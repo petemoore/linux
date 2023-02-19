@@ -1249,23 +1249,38 @@ static const struct of_device_id brcm_pcie_match[] = {
 
 static int brcm_pcie_probe(struct platform_device *pdev)
 {
+	///////////////////////////////////////////////////////////////
+	//
+	// Added by pmoore for rpi400 debugging...
+	//
+	struct device dev;
+	//
+	///////////////////////////////////////////////////////////////
+
 	struct device_node *np = pdev->dev.of_node, *msi_np;
 	struct pci_host_bridge *bridge;
 	const struct pcie_cfg_data *data;
 	struct brcm_pcie *pcie;
 	int ret;
 
+	// Initialise bridge, and set it's parent to &pdev->dev (struct device),
+	// allocating memory for pci_host_bridge plus brcm_pcie
+	// Also registers teardown action for &pdev->dev (parent) for releasing host bridge (child)
 	bridge = devm_pci_alloc_host_bridge(&pdev->dev, sizeof(*pcie));
 	if (!bridge)
 		return -ENOMEM;
 
+	// Look up textual names for for host bridge device(?)
 	data = of_device_get_match_data(&pdev->dev);
 	if (!data) {
 		pr_err("failed to look up compatible string\n");
 		return -EINVAL;
 	}
 
+	// pcie data comes at end of pci_host_bridge ("private" struct member)
+	// and is the brcm_pcie object
 	pcie = pci_host_bridge_priv(bridge);
+	// configure all the pcie fields
 	pcie->dev = &pdev->dev;
 	pcie->np = np;
 	pcie->reg_offsets = data->offsets;
@@ -1273,17 +1288,21 @@ static int brcm_pcie_probe(struct platform_device *pdev)
 	pcie->perst_set = data->perst_set;
 	pcie->bridge_sw_init_set = data->bridge_sw_init_set;
 
+	// Presumably interfaces with MMU to map physical (IO) memory to virtual memory address ranges
 	pcie->base = devm_platform_ioremap_resource(pdev, 0);
 	if (IS_ERR(pcie->base))
 		return PTR_ERR(pcie->base);
 
+	// Set up PCIE clock(?)
 	pcie->clk = devm_clk_get_optional(&pdev->dev, "sw_pcie");
 	if (IS_ERR(pcie->clk))
 		return PTR_ERR(pcie->clk);
 
+	// link speed === pcie generation???
 	ret = of_pci_get_max_link_speed(np);
 	pcie->gen = (ret < 0) ? 0 : ret;
 
+	// fetch from device-tree or /arch/arm/boot/dts/bcm2711.dtsi ?
 	pcie->ssc = of_property_read_bool(np, "brcm,enable-ssc");
 	pcie->l1ss = of_property_read_bool(np, "brcm,enable-l1ss");
 
@@ -1313,6 +1332,21 @@ static int brcm_pcie_probe(struct platform_device *pdev)
 		clk_disable_unprepare(pcie->clk);
 		return ret;
 	}
+
+	///////////////////////////////////////////////////////////////
+	//
+	// Added by pmoore for rpi400 debugging...
+	dev = pdev->dev;
+	dev_info(&dev, "pdev->name: %s\n", pdev->name);
+	dev_info(&dev, "pdev->id: %#0x\n", pdev->id);
+	dev_info(&dev, "pdev->id_auto: %s\n", pdev->id_auto ? "true":"false");
+	dev_info(&dev, "pdev->dev.init_name: %s\n", pdev->dev.init_name);
+	dev_info(&dev, "pdev->dev.platform_data: 0x%p\n", pdev->dev.platform_data);
+	dev_info(&dev, "pdev->platform_dma_mask: %#018llx\n", pdev->platform_dma_mask);
+	dev_info(&dev, "pdev->num_resources: %#0x\n", pdev->num_resources);
+	dev_info(&dev, "pdev->driver_override: %s\n", pdev->driver_override);
+	//
+	///////////////////////////////////////////////////////////////
 
 	ret = brcm_pcie_setup(pcie);
 	if (ret)
