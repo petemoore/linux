@@ -142,6 +142,14 @@ static inline u64 __raw_readq(const volatile void __iomem *addr)
 #define writel(v,c)		({ __iowmb(); writel_relaxed((v),(c)); })
 #define writeq(v,c)		({ __iowmb(); writeq_relaxed((v),(c)); })
 
+///////////////////////////////////////////////////////////////
+//
+// Added by pmoore for rpi400 debugging...
+#define pete_readl(loc, addr) ({ u32 value = readl((addr)); printk(KERN_INFO "%s Read 32 bits [0x%px]=%#0x\n", (loc), (void*)(addr), (value)); value;})
+#define pete_writel(loc, value, addr) ({ printk(KERN_INFO "%s Write 32 bits [0x%px]=%#0x\n", (loc), (void*)(addr), (__force u32)(value)); writel((value), (addr));})
+//
+///////////////////////////////////////////////////////////////
+
 /*
  *  I/O port access primitives.
  */
