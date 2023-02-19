@@ -517,6 +517,12 @@ static void brcm_pcie_set_outbound_win(struct brcm_pcie *pcie,
 	phys_addr_t cpu_addr_mb, limit_addr_mb;
 	int high_addr_shift;
 	u32 tmp;
+	struct device *dev = pcie->dev;
+
+	dev_info(dev, "pmoore: cpu_addr: %#018llx\n", cpu_addr);
+	dev_info(dev, "pmoore: pcie_addr: %#018llx\n", pcie_addr);
+	dev_info(dev, "pmoore: size: %#018llx\n", size);
+	dev_info(dev, "pmoore: win: %#010x\n", win);
 
 	/* Set the base of the pcie_addr window */
 	writel(lower_32_bits(pcie_addr), pcie->base + PCIE_MEM_WIN0_LO(win));
@@ -524,7 +530,9 @@ static void brcm_pcie_set_outbound_win(struct brcm_pcie *pcie,
 
 	/* Write the addr base & limit lower bits (in MBs) */
 	cpu_addr_mb = cpu_addr / SZ_1M;
+	dev_info(dev, "pmoore: cpu_addr_mb: %#018llx\n", cpu_addr_mb);
 	limit_addr_mb = (cpu_addr + size - 1) / SZ_1M;
+	dev_info(dev, "pmoore: limit_addr_mb: %#018llx\n", limit_addr_mb);
 
 	tmp = readl(pcie->base + PCIE_MEM_WIN0_BASE_LIMIT(win));
 	u32p_replace_bits(&tmp, cpu_addr_mb,
@@ -539,6 +547,7 @@ static void brcm_pcie_set_outbound_win(struct brcm_pcie *pcie,
 	/* Write the cpu & limit addr upper bits */
 	high_addr_shift =
 		HWEIGHT32(PCIE_MISC_CPU_2_PCIE_MEM_WIN0_BASE_LIMIT_BASE_MASK);
+	dev_info(dev, "pmoore: high_addr_shift: %#010x\n", high_addr_shift);
 
 	cpu_addr_mb_high = cpu_addr_mb >> high_addr_shift;
 	tmp = readl(pcie->base + PCIE_MEM_WIN0_BASE_HI(win));
@@ -970,7 +979,7 @@ static void __iomem *brcm7425_pcie_map_bus(struct pci_bus *bus,
 	writel(idx, base + IDX_ADDR(pcie));
 	return base + DATA_ADDR(pcie);
 }
-
+// sets bit 1 of [pcie->base+0x9210] to val
 static void brcm_pcie_bridge_sw_init_set_generic(struct brcm_pcie *pcie, u32 val)
 {
 	u32 tmp, mask =  RGR1_SW_INIT_1_INIT_GENERIC_MASK;
@@ -1040,7 +1049,7 @@ static void brcm_pcie_perst_set_generic(struct brcm_pcie *pcie, u32 val)
 
 	tmp = readl(pcie->base + PCIE_RGR1_SW_INIT_1(pcie));
 	u32p_replace_bits(&tmp, val, PCIE_RGR1_SW_INIT_1_PERST_MASK);
-	writel(tmp, pcie->base + PCIE_RGR1_SW_INIT_1(pcie));
+	writel(tmp, pcie->base + PCIE_RGR1_SW_INIT_1(pcie)); // set bit 0 to val
 }
 
 static int brcm_pcie_get_rc_bar2_size_and_offset(struct brcm_pcie *pcie,
@@ -1056,10 +1065,15 @@ static int brcm_pcie_get_rc_bar2_size_and_offset(struct brcm_pcie *pcie,
 
 	resource_list_for_each_entry(entry, &bridge->dma_ranges) {
 		u64 pcie_beg = entry->res->start - entry->offset;
+		dev_info(dev, "pmoore: pcie_beg: %#018llx\n", pcie_beg);
+		dev_info(dev, "pmoore: entry->res->start: %#018llx\n", entry->res->start);
+		dev_info(dev, "pmoore: entry->offset: %#018llx\n", entry->offset);
 
 		size += entry->res->end - entry->res->start + 1;
+		dev_info(dev, "pmoore: size: %#018llx\n", size);
 		if (pcie_beg < lowest_pcie_addr)
 			lowest_pcie_addr = pcie_beg;
+		dev_info(dev, "pmoore: lowest_pcie_addr: %#018llx\n", lowest_pcie_addr);
 		if (pcie->type == BCM2711 || pcie->type == BCM2712)
 			break; // Only consider the first entry
 	}
@@ -1071,6 +1085,8 @@ static int brcm_pcie_get_rc_bar2_size_and_offset(struct brcm_pcie *pcie,
 
 	ret = of_property_read_variable_u64_array(pcie->np, "brcm,scb-sizes", pcie->memc_size, 1,
 						  PCIE_BRCM_MAX_MEMC);
+	dev_info(dev, "pmoore: ret: %#010x\n", ret);
+
 
 	if (ret <= 0) {
 		/* Make an educated guess */
@@ -1081,13 +1097,17 @@ static int brcm_pcie_get_rc_bar2_size_and_offset(struct brcm_pcie *pcie,
 	}
 
 	/* Each memc is viewed through a "port" that is a power of 2 */
-	for (i = 0, size = 0; i < pcie->num_memc; i++)
+	for (i = 0, size = 0; i < pcie->num_memc; i++) {
 		size += pcie->memc_size[i];
+		dev_info(dev, "pmoore: size: %#018llx\n", size);
+	}
 
 	/* System memory starts at this address in PCIe-space */
 	*rc_bar2_offset = lowest_pcie_addr;
+	dev_info(dev, "pmoore: *rc_bar2_offset: %#018llx\n", *rc_bar2_offset);
 	/* The sum of all memc views must also be a power of 2 */
 	*rc_bar2_size = 1ULL << fls64(size - 1);
+	dev_info(dev, "pmoore: *rc_bar2_size: %#018llx\n", *rc_bar2_size);
 
 	/*
 	 * We validate the inbound memory view even though we should trust
@@ -1167,23 +1187,23 @@ static int brcm_pcie_setup(struct brcm_pcie *pcie)
 	int ret, memc, count, i;
 
 	/* Reset the bridge */
-	pcie->bridge_sw_init_set(pcie, 1);
+	pcie->bridge_sw_init_set(pcie, 1); // calls brcm_pcie_bridge_sw_init_set_generic: set bit 1 of [pcie->base + 0x9210]
 
 	/* Ensure that PERST# is asserted; some bootloaders may deassert it. */
 	if (pcie->type == BCM2711)
-		pcie->perst_set(pcie, 1);
+		pcie->perst_set(pcie, 1); // calls brcm_pcie_perst_set_generic: set bit 0 of [pcie->base + 0x9210]
 
 	usleep_range(100, 200);
 
 	/* Take the bridge out of reset */
-	pcie->bridge_sw_init_set(pcie, 0);
+	pcie->bridge_sw_init_set(pcie, 0); // calls brcm_pcie_bridge_sw_init_set_generic: clear bit 1 of [pcie->base + 0x9210]
 
 	tmp = readl(base + PCIE_MISC_HARD_PCIE_HARD_DEBUG);
 	if (is_bmips(pcie))
 		tmp &= ~PCIE_BMIPS_MISC_HARD_PCIE_HARD_DEBUG_SERDES_IDDQ_MASK;
 	else
 		tmp &= ~PCIE_MISC_HARD_PCIE_HARD_DEBUG_SERDES_IDDQ_MASK;
-	writel(tmp, base + PCIE_MISC_HARD_PCIE_HARD_DEBUG);
+	writel(tmp, base + PCIE_MISC_HARD_PCIE_HARD_DEBUG); // clear bit 27 of [pcie->base + 0x4204]
 	/* Wait for SerDes to be stable */
 	usleep_range(100, 200);
 
@@ -1219,9 +1239,9 @@ static int brcm_pcie_setup(struct brcm_pcie *pcie)
 	 * RCB_MPS_MODE
 	 */
 	tmp = readl(base + PCIE_MISC_MISC_CTRL);
-	u32p_replace_bits(&tmp, 1, PCIE_MISC_MISC_CTRL_SCB_ACCESS_EN_MASK);
-	u32p_replace_bits(&tmp, 1, PCIE_MISC_MISC_CTRL_CFG_READ_UR_MODE_MASK);
-	u32p_replace_bits(&tmp, burst, PCIE_MISC_MISC_CTRL_MAX_BURST_SIZE_MASK);
+	u32p_replace_bits(&tmp, 1, PCIE_MISC_MISC_CTRL_SCB_ACCESS_EN_MASK); // set bit 12
+	u32p_replace_bits(&tmp, 1, PCIE_MISC_MISC_CTRL_CFG_READ_UR_MODE_MASK); // set bit 13
+	u32p_replace_bits(&tmp, burst, PCIE_MISC_MISC_CTRL_MAX_BURST_SIZE_MASK); // clear bits 20/21
 	if (pcie->rcb_mps_mode)
 		u32p_replace_bits(&tmp, 1, PCIE_MISC_MISC_CTRL_PCIE_RCB_MPS_MODE_MASK);
 	writel(tmp, base + PCIE_MISC_MISC_CTRL);
@@ -1246,17 +1266,17 @@ static int brcm_pcie_setup(struct brcm_pcie *pcie)
 	tmp = readl(base + PCIE_MISC_MISC_CTRL);
 
 	for (memc = 0; memc < pcie->num_memc; memc++) {
-		u32 scb_size_val = ilog2(pcie->memc_size[memc]) - 15;
+		u32 scb_size_val = ilog2(pcie->memc_size[memc]) - 15; // ilog2(pcie->memc_size[0]) = 32
 
 		if (memc == 0)
-			u32p_replace_bits(&tmp, scb_size_val, SCB_SIZE_MASK(0));
+			u32p_replace_bits(&tmp, scb_size_val, SCB_SIZE_MASK(0)); // scb_size_val = 0b10001 (17)
 		else if (memc == 1)
 			u32p_replace_bits(&tmp, scb_size_val, SCB_SIZE_MASK(1));
 		else if (memc == 2)
 			u32p_replace_bits(&tmp, scb_size_val, SCB_SIZE_MASK(2));
 	}
 
-	writel(tmp, base + PCIE_MISC_MISC_CTRL);
+	writel(tmp, base + PCIE_MISC_MISC_CTRL); // set bits 27-31 to 0b10001
 
 	if (pcie->type == BCM2712) {
 		/* Suppress AXI error responses and return 1s for read failures */
@@ -1301,12 +1321,12 @@ static int brcm_pcie_setup(struct brcm_pcie *pcie)
 	/* disable the PCIe->GISB memory window (RC_BAR1) */
 	tmp = readl(base + PCIE_MISC_RC_BAR1_CONFIG_LO);
 	tmp &= ~PCIE_MISC_RC_BAR1_CONFIG_LO_SIZE_MASK;
-	writel(tmp, base + PCIE_MISC_RC_BAR1_CONFIG_LO);
+	writel(tmp, base + PCIE_MISC_RC_BAR1_CONFIG_LO); // clear bits 0-4
 
 	/* disable the PCIe->SCB memory window (RC_BAR3) */
 	tmp = readl(base + PCIE_MISC_RC_BAR3_CONFIG_LO);
 	tmp &= ~PCIE_MISC_RC_BAR3_CONFIG_LO_SIZE_MASK;
-	writel(tmp, base + PCIE_MISC_RC_BAR3_CONFIG_LO);
+	writel(tmp, base + PCIE_MISC_RC_BAR3_CONFIG_LO); // clear bits 0-4
 
 	/* Don't advertise L0s capability if 'aspm-no-l0s' */
 	aspm_support = PCIE_LINK_STATE_L1;
@@ -1928,23 +1948,39 @@ static struct pci_ops brcm7425_pcie_ops = {
 
 static int brcm_pcie_probe(struct platform_device *pdev)
 {
+	///////////////////////////////////////////////////////////////
+	//
+	// Added by pmoore for rpi400 debugging...
+	//
+	struct device dev;
+	struct resource_entry *window;
+	//
+	///////////////////////////////////////////////////////////////
+
 	struct device_node *np = pdev->dev.of_node, *msi_np;
 	struct pci_host_bridge *bridge;
 	const struct pcie_cfg_data *data;
 	struct brcm_pcie *pcie;
 	int ret;
 
+	// Initialise bridge, and set it's parent to &pdev->dev (struct device),
+	// allocating memory for pci_host_bridge plus brcm_pcie
+	// Also registers teardown action for &pdev->dev (parent) for releasing host bridge (child)
 	bridge = devm_pci_alloc_host_bridge(&pdev->dev, sizeof(*pcie));
 	if (!bridge)
 		return -ENOMEM;
 
+	// Look up textual names for for host bridge device(?)
 	data = of_device_get_match_data(&pdev->dev);
 	if (!data) {
 		dev_err(&pdev->dev, "failed to look up compatible string\n");
 		return -EINVAL;
 	}
 
+	// pcie data comes at end of pci_host_bridge ("private" struct member)
+	// and is the brcm_pcie object
 	pcie = pci_host_bridge_priv(bridge);
+	// configure all the pcie fields
 	pcie->dev = &pdev->dev;
 	pcie->np = np;
 	pcie->reg_offsets = data->offsets;
@@ -1953,17 +1989,21 @@ static int brcm_pcie_probe(struct platform_device *pdev)
 	pcie->bridge_sw_init_set = data->bridge_sw_init_set;
 	pcie->rc_mode = data->rc_mode;
 
+	// Presumably interfaces with MMU to map physical (IO) memory to virtual memory address ranges
 	pcie->base = devm_platform_ioremap_resource(pdev, 0);
 	if (IS_ERR(pcie->base))
 		return PTR_ERR(pcie->base);
 
+	// Set up PCIE clock(?)
 	pcie->clk = devm_clk_get_optional(&pdev->dev, "sw_pcie");
 	if (IS_ERR(pcie->clk))
 		return PTR_ERR(pcie->clk);
 
+	// link speed === pcie generation???
 	ret = of_pci_get_max_link_speed(np);
 	pcie->gen = (ret < 0) ? 0 : ret;
 
+	// fetch from device-tree or /arch/arm/boot/dts/bcm2711.dtsi ?
 	pcie->ssc = of_property_read_bool(np, "brcm,enable-ssc");
 	pcie->l1ss = of_property_read_bool(np, "brcm,enable-l1ss");
 	pcie->rcb_mps_mode = of_property_read_bool(np, "brcm,enable-mps-rcb");
@@ -2001,6 +2041,21 @@ static int brcm_pcie_probe(struct platform_device *pdev)
 		clk_disable_unprepare(pcie->clk);
 		return ret;
 	}
+
+	///////////////////////////////////////////////////////////////
+	//
+	// Added by pmoore for rpi400 debugging...
+	dev = pdev->dev;
+	dev_info(&dev, "pmoore: pdev->name: %s\n", pdev->name);
+	dev_info(&dev, "pmoore: pdev->id: %#0x\n", pdev->id);
+	dev_info(&dev, "pmoore: pdev->id_auto: %s\n", pdev->id_auto ? "true":"false");
+	dev_info(&dev, "pmoore: pdev->dev.init_name: %s\n", pdev->dev.init_name);
+	dev_info(&dev, "pmoore: pdev->dev.platform_data: 0x%p\n", pdev->dev.platform_data);
+	dev_info(&dev, "pmoore: pdev->platform_dma_mask: %#018llx\n", pdev->platform_dma_mask);
+	dev_info(&dev, "pmoore: pdev->num_resources: %#0x\n", pdev->num_resources);
+	dev_info(&dev, "pmoore: pdev->driver_override: %s\n", pdev->driver_override);
+	//
+	///////////////////////////////////////////////////////////////
 
 	ret = brcm_pcie_setup(pcie);
 	if (ret)
@@ -2053,6 +2108,45 @@ static int brcm_pcie_probe(struct platform_device *pdev)
 	bridge->sysdata = pcie;
 
 	platform_set_drvdata(pdev, pcie);
+
+	///////////////////////////////////////////////////////////////
+	//
+	// Added by pmoore for rpi400 debugging...
+	dev_info(&dev, "pmoore: bridge->bus: %p\n", bridge->bus); // null
+	dev_info(&dev, "pmoore: bridge->sysdata: %p\n", bridge->sysdata); // not null
+	dev_info(&dev, "pmoore: bridge->busnr: %#0x\n", bridge->busnr); // 0
+	dev_info(&dev, "pmoore: bridge->domain_nr: %#0x\n", bridge->domain_nr); // 0xffffffff
+	resource_list_for_each_entry(window, &bridge->windows) {
+		dev_info(&dev, "pmoore: bridge->windows resource: start=%#018llx, end=%#018llx, size=%#018llx, flags=%lx name=%s\n",
+		   (unsigned long long)window->res->start,
+		   (unsigned long long)window->res->end,
+		   (unsigned long long)resource_size(window->res),
+		   window->res->flags,
+		   window->res->name);
+           // start=0x0000000000000000, end=0x00000000000000ff, size=0x0000000000000100, flags=0x1000 name=(null)
+           // start=0x0000000600000000, end=0x000000063fffffff, size=0x0000000040000000, flags=0x200 name=pcie@7d500000
+	}
+	// dev_info(&dev, "pmoore: bridge->dma_ranges: %s\n", bridge->dma_ranges);
+	// dev_info(&dev, "pmoore: bridge->swizzle_irq: %s\n", bridge->swizzle_irq);
+	// dev_info(&dev, "pmoore: bridge->map_irq: %s\n", bridge->map_irq);
+	// dev_info(&dev, "pmoore: bridge->release_fn: %p\n", bridge->release_fn);
+	dev_info(&dev, "pmoore: bridge->release_data: %p\n", bridge->release_data); // null
+	dev_info(&dev, "pmoore: bridge->ignore_reset_delay: %x\n", bridge->ignore_reset_delay); // 0
+	dev_info(&dev, "pmoore: bridge->no_ext_tags: %x\n", bridge->no_ext_tags); // 0
+	dev_info(&dev, "pmoore: bridge->native_aer: %x\n", bridge->native_aer); // 1
+	dev_info(&dev, "pmoore: bridge->native_pcie_hotplug: %x\n", bridge->native_pcie_hotplug); // 1
+	dev_info(&dev, "pmoore: bridge->native_shpc_hotplug: %x\n", bridge->native_shpc_hotplug); // 1
+	dev_info(&dev, "pmoore: bridge->native_pme: %x\n", bridge->native_pme); // 1
+	dev_info(&dev, "pmoore: bridge->native_ltr: %x\n", bridge->native_ltr); // 1
+	dev_info(&dev, "pmoore: bridge->native_dpc: %x\n", bridge->native_dpc); // 1
+	dev_info(&dev, "pmoore: bridge->preserve_config: %x\n", bridge->preserve_config); // 0
+	dev_info(&dev, "pmoore: bridge->size_windows: %x\n", bridge->size_windows); // 0
+	dev_info(&dev, "pmoore: bridge->msi_domain: %x\n", bridge->msi_domain); // 0
+	// dev_info(&dev, "pmoore: bridge->private: %#0x\n", bridge->private);
+	//
+	dev_info(&dev, "pmoore: pci_flags: %#0x\n", pci_flags); // 0
+	//
+	///////////////////////////////////////////////////////////////
 
 	ret = pci_host_probe(bridge);
 	if (!ret && !brcm_pcie_link_up(pcie))
