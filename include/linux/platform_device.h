@@ -28,6 +28,7 @@ struct platform_device {
 	u64		platform_dma_mask;
 	struct device_dma_parameters dma_parms;
 	u32		num_resources;
+	// pointer to first resource of num_resources (array)
 	struct resource	*resource;
 
 	const struct platform_device_id	*id_entry;

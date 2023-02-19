@@ -726,7 +726,7 @@ static struct pci_ops brcm_pcie_ops = {
 	.read = pci_generic_config_read,
 	.write = pci_generic_config_write,
 };
-
+// sets bit 1 of [pcie->base+0x9210] to val
 static inline void brcm_pcie_bridge_sw_init_set_generic(struct brcm_pcie *pcie, u32 val)
 {
 	u32 tmp, mask =  RGR1_SW_INIT_1_INIT_GENERIC_MASK;
@@ -774,7 +774,7 @@ static inline void brcm_pcie_perst_set_generic(struct brcm_pcie *pcie, u32 val)
 
 	tmp = readl(pcie->base + PCIE_RGR1_SW_INIT_1(pcie));
 	u32p_replace_bits(&tmp, val, PCIE_RGR1_SW_INIT_1_PERST_MASK);
-	writel(tmp, pcie->base + PCIE_RGR1_SW_INIT_1(pcie));
+	writel(tmp, pcie->base + PCIE_RGR1_SW_INIT_1(pcie)); // set bit 0 to val
 }
 
 static inline int brcm_pcie_get_rc_bar2_size_and_offset(struct brcm_pcie *pcie,
@@ -879,17 +879,17 @@ static int brcm_pcie_setup(struct brcm_pcie *pcie)
 	u32 tmp, burst, aspm_support;
 
 	/* Reset the bridge */
-	pcie->bridge_sw_init_set(pcie, 1);
-	pcie->perst_set(pcie, 1);
+	pcie->bridge_sw_init_set(pcie, 1); // calls brcm_pcie_bridge_sw_init_set_generic: set bit 1 of [pcie->base + 0x9210]
+	pcie->perst_set(pcie, 1); // calls brcm_pcie_perst_set_generic: set bit 0 of [pcie->base + 0x9210]
 
 	usleep_range(100, 200);
 
 	/* Take the bridge out of reset */
-	pcie->bridge_sw_init_set(pcie, 0);
+	pcie->bridge_sw_init_set(pcie, 0); // calls brcm_pcie_bridge_sw_init_set_generic: clear bit 1 of [pcie->base + 0x9210]
 
 	tmp = readl(base + PCIE_MISC_HARD_PCIE_HARD_DEBUG);
 	tmp &= ~PCIE_MISC_HARD_PCIE_HARD_DEBUG_SERDES_IDDQ_MASK;
-	writel(tmp, base + PCIE_MISC_HARD_PCIE_HARD_DEBUG);
+	writel(tmp, base + PCIE_MISC_HARD_PCIE_HARD_DEBUG); // clear bit 27 of [pcie->base + 0x4204]
 	/* Wait for SerDes to be stable */
 	usleep_range(100, 200);
 
@@ -907,9 +907,9 @@ static int brcm_pcie_setup(struct brcm_pcie *pcie)
 
 	/* Set SCB_MAX_BURST_SIZE, CFG_READ_UR_MODE, SCB_ACCESS_EN */
 	tmp = readl(base + PCIE_MISC_MISC_CTRL);
-	u32p_replace_bits(&tmp, 1, PCIE_MISC_MISC_CTRL_SCB_ACCESS_EN_MASK);
-	u32p_replace_bits(&tmp, 1, PCIE_MISC_MISC_CTRL_CFG_READ_UR_MODE_MASK);
-	u32p_replace_bits(&tmp, burst, PCIE_MISC_MISC_CTRL_MAX_BURST_SIZE_MASK);
+	u32p_replace_bits(&tmp, 1, PCIE_MISC_MISC_CTRL_SCB_ACCESS_EN_MASK); // set bit 12
+	u32p_replace_bits(&tmp, 1, PCIE_MISC_MISC_CTRL_CFG_READ_UR_MODE_MASK); // set bit 13
+	u32p_replace_bits(&tmp, burst, PCIE_MISC_MISC_CTRL_MAX_BURST_SIZE_MASK); // clear bits 20/21
 	writel(tmp, base + PCIE_MISC_MISC_CTRL);
 
 	ret = brcm_pcie_get_rc_bar2_size_and_offset(pcie, &rc_bar2_size,
@@ -926,16 +926,16 @@ static int brcm_pcie_setup(struct brcm_pcie *pcie)
 
 	tmp = readl(base + PCIE_MISC_MISC_CTRL);
 	for (memc = 0; memc < pcie->num_memc; memc++) {
-		u32 scb_size_val = ilog2(pcie->memc_size[memc]) - 15;
+		u32 scb_size_val = ilog2(pcie->memc_size[memc]) - 15; // ilog2(pcie->memc_size[0]) = 32
 
 		if (memc == 0)
-			u32p_replace_bits(&tmp, scb_size_val, SCB_SIZE_MASK(0));
+			u32p_replace_bits(&tmp, scb_size_val, SCB_SIZE_MASK(0)); // scb_size_val = 0b10001 (17)
 		else if (memc == 1)
 			u32p_replace_bits(&tmp, scb_size_val, SCB_SIZE_MASK(1));
 		else if (memc == 2)
 			u32p_replace_bits(&tmp, scb_size_val, SCB_SIZE_MASK(2));
 	}
-	writel(tmp, base + PCIE_MISC_MISC_CTRL);
+	writel(tmp, base + PCIE_MISC_MISC_CTRL); // set bits 27-31 to 0b10001
 
 	/*
 	 * We ideally want the MSI target address to be located in the 32bit
@@ -952,24 +952,24 @@ static int brcm_pcie_setup(struct brcm_pcie *pcie)
 	/* disable the PCIe->GISB memory window (RC_BAR1) */
 	tmp = readl(base + PCIE_MISC_RC_BAR1_CONFIG_LO);
 	tmp &= ~PCIE_MISC_RC_BAR1_CONFIG_LO_SIZE_MASK;
-	writel(tmp, base + PCIE_MISC_RC_BAR1_CONFIG_LO);
+	writel(tmp, base + PCIE_MISC_RC_BAR1_CONFIG_LO); // clear bits 0-4
 
 	/* disable the PCIe->SCB memory window (RC_BAR3) */
 	tmp = readl(base + PCIE_MISC_RC_BAR3_CONFIG_LO);
 	tmp &= ~PCIE_MISC_RC_BAR3_CONFIG_LO_SIZE_MASK;
-	writel(tmp, base + PCIE_MISC_RC_BAR3_CONFIG_LO);
+	writel(tmp, base + PCIE_MISC_RC_BAR3_CONFIG_LO); // clear bits 0-4
 
 	if (pcie->gen)
-		brcm_pcie_set_gen(pcie, pcie->gen);
+		brcm_pcie_set_gen(pcie, pcie->gen); // not called
 
 	/* Unassert the fundamental reset */
-	pcie->perst_set(pcie, 0);
+	pcie->perst_set(pcie, 0); // calls brcm_pcie_perst_set_generic: clear bit 0 of [pcie->base + 0x9210]
 
 	/*
 	 * Give the RC/EP time to wake up, before trying to configure RC.
 	 * Intermittently check status for link-up, up to a total of 100ms.
 	 */
-	for (i = 0; i < 100 && !brcm_pcie_link_up(pcie); i += 5)
+	for (i = 0; i < 100 && !brcm_pcie_link_up(pcie); i += 5) // wait for bits 4 and 5 to be set of [base + 0x4068]
 		msleep(5);
 
 	if (!brcm_pcie_link_up(pcie)) {
@@ -1249,23 +1249,38 @@ static const struct of_device_id brcm_pcie_match[] = {
 
 static int brcm_pcie_probe(struct platform_device *pdev)
 {
+	///////////////////////////////////////////////////////////////
+	//
+	// Added by pmoore for rpi400 debugging...
+	//
+	struct device dev;
+	//
+	///////////////////////////////////////////////////////////////
+
 	struct device_node *np = pdev->dev.of_node, *msi_np;
 	struct pci_host_bridge *bridge;
 	const struct pcie_cfg_data *data;
 	struct brcm_pcie *pcie;
 	int ret;
 
+	// Initialise bridge, and set it's parent to &pdev->dev (struct device),
+	// allocating memory for pci_host_bridge plus brcm_pcie
+	// Also registers teardown action for &pdev->dev (parent) for releasing host bridge (child)
 	bridge = devm_pci_alloc_host_bridge(&pdev->dev, sizeof(*pcie));
 	if (!bridge)
 		return -ENOMEM;
 
+	// Look up textual names for for host bridge device(?)
 	data = of_device_get_match_data(&pdev->dev);
 	if (!data) {
 		pr_err("failed to look up compatible string\n");
 		return -EINVAL;
 	}
 
+	// pcie data comes at end of pci_host_bridge ("private" struct member)
+	// and is the brcm_pcie object
 	pcie = pci_host_bridge_priv(bridge);
+	// configure all the pcie fields
 	pcie->dev = &pdev->dev;
 	pcie->np = np;
 	pcie->reg_offsets = data->offsets;
@@ -1273,17 +1288,21 @@ static int brcm_pcie_probe(struct platform_device *pdev)
 	pcie->perst_set = data->perst_set;
 	pcie->bridge_sw_init_set = data->bridge_sw_init_set;
 
+	// Presumably interfaces with MMU to map physical (IO) memory to virtual memory address ranges
 	pcie->base = devm_platform_ioremap_resource(pdev, 0);
 	if (IS_ERR(pcie->base))
 		return PTR_ERR(pcie->base);
 
+	// Set up PCIE clock(?)
 	pcie->clk = devm_clk_get_optional(&pdev->dev, "sw_pcie");
 	if (IS_ERR(pcie->clk))
 		return PTR_ERR(pcie->clk);
 
+	// link speed === pcie generation???
 	ret = of_pci_get_max_link_speed(np);
 	pcie->gen = (ret < 0) ? 0 : ret;
 
+	// fetch from device-tree or /arch/arm/boot/dts/bcm2711.dtsi ?
 	pcie->ssc = of_property_read_bool(np, "brcm,enable-ssc");
 	pcie->l1ss = of_property_read_bool(np, "brcm,enable-l1ss");
 
@@ -1313,6 +1332,21 @@ static int brcm_pcie_probe(struct platform_device *pdev)
 		clk_disable_unprepare(pcie->clk);
 		return ret;
 	}
+
+	///////////////////////////////////////////////////////////////
+	//
+	// Added by pmoore for rpi400 debugging...
+	dev = pdev->dev;
+	dev_info(&dev, "pdev->name: %s\n", pdev->name);
+	dev_info(&dev, "pdev->id: %#0x\n", pdev->id);
+	dev_info(&dev, "pdev->id_auto: %s\n", pdev->id_auto ? "true":"false");
+	dev_info(&dev, "pdev->dev.init_name: %s\n", pdev->dev.init_name);
+	dev_info(&dev, "pdev->dev.platform_data: 0x%p\n", pdev->dev.platform_data);
+	dev_info(&dev, "pdev->platform_dma_mask: %#018llx\n", pdev->platform_dma_mask);
+	dev_info(&dev, "pdev->num_resources: %#0x\n", pdev->num_resources);
+	dev_info(&dev, "pdev->driver_override: %s\n", pdev->driver_override);
+	//
+	///////////////////////////////////////////////////////////////
 
 	ret = brcm_pcie_setup(pcie);
 	if (ret)
