@@ -82,10 +82,10 @@ void vc4_hvs_dump_state(struct vc4_hvs *hvs)
 	for (i = 0; i < 64; i += 4) {
 		DRM_INFO("0x%08x (%s): 0x%08x 0x%08x 0x%08x 0x%08x\n",
 			 i * 4, i < HVS_BOOTLOADER_DLIST_END ? "B" : "D",
-			 pete_readl("drivers/gpu/drm/vc4/vc4_hvs.c:85", (u32 __iomem *)hvs->dlist + i + 0),
-			 pete_readl("drivers/gpu/drm/vc4/vc4_hvs.c:86", (u32 __iomem *)hvs->dlist + i + 1),
-			 pete_readl("drivers/gpu/drm/vc4/vc4_hvs.c:87", (u32 __iomem *)hvs->dlist + i + 2),
-			 pete_readl("drivers/gpu/drm/vc4/vc4_hvs.c:88", (u32 __iomem *)hvs->dlist + i + 3));
+			 readl((u32 __iomem *)hvs->dlist + i + 0),
+			 readl((u32 __iomem *)hvs->dlist + i + 1),
+			 readl((u32 __iomem *)hvs->dlist + i + 2),
+			 readl((u32 __iomem *)hvs->dlist + i + 3));
 	}
 
 	drm_dev_exit(idx);
