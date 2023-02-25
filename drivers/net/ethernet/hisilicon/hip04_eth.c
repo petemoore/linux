@@ -410,7 +410,7 @@ static void hip04_set_xmit_desc(struct hip04_priv *priv, dma_addr_t phys)
 	u32 val;
 
 	val = phys >> PPE_BUF_SIZE_SHIFT | PPE_TX_BUF_HOLD;
-	writel(val, priv->base + PPE_CFG_CPU_ADD_ADDR);
+	pete_writel("drivers/net/ethernet/hisilicon/hip04_eth.c:413", val, priv->base + PPE_CFG_CPU_ADD_ADDR);
 }
 
 static void hip04_set_recv_desc(struct hip04_priv *priv, dma_addr_t phys)
@@ -423,7 +423,7 @@ static void hip04_set_recv_desc(struct hip04_priv *priv, dma_addr_t phys)
 
 static u32 hip04_recv_cnt(struct hip04_priv *priv)
 {
-	return readl(priv->base + PPE_HIS_RX_PKT_CNT);
+	return pete_readl("drivers/net/ethernet/hisilicon/hip04_eth.c:426", priv->base + PPE_HIS_RX_PKT_CNT);
 }
 
 static void hip04_update_mac_address(struct net_device *ndev)

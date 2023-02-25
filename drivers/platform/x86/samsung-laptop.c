@@ -419,8 +419,8 @@ static int sabi_command(struct samsung_laptop *samsung, u16 command,
 	writew(command, samsung->sabi_iface + SABI_IFACE_SUB);
 	writeb(0, samsung->sabi_iface + SABI_IFACE_COMPLETE);
 	if (in) {
-		writel(in->d0, samsung->sabi_iface + SABI_IFACE_DATA);
-		writel(in->d1, samsung->sabi_iface + SABI_IFACE_DATA + 4);
+		pete_writel("drivers/platform/x86/samsung-laptop.c:422", in->d0, samsung->sabi_iface + SABI_IFACE_DATA);
+		pete_writel("drivers/platform/x86/samsung-laptop.c:423", in->d1, samsung->sabi_iface + SABI_IFACE_DATA + 4);
 		writew(in->d2, samsung->sabi_iface + SABI_IFACE_DATA + 8);
 		writeb(in->d3, samsung->sabi_iface + SABI_IFACE_DATA + 10);
 	}
@@ -448,8 +448,8 @@ static int sabi_command(struct samsung_laptop *samsung, u16 command,
 	}
 
 	if (out) {
-		out->d0 = readl(samsung->sabi_iface + SABI_IFACE_DATA);
-		out->d1 = readl(samsung->sabi_iface + SABI_IFACE_DATA + 4);
+		out->d0 = pete_readl("drivers/platform/x86/samsung-laptop.c:451", samsung->sabi_iface + SABI_IFACE_DATA);
+		out->d1 = pete_readl("drivers/platform/x86/samsung-laptop.c:452", samsung->sabi_iface + SABI_IFACE_DATA + 4);
 		out->d2 = readw(samsung->sabi_iface + SABI_IFACE_DATA + 2);
 		out->d3 = readb(samsung->sabi_iface + SABI_IFACE_DATA + 1);
 	}

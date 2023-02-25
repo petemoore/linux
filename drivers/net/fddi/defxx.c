@@ -363,7 +363,7 @@ static struct tc_driver dfx_tc_driver;
 
 static inline void dfx_writel(DFX_board_t *bp, int offset, u32 data)
 {
-	writel(data, bp->base.mem + offset);
+	pete_writel("drivers/net/fddi/defxx.c:366", data, bp->base.mem + offset);
 	mb();
 }
 
@@ -386,7 +386,7 @@ static void dfx_port_write_long(DFX_board_t *bp, int offset, u32 data)
 static inline void dfx_readl(DFX_board_t *bp, int offset, u32 *data)
 {
 	mb();
-	*data = readl(bp->base.mem + offset);
+	*data = pete_readl("drivers/net/fddi/defxx.c:389", bp->base.mem + offset);
 }
 
 static inline void dfx_inl(DFX_board_t *bp, int offset, u32 *data)

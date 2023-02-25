@@ -63,13 +63,13 @@ static int mv_hsic_phy_init(struct phy *phy)
 	clk_prepare_enable(mv_phy->clk);
 
 	/* Set reference clock */
-	writel(0x1 << PHY_28NM_HSIC_PLL_SELLPFR_SHIFT |
+	pete_writel("drivers/phy/marvell/phy-pxa-28nm-hsic.c:66", 0x1 << PHY_28NM_HSIC_PLL_SELLPFR_SHIFT |
 		0xf0 << PHY_28NM_HSIC_PLL_FBDIV_SHIFT |
 		0xd << PHY_28NM_HSIC_PLL_REFDIV_SHIFT,
 		base + PHY_28NM_HSIC_PLL_CTRL01);
 
 	/* Turn on PLL */
-	writel(readl(base + PHY_28NM_HSIC_PLL_CTRL2) |
+	pete_writel("drivers/phy/marvell/phy-pxa-28nm-hsic.c:72", pete_readl("drivers/phy/marvell/phy-pxa-28nm-hsic.c:72", base + PHY_28NM_HSIC_PLL_CTRL2) |
 		PHY_28NM_HSIC_S2H_PU_PLL,
 		base + PHY_28NM_HSIC_PLL_CTRL2);
 
@@ -92,11 +92,11 @@ static int mv_hsic_phy_power_on(struct phy *phy)
 	u32 reg;
 	int ret;
 
-	reg = readl(base + PHY_28NM_HSIC_CTRL);
+	reg = pete_readl("drivers/phy/marvell/phy-pxa-28nm-hsic.c:95", base + PHY_28NM_HSIC_CTRL);
 	/* Avoid SE0 state when resume for some device will take it as reset */
 	reg &= ~S2H_DRV_SE0_4RESUME;
 	reg |= PHY_28NM_HSIC_S2H_HSIC_EN;	/* Enable HSIC PHY */
-	writel(reg, base + PHY_28NM_HSIC_CTRL);
+	pete_writel("drivers/phy/marvell/phy-pxa-28nm-hsic.c:99", reg, base + PHY_28NM_HSIC_CTRL);
 
 	/*
 	 *  Calibration Timing
@@ -129,7 +129,7 @@ static int mv_hsic_phy_power_off(struct phy *phy)
 	struct mv_hsic_phy *mv_phy = phy_get_drvdata(phy);
 	void __iomem *base = mv_phy->base;
 
-	writel(readl(base + PHY_28NM_HSIC_CTRL) & ~PHY_28NM_HSIC_S2H_HSIC_EN,
+	pete_writel("drivers/phy/marvell/phy-pxa-28nm-hsic.c:132", pete_readl("drivers/phy/marvell/phy-pxa-28nm-hsic.c:132", base + PHY_28NM_HSIC_CTRL) & ~PHY_28NM_HSIC_S2H_HSIC_EN,
 		base + PHY_28NM_HSIC_CTRL);
 
 	return 0;
@@ -141,7 +141,7 @@ static int mv_hsic_phy_exit(struct phy *phy)
 	void __iomem *base = mv_phy->base;
 
 	/* Turn off PLL */
-	writel(readl(base + PHY_28NM_HSIC_PLL_CTRL2) &
+	pete_writel("drivers/phy/marvell/phy-pxa-28nm-hsic.c:144", pete_readl("drivers/phy/marvell/phy-pxa-28nm-hsic.c:144", base + PHY_28NM_HSIC_PLL_CTRL2) &
 		~PHY_28NM_HSIC_S2H_PU_PLL,
 		base + PHY_28NM_HSIC_PLL_CTRL2);
 

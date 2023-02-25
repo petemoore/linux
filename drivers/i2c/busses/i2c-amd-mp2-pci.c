@@ -49,7 +49,7 @@ static int amd_mp2_cmd(struct amd_i2c_common *i2c_common,
 
 	reg = privdata->mmio + ((i2c_cmd_base.s.bus_id == 1) ?
 				AMD_C2P_MSG1 : AMD_C2P_MSG0);
-	writel(i2c_cmd_base.ul, reg);
+	pete_writel("drivers/i2c/busses/i2c-amd-mp2-pci.c:52", i2c_cmd_base.ul, reg);
 
 	return 0;
 }
@@ -215,10 +215,10 @@ static irqreturn_t amd_mp2_irq_isr(int irq, void *dev)
 
 		reg = privdata->mmio + ((bus_id == 0) ?
 					AMD_P2C_MSG1 : AMD_P2C_MSG2);
-		val = readl(reg);
+		val = pete_readl("drivers/i2c/busses/i2c-amd-mp2-pci.c:218", reg);
 		if (val != 0) {
-			writel(0, reg);
-			writel(0, privdata->mmio + AMD_P2C_MSG_INTEN);
+			pete_writel("drivers/i2c/busses/i2c-amd-mp2-pci.c:220", 0, reg);
+			pete_writel("drivers/i2c/busses/i2c-amd-mp2-pci.c:221", 0, privdata->mmio + AMD_P2C_MSG_INTEN);
 			i2c_common->eventval.ul = val;
 			i2c_common->cmd_completion(i2c_common);
 
@@ -227,9 +227,9 @@ static irqreturn_t amd_mp2_irq_isr(int irq, void *dev)
 	}
 
 	if (ret != IRQ_HANDLED) {
-		val = readl(privdata->mmio + AMD_P2C_MSG_INTEN);
+		val = pete_readl("drivers/i2c/busses/i2c-amd-mp2-pci.c:230", privdata->mmio + AMD_P2C_MSG_INTEN);
 		if (val != 0) {
-			writel(0, privdata->mmio + AMD_P2C_MSG_INTEN);
+			pete_writel("drivers/i2c/busses/i2c-amd-mp2-pci.c:232", 0, privdata->mmio + AMD_P2C_MSG_INTEN);
 			pci_warn(pdev, "received irq without message\n");
 			ret = IRQ_HANDLED;
 		}
@@ -279,10 +279,10 @@ static void amd_mp2_clear_reg(struct amd_mp2_dev *privdata)
 	int reg;
 
 	for (reg = AMD_C2P_MSG0; reg <= AMD_C2P_MSG9; reg += 4)
-		writel(0, privdata->mmio + reg);
+		pete_writel("drivers/i2c/busses/i2c-amd-mp2-pci.c:282", 0, privdata->mmio + reg);
 
 	for (reg = AMD_P2C_MSG1; reg <= AMD_P2C_MSG2; reg += 4)
-		writel(0, privdata->mmio + reg);
+		pete_writel("drivers/i2c/busses/i2c-amd-mp2-pci.c:285", 0, privdata->mmio + reg);
 }
 
 static int amd_mp2_pci_init(struct amd_mp2_dev *privdata,
@@ -315,7 +315,7 @@ static int amd_mp2_pci_init(struct amd_mp2_dev *privdata,
 	}
 
 	/* Set up intx irq */
-	writel(0, privdata->mmio + AMD_P2C_MSG_INTEN);
+	pete_writel("drivers/i2c/busses/i2c-amd-mp2-pci.c:318", 0, privdata->mmio + AMD_P2C_MSG_INTEN);
 	pci_intx(pci_dev, 1);
 	rc = devm_request_irq(&pci_dev->dev, pci_dev->irq, amd_mp2_irq_isr,
 			      IRQF_SHARED, dev_name(&pci_dev->dev), privdata);

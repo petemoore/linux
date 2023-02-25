@@ -256,8 +256,8 @@ static int __init at91_get_cidr_exid_from_dbgu(u32 *cidr, u32 *exid)
 		return -ENXIO;
 	}
 
-	*cidr = readl(regs + AT91_DBGU_CIDR);
-	*exid = readl(regs + AT91_DBGU_EXID);
+	*cidr = pete_readl("drivers/soc/atmel/soc.c:259", regs + AT91_DBGU_CIDR);
+	*exid = pete_readl("drivers/soc/atmel/soc.c:260", regs + AT91_DBGU_EXID);
 
 	iounmap(regs);
 
@@ -286,8 +286,8 @@ static int __init at91_get_cidr_exid_from_chipid(u32 *cidr, u32 *exid)
 		return -ENXIO;
 	}
 
-	*cidr = readl(regs + AT91_CHIPID_CIDR);
-	*exid = readl(regs + AT91_CHIPID_EXID);
+	*cidr = pete_readl("drivers/soc/atmel/soc.c:289", regs + AT91_CHIPID_CIDR);
+	*exid = pete_readl("drivers/soc/atmel/soc.c:290", regs + AT91_CHIPID_EXID);
 
 	iounmap(regs);
 

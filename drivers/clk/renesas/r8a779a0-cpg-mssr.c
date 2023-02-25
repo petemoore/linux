@@ -284,7 +284,7 @@ static struct clk * __init rcar_r8a779a0_cpg_clk_register(struct device *dev,
 		break;
 
 	case CLK_TYPE_R8A779A0_PLL2X_3X:
-		value = readl(base + core->offset);
+		value = pete_readl("drivers/clk/renesas/r8a779a0-cpg-mssr.c:287", base + core->offset);
 		mult = (((value >> 24) & 0x7f) + 1) * 2;
 		break;
 

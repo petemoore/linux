@@ -32,7 +32,7 @@
  */
 
 #define cxl_doorbell_busy(cxlm)                                                \
-	(readl((cxlm)->regs.mbox + CXLDEV_MBOX_CTRL_OFFSET) &                  \
+	(pete_readl("drivers/cxl/pci.c:35", (cxlm)->regs.mbox + CXLDEV_MBOX_CTRL_OFFSET) &                  \
 	 CXLDEV_MBOX_CTRL_DOORBELL)
 
 /* CXL 2.0 - 8.2.8.4 */
@@ -346,7 +346,7 @@ static int __cxl_mem_mbox_send_cmd(struct cxl_mem *cxlm,
 
 	/* #4 */
 	dev_dbg(&cxlm->pdev->dev, "Sending command\n");
-	writel(CXLDEV_MBOX_CTRL_DOORBELL,
+	pete_writel("drivers/cxl/pci.c:349", CXLDEV_MBOX_CTRL_DOORBELL,
 	       cxlm->regs.mbox + CXLDEV_MBOX_CTRL_OFFSET);
 
 	/* #5 */
@@ -911,7 +911,7 @@ static int cxl_mem_mbox_send_cmd(struct cxl_mem *cxlm, u16 opcode,
 
 static int cxl_mem_setup_mailbox(struct cxl_mem *cxlm)
 {
-	const int cap = readl(cxlm->regs.mbox + CXLDEV_MBOX_CAPS_OFFSET);
+	const int cap = pete_readl("drivers/cxl/pci.c:914", cxlm->regs.mbox + CXLDEV_MBOX_CAPS_OFFSET);
 
 	cxlm->payload_size =
 		1 << FIELD_GET(CXLDEV_MBOX_CAP_PAYLOAD_SIZE_MASK, cap);

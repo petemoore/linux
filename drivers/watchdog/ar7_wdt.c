@@ -42,8 +42,8 @@ static bool nowayout = WATCHDOG_NOWAYOUT;
 module_param(nowayout, bool, 0);
 MODULE_PARM_DESC(nowayout, "Disable watchdog shutdown on close");
 
-#define READ_REG(x) readl((void __iomem *)&(x))
-#define WRITE_REG(x, v) writel((v), (void __iomem *)&(x))
+#define READ_REG(x) pete_readl("drivers/watchdog/ar7_wdt.c:45", (void __iomem *)&(x))
+#define WRITE_REG(x, v) pete_writel("drivers/watchdog/ar7_wdt.c:46", (v), (void __iomem *)&(x))
 
 struct ar7_wdt {
 	u32 kick_lock;

@@ -58,9 +58,9 @@ static void iproc_pwmc_enable(struct iproc_pwmc *ip, unsigned int channel)
 {
 	u32 value;
 
-	value = readl(ip->base + IPROC_PWM_CTRL_OFFSET);
+	value = pete_readl("drivers/pwm/pwm-bcm-iproc.c:61", ip->base + IPROC_PWM_CTRL_OFFSET);
 	value |= 1 << IPROC_PWM_CTRL_EN_SHIFT(channel);
-	writel(value, ip->base + IPROC_PWM_CTRL_OFFSET);
+	pete_writel("drivers/pwm/pwm-bcm-iproc.c:63", value, ip->base + IPROC_PWM_CTRL_OFFSET);
 
 	/* must be a 400 ns delay between clearing and setting enable bit */
 	ndelay(400);
@@ -70,9 +70,9 @@ static void iproc_pwmc_disable(struct iproc_pwmc *ip, unsigned int channel)
 {
 	u32 value;
 
-	value = readl(ip->base + IPROC_PWM_CTRL_OFFSET);
+	value = pete_readl("drivers/pwm/pwm-bcm-iproc.c:73", ip->base + IPROC_PWM_CTRL_OFFSET);
 	value &= ~(1 << IPROC_PWM_CTRL_EN_SHIFT(channel));
-	writel(value, ip->base + IPROC_PWM_CTRL_OFFSET);
+	pete_writel("drivers/pwm/pwm-bcm-iproc.c:75", value, ip->base + IPROC_PWM_CTRL_OFFSET);
 
 	/* must be a 400 ns delay between clearing and setting enable bit */
 	ndelay(400);
@@ -85,7 +85,7 @@ static void iproc_pwmc_get_state(struct pwm_chip *chip, struct pwm_device *pwm,
 	u64 tmp, multi, rate;
 	u32 value, prescale;
 
-	value = readl(ip->base + IPROC_PWM_CTRL_OFFSET);
+	value = pete_readl("drivers/pwm/pwm-bcm-iproc.c:88", ip->base + IPROC_PWM_CTRL_OFFSET);
 
 	if (value & BIT(IPROC_PWM_CTRL_EN_SHIFT(pwm->hwpwm)))
 		state->enabled = true;
@@ -104,17 +104,17 @@ static void iproc_pwmc_get_state(struct pwm_chip *chip, struct pwm_device *pwm,
 		return;
 	}
 
-	value = readl(ip->base + IPROC_PWM_PRESCALE_OFFSET);
+	value = pete_readl("drivers/pwm/pwm-bcm-iproc.c:107", ip->base + IPROC_PWM_PRESCALE_OFFSET);
 	prescale = value >> IPROC_PWM_PRESCALE_SHIFT(pwm->hwpwm);
 	prescale &= IPROC_PWM_PRESCALE_MAX;
 
 	multi = NSEC_PER_SEC * (prescale + 1);
 
-	value = readl(ip->base + IPROC_PWM_PERIOD_OFFSET(pwm->hwpwm));
+	value = pete_readl("drivers/pwm/pwm-bcm-iproc.c:113", ip->base + IPROC_PWM_PERIOD_OFFSET(pwm->hwpwm));
 	tmp = (value & IPROC_PWM_PERIOD_MAX) * multi;
 	state->period = div64_u64(tmp, rate);
 
-	value = readl(ip->base + IPROC_PWM_DUTY_CYCLE_OFFSET(pwm->hwpwm));
+	value = pete_readl("drivers/pwm/pwm-bcm-iproc.c:117", ip->base + IPROC_PWM_DUTY_CYCLE_OFFSET(pwm->hwpwm));
 	tmp = (value & IPROC_PWM_PERIOD_MAX) * multi;
 	state->duty_cycle = div64_u64(tmp, rate);
 }
@@ -163,24 +163,24 @@ static int iproc_pwmc_apply(struct pwm_chip *chip, struct pwm_device *pwm,
 	iproc_pwmc_disable(ip, pwm->hwpwm);
 
 	/* Set prescale */
-	value = readl(ip->base + IPROC_PWM_PRESCALE_OFFSET);
+	value = pete_readl("drivers/pwm/pwm-bcm-iproc.c:166", ip->base + IPROC_PWM_PRESCALE_OFFSET);
 	value &= ~IPROC_PWM_PRESCALE_MASK(pwm->hwpwm);
 	value |= prescale << IPROC_PWM_PRESCALE_SHIFT(pwm->hwpwm);
-	writel(value, ip->base + IPROC_PWM_PRESCALE_OFFSET);
+	pete_writel("drivers/pwm/pwm-bcm-iproc.c:169", value, ip->base + IPROC_PWM_PRESCALE_OFFSET);
 
 	/* set period and duty cycle */
-	writel(period, ip->base + IPROC_PWM_PERIOD_OFFSET(pwm->hwpwm));
-	writel(duty, ip->base + IPROC_PWM_DUTY_CYCLE_OFFSET(pwm->hwpwm));
+	pete_writel("drivers/pwm/pwm-bcm-iproc.c:172", period, ip->base + IPROC_PWM_PERIOD_OFFSET(pwm->hwpwm));
+	pete_writel("drivers/pwm/pwm-bcm-iproc.c:173", duty, ip->base + IPROC_PWM_DUTY_CYCLE_OFFSET(pwm->hwpwm));
 
 	/* set polarity */
-	value = readl(ip->base + IPROC_PWM_CTRL_OFFSET);
+	value = pete_readl("drivers/pwm/pwm-bcm-iproc.c:176", ip->base + IPROC_PWM_CTRL_OFFSET);
 
 	if (state->polarity == PWM_POLARITY_NORMAL)
 		value |= 1 << IPROC_PWM_CTRL_POLARITY_SHIFT(pwm->hwpwm);
 	else
 		value &= ~(1 << IPROC_PWM_CTRL_POLARITY_SHIFT(pwm->hwpwm));
 
-	writel(value, ip->base + IPROC_PWM_CTRL_OFFSET);
+	pete_writel("drivers/pwm/pwm-bcm-iproc.c:183", value, ip->base + IPROC_PWM_CTRL_OFFSET);
 
 	if (state->enabled)
 		iproc_pwmc_enable(ip, pwm->hwpwm);
@@ -229,14 +229,14 @@ static int iproc_pwmc_probe(struct platform_device *pdev)
 	}
 
 	/* Set full drive and normal polarity for all channels */
-	value = readl(ip->base + IPROC_PWM_CTRL_OFFSET);
+	value = pete_readl("drivers/pwm/pwm-bcm-iproc.c:232", ip->base + IPROC_PWM_CTRL_OFFSET);
 
 	for (i = 0; i < ip->chip.npwm; i++) {
 		value &= ~(1 << IPROC_PWM_CTRL_TYPE_SHIFT(i));
 		value |= 1 << IPROC_PWM_CTRL_POLARITY_SHIFT(i);
 	}
 
-	writel(value, ip->base + IPROC_PWM_CTRL_OFFSET);
+	pete_writel("drivers/pwm/pwm-bcm-iproc.c:239", value, ip->base + IPROC_PWM_CTRL_OFFSET);
 
 	ret = pwmchip_add(&ip->chip);
 	if (ret < 0) {

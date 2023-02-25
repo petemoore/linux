@@ -107,7 +107,7 @@ static irqreturn_t do_outbox_isr(void __iomem *base, struct sprd_mbox_priv *priv
 	u32 fifo_sts, fifo_len, msg[2];
 	int i, id;
 
-	fifo_sts = readl(base + SPRD_MBOX_FIFO_STS);
+	fifo_sts = pete_readl("drivers/mailbox/sprd-mailbox.c:110", base + SPRD_MBOX_FIFO_STS);
 
 	fifo_len = sprd_mbox_get_fifo_len(priv, fifo_sts);
 	if (!fifo_len) {
@@ -116,9 +116,9 @@ static irqreturn_t do_outbox_isr(void __iomem *base, struct sprd_mbox_priv *priv
 	}
 
 	for (i = 0; i < fifo_len; i++) {
-		msg[0] = readl(base + SPRD_MBOX_MSG_LOW);
-		msg[1] = readl(base + SPRD_MBOX_MSG_HIGH);
-		id = readl(base + SPRD_MBOX_ID);
+		msg[0] = pete_readl("drivers/mailbox/sprd-mailbox.c:119", base + SPRD_MBOX_MSG_LOW);
+		msg[1] = pete_readl("drivers/mailbox/sprd-mailbox.c:120", base + SPRD_MBOX_MSG_HIGH);
+		id = pete_readl("drivers/mailbox/sprd-mailbox.c:121", base + SPRD_MBOX_ID);
 
 		chan = &priv->chan[id];
 		if (chan->cl)
@@ -128,11 +128,11 @@ static irqreturn_t do_outbox_isr(void __iomem *base, struct sprd_mbox_priv *priv
 				    "message's been dropped at ch[%d]\n", id);
 
 		/* Trigger to update outbox FIFO pointer */
-		writel(0x1, base + SPRD_MBOX_TRIGGER);
+		pete_writel("drivers/mailbox/sprd-mailbox.c:131", 0x1, base + SPRD_MBOX_TRIGGER);
 	}
 
 	/* Clear irq status after reading all message. */
-	writel(SPRD_MBOX_IRQ_CLR, base + SPRD_MBOX_IRQ_STS);
+	pete_writel("drivers/mailbox/sprd-mailbox.c:135", SPRD_MBOX_IRQ_CLR, base + SPRD_MBOX_IRQ_STS);
 
 	return IRQ_HANDLED;
 }
@@ -157,7 +157,7 @@ static irqreturn_t sprd_mbox_inbox_isr(int irq, void *data)
 	struct mbox_chan *chan;
 	u32 fifo_sts, send_sts, busy, id;
 
-	fifo_sts = readl(priv->inbox_base + SPRD_MBOX_FIFO_STS);
+	fifo_sts = pete_readl("drivers/mailbox/sprd-mailbox.c:160", priv->inbox_base + SPRD_MBOX_FIFO_STS);
 
 	/* Get the inbox data delivery status */
 	send_sts = (fifo_sts & SPRD_INBOX_FIFO_DELIVER_MASK) >>
@@ -183,12 +183,12 @@ static irqreturn_t sprd_mbox_inbox_isr(int irq, void *data)
 	}
 
 	/* Clear FIFO delivery and overflow status */
-	writel(fifo_sts &
+	pete_writel("drivers/mailbox/sprd-mailbox.c:186", fifo_sts &
 	       (SPRD_INBOX_FIFO_DELIVER_MASK | SPRD_INBOX_FIFO_OVERLOW_MASK),
 	       priv->inbox_base + SPRD_MBOX_FIFO_RST);
 
 	/* Clear irq status */
-	writel(SPRD_MBOX_IRQ_CLR, priv->inbox_base + SPRD_MBOX_IRQ_STS);
+	pete_writel("drivers/mailbox/sprd-mailbox.c:191", SPRD_MBOX_IRQ_CLR, priv->inbox_base + SPRD_MBOX_IRQ_STS);
 
 	return IRQ_HANDLED;
 }
@@ -200,14 +200,14 @@ static int sprd_mbox_send_data(struct mbox_chan *chan, void *msg)
 	u32 *data = msg;
 
 	/* Write data into inbox FIFO, and only support 8 bytes every time */
-	writel(data[0], priv->inbox_base + SPRD_MBOX_MSG_LOW);
-	writel(data[1], priv->inbox_base + SPRD_MBOX_MSG_HIGH);
+	pete_writel("drivers/mailbox/sprd-mailbox.c:203", data[0], priv->inbox_base + SPRD_MBOX_MSG_LOW);
+	pete_writel("drivers/mailbox/sprd-mailbox.c:204", data[1], priv->inbox_base + SPRD_MBOX_MSG_HIGH);
 
 	/* Set target core id */
-	writel(id, priv->inbox_base + SPRD_MBOX_ID);
+	pete_writel("drivers/mailbox/sprd-mailbox.c:207", id, priv->inbox_base + SPRD_MBOX_ID);
 
 	/* Trigger remote request */
-	writel(0x1, priv->inbox_base + SPRD_MBOX_TRIGGER);
+	pete_writel("drivers/mailbox/sprd-mailbox.c:210", 0x1, priv->inbox_base + SPRD_MBOX_TRIGGER);
 
 	return 0;
 }
@@ -221,7 +221,7 @@ static int sprd_mbox_flush(struct mbox_chan *chan, unsigned long timeout)
 	timeout = jiffies + msecs_to_jiffies(timeout);
 
 	while (time_before(jiffies, timeout)) {
-		busy = readl(priv->inbox_base + SPRD_MBOX_FIFO_STS) &
+		busy = pete_readl("drivers/mailbox/sprd-mailbox.c:224", priv->inbox_base + SPRD_MBOX_FIFO_STS) &
 			SPRD_INBOX_FIFO_BUSY_MASK;
 		if (!(busy & BIT(id))) {
 			mbox_chan_txdone(chan, 0);
@@ -242,24 +242,24 @@ static int sprd_mbox_startup(struct mbox_chan *chan)
 	mutex_lock(&priv->lock);
 	if (priv->refcnt++ == 0) {
 		/* Select outbox FIFO mode and reset the outbox FIFO status */
-		writel(0x0, priv->outbox_base + SPRD_MBOX_FIFO_RST);
+		pete_writel("drivers/mailbox/sprd-mailbox.c:245", 0x0, priv->outbox_base + SPRD_MBOX_FIFO_RST);
 
 		/* Enable inbox FIFO overflow and delivery interrupt */
-		val = readl(priv->inbox_base + SPRD_MBOX_IRQ_MSK);
+		val = pete_readl("drivers/mailbox/sprd-mailbox.c:248", priv->inbox_base + SPRD_MBOX_IRQ_MSK);
 		val &= ~(SPRD_INBOX_FIFO_OVERFLOW_IRQ | SPRD_INBOX_FIFO_DELIVER_IRQ);
-		writel(val, priv->inbox_base + SPRD_MBOX_IRQ_MSK);
+		pete_writel("drivers/mailbox/sprd-mailbox.c:250", val, priv->inbox_base + SPRD_MBOX_IRQ_MSK);
 
 		/* Enable outbox FIFO not empty interrupt */
-		val = readl(priv->outbox_base + SPRD_MBOX_IRQ_MSK);
+		val = pete_readl("drivers/mailbox/sprd-mailbox.c:253", priv->outbox_base + SPRD_MBOX_IRQ_MSK);
 		val &= ~SPRD_OUTBOX_FIFO_NOT_EMPTY_IRQ;
-		writel(val, priv->outbox_base + SPRD_MBOX_IRQ_MSK);
+		pete_writel("drivers/mailbox/sprd-mailbox.c:255", val, priv->outbox_base + SPRD_MBOX_IRQ_MSK);
 
 		/* Enable supplementary outbox as the fundamental one */
 		if (priv->supp_base) {
-			writel(0x0, priv->supp_base + SPRD_MBOX_FIFO_RST);
-			val = readl(priv->supp_base + SPRD_MBOX_IRQ_MSK);
+			pete_writel("drivers/mailbox/sprd-mailbox.c:259", 0x0, priv->supp_base + SPRD_MBOX_FIFO_RST);
+			val = pete_readl("drivers/mailbox/sprd-mailbox.c:260", priv->supp_base + SPRD_MBOX_IRQ_MSK);
 			val &= ~SPRD_OUTBOX_FIFO_NOT_EMPTY_IRQ;
-			writel(val, priv->supp_base + SPRD_MBOX_IRQ_MSK);
+			pete_writel("drivers/mailbox/sprd-mailbox.c:262", val, priv->supp_base + SPRD_MBOX_IRQ_MSK);
 		}
 	}
 	mutex_unlock(&priv->lock);
@@ -274,11 +274,11 @@ static void sprd_mbox_shutdown(struct mbox_chan *chan)
 	mutex_lock(&priv->lock);
 	if (--priv->refcnt == 0) {
 		/* Disable inbox & outbox interrupt */
-		writel(SPRD_INBOX_FIFO_IRQ_MASK, priv->inbox_base + SPRD_MBOX_IRQ_MSK);
-		writel(SPRD_OUTBOX_FIFO_IRQ_MASK, priv->outbox_base + SPRD_MBOX_IRQ_MSK);
+		pete_writel("drivers/mailbox/sprd-mailbox.c:277", SPRD_INBOX_FIFO_IRQ_MASK, priv->inbox_base + SPRD_MBOX_IRQ_MSK);
+		pete_writel("drivers/mailbox/sprd-mailbox.c:278", SPRD_OUTBOX_FIFO_IRQ_MASK, priv->outbox_base + SPRD_MBOX_IRQ_MSK);
 
 		if (priv->supp_base)
-			writel(SPRD_OUTBOX_FIFO_IRQ_MASK,
+			pete_writel("drivers/mailbox/sprd-mailbox.c:281", SPRD_OUTBOX_FIFO_IRQ_MASK,
 			       priv->supp_base + SPRD_MBOX_IRQ_MSK);
 	}
 	mutex_unlock(&priv->lock);
@@ -389,7 +389,7 @@ static int sprd_mbox_probe(struct platform_device *pdev)
 
 	/* Get the default outbox FIFO depth */
 	priv->outbox_fifo_depth =
-		readl(priv->outbox_base + SPRD_MBOX_FIFO_DEPTH) + 1;
+		pete_readl("drivers/mailbox/sprd-mailbox.c:392", priv->outbox_base + SPRD_MBOX_FIFO_DEPTH) + 1;
 	priv->mbox.dev = dev;
 	priv->mbox.chans = &priv->chan[0];
 	priv->mbox.num_chans = SPRD_MBOX_CHAN_MAX;

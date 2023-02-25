@@ -112,7 +112,7 @@ static ssize_t w100fb_reg_read(struct device *dev, struct device_attribute *attr
 {
 	unsigned long regs, param;
 	regs = simple_strtoul(buf, NULL, 16);
-	param = readl(remapped_regs + regs);
+	param = pete_readl("drivers/video/fbdev/w100fb.c:115", remapped_regs + regs);
 	printk("Read Register 0x%08lX: 0x%08lX\n", regs, param);
 	return count;
 }
@@ -126,7 +126,7 @@ static ssize_t w100fb_reg_write(struct device *dev, struct device_attribute *att
 
 	if (regs <= 0x2000) {
 		printk("Write Register 0x%08lX: 0x%08lX\n", regs, param);
-		writel(param, remapped_regs + regs);
+		pete_writel("drivers/video/fbdev/w100fb.c:129", param, remapped_regs + regs);
 	}
 
 	return count;
@@ -266,7 +266,7 @@ static void w100_fifo_wait(int entries)
 	int i;
 
 	for (i = 0; i < 2000000; i++) {
-		status.val = readl(remapped_regs + mmRBBM_STATUS);
+		status.val = pete_readl("drivers/video/fbdev/w100fb.c:269", remapped_regs + mmRBBM_STATUS);
 		if (status.f.cmdfifo_avail >= entries)
 			return;
 		udelay(1);
@@ -281,7 +281,7 @@ static int w100fb_sync(struct fb_info *info)
 	int i;
 
 	for (i = 0; i < 2000000; i++) {
-		status.val = readl(remapped_regs + mmRBBM_STATUS);
+		status.val = pete_readl("drivers/video/fbdev/w100fb.c:284", remapped_regs + mmRBBM_STATUS);
 		if (!status.f.gui_active)
 			return 0;
 		udelay(1);
@@ -299,15 +299,15 @@ static void w100_init_graphic_engine(struct w100fb_par *par)
 	union dp_cntl_u dp_cntl;
 
 	w100_fifo_wait(4);
-	writel(W100_FB_BASE, remapped_regs + mmDST_OFFSET);
-	writel(par->xres, remapped_regs + mmDST_PITCH);
-	writel(W100_FB_BASE, remapped_regs + mmSRC_OFFSET);
-	writel(par->xres, remapped_regs + mmSRC_PITCH);
+	pete_writel("drivers/video/fbdev/w100fb.c:302", W100_FB_BASE, remapped_regs + mmDST_OFFSET);
+	pete_writel("drivers/video/fbdev/w100fb.c:303", par->xres, remapped_regs + mmDST_PITCH);
+	pete_writel("drivers/video/fbdev/w100fb.c:304", W100_FB_BASE, remapped_regs + mmSRC_OFFSET);
+	pete_writel("drivers/video/fbdev/w100fb.c:305", par->xres, remapped_regs + mmSRC_PITCH);
 
 	w100_fifo_wait(3);
-	writel(0, remapped_regs + mmSC_TOP_LEFT);
-	writel((par->yres << 16) | par->xres, remapped_regs + mmSC_BOTTOM_RIGHT);
-	writel(0x1fff1fff, remapped_regs + mmSRC_SC_BOTTOM_RIGHT);
+	pete_writel("drivers/video/fbdev/w100fb.c:308", 0, remapped_regs + mmSC_TOP_LEFT);
+	pete_writel("drivers/video/fbdev/w100fb.c:309", (par->yres << 16) | par->xres, remapped_regs + mmSC_BOTTOM_RIGHT);
+	pete_writel("drivers/video/fbdev/w100fb.c:310", 0x1fff1fff, remapped_regs + mmSRC_SC_BOTTOM_RIGHT);
 
 	w100_fifo_wait(4);
 	dp_cntl.val = 0;
@@ -317,7 +317,7 @@ static void w100_init_graphic_engine(struct w100fb_par *par)
 	dp_cntl.f.src_y_dir = 1;
 	dp_cntl.f.dst_major_x = 1;
 	dp_cntl.f.src_major_x = 1;
-	writel(dp_cntl.val, remapped_regs + mmDP_CNTL);
+	pete_writel("drivers/video/fbdev/w100fb.c:320", dp_cntl.val, remapped_regs + mmDP_CNTL);
 
 	gmc.val = 0;
 	gmc.f.gmc_src_pitch_offset_cntl = 1;
@@ -334,7 +334,7 @@ static void w100_init_graphic_engine(struct w100fb_par *par)
 	gmc.f.gmc_clr_cmp_fcn_dis = 1;
 	gmc.f.gmc_wr_msk_dis = 1;
 	gmc.f.gmc_dp_op = DP_OP_ROP;
-	writel(gmc.val, remapped_regs + mmDP_GUI_MASTER_CNTL);
+	pete_writel("drivers/video/fbdev/w100fb.c:337", gmc.val, remapped_regs + mmDP_GUI_MASTER_CNTL);
 
 	dp_datatype.val = dp_mix.val = 0;
 	dp_datatype.f.dp_dst_datatype = gmc.f.gmc_dst_datatype;
@@ -343,13 +343,13 @@ static void w100_init_graphic_engine(struct w100fb_par *par)
 	dp_datatype.f.dp_src2_datatype = gmc.f.gmc_src_datatype;
 	dp_datatype.f.dp_src_datatype = gmc.f.gmc_src_datatype;
 	dp_datatype.f.dp_byte_pix_order = gmc.f.gmc_byte_pix_order;
-	writel(dp_datatype.val, remapped_regs + mmDP_DATATYPE);
+	pete_writel("drivers/video/fbdev/w100fb.c:346", dp_datatype.val, remapped_regs + mmDP_DATATYPE);
 
 	dp_mix.f.dp_src_source = gmc.f.gmc_dp_src_source;
 	dp_mix.f.dp_src2_source = 1;
 	dp_mix.f.dp_rop3 = gmc.f.gmc_rop3;
 	dp_mix.f.dp_op = gmc.f.gmc_dp_op;
-	writel(dp_mix.val, remapped_regs + mmDP_MIX);
+	pete_writel("drivers/video/fbdev/w100fb.c:352", dp_mix.val, remapped_regs + mmDP_MIX);
 }
 
 
@@ -365,16 +365,16 @@ static void w100fb_fillrect(struct fb_info *info,
 		return;
 	}
 
-	gmc.val = readl(remapped_regs + mmDP_GUI_MASTER_CNTL);
+	gmc.val = pete_readl("drivers/video/fbdev/w100fb.c:368", remapped_regs + mmDP_GUI_MASTER_CNTL);
 	gmc.f.gmc_rop3 = ROP3_PATCOPY;
 	gmc.f.gmc_brush_datatype = GMC_BRUSH_SOLID_COLOR;
 	w100_fifo_wait(2);
-	writel(gmc.val, remapped_regs + mmDP_GUI_MASTER_CNTL);
-	writel(rect->color, remapped_regs + mmDP_BRUSH_FRGD_CLR);
+	pete_writel("drivers/video/fbdev/w100fb.c:372", gmc.val, remapped_regs + mmDP_GUI_MASTER_CNTL);
+	pete_writel("drivers/video/fbdev/w100fb.c:373", rect->color, remapped_regs + mmDP_BRUSH_FRGD_CLR);
 
 	w100_fifo_wait(2);
-	writel((rect->dy << 16) | (rect->dx & 0xffff), remapped_regs + mmDST_Y_X);
-	writel((rect->width << 16) | (rect->height & 0xffff),
+	pete_writel("drivers/video/fbdev/w100fb.c:376", (rect->dy << 16) | (rect->dx & 0xffff), remapped_regs + mmDST_Y_X);
+	pete_writel("drivers/video/fbdev/w100fb.c:377", (rect->width << 16) | (rect->height & 0xffff),
 	       remapped_regs + mmDST_WIDTH_HEIGHT);
 }
 
@@ -393,16 +393,16 @@ static void w100fb_copyarea(struct fb_info *info,
 		return;
 	}
 
-	gmc.val = readl(remapped_regs + mmDP_GUI_MASTER_CNTL);
+	gmc.val = pete_readl("drivers/video/fbdev/w100fb.c:396", remapped_regs + mmDP_GUI_MASTER_CNTL);
 	gmc.f.gmc_rop3 = ROP3_SRCCOPY;
 	gmc.f.gmc_brush_datatype = GMC_BRUSH_NONE;
 	w100_fifo_wait(1);
-	writel(gmc.val, remapped_regs + mmDP_GUI_MASTER_CNTL);
+	pete_writel("drivers/video/fbdev/w100fb.c:400", gmc.val, remapped_regs + mmDP_GUI_MASTER_CNTL);
 
 	w100_fifo_wait(3);
-	writel((sy << 16) | (sx & 0xffff), remapped_regs + mmSRC_Y_X);
-	writel((dy << 16) | (dx & 0xffff), remapped_regs + mmDST_Y_X);
-	writel((w << 16) | (h & 0xffff), remapped_regs + mmDST_WIDTH_HEIGHT);
+	pete_writel("drivers/video/fbdev/w100fb.c:403", (sy << 16) | (sx & 0xffff), remapped_regs + mmSRC_Y_X);
+	pete_writel("drivers/video/fbdev/w100fb.c:404", (dy << 16) | (dx & 0xffff), remapped_regs + mmDST_Y_X);
+	pete_writel("drivers/video/fbdev/w100fb.c:405", (w << 16) | (h & 0xffff), remapped_regs + mmDST_WIDTH_HEIGHT);
 }
 
 
@@ -661,7 +661,7 @@ static int w100fb_probe(struct platform_device *pdev)
 
 	/* Identify the chip */
 	printk("Found ");
-	chip_id = readl(remapped_regs + mmCHIP_ID);
+	chip_id = pete_readl("drivers/video/fbdev/w100fb.c:664", remapped_regs + mmCHIP_ID);
 	switch(chip_id) {
 		case CHIP_ID_W100:  printk("w100");  break;
 		case CHIP_ID_W3200: printk("w3200"); break;
@@ -834,7 +834,7 @@ static void w100_update_disable(void)
 	disp_db_buf_wr_cntl.f.db_buf_cntl = 0x1e;
 	disp_db_buf_wr_cntl.f.update_db_buf = 0;
 	disp_db_buf_wr_cntl.f.en_db_buf = 0;
-	writel((u32) (disp_db_buf_wr_cntl.val), remapped_regs + mmDISP_DB_BUF_CNTL);
+	pete_writel("drivers/video/fbdev/w100fb.c:837", (u32) (disp_db_buf_wr_cntl.val), remapped_regs + mmDISP_DB_BUF_CNTL);
 }
 
 static void w100_update_enable(void)
@@ -845,7 +845,7 @@ static void w100_update_enable(void)
 	disp_db_buf_wr_cntl.f.db_buf_cntl = 0x1e;
 	disp_db_buf_wr_cntl.f.update_db_buf = 1;
 	disp_db_buf_wr_cntl.f.en_db_buf = 1;
-	writel((u32) (disp_db_buf_wr_cntl.val), remapped_regs + mmDISP_DB_BUF_CNTL);
+	pete_writel("drivers/video/fbdev/w100fb.c:848", (u32) (disp_db_buf_wr_cntl.val), remapped_regs + mmDISP_DB_BUF_CNTL);
 }
 
 unsigned long w100fb_gpio_read(int port)
@@ -853,9 +853,9 @@ unsigned long w100fb_gpio_read(int port)
 	unsigned long value;
 
 	if (port==W100_GPIO_PORT_A)
-		value = readl(remapped_regs + mmGPIO_DATA);
+		value = pete_readl("drivers/video/fbdev/w100fb.c:856", remapped_regs + mmGPIO_DATA);
 	else
-		value = readl(remapped_regs + mmGPIO_DATA2);
+		value = pete_readl("drivers/video/fbdev/w100fb.c:858", remapped_regs + mmGPIO_DATA2);
 
 	return value;
 }
@@ -863,9 +863,9 @@ unsigned long w100fb_gpio_read(int port)
 void w100fb_gpio_write(int port, unsigned long value)
 {
 	if (port==W100_GPIO_PORT_A)
-		writel(value, remapped_regs + mmGPIO_DATA);
+		pete_writel("drivers/video/fbdev/w100fb.c:866", value, remapped_regs + mmGPIO_DATA);
 	else
-		writel(value, remapped_regs + mmGPIO_DATA2);
+		pete_writel("drivers/video/fbdev/w100fb.c:868", value, remapped_regs + mmGPIO_DATA2);
 }
 EXPORT_SYMBOL(w100fb_gpio_read);
 EXPORT_SYMBOL(w100fb_gpio_write);
@@ -891,32 +891,32 @@ static void w100_hw_init(struct w100fb_par *par)
 
 	/* This is what the fpga_init code does on reset. May be wrong
 	   but there is little info available */
-	writel(0x31, remapped_regs + mmSCRATCH_UMSK);
+	pete_writel("drivers/video/fbdev/w100fb.c:894", 0x31, remapped_regs + mmSCRATCH_UMSK);
 	for (temp32 = 0; temp32 < 10000; temp32++)
-		readl(remapped_regs + mmSCRATCH_UMSK);
-	writel(0x30, remapped_regs + mmSCRATCH_UMSK);
+		pete_readl("drivers/video/fbdev/w100fb.c:896", remapped_regs + mmSCRATCH_UMSK);
+	pete_writel("drivers/video/fbdev/w100fb.c:897", 0x30, remapped_regs + mmSCRATCH_UMSK);
 
 	/* Set up CIF */
 	cif_io.val = defCIF_IO;
-	writel((u32)(cif_io.val), remapped_regs + mmCIF_IO);
+	pete_writel("drivers/video/fbdev/w100fb.c:901", (u32)(cif_io.val), remapped_regs + mmCIF_IO);
 
-	cif_write_dbg.val = readl(remapped_regs + mmCIF_WRITE_DBG);
+	cif_write_dbg.val = pete_readl("drivers/video/fbdev/w100fb.c:903", remapped_regs + mmCIF_WRITE_DBG);
 	cif_write_dbg.f.dis_packer_ful_during_rbbm_timeout = 0;
 	cif_write_dbg.f.en_dword_split_to_rbbm = 1;
 	cif_write_dbg.f.dis_timeout_during_rbbm = 1;
-	writel((u32) (cif_write_dbg.val), remapped_regs + mmCIF_WRITE_DBG);
+	pete_writel("drivers/video/fbdev/w100fb.c:907", (u32) (cif_write_dbg.val), remapped_regs + mmCIF_WRITE_DBG);
 
-	cif_read_dbg.val = readl(remapped_regs + mmCIF_READ_DBG);
+	cif_read_dbg.val = pete_readl("drivers/video/fbdev/w100fb.c:909", remapped_regs + mmCIF_READ_DBG);
 	cif_read_dbg.f.dis_rd_same_byte_to_trig_fetch = 1;
-	writel((u32) (cif_read_dbg.val), remapped_regs + mmCIF_READ_DBG);
+	pete_writel("drivers/video/fbdev/w100fb.c:911", (u32) (cif_read_dbg.val), remapped_regs + mmCIF_READ_DBG);
 
-	cif_cntl.val = readl(remapped_regs + mmCIF_CNTL);
+	cif_cntl.val = pete_readl("drivers/video/fbdev/w100fb.c:913", remapped_regs + mmCIF_CNTL);
 	cif_cntl.f.dis_system_bits = 1;
 	cif_cntl.f.dis_mr = 1;
 	cif_cntl.f.en_wait_to_compensate_dq_prop_dly = 0;
 	cif_cntl.f.intb_oe = 1;
 	cif_cntl.f.interrupt_active_high = 1;
-	writel((u32) (cif_cntl.val), remapped_regs + mmCIF_CNTL);
+	pete_writel("drivers/video/fbdev/w100fb.c:919", (u32) (cif_cntl.val), remapped_regs + mmCIF_CNTL);
 
 	/* Setup cfgINTF_CNTL and cfgCPU defaults */
 	intf_cntl.val = defINTF_CNTL;
@@ -938,32 +938,32 @@ static void w100_hw_init(struct w100fb_par *par)
 
 	cfgreg_base.val = defCFGREG_BASE;
 	cfgreg_base.f.cfgreg_base = W100_CFG_BASE;
-	writel((u32) (cfgreg_base.val), remapped_regs + mmCFGREG_BASE);
+	pete_writel("drivers/video/fbdev/w100fb.c:941", (u32) (cfgreg_base.val), remapped_regs + mmCFGREG_BASE);
 
 	wrap_start_dir.val = defWRAP_START_DIR;
 	wrap_start_dir.f.start_addr = WRAP_BUF_BASE_VALUE >> 1;
-	writel((u32) (wrap_start_dir.val), remapped_regs + mmWRAP_START_DIR);
+	pete_writel("drivers/video/fbdev/w100fb.c:945", (u32) (wrap_start_dir.val), remapped_regs + mmWRAP_START_DIR);
 
 	wrap_top_dir.val = defWRAP_TOP_DIR;
 	wrap_top_dir.f.top_addr = WRAP_BUF_TOP_VALUE >> 1;
-	writel((u32) (wrap_top_dir.val), remapped_regs + mmWRAP_TOP_DIR);
+	pete_writel("drivers/video/fbdev/w100fb.c:949", (u32) (wrap_top_dir.val), remapped_regs + mmWRAP_TOP_DIR);
 
-	writel((u32) 0x2440, remapped_regs + mmRBBM_CNTL);
+	pete_writel("drivers/video/fbdev/w100fb.c:951", (u32) 0x2440, remapped_regs + mmRBBM_CNTL);
 
 	/* Set the hardware to 565 colour */
-	temp32 = readl(remapped_regs + mmDISP_DEBUG2);
+	temp32 = pete_readl("drivers/video/fbdev/w100fb.c:954", remapped_regs + mmDISP_DEBUG2);
 	temp32 &= 0xff7fffff;
 	temp32 |= 0x00800000;
-	writel(temp32, remapped_regs + mmDISP_DEBUG2);
+	pete_writel("drivers/video/fbdev/w100fb.c:957", temp32, remapped_regs + mmDISP_DEBUG2);
 
 	/* Initialise the GPIO lines */
 	if (gpio) {
-		writel(gpio->init_data1, remapped_regs + mmGPIO_DATA);
-		writel(gpio->init_data2, remapped_regs + mmGPIO_DATA2);
-		writel(gpio->gpio_dir1,  remapped_regs + mmGPIO_CNTL1);
-		writel(gpio->gpio_oe1,   remapped_regs + mmGPIO_CNTL2);
-		writel(gpio->gpio_dir2,  remapped_regs + mmGPIO_CNTL3);
-		writel(gpio->gpio_oe2,   remapped_regs + mmGPIO_CNTL4);
+		pete_writel("drivers/video/fbdev/w100fb.c:961", gpio->init_data1, remapped_regs + mmGPIO_DATA);
+		pete_writel("drivers/video/fbdev/w100fb.c:962", gpio->init_data2, remapped_regs + mmGPIO_DATA2);
+		pete_writel("drivers/video/fbdev/w100fb.c:963", gpio->gpio_dir1,  remapped_regs + mmGPIO_CNTL1);
+		pete_writel("drivers/video/fbdev/w100fb.c:964", gpio->gpio_oe1,   remapped_regs + mmGPIO_CNTL2);
+		pete_writel("drivers/video/fbdev/w100fb.c:965", gpio->gpio_dir2,  remapped_regs + mmGPIO_CNTL3);
+		pete_writel("drivers/video/fbdev/w100fb.c:966", gpio->gpio_oe2,   remapped_regs + mmGPIO_CNTL4);
 	}
 }
 
@@ -1049,22 +1049,22 @@ static unsigned int w100_get_testcount(unsigned int testclk_sel)
 	clk_test_cntl.f.start_check_freq = 0x0;
 	clk_test_cntl.f.testclk_sel = testclk_sel;
 	clk_test_cntl.f.tstcount_rst = 0x1; /* set reset */
-	writel((u32) (clk_test_cntl.val), remapped_regs + mmCLK_TEST_CNTL);
+	pete_writel("drivers/video/fbdev/w100fb.c:1052", (u32) (clk_test_cntl.val), remapped_regs + mmCLK_TEST_CNTL);
 
 	clk_test_cntl.f.tstcount_rst = 0x0; /* clear reset */
-	writel((u32) (clk_test_cntl.val), remapped_regs + mmCLK_TEST_CNTL);
+	pete_writel("drivers/video/fbdev/w100fb.c:1055", (u32) (clk_test_cntl.val), remapped_regs + mmCLK_TEST_CNTL);
 
 	/* Run clock test */
 	clk_test_cntl.f.start_check_freq = 0x1;
-	writel((u32) (clk_test_cntl.val), remapped_regs + mmCLK_TEST_CNTL);
+	pete_writel("drivers/video/fbdev/w100fb.c:1059", (u32) (clk_test_cntl.val), remapped_regs + mmCLK_TEST_CNTL);
 
 	/* Give the test time to complete */
 	udelay(20);
 
 	/* Return the result */
-	clk_test_cntl.val = readl(remapped_regs + mmCLK_TEST_CNTL);
+	clk_test_cntl.val = pete_readl("drivers/video/fbdev/w100fb.c:1065", remapped_regs + mmCLK_TEST_CNTL);
 	clk_test_cntl.f.start_check_freq = 0x0;
-	writel((u32) (clk_test_cntl.val), remapped_regs + mmCLK_TEST_CNTL);
+	pete_writel("drivers/video/fbdev/w100fb.c:1067", (u32) (clk_test_cntl.val), remapped_regs + mmCLK_TEST_CNTL);
 
 	return clk_test_cntl.f.test_count;
 }
@@ -1091,13 +1091,13 @@ static int w100_pll_adjust(struct w100_pll_info *pll)
 	do {
 		/* set VCO input = 0.8 * VDD */
 		w100_pwr_state.pll_cntl.f.pll_dactal = 0xd;
-		writel((u32) (w100_pwr_state.pll_cntl.val), remapped_regs + mmPLL_CNTL);
+		pete_writel("drivers/video/fbdev/w100fb.c:1094", (u32) (w100_pwr_state.pll_cntl.val), remapped_regs + mmPLL_CNTL);
 
 		tf80 = w100_get_testcount(TESTCLK_SRC_PLL);
 		if (tf80 >= (pll->tfgoal)) {
 			/* set VCO input = 0.2 * VDD */
 			w100_pwr_state.pll_cntl.f.pll_dactal = 0x7;
-			writel((u32) (w100_pwr_state.pll_cntl.val), remapped_regs + mmPLL_CNTL);
+			pete_writel("drivers/video/fbdev/w100fb.c:1100", (u32) (w100_pwr_state.pll_cntl.val), remapped_regs + mmPLL_CNTL);
 
 			tf20 = w100_get_testcount(TESTCLK_SRC_PLL);
 			if (tf20 <= (pll->tfgoal))
@@ -1137,17 +1137,17 @@ static int w100_pll_calibration(struct w100_pll_info *pll)
 	/* PLL Reset And Lock */
 	/* set VCO input = 0.5 * VDD */
 	w100_pwr_state.pll_cntl.f.pll_dactal = 0xa;
-	writel((u32) (w100_pwr_state.pll_cntl.val), remapped_regs + mmPLL_CNTL);
+	pete_writel("drivers/video/fbdev/w100fb.c:1140", (u32) (w100_pwr_state.pll_cntl.val), remapped_regs + mmPLL_CNTL);
 
 	udelay(1);  /* reset time */
 
 	/* enable charge pump */
 	w100_pwr_state.pll_cntl.f.pll_tcpoff = 0x0;  /* normal */
-	writel((u32) (w100_pwr_state.pll_cntl.val), remapped_regs + mmPLL_CNTL);
+	pete_writel("drivers/video/fbdev/w100fb.c:1146", (u32) (w100_pwr_state.pll_cntl.val), remapped_regs + mmPLL_CNTL);
 
 	/* set VCO input = Hi-Z, disable DAC */
 	w100_pwr_state.pll_cntl.f.pll_dactal = 0x0;
-	writel((u32) (w100_pwr_state.pll_cntl.val), remapped_regs + mmPLL_CNTL);
+	pete_writel("drivers/video/fbdev/w100fb.c:1150", (u32) (w100_pwr_state.pll_cntl.val), remapped_regs + mmPLL_CNTL);
 
 	udelay(400);  /* lock time */
 
@@ -1165,21 +1165,21 @@ static int w100_pll_set_clk(struct w100_pll_info *pll)
 	{
 		w100_pwr_state.pwrmgt_cntl.f.pwm_fast_noml_hw_en = 0x0;  /* disable fast to normal */
 		w100_pwr_state.pwrmgt_cntl.f.pwm_noml_fast_hw_en = 0x0;  /* disable normal to fast */
-		writel((u32) (w100_pwr_state.pwrmgt_cntl.val), remapped_regs + mmPWRMGT_CNTL);
+		pete_writel("drivers/video/fbdev/w100fb.c:1168", (u32) (w100_pwr_state.pwrmgt_cntl.val), remapped_regs + mmPWRMGT_CNTL);
 	}
 
 	/* Set system clock source to XTAL whilst adjusting the PLL! */
 	w100_pwr_state.sclk_cntl.f.sclk_src_sel = CLK_SRC_XTAL;
-	writel((u32) (w100_pwr_state.sclk_cntl.val), remapped_regs + mmSCLK_CNTL);
+	pete_writel("drivers/video/fbdev/w100fb.c:1173", (u32) (w100_pwr_state.sclk_cntl.val), remapped_regs + mmSCLK_CNTL);
 
 	w100_pwr_state.pll_ref_fb_div.f.pll_ref_div = pll->M;
 	w100_pwr_state.pll_ref_fb_div.f.pll_fb_div_int = pll->N_int;
 	w100_pwr_state.pll_ref_fb_div.f.pll_fb_div_frac = pll->N_fac;
 	w100_pwr_state.pll_ref_fb_div.f.pll_lock_time = pll->lock_time;
-	writel((u32) (w100_pwr_state.pll_ref_fb_div.val), remapped_regs + mmPLL_REF_FB_DIV);
+	pete_writel("drivers/video/fbdev/w100fb.c:1179", (u32) (w100_pwr_state.pll_ref_fb_div.val), remapped_regs + mmPLL_REF_FB_DIV);
 
 	w100_pwr_state.pwrmgt_cntl.f.pwm_mode_req = 0;
-	writel((u32) (w100_pwr_state.pwrmgt_cntl.val), remapped_regs + mmPWRMGT_CNTL);
+	pete_writel("drivers/video/fbdev/w100fb.c:1182", (u32) (w100_pwr_state.pwrmgt_cntl.val), remapped_regs + mmPWRMGT_CNTL);
 
 	status = w100_pll_calibration(pll);
 
@@ -1187,7 +1187,7 @@ static int w100_pll_set_clk(struct w100_pll_info *pll)
 	{
 		w100_pwr_state.pwrmgt_cntl.f.pwm_fast_noml_hw_en = 0x1;  /* reenable fast to normal */
 		w100_pwr_state.pwrmgt_cntl.f.pwm_noml_fast_hw_en = 0x1;  /* reenable normal to fast  */
-		writel((u32) (w100_pwr_state.pwrmgt_cntl.val), remapped_regs + mmPWRMGT_CNTL);
+		pete_writel("drivers/video/fbdev/w100fb.c:1190", (u32) (w100_pwr_state.pwrmgt_cntl.val), remapped_regs + mmPWRMGT_CNTL);
 	}
 	return status;
 }
@@ -1216,7 +1216,7 @@ static void w100_pwm_setup(struct w100fb_par *par)
 	w100_pwr_state.clk_pin_cntl.f.xtalin_pm_en = 0x0;
 	w100_pwr_state.clk_pin_cntl.f.xtalin_dbl_en = par->mach->xtal_dbl ? 1 : 0;
 	w100_pwr_state.clk_pin_cntl.f.cg_debug = 0x0;
-	writel((u32) (w100_pwr_state.clk_pin_cntl.val), remapped_regs + mmCLK_PIN_CNTL);
+	pete_writel("drivers/video/fbdev/w100fb.c:1219", (u32) (w100_pwr_state.clk_pin_cntl.val), remapped_regs + mmCLK_PIN_CNTL);
 
 	w100_pwr_state.sclk_cntl.f.sclk_src_sel = CLK_SRC_XTAL;
 	w100_pwr_state.sclk_cntl.f.sclk_post_div_fast = 0x0;  /* Pfast = 1 */
@@ -1236,19 +1236,19 @@ static void w100_pwm_setup(struct w100fb_par *par)
 	w100_pwr_state.sclk_cntl.f.busy_extend_e2 = 0x0;
 	w100_pwr_state.sclk_cntl.f.busy_extend_e3 = 0x0;
 	w100_pwr_state.sclk_cntl.f.busy_extend_idct = 0x0;
-	writel((u32) (w100_pwr_state.sclk_cntl.val), remapped_regs + mmSCLK_CNTL);
+	pete_writel("drivers/video/fbdev/w100fb.c:1239", (u32) (w100_pwr_state.sclk_cntl.val), remapped_regs + mmSCLK_CNTL);
 
 	w100_pwr_state.pclk_cntl.f.pclk_src_sel = CLK_SRC_XTAL;
 	w100_pwr_state.pclk_cntl.f.pclk_post_div = 0x1;    /* P = 2 */
 	w100_pwr_state.pclk_cntl.f.pclk_force_disp = 0x0;  /* Dynamic */
-	writel((u32) (w100_pwr_state.pclk_cntl.val), remapped_regs + mmPCLK_CNTL);
+	pete_writel("drivers/video/fbdev/w100fb.c:1244", (u32) (w100_pwr_state.pclk_cntl.val), remapped_regs + mmPCLK_CNTL);
 
 	w100_pwr_state.pll_ref_fb_div.f.pll_ref_div = 0x0;     /* M = 1 */
 	w100_pwr_state.pll_ref_fb_div.f.pll_fb_div_int = 0x0;  /* N = 1.0 */
 	w100_pwr_state.pll_ref_fb_div.f.pll_fb_div_frac = 0x0;
 	w100_pwr_state.pll_ref_fb_div.f.pll_reset_time = 0x5;
 	w100_pwr_state.pll_ref_fb_div.f.pll_lock_time = 0xff;
-	writel((u32) (w100_pwr_state.pll_ref_fb_div.val), remapped_regs + mmPLL_REF_FB_DIV);
+	pete_writel("drivers/video/fbdev/w100fb.c:1251", (u32) (w100_pwr_state.pll_ref_fb_div.val), remapped_regs + mmPLL_REF_FB_DIV);
 
 	w100_pwr_state.pll_cntl.f.pll_pwdn = 0x1;
 	w100_pwr_state.pll_cntl.f.pll_reset = 0x1;
@@ -1268,7 +1268,7 @@ static void w100_pwm_setup(struct w100fb_par *par)
 	w100_pwr_state.pll_cntl.f.pll_conf = 0x2;
 	w100_pwr_state.pll_cntl.f.pll_mbctrl = 0x2;
 	w100_pwr_state.pll_cntl.f.pll_ring_off = 0x0;
-	writel((u32) (w100_pwr_state.pll_cntl.val), remapped_regs + mmPLL_CNTL);
+	pete_writel("drivers/video/fbdev/w100fb.c:1271", (u32) (w100_pwr_state.pll_cntl.val), remapped_regs + mmPLL_CNTL);
 
 	w100_pwr_state.pwrmgt_cntl.f.pwm_enable = 0x0;
 	w100_pwr_state.pwrmgt_cntl.f.pwm_mode_req = 0x1;  /* normal mode (0, 1, 3) */
@@ -1279,7 +1279,7 @@ static void w100_pwm_setup(struct w100fb_par *par)
 	w100_pwr_state.pwrmgt_cntl.f.pwm_noml_fast_cond = 0x1;  /* PM4,ENG */
 	w100_pwr_state.pwrmgt_cntl.f.pwm_idle_timer = 0xFF;
 	w100_pwr_state.pwrmgt_cntl.f.pwm_busy_timer = 0xFF;
-	writel((u32) (w100_pwr_state.pwrmgt_cntl.val), remapped_regs + mmPWRMGT_CNTL);
+	pete_writel("drivers/video/fbdev/w100fb.c:1282", (u32) (w100_pwr_state.pwrmgt_cntl.val), remapped_regs + mmPWRMGT_CNTL);
 
 	w100_pwr_state.auto_mode = 0;  /* manual mode */
 }
@@ -1298,7 +1298,7 @@ static void w100_init_clocks(struct w100fb_par *par)
 	w100_pwr_state.sclk_cntl.f.sclk_src_sel = mode->sysclk_src;
 	w100_pwr_state.sclk_cntl.f.sclk_post_div_fast = mode->sysclk_divider;
 	w100_pwr_state.sclk_cntl.f.sclk_post_div_slow = mode->sysclk_divider;
-	writel((u32) (w100_pwr_state.sclk_cntl.val), remapped_regs + mmSCLK_CNTL);
+	pete_writel("drivers/video/fbdev/w100fb.c:1301", (u32) (w100_pwr_state.sclk_cntl.val), remapped_regs + mmSCLK_CNTL);
 }
 
 static void w100_init_lcd(struct w100fb_par *par)
@@ -1317,54 +1317,54 @@ static void w100_init_lcd(struct w100fb_par *par)
 	active_h_disp.val = 0;
 	active_h_disp.f.active_h_start=mode->left_margin;
 	active_h_disp.f.active_h_end=mode->left_margin + mode->xres;
-	writel(active_h_disp.val, remapped_regs + mmACTIVE_H_DISP);
+	pete_writel("drivers/video/fbdev/w100fb.c:1320", active_h_disp.val, remapped_regs + mmACTIVE_H_DISP);
 
 	active_v_disp.val = 0;
 	active_v_disp.f.active_v_start=mode->upper_margin;
 	active_v_disp.f.active_v_end=mode->upper_margin + mode->yres;
-	writel(active_v_disp.val, remapped_regs + mmACTIVE_V_DISP);
+	pete_writel("drivers/video/fbdev/w100fb.c:1325", active_v_disp.val, remapped_regs + mmACTIVE_V_DISP);
 
 	graphic_h_disp.val = 0;
 	graphic_h_disp.f.graphic_h_start=mode->left_margin;
 	graphic_h_disp.f.graphic_h_end=mode->left_margin + mode->xres;
-	writel(graphic_h_disp.val, remapped_regs + mmGRAPHIC_H_DISP);
+	pete_writel("drivers/video/fbdev/w100fb.c:1330", graphic_h_disp.val, remapped_regs + mmGRAPHIC_H_DISP);
 
 	graphic_v_disp.val = 0;
 	graphic_v_disp.f.graphic_v_start=mode->upper_margin;
 	graphic_v_disp.f.graphic_v_end=mode->upper_margin + mode->yres;
-	writel(graphic_v_disp.val, remapped_regs + mmGRAPHIC_V_DISP);
+	pete_writel("drivers/video/fbdev/w100fb.c:1335", graphic_v_disp.val, remapped_regs + mmGRAPHIC_V_DISP);
 
 	crtc_total.val = 0;
 	crtc_total.f.crtc_h_total=mode->left_margin  + mode->xres + mode->right_margin;
 	crtc_total.f.crtc_v_total=mode->upper_margin + mode->yres + mode->lower_margin;
-	writel(crtc_total.val, remapped_regs + mmCRTC_TOTAL);
+	pete_writel("drivers/video/fbdev/w100fb.c:1340", crtc_total.val, remapped_regs + mmCRTC_TOTAL);
 
-	writel(mode->crtc_ss, remapped_regs + mmCRTC_SS);
-	writel(mode->crtc_ls, remapped_regs + mmCRTC_LS);
-	writel(mode->crtc_gs, remapped_regs + mmCRTC_GS);
-	writel(mode->crtc_vpos_gs, remapped_regs + mmCRTC_VPOS_GS);
-	writel(mode->crtc_rev, remapped_regs + mmCRTC_REV);
-	writel(mode->crtc_dclk, remapped_regs + mmCRTC_DCLK);
-	writel(mode->crtc_gclk, remapped_regs + mmCRTC_GCLK);
-	writel(mode->crtc_goe, remapped_regs + mmCRTC_GOE);
-	writel(mode->crtc_ps1_active, remapped_regs + mmCRTC_PS1_ACTIVE);
+	pete_writel("drivers/video/fbdev/w100fb.c:1342", mode->crtc_ss, remapped_regs + mmCRTC_SS);
+	pete_writel("drivers/video/fbdev/w100fb.c:1343", mode->crtc_ls, remapped_regs + mmCRTC_LS);
+	pete_writel("drivers/video/fbdev/w100fb.c:1344", mode->crtc_gs, remapped_regs + mmCRTC_GS);
+	pete_writel("drivers/video/fbdev/w100fb.c:1345", mode->crtc_vpos_gs, remapped_regs + mmCRTC_VPOS_GS);
+	pete_writel("drivers/video/fbdev/w100fb.c:1346", mode->crtc_rev, remapped_regs + mmCRTC_REV);
+	pete_writel("drivers/video/fbdev/w100fb.c:1347", mode->crtc_dclk, remapped_regs + mmCRTC_DCLK);
+	pete_writel("drivers/video/fbdev/w100fb.c:1348", mode->crtc_gclk, remapped_regs + mmCRTC_GCLK);
+	pete_writel("drivers/video/fbdev/w100fb.c:1349", mode->crtc_goe, remapped_regs + mmCRTC_GOE);
+	pete_writel("drivers/video/fbdev/w100fb.c:1350", mode->crtc_ps1_active, remapped_regs + mmCRTC_PS1_ACTIVE);
 
-	writel(regs->lcd_format, remapped_regs + mmLCD_FORMAT);
-	writel(regs->lcdd_cntl1, remapped_regs + mmLCDD_CNTL1);
-	writel(regs->lcdd_cntl2, remapped_regs + mmLCDD_CNTL2);
-	writel(regs->genlcd_cntl1, remapped_regs + mmGENLCD_CNTL1);
-	writel(regs->genlcd_cntl2, remapped_regs + mmGENLCD_CNTL2);
-	writel(regs->genlcd_cntl3, remapped_regs + mmGENLCD_CNTL3);
+	pete_writel("drivers/video/fbdev/w100fb.c:1352", regs->lcd_format, remapped_regs + mmLCD_FORMAT);
+	pete_writel("drivers/video/fbdev/w100fb.c:1353", regs->lcdd_cntl1, remapped_regs + mmLCDD_CNTL1);
+	pete_writel("drivers/video/fbdev/w100fb.c:1354", regs->lcdd_cntl2, remapped_regs + mmLCDD_CNTL2);
+	pete_writel("drivers/video/fbdev/w100fb.c:1355", regs->genlcd_cntl1, remapped_regs + mmGENLCD_CNTL1);
+	pete_writel("drivers/video/fbdev/w100fb.c:1356", regs->genlcd_cntl2, remapped_regs + mmGENLCD_CNTL2);
+	pete_writel("drivers/video/fbdev/w100fb.c:1357", regs->genlcd_cntl3, remapped_regs + mmGENLCD_CNTL3);
 
-	writel(0x00000000, remapped_regs + mmCRTC_FRAME);
-	writel(0x00000000, remapped_regs + mmCRTC_FRAME_VPOS);
-	writel(0x00000000, remapped_regs + mmCRTC_DEFAULT_COUNT);
-	writel(0x0000FF00, remapped_regs + mmLCD_BACKGROUND_COLOR);
+	pete_writel("drivers/video/fbdev/w100fb.c:1359", 0x00000000, remapped_regs + mmCRTC_FRAME);
+	pete_writel("drivers/video/fbdev/w100fb.c:1360", 0x00000000, remapped_regs + mmCRTC_FRAME_VPOS);
+	pete_writel("drivers/video/fbdev/w100fb.c:1361", 0x00000000, remapped_regs + mmCRTC_DEFAULT_COUNT);
+	pete_writel("drivers/video/fbdev/w100fb.c:1362", 0x0000FF00, remapped_regs + mmLCD_BACKGROUND_COLOR);
 
 	/* Hack for overlay in ext memory */
-	temp32 = readl(remapped_regs + mmDISP_DEBUG2);
+	temp32 = pete_readl("drivers/video/fbdev/w100fb.c:1365", remapped_regs + mmDISP_DEBUG2);
 	temp32 |= 0xc0000000;
-	writel(temp32, remapped_regs + mmDISP_DEBUG2);
+	pete_writel("drivers/video/fbdev/w100fb.c:1367", temp32, remapped_regs + mmDISP_DEBUG2);
 }
 
 
@@ -1381,42 +1381,42 @@ static void w100_setup_memory(struct w100fb_par *par)
 		/* Map Internal Memory at FB Base */
 		intmem_location.f.mc_fb_start = W100_FB_BASE >> 8;
 		intmem_location.f.mc_fb_top = (W100_FB_BASE+MEM_INT_SIZE) >> 8;
-		writel((u32) (intmem_location.val), remapped_regs + mmMC_FB_LOCATION);
+		pete_writel("drivers/video/fbdev/w100fb.c:1384", (u32) (intmem_location.val), remapped_regs + mmMC_FB_LOCATION);
 
 		/* Unmap External Memory - value is *probably* irrelevant but may have meaning
 		   to acceleration libraries */
 		extmem_location.f.mc_ext_mem_start = MEM_EXT_BASE_VALUE >> 8;
 		extmem_location.f.mc_ext_mem_top = (MEM_EXT_BASE_VALUE-1) >> 8;
-		writel((u32) (extmem_location.val), remapped_regs + mmMC_EXT_MEM_LOCATION);
+		pete_writel("drivers/video/fbdev/w100fb.c:1390", (u32) (extmem_location.val), remapped_regs + mmMC_EXT_MEM_LOCATION);
 	} else {
 		/* Map Internal Memory to its default location */
 		intmem_location.f.mc_fb_start = MEM_INT_BASE_VALUE >> 8;
 		intmem_location.f.mc_fb_top = (MEM_INT_BASE_VALUE+MEM_INT_SIZE) >> 8;
-		writel((u32) (intmem_location.val), remapped_regs + mmMC_FB_LOCATION);
+		pete_writel("drivers/video/fbdev/w100fb.c:1395", (u32) (intmem_location.val), remapped_regs + mmMC_FB_LOCATION);
 
 		/* Map External Memory at FB Base */
 		extmem_location.f.mc_ext_mem_start = W100_FB_BASE >> 8;
 		extmem_location.f.mc_ext_mem_top = (W100_FB_BASE+par->mach->mem->size) >> 8;
-		writel((u32) (extmem_location.val), remapped_regs + mmMC_EXT_MEM_LOCATION);
+		pete_writel("drivers/video/fbdev/w100fb.c:1400", (u32) (extmem_location.val), remapped_regs + mmMC_EXT_MEM_LOCATION);
 
-		writel(0x00007800, remapped_regs + mmMC_BIST_CTRL);
-		writel(mem->ext_cntl, remapped_regs + mmMEM_EXT_CNTL);
-		writel(0x00200021, remapped_regs + mmMEM_SDRAM_MODE_REG);
+		pete_writel("drivers/video/fbdev/w100fb.c:1402", 0x00007800, remapped_regs + mmMC_BIST_CTRL);
+		pete_writel("drivers/video/fbdev/w100fb.c:1403", mem->ext_cntl, remapped_regs + mmMEM_EXT_CNTL);
+		pete_writel("drivers/video/fbdev/w100fb.c:1404", 0x00200021, remapped_regs + mmMEM_SDRAM_MODE_REG);
 		udelay(100);
-		writel(0x80200021, remapped_regs + mmMEM_SDRAM_MODE_REG);
+		pete_writel("drivers/video/fbdev/w100fb.c:1406", 0x80200021, remapped_regs + mmMEM_SDRAM_MODE_REG);
 		udelay(100);
-		writel(mem->sdram_mode_reg, remapped_regs + mmMEM_SDRAM_MODE_REG);
+		pete_writel("drivers/video/fbdev/w100fb.c:1408", mem->sdram_mode_reg, remapped_regs + mmMEM_SDRAM_MODE_REG);
 		udelay(100);
-		writel(mem->ext_timing_cntl, remapped_regs + mmMEM_EXT_TIMING_CNTL);
-		writel(mem->io_cntl, remapped_regs + mmMEM_IO_CNTL);
+		pete_writel("drivers/video/fbdev/w100fb.c:1410", mem->ext_timing_cntl, remapped_regs + mmMEM_EXT_TIMING_CNTL);
+		pete_writel("drivers/video/fbdev/w100fb.c:1411", mem->io_cntl, remapped_regs + mmMEM_IO_CNTL);
 		if (bm_mem) {
-			writel(bm_mem->ext_mem_bw, remapped_regs + mmBM_EXT_MEM_BANDWIDTH);
-			writel(bm_mem->offset, remapped_regs + mmBM_OFFSET);
-			writel(bm_mem->ext_timing_ctl, remapped_regs + mmBM_MEM_EXT_TIMING_CNTL);
-			writel(bm_mem->ext_cntl, remapped_regs + mmBM_MEM_EXT_CNTL);
-			writel(bm_mem->mode_reg, remapped_regs + mmBM_MEM_MODE_REG);
-			writel(bm_mem->io_cntl, remapped_regs + mmBM_MEM_IO_CNTL);
-			writel(bm_mem->config, remapped_regs + mmBM_CONFIG);
+			pete_writel("drivers/video/fbdev/w100fb.c:1413", bm_mem->ext_mem_bw, remapped_regs + mmBM_EXT_MEM_BANDWIDTH);
+			pete_writel("drivers/video/fbdev/w100fb.c:1414", bm_mem->offset, remapped_regs + mmBM_OFFSET);
+			pete_writel("drivers/video/fbdev/w100fb.c:1415", bm_mem->ext_timing_ctl, remapped_regs + mmBM_MEM_EXT_TIMING_CNTL);
+			pete_writel("drivers/video/fbdev/w100fb.c:1416", bm_mem->ext_cntl, remapped_regs + mmBM_MEM_EXT_CNTL);
+			pete_writel("drivers/video/fbdev/w100fb.c:1417", bm_mem->mode_reg, remapped_regs + mmBM_MEM_MODE_REG);
+			pete_writel("drivers/video/fbdev/w100fb.c:1418", bm_mem->io_cntl, remapped_regs + mmBM_MEM_IO_CNTL);
+			pete_writel("drivers/video/fbdev/w100fb.c:1419", bm_mem->config, remapped_regs + mmBM_CONFIG);
 		}
 	}
 }
@@ -1501,11 +1501,11 @@ static void w100_set_dispregs(struct w100fb_par *par)
 	/* Set the pixel clock source and divider */
 	w100_pwr_state.pclk_cntl.f.pclk_src_sel = par->mode->pixclk_src;
 	w100_pwr_state.pclk_cntl.f.pclk_post_div = divider;
-	writel((u32) (w100_pwr_state.pclk_cntl.val), remapped_regs + mmPCLK_CNTL);
+	pete_writel("drivers/video/fbdev/w100fb.c:1504", (u32) (w100_pwr_state.pclk_cntl.val), remapped_regs + mmPCLK_CNTL);
 
-	writel(graphic_ctrl.val, remapped_regs + mmGRAPHIC_CTRL);
-	writel(W100_FB_BASE + ((offset * BITS_PER_PIXEL/8)&~0x03UL), remapped_regs + mmGRAPHIC_OFFSET);
-	writel((par->xres*BITS_PER_PIXEL/8), remapped_regs + mmGRAPHIC_PITCH);
+	pete_writel("drivers/video/fbdev/w100fb.c:1506", graphic_ctrl.val, remapped_regs + mmGRAPHIC_CTRL);
+	pete_writel("drivers/video/fbdev/w100fb.c:1507", W100_FB_BASE + ((offset * BITS_PER_PIXEL/8)&~0x03UL), remapped_regs + mmGRAPHIC_OFFSET);
+	pete_writel("drivers/video/fbdev/w100fb.c:1508", (par->xres*BITS_PER_PIXEL/8), remapped_regs + mmGRAPHIC_PITCH);
 }
 
 
@@ -1526,7 +1526,7 @@ static void calc_hsync(struct w100fb_par *par)
 
 	hsync /= (w100_pwr_state.pclk_cntl.f.pclk_post_div + 1);
 
-	crtc_ss.val = readl(remapped_regs + mmCRTC_SS);
+	crtc_ss.val = pete_readl("drivers/video/fbdev/w100fb.c:1529", remapped_regs + mmCRTC_SS);
 	if (crtc_ss.val)
 		par->hsync_len = hsync / (crtc_ss.f.ss_end-crtc_ss.f.ss_start);
 	else
@@ -1537,54 +1537,54 @@ static void w100_suspend(u32 mode)
 {
 	u32 val;
 
-	writel(0x7FFF8000, remapped_regs + mmMC_EXT_MEM_LOCATION);
-	writel(0x00FF0000, remapped_regs + mmMC_PERF_MON_CNTL);
+	pete_writel("drivers/video/fbdev/w100fb.c:1540", 0x7FFF8000, remapped_regs + mmMC_EXT_MEM_LOCATION);
+	pete_writel("drivers/video/fbdev/w100fb.c:1541", 0x00FF0000, remapped_regs + mmMC_PERF_MON_CNTL);
 
-	val = readl(remapped_regs + mmMEM_EXT_TIMING_CNTL);
+	val = pete_readl("drivers/video/fbdev/w100fb.c:1543", remapped_regs + mmMEM_EXT_TIMING_CNTL);
 	val &= ~(0x00100000);  /* bit20=0 */
 	val |= 0xFF000000;     /* bit31:24=0xff */
-	writel(val, remapped_regs + mmMEM_EXT_TIMING_CNTL);
+	pete_writel("drivers/video/fbdev/w100fb.c:1546", val, remapped_regs + mmMEM_EXT_TIMING_CNTL);
 
-	val = readl(remapped_regs + mmMEM_EXT_CNTL);
+	val = pete_readl("drivers/video/fbdev/w100fb.c:1548", remapped_regs + mmMEM_EXT_CNTL);
 	val &= ~(0x00040000);  /* bit18=0 */
 	val |= 0x00080000;     /* bit19=1 */
-	writel(val, remapped_regs + mmMEM_EXT_CNTL);
+	pete_writel("drivers/video/fbdev/w100fb.c:1551", val, remapped_regs + mmMEM_EXT_CNTL);
 
 	udelay(1);  /* wait 1us */
 
 	if (mode == W100_SUSPEND_EXTMEM) {
 		/* CKE: Tri-State */
-		val = readl(remapped_regs + mmMEM_EXT_CNTL);
+		val = pete_readl("drivers/video/fbdev/w100fb.c:1557", remapped_regs + mmMEM_EXT_CNTL);
 		val |= 0x40000000;  /* bit30=1 */
-		writel(val, remapped_regs + mmMEM_EXT_CNTL);
+		pete_writel("drivers/video/fbdev/w100fb.c:1559", val, remapped_regs + mmMEM_EXT_CNTL);
 
 		/* CLK: Stop */
-		val = readl(remapped_regs + mmMEM_EXT_CNTL);
+		val = pete_readl("drivers/video/fbdev/w100fb.c:1562", remapped_regs + mmMEM_EXT_CNTL);
 		val &= ~(0x00000001);  /* bit0=0 */
-		writel(val, remapped_regs + mmMEM_EXT_CNTL);
+		pete_writel("drivers/video/fbdev/w100fb.c:1564", val, remapped_regs + mmMEM_EXT_CNTL);
 	} else {
-		writel(0x00000000, remapped_regs + mmSCLK_CNTL);
-		writel(0x000000BF, remapped_regs + mmCLK_PIN_CNTL);
-		writel(0x00000015, remapped_regs + mmPWRMGT_CNTL);
+		pete_writel("drivers/video/fbdev/w100fb.c:1566", 0x00000000, remapped_regs + mmSCLK_CNTL);
+		pete_writel("drivers/video/fbdev/w100fb.c:1567", 0x000000BF, remapped_regs + mmCLK_PIN_CNTL);
+		pete_writel("drivers/video/fbdev/w100fb.c:1568", 0x00000015, remapped_regs + mmPWRMGT_CNTL);
 
 		udelay(5);
 
-		val = readl(remapped_regs + mmPLL_CNTL);
+		val = pete_readl("drivers/video/fbdev/w100fb.c:1572", remapped_regs + mmPLL_CNTL);
 		val |= 0x00000004;  /* bit2=1 */
-		writel(val, remapped_regs + mmPLL_CNTL);
+		pete_writel("drivers/video/fbdev/w100fb.c:1574", val, remapped_regs + mmPLL_CNTL);
 
-		writel(0x00000000, remapped_regs + mmLCDD_CNTL1);
-		writel(0x00000000, remapped_regs + mmLCDD_CNTL2);
-		writel(0x00000000, remapped_regs + mmGENLCD_CNTL1);
-		writel(0x00000000, remapped_regs + mmGENLCD_CNTL2);
-		writel(0x00000000, remapped_regs + mmGENLCD_CNTL3);
+		pete_writel("drivers/video/fbdev/w100fb.c:1576", 0x00000000, remapped_regs + mmLCDD_CNTL1);
+		pete_writel("drivers/video/fbdev/w100fb.c:1577", 0x00000000, remapped_regs + mmLCDD_CNTL2);
+		pete_writel("drivers/video/fbdev/w100fb.c:1578", 0x00000000, remapped_regs + mmGENLCD_CNTL1);
+		pete_writel("drivers/video/fbdev/w100fb.c:1579", 0x00000000, remapped_regs + mmGENLCD_CNTL2);
+		pete_writel("drivers/video/fbdev/w100fb.c:1580", 0x00000000, remapped_regs + mmGENLCD_CNTL3);
 
-		val = readl(remapped_regs + mmMEM_EXT_CNTL);
+		val = pete_readl("drivers/video/fbdev/w100fb.c:1582", remapped_regs + mmMEM_EXT_CNTL);
 		val |= 0xF0000000;
 		val &= ~(0x00000001);
-		writel(val, remapped_regs + mmMEM_EXT_CNTL);
+		pete_writel("drivers/video/fbdev/w100fb.c:1585", val, remapped_regs + mmMEM_EXT_CNTL);
 
-		writel(0x0000001d, remapped_regs + mmPWRMGT_CNTL);
+		pete_writel("drivers/video/fbdev/w100fb.c:1587", 0x0000001d, remapped_regs + mmPWRMGT_CNTL);
 	}
 }
 
@@ -1593,38 +1593,38 @@ static void w100_vsync(void)
 	u32 tmp;
 	int timeout = 30000;  /* VSync timeout = 30[ms] > 16.8[ms] */
 
-	tmp = readl(remapped_regs + mmACTIVE_V_DISP);
+	tmp = pete_readl("drivers/video/fbdev/w100fb.c:1596", remapped_regs + mmACTIVE_V_DISP);
 
 	/* set vline pos  */
-	writel((tmp >> 16) & 0x3ff, remapped_regs + mmDISP_INT_CNTL);
+	pete_writel("drivers/video/fbdev/w100fb.c:1599", (tmp >> 16) & 0x3ff, remapped_regs + mmDISP_INT_CNTL);
 
 	/* disable vline irq */
-	tmp = readl(remapped_regs + mmGEN_INT_CNTL);
+	tmp = pete_readl("drivers/video/fbdev/w100fb.c:1602", remapped_regs + mmGEN_INT_CNTL);
 
 	tmp &= ~0x00000002;
-	writel(tmp, remapped_regs + mmGEN_INT_CNTL);
+	pete_writel("drivers/video/fbdev/w100fb.c:1605", tmp, remapped_regs + mmGEN_INT_CNTL);
 
 	/* clear vline irq status */
-	writel(0x00000002, remapped_regs + mmGEN_INT_STATUS);
+	pete_writel("drivers/video/fbdev/w100fb.c:1608", 0x00000002, remapped_regs + mmGEN_INT_STATUS);
 
 	/* enable vline irq */
-	writel((tmp | 0x00000002), remapped_regs + mmGEN_INT_CNTL);
+	pete_writel("drivers/video/fbdev/w100fb.c:1611", (tmp | 0x00000002), remapped_regs + mmGEN_INT_CNTL);
 
 	/* clear vline irq status */
-	writel(0x00000002, remapped_regs + mmGEN_INT_STATUS);
+	pete_writel("drivers/video/fbdev/w100fb.c:1614", 0x00000002, remapped_regs + mmGEN_INT_STATUS);
 
 	while(timeout > 0) {
-		if (readl(remapped_regs + mmGEN_INT_STATUS) & 0x00000002)
+		if (pete_readl("drivers/video/fbdev/w100fb.c:1617", remapped_regs + mmGEN_INT_STATUS) & 0x00000002)
 			break;
 		udelay(1);
 		timeout--;
 	}
 
 	/* disable vline irq */
-	writel(tmp, remapped_regs + mmGEN_INT_CNTL);
+	pete_writel("drivers/video/fbdev/w100fb.c:1624", tmp, remapped_regs + mmGEN_INT_CNTL);
 
 	/* clear vline irq status */
-	writel(0x00000002, remapped_regs + mmGEN_INT_STATUS);
+	pete_writel("drivers/video/fbdev/w100fb.c:1627", 0x00000002, remapped_regs + mmGEN_INT_STATUS);
 }
 
 static struct platform_driver w100fb_driver = {

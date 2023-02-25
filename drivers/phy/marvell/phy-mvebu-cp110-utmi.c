@@ -118,47 +118,47 @@ static void mvebu_cp110_utmi_port_setup(struct mvebu_cp110_utmi_port *port)
 	 * The crystal used for all platform boards is now 25MHz.
 	 * See the functional specification for details.
 	 */
-	reg = readl(PORT_REGS(port) + UTMI_PLL_CTRL_REG);
+	reg = pete_readl("drivers/phy/marvell/phy-mvebu-cp110-utmi.c:121", PORT_REGS(port) + UTMI_PLL_CTRL_REG);
 	reg &= ~(PLL_REFDIV_MASK | PLL_FBDIV_MASK | PLL_SEL_LPFR_MASK);
 	reg |= (PLL_REFDIV_VAL << PLL_REFDIV_OFFSET) |
 	       (PLL_FBDIV_VAL << PLL_FBDIV_OFFSET);
-	writel(reg, PORT_REGS(port) + UTMI_PLL_CTRL_REG);
+	pete_writel("drivers/phy/marvell/phy-mvebu-cp110-utmi.c:125", reg, PORT_REGS(port) + UTMI_PLL_CTRL_REG);
 
 	/* Impedance Calibration Threshold Setting */
-	reg = readl(PORT_REGS(port) + UTMI_CAL_CTRL_REG);
+	reg = pete_readl("drivers/phy/marvell/phy-mvebu-cp110-utmi.c:128", PORT_REGS(port) + UTMI_CAL_CTRL_REG);
 	reg &= ~IMPCAL_VTH_MASK;
 	reg |= IMPCAL_VTH_VAL << IMPCAL_VTH_OFFSET;
-	writel(reg, PORT_REGS(port) + UTMI_CAL_CTRL_REG);
+	pete_writel("drivers/phy/marvell/phy-mvebu-cp110-utmi.c:131", reg, PORT_REGS(port) + UTMI_CAL_CTRL_REG);
 
 	/* Set LS TX driver strength coarse control */
-	reg = readl(PORT_REGS(port) + UTMI_TX_CH_CTRL_REG);
+	reg = pete_readl("drivers/phy/marvell/phy-mvebu-cp110-utmi.c:134", PORT_REGS(port) + UTMI_TX_CH_CTRL_REG);
 	reg &= ~TX_AMP_MASK;
 	reg |= TX_AMP_VAL << TX_AMP_OFFSET;
-	writel(reg, PORT_REGS(port) + UTMI_TX_CH_CTRL_REG);
+	pete_writel("drivers/phy/marvell/phy-mvebu-cp110-utmi.c:137", reg, PORT_REGS(port) + UTMI_TX_CH_CTRL_REG);
 
 	/* Disable SQ and enable analog squelch detect */
-	reg = readl(PORT_REGS(port) + UTMI_RX_CH_CTRL0_REG);
+	reg = pete_readl("drivers/phy/marvell/phy-mvebu-cp110-utmi.c:140", PORT_REGS(port) + UTMI_RX_CH_CTRL0_REG);
 	reg &= ~SQ_DET_EN;
 	reg |= SQ_ANA_DTC_SEL;
-	writel(reg, PORT_REGS(port) + UTMI_RX_CH_CTRL0_REG);
+	pete_writel("drivers/phy/marvell/phy-mvebu-cp110-utmi.c:143", reg, PORT_REGS(port) + UTMI_RX_CH_CTRL0_REG);
 
 	/*
 	 * Set External squelch calibration number and
 	 * enable the External squelch calibration
 	 */
-	reg = readl(PORT_REGS(port) + UTMI_RX_CH_CTRL1_REG);
+	reg = pete_readl("drivers/phy/marvell/phy-mvebu-cp110-utmi.c:149", PORT_REGS(port) + UTMI_RX_CH_CTRL1_REG);
 	reg &= ~SQ_AMP_CAL_MASK;
 	reg |= (SQ_AMP_CAL_VAL << SQ_AMP_CAL_OFFSET) | SQ_AMP_CAL_EN;
-	writel(reg, PORT_REGS(port) + UTMI_RX_CH_CTRL1_REG);
+	pete_writel("drivers/phy/marvell/phy-mvebu-cp110-utmi.c:152", reg, PORT_REGS(port) + UTMI_RX_CH_CTRL1_REG);
 
 	/*
 	 * Set Control VDAT Reference Voltage - 0.325V and
 	 * Control VSRC Reference Voltage - 0.6V
 	 */
-	reg = readl(PORT_REGS(port) + UTMI_CHGDTC_CTRL_REG);
+	reg = pete_readl("drivers/phy/marvell/phy-mvebu-cp110-utmi.c:158", PORT_REGS(port) + UTMI_CHGDTC_CTRL_REG);
 	reg &= ~(VDAT_MASK | VSRC_MASK);
 	reg |= (VDAT_VAL << VDAT_OFFSET) | (VSRC_VAL << VSRC_OFFSET);
-	writel(reg, PORT_REGS(port) + UTMI_CHGDTC_CTRL_REG);
+	pete_writel("drivers/phy/marvell/phy-mvebu-cp110-utmi.c:161", reg, PORT_REGS(port) + UTMI_CHGDTC_CTRL_REG);
 }
 
 static int mvebu_cp110_utmi_phy_power_off(struct phy *phy)
@@ -215,9 +215,9 @@ static int mvebu_cp110_utmi_phy_power_on(struct phy *phy)
 	}
 
 	/* Set Test suspendm mode and enable Test UTMI select */
-	reg = readl(PORT_REGS(port) + UTMI_CTRL_STATUS0_REG);
+	reg = pete_readl("drivers/phy/marvell/phy-mvebu-cp110-utmi.c:218", PORT_REGS(port) + UTMI_CTRL_STATUS0_REG);
 	reg |= SUSPENDM | TEST_SEL;
-	writel(reg, PORT_REGS(port) + UTMI_CTRL_STATUS0_REG);
+	pete_writel("drivers/phy/marvell/phy-mvebu-cp110-utmi.c:220", reg, PORT_REGS(port) + UTMI_CTRL_STATUS0_REG);
 
 	/* Wait for UTMI power down */
 	mdelay(1);
@@ -230,9 +230,9 @@ static int mvebu_cp110_utmi_phy_power_on(struct phy *phy)
 			UTMI_PHY_CFG_PU_MASK);
 
 	/* Disable Test UTMI select */
-	reg = readl(PORT_REGS(port) + UTMI_CTRL_STATUS0_REG);
+	reg = pete_readl("drivers/phy/marvell/phy-mvebu-cp110-utmi.c:233", PORT_REGS(port) + UTMI_CTRL_STATUS0_REG);
 	reg &= ~TEST_SEL;
-	writel(reg, PORT_REGS(port) + UTMI_CTRL_STATUS0_REG);
+	pete_writel("drivers/phy/marvell/phy-mvebu-cp110-utmi.c:235", reg, PORT_REGS(port) + UTMI_CTRL_STATUS0_REG);
 
 	/* Wait for impedance calibration */
 	ret = readl_poll_timeout(PORT_REGS(port) + UTMI_CAL_CTRL_REG, reg,

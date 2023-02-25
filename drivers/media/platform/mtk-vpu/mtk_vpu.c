@@ -226,12 +226,12 @@ struct mtk_vpu {
 
 static inline void vpu_cfg_writel(struct mtk_vpu *vpu, u32 val, u32 offset)
 {
-	writel(val, vpu->reg.cfg + offset);
+	pete_writel("drivers/media/platform/mtk-vpu/mtk_vpu.c:229", val, vpu->reg.cfg + offset);
 }
 
 static inline u32 vpu_cfg_readl(struct mtk_vpu *vpu, u32 offset)
 {
-	return readl(vpu->reg.cfg + offset);
+	return pete_readl("drivers/media/platform/mtk-vpu/mtk_vpu.c:234", vpu->reg.cfg + offset);
 }
 
 static inline bool vpu_running(struct mtk_vpu *vpu)
@@ -350,8 +350,8 @@ int vpu_ipi_send(struct platform_device *pdev,
 	} while (vpu_cfg_readl(vpu, HOST_TO_VPU));
 
 	memcpy_toio(send_obj->share_buf, buf, len);
-	writel(len, &send_obj->len);
-	writel(id, &send_obj->id);
+	pete_writel("drivers/media/platform/mtk-vpu/mtk_vpu.c:353", len, &send_obj->len);
+	pete_writel("drivers/media/platform/mtk-vpu/mtk_vpu.c:354", id, &send_obj->id);
 
 	vpu->ipi_id_ack[id] = false;
 	/* send the command to VPU */
@@ -743,11 +743,11 @@ static void vpu_ipi_handler(struct mtk_vpu *vpu)
 	struct share_obj __iomem *rcv_obj = vpu->recv_buf;
 	struct vpu_ipi_desc *ipi_desc = vpu->ipi_desc;
 	unsigned char data[SHARE_BUF_SIZE];
-	s32 id = readl(&rcv_obj->id);
+	s32 id = pete_readl("drivers/media/platform/mtk-vpu/mtk_vpu.c:746", &rcv_obj->id);
 
 	memcpy_fromio(data, rcv_obj->share_buf, sizeof(data));
 	if (id < IPI_MAX && ipi_desc[id].handler) {
-		ipi_desc[id].handler(data, readl(&rcv_obj->len),
+		ipi_desc[id].handler(data, pete_readl("drivers/media/platform/mtk-vpu/mtk_vpu.c:750", &rcv_obj->len),
 				     ipi_desc[id].priv);
 		if (id > IPI_VPU_INIT) {
 			vpu->ipi_id_ack[id] = true;

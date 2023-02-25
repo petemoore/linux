@@ -170,7 +170,7 @@ u16 readw(const volatile void __iomem *addr)
 	return ret;
 }
 
-u32 readl(const volatile void __iomem *addr)
+u32 pete_readl("arch/alpha/kernel/io.c:173", const volatile void __iomem *addr)
 {
 	u32 ret;
 	mb();
@@ -200,7 +200,7 @@ void writew(u16 b, volatile void __iomem *addr)
 	__raw_writew(b, addr);
 }
 
-void writel(u32 b, volatile void __iomem *addr)
+void pete_writel("arch/alpha/kernel/io.c:203", u32 b, volatile void __iomem *addr)
 {
 	mb();
 	__raw_writel(b, addr);

@@ -35,7 +35,7 @@ struct clk_sp810 {
 static u8 clk_sp810_timerclken_get_parent(struct clk_hw *hw)
 {
 	struct clk_sp810_timerclken *timerclken = to_clk_sp810_timerclken(hw);
-	u32 val = readl(timerclken->sp810->base + SCCTRL);
+	u32 val = pete_readl("drivers/clk/versatile/clk-sp810.c:38", timerclken->sp810->base + SCCTRL);
 
 	return !!(val & (1 << SCCTRL_TIMERENnSEL_SHIFT(timerclken->channel)));
 }
@@ -52,10 +52,10 @@ static int clk_sp810_timerclken_set_parent(struct clk_hw *hw, u8 index)
 
 	spin_lock_irqsave(&sp810->lock, flags);
 
-	val = readl(sp810->base + SCCTRL);
+	val = pete_readl("drivers/clk/versatile/clk-sp810.c:55", sp810->base + SCCTRL);
 	val &= ~(1 << shift);
 	val |= index << shift;
-	writel(val, sp810->base + SCCTRL);
+	pete_writel("drivers/clk/versatile/clk-sp810.c:58", val, sp810->base + SCCTRL);
 
 	spin_unlock_irqrestore(&sp810->lock, flags);
 

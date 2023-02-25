@@ -85,21 +85,21 @@ static int pnx4008_wdt_start(struct watchdog_device *wdd)
 	spin_lock(&io_lock);
 
 	/* stop counter, initiate counter reset */
-	writel(RESET_COUNT, WDTIM_CTRL(wdt_base));
+	pete_writel("drivers/watchdog/pnx4008_wdt.c:88", RESET_COUNT, WDTIM_CTRL(wdt_base));
 	/*wait for reset to complete. 100% guarantee event */
-	while (readl(WDTIM_COUNTER(wdt_base)))
+	while (pete_readl("drivers/watchdog/pnx4008_wdt.c:90", WDTIM_COUNTER(wdt_base)))
 		cpu_relax();
 	/* internal and external reset, stop after that */
-	writel(M_RES2 | STOP_COUNT0 | RESET_COUNT0, WDTIM_MCTRL(wdt_base));
+	pete_writel("drivers/watchdog/pnx4008_wdt.c:93", M_RES2 | STOP_COUNT0 | RESET_COUNT0, WDTIM_MCTRL(wdt_base));
 	/* configure match output */
-	writel(MATCH_OUTPUT_HIGH, WDTIM_EMR(wdt_base));
+	pete_writel("drivers/watchdog/pnx4008_wdt.c:95", MATCH_OUTPUT_HIGH, WDTIM_EMR(wdt_base));
 	/* clear interrupt, just in case */
-	writel(MATCH_INT, WDTIM_INT(wdt_base));
+	pete_writel("drivers/watchdog/pnx4008_wdt.c:97", MATCH_INT, WDTIM_INT(wdt_base));
 	/* the longest pulse period 65541/(13*10^6) seconds ~ 5 ms. */
-	writel(0xFFFF, WDTIM_PULSE(wdt_base));
-	writel(wdd->timeout * WDOG_COUNTER_RATE, WDTIM_MATCH0(wdt_base));
+	pete_writel("drivers/watchdog/pnx4008_wdt.c:99", 0xFFFF, WDTIM_PULSE(wdt_base));
+	pete_writel("drivers/watchdog/pnx4008_wdt.c:100", wdd->timeout * WDOG_COUNTER_RATE, WDTIM_MATCH0(wdt_base));
 	/*enable counter, stop when debugger active */
-	writel(COUNT_ENAB | DEBUG_EN, WDTIM_CTRL(wdt_base));
+	pete_writel("drivers/watchdog/pnx4008_wdt.c:102", COUNT_ENAB | DEBUG_EN, WDTIM_CTRL(wdt_base));
 
 	spin_unlock(&io_lock);
 	return 0;
@@ -109,7 +109,7 @@ static int pnx4008_wdt_stop(struct watchdog_device *wdd)
 {
 	spin_lock(&io_lock);
 
-	writel(0, WDTIM_CTRL(wdt_base));	/*stop counter */
+	pete_writel("drivers/watchdog/pnx4008_wdt.c:112", 0, WDTIM_CTRL(wdt_base));	/*stop counter */
 
 	spin_unlock(&io_lock);
 	return 0;
@@ -142,13 +142,13 @@ static int pnx4008_restart_handler(struct watchdog_device *wdd,
 
 	if (mode == REBOOT_SOFT) {
 		/* Force match output active */
-		writel(EXT_MATCH0, WDTIM_EMR(wdt_base));
+		pete_writel("drivers/watchdog/pnx4008_wdt.c:145", EXT_MATCH0, WDTIM_EMR(wdt_base));
 		/* Internal reset on match output (RESOUT_N not asserted) */
-		writel(M_RES1, WDTIM_MCTRL(wdt_base));
+		pete_writel("drivers/watchdog/pnx4008_wdt.c:147", M_RES1, WDTIM_MCTRL(wdt_base));
 	} else {
 		/* Instant assert of RESETOUT_N with pulse length 1mS */
-		writel(13000, WDTIM_PULSE(wdt_base));
-		writel(M_RES2 | RESFRC1 | RESFRC2, WDTIM_MCTRL(wdt_base));
+		pete_writel("drivers/watchdog/pnx4008_wdt.c:150", 13000, WDTIM_PULSE(wdt_base));
+		pete_writel("drivers/watchdog/pnx4008_wdt.c:151", M_RES2 | RESFRC1 | RESFRC2, WDTIM_MCTRL(wdt_base));
 	}
 
 	/* Wait for watchdog to reset system */
@@ -207,13 +207,13 @@ static int pnx4008_wdt_probe(struct platform_device *pdev)
 	if (ret)
 		return ret;
 
-	pnx4008_wdd.bootstatus = (readl(WDTIM_RES(wdt_base)) & WDOG_RESET) ?
+	pnx4008_wdd.bootstatus = (pete_readl("drivers/watchdog/pnx4008_wdt.c:210", WDTIM_RES(wdt_base)) & WDOG_RESET) ?
 			WDIOF_CARDRESET : 0;
 	pnx4008_wdd.parent = dev;
 	watchdog_set_nowayout(&pnx4008_wdd, nowayout);
 	watchdog_set_restart_priority(&pnx4008_wdd, 128);
 
-	if (readl(WDTIM_CTRL(wdt_base)) & COUNT_ENAB)
+	if (pete_readl("drivers/watchdog/pnx4008_wdt.c:216", WDTIM_CTRL(wdt_base)) & COUNT_ENAB)
 		set_bit(WDOG_HW_RUNNING, &pnx4008_wdd.status);
 
 	ret = devm_watchdog_register_device(dev, &pnx4008_wdd);

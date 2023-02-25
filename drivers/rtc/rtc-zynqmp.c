@@ -66,9 +66,9 @@ static int xlnx_rtc_set_time(struct device *dev, struct rtc_time *tm)
 	 * force the next second to be signaled exactly in 1 second period
 	 */
 	xrtcdev->calibval &= RTC_CALIB_MASK;
-	writel(xrtcdev->calibval, (xrtcdev->reg_base + RTC_CALIB_WR));
+	pete_writel("drivers/rtc/rtc-zynqmp.c:69", xrtcdev->calibval, (xrtcdev->reg_base + RTC_CALIB_WR));
 
-	writel(new_time, xrtcdev->reg_base + RTC_SET_TM_WR);
+	pete_writel("drivers/rtc/rtc-zynqmp.c:71", new_time, xrtcdev->reg_base + RTC_SET_TM_WR);
 
 	/*
 	 * Clear the rtc interrupt status register after setting the
@@ -78,7 +78,7 @@ static int xlnx_rtc_set_time(struct device *dev, struct rtc_time *tm)
 	 * the current time should be read from SET_TIME_READ register;
 	 * otherwise, CURRENT_TIME register is read to report the time
 	 */
-	writel(RTC_INT_SEC, xrtcdev->reg_base + RTC_INT_STS);
+	pete_writel("drivers/rtc/rtc-zynqmp.c:81", RTC_INT_SEC, xrtcdev->reg_base + RTC_INT_STS);
 
 	return 0;
 }
@@ -89,14 +89,14 @@ static int xlnx_rtc_read_time(struct device *dev, struct rtc_time *tm)
 	unsigned long read_time;
 	struct xlnx_rtc_dev *xrtcdev = dev_get_drvdata(dev);
 
-	status = readl(xrtcdev->reg_base + RTC_INT_STS);
+	status = pete_readl("drivers/rtc/rtc-zynqmp.c:92", xrtcdev->reg_base + RTC_INT_STS);
 
 	if (status & RTC_INT_SEC) {
 		/*
 		 * RTC has updated the CURRENT_TIME with the time written into
 		 * SET_TIME_WRITE register.
 		 */
-		read_time = readl(xrtcdev->reg_base + RTC_CUR_TM);
+		read_time = pete_readl("drivers/rtc/rtc-zynqmp.c:99", xrtcdev->reg_base + RTC_CUR_TM);
 	} else {
 		/*
 		 * Time written in SET_TIME_WRITE has not yet updated into
@@ -105,7 +105,7 @@ static int xlnx_rtc_read_time(struct device *dev, struct rtc_time *tm)
 		 * Since we add +1 sec while writing, we need to -1 sec while
 		 * reading.
 		 */
-		read_time = readl(xrtcdev->reg_base + RTC_SET_TM_RD) - 1;
+		read_time = pete_readl("drivers/rtc/rtc-zynqmp.c:108", xrtcdev->reg_base + RTC_SET_TM_RD) - 1;
 	}
 	rtc_time64_to_tm(read_time, tm);
 
@@ -116,8 +116,8 @@ static int xlnx_rtc_read_alarm(struct device *dev, struct rtc_wkalrm *alrm)
 {
 	struct xlnx_rtc_dev *xrtcdev = dev_get_drvdata(dev);
 
-	rtc_time64_to_tm(readl(xrtcdev->reg_base + RTC_ALRM), &alrm->time);
-	alrm->enabled = readl(xrtcdev->reg_base + RTC_INT_MASK) & RTC_INT_ALRM;
+	rtc_time64_to_tm(pete_readl("drivers/rtc/rtc-zynqmp.c:119", xrtcdev->reg_base + RTC_ALRM), &alrm->time);
+	alrm->enabled = pete_readl("drivers/rtc/rtc-zynqmp.c:120", xrtcdev->reg_base + RTC_INT_MASK) & RTC_INT_ALRM;
 
 	return 0;
 }
@@ -132,7 +132,7 @@ static int xlnx_rtc_alarm_irq_enable(struct device *dev, u32 enabled)
 
 	if (enabled) {
 		while (1) {
-			status = readl(xrtcdev->reg_base + RTC_INT_STS);
+			status = pete_readl("drivers/rtc/rtc-zynqmp.c:135", xrtcdev->reg_base + RTC_INT_STS);
 			if (!((status & RTC_ALRM_MASK) == RTC_ALRM_MASK))
 				break;
 
@@ -140,12 +140,12 @@ static int xlnx_rtc_alarm_irq_enable(struct device *dev, u32 enabled)
 				dev_err(dev, "Time out occur, while clearing alarm status bit\n");
 				return -ETIMEDOUT;
 			}
-			writel(RTC_INT_ALRM, xrtcdev->reg_base + RTC_INT_STS);
+			pete_writel("drivers/rtc/rtc-zynqmp.c:143", RTC_INT_ALRM, xrtcdev->reg_base + RTC_INT_STS);
 		}
 
-		writel(RTC_INT_ALRM, xrtcdev->reg_base + RTC_INT_EN);
+		pete_writel("drivers/rtc/rtc-zynqmp.c:146", RTC_INT_ALRM, xrtcdev->reg_base + RTC_INT_EN);
 	} else {
-		writel(RTC_INT_ALRM, xrtcdev->reg_base + RTC_INT_DIS);
+		pete_writel("drivers/rtc/rtc-zynqmp.c:148", RTC_INT_ALRM, xrtcdev->reg_base + RTC_INT_DIS);
 	}
 
 	return 0;
@@ -158,7 +158,7 @@ static int xlnx_rtc_set_alarm(struct device *dev, struct rtc_wkalrm *alrm)
 
 	alarm_time = rtc_tm_to_time64(&alrm->time);
 
-	writel((u32)alarm_time, (xrtcdev->reg_base + RTC_ALRM));
+	pete_writel("drivers/rtc/rtc-zynqmp.c:161", (u32)alarm_time, (xrtcdev->reg_base + RTC_ALRM));
 
 	xlnx_rtc_alarm_irq_enable(dev, alrm->enabled);
 
@@ -170,9 +170,9 @@ static void xlnx_init_rtc(struct xlnx_rtc_dev *xrtcdev)
 	u32 rtc_ctrl;
 
 	/* Enable RTC switch to battery when VCC_PSAUX is not available */
-	rtc_ctrl = readl(xrtcdev->reg_base + RTC_CTRL);
+	rtc_ctrl = pete_readl("drivers/rtc/rtc-zynqmp.c:173", xrtcdev->reg_base + RTC_CTRL);
 	rtc_ctrl |= RTC_BATT_EN;
-	writel(rtc_ctrl, xrtcdev->reg_base + RTC_CTRL);
+	pete_writel("drivers/rtc/rtc-zynqmp.c:175", rtc_ctrl, xrtcdev->reg_base + RTC_CTRL);
 
 	/*
 	 * Based on crystal freq of 33.330 KHz
@@ -181,7 +181,7 @@ static void xlnx_init_rtc(struct xlnx_rtc_dev *xrtcdev)
 	 * to correct RTC delay in frequency over period of time.
 	 */
 	xrtcdev->calibval &= RTC_CALIB_MASK;
-	writel(xrtcdev->calibval, (xrtcdev->reg_base + RTC_CALIB_WR));
+	pete_writel("drivers/rtc/rtc-zynqmp.c:184", xrtcdev->calibval, (xrtcdev->reg_base + RTC_CALIB_WR));
 }
 
 static const struct rtc_class_ops xlnx_rtc_ops = {
@@ -197,13 +197,13 @@ static irqreturn_t xlnx_rtc_interrupt(int irq, void *id)
 	struct xlnx_rtc_dev *xrtcdev = (struct xlnx_rtc_dev *)id;
 	unsigned int status;
 
-	status = readl(xrtcdev->reg_base + RTC_INT_STS);
+	status = pete_readl("drivers/rtc/rtc-zynqmp.c:200", xrtcdev->reg_base + RTC_INT_STS);
 	/* Check if interrupt asserted */
 	if (!(status & (RTC_INT_SEC | RTC_INT_ALRM)))
 		return IRQ_NONE;
 
 	/* Disable RTC_INT_ALRM interrupt only */
-	writel(RTC_INT_ALRM, xrtcdev->reg_base + RTC_INT_DIS);
+	pete_writel("drivers/rtc/rtc-zynqmp.c:206", RTC_INT_ALRM, xrtcdev->reg_base + RTC_INT_DIS);
 
 	if (status & RTC_INT_ALRM)
 		rtc_update_irq(xrtcdev->rtc, 1, RTC_IRQF | RTC_AF);

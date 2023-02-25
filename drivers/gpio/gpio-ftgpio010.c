@@ -58,7 +58,7 @@ static void ftgpio_gpio_ack_irq(struct irq_data *d)
 	struct gpio_chip *gc = irq_data_get_irq_chip_data(d);
 	struct ftgpio_gpio *g = gpiochip_get_data(gc);
 
-	writel(BIT(irqd_to_hwirq(d)), g->base + GPIO_INT_CLR);
+	pete_writel("drivers/gpio/gpio-ftgpio010.c:61", BIT(irqd_to_hwirq(d)), g->base + GPIO_INT_CLR);
 }
 
 static void ftgpio_gpio_mask_irq(struct irq_data *d)
@@ -67,9 +67,9 @@ static void ftgpio_gpio_mask_irq(struct irq_data *d)
 	struct ftgpio_gpio *g = gpiochip_get_data(gc);
 	u32 val;
 
-	val = readl(g->base + GPIO_INT_EN);
+	val = pete_readl("drivers/gpio/gpio-ftgpio010.c:70", g->base + GPIO_INT_EN);
 	val &= ~BIT(irqd_to_hwirq(d));
-	writel(val, g->base + GPIO_INT_EN);
+	pete_writel("drivers/gpio/gpio-ftgpio010.c:72", val, g->base + GPIO_INT_EN);
 }
 
 static void ftgpio_gpio_unmask_irq(struct irq_data *d)
@@ -78,9 +78,9 @@ static void ftgpio_gpio_unmask_irq(struct irq_data *d)
 	struct ftgpio_gpio *g = gpiochip_get_data(gc);
 	u32 val;
 
-	val = readl(g->base + GPIO_INT_EN);
+	val = pete_readl("drivers/gpio/gpio-ftgpio010.c:81", g->base + GPIO_INT_EN);
 	val |= BIT(irqd_to_hwirq(d));
-	writel(val, g->base + GPIO_INT_EN);
+	pete_writel("drivers/gpio/gpio-ftgpio010.c:83", val, g->base + GPIO_INT_EN);
 }
 
 static int ftgpio_gpio_set_irq_type(struct irq_data *d, unsigned int type)
@@ -90,9 +90,9 @@ static int ftgpio_gpio_set_irq_type(struct irq_data *d, unsigned int type)
 	u32 mask = BIT(irqd_to_hwirq(d));
 	u32 reg_both, reg_level, reg_type;
 
-	reg_type = readl(g->base + GPIO_INT_TYPE);
-	reg_level = readl(g->base + GPIO_INT_LEVEL);
-	reg_both = readl(g->base + GPIO_INT_BOTH_EDGE);
+	reg_type = pete_readl("drivers/gpio/gpio-ftgpio010.c:93", g->base + GPIO_INT_TYPE);
+	reg_level = pete_readl("drivers/gpio/gpio-ftgpio010.c:94", g->base + GPIO_INT_LEVEL);
+	reg_both = pete_readl("drivers/gpio/gpio-ftgpio010.c:95", g->base + GPIO_INT_BOTH_EDGE);
 
 	switch (type) {
 	case IRQ_TYPE_EDGE_BOTH:
@@ -127,9 +127,9 @@ static int ftgpio_gpio_set_irq_type(struct irq_data *d, unsigned int type)
 		return -EINVAL;
 	}
 
-	writel(reg_type, g->base + GPIO_INT_TYPE);
-	writel(reg_level, g->base + GPIO_INT_LEVEL);
-	writel(reg_both, g->base + GPIO_INT_BOTH_EDGE);
+	pete_writel("drivers/gpio/gpio-ftgpio010.c:130", reg_type, g->base + GPIO_INT_TYPE);
+	pete_writel("drivers/gpio/gpio-ftgpio010.c:131", reg_level, g->base + GPIO_INT_LEVEL);
+	pete_writel("drivers/gpio/gpio-ftgpio010.c:132", reg_both, g->base + GPIO_INT_BOTH_EDGE);
 
 	ftgpio_gpio_ack_irq(d);
 
@@ -146,7 +146,7 @@ static void ftgpio_gpio_irq_handler(struct irq_desc *desc)
 
 	chained_irq_enter(irqchip, desc);
 
-	stat = readl(g->base + GPIO_INT_STAT_RAW);
+	stat = pete_readl("drivers/gpio/gpio-ftgpio010.c:149", g->base + GPIO_INT_STAT_RAW);
 	if (stat)
 		for_each_set_bit(offset, &stat, gc->ngpio)
 			generic_handle_domain_irq(gc->irq.domain, offset);
@@ -188,7 +188,7 @@ static int ftgpio_gpio_set_config(struct gpio_chip *gc, unsigned int offset,
 	dev_dbg(g->dev, "prescale divisor: %08x, resulting frequency %lu Hz\n",
 		deb_div, (pclk_freq/deb_div));
 
-	val = readl(g->base + GPIO_DEBOUNCE_PRESCALE);
+	val = pete_readl("drivers/gpio/gpio-ftgpio010.c:191", g->base + GPIO_DEBOUNCE_PRESCALE);
 	if (val == deb_div) {
 		/*
 		 * The debounce timer happens to already be set to the
@@ -197,13 +197,13 @@ static int ftgpio_gpio_set_config(struct gpio_chip *gc, unsigned int offset,
 		 * often than you think, for example when all GPIO keys
 		 * on a system are requesting the same debounce interval.
 		 */
-		val = readl(g->base + GPIO_DEBOUNCE_EN);
+		val = pete_readl("drivers/gpio/gpio-ftgpio010.c:200", g->base + GPIO_DEBOUNCE_EN);
 		val |= BIT(offset);
-		writel(val, g->base + GPIO_DEBOUNCE_EN);
+		pete_writel("drivers/gpio/gpio-ftgpio010.c:202", val, g->base + GPIO_DEBOUNCE_EN);
 		return 0;
 	}
 
-	val = readl(g->base + GPIO_DEBOUNCE_EN);
+	val = pete_readl("drivers/gpio/gpio-ftgpio010.c:206", g->base + GPIO_DEBOUNCE_EN);
 	if (val) {
 		/*
 		 * Oh no! Someone is already using the debounce with
@@ -213,10 +213,10 @@ static int ftgpio_gpio_set_config(struct gpio_chip *gc, unsigned int offset,
 	}
 
 	/* First come, first serve */
-	writel(deb_div, g->base + GPIO_DEBOUNCE_PRESCALE);
+	pete_writel("drivers/gpio/gpio-ftgpio010.c:216", deb_div, g->base + GPIO_DEBOUNCE_PRESCALE);
 	/* Enable debounce */
 	val |= BIT(offset);
-	writel(val, g->base + GPIO_DEBOUNCE_EN);
+	pete_writel("drivers/gpio/gpio-ftgpio010.c:219", val, g->base + GPIO_DEBOUNCE_EN);
 
 	return 0;
 }
@@ -298,12 +298,12 @@ static int ftgpio_gpio_probe(struct platform_device *pdev)
 	girq->parents[0] = irq;
 
 	/* Disable, unmask and clear all interrupts */
-	writel(0x0, g->base + GPIO_INT_EN);
-	writel(0x0, g->base + GPIO_INT_MASK);
-	writel(~0x0, g->base + GPIO_INT_CLR);
+	pete_writel("drivers/gpio/gpio-ftgpio010.c:301", 0x0, g->base + GPIO_INT_EN);
+	pete_writel("drivers/gpio/gpio-ftgpio010.c:302", 0x0, g->base + GPIO_INT_MASK);
+	pete_writel("drivers/gpio/gpio-ftgpio010.c:303", ~0x0, g->base + GPIO_INT_CLR);
 
 	/* Clear any use of debounce */
-	writel(0x0, g->base + GPIO_DEBOUNCE_EN);
+	pete_writel("drivers/gpio/gpio-ftgpio010.c:306", 0x0, g->base + GPIO_DEBOUNCE_EN);
 
 	ret = devm_gpiochip_add_data(dev, &g->gc, g);
 	if (ret)

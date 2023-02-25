@@ -445,12 +445,12 @@ static const struct csis_pix_format *find_csis_format(u32 code)
 
 static inline u32 mipi_csis_read(struct csi_state *state, u32 reg)
 {
-	return readl(state->regs + reg);
+	return pete_readl("drivers/staging/media/imx/imx7-mipi-csis.c:448", state->regs + reg);
 }
 
 static inline void mipi_csis_write(struct csi_state *state, u32 reg, u32 val)
 {
-	writel(val, state->regs + reg);
+	pete_writel("drivers/staging/media/imx/imx7-mipi-csis.c:453", val, state->regs + reg);
 }
 
 static void mipi_csis_enable_interrupts(struct csi_state *state, bool on)

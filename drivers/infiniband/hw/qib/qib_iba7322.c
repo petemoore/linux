@@ -784,7 +784,7 @@ static inline u32 qib_read_ureg32(const struct qib_devdata *dd,
 {
 	if (!dd->kregbase || !(dd->flags & QIB_PRESENT))
 		return 0;
-	return readl(regno + (u64 __iomem *)(
+	return pete_readl("drivers/infiniband/hw/qib/qib_iba7322.c:787", regno + (u64 __iomem *)(
 		(dd->ureg_align * ctxt) + (dd->userbase ?
 		 (char __iomem *)dd->userbase :
 		 (char __iomem *)dd->kregbase + dd->uregbase)));
@@ -823,7 +823,7 @@ static inline u32 qib_read_kreg32(const struct qib_devdata *dd,
 {
 	if (!dd->kregbase || !(dd->flags & QIB_PRESENT))
 		return -1;
-	return readl((u32 __iomem *) &dd->kregbase[regno]);
+	return pete_readl("drivers/infiniband/hw/qib/qib_iba7322.c:826", (u32 __iomem *) &dd->kregbase[regno]);
 }
 
 static inline u64 qib_read_kreg64(const struct qib_devdata *dd,
@@ -888,7 +888,7 @@ static inline u32 read_7322_creg32(const struct qib_devdata *dd, u16 regno)
 {
 	if (!dd->cspec->cregbase || !(dd->flags & QIB_PRESENT))
 		return 0;
-	return readl(&dd->cspec->cregbase[regno]);
+	return pete_readl("drivers/infiniband/hw/qib/qib_iba7322.c:891", &dd->cspec->cregbase[regno]);
 
 
 }
@@ -916,7 +916,7 @@ static inline u32 read_7322_creg32_port(const struct qib_pportdata *ppd,
 	if (!ppd->cpspec || !ppd->cpspec->cpregbase ||
 	    !(ppd->dd->flags & QIB_PRESENT))
 		return 0;
-	return readl(&ppd->cpspec->cpregbase[regno]);
+	return pete_readl("drivers/infiniband/hw/qib/qib_iba7322.c:919", &ppd->cpspec->cpregbase[regno]);
 }
 
 /* bits in Control register */

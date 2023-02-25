@@ -54,7 +54,7 @@ static int sdv_gpio_pub_set_type(struct irq_data *d, unsigned int type)
 	else
 		type_reg = sd->gpio_pub_base + GPIT1R1;
 
-	reg = readl(type_reg);
+	reg = pete_readl("drivers/gpio/gpio-sodaville.c:57", type_reg);
 
 	switch (type) {
 	case IRQ_TYPE_LEVEL_HIGH:
@@ -69,17 +69,17 @@ static int sdv_gpio_pub_set_type(struct irq_data *d, unsigned int type)
 		return -EINVAL;
 	}
 
-	writel(reg, type_reg);
+	pete_writel("drivers/gpio/gpio-sodaville.c:72", reg, type_reg);
 	return 0;
 }
 
 static irqreturn_t sdv_gpio_pub_irq_handler(int irq, void *data)
 {
 	struct sdv_gpio_chip_data *sd = data;
-	unsigned long irq_stat = readl(sd->gpio_pub_base + GPSTR);
+	unsigned long irq_stat = pete_readl("drivers/gpio/gpio-sodaville.c:79", sd->gpio_pub_base + GPSTR);
 	int irq_bit;
 
-	irq_stat &= readl(sd->gpio_pub_base + GPIO_INT);
+	irq_stat &= pete_readl("drivers/gpio/gpio-sodaville.c:82", sd->gpio_pub_base + GPIO_INT);
 	if (!irq_stat)
 		return IRQ_NONE;
 
@@ -134,8 +134,8 @@ static int sdv_register_irqsupport(struct sdv_gpio_chip_data *sd,
 		return sd->irq_base;
 
 	/* mask + ACK all interrupt sources */
-	writel(0, sd->gpio_pub_base + GPIO_INT);
-	writel((1 << 11) - 1, sd->gpio_pub_base + GPSTR);
+	pete_writel("drivers/gpio/gpio-sodaville.c:137", 0, sd->gpio_pub_base + GPIO_INT);
+	pete_writel("drivers/gpio/gpio-sodaville.c:138", (1 << 11) - 1, sd->gpio_pub_base + GPSTR);
 
 	ret = devm_request_irq(&pdev->dev, pdev->irq,
 			       sdv_gpio_pub_irq_handler, IRQF_SHARED,
@@ -204,7 +204,7 @@ static int sdv_gpio_probe(struct pci_dev *pdev,
 
 	ret = of_property_read_u32(pdev->dev.of_node, "intel,muxctl", &mux_val);
 	if (!ret)
-		writel(mux_val, sd->gpio_pub_base + GPMUXCTL);
+		pete_writel("drivers/gpio/gpio-sodaville.c:207", mux_val, sd->gpio_pub_base + GPMUXCTL);
 
 	ret = bgpio_init(&sd->chip, &pdev->dev, 4,
 			sd->gpio_pub_base + GPINR, sd->gpio_pub_base + GPOUTR,

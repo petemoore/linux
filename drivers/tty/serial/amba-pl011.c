@@ -2565,10 +2565,10 @@ static struct console amba_console = {
 
 static void qdf2400_e44_putc(struct uart_port *port, int c)
 {
-	while (readl(port->membase + UART01x_FR) & UART01x_FR_TXFF)
+	while (pete_readl("drivers/tty/serial/amba-pl011.c:2568", port->membase + UART01x_FR) & UART01x_FR_TXFF)
 		cpu_relax();
-	writel(c, port->membase + UART01x_DR);
-	while (!(readl(port->membase + UART01x_FR) & UART011_FR_TXFE))
+	pete_writel("drivers/tty/serial/amba-pl011.c:2570", c, port->membase + UART01x_DR);
+	while (!(pete_readl("drivers/tty/serial/amba-pl011.c:2571", port->membase + UART01x_FR) & UART011_FR_TXFE))
 		cpu_relax();
 }
 
@@ -2581,13 +2581,13 @@ static void qdf2400_e44_early_write(struct console *con, const char *s, unsigned
 
 static void pl011_putc(struct uart_port *port, int c)
 {
-	while (readl(port->membase + UART01x_FR) & UART01x_FR_TXFF)
+	while (pete_readl("drivers/tty/serial/amba-pl011.c:2584", port->membase + UART01x_FR) & UART01x_FR_TXFF)
 		cpu_relax();
 	if (port->iotype == UPIO_MEM32)
-		writel(c, port->membase + UART01x_DR);
+		pete_writel("drivers/tty/serial/amba-pl011.c:2587", c, port->membase + UART01x_DR);
 	else
 		writeb(c, port->membase + UART01x_DR);
-	while (readl(port->membase + UART01x_FR) & UART01x_FR_BUSY)
+	while (pete_readl("drivers/tty/serial/amba-pl011.c:2590", port->membase + UART01x_FR) & UART01x_FR_BUSY)
 		cpu_relax();
 }
 
@@ -2601,11 +2601,11 @@ static void pl011_early_write(struct console *con, const char *s, unsigned n)
 #ifdef CONFIG_CONSOLE_POLL
 static int pl011_getc(struct uart_port *port)
 {
-	if (readl(port->membase + UART01x_FR) & UART01x_FR_RXFE)
+	if (pete_readl("drivers/tty/serial/amba-pl011.c:2604", port->membase + UART01x_FR) & UART01x_FR_RXFE)
 		return NO_POLL_CHAR;
 
 	if (port->iotype == UPIO_MEM32)
-		return readl(port->membase + UART01x_DR);
+		return pete_readl("drivers/tty/serial/amba-pl011.c:2608", port->membase + UART01x_DR);
 	else
 		return readb(port->membase + UART01x_DR);
 }

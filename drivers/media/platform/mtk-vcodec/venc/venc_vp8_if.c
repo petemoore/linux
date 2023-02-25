@@ -134,7 +134,7 @@ struct venc_vp8_inst {
 
 static inline u32 vp8_enc_read_reg(struct venc_vp8_inst *inst, u32 addr)
 {
-	return readl(inst->hw_base + addr);
+	return pete_readl("drivers/media/platform/mtk-vcodec/venc/venc_vp8_if.c:137", inst->hw_base + addr);
 }
 
 static void vp8_enc_free_work_buf(struct venc_vp8_inst *inst)

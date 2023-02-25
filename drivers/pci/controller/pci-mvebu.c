@@ -111,12 +111,12 @@ struct mvebu_pcie_port {
 
 static inline void mvebu_writel(struct mvebu_pcie_port *port, u32 val, u32 reg)
 {
-	writel(val, port->base + reg);
+	pete_writel("drivers/pci/controller/pci-mvebu.c:114", val, port->base + reg);
 }
 
 static inline u32 mvebu_readl(struct mvebu_pcie_port *port, u32 reg)
 {
-	return readl(port->base + reg);
+	return pete_readl("drivers/pci/controller/pci-mvebu.c:119", port->base + reg);
 }
 
 static inline bool mvebu_has_ioport(struct mvebu_pcie_port *port)
@@ -284,7 +284,7 @@ static int mvebu_pcie_hw_wr_conf(struct mvebu_pcie_port *port,
 		writew(val, conf_data + (where & 2));
 		break;
 	case 4:
-		writel(val, conf_data);
+		pete_writel("drivers/pci/controller/pci-mvebu.c:287", val, conf_data);
 		break;
 	default:
 		return PCIBIOS_BAD_REGISTER_NUMBER;

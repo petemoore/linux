@@ -88,7 +88,7 @@ static void st_fdma_xfer_desc(struct st_fdma_chan *fchan)
 	/* start the channel for the descriptor */
 	fnode_write(fchan, nbytes, FDMA_CNTN_OFST);
 	fchan_write(fchan, ch_cmd, FDMA_CH_CMD_OFST);
-	writel(cmd,
+	pete_writel("drivers/dma/st_fdma.c:91", cmd,
 		fchan->fdev->slim_rproc->peri + FDMA_CMD_SET_OFST);
 
 	dev_dbg(fchan->fdev->dev, "start chan:%d\n", fchan->vchan.chan.chan_id);

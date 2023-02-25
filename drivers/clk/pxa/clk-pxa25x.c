@@ -121,7 +121,7 @@ unsigned int pxa25x_get_clk_frequency_khz(int info)
 static unsigned long clk_pxa25x_memory_get_rate(struct clk_hw *hw,
 						unsigned long parent_rate)
 {
-	unsigned long cccr = readl(CCCR);
+	unsigned long cccr = pete_readl("drivers/clk/pxa/clk-pxa25x.c:124", CCCR);
 	unsigned int m = M_clk_mult[(cccr >> 5) & 0x03];
 
 	return parent_rate / m;
@@ -225,7 +225,7 @@ MUX_OPS(clk_pxa25x_core, "core", CLK_SET_RATE_PARENT);
 static unsigned long clk_pxa25x_run_get_rate(struct clk_hw *hw,
 					     unsigned long parent_rate)
 {
-	unsigned long cccr = readl(CCCR);
+	unsigned long cccr = pete_readl("drivers/clk/pxa/clk-pxa25x.c:228", CCCR);
 	unsigned int n2 = N2_clk_mult[(cccr >> 7) & 0x07];
 
 	return (parent_rate / n2) * 2;
@@ -236,7 +236,7 @@ RATE_RO_OPS(clk_pxa25x_run, "run");
 static unsigned long clk_pxa25x_cpll_get_rate(struct clk_hw *hw,
 	unsigned long parent_rate)
 {
-	unsigned long clkcfg, cccr = readl(CCCR);
+	unsigned long clkcfg, cccr = pete_readl("drivers/clk/pxa/clk-pxa25x.c:239", CCCR);
 	unsigned int l, m, n2, t;
 
 	asm("mrc\tp14, 0, %0, c6, c0, 0" : "=r" (clkcfg));

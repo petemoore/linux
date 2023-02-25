@@ -47,11 +47,11 @@ static notrace u64 jcore_sched_clock_read(void)
 	u32 seclo, nsec, seclo0;
 	__iomem void *base = jcore_pit_base;
 
-	seclo = readl(base + REG_SECLO);
+	seclo = pete_readl("drivers/clocksource/jcore-pit.c:50", base + REG_SECLO);
 	do {
 		seclo0 = seclo;
-		nsec  = readl(base + REG_NSEC);
-		seclo = readl(base + REG_SECLO);
+		nsec  = pete_readl("drivers/clocksource/jcore-pit.c:53", base + REG_NSEC);
+		seclo = pete_readl("drivers/clocksource/jcore-pit.c:54", base + REG_SECLO);
 	} while (seclo0 != seclo);
 
 	return seclo * NSEC_PER_SEC + nsec;
@@ -64,15 +64,15 @@ static u64 jcore_clocksource_read(struct clocksource *cs)
 
 static int jcore_pit_disable(struct jcore_pit *pit)
 {
-	writel(0, pit->base + REG_PITEN);
+	pete_writel("drivers/clocksource/jcore-pit.c:67", 0, pit->base + REG_PITEN);
 	return 0;
 }
 
 static int jcore_pit_set(unsigned long delta, struct jcore_pit *pit)
 {
 	jcore_pit_disable(pit);
-	writel(delta, pit->base + REG_THROT);
-	writel(pit->enable_val, pit->base + REG_PITEN);
+	pete_writel("drivers/clocksource/jcore-pit.c:74", delta, pit->base + REG_THROT);
+	pete_writel("drivers/clocksource/jcore-pit.c:75", pit->enable_val, pit->base + REG_PITEN);
 	return 0;
 }
 
@@ -112,7 +112,7 @@ static int jcore_pit_local_init(unsigned cpu)
 
 	pr_info("Local J-Core PIT init on cpu %u\n", cpu);
 
-	buspd = readl(pit->base + REG_BUSPD);
+	buspd = pete_readl("drivers/clocksource/jcore-pit.c:115", pit->base + REG_BUSPD);
 	freq = DIV_ROUND_CLOSEST(NSEC_PER_SEC, buspd);
 	pit->periodic_delta = DIV_ROUND_CLOSEST(NSEC_PER_SEC, HZ * buspd);
 

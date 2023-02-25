@@ -63,9 +63,9 @@ static int s500_wakeup_secondary(unsigned int cpu)
 	/* wait for CPUx to run to WFE instruction */
 	udelay(200);
 
-	writel(__pa_symbol(secondary_startup),
+	pete_writel("arch/arm/mach-actions/platsmp.c:66", __pa_symbol(secondary_startup),
 	       timer_base_addr + OWL_CPU1_ADDR + (cpu - 1) * 4);
-	writel(OWL_CPUx_FLAG_BOOT,
+	pete_writel("arch/arm/mach-actions/platsmp.c:68", OWL_CPUx_FLAG_BOOT,
 	       timer_base_addr + OWL_CPU1_FLAG + (cpu - 1) * 4);
 
 	dsb_sev();
@@ -86,8 +86,8 @@ static int s500_smp_boot_secondary(unsigned int cpu, struct task_struct *idle)
 
 	smp_send_reschedule(cpu);
 
-	writel(0, timer_base_addr + OWL_CPU1_ADDR + (cpu - 1) * 4);
-	writel(0, timer_base_addr + OWL_CPU1_FLAG + (cpu - 1) * 4);
+	pete_writel("arch/arm/mach-actions/platsmp.c:89", 0, timer_base_addr + OWL_CPU1_ADDR + (cpu - 1) * 4);
+	pete_writel("arch/arm/mach-actions/platsmp.c:90", 0, timer_base_addr + OWL_CPU1_FLAG + (cpu - 1) * 4);
 
 	return 0;
 }

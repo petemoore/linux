@@ -143,7 +143,7 @@ static inline u32 pvt_update(void __iomem *reg, u32 mask, u32 data)
 	u32 old;
 
 	old = readl_relaxed(reg);
-	writel((old & ~mask) | (data & mask), reg);
+	pete_writel("drivers/hwmon/bt1-pvt.c:146", (old & ~mask) | (data & mask), reg);
 
 	return old & mask;
 }
@@ -189,7 +189,7 @@ static inline void pvt_set_tout(struct pvt_hwmon *pvt, u32 tout)
 	u32 old;
 
 	old = pvt_update(pvt->regs + PVT_CTRL, PVT_CTRL_EN, 0);
-	writel(tout, pvt->regs + PVT_TTIMEOUT);
+	pete_writel("drivers/hwmon/bt1-pvt.c:192", tout, pvt->regs + PVT_TTIMEOUT);
 	pvt_update(pvt->regs + PVT_CTRL, PVT_CTRL_EN, old);
 }
 
@@ -237,7 +237,7 @@ static irqreturn_t pvt_soft_isr(int irq, void *data)
 	 * status before the next conversion happens. Threshold events will be
 	 * handled a bit later.
 	 */
-	thres_sts = readl(pvt->regs + PVT_RAW_INTR_STAT);
+	thres_sts = pete_readl("drivers/hwmon/bt1-pvt.c:240", pvt->regs + PVT_RAW_INTR_STAT);
 
 	/*
 	 * Then lets recharge the PVT interface with the next sampling mode.
@@ -263,7 +263,7 @@ static irqreturn_t pvt_soft_isr(int irq, void *data)
 	old = pvt_update(pvt->regs + PVT_INTR_MASK, PVT_INTR_DVALID,
 			 PVT_INTR_DVALID);
 
-	val = readl(pvt->regs + PVT_DATA);
+	val = pete_readl("drivers/hwmon/bt1-pvt.c:266", pvt->regs + PVT_DATA);
 
 	pvt_set_mode(pvt, pvt_info[pvt->sensor].mode);
 
@@ -337,7 +337,7 @@ static int pvt_read_limit(struct pvt_hwmon *pvt, enum pvt_sensor_type type,
 	u32 data;
 
 	/* No need in serialization, since it is just read from MMIO. */
-	data = readl(pvt->regs + pvt_info[type].thres_base);
+	data = pete_readl("drivers/hwmon/bt1-pvt.c:340", pvt->regs + pvt_info[type].thres_base);
 
 	if (is_low)
 		data = FIELD_GET(PVT_THRES_LO_MASK, data);
@@ -372,7 +372,7 @@ static int pvt_write_limit(struct pvt_hwmon *pvt, enum pvt_sensor_type type,
 		return ret;
 
 	/* Make sure the upper and lower ranges don't intersect. */
-	limit = readl(pvt->regs + pvt_info[type].thres_base);
+	limit = pete_readl("drivers/hwmon/bt1-pvt.c:375", pvt->regs + pvt_info[type].thres_base);
 	if (is_low) {
 		limit = FIELD_GET(PVT_THRES_HI_MASK, limit);
 		data = clamp_val(data, PVT_DATA_MIN, limit);
@@ -446,7 +446,7 @@ static irqreturn_t pvt_hard_isr(int irq, void *data)
 	 * Nothing special for alarm-less driver. Just read the data, update
 	 * the cache and notify a waiter of this event.
 	 */
-	val = readl(pvt->regs + PVT_DATA);
+	val = pete_readl("drivers/hwmon/bt1-pvt.c:449", pvt->regs + PVT_DATA);
 	if (!(val & PVT_DATA_VALID)) {
 		dev_err(pvt->dev, "Got IRQ when data isn't valid\n");
 		return IRQ_HANDLED;
@@ -637,7 +637,7 @@ static int pvt_read_trim(struct pvt_hwmon *pvt, long *val)
 {
 	u32 data;
 
-	data = readl(pvt->regs + PVT_CTRL);
+	data = pete_readl("drivers/hwmon/bt1-pvt.c:640", pvt->regs + PVT_CTRL);
 	*val = FIELD_GET(PVT_CTRL_TRIM_MASK, data) * PVT_TRIM_STEP;
 
 	return 0;
@@ -984,12 +984,12 @@ static int pvt_check_pwr(struct pvt_hwmon *pvt)
 	pvt_update(pvt->regs + PVT_INTR_MASK, PVT_INTR_ALL, PVT_INTR_ALL);
 	pvt_update(pvt->regs + PVT_CTRL, PVT_CTRL_EN, PVT_CTRL_EN);
 	pvt_set_tout(pvt, 0);
-	readl(pvt->regs + PVT_DATA);
+	pete_readl("drivers/hwmon/bt1-pvt.c:987", pvt->regs + PVT_DATA);
 
 	tout = PVT_TOUT_MIN / NSEC_PER_USEC;
 	usleep_range(tout, 2 * tout);
 
-	data = readl(pvt->regs + PVT_DATA);
+	data = pete_readl("drivers/hwmon/bt1-pvt.c:992", pvt->regs + PVT_DATA);
 	if (!(data & PVT_DATA_VALID)) {
 		ret = -ENODEV;
 		dev_err(pvt->dev, "Sensor is powered down\n");
@@ -1018,8 +1018,8 @@ static int pvt_init_iface(struct pvt_hwmon *pvt)
 	 */
 	pvt_update(pvt->regs + PVT_INTR_MASK, PVT_INTR_ALL, PVT_INTR_ALL);
 	pvt_update(pvt->regs + PVT_CTRL, PVT_CTRL_EN, 0);
-	readl(pvt->regs + PVT_CLR_INTR);
-	readl(pvt->regs + PVT_DATA);
+	pete_readl("drivers/hwmon/bt1-pvt.c:1021", pvt->regs + PVT_CLR_INTR);
+	pete_readl("drivers/hwmon/bt1-pvt.c:1022", pvt->regs + PVT_DATA);
 
 	/* Setup default sensor mode, timeout and temperature trim. */
 	pvt_set_mode(pvt, pvt_info[pvt->sensor].mode);

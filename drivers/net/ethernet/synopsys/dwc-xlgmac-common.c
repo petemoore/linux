@@ -361,13 +361,13 @@ void xlgmac_get_all_hw_features(struct xlgmac_pdata *pdata)
 	struct xlgmac_hw_features *hw_feat = &pdata->hw_feat;
 	unsigned int mac_hfr0, mac_hfr1, mac_hfr2;
 
-	mac_hfr0 = readl(pdata->mac_regs + MAC_HWF0R);
-	mac_hfr1 = readl(pdata->mac_regs + MAC_HWF1R);
-	mac_hfr2 = readl(pdata->mac_regs + MAC_HWF2R);
+	mac_hfr0 = pete_readl("drivers/net/ethernet/synopsys/dwc-xlgmac-common.c:364", pdata->mac_regs + MAC_HWF0R);
+	mac_hfr1 = pete_readl("drivers/net/ethernet/synopsys/dwc-xlgmac-common.c:365", pdata->mac_regs + MAC_HWF1R);
+	mac_hfr2 = pete_readl("drivers/net/ethernet/synopsys/dwc-xlgmac-common.c:366", pdata->mac_regs + MAC_HWF2R);
 
 	memset(hw_feat, 0, sizeof(*hw_feat));
 
-	hw_feat->version = readl(pdata->mac_regs + MAC_VR);
+	hw_feat->version = pete_readl("drivers/net/ethernet/synopsys/dwc-xlgmac-common.c:370", pdata->mac_regs + MAC_VR);
 
 	/* Hardware feature register 0 */
 	hw_feat->phyifsel    = XLGMAC_GET_REG_BITS(mac_hfr0,

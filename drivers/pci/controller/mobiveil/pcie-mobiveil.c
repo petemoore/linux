@@ -29,11 +29,11 @@ static void mobiveil_pcie_sel_page(struct mobiveil_pcie *pcie, u8 pg_idx)
 {
 	u32 val;
 
-	val = readl(pcie->csr_axi_slave_base + PAB_CTRL);
+	val = pete_readl("drivers/pci/controller/mobiveil/pcie-mobiveil.c:32", pcie->csr_axi_slave_base + PAB_CTRL);
 	val &= ~(PAGE_SEL_MASK << PAGE_SEL_SHIFT);
 	val |= (pg_idx & PAGE_SEL_MASK) << PAGE_SEL_SHIFT;
 
-	writel(val, pcie->csr_axi_slave_base + PAB_CTRL);
+	pete_writel("drivers/pci/controller/mobiveil/pcie-mobiveil.c:36", val, pcie->csr_axi_slave_base + PAB_CTRL);
 }
 
 static void __iomem *mobiveil_pcie_comp_addr(struct mobiveil_pcie *pcie,
@@ -58,7 +58,7 @@ static int mobiveil_pcie_read(void __iomem *addr, int size, u32 *val)
 
 	switch (size) {
 	case 4:
-		*val = readl(addr);
+		*val = pete_readl("drivers/pci/controller/mobiveil/pcie-mobiveil.c:61", addr);
 		break;
 	case 2:
 		*val = readw(addr);
@@ -81,7 +81,7 @@ static int mobiveil_pcie_write(void __iomem *addr, int size, u32 val)
 
 	switch (size) {
 	case 4:
-		writel(val, addr);
+		pete_writel("drivers/pci/controller/mobiveil/pcie-mobiveil.c:84", val, addr);
 		break;
 	case 2:
 		writew(val, addr);

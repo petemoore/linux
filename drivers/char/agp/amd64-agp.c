@@ -68,7 +68,7 @@ static int amd64_insert_memory(struct agp_memory *mem, off_t pg_start, int type)
 
 	/* gatt table should be empty. */
 	while (j < (pg_start + mem->page_count)) {
-		if (!PGE_EMPTY(agp_bridge, readl(agp_bridge->gatt_table+j)))
+		if (!PGE_EMPTY(agp_bridge, pete_readl("drivers/char/agp/amd64-agp.c:71", agp_bridge->gatt_table+j)))
 			return -EBUSY;
 		j++;
 	}
@@ -88,8 +88,8 @@ static int amd64_insert_memory(struct agp_memory *mem, off_t pg_start, int type)
 		pte |=(tmp & 0x00000000fffff000ULL);
 		pte |= GPTE_VALID | GPTE_COHERENT;
 
-		writel(pte, agp_bridge->gatt_table+j);
-		readl(agp_bridge->gatt_table+j);	/* PCI Posting. */
+		pete_writel("drivers/char/agp/amd64-agp.c:91", pte, agp_bridge->gatt_table+j);
+		pete_readl("drivers/char/agp/amd64-agp.c:92", agp_bridge->gatt_table+j);	/* PCI Posting. */
 	}
 	amd64_tlbflush(mem);
 	return 0;

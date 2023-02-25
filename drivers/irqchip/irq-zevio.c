@@ -41,15 +41,15 @@ static void zevio_irq_ack(struct irq_data *irqd)
 	struct irq_chip_generic *gc = irq_data_get_irq_chip_data(irqd);
 	struct irq_chip_regs *regs = &irq_data_get_chip_type(irqd)->regs;
 
-	readl(gc->reg_base + regs->ack);
+	pete_readl("drivers/irqchip/irq-zevio.c:44", gc->reg_base + regs->ack);
 }
 
 static void __exception_irq_entry zevio_handle_irq(struct pt_regs *regs)
 {
 	int irqnr;
 
-	while (readl(zevio_irq_io + IO_STATUS)) {
-		irqnr = readl(zevio_irq_io + IO_CURRENT);
+	while (pete_readl("drivers/irqchip/irq-zevio.c:51", zevio_irq_io + IO_STATUS)) {
+		irqnr = pete_readl("drivers/irqchip/irq-zevio.c:52", zevio_irq_io + IO_CURRENT);
 		handle_domain_irq(zevio_irq_domain, irqnr, regs);
 	}
 }
@@ -57,13 +57,13 @@ static void __exception_irq_entry zevio_handle_irq(struct pt_regs *regs)
 static void __init zevio_init_irq_base(void __iomem *base)
 {
 	/* Disable all interrupts */
-	writel(~0, base + IO_DISABLE);
+	pete_writel("drivers/irqchip/irq-zevio.c:60", ~0, base + IO_DISABLE);
 
 	/* Accept interrupts of all priorities */
-	writel(0xF, base + IO_MAX_PRIOTY);
+	pete_writel("drivers/irqchip/irq-zevio.c:63", 0xF, base + IO_MAX_PRIOTY);
 
 	/* Reset existing interrupts */
-	readl(base + IO_RESET);
+	pete_readl("drivers/irqchip/irq-zevio.c:66", base + IO_RESET);
 }
 
 static int __init zevio_of_init(struct device_node *node,
@@ -80,10 +80,10 @@ static int __init zevio_of_init(struct device_node *node,
 	BUG_ON(!zevio_irq_io);
 
 	/* Do not invert interrupt status bits */
-	writel(~0, zevio_irq_io + IO_INVERT_SEL);
+	pete_writel("drivers/irqchip/irq-zevio.c:83", ~0, zevio_irq_io + IO_INVERT_SEL);
 
 	/* Disable sticky interrupts */
-	writel(0, zevio_irq_io + IO_STICKY_SEL);
+	pete_writel("drivers/irqchip/irq-zevio.c:86", 0, zevio_irq_io + IO_STICKY_SEL);
 
 	/* We don't use IRQ priorities. Set each IRQ to highest priority. */
 	memset_io(zevio_irq_io + IO_PRIORITY_SEL, 0, MAX_INTRS * sizeof(u32));

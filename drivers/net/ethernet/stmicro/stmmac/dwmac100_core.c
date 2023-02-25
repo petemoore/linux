@@ -24,7 +24,7 @@ static void dwmac100_core_init(struct mac_device_info *hw,
 			       struct net_device *dev)
 {
 	void __iomem *ioaddr = hw->pcsr;
-	u32 value = readl(ioaddr + MAC_CONTROL);
+	u32 value = pete_readl("drivers/net/ethernet/stmicro/stmmac/dwmac100_core.c:27", ioaddr + MAC_CONTROL);
 
 	value |= MAC_CORE_INIT;
 
@@ -35,10 +35,10 @@ static void dwmac100_core_init(struct mac_device_info *hw,
 	if (netdev_uses_dsa(dev))
 		value &= ~MAC_CONTROL_ASTP;
 
-	writel(value, ioaddr + MAC_CONTROL);
+	pete_writel("drivers/net/ethernet/stmicro/stmmac/dwmac100_core.c:38", value, ioaddr + MAC_CONTROL);
 
 #ifdef STMMAC_VLAN_TAG_USED
-	writel(ETH_P_8021Q, ioaddr + MAC_VLAN1);
+	pete_writel("drivers/net/ethernet/stmicro/stmmac/dwmac100_core.c:41", ETH_P_8021Q, ioaddr + MAC_VLAN1);
 #endif
 }
 
@@ -46,14 +46,14 @@ static void dwmac100_dump_mac_regs(struct mac_device_info *hw, u32 *reg_space)
 {
 	void __iomem *ioaddr = hw->pcsr;
 
-	reg_space[MAC_CONTROL / 4] = readl(ioaddr + MAC_CONTROL);
-	reg_space[MAC_ADDR_HIGH / 4] = readl(ioaddr + MAC_ADDR_HIGH);
-	reg_space[MAC_ADDR_LOW / 4] = readl(ioaddr + MAC_ADDR_LOW);
-	reg_space[MAC_HASH_HIGH / 4] = readl(ioaddr + MAC_HASH_HIGH);
-	reg_space[MAC_HASH_LOW / 4] = readl(ioaddr + MAC_HASH_LOW);
-	reg_space[MAC_FLOW_CTRL / 4] = readl(ioaddr + MAC_FLOW_CTRL);
-	reg_space[MAC_VLAN1 / 4] = readl(ioaddr + MAC_VLAN1);
-	reg_space[MAC_VLAN2 / 4] = readl(ioaddr + MAC_VLAN2);
+	reg_space[MAC_CONTROL / 4] = pete_readl("drivers/net/ethernet/stmicro/stmmac/dwmac100_core.c:49", ioaddr + MAC_CONTROL);
+	reg_space[MAC_ADDR_HIGH / 4] = pete_readl("drivers/net/ethernet/stmicro/stmmac/dwmac100_core.c:50", ioaddr + MAC_ADDR_HIGH);
+	reg_space[MAC_ADDR_LOW / 4] = pete_readl("drivers/net/ethernet/stmicro/stmmac/dwmac100_core.c:51", ioaddr + MAC_ADDR_LOW);
+	reg_space[MAC_HASH_HIGH / 4] = pete_readl("drivers/net/ethernet/stmicro/stmmac/dwmac100_core.c:52", ioaddr + MAC_HASH_HIGH);
+	reg_space[MAC_HASH_LOW / 4] = pete_readl("drivers/net/ethernet/stmicro/stmmac/dwmac100_core.c:53", ioaddr + MAC_HASH_LOW);
+	reg_space[MAC_FLOW_CTRL / 4] = pete_readl("drivers/net/ethernet/stmicro/stmmac/dwmac100_core.c:54", ioaddr + MAC_FLOW_CTRL);
+	reg_space[MAC_VLAN1 / 4] = pete_readl("drivers/net/ethernet/stmicro/stmmac/dwmac100_core.c:55", ioaddr + MAC_VLAN1);
+	reg_space[MAC_VLAN2 / 4] = pete_readl("drivers/net/ethernet/stmicro/stmmac/dwmac100_core.c:56", ioaddr + MAC_VLAN2);
 }
 
 static int dwmac100_rx_ipc_enable(struct mac_device_info *hw)
@@ -87,7 +87,7 @@ static void dwmac100_set_filter(struct mac_device_info *hw,
 				struct net_device *dev)
 {
 	void __iomem *ioaddr = (void __iomem *)dev->base_addr;
-	u32 value = readl(ioaddr + MAC_CONTROL);
+	u32 value = pete_readl("drivers/net/ethernet/stmicro/stmmac/dwmac100_core.c:90", ioaddr + MAC_CONTROL);
 
 	if (dev->flags & IFF_PROMISC) {
 		value |= MAC_CONTROL_PR;
@@ -97,8 +97,8 @@ static void dwmac100_set_filter(struct mac_device_info *hw,
 		   || (dev->flags & IFF_ALLMULTI)) {
 		value |= MAC_CONTROL_PM;
 		value &= ~(MAC_CONTROL_PR | MAC_CONTROL_IF | MAC_CONTROL_HO);
-		writel(0xffffffff, ioaddr + MAC_HASH_HIGH);
-		writel(0xffffffff, ioaddr + MAC_HASH_LOW);
+		pete_writel("drivers/net/ethernet/stmicro/stmmac/dwmac100_core.c:100", 0xffffffff, ioaddr + MAC_HASH_HIGH);
+		pete_writel("drivers/net/ethernet/stmicro/stmmac/dwmac100_core.c:101", 0xffffffff, ioaddr + MAC_HASH_LOW);
 	} else if (netdev_mc_empty(dev)) {	/* no multicast */
 		value &= ~(MAC_CONTROL_PM | MAC_CONTROL_PR | MAC_CONTROL_IF |
 			   MAC_CONTROL_HO | MAC_CONTROL_HP);
@@ -125,11 +125,11 @@ static void dwmac100_set_filter(struct mac_device_info *hw,
 			 */
 			mc_filter[bit_nr >> 5] |= 1 << (bit_nr & 31);
 		}
-		writel(mc_filter[0], ioaddr + MAC_HASH_LOW);
-		writel(mc_filter[1], ioaddr + MAC_HASH_HIGH);
+		pete_writel("drivers/net/ethernet/stmicro/stmmac/dwmac100_core.c:128", mc_filter[0], ioaddr + MAC_HASH_LOW);
+		pete_writel("drivers/net/ethernet/stmicro/stmmac/dwmac100_core.c:129", mc_filter[1], ioaddr + MAC_HASH_HIGH);
 	}
 
-	writel(value, ioaddr + MAC_CONTROL);
+	pete_writel("drivers/net/ethernet/stmicro/stmmac/dwmac100_core.c:132", value, ioaddr + MAC_CONTROL);
 }
 
 static void dwmac100_flow_ctrl(struct mac_device_info *hw, unsigned int duplex,
@@ -141,7 +141,7 @@ static void dwmac100_flow_ctrl(struct mac_device_info *hw, unsigned int duplex,
 
 	if (duplex)
 		flow |= (pause_time << MAC_FLOW_CTRL_PT_SHIFT);
-	writel(flow, ioaddr + MAC_FLOW_CTRL);
+	pete_writel("drivers/net/ethernet/stmicro/stmmac/dwmac100_core.c:144", flow, ioaddr + MAC_FLOW_CTRL);
 }
 
 /* No PMT module supported on ST boards with this Eth chip. */
@@ -152,14 +152,14 @@ static void dwmac100_pmt(struct mac_device_info *hw, unsigned long mode)
 
 static void dwmac100_set_mac_loopback(void __iomem *ioaddr, bool enable)
 {
-	u32 value = readl(ioaddr + MAC_CONTROL);
+	u32 value = pete_readl("drivers/net/ethernet/stmicro/stmmac/dwmac100_core.c:155", ioaddr + MAC_CONTROL);
 
 	if (enable)
 		value |= MAC_CONTROL_OM;
 	else
 		value &= ~MAC_CONTROL_OM;
 
-	writel(value, ioaddr + MAC_CONTROL);
+	pete_writel("drivers/net/ethernet/stmicro/stmmac/dwmac100_core.c:162", value, ioaddr + MAC_CONTROL);
 }
 
 const struct stmmac_ops dwmac100_ops = {

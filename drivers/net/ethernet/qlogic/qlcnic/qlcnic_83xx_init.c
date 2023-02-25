@@ -1370,7 +1370,7 @@ static int qlcnic_83xx_copy_fw_file(struct qlcnic_adapter *adapter)
 	temp_le = (__le32 *)fw->data;
 
 	/* FW image in file is in little endian, swap the data to nullify
-	 * the effect of writel() operation on big endian platform.
+	 * the effect of pete_writel("drivers/net/ethernet/qlogic/qlcnic/qlcnic_83xx_init.c:1373", ) operation on big endian platform.
 	 */
 	for (i = 0; i < fw->size / sizeof(u32); i++)
 		temp[i] = __le32_to_cpu(temp_le[i]);

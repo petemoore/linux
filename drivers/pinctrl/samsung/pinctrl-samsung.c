@@ -402,10 +402,10 @@ static void samsung_pinmux_setup(struct pinctrl_dev *pctldev, unsigned selector,
 
 	raw_spin_lock_irqsave(&bank->slock, flags);
 
-	data = readl(reg + type->reg_offset[PINCFG_TYPE_FUNC]);
+	data = pete_readl("drivers/pinctrl/samsung/pinctrl-samsung.c:405", reg + type->reg_offset[PINCFG_TYPE_FUNC]);
 	data &= ~(mask << shift);
 	data |= func->val << shift;
-	writel(data, reg + type->reg_offset[PINCFG_TYPE_FUNC]);
+	pete_writel("drivers/pinctrl/samsung/pinctrl-samsung.c:408", data, reg + type->reg_offset[PINCFG_TYPE_FUNC]);
 
 	raw_spin_unlock_irqrestore(&bank->slock, flags);
 }
@@ -455,13 +455,13 @@ static int samsung_pinconf_rw(struct pinctrl_dev *pctldev, unsigned int pin,
 
 	mask = (1 << width) - 1;
 	shift = pin_offset * width;
-	data = readl(reg_base + cfg_reg);
+	data = pete_readl("drivers/pinctrl/samsung/pinctrl-samsung.c:458", reg_base + cfg_reg);
 
 	if (set) {
 		cfg_value = PINCFG_UNPACK_VALUE(*config);
 		data &= ~(mask << shift);
 		data |= (cfg_value << shift);
-		writel(data, reg_base + cfg_reg);
+		pete_writel("drivers/pinctrl/samsung/pinctrl-samsung.c:464", data, reg_base + cfg_reg);
 	} else {
 		data >>= shift;
 		data &= mask;
@@ -548,11 +548,11 @@ static void samsung_gpio_set_value(struct gpio_chip *gc,
 
 	reg = bank->pctl_base + bank->pctl_offset;
 
-	data = readl(reg + type->reg_offset[PINCFG_TYPE_DAT]);
+	data = pete_readl("drivers/pinctrl/samsung/pinctrl-samsung.c:551", reg + type->reg_offset[PINCFG_TYPE_DAT]);
 	data &= ~(1 << offset);
 	if (value)
 		data |= 1 << offset;
-	writel(data, reg + type->reg_offset[PINCFG_TYPE_DAT]);
+	pete_writel("drivers/pinctrl/samsung/pinctrl-samsung.c:555", data, reg + type->reg_offset[PINCFG_TYPE_DAT]);
 }
 
 /* gpiolib gpio_set callback function */
@@ -576,7 +576,7 @@ static int samsung_gpio_get(struct gpio_chip *gc, unsigned offset)
 
 	reg = bank->pctl_base + bank->pctl_offset;
 
-	data = readl(reg + type->reg_offset[PINCFG_TYPE_DAT]);
+	data = pete_readl("drivers/pinctrl/samsung/pinctrl-samsung.c:579", reg + type->reg_offset[PINCFG_TYPE_DAT]);
 	data >>= offset;
 	data &= 1;
 	return data;
@@ -610,11 +610,11 @@ static int samsung_gpio_set_direction(struct gpio_chip *gc,
 		reg += 4;
 	}
 
-	data = readl(reg);
+	data = pete_readl("drivers/pinctrl/samsung/pinctrl-samsung.c:613", reg);
 	data &= ~(mask << shift);
 	if (!input)
 		data |= EXYNOS_PIN_FUNC_OUTPUT << shift;
-	writel(data, reg);
+	pete_writel("drivers/pinctrl/samsung/pinctrl-samsung.c:617", data, reg);
 
 	return 0;
 }
@@ -1179,12 +1179,12 @@ static int __maybe_unused samsung_pinctrl_suspend(struct device *dev)
 
 		for (type = 0; type < PINCFG_TYPE_NUM; type++)
 			if (widths[type])
-				bank->pm_save[type] = readl(reg + offs[type]);
+				bank->pm_save[type] = pete_readl("drivers/pinctrl/samsung/pinctrl-samsung.c:1182", reg + offs[type]);
 
 		if (widths[PINCFG_TYPE_FUNC] * bank->nr_pins > 32) {
 			/* Some banks have two config registers */
 			bank->pm_save[PINCFG_TYPE_NUM] =
-				readl(reg + offs[PINCFG_TYPE_FUNC] + 4);
+				pete_readl("drivers/pinctrl/samsung/pinctrl-samsung.c:1187", reg + offs[PINCFG_TYPE_FUNC] + 4);
 			pr_debug("Save %s @ %p (con %#010x %08x)\n",
 				 bank->name, reg,
 				 bank->pm_save[PINCFG_TYPE_FUNC],
@@ -1234,20 +1234,20 @@ static int __maybe_unused samsung_pinctrl_resume(struct device *dev)
 			/* Some banks have two config registers */
 			pr_debug("%s @ %p (con %#010x %08x => %#010x %08x)\n",
 				 bank->name, reg,
-				 readl(reg + offs[PINCFG_TYPE_FUNC]),
-				 readl(reg + offs[PINCFG_TYPE_FUNC] + 4),
+				 pete_readl("drivers/pinctrl/samsung/pinctrl-samsung.c:1237", reg + offs[PINCFG_TYPE_FUNC]),
+				 pete_readl("drivers/pinctrl/samsung/pinctrl-samsung.c:1238", reg + offs[PINCFG_TYPE_FUNC] + 4),
 				 bank->pm_save[PINCFG_TYPE_FUNC],
 				 bank->pm_save[PINCFG_TYPE_NUM]);
-			writel(bank->pm_save[PINCFG_TYPE_NUM],
+			pete_writel("drivers/pinctrl/samsung/pinctrl-samsung.c:1241", bank->pm_save[PINCFG_TYPE_NUM],
 			       reg + offs[PINCFG_TYPE_FUNC] + 4);
 		} else {
 			pr_debug("%s @ %p (con %#010x => %#010x)\n", bank->name,
-				 reg, readl(reg + offs[PINCFG_TYPE_FUNC]),
+				 reg, pete_readl("drivers/pinctrl/samsung/pinctrl-samsung.c:1245", reg + offs[PINCFG_TYPE_FUNC]),
 				 bank->pm_save[PINCFG_TYPE_FUNC]);
 		}
 		for (type = 0; type < PINCFG_TYPE_NUM; type++)
 			if (widths[type])
-				writel(bank->pm_save[type], reg + offs[type]);
+				pete_writel("drivers/pinctrl/samsung/pinctrl-samsung.c:1250", bank->pm_save[type], reg + offs[type]);
 	}
 
 	if (drvdata->retention_ctrl && drvdata->retention_ctrl->disable)

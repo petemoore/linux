@@ -340,7 +340,7 @@ static int mmci_card_busy(struct mmc_host *mmc)
 	int busy = 0;
 
 	spin_lock_irqsave(&host->lock, flags);
-	if (readl(host->base + MMCISTATUS) & host->variant->busy_detect_flag)
+	if (pete_readl("drivers/mmc/host/mmci.c:343", host->base + MMCISTATUS) & host->variant->busy_detect_flag)
 		busy = 1;
 	spin_unlock_irqrestore(&host->lock, flags);
 
@@ -369,7 +369,7 @@ void mmci_write_clkreg(struct mmci_host *host, u32 clk)
 {
 	if (host->clk_reg != clk) {
 		host->clk_reg = clk;
-		writel(clk, host->base + MMCICLOCK);
+		pete_writel("drivers/mmc/host/mmci.c:372", clk, host->base + MMCICLOCK);
 	}
 }
 
@@ -380,7 +380,7 @@ void mmci_write_pwrreg(struct mmci_host *host, u32 pwr)
 {
 	if (host->pwr_reg != pwr) {
 		host->pwr_reg = pwr;
-		writel(pwr, host->base + MMCIPOWER);
+		pete_writel("drivers/mmc/host/mmci.c:383", pwr, host->base + MMCIPOWER);
 	}
 }
 
@@ -394,7 +394,7 @@ static void mmci_write_datactrlreg(struct mmci_host *host, u32 datactrl)
 
 	if (host->datactrl_reg != datactrl) {
 		host->datactrl_reg = datactrl;
-		writel(datactrl, host->base + MMCIDATACTRL);
+		pete_writel("drivers/mmc/host/mmci.c:397", datactrl, host->base + MMCIDATACTRL);
 	}
 }
 
@@ -569,7 +569,7 @@ static int mmci_dma_start(struct mmci_host *host, unsigned int datactrl)
 	 * to fire next DMA request. When that happens, MMCI will
 	 * call mmci_data_end()
 	 */
-	writel(readl(host->base + MMCIMASK0) | MCI_DATAENDMASK,
+	pete_writel("drivers/mmc/host/mmci.c:572", pete_readl("drivers/mmc/host/mmci.c:572", host->base + MMCIMASK0) | MCI_DATAENDMASK,
 	       host->base + MMCIMASK0);
 	return 0;
 }
@@ -595,7 +595,7 @@ static void mmci_dma_error(struct mmci_host *host)
 static void
 mmci_request_end(struct mmci_host *host, struct mmc_request *mrq)
 {
-	writel(0, host->base + MMCICOMMAND);
+	pete_writel("drivers/mmc/host/mmci.c:598", 0, host->base + MMCICOMMAND);
 
 	BUG_ON(host->data);
 
@@ -611,16 +611,16 @@ static void mmci_set_mask1(struct mmci_host *host, unsigned int mask)
 	struct variant_data *variant = host->variant;
 
 	if (host->singleirq) {
-		unsigned int mask0 = readl(base + MMCIMASK0);
+		unsigned int mask0 = pete_readl("drivers/mmc/host/mmci.c:614", base + MMCIMASK0);
 
 		mask0 &= ~variant->irq_pio_mask;
 		mask0 |= mask;
 
-		writel(mask0, base + MMCIMASK0);
+		pete_writel("drivers/mmc/host/mmci.c:619", mask0, base + MMCIMASK0);
 	}
 
 	if (variant->mmcimask1)
-		writel(mask, base + MMCIMASK1);
+		pete_writel("drivers/mmc/host/mmci.c:623", mask, base + MMCIMASK1);
 
 	host->mask1_reg = mask;
 }
@@ -672,8 +672,8 @@ static bool ux500_busy_complete(struct mmci_host *host, u32 status, u32 err_msk)
 	 * isn't needed.
 	 */
 	if (!host->busy_status && !(status & err_msk) &&
-	    (readl(base + MMCISTATUS) & host->variant->busy_detect_flag)) {
-		writel(readl(base + MMCIMASK0) |
+	    (pete_readl("drivers/mmc/host/mmci.c:675", base + MMCISTATUS) & host->variant->busy_detect_flag)) {
+		pete_writel("drivers/mmc/host/mmci.c:676", pete_readl("drivers/mmc/host/mmci.c:676", base + MMCIMASK0) |
 		       host->variant->busy_detect_mask,
 		       base + MMCIMASK0);
 
@@ -694,7 +694,7 @@ static bool ux500_busy_complete(struct mmci_host *host, u32 status, u32 err_msk)
 	 */
 	if (host->busy_status &&
 	    (status & host->variant->busy_detect_flag)) {
-		writel(host->variant->busy_detect_mask, base + MMCICLEAR);
+		pete_writel("drivers/mmc/host/mmci.c:697", host->variant->busy_detect_mask, base + MMCICLEAR);
 		return false;
 	}
 
@@ -705,9 +705,9 @@ static bool ux500_busy_complete(struct mmci_host *host, u32 status, u32 err_msk)
 	 * process the command.
 	 */
 	if (host->busy_status) {
-		writel(host->variant->busy_detect_mask, base + MMCICLEAR);
+		pete_writel("drivers/mmc/host/mmci.c:708", host->variant->busy_detect_mask, base + MMCICLEAR);
 
-		writel(readl(base + MMCIMASK0) &
+		pete_writel("drivers/mmc/host/mmci.c:710", pete_readl("drivers/mmc/host/mmci.c:710", base + MMCIMASK0) &
 		       ~host->variant->busy_detect_mask, base + MMCIMASK0);
 		host->busy_status = 0;
 	}
@@ -865,7 +865,7 @@ void mmci_dmae_finalize(struct mmci_host *host, struct mmc_data *data)
 
 	/* Wait up to 1ms for the DMA to complete */
 	for (i = 0; ; i++) {
-		status = readl(host->base + MMCISTATUS);
+		status = pete_readl("drivers/mmc/host/mmci.c:868", host->base + MMCISTATUS);
 		if (!(status & MCI_RXDATAAVLBLMASK) || i >= 100)
 			break;
 		udelay(10);
@@ -1146,8 +1146,8 @@ static void mmci_start_data(struct mmci_host *host, struct mmc_data *data)
 	timeout = data->timeout_clks + (unsigned int)clks;
 
 	base = host->base;
-	writel(timeout, base + MMCIDATATIMER);
-	writel(host->size, base + MMCIDATALENGTH);
+	pete_writel("drivers/mmc/host/mmci.c:1149", timeout, base + MMCIDATATIMER);
+	pete_writel("drivers/mmc/host/mmci.c:1150", host->size, base + MMCIDATALENGTH);
 
 	datactrl = host->ops->get_datactrl_cfg(host);
 	datactrl |= host->data->flags & MMC_DATA_READ ? MCI_DPSM_DIRECTION : 0;
@@ -1206,7 +1206,7 @@ static void mmci_start_data(struct mmci_host *host, struct mmc_data *data)
 	}
 
 	mmci_write_datactrlreg(host, datactrl);
-	writel(readl(base + MMCIMASK0) & ~MCI_DATAENDMASK, base + MMCIMASK0);
+	pete_writel("drivers/mmc/host/mmci.c:1209", pete_readl("drivers/mmc/host/mmci.c:1209", base + MMCIMASK0) & ~MCI_DATAENDMASK, base + MMCIMASK0);
 	mmci_set_mask1(host, irqmask);
 }
 
@@ -1219,8 +1219,8 @@ mmci_start_command(struct mmci_host *host, struct mmc_command *cmd, u32 c)
 	dev_dbg(mmc_dev(host->mmc), "op %02x arg %08x flags %08x\n",
 	    cmd->opcode, cmd->arg, cmd->flags);
 
-	if (readl(base + MMCICOMMAND) & host->variant->cmdreg_cpsm_enable) {
-		writel(0, base + MMCICOMMAND);
+	if (pete_readl("drivers/mmc/host/mmci.c:1222", base + MMCICOMMAND) & host->variant->cmdreg_cpsm_enable) {
+		pete_writel("drivers/mmc/host/mmci.c:1223", 0, base + MMCICOMMAND);
 		mmci_reg_delay(host);
 	}
 
@@ -1262,8 +1262,8 @@ mmci_start_command(struct mmci_host *host, struct mmc_command *cmd, u32 c)
 
 	host->cmd = cmd;
 
-	writel(cmd->arg, base + MMCIARGUMENT);
-	writel(c, base + MMCICOMMAND);
+	pete_writel("drivers/mmc/host/mmci.c:1265", cmd->arg, base + MMCIARGUMENT);
+	pete_writel("drivers/mmc/host/mmci.c:1266", c, base + MMCICOMMAND);
 }
 
 static void mmci_stop_command(struct mmci_host *host)
@@ -1301,7 +1301,7 @@ mmci_data_irq(struct mmci_host *host, struct mmc_data *data,
 		 * matters for FIFO overruns only.
 		 */
 		if (!host->variant->datacnt_useless) {
-			remain = readl(host->base + MMCIDATACNT);
+			remain = pete_readl("drivers/mmc/host/mmci.c:1304", host->base + MMCIDATACNT);
 			success = data->blksz * data->blocks - remain;
 		} else {
 			success = 0;
@@ -1396,10 +1396,10 @@ mmci_cmd_irq(struct mmci_host *host, struct mmc_command *cmd,
 		cmd->error = -ETIMEDOUT;
 		host->irq_action = IRQ_WAKE_THREAD;
 	} else {
-		cmd->resp[0] = readl(base + MMCIRESPONSE0);
-		cmd->resp[1] = readl(base + MMCIRESPONSE1);
-		cmd->resp[2] = readl(base + MMCIRESPONSE2);
-		cmd->resp[3] = readl(base + MMCIRESPONSE3);
+		cmd->resp[0] = pete_readl("drivers/mmc/host/mmci.c:1399", base + MMCIRESPONSE0);
+		cmd->resp[1] = pete_readl("drivers/mmc/host/mmci.c:1400", base + MMCIRESPONSE1);
+		cmd->resp[2] = pete_readl("drivers/mmc/host/mmci.c:1401", base + MMCIRESPONSE2);
+		cmd->resp[3] = pete_readl("drivers/mmc/host/mmci.c:1402", base + MMCIRESPONSE3);
 	}
 
 	if ((!sbc && !cmd->data) || cmd->error) {
@@ -1427,7 +1427,7 @@ mmci_cmd_irq(struct mmci_host *host, struct mmc_command *cmd,
 
 static int mmci_get_rx_fifocnt(struct mmci_host *host, u32 status, int remain)
 {
-	return remain - (readl(host->base + MMCIFIFOCNT) << 2);
+	return remain - (pete_readl("drivers/mmc/host/mmci.c:1430", host->base + MMCIFIFOCNT) << 2);
 }
 
 static int mmci_qcom_get_rx_fifocnt(struct mmci_host *host, u32 status, int r)
@@ -1448,7 +1448,7 @@ static int mmci_pio_read(struct mmci_host *host, char *buffer, unsigned int rema
 {
 	void __iomem *base = host->base;
 	char *ptr = buffer;
-	u32 status = readl(host->base + MMCISTATUS);
+	u32 status = pete_readl("drivers/mmc/host/mmci.c:1451", host->base + MMCISTATUS);
 	int host_remain = host->size;
 
 	do {
@@ -1486,7 +1486,7 @@ static int mmci_pio_read(struct mmci_host *host, char *buffer, unsigned int rema
 		if (remain == 0)
 			break;
 
-		status = readl(base + MMCISTATUS);
+		status = pete_readl("drivers/mmc/host/mmci.c:1489", base + MMCISTATUS);
 	} while (status & MCI_RXDATAAVLBL);
 
 	return ptr - buffer;
@@ -1521,7 +1521,7 @@ static int mmci_pio_write(struct mmci_host *host, char *buffer, unsigned int rem
 		if (remain == 0)
 			break;
 
-		status = readl(base + MMCISTATUS);
+		status = pete_readl("drivers/mmc/host/mmci.c:1524", base + MMCISTATUS);
 	} while (status & MCI_TXFIFOHALFEMPTY);
 
 	return ptr - buffer;
@@ -1538,7 +1538,7 @@ static irqreturn_t mmci_pio_irq(int irq, void *dev_id)
 	void __iomem *base = host->base;
 	u32 status;
 
-	status = readl(base + MMCISTATUS);
+	status = pete_readl("drivers/mmc/host/mmci.c:1541", base + MMCISTATUS);
 
 	dev_dbg(mmc_dev(host->mmc), "irq1 (pio) %08x\n", status);
 
@@ -1576,7 +1576,7 @@ static irqreturn_t mmci_pio_irq(int irq, void *dev_id)
 		if (remain)
 			break;
 
-		status = readl(base + MMCISTATUS);
+		status = pete_readl("drivers/mmc/host/mmci.c:1579", base + MMCISTATUS);
 	} while (1);
 
 	sg_miter_stop(sg_miter);
@@ -1596,7 +1596,7 @@ static irqreturn_t mmci_pio_irq(int irq, void *dev_id)
 	 */
 	if (host->size == 0) {
 		mmci_set_mask1(host, 0);
-		writel(readl(base + MMCIMASK0) | MCI_DATAENDMASK, base + MMCIMASK0);
+		pete_writel("drivers/mmc/host/mmci.c:1599", pete_readl("drivers/mmc/host/mmci.c:1599", base + MMCIMASK0) | MCI_DATAENDMASK, base + MMCIMASK0);
 	}
 
 	return IRQ_HANDLED;
@@ -1614,7 +1614,7 @@ static irqreturn_t mmci_irq(int irq, void *dev_id)
 	host->irq_action = IRQ_HANDLED;
 
 	do {
-		status = readl(host->base + MMCISTATUS);
+		status = pete_readl("drivers/mmc/host/mmci.c:1617", host->base + MMCISTATUS);
 
 		if (host->singleirq) {
 			if (status & host->mask1_reg)
@@ -1627,12 +1627,12 @@ static irqreturn_t mmci_irq(int irq, void *dev_id)
 		 * Busy detection is managed by mmci_cmd_irq(), including to
 		 * clear the corresponding IRQ.
 		 */
-		status &= readl(host->base + MMCIMASK0);
+		status &= pete_readl("drivers/mmc/host/mmci.c:1630", host->base + MMCIMASK0);
 		if (host->variant->busy_detect)
-			writel(status & ~host->variant->busy_detect_mask,
+			pete_writel("drivers/mmc/host/mmci.c:1632", status & ~host->variant->busy_detect_mask,
 			       host->base + MMCICLEAR);
 		else
-			writel(status, host->base + MMCICLEAR);
+			pete_writel("drivers/mmc/host/mmci.c:1635", status, host->base + MMCICLEAR);
 
 		dev_dbg(mmc_dev(host->mmc), "irq0 (data+cmd) %08x\n", status);
 
@@ -1676,9 +1676,9 @@ static irqreturn_t mmci_irq_thread(int irq, void *dev_id)
 	}
 
 	spin_lock_irqsave(&host->lock, flags);
-	writel(host->clk_reg, host->base + MMCICLOCK);
-	writel(host->pwr_reg, host->base + MMCIPOWER);
-	writel(MCI_IRQENABLE | host->variant->start_err,
+	pete_writel("drivers/mmc/host/mmci.c:1679", host->clk_reg, host->base + MMCICLOCK);
+	pete_writel("drivers/mmc/host/mmci.c:1680", host->pwr_reg, host->base + MMCIPOWER);
+	pete_writel("drivers/mmc/host/mmci.c:1681", MCI_IRQENABLE | host->variant->start_err,
 	       host->base + MMCIMASK0);
 
 	host->irq_action = IRQ_HANDLED;
@@ -2201,12 +2201,12 @@ static int mmci_probe(struct amba_device *dev,
 
 	spin_lock_init(&host->lock);
 
-	writel(0, host->base + MMCIMASK0);
+	pete_writel("drivers/mmc/host/mmci.c:2204", 0, host->base + MMCIMASK0);
 
 	if (variant->mmcimask1)
-		writel(0, host->base + MMCIMASK1);
+		pete_writel("drivers/mmc/host/mmci.c:2207", 0, host->base + MMCIMASK1);
 
-	writel(0xfff, host->base + MMCICLEAR);
+	pete_writel("drivers/mmc/host/mmci.c:2209", 0xfff, host->base + MMCICLEAR);
 
 	/*
 	 * If:
@@ -2240,7 +2240,7 @@ static int mmci_probe(struct amba_device *dev,
 			goto clk_disable;
 	}
 
-	writel(MCI_IRQENABLE | variant->start_err, host->base + MMCIMASK0);
+	pete_writel("drivers/mmc/host/mmci.c:2243", MCI_IRQENABLE | variant->start_err, host->base + MMCIMASK0);
 
 	amba_set_drvdata(dev, mmc);
 
@@ -2284,13 +2284,13 @@ static void mmci_remove(struct amba_device *dev)
 
 		mmc_remove_host(mmc);
 
-		writel(0, host->base + MMCIMASK0);
+		pete_writel("drivers/mmc/host/mmci.c:2287", 0, host->base + MMCIMASK0);
 
 		if (variant->mmcimask1)
-			writel(0, host->base + MMCIMASK1);
+			pete_writel("drivers/mmc/host/mmci.c:2290", 0, host->base + MMCIMASK1);
 
-		writel(0, host->base + MMCICOMMAND);
-		writel(0, host->base + MMCIDATACTRL);
+		pete_writel("drivers/mmc/host/mmci.c:2292", 0, host->base + MMCICOMMAND);
+		pete_writel("drivers/mmc/host/mmci.c:2293", 0, host->base + MMCIDATACTRL);
 
 		mmci_dma_release(host);
 		clk_disable_unprepare(host->clk);
@@ -2305,11 +2305,11 @@ static void mmci_save(struct mmci_host *host)
 
 	spin_lock_irqsave(&host->lock, flags);
 
-	writel(0, host->base + MMCIMASK0);
+	pete_writel("drivers/mmc/host/mmci.c:2308", 0, host->base + MMCIMASK0);
 	if (host->variant->pwrreg_nopower) {
-		writel(0, host->base + MMCIDATACTRL);
-		writel(0, host->base + MMCIPOWER);
-		writel(0, host->base + MMCICLOCK);
+		pete_writel("drivers/mmc/host/mmci.c:2310", 0, host->base + MMCIDATACTRL);
+		pete_writel("drivers/mmc/host/mmci.c:2311", 0, host->base + MMCIPOWER);
+		pete_writel("drivers/mmc/host/mmci.c:2312", 0, host->base + MMCICLOCK);
 	}
 	mmci_reg_delay(host);
 
@@ -2323,11 +2323,11 @@ static void mmci_restore(struct mmci_host *host)
 	spin_lock_irqsave(&host->lock, flags);
 
 	if (host->variant->pwrreg_nopower) {
-		writel(host->clk_reg, host->base + MMCICLOCK);
-		writel(host->datactrl_reg, host->base + MMCIDATACTRL);
-		writel(host->pwr_reg, host->base + MMCIPOWER);
+		pete_writel("drivers/mmc/host/mmci.c:2326", host->clk_reg, host->base + MMCICLOCK);
+		pete_writel("drivers/mmc/host/mmci.c:2327", host->datactrl_reg, host->base + MMCIDATACTRL);
+		pete_writel("drivers/mmc/host/mmci.c:2328", host->pwr_reg, host->base + MMCIPOWER);
 	}
-	writel(MCI_IRQENABLE | host->variant->start_err,
+	pete_writel("drivers/mmc/host/mmci.c:2330", MCI_IRQENABLE | host->variant->start_err,
 	       host->base + MMCIMASK0);
 	mmci_reg_delay(host);
 

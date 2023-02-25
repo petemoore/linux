@@ -212,7 +212,7 @@ hp_zx1_lba_init (u64 hpa)
 
 	hp->lba_cap_offset = hp_zx1_lba_find_capability(hp->lba_regs, PCI_CAP_ID_AGP);
 
-	cap = readl(hp->lba_regs+hp->lba_cap_offset) & 0xff;
+	cap = pete_readl("drivers/char/agp/hp-agp.c:215", hp->lba_regs+hp->lba_cap_offset) & 0xff;
 	if (cap != PCI_CAP_ID_AGP) {
 		printk(KERN_ERR PFX "Invalid capability ID 0x%02x at 0x%x\n",
 		       cap, hp->lba_cap_offset);
@@ -241,19 +241,19 @@ hp_zx1_configure (void)
 
 	agp_bridge->gart_bus_addr = hp->gart_base;
 	agp_bridge->capndx = hp->lba_cap_offset;
-	agp_bridge->mode = readl(hp->lba_regs+hp->lba_cap_offset+PCI_AGP_STATUS);
+	agp_bridge->mode = pete_readl("drivers/char/agp/hp-agp.c:244", hp->lba_regs+hp->lba_cap_offset+PCI_AGP_STATUS);
 
 	if (hp->io_pdir_owner) {
-		writel(virt_to_phys(hp->io_pdir), hp->ioc_regs+HP_ZX1_PDIR_BASE);
-		readl(hp->ioc_regs+HP_ZX1_PDIR_BASE);
-		writel(hp->io_tlb_ps, hp->ioc_regs+HP_ZX1_TCNFG);
-		readl(hp->ioc_regs+HP_ZX1_TCNFG);
-		writel((unsigned int)(~(HP_ZX1_IOVA_SIZE-1)), hp->ioc_regs+HP_ZX1_IMASK);
-		readl(hp->ioc_regs+HP_ZX1_IMASK);
-		writel(hp->iova_base|1, hp->ioc_regs+HP_ZX1_IBASE);
-		readl(hp->ioc_regs+HP_ZX1_IBASE);
-		writel(hp->iova_base|ilog2(HP_ZX1_IOVA_SIZE), hp->ioc_regs+HP_ZX1_PCOM);
-		readl(hp->ioc_regs+HP_ZX1_PCOM);
+		pete_writel("drivers/char/agp/hp-agp.c:247", virt_to_phys(hp->io_pdir), hp->ioc_regs+HP_ZX1_PDIR_BASE);
+		pete_readl("drivers/char/agp/hp-agp.c:248", hp->ioc_regs+HP_ZX1_PDIR_BASE);
+		pete_writel("drivers/char/agp/hp-agp.c:249", hp->io_tlb_ps, hp->ioc_regs+HP_ZX1_TCNFG);
+		pete_readl("drivers/char/agp/hp-agp.c:250", hp->ioc_regs+HP_ZX1_TCNFG);
+		pete_writel("drivers/char/agp/hp-agp.c:251", (unsigned int)(~(HP_ZX1_IOVA_SIZE-1)), hp->ioc_regs+HP_ZX1_IMASK);
+		pete_readl("drivers/char/agp/hp-agp.c:252", hp->ioc_regs+HP_ZX1_IMASK);
+		pete_writel("drivers/char/agp/hp-agp.c:253", hp->iova_base|1, hp->ioc_regs+HP_ZX1_IBASE);
+		pete_readl("drivers/char/agp/hp-agp.c:254", hp->ioc_regs+HP_ZX1_IBASE);
+		pete_writel("drivers/char/agp/hp-agp.c:255", hp->iova_base|ilog2(HP_ZX1_IOVA_SIZE), hp->ioc_regs+HP_ZX1_PCOM);
+		pete_readl("drivers/char/agp/hp-agp.c:256", hp->ioc_regs+HP_ZX1_PCOM);
 	}
 
 	return 0;
@@ -405,11 +405,11 @@ hp_zx1_enable (struct agp_bridge_data *bridge, u32 mode)
 	struct _hp_private *hp = &hp_private;
 	u32 command;
 
-	command = readl(hp->lba_regs+hp->lba_cap_offset+PCI_AGP_STATUS);
+	command = pete_readl("drivers/char/agp/hp-agp.c:408", hp->lba_regs+hp->lba_cap_offset+PCI_AGP_STATUS);
 	command = agp_collect_device_status(bridge, mode, command);
 	command |= 0x00000100;
 
-	writel(command, hp->lba_regs+hp->lba_cap_offset+PCI_AGP_COMMAND);
+	pete_writel("drivers/char/agp/hp-agp.c:412", command, hp->lba_regs+hp->lba_cap_offset+PCI_AGP_COMMAND);
 
 	agp_device_command(command, (mode & AGP8X_MODE) != 0);
 }

@@ -43,7 +43,7 @@ static irqreturn_t keyscan_isr(int irq, void *dev_id)
 	unsigned long state, change;
 	int bit_nr;
 
-	state = readl(keypad->base + KEYSCAN_MATRIX_STATE_OFF) & 0xffff;
+	state = pete_readl("drivers/input/keyboard/st-keyscan.c:46", keypad->base + KEYSCAN_MATRIX_STATE_OFF) & 0xffff;
 	change = keypad->last_state ^ state;
 	keypad->last_state = state;
 
@@ -64,21 +64,21 @@ static int keyscan_start(struct st_keyscan *keypad)
 	if (error)
 		return error;
 
-	writel(keypad->debounce_us * (clk_get_rate(keypad->clk) / 1000000),
+	pete_writel("drivers/input/keyboard/st-keyscan.c:67", keypad->debounce_us * (clk_get_rate(keypad->clk) / 1000000),
 	       keypad->base + KEYSCAN_DEBOUNCE_TIME_OFF);
 
-	writel(((keypad->n_cols - 1) << KEYSCAN_MATRIX_DIM_X_SHIFT) |
+	pete_writel("drivers/input/keyboard/st-keyscan.c:70", ((keypad->n_cols - 1) << KEYSCAN_MATRIX_DIM_X_SHIFT) |
 	       ((keypad->n_rows - 1) << KEYSCAN_MATRIX_DIM_Y_SHIFT),
 	       keypad->base + KEYSCAN_MATRIX_DIM_OFF);
 
-	writel(KEYSCAN_CONFIG_ENABLE, keypad->base + KEYSCAN_CONFIG_OFF);
+	pete_writel("drivers/input/keyboard/st-keyscan.c:74", KEYSCAN_CONFIG_ENABLE, keypad->base + KEYSCAN_CONFIG_OFF);
 
 	return 0;
 }
 
 static void keyscan_stop(struct st_keyscan *keypad)
 {
-	writel(0, keypad->base + KEYSCAN_CONFIG_OFF);
+	pete_writel("drivers/input/keyboard/st-keyscan.c:81", 0, keypad->base + KEYSCAN_CONFIG_OFF);
 
 	clk_disable(keypad->clk);
 }

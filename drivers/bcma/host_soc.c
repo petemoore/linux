@@ -25,7 +25,7 @@ static u16 bcma_host_soc_read16(struct bcma_device *core, u16 offset)
 
 static u32 bcma_host_soc_read32(struct bcma_device *core, u16 offset)
 {
-	return readl(core->io_addr + offset);
+	return pete_readl("drivers/bcma/host_soc.c:28", core->io_addr + offset);
 }
 
 static void bcma_host_soc_write8(struct bcma_device *core, u16 offset,
@@ -43,7 +43,7 @@ static void bcma_host_soc_write16(struct bcma_device *core, u16 offset,
 static void bcma_host_soc_write32(struct bcma_device *core, u16 offset,
 				 u32 value)
 {
-	writel(value, core->io_addr + offset);
+	pete_writel("drivers/bcma/host_soc.c:46", value, core->io_addr + offset);
 }
 
 #ifdef CONFIG_BCMA_BLOCKIO
@@ -139,7 +139,7 @@ static u32 bcma_host_soc_aread32(struct bcma_device *core, u16 offset)
 {
 	if (WARN_ONCE(!core->io_wrap, "Accessed core has no wrapper/agent\n"))
 		return ~0;
-	return readl(core->io_wrap + offset);
+	return pete_readl("drivers/bcma/host_soc.c:142", core->io_wrap + offset);
 }
 
 static void bcma_host_soc_awrite32(struct bcma_device *core, u16 offset,
@@ -147,7 +147,7 @@ static void bcma_host_soc_awrite32(struct bcma_device *core, u16 offset,
 {
 	if (WARN_ONCE(!core->io_wrap, "Accessed core has no wrapper/agent\n"))
 		return;
-	writel(value, core->io_wrap + offset);
+	pete_writel("drivers/bcma/host_soc.c:150", value, core->io_wrap + offset);
 }
 
 static const struct bcma_host_ops bcma_host_soc_ops = {

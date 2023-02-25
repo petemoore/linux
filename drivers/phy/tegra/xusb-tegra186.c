@@ -264,12 +264,12 @@ struct tegra186_xusb_padctl {
 
 static inline void ao_writel(struct tegra186_xusb_padctl *priv, u32 value, unsigned int offset)
 {
-	writel(value, priv->ao_regs + offset);
+	pete_writel("drivers/phy/tegra/xusb-tegra186.c:267", value, priv->ao_regs + offset);
 }
 
 static inline u32 ao_readl(struct tegra186_xusb_padctl *priv, unsigned int offset)
 {
-	return readl(priv->ao_regs + offset);
+	return pete_readl("drivers/phy/tegra/xusb-tegra186.c:272", priv->ao_regs + offset);
 }
 
 static inline struct tegra186_xusb_padctl *

@@ -29,17 +29,17 @@ static void venus_reset_cpu(struct venus_core *core)
 	u32 fw_size = core->fw.mapped_mem_size;
 	void __iomem *wrapper_base = core->wrapper_base;
 
-	writel(0, wrapper_base + WRAPPER_FW_START_ADDR);
-	writel(fw_size, wrapper_base + WRAPPER_FW_END_ADDR);
-	writel(0, wrapper_base + WRAPPER_CPA_START_ADDR);
-	writel(fw_size, wrapper_base + WRAPPER_CPA_END_ADDR);
-	writel(fw_size, wrapper_base + WRAPPER_NONPIX_START_ADDR);
-	writel(fw_size, wrapper_base + WRAPPER_NONPIX_END_ADDR);
-	writel(0x0, wrapper_base + WRAPPER_CPU_CGC_DIS);
-	writel(0x0, wrapper_base + WRAPPER_CPU_CLOCK_CONFIG);
+	pete_writel("drivers/media/platform/qcom/venus/firmware.c:32", 0, wrapper_base + WRAPPER_FW_START_ADDR);
+	pete_writel("drivers/media/platform/qcom/venus/firmware.c:33", fw_size, wrapper_base + WRAPPER_FW_END_ADDR);
+	pete_writel("drivers/media/platform/qcom/venus/firmware.c:34", 0, wrapper_base + WRAPPER_CPA_START_ADDR);
+	pete_writel("drivers/media/platform/qcom/venus/firmware.c:35", fw_size, wrapper_base + WRAPPER_CPA_END_ADDR);
+	pete_writel("drivers/media/platform/qcom/venus/firmware.c:36", fw_size, wrapper_base + WRAPPER_NONPIX_START_ADDR);
+	pete_writel("drivers/media/platform/qcom/venus/firmware.c:37", fw_size, wrapper_base + WRAPPER_NONPIX_END_ADDR);
+	pete_writel("drivers/media/platform/qcom/venus/firmware.c:38", 0x0, wrapper_base + WRAPPER_CPU_CGC_DIS);
+	pete_writel("drivers/media/platform/qcom/venus/firmware.c:39", 0x0, wrapper_base + WRAPPER_CPU_CLOCK_CONFIG);
 
 	/* Bring ARM9 out of reset */
-	writel(0, wrapper_base + WRAPPER_A9SS_SW_RESET);
+	pete_writel("drivers/media/platform/qcom/venus/firmware.c:42", 0, wrapper_base + WRAPPER_A9SS_SW_RESET);
 }
 
 int venus_set_hw_state(struct venus_core *core, bool resume)
@@ -57,7 +57,7 @@ int venus_set_hw_state(struct venus_core *core, bool resume)
 		venus_reset_cpu(core);
 	} else {
 		if (!IS_V6(core))
-			writel(1, core->wrapper_base + WRAPPER_A9SS_SW_RESET);
+			pete_writel("drivers/media/platform/qcom/venus/firmware.c:60", 1, core->wrapper_base + WRAPPER_A9SS_SW_RESET);
 	}
 
 	return 0;

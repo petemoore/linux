@@ -108,7 +108,7 @@ static void regmap_mmio_write32le(struct regmap_mmio_context *ctx,
 				  unsigned int reg,
 				  unsigned int val)
 {
-	writel(val, ctx->regs + reg);
+	pete_writel("drivers/base/regmap/regmap-mmio.c:111", val, ctx->regs + reg);
 }
 
 static void regmap_mmio_write32le_relaxed(struct regmap_mmio_context *ctx,
@@ -193,7 +193,7 @@ static unsigned int regmap_mmio_read16be(struct regmap_mmio_context *ctx,
 static unsigned int regmap_mmio_read32le(struct regmap_mmio_context *ctx,
 				         unsigned int reg)
 {
-	return readl(ctx->regs + reg);
+	return pete_readl("drivers/base/regmap/regmap-mmio.c:196", ctx->regs + reg);
 }
 
 static unsigned int regmap_mmio_read32le_relaxed(struct regmap_mmio_context *ctx,

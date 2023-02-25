@@ -387,7 +387,7 @@ static void exynos4210_tmu_initialize(struct platform_device *pdev)
 {
 	struct exynos_tmu_data *data = platform_get_drvdata(pdev);
 
-	sanitize_temp_error(data, readl(data->base + EXYNOS_TMU_REG_TRIMINFO));
+	sanitize_temp_error(data, pete_readl("drivers/thermal/samsung/exynos_tmu.c:390", data->base + EXYNOS_TMU_REG_TRIMINFO));
 }
 
 static void exynos4412_tmu_set_trip_temp(struct exynos_tmu_data *data,
@@ -395,15 +395,15 @@ static void exynos4412_tmu_set_trip_temp(struct exynos_tmu_data *data,
 {
 	u32 th, con;
 
-	th = readl(data->base + EXYNOS_THD_TEMP_RISE);
+	th = pete_readl("drivers/thermal/samsung/exynos_tmu.c:398", data->base + EXYNOS_THD_TEMP_RISE);
 	th &= ~(0xff << 8 * trip);
 	th |= temp_to_code(data, temp) << 8 * trip;
-	writel(th, data->base + EXYNOS_THD_TEMP_RISE);
+	pete_writel("drivers/thermal/samsung/exynos_tmu.c:401", th, data->base + EXYNOS_THD_TEMP_RISE);
 
 	if (trip == 3) {
-		con = readl(data->base + EXYNOS_TMU_REG_CONTROL);
+		con = pete_readl("drivers/thermal/samsung/exynos_tmu.c:404", data->base + EXYNOS_TMU_REG_CONTROL);
 		con |= (1 << EXYNOS_TMU_THERM_TRIP_EN_SHIFT);
-		writel(con, data->base + EXYNOS_TMU_REG_CONTROL);
+		pete_writel("drivers/thermal/samsung/exynos_tmu.c:406", con, data->base + EXYNOS_TMU_REG_CONTROL);
 	}
 }
 
@@ -412,11 +412,11 @@ static void exynos4412_tmu_set_trip_hyst(struct exynos_tmu_data *data,
 {
 	u32 th;
 
-	th = readl(data->base + EXYNOS_THD_TEMP_FALL);
+	th = pete_readl("drivers/thermal/samsung/exynos_tmu.c:415", data->base + EXYNOS_THD_TEMP_FALL);
 	th &= ~(0xff << 8 * trip);
 	if (hyst)
 		th |= temp_to_code(data, temp - hyst) << 8 * trip;
-	writel(th, data->base + EXYNOS_THD_TEMP_FALL);
+	pete_writel("drivers/thermal/samsung/exynos_tmu.c:419", th, data->base + EXYNOS_THD_TEMP_FALL);
 }
 
 static void exynos4412_tmu_initialize(struct platform_device *pdev)
@@ -428,20 +428,20 @@ static void exynos4412_tmu_initialize(struct platform_device *pdev)
 	    data->soc == SOC_ARCH_EXYNOS4412 ||
 	    data->soc == SOC_ARCH_EXYNOS5250) {
 		if (data->soc == SOC_ARCH_EXYNOS3250) {
-			ctrl = readl(data->base + EXYNOS_TMU_TRIMINFO_CON1);
+			ctrl = pete_readl("drivers/thermal/samsung/exynos_tmu.c:431", data->base + EXYNOS_TMU_TRIMINFO_CON1);
 			ctrl |= EXYNOS_TRIMINFO_RELOAD_ENABLE;
-			writel(ctrl, data->base + EXYNOS_TMU_TRIMINFO_CON1);
+			pete_writel("drivers/thermal/samsung/exynos_tmu.c:433", ctrl, data->base + EXYNOS_TMU_TRIMINFO_CON1);
 		}
-		ctrl = readl(data->base + EXYNOS_TMU_TRIMINFO_CON2);
+		ctrl = pete_readl("drivers/thermal/samsung/exynos_tmu.c:435", data->base + EXYNOS_TMU_TRIMINFO_CON2);
 		ctrl |= EXYNOS_TRIMINFO_RELOAD_ENABLE;
-		writel(ctrl, data->base + EXYNOS_TMU_TRIMINFO_CON2);
+		pete_writel("drivers/thermal/samsung/exynos_tmu.c:437", ctrl, data->base + EXYNOS_TMU_TRIMINFO_CON2);
 	}
 
 	/* On exynos5420 the triminfo register is in the shared space */
 	if (data->soc == SOC_ARCH_EXYNOS5420_TRIMINFO)
-		trim_info = readl(data->base_second + EXYNOS_TMU_REG_TRIMINFO);
+		trim_info = pete_readl("drivers/thermal/samsung/exynos_tmu.c:442", data->base_second + EXYNOS_TMU_REG_TRIMINFO);
 	else
-		trim_info = readl(data->base + EXYNOS_TMU_REG_TRIMINFO);
+		trim_info = pete_readl("drivers/thermal/samsung/exynos_tmu.c:444", data->base + EXYNOS_TMU_REG_TRIMINFO);
 
 	sanitize_temp_error(data, trim_info);
 }
@@ -460,10 +460,10 @@ static void exynos5433_tmu_set_trip_temp(struct exynos_tmu_data *data,
 		j = trip;
 	}
 
-	th = readl(data->base + reg_off);
+	th = pete_readl("drivers/thermal/samsung/exynos_tmu.c:463", data->base + reg_off);
 	th &= ~(0xff << j * 8);
 	th |= (temp_to_code(data, temp) << j * 8);
-	writel(th, data->base + reg_off);
+	pete_writel("drivers/thermal/samsung/exynos_tmu.c:466", th, data->base + reg_off);
 }
 
 static void exynos5433_tmu_set_trip_hyst(struct exynos_tmu_data *data,
@@ -480,10 +480,10 @@ static void exynos5433_tmu_set_trip_hyst(struct exynos_tmu_data *data,
 		j = trip;
 	}
 
-	th = readl(data->base + reg_off);
+	th = pete_readl("drivers/thermal/samsung/exynos_tmu.c:483", data->base + reg_off);
 	th &= ~(0xff << j * 8);
 	th |= (temp_to_code(data, temp - hyst) << j * 8);
-	writel(th, data->base + reg_off);
+	pete_writel("drivers/thermal/samsung/exynos_tmu.c:486", th, data->base + reg_off);
 }
 
 static void exynos5433_tmu_initialize(struct platform_device *pdev)
@@ -492,7 +492,7 @@ static void exynos5433_tmu_initialize(struct platform_device *pdev)
 	unsigned int trim_info;
 	int sensor_id, cal_type;
 
-	trim_info = readl(data->base + EXYNOS_TMU_REG_TRIMINFO);
+	trim_info = pete_readl("drivers/thermal/samsung/exynos_tmu.c:495", data->base + EXYNOS_TMU_REG_TRIMINFO);
 	sanitize_temp_error(data, trim_info);
 
 	/* Read the temperature sensor id */
@@ -501,7 +501,7 @@ static void exynos5433_tmu_initialize(struct platform_device *pdev)
 	dev_info(&pdev->dev, "Temperature sensor ID: 0x%x\n", sensor_id);
 
 	/* Read the calibration mode */
-	writel(trim_info, data->base + EXYNOS_TMU_REG_TRIMINFO);
+	pete_writel("drivers/thermal/samsung/exynos_tmu.c:504", trim_info, data->base + EXYNOS_TMU_REG_TRIMINFO);
 	cal_type = (trim_info & EXYNOS5433_TRIMINFO_CALIB_SEL_MASK)
 				>> EXYNOS5433_TRIMINFO_CALIB_SEL_SHIFT;
 
@@ -528,10 +528,10 @@ static void exynos7_tmu_set_trip_temp(struct exynos_tmu_data *data,
 	reg_off = ((7 - trip) / 2) * 4;
 	bit_off = ((8 - trip) % 2);
 
-	th = readl(data->base + EXYNOS7_THD_TEMP_RISE7_6 + reg_off);
+	th = pete_readl("drivers/thermal/samsung/exynos_tmu.c:531", data->base + EXYNOS7_THD_TEMP_RISE7_6 + reg_off);
 	th &= ~(EXYNOS7_TMU_TEMP_MASK << (16 * bit_off));
 	th |= temp_to_code(data, temp) << (16 * bit_off);
-	writel(th, data->base + EXYNOS7_THD_TEMP_RISE7_6 + reg_off);
+	pete_writel("drivers/thermal/samsung/exynos_tmu.c:534", th, data->base + EXYNOS7_THD_TEMP_RISE7_6 + reg_off);
 }
 
 static void exynos7_tmu_set_trip_hyst(struct exynos_tmu_data *data,
@@ -543,10 +543,10 @@ static void exynos7_tmu_set_trip_hyst(struct exynos_tmu_data *data,
 	reg_off = ((7 - trip) / 2) * 4;
 	bit_off = ((8 - trip) % 2);
 
-	th = readl(data->base + EXYNOS7_THD_TEMP_FALL7_6 + reg_off);
+	th = pete_readl("drivers/thermal/samsung/exynos_tmu.c:546", data->base + EXYNOS7_THD_TEMP_FALL7_6 + reg_off);
 	th &= ~(EXYNOS7_TMU_TEMP_MASK << (16 * bit_off));
 	th |= temp_to_code(data, temp - hyst) << (16 * bit_off);
-	writel(th, data->base + EXYNOS7_THD_TEMP_FALL7_6 + reg_off);
+	pete_writel("drivers/thermal/samsung/exynos_tmu.c:549", th, data->base + EXYNOS7_THD_TEMP_FALL7_6 + reg_off);
 }
 
 static void exynos7_tmu_initialize(struct platform_device *pdev)
@@ -554,7 +554,7 @@ static void exynos7_tmu_initialize(struct platform_device *pdev)
 	struct exynos_tmu_data *data = platform_get_drvdata(pdev);
 	unsigned int trim_info;
 
-	trim_info = readl(data->base + EXYNOS_TMU_REG_TRIMINFO);
+	trim_info = pete_readl("drivers/thermal/samsung/exynos_tmu.c:557", data->base + EXYNOS_TMU_REG_TRIMINFO);
 	sanitize_temp_error(data, trim_info);
 }
 
@@ -564,7 +564,7 @@ static void exynos4210_tmu_control(struct platform_device *pdev, bool on)
 	struct thermal_zone_device *tz = data->tzd;
 	unsigned int con, interrupt_en = 0, i;
 
-	con = get_con_reg(data, readl(data->base + EXYNOS_TMU_REG_CONTROL));
+	con = get_con_reg(data, pete_readl("drivers/thermal/samsung/exynos_tmu.c:567", data->base + EXYNOS_TMU_REG_CONTROL));
 
 	if (on) {
 		for (i = 0; i < data->ntrip; i++) {
@@ -584,8 +584,8 @@ static void exynos4210_tmu_control(struct platform_device *pdev, bool on)
 		con &= ~(1 << EXYNOS_TMU_CORE_EN_SHIFT);
 	}
 
-	writel(interrupt_en, data->base + EXYNOS_TMU_REG_INTEN);
-	writel(con, data->base + EXYNOS_TMU_REG_CONTROL);
+	pete_writel("drivers/thermal/samsung/exynos_tmu.c:587", interrupt_en, data->base + EXYNOS_TMU_REG_INTEN);
+	pete_writel("drivers/thermal/samsung/exynos_tmu.c:588", con, data->base + EXYNOS_TMU_REG_CONTROL);
 }
 
 static void exynos5433_tmu_control(struct platform_device *pdev, bool on)
@@ -594,7 +594,7 @@ static void exynos5433_tmu_control(struct platform_device *pdev, bool on)
 	struct thermal_zone_device *tz = data->tzd;
 	unsigned int con, interrupt_en = 0, pd_det_en, i;
 
-	con = get_con_reg(data, readl(data->base + EXYNOS_TMU_REG_CONTROL));
+	con = get_con_reg(data, pete_readl("drivers/thermal/samsung/exynos_tmu.c:597", data->base + EXYNOS_TMU_REG_CONTROL));
 
 	if (on) {
 		for (i = 0; i < data->ntrip; i++) {
@@ -614,9 +614,9 @@ static void exynos5433_tmu_control(struct platform_device *pdev, bool on)
 
 	pd_det_en = on ? EXYNOS5433_PD_DET_EN : 0;
 
-	writel(pd_det_en, data->base + EXYNOS5433_TMU_PD_DET_EN);
-	writel(interrupt_en, data->base + EXYNOS5433_TMU_REG_INTEN);
-	writel(con, data->base + EXYNOS_TMU_REG_CONTROL);
+	pete_writel("drivers/thermal/samsung/exynos_tmu.c:617", pd_det_en, data->base + EXYNOS5433_TMU_PD_DET_EN);
+	pete_writel("drivers/thermal/samsung/exynos_tmu.c:618", interrupt_en, data->base + EXYNOS5433_TMU_REG_INTEN);
+	pete_writel("drivers/thermal/samsung/exynos_tmu.c:619", con, data->base + EXYNOS_TMU_REG_CONTROL);
 }
 
 static void exynos7_tmu_control(struct platform_device *pdev, bool on)
@@ -625,7 +625,7 @@ static void exynos7_tmu_control(struct platform_device *pdev, bool on)
 	struct thermal_zone_device *tz = data->tzd;
 	unsigned int con, interrupt_en = 0, i;
 
-	con = get_con_reg(data, readl(data->base + EXYNOS_TMU_REG_CONTROL));
+	con = get_con_reg(data, pete_readl("drivers/thermal/samsung/exynos_tmu.c:628", data->base + EXYNOS_TMU_REG_CONTROL));
 
 	if (on) {
 		for (i = 0; i < data->ntrip; i++) {
@@ -646,8 +646,8 @@ static void exynos7_tmu_control(struct platform_device *pdev, bool on)
 		con &= ~(1 << EXYNOS7_PD_DET_EN_SHIFT);
 	}
 
-	writel(interrupt_en, data->base + EXYNOS7_TMU_REG_INTEN);
-	writel(con, data->base + EXYNOS_TMU_REG_CONTROL);
+	pete_writel("drivers/thermal/samsung/exynos_tmu.c:649", interrupt_en, data->base + EXYNOS7_TMU_REG_INTEN);
+	pete_writel("drivers/thermal/samsung/exynos_tmu.c:650", con, data->base + EXYNOS_TMU_REG_CONTROL);
 }
 
 static int exynos_get_temp(void *p, int *temp)
@@ -723,9 +723,9 @@ static void exynos4412_tmu_set_emulation(struct exynos_tmu_data *data,
 	else
 		emul_con = EXYNOS_EMUL_CON;
 
-	val = readl(data->base + emul_con);
+	val = pete_readl("drivers/thermal/samsung/exynos_tmu.c:726", data->base + emul_con);
 	val = get_emul_con_reg(data, val, temp);
-	writel(val, data->base + emul_con);
+	pete_writel("drivers/thermal/samsung/exynos_tmu.c:728", val, data->base + emul_con);
 }
 
 static int exynos_tmu_set_emulation(void *drv_data, int temp)
@@ -810,7 +810,7 @@ static void exynos4210_tmu_clear_irqs(struct exynos_tmu_data *data)
 		tmu_intclear = EXYNOS_TMU_REG_INTCLEAR;
 	}
 
-	val_irq = readl(data->base + tmu_intstat);
+	val_irq = pete_readl("drivers/thermal/samsung/exynos_tmu.c:813", data->base + tmu_intstat);
 	/*
 	 * Clear the interrupts.  Please note that the documentation for
 	 * Exynos3250, Exynos4412, Exynos5250 and Exynos5260 incorrectly
@@ -819,7 +819,7 @@ static void exynos4210_tmu_clear_irqs(struct exynos_tmu_data *data)
 	 * and Exynos5440 documentation is correct (Exynos4210 doesn't
 	 * support FALL IRQs at all).
 	 */
-	writel(val_irq, data->base + tmu_intclear);
+	pete_writel("drivers/thermal/samsung/exynos_tmu.c:822", val_irq, data->base + tmu_intclear);
 }
 
 static irqreturn_t exynos_tmu_irq(int irq, void *id)

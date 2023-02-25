@@ -679,12 +679,12 @@ static int oxu_hub_control(struct usb_hcd *hcd,
 /* Low level read/write registers functions */
 static inline u32 oxu_readl(void __iomem *base, u32 reg)
 {
-	return readl(base + reg);
+	return pete_readl("drivers/usb/host/oxu210hp-hcd.c:682", base + reg);
 }
 
 static inline void oxu_writel(void __iomem *base, u32 reg, u32 val)
 {
-	writel(val, base + reg);
+	pete_writel("drivers/usb/host/oxu210hp-hcd.c:687", val, base + reg);
 }
 
 static inline void timer_action_done(struct oxu_hcd *oxu,
@@ -764,17 +764,17 @@ static int handshake(struct oxu_hcd *oxu, void __iomem *ptr,
 /* Force HC to halt state from unknown (EHCI spec section 2.3) */
 static int ehci_halt(struct oxu_hcd *oxu)
 {
-	u32	temp = readl(&oxu->regs->status);
+	u32	temp = pete_readl("drivers/usb/host/oxu210hp-hcd.c:767", &oxu->regs->status);
 
 	/* disable any irqs left enabled by previous code */
-	writel(0, &oxu->regs->intr_enable);
+	pete_writel("drivers/usb/host/oxu210hp-hcd.c:770", 0, &oxu->regs->intr_enable);
 
 	if ((temp & STS_HALT) != 0)
 		return 0;
 
-	temp = readl(&oxu->regs->command);
+	temp = pete_readl("drivers/usb/host/oxu210hp-hcd.c:775", &oxu->regs->command);
 	temp &= ~CMD_RUN;
-	writel(temp, &oxu->regs->command);
+	pete_writel("drivers/usb/host/oxu210hp-hcd.c:777", temp, &oxu->regs->command);
 	return handshake(oxu, &oxu->regs->status,
 			  STS_HALT, STS_HALT, 16 * 125);
 }
@@ -786,20 +786,20 @@ static void tdi_reset(struct oxu_hcd *oxu)
 	u32 tmp;
 
 	reg_ptr = (u32 __iomem *)(((u8 __iomem *)oxu->regs) + 0x68);
-	tmp = readl(reg_ptr);
+	tmp = pete_readl("drivers/usb/host/oxu210hp-hcd.c:789", reg_ptr);
 	tmp |= 0x3;
-	writel(tmp, reg_ptr);
+	pete_writel("drivers/usb/host/oxu210hp-hcd.c:791", tmp, reg_ptr);
 }
 
 /* Reset a non-running (STS_HALT == 1) controller */
 static int ehci_reset(struct oxu_hcd *oxu)
 {
 	int	retval;
-	u32	command = readl(&oxu->regs->command);
+	u32	command = pete_readl("drivers/usb/host/oxu210hp-hcd.c:798", &oxu->regs->command);
 
 	command |= CMD_RESET;
 	dbg_cmd(oxu, "reset", command);
-	writel(command, &oxu->regs->command);
+	pete_writel("drivers/usb/host/oxu210hp-hcd.c:802", command, &oxu->regs->command);
 	oxu_to_hcd(oxu)->state = HC_STATE_HALT;
 	oxu->next_statechange = jiffies;
 	retval = handshake(oxu, &oxu->regs->command,
@@ -823,7 +823,7 @@ static void ehci_quiesce(struct oxu_hcd *oxu)
 #endif
 
 	/* wait for any schedule enables/disables to take effect */
-	temp = readl(&oxu->regs->command) << 10;
+	temp = pete_readl("drivers/usb/host/oxu210hp-hcd.c:826", &oxu->regs->command) << 10;
 	temp &= STS_ASS | STS_PSS;
 	if (handshake(oxu, &oxu->regs->status, STS_ASS | STS_PSS,
 				temp, 16 * 125) != 0) {
@@ -832,9 +832,9 @@ static void ehci_quiesce(struct oxu_hcd *oxu)
 	}
 
 	/* then disable anything that's still active */
-	temp = readl(&oxu->regs->command);
+	temp = pete_readl("drivers/usb/host/oxu210hp-hcd.c:835", &oxu->regs->command);
 	temp &= ~(CMD_ASE | CMD_IAAD | CMD_PSE);
-	writel(temp, &oxu->regs->command);
+	pete_writel("drivers/usb/host/oxu210hp-hcd.c:837", temp, &oxu->regs->command);
 
 	/* hardware can take 16 microframes to turn off ... */
 	if (handshake(oxu, &oxu->regs->status, STS_ASS | STS_PSS,
@@ -1922,14 +1922,14 @@ static void qh_link_async(struct oxu_hcd *oxu, struct ehci_qh *qh)
 	head = oxu->async;
 	timer_action_done(oxu, TIMER_ASYNC_OFF);
 	if (!head->qh_next.qh) {
-		u32	cmd = readl(&oxu->regs->command);
+		u32	cmd = pete_readl("drivers/usb/host/oxu210hp-hcd.c:1925", &oxu->regs->command);
 
 		if (!(cmd & CMD_ASE)) {
 			/* in case a clear of CMD_ASE didn't take yet */
 			(void)handshake(oxu, &oxu->regs->status,
 					STS_ASS, 0, 150);
 			cmd |= CMD_ASE | CMD_RUN;
-			writel(cmd, &oxu->regs->command);
+			pete_writel("drivers/usb/host/oxu210hp-hcd.c:1932", cmd, &oxu->regs->command);
 			oxu_to_hcd(oxu)->state = HC_STATE_RUNNING;
 			/* posted write need not be known to HC yet ... */
 		}
@@ -2123,7 +2123,7 @@ static void end_unlink_async(struct oxu_hcd *oxu)
 
 static void start_unlink_async(struct oxu_hcd *oxu, struct ehci_qh *qh)
 {
-	int cmd = readl(&oxu->regs->command);
+	int cmd = pete_readl("drivers/usb/host/oxu210hp-hcd.c:2126", &oxu->regs->command);
 	struct ehci_qh *prev;
 
 #ifdef DEBUG
@@ -2138,7 +2138,7 @@ static void start_unlink_async(struct oxu_hcd *oxu, struct ehci_qh *qh)
 		if (oxu_to_hcd(oxu)->state != HC_STATE_HALT
 				&& !oxu->reclaim) {
 			/* ... and CMD_IAAD clear */
-			writel(cmd & ~CMD_ASE, &oxu->regs->command);
+			pete_writel("drivers/usb/host/oxu210hp-hcd.c:2141", cmd & ~CMD_ASE, &oxu->regs->command);
 			wmb();
 			/* handshake later, if we need to */
 			timer_action_done(oxu, TIMER_ASYNC_OFF);
@@ -2167,8 +2167,8 @@ static void start_unlink_async(struct oxu_hcd *oxu, struct ehci_qh *qh)
 
 	oxu->reclaim_ready = 0;
 	cmd |= CMD_IAAD;
-	writel(cmd, &oxu->regs->command);
-	(void) readl(&oxu->regs->command);
+	pete_writel("drivers/usb/host/oxu210hp-hcd.c:2170", cmd, &oxu->regs->command);
+	(void) pete_readl("drivers/usb/host/oxu210hp-hcd.c:2171", &oxu->regs->command);
 	timer_action(oxu, TIMER_IAA_WATCHDOG);
 }
 
@@ -2308,13 +2308,13 @@ static int enable_periodic(struct oxu_hcd *oxu)
 		return status;
 	}
 
-	cmd = readl(&oxu->regs->command) | CMD_PSE;
-	writel(cmd, &oxu->regs->command);
+	cmd = pete_readl("drivers/usb/host/oxu210hp-hcd.c:2311", &oxu->regs->command) | CMD_PSE;
+	pete_writel("drivers/usb/host/oxu210hp-hcd.c:2312", cmd, &oxu->regs->command);
 	/* posted write ... PSS happens later */
 	oxu_to_hcd(oxu)->state = HC_STATE_RUNNING;
 
 	/* make sure ehci_work scans these */
-	oxu->next_uframe = readl(&oxu->regs->frame_index)
+	oxu->next_uframe = pete_readl("drivers/usb/host/oxu210hp-hcd.c:2317", &oxu->regs->frame_index)
 		% (oxu->periodic_size << 3);
 	return 0;
 }
@@ -2334,8 +2334,8 @@ static int disable_periodic(struct oxu_hcd *oxu)
 		return status;
 	}
 
-	cmd = readl(&oxu->regs->command) & ~CMD_PSE;
-	writel(cmd, &oxu->regs->command);
+	cmd = pete_readl("drivers/usb/host/oxu210hp-hcd.c:2337", &oxu->regs->command) & ~CMD_PSE;
+	pete_writel("drivers/usb/host/oxu210hp-hcd.c:2338", cmd, &oxu->regs->command);
 	/* posted write ... */
 
 	oxu->next_uframe = -1;
@@ -2683,7 +2683,7 @@ static void scan_periodic(struct oxu_hcd *oxu)
 	 */
 	now_uframe = oxu->next_uframe;
 	if (HC_IS_RUNNING(oxu_to_hcd(oxu)->state))
-		clock = readl(&oxu->regs->frame_index);
+		clock = pete_readl("drivers/usb/host/oxu210hp-hcd.c:2686", &oxu->regs->frame_index);
 	else
 		clock = now_uframe + mod - 1;
 	clock %= mod;
@@ -2749,7 +2749,7 @@ restart:
 			if (!HC_IS_RUNNING(oxu_to_hcd(oxu)->state))
 				break;
 			oxu->next_uframe = now_uframe;
-			now = readl(&oxu->regs->frame_index) % mod;
+			now = pete_readl("drivers/usb/host/oxu210hp-hcd.c:2752", &oxu->regs->frame_index) % mod;
 			if (now_uframe == now)
 				break;
 
@@ -2771,7 +2771,7 @@ static void ehci_turn_off_all_ports(struct oxu_hcd *oxu)
 	int port = HCS_N_PORTS(oxu->hcs_params);
 
 	while (port--)
-		writel(PORT_RWC_BITS, &oxu->regs->port_status[port]);
+		pete_writel("drivers/usb/host/oxu210hp-hcd.c:2774", PORT_RWC_BITS, &oxu->regs->port_status[port]);
 }
 
 static void ehci_port_power(struct oxu_hcd *oxu, int is_on)
@@ -2861,7 +2861,7 @@ static irqreturn_t oxu210_hcd_irq(struct usb_hcd *hcd)
 
 	spin_lock(&oxu->lock);
 
-	status = readl(&oxu->regs->status);
+	status = pete_readl("drivers/usb/host/oxu210hp-hcd.c:2864", &oxu->regs->status);
 
 	/* e.g. cardbus physical eject */
 	if (status == ~(u32) 0) {
@@ -2877,8 +2877,8 @@ static irqreturn_t oxu210_hcd_irq(struct usb_hcd *hcd)
 	}
 
 	/* clear (just) interrupts */
-	writel(status, &oxu->regs->status);
-	readl(&oxu->regs->command);	/* unblock posted write */
+	pete_writel("drivers/usb/host/oxu210hp-hcd.c:2880", status, &oxu->regs->status);
+	pete_readl("drivers/usb/host/oxu210hp-hcd.c:2881", &oxu->regs->command);	/* unblock posted write */
 	bh = 0;
 
 #ifdef OXU_VERBOSE_DEBUG
@@ -2904,11 +2904,11 @@ static irqreturn_t oxu210_hcd_irq(struct usb_hcd *hcd)
 		pcd_status = status;
 
 		/* resume root hub? */
-		if (!(readl(&oxu->regs->command) & CMD_RUN))
+		if (!(pete_readl("drivers/usb/host/oxu210hp-hcd.c:2907", &oxu->regs->command) & CMD_RUN))
 			usb_hcd_resume_root_hub(hcd);
 
 		while (i--) {
-			int pstatus = readl(&oxu->regs->port_status[i]);
+			int pstatus = pete_readl("drivers/usb/host/oxu210hp-hcd.c:2911", &oxu->regs->port_status[i]);
 
 			if (pstatus & PORT_OWNER)
 				continue;
@@ -2930,14 +2930,14 @@ static irqreturn_t oxu210_hcd_irq(struct usb_hcd *hcd)
 	/* PCI errors [4.15.2.4] */
 	if (unlikely((status & STS_FATAL) != 0)) {
 		/* bogus "fatal" IRQs appear on some chips... why?  */
-		status = readl(&oxu->regs->status);
-		dbg_cmd(oxu, "fatal", readl(&oxu->regs->command));
+		status = pete_readl("drivers/usb/host/oxu210hp-hcd.c:2933", &oxu->regs->status);
+		dbg_cmd(oxu, "fatal", pete_readl("drivers/usb/host/oxu210hp-hcd.c:2934", &oxu->regs->command));
 		dbg_status(oxu, "fatal", status);
 		if (status & STS_HALT) {
 			oxu_err(oxu, "fatal error\n");
 dead:
 			ehci_reset(oxu);
-			writel(0, &oxu->regs->configured_flag);
+			pete_writel("drivers/usb/host/oxu210hp-hcd.c:2940", 0, &oxu->regs->configured_flag);
 			usb_hc_died(hcd);
 			/* generic layer kills/unlinks all urbs, then
 			 * uses oxu_stop to clean up the rest
@@ -2986,10 +2986,10 @@ static void oxu_watchdog(struct timer_list *t)
 
 	/* lost IAA irqs wedge things badly; seen with a vt8235 */
 	if (oxu->reclaim) {
-		u32 status = readl(&oxu->regs->status);
+		u32 status = pete_readl("drivers/usb/host/oxu210hp-hcd.c:2989", &oxu->regs->status);
 		if (status & STS_IAA) {
 			oxu_vdbg(oxu, "lost IAA\n");
-			writel(STS_IAA, &oxu->regs->status);
+			pete_writel("drivers/usb/host/oxu210hp-hcd.c:2992", STS_IAA, &oxu->regs->status);
 			oxu->reclaim_ready = 1;
 		}
 	}
@@ -3027,7 +3027,7 @@ static int oxu_hcd_init(struct usb_hcd *hcd)
 		return retval;
 
 	/* controllers may cache some of the periodic schedule ... */
-	hcc_params = readl(&oxu->caps->hcc_params);
+	hcc_params = pete_readl("drivers/usb/host/oxu210hp-hcd.c:3030", &oxu->caps->hcc_params);
 	if (HCC_ISOC_CACHE(hcc_params))		/* full frame cache */
 		oxu->i_thresh = 8;
 	else					/* N microframes cached */
@@ -3094,18 +3094,18 @@ static int oxu_reset(struct usb_hcd *hcd)
 	if (oxu->is_otg) {
 		oxu->caps = hcd->regs + OXU_OTG_CAP_OFFSET;
 		oxu->regs = hcd->regs + OXU_OTG_CAP_OFFSET + \
-			HC_LENGTH(readl(&oxu->caps->hc_capbase));
+			HC_LENGTH(pete_readl("drivers/usb/host/oxu210hp-hcd.c:3097", &oxu->caps->hc_capbase));
 
 		oxu->mem = hcd->regs + OXU_SPH_MEM;
 	} else {
 		oxu->caps = hcd->regs + OXU_SPH_CAP_OFFSET;
 		oxu->regs = hcd->regs + OXU_SPH_CAP_OFFSET + \
-			HC_LENGTH(readl(&oxu->caps->hc_capbase));
+			HC_LENGTH(pete_readl("drivers/usb/host/oxu210hp-hcd.c:3103", &oxu->caps->hc_capbase));
 
 		oxu->mem = hcd->regs + OXU_OTG_MEM;
 	}
 
-	oxu->hcs_params = readl(&oxu->caps->hcs_params);
+	oxu->hcs_params = pete_readl("drivers/usb/host/oxu210hp-hcd.c:3108", &oxu->caps->hcs_params);
 	oxu->sbrn = 0x20;
 
 	return oxu_hcd_init(hcd);
@@ -3125,8 +3125,8 @@ static int oxu_run(struct usb_hcd *hcd)
 		ehci_mem_cleanup(oxu);
 		return retval;
 	}
-	writel(oxu->periodic_dma, &oxu->regs->frame_list);
-	writel((u32) oxu->async->qh_dma, &oxu->regs->async_next);
+	pete_writel("drivers/usb/host/oxu210hp-hcd.c:3128", oxu->periodic_dma, &oxu->regs->frame_list);
+	pete_writel("drivers/usb/host/oxu210hp-hcd.c:3129", (u32) oxu->async->qh_dma, &oxu->regs->async_next);
 
 	/* hcc_params controls whether oxu->regs->segment must (!!!)
 	 * be used; it constrains QH/ITD/SITD and QTD locations.
@@ -3139,14 +3139,14 @@ static int oxu_run(struct usb_hcd *hcd)
 	 * Scsi_Host.highmem_io, and so forth.  It's readonly to all
 	 * host side drivers though.
 	 */
-	hcc_params = readl(&oxu->caps->hcc_params);
+	hcc_params = pete_readl("drivers/usb/host/oxu210hp-hcd.c:3142", &oxu->caps->hcc_params);
 	if (HCC_64BIT_ADDR(hcc_params))
-		writel(0, &oxu->regs->segment);
+		pete_writel("drivers/usb/host/oxu210hp-hcd.c:3144", 0, &oxu->regs->segment);
 
 	oxu->command &= ~(CMD_LRESET | CMD_IAAD | CMD_PSE |
 				CMD_ASE | CMD_RESET);
 	oxu->command |= CMD_RUN;
-	writel(oxu->command, &oxu->regs->command);
+	pete_writel("drivers/usb/host/oxu210hp-hcd.c:3149", oxu->command, &oxu->regs->command);
 	dbg_cmd(oxu, "init", oxu->command);
 
 	/*
@@ -3156,16 +3156,16 @@ static int oxu_run(struct usb_hcd *hcd)
 	 * and there's no companion controller unless maybe for USB OTG.)
 	 */
 	hcd->state = HC_STATE_RUNNING;
-	writel(FLAG_CF, &oxu->regs->configured_flag);
-	readl(&oxu->regs->command);	/* unblock posted writes */
+	pete_writel("drivers/usb/host/oxu210hp-hcd.c:3159", FLAG_CF, &oxu->regs->configured_flag);
+	pete_readl("drivers/usb/host/oxu210hp-hcd.c:3160", &oxu->regs->command);	/* unblock posted writes */
 
-	temp = HC_VERSION(readl(&oxu->caps->hc_capbase));
+	temp = HC_VERSION(pete_readl("drivers/usb/host/oxu210hp-hcd.c:3162", &oxu->caps->hc_capbase));
 	oxu_info(oxu, "USB %x.%x started, quasi-EHCI %x.%02x, driver %s%s\n",
 		((oxu->sbrn & 0xf0)>>4), (oxu->sbrn & 0x0f),
 		temp >> 8, temp & 0xff, DRIVER_VERSION,
 		ignore_oc ? ", overcurrent ignored" : "");
 
-	writel(INTR_MASK, &oxu->regs->intr_enable); /* Turn On Interrupts */
+	pete_writel("drivers/usb/host/oxu210hp-hcd.c:3168", INTR_MASK, &oxu->regs->intr_enable); /* Turn On Interrupts */
 
 	return 0;
 }
@@ -3185,11 +3185,11 @@ static void oxu_stop(struct usb_hcd *hcd)
 		ehci_quiesce(oxu);
 
 	ehci_reset(oxu);
-	writel(0, &oxu->regs->intr_enable);
+	pete_writel("drivers/usb/host/oxu210hp-hcd.c:3188", 0, &oxu->regs->intr_enable);
 	spin_unlock_irq(&oxu->lock);
 
 	/* let companion controllers work when we aren't */
-	writel(0, &oxu->regs->configured_flag);
+	pete_writel("drivers/usb/host/oxu210hp-hcd.c:3192", 0, &oxu->regs->configured_flag);
 
 	/* root hub is shut down separately (first, when possible) */
 	spin_lock_irq(&oxu->lock);
@@ -3198,7 +3198,7 @@ static void oxu_stop(struct usb_hcd *hcd)
 	spin_unlock_irq(&oxu->lock);
 	ehci_mem_cleanup(oxu);
 
-	dbg_status(oxu, "oxu_stop completed", readl(&oxu->regs->status));
+	dbg_status(oxu, "oxu_stop completed", pete_readl("drivers/usb/host/oxu210hp-hcd.c:3201", &oxu->regs->status));
 }
 
 /* Kick in for silicon on any bus (not just pci, etc).
@@ -3213,10 +3213,10 @@ static void oxu_shutdown(struct usb_hcd *hcd)
 	ehci_turn_off_all_ports(oxu);
 
 	/* make BIOS/etc use companion controller during reboot */
-	writel(0, &oxu->regs->configured_flag);
+	pete_writel("drivers/usb/host/oxu210hp-hcd.c:3216", 0, &oxu->regs->configured_flag);
 
 	/* unblock posted writes */
-	readl(&oxu->regs->configured_flag);
+	pete_readl("drivers/usb/host/oxu210hp-hcd.c:3219", &oxu->regs->configured_flag);
 }
 
 /* Non-error returns are a promise to giveback() the urb later
@@ -3480,7 +3480,7 @@ static int oxu_get_frame(struct usb_hcd *hcd)
 {
 	struct oxu_hcd *oxu = hcd_to_oxu(hcd);
 
-	return (readl(&oxu->regs->frame_index) >> 3) %
+	return (pete_readl("drivers/usb/host/oxu210hp-hcd.c:3483", &oxu->regs->frame_index) >> 3) %
 		oxu->periodic_size;
 }
 
@@ -3520,7 +3520,7 @@ static int oxu_hub_status_data(struct usb_hcd *hcd, char *buf)
 	/* port N changes (bit N)? */
 	spin_lock_irqsave(&oxu->lock, flags);
 	for (i = 0; i < ports; i++) {
-		temp = readl(&oxu->regs->port_status[i]);
+		temp = pete_readl("drivers/usb/host/oxu210hp-hcd.c:3523", &oxu->regs->port_status[i]);
 
 		/*
 		 * Return status information even for ports with OWNER set.
@@ -3595,7 +3595,7 @@ static int oxu_hub_control(struct usb_hcd *hcd, u16 typeReq,
 		if (!wIndex || wIndex > ports)
 			goto error;
 		wIndex--;
-		temp = readl(status_reg);
+		temp = pete_readl("drivers/usb/host/oxu210hp-hcd.c:3598", status_reg);
 
 		/*
 		 * Even if OWNER is set, so the port is owned by the
@@ -3606,10 +3606,10 @@ static int oxu_hub_control(struct usb_hcd *hcd, u16 typeReq,
 
 		switch (wValue) {
 		case USB_PORT_FEAT_ENABLE:
-			writel(temp & ~PORT_PE, status_reg);
+			pete_writel("drivers/usb/host/oxu210hp-hcd.c:3609", temp & ~PORT_PE, status_reg);
 			break;
 		case USB_PORT_FEAT_C_ENABLE:
-			writel((temp & ~PORT_RWC_BITS) | PORT_PEC, status_reg);
+			pete_writel("drivers/usb/host/oxu210hp-hcd.c:3612", (temp & ~PORT_RWC_BITS) | PORT_PEC, status_reg);
 			break;
 		case USB_PORT_FEAT_SUSPEND:
 			if (temp & PORT_RESET)
@@ -3619,7 +3619,7 @@ static int oxu_hub_control(struct usb_hcd *hcd, u16 typeReq,
 					goto error;
 				/* resume signaling for 20 msec */
 				temp &= ~(PORT_RWC_BITS | PORT_WAKE_BITS);
-				writel(temp | PORT_RESUME, status_reg);
+				pete_writel("drivers/usb/host/oxu210hp-hcd.c:3622", temp | PORT_RESUME, status_reg);
 				oxu->reset_done[wIndex] = jiffies
 						+ msecs_to_jiffies(20);
 			}
@@ -3629,14 +3629,14 @@ static int oxu_hub_control(struct usb_hcd *hcd, u16 typeReq,
 			break;
 		case USB_PORT_FEAT_POWER:
 			if (HCS_PPC(oxu->hcs_params))
-				writel(temp & ~(PORT_RWC_BITS | PORT_POWER),
+				pete_writel("drivers/usb/host/oxu210hp-hcd.c:3632", temp & ~(PORT_RWC_BITS | PORT_POWER),
 					  status_reg);
 			break;
 		case USB_PORT_FEAT_C_CONNECTION:
-			writel((temp & ~PORT_RWC_BITS) | PORT_CSC, status_reg);
+			pete_writel("drivers/usb/host/oxu210hp-hcd.c:3636", (temp & ~PORT_RWC_BITS) | PORT_CSC, status_reg);
 			break;
 		case USB_PORT_FEAT_C_OVER_CURRENT:
-			writel((temp & ~PORT_RWC_BITS) | PORT_OCC, status_reg);
+			pete_writel("drivers/usb/host/oxu210hp-hcd.c:3639", (temp & ~PORT_RWC_BITS) | PORT_OCC, status_reg);
 			break;
 		case USB_PORT_FEAT_C_RESET:
 			/* GetPortStatus clears reset */
@@ -3644,7 +3644,7 @@ static int oxu_hub_control(struct usb_hcd *hcd, u16 typeReq,
 		default:
 			goto error;
 		}
-		readl(&oxu->regs->command);	/* unblock posted write */
+		pete_readl("drivers/usb/host/oxu210hp-hcd.c:3647", &oxu->regs->command);	/* unblock posted write */
 		break;
 	case GetHubDescriptor:
 		ehci_hub_descriptor(oxu, (struct usb_hub_descriptor *)
@@ -3659,7 +3659,7 @@ static int oxu_hub_control(struct usb_hcd *hcd, u16 typeReq,
 			goto error;
 		wIndex--;
 		status = 0;
-		temp = readl(status_reg);
+		temp = pete_readl("drivers/usb/host/oxu210hp-hcd.c:3662", status_reg);
 
 		/* wPortChange bits */
 		if (temp & PORT_CSC)
@@ -3689,8 +3689,8 @@ static int oxu_hub_control(struct usb_hcd *hcd, u16 typeReq,
 				oxu->reset_done[wIndex] = 0;
 
 				/* stop resume signaling */
-				temp = readl(status_reg);
-				writel(temp & ~(PORT_RWC_BITS | PORT_RESUME),
+				temp = pete_readl("drivers/usb/host/oxu210hp-hcd.c:3692", status_reg);
+				pete_writel("drivers/usb/host/oxu210hp-hcd.c:3693", temp & ~(PORT_RWC_BITS | PORT_RESUME),
 					status_reg);
 				retval = handshake(oxu, status_reg,
 					   PORT_RESUME, 0, 2000 /* 2msec */);
@@ -3712,7 +3712,7 @@ static int oxu_hub_control(struct usb_hcd *hcd, u16 typeReq,
 			oxu->reset_done[wIndex] = 0;
 
 			/* force reset to complete */
-			writel(temp & ~(PORT_RWC_BITS | PORT_RESET),
+			pete_writel("drivers/usb/host/oxu210hp-hcd.c:3715", temp & ~(PORT_RWC_BITS | PORT_RESET),
 					status_reg);
 			/* REVISIT:  some hardware needs 550+ usec to clear
 			 * this bit; seems too long to spin routinely...
@@ -3727,7 +3727,7 @@ static int oxu_hub_control(struct usb_hcd *hcd, u16 typeReq,
 
 			/* see what we found out */
 			temp = check_reset_complete(oxu, wIndex, status_reg,
-					readl(status_reg));
+					pete_readl("drivers/usb/host/oxu210hp-hcd.c:3730", status_reg));
 		}
 
 		/* transfer dedicated ports to the companion hc */
@@ -3735,9 +3735,9 @@ static int oxu_hub_control(struct usb_hcd *hcd, u16 typeReq,
 				test_bit(wIndex, &oxu->companion_ports)) {
 			temp &= ~PORT_RWC_BITS;
 			temp |= PORT_OWNER;
-			writel(temp, status_reg);
+			pete_writel("drivers/usb/host/oxu210hp-hcd.c:3738", temp, status_reg);
 			oxu_dbg(oxu, "port %d --> companion\n", wIndex + 1);
-			temp = readl(status_reg);
+			temp = pete_readl("drivers/usb/host/oxu210hp-hcd.c:3740", status_reg);
 		}
 
 		/*
@@ -3784,7 +3784,7 @@ static int oxu_hub_control(struct usb_hcd *hcd, u16 typeReq,
 		if (!wIndex || wIndex > ports)
 			goto error;
 		wIndex--;
-		temp = readl(status_reg);
+		temp = pete_readl("drivers/usb/host/oxu210hp-hcd.c:3787", status_reg);
 		if (temp & PORT_OWNER)
 			break;
 
@@ -3796,11 +3796,11 @@ static int oxu_hub_control(struct usb_hcd *hcd, u16 typeReq,
 				goto error;
 			if (device_may_wakeup(&hcd->self.root_hub->dev))
 				temp |= PORT_WAKE_BITS;
-			writel(temp | PORT_SUSPEND, status_reg);
+			pete_writel("drivers/usb/host/oxu210hp-hcd.c:3799", temp | PORT_SUSPEND, status_reg);
 			break;
 		case USB_PORT_FEAT_POWER:
 			if (HCS_PPC(oxu->hcs_params))
-				writel(temp | PORT_POWER, status_reg);
+				pete_writel("drivers/usb/host/oxu210hp-hcd.c:3803", temp | PORT_POWER, status_reg);
 			break;
 		case USB_PORT_FEAT_RESET:
 			if (temp & PORT_RESUME)
@@ -3819,7 +3819,7 @@ static int oxu_hub_control(struct usb_hcd *hcd, u16 typeReq,
 			 */
 			oxu->reset_done[wIndex] = jiffies
 					+ msecs_to_jiffies(50);
-			writel(temp, status_reg);
+			pete_writel("drivers/usb/host/oxu210hp-hcd.c:3822", temp, status_reg);
 			break;
 
 		/* For downstream facing ports (these):  one hub port is put
@@ -3834,13 +3834,13 @@ static int oxu_hub_control(struct usb_hcd *hcd, u16 typeReq,
 			ehci_quiesce(oxu);
 			ehci_halt(oxu);
 			temp |= selector << 16;
-			writel(temp, status_reg);
+			pete_writel("drivers/usb/host/oxu210hp-hcd.c:3837", temp, status_reg);
 			break;
 
 		default:
 			goto error;
 		}
-		readl(&oxu->regs->command);	/* unblock posted writes */
+		pete_readl("drivers/usb/host/oxu210hp-hcd.c:3843", &oxu->regs->command);	/* unblock posted writes */
 		break;
 
 	default:
@@ -3873,7 +3873,7 @@ static int oxu_bus_suspend(struct usb_hcd *hcd)
 		ehci_quiesce(oxu);
 		hcd->state = HC_STATE_QUIESCING;
 	}
-	oxu->command = readl(&oxu->regs->command);
+	oxu->command = pete_readl("drivers/usb/host/oxu210hp-hcd.c:3876", &oxu->regs->command);
 	if (oxu->reclaim)
 		oxu->reclaim_ready = 1;
 	ehci_work(oxu);
@@ -3886,7 +3886,7 @@ static int oxu_bus_suspend(struct usb_hcd *hcd)
 	oxu->bus_suspended = 0;
 	while (port--) {
 		u32 __iomem *reg = &oxu->regs->port_status[port];
-		u32 t1 = readl(reg) & ~PORT_RWC_BITS;
+		u32 t1 = pete_readl("drivers/usb/host/oxu210hp-hcd.c:3889", reg) & ~PORT_RWC_BITS;
 		u32 t2 = t1;
 
 		/* keep track of which ports we suspend */
@@ -3905,7 +3905,7 @@ static int oxu_bus_suspend(struct usb_hcd *hcd)
 		if (t1 != t2) {
 			oxu_vdbg(oxu, "port %d, %08x -> %08x\n",
 				port + 1, t1, t2);
-			writel(t2, reg);
+			pete_writel("drivers/usb/host/oxu210hp-hcd.c:3908", t2, reg);
 		}
 	}
 
@@ -3920,8 +3920,8 @@ static int oxu_bus_suspend(struct usb_hcd *hcd)
 	mask = INTR_MASK;
 	if (!device_may_wakeup(&hcd->self.root_hub->dev))
 		mask &= ~STS_PCD;
-	writel(mask, &oxu->regs->intr_enable);
-	readl(&oxu->regs->intr_enable);
+	pete_writel("drivers/usb/host/oxu210hp-hcd.c:3923", mask, &oxu->regs->intr_enable);
+	pete_readl("drivers/usb/host/oxu210hp-hcd.c:3924", &oxu->regs->intr_enable);
 
 	oxu->next_statechange = jiffies + msecs_to_jiffies(10);
 	spin_unlock_irq(&oxu->lock);
@@ -3945,21 +3945,21 @@ static int oxu_bus_resume(struct usb_hcd *hcd)
 	 * the last user of the controller, not reset/pm hardware keeping
 	 * state we gave to it.
 	 */
-	temp = readl(&oxu->regs->intr_enable);
+	temp = pete_readl("drivers/usb/host/oxu210hp-hcd.c:3948", &oxu->regs->intr_enable);
 	oxu_dbg(oxu, "resume root hub%s\n", temp ? "" : " after power loss");
 
 	/* at least some APM implementations will try to deliver
 	 * IRQs right away, so delay them until we're ready.
 	 */
-	writel(0, &oxu->regs->intr_enable);
+	pete_writel("drivers/usb/host/oxu210hp-hcd.c:3954", 0, &oxu->regs->intr_enable);
 
 	/* re-init operational registers */
-	writel(0, &oxu->regs->segment);
-	writel(oxu->periodic_dma, &oxu->regs->frame_list);
-	writel((u32) oxu->async->qh_dma, &oxu->regs->async_next);
+	pete_writel("drivers/usb/host/oxu210hp-hcd.c:3957", 0, &oxu->regs->segment);
+	pete_writel("drivers/usb/host/oxu210hp-hcd.c:3958", oxu->periodic_dma, &oxu->regs->frame_list);
+	pete_writel("drivers/usb/host/oxu210hp-hcd.c:3959", (u32) oxu->async->qh_dma, &oxu->regs->async_next);
 
 	/* restore CMD_RUN, framelist size, and irq threshold */
-	writel(oxu->command, &oxu->regs->command);
+	pete_writel("drivers/usb/host/oxu210hp-hcd.c:3962", oxu->command, &oxu->regs->command);
 
 	/* Some controller/firmware combinations need a delay during which
 	 * they set up the port statuses.  See Bugzilla #8190. */
@@ -3968,26 +3968,26 @@ static int oxu_bus_resume(struct usb_hcd *hcd)
 	/* manually resume the ports we suspended during bus_suspend() */
 	i = HCS_N_PORTS(oxu->hcs_params);
 	while (i--) {
-		temp = readl(&oxu->regs->port_status[i]);
+		temp = pete_readl("drivers/usb/host/oxu210hp-hcd.c:3971", &oxu->regs->port_status[i]);
 		temp &= ~(PORT_RWC_BITS
 			| PORT_WKOC_E | PORT_WKDISC_E | PORT_WKCONN_E);
 		if (test_bit(i, &oxu->bus_suspended) && (temp & PORT_SUSPEND)) {
 			oxu->reset_done[i] = jiffies + msecs_to_jiffies(20);
 			temp |= PORT_RESUME;
 		}
-		writel(temp, &oxu->regs->port_status[i]);
+		pete_writel("drivers/usb/host/oxu210hp-hcd.c:3978", temp, &oxu->regs->port_status[i]);
 	}
 	i = HCS_N_PORTS(oxu->hcs_params);
 	mdelay(20);
 	while (i--) {
-		temp = readl(&oxu->regs->port_status[i]);
+		temp = pete_readl("drivers/usb/host/oxu210hp-hcd.c:3983", &oxu->regs->port_status[i]);
 		if (test_bit(i, &oxu->bus_suspended) && (temp & PORT_SUSPEND)) {
 			temp &= ~(PORT_RWC_BITS | PORT_RESUME);
-			writel(temp, &oxu->regs->port_status[i]);
+			pete_writel("drivers/usb/host/oxu210hp-hcd.c:3986", temp, &oxu->regs->port_status[i]);
 			oxu_vdbg(oxu, "resumed port %d\n", i + 1);
 		}
 	}
-	(void) readl(&oxu->regs->command);
+	(void) pete_readl("drivers/usb/host/oxu210hp-hcd.c:3990", &oxu->regs->command);
 
 	/* maybe re-activate the schedule(s) */
 	temp = 0;
@@ -3997,14 +3997,14 @@ static int oxu_bus_resume(struct usb_hcd *hcd)
 		temp |= CMD_PSE;
 	if (temp) {
 		oxu->command |= temp;
-		writel(oxu->command, &oxu->regs->command);
+		pete_writel("drivers/usb/host/oxu210hp-hcd.c:4000", oxu->command, &oxu->regs->command);
 	}
 
 	oxu->next_statechange = jiffies + msecs_to_jiffies(5);
 	hcd->state = HC_STATE_RUNNING;
 
 	/* Now we can safely re-enable irqs */
-	writel(INTR_MASK, &oxu->regs->intr_enable);
+	pete_writel("drivers/usb/host/oxu210hp-hcd.c:4007", INTR_MASK, &oxu->regs->intr_enable);
 
 	spin_unlock_irq(&oxu->lock);
 	return 0;

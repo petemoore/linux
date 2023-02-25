@@ -67,9 +67,9 @@ static void __init m54xx_i2c_init(void)
 	u32 r;
 
 	/* set the fec/i2c/irq pin assignment register for i2c */
-	r = readl(MCF_PAR_FECI2CIRQ);
+	r = pete_readl("arch/m68k/coldfire/m54xx.c:70", MCF_PAR_FECI2CIRQ);
 	r |= MCF_PAR_FECI2CIRQ_SDA | MCF_PAR_FECI2CIRQ_SCL;
-	writel(r, MCF_PAR_FECI2CIRQ);
+	pete_writel("arch/m68k/coldfire/m54xx.c:72", r, MCF_PAR_FECI2CIRQ);
 #endif /* IS_ENABLED(CONFIG_I2C_IMX) */
 }
 

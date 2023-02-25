@@ -50,13 +50,13 @@ MODULE_VERSION(DRV_MODULE_VERSION);
 #ifndef readq
 static u64 readq(void __iomem *reg)
 {
-	return ((u64) readl(reg)) | (((u64) readl(reg + 4UL)) << 32);
+	return ((u64) pete_readl("drivers/net/ethernet/sun/niu.c:53", reg)) | (((u64) pete_readl("drivers/net/ethernet/sun/niu.c:53", reg + 4UL)) << 32);
 }
 
 static void writeq(u64 val, void __iomem *reg)
 {
-	writel(val & 0xffffffff, reg);
-	writel(val >> 32, reg + 0x4UL);
+	pete_writel("drivers/net/ethernet/sun/niu.c:58", val & 0xffffffff, reg);
+	pete_writel("drivers/net/ethernet/sun/niu.c:59", val >> 32, reg + 0x4UL);
 }
 #endif
 

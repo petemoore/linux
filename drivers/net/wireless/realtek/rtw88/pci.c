@@ -64,7 +64,7 @@ static u32 rtw_pci_read32(struct rtw_dev *rtwdev, u32 addr)
 {
 	struct rtw_pci *rtwpci = (struct rtw_pci *)rtwdev->priv;
 
-	return readl(rtwpci->mmap + addr);
+	return pete_readl("drivers/net/wireless/realtek/rtw88/pci.c:67", rtwpci->mmap + addr);
 }
 
 static void rtw_pci_write8(struct rtw_dev *rtwdev, u32 addr, u8 val)
@@ -85,7 +85,7 @@ static void rtw_pci_write32(struct rtw_dev *rtwdev, u32 addr, u32 val)
 {
 	struct rtw_pci *rtwpci = (struct rtw_pci *)rtwdev->priv;
 
-	writel(val, rtwpci->mmap + addr);
+	pete_writel("drivers/net/wireless/realtek/rtw88/pci.c:88", val, rtwpci->mmap + addr);
 }
 
 static inline void *rtw_pci_get_tx_desc(struct rtw_pci_tx_ring *tx_ring, u8 idx)

@@ -97,7 +97,7 @@ void jz4780_nemc_set_type(struct device *dev, unsigned int bank,
 	struct jz4780_nemc *nemc = dev_get_drvdata(dev->parent);
 	uint32_t nfcsr;
 
-	nfcsr = readl(nemc->base + NEMC_NFCSR);
+	nfcsr = pete_readl("drivers/memory/jz4780-nemc.c:100", nemc->base + NEMC_NFCSR);
 
 	/* TODO: Support toggle NAND devices. */
 	switch (type) {
@@ -110,7 +110,7 @@ void jz4780_nemc_set_type(struct device *dev, unsigned int bank,
 		break;
 	}
 
-	writel(nfcsr, nemc->base + NEMC_NFCSR);
+	pete_writel("drivers/memory/jz4780-nemc.c:113", nfcsr, nemc->base + NEMC_NFCSR);
 }
 EXPORT_SYMBOL(jz4780_nemc_set_type);
 
@@ -128,14 +128,14 @@ void jz4780_nemc_assert(struct device *dev, unsigned int bank, bool assert)
 	struct jz4780_nemc *nemc = dev_get_drvdata(dev->parent);
 	uint32_t nfcsr;
 
-	nfcsr = readl(nemc->base + NEMC_NFCSR);
+	nfcsr = pete_readl("drivers/memory/jz4780-nemc.c:131", nemc->base + NEMC_NFCSR);
 
 	if (assert)
 		nfcsr |= NEMC_NFCSR_NFCEn(bank);
 	else
 		nfcsr &= ~NEMC_NFCSR_NFCEn(bank);
 
-	writel(nfcsr, nemc->base + NEMC_NFCSR);
+	pete_writel("drivers/memory/jz4780-nemc.c:138", nfcsr, nemc->base + NEMC_NFCSR);
 }
 EXPORT_SYMBOL(jz4780_nemc_assert);
 
@@ -185,7 +185,7 @@ static bool jz4780_nemc_configure_bank(struct jz4780_nemc *nemc,
 		15, 15, 15, 15, 15, 15
 	};
 
-	smcr = readl(nemc->base + NEMC_SMCRn(bank));
+	smcr = pete_readl("drivers/memory/jz4780-nemc.c:188", nemc->base + NEMC_SMCRn(bank));
 	smcr &= ~NEMC_SMCR_SMT;
 
 	if (!of_property_read_u32(node, "ingenic,nemc-bus-width", &val)) {
@@ -264,7 +264,7 @@ static bool jz4780_nemc_configure_bank(struct jz4780_nemc *nemc,
 		smcr |= cycles << NEMC_SMCR_TSTRV_SHIFT;
 	}
 
-	writel(smcr, nemc->base + NEMC_SMCRn(bank));
+	pete_writel("drivers/memory/jz4780-nemc.c:267", smcr, nemc->base + NEMC_SMCRn(bank));
 	return true;
 }
 
@@ -311,7 +311,7 @@ static int jz4780_nemc_probe(struct platform_device *pdev)
 		return -ENOMEM;
 	}
 
-	writel(0, nemc->base + NEMC_NFCSR);
+	pete_writel("drivers/memory/jz4780-nemc.c:314", 0, nemc->base + NEMC_NFCSR);
 
 	nemc->clk = devm_clk_get(dev, NULL);
 	if (IS_ERR(nemc->clk)) {

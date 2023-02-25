@@ -80,7 +80,7 @@ BFA_TRC_FILE(CNA, IOC);
 
 #define bfa_ioc_mbox_cmd_pending(__ioc)		\
 			(!list_empty(&((__ioc)->mbox_mod.cmd_q)) || \
-			readl((__ioc)->ioc_regs.hfn_mbox_cmd))
+			pete_readl("drivers/scsi/bfa/bfa_ioc.c:83", (__ioc)->ioc_regs.hfn_mbox_cmd))
 
 bfa_boolean_t bfa_auto_recover = BFA_TRUE;
 
@@ -707,23 +707,23 @@ bfa_iocpf_sm_fwcheck_entry(struct bfa_iocpf_s *iocpf)
 	/*
 	 * Spin on init semaphore to serialize.
 	 */
-	r32 = readl(iocpf->ioc->ioc_regs.ioc_init_sem_reg);
+	r32 = pete_readl("drivers/scsi/bfa/bfa_ioc.c:710", iocpf->ioc->ioc_regs.ioc_init_sem_reg);
 	while (r32 & 0x1) {
 		udelay(20);
-		r32 = readl(iocpf->ioc->ioc_regs.ioc_init_sem_reg);
+		r32 = pete_readl("drivers/scsi/bfa/bfa_ioc.c:713", iocpf->ioc->ioc_regs.ioc_init_sem_reg);
 	}
 
 	/* h/w sem init */
 	fwstate = bfa_ioc_get_cur_ioc_fwstate(iocpf->ioc);
 	if (fwstate == BFI_IOC_UNINIT) {
-		writel(1, iocpf->ioc->ioc_regs.ioc_init_sem_reg);
+		pete_writel("drivers/scsi/bfa/bfa_ioc.c:719", 1, iocpf->ioc->ioc_regs.ioc_init_sem_reg);
 		goto sem_get;
 	}
 
 	bfa_ioc_fwver_get(iocpf->ioc, &fwhdr);
 
 	if (swab32(fwhdr.exec) == BFI_FWBOOT_TYPE_NORMAL) {
-		writel(1, iocpf->ioc->ioc_regs.ioc_init_sem_reg);
+		pete_writel("drivers/scsi/bfa/bfa_ioc.c:726", 1, iocpf->ioc->ioc_regs.ioc_init_sem_reg);
 		goto sem_get;
 	}
 
@@ -731,7 +731,7 @@ bfa_iocpf_sm_fwcheck_entry(struct bfa_iocpf_s *iocpf)
 	 * Clear fwver hdr
 	 */
 	pgnum = PSS_SMEM_PGNUM(iocpf->ioc->ioc_regs.smem_pg0, loff);
-	writel(pgnum, iocpf->ioc->ioc_regs.host_page_num_fn);
+	pete_writel("drivers/scsi/bfa/bfa_ioc.c:734", pgnum, iocpf->ioc->ioc_regs.host_page_num_fn);
 
 	for (i = 0; i < sizeof(struct bfi_ioc_image_hdr_s) / sizeof(u32); i++) {
 		bfa_mem_write(iocpf->ioc->ioc_regs.smem_page_start, loff, 0);
@@ -751,7 +751,7 @@ bfa_iocpf_sm_fwcheck_entry(struct bfa_iocpf_s *iocpf)
 	/*
 	 * unlock init semaphore.
 	 */
-	writel(1, iocpf->ioc->ioc_regs.ioc_init_sem_reg);
+	pete_writel("drivers/scsi/bfa/bfa_ioc.c:754", 1, iocpf->ioc->ioc_regs.ioc_init_sem_reg);
 
 sem_get:
 	bfa_ioc_hw_sem_get(iocpf->ioc);
@@ -775,11 +775,11 @@ bfa_iocpf_sm_fwcheck(struct bfa_iocpf_s *iocpf, enum iocpf_event event)
 				bfa_fsm_set_state(iocpf, bfa_iocpf_sm_hwinit);
 			} else {
 				bfa_ioc_firmware_unlock(ioc);
-				writel(1, ioc->ioc_regs.ioc_sem_reg);
+				pete_writel("drivers/scsi/bfa/bfa_ioc.c:778", 1, ioc->ioc_regs.ioc_sem_reg);
 				bfa_sem_timer_start(ioc);
 			}
 		} else {
-			writel(1, ioc->ioc_regs.ioc_sem_reg);
+			pete_writel("drivers/scsi/bfa/bfa_ioc.c:782", 1, ioc->ioc_regs.ioc_sem_reg);
 			bfa_fsm_set_state(iocpf, bfa_iocpf_sm_mismatch);
 		}
 		break;
@@ -877,7 +877,7 @@ bfa_iocpf_sm_semwait(struct bfa_iocpf_s *iocpf, enum iocpf_event event)
 			bfa_ioc_sync_join(ioc);
 			bfa_fsm_set_state(iocpf, bfa_iocpf_sm_hwinit);
 		} else {
-			writel(1, ioc->ioc_regs.ioc_sem_reg);
+			pete_writel("drivers/scsi/bfa/bfa_ioc.c:880", 1, ioc->ioc_regs.ioc_sem_reg);
 			bfa_sem_timer_start(ioc);
 		}
 		break;
@@ -921,7 +921,7 @@ bfa_iocpf_sm_hwinit(struct bfa_iocpf_s *iocpf, enum iocpf_event event)
 		break;
 
 	case IOCPF_E_TIMEOUT:
-		writel(1, ioc->ioc_regs.ioc_sem_reg);
+		pete_writel("drivers/scsi/bfa/bfa_ioc.c:924", 1, ioc->ioc_regs.ioc_sem_reg);
 		bfa_fsm_send_event(ioc, IOC_E_PFFAILED);
 		bfa_fsm_set_state(iocpf, bfa_iocpf_sm_initfail_sync);
 		break;
@@ -929,7 +929,7 @@ bfa_iocpf_sm_hwinit(struct bfa_iocpf_s *iocpf, enum iocpf_event event)
 	case IOCPF_E_DISABLE:
 		bfa_iocpf_timer_stop(ioc);
 		bfa_ioc_sync_leave(ioc);
-		writel(1, ioc->ioc_regs.ioc_sem_reg);
+		pete_writel("drivers/scsi/bfa/bfa_ioc.c:932", 1, ioc->ioc_regs.ioc_sem_reg);
 		bfa_fsm_set_state(iocpf, bfa_iocpf_sm_disabled);
 		break;
 
@@ -963,7 +963,7 @@ bfa_iocpf_sm_enabling(struct bfa_iocpf_s *iocpf, enum iocpf_event event)
 	switch (event) {
 	case IOCPF_E_FWRSP_ENABLE:
 		bfa_iocpf_timer_stop(ioc);
-		writel(1, ioc->ioc_regs.ioc_sem_reg);
+		pete_writel("drivers/scsi/bfa/bfa_ioc.c:966", 1, ioc->ioc_regs.ioc_sem_reg);
 		bfa_fsm_set_state(iocpf, bfa_iocpf_sm_ready);
 		break;
 
@@ -972,7 +972,7 @@ bfa_iocpf_sm_enabling(struct bfa_iocpf_s *iocpf, enum iocpf_event event)
 		fallthrough;
 
 	case IOCPF_E_TIMEOUT:
-		writel(1, ioc->ioc_regs.ioc_sem_reg);
+		pete_writel("drivers/scsi/bfa/bfa_ioc.c:975", 1, ioc->ioc_regs.ioc_sem_reg);
 		if (event == IOCPF_E_TIMEOUT)
 			bfa_fsm_send_event(ioc, IOC_E_PFFAILED);
 		bfa_fsm_set_state(iocpf, bfa_iocpf_sm_initfail_sync);
@@ -980,7 +980,7 @@ bfa_iocpf_sm_enabling(struct bfa_iocpf_s *iocpf, enum iocpf_event event)
 
 	case IOCPF_E_DISABLE:
 		bfa_iocpf_timer_stop(ioc);
-		writel(1, ioc->ioc_regs.ioc_sem_reg);
+		pete_writel("drivers/scsi/bfa/bfa_ioc.c:983", 1, ioc->ioc_regs.ioc_sem_reg);
 		bfa_fsm_set_state(iocpf, bfa_iocpf_sm_disabling);
 		break;
 
@@ -1079,7 +1079,7 @@ bfa_iocpf_sm_disabling_sync(struct bfa_iocpf_s *iocpf, enum iocpf_event event)
 	switch (event) {
 	case IOCPF_E_SEMLOCKED:
 		bfa_ioc_sync_leave(ioc);
-		writel(1, ioc->ioc_regs.ioc_sem_reg);
+		pete_writel("drivers/scsi/bfa/bfa_ioc.c:1082", 1, ioc->ioc_regs.ioc_sem_reg);
 		bfa_fsm_set_state(iocpf, bfa_iocpf_sm_disabled);
 		break;
 
@@ -1150,7 +1150,7 @@ bfa_iocpf_sm_initfail_sync(struct bfa_iocpf_s *iocpf, enum iocpf_event event)
 		bfa_ioc_notify_fail(ioc);
 		bfa_ioc_sync_leave(ioc);
 		bfa_ioc_set_cur_ioc_fwstate(ioc, BFI_IOC_FAIL);
-		writel(1, ioc->ioc_regs.ioc_sem_reg);
+		pete_writel("drivers/scsi/bfa/bfa_ioc.c:1153", 1, ioc->ioc_regs.ioc_sem_reg);
 		bfa_fsm_set_state(iocpf, bfa_iocpf_sm_initfail);
 		break;
 
@@ -1239,13 +1239,13 @@ bfa_iocpf_sm_fail_sync(struct bfa_iocpf_s *iocpf, enum iocpf_event event)
 		if (!iocpf->auto_recover) {
 			bfa_ioc_sync_leave(ioc);
 			bfa_ioc_set_cur_ioc_fwstate(ioc, BFI_IOC_FAIL);
-			writel(1, ioc->ioc_regs.ioc_sem_reg);
+			pete_writel("drivers/scsi/bfa/bfa_ioc.c:1242", 1, ioc->ioc_regs.ioc_sem_reg);
 			bfa_fsm_set_state(iocpf, bfa_iocpf_sm_fail);
 		} else {
 			if (bfa_ioc_sync_complete(ioc))
 				bfa_fsm_set_state(iocpf, bfa_iocpf_sm_hwinit);
 			else {
-				writel(1, ioc->ioc_regs.ioc_sem_reg);
+				pete_writel("drivers/scsi/bfa/bfa_ioc.c:1248", 1, ioc->ioc_regs.ioc_sem_reg);
 				bfa_fsm_set_state(iocpf, bfa_iocpf_sm_semwait);
 			}
 		}
@@ -1328,12 +1328,12 @@ bfa_ioc_sem_get(void __iomem *sem_reg)
 	int cnt = 0;
 #define BFA_SEM_SPINCNT	3000
 
-	r32 = readl(sem_reg);
+	r32 = pete_readl("drivers/scsi/bfa/bfa_ioc.c:1331", sem_reg);
 
 	while ((r32 & 1) && (cnt < BFA_SEM_SPINCNT)) {
 		cnt++;
 		udelay(2);
-		r32 = readl(sem_reg);
+		r32 = pete_readl("drivers/scsi/bfa/bfa_ioc.c:1336", sem_reg);
 	}
 
 	if (!(r32 & 1))
@@ -1351,7 +1351,7 @@ bfa_ioc_hw_sem_get(struct bfa_ioc_s *ioc)
 	 * First read to the semaphore register will return 0, subsequent reads
 	 * will return 1. Semaphore is released by writing 1 to the register
 	 */
-	r32 = readl(ioc->ioc_regs.ioc_sem_reg);
+	r32 = pete_readl("drivers/scsi/bfa/bfa_ioc.c:1354", ioc->ioc_regs.ioc_sem_reg);
 	if (r32 == ~0) {
 		WARN_ON(r32 == ~0);
 		bfa_fsm_send_event(&ioc->iocpf, IOCPF_E_SEM_ERROR);
@@ -1375,7 +1375,7 @@ bfa_ioc_lmem_init(struct bfa_ioc_s *ioc)
 	int		i;
 #define PSS_LMEM_INIT_TIME  10000
 
-	pss_ctl = readl(ioc->ioc_regs.pss_ctl_reg);
+	pss_ctl = pete_readl("drivers/scsi/bfa/bfa_ioc.c:1378", ioc->ioc_regs.pss_ctl_reg);
 	pss_ctl &= ~__PSS_LMEM_RESET;
 	pss_ctl |= __PSS_LMEM_INIT_EN;
 
@@ -1383,14 +1383,14 @@ bfa_ioc_lmem_init(struct bfa_ioc_s *ioc)
 	 * i2c workaround 12.5khz clock
 	 */
 	pss_ctl |= __PSS_I2C_CLK_DIV(3UL);
-	writel(pss_ctl, ioc->ioc_regs.pss_ctl_reg);
+	pete_writel("drivers/scsi/bfa/bfa_ioc.c:1386", pss_ctl, ioc->ioc_regs.pss_ctl_reg);
 
 	/*
 	 * wait for memory initialization to be complete
 	 */
 	i = 0;
 	do {
-		pss_ctl = readl(ioc->ioc_regs.pss_ctl_reg);
+		pss_ctl = pete_readl("drivers/scsi/bfa/bfa_ioc.c:1393", ioc->ioc_regs.pss_ctl_reg);
 		i++;
 	} while (!(pss_ctl & __PSS_LMEM_INIT_DONE) && (i < PSS_LMEM_INIT_TIME));
 
@@ -1402,7 +1402,7 @@ bfa_ioc_lmem_init(struct bfa_ioc_s *ioc)
 	bfa_trc(ioc, pss_ctl);
 
 	pss_ctl &= ~(__PSS_LMEM_INIT_DONE | __PSS_LMEM_INIT_EN);
-	writel(pss_ctl, ioc->ioc_regs.pss_ctl_reg);
+	pete_writel("drivers/scsi/bfa/bfa_ioc.c:1405", pss_ctl, ioc->ioc_regs.pss_ctl_reg);
 }
 
 static void
@@ -1413,10 +1413,10 @@ bfa_ioc_lpu_start(struct bfa_ioc_s *ioc)
 	/*
 	 * Take processor out of reset.
 	 */
-	pss_ctl = readl(ioc->ioc_regs.pss_ctl_reg);
+	pss_ctl = pete_readl("drivers/scsi/bfa/bfa_ioc.c:1416", ioc->ioc_regs.pss_ctl_reg);
 	pss_ctl &= ~__PSS_LPU0_RESET;
 
-	writel(pss_ctl, ioc->ioc_regs.pss_ctl_reg);
+	pete_writel("drivers/scsi/bfa/bfa_ioc.c:1419", pss_ctl, ioc->ioc_regs.pss_ctl_reg);
 }
 
 static void
@@ -1427,10 +1427,10 @@ bfa_ioc_lpu_stop(struct bfa_ioc_s *ioc)
 	/*
 	 * Put processors in reset.
 	 */
-	pss_ctl = readl(ioc->ioc_regs.pss_ctl_reg);
+	pss_ctl = pete_readl("drivers/scsi/bfa/bfa_ioc.c:1430", ioc->ioc_regs.pss_ctl_reg);
 	pss_ctl |= (__PSS_LPU0_RESET | __PSS_LPU1_RESET);
 
-	writel(pss_ctl, ioc->ioc_regs.pss_ctl_reg);
+	pete_writel("drivers/scsi/bfa/bfa_ioc.c:1433", pss_ctl, ioc->ioc_regs.pss_ctl_reg);
 }
 
 /*
@@ -1445,7 +1445,7 @@ bfa_ioc_fwver_get(struct bfa_ioc_s *ioc, struct bfi_ioc_image_hdr_s *fwhdr)
 	u32	*fwsig = (u32 *) fwhdr;
 
 	pgnum = PSS_SMEM_PGNUM(ioc->ioc_regs.smem_pg0, loff);
-	writel(pgnum, ioc->ioc_regs.host_page_num_fn);
+	pete_writel("drivers/scsi/bfa/bfa_ioc.c:1448", pgnum, ioc->ioc_regs.host_page_num_fn);
 
 	for (i = 0; i < (sizeof(struct bfi_ioc_image_hdr_s) / sizeof(u32));
 	     i++) {
@@ -1669,7 +1669,7 @@ bfa_ioc_fwsig_invalidate(struct bfa_ioc_s *ioc)
 		return BFA_STATUS_ADAPTER_ENABLED;
 
 	pgnum = PSS_SMEM_PGNUM(ioc->ioc_regs.smem_pg0, loff);
-	writel(pgnum, ioc->ioc_regs.host_page_num_fn);
+	pete_writel("drivers/scsi/bfa/bfa_ioc.c:1672", pgnum, ioc->ioc_regs.host_page_num_fn);
 	bfa_mem_write(ioc->ioc_regs.smem_page_start, loff, BFA_IOC_FW_INV_SIGN);
 
 	return BFA_STATUS_OK;
@@ -1683,9 +1683,9 @@ bfa_ioc_msgflush(struct bfa_ioc_s *ioc)
 {
 	u32	r32;
 
-	r32 = readl(ioc->ioc_regs.lpu_mbox_cmd);
+	r32 = pete_readl("drivers/scsi/bfa/bfa_ioc.c:1686", ioc->ioc_regs.lpu_mbox_cmd);
 	if (r32)
-		writel(1, ioc->ioc_regs.lpu_mbox_cmd);
+		pete_writel("drivers/scsi/bfa/bfa_ioc.c:1688", 1, ioc->ioc_regs.lpu_mbox_cmd);
 }
 
 static void
@@ -1777,17 +1777,17 @@ bfa_ioc_mbox_send(struct bfa_ioc_s *ioc, void *ioc_msg, int len)
 	 * first write msg to mailbox registers
 	 */
 	for (i = 0; i < len / sizeof(u32); i++)
-		writel(cpu_to_le32(msgp[i]),
+		pete_writel("drivers/scsi/bfa/bfa_ioc.c:1780", cpu_to_le32(msgp[i]),
 			ioc->ioc_regs.hfn_mbox + i * sizeof(u32));
 
 	for (; i < BFI_IOC_MSGLEN_MAX / sizeof(u32); i++)
-		writel(0, ioc->ioc_regs.hfn_mbox + i * sizeof(u32));
+		pete_writel("drivers/scsi/bfa/bfa_ioc.c:1784", 0, ioc->ioc_regs.hfn_mbox + i * sizeof(u32));
 
 	/*
 	 * write 1 to mailbox CMD to trigger LPU event
 	 */
-	writel(1, ioc->ioc_regs.hfn_mbox_cmd);
-	(void) readl(ioc->ioc_regs.hfn_mbox_cmd);
+	pete_writel("drivers/scsi/bfa/bfa_ioc.c:1789", 1, ioc->ioc_regs.hfn_mbox_cmd);
+	(void) pete_readl("drivers/scsi/bfa/bfa_ioc.c:1790", ioc->ioc_regs.hfn_mbox_cmd);
 }
 
 static void
@@ -1833,7 +1833,7 @@ bfa_ioc_hb_check(void *cbarg)
 	struct bfa_ioc_s  *ioc = cbarg;
 	u32	hb_count;
 
-	hb_count = readl(ioc->ioc_regs.heartbeat);
+	hb_count = pete_readl("drivers/scsi/bfa/bfa_ioc.c:1836", ioc->ioc_regs.heartbeat);
 	if (ioc->hb_count == hb_count) {
 		bfa_ioc_recover(ioc);
 		return;
@@ -1848,7 +1848,7 @@ bfa_ioc_hb_check(void *cbarg)
 static void
 bfa_ioc_hb_monitor(struct bfa_ioc_s *ioc)
 {
-	ioc->hb_count = readl(ioc->ioc_regs.heartbeat);
+	ioc->hb_count = pete_readl("drivers/scsi/bfa/bfa_ioc.c:1851", ioc->ioc_regs.heartbeat);
 	bfa_hb_timer_start(ioc);
 }
 
@@ -1889,7 +1889,7 @@ bfa_ioc_download_fw(struct bfa_ioc_s *ioc, u32 boot_type,
 
 
 	pgnum = PSS_SMEM_PGNUM(ioc->ioc_regs.smem_pg0, loff);
-	writel(pgnum, ioc->ioc_regs.host_page_num_fn);
+	pete_writel("drivers/scsi/bfa/bfa_ioc.c:1892", pgnum, ioc->ioc_regs.host_page_num_fn);
 
 	for (i = 0; i < fwimg_size; i++) {
 
@@ -1926,11 +1926,11 @@ bfa_ioc_download_fw(struct bfa_ioc_s *ioc, u32 boot_type,
 		loff = PSS_SMEM_PGOFF(loff);
 		if (loff == 0) {
 			pgnum++;
-			writel(pgnum, ioc->ioc_regs.host_page_num_fn);
+			pete_writel("drivers/scsi/bfa/bfa_ioc.c:1929", pgnum, ioc->ioc_regs.host_page_num_fn);
 		}
 	}
 
-	writel(PSS_SMEM_PGNUM(ioc->ioc_regs.smem_pg0, 0),
+	pete_writel("drivers/scsi/bfa/bfa_ioc.c:1933", PSS_SMEM_PGNUM(ioc->ioc_regs.smem_pg0, 0),
 			ioc->ioc_regs.host_page_num_fn);
 
 	/*
@@ -2004,7 +2004,7 @@ bfa_ioc_mbox_poll(struct bfa_ioc_s *ioc)
 	/*
 	 * If previous command is not yet fetched by firmware, do nothing
 	 */
-	stat = readl(ioc->ioc_regs.hfn_mbox_cmd);
+	stat = pete_readl("drivers/scsi/bfa/bfa_ioc.c:2007", ioc->ioc_regs.hfn_mbox_cmd);
 	if (stat)
 		return;
 
@@ -2058,7 +2058,7 @@ bfa_ioc_smem_read(struct bfa_ioc_s *ioc, void *tbuf, u32 soff, u32 sz)
 		return BFA_STATUS_FAILED;
 	}
 
-	writel(pgnum, ioc->ioc_regs.host_page_num_fn);
+	pete_writel("drivers/scsi/bfa/bfa_ioc.c:2061", pgnum, ioc->ioc_regs.host_page_num_fn);
 
 	len = sz/sizeof(u32);
 	bfa_trc(ioc, len);
@@ -2073,16 +2073,16 @@ bfa_ioc_smem_read(struct bfa_ioc_s *ioc, void *tbuf, u32 soff, u32 sz)
 		loff = PSS_SMEM_PGOFF(loff);
 		if (loff == 0) {
 			pgnum++;
-			writel(pgnum, ioc->ioc_regs.host_page_num_fn);
+			pete_writel("drivers/scsi/bfa/bfa_ioc.c:2076", pgnum, ioc->ioc_regs.host_page_num_fn);
 		}
 	}
-	writel(PSS_SMEM_PGNUM(ioc->ioc_regs.smem_pg0, 0),
+	pete_writel("drivers/scsi/bfa/bfa_ioc.c:2079", PSS_SMEM_PGNUM(ioc->ioc_regs.smem_pg0, 0),
 			ioc->ioc_regs.host_page_num_fn);
 	/*
 	 *  release semaphore.
 	 */
-	readl(ioc->ioc_regs.ioc_init_sem_reg);
-	writel(1, ioc->ioc_regs.ioc_init_sem_reg);
+	pete_readl("drivers/scsi/bfa/bfa_ioc.c:2084", ioc->ioc_regs.ioc_init_sem_reg);
+	pete_writel("drivers/scsi/bfa/bfa_ioc.c:2085", 1, ioc->ioc_regs.ioc_init_sem_reg);
 
 	bfa_trc(ioc, pgnum);
 	return BFA_STATUS_OK;
@@ -2115,7 +2115,7 @@ bfa_ioc_smem_clr(struct bfa_ioc_s *ioc, u32 soff, u32 sz)
 		return BFA_STATUS_FAILED;
 	}
 
-	writel(pgnum, ioc->ioc_regs.host_page_num_fn);
+	pete_writel("drivers/scsi/bfa/bfa_ioc.c:2118", pgnum, ioc->ioc_regs.host_page_num_fn);
 
 	len = sz/sizeof(u32); /* len in words */
 	bfa_trc(ioc, len);
@@ -2129,17 +2129,17 @@ bfa_ioc_smem_clr(struct bfa_ioc_s *ioc, u32 soff, u32 sz)
 		loff = PSS_SMEM_PGOFF(loff);
 		if (loff == 0) {
 			pgnum++;
-			writel(pgnum, ioc->ioc_regs.host_page_num_fn);
+			pete_writel("drivers/scsi/bfa/bfa_ioc.c:2132", pgnum, ioc->ioc_regs.host_page_num_fn);
 		}
 	}
-	writel(PSS_SMEM_PGNUM(ioc->ioc_regs.smem_pg0, 0),
+	pete_writel("drivers/scsi/bfa/bfa_ioc.c:2135", PSS_SMEM_PGNUM(ioc->ioc_regs.smem_pg0, 0),
 			ioc->ioc_regs.host_page_num_fn);
 
 	/*
 	 *  release semaphore.
 	 */
-	readl(ioc->ioc_regs.ioc_init_sem_reg);
-	writel(1, ioc->ioc_regs.ioc_init_sem_reg);
+	pete_readl("drivers/scsi/bfa/bfa_ioc.c:2141", ioc->ioc_regs.ioc_init_sem_reg);
+	pete_writel("drivers/scsi/bfa/bfa_ioc.c:2142", 1, ioc->ioc_regs.ioc_init_sem_reg);
 	bfa_trc(ioc, pgnum);
 	return BFA_STATUS_OK;
 }
@@ -2198,8 +2198,8 @@ bfa_ioc_pll_init(struct bfa_ioc_s *ioc)
 	/*
 	 *  release semaphore.
 	 */
-	readl(ioc->ioc_regs.ioc_init_sem_reg);
-	writel(1, ioc->ioc_regs.ioc_init_sem_reg);
+	pete_readl("drivers/scsi/bfa/bfa_ioc.c:2201", ioc->ioc_regs.ioc_init_sem_reg);
+	pete_writel("drivers/scsi/bfa/bfa_ioc.c:2202", 1, ioc->ioc_regs.ioc_init_sem_reg);
 
 	return BFA_STATUS_OK;
 }
@@ -2289,7 +2289,7 @@ bfa_ioc_msgget(struct bfa_ioc_s *ioc, void *mbmsg)
 	u32	r32;
 	int		i;
 
-	r32 = readl(ioc->ioc_regs.lpu_mbox_cmd);
+	r32 = pete_readl("drivers/scsi/bfa/bfa_ioc.c:2292", ioc->ioc_regs.lpu_mbox_cmd);
 	if ((r32 & 1) == 0)
 		return BFA_FALSE;
 
@@ -2298,7 +2298,7 @@ bfa_ioc_msgget(struct bfa_ioc_s *ioc, void *mbmsg)
 	 */
 	for (i = 0; i < (sizeof(union bfi_ioc_i2h_msg_u) / sizeof(u32));
 	     i++) {
-		r32 = readl(ioc->ioc_regs.lpu_mbox +
+		r32 = pete_readl("drivers/scsi/bfa/bfa_ioc.c:2301", ioc->ioc_regs.lpu_mbox +
 				   i * sizeof(u32));
 		msgp[i] = cpu_to_be32(r32);
 	}
@@ -2306,8 +2306,8 @@ bfa_ioc_msgget(struct bfa_ioc_s *ioc, void *mbmsg)
 	/*
 	 * turn off mailbox interrupt by clearing mailbox status
 	 */
-	writel(1, ioc->ioc_regs.lpu_mbox_cmd);
-	readl(ioc->ioc_regs.lpu_mbox_cmd);
+	pete_writel("drivers/scsi/bfa/bfa_ioc.c:2309", 1, ioc->ioc_regs.lpu_mbox_cmd);
+	pete_readl("drivers/scsi/bfa/bfa_ioc.c:2310", ioc->ioc_regs.lpu_mbox_cmd);
 
 	return BFA_TRUE;
 }
@@ -2573,7 +2573,7 @@ bfa_ioc_mbox_queue(struct bfa_ioc_s *ioc, struct bfa_mbox_cmd_s *cmd)
 	/*
 	 * If mailbox is busy, queue command for poll timer
 	 */
-	stat = readl(ioc->ioc_regs.hfn_mbox_cmd);
+	stat = pete_readl("drivers/scsi/bfa/bfa_ioc.c:2576", ioc->ioc_regs.hfn_mbox_cmd);
 	if (stat) {
 		list_add_tail(&cmd->qe, &mod->cmd_q);
 		return;
@@ -4762,7 +4762,7 @@ bfa_diag_memtest_done(void *cbarg)
 	u32	pgnum, i;
 
 	pgnum = PSS_SMEM_PGNUM(ioc->ioc_regs.smem_pg0, loff);
-	writel(pgnum, ioc->ioc_regs.host_page_num_fn);
+	pete_writel("drivers/scsi/bfa/bfa_ioc.c:4765", pgnum, ioc->ioc_regs.host_page_num_fn);
 
 	for (i = 0; i < (sizeof(struct bfa_diag_memtest_result) /
 			 sizeof(u32)); i++) {
@@ -5505,7 +5505,7 @@ bfa_phy_busy(struct bfa_ioc_s *ioc)
 	void __iomem	*rb;
 
 	rb = bfa_ioc_bar0(ioc);
-	return readl(rb + BFA_PHY_LOCK_STATUS);
+	return pete_readl("drivers/scsi/bfa/bfa_ioc.c:5508", rb + BFA_PHY_LOCK_STATUS);
 }
 
 /*
@@ -6740,7 +6740,7 @@ bfa_flash_set_cmd(void __iomem *pci_bar, u8 wr_cnt,
 	cmd.r.read_cnt = rd_cnt;
 	cmd.r.addr_cnt = ad_cnt;
 	cmd.r.cmd = op;
-	writel(cmd.i, (pci_bar + FLI_CMD_REG));
+	pete_writel("drivers/scsi/bfa/bfa_ioc.c:6743", cmd.i, (pci_bar + FLI_CMD_REG));
 }
 
 static void
@@ -6750,7 +6750,7 @@ bfa_flash_set_addr(void __iomem *pci_bar, u32 address)
 
 	addr.r.addr = address & 0x00ffffff;
 	addr.r.dummy = 0;
-	writel(addr.i, (pci_bar + FLI_ADDR_REG));
+	pete_writel("drivers/scsi/bfa/bfa_ioc.c:6753", addr.i, (pci_bar + FLI_ADDR_REG));
 }
 
 static int
@@ -6758,7 +6758,7 @@ bfa_flash_cmd_act_check(void __iomem *pci_bar)
 {
 	union bfa_flash_cmd_reg_u cmd;
 
-	cmd.i = readl(pci_bar + FLI_CMD_REG);
+	cmd.i = pete_readl("drivers/scsi/bfa/bfa_ioc.c:6761", pci_bar + FLI_CMD_REG);
 
 	if (cmd.r.act)
 		return BFA_FLASH_ERR_CMD_ACT;
@@ -6781,20 +6781,20 @@ bfa_flash_fifo_flush(void __iomem *pci_bar)
 	u32 i;
 	union bfa_flash_dev_status_reg_u dev_status;
 
-	dev_status.i = readl(pci_bar + FLI_DEV_STATUS_REG);
+	dev_status.i = pete_readl("drivers/scsi/bfa/bfa_ioc.c:6784", pci_bar + FLI_DEV_STATUS_REG);
 
 	if (!dev_status.r.fifo_cnt)
 		return 0;
 
 	/* fifo counter in terms of words */
 	for (i = 0; i < dev_status.r.fifo_cnt; i++)
-		readl(pci_bar + FLI_RDDATA_REG);
+		pete_readl("drivers/scsi/bfa/bfa_ioc.c:6791", pci_bar + FLI_RDDATA_REG);
 
 	/*
 	 * Check the device status. It may take some time.
 	 */
 	for (i = 0; i < BFA_FLASH_CHECK_MAX; i++) {
-		dev_status.i = readl(pci_bar + FLI_DEV_STATUS_REG);
+		dev_status.i = pete_readl("drivers/scsi/bfa/bfa_ioc.c:6797", pci_bar + FLI_DEV_STATUS_REG);
 		if (!dev_status.r.fifo_cnt)
 			break;
 	}
@@ -6836,11 +6836,11 @@ bfa_flash_status_read(void __iomem *pci_bar)
 	if (status)
 		return status;
 
-	dev_status.i = readl(pci_bar + FLI_DEV_STATUS_REG);
+	dev_status.i = pete_readl("drivers/scsi/bfa/bfa_ioc.c:6839", pci_bar + FLI_DEV_STATUS_REG);
 	if (!dev_status.r.fifo_cnt)
 		return BFA_FLASH_BUSY;
 
-	ret_status = readl(pci_bar + FLI_RDDATA_REG);
+	ret_status = pete_readl("drivers/scsi/bfa/bfa_ioc.c:6843", pci_bar + FLI_RDDATA_REG);
 	ret_status >>= 24;
 
 	status = bfa_flash_fifo_flush(pci_bar);
@@ -6932,7 +6932,7 @@ bfa_flash_read_end(void __iomem *pci_bar, u32 len, char *buf)
 	 * read data fifo up to 32 words
 	 */
 	for (i = 0; i < len; i += 4) {
-		u32 w = readl(pci_bar + FLI_RDDATA_REG);
+		u32 w = pete_readl("drivers/scsi/bfa/bfa_ioc.c:6935", pci_bar + FLI_RDDATA_REG);
 		*((u32 *) (buf + i)) = swab32(w);
 	}
 
@@ -6960,7 +6960,7 @@ bfa_raw_sem_get(void __iomem *bar)
 {
 	int	locked;
 
-	locked = readl((bar + FLASH_SEM_LOCK_REG));
+	locked = pete_readl("drivers/scsi/bfa/bfa_ioc.c:6963", (bar + FLASH_SEM_LOCK_REG));
 	return !locked;
 
 }
@@ -6981,7 +6981,7 @@ bfa_flash_sem_get(void __iomem *bar)
 static void
 bfa_flash_sem_put(void __iomem *bar)
 {
-	writel(0, (bar + FLASH_SEM_LOCK_REG));
+	pete_writel("drivers/scsi/bfa/bfa_ioc.c:6984", 0, (bar + FLASH_SEM_LOCK_REG));
 }
 
 bfa_status_t

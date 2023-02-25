@@ -354,7 +354,7 @@ static inline void _ipw_write16(struct ipw_priv *ipw, unsigned long ofs,
 static inline void _ipw_write32(struct ipw_priv *ipw, unsigned long ofs,
 		u32 val)
 {
-	writel(val, ipw->hw_base + ofs);
+	pete_writel("drivers/net/wireless/intel/ipw2x00/ipw2200.c:357", val, ipw->hw_base + ofs);
 }
 
 /* 32-bit direct write (for low 4K of SRAM/regs), with debug wrapper */
@@ -393,7 +393,7 @@ static inline u16 _ipw_read16(struct ipw_priv *ipw, unsigned long ofs)
 /* 32-bit direct read (low 4K) */
 static inline u32 _ipw_read32(struct ipw_priv *ipw, unsigned long ofs)
 {
-	return readl(ipw->hw_base + ofs);
+	return pete_readl("drivers/net/wireless/intel/ipw2x00/ipw2200.c:396", ipw->hw_base + ofs);
 }
 
 /* alias to 32-bit direct read (low 4K of SRAM/regs), with debug wrapper */

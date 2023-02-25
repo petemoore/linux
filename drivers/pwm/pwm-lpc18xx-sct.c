@@ -115,13 +115,13 @@ to_lpc18xx_pwm_chip(struct pwm_chip *chip)
 static inline void lpc18xx_pwm_writel(struct lpc18xx_pwm_chip *lpc18xx_pwm,
 				      u32 reg, u32 val)
 {
-	writel(val, lpc18xx_pwm->base + reg);
+	pete_writel("drivers/pwm/pwm-lpc18xx-sct.c:118", val, lpc18xx_pwm->base + reg);
 }
 
 static inline u32 lpc18xx_pwm_readl(struct lpc18xx_pwm_chip *lpc18xx_pwm,
 				    u32 reg)
 {
-	return readl(lpc18xx_pwm->base + reg);
+	return pete_readl("drivers/pwm/pwm-lpc18xx-sct.c:124", lpc18xx_pwm->base + reg);
 }
 
 static void lpc18xx_pwm_set_conflict_res(struct lpc18xx_pwm_chip *lpc18xx_pwm,

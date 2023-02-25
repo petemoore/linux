@@ -31,17 +31,17 @@ static int ulpi_viewport_read(struct usb_phy *otg, u32 reg)
 	int ret;
 	void __iomem *view = otg->io_priv;
 
-	writel(ULPI_VIEW_WAKEUP | ULPI_VIEW_WRITE, view);
+	pete_writel("drivers/usb/phy/phy-ulpi-viewport.c:34", ULPI_VIEW_WAKEUP | ULPI_VIEW_WRITE, view);
 	ret = ulpi_viewport_wait(view, ULPI_VIEW_WAKEUP);
 	if (ret)
 		return ret;
 
-	writel(ULPI_VIEW_RUN | ULPI_VIEW_READ | ULPI_VIEW_ADDR(reg), view);
+	pete_writel("drivers/usb/phy/phy-ulpi-viewport.c:39", ULPI_VIEW_RUN | ULPI_VIEW_READ | ULPI_VIEW_ADDR(reg), view);
 	ret = ulpi_viewport_wait(view, ULPI_VIEW_RUN);
 	if (ret)
 		return ret;
 
-	return ULPI_VIEW_DATA_READ(readl(view));
+	return ULPI_VIEW_DATA_READ(pete_readl("drivers/usb/phy/phy-ulpi-viewport.c:44", view));
 }
 
 static int ulpi_viewport_write(struct usb_phy *otg, u32 val, u32 reg)
@@ -49,12 +49,12 @@ static int ulpi_viewport_write(struct usb_phy *otg, u32 val, u32 reg)
 	int ret;
 	void __iomem *view = otg->io_priv;
 
-	writel(ULPI_VIEW_WAKEUP | ULPI_VIEW_WRITE, view);
+	pete_writel("drivers/usb/phy/phy-ulpi-viewport.c:52", ULPI_VIEW_WAKEUP | ULPI_VIEW_WRITE, view);
 	ret = ulpi_viewport_wait(view, ULPI_VIEW_WAKEUP);
 	if (ret)
 		return ret;
 
-	writel(ULPI_VIEW_RUN | ULPI_VIEW_WRITE | ULPI_VIEW_DATA_WRITE(val) |
+	pete_writel("drivers/usb/phy/phy-ulpi-viewport.c:57", ULPI_VIEW_RUN | ULPI_VIEW_WRITE | ULPI_VIEW_DATA_WRITE(val) |
 						 ULPI_VIEW_ADDR(reg), view);
 
 	return ulpi_viewport_wait(view, ULPI_VIEW_RUN);

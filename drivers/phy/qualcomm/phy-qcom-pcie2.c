@@ -72,77 +72,77 @@ static int qcom_pcie2_phy_power_on(struct phy *phy)
 	u32 val;
 
 	/* Program REF_CLK source */
-	val = readl(qphy->base + PCIE20_PARF_PHY_REFCLK_CTRL2);
+	val = pete_readl("drivers/phy/qualcomm/phy-qcom-pcie2.c:75", qphy->base + PCIE20_PARF_PHY_REFCLK_CTRL2);
 	val &= ~BIT(1);
-	writel(val, qphy->base + PCIE20_PARF_PHY_REFCLK_CTRL2);
+	pete_writel("drivers/phy/qualcomm/phy-qcom-pcie2.c:77", val, qphy->base + PCIE20_PARF_PHY_REFCLK_CTRL2);
 
 	usleep_range(1000, 2000);
 
 	/* Don't use PAD for refclock */
-	val = readl(qphy->base + PCIE20_PARF_PHY_REFCLK_CTRL2);
+	val = pete_readl("drivers/phy/qualcomm/phy-qcom-pcie2.c:82", qphy->base + PCIE20_PARF_PHY_REFCLK_CTRL2);
 	val &= ~BIT(0);
-	writel(val, qphy->base + PCIE20_PARF_PHY_REFCLK_CTRL2);
+	pete_writel("drivers/phy/qualcomm/phy-qcom-pcie2.c:84", val, qphy->base + PCIE20_PARF_PHY_REFCLK_CTRL2);
 
 	/* Program SSP ENABLE */
-	val = readl(qphy->base + PCIE20_PARF_PHY_REFCLK_CTRL3);
+	val = pete_readl("drivers/phy/qualcomm/phy-qcom-pcie2.c:87", qphy->base + PCIE20_PARF_PHY_REFCLK_CTRL3);
 	val |= BIT(0);
-	writel(val, qphy->base + PCIE20_PARF_PHY_REFCLK_CTRL3);
+	pete_writel("drivers/phy/qualcomm/phy-qcom-pcie2.c:89", val, qphy->base + PCIE20_PARF_PHY_REFCLK_CTRL3);
 
 	usleep_range(1000, 2000);
 
 	/* Assert Phy SW Reset */
-	val = readl(qphy->base + PCIE2_PHY_RESET_CTRL);
+	val = pete_readl("drivers/phy/qualcomm/phy-qcom-pcie2.c:94", qphy->base + PCIE2_PHY_RESET_CTRL);
 	val |= BIT(0);
-	writel(val, qphy->base + PCIE2_PHY_RESET_CTRL);
+	pete_writel("drivers/phy/qualcomm/phy-qcom-pcie2.c:96", val, qphy->base + PCIE2_PHY_RESET_CTRL);
 
 	/* Program Tx Amplitude */
-	val = readl(qphy->base + PCIE20_PARF_PCS_SWING_CTRL1);
+	val = pete_readl("drivers/phy/qualcomm/phy-qcom-pcie2.c:99", qphy->base + PCIE20_PARF_PCS_SWING_CTRL1);
 	val &= ~0x7f;
 	val |= TX_AMP_VAL;
-	writel(val, qphy->base + PCIE20_PARF_PCS_SWING_CTRL1);
+	pete_writel("drivers/phy/qualcomm/phy-qcom-pcie2.c:102", val, qphy->base + PCIE20_PARF_PCS_SWING_CTRL1);
 
-	val = readl(qphy->base + PCIE20_PARF_PCS_SWING_CTRL2);
+	val = pete_readl("drivers/phy/qualcomm/phy-qcom-pcie2.c:104", qphy->base + PCIE20_PARF_PCS_SWING_CTRL2);
 	val &= ~0x7f;
 	val |= TX_AMP_VAL;
-	writel(val, qphy->base + PCIE20_PARF_PCS_SWING_CTRL2);
+	pete_writel("drivers/phy/qualcomm/phy-qcom-pcie2.c:107", val, qphy->base + PCIE20_PARF_PCS_SWING_CTRL2);
 
 	/* Program De-Emphasis */
-	val = readl(qphy->base + PCIE20_PARF_PCS_DEEMPH1);
+	val = pete_readl("drivers/phy/qualcomm/phy-qcom-pcie2.c:110", qphy->base + PCIE20_PARF_PCS_DEEMPH1);
 	val &= ~0x3f;
 	val |= TX_DEEMPH_GEN2_6DB_VAL;
-	writel(val, qphy->base + PCIE20_PARF_PCS_DEEMPH1);
+	pete_writel("drivers/phy/qualcomm/phy-qcom-pcie2.c:113", val, qphy->base + PCIE20_PARF_PCS_DEEMPH1);
 
-	val = readl(qphy->base + PCIE20_PARF_PCS_DEEMPH2);
+	val = pete_readl("drivers/phy/qualcomm/phy-qcom-pcie2.c:115", qphy->base + PCIE20_PARF_PCS_DEEMPH2);
 	val &= ~0x3f;
 	val |= TX_DEEMPH_GEN2_3_5DB_VAL;
-	writel(val, qphy->base + PCIE20_PARF_PCS_DEEMPH2);
+	pete_writel("drivers/phy/qualcomm/phy-qcom-pcie2.c:118", val, qphy->base + PCIE20_PARF_PCS_DEEMPH2);
 
-	val = readl(qphy->base + PCIE20_PARF_PCS_DEEMPH3);
+	val = pete_readl("drivers/phy/qualcomm/phy-qcom-pcie2.c:120", qphy->base + PCIE20_PARF_PCS_DEEMPH3);
 	val &= ~0x3f;
 	val |= TX_DEEMPH_GEN1_VAL;
-	writel(val, qphy->base + PCIE20_PARF_PCS_DEEMPH3);
+	pete_writel("drivers/phy/qualcomm/phy-qcom-pcie2.c:123", val, qphy->base + PCIE20_PARF_PCS_DEEMPH3);
 
 	/* Program Rx_Eq */
-	val = readl(qphy->base + PCIE20_PARF_CONFIGBITS);
+	val = pete_readl("drivers/phy/qualcomm/phy-qcom-pcie2.c:126", qphy->base + PCIE20_PARF_CONFIGBITS);
 	val &= ~0x7;
 	val |= PHY_RX0_EQ_GEN2_VAL;
-	writel(val, qphy->base + PCIE20_PARF_CONFIGBITS);
+	pete_writel("drivers/phy/qualcomm/phy-qcom-pcie2.c:129", val, qphy->base + PCIE20_PARF_CONFIGBITS);
 
 	/* Program Tx0_term_offset */
-	val = readl(qphy->base + PCIE20_PARF_PHY_CTRL3);
+	val = pete_readl("drivers/phy/qualcomm/phy-qcom-pcie2.c:132", qphy->base + PCIE20_PARF_PHY_CTRL3);
 	val &= ~0x1f;
 	val |= PHY_TX0_TERM_OFFST_VAL;
-	writel(val, qphy->base + PCIE20_PARF_PHY_CTRL3);
+	pete_writel("drivers/phy/qualcomm/phy-qcom-pcie2.c:135", val, qphy->base + PCIE20_PARF_PHY_CTRL3);
 
 	/* disable Tx2Rx Loopback */
-	val = readl(qphy->base + PCIE20_PARF_PCS_CTRL);
+	val = pete_readl("drivers/phy/qualcomm/phy-qcom-pcie2.c:138", qphy->base + PCIE20_PARF_PCS_CTRL);
 	val &= ~BIT(1);
-	writel(val, qphy->base + PCIE20_PARF_PCS_CTRL);
+	pete_writel("drivers/phy/qualcomm/phy-qcom-pcie2.c:140", val, qphy->base + PCIE20_PARF_PCS_CTRL);
 
 	/* De-assert Phy SW Reset */
-	val = readl(qphy->base + PCIE2_PHY_RESET_CTRL);
+	val = pete_readl("drivers/phy/qualcomm/phy-qcom-pcie2.c:143", qphy->base + PCIE2_PHY_RESET_CTRL);
 	val &= ~BIT(0);
-	writel(val, qphy->base + PCIE2_PHY_RESET_CTRL);
+	pete_writel("drivers/phy/qualcomm/phy-qcom-pcie2.c:145", val, qphy->base + PCIE2_PHY_RESET_CTRL);
 
 	usleep_range(1000, 2000);
 
@@ -174,9 +174,9 @@ static int qcom_pcie2_phy_power_off(struct phy *phy)
 	struct qcom_phy *qphy = phy_get_drvdata(phy);
 	u32 val;
 
-	val = readl(qphy->base + PCIE2_PHY_RESET_CTRL);
+	val = pete_readl("drivers/phy/qualcomm/phy-qcom-pcie2.c:177", qphy->base + PCIE2_PHY_RESET_CTRL);
 	val |= BIT(0);
-	writel(val, qphy->base + PCIE2_PHY_RESET_CTRL);
+	pete_writel("drivers/phy/qualcomm/phy-qcom-pcie2.c:179", val, qphy->base + PCIE2_PHY_RESET_CTRL);
 
 	clk_disable_unprepare(qphy->pipe_clk);
 	reset_control_assert(qphy->pipe_reset);

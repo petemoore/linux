@@ -275,7 +275,7 @@ static int mtk_pcie_check_cfg_cpld(struct mtk_pcie_port *port)
 	if (err)
 		return PCIBIOS_SET_FAILED;
 
-	if (readl(port->base + PCIE_APP_TLP_REQ) & APP_CPL_STATUS)
+	if (pete_readl("drivers/pci/controller/pcie-mediatek.c:278", port->base + PCIE_APP_TLP_REQ) & APP_CPL_STATUS)
 		return PCIBIOS_SET_FAILED;
 
 	return PCIBIOS_SUCCESSFUL;
@@ -287,23 +287,23 @@ static int mtk_pcie_hw_rd_cfg(struct mtk_pcie_port *port, u32 bus, u32 devfn,
 	u32 tmp;
 
 	/* Write PCIe configuration transaction header for Cfgrd */
-	writel(CFG_HEADER_DW0(CFG_WRRD_TYPE_0, CFG_RD_FMT),
+	pete_writel("drivers/pci/controller/pcie-mediatek.c:290", CFG_HEADER_DW0(CFG_WRRD_TYPE_0, CFG_RD_FMT),
 	       port->base + PCIE_CFG_HEADER0);
-	writel(CFG_HEADER_DW1(where, size), port->base + PCIE_CFG_HEADER1);
-	writel(CFG_HEADER_DW2(where, PCI_FUNC(devfn), PCI_SLOT(devfn), bus),
+	pete_writel("drivers/pci/controller/pcie-mediatek.c:292", CFG_HEADER_DW1(where, size), port->base + PCIE_CFG_HEADER1);
+	pete_writel("drivers/pci/controller/pcie-mediatek.c:293", CFG_HEADER_DW2(where, PCI_FUNC(devfn), PCI_SLOT(devfn), bus),
 	       port->base + PCIE_CFG_HEADER2);
 
 	/* Trigger h/w to transmit Cfgrd TLP */
-	tmp = readl(port->base + PCIE_APP_TLP_REQ);
+	tmp = pete_readl("drivers/pci/controller/pcie-mediatek.c:297", port->base + PCIE_APP_TLP_REQ);
 	tmp |= APP_CFG_REQ;
-	writel(tmp, port->base + PCIE_APP_TLP_REQ);
+	pete_writel("drivers/pci/controller/pcie-mediatek.c:299", tmp, port->base + PCIE_APP_TLP_REQ);
 
 	/* Check completion status */
 	if (mtk_pcie_check_cfg_cpld(port))
 		return PCIBIOS_SET_FAILED;
 
 	/* Read cpld payload of Cfgrd */
-	*val = readl(port->base + PCIE_CFG_RDATA);
+	*val = pete_readl("drivers/pci/controller/pcie-mediatek.c:306", port->base + PCIE_CFG_RDATA);
 
 	if (size == 1)
 		*val = (*val >> (8 * (where & 3))) & 0xff;
@@ -317,20 +317,20 @@ static int mtk_pcie_hw_wr_cfg(struct mtk_pcie_port *port, u32 bus, u32 devfn,
 			      int where, int size, u32 val)
 {
 	/* Write PCIe configuration transaction header for Cfgwr */
-	writel(CFG_HEADER_DW0(CFG_WRRD_TYPE_0, CFG_WR_FMT),
+	pete_writel("drivers/pci/controller/pcie-mediatek.c:320", CFG_HEADER_DW0(CFG_WRRD_TYPE_0, CFG_WR_FMT),
 	       port->base + PCIE_CFG_HEADER0);
-	writel(CFG_HEADER_DW1(where, size), port->base + PCIE_CFG_HEADER1);
-	writel(CFG_HEADER_DW2(where, PCI_FUNC(devfn), PCI_SLOT(devfn), bus),
+	pete_writel("drivers/pci/controller/pcie-mediatek.c:322", CFG_HEADER_DW1(where, size), port->base + PCIE_CFG_HEADER1);
+	pete_writel("drivers/pci/controller/pcie-mediatek.c:323", CFG_HEADER_DW2(where, PCI_FUNC(devfn), PCI_SLOT(devfn), bus),
 	       port->base + PCIE_CFG_HEADER2);
 
 	/* Write Cfgwr data */
 	val = val << 8 * (where & 3);
-	writel(val, port->base + PCIE_CFG_WDATA);
+	pete_writel("drivers/pci/controller/pcie-mediatek.c:328", val, port->base + PCIE_CFG_WDATA);
 
 	/* Trigger h/w to transmit Cfgwr TLP */
-	val = readl(port->base + PCIE_APP_TLP_REQ);
+	val = pete_readl("drivers/pci/controller/pcie-mediatek.c:331", port->base + PCIE_APP_TLP_REQ);
 	val |= APP_CFG_REQ;
-	writel(val, port->base + PCIE_APP_TLP_REQ);
+	pete_writel("drivers/pci/controller/pcie-mediatek.c:333", val, port->base + PCIE_APP_TLP_REQ);
 
 	/* Check completion status */
 	return mtk_pcie_check_cfg_cpld(port);
@@ -425,7 +425,7 @@ static void mtk_msi_ack_irq(struct irq_data *data)
 	struct mtk_pcie_port *port = irq_data_get_irq_chip_data(data);
 	u32 hwirq = data->hwirq;
 
-	writel(1 << hwirq, port->base + PCIE_IMSI_STATUS);
+	pete_writel("drivers/pci/controller/pcie-mediatek.c:428", 1 << hwirq, port->base + PCIE_IMSI_STATUS);
 }
 
 static struct irq_chip mtk_msi_bottom_irq_chip = {
@@ -529,11 +529,11 @@ static void mtk_pcie_enable_msi(struct mtk_pcie_port *port)
 
 	msg_addr = virt_to_phys(port->base + PCIE_MSI_VECTOR);
 	val = lower_32_bits(msg_addr);
-	writel(val, port->base + PCIE_IMSI_ADDR);
+	pete_writel("drivers/pci/controller/pcie-mediatek.c:532", val, port->base + PCIE_IMSI_ADDR);
 
-	val = readl(port->base + PCIE_INT_MASK);
+	val = pete_readl("drivers/pci/controller/pcie-mediatek.c:534", port->base + PCIE_INT_MASK);
 	val &= ~MSI_MASK;
-	writel(val, port->base + PCIE_INT_MASK);
+	pete_writel("drivers/pci/controller/pcie-mediatek.c:536", val, port->base + PCIE_INT_MASK);
 }
 
 static void mtk_pcie_irq_teardown(struct mtk_pcie *pcie)
@@ -610,11 +610,11 @@ static void mtk_pcie_intr_handler(struct irq_desc *desc)
 
 	chained_irq_enter(irqchip, desc);
 
-	status = readl(port->base + PCIE_INT_STATUS);
+	status = pete_readl("drivers/pci/controller/pcie-mediatek.c:613", port->base + PCIE_INT_STATUS);
 	if (status & INTX_MASK) {
 		for_each_set_bit_from(bit, &status, PCI_NUM_INTX + INTX_SHIFT) {
 			/* Clear the INTx */
-			writel(1 << bit, port->base + PCIE_INT_STATUS);
+			pete_writel("drivers/pci/controller/pcie-mediatek.c:617", 1 << bit, port->base + PCIE_INT_STATUS);
 			generic_handle_domain_irq(port->irq_domain,
 						  bit - INTX_SHIFT);
 		}
@@ -624,12 +624,12 @@ static void mtk_pcie_intr_handler(struct irq_desc *desc)
 		if (status & MSI_STATUS){
 			unsigned long imsi_status;
 
-			while ((imsi_status = readl(port->base + PCIE_IMSI_STATUS))) {
+			while ((imsi_status = pete_readl("drivers/pci/controller/pcie-mediatek.c:627", port->base + PCIE_IMSI_STATUS))) {
 				for_each_set_bit(bit, &imsi_status, MTK_MSI_IRQS_NUM)
 					generic_handle_domain_irq(port->inner_domain, bit);
 			}
 			/* Clear MSI interrupt status */
-			writel(MSI_STATUS, port->base + PCIE_INT_STATUS);
+			pete_writel("drivers/pci/controller/pcie-mediatek.c:632", MSI_STATUS, port->base + PCIE_INT_STATUS);
 		}
 	}
 
@@ -682,10 +682,10 @@ static int mtk_pcie_startup_port_v2(struct mtk_pcie_port *port)
 
 	/* MT7622 platforms need to enable LTSSM and ASPM from PCIe subsys */
 	if (pcie->base) {
-		val = readl(pcie->base + PCIE_SYS_CFG_V2);
+		val = pete_readl("drivers/pci/controller/pcie-mediatek.c:685", pcie->base + PCIE_SYS_CFG_V2);
 		val |= PCIE_CSR_LTSSM_EN(port->slot) |
 		       PCIE_CSR_ASPM_L1_EN(port->slot);
-		writel(val, pcie->base + PCIE_SYS_CFG_V2);
+		pete_writel("drivers/pci/controller/pcie-mediatek.c:688", val, pcie->base + PCIE_SYS_CFG_V2);
 	} else if (pcie->cfg) {
 		val = PCIE_CSR_LTSSM_EN(port->slot) |
 		      PCIE_CSR_ASPM_L1_EN(port->slot);
@@ -693,20 +693,20 @@ static int mtk_pcie_startup_port_v2(struct mtk_pcie_port *port)
 	}
 
 	/* Assert all reset signals */
-	writel(0, port->base + PCIE_RST_CTRL);
+	pete_writel("drivers/pci/controller/pcie-mediatek.c:696", 0, port->base + PCIE_RST_CTRL);
 
 	/*
 	 * Enable PCIe link down reset, if link status changed from link up to
 	 * link down, this will reset MAC control registers and configuration
 	 * space.
 	 */
-	writel(PCIE_LINKDOWN_RST_EN, port->base + PCIE_RST_CTRL);
+	pete_writel("drivers/pci/controller/pcie-mediatek.c:703", PCIE_LINKDOWN_RST_EN, port->base + PCIE_RST_CTRL);
 
 	/* De-assert PHY, PE, PIPE, MAC and configuration reset	*/
-	val = readl(port->base + PCIE_RST_CTRL);
+	val = pete_readl("drivers/pci/controller/pcie-mediatek.c:706", port->base + PCIE_RST_CTRL);
 	val |= PCIE_PHY_RSTB | PCIE_PERSTB | PCIE_PIPE_SRSTB |
 	       PCIE_MAC_SRSTB | PCIE_CRSTB;
-	writel(val, port->base + PCIE_RST_CTRL);
+	pete_writel("drivers/pci/controller/pcie-mediatek.c:709", val, port->base + PCIE_RST_CTRL);
 
 	/* Set up vendor ID and class code */
 	if (soc->need_fix_class_id) {
@@ -728,9 +728,9 @@ static int mtk_pcie_startup_port_v2(struct mtk_pcie_port *port)
 		return -ETIMEDOUT;
 
 	/* Set INTx mask */
-	val = readl(port->base + PCIE_INT_MASK);
+	val = pete_readl("drivers/pci/controller/pcie-mediatek.c:731", port->base + PCIE_INT_MASK);
 	val &= ~INTX_MASK;
-	writel(val, port->base + PCIE_INT_MASK);
+	pete_writel("drivers/pci/controller/pcie-mediatek.c:733", val, port->base + PCIE_INT_MASK);
 
 	if (IS_ENABLED(CONFIG_PCI_MSI))
 		mtk_pcie_enable_msi(port);
@@ -738,14 +738,14 @@ static int mtk_pcie_startup_port_v2(struct mtk_pcie_port *port)
 	/* Set AHB to PCIe translation windows */
 	val = lower_32_bits(mem->start) |
 	      AHB2PCIE_SIZE(fls(resource_size(mem)));
-	writel(val, port->base + PCIE_AHB_TRANS_BASE0_L);
+	pete_writel("drivers/pci/controller/pcie-mediatek.c:741", val, port->base + PCIE_AHB_TRANS_BASE0_L);
 
 	val = upper_32_bits(mem->start);
-	writel(val, port->base + PCIE_AHB_TRANS_BASE0_H);
+	pete_writel("drivers/pci/controller/pcie-mediatek.c:744", val, port->base + PCIE_AHB_TRANS_BASE0_H);
 
 	/* Set PCIe to AXI translation memory space.*/
 	val = PCIE2AHB_SIZE | WIN_ENABLE;
-	writel(val, port->base + PCIE_AXI_WINDOW0);
+	pete_writel("drivers/pci/controller/pcie-mediatek.c:748", val, port->base + PCIE_AXI_WINDOW0);
 
 	return 0;
 }
@@ -755,7 +755,7 @@ static void __iomem *mtk_pcie_map_bus(struct pci_bus *bus,
 {
 	struct mtk_pcie *pcie = bus->sysdata;
 
-	writel(PCIE_CONF_ADDR(where, PCI_FUNC(devfn), PCI_SLOT(devfn),
+	pete_writel("drivers/pci/controller/pcie-mediatek.c:758", PCIE_CONF_ADDR(where, PCI_FUNC(devfn), PCI_SLOT(devfn),
 			      bus->number), pcie->base + PCIE_CFG_ADDR);
 
 	return pcie->base + PCIE_CFG_DATA + (where & 3);
@@ -776,14 +776,14 @@ static int mtk_pcie_startup_port(struct mtk_pcie_port *port)
 	int err;
 
 	/* assert port PERST_N */
-	val = readl(pcie->base + PCIE_SYS_CFG);
+	val = pete_readl("drivers/pci/controller/pcie-mediatek.c:779", pcie->base + PCIE_SYS_CFG);
 	val |= PCIE_PORT_PERST(port->slot);
-	writel(val, pcie->base + PCIE_SYS_CFG);
+	pete_writel("drivers/pci/controller/pcie-mediatek.c:781", val, pcie->base + PCIE_SYS_CFG);
 
 	/* de-assert port PERST_N */
-	val = readl(pcie->base + PCIE_SYS_CFG);
+	val = pete_readl("drivers/pci/controller/pcie-mediatek.c:784", pcie->base + PCIE_SYS_CFG);
 	val &= ~PCIE_PORT_PERST(port->slot);
-	writel(val, pcie->base + PCIE_SYS_CFG);
+	pete_writel("drivers/pci/controller/pcie-mediatek.c:786", val, pcie->base + PCIE_SYS_CFG);
 
 	/* 100ms timeout value should be enough for Gen1/2 training */
 	err = readl_poll_timeout(port->base + PCIE_LINK_STATUS, val,
@@ -793,36 +793,36 @@ static int mtk_pcie_startup_port(struct mtk_pcie_port *port)
 		return -ETIMEDOUT;
 
 	/* enable interrupt */
-	val = readl(pcie->base + PCIE_INT_ENABLE);
+	val = pete_readl("drivers/pci/controller/pcie-mediatek.c:796", pcie->base + PCIE_INT_ENABLE);
 	val |= PCIE_PORT_INT_EN(port->slot);
-	writel(val, pcie->base + PCIE_INT_ENABLE);
+	pete_writel("drivers/pci/controller/pcie-mediatek.c:798", val, pcie->base + PCIE_INT_ENABLE);
 
 	/* map to all DDR region. We need to set it before cfg operation. */
-	writel(PCIE_BAR_MAP_MAX | PCIE_BAR_ENABLE,
+	pete_writel("drivers/pci/controller/pcie-mediatek.c:801", PCIE_BAR_MAP_MAX | PCIE_BAR_ENABLE,
 	       port->base + PCIE_BAR0_SETUP);
 
 	/* configure class code and revision ID */
-	writel(PCIE_CLASS_CODE | PCIE_REVISION_ID, port->base + PCIE_CLASS);
+	pete_writel("drivers/pci/controller/pcie-mediatek.c:805", PCIE_CLASS_CODE | PCIE_REVISION_ID, port->base + PCIE_CLASS);
 
 	/* configure FC credit */
-	writel(PCIE_CONF_ADDR(PCIE_FC_CREDIT, func, slot, 0),
+	pete_writel("drivers/pci/controller/pcie-mediatek.c:808", PCIE_CONF_ADDR(PCIE_FC_CREDIT, func, slot, 0),
 	       pcie->base + PCIE_CFG_ADDR);
-	val = readl(pcie->base + PCIE_CFG_DATA);
+	val = pete_readl("drivers/pci/controller/pcie-mediatek.c:810", pcie->base + PCIE_CFG_DATA);
 	val &= ~PCIE_FC_CREDIT_MASK;
 	val |= PCIE_FC_CREDIT_VAL(0x806c);
-	writel(PCIE_CONF_ADDR(PCIE_FC_CREDIT, func, slot, 0),
+	pete_writel("drivers/pci/controller/pcie-mediatek.c:813", PCIE_CONF_ADDR(PCIE_FC_CREDIT, func, slot, 0),
 	       pcie->base + PCIE_CFG_ADDR);
-	writel(val, pcie->base + PCIE_CFG_DATA);
+	pete_writel("drivers/pci/controller/pcie-mediatek.c:815", val, pcie->base + PCIE_CFG_DATA);
 
 	/* configure RC FTS number to 250 when it leaves L0s */
-	writel(PCIE_CONF_ADDR(PCIE_FTS_NUM, func, slot, 0),
+	pete_writel("drivers/pci/controller/pcie-mediatek.c:818", PCIE_CONF_ADDR(PCIE_FTS_NUM, func, slot, 0),
 	       pcie->base + PCIE_CFG_ADDR);
-	val = readl(pcie->base + PCIE_CFG_DATA);
+	val = pete_readl("drivers/pci/controller/pcie-mediatek.c:820", pcie->base + PCIE_CFG_DATA);
 	val &= ~PCIE_FTS_NUM_MASK;
 	val |= PCIE_FTS_NUM_L0(0x50);
-	writel(PCIE_CONF_ADDR(PCIE_FTS_NUM, func, slot, 0),
+	pete_writel("drivers/pci/controller/pcie-mediatek.c:823", PCIE_CONF_ADDR(PCIE_FTS_NUM, func, slot, 0),
 	       pcie->base + PCIE_CFG_ADDR);
-	writel(val, pcie->base + PCIE_CFG_DATA);
+	pete_writel("drivers/pci/controller/pcie-mediatek.c:825", val, pcie->base + PCIE_CFG_DATA);
 
 	return 0;
 }

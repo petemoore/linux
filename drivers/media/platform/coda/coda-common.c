@@ -76,14 +76,14 @@ void coda_write(struct coda_dev *dev, u32 data, u32 reg)
 {
 	v4l2_dbg(3, coda_debug, &dev->v4l2_dev,
 		 "%s: data=0x%x, reg=0x%x\n", __func__, data, reg);
-	writel(data, dev->regs_base + reg);
+	pete_writel("drivers/media/platform/coda/coda-common.c:79", data, dev->regs_base + reg);
 }
 
 unsigned int coda_read(struct coda_dev *dev, u32 reg)
 {
 	u32 data;
 
-	data = readl(dev->regs_base + reg);
+	data = pete_readl("drivers/media/platform/coda/coda-common.c:86", dev->regs_base + reg);
 	v4l2_dbg(3, coda_debug, &dev->v4l2_dev,
 		 "%s: data=0x%x, reg=0x%x\n", __func__, data, reg);
 	return data;

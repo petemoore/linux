@@ -3782,13 +3782,13 @@ static void wr_reg16(struct slgt_info *info, unsigned int addr, __u16 value)
 static __u32 rd_reg32(struct slgt_info *info, unsigned int addr)
 {
 	CALC_REGADDR();
-	return readl((void __iomem *)reg_addr);
+	return pete_readl("drivers/tty/synclink_gt.c:3785", (void __iomem *)reg_addr);
 }
 
 static void wr_reg32(struct slgt_info *info, unsigned int addr, __u32 value)
 {
 	CALC_REGADDR();
-	writel(value, (void __iomem *)reg_addr);
+	pete_writel("drivers/tty/synclink_gt.c:3791", value, (void __iomem *)reg_addr);
 }
 
 static void rdma_reset(struct slgt_info *info)

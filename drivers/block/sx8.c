@@ -455,7 +455,7 @@ static void carm_init_buckets(void __iomem *mmio)
 	unsigned int i;
 
 	for (i = 0; i < ARRAY_SIZE(msg_sizes); i++)
-		writel(msg_sizes[i], mmio + CARM_CMS0 + (4 * i));
+		pete_writel("drivers/block/sx8.c:458", msg_sizes[i], mmio + CARM_CMS0 + (4 * i));
 }
 
 static inline void *carm_ref_msg(struct carm_host *host,
@@ -481,19 +481,19 @@ static int carm_send_msg(struct carm_host *host,
 
 	VPRINTK("ENTER\n");
 
-	tmp = readl(mmio + CARM_HMUC);
+	tmp = pete_readl("drivers/block/sx8.c:484", mmio + CARM_HMUC);
 	if (tmp & CARM_Q_FULL) {
 #if 0
-		tmp = readl(mmio + CARM_INT_MASK);
+		tmp = pete_readl("drivers/block/sx8.c:487", mmio + CARM_INT_MASK);
 		tmp |= INT_Q_AVAILABLE;
-		writel(tmp, mmio + CARM_INT_MASK);
-		readl(mmio + CARM_INT_MASK);	/* flush */
+		pete_writel("drivers/block/sx8.c:489", tmp, mmio + CARM_INT_MASK);
+		pete_readl("drivers/block/sx8.c:490", mmio + CARM_INT_MASK);	/* flush */
 #endif
 		DPRINTK("host msg queue full\n");
 		rc = -EBUSY;
 	} else {
-		writel(msg | (cm_bucket << 1), mmio + CARM_IHQP);
-		readl(mmio + CARM_IHQP);	/* flush */
+		pete_writel("drivers/block/sx8.c:495", msg | (cm_bucket << 1), mmio + CARM_IHQP);
+		pete_readl("drivers/block/sx8.c:496", mmio + CARM_IHQP);	/* flush */
 	}
 
 	return rc;
@@ -1020,7 +1020,7 @@ static inline void carm_handle_responses(struct carm_host *host)
 
 		if (status == 0xffffffff) {
 			VPRINTK("ending response on index %u\n", idx);
-			writel(idx << 3, mmio + CARM_RESP_IDX);
+			pete_writel("drivers/block/sx8.c:1023", idx << 3, mmio + CARM_RESP_IDX);
 			break;
 		}
 
@@ -1066,7 +1066,7 @@ static irqreturn_t carm_interrupt(int irq, void *__host)
 	mmio = host->mmio;
 
 	/* reading should also clear interrupts */
-	mask = readl(mmio + CARM_INT_STAT);
+	mask = pete_readl("drivers/block/sx8.c:1069", mmio + CARM_INT_STAT);
 
 	if (mask == 0 || mask == 0xffffffff) {
 		VPRINTK("no work, mask == 0x%x\n", mask);
@@ -1074,7 +1074,7 @@ static irqreturn_t carm_interrupt(int irq, void *__host)
 	}
 
 	if (mask & INT_ACK_MASK)
-		writel(mask, mmio + CARM_INT_STAT);
+		pete_writel("drivers/block/sx8.c:1077", mask, mmio + CARM_INT_STAT);
 
 	if (unlikely(host->state == HST_INVALID)) {
 		VPRINTK("not initialized yet, mask = 0x%x\n", mask);
@@ -1222,7 +1222,7 @@ static int carm_init_wait(void __iomem *mmio, u32 bits, unsigned int test_bit)
 	unsigned int i;
 
 	for (i = 0; i < 50000; i++) {
-		u32 tmp = readl(mmio + CARM_LMUC);
+		u32 tmp = pete_readl("drivers/block/sx8.c:1225", mmio + CARM_LMUC);
 		udelay(100);
 
 		if (test_bit) {
@@ -1250,7 +1250,7 @@ static void carm_init_responses(struct carm_host *host)
 	for (i = 0; i < RMSG_Q_LEN; i++)
 		resp[i].status = cpu_to_le32(0xffffffff);
 
-	writel(0, mmio + CARM_RESP_IDX);
+	pete_writel("drivers/block/sx8.c:1253", 0, mmio + CARM_RESP_IDX);
 }
 
 static int carm_init_host(struct carm_host *host)
@@ -1262,7 +1262,7 @@ static int carm_init_host(struct carm_host *host)
 
 	DPRINTK("ENTER\n");
 
-	writel(0, mmio + CARM_INT_MASK);
+	pete_writel("drivers/block/sx8.c:1265", 0, mmio + CARM_INT_MASK);
 
 	tmp8 = readb(mmio + CARM_INITC);
 	if (tmp8 & 0x01) {
@@ -1274,7 +1274,7 @@ static int carm_init_host(struct carm_host *host)
 		msleep(5000);
 	}
 
-	tmp = readl(mmio + CARM_HMUC);
+	tmp = pete_readl("drivers/block/sx8.c:1277", mmio + CARM_HMUC);
 	if (tmp & CARM_CME) {
 		DPRINTK("CME bit present, waiting\n");
 		rc = carm_init_wait(mmio, CARM_CME, 1);
@@ -1293,8 +1293,8 @@ static int carm_init_host(struct carm_host *host)
 	}
 
 	tmp &= ~(CARM_RME | CARM_CME);
-	writel(tmp, mmio + CARM_HMUC);
-	readl(mmio + CARM_HMUC);	/* flush */
+	pete_writel("drivers/block/sx8.c:1296", tmp, mmio + CARM_HMUC);
+	pete_readl("drivers/block/sx8.c:1297", mmio + CARM_HMUC);	/* flush */
 
 	rc = carm_init_wait(mmio, CARM_RME | CARM_CME, 0);
 	if (rc) {
@@ -1304,14 +1304,14 @@ static int carm_init_host(struct carm_host *host)
 
 	carm_init_buckets(mmio);
 
-	writel(host->shm_dma & 0xffffffff, mmio + RBUF_ADDR_LO);
-	writel((host->shm_dma >> 16) >> 16, mmio + RBUF_ADDR_HI);
-	writel(RBUF_LEN, mmio + RBUF_BYTE_SZ);
+	pete_writel("drivers/block/sx8.c:1307", host->shm_dma & 0xffffffff, mmio + RBUF_ADDR_LO);
+	pete_writel("drivers/block/sx8.c:1308", (host->shm_dma >> 16) >> 16, mmio + RBUF_ADDR_HI);
+	pete_writel("drivers/block/sx8.c:1309", RBUF_LEN, mmio + RBUF_BYTE_SZ);
 
-	tmp = readl(mmio + CARM_HMUC);
+	tmp = pete_readl("drivers/block/sx8.c:1311", mmio + CARM_HMUC);
 	tmp |= (CARM_RME | CARM_CME | CARM_WZBC);
-	writel(tmp, mmio + CARM_HMUC);
-	readl(mmio + CARM_HMUC);	/* flush */
+	pete_writel("drivers/block/sx8.c:1313", tmp, mmio + CARM_HMUC);
+	pete_readl("drivers/block/sx8.c:1314", mmio + CARM_HMUC);	/* flush */
 
 	rc = carm_init_wait(mmio, CARM_RME | CARM_CME, 1);
 	if (rc) {
@@ -1319,8 +1319,8 @@ static int carm_init_host(struct carm_host *host)
 		return rc;
 	}
 
-	writel(0, mmio + CARM_HMPHA);
-	writel(INT_DEF_MASK, mmio + CARM_INT_MASK);
+	pete_writel("drivers/block/sx8.c:1322", 0, mmio + CARM_HMPHA);
+	pete_writel("drivers/block/sx8.c:1323", INT_DEF_MASK, mmio + CARM_INT_MASK);
 
 	carm_init_responses(host);
 

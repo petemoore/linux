@@ -55,18 +55,18 @@ static void uniphier_ahciphy_pxs2_enable(struct uniphier_ahciphy_priv *priv,
 {
 	u32 val;
 
-	val = readl(priv->base + CKCTRL);
+	val = pete_readl("drivers/phy/socionext/phy-uniphier-ahci.c:58", priv->base + CKCTRL);
 
 	if (enable) {
 		val |= CKCTRL_REF_SSP_EN;
-		writel(val, priv->base + CKCTRL);
+		pete_writel("drivers/phy/socionext/phy-uniphier-ahci.c:62", val, priv->base + CKCTRL);
 		val &= ~CKCTRL_P0_RESET;
-		writel(val, priv->base + CKCTRL);
+		pete_writel("drivers/phy/socionext/phy-uniphier-ahci.c:64", val, priv->base + CKCTRL);
 	} else {
 		val |= CKCTRL_P0_RESET;
-		writel(val, priv->base + CKCTRL);
+		pete_writel("drivers/phy/socionext/phy-uniphier-ahci.c:67", val, priv->base + CKCTRL);
 		val &= ~CKCTRL_REF_SSP_EN;
-		writel(val, priv->base + CKCTRL);
+		pete_writel("drivers/phy/socionext/phy-uniphier-ahci.c:69", val, priv->base + CKCTRL);
 	}
 }
 
@@ -105,16 +105,16 @@ static int uniphier_ahciphy_pxs3_init(struct uniphier_ahciphy_priv *priv)
 	u32 val;
 
 	/* setup port parameter */
-	val = readl(priv->base + TXCTRL0);
+	val = pete_readl("drivers/phy/socionext/phy-uniphier-ahci.c:108", priv->base + TXCTRL0);
 	val &= ~TXCTRL0_AMP_G3_MASK;
 	val |= FIELD_PREP(TXCTRL0_AMP_G3_MASK, 0x73);
 	val &= ~TXCTRL0_AMP_G2_MASK;
 	val |= FIELD_PREP(TXCTRL0_AMP_G2_MASK, 0x46);
 	val &= ~TXCTRL0_AMP_G1_MASK;
 	val |= FIELD_PREP(TXCTRL0_AMP_G1_MASK, 0x42);
-	writel(val, priv->base + TXCTRL0);
+	pete_writel("drivers/phy/socionext/phy-uniphier-ahci.c:115", val, priv->base + TXCTRL0);
 
-	val = readl(priv->base + TXCTRL1);
+	val = pete_readl("drivers/phy/socionext/phy-uniphier-ahci.c:117", priv->base + TXCTRL1);
 	val &= ~TXCTRL1_DEEMPH_G3_MASK;
 	val |= FIELD_PREP(TXCTRL1_DEEMPH_G3_MASK, 0x23);
 	val &= ~TXCTRL1_DEEMPH_G2_MASK;
@@ -122,7 +122,7 @@ static int uniphier_ahciphy_pxs3_init(struct uniphier_ahciphy_priv *priv)
 	val &= ~TXCTRL1_DEEMPH_G1_MASK;
 	val |= FIELD_PREP(TXCTRL1_DEEMPH_G1_MASK, 0x05);
 
-	val = readl(priv->base + RXCTRL);
+	val = pete_readl("drivers/phy/socionext/phy-uniphier-ahci.c:125", priv->base + RXCTRL);
 	val &= ~RXCTRL_LOS_LVL_MASK;
 	val |= FIELD_PREP(RXCTRL_LOS_LVL_MASK, 0x9);
 	val &= ~RXCTRL_LOS_BIAS_MASK;
@@ -132,7 +132,7 @@ static int uniphier_ahciphy_pxs3_init(struct uniphier_ahciphy_priv *priv)
 
 	/* dummy read 25 times to make a wait time for the phy to stabilize */
 	for (i = 0; i < 25; i++)
-		readl(priv->base + CKCTRL);
+		pete_readl("drivers/phy/socionext/phy-uniphier-ahci.c:135", priv->base + CKCTRL);
 
 	return 0;
 }

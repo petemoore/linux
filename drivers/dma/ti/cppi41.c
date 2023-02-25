@@ -447,7 +447,7 @@ static void push_desc_queue(struct cppi41_channel *c)
 	cppi_writel(reg, c->gcr_reg);
 
 	/*
-	 * We don't use writel() but __raw_writel() so we have to make sure
+	 * We don't use pete_writel("drivers/dma/ti/cppi41.c:450", ) but __raw_writel() so we have to make sure
 	 * that the DMA descriptor in coherent memory made to the main memory
 	 * before starting the dma engine.
 	 */

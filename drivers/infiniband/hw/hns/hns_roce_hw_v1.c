@@ -509,7 +509,7 @@ static int hns_roce_v1_set_hem(struct hns_roce_dev *hr_dev,
 
 		end = HW_SYNC_TIMEOUT_MSECS;
 		while (end > 0) {
-			if (!(readl(bt_cmd) >> BT_CMD_SYNC_SHIFT))
+			if (!(pete_readl("drivers/infiniband/hw/hns/hns_roce_hw_v1.c:512", bt_cmd) >> BT_CMD_SYNC_SHIFT))
 				break;
 
 			mdelay(HW_SYNC_SLEEP_TIME_INTERVAL);
@@ -1676,7 +1676,7 @@ static void hns_roce_v1_exit(struct hns_roce_dev *hr_dev)
 
 static int hns_roce_v1_cmd_pending(struct hns_roce_dev *hr_dev)
 {
-	u32 status = readl(hr_dev->reg_base + ROCEE_MB6_REG);
+	u32 status = pete_readl("drivers/infiniband/hw/hns/hns_roce_hw_v1.c:1679", hr_dev->reg_base + ROCEE_MB6_REG);
 
 	return (!!(status & (1 << HCR_GO_BIT)));
 }
@@ -1713,11 +1713,11 @@ static int hns_roce_v1_post_mbox(struct hns_roce_dev *hr_dev, u64 in_param,
 	val = le32_to_cpu(tmp);
 	writeq(in_param, hcr + 0);
 	writeq(out_param, hcr + 2);
-	writel(in_modifier, hcr + 4);
+	pete_writel("drivers/infiniband/hw/hns/hns_roce_hw_v1.c:1716", in_modifier, hcr + 4);
 	/* Memory barrier */
 	wmb();
 
-	writel(val, hcr + 5);
+	pete_writel("drivers/infiniband/hw/hns/hns_roce_hw_v1.c:1720", val, hcr + 5);
 
 	return 0;
 }
@@ -2443,7 +2443,7 @@ static int hns_roce_v1_clear_hem(struct hns_roce_dev *hr_dev,
 	bt_cmd = hr_dev->reg_base + ROCEE_BT_CMD_H_REG;
 
 	while (1) {
-		if (readl(bt_cmd) >> BT_CMD_SYNC_SHIFT) {
+		if (pete_readl("drivers/infiniband/hw/hns/hns_roce_hw_v1.c:2446", bt_cmd) >> BT_CMD_SYNC_SHIFT) {
 			if (!end) {
 				dev_err(dev, "Write bt_cmd err,hw_sync is not zero.\n");
 				spin_unlock_irqrestore(&hr_dev->bt_cmd_lock,
@@ -2663,16 +2663,16 @@ static int hns_roce_v1_m_sqp(struct ib_qp *ibqp, const struct ib_qp_attr *attr,
 				       ROCEE_QP1C_CFG0_0_REG +
 				       hr_qp->phy_port * sizeof(*context));
 
-		writel(le32_to_cpu(context->qp1c_bytes_4), addr);
-		writel(le32_to_cpu(context->sq_rq_bt_l), addr + 1);
-		writel(le32_to_cpu(context->qp1c_bytes_12), addr + 2);
-		writel(le32_to_cpu(context->qp1c_bytes_16), addr + 3);
-		writel(le32_to_cpu(context->qp1c_bytes_20), addr + 4);
-		writel(le32_to_cpu(context->cur_rq_wqe_ba_l), addr + 5);
-		writel(le32_to_cpu(context->qp1c_bytes_28), addr + 6);
-		writel(le32_to_cpu(context->qp1c_bytes_32), addr + 7);
-		writel(le32_to_cpu(context->cur_sq_wqe_ba_l), addr + 8);
-		writel(le32_to_cpu(context->qp1c_bytes_40), addr + 9);
+		pete_writel("drivers/infiniband/hw/hns/hns_roce_hw_v1.c:2666", le32_to_cpu(context->qp1c_bytes_4), addr);
+		pete_writel("drivers/infiniband/hw/hns/hns_roce_hw_v1.c:2667", le32_to_cpu(context->sq_rq_bt_l), addr + 1);
+		pete_writel("drivers/infiniband/hw/hns/hns_roce_hw_v1.c:2668", le32_to_cpu(context->qp1c_bytes_12), addr + 2);
+		pete_writel("drivers/infiniband/hw/hns/hns_roce_hw_v1.c:2669", le32_to_cpu(context->qp1c_bytes_16), addr + 3);
+		pete_writel("drivers/infiniband/hw/hns/hns_roce_hw_v1.c:2670", le32_to_cpu(context->qp1c_bytes_20), addr + 4);
+		pete_writel("drivers/infiniband/hw/hns/hns_roce_hw_v1.c:2671", le32_to_cpu(context->cur_rq_wqe_ba_l), addr + 5);
+		pete_writel("drivers/infiniband/hw/hns/hns_roce_hw_v1.c:2672", le32_to_cpu(context->qp1c_bytes_28), addr + 6);
+		pete_writel("drivers/infiniband/hw/hns/hns_roce_hw_v1.c:2673", le32_to_cpu(context->qp1c_bytes_32), addr + 7);
+		pete_writel("drivers/infiniband/hw/hns/hns_roce_hw_v1.c:2674", le32_to_cpu(context->cur_sq_wqe_ba_l), addr + 8);
+		pete_writel("drivers/infiniband/hw/hns/hns_roce_hw_v1.c:2675", le32_to_cpu(context->qp1c_bytes_40), addr + 9);
 	}
 
 	/* Modify QP1C status */
@@ -4165,7 +4165,7 @@ static void hns_roce_v1_enable_eq(struct hns_roce_dev *hr_dev, int eq_num,
 	__le32 tmp;
 	u32 val;
 
-	val = readl(eqc);
+	val = pete_readl("drivers/infiniband/hw/hns/hns_roce_hw_v1.c:4168", eqc);
 	tmp = cpu_to_le32(val);
 
 	if (enable_flag)
@@ -4180,7 +4180,7 @@ static void hns_roce_v1_enable_eq(struct hns_roce_dev *hr_dev, int eq_num,
 			       HNS_ROCE_EQ_STAT_INVALID);
 
 	val = le32_to_cpu(tmp);
-	writel(val, eqc);
+	pete_writel("drivers/infiniband/hw/hns/hns_roce_hw_v1.c:4183", val, eqc);
 }
 
 static int hns_roce_v1_create_eq(struct hns_roce_dev *hr_dev,
@@ -4232,10 +4232,10 @@ static int hns_roce_v1_create_eq(struct hns_roce_dev *hr_dev,
 		       ROCEE_CAEP_AEQC_AEQE_SHIFT_CAEP_AEQC_AEQE_SHIFT_S,
 		       eq->log_entries);
 	eqshift_val = le32_to_cpu(tmp);
-	writel(eqshift_val, eqc);
+	pete_writel("drivers/infiniband/hw/hns/hns_roce_hw_v1.c:4235", eqshift_val, eqc);
 
 	/* Configure eq extended address 12~44bit */
-	writel((u32)(eq->buf_list[0].map >> 12), eqc + 4);
+	pete_writel("drivers/infiniband/hw/hns/hns_roce_hw_v1.c:4238", (u32)(eq->buf_list[0].map >> 12), eqc + 4);
 
 	/*
 	 * Configure eq extended address 45~49 bit.
@@ -4249,13 +4249,13 @@ static int hns_roce_v1_create_eq(struct hns_roce_dev *hr_dev,
 	roce_set_field(tmp1, ROCEE_CAEP_AEQE_CUR_IDX_CAEP_AEQE_CUR_IDX_M,
 		       ROCEE_CAEP_AEQE_CUR_IDX_CAEP_AEQE_CUR_IDX_S, 0);
 	eqcuridx_val = le32_to_cpu(tmp1);
-	writel(eqcuridx_val, eqc + 8);
+	pete_writel("drivers/infiniband/hw/hns/hns_roce_hw_v1.c:4252", eqcuridx_val, eqc + 8);
 
 	/* Configure eq consumer index */
 	roce_set_field(tmp2, ROCEE_CAEP_AEQE_CONS_IDX_CAEP_AEQE_CONS_IDX_M,
 		       ROCEE_CAEP_AEQE_CONS_IDX_CAEP_AEQE_CONS_IDX_S, 0);
 	eqconsindx_val = le32_to_cpu(tmp2);
-	writel(eqconsindx_val, eqc + 0xc);
+	pete_writel("drivers/infiniband/hw/hns/hns_roce_hw_v1.c:4258", eqconsindx_val, eqc + 0xc);
 
 	return 0;
 

@@ -997,9 +997,9 @@ static void __init sun5i_ccu_init(struct device_node *node,
 	}
 
 	/* Force the PLL-Audio-1x divider to 1 */
-	val = readl(reg + SUN5I_PLL_AUDIO_REG);
+	val = pete_readl("drivers/clk/sunxi-ng/ccu-sun5i.c:1000", reg + SUN5I_PLL_AUDIO_REG);
 	val &= ~GENMASK(29, 26);
-	writel(val | (0 << 26), reg + SUN5I_PLL_AUDIO_REG);
+	pete_writel("drivers/clk/sunxi-ng/ccu-sun5i.c:1002", val | (0 << 26), reg + SUN5I_PLL_AUDIO_REG);
 
 	/*
 	 * Use the peripheral PLL as the AHB parent, instead of CPU /
@@ -1008,9 +1008,9 @@ static void __init sun5i_ccu_init(struct device_node *node,
 	 * This is especially a big deal for the HS timer whose parent
 	 * clock is AHB.
 	 */
-	val = readl(reg + SUN5I_AHB_REG);
+	val = pete_readl("drivers/clk/sunxi-ng/ccu-sun5i.c:1011", reg + SUN5I_AHB_REG);
 	val &= ~GENMASK(7, 6);
-	writel(val | (2 << 6), reg + SUN5I_AHB_REG);
+	pete_writel("drivers/clk/sunxi-ng/ccu-sun5i.c:1013", val | (2 << 6), reg + SUN5I_AHB_REG);
 
 	of_sunxi_ccu_probe(node, reg, desc);
 }

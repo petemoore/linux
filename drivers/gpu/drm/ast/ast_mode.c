@@ -690,7 +690,7 @@ static void ast_update_cursor_image(u8 __iomem *dst, const u8 *src, int width, i
 			data32.b[2] = srcdata32[1].b[1] | (srcdata32[1].b[0] >> 4);
 			data32.b[3] = srcdata32[1].b[3] | (srcdata32[1].b[2] >> 4);
 
-			writel(data32.ul, dstxor);
+			pete_writel("drivers/gpu/drm/ast/ast_mode.c:693", data32.ul, dstxor);
 			csum += data32.ul;
 
 			dstxor += 4;
@@ -713,11 +713,11 @@ static void ast_update_cursor_image(u8 __iomem *dst, const u8 *src, int width, i
 
 	/* write checksum + signature */
 	dst += AST_HWC_SIZE;
-	writel(csum, dst);
-	writel(width, dst + AST_HWC_SIGNATURE_SizeX);
-	writel(height, dst + AST_HWC_SIGNATURE_SizeY);
-	writel(0, dst + AST_HWC_SIGNATURE_HOTSPOTX);
-	writel(0, dst + AST_HWC_SIGNATURE_HOTSPOTY);
+	pete_writel("drivers/gpu/drm/ast/ast_mode.c:716", csum, dst);
+	pete_writel("drivers/gpu/drm/ast/ast_mode.c:717", width, dst + AST_HWC_SIGNATURE_SizeX);
+	pete_writel("drivers/gpu/drm/ast/ast_mode.c:718", height, dst + AST_HWC_SIGNATURE_SizeY);
+	pete_writel("drivers/gpu/drm/ast/ast_mode.c:719", 0, dst + AST_HWC_SIGNATURE_HOTSPOTX);
+	pete_writel("drivers/gpu/drm/ast/ast_mode.c:720", 0, dst + AST_HWC_SIGNATURE_HOTSPOTY);
 }
 
 static void ast_set_cursor_base(struct ast_private *ast, u64 address)
@@ -841,8 +841,8 @@ ast_cursor_plane_helper_atomic_update(struct drm_plane *plane,
 	 * Update location in HWC signature and registers.
 	 */
 
-	writel(new_state->crtc_x, sig + AST_HWC_SIGNATURE_X);
-	writel(new_state->crtc_y, sig + AST_HWC_SIGNATURE_Y);
+	pete_writel("drivers/gpu/drm/ast/ast_mode.c:844", new_state->crtc_x, sig + AST_HWC_SIGNATURE_X);
+	pete_writel("drivers/gpu/drm/ast/ast_mode.c:845", new_state->crtc_y, sig + AST_HWC_SIGNATURE_Y);
 
 	offset_x = AST_MAX_HWC_WIDTH - fb->width;
 	offset_y = AST_MAX_HWC_HEIGHT - fb->height;

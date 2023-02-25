@@ -32,10 +32,10 @@ static void clps711x_pwm_update_val(struct clps711x_chip *priv, u32 n, u32 v)
 
 	spin_lock_irqsave(&priv->lock, flags);
 
-	tmp = readl(priv->pmpcon);
+	tmp = pete_readl("drivers/pwm/pwm-clps711x.c:35", priv->pmpcon);
 	tmp &= ~(0xf << shift);
 	tmp |= v << shift;
-	writel(tmp, priv->pmpcon);
+	pete_writel("drivers/pwm/pwm-clps711x.c:38", tmp, priv->pmpcon);
 
 	spin_unlock_irqrestore(&priv->lock, flags);
 }

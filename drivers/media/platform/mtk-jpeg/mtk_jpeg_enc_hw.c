@@ -32,24 +32,24 @@ static const struct mtk_jpeg_enc_qlt mtk_jpeg_enc_quality[] = {
 
 void mtk_jpeg_enc_reset(void __iomem *base)
 {
-	writel(0, base + JPEG_ENC_RSTB);
-	writel(JPEG_ENC_RESET_BIT, base + JPEG_ENC_RSTB);
-	writel(0, base + JPEG_ENC_CODEC_SEL);
+	pete_writel("drivers/media/platform/mtk-jpeg/mtk_jpeg_enc_hw.c:35", 0, base + JPEG_ENC_RSTB);
+	pete_writel("drivers/media/platform/mtk-jpeg/mtk_jpeg_enc_hw.c:36", JPEG_ENC_RESET_BIT, base + JPEG_ENC_RSTB);
+	pete_writel("drivers/media/platform/mtk-jpeg/mtk_jpeg_enc_hw.c:37", 0, base + JPEG_ENC_CODEC_SEL);
 }
 
 u32 mtk_jpeg_enc_get_file_size(void __iomem *base)
 {
-	return readl(base + JPEG_ENC_DMA_ADDR0) -
-	       readl(base + JPEG_ENC_DST_ADDR0);
+	return pete_readl("drivers/media/platform/mtk-jpeg/mtk_jpeg_enc_hw.c:42", base + JPEG_ENC_DMA_ADDR0) -
+	       pete_readl("drivers/media/platform/mtk-jpeg/mtk_jpeg_enc_hw.c:43", base + JPEG_ENC_DST_ADDR0);
 }
 
 void mtk_jpeg_enc_start(void __iomem *base)
 {
 	u32 value;
 
-	value = readl(base + JPEG_ENC_CTRL);
+	value = pete_readl("drivers/media/platform/mtk-jpeg/mtk_jpeg_enc_hw.c:50", base + JPEG_ENC_CTRL);
 	value |= JPEG_ENC_CTRL_INT_EN_BIT | JPEG_ENC_CTRL_ENABLE_BIT;
-	writel(value, base + JPEG_ENC_CTRL);
+	pete_writel("drivers/media/platform/mtk-jpeg/mtk_jpeg_enc_hw.c:52", value, base + JPEG_ENC_CTRL);
 }
 
 void mtk_jpeg_set_enc_src(struct mtk_jpeg_ctx *ctx,  void __iomem *base,
@@ -62,9 +62,9 @@ void mtk_jpeg_set_enc_src(struct mtk_jpeg_ctx *ctx,  void __iomem *base,
 		dma_addr = vb2_dma_contig_plane_dma_addr(src_buf, i) +
 			   src_buf->planes[i].data_offset;
 		if (!i)
-			writel(dma_addr, base + JPEG_ENC_SRC_LUMA_ADDR);
+			pete_writel("drivers/media/platform/mtk-jpeg/mtk_jpeg_enc_hw.c:65", dma_addr, base + JPEG_ENC_SRC_LUMA_ADDR);
 		else
-			writel(dma_addr, base + JPEG_ENC_SRC_CHROMA_ADDR);
+			pete_writel("drivers/media/platform/mtk-jpeg/mtk_jpeg_enc_hw.c:67", dma_addr, base + JPEG_ENC_SRC_CHROMA_ADDR);
 	}
 }
 
@@ -81,10 +81,10 @@ void mtk_jpeg_set_enc_dst(struct mtk_jpeg_ctx *ctx, void __iomem *base,
 	dma_addr_offsetmask = dma_addr & JPEG_ENC_DST_ADDR_OFFSET_MASK;
 	size = vb2_plane_size(dst_buf, 0);
 
-	writel(dma_addr_offset & ~0xf, base + JPEG_ENC_OFFSET_ADDR);
-	writel(dma_addr_offsetmask & 0xf, base + JPEG_ENC_BYTE_OFFSET_MASK);
-	writel(dma_addr & ~0xf, base + JPEG_ENC_DST_ADDR0);
-	writel((dma_addr + size) & ~0xf, base + JPEG_ENC_STALL_ADDR0);
+	pete_writel("drivers/media/platform/mtk-jpeg/mtk_jpeg_enc_hw.c:84", dma_addr_offset & ~0xf, base + JPEG_ENC_OFFSET_ADDR);
+	pete_writel("drivers/media/platform/mtk-jpeg/mtk_jpeg_enc_hw.c:85", dma_addr_offsetmask & 0xf, base + JPEG_ENC_BYTE_OFFSET_MASK);
+	pete_writel("drivers/media/platform/mtk-jpeg/mtk_jpeg_enc_hw.c:86", dma_addr & ~0xf, base + JPEG_ENC_DST_ADDR0);
+	pete_writel("drivers/media/platform/mtk-jpeg/mtk_jpeg_enc_hw.c:87", (dma_addr + size) & ~0xf, base + JPEG_ENC_STALL_ADDR0);
 }
 
 void mtk_jpeg_set_enc_params(struct mtk_jpeg_ctx *ctx,  void __iomem *base)
@@ -100,7 +100,7 @@ void mtk_jpeg_set_enc_params(struct mtk_jpeg_ctx *ctx,  void __iomem *base)
 	u32 i, enc_quality;
 
 	value = width << 16 | height;
-	writel(value, base + JPEG_ENC_IMG_SIZE);
+	pete_writel("drivers/media/platform/mtk-jpeg/mtk_jpeg_enc_hw.c:103", value, base + JPEG_ENC_IMG_SIZE);
 
 	if (enc_format == V4L2_PIX_FMT_NV12M ||
 	    enc_format == V4L2_PIX_FMT_NV21M)
@@ -113,7 +113,7 @@ void mtk_jpeg_set_enc_params(struct mtk_jpeg_ctx *ctx,  void __iomem *base)
 	else
 		blk_num = DIV_ROUND_UP(width, 16) *
 			  DIV_ROUND_UP(height, 8) * 4 - 1;
-	writel(blk_num, base + JPEG_ENC_BLK_NUM);
+	pete_writel("drivers/media/platform/mtk-jpeg/mtk_jpeg_enc_hw.c:116", blk_num, base + JPEG_ENC_BLK_NUM);
 
 	if (enc_format == V4L2_PIX_FMT_NV12M ||
 	    enc_format == V4L2_PIX_FMT_NV21M) {
@@ -125,8 +125,8 @@ void mtk_jpeg_set_enc_params(struct mtk_jpeg_ctx *ctx,  void __iomem *base)
 		img_stride = round_up(width * 2, 32);
 		mem_stride = img_stride;
 	}
-	writel(img_stride, base + JPEG_ENC_IMG_STRIDE);
-	writel(mem_stride, base + JPEG_ENC_STRIDE);
+	pete_writel("drivers/media/platform/mtk-jpeg/mtk_jpeg_enc_hw.c:128", img_stride, base + JPEG_ENC_IMG_STRIDE);
+	pete_writel("drivers/media/platform/mtk-jpeg/mtk_jpeg_enc_hw.c:129", mem_stride, base + JPEG_ENC_STRIDE);
 
 	enc_quality = mtk_jpeg_enc_quality[0].hardware_value;
 	for (i = 0; i < ARRAY_SIZE(mtk_jpeg_enc_quality); i++) {
@@ -135,9 +135,9 @@ void mtk_jpeg_set_enc_params(struct mtk_jpeg_ctx *ctx,  void __iomem *base)
 			break;
 		}
 	}
-	writel(enc_quality, base + JPEG_ENC_QUALITY);
+	pete_writel("drivers/media/platform/mtk-jpeg/mtk_jpeg_enc_hw.c:138", enc_quality, base + JPEG_ENC_QUALITY);
 
-	value = readl(base + JPEG_ENC_CTRL);
+	value = pete_readl("drivers/media/platform/mtk-jpeg/mtk_jpeg_enc_hw.c:140", base + JPEG_ENC_CTRL);
 	value &= ~JPEG_ENC_CTRL_YUV_FORMAT_MASK;
 	value |= (ctx->out_q.fmt->hw_format & 3) << 3;
 	if (ctx->enable_exif)
@@ -148,7 +148,7 @@ void mtk_jpeg_set_enc_params(struct mtk_jpeg_ctx *ctx,  void __iomem *base)
 		value |= JPEG_ENC_CTRL_RESTART_EN_BIT;
 	else
 		value &= ~JPEG_ENC_CTRL_RESTART_EN_BIT;
-	writel(value, base + JPEG_ENC_CTRL);
+	pete_writel("drivers/media/platform/mtk-jpeg/mtk_jpeg_enc_hw.c:151", value, base + JPEG_ENC_CTRL);
 
-	writel(ctx->restart_interval, base + JPEG_ENC_RST_MCU_NUM);
+	pete_writel("drivers/media/platform/mtk-jpeg/mtk_jpeg_enc_hw.c:153", ctx->restart_interval, base + JPEG_ENC_RST_MCU_NUM);
 }

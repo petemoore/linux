@@ -40,14 +40,14 @@ static irqreturn_t tifm_7xx1_isr(int irq, void *dev_id)
 	unsigned int irq_status, cnt;
 
 	spin_lock(&fm->lock);
-	irq_status = readl(fm->addr + FM_INTERRUPT_STATUS);
+	irq_status = pete_readl("drivers/misc/tifm_7xx1.c:43", fm->addr + FM_INTERRUPT_STATUS);
 	if (irq_status == 0 || irq_status == (~0)) {
 		spin_unlock(&fm->lock);
 		return IRQ_NONE;
 	}
 
 	if (irq_status & TIFM_IRQ_ENABLE) {
-		writel(TIFM_IRQ_ENABLE, fm->addr + FM_CLEAR_INTERRUPT_ENABLE);
+		pete_writel("drivers/misc/tifm_7xx1.c:50", TIFM_IRQ_ENABLE, fm->addr + FM_CLEAR_INTERRUPT_ENABLE);
 
 		for (cnt = 0; cnt < fm->num_sockets; cnt++) {
 			sock = fm->sockets[cnt];
@@ -62,12 +62,12 @@ static irqreturn_t tifm_7xx1_isr(int irq, void *dev_id)
 		fm->socket_change_set |= irq_status
 					 & ((1 << fm->num_sockets) - 1);
 	}
-	writel(irq_status, fm->addr + FM_INTERRUPT_STATUS);
+	pete_writel("drivers/misc/tifm_7xx1.c:65", irq_status, fm->addr + FM_INTERRUPT_STATUS);
 
 	if (fm->finish_me)
 		complete_all(fm->finish_me);
 	else if (!fm->socket_change_set)
-		writel(TIFM_IRQ_ENABLE, fm->addr + FM_SET_INTERRUPT_ENABLE);
+		pete_writel("drivers/misc/tifm_7xx1.c:70", TIFM_IRQ_ENABLE, fm->addr + FM_SET_INTERRUPT_ENABLE);
 	else
 		tifm_queue_work(&fm->media_switcher);
 
@@ -80,49 +80,49 @@ static unsigned char tifm_7xx1_toggle_sock_power(char __iomem *sock_addr)
 	unsigned int s_state;
 	int cnt;
 
-	writel(0x0e00, sock_addr + SOCK_CONTROL);
+	pete_writel("drivers/misc/tifm_7xx1.c:83", 0x0e00, sock_addr + SOCK_CONTROL);
 
 	for (cnt = 16; cnt <= 256; cnt <<= 1) {
 		if (!(TIFM_SOCK_STATE_POWERED
-		      & readl(sock_addr + SOCK_PRESENT_STATE)))
+		      & pete_readl("drivers/misc/tifm_7xx1.c:87", sock_addr + SOCK_PRESENT_STATE)))
 			break;
 
 		msleep(cnt);
 	}
 
-	s_state = readl(sock_addr + SOCK_PRESENT_STATE);
+	s_state = pete_readl("drivers/misc/tifm_7xx1.c:93", sock_addr + SOCK_PRESENT_STATE);
 	if (!(TIFM_SOCK_STATE_OCCUPIED & s_state))
 		return 0;
 
-	writel(readl(sock_addr + SOCK_CONTROL) | TIFM_CTRL_LED,
+	pete_writel("drivers/misc/tifm_7xx1.c:97", pete_readl("drivers/misc/tifm_7xx1.c:97", sock_addr + SOCK_CONTROL) | TIFM_CTRL_LED,
 	       sock_addr + SOCK_CONTROL);
 
 	/* xd needs some extra time before power on */
-	if (((readl(sock_addr + SOCK_PRESENT_STATE) >> 4) & 7)
+	if (((pete_readl("drivers/misc/tifm_7xx1.c:101", sock_addr + SOCK_PRESENT_STATE) >> 4) & 7)
 	    == TIFM_TYPE_XD)
 		msleep(40);
 
-	writel((s_state & TIFM_CTRL_POWER_MASK) | 0x0c00,
+	pete_writel("drivers/misc/tifm_7xx1.c:105", (s_state & TIFM_CTRL_POWER_MASK) | 0x0c00,
 	       sock_addr + SOCK_CONTROL);
 	/* wait for power to stabilize */
 	msleep(20);
 	for (cnt = 16; cnt <= 256; cnt <<= 1) {
 		if ((TIFM_SOCK_STATE_POWERED
-		     & readl(sock_addr + SOCK_PRESENT_STATE)))
+		     & pete_readl("drivers/misc/tifm_7xx1.c:111", sock_addr + SOCK_PRESENT_STATE)))
 			break;
 
 		msleep(cnt);
 	}
 
-	writel(readl(sock_addr + SOCK_CONTROL) & (~TIFM_CTRL_LED),
+	pete_writel("drivers/misc/tifm_7xx1.c:117", pete_readl("drivers/misc/tifm_7xx1.c:117", sock_addr + SOCK_CONTROL) & (~TIFM_CTRL_LED),
 	       sock_addr + SOCK_CONTROL);
 
-	return (readl(sock_addr + SOCK_PRESENT_STATE) >> 4) & 7;
+	return (pete_readl("drivers/misc/tifm_7xx1.c:120", sock_addr + SOCK_PRESENT_STATE) >> 4) & 7;
 }
 
 inline static void tifm_7xx1_sock_power_off(char __iomem *sock_addr)
 {
-	writel((~TIFM_CTRL_POWER_MASK) & readl(sock_addr + SOCK_CONTROL),
+	pete_writel("drivers/misc/tifm_7xx1.c:125", (~TIFM_CTRL_POWER_MASK) & pete_readl("drivers/misc/tifm_7xx1.c:125", sock_addr + SOCK_CONTROL),
 	       sock_addr + SOCK_CONTROL);
 }
 
@@ -168,7 +168,7 @@ static void tifm_7xx1_switch_media(struct work_struct *work)
 			device_unregister(&sock->dev);
 			spin_lock_irqsave(&fm->lock, flags);
 			tifm_7xx1_sock_power_off(sock_addr);
-			writel(0x0e00, sock_addr + SOCK_CONTROL);
+			pete_writel("drivers/misc/tifm_7xx1.c:171", 0x0e00, sock_addr + SOCK_CONTROL);
 		}
 
 		spin_unlock_irqrestore(&fm->lock, flags);
@@ -195,15 +195,15 @@ static void tifm_7xx1_switch_media(struct work_struct *work)
 		spin_lock_irqsave(&fm->lock, flags);
 	}
 
-	writel(TIFM_IRQ_FIFOMASK(socket_change_set)
+	pete_writel("drivers/misc/tifm_7xx1.c:198", TIFM_IRQ_FIFOMASK(socket_change_set)
 	       | TIFM_IRQ_CARDMASK(socket_change_set),
 	       fm->addr + FM_CLEAR_INTERRUPT_ENABLE);
 
-	writel(TIFM_IRQ_FIFOMASK(socket_change_set)
+	pete_writel("drivers/misc/tifm_7xx1.c:202", TIFM_IRQ_FIFOMASK(socket_change_set)
 	       | TIFM_IRQ_CARDMASK(socket_change_set),
 	       fm->addr + FM_SET_INTERRUPT_ENABLE);
 
-	writel(TIFM_IRQ_ENABLE, fm->addr + FM_SET_INTERRUPT_ENABLE);
+	pete_writel("drivers/misc/tifm_7xx1.c:206", TIFM_IRQ_ENABLE, fm->addr + FM_SET_INTERRUPT_ENABLE);
 	spin_unlock_irqrestore(&fm->lock, flags);
 }
 
@@ -256,7 +256,7 @@ static int __maybe_unused tifm_7xx1_resume(struct device *dev_d)
 		}
 	}
 
-	writel(TIFM_IRQ_ENABLE | TIFM_IRQ_SOCKMASK((1 << fm->num_sockets) - 1),
+	pete_writel("drivers/misc/tifm_7xx1.c:259", TIFM_IRQ_ENABLE | TIFM_IRQ_SOCKMASK((1 << fm->num_sockets) - 1),
 	       fm->addr + FM_SET_INTERRUPT_ENABLE);
 	dev_dbg(&dev->dev, "change sets on resume: good %x, bad %x\n",
 		good_sockets, bad_sockets);
@@ -267,10 +267,10 @@ static int __maybe_unused tifm_7xx1_resume(struct device *dev_d)
 		spin_unlock_irqrestore(&fm->lock, flags);
 		timeout = wait_for_completion_timeout(&finish_resume, HZ);
 		dev_dbg(&dev->dev, "wait returned %lu\n", timeout);
-		writel(TIFM_IRQ_FIFOMASK(good_sockets)
+		pete_writel("drivers/misc/tifm_7xx1.c:270", TIFM_IRQ_FIFOMASK(good_sockets)
 		       | TIFM_IRQ_CARDMASK(good_sockets),
 		       fm->addr + FM_CLEAR_INTERRUPT_ENABLE);
-		writel(TIFM_IRQ_FIFOMASK(good_sockets)
+		pete_writel("drivers/misc/tifm_7xx1.c:273", TIFM_IRQ_FIFOMASK(good_sockets)
 		       | TIFM_IRQ_CARDMASK(good_sockets),
 		       fm->addr + FM_SET_INTERRUPT_ENABLE);
 		spin_lock_irqsave(&fm->lock, flags);
@@ -283,7 +283,7 @@ static int __maybe_unused tifm_7xx1_resume(struct device *dev_d)
 		tifm_queue_work(&fm->media_switcher);
 
 	spin_unlock_irqrestore(&fm->lock, flags);
-	writel(TIFM_IRQ_ENABLE,
+	pete_writel("drivers/misc/tifm_7xx1.c:286", TIFM_IRQ_ENABLE,
 	       fm->addr + FM_SET_INTERRUPT_ENABLE);
 
 	return 0;
@@ -355,9 +355,9 @@ static int tifm_7xx1_probe(struct pci_dev *dev,
 	if (rc)
 		goto err_out_irq;
 
-	writel(TIFM_IRQ_ENABLE | TIFM_IRQ_SOCKMASK((1 << fm->num_sockets) - 1),
+	pete_writel("drivers/misc/tifm_7xx1.c:358", TIFM_IRQ_ENABLE | TIFM_IRQ_SOCKMASK((1 << fm->num_sockets) - 1),
 	       fm->addr + FM_CLEAR_INTERRUPT_ENABLE);
-	writel(TIFM_IRQ_ENABLE | TIFM_IRQ_SOCKMASK((1 << fm->num_sockets) - 1),
+	pete_writel("drivers/misc/tifm_7xx1.c:360", TIFM_IRQ_ENABLE | TIFM_IRQ_SOCKMASK((1 << fm->num_sockets) - 1),
 	       fm->addr + FM_SET_INTERRUPT_ENABLE);
 	return 0;
 
@@ -383,7 +383,7 @@ static void tifm_7xx1_remove(struct pci_dev *dev)
 
 	fm->eject = tifm_7xx1_dummy_eject;
 	fm->has_ms_pif = tifm_7xx1_dummy_has_ms_pif;
-	writel(TIFM_IRQ_SETALL, fm->addr + FM_CLEAR_INTERRUPT_ENABLE);
+	pete_writel("drivers/misc/tifm_7xx1.c:386", TIFM_IRQ_SETALL, fm->addr + FM_CLEAR_INTERRUPT_ENABLE);
 	free_irq(dev->irq, fm);
 
 	tifm_remove_adapter(fm);

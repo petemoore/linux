@@ -56,8 +56,8 @@
 #define	write_counter(V, MC)	writeq(V, MC)
 #define	read_counter(MC)	readq(MC)
 #else
-#define	write_counter(V, MC)	writel(V, MC)
-#define	read_counter(MC)	readl(MC)
+#define	write_counter(V, MC)	pete_writel("drivers/char/hpet.c:59", V, MC)
+#define	read_counter(MC)	pete_readl("drivers/char/hpet.c:60", MC)
 #endif
 
 static DEFINE_MUTEX(hpet_mutex); /* replaces BKL */
@@ -124,15 +124,15 @@ static struct hpets *hpets;
 #ifndef readq
 static inline unsigned long long readq(void __iomem *addr)
 {
-	return readl(addr) | (((unsigned long long)readl(addr + 4)) << 32LL);
+	return pete_readl("drivers/char/hpet.c:127", addr) | (((unsigned long long)pete_readl("drivers/char/hpet.c:127", addr + 4)) << 32LL);
 }
 #endif
 
 #ifndef writeq
 static inline void writeq(unsigned long long v, void __iomem *addr)
 {
-	writel(v & 0xffffffff, addr);
-	writel(v >> 32, addr + 4);
+	pete_writel("drivers/char/hpet.c:134", v & 0xffffffff, addr);
+	pete_writel("drivers/char/hpet.c:135", v >> 32, addr + 4);
 }
 #endif
 
@@ -145,7 +145,7 @@ static irqreturn_t hpet_interrupt(int irq, void *data)
 	isr = 1 << (devp - devp->hd_hpets->hp_dev);
 
 	if ((devp->hd_flags & HPET_SHARED_IRQ) &&
-	    !(isr & readl(&devp->hd_hpet->hpet_isr)))
+	    !(isr & pete_readl("drivers/char/hpet.c:148", &devp->hd_hpet->hpet_isr)))
 		return IRQ_NONE;
 
 	spin_lock(&hpet_lock);
@@ -185,7 +185,7 @@ static irqreturn_t hpet_interrupt(int irq, void *data)
 	}
 
 	if (devp->hd_flags & HPET_SHARED_IRQ)
-		writel(isr, &devp->hd_hpet->hpet_isr);
+		pete_writel("drivers/char/hpet.c:188", isr, &devp->hd_hpet->hpet_isr);
 	spin_unlock(&hpet_lock);
 
 	wake_up_interruptible(&devp->hd_waitqueue);
@@ -210,10 +210,10 @@ static void hpet_timer_set_irq(struct hpet_dev *devp)
 	timer = devp->hd_timer;
 
 	/* we prefer level triggered mode */
-	v = readl(&timer->hpet_config);
+	v = pete_readl("drivers/char/hpet.c:213", &timer->hpet_config);
 	if (!(v & Tn_INT_TYPE_CNF_MASK)) {
 		v |= Tn_INT_TYPE_CNF_MASK;
-		writel(v, &timer->hpet_config);
+		pete_writel("drivers/char/hpet.c:216", v, &timer->hpet_config);
 	}
 	spin_unlock_irq(&hpet_lock);
 
@@ -245,9 +245,9 @@ static void hpet_timer_set_irq(struct hpet_dev *devp)
 
 	if (irq < HPET_MAX_IRQ) {
 		spin_lock_irq(&hpet_lock);
-		v = readl(&timer->hpet_config);
+		v = pete_readl("drivers/char/hpet.c:248", &timer->hpet_config);
 		v |= irq << Tn_INT_ROUTE_CNF_SHIFT;
-		writel(v, &timer->hpet_config);
+		pete_writel("drivers/char/hpet.c:250", v, &timer->hpet_config);
 		devp->hd_hdwirq = gsi;
 		spin_unlock_irq(&hpet_lock);
 	}
@@ -475,7 +475,7 @@ static int hpet_ioctl_ieon(struct hpet_dev *devp)
 
 	devp->hd_flags |= HPET_IE;
 
-	if (readl(&timer->hpet_config) & Tn_INT_TYPE_CNF_MASK)
+	if (pete_readl("drivers/char/hpet.c:478", &timer->hpet_config) & Tn_INT_TYPE_CNF_MASK)
 		devp->hd_flags |= HPET_SHARED_IRQ;
 	spin_unlock_irq(&hpet_lock);
 
@@ -490,13 +490,13 @@ static int hpet_ioctl_ieon(struct hpet_dev *devp)
 			 * unwanted interrupt status bit, program the timer
 			 * so that it will not fire in the near future ...
 			 */
-			writel(readl(&timer->hpet_config) & ~Tn_TYPE_CNF_MASK,
+			pete_writel("drivers/char/hpet.c:493", pete_readl("drivers/char/hpet.c:493", &timer->hpet_config) & ~Tn_TYPE_CNF_MASK,
 			       &timer->hpet_config);
 			write_counter(read_counter(&hpet->hpet_mc),
 				      &timer->hpet_compare);
 			/* ... and clear any left-over status. */
 			isr = 1 << (devp - devp->hd_hpets->hp_dev);
-			writel(isr, &hpet->hpet_isr);
+			pete_writel("drivers/char/hpet.c:499", isr, &hpet->hpet_isr);
 		}
 
 		sprintf(devp->hd_name, "hpet%d", (int)(devp - hpetp->hp_dev));
@@ -552,7 +552,7 @@ static int hpet_ioctl_ieon(struct hpet_dev *devp)
 
 	if (devp->hd_flags & HPET_SHARED_IRQ) {
 		isr = 1 << (devp - devp->hd_hpets->hp_dev);
-		writel(isr, &hpet->hpet_isr);
+		pete_writel("drivers/char/hpet.c:555", isr, &hpet->hpet_isr);
 	}
 	writeq(g, &timer->hpet_config);
 	local_irq_restore(flags);

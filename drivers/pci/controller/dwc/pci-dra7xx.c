@@ -102,13 +102,13 @@ struct dra7xx_pcie_of_data {
 
 static inline u32 dra7xx_pcie_readl(struct dra7xx_pcie *pcie, u32 offset)
 {
-	return readl(pcie->base + offset);
+	return pete_readl("drivers/pci/controller/dwc/pci-dra7xx.c:105", pcie->base + offset);
 }
 
 static inline void dra7xx_pcie_writel(struct dra7xx_pcie *pcie, u32 offset,
 				      u32 value)
 {
-	writel(value, pcie->base + offset);
+	pete_writel("drivers/pci/controller/dwc/pci-dra7xx.c:111", value, pcie->base + offset);
 }
 
 static u64 dra7xx_pcie_cpu_addr_fixup(struct dw_pcie *pci, u64 pci_addr)

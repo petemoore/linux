@@ -71,8 +71,8 @@ extern void bcm_dma_start(void __iomem *dma_chan_base,
 {
 	dsb(sy);	/* ARM data synchronization (push) operation */
 
-	writel(control_block, dma_chan_base + BCM2708_DMA_ADDR);
-	writel(BCM2708_DMA_ACTIVE, dma_chan_base + BCM2708_DMA_CS);
+	pete_writel("drivers/dma/bcm2708-dmaengine.c:74", control_block, dma_chan_base + BCM2708_DMA_ADDR);
+	pete_writel("drivers/dma/bcm2708-dmaengine.c:75", BCM2708_DMA_ACTIVE, dma_chan_base + BCM2708_DMA_CS);
 }
 EXPORT_SYMBOL_GPL(bcm_dma_start);
 
@@ -81,7 +81,7 @@ extern void bcm_dma_wait_idle(void __iomem *dma_chan_base)
 	dsb(sy);
 
 	/* ugly busy wait only option for now */
-	while (readl(dma_chan_base + BCM2708_DMA_CS) & BCM2708_DMA_ACTIVE)
+	while (pete_readl("drivers/dma/bcm2708-dmaengine.c:84", dma_chan_base + BCM2708_DMA_CS) & BCM2708_DMA_ACTIVE)
 		cpu_relax();
 }
 EXPORT_SYMBOL_GPL(bcm_dma_wait_idle);
@@ -90,7 +90,7 @@ extern bool bcm_dma_is_busy(void __iomem *dma_chan_base)
 {
 	dsb(sy);
 
-	return readl(dma_chan_base + BCM2708_DMA_CS) & BCM2708_DMA_ACTIVE;
+	return pete_readl("drivers/dma/bcm2708-dmaengine.c:93", dma_chan_base + BCM2708_DMA_CS) & BCM2708_DMA_ACTIVE;
 }
 EXPORT_SYMBOL_GPL(bcm_dma_is_busy);
 
@@ -108,17 +108,17 @@ extern int bcm_dma_abort(void __iomem *dma_chan_base)
 	unsigned long int cs;
 	int rc = 0;
 
-	cs = readl(dma_chan_base + BCM2708_DMA_CS);
+	cs = pete_readl("drivers/dma/bcm2708-dmaengine.c:111", dma_chan_base + BCM2708_DMA_CS);
 
 	if (BCM2708_DMA_ACTIVE & cs) {
 		long int timeout = 10000;
 
 		/* write 0 to the active bit - pause the DMA */
-		writel(0, dma_chan_base + BCM2708_DMA_CS);
+		pete_writel("drivers/dma/bcm2708-dmaengine.c:117", 0, dma_chan_base + BCM2708_DMA_CS);
 
 		/* wait for any current AXI transfer to complete */
 		while (0 != (cs & BCM2708_DMA_ISPAUSED) && --timeout >= 0)
-			cs = readl(dma_chan_base + BCM2708_DMA_CS);
+			cs = pete_readl("drivers/dma/bcm2708-dmaengine.c:121", dma_chan_base + BCM2708_DMA_CS);
 
 		if (0 != (cs & BCM2708_DMA_ISPAUSED)) {
 			/* we'll un-pause when we set of our next DMA */
@@ -126,10 +126,10 @@ extern int bcm_dma_abort(void __iomem *dma_chan_base)
 
 		} else if (BCM2708_DMA_ACTIVE & cs) {
 			/* terminate the control block chain */
-			writel(0, dma_chan_base + BCM2708_DMA_NEXTCB);
+			pete_writel("drivers/dma/bcm2708-dmaengine.c:129", 0, dma_chan_base + BCM2708_DMA_NEXTCB);
 
 			/* abort the whole DMA */
-			writel(BCM2708_DMA_ABORT | BCM2708_DMA_ACTIVE,
+			pete_writel("drivers/dma/bcm2708-dmaengine.c:132", BCM2708_DMA_ABORT | BCM2708_DMA_ACTIVE,
 			       dma_chan_base + BCM2708_DMA_CS);
 		}
 	}

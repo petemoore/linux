@@ -701,13 +701,13 @@ static void cdns_dsi_bridge_disable(struct drm_bridge *bridge)
 	struct cdns_dsi *dsi = input_to_dsi(input);
 	u32 val;
 
-	val = readl(dsi->regs + MCTL_MAIN_DATA_CTL);
+	val = pete_readl("drivers/gpu/drm/bridge/cdns-dsi.c:704", dsi->regs + MCTL_MAIN_DATA_CTL);
 	val &= ~(IF_VID_SELECT_MASK | IF_VID_MODE | VID_EN | HOST_EOT_GEN |
 		 DISP_EOT_GEN);
-	writel(val, dsi->regs + MCTL_MAIN_DATA_CTL);
+	pete_writel("drivers/gpu/drm/bridge/cdns-dsi.c:707", val, dsi->regs + MCTL_MAIN_DATA_CTL);
 
-	val = readl(dsi->regs + MCTL_MAIN_EN) & ~IF_EN(input->id);
-	writel(val, dsi->regs + MCTL_MAIN_EN);
+	val = pete_readl("drivers/gpu/drm/bridge/cdns-dsi.c:709", dsi->regs + MCTL_MAIN_EN) & ~IF_EN(input->id);
+	pete_writel("drivers/gpu/drm/bridge/cdns-dsi.c:710", val, dsi->regs + MCTL_MAIN_EN);
 	pm_runtime_put(dsi->base.dev);
 }
 
@@ -720,7 +720,7 @@ static void cdns_dsi_hs_init(struct cdns_dsi *dsi)
 	 * Power all internal DPHY blocks down and maintain their reset line
 	 * asserted before changing the DPHY config.
 	 */
-	writel(DPHY_CMN_PSO | DPHY_PLL_PSO | DPHY_ALL_D_PDN | DPHY_C_PDN |
+	pete_writel("drivers/gpu/drm/bridge/cdns-dsi.c:723", DPHY_CMN_PSO | DPHY_PLL_PSO | DPHY_ALL_D_PDN | DPHY_C_PDN |
 	       DPHY_CMN_PDN | DPHY_PLL_PDN,
 	       dsi->regs + MCTL_DPHY_CFG0);
 
@@ -730,13 +730,13 @@ static void cdns_dsi_hs_init(struct cdns_dsi *dsi)
 	phy_power_on(dsi->dphy);
 
 	/* Activate the PLL and wait until it's locked. */
-	writel(PLL_LOCKED, dsi->regs + MCTL_MAIN_STS_CLR);
-	writel(DPHY_CMN_PSO | DPHY_ALL_D_PDN | DPHY_C_PDN | DPHY_CMN_PDN,
+	pete_writel("drivers/gpu/drm/bridge/cdns-dsi.c:733", PLL_LOCKED, dsi->regs + MCTL_MAIN_STS_CLR);
+	pete_writel("drivers/gpu/drm/bridge/cdns-dsi.c:734", DPHY_CMN_PSO | DPHY_ALL_D_PDN | DPHY_C_PDN | DPHY_CMN_PDN,
 	       dsi->regs + MCTL_DPHY_CFG0);
 	WARN_ON_ONCE(readl_poll_timeout(dsi->regs + MCTL_MAIN_STS, status,
 					status & PLL_LOCKED, 100, 100));
 	/* De-assert data and clock reset lines. */
-	writel(DPHY_CMN_PSO | DPHY_ALL_D_PDN | DPHY_C_PDN | DPHY_CMN_PDN |
+	pete_writel("drivers/gpu/drm/bridge/cdns-dsi.c:739", DPHY_CMN_PSO | DPHY_ALL_D_PDN | DPHY_C_PDN | DPHY_CMN_PDN |
 	       DPHY_D_RSTB(output->dev->lanes) | DPHY_C_RSTB,
 	       dsi->regs + MCTL_DPHY_CFG0);
 }
@@ -758,21 +758,21 @@ static void cdns_dsi_init_link(struct cdns_dsi *dsi)
 	if (!(output->dev->mode_flags & MIPI_DSI_CLOCK_NON_CONTINUOUS))
 		val |= CLK_CONTINUOUS;
 
-	writel(val, dsi->regs + MCTL_MAIN_PHY_CTL);
+	pete_writel("drivers/gpu/drm/bridge/cdns-dsi.c:761", val, dsi->regs + MCTL_MAIN_PHY_CTL);
 
 	/* ULPOUT should be set to 1ms and is expressed in sysclk cycles. */
 	sysclk_period = NSEC_PER_SEC / clk_get_rate(dsi->dsi_sys_clk);
 	ulpout = DIV_ROUND_UP(NSEC_PER_MSEC, sysclk_period);
-	writel(CLK_LANE_ULPOUT_TIME(ulpout) | DATA_LANE_ULPOUT_TIME(ulpout),
+	pete_writel("drivers/gpu/drm/bridge/cdns-dsi.c:766", CLK_LANE_ULPOUT_TIME(ulpout) | DATA_LANE_ULPOUT_TIME(ulpout),
 	       dsi->regs + MCTL_ULPOUT_TIME);
 
-	writel(LINK_EN, dsi->regs + MCTL_MAIN_DATA_CTL);
+	pete_writel("drivers/gpu/drm/bridge/cdns-dsi.c:769", LINK_EN, dsi->regs + MCTL_MAIN_DATA_CTL);
 
 	val = CLK_LANE_EN | PLL_START;
 	for (i = 0; i < output->dev->lanes; i++)
 		val |= DATA_LANE_START(i);
 
-	writel(val, dsi->regs + MCTL_MAIN_EN);
+	pete_writel("drivers/gpu/drm/bridge/cdns-dsi.c:775", val, dsi->regs + MCTL_MAIN_EN);
 
 	dsi->link_initialized = true;
 }
@@ -800,30 +800,30 @@ static void cdns_dsi_bridge_enable(struct drm_bridge *bridge)
 	cdns_dsi_hs_init(dsi);
 	cdns_dsi_init_link(dsi);
 
-	writel(HBP_LEN(dsi_cfg.hbp) | HSA_LEN(dsi_cfg.hsa),
+	pete_writel("drivers/gpu/drm/bridge/cdns-dsi.c:803", HBP_LEN(dsi_cfg.hbp) | HSA_LEN(dsi_cfg.hsa),
 	       dsi->regs + VID_HSIZE1);
-	writel(HFP_LEN(dsi_cfg.hfp) | HACT_LEN(dsi_cfg.hact),
+	pete_writel("drivers/gpu/drm/bridge/cdns-dsi.c:805", HFP_LEN(dsi_cfg.hfp) | HACT_LEN(dsi_cfg.hact),
 	       dsi->regs + VID_HSIZE2);
 
-	writel(VBP_LEN(mode->crtc_vtotal - mode->crtc_vsync_end - 1) |
+	pete_writel("drivers/gpu/drm/bridge/cdns-dsi.c:808", VBP_LEN(mode->crtc_vtotal - mode->crtc_vsync_end - 1) |
 	       VFP_LEN(mode->crtc_vsync_start - mode->crtc_vdisplay) |
 	       VSA_LEN(mode->crtc_vsync_end - mode->crtc_vsync_start + 1),
 	       dsi->regs + VID_VSIZE1);
-	writel(mode->crtc_vdisplay, dsi->regs + VID_VSIZE2);
+	pete_writel("drivers/gpu/drm/bridge/cdns-dsi.c:812", mode->crtc_vdisplay, dsi->regs + VID_VSIZE2);
 
 	tmp = dsi_cfg.htotal -
 	      (dsi_cfg.hsa + DSI_BLANKING_FRAME_OVERHEAD +
 	       DSI_HSA_FRAME_OVERHEAD);
-	writel(BLK_LINE_PULSE_PKT_LEN(tmp), dsi->regs + VID_BLKSIZE2);
+	pete_writel("drivers/gpu/drm/bridge/cdns-dsi.c:817", BLK_LINE_PULSE_PKT_LEN(tmp), dsi->regs + VID_BLKSIZE2);
 	if (output->dev->mode_flags & MIPI_DSI_MODE_VIDEO_SYNC_PULSE)
-		writel(MAX_LINE_LIMIT(tmp - DSI_NULL_FRAME_OVERHEAD),
+		pete_writel("drivers/gpu/drm/bridge/cdns-dsi.c:819", MAX_LINE_LIMIT(tmp - DSI_NULL_FRAME_OVERHEAD),
 		       dsi->regs + VID_VCA_SETTING2);
 
 	tmp = dsi_cfg.htotal -
 	      (DSI_HSS_VSS_VSE_FRAME_OVERHEAD + DSI_BLANKING_FRAME_OVERHEAD);
-	writel(BLK_LINE_EVENT_PKT_LEN(tmp), dsi->regs + VID_BLKSIZE1);
+	pete_writel("drivers/gpu/drm/bridge/cdns-dsi.c:824", BLK_LINE_EVENT_PKT_LEN(tmp), dsi->regs + VID_BLKSIZE1);
 	if (!(output->dev->mode_flags & MIPI_DSI_MODE_VIDEO_SYNC_PULSE))
-		writel(MAX_LINE_LIMIT(tmp - DSI_NULL_FRAME_OVERHEAD),
+		pete_writel("drivers/gpu/drm/bridge/cdns-dsi.c:826", MAX_LINE_LIMIT(tmp - DSI_NULL_FRAME_OVERHEAD),
 		       dsi->regs + VID_VCA_SETTING2);
 
 	tmp = DIV_ROUND_UP(dsi_cfg.htotal, nlanes) -
@@ -835,7 +835,7 @@ static void cdns_dsi_bridge_enable(struct drm_bridge *bridge)
 	tx_byte_period = DIV_ROUND_DOWN_ULL((u64)NSEC_PER_SEC * 8,
 					    phy_cfg->hs_clk_rate);
 	reg_wakeup = (phy_cfg->hs_prepare + phy_cfg->hs_zero) / tx_byte_period;
-	writel(REG_WAKEUP_TIME(reg_wakeup) | REG_LINE_DURATION(tmp),
+	pete_writel("drivers/gpu/drm/bridge/cdns-dsi.c:838", REG_WAKEUP_TIME(reg_wakeup) | REG_LINE_DURATION(tmp),
 	       dsi->regs + VID_DPHY_TIME);
 
 	/*
@@ -856,10 +856,10 @@ static void cdns_dsi_bridge_enable(struct drm_bridge *bridge)
 	if (tmp > HSTX_TIMEOUT_MAX)
 		tmp = HSTX_TIMEOUT_MAX;
 
-	writel(CLK_DIV(div) | HSTX_TIMEOUT(tmp),
+	pete_writel("drivers/gpu/drm/bridge/cdns-dsi.c:859", CLK_DIV(div) | HSTX_TIMEOUT(tmp),
 	       dsi->regs + MCTL_DPHY_TIMEOUT1);
 
-	writel(LPRX_TIMEOUT(tmp), dsi->regs + MCTL_DPHY_TIMEOUT2);
+	pete_writel("drivers/gpu/drm/bridge/cdns-dsi.c:862", LPRX_TIMEOUT(tmp), dsi->regs + MCTL_DPHY_TIMEOUT2);
 
 	if (output->dev->mode_flags & MIPI_DSI_MODE_VIDEO) {
 		switch (output->dev->format) {
@@ -896,10 +896,10 @@ static void cdns_dsi_bridge_enable(struct drm_bridge *bridge)
 		       RECOVERY_MODE(RECOVERY_MODE_NEXT_HSYNC) |
 		       VID_IGNORE_MISS_VSYNC;
 
-		writel(tmp, dsi->regs + VID_MAIN_CTL);
+		pete_writel("drivers/gpu/drm/bridge/cdns-dsi.c:899", tmp, dsi->regs + VID_MAIN_CTL);
 	}
 
-	tmp = readl(dsi->regs + MCTL_MAIN_DATA_CTL);
+	tmp = pete_readl("drivers/gpu/drm/bridge/cdns-dsi.c:902", dsi->regs + MCTL_MAIN_DATA_CTL);
 	tmp &= ~(IF_VID_SELECT_MASK | HOST_EOT_GEN | IF_VID_MODE);
 
 	if (!(output->dev->mode_flags & MIPI_DSI_MODE_NO_EOT_PACKET))
@@ -908,10 +908,10 @@ static void cdns_dsi_bridge_enable(struct drm_bridge *bridge)
 	if (output->dev->mode_flags & MIPI_DSI_MODE_VIDEO)
 		tmp |= IF_VID_MODE | IF_VID_SELECT(input->id) | VID_EN;
 
-	writel(tmp, dsi->regs + MCTL_MAIN_DATA_CTL);
+	pete_writel("drivers/gpu/drm/bridge/cdns-dsi.c:911", tmp, dsi->regs + MCTL_MAIN_DATA_CTL);
 
-	tmp = readl(dsi->regs + MCTL_MAIN_EN) | IF_EN(input->id);
-	writel(tmp, dsi->regs + MCTL_MAIN_EN);
+	tmp = pete_readl("drivers/gpu/drm/bridge/cdns-dsi.c:913", dsi->regs + MCTL_MAIN_EN) | IF_EN(input->id);
+	pete_writel("drivers/gpu/drm/bridge/cdns-dsi.c:914", tmp, dsi->regs + MCTL_MAIN_EN);
 }
 
 static const struct drm_bridge_funcs cdns_dsi_bridge_funcs = {
@@ -1008,11 +1008,11 @@ static irqreturn_t cdns_dsi_interrupt(int irq, void *data)
 	irqreturn_t ret = IRQ_NONE;
 	u32 flag, ctl;
 
-	flag = readl(dsi->regs + DIRECT_CMD_STS_FLAG);
+	flag = pete_readl("drivers/gpu/drm/bridge/cdns-dsi.c:1011", dsi->regs + DIRECT_CMD_STS_FLAG);
 	if (flag) {
-		ctl = readl(dsi->regs + DIRECT_CMD_STS_CTL);
+		ctl = pete_readl("drivers/gpu/drm/bridge/cdns-dsi.c:1013", dsi->regs + DIRECT_CMD_STS_CTL);
 		ctl &= ~flag;
-		writel(ctl, dsi->regs + DIRECT_CMD_STS_CTL);
+		pete_writel("drivers/gpu/drm/bridge/cdns-dsi.c:1015", ctl, dsi->regs + DIRECT_CMD_STS_CTL);
 		complete(&dsi->direct_cmd_comp);
 		ret = IRQ_HANDLED;
 	}
@@ -1078,10 +1078,10 @@ static ssize_t cdns_dsi_transfer(struct mipi_dsi_host *host,
 		ctl = BTA_EN;
 	}
 
-	writel(readl(dsi->regs + MCTL_MAIN_DATA_CTL) | ctl,
+	pete_writel("drivers/gpu/drm/bridge/cdns-dsi.c:1081", pete_readl("drivers/gpu/drm/bridge/cdns-dsi.c:1081", dsi->regs + MCTL_MAIN_DATA_CTL) | ctl,
 	       dsi->regs + MCTL_MAIN_DATA_CTL);
 
-	writel(cmd, dsi->regs + DIRECT_CMD_MAIN_SETTINGS);
+	pete_writel("drivers/gpu/drm/bridge/cdns-dsi.c:1084", cmd, dsi->regs + DIRECT_CMD_MAIN_SETTINGS);
 
 	for (i = 0; i < tx_len; i += 4) {
 		const u8 *buf = msg->tx_buf;
@@ -1091,23 +1091,23 @@ static ssize_t cdns_dsi_transfer(struct mipi_dsi_host *host,
 		for (j = 0; j < 4 && j + i < tx_len; j++)
 			val |= (u32)buf[i + j] << (8 * j);
 
-		writel(val, dsi->regs + DIRECT_CMD_WRDATA);
+		pete_writel("drivers/gpu/drm/bridge/cdns-dsi.c:1094", val, dsi->regs + DIRECT_CMD_WRDATA);
 	}
 
 	/* Clear status flags before sending the command. */
-	writel(wait, dsi->regs + DIRECT_CMD_STS_CLR);
-	writel(wait, dsi->regs + DIRECT_CMD_STS_CTL);
+	pete_writel("drivers/gpu/drm/bridge/cdns-dsi.c:1098", wait, dsi->regs + DIRECT_CMD_STS_CLR);
+	pete_writel("drivers/gpu/drm/bridge/cdns-dsi.c:1099", wait, dsi->regs + DIRECT_CMD_STS_CTL);
 	reinit_completion(&dsi->direct_cmd_comp);
-	writel(0, dsi->regs + DIRECT_CMD_SEND);
+	pete_writel("drivers/gpu/drm/bridge/cdns-dsi.c:1101", 0, dsi->regs + DIRECT_CMD_SEND);
 
 	wait_for_completion_timeout(&dsi->direct_cmd_comp,
 				    msecs_to_jiffies(1000));
 
-	sts = readl(dsi->regs + DIRECT_CMD_STS);
-	writel(wait, dsi->regs + DIRECT_CMD_STS_CLR);
-	writel(0, dsi->regs + DIRECT_CMD_STS_CTL);
+	sts = pete_readl("drivers/gpu/drm/bridge/cdns-dsi.c:1106", dsi->regs + DIRECT_CMD_STS);
+	pete_writel("drivers/gpu/drm/bridge/cdns-dsi.c:1107", wait, dsi->regs + DIRECT_CMD_STS_CLR);
+	pete_writel("drivers/gpu/drm/bridge/cdns-dsi.c:1108", 0, dsi->regs + DIRECT_CMD_STS_CTL);
 
-	writel(readl(dsi->regs + MCTL_MAIN_DATA_CTL) & ~ctl,
+	pete_writel("drivers/gpu/drm/bridge/cdns-dsi.c:1110", pete_readl("drivers/gpu/drm/bridge/cdns-dsi.c:1110", dsi->regs + MCTL_MAIN_DATA_CTL) & ~ctl,
 	       dsi->regs + MCTL_MAIN_DATA_CTL);
 
 	/* We did not receive the events we were waiting for. */
@@ -1126,7 +1126,7 @@ static ssize_t cdns_dsi_transfer(struct mipi_dsi_host *host,
 		u8 *buf = msg->rx_buf;
 		int j;
 
-		val = readl(dsi->regs + DIRECT_CMD_RDDATA);
+		val = pete_readl("drivers/gpu/drm/bridge/cdns-dsi.c:1129", dsi->regs + DIRECT_CMD_RDDATA);
 		for (j = 0; j < 4 && j + i < rx_len; j++)
 			buf[i + j] = val >> (8 * j);
 	}
@@ -1213,21 +1213,21 @@ static int cdns_dsi_drm_probe(struct platform_device *pdev)
 	if (ret)
 		return ret;
 
-	val = readl(dsi->regs + ID_REG);
+	val = pete_readl("drivers/gpu/drm/bridge/cdns-dsi.c:1216", dsi->regs + ID_REG);
 	if (REV_VENDOR_ID(val) != 0xcad) {
 		dev_err(&pdev->dev, "invalid vendor id\n");
 		ret = -EINVAL;
 		goto err_disable_pclk;
 	}
 
-	val = readl(dsi->regs + IP_CONF);
+	val = pete_readl("drivers/gpu/drm/bridge/cdns-dsi.c:1223", dsi->regs + IP_CONF);
 	dsi->direct_cmd_fifo_depth = 1 << (DIRCMD_FIFO_DEPTH(val) + 2);
 	dsi->rx_fifo_depth = RX_FIFO_DEPTH(val);
 	init_completion(&dsi->direct_cmd_comp);
 
-	writel(0, dsi->regs + MCTL_MAIN_DATA_CTL);
-	writel(0, dsi->regs + MCTL_MAIN_EN);
-	writel(0, dsi->regs + MCTL_MAIN_PHY_CTL);
+	pete_writel("drivers/gpu/drm/bridge/cdns-dsi.c:1228", 0, dsi->regs + MCTL_MAIN_DATA_CTL);
+	pete_writel("drivers/gpu/drm/bridge/cdns-dsi.c:1229", 0, dsi->regs + MCTL_MAIN_EN);
+	pete_writel("drivers/gpu/drm/bridge/cdns-dsi.c:1230", 0, dsi->regs + MCTL_MAIN_PHY_CTL);
 
 	/*
 	 * We only support the DPI input, so force input->id to
@@ -1238,14 +1238,14 @@ static int cdns_dsi_drm_probe(struct platform_device *pdev)
 	input->bridge.of_node = pdev->dev.of_node;
 
 	/* Mask all interrupts before registering the IRQ handler. */
-	writel(0, dsi->regs + MCTL_MAIN_STS_CTL);
-	writel(0, dsi->regs + MCTL_DPHY_ERR_CTL1);
-	writel(0, dsi->regs + CMD_MODE_STS_CTL);
-	writel(0, dsi->regs + DIRECT_CMD_STS_CTL);
-	writel(0, dsi->regs + DIRECT_CMD_RD_STS_CTL);
-	writel(0, dsi->regs + VID_MODE_STS_CTL);
-	writel(0, dsi->regs + TVG_STS_CTL);
-	writel(0, dsi->regs + DPI_IRQ_EN);
+	pete_writel("drivers/gpu/drm/bridge/cdns-dsi.c:1241", 0, dsi->regs + MCTL_MAIN_STS_CTL);
+	pete_writel("drivers/gpu/drm/bridge/cdns-dsi.c:1242", 0, dsi->regs + MCTL_DPHY_ERR_CTL1);
+	pete_writel("drivers/gpu/drm/bridge/cdns-dsi.c:1243", 0, dsi->regs + CMD_MODE_STS_CTL);
+	pete_writel("drivers/gpu/drm/bridge/cdns-dsi.c:1244", 0, dsi->regs + DIRECT_CMD_STS_CTL);
+	pete_writel("drivers/gpu/drm/bridge/cdns-dsi.c:1245", 0, dsi->regs + DIRECT_CMD_RD_STS_CTL);
+	pete_writel("drivers/gpu/drm/bridge/cdns-dsi.c:1246", 0, dsi->regs + VID_MODE_STS_CTL);
+	pete_writel("drivers/gpu/drm/bridge/cdns-dsi.c:1247", 0, dsi->regs + TVG_STS_CTL);
+	pete_writel("drivers/gpu/drm/bridge/cdns-dsi.c:1248", 0, dsi->regs + DPI_IRQ_EN);
 	ret = devm_request_irq(&pdev->dev, irq, cdns_dsi_interrupt, 0,
 			       dev_name(&pdev->dev), dsi);
 	if (ret)

@@ -268,7 +268,7 @@ static void log_event_impl(const char *event, u32 param1, u32 param2)
 
 		entry = sdhost_log_buf + sdhost_log_idx;
 		memcpy(entry->event, event, 4);
-		entry->timestamp = (readl(timer_base + 4) & 0x3fffffff) +
+		entry->timestamp = (pete_readl("drivers/mmc/host/bcm2835-sdhost.c:271", timer_base + 4) & 0x3fffffff) +
 			(smp_processor_id()<<30);
 		entry->param1 = param1;
 		entry->param2 = param2;
@@ -315,12 +315,12 @@ static void log_dump(void)
 
 static inline void bcm2835_sdhost_write(struct bcm2835_host *host, u32 val, int reg)
 {
-	writel(val, host->ioaddr + reg);
+	pete_writel("drivers/mmc/host/bcm2835-sdhost.c:318", val, host->ioaddr + reg);
 }
 
 static inline u32 bcm2835_sdhost_read(struct bcm2835_host *host, int reg)
 {
-	return readl(host->ioaddr + reg);
+	return pete_readl("drivers/mmc/host/bcm2835-sdhost.c:323", host->ioaddr + reg);
 }
 
 static inline u32 bcm2835_sdhost_read_relaxed(struct bcm2835_host *host, int reg)
@@ -1266,11 +1266,11 @@ static void bcm2835_sdhost_finish_command(struct bcm2835_host *host,
 				host->cmd->error = -EILSEQ;
 			}
 
-			edm = readl(host->ioaddr + SDEDM);
+			edm = pete_readl("drivers/mmc/host/bcm2835-sdhost.c:1269", host->ioaddr + SDEDM);
 			fsm = edm & SDEDM_FSM_MASK;
 			if (fsm == SDEDM_FSM_READWAIT ||
 			    fsm == SDEDM_FSM_WRITESTART1)
-				writel(edm | SDEDM_FORCE_DATA_MODE,
+				pete_writel("drivers/mmc/host/bcm2835-sdhost.c:1273", edm | SDEDM_FORCE_DATA_MODE,
 				       host->ioaddr + SDEDM);
 			tasklet_schedule(&host->finish_tasklet);
 			return;

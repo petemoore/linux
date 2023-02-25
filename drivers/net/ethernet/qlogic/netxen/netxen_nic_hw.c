@@ -1056,9 +1056,9 @@ netxen_nic_pci_set_crbwindow_128M(struct netxen_adapter *adapter,
 	offset = PCI_OFFSET_SECOND_RANGE(adapter,
 			NETXEN_PCIX_PH_REG(PCIE_CRB_WINDOW_REG(func)));
 
-	writel(window, offset);
+	pete_writel("drivers/net/ethernet/qlogic/netxen/netxen_nic_hw.c:1059", window, offset);
 	do {
-		if (window == readl(offset))
+		if (window == pete_readl("drivers/net/ethernet/qlogic/netxen/netxen_nic_hw.c:1061", offset))
 			break;
 
 		if (printk_ratelimit())
@@ -1126,8 +1126,8 @@ netxen_nic_pci_set_crbwindow_2M(struct netxen_adapter *adapter, ulong off)
 
 	window = CRB_HI(off);
 
-	writel(window, addr);
-	if (readl(addr) != window) {
+	pete_writel("drivers/net/ethernet/qlogic/netxen/netxen_nic_hw.c:1129", window, addr);
+	if (pete_readl("drivers/net/ethernet/qlogic/netxen/netxen_nic_hw.c:1130", addr) != window) {
 		if (printk_ratelimit())
 			dev_warn(&adapter->pdev->dev,
 				"failed to set CRB window to %d off 0x%lx\n",
@@ -1176,7 +1176,7 @@ netxen_nic_hw_write_wx_128M(struct netxen_adapter *adapter, ulong off, u32 data)
 	} else {        /* Window 0 */
 		write_lock_irqsave(&adapter->ahw.crb_lock, flags);
 		netxen_nic_pci_set_crbwindow_128M(adapter, 0);
-		writel(data, addr);
+		pete_writel("drivers/net/ethernet/qlogic/netxen/netxen_nic_hw.c:1179", data, addr);
 		netxen_nic_pci_set_crbwindow_128M(adapter,
 				NETXEN_WINDOW_ONE);
 		write_unlock_irqrestore(&adapter->ahw.crb_lock, flags);
@@ -1204,7 +1204,7 @@ netxen_nic_hw_read_wx_128M(struct netxen_adapter *adapter, ulong off)
 	} else {        /* Window 0 */
 		write_lock_irqsave(&adapter->ahw.crb_lock, flags);
 		netxen_nic_pci_set_crbwindow_128M(adapter, 0);
-		data = readl(addr);
+		data = pete_readl("drivers/net/ethernet/qlogic/netxen/netxen_nic_hw.c:1207", addr);
 		netxen_nic_pci_set_crbwindow_128M(adapter,
 				NETXEN_WINDOW_ONE);
 		write_unlock_irqrestore(&adapter->ahw.crb_lock, flags);
@@ -1226,7 +1226,7 @@ netxen_nic_hw_write_wx_2M(struct netxen_adapter *adapter, ulong off, u32 data)
 	rv = netxen_nic_pci_get_crb_addr_2M(adapter, off, &addr);
 
 	if (rv == 0) {
-		writel(data, addr);
+		pete_writel("drivers/net/ethernet/qlogic/netxen/netxen_nic_hw.c:1229", data, addr);
 		return 0;
 	}
 
@@ -1235,7 +1235,7 @@ netxen_nic_hw_write_wx_2M(struct netxen_adapter *adapter, ulong off, u32 data)
 		write_lock_irqsave(&adapter->ahw.crb_lock, flags);
 		crb_win_lock(adapter);
 		netxen_nic_pci_set_crbwindow_2M(adapter, off);
-		writel(data, addr);
+		pete_writel("drivers/net/ethernet/qlogic/netxen/netxen_nic_hw.c:1238", data, addr);
 		crb_win_unlock(adapter);
 		write_unlock_irqrestore(&adapter->ahw.crb_lock, flags);
 		return 0;
@@ -1258,14 +1258,14 @@ netxen_nic_hw_read_wx_2M(struct netxen_adapter *adapter, ulong off)
 	rv = netxen_nic_pci_get_crb_addr_2M(adapter, off, &addr);
 
 	if (rv == 0)
-		return readl(addr);
+		return pete_readl("drivers/net/ethernet/qlogic/netxen/netxen_nic_hw.c:1261", addr);
 
 	if (rv > 0) {
 		/* indirect access */
 		write_lock_irqsave(&adapter->ahw.crb_lock, flags);
 		crb_win_lock(adapter);
 		netxen_nic_pci_set_crbwindow_2M(adapter, off);
-		data = readl(addr);
+		data = pete_readl("drivers/net/ethernet/qlogic/netxen/netxen_nic_hw.c:1268", addr);
 		crb_win_unlock(adapter);
 		write_unlock_irqrestore(&adapter->ahw.crb_lock, flags);
 		return data;
@@ -1282,7 +1282,7 @@ static void netxen_nic_io_write_128M(struct netxen_adapter *adapter,
 		void __iomem *addr, u32 data)
 {
 	read_lock(&adapter->ahw.crb_lock);
-	writel(data, addr);
+	pete_writel("drivers/net/ethernet/qlogic/netxen/netxen_nic_hw.c:1285", data, addr);
 	read_unlock(&adapter->ahw.crb_lock);
 }
 
@@ -1292,7 +1292,7 @@ static u32 netxen_nic_io_read_128M(struct netxen_adapter *adapter,
 	u32 val;
 
 	read_lock(&adapter->ahw.crb_lock);
-	val = readl(addr);
+	val = pete_readl("drivers/net/ethernet/qlogic/netxen/netxen_nic_hw.c:1295", addr);
 	read_unlock(&adapter->ahw.crb_lock);
 
 	return val;
@@ -1301,13 +1301,13 @@ static u32 netxen_nic_io_read_128M(struct netxen_adapter *adapter,
 static void netxen_nic_io_write_2M(struct netxen_adapter *adapter,
 		void __iomem *addr, u32 data)
 {
-	writel(data, addr);
+	pete_writel("drivers/net/ethernet/qlogic/netxen/netxen_nic_hw.c:1304", data, addr);
 }
 
 static u32 netxen_nic_io_read_2M(struct netxen_adapter *adapter,
 		void __iomem *addr)
 {
-	return readl(addr);
+	return pete_readl("drivers/net/ethernet/qlogic/netxen/netxen_nic_hw.c:1310", addr);
 }
 
 void __iomem *
@@ -1353,9 +1353,9 @@ netxen_nic_pci_set_window_2M(struct netxen_adapter *adapter,
 
 	window = OCM_WIN(addr);
 
-	writel(window, adapter->ahw.ocm_win_crb);
+	pete_writel("drivers/net/ethernet/qlogic/netxen/netxen_nic_hw.c:1356", window, adapter->ahw.ocm_win_crb);
 	/* read back to flush */
-	readl(adapter->ahw.ocm_win_crb);
+	pete_readl("drivers/net/ethernet/qlogic/netxen/netxen_nic_hw.c:1358", adapter->ahw.ocm_win_crb);
 
 	adapter->ahw.ocm_win = window;
 	*start = NETXEN_PCI_OCM0_2M + GET_MEM_OFFS_2M(addr);
@@ -1482,16 +1482,16 @@ correct:
 	spin_lock(&adapter->ahw.mem_lock);
 	netxen_nic_pci_set_crbwindow_128M(adapter, 0);
 
-	writel(off_lo, (mem_crb + MIU_TEST_AGT_ADDR_LO));
-	writel(off_hi, (mem_crb + addr_hi));
-	writel(data & 0xffffffff, (mem_crb + data_lo));
-	writel((data >> 32) & 0xffffffff, (mem_crb + data_hi));
-	writel((TA_CTL_ENABLE | TA_CTL_WRITE), (mem_crb + TEST_AGT_CTRL));
-	writel((TA_CTL_START | TA_CTL_ENABLE | TA_CTL_WRITE),
+	pete_writel("drivers/net/ethernet/qlogic/netxen/netxen_nic_hw.c:1485", off_lo, (mem_crb + MIU_TEST_AGT_ADDR_LO));
+	pete_writel("drivers/net/ethernet/qlogic/netxen/netxen_nic_hw.c:1486", off_hi, (mem_crb + addr_hi));
+	pete_writel("drivers/net/ethernet/qlogic/netxen/netxen_nic_hw.c:1487", data & 0xffffffff, (mem_crb + data_lo));
+	pete_writel("drivers/net/ethernet/qlogic/netxen/netxen_nic_hw.c:1488", (data >> 32) & 0xffffffff, (mem_crb + data_hi));
+	pete_writel("drivers/net/ethernet/qlogic/netxen/netxen_nic_hw.c:1489", (TA_CTL_ENABLE | TA_CTL_WRITE), (mem_crb + TEST_AGT_CTRL));
+	pete_writel("drivers/net/ethernet/qlogic/netxen/netxen_nic_hw.c:1490", (TA_CTL_START | TA_CTL_ENABLE | TA_CTL_WRITE),
 			(mem_crb + TEST_AGT_CTRL));
 
 	for (j = 0; j < MAX_CTL_CHECK; j++) {
-		temp = readl((mem_crb + TEST_AGT_CTRL));
+		temp = pete_readl("drivers/net/ethernet/qlogic/netxen/netxen_nic_hw.c:1494", (mem_crb + TEST_AGT_CTRL));
 		if ((temp & TA_CTL_BUSY) == 0)
 			break;
 	}
@@ -1560,13 +1560,13 @@ correct:
 	spin_lock(&adapter->ahw.mem_lock);
 	netxen_nic_pci_set_crbwindow_128M(adapter, 0);
 
-	writel(off_lo, (mem_crb + MIU_TEST_AGT_ADDR_LO));
-	writel(off_hi, (mem_crb + addr_hi));
-	writel(TA_CTL_ENABLE, (mem_crb + TEST_AGT_CTRL));
-	writel((TA_CTL_START|TA_CTL_ENABLE), (mem_crb + TEST_AGT_CTRL));
+	pete_writel("drivers/net/ethernet/qlogic/netxen/netxen_nic_hw.c:1563", off_lo, (mem_crb + MIU_TEST_AGT_ADDR_LO));
+	pete_writel("drivers/net/ethernet/qlogic/netxen/netxen_nic_hw.c:1564", off_hi, (mem_crb + addr_hi));
+	pete_writel("drivers/net/ethernet/qlogic/netxen/netxen_nic_hw.c:1565", TA_CTL_ENABLE, (mem_crb + TEST_AGT_CTRL));
+	pete_writel("drivers/net/ethernet/qlogic/netxen/netxen_nic_hw.c:1566", (TA_CTL_START|TA_CTL_ENABLE), (mem_crb + TEST_AGT_CTRL));
 
 	for (j = 0; j < MAX_CTL_CHECK; j++) {
-		temp = readl(mem_crb + TEST_AGT_CTRL);
+		temp = pete_readl("drivers/net/ethernet/qlogic/netxen/netxen_nic_hw.c:1569", mem_crb + TEST_AGT_CTRL);
 		if ((temp & TA_CTL_BUSY) == 0)
 			break;
 	}
@@ -1578,9 +1578,9 @@ correct:
 		ret = -EIO;
 	} else {
 
-		temp = readl(mem_crb + data_hi);
+		temp = pete_readl("drivers/net/ethernet/qlogic/netxen/netxen_nic_hw.c:1581", mem_crb + data_hi);
 		val = ((u64)temp << 32);
-		val |= readl(mem_crb + data_lo);
+		val |= pete_readl("drivers/net/ethernet/qlogic/netxen/netxen_nic_hw.c:1583", mem_crb + data_lo);
 		*data = val;
 		ret = 0;
 	}
@@ -1627,20 +1627,20 @@ correct:
 
 	spin_lock(&adapter->ahw.mem_lock);
 
-	writel(off8, (mem_crb + MIU_TEST_AGT_ADDR_LO));
-	writel(0, (mem_crb + MIU_TEST_AGT_ADDR_HI));
+	pete_writel("drivers/net/ethernet/qlogic/netxen/netxen_nic_hw.c:1630", off8, (mem_crb + MIU_TEST_AGT_ADDR_LO));
+	pete_writel("drivers/net/ethernet/qlogic/netxen/netxen_nic_hw.c:1631", 0, (mem_crb + MIU_TEST_AGT_ADDR_HI));
 
-	writel(data & 0xffffffff,
+	pete_writel("drivers/net/ethernet/qlogic/netxen/netxen_nic_hw.c:1633", data & 0xffffffff,
 			mem_crb + MIU_TEST_AGT_WRDATA_LO);
-	writel((data >> 32) & 0xffffffff,
+	pete_writel("drivers/net/ethernet/qlogic/netxen/netxen_nic_hw.c:1635", (data >> 32) & 0xffffffff,
 			mem_crb + MIU_TEST_AGT_WRDATA_HI);
 
-	writel((TA_CTL_ENABLE | TA_CTL_WRITE), (mem_crb + TEST_AGT_CTRL));
-	writel((TA_CTL_START | TA_CTL_ENABLE | TA_CTL_WRITE),
+	pete_writel("drivers/net/ethernet/qlogic/netxen/netxen_nic_hw.c:1638", (TA_CTL_ENABLE | TA_CTL_WRITE), (mem_crb + TEST_AGT_CTRL));
+	pete_writel("drivers/net/ethernet/qlogic/netxen/netxen_nic_hw.c:1639", (TA_CTL_START | TA_CTL_ENABLE | TA_CTL_WRITE),
 			(mem_crb + TEST_AGT_CTRL));
 
 	for (j = 0; j < MAX_CTL_CHECK; j++) {
-		temp = readl(mem_crb + TEST_AGT_CTRL);
+		temp = pete_readl("drivers/net/ethernet/qlogic/netxen/netxen_nic_hw.c:1643", mem_crb + TEST_AGT_CTRL);
 		if ((temp & TA_CTL_BUSY) == 0)
 			break;
 	}
@@ -1697,13 +1697,13 @@ correct:
 
 	spin_lock(&adapter->ahw.mem_lock);
 
-	writel(off8, (mem_crb + MIU_TEST_AGT_ADDR_LO));
-	writel(0, (mem_crb + MIU_TEST_AGT_ADDR_HI));
-	writel(TA_CTL_ENABLE, (mem_crb + TEST_AGT_CTRL));
-	writel((TA_CTL_START | TA_CTL_ENABLE), (mem_crb + TEST_AGT_CTRL));
+	pete_writel("drivers/net/ethernet/qlogic/netxen/netxen_nic_hw.c:1700", off8, (mem_crb + MIU_TEST_AGT_ADDR_LO));
+	pete_writel("drivers/net/ethernet/qlogic/netxen/netxen_nic_hw.c:1701", 0, (mem_crb + MIU_TEST_AGT_ADDR_HI));
+	pete_writel("drivers/net/ethernet/qlogic/netxen/netxen_nic_hw.c:1702", TA_CTL_ENABLE, (mem_crb + TEST_AGT_CTRL));
+	pete_writel("drivers/net/ethernet/qlogic/netxen/netxen_nic_hw.c:1703", (TA_CTL_START | TA_CTL_ENABLE), (mem_crb + TEST_AGT_CTRL));
 
 	for (j = 0; j < MAX_CTL_CHECK; j++) {
-		temp = readl(mem_crb + TEST_AGT_CTRL);
+		temp = pete_readl("drivers/net/ethernet/qlogic/netxen/netxen_nic_hw.c:1706", mem_crb + TEST_AGT_CTRL);
 		if ((temp & TA_CTL_BUSY) == 0)
 			break;
 	}
@@ -1714,8 +1714,8 @@ correct:
 					"failed to read through agent\n");
 		ret = -EIO;
 	} else {
-		val = (u64)(readl(mem_crb + MIU_TEST_AGT_RDDATA_HI)) << 32;
-		val |= readl(mem_crb + MIU_TEST_AGT_RDDATA_LO);
+		val = (u64)(pete_readl("drivers/net/ethernet/qlogic/netxen/netxen_nic_hw.c:1717", mem_crb + MIU_TEST_AGT_RDDATA_HI)) << 32;
+		val |= pete_readl("drivers/net/ethernet/qlogic/netxen/netxen_nic_hw.c:1718", mem_crb + MIU_TEST_AGT_RDDATA_LO);
 		*data = val;
 		ret = 0;
 	}
@@ -2119,14 +2119,14 @@ netxen_md_rdrom(struct netxen_adapter *adapter,
 	fl_addr = romEntry->read_addr;
 	size = romEntry->read_data_size/4;
 lock_try:
-	lck_val = readl((void __iomem *)(adapter->ahw.pci_base0 +
+	lck_val = pete_readl("drivers/net/ethernet/qlogic/netxen/netxen_nic_hw.c:2122", (void __iomem *)(adapter->ahw.pci_base0 +
 							NX_FLASH_SEM2_LK));
 	if (!lck_val && count < MAX_CTL_CHECK) {
 		msleep(20);
 		count++;
 		goto lock_try;
 	}
-	writel(adapter->ahw.pci_func, (void __iomem *)(adapter->ahw.pci_base0 +
+	pete_writel("drivers/net/ethernet/qlogic/netxen/netxen_nic_hw.c:2129", adapter->ahw.pci_func, (void __iomem *)(adapter->ahw.pci_base0 +
 							NX_FLASH_LOCK_ID));
 	for (i = 0; i < size; i++) {
 		waddr = fl_addr & 0xFFFF0000;
@@ -2136,7 +2136,7 @@ lock_try:
 		*data_buff++ = cpu_to_le32(val);
 		fl_addr += sizeof(val);
 	}
-	readl((void __iomem *)(adapter->ahw.pci_base0 + NX_FLASH_SEM2_ULK));
+	pete_readl("drivers/net/ethernet/qlogic/netxen/netxen_nic_hw.c:2139", (void __iomem *)(adapter->ahw.pci_base0 + NX_FLASH_SEM2_ULK));
 	return romEntry->read_data_size;
 }
 
@@ -2245,7 +2245,7 @@ netxen_md_rdocm(struct netxen_adapter *adapter,
 	loop_cnt = ocmEntry->op_count;
 
 	for (i = 0; i < loop_cnt; i++) {
-		value = readl(addr);
+		value = pete_readl("drivers/net/ethernet/qlogic/netxen/netxen_nic_hw.c:2248", addr);
 		*data_buff++ = value;
 		addr += ocmEntry->read_addr_stride;
 	}

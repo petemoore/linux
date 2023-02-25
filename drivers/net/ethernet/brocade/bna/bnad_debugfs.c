@@ -349,7 +349,7 @@ bnad_debugfs_write_regrd(struct file *file, const char __user *buf,
 	regbuf =  (u32 *)bnad->regdata;
 	spin_lock_irqsave(&bnad->bna_lock, flags);
 	for (i = 0; i < len; i++) {
-		*regbuf = readl(reg_addr);
+		*regbuf = pete_readl("drivers/net/ethernet/brocade/bna/bnad_debugfs.c:352", reg_addr);
 		regbuf++;
 		reg_addr += sizeof(u32);
 	}
@@ -395,7 +395,7 @@ bnad_debugfs_write_regwr(struct file *file, const char __user *buf,
 
 	reg_addr = (bfa_ioc_bar0(ioc)) + addr;
 	spin_lock_irqsave(&bnad->bna_lock, flags);
-	writel(val, reg_addr);
+	pete_writel("drivers/net/ethernet/brocade/bna/bnad_debugfs.c:398", val, reg_addr);
 	spin_unlock_irqrestore(&bnad->bna_lock, flags);
 
 	return nbytes;

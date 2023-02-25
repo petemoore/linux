@@ -473,7 +473,7 @@ static int intel_get_lctl_scf(struct azx *chip)
 	u32 val, t;
 	int i;
 
-	val = readl(bus->mlcap + AZX_ML_BASE + AZX_REG_ML_LCAP);
+	val = pete_readl("sound/pci/hda/hda_intel.c:476", bus->mlcap + AZX_ML_BASE + AZX_REG_ML_LCAP);
 
 	for (i = 0; i < ARRAY_SIZE(preferred_bits); i++) {
 		t = preferred_bits[i];
@@ -495,14 +495,14 @@ static int intel_ml_lctl_set_power(struct azx *chip, int state)
 	 * the codecs are sharing the first link setting by default
 	 * If other links are enabled for stream, they need similar fix
 	 */
-	val = readl(bus->mlcap + AZX_ML_BASE + AZX_REG_ML_LCTL);
+	val = pete_readl("sound/pci/hda/hda_intel.c:498", bus->mlcap + AZX_ML_BASE + AZX_REG_ML_LCTL);
 	val &= ~AZX_MLCTL_SPA;
 	val |= state << AZX_MLCTL_SPA_SHIFT;
-	writel(val, bus->mlcap + AZX_ML_BASE + AZX_REG_ML_LCTL);
+	pete_writel("sound/pci/hda/hda_intel.c:501", val, bus->mlcap + AZX_ML_BASE + AZX_REG_ML_LCTL);
 	/* wait for CPA */
 	timeout = 50;
 	while (timeout) {
-		if (((readl(bus->mlcap + AZX_ML_BASE + AZX_REG_ML_LCTL)) &
+		if (((pete_readl("sound/pci/hda/hda_intel.c:505", bus->mlcap + AZX_ML_BASE + AZX_REG_ML_LCTL)) &
 		    AZX_MLCTL_CPA) == (state << AZX_MLCTL_CPA_SHIFT))
 			return 0;
 		timeout--;
@@ -519,7 +519,7 @@ static void intel_init_lctl(struct azx *chip)
 	int ret;
 
 	/* 0. check lctl register value is correct or not */
-	val = readl(bus->mlcap + AZX_ML_BASE + AZX_REG_ML_LCTL);
+	val = pete_readl("sound/pci/hda/hda_intel.c:522", bus->mlcap + AZX_ML_BASE + AZX_REG_ML_LCTL);
 	/* if SCF is already set, let's use it */
 	if ((val & ML_LCTL_SCF_MASK) != 0)
 		return;
@@ -541,7 +541,7 @@ static void intel_init_lctl(struct azx *chip)
 	/* 2. update SCF to select a properly audio clock*/
 	val &= ~ML_LCTL_SCF_MASK;
 	val |= intel_get_lctl_scf(chip);
-	writel(val, bus->mlcap + AZX_ML_BASE + AZX_REG_ML_LCTL);
+	pete_writel("sound/pci/hda/hda_intel.c:544", val, bus->mlcap + AZX_ML_BASE + AZX_REG_ML_LCTL);
 
 set_spa:
 	/* 4. turn link up: set SPA to 1 and wait CPA to 1 */

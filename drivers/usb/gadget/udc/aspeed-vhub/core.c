@@ -104,21 +104,21 @@ static irqreturn_t ast_vhub_irq(int irq, void *data)
 	spin_lock(&vhub->lock);
 
 	/* Read and ACK interrupts */
-	istat = readl(vhub->regs + AST_VHUB_ISR);
+	istat = pete_readl("drivers/usb/gadget/udc/aspeed-vhub/core.c:107", vhub->regs + AST_VHUB_ISR);
 	if (!istat)
 		goto bail;
-	writel(istat, vhub->regs + AST_VHUB_ISR);
+	pete_writel("drivers/usb/gadget/udc/aspeed-vhub/core.c:110", istat, vhub->regs + AST_VHUB_ISR);
 	iret = IRQ_HANDLED;
 
 	UDCVDBG(vhub, "irq status=%08x, ep_acks=%08x ep_nacks=%08x\n",
 	       istat,
-	       readl(vhub->regs + AST_VHUB_EP_ACK_ISR),
-	       readl(vhub->regs + AST_VHUB_EP_NACK_ISR));
+	       pete_readl("drivers/usb/gadget/udc/aspeed-vhub/core.c:115", vhub->regs + AST_VHUB_EP_ACK_ISR),
+	       pete_readl("drivers/usb/gadget/udc/aspeed-vhub/core.c:116", vhub->regs + AST_VHUB_EP_NACK_ISR));
 
 	/* Handle generic EPs first */
 	if (istat & VHUB_IRQ_EP_POOL_ACK_STALL) {
-		u32 ep_acks = readl(vhub->regs + AST_VHUB_EP_ACK_ISR);
-		writel(ep_acks, vhub->regs + AST_VHUB_EP_ACK_ISR);
+		u32 ep_acks = pete_readl("drivers/usb/gadget/udc/aspeed-vhub/core.c:120", vhub->regs + AST_VHUB_EP_ACK_ISR);
+		pete_writel("drivers/usb/gadget/udc/aspeed-vhub/core.c:121", ep_acks, vhub->regs + AST_VHUB_EP_ACK_ISR);
 
 		for (i = 0; ep_acks && i < vhub->max_epns; i++) {
 			u32 mask = VHUB_EP_IRQ(i);
@@ -196,55 +196,55 @@ void ast_vhub_init_hw(struct ast_vhub *vhub)
 	 * transaction.
 	 */
 	ctrl |= VHUB_CTRL_ISO_RSP_CTRL | VHUB_CTRL_SPLIT_IN;
-	writel(ctrl, vhub->regs + AST_VHUB_CTRL);
+	pete_writel("drivers/usb/gadget/udc/aspeed-vhub/core.c:199", ctrl, vhub->regs + AST_VHUB_CTRL);
 	udelay(1);
 
 	/* Set descriptor ring size */
 	if (AST_VHUB_DESCS_COUNT == 256) {
 		ctrl |= VHUB_CTRL_LONG_DESC;
-		writel(ctrl, vhub->regs + AST_VHUB_CTRL);
+		pete_writel("drivers/usb/gadget/udc/aspeed-vhub/core.c:205", ctrl, vhub->regs + AST_VHUB_CTRL);
 	} else {
 		BUILD_BUG_ON(AST_VHUB_DESCS_COUNT != 32);
 	}
 
 	/* Reset all devices */
 	port_mask = GENMASK(vhub->max_ports, 1);
-	writel(VHUB_SW_RESET_ROOT_HUB |
+	pete_writel("drivers/usb/gadget/udc/aspeed-vhub/core.c:212", VHUB_SW_RESET_ROOT_HUB |
 	       VHUB_SW_RESET_DMA_CONTROLLER |
 	       VHUB_SW_RESET_EP_POOL |
 	       port_mask, vhub->regs + AST_VHUB_SW_RESET);
 	udelay(1);
-	writel(0, vhub->regs + AST_VHUB_SW_RESET);
+	pete_writel("drivers/usb/gadget/udc/aspeed-vhub/core.c:217", 0, vhub->regs + AST_VHUB_SW_RESET);
 
 	/* Disable and cleanup EP ACK/NACK interrupts */
 	epn_mask = GENMASK(vhub->max_epns - 1, 0);
-	writel(0, vhub->regs + AST_VHUB_EP_ACK_IER);
-	writel(0, vhub->regs + AST_VHUB_EP_NACK_IER);
-	writel(epn_mask, vhub->regs + AST_VHUB_EP_ACK_ISR);
-	writel(epn_mask, vhub->regs + AST_VHUB_EP_NACK_ISR);
+	pete_writel("drivers/usb/gadget/udc/aspeed-vhub/core.c:221", 0, vhub->regs + AST_VHUB_EP_ACK_IER);
+	pete_writel("drivers/usb/gadget/udc/aspeed-vhub/core.c:222", 0, vhub->regs + AST_VHUB_EP_NACK_IER);
+	pete_writel("drivers/usb/gadget/udc/aspeed-vhub/core.c:223", epn_mask, vhub->regs + AST_VHUB_EP_ACK_ISR);
+	pete_writel("drivers/usb/gadget/udc/aspeed-vhub/core.c:224", epn_mask, vhub->regs + AST_VHUB_EP_NACK_ISR);
 
 	/* Default settings for EP0, enable HW hub EP1 */
-	writel(0, vhub->regs + AST_VHUB_EP0_CTRL);
-	writel(VHUB_EP1_CTRL_RESET_TOGGLE |
+	pete_writel("drivers/usb/gadget/udc/aspeed-vhub/core.c:227", 0, vhub->regs + AST_VHUB_EP0_CTRL);
+	pete_writel("drivers/usb/gadget/udc/aspeed-vhub/core.c:228", VHUB_EP1_CTRL_RESET_TOGGLE |
 	       VHUB_EP1_CTRL_ENABLE,
 	       vhub->regs + AST_VHUB_EP1_CTRL);
-	writel(0, vhub->regs + AST_VHUB_EP1_STS_CHG);
+	pete_writel("drivers/usb/gadget/udc/aspeed-vhub/core.c:231", 0, vhub->regs + AST_VHUB_EP1_STS_CHG);
 
 	/* Configure EP0 DMA buffer */
-	writel(vhub->ep0.buf_dma, vhub->regs + AST_VHUB_EP0_DATA);
+	pete_writel("drivers/usb/gadget/udc/aspeed-vhub/core.c:234", vhub->ep0.buf_dma, vhub->regs + AST_VHUB_EP0_DATA);
 
 	/* Clear address */
-	writel(0, vhub->regs + AST_VHUB_CONF);
+	pete_writel("drivers/usb/gadget/udc/aspeed-vhub/core.c:237", 0, vhub->regs + AST_VHUB_CONF);
 
 	/* Pullup hub (activate on host) */
 	if (vhub->force_usb1)
 		ctrl |= VHUB_CTRL_FULL_SPEED_ONLY;
 
 	ctrl |= VHUB_CTRL_UPSTREAM_CONNECT;
-	writel(ctrl, vhub->regs + AST_VHUB_CTRL);
+	pete_writel("drivers/usb/gadget/udc/aspeed-vhub/core.c:244", ctrl, vhub->regs + AST_VHUB_CTRL);
 
 	/* Enable some interrupts */
-	writel(VHUB_IRQ_HUB_EP0_IN_ACK_STALL |
+	pete_writel("drivers/usb/gadget/udc/aspeed-vhub/core.c:247", VHUB_IRQ_HUB_EP0_IN_ACK_STALL |
 	       VHUB_IRQ_HUB_EP0_OUT_ACK_STALL |
 	       VHUB_IRQ_HUB_EP0_SETUP |
 	       VHUB_IRQ_EP_POOL_ACK_STALL |
@@ -270,11 +270,11 @@ static int ast_vhub_remove(struct platform_device *pdev)
 	spin_lock_irqsave(&vhub->lock, flags);
 
 	/* Mask & ack all interrupts  */
-	writel(0, vhub->regs + AST_VHUB_IER);
-	writel(VHUB_IRQ_ACK_ALL, vhub->regs + AST_VHUB_ISR);
+	pete_writel("drivers/usb/gadget/udc/aspeed-vhub/core.c:273", 0, vhub->regs + AST_VHUB_IER);
+	pete_writel("drivers/usb/gadget/udc/aspeed-vhub/core.c:274", VHUB_IRQ_ACK_ALL, vhub->regs + AST_VHUB_ISR);
 
 	/* Pull device, leave PHY enabled */
-	writel(VHUB_CTRL_PHY_CLK |
+	pete_writel("drivers/usb/gadget/udc/aspeed-vhub/core.c:277", VHUB_CTRL_PHY_CLK |
 	       VHUB_CTRL_PHY_RESET_DIS,
 	       vhub->regs + AST_VHUB_CTRL);
 
@@ -358,8 +358,8 @@ static int ast_vhub_probe(struct platform_device *pdev)
 		vhub->force_usb1 = true;
 
 	/* Mask & ack all interrupts before installing the handler */
-	writel(0, vhub->regs + AST_VHUB_IER);
-	writel(VHUB_IRQ_ACK_ALL, vhub->regs + AST_VHUB_ISR);
+	pete_writel("drivers/usb/gadget/udc/aspeed-vhub/core.c:361", 0, vhub->regs + AST_VHUB_IER);
+	pete_writel("drivers/usb/gadget/udc/aspeed-vhub/core.c:362", VHUB_IRQ_ACK_ALL, vhub->regs + AST_VHUB_ISR);
 
 	/* Find interrupt and install handler */
 	vhub->irq = platform_get_irq(pdev, 0);

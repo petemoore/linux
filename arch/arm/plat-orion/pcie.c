@@ -54,27 +54,27 @@
 
 u32 orion_pcie_dev_id(void __iomem *base)
 {
-	return readl(base + PCIE_DEV_ID_OFF) >> 16;
+	return pete_readl("arch/arm/plat-orion/pcie.c:57", base + PCIE_DEV_ID_OFF) >> 16;
 }
 
 u32 orion_pcie_rev(void __iomem *base)
 {
-	return readl(base + PCIE_DEV_REV_OFF) & 0xff;
+	return pete_readl("arch/arm/plat-orion/pcie.c:62", base + PCIE_DEV_REV_OFF) & 0xff;
 }
 
 int orion_pcie_link_up(void __iomem *base)
 {
-	return !(readl(base + PCIE_STAT_OFF) & PCIE_STAT_LINK_DOWN);
+	return !(pete_readl("arch/arm/plat-orion/pcie.c:67", base + PCIE_STAT_OFF) & PCIE_STAT_LINK_DOWN);
 }
 
 int __init orion_pcie_x4_mode(void __iomem *base)
 {
-	return !(readl(base + PCIE_CTRL_OFF) & PCIE_CTRL_X1_MODE);
+	return !(pete_readl("arch/arm/plat-orion/pcie.c:72", base + PCIE_CTRL_OFF) & PCIE_CTRL_X1_MODE);
 }
 
 int orion_pcie_get_local_bus_nr(void __iomem *base)
 {
-	u32 stat = readl(base + PCIE_STAT_OFF);
+	u32 stat = pete_readl("arch/arm/plat-orion/pcie.c:77", base + PCIE_STAT_OFF);
 
 	return (stat >> PCIE_STAT_BUS_OFFS) & PCIE_STAT_BUS_MASK;
 }
@@ -83,10 +83,10 @@ void __init orion_pcie_set_local_bus_nr(void __iomem *base, int nr)
 {
 	u32 stat;
 
-	stat = readl(base + PCIE_STAT_OFF);
+	stat = pete_readl("arch/arm/plat-orion/pcie.c:86", base + PCIE_STAT_OFF);
 	stat &= ~(PCIE_STAT_BUS_MASK << PCIE_STAT_BUS_OFFS);
 	stat |= nr << PCIE_STAT_BUS_OFFS;
-	writel(stat, base + PCIE_STAT_OFF);
+	pete_writel("arch/arm/plat-orion/pcie.c:89", stat, base + PCIE_STAT_OFF);
 }
 
 void __init orion_pcie_reset(void __iomem *base)
@@ -100,9 +100,9 @@ void __init orion_pcie_reset(void __iomem *base)
 	 * When set, generates an internal reset in the PCI Express unit.
 	 * This bit should be cleared after the link is re-established.
 	 */
-	reg = readl(base + PCIE_DEBUG_CTRL);
+	reg = pete_readl("arch/arm/plat-orion/pcie.c:103", base + PCIE_DEBUG_CTRL);
 	reg |= PCIE_DEBUG_SOFT_RESET;
-	writel(reg, base + PCIE_DEBUG_CTRL);
+	pete_writel("arch/arm/plat-orion/pcie.c:105", reg, base + PCIE_DEBUG_CTRL);
 
 	for (i = 0; i < 20; i++) {
 		mdelay(10);
@@ -112,7 +112,7 @@ void __init orion_pcie_reset(void __iomem *base)
 	}
 
 	reg &= ~(PCIE_DEBUG_SOFT_RESET);
-	writel(reg, base + PCIE_DEBUG_CTRL);
+	pete_writel("arch/arm/plat-orion/pcie.c:115", reg, base + PCIE_DEBUG_CTRL);
 }
 
 /*
@@ -132,20 +132,20 @@ static void __init orion_pcie_setup_wins(void __iomem *base)
 	 * First, disable and clear BARs and windows.
 	 */
 	for (i = 1; i <= 2; i++) {
-		writel(0, base + PCIE_BAR_CTRL_OFF(i));
-		writel(0, base + PCIE_BAR_LO_OFF(i));
-		writel(0, base + PCIE_BAR_HI_OFF(i));
+		pete_writel("arch/arm/plat-orion/pcie.c:135", 0, base + PCIE_BAR_CTRL_OFF(i));
+		pete_writel("arch/arm/plat-orion/pcie.c:136", 0, base + PCIE_BAR_LO_OFF(i));
+		pete_writel("arch/arm/plat-orion/pcie.c:137", 0, base + PCIE_BAR_HI_OFF(i));
 	}
 
 	for (i = 0; i < 5; i++) {
-		writel(0, base + PCIE_WIN04_CTRL_OFF(i));
-		writel(0, base + PCIE_WIN04_BASE_OFF(i));
-		writel(0, base + PCIE_WIN04_REMAP_OFF(i));
+		pete_writel("arch/arm/plat-orion/pcie.c:141", 0, base + PCIE_WIN04_CTRL_OFF(i));
+		pete_writel("arch/arm/plat-orion/pcie.c:142", 0, base + PCIE_WIN04_BASE_OFF(i));
+		pete_writel("arch/arm/plat-orion/pcie.c:143", 0, base + PCIE_WIN04_REMAP_OFF(i));
 	}
 
-	writel(0, base + PCIE_WIN5_CTRL_OFF);
-	writel(0, base + PCIE_WIN5_BASE_OFF);
-	writel(0, base + PCIE_WIN5_REMAP_OFF);
+	pete_writel("arch/arm/plat-orion/pcie.c:146", 0, base + PCIE_WIN5_CTRL_OFF);
+	pete_writel("arch/arm/plat-orion/pcie.c:147", 0, base + PCIE_WIN5_BASE_OFF);
+	pete_writel("arch/arm/plat-orion/pcie.c:148", 0, base + PCIE_WIN5_REMAP_OFF);
 
 	/*
 	 * Setup windows for DDR banks.  Count total DDR size on the fly.
@@ -154,9 +154,9 @@ static void __init orion_pcie_setup_wins(void __iomem *base)
 	for (i = 0; i < dram->num_cs; i++) {
 		const struct mbus_dram_window *cs = dram->cs + i;
 
-		writel(cs->base & 0xffff0000, base + PCIE_WIN04_BASE_OFF(i));
-		writel(0, base + PCIE_WIN04_REMAP_OFF(i));
-		writel(((cs->size - 1) & 0xffff0000) |
+		pete_writel("arch/arm/plat-orion/pcie.c:157", cs->base & 0xffff0000, base + PCIE_WIN04_BASE_OFF(i));
+		pete_writel("arch/arm/plat-orion/pcie.c:158", 0, base + PCIE_WIN04_REMAP_OFF(i));
+		pete_writel("arch/arm/plat-orion/pcie.c:159", ((cs->size - 1) & 0xffff0000) |
 			(cs->mbus_attr << 8) |
 			(dram->mbus_dram_target_id << 4) | 1,
 				base + PCIE_WIN04_CTRL_OFF(i));
@@ -173,9 +173,9 @@ static void __init orion_pcie_setup_wins(void __iomem *base)
 	/*
 	 * Setup BAR[1] to all DRAM banks.
 	 */
-	writel(dram->cs[0].base, base + PCIE_BAR_LO_OFF(1));
-	writel(0, base + PCIE_BAR_HI_OFF(1));
-	writel(((size - 1) & 0xffff0000) | 1, base + PCIE_BAR_CTRL_OFF(1));
+	pete_writel("arch/arm/plat-orion/pcie.c:176", dram->cs[0].base, base + PCIE_BAR_LO_OFF(1));
+	pete_writel("arch/arm/plat-orion/pcie.c:177", 0, base + PCIE_BAR_HI_OFF(1));
+	pete_writel("arch/arm/plat-orion/pcie.c:178", ((size - 1) & 0xffff0000) | 1, base + PCIE_BAR_CTRL_OFF(1));
 }
 
 void __init orion_pcie_setup(void __iomem *base)
@@ -200,21 +200,21 @@ void __init orion_pcie_setup(void __iomem *base)
 	/*
 	 * Enable interrupt lines A-D.
 	 */
-	mask = readl(base + PCIE_MASK_OFF);
+	mask = pete_readl("arch/arm/plat-orion/pcie.c:203", base + PCIE_MASK_OFF);
 	mask |= 0x0f000000;
-	writel(mask, base + PCIE_MASK_OFF);
+	pete_writel("arch/arm/plat-orion/pcie.c:205", mask, base + PCIE_MASK_OFF);
 }
 
 int orion_pcie_rd_conf(void __iomem *base, struct pci_bus *bus,
 		       u32 devfn, int where, int size, u32 *val)
 {
-	writel(PCIE_CONF_BUS(bus->number) |
+	pete_writel("arch/arm/plat-orion/pcie.c:211", PCIE_CONF_BUS(bus->number) |
 		PCIE_CONF_DEV(PCI_SLOT(devfn)) |
 		PCIE_CONF_FUNC(PCI_FUNC(devfn)) |
 		PCIE_CONF_REG(where) | PCIE_CONF_ADDR_EN,
 			base + PCIE_CONF_ADDR_OFF);
 
-	*val = readl(base + PCIE_CONF_DATA_OFF);
+	*val = pete_readl("arch/arm/plat-orion/pcie.c:217", base + PCIE_CONF_DATA_OFF);
 
 	if (size == 1)
 		*val = (*val >> (8 * (where & 3))) & 0xff;
@@ -227,17 +227,17 @@ int orion_pcie_rd_conf(void __iomem *base, struct pci_bus *bus,
 int orion_pcie_rd_conf_tlp(void __iomem *base, struct pci_bus *bus,
 			   u32 devfn, int where, int size, u32 *val)
 {
-	writel(PCIE_CONF_BUS(bus->number) |
+	pete_writel("arch/arm/plat-orion/pcie.c:230", PCIE_CONF_BUS(bus->number) |
 		PCIE_CONF_DEV(PCI_SLOT(devfn)) |
 		PCIE_CONF_FUNC(PCI_FUNC(devfn)) |
 		PCIE_CONF_REG(where) | PCIE_CONF_ADDR_EN,
 			base + PCIE_CONF_ADDR_OFF);
 
-	*val = readl(base + PCIE_CONF_DATA_OFF);
+	*val = pete_readl("arch/arm/plat-orion/pcie.c:236", base + PCIE_CONF_DATA_OFF);
 
 	if (bus->number != orion_pcie_get_local_bus_nr(base) ||
 	    PCI_FUNC(devfn) != 0)
-		*val = readl(base + PCIE_HEADER_LOG_4_OFF);
+		*val = pete_readl("arch/arm/plat-orion/pcie.c:240", base + PCIE_HEADER_LOG_4_OFF);
 
 	if (size == 1)
 		*val = (*val >> (8 * (where & 3))) & 0xff;
@@ -250,7 +250,7 @@ int orion_pcie_rd_conf_tlp(void __iomem *base, struct pci_bus *bus,
 int orion_pcie_rd_conf_wa(void __iomem *wa_base, struct pci_bus *bus,
 			  u32 devfn, int where, int size, u32 *val)
 {
-	*val = readl(wa_base + (PCIE_CONF_BUS(bus->number) |
+	*val = pete_readl("arch/arm/plat-orion/pcie.c:253", wa_base + (PCIE_CONF_BUS(bus->number) |
 				PCIE_CONF_DEV(PCI_SLOT(devfn)) |
 				PCIE_CONF_FUNC(PCI_FUNC(devfn)) |
 				PCIE_CONF_REG(where)));
@@ -268,14 +268,14 @@ int orion_pcie_wr_conf(void __iomem *base, struct pci_bus *bus,
 {
 	int ret = PCIBIOS_SUCCESSFUL;
 
-	writel(PCIE_CONF_BUS(bus->number) |
+	pete_writel("arch/arm/plat-orion/pcie.c:271", PCIE_CONF_BUS(bus->number) |
 		PCIE_CONF_DEV(PCI_SLOT(devfn)) |
 		PCIE_CONF_FUNC(PCI_FUNC(devfn)) |
 		PCIE_CONF_REG(where) | PCIE_CONF_ADDR_EN,
 			base + PCIE_CONF_ADDR_OFF);
 
 	if (size == 4) {
-		writel(val, base + PCIE_CONF_DATA_OFF);
+		pete_writel("arch/arm/plat-orion/pcie.c:278", val, base + PCIE_CONF_DATA_OFF);
 	} else if (size == 2) {
 		writew(val, base + PCIE_CONF_DATA_OFF + (where & 3));
 	} else if (size == 1) {

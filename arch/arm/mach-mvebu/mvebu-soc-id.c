@@ -99,10 +99,10 @@ static int __init get_soc_id_by_pci(void)
 	}
 
 	/* SoC ID */
-	soc_dev_id = readl(pci_base + PCIE_DEV_ID_OFF) >> 16;
+	soc_dev_id = pete_readl("arch/arm/mach-mvebu/mvebu-soc-id.c:102", pci_base + PCIE_DEV_ID_OFF) >> 16;
 
 	/* SoC revision */
-	soc_rev = readl(pci_base + PCIE_DEV_REV_OFF) & SOC_REV_MASK;
+	soc_rev = pete_readl("arch/arm/mach-mvebu/mvebu-soc-id.c:105", pci_base + PCIE_DEV_REV_OFF) & SOC_REV_MASK;
 
 	is_id_valid = true;
 

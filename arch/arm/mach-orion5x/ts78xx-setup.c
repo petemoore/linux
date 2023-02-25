@@ -411,7 +411,7 @@ static int ts78xx_fpga_unload_devices(void)
 
 static int ts78xx_fpga_load(void)
 {
-	ts78xx_fpga.id = readl(TS78XX_FPGA_REGS_VIRT_BASE);
+	ts78xx_fpga.id = pete_readl("arch/arm/mach-orion5x/ts78xx-setup.c:414", TS78XX_FPGA_REGS_VIRT_BASE);
 
 	pr_info("FPGA magic=0x%.6x, rev=0x%.2x\n",
 			(ts78xx_fpga.id >> 8) & 0xffffff,
@@ -431,7 +431,7 @@ static int ts78xx_fpga_unload(void)
 {
 	unsigned int fpga_id;
 
-	fpga_id = readl(TS78XX_FPGA_REGS_VIRT_BASE);
+	fpga_id = pete_readl("arch/arm/mach-orion5x/ts78xx-setup.c:434", TS78XX_FPGA_REGS_VIRT_BASE);
 
 	/*
 	 * There does not seem to be a feasible way to block access to the GPIO

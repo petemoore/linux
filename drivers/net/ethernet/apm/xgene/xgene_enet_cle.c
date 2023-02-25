@@ -742,7 +742,7 @@ static int xgene_cle_setup_rss(struct xgene_enet_pdata *pdata)
 
 		/* enable RSS */
 		val = (RSS_IPV4_12B << 1) | 0x1;
-		writel(val, base + RSS_CTRL0 + offset);
+		pete_writel("drivers/net/ethernet/apm/xgene/xgene_enet_cle.c:745", val, base + RSS_CTRL0 + offset);
 	}
 
 	/* setup sideband data */

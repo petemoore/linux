@@ -87,27 +87,27 @@ struct otpc_priv {
 
 static inline void set_command(void __iomem *base, u32 command)
 {
-	writel(command & OTPC_CMD_MASK, base + OTPC_COMMAND_OFFSET);
+	pete_writel("drivers/nvmem/bcm-ocotp.c:90", command & OTPC_CMD_MASK, base + OTPC_COMMAND_OFFSET);
 }
 
 static inline void set_cpu_address(void __iomem *base, u32 addr)
 {
-	writel(addr & OTPC_ADDR_MASK, base + OTPC_CPUADDR_REG_OFFSET);
+	pete_writel("drivers/nvmem/bcm-ocotp.c:95", addr & OTPC_ADDR_MASK, base + OTPC_CPUADDR_REG_OFFSET);
 }
 
 static inline void set_start_bit(void __iomem *base)
 {
-	writel(1 << OTPC_CMD_START_START, base + OTPC_CMD_START_OFFSET);
+	pete_writel("drivers/nvmem/bcm-ocotp.c:100", 1 << OTPC_CMD_START_START, base + OTPC_CMD_START_OFFSET);
 }
 
 static inline void reset_start_bit(void __iomem *base)
 {
-	writel(0, base + OTPC_CMD_START_OFFSET);
+	pete_writel("drivers/nvmem/bcm-ocotp.c:105", 0, base + OTPC_CMD_START_OFFSET);
 }
 
 static inline void write_cpu_data(void __iomem *base, u32 value)
 {
-	writel(value, base + OTPC_CPU_WRITE_REG_OFFSET);
+	pete_writel("drivers/nvmem/bcm-ocotp.c:110", value, base + OTPC_CPU_WRITE_REG_OFFSET);
 }
 
 static int poll_cpu_status(void __iomem *base, u32 value)
@@ -116,7 +116,7 @@ static int poll_cpu_status(void __iomem *base, u32 value)
 	u32 retries;
 
 	for (retries = 0; retries < OTPC_RETRIES; retries++) {
-		status = readl(base + OTPC_CPU_STATUS_OFFSET);
+		status = pete_readl("drivers/nvmem/bcm-ocotp.c:119", base + OTPC_CPU_STATUS_OFFSET);
 		if (status & value)
 			break;
 		udelay(1);
@@ -179,7 +179,7 @@ static int bcm_otpc_read(void *context, unsigned int offset, void *val,
 		}
 
 		for (i = 0; i < priv->map->otpc_row_size; i++) {
-			*buf++ = readl(priv->base +
+			*buf++ = pete_readl("drivers/nvmem/bcm-ocotp.c:182", priv->base +
 					priv->map->data_r_offset[i]);
 			bytes_read += sizeof(*buf);
 		}
@@ -210,7 +210,7 @@ static int bcm_otpc_write(void *context, unsigned int offset, void *val,
 		set_command(priv->base, OTPC_CMD_PROGRAM);
 		set_cpu_address(priv->base, address++);
 		for (i = 0; i < priv->map->otpc_row_size; i++) {
-			writel(*buf, priv->base + priv->map->data_w_offset[i]);
+			pete_writel("drivers/nvmem/bcm-ocotp.c:213", *buf, priv->base + priv->map->data_w_offset[i]);
 			buf++;
 			bytes_written += sizeof(*buf);
 		}
@@ -277,7 +277,7 @@ static int bcm_otpc_probe(struct platform_device *pdev)
 	}
 
 	/* Enable CPU access to OTPC. */
-	writel(readl(priv->base + OTPC_MODE_REG_OFFSET) |
+	pete_writel("drivers/nvmem/bcm-ocotp.c:280", pete_readl("drivers/nvmem/bcm-ocotp.c:280", priv->base + OTPC_MODE_REG_OFFSET) |
 		BIT(OTPC_MODE_REG_OTPC_MODE),
 		priv->base + OTPC_MODE_REG_OFFSET);
 	reset_start_bit(priv->base);

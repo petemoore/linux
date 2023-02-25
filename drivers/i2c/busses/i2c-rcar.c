@@ -152,12 +152,12 @@ struct rcar_i2c_priv {
 
 static void rcar_i2c_write(struct rcar_i2c_priv *priv, int reg, u32 val)
 {
-	writel(val, priv->io + reg);
+	pete_writel("drivers/i2c/busses/i2c-rcar.c:155", val, priv->io + reg);
 }
 
 static u32 rcar_i2c_read(struct rcar_i2c_priv *priv, int reg)
 {
-	return readl(priv->io + reg);
+	return pete_readl("drivers/i2c/busses/i2c-rcar.c:160", priv->io + reg);
 }
 
 static int rcar_i2c_get_scl(struct i2c_adapter *adap)

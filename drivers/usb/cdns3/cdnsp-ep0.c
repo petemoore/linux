@@ -194,9 +194,9 @@ static void cdnsp_enter_test_mode(struct cdnsp_device *pdev)
 {
 	u32 temp;
 
-	temp = readl(&pdev->active_port->regs->portpmsc) & ~GENMASK(31, 28);
+	temp = pete_readl("drivers/usb/cdns3/cdnsp-ep0.c:197", &pdev->active_port->regs->portpmsc) & ~GENMASK(31, 28);
 	temp |= PORT_TEST_MODE(pdev->test_mode);
-	writel(temp, &pdev->active_port->regs->portpmsc);
+	pete_writel("drivers/usb/cdns3/cdnsp-ep0.c:199", temp, &pdev->active_port->regs->portpmsc);
 }
 
 static int cdnsp_ep0_handle_feature_device(struct cdnsp_device *pdev,

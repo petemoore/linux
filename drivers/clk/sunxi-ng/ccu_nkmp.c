@@ -95,7 +95,7 @@ static unsigned long ccu_nkmp_recalc_rate(struct clk_hw *hw,
 	unsigned long n, m, k, p, rate;
 	u32 reg;
 
-	reg = readl(nkmp->common.base + nkmp->common.reg);
+	reg = pete_readl("drivers/clk/sunxi-ng/ccu_nkmp.c:98", nkmp->common.base + nkmp->common.reg);
 
 	n = reg >> nkmp->n.shift;
 	n &= (1 << nkmp->n.width) - 1;
@@ -204,7 +204,7 @@ static int ccu_nkmp_set_rate(struct clk_hw *hw, unsigned long rate,
 
 	spin_lock_irqsave(nkmp->common.lock, flags);
 
-	reg = readl(nkmp->common.base + nkmp->common.reg);
+	reg = pete_readl("drivers/clk/sunxi-ng/ccu_nkmp.c:207", nkmp->common.base + nkmp->common.reg);
 	reg &= ~(n_mask | k_mask | m_mask | p_mask);
 
 	reg |= ((_nkmp.n - nkmp->n.offset) << nkmp->n.shift) & n_mask;
@@ -212,7 +212,7 @@ static int ccu_nkmp_set_rate(struct clk_hw *hw, unsigned long rate,
 	reg |= ((_nkmp.m - nkmp->m.offset) << nkmp->m.shift) & m_mask;
 	reg |= (ilog2(_nkmp.p) << nkmp->p.shift) & p_mask;
 
-	writel(reg, nkmp->common.base + nkmp->common.reg);
+	pete_writel("drivers/clk/sunxi-ng/ccu_nkmp.c:215", reg, nkmp->common.base + nkmp->common.reg);
 
 	spin_unlock_irqrestore(nkmp->common.lock, flags);
 

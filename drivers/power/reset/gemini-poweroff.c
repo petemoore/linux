@@ -39,11 +39,11 @@ static irqreturn_t gemini_powerbutton_interrupt(int irq, void *data)
 	u32 val;
 
 	/* ACK the IRQ */
-	val = readl(gpw->base + GEMINI_PWC_CTRLREG);
+	val = pete_readl("drivers/power/reset/gemini-poweroff.c:42", gpw->base + GEMINI_PWC_CTRLREG);
 	val |= GEMINI_CTRL_IRQ_CLR;
-	writel(val, gpw->base + GEMINI_PWC_CTRLREG);
+	pete_writel("drivers/power/reset/gemini-poweroff.c:44", val, gpw->base + GEMINI_PWC_CTRLREG);
 
-	val = readl(gpw->base + GEMINI_PWC_STATREG);
+	val = pete_readl("drivers/power/reset/gemini-poweroff.c:46", gpw->base + GEMINI_PWC_STATREG);
 	val &= 0x70U;
 	switch (val) {
 	case GEMINI_STAT_CIR:
@@ -79,13 +79,13 @@ static void gemini_poweroff(void)
 	u32 val;
 
 	dev_crit(gpw->dev, "Gemini power off\n");
-	val = readl(gpw->base + GEMINI_PWC_CTRLREG);
+	val = pete_readl("drivers/power/reset/gemini-poweroff.c:82", gpw->base + GEMINI_PWC_CTRLREG);
 	val |= GEMINI_CTRL_ENABLE | GEMINI_CTRL_IRQ_CLR;
-	writel(val, gpw->base + GEMINI_PWC_CTRLREG);
+	pete_writel("drivers/power/reset/gemini-poweroff.c:84", val, gpw->base + GEMINI_PWC_CTRLREG);
 
 	val &= ~GEMINI_CTRL_ENABLE;
 	val |= GEMINI_CTRL_SHUTDOWN;
-	writel(val, gpw->base + GEMINI_PWC_CTRLREG);
+	pete_writel("drivers/power/reset/gemini-poweroff.c:88", val, gpw->base + GEMINI_PWC_CTRLREG);
 }
 
 static int gemini_poweroff_probe(struct platform_device *pdev)
@@ -112,7 +112,7 @@ static int gemini_poweroff_probe(struct platform_device *pdev)
 
 	gpw->dev = dev;
 
-	val = readl(gpw->base + GEMINI_PWC_IDREG);
+	val = pete_readl("drivers/power/reset/gemini-poweroff.c:115", gpw->base + GEMINI_PWC_IDREG);
 	val &= 0xFFFFFF00U;
 	if (val != GEMINI_PWC_ID) {
 		dev_err(dev, "wrong power controller ID: %08x\n",
@@ -126,24 +126,24 @@ static int gemini_poweroff_probe(struct platform_device *pdev)
 	 * will result in unconditional poweroff without any warning.
 	 * This makes the kernel handle the poweroff.
 	 */
-	val = readl(gpw->base + GEMINI_PWC_CTRLREG);
+	val = pete_readl("drivers/power/reset/gemini-poweroff.c:129", gpw->base + GEMINI_PWC_CTRLREG);
 	val |= GEMINI_CTRL_ENABLE;
-	writel(val, gpw->base + GEMINI_PWC_CTRLREG);
+	pete_writel("drivers/power/reset/gemini-poweroff.c:131", val, gpw->base + GEMINI_PWC_CTRLREG);
 
 	/* Clear the IRQ */
-	val = readl(gpw->base + GEMINI_PWC_CTRLREG);
+	val = pete_readl("drivers/power/reset/gemini-poweroff.c:134", gpw->base + GEMINI_PWC_CTRLREG);
 	val |= GEMINI_CTRL_IRQ_CLR;
-	writel(val, gpw->base + GEMINI_PWC_CTRLREG);
+	pete_writel("drivers/power/reset/gemini-poweroff.c:136", val, gpw->base + GEMINI_PWC_CTRLREG);
 
 	/* Wait for this to clear */
-	val = readl(gpw->base + GEMINI_PWC_STATREG);
+	val = pete_readl("drivers/power/reset/gemini-poweroff.c:139", gpw->base + GEMINI_PWC_STATREG);
 	while (val & 0x70U)
-		val = readl(gpw->base + GEMINI_PWC_STATREG);
+		val = pete_readl("drivers/power/reset/gemini-poweroff.c:141", gpw->base + GEMINI_PWC_STATREG);
 
 	/* Clear the IRQ again */
-	val = readl(gpw->base + GEMINI_PWC_CTRLREG);
+	val = pete_readl("drivers/power/reset/gemini-poweroff.c:144", gpw->base + GEMINI_PWC_CTRLREG);
 	val |= GEMINI_CTRL_IRQ_CLR;
-	writel(val, gpw->base + GEMINI_PWC_CTRLREG);
+	pete_writel("drivers/power/reset/gemini-poweroff.c:146", val, gpw->base + GEMINI_PWC_CTRLREG);
 
 	ret = devm_request_irq(dev, irq, gemini_powerbutton_interrupt, 0,
 			       "poweroff", gpw);

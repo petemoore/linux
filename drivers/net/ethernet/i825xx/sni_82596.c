@@ -45,7 +45,7 @@ static inline void ca(struct net_device *dev)
 {
 	struct i596_private *lp = netdev_priv(dev);
 
-	writel(0, lp->ca);
+	pete_writel("drivers/net/ethernet/i825xx/sni_82596.c:48", 0, lp->ca);
 }
 
 
@@ -61,10 +61,10 @@ static void mpu_port(struct net_device *dev, int c, dma_addr_t x)
 		udelay(1);
 		writew(v >> 16, lp->mpu_port);
 	} else {
-		writel(v, lp->mpu_port);
+		pete_writel("drivers/net/ethernet/i825xx/sni_82596.c:64", v, lp->mpu_port);
 		wmb();  /* order writes to MPU port */
 		udelay(1);
-		writel(v, lp->mpu_port);
+		pete_writel("drivers/net/ethernet/i825xx/sni_82596.c:67", v, lp->mpu_port);
 	}
 }
 

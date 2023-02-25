@@ -172,36 +172,36 @@ struct rz_dmac {
 static void rz_dmac_writel(struct rz_dmac *dmac, unsigned int val,
 			   unsigned int offset)
 {
-	writel(val, dmac->base + offset);
+	pete_writel("drivers/dma/sh/rz-dmac.c:175", val, dmac->base + offset);
 }
 
 static void rz_dmac_ext_writel(struct rz_dmac *dmac, unsigned int val,
 			       unsigned int offset)
 {
-	writel(val, dmac->ext_base + offset);
+	pete_writel("drivers/dma/sh/rz-dmac.c:181", val, dmac->ext_base + offset);
 }
 
 static u32 rz_dmac_ext_readl(struct rz_dmac *dmac, unsigned int offset)
 {
-	return readl(dmac->ext_base + offset);
+	return pete_readl("drivers/dma/sh/rz-dmac.c:186", dmac->ext_base + offset);
 }
 
 static void rz_dmac_ch_writel(struct rz_dmac_chan *channel, unsigned int val,
 			      unsigned int offset, int which)
 {
 	if (which)
-		writel(val, channel->ch_base + offset);
+		pete_writel("drivers/dma/sh/rz-dmac.c:193", val, channel->ch_base + offset);
 	else
-		writel(val, channel->ch_cmn_base + offset);
+		pete_writel("drivers/dma/sh/rz-dmac.c:195", val, channel->ch_cmn_base + offset);
 }
 
 static u32 rz_dmac_ch_readl(struct rz_dmac_chan *channel,
 			    unsigned int offset, int which)
 {
 	if (which)
-		return readl(channel->ch_base + offset);
+		return pete_readl("drivers/dma/sh/rz-dmac.c:202", channel->ch_base + offset);
 	else
-		return readl(channel->ch_cmn_base + offset);
+		return pete_readl("drivers/dma/sh/rz-dmac.c:204", channel->ch_cmn_base + offset);
 }
 
 /*

@@ -681,7 +681,7 @@ static void qla4xxx_isr_decode_mailbox(struct scsi_qla_host * ha,
 			 * location and set mailbox command done flag
 			 */
 			for (i = 0; i < ha->mbox_status_count; i++)
-				ha->mbox_status[i] = readl(&mailbox_out[i]);
+				ha->mbox_status[i] = pete_readl("drivers/scsi/qla4xxx/ql4_isr.c:684", &mailbox_out[i]);
 
 			set_bit(AF_MBOX_COMMAND_DONE, &ha->flags);
 
@@ -690,7 +690,7 @@ static void qla4xxx_isr_decode_mailbox(struct scsi_qla_host * ha,
 		}
 	} else if (mbox_status >> 12 == MBOX_ASYNC_EVENT_STATUS) {
 		for (i = 0; i < MBOX_AEN_REG_COUNT; i++)
-			mbox_sts[i] = readl(&mailbox_out[i]);
+			mbox_sts[i] = pete_readl("drivers/scsi/qla4xxx/ql4_isr.c:693", &mailbox_out[i]);
 
 		/* Immediately process the AENs that don't require much work.
 		 * Only queue the database_changed AENs */
@@ -1029,15 +1029,15 @@ void qla4_83xx_interrupt_service_routine(struct scsi_qla_host *ha,
 	/* Process mailbox/asynch event interrupt.*/
 	if (intr_status) {
 		qla4xxx_isr_decode_mailbox(ha,
-				readl(&ha->qla4_83xx_reg->mailbox_out[0]));
+				pete_readl("drivers/scsi/qla4xxx/ql4_isr.c:1032", &ha->qla4_83xx_reg->mailbox_out[0]));
 		/* clear the interrupt */
-		writel(0, &ha->qla4_83xx_reg->risc_intr);
+		pete_writel("drivers/scsi/qla4xxx/ql4_isr.c:1034", 0, &ha->qla4_83xx_reg->risc_intr);
 	} else {
 		qla4xxx_process_response_queue(ha);
 	}
 
 	/* clear the interrupt */
-	writel(0, &ha->qla4_83xx_reg->mb_int_mask);
+	pete_writel("drivers/scsi/qla4xxx/ql4_isr.c:1040", 0, &ha->qla4_83xx_reg->mb_int_mask);
 }
 
 /**
@@ -1059,11 +1059,11 @@ void qla4_82xx_interrupt_service_routine(struct scsi_qla_host *ha,
 	/* Process mailbox/asynch event interrupt.*/
 	if (intr_status & HSRX_RISC_MB_INT)
 		qla4xxx_isr_decode_mailbox(ha,
-		    readl(&ha->qla4_82xx_reg->mailbox_out[0]));
+		    pete_readl("drivers/scsi/qla4xxx/ql4_isr.c:1062", &ha->qla4_82xx_reg->mailbox_out[0]));
 
 	/* clear the interrupt */
-	writel(0, &ha->qla4_82xx_reg->host_int);
-	readl(&ha->qla4_82xx_reg->host_int);
+	pete_writel("drivers/scsi/qla4xxx/ql4_isr.c:1065", 0, &ha->qla4_82xx_reg->host_int);
+	pete_readl("drivers/scsi/qla4xxx/ql4_isr.c:1066", &ha->qla4_82xx_reg->host_int);
 }
 
 /**
@@ -1084,12 +1084,12 @@ void qla4xxx_interrupt_service_routine(struct scsi_qla_host * ha,
 	/* Process mailbox/asynch event	 interrupt.*/
 	if (intr_status & CSR_SCSI_PROCESSOR_INTR) {
 		qla4xxx_isr_decode_mailbox(ha,
-					   readl(&ha->reg->mailbox[0]));
+					   pete_readl("drivers/scsi/qla4xxx/ql4_isr.c:1087", &ha->reg->mailbox[0]));
 
 		/* Clear Mailbox Interrupt */
-		writel(set_rmask(CSR_SCSI_PROCESSOR_INTR),
+		pete_writel("drivers/scsi/qla4xxx/ql4_isr.c:1090", set_rmask(CSR_SCSI_PROCESSOR_INTR),
 		       &ha->reg->ctrl_status);
-		readl(&ha->reg->ctrl_status);
+		pete_readl("drivers/scsi/qla4xxx/ql4_isr.c:1092", &ha->reg->ctrl_status);
 	}
 }
 
@@ -1107,7 +1107,7 @@ static void qla4_82xx_spurious_interrupt(struct scsi_qla_host *ha,
 
 	DEBUG2(ql4_printk(KERN_INFO, ha, "Spurious Interrupt\n"));
 	if (is_qla8022(ha)) {
-		writel(0, &ha->qla4_82xx_reg->host_int);
+		pete_writel("drivers/scsi/qla4xxx/ql4_isr.c:1110", 0, &ha->qla4_82xx_reg->host_int);
 		if (!ha->pdev->msi_enabled && !ha->pdev->msix_enabled)
 			qla4_82xx_wr_32(ha, ha->nx_legacy_intr.tgt_mask_reg,
 			    0xfbff);
@@ -1149,7 +1149,7 @@ irqreturn_t qla4xxx_intr_handler(int irq, void *dev_id)
 		    ha->response_out)
 			intr_status = CSR_SCSI_COMPLETION_INTR;
 		else
-			intr_status = readl(&ha->reg->ctrl_status);
+			intr_status = pete_readl("drivers/scsi/qla4xxx/ql4_isr.c:1152", &ha->reg->ctrl_status);
 
 		if ((intr_status &
 		    (CSR_SCSI_RESET_INTR|CSR_FATAL_ERROR|INTR_PENDING)) == 0) {
@@ -1161,7 +1161,7 @@ irqreturn_t qla4xxx_intr_handler(int irq, void *dev_id)
 		if (intr_status & CSR_FATAL_ERROR) {
 			DEBUG2(printk(KERN_INFO "scsi%ld: Fatal Error, "
 				      "Status 0x%04x\n", ha->host_no,
-				      readl(isp_port_error_status (ha))));
+				      pete_readl("drivers/scsi/qla4xxx/ql4_isr.c:1164", isp_port_error_status (ha))));
 
 			/* Issue Soft Reset to clear this error condition.
 			 * This will prevent the RISC from repeatedly
@@ -1170,16 +1170,16 @@ irqreturn_t qla4xxx_intr_handler(int irq, void *dev_id)
 			 * NOTE: Disabling RISC interrupts does not work in
 			 * this case, as CSR_FATAL_ERROR overrides
 			 * CSR_SCSI_INTR_ENABLE */
-			if ((readl(&ha->reg->ctrl_status) &
+			if ((pete_readl("drivers/scsi/qla4xxx/ql4_isr.c:1173", &ha->reg->ctrl_status) &
 			     CSR_SCSI_RESET_INTR) == 0) {
-				writel(set_rmask(CSR_SOFT_RESET),
+				pete_writel("drivers/scsi/qla4xxx/ql4_isr.c:1175", set_rmask(CSR_SOFT_RESET),
 				       &ha->reg->ctrl_status);
-				readl(&ha->reg->ctrl_status);
+				pete_readl("drivers/scsi/qla4xxx/ql4_isr.c:1177", &ha->reg->ctrl_status);
 			}
 
-			writel(set_rmask(CSR_FATAL_ERROR),
+			pete_writel("drivers/scsi/qla4xxx/ql4_isr.c:1180", set_rmask(CSR_FATAL_ERROR),
 			       &ha->reg->ctrl_status);
-			readl(&ha->reg->ctrl_status);
+			pete_readl("drivers/scsi/qla4xxx/ql4_isr.c:1182", &ha->reg->ctrl_status);
 
 			__qla4xxx_disable_intrs(ha);
 
@@ -1190,9 +1190,9 @@ irqreturn_t qla4xxx_intr_handler(int irq, void *dev_id)
 			clear_bit(AF_ONLINE, &ha->flags);
 			__qla4xxx_disable_intrs(ha);
 
-			writel(set_rmask(CSR_SCSI_RESET_INTR),
+			pete_writel("drivers/scsi/qla4xxx/ql4_isr.c:1193", set_rmask(CSR_SCSI_RESET_INTR),
 			       &ha->reg->ctrl_status);
-			readl(&ha->reg->ctrl_status);
+			pete_readl("drivers/scsi/qla4xxx/ql4_isr.c:1195", &ha->reg->ctrl_status);
 
 			if (!test_bit(AF_HA_REMOVAL, &ha->flags))
 				set_bit(DPC_RESET_HA_INTR, &ha->dpc_flags);
@@ -1248,12 +1248,12 @@ irqreturn_t qla4_82xx_intr_handler(int irq, void *dev_id)
 
 	spin_lock_irqsave(&ha->hardware_lock, flags);
 	while (1) {
-		if (!(readl(&ha->qla4_82xx_reg->host_int) &
+		if (!(pete_readl("drivers/scsi/qla4xxx/ql4_isr.c:1251", &ha->qla4_82xx_reg->host_int) &
 		    ISRX_82XX_RISC_INT)) {
 			qla4_82xx_spurious_interrupt(ha, reqs_count);
 			break;
 		}
-		intr_status =  readl(&ha->qla4_82xx_reg->host_status);
+		intr_status =  pete_readl("drivers/scsi/qla4xxx/ql4_isr.c:1256", &ha->qla4_82xx_reg->host_status);
 		if ((intr_status &
 		    (HSRX_RISC_MB_INT | HSRX_RISC_IOCB_INT)) == 0)  {
 			qla4_82xx_spurious_interrupt(ha, reqs_count);
@@ -1289,7 +1289,7 @@ irqreturn_t qla4_83xx_intr_handler(int irq, void *dev_id)
 	unsigned long flags = 0;
 
 	ha->isr_count++;
-	leg_int_ptr = readl(&ha->qla4_83xx_reg->leg_int_ptr);
+	leg_int_ptr = pete_readl("drivers/scsi/qla4xxx/ql4_isr.c:1292", &ha->qla4_83xx_reg->leg_int_ptr);
 
 	/* Legacy interrupt is valid if bit31 of leg_int_ptr is set */
 	if (!(leg_int_ptr & LEG_INT_PTR_B31)) {
@@ -1312,15 +1312,15 @@ irqreturn_t qla4_83xx_intr_handler(int irq, void *dev_id)
 	 * Control register and poll till Legacy Interrupt Pointer register
 	 * bit30 is 0.
 	 */
-	writel(0, &ha->qla4_83xx_reg->leg_int_trig);
+	pete_writel("drivers/scsi/qla4xxx/ql4_isr.c:1315", 0, &ha->qla4_83xx_reg->leg_int_trig);
 	do {
-		leg_int_ptr = readl(&ha->qla4_83xx_reg->leg_int_ptr);
+		leg_int_ptr = pete_readl("drivers/scsi/qla4xxx/ql4_isr.c:1317", &ha->qla4_83xx_reg->leg_int_ptr);
 		if ((leg_int_ptr & PF_BITS_MASK) != ha->pf_bit)
 			break;
 	} while (leg_int_ptr & LEG_INT_PTR_B30);
 
 	spin_lock_irqsave(&ha->hardware_lock, flags);
-	leg_int_ptr = readl(&ha->qla4_83xx_reg->risc_intr);
+	leg_int_ptr = pete_readl("drivers/scsi/qla4xxx/ql4_isr.c:1323", &ha->qla4_83xx_reg->risc_intr);
 	ha->isp_ops->interrupt_service_routine(ha, leg_int_ptr);
 	spin_unlock_irqrestore(&ha->hardware_lock, flags);
 
@@ -1358,23 +1358,23 @@ static irqreturn_t qla4_83xx_mailbox_intr_handler(int irq, void *dev_id)
 
 	spin_lock_irqsave(&ha->hardware_lock, flags);
 
-	ival = readl(&ha->qla4_83xx_reg->risc_intr);
+	ival = pete_readl("drivers/scsi/qla4xxx/ql4_isr.c:1361", &ha->qla4_83xx_reg->risc_intr);
 	if (ival == 0) {
 		ql4_printk(KERN_INFO, ha,
 			   "%s: It is a spurious mailbox interrupt!\n",
 			   __func__);
-		ival = readl(&ha->qla4_83xx_reg->mb_int_mask);
+		ival = pete_readl("drivers/scsi/qla4xxx/ql4_isr.c:1366", &ha->qla4_83xx_reg->mb_int_mask);
 		ival &= ~INT_MASK_FW_MB;
-		writel(ival, &ha->qla4_83xx_reg->mb_int_mask);
+		pete_writel("drivers/scsi/qla4xxx/ql4_isr.c:1368", ival, &ha->qla4_83xx_reg->mb_int_mask);
 		goto exit;
 	}
 
 	qla4xxx_isr_decode_mailbox(ha,
-				   readl(&ha->qla4_83xx_reg->mailbox_out[0]));
-	writel(0, &ha->qla4_83xx_reg->risc_intr);
-	ival = readl(&ha->qla4_83xx_reg->mb_int_mask);
+				   pete_readl("drivers/scsi/qla4xxx/ql4_isr.c:1373", &ha->qla4_83xx_reg->mailbox_out[0]));
+	pete_writel("drivers/scsi/qla4xxx/ql4_isr.c:1374", 0, &ha->qla4_83xx_reg->risc_intr);
+	ival = pete_readl("drivers/scsi/qla4xxx/ql4_isr.c:1375", &ha->qla4_83xx_reg->mb_int_mask);
 	ival &= ~INT_MASK_FW_MB;
-	writel(ival, &ha->qla4_83xx_reg->mb_int_mask);
+	pete_writel("drivers/scsi/qla4xxx/ql4_isr.c:1377", ival, &ha->qla4_83xx_reg->mb_int_mask);
 	ha->isr_count++;
 exit:
 	spin_unlock_irqrestore(&ha->hardware_lock, flags);
@@ -1402,13 +1402,13 @@ qla4_8xxx_default_intr_handler(int irq, void *dev_id)
 	} else {
 		spin_lock_irqsave(&ha->hardware_lock, flags);
 		while (1) {
-			if (!(readl(&ha->qla4_82xx_reg->host_int) &
+			if (!(pete_readl("drivers/scsi/qla4xxx/ql4_isr.c:1405", &ha->qla4_82xx_reg->host_int) &
 			    ISRX_82XX_RISC_INT)) {
 				qla4_82xx_spurious_interrupt(ha, reqs_count);
 				break;
 			}
 
-			intr_status =  readl(&ha->qla4_82xx_reg->host_status);
+			intr_status =  pete_readl("drivers/scsi/qla4xxx/ql4_isr.c:1411", &ha->qla4_82xx_reg->host_status);
 			if ((intr_status &
 			    (HSRX_RISC_MB_INT | HSRX_RISC_IOCB_INT)) == 0) {
 				qla4_82xx_spurious_interrupt(ha, reqs_count);
@@ -1436,19 +1436,19 @@ qla4_8xxx_msix_rsp_q(int irq, void *dev_id)
 
 	spin_lock_irqsave(&ha->hardware_lock, flags);
 	if (is_qla8032(ha) || is_qla8042(ha)) {
-		ival = readl(&ha->qla4_83xx_reg->iocb_int_mask);
+		ival = pete_readl("drivers/scsi/qla4xxx/ql4_isr.c:1439", &ha->qla4_83xx_reg->iocb_int_mask);
 		if (ival == 0) {
 			ql4_printk(KERN_INFO, ha, "%s: It is a spurious iocb interrupt!\n",
 				   __func__);
 			goto exit_msix_rsp_q;
 		}
 		qla4xxx_process_response_queue(ha);
-		writel(0, &ha->qla4_83xx_reg->iocb_int_mask);
+		pete_writel("drivers/scsi/qla4xxx/ql4_isr.c:1446", 0, &ha->qla4_83xx_reg->iocb_int_mask);
 	} else {
-		intr_status = readl(&ha->qla4_82xx_reg->host_status);
+		intr_status = pete_readl("drivers/scsi/qla4xxx/ql4_isr.c:1448", &ha->qla4_82xx_reg->host_status);
 		if (intr_status & HSRX_RISC_IOCB_INT) {
 			qla4xxx_process_response_queue(ha);
-			writel(0, &ha->qla4_82xx_reg->host_int);
+			pete_writel("drivers/scsi/qla4xxx/ql4_isr.c:1451", 0, &ha->qla4_82xx_reg->host_int);
 		} else {
 			ql4_printk(KERN_INFO, ha, "%s: spurious iocb interrupt...\n",
 				   __func__);

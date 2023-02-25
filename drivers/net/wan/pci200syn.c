@@ -321,12 +321,12 @@ static int pci200_pci_init_one(struct pci_dev *pdev,
 
 	/* Reset PLX */
 	p = &card->plxbase->init_ctrl;
-	writel(readl(p) | 0x40000000, p);
-	readl(p);		/* Flush the write - do not use sca_flush */
+	pete_writel("drivers/net/wan/pci200syn.c:324", pete_readl("drivers/net/wan/pci200syn.c:324", p) | 0x40000000, p);
+	pete_readl("drivers/net/wan/pci200syn.c:325", p);		/* Flush the write - do not use sca_flush */
 	udelay(1);
 
-	writel(readl(p) & ~0x40000000, p);
-	readl(p);		/* Flush the write - do not use sca_flush */
+	pete_writel("drivers/net/wan/pci200syn.c:328", pete_readl("drivers/net/wan/pci200syn.c:328", p) & ~0x40000000, p);
+	pete_readl("drivers/net/wan/pci200syn.c:329", p);		/* Flush the write - do not use sca_flush */
 	udelay(1);
 
 	ramsize = sca_detect_ram(card, card->rambase,

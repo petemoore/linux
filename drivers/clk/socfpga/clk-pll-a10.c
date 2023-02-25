@@ -39,7 +39,7 @@ static unsigned long clk_pll_recalc_rate(struct clk_hw *hwclk,
 	unsigned long long vco_freq;
 
 	/* read VCO1 reg for numerator and denominator */
-	reg = readl(socfpgaclk->hw.reg + 0x4);
+	reg = pete_readl("drivers/clk/socfpga/clk-pll-a10.c:42", socfpgaclk->hw.reg + 0x4);
 	divf = (reg & SOCFPGA_PLL_DIVF_MASK) >> SOCFPGA_PLL_DIVF_SHIFT;
 	divq = (reg & SOCFPGA_PLL_DIVQ_MASK) >> SOCFPGA_PLL_DIVQ_SHIFT;
 	vco_freq = (unsigned long long)parent_rate * (divf + 1);
@@ -52,7 +52,7 @@ static u8 clk_pll_get_parent(struct clk_hw *hwclk)
 	struct socfpga_pll *socfpgaclk = to_socfpga_clk(hwclk);
 	u32 pll_src;
 
-	pll_src = readl(socfpgaclk->hw.reg);
+	pll_src = pete_readl("drivers/clk/socfpga/clk-pll-a10.c:55", socfpgaclk->hw.reg);
 
 	return (pll_src >> CLK_MGR_PLL_CLK_SRC_SHIFT) &
 		CLK_MGR_PLL_CLK_SRC_MASK;

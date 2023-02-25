@@ -54,33 +54,33 @@ static void sunxi_clrbits(void __iomem *reg, u32 clr_val)
 {
 	u32 reg_val;
 
-	reg_val = readl(reg);
+	reg_val = pete_readl("drivers/ata/ahci_sunxi.c:57", reg);
 	reg_val &= ~(clr_val);
-	writel(reg_val, reg);
+	pete_writel("drivers/ata/ahci_sunxi.c:59", reg_val, reg);
 }
 
 static void sunxi_setbits(void __iomem *reg, u32 set_val)
 {
 	u32 reg_val;
 
-	reg_val = readl(reg);
+	reg_val = pete_readl("drivers/ata/ahci_sunxi.c:66", reg);
 	reg_val |= set_val;
-	writel(reg_val, reg);
+	pete_writel("drivers/ata/ahci_sunxi.c:68", reg_val, reg);
 }
 
 static void sunxi_clrsetbits(void __iomem *reg, u32 clr_val, u32 set_val)
 {
 	u32 reg_val;
 
-	reg_val = readl(reg);
+	reg_val = pete_readl("drivers/ata/ahci_sunxi.c:75", reg);
 	reg_val &= ~(clr_val);
 	reg_val |= set_val;
-	writel(reg_val, reg);
+	pete_writel("drivers/ata/ahci_sunxi.c:78", reg_val, reg);
 }
 
 static u32 sunxi_getbits(void __iomem *reg, u8 mask, u8 shift)
 {
-	return (readl(reg) >> shift) & mask;
+	return (pete_readl("drivers/ata/ahci_sunxi.c:83", reg) >> shift) & mask;
 }
 
 static int ahci_sunxi_phy_init(struct device *dev, void __iomem *reg_base)
@@ -89,7 +89,7 @@ static int ahci_sunxi_phy_init(struct device *dev, void __iomem *reg_base)
 	int timeout;
 
 	/* This magic is from the original code */
-	writel(0, reg_base + AHCI_RWCR);
+	pete_writel("drivers/ata/ahci_sunxi.c:92", 0, reg_base + AHCI_RWCR);
 	msleep(5);
 
 	sunxi_setbits(reg_base + AHCI_PHYCS1R, BIT(19));
@@ -139,7 +139,7 @@ static int ahci_sunxi_phy_init(struct device *dev, void __iomem *reg_base)
 
 	msleep(15);
 
-	writel(0x7, reg_base + AHCI_RWCR);
+	pete_writel("drivers/ata/ahci_sunxi.c:142", 0x7, reg_base + AHCI_RWCR);
 
 	return 0;
 }

@@ -328,7 +328,7 @@ static int dio200_pcie_board_setup(struct comedi_device *dev)
 		dev_err(dev->class_dev, "error! failed to map registers!\n");
 		return -ENOMEM;
 	}
-	writel(0x80, brbase + 0x50);
+	pete_writel("drivers/comedi/drivers/amplc_dio200_pci.c:331", 0x80, brbase + 0x50);
 	iounmap(brbase);
 	/* Enable "enhanced" features of board. */
 	amplc_dio200_set_enhance(dev, 1);

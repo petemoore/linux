@@ -64,7 +64,7 @@ static void gpio_nand_dosync(struct gpiomtd *gpiomtd)
 		 * What's required is what's here - a read from a separate
 		 * region with a dependency on that read.
 		 */
-		tmp = readl(gpiomtd->io_sync);
+		tmp = pete_readl("drivers/mtd/nand/raw/gpio.c:67", gpiomtd->io_sync);
 		asm volatile("mov %1, %0\n" : "=r" (tmp) : "r" (tmp));
 	}
 }

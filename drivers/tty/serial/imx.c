@@ -294,7 +294,7 @@ static void imx_uart_writel(struct imx_port *sport, u32 val, u32 offset)
 	default:
 		break;
 	}
-	writel(val, sport->port.membase + offset);
+	pete_writel("drivers/tty/serial/imx.c:297", val, sport->port.membase + offset);
 }
 
 static u32 imx_uart_readl(struct imx_port *sport, u32 offset)
@@ -311,7 +311,7 @@ static u32 imx_uart_readl(struct imx_port *sport, u32 offset)
 		 * conditionally.
 		 */
 		if (!(sport->ucr2 & UCR2_SRST))
-			sport->ucr2 = readl(sport->port.membase + offset);
+			sport->ucr2 = pete_readl("drivers/tty/serial/imx.c:314", sport->port.membase + offset);
 		return sport->ucr2;
 		break;
 	case UCR3:
@@ -324,7 +324,7 @@ static u32 imx_uart_readl(struct imx_port *sport, u32 offset)
 		return sport->ufcr;
 		break;
 	default:
-		return readl(sport->port.membase + offset);
+		return pete_readl("drivers/tty/serial/imx.c:327", sport->port.membase + offset);
 	}
 }
 
@@ -2288,11 +2288,11 @@ static int imx_uart_probe(struct platform_device *pdev)
 	}
 
 	/* initialize shadow register values */
-	sport->ucr1 = readl(sport->port.membase + UCR1);
-	sport->ucr2 = readl(sport->port.membase + UCR2);
-	sport->ucr3 = readl(sport->port.membase + UCR3);
-	sport->ucr4 = readl(sport->port.membase + UCR4);
-	sport->ufcr = readl(sport->port.membase + UFCR);
+	sport->ucr1 = pete_readl("drivers/tty/serial/imx.c:2291", sport->port.membase + UCR1);
+	sport->ucr2 = pete_readl("drivers/tty/serial/imx.c:2292", sport->port.membase + UCR2);
+	sport->ucr3 = pete_readl("drivers/tty/serial/imx.c:2293", sport->port.membase + UCR3);
+	sport->ucr4 = pete_readl("drivers/tty/serial/imx.c:2294", sport->port.membase + UCR4);
+	sport->ufcr = pete_readl("drivers/tty/serial/imx.c:2295", sport->port.membase + UFCR);
 
 	ret = uart_get_rs485_mode(&sport->port);
 	if (ret) {

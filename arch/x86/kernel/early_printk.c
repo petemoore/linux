@@ -196,14 +196,14 @@ static void mem32_serial_out(unsigned long addr, int offset, int value)
 {
 	u32 __iomem *vaddr = (u32 __iomem *)addr;
 	/* shift implied by pointer type */
-	writel(value, vaddr + offset);
+	pete_writel("arch/x86/kernel/early_printk.c:199", value, vaddr + offset);
 }
 
 static unsigned int mem32_serial_in(unsigned long addr, int offset)
 {
 	u32 __iomem *vaddr = (u32 __iomem *)addr;
 	/* shift implied by pointer type */
-	return readl(vaddr + offset);
+	return pete_readl("arch/x86/kernel/early_printk.c:206", vaddr + offset);
 }
 
 /*

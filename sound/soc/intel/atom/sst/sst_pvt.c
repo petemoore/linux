@@ -29,13 +29,13 @@
 
 int sst_shim_write(void __iomem *addr, int offset, int value)
 {
-	writel(value, addr + offset);
+	pete_writel("sound/soc/intel/atom/sst/sst_pvt.c:32", value, addr + offset);
 	return 0;
 }
 
 u32 sst_shim_read(void __iomem *addr, int offset)
 {
-	return readl(addr + offset);
+	return pete_readl("sound/soc/intel/atom/sst/sst_pvt.c:38", addr + offset);
 }
 
 u64 sst_reg_read64(void __iomem *addr, int offset)

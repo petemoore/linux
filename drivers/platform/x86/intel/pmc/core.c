@@ -947,13 +947,13 @@ static const struct pmc_reg_map adl_reg_map = {
 
 static inline u32 pmc_core_reg_read(struct pmc_dev *pmcdev, int reg_offset)
 {
-	return readl(pmcdev->regbase + reg_offset);
+	return pete_readl("drivers/platform/x86/intel/pmc/core.c:950", pmcdev->regbase + reg_offset);
 }
 
 static inline void pmc_core_reg_write(struct pmc_dev *pmcdev, int reg_offset,
 				      u32 val)
 {
-	writel(val, pmcdev->regbase + reg_offset);
+	pete_writel("drivers/platform/x86/intel/pmc/core.c:956", val, pmcdev->regbase + reg_offset);
 }
 
 static inline u64 pmc_core_adjust_slp_s0_step(struct pmc_dev *pmcdev, u32 value)

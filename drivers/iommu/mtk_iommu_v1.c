@@ -229,7 +229,7 @@ static int mtk_iommu_domain_finalise(struct mtk_iommu_data *data)
 	if (!dom->pgt_va)
 		return -ENOMEM;
 
-	writel(dom->pgt_pa, data->base + REG_MMU_PT_BASE_ADDR);
+	pete_writel("drivers/iommu/mtk_iommu_v1.c:232", dom->pgt_pa, data->base + REG_MMU_PT_BASE_ADDR);
 
 	dom->data = data;
 

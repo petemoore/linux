@@ -20,35 +20,35 @@ void exynos3250_jpeg_reset(void __iomem *regs)
 	u32 reg = 1;
 	int count = 1000;
 
-	writel(1, regs + EXYNOS3250_SW_RESET);
+	pete_writel("drivers/media/platform/s5p-jpeg/jpeg-hw-exynos3250.c:23", 1, regs + EXYNOS3250_SW_RESET);
 	/* no other way but polling for when JPEG IP becomes operational */
 	while (reg != 0 && --count > 0) {
 		udelay(1);
 		cpu_relax();
-		reg = readl(regs + EXYNOS3250_SW_RESET);
+		reg = pete_readl("drivers/media/platform/s5p-jpeg/jpeg-hw-exynos3250.c:28", regs + EXYNOS3250_SW_RESET);
 	}
 
 	reg = 0;
 	count = 1000;
 
 	while (reg != 1 && --count > 0) {
-		writel(1, regs + EXYNOS3250_JPGDRI);
+		pete_writel("drivers/media/platform/s5p-jpeg/jpeg-hw-exynos3250.c:35", 1, regs + EXYNOS3250_JPGDRI);
 		udelay(1);
 		cpu_relax();
-		reg = readl(regs + EXYNOS3250_JPGDRI);
+		reg = pete_readl("drivers/media/platform/s5p-jpeg/jpeg-hw-exynos3250.c:38", regs + EXYNOS3250_JPGDRI);
 	}
 
-	writel(0, regs + EXYNOS3250_JPGDRI);
+	pete_writel("drivers/media/platform/s5p-jpeg/jpeg-hw-exynos3250.c:41", 0, regs + EXYNOS3250_JPGDRI);
 }
 
 void exynos3250_jpeg_poweron(void __iomem *regs)
 {
-	writel(EXYNOS3250_POWER_ON, regs + EXYNOS3250_JPGCLKCON);
+	pete_writel("drivers/media/platform/s5p-jpeg/jpeg-hw-exynos3250.c:46", EXYNOS3250_POWER_ON, regs + EXYNOS3250_JPGCLKCON);
 }
 
 void exynos3250_jpeg_set_dma_num(void __iomem *regs)
 {
-	writel(((EXYNOS3250_DMA_MO_COUNT << EXYNOS3250_WDMA_ISSUE_NUM_SHIFT) &
+	pete_writel("drivers/media/platform/s5p-jpeg/jpeg-hw-exynos3250.c:51", ((EXYNOS3250_DMA_MO_COUNT << EXYNOS3250_WDMA_ISSUE_NUM_SHIFT) &
 			EXYNOS3250_WDMA_ISSUE_NUM_MASK) |
 	       ((EXYNOS3250_DMA_MO_COUNT << EXYNOS3250_RDMA_ISSUE_NUM_SHIFT) &
 			EXYNOS3250_RDMA_ISSUE_NUM_MASK) |
@@ -61,16 +61,16 @@ void exynos3250_jpeg_clk_set(void __iomem *base)
 {
 	u32 reg;
 
-	reg = readl(base + EXYNOS3250_JPGCMOD) & ~EXYNOS3250_HALF_EN_MASK;
+	reg = pete_readl("drivers/media/platform/s5p-jpeg/jpeg-hw-exynos3250.c:64", base + EXYNOS3250_JPGCMOD) & ~EXYNOS3250_HALF_EN_MASK;
 
-	writel(reg | EXYNOS3250_HALF_EN, base + EXYNOS3250_JPGCMOD);
+	pete_writel("drivers/media/platform/s5p-jpeg/jpeg-hw-exynos3250.c:66", reg | EXYNOS3250_HALF_EN, base + EXYNOS3250_JPGCMOD);
 }
 
 void exynos3250_jpeg_input_raw_fmt(void __iomem *regs, unsigned int fmt)
 {
 	u32 reg;
 
-	reg = readl(regs + EXYNOS3250_JPGCMOD) &
+	reg = pete_readl("drivers/media/platform/s5p-jpeg/jpeg-hw-exynos3250.c:73", regs + EXYNOS3250_JPGCMOD) &
 			EXYNOS3250_MODE_Y16_MASK;
 
 	switch (fmt) {
@@ -114,19 +114,19 @@ void exynos3250_jpeg_input_raw_fmt(void __iomem *regs, unsigned int fmt)
 
 	}
 
-	writel(reg, regs + EXYNOS3250_JPGCMOD);
+	pete_writel("drivers/media/platform/s5p-jpeg/jpeg-hw-exynos3250.c:117", reg, regs + EXYNOS3250_JPGCMOD);
 }
 
 void exynos3250_jpeg_set_y16(void __iomem *regs, bool y16)
 {
 	u32 reg;
 
-	reg = readl(regs + EXYNOS3250_JPGCMOD);
+	reg = pete_readl("drivers/media/platform/s5p-jpeg/jpeg-hw-exynos3250.c:124", regs + EXYNOS3250_JPGCMOD);
 	if (y16)
 		reg |= EXYNOS3250_MODE_Y16;
 	else
 		reg &= ~EXYNOS3250_MODE_Y16_MASK;
-	writel(reg, regs + EXYNOS3250_JPGCMOD);
+	pete_writel("drivers/media/platform/s5p-jpeg/jpeg-hw-exynos3250.c:129", reg, regs + EXYNOS3250_JPGCMOD);
 }
 
 void exynos3250_jpeg_proc_mode(void __iomem *regs, unsigned int mode)
@@ -137,10 +137,10 @@ void exynos3250_jpeg_proc_mode(void __iomem *regs, unsigned int mode)
 		m = EXYNOS3250_PROC_MODE_COMPR;
 	else
 		m = EXYNOS3250_PROC_MODE_DECOMPR;
-	reg = readl(regs + EXYNOS3250_JPGMOD);
+	reg = pete_readl("drivers/media/platform/s5p-jpeg/jpeg-hw-exynos3250.c:140", regs + EXYNOS3250_JPGMOD);
 	reg &= ~EXYNOS3250_PROC_MODE_MASK;
 	reg |= m;
-	writel(reg, regs + EXYNOS3250_JPGMOD);
+	pete_writel("drivers/media/platform/s5p-jpeg/jpeg-hw-exynos3250.c:143", reg, regs + EXYNOS3250_JPGMOD);
 }
 
 void exynos3250_jpeg_subsampling_mode(void __iomem *regs, unsigned int mode)
@@ -159,15 +159,15 @@ void exynos3250_jpeg_subsampling_mode(void __iomem *regs, unsigned int mode)
 		break;
 	}
 
-	reg = readl(regs + EXYNOS3250_JPGMOD);
+	reg = pete_readl("drivers/media/platform/s5p-jpeg/jpeg-hw-exynos3250.c:162", regs + EXYNOS3250_JPGMOD);
 	reg &= ~EXYNOS3250_SUBSAMPLING_MODE_MASK;
 	reg |= m;
-	writel(reg, regs + EXYNOS3250_JPGMOD);
+	pete_writel("drivers/media/platform/s5p-jpeg/jpeg-hw-exynos3250.c:165", reg, regs + EXYNOS3250_JPGMOD);
 }
 
 unsigned int exynos3250_jpeg_get_subsampling_mode(void __iomem *regs)
 {
-	return readl(regs + EXYNOS3250_JPGMOD) &
+	return pete_readl("drivers/media/platform/s5p-jpeg/jpeg-hw-exynos3250.c:170", regs + EXYNOS3250_JPGMOD) &
 				EXYNOS3250_SUBSAMPLING_MODE_MASK;
 }
 
@@ -176,42 +176,42 @@ void exynos3250_jpeg_dri(void __iomem *regs, unsigned int dri)
 	u32 reg;
 
 	reg = dri & EXYNOS3250_JPGDRI_MASK;
-	writel(reg, regs + EXYNOS3250_JPGDRI);
+	pete_writel("drivers/media/platform/s5p-jpeg/jpeg-hw-exynos3250.c:179", reg, regs + EXYNOS3250_JPGDRI);
 }
 
 void exynos3250_jpeg_qtbl(void __iomem *regs, unsigned int t, unsigned int n)
 {
 	unsigned long reg;
 
-	reg = readl(regs + EXYNOS3250_QHTBL);
+	reg = pete_readl("drivers/media/platform/s5p-jpeg/jpeg-hw-exynos3250.c:186", regs + EXYNOS3250_QHTBL);
 	reg &= ~EXYNOS3250_QT_NUM_MASK(t);
 	reg |= (n << EXYNOS3250_QT_NUM_SHIFT(t)) &
 					EXYNOS3250_QT_NUM_MASK(t);
-	writel(reg, regs + EXYNOS3250_QHTBL);
+	pete_writel("drivers/media/platform/s5p-jpeg/jpeg-hw-exynos3250.c:190", reg, regs + EXYNOS3250_QHTBL);
 }
 
 void exynos3250_jpeg_htbl_ac(void __iomem *regs, unsigned int t)
 {
 	unsigned long reg;
 
-	reg = readl(regs + EXYNOS3250_QHTBL);
+	reg = pete_readl("drivers/media/platform/s5p-jpeg/jpeg-hw-exynos3250.c:197", regs + EXYNOS3250_QHTBL);
 	reg &= ~EXYNOS3250_HT_NUM_AC_MASK(t);
 	/* this driver uses table 0 for all color components */
 	reg |= (0 << EXYNOS3250_HT_NUM_AC_SHIFT(t)) &
 					EXYNOS3250_HT_NUM_AC_MASK(t);
-	writel(reg, regs + EXYNOS3250_QHTBL);
+	pete_writel("drivers/media/platform/s5p-jpeg/jpeg-hw-exynos3250.c:202", reg, regs + EXYNOS3250_QHTBL);
 }
 
 void exynos3250_jpeg_htbl_dc(void __iomem *regs, unsigned int t)
 {
 	unsigned long reg;
 
-	reg = readl(regs + EXYNOS3250_QHTBL);
+	reg = pete_readl("drivers/media/platform/s5p-jpeg/jpeg-hw-exynos3250.c:209", regs + EXYNOS3250_QHTBL);
 	reg &= ~EXYNOS3250_HT_NUM_DC_MASK(t);
 	/* this driver uses table 0 for all color components */
 	reg |= (0 << EXYNOS3250_HT_NUM_DC_SHIFT(t)) &
 					EXYNOS3250_HT_NUM_DC_MASK(t);
-	writel(reg, regs + EXYNOS3250_QHTBL);
+	pete_writel("drivers/media/platform/s5p-jpeg/jpeg-hw-exynos3250.c:214", reg, regs + EXYNOS3250_QHTBL);
 }
 
 void exynos3250_jpeg_set_y(void __iomem *regs, unsigned int y)
@@ -219,7 +219,7 @@ void exynos3250_jpeg_set_y(void __iomem *regs, unsigned int y)
 	u32 reg;
 
 	reg = y & EXYNOS3250_JPGY_MASK;
-	writel(reg, regs + EXYNOS3250_JPGY);
+	pete_writel("drivers/media/platform/s5p-jpeg/jpeg-hw-exynos3250.c:222", reg, regs + EXYNOS3250_JPGY);
 }
 
 void exynos3250_jpeg_set_x(void __iomem *regs, unsigned int x)
@@ -227,18 +227,18 @@ void exynos3250_jpeg_set_x(void __iomem *regs, unsigned int x)
 	u32 reg;
 
 	reg = x & EXYNOS3250_JPGX_MASK;
-	writel(reg, regs + EXYNOS3250_JPGX);
+	pete_writel("drivers/media/platform/s5p-jpeg/jpeg-hw-exynos3250.c:230", reg, regs + EXYNOS3250_JPGX);
 }
 
 #if 0	/* Currently unused */
 unsigned int exynos3250_jpeg_get_y(void __iomem *regs)
 {
-	return readl(regs + EXYNOS3250_JPGY);
+	return pete_readl("drivers/media/platform/s5p-jpeg/jpeg-hw-exynos3250.c:236", regs + EXYNOS3250_JPGY);
 }
 
 unsigned int exynos3250_jpeg_get_x(void __iomem *regs)
 {
-	return readl(regs + EXYNOS3250_JPGX);
+	return pete_readl("drivers/media/platform/s5p-jpeg/jpeg-hw-exynos3250.c:241", regs + EXYNOS3250_JPGX);
 }
 #endif
 
@@ -246,7 +246,7 @@ void exynos3250_jpeg_interrupts_enable(void __iomem *regs)
 {
 	u32 reg;
 
-	reg = readl(regs + EXYNOS3250_JPGINTSE);
+	reg = pete_readl("drivers/media/platform/s5p-jpeg/jpeg-hw-exynos3250.c:249", regs + EXYNOS3250_JPGINTSE);
 	reg |= (EXYNOS3250_JPEG_DONE_EN |
 		EXYNOS3250_WDMA_DONE_EN |
 		EXYNOS3250_RDMA_DONE_EN |
@@ -254,7 +254,7 @@ void exynos3250_jpeg_interrupts_enable(void __iomem *regs)
 		EXYNOS3250_CORE_DONE_EN |
 		EXYNOS3250_ERR_INT_EN |
 		EXYNOS3250_HEAD_INT_EN);
-	writel(reg, regs + EXYNOS3250_JPGINTSE);
+	pete_writel("drivers/media/platform/s5p-jpeg/jpeg-hw-exynos3250.c:257", reg, regs + EXYNOS3250_JPGINTSE);
 }
 
 void exynos3250_jpeg_enc_stream_bound(void __iomem *regs, unsigned int size)
@@ -262,7 +262,7 @@ void exynos3250_jpeg_enc_stream_bound(void __iomem *regs, unsigned int size)
 	u32 reg;
 
 	reg = size & EXYNOS3250_ENC_STREAM_BOUND_MASK;
-	writel(reg, regs + EXYNOS3250_ENC_STREAM_BOUND);
+	pete_writel("drivers/media/platform/s5p-jpeg/jpeg-hw-exynos3250.c:265", reg, regs + EXYNOS3250_ENC_STREAM_BOUND);
 }
 
 void exynos3250_jpeg_output_raw_fmt(void __iomem *regs, unsigned int fmt)
@@ -310,19 +310,19 @@ void exynos3250_jpeg_output_raw_fmt(void __iomem *regs, unsigned int fmt)
 		break;
 	}
 
-	writel(reg, regs + EXYNOS3250_OUTFORM);
+	pete_writel("drivers/media/platform/s5p-jpeg/jpeg-hw-exynos3250.c:313", reg, regs + EXYNOS3250_OUTFORM);
 }
 
 void exynos3250_jpeg_jpgadr(void __iomem *regs, unsigned int addr)
 {
-	writel(addr, regs + EXYNOS3250_JPG_JPGADR);
+	pete_writel("drivers/media/platform/s5p-jpeg/jpeg-hw-exynos3250.c:318", addr, regs + EXYNOS3250_JPG_JPGADR);
 }
 
 void exynos3250_jpeg_imgadr(void __iomem *regs, struct s5p_jpeg_addr *img_addr)
 {
-	writel(img_addr->y, regs + EXYNOS3250_LUMA_BASE);
-	writel(img_addr->cb, regs + EXYNOS3250_CHROMA_BASE);
-	writel(img_addr->cr, regs + EXYNOS3250_CHROMA_CR_BASE);
+	pete_writel("drivers/media/platform/s5p-jpeg/jpeg-hw-exynos3250.c:323", img_addr->y, regs + EXYNOS3250_LUMA_BASE);
+	pete_writel("drivers/media/platform/s5p-jpeg/jpeg-hw-exynos3250.c:324", img_addr->cb, regs + EXYNOS3250_CHROMA_BASE);
+	pete_writel("drivers/media/platform/s5p-jpeg/jpeg-hw-exynos3250.c:325", img_addr->cr, regs + EXYNOS3250_CHROMA_CR_BASE);
 }
 
 void exynos3250_jpeg_stride(void __iomem *regs, unsigned int img_fmt,
@@ -355,9 +355,9 @@ void exynos3250_jpeg_stride(void __iomem *regs, unsigned int img_fmt,
 		break;
 	}
 
-	writel(reg_luma, regs + EXYNOS3250_LUMA_STRIDE);
-	writel(reg_cb, regs + EXYNOS3250_CHROMA_STRIDE);
-	writel(reg_cr, regs + EXYNOS3250_CHROMA_CR_STRIDE);
+	pete_writel("drivers/media/platform/s5p-jpeg/jpeg-hw-exynos3250.c:358", reg_luma, regs + EXYNOS3250_LUMA_STRIDE);
+	pete_writel("drivers/media/platform/s5p-jpeg/jpeg-hw-exynos3250.c:359", reg_cb, regs + EXYNOS3250_CHROMA_STRIDE);
+	pete_writel("drivers/media/platform/s5p-jpeg/jpeg-hw-exynos3250.c:360", reg_cr, regs + EXYNOS3250_CHROMA_CR_STRIDE);
 }
 
 void exynos3250_jpeg_offset(void __iomem *regs, unsigned int x_offset,
@@ -370,77 +370,77 @@ void exynos3250_jpeg_offset(void __iomem *regs, unsigned int x_offset,
 	reg |= (x_offset << EXYNOS3250_LUMA_YX_OFFSET_SHIFT) &
 			EXYNOS3250_LUMA_YX_OFFSET_MASK;
 
-	writel(reg, regs + EXYNOS3250_LUMA_XY_OFFSET);
+	pete_writel("drivers/media/platform/s5p-jpeg/jpeg-hw-exynos3250.c:373", reg, regs + EXYNOS3250_LUMA_XY_OFFSET);
 
 	reg = (y_offset << EXYNOS3250_CHROMA_YY_OFFSET_SHIFT) &
 			EXYNOS3250_CHROMA_YY_OFFSET_MASK;
 	reg |= (x_offset << EXYNOS3250_CHROMA_YX_OFFSET_SHIFT) &
 			EXYNOS3250_CHROMA_YX_OFFSET_MASK;
 
-	writel(reg, regs + EXYNOS3250_CHROMA_XY_OFFSET);
+	pete_writel("drivers/media/platform/s5p-jpeg/jpeg-hw-exynos3250.c:380", reg, regs + EXYNOS3250_CHROMA_XY_OFFSET);
 
 	reg = (y_offset << EXYNOS3250_CHROMA_CR_YY_OFFSET_SHIFT) &
 			EXYNOS3250_CHROMA_CR_YY_OFFSET_MASK;
 	reg |= (x_offset << EXYNOS3250_CHROMA_CR_YX_OFFSET_SHIFT) &
 			EXYNOS3250_CHROMA_CR_YX_OFFSET_MASK;
 
-	writel(reg, regs + EXYNOS3250_CHROMA_CR_XY_OFFSET);
+	pete_writel("drivers/media/platform/s5p-jpeg/jpeg-hw-exynos3250.c:387", reg, regs + EXYNOS3250_CHROMA_CR_XY_OFFSET);
 }
 
 void exynos3250_jpeg_coef(void __iomem *base, unsigned int mode)
 {
 	if (mode == S5P_JPEG_ENCODE) {
-		writel(EXYNOS3250_JPEG_ENC_COEF1,
+		pete_writel("drivers/media/platform/s5p-jpeg/jpeg-hw-exynos3250.c:393", EXYNOS3250_JPEG_ENC_COEF1,
 					base + EXYNOS3250_JPG_COEF(1));
-		writel(EXYNOS3250_JPEG_ENC_COEF2,
+		pete_writel("drivers/media/platform/s5p-jpeg/jpeg-hw-exynos3250.c:395", EXYNOS3250_JPEG_ENC_COEF2,
 					base + EXYNOS3250_JPG_COEF(2));
-		writel(EXYNOS3250_JPEG_ENC_COEF3,
+		pete_writel("drivers/media/platform/s5p-jpeg/jpeg-hw-exynos3250.c:397", EXYNOS3250_JPEG_ENC_COEF3,
 					base + EXYNOS3250_JPG_COEF(3));
 	} else {
-		writel(EXYNOS3250_JPEG_DEC_COEF1,
+		pete_writel("drivers/media/platform/s5p-jpeg/jpeg-hw-exynos3250.c:400", EXYNOS3250_JPEG_DEC_COEF1,
 					base + EXYNOS3250_JPG_COEF(1));
-		writel(EXYNOS3250_JPEG_DEC_COEF2,
+		pete_writel("drivers/media/platform/s5p-jpeg/jpeg-hw-exynos3250.c:402", EXYNOS3250_JPEG_DEC_COEF2,
 					base + EXYNOS3250_JPG_COEF(2));
-		writel(EXYNOS3250_JPEG_DEC_COEF3,
+		pete_writel("drivers/media/platform/s5p-jpeg/jpeg-hw-exynos3250.c:404", EXYNOS3250_JPEG_DEC_COEF3,
 					base + EXYNOS3250_JPG_COEF(3));
 	}
 }
 
 void exynos3250_jpeg_start(void __iomem *regs)
 {
-	writel(1, regs + EXYNOS3250_JSTART);
+	pete_writel("drivers/media/platform/s5p-jpeg/jpeg-hw-exynos3250.c:411", 1, regs + EXYNOS3250_JSTART);
 }
 
 void exynos3250_jpeg_rstart(void __iomem *regs)
 {
-	writel(1, regs + EXYNOS3250_JRSTART);
+	pete_writel("drivers/media/platform/s5p-jpeg/jpeg-hw-exynos3250.c:416", 1, regs + EXYNOS3250_JRSTART);
 }
 
 unsigned int exynos3250_jpeg_get_int_status(void __iomem *regs)
 {
-	return readl(regs + EXYNOS3250_JPGINTST);
+	return pete_readl("drivers/media/platform/s5p-jpeg/jpeg-hw-exynos3250.c:421", regs + EXYNOS3250_JPGINTST);
 }
 
 void exynos3250_jpeg_clear_int_status(void __iomem *regs,
 				      unsigned int value)
 {
-	writel(value, regs + EXYNOS3250_JPGINTST);
+	pete_writel("drivers/media/platform/s5p-jpeg/jpeg-hw-exynos3250.c:427", value, regs + EXYNOS3250_JPGINTST);
 }
 
 unsigned int exynos3250_jpeg_operating(void __iomem *regs)
 {
-	return readl(regs + S5P_JPGOPR) & EXYNOS3250_JPGOPR_MASK;
+	return pete_readl("drivers/media/platform/s5p-jpeg/jpeg-hw-exynos3250.c:432", regs + S5P_JPGOPR) & EXYNOS3250_JPGOPR_MASK;
 }
 
 unsigned int exynos3250_jpeg_compressed_size(void __iomem *regs)
 {
-	return readl(regs + EXYNOS3250_JPGCNT) & EXYNOS3250_JPGCNT_MASK;
+	return pete_readl("drivers/media/platform/s5p-jpeg/jpeg-hw-exynos3250.c:437", regs + EXYNOS3250_JPGCNT) & EXYNOS3250_JPGCNT_MASK;
 }
 
 void exynos3250_jpeg_dec_stream_size(void __iomem *regs,
 						unsigned int size)
 {
-	writel(size & EXYNOS3250_DEC_STREAM_MASK,
+	pete_writel("drivers/media/platform/s5p-jpeg/jpeg-hw-exynos3250.c:443", size & EXYNOS3250_DEC_STREAM_MASK,
 				regs + EXYNOS3250_DEC_STREAM_SIZE);
 }
 
@@ -463,7 +463,7 @@ void exynos3250_jpeg_dec_scaling_ratio(void __iomem *regs,
 		break;
 	}
 
-	writel(sratio & EXYNOS3250_DEC_SCALE_FACTOR_MASK,
+	pete_writel("drivers/media/platform/s5p-jpeg/jpeg-hw-exynos3250.c:466", sratio & EXYNOS3250_DEC_SCALE_FACTOR_MASK,
 				regs + EXYNOS3250_DEC_SCALING_RATIO);
 }
 
@@ -471,16 +471,16 @@ void exynos3250_jpeg_set_timer(void __iomem *regs, unsigned int time_value)
 {
 	time_value &= EXYNOS3250_TIMER_INIT_MASK;
 
-	writel(EXYNOS3250_TIMER_INT_STAT | time_value,
+	pete_writel("drivers/media/platform/s5p-jpeg/jpeg-hw-exynos3250.c:474", EXYNOS3250_TIMER_INT_STAT | time_value,
 					regs + EXYNOS3250_TIMER_SE);
 }
 
 unsigned int exynos3250_jpeg_get_timer_status(void __iomem *regs)
 {
-	return readl(regs + EXYNOS3250_TIMER_ST);
+	return pete_readl("drivers/media/platform/s5p-jpeg/jpeg-hw-exynos3250.c:480", regs + EXYNOS3250_TIMER_ST);
 }
 
 void exynos3250_jpeg_clear_timer_status(void __iomem *regs)
 {
-	writel(EXYNOS3250_TIMER_INT_STAT, regs + EXYNOS3250_TIMER_ST);
+	pete_writel("drivers/media/platform/s5p-jpeg/jpeg-hw-exynos3250.c:485", EXYNOS3250_TIMER_INT_STAT, regs + EXYNOS3250_TIMER_ST);
 }

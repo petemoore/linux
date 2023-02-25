@@ -38,13 +38,13 @@ static void stop_udc(struct udc *udc)
 	spin_lock(&udc->lock);
 
 	/* Flush the receieve fifo */
-	reg = readl(&udc->regs->ctl);
+	reg = pete_readl("drivers/usb/gadget/udc/snps_udc_plat.c:41", &udc->regs->ctl);
 	reg |= AMD_BIT(UDC_DEVCTL_SRX_FLUSH);
-	writel(reg, &udc->regs->ctl);
+	pete_writel("drivers/usb/gadget/udc/snps_udc_plat.c:43", reg, &udc->regs->ctl);
 
-	reg = readl(&udc->regs->ctl);
+	reg = pete_readl("drivers/usb/gadget/udc/snps_udc_plat.c:45", &udc->regs->ctl);
 	reg &= ~(AMD_BIT(UDC_DEVCTL_SRX_FLUSH));
-	writel(reg, &udc->regs->ctl);
+	pete_writel("drivers/usb/gadget/udc/snps_udc_plat.c:47", reg, &udc->regs->ctl);
 	dev_dbg(udc->dev, "ep rx queue flushed\n");
 
 	/* Mask interrupts. Required more so when the

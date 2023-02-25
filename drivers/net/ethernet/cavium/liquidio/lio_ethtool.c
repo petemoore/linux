@@ -1211,7 +1211,7 @@ static int lio_reset_queues(struct net_device *netdev, uint32_t num_qs)
 		}
 
 		for (i = 0; i < oct->num_oqs; i++)
-			writel(oct->droq[i]->max_count,
+			pete_writel("drivers/net/ethernet/cavium/liquidio/lio_ethtool.c:1214", oct->droq[i]->max_count,
 			       oct->droq[i]->pkts_credit_reg);
 
 		/* Informing firmware about the new queue count. It is required

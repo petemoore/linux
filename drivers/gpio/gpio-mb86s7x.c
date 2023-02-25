@@ -48,9 +48,9 @@ static int mb86s70_gpio_request(struct gpio_chip *gc, unsigned gpio)
 
 	spin_lock_irqsave(&gchip->lock, flags);
 
-	val = readl(gchip->base + PFR(gpio));
+	val = pete_readl("drivers/gpio/gpio-mb86s7x.c:51", gchip->base + PFR(gpio));
 	val &= ~OFFSET(gpio);
-	writel(val, gchip->base + PFR(gpio));
+	pete_writel("drivers/gpio/gpio-mb86s7x.c:53", val, gchip->base + PFR(gpio));
 
 	spin_unlock_irqrestore(&gchip->lock, flags);
 
@@ -65,9 +65,9 @@ static void mb86s70_gpio_free(struct gpio_chip *gc, unsigned gpio)
 
 	spin_lock_irqsave(&gchip->lock, flags);
 
-	val = readl(gchip->base + PFR(gpio));
+	val = pete_readl("drivers/gpio/gpio-mb86s7x.c:68", gchip->base + PFR(gpio));
 	val |= OFFSET(gpio);
-	writel(val, gchip->base + PFR(gpio));
+	pete_writel("drivers/gpio/gpio-mb86s7x.c:70", val, gchip->base + PFR(gpio));
 
 	spin_unlock_irqrestore(&gchip->lock, flags);
 }
@@ -80,9 +80,9 @@ static int mb86s70_gpio_direction_input(struct gpio_chip *gc, unsigned gpio)
 
 	spin_lock_irqsave(&gchip->lock, flags);
 
-	val = readl(gchip->base + DDR(gpio));
+	val = pete_readl("drivers/gpio/gpio-mb86s7x.c:83", gchip->base + DDR(gpio));
 	val &= ~OFFSET(gpio);
-	writel(val, gchip->base + DDR(gpio));
+	pete_writel("drivers/gpio/gpio-mb86s7x.c:85", val, gchip->base + DDR(gpio));
 
 	spin_unlock_irqrestore(&gchip->lock, flags);
 
@@ -98,16 +98,16 @@ static int mb86s70_gpio_direction_output(struct gpio_chip *gc,
 
 	spin_lock_irqsave(&gchip->lock, flags);
 
-	val = readl(gchip->base + PDR(gpio));
+	val = pete_readl("drivers/gpio/gpio-mb86s7x.c:101", gchip->base + PDR(gpio));
 	if (value)
 		val |= OFFSET(gpio);
 	else
 		val &= ~OFFSET(gpio);
-	writel(val, gchip->base + PDR(gpio));
+	pete_writel("drivers/gpio/gpio-mb86s7x.c:106", val, gchip->base + PDR(gpio));
 
-	val = readl(gchip->base + DDR(gpio));
+	val = pete_readl("drivers/gpio/gpio-mb86s7x.c:108", gchip->base + DDR(gpio));
 	val |= OFFSET(gpio);
-	writel(val, gchip->base + DDR(gpio));
+	pete_writel("drivers/gpio/gpio-mb86s7x.c:110", val, gchip->base + DDR(gpio));
 
 	spin_unlock_irqrestore(&gchip->lock, flags);
 
@@ -118,7 +118,7 @@ static int mb86s70_gpio_get(struct gpio_chip *gc, unsigned gpio)
 {
 	struct mb86s70_gpio_chip *gchip = gpiochip_get_data(gc);
 
-	return !!(readl(gchip->base + PDR(gpio)) & OFFSET(gpio));
+	return !!(pete_readl("drivers/gpio/gpio-mb86s7x.c:121", gchip->base + PDR(gpio)) & OFFSET(gpio));
 }
 
 static void mb86s70_gpio_set(struct gpio_chip *gc, unsigned gpio, int value)
@@ -129,12 +129,12 @@ static void mb86s70_gpio_set(struct gpio_chip *gc, unsigned gpio, int value)
 
 	spin_lock_irqsave(&gchip->lock, flags);
 
-	val = readl(gchip->base + PDR(gpio));
+	val = pete_readl("drivers/gpio/gpio-mb86s7x.c:132", gchip->base + PDR(gpio));
 	if (value)
 		val |= OFFSET(gpio);
 	else
 		val &= ~OFFSET(gpio);
-	writel(val, gchip->base + PDR(gpio));
+	pete_writel("drivers/gpio/gpio-mb86s7x.c:137", val, gchip->base + PDR(gpio));
 
 	spin_unlock_irqrestore(&gchip->lock, flags);
 }

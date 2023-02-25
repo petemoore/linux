@@ -41,8 +41,8 @@ static int sunxi_ve_reset_assert(struct reset_controller_dev *rcdev,
 
 	spin_lock_irqsave(data->lock, flags);
 
-	reg = readl(data->reg);
-	writel(reg & ~BIT(SUN4I_VE_RESET), data->reg);
+	reg = pete_readl("drivers/clk/sunxi/clk-a10-ve.c:44", data->reg);
+	pete_writel("drivers/clk/sunxi/clk-a10-ve.c:45", reg & ~BIT(SUN4I_VE_RESET), data->reg);
 
 	spin_unlock_irqrestore(data->lock, flags);
 
@@ -60,8 +60,8 @@ static int sunxi_ve_reset_deassert(struct reset_controller_dev *rcdev,
 
 	spin_lock_irqsave(data->lock, flags);
 
-	reg = readl(data->reg);
-	writel(reg | BIT(SUN4I_VE_RESET), data->reg);
+	reg = pete_readl("drivers/clk/sunxi/clk-a10-ve.c:63", data->reg);
+	pete_writel("drivers/clk/sunxi/clk-a10-ve.c:64", reg | BIT(SUN4I_VE_RESET), data->reg);
 
 	spin_unlock_irqrestore(data->lock, flags);
 

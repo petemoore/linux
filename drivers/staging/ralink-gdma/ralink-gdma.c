@@ -154,13 +154,13 @@ static struct gdma_dma_desc *to_gdma_dma_desc(struct virt_dma_desc *vdesc)
 static inline uint32_t gdma_dma_read(struct gdma_dma_dev *dma_dev,
 				     unsigned int reg)
 {
-	return readl(dma_dev->base + reg);
+	return pete_readl("drivers/staging/ralink-gdma/ralink-gdma.c:157", dma_dev->base + reg);
 }
 
 static inline void gdma_dma_write(struct gdma_dma_dev *dma_dev,
 				  unsigned int reg, uint32_t val)
 {
-	writel(val, dma_dev->base + reg);
+	pete_writel("drivers/staging/ralink-gdma/ralink-gdma.c:163", val, dma_dev->base + reg);
 }
 
 static enum gdma_dma_transfer_size gdma_dma_maxburst(u32 maxburst)

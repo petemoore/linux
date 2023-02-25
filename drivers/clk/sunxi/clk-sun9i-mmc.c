@@ -45,8 +45,8 @@ static int sun9i_mmc_reset_assert(struct reset_controller_dev *rcdev,
 	clk_prepare_enable(data->clk);
 	spin_lock_irqsave(&data->lock, flags);
 
-	val = readl(reg);
-	writel(val & ~BIT(SUN9I_MMC_RESET_BIT), reg);
+	val = pete_readl("drivers/clk/sunxi/clk-sun9i-mmc.c:48", reg);
+	pete_writel("drivers/clk/sunxi/clk-sun9i-mmc.c:49", val & ~BIT(SUN9I_MMC_RESET_BIT), reg);
 
 	spin_unlock_irqrestore(&data->lock, flags);
 	clk_disable_unprepare(data->clk);
@@ -67,8 +67,8 @@ static int sun9i_mmc_reset_deassert(struct reset_controller_dev *rcdev,
 	clk_prepare_enable(data->clk);
 	spin_lock_irqsave(&data->lock, flags);
 
-	val = readl(reg);
-	writel(val | BIT(SUN9I_MMC_RESET_BIT), reg);
+	val = pete_readl("drivers/clk/sunxi/clk-sun9i-mmc.c:70", reg);
+	pete_writel("drivers/clk/sunxi/clk-sun9i-mmc.c:71", val | BIT(SUN9I_MMC_RESET_BIT), reg);
 
 	spin_unlock_irqrestore(&data->lock, flags);
 	clk_disable_unprepare(data->clk);

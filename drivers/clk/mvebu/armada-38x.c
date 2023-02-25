@@ -38,7 +38,7 @@ static u32 __init armada_38x_get_tclk_freq(void __iomem *sar)
 {
 	u8 tclk_freq_select;
 
-	tclk_freq_select = ((readl(sar) >> SAR_A380_TCLK_FREQ_OPT) &
+	tclk_freq_select = ((pete_readl("drivers/clk/mvebu/armada-38x.c:41", sar) >> SAR_A380_TCLK_FREQ_OPT) &
 			    SAR_A380_TCLK_FREQ_OPT_MASK);
 	return armada_38x_tclk_frequencies[tclk_freq_select];
 }
@@ -55,7 +55,7 @@ static u32 __init armada_38x_get_cpu_freq(void __iomem *sar)
 {
 	u8 cpu_freq_select;
 
-	cpu_freq_select = ((readl(sar) >> SAR_A380_CPU_DDR_L2_FREQ_OPT) &
+	cpu_freq_select = ((pete_readl("drivers/clk/mvebu/armada-38x.c:58", sar) >> SAR_A380_CPU_DDR_L2_FREQ_OPT) &
 			   SAR_A380_CPU_DDR_L2_FREQ_OPT_MASK);
 	if (cpu_freq_select >= ARRAY_SIZE(armada_38x_cpu_frequencies)) {
 		pr_err("Selected CPU frequency (%d) unsupported\n",
@@ -98,7 +98,7 @@ static const int armada_38x_cpu_ddr_ratios[32][2] __initconst = {
 static void __init armada_38x_get_clk_ratio(
 	void __iomem *sar, int id, int *mult, int *div)
 {
-	u32 opt = ((readl(sar) >> SAR_A380_CPU_DDR_L2_FREQ_OPT) &
+	u32 opt = ((pete_readl("drivers/clk/mvebu/armada-38x.c:101", sar) >> SAR_A380_CPU_DDR_L2_FREQ_OPT) &
 		SAR_A380_CPU_DDR_L2_FREQ_OPT_MASK);
 
 	switch (id) {

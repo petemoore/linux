@@ -121,16 +121,16 @@ static int imx_phy_crbit_assert(void __iomem *mmio, u32 bit, bool assert)
 	u32 srval;
 
 	/* Assert or deassert the bit */
-	crval = readl(mmio + IMX_P0PHYCR);
+	crval = pete_readl("drivers/ata/ahci_imx.c:124", mmio + IMX_P0PHYCR);
 	if (assert)
 		crval |= bit;
 	else
 		crval &= ~bit;
-	writel(crval, mmio + IMX_P0PHYCR);
+	pete_writel("drivers/ata/ahci_imx.c:129", crval, mmio + IMX_P0PHYCR);
 
 	/* Wait for the cr_ack signal */
 	do {
-		srval = readl(mmio + IMX_P0PHYSR);
+		srval = pete_readl("drivers/ata/ahci_imx.c:133", mmio + IMX_P0PHYSR);
 		if ((assert ? srval : ~srval) & IMX_P0PHYSR_CR_ACK)
 			break;
 		usleep_range(100, 200);
@@ -145,7 +145,7 @@ static int imx_phy_reg_addressing(u16 addr, void __iomem *mmio)
 	int ret;
 
 	/* Supply the address on cr_data_in */
-	writel(crval, mmio + IMX_P0PHYCR);
+	pete_writel("drivers/ata/ahci_imx.c:148", crval, mmio + IMX_P0PHYCR);
 
 	/* Assert the cr_cap_addr signal */
 	ret = imx_phy_crbit_assert(mmio, IMX_P0PHYCR_CR_CAP_ADDR, true);
@@ -166,7 +166,7 @@ static int imx_phy_reg_write(u16 val, void __iomem *mmio)
 	int ret;
 
 	/* Supply the data on cr_data_in */
-	writel(crval, mmio + IMX_P0PHYCR);
+	pete_writel("drivers/ata/ahci_imx.c:169", crval, mmio + IMX_P0PHYCR);
 
 	/* Assert the cr_cap_data signal */
 	ret = imx_phy_crbit_assert(mmio, IMX_P0PHYCR_CR_CAP_DATA, true);
@@ -184,7 +184,7 @@ static int imx_phy_reg_write(u16 val, void __iomem *mmio)
 		 * so we return immediately here.
 		 */
 		crval |= IMX_P0PHYCR_CR_WRITE;
-		writel(crval, mmio + IMX_P0PHYCR);
+		pete_writel("drivers/ata/ahci_imx.c:187", crval, mmio + IMX_P0PHYCR);
 		goto out;
 	}
 
@@ -212,7 +212,7 @@ static int imx_phy_reg_read(u16 *val, void __iomem *mmio)
 		return ret;
 
 	/* Capture the data from cr_data_out[] */
-	*val = readl(mmio + IMX_P0PHYSR) & IMX_P0PHYSR_CR_DATA_OUT;
+	*val = pete_readl("drivers/ata/ahci_imx.c:215", mmio + IMX_P0PHYSR) & IMX_P0PHYSR_CR_DATA_OUT;
 
 	/* Deassert cr_read */
 	ret = imx_phy_crbit_assert(mmio, IMX_P0PHYCR_CR_READ, false);
@@ -766,8 +766,8 @@ static void ahci_imx_error_handler(struct ata_port *ap)
 	 * without full reset once the pddq mode is enabled making it
 	 * impossible to use as part of libata LPM.
 	 */
-	reg_val = readl(mmio + IMX_P0PHYCR);
-	writel(reg_val | IMX_P0PHYCR_TEST_PDDQ, mmio + IMX_P0PHYCR);
+	reg_val = pete_readl("drivers/ata/ahci_imx.c:769", mmio + IMX_P0PHYCR);
+	pete_writel("drivers/ata/ahci_imx.c:770", reg_val | IMX_P0PHYCR_TEST_PDDQ, mmio + IMX_P0PHYCR);
 	imx_sata_disable(hpriv);
 	imxpriv->no_device = true;
 
@@ -1147,19 +1147,19 @@ static int imx_ahci_probe(struct platform_device *pdev)
 	 * Implement the port0.
 	 * Get the ahb clock rate, and configure the TIMER1MS register.
 	 */
-	reg_val = readl(hpriv->mmio + HOST_CAP);
+	reg_val = pete_readl("drivers/ata/ahci_imx.c:1150", hpriv->mmio + HOST_CAP);
 	if (!(reg_val & HOST_CAP_SSS)) {
 		reg_val |= HOST_CAP_SSS;
-		writel(reg_val, hpriv->mmio + HOST_CAP);
+		pete_writel("drivers/ata/ahci_imx.c:1153", reg_val, hpriv->mmio + HOST_CAP);
 	}
-	reg_val = readl(hpriv->mmio + HOST_PORTS_IMPL);
+	reg_val = pete_readl("drivers/ata/ahci_imx.c:1155", hpriv->mmio + HOST_PORTS_IMPL);
 	if (!(reg_val & 0x1)) {
 		reg_val |= 0x1;
-		writel(reg_val, hpriv->mmio + HOST_PORTS_IMPL);
+		pete_writel("drivers/ata/ahci_imx.c:1158", reg_val, hpriv->mmio + HOST_PORTS_IMPL);
 	}
 
 	reg_val = clk_get_rate(imxpriv->ahb_clk) / 1000;
-	writel(reg_val, hpriv->mmio + IMX_TIMER1MS);
+	pete_writel("drivers/ata/ahci_imx.c:1162", reg_val, hpriv->mmio + IMX_TIMER1MS);
 
 	ret = ahci_platform_init_host(pdev, hpriv, &ahci_imx_port_info,
 				      &ahci_platform_sht);

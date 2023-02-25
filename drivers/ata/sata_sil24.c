@@ -474,9 +474,9 @@ static void sil24_dev_config(struct ata_device *dev)
 	void __iomem *port = sil24_port_base(dev->link->ap);
 
 	if (dev->cdb_len == 16)
-		writel(PORT_CS_CDB16, port + PORT_CTRL_STAT);
+		pete_writel("drivers/ata/sata_sil24.c:477", PORT_CS_CDB16, port + PORT_CTRL_STAT);
 	else
-		writel(PORT_CS_CDB16, port + PORT_CTRL_CLR);
+		pete_writel("drivers/ata/sata_sil24.c:479", PORT_CS_CDB16, port + PORT_CTRL_CLR);
 }
 
 static void sil24_read_tf(struct ata_port *ap, int tag, struct ata_taskfile *tf)
@@ -502,7 +502,7 @@ static int sil24_scr_read(struct ata_link *link, unsigned sc_reg, u32 *val)
 	void __iomem *scr_addr = sil24_port_base(link->ap) + PORT_SCONTROL;
 
 	if (sc_reg < ARRAY_SIZE(sil24_scr_map)) {
-		*val = readl(scr_addr + sil24_scr_map[sc_reg] * 4);
+		*val = pete_readl("drivers/ata/sata_sil24.c:505", scr_addr + sil24_scr_map[sc_reg] * 4);
 		return 0;
 	}
 	return -EINVAL;
@@ -513,7 +513,7 @@ static int sil24_scr_write(struct ata_link *link, unsigned sc_reg, u32 val)
 	void __iomem *scr_addr = sil24_port_base(link->ap) + PORT_SCONTROL;
 
 	if (sc_reg < ARRAY_SIZE(sil24_scr_map)) {
-		writel(val, scr_addr + sil24_scr_map[sc_reg] * 4);
+		pete_writel("drivers/ata/sata_sil24.c:516", val, scr_addr + sil24_scr_map[sc_reg] * 4);
 		return 0;
 	}
 	return -EINVAL;
@@ -525,9 +525,9 @@ static void sil24_config_port(struct ata_port *ap)
 
 	/* configure IRQ WoC */
 	if (ap->flags & SIL24_FLAG_PCIX_IRQ_WOC)
-		writel(PORT_CS_IRQ_WOC, port + PORT_CTRL_STAT);
+		pete_writel("drivers/ata/sata_sil24.c:528", PORT_CS_IRQ_WOC, port + PORT_CTRL_STAT);
 	else
-		writel(PORT_CS_IRQ_WOC, port + PORT_CTRL_CLR);
+		pete_writel("drivers/ata/sata_sil24.c:530", PORT_CS_IRQ_WOC, port + PORT_CTRL_CLR);
 
 	/* zero error counters. */
 	writew(0x8000, port + PORT_DECODE_ERR_THRESH);
@@ -538,10 +538,10 @@ static void sil24_config_port(struct ata_port *ap)
 	writew(0x0000, port + PORT_HSHK_ERR_CNT);
 
 	/* always use 64bit activation */
-	writel(PORT_CS_32BIT_ACTV, port + PORT_CTRL_CLR);
+	pete_writel("drivers/ata/sata_sil24.c:541", PORT_CS_32BIT_ACTV, port + PORT_CTRL_CLR);
 
 	/* clear port multiplier enable and resume bits */
-	writel(PORT_CS_PMP_EN | PORT_CS_PMP_RESUME, port + PORT_CTRL_CLR);
+	pete_writel("drivers/ata/sata_sil24.c:544", PORT_CS_PMP_EN | PORT_CS_PMP_RESUME, port + PORT_CTRL_CLR);
 }
 
 static void sil24_config_pmp(struct ata_port *ap, int attached)
@@ -549,9 +549,9 @@ static void sil24_config_pmp(struct ata_port *ap, int attached)
 	void __iomem *port = sil24_port_base(ap);
 
 	if (attached)
-		writel(PORT_CS_PMP_EN, port + PORT_CTRL_STAT);
+		pete_writel("drivers/ata/sata_sil24.c:552", PORT_CS_PMP_EN, port + PORT_CTRL_STAT);
 	else
-		writel(PORT_CS_PMP_EN, port + PORT_CTRL_CLR);
+		pete_writel("drivers/ata/sata_sil24.c:554", PORT_CS_PMP_EN, port + PORT_CTRL_CLR);
 }
 
 static void sil24_clear_pmp(struct ata_port *ap)
@@ -559,13 +559,13 @@ static void sil24_clear_pmp(struct ata_port *ap)
 	void __iomem *port = sil24_port_base(ap);
 	int i;
 
-	writel(PORT_CS_PMP_RESUME, port + PORT_CTRL_CLR);
+	pete_writel("drivers/ata/sata_sil24.c:562", PORT_CS_PMP_RESUME, port + PORT_CTRL_CLR);
 
 	for (i = 0; i < SATA_PMP_MAX_PORTS; i++) {
 		void __iomem *pmp_base = port + PORT_PMP + i * PORT_PMP_SIZE;
 
-		writel(0, pmp_base + PORT_PMP_STATUS);
-		writel(0, pmp_base + PORT_PMP_QACTIVE);
+		pete_writel("drivers/ata/sata_sil24.c:567", 0, pmp_base + PORT_PMP_STATUS);
+		pete_writel("drivers/ata/sata_sil24.c:568", 0, pmp_base + PORT_PMP_QACTIVE);
 	}
 }
 
@@ -579,7 +579,7 @@ static int sil24_init_port(struct ata_port *ap)
 	if (sata_pmp_attached(ap))
 		sil24_clear_pmp(ap);
 
-	writel(PORT_CS_INIT, port + PORT_CTRL_STAT);
+	pete_writel("drivers/ata/sata_sil24.c:582", PORT_CS_INIT, port + PORT_CTRL_STAT);
 	ata_wait_register(ap, port + PORT_CTRL_STAT,
 			  PORT_CS_INIT, PORT_CS_INIT, 10, 100);
 	tmp = ata_wait_register(ap, port + PORT_CTRL_STAT,
@@ -610,22 +610,22 @@ static int sil24_exec_polled_cmd(struct ata_port *ap, int pmp,
 	ata_tf_to_fis(tf, pmp, is_cmd, prb->fis);
 
 	/* temporarily plug completion and error interrupts */
-	irq_enabled = readl(port + PORT_IRQ_ENABLE_SET);
-	writel(PORT_IRQ_COMPLETE | PORT_IRQ_ERROR, port + PORT_IRQ_ENABLE_CLR);
+	irq_enabled = pete_readl("drivers/ata/sata_sil24.c:613", port + PORT_IRQ_ENABLE_SET);
+	pete_writel("drivers/ata/sata_sil24.c:614", PORT_IRQ_COMPLETE | PORT_IRQ_ERROR, port + PORT_IRQ_ENABLE_CLR);
 
 	/*
 	 * The barrier is required to ensure that writes to cmd_block reach
 	 * the memory before the write to PORT_CMD_ACTIVATE.
 	 */
 	wmb();
-	writel((u32)paddr, port + PORT_CMD_ACTIVATE);
-	writel((u64)paddr >> 32, port + PORT_CMD_ACTIVATE + 4);
+	pete_writel("drivers/ata/sata_sil24.c:621", (u32)paddr, port + PORT_CMD_ACTIVATE);
+	pete_writel("drivers/ata/sata_sil24.c:622", (u64)paddr >> 32, port + PORT_CMD_ACTIVATE + 4);
 
 	irq_mask = (PORT_IRQ_COMPLETE | PORT_IRQ_ERROR) << PORT_IRQ_RAW_SHIFT;
 	irq_stat = ata_wait_register(ap, port + PORT_IRQ_STAT, irq_mask, 0x0,
 				     10, timeout_msec);
 
-	writel(irq_mask, port + PORT_IRQ_STAT); /* clear IRQs */
+	pete_writel("drivers/ata/sata_sil24.c:628", irq_mask, port + PORT_IRQ_STAT); /* clear IRQs */
 	irq_stat >>= PORT_IRQ_RAW_SHIFT;
 
 	if (irq_stat & PORT_IRQ_COMPLETE)
@@ -641,7 +641,7 @@ static int sil24_exec_polled_cmd(struct ata_port *ap, int pmp,
 	}
 
 	/* restore IRQ enabled */
-	writel(irq_enabled, port + PORT_IRQ_ENABLE_SET);
+	pete_writel("drivers/ata/sata_sil24.c:644", irq_enabled, port + PORT_IRQ_ENABLE_SET);
 
 	return rc;
 }
@@ -709,9 +709,9 @@ static int sil24_hardreset(struct ata_link *link, unsigned int *class,
 		ata_port_warn(ap,
 			      "controller in dubious state, performing PORT_RST\n");
 
-		writel(PORT_CS_PORT_RST, port + PORT_CTRL_STAT);
+		pete_writel("drivers/ata/sata_sil24.c:712", PORT_CS_PORT_RST, port + PORT_CTRL_STAT);
 		ata_msleep(ap, 10);
-		writel(PORT_CS_PORT_RST, port + PORT_CTRL_CLR);
+		pete_writel("drivers/ata/sata_sil24.c:714", PORT_CS_PORT_RST, port + PORT_CTRL_CLR);
 		ata_wait_register(ap, port + PORT_CTRL_STAT, PORT_CS_RDY, 0,
 				  10, 5000);
 
@@ -730,7 +730,7 @@ static int sil24_hardreset(struct ata_link *link, unsigned int *class,
 	if (ata_link_online(link))
 		tout_msec = 5000;
 
-	writel(PORT_CS_DEV_RST, port + PORT_CTRL_STAT);
+	pete_writel("drivers/ata/sata_sil24.c:733", PORT_CS_DEV_RST, port + PORT_CTRL_STAT);
 	tmp = ata_wait_register(ap, port + PORT_CTRL_STAT,
 				PORT_CS_DEV_RST, PORT_CS_DEV_RST, 10,
 				tout_msec);
@@ -898,8 +898,8 @@ static unsigned int sil24_qc_issue(struct ata_queued_cmd *qc)
 	 * the memory before the write to PORT_CMD_ACTIVATE.
 	 */
 	wmb();
-	writel((u32)paddr, activate);
-	writel((u64)paddr >> 32, activate + 4);
+	pete_writel("drivers/ata/sata_sil24.c:901", (u32)paddr, activate);
+	pete_writel("drivers/ata/sata_sil24.c:902", (u64)paddr >> 32, activate + 4);
 
 	return 0;
 }
@@ -954,7 +954,7 @@ static void sil24_freeze(struct ata_port *ap)
 	/* Port-wide IRQ mask in HOST_CTRL doesn't really work, clear
 	 * PORT_IRQ_ENABLE instead.
 	 */
-	writel(0xffff, port + PORT_IRQ_ENABLE_CLR);
+	pete_writel("drivers/ata/sata_sil24.c:957", 0xffff, port + PORT_IRQ_ENABLE_CLR);
 }
 
 static void sil24_thaw(struct ata_port *ap)
@@ -963,11 +963,11 @@ static void sil24_thaw(struct ata_port *ap)
 	u32 tmp;
 
 	/* clear IRQ */
-	tmp = readl(port + PORT_IRQ_STAT);
-	writel(tmp, port + PORT_IRQ_STAT);
+	tmp = pete_readl("drivers/ata/sata_sil24.c:966", port + PORT_IRQ_STAT);
+	pete_writel("drivers/ata/sata_sil24.c:967", tmp, port + PORT_IRQ_STAT);
 
 	/* turn IRQ back on */
-	writel(DEF_PORT_IRQ, port + PORT_IRQ_ENABLE_SET);
+	pete_writel("drivers/ata/sata_sil24.c:970", DEF_PORT_IRQ, port + PORT_IRQ_ENABLE_SET);
 }
 
 static void sil24_error_intr(struct ata_port *ap)
@@ -981,8 +981,8 @@ static void sil24_error_intr(struct ata_port *ap)
 	u32 irq_stat;
 
 	/* on error, we need to clear IRQ explicitly */
-	irq_stat = readl(port + PORT_IRQ_STAT);
-	writel(irq_stat, port + PORT_IRQ_STAT);
+	irq_stat = pete_readl("drivers/ata/sata_sil24.c:984", port + PORT_IRQ_STAT);
+	pete_writel("drivers/ata/sata_sil24.c:985", irq_stat, port + PORT_IRQ_STAT);
 
 	/* first, analyze and record host port events */
 	link = &ap->link;
@@ -1035,7 +1035,7 @@ static void sil24_error_intr(struct ata_port *ap)
 
 		/* find out the offending link and qc */
 		if (sata_pmp_attached(ap)) {
-			context = readl(port + PORT_CONTEXT);
+			context = pete_readl("drivers/ata/sata_sil24.c:1038", port + PORT_CONTEXT);
 			pmp = (context >> 5) & 0xf;
 
 			if (pmp < ap->nr_pmp_links) {
@@ -1055,7 +1055,7 @@ static void sil24_error_intr(struct ata_port *ap)
 			qc = ata_qc_from_tag(ap, link->active_tag);
 
 		/* analyze CMD_ERR */
-		cerr = readl(port + PORT_CMD_ERR);
+		cerr = pete_readl("drivers/ata/sata_sil24.c:1058", port + PORT_CMD_ERR);
 		if (cerr < ARRAY_SIZE(sil24_cerr_db))
 			ci = &sil24_cerr_db[cerr];
 
@@ -1083,7 +1083,7 @@ static void sil24_error_intr(struct ata_port *ap)
 
 		/* if PMP, resume */
 		if (sata_pmp_attached(ap))
-			writel(PORT_CS_PMP_RESUME, port + PORT_CTRL_STAT);
+			pete_writel("drivers/ata/sata_sil24.c:1086", PORT_CS_PMP_RESUME, port + PORT_CTRL_STAT);
 	}
 
 	/* freeze or abort */
@@ -1111,9 +1111,9 @@ static inline void sil24_host_intr(struct ata_port *ap)
 	 * PORT_SLOT_STAT.
 	 */
 	if (ap->flags & SIL24_FLAG_PCIX_IRQ_WOC)
-		writel(PORT_IRQ_COMPLETE, port + PORT_IRQ_STAT);
+		pete_writel("drivers/ata/sata_sil24.c:1114", PORT_IRQ_COMPLETE, port + PORT_IRQ_STAT);
 
-	slot_stat = readl(port + PORT_SLOT_STAT);
+	slot_stat = pete_readl("drivers/ata/sata_sil24.c:1116", port + PORT_SLOT_STAT);
 
 	if (unlikely(slot_stat & HOST_SSTAT_ATTN)) {
 		sil24_error_intr(ap);
@@ -1147,7 +1147,7 @@ static irqreturn_t sil24_interrupt(int irq, void *dev_instance)
 	u32 status;
 	int i;
 
-	status = readl(host_base + HOST_IRQ_STAT);
+	status = pete_readl("drivers/ata/sata_sil24.c:1150", host_base + HOST_IRQ_STAT);
 
 	if (status == 0xffffffff) {
 		dev_err(host->dev, "IRQ status == 0xffffffff, "
@@ -1226,10 +1226,10 @@ static void sil24_init_controller(struct ata_host *host)
 	int i;
 
 	/* GPIO off */
-	writel(0, host_base + HOST_FLASH_CMD);
+	pete_writel("drivers/ata/sata_sil24.c:1229", 0, host_base + HOST_FLASH_CMD);
 
 	/* clear global reset & mask interrupts during initialization */
-	writel(0, host_base + HOST_CTRL);
+	pete_writel("drivers/ata/sata_sil24.c:1232", 0, host_base + HOST_CTRL);
 
 	/* init ports */
 	for (i = 0; i < host->n_ports; i++) {
@@ -1238,12 +1238,12 @@ static void sil24_init_controller(struct ata_host *host)
 
 
 		/* Initial PHY setting */
-		writel(0x20c, port + PORT_PHY_CFG);
+		pete_writel("drivers/ata/sata_sil24.c:1241", 0x20c, port + PORT_PHY_CFG);
 
 		/* Clear port RST */
-		tmp = readl(port + PORT_CTRL_STAT);
+		tmp = pete_readl("drivers/ata/sata_sil24.c:1244", port + PORT_CTRL_STAT);
 		if (tmp & PORT_CS_PORT_RST) {
-			writel(PORT_CS_PORT_RST, port + PORT_CTRL_CLR);
+			pete_writel("drivers/ata/sata_sil24.c:1246", PORT_CS_PORT_RST, port + PORT_CTRL_CLR);
 			tmp = ata_wait_register(NULL, port + PORT_CTRL_STAT,
 						PORT_CS_PORT_RST,
 						PORT_CS_PORT_RST, 10, 100);
@@ -1257,7 +1257,7 @@ static void sil24_init_controller(struct ata_host *host)
 	}
 
 	/* Turn on interrupts */
-	writel(IRQ_STAT_4PORTS, host_base + HOST_CTRL);
+	pete_writel("drivers/ata/sata_sil24.c:1260", IRQ_STAT_4PORTS, host_base + HOST_CTRL);
 }
 
 static int sil24_init_one(struct pci_dev *pdev, const struct pci_device_id *ent)
@@ -1290,7 +1290,7 @@ static int sil24_init_one(struct pci_dev *pdev, const struct pci_device_id *ent)
 
 	/* apply workaround for completion IRQ loss on PCI-X errata */
 	if (pi.flags & SIL24_FLAG_PCIX_IRQ_WOC) {
-		tmp = readl(iomap[SIL24_HOST_BAR] + HOST_CTRL);
+		tmp = pete_readl("drivers/ata/sata_sil24.c:1293", iomap[SIL24_HOST_BAR] + HOST_CTRL);
 		if (tmp & (HOST_CTRL_TRDY | HOST_CTRL_STOP | HOST_CTRL_DEVSEL))
 			dev_info(&pdev->dev,
 				 "Applying completion IRQ loss on PCI-X errata fix\n");
@@ -1341,7 +1341,7 @@ static int sil24_pci_device_resume(struct pci_dev *pdev)
 		return rc;
 
 	if (pdev->dev.power.power_state.event == PM_EVENT_SUSPEND)
-		writel(HOST_CTRL_GLOBAL_RST, host_base + HOST_CTRL);
+		pete_writel("drivers/ata/sata_sil24.c:1344", HOST_CTRL_GLOBAL_RST, host_base + HOST_CTRL);
 
 	sil24_init_controller(host);
 

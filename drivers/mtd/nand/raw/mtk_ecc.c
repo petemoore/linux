@@ -152,7 +152,7 @@ static irqreturn_t mtk_ecc_irq(int irq, void *id)
 			return IRQ_HANDLED;
 		}
 	} else {
-		enc = readl(ecc->regs + ecc->caps->ecc_regs[ECC_ENCIRQ_STA])
+		enc = pete_readl("drivers/mtd/nand/raw/mtk_ecc.c:155", ecc->regs + ecc->caps->ecc_regs[ECC_ENCIRQ_STA])
 		      & ECC_IRQ_EN;
 		if (enc)
 			complete(&ecc->done);
@@ -187,10 +187,10 @@ static int mtk_ecc_config(struct mtk_ecc *ecc, struct mtk_ecc_config *config)
 
 		reg = ecc_bit | (config->mode << ecc->caps->ecc_mode_shift);
 		reg |= (enc_sz << ECC_MS_SHIFT);
-		writel(reg, ecc->regs + ECC_ENCCNFG);
+		pete_writel("drivers/mtd/nand/raw/mtk_ecc.c:190", reg, ecc->regs + ECC_ENCCNFG);
 
 		if (config->mode != ECC_NFI_MODE)
-			writel(lower_32_bits(config->addr),
+			pete_writel("drivers/mtd/nand/raw/mtk_ecc.c:193", lower_32_bits(config->addr),
 			       ecc->regs + ECC_ENCDIADDR);
 
 	} else {
@@ -201,7 +201,7 @@ static int mtk_ecc_config(struct mtk_ecc *ecc, struct mtk_ecc_config *config)
 		reg = ecc_bit | (config->mode << ecc->caps->ecc_mode_shift);
 		reg |= (dec_sz << ECC_MS_SHIFT) | DEC_CNFG_CORRECT;
 		reg |= DEC_EMPTY_EN;
-		writel(reg, ecc->regs + ECC_DECCNFG);
+		pete_writel("drivers/mtd/nand/raw/mtk_ecc.c:204", reg, ecc->regs + ECC_DECCNFG);
 
 		if (config->sectors)
 			ecc->sectors = 1 << (config->sectors - 1);
@@ -221,7 +221,7 @@ void mtk_ecc_get_stats(struct mtk_ecc *ecc, struct mtk_ecc_stats *stats,
 
 	for (i = 0; i < sectors; i++) {
 		offset = (i >> 2) << 2;
-		err = readl(ecc->regs + ECC_DECENUM0 + offset);
+		err = pete_readl("drivers/mtd/nand/raw/mtk_ecc.c:224", ecc->regs + ECC_DECENUM0 + offset);
 		err = err >> ((i % 4) * ecc->caps->err_shift);
 		err &= ecc->caps->err_mask;
 		if (err == ecc->caps->err_mask) {
@@ -251,7 +251,7 @@ static void mtk_ecc_hw_init(struct mtk_ecc *ecc)
 	writew(ECC_OP_DISABLE, ecc->regs + ECC_ENCCON);
 
 	mtk_ecc_wait_idle(ecc, ECC_DECODE);
-	writel(ECC_OP_DISABLE, ecc->regs + ECC_DECCON);
+	pete_writel("drivers/mtd/nand/raw/mtk_ecc.c:254", ECC_OP_DISABLE, ecc->regs + ECC_DECCON);
 }
 
 static struct mtk_ecc *mtk_ecc_get(struct device_node *np)

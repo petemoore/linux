@@ -301,7 +301,7 @@ static int qla4xxx_isp_check_reg(struct scsi_qla_host *ha)
 	int rval = QLA_SUCCESS;
 
 	if (is_qla8022(ha))
-		reg_val = readl(&ha->qla4_82xx_reg->host_status);
+		reg_val = pete_readl("drivers/scsi/qla4xxx/ql4_os.c:304", &ha->qla4_82xx_reg->host_status);
 	else if (is_qla8032(ha) || is_qla8042(ha))
 		reg_val = qla4_8xxx_rd_direct(ha, QLA8XXX_PEG_ALIVE_COUNTER);
 	else
@@ -4674,11 +4674,11 @@ int qla4xxx_hw_reset(struct scsi_qla_host *ha)
 	 */
 	ctrl_status = readw(&ha->reg->ctrl_status);
 	if ((ctrl_status & CSR_SCSI_RESET_INTR) != 0)
-		writel(set_rmask(CSR_SCSI_RESET_INTR), &ha->reg->ctrl_status);
+		pete_writel("drivers/scsi/qla4xxx/ql4_os.c:4677", set_rmask(CSR_SCSI_RESET_INTR), &ha->reg->ctrl_status);
 
 	/* Issue Soft Reset */
-	writel(set_rmask(CSR_SOFT_RESET), &ha->reg->ctrl_status);
-	readl(&ha->reg->ctrl_status);
+	pete_writel("drivers/scsi/qla4xxx/ql4_os.c:4680", set_rmask(CSR_SOFT_RESET), &ha->reg->ctrl_status);
+	pete_readl("drivers/scsi/qla4xxx/ql4_os.c:4681", &ha->reg->ctrl_status);
 
 	spin_unlock_irqrestore(&ha->hardware_lock, flags);
 	return QLA_SUCCESS;
@@ -4719,8 +4719,8 @@ int qla4xxx_soft_reset(struct scsi_qla_host *ha)
 			      "Network function, clearing it now!\n",
 			      ha->host_no));
 		spin_lock_irqsave(&ha->hardware_lock, flags);
-		writel(set_rmask(CSR_NET_RESET_INTR), &ha->reg->ctrl_status);
-		readl(&ha->reg->ctrl_status);
+		pete_writel("drivers/scsi/qla4xxx/ql4_os.c:4722", set_rmask(CSR_NET_RESET_INTR), &ha->reg->ctrl_status);
+		pete_readl("drivers/scsi/qla4xxx/ql4_os.c:4723", &ha->reg->ctrl_status);
 		spin_unlock_irqrestore(&ha->hardware_lock, flags);
 	}
 
@@ -4746,8 +4746,8 @@ int qla4xxx_soft_reset(struct scsi_qla_host *ha)
 	spin_lock_irqsave(&ha->hardware_lock, flags);
 	ctrl_status = readw(&ha->reg->ctrl_status);
 	if ((ctrl_status & CSR_SCSI_RESET_INTR) != 0) {
-		writel(set_rmask(CSR_SCSI_RESET_INTR), &ha->reg->ctrl_status);
-		readl(&ha->reg->ctrl_status);
+		pete_writel("drivers/scsi/qla4xxx/ql4_os.c:4749", set_rmask(CSR_SCSI_RESET_INTR), &ha->reg->ctrl_status);
+		pete_readl("drivers/scsi/qla4xxx/ql4_os.c:4750", &ha->reg->ctrl_status);
 	}
 	spin_unlock_irqrestore(&ha->hardware_lock, flags);
 
@@ -4760,8 +4760,8 @@ int qla4xxx_soft_reset(struct scsi_qla_host *ha)
 	if (max_wait_time == 0) {
 		/* Issue Force Soft Reset */
 		spin_lock_irqsave(&ha->hardware_lock, flags);
-		writel(set_rmask(CSR_FORCE_SOFT_RESET), &ha->reg->ctrl_status);
-		readl(&ha->reg->ctrl_status);
+		pete_writel("drivers/scsi/qla4xxx/ql4_os.c:4763", set_rmask(CSR_FORCE_SOFT_RESET), &ha->reg->ctrl_status);
+		pete_readl("drivers/scsi/qla4xxx/ql4_os.c:4764", &ha->reg->ctrl_status);
 		spin_unlock_irqrestore(&ha->hardware_lock, flags);
 		/* Wait until the firmware tells us the Soft Reset is done */
 		max_wait_time = SOFT_RESET_TOV;
@@ -5473,15 +5473,15 @@ static void qla4xxx_free_adapter(struct scsi_qla_host *ha)
 	ha->isp_ops->disable_intrs(ha);
 
 	if (is_qla40XX(ha)) {
-		writel(set_rmask(CSR_SCSI_PROCESSOR_INTR),
+		pete_writel("drivers/scsi/qla4xxx/ql4_os.c:5476", set_rmask(CSR_SCSI_PROCESSOR_INTR),
 		       &ha->reg->ctrl_status);
-		readl(&ha->reg->ctrl_status);
+		pete_readl("drivers/scsi/qla4xxx/ql4_os.c:5478", &ha->reg->ctrl_status);
 	} else if (is_qla8022(ha)) {
-		writel(0, &ha->qla4_82xx_reg->host_int);
-		readl(&ha->qla4_82xx_reg->host_int);
+		pete_writel("drivers/scsi/qla4xxx/ql4_os.c:5480", 0, &ha->qla4_82xx_reg->host_int);
+		pete_readl("drivers/scsi/qla4xxx/ql4_os.c:5481", &ha->qla4_82xx_reg->host_int);
 	} else if (is_qla8032(ha) || is_qla8042(ha)) {
-		writel(0, &ha->qla4_83xx_reg->risc_intr);
-		readl(&ha->qla4_83xx_reg->risc_intr);
+		pete_writel("drivers/scsi/qla4xxx/ql4_os.c:5483", 0, &ha->qla4_83xx_reg->risc_intr);
+		pete_readl("drivers/scsi/qla4xxx/ql4_os.c:5484", &ha->qla4_83xx_reg->risc_intr);
 	}
 
 	/* Remove timer thread, if present */
@@ -5713,7 +5713,7 @@ uint16_t qla4xxx_rd_shdw_req_q_out(struct scsi_qla_host *ha)
 
 uint16_t qla4_82xx_rd_shdw_req_q_out(struct scsi_qla_host *ha)
 {
-	return (uint16_t)le32_to_cpu(readl(&ha->qla4_82xx_reg->req_q_out));
+	return (uint16_t)le32_to_cpu(pete_readl("drivers/scsi/qla4xxx/ql4_os.c:5716", &ha->qla4_82xx_reg->req_q_out));
 }
 
 uint16_t qla4xxx_rd_shdw_rsp_q_in(struct scsi_qla_host *ha)
@@ -5723,7 +5723,7 @@ uint16_t qla4xxx_rd_shdw_rsp_q_in(struct scsi_qla_host *ha)
 
 uint16_t qla4_82xx_rd_shdw_rsp_q_in(struct scsi_qla_host *ha)
 {
-	return (uint16_t)le32_to_cpu(readl(&ha->qla4_82xx_reg->rsp_q_in));
+	return (uint16_t)le32_to_cpu(pete_readl("drivers/scsi/qla4xxx/ql4_os.c:5726", &ha->qla4_82xx_reg->rsp_q_in));
 }
 
 static ssize_t qla4xxx_show_boot_eth_info(void *data, int type, char *buf)

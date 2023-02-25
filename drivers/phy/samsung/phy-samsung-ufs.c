@@ -36,11 +36,11 @@ static void samsung_ufs_phy_config(struct samsung_ufs_phy *phy,
 
 	switch (lane) {
 	case LANE_0:
-		writel(cfg->val, (phy)->reg_pma + cfg->off_0);
+		pete_writel("drivers/phy/samsung/phy-samsung-ufs.c:39", cfg->val, (phy)->reg_pma + cfg->off_0);
 		break;
 	case LANE_1:
 		if (cfg->id == PHY_TRSV_BLK)
-			writel(cfg->val, (phy)->reg_pma + cfg->off_1);
+			pete_writel("drivers/phy/samsung/phy-samsung-ufs.c:43", cfg->val, (phy)->reg_pma + cfg->off_1);
 		break;
 	}
 }

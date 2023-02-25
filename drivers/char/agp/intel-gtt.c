@@ -187,12 +187,12 @@ static int i810_setup(void)
 	if (!intel_private.registers)
 		return -ENOMEM;
 
-	writel(virt_to_phys(gtt_table) | I810_PGETBL_ENABLED,
+	pete_writel("drivers/char/agp/intel-gtt.c:190", virt_to_phys(gtt_table) | I810_PGETBL_ENABLED,
 	       intel_private.registers+I810_PGETBL_CTL);
 
 	intel_private.gtt_phys_addr = reg_addr + I810_PTE_BASE;
 
-	if ((readl(intel_private.registers+I810_DRAM_CTL)
+	if ((pete_readl("drivers/char/agp/intel-gtt.c:195", intel_private.registers+I810_DRAM_CTL)
 		& I810_DRAM_ROW_0) == I810_DRAM_ROW_0_SDRAM) {
 		dev_info(&intel_private.pcidev->dev,
 			 "detected 4MB dedicated video ram\n");
@@ -204,7 +204,7 @@ static int i810_setup(void)
 
 static void i810_cleanup(void)
 {
-	writel(0, intel_private.registers+I810_PGETBL_CTL);
+	pete_writel("drivers/char/agp/intel-gtt.c:207", 0, intel_private.registers+I810_PGETBL_CTL);
 	free_gatt_pages(intel_private.i81x_gtt_table, I810_GTT_ORDER);
 }
 
@@ -435,15 +435,15 @@ static void i965_adjust_pgetbl_size(unsigned int size_flag)
 	u32 pgetbl_ctl, pgetbl_ctl2;
 
 	/* ensure that ppgtt is disabled */
-	pgetbl_ctl2 = readl(intel_private.registers+I965_PGETBL_CTL2);
+	pgetbl_ctl2 = pete_readl("drivers/char/agp/intel-gtt.c:438", intel_private.registers+I965_PGETBL_CTL2);
 	pgetbl_ctl2 &= ~I810_PGETBL_ENABLED;
-	writel(pgetbl_ctl2, intel_private.registers+I965_PGETBL_CTL2);
+	pete_writel("drivers/char/agp/intel-gtt.c:440", pgetbl_ctl2, intel_private.registers+I965_PGETBL_CTL2);
 
 	/* write the new ggtt size */
-	pgetbl_ctl = readl(intel_private.registers+I810_PGETBL_CTL);
+	pgetbl_ctl = pete_readl("drivers/char/agp/intel-gtt.c:443", intel_private.registers+I810_PGETBL_CTL);
 	pgetbl_ctl &= ~I965_PGETBL_SIZE_MASK;
 	pgetbl_ctl |= size_flag;
-	writel(pgetbl_ctl, intel_private.registers+I810_PGETBL_CTL);
+	pete_writel("drivers/char/agp/intel-gtt.c:446", pgetbl_ctl, intel_private.registers+I810_PGETBL_CTL);
 }
 
 static unsigned int i965_gtt_total_entries(void)
@@ -471,7 +471,7 @@ static unsigned int i965_gtt_total_entries(void)
 		}
 	}
 
-	pgetbl_ctl = readl(intel_private.registers+I810_PGETBL_CTL);
+	pgetbl_ctl = pete_readl("drivers/char/agp/intel-gtt.c:474", intel_private.registers+I810_PGETBL_CTL);
 
 	switch (pgetbl_ctl & I965_PGETBL_SIZE_MASK) {
 	case I965_PGETBL_SIZE_128KB:
@@ -615,7 +615,7 @@ static int intel_gtt_init(void)
 
 	/* save the PGETBL reg for resume */
 	intel_private.PGETBL_save =
-		readl(intel_private.registers+I810_PGETBL_CTL)
+		pete_readl("drivers/char/agp/intel-gtt.c:618", intel_private.registers+I810_PGETBL_CTL)
 			& ~I810_PGETBL_ENABLED;
 	/* we only ever restore the register when enabling the PGTBL... */
 	if (HAS_PGTBL_EN)
@@ -721,10 +721,10 @@ static void i830_chipset_flush(void)
 	 *
 	 * Also works as advertised on my 845G.
 	 */
-	writel(readl(intel_private.registers+I830_HIC) | (1<<31),
+	pete_writel("drivers/char/agp/intel-gtt.c:724", pete_readl("drivers/char/agp/intel-gtt.c:724", intel_private.registers+I830_HIC) | (1<<31),
 	       intel_private.registers+I830_HIC);
 
-	while (readl(intel_private.registers+I830_HIC) & (1<<31)) {
+	while (pete_readl("drivers/char/agp/intel-gtt.c:727", intel_private.registers+I830_HIC) & (1<<31)) {
 		if (time_after(jiffies, timeout))
 			break;
 
@@ -770,19 +770,19 @@ bool intel_enable_gtt(void)
 	 * be paranoid and flush all chipset write buffers...
 	 */
 	if (INTEL_GTT_GEN >= 3)
-		writel(0, intel_private.registers+GFX_FLSH_CNTL);
+		pete_writel("drivers/char/agp/intel-gtt.c:773", 0, intel_private.registers+GFX_FLSH_CNTL);
 
 	reg = intel_private.registers+I810_PGETBL_CTL;
-	writel(intel_private.PGETBL_save, reg);
-	if (HAS_PGTBL_EN && (readl(reg) & I810_PGETBL_ENABLED) == 0) {
+	pete_writel("drivers/char/agp/intel-gtt.c:776", intel_private.PGETBL_save, reg);
+	if (HAS_PGTBL_EN && (pete_readl("drivers/char/agp/intel-gtt.c:777", reg) & I810_PGETBL_ENABLED) == 0) {
 		dev_err(&intel_private.pcidev->dev,
 			"failed to enable the GTT: PGETBL=%x [expected %x]\n",
-			readl(reg), intel_private.PGETBL_save);
+			pete_readl("drivers/char/agp/intel-gtt.c:780", reg), intel_private.PGETBL_save);
 		return false;
 	}
 
 	if (INTEL_GTT_GEN >= 3)
-		writel(0, intel_private.registers+GFX_FLSH_CNTL);
+		pete_writel("drivers/char/agp/intel-gtt.c:785", 0, intel_private.registers+GFX_FLSH_CNTL);
 
 	return true;
 }
@@ -848,7 +848,7 @@ void intel_gtt_insert_page(dma_addr_t addr,
 			   unsigned int flags)
 {
 	intel_private.driver->write_entry(addr, pg, flags);
-	readl(intel_private.gtt + pg);
+	pete_readl("drivers/char/agp/intel-gtt.c:851", intel_private.gtt + pg);
 	if (intel_private.driver->chipset_flush)
 		intel_private.driver->chipset_flush();
 }
@@ -874,7 +874,7 @@ void intel_gtt_insert_sg_entries(struct sg_table *st,
 			j++;
 		}
 	}
-	readl(intel_private.gtt + j - 1);
+	pete_readl("drivers/char/agp/intel-gtt.c:877", intel_private.gtt + j - 1);
 	if (intel_private.driver->chipset_flush)
 		intel_private.driver->chipset_flush();
 }
@@ -1110,7 +1110,7 @@ static void i9xx_chipset_flush(void)
 {
 	wmb();
 	if (intel_private.i9xx_flush_page)
-		writel(1, intel_private.i9xx_flush_page);
+		pete_writel("drivers/char/agp/intel-gtt.c:1113", 1, intel_private.i9xx_flush_page);
 }
 
 static void i965_write_entry(dma_addr_t addr,

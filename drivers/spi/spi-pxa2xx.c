@@ -313,14 +313,14 @@ static u32 pxa2xx_configure_sscr0(const struct driver_data *drv_data,
 static u32 __lpss_ssp_read_priv(struct driver_data *drv_data, unsigned offset)
 {
 	WARN_ON(!drv_data->lpss_base);
-	return readl(drv_data->lpss_base + offset);
+	return pete_readl("drivers/spi/spi-pxa2xx.c:316", drv_data->lpss_base + offset);
 }
 
 static void __lpss_ssp_write_priv(struct driver_data *drv_data,
 				  unsigned offset, u32 value)
 {
 	WARN_ON(!drv_data->lpss_base);
-	writel(value, drv_data->lpss_base + offset);
+	pete_writel("drivers/spi/spi-pxa2xx.c:323", value, drv_data->lpss_base + offset);
 }
 
 /*

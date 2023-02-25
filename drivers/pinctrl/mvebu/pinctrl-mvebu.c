@@ -61,7 +61,7 @@ int mvebu_mmio_mpp_ctrl_get(struct mvebu_mpp_ctrl_data *data,
 	unsigned off = (pid / MVEBU_MPPS_PER_REG) * MVEBU_MPP_BITS;
 	unsigned shift = (pid % MVEBU_MPPS_PER_REG) * MVEBU_MPP_BITS;
 
-	*config = (readl(data->base + off) >> shift) & MVEBU_MPP_MASK;
+	*config = (pete_readl("drivers/pinctrl/mvebu/pinctrl-mvebu.c:64", data->base + off) >> shift) & MVEBU_MPP_MASK;
 
 	return 0;
 }
@@ -73,8 +73,8 @@ int mvebu_mmio_mpp_ctrl_set(struct mvebu_mpp_ctrl_data *data,
 	unsigned shift = (pid % MVEBU_MPPS_PER_REG) * MVEBU_MPP_BITS;
 	unsigned long reg;
 
-	reg = readl(data->base + off) & ~(MVEBU_MPP_MASK << shift);
-	writel(reg | (config << shift), data->base + off);
+	reg = pete_readl("drivers/pinctrl/mvebu/pinctrl-mvebu.c:76", data->base + off) & ~(MVEBU_MPP_MASK << shift);
+	pete_writel("drivers/pinctrl/mvebu/pinctrl-mvebu.c:77", reg | (config << shift), data->base + off);
 
 	return 0;
 }

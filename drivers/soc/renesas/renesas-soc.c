@@ -345,7 +345,7 @@ static int __init renesas_soc_init(void)
 		of_node_put(np);
 
 		if (chipid) {
-			product = readl(chipid);
+			product = pete_readl("drivers/soc/renesas/renesas-soc.c:348", chipid);
 			iounmap(chipid);
 
 			if (soc->id && ((product >> 16) & 0xff) != soc->id) {
@@ -370,7 +370,7 @@ static int __init renesas_soc_init(void)
 		of_node_put(np);
 
 		if (chipid) {
-			product = readl(chipid + 0x0a04);
+			product = pete_readl("drivers/soc/renesas/renesas-soc.c:373", chipid + 0x0a04);
 			iounmap(chipid);
 
 			if (soc->id && (product & 0xfffffff) != soc->id) {
@@ -392,7 +392,7 @@ static int __init renesas_soc_init(void)
 		chipid = ioremap(family->reg, 4);
 	}
 	if (chipid) {
-		product = readl(chipid);
+		product = pete_readl("drivers/soc/renesas/renesas-soc.c:395", chipid);
 		iounmap(chipid);
 		/* R-Car M3-W ES1.1 incorrectly identifies as ES2.0 */
 		if ((product & 0x7fff) == 0x5210)

@@ -944,7 +944,7 @@ static inline u8 __iomem *get_hwbase(struct net_device *dev)
 static inline void pci_push(u8 __iomem *base)
 {
 	/* force out pending posted writes */
-	readl(base);
+	pete_readl("drivers/net/ethernet/nvidia/forcedeth.c:947", base);
 }
 
 static inline u32 nv_descr_getlength(struct ring_desc *prd, u32 v)
@@ -976,7 +976,7 @@ static int reg_delay(struct net_device *dev, int offset, u32 mask, u32 target,
 		delaymax -= delay;
 		if (delaymax < 0)
 			return 1;
-	} while ((readl(base + offset) & mask) != target);
+	} while ((pete_readl("drivers/net/ethernet/nvidia/forcedeth.c:979", base + offset) & mask) != target);
 	return 0;
 }
 
@@ -1000,17 +1000,17 @@ static void setup_hw_rings(struct net_device *dev, int rxtx_flags)
 
 	if (!nv_optimized(np)) {
 		if (rxtx_flags & NV_SETUP_RX_RING)
-			writel(dma_low(np->ring_addr), base + NvRegRxRingPhysAddr);
+			pete_writel("drivers/net/ethernet/nvidia/forcedeth.c:1003", dma_low(np->ring_addr), base + NvRegRxRingPhysAddr);
 		if (rxtx_flags & NV_SETUP_TX_RING)
-			writel(dma_low(np->ring_addr + np->rx_ring_size*sizeof(struct ring_desc)), base + NvRegTxRingPhysAddr);
+			pete_writel("drivers/net/ethernet/nvidia/forcedeth.c:1005", dma_low(np->ring_addr + np->rx_ring_size*sizeof(struct ring_desc)), base + NvRegTxRingPhysAddr);
 	} else {
 		if (rxtx_flags & NV_SETUP_RX_RING) {
-			writel(dma_low(np->ring_addr), base + NvRegRxRingPhysAddr);
-			writel(dma_high(np->ring_addr), base + NvRegRxRingPhysAddrHigh);
+			pete_writel("drivers/net/ethernet/nvidia/forcedeth.c:1008", dma_low(np->ring_addr), base + NvRegRxRingPhysAddr);
+			pete_writel("drivers/net/ethernet/nvidia/forcedeth.c:1009", dma_high(np->ring_addr), base + NvRegRxRingPhysAddrHigh);
 		}
 		if (rxtx_flags & NV_SETUP_TX_RING) {
-			writel(dma_low(np->ring_addr + np->rx_ring_size*sizeof(struct ring_desc_ex)), base + NvRegTxRingPhysAddr);
-			writel(dma_high(np->ring_addr + np->rx_ring_size*sizeof(struct ring_desc_ex)), base + NvRegTxRingPhysAddrHigh);
+			pete_writel("drivers/net/ethernet/nvidia/forcedeth.c:1012", dma_low(np->ring_addr + np->rx_ring_size*sizeof(struct ring_desc_ex)), base + NvRegTxRingPhysAddr);
+			pete_writel("drivers/net/ethernet/nvidia/forcedeth.c:1013", dma_high(np->ring_addr + np->rx_ring_size*sizeof(struct ring_desc_ex)), base + NvRegTxRingPhysAddrHigh);
 		}
 	}
 }
@@ -1057,12 +1057,12 @@ static void nv_txrx_gate(struct net_device *dev, bool gate)
 
 	if (!np->mac_in_use &&
 	    (np->driver_data & DEV_HAS_POWER_CNTRL)) {
-		powerstate = readl(base + NvRegPowerState2);
+		powerstate = pete_readl("drivers/net/ethernet/nvidia/forcedeth.c:1060", base + NvRegPowerState2);
 		if (gate)
 			powerstate |= NVREG_POWERSTATE2_GATE_CLOCKS;
 		else
 			powerstate &= ~NVREG_POWERSTATE2_GATE_CLOCKS;
-		writel(powerstate, base + NvRegPowerState2);
+		pete_writel("drivers/net/ethernet/nvidia/forcedeth.c:1065", powerstate, base + NvRegPowerState2);
 	}
 }
 
@@ -1103,7 +1103,7 @@ static void nv_enable_hw_interrupts(struct net_device *dev, u32 mask)
 {
 	u8 __iomem *base = get_hwbase(dev);
 
-	writel(mask, base + NvRegIrqMask);
+	pete_writel("drivers/net/ethernet/nvidia/forcedeth.c:1106", mask, base + NvRegIrqMask);
 }
 
 static void nv_disable_hw_interrupts(struct net_device *dev, u32 mask)
@@ -1112,11 +1112,11 @@ static void nv_disable_hw_interrupts(struct net_device *dev, u32 mask)
 	u8 __iomem *base = get_hwbase(dev);
 
 	if (np->msi_flags & NV_MSI_X_ENABLED) {
-		writel(mask, base + NvRegIrqMask);
+		pete_writel("drivers/net/ethernet/nvidia/forcedeth.c:1115", mask, base + NvRegIrqMask);
 	} else {
 		if (np->msi_flags & NV_MSI_ENABLED)
-			writel(0, base + NvRegMSIIrqMask);
-		writel(0, base + NvRegIrqMask);
+			pete_writel("drivers/net/ethernet/nvidia/forcedeth.c:1118", 0, base + NvRegMSIIrqMask);
+		pete_writel("drivers/net/ethernet/nvidia/forcedeth.c:1119", 0, base + NvRegIrqMask);
 	}
 }
 
@@ -1145,20 +1145,20 @@ static int mii_rw(struct net_device *dev, int addr, int miireg, int value)
 	u32 reg;
 	int retval;
 
-	writel(NVREG_MIISTAT_MASK_RW, base + NvRegMIIStatus);
+	pete_writel("drivers/net/ethernet/nvidia/forcedeth.c:1148", NVREG_MIISTAT_MASK_RW, base + NvRegMIIStatus);
 
-	reg = readl(base + NvRegMIIControl);
+	reg = pete_readl("drivers/net/ethernet/nvidia/forcedeth.c:1150", base + NvRegMIIControl);
 	if (reg & NVREG_MIICTL_INUSE) {
-		writel(NVREG_MIICTL_INUSE, base + NvRegMIIControl);
+		pete_writel("drivers/net/ethernet/nvidia/forcedeth.c:1152", NVREG_MIICTL_INUSE, base + NvRegMIIControl);
 		udelay(NV_MIIBUSY_DELAY);
 	}
 
 	reg = (addr << NVREG_MIICTL_ADDRSHIFT) | miireg;
 	if (value != MII_READ) {
-		writel(value, base + NvRegMIIData);
+		pete_writel("drivers/net/ethernet/nvidia/forcedeth.c:1158", value, base + NvRegMIIData);
 		reg |= NVREG_MIICTL_WRITE;
 	}
-	writel(reg, base + NvRegMIIControl);
+	pete_writel("drivers/net/ethernet/nvidia/forcedeth.c:1161", reg, base + NvRegMIIControl);
 
 	if (reg_delay(dev, NvRegMIIControl, NVREG_MIICTL_INUSE, 0,
 			NV_MIIPHY_DELAY, NV_MIIPHY_DELAYMAX)) {
@@ -1166,10 +1166,10 @@ static int mii_rw(struct net_device *dev, int addr, int miireg, int value)
 	} else if (value != MII_READ) {
 		/* it was a write operation - fewer failures are detectable */
 		retval = 0;
-	} else if (readl(base + NvRegMIIStatus) & NVREG_MIISTAT_ERROR) {
+	} else if (pete_readl("drivers/net/ethernet/nvidia/forcedeth.c:1169", base + NvRegMIIStatus) & NVREG_MIISTAT_ERROR) {
 		retval = -1;
 	} else {
-		retval = readl(base + NvRegMIIData);
+		retval = pete_readl("drivers/net/ethernet/nvidia/forcedeth.c:1172", base + NvRegMIIData);
 	}
 
 	return retval;
@@ -1227,15 +1227,15 @@ static int init_realtek_8211c(struct net_device *dev, struct fe_priv *np)
 {
 	u32 reg;
 	u8 __iomem *base = get_hwbase(dev);
-	u32 powerstate = readl(base + NvRegPowerState2);
+	u32 powerstate = pete_readl("drivers/net/ethernet/nvidia/forcedeth.c:1230", base + NvRegPowerState2);
 
 	/* need to perform hw phy reset */
 	powerstate |= NVREG_POWERSTATE2_PHY_RESET;
-	writel(powerstate, base + NvRegPowerState2);
+	pete_writel("drivers/net/ethernet/nvidia/forcedeth.c:1234", powerstate, base + NvRegPowerState2);
 	msleep(25);
 
 	powerstate &= ~NVREG_POWERSTATE2_PHY_RESET;
-	writel(powerstate, base + NvRegPowerState2);
+	pete_writel("drivers/net/ethernet/nvidia/forcedeth.c:1238", powerstate, base + NvRegPowerState2);
 	msleep(25);
 
 	reg = mii_rw(dev, np->phyaddr, PHY_REALTEK_INIT_REG6, MII_READ);
@@ -1436,7 +1436,7 @@ static int phy_init(struct net_device *dev)
 	}
 
 	/* get phy interface type */
-	phyinterface = readl(base + NvRegPhyInterface);
+	phyinterface = pete_readl("drivers/net/ethernet/nvidia/forcedeth.c:1439", base + NvRegPhyInterface);
 
 	/* see if gigabit phy */
 	mii_status = mii_rw(dev, np->phyaddr, MII_BMSR, MII_READ);
@@ -1532,20 +1532,20 @@ static void nv_start_rx(struct net_device *dev)
 {
 	struct fe_priv *np = netdev_priv(dev);
 	u8 __iomem *base = get_hwbase(dev);
-	u32 rx_ctrl = readl(base + NvRegReceiverControl);
+	u32 rx_ctrl = pete_readl("drivers/net/ethernet/nvidia/forcedeth.c:1535", base + NvRegReceiverControl);
 
 	/* Already running? Stop it. */
-	if ((readl(base + NvRegReceiverControl) & NVREG_RCVCTL_START) && !np->mac_in_use) {
+	if ((pete_readl("drivers/net/ethernet/nvidia/forcedeth.c:1538", base + NvRegReceiverControl) & NVREG_RCVCTL_START) && !np->mac_in_use) {
 		rx_ctrl &= ~NVREG_RCVCTL_START;
-		writel(rx_ctrl, base + NvRegReceiverControl);
+		pete_writel("drivers/net/ethernet/nvidia/forcedeth.c:1540", rx_ctrl, base + NvRegReceiverControl);
 		pci_push(base);
 	}
-	writel(np->linkspeed, base + NvRegLinkSpeed);
+	pete_writel("drivers/net/ethernet/nvidia/forcedeth.c:1543", np->linkspeed, base + NvRegLinkSpeed);
 	pci_push(base);
 	rx_ctrl |= NVREG_RCVCTL_START;
 	if (np->mac_in_use)
 		rx_ctrl &= ~NVREG_RCVCTL_RX_PATH_EN;
-	writel(rx_ctrl, base + NvRegReceiverControl);
+	pete_writel("drivers/net/ethernet/nvidia/forcedeth.c:1548", rx_ctrl, base + NvRegReceiverControl);
 	pci_push(base);
 }
 
@@ -1553,13 +1553,13 @@ static void nv_stop_rx(struct net_device *dev)
 {
 	struct fe_priv *np = netdev_priv(dev);
 	u8 __iomem *base = get_hwbase(dev);
-	u32 rx_ctrl = readl(base + NvRegReceiverControl);
+	u32 rx_ctrl = pete_readl("drivers/net/ethernet/nvidia/forcedeth.c:1556", base + NvRegReceiverControl);
 
 	if (!np->mac_in_use)
 		rx_ctrl &= ~NVREG_RCVCTL_START;
 	else
 		rx_ctrl |= NVREG_RCVCTL_RX_PATH_EN;
-	writel(rx_ctrl, base + NvRegReceiverControl);
+	pete_writel("drivers/net/ethernet/nvidia/forcedeth.c:1562", rx_ctrl, base + NvRegReceiverControl);
 	if (reg_delay(dev, NvRegReceiverStatus, NVREG_RCVSTAT_BUSY, 0,
 		      NV_RXSTOP_DELAY1, NV_RXSTOP_DELAY1MAX))
 		netdev_info(dev, "%s: ReceiverStatus remained busy\n",
@@ -1567,19 +1567,19 @@ static void nv_stop_rx(struct net_device *dev)
 
 	udelay(NV_RXSTOP_DELAY2);
 	if (!np->mac_in_use)
-		writel(0, base + NvRegLinkSpeed);
+		pete_writel("drivers/net/ethernet/nvidia/forcedeth.c:1570", 0, base + NvRegLinkSpeed);
 }
 
 static void nv_start_tx(struct net_device *dev)
 {
 	struct fe_priv *np = netdev_priv(dev);
 	u8 __iomem *base = get_hwbase(dev);
-	u32 tx_ctrl = readl(base + NvRegTransmitterControl);
+	u32 tx_ctrl = pete_readl("drivers/net/ethernet/nvidia/forcedeth.c:1577", base + NvRegTransmitterControl);
 
 	tx_ctrl |= NVREG_XMITCTL_START;
 	if (np->mac_in_use)
 		tx_ctrl &= ~NVREG_XMITCTL_TX_PATH_EN;
-	writel(tx_ctrl, base + NvRegTransmitterControl);
+	pete_writel("drivers/net/ethernet/nvidia/forcedeth.c:1582", tx_ctrl, base + NvRegTransmitterControl);
 	pci_push(base);
 }
 
@@ -1587,13 +1587,13 @@ static void nv_stop_tx(struct net_device *dev)
 {
 	struct fe_priv *np = netdev_priv(dev);
 	u8 __iomem *base = get_hwbase(dev);
-	u32 tx_ctrl = readl(base + NvRegTransmitterControl);
+	u32 tx_ctrl = pete_readl("drivers/net/ethernet/nvidia/forcedeth.c:1590", base + NvRegTransmitterControl);
 
 	if (!np->mac_in_use)
 		tx_ctrl &= ~NVREG_XMITCTL_START;
 	else
 		tx_ctrl |= NVREG_XMITCTL_TX_PATH_EN;
-	writel(tx_ctrl, base + NvRegTransmitterControl);
+	pete_writel("drivers/net/ethernet/nvidia/forcedeth.c:1596", tx_ctrl, base + NvRegTransmitterControl);
 	if (reg_delay(dev, NvRegTransmitterStatus, NVREG_XMITSTAT_BUSY, 0,
 		      NV_TXSTOP_DELAY1, NV_TXSTOP_DELAY1MAX))
 		netdev_info(dev, "%s: TransmitterStatus remained busy\n",
@@ -1601,7 +1601,7 @@ static void nv_stop_tx(struct net_device *dev)
 
 	udelay(NV_TXSTOP_DELAY2);
 	if (!np->mac_in_use)
-		writel(readl(base + NvRegTransmitPoll) & NVREG_TRANSMITPOLL_MAC_ADDR_REV,
+		pete_writel("drivers/net/ethernet/nvidia/forcedeth.c:1604", pete_readl("drivers/net/ethernet/nvidia/forcedeth.c:1604", base + NvRegTransmitPoll) & NVREG_TRANSMITPOLL_MAC_ADDR_REV,
 		       base + NvRegTransmitPoll);
 }
 
@@ -1622,10 +1622,10 @@ static void nv_txrx_reset(struct net_device *dev)
 	struct fe_priv *np = netdev_priv(dev);
 	u8 __iomem *base = get_hwbase(dev);
 
-	writel(NVREG_TXRXCTL_BIT2 | NVREG_TXRXCTL_RESET | np->txrxctl_bits, base + NvRegTxRxControl);
+	pete_writel("drivers/net/ethernet/nvidia/forcedeth.c:1625", NVREG_TXRXCTL_BIT2 | NVREG_TXRXCTL_RESET | np->txrxctl_bits, base + NvRegTxRxControl);
 	pci_push(base);
 	udelay(NV_TXRX_RESET_DELAY);
-	writel(NVREG_TXRXCTL_BIT2 | np->txrxctl_bits, base + NvRegTxRxControl);
+	pete_writel("drivers/net/ethernet/nvidia/forcedeth.c:1628", NVREG_TXRXCTL_BIT2 | np->txrxctl_bits, base + NvRegTxRxControl);
 	pci_push(base);
 }
 
@@ -1635,27 +1635,27 @@ static void nv_mac_reset(struct net_device *dev)
 	u8 __iomem *base = get_hwbase(dev);
 	u32 temp1, temp2, temp3;
 
-	writel(NVREG_TXRXCTL_BIT2 | NVREG_TXRXCTL_RESET | np->txrxctl_bits, base + NvRegTxRxControl);
+	pete_writel("drivers/net/ethernet/nvidia/forcedeth.c:1638", NVREG_TXRXCTL_BIT2 | NVREG_TXRXCTL_RESET | np->txrxctl_bits, base + NvRegTxRxControl);
 	pci_push(base);
 
 	/* save registers since they will be cleared on reset */
-	temp1 = readl(base + NvRegMacAddrA);
-	temp2 = readl(base + NvRegMacAddrB);
-	temp3 = readl(base + NvRegTransmitPoll);
+	temp1 = pete_readl("drivers/net/ethernet/nvidia/forcedeth.c:1642", base + NvRegMacAddrA);
+	temp2 = pete_readl("drivers/net/ethernet/nvidia/forcedeth.c:1643", base + NvRegMacAddrB);
+	temp3 = pete_readl("drivers/net/ethernet/nvidia/forcedeth.c:1644", base + NvRegTransmitPoll);
 
-	writel(NVREG_MAC_RESET_ASSERT, base + NvRegMacReset);
+	pete_writel("drivers/net/ethernet/nvidia/forcedeth.c:1646", NVREG_MAC_RESET_ASSERT, base + NvRegMacReset);
 	pci_push(base);
 	udelay(NV_MAC_RESET_DELAY);
-	writel(0, base + NvRegMacReset);
+	pete_writel("drivers/net/ethernet/nvidia/forcedeth.c:1649", 0, base + NvRegMacReset);
 	pci_push(base);
 	udelay(NV_MAC_RESET_DELAY);
 
 	/* restore saved registers */
-	writel(temp1, base + NvRegMacAddrA);
-	writel(temp2, base + NvRegMacAddrB);
-	writel(temp3, base + NvRegTransmitPoll);
+	pete_writel("drivers/net/ethernet/nvidia/forcedeth.c:1654", temp1, base + NvRegMacAddrA);
+	pete_writel("drivers/net/ethernet/nvidia/forcedeth.c:1655", temp2, base + NvRegMacAddrB);
+	pete_writel("drivers/net/ethernet/nvidia/forcedeth.c:1656", temp3, base + NvRegTransmitPoll);
 
-	writel(NVREG_TXRXCTL_BIT2 | np->txrxctl_bits, base + NvRegTxRxControl);
+	pete_writel("drivers/net/ethernet/nvidia/forcedeth.c:1658", NVREG_TXRXCTL_BIT2 | np->txrxctl_bits, base + NvRegTxRxControl);
 	pci_push(base);
 }
 
@@ -1668,27 +1668,27 @@ static void nv_update_stats(struct net_device *dev)
 	lockdep_assert_held(&np->hwstats_lock);
 
 	/* query hardware */
-	np->estats.tx_bytes += readl(base + NvRegTxCnt);
-	np->estats.tx_zero_rexmt += readl(base + NvRegTxZeroReXmt);
-	np->estats.tx_one_rexmt += readl(base + NvRegTxOneReXmt);
-	np->estats.tx_many_rexmt += readl(base + NvRegTxManyReXmt);
-	np->estats.tx_late_collision += readl(base + NvRegTxLateCol);
-	np->estats.tx_fifo_errors += readl(base + NvRegTxUnderflow);
-	np->estats.tx_carrier_errors += readl(base + NvRegTxLossCarrier);
-	np->estats.tx_excess_deferral += readl(base + NvRegTxExcessDef);
-	np->estats.tx_retry_error += readl(base + NvRegTxRetryErr);
-	np->estats.rx_frame_error += readl(base + NvRegRxFrameErr);
-	np->estats.rx_extra_byte += readl(base + NvRegRxExtraByte);
-	np->estats.rx_late_collision += readl(base + NvRegRxLateCol);
-	np->estats.rx_runt += readl(base + NvRegRxRunt);
-	np->estats.rx_frame_too_long += readl(base + NvRegRxFrameTooLong);
-	np->estats.rx_over_errors += readl(base + NvRegRxOverflow);
-	np->estats.rx_crc_errors += readl(base + NvRegRxFCSErr);
-	np->estats.rx_frame_align_error += readl(base + NvRegRxFrameAlignErr);
-	np->estats.rx_length_error += readl(base + NvRegRxLenErr);
-	np->estats.rx_unicast += readl(base + NvRegRxUnicast);
-	np->estats.rx_multicast += readl(base + NvRegRxMulticast);
-	np->estats.rx_broadcast += readl(base + NvRegRxBroadcast);
+	np->estats.tx_bytes += pete_readl("drivers/net/ethernet/nvidia/forcedeth.c:1671", base + NvRegTxCnt);
+	np->estats.tx_zero_rexmt += pete_readl("drivers/net/ethernet/nvidia/forcedeth.c:1672", base + NvRegTxZeroReXmt);
+	np->estats.tx_one_rexmt += pete_readl("drivers/net/ethernet/nvidia/forcedeth.c:1673", base + NvRegTxOneReXmt);
+	np->estats.tx_many_rexmt += pete_readl("drivers/net/ethernet/nvidia/forcedeth.c:1674", base + NvRegTxManyReXmt);
+	np->estats.tx_late_collision += pete_readl("drivers/net/ethernet/nvidia/forcedeth.c:1675", base + NvRegTxLateCol);
+	np->estats.tx_fifo_errors += pete_readl("drivers/net/ethernet/nvidia/forcedeth.c:1676", base + NvRegTxUnderflow);
+	np->estats.tx_carrier_errors += pete_readl("drivers/net/ethernet/nvidia/forcedeth.c:1677", base + NvRegTxLossCarrier);
+	np->estats.tx_excess_deferral += pete_readl("drivers/net/ethernet/nvidia/forcedeth.c:1678", base + NvRegTxExcessDef);
+	np->estats.tx_retry_error += pete_readl("drivers/net/ethernet/nvidia/forcedeth.c:1679", base + NvRegTxRetryErr);
+	np->estats.rx_frame_error += pete_readl("drivers/net/ethernet/nvidia/forcedeth.c:1680", base + NvRegRxFrameErr);
+	np->estats.rx_extra_byte += pete_readl("drivers/net/ethernet/nvidia/forcedeth.c:1681", base + NvRegRxExtraByte);
+	np->estats.rx_late_collision += pete_readl("drivers/net/ethernet/nvidia/forcedeth.c:1682", base + NvRegRxLateCol);
+	np->estats.rx_runt += pete_readl("drivers/net/ethernet/nvidia/forcedeth.c:1683", base + NvRegRxRunt);
+	np->estats.rx_frame_too_long += pete_readl("drivers/net/ethernet/nvidia/forcedeth.c:1684", base + NvRegRxFrameTooLong);
+	np->estats.rx_over_errors += pete_readl("drivers/net/ethernet/nvidia/forcedeth.c:1685", base + NvRegRxOverflow);
+	np->estats.rx_crc_errors += pete_readl("drivers/net/ethernet/nvidia/forcedeth.c:1686", base + NvRegRxFCSErr);
+	np->estats.rx_frame_align_error += pete_readl("drivers/net/ethernet/nvidia/forcedeth.c:1687", base + NvRegRxFrameAlignErr);
+	np->estats.rx_length_error += pete_readl("drivers/net/ethernet/nvidia/forcedeth.c:1688", base + NvRegRxLenErr);
+	np->estats.rx_unicast += pete_readl("drivers/net/ethernet/nvidia/forcedeth.c:1689", base + NvRegRxUnicast);
+	np->estats.rx_multicast += pete_readl("drivers/net/ethernet/nvidia/forcedeth.c:1690", base + NvRegRxMulticast);
+	np->estats.rx_broadcast += pete_readl("drivers/net/ethernet/nvidia/forcedeth.c:1691", base + NvRegRxBroadcast);
 	np->estats.rx_packets =
 		np->estats.rx_unicast +
 		np->estats.rx_multicast +
@@ -1709,19 +1709,19 @@ static void nv_update_stats(struct net_device *dev)
 		np->estats.tx_retry_error;
 
 	if (np->driver_data & DEV_HAS_STATISTICS_V2) {
-		np->estats.tx_deferral += readl(base + NvRegTxDef);
-		np->estats.tx_packets += readl(base + NvRegTxFrame);
-		np->estats.rx_bytes += readl(base + NvRegRxCnt);
-		np->estats.tx_pause += readl(base + NvRegTxPause);
-		np->estats.rx_pause += readl(base + NvRegRxPause);
-		np->estats.rx_drop_frame += readl(base + NvRegRxDropFrame);
+		np->estats.tx_deferral += pete_readl("drivers/net/ethernet/nvidia/forcedeth.c:1712", base + NvRegTxDef);
+		np->estats.tx_packets += pete_readl("drivers/net/ethernet/nvidia/forcedeth.c:1713", base + NvRegTxFrame);
+		np->estats.rx_bytes += pete_readl("drivers/net/ethernet/nvidia/forcedeth.c:1714", base + NvRegRxCnt);
+		np->estats.tx_pause += pete_readl("drivers/net/ethernet/nvidia/forcedeth.c:1715", base + NvRegTxPause);
+		np->estats.rx_pause += pete_readl("drivers/net/ethernet/nvidia/forcedeth.c:1716", base + NvRegRxPause);
+		np->estats.rx_drop_frame += pete_readl("drivers/net/ethernet/nvidia/forcedeth.c:1717", base + NvRegRxDropFrame);
 		np->estats.rx_errors_total += np->estats.rx_drop_frame;
 	}
 
 	if (np->driver_data & DEV_HAS_STATISTICS_V3) {
-		np->estats.tx_unicast += readl(base + NvRegTxUnicast);
-		np->estats.tx_multicast += readl(base + NvRegTxMulticast);
-		np->estats.tx_broadcast += readl(base + NvRegTxBroadcast);
+		np->estats.tx_unicast += pete_readl("drivers/net/ethernet/nvidia/forcedeth.c:1722", base + NvRegTxUnicast);
+		np->estats.tx_multicast += pete_readl("drivers/net/ethernet/nvidia/forcedeth.c:1723", base + NvRegTxMulticast);
+		np->estats.tx_broadcast += pete_readl("drivers/net/ethernet/nvidia/forcedeth.c:1724", base + NvRegTxBroadcast);
 	}
 }
 
@@ -2097,18 +2097,18 @@ static void nv_legacybackoff_reseed(struct net_device *dev)
 	u32 low;
 	int tx_status = 0;
 
-	reg = readl(base + NvRegSlotTime) & ~NVREG_SLOTTIME_MASK;
+	reg = pete_readl("drivers/net/ethernet/nvidia/forcedeth.c:2100", base + NvRegSlotTime) & ~NVREG_SLOTTIME_MASK;
 	get_random_bytes(&low, sizeof(low));
 	reg |= low & NVREG_SLOTTIME_MASK;
 
 	/* Need to stop tx before change takes effect.
 	 * Caller has already gained np->lock.
 	 */
-	tx_status = readl(base + NvRegTransmitterControl) & NVREG_XMITCTL_START;
+	tx_status = pete_readl("drivers/net/ethernet/nvidia/forcedeth.c:2107", base + NvRegTransmitterControl) & NVREG_XMITCTL_START;
 	if (tx_status)
 		nv_stop_tx(dev);
 	nv_stop_rx(dev);
-	writel(reg, base + NvRegSlotTime);
+	pete_writel("drivers/net/ethernet/nvidia/forcedeth.c:2111", reg, base + NvRegSlotTime);
 	if (tx_status)
 		nv_start_tx(dev);
 	nv_start_rx(dev);
@@ -2185,7 +2185,7 @@ static void nv_gear_backoff_reseed(struct net_device *dev)
 	temp = NVREG_BKOFFCTRL_DEFAULT | (0 << NVREG_BKOFFCTRL_SELECT);
 	temp |= combinedSeed & NVREG_BKOFFCTRL_SEED_MASK;
 	temp |= combinedSeed >> NVREG_BKOFFCTRL_GEAR;
-	writel(temp, base + NvRegBackOffControl);
+	pete_writel("drivers/net/ethernet/nvidia/forcedeth.c:2188", temp, base + NvRegBackOffControl);
 
 	/* Setup seeds for all gear LFSRs. */
 	get_random_bytes(&seedset, sizeof(seedset));
@@ -2194,7 +2194,7 @@ static void nv_gear_backoff_reseed(struct net_device *dev)
 		temp = NVREG_BKOFFCTRL_DEFAULT | (i << NVREG_BKOFFCTRL_SELECT);
 		temp |= main_seedset[seedset][i-1] & 0x3ff;
 		temp |= ((gear_seedset[seedset][i-1] & 0x3ff) << NVREG_BKOFFCTRL_GEAR);
-		writel(temp, base + NvRegBackOffControl);
+		pete_writel("drivers/net/ethernet/nvidia/forcedeth.c:2197", temp, base + NvRegBackOffControl);
 	}
 }
 
@@ -2369,7 +2369,7 @@ txkick:
 		u32 txrxctl_kick;
 dma_error:
 		txrxctl_kick = NVREG_TXRXCTL_KICK | np->txrxctl_bits;
-		writel(txrxctl_kick, get_hwbase(dev) + NvRegTxRxControl);
+		pete_writel("drivers/net/ethernet/nvidia/forcedeth.c:2372", txrxctl_kick, get_hwbase(dev) + NvRegTxRxControl);
 	}
 
 	return ret;
@@ -2574,7 +2574,7 @@ txkick:
 		u32 txrxctl_kick;
 dma_error:
 		txrxctl_kick = NVREG_TXRXCTL_KICK | np->txrxctl_bits;
-		writel(txrxctl_kick, get_hwbase(dev) + NvRegTxRxControl);
+		pete_writel("drivers/net/ethernet/nvidia/forcedeth.c:2577", txrxctl_kick, get_hwbase(dev) + NvRegTxRxControl);
 	}
 
 	return ret;
@@ -2594,7 +2594,7 @@ static inline void nv_tx_flip_ownership(struct net_device *dev)
 		if (np->tx_change_owner == np->tx_end_flip)
 			np->tx_change_owner = NULL;
 
-		writel(NVREG_TXRXCTL_KICK|np->txrxctl_bits, get_hwbase(dev) + NvRegTxRxControl);
+		pete_writel("drivers/net/ethernet/nvidia/forcedeth.c:2597", NVREG_TXRXCTL_KICK|np->txrxctl_bits, get_hwbase(dev) + NvRegTxRxControl);
 	}
 }
 
@@ -2743,9 +2743,9 @@ static void nv_tx_timeout(struct net_device *dev, unsigned int txqueue)
 	int saved_tx_limit;
 
 	if (np->msi_flags & NV_MSI_X_ENABLED)
-		status = readl(base + NvRegMSIXIrqStatus) & NVREG_IRQSTAT_MASK;
+		status = pete_readl("drivers/net/ethernet/nvidia/forcedeth.c:2746", base + NvRegMSIXIrqStatus) & NVREG_IRQSTAT_MASK;
 	else
-		status = readl(base + NvRegIrqStatus) & NVREG_IRQSTAT_MASK;
+		status = pete_readl("drivers/net/ethernet/nvidia/forcedeth.c:2748", base + NvRegIrqStatus) & NVREG_IRQSTAT_MASK;
 
 	netdev_warn(dev, "Got tx_timeout. irq status: %08x\n", status);
 
@@ -2759,10 +2759,10 @@ static void nv_tx_timeout(struct net_device *dev, unsigned int txqueue)
 				    "%3x: %08x %08x %08x %08x "
 				    "%08x %08x %08x %08x\n",
 				    i,
-				    readl(base + i + 0), readl(base + i + 4),
-				    readl(base + i + 8), readl(base + i + 12),
-				    readl(base + i + 16), readl(base + i + 20),
-				    readl(base + i + 24), readl(base + i + 28));
+				    pete_readl("drivers/net/ethernet/nvidia/forcedeth.c:2762", base + i + 0), pete_readl("drivers/net/ethernet/nvidia/forcedeth.c:2762", base + i + 4),
+				    pete_readl("drivers/net/ethernet/nvidia/forcedeth.c:2763", base + i + 8), pete_readl("drivers/net/ethernet/nvidia/forcedeth.c:2763", base + i + 12),
+				    pete_readl("drivers/net/ethernet/nvidia/forcedeth.c:2764", base + i + 16), pete_readl("drivers/net/ethernet/nvidia/forcedeth.c:2764", base + i + 20),
+				    pete_readl("drivers/net/ethernet/nvidia/forcedeth.c:2765", base + i + 24), pete_readl("drivers/net/ethernet/nvidia/forcedeth.c:2765", base + i + 28));
 		}
 		netdev_info(dev, "Dumping tx ring\n");
 		for (i = 0; i < np->tx_ring_size; i += 4) {
@@ -3130,12 +3130,12 @@ static int nv_change_mtu(struct net_device *dev, int new_mtu)
 				mod_timer(&np->oom_kick, jiffies + OOM_REFILL);
 		}
 		/* reinit nic view of the rx queue */
-		writel(np->rx_buf_sz, base + NvRegOffloadConfig);
+		pete_writel("drivers/net/ethernet/nvidia/forcedeth.c:3133", np->rx_buf_sz, base + NvRegOffloadConfig);
 		setup_hw_rings(dev, NV_SETUP_RX_RING | NV_SETUP_TX_RING);
-		writel(((np->rx_ring_size-1) << NVREG_RINGSZ_RXSHIFT) + ((np->tx_ring_size-1) << NVREG_RINGSZ_TXSHIFT),
+		pete_writel("drivers/net/ethernet/nvidia/forcedeth.c:3135", ((np->rx_ring_size-1) << NVREG_RINGSZ_RXSHIFT) + ((np->tx_ring_size-1) << NVREG_RINGSZ_TXSHIFT),
 			base + NvRegRingSizes);
 		pci_push(base);
-		writel(NVREG_TXRXCTL_KICK|np->txrxctl_bits, get_hwbase(dev) + NvRegTxRxControl);
+		pete_writel("drivers/net/ethernet/nvidia/forcedeth.c:3138", NVREG_TXRXCTL_KICK|np->txrxctl_bits, get_hwbase(dev) + NvRegTxRxControl);
 		pci_push(base);
 
 		/* restart rx engine */
@@ -3158,8 +3158,8 @@ static void nv_copy_mac_to_hw(struct net_device *dev)
 			(dev->dev_addr[2] << 16) + (dev->dev_addr[3] << 24);
 	mac[1] = (dev->dev_addr[4] << 0) + (dev->dev_addr[5] << 8);
 
-	writel(mac[0], base + NvRegMacAddrA);
-	writel(mac[1], base + NvRegMacAddrB);
+	pete_writel("drivers/net/ethernet/nvidia/forcedeth.c:3161", mac[0], base + NvRegMacAddrA);
+	pete_writel("drivers/net/ethernet/nvidia/forcedeth.c:3162", mac[1], base + NvRegMacAddrB);
 }
 
 /*
@@ -3209,7 +3209,7 @@ static void nv_set_multicast(struct net_device *dev)
 	u8 __iomem *base = get_hwbase(dev);
 	u32 addr[2];
 	u32 mask[2];
-	u32 pff = readl(base + NvRegPacketFilterFlags) & NVREG_PFF_PAUSE_RX;
+	u32 pff = pete_readl("drivers/net/ethernet/nvidia/forcedeth.c:3212", base + NvRegPacketFilterFlags) & NVREG_PFF_PAUSE_RX;
 
 	memset(addr, 0, sizeof(addr));
 	memset(mask, 0, sizeof(mask));
@@ -3254,11 +3254,11 @@ static void nv_set_multicast(struct net_device *dev)
 	pff |= NVREG_PFF_ALWAYS;
 	spin_lock_irq(&np->lock);
 	nv_stop_rx(dev);
-	writel(addr[0], base + NvRegMulticastAddrA);
-	writel(addr[1], base + NvRegMulticastAddrB);
-	writel(mask[0], base + NvRegMulticastMaskA);
-	writel(mask[1], base + NvRegMulticastMaskB);
-	writel(pff, base + NvRegPacketFilterFlags);
+	pete_writel("drivers/net/ethernet/nvidia/forcedeth.c:3257", addr[0], base + NvRegMulticastAddrA);
+	pete_writel("drivers/net/ethernet/nvidia/forcedeth.c:3258", addr[1], base + NvRegMulticastAddrB);
+	pete_writel("drivers/net/ethernet/nvidia/forcedeth.c:3259", mask[0], base + NvRegMulticastMaskA);
+	pete_writel("drivers/net/ethernet/nvidia/forcedeth.c:3260", mask[1], base + NvRegMulticastMaskB);
+	pete_writel("drivers/net/ethernet/nvidia/forcedeth.c:3261", pff, base + NvRegPacketFilterFlags);
 	nv_start_rx(dev);
 	spin_unlock_irq(&np->lock);
 }
@@ -3271,16 +3271,16 @@ static void nv_update_pause(struct net_device *dev, u32 pause_flags)
 	np->pause_flags &= ~(NV_PAUSEFRAME_TX_ENABLE | NV_PAUSEFRAME_RX_ENABLE);
 
 	if (np->pause_flags & NV_PAUSEFRAME_RX_CAPABLE) {
-		u32 pff = readl(base + NvRegPacketFilterFlags) & ~NVREG_PFF_PAUSE_RX;
+		u32 pff = pete_readl("drivers/net/ethernet/nvidia/forcedeth.c:3274", base + NvRegPacketFilterFlags) & ~NVREG_PFF_PAUSE_RX;
 		if (pause_flags & NV_PAUSEFRAME_RX_ENABLE) {
-			writel(pff|NVREG_PFF_PAUSE_RX, base + NvRegPacketFilterFlags);
+			pete_writel("drivers/net/ethernet/nvidia/forcedeth.c:3276", pff|NVREG_PFF_PAUSE_RX, base + NvRegPacketFilterFlags);
 			np->pause_flags |= NV_PAUSEFRAME_RX_ENABLE;
 		} else {
-			writel(pff, base + NvRegPacketFilterFlags);
+			pete_writel("drivers/net/ethernet/nvidia/forcedeth.c:3279", pff, base + NvRegPacketFilterFlags);
 		}
 	}
 	if (np->pause_flags & NV_PAUSEFRAME_TX_CAPABLE) {
-		u32 regmisc = readl(base + NvRegMisc1) & ~NVREG_MISC1_PAUSE_TX;
+		u32 regmisc = pete_readl("drivers/net/ethernet/nvidia/forcedeth.c:3283", base + NvRegMisc1) & ~NVREG_MISC1_PAUSE_TX;
 		if (pause_flags & NV_PAUSEFRAME_TX_ENABLE) {
 			u32 pause_enable = NVREG_TX_PAUSEFRAME_ENABLE_V1;
 			if (np->driver_data & DEV_HAS_PAUSEFRAME_TX_V2)
@@ -3288,14 +3288,14 @@ static void nv_update_pause(struct net_device *dev, u32 pause_flags)
 			if (np->driver_data & DEV_HAS_PAUSEFRAME_TX_V3) {
 				pause_enable = NVREG_TX_PAUSEFRAME_ENABLE_V3;
 				/* limit the number of tx pause frames to a default of 8 */
-				writel(readl(base + NvRegTxPauseFrameLimit)|NVREG_TX_PAUSEFRAMELIMIT_ENABLE, base + NvRegTxPauseFrameLimit);
+				pete_writel("drivers/net/ethernet/nvidia/forcedeth.c:3291", pete_readl("drivers/net/ethernet/nvidia/forcedeth.c:3291", base + NvRegTxPauseFrameLimit)|NVREG_TX_PAUSEFRAMELIMIT_ENABLE, base + NvRegTxPauseFrameLimit);
 			}
-			writel(pause_enable,  base + NvRegTxPauseFrame);
-			writel(regmisc|NVREG_MISC1_PAUSE_TX, base + NvRegMisc1);
+			pete_writel("drivers/net/ethernet/nvidia/forcedeth.c:3293", pause_enable,  base + NvRegTxPauseFrame);
+			pete_writel("drivers/net/ethernet/nvidia/forcedeth.c:3294", regmisc|NVREG_MISC1_PAUSE_TX, base + NvRegMisc1);
 			np->pause_flags |= NV_PAUSEFRAME_TX_ENABLE;
 		} else {
-			writel(NVREG_TX_PAUSEFRAME_DISABLE,  base + NvRegTxPauseFrame);
-			writel(regmisc, base + NvRegMisc1);
+			pete_writel("drivers/net/ethernet/nvidia/forcedeth.c:3297", NVREG_TX_PAUSEFRAME_DISABLE,  base + NvRegTxPauseFrame);
+			pete_writel("drivers/net/ethernet/nvidia/forcedeth.c:3298", regmisc, base + NvRegMisc1);
 		}
 	}
 }
@@ -3314,7 +3314,7 @@ static void nv_force_linkspeed(struct net_device *dev, int speed, int duplex)
 	mii_status = mii_rw(dev, np->phyaddr, MII_BMSR, MII_READ);
 	if (mii_status & PHY_GIGABIT) {
 		np->gigabit = PHY_GIGABIT;
-		phyreg = readl(base + NvRegSlotTime);
+		phyreg = pete_readl("drivers/net/ethernet/nvidia/forcedeth.c:3317", base + NvRegSlotTime);
 		phyreg &= ~(0x3FF00);
 		if ((np->linkspeed & 0xFFF) == NVREG_LINKSPEED_10)
 			phyreg |= NVREG_SLOTTIME_10_100_FULL;
@@ -3322,10 +3322,10 @@ static void nv_force_linkspeed(struct net_device *dev, int speed, int duplex)
 			phyreg |= NVREG_SLOTTIME_10_100_FULL;
 		else if ((np->linkspeed & 0xFFF) == NVREG_LINKSPEED_1000)
 			phyreg |= NVREG_SLOTTIME_1000_FULL;
-		writel(phyreg, base + NvRegSlotTime);
+		pete_writel("drivers/net/ethernet/nvidia/forcedeth.c:3325", phyreg, base + NvRegSlotTime);
 	}
 
-	phyreg = readl(base + NvRegPhyInterface);
+	phyreg = pete_readl("drivers/net/ethernet/nvidia/forcedeth.c:3328", base + NvRegPhyInterface);
 	phyreg &= ~(PHY_HALF|PHY_100|PHY_1000);
 	if (np->duplex == 0)
 		phyreg |= PHY_HALF;
@@ -3334,7 +3334,7 @@ static void nv_force_linkspeed(struct net_device *dev, int speed, int duplex)
 	else if ((np->linkspeed & NVREG_LINKSPEED_MASK) ==
 							NVREG_LINKSPEED_1000)
 		phyreg |= PHY_1000;
-	writel(phyreg, base + NvRegPhyInterface);
+	pete_writel("drivers/net/ethernet/nvidia/forcedeth.c:3337", phyreg, base + NvRegPhyInterface);
 
 	if (phyreg & PHY_RGMII) {
 		if ((np->linkspeed & NVREG_LINKSPEED_MASK) ==
@@ -3345,7 +3345,7 @@ static void nv_force_linkspeed(struct net_device *dev, int speed, int duplex)
 	} else {
 		txreg = NVREG_TX_DEFERRAL_DEFAULT;
 	}
-	writel(txreg, base + NvRegTxDeferral);
+	pete_writel("drivers/net/ethernet/nvidia/forcedeth.c:3348", txreg, base + NvRegTxDeferral);
 
 	if (np->desc_ver == DESC_VER_1) {
 		txreg = NVREG_TX_WM_DESC1_DEFAULT;
@@ -3356,12 +3356,12 @@ static void nv_force_linkspeed(struct net_device *dev, int speed, int duplex)
 		else
 			txreg = NVREG_TX_WM_DESC2_3_DEFAULT;
 	}
-	writel(txreg, base + NvRegTxWatermark);
+	pete_writel("drivers/net/ethernet/nvidia/forcedeth.c:3359", txreg, base + NvRegTxWatermark);
 
-	writel(NVREG_MISC1_FORCE | (np->duplex ? 0 : NVREG_MISC1_HD),
+	pete_writel("drivers/net/ethernet/nvidia/forcedeth.c:3361", NVREG_MISC1_FORCE | (np->duplex ? 0 : NVREG_MISC1_HD),
 			base + NvRegMisc1);
 	pci_push(base);
-	writel(np->linkspeed, base + NvRegLinkSpeed);
+	pete_writel("drivers/net/ethernet/nvidia/forcedeth.c:3364", np->linkspeed, base + NvRegLinkSpeed);
 	pci_push(base);
 }
 
@@ -3487,27 +3487,27 @@ set_speed:
 	np->linkspeed = newls;
 
 	/* The transmitter and receiver must be restarted for safe update */
-	if (readl(base + NvRegTransmitterControl) & NVREG_XMITCTL_START) {
+	if (pete_readl("drivers/net/ethernet/nvidia/forcedeth.c:3490", base + NvRegTransmitterControl) & NVREG_XMITCTL_START) {
 		txrxFlags |= NV_RESTART_TX;
 		nv_stop_tx(dev);
 	}
-	if (readl(base + NvRegReceiverControl) & NVREG_RCVCTL_START) {
+	if (pete_readl("drivers/net/ethernet/nvidia/forcedeth.c:3494", base + NvRegReceiverControl) & NVREG_RCVCTL_START) {
 		txrxFlags |= NV_RESTART_RX;
 		nv_stop_rx(dev);
 	}
 
 	if (np->gigabit == PHY_GIGABIT) {
-		phyreg = readl(base + NvRegSlotTime);
+		phyreg = pete_readl("drivers/net/ethernet/nvidia/forcedeth.c:3500", base + NvRegSlotTime);
 		phyreg &= ~(0x3FF00);
 		if (((np->linkspeed & 0xFFF) == NVREG_LINKSPEED_10) ||
 		    ((np->linkspeed & 0xFFF) == NVREG_LINKSPEED_100))
 			phyreg |= NVREG_SLOTTIME_10_100_FULL;
 		else if ((np->linkspeed & 0xFFF) == NVREG_LINKSPEED_1000)
 			phyreg |= NVREG_SLOTTIME_1000_FULL;
-		writel(phyreg, base + NvRegSlotTime);
+		pete_writel("drivers/net/ethernet/nvidia/forcedeth.c:3507", phyreg, base + NvRegSlotTime);
 	}
 
-	phyreg = readl(base + NvRegPhyInterface);
+	phyreg = pete_readl("drivers/net/ethernet/nvidia/forcedeth.c:3510", base + NvRegPhyInterface);
 	phyreg &= ~(PHY_HALF|PHY_100|PHY_1000);
 	if (np->duplex == 0)
 		phyreg |= PHY_HALF;
@@ -3515,7 +3515,7 @@ set_speed:
 		phyreg |= PHY_100;
 	else if ((np->linkspeed & NVREG_LINKSPEED_MASK) == NVREG_LINKSPEED_1000)
 		phyreg |= PHY_1000;
-	writel(phyreg, base + NvRegPhyInterface);
+	pete_writel("drivers/net/ethernet/nvidia/forcedeth.c:3518", phyreg, base + NvRegPhyInterface);
 
 	phy_exp = mii_rw(dev, np->phyaddr, MII_EXPANSION, MII_READ) & EXPANSION_NWAY; /* autoneg capable */
 	if (phyreg & PHY_RGMII) {
@@ -3537,7 +3537,7 @@ set_speed:
 		else
 			txreg = NVREG_TX_DEFERRAL_DEFAULT;
 	}
-	writel(txreg, base + NvRegTxDeferral);
+	pete_writel("drivers/net/ethernet/nvidia/forcedeth.c:3540", txreg, base + NvRegTxDeferral);
 
 	if (np->desc_ver == DESC_VER_1) {
 		txreg = NVREG_TX_WM_DESC1_DEFAULT;
@@ -3547,12 +3547,12 @@ set_speed:
 		else
 			txreg = NVREG_TX_WM_DESC2_3_DEFAULT;
 	}
-	writel(txreg, base + NvRegTxWatermark);
+	pete_writel("drivers/net/ethernet/nvidia/forcedeth.c:3550", txreg, base + NvRegTxWatermark);
 
-	writel(NVREG_MISC1_FORCE | (np->duplex ? 0 : NVREG_MISC1_HD),
+	pete_writel("drivers/net/ethernet/nvidia/forcedeth.c:3552", NVREG_MISC1_FORCE | (np->duplex ? 0 : NVREG_MISC1_HD),
 		base + NvRegMisc1);
 	pci_push(base);
-	writel(np->linkspeed, base + NvRegLinkSpeed);
+	pete_writel("drivers/net/ethernet/nvidia/forcedeth.c:3555", np->linkspeed, base + NvRegLinkSpeed);
 	pci_push(base);
 
 	pause_flags = 0;
@@ -3622,8 +3622,8 @@ static void nv_link_irq(struct net_device *dev)
 	u8 __iomem *base = get_hwbase(dev);
 	u32 miistat;
 
-	miistat = readl(base + NvRegMIIStatus);
-	writel(NVREG_MIISTAT_LINKCHANGE, base + NvRegMIIStatus);
+	miistat = pete_readl("drivers/net/ethernet/nvidia/forcedeth.c:3625", base + NvRegMIIStatus);
+	pete_writel("drivers/net/ethernet/nvidia/forcedeth.c:3626", NVREG_MIISTAT_LINKCHANGE, base + NvRegMIIStatus);
 
 	if (miistat & (NVREG_MIISTAT_LINKCHANGE))
 		nv_linkchange(dev);
@@ -3638,8 +3638,8 @@ static void nv_msi_workaround(struct fe_priv *np)
 	if (np->msi_flags & NV_MSI_ENABLED) {
 		u8 __iomem *base = np->base;
 
-		writel(0, base + NvRegMSIIrqMask);
-		writel(NVREG_MSI_VECTOR_0_ENABLED, base + NvRegMSIIrqMask);
+		pete_writel("drivers/net/ethernet/nvidia/forcedeth.c:3641", 0, base + NvRegMSIIrqMask);
+		pete_writel("drivers/net/ethernet/nvidia/forcedeth.c:3642", NVREG_MSI_VECTOR_0_ENABLED, base + NvRegMSIIrqMask);
 	}
 }
 
@@ -3678,11 +3678,11 @@ static irqreturn_t nv_nic_irq(int foo, void *data)
 	u8 __iomem *base = get_hwbase(dev);
 
 	if (!(np->msi_flags & NV_MSI_X_ENABLED)) {
-		np->events = readl(base + NvRegIrqStatus);
-		writel(np->events, base + NvRegIrqStatus);
+		np->events = pete_readl("drivers/net/ethernet/nvidia/forcedeth.c:3681", base + NvRegIrqStatus);
+		pete_writel("drivers/net/ethernet/nvidia/forcedeth.c:3682", np->events, base + NvRegIrqStatus);
 	} else {
-		np->events = readl(base + NvRegMSIXIrqStatus);
-		writel(np->events, base + NvRegMSIXIrqStatus);
+		np->events = pete_readl("drivers/net/ethernet/nvidia/forcedeth.c:3684", base + NvRegMSIXIrqStatus);
+		pete_writel("drivers/net/ethernet/nvidia/forcedeth.c:3685", np->events, base + NvRegMSIXIrqStatus);
 	}
 	if (!(np->events & np->irqmask))
 		return IRQ_NONE;
@@ -3693,7 +3693,7 @@ static irqreturn_t nv_nic_irq(int foo, void *data)
 		/*
 		 * Disable further irq's (msix not enabled with napi)
 		 */
-		writel(0, base + NvRegIrqMask);
+		pete_writel("drivers/net/ethernet/nvidia/forcedeth.c:3696", 0, base + NvRegIrqMask);
 		__napi_schedule(&np->napi);
 	}
 
@@ -3711,11 +3711,11 @@ static irqreturn_t nv_nic_irq_optimized(int foo, void *data)
 	u8 __iomem *base = get_hwbase(dev);
 
 	if (!(np->msi_flags & NV_MSI_X_ENABLED)) {
-		np->events = readl(base + NvRegIrqStatus);
-		writel(np->events, base + NvRegIrqStatus);
+		np->events = pete_readl("drivers/net/ethernet/nvidia/forcedeth.c:3714", base + NvRegIrqStatus);
+		pete_writel("drivers/net/ethernet/nvidia/forcedeth.c:3715", np->events, base + NvRegIrqStatus);
 	} else {
-		np->events = readl(base + NvRegMSIXIrqStatus);
-		writel(np->events, base + NvRegMSIXIrqStatus);
+		np->events = pete_readl("drivers/net/ethernet/nvidia/forcedeth.c:3717", base + NvRegMSIXIrqStatus);
+		pete_writel("drivers/net/ethernet/nvidia/forcedeth.c:3718", np->events, base + NvRegMSIXIrqStatus);
 	}
 	if (!(np->events & np->irqmask))
 		return IRQ_NONE;
@@ -3726,7 +3726,7 @@ static irqreturn_t nv_nic_irq_optimized(int foo, void *data)
 		/*
 		 * Disable further irq's (msix not enabled with napi)
 		 */
-		writel(0, base + NvRegIrqMask);
+		pete_writel("drivers/net/ethernet/nvidia/forcedeth.c:3729", 0, base + NvRegIrqMask);
 		__napi_schedule(&np->napi);
 	}
 
@@ -3743,8 +3743,8 @@ static irqreturn_t nv_nic_irq_tx(int foo, void *data)
 	unsigned long flags;
 
 	for (i = 0;; i++) {
-		events = readl(base + NvRegMSIXIrqStatus) & NVREG_IRQ_TX_ALL;
-		writel(events, base + NvRegMSIXIrqStatus);
+		events = pete_readl("drivers/net/ethernet/nvidia/forcedeth.c:3746", base + NvRegMSIXIrqStatus) & NVREG_IRQ_TX_ALL;
+		pete_writel("drivers/net/ethernet/nvidia/forcedeth.c:3747", events, base + NvRegMSIXIrqStatus);
 		netdev_dbg(dev, "tx irq events: %08x\n", events);
 		if (!(events & np->irqmask))
 			break;
@@ -3756,7 +3756,7 @@ static irqreturn_t nv_nic_irq_tx(int foo, void *data)
 		if (unlikely(i > max_interrupt_work)) {
 			spin_lock_irqsave(&np->lock, flags);
 			/* disable interrupts on the nic */
-			writel(NVREG_IRQ_TX_ALL, base + NvRegIrqMask);
+			pete_writel("drivers/net/ethernet/nvidia/forcedeth.c:3759", NVREG_IRQ_TX_ALL, base + NvRegIrqMask);
 			pci_push(base);
 
 			if (!np->in_shutdown) {
@@ -3840,7 +3840,7 @@ static int nv_napi_poll(struct napi_struct *napi, int budget)
 		   (msix not enabled in napi) */
 		napi_complete_done(napi, rx_work);
 
-		writel(np->irqmask, base + NvRegIrqMask);
+		pete_writel("drivers/net/ethernet/nvidia/forcedeth.c:3843", np->irqmask, base + NvRegIrqMask);
 	}
 	return rx_work;
 }
@@ -3855,8 +3855,8 @@ static irqreturn_t nv_nic_irq_rx(int foo, void *data)
 	unsigned long flags;
 
 	for (i = 0;; i++) {
-		events = readl(base + NvRegMSIXIrqStatus) & NVREG_IRQ_RX_ALL;
-		writel(events, base + NvRegMSIXIrqStatus);
+		events = pete_readl("drivers/net/ethernet/nvidia/forcedeth.c:3858", base + NvRegMSIXIrqStatus) & NVREG_IRQ_RX_ALL;
+		pete_writel("drivers/net/ethernet/nvidia/forcedeth.c:3859", events, base + NvRegMSIXIrqStatus);
 		netdev_dbg(dev, "rx irq events: %08x\n", events);
 		if (!(events & np->irqmask))
 			break;
@@ -3873,7 +3873,7 @@ static irqreturn_t nv_nic_irq_rx(int foo, void *data)
 		if (unlikely(i > max_interrupt_work)) {
 			spin_lock_irqsave(&np->lock, flags);
 			/* disable interrupts on the nic */
-			writel(NVREG_IRQ_RX_ALL, base + NvRegIrqMask);
+			pete_writel("drivers/net/ethernet/nvidia/forcedeth.c:3876", NVREG_IRQ_RX_ALL, base + NvRegIrqMask);
 			pci_push(base);
 
 			if (!np->in_shutdown) {
@@ -3900,8 +3900,8 @@ static irqreturn_t nv_nic_irq_other(int foo, void *data)
 	unsigned long flags;
 
 	for (i = 0;; i++) {
-		events = readl(base + NvRegMSIXIrqStatus) & NVREG_IRQ_OTHER;
-		writel(events, base + NvRegMSIXIrqStatus);
+		events = pete_readl("drivers/net/ethernet/nvidia/forcedeth.c:3903", base + NvRegMSIXIrqStatus) & NVREG_IRQ_OTHER;
+		pete_writel("drivers/net/ethernet/nvidia/forcedeth.c:3904", events, base + NvRegMSIXIrqStatus);
 		netdev_dbg(dev, "irq events: %08x\n", events);
 		if (!(events & np->irqmask))
 			break;
@@ -3925,7 +3925,7 @@ static irqreturn_t nv_nic_irq_other(int foo, void *data)
 		if (events & NVREG_IRQ_RECOVER_ERROR) {
 			spin_lock_irqsave(&np->lock, flags);
 			/* disable interrupts on the nic */
-			writel(NVREG_IRQ_OTHER, base + NvRegIrqMask);
+			pete_writel("drivers/net/ethernet/nvidia/forcedeth.c:3928", NVREG_IRQ_OTHER, base + NvRegIrqMask);
 			pci_push(base);
 
 			if (!np->in_shutdown) {
@@ -3939,7 +3939,7 @@ static irqreturn_t nv_nic_irq_other(int foo, void *data)
 		if (unlikely(i > max_interrupt_work)) {
 			spin_lock_irqsave(&np->lock, flags);
 			/* disable interrupts on the nic */
-			writel(NVREG_IRQ_OTHER, base + NvRegIrqMask);
+			pete_writel("drivers/net/ethernet/nvidia/forcedeth.c:3942", NVREG_IRQ_OTHER, base + NvRegIrqMask);
 			pci_push(base);
 
 			if (!np->in_shutdown) {
@@ -3965,11 +3965,11 @@ static irqreturn_t nv_nic_irq_test(int foo, void *data)
 	u32 events;
 
 	if (!(np->msi_flags & NV_MSI_X_ENABLED)) {
-		events = readl(base + NvRegIrqStatus) & NVREG_IRQSTAT_MASK;
-		writel(events & NVREG_IRQ_TIMER, base + NvRegIrqStatus);
+		events = pete_readl("drivers/net/ethernet/nvidia/forcedeth.c:3968", base + NvRegIrqStatus) & NVREG_IRQSTAT_MASK;
+		pete_writel("drivers/net/ethernet/nvidia/forcedeth.c:3969", events & NVREG_IRQ_TIMER, base + NvRegIrqStatus);
 	} else {
-		events = readl(base + NvRegMSIXIrqStatus) & NVREG_IRQSTAT_MASK;
-		writel(events & NVREG_IRQ_TIMER, base + NvRegMSIXIrqStatus);
+		events = pete_readl("drivers/net/ethernet/nvidia/forcedeth.c:3971", base + NvRegMSIXIrqStatus) & NVREG_IRQSTAT_MASK;
+		pete_writel("drivers/net/ethernet/nvidia/forcedeth.c:3972", events & NVREG_IRQ_TIMER, base + NvRegMSIXIrqStatus);
 	}
 	pci_push(base);
 	if (!(events & NVREG_IRQ_TIMER))
@@ -3998,14 +3998,14 @@ static void set_msix_vector_map(struct net_device *dev, u32 vector, u32 irqmask)
 		if ((irqmask >> i) & 0x1)
 			msixmap |= vector << (i << 2);
 	}
-	writel(readl(base + NvRegMSIXMap0) | msixmap, base + NvRegMSIXMap0);
+	pete_writel("drivers/net/ethernet/nvidia/forcedeth.c:4001", pete_readl("drivers/net/ethernet/nvidia/forcedeth.c:4001", base + NvRegMSIXMap0) | msixmap, base + NvRegMSIXMap0);
 
 	msixmap = 0;
 	for (i = 0; i < 8; i++) {
 		if ((irqmask >> (i + 8)) & 0x1)
 			msixmap |= vector << (i << 2);
 	}
-	writel(readl(base + NvRegMSIXMap1) | msixmap, base + NvRegMSIXMap1);
+	pete_writel("drivers/net/ethernet/nvidia/forcedeth.c:4008", pete_readl("drivers/net/ethernet/nvidia/forcedeth.c:4008", base + NvRegMSIXMap1) | msixmap, base + NvRegMSIXMap1);
 }
 
 static int nv_request_irq(struct net_device *dev, int intr_test)
@@ -4072,8 +4072,8 @@ static int nv_request_irq(struct net_device *dev, int intr_test)
 					goto out_free_tx;
 				}
 				/* map interrupts to their respective vector */
-				writel(0, base + NvRegMSIXMap0);
-				writel(0, base + NvRegMSIXMap1);
+				pete_writel("drivers/net/ethernet/nvidia/forcedeth.c:4075", 0, base + NvRegMSIXMap0);
+				pete_writel("drivers/net/ethernet/nvidia/forcedeth.c:4076", 0, base + NvRegMSIXMap1);
 				set_msix_vector_map(dev, NV_MSI_X_VECTOR_RX, NVREG_IRQ_RX_ALL);
 				set_msix_vector_map(dev, NV_MSI_X_VECTOR_TX, NVREG_IRQ_TX_ALL);
 				set_msix_vector_map(dev, NV_MSI_X_VECTOR_OTHER, NVREG_IRQ_OTHER);
@@ -4091,8 +4091,8 @@ static int nv_request_irq(struct net_device *dev, int intr_test)
 				}
 
 				/* map interrupts to vector 0 */
-				writel(0, base + NvRegMSIXMap0);
-				writel(0, base + NvRegMSIXMap1);
+				pete_writel("drivers/net/ethernet/nvidia/forcedeth.c:4094", 0, base + NvRegMSIXMap0);
+				pete_writel("drivers/net/ethernet/nvidia/forcedeth.c:4095", 0, base + NvRegMSIXMap1);
 			}
 			netdev_info(dev, "MSI-X enabled\n");
 			return 0;
@@ -4112,10 +4112,10 @@ static int nv_request_irq(struct net_device *dev, int intr_test)
 			}
 
 			/* map interrupts to vector 0 */
-			writel(0, base + NvRegMSIMap0);
-			writel(0, base + NvRegMSIMap1);
+			pete_writel("drivers/net/ethernet/nvidia/forcedeth.c:4115", 0, base + NvRegMSIMap0);
+			pete_writel("drivers/net/ethernet/nvidia/forcedeth.c:4116", 0, base + NvRegMSIMap1);
 			/* enable msi vector 0 */
-			writel(NVREG_MSI_VECTOR_0_ENABLED, base + NvRegMSIIrqMask);
+			pete_writel("drivers/net/ethernet/nvidia/forcedeth.c:4118", NVREG_MSI_VECTOR_0_ENABLED, base + NvRegMSIIrqMask);
 			netdev_info(dev, "MSI enabled\n");
 			return 0;
 		}
@@ -4212,18 +4212,18 @@ static void nv_do_nic_poll(struct timer_list *t)
 					mod_timer(&np->oom_kick, jiffies + OOM_REFILL);
 			}
 			/* reinit nic view of the rx queue */
-			writel(np->rx_buf_sz, base + NvRegOffloadConfig);
+			pete_writel("drivers/net/ethernet/nvidia/forcedeth.c:4215", np->rx_buf_sz, base + NvRegOffloadConfig);
 			setup_hw_rings(dev, NV_SETUP_RX_RING | NV_SETUP_TX_RING);
-			writel(((np->rx_ring_size-1) << NVREG_RINGSZ_RXSHIFT) + ((np->tx_ring_size-1) << NVREG_RINGSZ_TXSHIFT),
+			pete_writel("drivers/net/ethernet/nvidia/forcedeth.c:4217", ((np->rx_ring_size-1) << NVREG_RINGSZ_RXSHIFT) + ((np->tx_ring_size-1) << NVREG_RINGSZ_TXSHIFT),
 				base + NvRegRingSizes);
 			pci_push(base);
-			writel(NVREG_TXRXCTL_KICK|np->txrxctl_bits, get_hwbase(dev) + NvRegTxRxControl);
+			pete_writel("drivers/net/ethernet/nvidia/forcedeth.c:4220", NVREG_TXRXCTL_KICK|np->txrxctl_bits, get_hwbase(dev) + NvRegTxRxControl);
 			pci_push(base);
 			/* clear interrupts */
 			if (!(np->msi_flags & NV_MSI_X_ENABLED))
-				writel(NVREG_IRQSTAT_MASK, base + NvRegIrqStatus);
+				pete_writel("drivers/net/ethernet/nvidia/forcedeth.c:4224", NVREG_IRQSTAT_MASK, base + NvRegIrqStatus);
 			else
-				writel(NVREG_IRQSTAT_MASK, base + NvRegMSIXIrqStatus);
+				pete_writel("drivers/net/ethernet/nvidia/forcedeth.c:4226", NVREG_IRQSTAT_MASK, base + NvRegMSIXIrqStatus);
 
 			/* restart rx engine */
 			nv_start_rxtx(dev);
@@ -4233,7 +4233,7 @@ static void nv_do_nic_poll(struct timer_list *t)
 		}
 	}
 
-	writel(mask, base + NvRegIrqMask);
+	pete_writel("drivers/net/ethernet/nvidia/forcedeth.c:4236", mask, base + NvRegIrqMask);
 	pci_push(base);
 
 	if (!using_multi_irqs(dev)) {
@@ -4321,7 +4321,7 @@ static int nv_set_wol(struct net_device *dev, struct ethtool_wolinfo *wolinfo)
 	}
 	if (netif_running(dev)) {
 		spin_lock_irq(&np->lock);
-		writel(flags, base + NvRegWakeUpFlags);
+		pete_writel("drivers/net/ethernet/nvidia/forcedeth.c:4324", flags, base + NvRegWakeUpFlags);
 		spin_unlock_irq(&np->lock);
 	}
 	device_set_wakeup_enable(&np->pci_dev->dev, np->wolenabled);
@@ -4600,7 +4600,7 @@ static void nv_get_regs(struct net_device *dev, struct ethtool_regs *regs, void 
 	regs->version = FORCEDETH_REGS_VER;
 	spin_lock_irq(&np->lock);
 	for (i = 0; i < np->register_size/sizeof(u32); i++)
-		rbuf[i] = readl(base + i*sizeof(u32));
+		rbuf[i] = pete_readl("drivers/net/ethernet/nvidia/forcedeth.c:4603", base + i*sizeof(u32));
 	spin_unlock_irq(&np->lock);
 }
 
@@ -4765,12 +4765,12 @@ static int nv_set_ringparam(struct net_device *dev, struct ethtool_ringparam* ri
 		}
 
 		/* reinit nic view of the queues */
-		writel(np->rx_buf_sz, base + NvRegOffloadConfig);
+		pete_writel("drivers/net/ethernet/nvidia/forcedeth.c:4768", np->rx_buf_sz, base + NvRegOffloadConfig);
 		setup_hw_rings(dev, NV_SETUP_RX_RING | NV_SETUP_TX_RING);
-		writel(((np->rx_ring_size-1) << NVREG_RINGSZ_RXSHIFT) + ((np->tx_ring_size-1) << NVREG_RINGSZ_TXSHIFT),
+		pete_writel("drivers/net/ethernet/nvidia/forcedeth.c:4770", ((np->rx_ring_size-1) << NVREG_RINGSZ_RXSHIFT) + ((np->tx_ring_size-1) << NVREG_RINGSZ_TXSHIFT),
 			base + NvRegRingSizes);
 		pci_push(base);
-		writel(NVREG_TXRXCTL_KICK|np->txrxctl_bits, get_hwbase(dev) + NvRegTxRxControl);
+		pete_writel("drivers/net/ethernet/nvidia/forcedeth.c:4773", NVREG_TXRXCTL_KICK|np->txrxctl_bits, get_hwbase(dev) + NvRegTxRxControl);
 		pci_push(base);
 
 		/* restart engines */
@@ -4946,7 +4946,7 @@ static void nv_vlan_mode(struct net_device *dev, netdev_features_t features)
 	else
 		np->txrxctl_bits &= ~NVREG_TXRXCTL_VLANINS;
 
-	writel(np->txrxctl_bits, get_hwbase(dev) + NvRegTxRxControl);
+	pete_writel("drivers/net/ethernet/nvidia/forcedeth.c:4949", np->txrxctl_bits, get_hwbase(dev) + NvRegTxRxControl);
 
 	spin_unlock_irq(&np->lock);
 }
@@ -4973,7 +4973,7 @@ static int nv_set_features(struct net_device *dev, netdev_features_t features)
 			np->txrxctl_bits &= ~NVREG_TXRXCTL_RXCHECK;
 
 		if (netif_running(dev))
-			writel(np->txrxctl_bits, base + NvRegTxRxControl);
+			pete_writel("drivers/net/ethernet/nvidia/forcedeth.c:4976", np->txrxctl_bits, base + NvRegTxRxControl);
 
 		spin_unlock_irq(&np->lock);
 	}
@@ -5044,21 +5044,21 @@ static int nv_register_test(struct net_device *dev)
 	u32 orig_read, new_read;
 
 	do {
-		orig_read = readl(base + nv_registers_test[i].reg);
+		orig_read = pete_readl("drivers/net/ethernet/nvidia/forcedeth.c:5047", base + nv_registers_test[i].reg);
 
 		/* xor with mask to toggle bits */
 		orig_read ^= nv_registers_test[i].mask;
 
-		writel(orig_read, base + nv_registers_test[i].reg);
+		pete_writel("drivers/net/ethernet/nvidia/forcedeth.c:5052", orig_read, base + nv_registers_test[i].reg);
 
-		new_read = readl(base + nv_registers_test[i].reg);
+		new_read = pete_readl("drivers/net/ethernet/nvidia/forcedeth.c:5054", base + nv_registers_test[i].reg);
 
 		if ((new_read & nv_registers_test[i].mask) != (orig_read & nv_registers_test[i].mask))
 			return 0;
 
 		/* restore original value */
 		orig_read ^= nv_registers_test[i].mask;
-		writel(orig_read, base + nv_registers_test[i].reg);
+		pete_writel("drivers/net/ethernet/nvidia/forcedeth.c:5061", orig_read, base + nv_registers_test[i].reg);
 
 	} while (nv_registers_test[++i].reg != 0);
 
@@ -5076,7 +5076,7 @@ static int nv_interrupt_test(struct net_device *dev)
 	if (netif_running(dev)) {
 		/* free current irq */
 		nv_free_irq(dev);
-		save_poll_interval = readl(base+NvRegPollingInterval);
+		save_poll_interval = pete_readl("drivers/net/ethernet/nvidia/forcedeth.c:5079", base+NvRegPollingInterval);
 	}
 
 	/* flag to test interrupt handler */
@@ -5090,8 +5090,8 @@ static int nv_interrupt_test(struct net_device *dev)
 		return 0;
 
 	/* setup timer interrupt */
-	writel(NVREG_POLL_DEFAULT_CPU, base + NvRegPollingInterval);
-	writel(NVREG_UNKSETUP6_VAL, base + NvRegUnknownSetupReg6);
+	pete_writel("drivers/net/ethernet/nvidia/forcedeth.c:5093", NVREG_POLL_DEFAULT_CPU, base + NvRegPollingInterval);
+	pete_writel("drivers/net/ethernet/nvidia/forcedeth.c:5094", NVREG_UNKSETUP6_VAL, base + NvRegUnknownSetupReg6);
 
 	nv_enable_hw_interrupts(dev, NVREG_IRQ_TIMER);
 
@@ -5107,9 +5107,9 @@ static int nv_interrupt_test(struct net_device *dev)
 
 	nv_disable_hw_interrupts(dev, NVREG_IRQ_TIMER);
 	if (!(np->msi_flags & NV_MSI_X_ENABLED))
-		writel(NVREG_IRQSTAT_MASK, base + NvRegIrqStatus);
+		pete_writel("drivers/net/ethernet/nvidia/forcedeth.c:5110", NVREG_IRQSTAT_MASK, base + NvRegIrqStatus);
 	else
-		writel(NVREG_IRQSTAT_MASK, base + NvRegMSIXIrqStatus);
+		pete_writel("drivers/net/ethernet/nvidia/forcedeth.c:5112", NVREG_IRQSTAT_MASK, base + NvRegMSIXIrqStatus);
 
 	spin_unlock_irq(&np->lock);
 
@@ -5118,8 +5118,8 @@ static int nv_interrupt_test(struct net_device *dev)
 	np->msi_flags = save_msi_flags;
 
 	if (netif_running(dev)) {
-		writel(save_poll_interval, base + NvRegPollingInterval);
-		writel(NVREG_UNKSETUP6_VAL, base + NvRegUnknownSetupReg6);
+		pete_writel("drivers/net/ethernet/nvidia/forcedeth.c:5121", save_poll_interval, base + NvRegPollingInterval);
+		pete_writel("drivers/net/ethernet/nvidia/forcedeth.c:5122", NVREG_UNKSETUP6_VAL, base + NvRegUnknownSetupReg6);
 		/* restore original irq */
 		if (nv_request_irq(dev, 0))
 			return 0;
@@ -5144,8 +5144,8 @@ static int nv_loopback_test(struct net_device *dev)
 
 	if (netif_running(dev)) {
 		nv_disable_irq(dev);
-		filter_flags = readl(base + NvRegPacketFilterFlags);
-		misc1_flags = readl(base + NvRegMisc1);
+		filter_flags = pete_readl("drivers/net/ethernet/nvidia/forcedeth.c:5147", base + NvRegPacketFilterFlags);
+		misc1_flags = pete_readl("drivers/net/ethernet/nvidia/forcedeth.c:5148", base + NvRegMisc1);
 	} else {
 		nv_txrx_reset(dev);
 	}
@@ -5155,13 +5155,13 @@ static int nv_loopback_test(struct net_device *dev)
 	nv_init_ring(dev);
 
 	/* setup hardware for loopback */
-	writel(NVREG_MISC1_FORCE, base + NvRegMisc1);
-	writel(NVREG_PFF_ALWAYS | NVREG_PFF_LOOPBACK, base + NvRegPacketFilterFlags);
+	pete_writel("drivers/net/ethernet/nvidia/forcedeth.c:5158", NVREG_MISC1_FORCE, base + NvRegMisc1);
+	pete_writel("drivers/net/ethernet/nvidia/forcedeth.c:5159", NVREG_PFF_ALWAYS | NVREG_PFF_LOOPBACK, base + NvRegPacketFilterFlags);
 
 	/* reinit nic view of the rx queue */
-	writel(np->rx_buf_sz, base + NvRegOffloadConfig);
+	pete_writel("drivers/net/ethernet/nvidia/forcedeth.c:5162", np->rx_buf_sz, base + NvRegOffloadConfig);
 	setup_hw_rings(dev, NV_SETUP_RX_RING | NV_SETUP_TX_RING);
-	writel(((np->rx_ring_size-1) << NVREG_RINGSZ_RXSHIFT) + ((np->tx_ring_size-1) << NVREG_RINGSZ_TXSHIFT),
+	pete_writel("drivers/net/ethernet/nvidia/forcedeth.c:5164", ((np->rx_ring_size-1) << NVREG_RINGSZ_RXSHIFT) + ((np->tx_ring_size-1) << NVREG_RINGSZ_TXSHIFT),
 		base + NvRegRingSizes);
 	pci_push(base);
 
@@ -5195,7 +5195,7 @@ static int nv_loopback_test(struct net_device *dev)
 		np->tx_ring.ex[0].buflow = cpu_to_le32(dma_low(test_dma_addr));
 		np->tx_ring.ex[0].flaglen = cpu_to_le32((pkt_len-1) | np->tx_flags | tx_flags_extra);
 	}
-	writel(NVREG_TXRXCTL_KICK|np->txrxctl_bits, get_hwbase(dev) + NvRegTxRxControl);
+	pete_writel("drivers/net/ethernet/nvidia/forcedeth.c:5198", NVREG_TXRXCTL_KICK|np->txrxctl_bits, get_hwbase(dev) + NvRegTxRxControl);
 	pci_push(get_hwbase(dev));
 
 	msleep(500);
@@ -5246,8 +5246,8 @@ static int nv_loopback_test(struct net_device *dev)
 	nv_drain_rxtx(dev);
 
 	if (netif_running(dev)) {
-		writel(misc1_flags, base + NvRegMisc1);
-		writel(filter_flags, base + NvRegPacketFilterFlags);
+		pete_writel("drivers/net/ethernet/nvidia/forcedeth.c:5249", misc1_flags, base + NvRegMisc1);
+		pete_writel("drivers/net/ethernet/nvidia/forcedeth.c:5250", filter_flags, base + NvRegPacketFilterFlags);
 		nv_enable_irq(dev);
 	}
 
@@ -5277,9 +5277,9 @@ static void nv_self_test(struct net_device *dev, struct ethtool_test *test, u64 
 			spin_lock_irq(&np->lock);
 			nv_disable_hw_interrupts(dev, np->irqmask);
 			if (!(np->msi_flags & NV_MSI_X_ENABLED))
-				writel(NVREG_IRQSTAT_MASK, base + NvRegIrqStatus);
+				pete_writel("drivers/net/ethernet/nvidia/forcedeth.c:5280", NVREG_IRQSTAT_MASK, base + NvRegIrqStatus);
 			else
-				writel(NVREG_IRQSTAT_MASK, base + NvRegMSIXIrqStatus);
+				pete_writel("drivers/net/ethernet/nvidia/forcedeth.c:5282", NVREG_IRQSTAT_MASK, base + NvRegMSIXIrqStatus);
 			/* stop engines */
 			nv_stop_rxtx(dev);
 			nv_txrx_reset(dev);
@@ -5318,12 +5318,12 @@ static void nv_self_test(struct net_device *dev, struct ethtool_test *test, u64 
 					mod_timer(&np->oom_kick, jiffies + OOM_REFILL);
 			}
 			/* reinit nic view of the rx queue */
-			writel(np->rx_buf_sz, base + NvRegOffloadConfig);
+			pete_writel("drivers/net/ethernet/nvidia/forcedeth.c:5321", np->rx_buf_sz, base + NvRegOffloadConfig);
 			setup_hw_rings(dev, NV_SETUP_RX_RING | NV_SETUP_TX_RING);
-			writel(((np->rx_ring_size-1) << NVREG_RINGSZ_RXSHIFT) + ((np->tx_ring_size-1) << NVREG_RINGSZ_TXSHIFT),
+			pete_writel("drivers/net/ethernet/nvidia/forcedeth.c:5323", ((np->rx_ring_size-1) << NVREG_RINGSZ_RXSHIFT) + ((np->tx_ring_size-1) << NVREG_RINGSZ_TXSHIFT),
 				base + NvRegRingSizes);
 			pci_push(base);
-			writel(NVREG_TXRXCTL_KICK|np->txrxctl_bits, get_hwbase(dev) + NvRegTxRxControl);
+			pete_writel("drivers/net/ethernet/nvidia/forcedeth.c:5326", NVREG_TXRXCTL_KICK|np->txrxctl_bits, get_hwbase(dev) + NvRegTxRxControl);
 			pci_push(base);
 			/* restart rx engine */
 			nv_start_rxtx(dev);
@@ -5376,7 +5376,7 @@ static int nv_mgmt_acquire_sema(struct net_device *dev)
 	u32 tx_ctrl, mgmt_sema;
 
 	for (i = 0; i < 10; i++) {
-		mgmt_sema = readl(base + NvRegTransmitterControl) & NVREG_XMITCTL_MGMT_SEMA_MASK;
+		mgmt_sema = pete_readl("drivers/net/ethernet/nvidia/forcedeth.c:5379", base + NvRegTransmitterControl) & NVREG_XMITCTL_MGMT_SEMA_MASK;
 		if (mgmt_sema == NVREG_XMITCTL_MGMT_SEMA_FREE)
 			break;
 		msleep(500);
@@ -5386,12 +5386,12 @@ static int nv_mgmt_acquire_sema(struct net_device *dev)
 		return 0;
 
 	for (i = 0; i < 2; i++) {
-		tx_ctrl = readl(base + NvRegTransmitterControl);
+		tx_ctrl = pete_readl("drivers/net/ethernet/nvidia/forcedeth.c:5389", base + NvRegTransmitterControl);
 		tx_ctrl |= NVREG_XMITCTL_HOST_SEMA_ACQ;
-		writel(tx_ctrl, base + NvRegTransmitterControl);
+		pete_writel("drivers/net/ethernet/nvidia/forcedeth.c:5391", tx_ctrl, base + NvRegTransmitterControl);
 
 		/* verify that semaphore was acquired */
-		tx_ctrl = readl(base + NvRegTransmitterControl);
+		tx_ctrl = pete_readl("drivers/net/ethernet/nvidia/forcedeth.c:5394", base + NvRegTransmitterControl);
 		if (((tx_ctrl & NVREG_XMITCTL_HOST_SEMA_MASK) == NVREG_XMITCTL_HOST_SEMA_ACQ) &&
 		    ((tx_ctrl & NVREG_XMITCTL_MGMT_SEMA_MASK) == NVREG_XMITCTL_MGMT_SEMA_FREE)) {
 			np->mgmt_sema = 1;
@@ -5411,9 +5411,9 @@ static void nv_mgmt_release_sema(struct net_device *dev)
 
 	if (np->driver_data & DEV_HAS_MGMT_UNIT) {
 		if (np->mgmt_sema) {
-			tx_ctrl = readl(base + NvRegTransmitterControl);
+			tx_ctrl = pete_readl("drivers/net/ethernet/nvidia/forcedeth.c:5414", base + NvRegTransmitterControl);
 			tx_ctrl &= ~NVREG_XMITCTL_HOST_SEMA_ACQ;
-			writel(tx_ctrl, base + NvRegTransmitterControl);
+			pete_writel("drivers/net/ethernet/nvidia/forcedeth.c:5416", tx_ctrl, base + NvRegTransmitterControl);
 		}
 	}
 }
@@ -5423,16 +5423,16 @@ static int nv_mgmt_get_version(struct net_device *dev)
 {
 	struct fe_priv *np = netdev_priv(dev);
 	u8 __iomem *base = get_hwbase(dev);
-	u32 data_ready = readl(base + NvRegTransmitterControl);
+	u32 data_ready = pete_readl("drivers/net/ethernet/nvidia/forcedeth.c:5426", base + NvRegTransmitterControl);
 	u32 data_ready2 = 0;
 	unsigned long start;
 	int ready = 0;
 
-	writel(NVREG_MGMTUNITGETVERSION, base + NvRegMgmtUnitGetVersion);
-	writel(data_ready ^ NVREG_XMITCTL_DATA_START, base + NvRegTransmitterControl);
+	pete_writel("drivers/net/ethernet/nvidia/forcedeth.c:5431", NVREG_MGMTUNITGETVERSION, base + NvRegMgmtUnitGetVersion);
+	pete_writel("drivers/net/ethernet/nvidia/forcedeth.c:5432", data_ready ^ NVREG_XMITCTL_DATA_START, base + NvRegTransmitterControl);
 	start = jiffies;
 	while (time_before(jiffies, start + 5*HZ)) {
-		data_ready2 = readl(base + NvRegTransmitterControl);
+		data_ready2 = pete_readl("drivers/net/ethernet/nvidia/forcedeth.c:5435", base + NvRegTransmitterControl);
 		if ((data_ready & NVREG_XMITCTL_DATA_READY) != (data_ready2 & NVREG_XMITCTL_DATA_READY)) {
 			ready = 1;
 			break;
@@ -5443,7 +5443,7 @@ static int nv_mgmt_get_version(struct net_device *dev)
 	if (!ready || (data_ready2 & NVREG_XMITCTL_DATA_ERROR))
 		return 0;
 
-	np->mgmt_version = readl(base + NvRegMgmtUnitVersion) & NVREG_MGMTUNITVERSION;
+	np->mgmt_version = pete_readl("drivers/net/ethernet/nvidia/forcedeth.c:5446", base + NvRegMgmtUnitVersion) & NVREG_MGMTUNITVERSION;
 
 	return 1;
 }
@@ -5464,104 +5464,104 @@ static int nv_open(struct net_device *dev)
 	/* erase previous misconfiguration */
 	if (np->driver_data & DEV_HAS_POWER_CNTRL)
 		nv_mac_reset(dev);
-	writel(NVREG_MCASTADDRA_FORCE, base + NvRegMulticastAddrA);
-	writel(0, base + NvRegMulticastAddrB);
-	writel(NVREG_MCASTMASKA_NONE, base + NvRegMulticastMaskA);
-	writel(NVREG_MCASTMASKB_NONE, base + NvRegMulticastMaskB);
-	writel(0, base + NvRegPacketFilterFlags);
+	pete_writel("drivers/net/ethernet/nvidia/forcedeth.c:5467", NVREG_MCASTADDRA_FORCE, base + NvRegMulticastAddrA);
+	pete_writel("drivers/net/ethernet/nvidia/forcedeth.c:5468", 0, base + NvRegMulticastAddrB);
+	pete_writel("drivers/net/ethernet/nvidia/forcedeth.c:5469", NVREG_MCASTMASKA_NONE, base + NvRegMulticastMaskA);
+	pete_writel("drivers/net/ethernet/nvidia/forcedeth.c:5470", NVREG_MCASTMASKB_NONE, base + NvRegMulticastMaskB);
+	pete_writel("drivers/net/ethernet/nvidia/forcedeth.c:5471", 0, base + NvRegPacketFilterFlags);
 
-	writel(0, base + NvRegTransmitterControl);
-	writel(0, base + NvRegReceiverControl);
+	pete_writel("drivers/net/ethernet/nvidia/forcedeth.c:5473", 0, base + NvRegTransmitterControl);
+	pete_writel("drivers/net/ethernet/nvidia/forcedeth.c:5474", 0, base + NvRegReceiverControl);
 
-	writel(0, base + NvRegAdapterControl);
+	pete_writel("drivers/net/ethernet/nvidia/forcedeth.c:5476", 0, base + NvRegAdapterControl);
 
 	if (np->pause_flags & NV_PAUSEFRAME_TX_CAPABLE)
-		writel(NVREG_TX_PAUSEFRAME_DISABLE,  base + NvRegTxPauseFrame);
+		pete_writel("drivers/net/ethernet/nvidia/forcedeth.c:5479", NVREG_TX_PAUSEFRAME_DISABLE,  base + NvRegTxPauseFrame);
 
 	/* initialize descriptor rings */
 	set_bufsize(dev);
 	oom = nv_init_ring(dev);
 
-	writel(0, base + NvRegLinkSpeed);
-	writel(readl(base + NvRegTransmitPoll) & NVREG_TRANSMITPOLL_MAC_ADDR_REV, base + NvRegTransmitPoll);
+	pete_writel("drivers/net/ethernet/nvidia/forcedeth.c:5485", 0, base + NvRegLinkSpeed);
+	pete_writel("drivers/net/ethernet/nvidia/forcedeth.c:5486", pete_readl("drivers/net/ethernet/nvidia/forcedeth.c:5486", base + NvRegTransmitPoll) & NVREG_TRANSMITPOLL_MAC_ADDR_REV, base + NvRegTransmitPoll);
 	nv_txrx_reset(dev);
-	writel(0, base + NvRegUnknownSetupReg6);
+	pete_writel("drivers/net/ethernet/nvidia/forcedeth.c:5488", 0, base + NvRegUnknownSetupReg6);
 
 	np->in_shutdown = 0;
 
 	/* give hw rings */
 	setup_hw_rings(dev, NV_SETUP_RX_RING | NV_SETUP_TX_RING);
-	writel(((np->rx_ring_size-1) << NVREG_RINGSZ_RXSHIFT) + ((np->tx_ring_size-1) << NVREG_RINGSZ_TXSHIFT),
+	pete_writel("drivers/net/ethernet/nvidia/forcedeth.c:5494", ((np->rx_ring_size-1) << NVREG_RINGSZ_RXSHIFT) + ((np->tx_ring_size-1) << NVREG_RINGSZ_TXSHIFT),
 		base + NvRegRingSizes);
 
-	writel(np->linkspeed, base + NvRegLinkSpeed);
+	pete_writel("drivers/net/ethernet/nvidia/forcedeth.c:5497", np->linkspeed, base + NvRegLinkSpeed);
 	if (np->desc_ver == DESC_VER_1)
-		writel(NVREG_TX_WM_DESC1_DEFAULT, base + NvRegTxWatermark);
+		pete_writel("drivers/net/ethernet/nvidia/forcedeth.c:5499", NVREG_TX_WM_DESC1_DEFAULT, base + NvRegTxWatermark);
 	else
-		writel(NVREG_TX_WM_DESC2_3_DEFAULT, base + NvRegTxWatermark);
-	writel(np->txrxctl_bits, base + NvRegTxRxControl);
-	writel(np->vlanctl_bits, base + NvRegVlanControl);
+		pete_writel("drivers/net/ethernet/nvidia/forcedeth.c:5501", NVREG_TX_WM_DESC2_3_DEFAULT, base + NvRegTxWatermark);
+	pete_writel("drivers/net/ethernet/nvidia/forcedeth.c:5502", np->txrxctl_bits, base + NvRegTxRxControl);
+	pete_writel("drivers/net/ethernet/nvidia/forcedeth.c:5503", np->vlanctl_bits, base + NvRegVlanControl);
 	pci_push(base);
-	writel(NVREG_TXRXCTL_BIT1|np->txrxctl_bits, base + NvRegTxRxControl);
+	pete_writel("drivers/net/ethernet/nvidia/forcedeth.c:5505", NVREG_TXRXCTL_BIT1|np->txrxctl_bits, base + NvRegTxRxControl);
 	if (reg_delay(dev, NvRegUnknownSetupReg5,
 		      NVREG_UNKSETUP5_BIT31, NVREG_UNKSETUP5_BIT31,
 		      NV_SETUP5_DELAY, NV_SETUP5_DELAYMAX))
 		netdev_info(dev,
 			    "%s: SetupReg5, Bit 31 remained off\n", __func__);
 
-	writel(0, base + NvRegMIIMask);
-	writel(NVREG_IRQSTAT_MASK, base + NvRegIrqStatus);
-	writel(NVREG_MIISTAT_MASK_ALL, base + NvRegMIIStatus);
+	pete_writel("drivers/net/ethernet/nvidia/forcedeth.c:5512", 0, base + NvRegMIIMask);
+	pete_writel("drivers/net/ethernet/nvidia/forcedeth.c:5513", NVREG_IRQSTAT_MASK, base + NvRegIrqStatus);
+	pete_writel("drivers/net/ethernet/nvidia/forcedeth.c:5514", NVREG_MIISTAT_MASK_ALL, base + NvRegMIIStatus);
 
-	writel(NVREG_MISC1_FORCE | NVREG_MISC1_HD, base + NvRegMisc1);
-	writel(readl(base + NvRegTransmitterStatus), base + NvRegTransmitterStatus);
-	writel(NVREG_PFF_ALWAYS, base + NvRegPacketFilterFlags);
-	writel(np->rx_buf_sz, base + NvRegOffloadConfig);
+	pete_writel("drivers/net/ethernet/nvidia/forcedeth.c:5516", NVREG_MISC1_FORCE | NVREG_MISC1_HD, base + NvRegMisc1);
+	pete_writel("drivers/net/ethernet/nvidia/forcedeth.c:5517", pete_readl("drivers/net/ethernet/nvidia/forcedeth.c:5517", base + NvRegTransmitterStatus), base + NvRegTransmitterStatus);
+	pete_writel("drivers/net/ethernet/nvidia/forcedeth.c:5518", NVREG_PFF_ALWAYS, base + NvRegPacketFilterFlags);
+	pete_writel("drivers/net/ethernet/nvidia/forcedeth.c:5519", np->rx_buf_sz, base + NvRegOffloadConfig);
 
-	writel(readl(base + NvRegReceiverStatus), base + NvRegReceiverStatus);
+	pete_writel("drivers/net/ethernet/nvidia/forcedeth.c:5521", pete_readl("drivers/net/ethernet/nvidia/forcedeth.c:5521", base + NvRegReceiverStatus), base + NvRegReceiverStatus);
 
 	get_random_bytes(&low, sizeof(low));
 	low &= NVREG_SLOTTIME_MASK;
 	if (np->desc_ver == DESC_VER_1) {
-		writel(low|NVREG_SLOTTIME_DEFAULT, base + NvRegSlotTime);
+		pete_writel("drivers/net/ethernet/nvidia/forcedeth.c:5526", low|NVREG_SLOTTIME_DEFAULT, base + NvRegSlotTime);
 	} else {
 		if (!(np->driver_data & DEV_HAS_GEAR_MODE)) {
 			/* setup legacy backoff */
-			writel(NVREG_SLOTTIME_LEGBF_ENABLED|NVREG_SLOTTIME_10_100_FULL|low, base + NvRegSlotTime);
+			pete_writel("drivers/net/ethernet/nvidia/forcedeth.c:5530", NVREG_SLOTTIME_LEGBF_ENABLED|NVREG_SLOTTIME_10_100_FULL|low, base + NvRegSlotTime);
 		} else {
-			writel(NVREG_SLOTTIME_10_100_FULL, base + NvRegSlotTime);
+			pete_writel("drivers/net/ethernet/nvidia/forcedeth.c:5532", NVREG_SLOTTIME_10_100_FULL, base + NvRegSlotTime);
 			nv_gear_backoff_reseed(dev);
 		}
 	}
-	writel(NVREG_TX_DEFERRAL_DEFAULT, base + NvRegTxDeferral);
-	writel(NVREG_RX_DEFERRAL_DEFAULT, base + NvRegRxDeferral);
+	pete_writel("drivers/net/ethernet/nvidia/forcedeth.c:5536", NVREG_TX_DEFERRAL_DEFAULT, base + NvRegTxDeferral);
+	pete_writel("drivers/net/ethernet/nvidia/forcedeth.c:5537", NVREG_RX_DEFERRAL_DEFAULT, base + NvRegRxDeferral);
 	if (poll_interval == -1) {
 		if (optimization_mode == NV_OPTIMIZATION_MODE_THROUGHPUT)
-			writel(NVREG_POLL_DEFAULT_THROUGHPUT, base + NvRegPollingInterval);
+			pete_writel("drivers/net/ethernet/nvidia/forcedeth.c:5540", NVREG_POLL_DEFAULT_THROUGHPUT, base + NvRegPollingInterval);
 		else
-			writel(NVREG_POLL_DEFAULT_CPU, base + NvRegPollingInterval);
+			pete_writel("drivers/net/ethernet/nvidia/forcedeth.c:5542", NVREG_POLL_DEFAULT_CPU, base + NvRegPollingInterval);
 	} else
-		writel(poll_interval & 0xFFFF, base + NvRegPollingInterval);
-	writel(NVREG_UNKSETUP6_VAL, base + NvRegUnknownSetupReg6);
-	writel((np->phyaddr << NVREG_ADAPTCTL_PHYSHIFT)|NVREG_ADAPTCTL_PHYVALID|NVREG_ADAPTCTL_RUNNING,
+		pete_writel("drivers/net/ethernet/nvidia/forcedeth.c:5544", poll_interval & 0xFFFF, base + NvRegPollingInterval);
+	pete_writel("drivers/net/ethernet/nvidia/forcedeth.c:5545", NVREG_UNKSETUP6_VAL, base + NvRegUnknownSetupReg6);
+	pete_writel("drivers/net/ethernet/nvidia/forcedeth.c:5546", (np->phyaddr << NVREG_ADAPTCTL_PHYSHIFT)|NVREG_ADAPTCTL_PHYVALID|NVREG_ADAPTCTL_RUNNING,
 			base + NvRegAdapterControl);
-	writel(NVREG_MIISPEED_BIT8|NVREG_MIIDELAY, base + NvRegMIISpeed);
-	writel(NVREG_MII_LINKCHANGE, base + NvRegMIIMask);
+	pete_writel("drivers/net/ethernet/nvidia/forcedeth.c:5548", NVREG_MIISPEED_BIT8|NVREG_MIIDELAY, base + NvRegMIISpeed);
+	pete_writel("drivers/net/ethernet/nvidia/forcedeth.c:5549", NVREG_MII_LINKCHANGE, base + NvRegMIIMask);
 	if (np->wolenabled)
-		writel(NVREG_WAKEUPFLAGS_ENABLE , base + NvRegWakeUpFlags);
+		pete_writel("drivers/net/ethernet/nvidia/forcedeth.c:5551", NVREG_WAKEUPFLAGS_ENABLE , base + NvRegWakeUpFlags);
 
-	i = readl(base + NvRegPowerState);
+	i = pete_readl("drivers/net/ethernet/nvidia/forcedeth.c:5553", base + NvRegPowerState);
 	if ((i & NVREG_POWERSTATE_POWEREDUP) == 0)
-		writel(NVREG_POWERSTATE_POWEREDUP|i, base + NvRegPowerState);
+		pete_writel("drivers/net/ethernet/nvidia/forcedeth.c:5555", NVREG_POWERSTATE_POWEREDUP|i, base + NvRegPowerState);
 
 	pci_push(base);
 	udelay(10);
-	writel(readl(base + NvRegPowerState) | NVREG_POWERSTATE_VALID, base + NvRegPowerState);
+	pete_writel("drivers/net/ethernet/nvidia/forcedeth.c:5559", pete_readl("drivers/net/ethernet/nvidia/forcedeth.c:5559", base + NvRegPowerState) | NVREG_POWERSTATE_VALID, base + NvRegPowerState);
 
 	nv_disable_hw_interrupts(dev, np->irqmask);
 	pci_push(base);
-	writel(NVREG_MIISTAT_MASK_ALL, base + NvRegMIIStatus);
-	writel(NVREG_IRQSTAT_MASK, base + NvRegIrqStatus);
+	pete_writel("drivers/net/ethernet/nvidia/forcedeth.c:5563", NVREG_MIISTAT_MASK_ALL, base + NvRegMIIStatus);
+	pete_writel("drivers/net/ethernet/nvidia/forcedeth.c:5564", NVREG_IRQSTAT_MASK, base + NvRegIrqStatus);
 	pci_push(base);
 
 	if (nv_request_irq(dev, 0))
@@ -5571,16 +5571,16 @@ static int nv_open(struct net_device *dev)
 	nv_enable_hw_interrupts(dev, np->irqmask);
 
 	spin_lock_irq(&np->lock);
-	writel(NVREG_MCASTADDRA_FORCE, base + NvRegMulticastAddrA);
-	writel(0, base + NvRegMulticastAddrB);
-	writel(NVREG_MCASTMASKA_NONE, base + NvRegMulticastMaskA);
-	writel(NVREG_MCASTMASKB_NONE, base + NvRegMulticastMaskB);
-	writel(NVREG_PFF_ALWAYS|NVREG_PFF_MYADDR, base + NvRegPacketFilterFlags);
+	pete_writel("drivers/net/ethernet/nvidia/forcedeth.c:5574", NVREG_MCASTADDRA_FORCE, base + NvRegMulticastAddrA);
+	pete_writel("drivers/net/ethernet/nvidia/forcedeth.c:5575", 0, base + NvRegMulticastAddrB);
+	pete_writel("drivers/net/ethernet/nvidia/forcedeth.c:5576", NVREG_MCASTMASKA_NONE, base + NvRegMulticastMaskA);
+	pete_writel("drivers/net/ethernet/nvidia/forcedeth.c:5577", NVREG_MCASTMASKB_NONE, base + NvRegMulticastMaskB);
+	pete_writel("drivers/net/ethernet/nvidia/forcedeth.c:5578", NVREG_PFF_ALWAYS|NVREG_PFF_MYADDR, base + NvRegPacketFilterFlags);
 	/* One manual link speed update: Interrupts are enabled, future link
 	 * speed changes cause interrupts and are handled by nv_link_irq().
 	 */
-	readl(base + NvRegMIIStatus);
-	writel(NVREG_MIISTAT_MASK_ALL, base + NvRegMIIStatus);
+	pete_readl("drivers/net/ethernet/nvidia/forcedeth.c:5582", base + NvRegMIIStatus);
+	pete_writel("drivers/net/ethernet/nvidia/forcedeth.c:5583", NVREG_MIISTAT_MASK_ALL, base + NvRegMIIStatus);
 
 	/* set linkspeed to invalid value, thus force nv_update_linkspeed
 	 * to init hw */
@@ -5652,7 +5652,7 @@ static int nv_close(struct net_device *dev)
 
 	if (np->wolenabled || !phy_power_down) {
 		nv_txrx_gate(dev, false);
-		writel(NVREG_PFF_ALWAYS|NVREG_PFF_MYADDR, base + NvRegPacketFilterFlags);
+		pete_writel("drivers/net/ethernet/nvidia/forcedeth.c:5655", NVREG_PFF_ALWAYS|NVREG_PFF_MYADDR, base + NvRegPacketFilterFlags);
 		nv_start_rx(dev);
 	} else {
 		/* power down phy */
@@ -5877,11 +5877,11 @@ static int nv_probe(struct pci_dev *pci_dev, const struct pci_device_id *id)
 
 	/* read the mac address */
 	base = get_hwbase(dev);
-	np->orig_mac[0] = readl(base + NvRegMacAddrA);
-	np->orig_mac[1] = readl(base + NvRegMacAddrB);
+	np->orig_mac[0] = pete_readl("drivers/net/ethernet/nvidia/forcedeth.c:5880", base + NvRegMacAddrA);
+	np->orig_mac[1] = pete_readl("drivers/net/ethernet/nvidia/forcedeth.c:5881", base + NvRegMacAddrB);
 
 	/* check the workaround bit for correct mac address order */
-	txreg = readl(base + NvRegTransmitPoll);
+	txreg = pete_readl("drivers/net/ethernet/nvidia/forcedeth.c:5884", base + NvRegTransmitPoll);
 	if (id->driver_data & DEV_HAS_CORRECT_MACADDR) {
 		/* mac address is already in correct order */
 		dev->dev_addr[0] = (np->orig_mac[0] >>  0) & 0xff;
@@ -5914,7 +5914,7 @@ static int nv_probe(struct pci_dev *pci_dev, const struct pci_device_id *id)
 		dev->dev_addr[3] = (np->orig_mac[0] >> 16) & 0xff;
 		dev->dev_addr[4] = (np->orig_mac[0] >>  8) & 0xff;
 		dev->dev_addr[5] = (np->orig_mac[0] >>  0) & 0xff;
-		writel(txreg|NVREG_TRANSMITPOLL_MAC_ADDR_REV, base + NvRegTransmitPoll);
+		pete_writel("drivers/net/ethernet/nvidia/forcedeth.c:5917", txreg|NVREG_TRANSMITPOLL_MAC_ADDR_REV, base + NvRegTransmitPoll);
 		dev_dbg(&pci_dev->dev,
 			"%s: set workaround bit for reversed mac addr\n",
 			__func__);
@@ -5937,19 +5937,19 @@ static int nv_probe(struct pci_dev *pci_dev, const struct pci_device_id *id)
 	nv_copy_mac_to_hw(dev);
 
 	/* disable WOL */
-	writel(0, base + NvRegWakeUpFlags);
+	pete_writel("drivers/net/ethernet/nvidia/forcedeth.c:5940", 0, base + NvRegWakeUpFlags);
 	np->wolenabled = 0;
 	device_set_wakeup_enable(&pci_dev->dev, false);
 
 	if (id->driver_data & DEV_HAS_POWER_CNTRL) {
 
 		/* take phy and nic out of low power mode */
-		powerstate = readl(base + NvRegPowerState2);
+		powerstate = pete_readl("drivers/net/ethernet/nvidia/forcedeth.c:5947", base + NvRegPowerState2);
 		powerstate &= ~NVREG_POWERSTATE2_POWERUP_MASK;
 		if ((id->driver_data & DEV_NEED_LOW_POWER_FIX) &&
 		    pci_dev->revision >= 0xA3)
 			powerstate |= NVREG_POWERSTATE2_POWERUP_REV_A3;
-		writel(powerstate, base + NvRegPowerState2);
+		pete_writel("drivers/net/ethernet/nvidia/forcedeth.c:5952", powerstate, base + NvRegPowerState2);
 	}
 
 	if (np->desc_ver == DESC_VER_1)
@@ -6005,27 +6005,27 @@ static int nv_probe(struct pci_dev *pci_dev, const struct pci_device_id *id)
 	}
 
 	/* clear phy state and temporarily halt phy interrupts */
-	writel(0, base + NvRegMIIMask);
-	phystate = readl(base + NvRegAdapterControl);
+	pete_writel("drivers/net/ethernet/nvidia/forcedeth.c:6008", 0, base + NvRegMIIMask);
+	phystate = pete_readl("drivers/net/ethernet/nvidia/forcedeth.c:6009", base + NvRegAdapterControl);
 	if (phystate & NVREG_ADAPTCTL_RUNNING) {
 		phystate_orig = 1;
 		phystate &= ~NVREG_ADAPTCTL_RUNNING;
-		writel(phystate, base + NvRegAdapterControl);
+		pete_writel("drivers/net/ethernet/nvidia/forcedeth.c:6013", phystate, base + NvRegAdapterControl);
 	}
-	writel(NVREG_MIISTAT_MASK_ALL, base + NvRegMIIStatus);
+	pete_writel("drivers/net/ethernet/nvidia/forcedeth.c:6015", NVREG_MIISTAT_MASK_ALL, base + NvRegMIIStatus);
 
 	if (id->driver_data & DEV_HAS_MGMT_UNIT) {
 		/* management unit running on the mac? */
-		if ((readl(base + NvRegTransmitterControl) & NVREG_XMITCTL_MGMT_ST) &&
-		    (readl(base + NvRegTransmitterControl) & NVREG_XMITCTL_SYNC_PHY_INIT) &&
+		if ((pete_readl("drivers/net/ethernet/nvidia/forcedeth.c:6019", base + NvRegTransmitterControl) & NVREG_XMITCTL_MGMT_ST) &&
+		    (pete_readl("drivers/net/ethernet/nvidia/forcedeth.c:6020", base + NvRegTransmitterControl) & NVREG_XMITCTL_SYNC_PHY_INIT) &&
 		    nv_mgmt_acquire_sema(dev) &&
 		    nv_mgmt_get_version(dev)) {
 			np->mac_in_use = 1;
 			if (np->mgmt_version > 0)
-				np->mac_in_use = readl(base + NvRegMgmtUnitControl) & NVREG_MGMTUNITCONTROL_INUSE;
+				np->mac_in_use = pete_readl("drivers/net/ethernet/nvidia/forcedeth.c:6025", base + NvRegMgmtUnitControl) & NVREG_MGMTUNITCONTROL_INUSE;
 			/* management unit setup the phy already? */
 			if (np->mac_in_use &&
-			    ((readl(base + NvRegTransmitterControl) & NVREG_XMITCTL_SYNC_MASK) ==
+			    ((pete_readl("drivers/net/ethernet/nvidia/forcedeth.c:6028", base + NvRegTransmitterControl) & NVREG_XMITCTL_SYNC_MASK) ==
 			     NVREG_XMITCTL_SYNC_PHY_INIT)) {
 				/* phy is inited by mgmt unit */
 				phyinitialized = 1;
@@ -6130,7 +6130,7 @@ static int nv_probe(struct pci_dev *pci_dev, const struct pci_device_id *id)
 
 out_error:
 	if (phystate_orig)
-		writel(phystate|NVREG_ADAPTCTL_RUNNING, base + NvRegAdapterControl);
+		pete_writel("drivers/net/ethernet/nvidia/forcedeth.c:6133", phystate|NVREG_ADAPTCTL_RUNNING, base + NvRegAdapterControl);
 out_freering:
 	free_rings(dev);
 out_unmap:
@@ -6178,9 +6178,9 @@ static void nv_restore_mac_addr(struct pci_dev *pci_dev)
 	/* special op: write back the misordered MAC address - otherwise
 	 * the next nv_probe would see a wrong address.
 	 */
-	writel(np->orig_mac[0], base + NvRegMacAddrA);
-	writel(np->orig_mac[1], base + NvRegMacAddrB);
-	writel(readl(base + NvRegTransmitPoll) & ~NVREG_TRANSMITPOLL_MAC_ADDR_REV,
+	pete_writel("drivers/net/ethernet/nvidia/forcedeth.c:6181", np->orig_mac[0], base + NvRegMacAddrA);
+	pete_writel("drivers/net/ethernet/nvidia/forcedeth.c:6182", np->orig_mac[1], base + NvRegMacAddrB);
+	pete_writel("drivers/net/ethernet/nvidia/forcedeth.c:6183", pete_readl("drivers/net/ethernet/nvidia/forcedeth.c:6183", base + NvRegTransmitPoll) & ~NVREG_TRANSMITPOLL_MAC_ADDR_REV,
 	       base + NvRegTransmitPoll);
 }
 
@@ -6224,7 +6224,7 @@ static int nv_suspend(struct device *device)
 
 	/* save non-pci configuration space */
 	for (i = 0; i <= np->register_size/sizeof(u32); i++)
-		np->saved_config_space[i] = readl(base + i*sizeof(u32));
+		np->saved_config_space[i] = pete_readl("drivers/net/ethernet/nvidia/forcedeth.c:6227", base + i*sizeof(u32));
 
 	return 0;
 }
@@ -6239,7 +6239,7 @@ static int nv_resume(struct device *device)
 
 	/* restore non-pci configuration space */
 	for (i = 0; i <= np->register_size/sizeof(u32); i++)
-		writel(np->saved_config_space[i], base+i*sizeof(u32));
+		pete_writel("drivers/net/ethernet/nvidia/forcedeth.c:6242", np->saved_config_space[i], base+i*sizeof(u32));
 
 	if (np->driver_data & DEV_NEED_MSI_FIX)
 		pci_write_config_dword(pdev, NV_MSI_PRIV_OFFSET, NV_MSI_PRIV_VALUE);

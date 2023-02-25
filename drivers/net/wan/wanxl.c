@@ -261,9 +261,9 @@ static irqreturn_t wanxl_intr(int irq, void *dev_id)
 	u32 stat;
 	int handled = 0;
 
-	while ((stat = readl(card->plx + PLX_DOORBELL_FROM_CARD)) != 0) {
+	while ((stat = pete_readl("drivers/net/wan/wanxl.c:264", card->plx + PLX_DOORBELL_FROM_CARD)) != 0) {
 		handled = 1;
-		writel(stat, card->plx + PLX_DOORBELL_FROM_CARD);
+		pete_writel("drivers/net/wan/wanxl.c:266", stat, card->plx + PLX_DOORBELL_FROM_CARD);
 
 		for (i = 0; i < card->n_ports; i++) {
 			if (stat & (1 << (DOORBELL_FROM_CARD_TX_0 + i)))
@@ -306,7 +306,7 @@ static netdev_tx_t wanxl_xmit(struct sk_buff *skb, struct net_device *dev)
 				       skb->len, DMA_TO_DEVICE);
 	desc->length = skb->len;
 	desc->stat = PACKET_FULL;
-	writel(1 << (DOORBELL_TO_CARD_TX_0 + port->node),
+	pete_writel("drivers/net/wan/wanxl.c:309", 1 << (DOORBELL_TO_CARD_TX_0 + port->node),
 	       port->card->plx + PLX_DOORBELL_TO_CARD);
 
 	port->tx_out = (port->tx_out + 1) % TX_BUFFERS;
@@ -410,7 +410,7 @@ static int wanxl_open(struct net_device *dev)
 	for (i = 0; i < TX_BUFFERS; i++)
 		get_status(port)->tx_descs[i].stat = PACKET_EMPTY;
 	/* signal the card */
-	writel(1 << (DOORBELL_TO_CARD_OPEN_0 + port->node), dbr);
+	pete_writel("drivers/net/wan/wanxl.c:413", 1 << (DOORBELL_TO_CARD_OPEN_0 + port->node), dbr);
 
 	timeout = jiffies + HZ;
 	do {
@@ -422,7 +422,7 @@ static int wanxl_open(struct net_device *dev)
 
 	netdev_err(dev, "unable to open port\n");
 	/* ask the card to close the port, should it be still alive */
-	writel(1 << (DOORBELL_TO_CARD_CLOSE_0 + port->node), dbr);
+	pete_writel("drivers/net/wan/wanxl.c:425", 1 << (DOORBELL_TO_CARD_CLOSE_0 + port->node), dbr);
 	return -EFAULT;
 }
 
@@ -434,7 +434,7 @@ static int wanxl_close(struct net_device *dev)
 
 	hdlc_close(dev);
 	/* signal the card */
-	writel(1 << (DOORBELL_TO_CARD_CLOSE_0 + port->node),
+	pete_writel("drivers/net/wan/wanxl.c:437", 1 << (DOORBELL_TO_CARD_CLOSE_0 + port->node),
 	       port->card->plx + PLX_DOORBELL_TO_CARD);
 
 	timeout = jiffies + HZ;
@@ -477,9 +477,9 @@ static int wanxl_puts_command(struct card *card, u32 cmd)
 {
 	unsigned long timeout = jiffies + 5 * HZ;
 
-	writel(cmd, card->plx + PLX_MAILBOX_1);
+	pete_writel("drivers/net/wan/wanxl.c:480", cmd, card->plx + PLX_MAILBOX_1);
 	do {
-		if (readl(card->plx + PLX_MAILBOX_1) == 0)
+		if (pete_readl("drivers/net/wan/wanxl.c:482", card->plx + PLX_MAILBOX_1) == 0)
 			return 0;
 
 		schedule();
@@ -490,14 +490,14 @@ static int wanxl_puts_command(struct card *card, u32 cmd)
 
 static void wanxl_reset(struct card *card)
 {
-	u32 old_value = readl(card->plx + PLX_CONTROL) & ~PLX_CTL_RESET;
+	u32 old_value = pete_readl("drivers/net/wan/wanxl.c:493", card->plx + PLX_CONTROL) & ~PLX_CTL_RESET;
 
-	writel(0x80, card->plx + PLX_MAILBOX_0);
-	writel(old_value | PLX_CTL_RESET, card->plx + PLX_CONTROL);
-	readl(card->plx + PLX_CONTROL); /* wait for posted write */
+	pete_writel("drivers/net/wan/wanxl.c:495", 0x80, card->plx + PLX_MAILBOX_0);
+	pete_writel("drivers/net/wan/wanxl.c:496", old_value | PLX_CTL_RESET, card->plx + PLX_CONTROL);
+	pete_readl("drivers/net/wan/wanxl.c:497", card->plx + PLX_CONTROL); /* wait for posted write */
 	udelay(1);
-	writel(old_value, card->plx + PLX_CONTROL);
-	readl(card->plx + PLX_CONTROL); /* wait for posted write */
+	pete_writel("drivers/net/wan/wanxl.c:499", old_value, card->plx + PLX_CONTROL);
+	pete_readl("drivers/net/wan/wanxl.c:500", card->plx + PLX_CONTROL); /* wait for posted write */
 }
 
 static void wanxl_pci_remove_one(struct pci_dev *pdev)
@@ -648,7 +648,7 @@ static int wanxl_pci_init_one(struct pci_dev *pdev,
 #endif
 
 	timeout = jiffies + 20 * HZ;
-	while ((stat = readl(card->plx + PLX_MAILBOX_0)) != 0) {
+	while ((stat = pete_readl("drivers/net/wan/wanxl.c:651", card->plx + PLX_MAILBOX_0)) != 0) {
 		if (time_before(timeout, jiffies)) {
 			pr_warn("%s: timeout waiting for PUTS to complete\n",
 				pci_name(pdev));
@@ -672,7 +672,7 @@ static int wanxl_pci_init_one(struct pci_dev *pdev,
 	}
 
 	/* get on-board memory size (PUTS detects no more than 4 MB) */
-	ramsize = readl(card->plx + PLX_MAILBOX_2) & MBX2_MEMSZ_MASK;
+	ramsize = pete_readl("drivers/net/wan/wanxl.c:675", card->plx + PLX_MAILBOX_2) & MBX2_MEMSZ_MASK;
 
 	/* set up on-board RAM mapping */
 	mem_phy = pci_resource_start(pdev, 2);
@@ -712,17 +712,17 @@ static int wanxl_pci_init_one(struct pci_dev *pdev,
 	}
 
 	for (i = 0; i < sizeof(firmware); i += 4)
-		writel(ntohl(*(__be32 *)(firmware + i)), mem + PDM_OFFSET + i);
+		pete_writel("drivers/net/wan/wanxl.c:715", ntohl(*(__be32 *)(firmware + i)), mem + PDM_OFFSET + i);
 
 	for (i = 0; i < ports; i++)
-		writel(card->status_address +
+		pete_writel("drivers/net/wan/wanxl.c:718", card->status_address +
 		       (void *)&card->status->port_status[i] -
 		       (void *)card->status, mem + PDM_OFFSET + 4 + i * 4);
-	writel(card->status_address, mem + PDM_OFFSET + 20);
-	writel(PDM_OFFSET, mem);
+	pete_writel("drivers/net/wan/wanxl.c:721", card->status_address, mem + PDM_OFFSET + 20);
+	pete_writel("drivers/net/wan/wanxl.c:722", PDM_OFFSET, mem);
 	iounmap(mem);
 
-	writel(0, card->plx + PLX_MAILBOX_5);
+	pete_writel("drivers/net/wan/wanxl.c:725", 0, card->plx + PLX_MAILBOX_5);
 
 	if (wanxl_puts_command(card, MBX1_CMD_ABORTJ)) {
 		pr_warn("%s: unable to Abort and Jump\n", pci_name(pdev));
@@ -732,7 +732,7 @@ static int wanxl_pci_init_one(struct pci_dev *pdev,
 
 	timeout = jiffies + 5 * HZ;
 	do {
-		stat = readl(card->plx + PLX_MAILBOX_5);
+		stat = pete_readl("drivers/net/wan/wanxl.c:735", card->plx + PLX_MAILBOX_5);
 		if (stat)
 			break;
 		schedule();

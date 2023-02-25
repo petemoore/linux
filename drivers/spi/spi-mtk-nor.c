@@ -113,11 +113,11 @@ struct mtk_nor {
 
 static inline void mtk_nor_rmw(struct mtk_nor *sp, u32 reg, u32 set, u32 clr)
 {
-	u32 val = readl(sp->base + reg);
+	u32 val = pete_readl("drivers/spi/spi-mtk-nor.c:116", sp->base + reg);
 
 	val &= ~clr;
 	val |= set;
-	writel(val, sp->base + reg);
+	pete_writel("drivers/spi/spi-mtk-nor.c:120", val, sp->base + reg);
 }
 
 static inline int mtk_nor_cmd_exec(struct mtk_nor *sp, u32 cmd, ulong clk)
@@ -126,7 +126,7 @@ static inline int mtk_nor_cmd_exec(struct mtk_nor *sp, u32 cmd, ulong clk)
 	u32 reg;
 	int ret;
 
-	writel(cmd, sp->base + MTK_NOR_REG_CMD);
+	pete_writel("drivers/spi/spi-mtk-nor.c:129", cmd, sp->base + MTK_NOR_REG_CMD);
 	ret = readl_poll_timeout(sp->base + MTK_NOR_REG_CMD, reg, !(reg & cmd),
 				 delay / 3, (delay + 1) * 200);
 	if (ret < 0)
@@ -344,14 +344,14 @@ static int mtk_nor_dma_exec(struct mtk_nor *sp, u32 from, unsigned int length,
 	ulong delay;
 	u32 reg;
 
-	writel(from, sp->base + MTK_NOR_REG_DMA_FADR);
-	writel(dma_addr, sp->base + MTK_NOR_REG_DMA_DADR);
-	writel(dma_addr + length, sp->base + MTK_NOR_REG_DMA_END_DADR);
+	pete_writel("drivers/spi/spi-mtk-nor.c:347", from, sp->base + MTK_NOR_REG_DMA_FADR);
+	pete_writel("drivers/spi/spi-mtk-nor.c:348", dma_addr, sp->base + MTK_NOR_REG_DMA_DADR);
+	pete_writel("drivers/spi/spi-mtk-nor.c:349", dma_addr + length, sp->base + MTK_NOR_REG_DMA_END_DADR);
 
 	if (sp->high_dma) {
-		writel(upper_32_bits(dma_addr),
+		pete_writel("drivers/spi/spi-mtk-nor.c:352", upper_32_bits(dma_addr),
 		       sp->base + MTK_NOR_REG_DMA_DADR_HB);
-		writel(upper_32_bits(dma_addr + length),
+		pete_writel("drivers/spi/spi-mtk-nor.c:354", upper_32_bits(dma_addr + length),
 		       sp->base + MTK_NOR_REG_DMA_END_DADR_HB);
 	}
 
@@ -438,8 +438,8 @@ static int mtk_nor_write_buffer_enable(struct mtk_nor *sp)
 	if (sp->wbuf_en)
 		return 0;
 
-	val = readl(sp->base + MTK_NOR_REG_CFG2);
-	writel(val | MTK_NOR_WR_BUF_EN, sp->base + MTK_NOR_REG_CFG2);
+	val = pete_readl("drivers/spi/spi-mtk-nor.c:441", sp->base + MTK_NOR_REG_CFG2);
+	pete_writel("drivers/spi/spi-mtk-nor.c:442", val | MTK_NOR_WR_BUF_EN, sp->base + MTK_NOR_REG_CFG2);
 	ret = readl_poll_timeout(sp->base + MTK_NOR_REG_CFG2, val,
 				 val & MTK_NOR_WR_BUF_EN, 0, 10000);
 	if (!ret)
@@ -454,8 +454,8 @@ static int mtk_nor_write_buffer_disable(struct mtk_nor *sp)
 
 	if (!sp->wbuf_en)
 		return 0;
-	val = readl(sp->base + MTK_NOR_REG_CFG2);
-	writel(val & ~MTK_NOR_WR_BUF_EN, sp->base + MTK_NOR_REG_CFG2);
+	val = pete_readl("drivers/spi/spi-mtk-nor.c:457", sp->base + MTK_NOR_REG_CFG2);
+	pete_writel("drivers/spi/spi-mtk-nor.c:458", val & ~MTK_NOR_WR_BUF_EN, sp->base + MTK_NOR_REG_CFG2);
 	ret = readl_poll_timeout(sp->base + MTK_NOR_REG_CFG2, val,
 				 !(val & MTK_NOR_WR_BUF_EN), 0, 10000);
 	if (!ret)
@@ -476,7 +476,7 @@ static int mtk_nor_pp_buffered(struct mtk_nor *sp, const struct spi_mem_op *op)
 	for (i = 0; i < op->data.nbytes; i += 4) {
 		val = buf[i + 3] << 24 | buf[i + 2] << 16 | buf[i + 1] << 8 |
 		      buf[i];
-		writel(val, sp->base + MTK_NOR_REG_PP_DATA);
+		pete_writel("drivers/spi/spi-mtk-nor.c:479", val, sp->base + MTK_NOR_REG_PP_DATA);
 	}
 	return mtk_nor_cmd_exec(sp, MTK_NOR_CMD_WRITE,
 				(op->data.nbytes + 5) * BITS_PER_BYTE);
@@ -554,7 +554,7 @@ static int mtk_nor_spi_mem_prg(struct mtk_nor *sp, const struct spi_mem_op *op)
 	}
 
 	// trigger op
-	writel(prg_len * BITS_PER_BYTE, sp->base + MTK_NOR_REG_PRG_CNT);
+	pete_writel("drivers/spi/spi-mtk-nor.c:557", prg_len * BITS_PER_BYTE, sp->base + MTK_NOR_REG_PRG_CNT);
 	ret = mtk_nor_cmd_exec(sp, MTK_NOR_CMD_PROGRAM,
 			       prg_len * BITS_PER_BYTE);
 	if (ret)
@@ -644,7 +644,7 @@ static int mtk_nor_transfer_one_message(struct spi_controller *master,
 		trx_len += t->len;
 	}
 
-	writel(trx_len * BITS_PER_BYTE, sp->base + MTK_NOR_REG_PRG_CNT);
+	pete_writel("drivers/spi/spi-mtk-nor.c:647", trx_len * BITS_PER_BYTE, sp->base + MTK_NOR_REG_PRG_CNT);
 
 	stat = mtk_nor_cmd_exec(sp, MTK_NOR_CMD_PROGRAM,
 				trx_len * BITS_PER_BYTE);
@@ -702,10 +702,10 @@ static int mtk_nor_enable_clk(struct mtk_nor *sp)
 
 static void mtk_nor_init(struct mtk_nor *sp)
 {
-	writel(0, sp->base + MTK_NOR_REG_IRQ_EN);
-	writel(MTK_NOR_IRQ_MASK, sp->base + MTK_NOR_REG_IRQ_STAT);
+	pete_writel("drivers/spi/spi-mtk-nor.c:705", 0, sp->base + MTK_NOR_REG_IRQ_EN);
+	pete_writel("drivers/spi/spi-mtk-nor.c:706", MTK_NOR_IRQ_MASK, sp->base + MTK_NOR_REG_IRQ_STAT);
 
-	writel(MTK_NOR_ENABLE_SF_CMD, sp->base + MTK_NOR_REG_WP);
+	pete_writel("drivers/spi/spi-mtk-nor.c:708", MTK_NOR_ENABLE_SF_CMD, sp->base + MTK_NOR_REG_WP);
 	mtk_nor_rmw(sp, MTK_NOR_REG_CFG2, MTK_NOR_WR_CUSTOM_OP_EN, 0);
 	mtk_nor_rmw(sp, MTK_NOR_REG_CFG3,
 		    MTK_NOR_DISABLE_WREN | MTK_NOR_DISABLE_SR_POLL, 0);
@@ -716,17 +716,17 @@ static irqreturn_t mtk_nor_irq_handler(int irq, void *data)
 	struct mtk_nor *sp = data;
 	u32 irq_status, irq_enabled;
 
-	irq_status = readl(sp->base + MTK_NOR_REG_IRQ_STAT);
-	irq_enabled = readl(sp->base + MTK_NOR_REG_IRQ_EN);
+	irq_status = pete_readl("drivers/spi/spi-mtk-nor.c:719", sp->base + MTK_NOR_REG_IRQ_STAT);
+	irq_enabled = pete_readl("drivers/spi/spi-mtk-nor.c:720", sp->base + MTK_NOR_REG_IRQ_EN);
 	// write status back to clear interrupt
-	writel(irq_status, sp->base + MTK_NOR_REG_IRQ_STAT);
+	pete_writel("drivers/spi/spi-mtk-nor.c:722", irq_status, sp->base + MTK_NOR_REG_IRQ_STAT);
 
 	if (!(irq_status & irq_enabled))
 		return IRQ_NONE;
 
 	if (irq_status & MTK_NOR_IRQ_DMA) {
 		complete(&sp->op_done);
-		writel(0, sp->base + MTK_NOR_REG_IRQ_EN);
+		pete_writel("drivers/spi/spi-mtk-nor.c:729", 0, sp->base + MTK_NOR_REG_IRQ_EN);
 	}
 
 	return IRQ_HANDLED;

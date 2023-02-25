@@ -28,7 +28,7 @@ static int ioc3kbd_wait(struct ioc3_serioregs __iomem *regs, u32 mask)
 {
 	unsigned long timeout = 0;
 
-	while ((readl(&regs->km_csr) & mask) && (timeout < 250)) {
+	while ((pete_readl("drivers/input/serio/ioc3kbd.c:31", &regs->km_csr) & mask) && (timeout < 250)) {
 		udelay(50);
 		timeout++;
 	}
@@ -44,7 +44,7 @@ static int ioc3kbd_write(struct serio *dev, u8 val)
 	if (ret)
 		return ret;
 
-	writel(val, &d->regs->k_wd);
+	pete_writel("drivers/input/serio/ioc3kbd.c:47", val, &d->regs->k_wd);
 
 	return 0;
 }
@@ -73,7 +73,7 @@ static int ioc3aux_write(struct serio *dev, u8 val)
 	if (ret)
 		return ret;
 
-	writel(val, &d->regs->m_wd);
+	pete_writel("drivers/input/serio/ioc3kbd.c:76", val, &d->regs->m_wd);
 
 	return 0;
 }
@@ -108,11 +108,11 @@ static irqreturn_t ioc3kbd_intr(int itq, void *dev_id)
 	struct ioc3kbd_data *d = dev_id;
 	u32 data_k, data_m;
 
-	data_k = readl(&d->regs->k_rd);
+	data_k = pete_readl("drivers/input/serio/ioc3kbd.c:111", &d->regs->k_rd);
 	if (d->kbd_exists)
 		ioc3kbd_process_data(d->kbd, data_k);
 
-	data_m = readl(&d->regs->m_rd);
+	data_m = pete_readl("drivers/input/serio/ioc3kbd.c:115", &d->regs->m_rd);
 	if (d->aux_exists)
 		ioc3kbd_process_data(d->aux, data_m);
 
@@ -185,7 +185,7 @@ static int ioc3kbd_probe(struct platform_device *pdev)
 	}
 
 	/* enable ports */
-	writel(KM_CSR_K_CLAMP_3 | KM_CSR_M_CLAMP_3, &regs->km_csr);
+	pete_writel("drivers/input/serio/ioc3kbd.c:188", KM_CSR_K_CLAMP_3 | KM_CSR_M_CLAMP_3, &regs->km_csr);
 
 	return 0;
 }

@@ -205,7 +205,7 @@ static int tve200_probe(struct platform_device *pdev)
 	}
 
 	/* turn off interrupts before requesting the irq */
-	writel(0, priv->regs + TVE200_INT_EN);
+	pete_writel("drivers/gpu/drm/tve200/tve200_drv.c:208", 0, priv->regs + TVE200_INT_EN);
 
 	ret = devm_request_irq(dev, irq, tve200_irq, 0, "tve200", priv);
 	if (ret) {

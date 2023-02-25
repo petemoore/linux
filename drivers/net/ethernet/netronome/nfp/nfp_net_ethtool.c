@@ -962,7 +962,7 @@ static int nfp_net_set_rss_hash_opt(struct nfp_net *nn,
 	if (new_rss_cfg == nn->rss_cfg)
 		return 0;
 
-	writel(new_rss_cfg, nn->dp.ctrl_bar + NFP_NET_CFG_RSS_CTRL);
+	pete_writel("drivers/net/ethernet/netronome/nfp/nfp_net_ethtool.c:965", new_rss_cfg, nn->dp.ctrl_bar + NFP_NET_CFG_RSS_CTRL);
 	err = nfp_net_reconfig(nn, NFP_NET_CFG_UPDATE_RSS);
 	if (err)
 		return err;
@@ -1074,7 +1074,7 @@ static void nfp_net_get_regs(struct net_device *netdev,
 	regs->version = nn_readl(nn, NFP_NET_CFG_VERSION);
 
 	for (i = 0; i < NFP_NET_CFG_BAR_SZ / sizeof(u32); i++)
-		regs_buf[i] = readl(nn->dp.ctrl_bar + (i * sizeof(u32)));
+		regs_buf[i] = pete_readl("drivers/net/ethernet/netronome/nfp/nfp_net_ethtool.c:1077", nn->dp.ctrl_bar + (i * sizeof(u32)));
 }
 
 static int nfp_net_get_coalesce(struct net_device *netdev,

@@ -249,7 +249,7 @@ MODULE_DEVICE_TABLE(of, exynos5_i2c_match);
 
 static void exynos5_i2c_clr_pend_irq(struct exynos5_i2c *i2c)
 {
-	writel(readl(i2c->regs + HSI2C_INT_STATUS),
+	pete_writel("drivers/i2c/busses/i2c-exynos5.c:252", pete_readl("drivers/i2c/busses/i2c-exynos5.c:252", i2c->regs + HSI2C_INT_STATUS),
 				i2c->regs + HSI2C_INT_STATUS);
 }
 
@@ -296,7 +296,7 @@ static int exynos5_i2c_set_timing(struct exynos5_i2c *i2c, bool hs_timings)
 	 * Constraints: 4 <= temp, 0 <= CLK_DIV < 256, 2 <= clk_cycle <= 510
 	 *
 	 */
-	t_ftl_cycle = (readl(i2c->regs + HSI2C_CONF) >> 16) & 0x7;
+	t_ftl_cycle = (pete_readl("drivers/i2c/busses/i2c-exynos5.c:299", i2c->regs + HSI2C_CONF) >> 16) & 0x7;
 	temp = clkin / op_clk - 8 - t_ftl_cycle;
 	if (i2c->variant->hw != I2C_TYPE_EXYNOS7)
 		temp -= t_ftl_cycle;
@@ -331,15 +331,15 @@ static int exynos5_i2c_set_timing(struct exynos5_i2c *i2c, bool hs_timings)
 	dev_dbg(i2c->dev, "tDATA_HD: %X\n", t_data_hd);
 
 	if (hs_timings) {
-		writel(i2c_timing_s1, i2c->regs + HSI2C_TIMING_HS1);
-		writel(i2c_timing_s2, i2c->regs + HSI2C_TIMING_HS2);
-		writel(i2c_timing_s3, i2c->regs + HSI2C_TIMING_HS3);
+		pete_writel("drivers/i2c/busses/i2c-exynos5.c:334", i2c_timing_s1, i2c->regs + HSI2C_TIMING_HS1);
+		pete_writel("drivers/i2c/busses/i2c-exynos5.c:335", i2c_timing_s2, i2c->regs + HSI2C_TIMING_HS2);
+		pete_writel("drivers/i2c/busses/i2c-exynos5.c:336", i2c_timing_s3, i2c->regs + HSI2C_TIMING_HS3);
 	} else {
-		writel(i2c_timing_s1, i2c->regs + HSI2C_TIMING_FS1);
-		writel(i2c_timing_s2, i2c->regs + HSI2C_TIMING_FS2);
-		writel(i2c_timing_s3, i2c->regs + HSI2C_TIMING_FS3);
+		pete_writel("drivers/i2c/busses/i2c-exynos5.c:338", i2c_timing_s1, i2c->regs + HSI2C_TIMING_FS1);
+		pete_writel("drivers/i2c/busses/i2c-exynos5.c:339", i2c_timing_s2, i2c->regs + HSI2C_TIMING_FS2);
+		pete_writel("drivers/i2c/busses/i2c-exynos5.c:340", i2c_timing_s3, i2c->regs + HSI2C_TIMING_FS3);
 	}
-	writel(i2c_timing_sla, i2c->regs + HSI2C_TIMING_SLA);
+	pete_writel("drivers/i2c/busses/i2c-exynos5.c:342", i2c_timing_sla, i2c->regs + HSI2C_TIMING_SLA);
 
 	return 0;
 }
@@ -361,24 +361,24 @@ static int exynos5_hsi2c_clock_setup(struct exynos5_i2c *i2c)
  */
 static void exynos5_i2c_init(struct exynos5_i2c *i2c)
 {
-	u32 i2c_conf = readl(i2c->regs + HSI2C_CONF);
-	u32 i2c_timeout = readl(i2c->regs + HSI2C_TIMEOUT);
+	u32 i2c_conf = pete_readl("drivers/i2c/busses/i2c-exynos5.c:364", i2c->regs + HSI2C_CONF);
+	u32 i2c_timeout = pete_readl("drivers/i2c/busses/i2c-exynos5.c:365", i2c->regs + HSI2C_TIMEOUT);
 
 	/* Clear to disable Timeout */
 	i2c_timeout &= ~HSI2C_TIMEOUT_EN;
-	writel(i2c_timeout, i2c->regs + HSI2C_TIMEOUT);
+	pete_writel("drivers/i2c/busses/i2c-exynos5.c:369", i2c_timeout, i2c->regs + HSI2C_TIMEOUT);
 
-	writel((HSI2C_FUNC_MODE_I2C | HSI2C_MASTER),
+	pete_writel("drivers/i2c/busses/i2c-exynos5.c:371", (HSI2C_FUNC_MODE_I2C | HSI2C_MASTER),
 					i2c->regs + HSI2C_CTL);
-	writel(HSI2C_TRAILING_COUNT, i2c->regs + HSI2C_TRAILIG_CTL);
+	pete_writel("drivers/i2c/busses/i2c-exynos5.c:373", HSI2C_TRAILING_COUNT, i2c->regs + HSI2C_TRAILIG_CTL);
 
 	if (i2c->op_clock >= I2C_MAX_FAST_MODE_PLUS_FREQ) {
-		writel(HSI2C_MASTER_ID(MASTER_ID(i2c->adap.nr)),
+		pete_writel("drivers/i2c/busses/i2c-exynos5.c:376", HSI2C_MASTER_ID(MASTER_ID(i2c->adap.nr)),
 					i2c->regs + HSI2C_ADDR);
 		i2c_conf |= HSI2C_HS_MODE;
 	}
 
-	writel(i2c_conf | HSI2C_AUTO_MODE, i2c->regs + HSI2C_CONF);
+	pete_writel("drivers/i2c/busses/i2c-exynos5.c:381", i2c_conf | HSI2C_AUTO_MODE, i2c->regs + HSI2C_CONF);
 }
 
 static void exynos5_i2c_reset(struct exynos5_i2c *i2c)
@@ -386,13 +386,13 @@ static void exynos5_i2c_reset(struct exynos5_i2c *i2c)
 	u32 i2c_ctl;
 
 	/* Set and clear the bit for reset */
-	i2c_ctl = readl(i2c->regs + HSI2C_CTL);
+	i2c_ctl = pete_readl("drivers/i2c/busses/i2c-exynos5.c:389", i2c->regs + HSI2C_CTL);
 	i2c_ctl |= HSI2C_SW_RST;
-	writel(i2c_ctl, i2c->regs + HSI2C_CTL);
+	pete_writel("drivers/i2c/busses/i2c-exynos5.c:391", i2c_ctl, i2c->regs + HSI2C_CTL);
 
-	i2c_ctl = readl(i2c->regs + HSI2C_CTL);
+	i2c_ctl = pete_readl("drivers/i2c/busses/i2c-exynos5.c:393", i2c->regs + HSI2C_CTL);
 	i2c_ctl &= ~HSI2C_SW_RST;
-	writel(i2c_ctl, i2c->regs + HSI2C_CTL);
+	pete_writel("drivers/i2c/busses/i2c-exynos5.c:395", i2c_ctl, i2c->regs + HSI2C_CTL);
 
 	/* We don't expect calculations to fail during the run */
 	exynos5_hsi2c_clock_setup(i2c);
@@ -418,8 +418,8 @@ static irqreturn_t exynos5_i2c_irq(int irqno, void *dev_id)
 
 	spin_lock(&i2c->lock);
 
-	int_status = readl(i2c->regs + HSI2C_INT_STATUS);
-	writel(int_status, i2c->regs + HSI2C_INT_STATUS);
+	int_status = pete_readl("drivers/i2c/busses/i2c-exynos5.c:421", i2c->regs + HSI2C_INT_STATUS);
+	pete_writel("drivers/i2c/busses/i2c-exynos5.c:422", int_status, i2c->regs + HSI2C_INT_STATUS);
 
 	/* handle interrupt related to the transfer status */
 	if (i2c->variant->hw == I2C_TYPE_EXYNOS7) {
@@ -444,7 +444,7 @@ static irqreturn_t exynos5_i2c_irq(int irqno, void *dev_id)
 			goto stop;
 		}
 	} else if (int_status & HSI2C_INT_I2C) {
-		trans_status = readl(i2c->regs + HSI2C_TRANS_STATUS);
+		trans_status = pete_readl("drivers/i2c/busses/i2c-exynos5.c:447", i2c->regs + HSI2C_TRANS_STATUS);
 		if (trans_status & HSI2C_NO_DEV_ACK) {
 			dev_dbg(i2c->dev, "No ACK from device\n");
 			i2c->state = -ENXIO;
@@ -469,33 +469,33 @@ static irqreturn_t exynos5_i2c_irq(int irqno, void *dev_id)
 
 	if ((i2c->msg->flags & I2C_M_RD) && (int_status &
 			(HSI2C_INT_TRAILING | HSI2C_INT_RX_ALMOSTFULL))) {
-		fifo_status = readl(i2c->regs + HSI2C_FIFO_STATUS);
+		fifo_status = pete_readl("drivers/i2c/busses/i2c-exynos5.c:472", i2c->regs + HSI2C_FIFO_STATUS);
 		fifo_level = HSI2C_RX_FIFO_LVL(fifo_status);
 		len = min(fifo_level, i2c->msg->len - i2c->msg_ptr);
 
 		while (len > 0) {
 			byte = (unsigned char)
-				readl(i2c->regs + HSI2C_RX_DATA);
+				pete_readl("drivers/i2c/busses/i2c-exynos5.c:478", i2c->regs + HSI2C_RX_DATA);
 			i2c->msg->buf[i2c->msg_ptr++] = byte;
 			len--;
 		}
 		i2c->state = 0;
 	} else if (int_status & HSI2C_INT_TX_ALMOSTEMPTY) {
-		fifo_status = readl(i2c->regs + HSI2C_FIFO_STATUS);
+		fifo_status = pete_readl("drivers/i2c/busses/i2c-exynos5.c:484", i2c->regs + HSI2C_FIFO_STATUS);
 		fifo_level = HSI2C_TX_FIFO_LVL(fifo_status);
 
 		len = i2c->variant->fifo_depth - fifo_level;
 		if (len > (i2c->msg->len - i2c->msg_ptr)) {
-			u32 int_en = readl(i2c->regs + HSI2C_INT_ENABLE);
+			u32 int_en = pete_readl("drivers/i2c/busses/i2c-exynos5.c:489", i2c->regs + HSI2C_INT_ENABLE);
 
 			int_en &= ~HSI2C_INT_TX_ALMOSTEMPTY_EN;
-			writel(int_en, i2c->regs + HSI2C_INT_ENABLE);
+			pete_writel("drivers/i2c/busses/i2c-exynos5.c:492", int_en, i2c->regs + HSI2C_INT_ENABLE);
 			len = i2c->msg->len - i2c->msg_ptr;
 		}
 
 		while (len > 0) {
 			byte = i2c->msg->buf[i2c->msg_ptr++];
-			writel(byte, i2c->regs + HSI2C_TX_DATA);
+			pete_writel("drivers/i2c/busses/i2c-exynos5.c:498", byte, i2c->regs + HSI2C_TX_DATA);
 			len--;
 		}
 		i2c->state = 0;
@@ -504,7 +504,7 @@ static irqreturn_t exynos5_i2c_irq(int irqno, void *dev_id)
  stop:
 	if ((i2c->trans_done && (i2c->msg->len == i2c->msg_ptr)) ||
 	    (i2c->state < 0)) {
-		writel(0, i2c->regs + HSI2C_INT_ENABLE);
+		pete_writel("drivers/i2c/busses/i2c-exynos5.c:507", 0, i2c->regs + HSI2C_INT_ENABLE);
 		exynos5_i2c_clr_pend_irq(i2c);
 		complete(&i2c->msg_complete);
 	}
@@ -530,7 +530,7 @@ static int exynos5_i2c_wait_bus_idle(struct exynos5_i2c *i2c)
 	/* wait for 100 milli seconds for the bus to be idle */
 	stop_time = jiffies + msecs_to_jiffies(100) + 1;
 	do {
-		trans_status = readl(i2c->regs + HSI2C_TRANS_STATUS);
+		trans_status = pete_readl("drivers/i2c/busses/i2c-exynos5.c:533", i2c->regs + HSI2C_TRANS_STATUS);
 		if (!(trans_status & HSI2C_MASTER_BUSY))
 			return 0;
 
@@ -544,25 +544,25 @@ static void exynos5_i2c_bus_recover(struct exynos5_i2c *i2c)
 {
 	u32 val;
 
-	val = readl(i2c->regs + HSI2C_CTL) | HSI2C_RXCHON;
-	writel(val, i2c->regs + HSI2C_CTL);
-	val = readl(i2c->regs + HSI2C_CONF) & ~HSI2C_AUTO_MODE;
-	writel(val, i2c->regs + HSI2C_CONF);
+	val = pete_readl("drivers/i2c/busses/i2c-exynos5.c:547", i2c->regs + HSI2C_CTL) | HSI2C_RXCHON;
+	pete_writel("drivers/i2c/busses/i2c-exynos5.c:548", val, i2c->regs + HSI2C_CTL);
+	val = pete_readl("drivers/i2c/busses/i2c-exynos5.c:549", i2c->regs + HSI2C_CONF) & ~HSI2C_AUTO_MODE;
+	pete_writel("drivers/i2c/busses/i2c-exynos5.c:550", val, i2c->regs + HSI2C_CONF);
 
 	/*
 	 * Specification says master should send nine clock pulses. It can be
 	 * emulated by sending manual read command (nine pulses for read eight
 	 * bits + one pulse for NACK).
 	 */
-	writel(HSI2C_CMD_READ_DATA, i2c->regs + HSI2C_MANUAL_CMD);
+	pete_writel("drivers/i2c/busses/i2c-exynos5.c:557", HSI2C_CMD_READ_DATA, i2c->regs + HSI2C_MANUAL_CMD);
 	exynos5_i2c_wait_bus_idle(i2c);
-	writel(HSI2C_CMD_SEND_STOP, i2c->regs + HSI2C_MANUAL_CMD);
+	pete_writel("drivers/i2c/busses/i2c-exynos5.c:559", HSI2C_CMD_SEND_STOP, i2c->regs + HSI2C_MANUAL_CMD);
 	exynos5_i2c_wait_bus_idle(i2c);
 
-	val = readl(i2c->regs + HSI2C_CTL) & ~HSI2C_RXCHON;
-	writel(val, i2c->regs + HSI2C_CTL);
-	val = readl(i2c->regs + HSI2C_CONF) | HSI2C_AUTO_MODE;
-	writel(val, i2c->regs + HSI2C_CONF);
+	val = pete_readl("drivers/i2c/busses/i2c-exynos5.c:562", i2c->regs + HSI2C_CTL) & ~HSI2C_RXCHON;
+	pete_writel("drivers/i2c/busses/i2c-exynos5.c:563", val, i2c->regs + HSI2C_CTL);
+	val = pete_readl("drivers/i2c/busses/i2c-exynos5.c:564", i2c->regs + HSI2C_CONF) | HSI2C_AUTO_MODE;
+	pete_writel("drivers/i2c/busses/i2c-exynos5.c:565", val, i2c->regs + HSI2C_CONF);
 }
 
 static void exynos5_i2c_bus_check(struct exynos5_i2c *i2c)
@@ -579,7 +579,7 @@ static void exynos5_i2c_bus_check(struct exynos5_i2c *i2c)
 	 */
 	timeout = jiffies + msecs_to_jiffies(100);
 	for (;;) {
-		u32 st = readl(i2c->regs + HSI2C_TRANS_STATUS);
+		u32 st = pete_readl("drivers/i2c/busses/i2c-exynos5.c:582", i2c->regs + HSI2C_TRANS_STATUS);
 
 		if ((st & HSI2C_MASTER_ST_MASK) != HSI2C_MASTER_ST_LOSE)
 			return;
@@ -616,7 +616,7 @@ static void exynos5_i2c_message_start(struct exynos5_i2c *i2c, int stop)
 	else
 		int_en |= HSI2C_INT_I2C;
 
-	i2c_ctl = readl(i2c->regs + HSI2C_CTL);
+	i2c_ctl = pete_readl("drivers/i2c/busses/i2c-exynos5.c:619", i2c->regs + HSI2C_CTL);
 	i2c_ctl &= ~(HSI2C_TXCHON | HSI2C_RXCHON);
 	fifo_ctl = HSI2C_RXFIFO_EN | HSI2C_TXFIFO_EN;
 
@@ -646,10 +646,10 @@ static void exynos5_i2c_message_start(struct exynos5_i2c *i2c, int stop)
 	if (i2c->op_clock >= I2C_MAX_FAST_MODE_PLUS_FREQ)
 		i2c_addr |= HSI2C_MASTER_ID(MASTER_ID(i2c->adap.nr));
 
-	writel(i2c_addr, i2c->regs + HSI2C_ADDR);
+	pete_writel("drivers/i2c/busses/i2c-exynos5.c:649", i2c_addr, i2c->regs + HSI2C_ADDR);
 
-	writel(fifo_ctl, i2c->regs + HSI2C_FIFO_CTL);
-	writel(i2c_ctl, i2c->regs + HSI2C_CTL);
+	pete_writel("drivers/i2c/busses/i2c-exynos5.c:651", fifo_ctl, i2c->regs + HSI2C_FIFO_CTL);
+	pete_writel("drivers/i2c/busses/i2c-exynos5.c:652", i2c_ctl, i2c->regs + HSI2C_CTL);
 
 	exynos5_i2c_bus_check(i2c);
 
@@ -658,13 +658,13 @@ static void exynos5_i2c_message_start(struct exynos5_i2c *i2c, int stop)
 	 * miss any INT_I2C interrupts.
 	 */
 	spin_lock_irqsave(&i2c->lock, flags);
-	writel(int_en, i2c->regs + HSI2C_INT_ENABLE);
+	pete_writel("drivers/i2c/busses/i2c-exynos5.c:661", int_en, i2c->regs + HSI2C_INT_ENABLE);
 
 	if (stop == 1)
 		i2c_auto_conf |= HSI2C_STOP_AFTER_TRANS;
 	i2c_auto_conf |= i2c->msg->len;
 	i2c_auto_conf |= HSI2C_MASTER_RUN;
-	writel(i2c_auto_conf, i2c->regs + HSI2C_AUTO_CONF);
+	pete_writel("drivers/i2c/busses/i2c-exynos5.c:667", i2c_auto_conf, i2c->regs + HSI2C_AUTO_CONF);
 	spin_unlock_irqrestore(&i2c->lock, flags);
 }
 

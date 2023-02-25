@@ -182,17 +182,17 @@ static int hisi_spi_debugfs_init(struct hisi_spi *hs)
 
 static u32 hisi_spi_busy(struct hisi_spi *hs)
 {
-	return readl(hs->regs + HISI_SPI_SR) & SR_BUSY;
+	return pete_readl("drivers/spi/spi-hisi-kunpeng.c:185", hs->regs + HISI_SPI_SR) & SR_BUSY;
 }
 
 static u32 hisi_spi_rx_not_empty(struct hisi_spi *hs)
 {
-	return readl(hs->regs + HISI_SPI_SR) & SR_RXNE;
+	return pete_readl("drivers/spi/spi-hisi-kunpeng.c:190", hs->regs + HISI_SPI_SR) & SR_RXNE;
 }
 
 static u32 hisi_spi_tx_not_full(struct hisi_spi *hs)
 {
-	return readl(hs->regs + HISI_SPI_SR) & SR_TXNF;
+	return pete_readl("drivers/spi/spi-hisi-kunpeng.c:195", hs->regs + HISI_SPI_SR) & SR_TXNF;
 }
 
 static void hisi_spi_flush_fifo(struct hisi_spi *hs)
@@ -201,16 +201,16 @@ static void hisi_spi_flush_fifo(struct hisi_spi *hs)
 
 	do {
 		while (hisi_spi_rx_not_empty(hs))
-			readl(hs->regs + HISI_SPI_DOUT);
+			pete_readl("drivers/spi/spi-hisi-kunpeng.c:204", hs->regs + HISI_SPI_DOUT);
 	} while (hisi_spi_busy(hs) && limit--);
 }
 
 /* Disable the controller and all interrupts */
 static void hisi_spi_disable(struct hisi_spi *hs)
 {
-	writel(0, hs->regs + HISI_SPI_ENR);
-	writel(IMR_MASK, hs->regs + HISI_SPI_IMR);
-	writel(ICR_MASK, hs->regs + HISI_SPI_ICR);
+	pete_writel("drivers/spi/spi-hisi-kunpeng.c:211", 0, hs->regs + HISI_SPI_ENR);
+	pete_writel("drivers/spi/spi-hisi-kunpeng.c:212", IMR_MASK, hs->regs + HISI_SPI_IMR);
+	pete_writel("drivers/spi/spi-hisi-kunpeng.c:213", ICR_MASK, hs->regs + HISI_SPI_ICR);
 }
 
 static u8 hisi_spi_n_bytes(struct spi_transfer *transfer)
@@ -229,7 +229,7 @@ static void hisi_spi_reader(struct hisi_spi *hs)
 	u32 rxw;
 
 	while (hisi_spi_rx_not_empty(hs) && max--) {
-		rxw = readl(hs->regs + HISI_SPI_DOUT);
+		rxw = pete_readl("drivers/spi/spi-hisi-kunpeng.c:232", hs->regs + HISI_SPI_DOUT);
 		/* Check the transfer's original "rx" is not null */
 		if (hs->rx) {
 			switch (hs->n_bytes) {
@@ -270,7 +270,7 @@ static void hisi_spi_writer(struct hisi_spi *hs)
 			}
 			hs->tx += hs->n_bytes;
 		}
-		writel(txw, hs->regs + HISI_SPI_DIN);
+		pete_writel("drivers/spi/spi-hisi-kunpeng.c:273", txw, hs->regs + HISI_SPI_DIN);
 		--hs->tx_len;
 	}
 }
@@ -327,7 +327,7 @@ static void hisi_spi_hw_init(struct hisi_spi *hs)
 	hisi_spi_disable(hs);
 
 	/* FIFO default config */
-	writel(FIELD_PREP(FIFOC_TX_MASK, HISI_SPI_TX_64_OR_LESS) |
+	pete_writel("drivers/spi/spi-hisi-kunpeng.c:330", FIELD_PREP(FIFOC_TX_MASK, HISI_SPI_TX_64_OR_LESS) |
 		FIELD_PREP(FIFOC_RX_MASK, HISI_SPI_RX_16),
 		hs->regs + HISI_SPI_FIFOC);
 
@@ -338,7 +338,7 @@ static irqreturn_t hisi_spi_irq(int irq, void *dev_id)
 {
 	struct spi_controller *master = dev_id;
 	struct hisi_spi *hs = spi_controller_get_devdata(master);
-	u32 irq_status = readl(hs->regs + HISI_SPI_ISR) & ISR_MASK;
+	u32 irq_status = pete_readl("drivers/spi/spi-hisi-kunpeng.c:341", hs->regs + HISI_SPI_ISR) & ISR_MASK;
 
 	if (!irq_status)
 		return IRQ_NONE;
@@ -386,7 +386,7 @@ static int hisi_spi_transfer_one(struct spi_controller *master,
 	cr |= FIELD_PREP(CR_DIV_PRE_MASK, chip->div_pre);
 	cr |= FIELD_PREP(CR_DIV_POST_MASK, chip->div_post);
 	cr |= FIELD_PREP(CR_BPW_MASK, transfer->bits_per_word - 1);
-	writel(cr, hs->regs + HISI_SPI_CR);
+	pete_writel("drivers/spi/spi-hisi-kunpeng.c:389", cr, hs->regs + HISI_SPI_CR);
 
 	hisi_spi_flush_fifo(hs);
 
@@ -403,8 +403,8 @@ static int hisi_spi_transfer_one(struct spi_controller *master,
 	smp_mb();
 
 	/* Enable all interrupts and the controller */
-	writel(~(u32)IMR_MASK, hs->regs + HISI_SPI_IMR);
-	writel(1, hs->regs + HISI_SPI_ENR);
+	pete_writel("drivers/spi/spi-hisi-kunpeng.c:406", ~(u32)IMR_MASK, hs->regs + HISI_SPI_IMR);
+	pete_writel("drivers/spi/spi-hisi-kunpeng.c:407", 1, hs->regs + HISI_SPI_ENR);
 
 	return 1;
 }
@@ -517,7 +517,7 @@ static int hisi_spi_probe(struct platform_device *pdev)
 		dev_info(dev, "failed to create debugfs dir\n");
 
 	dev_info(dev, "hw version:0x%x max-freq:%u kHz\n",
-		readl(hs->regs + HISI_SPI_VERSION),
+		pete_readl("drivers/spi/spi-hisi-kunpeng.c:520", hs->regs + HISI_SPI_VERSION),
 		master->max_speed_hz / 1000);
 
 	return 0;

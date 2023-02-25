@@ -145,12 +145,12 @@ int sun8i_ce_run_task(struct sun8i_ce_dev *ce, int flow, const char *name)
 
 	mutex_lock(&ce->mlock);
 
-	v = readl(ce->base + CE_ICR);
+	v = pete_readl("drivers/crypto/allwinner/sun8i-ce/sun8i-ce-core.c:148", ce->base + CE_ICR);
 	v |= 1 << flow;
-	writel(v, ce->base + CE_ICR);
+	pete_writel("drivers/crypto/allwinner/sun8i-ce/sun8i-ce-core.c:150", v, ce->base + CE_ICR);
 
 	reinit_completion(&ce->chanlist[flow].complete);
-	writel(ce->chanlist[flow].t_phy, ce->base + CE_TDQ);
+	pete_writel("drivers/crypto/allwinner/sun8i-ce/sun8i-ce-core.c:153", ce->chanlist[flow].t_phy, ce->base + CE_TDQ);
 
 	ce->chanlist[flow].status = 0;
 	/* Be sure all data is written before enabling the task */
@@ -160,7 +160,7 @@ int sun8i_ce_run_task(struct sun8i_ce_dev *ce, int flow, const char *name)
 	 * on older SoCs, we have no reason to complicate things.
 	 */
 	v = 1 | ((le32_to_cpu(ce->chanlist[flow].tl->t_common_ctl) & 0x7F) << 8);
-	writel(v, ce->base + CE_TLR);
+	pete_writel("drivers/crypto/allwinner/sun8i-ce/sun8i-ce-core.c:163", v, ce->base + CE_TLR);
 	mutex_unlock(&ce->mlock);
 
 	wait_for_completion_interruptible_timeout(&ce->chanlist[flow].complete,
@@ -174,7 +174,7 @@ int sun8i_ce_run_task(struct sun8i_ce_dev *ce, int flow, const char *name)
 	/* No need to lock for this read, the channel is locked so
 	 * nothing could modify the error value for this channel
 	 */
-	v = readl(ce->base + CE_ESR);
+	v = pete_readl("drivers/crypto/allwinner/sun8i-ce/sun8i-ce-core.c:177", ce->base + CE_ESR);
 	switch (ce->variant->esr) {
 	case ESR_H3:
 		/* Sadly, the error bit is not per flow */
@@ -240,10 +240,10 @@ static irqreturn_t ce_irq_handler(int irq, void *data)
 	int flow = 0;
 	u32 p;
 
-	p = readl(ce->base + CE_ISR);
+	p = pete_readl("drivers/crypto/allwinner/sun8i-ce/sun8i-ce-core.c:243", ce->base + CE_ISR);
 	for (flow = 0; flow < MAXFLOW; flow++) {
 		if (p & (BIT(flow))) {
-			writel(BIT(flow), ce->base + CE_ISR);
+			pete_writel("drivers/crypto/allwinner/sun8i-ce/sun8i-ce-core.c:246", BIT(flow), ce->base + CE_ISR);
 			ce->chanlist[flow].status = 1;
 			complete(&ce->chanlist[flow].complete);
 		}
@@ -940,7 +940,7 @@ static int sun8i_ce_probe(struct platform_device *pdev)
 	sun8i_ce_hwrng_register(ce);
 #endif
 
-	v = readl(ce->base + CE_CTR);
+	v = pete_readl("drivers/crypto/allwinner/sun8i-ce/sun8i-ce-core.c:943", ce->base + CE_CTR);
 	v >>= CE_DIE_ID_SHIFT;
 	v &= CE_DIE_ID_MASK;
 	dev_info(&pdev->dev, "CryptoEngine Die ID %x\n", v);

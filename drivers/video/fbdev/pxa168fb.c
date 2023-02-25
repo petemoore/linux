@@ -284,7 +284,7 @@ static void set_clock_divider(struct pxa168fb_info *fbi,
 	 * Set setting to reg.
 	 */
 	x |= divider_int;
-	writel(x, fbi->reg_base + LCD_CFG_SCLK_DIV);
+	pete_writel("drivers/video/fbdev/pxa168fb.c:287", x, fbi->reg_base + LCD_CFG_SCLK_DIV);
 }
 
 static void set_dma_control0(struct pxa168fb_info *fbi)
@@ -294,7 +294,7 @@ static void set_dma_control0(struct pxa168fb_info *fbi)
 	/*
 	 * Set bit to enable graphics DMA.
 	 */
-	x = readl(fbi->reg_base + LCD_SPU_DMA_CTRL0);
+	x = pete_readl("drivers/video/fbdev/pxa168fb.c:297", fbi->reg_base + LCD_SPU_DMA_CTRL0);
 	x &= ~CFG_GRA_ENA_MASK;
 	x |= fbi->active ? CFG_GRA_ENA(1) : CFG_GRA_ENA(0);
 
@@ -319,7 +319,7 @@ static void set_dma_control0(struct pxa168fb_info *fbi)
 	x &= ~(1 << 12);
 	x |= ((fbi->pix_fmt & 1) ^ (fbi->panel_rbswap)) << 12;
 
-	writel(x, fbi->reg_base + LCD_SPU_DMA_CTRL0);
+	pete_writel("drivers/video/fbdev/pxa168fb.c:322", x, fbi->reg_base + LCD_SPU_DMA_CTRL0);
 }
 
 static void set_dma_control1(struct pxa168fb_info *fbi, int sync)
@@ -331,7 +331,7 @@ static void set_dma_control1(struct pxa168fb_info *fbi, int sync)
 	 * enable, power save enable, configure alpha registers to
 	 * display 100% graphics, and set pixel command.
 	 */
-	x = readl(fbi->reg_base + LCD_SPU_DMA_CTRL1);
+	x = pete_readl("drivers/video/fbdev/pxa168fb.c:334", fbi->reg_base + LCD_SPU_DMA_CTRL1);
 	x |= 0x2032ff81;
 
 	/*
@@ -341,7 +341,7 @@ static void set_dma_control1(struct pxa168fb_info *fbi, int sync)
 	if (!(sync & FB_SYNC_VERT_HIGH_ACT))
 		x |= 0x08000000;
 
-	writel(x, fbi->reg_base + LCD_SPU_DMA_CTRL1);
+	pete_writel("drivers/video/fbdev/pxa168fb.c:344", x, fbi->reg_base + LCD_SPU_DMA_CTRL1);
 }
 
 static void set_graphics_start(struct fb_info *info, int xoffset, int yoffset)
@@ -354,7 +354,7 @@ static void set_graphics_start(struct fb_info *info, int xoffset, int yoffset)
 	pixel_offset = (yoffset * var->xres_virtual) + xoffset;
 
 	addr = fbi->fb_start_dma + (pixel_offset * (var->bits_per_pixel >> 3));
-	writel(addr, fbi->reg_base + LCD_CFG_GRA_START_ADDR0);
+	pete_writel("drivers/video/fbdev/pxa168fb.c:357", addr, fbi->reg_base + LCD_CFG_GRA_START_ADDR0);
 }
 
 static void set_dumb_panel_control(struct fb_info *info)
@@ -366,7 +366,7 @@ static void set_dumb_panel_control(struct fb_info *info)
 	/*
 	 * Preserve enable flag.
 	 */
-	x = readl(fbi->reg_base + LCD_SPU_DUMB_CTRL) & 0x00000001;
+	x = pete_readl("drivers/video/fbdev/pxa168fb.c:369", fbi->reg_base + LCD_SPU_DUMB_CTRL) & 0x00000001;
 
 	x |= (fbi->is_blanked ? 0x7 : mi->dumb_mode) << 28;
 	x |= mi->gpio_output_data << 20;
@@ -379,7 +379,7 @@ static void set_dumb_panel_control(struct fb_info *info)
 	x |= (info->var.sync & FB_SYNC_HOR_HIGH_ACT) ? 0 : 0x00000004;
 	x |= mi->invert_pixclock ? 0x00000002 : 0;
 
-	writel(x, fbi->reg_base + LCD_SPU_DUMB_CTRL);
+	pete_writel("drivers/video/fbdev/pxa168fb.c:382", x, fbi->reg_base + LCD_SPU_DUMB_CTRL);
 }
 
 static void set_dumb_screen_dimensions(struct fb_info *info)
@@ -392,7 +392,7 @@ static void set_dumb_screen_dimensions(struct fb_info *info)
 	x = v->xres + v->right_margin + v->hsync_len + v->left_margin;
 	y = v->yres + v->lower_margin + v->vsync_len + v->upper_margin;
 
-	writel((y << 16) | x, fbi->reg_base + LCD_SPUT_V_H_TOTAL);
+	pete_writel("drivers/video/fbdev/pxa168fb.c:395", (y << 16) | x, fbi->reg_base + LCD_SPUT_V_H_TOTAL);
 }
 
 static int pxa168fb_set_par(struct fb_info *info)
@@ -415,13 +415,13 @@ static int pxa168fb_set_par(struct fb_info *info)
 	/*
 	 * Disable panel output while we setup the display.
 	 */
-	x = readl(fbi->reg_base + LCD_SPU_DUMB_CTRL);
-	writel(x & ~1, fbi->reg_base + LCD_SPU_DUMB_CTRL);
+	x = pete_readl("drivers/video/fbdev/pxa168fb.c:418", fbi->reg_base + LCD_SPU_DUMB_CTRL);
+	pete_writel("drivers/video/fbdev/pxa168fb.c:419", x & ~1, fbi->reg_base + LCD_SPU_DUMB_CTRL);
 
 	/*
 	 * Configure global panel parameters.
 	 */
-	writel((var->yres << 16) | var->xres,
+	pete_writel("drivers/video/fbdev/pxa168fb.c:424", (var->yres << 16) | var->xres,
 		fbi->reg_base + LCD_SPU_V_H_ACTIVE);
 
 	/*
@@ -439,12 +439,12 @@ static int pxa168fb_set_par(struct fb_info *info)
 	/*
 	 * Configure graphics DMA parameters.
 	 */
-	x = readl(fbi->reg_base + LCD_CFG_GRA_PITCH);
+	x = pete_readl("drivers/video/fbdev/pxa168fb.c:442", fbi->reg_base + LCD_CFG_GRA_PITCH);
 	x = (x & ~0xFFFF) | ((var->xres_virtual * var->bits_per_pixel) >> 3);
-	writel(x, fbi->reg_base + LCD_CFG_GRA_PITCH);
-	writel((var->yres << 16) | var->xres,
+	pete_writel("drivers/video/fbdev/pxa168fb.c:444", x, fbi->reg_base + LCD_CFG_GRA_PITCH);
+	pete_writel("drivers/video/fbdev/pxa168fb.c:445", (var->yres << 16) | var->xres,
 		fbi->reg_base + LCD_SPU_GRA_HPXL_VLN);
-	writel((var->yres << 16) | var->xres,
+	pete_writel("drivers/video/fbdev/pxa168fb.c:447", (var->yres << 16) | var->xres,
 		fbi->reg_base + LCD_SPU_GZM_HPXL_VLN);
 
 	/*
@@ -453,16 +453,16 @@ static int pxa168fb_set_par(struct fb_info *info)
 	set_dumb_panel_control(info);
 	set_dumb_screen_dimensions(info);
 
-	writel((var->left_margin << 16) | var->right_margin,
+	pete_writel("drivers/video/fbdev/pxa168fb.c:456", (var->left_margin << 16) | var->right_margin,
 			fbi->reg_base + LCD_SPU_H_PORCH);
-	writel((var->upper_margin << 16) | var->lower_margin,
+	pete_writel("drivers/video/fbdev/pxa168fb.c:458", (var->upper_margin << 16) | var->lower_margin,
 			fbi->reg_base + LCD_SPU_V_PORCH);
 
 	/*
 	 * Re-enable panel output.
 	 */
-	x = readl(fbi->reg_base + LCD_SPU_DUMB_CTRL);
-	writel(x | 1, fbi->reg_base + LCD_SPU_DUMB_CTRL);
+	x = pete_readl("drivers/video/fbdev/pxa168fb.c:464", fbi->reg_base + LCD_SPU_DUMB_CTRL);
+	pete_writel("drivers/video/fbdev/pxa168fb.c:465", x | 1, fbi->reg_base + LCD_SPU_DUMB_CTRL);
 
 	return 0;
 }
@@ -501,8 +501,8 @@ pxa168fb_setcolreg(unsigned int regno, unsigned int red, unsigned int green,
 
 	if (info->fix.visual == FB_VISUAL_PSEUDOCOLOR && regno < 256) {
 		val = to_rgb(red, green, blue);
-		writel(val, fbi->reg_base + LCD_SPU_SRAM_WRDAT);
-		writel(0x8300 | regno, fbi->reg_base + LCD_SPU_SRAM_CTRL);
+		pete_writel("drivers/video/fbdev/pxa168fb.c:504", val, fbi->reg_base + LCD_SPU_SRAM_WRDAT);
+		pete_writel("drivers/video/fbdev/pxa168fb.c:505", 0x8300 | regno, fbi->reg_base + LCD_SPU_SRAM_CTRL);
 	}
 
 	return 0;
@@ -529,11 +529,11 @@ static int pxa168fb_pan_display(struct fb_var_screeninfo *var,
 static irqreturn_t pxa168fb_handle_irq(int irq, void *dev_id)
 {
 	struct pxa168fb_info *fbi = dev_id;
-	u32 isr = readl(fbi->reg_base + SPU_IRQ_ISR);
+	u32 isr = pete_readl("drivers/video/fbdev/pxa168fb.c:532", fbi->reg_base + SPU_IRQ_ISR);
 
 	if ((isr & GRA_FRAME_IRQ0_ENA_MASK)) {
 
-		writel(isr & (~GRA_FRAME_IRQ0_ENA_MASK),
+		pete_writel("drivers/video/fbdev/pxa168fb.c:536", isr & (~GRA_FRAME_IRQ0_ENA_MASK),
 			fbi->reg_base + SPU_IRQ_ISR);
 
 		return IRQ_HANDLED;
@@ -709,12 +709,12 @@ static int pxa168fb_probe(struct platform_device *pdev)
 	/*
 	 * Configure default register values.
 	 */
-	writel(0, fbi->reg_base + LCD_SPU_BLANKCOLOR);
-	writel(mi->io_pin_allocation_mode, fbi->reg_base + SPU_IOPAD_CONTROL);
-	writel(0, fbi->reg_base + LCD_CFG_GRA_START_ADDR1);
-	writel(0, fbi->reg_base + LCD_SPU_GRA_OVSA_HPXL_VLN);
-	writel(0, fbi->reg_base + LCD_SPU_SRAM_PARA0);
-	writel(CFG_CSB_256x32(0x1)|CFG_CSB_256x24(0x1)|CFG_CSB_256x8(0x1),
+	pete_writel("drivers/video/fbdev/pxa168fb.c:712", 0, fbi->reg_base + LCD_SPU_BLANKCOLOR);
+	pete_writel("drivers/video/fbdev/pxa168fb.c:713", mi->io_pin_allocation_mode, fbi->reg_base + SPU_IOPAD_CONTROL);
+	pete_writel("drivers/video/fbdev/pxa168fb.c:714", 0, fbi->reg_base + LCD_CFG_GRA_START_ADDR1);
+	pete_writel("drivers/video/fbdev/pxa168fb.c:715", 0, fbi->reg_base + LCD_SPU_GRA_OVSA_HPXL_VLN);
+	pete_writel("drivers/video/fbdev/pxa168fb.c:716", 0, fbi->reg_base + LCD_SPU_SRAM_PARA0);
+	pete_writel("drivers/video/fbdev/pxa168fb.c:717", CFG_CSB_256x32(0x1)|CFG_CSB_256x24(0x1)|CFG_CSB_256x8(0x1),
 		fbi->reg_base + LCD_SPU_SRAM_PARA1);
 
 	/*
@@ -739,7 +739,7 @@ static int pxa168fb_probe(struct platform_device *pdev)
 	/*
 	 * Enable GFX interrupt
 	 */
-	writel(GRA_FRAME_IRQ0_ENA(0x1), fbi->reg_base + SPU_IRQ_ENA);
+	pete_writel("drivers/video/fbdev/pxa168fb.c:742", GRA_FRAME_IRQ0_ENA(0x1), fbi->reg_base + SPU_IRQ_ENA);
 
 	/*
 	 * Register framebuffer.
@@ -778,15 +778,15 @@ static int pxa168fb_remove(struct platform_device *pdev)
 		return 0;
 
 	/* disable DMA transfer */
-	data = readl(fbi->reg_base + LCD_SPU_DMA_CTRL0);
+	data = pete_readl("drivers/video/fbdev/pxa168fb.c:781", fbi->reg_base + LCD_SPU_DMA_CTRL0);
 	data &= ~CFG_GRA_ENA_MASK;
-	writel(data, fbi->reg_base + LCD_SPU_DMA_CTRL0);
+	pete_writel("drivers/video/fbdev/pxa168fb.c:783", data, fbi->reg_base + LCD_SPU_DMA_CTRL0);
 
 	info = fbi->info;
 
 	unregister_framebuffer(info);
 
-	writel(GRA_FRAME_IRQ0_ENA(0x0), fbi->reg_base + SPU_IRQ_ENA);
+	pete_writel("drivers/video/fbdev/pxa168fb.c:789", GRA_FRAME_IRQ0_ENA(0x0), fbi->reg_base + SPU_IRQ_ENA);
 
 	if (info->cmap.len)
 		fb_dealloc_cmap(&info->cmap);

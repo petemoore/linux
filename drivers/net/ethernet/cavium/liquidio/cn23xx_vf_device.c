@@ -523,7 +523,7 @@ static u64 cn23xx_vf_msix_interrupt_handler(void *dev)
 
 static u32 cn23xx_update_read_index(struct octeon_instr_queue *iq)
 {
-	u32 pkt_in_done = readl(iq->inst_cnt_reg);
+	u32 pkt_in_done = pete_readl("drivers/net/ethernet/cavium/liquidio/cn23xx_vf_device.c:526", iq->inst_cnt_reg);
 	u32 last_done;
 	u32 new_idx;
 

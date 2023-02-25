@@ -864,7 +864,7 @@ typedef struct asc_mc_saved {
 #define ADV_MEM_READW(addr) readw(addr)
 #define ADV_MEM_WRITEB(addr, byte) writeb(byte, addr)
 #define ADV_MEM_WRITEW(addr, word) writew(word, addr)
-#define ADV_MEM_WRITEDW(addr, dword) writel(dword, addr)
+#define ADV_MEM_WRITEDW(addr, dword) pete_writel("drivers/scsi/advansys.c:867", dword, addr)
 
 /*
  * Define total number of simultaneous maximum element scatter-gather

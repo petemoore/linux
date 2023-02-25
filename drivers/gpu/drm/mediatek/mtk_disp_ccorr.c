@@ -75,7 +75,7 @@ void mtk_ccorr_start(struct device *dev)
 {
 	struct mtk_disp_ccorr *ccorr = dev_get_drvdata(dev);
 
-	writel(CCORR_EN, ccorr->regs + DISP_CCORR_EN);
+	pete_writel("drivers/gpu/drm/mediatek/mtk_disp_ccorr.c:78", CCORR_EN, ccorr->regs + DISP_CCORR_EN);
 }
 
 void mtk_ccorr_stop(struct device *dev)

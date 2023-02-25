@@ -75,8 +75,8 @@ static void __iomem *gpt_sched_reg __read_mostly;
 static void mtk_syst_ack_irq(struct timer_of *to)
 {
 	/* Clear and disable interrupt */
-	writel(SYST_CON_EN, SYST_CON_REG(to));
-	writel(SYST_CON_IRQ_CLR | SYST_CON_EN, SYST_CON_REG(to));
+	pete_writel("drivers/clocksource/timer-mediatek.c:78", SYST_CON_EN, SYST_CON_REG(to));
+	pete_writel("drivers/clocksource/timer-mediatek.c:79", SYST_CON_IRQ_CLR | SYST_CON_EN, SYST_CON_REG(to));
 }
 
 static irqreturn_t mtk_syst_handler(int irq, void *dev_id)
@@ -96,16 +96,16 @@ static int mtk_syst_clkevt_next_event(unsigned long ticks,
 	struct timer_of *to = to_timer_of(clkevt);
 
 	/* Enable clock to allow timeout tick update later */
-	writel(SYST_CON_EN, SYST_CON_REG(to));
+	pete_writel("drivers/clocksource/timer-mediatek.c:99", SYST_CON_EN, SYST_CON_REG(to));
 
 	/*
 	 * Write new timeout ticks. Timer shall start countdown
 	 * after timeout ticks are updated.
 	 */
-	writel(ticks, SYST_VAL_REG(to));
+	pete_writel("drivers/clocksource/timer-mediatek.c:105", ticks, SYST_VAL_REG(to));
 
 	/* Enable interrupt */
-	writel(SYST_CON_EN | SYST_CON_IRQ_EN, SYST_CON_REG(to));
+	pete_writel("drivers/clocksource/timer-mediatek.c:108", SYST_CON_EN | SYST_CON_IRQ_EN, SYST_CON_REG(to));
 
 	return 0;
 }
@@ -116,7 +116,7 @@ static int mtk_syst_clkevt_shutdown(struct clock_event_device *clkevt)
 	mtk_syst_ack_irq(to_timer_of(clkevt));
 
 	/* Disable timer */
-	writel(0, SYST_CON_REG(to_timer_of(clkevt)));
+	pete_writel("drivers/clocksource/timer-mediatek.c:119", 0, SYST_CON_REG(to_timer_of(clkevt)));
 
 	return 0;
 }
@@ -140,15 +140,15 @@ static void mtk_gpt_clkevt_time_stop(struct timer_of *to, u8 timer)
 {
 	u32 val;
 
-	val = readl(timer_of_base(to) + GPT_CTRL_REG(timer));
-	writel(val & ~GPT_CTRL_ENABLE, timer_of_base(to) +
+	val = pete_readl("drivers/clocksource/timer-mediatek.c:143", timer_of_base(to) + GPT_CTRL_REG(timer));
+	pete_writel("drivers/clocksource/timer-mediatek.c:144", val & ~GPT_CTRL_ENABLE, timer_of_base(to) +
 	       GPT_CTRL_REG(timer));
 }
 
 static void mtk_gpt_clkevt_time_setup(struct timer_of *to,
 				      unsigned long delay, u8 timer)
 {
-	writel(delay, timer_of_base(to) + GPT_CMP_REG(timer));
+	pete_writel("drivers/clocksource/timer-mediatek.c:151", delay, timer_of_base(to) + GPT_CMP_REG(timer));
 }
 
 static void mtk_gpt_clkevt_time_start(struct timer_of *to,
@@ -157,9 +157,9 @@ static void mtk_gpt_clkevt_time_start(struct timer_of *to,
 	u32 val;
 
 	/* Acknowledge interrupt */
-	writel(GPT_IRQ_ACK(timer), timer_of_base(to) + GPT_IRQ_ACK_REG);
+	pete_writel("drivers/clocksource/timer-mediatek.c:160", GPT_IRQ_ACK(timer), timer_of_base(to) + GPT_IRQ_ACK_REG);
 
-	val = readl(timer_of_base(to) + GPT_CTRL_REG(timer));
+	val = pete_readl("drivers/clocksource/timer-mediatek.c:162", timer_of_base(to) + GPT_CTRL_REG(timer));
 
 	/* Clear 2 bit timer operation mode field */
 	val &= ~GPT_CTRL_OP(0x3);
@@ -169,7 +169,7 @@ static void mtk_gpt_clkevt_time_start(struct timer_of *to,
 	else
 		val |= GPT_CTRL_OP(GPT_CTRL_OP_ONESHOT);
 
-	writel(val | GPT_CTRL_ENABLE | GPT_CTRL_CLEAR,
+	pete_writel("drivers/clocksource/timer-mediatek.c:172", val | GPT_CTRL_ENABLE | GPT_CTRL_CLEAR,
 	       timer_of_base(to) + GPT_CTRL_REG(timer));
 }
 
@@ -209,7 +209,7 @@ static irqreturn_t mtk_gpt_interrupt(int irq, void *dev_id)
 	struct timer_of *to = to_timer_of(clkevt);
 
 	/* Acknowledge timer0 irq */
-	writel(GPT_IRQ_ACK(TIMER_CLK_EVT), timer_of_base(to) + GPT_IRQ_ACK_REG);
+	pete_writel("drivers/clocksource/timer-mediatek.c:212", GPT_IRQ_ACK(TIMER_CLK_EVT), timer_of_base(to) + GPT_IRQ_ACK_REG);
 	clkevt->event_handler(clkevt);
 
 	return IRQ_HANDLED;
@@ -218,15 +218,15 @@ static irqreturn_t mtk_gpt_interrupt(int irq, void *dev_id)
 static void
 __init mtk_gpt_setup(struct timer_of *to, u8 timer, u8 option)
 {
-	writel(GPT_CTRL_CLEAR | GPT_CTRL_DISABLE,
+	pete_writel("drivers/clocksource/timer-mediatek.c:221", GPT_CTRL_CLEAR | GPT_CTRL_DISABLE,
 	       timer_of_base(to) + GPT_CTRL_REG(timer));
 
-	writel(GPT_CLK_SRC(GPT_CLK_SRC_SYS13M) | GPT_CLK_DIV1,
+	pete_writel("drivers/clocksource/timer-mediatek.c:224", GPT_CLK_SRC(GPT_CLK_SRC_SYS13M) | GPT_CLK_DIV1,
 	       timer_of_base(to) + GPT_CLK_REG(timer));
 
-	writel(0x0, timer_of_base(to) + GPT_CMP_REG(timer));
+	pete_writel("drivers/clocksource/timer-mediatek.c:227", 0x0, timer_of_base(to) + GPT_CMP_REG(timer));
 
-	writel(GPT_CTRL_OP(option) | GPT_CTRL_ENABLE,
+	pete_writel("drivers/clocksource/timer-mediatek.c:229", GPT_CTRL_OP(option) | GPT_CTRL_ENABLE,
 	       timer_of_base(to) + GPT_CTRL_REG(timer));
 }
 
@@ -235,13 +235,13 @@ static void mtk_gpt_enable_irq(struct timer_of *to, u8 timer)
 	u32 val;
 
 	/* Disable all interrupts */
-	writel(0x0, timer_of_base(to) + GPT_IRQ_EN_REG);
+	pete_writel("drivers/clocksource/timer-mediatek.c:238", 0x0, timer_of_base(to) + GPT_IRQ_EN_REG);
 
 	/* Acknowledge all spurious pending interrupts */
-	writel(0x3f, timer_of_base(to) + GPT_IRQ_ACK_REG);
+	pete_writel("drivers/clocksource/timer-mediatek.c:241", 0x3f, timer_of_base(to) + GPT_IRQ_ACK_REG);
 
-	val = readl(timer_of_base(to) + GPT_IRQ_EN_REG);
-	writel(val | GPT_IRQ_ENABLE(timer),
+	val = pete_readl("drivers/clocksource/timer-mediatek.c:243", timer_of_base(to) + GPT_IRQ_EN_REG);
+	pete_writel("drivers/clocksource/timer-mediatek.c:244", val | GPT_IRQ_ENABLE(timer),
 	       timer_of_base(to) + GPT_IRQ_EN_REG);
 }
 
@@ -257,14 +257,14 @@ static void mtk_gpt_suspend(struct clock_event_device *clk)
 	struct timer_of *to = to_timer_of(clk);
 
 	/* Disable all interrupts */
-	writel(0x0, timer_of_base(to) + GPT_IRQ_EN_REG);
+	pete_writel("drivers/clocksource/timer-mediatek.c:260", 0x0, timer_of_base(to) + GPT_IRQ_EN_REG);
 
 	/*
 	 * This is called with interrupts disabled,
 	 * so we need to ack any interrupt that is pending
 	 * or for example ATF will prevent a suspend from completing.
 	 */
-	writel(0x3f, timer_of_base(to) + GPT_IRQ_ACK_REG);
+	pete_writel("drivers/clocksource/timer-mediatek.c:267", 0x3f, timer_of_base(to) + GPT_IRQ_ACK_REG);
 }
 
 static struct timer_of to = {

@@ -170,7 +170,7 @@ const struct seq_operations cpuinfo_op = {
 #define get_wait(base, addr) ({		\
 	int baddr;			\
 	baddr = ((addr) / 0x200000 * 16);			     \
-	w *= (readl((base) + 2) & (7 << baddr)) + 1;	\
+	w *= (pete_readl("arch/h8300/kernel/setup.c:173", (base) + 2) & (7 << baddr)) + 1;	\
 	})
 #endif
 

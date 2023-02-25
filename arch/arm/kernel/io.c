@@ -33,7 +33,7 @@ void atomic_io_modify(void __iomem *reg, u32 mask, u32 set)
 	raw_spin_lock_irqsave(&__io_lock, flags);
 	value = readl_relaxed(reg) & ~mask;
 	value |= (set & mask);
-	writel(value, reg);
+	pete_writel("arch/arm/kernel/io.c:36", value, reg);
 	raw_spin_unlock_irqrestore(&__io_lock, flags);
 }
 EXPORT_SYMBOL(atomic_io_modify);

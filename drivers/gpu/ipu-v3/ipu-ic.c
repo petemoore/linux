@@ -163,12 +163,12 @@ struct ipu_ic_priv {
 
 static inline u32 ipu_ic_read(struct ipu_ic *ic, unsigned offset)
 {
-	return readl(ic->priv->base + offset);
+	return pete_readl("drivers/gpu/ipu-v3/ipu-ic.c:166", ic->priv->base + offset);
 }
 
 static inline void ipu_ic_write(struct ipu_ic *ic, u32 value, unsigned offset)
 {
-	writel(value, ic->priv->base + offset);
+	pete_writel("drivers/gpu/ipu-v3/ipu-ic.c:171", value, ic->priv->base + offset);
 }
 
 static int init_csc(struct ipu_ic *ic,
@@ -190,25 +190,25 @@ static int init_csc(struct ipu_ic *ic,
 
 	param = ((a[0] & 0x1f) << 27) | ((c[0][0] & 0x1ff) << 18) |
 		((c[1][1] & 0x1ff) << 9) | (c[2][2] & 0x1ff);
-	writel(param, base++);
+	pete_writel("drivers/gpu/ipu-v3/ipu-ic.c:193", param, base++);
 
 	param = ((a[0] & 0x1fe0) >> 5) | (csc->params.scale << 8) |
 		(csc->params.sat << 10);
-	writel(param, base++);
+	pete_writel("drivers/gpu/ipu-v3/ipu-ic.c:197", param, base++);
 
 	param = ((a[1] & 0x1f) << 27) | ((c[0][1] & 0x1ff) << 18) |
 		((c[1][0] & 0x1ff) << 9) | (c[2][0] & 0x1ff);
-	writel(param, base++);
+	pete_writel("drivers/gpu/ipu-v3/ipu-ic.c:201", param, base++);
 
 	param = ((a[1] & 0x1fe0) >> 5);
-	writel(param, base++);
+	pete_writel("drivers/gpu/ipu-v3/ipu-ic.c:204", param, base++);
 
 	param = ((a[2] & 0x1f) << 27) | ((c[0][2] & 0x1ff) << 18) |
 		((c[1][2] & 0x1ff) << 9) | (c[2][1] & 0x1ff);
-	writel(param, base++);
+	pete_writel("drivers/gpu/ipu-v3/ipu-ic.c:208", param, base++);
 
 	param = ((a[2] & 0x1fe0) >> 5);
-	writel(param, base++);
+	pete_writel("drivers/gpu/ipu-v3/ipu-ic.c:211", param, base++);
 
 	return 0;
 }

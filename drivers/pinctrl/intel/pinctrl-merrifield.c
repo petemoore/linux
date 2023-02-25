@@ -488,7 +488,7 @@ static int mrfld_read_bufcfg(struct mrfld_pinctrl *mp, unsigned int pin, u32 *va
 		return -EBUSY;
 
 	bufcfg = mrfld_get_bufcfg(mp, pin);
-	*value = readl(bufcfg);
+	*value = pete_readl("drivers/pinctrl/intel/pinctrl-merrifield.c:491", bufcfg);
 
 	return 0;
 }
@@ -500,12 +500,12 @@ static void mrfld_update_bufcfg(struct mrfld_pinctrl *mp, unsigned int pin,
 	u32 value;
 
 	bufcfg = mrfld_get_bufcfg(mp, pin);
-	value = readl(bufcfg);
+	value = pete_readl("drivers/pinctrl/intel/pinctrl-merrifield.c:503", bufcfg);
 
 	value &= ~mask;
 	value |= bits & mask;
 
-	writel(value, bufcfg);
+	pete_writel("drivers/pinctrl/intel/pinctrl-merrifield.c:508", value, bufcfg);
 }
 
 static int mrfld_get_groups_count(struct pinctrl_dev *pctldev)

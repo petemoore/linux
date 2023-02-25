@@ -20,8 +20,8 @@
  * PIO Access Area
  */
 
-#define pio_reg_read(r)		readl(hci->PIO_regs + (PIO_##r))
-#define pio_reg_write(r, v)	writel(v, hci->PIO_regs + (PIO_##r))
+#define pio_reg_read(r)		pete_readl("drivers/i3c/master/mipi-i3c-hci/pio.c:23", hci->PIO_regs + (PIO_##r))
+#define pio_reg_write(r, v)	pete_writel("drivers/i3c/master/mipi-i3c-hci/pio.c:24", v, hci->PIO_regs + (PIO_##r))
 
 #define PIO_COMMAND_QUEUE_PORT		0x00
 #define PIO_RESPONSE_QUEUE_PORT		0x04
@@ -689,7 +689,7 @@ static bool hci_pio_dequeue_xfer(struct i3c_hci *hci, struct hci_xfer *xfer, int
 	DBG("n=%d status=%#x/%#x", n,
 	    pio_reg_read(INTR_STATUS), pio_reg_read(INTR_SIGNAL_ENABLE));
 	DBG("main_status = %#x/%#x",
-	    readl(hci->base_regs + 0x20), readl(hci->base_regs + 0x28));
+	    pete_readl("drivers/i3c/master/mipi-i3c-hci/pio.c:692", hci->base_regs + 0x20), pete_readl("drivers/i3c/master/mipi-i3c-hci/pio.c:692", hci->base_regs + 0x28));
 
 	ret = hci_pio_dequeue_xfer_common(hci, pio, xfer, n);
 	spin_unlock_irq(&pio->lock);

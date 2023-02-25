@@ -191,7 +191,7 @@ MODULE_PARM_DESC(fw_cmd_doorbell, "post FW commands through doorbell page if non
 
 static inline int go_bit(struct mthca_dev *dev)
 {
-	return readl(dev->hcr + HCR_STATUS_OFFSET) &
+	return pete_readl("drivers/infiniband/hw/mthca/mthca_cmd.c:194", dev->hcr + HCR_STATUS_OFFSET) &
 		swab32(1 << HCR_GO_BIT);
 }
 

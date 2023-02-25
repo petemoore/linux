@@ -139,14 +139,14 @@ void ipu_dmfc_config_wait4eot(struct dmfc_channel *dmfc, int width)
 
 	mutex_lock(&priv->mutex);
 
-	dmfc_gen1 = readl(priv->base + DMFC_GENERAL1);
+	dmfc_gen1 = pete_readl("drivers/gpu/ipu-v3/ipu-dmfc.c:142", priv->base + DMFC_GENERAL1);
 
 	if ((dmfc->slots * 64 * 4) / width > dmfc->data->max_fifo_lines)
 		dmfc_gen1 |= 1 << dmfc->data->eot_shift;
 	else
 		dmfc_gen1 &= ~(1 << dmfc->data->eot_shift);
 
-	writel(dmfc_gen1, priv->base + DMFC_GENERAL1);
+	pete_writel("drivers/gpu/ipu-v3/ipu-dmfc.c:149", dmfc_gen1, priv->base + DMFC_GENERAL1);
 
 	mutex_unlock(&priv->mutex);
 }
@@ -200,11 +200,11 @@ int ipu_dmfc_init(struct ipu_soc *ipu, struct device *dev, unsigned long base,
 			priv->channels[i].slots = 2;
 	}
 
-	writel(0x00000050, priv->base + DMFC_WR_CHAN);
-	writel(0x00005654, priv->base + DMFC_DP_CHAN);
-	writel(0x202020f6, priv->base + DMFC_WR_CHAN_DEF);
-	writel(0x2020f6f6, priv->base + DMFC_DP_CHAN_DEF);
-	writel(0x00000003, priv->base + DMFC_GENERAL1);
+	pete_writel("drivers/gpu/ipu-v3/ipu-dmfc.c:203", 0x00000050, priv->base + DMFC_WR_CHAN);
+	pete_writel("drivers/gpu/ipu-v3/ipu-dmfc.c:204", 0x00005654, priv->base + DMFC_DP_CHAN);
+	pete_writel("drivers/gpu/ipu-v3/ipu-dmfc.c:205", 0x202020f6, priv->base + DMFC_WR_CHAN_DEF);
+	pete_writel("drivers/gpu/ipu-v3/ipu-dmfc.c:206", 0x2020f6f6, priv->base + DMFC_DP_CHAN_DEF);
+	pete_writel("drivers/gpu/ipu-v3/ipu-dmfc.c:207", 0x00000003, priv->base + DMFC_GENERAL1);
 
 	return 0;
 }

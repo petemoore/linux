@@ -107,10 +107,10 @@ static u_int32_t clocktab[] = {
 };
 
 #define NICSTAR_REG_WRITE(bs, reg, val) \
-	while ( readl(bs + STAT) & 0x0200 ) ; \
-	writel((val),(base)+(reg))
+	while ( pete_readl("drivers/atm/nicstarmac.c:110", bs + STAT) & 0x0200 ) ; \
+	pete_writel("drivers/atm/nicstarmac.c:111", (val),(base)+(reg))
 #define NICSTAR_REG_READ(bs, reg) \
-	readl((base)+(reg))
+	pete_readl("drivers/atm/nicstarmac.c:113", (base)+(reg))
 #define NICSTAR_REG_GENERAL_PURPOSE GP
 
 /*

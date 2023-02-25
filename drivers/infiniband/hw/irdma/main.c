@@ -117,7 +117,7 @@ static void irdma_iidc_event_handler(struct ice_pf *pf, struct iidc_event *event
 		if (event->reg & IRDMAPFINT_OICR_PE_CRITERR_M) {
 			u32 pe_criterr;
 
-			pe_criterr = readl(iwdev->rf->sc_dev.hw_regs[IRDMA_GLPE_CRITERR]);
+			pe_criterr = pete_readl("drivers/infiniband/hw/irdma/main.c:120", iwdev->rf->sc_dev.hw_regs[IRDMA_GLPE_CRITERR]);
 #define IRDMA_Q1_RESOURCE_ERR 0x0001024d
 			if (pe_criterr != IRDMA_Q1_RESOURCE_ERR) {
 				ibdev_err(&iwdev->ibdev, "critical PE Error, GLPE_CRITERR=0x%08x\n",

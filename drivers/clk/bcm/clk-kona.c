@@ -129,14 +129,14 @@ scale_rate(struct bcm_clk_div *div, u32 rate)
 /* Read a 32-bit register value from a CCU's address space. */
 static inline u32 __ccu_read(struct ccu_data *ccu, u32 reg_offset)
 {
-	return readl(ccu->base + reg_offset);
+	return pete_readl("drivers/clk/bcm/clk-kona.c:132", ccu->base + reg_offset);
 }
 
 /* Write a 32-bit register value into a CCU's address space. */
 static inline void
 __ccu_write(struct ccu_data *ccu, u32 reg_offset, u32 reg_val)
 {
-	writel(reg_val, ccu->base + reg_offset);
+	pete_writel("drivers/clk/bcm/clk-kona.c:139", reg_val, ccu->base + reg_offset);
 }
 
 static inline unsigned long ccu_lock(struct ccu_data *ccu)

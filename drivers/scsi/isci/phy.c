@@ -98,16 +98,16 @@ sci_phy_transport_layer_initialization(struct isci_phy *iphy,
 
 	iphy->transport_layer_registers = reg;
 
-	writel(SCIC_SDS_REMOTE_NODE_CONTEXT_INVALID_INDEX,
+	pete_writel("drivers/scsi/isci/phy.c:101", SCIC_SDS_REMOTE_NODE_CONTEXT_INVALID_INDEX,
 		&iphy->transport_layer_registers->stp_rni);
 
 	/*
 	 * Hardware team recommends that we enable the STP prefetch for all
 	 * transports
 	 */
-	tl_control = readl(&iphy->transport_layer_registers->control);
+	tl_control = pete_readl("drivers/scsi/isci/phy.c:108", &iphy->transport_layer_registers->control);
 	tl_control |= SCU_TLCR_GEN_BIT(STP_WRITE_DATA_PREFETCH);
-	writel(tl_control, &iphy->transport_layer_registers->control);
+	pete_writel("drivers/scsi/isci/phy.c:110", tl_control, &iphy->transport_layer_registers->control);
 
 	return SCI_SUCCESS;
 }
@@ -135,7 +135,7 @@ sci_phy_link_layer_initialization(struct isci_phy *iphy,
 	/* Set our IDENTIFY frame data */
 	#define SCI_END_DEVICE 0x01
 
-	writel(SCU_SAS_TIID_GEN_BIT(SMP_INITIATOR) |
+	pete_writel("drivers/scsi/isci/phy.c:138", SCU_SAS_TIID_GEN_BIT(SMP_INITIATOR) |
 	       SCU_SAS_TIID_GEN_BIT(SSP_INITIATOR) |
 	       SCU_SAS_TIID_GEN_BIT(STP_INITIATOR) |
 	       SCU_SAS_TIID_GEN_BIT(DA_SATA_HOST) |
@@ -143,23 +143,23 @@ sci_phy_link_layer_initialization(struct isci_phy *iphy,
 	       &llr->transmit_identification);
 
 	/* Write the device SAS Address */
-	writel(0xFEDCBA98, &llr->sas_device_name_high);
-	writel(phy_idx, &llr->sas_device_name_low);
+	pete_writel("drivers/scsi/isci/phy.c:146", 0xFEDCBA98, &llr->sas_device_name_high);
+	pete_writel("drivers/scsi/isci/phy.c:147", phy_idx, &llr->sas_device_name_low);
 
 	/* Write the source SAS Address */
-	writel(phy_oem->sas_address.high, &llr->source_sas_address_high);
-	writel(phy_oem->sas_address.low, &llr->source_sas_address_low);
+	pete_writel("drivers/scsi/isci/phy.c:150", phy_oem->sas_address.high, &llr->source_sas_address_high);
+	pete_writel("drivers/scsi/isci/phy.c:151", phy_oem->sas_address.low, &llr->source_sas_address_low);
 
 	/* Clear and Set the PHY Identifier */
-	writel(0, &llr->identify_frame_phy_id);
-	writel(SCU_SAS_TIPID_GEN_VALUE(ID, phy_idx), &llr->identify_frame_phy_id);
+	pete_writel("drivers/scsi/isci/phy.c:154", 0, &llr->identify_frame_phy_id);
+	pete_writel("drivers/scsi/isci/phy.c:155", SCU_SAS_TIPID_GEN_VALUE(ID, phy_idx), &llr->identify_frame_phy_id);
 
 	/* Change the initial state of the phy configuration register */
-	phy_configuration = readl(&llr->phy_configuration);
+	phy_configuration = pete_readl("drivers/scsi/isci/phy.c:158", &llr->phy_configuration);
 
 	/* Hold OOB state machine in reset */
 	phy_configuration |=  SCU_SAS_PCFG_GEN_BIT(OOB_RESET);
-	writel(phy_configuration, &llr->phy_configuration);
+	pete_writel("drivers/scsi/isci/phy.c:162", phy_configuration, &llr->phy_configuration);
 
 	/* Configure the SNW capabilities */
 	phy_cap.all = 0;
@@ -200,25 +200,25 @@ sci_phy_link_layer_initialization(struct isci_phy *iphy,
 		if (en_sas) {
 			u32 reg;
 
-			reg = readl(&xcvr->afe_xcvr_control0);
+			reg = pete_readl("drivers/scsi/isci/phy.c:203", &xcvr->afe_xcvr_control0);
 			reg |= (0x00100000 | (sas_type << 19));
-			writel(reg, &xcvr->afe_xcvr_control0);
+			pete_writel("drivers/scsi/isci/phy.c:205", reg, &xcvr->afe_xcvr_control0);
 
-			reg = readl(&xcvr->afe_tx_ssc_control);
+			reg = pete_readl("drivers/scsi/isci/phy.c:207", &xcvr->afe_tx_ssc_control);
 			reg |= sas_spread << 8;
-			writel(reg, &xcvr->afe_tx_ssc_control);
+			pete_writel("drivers/scsi/isci/phy.c:209", reg, &xcvr->afe_tx_ssc_control);
 		}
 
 		if (en_sata) {
 			u32 reg;
 
-			reg = readl(&xcvr->afe_tx_ssc_control);
+			reg = pete_readl("drivers/scsi/isci/phy.c:215", &xcvr->afe_tx_ssc_control);
 			reg |= sata_spread;
-			writel(reg, &xcvr->afe_tx_ssc_control);
+			pete_writel("drivers/scsi/isci/phy.c:217", reg, &xcvr->afe_tx_ssc_control);
 
-			reg = readl(&llr->stp_control);
+			reg = pete_readl("drivers/scsi/isci/phy.c:219", &llr->stp_control);
 			reg |= 1 << 12;
-			writel(reg, &llr->stp_control);
+			pete_writel("drivers/scsi/isci/phy.c:221", reg, &llr->stp_control);
 		}
 	}
 
@@ -238,12 +238,12 @@ sci_phy_link_layer_initialization(struct isci_phy *iphy,
 	if ((parity_count % 2) != 0)
 		phy_cap.parity = 1;
 
-	writel(phy_cap.all, &llr->phy_capabilities);
+	pete_writel("drivers/scsi/isci/phy.c:241", phy_cap.all, &llr->phy_capabilities);
 
 	/* Set the enable spinup period but disable the ability to send
 	 * notify enable spinup
 	 */
-	writel(SCU_ENSPINUP_GEN_VAL(COUNT,
+	pete_writel("drivers/scsi/isci/phy.c:246", SCU_ENSPINUP_GEN_VAL(COUNT,
 			phy_user->notify_enable_spin_up_insertion_frequency),
 		&llr->notify_enable_spinup_control);
 
@@ -256,13 +256,13 @@ sci_phy_link_layer_initialization(struct isci_phy *iphy,
 	clksm_value |= SCU_ALIGN_INSERTION_FREQUENCY_GEN_VAL(GENERAL,
 			phy_user->align_insertion_frequency);
 
-	writel(clksm_value, &llr->clock_skew_management);
+	pete_writel("drivers/scsi/isci/phy.c:259", clksm_value, &llr->clock_skew_management);
 
 	if (is_c0(ihost->pdev) || is_c1(ihost->pdev)) {
-		writel(0x04210400, &llr->afe_lookup_table_control);
-		writel(0x020A7C05, &llr->sas_primitive_timeout);
+		pete_writel("drivers/scsi/isci/phy.c:262", 0x04210400, &llr->afe_lookup_table_control);
+		pete_writel("drivers/scsi/isci/phy.c:263", 0x020A7C05, &llr->sas_primitive_timeout);
 	} else
-		writel(0x02108421, &llr->afe_lookup_table_control);
+		pete_writel("drivers/scsi/isci/phy.c:265", 0x02108421, &llr->afe_lookup_table_control);
 
 	llctl = SCU_SAS_LLCTL_GEN_VAL(NO_OUTBOUND_TASK_TIMEOUT,
 		(u8)ihost->user_parameters.no_outbound_task_timeout);
@@ -279,9 +279,9 @@ sci_phy_link_layer_initialization(struct isci_phy *iphy,
 		break;
 	}
 	llctl |= SCU_SAS_LLCTL_GEN_VAL(MAX_LINK_RATE, link_rate);
-	writel(llctl, &llr->link_layer_control);
+	pete_writel("drivers/scsi/isci/phy.c:282", llctl, &llr->link_layer_control);
 
-	sp_timeouts = readl(&llr->sas_phy_timeouts);
+	sp_timeouts = pete_readl("drivers/scsi/isci/phy.c:284", &llr->sas_phy_timeouts);
 
 	/* Clear the default 0x36 (54us) RATE_CHANGE timeout value. */
 	sp_timeouts &= ~SCU_SAS_PHYTOV_GEN_VAL(RATE_CHANGE, 0xFF);
@@ -291,7 +291,7 @@ sci_phy_link_layer_initialization(struct isci_phy *iphy,
 	 */
 	sp_timeouts |= SCU_SAS_PHYTOV_GEN_VAL(RATE_CHANGE, 0x3B);
 
-	writel(sp_timeouts, &llr->sas_phy_timeouts);
+	pete_writel("drivers/scsi/isci/phy.c:294", sp_timeouts, &llr->sas_phy_timeouts);
 
 	if (is_a2(ihost->pdev)) {
 		/* Program the max ARB time for the PHY to 700us so we
@@ -300,14 +300,14 @@ sci_phy_link_layer_initialization(struct isci_phy *iphy,
 		 * This time value will guarantee that the initiator PHY
 		 * will generate the break.
 		 */
-		writel(SCIC_SDS_PHY_MAX_ARBITRATION_WAIT_TIME,
+		pete_writel("drivers/scsi/isci/phy.c:303", SCIC_SDS_PHY_MAX_ARBITRATION_WAIT_TIME,
 		       &llr->maximum_arbitration_wait_timer_timeout);
 	}
 
 	/* Disable link layer hang detection, rely on the OS timeout for
 	 * I/O timeouts.
 	 */
-	writel(0, &llr->link_layer_hang_detection_timeout);
+	pete_writel("drivers/scsi/isci/phy.c:310", 0, &llr->link_layer_hang_detection_timeout);
 
 	/* We can exit the initial state to the stopped state */
 	sci_change_state(&iphy->sm, SCI_PHY_STOPPED);
@@ -407,15 +407,15 @@ void sci_phy_setup_transport(struct isci_phy *iphy, u32 device_id)
 {
 	u32 tl_control;
 
-	writel(device_id, &iphy->transport_layer_registers->stp_rni);
+	pete_writel("drivers/scsi/isci/phy.c:410", device_id, &iphy->transport_layer_registers->stp_rni);
 
 	/*
 	 * The read should guarantee that the first write gets posted
 	 * before the next write
 	 */
-	tl_control = readl(&iphy->transport_layer_registers->control);
+	tl_control = pete_readl("drivers/scsi/isci/phy.c:416", &iphy->transport_layer_registers->control);
 	tl_control |= SCU_TLCR_GEN_BIT(CLEAR_TCI_NCQ_MAPPING_TABLE);
-	writel(tl_control, &iphy->transport_layer_registers->control);
+	pete_writel("drivers/scsi/isci/phy.c:418", tl_control, &iphy->transport_layer_registers->control);
 }
 
 static void sci_phy_suspend(struct isci_phy *iphy)
@@ -423,9 +423,9 @@ static void sci_phy_suspend(struct isci_phy *iphy)
 	u32 scu_sas_pcfg_value;
 
 	scu_sas_pcfg_value =
-		readl(&iphy->link_layer_registers->phy_configuration);
+		pete_readl("drivers/scsi/isci/phy.c:426", &iphy->link_layer_registers->phy_configuration);
 	scu_sas_pcfg_value |= SCU_SAS_PCFG_GEN_BIT(SUSPEND_PROTOCOL_ENGINE);
-	writel(scu_sas_pcfg_value,
+	pete_writel("drivers/scsi/isci/phy.c:428", scu_sas_pcfg_value,
 		&iphy->link_layer_registers->phy_configuration);
 
 	sci_phy_setup_transport(iphy, SCIC_SDS_REMOTE_NODE_CONTEXT_INVALID_INDEX);
@@ -436,16 +436,16 @@ void sci_phy_resume(struct isci_phy *iphy)
 	u32 scu_sas_pcfg_value;
 
 	scu_sas_pcfg_value =
-		readl(&iphy->link_layer_registers->phy_configuration);
+		pete_readl("drivers/scsi/isci/phy.c:439", &iphy->link_layer_registers->phy_configuration);
 	scu_sas_pcfg_value &= ~SCU_SAS_PCFG_GEN_BIT(SUSPEND_PROTOCOL_ENGINE);
-	writel(scu_sas_pcfg_value,
+	pete_writel("drivers/scsi/isci/phy.c:441", scu_sas_pcfg_value,
 		&iphy->link_layer_registers->phy_configuration);
 }
 
 void sci_phy_get_sas_address(struct isci_phy *iphy, struct sci_sas_address *sas)
 {
-	sas->high = readl(&iphy->link_layer_registers->source_sas_address_high);
-	sas->low = readl(&iphy->link_layer_registers->source_sas_address_low);
+	sas->high = pete_readl("drivers/scsi/isci/phy.c:447", &iphy->link_layer_registers->source_sas_address_high);
+	sas->low = pete_readl("drivers/scsi/isci/phy.c:448", &iphy->link_layer_registers->source_sas_address_low);
 }
 
 void sci_phy_get_attached_sas_address(struct isci_phy *iphy, struct sci_sas_address *sas)
@@ -458,7 +458,7 @@ void sci_phy_get_attached_sas_address(struct isci_phy *iphy, struct sci_sas_addr
 
 void sci_phy_get_protocols(struct isci_phy *iphy, struct sci_phy_proto *proto)
 {
-	proto->all = readl(&iphy->link_layer_registers->transmit_identification);
+	proto->all = pete_readl("drivers/scsi/isci/phy.c:461", &iphy->link_layer_registers->transmit_identification);
 }
 
 enum sci_status sci_phy_start(struct isci_phy *iphy)
@@ -523,9 +523,9 @@ enum sci_status sci_phy_consume_power_handler(struct isci_phy *iphy)
 	case SCI_PHY_SUB_AWAIT_SAS_POWER: {
 		u32 enable_spinup;
 
-		enable_spinup = readl(&iphy->link_layer_registers->notify_enable_spinup_control);
+		enable_spinup = pete_readl("drivers/scsi/isci/phy.c:526", &iphy->link_layer_registers->notify_enable_spinup_control);
 		enable_spinup |= SCU_ENSPINUP_GEN_BIT(ENABLE);
-		writel(enable_spinup, &iphy->link_layer_registers->notify_enable_spinup_control);
+		pete_writel("drivers/scsi/isci/phy.c:528", enable_spinup, &iphy->link_layer_registers->notify_enable_spinup_control);
 
 		/* Change state to the final state this substate machine has run to completion */
 		sci_change_state(&iphy->sm, SCI_PHY_SUB_FINAL);
@@ -537,17 +537,17 @@ enum sci_status sci_phy_consume_power_handler(struct isci_phy *iphy)
 
 		/* Release the spinup hold state and reset the OOB state machine */
 		scu_sas_pcfg_value =
-			readl(&iphy->link_layer_registers->phy_configuration);
+			pete_readl("drivers/scsi/isci/phy.c:540", &iphy->link_layer_registers->phy_configuration);
 		scu_sas_pcfg_value &=
 			~(SCU_SAS_PCFG_GEN_BIT(SATA_SPINUP_HOLD) | SCU_SAS_PCFG_GEN_BIT(OOB_ENABLE));
 		scu_sas_pcfg_value |= SCU_SAS_PCFG_GEN_BIT(OOB_RESET);
-		writel(scu_sas_pcfg_value,
+		pete_writel("drivers/scsi/isci/phy.c:544", scu_sas_pcfg_value,
 			&iphy->link_layer_registers->phy_configuration);
 
 		/* Now restart the OOB operation */
 		scu_sas_pcfg_value &= ~SCU_SAS_PCFG_GEN_BIT(OOB_RESET);
 		scu_sas_pcfg_value |= SCU_SAS_PCFG_GEN_BIT(OOB_ENABLE);
-		writel(scu_sas_pcfg_value,
+		pete_writel("drivers/scsi/isci/phy.c:550", scu_sas_pcfg_value,
 			&iphy->link_layer_registers->phy_configuration);
 
 		/* Change state to the final state this substate machine has run to completion */
@@ -570,9 +570,9 @@ static void sci_phy_start_sas_link_training(struct isci_phy *iphy)
 	 */
 	u32 phy_control;
 
-	phy_control = readl(&iphy->link_layer_registers->phy_configuration);
+	phy_control = pete_readl("drivers/scsi/isci/phy.c:573", &iphy->link_layer_registers->phy_configuration);
 	phy_control |= SCU_SAS_PCFG_GEN_BIT(SATA_SPINUP_HOLD);
-	writel(phy_control,
+	pete_writel("drivers/scsi/isci/phy.c:575", phy_control,
 	       &iphy->link_layer_registers->phy_configuration);
 
 	sci_change_state(&iphy->sm, SCI_PHY_SUB_AWAIT_SAS_SPEED_EN);
@@ -671,11 +671,11 @@ static void scu_link_layer_set_txcomsas_timeout(struct isci_phy *iphy, u32 timeo
 	u32 val;
 
 	/* Extend timeout */
-	val = readl(&iphy->link_layer_registers->transmit_comsas_signal);
+	val = pete_readl("drivers/scsi/isci/phy.c:674", &iphy->link_layer_registers->transmit_comsas_signal);
 	val &= ~SCU_SAS_LLTXCOMSAS_GEN_VAL(NEGTIME, SCU_SAS_LINK_LAYER_TXCOMSAS_NEGTIME_MASK);
 	val |= SCU_SAS_LLTXCOMSAS_GEN_VAL(NEGTIME, timeout);
 
-	writel(val, &iphy->link_layer_registers->transmit_comsas_signal);
+	pete_writel("drivers/scsi/isci/phy.c:678", val, &iphy->link_layer_registers->transmit_comsas_signal);
 }
 
 enum sci_status sci_phy_event_handler(struct isci_phy *iphy, u32 event_code)
@@ -1179,18 +1179,18 @@ static void scu_link_layer_stop_protocol_engine(
 
 	/* Suspend the protocol engine and place it in a sata spinup hold state */
 	scu_sas_pcfg_value =
-		readl(&iphy->link_layer_registers->phy_configuration);
+		pete_readl("drivers/scsi/isci/phy.c:1182", &iphy->link_layer_registers->phy_configuration);
 	scu_sas_pcfg_value |=
 		(SCU_SAS_PCFG_GEN_BIT(OOB_RESET) |
 		 SCU_SAS_PCFG_GEN_BIT(SUSPEND_PROTOCOL_ENGINE) |
 		 SCU_SAS_PCFG_GEN_BIT(SATA_SPINUP_HOLD));
-	writel(scu_sas_pcfg_value,
+	pete_writel("drivers/scsi/isci/phy.c:1187", scu_sas_pcfg_value,
 	       &iphy->link_layer_registers->phy_configuration);
 
 	/* Disable the notify enable spinup primitives */
-	enable_spinup_value = readl(&iphy->link_layer_registers->notify_enable_spinup_control);
+	enable_spinup_value = pete_readl("drivers/scsi/isci/phy.c:1191", &iphy->link_layer_registers->notify_enable_spinup_control);
 	enable_spinup_value &= ~SCU_ENSPINUP_GEN_BIT(ENABLE);
-	writel(enable_spinup_value, &iphy->link_layer_registers->notify_enable_spinup_control);
+	pete_writel("drivers/scsi/isci/phy.c:1193", enable_spinup_value, &iphy->link_layer_registers->notify_enable_spinup_control);
 }
 
 static void scu_link_layer_start_oob(struct isci_phy *iphy)
@@ -1199,19 +1199,19 @@ static void scu_link_layer_start_oob(struct isci_phy *iphy)
 	u32 val;
 
 	/** Reset OOB sequence - start */
-	val = readl(&ll->phy_configuration);
+	val = pete_readl("drivers/scsi/isci/phy.c:1202", &ll->phy_configuration);
 	val &= ~(SCU_SAS_PCFG_GEN_BIT(OOB_RESET) |
 		 SCU_SAS_PCFG_GEN_BIT(OOB_ENABLE) |
 		 SCU_SAS_PCFG_GEN_BIT(HARD_RESET));
-	writel(val, &ll->phy_configuration);
-	readl(&ll->phy_configuration); /* flush */
+	pete_writel("drivers/scsi/isci/phy.c:1206", val, &ll->phy_configuration);
+	pete_readl("drivers/scsi/isci/phy.c:1207", &ll->phy_configuration); /* flush */
 	/** Reset OOB sequence - end */
 
 	/** Start OOB sequence - start */
-	val = readl(&ll->phy_configuration);
+	val = pete_readl("drivers/scsi/isci/phy.c:1211", &ll->phy_configuration);
 	val |= SCU_SAS_PCFG_GEN_BIT(OOB_ENABLE);
-	writel(val, &ll->phy_configuration);
-	readl(&ll->phy_configuration); /* flush */
+	pete_writel("drivers/scsi/isci/phy.c:1213", val, &ll->phy_configuration);
+	pete_readl("drivers/scsi/isci/phy.c:1214", &ll->phy_configuration); /* flush */
 	/** Start OOB sequence - end */
 }
 
@@ -1233,18 +1233,18 @@ static void scu_link_layer_tx_hard_reset(
 	 * SAS Phys must wait for the HARD_RESET_TX event notification to transition
 	 * to the starting state. */
 	phy_configuration_value =
-		readl(&iphy->link_layer_registers->phy_configuration);
+		pete_readl("drivers/scsi/isci/phy.c:1236", &iphy->link_layer_registers->phy_configuration);
 	phy_configuration_value &= ~(SCU_SAS_PCFG_GEN_BIT(OOB_ENABLE));
 	phy_configuration_value |=
 		(SCU_SAS_PCFG_GEN_BIT(HARD_RESET) |
 		 SCU_SAS_PCFG_GEN_BIT(OOB_RESET));
-	writel(phy_configuration_value,
+	pete_writel("drivers/scsi/isci/phy.c:1241", phy_configuration_value,
 	       &iphy->link_layer_registers->phy_configuration);
 
 	/* Now take the OOB state machine out of reset */
 	phy_configuration_value |= SCU_SAS_PCFG_GEN_BIT(OOB_ENABLE);
 	phy_configuration_value &= ~SCU_SAS_PCFG_GEN_BIT(OOB_RESET);
-	writel(phy_configuration_value,
+	pete_writel("drivers/scsi/isci/phy.c:1247", phy_configuration_value,
 	       &iphy->link_layer_registers->phy_configuration);
 }
 
@@ -1466,10 +1466,10 @@ int isci_phy_control(struct asd_sas_phy *sas_phy,
 		struct sas_phy *phy = sas_phy->phy;
 
 		r = iphy->link_layer_registers;
-		phy->running_disparity_error_count = readl(&r->running_disparity_error_count);
-		phy->loss_of_dword_sync_count = readl(&r->loss_of_sync_error_count);
-		phy->phy_reset_problem_count = readl(&r->phy_reset_problem_count);
-		phy->invalid_dword_count = readl(&r->invalid_dword_counter);
+		phy->running_disparity_error_count = pete_readl("drivers/scsi/isci/phy.c:1469", &r->running_disparity_error_count);
+		phy->loss_of_dword_sync_count = pete_readl("drivers/scsi/isci/phy.c:1470", &r->loss_of_sync_error_count);
+		phy->phy_reset_problem_count = pete_readl("drivers/scsi/isci/phy.c:1471", &r->phy_reset_problem_count);
+		phy->invalid_dword_count = pete_readl("drivers/scsi/isci/phy.c:1472", &r->invalid_dword_counter);
 		break;
 	}
 

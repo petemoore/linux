@@ -111,9 +111,9 @@ static u32 rocker_msix_rx_vector(const struct rocker_port *rocker_port)
 }
 
 #define rocker_write32(rocker, reg, val)	\
-	writel((val), (rocker)->hw_addr + (ROCKER_ ## reg))
+	pete_writel("drivers/net/ethernet/rocker/rocker_main.c:114", (val), (rocker)->hw_addr + (ROCKER_ ## reg))
 #define rocker_read32(rocker, reg)	\
-	readl((rocker)->hw_addr + (ROCKER_ ## reg))
+	pete_readl("drivers/net/ethernet/rocker/rocker_main.c:116", (rocker)->hw_addr + (ROCKER_ ## reg))
 #define rocker_write64(rocker, reg, val)	\
 	writeq((val), (rocker)->hw_addr + (ROCKER_ ## reg))
 #define rocker_read64(rocker, reg)	\

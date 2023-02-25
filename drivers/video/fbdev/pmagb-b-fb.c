@@ -68,12 +68,12 @@ static const struct fb_fix_screeninfo pmagbbfb_fix = {
 
 static inline void sfb_write(struct pmagbbfb_par *par, unsigned int reg, u32 v)
 {
-	writel(v, par->sfb + reg / 4);
+	pete_writel("drivers/video/fbdev/pmagb-b-fb.c:71", v, par->sfb + reg / 4);
 }
 
 static inline u32 sfb_read(struct pmagbbfb_par *par, unsigned int reg)
 {
-	return readl(par->sfb + reg / 4);
+	return pete_readl("drivers/video/fbdev/pmagb-b-fb.c:76", par->sfb + reg / 4);
 }
 
 static inline void dac_write(struct pmagbbfb_par *par, unsigned int reg, u8 v)
@@ -88,7 +88,7 @@ static inline u8 dac_read(struct pmagbbfb_par *par, unsigned int reg)
 
 static inline void gp0_write(struct pmagbbfb_par *par, u32 v)
 {
-	writel(v, par->mmio + PMAGB_B_GP0);
+	pete_writel("drivers/video/fbdev/pmagb-b-fb.c:91", v, par->mmio + PMAGB_B_GP0);
 }
 
 

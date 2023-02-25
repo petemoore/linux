@@ -106,7 +106,7 @@ MODULE_PARM_DESC(default_font, "Default font name");
 /*
  * Our access methods.
  */
-#define cyber2000fb_writel(val, reg, cfb)	writel(val, (cfb)->regs + (reg))
+#define cyber2000fb_writel(val, reg, cfb)	pete_writel("drivers/video/fbdev/cyber2000fb.c:109", val, (cfb)->regs + (reg))
 #define cyber2000fb_writew(val, reg, cfb)	writew(val, (cfb)->regs + (reg))
 #define cyber2000fb_writeb(val, reg, cfb)	writeb(val, (cfb)->regs + (reg))
 

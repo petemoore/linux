@@ -693,7 +693,7 @@ int acpi_os_read_iomem(void __iomem *virt_addr, u64 *value, u32 width)
 		*(u16 *) value = readw(virt_addr);
 		break;
 	case 32:
-		*(u32 *) value = readl(virt_addr);
+		*(u32 *) value = pete_readl("drivers/acpi/osl.c:696", virt_addr);
 		break;
 	case 64:
 		*(u64 *) value = readq(virt_addr);
@@ -763,7 +763,7 @@ acpi_os_write_memory(acpi_physical_address phys_addr, u64 value, u32 width)
 		writew(value, virt_addr);
 		break;
 	case 32:
-		writel(value, virt_addr);
+		pete_writel("drivers/acpi/osl.c:766", value, virt_addr);
 		break;
 	case 64:
 		writeq(value, virt_addr);

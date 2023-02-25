@@ -214,12 +214,12 @@ static u32 sbus_hme_read_desc32(hme32 *p)
 
 static void pci_hme_write32(void __iomem *reg, u32 val)
 {
-	writel(val, reg);
+	pete_writel("drivers/net/ethernet/sun/sunhme.c:217", val, reg);
 }
 
 static u32 pci_hme_read32(void __iomem *reg)
 {
-	return readl(reg);
+	return pete_readl("drivers/net/ethernet/sun/sunhme.c:222", reg);
 }
 
 static void pci_hme_write_rxd(struct happy_meal_rxd *rxd, u32 flags, u32 addr)
@@ -272,9 +272,9 @@ do {	(__txd)->tx_addr = (__force hme32)(u32)(__addr); \
 #else
 /* PCI only compilation */
 #define hme_write32(__hp, __reg, __val) \
-	writel((__val), (__reg))
+	pete_writel("drivers/net/ethernet/sun/sunhme.c:275", (__val), (__reg))
 #define hme_read32(__hp, __reg) \
-	readl(__reg)
+	pete_readl("drivers/net/ethernet/sun/sunhme.c:277", __reg)
 #define hme_write_rxd(__hp, __rxd, __flags, __addr) \
 do {	(__rxd)->rx_addr = (__force hme32)cpu_to_le32(__addr); \
 	dma_wmb(); \

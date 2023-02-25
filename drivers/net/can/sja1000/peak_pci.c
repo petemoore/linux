@@ -611,9 +611,9 @@ static int peak_pci_probe(struct pci_dev *pdev, const struct pci_device_id *ent)
 	writeb(0x04, cfg_base + PITA_MISC + 3);
 
 	/* FPGA equipped card if not 0 */
-	if (readl(cfg_base + PEAK_VER_REG1)) {
+	if (pete_readl("drivers/net/can/sja1000/peak_pci.c:614", cfg_base + PEAK_VER_REG1)) {
 		/* FPGA card: display version of the running firmware */
-		u32 fw_ver = readl(cfg_base + PEAK_VER_REG2);
+		u32 fw_ver = pete_readl("drivers/net/can/sja1000/peak_pci.c:616", cfg_base + PEAK_VER_REG2);
 
 		snprintf(fw_str, sizeof(fw_str), " FW v%u.%u.%u",
 			 (fw_ver >> 12) & 0xf,

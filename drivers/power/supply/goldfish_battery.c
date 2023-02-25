@@ -28,9 +28,9 @@ struct goldfish_battery_data {
 };
 
 #define GOLDFISH_BATTERY_READ(data, addr) \
-	(readl(data->reg_base + addr))
+	(pete_readl("drivers/power/supply/goldfish_battery.c:31", data->reg_base + addr))
 #define GOLDFISH_BATTERY_WRITE(data, addr, x) \
-	(writel(x, data->reg_base + addr))
+	(pete_writel("drivers/power/supply/goldfish_battery.c:33", x, data->reg_base + addr))
 
 enum {
 	/* status register */

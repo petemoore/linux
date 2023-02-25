@@ -124,7 +124,7 @@ static void ems_pci_v1_post_irq(const struct sja1000_priv *priv)
 	struct ems_pci_card *card = (struct ems_pci_card *)priv->priv;
 
 	/* reset int flag of pita */
-	writel(PITA2_ICR_INT0_EN | PITA2_ICR_INT0,
+	pete_writel("drivers/net/can/sja1000/ems_pci.c:127", PITA2_ICR_INT0_EN | PITA2_ICR_INT0,
 	       card->conf_addr + PITA2_ICR);
 }
 
@@ -143,7 +143,7 @@ static void ems_pci_v2_post_irq(const struct sja1000_priv *priv)
 {
 	struct ems_pci_card *card = (struct ems_pci_card *)priv->priv;
 
-	writel(PLX_ICSR_ENA_CLR, card->conf_addr + PLX_ICSR);
+	pete_writel("drivers/net/can/sja1000/ems_pci.c:146", PLX_ICSR_ENA_CLR, card->conf_addr + PLX_ICSR);
 }
 
 /*
@@ -261,7 +261,7 @@ static int ems_pci_add_card(struct pci_dev *pdev,
 
 	if (card->version == 1) {
 		/* Configure PITA-2 parallel interface (enable MUX) */
-		writel(PITA2_MISC_CONFIG, card->conf_addr + PITA2_MISC);
+		pete_writel("drivers/net/can/sja1000/ems_pci.c:264", PITA2_MISC_CONFIG, card->conf_addr + PITA2_MISC);
 
 		/* Check for unique EMS CAN signature */
 		if (ems_pci_v1_readb(card, 0) != 0x55 ||
@@ -315,11 +315,11 @@ static int ems_pci_add_card(struct pci_dev *pdev,
 
 			if (card->version == 1)
 				/* reset int flag of pita */
-				writel(PITA2_ICR_INT0_EN | PITA2_ICR_INT0,
+				pete_writel("drivers/net/can/sja1000/ems_pci.c:318", PITA2_ICR_INT0_EN | PITA2_ICR_INT0,
 				       card->conf_addr + PITA2_ICR);
 			else
 				/* enable IRQ in PLX 9030 */
-				writel(PLX_ICSR_ENA_CLR,
+				pete_writel("drivers/net/can/sja1000/ems_pci.c:322", PLX_ICSR_ENA_CLR,
 				       card->conf_addr + PLX_ICSR);
 
 			/* Register SJA1000 device */

@@ -39,7 +39,7 @@ static int mxs_ocotp_wait(struct mxs_ocotp *otp)
 	unsigned int status = 0;
 
 	while (timeout--) {
-		status = readl(otp->base);
+		status = pete_readl("drivers/nvmem/mxs-ocotp.c:42", otp->base);
 
 		if (!(status & (BM_OCOTP_CTRL_BUSY | BM_OCOTP_CTRL_ERROR)))
 			break;
@@ -66,14 +66,14 @@ static int mxs_ocotp_read(void *context, unsigned int offset,
 	if (ret)
 		return ret;
 
-	writel(BM_OCOTP_CTRL_ERROR, otp->base + STMP_OFFSET_REG_CLR);
+	pete_writel("drivers/nvmem/mxs-ocotp.c:69", BM_OCOTP_CTRL_ERROR, otp->base + STMP_OFFSET_REG_CLR);
 
 	ret = mxs_ocotp_wait(otp);
 	if (ret)
 		goto disable_clk;
 
 	/* open OCOTP banks for read */
-	writel(BM_OCOTP_CTRL_RD_BANK_OPEN, otp->base + STMP_OFFSET_REG_SET);
+	pete_writel("drivers/nvmem/mxs-ocotp.c:76", BM_OCOTP_CTRL_RD_BANK_OPEN, otp->base + STMP_OFFSET_REG_SET);
 
 	/* approximately wait 33 hclk cycles */
 	udelay(1);
@@ -87,7 +87,7 @@ static int mxs_ocotp_read(void *context, unsigned int offset,
 			/* fill up non-data register */
 			*buf++ = 0;
 		} else {
-			*buf++ = readl(otp->base + offset);
+			*buf++ = pete_readl("drivers/nvmem/mxs-ocotp.c:90", otp->base + offset);
 		}
 
 		bytes -= 4;
@@ -96,7 +96,7 @@ static int mxs_ocotp_read(void *context, unsigned int offset,
 
 close_banks:
 	/* close banks for power saving */
-	writel(BM_OCOTP_CTRL_RD_BANK_OPEN, otp->base + STMP_OFFSET_REG_CLR);
+	pete_writel("drivers/nvmem/mxs-ocotp.c:99", BM_OCOTP_CTRL_RD_BANK_OPEN, otp->base + STMP_OFFSET_REG_CLR);
 
 disable_clk:
 	clk_disable(otp->clk);

@@ -74,7 +74,7 @@ bool mcde_dsi_irq(struct mipi_dsi_device *mdsi)
 
 	dev_dbg(d->dev, "%s called\n", __func__);
 
-	val = readl(d->regs + DSI_DIRECT_CMD_STS_FLAG);
+	val = pete_readl("drivers/gpu/drm/mcde/mcde_dsi.c:77", d->regs + DSI_DIRECT_CMD_STS_FLAG);
 	if (val)
 		dev_dbg(d->dev, "DSI_DIRECT_CMD_STS_FLAG = %08x\n", val);
 	if (val & DSI_DIRECT_CMD_STS_WRITE_COMPLETED)
@@ -88,9 +88,9 @@ bool mcde_dsi_irq(struct mipi_dsi_device *mdsi)
 	if (val & DSI_DIRECT_CMD_STS_READ_COMPLETED_WITH_ERR)
 		dev_err(d->dev, "direct command read ERR received\n");
 	/* Mask off the ACK value and clear status */
-	writel(val, d->regs + DSI_DIRECT_CMD_STS_CLR);
+	pete_writel("drivers/gpu/drm/mcde/mcde_dsi.c:91", val, d->regs + DSI_DIRECT_CMD_STS_CLR);
 
-	val = readl(d->regs + DSI_CMD_MODE_STS_FLAG);
+	val = pete_readl("drivers/gpu/drm/mcde/mcde_dsi.c:93", d->regs + DSI_CMD_MODE_STS_FLAG);
 	if (val)
 		dev_dbg(d->dev, "DSI_CMD_MODE_STS_FLAG = %08x\n", val);
 	if (val & DSI_CMD_MODE_STS_ERR_NO_TE)
@@ -105,19 +105,19 @@ bool mcde_dsi_irq(struct mipi_dsi_device *mdsi)
 		dev_err(d->dev, "CMD mode SD2 underrun\n");
 	if (val & DSI_CMD_MODE_STS_ERR_UNWANTED_RD)
 		dev_err(d->dev, "CMD mode unwanted RD\n");
-	writel(val, d->regs + DSI_CMD_MODE_STS_CLR);
+	pete_writel("drivers/gpu/drm/mcde/mcde_dsi.c:108", val, d->regs + DSI_CMD_MODE_STS_CLR);
 
-	val = readl(d->regs + DSI_DIRECT_CMD_RD_STS_FLAG);
+	val = pete_readl("drivers/gpu/drm/mcde/mcde_dsi.c:110", d->regs + DSI_DIRECT_CMD_RD_STS_FLAG);
 	if (val)
 		dev_dbg(d->dev, "DSI_DIRECT_CMD_RD_STS_FLAG = %08x\n", val);
-	writel(val, d->regs + DSI_DIRECT_CMD_RD_STS_CLR);
+	pete_writel("drivers/gpu/drm/mcde/mcde_dsi.c:113", val, d->regs + DSI_DIRECT_CMD_RD_STS_CLR);
 
-	val = readl(d->regs + DSI_TG_STS_FLAG);
+	val = pete_readl("drivers/gpu/drm/mcde/mcde_dsi.c:115", d->regs + DSI_TG_STS_FLAG);
 	if (val)
 		dev_dbg(d->dev, "DSI_TG_STS_FLAG = %08x\n", val);
-	writel(val, d->regs + DSI_TG_STS_CLR);
+	pete_writel("drivers/gpu/drm/mcde/mcde_dsi.c:118", val, d->regs + DSI_TG_STS_CLR);
 
-	val = readl(d->regs + DSI_VID_MODE_STS_FLAG);
+	val = pete_readl("drivers/gpu/drm/mcde/mcde_dsi.c:120", d->regs + DSI_VID_MODE_STS_FLAG);
 	if (val)
 		dev_dbg(d->dev, "DSI_VID_MODE_STS_FLAG = %08x\n", val);
 	if (val & DSI_VID_MODE_STS_VSG_RUNNING)
@@ -140,7 +140,7 @@ bool mcde_dsi_irq(struct mipi_dsi_device *mdsi)
 		dev_err(d->dev, "VID mode received packets differ from expected size\n");
 	if (val & DSI_VID_MODE_STS_VSG_RECOVERY)
 		dev_err(d->dev, "VID mode VSG in recovery mode\n");
-	writel(val, d->regs + DSI_VID_MODE_STS_CLR);
+	pete_writel("drivers/gpu/drm/mcde/mcde_dsi.c:143", val, d->regs + DSI_VID_MODE_STS_CLR);
 
 	return te_received;
 }
@@ -219,15 +219,15 @@ static int mcde_dsi_execute_transfer(struct mcde_dsi *d,
 	u32 val;
 	int ret;
 
-	writel(~0, d->regs + DSI_DIRECT_CMD_STS_CLR);
-	writel(~0, d->regs + DSI_CMD_MODE_STS_CLR);
+	pete_writel("drivers/gpu/drm/mcde/mcde_dsi.c:222", ~0, d->regs + DSI_DIRECT_CMD_STS_CLR);
+	pete_writel("drivers/gpu/drm/mcde/mcde_dsi.c:223", ~0, d->regs + DSI_CMD_MODE_STS_CLR);
 	/* Send command */
-	writel(1, d->regs + DSI_DIRECT_CMD_SEND);
+	pete_writel("drivers/gpu/drm/mcde/mcde_dsi.c:225", 1, d->regs + DSI_DIRECT_CMD_SEND);
 
 	loop_counter = 1000 * 1000 / loop_delay_us;
 	if (MCDE_DSI_HOST_IS_READ(msg->type)) {
 		/* Read command */
-		while (!(readl(d->regs + DSI_DIRECT_CMD_STS) &
+		while (!(pete_readl("drivers/gpu/drm/mcde/mcde_dsi.c:230", d->regs + DSI_DIRECT_CMD_STS) &
 			 (DSI_DIRECT_CMD_STS_READ_COMPLETED |
 			  DSI_DIRECT_CMD_STS_READ_COMPLETED_WITH_ERR))
 		       && --loop_counter)
@@ -239,7 +239,7 @@ static int mcde_dsi_execute_transfer(struct mcde_dsi *d,
 		}
 	} else {
 		/* Writing only */
-		while (!(readl(d->regs + DSI_DIRECT_CMD_STS) &
+		while (!(pete_readl("drivers/gpu/drm/mcde/mcde_dsi.c:242", d->regs + DSI_DIRECT_CMD_STS) &
 			 DSI_DIRECT_CMD_STS_WRITE_COMPLETED)
 		       && --loop_counter)
 			usleep_range(loop_delay_us, (loop_delay_us * 3) / 2);
@@ -251,10 +251,10 @@ static int mcde_dsi_execute_transfer(struct mcde_dsi *d,
 		}
 	}
 
-	val = readl(d->regs + DSI_DIRECT_CMD_STS);
+	val = pete_readl("drivers/gpu/drm/mcde/mcde_dsi.c:254", d->regs + DSI_DIRECT_CMD_STS);
 	if (val & DSI_DIRECT_CMD_STS_READ_COMPLETED_WITH_ERR) {
 		dev_err(d->dev, "read completed with error\n");
-		writel(1, d->regs + DSI_DIRECT_CMD_RD_INIT);
+		pete_writel("drivers/gpu/drm/mcde/mcde_dsi.c:257", 1, d->regs + DSI_DIRECT_CMD_RD_INIT);
 		return -EIO;
 	}
 	if (val & DSI_DIRECT_CMD_STS_ACKNOWLEDGE_WITH_ERR_RECEIVED) {
@@ -273,9 +273,9 @@ static int mcde_dsi_execute_transfer(struct mcde_dsi *d,
 		u32 rddat;
 		u8 *rx = msg->rx_buf;
 
-		rdsz = readl(d->regs + DSI_DIRECT_CMD_RD_PROPERTY);
+		rdsz = pete_readl("drivers/gpu/drm/mcde/mcde_dsi.c:276", d->regs + DSI_DIRECT_CMD_RD_PROPERTY);
 		rdsz &= DSI_DIRECT_CMD_RD_PROPERTY_RD_SIZE_MASK;
-		rddat = readl(d->regs + DSI_DIRECT_CMD_RDDAT);
+		rddat = pete_readl("drivers/gpu/drm/mcde/mcde_dsi.c:278", d->regs + DSI_DIRECT_CMD_RDDAT);
 		if (rdsz < rxlen) {
 			dev_err(d->dev, "read error, requested %zd got %d\n",
 				rxlen, rdsz);
@@ -336,7 +336,7 @@ static ssize_t mcde_dsi_host_transfer(struct mipi_dsi_host *host,
 	val |= txlen << DSI_DIRECT_CMD_MAIN_SETTINGS_CMD_SIZE_SHIFT;
 	val |= DSI_DIRECT_CMD_MAIN_SETTINGS_CMD_LP_EN;
 	val |= msg->type << DSI_DIRECT_CMD_MAIN_SETTINGS_CMD_HEAD_SHIFT;
-	writel(val, d->regs + DSI_DIRECT_CMD_MAIN_SETTINGS);
+	pete_writel("drivers/gpu/drm/mcde/mcde_dsi.c:339", val, d->regs + DSI_DIRECT_CMD_MAIN_SETTINGS);
 
 	/* MIPI DCS command is part of the data */
 	if (txlen > 0) {
@@ -344,24 +344,24 @@ static ssize_t mcde_dsi_host_transfer(struct mipi_dsi_host *host,
 		for (i = 0; i < 4 && i < txlen; i++)
 			val |= tx[i] << (i * 8);
 	}
-	writel(val, d->regs + DSI_DIRECT_CMD_WRDAT0);
+	pete_writel("drivers/gpu/drm/mcde/mcde_dsi.c:347", val, d->regs + DSI_DIRECT_CMD_WRDAT0);
 	if (txlen > 4) {
 		val = 0;
 		for (i = 0; i < 4 && (i + 4) < txlen; i++)
 			val |= tx[i + 4] << (i * 8);
-		writel(val, d->regs + DSI_DIRECT_CMD_WRDAT1);
+		pete_writel("drivers/gpu/drm/mcde/mcde_dsi.c:352", val, d->regs + DSI_DIRECT_CMD_WRDAT1);
 	}
 	if (txlen > 8) {
 		val = 0;
 		for (i = 0; i < 4 && (i + 8) < txlen; i++)
 			val |= tx[i + 8] << (i * 8);
-		writel(val, d->regs + DSI_DIRECT_CMD_WRDAT2);
+		pete_writel("drivers/gpu/drm/mcde/mcde_dsi.c:358", val, d->regs + DSI_DIRECT_CMD_WRDAT2);
 	}
 	if (txlen > 12) {
 		val = 0;
 		for (i = 0; i < 4 && (i + 12) < txlen; i++)
 			val |= tx[i + 12] << (i * 8);
-		writel(val, d->regs + DSI_DIRECT_CMD_WRDAT3);
+		pete_writel("drivers/gpu/drm/mcde/mcde_dsi.c:364", val, d->regs + DSI_DIRECT_CMD_WRDAT3);
 	}
 
 	while (retries < 3) {
@@ -374,8 +374,8 @@ static ssize_t mcde_dsi_host_transfer(struct mipi_dsi_host *host,
 		dev_err(d->dev, "gave up after %d retries\n", retries);
 
 	/* Clear any errors */
-	writel(~0, d->regs + DSI_DIRECT_CMD_STS_CLR);
-	writel(~0, d->regs + DSI_CMD_MODE_STS_CLR);
+	pete_writel("drivers/gpu/drm/mcde/mcde_dsi.c:377", ~0, d->regs + DSI_DIRECT_CMD_STS_CLR);
+	pete_writel("drivers/gpu/drm/mcde/mcde_dsi.c:378", ~0, d->regs + DSI_CMD_MODE_STS_CLR);
 
 	return ret;
 }
@@ -401,28 +401,28 @@ void mcde_dsi_te_request(struct mipi_dsi_device *mdsi)
 	val |= DSI_DIRECT_CMD_MAIN_SETTINGS_CMD_LP_EN;
 	val |= MIPI_DSI_GENERIC_SHORT_WRITE_1_PARAM <<
 		DSI_DIRECT_CMD_MAIN_SETTINGS_CMD_HEAD_SHIFT;
-	writel(val, d->regs + DSI_DIRECT_CMD_MAIN_SETTINGS);
+	pete_writel("drivers/gpu/drm/mcde/mcde_dsi.c:404", val, d->regs + DSI_DIRECT_CMD_MAIN_SETTINGS);
 
 	/* Clear TE reveived and error status bits and enables them */
-	writel(DSI_DIRECT_CMD_STS_CLR_TE_RECEIVED_CLR |
+	pete_writel("drivers/gpu/drm/mcde/mcde_dsi.c:407", DSI_DIRECT_CMD_STS_CLR_TE_RECEIVED_CLR |
 	       DSI_DIRECT_CMD_STS_CLR_ACKNOWLEDGE_WITH_ERR_RECEIVED_CLR,
 	       d->regs + DSI_DIRECT_CMD_STS_CLR);
-	val = readl(d->regs + DSI_DIRECT_CMD_STS_CTL);
+	val = pete_readl("drivers/gpu/drm/mcde/mcde_dsi.c:410", d->regs + DSI_DIRECT_CMD_STS_CTL);
 	val |= DSI_DIRECT_CMD_STS_CTL_TE_RECEIVED_EN;
 	val |= DSI_DIRECT_CMD_STS_CTL_ACKNOWLEDGE_WITH_ERR_EN;
-	writel(val, d->regs + DSI_DIRECT_CMD_STS_CTL);
+	pete_writel("drivers/gpu/drm/mcde/mcde_dsi.c:413", val, d->regs + DSI_DIRECT_CMD_STS_CTL);
 
 	/* Clear and enable no TE or TE missing status */
-	writel(DSI_CMD_MODE_STS_CLR_ERR_NO_TE_CLR |
+	pete_writel("drivers/gpu/drm/mcde/mcde_dsi.c:416", DSI_CMD_MODE_STS_CLR_ERR_NO_TE_CLR |
 	       DSI_CMD_MODE_STS_CLR_ERR_TE_MISS_CLR,
 	       d->regs + DSI_CMD_MODE_STS_CLR);
-	val = readl(d->regs + DSI_CMD_MODE_STS_CTL);
+	val = pete_readl("drivers/gpu/drm/mcde/mcde_dsi.c:419", d->regs + DSI_CMD_MODE_STS_CTL);
 	val |= DSI_CMD_MODE_STS_CTL_ERR_NO_TE_EN;
 	val |= DSI_CMD_MODE_STS_CTL_ERR_TE_MISS_EN;
-	writel(val, d->regs + DSI_CMD_MODE_STS_CTL);
+	pete_writel("drivers/gpu/drm/mcde/mcde_dsi.c:422", val, d->regs + DSI_CMD_MODE_STS_CTL);
 
 	/* Send this TE request command */
-	writel(1, d->regs + DSI_DIRECT_CMD_SEND);
+	pete_writel("drivers/gpu/drm/mcde/mcde_dsi.c:425", 1, d->regs + DSI_DIRECT_CMD_SEND);
 }
 
 static void mcde_dsi_setup_video_mode(struct mcde_dsi *d,
@@ -491,7 +491,7 @@ static void mcde_dsi_setup_video_mode(struct mcde_dsi *d,
 	/* Recovery mode 1 */
 	val |= 1 << DSI_VID_MAIN_CTL_RECOVERY_MODE_SHIFT;
 	/* All other fields zero */
-	writel(val, d->regs + DSI_VID_MAIN_CTL);
+	pete_writel("drivers/gpu/drm/mcde/mcde_dsi.c:494", val, d->regs + DSI_VID_MAIN_CTL);
 
 	/* Vertical frame parameters are pretty straight-forward */
 	val = mode->vdisplay << DSI_VID_VSIZE_VACT_LENGTH_SHIFT;
@@ -504,7 +504,7 @@ static void mcde_dsi_setup_video_mode(struct mcde_dsi *d,
 	/* vertical back porch */
 	val |= (mode->vtotal - mode->vsync_end)
 		<< DSI_VID_VSIZE_VBP_LENGTH_SHIFT;
-	writel(val, d->regs + DSI_VID_VSIZE);
+	pete_writel("drivers/gpu/drm/mcde/mcde_dsi.c:507", val, d->regs + DSI_VID_VSIZE);
 
 	/*
 	 * Horizontal frame parameters:
@@ -564,11 +564,11 @@ static void mcde_dsi_setup_video_mode(struct mcde_dsi *d,
 	val |= hbp << DSI_VID_HSIZE1_HBP_LENGTH_SHIFT;
 	/* horizontal front porch */
 	val |= hfp << DSI_VID_HSIZE1_HFP_LENGTH_SHIFT;
-	writel(val, d->regs + DSI_VID_HSIZE1);
+	pete_writel("drivers/gpu/drm/mcde/mcde_dsi.c:567", val, d->regs + DSI_VID_HSIZE1);
 
 	/* RGB data length (visible bytes on one scanline) */
 	val = mode->hdisplay * cpp;
-	writel(val, d->regs + DSI_VID_HSIZE2);
+	pete_writel("drivers/gpu/drm/mcde/mcde_dsi.c:571", val, d->regs + DSI_VID_HSIZE2);
 	dev_dbg(d->dev, "RGB length, visible area on a line: %u bytes\n", val);
 
 	/*
@@ -615,7 +615,7 @@ static void mcde_dsi_setup_video_mode(struct mcde_dsi *d,
 	 */
 	if (d->mdsi->mode_flags & MIPI_DSI_MODE_VIDEO_SYNC_PULSE) {
 		/* Set the event packet size to 0 (not used) */
-		writel(0, d->regs + DSI_VID_BLKSIZE1);
+		pete_writel("drivers/gpu/drm/mcde/mcde_dsi.c:618", 0, d->regs + DSI_VID_BLKSIZE1);
 		/*
 		 * FIXME: isn't the hsync width in pixels? The porch and
 		 * sync area size is in pixels here, but this -6
@@ -624,10 +624,10 @@ static void mcde_dsi_setup_video_mode(struct mcde_dsi *d,
 		 */
 		blkline_pck = bpl - (mode->hsync_end - mode->hsync_start) - 6;
 		val = blkline_pck << DSI_VID_BLKSIZE2_BLKLINE_PULSE_PCK_SHIFT;
-		writel(val, d->regs + DSI_VID_BLKSIZE2);
+		pete_writel("drivers/gpu/drm/mcde/mcde_dsi.c:627", val, d->regs + DSI_VID_BLKSIZE2);
 	} else {
 		/* Set the sync pulse packet size to 0 (not used) */
-		writel(0, d->regs + DSI_VID_BLKSIZE2);
+		pete_writel("drivers/gpu/drm/mcde/mcde_dsi.c:630", 0, d->regs + DSI_VID_BLKSIZE2);
 		/* Specifying payload size in bytes (-4-6 from manual) */
 		blkline_pck = bpl - 4 - 6;
 		if (blkline_pck > 0x1FFF)
@@ -635,7 +635,7 @@ static void mcde_dsi_setup_video_mode(struct mcde_dsi *d,
 				blkline_pck);
 		val = blkline_pck << DSI_VID_BLKSIZE1_BLKLINE_EVENT_PCK_SHIFT;
 		val &= DSI_VID_BLKSIZE1_BLKLINE_EVENT_PCK_MASK;
-		writel(val, d->regs + DSI_VID_BLKSIZE1);
+		pete_writel("drivers/gpu/drm/mcde/mcde_dsi.c:638", val, d->regs + DSI_VID_BLKSIZE1);
 	}
 
 	/*
@@ -662,7 +662,7 @@ static void mcde_dsi_setup_video_mode(struct mcde_dsi *d,
 	 * values like 48 and 72 seen in the vendor code.
 	 */
 	val |= 48 << DSI_VID_DPHY_TIME_REG_WAKEUP_TIME_SHIFT;
-	writel(val, d->regs + DSI_VID_DPHY_TIME);
+	pete_writel("drivers/gpu/drm/mcde/mcde_dsi.c:665", val, d->regs + DSI_VID_DPHY_TIME);
 
 	/*
 	 * See the manual figure 657 page 2203 for understanding the impact
@@ -693,15 +693,15 @@ static void mcde_dsi_setup_video_mode(struct mcde_dsi *d,
 		}
 		dev_dbg(d->dev, "BLKEOL packet: %d bytes\n", blkeol_pck);
 
-		val = readl(d->regs + DSI_VID_BLKSIZE1);
+		val = pete_readl("drivers/gpu/drm/mcde/mcde_dsi.c:696", d->regs + DSI_VID_BLKSIZE1);
 		val &= ~DSI_VID_BLKSIZE1_BLKEOL_PCK_MASK;
 		val |= blkeol_pck << DSI_VID_BLKSIZE1_BLKEOL_PCK_SHIFT;
-		writel(val, d->regs + DSI_VID_BLKSIZE1);
+		pete_writel("drivers/gpu/drm/mcde/mcde_dsi.c:699", val, d->regs + DSI_VID_BLKSIZE1);
 		/* Use the same value for exact burst limit */
 		val = blkeol_pck <<
 			DSI_VID_VCA_SETTING2_EXACT_BURST_LIMIT_SHIFT;
 		val &= DSI_VID_VCA_SETTING2_EXACT_BURST_LIMIT_MASK;
-		writel(val, d->regs + DSI_VID_VCA_SETTING2);
+		pete_writel("drivers/gpu/drm/mcde/mcde_dsi.c:704", val, d->regs + DSI_VID_VCA_SETTING2);
 		/*
 		 * This BLKEOL duration is claimed to be the duration in clock
 		 * cycles of the BLLP end-of-line (EOL) period for each line if
@@ -723,26 +723,26 @@ static void mcde_dsi_setup_video_mode(struct mcde_dsi *d,
 		dev_dbg(d->dev, "BLKEOL duration: %d clock cycles\n",
 			blkeol_duration);
 
-		val = readl(d->regs + DSI_VID_PCK_TIME);
+		val = pete_readl("drivers/gpu/drm/mcde/mcde_dsi.c:726", d->regs + DSI_VID_PCK_TIME);
 		val &= ~DSI_VID_PCK_TIME_BLKEOL_DURATION_MASK;
 		val |= blkeol_duration <<
 			DSI_VID_PCK_TIME_BLKEOL_DURATION_SHIFT;
-		writel(val, d->regs + DSI_VID_PCK_TIME);
+		pete_writel("drivers/gpu/drm/mcde/mcde_dsi.c:730", val, d->regs + DSI_VID_PCK_TIME);
 
 		/* Max burst limit, this is given in bytes */
-		val = readl(d->regs + DSI_VID_VCA_SETTING1);
+		val = pete_readl("drivers/gpu/drm/mcde/mcde_dsi.c:733", d->regs + DSI_VID_VCA_SETTING1);
 		val &= ~DSI_VID_VCA_SETTING1_MAX_BURST_LIMIT_MASK;
 		val |= (blkeol_pck - 6) <<
 			DSI_VID_VCA_SETTING1_MAX_BURST_LIMIT_SHIFT;
-		writel(val, d->regs + DSI_VID_VCA_SETTING1);
+		pete_writel("drivers/gpu/drm/mcde/mcde_dsi.c:737", val, d->regs + DSI_VID_VCA_SETTING1);
 	}
 
 	/* Maximum line limit */
-	val = readl(d->regs + DSI_VID_VCA_SETTING2);
+	val = pete_readl("drivers/gpu/drm/mcde/mcde_dsi.c:741", d->regs + DSI_VID_VCA_SETTING2);
 	val &= ~DSI_VID_VCA_SETTING2_MAX_LINE_LIMIT_MASK;
 	val |= (blkline_pck - 6) <<
 		DSI_VID_VCA_SETTING2_MAX_LINE_LIMIT_SHIFT;
-	writel(val, d->regs + DSI_VID_VCA_SETTING2);
+	pete_writel("drivers/gpu/drm/mcde/mcde_dsi.c:745", val, d->regs + DSI_VID_VCA_SETTING2);
 	dev_dbg(d->dev, "blkline pck: %d bytes\n", blkline_pck - 6);
 }
 
@@ -753,7 +753,7 @@ static void mcde_dsi_start(struct mcde_dsi *d)
 	int i;
 
 	/* No integration mode */
-	writel(0, d->regs + DSI_MCTL_INTEGRATION_MODE);
+	pete_writel("drivers/gpu/drm/mcde/mcde_dsi.c:756", 0, d->regs + DSI_MCTL_INTEGRATION_MODE);
 
 	/* Enable the DSI port, from drivers/video/mcde/dsilink_v2.c */
 	val = DSI_MCTL_MAIN_DATA_CTL_LINK_EN |
@@ -762,11 +762,11 @@ static void mcde_dsi_start(struct mcde_dsi *d)
 		DSI_MCTL_MAIN_DATA_CTL_REG_TE_EN;
 	if (!(d->mdsi->mode_flags & MIPI_DSI_MODE_NO_EOT_PACKET))
 		val |= DSI_MCTL_MAIN_DATA_CTL_HOST_EOT_GEN;
-	writel(val, d->regs + DSI_MCTL_MAIN_DATA_CTL);
+	pete_writel("drivers/gpu/drm/mcde/mcde_dsi.c:765", val, d->regs + DSI_MCTL_MAIN_DATA_CTL);
 
 	/* Set a high command timeout, clear other fields */
 	val = 0x3ff << DSI_CMD_MODE_CTL_TE_TIMEOUT_SHIFT;
-	writel(val, d->regs + DSI_CMD_MODE_CTL);
+	pete_writel("drivers/gpu/drm/mcde/mcde_dsi.c:769", val, d->regs + DSI_CMD_MODE_CTL);
 
 	/*
 	 * UI_X4 is described as "unit interval times four"
@@ -779,7 +779,7 @@ static void mcde_dsi_start(struct mcde_dsi *d)
 	dev_dbg(d->dev, "UI value: %d\n", val);
 	val <<= DSI_MCTL_DPHY_STATIC_UI_X4_SHIFT;
 	val &= DSI_MCTL_DPHY_STATIC_UI_X4_MASK;
-	writel(val, d->regs + DSI_MCTL_DPHY_STATIC);
+	pete_writel("drivers/gpu/drm/mcde/mcde_dsi.c:782", val, d->regs + DSI_MCTL_DPHY_STATIC);
 
 	/*
 	 * Enable clocking: 0x0f (something?) between each burst,
@@ -795,20 +795,20 @@ static void mcde_dsi_start(struct mcde_dsi *d)
 	val |= DSI_MCTL_MAIN_PHY_CTL_CLK_ULPM_EN |
 		DSI_MCTL_MAIN_PHY_CTL_DAT1_ULPM_EN |
 		DSI_MCTL_MAIN_PHY_CTL_DAT2_ULPM_EN;
-	writel(val, d->regs + DSI_MCTL_MAIN_PHY_CTL);
+	pete_writel("drivers/gpu/drm/mcde/mcde_dsi.c:798", val, d->regs + DSI_MCTL_MAIN_PHY_CTL);
 
 	val = (1 << DSI_MCTL_ULPOUT_TIME_CKLANE_ULPOUT_TIME_SHIFT) |
 		(1 << DSI_MCTL_ULPOUT_TIME_DATA_ULPOUT_TIME_SHIFT);
-	writel(val, d->regs + DSI_MCTL_ULPOUT_TIME);
+	pete_writel("drivers/gpu/drm/mcde/mcde_dsi.c:802", val, d->regs + DSI_MCTL_ULPOUT_TIME);
 
-	writel(DSI_DPHY_LANES_TRIM_DPHY_SPECS_90_81B_0_90,
+	pete_writel("drivers/gpu/drm/mcde/mcde_dsi.c:804", DSI_DPHY_LANES_TRIM_DPHY_SPECS_90_81B_0_90,
 	       d->regs + DSI_DPHY_LANES_TRIM);
 
 	/* High PHY timeout */
 	val = (0x0f << DSI_MCTL_DPHY_TIMEOUT_CLK_DIV_SHIFT) |
 		(0x3fff << DSI_MCTL_DPHY_TIMEOUT_HSTX_TO_VAL_SHIFT) |
 		(0x3fff << DSI_MCTL_DPHY_TIMEOUT_LPRX_TO_VAL_SHIFT);
-	writel(val, d->regs + DSI_MCTL_DPHY_TIMEOUT);
+	pete_writel("drivers/gpu/drm/mcde/mcde_dsi.c:811", val, d->regs + DSI_MCTL_DPHY_TIMEOUT);
 
 	val = DSI_MCTL_MAIN_EN_PLL_START |
 		DSI_MCTL_MAIN_EN_CKLANE_EN |
@@ -816,7 +816,7 @@ static void mcde_dsi_start(struct mcde_dsi *d)
 		DSI_MCTL_MAIN_EN_IF1_EN;
 	if (d->mdsi->lanes == 2)
 		val |= DSI_MCTL_MAIN_EN_DAT2_EN;
-	writel(val, d->regs + DSI_MCTL_MAIN_EN);
+	pete_writel("drivers/gpu/drm/mcde/mcde_dsi.c:819", val, d->regs + DSI_MCTL_MAIN_EN);
 
 	/* Wait for the PLL to lock and the clock and data lines to come up */
 	i = 0;
@@ -825,7 +825,7 @@ static void mcde_dsi_start(struct mcde_dsi *d)
 		DSI_MCTL_MAIN_STS_DAT1_READY;
 	if (d->mdsi->lanes == 2)
 		val |= DSI_MCTL_MAIN_STS_DAT2_READY;
-	while ((readl(d->regs + DSI_MCTL_MAIN_STS) & val) != val) {
+	while ((pete_readl("drivers/gpu/drm/mcde/mcde_dsi.c:828", d->regs + DSI_MCTL_MAIN_STS) & val) != val) {
 		/* Sleep for a millisecond */
 		usleep_range(1000, 1500);
 		if (i++ == 100) {
@@ -837,7 +837,7 @@ static void mcde_dsi_start(struct mcde_dsi *d)
 	/* TODO needed? */
 
 	/* Command mode, clear IF1 ID */
-	val = readl(d->regs + DSI_CMD_MODE_CTL);
+	val = pete_readl("drivers/gpu/drm/mcde/mcde_dsi.c:840", d->regs + DSI_CMD_MODE_CTL);
 	/*
 	 * If we enable low-power mode here,
 	 * then display updates become really slow.
@@ -845,7 +845,7 @@ static void mcde_dsi_start(struct mcde_dsi *d)
 	if (d->mdsi->mode_flags & MIPI_DSI_MODE_LPM)
 		val |= DSI_CMD_MODE_CTL_IF1_LP_EN;
 	val &= ~DSI_CMD_MODE_CTL_IF1_ID_MASK;
-	writel(val, d->regs + DSI_CMD_MODE_CTL);
+	pete_writel("drivers/gpu/drm/mcde/mcde_dsi.c:848", val, d->regs + DSI_CMD_MODE_CTL);
 
 	/* Wait for DSI PHY to initialize */
 	usleep_range(100, 200);
@@ -920,28 +920,28 @@ void mcde_dsi_enable(struct drm_bridge *bridge)
 		mcde_dsi_setup_video_mode(d, d->mode);
 
 		/* Put IF1 into video mode */
-		val = readl(d->regs + DSI_MCTL_MAIN_DATA_CTL);
+		val = pete_readl("drivers/gpu/drm/mcde/mcde_dsi.c:923", d->regs + DSI_MCTL_MAIN_DATA_CTL);
 		val |= DSI_MCTL_MAIN_DATA_CTL_IF1_MODE;
-		writel(val, d->regs + DSI_MCTL_MAIN_DATA_CTL);
+		pete_writel("drivers/gpu/drm/mcde/mcde_dsi.c:925", val, d->regs + DSI_MCTL_MAIN_DATA_CTL);
 
 		/* Disable command mode on IF1 */
-		val = readl(d->regs + DSI_CMD_MODE_CTL);
+		val = pete_readl("drivers/gpu/drm/mcde/mcde_dsi.c:928", d->regs + DSI_CMD_MODE_CTL);
 		val &= ~DSI_CMD_MODE_CTL_IF1_LP_EN;
-		writel(val, d->regs + DSI_CMD_MODE_CTL);
+		pete_writel("drivers/gpu/drm/mcde/mcde_dsi.c:930", val, d->regs + DSI_CMD_MODE_CTL);
 
 		/* Enable some error interrupts */
-		val = readl(d->regs + DSI_VID_MODE_STS_CTL);
+		val = pete_readl("drivers/gpu/drm/mcde/mcde_dsi.c:933", d->regs + DSI_VID_MODE_STS_CTL);
 		val |= DSI_VID_MODE_STS_CTL_ERR_MISSING_VSYNC;
 		val |= DSI_VID_MODE_STS_CTL_ERR_MISSING_DATA;
-		writel(val, d->regs + DSI_VID_MODE_STS_CTL);
+		pete_writel("drivers/gpu/drm/mcde/mcde_dsi.c:936", val, d->regs + DSI_VID_MODE_STS_CTL);
 
 		/* Enable video mode */
-		val = readl(d->regs + DSI_MCTL_MAIN_DATA_CTL);
+		val = pete_readl("drivers/gpu/drm/mcde/mcde_dsi.c:939", d->regs + DSI_MCTL_MAIN_DATA_CTL);
 		val |= DSI_MCTL_MAIN_DATA_CTL_VID_EN;
-		writel(val, d->regs + DSI_MCTL_MAIN_DATA_CTL);
+		pete_writel("drivers/gpu/drm/mcde/mcde_dsi.c:941", val, d->regs + DSI_MCTL_MAIN_DATA_CTL);
 	} else {
 		/* Command mode, clear IF1 ID */
-		val = readl(d->regs + DSI_CMD_MODE_CTL);
+		val = pete_readl("drivers/gpu/drm/mcde/mcde_dsi.c:944", d->regs + DSI_CMD_MODE_CTL);
 		/*
 		 * If we enable low-power mode here
 		 * the display updates become really slow.
@@ -949,7 +949,7 @@ void mcde_dsi_enable(struct drm_bridge *bridge)
 		if (d->mdsi->mode_flags & MIPI_DSI_MODE_LPM)
 			val |= DSI_CMD_MODE_CTL_IF1_LP_EN;
 		val &= ~DSI_CMD_MODE_CTL_IF1_ID_MASK;
-		writel(val, d->regs + DSI_CMD_MODE_CTL);
+		pete_writel("drivers/gpu/drm/mcde/mcde_dsi.c:952", val, d->regs + DSI_CMD_MODE_CTL);
 	}
 
 	dev_info(d->dev, "enabled MCDE DSI master\n");
@@ -985,7 +985,7 @@ static void mcde_dsi_wait_for_command_mode_stop(struct mcde_dsi *d)
 	 */
 	i = 0;
 	val = DSI_CMD_MODE_STS_CSM_RUNNING;
-	while ((readl(d->regs + DSI_CMD_MODE_STS) & val) == val) {
+	while ((pete_readl("drivers/gpu/drm/mcde/mcde_dsi.c:988", d->regs + DSI_CMD_MODE_STS) & val) == val) {
 		/* Sleep for a millisecond */
 		usleep_range(1000, 2000);
 		if (i++ == 100) {
@@ -1004,7 +1004,7 @@ static void mcde_dsi_wait_for_video_mode_stop(struct mcde_dsi *d)
 	/* Wait until we get out og video mode */
 	i = 0;
 	val = DSI_VID_MODE_STS_VSG_RUNNING;
-	while ((readl(d->regs + DSI_VID_MODE_STS) & val) == val) {
+	while ((pete_readl("drivers/gpu/drm/mcde/mcde_dsi.c:1007", d->regs + DSI_VID_MODE_STS) & val) == val) {
 		/* Sleep for a millisecond */
 		usleep_range(1000, 2000);
 		if (i++ == 100) {
@@ -1026,9 +1026,9 @@ void mcde_dsi_disable(struct drm_bridge *bridge)
 
 	if (d->mdsi->mode_flags & MIPI_DSI_MODE_VIDEO) {
 		/* Stop video mode */
-		val = readl(d->regs + DSI_MCTL_MAIN_DATA_CTL);
+		val = pete_readl("drivers/gpu/drm/mcde/mcde_dsi.c:1029", d->regs + DSI_MCTL_MAIN_DATA_CTL);
 		val &= ~DSI_MCTL_MAIN_DATA_CTL_VID_EN;
-		writel(val, d->regs + DSI_MCTL_MAIN_DATA_CTL);
+		pete_writel("drivers/gpu/drm/mcde/mcde_dsi.c:1031", val, d->regs + DSI_MCTL_MAIN_DATA_CTL);
 		mcde_dsi_wait_for_video_mode_stop(d);
 	} else {
 		/* Stop command mode */
@@ -1042,7 +1042,7 @@ void mcde_dsi_disable(struct drm_bridge *bridge)
 	 */
 
 	/* Disable all error interrupts */
-	writel(0, d->regs + DSI_VID_MODE_STS_CTL);
+	pete_writel("drivers/gpu/drm/mcde/mcde_dsi.c:1045", 0, d->regs + DSI_VID_MODE_STS_CTL);
 	clk_disable_unprepare(d->hs_clk);
 	clk_disable_unprepare(d->lp_clk);
 }
@@ -1193,7 +1193,7 @@ static int mcde_dsi_probe(struct platform_device *pdev)
 	if (IS_ERR(d->regs))
 		return PTR_ERR(d->regs);
 
-	dsi_id = readl(d->regs + DSI_ID_REG);
+	dsi_id = pete_readl("drivers/gpu/drm/mcde/mcde_dsi.c:1196", d->regs + DSI_ID_REG);
 	dev_info(dev, "HW revision 0x%08x\n", dsi_id);
 
 	host = &d->dsi_host;

@@ -31,14 +31,14 @@ static void intf_mem_outw(const struct si_sm_io *io, unsigned int offset,
 static unsigned char intf_mem_inl(const struct si_sm_io *io,
 				  unsigned int offset)
 {
-	return (readl((io->addr)+(offset * io->regspacing)) >> io->regshift)
+	return (pete_readl("drivers/char/ipmi/ipmi_si_mem_io.c:34", (io->addr)+(offset * io->regspacing)) >> io->regshift)
 		& 0xff;
 }
 
 static void intf_mem_outl(const struct si_sm_io *io, unsigned int offset,
 			  unsigned char b)
 {
-	writel(b << io->regshift, (io->addr)+(offset * io->regspacing));
+	pete_writel("drivers/char/ipmi/ipmi_si_mem_io.c:41", b << io->regshift, (io->addr)+(offset * io->regspacing));
 }
 
 #ifdef readq

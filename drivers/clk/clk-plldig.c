@@ -69,13 +69,13 @@ static int plldig_enable(struct clk_hw *hw)
 	struct clk_plldig *data = to_clk_plldig(hw);
 	u32 val;
 
-	val = readl(data->regs + PLLDIG_REG_PLLFM);
+	val = pete_readl("drivers/clk/clk-plldig.c:72", data->regs + PLLDIG_REG_PLLFM);
 	/*
 	 * Use Bypass mode with PLL off by default, the frequency overshoot
 	 * detector output was disable. SSCG Bypass mode should be enable.
 	 */
 	val |= PLLDIG_SSCGBYP_ENABLE;
-	writel(val, data->regs + PLLDIG_REG_PLLFM);
+	pete_writel("drivers/clk/clk-plldig.c:78", val, data->regs + PLLDIG_REG_PLLFM);
 
 	return 0;
 }
@@ -85,19 +85,19 @@ static void plldig_disable(struct clk_hw *hw)
 	struct clk_plldig *data = to_clk_plldig(hw);
 	u32 val;
 
-	val = readl(data->regs + PLLDIG_REG_PLLFM);
+	val = pete_readl("drivers/clk/clk-plldig.c:88", data->regs + PLLDIG_REG_PLLFM);
 
 	val &= ~PLLDIG_SSCGBYP_ENABLE;
 	val |= FIELD_PREP(PLLDIG_SSCGBYP_ENABLE, 0x0);
 
-	writel(val, data->regs + PLLDIG_REG_PLLFM);
+	pete_writel("drivers/clk/clk-plldig.c:93", val, data->regs + PLLDIG_REG_PLLFM);
 }
 
 static int plldig_is_enabled(struct clk_hw *hw)
 {
 	struct clk_plldig *data = to_clk_plldig(hw);
 
-	return readl(data->regs + PLLDIG_REG_PLLFM) &
+	return pete_readl("drivers/clk/clk-plldig.c:100", data->regs + PLLDIG_REG_PLLFM) &
 			      PLLDIG_SSCGBYP_ENABLE;
 }
 
@@ -107,7 +107,7 @@ static unsigned long plldig_recalc_rate(struct clk_hw *hw,
 	struct clk_plldig *data = to_clk_plldig(hw);
 	u32 val, rfdphi1;
 
-	val = readl(data->regs + PLLDIG_REG_PLLDV);
+	val = pete_readl("drivers/clk/clk-plldig.c:110", data->regs + PLLDIG_REG_PLLDV);
 
 	/* Check if PLL is bypassed */
 	if (val & PLLDIG_SSCGBYP_ENABLE)
@@ -160,10 +160,10 @@ static int plldig_set_rate(struct clk_hw *hw, unsigned long rate,
 	rfdphi1 = plldig_calc_target_div(data->vco_freq, rate);
 
 	/* update the divider value */
-	val = readl(data->regs + PLLDIG_REG_PLLDV);
+	val = pete_readl("drivers/clk/clk-plldig.c:163", data->regs + PLLDIG_REG_PLLDV);
 	val &= ~PLLDIG_RFDPHI1_MASK;
 	val |= FIELD_PREP(PLLDIG_RFDPHI1_MASK, rfdphi1);
-	writel(val, data->regs + PLLDIG_REG_PLLDV);
+	pete_writel("drivers/clk/clk-plldig.c:166", val, data->regs + PLLDIG_REG_PLLDV);
 
 	/* waiting for old lock state to clear */
 	udelay(200);
@@ -209,13 +209,13 @@ static int plldig_init(struct clk_hw *hw)
 	}
 
 	val = FIELD_PREP(PLLDIG_MFD_MASK, mfd);
-	writel(val, data->regs + PLLDIG_REG_PLLDV);
+	pete_writel("drivers/clk/clk-plldig.c:212", val, data->regs + PLLDIG_REG_PLLDV);
 
 	/* Enable fractional divider */
 	if (fracdiv) {
 		val = FIELD_PREP(PLLDIG_FRAC_MASK, fracdiv);
 		val |= PLLDIG_FDEN;
-		writel(val, data->regs + PLLDIG_REG_PLLFD);
+		pete_writel("drivers/clk/clk-plldig.c:218", val, data->regs + PLLDIG_REG_PLLFD);
 	}
 
 	return 0;

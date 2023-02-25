@@ -64,11 +64,11 @@ static int tegra_gmi_enable(struct tegra_gmi *gmi)
 	usleep_range(2000, 4000);
 	reset_control_deassert(gmi->rst);
 
-	writel(gmi->snor_timing0, gmi->base + TEGRA_GMI_TIMING0);
-	writel(gmi->snor_timing1, gmi->base + TEGRA_GMI_TIMING1);
+	pete_writel("drivers/bus/tegra-gmi.c:67", gmi->snor_timing0, gmi->base + TEGRA_GMI_TIMING0);
+	pete_writel("drivers/bus/tegra-gmi.c:68", gmi->snor_timing1, gmi->base + TEGRA_GMI_TIMING1);
 
 	gmi->snor_config |= TEGRA_GMI_CONFIG_GO;
-	writel(gmi->snor_config, gmi->base + TEGRA_GMI_CONFIG);
+	pete_writel("drivers/bus/tegra-gmi.c:71", gmi->snor_config, gmi->base + TEGRA_GMI_CONFIG);
 
 	return 0;
 }
@@ -78,9 +78,9 @@ static void tegra_gmi_disable(struct tegra_gmi *gmi)
 	u32 config;
 
 	/* stop GMI operation */
-	config = readl(gmi->base + TEGRA_GMI_CONFIG);
+	config = pete_readl("drivers/bus/tegra-gmi.c:81", gmi->base + TEGRA_GMI_CONFIG);
 	config &= ~TEGRA_GMI_CONFIG_GO;
-	writel(config, gmi->base + TEGRA_GMI_CONFIG);
+	pete_writel("drivers/bus/tegra-gmi.c:83", config, gmi->base + TEGRA_GMI_CONFIG);
 
 	reset_control_assert(gmi->rst);
 	clk_disable_unprepare(gmi->clk);

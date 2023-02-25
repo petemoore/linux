@@ -43,15 +43,15 @@ static int atmel_trng_read(struct hwrng *rng, void *buf, size_t max,
 	u32 *data = buf;
 
 	/* data ready? */
-	if (readl(trng->base + TRNG_ISR) & 1) {
-		*data = readl(trng->base + TRNG_ODATA);
+	if (pete_readl("drivers/char/hw_random/atmel-rng.c:46", trng->base + TRNG_ISR) & 1) {
+		*data = pete_readl("drivers/char/hw_random/atmel-rng.c:47", trng->base + TRNG_ODATA);
 		/*
 		  ensure data ready is only set again AFTER the next data
 		  word is ready in case it got set between checking ISR
 		  and reading ODATA, so we don't risk re-reading the
 		  same word
 		*/
-		readl(trng->base + TRNG_ISR);
+		pete_readl("drivers/char/hw_random/atmel-rng.c:54", trng->base + TRNG_ISR);
 		return 4;
 	} else
 		return 0;
@@ -59,12 +59,12 @@ static int atmel_trng_read(struct hwrng *rng, void *buf, size_t max,
 
 static void atmel_trng_enable(struct atmel_trng *trng)
 {
-	writel(TRNG_KEY | 1, trng->base + TRNG_CR);
+	pete_writel("drivers/char/hw_random/atmel-rng.c:62", TRNG_KEY | 1, trng->base + TRNG_CR);
 }
 
 static void atmel_trng_disable(struct atmel_trng *trng)
 {
-	writel(TRNG_KEY, trng->base + TRNG_CR);
+	pete_writel("drivers/char/hw_random/atmel-rng.c:67", TRNG_KEY, trng->base + TRNG_CR);
 }
 
 static int atmel_trng_probe(struct platform_device *pdev)
@@ -93,7 +93,7 @@ static int atmel_trng_probe(struct platform_device *pdev)
 
 		/* if peripheral clk is above 100MHz, set HALFR */
 		if (rate > 100000000)
-			writel(TRNG_HALFR, trng->base + TRNG_MR);
+			pete_writel("drivers/char/hw_random/atmel-rng.c:96", TRNG_HALFR, trng->base + TRNG_MR);
 	}
 
 	ret = clk_prepare_enable(trng->clk);

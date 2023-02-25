@@ -235,11 +235,11 @@ static int da8xx_mstpri_probe(struct platform_device *pdev)
 			continue;
 		}
 
-		reg = readl(mstpri + prio_descr->reg);
+		reg = pete_readl("drivers/bus/da8xx-mstpri.c:238", mstpri + prio_descr->reg);
 		reg &= ~prio_descr->mask;
 		reg |= prio->val << prio_descr->shift;
 
-		writel(reg, mstpri + prio_descr->reg);
+		pete_writel("drivers/bus/da8xx-mstpri.c:242", reg, mstpri + prio_descr->reg);
 	}
 
 	return 0;

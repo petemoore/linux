@@ -233,19 +233,19 @@ static void meson_pwm_enable(struct meson_pwm *meson, struct pwm_device *pwm)
 
 	spin_lock_irqsave(&meson->lock, flags);
 
-	value = readl(meson->base + REG_MISC_AB);
+	value = pete_readl("drivers/pwm/pwm-meson.c:236", meson->base + REG_MISC_AB);
 	value &= ~(MISC_CLK_DIV_MASK << channel_data->clk_div_shift);
 	value |= channel->pre_div << channel_data->clk_div_shift;
 	value |= channel_data->clk_en_mask;
-	writel(value, meson->base + REG_MISC_AB);
+	pete_writel("drivers/pwm/pwm-meson.c:240", value, meson->base + REG_MISC_AB);
 
 	value = FIELD_PREP(PWM_HIGH_MASK, channel->hi) |
 		FIELD_PREP(PWM_LOW_MASK, channel->lo);
-	writel(value, meson->base + channel_data->reg_offset);
+	pete_writel("drivers/pwm/pwm-meson.c:244", value, meson->base + channel_data->reg_offset);
 
-	value = readl(meson->base + REG_MISC_AB);
+	value = pete_readl("drivers/pwm/pwm-meson.c:246", meson->base + REG_MISC_AB);
 	value |= channel_data->pwm_en_mask;
-	writel(value, meson->base + REG_MISC_AB);
+	pete_writel("drivers/pwm/pwm-meson.c:248", value, meson->base + REG_MISC_AB);
 
 	spin_unlock_irqrestore(&meson->lock, flags);
 }
@@ -257,9 +257,9 @@ static void meson_pwm_disable(struct meson_pwm *meson, struct pwm_device *pwm)
 
 	spin_lock_irqsave(&meson->lock, flags);
 
-	value = readl(meson->base + REG_MISC_AB);
+	value = pete_readl("drivers/pwm/pwm-meson.c:260", meson->base + REG_MISC_AB);
 	value &= ~meson_pwm_per_channel_data[pwm->hwpwm].pwm_en_mask;
-	writel(value, meson->base + REG_MISC_AB);
+	pete_writel("drivers/pwm/pwm-meson.c:262", value, meson->base + REG_MISC_AB);
 
 	spin_unlock_irqrestore(&meson->lock, flags);
 }
@@ -341,7 +341,7 @@ static void meson_pwm_get_state(struct pwm_chip *chip, struct pwm_device *pwm,
 	channel = &meson->channels[pwm->hwpwm];
 	channel_data = &meson_pwm_per_channel_data[pwm->hwpwm];
 
-	value = readl(meson->base + REG_MISC_AB);
+	value = pete_readl("drivers/pwm/pwm-meson.c:344", meson->base + REG_MISC_AB);
 
 	tmp = channel_data->pwm_en_mask | channel_data->clk_en_mask;
 	state->enabled = (value & tmp) == tmp;
@@ -349,7 +349,7 @@ static void meson_pwm_get_state(struct pwm_chip *chip, struct pwm_device *pwm,
 	tmp = value >> channel_data->clk_div_shift;
 	channel->pre_div = FIELD_GET(MISC_CLK_DIV_MASK, tmp);
 
-	value = readl(meson->base + channel_data->reg_offset);
+	value = pete_readl("drivers/pwm/pwm-meson.c:352", meson->base + channel_data->reg_offset);
 
 	channel->lo = FIELD_GET(PWM_LOW_MASK, value);
 	channel->hi = FIELD_GET(PWM_HIGH_MASK, value);

@@ -99,12 +99,12 @@ struct bcm2708_i2c {
 
 static inline u32 bcm2708_rd(struct bcm2708_i2c *bi, unsigned reg)
 {
-	return readl(bi->base + reg);
+	return pete_readl("drivers/i2c/busses/i2c-bcm2708.c:102", bi->base + reg);
 }
 
 static inline void bcm2708_wr(struct bcm2708_i2c *bi, unsigned reg, u32 val)
 {
-	writel(val, bi->base + reg);
+	pete_writel("drivers/i2c/busses/i2c-bcm2708.c:107", val, bi->base + reg);
 }
 
 static inline void bcm2708_bsc_reset(struct bcm2708_i2c *bi)

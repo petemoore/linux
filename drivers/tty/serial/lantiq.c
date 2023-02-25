@@ -303,7 +303,7 @@ static irqreturn_t lqasc_irq(int irq, void *p)
 	struct ltq_uart_port *ltq_port = to_ltq_uart_port(port);
 
 	spin_lock_irqsave(&ltq_port->lock, flags);
-	stat = readl(port->membase + LTQ_ASC_IRNCR);
+	stat = pete_readl("drivers/tty/serial/lantiq.c:306", port->membase + LTQ_ASC_IRNCR);
 	spin_unlock_irqrestore(&ltq_port->lock, flags);
 	if (!(stat & ASC_IRNCR_MASK))
 		return IRQ_NONE;

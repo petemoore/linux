@@ -104,22 +104,22 @@ static irqreturn_t st_rc_rx_interrupt(int irq, void *data)
 	/* FIXME: is 10ms good enough ? */
 	timeout = jiffies +  msecs_to_jiffies(10);
 	do {
-		status  = readl(dev->rx_base + IRB_RX_STATUS);
+		status  = pete_readl("drivers/media/rc/st_rc.c:107", dev->rx_base + IRB_RX_STATUS);
 		if (!(status & (IRB_FIFO_NOT_EMPTY | IRB_OVERFLOW)))
 			break;
 
-		int_status = readl(dev->rx_base + IRB_RX_INT_STATUS);
+		int_status = pete_readl("drivers/media/rc/st_rc.c:111", dev->rx_base + IRB_RX_INT_STATUS);
 		if (unlikely(int_status & IRB_RX_OVERRUN_INT)) {
 			/* discard the entire collection in case of errors!  */
 			ir_raw_event_reset(dev->rdev);
 			dev_info(dev->dev, "IR RX overrun\n");
-			writel(IRB_RX_OVERRUN_INT,
+			pete_writel("drivers/media/rc/st_rc.c:116", IRB_RX_OVERRUN_INT,
 					dev->rx_base + IRB_RX_INT_CLEAR);
 			continue;
 		}
 
-		symbol = readl(dev->rx_base + IRB_RX_SYS);
-		mark = readl(dev->rx_base + IRB_RX_ON);
+		symbol = pete_readl("drivers/media/rc/st_rc.c:121", dev->rx_base + IRB_RX_SYS);
+		mark = pete_readl("drivers/media/rc/st_rc.c:122", dev->rx_base + IRB_RX_ON);
 
 		if (symbol == IRB_TIMEOUT)
 			last_symbol = 1;
@@ -150,7 +150,7 @@ static irqreturn_t st_rc_rx_interrupt(int irq, void *data)
 		last_symbol = 0;
 	} while (time_is_after_jiffies(timeout));
 
-	writel(IRB_RX_INTS, dev->rx_base + IRB_RX_INT_CLEAR);
+	pete_writel("drivers/media/rc/st_rc.c:153", IRB_RX_INTS, dev->rx_base + IRB_RX_INT_CLEAR);
 
 	/* Empty software fifo */
 	ir_raw_event_handle(dev->rdev);
@@ -176,10 +176,10 @@ static int st_rc_hardware_init(struct st_rc_device *dev)
 	baseclock = clk_get_rate(dev->sys_clock);
 
 	/* IRB input pins are inverted internally from high to low. */
-	writel(1, dev->rx_base + IRB_RX_POLARITY_INV);
+	pete_writel("drivers/media/rc/st_rc.c:179", 1, dev->rx_base + IRB_RX_POLARITY_INV);
 
 	rx_sampling_freq_div = baseclock / IRB_SAMPLE_FREQ;
-	writel(rx_sampling_freq_div, dev->base + IRB_SAMPLE_RATE_COMM);
+	pete_writel("drivers/media/rc/st_rc.c:182", rx_sampling_freq_div, dev->base + IRB_SAMPLE_RATE_COMM);
 
 	freqdiff = baseclock - (rx_sampling_freq_div * IRB_SAMPLE_FREQ);
 	if (freqdiff) { /* over clocking, workout the adjustment factors */
@@ -189,7 +189,7 @@ static int st_rc_hardware_init(struct st_rc_device *dev)
 		rx_max_symbol_per = (rx_max_symbol_per * 1000)/dev->sample_div;
 	}
 
-	writel(rx_max_symbol_per, dev->rx_base + IRB_MAX_SYM_PERIOD);
+	pete_writel("drivers/media/rc/st_rc.c:192", rx_max_symbol_per, dev->rx_base + IRB_MAX_SYM_PERIOD);
 
 	return 0;
 }
@@ -211,8 +211,8 @@ static int st_rc_open(struct rc_dev *rdev)
 	unsigned long flags;
 	local_irq_save(flags);
 	/* enable interrupts and receiver */
-	writel(IRB_RX_INTS, dev->rx_base + IRB_RX_INT_EN);
-	writel(0x01, dev->rx_base + IRB_RX_EN);
+	pete_writel("drivers/media/rc/st_rc.c:214", IRB_RX_INTS, dev->rx_base + IRB_RX_INT_EN);
+	pete_writel("drivers/media/rc/st_rc.c:215", 0x01, dev->rx_base + IRB_RX_EN);
 	local_irq_restore(flags);
 
 	return 0;
@@ -222,8 +222,8 @@ static void st_rc_close(struct rc_dev *rdev)
 {
 	struct st_rc_device *dev = rdev->priv;
 	/* disable interrupts and receiver */
-	writel(0x00, dev->rx_base + IRB_RX_EN);
-	writel(0x00, dev->rx_base + IRB_RX_INT_EN);
+	pete_writel("drivers/media/rc/st_rc.c:225", 0x00, dev->rx_base + IRB_RX_EN);
+	pete_writel("drivers/media/rc/st_rc.c:226", 0x00, dev->rx_base + IRB_RX_INT_EN);
 }
 
 static int st_rc_probe(struct platform_device *pdev)
@@ -358,8 +358,8 @@ static int st_rc_suspend(struct device *dev)
 			return -EINVAL;
 	} else {
 		pinctrl_pm_select_sleep_state(dev);
-		writel(0x00, rc_dev->rx_base + IRB_RX_EN);
-		writel(0x00, rc_dev->rx_base + IRB_RX_INT_EN);
+		pete_writel("drivers/media/rc/st_rc.c:361", 0x00, rc_dev->rx_base + IRB_RX_EN);
+		pete_writel("drivers/media/rc/st_rc.c:362", 0x00, rc_dev->rx_base + IRB_RX_INT_EN);
 		clk_disable_unprepare(rc_dev->sys_clock);
 		reset_control_assert(rc_dev->rstc);
 	}
@@ -383,8 +383,8 @@ static int st_rc_resume(struct device *dev)
 			return ret;
 
 		if (rdev->users) {
-			writel(IRB_RX_INTS, rc_dev->rx_base + IRB_RX_INT_EN);
-			writel(0x01, rc_dev->rx_base + IRB_RX_EN);
+			pete_writel("drivers/media/rc/st_rc.c:386", IRB_RX_INTS, rc_dev->rx_base + IRB_RX_INT_EN);
+			pete_writel("drivers/media/rc/st_rc.c:387", 0x01, rc_dev->rx_base + IRB_RX_EN);
 		}
 	}
 

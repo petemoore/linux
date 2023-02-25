@@ -60,7 +60,7 @@ static int __init ostm_init_clksrc(struct timer_of *to)
 {
 	ostm_timer_stop(to);
 
-	writel(0, timer_of_base(to) + OSTM_CMP);
+	pete_writel("drivers/clocksource/renesas-ostm.c:63", 0, timer_of_base(to) + OSTM_CMP);
 	writeb(CTL_FREERUN, timer_of_base(to) + OSTM_CTL);
 	writeb(TS, timer_of_base(to) + OSTM_TS);
 
@@ -71,7 +71,7 @@ static int __init ostm_init_clksrc(struct timer_of *to)
 
 static u64 notrace ostm_read_sched_clock(void)
 {
-	return readl(system_clock);
+	return pete_readl("drivers/clocksource/renesas-ostm.c:74", system_clock);
 }
 
 static void __init ostm_init_sched_clock(struct timer_of *to)
@@ -87,7 +87,7 @@ static int ostm_clock_event_next(unsigned long delta,
 
 	ostm_timer_stop(to);
 
-	writel(delta, timer_of_base(to) + OSTM_CMP);
+	pete_writel("drivers/clocksource/renesas-ostm.c:90", delta, timer_of_base(to) + OSTM_CMP);
 	writeb(CTL_ONESHOT, timer_of_base(to) + OSTM_CTL);
 	writeb(TS, timer_of_base(to) + OSTM_TS);
 
@@ -109,7 +109,7 @@ static int ostm_set_periodic(struct clock_event_device *ced)
 	if (clockevent_state_oneshot(ced) || clockevent_state_periodic(ced))
 		ostm_timer_stop(to);
 
-	writel(timer_of_period(to) - 1, timer_of_base(to) + OSTM_CMP);
+	pete_writel("drivers/clocksource/renesas-ostm.c:112", timer_of_period(to) - 1, timer_of_base(to) + OSTM_CMP);
 	writeb(CTL_PERIODIC, timer_of_base(to) + OSTM_CTL);
 	writeb(TS, timer_of_base(to) + OSTM_TS);
 

@@ -60,7 +60,7 @@ static struct shdwc {
 static void __init at91_wakeup_status(struct platform_device *pdev)
 {
 	const char *reason;
-	u32 reg = readl(at91_shdwc.shdwc_base + AT91_SHDW_SR);
+	u32 reg = pete_readl("drivers/power/reset/at91-poweroff.c:63", at91_shdwc.shdwc_base + AT91_SHDW_SR);
 
 	/* Simple power-on, just bail out */
 	if (!reg)
@@ -146,7 +146,7 @@ static void at91_poweroff_dt_set_wakeup_mode(struct platform_device *pdev)
 	if (of_property_read_bool(np, "atmel,wakeup-rtt-timer"))
 			mode |= AT91_SHDW_RTTWKEN;
 
-	writel(wakeup_mode | mode, at91_shdwc.shdwc_base + AT91_SHDW_MR);
+	pete_writel("drivers/power/reset/at91-poweroff.c:149", wakeup_mode | mode, at91_shdwc.shdwc_base + AT91_SHDW_MR);
 }
 
 static int __init at91_poweroff_probe(struct platform_device *pdev)
@@ -186,7 +186,7 @@ static int __init at91_poweroff_probe(struct platform_device *pdev)
 			goto clk_disable;
 		}
 
-		ddr_type = readl(at91_shdwc.mpddrc_base + AT91_DDRSDRC_MDR) &
+		ddr_type = pete_readl("drivers/power/reset/at91-poweroff.c:189", at91_shdwc.mpddrc_base + AT91_DDRSDRC_MDR) &
 				 AT91_DDRSDRC_MD;
 		if (ddr_type != AT91_DDRSDRC_MD_LPDDR2 &&
 		    ddr_type != AT91_DDRSDRC_MD_LPDDR3) {

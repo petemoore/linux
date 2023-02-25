@@ -400,7 +400,7 @@ static int i82875p_probe1(struct pci_dev *pdev, int dev_idx)
 
 	if (i82875p_setup_overfl_dev(pdev, &ovrfl_pdev, &ovrfl_window))
 		return -ENODEV;
-	drc = readl(ovrfl_window + I82875P_DRC);
+	drc = pete_readl("drivers/edac/i82875p_edac.c:403", ovrfl_window + I82875P_DRC);
 	nr_chans = dual_channel_active(drc) + 1;
 
 	layers[0].type = EDAC_MC_LAYER_CHIP_SELECT;

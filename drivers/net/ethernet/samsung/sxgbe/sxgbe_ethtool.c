@@ -416,9 +416,9 @@ static int sxgbe_set_rss_hash_opt(struct sxgbe_priv_data *priv,
 	}
 
 	/* Read SXGBE RSS control register and update */
-	reg_val |= readl(priv->ioaddr + SXGBE_CORE_RSS_CTL_REG);
-	writel(reg_val, priv->ioaddr + SXGBE_CORE_RSS_CTL_REG);
-	readl(priv->ioaddr + SXGBE_CORE_RSS_CTL_REG);
+	reg_val |= pete_readl("drivers/net/ethernet/samsung/sxgbe/sxgbe_ethtool.c:419", priv->ioaddr + SXGBE_CORE_RSS_CTL_REG);
+	pete_writel("drivers/net/ethernet/samsung/sxgbe/sxgbe_ethtool.c:420", reg_val, priv->ioaddr + SXGBE_CORE_RSS_CTL_REG);
+	pete_readl("drivers/net/ethernet/samsung/sxgbe/sxgbe_ethtool.c:421", priv->ioaddr + SXGBE_CORE_RSS_CTL_REG);
 
 	return 0;
 }
@@ -453,21 +453,21 @@ static void sxgbe_get_regs(struct net_device *dev,
 	/* MAC registers */
 	for (reg_offset = START_MAC_REG_OFFSET;
 	     reg_offset <= MAX_MAC_REG_OFFSET; reg_offset += 4) {
-		reg_space[reg_ix] = readl(ioaddr + reg_offset);
+		reg_space[reg_ix] = pete_readl("drivers/net/ethernet/samsung/sxgbe/sxgbe_ethtool.c:456", ioaddr + reg_offset);
 		reg_ix++;
 	}
 
 	/* MTL registers */
 	for (reg_offset = START_MTL_REG_OFFSET;
 	     reg_offset <= MAX_MTL_REG_OFFSET; reg_offset += 4) {
-		reg_space[reg_ix] = readl(ioaddr + reg_offset);
+		reg_space[reg_ix] = pete_readl("drivers/net/ethernet/samsung/sxgbe/sxgbe_ethtool.c:463", ioaddr + reg_offset);
 		reg_ix++;
 	}
 
 	/* DMA registers */
 	for (reg_offset = START_DMA_REG_OFFSET;
 	     reg_offset <= MAX_DMA_REG_OFFSET; reg_offset += 4) {
-		reg_space[reg_ix] = readl(ioaddr + reg_offset);
+		reg_space[reg_ix] = pete_readl("drivers/net/ethernet/samsung/sxgbe/sxgbe_ethtool.c:470", ioaddr + reg_offset);
 		reg_ix++;
 	}
 

@@ -184,15 +184,15 @@ static void write_hw_segmentation_data(struct vdec_vp8_inst *inst)
 	void __iomem *cm = inst->reg_base.cm;
 	struct vdec_vp8_vsi *vsi = inst->vsi;
 
-	seg_id_addr = readl(inst->reg_base.top + VP8_SEGID_DRAM_ADDR) >> 4;
+	seg_id_addr = pete_readl("drivers/media/platform/mtk-vcodec/vdec/vdec_vp8_if.c:187", inst->reg_base.top + VP8_SEGID_DRAM_ADDR) >> 4;
 
 	for (i = 0; i < ARRAY_SIZE(vsi->segment_buf); i++) {
 		for (j = ARRAY_SIZE(vsi->segment_buf[i]) - 1; j >= 0; j--) {
 			val = (1 << 16) + ((seg_id_addr + i) << 2) + j;
-			writel(val, cm + VP8_HW_VLD_ADDR);
+			pete_writel("drivers/media/platform/mtk-vcodec/vdec/vdec_vp8_if.c:192", val, cm + VP8_HW_VLD_ADDR);
 
 			val = vsi->segment_buf[i][j];
-			writel(val, cm + VP8_HW_VLD_VALUE);
+			pete_writel("drivers/media/platform/mtk-vcodec/vdec/vdec_vp8_if.c:195", val, cm + VP8_HW_VLD_VALUE);
 		}
 	}
 }
@@ -205,14 +205,14 @@ static void read_hw_segmentation_data(struct vdec_vp8_inst *inst)
 	void __iomem *cm = inst->reg_base.cm;
 	struct vdec_vp8_vsi *vsi = inst->vsi;
 
-	seg_id_addr = readl(inst->reg_base.top + VP8_SEGID_DRAM_ADDR) >> 4;
+	seg_id_addr = pete_readl("drivers/media/platform/mtk-vcodec/vdec/vdec_vp8_if.c:208", inst->reg_base.top + VP8_SEGID_DRAM_ADDR) >> 4;
 
 	for (i = 0; i < ARRAY_SIZE(vsi->segment_buf); i++) {
 		for (j = ARRAY_SIZE(vsi->segment_buf[i]) - 1; j >= 0; j--) {
 			val = ((seg_id_addr + i) << 2) + j;
-			writel(val, cm + VP8_HW_VLD_ADDR);
+			pete_writel("drivers/media/platform/mtk-vcodec/vdec/vdec_vp8_if.c:213", val, cm + VP8_HW_VLD_ADDR);
 
-			val = readl(cm + VP8_HW_VLD_VALUE);
+			val = pete_readl("drivers/media/platform/mtk-vcodec/vdec/vdec_vp8_if.c:215", cm + VP8_HW_VLD_VALUE);
 			vsi->segment_buf[i][j] = val;
 		}
 	}
@@ -228,22 +228,22 @@ static void enable_hw_rw_function(struct vdec_vp8_inst *inst)
 	void __iomem *hwb = inst->reg_base.hwb;
 	void __iomem *hwd = inst->reg_base.hwd;
 
-	writel(0x1, sys + VP8_RW_CKEN_SET);
-	writel(0x101, ld + VP8_WO_VLD_SRST);
-	writel(0x101, hwb + VP8_WO_VLD_SRST);
+	pete_writel("drivers/media/platform/mtk-vcodec/vdec/vdec_vp8_if.c:231", 0x1, sys + VP8_RW_CKEN_SET);
+	pete_writel("drivers/media/platform/mtk-vcodec/vdec/vdec_vp8_if.c:232", 0x101, ld + VP8_WO_VLD_SRST);
+	pete_writel("drivers/media/platform/mtk-vcodec/vdec/vdec_vp8_if.c:233", 0x101, hwb + VP8_WO_VLD_SRST);
 
-	writel(1, sys);
-	val = readl(misc + VP8_RW_MISC_SRST);
-	writel((val & 0xFFFFFFFE), misc + VP8_RW_MISC_SRST);
+	pete_writel("drivers/media/platform/mtk-vcodec/vdec/vdec_vp8_if.c:235", 1, sys);
+	val = pete_readl("drivers/media/platform/mtk-vcodec/vdec/vdec_vp8_if.c:236", misc + VP8_RW_MISC_SRST);
+	pete_writel("drivers/media/platform/mtk-vcodec/vdec/vdec_vp8_if.c:237", (val & 0xFFFFFFFE), misc + VP8_RW_MISC_SRST);
 
-	writel(0x1, misc + VP8_RW_MISC_SYS_SEL);
-	writel(0x17F, misc + VP8_RW_MISC_SPEC_CON);
-	writel(0x71201100, misc + VP8_RW_MISC_FUNC_CON);
-	writel(0x0, ld + VP8_WO_VLD_SRST);
-	writel(0x0, hwb + VP8_WO_VLD_SRST);
-	writel(0x1, sys + VP8_RW_DCM_CON);
-	writel(0x1, misc + VP8_RW_MISC_DCM_CON);
-	writel(0x1, hwd + VP8_RW_VP8_CTRL);
+	pete_writel("drivers/media/platform/mtk-vcodec/vdec/vdec_vp8_if.c:239", 0x1, misc + VP8_RW_MISC_SYS_SEL);
+	pete_writel("drivers/media/platform/mtk-vcodec/vdec/vdec_vp8_if.c:240", 0x17F, misc + VP8_RW_MISC_SPEC_CON);
+	pete_writel("drivers/media/platform/mtk-vcodec/vdec/vdec_vp8_if.c:241", 0x71201100, misc + VP8_RW_MISC_FUNC_CON);
+	pete_writel("drivers/media/platform/mtk-vcodec/vdec/vdec_vp8_if.c:242", 0x0, ld + VP8_WO_VLD_SRST);
+	pete_writel("drivers/media/platform/mtk-vcodec/vdec/vdec_vp8_if.c:243", 0x0, hwb + VP8_WO_VLD_SRST);
+	pete_writel("drivers/media/platform/mtk-vcodec/vdec/vdec_vp8_if.c:244", 0x1, sys + VP8_RW_DCM_CON);
+	pete_writel("drivers/media/platform/mtk-vcodec/vdec/vdec_vp8_if.c:245", 0x1, misc + VP8_RW_MISC_DCM_CON);
+	pete_writel("drivers/media/platform/mtk-vcodec/vdec/vdec_vp8_if.c:246", 0x1, hwd + VP8_RW_VP8_CTRL);
 }
 
 static void store_dec_table(struct vdec_vp8_inst *inst)
@@ -254,10 +254,10 @@ static void store_dec_table(struct vdec_vp8_inst *inst)
 	u32 *p = &inst->vsi->dec_table[VP8_DEC_TABLE_OFFSET];
 
 	for (i = 0; i < VP8_DEC_TABLE_PROC_LOOP; i++) {
-		writel(addr, hwd + VP8_BSASET);
+		pete_writel("drivers/media/platform/mtk-vcodec/vdec/vdec_vp8_if.c:257", addr, hwd + VP8_BSASET);
 		for (j = 0; j < VP8_DEC_TABLE_UNIT ; j++) {
 			val = *p++;
-			writel(val, hwd + VP8_BSDSET);
+			pete_writel("drivers/media/platform/mtk-vcodec/vdec/vdec_vp8_if.c:260", val, hwd + VP8_BSDSET);
 		}
 		addr += VP8_DEC_TABLE_RW_UNIT;
 	}
@@ -271,11 +271,11 @@ static void load_dec_table(struct vdec_vp8_inst *inst)
 	void __iomem *hwd = inst->reg_base.hwd;
 
 	for (i = 0; i < VP8_DEC_TABLE_PROC_LOOP; i++) {
-		writel(addr, hwd + VP8_BSASET);
+		pete_writel("drivers/media/platform/mtk-vcodec/vdec/vdec_vp8_if.c:274", addr, hwd + VP8_BSASET);
 		/* read total 11 bytes */
-		*p++ = readl(hwd + VP8_BSDSET);
-		*p++ = readl(hwd + VP8_BSDSET);
-		*p++ = readl(hwd + VP8_BSDSET) & 0xFFFFFF;
+		*p++ = pete_readl("drivers/media/platform/mtk-vcodec/vdec/vdec_vp8_if.c:276", hwd + VP8_BSDSET);
+		*p++ = pete_readl("drivers/media/platform/mtk-vcodec/vdec/vdec_vp8_if.c:277", hwd + VP8_BSDSET);
+		*p++ = pete_readl("drivers/media/platform/mtk-vcodec/vdec/vdec_vp8_if.c:278", hwd + VP8_BSDSET) & 0xFFFFFF;
 		addr += VP8_DEC_TABLE_RW_UNIT;
 	}
 }

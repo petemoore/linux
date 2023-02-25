@@ -335,17 +335,17 @@ static void via_print_sdchc(struct via_crdr_mmc_host *host)
 
 	pr_debug("SDC MMIO Registers:\n");
 	pr_debug("SDCONTROL=%08x, SDCMDARG=%08x, SDBUSMODE=%08x\n",
-		 readl(addrbase + VIA_CRDR_SDCTRL),
-		 readl(addrbase + VIA_CRDR_SDCARG),
-		 readl(addrbase + VIA_CRDR_SDBUSMODE));
+		 pete_readl("drivers/mmc/host/via-sdmmc.c:338", addrbase + VIA_CRDR_SDCTRL),
+		 pete_readl("drivers/mmc/host/via-sdmmc.c:339", addrbase + VIA_CRDR_SDCARG),
+		 pete_readl("drivers/mmc/host/via-sdmmc.c:340", addrbase + VIA_CRDR_SDBUSMODE));
 	pr_debug("SDBLKLEN=%08x, SDCURBLKCNT=%08x, SDINTMASK=%08x\n",
-		 readl(addrbase + VIA_CRDR_SDBLKLEN),
-		 readl(addrbase + VIA_CRDR_SDCURBLKCNT),
-		 readl(addrbase + VIA_CRDR_SDINTMASK));
+		 pete_readl("drivers/mmc/host/via-sdmmc.c:342", addrbase + VIA_CRDR_SDBLKLEN),
+		 pete_readl("drivers/mmc/host/via-sdmmc.c:343", addrbase + VIA_CRDR_SDCURBLKCNT),
+		 pete_readl("drivers/mmc/host/via-sdmmc.c:344", addrbase + VIA_CRDR_SDINTMASK));
 	pr_debug("SDSTATUS=%08x, SDCLKSEL=%08x, SDEXTCTRL=%08x\n",
-		 readl(addrbase + VIA_CRDR_SDSTATUS),
-		 readl(addrbase + VIA_CRDR_SDCLKSEL),
-		 readl(addrbase + VIA_CRDR_SDEXTCTRL));
+		 pete_readl("drivers/mmc/host/via-sdmmc.c:346", addrbase + VIA_CRDR_SDSTATUS),
+		 pete_readl("drivers/mmc/host/via-sdmmc.c:347", addrbase + VIA_CRDR_SDCLKSEL),
+		 pete_readl("drivers/mmc/host/via-sdmmc.c:348", addrbase + VIA_CRDR_SDEXTCTRL));
 }
 
 static void via_print_pcictrl(struct via_crdr_mmc_host *host)
@@ -406,16 +406,16 @@ static void via_save_sdcreg(struct via_crdr_mmc_host *host)
 	pm_sdhc_reg = &(host->pm_sdhc_reg);
 	addrbase = host->sdhc_mmiobase;
 
-	pm_sdhc_reg->sdcontrol_reg = readl(addrbase + VIA_CRDR_SDCTRL);
-	pm_sdhc_reg->sdcmdarg_reg = readl(addrbase + VIA_CRDR_SDCARG);
-	pm_sdhc_reg->sdbusmode_reg = readl(addrbase + VIA_CRDR_SDBUSMODE);
-	pm_sdhc_reg->sdblklen_reg = readl(addrbase + VIA_CRDR_SDBLKLEN);
-	pm_sdhc_reg->sdcurblkcnt_reg = readl(addrbase + VIA_CRDR_SDCURBLKCNT);
-	pm_sdhc_reg->sdintmask_reg = readl(addrbase + VIA_CRDR_SDINTMASK);
-	pm_sdhc_reg->sdstatus_reg = readl(addrbase + VIA_CRDR_SDSTATUS);
-	pm_sdhc_reg->sdrsptmo_reg = readl(addrbase + VIA_CRDR_SDRSPTMO);
-	pm_sdhc_reg->sdclksel_reg = readl(addrbase + VIA_CRDR_SDCLKSEL);
-	pm_sdhc_reg->sdextctrl_reg = readl(addrbase + VIA_CRDR_SDEXTCTRL);
+	pm_sdhc_reg->sdcontrol_reg = pete_readl("drivers/mmc/host/via-sdmmc.c:409", addrbase + VIA_CRDR_SDCTRL);
+	pm_sdhc_reg->sdcmdarg_reg = pete_readl("drivers/mmc/host/via-sdmmc.c:410", addrbase + VIA_CRDR_SDCARG);
+	pm_sdhc_reg->sdbusmode_reg = pete_readl("drivers/mmc/host/via-sdmmc.c:411", addrbase + VIA_CRDR_SDBUSMODE);
+	pm_sdhc_reg->sdblklen_reg = pete_readl("drivers/mmc/host/via-sdmmc.c:412", addrbase + VIA_CRDR_SDBLKLEN);
+	pm_sdhc_reg->sdcurblkcnt_reg = pete_readl("drivers/mmc/host/via-sdmmc.c:413", addrbase + VIA_CRDR_SDCURBLKCNT);
+	pm_sdhc_reg->sdintmask_reg = pete_readl("drivers/mmc/host/via-sdmmc.c:414", addrbase + VIA_CRDR_SDINTMASK);
+	pm_sdhc_reg->sdstatus_reg = pete_readl("drivers/mmc/host/via-sdmmc.c:415", addrbase + VIA_CRDR_SDSTATUS);
+	pm_sdhc_reg->sdrsptmo_reg = pete_readl("drivers/mmc/host/via-sdmmc.c:416", addrbase + VIA_CRDR_SDRSPTMO);
+	pm_sdhc_reg->sdclksel_reg = pete_readl("drivers/mmc/host/via-sdmmc.c:417", addrbase + VIA_CRDR_SDCLKSEL);
+	pm_sdhc_reg->sdextctrl_reg = pete_readl("drivers/mmc/host/via-sdmmc.c:418", addrbase + VIA_CRDR_SDEXTCTRL);
 }
 
 static void via_restore_sdcreg(struct via_crdr_mmc_host *host)
@@ -426,16 +426,16 @@ static void via_restore_sdcreg(struct via_crdr_mmc_host *host)
 	pm_sdhc_reg = &(host->pm_sdhc_reg);
 	addrbase = host->sdhc_mmiobase;
 
-	writel(pm_sdhc_reg->sdcontrol_reg, addrbase + VIA_CRDR_SDCTRL);
-	writel(pm_sdhc_reg->sdcmdarg_reg, addrbase + VIA_CRDR_SDCARG);
-	writel(pm_sdhc_reg->sdbusmode_reg, addrbase + VIA_CRDR_SDBUSMODE);
-	writel(pm_sdhc_reg->sdblklen_reg, addrbase + VIA_CRDR_SDBLKLEN);
-	writel(pm_sdhc_reg->sdcurblkcnt_reg, addrbase + VIA_CRDR_SDCURBLKCNT);
-	writel(pm_sdhc_reg->sdintmask_reg, addrbase + VIA_CRDR_SDINTMASK);
-	writel(pm_sdhc_reg->sdstatus_reg, addrbase + VIA_CRDR_SDSTATUS);
-	writel(pm_sdhc_reg->sdrsptmo_reg, addrbase + VIA_CRDR_SDRSPTMO);
-	writel(pm_sdhc_reg->sdclksel_reg, addrbase + VIA_CRDR_SDCLKSEL);
-	writel(pm_sdhc_reg->sdextctrl_reg, addrbase + VIA_CRDR_SDEXTCTRL);
+	pete_writel("drivers/mmc/host/via-sdmmc.c:429", pm_sdhc_reg->sdcontrol_reg, addrbase + VIA_CRDR_SDCTRL);
+	pete_writel("drivers/mmc/host/via-sdmmc.c:430", pm_sdhc_reg->sdcmdarg_reg, addrbase + VIA_CRDR_SDCARG);
+	pete_writel("drivers/mmc/host/via-sdmmc.c:431", pm_sdhc_reg->sdbusmode_reg, addrbase + VIA_CRDR_SDBUSMODE);
+	pete_writel("drivers/mmc/host/via-sdmmc.c:432", pm_sdhc_reg->sdblklen_reg, addrbase + VIA_CRDR_SDBLKLEN);
+	pete_writel("drivers/mmc/host/via-sdmmc.c:433", pm_sdhc_reg->sdcurblkcnt_reg, addrbase + VIA_CRDR_SDCURBLKCNT);
+	pete_writel("drivers/mmc/host/via-sdmmc.c:434", pm_sdhc_reg->sdintmask_reg, addrbase + VIA_CRDR_SDINTMASK);
+	pete_writel("drivers/mmc/host/via-sdmmc.c:435", pm_sdhc_reg->sdstatus_reg, addrbase + VIA_CRDR_SDSTATUS);
+	pete_writel("drivers/mmc/host/via-sdmmc.c:436", pm_sdhc_reg->sdrsptmo_reg, addrbase + VIA_CRDR_SDRSPTMO);
+	pete_writel("drivers/mmc/host/via-sdmmc.c:437", pm_sdhc_reg->sdclksel_reg, addrbase + VIA_CRDR_SDCLKSEL);
+	pete_writel("drivers/mmc/host/via-sdmmc.c:438", pm_sdhc_reg->sdextctrl_reg, addrbase + VIA_CRDR_SDEXTCTRL);
 }
 
 static void via_pwron_sleep(struct via_crdr_mmc_host *sdhost)
@@ -460,10 +460,10 @@ static void via_set_ddma(struct via_crdr_mmc_host *host,
 
 	addrbase = host->ddma_mmiobase;
 
-	writel(dmaaddr, addrbase + VIA_CRDR_DMABASEADD);
-	writel(count, addrbase + VIA_CRDR_DMACOUNTER);
-	writel(ctrl_data, addrbase + VIA_CRDR_DMACTRL);
-	writel(0x01, addrbase + VIA_CRDR_DMASTART);
+	pete_writel("drivers/mmc/host/via-sdmmc.c:463", dmaaddr, addrbase + VIA_CRDR_DMABASEADD);
+	pete_writel("drivers/mmc/host/via-sdmmc.c:464", count, addrbase + VIA_CRDR_DMACOUNTER);
+	pete_writel("drivers/mmc/host/via-sdmmc.c:465", ctrl_data, addrbase + VIA_CRDR_DMACTRL);
+	pete_writel("drivers/mmc/host/via-sdmmc.c:466", 0x01, addrbase + VIA_CRDR_DMASTART);
 
 	/* It seems that our DMA can not work normally with 375kHz clock */
 	/* FIXME: don't brute-force 8MHz but use PIO at 375kHz !! */
@@ -503,17 +503,17 @@ static void via_sdc_preparedata(struct via_crdr_mmc_host *host,
 	blk_reg |= VIA_CRDR_SDBLKLEN_GPIDET | VIA_CRDR_SDBLKLEN_INTEN;
 	blk_reg |= (data->blocks) << 16;
 
-	writel(blk_reg, addrbase + VIA_CRDR_SDBLKLEN);
+	pete_writel("drivers/mmc/host/via-sdmmc.c:506", blk_reg, addrbase + VIA_CRDR_SDBLKLEN);
 }
 
 static void via_sdc_get_response(struct via_crdr_mmc_host *host,
 				 struct mmc_command *cmd)
 {
 	void __iomem *addrbase = host->sdhc_mmiobase;
-	u32 dwdata0 = readl(addrbase + VIA_CRDR_SDRESP0);
-	u32 dwdata1 = readl(addrbase + VIA_CRDR_SDRESP1);
-	u32 dwdata2 = readl(addrbase + VIA_CRDR_SDRESP2);
-	u32 dwdata3 = readl(addrbase + VIA_CRDR_SDRESP3);
+	u32 dwdata0 = pete_readl("drivers/mmc/host/via-sdmmc.c:513", addrbase + VIA_CRDR_SDRESP0);
+	u32 dwdata1 = pete_readl("drivers/mmc/host/via-sdmmc.c:514", addrbase + VIA_CRDR_SDRESP1);
+	u32 dwdata2 = pete_readl("drivers/mmc/host/via-sdmmc.c:515", addrbase + VIA_CRDR_SDRESP2);
+	u32 dwdata3 = pete_readl("drivers/mmc/host/via-sdmmc.c:516", addrbase + VIA_CRDR_SDRESP3);
 
 	if (cmd->flags & MMC_RSP_136) {
 		cmd->resp[0] = ((u8) (dwdata1)) |
@@ -618,8 +618,8 @@ nodata:
 	cmdctrl |= VIA_CRDR_SDCTRL_START;
 
 	addrbase = host->sdhc_mmiobase;
-	writel(cmd->arg, addrbase + VIA_CRDR_SDCARG);
-	writel(cmdctrl, addrbase + VIA_CRDR_SDCTRL);
+	pete_writel("drivers/mmc/host/via-sdmmc.c:621", cmd->arg, addrbase + VIA_CRDR_SDCARG);
+	pete_writel("drivers/mmc/host/via-sdmmc.c:622", cmdctrl, addrbase + VIA_CRDR_SDCTRL);
 }
 
 static void via_sdc_finish_data(struct via_crdr_mmc_host *host)
@@ -729,8 +729,8 @@ static void via_sdc_set_ios(struct mmc_host *mmc, struct mmc_ios *ios)
 	spin_lock_irqsave(&host->lock, flags);
 
 	addrbase = host->sdhc_mmiobase;
-	org_data = readl(addrbase + VIA_CRDR_SDBUSMODE);
-	sdextctrl = readl(addrbase + VIA_CRDR_SDEXTCTRL);
+	org_data = pete_readl("drivers/mmc/host/via-sdmmc.c:732", addrbase + VIA_CRDR_SDBUSMODE);
+	sdextctrl = pete_readl("drivers/mmc/host/via-sdmmc.c:733", addrbase + VIA_CRDR_SDEXTCTRL);
 
 	if (ios->bus_width == MMC_BUS_WIDTH_1)
 		org_data &= ~VIA_CRDR_SDMODE_4BIT;
@@ -747,8 +747,8 @@ static void via_sdc_set_ios(struct mmc_host *mmc, struct mmc_ios *ios)
 	else
 		sdextctrl &= ~VIA_CRDR_SDEXTCTRL_HISPD;
 
-	writel(org_data, addrbase + VIA_CRDR_SDBUSMODE);
-	writel(sdextctrl, addrbase + VIA_CRDR_SDEXTCTRL);
+	pete_writel("drivers/mmc/host/via-sdmmc.c:750", org_data, addrbase + VIA_CRDR_SDBUSMODE);
+	pete_writel("drivers/mmc/host/via-sdmmc.c:751", sdextctrl, addrbase + VIA_CRDR_SDEXTCTRL);
 
 	if (ios->clock >= 48000000)
 		clock = PCI_CLK_48M;
@@ -946,7 +946,7 @@ static void via_sdc_timeout(struct timer_list *t)
 		       sdhost->mrq->cmd->opcode);
 
 		if (sdhost->data) {
-			writel(VIA_CRDR_DMACTRL_SFTRST,
+			pete_writel("drivers/mmc/host/via-sdmmc.c:949", VIA_CRDR_DMACTRL_SFTRST,
 				sdhost->ddma_mmiobase + VIA_CRDR_DMACTRL);
 			sdhost->data->error = -ETIMEDOUT;
 			via_sdc_finish_data(sdhost);
@@ -991,7 +991,7 @@ static void via_sdc_card_detect(struct work_struct *work)
 	host = container_of(work, struct via_crdr_mmc_host, carddet_work);
 
 	addrbase = host->ddma_mmiobase;
-	writel(VIA_CRDR_DMACTRL_SFTRST, addrbase + VIA_CRDR_DMACTRL);
+	pete_writel("drivers/mmc/host/via-sdmmc.c:994", VIA_CRDR_DMACTRL_SFTRST, addrbase + VIA_CRDR_DMACTRL);
 
 	spin_lock_irqsave(&host->lock, flags);
 
@@ -1054,11 +1054,11 @@ static void via_init_mmc_host(struct via_crdr_mmc_host *host)
 	tasklet_setup(&host->finish_tasklet, via_sdc_tasklet_finish);
 
 	addrbase = host->sdhc_mmiobase;
-	writel(0x0, addrbase + VIA_CRDR_SDINTMASK);
+	pete_writel("drivers/mmc/host/via-sdmmc.c:1057", 0x0, addrbase + VIA_CRDR_SDINTMASK);
 	msleep(1);
 
 	lenreg = VIA_CRDR_SDBLKLEN_GPIDET | VIA_CRDR_SDBLKLEN_INTEN;
-	writel(lenreg, addrbase + VIA_CRDR_SDBLKLEN);
+	pete_writel("drivers/mmc/host/via-sdmmc.c:1061", lenreg, addrbase + VIA_CRDR_SDBLKLEN);
 
 	status = readw(addrbase + VIA_CRDR_SDSTATUS);
 	status &= VIA_CRDR_SDSTS_W1C_MASK;
@@ -1070,7 +1070,7 @@ static void via_init_mmc_host(struct via_crdr_mmc_host *host)
 
 	writeb(0x0, addrbase + VIA_CRDR_SDEXTCTRL);
 
-	writel(VIA_CRDR_SDACTIVE_INTMASK, addrbase + VIA_CRDR_SDINTMASK);
+	pete_writel("drivers/mmc/host/via-sdmmc.c:1073", VIA_CRDR_SDACTIVE_INTMASK, addrbase + VIA_CRDR_SDINTMASK);
 	msleep(1);
 }
 
@@ -1189,7 +1189,7 @@ static void via_sd_remove(struct pci_dev *pcidev)
 			"transfer\n", mmc_hostname(sdhost->mmc));
 
 		/* make sure all DMA is stopped */
-		writel(VIA_CRDR_DMACTRL_SFTRST,
+		pete_writel("drivers/mmc/host/via-sdmmc.c:1192", VIA_CRDR_DMACTRL_SFTRST,
 			sdhost->ddma_mmiobase + VIA_CRDR_DMACTRL);
 		sdhost->mrq->cmd->error = -ENOMEDIUM;
 		if (sdhost->mrq->stop)
@@ -1232,10 +1232,10 @@ static void __maybe_unused via_init_sdc_pm(struct via_crdr_mmc_host *host)
 	pm_sdhcreg = &(host->pm_sdhc_reg);
 	addrbase = host->sdhc_mmiobase;
 
-	writel(0x0, addrbase + VIA_CRDR_SDINTMASK);
+	pete_writel("drivers/mmc/host/via-sdmmc.c:1235", 0x0, addrbase + VIA_CRDR_SDINTMASK);
 
 	lenreg = VIA_CRDR_SDBLKLEN_GPIDET | VIA_CRDR_SDBLKLEN_INTEN;
-	writel(lenreg, addrbase + VIA_CRDR_SDBLKLEN);
+	pete_writel("drivers/mmc/host/via-sdmmc.c:1238", lenreg, addrbase + VIA_CRDR_SDBLKLEN);
 
 	status = readw(addrbase + VIA_CRDR_SDSTATUS);
 	status &= VIA_CRDR_SDSTS_W1C_MASK;
@@ -1245,12 +1245,12 @@ static void __maybe_unused via_init_sdc_pm(struct via_crdr_mmc_host *host)
 	status |= VIA_CRDR_SDSTS_CFE;
 	writew(status, addrbase + VIA_CRDR_SDSTATUS2);
 
-	writel(pm_sdhcreg->sdcontrol_reg, addrbase + VIA_CRDR_SDCTRL);
-	writel(pm_sdhcreg->sdcmdarg_reg, addrbase + VIA_CRDR_SDCARG);
-	writel(pm_sdhcreg->sdintmask_reg, addrbase + VIA_CRDR_SDINTMASK);
-	writel(pm_sdhcreg->sdrsptmo_reg, addrbase + VIA_CRDR_SDRSPTMO);
-	writel(pm_sdhcreg->sdclksel_reg, addrbase + VIA_CRDR_SDCLKSEL);
-	writel(pm_sdhcreg->sdextctrl_reg, addrbase + VIA_CRDR_SDEXTCTRL);
+	pete_writel("drivers/mmc/host/via-sdmmc.c:1248", pm_sdhcreg->sdcontrol_reg, addrbase + VIA_CRDR_SDCTRL);
+	pete_writel("drivers/mmc/host/via-sdmmc.c:1249", pm_sdhcreg->sdcmdarg_reg, addrbase + VIA_CRDR_SDCARG);
+	pete_writel("drivers/mmc/host/via-sdmmc.c:1250", pm_sdhcreg->sdintmask_reg, addrbase + VIA_CRDR_SDINTMASK);
+	pete_writel("drivers/mmc/host/via-sdmmc.c:1251", pm_sdhcreg->sdrsptmo_reg, addrbase + VIA_CRDR_SDRSPTMO);
+	pete_writel("drivers/mmc/host/via-sdmmc.c:1252", pm_sdhcreg->sdclksel_reg, addrbase + VIA_CRDR_SDCLKSEL);
+	pete_writel("drivers/mmc/host/via-sdmmc.c:1253", pm_sdhcreg->sdextctrl_reg, addrbase + VIA_CRDR_SDEXTCTRL);
 
 	via_print_pcictrl(host);
 	via_print_sdchc(host);

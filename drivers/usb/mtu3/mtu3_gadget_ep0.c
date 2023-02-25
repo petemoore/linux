@@ -111,7 +111,7 @@ static void ep0_read_fifo(struct mtu3_ep *mep, u8 *dst, u16 len)
 		index = len & ~0x03;
 	}
 	if (len & 0x3) {
-		value = readl(fifo);
+		value = pete_readl("drivers/usb/mtu3/mtu3_gadget_ep0.c:114", fifo);
 		memcpy(&dst[index], &value, len & 0x3);
 	}
 

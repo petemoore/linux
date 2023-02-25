@@ -113,13 +113,13 @@ struct jz4740_i2s {
 static inline uint32_t jz4740_i2s_read(const struct jz4740_i2s *i2s,
 	unsigned int reg)
 {
-	return readl(i2s->base + reg);
+	return pete_readl("sound/soc/jz4740/jz4740-i2s.c:116", i2s->base + reg);
 }
 
 static inline void jz4740_i2s_write(const struct jz4740_i2s *i2s,
 	unsigned int reg, uint32_t value)
 {
-	writel(value, i2s->base + reg);
+	pete_writel("sound/soc/jz4740/jz4740-i2s.c:122", value, i2s->base + reg);
 }
 
 static inline void jz4740_i2s_set_bits(const struct jz4740_i2s *i2s,

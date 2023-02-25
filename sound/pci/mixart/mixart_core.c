@@ -153,7 +153,7 @@ static int send_msg( struct mixart_mgr *mgr,
 	}
 
 	msg_frame_address = readl_be(MIXART_MEM(mgr, tailptr));
-	writel(0, MIXART_MEM(mgr, tailptr)); /* set address to zero on this fifo position */
+	pete_writel("sound/pci/mixart/mixart_core.c:156", 0, MIXART_MEM(mgr, tailptr)); /* set address to zero on this fifo position */
 
 	/* increment the inbound free tail */
 	tailptr += 4;
@@ -406,8 +406,8 @@ irqreturn_t snd_mixart_interrupt(int irq, void *dev_id)
 	writel_le(MIXART_HOST_ALL_INTERRUPT_MASKED, MIXART_REG(mgr, MIXART_PCI_OMIMR_OFFSET));
 
 	/* outdoorbell register clear */
-	it_reg = readl(MIXART_REG(mgr, MIXART_PCI_ODBR_OFFSET));
-	writel(it_reg, MIXART_REG(mgr, MIXART_PCI_ODBR_OFFSET));
+	it_reg = pete_readl("sound/pci/mixart/mixart_core.c:409", MIXART_REG(mgr, MIXART_PCI_ODBR_OFFSET));
+	pete_writel("sound/pci/mixart/mixart_core.c:410", it_reg, MIXART_REG(mgr, MIXART_PCI_ODBR_OFFSET));
 
 	/* clear interrupt */
 	writel_le( MIXART_OIDI, MIXART_REG(mgr, MIXART_PCI_OMISR_OFFSET) );
@@ -563,8 +563,8 @@ irqreturn_t snd_mixart_threaded_irq(int irq, void *dev_id)
 
 void snd_mixart_init_mailbox(struct mixart_mgr *mgr)
 {
-	writel( 0, MIXART_MEM( mgr, MSG_HOST_RSC_PROTECTION ) );
-	writel( 0, MIXART_MEM( mgr, MSG_AGENT_RSC_PROTECTION ) );
+	pete_writel("sound/pci/mixart/mixart_core.c:566",  0, MIXART_MEM( mgr, MSG_HOST_RSC_PROTECTION ) );
+	pete_writel("sound/pci/mixart/mixart_core.c:567",  0, MIXART_MEM( mgr, MSG_AGENT_RSC_PROTECTION ) );
 
 	/* allow outbound messagebox to generate interrupts */
 	if(mgr->irq >= 0) {

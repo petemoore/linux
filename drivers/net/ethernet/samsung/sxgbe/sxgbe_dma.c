@@ -22,7 +22,7 @@ static int sxgbe_dma_init(void __iomem *ioaddr, int fix_burst, int burst_map)
 {
 	u32 reg_val;
 
-	reg_val = readl(ioaddr + SXGBE_DMA_SYSBUS_MODE_REG);
+	reg_val = pete_readl("drivers/net/ethernet/samsung/sxgbe/sxgbe_dma.c:25", ioaddr + SXGBE_DMA_SYSBUS_MODE_REG);
 
 	/* if fix_burst = 0, Set UNDEF = 1 of DMA_Sys_Mode Register.
 	 * if fix_burst = 1, Set UNDEF = 0 of DMA_Sys_Mode Register.
@@ -35,7 +35,7 @@ static int sxgbe_dma_init(void __iomem *ioaddr, int fix_burst, int burst_map)
 	/* write burst len map */
 	reg_val |= (burst_map << SXGBE_DMA_BLENMAP_LSHIFT);
 
-	writel(reg_val,	ioaddr + SXGBE_DMA_SYSBUS_MODE_REG);
+	pete_writel("drivers/net/ethernet/samsung/sxgbe/sxgbe_dma.c:38", reg_val,	ioaddr + SXGBE_DMA_SYSBUS_MODE_REG);
 
 	return 0;
 }
@@ -47,30 +47,30 @@ static void sxgbe_dma_channel_init(void __iomem *ioaddr, int cha_num,
 	u32 reg_val;
 	dma_addr_t dma_addr;
 
-	reg_val = readl(ioaddr + SXGBE_DMA_CHA_CTL_REG(cha_num));
+	reg_val = pete_readl("drivers/net/ethernet/samsung/sxgbe/sxgbe_dma.c:50", ioaddr + SXGBE_DMA_CHA_CTL_REG(cha_num));
 	/* set the pbl */
 	if (fix_burst) {
 		reg_val |= SXGBE_DMA_PBL_X8MODE;
-		writel(reg_val, ioaddr + SXGBE_DMA_CHA_CTL_REG(cha_num));
+		pete_writel("drivers/net/ethernet/samsung/sxgbe/sxgbe_dma.c:54", reg_val, ioaddr + SXGBE_DMA_CHA_CTL_REG(cha_num));
 		/* program the TX pbl */
-		reg_val = readl(ioaddr + SXGBE_DMA_CHA_TXCTL_REG(cha_num));
+		reg_val = pete_readl("drivers/net/ethernet/samsung/sxgbe/sxgbe_dma.c:56", ioaddr + SXGBE_DMA_CHA_TXCTL_REG(cha_num));
 		reg_val |= (pbl << SXGBE_DMA_TXPBL_LSHIFT);
-		writel(reg_val, ioaddr + SXGBE_DMA_CHA_TXCTL_REG(cha_num));
+		pete_writel("drivers/net/ethernet/samsung/sxgbe/sxgbe_dma.c:58", reg_val, ioaddr + SXGBE_DMA_CHA_TXCTL_REG(cha_num));
 		/* program the RX pbl */
-		reg_val = readl(ioaddr + SXGBE_DMA_CHA_RXCTL_REG(cha_num));
+		reg_val = pete_readl("drivers/net/ethernet/samsung/sxgbe/sxgbe_dma.c:60", ioaddr + SXGBE_DMA_CHA_RXCTL_REG(cha_num));
 		reg_val |= (pbl << SXGBE_DMA_RXPBL_LSHIFT);
-		writel(reg_val, ioaddr + SXGBE_DMA_CHA_RXCTL_REG(cha_num));
+		pete_writel("drivers/net/ethernet/samsung/sxgbe/sxgbe_dma.c:62", reg_val, ioaddr + SXGBE_DMA_CHA_RXCTL_REG(cha_num));
 	}
 
 	/* program desc registers */
-	writel(upper_32_bits(dma_tx),
+	pete_writel("drivers/net/ethernet/samsung/sxgbe/sxgbe_dma.c:66", upper_32_bits(dma_tx),
 	       ioaddr + SXGBE_DMA_CHA_TXDESC_HADD_REG(cha_num));
-	writel(lower_32_bits(dma_tx),
+	pete_writel("drivers/net/ethernet/samsung/sxgbe/sxgbe_dma.c:68", lower_32_bits(dma_tx),
 	       ioaddr + SXGBE_DMA_CHA_TXDESC_LADD_REG(cha_num));
 
-	writel(upper_32_bits(dma_rx),
+	pete_writel("drivers/net/ethernet/samsung/sxgbe/sxgbe_dma.c:71", upper_32_bits(dma_rx),
 	       ioaddr + SXGBE_DMA_CHA_RXDESC_HADD_REG(cha_num));
-	writel(lower_32_bits(dma_rx),
+	pete_writel("drivers/net/ethernet/samsung/sxgbe/sxgbe_dma.c:73", lower_32_bits(dma_rx),
 	       ioaddr + SXGBE_DMA_CHA_RXDESC_LADD_REG(cha_num));
 
 	/* program tail pointers */
@@ -78,18 +78,18 @@ static void sxgbe_dma_channel_init(void __iomem *ioaddr, int cha_num,
 	 * same as TX/RX desc list
 	 */
 	dma_addr = dma_tx + ((t_rsize - 1) * SXGBE_DESC_SIZE_BYTES);
-	writel(lower_32_bits(dma_addr),
+	pete_writel("drivers/net/ethernet/samsung/sxgbe/sxgbe_dma.c:81", lower_32_bits(dma_addr),
 	       ioaddr + SXGBE_DMA_CHA_TXDESC_TAILPTR_REG(cha_num));
 
 	dma_addr = dma_rx + ((r_rsize - 1) * SXGBE_DESC_SIZE_BYTES);
-	writel(lower_32_bits(dma_addr),
+	pete_writel("drivers/net/ethernet/samsung/sxgbe/sxgbe_dma.c:85", lower_32_bits(dma_addr),
 	       ioaddr + SXGBE_DMA_CHA_RXDESC_LADD_REG(cha_num));
 	/* program the ring sizes */
-	writel(t_rsize - 1, ioaddr + SXGBE_DMA_CHA_TXDESC_RINGLEN_REG(cha_num));
-	writel(r_rsize - 1, ioaddr + SXGBE_DMA_CHA_RXDESC_RINGLEN_REG(cha_num));
+	pete_writel("drivers/net/ethernet/samsung/sxgbe/sxgbe_dma.c:88", t_rsize - 1, ioaddr + SXGBE_DMA_CHA_TXDESC_RINGLEN_REG(cha_num));
+	pete_writel("drivers/net/ethernet/samsung/sxgbe/sxgbe_dma.c:89", r_rsize - 1, ioaddr + SXGBE_DMA_CHA_RXDESC_RINGLEN_REG(cha_num));
 
 	/* Enable TX/RX interrupts */
-	writel(SXGBE_DMA_ENA_INT,
+	pete_writel("drivers/net/ethernet/samsung/sxgbe/sxgbe_dma.c:92", SXGBE_DMA_ENA_INT,
 	       ioaddr + SXGBE_DMA_CHA_INT_ENABLE_REG(cha_num));
 }
 
@@ -97,22 +97,22 @@ static void sxgbe_enable_dma_transmission(void __iomem *ioaddr, int cha_num)
 {
 	u32 tx_config;
 
-	tx_config = readl(ioaddr + SXGBE_DMA_CHA_TXCTL_REG(cha_num));
+	tx_config = pete_readl("drivers/net/ethernet/samsung/sxgbe/sxgbe_dma.c:100", ioaddr + SXGBE_DMA_CHA_TXCTL_REG(cha_num));
 	tx_config |= SXGBE_TX_START_DMA;
-	writel(tx_config, ioaddr + SXGBE_DMA_CHA_TXCTL_REG(cha_num));
+	pete_writel("drivers/net/ethernet/samsung/sxgbe/sxgbe_dma.c:102", tx_config, ioaddr + SXGBE_DMA_CHA_TXCTL_REG(cha_num));
 }
 
 static void sxgbe_enable_dma_irq(void __iomem *ioaddr, int dma_cnum)
 {
 	/* Enable TX/RX interrupts */
-	writel(SXGBE_DMA_ENA_INT,
+	pete_writel("drivers/net/ethernet/samsung/sxgbe/sxgbe_dma.c:108", SXGBE_DMA_ENA_INT,
 	       ioaddr + SXGBE_DMA_CHA_INT_ENABLE_REG(dma_cnum));
 }
 
 static void sxgbe_disable_dma_irq(void __iomem *ioaddr, int dma_cnum)
 {
 	/* Disable TX/RX interrupts */
-	writel(0, ioaddr + SXGBE_DMA_CHA_INT_ENABLE_REG(dma_cnum));
+	pete_writel("drivers/net/ethernet/samsung/sxgbe/sxgbe_dma.c:115", 0, ioaddr + SXGBE_DMA_CHA_INT_ENABLE_REG(dma_cnum));
 }
 
 static void sxgbe_dma_start_tx(void __iomem *ioaddr, int tchannels)
@@ -121,9 +121,9 @@ static void sxgbe_dma_start_tx(void __iomem *ioaddr, int tchannels)
 	u32 tx_ctl_reg;
 
 	for (cnum = 0; cnum < tchannels; cnum++) {
-		tx_ctl_reg = readl(ioaddr + SXGBE_DMA_CHA_TXCTL_REG(cnum));
+		tx_ctl_reg = pete_readl("drivers/net/ethernet/samsung/sxgbe/sxgbe_dma.c:124", ioaddr + SXGBE_DMA_CHA_TXCTL_REG(cnum));
 		tx_ctl_reg |= SXGBE_TX_ENABLE;
-		writel(tx_ctl_reg,
+		pete_writel("drivers/net/ethernet/samsung/sxgbe/sxgbe_dma.c:126", tx_ctl_reg,
 		       ioaddr + SXGBE_DMA_CHA_TXCTL_REG(cnum));
 	}
 }
@@ -132,18 +132,18 @@ static void sxgbe_dma_start_tx_queue(void __iomem *ioaddr, int dma_cnum)
 {
 	u32 tx_ctl_reg;
 
-	tx_ctl_reg = readl(ioaddr + SXGBE_DMA_CHA_TXCTL_REG(dma_cnum));
+	tx_ctl_reg = pete_readl("drivers/net/ethernet/samsung/sxgbe/sxgbe_dma.c:135", ioaddr + SXGBE_DMA_CHA_TXCTL_REG(dma_cnum));
 	tx_ctl_reg |= SXGBE_TX_ENABLE;
-	writel(tx_ctl_reg, ioaddr + SXGBE_DMA_CHA_TXCTL_REG(dma_cnum));
+	pete_writel("drivers/net/ethernet/samsung/sxgbe/sxgbe_dma.c:137", tx_ctl_reg, ioaddr + SXGBE_DMA_CHA_TXCTL_REG(dma_cnum));
 }
 
 static void sxgbe_dma_stop_tx_queue(void __iomem *ioaddr, int dma_cnum)
 {
 	u32 tx_ctl_reg;
 
-	tx_ctl_reg = readl(ioaddr + SXGBE_DMA_CHA_TXCTL_REG(dma_cnum));
+	tx_ctl_reg = pete_readl("drivers/net/ethernet/samsung/sxgbe/sxgbe_dma.c:144", ioaddr + SXGBE_DMA_CHA_TXCTL_REG(dma_cnum));
 	tx_ctl_reg &= ~(SXGBE_TX_ENABLE);
-	writel(tx_ctl_reg, ioaddr + SXGBE_DMA_CHA_TXCTL_REG(dma_cnum));
+	pete_writel("drivers/net/ethernet/samsung/sxgbe/sxgbe_dma.c:146", tx_ctl_reg, ioaddr + SXGBE_DMA_CHA_TXCTL_REG(dma_cnum));
 }
 
 static void sxgbe_dma_stop_tx(void __iomem *ioaddr, int tchannels)
@@ -152,9 +152,9 @@ static void sxgbe_dma_stop_tx(void __iomem *ioaddr, int tchannels)
 	u32 tx_ctl_reg;
 
 	for (cnum = 0; cnum < tchannels; cnum++) {
-		tx_ctl_reg = readl(ioaddr + SXGBE_DMA_CHA_TXCTL_REG(cnum));
+		tx_ctl_reg = pete_readl("drivers/net/ethernet/samsung/sxgbe/sxgbe_dma.c:155", ioaddr + SXGBE_DMA_CHA_TXCTL_REG(cnum));
 		tx_ctl_reg &= ~(SXGBE_TX_ENABLE);
-		writel(tx_ctl_reg, ioaddr + SXGBE_DMA_CHA_TXCTL_REG(cnum));
+		pete_writel("drivers/net/ethernet/samsung/sxgbe/sxgbe_dma.c:157", tx_ctl_reg, ioaddr + SXGBE_DMA_CHA_TXCTL_REG(cnum));
 	}
 }
 
@@ -164,9 +164,9 @@ static void sxgbe_dma_start_rx(void __iomem *ioaddr, int rchannels)
 	u32 rx_ctl_reg;
 
 	for (cnum = 0; cnum < rchannels; cnum++) {
-		rx_ctl_reg = readl(ioaddr + SXGBE_DMA_CHA_RXCTL_REG(cnum));
+		rx_ctl_reg = pete_readl("drivers/net/ethernet/samsung/sxgbe/sxgbe_dma.c:167", ioaddr + SXGBE_DMA_CHA_RXCTL_REG(cnum));
 		rx_ctl_reg |= SXGBE_RX_ENABLE;
-		writel(rx_ctl_reg,
+		pete_writel("drivers/net/ethernet/samsung/sxgbe/sxgbe_dma.c:169", rx_ctl_reg,
 		       ioaddr + SXGBE_DMA_CHA_RXCTL_REG(cnum));
 	}
 }
@@ -177,16 +177,16 @@ static void sxgbe_dma_stop_rx(void __iomem *ioaddr, int rchannels)
 	u32 rx_ctl_reg;
 
 	for (cnum = 0; cnum < rchannels; cnum++) {
-		rx_ctl_reg = readl(ioaddr + SXGBE_DMA_CHA_RXCTL_REG(cnum));
+		rx_ctl_reg = pete_readl("drivers/net/ethernet/samsung/sxgbe/sxgbe_dma.c:180", ioaddr + SXGBE_DMA_CHA_RXCTL_REG(cnum));
 		rx_ctl_reg &= ~(SXGBE_RX_ENABLE);
-		writel(rx_ctl_reg, ioaddr + SXGBE_DMA_CHA_RXCTL_REG(cnum));
+		pete_writel("drivers/net/ethernet/samsung/sxgbe/sxgbe_dma.c:182", rx_ctl_reg, ioaddr + SXGBE_DMA_CHA_RXCTL_REG(cnum));
 	}
 }
 
 static int sxgbe_tx_dma_int_status(void __iomem *ioaddr, int channel_no,
 				   struct sxgbe_extra_stats *x)
 {
-	u32 int_status = readl(ioaddr + SXGBE_DMA_CHA_STATUS_REG(channel_no));
+	u32 int_status = pete_readl("drivers/net/ethernet/samsung/sxgbe/sxgbe_dma.c:189", ioaddr + SXGBE_DMA_CHA_STATUS_REG(channel_no));
 	u32 clear_val = 0;
 	u32 ret_val = 0;
 
@@ -250,7 +250,7 @@ static int sxgbe_tx_dma_int_status(void __iomem *ioaddr, int channel_no,
 	}
 
 	/* clear the served bits */
-	writel(clear_val, ioaddr + SXGBE_DMA_CHA_STATUS_REG(channel_no));
+	pete_writel("drivers/net/ethernet/samsung/sxgbe/sxgbe_dma.c:253", clear_val, ioaddr + SXGBE_DMA_CHA_STATUS_REG(channel_no));
 
 	return ret_val;
 }
@@ -258,7 +258,7 @@ static int sxgbe_tx_dma_int_status(void __iomem *ioaddr, int channel_no,
 static int sxgbe_rx_dma_int_status(void __iomem *ioaddr, int channel_no,
 				   struct sxgbe_extra_stats *x)
 {
-	u32 int_status = readl(ioaddr + SXGBE_DMA_CHA_STATUS_REG(channel_no));
+	u32 int_status = pete_readl("drivers/net/ethernet/samsung/sxgbe/sxgbe_dma.c:261", ioaddr + SXGBE_DMA_CHA_STATUS_REG(channel_no));
 	u32 clear_val = 0;
 	u32 ret_val = 0;
 
@@ -316,7 +316,7 @@ static int sxgbe_rx_dma_int_status(void __iomem *ioaddr, int channel_no,
 	}
 
 	/* clear the served bits */
-	writel(clear_val, ioaddr + SXGBE_DMA_CHA_STATUS_REG(channel_no));
+	pete_writel("drivers/net/ethernet/samsung/sxgbe/sxgbe_dma.c:319", clear_val, ioaddr + SXGBE_DMA_CHA_STATUS_REG(channel_no));
 
 	return ret_val;
 }
@@ -327,7 +327,7 @@ static void sxgbe_dma_rx_watchdog(void __iomem *ioaddr, u32 riwt)
 	u32 que_num;
 
 	SXGBE_FOR_EACH_QUEUE(SXGBE_RX_QUEUES, que_num) {
-		writel(riwt,
+		pete_writel("drivers/net/ethernet/samsung/sxgbe/sxgbe_dma.c:330", riwt,
 		       ioaddr + SXGBE_DMA_CHA_INT_RXWATCHTMR_REG(que_num));
 	}
 }
@@ -336,9 +336,9 @@ static void sxgbe_enable_tso(void __iomem *ioaddr, u8 chan_num)
 {
 	u32 ctrl;
 
-	ctrl = readl(ioaddr + SXGBE_DMA_CHA_TXCTL_REG(chan_num));
+	ctrl = pete_readl("drivers/net/ethernet/samsung/sxgbe/sxgbe_dma.c:339", ioaddr + SXGBE_DMA_CHA_TXCTL_REG(chan_num));
 	ctrl |= SXGBE_DMA_CHA_TXCTL_TSE_ENABLE;
-	writel(ctrl, ioaddr + SXGBE_DMA_CHA_TXCTL_REG(chan_num));
+	pete_writel("drivers/net/ethernet/samsung/sxgbe/sxgbe_dma.c:341", ctrl, ioaddr + SXGBE_DMA_CHA_TXCTL_REG(chan_num));
 }
 
 static const struct sxgbe_dma_ops sxgbe_dma_ops = {

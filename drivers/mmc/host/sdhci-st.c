@@ -229,7 +229,7 @@ static int st_mmcss_lock_dll(void __iomem *ioaddr)
 	/* Checks if the DLL procedure is finished */
 	do {
 		curr = jiffies;
-		value = readl(ioaddr + ST_MMC_STATUS_R);
+		value = pete_readl("drivers/mmc/host/sdhci-st.c:232", ioaddr + ST_MMC_STATUS_R);
 		if (value & 0x1)
 			return 0;
 

@@ -68,11 +68,11 @@ static int clk_fixup_div_set_rate(struct clk_hw *hw, unsigned long rate,
 
 	spin_lock_irqsave(div->lock, flags);
 
-	val = readl(div->reg);
+	val = pete_readl("drivers/clk/imx/clk-fixup-div.c:71", div->reg);
 	val &= ~(div_mask(div) << div->shift);
 	val |= value << div->shift;
 	fixup_div->fixup(&val);
-	writel(val, div->reg);
+	pete_writel("drivers/clk/imx/clk-fixup-div.c:75", val, div->reg);
 
 	spin_unlock_irqrestore(div->lock, flags);
 

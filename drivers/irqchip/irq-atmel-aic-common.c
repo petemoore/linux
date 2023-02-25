@@ -156,7 +156,7 @@ void __init aic_common_rtc_irq_fixup(void)
 	if (!regs)
 		return;
 
-	writel(AT91_RTC_IRQ_MASK, regs + AT91_RTC_IDR);
+	pete_writel("drivers/irqchip/irq-atmel-aic-common.c:159", AT91_RTC_IRQ_MASK, regs + AT91_RTC_IDR);
 
 	iounmap(regs);
 }
@@ -179,7 +179,7 @@ void __init aic_common_rtt_irq_fixup(void)
 		if (!regs)
 			continue;
 
-		writel(readl(regs + AT91_RTT_MR) &
+		pete_writel("drivers/irqchip/irq-atmel-aic-common.c:182", pete_readl("drivers/irqchip/irq-atmel-aic-common.c:182", regs + AT91_RTT_MR) &
 		       ~(AT91_RTT_ALMIEN | AT91_RTT_RTTINCIEN),
 		       regs + AT91_RTT_MR);
 

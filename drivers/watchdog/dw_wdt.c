@@ -101,7 +101,7 @@ struct dw_wdt {
 
 static inline int dw_wdt_is_enabled(struct dw_wdt *dw_wdt)
 {
-	return readl(dw_wdt->regs + WDOG_CONTROL_REG_OFFSET) &
+	return pete_readl("drivers/watchdog/dw_wdt.c:104", dw_wdt->regs + WDOG_CONTROL_REG_OFFSET) &
 		WDOG_CONTROL_REG_WDT_EN_MASK;
 }
 
@@ -109,12 +109,12 @@ static void dw_wdt_update_mode(struct dw_wdt *dw_wdt, enum dw_wdt_rmod rmod)
 {
 	u32 val;
 
-	val = readl(dw_wdt->regs + WDOG_CONTROL_REG_OFFSET);
+	val = pete_readl("drivers/watchdog/dw_wdt.c:112", dw_wdt->regs + WDOG_CONTROL_REG_OFFSET);
 	if (rmod == DW_WDT_RMOD_IRQ)
 		val |= WDOG_CONTROL_REG_RESP_MODE_MASK;
 	else
 		val &= ~WDOG_CONTROL_REG_RESP_MODE_MASK;
-	writel(val, dw_wdt->regs + WDOG_CONTROL_REG_OFFSET);
+	pete_writel("drivers/watchdog/dw_wdt.c:117", val, dw_wdt->regs + WDOG_CONTROL_REG_OFFSET);
 
 	dw_wdt->rmod = rmod;
 }
@@ -170,7 +170,7 @@ static unsigned int dw_wdt_get_max_timeout_ms(struct dw_wdt *dw_wdt)
 
 static unsigned int dw_wdt_get_timeout(struct dw_wdt *dw_wdt)
 {
-	int top_val = readl(dw_wdt->regs + WDOG_TIMEOUT_RANGE_REG_OFFSET) & 0xF;
+	int top_val = pete_readl("drivers/watchdog/dw_wdt.c:173", dw_wdt->regs + WDOG_TIMEOUT_RANGE_REG_OFFSET) & 0xF;
 	int idx;
 
 	for (idx = 0; idx < DW_WDT_NUM_TOPS; ++idx) {
@@ -189,7 +189,7 @@ static int dw_wdt_ping(struct watchdog_device *wdd)
 {
 	struct dw_wdt *dw_wdt = to_dw_wdt(wdd);
 
-	writel(WDOG_COUNTER_RESTART_KICK_VALUE, dw_wdt->regs +
+	pete_writel("drivers/watchdog/dw_wdt.c:192", WDOG_COUNTER_RESTART_KICK_VALUE, dw_wdt->regs +
 	       WDOG_COUNTER_RESTART_REG_OFFSET);
 
 	return 0;
@@ -222,7 +222,7 @@ static int dw_wdt_set_timeout(struct watchdog_device *wdd, unsigned int top_s)
 	 * CP_WDT_DUAL_TOP in WDT_COMP_PARAMS_1).  On those we
 	 * effectively get a pat of the watchdog right here.
 	 */
-	writel(top_val | top_val << WDOG_TIMEOUT_RANGE_TOPINIT_SHIFT,
+	pete_writel("drivers/watchdog/dw_wdt.c:225", top_val | top_val << WDOG_TIMEOUT_RANGE_TOPINIT_SHIFT,
 	       dw_wdt->regs + WDOG_TIMEOUT_RANGE_REG_OFFSET);
 
 	/* Kick new TOP value into the watchdog counter if activated. */
@@ -259,7 +259,7 @@ static int dw_wdt_set_pretimeout(struct watchdog_device *wdd, unsigned int req)
 
 static void dw_wdt_arm_system_reset(struct dw_wdt *dw_wdt)
 {
-	u32 val = readl(dw_wdt->regs + WDOG_CONTROL_REG_OFFSET);
+	u32 val = pete_readl("drivers/watchdog/dw_wdt.c:262", dw_wdt->regs + WDOG_CONTROL_REG_OFFSET);
 
 	/* Disable/enable interrupt mode depending on the RMOD flag. */
 	if (dw_wdt->rmod == DW_WDT_RMOD_IRQ)
@@ -268,7 +268,7 @@ static void dw_wdt_arm_system_reset(struct dw_wdt *dw_wdt)
 		val &= ~WDOG_CONTROL_REG_RESP_MODE_MASK;
 	/* Enable watchdog. */
 	val |= WDOG_CONTROL_REG_WDT_EN_MASK;
-	writel(val, dw_wdt->regs + WDOG_CONTROL_REG_OFFSET);
+	pete_writel("drivers/watchdog/dw_wdt.c:271", val, dw_wdt->regs + WDOG_CONTROL_REG_OFFSET);
 }
 
 static int dw_wdt_start(struct watchdog_device *wdd)
@@ -302,10 +302,10 @@ static int dw_wdt_restart(struct watchdog_device *wdd,
 {
 	struct dw_wdt *dw_wdt = to_dw_wdt(wdd);
 
-	writel(0, dw_wdt->regs + WDOG_TIMEOUT_RANGE_REG_OFFSET);
+	pete_writel("drivers/watchdog/dw_wdt.c:305", 0, dw_wdt->regs + WDOG_TIMEOUT_RANGE_REG_OFFSET);
 	dw_wdt_update_mode(dw_wdt, DW_WDT_RMOD_RESET);
 	if (dw_wdt_is_enabled(dw_wdt))
-		writel(WDOG_COUNTER_RESTART_KICK_VALUE,
+		pete_writel("drivers/watchdog/dw_wdt.c:308", WDOG_COUNTER_RESTART_KICK_VALUE,
 		       dw_wdt->regs + WDOG_COUNTER_RESTART_REG_OFFSET);
 	else
 		dw_wdt_arm_system_reset(dw_wdt);
@@ -322,11 +322,11 @@ static unsigned int dw_wdt_get_timeleft(struct watchdog_device *wdd)
 	unsigned int sec;
 	u32 val;
 
-	val = readl(dw_wdt->regs + WDOG_CURRENT_COUNT_REG_OFFSET);
+	val = pete_readl("drivers/watchdog/dw_wdt.c:325", dw_wdt->regs + WDOG_CURRENT_COUNT_REG_OFFSET);
 	sec = val / dw_wdt->rate;
 
 	if (dw_wdt->rmod == DW_WDT_RMOD_IRQ) {
-		val = readl(dw_wdt->regs + WDOG_INTERRUPT_STATUS_REG_OFFSET);
+		val = pete_readl("drivers/watchdog/dw_wdt.c:329", dw_wdt->regs + WDOG_INTERRUPT_STATUS_REG_OFFSET);
 		if (!val)
 			sec += wdd->pretimeout;
 	}
@@ -366,7 +366,7 @@ static irqreturn_t dw_wdt_irq(int irq, void *devid)
 	 * We don't clear the IRQ status. It's supposed to be done by the
 	 * following ping operations.
 	 */
-	val = readl(dw_wdt->regs + WDOG_INTERRUPT_STATUS_REG_OFFSET);
+	val = pete_readl("drivers/watchdog/dw_wdt.c:369", dw_wdt->regs + WDOG_INTERRUPT_STATUS_REG_OFFSET);
 	if (!val)
 		return IRQ_NONE;
 
@@ -380,8 +380,8 @@ static int dw_wdt_suspend(struct device *dev)
 {
 	struct dw_wdt *dw_wdt = dev_get_drvdata(dev);
 
-	dw_wdt->control = readl(dw_wdt->regs + WDOG_CONTROL_REG_OFFSET);
-	dw_wdt->timeout = readl(dw_wdt->regs + WDOG_TIMEOUT_RANGE_REG_OFFSET);
+	dw_wdt->control = pete_readl("drivers/watchdog/dw_wdt.c:383", dw_wdt->regs + WDOG_CONTROL_REG_OFFSET);
+	dw_wdt->timeout = pete_readl("drivers/watchdog/dw_wdt.c:384", dw_wdt->regs + WDOG_TIMEOUT_RANGE_REG_OFFSET);
 
 	clk_disable_unprepare(dw_wdt->pclk);
 	clk_disable_unprepare(dw_wdt->clk);
@@ -403,8 +403,8 @@ static int dw_wdt_resume(struct device *dev)
 		return err;
 	}
 
-	writel(dw_wdt->timeout, dw_wdt->regs + WDOG_TIMEOUT_RANGE_REG_OFFSET);
-	writel(dw_wdt->control, dw_wdt->regs + WDOG_CONTROL_REG_OFFSET);
+	pete_writel("drivers/watchdog/dw_wdt.c:406", dw_wdt->timeout, dw_wdt->regs + WDOG_TIMEOUT_RANGE_REG_OFFSET);
+	pete_writel("drivers/watchdog/dw_wdt.c:407", dw_wdt->control, dw_wdt->regs + WDOG_CONTROL_REG_OFFSET);
 
 	dw_wdt_ping(&dw_wdt->wdd);
 
@@ -469,7 +469,7 @@ static int dw_wdt_init_timeouts(struct dw_wdt *dw_wdt, struct device *dev)
 	 * WDT_USE_FIX_TOP flag found in the component specific parameters
 	 * #1 register.
 	 */
-	data = readl(dw_wdt->regs + WDOG_COMP_PARAMS_1_REG_OFFSET);
+	data = pete_readl("drivers/watchdog/dw_wdt.c:472", dw_wdt->regs + WDOG_COMP_PARAMS_1_REG_OFFSET);
 	if (data & WDOG_COMP_PARAMS_1_USE_FIX_TOP) {
 		tops = dw_wdt_fix_tops;
 	} else {

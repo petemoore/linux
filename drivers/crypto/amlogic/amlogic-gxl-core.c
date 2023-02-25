@@ -28,7 +28,7 @@ static irqreturn_t meson_irq_handler(int irq, void *data)
 
 	for (flow = 0; flow < MAXFLOW; flow++) {
 		if (mc->irqs[flow] == irq) {
-			p = readl(mc->base + ((0x04 + flow) << 2));
+			p = pete_readl("drivers/crypto/amlogic/amlogic-gxl-core.c:31", mc->base + ((0x04 + flow) << 2));
 			if (p) {
 				writel_relaxed(0xF, mc->base + ((0x4 + flow) << 2));
 				mc->chanlist[flow].status = 1;

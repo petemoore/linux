@@ -11,7 +11,7 @@
 
 static bool qtnf_shm_ipc_has_new_data(struct qtnf_shm_ipc *ipc)
 {
-	const u32 flags = readl(&ipc->shm_region->headroom.hdr.flags);
+	const u32 flags = pete_readl("drivers/net/wireless/quantenna/qtnfmac/shm_ipc.c:14", &ipc->shm_region->headroom.hdr.flags);
 
 	return (flags & QTNF_SHM_IPC_NEW_DATA);
 }
@@ -37,8 +37,8 @@ static void qtnf_shm_handle_new_data(struct qtnf_shm_ipc *ipc)
 				    ipc->shm_region->data, size);
 	}
 
-	writel(QTNF_SHM_IPC_ACK, &shm_reg_hdr->flags);
-	readl(&shm_reg_hdr->flags); /* flush PCIe write */
+	pete_writel("drivers/net/wireless/quantenna/qtnfmac/shm_ipc.c:40", QTNF_SHM_IPC_ACK, &shm_reg_hdr->flags);
+	pete_readl("drivers/net/wireless/quantenna/qtnfmac/shm_ipc.c:41", &shm_reg_hdr->flags); /* flush PCIe write */
 
 	ipc->interrupt.fn(ipc->interrupt.arg);
 }
@@ -56,7 +56,7 @@ static void qtnf_shm_ipc_irq_inbound_handler(struct qtnf_shm_ipc *ipc)
 {
 	u32 flags;
 
-	flags = readl(&ipc->shm_region->headroom.hdr.flags);
+	flags = pete_readl("drivers/net/wireless/quantenna/qtnfmac/shm_ipc.c:59", &ipc->shm_region->headroom.hdr.flags);
 
 	if (flags & QTNF_SHM_IPC_NEW_DATA)
 		queue_work(ipc->workqueue, &ipc->irq_work);
@@ -69,7 +69,7 @@ static void qtnf_shm_ipc_irq_outbound_handler(struct qtnf_shm_ipc *ipc)
 	if (!READ_ONCE(ipc->waiting_for_ack))
 		return;
 
-	flags = readl(&ipc->shm_region->headroom.hdr.flags);
+	flags = pete_readl("drivers/net/wireless/quantenna/qtnfmac/shm_ipc.c:72", &ipc->shm_region->headroom.hdr.flags);
 
 	if (flags & QTNF_SHM_IPC_ACK) {
 		WRITE_ONCE(ipc->waiting_for_ack, 0);
@@ -143,8 +143,8 @@ int qtnf_shm_ipc_send(struct qtnf_shm_ipc *ipc, const u8 *buf, size_t size)
 	/* sync previous memory write before announcing new data ready */
 	wmb();
 
-	writel(QTNF_SHM_IPC_NEW_DATA, &shm_reg_hdr->flags);
-	readl(&shm_reg_hdr->flags); /* flush PCIe write */
+	pete_writel("drivers/net/wireless/quantenna/qtnfmac/shm_ipc.c:146", QTNF_SHM_IPC_NEW_DATA, &shm_reg_hdr->flags);
+	pete_readl("drivers/net/wireless/quantenna/qtnfmac/shm_ipc.c:147", &shm_reg_hdr->flags); /* flush PCIe write */
 
 	ipc->interrupt.fn(ipc->interrupt.arg);
 

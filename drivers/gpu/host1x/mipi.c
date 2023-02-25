@@ -136,13 +136,13 @@ struct tegra_mipi_device {
 static inline u32 tegra_mipi_readl(struct tegra_mipi *mipi,
 				   unsigned long offset)
 {
-	return readl(mipi->regs + (offset << 2));
+	return pete_readl("drivers/gpu/host1x/mipi.c:139", mipi->regs + (offset << 2));
 }
 
 static inline void tegra_mipi_writel(struct tegra_mipi *mipi, u32 value,
 				     unsigned long offset)
 {
-	writel(value, mipi->regs + (offset << 2));
+	pete_writel("drivers/gpu/host1x/mipi.c:145", value, mipi->regs + (offset << 2));
 }
 
 static int tegra_mipi_power_up(struct tegra_mipi *mipi)

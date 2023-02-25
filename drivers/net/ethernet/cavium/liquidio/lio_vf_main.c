@@ -2414,7 +2414,7 @@ static int octeon_device_init(struct octeon_device *oct)
 	 * the output queue is enabled.
 	 */
 	for (j = 0; j < oct->num_oqs; j++)
-		writel(oct->droq[j]->max_count, oct->droq[j]->pkts_credit_reg);
+		pete_writel("drivers/net/ethernet/cavium/liquidio/lio_vf_main.c:2417", oct->droq[j]->max_count, oct->droq[j]->pkts_credit_reg);
 
 	/* Packets can start arriving on the output queues from this point. */
 

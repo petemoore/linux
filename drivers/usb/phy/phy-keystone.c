@@ -32,13 +32,13 @@ struct keystone_usbphy {
 
 static inline u32 keystone_usbphy_readl(void __iomem *base, u32 offset)
 {
-	return readl(base + offset);
+	return pete_readl("drivers/usb/phy/phy-keystone.c:35", base + offset);
 }
 
 static inline void keystone_usbphy_writel(void __iomem *base,
 					  u32 offset, u32 value)
 {
-	writel(value, base + offset);
+	pete_writel("drivers/usb/phy/phy-keystone.c:41", value, base + offset);
 }
 
 static int keystone_usbphy_init(struct usb_phy *phy)

@@ -44,7 +44,7 @@ static int xgene_rtc_read_time(struct device *dev, struct rtc_time *tm)
 {
 	struct xgene_rtc_dev *pdata = dev_get_drvdata(dev);
 
-	rtc_time64_to_tm(readl(pdata->csr_base + RTC_CCVR), tm);
+	rtc_time64_to_tm(pete_readl("drivers/rtc/rtc-xgene.c:47", pdata->csr_base + RTC_CCVR), tm);
 	return 0;
 }
 
@@ -56,8 +56,8 @@ static int xgene_rtc_set_time(struct device *dev, struct rtc_time *tm)
 	 * NOTE: After the following write, the RTC_CCVR is only reflected
 	 *       after the update cycle of 1 seconds.
 	 */
-	writel((u32)rtc_tm_to_time64(tm), pdata->csr_base + RTC_CLR);
-	readl(pdata->csr_base + RTC_CLR); /* Force a barrier */
+	pete_writel("drivers/rtc/rtc-xgene.c:59", (u32)rtc_tm_to_time64(tm), pdata->csr_base + RTC_CLR);
+	pete_readl("drivers/rtc/rtc-xgene.c:60", pdata->csr_base + RTC_CLR); /* Force a barrier */
 
 	return 0;
 }
@@ -68,7 +68,7 @@ static int xgene_rtc_read_alarm(struct device *dev, struct rtc_wkalrm *alrm)
 
 	/* If possible, CMR should be read here */
 	rtc_time64_to_tm(0, &alrm->time);
-	alrm->enabled = readl(pdata->csr_base + RTC_CCR) & RTC_CCR_IE;
+	alrm->enabled = pete_readl("drivers/rtc/rtc-xgene.c:71", pdata->csr_base + RTC_CCR) & RTC_CCR_IE;
 
 	return 0;
 }
@@ -78,7 +78,7 @@ static int xgene_rtc_alarm_irq_enable(struct device *dev, u32 enabled)
 	struct xgene_rtc_dev *pdata = dev_get_drvdata(dev);
 	u32 ccr;
 
-	ccr = readl(pdata->csr_base + RTC_CCR);
+	ccr = pete_readl("drivers/rtc/rtc-xgene.c:81", pdata->csr_base + RTC_CCR);
 	if (enabled) {
 		ccr &= ~RTC_CCR_MASK;
 		ccr |= RTC_CCR_IE;
@@ -86,7 +86,7 @@ static int xgene_rtc_alarm_irq_enable(struct device *dev, u32 enabled)
 		ccr &= ~RTC_CCR_IE;
 		ccr |= RTC_CCR_MASK;
 	}
-	writel(ccr, pdata->csr_base + RTC_CCR);
+	pete_writel("drivers/rtc/rtc-xgene.c:89", ccr, pdata->csr_base + RTC_CCR);
 
 	return 0;
 }
@@ -95,14 +95,14 @@ static int xgene_rtc_alarm_irq_enabled(struct device *dev)
 {
 	struct xgene_rtc_dev *pdata = dev_get_drvdata(dev);
 
-	return readl(pdata->csr_base + RTC_CCR) & RTC_CCR_IE ? 1 : 0;
+	return pete_readl("drivers/rtc/rtc-xgene.c:98", pdata->csr_base + RTC_CCR) & RTC_CCR_IE ? 1 : 0;
 }
 
 static int xgene_rtc_set_alarm(struct device *dev, struct rtc_wkalrm *alrm)
 {
 	struct xgene_rtc_dev *pdata = dev_get_drvdata(dev);
 
-	writel((u32)rtc_tm_to_time64(&alrm->time), pdata->csr_base + RTC_CMR);
+	pete_writel("drivers/rtc/rtc-xgene.c:105", (u32)rtc_tm_to_time64(&alrm->time), pdata->csr_base + RTC_CMR);
 
 	xgene_rtc_alarm_irq_enable(dev, alrm->enabled);
 
@@ -122,11 +122,11 @@ static irqreturn_t xgene_rtc_interrupt(int irq, void *id)
 	struct xgene_rtc_dev *pdata = id;
 
 	/* Check if interrupt asserted */
-	if (!(readl(pdata->csr_base + RTC_STAT) & RTC_STAT_BIT))
+	if (!(pete_readl("drivers/rtc/rtc-xgene.c:125", pdata->csr_base + RTC_STAT) & RTC_STAT_BIT))
 		return IRQ_NONE;
 
 	/* Clear interrupt */
-	readl(pdata->csr_base + RTC_EOI);
+	pete_readl("drivers/rtc/rtc-xgene.c:129", pdata->csr_base + RTC_EOI);
 
 	rtc_update_irq(pdata->rtc, 1, RTC_IRQF | RTC_AF);
 
@@ -172,7 +172,7 @@ static int xgene_rtc_probe(struct platform_device *pdev)
 		return ret;
 
 	/* Turn on the clock and the crystal */
-	writel(RTC_CCR_EN, pdata->csr_base + RTC_CCR);
+	pete_writel("drivers/rtc/rtc-xgene.c:175", RTC_CCR_EN, pdata->csr_base + RTC_CCR);
 
 	ret = device_init_wakeup(&pdev->dev, 1);
 	if (ret) {

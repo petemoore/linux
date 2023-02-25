@@ -228,7 +228,7 @@ no_buffers:
 		 * such as IA-64).
 		*/
 		wmb();
-		writel(i, adapter->hw.hw_addr + rx_ring->tail);
+		pete_writel("drivers/net/ethernet/intel/igbvf/netdev.c:231", i, adapter->hw.hw_addr + rx_ring->tail);
 	}
 }
 
@@ -519,8 +519,8 @@ static void igbvf_clean_tx_ring(struct igbvf_ring *tx_ring)
 	tx_ring->next_to_use = 0;
 	tx_ring->next_to_clean = 0;
 
-	writel(0, adapter->hw.hw_addr + tx_ring->head);
-	writel(0, adapter->hw.hw_addr + tx_ring->tail);
+	pete_writel("drivers/net/ethernet/intel/igbvf/netdev.c:522", 0, adapter->hw.hw_addr + tx_ring->head);
+	pete_writel("drivers/net/ethernet/intel/igbvf/netdev.c:523", 0, adapter->hw.hw_addr + tx_ring->tail);
 }
 
 /**
@@ -602,8 +602,8 @@ static void igbvf_clean_rx_ring(struct igbvf_ring *rx_ring)
 	rx_ring->next_to_clean = 0;
 	rx_ring->next_to_use = 0;
 
-	writel(0, adapter->hw.hw_addr + rx_ring->head);
-	writel(0, adapter->hw.hw_addr + rx_ring->tail);
+	pete_writel("drivers/net/ethernet/intel/igbvf/netdev.c:605", 0, adapter->hw.hw_addr + rx_ring->head);
+	pete_writel("drivers/net/ethernet/intel/igbvf/netdev.c:606", 0, adapter->hw.hw_addr + rx_ring->tail);
 }
 
 /**
@@ -875,7 +875,7 @@ static irqreturn_t igbvf_intr_msix_tx(int irq, void *data)
 	struct igbvf_ring *tx_ring = adapter->tx_ring;
 
 	if (tx_ring->set_itr) {
-		writel(tx_ring->itr_val,
+		pete_writel("drivers/net/ethernet/intel/igbvf/netdev.c:878", tx_ring->itr_val,
 		       adapter->hw.hw_addr + tx_ring->itr_register);
 		adapter->tx_ring->set_itr = 0;
 	}
@@ -906,7 +906,7 @@ static irqreturn_t igbvf_intr_msix_rx(int irq, void *data)
 	 * previous interrupt.
 	 */
 	if (adapter->rx_ring->set_itr) {
-		writel(adapter->rx_ring->itr_val,
+		pete_writel("drivers/net/ethernet/intel/igbvf/netdev.c:909", adapter->rx_ring->itr_val,
 		       adapter->hw.hw_addr + adapter->rx_ring->itr_register);
 		adapter->rx_ring->set_itr = 0;
 	}
@@ -984,10 +984,10 @@ static void igbvf_configure_msix(struct igbvf_adapter *adapter)
 
 	igbvf_assign_vector(adapter, IGBVF_NO_QUEUE, 0, vector++);
 	adapter->eims_enable_mask |= tx_ring->eims_value;
-	writel(tx_ring->itr_val, hw->hw_addr + tx_ring->itr_register);
+	pete_writel("drivers/net/ethernet/intel/igbvf/netdev.c:987", tx_ring->itr_val, hw->hw_addr + tx_ring->itr_register);
 	igbvf_assign_vector(adapter, 0, IGBVF_NO_QUEUE, vector++);
 	adapter->eims_enable_mask |= rx_ring->eims_value;
-	writel(rx_ring->itr_val, hw->hw_addr + rx_ring->itr_register);
+	pete_writel("drivers/net/ethernet/intel/igbvf/netdev.c:990", rx_ring->itr_val, hw->hw_addr + rx_ring->itr_register);
 
 	/* set vector for other causes, i.e. link changes */
 
@@ -2270,7 +2270,7 @@ static inline void igbvf_tx_queue_adv(struct igbvf_adapter *adapter,
 
 	tx_ring->buffer_info[first].next_to_watch = tx_desc;
 	tx_ring->next_to_use = i;
-	writel(i, adapter->hw.hw_addr + tx_ring->tail);
+	pete_writel("drivers/net/ethernet/intel/igbvf/netdev.c:2273", i, adapter->hw.hw_addr + tx_ring->tail);
 }
 
 static netdev_tx_t igbvf_xmit_frame_ring_adv(struct sk_buff *skb,

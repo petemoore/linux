@@ -145,7 +145,7 @@ static void set_desc(struct mmp_pdma_phy *phy, dma_addr_t addr)
 {
 	u32 reg = (phy->idx << 4) + DDADR;
 
-	writel(addr, phy->base + reg);
+	pete_writel("drivers/dma/mmp_pdma.c:148", addr, phy->base + reg);
 }
 
 static void enable_chan(struct mmp_pdma_phy *phy)
@@ -156,17 +156,17 @@ static void enable_chan(struct mmp_pdma_phy *phy)
 		return;
 
 	reg = DRCMR(phy->vchan->drcmr);
-	writel(DRCMR_MAPVLD | phy->idx, phy->base + reg);
+	pete_writel("drivers/dma/mmp_pdma.c:159", DRCMR_MAPVLD | phy->idx, phy->base + reg);
 
-	dalgn = readl(phy->base + DALGN);
+	dalgn = pete_readl("drivers/dma/mmp_pdma.c:161", phy->base + DALGN);
 	if (phy->vchan->byte_align)
 		dalgn |= 1 << phy->idx;
 	else
 		dalgn &= ~(1 << phy->idx);
-	writel(dalgn, phy->base + DALGN);
+	pete_writel("drivers/dma/mmp_pdma.c:166", dalgn, phy->base + DALGN);
 
 	reg = (phy->idx << 2) + DCSR;
-	writel(readl(phy->base + reg) | DCSR_RUN, phy->base + reg);
+	pete_writel("drivers/dma/mmp_pdma.c:169", pete_readl("drivers/dma/mmp_pdma.c:169", phy->base + reg) | DCSR_RUN, phy->base + reg);
 }
 
 static void disable_chan(struct mmp_pdma_phy *phy)
@@ -177,21 +177,21 @@ static void disable_chan(struct mmp_pdma_phy *phy)
 		return;
 
 	reg = (phy->idx << 2) + DCSR;
-	writel(readl(phy->base + reg) & ~DCSR_RUN, phy->base + reg);
+	pete_writel("drivers/dma/mmp_pdma.c:180", pete_readl("drivers/dma/mmp_pdma.c:180", phy->base + reg) & ~DCSR_RUN, phy->base + reg);
 }
 
 static int clear_chan_irq(struct mmp_pdma_phy *phy)
 {
 	u32 dcsr;
-	u32 dint = readl(phy->base + DINT);
+	u32 dint = pete_readl("drivers/dma/mmp_pdma.c:186", phy->base + DINT);
 	u32 reg = (phy->idx << 2) + DCSR;
 
 	if (!(dint & BIT(phy->idx)))
 		return -EAGAIN;
 
 	/* clear irq */
-	dcsr = readl(phy->base + reg);
-	writel(dcsr, phy->base + reg);
+	dcsr = pete_readl("drivers/dma/mmp_pdma.c:193", phy->base + reg);
+	pete_writel("drivers/dma/mmp_pdma.c:194", dcsr, phy->base + reg);
 	if ((dcsr & DCSR_BUSERR) && (phy->vchan))
 		dev_warn(phy->vchan->dev, "DCSR_BUSERR\n");
 
@@ -213,7 +213,7 @@ static irqreturn_t mmp_pdma_int_handler(int irq, void *dev_id)
 {
 	struct mmp_pdma_device *pdev = dev_id;
 	struct mmp_pdma_phy *phy;
-	u32 dint = readl(pdev->base + DINT);
+	u32 dint = pete_readl("drivers/dma/mmp_pdma.c:216", pdev->base + DINT);
 	int i, ret;
 	int irq_num = 0;
 
@@ -281,7 +281,7 @@ static void mmp_pdma_free_phy(struct mmp_pdma_chan *pchan)
 
 	/* clear the channel mapping in DRCMR */
 	reg = DRCMR(pchan->drcmr);
-	writel(0, pchan->phy->base + reg);
+	pete_writel("drivers/dma/mmp_pdma.c:284", 0, pchan->phy->base + reg);
 
 	spin_lock_irqsave(&pdev->phy_lock, flags);
 	pchan->phy->vchan = NULL;
@@ -775,9 +775,9 @@ static unsigned int mmp_pdma_residue(struct mmp_pdma_chan *chan,
 		return 0;
 
 	if (chan->dir == DMA_DEV_TO_MEM)
-		curr = readl(chan->phy->base + DTADR(chan->phy->idx));
+		curr = pete_readl("drivers/dma/mmp_pdma.c:778", chan->phy->base + DTADR(chan->phy->idx));
 	else
-		curr = readl(chan->phy->base + DSADR(chan->phy->idx));
+		curr = pete_readl("drivers/dma/mmp_pdma.c:780", chan->phy->base + DSADR(chan->phy->idx));
 
 	list_for_each_entry(sw, &chan->chain_running, node) {
 		u32 start, end, len;

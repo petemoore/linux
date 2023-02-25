@@ -260,7 +260,7 @@ void imx6_enable_rbc(bool enable)
 	val = readl_relaxed(ccm_base + CCR);
 	val &= ~BM_CCR_RBC_BYPASS_COUNT;
 	val |= enable ? BM_CCR_RBC_BYPASS_COUNT : 0;
-	writel(val, ccm_base + CCR);
+	pete_writel("arch/arm/mach-imx/pm-imx6.c:263", val, ccm_base + CCR);
 
 	/*
 	 * need to delay at least 2 cycles of CKIL(32K)

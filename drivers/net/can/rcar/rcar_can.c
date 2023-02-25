@@ -437,7 +437,7 @@ static void rcar_can_set_bittiming(struct net_device *dev)
 	 * All the registers are big-endian but they get byte-swapped on 32-bit
 	 * read/write (but not on 8-bit, contrary to the manuals)...
 	 */
-	writel((bcr << 8) | priv->clock_select, &priv->regs->bcr);
+	pete_writel("drivers/net/can/rcar/rcar_can.c:440", (bcr << 8) | priv->clock_select, &priv->regs->bcr);
 }
 
 static void rcar_can_start(struct net_device *ndev)
@@ -471,15 +471,15 @@ static void rcar_can_start(struct net_device *ndev)
 	writew(ctlr, &priv->regs->ctlr);
 
 	/* Accept all SID and EID */
-	writel(0, &priv->regs->mkr_2_9[6]);
-	writel(0, &priv->regs->mkr_2_9[7]);
+	pete_writel("drivers/net/can/rcar/rcar_can.c:474", 0, &priv->regs->mkr_2_9[6]);
+	pete_writel("drivers/net/can/rcar/rcar_can.c:475", 0, &priv->regs->mkr_2_9[7]);
 	/* In FIFO mailbox mode, write "0" to bits 24 to 31 */
-	writel(0, &priv->regs->mkivlr1);
+	pete_writel("drivers/net/can/rcar/rcar_can.c:477", 0, &priv->regs->mkivlr1);
 	/* Accept all frames */
-	writel(0, &priv->regs->fidcr[0]);
-	writel(RCAR_CAN_FIDCR_IDE | RCAR_CAN_FIDCR_RTR, &priv->regs->fidcr[1]);
+	pete_writel("drivers/net/can/rcar/rcar_can.c:479", 0, &priv->regs->fidcr[0]);
+	pete_writel("drivers/net/can/rcar/rcar_can.c:480", RCAR_CAN_FIDCR_IDE | RCAR_CAN_FIDCR_RTR, &priv->regs->fidcr[1]);
 	/* Enable and configure FIFO mailbox interrupts */
-	writel(RCAR_CAN_MIER1_RXFIE | RCAR_CAN_MIER1_TXFIE, &priv->regs->mier1);
+	pete_writel("drivers/net/can/rcar/rcar_can.c:482", RCAR_CAN_MIER1_RXFIE | RCAR_CAN_MIER1_TXFIE, &priv->regs->mier1);
 
 	priv->ier = RCAR_CAN_IER_ERSIE | RCAR_CAN_IER_RXFIE |
 		    RCAR_CAN_IER_TXFIE;
@@ -564,8 +564,8 @@ static void rcar_can_stop(struct net_device *ndev)
 		if (readw(&priv->regs->str) & RCAR_CAN_STR_RSTST)
 			break;
 	}
-	writel(0, &priv->regs->mier0);
-	writel(0, &priv->regs->mier1);
+	pete_writel("drivers/net/can/rcar/rcar_can.c:567", 0, &priv->regs->mier0);
+	pete_writel("drivers/net/can/rcar/rcar_can.c:568", 0, &priv->regs->mier1);
 	writeb(0, &priv->regs->ier);
 	writeb(0, &priv->regs->eier);
 	/* Go to sleep mode */
@@ -612,7 +612,7 @@ static netdev_tx_t rcar_can_start_xmit(struct sk_buff *skb,
 			       &priv->regs->mb[RCAR_CAN_TX_FIFO_MBX].data[i]);
 	}
 
-	writel(data, &priv->regs->mb[RCAR_CAN_TX_FIFO_MBX].id);
+	pete_writel("drivers/net/can/rcar/rcar_can.c:615", data, &priv->regs->mb[RCAR_CAN_TX_FIFO_MBX].id);
 
 	writeb(cf->len, &priv->regs->mb[RCAR_CAN_TX_FIFO_MBX].dlc);
 
@@ -652,7 +652,7 @@ static void rcar_can_rx_pkt(struct rcar_can_priv *priv)
 		return;
 	}
 
-	data = readl(&priv->regs->mb[RCAR_CAN_RX_FIFO_MBX].id);
+	data = pete_readl("drivers/net/can/rcar/rcar_can.c:655", &priv->regs->mb[RCAR_CAN_RX_FIFO_MBX].id);
 	if (data & RCAR_CAN_IDE)
 		cf->can_id = (data & CAN_EFF_MASK) | CAN_EFF_FLAG;
 	else

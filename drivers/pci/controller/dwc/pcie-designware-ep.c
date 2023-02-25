@@ -530,7 +530,7 @@ int dw_pcie_ep_raise_msi_irq(struct dw_pcie_ep *ep, u8 func_no,
 	if (ret)
 		return ret;
 
-	writel(msg_data | (interrupt_num - 1), ep->msi_mem + aligned_offset);
+	pete_writel("drivers/pci/controller/dwc/pcie-designware-ep.c:533", msg_data | (interrupt_num - 1), ep->msi_mem + aligned_offset);
 
 	dw_pcie_ep_unmap_addr(epc, func_no, 0, ep->msi_mem_phys);
 
@@ -598,7 +598,7 @@ int dw_pcie_ep_raise_msix_irq(struct dw_pcie_ep *ep, u8 func_no,
 	if (ret)
 		return ret;
 
-	writel(msg_data, ep->msi_mem + aligned_offset);
+	pete_writel("drivers/pci/controller/dwc/pcie-designware-ep.c:601", msg_data, ep->msi_mem + aligned_offset);
 
 	dw_pcie_ep_unmap_addr(epc, func_no, 0, ep->msi_mem_phys);
 

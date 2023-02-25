@@ -646,7 +646,7 @@ void hinic_sq_write_db(struct hinic_sq *sq, u16 prod_idx, unsigned int wqe_size,
 
 	wmb();  /* Write all before the doorbell */
 
-	writel(sq_prepare_db(sq, prod_idx, cos), SQ_DB_ADDR(sq, prod_idx));
+	pete_writel("drivers/net/ethernet/huawei/hinic/hinic_hw_qp.c:649", sq_prepare_db(sq, prod_idx, cos), SQ_DB_ADDR(sq, prod_idx));
 }
 
 /**

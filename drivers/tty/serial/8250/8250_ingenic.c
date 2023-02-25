@@ -44,12 +44,12 @@ static struct earlycon_device *early_device;
 
 static uint8_t early_in(struct uart_port *port, int offset)
 {
-	return readl(port->membase + (offset << 2));
+	return pete_readl("drivers/tty/serial/8250/8250_ingenic.c:47", port->membase + (offset << 2));
 }
 
 static void early_out(struct uart_port *port, int offset, uint8_t value)
 {
-	writel(value, port->membase + (offset << 2));
+	pete_writel("drivers/tty/serial/8250/8250_ingenic.c:52", value, port->membase + (offset << 2));
 }
 
 static void ingenic_early_console_putc(struct uart_port *port, int c)

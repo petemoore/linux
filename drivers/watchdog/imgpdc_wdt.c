@@ -90,8 +90,8 @@ static int pdc_wdt_keepalive(struct watchdog_device *wdt_dev)
 {
 	struct pdc_wdt_dev *wdt = watchdog_get_drvdata(wdt_dev);
 
-	writel(PDC_WDT_TICKLE1_MAGIC, wdt->base + PDC_WDT_TICKLE1);
-	writel(PDC_WDT_TICKLE2_MAGIC, wdt->base + PDC_WDT_TICKLE2);
+	pete_writel("drivers/watchdog/imgpdc_wdt.c:93", PDC_WDT_TICKLE1_MAGIC, wdt->base + PDC_WDT_TICKLE1);
+	pete_writel("drivers/watchdog/imgpdc_wdt.c:94", PDC_WDT_TICKLE2_MAGIC, wdt->base + PDC_WDT_TICKLE2);
 
 	return 0;
 }
@@ -101,9 +101,9 @@ static int pdc_wdt_stop(struct watchdog_device *wdt_dev)
 	unsigned int val;
 	struct pdc_wdt_dev *wdt = watchdog_get_drvdata(wdt_dev);
 
-	val = readl(wdt->base + PDC_WDT_CONFIG);
+	val = pete_readl("drivers/watchdog/imgpdc_wdt.c:104", wdt->base + PDC_WDT_CONFIG);
 	val &= ~PDC_WDT_CONFIG_ENABLE;
-	writel(val, wdt->base + PDC_WDT_CONFIG);
+	pete_writel("drivers/watchdog/imgpdc_wdt.c:106", val, wdt->base + PDC_WDT_CONFIG);
 
 	/* Must tickle to finish the stop */
 	pdc_wdt_keepalive(wdt_dev);
@@ -116,9 +116,9 @@ static void __pdc_wdt_set_timeout(struct pdc_wdt_dev *wdt)
 	unsigned long clk_rate = clk_get_rate(wdt->wdt_clk);
 	unsigned int val;
 
-	val = readl(wdt->base + PDC_WDT_CONFIG) & ~PDC_WDT_CONFIG_DELAY_MASK;
+	val = pete_readl("drivers/watchdog/imgpdc_wdt.c:119", wdt->base + PDC_WDT_CONFIG) & ~PDC_WDT_CONFIG_DELAY_MASK;
 	val |= order_base_2(wdt->wdt_dev.timeout * clk_rate) - 1;
-	writel(val, wdt->base + PDC_WDT_CONFIG);
+	pete_writel("drivers/watchdog/imgpdc_wdt.c:121", val, wdt->base + PDC_WDT_CONFIG);
 }
 
 static int pdc_wdt_set_timeout(struct watchdog_device *wdt_dev,
@@ -141,9 +141,9 @@ static int pdc_wdt_start(struct watchdog_device *wdt_dev)
 
 	__pdc_wdt_set_timeout(wdt);
 
-	val = readl(wdt->base + PDC_WDT_CONFIG);
+	val = pete_readl("drivers/watchdog/imgpdc_wdt.c:144", wdt->base + PDC_WDT_CONFIG);
 	val |= PDC_WDT_CONFIG_ENABLE;
-	writel(val, wdt->base + PDC_WDT_CONFIG);
+	pete_writel("drivers/watchdog/imgpdc_wdt.c:146", val, wdt->base + PDC_WDT_CONFIG);
 
 	return 0;
 }
@@ -154,7 +154,7 @@ static int pdc_wdt_restart(struct watchdog_device *wdt_dev,
 	struct pdc_wdt_dev *wdt = watchdog_get_drvdata(wdt_dev);
 
 	/* Assert SOFT_RESET */
-	writel(0x1, wdt->base + PDC_WDT_SOFT_RESET);
+	pete_writel("drivers/watchdog/imgpdc_wdt.c:157", 0x1, wdt->base + PDC_WDT_SOFT_RESET);
 
 	return 0;
 }
@@ -260,7 +260,7 @@ static int pdc_wdt_probe(struct platform_device *pdev)
 	pdc_wdt_stop(&pdc_wdt->wdt_dev);
 
 	/* Find what caused the last reset */
-	val = readl(pdc_wdt->base + PDC_WDT_TICKLE1);
+	val = pete_readl("drivers/watchdog/imgpdc_wdt.c:263", pdc_wdt->base + PDC_WDT_TICKLE1);
 	val = (val & PDC_WDT_TICKLE_STATUS_MASK) >> PDC_WDT_TICKLE_STATUS_SHIFT;
 	switch (val) {
 	case PDC_WDT_TICKLE_STATUS_TICKLE:

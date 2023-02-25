@@ -43,18 +43,18 @@ static int ddb_i2c_cmd(struct ddb_i2c *i2c, u32 adr, u32 cmd)
 	unsigned long stat;
 	u32 val;
 
-	ddbwritel(dev, (adr << 9) | cmd, i2c->regs + I2C_COMMAND);
+	ddbpete_writel("drivers/media/pci/ddbridge/ddbridge-i2c.c:46", dev, (adr << 9) | cmd, i2c->regs + I2C_COMMAND);
 	stat = wait_for_completion_timeout(&i2c->completion, HZ);
-	val = ddbreadl(dev, i2c->regs + I2C_COMMAND);
+	val = ddbpete_readl("drivers/media/pci/ddbridge/ddbridge-i2c.c:48", dev, i2c->regs + I2C_COMMAND);
 	if (stat == 0) {
 		dev_err(dev->dev, "I2C timeout, card %d, port %d, link %u\n",
 			dev->nr, i2c->nr, i2c->link);
 		{
-			u32 istat = ddbreadl(dev, INTERRUPT_STATUS);
+			u32 istat = ddbpete_readl("drivers/media/pci/ddbridge/ddbridge-i2c.c:53", dev, INTERRUPT_STATUS);
 
 			dev_err(dev->dev, "DDBridge IRS %08x\n", istat);
 			if (i2c->link) {
-				u32 listat = ddbreadl(dev,
+				u32 listat = ddbpete_readl("drivers/media/pci/ddbridge/ddbridge-i2c.c:57", dev,
 					DDB_LINK_TAG(i2c->link) |
 					INTERRUPT_STATUS);
 
@@ -62,9 +62,9 @@ static int ddb_i2c_cmd(struct ddb_i2c *i2c, u32 adr, u32 cmd)
 					i2c->link, listat);
 			}
 			if (istat & 1) {
-				ddbwritel(dev, istat & 1, INTERRUPT_ACK);
+				ddbpete_writel("drivers/media/pci/ddbridge/ddbridge-i2c.c:65", dev, istat & 1, INTERRUPT_ACK);
 			} else {
-				u32 mon = ddbreadl(dev,
+				u32 mon = ddbpete_readl("drivers/media/pci/ddbridge/ddbridge-i2c.c:67", dev,
 					i2c->regs + I2C_MONITOR);
 
 				dev_err(dev->dev, "I2C cmd=%08x mon=%08x\n",
@@ -94,7 +94,7 @@ static int ddb_i2c_master_xfer(struct i2c_adapter *adapter,
 	switch (num) {
 	case 1:
 		if (msg[0].flags & I2C_M_RD) {
-			ddbwritel(dev, msg[0].len << 16,
+			ddbpete_writel("drivers/media/pci/ddbridge/ddbridge-i2c.c:97", dev, msg[0].len << 16,
 				  i2c->regs + I2C_TASKLENGTH);
 			if (ddb_i2c_cmd(i2c, addr, 3))
 				break;
@@ -103,7 +103,7 @@ static int ddb_i2c_master_xfer(struct i2c_adapter *adapter,
 			return num;
 		}
 		ddbcpyto(dev, i2c->wbuf, msg[0].buf, msg[0].len);
-		ddbwritel(dev, msg[0].len, i2c->regs + I2C_TASKLENGTH);
+		ddbpete_writel("drivers/media/pci/ddbridge/ddbridge-i2c.c:106", dev, msg[0].len, i2c->regs + I2C_TASKLENGTH);
 		if (ddb_i2c_cmd(i2c, addr, 2))
 			break;
 		return num;
@@ -115,7 +115,7 @@ static int ddb_i2c_master_xfer(struct i2c_adapter *adapter,
 		if (msg[1].len > i2c->bsize)
 			break;
 		ddbcpyto(dev, i2c->wbuf, msg[0].buf, msg[0].len);
-		ddbwritel(dev, msg[0].len | (msg[1].len << 16),
+		ddbpete_writel("drivers/media/pci/ddbridge/ddbridge-i2c.c:118", dev, msg[0].len | (msg[1].len << 16),
 			  i2c->regs + I2C_TASKLENGTH);
 		if (ddb_i2c_cmd(i2c, addr, 1))
 			break;
@@ -172,8 +172,8 @@ static int ddb_i2c_add(struct ddb *dev, struct ddb_i2c *i2c,
 	i2c->rbuf = i2c->wbuf; /* + i2c->bsize / 2 */
 	i2c->regs = DDB_LINK_TAG(link) |
 		(regmap->i2c->base + regmap->i2c->size * i);
-	ddbwritel(dev, I2C_SPEED_100, i2c->regs + I2C_TIMING);
-	ddbwritel(dev, ((i2c->rbuf & 0xffff) << 16) | (i2c->wbuf & 0xffff),
+	ddbpete_writel("drivers/media/pci/ddbridge/ddbridge-i2c.c:175", dev, I2C_SPEED_100, i2c->regs + I2C_TIMING);
+	ddbpete_writel("drivers/media/pci/ddbridge/ddbridge-i2c.c:176", dev, ((i2c->rbuf & 0xffff) << 16) | (i2c->wbuf & 0xffff),
 		  i2c->regs + I2C_TASKADDRESS);
 	init_completion(&i2c->completion);
 

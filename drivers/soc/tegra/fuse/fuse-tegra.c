@@ -352,15 +352,15 @@ static void tegra_enable_fuse_clk(void __iomem *base)
 
 	reg = readl_relaxed(base + 0x48);
 	reg |= 1 << 28;
-	writel(reg, base + 0x48);
+	pete_writel("drivers/soc/tegra/fuse/fuse-tegra.c:355", reg, base + 0x48);
 
 	/*
 	 * Enable FUSE clock. This needs to be hardcoded because the clock
 	 * subsystem is not active during early boot.
 	 */
-	reg = readl(base + 0x14);
+	reg = pete_readl("drivers/soc/tegra/fuse/fuse-tegra.c:361", base + 0x14);
 	reg |= 1 << 7;
-	writel(reg, base + 0x14);
+	pete_writel("drivers/soc/tegra/fuse/fuse-tegra.c:363", reg, base + 0x14);
 }
 
 static ssize_t major_show(struct device *dev, struct device_attribute *attr,

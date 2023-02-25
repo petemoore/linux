@@ -151,7 +151,7 @@ static void smu_start_cmd(void)
 	 * the SMU is actually communicating with us via i2c to the
 	 * northbridge or the CPU to access RAM.
 	 */
-	writel(smu->cmd_buf_abs, smu->db_buf);
+	pete_writel("drivers/macintosh/smu.c:154", smu->cmd_buf_abs, smu->db_buf);
 
 	/* Ring the SMU doorbell */
 	pmac_do_feature_call(PMAC_FTR_WRITE_GPIO, NULL, smu->doorbell, 4);

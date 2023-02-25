@@ -66,7 +66,7 @@ static int mxs_pwm_apply(struct pwm_chip *chip, struct pwm_device *pwm,
 	}
 
 	if (!state->enabled && pwm_is_enabled(pwm))
-		writel(1 << pwm->hwpwm, mxs->base + PWM_CTRL + CLR);
+		pete_writel("drivers/pwm/pwm-mxs.c:69", 1 << pwm->hwpwm, mxs->base + PWM_CTRL + CLR);
 
 	rate = clk_get_rate(mxs->clk);
 	while (1) {
@@ -94,9 +94,9 @@ static int mxs_pwm_apply(struct pwm_chip *chip, struct pwm_device *pwm,
 
 	pol_bits = state->polarity == PWM_POLARITY_NORMAL ?
 		PERIOD_POLARITY_NORMAL : PERIOD_POLARITY_INVERSE;
-	writel(duty_cycles << 16,
+	pete_writel("drivers/pwm/pwm-mxs.c:97", duty_cycles << 16,
 	       mxs->base + PWM_ACTIVE0 + pwm->hwpwm * 0x20);
-	writel(PERIOD_PERIOD(period_cycles) | pol_bits | PERIOD_CDIV(div),
+	pete_writel("drivers/pwm/pwm-mxs.c:99", PERIOD_PERIOD(period_cycles) | pol_bits | PERIOD_CDIV(div),
 	       mxs->base + PWM_PERIOD0 + pwm->hwpwm * 0x20);
 
 	if (state->enabled) {
@@ -105,7 +105,7 @@ static int mxs_pwm_apply(struct pwm_chip *chip, struct pwm_device *pwm,
 			 * The clock was enabled above. Just enable
 			 * the channel in the control register.
 			 */
-			writel(1 << pwm->hwpwm, mxs->base + PWM_CTRL + SET);
+			pete_writel("drivers/pwm/pwm-mxs.c:108", 1 << pwm->hwpwm, mxs->base + PWM_CTRL + SET);
 		}
 	} else {
 		clk_disable_unprepare(mxs->clk);

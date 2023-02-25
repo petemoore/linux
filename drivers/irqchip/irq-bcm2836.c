@@ -31,7 +31,7 @@ static void bcm2836_arm_irqchip_mask_per_cpu_irq(unsigned int reg_offset,
 {
 	void __iomem *reg = intc.base + reg_offset + 4 * cpu;
 
-	writel(readl(reg) & ~BIT(bit), reg);
+	pete_writel("drivers/irqchip/irq-bcm2836.c:34", pete_readl("drivers/irqchip/irq-bcm2836.c:34", reg) & ~BIT(bit), reg);
 }
 
 static void bcm2836_arm_irqchip_unmask_per_cpu_irq(unsigned int reg_offset,
@@ -40,7 +40,7 @@ static void bcm2836_arm_irqchip_unmask_per_cpu_irq(unsigned int reg_offset,
 {
 	void __iomem *reg = intc.base + reg_offset + 4 * cpu;
 
-	writel(readl(reg) | BIT(bit), reg);
+	pete_writel("drivers/irqchip/irq-bcm2836.c:43", pete_readl("drivers/irqchip/irq-bcm2836.c:43", reg) | BIT(bit), reg);
 }
 
 static void bcm2836_arm_irqchip_mask_timer_irq(struct irq_data *d)
@@ -65,12 +65,12 @@ static struct irq_chip bcm2836_arm_irqchip_timer = {
 
 static void bcm2836_arm_irqchip_mask_pmu_irq(struct irq_data *d)
 {
-	writel(1 << smp_processor_id(), intc.base + LOCAL_PM_ROUTING_CLR);
+	pete_writel("drivers/irqchip/irq-bcm2836.c:68", 1 << smp_processor_id(), intc.base + LOCAL_PM_ROUTING_CLR);
 }
 
 static void bcm2836_arm_irqchip_unmask_pmu_irq(struct irq_data *d)
 {
-	writel(1 << smp_processor_id(), intc.base + LOCAL_PM_ROUTING_SET);
+	pete_writel("drivers/irqchip/irq-bcm2836.c:73", 1 << smp_processor_id(), intc.base + LOCAL_PM_ROUTING_SET);
 }
 
 static struct irq_chip bcm2836_arm_irqchip_pmu = {
@@ -93,13 +93,13 @@ void bcm2836_arm_irqchip_spin_gpu_irq(void)
 {
 	u32 i;
 	void __iomem *gpurouting = (intc.base + LOCAL_GPU_ROUTING);
-	u32 routing_val = readl(gpurouting);
+	u32 routing_val = pete_readl("drivers/irqchip/irq-bcm2836.c:96", gpurouting);
 
 	for (i = 1; i <= 3; i++) {
 		u32 new_routing_val = (routing_val + i) & 3;
 
 		if (cpu_active(new_routing_val)) {
-			writel(new_routing_val, gpurouting);
+			pete_writel("drivers/irqchip/irq-bcm2836.c:102", new_routing_val, gpurouting);
 			return;
 		}
 	}
@@ -330,13 +330,13 @@ static void bcm2835_init_local_timer_frequency(void)
 	 * 8 unset), and only increment by 1 instead of 2 (bit 9
 	 * unset).
 	 */
-	writel(0, intc.base + LOCAL_CONTROL);
+	pete_writel("drivers/irqchip/irq-bcm2836.c:333", 0, intc.base + LOCAL_CONTROL);
 
 	/*
 	 * Set the timer prescaler to 1:1 (timer freq = input freq *
 	 * 2**31 / prescaler)
 	 */
-	writel(0x80000000, intc.base + LOCAL_PRESCALER);
+	pete_writel("drivers/irqchip/irq-bcm2836.c:339", 0x80000000, intc.base + LOCAL_PRESCALER);
 }
 
 static int __init bcm2836_arm_irqchip_l1_intc_of_init(struct device_node *node,

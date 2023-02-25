@@ -222,7 +222,7 @@ static const int num_adc_stages_611x = 3;
 static void ni_writel(struct comedi_device *dev, unsigned int data, int reg)
 {
 	if (dev->mmio)
-		writel(data, dev->mmio + reg);
+		pete_writel("drivers/comedi/drivers/ni_mio_common.c:225", data, dev->mmio + reg);
 	else
 		outl(data, dev->iobase + reg);
 }
@@ -246,7 +246,7 @@ static void ni_writeb(struct comedi_device *dev, unsigned int data, int reg)
 static unsigned int ni_readl(struct comedi_device *dev, int reg)
 {
 	if (dev->mmio)
-		return readl(dev->mmio + reg);
+		return pete_readl("drivers/comedi/drivers/ni_mio_common.c:249", dev->mmio + reg);
 
 	return inl(dev->iobase + reg);
 }

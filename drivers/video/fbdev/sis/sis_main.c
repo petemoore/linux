@@ -2895,10 +2895,10 @@ sisfb_engine_init(struct sis_video_info *ivideo)
 				tempq = (u32)(ivideo->video_size - ivideo->cmdQueueSize);
 				MMIO_OUT32(ivideo->mmio_vbase, Q_BASE_ADDR, tempq);
 
-				writel(0x16800000 + 0x8240, ivideo->video_vbase + tempq);
-				writel(templ | (1 << 10), ivideo->video_vbase + tempq + 4);
-				writel(0x168F0000, ivideo->video_vbase + tempq + 8);
-				writel(0x168F0000, ivideo->video_vbase + tempq + 12);
+				pete_writel("drivers/video/fbdev/sis/sis_main.c:2898", 0x16800000 + 0x8240, ivideo->video_vbase + tempq);
+				pete_writel("drivers/video/fbdev/sis/sis_main.c:2899", templ | (1 << 10), ivideo->video_vbase + tempq + 4);
+				pete_writel("drivers/video/fbdev/sis/sis_main.c:2900", 0x168F0000, ivideo->video_vbase + tempq + 8);
+				pete_writel("drivers/video/fbdev/sis/sis_main.c:2901", 0x168F0000, ivideo->video_vbase + tempq + 12);
 
 				MMIO_OUT32(ivideo->mmio_vbase, Q_WRITE_PTR, (tempq + 16));
 
@@ -4216,18 +4216,18 @@ static int sisfb_post_300_buswidth(struct sis_video_info *ivideo)
 		}
 	}
 
-	writel(0x01234567L, FBAddress);
-	writel(0x456789ABL, (FBAddress + 4));
-	writel(0x89ABCDEFL, (FBAddress + 8));
-	writel(0xCDEF0123L, (FBAddress + 12));
+	pete_writel("drivers/video/fbdev/sis/sis_main.c:4219", 0x01234567L, FBAddress);
+	pete_writel("drivers/video/fbdev/sis/sis_main.c:4220", 0x456789ABL, (FBAddress + 4));
+	pete_writel("drivers/video/fbdev/sis/sis_main.c:4221", 0x89ABCDEFL, (FBAddress + 8));
+	pete_writel("drivers/video/fbdev/sis/sis_main.c:4222", 0xCDEF0123L, (FBAddress + 12));
 
 	reg = SiS_GetReg(SISSR, 0x3b);
 	if(reg & 0x01) {
-		if(readl((FBAddress + 12)) == 0xCDEF0123L)
+		if(pete_readl("drivers/video/fbdev/sis/sis_main.c:4226", (FBAddress + 12)) == 0xCDEF0123L)
 			return 4;	/* Channel A 128bit */
 	}
 
-	if(readl((FBAddress + 4)) == 0x456789ABL)
+	if(pete_readl("drivers/video/fbdev/sis/sis_main.c:4230", (FBAddress + 4)) == 0x456789ABL)
 		return 2;		/* Channel B 64bit */
 
 	return 1;			/* 32bit */
@@ -4603,23 +4603,23 @@ static int sisfb_post_xgi_rwtest(struct sis_video_info *ivideo, int starta,
 	unsigned int pos;
 	int i;
 
-	writel(0, ivideo->video_vbase);
+	pete_writel("drivers/video/fbdev/sis/sis_main.c:4606", 0, ivideo->video_vbase);
 
 	for(i = starta; i <= enda; i++) {
 		pos = 1 << i;
 		if(pos < mapsize)
-			writel(pos, ivideo->video_vbase + pos);
+			pete_writel("drivers/video/fbdev/sis/sis_main.c:4611", pos, ivideo->video_vbase + pos);
 	}
 
 	sisfb_post_xgi_delay(ivideo, 150);
 
-	if(readl(ivideo->video_vbase) != 0)
+	if(pete_readl("drivers/video/fbdev/sis/sis_main.c:4616", ivideo->video_vbase) != 0)
 		return 0;
 
 	for(i = starta; i <= enda; i++) {
 		pos = 1 << i;
 		if(pos < mapsize) {
-			if(readl(ivideo->video_vbase + pos) != pos)
+			if(pete_readl("drivers/video/fbdev/sis/sis_main.c:4622", ivideo->video_vbase + pos) != pos)
 				return 0;
 		} else
 			return 0;

@@ -392,7 +392,7 @@ enable_hwirq(struct inf_hw *hw)
 	switch (hw->ci->typ) {
 	case INF_DIVA201:
 	case INF_DIVA202:
-		writel(PITA_INT0_ENABLE, hw->cfg.p);
+		pete_writel("drivers/isdn/hardware/mISDN/mISDNinfineon.c:395", PITA_INT0_ENABLE, hw->cfg.p);
 		break;
 	case INF_SPEEDWIN:
 	case INF_SAPHIR3:
@@ -436,7 +436,7 @@ disable_hwirq(struct inf_hw *hw)
 	switch (hw->ci->typ) {
 	case INF_DIVA201:
 	case INF_DIVA202:
-		writel(0, hw->cfg.p);
+		pete_writel("drivers/isdn/hardware/mISDN/mISDNinfineon.c:439", 0, hw->cfg.p);
 		break;
 	case INF_SPEEDWIN:
 	case INF_SAPHIR3:
@@ -499,17 +499,17 @@ reset_inf(struct inf_hw *hw)
 		     (u32)hw->cfg.start + DIVA_PCI_CTRL);
 		break;
 	case INF_DIVA201:
-		writel(PITA_PARA_SOFTRESET | PITA_PARA_MPX_MODE,
+		pete_writel("drivers/isdn/hardware/mISDN/mISDNinfineon.c:502", PITA_PARA_SOFTRESET | PITA_PARA_MPX_MODE,
 		       hw->cfg.p + PITA_MISC_REG);
 		mdelay(1);
-		writel(PITA_PARA_MPX_MODE, hw->cfg.p + PITA_MISC_REG);
+		pete_writel("drivers/isdn/hardware/mISDN/mISDNinfineon.c:505", PITA_PARA_MPX_MODE, hw->cfg.p + PITA_MISC_REG);
 		mdelay(10);
 		break;
 	case INF_DIVA202:
-		writel(PITA_PARA_SOFTRESET | PITA_PARA_MPX_MODE,
+		pete_writel("drivers/isdn/hardware/mISDN/mISDNinfineon.c:509", PITA_PARA_SOFTRESET | PITA_PARA_MPX_MODE,
 		       hw->cfg.p + PITA_MISC_REG);
 		mdelay(1);
-		writel(PITA_PARA_MPX_MODE | PITA_SER_SOFTRESET,
+		pete_writel("drivers/isdn/hardware/mISDN/mISDNinfineon.c:512", PITA_PARA_MPX_MODE | PITA_SER_SOFTRESET,
 		       hw->cfg.p + PITA_MISC_REG);
 		mdelay(10);
 		break;

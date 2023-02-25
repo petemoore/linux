@@ -200,12 +200,12 @@ enum { DEVICE_DIGITAL, DEVICE_ANALOG };
 
 static inline u32 snd_bt87x_readl(struct snd_bt87x *chip, u32 reg)
 {
-	return readl(chip->mmio + reg);
+	return pete_readl("sound/pci/bt87x.c:203", chip->mmio + reg);
 }
 
 static inline void snd_bt87x_writel(struct snd_bt87x *chip, u32 reg, u32 value)
 {
-	writel(value, chip->mmio + reg);
+	pete_writel("sound/pci/bt87x.c:208", value, chip->mmio + reg);
 }
 
 static int snd_bt87x_create_risc(struct snd_bt87x *chip, struct snd_pcm_substream *substream,

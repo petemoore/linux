@@ -60,9 +60,9 @@ static int lnb_command(struct ddb *dev, u32 link, u32 lnb, u32 cmd)
 	u32 c, v = 0, tag = DDB_LINK_TAG(link);
 
 	v = LNB_TONE & (dev->link[link].lnb.tone << (15 - lnb));
-	ddbwritel(dev, cmd | v, tag | LNB_CONTROL(lnb));
+	ddbpete_writel("drivers/media/pci/ddbridge/ddbridge-max.c:63", dev, cmd | v, tag | LNB_CONTROL(lnb));
 	for (c = 0; c < 10; c++) {
-		v = ddbreadl(dev, tag | LNB_CONTROL(lnb));
+		v = ddbpete_readl("drivers/media/pci/ddbridge/ddbridge-max.c:65", dev, tag | LNB_CONTROL(lnb));
 		if ((v & LNB_BUSY) == 0)
 			break;
 		msleep(20);
@@ -90,9 +90,9 @@ static int max_send_master_cmd(struct dvb_frontend *fe,
 		dvb->diseqc_send_master_cmd(fe, cmd);
 
 	mutex_lock(&dev->link[port->lnr].lnb.lock);
-	ddbwritel(dev, 0, tag | LNB_BUF_LEVEL(dvb->input));
+	ddbpete_writel("drivers/media/pci/ddbridge/ddbridge-max.c:93", dev, 0, tag | LNB_BUF_LEVEL(dvb->input));
 	for (i = 0; i < cmd->msg_len; i++)
-		ddbwritel(dev, cmd->msg[i], tag | LNB_BUF_WRITE(dvb->input));
+		ddbpete_writel("drivers/media/pci/ddbridge/ddbridge-max.c:95", dev, cmd->msg[i], tag | LNB_BUF_WRITE(dvb->input));
 	lnb_command(dev, port->lnr, dvb->input, LNB_CMD_DISEQC);
 	mutex_unlock(&dev->link[port->lnr].lnb.lock);
 	return 0;
@@ -104,9 +104,9 @@ static int lnb_send_diseqc(struct ddb *dev, u32 link, u32 input,
 	u32 tag = DDB_LINK_TAG(link);
 	int i;
 
-	ddbwritel(dev, 0, tag | LNB_BUF_LEVEL(input));
+	ddbpete_writel("drivers/media/pci/ddbridge/ddbridge-max.c:107", dev, 0, tag | LNB_BUF_LEVEL(input));
 	for (i = 0; i < cmd->msg_len; i++)
-		ddbwritel(dev, cmd->msg[i], tag | LNB_BUF_WRITE(input));
+		ddbpete_writel("drivers/media/pci/ddbridge/ddbridge-max.c:109", dev, cmd->msg[i], tag | LNB_BUF_WRITE(input));
 	lnb_command(dev, link, input, LNB_CMD_DISEQC);
 	return 0;
 }

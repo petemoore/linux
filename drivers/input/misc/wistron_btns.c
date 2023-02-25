@@ -103,7 +103,7 @@ static int __init map_bios(void)
 		return -ENODEV;
 	}
 
-	entry_point = readl(base + offset + 5);
+	entry_point = pete_readl("drivers/input/misc/wistron_btns.c:106", base + offset + 5);
 	printk(KERN_DEBUG
 		"wistron_btns: BIOS signature found at %p, entry point %08X\n",
 		base + offset, entry_point);

@@ -266,20 +266,20 @@ static void __init rb532_nand_setup(void)
 static int __init plat_setup_devices(void)
 {
 	/* Look for the CF card reader */
-	if (!readl(IDT434_REG_BASE + DEV1MASK))
+	if (!pete_readl("arch/mips/rb532/devices.c:269", IDT434_REG_BASE + DEV1MASK))
 		rb532_devs[2] = NULL;	/* disable cf_slot0 at index 2 */
 	else {
 		cf_slot0_res[0].start =
-		    readl(IDT434_REG_BASE + DEV1BASE);
+		    pete_readl("arch/mips/rb532/devices.c:273", IDT434_REG_BASE + DEV1BASE);
 		cf_slot0_res[0].end = cf_slot0_res[0].start + 0x1000;
 	}
 
 	/* Read the NAND resources from the device controller */
-	nand_slot0_res[0].start = readl(IDT434_REG_BASE + DEV2BASE);
+	nand_slot0_res[0].start = pete_readl("arch/mips/rb532/devices.c:278", IDT434_REG_BASE + DEV2BASE);
 	nand_slot0_res[0].end = nand_slot0_res[0].start + 0x1000;
 
 	/* Read and map device controller 3 */
-	dev3.base = ioremap(readl(IDT434_REG_BASE + DEV3BASE), 1);
+	dev3.base = ioremap(pete_readl("arch/mips/rb532/devices.c:282", IDT434_REG_BASE + DEV3BASE), 1);
 
 	if (!dev3.base) {
 		printk(KERN_ERR "rb532: cannot remap device controller 3\n");

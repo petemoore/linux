@@ -724,7 +724,7 @@ static void _hv_pcifront_read_config(struct hv_pci_dev *hpdev, int where,
 	} else if (where + size <= CFG_PAGE_SIZE) {
 		spin_lock_irqsave(&hpdev->hbus->config_lock, flags);
 		/* Choose the function to be read. (See comment above) */
-		writel(hpdev->desc.win_slot.slot, hpdev->hbus->cfg_addr);
+		pete_writel("drivers/pci/controller/pci-hyperv.c:727", hpdev->desc.win_slot.slot, hpdev->hbus->cfg_addr);
 		/* Make sure the function was chosen before we start reading. */
 		mb();
 		/* Read from that function's config space. */
@@ -736,7 +736,7 @@ static void _hv_pcifront_read_config(struct hv_pci_dev *hpdev, int where,
 			*val = readw(addr);
 			break;
 		default:
-			*val = readl(addr);
+			*val = pete_readl("drivers/pci/controller/pci-hyperv.c:739", addr);
 			break;
 		}
 		/*
@@ -761,7 +761,7 @@ static u16 hv_pcifront_get_vendor_id(struct hv_pci_dev *hpdev)
 	spin_lock_irqsave(&hpdev->hbus->config_lock, flags);
 
 	/* Choose the function to be read. (See comment above) */
-	writel(hpdev->desc.win_slot.slot, hpdev->hbus->cfg_addr);
+	pete_writel("drivers/pci/controller/pci-hyperv.c:764", hpdev->desc.win_slot.slot, hpdev->hbus->cfg_addr);
 	/* Make sure the function was chosen before we start reading. */
 	mb();
 	/* Read from that function's config space. */
@@ -795,7 +795,7 @@ static void _hv_pcifront_write_config(struct hv_pci_dev *hpdev, int where,
 	} else if (where >= PCI_COMMAND && where + size <= CFG_PAGE_SIZE) {
 		spin_lock_irqsave(&hpdev->hbus->config_lock, flags);
 		/* Choose the function to be written. (See comment above) */
-		writel(hpdev->desc.win_slot.slot, hpdev->hbus->cfg_addr);
+		pete_writel("drivers/pci/controller/pci-hyperv.c:798", hpdev->desc.win_slot.slot, hpdev->hbus->cfg_addr);
 		/* Make sure the function was chosen before we start writing. */
 		wmb();
 		/* Write to that function's config space. */
@@ -807,7 +807,7 @@ static void _hv_pcifront_write_config(struct hv_pci_dev *hpdev, int where,
 			writew(val, addr);
 			break;
 		default:
-			writel(val, addr);
+			pete_writel("drivers/pci/controller/pci-hyperv.c:810", val, addr);
 			break;
 		}
 		/*

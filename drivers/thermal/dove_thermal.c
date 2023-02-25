@@ -58,17 +58,17 @@ static int dove_init_sensor(const struct dove_thermal_priv *priv)
 	/* Set the high level reference for calibration */
 	reg &= ~PMU_TDC0_SEL_VCAL_MASK;
 	reg |= (0x2 << PMU_TDC0_SEL_VCAL_OFFS);
-	writel(reg, priv->control);
+	pete_writel("drivers/thermal/dove_thermal.c:61", reg, priv->control);
 
 	/* Reset the sensor */
 	reg = readl_relaxed(priv->control);
-	writel((reg | PMU_TDC0_SW_RST_MASK), priv->control);
-	writel(reg, priv->control);
+	pete_writel("drivers/thermal/dove_thermal.c:65", (reg | PMU_TDC0_SW_RST_MASK), priv->control);
+	pete_writel("drivers/thermal/dove_thermal.c:66", reg, priv->control);
 
 	/* Enable the sensor */
 	reg = readl_relaxed(priv->sensor);
 	reg &= ~PMU_TM_DISABLE_MASK;
-	writel(reg, priv->sensor);
+	pete_writel("drivers/thermal/dove_thermal.c:71", reg, priv->sensor);
 
 	/* Poll the sensor for the first reading */
 	for (i = 0; i < 1000000; i++) {

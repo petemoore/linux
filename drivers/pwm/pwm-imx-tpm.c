@@ -145,14 +145,14 @@ static void pwm_imx_tpm_get_state(struct pwm_chip *chip,
 
 	/* get duty cycle */
 	rate = clk_get_rate(tpm->clk);
-	val = readl(tpm->base + PWM_IMX_TPM_SC);
+	val = pete_readl("drivers/pwm/pwm-imx-tpm.c:148", tpm->base + PWM_IMX_TPM_SC);
 	prescale = FIELD_GET(PWM_IMX_TPM_SC_PS, val);
-	tmp = readl(tpm->base + PWM_IMX_TPM_CnV(pwm->hwpwm));
+	tmp = pete_readl("drivers/pwm/pwm-imx-tpm.c:150", tpm->base + PWM_IMX_TPM_CnV(pwm->hwpwm));
 	tmp = (tmp << prescale) * NSEC_PER_SEC;
 	state->duty_cycle = DIV_ROUND_CLOSEST_ULL(tmp, rate);
 
 	/* get polarity */
-	val = readl(tpm->base + PWM_IMX_TPM_CnSC(pwm->hwpwm));
+	val = pete_readl("drivers/pwm/pwm-imx-tpm.c:155", tpm->base + PWM_IMX_TPM_CnSC(pwm->hwpwm));
 	if ((val & PWM_IMX_TPM_CnSC_ELS) == PWM_IMX_TPM_CnSC_ELS_INVERSED)
 		state->polarity = PWM_POLARITY_INVERSED;
 	else
@@ -189,7 +189,7 @@ static int pwm_imx_tpm_apply_hw(struct pwm_chip *chip,
 		if (tpm->user_count > 1)
 			return -EBUSY;
 
-		val = readl(tpm->base + PWM_IMX_TPM_SC);
+		val = pete_readl("drivers/pwm/pwm-imx-tpm.c:192", tpm->base + PWM_IMX_TPM_SC);
 		cmod = FIELD_GET(PWM_IMX_TPM_SC_CMOD, val);
 		cur_prescale = FIELD_GET(PWM_IMX_TPM_SC_PS, val);
 		if (cmod && cur_prescale != p->prescale)
@@ -198,7 +198,7 @@ static int pwm_imx_tpm_apply_hw(struct pwm_chip *chip,
 		/* set TPM counter prescale */
 		val &= ~PWM_IMX_TPM_SC_PS;
 		val |= FIELD_PREP(PWM_IMX_TPM_SC_PS, p->prescale);
-		writel(val, tpm->base + PWM_IMX_TPM_SC);
+		pete_writel("drivers/pwm/pwm-imx-tpm.c:201", val, tpm->base + PWM_IMX_TPM_SC);
 
 		/*
 		 * set period count:
@@ -208,7 +208,7 @@ static int pwm_imx_tpm_apply_hw(struct pwm_chip *chip,
 		 * if the PWM is enabled (CMOD[1:0] ≠ 2b00), the period length
 		 * is latched into hardware when the next period starts.
 		 */
-		writel(p->mod, tpm->base + PWM_IMX_TPM_MOD);
+		pete_writel("drivers/pwm/pwm-imx-tpm.c:211", p->mod, tpm->base + PWM_IMX_TPM_MOD);
 		tpm->real_period = state->period;
 		period_update = true;
 	}
@@ -228,7 +228,7 @@ static int pwm_imx_tpm_apply_hw(struct pwm_chip *chip,
 		 * if the PWM is enabled (CMOD[1:0] ≠ 2b00), the duty length
 		 * is latched into hardware when the next period starts.
 		 */
-		writel(p->val, tpm->base + PWM_IMX_TPM_CnV(pwm->hwpwm));
+		pete_writel("drivers/pwm/pwm-imx-tpm.c:231", p->val, tpm->base + PWM_IMX_TPM_CnV(pwm->hwpwm));
 		duty_update = true;
 	}
 
@@ -236,8 +236,8 @@ static int pwm_imx_tpm_apply_hw(struct pwm_chip *chip,
 	if (period_update || duty_update) {
 		timeout = jiffies + msecs_to_jiffies(tpm->real_period /
 						     NSEC_PER_MSEC + 1);
-		while (readl(tpm->base + PWM_IMX_TPM_MOD) != p->mod
-		       || readl(tpm->base + PWM_IMX_TPM_CnV(pwm->hwpwm))
+		while (pete_readl("drivers/pwm/pwm-imx-tpm.c:239", tpm->base + PWM_IMX_TPM_MOD) != p->mod
+		       || pete_readl("drivers/pwm/pwm-imx-tpm.c:240", tpm->base + PWM_IMX_TPM_CnV(pwm->hwpwm))
 		       != p->val) {
 			if (time_after(jiffies, timeout))
 				return -ETIME;
@@ -251,7 +251,7 @@ static int pwm_imx_tpm_apply_hw(struct pwm_chip *chip,
 	 * make sure MSA/MSB/ELS are set to 0 which means channel
 	 * disabled.
 	 */
-	val = readl(tpm->base + PWM_IMX_TPM_CnSC(pwm->hwpwm));
+	val = pete_readl("drivers/pwm/pwm-imx-tpm.c:254", tpm->base + PWM_IMX_TPM_CnSC(pwm->hwpwm));
 	val &= ~(PWM_IMX_TPM_CnSC_ELS | PWM_IMX_TPM_CnSC_MSA |
 		 PWM_IMX_TPM_CnSC_MSB);
 	if (state->enabled) {
@@ -267,11 +267,11 @@ static int pwm_imx_tpm_apply_hw(struct pwm_chip *chip,
 			PWM_IMX_TPM_CnSC_ELS_NORMAL :
 			PWM_IMX_TPM_CnSC_ELS_INVERSED;
 	}
-	writel(val, tpm->base + PWM_IMX_TPM_CnSC(pwm->hwpwm));
+	pete_writel("drivers/pwm/pwm-imx-tpm.c:270", val, tpm->base + PWM_IMX_TPM_CnSC(pwm->hwpwm));
 
 	/* control the counter status */
 	if (state->enabled != c.enabled) {
-		val = readl(tpm->base + PWM_IMX_TPM_SC);
+		val = pete_readl("drivers/pwm/pwm-imx-tpm.c:274", tpm->base + PWM_IMX_TPM_SC);
 		if (state->enabled) {
 			if (++tpm->enable_count == 1)
 				val |= PWM_IMX_TPM_SC_CMOD_INC_EVERY_CLK;
@@ -279,7 +279,7 @@ static int pwm_imx_tpm_apply_hw(struct pwm_chip *chip,
 			if (--tpm->enable_count == 0)
 				val &= ~PWM_IMX_TPM_SC_CMOD;
 		}
-		writel(val, tpm->base + PWM_IMX_TPM_SC);
+		pete_writel("drivers/pwm/pwm-imx-tpm.c:282", val, tpm->base + PWM_IMX_TPM_SC);
 	}
 
 	return 0;
@@ -365,7 +365,7 @@ static int pwm_imx_tpm_probe(struct platform_device *pdev)
 	tpm->chip.ops = &imx_tpm_pwm_ops;
 
 	/* get number of channels */
-	val = readl(tpm->base + PWM_IMX_TPM_PARAM);
+	val = pete_readl("drivers/pwm/pwm-imx-tpm.c:368", tpm->base + PWM_IMX_TPM_PARAM);
 	tpm->chip.npwm = FIELD_GET(PWM_IMX_TPM_PARAM_CHAN, val);
 
 	mutex_init(&tpm->lock);

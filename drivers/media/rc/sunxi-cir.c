@@ -104,10 +104,10 @@ static irqreturn_t sunxi_ir_irq(int irqno, void *dev_id)
 	struct sunxi_ir *ir = dev_id;
 	struct ir_raw_event rawir = {};
 
-	status = readl(ir->base + SUNXI_IR_RXSTA_REG);
+	status = pete_readl("drivers/media/rc/sunxi-cir.c:107", ir->base + SUNXI_IR_RXSTA_REG);
 
 	/* clean all pending statuses */
-	writel(status | REG_RXSTA_CLEARALL, ir->base + SUNXI_IR_RXSTA_REG);
+	pete_writel("drivers/media/rc/sunxi-cir.c:110", status | REG_RXSTA_CLEARALL, ir->base + SUNXI_IR_RXSTA_REG);
 
 	if (status & (REG_RXSTA_RA | REG_RXSTA_RPE)) {
 		/* How many messages in fifo */
@@ -161,7 +161,7 @@ static int sunxi_ir_set_timeout(struct rc_dev *rc_dev, unsigned int timeout)
 	dev_dbg(rc_dev->dev.parent, "setting idle threshold to %u\n", ithr);
 
 	/* Set noise threshold and idle threshold */
-	writel(REG_CIR_NTHR(SUNXI_IR_RXNOISE) | REG_CIR_ITHR(ithr),
+	pete_writel("drivers/media/rc/sunxi-cir.c:164", REG_CIR_NTHR(SUNXI_IR_RXNOISE) | REG_CIR_ITHR(ithr),
 	       ir->base + SUNXI_IR_CIR_REG);
 
 	rc_dev->timeout = sunxi_ithr_to_usec(base_clk, ithr);
@@ -192,28 +192,28 @@ static int sunxi_ir_hw_init(struct device *dev)
 	}
 
 	/* Enable CIR Mode */
-	writel(REG_CTL_MD, ir->base + SUNXI_IR_CTL_REG);
+	pete_writel("drivers/media/rc/sunxi-cir.c:195", REG_CTL_MD, ir->base + SUNXI_IR_CTL_REG);
 
 	/* Set noise threshold and idle threshold */
 	sunxi_ir_set_timeout(ir->rc, ir->rc->timeout);
 
 	/* Invert Input Signal */
-	writel(REG_RXCTL_RPPI, ir->base + SUNXI_IR_RXCTL_REG);
+	pete_writel("drivers/media/rc/sunxi-cir.c:201", REG_RXCTL_RPPI, ir->base + SUNXI_IR_RXCTL_REG);
 
 	/* Clear All Rx Interrupt Status */
-	writel(REG_RXSTA_CLEARALL, ir->base + SUNXI_IR_RXSTA_REG);
+	pete_writel("drivers/media/rc/sunxi-cir.c:204", REG_RXSTA_CLEARALL, ir->base + SUNXI_IR_RXSTA_REG);
 
 	/*
 	 * Enable IRQ on overflow, packet end, FIFO available with trigger
 	 * level
 	 */
-	writel(REG_RXINT_ROI_EN | REG_RXINT_RPEI_EN |
+	pete_writel("drivers/media/rc/sunxi-cir.c:210", REG_RXINT_ROI_EN | REG_RXINT_RPEI_EN |
 	       REG_RXINT_RAI_EN | REG_RXINT_RAL(ir->fifo_size / 2 - 1),
 	       ir->base + SUNXI_IR_RXINT_REG);
 
 	/* Enable IR Module */
-	tmp = readl(ir->base + SUNXI_IR_CTL_REG);
-	writel(tmp | REG_CTL_GEN | REG_CTL_RXEN, ir->base + SUNXI_IR_CTL_REG);
+	tmp = pete_readl("drivers/media/rc/sunxi-cir.c:215", ir->base + SUNXI_IR_CTL_REG);
+	pete_writel("drivers/media/rc/sunxi-cir.c:216", tmp | REG_CTL_GEN | REG_CTL_RXEN, ir->base + SUNXI_IR_CTL_REG);
 
 	return 0;
 

@@ -412,7 +412,7 @@ static int __init ebda_rio_table(void)
 		if (!rio_detail_ptr)
 			return -ENOMEM;
 		rio_detail_ptr->rio_node_id = readb(io_mem + offset);
-		rio_detail_ptr->bbar = readl(io_mem + offset + 1);
+		rio_detail_ptr->bbar = pete_readl("drivers/pci/hotplug/ibmphp_ebda.c:415", io_mem + offset + 1);
 		rio_detail_ptr->rio_type = readb(io_mem + offset + 5);
 		rio_detail_ptr->owner_id = readb(io_mem + offset + 6);
 		rio_detail_ptr->port0_node_connect = readb(io_mem + offset + 7);
@@ -820,7 +820,7 @@ static int __init ebda_rsrc_controller(void)
 
 			case 2:
 			case 4:
-				hpc_ptr->u.wpeg_ctlr.wpegbbar = readl(io_mem + addr);
+				hpc_ptr->u.wpeg_ctlr.wpegbbar = pete_readl("drivers/pci/hotplug/ibmphp_ebda.c:823", io_mem + addr);
 				hpc_ptr->u.wpeg_ctlr.i2c_addr = readb(io_mem + addr + 4);
 				hpc_ptr->irq = readb(io_mem + addr + 5);
 				addr += 6;
@@ -964,8 +964,8 @@ static int __init ebda_rsrc_rsrc(void)
 
 			rsrc_ptr->bus_num = readb(io_mem + addr);
 			rsrc_ptr->dev_fun = readb(io_mem + addr + 1);
-			rsrc_ptr->start_addr = readl(io_mem + addr + 2);
-			rsrc_ptr->end_addr = readl(io_mem + addr + 6);
+			rsrc_ptr->start_addr = pete_readl("drivers/pci/hotplug/ibmphp_ebda.c:967", io_mem + addr + 2);
+			rsrc_ptr->end_addr = pete_readl("drivers/pci/hotplug/ibmphp_ebda.c:968", io_mem + addr + 6);
 			addr += 10;
 
 			debug("rsrc from mem or pfm ---\n");

@@ -95,24 +95,24 @@ static inline void dwc3_qcom_setbits(void __iomem *base, u32 offset, u32 val)
 {
 	u32 reg;
 
-	reg = readl(base + offset);
+	reg = pete_readl("drivers/usb/dwc3/dwc3-qcom.c:98", base + offset);
 	reg |= val;
-	writel(reg, base + offset);
+	pete_writel("drivers/usb/dwc3/dwc3-qcom.c:100", reg, base + offset);
 
 	/* ensure that above write is through */
-	readl(base + offset);
+	pete_readl("drivers/usb/dwc3/dwc3-qcom.c:103", base + offset);
 }
 
 static inline void dwc3_qcom_clrbits(void __iomem *base, u32 offset, u32 val)
 {
 	u32 reg;
 
-	reg = readl(base + offset);
+	reg = pete_readl("drivers/usb/dwc3/dwc3-qcom.c:110", base + offset);
 	reg &= ~val;
-	writel(reg, base + offset);
+	pete_writel("drivers/usb/dwc3/dwc3-qcom.c:112", reg, base + offset);
 
 	/* ensure that above write is through */
-	readl(base + offset);
+	pete_readl("drivers/usb/dwc3/dwc3-qcom.c:115", base + offset);
 }
 
 static void dwc3_qcom_vbus_override_enable(struct dwc3_qcom *qcom, bool enable)
@@ -365,7 +365,7 @@ static int dwc3_qcom_suspend(struct dwc3_qcom *qcom)
 	if (qcom->is_suspended)
 		return 0;
 
-	val = readl(qcom->qscratch_base + PWR_EVNT_IRQ_STAT_REG);
+	val = pete_readl("drivers/usb/dwc3/dwc3-qcom.c:368", qcom->qscratch_base + PWR_EVNT_IRQ_STAT_REG);
 	if (!(val & PWR_EVNT_LPM_IN_L2_MASK))
 		dev_err(qcom->dev, "HS-PHY not in L2\n");
 

@@ -166,7 +166,7 @@ static int vexpress_syscfg_exec(struct vexpress_syscfg_func *func,
 	if (WARN_ON(index >= func->num_templates))
 		return -EINVAL;
 
-	command = readl(syscfg->base + SYS_CFGCTRL);
+	command = pete_readl("drivers/bus/vexpress-config.c:169", syscfg->base + SYS_CFGCTRL);
 	if (WARN_ON(command & SYS_CFGCTRL_START))
 		return -EBUSY;
 
@@ -180,9 +180,9 @@ static int vexpress_syscfg_exec(struct vexpress_syscfg_func *func,
 
 	dev_dbg(syscfg->dev, "func %p, command %x, data %x\n",
 			func, command, *data);
-	writel(*data, syscfg->base + SYS_CFGDATA);
-	writel(0, syscfg->base + SYS_CFGSTAT);
-	writel(command, syscfg->base + SYS_CFGCTRL);
+	pete_writel("drivers/bus/vexpress-config.c:183", *data, syscfg->base + SYS_CFGDATA);
+	pete_writel("drivers/bus/vexpress-config.c:184", 0, syscfg->base + SYS_CFGSTAT);
+	pete_writel("drivers/bus/vexpress-config.c:185", command, syscfg->base + SYS_CFGCTRL);
 	mb();
 
 	/* The operation can take ages... Go to sleep, 100us initially */
@@ -198,7 +198,7 @@ static int vexpress_syscfg_exec(struct vexpress_syscfg_func *func,
 			udelay(timeout);
 		}
 
-		status = readl(syscfg->base + SYS_CFGSTAT);
+		status = pete_readl("drivers/bus/vexpress-config.c:201", syscfg->base + SYS_CFGSTAT);
 		if (status & SYS_CFGSTAT_ERR)
 			return -EFAULT;
 
@@ -209,7 +209,7 @@ static int vexpress_syscfg_exec(struct vexpress_syscfg_func *func,
 		return -ETIMEDOUT;
 
 	if (!write) {
-		*data = readl(syscfg->base + SYS_CFGDATA);
+		*data = pete_readl("drivers/bus/vexpress-config.c:212", syscfg->base + SYS_CFGDATA);
 		dev_dbg(syscfg->dev, "func %p, read data %x\n", func, *data);
 	}
 
@@ -376,13 +376,13 @@ static int vexpress_syscfg_probe(struct platform_device *pdev)
 
 	dev_set_drvdata(&pdev->dev, bridge);
 
-	master = readl(syscfg->base + SYS_MISC) & SYS_MISC_MASTERSITE ?
+	master = pete_readl("drivers/bus/vexpress-config.c:379", syscfg->base + SYS_MISC) & SYS_MISC_MASTERSITE ?
 			VEXPRESS_SITE_DB2 : VEXPRESS_SITE_DB1;
 	vexpress_config_set_master(master);
 
 	/* Confirm board type against DT property, if available */
 	if (of_property_read_u32(of_root, "arm,hbi", &dt_hbi) == 0) {
-		u32 id = readl(syscfg->base + (master == VEXPRESS_SITE_DB1 ?
+		u32 id = pete_readl("drivers/bus/vexpress-config.c:385", syscfg->base + (master == VEXPRESS_SITE_DB1 ?
 				 SYS_PROCID0 : SYS_PROCID1));
 		u32 hbi = (id >> SYS_PROCIDx_HBI_SHIFT) & SYS_HBI_MASK;
 

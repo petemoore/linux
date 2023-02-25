@@ -356,7 +356,7 @@ static void cdns_pcie_ep_assert_intx(struct cdns_pcie_ep *ep, u8 fn, u8 intx,
 	offset = CDNS_PCIE_NORMAL_MSG_ROUTING(MSG_ROUTING_LOCAL) |
 		 CDNS_PCIE_NORMAL_MSG_CODE(msg_code) |
 		 CDNS_PCIE_MSG_NO_DATA;
-	writel(0, ep->irq_cpu_addr + offset);
+	pete_writel("drivers/pci/controller/cadence/pcie-cadence-ep.c:359", 0, ep->irq_cpu_addr + offset);
 }
 
 static int cdns_pcie_ep_send_legacy_irq(struct cdns_pcie_ep *ep, u8 fn, u8 vfn,
@@ -422,7 +422,7 @@ static int cdns_pcie_ep_send_msi_irq(struct cdns_pcie_ep *ep, u8 fn, u8 vfn,
 		ep->irq_pci_addr = (pci_addr & ~pci_addr_mask);
 		ep->irq_pci_fn = fn;
 	}
-	writel(data, ep->irq_cpu_addr + (pci_addr & pci_addr_mask));
+	pete_writel("drivers/pci/controller/cadence/pcie-cadence-ep.c:425", data, ep->irq_cpu_addr + (pci_addr & pci_addr_mask));
 
 	return 0;
 }
@@ -525,7 +525,7 @@ static int cdns_pcie_ep_send_msix_irq(struct cdns_pcie_ep *ep, u8 fn, u8 vfn,
 		ep->irq_pci_addr = (msg_addr & ~pci_addr_mask);
 		ep->irq_pci_fn = fn;
 	}
-	writel(msg_data, ep->irq_cpu_addr + (msg_addr & pci_addr_mask));
+	pete_writel("drivers/pci/controller/cadence/pcie-cadence-ep.c:528", msg_data, ep->irq_cpu_addr + (msg_addr & pci_addr_mask));
 
 	return 0;
 }

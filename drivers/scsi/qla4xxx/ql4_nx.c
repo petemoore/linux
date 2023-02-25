@@ -361,12 +361,12 @@ qla4_82xx_pci_set_crbwindow_2M(struct scsi_qla_host *ha, ulong *off)
 	u32 win_read;
 
 	ha->crb_win = CRB_HI(*off);
-	writel(ha->crb_win,
+	pete_writel("drivers/scsi/qla4xxx/ql4_nx.c:364", ha->crb_win,
 		(void __iomem *)(CRB_WINDOW_2M + ha->nx_pcibase));
 
 	/* Read back value to make sure write has gone through before trying
 	* to use it. */
-	win_read = readl((void __iomem *)(CRB_WINDOW_2M + ha->nx_pcibase));
+	win_read = pete_readl("drivers/scsi/qla4xxx/ql4_nx.c:369", (void __iomem *)(CRB_WINDOW_2M + ha->nx_pcibase));
 	if (win_read != ha->crb_win) {
 		DEBUG2(ql4_printk(KERN_INFO, ha,
 		    "%s: Written crbwin (0x%x) != Read crbwin (0x%x),"
@@ -420,7 +420,7 @@ qla4_82xx_wr_32(struct scsi_qla_host *ha, ulong off, u32 data)
 		qla4_82xx_pci_set_crbwindow_2M(ha, &off);
 	}
 
-	writel(data, (void __iomem *)off);
+	pete_writel("drivers/scsi/qla4xxx/ql4_nx.c:423", data, (void __iomem *)off);
 
 	if (rv == 1) {
 		qla4_82xx_crb_win_unlock(ha);
@@ -443,7 +443,7 @@ uint32_t qla4_82xx_rd_32(struct scsi_qla_host *ha, ulong off)
 		qla4_82xx_crb_win_lock(ha);
 		qla4_82xx_pci_set_crbwindow_2M(ha, &off);
 	}
-	data = readl((void __iomem *)off);
+	data = pete_readl("drivers/scsi/qla4xxx/ql4_nx.c:446", (void __iomem *)off);
 
 	if (rv == 1) {
 		qla4_82xx_crb_win_unlock(ha);
@@ -459,13 +459,13 @@ int qla4_82xx_md_rd_32(struct scsi_qla_host *ha, uint32_t off, uint32_t *data)
 	int rval = QLA_SUCCESS;
 
 	off_value  = off & 0xFFFF0000;
-	writel(off_value, (void __iomem *)(CRB_WINDOW_2M + ha->nx_pcibase));
+	pete_writel("drivers/scsi/qla4xxx/ql4_nx.c:462", off_value, (void __iomem *)(CRB_WINDOW_2M + ha->nx_pcibase));
 
 	/*
 	 * Read back value to make sure write has gone through before trying
 	 * to use it.
 	 */
-	win_read = readl((void __iomem *)(CRB_WINDOW_2M + ha->nx_pcibase));
+	win_read = pete_readl("drivers/scsi/qla4xxx/ql4_nx.c:468", (void __iomem *)(CRB_WINDOW_2M + ha->nx_pcibase));
 	if (win_read != off_value) {
 		DEBUG2(ql4_printk(KERN_INFO, ha,
 				  "%s: Written (0x%x) != Read (0x%x), off=0x%x\n",
@@ -473,7 +473,7 @@ int qla4_82xx_md_rd_32(struct scsi_qla_host *ha, uint32_t off, uint32_t *data)
 		rval = QLA_ERROR;
 	} else {
 		off_value  = off & 0x0000FFFF;
-		*data = readl((void __iomem *)(off_value + CRB_INDIRECT_2M +
+		*data = pete_readl("drivers/scsi/qla4xxx/ql4_nx.c:476", (void __iomem *)(off_value + CRB_INDIRECT_2M +
 					       ha->nx_pcibase));
 	}
 	return rval;
@@ -485,12 +485,12 @@ int qla4_82xx_md_wr_32(struct scsi_qla_host *ha, uint32_t off, uint32_t data)
 	int rval = QLA_SUCCESS;
 
 	off_value  = off & 0xFFFF0000;
-	writel(off_value, (void __iomem *)(CRB_WINDOW_2M + ha->nx_pcibase));
+	pete_writel("drivers/scsi/qla4xxx/ql4_nx.c:488", off_value, (void __iomem *)(CRB_WINDOW_2M + ha->nx_pcibase));
 
 	/* Read back value to make sure write has gone through before trying
 	 * to use it.
 	 */
-	win_read = readl((void __iomem *)(CRB_WINDOW_2M + ha->nx_pcibase));
+	win_read = pete_readl("drivers/scsi/qla4xxx/ql4_nx.c:493", (void __iomem *)(CRB_WINDOW_2M + ha->nx_pcibase));
 	if (win_read != off_value) {
 		DEBUG2(ql4_printk(KERN_INFO, ha,
 				  "%s: Written (0x%x) != Read (0x%x), off=0x%x\n",
@@ -498,7 +498,7 @@ int qla4_82xx_md_wr_32(struct scsi_qla_host *ha, uint32_t off, uint32_t data)
 		rval = QLA_ERROR;
 	} else {
 		off_value  = off & 0x0000FFFF;
-		writel(data, (void __iomem *)(off_value + CRB_INDIRECT_2M +
+		pete_writel("drivers/scsi/qla4xxx/ql4_nx.c:501", data, (void __iomem *)(off_value + CRB_INDIRECT_2M +
 					      ha->nx_pcibase));
 	}
 	return rval;
@@ -755,7 +755,7 @@ static int qla4_82xx_pci_mem_read_direct(struct scsi_qla_host *ha,
 		*(u16 *)data = readw(addr);
 		break;
 	case 4:
-		*(u32 *)data = readl(addr);
+		*(u32 *)data = pete_readl("drivers/scsi/qla4xxx/ql4_nx.c:758", addr);
 		break;
 	case 8:
 		*(u64 *)data = readq(addr);
@@ -826,7 +826,7 @@ qla4_82xx_pci_mem_write_direct(struct scsi_qla_host *ha, u64 off,
 		writew(*(u16 *)data, addr);
 		break;
 	case 4:
-		writel(*(u32 *)data, addr);
+		pete_writel("drivers/scsi/qla4xxx/ql4_nx.c:829", *(u32 *)data, addr);
 		break;
 	case 8:
 		writeq(*(u64 *)data, addr);
@@ -2324,7 +2324,7 @@ static void qla4_8xxx_minidump_process_rdocm(struct scsi_qla_host *ha,
 			  __func__, r_addr, r_stride, loop_cnt));
 
 	for (i = 0; i < loop_cnt; i++) {
-		r_value = readl((void __iomem *)(r_addr + ha->nx_pcibase));
+		r_value = pete_readl("drivers/scsi/qla4xxx/ql4_nx.c:2327", (void __iomem *)(r_addr + ha->nx_pcibase));
 		*data_ptr++ = cpu_to_le32(r_value);
 		r_addr += r_stride;
 	}
@@ -3598,11 +3598,11 @@ int qla4_8xxx_load_risc(struct scsi_qla_host *ha)
 
 	/* clear the interrupt */
 	if (is_qla8032(ha) || is_qla8042(ha)) {
-		writel(0, &ha->qla4_83xx_reg->risc_intr);
-		readl(&ha->qla4_83xx_reg->risc_intr);
+		pete_writel("drivers/scsi/qla4xxx/ql4_nx.c:3601", 0, &ha->qla4_83xx_reg->risc_intr);
+		pete_readl("drivers/scsi/qla4xxx/ql4_nx.c:3602", &ha->qla4_83xx_reg->risc_intr);
 	} else if (is_qla8022(ha)) {
-		writel(0, &ha->qla4_82xx_reg->host_int);
-		readl(&ha->qla4_82xx_reg->host_int);
+		pete_writel("drivers/scsi/qla4xxx/ql4_nx.c:3604", 0, &ha->qla4_82xx_reg->host_int);
+		pete_readl("drivers/scsi/qla4xxx/ql4_nx.c:3605", &ha->qla4_82xx_reg->host_int);
 	}
 
 	retval = qla4_8xxx_device_state_handler(ha);
@@ -3905,23 +3905,23 @@ void qla4_82xx_queue_mbox_cmd(struct scsi_qla_host *ha, uint32_t *mbx_cmd,
 
 	/* Load all mailbox registers, except mailbox 0. */
 	for (i = 1; i < in_count; i++)
-		writel(mbx_cmd[i], &ha->qla4_82xx_reg->mailbox_in[i]);
+		pete_writel("drivers/scsi/qla4xxx/ql4_nx.c:3908", mbx_cmd[i], &ha->qla4_82xx_reg->mailbox_in[i]);
 
 	/* Wakeup firmware  */
-	writel(mbx_cmd[0], &ha->qla4_82xx_reg->mailbox_in[0]);
-	readl(&ha->qla4_82xx_reg->mailbox_in[0]);
-	writel(HINT_MBX_INT_PENDING, &ha->qla4_82xx_reg->hint);
-	readl(&ha->qla4_82xx_reg->hint);
+	pete_writel("drivers/scsi/qla4xxx/ql4_nx.c:3911", mbx_cmd[0], &ha->qla4_82xx_reg->mailbox_in[0]);
+	pete_readl("drivers/scsi/qla4xxx/ql4_nx.c:3912", &ha->qla4_82xx_reg->mailbox_in[0]);
+	pete_writel("drivers/scsi/qla4xxx/ql4_nx.c:3913", HINT_MBX_INT_PENDING, &ha->qla4_82xx_reg->hint);
+	pete_readl("drivers/scsi/qla4xxx/ql4_nx.c:3914", &ha->qla4_82xx_reg->hint);
 }
 
 void qla4_82xx_process_mbox_intr(struct scsi_qla_host *ha, int out_count)
 {
 	int intr_status;
 
-	intr_status = readl(&ha->qla4_82xx_reg->host_int);
+	intr_status = pete_readl("drivers/scsi/qla4xxx/ql4_nx.c:3921", &ha->qla4_82xx_reg->host_int);
 	if (intr_status & ISRX_82XX_RISC_INT) {
 		ha->mbox_status_count = out_count;
-		intr_status = readl(&ha->qla4_82xx_reg->host_status);
+		intr_status = pete_readl("drivers/scsi/qla4xxx/ql4_nx.c:3924", &ha->qla4_82xx_reg->host_status);
 		ha->isp_ops->interrupt_service_routine(ha, intr_status);
 
 		if (test_bit(AF_INTERRUPTS_ON, &ha->flags) &&

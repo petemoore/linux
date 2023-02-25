@@ -1728,7 +1728,7 @@ u32 cik_get_xclk(struct radeon_device *rdev)
 u32 cik_mm_rdoorbell(struct radeon_device *rdev, u32 index)
 {
 	if (index < rdev->doorbell.num_doorbells) {
-		return readl(rdev->doorbell.ptr + index);
+		return pete_readl("drivers/gpu/drm/radeon/cik.c:1731", rdev->doorbell.ptr + index);
 	} else {
 		DRM_ERROR("reading beyond doorbell aperture: 0x%08x!\n", index);
 		return 0;
@@ -1748,7 +1748,7 @@ u32 cik_mm_rdoorbell(struct radeon_device *rdev, u32 index)
 void cik_mm_wdoorbell(struct radeon_device *rdev, u32 index, u32 v)
 {
 	if (index < rdev->doorbell.num_doorbells) {
-		writel(v, rdev->doorbell.ptr + index);
+		pete_writel("drivers/gpu/drm/radeon/cik.c:1751", v, rdev->doorbell.ptr + index);
 	} else {
 		DRM_ERROR("writing beyond doorbell aperture: 0x%08x!\n", index);
 	}

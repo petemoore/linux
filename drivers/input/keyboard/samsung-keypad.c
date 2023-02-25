@@ -91,15 +91,15 @@ static void samsung_keypad_scan(struct samsung_keypad *keypad,
 			val &= ~(1 << col);
 		}
 
-		writel(val, keypad->base + SAMSUNG_KEYIFCOL);
+		pete_writel("drivers/input/keyboard/samsung-keypad.c:94", val, keypad->base + SAMSUNG_KEYIFCOL);
 		mdelay(1);
 
-		val = readl(keypad->base + SAMSUNG_KEYIFROW);
+		val = pete_readl("drivers/input/keyboard/samsung-keypad.c:97", keypad->base + SAMSUNG_KEYIFROW);
 		row_state[col] = ~val & ((1 << keypad->rows) - 1);
 	}
 
 	/* KEYIFCOL reg clear */
-	writel(0, keypad->base + SAMSUNG_KEYIFCOL);
+	pete_writel("drivers/input/keyboard/samsung-keypad.c:102", 0, keypad->base + SAMSUNG_KEYIFCOL);
 }
 
 static bool samsung_keypad_report(struct samsung_keypad *keypad,
@@ -151,9 +151,9 @@ static irqreturn_t samsung_keypad_irq(int irq, void *dev_id)
 	pm_runtime_get_sync(&keypad->pdev->dev);
 
 	do {
-		readl(keypad->base + SAMSUNG_KEYIFSTSCLR);
+		pete_readl("drivers/input/keyboard/samsung-keypad.c:154", keypad->base + SAMSUNG_KEYIFSTSCLR);
 		/* Clear interrupt. */
-		writel(~0x0, keypad->base + SAMSUNG_KEYIFSTSCLR);
+		pete_writel("drivers/input/keyboard/samsung-keypad.c:156", ~0x0, keypad->base + SAMSUNG_KEYIFSTSCLR);
 
 		samsung_keypad_scan(keypad, row_state);
 
@@ -181,12 +181,12 @@ static void samsung_keypad_start(struct samsung_keypad *keypad)
 	clk_enable(keypad->clk);
 
 	/* Enable interrupt bits. */
-	val = readl(keypad->base + SAMSUNG_KEYIFCON);
+	val = pete_readl("drivers/input/keyboard/samsung-keypad.c:184", keypad->base + SAMSUNG_KEYIFCON);
 	val |= SAMSUNG_KEYIFCON_INT_F_EN | SAMSUNG_KEYIFCON_INT_R_EN;
-	writel(val, keypad->base + SAMSUNG_KEYIFCON);
+	pete_writel("drivers/input/keyboard/samsung-keypad.c:186", val, keypad->base + SAMSUNG_KEYIFCON);
 
 	/* KEYIFCOL reg clear. */
-	writel(0, keypad->base + SAMSUNG_KEYIFCOL);
+	pete_writel("drivers/input/keyboard/samsung-keypad.c:189", 0, keypad->base + SAMSUNG_KEYIFCOL);
 
 	pm_runtime_put(&keypad->pdev->dev);
 }
@@ -203,12 +203,12 @@ static void samsung_keypad_stop(struct samsung_keypad *keypad)
 	disable_irq(keypad->irq);
 
 	/* Clear interrupt. */
-	writel(~0x0, keypad->base + SAMSUNG_KEYIFSTSCLR);
+	pete_writel("drivers/input/keyboard/samsung-keypad.c:206", ~0x0, keypad->base + SAMSUNG_KEYIFSTSCLR);
 
 	/* Disable interrupt bits. */
-	val = readl(keypad->base + SAMSUNG_KEYIFCON);
+	val = pete_readl("drivers/input/keyboard/samsung-keypad.c:209", keypad->base + SAMSUNG_KEYIFCON);
 	val &= ~(SAMSUNG_KEYIFCON_INT_F_EN | SAMSUNG_KEYIFCON_INT_R_EN);
-	writel(val, keypad->base + SAMSUNG_KEYIFCON);
+	pete_writel("drivers/input/keyboard/samsung-keypad.c:211", val, keypad->base + SAMSUNG_KEYIFCON);
 
 	clk_disable(keypad->clk);
 
@@ -474,9 +474,9 @@ static int samsung_keypad_runtime_suspend(struct device *dev)
 	if (!error)
 		keypad->wake_enabled = true;
 
-	val = readl(keypad->base + SAMSUNG_KEYIFCON);
+	val = pete_readl("drivers/input/keyboard/samsung-keypad.c:477", keypad->base + SAMSUNG_KEYIFCON);
 	val |= SAMSUNG_KEYIFCON_WAKEUPEN;
-	writel(val, keypad->base + SAMSUNG_KEYIFCON);
+	pete_writel("drivers/input/keyboard/samsung-keypad.c:479", val, keypad->base + SAMSUNG_KEYIFCON);
 
 	clk_disable(keypad->clk);
 
@@ -494,9 +494,9 @@ static int samsung_keypad_runtime_resume(struct device *dev)
 
 	clk_enable(keypad->clk);
 
-	val = readl(keypad->base + SAMSUNG_KEYIFCON);
+	val = pete_readl("drivers/input/keyboard/samsung-keypad.c:497", keypad->base + SAMSUNG_KEYIFCON);
 	val &= ~SAMSUNG_KEYIFCON_WAKEUPEN;
-	writel(val, keypad->base + SAMSUNG_KEYIFCON);
+	pete_writel("drivers/input/keyboard/samsung-keypad.c:499", val, keypad->base + SAMSUNG_KEYIFCON);
 
 	if (keypad->wake_enabled)
 		disable_irq_wake(keypad->irq);
@@ -513,7 +513,7 @@ static void samsung_keypad_toggle_wakeup(struct samsung_keypad *keypad,
 
 	clk_enable(keypad->clk);
 
-	val = readl(keypad->base + SAMSUNG_KEYIFCON);
+	val = pete_readl("drivers/input/keyboard/samsung-keypad.c:516", keypad->base + SAMSUNG_KEYIFCON);
 	if (enable) {
 		val |= SAMSUNG_KEYIFCON_WAKEUPEN;
 		if (device_may_wakeup(&keypad->pdev->dev))
@@ -523,7 +523,7 @@ static void samsung_keypad_toggle_wakeup(struct samsung_keypad *keypad,
 		if (device_may_wakeup(&keypad->pdev->dev))
 			disable_irq_wake(keypad->irq);
 	}
-	writel(val, keypad->base + SAMSUNG_KEYIFCON);
+	pete_writel("drivers/input/keyboard/samsung-keypad.c:526", val, keypad->base + SAMSUNG_KEYIFCON);
 
 	clk_disable(keypad->clk);
 }

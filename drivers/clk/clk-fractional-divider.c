@@ -52,7 +52,7 @@ static inline u32 clk_fd_readl(struct clk_fractional_divider *fd)
 	if (fd->flags & CLK_FRAC_DIVIDER_BIG_ENDIAN)
 		return ioread32be(fd->reg);
 
-	return readl(fd->reg);
+	return pete_readl("drivers/clk/clk-fractional-divider.c:55", fd->reg);
 }
 
 static inline void clk_fd_writel(struct clk_fractional_divider *fd, u32 val)
@@ -60,7 +60,7 @@ static inline void clk_fd_writel(struct clk_fractional_divider *fd, u32 val)
 	if (fd->flags & CLK_FRAC_DIVIDER_BIG_ENDIAN)
 		iowrite32be(val, fd->reg);
 	else
-		writel(val, fd->reg);
+		pete_writel("drivers/clk/clk-fractional-divider.c:63", val, fd->reg);
 }
 
 static unsigned long clk_fd_recalc_rate(struct clk_hw *hw,

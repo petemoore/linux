@@ -99,7 +99,7 @@ static void wait_for_xmit_empty(struct uart_port *port)
 	unsigned int timeout = 10000;
 
 	do {
-		if (LPC32XX_HSU_TX_LEV(readl(LPC32XX_HSUART_LEVEL(
+		if (LPC32XX_HSU_TX_LEV(pete_readl("drivers/tty/serial/lpc32xx_hs.c:102", LPC32XX_HSUART_LEVEL(
 							port->membase))) == 0)
 			break;
 		if (--timeout == 0)
@@ -113,7 +113,7 @@ static void wait_for_xmit_ready(struct uart_port *port)
 	unsigned int timeout = 10000;
 
 	while (1) {
-		if (LPC32XX_HSU_TX_LEV(readl(LPC32XX_HSUART_LEVEL(
+		if (LPC32XX_HSU_TX_LEV(pete_readl("drivers/tty/serial/lpc32xx_hs.c:116", LPC32XX_HSUART_LEVEL(
 							port->membase))) < 32)
 			break;
 		if (--timeout == 0)
@@ -125,7 +125,7 @@ static void wait_for_xmit_ready(struct uart_port *port)
 static void lpc32xx_hsuart_console_putchar(struct uart_port *port, int ch)
 {
 	wait_for_xmit_ready(port);
-	writel((u32)ch, LPC32XX_HSUART_FIFO(port->membase));
+	pete_writel("drivers/tty/serial/lpc32xx_hs.c:128", (u32)ch, LPC32XX_HSUART_FIFO(port->membase));
 }
 
 static void lpc32xx_hsuart_console_write(struct console *co, const char *s,
@@ -243,9 +243,9 @@ static void __serial_uart_flush(struct uart_port *port)
 {
 	int cnt = 0;
 
-	while ((readl(LPC32XX_HSUART_LEVEL(port->membase)) > 0) &&
+	while ((pete_readl("drivers/tty/serial/lpc32xx_hs.c:246", LPC32XX_HSUART_LEVEL(port->membase)) > 0) &&
 	       (cnt++ < FIFO_READ_LIMIT))
-		readl(LPC32XX_HSUART_FIFO(port->membase));
+		pete_readl("drivers/tty/serial/lpc32xx_hs.c:248", LPC32XX_HSUART_FIFO(port->membase));
 }
 
 static void __serial_lpc32xx_rx(struct uart_port *port)
@@ -254,14 +254,14 @@ static void __serial_lpc32xx_rx(struct uart_port *port)
 	unsigned int tmp, flag;
 
 	/* Read data from FIFO and push into terminal */
-	tmp = readl(LPC32XX_HSUART_FIFO(port->membase));
+	tmp = pete_readl("drivers/tty/serial/lpc32xx_hs.c:257", LPC32XX_HSUART_FIFO(port->membase));
 	while (!(tmp & LPC32XX_HSU_RX_EMPTY)) {
 		flag = TTY_NORMAL;
 		port->icount.rx++;
 
 		if (tmp & LPC32XX_HSU_ERROR_DATA) {
 			/* Framing error */
-			writel(LPC32XX_HSU_FE_INT,
+			pete_writel("drivers/tty/serial/lpc32xx_hs.c:264", LPC32XX_HSU_FE_INT,
 			       LPC32XX_HSUART_IIR(port->membase));
 			port->icount.frame++;
 			flag = TTY_FRAME;
@@ -270,7 +270,7 @@ static void __serial_lpc32xx_rx(struct uart_port *port)
 
 		tty_insert_flip_char(tport, (tmp & 0xFF), flag);
 
-		tmp = readl(LPC32XX_HSUART_FIFO(port->membase));
+		tmp = pete_readl("drivers/tty/serial/lpc32xx_hs.c:273", LPC32XX_HSUART_FIFO(port->membase));
 	}
 
 	tty_flip_buffer_push(tport);
@@ -282,7 +282,7 @@ static void __serial_lpc32xx_tx(struct uart_port *port)
 	unsigned int tmp;
 
 	if (port->x_char) {
-		writel((u32)port->x_char, LPC32XX_HSUART_FIFO(port->membase));
+		pete_writel("drivers/tty/serial/lpc32xx_hs.c:285", (u32)port->x_char, LPC32XX_HSUART_FIFO(port->membase));
 		port->icount.tx++;
 		port->x_char = 0;
 		return;
@@ -292,9 +292,9 @@ static void __serial_lpc32xx_tx(struct uart_port *port)
 		goto exit_tx;
 
 	/* Transfer data */
-	while (LPC32XX_HSU_TX_LEV(readl(
+	while (LPC32XX_HSU_TX_LEV(pete_readl("drivers/tty/serial/lpc32xx_hs.c:295", 
 		LPC32XX_HSUART_LEVEL(port->membase))) < 64) {
-		writel((u32) xmit->buf[xmit->tail],
+		pete_writel("drivers/tty/serial/lpc32xx_hs.c:297", (u32) xmit->buf[xmit->tail],
 		       LPC32XX_HSUART_FIFO(port->membase));
 		xmit->tail = (xmit->tail + 1) & (UART_XMIT_SIZE - 1);
 		port->icount.tx++;
@@ -307,9 +307,9 @@ static void __serial_lpc32xx_tx(struct uart_port *port)
 
 exit_tx:
 	if (uart_circ_empty(xmit)) {
-		tmp = readl(LPC32XX_HSUART_CTRL(port->membase));
+		tmp = pete_readl("drivers/tty/serial/lpc32xx_hs.c:310", LPC32XX_HSUART_CTRL(port->membase));
 		tmp &= ~LPC32XX_HSU_TX_INT_EN;
-		writel(tmp, LPC32XX_HSUART_CTRL(port->membase));
+		pete_writel("drivers/tty/serial/lpc32xx_hs.c:312", tmp, LPC32XX_HSUART_CTRL(port->membase));
 	}
 }
 
@@ -322,22 +322,22 @@ static irqreturn_t serial_lpc32xx_interrupt(int irq, void *dev_id)
 	spin_lock(&port->lock);
 
 	/* Read UART status and clear latched interrupts */
-	status = readl(LPC32XX_HSUART_IIR(port->membase));
+	status = pete_readl("drivers/tty/serial/lpc32xx_hs.c:325", LPC32XX_HSUART_IIR(port->membase));
 
 	if (status & LPC32XX_HSU_BRK_INT) {
 		/* Break received */
-		writel(LPC32XX_HSU_BRK_INT, LPC32XX_HSUART_IIR(port->membase));
+		pete_writel("drivers/tty/serial/lpc32xx_hs.c:329", LPC32XX_HSU_BRK_INT, LPC32XX_HSUART_IIR(port->membase));
 		port->icount.brk++;
 		uart_handle_break(port);
 	}
 
 	/* Framing error */
 	if (status & LPC32XX_HSU_FE_INT)
-		writel(LPC32XX_HSU_FE_INT, LPC32XX_HSUART_IIR(port->membase));
+		pete_writel("drivers/tty/serial/lpc32xx_hs.c:336", LPC32XX_HSU_FE_INT, LPC32XX_HSUART_IIR(port->membase));
 
 	if (status & LPC32XX_HSU_RX_OE_INT) {
 		/* Receive FIFO overrun */
-		writel(LPC32XX_HSU_RX_OE_INT,
+		pete_writel("drivers/tty/serial/lpc32xx_hs.c:340", LPC32XX_HSU_RX_OE_INT,
 		       LPC32XX_HSUART_IIR(port->membase));
 		port->icount.overrun++;
 		tty_insert_flip_char(tport, 0, TTY_OVERRUN);
@@ -350,7 +350,7 @@ static irqreturn_t serial_lpc32xx_interrupt(int irq, void *dev_id)
 
 	/* Transmit data request? */
 	if ((status & LPC32XX_HSU_TX_INT) && (!uart_tx_stopped(port))) {
-		writel(LPC32XX_HSU_TX_INT, LPC32XX_HSUART_IIR(port->membase));
+		pete_writel("drivers/tty/serial/lpc32xx_hs.c:353", LPC32XX_HSU_TX_INT, LPC32XX_HSUART_IIR(port->membase));
 		__serial_lpc32xx_tx(port);
 	}
 
@@ -364,7 +364,7 @@ static unsigned int serial_lpc32xx_tx_empty(struct uart_port *port)
 {
 	unsigned int ret = 0;
 
-	if (LPC32XX_HSU_TX_LEV(readl(LPC32XX_HSUART_LEVEL(port->membase))) == 0)
+	if (LPC32XX_HSU_TX_LEV(pete_readl("drivers/tty/serial/lpc32xx_hs.c:367", LPC32XX_HSUART_LEVEL(port->membase))) == 0)
 		ret = TIOCSER_TEMT;
 
 	return ret;
@@ -389,9 +389,9 @@ static void serial_lpc32xx_stop_tx(struct uart_port *port)
 {
 	u32 tmp;
 
-	tmp = readl(LPC32XX_HSUART_CTRL(port->membase));
+	tmp = pete_readl("drivers/tty/serial/lpc32xx_hs.c:392", LPC32XX_HSUART_CTRL(port->membase));
 	tmp &= ~LPC32XX_HSU_TX_INT_EN;
-	writel(tmp, LPC32XX_HSUART_CTRL(port->membase));
+	pete_writel("drivers/tty/serial/lpc32xx_hs.c:394", tmp, LPC32XX_HSUART_CTRL(port->membase));
 }
 
 /* port->lock held by caller.  */
@@ -400,9 +400,9 @@ static void serial_lpc32xx_start_tx(struct uart_port *port)
 	u32 tmp;
 
 	__serial_lpc32xx_tx(port);
-	tmp = readl(LPC32XX_HSUART_CTRL(port->membase));
+	tmp = pete_readl("drivers/tty/serial/lpc32xx_hs.c:403", LPC32XX_HSUART_CTRL(port->membase));
 	tmp |= LPC32XX_HSU_TX_INT_EN;
-	writel(tmp, LPC32XX_HSUART_CTRL(port->membase));
+	pete_writel("drivers/tty/serial/lpc32xx_hs.c:405", tmp, LPC32XX_HSUART_CTRL(port->membase));
 }
 
 /* port->lock held by caller.  */
@@ -410,11 +410,11 @@ static void serial_lpc32xx_stop_rx(struct uart_port *port)
 {
 	u32 tmp;
 
-	tmp = readl(LPC32XX_HSUART_CTRL(port->membase));
+	tmp = pete_readl("drivers/tty/serial/lpc32xx_hs.c:413", LPC32XX_HSUART_CTRL(port->membase));
 	tmp &= ~(LPC32XX_HSU_RX_INT_EN | LPC32XX_HSU_ERR_INT_EN);
-	writel(tmp, LPC32XX_HSUART_CTRL(port->membase));
+	pete_writel("drivers/tty/serial/lpc32xx_hs.c:415", tmp, LPC32XX_HSUART_CTRL(port->membase));
 
-	writel((LPC32XX_HSU_BRK_INT | LPC32XX_HSU_RX_OE_INT |
+	pete_writel("drivers/tty/serial/lpc32xx_hs.c:417", (LPC32XX_HSU_BRK_INT | LPC32XX_HSU_RX_OE_INT |
 		LPC32XX_HSU_FE_INT), LPC32XX_HSUART_IIR(port->membase));
 }
 
@@ -426,12 +426,12 @@ static void serial_lpc32xx_break_ctl(struct uart_port *port,
 	u32 tmp;
 
 	spin_lock_irqsave(&port->lock, flags);
-	tmp = readl(LPC32XX_HSUART_CTRL(port->membase));
+	tmp = pete_readl("drivers/tty/serial/lpc32xx_hs.c:429", LPC32XX_HSUART_CTRL(port->membase));
 	if (break_state != 0)
 		tmp |= LPC32XX_HSU_BREAK;
 	else
 		tmp &= ~LPC32XX_HSU_BREAK;
-	writel(tmp, LPC32XX_HSUART_CTRL(port->membase));
+	pete_writel("drivers/tty/serial/lpc32xx_hs.c:434", tmp, LPC32XX_HSUART_CTRL(port->membase));
 	spin_unlock_irqrestore(&port->lock, flags);
 }
 
@@ -446,11 +446,11 @@ static int serial_lpc32xx_startup(struct uart_port *port)
 
 	__serial_uart_flush(port);
 
-	writel((LPC32XX_HSU_TX_INT | LPC32XX_HSU_FE_INT |
+	pete_writel("drivers/tty/serial/lpc32xx_hs.c:449", (LPC32XX_HSU_TX_INT | LPC32XX_HSU_FE_INT |
 		LPC32XX_HSU_BRK_INT | LPC32XX_HSU_RX_OE_INT),
 	       LPC32XX_HSUART_IIR(port->membase));
 
-	writel(0xFF, LPC32XX_HSUART_RATE(port->membase));
+	pete_writel("drivers/tty/serial/lpc32xx_hs.c:453", 0xFF, LPC32XX_HSUART_RATE(port->membase));
 
 	/*
 	 * Set receiver timeout, HSU offset of 20, no break, no interrupts,
@@ -458,7 +458,7 @@ static int serial_lpc32xx_startup(struct uart_port *port)
 	 */
 	tmp = LPC32XX_HSU_TX_TL8B | LPC32XX_HSU_RX_TL32B |
 		LPC32XX_HSU_OFFSET(20) | LPC32XX_HSU_TMO_INACT_4B;
-	writel(tmp, LPC32XX_HSUART_CTRL(port->membase));
+	pete_writel("drivers/tty/serial/lpc32xx_hs.c:461", tmp, LPC32XX_HSUART_CTRL(port->membase));
 
 	lpc32xx_loopback_set(port->mapbase, 0); /* get out of loopback mode */
 
@@ -467,7 +467,7 @@ static int serial_lpc32xx_startup(struct uart_port *port)
 	retval = request_irq(port->irq, serial_lpc32xx_interrupt,
 			     0, MODNAME, port);
 	if (!retval)
-		writel((tmp | LPC32XX_HSU_RX_INT_EN | LPC32XX_HSU_ERR_INT_EN),
+		pete_writel("drivers/tty/serial/lpc32xx_hs.c:470", (tmp | LPC32XX_HSU_RX_INT_EN | LPC32XX_HSU_ERR_INT_EN),
 		       LPC32XX_HSUART_CTRL(port->membase));
 
 	return retval;
@@ -483,7 +483,7 @@ static void serial_lpc32xx_shutdown(struct uart_port *port)
 
 	tmp = LPC32XX_HSU_TX_TL8B | LPC32XX_HSU_RX_TL32B |
 		LPC32XX_HSU_OFFSET(20) | LPC32XX_HSU_TMO_INACT_4B;
-	writel(tmp, LPC32XX_HSUART_CTRL(port->membase));
+	pete_writel("drivers/tty/serial/lpc32xx_hs.c:486", tmp, LPC32XX_HSUART_CTRL(port->membase));
 
 	lpc32xx_loopback_set(port->mapbase, 1); /* go to loopback mode */
 
@@ -515,14 +515,14 @@ static void serial_lpc32xx_set_termios(struct uart_port *port,
 	spin_lock_irqsave(&port->lock, flags);
 
 	/* Ignore characters? */
-	tmp = readl(LPC32XX_HSUART_CTRL(port->membase));
+	tmp = pete_readl("drivers/tty/serial/lpc32xx_hs.c:518", LPC32XX_HSUART_CTRL(port->membase));
 	if ((termios->c_cflag & CREAD) == 0)
 		tmp &= ~(LPC32XX_HSU_RX_INT_EN | LPC32XX_HSU_ERR_INT_EN);
 	else
 		tmp |= LPC32XX_HSU_RX_INT_EN | LPC32XX_HSU_ERR_INT_EN;
-	writel(tmp, LPC32XX_HSUART_CTRL(port->membase));
+	pete_writel("drivers/tty/serial/lpc32xx_hs.c:523", tmp, LPC32XX_HSUART_CTRL(port->membase));
 
-	writel(quot, LPC32XX_HSUART_RATE(port->membase));
+	pete_writel("drivers/tty/serial/lpc32xx_hs.c:525", quot, LPC32XX_HSUART_RATE(port->membase));
 
 	uart_update_timeout(port, termios->c_cflag, baud);
 
@@ -583,15 +583,15 @@ static void serial_lpc32xx_config_port(struct uart_port *port, int uflags)
 
 	__serial_uart_flush(port);
 
-	writel((LPC32XX_HSU_TX_INT | LPC32XX_HSU_FE_INT |
+	pete_writel("drivers/tty/serial/lpc32xx_hs.c:586", (LPC32XX_HSU_TX_INT | LPC32XX_HSU_FE_INT |
 		LPC32XX_HSU_BRK_INT | LPC32XX_HSU_RX_OE_INT),
 	       LPC32XX_HSUART_IIR(port->membase));
 
-	writel(0xFF, LPC32XX_HSUART_RATE(port->membase));
+	pete_writel("drivers/tty/serial/lpc32xx_hs.c:590", 0xFF, LPC32XX_HSUART_RATE(port->membase));
 
 	/* Set receiver timeout, HSU offset of 20, no break, no interrupts,
 	   and default FIFO trigger levels */
-	writel(LPC32XX_HSU_TX_TL8B | LPC32XX_HSU_RX_TL32B |
+	pete_writel("drivers/tty/serial/lpc32xx_hs.c:594", LPC32XX_HSU_TX_TL8B | LPC32XX_HSU_RX_TL32B |
 	       LPC32XX_HSU_OFFSET(20) | LPC32XX_HSU_TMO_INACT_4B,
 	       LPC32XX_HSUART_CTRL(port->membase));
 }

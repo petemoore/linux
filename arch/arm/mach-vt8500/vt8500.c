@@ -33,7 +33,7 @@ static void __iomem *pmc_base;
 static void vt8500_restart(enum reboot_mode mode, const char *cmd)
 {
 	if (pmc_base)
-		writel(1, pmc_base + VT8500_PMSR_REG);
+		pete_writel("arch/arm/mach-vt8500/vt8500.c:36", 1, pmc_base + VT8500_PMSR_REG);
 }
 
 static struct map_desc vt8500_io_desc[] __initdata = {
@@ -85,7 +85,7 @@ static void __init vt8500_init(void)
 								__func__);
 		}
 		if (gpio_base) {
-			writel(readl(gpio_base + VT8500_GPIO_MUX_REG) | 1,
+			pete_writel("arch/arm/mach-vt8500/vt8500.c:88", pete_readl("arch/arm/mach-vt8500/vt8500.c:88", gpio_base + VT8500_GPIO_MUX_REG) | 1,
 				gpio_base + VT8500_GPIO_MUX_REG);
 			iounmap(gpio_base);
 		} else
@@ -117,7 +117,7 @@ static void __init vt8500_init(void)
 								__func__);
 		}
 		if (gpio_base) {
-			writel(readl(gpio_base + VT8500_GPIO_MUX_REG) |
+			pete_writel("arch/arm/mach-vt8500/vt8500.c:120", pete_readl("arch/arm/mach-vt8500/vt8500.c:120", gpio_base + VT8500_GPIO_MUX_REG) |
 				0x80000000, gpio_base + VT8500_GPIO_MUX_REG);
 			iounmap(gpio_base);
 		} else

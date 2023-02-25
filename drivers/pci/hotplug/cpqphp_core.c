@@ -586,7 +586,7 @@ static int ctrl_slot_setup(struct controller *ctrl,
 
 	dbg("%s\n", __func__);
 
-	tempdword = readl(ctrl->hpc_reg + INT_INPUT_CLEAR);
+	tempdword = pete_readl("drivers/pci/hotplug/cpqphp_core.c:589", ctrl->hpc_reg + INT_INPUT_CLEAR);
 
 	number_of_slots = readb(ctrl->hpc_reg + SLOT_MASK) & 0x0F;
 	slot_device = readb(ctrl->hpc_reg + SLOT_MASK) >> 4;
@@ -731,7 +731,7 @@ static int one_time_init(void)
 		goto error_rom_start;
 	}
 
-	smbios_start = ioremap(readl(smbios_table + ST_ADDRESS),
+	smbios_start = ioremap(pete_readl("drivers/pci/hotplug/cpqphp_core.c:734", smbios_table + ST_ADDRESS),
 					readw(smbios_table + ST_LENGTH));
 	if (!smbios_start) {
 		err("Could not ioremap memory region taken from SMBIOS values\n");
@@ -1135,7 +1135,7 @@ static int cpqhpc_probe(struct pci_dev *pdev, const struct pci_device_id *ent)
 	}
 
 	/* Mask all general input interrupts */
-	writel(0xFFFFFFFFL, ctrl->hpc_reg + INT_MASK);
+	pete_writel("drivers/pci/hotplug/cpqphp_core.c:1138", 0xFFFFFFFFL, ctrl->hpc_reg + INT_MASK);
 
 	/* set up the interrupt */
 	dbg("HPC interrupt = %d\n", ctrl->interrupt);
@@ -1155,11 +1155,11 @@ static int cpqhpc_probe(struct pci_dev *pdev, const struct pci_device_id *ent)
 	writew(temp_word, ctrl->hpc_reg + MISC);
 
 	/* Changed 05/05/97 to clear all interrupts at start */
-	writel(0xFFFFFFFFL, ctrl->hpc_reg + INT_INPUT_CLEAR);
+	pete_writel("drivers/pci/hotplug/cpqphp_core.c:1158", 0xFFFFFFFFL, ctrl->hpc_reg + INT_INPUT_CLEAR);
 
-	ctrl->ctrl_int_comp = readl(ctrl->hpc_reg + INT_INPUT_CLEAR);
+	ctrl->ctrl_int_comp = pete_readl("drivers/pci/hotplug/cpqphp_core.c:1160", ctrl->hpc_reg + INT_INPUT_CLEAR);
 
-	writel(0x0L, ctrl->hpc_reg + INT_MASK);
+	pete_writel("drivers/pci/hotplug/cpqphp_core.c:1162", 0x0L, ctrl->hpc_reg + INT_MASK);
 
 	if (!cpqhp_ctrl_list) {
 		cpqhp_ctrl_list = ctrl;
@@ -1264,7 +1264,7 @@ static void __exit unload_cpqphpd(void)
 			rc = read_slot_enable(ctrl);
 
 			writeb(0, ctrl->hpc_reg + SLOT_SERR);
-			writel(0xFFFFFFC0L | ~rc, ctrl->hpc_reg + INT_MASK);
+			pete_writel("drivers/pci/hotplug/cpqphp_core.c:1267", 0xFFFFFFC0L | ~rc, ctrl->hpc_reg + INT_MASK);
 
 			misc = readw(ctrl->hpc_reg + MISC);
 			misc &= 0xFFFD;

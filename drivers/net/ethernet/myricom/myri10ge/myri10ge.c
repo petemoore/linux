@@ -649,7 +649,7 @@ static int myri10ge_adopt_running_firmware(struct myri10ge_priv *mgp)
 	int status;
 
 	/* find running firmware header */
-	hdr_offset = swab32(readl(mgp->sram + MCP_HEADER_PTR_OFFSET));
+	hdr_offset = swab32(pete_readl("drivers/net/ethernet/myricom/myri10ge/myri10ge.c:652", mgp->sram + MCP_HEADER_PTR_OFFSET));
 
 	if ((hdr_offset & 3) || hdr_offset + sizeof(*hdr) > mgp->sram_size) {
 		dev_err(dev, "Running firmware has bad header offset (%d)\n",
@@ -1871,13 +1871,13 @@ static int myri10ge_led(struct myri10ge_priv *mgp, int on)
 	u32 pattern = 0xfffffffe;
 
 	/* find running firmware header */
-	hdr_off = swab32(readl(mgp->sram + MCP_HEADER_PTR_OFFSET));
+	hdr_off = swab32(pete_readl("drivers/net/ethernet/myricom/myri10ge/myri10ge.c:1874", mgp->sram + MCP_HEADER_PTR_OFFSET));
 	if ((hdr_off & 3) || hdr_off + sizeof(*hdr) > mgp->sram_size) {
 		dev_err(dev, "Running firmware has bad header offset (%d)\n",
 			(int)hdr_off);
 		return -EIO;
 	}
-	hdr_len = swab32(readl(mgp->sram + hdr_off +
+	hdr_len = swab32(pete_readl("drivers/net/ethernet/myricom/myri10ge/myri10ge.c:1880", mgp->sram + hdr_off +
 			       offsetof(struct mcp_gen_header, header_length)));
 	pattern_off = hdr_off + offsetof(struct mcp_gen_header, led_pattern);
 	if (pattern_off >= (hdr_len + hdr_off)) {
@@ -1885,8 +1885,8 @@ static int myri10ge_led(struct myri10ge_priv *mgp, int on)
 		return -EINVAL;
 	}
 	if (!on)
-		pattern = swab32(readl(mgp->sram + pattern_off + 4));
-	writel(swab32(pattern), mgp->sram + pattern_off);
+		pattern = swab32(pete_readl("drivers/net/ethernet/myricom/myri10ge/myri10ge.c:1888", mgp->sram + pattern_off + 4));
+	pete_writel("drivers/net/ethernet/myricom/myri10ge/myri10ge.c:1889", swab32(pattern), mgp->sram + pattern_off);
 	return 0;
 }
 
@@ -3808,9 +3808,9 @@ static int myri10ge_probe(struct pci_dev *pdev, const struct pci_device_id *ent)
 		goto abort_with_mtrr;
 	}
 	hdr_offset =
-	    swab32(readl(mgp->sram + MCP_HEADER_PTR_OFFSET)) & 0xffffc;
+	    swab32(pete_readl("drivers/net/ethernet/myricom/myri10ge/myri10ge.c:3811", mgp->sram + MCP_HEADER_PTR_OFFSET)) & 0xffffc;
 	ss_offset = hdr_offset + offsetof(struct mcp_gen_header, string_specs);
-	mgp->sram_size = swab32(readl(mgp->sram + ss_offset));
+	mgp->sram_size = swab32(pete_readl("drivers/net/ethernet/myricom/myri10ge/myri10ge.c:3813", mgp->sram + ss_offset));
 	if (mgp->sram_size > mgp->board_span ||
 	    mgp->sram_size <= MYRI10GE_FW_OFFSET) {
 		dev_err(&pdev->dev,

@@ -348,9 +348,9 @@ static int pdc_sata_port_start(struct ata_port *ap)
 		void __iomem *sata_mmio = ap->ioaddr.scr_addr;
 		unsigned int tmp;
 
-		tmp = readl(sata_mmio + PDC_PHYMODE4);
+		tmp = pete_readl("drivers/ata/sata_promise.c:351", sata_mmio + PDC_PHYMODE4);
 		tmp = (tmp & ~3) | 1;	/* set bits 1:0 = 0:1 */
-		writel(tmp, sata_mmio + PDC_PHYMODE4);
+		pete_writel("drivers/ata/sata_promise.c:353", tmp, sata_mmio + PDC_PHYMODE4);
 	}
 
 	return 0;
@@ -361,7 +361,7 @@ static void pdc_fpdma_clear_interrupt_flag(struct ata_port *ap)
 	void __iomem *sata_mmio = ap->ioaddr.scr_addr;
 	u32 tmp;
 
-	tmp = readl(sata_mmio + PDC_FPDMA_CTLSTAT);
+	tmp = pete_readl("drivers/ata/sata_promise.c:364", sata_mmio + PDC_FPDMA_CTLSTAT);
 	tmp |= PDC_FPDMA_CTLSTAT_DMASETUP_INT_FLAG;
 	tmp |= PDC_FPDMA_CTLSTAT_SETDB_INT_FLAG;
 
@@ -376,15 +376,15 @@ static void pdc_fpdma_reset(struct ata_port *ap)
 	void __iomem *sata_mmio = ap->ioaddr.scr_addr;
 	u8 tmp;
 
-	tmp = (u8)readl(sata_mmio + PDC_FPDMA_CTLSTAT);
+	tmp = (u8)pete_readl("drivers/ata/sata_promise.c:379", sata_mmio + PDC_FPDMA_CTLSTAT);
 	tmp &= 0x7F;
 	tmp |= PDC_FPDMA_CTLSTAT_RESET;
 	writeb(tmp, sata_mmio + PDC_FPDMA_CTLSTAT);
-	readl(sata_mmio + PDC_FPDMA_CTLSTAT); /* flush */
+	pete_readl("drivers/ata/sata_promise.c:383", sata_mmio + PDC_FPDMA_CTLSTAT); /* flush */
 	udelay(100);
 	tmp &= ~PDC_FPDMA_CTLSTAT_RESET;
 	writeb(tmp, sata_mmio + PDC_FPDMA_CTLSTAT);
-	readl(sata_mmio + PDC_FPDMA_CTLSTAT); /* flush */
+	pete_readl("drivers/ata/sata_promise.c:387", sata_mmio + PDC_FPDMA_CTLSTAT); /* flush */
 
 	pdc_fpdma_clear_interrupt_flag(ap);
 }
@@ -397,8 +397,8 @@ static void pdc_not_at_command_packet_phase(struct ata_port *ap)
 
 	/* check not at ASIC packet command phase */
 	for (i = 0; i < 100; ++i) {
-		writel(0, sata_mmio + PDC_INTERNAL_DEBUG_1);
-		tmp = readl(sata_mmio + PDC_INTERNAL_DEBUG_2);
+		pete_writel("drivers/ata/sata_promise.c:400", 0, sata_mmio + PDC_INTERNAL_DEBUG_1);
+		tmp = pete_readl("drivers/ata/sata_promise.c:401", sata_mmio + PDC_INTERNAL_DEBUG_2);
 		if ((tmp & 0xF) != 1)
 			break;
 		udelay(100);
@@ -409,8 +409,8 @@ static void pdc_clear_internal_debug_record_error_register(struct ata_port *ap)
 {
 	void __iomem *sata_mmio = ap->ioaddr.scr_addr;
 
-	writel(0xffffffff, sata_mmio + PDC_SATA_ERROR);
-	writel(0xffff0000, sata_mmio + PDC_LINK_LAYER_ERRORS);
+	pete_writel("drivers/ata/sata_promise.c:412", 0xffffffff, sata_mmio + PDC_SATA_ERROR);
+	pete_writel("drivers/ata/sata_promise.c:413", 0xffff0000, sata_mmio + PDC_LINK_LAYER_ERRORS);
 }
 
 static void pdc_reset_port(struct ata_port *ap)
@@ -422,24 +422,24 @@ static void pdc_reset_port(struct ata_port *ap)
 	if (ap->flags & PDC_FLAG_GEN_II)
 		pdc_not_at_command_packet_phase(ap);
 
-	tmp = readl(ata_ctlstat_mmio);
+	tmp = pete_readl("drivers/ata/sata_promise.c:425", ata_ctlstat_mmio);
 	tmp |= PDC_RESET;
-	writel(tmp, ata_ctlstat_mmio);
+	pete_writel("drivers/ata/sata_promise.c:427", tmp, ata_ctlstat_mmio);
 
 	for (i = 11; i > 0; i--) {
-		tmp = readl(ata_ctlstat_mmio);
+		tmp = pete_readl("drivers/ata/sata_promise.c:430", ata_ctlstat_mmio);
 		if (tmp & PDC_RESET)
 			break;
 
 		udelay(100);
 
 		tmp |= PDC_RESET;
-		writel(tmp, ata_ctlstat_mmio);
+		pete_writel("drivers/ata/sata_promise.c:437", tmp, ata_ctlstat_mmio);
 	}
 
 	tmp &= ~PDC_RESET;
-	writel(tmp, ata_ctlstat_mmio);
-	readl(ata_ctlstat_mmio);	/* flush */
+	pete_writel("drivers/ata/sata_promise.c:441", tmp, ata_ctlstat_mmio);
+	pete_readl("drivers/ata/sata_promise.c:442", ata_ctlstat_mmio);	/* flush */
 
 	if (sata_scr_valid(&ap->link) && (ap->flags & PDC_FLAG_GEN_II)) {
 		pdc_fpdma_reset(ap);
@@ -463,7 +463,7 @@ static int pdc_sata_scr_read(struct ata_link *link,
 {
 	if (sc_reg > SCR_CONTROL)
 		return -EINVAL;
-	*val = readl(link->ap->ioaddr.scr_addr + (sc_reg * 4));
+	*val = pete_readl("drivers/ata/sata_promise.c:466", link->ap->ioaddr.scr_addr + (sc_reg * 4));
 	return 0;
 }
 
@@ -472,7 +472,7 @@ static int pdc_sata_scr_write(struct ata_link *link,
 {
 	if (sc_reg > SCR_CONTROL)
 		return -EINVAL;
-	writel(val, link->ap->ioaddr.scr_addr + (sc_reg * 4));
+	pete_writel("drivers/ata/sata_promise.c:475", val, link->ap->ioaddr.scr_addr + (sc_reg * 4));
 	return 0;
 }
 
@@ -698,11 +698,11 @@ static void pdc_freeze(struct ata_port *ap)
 	void __iomem *ata_mmio = ap->ioaddr.cmd_addr;
 	u32 tmp;
 
-	tmp = readl(ata_mmio + PDC_CTLSTAT);
+	tmp = pete_readl("drivers/ata/sata_promise.c:701", ata_mmio + PDC_CTLSTAT);
 	tmp |= PDC_IRQ_DISABLE;
 	tmp &= ~PDC_DMA_ENABLE;
-	writel(tmp, ata_mmio + PDC_CTLSTAT);
-	readl(ata_mmio + PDC_CTLSTAT); /* flush */
+	pete_writel("drivers/ata/sata_promise.c:704", tmp, ata_mmio + PDC_CTLSTAT);
+	pete_readl("drivers/ata/sata_promise.c:705", ata_mmio + PDC_CTLSTAT); /* flush */
 }
 
 static void pdc_sata_freeze(struct ata_port *ap)
@@ -720,10 +720,10 @@ static void pdc_sata_freeze(struct ata_port *ap)
 	 * 2) ap->lock == &ap->host->lock
 	 * 3) ->freeze() and ->thaw() are called with ap->lock held
 	 */
-	hotplug_status = readl(host_mmio + hotplug_offset);
+	hotplug_status = pete_readl("drivers/ata/sata_promise.c:723", host_mmio + hotplug_offset);
 	hotplug_status |= 0x11 << (ata_no + 16);
-	writel(hotplug_status, host_mmio + hotplug_offset);
-	readl(host_mmio + hotplug_offset); /* flush */
+	pete_writel("drivers/ata/sata_promise.c:725", hotplug_status, host_mmio + hotplug_offset);
+	pete_readl("drivers/ata/sata_promise.c:726", host_mmio + hotplug_offset); /* flush */
 
 	pdc_freeze(ap);
 }
@@ -734,13 +734,13 @@ static void pdc_thaw(struct ata_port *ap)
 	u32 tmp;
 
 	/* clear IRQ */
-	readl(ata_mmio + PDC_COMMAND);
+	pete_readl("drivers/ata/sata_promise.c:737", ata_mmio + PDC_COMMAND);
 
 	/* turn IRQ back on */
-	tmp = readl(ata_mmio + PDC_CTLSTAT);
+	tmp = pete_readl("drivers/ata/sata_promise.c:740", ata_mmio + PDC_CTLSTAT);
 	tmp &= ~PDC_IRQ_DISABLE;
-	writel(tmp, ata_mmio + PDC_CTLSTAT);
-	readl(ata_mmio + PDC_CTLSTAT); /* flush */
+	pete_writel("drivers/ata/sata_promise.c:742", tmp, ata_mmio + PDC_CTLSTAT);
+	pete_readl("drivers/ata/sata_promise.c:743", ata_mmio + PDC_CTLSTAT); /* flush */
 }
 
 static void pdc_sata_thaw(struct ata_port *ap)
@@ -756,11 +756,11 @@ static void pdc_sata_thaw(struct ata_port *ap)
 	/* Enable hotplug events on this port.
 	 * Locking: see pdc_sata_freeze().
 	 */
-	hotplug_status = readl(host_mmio + hotplug_offset);
+	hotplug_status = pete_readl("drivers/ata/sata_promise.c:759", host_mmio + hotplug_offset);
 	hotplug_status |= 0x11 << ata_no;
 	hotplug_status &= ~(0x11 << (ata_no + 16));
-	writel(hotplug_status, host_mmio + hotplug_offset);
-	readl(host_mmio + hotplug_offset); /* flush */
+	pete_writel("drivers/ata/sata_promise.c:762", hotplug_status, host_mmio + hotplug_offset);
+	pete_readl("drivers/ata/sata_promise.c:763", host_mmio + hotplug_offset); /* flush */
 }
 
 static int pdc_pata_softreset(struct ata_link *link, unsigned int *class,
@@ -880,7 +880,7 @@ static unsigned int pdc_host_intr(struct ata_port *ap,
 		err_mask &= ~PDC1_ERR_MASK;
 	else
 		err_mask &= ~PDC2_ERR_MASK;
-	port_status = readl(ata_mmio + PDC_GLOBAL_CTL);
+	port_status = pete_readl("drivers/ata/sata_promise.c:883", ata_mmio + PDC_GLOBAL_CTL);
 	if (unlikely(port_status & err_mask)) {
 		pdc_error_intr(ap, qc, port_status, err_mask);
 		return 1;
@@ -907,7 +907,7 @@ static void pdc_irq_clear(struct ata_port *ap)
 {
 	void __iomem *ata_mmio = ap->ioaddr.cmd_addr;
 
-	readl(ata_mmio + PDC_COMMAND);
+	pete_readl("drivers/ata/sata_promise.c:910", ata_mmio + PDC_COMMAND);
 }
 
 static irqreturn_t pdc_interrupt(int irq, void *dev_instance)
@@ -936,15 +936,15 @@ static irqreturn_t pdc_interrupt(int irq, void *dev_instance)
 	/* read and clear hotplug flags for all ports */
 	if (host->ports[0]->flags & PDC_FLAG_GEN_II) {
 		hotplug_offset = PDC2_SATA_PLUG_CSR;
-		hotplug_status = readl(host_mmio + hotplug_offset);
+		hotplug_status = pete_readl("drivers/ata/sata_promise.c:939", host_mmio + hotplug_offset);
 		if (hotplug_status & 0xff)
-			writel(hotplug_status | 0xff, host_mmio + hotplug_offset);
+			pete_writel("drivers/ata/sata_promise.c:941", hotplug_status | 0xff, host_mmio + hotplug_offset);
 		hotplug_status &= 0xff;	/* clear uninteresting bits */
 	} else
 		hotplug_status = 0;
 
 	/* reading should also clear interrupts */
-	mask = readl(host_mmio + PDC_INT_SEQMASK);
+	mask = pete_readl("drivers/ata/sata_promise.c:947", host_mmio + PDC_INT_SEQMASK);
 
 	if (mask == 0xffffffff && hotplug_status == 0) {
 		VPRINTK("QUICK EXIT 2\n");
@@ -957,7 +957,7 @@ static irqreturn_t pdc_interrupt(int irq, void *dev_instance)
 		goto done_irq;
 	}
 
-	writel(mask, host_mmio + PDC_INT_SEQMASK);
+	pete_writel("drivers/ata/sata_promise.c:960", mask, host_mmio + PDC_INT_SEQMASK);
 
 	is_sataii_tx4 = pdc_is_sataii_tx4(host->ports[0]->flags);
 
@@ -1007,13 +1007,13 @@ static void pdc_packet_start(struct ata_queued_cmd *qc)
 
 	VPRINTK("ENTER, ap %p\n", ap);
 
-	writel(0x00000001, host_mmio + (seq * 4));
-	readl(host_mmio + (seq * 4));	/* flush */
+	pete_writel("drivers/ata/sata_promise.c:1010", 0x00000001, host_mmio + (seq * 4));
+	pete_readl("drivers/ata/sata_promise.c:1011", host_mmio + (seq * 4));	/* flush */
 
 	pp->pkt[2] = seq;
 	wmb();			/* flush PRD, pkt writes */
-	writel(pp->pkt_dma, ata_mmio + PDC_PKT_SUBMIT);
-	readl(ata_mmio + PDC_PKT_SUBMIT); /* flush */
+	pete_writel("drivers/ata/sata_promise.c:1015", pp->pkt_dma, ata_mmio + PDC_PKT_SUBMIT);
+	pete_readl("drivers/ata/sata_promise.c:1016", ata_mmio + PDC_PKT_SUBMIT); /* flush */
 }
 
 static unsigned int pdc_qc_issue(struct ata_queued_cmd *qc)
@@ -1124,40 +1124,40 @@ static void pdc_host_init(struct ata_host *host)
 	 */
 
 	/* enable BMR_BURST, maybe change FIFO_SHD to 8 dwords */
-	tmp = readl(host_mmio + PDC_FLASH_CTL);
+	tmp = pete_readl("drivers/ata/sata_promise.c:1127", host_mmio + PDC_FLASH_CTL);
 	tmp |= 0x02000;	/* bit 13 (enable bmr burst) */
 	if (!is_gen2)
 		tmp |= 0x10000;	/* bit 16 (fifo threshold at 8 dw) */
-	writel(tmp, host_mmio + PDC_FLASH_CTL);
+	pete_writel("drivers/ata/sata_promise.c:1131", tmp, host_mmio + PDC_FLASH_CTL);
 
 	/* clear plug/unplug flags for all ports */
-	tmp = readl(host_mmio + hotplug_offset);
-	writel(tmp | 0xff, host_mmio + hotplug_offset);
+	tmp = pete_readl("drivers/ata/sata_promise.c:1134", host_mmio + hotplug_offset);
+	pete_writel("drivers/ata/sata_promise.c:1135", tmp | 0xff, host_mmio + hotplug_offset);
 
-	tmp = readl(host_mmio + hotplug_offset);
+	tmp = pete_readl("drivers/ata/sata_promise.c:1137", host_mmio + hotplug_offset);
 	if (is_gen2)	/* unmask plug/unplug ints */
-		writel(tmp & ~0xff0000, host_mmio + hotplug_offset);
+		pete_writel("drivers/ata/sata_promise.c:1139", tmp & ~0xff0000, host_mmio + hotplug_offset);
 	else		/* mask plug/unplug ints */
-		writel(tmp | 0xff0000, host_mmio + hotplug_offset);
+		pete_writel("drivers/ata/sata_promise.c:1141", tmp | 0xff0000, host_mmio + hotplug_offset);
 
 	/* don't initialise TBG or SLEW on 2nd generation chips */
 	if (is_gen2)
 		return;
 
 	/* reduce TBG clock to 133 Mhz. */
-	tmp = readl(host_mmio + PDC_TBG_MODE);
+	tmp = pete_readl("drivers/ata/sata_promise.c:1148", host_mmio + PDC_TBG_MODE);
 	tmp &= ~0x30000; /* clear bit 17, 16*/
 	tmp |= 0x10000;  /* set bit 17:16 = 0:1 */
-	writel(tmp, host_mmio + PDC_TBG_MODE);
+	pete_writel("drivers/ata/sata_promise.c:1151", tmp, host_mmio + PDC_TBG_MODE);
 
-	readl(host_mmio + PDC_TBG_MODE);	/* flush */
+	pete_readl("drivers/ata/sata_promise.c:1153", host_mmio + PDC_TBG_MODE);	/* flush */
 	msleep(10);
 
 	/* adjust slew rate control register. */
-	tmp = readl(host_mmio + PDC_SLEW_CTL);
+	tmp = pete_readl("drivers/ata/sata_promise.c:1157", host_mmio + PDC_SLEW_CTL);
 	tmp &= 0xFFFFF03F; /* clear bit 11 ~ 6 */
 	tmp  |= 0x00000900; /* set bit 11-9 = 100b , bit 8-6 = 100 */
-	writel(tmp, host_mmio + PDC_SLEW_CTL);
+	pete_writel("drivers/ata/sata_promise.c:1160", tmp, host_mmio + PDC_SLEW_CTL);
 }
 
 static int pdc_ata_init_one(struct pci_dev *pdev,

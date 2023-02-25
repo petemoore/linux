@@ -364,7 +364,7 @@ static void __iomem *v3_map_bus(struct pci_bus *bus,
 	 * prefetchable), this frees up base1 for re-use by
 	 * configuration memory
 	 */
-	writel(v3_addr_to_lb_base(v3->non_pre_mem) |
+	pete_writel("drivers/pci/controller/pci-v3-semi.c:367", v3_addr_to_lb_base(v3->non_pre_mem) |
 	       V3_LB_BASE_ADR_SIZE_512MB | V3_LB_BASE_ENABLE,
 	       v3->base + V3_LB_BASE0);
 
@@ -372,7 +372,7 @@ static void __iomem *v3_map_bus(struct pci_bus *bus,
 	 * Set up base1/map1 to point into configuration space.
 	 * The config mem is always 16MB.
 	 */
-	writel(v3_addr_to_lb_base(v3->config_mem) |
+	pete_writel("drivers/pci/controller/pci-v3-semi.c:375", v3_addr_to_lb_base(v3->config_mem) |
 	       V3_LB_BASE_ADR_SIZE_16MB | V3_LB_BASE_ENABLE,
 	       v3->base + V3_LB_BASE1);
 	writew(mapaddress, v3->base + V3_LB_MAP1);
@@ -385,7 +385,7 @@ static void v3_unmap_bus(struct v3_pci *v3)
 	/*
 	 * Reassign base1 for use by prefetchable PCI memory
 	 */
-	writel(v3_addr_to_lb_base(v3->pre_mem) |
+	pete_writel("drivers/pci/controller/pci-v3-semi.c:388", v3_addr_to_lb_base(v3->pre_mem) |
 	       V3_LB_BASE_ADR_SIZE_256MB | V3_LB_BASE_PREFETCH |
 	       V3_LB_BASE_ENABLE,
 	       v3->base + V3_LB_BASE1);
@@ -396,7 +396,7 @@ static void v3_unmap_bus(struct v3_pci *v3)
 	/*
 	 * And shrink base0 back to a 256M window (NOTE: MAP0 already correct)
 	 */
-	writel(v3_addr_to_lb_base(v3->non_pre_mem) |
+	pete_writel("drivers/pci/controller/pci-v3-semi.c:399", v3_addr_to_lb_base(v3->non_pre_mem) |
 	       V3_LB_BASE_ADR_SIZE_256MB | V3_LB_BASE_ENABLE,
 	       v3->base + V3_LB_BASE0);
 }
@@ -501,7 +501,7 @@ static int v3_integrator_init(struct v3_pci *v3)
 		msleep(230);
 
 		/* Set the physical base for the controller itself */
-		writel(0x6200, v3->base + V3_LB_IO_BASE);
+		pete_writel("drivers/pci/controller/pci-v3-semi.c:504", 0x6200, v3->base + V3_LB_IO_BASE);
 
 		/* Wait for the mailbox to settle after reset */
 		do {
@@ -529,7 +529,7 @@ static int v3_pci_setup_resource(struct v3_pci *v3,
 		io = win->res;
 
 		/* Setup window 2 - PCI I/O */
-		writel(v3_addr_to_lb_base2(pci_pio_to_address(io->start)) |
+		pete_writel("drivers/pci/controller/pci-v3-semi.c:532", v3_addr_to_lb_base2(pci_pio_to_address(io->start)) |
 		       V3_LB_BASE2_ENABLE,
 		       v3->base + V3_LB_BASE2);
 		writew(v3_addr_to_lb_map2(io->start - win->offset),
@@ -554,7 +554,7 @@ static int v3_pci_setup_resource(struct v3_pci *v3,
 				return -EINVAL;
 			}
 			/* Setup window 1 - PCI prefetchable memory */
-			writel(v3_addr_to_lb_base(v3->pre_mem) |
+			pete_writel("drivers/pci/controller/pci-v3-semi.c:557", v3_addr_to_lb_base(v3->pre_mem) |
 			       V3_LB_BASE_ADR_SIZE_256MB |
 			       V3_LB_BASE_PREFETCH |
 			       V3_LB_BASE_ENABLE,
@@ -574,7 +574,7 @@ static int v3_pci_setup_resource(struct v3_pci *v3,
 				return -EINVAL;
 			}
 			/* Setup window 0 - PCI non-prefetchable memory */
-			writel(v3_addr_to_lb_base(v3->non_pre_mem) |
+			pete_writel("drivers/pci/controller/pci-v3-semi.c:577", v3_addr_to_lb_base(v3->non_pre_mem) |
 			       V3_LB_BASE_ADR_SIZE_256MB |
 			       V3_LB_BASE_ENABLE,
 			       v3->base + V3_LB_BASE0);
@@ -689,11 +689,11 @@ static int v3_pci_parse_map_dma_ranges(struct v3_pci *v3,
 			return ret;
 
 		if (i == 0) {
-			writel(pci_base, v3->base + V3_PCI_BASE0);
-			writel(pci_map, v3->base + V3_PCI_MAP0);
+			pete_writel("drivers/pci/controller/pci-v3-semi.c:692", pci_base, v3->base + V3_PCI_BASE0);
+			pete_writel("drivers/pci/controller/pci-v3-semi.c:693", pci_map, v3->base + V3_PCI_MAP0);
 		} else if (i == 1) {
-			writel(pci_base, v3->base + V3_PCI_BASE1);
-			writel(pci_map, v3->base + V3_PCI_MAP1);
+			pete_writel("drivers/pci/controller/pci-v3-semi.c:695", pci_base, v3->base + V3_PCI_BASE1);
+			pete_writel("drivers/pci/controller/pci-v3-semi.c:696", pci_map, v3->base + V3_PCI_MAP1);
 		} else {
 			dev_err(dev, "too many ranges, only two supported\n");
 			dev_err(dev, "range %d ignored\n", i);
@@ -746,9 +746,9 @@ static int v3_pci_probe(struct platform_device *pdev)
 	 * of the V3 controller itself, verify that this is the same
 	 * as the physical memory we've remapped it from.
 	 */
-	if (readl(v3->base + V3_LB_IO_BASE) != (regs->start >> 16))
+	if (pete_readl("drivers/pci/controller/pci-v3-semi.c:749", v3->base + V3_LB_IO_BASE) != (regs->start >> 16))
 		dev_err(dev, "V3_LB_IO_BASE = %08x but device is @%pR\n",
-			readl(v3->base + V3_LB_IO_BASE), regs);
+			pete_readl("drivers/pci/controller/pci-v3-semi.c:751", v3->base + V3_LB_IO_BASE), regs);
 
 	/* Configuration space is 16MB directly mapped */
 	regs = platform_get_resource(pdev, IORESOURCE_MEM, 1);
@@ -826,7 +826,7 @@ static int v3_pci_probe(struct platform_device *pdev)
 	 * set AD_LOW0 to 1 if one of the LB_MAP registers choose
 	 * to use this (should be unused).
 	 */
-	writel(0x00000000, v3->base + V3_PCI_IO_BASE);
+	pete_writel("drivers/pci/controller/pci-v3-semi.c:829", 0x00000000, v3->base + V3_PCI_IO_BASE);
 	val = V3_PCI_CFG_M_IO_REG_DIS | V3_PCI_CFG_M_IO_DIS |
 		V3_PCI_CFG_M_EN3V | V3_PCI_CFG_M_AD_LOW0;
 	/*

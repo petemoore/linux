@@ -348,7 +348,7 @@ static u64 adl_err_addr_to_imc_addr(u64 eaddr, int mc)
 	if (eaddr >= 2 * ms_s_size)
 		return eaddr - ms_s_size;
 
-	mc_hash = readl(imc->window + MAD_MC_HASH_OFFSET);
+	mc_hash = pete_readl("drivers/edac/igen6_edac.c:351", imc->window + MAD_MC_HASH_OFFSET);
 
 	intlv_bit = MAC_MC_HASH_LSB(mc_hash) + 6;
 
@@ -521,7 +521,7 @@ static int igen6_decode(struct decoded_addr *res)
 	}
 
 	/* Decode channel */
-	hash   = readl(imc->window + CHANNEL_HASH_OFFSET);
+	hash   = pete_readl("drivers/edac/igen6_edac.c:524", imc->window + CHANNEL_HASH_OFFSET);
 	s_size = imc->ch_s_size;
 	l_map  = imc->ch_l_map;
 	decode_addr(addr, hash, s_size, l_map, &idx, &sub_addr);
@@ -529,7 +529,7 @@ static int igen6_decode(struct decoded_addr *res)
 	res->channel_addr = sub_addr;
 
 	/* Decode sub-channel/DIMM */
-	hash   = readl(imc->window + CHANNEL_EHASH_OFFSET);
+	hash   = pete_readl("drivers/edac/igen6_edac.c:532", imc->window + CHANNEL_EHASH_OFFSET);
 	s_size = imc->dimm_s_size[idx];
 	l_map  = imc->dimm_l_map[idx];
 	decode_addr(res->channel_addr, hash, s_size, l_map, &idx, &sub_addr);
@@ -785,7 +785,7 @@ static struct notifier_block ecclog_mce_dec = {
 
 static bool igen6_check_ecc(struct igen6_imc *imc)
 {
-	u32 activate = readl(imc->window + IBECC_ACTIVATE_OFFSET);
+	u32 activate = pete_readl("drivers/edac/igen6_edac.c:788", imc->window + IBECC_ACTIVATE_OFFSET);
 
 	return !!(activate & IBECC_ACTIVATE_EN);
 }
@@ -803,15 +803,15 @@ static int igen6_get_dimm_config(struct mem_ctl_info *mci)
 
 	edac_dbg(2, "\n");
 
-	mad_inter = readl(imc->window + MAD_INTER_CHANNEL_OFFSET);
+	mad_inter = pete_readl("drivers/edac/igen6_edac.c:806", imc->window + MAD_INTER_CHANNEL_OFFSET);
 	mtype = get_memory_type(mad_inter);
 	ecc = igen6_check_ecc(imc);
 	imc->ch_s_size = MAD_INTER_CHANNEL_CH_S_SIZE(mad_inter);
 	imc->ch_l_map  = MAD_INTER_CHANNEL_CH_L_MAP(mad_inter);
 
 	for (i = 0; i < NUM_CHANNELS; i++) {
-		mad_intra = readl(imc->window + MAD_INTRA_CH0_OFFSET + i * 4);
-		mad_dimm  = readl(imc->window + MAD_DIMM_CH0_OFFSET + i * 4);
+		mad_intra = pete_readl("drivers/edac/igen6_edac.c:813", imc->window + MAD_INTRA_CH0_OFFSET + i * 4);
+		mad_dimm  = pete_readl("drivers/edac/igen6_edac.c:814", imc->window + MAD_DIMM_CH0_OFFSET + i * 4);
 
 		imc->dimm_l_size[i] = MAD_DIMM_CH_DIMM_L_SIZE(mad_dimm);
 		imc->dimm_s_size[i] = MAD_DIMM_CH_DIMM_S_SIZE(mad_dimm);
@@ -868,19 +868,19 @@ static void igen6_reg_dump(struct igen6_imc *imc)
 	int i;
 
 	edac_dbg(2, "CHANNEL_HASH     : 0x%x\n",
-		 readl(imc->window + CHANNEL_HASH_OFFSET));
+		 pete_readl("drivers/edac/igen6_edac.c:871", imc->window + CHANNEL_HASH_OFFSET));
 	edac_dbg(2, "CHANNEL_EHASH    : 0x%x\n",
-		 readl(imc->window + CHANNEL_EHASH_OFFSET));
+		 pete_readl("drivers/edac/igen6_edac.c:873", imc->window + CHANNEL_EHASH_OFFSET));
 	edac_dbg(2, "MAD_INTER_CHANNEL: 0x%x\n",
-		 readl(imc->window + MAD_INTER_CHANNEL_OFFSET));
+		 pete_readl("drivers/edac/igen6_edac.c:875", imc->window + MAD_INTER_CHANNEL_OFFSET));
 	edac_dbg(2, "ECC_ERROR_LOG    : 0x%llx\n",
 		 readq(imc->window + ECC_ERROR_LOG_OFFSET));
 
 	for (i = 0; i < NUM_CHANNELS; i++) {
 		edac_dbg(2, "MAD_INTRA_CH%d    : 0x%x\n", i,
-			 readl(imc->window + MAD_INTRA_CH0_OFFSET + i * 4));
+			 pete_readl("drivers/edac/igen6_edac.c:881", imc->window + MAD_INTRA_CH0_OFFSET + i * 4));
 		edac_dbg(2, "MAD_DIMM_CH%d     : 0x%x\n", i,
-			 readl(imc->window + MAD_DIMM_CH0_OFFSET + i * 4));
+			 pete_readl("drivers/edac/igen6_edac.c:883", imc->window + MAD_DIMM_CH0_OFFSET + i * 4));
 	}
 	edac_dbg(2, "TOLUD            : 0x%x", igen6_tolud);
 	edac_dbg(2, "TOUUD            : 0x%llx", igen6_touud);

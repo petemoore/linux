@@ -186,12 +186,12 @@ static inline void shpc_writew(struct controller *ctrl, int reg, u16 val)
 
 static inline u32 shpc_readl(struct controller *ctrl, int reg)
 {
-	return readl(ctrl->creg + reg);
+	return pete_readl("drivers/pci/hotplug/shpchp_hpc.c:189", ctrl->creg + reg);
 }
 
 static inline void shpc_writel(struct controller *ctrl, int reg, u32 val)
 {
-	writel(val, ctrl->creg + reg);
+	pete_writel("drivers/pci/hotplug/shpchp_hpc.c:194", val, ctrl->creg + reg);
 }
 
 static inline int shpc_indirect_read(struct controller *ctrl, int index,

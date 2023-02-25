@@ -123,9 +123,9 @@ static int ks_sa_rng_init(struct hwrng *rng)
 			  SA_CMD_STATUS_REG_TRNG_ENABLE);
 
 	/* Configure RNG module */
-	writel(0, &ks_sa_rng->reg_rng->control);
+	pete_writel("drivers/char/hw_random/ks-sa-rng.c:126", 0, &ks_sa_rng->reg_rng->control);
 	value = TRNG_DEF_STARTUP_CYCLES << TRNG_CNTL_REG_STARTUP_CYCLES_SHIFT;
-	writel(value, &ks_sa_rng->reg_rng->control);
+	pete_writel("drivers/char/hw_random/ks-sa-rng.c:128", value, &ks_sa_rng->reg_rng->control);
 
 	value =	(TRNG_DEF_MIN_REFILL_CYCLES <<
 		 TRNG_CFG_REG_MIN_REFILL_CYCLES_SHIFT) |
@@ -134,15 +134,15 @@ static int ks_sa_rng_init(struct hwrng *rng)
 		(TRNG_DEF_CLK_DIV_CYCLES <<
 		 TRNG_CFG_REG_SAMPLE_DIV_SHIFT);
 
-	writel(value, &ks_sa_rng->reg_rng->config);
+	pete_writel("drivers/char/hw_random/ks-sa-rng.c:137", value, &ks_sa_rng->reg_rng->config);
 
 	/* Disable all interrupts from TRNG */
-	writel(0, &ks_sa_rng->reg_rng->intmask);
+	pete_writel("drivers/char/hw_random/ks-sa-rng.c:140", 0, &ks_sa_rng->reg_rng->intmask);
 
 	/* Enable RNG */
-	value = readl(&ks_sa_rng->reg_rng->control);
+	value = pete_readl("drivers/char/hw_random/ks-sa-rng.c:143", &ks_sa_rng->reg_rng->control);
 	value |= TRNG_CNTL_REG_TRNG_ENABLE;
-	writel(value, &ks_sa_rng->reg_rng->control);
+	pete_writel("drivers/char/hw_random/ks-sa-rng.c:145", value, &ks_sa_rng->reg_rng->control);
 
 	ks_sa_rng->refill_delay_ns = refill_delay_ns(clk_rate);
 	ks_sa_rng->ready_ts = ktime_get_ns() +
@@ -157,7 +157,7 @@ static void ks_sa_rng_cleanup(struct hwrng *rng)
 	struct ks_sa_rng *ks_sa_rng = dev_get_drvdata(dev);
 
 	/* Disable RNG */
-	writel(0, &ks_sa_rng->reg_rng->control);
+	pete_writel("drivers/char/hw_random/ks-sa-rng.c:160", 0, &ks_sa_rng->reg_rng->control);
 	regmap_write_bits(ks_sa_rng->regmap_cfg, SA_CMD_STATUS_OFS,
 			  SA_CMD_STATUS_REG_TRNG_ENABLE, 0);
 }
@@ -168,10 +168,10 @@ static int ks_sa_rng_data_read(struct hwrng *rng, u32 *data)
 	struct ks_sa_rng *ks_sa_rng = dev_get_drvdata(dev);
 
 	/* Read random data */
-	data[0] = readl(&ks_sa_rng->reg_rng->output_l);
-	data[1] = readl(&ks_sa_rng->reg_rng->output_h);
+	data[0] = pete_readl("drivers/char/hw_random/ks-sa-rng.c:171", &ks_sa_rng->reg_rng->output_l);
+	data[1] = pete_readl("drivers/char/hw_random/ks-sa-rng.c:172", &ks_sa_rng->reg_rng->output_h);
 
-	writel(TRNG_INTACK_REG_READY, &ks_sa_rng->reg_rng->intack);
+	pete_writel("drivers/char/hw_random/ks-sa-rng.c:174", TRNG_INTACK_REG_READY, &ks_sa_rng->reg_rng->intack);
 	ks_sa_rng->ready_ts = ktime_get_ns() + ks_sa_rng->refill_delay_ns;
 
 	return sizeof(u32) * 2;
@@ -195,7 +195,7 @@ static int ks_sa_rng_data_present(struct hwrng *rng, int wait)
 	}
 
 	for (j = 0; j < SA_MAX_RNG_DATA_RETRIES; j++) {
-		ready = readl(&ks_sa_rng->reg_rng->status);
+		ready = pete_readl("drivers/char/hw_random/ks-sa-rng.c:198", &ks_sa_rng->reg_rng->status);
 		ready &= TRNG_STATUS_REG_READY;
 
 		if (ready || !wait)

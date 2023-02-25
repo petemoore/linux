@@ -147,8 +147,8 @@ static int rockchip_boot_secondary(unsigned int cpu, struct task_struct *idle)
 		 */
 		mdelay(1); /* ensure the cpus other than cpu0 to startup */
 
-		writel(__pa_symbol(secondary_startup), sram_base_addr + 8);
-		writel(0xDEADBEAF, sram_base_addr + 4);
+		pete_writel("arch/arm/mach-rockchip/platsmp.c:150", __pa_symbol(secondary_startup), sram_base_addr + 8);
+		pete_writel("arch/arm/mach-rockchip/platsmp.c:151", 0xDEADBEAF, sram_base_addr + 4);
 		dsb_sev();
 	}
 

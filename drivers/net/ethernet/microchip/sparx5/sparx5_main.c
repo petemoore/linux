@@ -329,9 +329,9 @@ static int sparx5_init_ram(struct sparx5 *s5)
 		for (idx = 0; idx < ARRAY_SIZE(spx5_ram_cfg); idx++) {
 			cfg = &spx5_ram_cfg[idx];
 			if (jdx == 0) {
-				writel(cfg->init_val, cfg->init_reg);
+				pete_writel("drivers/net/ethernet/microchip/sparx5/sparx5_main.c:332", cfg->init_val, cfg->init_reg);
 			} else {
-				value = readl(cfg->init_reg);
+				value = pete_readl("drivers/net/ethernet/microchip/sparx5/sparx5_main.c:334", cfg->init_reg);
 				if ((value & cfg->init_val) != cfg->init_val)
 					pending--;
 			}

@@ -148,20 +148,20 @@ static void dbg_dumpregs(struct s3cmci_host *host, char *prefix)
 	u32 con, pre, cmdarg, cmdcon, cmdsta, r0, r1, r2, r3, timer;
 	u32 datcon, datcnt, datsta, fsta;
 
-	con 	= readl(host->base + S3C2410_SDICON);
-	pre 	= readl(host->base + S3C2410_SDIPRE);
-	cmdarg 	= readl(host->base + S3C2410_SDICMDARG);
-	cmdcon 	= readl(host->base + S3C2410_SDICMDCON);
-	cmdsta 	= readl(host->base + S3C2410_SDICMDSTAT);
-	r0 	= readl(host->base + S3C2410_SDIRSP0);
-	r1 	= readl(host->base + S3C2410_SDIRSP1);
-	r2 	= readl(host->base + S3C2410_SDIRSP2);
-	r3 	= readl(host->base + S3C2410_SDIRSP3);
-	timer 	= readl(host->base + S3C2410_SDITIMER);
-	datcon 	= readl(host->base + S3C2410_SDIDCON);
-	datcnt 	= readl(host->base + S3C2410_SDIDCNT);
-	datsta 	= readl(host->base + S3C2410_SDIDSTA);
-	fsta 	= readl(host->base + S3C2410_SDIFSTA);
+	con 	= pete_readl("drivers/mmc/host/s3cmci.c:151", host->base + S3C2410_SDICON);
+	pre 	= pete_readl("drivers/mmc/host/s3cmci.c:152", host->base + S3C2410_SDIPRE);
+	cmdarg 	= pete_readl("drivers/mmc/host/s3cmci.c:153", host->base + S3C2410_SDICMDARG);
+	cmdcon 	= pete_readl("drivers/mmc/host/s3cmci.c:154", host->base + S3C2410_SDICMDCON);
+	cmdsta 	= pete_readl("drivers/mmc/host/s3cmci.c:155", host->base + S3C2410_SDICMDSTAT);
+	r0 	= pete_readl("drivers/mmc/host/s3cmci.c:156", host->base + S3C2410_SDIRSP0);
+	r1 	= pete_readl("drivers/mmc/host/s3cmci.c:157", host->base + S3C2410_SDIRSP1);
+	r2 	= pete_readl("drivers/mmc/host/s3cmci.c:158", host->base + S3C2410_SDIRSP2);
+	r3 	= pete_readl("drivers/mmc/host/s3cmci.c:159", host->base + S3C2410_SDIRSP3);
+	timer 	= pete_readl("drivers/mmc/host/s3cmci.c:160", host->base + S3C2410_SDITIMER);
+	datcon 	= pete_readl("drivers/mmc/host/s3cmci.c:161", host->base + S3C2410_SDIDCON);
+	datcnt 	= pete_readl("drivers/mmc/host/s3cmci.c:162", host->base + S3C2410_SDIDCNT);
+	datsta 	= pete_readl("drivers/mmc/host/s3cmci.c:163", host->base + S3C2410_SDIDSTA);
+	fsta 	= pete_readl("drivers/mmc/host/s3cmci.c:164", host->base + S3C2410_SDIFSTA);
 
 	dbg(host, dbg_debug, "%s  CON:[%08x]  PRE:[%08x]  TMR:[%08x]\n",
 				prefix, con, pre, timer);
@@ -221,7 +221,7 @@ static void dbg_dumpcmd(struct s3cmci_host *host, struct mmc_command *cmd,
 	} else {
 		dbg(host, dbglvl, "DAT[ERR %i] %s DCNT:0x%08x\n",
 			cmd->data->error, host->dbgmsg_dat,
-			readl(host->base + S3C2410_SDIDCNT));
+			pete_readl("drivers/mmc/host/s3cmci.c:224", host->base + S3C2410_SDIDCNT));
 	}
 }
 #else
@@ -256,10 +256,10 @@ static inline u32 enable_imask(struct s3cmci_host *host, u32 imask)
 {
 	u32 newmask;
 
-	newmask = readl(host->base + host->sdiimsk);
+	newmask = pete_readl("drivers/mmc/host/s3cmci.c:259", host->base + host->sdiimsk);
 	newmask |= imask;
 
-	writel(newmask, host->base + host->sdiimsk);
+	pete_writel("drivers/mmc/host/s3cmci.c:262", newmask, host->base + host->sdiimsk);
 
 	return newmask;
 }
@@ -268,21 +268,21 @@ static inline u32 disable_imask(struct s3cmci_host *host, u32 imask)
 {
 	u32 newmask;
 
-	newmask = readl(host->base + host->sdiimsk);
+	newmask = pete_readl("drivers/mmc/host/s3cmci.c:271", host->base + host->sdiimsk);
 	newmask &= ~imask;
 
-	writel(newmask, host->base + host->sdiimsk);
+	pete_writel("drivers/mmc/host/s3cmci.c:274", newmask, host->base + host->sdiimsk);
 
 	return newmask;
 }
 
 static inline void clear_imask(struct s3cmci_host *host)
 {
-	u32 mask = readl(host->base + host->sdiimsk);
+	u32 mask = pete_readl("drivers/mmc/host/s3cmci.c:281", host->base + host->sdiimsk);
 
 	/* preserve the SDIO IRQ mask state */
 	mask &= S3C2410_SDIIMSK_SDIOIRQ;
-	writel(mask, host->base + host->sdiimsk);
+	pete_writel("drivers/mmc/host/s3cmci.c:285", mask, host->base + host->sdiimsk);
 }
 
 /**
@@ -339,7 +339,7 @@ static inline int get_data_buffer(struct s3cmci_host *host,
 
 static inline u32 fifo_count(struct s3cmci_host *host)
 {
-	u32 fifostat = readl(host->base + S3C2410_SDIFSTA);
+	u32 fifostat = pete_readl("drivers/mmc/host/s3cmci.c:342", host->base + S3C2410_SDIFSTA);
 
 	fifostat &= S3C2410_SDIFSTA_COUNTMASK;
 	return fifostat;
@@ -347,7 +347,7 @@ static inline u32 fifo_count(struct s3cmci_host *host)
 
 static inline u32 fifo_free(struct s3cmci_host *host)
 {
-	u32 fifostat = readl(host->base + S3C2410_SDIFSTA);
+	u32 fifostat = pete_readl("drivers/mmc/host/s3cmci.c:350", host->base + S3C2410_SDIFSTA);
 
 	fifostat &= S3C2410_SDIFSTA_COUNTMASK;
 	return 63 - fifostat;
@@ -417,7 +417,7 @@ static void do_pio_read(struct s3cmci_host *host)
 	void __iomem *from_ptr;
 
 	/* write real prescaler to host, it might be set slow to fix */
-	writel(host->prescaler, host->base + S3C2410_SDIPRE);
+	pete_writel("drivers/mmc/host/s3cmci.c:420", host->prescaler, host->base + S3C2410_SDIPRE);
 
 	from_ptr = host->base + host->sdidata;
 
@@ -442,7 +442,7 @@ static void do_pio_read(struct s3cmci_host *host)
 		dbg(host, dbg_pio,
 		    "pio_read(): fifo:[%02i] buffer:[%03i] dcnt:[%08X]\n",
 		    fifo, host->pio_bytes,
-		    readl(host->base + S3C2410_SDIDCNT));
+		    pete_readl("drivers/mmc/host/s3cmci.c:445", host->base + S3C2410_SDIDCNT));
 
 		/* If we have reached the end of the block, we can
 		 * read a word and get 1 to 3 bytes.  If we in the
@@ -460,12 +460,12 @@ static void do_pio_read(struct s3cmci_host *host)
 		fifo_words = fifo >> 2;
 		ptr = host->pio_ptr;
 		while (fifo_words--)
-			*ptr++ = readl(from_ptr);
+			*ptr++ = pete_readl("drivers/mmc/host/s3cmci.c:463", from_ptr);
 		host->pio_ptr = ptr;
 
 		if (fifo & 3) {
 			u32 n = fifo & 3;
-			u32 data = readl(from_ptr);
+			u32 data = pete_readl("drivers/mmc/host/s3cmci.c:468", from_ptr);
 			u8 *p = (u8 *)host->pio_ptr;
 
 			while (n--) {
@@ -533,7 +533,7 @@ static void do_pio_write(struct s3cmci_host *host)
 		fifo = (fifo + 3) >> 2;
 		ptr = host->pio_ptr;
 		while (fifo--)
-			writel(*ptr++, to_ptr);
+			pete_writel("drivers/mmc/host/s3cmci.c:536", *ptr++, to_ptr);
 		host->pio_ptr = ptr;
 	}
 
@@ -605,13 +605,13 @@ static irqreturn_t s3cmci_irq(int irq, void *dev_id)
 	u32 mci_cclear = 0, mci_dclear;
 	unsigned long iflags;
 
-	mci_dsta = readl(host->base + S3C2410_SDIDSTA);
-	mci_imsk = readl(host->base + host->sdiimsk);
+	mci_dsta = pete_readl("drivers/mmc/host/s3cmci.c:608", host->base + S3C2410_SDIDSTA);
+	mci_imsk = pete_readl("drivers/mmc/host/s3cmci.c:609", host->base + host->sdiimsk);
 
 	if (mci_dsta & S3C2410_SDIDSTA_SDIOIRQDETECT) {
 		if (mci_imsk & S3C2410_SDIIMSK_SDIOIRQ) {
 			mci_dclear = S3C2410_SDIDSTA_SDIOIRQDETECT;
-			writel(mci_dclear, host->base + S3C2410_SDIDSTA);
+			pete_writel("drivers/mmc/host/s3cmci.c:614", mci_dclear, host->base + S3C2410_SDIDSTA);
 
 			mmc_signal_sdio_irq(host->mmc);
 			return IRQ_HANDLED;
@@ -620,9 +620,9 @@ static irqreturn_t s3cmci_irq(int irq, void *dev_id)
 
 	spin_lock_irqsave(&host->complete_lock, iflags);
 
-	mci_csta = readl(host->base + S3C2410_SDICMDSTAT);
-	mci_dcnt = readl(host->base + S3C2410_SDIDCNT);
-	mci_fsta = readl(host->base + S3C2410_SDIFSTA);
+	mci_csta = pete_readl("drivers/mmc/host/s3cmci.c:623", host->base + S3C2410_SDICMDSTAT);
+	mci_dcnt = pete_readl("drivers/mmc/host/s3cmci.c:624", host->base + S3C2410_SDIDCNT);
+	mci_fsta = pete_readl("drivers/mmc/host/s3cmci.c:625", host->base + S3C2410_SDIFSTA);
 	mci_dclear = 0;
 
 	if ((host->complete_what == COMPLETION_NONE) ||
@@ -772,8 +772,8 @@ static irqreturn_t s3cmci_irq(int irq, void *dev_id)
 	}
 
 clear_status_bits:
-	writel(mci_cclear, host->base + S3C2410_SDICMDSTAT);
-	writel(mci_dclear, host->base + S3C2410_SDIDSTA);
+	pete_writel("drivers/mmc/host/s3cmci.c:775", mci_cclear, host->base + S3C2410_SDICMDSTAT);
+	pete_writel("drivers/mmc/host/s3cmci.c:776", mci_dclear, host->base + S3C2410_SDIDSTA);
 
 	goto irq_out;
 
@@ -841,12 +841,12 @@ static void finalize_request(struct s3cmci_host *host)
 	}
 
 	/* Read response from controller. */
-	cmd->resp[0] = readl(host->base + S3C2410_SDIRSP0);
-	cmd->resp[1] = readl(host->base + S3C2410_SDIRSP1);
-	cmd->resp[2] = readl(host->base + S3C2410_SDIRSP2);
-	cmd->resp[3] = readl(host->base + S3C2410_SDIRSP3);
+	cmd->resp[0] = pete_readl("drivers/mmc/host/s3cmci.c:844", host->base + S3C2410_SDIRSP0);
+	cmd->resp[1] = pete_readl("drivers/mmc/host/s3cmci.c:845", host->base + S3C2410_SDIRSP1);
+	cmd->resp[2] = pete_readl("drivers/mmc/host/s3cmci.c:846", host->base + S3C2410_SDIRSP2);
+	cmd->resp[3] = pete_readl("drivers/mmc/host/s3cmci.c:847", host->base + S3C2410_SDIRSP3);
 
-	writel(host->prescaler, host->base + S3C2410_SDIPRE);
+	pete_writel("drivers/mmc/host/s3cmci.c:849", host->prescaler, host->base + S3C2410_SDIPRE);
 
 	if (cmd->error)
 		debug_as_failure = 1;
@@ -857,9 +857,9 @@ static void finalize_request(struct s3cmci_host *host)
 	dbg_dumpcmd(host, cmd, debug_as_failure);
 
 	/* Cleanup controller */
-	writel(0, host->base + S3C2410_SDICMDARG);
-	writel(S3C2410_SDIDCON_STOP, host->base + S3C2410_SDIDCON);
-	writel(0, host->base + S3C2410_SDICMDCON);
+	pete_writel("drivers/mmc/host/s3cmci.c:860", 0, host->base + S3C2410_SDICMDARG);
+	pete_writel("drivers/mmc/host/s3cmci.c:861", S3C2410_SDIDCON_STOP, host->base + S3C2410_SDIDCON);
+	pete_writel("drivers/mmc/host/s3cmci.c:862", 0, host->base + S3C2410_SDICMDCON);
 	clear_imask(host);
 
 	if (cmd->data && cmd->error)
@@ -891,17 +891,17 @@ static void finalize_request(struct s3cmci_host *host)
 
 		if (host->is2440) {
 			/* Clear failure register and reset fifo. */
-			writel(S3C2440_SDIFSTA_FIFORESET |
+			pete_writel("drivers/mmc/host/s3cmci.c:894", S3C2440_SDIFSTA_FIFORESET |
 			       S3C2440_SDIFSTA_FIFOFAIL,
 			       host->base + S3C2410_SDIFSTA);
 		} else {
 			u32 mci_con;
 
 			/* reset fifo */
-			mci_con = readl(host->base + S3C2410_SDICON);
+			mci_con = pete_readl("drivers/mmc/host/s3cmci.c:901", host->base + S3C2410_SDICON);
 			mci_con |= S3C2410_SDICON_FIFORESET;
 
-			writel(mci_con, host->base + S3C2410_SDICON);
+			pete_writel("drivers/mmc/host/s3cmci.c:904", mci_con, host->base + S3C2410_SDICON);
 		}
 	}
 
@@ -931,7 +931,7 @@ static void s3cmci_send_command(struct s3cmci_host *host,
 	else
 		host->complete_what = COMPLETION_CMDSENT;
 
-	writel(cmd->arg, host->base + S3C2410_SDICMDARG);
+	pete_writel("drivers/mmc/host/s3cmci.c:934", cmd->arg, host->base + S3C2410_SDICMDARG);
 
 	ccon  = cmd->opcode & S3C2410_SDICMDCON_INDEX;
 	ccon |= S3C2410_SDICMDCON_SENDERHOST | S3C2410_SDICMDCON_CMDSTART;
@@ -942,7 +942,7 @@ static void s3cmci_send_command(struct s3cmci_host *host,
 	if (cmd->flags & MMC_RSP_136)
 		ccon |= S3C2410_SDICMDCON_LONGRSP;
 
-	writel(ccon, host->base + S3C2410_SDICMDCON);
+	pete_writel("drivers/mmc/host/s3cmci.c:945", ccon, host->base + S3C2410_SDICMDCON);
 }
 
 static int s3cmci_setup_data(struct s3cmci_host *host, struct mmc_data *data)
@@ -960,13 +960,13 @@ static int s3cmci_setup_data(struct s3cmci_host *host, struct mmc_data *data)
 		}
 	}
 
-	while (readl(host->base + S3C2410_SDIDSTA) &
+	while (pete_readl("drivers/mmc/host/s3cmci.c:963", host->base + S3C2410_SDIDSTA) &
 	       (S3C2410_SDIDSTA_TXDATAON | S3C2410_SDIDSTA_RXDATAON)) {
 
 		dbg(host, dbg_err,
 		    "mci_setup_data() transfer stillin progress.\n");
 
-		writel(S3C2410_SDIDCON_STOP, host->base + S3C2410_SDIDCON);
+		pete_writel("drivers/mmc/host/s3cmci.c:969", S3C2410_SDIDCON_STOP, host->base + S3C2410_SDIDCON);
 		s3cmci_reset(host);
 
 		if ((stoptries--) == 0) {
@@ -1000,11 +1000,11 @@ static int s3cmci_setup_data(struct s3cmci_host *host, struct mmc_data *data)
 		dcon |= S3C2440_SDIDCON_DATSTART;
 	}
 
-	writel(dcon, host->base + S3C2410_SDIDCON);
+	pete_writel("drivers/mmc/host/s3cmci.c:1003", dcon, host->base + S3C2410_SDIDCON);
 
 	/* write BSIZE register */
 
-	writel(data->blksz, host->base + S3C2410_SDIBSIZE);
+	pete_writel("drivers/mmc/host/s3cmci.c:1007", data->blksz, host->base + S3C2410_SDIBSIZE);
 
 	/* add to IMASK register */
 	imsk = S3C2410_SDIIMSK_FIFOFAIL | S3C2410_SDIIMSK_DATACRC |
@@ -1015,13 +1015,13 @@ static int s3cmci_setup_data(struct s3cmci_host *host, struct mmc_data *data)
 	/* write TIMER register */
 
 	if (host->is2440) {
-		writel(0x007FFFFF, host->base + S3C2410_SDITIMER);
+		pete_writel("drivers/mmc/host/s3cmci.c:1018", 0x007FFFFF, host->base + S3C2410_SDITIMER);
 	} else {
-		writel(0x0000FFFF, host->base + S3C2410_SDITIMER);
+		pete_writel("drivers/mmc/host/s3cmci.c:1020", 0x0000FFFF, host->base + S3C2410_SDITIMER);
 
 		/* FIX: set slow clock to prevent timeouts on read */
 		if (data->flags & MMC_DATA_READ)
-			writel(0xFF, host->base + S3C2410_SDIPRE);
+			pete_writel("drivers/mmc/host/s3cmci.c:1024", 0xFF, host->base + S3C2410_SDIPRE);
 	}
 
 	return 0;
@@ -1065,7 +1065,7 @@ static int s3cmci_prepare_dma(struct s3cmci_host *host, struct mmc_data *data)
 	BUG_ON((data->flags & BOTH_DIR) == BOTH_DIR);
 
 	/* Restore prescaler value */
-	writel(host->prescaler, host->base + S3C2410_SDIPRE);
+	pete_writel("drivers/mmc/host/s3cmci.c:1068", host->prescaler, host->base + S3C2410_SDIPRE);
 
 	if (!rw)
 		conf.direction = DMA_DEV_TO_MEM;
@@ -1106,9 +1106,9 @@ static void s3cmci_send_request(struct mmc_host *mmc)
 	/* Clear command, data and fifo status registers
 	   Fifo clear only necessary on 2440, but doesn't hurt on 2410
 	*/
-	writel(0xFFFFFFFF, host->base + S3C2410_SDICMDSTAT);
-	writel(0xFFFFFFFF, host->base + S3C2410_SDIDSTA);
-	writel(0xFFFFFFFF, host->base + S3C2410_SDIFSTA);
+	pete_writel("drivers/mmc/host/s3cmci.c:1109", 0xFFFFFFFF, host->base + S3C2410_SDICMDSTAT);
+	pete_writel("drivers/mmc/host/s3cmci.c:1110", 0xFFFFFFFF, host->base + S3C2410_SDIDSTA);
+	pete_writel("drivers/mmc/host/s3cmci.c:1111", 0xFFFFFFFF, host->base + S3C2410_SDIFSTA);
 
 	if (cmd->data) {
 		int res = s3cmci_setup_data(host, cmd->data);
@@ -1178,7 +1178,7 @@ static void s3cmci_set_clk(struct s3cmci_host *host, struct mmc_ios *ios)
 		mci_psc = 255;
 
 	host->prescaler = mci_psc;
-	writel(host->prescaler, host->base + S3C2410_SDIPRE);
+	pete_writel("drivers/mmc/host/s3cmci.c:1181", host->prescaler, host->base + S3C2410_SDIPRE);
 
 	/* If requested clock is 0, real_rate will be 0, too */
 	if (ios->clock == 0)
@@ -1192,7 +1192,7 @@ static void s3cmci_set_ios(struct mmc_host *mmc, struct mmc_ios *ios)
 
 	/* Set the power state */
 
-	mci_con = readl(host->base + S3C2410_SDICON);
+	mci_con = pete_readl("drivers/mmc/host/s3cmci.c:1195", host->base + S3C2410_SDICON);
 
 	switch (ios->power_mode) {
 	case MMC_POWER_ON:
@@ -1219,7 +1219,7 @@ static void s3cmci_set_ios(struct mmc_host *mmc, struct mmc_ios *ios)
 	else
 		mci_con &= ~S3C2410_SDICON_CLOCKTYPE;
 
-	writel(mci_con, host->base + S3C2410_SDICON);
+	pete_writel("drivers/mmc/host/s3cmci.c:1222", mci_con, host->base + S3C2410_SDICON);
 
 	if ((ios->power_mode == MMC_POWER_ON) ||
 	    (ios->power_mode == MMC_POWER_UP)) {
@@ -1234,10 +1234,10 @@ static void s3cmci_set_ios(struct mmc_host *mmc, struct mmc_ios *ios)
 
 static void s3cmci_reset(struct s3cmci_host *host)
 {
-	u32 con = readl(host->base + S3C2410_SDICON);
+	u32 con = pete_readl("drivers/mmc/host/s3cmci.c:1237", host->base + S3C2410_SDICON);
 
 	con |= S3C2440_SDICON_SDRESET;
-	writel(con, host->base + S3C2410_SDICON);
+	pete_writel("drivers/mmc/host/s3cmci.c:1240", con, host->base + S3C2410_SDICON);
 }
 
 static void s3cmci_enable_sdio_irq(struct mmc_host *mmc, int enable)
@@ -1248,7 +1248,7 @@ static void s3cmci_enable_sdio_irq(struct mmc_host *mmc, int enable)
 
 	local_irq_save(flags);
 
-	con = readl(host->base + S3C2410_SDICON);
+	con = pete_readl("drivers/mmc/host/s3cmci.c:1251", host->base + S3C2410_SDICON);
 	host->sdio_irqen = enable;
 
 	if (enable == host->sdio_irqen)
@@ -1272,7 +1272,7 @@ static void s3cmci_enable_sdio_irq(struct mmc_host *mmc, int enable)
 		}
 	}
 
-	writel(con, host->base + S3C2410_SDICON);
+	pete_writel("drivers/mmc/host/s3cmci.c:1275", con, host->base + S3C2410_SDICON);
 
  same_state:
 	local_irq_restore(flags);
@@ -1401,9 +1401,9 @@ static int s3cmci_regs_show(struct seq_file *seq, void *v)
 
 	for (; rptr->name; rptr++)
 		seq_printf(seq, "SDI%s\t=0x%08x\n", rptr->name,
-			   readl(host->base + rptr->addr));
+			   pete_readl("drivers/mmc/host/s3cmci.c:1404", host->base + rptr->addr));
 
-	seq_printf(seq, "SDIIMSK\t=0x%08x\n", readl(host->base + host->sdiimsk));
+	seq_printf(seq, "SDIIMSK\t=0x%08x\n", pete_readl("drivers/mmc/host/s3cmci.c:1406", host->base + host->sdiimsk));
 
 	return 0;
 }

@@ -190,14 +190,14 @@ static int faraday_raw_pci_read_config(struct faraday_pci *p, int bus_number,
 				       unsigned int fn, int config, int size,
 				       u32 *value)
 {
-	writel(PCI_CONF_BUS(bus_number) |
+	pete_writel("drivers/pci/controller/pci-ftpci100.c:193", PCI_CONF_BUS(bus_number) |
 			PCI_CONF_DEVICE(PCI_SLOT(fn)) |
 			PCI_CONF_FUNCTION(PCI_FUNC(fn)) |
 			PCI_CONF_WHERE(config) |
 			PCI_CONF_ENABLE,
 			p->base + FTPCI_CONFIG);
 
-	*value = readl(p->base + FTPCI_DATA);
+	*value = pete_readl("drivers/pci/controller/pci-ftpci100.c:200", p->base + FTPCI_DATA);
 
 	if (size == 1)
 		*value = (*value >> (8 * (config & 3))) & 0xFF;
@@ -225,7 +225,7 @@ static int faraday_raw_pci_write_config(struct faraday_pci *p, int bus_number,
 {
 	int ret = PCIBIOS_SUCCESSFUL;
 
-	writel(PCI_CONF_BUS(bus_number) |
+	pete_writel("drivers/pci/controller/pci-ftpci100.c:228", PCI_CONF_BUS(bus_number) |
 			PCI_CONF_DEVICE(PCI_SLOT(fn)) |
 			PCI_CONF_FUNCTION(PCI_FUNC(fn)) |
 			PCI_CONF_WHERE(config) |
@@ -234,7 +234,7 @@ static int faraday_raw_pci_write_config(struct faraday_pci *p, int bus_number,
 
 	switch (size) {
 	case 4:
-		writel(value, p->base + FTPCI_DATA);
+		pete_writel("drivers/pci/controller/pci-ftpci100.c:237", value, p->base + FTPCI_DATA);
 		break;
 	case 2:
 		writew(value, p->base + FTPCI_DATA + (config & 3));
@@ -469,7 +469,7 @@ static int faraday_pci_probe(struct platform_device *pdev)
 		if (!faraday_res_to_memcfg(io->start - win->offset,
 					   resource_size(io), &val)) {
 			/* setup I/O space size */
-			writel(val, p->base + FTPCI_IOSIZE);
+			pete_writel("drivers/pci/controller/pci-ftpci100.c:472", val, p->base + FTPCI_IOSIZE);
 		} else {
 			dev_err(dev, "illegal IO mem size\n");
 			return -EINVAL;
@@ -477,11 +477,11 @@ static int faraday_pci_probe(struct platform_device *pdev)
 	}
 
 	/* Setup hostbridge */
-	val = readl(p->base + FTPCI_CTRL);
+	val = pete_readl("drivers/pci/controller/pci-ftpci100.c:480", p->base + FTPCI_CTRL);
 	val |= PCI_COMMAND_IO;
 	val |= PCI_COMMAND_MEMORY;
 	val |= PCI_COMMAND_MASTER;
-	writel(val, p->base + FTPCI_CTRL);
+	pete_writel("drivers/pci/controller/pci-ftpci100.c:484", val, p->base + FTPCI_CTRL);
 	/* Mask and clear all interrupts */
 	faraday_raw_pci_write_config(p, 0, 0, FARADAY_PCI_CTRL2 + 2, 2, 0xF000);
 	if (variant->cascaded_irq) {

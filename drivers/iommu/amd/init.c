@@ -673,8 +673,8 @@ void amd_iommu_reset_cmd_buffer(struct amd_iommu *iommu)
 {
 	iommu_feature_disable(iommu, CONTROL_CMDBUF_EN);
 
-	writel(0x00, iommu->mmio_base + MMIO_CMD_HEAD_OFFSET);
-	writel(0x00, iommu->mmio_base + MMIO_CMD_TAIL_OFFSET);
+	pete_writel("drivers/iommu/amd/init.c:676", 0x00, iommu->mmio_base + MMIO_CMD_HEAD_OFFSET);
+	pete_writel("drivers/iommu/amd/init.c:677", 0x00, iommu->mmio_base + MMIO_CMD_TAIL_OFFSET);
 	iommu->cmd_buf_head = 0;
 	iommu->cmd_buf_tail = 0;
 
@@ -750,8 +750,8 @@ static void iommu_enable_event_buffer(struct amd_iommu *iommu)
 		    &entry, sizeof(entry));
 
 	/* set head and tail to zero manually */
-	writel(0x00, iommu->mmio_base + MMIO_EVT_HEAD_OFFSET);
-	writel(0x00, iommu->mmio_base + MMIO_EVT_TAIL_OFFSET);
+	pete_writel("drivers/iommu/amd/init.c:753", 0x00, iommu->mmio_base + MMIO_EVT_HEAD_OFFSET);
+	pete_writel("drivers/iommu/amd/init.c:754", 0x00, iommu->mmio_base + MMIO_EVT_TAIL_OFFSET);
 
 	iommu_feature_enable(iommu, CONTROL_EVT_LOG_EN);
 }
@@ -791,8 +791,8 @@ static void iommu_enable_ppr_log(struct amd_iommu *iommu)
 		    &entry, sizeof(entry));
 
 	/* set head and tail to zero manually */
-	writel(0x00, iommu->mmio_base + MMIO_PPR_HEAD_OFFSET);
-	writel(0x00, iommu->mmio_base + MMIO_PPR_TAIL_OFFSET);
+	pete_writel("drivers/iommu/amd/init.c:794", 0x00, iommu->mmio_base + MMIO_PPR_HEAD_OFFSET);
+	pete_writel("drivers/iommu/amd/init.c:795", 0x00, iommu->mmio_base + MMIO_PPR_TAIL_OFFSET);
 
 	iommu_feature_enable(iommu, CONTROL_PPRLOG_EN);
 	iommu_feature_enable(iommu, CONTROL_PPR_EN);
@@ -821,7 +821,7 @@ static int iommu_ga_log_enable(struct amd_iommu *iommu)
 		return -EINVAL;
 
 	/* Check if already running */
-	status = readl(iommu->mmio_base + MMIO_STATUS_OFFSET);
+	status = pete_readl("drivers/iommu/amd/init.c:824", iommu->mmio_base + MMIO_STATUS_OFFSET);
 	if (WARN_ON(status & (MMIO_STATUS_GALOG_RUN_MASK)))
 		return 0;
 
@@ -832,15 +832,15 @@ static int iommu_ga_log_enable(struct amd_iommu *iommu)
 		 (BIT_ULL(52)-1)) & ~7ULL;
 	memcpy_toio(iommu->mmio_base + MMIO_GA_LOG_TAIL_OFFSET,
 		    &entry, sizeof(entry));
-	writel(0x00, iommu->mmio_base + MMIO_GA_HEAD_OFFSET);
-	writel(0x00, iommu->mmio_base + MMIO_GA_TAIL_OFFSET);
+	pete_writel("drivers/iommu/amd/init.c:835", 0x00, iommu->mmio_base + MMIO_GA_HEAD_OFFSET);
+	pete_writel("drivers/iommu/amd/init.c:836", 0x00, iommu->mmio_base + MMIO_GA_TAIL_OFFSET);
 
 
 	iommu_feature_enable(iommu, CONTROL_GAINT_EN);
 	iommu_feature_enable(iommu, CONTROL_GALOG_EN);
 
 	for (i = 0; i < LOOP_TIMEOUT; ++i) {
-		status = readl(iommu->mmio_base + MMIO_STATUS_OFFSET);
+		status = pete_readl("drivers/iommu/amd/init.c:843", iommu->mmio_base + MMIO_STATUS_OFFSET);
 		if (status & (MMIO_STATUS_GALOG_RUN_MASK))
 			break;
 		udelay(10);
@@ -946,8 +946,8 @@ static bool copy_device_table(void)
 	pr_warn("Translation is already enabled - trying to copy translation structures\n");
 	for_each_iommu(iommu) {
 		/* All IOMMUs should use the same device table with the same size */
-		lo = readl(iommu->mmio_base + MMIO_DEV_TABLE_OFFSET);
-		hi = readl(iommu->mmio_base + MMIO_DEV_TABLE_OFFSET + 4);
+		lo = pete_readl("drivers/iommu/amd/init.c:949", iommu->mmio_base + MMIO_DEV_TABLE_OFFSET);
+		hi = pete_readl("drivers/iommu/amd/init.c:950", iommu->mmio_base + MMIO_DEV_TABLE_OFFSET + 4);
 		entry = (((u64) hi) << 32) + lo;
 		if (last_entry && last_entry != entry) {
 			pr_err("IOMMU:%d should use the same dev table as others!\n",
@@ -1734,7 +1734,7 @@ static void init_iommu_perf_ctr(struct amd_iommu *iommu)
 
 	pci_info(pdev, "IOMMU performance counters supported\n");
 
-	val = readl(iommu->mmio_base + MMIO_CNTR_CONF_OFFSET);
+	val = pete_readl("drivers/iommu/amd/init.c:1737", iommu->mmio_base + MMIO_CNTR_CONF_OFFSET);
 	iommu->max_banks = (u8) ((val >> 12) & 0x3f);
 	iommu->max_counters = (u8) ((val >> 7) & 0xf);
 
@@ -3333,12 +3333,12 @@ static int iommu_pc_get_set_reg(struct amd_iommu *iommu, u8 bank, u8 cntr,
 	if (is_write) {
 		u64 val = *value & GENMASK_ULL(47, 0);
 
-		writel((u32)val, iommu->mmio_base + offset);
-		writel((val >> 32), iommu->mmio_base + offset + 4);
+		pete_writel("drivers/iommu/amd/init.c:3336", (u32)val, iommu->mmio_base + offset);
+		pete_writel("drivers/iommu/amd/init.c:3337", (val >> 32), iommu->mmio_base + offset + 4);
 	} else {
-		*value = readl(iommu->mmio_base + offset + 4);
+		*value = pete_readl("drivers/iommu/amd/init.c:3339", iommu->mmio_base + offset + 4);
 		*value <<= 32;
-		*value |= readl(iommu->mmio_base + offset);
+		*value |= pete_readl("drivers/iommu/amd/init.c:3341", iommu->mmio_base + offset);
 		*value &= GENMASK_ULL(47, 0);
 	}
 

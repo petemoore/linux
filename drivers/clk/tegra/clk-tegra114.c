@@ -1077,7 +1077,7 @@ static void tegra114_wait_cpu_in_reset(u32 cpu)
 	unsigned int reg;
 
 	do {
-		reg = readl(clk_base + CLK_RST_CONTROLLER_CPU_CMPLX_STATUS);
+		reg = pete_readl("drivers/clk/tegra/clk-tegra114.c:1080", clk_base + CLK_RST_CONTROLLER_CPU_CMPLX_STATUS);
 		cpu_relax();
 	} while (!(reg & (1 << cpu)));  /* check CPU been reset or not */
 }
@@ -1092,23 +1092,23 @@ static void tegra114_cpu_clock_suspend(void)
 {
 	/* switch coresite to clk_m, save off original source */
 	tegra114_cpu_clk_sctx.clk_csite_src =
-				readl(clk_base + CLK_SOURCE_CSITE);
-	writel(3 << 30, clk_base + CLK_SOURCE_CSITE);
+				pete_readl("drivers/clk/tegra/clk-tegra114.c:1095", clk_base + CLK_SOURCE_CSITE);
+	pete_writel("drivers/clk/tegra/clk-tegra114.c:1096", 3 << 30, clk_base + CLK_SOURCE_CSITE);
 
 	tegra114_cpu_clk_sctx.cclkg_burst =
-				readl(clk_base + CCLKG_BURST_POLICY);
+				pete_readl("drivers/clk/tegra/clk-tegra114.c:1099", clk_base + CCLKG_BURST_POLICY);
 	tegra114_cpu_clk_sctx.cclkg_divider =
-				readl(clk_base + CCLKG_BURST_POLICY + 4);
+				pete_readl("drivers/clk/tegra/clk-tegra114.c:1101", clk_base + CCLKG_BURST_POLICY + 4);
 }
 
 static void tegra114_cpu_clock_resume(void)
 {
-	writel(tegra114_cpu_clk_sctx.clk_csite_src,
+	pete_writel("drivers/clk/tegra/clk-tegra114.c:1106", tegra114_cpu_clk_sctx.clk_csite_src,
 					clk_base + CLK_SOURCE_CSITE);
 
-	writel(tegra114_cpu_clk_sctx.cclkg_burst,
+	pete_writel("drivers/clk/tegra/clk-tegra114.c:1109", tegra114_cpu_clk_sctx.cclkg_burst,
 					clk_base + CCLKG_BURST_POLICY);
-	writel(tegra114_cpu_clk_sctx.cclkg_divider,
+	pete_writel("drivers/clk/tegra/clk-tegra114.c:1111", tegra114_cpu_clk_sctx.cclkg_divider,
 					clk_base + CCLKG_BURST_POLICY + 4);
 }
 #endif

@@ -183,8 +183,8 @@ struct am65_cpts_skb_cb_data {
 	u32 skb_mtype_seqid;
 };
 
-#define am65_cpts_write32(c, v, r) writel(v, &(c)->reg->r)
-#define am65_cpts_read32(c, r) readl(&(c)->reg->r)
+#define am65_cpts_write32(c, v, r) pete_writel("drivers/net/ethernet/ti/am65-cpts.c:186", v, &(c)->reg->r)
+#define am65_cpts_read32(c, r) pete_readl("drivers/net/ethernet/ti/am65-cpts.c:187", &(c)->reg->r)
 
 static void am65_cpts_settime(struct am65_cpts *cpts, u64 start_tstamp)
 {

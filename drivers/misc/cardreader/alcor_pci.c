@@ -67,7 +67,7 @@ EXPORT_SYMBOL_GPL(alcor_write16);
 
 void alcor_write32(struct alcor_pci_priv *priv, u32 val, unsigned int addr)
 {
-	writel(val, priv->iobase + addr);
+	pete_writel("drivers/misc/cardreader/alcor_pci.c:70", val, priv->iobase + addr);
 }
 EXPORT_SYMBOL_GPL(alcor_write32);
 
@@ -85,7 +85,7 @@ EXPORT_SYMBOL_GPL(alcor_read8);
 
 u32 alcor_read32(struct alcor_pci_priv *priv, unsigned int addr)
 {
-	return readl(priv->iobase + addr);
+	return pete_readl("drivers/misc/cardreader/alcor_pci.c:88", priv->iobase + addr);
 }
 EXPORT_SYMBOL_GPL(alcor_read32);
 

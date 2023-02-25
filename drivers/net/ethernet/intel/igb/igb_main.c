@@ -737,10 +737,10 @@ u32 igb_rd32(struct e1000_hw *hw, u32 reg)
 	if (E1000_REMOVED(hw_addr))
 		return ~value;
 
-	value = readl(&hw_addr[reg]);
+	value = pete_readl("drivers/net/ethernet/intel/igb/igb_main.c:740", &hw_addr[reg]);
 
 	/* reads should not return all F's */
-	if (!(~value) && (!reg || !(~readl(hw_addr)))) {
+	if (!(~value) && (!reg || !(~pete_readl("drivers/net/ethernet/intel/igb/igb_main.c:743", hw_addr)))) {
 		struct net_device *netdev = igb->netdev;
 		hw->hw_addr = NULL;
 		netdev_err(netdev, "PCIe link lost\n");
@@ -2899,7 +2899,7 @@ static void igb_xdp_ring_update_tail(struct igb_ring *ring)
 	 * are new descriptors to fetch.
 	 */
 	wmb();
-	writel(ring->next_to_use, ring->tail);
+	pete_writel("drivers/net/ethernet/intel/igb/igb_main.c:2902", ring->next_to_use, ring->tail);
 }
 
 static struct igb_ring *igb_xdp_tx_queue_mapping(struct igb_adapter *adapter)
@@ -4310,7 +4310,7 @@ void igb_configure_tx_ring(struct igb_adapter *adapter,
 
 	ring->tail = adapter->io_addr + E1000_TDT(reg_idx);
 	wr32(E1000_TDH(reg_idx), 0);
-	writel(0, ring->tail);
+	pete_writel("drivers/net/ethernet/intel/igb/igb_main.c:4313", 0, ring->tail);
 
 	txdctl |= IGB_TX_PTHRESH;
 	txdctl |= IGB_TX_HTHRESH << 8;
@@ -4711,7 +4711,7 @@ void igb_configure_rx_ring(struct igb_adapter *adapter,
 	/* initialize head and tail */
 	ring->tail = adapter->io_addr + E1000_RDT(reg_idx);
 	wr32(E1000_RDH(reg_idx), 0);
-	writel(0, ring->tail);
+	pete_writel("drivers/net/ethernet/intel/igb/igb_main.c:4714", 0, ring->tail);
 
 	/* set descriptor configuration */
 	igb_setup_srrctl(adapter, ring);
@@ -6230,7 +6230,7 @@ static int igb_tx_map(struct igb_ring *tx_ring,
 	igb_maybe_stop_tx(tx_ring, DESC_NEEDED);
 
 	if (netif_xmit_stopped(txring_txq(tx_ring)) || !netdev_xmit_more()) {
-		writel(i, tx_ring->tail);
+		pete_writel("drivers/net/ethernet/intel/igb/igb_main.c:6233", i, tx_ring->tail);
 	}
 	return 0;
 
@@ -6336,7 +6336,7 @@ int igb_xmit_xdp_ring(struct igb_adapter *adapter,
 	igb_maybe_stop_tx(tx_ring, DESC_NEEDED);
 
 	if (netif_xmit_stopped(txring_txq(tx_ring)) || !netdev_xmit_more())
-		writel(i, tx_ring->tail);
+		pete_writel("drivers/net/ethernet/intel/igb/igb_main.c:6339", i, tx_ring->tail);
 
 	return IGB_XDP_TX;
 }
@@ -6882,7 +6882,7 @@ static void igb_write_itr(struct igb_q_vector *q_vector)
 	else
 		itr_val |= E1000_EITR_CNT_IGNR;
 
-	writel(itr_val, q_vector->itr_register);
+	pete_writel("drivers/net/ethernet/intel/igb/igb_main.c:6885", itr_val, q_vector->itr_register);
 	q_vector->set_itr = 0;
 }
 
@@ -8183,7 +8183,7 @@ static bool igb_clean_tx_irq(struct igb_q_vector *q_vector, int napi_budget)
 				"  desc.status          <%x>\n",
 				tx_ring->queue_index,
 				rd32(E1000_TDH(tx_ring->reg_idx)),
-				readl(tx_ring->tail),
+				pete_readl("drivers/net/ethernet/intel/igb/igb_main.c:8186", tx_ring->tail),
 				tx_ring->next_to_use,
 				tx_ring->next_to_clean,
 				tx_buffer->time_stamp,
@@ -8949,7 +8949,7 @@ void igb_alloc_rx_buffers(struct igb_ring *rx_ring, u16 cleaned_count)
 		 * such as IA-64).
 		 */
 		dma_wmb();
-		writel(i, rx_ring->tail);
+		pete_writel("drivers/net/ethernet/intel/igb/igb_main.c:8952", i, rx_ring->tail);
 	}
 }
 

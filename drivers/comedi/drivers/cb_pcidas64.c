@@ -1228,7 +1228,7 @@ static void disable_plx_interrupts(struct comedi_device *dev)
 	struct pcidas64_private *devpriv = dev->private;
 
 	devpriv->plx_intcsr_bits = 0;
-	writel(devpriv->plx_intcsr_bits,
+	pete_writel("drivers/comedi/drivers/cb_pcidas64.c:1231", devpriv->plx_intcsr_bits,
 	       devpriv->plx9080_iobase + PLX_REG_INTCSR);
 }
 
@@ -1282,14 +1282,14 @@ static void init_plx9080(struct comedi_device *dev)
 	void __iomem *plx_iobase = devpriv->plx9080_iobase;
 
 	devpriv->plx_control_bits =
-		readl(devpriv->plx9080_iobase + PLX_REG_CNTRL);
+		pete_readl("drivers/comedi/drivers/cb_pcidas64.c:1285", devpriv->plx9080_iobase + PLX_REG_CNTRL);
 
 #ifdef __BIG_ENDIAN
 	bits = PLX_BIGEND_DMA0 | PLX_BIGEND_DMA1;
 #else
 	bits = 0;
 #endif
-	writel(bits, devpriv->plx9080_iobase + PLX_REG_BIGEND);
+	pete_writel("drivers/comedi/drivers/cb_pcidas64.c:1292", bits, devpriv->plx9080_iobase + PLX_REG_BIGEND);
 
 	disable_plx_interrupts(dev);
 
@@ -1325,16 +1325,16 @@ static void init_plx9080(struct comedi_device *dev)
 		bits |= PLX_DMAMODE_WIDTH_32;
 	else				/* localspace0 bus is 16 bits wide */
 		bits |= PLX_DMAMODE_WIDTH_16;
-	writel(bits, plx_iobase + PLX_REG_DMAMODE1);
+	pete_writel("drivers/comedi/drivers/cb_pcidas64.c:1328", bits, plx_iobase + PLX_REG_DMAMODE1);
 	if (ao_cmd_is_supported(board))
-		writel(bits, plx_iobase + PLX_REG_DMAMODE0);
+		pete_writel("drivers/comedi/drivers/cb_pcidas64.c:1330", bits, plx_iobase + PLX_REG_DMAMODE0);
 
 	/* enable interrupts on plx 9080 */
 	devpriv->plx_intcsr_bits |=
 	    PLX_INTCSR_LSEABORTEN | PLX_INTCSR_LSEPARITYEN | PLX_INTCSR_PIEN |
 	    PLX_INTCSR_PLIEN | PLX_INTCSR_PABORTIEN | PLX_INTCSR_LIOEN |
 	    PLX_INTCSR_DMA0IEN | PLX_INTCSR_DMA1IEN;
-	writel(devpriv->plx_intcsr_bits,
+	pete_writel("drivers/comedi/drivers/cb_pcidas64.c:1337", devpriv->plx_intcsr_bits,
 	       devpriv->plx9080_iobase + PLX_REG_INTCSR);
 }
 
@@ -1612,11 +1612,11 @@ static void i2c_set_sda(struct comedi_device *dev, int state)
 
 	if (state) {				/* set data line high */
 		devpriv->plx_control_bits &= ~data_bit;
-		writel(devpriv->plx_control_bits, plx_control_addr);
+		pete_writel("drivers/comedi/drivers/cb_pcidas64.c:1615", devpriv->plx_control_bits, plx_control_addr);
 		udelay(i2c_high_udelay);
 	} else {				/* set data line low */
 		devpriv->plx_control_bits |= data_bit;
-		writel(devpriv->plx_control_bits, plx_control_addr);
+		pete_writel("drivers/comedi/drivers/cb_pcidas64.c:1619", devpriv->plx_control_bits, plx_control_addr);
 		udelay(i2c_low_udelay);
 	}
 }
@@ -1631,11 +1631,11 @@ static void i2c_set_scl(struct comedi_device *dev, int state)
 
 	if (state) {				/* set clock line high */
 		devpriv->plx_control_bits &= ~clock_bit;
-		writel(devpriv->plx_control_bits, plx_control_addr);
+		pete_writel("drivers/comedi/drivers/cb_pcidas64.c:1634", devpriv->plx_control_bits, plx_control_addr);
 		udelay(i2c_high_udelay);
 	} else {				/* set clock line low */
 		devpriv->plx_control_bits |= clock_bit;
-		writel(devpriv->plx_control_bits, plx_control_addr);
+		pete_writel("drivers/comedi/drivers/cb_pcidas64.c:1638", devpriv->plx_control_bits, plx_control_addr);
 		udelay(i2c_low_udelay);
 	}
 }
@@ -1863,7 +1863,7 @@ static int ai_rinsn(struct comedi_device *dev, struct comedi_subdevice *s,
 			return ret;
 
 		if (board->layout == LAYOUT_4020)
-			data[n] = readl(dev->mmio + ADC_FIFO_REG) & 0xffff;
+			data[n] = pete_readl("drivers/comedi/drivers/cb_pcidas64.c:1866", dev->mmio + ADC_FIFO_REG) & 0xffff;
 		else
 			data[n] = readw(devpriv->main_iobase + PIPE1_READ_REG);
 	}
@@ -2536,16 +2536,16 @@ static inline void load_first_dma_descriptor(struct comedi_device *dev,
 	 * block.  Initializing them to zero seems to fix the problem.
 	 */
 	if (dma_channel) {
-		writel(0, devpriv->plx9080_iobase + PLX_REG_DMASIZ1);
-		writel(0, devpriv->plx9080_iobase + PLX_REG_DMAPADR1);
-		writel(0, devpriv->plx9080_iobase + PLX_REG_DMALADR1);
-		writel(descriptor_bits,
+		pete_writel("drivers/comedi/drivers/cb_pcidas64.c:2539", 0, devpriv->plx9080_iobase + PLX_REG_DMASIZ1);
+		pete_writel("drivers/comedi/drivers/cb_pcidas64.c:2540", 0, devpriv->plx9080_iobase + PLX_REG_DMAPADR1);
+		pete_writel("drivers/comedi/drivers/cb_pcidas64.c:2541", 0, devpriv->plx9080_iobase + PLX_REG_DMALADR1);
+		pete_writel("drivers/comedi/drivers/cb_pcidas64.c:2542", descriptor_bits,
 		       devpriv->plx9080_iobase + PLX_REG_DMADPR1);
 	} else {
-		writel(0, devpriv->plx9080_iobase + PLX_REG_DMASIZ0);
-		writel(0, devpriv->plx9080_iobase + PLX_REG_DMAPADR0);
-		writel(0, devpriv->plx9080_iobase + PLX_REG_DMALADR0);
-		writel(descriptor_bits,
+		pete_writel("drivers/comedi/drivers/cb_pcidas64.c:2545", 0, devpriv->plx9080_iobase + PLX_REG_DMASIZ0);
+		pete_writel("drivers/comedi/drivers/cb_pcidas64.c:2546", 0, devpriv->plx9080_iobase + PLX_REG_DMAPADR0);
+		pete_writel("drivers/comedi/drivers/cb_pcidas64.c:2547", 0, devpriv->plx9080_iobase + PLX_REG_DMALADR0);
+		pete_writel("drivers/comedi/drivers/cb_pcidas64.c:2548", descriptor_bits,
 		       devpriv->plx9080_iobase + PLX_REG_DMADPR0);
 	}
 }
@@ -2748,7 +2748,7 @@ static void pio_drain_ai_fifo_32(struct comedi_device *dev)
 	for (i = 0; read_code != write_code && i < nsamples;) {
 		unsigned short val;
 
-		fifo_data = readl(dev->mmio + ADC_FIFO_REG);
+		fifo_data = pete_readl("drivers/comedi/drivers/cb_pcidas64.c:2751", dev->mmio + ADC_FIFO_REG);
 		val = fifo_data & 0xffff;
 		comedi_buf_write_samples(s, &val, 1);
 		i++;
@@ -2786,7 +2786,7 @@ static void drain_dma_buffers(struct comedi_device *dev, unsigned int channel)
 	pci_addr_reg = devpriv->plx9080_iobase + PLX_REG_DMAPADR(channel);
 
 	/* loop until we have read all the full buffers */
-	for (j = 0, next_transfer_addr = readl(pci_addr_reg);
+	for (j = 0, next_transfer_addr = pete_readl("drivers/comedi/drivers/cb_pcidas64.c:2789", pci_addr_reg);
 	     (next_transfer_addr <
 	      devpriv->ai_buffer_bus_addr[devpriv->ai_dma_index] ||
 	      next_transfer_addr >=
@@ -2882,7 +2882,7 @@ static int last_ao_dma_load_completed(struct comedi_device *dev)
 		return 0;
 
 	transfer_address =
-		readl(devpriv->plx9080_iobase + PLX_REG_DMAPADR0);
+		pete_readl("drivers/comedi/drivers/cb_pcidas64.c:2885", devpriv->plx9080_iobase + PLX_REG_DMAPADR0);
 	if (transfer_address != devpriv->ao_buffer_bus_addr[buffer_index])
 		return 0;
 
@@ -2906,7 +2906,7 @@ static void restart_ao_dma(struct comedi_device *dev)
 	struct pcidas64_private *devpriv = dev->private;
 	unsigned int dma_desc_bits;
 
-	dma_desc_bits = readl(devpriv->plx9080_iobase + PLX_REG_DMADPR0);
+	dma_desc_bits = pete_readl("drivers/comedi/drivers/cb_pcidas64.c:2909", devpriv->plx9080_iobase + PLX_REG_DMADPR0);
 	dma_desc_bits &= ~PLX_DMADPR_CHAINEND;
 	load_first_dma_descriptor(dev, 0, dma_desc_bits);
 
@@ -2974,7 +2974,7 @@ static void load_ao_dma(struct comedi_device *dev, const struct comedi_cmd *cmd)
 	do {
 		buffer_index = devpriv->ao_dma_index;
 		/* don't overwrite data that hasn't been transferred yet */
-		next_transfer_addr = readl(pci_addr_reg);
+		next_transfer_addr = pete_readl("drivers/comedi/drivers/cb_pcidas64.c:2977", pci_addr_reg);
 		if (next_transfer_addr >=
 		    devpriv->ao_buffer_bus_addr[buffer_index] &&
 		    next_transfer_addr <
@@ -3043,7 +3043,7 @@ static irqreturn_t handle_interrupt(int irq, void *d)
 	u32 plx_status;
 	u32 plx_bits;
 
-	plx_status = readl(devpriv->plx9080_iobase + PLX_REG_INTCSR);
+	plx_status = pete_readl("drivers/comedi/drivers/cb_pcidas64.c:3046", devpriv->plx9080_iobase + PLX_REG_INTCSR);
 	status = readw(devpriv->main_iobase + HW_STATUS_REG);
 
 	/*
@@ -3060,8 +3060,8 @@ static irqreturn_t handle_interrupt(int irq, void *d)
 	/* clear possible plx9080 interrupt sources */
 	if (plx_status & PLX_INTCSR_LDBIA) {
 		/* clear local doorbell interrupt */
-		plx_bits = readl(devpriv->plx9080_iobase + PLX_REG_L2PDBELL);
-		writel(plx_bits, devpriv->plx9080_iobase + PLX_REG_L2PDBELL);
+		plx_bits = pete_readl("drivers/comedi/drivers/cb_pcidas64.c:3063", devpriv->plx9080_iobase + PLX_REG_L2PDBELL);
+		pete_writel("drivers/comedi/drivers/cb_pcidas64.c:3064", plx_bits, devpriv->plx9080_iobase + PLX_REG_L2PDBELL);
 	}
 
 	return IRQ_HANDLED;
@@ -3713,11 +3713,11 @@ static u16 read_eeprom(struct comedi_device *dev, u8 address)
 	devpriv->plx_control_bits &= ~PLX_CNTRL_EESK & ~PLX_CNTRL_EECS;
 	/* make sure we don't send anything to the i2c bus on 4020 */
 	devpriv->plx_control_bits |= PLX_CNTRL_USERO;
-	writel(devpriv->plx_control_bits, plx_control_addr);
+	pete_writel("drivers/comedi/drivers/cb_pcidas64.c:3716", devpriv->plx_control_bits, plx_control_addr);
 	/* activate serial eeprom */
 	udelay(eeprom_udelay);
 	devpriv->plx_control_bits |= PLX_CNTRL_EECS;
-	writel(devpriv->plx_control_bits, plx_control_addr);
+	pete_writel("drivers/comedi/drivers/cb_pcidas64.c:3720", devpriv->plx_control_bits, plx_control_addr);
 
 	/* write read command and desired memory address */
 	for (bit = 1 << (bitstream_length - 1); bit; bit >>= 1) {
@@ -3727,14 +3727,14 @@ static u16 read_eeprom(struct comedi_device *dev, u8 address)
 			devpriv->plx_control_bits |= PLX_CNTRL_EEWB;
 		else
 			devpriv->plx_control_bits &= ~PLX_CNTRL_EEWB;
-		writel(devpriv->plx_control_bits, plx_control_addr);
+		pete_writel("drivers/comedi/drivers/cb_pcidas64.c:3730", devpriv->plx_control_bits, plx_control_addr);
 		/* clock in bit */
 		udelay(eeprom_udelay);
 		devpriv->plx_control_bits |= PLX_CNTRL_EESK;
-		writel(devpriv->plx_control_bits, plx_control_addr);
+		pete_writel("drivers/comedi/drivers/cb_pcidas64.c:3734", devpriv->plx_control_bits, plx_control_addr);
 		udelay(eeprom_udelay);
 		devpriv->plx_control_bits &= ~PLX_CNTRL_EESK;
-		writel(devpriv->plx_control_bits, plx_control_addr);
+		pete_writel("drivers/comedi/drivers/cb_pcidas64.c:3737", devpriv->plx_control_bits, plx_control_addr);
 	}
 	/* read back value from eeprom memory location */
 	value = 0;
@@ -3742,19 +3742,19 @@ static u16 read_eeprom(struct comedi_device *dev, u8 address)
 		/* clock out bit */
 		udelay(eeprom_udelay);
 		devpriv->plx_control_bits |= PLX_CNTRL_EESK;
-		writel(devpriv->plx_control_bits, plx_control_addr);
+		pete_writel("drivers/comedi/drivers/cb_pcidas64.c:3745", devpriv->plx_control_bits, plx_control_addr);
 		udelay(eeprom_udelay);
 		devpriv->plx_control_bits &= ~PLX_CNTRL_EESK;
-		writel(devpriv->plx_control_bits, plx_control_addr);
+		pete_writel("drivers/comedi/drivers/cb_pcidas64.c:3748", devpriv->plx_control_bits, plx_control_addr);
 		udelay(eeprom_udelay);
-		if (readl(plx_control_addr) & PLX_CNTRL_EERB)
+		if (pete_readl("drivers/comedi/drivers/cb_pcidas64.c:3750", plx_control_addr) & PLX_CNTRL_EERB)
 			value |= bit;
 	}
 
 	/* deactivate eeprom serial input */
 	udelay(eeprom_udelay);
 	devpriv->plx_control_bits &= ~PLX_CNTRL_EECS;
-	writel(devpriv->plx_control_bits, plx_control_addr);
+	pete_writel("drivers/comedi/drivers/cb_pcidas64.c:3757", devpriv->plx_control_bits, plx_control_addr);
 
 	return value;
 }
@@ -3947,7 +3947,7 @@ static int setup_subdevices(struct comedi_device *dev)
 
 	/* serial EEPROM, if present */
 	s = &dev->subdevices[8];
-	if (readl(devpriv->plx9080_iobase + PLX_REG_CNTRL) &
+	if (pete_readl("drivers/comedi/drivers/cb_pcidas64.c:3950", devpriv->plx9080_iobase + PLX_REG_CNTRL) &
 	    PLX_CNTRL_EEPRESENT) {
 		s->type = COMEDI_SUBD_MEMORY;
 		s->subdev_flags = SDF_READABLE | SDF_INTERNAL;
@@ -4005,15 +4005,15 @@ static int auto_attach(struct comedi_device *dev,
 	}
 
 	/* figure out what local addresses are */
-	local_range = readl(devpriv->plx9080_iobase + PLX_REG_LAS0RR) &
+	local_range = pete_readl("drivers/comedi/drivers/cb_pcidas64.c:4008", devpriv->plx9080_iobase + PLX_REG_LAS0RR) &
 		      PLX_LASRR_MEM_MASK;
-	local_decode = readl(devpriv->plx9080_iobase + PLX_REG_LAS0BA) &
+	local_decode = pete_readl("drivers/comedi/drivers/cb_pcidas64.c:4010", devpriv->plx9080_iobase + PLX_REG_LAS0BA) &
 		       local_range & PLX_LASBA_MEM_MASK;
 	devpriv->local0_iobase = ((u32)devpriv->main_phys_iobase &
 				  ~local_range) | local_decode;
-	local_range = readl(devpriv->plx9080_iobase + PLX_REG_LAS1RR) &
+	local_range = pete_readl("drivers/comedi/drivers/cb_pcidas64.c:4014", devpriv->plx9080_iobase + PLX_REG_LAS1RR) &
 		      PLX_LASRR_MEM_MASK;
-	local_decode = readl(devpriv->plx9080_iobase + PLX_REG_LAS1BA) &
+	local_decode = pete_readl("drivers/comedi/drivers/cb_pcidas64.c:4016", devpriv->plx9080_iobase + PLX_REG_LAS1BA) &
 		       local_range & PLX_LASBA_MEM_MASK;
 	devpriv->local1_iobase = ((u32)devpriv->dio_counter_phys_iobase &
 				  ~local_range) | local_decode;

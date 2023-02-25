@@ -44,7 +44,7 @@ static int hisi_clk_get_phase(struct clk_hw *hw)
 	struct clk_hisi_phase *phase = to_clk_hisi_phase(hw);
 	u32 regval;
 
-	regval = readl(phase->reg);
+	regval = pete_readl("drivers/clk/hisilicon/clk-hisi-phase.c:47", phase->reg);
 	regval = (regval & phase->mask) >> phase->shift;
 
 	return hisi_phase_regval_to_degrees(phase, regval);
@@ -75,10 +75,10 @@ static int hisi_clk_set_phase(struct clk_hw *hw, int degrees)
 
 	spin_lock_irqsave(phase->lock, flags);
 
-	val = readl(phase->reg);
+	val = pete_readl("drivers/clk/hisilicon/clk-hisi-phase.c:78", phase->reg);
 	val &= ~phase->mask;
 	val |= regval << phase->shift;
-	writel(val, phase->reg);
+	pete_writel("drivers/clk/hisilicon/clk-hisi-phase.c:81", val, phase->reg);
 
 	spin_unlock_irqrestore(phase->lock, flags);
 

@@ -164,7 +164,7 @@ static void exynos4210_phy_pwr(struct samsung_usb2_phy_instance *inst, bool on)
 				EXYNOS_4210_URSTCON_PHY1_P1P2 |
 				EXYNOS_4210_URSTCON_HOST_LINK_ALL |
 				EXYNOS_4210_URSTCON_HOST_LINK_P0;
-		writel(on, drv->reg_phy + EXYNOS_4210_UPHY1CON);
+		pete_writel("drivers/phy/samsung/phy-exynos4210-usb2.c:167", on, drv->reg_phy + EXYNOS_4210_UPHY1CON);
 		break;
 	case EXYNOS4210_HSIC0:
 		phypwr =	EXYNOS_4210_UPHYPWR_HSIC0;
@@ -179,28 +179,28 @@ static void exynos4210_phy_pwr(struct samsung_usb2_phy_instance *inst, bool on)
 	}
 
 	if (on) {
-		clk = readl(drv->reg_phy + EXYNOS_4210_UPHYCLK);
+		clk = pete_readl("drivers/phy/samsung/phy-exynos4210-usb2.c:182", drv->reg_phy + EXYNOS_4210_UPHYCLK);
 		clk &= ~EXYNOS_4210_UPHYCLK_PHYFSEL_MASK;
 		clk |= drv->ref_reg_val << EXYNOS_4210_UPHYCLK_PHYFSEL_OFFSET;
-		writel(clk, drv->reg_phy + EXYNOS_4210_UPHYCLK);
+		pete_writel("drivers/phy/samsung/phy-exynos4210-usb2.c:185", clk, drv->reg_phy + EXYNOS_4210_UPHYCLK);
 
-		pwr = readl(drv->reg_phy + EXYNOS_4210_UPHYPWR);
+		pwr = pete_readl("drivers/phy/samsung/phy-exynos4210-usb2.c:187", drv->reg_phy + EXYNOS_4210_UPHYPWR);
 		pwr &= ~phypwr;
-		writel(pwr, drv->reg_phy + EXYNOS_4210_UPHYPWR);
+		pete_writel("drivers/phy/samsung/phy-exynos4210-usb2.c:189", pwr, drv->reg_phy + EXYNOS_4210_UPHYPWR);
 
-		rst = readl(drv->reg_phy + EXYNOS_4210_UPHYRST);
+		rst = pete_readl("drivers/phy/samsung/phy-exynos4210-usb2.c:191", drv->reg_phy + EXYNOS_4210_UPHYRST);
 		rst |= rstbits;
-		writel(rst, drv->reg_phy + EXYNOS_4210_UPHYRST);
+		pete_writel("drivers/phy/samsung/phy-exynos4210-usb2.c:193", rst, drv->reg_phy + EXYNOS_4210_UPHYRST);
 		udelay(10);
 		rst &= ~rstbits;
-		writel(rst, drv->reg_phy + EXYNOS_4210_UPHYRST);
+		pete_writel("drivers/phy/samsung/phy-exynos4210-usb2.c:196", rst, drv->reg_phy + EXYNOS_4210_UPHYRST);
 		/* The following delay is necessary for the reset sequence to be
 		 * completed */
 		udelay(80);
 	} else {
-		pwr = readl(drv->reg_phy + EXYNOS_4210_UPHYPWR);
+		pwr = pete_readl("drivers/phy/samsung/phy-exynos4210-usb2.c:201", drv->reg_phy + EXYNOS_4210_UPHYPWR);
 		pwr |= phypwr;
-		writel(pwr, drv->reg_phy + EXYNOS_4210_UPHYPWR);
+		pete_writel("drivers/phy/samsung/phy-exynos4210-usb2.c:203", pwr, drv->reg_phy + EXYNOS_4210_UPHYPWR);
 	}
 }
 

@@ -46,7 +46,7 @@ static int jcore_spi_wait(void __iomem *ctrl_reg)
 	unsigned timeout = JCORE_SPI_WAIT_RDY_MAX_LOOP;
 
 	do {
-		if (!(readl(ctrl_reg) & JCORE_SPI_STAT_BUSY))
+		if (!(pete_readl("drivers/spi/spi-jcore.c:49", ctrl_reg) & JCORE_SPI_STAT_BUSY))
 			return 0;
 		cpu_relax();
 	} while (--timeout);
@@ -62,7 +62,7 @@ static void jcore_spi_program(struct jcore_spi *hw)
 		dev_err(hw->master->dev.parent,
 			"timeout waiting to program ctrl reg.\n");
 
-	writel(hw->cs_reg | hw->speed_reg, ctrl_reg);
+	pete_writel("drivers/spi/spi-jcore.c:65", hw->cs_reg | hw->speed_reg, ctrl_reg);
 }
 
 static void jcore_spi_chipsel(struct spi_device *spi, bool value)
@@ -120,14 +120,14 @@ static int jcore_spi_txrx(struct spi_master *master, struct spi_device *spi,
 		if (jcore_spi_wait(ctrl_reg))
 			break;
 
-		writel(tx ? *tx++ : 0, data_reg);
-		writel(xmit, ctrl_reg);
+		pete_writel("drivers/spi/spi-jcore.c:123", tx ? *tx++ : 0, data_reg);
+		pete_writel("drivers/spi/spi-jcore.c:124", xmit, ctrl_reg);
 
 		if (jcore_spi_wait(ctrl_reg))
 			break;
 
 		if (rx)
-			*rx++ = readl(data_reg);
+			*rx++ = pete_readl("drivers/spi/spi-jcore.c:130", data_reg);
 	}
 
 	spi_finalize_current_transfer(master);

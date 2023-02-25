@@ -47,7 +47,7 @@ static int ti_j721e_ufs_probe(struct platform_device *pdev)
 
 	/*  Take UFS slave device out of reset */
 	reg |= TI_UFS_SS_RST_N_PCS;
-	writel(reg, regbase + TI_UFS_SS_CTRL);
+	pete_writel("drivers/scsi/ufs/ti-j721e-ufs.c:50", reg, regbase + TI_UFS_SS_CTRL);
 
 	ret = of_platform_populate(pdev->dev.of_node, NULL, NULL,
 				   dev);

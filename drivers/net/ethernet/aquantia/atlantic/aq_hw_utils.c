@@ -39,10 +39,10 @@ u32 aq_hw_read_reg_bit(struct aq_hw_s *aq_hw, u32 addr, u32 msk, u32 shift)
 
 u32 aq_hw_read_reg(struct aq_hw_s *hw, u32 reg)
 {
-	u32 value = readl(hw->mmio + reg);
+	u32 value = pete_readl("drivers/net/ethernet/aquantia/atlantic/aq_hw_utils.c:42", hw->mmio + reg);
 
 	if (value == U32_MAX &&
-	    readl(hw->mmio + hw->aq_nic_cfg->aq_hw_caps->hw_alive_check_addr) == U32_MAX)
+	    pete_readl("drivers/net/ethernet/aquantia/atlantic/aq_hw_utils.c:45", hw->mmio + hw->aq_nic_cfg->aq_hw_caps->hw_alive_check_addr) == U32_MAX)
 		aq_utils_obj_set(&hw->flags, AQ_HW_FLAG_ERR_UNPLUG);
 
 	return value;
@@ -50,7 +50,7 @@ u32 aq_hw_read_reg(struct aq_hw_s *hw, u32 reg)
 
 void aq_hw_write_reg(struct aq_hw_s *hw, u32 reg, u32 value)
 {
-	writel(value, hw->mmio + reg);
+	pete_writel("drivers/net/ethernet/aquantia/atlantic/aq_hw_utils.c:53", value, hw->mmio + reg);
 }
 
 /* Most of 64-bit registers are in LSW, MSW form.
@@ -67,7 +67,7 @@ u64 aq_hw_read_reg64(struct aq_hw_s *hw, u32 reg)
 		value = lo_hi_readq(hw->mmio + reg);
 
 	if (value == U64_MAX &&
-	    readl(hw->mmio + hw->aq_nic_cfg->aq_hw_caps->hw_alive_check_addr) == U32_MAX)
+	    pete_readl("drivers/net/ethernet/aquantia/atlantic/aq_hw_utils.c:70", hw->mmio + hw->aq_nic_cfg->aq_hw_caps->hw_alive_check_addr) == U32_MAX)
 		aq_utils_obj_set(&hw->flags, AQ_HW_FLAG_ERR_UNPLUG);
 
 	return value;

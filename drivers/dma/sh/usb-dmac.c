@@ -150,22 +150,22 @@ struct usb_dmac {
 
 static void usb_dmac_write(struct usb_dmac *dmac, u32 reg, u32 data)
 {
-	writel(data, dmac->iomem + reg);
+	pete_writel("drivers/dma/sh/usb-dmac.c:153", data, dmac->iomem + reg);
 }
 
 static u32 usb_dmac_read(struct usb_dmac *dmac, u32 reg)
 {
-	return readl(dmac->iomem + reg);
+	return pete_readl("drivers/dma/sh/usb-dmac.c:158", dmac->iomem + reg);
 }
 
 static u32 usb_dmac_chan_read(struct usb_dmac_chan *chan, u32 reg)
 {
-	return readl(chan->iomem + reg);
+	return pete_readl("drivers/dma/sh/usb-dmac.c:163", chan->iomem + reg);
 }
 
 static void usb_dmac_chan_write(struct usb_dmac_chan *chan, u32 reg, u32 data)
 {
-	writel(data, chan->iomem + reg);
+	pete_writel("drivers/dma/sh/usb-dmac.c:168", data, chan->iomem + reg);
 }
 
 /* -----------------------------------------------------------------------------

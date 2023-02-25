@@ -464,7 +464,7 @@ static u32 tegra_pmc_readl(struct tegra_pmc *pmc, unsigned long offset)
 		return res.a1;
 	}
 
-	return readl(pmc->base + offset);
+	return pete_readl("drivers/soc/tegra/pmc.c:467", pmc->base + offset);
 }
 
 static void tegra_pmc_writel(struct tegra_pmc *pmc, u32 value,
@@ -484,7 +484,7 @@ static void tegra_pmc_writel(struct tegra_pmc *pmc, u32 value,
 					res.a0);
 		}
 	} else {
-		writel(value, pmc->base + offset);
+		pete_writel("drivers/soc/tegra/pmc.c:487", value, pmc->base + offset);
 	}
 }
 
@@ -493,7 +493,7 @@ static u32 tegra_pmc_scratch_readl(struct tegra_pmc *pmc, unsigned long offset)
 	if (pmc->tz_only)
 		return tegra_pmc_readl(pmc, offset);
 
-	return readl(pmc->scratch + offset);
+	return pete_readl("drivers/soc/tegra/pmc.c:496", pmc->scratch + offset);
 }
 
 static void tegra_pmc_scratch_writel(struct tegra_pmc *pmc, u32 value,
@@ -502,7 +502,7 @@ static void tegra_pmc_scratch_writel(struct tegra_pmc *pmc, u32 value,
 	if (pmc->tz_only)
 		tegra_pmc_writel(pmc, value, offset);
 	else
-		writel(value, pmc->scratch + offset);
+		pete_writel("drivers/soc/tegra/pmc.c:505", value, pmc->scratch + offset);
 }
 
 /*
@@ -2337,20 +2337,20 @@ static int tegra186_pmc_irq_set_wake(struct irq_data *data, unsigned int on)
 	bit = data->hwirq % 32;
 
 	/* clear wake status */
-	writel(0x1, pmc->wake + WAKE_AOWAKE_STATUS_W(data->hwirq));
+	pete_writel("drivers/soc/tegra/pmc.c:2340", 0x1, pmc->wake + WAKE_AOWAKE_STATUS_W(data->hwirq));
 
 	/* route wake to tier 2 */
-	value = readl(pmc->wake + WAKE_AOWAKE_TIER2_ROUTING(offset));
+	value = pete_readl("drivers/soc/tegra/pmc.c:2343", pmc->wake + WAKE_AOWAKE_TIER2_ROUTING(offset));
 
 	if (!on)
 		value &= ~(1 << bit);
 	else
 		value |= 1 << bit;
 
-	writel(value, pmc->wake + WAKE_AOWAKE_TIER2_ROUTING(offset));
+	pete_writel("drivers/soc/tegra/pmc.c:2350", value, pmc->wake + WAKE_AOWAKE_TIER2_ROUTING(offset));
 
 	/* enable wakeup event */
-	writel(!!on, pmc->wake + WAKE_AOWAKE_MASK_W(data->hwirq));
+	pete_writel("drivers/soc/tegra/pmc.c:2353", !!on, pmc->wake + WAKE_AOWAKE_MASK_W(data->hwirq));
 
 	return 0;
 }
@@ -2360,7 +2360,7 @@ static int tegra186_pmc_irq_set_type(struct irq_data *data, unsigned int type)
 	struct tegra_pmc *pmc = irq_data_get_irq_chip_data(data);
 	u32 value;
 
-	value = readl(pmc->wake + WAKE_AOWAKE_CNTRL(data->hwirq));
+	value = pete_readl("drivers/soc/tegra/pmc.c:2363", pmc->wake + WAKE_AOWAKE_CNTRL(data->hwirq));
 
 	switch (type) {
 	case IRQ_TYPE_EDGE_RISING:
@@ -2381,7 +2381,7 @@ static int tegra186_pmc_irq_set_type(struct irq_data *data, unsigned int type)
 		return -EINVAL;
 	}
 
-	writel(value, pmc->wake + WAKE_AOWAKE_CNTRL(data->hwirq));
+	pete_writel("drivers/soc/tegra/pmc.c:2384", value, pmc->wake + WAKE_AOWAKE_CNTRL(data->hwirq));
 
 	return 0;
 }
@@ -3514,14 +3514,14 @@ static void tegra186_pmc_setup_irq_polarity(struct tegra_pmc *pmc,
 		return;
 	}
 
-	value = readl(wake + WAKE_AOWAKE_CTRL);
+	value = pete_readl("drivers/soc/tegra/pmc.c:3517", wake + WAKE_AOWAKE_CTRL);
 
 	if (invert)
 		value |= WAKE_AOWAKE_CTRL_INTR_POLARITY;
 	else
 		value &= ~WAKE_AOWAKE_CTRL_INTR_POLARITY;
 
-	writel(value, wake + WAKE_AOWAKE_CTRL);
+	pete_writel("drivers/soc/tegra/pmc.c:3524", value, wake + WAKE_AOWAKE_CTRL);
 
 	iounmap(wake);
 }
@@ -3840,15 +3840,15 @@ static bool __init tegra_pmc_detect_tz_only(struct tegra_pmc *pmc)
 {
 	u32 value, saved;
 
-	saved = readl(pmc->base + pmc->soc->regs->scratch0);
+	saved = pete_readl("drivers/soc/tegra/pmc.c:3843", pmc->base + pmc->soc->regs->scratch0);
 	value = saved ^ 0xffffffff;
 
 	if (value == 0xffffffff)
 		value = 0xdeadbeef;
 
 	/* write pattern and read it back */
-	writel(value, pmc->base + pmc->soc->regs->scratch0);
-	value = readl(pmc->base + pmc->soc->regs->scratch0);
+	pete_writel("drivers/soc/tegra/pmc.c:3850", value, pmc->base + pmc->soc->regs->scratch0);
+	value = pete_readl("drivers/soc/tegra/pmc.c:3851", pmc->base + pmc->soc->regs->scratch0);
 
 	/* if we read all-zeroes, access is restricted to TZ only */
 	if (value == 0) {
@@ -3857,7 +3857,7 @@ static bool __init tegra_pmc_detect_tz_only(struct tegra_pmc *pmc)
 	}
 
 	/* restore original value */
-	writel(saved, pmc->base + pmc->soc->regs->scratch0);
+	pete_writel("drivers/soc/tegra/pmc.c:3860", saved, pmc->base + pmc->soc->regs->scratch0);
 
 	return false;
 }

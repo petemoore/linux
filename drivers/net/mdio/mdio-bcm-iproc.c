@@ -44,7 +44,7 @@ static inline int iproc_mdio_wait_for_idle(void __iomem *base)
 	unsigned int timeout = 1000; /* loop for 1s */
 
 	do {
-		val = readl(base + MII_CTRL_OFFSET);
+		val = pete_readl("drivers/net/mdio/mdio-bcm-iproc.c:47", base + MII_CTRL_OFFSET);
 		if ((val & BIT(MII_CTRL_BUSY_SHIFT)) == 0)
 			return 0;
 
@@ -60,7 +60,7 @@ static inline void iproc_mdio_config_clk(void __iomem *base)
 
 	val = (IPROC_GPHY_MDCDIV << MII_CTRL_DIV_SHIFT) |
 		  BIT(MII_CTRL_PRE_SHIFT);
-	writel(val, base + MII_CTRL_OFFSET);
+	pete_writel("drivers/net/mdio/mdio-bcm-iproc.c:63", val, base + MII_CTRL_OFFSET);
 }
 
 static int iproc_mdio_read(struct mii_bus *bus, int phy_id, int reg)
@@ -80,13 +80,13 @@ static int iproc_mdio_read(struct mii_bus *bus, int phy_id, int reg)
 		BIT(MII_DATA_SB_SHIFT) |
 		(MII_DATA_OP_READ << MII_DATA_OP_SHIFT);
 
-	writel(cmd, priv->base + MII_DATA_OFFSET);
+	pete_writel("drivers/net/mdio/mdio-bcm-iproc.c:83", cmd, priv->base + MII_DATA_OFFSET);
 
 	rc = iproc_mdio_wait_for_idle(priv->base);
 	if (rc)
 		return rc;
 
-	cmd = readl(priv->base + MII_DATA_OFFSET) & MII_DATA_MASK;
+	cmd = pete_readl("drivers/net/mdio/mdio-bcm-iproc.c:89", priv->base + MII_DATA_OFFSET) & MII_DATA_MASK;
 
 	return cmd;
 }
@@ -110,7 +110,7 @@ static int iproc_mdio_write(struct mii_bus *bus, int phy_id,
 		(MII_DATA_OP_WRITE << MII_DATA_OP_SHIFT) |
 		((u32)(val) & MII_DATA_MASK);
 
-	writel(cmd, priv->base + MII_DATA_OFFSET);
+	pete_writel("drivers/net/mdio/mdio-bcm-iproc.c:113", cmd, priv->base + MII_DATA_OFFSET);
 
 	rc = iproc_mdio_wait_for_idle(priv->base);
 	if (rc)

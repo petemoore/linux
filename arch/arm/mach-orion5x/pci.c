@@ -266,7 +266,7 @@ static int orion5x_pci_cardbus_mode;
 
 static int orion5x_pci_local_bus_nr(void)
 {
-	u32 conf = readl(PCI_P2P_CONF);
+	u32 conf = pete_readl("arch/arm/mach-orion5x/pci.c:269", PCI_P2P_CONF);
 	return((conf & PCI_P2P_BUS_MASK) >> PCI_P2P_BUS_OFFS);
 }
 
@@ -276,11 +276,11 @@ static int orion5x_pci_hw_rd_conf(int bus, int dev, u32 func,
 	unsigned long flags;
 	spin_lock_irqsave(&orion5x_pci_lock, flags);
 
-	writel(PCI_CONF_BUS(bus) |
+	pete_writel("arch/arm/mach-orion5x/pci.c:279", PCI_CONF_BUS(bus) |
 		PCI_CONF_DEV(dev) | PCI_CONF_REG(where) |
 		PCI_CONF_FUNC(func) | PCI_CONF_ADDR_EN, PCI_CONF_ADDR);
 
-	*val = readl(PCI_CONF_DATA);
+	*val = pete_readl("arch/arm/mach-orion5x/pci.c:283", PCI_CONF_DATA);
 
 	if (size == 1)
 		*val = (*val >> (8*(where & 0x3))) & 0xff;
@@ -300,7 +300,7 @@ static int orion5x_pci_hw_wr_conf(int bus, int dev, u32 func,
 
 	spin_lock_irqsave(&orion5x_pci_lock, flags);
 
-	writel(PCI_CONF_BUS(bus) |
+	pete_writel("arch/arm/mach-orion5x/pci.c:303", PCI_CONF_BUS(bus) |
 		PCI_CONF_DEV(dev) | PCI_CONF_REG(where) |
 		PCI_CONF_FUNC(func) | PCI_CONF_ADDR_EN, PCI_CONF_ADDR);
 
@@ -368,9 +368,9 @@ static struct pci_ops pci_ops = {
 
 static void __init orion5x_pci_set_bus_nr(int nr)
 {
-	u32 p2p = readl(PCI_P2P_CONF);
+	u32 p2p = pete_readl("arch/arm/mach-orion5x/pci.c:371", PCI_P2P_CONF);
 
-	if (readl(PCI_MODE) & PCI_MODE_PCIX) {
+	if (pete_readl("arch/arm/mach-orion5x/pci.c:373", PCI_MODE) & PCI_MODE_PCIX) {
 		/*
 		 * PCI-X mode
 		 */
@@ -387,7 +387,7 @@ static void __init orion5x_pci_set_bus_nr(int nr)
 		 */
 		p2p &= ~PCI_P2P_BUS_MASK;
 		p2p |= (nr << PCI_P2P_BUS_OFFS);
-		writel(p2p, PCI_P2P_CONF);
+		pete_writel("arch/arm/mach-orion5x/pci.c:390", p2p, PCI_P2P_CONF);
 	}
 }
 
@@ -415,7 +415,7 @@ static void __init orion5x_setup_pci_wins(void)
 	 * First, disable windows.
 	 */
 	win_enable = 0xffffffff;
-	writel(win_enable, PCI_BAR_ENABLE);
+	pete_writel("arch/arm/mach-orion5x/pci.c:418", win_enable, PCI_BAR_ENABLE);
 
 	/*
 	 * Setup windows for DDR banks.
@@ -441,9 +441,9 @@ static void __init orion5x_setup_pci_wins(void)
 		 */
 		reg = PCI_CONF_REG_BAR_HI_CS(cs->cs_index);
 		orion5x_pci_hw_wr_conf(bus, 0, func, reg, 4, 0);
-		writel((cs->size - 1) & 0xfffff000,
+		pete_writel("arch/arm/mach-orion5x/pci.c:444", (cs->size - 1) & 0xfffff000,
 			PCI_BAR_SIZE_DDR_CS(cs->cs_index));
-		writel(cs->base & 0xfffff000,
+		pete_writel("arch/arm/mach-orion5x/pci.c:446", cs->base & 0xfffff000,
 			PCI_BAR_REMAP_DDR_CS(cs->cs_index));
 
 		/*
@@ -455,7 +455,7 @@ static void __init orion5x_setup_pci_wins(void)
 	/*
 	 * Re-enable decode windows.
 	 */
-	writel(win_enable, PCI_BAR_ENABLE);
+	pete_writel("arch/arm/mach-orion5x/pci.c:458", win_enable, PCI_BAR_ENABLE);
 
 	/*
 	 * Disable automatic update of address remapping when writing to BARs.

@@ -252,7 +252,7 @@ static unsigned __maybe_unused pcs_readw(void __iomem *reg)
 
 static unsigned __maybe_unused pcs_readl(void __iomem *reg)
 {
-	return readl(reg);
+	return pete_readl("drivers/pinctrl/pinctrl-single.c:255", reg);
 }
 
 static void __maybe_unused pcs_writeb(unsigned val, void __iomem *reg)
@@ -267,7 +267,7 @@ static void __maybe_unused pcs_writew(unsigned val, void __iomem *reg)
 
 static void __maybe_unused pcs_writel(unsigned val, void __iomem *reg)
 {
-	writel(val, reg);
+	pete_writel("drivers/pinctrl/pinctrl-single.c:270", val, reg);
 }
 
 static unsigned int pcs_pin_reg_offset_get(struct pcs_device *pcs,

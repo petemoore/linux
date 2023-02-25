@@ -107,11 +107,11 @@ static void decon_clear_channels(struct exynos_drm_crtc *crtc)
 
 	/* Check if any channel is enabled. */
 	for (win = 0; win < WINDOWS_NR; win++) {
-		u32 val = readl(ctx->regs + WINCON(win));
+		u32 val = pete_readl("drivers/gpu/drm/exynos/exynos7_drm_decon.c:110", ctx->regs + WINCON(win));
 
 		if (val & WINCONx_ENWIN) {
 			val &= ~WINCONx_ENWIN;
-			writel(val, ctx->regs + WINCON(win));
+			pete_writel("drivers/gpu/drm/exynos/exynos7_drm_decon.c:114", val, ctx->regs + WINCON(win));
 			ch_enabled = 1;
 		}
 	}
@@ -170,10 +170,10 @@ static void decon_commit(struct exynos_drm_crtc *crtc)
 		vfpd = mode->crtc_vsync_start - mode->crtc_vdisplay;
 
 		val = VIDTCON0_VBPD(vbpd - 1) | VIDTCON0_VFPD(vfpd - 1);
-		writel(val, ctx->regs + VIDTCON0);
+		pete_writel("drivers/gpu/drm/exynos/exynos7_drm_decon.c:173", val, ctx->regs + VIDTCON0);
 
 		val = VIDTCON1_VSPW(vsync_len - 1);
-		writel(val, ctx->regs + VIDTCON1);
+		pete_writel("drivers/gpu/drm/exynos/exynos7_drm_decon.c:176", val, ctx->regs + VIDTCON1);
 
 		/* setup horizontal timing values.  */
 		hsync_len = mode->crtc_hsync_end - mode->crtc_hsync_start;
@@ -182,36 +182,36 @@ static void decon_commit(struct exynos_drm_crtc *crtc)
 
 		/* setup horizontal timing values.  */
 		val = VIDTCON2_HBPD(hbpd - 1) | VIDTCON2_HFPD(hfpd - 1);
-		writel(val, ctx->regs + VIDTCON2);
+		pete_writel("drivers/gpu/drm/exynos/exynos7_drm_decon.c:185", val, ctx->regs + VIDTCON2);
 
 		val = VIDTCON3_HSPW(hsync_len - 1);
-		writel(val, ctx->regs + VIDTCON3);
+		pete_writel("drivers/gpu/drm/exynos/exynos7_drm_decon.c:188", val, ctx->regs + VIDTCON3);
 	}
 
 	/* setup horizontal and vertical display size. */
 	val = VIDTCON4_LINEVAL(mode->vdisplay - 1) |
 	       VIDTCON4_HOZVAL(mode->hdisplay - 1);
-	writel(val, ctx->regs + VIDTCON4);
+	pete_writel("drivers/gpu/drm/exynos/exynos7_drm_decon.c:194", val, ctx->regs + VIDTCON4);
 
-	writel(mode->vdisplay - 1, ctx->regs + LINECNT_OP_THRESHOLD);
+	pete_writel("drivers/gpu/drm/exynos/exynos7_drm_decon.c:196", mode->vdisplay - 1, ctx->regs + LINECNT_OP_THRESHOLD);
 
 	/*
 	 * fields of register with prefix '_F' would be updated
 	 * at vsync(same as dma start)
 	 */
 	val = VIDCON0_ENVID | VIDCON0_ENVID_F;
-	writel(val, ctx->regs + VIDCON0);
+	pete_writel("drivers/gpu/drm/exynos/exynos7_drm_decon.c:203", val, ctx->regs + VIDCON0);
 
 	clkdiv = decon_calc_clkdiv(ctx, mode);
 	if (clkdiv > 1) {
 		val = VCLKCON1_CLKVAL_NUM_VCLK(clkdiv - 1);
-		writel(val, ctx->regs + VCLKCON1);
-		writel(val, ctx->regs + VCLKCON2);
+		pete_writel("drivers/gpu/drm/exynos/exynos7_drm_decon.c:208", val, ctx->regs + VCLKCON1);
+		pete_writel("drivers/gpu/drm/exynos/exynos7_drm_decon.c:209", val, ctx->regs + VCLKCON2);
 	}
 
-	val = readl(ctx->regs + DECON_UPDATE);
+	val = pete_readl("drivers/gpu/drm/exynos/exynos7_drm_decon.c:212", ctx->regs + DECON_UPDATE);
 	val |= DECON_UPDATE_STANDALONE_F;
-	writel(val, ctx->regs + DECON_UPDATE);
+	pete_writel("drivers/gpu/drm/exynos/exynos7_drm_decon.c:214", val, ctx->regs + DECON_UPDATE);
 }
 
 static int decon_enable_vblank(struct exynos_drm_crtc *crtc)
@@ -223,7 +223,7 @@ static int decon_enable_vblank(struct exynos_drm_crtc *crtc)
 		return -EPERM;
 
 	if (!test_and_set_bit(0, &ctx->irq_flags)) {
-		val = readl(ctx->regs + VIDINTCON0);
+		val = pete_readl("drivers/gpu/drm/exynos/exynos7_drm_decon.c:226", ctx->regs + VIDINTCON0);
 
 		val |= VIDINTCON0_INT_ENABLE;
 
@@ -233,7 +233,7 @@ static int decon_enable_vblank(struct exynos_drm_crtc *crtc)
 			val |= VIDINTCON0_FRAMESEL0_VSYNC;
 		}
 
-		writel(val, ctx->regs + VIDINTCON0);
+		pete_writel("drivers/gpu/drm/exynos/exynos7_drm_decon.c:236", val, ctx->regs + VIDINTCON0);
 	}
 
 	return 0;
@@ -248,13 +248,13 @@ static void decon_disable_vblank(struct exynos_drm_crtc *crtc)
 		return;
 
 	if (test_and_clear_bit(0, &ctx->irq_flags)) {
-		val = readl(ctx->regs + VIDINTCON0);
+		val = pete_readl("drivers/gpu/drm/exynos/exynos7_drm_decon.c:251", ctx->regs + VIDINTCON0);
 
 		val &= ~VIDINTCON0_INT_ENABLE;
 		if (!ctx->i80_if)
 			val &= ~VIDINTCON0_INT_FRAME;
 
-		writel(val, ctx->regs + VIDINTCON0);
+		pete_writel("drivers/gpu/drm/exynos/exynos7_drm_decon.c:257", val, ctx->regs + VIDINTCON0);
 	}
 }
 
@@ -264,7 +264,7 @@ static void decon_win_set_pixfmt(struct decon_context *ctx, unsigned int win,
 	unsigned long val;
 	int padding;
 
-	val = readl(ctx->regs + WINCON(win));
+	val = pete_readl("drivers/gpu/drm/exynos/exynos7_drm_decon.c:267", ctx->regs + WINCON(win));
 	val &= ~WINCONx_BPPMODE_MASK;
 
 	switch (fb->format->format) {
@@ -327,7 +327,7 @@ static void decon_win_set_pixfmt(struct decon_context *ctx, unsigned int win,
 		val |= WINCONx_BURSTLEN_8WORD;
 	}
 
-	writel(val, ctx->regs + WINCON(win));
+	pete_writel("drivers/gpu/drm/exynos/exynos7_drm_decon.c:330", val, ctx->regs + WINCON(win));
 }
 
 static void decon_win_set_colkey(struct decon_context *ctx, unsigned int win)
@@ -339,8 +339,8 @@ static void decon_win_set_colkey(struct decon_context *ctx, unsigned int win)
 
 	keycon1 = WxKEYCON1_COLVAL(0xffffffff);
 
-	writel(keycon0, ctx->regs + WKEYCON0_BASE(win));
-	writel(keycon1, ctx->regs + WKEYCON1_BASE(win));
+	pete_writel("drivers/gpu/drm/exynos/exynos7_drm_decon.c:342", keycon0, ctx->regs + WKEYCON0_BASE(win));
+	pete_writel("drivers/gpu/drm/exynos/exynos7_drm_decon.c:343", keycon1, ctx->regs + WKEYCON1_BASE(win));
 }
 
 /**
@@ -357,12 +357,12 @@ static void decon_shadow_protect_win(struct decon_context *ctx,
 
 	bits = SHADOWCON_WINx_PROTECT(win);
 
-	val = readl(ctx->regs + SHADOWCON);
+	val = pete_readl("drivers/gpu/drm/exynos/exynos7_drm_decon.c:360", ctx->regs + SHADOWCON);
 	if (protect)
 		val |= bits;
 	else
 		val &= ~bits;
-	writel(val, ctx->regs + SHADOWCON);
+	pete_writel("drivers/gpu/drm/exynos/exynos7_drm_decon.c:365", val, ctx->regs + SHADOWCON);
 }
 
 static void decon_atomic_begin(struct exynos_drm_crtc *crtc)
@@ -407,17 +407,17 @@ static void decon_update_plane(struct exynos_drm_crtc *crtc,
 
 	/* buffer start address */
 	val = (unsigned long)exynos_drm_fb_dma_addr(fb, 0);
-	writel(val, ctx->regs + VIDW_BUF_START(win));
+	pete_writel("drivers/gpu/drm/exynos/exynos7_drm_decon.c:410", val, ctx->regs + VIDW_BUF_START(win));
 
 	padding = (pitch / cpp) - fb->width;
 
 	/* buffer size */
-	writel(fb->width + padding, ctx->regs + VIDW_WHOLE_X(win));
-	writel(fb->height, ctx->regs + VIDW_WHOLE_Y(win));
+	pete_writel("drivers/gpu/drm/exynos/exynos7_drm_decon.c:415", fb->width + padding, ctx->regs + VIDW_WHOLE_X(win));
+	pete_writel("drivers/gpu/drm/exynos/exynos7_drm_decon.c:416", fb->height, ctx->regs + VIDW_WHOLE_Y(win));
 
 	/* offset from the start of the buffer to read */
-	writel(state->src.x, ctx->regs + VIDW_OFFSET_X(win));
-	writel(state->src.y, ctx->regs + VIDW_OFFSET_Y(win));
+	pete_writel("drivers/gpu/drm/exynos/exynos7_drm_decon.c:419", state->src.x, ctx->regs + VIDW_OFFSET_X(win));
+	pete_writel("drivers/gpu/drm/exynos/exynos7_drm_decon.c:420", state->src.y, ctx->regs + VIDW_OFFSET_Y(win));
 
 	DRM_DEV_DEBUG_KMS(ctx->dev, "start addr = 0x%lx\n",
 			(unsigned long)val);
@@ -426,7 +426,7 @@ static void decon_update_plane(struct exynos_drm_crtc *crtc,
 
 	val = VIDOSDxA_TOPLEFT_X(state->crtc.x) |
 		VIDOSDxA_TOPLEFT_Y(state->crtc.y);
-	writel(val, ctx->regs + VIDOSD_A(win));
+	pete_writel("drivers/gpu/drm/exynos/exynos7_drm_decon.c:429", val, ctx->regs + VIDOSD_A(win));
 
 	last_x = state->crtc.x + state->crtc.w;
 	if (last_x)
@@ -437,7 +437,7 @@ static void decon_update_plane(struct exynos_drm_crtc *crtc,
 
 	val = VIDOSDxB_BOTRIGHT_X(last_x) | VIDOSDxB_BOTRIGHT_Y(last_y);
 
-	writel(val, ctx->regs + VIDOSD_B(win));
+	pete_writel("drivers/gpu/drm/exynos/exynos7_drm_decon.c:440", val, ctx->regs + VIDOSD_B(win));
 
 	DRM_DEV_DEBUG_KMS(ctx->dev, "osd pos: tx = %d, ty = %d, bx = %d, by = %d\n",
 			state->crtc.x, state->crtc.y, last_x, last_y);
@@ -447,13 +447,13 @@ static void decon_update_plane(struct exynos_drm_crtc *crtc,
 			VIDOSDxC_ALPHA0_G_F(0x0) |
 			VIDOSDxC_ALPHA0_B_F(0x0);
 
-	writel(alpha, ctx->regs + VIDOSD_C(win));
+	pete_writel("drivers/gpu/drm/exynos/exynos7_drm_decon.c:450", alpha, ctx->regs + VIDOSD_C(win));
 
 	alpha = VIDOSDxD_ALPHA1_R_F(0xff) |
 			VIDOSDxD_ALPHA1_G_F(0xff) |
 			VIDOSDxD_ALPHA1_B_F(0xff);
 
-	writel(alpha, ctx->regs + VIDOSD_D(win));
+	pete_writel("drivers/gpu/drm/exynos/exynos7_drm_decon.c:456", alpha, ctx->regs + VIDOSD_D(win));
 
 	decon_win_set_pixfmt(ctx, win, fb);
 
@@ -462,17 +462,17 @@ static void decon_update_plane(struct exynos_drm_crtc *crtc,
 		decon_win_set_colkey(ctx, win);
 
 	/* wincon */
-	val = readl(ctx->regs + WINCON(win));
+	val = pete_readl("drivers/gpu/drm/exynos/exynos7_drm_decon.c:465", ctx->regs + WINCON(win));
 	val |= WINCONx_TRIPLE_BUF_MODE;
 	val |= WINCONx_ENWIN;
-	writel(val, ctx->regs + WINCON(win));
+	pete_writel("drivers/gpu/drm/exynos/exynos7_drm_decon.c:468", val, ctx->regs + WINCON(win));
 
 	/* Enable DMA channel and unprotect windows */
 	decon_shadow_protect_win(ctx, win, false);
 
-	val = readl(ctx->regs + DECON_UPDATE);
+	val = pete_readl("drivers/gpu/drm/exynos/exynos7_drm_decon.c:473", ctx->regs + DECON_UPDATE);
 	val |= DECON_UPDATE_STANDALONE_F;
-	writel(val, ctx->regs + DECON_UPDATE);
+	pete_writel("drivers/gpu/drm/exynos/exynos7_drm_decon.c:475", val, ctx->regs + DECON_UPDATE);
 }
 
 static void decon_disable_plane(struct exynos_drm_crtc *crtc,
@@ -489,13 +489,13 @@ static void decon_disable_plane(struct exynos_drm_crtc *crtc,
 	decon_shadow_protect_win(ctx, win, true);
 
 	/* wincon */
-	val = readl(ctx->regs + WINCON(win));
+	val = pete_readl("drivers/gpu/drm/exynos/exynos7_drm_decon.c:492", ctx->regs + WINCON(win));
 	val &= ~WINCONx_ENWIN;
-	writel(val, ctx->regs + WINCON(win));
+	pete_writel("drivers/gpu/drm/exynos/exynos7_drm_decon.c:494", val, ctx->regs + WINCON(win));
 
-	val = readl(ctx->regs + DECON_UPDATE);
+	val = pete_readl("drivers/gpu/drm/exynos/exynos7_drm_decon.c:496", ctx->regs + DECON_UPDATE);
 	val |= DECON_UPDATE_STANDALONE_F;
-	writel(val, ctx->regs + DECON_UPDATE);
+	pete_writel("drivers/gpu/drm/exynos/exynos7_drm_decon.c:498", val, ctx->regs + DECON_UPDATE);
 }
 
 static void decon_atomic_flush(struct exynos_drm_crtc *crtc)
@@ -515,17 +515,17 @@ static void decon_init(struct decon_context *ctx)
 {
 	u32 val;
 
-	writel(VIDCON0_SWRESET, ctx->regs + VIDCON0);
+	pete_writel("drivers/gpu/drm/exynos/exynos7_drm_decon.c:518", VIDCON0_SWRESET, ctx->regs + VIDCON0);
 
 	val = VIDOUTCON0_DISP_IF_0_ON;
 	if (!ctx->i80_if)
 		val |= VIDOUTCON0_RGBIF;
-	writel(val, ctx->regs + VIDOUTCON0);
+	pete_writel("drivers/gpu/drm/exynos/exynos7_drm_decon.c:523", val, ctx->regs + VIDOUTCON0);
 
-	writel(VCLKCON0_CLKVALUP | VCLKCON0_VCLKFREE, ctx->regs + VCLKCON0);
+	pete_writel("drivers/gpu/drm/exynos/exynos7_drm_decon.c:525", VCLKCON0_CLKVALUP | VCLKCON0_VCLKFREE, ctx->regs + VCLKCON0);
 
 	if (!ctx->i80_if)
-		writel(VIDCON1_VCLK_HOLD, ctx->regs + VIDCON1(0));
+		pete_writel("drivers/gpu/drm/exynos/exynos7_drm_decon.c:528", VIDCON1_VCLK_HOLD, ctx->regs + VIDCON1(0));
 }
 
 static void decon_atomic_enable(struct exynos_drm_crtc *crtc)
@@ -591,11 +591,11 @@ static irqreturn_t decon_irq_handler(int irq, void *dev_id)
 	struct decon_context *ctx = (struct decon_context *)dev_id;
 	u32 val, clear_bit;
 
-	val = readl(ctx->regs + VIDINTCON1);
+	val = pete_readl("drivers/gpu/drm/exynos/exynos7_drm_decon.c:594", ctx->regs + VIDINTCON1);
 
 	clear_bit = ctx->i80_if ? VIDINTCON1_INT_I80 : VIDINTCON1_INT_FRAME;
 	if (val & clear_bit)
-		writel(clear_bit, ctx->regs + VIDINTCON1);
+		pete_writel("drivers/gpu/drm/exynos/exynos7_drm_decon.c:598", clear_bit, ctx->regs + VIDINTCON1);
 
 	/* check the crtc is detached already from encoder */
 	if (!ctx->drm_dev)

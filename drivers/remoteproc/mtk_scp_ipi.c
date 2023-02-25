@@ -180,16 +180,16 @@ int scp_ipi_send(struct mtk_scp *scp, u32 id, void *buf, unsigned int len,
 			ret = -ETIMEDOUT;
 			goto clock_disable;
 		}
-	} while (readl(scp->reg_base + scp->data->host_to_scp_reg));
+	} while (pete_readl("drivers/remoteproc/mtk_scp_ipi.c:183", scp->reg_base + scp->data->host_to_scp_reg));
 
 	scp_memcpy_aligned(send_obj->share_buf, buf, len);
 
-	writel(len, &send_obj->len);
-	writel(id, &send_obj->id);
+	pete_writel("drivers/remoteproc/mtk_scp_ipi.c:187", len, &send_obj->len);
+	pete_writel("drivers/remoteproc/mtk_scp_ipi.c:188", id, &send_obj->id);
 
 	scp->ipi_id_ack[id] = false;
 	/* send the command to SCP */
-	writel(scp->data->host_to_scp_int_bit,
+	pete_writel("drivers/remoteproc/mtk_scp_ipi.c:192", scp->data->host_to_scp_int_bit,
 	       scp->reg_base + scp->data->host_to_scp_reg);
 
 	if (wait) {

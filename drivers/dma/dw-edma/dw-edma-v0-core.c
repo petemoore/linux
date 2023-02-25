@@ -29,10 +29,10 @@ static inline struct dw_edma_v0_regs __iomem *__dw_regs(struct dw_edma *dw)
 }
 
 #define SET_32(dw, name, value)				\
-	writel(value, &(__dw_regs(dw)->name))
+	pete_writel("drivers/dma/dw-edma/dw-edma-v0-core.c:32", value, &(__dw_regs(dw)->name))
 
 #define GET_32(dw, name)				\
-	readl(&(__dw_regs(dw)->name))
+	pete_readl("drivers/dma/dw-edma/dw-edma-v0-core.c:35", &(__dw_regs(dw)->name))
 
 #define SET_RW_32(dw, dir, name, value)			\
 	do {						\
@@ -83,7 +83,7 @@ static inline struct dw_edma_v0_regs __iomem *__dw_regs(struct dw_edma *dw)
 #endif /* CONFIG_64BIT */
 
 #define SET_COMPAT(dw, name, value)			\
-	writel(value, &(__dw_regs(dw)->type.unroll.name))
+	pete_writel("drivers/dma/dw-edma/dw-edma-v0-core.c:86", value, &(__dw_regs(dw)->type.unroll.name))
 
 #define SET_RW_COMPAT(dw, dir, name, value)		\
 	do {						\
@@ -118,13 +118,13 @@ static inline void writel_ch(struct dw_edma *dw, enum dw_edma_dir dir, u16 ch,
 		if (dir == EDMA_DIR_READ)
 			viewport_sel |= BIT(31);
 
-		writel(viewport_sel,
+		pete_writel("drivers/dma/dw-edma/dw-edma-v0-core.c:121", viewport_sel,
 		       &(__dw_regs(dw)->type.legacy.viewport_sel));
-		writel(value, addr);
+		pete_writel("drivers/dma/dw-edma/dw-edma-v0-core.c:123", value, addr);
 
 		raw_spin_unlock_irqrestore(&dw->lock, flags);
 	} else {
-		writel(value, addr);
+		pete_writel("drivers/dma/dw-edma/dw-edma-v0-core.c:127", value, addr);
 	}
 }
 
@@ -143,13 +143,13 @@ static inline u32 readl_ch(struct dw_edma *dw, enum dw_edma_dir dir, u16 ch,
 		if (dir == EDMA_DIR_READ)
 			viewport_sel |= BIT(31);
 
-		writel(viewport_sel,
+		pete_writel("drivers/dma/dw-edma/dw-edma-v0-core.c:146", viewport_sel,
 		       &(__dw_regs(dw)->type.legacy.viewport_sel));
-		value = readl(addr);
+		value = pete_readl("drivers/dma/dw-edma/dw-edma-v0-core.c:148", addr);
 
 		raw_spin_unlock_irqrestore(&dw->lock, flags);
 	} else {
-		value = readl(addr);
+		value = pete_readl("drivers/dma/dw-edma/dw-edma-v0-core.c:152", addr);
 	}
 
 	return value;
@@ -162,7 +162,7 @@ static inline u32 readl_ch(struct dw_edma *dw, enum dw_edma_dir dir, u16 ch,
 	readl_ch(dw, dir, ch, &(__dw_ch_regs(dw, dir, ch)->name))
 
 #define SET_LL_32(ll, value) \
-	writel(value, ll)
+	pete_writel("drivers/dma/dw-edma/dw-edma-v0-core.c:165", value, ll)
 
 #ifdef CONFIG_64BIT
 
@@ -179,7 +179,7 @@ static inline void writeq_ch(struct dw_edma *dw, enum dw_edma_dir dir, u16 ch,
 		if (dir == EDMA_DIR_READ)
 			viewport_sel |= BIT(31);
 
-		writel(viewport_sel,
+		pete_writel("drivers/dma/dw-edma/dw-edma-v0-core.c:182", viewport_sel,
 		       &(__dw_regs(dw)->type.legacy.viewport_sel));
 		writeq(value, addr);
 
@@ -204,7 +204,7 @@ static inline u64 readq_ch(struct dw_edma *dw, enum dw_edma_dir dir, u16 ch,
 		if (dir == EDMA_DIR_READ)
 			viewport_sel |= BIT(31);
 
-		writel(viewport_sel,
+		pete_writel("drivers/dma/dw-edma/dw-edma-v0-core.c:207", viewport_sel,
 		       &(__dw_regs(dw)->type.legacy.viewport_sel));
 		value = readq(addr);
 

@@ -167,7 +167,7 @@ static void sca_init_port(port_t *port)
 			u32 buff_off = buffer_offset(port, i, transmit);
 
 			writew(chain_off, &desc->cp);
-			writel(buff_off, &desc->bp);
+			pete_writel("drivers/net/wan/hd64570.c:170", buff_off, &desc->bp);
 			writew(0, &desc->len);
 			writeb(0, &desc->stat);
 		}
@@ -693,14 +693,14 @@ static u32 sca_detect_ram(card_t *card, u8 __iomem *rambase, u32 ramsize)
 		i -= 4;
 		if ((i + 4) % size == 0)
 			openwin(card, i / size);
-		writel(i ^ 0x12345678, rambase + i % size);
+		pete_writel("drivers/net/wan/hd64570.c:696", i ^ 0x12345678, rambase + i % size);
 	} while (i > 0);
 
 	for (i = 0; i < ramsize ; i += 4) {
 		if (i % size == 0)
 			openwin(card, i / size);
 
-		if (readl(rambase + i % size) != (i ^ 0x12345678))
+		if (pete_readl("drivers/net/wan/hd64570.c:703", rambase + i % size) != (i ^ 0x12345678))
 			break;
 	}
 

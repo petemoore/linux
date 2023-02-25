@@ -1423,20 +1423,20 @@ static u8 DEFAULT_MAC_ADDRESS[] = { 0x00, 0x10, 0xA1, 0x88, 0x42, 0x01 };
 
 static inline void hw_ack_intr(struct ksz_hw *hw, uint interrupt)
 {
-	writel(interrupt, hw->io + KS884X_INTERRUPTS_STATUS);
+	pete_writel("drivers/net/ethernet/micrel/ksz884x.c:1426", interrupt, hw->io + KS884X_INTERRUPTS_STATUS);
 }
 
 static inline void hw_dis_intr(struct ksz_hw *hw)
 {
 	hw->intr_blocked = hw->intr_mask;
-	writel(0, hw->io + KS884X_INTERRUPTS_ENABLE);
-	hw->intr_set = readl(hw->io + KS884X_INTERRUPTS_ENABLE);
+	pete_writel("drivers/net/ethernet/micrel/ksz884x.c:1432", 0, hw->io + KS884X_INTERRUPTS_ENABLE);
+	hw->intr_set = pete_readl("drivers/net/ethernet/micrel/ksz884x.c:1433", hw->io + KS884X_INTERRUPTS_ENABLE);
 }
 
 static inline void hw_set_intr(struct ksz_hw *hw, uint interrupt)
 {
 	hw->intr_set = interrupt;
-	writel(interrupt, hw->io + KS884X_INTERRUPTS_ENABLE);
+	pete_writel("drivers/net/ethernet/micrel/ksz884x.c:1439", interrupt, hw->io + KS884X_INTERRUPTS_ENABLE);
 }
 
 static inline void hw_ena_intr(struct ksz_hw *hw)
@@ -1454,9 +1454,9 @@ static inline void hw_turn_off_intr(struct ksz_hw *hw, uint interrupt)
 {
 	u32 read_intr;
 
-	read_intr = readl(hw->io + KS884X_INTERRUPTS_ENABLE);
+	read_intr = pete_readl("drivers/net/ethernet/micrel/ksz884x.c:1457", hw->io + KS884X_INTERRUPTS_ENABLE);
 	hw->intr_set = read_intr & ~interrupt;
-	writel(hw->intr_set, hw->io + KS884X_INTERRUPTS_ENABLE);
+	pete_writel("drivers/net/ethernet/micrel/ksz884x.c:1459", hw->intr_set, hw->io + KS884X_INTERRUPTS_ENABLE);
 	hw_dis_intr_bit(hw, interrupt);
 }
 
@@ -1480,14 +1480,14 @@ static inline void hw_ena_intr_bit(struct ksz_hw *hw, uint interrupt)
 {
 	u32 read_intr;
 
-	read_intr = readl(hw->io + KS884X_INTERRUPTS_ENABLE);
+	read_intr = pete_readl("drivers/net/ethernet/micrel/ksz884x.c:1483", hw->io + KS884X_INTERRUPTS_ENABLE);
 	hw->intr_set = read_intr | interrupt;
-	writel(hw->intr_set, hw->io + KS884X_INTERRUPTS_ENABLE);
+	pete_writel("drivers/net/ethernet/micrel/ksz884x.c:1485", hw->intr_set, hw->io + KS884X_INTERRUPTS_ENABLE);
 }
 
 static inline void hw_read_intr(struct ksz_hw *hw, uint *status)
 {
-	*status = readl(hw->io + KS884X_INTERRUPTS_STATUS);
+	*status = pete_readl("drivers/net/ethernet/micrel/ksz884x.c:1490", hw->io + KS884X_INTERRUPTS_STATUS);
 	*status = *status & hw->intr_set;
 }
 
@@ -1607,7 +1607,7 @@ static void sw_r_table(struct ksz_hw *hw, int table, u16 addr, u32 *data)
 
 	writew(ctrl_addr, hw->io + KS884X_IACR_OFFSET);
 	HW_DELAY(hw, KS884X_IACR_OFFSET);
-	*data = readl(hw->io + KS884X_ACC_DATA_0_OFFSET);
+	*data = pete_readl("drivers/net/ethernet/micrel/ksz884x.c:1610", hw->io + KS884X_ACC_DATA_0_OFFSET);
 
 	hw_restore_intr(hw, interrupt);
 }
@@ -1633,8 +1633,8 @@ static void sw_w_table_64(struct ksz_hw *hw, int table, u16 addr, u32 data_hi,
 
 	interrupt = hw_block_intr(hw);
 
-	writel(data_hi, hw->io + KS884X_ACC_DATA_4_OFFSET);
-	writel(data_lo, hw->io + KS884X_ACC_DATA_0_OFFSET);
+	pete_writel("drivers/net/ethernet/micrel/ksz884x.c:1636", data_hi, hw->io + KS884X_ACC_DATA_4_OFFSET);
+	pete_writel("drivers/net/ethernet/micrel/ksz884x.c:1637", data_lo, hw->io + KS884X_ACC_DATA_0_OFFSET);
 
 	writew(ctrl_addr, hw->io + KS884X_IACR_OFFSET);
 	HW_DELAY(hw, KS884X_IACR_OFFSET);
@@ -1735,7 +1735,7 @@ static void port_r_mib_cnt(struct ksz_hw *hw, int port, u16 addr, u64 *cnt)
 	HW_DELAY(hw, KS884X_IACR_OFFSET);
 
 	for (timeout = 100; timeout > 0; timeout--) {
-		data = readl(hw->io + KS884X_ACC_DATA_0_OFFSET);
+		data = pete_readl("drivers/net/ethernet/micrel/ksz884x.c:1738", hw->io + KS884X_ACC_DATA_0_OFFSET);
 
 		if (data & MIB_COUNTER_VALID) {
 			if (data & MIB_COUNTER_OVERFLOW)
@@ -1775,7 +1775,7 @@ static void port_r_mib_pkt(struct ksz_hw *hw, int port, u32 *last, u64 *cnt)
 			<< 8);
 		writew(ctrl_addr, hw->io + KS884X_IACR_OFFSET);
 		HW_DELAY(hw, KS884X_IACR_OFFSET);
-		data = readl(hw->io + KS884X_ACC_DATA_0_OFFSET);
+		data = pete_readl("drivers/net/ethernet/micrel/ksz884x.c:1778", hw->io + KS884X_ACC_DATA_0_OFFSET);
 
 		hw_restore_intr(hw, interrupt);
 
@@ -2177,7 +2177,7 @@ static void sw_dis_prio_rate(struct ksz_hw *hw, int port)
 
 	PORT_CTRL_ADDR(port, addr);
 	addr += KS8842_PORT_IN_RATE_OFFSET;
-	writel(0, hw->io + addr);
+	pete_writel("drivers/net/ethernet/micrel/ksz884x.c:2180", 0, hw->io + addr);
 }
 
 /**
@@ -3143,9 +3143,9 @@ static void set_flow_ctrl(struct ksz_hw *hw, int rx, int tx)
 		hw->tx_cfg &= ~DMA_TX_FLOW_ENABLE;
 	if (hw->enabled) {
 		if (rx_cfg != hw->rx_cfg)
-			writel(hw->rx_cfg, hw->io + KS_DMA_RX_CTRL);
+			pete_writel("drivers/net/ethernet/micrel/ksz884x.c:3146", hw->rx_cfg, hw->io + KS_DMA_RX_CTRL);
 		if (tx_cfg != hw->tx_cfg)
-			writel(hw->tx_cfg, hw->io + KS_DMA_TX_CTRL);
+			pete_writel("drivers/net/ethernet/micrel/ksz884x.c:3148", hw->tx_cfg, hw->io + KS_DMA_TX_CTRL);
 	}
 }
 
@@ -3190,7 +3190,7 @@ static inline void port_cfg_change(struct ksz_hw *hw, struct ksz_port *port,
 		if (1 == info->duplex)
 			hw->tx_cfg &= ~DMA_TX_FLOW_ENABLE;
 		if (hw->enabled && cfg != hw->tx_cfg)
-			writel(hw->tx_cfg, hw->io + KS_DMA_TX_CTRL);
+			pete_writel("drivers/net/ethernet/micrel/ksz884x.c:3193", hw->tx_cfg, hw->io + KS_DMA_TX_CTRL);
 	}
 }
 
@@ -3495,8 +3495,8 @@ static void hw_set_wol_frame(struct ksz_hw *hw, int i, uint mask_size,
 		frame_size = 64;
 
 	i *= 0x10;
-	writel(0, hw->io + KS8841_WOL_FRAME_BYTE0_OFFSET + i);
-	writel(0, hw->io + KS8841_WOL_FRAME_BYTE2_OFFSET + i);
+	pete_writel("drivers/net/ethernet/micrel/ksz884x.c:3498", 0, hw->io + KS8841_WOL_FRAME_BYTE0_OFFSET + i);
+	pete_writel("drivers/net/ethernet/micrel/ksz884x.c:3499", 0, hw->io + KS8841_WOL_FRAME_BYTE2_OFFSET + i);
 
 	bits = len = from = to = 0;
 	do {
@@ -3525,7 +3525,7 @@ static void hw_set_wol_frame(struct ksz_hw *hw, int i, uint mask_size,
 			1);
 	}
 	crc = ether_crc(to, data);
-	writel(crc, hw->io + KS8841_WOL_FRAME_CRC_OFFSET + i);
+	pete_writel("drivers/net/ethernet/micrel/ksz884x.c:3528", crc, hw->io + KS8841_WOL_FRAME_CRC_OFFSET + i);
 }
 
 /**
@@ -3785,8 +3785,8 @@ static void hw_init_desc(struct ksz_desc_info *desc_info, int transmit)
 static void hw_set_desc_base(struct ksz_hw *hw, u32 tx_addr, u32 rx_addr)
 {
 	/* Set base address of Tx/Rx descriptors. */
-	writel(tx_addr, hw->io + KS_DMA_TX_ADDR);
-	writel(rx_addr, hw->io + KS_DMA_RX_ADDR);
+	pete_writel("drivers/net/ethernet/micrel/ksz884x.c:3788", tx_addr, hw->io + KS_DMA_TX_ADDR);
+	pete_writel("drivers/net/ethernet/micrel/ksz884x.c:3789", rx_addr, hw->io + KS_DMA_RX_ADDR);
 }
 
 static void hw_reset_pkts(struct ksz_desc_info *info)
@@ -3798,7 +3798,7 @@ static void hw_reset_pkts(struct ksz_desc_info *info)
 
 static inline void hw_resume_rx(struct ksz_hw *hw)
 {
-	writel(DMA_START, hw->io + KS_DMA_RX_START);
+	pete_writel("drivers/net/ethernet/micrel/ksz884x.c:3801", DMA_START, hw->io + KS_DMA_RX_START);
 }
 
 /**
@@ -3809,12 +3809,12 @@ static inline void hw_resume_rx(struct ksz_hw *hw)
  */
 static void hw_start_rx(struct ksz_hw *hw)
 {
-	writel(hw->rx_cfg, hw->io + KS_DMA_RX_CTRL);
+	pete_writel("drivers/net/ethernet/micrel/ksz884x.c:3812", hw->rx_cfg, hw->io + KS_DMA_RX_CTRL);
 
 	/* Notify when the receive stops. */
 	hw->intr_mask |= KS884X_INT_RX_STOPPED;
 
-	writel(DMA_START, hw->io + KS_DMA_RX_START);
+	pete_writel("drivers/net/ethernet/micrel/ksz884x.c:3817", DMA_START, hw->io + KS_DMA_RX_START);
 	hw_ack_intr(hw, KS884X_INT_RX_STOPPED);
 	hw->rx_stop++;
 
@@ -3833,7 +3833,7 @@ static void hw_stop_rx(struct ksz_hw *hw)
 {
 	hw->rx_stop = 0;
 	hw_turn_off_intr(hw, KS884X_INT_RX_STOPPED);
-	writel((hw->rx_cfg & ~DMA_RX_ENABLE), hw->io + KS_DMA_RX_CTRL);
+	pete_writel("drivers/net/ethernet/micrel/ksz884x.c:3836", (hw->rx_cfg & ~DMA_RX_ENABLE), hw->io + KS_DMA_RX_CTRL);
 }
 
 /**
@@ -3844,7 +3844,7 @@ static void hw_stop_rx(struct ksz_hw *hw)
  */
 static void hw_start_tx(struct ksz_hw *hw)
 {
-	writel(hw->tx_cfg, hw->io + KS_DMA_TX_CTRL);
+	pete_writel("drivers/net/ethernet/micrel/ksz884x.c:3847", hw->tx_cfg, hw->io + KS_DMA_TX_CTRL);
 }
 
 /**
@@ -3855,7 +3855,7 @@ static void hw_start_tx(struct ksz_hw *hw)
  */
 static void hw_stop_tx(struct ksz_hw *hw)
 {
-	writel((hw->tx_cfg & ~DMA_TX_ENABLE), hw->io + KS_DMA_TX_CTRL);
+	pete_writel("drivers/net/ethernet/micrel/ksz884x.c:3858", (hw->tx_cfg & ~DMA_TX_ENABLE), hw->io + KS_DMA_TX_CTRL);
 }
 
 /**
@@ -3942,7 +3942,7 @@ static void hw_send_pkt(struct ksz_hw *hw)
 
 	release_desc(cur);
 
-	writel(0, hw->io + KS_DMA_TX_START);
+	pete_writel("drivers/net/ethernet/micrel/ksz884x.c:3945", 0, hw->io + KS_DMA_TX_START);
 }
 
 static int empty_addr(u8 *addr)
@@ -4016,8 +4016,8 @@ static void hw_ena_add_addr(struct ksz_hw *hw, int index, u8 *mac_addr)
 	}
 	index *= ADD_ADDR_INCR;
 
-	writel(mac_addr_lo, hw->io + index + KS_ADD_ADDR_0_LO);
-	writel(mac_addr_hi, hw->io + index + KS_ADD_ADDR_0_HI);
+	pete_writel("drivers/net/ethernet/micrel/ksz884x.c:4019", mac_addr_lo, hw->io + index + KS_ADD_ADDR_0_LO);
+	pete_writel("drivers/net/ethernet/micrel/ksz884x.c:4020", mac_addr_hi, hw->io + index + KS_ADD_ADDR_0_HI);
 }
 
 static void hw_set_add_addr(struct ksz_hw *hw)
@@ -4026,7 +4026,7 @@ static void hw_set_add_addr(struct ksz_hw *hw)
 
 	for (i = 0; i < ADDITIONAL_ENTRIES; i++) {
 		if (empty_addr(hw->address[i]))
-			writel(0, hw->io + ADD_ADDR_INCR * i +
+			pete_writel("drivers/net/ethernet/micrel/ksz884x.c:4029", 0, hw->io + ADD_ADDR_INCR * i +
 				KS_ADD_ADDR_0_HI);
 		else
 			hw_ena_add_addr(hw, i, hw->address[i]);
@@ -4061,7 +4061,7 @@ static int hw_del_addr(struct ksz_hw *hw, u8 *mac_addr)
 	for (i = 0; i < hw->addr_list_size; i++) {
 		if (ether_addr_equal(hw->address[i], mac_addr)) {
 			eth_zero_addr(hw->address[i]);
-			writel(0, hw->io + ADD_ADDR_INCR * i +
+			pete_writel("drivers/net/ethernet/micrel/ksz884x.c:4064", 0, hw->io + ADD_ADDR_INCR * i +
 				KS_ADD_ADDR_0_HI);
 			return 0;
 		}
@@ -5207,7 +5207,7 @@ static irqreturn_t netdev_intr(int irq, void *dev_id)
 
 			hw->intr_mask &= ~KS884X_INT_TX_STOPPED;
 			pr_info("Tx stopped\n");
-			data = readl(hw->io + KS_DMA_TX_CTRL);
+			data = pete_readl("drivers/net/ethernet/micrel/ksz884x.c:5210", hw->io + KS_DMA_TX_CTRL);
 			if (!(data & DMA_TX_ENABLE))
 				pr_info("Tx disabled\n");
 			break;
@@ -6065,7 +6065,7 @@ static void netdev_get_regs(struct net_device *dev, struct ethtool_regs *regs,
 	}
 	while (range->end > range->start) {
 		for (len = range->start; len < range->end; len += 4) {
-			*buf = readl(hw->io + len);
+			*buf = pete_readl("drivers/net/ethernet/micrel/ksz884x.c:6068", hw->io + len);
 			buf++;
 		}
 		range++;
@@ -6510,7 +6510,7 @@ static int netdev_set_features(struct net_device *dev,
 		hw->rx_cfg &= ~(DMA_RX_CSUM_TCP | DMA_RX_CSUM_IP);
 
 	if (hw->enabled)
-		writel(hw->rx_cfg, hw->io + KS_DMA_RX_CTRL);
+		pete_writel("drivers/net/ethernet/micrel/ksz884x.c:6513", hw->rx_cfg, hw->io + KS_DMA_RX_CTRL);
 
 	mutex_unlock(&hw_priv->lock);
 

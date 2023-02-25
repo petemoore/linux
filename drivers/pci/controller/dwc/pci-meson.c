@@ -216,12 +216,12 @@ static int meson_pcie_probe_clocks(struct meson_pcie *mp)
 
 static inline u32 meson_cfg_readl(struct meson_pcie *mp, u32 reg)
 {
-	return readl(mp->cfg_base + reg);
+	return pete_readl("drivers/pci/controller/dwc/pci-meson.c:219", mp->cfg_base + reg);
 }
 
 static inline void meson_cfg_writel(struct meson_pcie *mp, u32 val, u32 reg)
 {
-	writel(val, mp->cfg_base + reg);
+	pete_writel("drivers/pci/controller/dwc/pci-meson.c:224", val, mp->cfg_base + reg);
 }
 
 static void meson_pcie_assert_reset(struct meson_pcie *mp)

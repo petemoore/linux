@@ -76,9 +76,9 @@ static void s3c2412_snd_txctrl(struct s3c_i2sv2_info *i2s, int on)
 
 	pr_debug("%s(%d)\n", __func__, on);
 
-	fic = readl(regs + S3C2412_IISFIC);
-	con = readl(regs + S3C2412_IISCON);
-	mod = readl(regs + S3C2412_IISMOD);
+	fic = pete_readl("sound/soc/samsung/s3c-i2s-v2.c:79", regs + S3C2412_IISFIC);
+	con = pete_readl("sound/soc/samsung/s3c-i2s-v2.c:80", regs + S3C2412_IISCON);
+	mod = pete_readl("sound/soc/samsung/s3c-i2s-v2.c:81", regs + S3C2412_IISMOD);
 
 	pr_debug("%s: IIS: CON=%x MOD=%x FIC=%x\n", __func__, con, mod, fic);
 
@@ -104,8 +104,8 @@ static void s3c2412_snd_txctrl(struct s3c_i2sv2_info *i2s, int on)
 			break;
 		}
 
-		writel(con, regs + S3C2412_IISCON);
-		writel(mod, regs + S3C2412_IISMOD);
+		pete_writel("sound/soc/samsung/s3c-i2s-v2.c:107", con, regs + S3C2412_IISCON);
+		pete_writel("sound/soc/samsung/s3c-i2s-v2.c:108", mod, regs + S3C2412_IISMOD);
 	} else {
 		/* Note, we do not have any indication that the FIFO problems
 		 * tha the S3C2410/2440 had apply here, so we should be able
@@ -133,11 +133,11 @@ static void s3c2412_snd_txctrl(struct s3c_i2sv2_info *i2s, int on)
 			break;
 		}
 
-		writel(mod, regs + S3C2412_IISMOD);
-		writel(con, regs + S3C2412_IISCON);
+		pete_writel("sound/soc/samsung/s3c-i2s-v2.c:136", mod, regs + S3C2412_IISMOD);
+		pete_writel("sound/soc/samsung/s3c-i2s-v2.c:137", con, regs + S3C2412_IISCON);
 	}
 
-	fic = readl(regs + S3C2412_IISFIC);
+	fic = pete_readl("sound/soc/samsung/s3c-i2s-v2.c:140", regs + S3C2412_IISFIC);
 	dbg_showcon(__func__, con);
 	pr_debug("%s: IIS: CON=%x MOD=%x FIC=%x\n", __func__, con, mod, fic);
 }
@@ -149,9 +149,9 @@ static void s3c2412_snd_rxctrl(struct s3c_i2sv2_info *i2s, int on)
 
 	pr_debug("%s(%d)\n", __func__, on);
 
-	fic = readl(regs + S3C2412_IISFIC);
-	con = readl(regs + S3C2412_IISCON);
-	mod = readl(regs + S3C2412_IISMOD);
+	fic = pete_readl("sound/soc/samsung/s3c-i2s-v2.c:152", regs + S3C2412_IISFIC);
+	con = pete_readl("sound/soc/samsung/s3c-i2s-v2.c:153", regs + S3C2412_IISCON);
+	mod = pete_readl("sound/soc/samsung/s3c-i2s-v2.c:154", regs + S3C2412_IISMOD);
 
 	pr_debug("%s: IIS: CON=%x MOD=%x FIC=%x\n", __func__, con, mod, fic);
 
@@ -176,8 +176,8 @@ static void s3c2412_snd_rxctrl(struct s3c_i2sv2_info *i2s, int on)
 				mod & S3C2412_IISMOD_MODE_MASK);
 		}
 
-		writel(mod, regs + S3C2412_IISMOD);
-		writel(con, regs + S3C2412_IISCON);
+		pete_writel("sound/soc/samsung/s3c-i2s-v2.c:179", mod, regs + S3C2412_IISMOD);
+		pete_writel("sound/soc/samsung/s3c-i2s-v2.c:180", con, regs + S3C2412_IISCON);
 	} else {
 		/* See txctrl notes on FIFOs. */
 
@@ -201,11 +201,11 @@ static void s3c2412_snd_rxctrl(struct s3c_i2sv2_info *i2s, int on)
 				mod & S3C2412_IISMOD_MODE_MASK);
 		}
 
-		writel(con, regs + S3C2412_IISCON);
-		writel(mod, regs + S3C2412_IISMOD);
+		pete_writel("sound/soc/samsung/s3c-i2s-v2.c:204", con, regs + S3C2412_IISCON);
+		pete_writel("sound/soc/samsung/s3c-i2s-v2.c:205", mod, regs + S3C2412_IISMOD);
 	}
 
-	fic = readl(regs + S3C2412_IISFIC);
+	fic = pete_readl("sound/soc/samsung/s3c-i2s-v2.c:208", regs + S3C2412_IISFIC);
 	pr_debug("%s: IIS: CON=%x MOD=%x FIC=%x\n", __func__, con, mod, fic);
 }
 
@@ -223,7 +223,7 @@ static int s3c2412_snd_lrsync(struct s3c_i2sv2_info *i2s)
 	pr_debug("Entered %s\n", __func__);
 
 	while (--loops) {
-		iiscon = readl(i2s->regs + S3C2412_IISCON);
+		iiscon = pete_readl("sound/soc/samsung/s3c-i2s-v2.c:226", i2s->regs + S3C2412_IISCON);
 		if (iiscon & S3C2412_IISCON_LRINDEX)
 			break;
 
@@ -249,7 +249,7 @@ static int s3c2412_i2s_set_fmt(struct snd_soc_dai *cpu_dai,
 
 	pr_debug("Entered %s\n", __func__);
 
-	iismod = readl(i2s->regs + S3C2412_IISMOD);
+	iismod = pete_readl("sound/soc/samsung/s3c-i2s-v2.c:252", i2s->regs + S3C2412_IISMOD);
 	pr_debug("hw_params r: IISMOD: %x \n", iismod);
 
 	switch (fmt & SND_SOC_DAIFMT_MASTER_MASK) {
@@ -286,7 +286,7 @@ static int s3c2412_i2s_set_fmt(struct snd_soc_dai *cpu_dai,
 		return -EINVAL;
 	}
 
-	writel(iismod, i2s->regs + S3C2412_IISMOD);
+	pete_writel("sound/soc/samsung/s3c-i2s-v2.c:289", iismod, i2s->regs + S3C2412_IISMOD);
 	pr_debug("hw_params w: IISMOD: %x \n", iismod);
 	return 0;
 }
@@ -309,7 +309,7 @@ static int s3c_i2sv2_hw_params(struct snd_pcm_substream *substream,
 	snd_soc_dai_set_dma_data(dai, substream, dma_data);
 
 	/* Working copies of register */
-	iismod = readl(i2s->regs + S3C2412_IISMOD);
+	iismod = pete_readl("sound/soc/samsung/s3c-i2s-v2.c:312", i2s->regs + S3C2412_IISMOD);
 	pr_debug("%s: r: IISMOD: %x\n", __func__, iismod);
 
 	iismod &= ~S3C64XX_IISMOD_BLC_MASK;
@@ -325,7 +325,7 @@ static int s3c_i2sv2_hw_params(struct snd_pcm_substream *substream,
 		break;
 	}
 
-	writel(iismod, i2s->regs + S3C2412_IISMOD);
+	pete_writel("sound/soc/samsung/s3c-i2s-v2.c:328", iismod, i2s->regs + S3C2412_IISMOD);
 	pr_debug("%s: w: IISMOD: %x\n", __func__, iismod);
 
 	return 0;
@@ -335,7 +335,7 @@ static int s3c_i2sv2_set_sysclk(struct snd_soc_dai *cpu_dai,
 				  int clk_id, unsigned int freq, int dir)
 {
 	struct s3c_i2sv2_info *i2s = to_info(cpu_dai);
-	u32 iismod = readl(i2s->regs + S3C2412_IISMOD);
+	u32 iismod = pete_readl("sound/soc/samsung/s3c-i2s-v2.c:338", i2s->regs + S3C2412_IISMOD);
 
 	pr_debug("Entered %s\n", __func__);
 	pr_debug("%s r: IISMOD: %x\n", __func__, iismod);
@@ -370,7 +370,7 @@ static int s3c_i2sv2_set_sysclk(struct snd_soc_dai *cpu_dai,
 		return -EINVAL;
 	}
 
-	writel(iismod, i2s->regs + S3C2412_IISMOD);
+	pete_writel("sound/soc/samsung/s3c-i2s-v2.c:373", iismod, i2s->regs + S3C2412_IISMOD);
 	pr_debug("%s w: IISMOD: %x\n", __func__, iismod);
 
 	return 0;
@@ -391,11 +391,11 @@ static int s3c2412_i2s_trigger(struct snd_pcm_substream *substream, int cmd,
 	case SNDRV_PCM_TRIGGER_START:
 		/* On start, ensure that the FIFOs are cleared and reset. */
 
-		writel(capture ? S3C2412_IISFIC_RXFLUSH : S3C2412_IISFIC_TXFLUSH,
+		pete_writel("sound/soc/samsung/s3c-i2s-v2.c:394", capture ? S3C2412_IISFIC_RXFLUSH : S3C2412_IISFIC_TXFLUSH,
 		       i2s->regs + S3C2412_IISFIC);
 
 		/* clear again, just in case */
-		writel(0x0, i2s->regs + S3C2412_IISFIC);
+		pete_writel("sound/soc/samsung/s3c-i2s-v2.c:398", 0x0, i2s->regs + S3C2412_IISFIC);
 
 	case SNDRV_PCM_TRIGGER_RESUME:
 	case SNDRV_PCM_TRIGGER_PAUSE_RELEASE:
@@ -471,11 +471,11 @@ static int s3c2412_i2s_set_clkdiv(struct snd_soc_dai *cpu_dai,
 			return -EINVAL;
 		}
 
-		reg = readl(i2s->regs + S3C2412_IISMOD);
+		reg = pete_readl("sound/soc/samsung/s3c-i2s-v2.c:474", i2s->regs + S3C2412_IISMOD);
 		reg &= ~S3C2412_IISMOD_BCLK_MASK;
-		writel(reg | div, i2s->regs + S3C2412_IISMOD);
+		pete_writel("sound/soc/samsung/s3c-i2s-v2.c:476", reg | div, i2s->regs + S3C2412_IISMOD);
 
-		pr_debug("%s: MOD=%08x\n", __func__, readl(i2s->regs + S3C2412_IISMOD));
+		pr_debug("%s: MOD=%08x\n", __func__, pete_readl("sound/soc/samsung/s3c-i2s-v2.c:478", i2s->regs + S3C2412_IISMOD));
 		break;
 
 	case S3C_I2SV2_DIV_RCLK:
@@ -500,20 +500,20 @@ static int s3c2412_i2s_set_clkdiv(struct snd_soc_dai *cpu_dai,
 			return -EINVAL;
 		}
 
-		reg = readl(i2s->regs + S3C2412_IISMOD);
+		reg = pete_readl("sound/soc/samsung/s3c-i2s-v2.c:503", i2s->regs + S3C2412_IISMOD);
 		reg &= ~S3C2412_IISMOD_RCLK_MASK;
-		writel(reg | div, i2s->regs + S3C2412_IISMOD);
-		pr_debug("%s: MOD=%08x\n", __func__, readl(i2s->regs + S3C2412_IISMOD));
+		pete_writel("sound/soc/samsung/s3c-i2s-v2.c:505", reg | div, i2s->regs + S3C2412_IISMOD);
+		pr_debug("%s: MOD=%08x\n", __func__, pete_readl("sound/soc/samsung/s3c-i2s-v2.c:506", i2s->regs + S3C2412_IISMOD));
 		break;
 
 	case S3C_I2SV2_DIV_PRESCALER:
 		if (div >= 0) {
-			writel((div << 8) | S3C2412_IISPSR_PSREN,
+			pete_writel("sound/soc/samsung/s3c-i2s-v2.c:511", (div << 8) | S3C2412_IISPSR_PSREN,
 			       i2s->regs + S3C2412_IISPSR);
 		} else {
-			writel(0x0, i2s->regs + S3C2412_IISPSR);
+			pete_writel("sound/soc/samsung/s3c-i2s-v2.c:514", 0x0, i2s->regs + S3C2412_IISPSR);
 		}
-		pr_debug("%s: PSR=%08x\n", __func__, readl(i2s->regs + S3C2412_IISPSR));
+		pr_debug("%s: PSR=%08x\n", __func__, pete_readl("sound/soc/samsung/s3c-i2s-v2.c:516", i2s->regs + S3C2412_IISPSR));
 		break;
 
 	default:
@@ -527,7 +527,7 @@ static snd_pcm_sframes_t s3c2412_i2s_delay(struct snd_pcm_substream *substream,
 					   struct snd_soc_dai *dai)
 {
 	struct s3c_i2sv2_info *i2s = to_info(dai);
-	u32 reg = readl(i2s->regs + S3C2412_IISFIC);
+	u32 reg = pete_readl("sound/soc/samsung/s3c-i2s-v2.c:530", i2s->regs + S3C2412_IISFIC);
 	snd_pcm_sframes_t delay;
 
 	if (substream->stream == SNDRV_PCM_STREAM_PLAYBACK)
@@ -541,7 +541,7 @@ static snd_pcm_sframes_t s3c2412_i2s_delay(struct snd_pcm_substream *substream,
 struct clk *s3c_i2sv2_get_clock(struct snd_soc_dai *cpu_dai)
 {
 	struct s3c_i2sv2_info *i2s = to_info(cpu_dai);
-	u32 iismod = readl(i2s->regs + S3C2412_IISMOD);
+	u32 iismod = pete_readl("sound/soc/samsung/s3c-i2s-v2.c:544", i2s->regs + S3C2412_IISMOD);
 
 	if (iismod & S3C2412_IISMOD_IMS_SYSMUX)
 		return i2s->iis_cclk;
@@ -636,9 +636,9 @@ int s3c_i2sv2_probe(struct snd_soc_dai *dai,
 
 	/* Mark ourselves as in TXRX mode so we can run through our cleanup
 	 * process without warnings. */
-	iismod = readl(i2s->regs + S3C2412_IISMOD);
+	iismod = pete_readl("sound/soc/samsung/s3c-i2s-v2.c:639", i2s->regs + S3C2412_IISMOD);
 	iismod |= S3C2412_IISMOD_MODE_TXRX;
-	writel(iismod, i2s->regs + S3C2412_IISMOD);
+	pete_writel("sound/soc/samsung/s3c-i2s-v2.c:641", iismod, i2s->regs + S3C2412_IISMOD);
 	s3c2412_snd_txctrl(i2s, 0);
 	s3c2412_snd_rxctrl(i2s, 0);
 

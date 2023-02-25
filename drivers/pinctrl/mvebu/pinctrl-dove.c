@@ -65,13 +65,13 @@ static int dove_pmu_mpp_ctrl_get(struct mvebu_mpp_ctrl_data *data,
 {
 	unsigned off = (pid / MVEBU_MPPS_PER_REG) * MVEBU_MPP_BITS;
 	unsigned shift = (pid % MVEBU_MPPS_PER_REG) * MVEBU_MPP_BITS;
-	unsigned long pmu = readl(data->base + PMU_MPP_GENERAL_CTRL);
+	unsigned long pmu = pete_readl("drivers/pinctrl/mvebu/pinctrl-dove.c:68", data->base + PMU_MPP_GENERAL_CTRL);
 	unsigned long func;
 
 	if ((pmu & BIT(pid)) == 0)
 		return mvebu_mmio_mpp_ctrl_get(data, pid, config);
 
-	func = readl(pmu_base + PMU_SIGNAL_SELECT_0 + off);
+	func = pete_readl("drivers/pinctrl/mvebu/pinctrl-dove.c:74", pmu_base + PMU_SIGNAL_SELECT_0 + off);
 	*config = (func >> shift) & MVEBU_MPP_MASK;
 	*config |= CONFIG_PMU;
 
@@ -83,19 +83,19 @@ static int dove_pmu_mpp_ctrl_set(struct mvebu_mpp_ctrl_data *data,
 {
 	unsigned off = (pid / MVEBU_MPPS_PER_REG) * MVEBU_MPP_BITS;
 	unsigned shift = (pid % MVEBU_MPPS_PER_REG) * MVEBU_MPP_BITS;
-	unsigned long pmu = readl(data->base + PMU_MPP_GENERAL_CTRL);
+	unsigned long pmu = pete_readl("drivers/pinctrl/mvebu/pinctrl-dove.c:86", data->base + PMU_MPP_GENERAL_CTRL);
 	unsigned long func;
 
 	if ((config & CONFIG_PMU) == 0) {
-		writel(pmu & ~BIT(pid), data->base + PMU_MPP_GENERAL_CTRL);
+		pete_writel("drivers/pinctrl/mvebu/pinctrl-dove.c:90", pmu & ~BIT(pid), data->base + PMU_MPP_GENERAL_CTRL);
 		return mvebu_mmio_mpp_ctrl_set(data, pid, config);
 	}
 
-	writel(pmu | BIT(pid), data->base + PMU_MPP_GENERAL_CTRL);
-	func = readl(pmu_base + PMU_SIGNAL_SELECT_0 + off);
+	pete_writel("drivers/pinctrl/mvebu/pinctrl-dove.c:94", pmu | BIT(pid), data->base + PMU_MPP_GENERAL_CTRL);
+	func = pete_readl("drivers/pinctrl/mvebu/pinctrl-dove.c:95", pmu_base + PMU_SIGNAL_SELECT_0 + off);
 	func &= ~(MVEBU_MPP_MASK << shift);
 	func |= (config & MVEBU_MPP_MASK) << shift;
-	writel(func, pmu_base + PMU_SIGNAL_SELECT_0 + off);
+	pete_writel("drivers/pinctrl/mvebu/pinctrl-dove.c:98", func, pmu_base + PMU_SIGNAL_SELECT_0 + off);
 
 	return 0;
 }
@@ -103,7 +103,7 @@ static int dove_pmu_mpp_ctrl_set(struct mvebu_mpp_ctrl_data *data,
 static int dove_mpp4_ctrl_get(struct mvebu_mpp_ctrl_data *data, unsigned pid,
 			      unsigned long *config)
 {
-	unsigned long mpp4 = readl(mpp4_base);
+	unsigned long mpp4 = pete_readl("drivers/pinctrl/mvebu/pinctrl-dove.c:106", mpp4_base);
 	unsigned long mask;
 
 	switch (pid) {
@@ -134,7 +134,7 @@ static int dove_mpp4_ctrl_get(struct mvebu_mpp_ctrl_data *data, unsigned pid,
 static int dove_mpp4_ctrl_set(struct mvebu_mpp_ctrl_data *data, unsigned pid,
 			      unsigned long config)
 {
-	unsigned long mpp4 = readl(mpp4_base);
+	unsigned long mpp4 = pete_readl("drivers/pinctrl/mvebu/pinctrl-dove.c:137", mpp4_base);
 	unsigned long mask;
 
 	switch (pid) {
@@ -161,7 +161,7 @@ static int dove_mpp4_ctrl_set(struct mvebu_mpp_ctrl_data *data, unsigned pid,
 	if (config)
 		mpp4 |= mask;
 
-	writel(mpp4, mpp4_base);
+	pete_writel("drivers/pinctrl/mvebu/pinctrl-dove.c:164", mpp4, mpp4_base);
 
 	return 0;
 }
@@ -189,7 +189,7 @@ static int dove_nand_ctrl_set(struct mvebu_mpp_ctrl_data *data, unsigned pid,
 static int dove_audio0_ctrl_get(struct mvebu_mpp_ctrl_data *data, unsigned pid,
 				unsigned long *config)
 {
-	unsigned long pmu = readl(data->base + PMU_MPP_GENERAL_CTRL);
+	unsigned long pmu = pete_readl("drivers/pinctrl/mvebu/pinctrl-dove.c:192", data->base + PMU_MPP_GENERAL_CTRL);
 
 	*config = ((pmu & AU0_AC97_SEL) != 0);
 
@@ -199,12 +199,12 @@ static int dove_audio0_ctrl_get(struct mvebu_mpp_ctrl_data *data, unsigned pid,
 static int dove_audio0_ctrl_set(struct mvebu_mpp_ctrl_data *data, unsigned pid,
 				unsigned long config)
 {
-	unsigned long pmu = readl(data->base + PMU_MPP_GENERAL_CTRL);
+	unsigned long pmu = pete_readl("drivers/pinctrl/mvebu/pinctrl-dove.c:202", data->base + PMU_MPP_GENERAL_CTRL);
 
 	pmu &= ~AU0_AC97_SEL;
 	if (config)
 		pmu |= AU0_AC97_SEL;
-	writel(pmu, data->base + PMU_MPP_GENERAL_CTRL);
+	pete_writel("drivers/pinctrl/mvebu/pinctrl-dove.c:207", pmu, data->base + PMU_MPP_GENERAL_CTRL);
 
 	return 0;
 }
@@ -212,7 +212,7 @@ static int dove_audio0_ctrl_set(struct mvebu_mpp_ctrl_data *data, unsigned pid,
 static int dove_audio1_ctrl_get(struct mvebu_mpp_ctrl_data *data, unsigned pid,
 				unsigned long *config)
 {
-	unsigned int mpp4 = readl(mpp4_base);
+	unsigned int mpp4 = pete_readl("drivers/pinctrl/mvebu/pinctrl-dove.c:215", mpp4_base);
 	unsigned int sspc1;
 	unsigned int gmpp;
 	unsigned int gcfg2;
@@ -243,12 +243,12 @@ static int dove_audio1_ctrl_get(struct mvebu_mpp_ctrl_data *data, unsigned pid,
 static int dove_audio1_ctrl_set(struct mvebu_mpp_ctrl_data *data, unsigned pid,
 				unsigned long config)
 {
-	unsigned int mpp4 = readl(mpp4_base);
+	unsigned int mpp4 = pete_readl("drivers/pinctrl/mvebu/pinctrl-dove.c:246", mpp4_base);
 
 	mpp4 &= ~AU1_GPIO_SEL;
 	if (config & BIT(3))
 		mpp4 |= AU1_GPIO_SEL;
-	writel(mpp4, mpp4_base);
+	pete_writel("drivers/pinctrl/mvebu/pinctrl-dove.c:251", mpp4, mpp4_base);
 
 	regmap_update_bits(gconfmap, SSP_CTRL_STATUS_1,
 			   SSP_ON_AU1,

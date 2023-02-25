@@ -741,7 +741,7 @@ static int hamachi_init_one(struct pci_dev *pdev,
 	}
 
 	printk(KERN_INFO "%s: %s type %x at %p, %pM, IRQ %d.\n",
-		   dev->name, chip_tbl[chip_id].name, readl(ioaddr + ChipRev),
+		   dev->name, chip_tbl[chip_id].name, pete_readl("drivers/net/ethernet/packetengines/hamachi.c:744", ioaddr + ChipRev),
 		   ioaddr, dev->dev_addr, irq);
 	i = readb(ioaddr + PCIClkMeas);
 	printk(KERN_INFO "%s:  %d-bit %d Mhz PCI bus (%d), Virtual Jumpers "
@@ -868,13 +868,13 @@ static int hamachi_open(struct net_device *dev)
 
 #if ADDRLEN == 64
 	/* writellll anyone ? */
-	writel(hmp->rx_ring_dma, ioaddr + RxPtr);
-	writel(hmp->rx_ring_dma >> 32, ioaddr + RxPtr + 4);
-	writel(hmp->tx_ring_dma, ioaddr + TxPtr);
-	writel(hmp->tx_ring_dma >> 32, ioaddr + TxPtr + 4);
+	pete_writel("drivers/net/ethernet/packetengines/hamachi.c:871", hmp->rx_ring_dma, ioaddr + RxPtr);
+	pete_writel("drivers/net/ethernet/packetengines/hamachi.c:872", hmp->rx_ring_dma >> 32, ioaddr + RxPtr + 4);
+	pete_writel("drivers/net/ethernet/packetengines/hamachi.c:873", hmp->tx_ring_dma, ioaddr + TxPtr);
+	pete_writel("drivers/net/ethernet/packetengines/hamachi.c:874", hmp->tx_ring_dma >> 32, ioaddr + TxPtr + 4);
 #else
-	writel(hmp->rx_ring_dma, ioaddr + RxPtr);
-	writel(hmp->tx_ring_dma, ioaddr + TxPtr);
+	pete_writel("drivers/net/ethernet/packetengines/hamachi.c:876", hmp->rx_ring_dma, ioaddr + RxPtr);
+	pete_writel("drivers/net/ethernet/packetengines/hamachi.c:877", hmp->tx_ring_dma, ioaddr + TxPtr);
 #endif
 
 	/* TODO:  It would make sense to organize this as words since the card
@@ -933,7 +933,7 @@ static int hamachi_open(struct net_device *dev)
 	/* Why do we enable receives/transmits here? -KDU */
 	writew(0x0780, ioaddr + MACCnfg2); /* Upper 16 bits control LEDs. */
 	/* Enable automatic generation of flow control frames, period 0xffff. */
-	writel(0x0030FFFF, ioaddr + FlowCtrl);
+	pete_writel("drivers/net/ethernet/packetengines/hamachi.c:936", 0x0030FFFF, ioaddr + FlowCtrl);
 	writew(MAX_FRAME_SIZE, ioaddr + MaxFrameSize); 	/* dev->mtu+14 ??? */
 
 	/* Enable legacy links. */
@@ -957,15 +957,15 @@ static int hamachi_open(struct net_device *dev)
 		printk("rx_int_var: %x, tx_int_var: %x\n", rx_int_var, tx_int_var);
 	}
 
-	writel(tx_int_var, ioaddr + TxIntrCtrl);
-	writel(rx_int_var, ioaddr + RxIntrCtrl);
+	pete_writel("drivers/net/ethernet/packetengines/hamachi.c:960", tx_int_var, ioaddr + TxIntrCtrl);
+	pete_writel("drivers/net/ethernet/packetengines/hamachi.c:961", rx_int_var, ioaddr + RxIntrCtrl);
 
 	set_rx_mode(dev);
 
 	netif_start_queue(dev);
 
 	/* Enable interrupts by setting the interrupt mask. */
-	writel(0x80878787, ioaddr + InterruptEnable);
+	pete_writel("drivers/net/ethernet/packetengines/hamachi.c:968", 0x80878787, ioaddr + InterruptEnable);
 	writew(0x0000, ioaddr + EventStatus);	/* Clear non-interrupting events */
 
 	/* Configure and start the DMA channels. */
@@ -1316,7 +1316,7 @@ static irqreturn_t hamachi_interrupt(int irq, void *dev_instance)
 	spin_lock(&hmp->lock);
 
 	do {
-		u32 intr_status = readl(ioaddr + InterruptClear);
+		u32 intr_status = pete_readl("drivers/net/ethernet/packetengines/hamachi.c:1319", ioaddr + InterruptClear);
 
 		if (hamachi_debug > 4)
 			printk(KERN_DEBUG "%s: Hamachi interrupt, status %4.4x.\n",
@@ -1384,7 +1384,7 @@ static irqreturn_t hamachi_interrupt(int irq, void *dev_instance)
 
 	if (hamachi_debug > 3)
 		printk(KERN_DEBUG "%s: exiting interrupt, status=%#4.4x.\n",
-			   dev->name, readl(ioaddr + IntrStatus));
+			   dev->name, pete_readl("drivers/net/ethernet/packetengines/hamachi.c:1387", ioaddr + IntrStatus));
 
 #ifndef final_version
 	/* Code that should never be run!  Perhaps remove after testing.. */
@@ -1633,7 +1633,7 @@ static void hamachi_error(struct net_device *dev, int intr_status)
 				   " %4.4x, Status %4.4x %4.4x Intr status %4.4x.\n",
 				   dev->name, readw(ioaddr + 0x0E0), readw(ioaddr + 0x0E2),
 				   readw(ioaddr + ANLinkPartnerAbility),
-				   readl(ioaddr + IntrStatus));
+				   pete_readl("drivers/net/ethernet/packetengines/hamachi.c:1636", ioaddr + IntrStatus));
 		if (readw(ioaddr + ANStatus) & 0x20)
 			writeb(0x01, ioaddr + LEDCtrl);
 		else
@@ -1642,8 +1642,8 @@ static void hamachi_error(struct net_device *dev, int intr_status)
 	if (intr_status & StatsMax) {
 		hamachi_get_stats(dev);
 		/* Read the overflow bits to clear. */
-		readl(ioaddr + 0x370);
-		readl(ioaddr + 0x3F0);
+		pete_readl("drivers/net/ethernet/packetengines/hamachi.c:1645", ioaddr + 0x370);
+		pete_readl("drivers/net/ethernet/packetengines/hamachi.c:1646", ioaddr + 0x3F0);
 	}
 	if ((intr_status & ~(LinkChange|StatsMax|NegotiationChange|IntrRxDone|IntrTxDone)) &&
 	    hamachi_debug)
@@ -1668,16 +1668,16 @@ static int hamachi_close(struct net_device *dev)
 	if (hamachi_debug > 1) {
 		printk(KERN_DEBUG "%s: Shutting down ethercard, status was Tx %4.4x Rx %4.4x Int %2.2x.\n",
 			   dev->name, readw(ioaddr + TxStatus),
-			   readw(ioaddr + RxStatus), readl(ioaddr + IntrStatus));
+			   readw(ioaddr + RxStatus), pete_readl("drivers/net/ethernet/packetengines/hamachi.c:1671", ioaddr + IntrStatus));
 		printk(KERN_DEBUG "%s: Queue pointers were Tx %d / %d,  Rx %d / %d.\n",
 			   dev->name, hmp->cur_tx, hmp->dirty_tx, hmp->cur_rx, hmp->dirty_rx);
 	}
 
 	/* Disable interrupts by clearing the interrupt mask. */
-	writel(0x0000, ioaddr + InterruptEnable);
+	pete_writel("drivers/net/ethernet/packetengines/hamachi.c:1677", 0x0000, ioaddr + InterruptEnable);
 
 	/* Stop the chip's Tx and Rx processes. */
-	writel(2, ioaddr + RxCmd);
+	pete_writel("drivers/net/ethernet/packetengines/hamachi.c:1680", 2, ioaddr + RxCmd);
 	writew(2, ioaddr + TxCmd);
 
 #ifdef __i386__
@@ -1686,13 +1686,13 @@ static int hamachi_close(struct net_device *dev)
 			   (int)hmp->tx_ring_dma);
 		for (i = 0; i < TX_RING_SIZE; i++)
 			printk(KERN_DEBUG " %c #%d desc. %8.8x %8.8x.\n",
-				   readl(ioaddr + TxCurPtr) == (long)&hmp->tx_ring[i] ? '>' : ' ',
+				   pete_readl("drivers/net/ethernet/packetengines/hamachi.c:1689", ioaddr + TxCurPtr) == (long)&hmp->tx_ring[i] ? '>' : ' ',
 				   i, hmp->tx_ring[i].status_n_length, hmp->tx_ring[i].addr);
 		printk(KERN_DEBUG "  Rx ring %8.8x:\n",
 			   (int)hmp->rx_ring_dma);
 		for (i = 0; i < RX_RING_SIZE; i++) {
 			printk(KERN_DEBUG " %c #%d desc. %4.4x %8.8x\n",
-				   readl(ioaddr + RxCurPtr) == (long)&hmp->rx_ring[i] ? '>' : ' ',
+				   pete_readl("drivers/net/ethernet/packetengines/hamachi.c:1695", ioaddr + RxCurPtr) == (long)&hmp->rx_ring[i] ? '>' : ' ',
 				   i, hmp->rx_ring[i].status_n_length, hmp->rx_ring[i].addr);
 			if (hamachi_debug > 6) {
 				if (*(u8*)hmp->rx_skbuff[i]->data != 0x69) {
@@ -1755,25 +1755,25 @@ static struct net_device_stats *hamachi_get_stats(struct net_device *dev)
            so I think I'll comment it out here and see if better things
            happen.
         */
-	/* dev->stats.tx_packets	= readl(ioaddr + 0x000); */
+	/* dev->stats.tx_packets	= pete_readl("drivers/net/ethernet/packetengines/hamachi.c:1758", ioaddr + 0x000); */
 
 	/* Total Uni+Brd+Multi */
-	dev->stats.rx_bytes = readl(ioaddr + 0x330);
+	dev->stats.rx_bytes = pete_readl("drivers/net/ethernet/packetengines/hamachi.c:1761", ioaddr + 0x330);
 	/* Total Uni+Brd+Multi */
-	dev->stats.tx_bytes = readl(ioaddr + 0x3B0);
+	dev->stats.tx_bytes = pete_readl("drivers/net/ethernet/packetengines/hamachi.c:1763", ioaddr + 0x3B0);
 	/* Multicast Rx */
-	dev->stats.multicast = readl(ioaddr + 0x320);
+	dev->stats.multicast = pete_readl("drivers/net/ethernet/packetengines/hamachi.c:1765", ioaddr + 0x320);
 
 	/* Over+Undersized */
-	dev->stats.rx_length_errors = readl(ioaddr + 0x368);
+	dev->stats.rx_length_errors = pete_readl("drivers/net/ethernet/packetengines/hamachi.c:1768", ioaddr + 0x368);
 	/* Jabber */
-	dev->stats.rx_over_errors = readl(ioaddr + 0x35C);
+	dev->stats.rx_over_errors = pete_readl("drivers/net/ethernet/packetengines/hamachi.c:1770", ioaddr + 0x35C);
 	/* Jabber */
-	dev->stats.rx_crc_errors = readl(ioaddr + 0x360);
+	dev->stats.rx_crc_errors = pete_readl("drivers/net/ethernet/packetengines/hamachi.c:1772", ioaddr + 0x360);
 	/* Symbol Errs */
-	dev->stats.rx_frame_errors = readl(ioaddr + 0x364);
+	dev->stats.rx_frame_errors = pete_readl("drivers/net/ethernet/packetengines/hamachi.c:1774", ioaddr + 0x364);
 	/* Dropped */
-	dev->stats.rx_missed_errors = readl(ioaddr + 0x36C);
+	dev->stats.rx_missed_errors = pete_readl("drivers/net/ethernet/packetengines/hamachi.c:1776", ioaddr + 0x36C);
 
 	return &dev->stats;
 }
@@ -1793,14 +1793,14 @@ static void set_rx_mode(struct net_device *dev)
 		int i = 0;
 
 		netdev_for_each_mc_addr(ha, dev) {
-			writel(*(u32 *)(ha->addr), ioaddr + 0x100 + i*8);
-			writel(0x20000 | (*(u16 *)&ha->addr[4]),
+			pete_writel("drivers/net/ethernet/packetengines/hamachi.c:1796", *(u32 *)(ha->addr), ioaddr + 0x100 + i*8);
+			pete_writel("drivers/net/ethernet/packetengines/hamachi.c:1797", 0x20000 | (*(u16 *)&ha->addr[4]),
 				   ioaddr + 0x104 + i*8);
 			i++;
 		}
 		/* Clear remaining entries. */
 		for (; i < 64; i++)
-			writel(0, ioaddr + 0x104 + i*8);
+			pete_writel("drivers/net/ethernet/packetengines/hamachi.c:1803", 0, ioaddr + 0x104 + i*8);
 		writew(0x0003, ioaddr + AddrMode);
 	} else {					/* Normal, unicast/broadcast-only mode. */
 		writew(0x0001, ioaddr + AddrMode);
@@ -1890,11 +1890,11 @@ static int hamachi_siocdevprivate(struct net_device *dev, struct ifreq *rq,
 	 */
 	if (!capable(CAP_NET_ADMIN))
 		return -EPERM;
-	writel(d[0], np->base + TxIntrCtrl);
-	writel(d[1], np->base + RxIntrCtrl);
+	pete_writel("drivers/net/ethernet/packetengines/hamachi.c:1893", d[0], np->base + TxIntrCtrl);
+	pete_writel("drivers/net/ethernet/packetengines/hamachi.c:1894", d[1], np->base + RxIntrCtrl);
 	printk(KERN_NOTICE "%s: tx %08x, rx %08x intr\n", dev->name,
-	       (u32)readl(np->base + TxIntrCtrl),
-	       (u32)readl(np->base + RxIntrCtrl));
+	       (u32)pete_readl("drivers/net/ethernet/packetengines/hamachi.c:1896", np->base + TxIntrCtrl),
+	       (u32)pete_readl("drivers/net/ethernet/packetengines/hamachi.c:1897", np->base + RxIntrCtrl));
 
 	return 0;
 }

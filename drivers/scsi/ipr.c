@@ -751,13 +751,13 @@ static void ipr_mask_and_clear_interrupts(struct ipr_ioa_cfg *ioa_cfg,
 	if (ioa_cfg->sis64)
 		writeq(~0, ioa_cfg->regs.set_interrupt_mask_reg);
 	else
-		writel(~0, ioa_cfg->regs.set_interrupt_mask_reg);
+		pete_writel("drivers/scsi/ipr.c:754", ~0, ioa_cfg->regs.set_interrupt_mask_reg);
 
 	/* Clear any pending interrupts */
 	if (ioa_cfg->sis64)
-		writel(~0, ioa_cfg->regs.clr_interrupt_reg);
-	writel(clr_ints, ioa_cfg->regs.clr_interrupt_reg32);
-	readl(ioa_cfg->regs.sense_interrupt_reg);
+		pete_writel("drivers/scsi/ipr.c:758", ~0, ioa_cfg->regs.clr_interrupt_reg);
+	pete_writel("drivers/scsi/ipr.c:759", clr_ints, ioa_cfg->regs.clr_interrupt_reg32);
+	pete_readl("drivers/scsi/ipr.c:760", ioa_cfg->regs.sense_interrupt_reg);
 }
 
 /**
@@ -959,7 +959,7 @@ static void ipr_send_command(struct ipr_cmnd *ipr_cmd)
 			send_dma_addr |= 0x4;
 		writeq(send_dma_addr, ioa_cfg->regs.ioarrin_reg);
 	} else
-		writel(send_dma_addr, ioa_cfg->regs.ioarrin_reg);
+		pete_writel("drivers/scsi/ipr.c:962", send_dma_addr, ioa_cfg->regs.ioarrin_reg);
 }
 
 /**
@@ -2818,7 +2818,7 @@ static int ipr_wait_iodbg_ack(struct ipr_ioa_cfg *ioa_cfg, int max_delay)
 
 	/* Read interrupt reg until IOA signals IO Debug Acknowledge */
 	while (delay < max_delay) {
-		pcii_reg = readl(ioa_cfg->regs.sense_interrupt_reg);
+		pcii_reg = pete_readl("drivers/scsi/ipr.c:2821", ioa_cfg->regs.sense_interrupt_reg);
 
 		if (pcii_reg & IPR_PCII_IO_DEBUG_ACKNOWLEDGE)
 			return 0;
@@ -2851,8 +2851,8 @@ static int ipr_get_sis64_dump_data_section(struct ipr_ioa_cfg *ioa_cfg,
 	int i;
 
 	for (i = 0; i < length_in_words; i++) {
-		writel(start_addr+(i*4), ioa_cfg->regs.dump_addr_reg);
-		*dest = cpu_to_be32(readl(ioa_cfg->regs.dump_data_reg));
+		pete_writel("drivers/scsi/ipr.c:2854", start_addr+(i*4), ioa_cfg->regs.dump_addr_reg);
+		*dest = cpu_to_be32(pete_readl("drivers/scsi/ipr.c:2855", ioa_cfg->regs.dump_data_reg));
 		dest++;
 	}
 
@@ -2881,7 +2881,7 @@ static int ipr_get_ldump_data_section(struct ipr_ioa_cfg *ioa_cfg,
 						       dest, length_in_words);
 
 	/* Write IOA interrupt reg starting LDUMP state  */
-	writel((IPR_UPROCI_RESET_ALERT | IPR_UPROCI_IO_DEBUG_ALERT),
+	pete_writel("drivers/scsi/ipr.c:2884", (IPR_UPROCI_RESET_ALERT | IPR_UPROCI_IO_DEBUG_ALERT),
 	       ioa_cfg->regs.set_uproc_interrupt_reg32);
 
 	/* Wait for IO debug acknowledge */
@@ -2893,14 +2893,14 @@ static int ipr_get_ldump_data_section(struct ipr_ioa_cfg *ioa_cfg,
 	}
 
 	/* Signal LDUMP interlocked - clear IO debug ack */
-	writel(IPR_PCII_IO_DEBUG_ACKNOWLEDGE,
+	pete_writel("drivers/scsi/ipr.c:2896", IPR_PCII_IO_DEBUG_ACKNOWLEDGE,
 	       ioa_cfg->regs.clr_interrupt_reg);
 
 	/* Write Mailbox with starting address */
-	writel(start_addr, ioa_cfg->ioa_mailbox);
+	pete_writel("drivers/scsi/ipr.c:2900", start_addr, ioa_cfg->ioa_mailbox);
 
 	/* Signal address valid - clear IOA Reset alert */
-	writel(IPR_UPROCI_RESET_ALERT,
+	pete_writel("drivers/scsi/ipr.c:2903", IPR_UPROCI_RESET_ALERT,
 	       ioa_cfg->regs.clr_uproc_interrupt_reg32);
 
 	for (i = 0; i < length_in_words; i++) {
@@ -2913,32 +2913,32 @@ static int ipr_get_ldump_data_section(struct ipr_ioa_cfg *ioa_cfg,
 		}
 
 		/* Read data from mailbox and increment destination pointer */
-		*dest = cpu_to_be32(readl(ioa_cfg->ioa_mailbox));
+		*dest = cpu_to_be32(pete_readl("drivers/scsi/ipr.c:2916", ioa_cfg->ioa_mailbox));
 		dest++;
 
 		/* For all but the last word of data, signal data received */
 		if (i < (length_in_words - 1)) {
 			/* Signal dump data received - Clear IO debug Ack */
-			writel(IPR_PCII_IO_DEBUG_ACKNOWLEDGE,
+			pete_writel("drivers/scsi/ipr.c:2922", IPR_PCII_IO_DEBUG_ACKNOWLEDGE,
 			       ioa_cfg->regs.clr_interrupt_reg);
 		}
 	}
 
 	/* Signal end of block transfer. Set reset alert then clear IO debug ack */
-	writel(IPR_UPROCI_RESET_ALERT,
+	pete_writel("drivers/scsi/ipr.c:2928", IPR_UPROCI_RESET_ALERT,
 	       ioa_cfg->regs.set_uproc_interrupt_reg32);
 
-	writel(IPR_UPROCI_IO_DEBUG_ALERT,
+	pete_writel("drivers/scsi/ipr.c:2931", IPR_UPROCI_IO_DEBUG_ALERT,
 	       ioa_cfg->regs.clr_uproc_interrupt_reg32);
 
 	/* Signal dump data received - Clear IO debug Ack */
-	writel(IPR_PCII_IO_DEBUG_ACKNOWLEDGE,
+	pete_writel("drivers/scsi/ipr.c:2935", IPR_PCII_IO_DEBUG_ACKNOWLEDGE,
 	       ioa_cfg->regs.clr_interrupt_reg);
 
 	/* Wait for IOA to signal LDUMP exit - IOA reset alert will be cleared */
 	while (delay < IPR_LDUMP_MAX_SHORT_ACK_DELAY_IN_USEC) {
 		temp_pcii_reg =
-		    readl(ioa_cfg->regs.sense_uproc_interrupt_reg32);
+		    pete_readl("drivers/scsi/ipr.c:2941", ioa_cfg->regs.sense_uproc_interrupt_reg32);
 
 		if (!(temp_pcii_reg & IPR_UPROCI_RESET_ALERT))
 			return 0;
@@ -3160,7 +3160,7 @@ static void ipr_get_ioa_dump(struct ipr_ioa_cfg *ioa_cfg, struct ipr_dump *dump)
 		spin_lock_irqsave(ioa_cfg->host->host_lock, lock_flags);
 	}
 
-	start_addr = readl(ioa_cfg->ioa_mailbox);
+	start_addr = pete_readl("drivers/scsi/ipr.c:3163", ioa_cfg->ioa_mailbox);
 
 	if (!ioa_cfg->sis64 && !ipr_sdt_is_fmt2(start_addr)) {
 		dev_err(&ioa_cfg->pdev->dev,
@@ -5532,7 +5532,7 @@ static int ipr_cancel_op(struct scsi_cmnd *scsi_cmd)
 	 * by a still not detected EEH error. In such cases, reading a register will
 	 * trigger the EEH recovery infrastructure.
 	 */
-	readl(ioa_cfg->regs.sense_interrupt_reg);
+	pete_readl("drivers/scsi/ipr.c:5535", ioa_cfg->regs.sense_interrupt_reg);
 
 	if (!ipr_is_gscsi(res))
 		return FAILED;
@@ -5646,7 +5646,7 @@ static irqreturn_t ipr_handle_other_interrupt(struct ipr_ioa_cfg *ioa_cfg,
 	irqreturn_t rc = IRQ_HANDLED;
 	u32 int_mask_reg;
 
-	int_mask_reg = readl(ioa_cfg->regs.sense_interrupt_mask_reg32);
+	int_mask_reg = pete_readl("drivers/scsi/ipr.c:5649", ioa_cfg->regs.sense_interrupt_mask_reg32);
 	int_reg &= ~int_mask_reg;
 
 	/* If an interrupt on the adapter did not occur, ignore it.
@@ -5654,13 +5654,13 @@ static irqreturn_t ipr_handle_other_interrupt(struct ipr_ioa_cfg *ioa_cfg,
 	 */
 	if ((int_reg & IPR_PCII_OPER_INTERRUPTS) == 0) {
 		if (ioa_cfg->sis64) {
-			int_mask_reg = readl(ioa_cfg->regs.sense_interrupt_mask_reg);
-			int_reg = readl(ioa_cfg->regs.sense_interrupt_reg) & ~int_mask_reg;
+			int_mask_reg = pete_readl("drivers/scsi/ipr.c:5657", ioa_cfg->regs.sense_interrupt_mask_reg);
+			int_reg = pete_readl("drivers/scsi/ipr.c:5658", ioa_cfg->regs.sense_interrupt_reg) & ~int_mask_reg;
 			if (int_reg & IPR_PCII_IPL_STAGE_CHANGE) {
 
 				/* clear stage change */
-				writel(IPR_PCII_IPL_STAGE_CHANGE, ioa_cfg->regs.clr_interrupt_reg);
-				int_reg = readl(ioa_cfg->regs.sense_interrupt_reg) & ~int_mask_reg;
+				pete_writel("drivers/scsi/ipr.c:5662", IPR_PCII_IPL_STAGE_CHANGE, ioa_cfg->regs.clr_interrupt_reg);
+				int_reg = pete_readl("drivers/scsi/ipr.c:5663", ioa_cfg->regs.sense_interrupt_reg) & ~int_mask_reg;
 				list_del(&ioa_cfg->reset_cmd->queue);
 				del_timer(&ioa_cfg->reset_cmd->timer);
 				ipr_reset_ioa_job(ioa_cfg->reset_cmd);
@@ -5673,8 +5673,8 @@ static irqreturn_t ipr_handle_other_interrupt(struct ipr_ioa_cfg *ioa_cfg,
 
 	if (int_reg & IPR_PCII_IOA_TRANS_TO_OPER) {
 		/* Mask the interrupt */
-		writel(IPR_PCII_IOA_TRANS_TO_OPER, ioa_cfg->regs.set_interrupt_mask_reg);
-		int_reg = readl(ioa_cfg->regs.sense_interrupt_reg);
+		pete_writel("drivers/scsi/ipr.c:5676", IPR_PCII_IOA_TRANS_TO_OPER, ioa_cfg->regs.set_interrupt_mask_reg);
+		int_reg = pete_readl("drivers/scsi/ipr.c:5677", ioa_cfg->regs.sense_interrupt_reg);
 
 		list_del(&ioa_cfg->reset_cmd->queue);
 		del_timer(&ioa_cfg->reset_cmd->timer);
@@ -5684,8 +5684,8 @@ static irqreturn_t ipr_handle_other_interrupt(struct ipr_ioa_cfg *ioa_cfg,
 			if (ipr_debug && printk_ratelimit())
 				dev_err(&ioa_cfg->pdev->dev,
 					"Spurious interrupt detected. 0x%08X\n", int_reg);
-			writel(IPR_PCII_HRRQ_UPDATED, ioa_cfg->regs.clr_interrupt_reg32);
-			int_reg = readl(ioa_cfg->regs.sense_interrupt_reg32);
+			pete_writel("drivers/scsi/ipr.c:5687", IPR_PCII_HRRQ_UPDATED, ioa_cfg->regs.clr_interrupt_reg32);
+			int_reg = pete_readl("drivers/scsi/ipr.c:5688", ioa_cfg->regs.sense_interrupt_reg32);
 			return IRQ_NONE;
 		}
 	} else {
@@ -5840,14 +5840,14 @@ static irqreturn_t ipr_isr(int irq, void *devp)
 			/* Clear the PCI interrupt */
 			num_hrrq = 0;
 			do {
-				writel(IPR_PCII_HRRQ_UPDATED,
+				pete_writel("drivers/scsi/ipr.c:5843", IPR_PCII_HRRQ_UPDATED,
 				     ioa_cfg->regs.clr_interrupt_reg32);
-				int_reg = readl(ioa_cfg->regs.sense_interrupt_reg32);
+				int_reg = pete_readl("drivers/scsi/ipr.c:5845", ioa_cfg->regs.sense_interrupt_reg32);
 			} while (int_reg & IPR_PCII_HRRQ_UPDATED &&
 				num_hrrq++ < IPR_MAX_HRRQ_RETRIES);
 
 		} else if (rc == IRQ_NONE && irq_none == 0) {
-			int_reg = readl(ioa_cfg->regs.sense_interrupt_reg32);
+			int_reg = pete_readl("drivers/scsi/ipr.c:5850", ioa_cfg->regs.sense_interrupt_reg32);
 			irq_none++;
 		} else if (num_hrrq == IPR_MAX_HRRQ_RETRIES &&
 			   int_reg & IPR_PCII_HRRQ_UPDATED) {
@@ -8387,7 +8387,7 @@ static int ipr_reset_next_stage(struct ipr_cmnd *ipr_cmd)
 	struct ipr_ioa_cfg *ioa_cfg = ipr_cmd->ioa_cfg;
 	u64 maskval = 0;
 
-	feedback = readl(ioa_cfg->regs.init_feedback_reg);
+	feedback = pete_readl("drivers/scsi/ipr.c:8390", ioa_cfg->regs.init_feedback_reg);
 	stage = feedback & IPR_IPL_INIT_STAGE_MASK;
 	stage_time = feedback & IPR_IPL_INIT_STAGE_TIME_MASK;
 
@@ -8402,18 +8402,18 @@ static int ipr_reset_next_stage(struct ipr_cmnd *ipr_cmd)
 		stage_time = IPR_LONG_OPERATIONAL_TIMEOUT;
 
 	if (stage == IPR_IPL_INIT_STAGE_UNKNOWN) {
-		writel(IPR_PCII_IPL_STAGE_CHANGE, ioa_cfg->regs.set_interrupt_mask_reg);
-		int_reg = readl(ioa_cfg->regs.sense_interrupt_mask_reg);
+		pete_writel("drivers/scsi/ipr.c:8405", IPR_PCII_IPL_STAGE_CHANGE, ioa_cfg->regs.set_interrupt_mask_reg);
+		int_reg = pete_readl("drivers/scsi/ipr.c:8406", ioa_cfg->regs.sense_interrupt_mask_reg);
 		stage_time = ioa_cfg->transop_timeout;
 		ipr_cmd->job_step = ipr_ioafp_identify_hrrq;
 	} else if (stage == IPR_IPL_INIT_STAGE_TRANSOP) {
-		int_reg = readl(ioa_cfg->regs.sense_interrupt_reg32);
+		int_reg = pete_readl("drivers/scsi/ipr.c:8410", ioa_cfg->regs.sense_interrupt_reg32);
 		if (int_reg & IPR_PCII_IOA_TRANS_TO_OPER) {
 			ipr_cmd->job_step = ipr_ioafp_identify_hrrq;
 			maskval = IPR_PCII_IPL_STAGE_CHANGE;
 			maskval = (maskval << 32) | IPR_PCII_IOA_TRANS_TO_OPER;
 			writeq(maskval, ioa_cfg->regs.set_interrupt_mask_reg);
-			int_reg = readl(ioa_cfg->regs.sense_interrupt_mask_reg);
+			int_reg = pete_readl("drivers/scsi/ipr.c:8416", ioa_cfg->regs.sense_interrupt_mask_reg);
 			return IPR_RC_JOB_CONTINUE;
 		}
 	}
@@ -8456,30 +8456,30 @@ static int ipr_reset_enable_ioa(struct ipr_cmnd *ipr_cmd)
 	}
 	if (ioa_cfg->sis64) {
 		/* Set the adapter to the correct endian mode. */
-		writel(IPR_ENDIAN_SWAP_KEY, ioa_cfg->regs.endian_swap_reg);
-		int_reg = readl(ioa_cfg->regs.endian_swap_reg);
+		pete_writel("drivers/scsi/ipr.c:8459", IPR_ENDIAN_SWAP_KEY, ioa_cfg->regs.endian_swap_reg);
+		int_reg = pete_readl("drivers/scsi/ipr.c:8460", ioa_cfg->regs.endian_swap_reg);
 	}
 
-	int_reg = readl(ioa_cfg->regs.sense_interrupt_reg32);
+	int_reg = pete_readl("drivers/scsi/ipr.c:8463", ioa_cfg->regs.sense_interrupt_reg32);
 
 	if (int_reg & IPR_PCII_IOA_TRANS_TO_OPER) {
-		writel((IPR_PCII_ERROR_INTERRUPTS | IPR_PCII_HRRQ_UPDATED),
+		pete_writel("drivers/scsi/ipr.c:8466", (IPR_PCII_ERROR_INTERRUPTS | IPR_PCII_HRRQ_UPDATED),
 		       ioa_cfg->regs.clr_interrupt_mask_reg32);
-		int_reg = readl(ioa_cfg->regs.sense_interrupt_mask_reg);
+		int_reg = pete_readl("drivers/scsi/ipr.c:8468", ioa_cfg->regs.sense_interrupt_mask_reg);
 		return IPR_RC_JOB_CONTINUE;
 	}
 
 	/* Enable destructive diagnostics on IOA */
-	writel(ioa_cfg->doorbell, ioa_cfg->regs.set_uproc_interrupt_reg32);
+	pete_writel("drivers/scsi/ipr.c:8473", ioa_cfg->doorbell, ioa_cfg->regs.set_uproc_interrupt_reg32);
 
 	if (ioa_cfg->sis64) {
 		maskval = IPR_PCII_IPL_STAGE_CHANGE;
 		maskval = (maskval << 32) | IPR_PCII_OPER_INTERRUPTS;
 		writeq(maskval, ioa_cfg->regs.clr_interrupt_mask_reg);
 	} else
-		writel(IPR_PCII_OPER_INTERRUPTS, ioa_cfg->regs.clr_interrupt_mask_reg32);
+		pete_writel("drivers/scsi/ipr.c:8480", IPR_PCII_OPER_INTERRUPTS, ioa_cfg->regs.clr_interrupt_mask_reg32);
 
-	int_reg = readl(ioa_cfg->regs.sense_interrupt_mask_reg);
+	int_reg = pete_readl("drivers/scsi/ipr.c:8482", ioa_cfg->regs.sense_interrupt_mask_reg);
 
 	dev_info(&ioa_cfg->pdev->dev, "Initializing IOA.\n");
 
@@ -8557,7 +8557,7 @@ static void ipr_get_unit_check_buffer(struct ipr_ioa_cfg *ioa_cfg)
 	int rc, length;
 	u32 ioasc;
 
-	mailbox = readl(ioa_cfg->ioa_mailbox);
+	mailbox = pete_readl("drivers/scsi/ipr.c:8560", ioa_cfg->ioa_mailbox);
 
 	if (!ioa_cfg->sis64 && !ipr_sdt_is_fmt2(mailbox)) {
 		ipr_unit_check_no_data(ioa_cfg);
@@ -8638,7 +8638,7 @@ static int ipr_dump_mailbox_wait(struct ipr_cmnd *ipr_cmd)
 		return IPR_RC_JOB_RETURN;
 
 	if (!ioa_cfg->sis64 || !ipr_cmd->u.time_left ||
-	    (readl(ioa_cfg->regs.sense_interrupt_reg) &
+	    (pete_readl("drivers/scsi/ipr.c:8641", ioa_cfg->regs.sense_interrupt_reg) &
 	     IPR_PCII_MAILBOX_STABLE)) {
 
 		if (!ipr_cmd->u.time_left)
@@ -8692,8 +8692,8 @@ static int ipr_reset_restore_cfg_space(struct ipr_cmnd *ipr_cmd)
 
 	if (ioa_cfg->sis64) {
 		/* Set the adapter to the correct endian mode. */
-		writel(IPR_ENDIAN_SWAP_KEY, ioa_cfg->regs.endian_swap_reg);
-		readl(ioa_cfg->regs.endian_swap_reg);
+		pete_writel("drivers/scsi/ipr.c:8695", IPR_ENDIAN_SWAP_KEY, ioa_cfg->regs.endian_swap_reg);
+		pete_readl("drivers/scsi/ipr.c:8696", ioa_cfg->regs.endian_swap_reg);
 	}
 
 	if (ioa_cfg->ioa_unit_checked) {
@@ -8761,7 +8761,7 @@ static int ipr_reset_start_bist(struct ipr_cmnd *ipr_cmd)
 
 	ENTER;
 	if (ioa_cfg->ipr_chip->bist_method == IPR_MMIO)
-		writel(IPR_UPROCI_SIS64_START_BIST,
+		pete_writel("drivers/scsi/ipr.c:8764", IPR_UPROCI_SIS64_START_BIST,
 		       ioa_cfg->regs.set_uproc_interrupt_reg32);
 	else
 		rc = pci_write_config_byte(ioa_cfg->pdev, PCI_BIST, PCI_BIST_START);
@@ -8908,7 +8908,7 @@ static int ipr_reset_allowed(struct ipr_ioa_cfg *ioa_cfg)
 {
 	volatile u32 temp_reg;
 
-	temp_reg = readl(ioa_cfg->regs.sense_interrupt_reg);
+	temp_reg = pete_readl("drivers/scsi/ipr.c:8911", ioa_cfg->regs.sense_interrupt_reg);
 	return ((temp_reg & IPR_PCII_CRITICAL_OPERATION) == 0);
 }
 
@@ -8966,7 +8966,7 @@ static int ipr_reset_alert(struct ipr_cmnd *ipr_cmd)
 
 	if ((rc == PCIBIOS_SUCCESSFUL) && (cmd_reg & PCI_COMMAND_MEMORY)) {
 		ipr_mask_and_clear_interrupts(ioa_cfg, ~0);
-		writel(IPR_UPROCI_RESET_ALERT, ioa_cfg->regs.set_uproc_interrupt_reg32);
+		pete_writel("drivers/scsi/ipr.c:8969", IPR_UPROCI_RESET_ALERT, ioa_cfg->regs.set_uproc_interrupt_reg32);
 		ipr_cmd->job_step = ipr_reset_wait_to_start_bist;
 	} else {
 		ipr_cmd->job_step = ipr_reset_block_config_access;
@@ -10124,8 +10124,8 @@ static int ipr_test_msi(struct ipr_ioa_cfg *ioa_cfg, struct pci_dev *pdev)
 	init_waitqueue_head(&ioa_cfg->msi_wait_q);
 	ioa_cfg->msi_received = 0;
 	ipr_mask_and_clear_interrupts(ioa_cfg, ~IPR_PCII_IOA_TRANS_TO_OPER);
-	writel(IPR_PCII_IO_DEBUG_ACKNOWLEDGE, ioa_cfg->regs.clr_interrupt_mask_reg32);
-	readl(ioa_cfg->regs.sense_interrupt_mask_reg);
+	pete_writel("drivers/scsi/ipr.c:10127", IPR_PCII_IO_DEBUG_ACKNOWLEDGE, ioa_cfg->regs.clr_interrupt_mask_reg32);
+	pete_readl("drivers/scsi/ipr.c:10128", ioa_cfg->regs.sense_interrupt_mask_reg);
 	spin_unlock_irqrestore(ioa_cfg->host->host_lock, lock_flags);
 
 	rc = request_irq(irq, ipr_test_intr, 0, IPR_NAME, ioa_cfg);
@@ -10135,8 +10135,8 @@ static int ipr_test_msi(struct ipr_ioa_cfg *ioa_cfg, struct pci_dev *pdev)
 	} else if (ipr_debug)
 		dev_info(&pdev->dev, "IRQ assigned: %d\n", irq);
 
-	writel(IPR_PCII_IO_DEBUG_ACKNOWLEDGE, ioa_cfg->regs.sense_interrupt_reg32);
-	readl(ioa_cfg->regs.sense_interrupt_reg);
+	pete_writel("drivers/scsi/ipr.c:10138", IPR_PCII_IO_DEBUG_ACKNOWLEDGE, ioa_cfg->regs.sense_interrupt_reg32);
+	pete_readl("drivers/scsi/ipr.c:10139", ioa_cfg->regs.sense_interrupt_reg);
 	wait_event_timeout(ioa_cfg->msi_wait_q, ioa_cfg->msi_received, HZ);
 	spin_lock_irqsave(ioa_cfg->host->host_lock, lock_flags);
 	ipr_mask_and_clear_interrupts(ioa_cfg, ~IPR_PCII_IOA_TRANS_TO_OPER);
@@ -10281,7 +10281,7 @@ static int ipr_probe_ioa(struct pci_dev *pdev,
 	}
 
 	/* Issue MMIO read to ensure card is not in EEH */
-	interrupts = readl(ioa_cfg->regs.sense_interrupt_reg);
+	interrupts = pete_readl("drivers/scsi/ipr.c:10284", ioa_cfg->regs.sense_interrupt_reg);
 	ipr_wait_for_pci_err_recovery(ioa_cfg);
 
 	if (ipr_number_of_msix > IPR_MAX_MSIX_VECTORS) {
@@ -10364,9 +10364,9 @@ static int ipr_probe_ioa(struct pci_dev *pdev,
 	 * If HRRQ updated interrupt is not masked, or reset alert is set,
 	 * the card is in an unknown state and needs a hard reset
 	 */
-	mask = readl(ioa_cfg->regs.sense_interrupt_mask_reg32);
-	interrupts = readl(ioa_cfg->regs.sense_interrupt_reg32);
-	uproc = readl(ioa_cfg->regs.sense_uproc_interrupt_reg32);
+	mask = pete_readl("drivers/scsi/ipr.c:10367", ioa_cfg->regs.sense_interrupt_mask_reg32);
+	interrupts = pete_readl("drivers/scsi/ipr.c:10368", ioa_cfg->regs.sense_interrupt_reg32);
+	uproc = pete_readl("drivers/scsi/ipr.c:10369", ioa_cfg->regs.sense_uproc_interrupt_reg32);
 	if ((mask & IPR_PCII_HRRQ_UPDATED) == 0 || (uproc & IPR_UPROCI_RESET_ALERT))
 		ioa_cfg->needs_hard_reset = 1;
 	if ((interrupts & IPR_PCII_ERROR_INTERRUPTS) || reset_devices)

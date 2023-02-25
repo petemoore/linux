@@ -228,7 +228,7 @@ static inline u8 *mtk_oob_ptr(struct nand_chip *chip, int i)
 
 static inline void nfi_writel(struct mtk_nfc *nfc, u32 val, u32 reg)
 {
-	writel(val, nfc->regs + reg);
+	pete_writel("drivers/mtd/nand/raw/mtk_nand.c:231", val, nfc->regs + reg);
 }
 
 static inline void nfi_writew(struct mtk_nfc *nfc, u16 val, u32 reg)

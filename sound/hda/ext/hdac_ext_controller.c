@@ -89,7 +89,7 @@ int snd_hdac_ext_bus_get_ml_capabilities(struct hdac_bus *bus)
 	u32 link_count;
 	struct hdac_ext_link *hlink;
 
-	link_count = readl(bus->mlcap + AZX_REG_ML_MLCD) + 1;
+	link_count = pete_readl("sound/hda/ext/hdac_ext_controller.c:92", bus->mlcap + AZX_REG_ML_MLCD) + 1;
 
 	dev_dbg(bus->dev, "In %s Link count: %d\n", __func__, link_count);
 
@@ -101,7 +101,7 @@ int snd_hdac_ext_bus_get_ml_capabilities(struct hdac_bus *bus)
 		hlink->bus = bus;
 		hlink->ml_addr = bus->mlcap + AZX_ML_BASE +
 					(AZX_ML_INTERVAL * idx);
-		hlink->lcaps  = readl(hlink->ml_addr + AZX_REG_ML_LCAP);
+		hlink->lcaps  = pete_readl("sound/hda/ext/hdac_ext_controller.c:104", hlink->ml_addr + AZX_REG_ML_LCAP);
 		hlink->lsdiid = readw(hlink->ml_addr + AZX_REG_ML_LSDIID);
 
 		/* since link in On, update the ref */
@@ -172,7 +172,7 @@ static int check_hdac_link_power_active(struct hdac_ext_link *link, bool enable)
 	timeout = 150;
 
 	do {
-		val = readl(link->ml_addr + AZX_REG_ML_LCTL);
+		val = pete_readl("sound/hda/ext/hdac_ext_controller.c:175", link->ml_addr + AZX_REG_ML_LCTL);
 		if (enable) {
 			if (((val & mask) >> AZX_MLCTL_CPA_SHIFT))
 				return 0;

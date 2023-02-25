@@ -43,7 +43,7 @@ int pl080_get_signal(const struct pl08x_channel_data *cd)
 
 	/* If acquiring for the first time, configure it */
 	if (!signals[signal].busy) {
-		val = readl(DMA_CHN_CFG);
+		val = pete_readl("arch/arm/mach-spear/pl080.c:46", DMA_CHN_CFG);
 
 		/*
 		 * Each request line has two bits in DMA_CHN_CFG register. To
@@ -52,7 +52,7 @@ int pl080_get_signal(const struct pl08x_channel_data *cd)
 		 */
 		val &= ~(0x3 << (signal * 2));
 		val |= cd->muxval << (signal * 2);
-		writel(val, DMA_CHN_CFG);
+		pete_writel("arch/arm/mach-spear/pl080.c:55", val, DMA_CHN_CFG);
 	}
 
 	signals[signal].busy++;

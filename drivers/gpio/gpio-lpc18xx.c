@@ -288,12 +288,12 @@ static int lpc18xx_gpio_direction(struct gpio_chip *chip, unsigned offset,
 	pin  = offset % LPC18XX_PINS_PER_PORT;
 
 	spin_lock_irqsave(&gc->lock, flags);
-	dir = readl(gc->base + LPC18XX_REG_DIR(port));
+	dir = pete_readl("drivers/gpio/gpio-lpc18xx.c:291", gc->base + LPC18XX_REG_DIR(port));
 	if (out)
 		dir |= BIT(pin);
 	else
 		dir &= ~BIT(pin);
-	writel(dir, gc->base + LPC18XX_REG_DIR(port));
+	pete_writel("drivers/gpio/gpio-lpc18xx.c:296", dir, gc->base + LPC18XX_REG_DIR(port));
 	spin_unlock_irqrestore(&gc->lock, flags);
 
 	return 0;

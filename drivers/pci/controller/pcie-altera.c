@@ -393,7 +393,7 @@ static int s10_rp_read_cfg(struct altera_pcie *pcie, int where,
 		*value = readw(addr);
 		break;
 	default:
-		*value = readl(addr);
+		*value = pete_readl("drivers/pci/controller/pcie-altera.c:396", addr);
 		break;
 	}
 
@@ -413,7 +413,7 @@ static int s10_rp_write_cfg(struct altera_pcie *pcie, u8 busno,
 		writew(value, addr);
 		break;
 	default:
-		writel(value, addr);
+		pete_writel("drivers/pci/controller/pcie-altera.c:416", value, addr);
 		break;
 	}
 

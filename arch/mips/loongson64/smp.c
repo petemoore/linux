@@ -35,13 +35,13 @@ static void *ipi_mailbox_buf[16];
 static uint32_t core0_c0count[NR_CPUS];
 
 /* read a 32bit value from ipi register */
-#define loongson3_ipi_read32(addr) readl(addr)
+#define loongson3_ipi_read32(addr) pete_readl("arch/mips/loongson64/smp.c:38", addr)
 /* read a 64bit value from ipi register */
 #define loongson3_ipi_read64(addr) readq(addr)
 /* write a 32bit value to ipi register */
 #define loongson3_ipi_write32(action, addr)	\
 	do {					\
-		writel(action, addr);		\
+		pete_writel("arch/mips/loongson64/smp.c:44", action, addr);		\
 		__wbflush();			\
 	} while (0)
 /* write a 64bit value to ipi register */

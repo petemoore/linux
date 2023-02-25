@@ -36,7 +36,7 @@ static void ce4100_power_off(void)
 static unsigned int mem_serial_in(struct uart_port *p, int offset)
 {
 	offset = offset << p->regshift;
-	return readl(p->membase + offset);
+	return pete_readl("arch/x86/platform/ce4100/ce4100.c:39", p->membase + offset);
 }
 
 /*
@@ -55,7 +55,7 @@ static unsigned int ce4100_mem_serial_in(struct uart_port *p, int offset)
 
 	if (offset == UART_IIR) {
 		offset = offset << p->regshift;
-		ret = readl(p->membase + offset);
+		ret = pete_readl("arch/x86/platform/ce4100/ce4100.c:58", p->membase + offset);
 		if (ret & UART_IIR_NO_INT) {
 			/* see if the TX interrupt should have really set */
 			ier = mem_serial_in(p, UART_IER);
@@ -76,7 +76,7 @@ static unsigned int ce4100_mem_serial_in(struct uart_port *p, int offset)
 static void ce4100_mem_serial_out(struct uart_port *p, int offset, int value)
 {
 	offset = offset << p->regshift;
-	writel(value, p->membase + offset);
+	pete_writel("arch/x86/platform/ce4100/ce4100.c:79", value, p->membase + offset);
 }
 
 static void ce4100_serial_fixup(int port, struct uart_port *up,

@@ -1076,7 +1076,7 @@ sli_queue_eq_arm(struct sli4 *sli4, struct sli4_queue *q, bool arm)
 	else
 		val = sli_format_eq_db_data(q->n_posted, q->id, a);
 
-	writel(val, q->db_regaddr);
+	pete_writel("drivers/scsi/elx/libefc_sli/sli4.c:1079", val, q->db_regaddr);
 	q->n_posted = 0;
 	spin_unlock_irqrestore(&q->lock, flags);
 
@@ -1099,7 +1099,7 @@ sli_queue_arm(struct sli4 *sli4, struct sli4_queue *q, bool arm)
 		else
 			val = sli_format_eq_db_data(q->n_posted, q->id, a);
 
-		writel(val, q->db_regaddr);
+		pete_writel("drivers/scsi/elx/libefc_sli/sli4.c:1102", val, q->db_regaddr);
 		q->n_posted = 0;
 		break;
 	case SLI4_QTYPE_CQ:
@@ -1108,7 +1108,7 @@ sli_queue_arm(struct sli4 *sli4, struct sli4_queue *q, bool arm)
 		else
 			val = sli_format_cq_db_data(q->n_posted, q->id, a);
 
-		writel(val, q->db_regaddr);
+		pete_writel("drivers/scsi/elx/libefc_sli/sli4.c:1111", val, q->db_regaddr);
 		q->n_posted = 0;
 		break;
 	default:
@@ -1137,7 +1137,7 @@ sli_wq_write(struct sli4 *sli4, struct sli4_queue *q, u8 *entry)
 	memcpy(qe, entry, q->size);
 	val = sli_format_wq_db_data(q->id);
 
-	writel(val, q->db_regaddr);
+	pete_writel("drivers/scsi/elx/libefc_sli/sli4.c:1140", val, q->db_regaddr);
 	q->index = (q->index + 1) & (q->length - 1);
 
 	return qindex;
@@ -1157,7 +1157,7 @@ sli_mq_write(struct sli4 *sli4, struct sli4_queue *q, u8 *entry)
 
 	memcpy(qe, entry, q->size);
 	val = sli_format_mq_db_data(q->id);
-	writel(val, q->db_regaddr);
+	pete_writel("drivers/scsi/elx/libefc_sli/sli4.c:1160", val, q->db_regaddr);
 	q->index = (q->index + 1) & (q->length - 1);
 	spin_unlock_irqrestore(&q->lock, flags);
 
@@ -1186,7 +1186,7 @@ sli_rq_write(struct sli4 *sli4, struct sli4_queue *q, u8 *entry)
 		goto skip;
 
 	val = sli_format_rq_db_data(q->id);
-	writel(val, q->db_regaddr);
+	pete_writel("drivers/scsi/elx/libefc_sli/sli4.c:1189", val, q->db_regaddr);
 skip:
 	q->index = (q->index + 1) & (q->length - 1);
 
@@ -2874,7 +2874,7 @@ sli_bmbx_wait(struct sli4 *sli4, u32 msec)
 	/* Wait for the bootstrap mailbox to report "ready" */
 	end = jiffies + msecs_to_jiffies(msec);
 	do {
-		val = readl(sli4->reg[0] + SLI4_BMBX_REG);
+		val = pete_readl("drivers/scsi/elx/libefc_sli/sli4.c:2877", sli4->reg[0] + SLI4_BMBX_REG);
 		if (val & SLI4_BMBX_RDY)
 			return 0;
 
@@ -2891,14 +2891,14 @@ sli_bmbx_write(struct sli4 *sli4)
 
 	/* write buffer location to bootstrap mailbox register */
 	val = sli_bmbx_write_hi(sli4->bmbx.phys);
-	writel(val, (sli4->reg[0] + SLI4_BMBX_REG));
+	pete_writel("drivers/scsi/elx/libefc_sli/sli4.c:2894", val, (sli4->reg[0] + SLI4_BMBX_REG));
 
 	if (sli_bmbx_wait(sli4, SLI4_BMBX_DELAY_US)) {
 		efc_log_crit(sli4, "BMBX WRITE_HI failed\n");
 		return -EIO;
 	}
 	val = sli_bmbx_write_lo(sli4->bmbx.phys);
-	writel(val, (sli4->reg[0] + SLI4_BMBX_REG));
+	pete_writel("drivers/scsi/elx/libefc_sli/sli4.c:2901", val, (sli4->reg[0] + SLI4_BMBX_REG));
 
 	/* wait for SLI Port to set ready bit */
 	return sli_bmbx_wait(sli4, SLI4_BMBX_TIMEOUT_MSEC);
@@ -2921,7 +2921,7 @@ sli_bmbx_command(struct sli4 *sli4)
 	/* Submit a command to the bootstrap mailbox and check the status */
 	if (sli_bmbx_write(sli4)) {
 		efc_log_crit(sli4, "bmbx write fail phys=%pad reg=%#x\n",
-			     &sli4->bmbx.phys, readl(sli4->reg[0] + SLI4_BMBX_REG));
+			     &sli4->bmbx.phys, pete_readl("drivers/scsi/elx/libefc_sli/sli4.c:2924", sli4->reg[0] + SLI4_BMBX_REG));
 		return -EIO;
 	}
 
@@ -4064,7 +4064,7 @@ sli_sliport_reset(struct sli4 *sli4)
 
 	val = SLI4_PORT_CTRL_IP;
 	/* Initialize port, endian */
-	writel(val, (sli4->reg[0] + SLI4_PORT_CTRL_REG));
+	pete_writel("drivers/scsi/elx/libefc_sli/sli4.c:4067", val, (sli4->reg[0] + SLI4_PORT_CTRL_REG));
 
 	rc = sli_wait_for_fw_ready(sli4, SLI4_FW_READY_TIMEOUT_MSEC);
 	if (!rc)
@@ -4763,7 +4763,7 @@ sli_fw_reset(struct sli4 *sli4)
 	}
 
 	/* Lancer uses PHYDEV_CONTROL */
-	writel(SLI4_PHYDEV_CTRL_FRST, (sli4->reg[0] + SLI4_PHYDEV_CTRL_REG));
+	pete_writel("drivers/scsi/elx/libefc_sli/sli4.c:4766", SLI4_PHYDEV_CTRL_FRST, (sli4->reg[0] + SLI4_PHYDEV_CTRL_REG));
 
 	/* wait for the FW to become ready after the reset */
 	if (!sli_wait_for_fw_ready(sli4, SLI4_FW_READY_TIMEOUT_MSEC)) {
@@ -4961,13 +4961,13 @@ int sli_raise_ue(struct sli4 *sli4, u8 dump)
 
 	if (dump == SLI4_FUNC_DESC_DUMP) {
 		val = SLI4_PORT_CTRL_FDD | SLI4_PORT_CTRL_IP;
-		writel(val, (sli4->reg[0] + SLI4_PORT_CTRL_REG));
+		pete_writel("drivers/scsi/elx/libefc_sli/sli4.c:4964", val, (sli4->reg[0] + SLI4_PORT_CTRL_REG));
 	} else {
 		val = SLI4_PHYDEV_CTRL_FRST;
 
 		if (dump == SLI4_CHIP_LEVEL_DUMP)
 			val |= SLI4_PHYDEV_CTRL_DD;
-		writel(val, (sli4->reg[0] + SLI4_PHYDEV_CTRL_REG));
+		pete_writel("drivers/scsi/elx/libefc_sli/sli4.c:4970", val, (sli4->reg[0] + SLI4_PHYDEV_CTRL_REG));
 	}
 
 	return 0;
@@ -4984,7 +4984,7 @@ int sli_dump_is_ready(struct sli4 *sli4)
 	 * ready before signaling that the dump is ready to go.
 	 */
 	port_val = sli_reg_read_status(sli4);
-	bmbx_val = readl(sli4->reg[0] + SLI4_BMBX_REG);
+	bmbx_val = pete_readl("drivers/scsi/elx/libefc_sli/sli4.c:4987", sli4->reg[0] + SLI4_BMBX_REG);
 
 	if ((bmbx_val & SLI4_BMBX_RDY) &&
 	    (port_val & SLI4_PORT_STATUS_RDY)) {

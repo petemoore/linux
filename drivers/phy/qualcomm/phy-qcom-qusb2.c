@@ -452,37 +452,37 @@ static inline void qusb2_write_mask(void __iomem *base, u32 offset,
 {
 	u32 reg;
 
-	reg = readl(base + offset);
+	reg = pete_readl("drivers/phy/qualcomm/phy-qcom-qusb2.c:455", base + offset);
 	reg &= ~mask;
 	reg |= val & mask;
-	writel(reg, base + offset);
+	pete_writel("drivers/phy/qualcomm/phy-qcom-qusb2.c:458", reg, base + offset);
 
 	/* Ensure above write is completed */
-	readl(base + offset);
+	pete_readl("drivers/phy/qualcomm/phy-qcom-qusb2.c:461", base + offset);
 }
 
 static inline void qusb2_setbits(void __iomem *base, u32 offset, u32 val)
 {
 	u32 reg;
 
-	reg = readl(base + offset);
+	reg = pete_readl("drivers/phy/qualcomm/phy-qcom-qusb2.c:468", base + offset);
 	reg |= val;
-	writel(reg, base + offset);
+	pete_writel("drivers/phy/qualcomm/phy-qcom-qusb2.c:470", reg, base + offset);
 
 	/* Ensure above write is completed */
-	readl(base + offset);
+	pete_readl("drivers/phy/qualcomm/phy-qcom-qusb2.c:473", base + offset);
 }
 
 static inline void qusb2_clrbits(void __iomem *base, u32 offset, u32 val)
 {
 	u32 reg;
 
-	reg = readl(base + offset);
+	reg = pete_readl("drivers/phy/qualcomm/phy-qcom-qusb2.c:480", base + offset);
 	reg &= ~val;
-	writel(reg, base + offset);
+	pete_writel("drivers/phy/qualcomm/phy-qcom-qusb2.c:482", reg, base + offset);
 
 	/* Ensure above write is completed */
-	readl(base + offset);
+	pete_readl("drivers/phy/qualcomm/phy-qcom-qusb2.c:485", base + offset);
 }
 
 static inline
@@ -494,9 +494,9 @@ void qcom_qusb2_phy_configure(void __iomem *base,
 
 	for (i = 0; i < num; i++) {
 		if (tbl[i].in_layout)
-			writel(tbl[i].val, base + regs[tbl[i].offset]);
+			pete_writel("drivers/phy/qualcomm/phy-qcom-qusb2.c:497", tbl[i].val, base + regs[tbl[i].offset]);
 		else
-			writel(tbl[i].val, base + tbl[i].offset);
+			pete_writel("drivers/phy/qualcomm/phy-qcom-qusb2.c:499", tbl[i].val, base + tbl[i].offset);
 	}
 }
 
@@ -643,7 +643,7 @@ static int __maybe_unused qusb2_phy_runtime_suspend(struct device *dev)
 		break;
 	}
 
-	writel(intr_mask, qphy->base + cfg->regs[QUSB2PHY_INTR_CTRL]);
+	pete_writel("drivers/phy/qualcomm/phy-qcom-qusb2.c:646", intr_mask, qphy->base + cfg->regs[QUSB2PHY_INTR_CTRL]);
 
 	/* hold core PLL into reset */
 	if (cfg->has_pll_override) {
@@ -704,7 +704,7 @@ static int __maybe_unused qusb2_phy_runtime_resume(struct device *dev)
 		}
 	}
 
-	writel(0x0, qphy->base + cfg->regs[QUSB2PHY_INTR_CTRL]);
+	pete_writel("drivers/phy/qualcomm/phy-qcom-qusb2.c:707", 0x0, qphy->base + cfg->regs[QUSB2PHY_INTR_CTRL]);
 
 	/* bring core PLL out of reset */
 	if (cfg->has_pll_override) {
@@ -773,7 +773,7 @@ static int qusb2_phy_init(struct phy *phy)
 
 	if (cfg->has_pll_test) {
 		/* save reset value to override reference clock scheme later */
-		val = readl(qphy->base + QUSB2PHY_PLL_TEST);
+		val = pete_readl("drivers/phy/qualcomm/phy-qcom-qusb2.c:776", qphy->base + QUSB2PHY_PLL_TEST);
 	}
 
 	qcom_qusb2_phy_configure(qphy->base, cfg->regs, cfg->tbl,
@@ -839,10 +839,10 @@ static int qusb2_phy_init(struct phy *phy)
 		else
 			val |= CLK_REF_SEL;
 
-		writel(val, qphy->base + QUSB2PHY_PLL_TEST);
+		pete_writel("drivers/phy/qualcomm/phy-qcom-qusb2.c:842", val, qphy->base + QUSB2PHY_PLL_TEST);
 
 		/* ensure above write is through */
-		readl(qphy->base + QUSB2PHY_PLL_TEST);
+		pete_readl("drivers/phy/qualcomm/phy-qcom-qusb2.c:845", qphy->base + QUSB2PHY_PLL_TEST);
 	}
 
 	/* Required to get phy pll lock successfully */

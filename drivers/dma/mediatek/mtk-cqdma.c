@@ -168,7 +168,7 @@ static struct device *cqdma2dev(struct mtk_cqdma_device *cqdma)
 
 static u32 mtk_dma_read(struct mtk_cqdma_pchan *pc, u32 reg)
 {
-	return readl(pc->base + reg);
+	return pete_readl("drivers/dma/mediatek/mtk-cqdma.c:171", pc->base + reg);
 }
 
 static void mtk_dma_write(struct mtk_cqdma_pchan *pc, u32 reg, u32 val)

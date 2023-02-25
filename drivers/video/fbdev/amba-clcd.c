@@ -43,8 +43,8 @@ static inline void clcdfb_set_start(struct clcd_fb *fb)
 	ustart += fb->fb.var.yoffset * fb->fb.fix.line_length;
 	lstart = ustart + fb->fb.var.yres * fb->fb.fix.line_length / 2;
 
-	writel(ustart, fb->regs + CLCD_UBAS);
-	writel(lstart, fb->regs + CLCD_LBAS);
+	pete_writel("drivers/video/fbdev/amba-clcd.c:46", ustart, fb->regs + CLCD_UBAS);
+	pete_writel("drivers/video/fbdev/amba-clcd.c:47", lstart, fb->regs + CLCD_LBAS);
 }
 
 static void clcdfb_disable(struct clcd_fb *fb)
@@ -59,16 +59,16 @@ static void clcdfb_disable(struct clcd_fb *fb)
 		backlight_update_status(fb->panel->backlight);
 	}
 
-	val = readl(fb->regs + fb->off_cntl);
+	val = pete_readl("drivers/video/fbdev/amba-clcd.c:62", fb->regs + fb->off_cntl);
 	if (val & CNTL_LCDPWR) {
 		val &= ~CNTL_LCDPWR;
-		writel(val, fb->regs + fb->off_cntl);
+		pete_writel("drivers/video/fbdev/amba-clcd.c:65", val, fb->regs + fb->off_cntl);
 
 		msleep(20);
 	}
 	if (val & CNTL_LCDEN) {
 		val &= ~CNTL_LCDEN;
-		writel(val, fb->regs + fb->off_cntl);
+		pete_writel("drivers/video/fbdev/amba-clcd.c:71", val, fb->regs + fb->off_cntl);
 	}
 
 	/*
@@ -94,7 +94,7 @@ static void clcdfb_enable(struct clcd_fb *fb, u32 cntl)
 	 * Bring up by first enabling..
 	 */
 	cntl |= CNTL_LCDEN;
-	writel(cntl, fb->regs + fb->off_cntl);
+	pete_writel("drivers/video/fbdev/amba-clcd.c:97", cntl, fb->regs + fb->off_cntl);
 
 	msleep(20);
 
@@ -102,7 +102,7 @@ static void clcdfb_enable(struct clcd_fb *fb, u32 cntl)
 	 * and now apply power.
 	 */
 	cntl |= CNTL_LCDPWR;
-	writel(cntl, fb->regs + fb->off_cntl);
+	pete_writel("drivers/video/fbdev/amba-clcd.c:105", cntl, fb->regs + fb->off_cntl);
 
 	/*
 	 * Turn on backlight
@@ -293,10 +293,10 @@ static int clcdfb_set_par(struct fb_info *info)
 
 	clcdfb_disable(fb);
 
-	writel(regs.tim0, fb->regs + CLCD_TIM0);
-	writel(regs.tim1, fb->regs + CLCD_TIM1);
-	writel(regs.tim2, fb->regs + CLCD_TIM2);
-	writel(regs.tim3, fb->regs + CLCD_TIM3);
+	pete_writel("drivers/video/fbdev/amba-clcd.c:296", regs.tim0, fb->regs + CLCD_TIM0);
+	pete_writel("drivers/video/fbdev/amba-clcd.c:297", regs.tim1, fb->regs + CLCD_TIM1);
+	pete_writel("drivers/video/fbdev/amba-clcd.c:298", regs.tim2, fb->regs + CLCD_TIM2);
+	pete_writel("drivers/video/fbdev/amba-clcd.c:299", regs.tim3, fb->regs + CLCD_TIM3);
 
 	clcdfb_set_start(fb);
 
@@ -311,10 +311,10 @@ static int clcdfb_set_par(struct fb_info *info)
 	       "CLCD: Registers set to\n"
 	       "  %08x %08x %08x %08x\n"
 	       "  %08x %08x %08x %08x\n",
-		readl(fb->regs + CLCD_TIM0), readl(fb->regs + CLCD_TIM1),
-		readl(fb->regs + CLCD_TIM2), readl(fb->regs + CLCD_TIM3),
-		readl(fb->regs + CLCD_UBAS), readl(fb->regs + CLCD_LBAS),
-		readl(fb->regs + fb->off_ienb), readl(fb->regs + fb->off_cntl));
+		pete_readl("drivers/video/fbdev/amba-clcd.c:314", fb->regs + CLCD_TIM0), pete_readl("drivers/video/fbdev/amba-clcd.c:314", fb->regs + CLCD_TIM1),
+		pete_readl("drivers/video/fbdev/amba-clcd.c:315", fb->regs + CLCD_TIM2), pete_readl("drivers/video/fbdev/amba-clcd.c:315", fb->regs + CLCD_TIM3),
+		pete_readl("drivers/video/fbdev/amba-clcd.c:316", fb->regs + CLCD_UBAS), pete_readl("drivers/video/fbdev/amba-clcd.c:316", fb->regs + CLCD_LBAS),
+		pete_readl("drivers/video/fbdev/amba-clcd.c:317", fb->regs + fb->off_ienb), pete_readl("drivers/video/fbdev/amba-clcd.c:317", fb->regs + fb->off_cntl));
 #endif
 
 	return 0;
@@ -365,8 +365,8 @@ clcdfb_setcolreg(unsigned int regno, unsigned int red, unsigned int green,
 			mask = 0xffff0000;
 		}
 
-		val = readl(fb->regs + hw_reg) & mask;
-		writel(val | newval, fb->regs + hw_reg);
+		val = pete_readl("drivers/video/fbdev/amba-clcd.c:368", fb->regs + hw_reg) & mask;
+		pete_writel("drivers/video/fbdev/amba-clcd.c:369", val | newval, fb->regs + hw_reg);
 	}
 
 	return regno > 255;
@@ -515,7 +515,7 @@ static int clcdfb_register(struct clcd_fb *fb)
 	/*
 	 * Ensure interrupts are disabled.
 	 */
-	writel(0, fb->regs + fb->off_ienb);
+	pete_writel("drivers/video/fbdev/amba-clcd.c:518", 0, fb->regs + fb->off_ienb);
 
 	fb_set_var(&fb->fb, &fb->fb.var);
 

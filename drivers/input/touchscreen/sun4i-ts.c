@@ -119,8 +119,8 @@ static void sun4i_ts_irq_handle_input(struct sun4i_ts_data *ts, u32 reg_val)
 	u32 x, y;
 
 	if (reg_val & FIFO_DATA_PENDING) {
-		x = readl(ts->base + TP_DATA);
-		y = readl(ts->base + TP_DATA);
+		x = pete_readl("drivers/input/touchscreen/sun4i-ts.c:122", ts->base + TP_DATA);
+		y = pete_readl("drivers/input/touchscreen/sun4i-ts.c:123", ts->base + TP_DATA);
 		/* The 1st location reported after an up event is unreliable */
 		if (!ts->ignore_fifo_data) {
 			input_report_abs(ts->input, ABS_X, x);
@@ -149,15 +149,15 @@ static irqreturn_t sun4i_ts_irq(int irq, void *dev_id)
 	struct sun4i_ts_data *ts = dev_id;
 	u32 reg_val;
 
-	reg_val  = readl(ts->base + TP_INT_FIFOS);
+	reg_val  = pete_readl("drivers/input/touchscreen/sun4i-ts.c:152", ts->base + TP_INT_FIFOS);
 
 	if (reg_val & TEMP_DATA_PENDING)
-		ts->temp_data = readl(ts->base + TEMP_DATA);
+		ts->temp_data = pete_readl("drivers/input/touchscreen/sun4i-ts.c:155", ts->base + TEMP_DATA);
 
 	if (ts->input)
 		sun4i_ts_irq_handle_input(ts, reg_val);
 
-	writel(reg_val, ts->base + TP_INT_FIFOS);
+	pete_writel("drivers/input/touchscreen/sun4i-ts.c:160", reg_val, ts->base + TP_INT_FIFOS);
 
 	return IRQ_HANDLED;
 }
@@ -167,7 +167,7 @@ static int sun4i_ts_open(struct input_dev *dev)
 	struct sun4i_ts_data *ts = input_get_drvdata(dev);
 
 	/* Flush, set trig level to 1, enable temp, data and up irqs */
-	writel(TEMP_IRQ_EN(1) | DATA_IRQ_EN(1) | FIFO_TRIG(1) | FIFO_FLUSH(1) |
+	pete_writel("drivers/input/touchscreen/sun4i-ts.c:170", TEMP_IRQ_EN(1) | DATA_IRQ_EN(1) | FIFO_TRIG(1) | FIFO_FLUSH(1) |
 		TP_UP_IRQ_EN(1), ts->base + TP_INT_FIFOC);
 
 	return 0;
@@ -178,7 +178,7 @@ static void sun4i_ts_close(struct input_dev *dev)
 	struct sun4i_ts_data *ts = input_get_drvdata(dev);
 
 	/* Deactivate all input IRQs */
-	writel(TEMP_IRQ_EN(1), ts->base + TP_INT_FIFOC);
+	pete_writel("drivers/input/touchscreen/sun4i-ts.c:181", TEMP_IRQ_EN(1), ts->base + TP_INT_FIFOC);
 }
 
 static int sun4i_get_temp(const struct sun4i_ts_data *ts, int *temp)
@@ -314,7 +314,7 @@ static int sun4i_ts_probe(struct platform_device *pdev)
 	 * Select HOSC clk, clkin = clk / 6, adc samplefreq = clkin / 8192,
 	 * t_acq = clkin / (16 * 64)
 	 */
-	writel(ADC_CLK_SEL(0) | ADC_CLK_DIV(2) | FS_DIV(7) | T_ACQ(63),
+	pete_writel("drivers/input/touchscreen/sun4i-ts.c:317", ADC_CLK_SEL(0) | ADC_CLK_DIV(2) | FS_DIV(7) | T_ACQ(63),
 	       ts->base + TP_CTRL0);
 
 	/*
@@ -323,7 +323,7 @@ static int sun4i_ts_probe(struct platform_device *pdev)
 	 */
 	of_property_read_u32(np, "allwinner,tp-sensitive-adjust",
 			     &tp_sensitive_adjust);
-	writel(TP_SENSITIVE_ADJUST(tp_sensitive_adjust) | TP_MODE_SELECT(0),
+	pete_writel("drivers/input/touchscreen/sun4i-ts.c:326", TP_SENSITIVE_ADJUST(tp_sensitive_adjust) | TP_MODE_SELECT(0),
 	       ts->base + TP_CTRL2);
 
 	/*
@@ -331,10 +331,10 @@ static int sun4i_ts_probe(struct platform_device *pdev)
 	 * filter type.
 	 */
 	of_property_read_u32(np, "allwinner,filter-type", &filter_type);
-	writel(FILTER_EN(1) | FILTER_TYPE(filter_type), ts->base + TP_CTRL3);
+	pete_writel("drivers/input/touchscreen/sun4i-ts.c:334", FILTER_EN(1) | FILTER_TYPE(filter_type), ts->base + TP_CTRL3);
 
 	/* Enable temperature measurement, period 1953 (2 seconds) */
-	writel(TEMP_ENABLE(1) | TEMP_PERIOD(1953), ts->base + TP_TPR);
+	pete_writel("drivers/input/touchscreen/sun4i-ts.c:337", TEMP_ENABLE(1) | TEMP_PERIOD(1953), ts->base + TP_TPR);
 
 	/*
 	 * Set stylus up debounce to aprox 10 ms, enable debounce, and
@@ -345,7 +345,7 @@ static int sun4i_ts_probe(struct platform_device *pdev)
 		reg |= SUN6I_TP_MODE_EN(1);
 	else
 		reg |= TP_MODE_EN(1);
-	writel(reg, ts->base + TP_CTRL1);
+	pete_writel("drivers/input/touchscreen/sun4i-ts.c:348", reg, ts->base + TP_CTRL1);
 
 	/*
 	 * The thermal core does not register hwmon devices for DT-based
@@ -361,12 +361,12 @@ static int sun4i_ts_probe(struct platform_device *pdev)
 	if (IS_ERR(thermal))
 		return PTR_ERR(thermal);
 
-	writel(TEMP_IRQ_EN(1), ts->base + TP_INT_FIFOC);
+	pete_writel("drivers/input/touchscreen/sun4i-ts.c:364", TEMP_IRQ_EN(1), ts->base + TP_INT_FIFOC);
 
 	if (ts_attached) {
 		error = input_register_device(ts->input);
 		if (error) {
-			writel(0, ts->base + TP_INT_FIFOC);
+			pete_writel("drivers/input/touchscreen/sun4i-ts.c:369", 0, ts->base + TP_INT_FIFOC);
 			return error;
 		}
 	}
@@ -384,7 +384,7 @@ static int sun4i_ts_remove(struct platform_device *pdev)
 		input_unregister_device(ts->input);
 
 	/* Deactivate all IRQs */
-	writel(0, ts->base + TP_INT_FIFOC);
+	pete_writel("drivers/input/touchscreen/sun4i-ts.c:387", 0, ts->base + TP_INT_FIFOC);
 
 	return 0;
 }

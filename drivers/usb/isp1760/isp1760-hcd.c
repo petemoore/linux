@@ -214,12 +214,12 @@ static void isp1760_hcd_portsc1_set_clear(struct isp1760_hcd *priv, u32 field,
 	u32 bit = isp176x_hc_portsc1_fields[field];
 	u16 portsc1_reg = priv->is_isp1763 ? ISP1763_HC_PORTSC1 :
 		ISP176x_HC_PORTSC1;
-	u32 port_status = readl(priv->base + portsc1_reg);
+	u32 port_status = pete_readl("drivers/usb/isp1760/isp1760-hcd.c:217", priv->base + portsc1_reg);
 
 	if (val)
-		writel(port_status | bit, priv->base + portsc1_reg);
+		pete_writel("drivers/usb/isp1760/isp1760-hcd.c:220", port_status | bit, priv->base + portsc1_reg);
 	else
-		writel(port_status & ~bit, priv->base + portsc1_reg);
+		pete_writel("drivers/usb/isp1760/isp1760-hcd.c:222", port_status & ~bit, priv->base + portsc1_reg);
 }
 
 static void isp1760_hcd_write(struct usb_hcd *hcd, u32 field, u32 val)

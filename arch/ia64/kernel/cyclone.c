@@ -75,7 +75,7 @@ int __init init_cyclone_clock(void)
 		use_cyclone = 0;
 		return -ENODEV;
 	}
-	writel(0x00000001,reg);
+	pete_writel("arch/ia64/kernel/cyclone.c:78", 0x00000001,reg);
 	iounmap(reg);
 
 	/* setup MPCS */
@@ -87,7 +87,7 @@ int __init init_cyclone_clock(void)
 		use_cyclone = 0;
 		return -ENODEV;
 	}
-	writel(0x00000001,reg);
+	pete_writel("arch/ia64/kernel/cyclone.c:90", 0x00000001,reg);
 	iounmap(reg);
 
 	/* map in cyclone_timer */
@@ -102,10 +102,10 @@ int __init init_cyclone_clock(void)
 
 	/*quick test to make sure its ticking*/
 	for(i=0; i<3; i++){
-		u32 old = readl(cyclone_timer);
+		u32 old = pete_readl("arch/ia64/kernel/cyclone.c:105", cyclone_timer);
 		int stall = 100;
 		while(stall--) barrier();
-		if(readl(cyclone_timer) == old){
+		if(pete_readl("arch/ia64/kernel/cyclone.c:108", cyclone_timer) == old){
 			printk(KERN_ERR "Summit chipset: Counter not counting!"
 					" DISABLED\n");
 			iounmap(cyclone_timer);

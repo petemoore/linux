@@ -40,9 +40,9 @@ static int ingenic_trng_init(struct hwrng *rng)
 	struct ingenic_trng *trng = container_of(rng, struct ingenic_trng, rng);
 	unsigned int ctrl;
 
-	ctrl = readl(trng->base + TRNG_REG_CFG_OFFSET);
+	ctrl = pete_readl("drivers/char/hw_random/ingenic-trng.c:43", trng->base + TRNG_REG_CFG_OFFSET);
 	ctrl |= CFG_GEN_EN;
-	writel(ctrl, trng->base + TRNG_REG_CFG_OFFSET);
+	pete_writel("drivers/char/hw_random/ingenic-trng.c:45", ctrl, trng->base + TRNG_REG_CFG_OFFSET);
 
 	return 0;
 }
@@ -52,9 +52,9 @@ static void ingenic_trng_cleanup(struct hwrng *rng)
 	struct ingenic_trng *trng = container_of(rng, struct ingenic_trng, rng);
 	unsigned int ctrl;
 
-	ctrl = readl(trng->base + TRNG_REG_CFG_OFFSET);
+	ctrl = pete_readl("drivers/char/hw_random/ingenic-trng.c:55", trng->base + TRNG_REG_CFG_OFFSET);
 	ctrl &= ~CFG_GEN_EN;
-	writel(ctrl, trng->base + TRNG_REG_CFG_OFFSET);
+	pete_writel("drivers/char/hw_random/ingenic-trng.c:57", ctrl, trng->base + TRNG_REG_CFG_OFFSET);
 }
 
 static int ingenic_trng_read(struct hwrng *rng, void *buf, size_t max, bool wait)
@@ -71,7 +71,7 @@ static int ingenic_trng_read(struct hwrng *rng, void *buf, size_t max, bool wait
 		return ret;
 	}
 
-	*data = readl(trng->base + TRNG_REG_RANDOMNUM_OFFSET);
+	*data = pete_readl("drivers/char/hw_random/ingenic-trng.c:74", trng->base + TRNG_REG_RANDOMNUM_OFFSET);
 
 	return 4;
 }
@@ -133,9 +133,9 @@ static int ingenic_trng_remove(struct platform_device *pdev)
 
 	hwrng_unregister(&trng->rng);
 
-	ctrl = readl(trng->base + TRNG_REG_CFG_OFFSET);
+	ctrl = pete_readl("drivers/char/hw_random/ingenic-trng.c:136", trng->base + TRNG_REG_CFG_OFFSET);
 	ctrl &= ~CFG_GEN_EN;
-	writel(ctrl, trng->base + TRNG_REG_CFG_OFFSET);
+	pete_writel("drivers/char/hw_random/ingenic-trng.c:138", ctrl, trng->base + TRNG_REG_CFG_OFFSET);
 
 	clk_disable_unprepare(trng->clk);
 

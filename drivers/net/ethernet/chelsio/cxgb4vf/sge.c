@@ -550,7 +550,7 @@ static inline void ring_fl_db(struct adapter *adapter, struct sge_fl *fl)
 				     T4VF_SGE_BASE_ADDR + SGE_VF_KDOORBELL,
 				     QID_V(fl->cntxt_id) | val);
 		} else {
-			writel(val | QID_V(fl->bar2_qid),
+			pete_writel("drivers/net/ethernet/chelsio/cxgb4vf/sge.c:553", val | QID_V(fl->bar2_qid),
 			       fl->bar2_addr + SGE_UDB_KDOORBELL);
 
 			/* This Write memory Barrier will force the write to
@@ -1021,7 +1021,7 @@ static inline void ring_tx_db(struct adapter *adapter, struct sge_txq *tq,
 				count--;
 			}
 		} else
-			writel(val | QID_V(tq->bar2_qid),
+			pete_writel("drivers/net/ethernet/chelsio/cxgb4vf/sge.c:1024", val | QID_V(tq->bar2_qid),
 			       tq->bar2_addr + SGE_UDB_KDOORBELL);
 
 		/* This Write Memory Barrier will force the write to the User
@@ -1911,7 +1911,7 @@ static int napi_rx_handler(struct napi_struct *napi, int budget)
 			     T4VF_SGE_BASE_ADDR + SGE_VF_GTS,
 			     val | INGRESSQID_V((u32)rspq->cntxt_id));
 	} else {
-		writel(val | INGRESSQID_V(rspq->bar2_qid),
+		pete_writel("drivers/net/ethernet/chelsio/cxgb4vf/sge.c:1914", val | INGRESSQID_V(rspq->bar2_qid),
 		       rspq->bar2_addr + SGE_UDB_GTS);
 		wmb();
 	}
@@ -2013,7 +2013,7 @@ static unsigned int process_intrq(struct adapter *adapter)
 		t4_write_reg(adapter, T4VF_SGE_BASE_ADDR + SGE_VF_GTS,
 			     val | INGRESSQID_V(intrq->cntxt_id));
 	} else {
-		writel(val | INGRESSQID_V(intrq->bar2_qid),
+		pete_writel("drivers/net/ethernet/chelsio/cxgb4vf/sge.c:2016", val | INGRESSQID_V(intrq->bar2_qid),
 		       intrq->bar2_addr + SGE_UDB_GTS);
 		wmb();
 	}

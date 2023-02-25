@@ -41,9 +41,9 @@
  */
 #if 0
 #define dma_read32(REG) \
-	readl(esp->dma_regs + (REG))
+	pete_readl("drivers/scsi/sun3x_esp.c:44", esp->dma_regs + (REG))
 #define dma_write32(VAL, REG) \
-	writel((VAL), esp->dma_regs + (REG))
+	pete_writel("drivers/scsi/sun3x_esp.c:46", (VAL), esp->dma_regs + (REG))
 #else
 #define dma_read32(REG) \
 	*(volatile u32 *)(esp->dma_regs + (REG))

@@ -433,13 +433,13 @@ static unsigned int mem16_serial_in(struct uart_port *p, int offset)
 static void mem32_serial_out(struct uart_port *p, int offset, int value)
 {
 	offset = offset << p->regshift;
-	writel(value, p->membase + offset);
+	pete_writel("drivers/tty/serial/8250/8250_port.c:436", value, p->membase + offset);
 }
 
 static unsigned int mem32_serial_in(struct uart_port *p, int offset)
 {
 	offset = offset << p->regshift;
-	return readl(p->membase + offset);
+	return pete_readl("drivers/tty/serial/8250/8250_port.c:442", p->membase + offset);
 }
 
 static void mem32be_serial_out(struct uart_port *p, int offset, int value)

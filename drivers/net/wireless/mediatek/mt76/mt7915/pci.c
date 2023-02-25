@@ -54,7 +54,7 @@ mt7915_pci_get_hif2(struct mt7915_dev *dev)
 	spin_lock_bh(&hif_lock);
 
 	list_for_each_entry(hif, &hif_list, list) {
-		val = readl(hif->regs + MT_PCIE_RECOG_ID);
+		val = pete_readl("drivers/net/wireless/mediatek/mt76/mt7915/pci.c:57", hif->regs + MT_PCIE_RECOG_ID);
 		val &= MT_PCIE_RECOG_ID_MASK;
 		if (val != dev->hif_idx)
 			continue;

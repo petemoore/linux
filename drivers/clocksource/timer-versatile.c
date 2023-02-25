@@ -16,7 +16,7 @@ static void __iomem *versatile_sys_24mhz;
 
 static u64 notrace versatile_sys_24mhz_read(void)
 {
-	return readl(versatile_sys_24mhz);
+	return pete_readl("drivers/clocksource/timer-versatile.c:19", versatile_sys_24mhz);
 }
 
 static int __init versatile_sched_clock_init(struct device_node *node)

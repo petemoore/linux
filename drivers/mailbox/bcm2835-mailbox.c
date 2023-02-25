@@ -72,8 +72,8 @@ static irqreturn_t bcm2835_mbox_irq(int irq, void *dev_id)
 	struct device *dev = mbox->controller.dev;
 	struct mbox_chan *link = &mbox->controller.chans[0];
 
-	while (!(readl(mbox->regs + MAIL0_STA) & ARM_MS_EMPTY)) {
-		u32 msg = readl(mbox->regs + MAIL0_RD);
+	while (!(pete_readl("drivers/mailbox/bcm2835-mailbox.c:75", mbox->regs + MAIL0_STA) & ARM_MS_EMPTY)) {
+		u32 msg = pete_readl("drivers/mailbox/bcm2835-mailbox.c:76", mbox->regs + MAIL0_RD);
 		dev_dbg(dev, "Reply 0x%08X\n", msg);
 		mbox_chan_received_data(link, &msg);
 	}
@@ -86,7 +86,7 @@ static int bcm2835_send_data(struct mbox_chan *link, void *data)
 	u32 msg = *(u32 *)data;
 
 	spin_lock(&mbox->lock);
-	writel(msg, mbox->regs + MAIL1_WRT);
+	pete_writel("drivers/mailbox/bcm2835-mailbox.c:89", msg, mbox->regs + MAIL1_WRT);
 	dev_dbg(mbox->controller.dev, "Request 0x%08X\n", msg);
 	spin_unlock(&mbox->lock);
 	return 0;
@@ -97,7 +97,7 @@ static int bcm2835_startup(struct mbox_chan *link)
 	struct bcm2835_mbox *mbox = bcm2835_link_mbox(link);
 
 	/* Enable the interrupt on data reception */
-	writel(ARM_MC_IHAVEDATAIRQEN, mbox->regs + MAIL0_CNF);
+	pete_writel("drivers/mailbox/bcm2835-mailbox.c:100", ARM_MC_IHAVEDATAIRQEN, mbox->regs + MAIL0_CNF);
 
 	return 0;
 }
@@ -106,7 +106,7 @@ static void bcm2835_shutdown(struct mbox_chan *link)
 {
 	struct bcm2835_mbox *mbox = bcm2835_link_mbox(link);
 
-	writel(0, mbox->regs + MAIL0_CNF);
+	pete_writel("drivers/mailbox/bcm2835-mailbox.c:109", 0, mbox->regs + MAIL0_CNF);
 }
 
 static bool bcm2835_last_tx_done(struct mbox_chan *link)
@@ -115,7 +115,7 @@ static bool bcm2835_last_tx_done(struct mbox_chan *link)
 	bool ret;
 
 	spin_lock(&mbox->lock);
-	ret = !(readl(mbox->regs + MAIL1_STA) & ARM_MS_FULL);
+	ret = !(pete_readl("drivers/mailbox/bcm2835-mailbox.c:118", mbox->regs + MAIL1_STA) & ARM_MS_FULL);
 	spin_unlock(&mbox->lock);
 	return ret;
 }

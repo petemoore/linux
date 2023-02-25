@@ -477,7 +477,7 @@ void vxge_hw_device_unmask_all(struct __vxge_hw_device *hldev)
  */
 void vxge_hw_device_flush_io(struct __vxge_hw_device *hldev)
 {
-	readl(&hldev->common_reg->titan_general_int_status);
+	pete_readl("drivers/net/ethernet/neterion/vxge/vxge-traffic.c:480", &hldev->common_reg->titan_general_int_status);
 }
 
 /**
@@ -2291,7 +2291,7 @@ void vxge_hw_vpath_inta_mask_tx_rx(struct __vxge_hw_vpath_handle *vp)
 			&hldev->common_reg->tim_int_mask0);
 	}
 
-	val64 = readl(&hldev->common_reg->tim_int_mask1);
+	val64 = pete_readl("drivers/net/ethernet/neterion/vxge/vxge-traffic.c:2294", &hldev->common_reg->tim_int_mask1);
 
 	if ((tim_int_mask1[VXGE_HW_VPATH_INTR_TX] != 0) ||
 		(tim_int_mask1[VXGE_HW_VPATH_INTR_RX] != 0)) {
@@ -2384,7 +2384,7 @@ enum vxge_hw_status vxge_hw_vpath_poll_rx(struct __vxge_hw_ring *ring)
 			}
 			writeq(VXGE_HW_PRC_RXD_DOORBELL_NEW_QW_CNT(new_count),
 				&ring->vp_reg->prc_rxd_doorbell);
-			readl(&ring->common_reg->titan_general_int_status);
+			pete_readl("drivers/net/ethernet/neterion/vxge/vxge-traffic.c:2387", &ring->common_reg->titan_general_int_status);
 			ring->doorbell_cnt = 0;
 		}
 	}

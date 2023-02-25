@@ -32,7 +32,7 @@ static int wait_ci_ready(struct ddb_ci *ci)
 
 	ndelay(500);
 	do {
-		if (ddbreadl(ci->port->dev,
+		if (ddbpete_readl("drivers/media/pci/ddbridge/ddbridge-ci.c:35", ci->port->dev,
 			     CI_CONTROL(ci->nr)) & CI_READY)
 			break;
 		usleep_range(1, 2);
@@ -50,10 +50,10 @@ static int read_attribute_mem(struct dvb_ca_en50221 *ca,
 
 	if (address > CI_BUFFER_SIZE)
 		return -1;
-	ddbwritel(ci->port->dev, CI_READ_CMD | (1 << 16) | address,
+	ddbpete_writel("drivers/media/pci/ddbridge/ddbridge-ci.c:53", ci->port->dev, CI_READ_CMD | (1 << 16) | address,
 		  CI_DO_READ_ATTRIBUTES(ci->nr));
 	wait_ci_ready(ci);
-	val = 0xff & ddbreadl(ci->port->dev, CI_BUFFER(ci->nr) + off);
+	val = 0xff & ddbpete_readl("drivers/media/pci/ddbridge/ddbridge-ci.c:56", ci->port->dev, CI_BUFFER(ci->nr) + off);
 	return val;
 }
 
@@ -62,7 +62,7 @@ static int write_attribute_mem(struct dvb_ca_en50221 *ca, int slot,
 {
 	struct ddb_ci *ci = ca->data;
 
-	ddbwritel(ci->port->dev, CI_WRITE_CMD | (value << 16) | address,
+	ddbpete_writel("drivers/media/pci/ddbridge/ddbridge-ci.c:65", ci->port->dev, CI_WRITE_CMD | (value << 16) | address,
 		  CI_DO_ATTRIBUTE_RW(ci->nr));
 	wait_ci_ready(ci);
 	return 0;
@@ -75,11 +75,11 @@ static int read_cam_control(struct dvb_ca_en50221 *ca,
 	struct ddb_ci *ci = ca->data;
 	u32 res;
 
-	ddbwritel(ci->port->dev, CI_READ_CMD | address,
+	ddbpete_writel("drivers/media/pci/ddbridge/ddbridge-ci.c:78", ci->port->dev, CI_READ_CMD | address,
 		  CI_DO_IO_RW(ci->nr));
 	ndelay(500);
 	do {
-		res = ddbreadl(ci->port->dev, CI_READDATA(ci->nr));
+		res = ddbpete_readl("drivers/media/pci/ddbridge/ddbridge-ci.c:82", ci->port->dev, CI_READDATA(ci->nr));
 		if (res & CI_READY)
 			break;
 		usleep_range(1, 2);
@@ -94,7 +94,7 @@ static int write_cam_control(struct dvb_ca_en50221 *ca, int slot,
 {
 	struct ddb_ci *ci = ca->data;
 
-	ddbwritel(ci->port->dev, CI_WRITE_CMD | (value << 16) | address,
+	ddbpete_writel("drivers/media/pci/ddbridge/ddbridge-ci.c:97", ci->port->dev, CI_WRITE_CMD | (value << 16) | address,
 		  CI_DO_IO_RW(ci->nr));
 	wait_ci_ready(ci);
 	return 0;
@@ -104,15 +104,15 @@ static int slot_reset(struct dvb_ca_en50221 *ca, int slot)
 {
 	struct ddb_ci *ci = ca->data;
 
-	ddbwritel(ci->port->dev, CI_POWER_ON,
+	ddbpete_writel("drivers/media/pci/ddbridge/ddbridge-ci.c:107", ci->port->dev, CI_POWER_ON,
 		  CI_CONTROL(ci->nr));
 	msleep(100);
-	ddbwritel(ci->port->dev, CI_POWER_ON | CI_RESET_CAM,
+	ddbpete_writel("drivers/media/pci/ddbridge/ddbridge-ci.c:110", ci->port->dev, CI_POWER_ON | CI_RESET_CAM,
 		  CI_CONTROL(ci->nr));
-	ddbwritel(ci->port->dev, CI_ENABLE | CI_POWER_ON | CI_RESET_CAM,
+	ddbpete_writel("drivers/media/pci/ddbridge/ddbridge-ci.c:112", ci->port->dev, CI_ENABLE | CI_POWER_ON | CI_RESET_CAM,
 		  CI_CONTROL(ci->nr));
 	usleep_range(20, 25);
-	ddbwritel(ci->port->dev, CI_ENABLE | CI_POWER_ON,
+	ddbpete_writel("drivers/media/pci/ddbridge/ddbridge-ci.c:115", ci->port->dev, CI_ENABLE | CI_POWER_ON,
 		  CI_CONTROL(ci->nr));
 	return 0;
 }
@@ -121,7 +121,7 @@ static int slot_shutdown(struct dvb_ca_en50221 *ca, int slot)
 {
 	struct ddb_ci *ci = ca->data;
 
-	ddbwritel(ci->port->dev, 0, CI_CONTROL(ci->nr));
+	ddbpete_writel("drivers/media/pci/ddbridge/ddbridge-ci.c:124", ci->port->dev, 0, CI_CONTROL(ci->nr));
 	msleep(300);
 	return 0;
 }
@@ -129,9 +129,9 @@ static int slot_shutdown(struct dvb_ca_en50221 *ca, int slot)
 static int slot_ts_enable(struct dvb_ca_en50221 *ca, int slot)
 {
 	struct ddb_ci *ci = ca->data;
-	u32 val = ddbreadl(ci->port->dev, CI_CONTROL(ci->nr));
+	u32 val = ddbpete_readl("drivers/media/pci/ddbridge/ddbridge-ci.c:132", ci->port->dev, CI_CONTROL(ci->nr));
 
-	ddbwritel(ci->port->dev, val | CI_BYPASS_DISABLE,
+	ddbpete_writel("drivers/media/pci/ddbridge/ddbridge-ci.c:134", ci->port->dev, val | CI_BYPASS_DISABLE,
 		  CI_CONTROL(ci->nr));
 	return 0;
 }
@@ -139,7 +139,7 @@ static int slot_ts_enable(struct dvb_ca_en50221 *ca, int slot)
 static int poll_slot_status(struct dvb_ca_en50221 *ca, int slot, int open)
 {
 	struct ddb_ci *ci = ca->data;
-	u32 val = ddbreadl(ci->port->dev, CI_CONTROL(ci->nr));
+	u32 val = ddbpete_readl("drivers/media/pci/ddbridge/ddbridge-ci.c:142", ci->port->dev, CI_CONTROL(ci->nr));
 	int stat = 0;
 
 	if (val & CI_CAM_DETECT)

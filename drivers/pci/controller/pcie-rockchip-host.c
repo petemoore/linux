@@ -113,7 +113,7 @@ static int rockchip_pcie_rd_own_conf(struct rockchip_pcie *rockchip,
 	}
 
 	if (size == 4) {
-		*val = readl(addr);
+		*val = pete_readl("drivers/pci/controller/pcie-rockchip-host.c:116", addr);
 	} else if (size == 2) {
 		*val = readw(addr);
 	} else if (size == 1) {
@@ -135,7 +135,7 @@ static int rockchip_pcie_wr_own_conf(struct rockchip_pcie *rockchip,
 	addr = rockchip->apb_base + PCIE_RC_CONFIG_NORMAL_BASE + offset;
 
 	if (size == 4) {
-		writel(val, addr);
+		pete_writel("drivers/pci/controller/pcie-rockchip-host.c:138", val, addr);
 		return PCIBIOS_SUCCESSFUL;
 	}
 
@@ -146,9 +146,9 @@ static int rockchip_pcie_wr_own_conf(struct rockchip_pcie *rockchip,
 	 * corrupt RW1C bits in adjacent registers.  But the hardware
 	 * doesn't support smaller writes.
 	 */
-	tmp = readl(addr) & mask;
+	tmp = pete_readl("drivers/pci/controller/pcie-rockchip-host.c:149", addr) & mask;
 	tmp |= val << ((where & 0x3) * 8);
-	writel(tmp, addr);
+	pete_writel("drivers/pci/controller/pcie-rockchip-host.c:151", tmp, addr);
 
 	return PCIBIOS_SUCCESSFUL;
 }
@@ -174,7 +174,7 @@ static int rockchip_pcie_rd_other_conf(struct rockchip_pcie *rockchip,
 						AXI_WRAPPER_TYPE1_CFG);
 
 	if (size == 4) {
-		*val = readl(addr);
+		*val = pete_readl("drivers/pci/controller/pcie-rockchip-host.c:177", addr);
 	} else if (size == 2) {
 		*val = readw(addr);
 	} else if (size == 1) {
@@ -205,7 +205,7 @@ static int rockchip_pcie_wr_other_conf(struct rockchip_pcie *rockchip,
 						AXI_WRAPPER_TYPE1_CFG);
 
 	if (size == 4)
-		writel(val, addr);
+		pete_writel("drivers/pci/controller/pcie-rockchip-host.c:208", val, addr);
 	else if (size == 2)
 		writew(val, addr);
 	else if (size == 1)
@@ -852,7 +852,7 @@ static int rockchip_pcie_wait_l2(struct rockchip_pcie *rockchip)
 	int err;
 
 	/* send PME_TURN_OFF message */
-	writel(0x0, rockchip->msg_region + PCIE_RC_SEND_PME_OFF);
+	pete_writel("drivers/pci/controller/pcie-rockchip-host.c:855", 0x0, rockchip->msg_region + PCIE_RC_SEND_PME_OFF);
 
 	/* read LTSSM and wait for falling into L2 link state */
 	err = readl_poll_timeout(rockchip->apb_base + PCIE_CLIENT_DEBUG_OUT_0,

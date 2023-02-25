@@ -73,7 +73,7 @@ static void __init nspire_ahbdiv_setup(struct device_node *node,
 	io = of_iomap(node, 0);
 	if (!io)
 		return;
-	val = readl(io);
+	val = pete_readl("drivers/clk/clk-nspire.c:76", io);
 	iounmap(io);
 
 	get_clkinfo(val, &info);
@@ -114,7 +114,7 @@ static void __init nspire_clk_setup(struct device_node *node,
 	io = of_iomap(node, 0);
 	if (!io)
 		return;
-	val = readl(io);
+	val = pete_readl("drivers/clk/clk-nspire.c:117", io);
 	iounmap(io);
 
 	get_clkinfo(val, &info);

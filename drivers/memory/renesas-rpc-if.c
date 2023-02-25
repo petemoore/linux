@@ -183,7 +183,7 @@ static int rpcif_reg_read(void *context, unsigned int reg, unsigned int *val)
 
 		case 4:
 		case 8:
-			*val = readl(rpc->base + reg);
+			*val = pete_readl("drivers/memory/renesas-rpc-if.c:186", rpc->base + reg);
 			return 0;
 
 		default:
@@ -197,7 +197,7 @@ static int rpcif_reg_read(void *context, unsigned int reg, unsigned int *val)
 		break;
 	}
 
-	*val = readl(rpc->base + reg);
+	*val = pete_readl("drivers/memory/renesas-rpc-if.c:200", rpc->base + reg);
 	return 0;
 }
 
@@ -218,7 +218,7 @@ static int rpcif_reg_write(void *context, unsigned int reg, unsigned int val)
 
 		case 4:
 		case 8:
-			writel(val, rpc->base + reg);
+			pete_writel("drivers/memory/renesas-rpc-if.c:221", val, rpc->base + reg);
 			return 0;
 
 		default:
@@ -235,7 +235,7 @@ static int rpcif_reg_write(void *context, unsigned int reg, unsigned int val)
 		return -EPERM;
 	}
 
-	writel(val, rpc->base + reg);
+	pete_writel("drivers/memory/renesas-rpc-if.c:238", val, rpc->base + reg);
 	return 0;
 }
 

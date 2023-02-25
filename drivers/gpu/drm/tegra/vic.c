@@ -49,7 +49,7 @@ static inline struct vic *to_vic(struct tegra_drm_client *client)
 
 static void vic_writel(struct vic *vic, u32 value, unsigned int offset)
 {
-	writel(value, vic->regs + offset);
+	pete_writel("drivers/gpu/drm/tegra/vic.c:52", value, vic->regs + offset);
 }
 
 static int vic_boot(struct vic *vic)

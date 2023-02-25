@@ -194,9 +194,9 @@ static void imx7d_adc_sample_rate_set(struct imx7d_adc *info)
 	 */
 	for (i = 0; i < 4; i++) {
 		tmp_cfg1 =
-			readl(info->regs + i * IMX7D_EACH_CHANNEL_REG_OFFSET);
+			pete_readl("drivers/iio/adc/imx7d_adc.c:197", info->regs + i * IMX7D_EACH_CHANNEL_REG_OFFSET);
 		tmp_cfg1 &= ~IMX7D_REG_ADC_CH_CFG1_CHANNEL_EN;
-		writel(tmp_cfg1,
+		pete_writel("drivers/iio/adc/imx7d_adc.c:199", tmp_cfg1,
 		       info->regs + i * IMX7D_EACH_CHANNEL_REG_OFFSET);
 	}
 
@@ -205,7 +205,7 @@ static void imx7d_adc_sample_rate_set(struct imx7d_adc *info)
 	info->pre_div_num = adc_analogure_clk.pre_div;
 
 	sample_rate |= adc_feature->core_time_unit;
-	writel(sample_rate, info->regs + IMX7D_REG_ADC_TIMER_UNIT);
+	pete_writel("drivers/iio/adc/imx7d_adc.c:208", sample_rate, info->regs + IMX7D_REG_ADC_TIMER_UNIT);
 }
 
 static void imx7d_adc_hw_init(struct imx7d_adc *info)
@@ -213,16 +213,16 @@ static void imx7d_adc_hw_init(struct imx7d_adc *info)
 	u32 cfg;
 
 	/* power up and enable adc analogue core */
-	cfg = readl(info->regs + IMX7D_REG_ADC_ADC_CFG);
+	cfg = pete_readl("drivers/iio/adc/imx7d_adc.c:216", info->regs + IMX7D_REG_ADC_ADC_CFG);
 	cfg &= ~(IMX7D_REG_ADC_ADC_CFG_ADC_CLK_DOWN |
 		 IMX7D_REG_ADC_ADC_CFG_ADC_POWER_DOWN);
 	cfg |= IMX7D_REG_ADC_ADC_CFG_ADC_EN;
-	writel(cfg, info->regs + IMX7D_REG_ADC_ADC_CFG);
+	pete_writel("drivers/iio/adc/imx7d_adc.c:220", cfg, info->regs + IMX7D_REG_ADC_ADC_CFG);
 
 	/* enable channel A,B,C,D interrupt */
-	writel(IMX7D_REG_ADC_INT_CHANNEL_INT_EN,
+	pete_writel("drivers/iio/adc/imx7d_adc.c:223", IMX7D_REG_ADC_INT_CHANNEL_INT_EN,
 	       info->regs + IMX7D_REG_ADC_INT_SIG_EN);
-	writel(IMX7D_REG_ADC_INT_CHANNEL_INT_EN,
+	pete_writel("drivers/iio/adc/imx7d_adc.c:225", IMX7D_REG_ADC_INT_CHANNEL_INT_EN,
 	       info->regs + IMX7D_REG_ADC_INT_EN);
 
 	imx7d_adc_sample_rate_set(info);
@@ -253,7 +253,7 @@ static void imx7d_adc_channel_set(struct imx7d_adc *info)
 	 * read register REG_ADC_CH_A\B\C\D_CFG2, according to the
 	 * channel chosen
 	 */
-	cfg2 = readl(info->regs + IMX7D_EACH_CHANNEL_REG_OFFSET * channel +
+	cfg2 = pete_readl("drivers/iio/adc/imx7d_adc.c:256", info->regs + IMX7D_EACH_CHANNEL_REG_OFFSET * channel +
 		     IMX7D_REG_ADC_CHANNEL_CFG2_BASE);
 
 	cfg2 |= imx7d_adc_average_num[info->adc_feature.avg_num];
@@ -262,9 +262,9 @@ static void imx7d_adc_channel_set(struct imx7d_adc *info)
 	 * write the register REG_ADC_CH_A\B\C\D_CFG2, according to
 	 * the channel chosen
 	 */
-	writel(cfg2, info->regs + IMX7D_EACH_CHANNEL_REG_OFFSET * channel +
+	pete_writel("drivers/iio/adc/imx7d_adc.c:265", cfg2, info->regs + IMX7D_EACH_CHANNEL_REG_OFFSET * channel +
 	       IMX7D_REG_ADC_CHANNEL_CFG2_BASE);
-	writel(cfg1, info->regs + IMX7D_EACH_CHANNEL_REG_OFFSET * channel);
+	pete_writel("drivers/iio/adc/imx7d_adc.c:267", cfg1, info->regs + IMX7D_EACH_CHANNEL_REG_OFFSET * channel);
 }
 
 static u32 imx7d_adc_get_sample_rate(struct imx7d_adc *info)
@@ -343,9 +343,9 @@ static int imx7d_adc_read_data(struct imx7d_adc *info)
 	 * channel C and D is the same.
 	 */
 	if (channel < 2)
-		value = readl(info->regs + IMX7D_REG_ADC_CHA_B_CNV_RSLT);
+		value = pete_readl("drivers/iio/adc/imx7d_adc.c:346", info->regs + IMX7D_REG_ADC_CHA_B_CNV_RSLT);
 	else
-		value = readl(info->regs + IMX7D_REG_ADC_CHC_D_CNV_RSLT);
+		value = pete_readl("drivers/iio/adc/imx7d_adc.c:348", info->regs + IMX7D_REG_ADC_CHC_D_CNV_RSLT);
 	if (channel & 0x1)	/* channel B or D */
 		value = (value >> 16) & 0xFFF;
 	else			/* channel A or C */
@@ -359,7 +359,7 @@ static irqreturn_t imx7d_adc_isr(int irq, void *dev_id)
 	struct imx7d_adc *info = dev_id;
 	int status;
 
-	status = readl(info->regs + IMX7D_REG_ADC_INT_STATUS);
+	status = pete_readl("drivers/iio/adc/imx7d_adc.c:362", info->regs + IMX7D_REG_ADC_INT_STATUS);
 	if (status & IMX7D_REG_ADC_INT_STATUS_CHANNEL_INT_STATUS) {
 		info->value = imx7d_adc_read_data(info);
 		complete(&info->completion);
@@ -371,7 +371,7 @@ static irqreturn_t imx7d_adc_isr(int irq, void *dev_id)
 		 * conversion finished flag.
 		 */
 		status &= ~IMX7D_REG_ADC_INT_STATUS_CHANNEL_INT_STATUS;
-		writel(status, info->regs + IMX7D_REG_ADC_INT_STATUS);
+		pete_writel("drivers/iio/adc/imx7d_adc.c:374", status, info->regs + IMX7D_REG_ADC_INT_STATUS);
 	}
 
 	/*
@@ -383,7 +383,7 @@ static irqreturn_t imx7d_adc_isr(int irq, void *dev_id)
 			"ADC got conversion time out interrupt: 0x%08x\n",
 			status);
 		status &= ~IMX7D_REG_ADC_INT_STATUS_CHANNEL_CONV_TIME_OUT;
-		writel(status, info->regs + IMX7D_REG_ADC_INT_STATUS);
+		pete_writel("drivers/iio/adc/imx7d_adc.c:386", status, info->regs + IMX7D_REG_ADC_INT_STATUS);
 	}
 
 	return IRQ_HANDLED;
@@ -398,7 +398,7 @@ static int imx7d_adc_reg_access(struct iio_dev *indio_dev,
 	if (!readval || reg % 4 || reg > IMX7D_REG_ADC_ADC_CFG)
 		return -EINVAL;
 
-	*readval = readl(info->regs + reg);
+	*readval = pete_readl("drivers/iio/adc/imx7d_adc.c:401", info->regs + reg);
 
 	return 0;
 }
@@ -418,11 +418,11 @@ static void imx7d_adc_power_down(struct imx7d_adc *info)
 {
 	u32 adc_cfg;
 
-	adc_cfg = readl(info->regs + IMX7D_REG_ADC_ADC_CFG);
+	adc_cfg = pete_readl("drivers/iio/adc/imx7d_adc.c:421", info->regs + IMX7D_REG_ADC_ADC_CFG);
 	adc_cfg |= IMX7D_REG_ADC_ADC_CFG_ADC_CLK_DOWN |
 		   IMX7D_REG_ADC_ADC_CFG_ADC_POWER_DOWN;
 	adc_cfg &= ~IMX7D_REG_ADC_ADC_CFG_ADC_EN;
-	writel(adc_cfg, info->regs + IMX7D_REG_ADC_ADC_CFG);
+	pete_writel("drivers/iio/adc/imx7d_adc.c:425", adc_cfg, info->regs + IMX7D_REG_ADC_ADC_CFG);
 }
 
 static int imx7d_adc_enable(struct device *dev)

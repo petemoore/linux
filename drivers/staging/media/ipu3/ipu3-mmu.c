@@ -77,7 +77,7 @@ static inline struct imgu_mmu *to_imgu_mmu(struct imgu_mmu_info *info)
  */
 static void imgu_mmu_tlb_invalidate(struct imgu_mmu *mmu)
 {
-	writel(TLB_INVALIDATE, mmu->base + REG_TLB_INVALIDATE);
+	pete_writel("drivers/staging/media/ipu3/ipu3-mmu.c:80", TLB_INVALIDATE, mmu->base + REG_TLB_INVALIDATE);
 }
 
 static void call_if_imgu_is_powered(struct imgu_mmu *mmu,
@@ -103,7 +103,7 @@ static void imgu_mmu_set_halt(struct imgu_mmu *mmu, bool halt)
 	int ret;
 	u32 val;
 
-	writel(halt, mmu->base + REG_GP_HALT);
+	pete_writel("drivers/staging/media/ipu3/ipu3-mmu.c:106", halt, mmu->base + REG_GP_HALT);
 	ret = readl_poll_timeout(mmu->base + REG_GP_HALTED,
 				 val, (val & 1) == halt, 1000, 100000);
 
@@ -474,7 +474,7 @@ struct imgu_mmu_info *imgu_mmu_init(struct device *parent, void __iomem *base)
 		goto fail_l2pts;
 
 	pteval = IPU3_ADDR2PTE(virt_to_phys(mmu->l1pt));
-	writel(pteval, mmu->base + REG_L1_PHYS);
+	pete_writel("drivers/staging/media/ipu3/ipu3-mmu.c:477", pteval, mmu->base + REG_L1_PHYS);
 	imgu_mmu_tlb_invalidate(mmu);
 	imgu_mmu_set_halt(mmu, false);
 
@@ -530,7 +530,7 @@ void imgu_mmu_resume(struct imgu_mmu_info *info)
 	imgu_mmu_set_halt(mmu, true);
 
 	pteval = IPU3_ADDR2PTE(virt_to_phys(mmu->l1pt));
-	writel(pteval, mmu->base + REG_L1_PHYS);
+	pete_writel("drivers/staging/media/ipu3/ipu3-mmu.c:533", pteval, mmu->base + REG_L1_PHYS);
 
 	imgu_mmu_tlb_invalidate(mmu);
 	imgu_mmu_set_halt(mmu, false);

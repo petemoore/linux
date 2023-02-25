@@ -233,10 +233,10 @@ static inline struct rp2_uart_port *port_to_up(struct uart_port *port)
 static void rp2_rmw(struct rp2_uart_port *up, int reg,
 		    u32 clr_bits, u32 set_bits)
 {
-	u32 tmp = readl(up->base + reg);
+	u32 tmp = pete_readl("drivers/tty/serial/rp2.c:236", up->base + reg);
 	tmp &= ~clr_bits;
 	tmp |= set_bits;
-	writel(tmp, up->base + reg);
+	pete_writel("drivers/tty/serial/rp2.c:239", tmp, up->base + reg);
 }
 
 static void rp2_rmw_clr(struct rp2_uart_port *up, int reg, u32 val)
@@ -256,12 +256,12 @@ static void rp2_mask_ch_irq(struct rp2_uart_port *up, int ch_num,
 
 	spin_lock_irqsave(&up->card->card_lock, flags);
 
-	irq_mask = readl(up->asic_base + RP2_CH_IRQ_MASK);
+	irq_mask = pete_readl("drivers/tty/serial/rp2.c:259", up->asic_base + RP2_CH_IRQ_MASK);
 	if (is_enabled)
 		irq_mask &= ~BIT(ch_num);
 	else
 		irq_mask |= BIT(ch_num);
-	writel(irq_mask, up->asic_base + RP2_CH_IRQ_MASK);
+	pete_writel("drivers/tty/serial/rp2.c:264", irq_mask, up->asic_base + RP2_CH_IRQ_MASK);
 
 	spin_unlock_irqrestore(&up->card->card_lock, flags);
 }
@@ -288,7 +288,7 @@ static unsigned int rp2_uart_get_mctrl(struct uart_port *port)
 	struct rp2_uart_port *up = port_to_up(port);
 	u32 status;
 
-	status = readl(up->base + RP2_CHAN_STAT);
+	status = pete_readl("drivers/tty/serial/rp2.c:291", up->base + RP2_CHAN_STAT);
 	return ((status & RP2_CHAN_STAT_DCD_m) ? TIOCM_CAR : 0) |
 	       ((status & RP2_CHAN_STAT_DSR_m) ? TIOCM_DSR : 0) |
 	       ((status & RP2_CHAN_STAT_CTS_m) ? TIOCM_CTS : 0) |
@@ -466,8 +466,8 @@ static void rp2_ch_interrupt(struct rp2_uart_port *up)
 	 * The IRQ status bits are clear-on-write.  Other status bits in
 	 * this register aren't, so it's harmless to write to them.
 	 */
-	status = readl(up->base + RP2_CHAN_STAT);
-	writel(status, up->base + RP2_CHAN_STAT);
+	status = pete_readl("drivers/tty/serial/rp2.c:469", up->base + RP2_CHAN_STAT);
+	pete_writel("drivers/tty/serial/rp2.c:470", status, up->base + RP2_CHAN_STAT);
 
 	if (status & RP2_CHAN_STAT_RXDATA_m)
 		rp2_rx_chars(up);
@@ -483,8 +483,8 @@ static int rp2_asic_interrupt(struct rp2_card *card, unsigned int asic_id)
 {
 	void __iomem *base = card->bar1 + RP2_ASIC_OFFSET(asic_id);
 	int ch, handled = 0;
-	unsigned long status = readl(base + RP2_CH_IRQ_STAT) &
-			       ~readl(base + RP2_CH_IRQ_MASK);
+	unsigned long status = pete_readl("drivers/tty/serial/rp2.c:486", base + RP2_CH_IRQ_STAT) &
+			       ~pete_readl("drivers/tty/serial/rp2.c:487", base + RP2_CH_IRQ_MASK);
 
 	for_each_set_bit(ch, &status, PORTS_PER_ASIC) {
 		rp2_ch_interrupt(&card->ports[ch]);
@@ -509,7 +509,7 @@ static inline void rp2_flush_fifos(struct rp2_uart_port *up)
 {
 	rp2_rmw_set(up, RP2_UART_CTL,
 		    RP2_UART_CTL_FLUSH_RX_m | RP2_UART_CTL_FLUSH_TX_m);
-	readl(up->base + RP2_UART_CTL);
+	pete_readl("drivers/tty/serial/rp2.c:512", up->base + RP2_UART_CTL);
 	udelay(10);
 	rp2_rmw_clr(up, RP2_UART_CTL,
 		    RP2_UART_CTL_FLUSH_RX_m | RP2_UART_CTL_FLUSH_TX_m);
@@ -600,7 +600,7 @@ static void rp2_reset_asic(struct rp2_card *card, unsigned int asic_id)
 	writew(1, base + RP2_GLOBAL_CMD);
 	readw(base + RP2_GLOBAL_CMD);
 	msleep(100);
-	writel(0, base + RP2_CLK_PRESCALER);
+	pete_writel("drivers/tty/serial/rp2.c:603", 0, base + RP2_CLK_PRESCALER);
 
 	/* TDM clock configuration */
 	clk_cfg = readw(base + RP2_ASIC_CFG);
@@ -608,33 +608,33 @@ static void rp2_reset_asic(struct rp2_card *card, unsigned int asic_id)
 	writew(clk_cfg, base + RP2_ASIC_CFG);
 
 	/* IRQ routing */
-	writel(ALL_PORTS_MASK, base + RP2_CH_IRQ_MASK);
-	writel(RP2_ASIC_IRQ_EN_m, base + RP2_ASIC_IRQ);
+	pete_writel("drivers/tty/serial/rp2.c:611", ALL_PORTS_MASK, base + RP2_CH_IRQ_MASK);
+	pete_writel("drivers/tty/serial/rp2.c:612", RP2_ASIC_IRQ_EN_m, base + RP2_ASIC_IRQ);
 }
 
 static void rp2_init_card(struct rp2_card *card)
 {
-	writel(4, card->bar0 + RP2_FPGA_CTL0);
-	writel(0, card->bar0 + RP2_FPGA_CTL1);
+	pete_writel("drivers/tty/serial/rp2.c:617", 4, card->bar0 + RP2_FPGA_CTL0);
+	pete_writel("drivers/tty/serial/rp2.c:618", 0, card->bar0 + RP2_FPGA_CTL1);
 
 	rp2_reset_asic(card, 0);
 	if (card->n_ports >= PORTS_PER_ASIC)
 		rp2_reset_asic(card, 1);
 
-	writel(RP2_IRQ_MASK_EN_m, card->bar0 + RP2_IRQ_MASK);
+	pete_writel("drivers/tty/serial/rp2.c:624", RP2_IRQ_MASK_EN_m, card->bar0 + RP2_IRQ_MASK);
 }
 
 static void rp2_init_port(struct rp2_uart_port *up, const struct firmware *fw)
 {
 	int i;
 
-	writel(RP2_UART_CTL_RESET_CH_m, up->base + RP2_UART_CTL);
-	readl(up->base + RP2_UART_CTL);
+	pete_writel("drivers/tty/serial/rp2.c:631", RP2_UART_CTL_RESET_CH_m, up->base + RP2_UART_CTL);
+	pete_readl("drivers/tty/serial/rp2.c:632", up->base + RP2_UART_CTL);
 	udelay(1);
 
-	writel(0, up->base + RP2_TXRX_CTL);
-	writel(0, up->base + RP2_UART_CTL);
-	readl(up->base + RP2_UART_CTL);
+	pete_writel("drivers/tty/serial/rp2.c:635", 0, up->base + RP2_TXRX_CTL);
+	pete_writel("drivers/tty/serial/rp2.c:636", 0, up->base + RP2_UART_CTL);
+	pete_readl("drivers/tty/serial/rp2.c:637", up->base + RP2_UART_CTL);
 	udelay(1);
 
 	rp2_flush_fifos(up);

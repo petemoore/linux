@@ -110,16 +110,16 @@ static void ipu_ch_param_write_field(struct ipuv3_channel *ch, u32 wbs, u32 v)
 
 	pr_debug("%s %d %d %d\n", __func__, word, bit , size);
 
-	val = readl(&base->word[word].data[i]);
+	val = pete_readl("drivers/gpu/ipu-v3/ipu-cpmem.c:113", &base->word[word].data[i]);
 	val &= ~(mask << ofs);
 	val |= v << ofs;
-	writel(val, &base->word[word].data[i]);
+	pete_writel("drivers/gpu/ipu-v3/ipu-cpmem.c:116", val, &base->word[word].data[i]);
 
 	if ((bit + size - 1) / 32 > i) {
-		val = readl(&base->word[word].data[i + 1]);
+		val = pete_readl("drivers/gpu/ipu-v3/ipu-cpmem.c:119", &base->word[word].data[i + 1]);
 		val &= ~(mask >> (ofs ? (32 - ofs) : 0));
 		val |= v >> (ofs ? (32 - ofs) : 0);
-		writel(val, &base->word[word].data[i + 1]);
+		pete_writel("drivers/gpu/ipu-v3/ipu-cpmem.c:122", val, &base->word[word].data[i + 1]);
 	}
 }
 
@@ -136,12 +136,12 @@ static u32 ipu_ch_param_read_field(struct ipuv3_channel *ch, u32 wbs)
 
 	pr_debug("%s %d %d %d\n", __func__, word, bit , size);
 
-	val = (readl(&base->word[word].data[i]) >> ofs) & mask;
+	val = (pete_readl("drivers/gpu/ipu-v3/ipu-cpmem.c:139", &base->word[word].data[i]) >> ofs) & mask;
 
 	if ((bit + size - 1) / 32 > i) {
 		u32 tmp;
 
-		tmp = readl(&base->word[word].data[i + 1]);
+		tmp = pete_readl("drivers/gpu/ipu-v3/ipu-cpmem.c:144", &base->word[word].data[i + 1]);
 		tmp &= mask >> (ofs ? (32 - ofs) : 0);
 		val |= tmp << (ofs ? (32 - ofs) : 0);
 	}
@@ -232,7 +232,7 @@ void ipu_cpmem_zero(struct ipuv3_channel *ch)
 	int i;
 
 	for (i = 0; i < sizeof(*p) / sizeof(u32); i++)
-		writel(0, base + i * sizeof(u32));
+		pete_writel("drivers/gpu/ipu-v3/ipu-cpmem.c:235", 0, base + i * sizeof(u32));
 }
 EXPORT_SYMBOL_GPL(ipu_cpmem_zero);
 
@@ -893,17 +893,17 @@ void ipu_cpmem_dump(struct ipuv3_channel *ch)
 	int chno = ch->num;
 
 	dev_dbg(ipu->dev, "ch %d word 0 - %08X %08X %08X %08X %08X\n", chno,
-		readl(&p->word[0].data[0]),
-		readl(&p->word[0].data[1]),
-		readl(&p->word[0].data[2]),
-		readl(&p->word[0].data[3]),
-		readl(&p->word[0].data[4]));
+		pete_readl("drivers/gpu/ipu-v3/ipu-cpmem.c:896", &p->word[0].data[0]),
+		pete_readl("drivers/gpu/ipu-v3/ipu-cpmem.c:897", &p->word[0].data[1]),
+		pete_readl("drivers/gpu/ipu-v3/ipu-cpmem.c:898", &p->word[0].data[2]),
+		pete_readl("drivers/gpu/ipu-v3/ipu-cpmem.c:899", &p->word[0].data[3]),
+		pete_readl("drivers/gpu/ipu-v3/ipu-cpmem.c:900", &p->word[0].data[4]));
 	dev_dbg(ipu->dev, "ch %d word 1 - %08X %08X %08X %08X %08X\n", chno,
-		readl(&p->word[1].data[0]),
-		readl(&p->word[1].data[1]),
-		readl(&p->word[1].data[2]),
-		readl(&p->word[1].data[3]),
-		readl(&p->word[1].data[4]));
+		pete_readl("drivers/gpu/ipu-v3/ipu-cpmem.c:902", &p->word[1].data[0]),
+		pete_readl("drivers/gpu/ipu-v3/ipu-cpmem.c:903", &p->word[1].data[1]),
+		pete_readl("drivers/gpu/ipu-v3/ipu-cpmem.c:904", &p->word[1].data[2]),
+		pete_readl("drivers/gpu/ipu-v3/ipu-cpmem.c:905", &p->word[1].data[3]),
+		pete_readl("drivers/gpu/ipu-v3/ipu-cpmem.c:906", &p->word[1].data[4]));
 	dev_dbg(ipu->dev, "PFS 0x%x, ",
 		 ipu_ch_param_read_field(ch, IPU_FIELD_PFS));
 	dev_dbg(ipu->dev, "BPP 0x%x, ",

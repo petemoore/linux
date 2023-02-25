@@ -501,7 +501,7 @@ static void k210_pinmux_set_pin_function(struct pinctrl_dev *pctldev,
 	dev_dbg(pdata->dev, "set pin %u function %s (%u) -> 0x%08x\n",
 		pin, info->name, func, val);
 
-	writel(val, &pdata->fpioa->pins[pin]);
+	pete_writel("drivers/pinctrl/pinctrl-k210.c:504", val, &pdata->fpioa->pins[pin]);
 }
 
 static int k210_pinconf_set_param(struct pinctrl_dev *pctldev,
@@ -509,7 +509,7 @@ static int k210_pinconf_set_param(struct pinctrl_dev *pctldev,
 				  unsigned int param, unsigned int arg)
 {
 	struct k210_fpioa_data *pdata = pinctrl_dev_get_drvdata(pctldev);
-	u32 val = readl(&pdata->fpioa->pins[pin]);
+	u32 val = pete_readl("drivers/pinctrl/pinctrl-k210.c:512", &pdata->fpioa->pins[pin]);
 	int drive;
 
 	dev_dbg(pdata->dev, "set pin %u param %u, arg 0x%x\n",
@@ -553,7 +553,7 @@ static int k210_pinconf_set_param(struct pinctrl_dev *pctldev,
 		break;
 	case PIN_CONFIG_OUTPUT:
 		k210_pinmux_set_pin_function(pctldev, pin, K210_PCF_CONSTANT);
-		val = readl(&pdata->fpioa->pins[pin]);
+		val = pete_readl("drivers/pinctrl/pinctrl-k210.c:556", &pdata->fpioa->pins[pin]);
 		val |= K210_PC_MODE_OUT;
 		if (!arg)
 			val |= K210_PC_DO_INV;
@@ -586,7 +586,7 @@ static int k210_pinconf_set_param(struct pinctrl_dev *pctldev,
 		return -EINVAL;
 	}
 
-	writel(val, &pdata->fpioa->pins[pin]);
+	pete_writel("drivers/pinctrl/pinctrl-k210.c:589", val, &pdata->fpioa->pins[pin]);
 
 	return 0;
 }
@@ -616,7 +616,7 @@ static void k210_pinconf_dbg_show(struct pinctrl_dev *pctldev,
 {
 	struct k210_fpioa_data *pdata = pinctrl_dev_get_drvdata(pctldev);
 
-	seq_printf(s, "%#x", readl(&pdata->fpioa->pins[pin]));
+	seq_printf(s, "%#x", pete_readl("drivers/pinctrl/pinctrl-k210.c:619", &pdata->fpioa->pins[pin]));
 }
 
 static int k210_pinconf_group_set(struct pinctrl_dev *pctldev,
@@ -918,8 +918,8 @@ static void k210_fpioa_init_ties(struct k210_fpioa_data *pdata)
 		}
 
 		/* Set value before enable */
-		writel(val, &fpioa->tie_val[i]);
-		writel(val, &fpioa->tie_en[i]);
+		pete_writel("drivers/pinctrl/pinctrl-k210.c:921", val, &fpioa->tie_val[i]);
+		pete_writel("drivers/pinctrl/pinctrl-k210.c:922", val, &fpioa->tie_en[i]);
 	}
 }
 

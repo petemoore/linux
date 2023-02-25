@@ -44,9 +44,9 @@ static void __init m525x_qspi_init(void)
 #if IS_ENABLED(CONFIG_SPI_COLDFIRE_QSPI)
 	/* set the GPIO function for the qspi cs gpios */
 	/* FIXME: replace with pinmux/pinctl support */
-	u32 f = readl(MCFSIM2_GPIOFUNC);
+	u32 f = pete_readl("arch/m68k/coldfire/m525x.c:47", MCFSIM2_GPIOFUNC);
 	f |= (1 << MCFQSPI_CS2) | (1 << MCFQSPI_CS1) | (1 << MCFQSPI_CS0);
-	writel(f, MCFSIM2_GPIOFUNC);
+	pete_writel("arch/m68k/coldfire/m525x.c:49", f, MCFSIM2_GPIOFUNC);
 
 	/* QSPI irq setup */
 	writeb(MCFSIM_ICR_AUTOVEC | MCFSIM_ICR_LEVEL4 | MCFSIM_ICR_PRI0,
@@ -66,10 +66,10 @@ static void __init m525x_i2c_init(void)
 	mcf_mapirq2imr(MCF_IRQ_I2C0, MCFINTC_I2C);
 
 	/* second I2C controller is completely different */
-	r = readl(MCFINTC2_INTPRI_REG(MCF_IRQ_I2C1));
+	r = pete_readl("arch/m68k/coldfire/m525x.c:69", MCFINTC2_INTPRI_REG(MCF_IRQ_I2C1));
 	r &= ~MCFINTC2_INTPRI_BITS(0xf, MCF_IRQ_I2C1);
 	r |= MCFINTC2_INTPRI_BITS(0x5, MCF_IRQ_I2C1);
-	writel(r, MCFINTC2_INTPRI_REG(MCF_IRQ_I2C1));
+	pete_writel("arch/m68k/coldfire/m525x.c:72", r, MCFINTC2_INTPRI_REG(MCF_IRQ_I2C1));
 #endif /* IS_ENABLED(CONFIG_I2C_IMX) */
 }
 

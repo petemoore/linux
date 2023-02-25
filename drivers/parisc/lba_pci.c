@@ -134,11 +134,11 @@ static inline struct lba_device *LBA_DEV(struct pci_hba_data *hba)
 
 #define READ_REG8(addr)  readb(addr)
 #define READ_REG16(addr) readw(addr)
-#define READ_REG32(addr) readl(addr)
+#define READ_REG32(addr) pete_readl("drivers/parisc/lba_pci.c:137", addr)
 #define READ_REG64(addr) readq(addr)
 #define WRITE_REG8(value, addr)  writeb(value, addr)
 #define WRITE_REG16(value, addr) writew(value, addr)
-#define WRITE_REG32(value, addr) writel(value, addr)
+#define WRITE_REG32(value, addr) pete_writel("drivers/parisc/lba_pci.c:141", value, addr)
 
 
 #define LBA_CFG_TOK(bus,dfn) ((u32) ((bus)<<16 | (dfn)<<8))

@@ -108,7 +108,7 @@ static void xhci_dbc_init_contexts(struct xhci_dbc *dbc, u32 string_length)
 
 	/* Populate bulk out endpoint context: */
 	ep_ctx			= dbc_bulkout_ctx(dbc);
-	max_burst		= DBC_CTRL_MAXBURST(readl(&dbc->regs->control));
+	max_burst		= DBC_CTRL_MAXBURST(pete_readl("drivers/usb/host/xhci-dbgcap.c:111", &dbc->regs->control));
 	deq			= dbc_bulkout_enq(dbc);
 	ep_ctx->ep_info		= 0;
 	ep_ctx->ep_info2	= dbc_epctx_info2(BULK_OUT_EP, 1024, max_burst);
@@ -125,10 +125,10 @@ static void xhci_dbc_init_contexts(struct xhci_dbc *dbc, u32 string_length)
 	lo_hi_writeq(dbc->ctx->dma, &dbc->regs->dccp);
 
 	dev_info = cpu_to_le32((DBC_VENDOR_ID << 16) | DBC_PROTOCOL);
-	writel(dev_info, &dbc->regs->devinfo1);
+	pete_writel("drivers/usb/host/xhci-dbgcap.c:128", dev_info, &dbc->regs->devinfo1);
 
 	dev_info = cpu_to_le32((DBC_DEVICE_REV << 16) | DBC_PRODUCT_ID);
-	writel(dev_info, &dbc->regs->devinfo2);
+	pete_writel("drivers/usb/host/xhci-dbgcap.c:131", dev_info, &dbc->regs->devinfo2);
 }
 
 static void xhci_dbc_giveback(struct dbc_request *req, int status)
@@ -286,7 +286,7 @@ static int xhci_dbc_queue_bulk_tx(struct dbc_ep *dep,
 	else
 		trb->generic.field[3] &= cpu_to_le32(~TRB_CYCLE);
 
-	writel(DBC_DOOR_BELL_TARGET(dep->direction), &dbc->regs->doorbell);
+	pete_writel("drivers/usb/host/xhci-dbgcap.c:289", DBC_DOOR_BELL_TARGET(dep->direction), &dbc->regs->doorbell);
 
 	return 0;
 }
@@ -502,7 +502,7 @@ static int xhci_dbc_mem_init(struct xhci_dbc *dbc, gfp_t flags)
 		goto string_fail;
 
 	/* Setup ERST register: */
-	writel(dbc->erst.erst_size, &dbc->regs->ersts);
+	pete_writel("drivers/usb/host/xhci-dbgcap.c:505", dbc->erst.erst_size, &dbc->regs->ersts);
 
 	lo_hi_writeq(dbc->erst.erst_dma_addr, &dbc->regs->erstba);
 	deq = xhci_trb_virt_to_dma(dbc->ring_evt->deq_seg,
@@ -569,7 +569,7 @@ static int xhci_do_dbc_start(struct xhci_dbc *dbc)
 	if (dbc->state != DS_DISABLED)
 		return -EINVAL;
 
-	writel(0, &dbc->regs->control);
+	pete_writel("drivers/usb/host/xhci-dbgcap.c:572", 0, &dbc->regs->control);
 	ret = xhci_handshake(&dbc->regs->control,
 			     DBC_CTRL_DBC_ENABLE,
 			     0, 1000);
@@ -580,8 +580,8 @@ static int xhci_do_dbc_start(struct xhci_dbc *dbc)
 	if (ret)
 		return ret;
 
-	ctrl = readl(&dbc->regs->control);
-	writel(ctrl | DBC_CTRL_DBC_ENABLE | DBC_CTRL_PORT_ENABLE,
+	ctrl = pete_readl("drivers/usb/host/xhci-dbgcap.c:583", &dbc->regs->control);
+	pete_writel("drivers/usb/host/xhci-dbgcap.c:584", ctrl | DBC_CTRL_DBC_ENABLE | DBC_CTRL_PORT_ENABLE,
 	       &dbc->regs->control);
 	ret = xhci_handshake(&dbc->regs->control,
 			     DBC_CTRL_DBC_ENABLE,
@@ -599,7 +599,7 @@ static int xhci_do_dbc_stop(struct xhci_dbc *dbc)
 	if (dbc->state == DS_DISABLED)
 		return -1;
 
-	writel(0, &dbc->regs->control);
+	pete_writel("drivers/usb/host/xhci-dbgcap.c:602", 0, &dbc->regs->control);
 	dbc->state = DS_DISABLED;
 
 	return 0;
@@ -662,7 +662,7 @@ dbc_handle_port_status(struct xhci_dbc *dbc, union xhci_trb *event)
 {
 	u32			portsc;
 
-	portsc = readl(&dbc->regs->portsc);
+	portsc = pete_readl("drivers/usb/host/xhci-dbgcap.c:665", &dbc->regs->portsc);
 	if (portsc & DBC_PORTSC_CONN_CHANGE)
 		dev_info(dbc->dev, "DbC port connect change\n");
 
@@ -676,7 +676,7 @@ dbc_handle_port_status(struct xhci_dbc *dbc, union xhci_trb *event)
 		dev_info(dbc->dev, "DbC config error change\n");
 
 	/* Port reset change bit will be cleared in other place: */
-	writel(portsc & ~DBC_PORTSC_RESET_CHANGE, &dbc->regs->portsc);
+	pete_writel("drivers/usb/host/xhci-dbgcap.c:679", portsc & ~DBC_PORTSC_RESET_CHANGE, &dbc->regs->portsc);
 }
 
 static void dbc_handle_xfer_event(struct xhci_dbc *dbc, union xhci_trb *event)
@@ -762,7 +762,7 @@ static enum evtreturn xhci_dbc_do_handle_events(struct xhci_dbc *dbc)
 
 		return EVT_ERR;
 	case DS_ENABLED:
-		portsc = readl(&dbc->regs->portsc);
+		portsc = pete_readl("drivers/usb/host/xhci-dbgcap.c:765", &dbc->regs->portsc);
 		if (portsc & DBC_PORTSC_CONN_STATUS) {
 			dbc->state = DS_CONNECTED;
 			dev_info(dbc->dev, "DbC connected\n");
@@ -770,19 +770,19 @@ static enum evtreturn xhci_dbc_do_handle_events(struct xhci_dbc *dbc)
 
 		return EVT_DONE;
 	case DS_CONNECTED:
-		ctrl = readl(&dbc->regs->control);
+		ctrl = pete_readl("drivers/usb/host/xhci-dbgcap.c:773", &dbc->regs->control);
 		if (ctrl & DBC_CTRL_DBC_RUN) {
 			dbc->state = DS_CONFIGURED;
 			dev_info(dbc->dev, "DbC configured\n");
-			portsc = readl(&dbc->regs->portsc);
-			writel(portsc, &dbc->regs->portsc);
+			portsc = pete_readl("drivers/usb/host/xhci-dbgcap.c:777", &dbc->regs->portsc);
+			pete_writel("drivers/usb/host/xhci-dbgcap.c:778", portsc, &dbc->regs->portsc);
 			return EVT_GSER;
 		}
 
 		return EVT_DONE;
 	case DS_CONFIGURED:
 		/* Handle cable unplug event: */
-		portsc = readl(&dbc->regs->portsc);
+		portsc = pete_readl("drivers/usb/host/xhci-dbgcap.c:785", &dbc->regs->portsc);
 		if (!(portsc & DBC_PORTSC_PORT_ENABLED) &&
 		    !(portsc & DBC_PORTSC_CONN_STATUS)) {
 			dev_info(dbc->dev, "DbC cable unplugged\n");
@@ -795,7 +795,7 @@ static enum evtreturn xhci_dbc_do_handle_events(struct xhci_dbc *dbc)
 		/* Handle debug port reset event: */
 		if (portsc & DBC_PORTSC_RESET_CHANGE) {
 			dev_info(dbc->dev, "DbC port reset\n");
-			writel(portsc, &dbc->regs->portsc);
+			pete_writel("drivers/usb/host/xhci-dbgcap.c:798", portsc, &dbc->regs->portsc);
 			dbc->state = DS_ENABLED;
 			xhci_dbc_flush_requests(dbc);
 
@@ -803,7 +803,7 @@ static enum evtreturn xhci_dbc_do_handle_events(struct xhci_dbc *dbc)
 		}
 
 		/* Handle endpoint stall event: */
-		ctrl = readl(&dbc->regs->control);
+		ctrl = pete_readl("drivers/usb/host/xhci-dbgcap.c:806", &dbc->regs->control);
 		if ((ctrl & DBC_CTRL_HALT_IN_TR) ||
 		    (ctrl & DBC_CTRL_HALT_OUT_TR)) {
 			dev_info(dbc->dev, "DbC Endpoint stall\n");
@@ -824,13 +824,13 @@ static enum evtreturn xhci_dbc_do_handle_events(struct xhci_dbc *dbc)
 
 		/* Clear DbC run change bit: */
 		if (ctrl & DBC_CTRL_DBC_RUN_CHANGE) {
-			writel(ctrl, &dbc->regs->control);
-			ctrl = readl(&dbc->regs->control);
+			pete_writel("drivers/usb/host/xhci-dbgcap.c:827", ctrl, &dbc->regs->control);
+			ctrl = pete_readl("drivers/usb/host/xhci-dbgcap.c:828", &dbc->regs->control);
 		}
 
 		break;
 	case DS_STALLED:
-		ctrl = readl(&dbc->regs->control);
+		ctrl = pete_readl("drivers/usb/host/xhci-dbgcap.c:833", &dbc->regs->control);
 		if (!(ctrl & DBC_CTRL_HALT_IN_TR) &&
 		    !(ctrl & DBC_CTRL_HALT_OUT_TR) &&
 		    (ctrl & DBC_CTRL_DBC_RUN)) {
@@ -987,7 +987,7 @@ xhci_alloc_dbc(struct device *dev, void __iomem *base, const struct dbc_driver *
 	dbc->dev = dev;
 	dbc->driver = driver;
 
-	if (readl(&dbc->regs->control) & DBC_CTRL_DBC_ENABLE)
+	if (pete_readl("drivers/usb/host/xhci-dbgcap.c:990", &dbc->regs->control) & DBC_CTRL_DBC_ENABLE)
 		goto err;
 
 	INIT_DELAYED_WORK(&dbc->event_work, xhci_dbc_handle_events);

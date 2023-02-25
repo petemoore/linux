@@ -211,10 +211,10 @@ static void phy_update_bits(struct inno_dsidphy *inno,
 	u32 reg = PHY_REG(first, second) << 2;
 	unsigned int tmp, orig;
 
-	orig = readl(inno->phy_base + reg);
+	orig = pete_readl("drivers/phy/rockchip/phy-rockchip-inno-dsidphy.c:214", inno->phy_base + reg);
 	tmp = orig & ~mask;
 	tmp |= val & mask;
-	writel(tmp, inno->phy_base + reg);
+	pete_writel("drivers/phy/rockchip/phy-rockchip-inno-dsidphy.c:217", tmp, inno->phy_base + reg);
 }
 
 static unsigned long inno_dsidphy_pll_calc_rate(struct inno_dsidphy *inno,

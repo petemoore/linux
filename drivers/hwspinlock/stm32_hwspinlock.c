@@ -30,8 +30,8 @@ static int stm32_hwspinlock_trylock(struct hwspinlock *lock)
 	void __iomem *lock_addr = lock->priv;
 	u32 status;
 
-	writel(STM32_MUTEX_LOCK_BIT | STM32_MUTEX_COREID, lock_addr);
-	status = readl(lock_addr);
+	pete_writel("drivers/hwspinlock/stm32_hwspinlock.c:33", STM32_MUTEX_LOCK_BIT | STM32_MUTEX_COREID, lock_addr);
+	status = pete_readl("drivers/hwspinlock/stm32_hwspinlock.c:34", lock_addr);
 
 	return status == (STM32_MUTEX_LOCK_BIT | STM32_MUTEX_COREID);
 }
@@ -40,7 +40,7 @@ static void stm32_hwspinlock_unlock(struct hwspinlock *lock)
 {
 	void __iomem *lock_addr = lock->priv;
 
-	writel(STM32_MUTEX_COREID, lock_addr);
+	pete_writel("drivers/hwspinlock/stm32_hwspinlock.c:43", STM32_MUTEX_COREID, lock_addr);
 }
 
 static void stm32_hwspinlock_relax(struct hwspinlock *lock)

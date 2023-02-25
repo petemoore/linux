@@ -251,7 +251,7 @@ struct s3c24xx_dma_engine {
  */
 static int s3c24xx_dma_phy_busy(struct s3c24xx_dma_phy *phy)
 {
-	unsigned int val = readl(phy->base + S3C24XX_DSTAT);
+	unsigned int val = pete_readl("drivers/dma/s3c24xx-dma.c:254", phy->base + S3C24XX_DSTAT);
 	return val & S3C24XX_DSTAT_STAT_BUSY;
 }
 
@@ -354,7 +354,7 @@ static inline void s3c24xx_dma_put_phy(struct s3c24xx_dma_phy *phy)
  */
 static void s3c24xx_dma_terminate_phy(struct s3c24xx_dma_phy *phy)
 {
-	writel(S3C24XX_DMASKTRIG_STOP, phy->base + S3C24XX_DMASKTRIG);
+	pete_writel("drivers/dma/s3c24xx-dma.c:357", S3C24XX_DMASKTRIG_STOP, phy->base + S3C24XX_DMASKTRIG);
 }
 
 /*
@@ -371,7 +371,7 @@ static u32 s3c24xx_dma_getbytes_chan(struct s3c24xx_dma_chan *s3cchan)
 {
 	struct s3c24xx_dma_phy *phy = s3cchan->phy;
 	struct s3c24xx_txd *txd = s3cchan->at;
-	u32 tc = readl(phy->base + S3C24XX_DSTAT) & S3C24XX_DSTAT_CURRTC_MASK;
+	u32 tc = pete_readl("drivers/dma/s3c24xx-dma.c:374", phy->base + S3C24XX_DSTAT) & S3C24XX_DSTAT_CURRTC_MASK;
 
 	return tc * txd->width;
 }
@@ -494,7 +494,7 @@ static void s3c24xx_dma_start_next_sg(struct s3c24xx_dma_chan *s3cchan,
 	if (!s3cchan->slave)
 		val |= S3C24XX_DMASKTRIG_SWTRIG;
 
-	writel(val, phy->base + S3C24XX_DMASKTRIG);
+	pete_writel("drivers/dma/s3c24xx-dma.c:497", val, phy->base + S3C24XX_DMASKTRIG);
 }
 
 /*

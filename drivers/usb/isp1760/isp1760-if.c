@@ -76,9 +76,9 @@ static int isp1761_pci_init(struct pci_dev *dev)
 		/*by default host is in 16bit mode, so
 		 * io operations at this stage must be 16 bit
 		 * */
-		writel(0xface, iobase + ISP176x_HC_SCRATCH);
+		pete_writel("drivers/usb/isp1760/isp1760-if.c:79", 0xface, iobase + ISP176x_HC_SCRATCH);
 		udelay(100);
-		reg_data = readl(iobase + ISP176x_HC_SCRATCH) & 0x0000ffff;
+		reg_data = pete_readl("drivers/usb/isp1760/isp1760-if.c:81", iobase + ISP176x_HC_SCRATCH) & 0x0000ffff;
 		retry_count--;
 	}
 
@@ -111,9 +111,9 @@ static int isp1761_pci_init(struct pci_dev *dev)
 
 	/* configure PLX PCI chip to pass interrupts */
 #define PLX_INT_CSR_REG 0x68
-	reg_data = readl(iobase + PLX_INT_CSR_REG);
+	reg_data = pete_readl("drivers/usb/isp1760/isp1760-if.c:114", iobase + PLX_INT_CSR_REG);
 	reg_data |= 0x900;
-	writel(reg_data, iobase + PLX_INT_CSR_REG);
+	pete_writel("drivers/usb/isp1760/isp1760-if.c:116", reg_data, iobase + PLX_INT_CSR_REG);
 
 	/* done with PLX IO access */
 	iounmap(iobase);

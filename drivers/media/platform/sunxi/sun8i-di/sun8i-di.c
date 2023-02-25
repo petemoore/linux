@@ -32,30 +32,30 @@ static u32 deinterlace_formats[] = {
 
 static inline u32 deinterlace_read(struct deinterlace_dev *dev, u32 reg)
 {
-	return readl(dev->base + reg);
+	return pete_readl("drivers/media/platform/sunxi/sun8i-di/sun8i-di.c:35", dev->base + reg);
 }
 
 static inline void deinterlace_write(struct deinterlace_dev *dev,
 				     u32 reg, u32 value)
 {
-	writel(value, dev->base + reg);
+	pete_writel("drivers/media/platform/sunxi/sun8i-di/sun8i-di.c:41", value, dev->base + reg);
 }
 
 static inline void deinterlace_set_bits(struct deinterlace_dev *dev,
 					u32 reg, u32 bits)
 {
-	writel(readl(dev->base + reg) | bits, dev->base + reg);
+	pete_writel("drivers/media/platform/sunxi/sun8i-di/sun8i-di.c:47", pete_readl("drivers/media/platform/sunxi/sun8i-di/sun8i-di.c:47", dev->base + reg) | bits, dev->base + reg);
 }
 
 static inline void deinterlace_clr_set_bits(struct deinterlace_dev *dev,
 					    u32 reg, u32 clr, u32 set)
 {
-	u32 val = readl(dev->base + reg);
+	u32 val = pete_readl("drivers/media/platform/sunxi/sun8i-di/sun8i-di.c:53", dev->base + reg);
 
 	val &= ~clr;
 	val |= set;
 
-	writel(val, dev->base + reg);
+	pete_writel("drivers/media/platform/sunxi/sun8i-di/sun8i-di.c:58", val, dev->base + reg);
 }
 
 static void deinterlace_device_run(void *priv)

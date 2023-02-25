@@ -59,12 +59,12 @@ struct dwc_pwm {
 
 static inline u32 dwc_pwm_readl(struct dwc_pwm *dwc, u32 offset)
 {
-	return readl(dwc->base + offset);
+	return pete_readl("drivers/pwm/pwm-dwc.c:62", dwc->base + offset);
 }
 
 static inline void dwc_pwm_writel(struct dwc_pwm *dwc, u32 value, u32 offset)
 {
-	writel(value, dwc->base + offset);
+	pete_writel("drivers/pwm/pwm-dwc.c:67", value, dwc->base + offset);
 }
 
 static void __dwc_pwm_set_enable(struct dwc_pwm *dwc, int pwm, int enabled)

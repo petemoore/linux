@@ -104,12 +104,12 @@ static int dwc3_byt_enable_ulpi_refclock(struct pci_dev *pci)
 	if (!reg)
 		return -ENOMEM;
 
-	value = readl(reg + GP_RWREG1);
+	value = pete_readl("drivers/usb/dwc3/dwc3-pci.c:107", reg + GP_RWREG1);
 	if (!(value & GP_RWREG1_ULPI_REFCLK_DISABLE))
 		goto unmap; /* ULPI refclk already enabled */
 
 	value &= ~GP_RWREG1_ULPI_REFCLK_DISABLE;
-	writel(value, reg + GP_RWREG1);
+	pete_writel("drivers/usb/dwc3/dwc3-pci.c:112", value, reg + GP_RWREG1);
 	/* This comes from the Intel Android x86 tree w/o any explanation */
 	msleep(100);
 unmap:

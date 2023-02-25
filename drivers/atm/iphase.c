@@ -145,7 +145,7 @@ static void ia_hack_tcq(IADEV *dev) {
   u_short		tcq_wr;
   struct ia_vcc         *iavcc_r = NULL; 
 
-  tcq_wr = readl(dev->seg_reg+TCQ_WR_PTR) & 0xffff;
+  tcq_wr = pete_readl("drivers/atm/iphase.c:148", dev->seg_reg+TCQ_WR_PTR) & 0xffff;
   while (dev->host_tcq_wr != tcq_wr) {
      desc1 = *(u_short *)(dev->seg_ram + dev->host_tcq_wr);
      if (!desc1) ;
@@ -721,9 +721,9 @@ static void ia_eeprom_put (IADEV *iadev, u32 addr, u_short val)
 	}
 	NVRAM_CLR_CE;
 	CFG_OR(NVCE);
-	t = readl(iadev->reg+IPHASE5575_EEPROM_ACCESS); 
+	t = pete_readl("drivers/atm/iphase.c:724", iadev->reg+IPHASE5575_EEPROM_ACCESS); 
 	while (!(t & NVDO))
-		t = readl(iadev->reg+IPHASE5575_EEPROM_ACCESS); 
+		t = pete_readl("drivers/atm/iphase.c:726", iadev->reg+IPHASE5575_EEPROM_ACCESS); 
 
 	NVRAM_CLR_CE;
 	/*
@@ -822,12 +822,12 @@ static void ia_hw_type(IADEV *iadev) {
 
 static u32 ia_phy_read32(struct iadev_priv *ia, unsigned int reg)
 {
-	return readl(ia->phy + (reg >> 2));
+	return pete_readl("drivers/atm/iphase.c:825", ia->phy + (reg >> 2));
 }
 
 static void ia_phy_write32(struct iadev_priv *ia, unsigned int reg, u32 val)
 {
-	writel(val, ia->phy + (reg >> 2));
+	pete_writel("drivers/atm/iphase.c:830", val, ia->phy + (reg >> 2));
 }
 
 static void ia_frontend_intr(struct iadev_priv *iadev)
@@ -1030,7 +1030,7 @@ static void desc_dbg(IADEV *iadev) {
   u_short tcq_wr_ptr, tcq_st_ptr, tcq_ed_ptr;
   u32 i;
   void __iomem *tmp;
-  // regval = readl((u32)ia_cmds->maddr);
+  // regval = pete_readl("drivers/atm/iphase.c:1033", (u32)ia_cmds->maddr);
   tcq_wr_ptr =  readw(iadev->seg_reg+TCQ_WR_PTR);
   printk("B_tcq_wr = 0x%x desc = %d last desc = %d\n",
                      tcq_wr_ptr, readw(iadev->seg_ram+tcq_wr_ptr),
@@ -1062,7 +1062,7 @@ static void rx_excp_rcvd(struct atm_dev *dev)
   //u_short *ptr;  
   int vci, error = 1;  
   iadev = INPH_IA_DEV(dev);  
-  state = readl(iadev->reass_reg + STATE_REG) & 0xffff;  
+  state = pete_readl("drivers/atm/iphase.c:1065", iadev->reass_reg + STATE_REG) & 0xffff;  
   while((state & EXCPQ_EMPTY) != EXCPQ_EMPTY)  
   { printk("state = %x \n", state); 
         excpq_rd_ptr = readw(iadev->reass_reg + EXCP_Q_RD_PTR) & 0xffff;  
@@ -1077,7 +1077,7 @@ static void rx_excp_rcvd(struct atm_dev *dev)
 	if (excpq_rd_ptr > (readw(iadev->reass_reg + EXCP_Q_ED_ADR)& 0xffff))  
  	    excpq_rd_ptr = readw(iadev->reass_reg + EXCP_Q_ST_ADR)& 0xffff;
 	writew( excpq_rd_ptr, iadev->reass_reg + EXCP_Q_RD_PTR);  
-        state = readl(iadev->reass_reg + STATE_REG) & 0xffff;  
+        state = pete_readl("drivers/atm/iphase.c:1080", iadev->reass_reg + STATE_REG) & 0xffff;  
   }  
 #endif
 }  
@@ -1202,7 +1202,7 @@ static int rx_pkt(struct atm_dev *dev)
 	iadev->rx_dle_q.write = wr_ptr;  
 	udelay(1);  
 	/* Increment transaction counter */  
-	writel(1, iadev->dma+IPHASE5575_RX_COUNTER);   
+	pete_writel("drivers/atm/iphase.c:1205", 1, iadev->dma+IPHASE5575_RX_COUNTER);   
 out:	return 0;  
 out_free_desc:
         free_desc(dev, desc);
@@ -1216,7 +1216,7 @@ static void rx_intr(struct atm_dev *dev)
   u_short state, i;  
   
   iadev = INPH_IA_DEV(dev);  
-  status = readl(iadev->reass_reg+REASS_INTR_STATUS_REG) & 0xffff;  
+  status = pete_readl("drivers/atm/iphase.c:1219", iadev->reass_reg+REASS_INTR_STATUS_REG) & 0xffff;  
   IF_EVENT(printk("rx_intr: status = 0x%x\n", status);)
   if (status & RX_PKT_RCVD)  
   {  
@@ -1226,12 +1226,12 @@ static void rx_intr(struct atm_dev *dev)
 	queue. Get all the descriptors and set up dma to move the   
 	packets till the packet complete queue is empty..  
 	*/  
-	state = readl(iadev->reass_reg + STATE_REG) & 0xffff;  
+	state = pete_readl("drivers/atm/iphase.c:1229", iadev->reass_reg + STATE_REG) & 0xffff;  
         IF_EVENT(printk("Rx intr status: RX_PKT_RCVD %08x\n", status);) 
 	while(!(state & PCQ_EMPTY))  
 	{  
              rx_pkt(dev);  
-	     state = readl(iadev->reass_reg + STATE_REG) & 0xffff;  
+	     state = pete_readl("drivers/atm/iphase.c:1234", iadev->reass_reg + STATE_REG) & 0xffff;  
 	}  
         iadev->rxing = 1;
   }  
@@ -1289,7 +1289,7 @@ static void rx_dle_intr(struct atm_dev *dev)
 	and push them up to the higher layer protocol. Also free the desc  
 	associated with the buffer. */  
   dle = iadev->rx_dle_q.read;  
-  dle_lp = readl(iadev->dma+IPHASE5575_RX_LIST_ADDR) & (sizeof(struct dle)*DLE_ENTRIES - 1);  
+  dle_lp = pete_readl("drivers/atm/iphase.c:1292", iadev->dma+IPHASE5575_RX_LIST_ADDR) & (sizeof(struct dle)*DLE_ENTRIES - 1);  
   cur_dle = (struct dle*)(iadev->rx_dle_q.start + (dle_lp >> 4));  
   while(dle != cur_dle)  
   {  
@@ -1363,10 +1363,10 @@ INCR_DLE:
   /* if the interrupts are masked because there were no free desc available,  
 		unmask them now. */ 
   if (!iadev->rxing) {
-     state = readl(iadev->reass_reg + STATE_REG) & 0xffff;
+     state = pete_readl("drivers/atm/iphase.c:1366", iadev->reass_reg + STATE_REG) & 0xffff;
      if (!(state & FREEQ_EMPTY)) {
-        state = readl(iadev->reass_reg + REASS_MASK_REG) & 0xffff;
-        writel(state & ~(RX_FREEQ_EMPT |/* RX_EXCP_RCVD |*/ RX_PKT_RCVD),
+        state = pete_readl("drivers/atm/iphase.c:1368", iadev->reass_reg + REASS_MASK_REG) & 0xffff;
+        pete_writel("drivers/atm/iphase.c:1369", state & ~(RX_FREEQ_EMPT |/* RX_EXCP_RCVD |*/ RX_PKT_RCVD),
                                       iadev->reass_reg+REASS_MASK_REG);
         iadev->rxing++; 
      }
@@ -1450,14 +1450,14 @@ static int rx_init(struct atm_dev *dev)
   
 	/* write the upper 20 bits of the start address to rx list address register */  
 	/* We know this is 32bit bus addressed so the following is safe */
-	writel(iadev->rx_dle_dma & 0xfffff000,
+	pete_writel("drivers/atm/iphase.c:1453", iadev->rx_dle_dma & 0xfffff000,
 	       iadev->dma + IPHASE5575_RX_LIST_ADDR);  
 	IF_INIT(printk("Tx Dle list addr: 0x%p value: 0x%0x\n",
                       iadev->dma+IPHASE5575_TX_LIST_ADDR,
-                      readl(iadev->dma + IPHASE5575_TX_LIST_ADDR));
+                      pete_readl("drivers/atm/iphase.c:1457", iadev->dma + IPHASE5575_TX_LIST_ADDR));
 	printk("Rx Dle list addr: 0x%p value: 0x%0x\n",
                       iadev->dma+IPHASE5575_RX_LIST_ADDR,
-                      readl(iadev->dma + IPHASE5575_RX_LIST_ADDR));)
+                      pete_readl("drivers/atm/iphase.c:1460", iadev->dma + IPHASE5575_RX_LIST_ADDR));)
   
 	writew(0xffff, iadev->reass_reg+REASS_MASK_REG);  
 	writew(0, iadev->reass_reg+MODE_REG);  
@@ -1666,7 +1666,7 @@ static void tx_intr(struct atm_dev *dev)
 
 	iadev = INPH_IA_DEV(dev);  
   
-	status = readl(iadev->seg_reg+SEG_INTR_STATUS_REG);  
+	status = pete_readl("drivers/atm/iphase.c:1669", iadev->seg_reg+SEG_INTR_STATUS_REG);  
         if (status & TRANSMIT_DONE){
 
            IF_EVENT(printk("Transmit Done Intr logic run\n");)
@@ -1696,7 +1696,7 @@ static void tx_dle_intr(struct atm_dev *dev)
         iadev = INPH_IA_DEV(dev);
         spin_lock_irqsave(&iadev->tx_lock, flags);   
         dle = iadev->tx_dle_q.read;
-        dle_lp = readl(iadev->dma+IPHASE5575_TX_LIST_ADDR) & 
+        dle_lp = pete_readl("drivers/atm/iphase.c:1699", iadev->dma+IPHASE5575_TX_LIST_ADDR) & 
                                         (sizeof(struct dle)*DLE_ENTRIES - 1);
         cur_dle = (struct dle*)(iadev->tx_dle_q.start + (dle_lp >> 4));
         while (dle != cur_dle)
@@ -1934,7 +1934,7 @@ static int tx_init(struct atm_dev *dev)
 	iadev->tx_dle_q.end = (struct dle*)((unsigned long)dle_addr+sizeof(struct dle)*DLE_ENTRIES);
 
 	/* write the upper 20 bits of the start address to tx list address register */  
-	writel(iadev->tx_dle_dma & 0xfffff000,
+	pete_writel("drivers/atm/iphase.c:1937", iadev->tx_dle_dma & 0xfffff000,
 	       iadev->dma + IPHASE5575_TX_LIST_ADDR);  
 	writew(0xffff, iadev->seg_reg+SEG_MASK_REG);  
 	writew(0, iadev->seg_reg+MODE_REG_0);  
@@ -2231,7 +2231,7 @@ static irqreturn_t ia_int(int irq, void *dev_id)
 
    dev = dev_id;  
    iadev = INPH_IA_DEV(dev);  
-   while( (status = readl(iadev->reg+IPHASE5575_BUS_STATUS_REG) & 0x7f))  
+   while( (status = pete_readl("drivers/atm/iphase.c:2234", iadev->reg+IPHASE5575_BUS_STATUS_REG) & 0x7f))  
    { 
 	handled = 1;
         IF_EVENT(printk("ia_int: status = 0x%x\n", status);) 
@@ -2244,7 +2244,7 @@ static irqreturn_t ia_int(int irq, void *dev_id)
 	if (status & STAT_DLERINT)  
 	{  
 	   /* Clear this bit by writing a 1 to it. */  
-	   writel(STAT_DLERINT, iadev->reg + IPHASE5575_BUS_STATUS_REG);
+	   pete_writel("drivers/atm/iphase.c:2247", STAT_DLERINT, iadev->reg + IPHASE5575_BUS_STATUS_REG);
 	   rx_dle_intr(dev);  
 	}  
 	if (status & STAT_SEGINT)  
@@ -2255,7 +2255,7 @@ static irqreturn_t ia_int(int irq, void *dev_id)
 	}  
 	if (status & STAT_DLETINT)  
 	{  
-	   writel(STAT_DLETINT, iadev->reg + IPHASE5575_BUS_STATUS_REG);
+	   pete_writel("drivers/atm/iphase.c:2258", STAT_DLETINT, iadev->reg + IPHASE5575_BUS_STATUS_REG);
 	   tx_dle_intr(dev);  
 	}  
 	if (status & (STAT_FEINT | STAT_ERRINT | STAT_MARKINT))  
@@ -2278,9 +2278,9 @@ static int get_esi(struct atm_dev *dev)
 	u16 mac2;  
 	  
 	iadev = INPH_IA_DEV(dev);  
-	mac1 = cpu_to_be32(le32_to_cpu(readl(  
+	mac1 = cpu_to_be32(le32_to_cpu(pete_readl("drivers/atm/iphase.c:2281",   
 				iadev->reg+IPHASE5575_MAC1)));  
-	mac2 = cpu_to_be16(le16_to_cpu(readl(iadev->reg+IPHASE5575_MAC2)));  
+	mac2 = cpu_to_be16(le16_to_cpu(pete_readl("drivers/atm/iphase.c:2283", iadev->reg+IPHASE5575_MAC2)));  
 	IF_INIT(printk("ESI: 0x%08x%04x\n", mac1, mac2);)  
 	for (i=0; i<MAC1_LEN; i++)  
 		dev->esi[i] = mac1 >>(8*(MAC1_LEN-1-i));  
@@ -2301,7 +2301,7 @@ static int reset_sar(struct atm_dev *dev)
 	  if ((error = pci_read_config_dword(iadev->pci,  
 				i*4, &pci[i])) != PCIBIOS_SUCCESSFUL)  
   	      return error;  
-	writel(0, iadev->reg+IPHASE5575_EXT_RESET);  
+	pete_writel("drivers/atm/iphase.c:2304", 0, iadev->reg+IPHASE5575_EXT_RESET);  
 	for(i=0; i<64; i++)  
 	  if ((error = pci_write_config_dword(iadev->pci,  
 					i*4, pci[i])) != PCIBIOS_SUCCESSFUL)  
@@ -2443,17 +2443,17 @@ static void ia_led_timer(struct timer_list *unused) {
         static u32 ctrl_reg; 
         for (i = 0; i < iadev_count; i++) {
            if (ia_dev[i]) {
-	      ctrl_reg = readl(ia_dev[i]->reg+IPHASE5575_BUS_CONTROL_REG);
+	      ctrl_reg = pete_readl("drivers/atm/iphase.c:2446", ia_dev[i]->reg+IPHASE5575_BUS_CONTROL_REG);
 	      if (blinking[i] == 0) {
 		 blinking[i]++;
                  ctrl_reg &= (~CTRL_LED);
-                 writel(ctrl_reg, ia_dev[i]->reg+IPHASE5575_BUS_CONTROL_REG);
+                 pete_writel("drivers/atm/iphase.c:2450", ctrl_reg, ia_dev[i]->reg+IPHASE5575_BUS_CONTROL_REG);
                  ia_update_stats(ia_dev[i]);
               }
               else {
 		 blinking[i] = 0;
 		 ctrl_reg |= CTRL_LED;
-                 writel(ctrl_reg, ia_dev[i]->reg+IPHASE5575_BUS_CONTROL_REG);
+                 pete_writel("drivers/atm/iphase.c:2456", ctrl_reg, ia_dev[i]->reg+IPHASE5575_BUS_CONTROL_REG);
                  spin_lock_irqsave(&ia_dev[i]->tx_lock, flags);
                  if (ia_dev[i]->close_pending)  
                     wake_up(&ia_dev[i]->close_wait);
@@ -2469,12 +2469,12 @@ static void ia_led_timer(struct timer_list *unused) {
 static void ia_phy_put(struct atm_dev *dev, unsigned char value,   
 	unsigned long addr)  
 {  
-	writel(value, INPH_IA_DEV(dev)->phy+addr);  
+	pete_writel("drivers/atm/iphase.c:2472", value, INPH_IA_DEV(dev)->phy+addr);  
 }  
   
 static unsigned char ia_phy_get(struct atm_dev *dev, unsigned long addr)  
 {  
-	return readl(INPH_IA_DEV(dev)->phy+addr);  
+	return pete_readl("drivers/atm/iphase.c:2477", INPH_IA_DEV(dev)->phy+addr);  
 }  
 
 static void ia_free_tx(IADEV *iadev)
@@ -2535,8 +2535,8 @@ static int ia_start(struct atm_dev *dev)
 		Registers and see. */  
   
 	IF_INIT(printk("Bus ctrl reg: %08x\n", 
-                            readl(iadev->reg+IPHASE5575_BUS_CONTROL_REG));)  
-	ctrl_reg = readl(iadev->reg+IPHASE5575_BUS_CONTROL_REG);  
+                            pete_readl("drivers/atm/iphase.c:2538", iadev->reg+IPHASE5575_BUS_CONTROL_REG));)  
+	ctrl_reg = pete_readl("drivers/atm/iphase.c:2539", iadev->reg+IPHASE5575_BUS_CONTROL_REG);  
 	ctrl_reg = (ctrl_reg & (CTRL_LED | CTRL_FE_RST))  
 			| CTRL_B8  
 			| CTRL_B16  
@@ -2552,12 +2552,12 @@ static int ia_start(struct atm_dev *dev)
 			| CTRL_FEMASK  
 			| CTRL_CSPREEMPT;  
   
-       writel(ctrl_reg, iadev->reg+IPHASE5575_BUS_CONTROL_REG);   
+       pete_writel("drivers/atm/iphase.c:2555", ctrl_reg, iadev->reg+IPHASE5575_BUS_CONTROL_REG);   
   
 	IF_INIT(printk("Bus ctrl reg after initializing: %08x\n", 
-                           readl(iadev->reg+IPHASE5575_BUS_CONTROL_REG));  
+                           pete_readl("drivers/atm/iphase.c:2558", iadev->reg+IPHASE5575_BUS_CONTROL_REG));  
 	   printk("Bus status reg after init: %08x\n", 
-                            readl(iadev->reg+IPHASE5575_BUS_STATUS_REG));)  
+                            pete_readl("drivers/atm/iphase.c:2560", iadev->reg+IPHASE5575_BUS_STATUS_REG));)  
     
         ia_hw_type(iadev); 
 	error = tx_init(dev);  
@@ -2567,10 +2567,10 @@ static int ia_start(struct atm_dev *dev)
 	if (error)
 		goto err_free_tx;
   
-	ctrl_reg = readl(iadev->reg+IPHASE5575_BUS_CONTROL_REG);  
-       	writel(ctrl_reg | CTRL_FE_RST, iadev->reg+IPHASE5575_BUS_CONTROL_REG);   
+	ctrl_reg = pete_readl("drivers/atm/iphase.c:2570", iadev->reg+IPHASE5575_BUS_CONTROL_REG);  
+       	pete_writel("drivers/atm/iphase.c:2571", ctrl_reg | CTRL_FE_RST, iadev->reg+IPHASE5575_BUS_CONTROL_REG);   
 	IF_INIT(printk("Bus ctrl reg after initializing: %08x\n", 
-                               readl(iadev->reg+IPHASE5575_BUS_CONTROL_REG));)  
+                               pete_readl("drivers/atm/iphase.c:2573", iadev->reg+IPHASE5575_BUS_CONTROL_REG));)  
         phy = 0; /* resolve compiler complaint */
         IF_INIT ( 
 	if ((phy=ia_phy_get(dev,0)) == 0x30)  
@@ -2778,7 +2778,7 @@ static int ia_ioctl(struct atm_dev *dev, unsigned int cmd, void __user *arg)
 	     if (!capable(CAP_NET_ADMIN)) return -EPERM;
              tmps = (u16 __user *)ia_cmds.buf;
              for(i=0; i<0x80; i+=2, tmps++)
-                if(put_user((u16)(readl(iadev->seg_reg+i) & 0xffff), tmps)) return -EFAULT;
+                if(put_user((u16)(pete_readl("drivers/atm/iphase.c:2781", iadev->seg_reg+i) & 0xffff), tmps)) return -EFAULT;
              ia_cmds.status = 0;
              ia_cmds.len = 0x80;
              break;
@@ -2786,7 +2786,7 @@ static int ia_ioctl(struct atm_dev *dev, unsigned int cmd, void __user *arg)
 	     if (!capable(CAP_NET_ADMIN)) return -EPERM;
              tmps = (u16 __user *)ia_cmds.buf;
              for(i=0; i<0x80; i+=2, tmps++)
-                if(put_user((u16)(readl(iadev->reass_reg+i) & 0xffff), tmps)) return -EFAULT;
+                if(put_user((u16)(pete_readl("drivers/atm/iphase.c:2789", iadev->reass_reg+i) & 0xffff), tmps)) return -EFAULT;
              ia_cmds.status = 0;
              ia_cmds.len = 0x80;
              break;
@@ -2803,10 +2803,10 @@ static int ia_ioctl(struct atm_dev *dev, unsigned int cmd, void __user *arg)
 	     rfL = &regs_local->rfredn;
              /* Copy real rfred registers into the local copy */
  	     for (i=0; i<(sizeof (rfredn_t))/4; i++)
-                ((u_int *)rfL)[i] = readl(iadev->reass_reg + i) & 0xffff;
+                ((u_int *)rfL)[i] = pete_readl("drivers/atm/iphase.c:2806", iadev->reass_reg + i) & 0xffff;
              	/* Copy real ffred registers into the local copy */
 	     for (i=0; i<(sizeof (ffredn_t))/4; i++)
-                ((u_int *)ffL)[i] = readl(iadev->seg_reg + i) & 0xffff;
+                ((u_int *)ffL)[i] = pete_readl("drivers/atm/iphase.c:2809", iadev->seg_reg + i) & 0xffff;
 
              if (copy_to_user(ia_cmds.buf, regs_local,sizeof(ia_regs_t))) {
                 kfree(regs_local);
@@ -3042,7 +3042,7 @@ static int ia_pkt_tx (struct atm_vcc *vcc, struct sk_buff *skb) {
         atomic_inc(&vcc->stats->tx);
         iadev->tx_pkt_cnt++;
 	/* Increment transaction counter */  
-	writel(2, iadev->dma+IPHASE5575_TX_COUNTER);  
+	pete_writel("drivers/atm/iphase.c:3045", 2, iadev->dma+IPHASE5575_TX_COUNTER);  
         
 #if 0        
         /* add flow control logic */ 

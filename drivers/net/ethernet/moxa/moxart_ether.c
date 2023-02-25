@@ -44,7 +44,7 @@ static inline void moxart_emac_write(struct net_device *ndev,
 {
 	struct moxart_mac_priv_t *priv = netdev_priv(ndev);
 
-	writel(value, priv->base + reg);
+	pete_writel("drivers/net/ethernet/moxa/moxart_ether.c:47", value, priv->base + reg);
 }
 
 static void moxart_update_mac_address(struct net_device *ndev)
@@ -93,11 +93,11 @@ static void moxart_mac_reset(struct net_device *ndev)
 {
 	struct moxart_mac_priv_t *priv = netdev_priv(ndev);
 
-	writel(SW_RST, priv->base + REG_MAC_CTRL);
-	while (readl(priv->base + REG_MAC_CTRL) & SW_RST)
+	pete_writel("drivers/net/ethernet/moxa/moxart_ether.c:96", SW_RST, priv->base + REG_MAC_CTRL);
+	while (pete_readl("drivers/net/ethernet/moxa/moxart_ether.c:97", priv->base + REG_MAC_CTRL) & SW_RST)
 		mdelay(10);
 
-	writel(0, priv->base + REG_INTERRUPT_MASK);
+	pete_writel("drivers/net/ethernet/moxa/moxart_ether.c:100", 0, priv->base + REG_INTERRUPT_MASK);
 
 	priv->reg_maccr = RX_BROADPKT | FULLDUP | CRC_APD | RX_FTL;
 }
@@ -106,15 +106,15 @@ static void moxart_mac_enable(struct net_device *ndev)
 {
 	struct moxart_mac_priv_t *priv = netdev_priv(ndev);
 
-	writel(0x00001010, priv->base + REG_INT_TIMER_CTRL);
-	writel(0x00000001, priv->base + REG_APOLL_TIMER_CTRL);
-	writel(0x00000390, priv->base + REG_DMA_BLEN_CTRL);
+	pete_writel("drivers/net/ethernet/moxa/moxart_ether.c:109", 0x00001010, priv->base + REG_INT_TIMER_CTRL);
+	pete_writel("drivers/net/ethernet/moxa/moxart_ether.c:110", 0x00000001, priv->base + REG_APOLL_TIMER_CTRL);
+	pete_writel("drivers/net/ethernet/moxa/moxart_ether.c:111", 0x00000390, priv->base + REG_DMA_BLEN_CTRL);
 
 	priv->reg_imr |= (RPKT_FINISH_M | XPKT_FINISH_M);
-	writel(priv->reg_imr, priv->base + REG_INTERRUPT_MASK);
+	pete_writel("drivers/net/ethernet/moxa/moxart_ether.c:114", priv->reg_imr, priv->base + REG_INTERRUPT_MASK);
 
 	priv->reg_maccr |= (RCV_EN | XMT_EN | RDMA_EN | XDMA_EN);
-	writel(priv->reg_maccr, priv->base + REG_MAC_CTRL);
+	pete_writel("drivers/net/ethernet/moxa/moxart_ether.c:117", priv->reg_maccr, priv->base + REG_MAC_CTRL);
 }
 
 static void moxart_mac_setup_desc_ring(struct net_device *ndev)
@@ -159,8 +159,8 @@ static void moxart_mac_setup_desc_ring(struct net_device *ndev)
 	priv->rx_head = 0;
 
 	/* reset the MAC controller TX/RX descriptor base address */
-	writel(priv->tx_base, priv->base + REG_TXR_BASE_ADDRESS);
-	writel(priv->rx_base, priv->base + REG_RXR_BASE_ADDRESS);
+	pete_writel("drivers/net/ethernet/moxa/moxart_ether.c:162", priv->tx_base, priv->base + REG_TXR_BASE_ADDRESS);
+	pete_writel("drivers/net/ethernet/moxa/moxart_ether.c:163", priv->rx_base, priv->base + REG_RXR_BASE_ADDRESS);
 }
 
 static int moxart_mac_open(struct net_device *ndev)
@@ -179,8 +179,8 @@ static int moxart_mac_open(struct net_device *ndev)
 	netif_start_queue(ndev);
 
 	netdev_dbg(ndev, "%s: IMR=0x%x, MACCR=0x%x\n",
-		   __func__, readl(priv->base + REG_INTERRUPT_MASK),
-		   readl(priv->base + REG_MAC_CTRL));
+		   __func__, pete_readl("drivers/net/ethernet/moxa/moxart_ether.c:182", priv->base + REG_INTERRUPT_MASK),
+		   pete_readl("drivers/net/ethernet/moxa/moxart_ether.c:183", priv->base + REG_MAC_CTRL));
 
 	return 0;
 }
@@ -195,10 +195,10 @@ static int moxart_mac_stop(struct net_device *ndev)
 	netif_stop_queue(ndev);
 
 	/* disable all interrupts */
-	writel(0, priv->base + REG_INTERRUPT_MASK);
+	pete_writel("drivers/net/ethernet/moxa/moxart_ether.c:198", 0, priv->base + REG_INTERRUPT_MASK);
 
 	/* disable all functions */
-	writel(0, priv->base + REG_MAC_CTRL);
+	pete_writel("drivers/net/ethernet/moxa/moxart_ether.c:201", 0, priv->base + REG_MAC_CTRL);
 
 	/* unmap areas mapped in moxart_mac_setup_desc_ring() */
 	for (i = 0; i < RX_DESC_NUM; i++)
@@ -276,7 +276,7 @@ rx_next:
 		napi_complete_done(napi, rx);
 
 	priv->reg_imr |= RPKT_FINISH_M;
-	writel(priv->reg_imr, priv->base + REG_INTERRUPT_MASK);
+	pete_writel("drivers/net/ethernet/moxa/moxart_ether.c:279", priv->reg_imr, priv->base + REG_INTERRUPT_MASK);
 
 	return rx;
 }
@@ -316,7 +316,7 @@ static irqreturn_t moxart_mac_interrupt(int irq, void *dev_id)
 {
 	struct net_device *ndev = (struct net_device *)dev_id;
 	struct moxart_mac_priv_t *priv = netdev_priv(ndev);
-	unsigned int ists = readl(priv->base + REG_INTERRUPT_STATUS);
+	unsigned int ists = pete_readl("drivers/net/ethernet/moxa/moxart_ether.c:319", priv->base + REG_INTERRUPT_STATUS);
 
 	if (ists & XPKT_OK_INT_STS)
 		moxart_tx_finished(ndev);
@@ -324,7 +324,7 @@ static irqreturn_t moxart_mac_interrupt(int irq, void *dev_id)
 	if (ists & RPKT_FINISH) {
 		if (napi_schedule_prep(&priv->napi)) {
 			priv->reg_imr &= ~RPKT_FINISH_M;
-			writel(priv->reg_imr, priv->base + REG_INTERRUPT_MASK);
+			pete_writel("drivers/net/ethernet/moxa/moxart_ether.c:327", priv->reg_imr, priv->base + REG_INTERRUPT_MASK);
 			__napi_schedule(&priv->napi);
 		}
 	}
@@ -391,7 +391,7 @@ static netdev_tx_t moxart_mac_start_xmit(struct sk_buff *skb,
 	moxart_desc_write(TX_DESC0_DMA_OWN, desc + TX_REG_OFFSET_DESC0);
 
 	/* start to send packet */
-	writel(0xffffffff, priv->base + REG_TX_POLL_DEMAND);
+	pete_writel("drivers/net/ethernet/moxa/moxart_ether.c:394", 0xffffffff, priv->base + REG_TX_POLL_DEMAND);
 
 	priv->tx_head = TX_NEXT(tx_head);
 
@@ -413,11 +413,11 @@ static void moxart_mac_setmulticast(struct net_device *ndev)
 		crc_val = crc32_le(~0, ha->addr, ETH_ALEN);
 		crc_val = (crc_val >> 26) & 0x3f;
 		if (crc_val >= 32) {
-			writel(readl(priv->base + REG_MCAST_HASH_TABLE1) |
+			pete_writel("drivers/net/ethernet/moxa/moxart_ether.c:416", pete_readl("drivers/net/ethernet/moxa/moxart_ether.c:416", priv->base + REG_MCAST_HASH_TABLE1) |
 			       (1UL << (crc_val - 32)),
 			       priv->base + REG_MCAST_HASH_TABLE1);
 		} else {
-			writel(readl(priv->base + REG_MCAST_HASH_TABLE0) |
+			pete_writel("drivers/net/ethernet/moxa/moxart_ether.c:420", pete_readl("drivers/net/ethernet/moxa/moxart_ether.c:420", priv->base + REG_MCAST_HASH_TABLE0) |
 			       (1UL << crc_val),
 			       priv->base + REG_MCAST_HASH_TABLE0);
 		}
@@ -443,7 +443,7 @@ static void moxart_mac_set_rx_mode(struct net_device *ndev)
 		priv->reg_maccr &= ~HT_MULTI_EN;
 	}
 
-	writel(priv->reg_maccr, priv->base + REG_MAC_CTRL);
+	pete_writel("drivers/net/ethernet/moxa/moxart_ether.c:446", priv->reg_maccr, priv->base + REG_MAC_CTRL);
 
 	spin_unlock_irq(&priv->txlock);
 }

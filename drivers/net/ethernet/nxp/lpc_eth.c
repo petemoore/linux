@@ -425,11 +425,11 @@ static void __lpc_set_mac(struct netdata_local *pldat, u8 *mac)
 
 	/* Set station address */
 	tmp = mac[0] | ((u32)mac[1] << 8);
-	writel(tmp, LPC_ENET_SA2(pldat->net_base));
+	pete_writel("drivers/net/ethernet/nxp/lpc_eth.c:428", tmp, LPC_ENET_SA2(pldat->net_base));
 	tmp = mac[2] | ((u32)mac[3] << 8);
-	writel(tmp, LPC_ENET_SA1(pldat->net_base));
+	pete_writel("drivers/net/ethernet/nxp/lpc_eth.c:430", tmp, LPC_ENET_SA1(pldat->net_base));
 	tmp = mac[4] | ((u32)mac[5] << 8);
-	writel(tmp, LPC_ENET_SA0(pldat->net_base));
+	pete_writel("drivers/net/ethernet/nxp/lpc_eth.c:432", tmp, LPC_ENET_SA0(pldat->net_base));
 
 	netdev_dbg(pldat->ndev, "Ethernet MAC address %pM\n", mac);
 }
@@ -439,13 +439,13 @@ static void __lpc_get_mac(struct netdata_local *pldat, u8 *mac)
 	u32 tmp;
 
 	/* Get station address */
-	tmp = readl(LPC_ENET_SA2(pldat->net_base));
+	tmp = pete_readl("drivers/net/ethernet/nxp/lpc_eth.c:442", LPC_ENET_SA2(pldat->net_base));
 	mac[0] = tmp & 0xFF;
 	mac[1] = tmp >> 8;
-	tmp = readl(LPC_ENET_SA1(pldat->net_base));
+	tmp = pete_readl("drivers/net/ethernet/nxp/lpc_eth.c:445", LPC_ENET_SA1(pldat->net_base));
 	mac[2] = tmp & 0xFF;
 	mac[3] = tmp >> 8;
-	tmp = readl(LPC_ENET_SA0(pldat->net_base));
+	tmp = pete_readl("drivers/net/ethernet/nxp/lpc_eth.c:448", LPC_ENET_SA0(pldat->net_base));
 	mac[4] = tmp & 0xFF;
 	mac[5] = tmp >> 8;
 }
@@ -455,46 +455,46 @@ static void __lpc_params_setup(struct netdata_local *pldat)
 	u32 tmp;
 
 	if (pldat->duplex == DUPLEX_FULL) {
-		tmp = readl(LPC_ENET_MAC2(pldat->net_base));
+		tmp = pete_readl("drivers/net/ethernet/nxp/lpc_eth.c:458", LPC_ENET_MAC2(pldat->net_base));
 		tmp |= LPC_MAC2_FULL_DUPLEX;
-		writel(tmp, LPC_ENET_MAC2(pldat->net_base));
-		tmp = readl(LPC_ENET_COMMAND(pldat->net_base));
+		pete_writel("drivers/net/ethernet/nxp/lpc_eth.c:460", tmp, LPC_ENET_MAC2(pldat->net_base));
+		tmp = pete_readl("drivers/net/ethernet/nxp/lpc_eth.c:461", LPC_ENET_COMMAND(pldat->net_base));
 		tmp |= LPC_COMMAND_FULLDUPLEX;
-		writel(tmp, LPC_ENET_COMMAND(pldat->net_base));
-		writel(LPC_IPGT_LOAD(0x15), LPC_ENET_IPGT(pldat->net_base));
+		pete_writel("drivers/net/ethernet/nxp/lpc_eth.c:463", tmp, LPC_ENET_COMMAND(pldat->net_base));
+		pete_writel("drivers/net/ethernet/nxp/lpc_eth.c:464", LPC_IPGT_LOAD(0x15), LPC_ENET_IPGT(pldat->net_base));
 	} else {
-		tmp = readl(LPC_ENET_MAC2(pldat->net_base));
+		tmp = pete_readl("drivers/net/ethernet/nxp/lpc_eth.c:466", LPC_ENET_MAC2(pldat->net_base));
 		tmp &= ~LPC_MAC2_FULL_DUPLEX;
-		writel(tmp, LPC_ENET_MAC2(pldat->net_base));
-		tmp = readl(LPC_ENET_COMMAND(pldat->net_base));
+		pete_writel("drivers/net/ethernet/nxp/lpc_eth.c:468", tmp, LPC_ENET_MAC2(pldat->net_base));
+		tmp = pete_readl("drivers/net/ethernet/nxp/lpc_eth.c:469", LPC_ENET_COMMAND(pldat->net_base));
 		tmp &= ~LPC_COMMAND_FULLDUPLEX;
-		writel(tmp, LPC_ENET_COMMAND(pldat->net_base));
-		writel(LPC_IPGT_LOAD(0x12), LPC_ENET_IPGT(pldat->net_base));
+		pete_writel("drivers/net/ethernet/nxp/lpc_eth.c:471", tmp, LPC_ENET_COMMAND(pldat->net_base));
+		pete_writel("drivers/net/ethernet/nxp/lpc_eth.c:472", LPC_IPGT_LOAD(0x12), LPC_ENET_IPGT(pldat->net_base));
 	}
 
 	if (pldat->speed == SPEED_100)
-		writel(LPC_SUPP_SPEED, LPC_ENET_SUPP(pldat->net_base));
+		pete_writel("drivers/net/ethernet/nxp/lpc_eth.c:476", LPC_SUPP_SPEED, LPC_ENET_SUPP(pldat->net_base));
 	else
-		writel(0, LPC_ENET_SUPP(pldat->net_base));
+		pete_writel("drivers/net/ethernet/nxp/lpc_eth.c:478", 0, LPC_ENET_SUPP(pldat->net_base));
 }
 
 static void __lpc_eth_reset(struct netdata_local *pldat)
 {
 	/* Reset all MAC logic */
-	writel((LPC_MAC1_RESET_TX | LPC_MAC1_RESET_MCS_TX | LPC_MAC1_RESET_RX |
+	pete_writel("drivers/net/ethernet/nxp/lpc_eth.c:484", (LPC_MAC1_RESET_TX | LPC_MAC1_RESET_MCS_TX | LPC_MAC1_RESET_RX |
 		LPC_MAC1_RESET_MCS_RX | LPC_MAC1_SIMULATION_RESET |
 		LPC_MAC1_SOFT_RESET), LPC_ENET_MAC1(pldat->net_base));
-	writel((LPC_COMMAND_REG_RESET | LPC_COMMAND_TXRESET |
+	pete_writel("drivers/net/ethernet/nxp/lpc_eth.c:487", (LPC_COMMAND_REG_RESET | LPC_COMMAND_TXRESET |
 		LPC_COMMAND_RXRESET), LPC_ENET_COMMAND(pldat->net_base));
 }
 
 static int __lpc_mii_mngt_reset(struct netdata_local *pldat)
 {
 	/* Reset MII management hardware */
-	writel(LPC_MCFG_RESET_MII_MGMT, LPC_ENET_MCFG(pldat->net_base));
+	pete_writel("drivers/net/ethernet/nxp/lpc_eth.c:494", LPC_MCFG_RESET_MII_MGMT, LPC_ENET_MCFG(pldat->net_base));
 
 	/* Setup MII clock to slowest rate with a /28 divider */
-	writel(LPC_MCFG_CLOCK_SELECT(LPC_MCFG_CLOCK_HOST_DIV_28),
+	pete_writel("drivers/net/ethernet/nxp/lpc_eth.c:497", LPC_MCFG_CLOCK_SELECT(LPC_MCFG_CLOCK_HOST_DIV_28),
 	       LPC_ENET_MCFG(pldat->net_base));
 
 	return 0;
@@ -512,13 +512,13 @@ static inline phys_addr_t __va_to_pa(void *addr, struct netdata_local *pldat)
 
 static void lpc_eth_enable_int(void __iomem *regbase)
 {
-	writel((LPC_MACINT_RXDONEINTEN | LPC_MACINT_TXDONEINTEN),
+	pete_writel("drivers/net/ethernet/nxp/lpc_eth.c:515", (LPC_MACINT_RXDONEINTEN | LPC_MACINT_TXDONEINTEN),
 	       LPC_ENET_INTENABLE(regbase));
 }
 
 static void lpc_eth_disable_int(void __iomem *regbase)
 {
-	writel(0, LPC_ENET_INTENABLE(regbase));
+	pete_writel("drivers/net/ethernet/nxp/lpc_eth.c:521", 0, LPC_ENET_INTENABLE(regbase));
 }
 
 /* Setup TX/RX descriptors */
@@ -581,17 +581,17 @@ static void __lpc_txrx_desc_setup(struct netdata_local *pldat)
 	/* Setup base addresses in hardware to point to buffers and
 	 * descriptors
 	 */
-	writel((ENET_TX_DESC - 1),
+	pete_writel("drivers/net/ethernet/nxp/lpc_eth.c:584", (ENET_TX_DESC - 1),
 	       LPC_ENET_TXDESCRIPTORNUMBER(pldat->net_base));
-	writel(__va_to_pa(pldat->tx_desc_v, pldat),
+	pete_writel("drivers/net/ethernet/nxp/lpc_eth.c:586", __va_to_pa(pldat->tx_desc_v, pldat),
 	       LPC_ENET_TXDESCRIPTOR(pldat->net_base));
-	writel(__va_to_pa(pldat->tx_stat_v, pldat),
+	pete_writel("drivers/net/ethernet/nxp/lpc_eth.c:588", __va_to_pa(pldat->tx_stat_v, pldat),
 	       LPC_ENET_TXSTATUS(pldat->net_base));
-	writel((ENET_RX_DESC - 1),
+	pete_writel("drivers/net/ethernet/nxp/lpc_eth.c:590", (ENET_RX_DESC - 1),
 	       LPC_ENET_RXDESCRIPTORNUMBER(pldat->net_base));
-	writel(__va_to_pa(pldat->rx_desc_v, pldat),
+	pete_writel("drivers/net/ethernet/nxp/lpc_eth.c:592", __va_to_pa(pldat->rx_desc_v, pldat),
 	       LPC_ENET_RXDESCRIPTOR(pldat->net_base));
-	writel(__va_to_pa(pldat->rx_stat_v, pldat),
+	pete_writel("drivers/net/ethernet/nxp/lpc_eth.c:594", __va_to_pa(pldat->rx_stat_v, pldat),
 	       LPC_ENET_RXSTATUS(pldat->net_base));
 }
 
@@ -600,32 +600,32 @@ static void __lpc_eth_init(struct netdata_local *pldat)
 	u32 tmp;
 
 	/* Disable controller and reset */
-	tmp = readl(LPC_ENET_COMMAND(pldat->net_base));
+	tmp = pete_readl("drivers/net/ethernet/nxp/lpc_eth.c:603", LPC_ENET_COMMAND(pldat->net_base));
 	tmp &= ~LPC_COMMAND_RXENABLE | LPC_COMMAND_TXENABLE;
-	writel(tmp, LPC_ENET_COMMAND(pldat->net_base));
-	tmp = readl(LPC_ENET_MAC1(pldat->net_base));
+	pete_writel("drivers/net/ethernet/nxp/lpc_eth.c:605", tmp, LPC_ENET_COMMAND(pldat->net_base));
+	tmp = pete_readl("drivers/net/ethernet/nxp/lpc_eth.c:606", LPC_ENET_MAC1(pldat->net_base));
 	tmp &= ~LPC_MAC1_RECV_ENABLE;
-	writel(tmp, LPC_ENET_MAC1(pldat->net_base));
+	pete_writel("drivers/net/ethernet/nxp/lpc_eth.c:608", tmp, LPC_ENET_MAC1(pldat->net_base));
 
 	/* Initial MAC setup */
-	writel(LPC_MAC1_PASS_ALL_RX_FRAMES, LPC_ENET_MAC1(pldat->net_base));
-	writel((LPC_MAC2_PAD_CRC_ENABLE | LPC_MAC2_CRC_ENABLE),
+	pete_writel("drivers/net/ethernet/nxp/lpc_eth.c:611", LPC_MAC1_PASS_ALL_RX_FRAMES, LPC_ENET_MAC1(pldat->net_base));
+	pete_writel("drivers/net/ethernet/nxp/lpc_eth.c:612", (LPC_MAC2_PAD_CRC_ENABLE | LPC_MAC2_CRC_ENABLE),
 	       LPC_ENET_MAC2(pldat->net_base));
-	writel(ENET_MAXF_SIZE, LPC_ENET_MAXF(pldat->net_base));
+	pete_writel("drivers/net/ethernet/nxp/lpc_eth.c:614", ENET_MAXF_SIZE, LPC_ENET_MAXF(pldat->net_base));
 
 	/* Collision window, gap */
-	writel((LPC_CLRT_LOAD_RETRY_MAX(0xF) |
+	pete_writel("drivers/net/ethernet/nxp/lpc_eth.c:617", (LPC_CLRT_LOAD_RETRY_MAX(0xF) |
 		LPC_CLRT_LOAD_COLLISION_WINDOW(0x37)),
 	       LPC_ENET_CLRT(pldat->net_base));
-	writel(LPC_IPGR_LOAD_PART2(0x12), LPC_ENET_IPGR(pldat->net_base));
+	pete_writel("drivers/net/ethernet/nxp/lpc_eth.c:620", LPC_IPGR_LOAD_PART2(0x12), LPC_ENET_IPGR(pldat->net_base));
 
 	if (lpc_phy_interface_mode(&pldat->pdev->dev) == PHY_INTERFACE_MODE_MII)
-		writel(LPC_COMMAND_PASSRUNTFRAME,
+		pete_writel("drivers/net/ethernet/nxp/lpc_eth.c:623", LPC_COMMAND_PASSRUNTFRAME,
 		       LPC_ENET_COMMAND(pldat->net_base));
 	else {
-		writel((LPC_COMMAND_PASSRUNTFRAME | LPC_COMMAND_RMII),
+		pete_writel("drivers/net/ethernet/nxp/lpc_eth.c:626", (LPC_COMMAND_PASSRUNTFRAME | LPC_COMMAND_RMII),
 		       LPC_ENET_COMMAND(pldat->net_base));
-		writel(LPC_SUPP_RESET_RMII, LPC_ENET_SUPP(pldat->net_base));
+		pete_writel("drivers/net/ethernet/nxp/lpc_eth.c:628", LPC_SUPP_RESET_RMII, LPC_ENET_SUPP(pldat->net_base));
 	}
 
 	__lpc_params_setup(pldat);
@@ -634,34 +634,34 @@ static void __lpc_eth_init(struct netdata_local *pldat)
 	__lpc_txrx_desc_setup(pldat);
 
 	/* Setup packet filtering */
-	writel((LPC_RXFLTRW_ACCEPTUBROADCAST | LPC_RXFLTRW_ACCEPTPERFECT),
+	pete_writel("drivers/net/ethernet/nxp/lpc_eth.c:637", (LPC_RXFLTRW_ACCEPTUBROADCAST | LPC_RXFLTRW_ACCEPTPERFECT),
 	       LPC_ENET_RXFILTER_CTRL(pldat->net_base));
 
 	/* Get the next TX buffer output index */
 	pldat->num_used_tx_buffs = 0;
 	pldat->last_tx_idx =
-		readl(LPC_ENET_TXCONSUMEINDEX(pldat->net_base));
+		pete_readl("drivers/net/ethernet/nxp/lpc_eth.c:643", LPC_ENET_TXCONSUMEINDEX(pldat->net_base));
 
 	/* Clear and enable interrupts */
-	writel(0xFFFF, LPC_ENET_INTCLEAR(pldat->net_base));
+	pete_writel("drivers/net/ethernet/nxp/lpc_eth.c:646", 0xFFFF, LPC_ENET_INTCLEAR(pldat->net_base));
 	smp_wmb();
 	lpc_eth_enable_int(pldat->net_base);
 
 	/* Enable controller */
-	tmp = readl(LPC_ENET_COMMAND(pldat->net_base));
+	tmp = pete_readl("drivers/net/ethernet/nxp/lpc_eth.c:651", LPC_ENET_COMMAND(pldat->net_base));
 	tmp |= LPC_COMMAND_RXENABLE | LPC_COMMAND_TXENABLE;
-	writel(tmp, LPC_ENET_COMMAND(pldat->net_base));
-	tmp = readl(LPC_ENET_MAC1(pldat->net_base));
+	pete_writel("drivers/net/ethernet/nxp/lpc_eth.c:653", tmp, LPC_ENET_COMMAND(pldat->net_base));
+	tmp = pete_readl("drivers/net/ethernet/nxp/lpc_eth.c:654", LPC_ENET_MAC1(pldat->net_base));
 	tmp |= LPC_MAC1_RECV_ENABLE;
-	writel(tmp, LPC_ENET_MAC1(pldat->net_base));
+	pete_writel("drivers/net/ethernet/nxp/lpc_eth.c:656", tmp, LPC_ENET_MAC1(pldat->net_base));
 }
 
 static void __lpc_eth_shutdown(struct netdata_local *pldat)
 {
 	/* Reset ethernet and power down PHY */
 	__lpc_eth_reset(pldat);
-	writel(0, LPC_ENET_MAC1(pldat->net_base));
-	writel(0, LPC_ENET_MAC2(pldat->net_base));
+	pete_writel("drivers/net/ethernet/nxp/lpc_eth.c:663", 0, LPC_ENET_MAC1(pldat->net_base));
+	pete_writel("drivers/net/ethernet/nxp/lpc_eth.c:664", 0, LPC_ENET_MAC2(pldat->net_base));
 }
 
 /*
@@ -673,18 +673,18 @@ static int lpc_mdio_read(struct mii_bus *bus, int phy_id, int phyreg)
 	unsigned long timeout = jiffies + msecs_to_jiffies(100);
 	int lps;
 
-	writel(((phy_id << 8) | phyreg), LPC_ENET_MADR(pldat->net_base));
-	writel(LPC_MCMD_READ, LPC_ENET_MCMD(pldat->net_base));
+	pete_writel("drivers/net/ethernet/nxp/lpc_eth.c:676", ((phy_id << 8) | phyreg), LPC_ENET_MADR(pldat->net_base));
+	pete_writel("drivers/net/ethernet/nxp/lpc_eth.c:677", LPC_MCMD_READ, LPC_ENET_MCMD(pldat->net_base));
 
 	/* Wait for unbusy status */
-	while (readl(LPC_ENET_MIND(pldat->net_base)) & LPC_MIND_BUSY) {
+	while (pete_readl("drivers/net/ethernet/nxp/lpc_eth.c:680", LPC_ENET_MIND(pldat->net_base)) & LPC_MIND_BUSY) {
 		if (time_after(jiffies, timeout))
 			return -EIO;
 		cpu_relax();
 	}
 
-	lps = readl(LPC_ENET_MRDD(pldat->net_base));
-	writel(0, LPC_ENET_MCMD(pldat->net_base));
+	lps = pete_readl("drivers/net/ethernet/nxp/lpc_eth.c:686", LPC_ENET_MRDD(pldat->net_base));
+	pete_writel("drivers/net/ethernet/nxp/lpc_eth.c:687", 0, LPC_ENET_MCMD(pldat->net_base));
 
 	return lps;
 }
@@ -695,11 +695,11 @@ static int lpc_mdio_write(struct mii_bus *bus, int phy_id, int phyreg,
 	struct netdata_local *pldat = bus->priv;
 	unsigned long timeout = jiffies + msecs_to_jiffies(100);
 
-	writel(((phy_id << 8) | phyreg), LPC_ENET_MADR(pldat->net_base));
-	writel(phydata, LPC_ENET_MWTD(pldat->net_base));
+	pete_writel("drivers/net/ethernet/nxp/lpc_eth.c:698", ((phy_id << 8) | phyreg), LPC_ENET_MADR(pldat->net_base));
+	pete_writel("drivers/net/ethernet/nxp/lpc_eth.c:699", phydata, LPC_ENET_MWTD(pldat->net_base));
 
 	/* Wait for completion */
-	while (readl(LPC_ENET_MIND(pldat->net_base)) & LPC_MIND_BUSY) {
+	while (pete_readl("drivers/net/ethernet/nxp/lpc_eth.c:702", LPC_ENET_MIND(pldat->net_base)) & LPC_MIND_BUSY) {
 		if (time_after(jiffies, timeout))
 			return -EIO;
 		cpu_relax();
@@ -800,12 +800,12 @@ static int lpc_mii_init(struct netdata_local *pldat)
 
 	/* Setup MII mode */
 	if (lpc_phy_interface_mode(&pldat->pdev->dev) == PHY_INTERFACE_MODE_MII)
-		writel(LPC_COMMAND_PASSRUNTFRAME,
+		pete_writel("drivers/net/ethernet/nxp/lpc_eth.c:803", LPC_COMMAND_PASSRUNTFRAME,
 		       LPC_ENET_COMMAND(pldat->net_base));
 	else {
-		writel((LPC_COMMAND_PASSRUNTFRAME | LPC_COMMAND_RMII),
+		pete_writel("drivers/net/ethernet/nxp/lpc_eth.c:806", (LPC_COMMAND_PASSRUNTFRAME | LPC_COMMAND_RMII),
 		       LPC_ENET_COMMAND(pldat->net_base));
-		writel(LPC_SUPP_RESET_RMII, LPC_ENET_SUPP(pldat->net_base));
+		pete_writel("drivers/net/ethernet/nxp/lpc_eth.c:808", LPC_SUPP_RESET_RMII, LPC_ENET_SUPP(pldat->net_base));
 	}
 
 	pldat->mii_bus->name = "lpc_mii_bus";
@@ -841,7 +841,7 @@ static void __lpc_handle_xmit(struct net_device *ndev)
 	struct netdata_local *pldat = netdev_priv(ndev);
 	u32 txcidx, *ptxstat, txstat;
 
-	txcidx = readl(LPC_ENET_TXCONSUMEINDEX(pldat->net_base));
+	txcidx = pete_readl("drivers/net/ethernet/nxp/lpc_eth.c:844", LPC_ENET_TXCONSUMEINDEX(pldat->net_base));
 	while (pldat->last_tx_idx != txcidx) {
 		unsigned int skblen = pldat->skblen[pldat->last_tx_idx];
 
@@ -883,7 +883,7 @@ static void __lpc_handle_xmit(struct net_device *ndev)
 			ndev->stats.tx_bytes += skblen;
 		}
 
-		txcidx = readl(LPC_ENET_TXCONSUMEINDEX(pldat->net_base));
+		txcidx = pete_readl("drivers/net/ethernet/nxp/lpc_eth.c:886", LPC_ENET_TXCONSUMEINDEX(pldat->net_base));
 	}
 
 	if (pldat->num_used_tx_buffs <= ENET_TX_DESC/2) {
@@ -901,9 +901,9 @@ static int __lpc_handle_recv(struct net_device *ndev, int budget)
 	int rx_done = 0;
 
 	/* Get the current RX buffer indexes */
-	rxconsidx = readl(LPC_ENET_RXCONSUMEINDEX(pldat->net_base));
+	rxconsidx = pete_readl("drivers/net/ethernet/nxp/lpc_eth.c:904", LPC_ENET_RXCONSUMEINDEX(pldat->net_base));
 	while (rx_done < budget && rxconsidx !=
-			readl(LPC_ENET_RXPRODUCEINDEX(pldat->net_base))) {
+			pete_readl("drivers/net/ethernet/nxp/lpc_eth.c:906", LPC_ENET_RXPRODUCEINDEX(pldat->net_base))) {
 		/* Get pointer to receive status */
 		prxstat = &pldat->rx_stat_v[rxconsidx];
 		len = (prxstat->statusinfo & RXSTATUS_SIZE) + 1;
@@ -954,7 +954,7 @@ static int __lpc_handle_recv(struct net_device *ndev, int budget)
 		rxconsidx = rxconsidx + 1;
 		if (rxconsidx >= ENET_RX_DESC)
 			rxconsidx = 0;
-		writel(rxconsidx,
+		pete_writel("drivers/net/ethernet/nxp/lpc_eth.c:957", rxconsidx,
 		       LPC_ENET_RXCONSUMEINDEX(pldat->net_base));
 		rx_done++;
 	}
@@ -991,9 +991,9 @@ static irqreturn_t __lpc_eth_interrupt(int irq, void *dev_id)
 
 	spin_lock(&pldat->lock);
 
-	tmp = readl(LPC_ENET_INTSTATUS(pldat->net_base));
+	tmp = pete_readl("drivers/net/ethernet/nxp/lpc_eth.c:994", LPC_ENET_INTSTATUS(pldat->net_base));
 	/* Clear interrupts */
-	writel(tmp, LPC_ENET_INTCLEAR(pldat->net_base));
+	pete_writel("drivers/net/ethernet/nxp/lpc_eth.c:996", tmp, LPC_ENET_INTCLEAR(pldat->net_base));
 
 	lpc_eth_disable_int(pldat->net_base);
 	if (likely(napi_schedule_prep(&pldat->napi)))
@@ -1018,8 +1018,8 @@ static int lpc_eth_close(struct net_device *ndev)
 	spin_lock_irqsave(&pldat->lock, flags);
 	__lpc_eth_reset(pldat);
 	netif_carrier_off(ndev);
-	writel(0, LPC_ENET_MAC1(pldat->net_base));
-	writel(0, LPC_ENET_MAC2(pldat->net_base));
+	pete_writel("drivers/net/ethernet/nxp/lpc_eth.c:1021", 0, LPC_ENET_MAC1(pldat->net_base));
+	pete_writel("drivers/net/ethernet/nxp/lpc_eth.c:1022", 0, LPC_ENET_MAC2(pldat->net_base));
 	spin_unlock_irqrestore(&pldat->lock, flags);
 
 	if (ndev->phydev)
@@ -1052,7 +1052,7 @@ static netdev_tx_t lpc_eth_hard_start_xmit(struct sk_buff *skb,
 	}
 
 	/* Get the next TX descriptor index */
-	txidx = readl(LPC_ENET_TXPRODUCEINDEX(pldat->net_base));
+	txidx = pete_readl("drivers/net/ethernet/nxp/lpc_eth.c:1055", LPC_ENET_TXPRODUCEINDEX(pldat->net_base));
 
 	/* Setup control for the transfer */
 	ptxstat = &pldat->tx_stat_v[txidx];
@@ -1072,7 +1072,7 @@ static netdev_tx_t lpc_eth_hard_start_xmit(struct sk_buff *skb,
 	txidx++;
 	if (txidx >= ENET_TX_DESC)
 		txidx = 0;
-	writel(txidx, LPC_ENET_TXPRODUCEINDEX(pldat->net_base));
+	pete_writel("drivers/net/ethernet/nxp/lpc_eth.c:1075", txidx, LPC_ENET_TXPRODUCEINDEX(pldat->net_base));
 
 	/* Stop queue if no more TX buffers */
 	if (pldat->num_used_tx_buffs >= (ENET_TX_DESC - 1))
@@ -1128,7 +1128,7 @@ static void lpc_eth_set_multicast_list(struct net_device *ndev)
 	if (netdev_hw_addr_list_count(mcptr))
 		tmp32 |= LPC_RXFLTRW_ACCEPTUMULTICASTHASH;
 
-	writel(tmp32, LPC_ENET_RXFILTER_CTRL(pldat->net_base));
+	pete_writel("drivers/net/ethernet/nxp/lpc_eth.c:1131", tmp32, LPC_ENET_RXFILTER_CTRL(pldat->net_base));
 
 
 	/* Set initial hash table */
@@ -1145,8 +1145,8 @@ static void lpc_eth_set_multicast_list(struct net_device *ndev)
 			hashlo |= 1 << hash_val;
 	}
 
-	writel(hashlo, LPC_ENET_HASHFILTERL(pldat->net_base));
-	writel(hashhi, LPC_ENET_HASHFILTERH(pldat->net_base));
+	pete_writel("drivers/net/ethernet/nxp/lpc_eth.c:1148", hashlo, LPC_ENET_HASHFILTERL(pldat->net_base));
+	pete_writel("drivers/net/ethernet/nxp/lpc_eth.c:1149", hashhi, LPC_ENET_HASHFILTERH(pldat->net_base));
 
 	spin_unlock_irqrestore(&pldat->lock, flags);
 }

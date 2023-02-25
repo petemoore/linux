@@ -683,7 +683,7 @@ void dump_sp_dmem(struct atomisp_device *isp, unsigned int addr,
 	addr += SP_DMEM_BASE;
 	addr &= 0x003FFFFF;
 	do {
-		data = readl(isp->base + addr);
+		data = pete_readl("drivers/staging/media/atomisp/pci/atomisp_cmd.c:686", isp->base + addr);
 		dev_dbg(isp->dev, "%s, \t [0x%x]:0x%x\n", __func__, addr, data);
 		addr += sizeof(u32);
 	} while (--size32);

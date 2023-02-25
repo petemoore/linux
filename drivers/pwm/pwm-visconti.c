@@ -50,7 +50,7 @@ static int visconti_pwm_apply(struct pwm_chip *chip, struct pwm_device *pwm,
 	u32 period, duty_cycle, pwmc0;
 
 	if (!state->enabled) {
-		writel(0, priv->base + PIPGM_PCSR(pwm->hwpwm));
+		pete_writel("drivers/pwm/pwm-visconti.c:53", 0, priv->base + PIPGM_PCSR(pwm->hwpwm));
 		return 0;
 	}
 
@@ -96,9 +96,9 @@ static int visconti_pwm_apply(struct pwm_chip *chip, struct pwm_device *pwm,
 
 	if (state->polarity == PWM_POLARITY_INVERSED)
 		pwmc0 |= PIPGM_PWMC_PWMACT;
-	writel(pwmc0, priv->base + PIPGM_PWMC(pwm->hwpwm));
-	writel(duty_cycle, priv->base + PIPGM_PDUT(pwm->hwpwm));
-	writel(period, priv->base + PIPGM_PCSR(pwm->hwpwm));
+	pete_writel("drivers/pwm/pwm-visconti.c:99", pwmc0, priv->base + PIPGM_PWMC(pwm->hwpwm));
+	pete_writel("drivers/pwm/pwm-visconti.c:100", duty_cycle, priv->base + PIPGM_PDUT(pwm->hwpwm));
+	pete_writel("drivers/pwm/pwm-visconti.c:101", period, priv->base + PIPGM_PCSR(pwm->hwpwm));
 
 	return 0;
 }
@@ -109,9 +109,9 @@ static void visconti_pwm_get_state(struct pwm_chip *chip, struct pwm_device *pwm
 	struct visconti_pwm_chip *priv = visconti_pwm_from_chip(chip);
 	u32 period, duty, pwmc0, pwmc0_clk;
 
-	period = readl(priv->base + PIPGM_PCSR(pwm->hwpwm));
-	duty = readl(priv->base + PIPGM_PDUT(pwm->hwpwm));
-	pwmc0 = readl(priv->base + PIPGM_PWMC(pwm->hwpwm));
+	period = pete_readl("drivers/pwm/pwm-visconti.c:112", priv->base + PIPGM_PCSR(pwm->hwpwm));
+	duty = pete_readl("drivers/pwm/pwm-visconti.c:113", priv->base + PIPGM_PDUT(pwm->hwpwm));
+	pwmc0 = pete_readl("drivers/pwm/pwm-visconti.c:114", priv->base + PIPGM_PWMC(pwm->hwpwm));
 	pwmc0_clk = pwmc0 & PIPGM_PWMC_CLK_MASK;
 
 	state->period = (period << pwmc0_clk) * NSEC_PER_USEC;

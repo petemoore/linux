@@ -32,7 +32,7 @@ int alpine_cpu_wakeup(unsigned int phys_cpu, uint32_t phys_resume_addr)
 	 * after setting proper CPU mode, and initialiing e.g. secure
 	 * regs (the same mode all CPUs are booted to - usually HYP)
 	 */
-	writel(phys_resume_addr,
+	pete_writel("arch/arm/mach-alpine/alpine_cpu_pm.c:35", phys_resume_addr,
 	       &al_cpu_resume_regs->per_cpu[phys_cpu].resume_addr);
 
 	/* Power-up the CPU */
@@ -54,7 +54,7 @@ void __init alpine_cpu_pm_init(void)
 	wakeup_supported = !IS_ERR(al_sysfabric) && al_cpu_resume_regs;
 
 	if (wakeup_supported) {
-		watermark = readl(&al_cpu_resume_regs->watermark);
+		watermark = pete_readl("arch/arm/mach-alpine/alpine_cpu_pm.c:57", &al_cpu_resume_regs->watermark);
 		wakeup_supported = (watermark & AL_CPU_RESUME_MAGIC_NUM_MASK)
 				    == AL_CPU_RESUME_MAGIC_NUM;
 	}

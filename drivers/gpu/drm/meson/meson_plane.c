@@ -171,7 +171,7 @@ static void meson_plane_atomic_update(struct drm_plane *plane,
 				   (0x100 << OSD_GLOBAL_ALPHA_SHIFT) |
 				   OSD_BLK0_ENABLE;
 
-	priv->viu.osd1_ctrl_stat2 = readl(priv->io_base +
+	priv->viu.osd1_ctrl_stat2 = pete_readl("drivers/gpu/drm/meson/meson_plane.c:174", priv->io_base +
 					  _REG(VIU_OSD1_CTRL_STAT2));
 
 	canvas_id_osd1 = priv->canvas_id_osd1;

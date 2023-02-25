@@ -299,17 +299,17 @@ static bool bnxt_vf_pciid(enum board_idx idx)
 #define DB_CP_IRQ_DIS_FLAGS	(DB_KEY_CP | DB_IRQ_DIS)
 
 #define BNXT_CP_DB_IRQ_DIS(db)						\
-		writel(DB_CP_IRQ_DIS_FLAGS, db)
+		pete_writel("drivers/net/ethernet/broadcom/bnxt/bnxt.c:302", DB_CP_IRQ_DIS_FLAGS, db)
 
 #define BNXT_DB_CQ(db, idx)						\
-	writel(DB_CP_FLAGS | RING_CMP(idx), (db)->doorbell)
+	pete_writel("drivers/net/ethernet/broadcom/bnxt/bnxt.c:305", DB_CP_FLAGS | RING_CMP(idx), (db)->doorbell)
 
 #define BNXT_DB_NQ_P5(db, idx)						\
 	bnxt_writeq(bp, (db)->db_key64 | DBR_TYPE_NQ | RING_CMP(idx),	\
 		    (db)->doorbell)
 
 #define BNXT_DB_CQ_ARM(db, idx)						\
-	writel(DB_CP_REARM_FLAGS | RING_CMP(idx), (db)->doorbell)
+	pete_writel("drivers/net/ethernet/broadcom/bnxt/bnxt.c:312", DB_CP_REARM_FLAGS | RING_CMP(idx), (db)->doorbell)
 
 #define BNXT_DB_NQ_ARM_P5(db, idx)					\
 	bnxt_writeq(bp, (db)->db_key64 | DBR_TYPE_NQ_ARM | RING_CMP(idx),\
@@ -2065,10 +2065,10 @@ u32 bnxt_fw_health_readl(struct bnxt *bp, int reg_idx)
 		reg_off = fw_health->mapped_regs[reg_idx];
 		fallthrough;
 	case BNXT_FW_HEALTH_REG_TYPE_BAR0:
-		val = readl(bp->bar0 + reg_off);
+		val = pete_readl("drivers/net/ethernet/broadcom/bnxt/bnxt.c:2068", bp->bar0 + reg_off);
 		break;
 	case BNXT_FW_HEALTH_REG_TYPE_BAR1:
-		val = readl(bp->bar1 + reg_off);
+		val = pete_readl("drivers/net/ethernet/broadcom/bnxt/bnxt.c:2071", bp->bar1 + reg_off);
 		break;
 	}
 	if (reg_idx == BNXT_FW_RESET_INPROG_REG)
@@ -2370,7 +2370,7 @@ static irqreturn_t bnxt_inta(int irq, void *dev_instance)
 	prefetch(&cpr->cp_desc_ring[CP_RING(cons)][CP_IDX(cons)]);
 
 	if (!bnxt_has_work(bp, cpr)) {
-		int_status = readl(bp->bar0 + BNXT_CAG_REG_LEGACY_INT_STATUS);
+		int_status = pete_readl("drivers/net/ethernet/broadcom/bnxt/bnxt.c:2373", bp->bar0 + BNXT_CAG_REG_LEGACY_INT_STATUS);
 		/* return if erroneous interrupt */
 		if (!(int_status & (0x10000 << cpr->cp_ring_struct.fw_ring_id)))
 			return IRQ_NONE;
@@ -7672,7 +7672,7 @@ static int bnxt_alloc_fw_health(struct bnxt *bp)
 
 static void __bnxt_map_fw_health_reg(struct bnxt *bp, u32 reg)
 {
-	writel(reg & BNXT_GRC_BASE_MASK, bp->bar0 +
+	pete_writel("drivers/net/ethernet/broadcom/bnxt/bnxt.c:7675", reg & BNXT_GRC_BASE_MASK, bp->bar0 +
 					 BNXT_GRCPF_REG_WINDOW_BASE_OUT +
 					 BNXT_FW_HEALTH_WIN_MAP_OFF);
 }
@@ -7716,11 +7716,11 @@ static void bnxt_try_map_fw_health_reg(struct bnxt *bp)
 	__bnxt_map_fw_health_reg(bp, HCOMM_STATUS_STRUCT_LOC);
 	hs = bp->bar0 + BNXT_FW_HEALTH_WIN_OFF(HCOMM_STATUS_STRUCT_LOC);
 
-	sig = readl(hs + offsetof(struct hcomm_status, sig_ver));
+	sig = pete_readl("drivers/net/ethernet/broadcom/bnxt/bnxt.c:7719", hs + offsetof(struct hcomm_status, sig_ver));
 	if ((sig & HCOMM_STATUS_SIGNATURE_MASK) != HCOMM_STATUS_SIGNATURE_VAL) {
 		if (!bp->chip_num) {
 			__bnxt_map_fw_health_reg(bp, BNXT_GRC_REG_BASE);
-			bp->chip_num = readl(bp->bar0 +
+			bp->chip_num = pete_readl("drivers/net/ethernet/broadcom/bnxt/bnxt.c:7723", bp->bar0 +
 					     BNXT_FW_HEALTH_WIN_BASE +
 					     BNXT_GRC_REG_CHIP_NUM);
 		}
@@ -7730,7 +7730,7 @@ static void bnxt_try_map_fw_health_reg(struct bnxt *bp)
 		status_loc = BNXT_GRC_REG_STATUS_P5 |
 			     BNXT_FW_HEALTH_REG_TYPE_BAR0;
 	} else {
-		status_loc = readl(hs + offsetof(struct hcomm_status,
+		status_loc = pete_readl("drivers/net/ethernet/broadcom/bnxt/bnxt.c:7733", hs + offsetof(struct hcomm_status,
 						 fw_status_loc));
 	}
 
@@ -10158,7 +10158,7 @@ static void bnxt_preset_reg_win(struct bnxt *bp)
 {
 	if (BNXT_PF(bp)) {
 		/* CAG registers map to GRC window #4 */
-		writel(BNXT_CAG_REG_BASE,
+		pete_writel("drivers/net/ethernet/broadcom/bnxt/bnxt.c:10161", BNXT_CAG_REG_BASE,
 		       bp->bar0 + BNXT_GRCPF_REG_WINDOW_BASE_OUT + 12);
 	}
 }
@@ -12062,15 +12062,15 @@ static void bnxt_fw_reset_writel(struct bnxt *bp, int reg_idx)
 		pci_write_config_dword(bp->pdev, reg_off, val);
 		break;
 	case BNXT_FW_HEALTH_REG_TYPE_GRC:
-		writel(reg_off & BNXT_GRC_BASE_MASK,
+		pete_writel("drivers/net/ethernet/broadcom/bnxt/bnxt.c:12065", reg_off & BNXT_GRC_BASE_MASK,
 		       bp->bar0 + BNXT_GRCPF_REG_WINDOW_BASE_OUT + 4);
 		reg_off = (reg_off & BNXT_GRC_OFFSET_MASK) + 0x2000;
 		fallthrough;
 	case BNXT_FW_HEALTH_REG_TYPE_BAR0:
-		writel(val, bp->bar0 + reg_off);
+		pete_writel("drivers/net/ethernet/broadcom/bnxt/bnxt.c:12070", val, bp->bar0 + reg_off);
 		break;
 	case BNXT_FW_HEALTH_REG_TYPE_BAR1:
-		writel(val, bp->bar1 + reg_off);
+		pete_writel("drivers/net/ethernet/broadcom/bnxt/bnxt.c:12073", val, bp->bar1 + reg_off);
 		break;
 	}
 	if (delay_msecs) {

@@ -15,8 +15,8 @@
 #include "lima_vm.h"
 #include "lima_regs.h"
 
-#define pp_write(reg, data) writel(data, ip->iomem + reg)
-#define pp_read(reg) readl(ip->iomem + reg)
+#define pp_write(reg, data) pete_writel("drivers/gpu/drm/lima/lima_pp.c:18", data, ip->iomem + reg)
+#define pp_read(reg) pete_readl("drivers/gpu/drm/lima/lima_pp.c:19", ip->iomem + reg)
 
 static void lima_pp_handle_irq(struct lima_ip *ip, u32 state)
 {
@@ -160,11 +160,11 @@ static void lima_pp_write_frame(struct lima_ip *ip, u32 *frame, u32 *wb)
 	int i, j, n = 0;
 
 	for (i = 0; i < LIMA_PP_FRAME_REG_NUM; i++)
-		writel(frame[i], ip->iomem + LIMA_PP_FRAME + i * 4);
+		pete_writel("drivers/gpu/drm/lima/lima_pp.c:163", frame[i], ip->iomem + LIMA_PP_FRAME + i * 4);
 
 	for (i = 0; i < 3; i++) {
 		for (j = 0; j < LIMA_PP_WB_REG_NUM; j++)
-			writel(wb[n++], ip->iomem + LIMA_PP_WB(i) + j * 4);
+			pete_writel("drivers/gpu/drm/lima/lima_pp.c:167", wb[n++], ip->iomem + LIMA_PP_WB(i) + j * 4);
 	}
 }
 

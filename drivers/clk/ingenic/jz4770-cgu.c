@@ -53,8 +53,8 @@ static int jz4770_uhc_phy_enable(struct clk_hw *hw)
 	void __iomem *reg_opcr		= cgu->base + CGU_REG_OPCR;
 	void __iomem *reg_usbpcr1	= cgu->base + CGU_REG_USBPCR1;
 
-	writel(readl(reg_opcr) & ~OPCR_SPENDH, reg_opcr);
-	writel(readl(reg_usbpcr1) | USBPCR1_UHC_POWER, reg_usbpcr1);
+	pete_writel("drivers/clk/ingenic/jz4770-cgu.c:56", pete_readl("drivers/clk/ingenic/jz4770-cgu.c:56", reg_opcr) & ~OPCR_SPENDH, reg_opcr);
+	pete_writel("drivers/clk/ingenic/jz4770-cgu.c:57", pete_readl("drivers/clk/ingenic/jz4770-cgu.c:57", reg_usbpcr1) | USBPCR1_UHC_POWER, reg_usbpcr1);
 	return 0;
 }
 
@@ -63,8 +63,8 @@ static void jz4770_uhc_phy_disable(struct clk_hw *hw)
 	void __iomem *reg_opcr		= cgu->base + CGU_REG_OPCR;
 	void __iomem *reg_usbpcr1	= cgu->base + CGU_REG_USBPCR1;
 
-	writel(readl(reg_usbpcr1) & ~USBPCR1_UHC_POWER, reg_usbpcr1);
-	writel(readl(reg_opcr) | OPCR_SPENDH, reg_opcr);
+	pete_writel("drivers/clk/ingenic/jz4770-cgu.c:66", pete_readl("drivers/clk/ingenic/jz4770-cgu.c:66", reg_usbpcr1) & ~USBPCR1_UHC_POWER, reg_usbpcr1);
+	pete_writel("drivers/clk/ingenic/jz4770-cgu.c:67", pete_readl("drivers/clk/ingenic/jz4770-cgu.c:67", reg_opcr) | OPCR_SPENDH, reg_opcr);
 }
 
 static int jz4770_uhc_phy_is_enabled(struct clk_hw *hw)
@@ -72,8 +72,8 @@ static int jz4770_uhc_phy_is_enabled(struct clk_hw *hw)
 	void __iomem *reg_opcr		= cgu->base + CGU_REG_OPCR;
 	void __iomem *reg_usbpcr1	= cgu->base + CGU_REG_USBPCR1;
 
-	return !(readl(reg_opcr) & OPCR_SPENDH) &&
-		(readl(reg_usbpcr1) & USBPCR1_UHC_POWER);
+	return !(pete_readl("drivers/clk/ingenic/jz4770-cgu.c:75", reg_opcr) & OPCR_SPENDH) &&
+		(pete_readl("drivers/clk/ingenic/jz4770-cgu.c:76", reg_usbpcr1) & USBPCR1_UHC_POWER);
 }
 
 static const struct clk_ops jz4770_uhc_phy_ops = {

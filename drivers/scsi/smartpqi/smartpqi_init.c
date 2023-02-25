@@ -478,7 +478,7 @@ static inline u32 pqi_read_heartbeat_counter(struct pqi_ctrl_info *ctrl_info)
 	if (!ctrl_info->heartbeat_counter)
 		return 0;
 
-	return readl(ctrl_info->heartbeat_counter);
+	return pete_readl("drivers/scsi/smartpqi/smartpqi_init.c:481", ctrl_info->heartbeat_counter);
 }
 
 static inline u8 pqi_read_soft_reset_status(struct pqi_ctrl_info *ctrl_info)
@@ -2895,7 +2895,7 @@ static int pqi_wait_for_pqi_mode_ready(struct pqi_ctrl_info *ctrl_info)
 	}
 
 	while (1) {
-		if (readl(&pqi_registers->device_status) ==
+		if (pete_readl("drivers/scsi/smartpqi/smartpqi_init.c:2898", &pqi_registers->device_status) ==
 			PQI_DEVICE_STATE_ALL_REGISTERS_READY)
 			break;
 		if (time_after(jiffies, timeout)) {
@@ -3181,7 +3181,7 @@ static int pqi_process_io_intr(struct pqi_ctrl_info *ctrl_info, struct pqi_queue
 	oq_ci = queue_group->oq_ci_copy;
 
 	while (1) {
-		oq_pi = readl(queue_group->oq_pi);
+		oq_pi = pete_readl("drivers/scsi/smartpqi/smartpqi_init.c:3184", queue_group->oq_pi);
 		if (oq_pi >= ctrl_info->num_elements_per_oq) {
 			pqi_invalid_response(ctrl_info);
 			dev_err(&ctrl_info->pci_dev->dev,
@@ -3261,7 +3261,7 @@ static int pqi_process_io_intr(struct pqi_ctrl_info *ctrl_info, struct pqi_queue
 
 	if (num_responses) {
 		queue_group->oq_ci_copy = oq_ci;
-		writel(oq_ci, queue_group->oq_ci);
+		pete_writel("drivers/scsi/smartpqi/smartpqi_init.c:3264", oq_ci, queue_group->oq_ci);
 	}
 
 	return num_responses;
@@ -3296,7 +3296,7 @@ static void pqi_send_event_ack(struct pqi_ctrl_info *ctrl_info,
 		spin_lock_irqsave(&queue_group->submit_lock[RAID_PATH], flags);
 
 		iq_pi = queue_group->iq_pi_copy[RAID_PATH];
-		iq_ci = readl(queue_group->iq_ci[RAID_PATH]);
+		iq_ci = pete_readl("drivers/scsi/smartpqi/smartpqi_init.c:3299", queue_group->iq_ci[RAID_PATH]);
 
 		if (pqi_num_elements_free(iq_pi, iq_ci,
 			ctrl_info->num_elements_per_iq))
@@ -3321,7 +3321,7 @@ static void pqi_send_event_ack(struct pqi_ctrl_info *ctrl_info,
 	 * This write notifies the controller that an IU is available to be
 	 * processed.
 	 */
-	writel(iq_pi, queue_group->iq_pi[RAID_PATH]);
+	pete_writel("drivers/scsi/smartpqi/smartpqi_init.c:3324", iq_pi, queue_group->iq_pi[RAID_PATH]);
 
 	spin_unlock_irqrestore(&queue_group->submit_lock[RAID_PATH], flags);
 }
@@ -3612,7 +3612,7 @@ static int pqi_process_event_intr(struct pqi_ctrl_info *ctrl_info)
 	oq_ci = event_queue->oq_ci_copy;
 
 	while (1) {
-		oq_pi = readl(event_queue->oq_pi);
+		oq_pi = pete_readl("drivers/scsi/smartpqi/smartpqi_init.c:3615", event_queue->oq_pi);
 		if (oq_pi >= PQI_NUM_EVENT_QUEUE_ELEMENTS) {
 			pqi_invalid_response(ctrl_info);
 			dev_err(&ctrl_info->pci_dev->dev,
@@ -3645,7 +3645,7 @@ static int pqi_process_event_intr(struct pqi_ctrl_info *ctrl_info)
 
 	if (num_events) {
 		event_queue->oq_ci_copy = oq_ci;
-		writel(oq_ci, event_queue->oq_ci);
+		pete_writel("drivers/scsi/smartpqi/smartpqi_init.c:3648", oq_ci, event_queue->oq_ci);
 		schedule_work(&ctrl_info->event_work);
 	}
 
@@ -3667,9 +3667,9 @@ static inline void pqi_configure_legacy_intx(struct pqi_ctrl_info *ctrl_info, bo
 	else
 		register_addr = &pqi_registers->legacy_intx_mask_set;
 
-	intx_mask = readl(register_addr);
+	intx_mask = pete_readl("drivers/scsi/smartpqi/smartpqi_init.c:3670", register_addr);
 	intx_mask |= PQI_LEGACY_INTX_MASK;
-	writel(intx_mask, register_addr);
+	pete_writel("drivers/scsi/smartpqi/smartpqi_init.c:3672", intx_mask, register_addr);
 }
 
 static void pqi_change_irq_mode(struct pqi_ctrl_info *ctrl_info,
@@ -3731,7 +3731,7 @@ static inline bool pqi_is_valid_irq(struct pqi_ctrl_info *ctrl_info)
 		valid_irq = true;
 		break;
 	case IRQ_MODE_INTX:
-		intx_status = readl(&ctrl_info->pqi_registers->legacy_intx_status);
+		intx_status = pete_readl("drivers/scsi/smartpqi/smartpqi_init.c:3734", &ctrl_info->pqi_registers->legacy_intx_status);
 		if (intx_status & PQI_LEGACY_INTX_PENDING)
 			valid_irq = true;
 		else
@@ -4103,9 +4103,9 @@ static int pqi_create_admin_queues(struct pqi_ctrl_info *ctrl_info)
 	reg = PQI_ADMIN_IQ_NUM_ELEMENTS |
 		(PQI_ADMIN_OQ_NUM_ELEMENTS << 8) |
 		(admin_queues->int_msg_num << 16);
-	writel(reg, &pqi_registers->admin_iq_num_elements);
+	pete_writel("drivers/scsi/smartpqi/smartpqi_init.c:4106", reg, &pqi_registers->admin_iq_num_elements);
 
-	writel(PQI_CREATE_ADMIN_QUEUE_PAIR,
+	pete_writel("drivers/scsi/smartpqi/smartpqi_init.c:4108", PQI_CREATE_ADMIN_QUEUE_PAIR,
 		&pqi_registers->function_and_status_code);
 
 	timeout = PQI_ADMIN_QUEUE_CREATE_TIMEOUT_JIFFIES + jiffies;
@@ -4155,7 +4155,7 @@ static void pqi_submit_admin_request(struct pqi_ctrl_info *ctrl_info,
 	 * This write notifies the controller that an IU is available to be
 	 * processed.
 	 */
-	writel(iq_pi, admin_queues->iq_pi);
+	pete_writel("drivers/scsi/smartpqi/smartpqi_init.c:4158", iq_pi, admin_queues->iq_pi);
 }
 
 #define PQI_ADMIN_REQUEST_TIMEOUT_SECS	60
@@ -4174,7 +4174,7 @@ static int pqi_poll_for_admin_response(struct pqi_ctrl_info *ctrl_info,
 	timeout = (PQI_ADMIN_REQUEST_TIMEOUT_SECS * PQI_HZ) + jiffies;
 
 	while (1) {
-		oq_pi = readl(admin_queues->oq_pi);
+		oq_pi = pete_readl("drivers/scsi/smartpqi/smartpqi_init.c:4177", admin_queues->oq_pi);
 		if (oq_pi != oq_ci)
 			break;
 		if (time_after(jiffies, timeout)) {
@@ -4192,7 +4192,7 @@ static int pqi_poll_for_admin_response(struct pqi_ctrl_info *ctrl_info,
 
 	oq_ci = (oq_ci + 1) % PQI_ADMIN_OQ_NUM_ELEMENTS;
 	admin_queues->oq_ci_copy = oq_ci;
-	writel(oq_ci, admin_queues->oq_ci);
+	pete_writel("drivers/scsi/smartpqi/smartpqi_init.c:4195", oq_ci, admin_queues->oq_ci);
 
 	return 0;
 }
@@ -4233,7 +4233,7 @@ static void pqi_start_io(struct pqi_ctrl_info *ctrl_info,
 			DIV_ROUND_UP(iu_length,
 				PQI_OPERATIONAL_IQ_ELEMENT_LENGTH);
 
-		iq_ci = readl(queue_group->iq_ci[path]);
+		iq_ci = pete_readl("drivers/scsi/smartpqi/smartpqi_init.c:4236", queue_group->iq_ci[path]);
 
 		if (num_elements_needed > pqi_num_elements_free(iq_pi, iq_ci,
 			ctrl_info->num_elements_per_iq))
@@ -4271,7 +4271,7 @@ static void pqi_start_io(struct pqi_ctrl_info *ctrl_info,
 		 * This write notifies the controller that one or more IUs are
 		 * available to be processed.
 		 */
-		writel(iq_pi, queue_group->iq_pi[path]);
+		pete_writel("drivers/scsi/smartpqi/smartpqi_init.c:4274", iq_pi, queue_group->iq_pi[path]);
 	}
 
 	spin_unlock_irqrestore(&queue_group->submit_lock[path], flags);
@@ -5827,7 +5827,7 @@ static int pqi_wait_until_inbound_queues_empty(struct pqi_ctrl_info *ctrl_info)
 			iq_pi = queue_group->iq_pi_copy[path];
 
 			while (1) {
-				iq_ci = readl(queue_group->iq_ci[path]);
+				iq_ci = pete_readl("drivers/scsi/smartpqi/smartpqi_init.c:5830", queue_group->iq_ci[path]);
 				if (iq_ci == iq_pi)
 					break;
 				pqi_check_ctrl_health(ctrl_info);
@@ -7056,7 +7056,7 @@ static int pqi_wait_for_pqi_reset_completion(struct pqi_ctrl_info *ctrl_info)
 
 	while (1) {
 		msleep(PQI_RESET_POLL_INTERVAL_MSECS);
-		reset_reg.all_bits = readl(&pqi_registers->device_reset);
+		reset_reg.all_bits = pete_readl("drivers/scsi/smartpqi/smartpqi_init.c:7059", &pqi_registers->device_reset);
 		if (reset_reg.bits.reset_action == PQI_RESET_ACTION_COMPLETED)
 			break;
 		pqi_check_ctrl_health(ctrl_info);
@@ -7091,7 +7091,7 @@ static int pqi_reset(struct pqi_ctrl_info *ctrl_info)
 	reset_reg.bits.reset_type = PQI_RESET_TYPE_HARD_RESET;
 	reset_reg.bits.reset_action = PQI_RESET_ACTION_RESET;
 
-	writel(reset_reg.all_bits, &ctrl_info->pqi_registers->device_reset);
+	pete_writel("drivers/scsi/smartpqi/smartpqi_init.c:7094", reset_reg.all_bits, &ctrl_info->pqi_registers->device_reset);
 
 	rc = pqi_wait_for_pqi_reset_completion(ctrl_info);
 	if (rc)
@@ -7904,20 +7904,20 @@ static void pqi_reinit_queues(struct pqi_ctrl_info *ctrl_info)
 	admin_queues = &ctrl_info->admin_queues;
 	admin_queues->iq_pi_copy = 0;
 	admin_queues->oq_ci_copy = 0;
-	writel(0, admin_queues->oq_pi);
+	pete_writel("drivers/scsi/smartpqi/smartpqi_init.c:7907", 0, admin_queues->oq_pi);
 
 	for (i = 0; i < ctrl_info->num_queue_groups; i++) {
 		ctrl_info->queue_groups[i].iq_pi_copy[RAID_PATH] = 0;
 		ctrl_info->queue_groups[i].iq_pi_copy[AIO_PATH] = 0;
 		ctrl_info->queue_groups[i].oq_ci_copy = 0;
 
-		writel(0, ctrl_info->queue_groups[i].iq_ci[RAID_PATH]);
-		writel(0, ctrl_info->queue_groups[i].iq_ci[AIO_PATH]);
-		writel(0, ctrl_info->queue_groups[i].oq_pi);
+		pete_writel("drivers/scsi/smartpqi/smartpqi_init.c:7914", 0, ctrl_info->queue_groups[i].iq_ci[RAID_PATH]);
+		pete_writel("drivers/scsi/smartpqi/smartpqi_init.c:7915", 0, ctrl_info->queue_groups[i].iq_ci[AIO_PATH]);
+		pete_writel("drivers/scsi/smartpqi/smartpqi_init.c:7916", 0, ctrl_info->queue_groups[i].oq_pi);
 	}
 
 	event_queue = &ctrl_info->event_queue;
-	writel(0, event_queue->oq_pi);
+	pete_writel("drivers/scsi/smartpqi/smartpqi_init.c:7920", 0, event_queue->oq_pi);
 	event_queue->oq_ci_copy = 0;
 }
 

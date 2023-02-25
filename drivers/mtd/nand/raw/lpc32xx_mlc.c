@@ -207,10 +207,10 @@ struct lpc32xx_nand_host {
  * Activate/Deactivate DMA Operation:
  *
  * Using the PL080 DMA Controller for transferring the 512 byte subpages
- * instead of doing readl() / writel() in a loop slows it down significantly.
+ * instead of doing pete_readl("drivers/mtd/nand/raw/lpc32xx_mlc.c:210", ) / pete_writel("drivers/mtd/nand/raw/lpc32xx_mlc.c:210", ) in a loop slows it down significantly.
  * Measurements via getnstimeofday() upon 512 byte subpage reads reveal:
  *
- * - readl() of 128 x 32 bits in a loop: ~20us
+ * - pete_readl("drivers/mtd/nand/raw/lpc32xx_mlc.c:213", ) of 128 x 32 bits in a loop: ~20us
  * - DMA read of 512 bytes (32 bit, 4...128 words bursts): ~60us
  * - DMA read of 512 bytes (32 bit, no bursts): ~100us
  *
@@ -233,7 +233,7 @@ static void lpc32xx_nand_setup(struct lpc32xx_nand_host *host)
 	uint32_t clkrate, tmp;
 
 	/* Reset MLC controller */
-	writel(MLCCMD_RESET, MLC_CMD(host->io_base));
+	pete_writel("drivers/mtd/nand/raw/lpc32xx_mlc.c:236", MLCCMD_RESET, MLC_CMD(host->io_base));
 	udelay(1000);
 
 	/* Get base clock for MLC block */
@@ -247,7 +247,7 @@ static void lpc32xx_nand_setup(struct lpc32xx_nand_host *host)
 
 	/* Configure MLC Controller: Large Block, 5 Byte Address */
 	tmp = MLCICR_LARGEBLOCK | MLCICR_LONGADDR;
-	writel(tmp, MLC_ICR(host->io_base));
+	pete_writel("drivers/mtd/nand/raw/lpc32xx_mlc.c:250", tmp, MLC_ICR(host->io_base));
 
 	/* Unlock MLC_TIME_REG
 	 * (among others, will be locked again automatically) */
@@ -262,14 +262,14 @@ static void lpc32xx_nand_setup(struct lpc32xx_nand_host *host)
 	tmp |= MLCTIMEREG_RD_LOW(clkrate / host->ncfg->rd_low);
 	tmp |= MLCTIMEREG_WR_HIGH(clkrate / host->ncfg->wr_high + 1);
 	tmp |= MLCTIMEREG_WR_LOW(clkrate / host->ncfg->wr_low);
-	writel(tmp, MLC_TIME_REG(host->io_base));
+	pete_writel("drivers/mtd/nand/raw/lpc32xx_mlc.c:265", tmp, MLC_TIME_REG(host->io_base));
 
 	/* Enable IRQ for CONTROLLER_READY and NAND_READY */
 	writeb(MLCIRQ_CONTROLLER_READY | MLCIRQ_NAND_READY,
 			MLC_IRQ_MR(host->io_base));
 
 	/* Normal nCE operation: nCE controlled by controller */
-	writel(MLCCEH_NORMAL, MLC_CEH(host->io_base));
+	pete_writel("drivers/mtd/nand/raw/lpc32xx_mlc.c:272", MLCCEH_NORMAL, MLC_CEH(host->io_base));
 }
 
 /*
@@ -282,9 +282,9 @@ static void lpc32xx_nand_cmd_ctrl(struct nand_chip *nand_chip, int cmd,
 
 	if (cmd != NAND_CMD_NONE) {
 		if (ctrl & NAND_CLE)
-			writel(cmd, MLC_CMD(host->io_base));
+			pete_writel("drivers/mtd/nand/raw/lpc32xx_mlc.c:285", cmd, MLC_CMD(host->io_base));
 		else
-			writel(cmd, MLC_ADDR(host->io_base));
+			pete_writel("drivers/mtd/nand/raw/lpc32xx_mlc.c:287", cmd, MLC_ADDR(host->io_base));
 	}
 }
 
@@ -462,7 +462,7 @@ static int lpc32xx_read_page(struct nand_chip *chip, uint8_t *buf,
 		lpc32xx_waitfunc_controller(chip);
 
 		/* Check ECC Error status */
-		mlc_isr = readl(MLC_ISR(host->io_base));
+		mlc_isr = pete_readl("drivers/mtd/nand/raw/lpc32xx_mlc.c:465", MLC_ISR(host->io_base));
 		if (mlc_isr & MLCISR_DECODER_FAILURE) {
 			mtd->ecc_stats.failed++;
 			dev_warn(&mtd->dev, "%s: DECODER_FAILURE\n", __func__);
@@ -479,13 +479,13 @@ static int lpc32xx_read_page(struct nand_chip *chip, uint8_t *buf,
 		} else {
 			for (j = 0; j < (512 >> 2); j++) {
 				*((uint32_t *)(buf)) =
-					readl(MLC_BUFF(host->io_base));
+					pete_readl("drivers/mtd/nand/raw/lpc32xx_mlc.c:482", MLC_BUFF(host->io_base));
 				buf += 4;
 			}
 		}
 		for (j = 0; j < (16 >> 2); j++) {
 			*((uint32_t *)(oobbuf)) =
-				readl(MLC_BUFF(host->io_base));
+				pete_readl("drivers/mtd/nand/raw/lpc32xx_mlc.c:488", MLC_BUFF(host->io_base));
 			oobbuf += 4;
 		}
 	}
@@ -526,12 +526,12 @@ static int lpc32xx_write_page_lowlevel(struct nand_chip *chip,
 				return res;
 		} else {
 			for (j = 0; j < (512 >> 2); j++) {
-				writel(*((uint32_t *)(buf)),
+				pete_writel("drivers/mtd/nand/raw/lpc32xx_mlc.c:529", *((uint32_t *)(buf)),
 				       MLC_BUFF(host->io_base));
 				buf += 4;
 			}
 		}
-		writel(*((uint32_t *)(oobbuf)), MLC_BUFF(host->io_base));
+		pete_writel("drivers/mtd/nand/raw/lpc32xx_mlc.c:534", *((uint32_t *)(oobbuf)), MLC_BUFF(host->io_base));
 		oobbuf += 4;
 		writew(*((uint16_t *)(oobbuf)), MLC_BUFF(host->io_base));
 		oobbuf += 12;

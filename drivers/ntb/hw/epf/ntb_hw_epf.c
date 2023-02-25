@@ -103,8 +103,8 @@ static int ntb_epf_send_command(struct ntb_epf_dev *ndev, u32 command,
 	u32 status;
 
 	mutex_lock(&ndev->cmd_lock);
-	writel(argument, ndev->ctrl_reg + NTB_EPF_ARGUMENT);
-	writel(command, ndev->ctrl_reg + NTB_EPF_COMMAND);
+	pete_writel("drivers/ntb/hw/epf/ntb_hw_epf.c:106", argument, ndev->ctrl_reg + NTB_EPF_ARGUMENT);
+	pete_writel("drivers/ntb/hw/epf/ntb_hw_epf.c:107", command, ndev->ctrl_reg + NTB_EPF_COMMAND);
 
 	timeout = ktime_add_ms(ktime_get(), NTB_EPF_COMMAND_TIMEOUT);
 	while (1) {
@@ -211,10 +211,10 @@ static u32 ntb_epf_spad_read(struct ntb_dev *ntb, int idx)
 		return 0;
 	}
 
-	offset = readl(ndev->ctrl_reg + NTB_EPF_SPAD_OFFSET);
+	offset = pete_readl("drivers/ntb/hw/epf/ntb_hw_epf.c:214", ndev->ctrl_reg + NTB_EPF_SPAD_OFFSET);
 	offset += (idx << 2);
 
-	return readl(ndev->ctrl_reg + offset);
+	return pete_readl("drivers/ntb/hw/epf/ntb_hw_epf.c:217", ndev->ctrl_reg + offset);
 }
 
 static int ntb_epf_spad_write(struct ntb_dev *ntb,
@@ -229,9 +229,9 @@ static int ntb_epf_spad_write(struct ntb_dev *ntb,
 		return -EINVAL;
 	}
 
-	offset = readl(ndev->ctrl_reg + NTB_EPF_SPAD_OFFSET);
+	offset = pete_readl("drivers/ntb/hw/epf/ntb_hw_epf.c:232", ndev->ctrl_reg + NTB_EPF_SPAD_OFFSET);
 	offset += (idx << 2);
-	writel(val, ndev->ctrl_reg + offset);
+	pete_writel("drivers/ntb/hw/epf/ntb_hw_epf.c:234", val, ndev->ctrl_reg + offset);
 
 	return 0;
 }
@@ -253,7 +253,7 @@ static u32 ntb_epf_peer_spad_read(struct ntb_dev *ntb, int pidx, int idx)
 	}
 
 	offset = (idx << 2);
-	return readl(ndev->peer_spad_reg + offset);
+	return pete_readl("drivers/ntb/hw/epf/ntb_hw_epf.c:256", ndev->peer_spad_reg + offset);
 }
 
 static int ntb_epf_peer_spad_write(struct ntb_dev *ntb, int pidx,
@@ -274,7 +274,7 @@ static int ntb_epf_peer_spad_write(struct ntb_dev *ntb, int pidx,
 	}
 
 	offset = (idx << 2);
-	writel(val, ndev->peer_spad_reg + offset);
+	pete_writel("drivers/ntb/hw/epf/ntb_hw_epf.c:277", val, ndev->peer_spad_reg + offset);
 
 	return 0;
 }
@@ -421,10 +421,10 @@ static int ntb_epf_mw_set_trans(struct ntb_dev *ntb, int pidx, int idx,
 		return -EINVAL;
 	}
 
-	writel(lower_32_bits(addr), ndev->ctrl_reg + NTB_EPF_LOWER_ADDR);
-	writel(upper_32_bits(addr), ndev->ctrl_reg + NTB_EPF_UPPER_ADDR);
-	writel(lower_32_bits(size), ndev->ctrl_reg + NTB_EPF_LOWER_SIZE);
-	writel(upper_32_bits(size), ndev->ctrl_reg + NTB_EPF_UPPER_SIZE);
+	pete_writel("drivers/ntb/hw/epf/ntb_hw_epf.c:424", lower_32_bits(addr), ndev->ctrl_reg + NTB_EPF_LOWER_ADDR);
+	pete_writel("drivers/ntb/hw/epf/ntb_hw_epf.c:425", upper_32_bits(addr), ndev->ctrl_reg + NTB_EPF_UPPER_ADDR);
+	pete_writel("drivers/ntb/hw/epf/ntb_hw_epf.c:426", lower_32_bits(size), ndev->ctrl_reg + NTB_EPF_LOWER_SIZE);
+	pete_writel("drivers/ntb/hw/epf/ntb_hw_epf.c:427", upper_32_bits(size), ndev->ctrl_reg + NTB_EPF_UPPER_SIZE);
 	ntb_epf_send_command(ndev, CMD_CONFIGURE_MW, idx);
 
 	return 0;
@@ -451,7 +451,7 @@ static int ntb_epf_peer_mw_get_addr(struct ntb_dev *ntb, int idx,
 	int bar;
 
 	if (idx == 0)
-		offset = readl(ndev->ctrl_reg + NTB_EPF_MW1_OFFSET);
+		offset = pete_readl("drivers/ntb/hw/epf/ntb_hw_epf.c:454", ndev->ctrl_reg + NTB_EPF_MW1_OFFSET);
 
 	bar = idx + NTB_EPF_MW_OFFSET;
 
@@ -479,11 +479,11 @@ static int ntb_epf_peer_db_set(struct ntb_dev *ntb, u64 db_bits)
 		return -EINVAL;
 	}
 
-	db_entry_size = readl(ndev->ctrl_reg + NTB_EPF_DB_ENTRY_SIZE);
+	db_entry_size = pete_readl("drivers/ntb/hw/epf/ntb_hw_epf.c:482", ndev->ctrl_reg + NTB_EPF_DB_ENTRY_SIZE);
 
-	db_data = readl(ndev->ctrl_reg + NTB_EPF_DB_DATA(interrupt_num));
-	db_offset = readl(ndev->ctrl_reg + NTB_EPF_DB_OFFSET(interrupt_num));
-	writel(db_data, ndev->db_reg + (db_entry_size * interrupt_num) +
+	db_data = pete_readl("drivers/ntb/hw/epf/ntb_hw_epf.c:484", ndev->ctrl_reg + NTB_EPF_DB_DATA(interrupt_num));
+	db_offset = pete_readl("drivers/ntb/hw/epf/ntb_hw_epf.c:485", ndev->ctrl_reg + NTB_EPF_DB_OFFSET(interrupt_num));
+	pete_writel("drivers/ntb/hw/epf/ntb_hw_epf.c:486", db_data, ndev->db_reg + (db_entry_size * interrupt_num) +
 	       db_offset);
 
 	return 0;
@@ -555,8 +555,8 @@ static int ntb_epf_init_dev(struct ntb_epf_dev *ndev)
 	}
 
 	ndev->db_valid_mask = BIT_ULL(ndev->db_count) - 1;
-	ndev->mw_count = readl(ndev->ctrl_reg + NTB_EPF_MW_COUNT);
-	ndev->spad_count = readl(ndev->ctrl_reg + NTB_EPF_SPAD_COUNT);
+	ndev->mw_count = pete_readl("drivers/ntb/hw/epf/ntb_hw_epf.c:558", ndev->ctrl_reg + NTB_EPF_MW_COUNT);
+	ndev->spad_count = pete_readl("drivers/ntb/hw/epf/ntb_hw_epf.c:559", ndev->ctrl_reg + NTB_EPF_SPAD_COUNT);
 
 	return 0;
 }

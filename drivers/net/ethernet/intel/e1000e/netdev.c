@@ -131,7 +131,7 @@ void __ew32(struct e1000_hw *hw, unsigned long reg, u32 val)
 	if (hw->adapter->flags2 & FLAG2_PCIM2PCI_ARBITER_WA)
 		__ew32_prepare(hw);
 
-	writel(val, hw->hw_addr + reg);
+	pete_writel("drivers/net/ethernet/intel/e1000e/netdev.c:134", val, hw->hw_addr + reg);
 }
 
 /**
@@ -607,9 +607,9 @@ static void e1000e_update_rdt_wa(struct e1000_ring *rx_ring, unsigned int i)
 	struct e1000_hw *hw = &adapter->hw;
 
 	__ew32_prepare(hw);
-	writel(i, rx_ring->tail);
+	pete_writel("drivers/net/ethernet/intel/e1000e/netdev.c:610", i, rx_ring->tail);
 
-	if (unlikely(i != readl(rx_ring->tail))) {
+	if (unlikely(i != pete_readl("drivers/net/ethernet/intel/e1000e/netdev.c:612", rx_ring->tail))) {
 		u32 rctl = er32(RCTL);
 
 		ew32(RCTL, rctl & ~E1000_RCTL_EN);
@@ -624,9 +624,9 @@ static void e1000e_update_tdt_wa(struct e1000_ring *tx_ring, unsigned int i)
 	struct e1000_hw *hw = &adapter->hw;
 
 	__ew32_prepare(hw);
-	writel(i, tx_ring->tail);
+	pete_writel("drivers/net/ethernet/intel/e1000e/netdev.c:627", i, tx_ring->tail);
 
-	if (unlikely(i != readl(tx_ring->tail))) {
+	if (unlikely(i != pete_readl("drivers/net/ethernet/intel/e1000e/netdev.c:629", tx_ring->tail))) {
 		u32 tctl = er32(TCTL);
 
 		ew32(TCTL, tctl & ~E1000_TCTL_EN);
@@ -694,7 +694,7 @@ map_skb:
 			if (adapter->flags2 & FLAG2_PCIM2PCI_ARBITER_WA)
 				e1000e_update_rdt_wa(rx_ring, i);
 			else
-				writel(i, rx_ring->tail);
+				pete_writel("drivers/net/ethernet/intel/e1000e/netdev.c:697", i, rx_ring->tail);
 		}
 		i++;
 		if (i == rx_ring->count)
@@ -796,7 +796,7 @@ static void e1000_alloc_rx_buffers_ps(struct e1000_ring *rx_ring,
 			if (adapter->flags2 & FLAG2_PCIM2PCI_ARBITER_WA)
 				e1000e_update_rdt_wa(rx_ring, i << 1);
 			else
-				writel(i << 1, rx_ring->tail);
+				pete_writel("drivers/net/ethernet/intel/e1000e/netdev.c:799", i << 1, rx_ring->tail);
 		}
 
 		i++;
@@ -889,7 +889,7 @@ check_page:
 		if (adapter->flags2 & FLAG2_PCIM2PCI_ARBITER_WA)
 			e1000e_update_rdt_wa(rx_ring, i);
 		else
-			writel(i, rx_ring->tail);
+			pete_writel("drivers/net/ethernet/intel/e1000e/netdev.c:892", i, rx_ring->tail);
 	}
 }
 
@@ -1147,7 +1147,7 @@ static void e1000_print_hw_hang(struct work_struct *work)
 	      "PHY 1000BASE-T Status  <%x>\n"
 	      "PHY Extended Status    <%x>\n"
 	      "PCI Status             <%x>\n",
-	      readl(tx_ring->head), readl(tx_ring->tail), tx_ring->next_to_use,
+	      pete_readl("drivers/net/ethernet/intel/e1000e/netdev.c:1150", tx_ring->head), pete_readl("drivers/net/ethernet/intel/e1000e/netdev.c:1150", tx_ring->tail), tx_ring->next_to_use,
 	      tx_ring->next_to_clean, tx_ring->buffer_info[eop].time_stamp,
 	      eop, jiffies, eop_desc->upper.fields.status, er32(STATUS),
 	      phy_status, phy_1000t_status, phy_ext_status, pci_status);
@@ -1953,7 +1953,7 @@ static irqreturn_t e1000_intr_msix_rx(int __always_unused irq, void *data)
 		u32 itr = rx_ring->itr_val ?
 			  1000000000 / (rx_ring->itr_val * 256) : 0;
 
-		writel(itr, rx_ring->itr_register);
+		pete_writel("drivers/net/ethernet/intel/e1000e/netdev.c:1956", itr, rx_ring->itr_register);
 		rx_ring->set_itr = 0;
 	}
 
@@ -1994,20 +1994,20 @@ static void e1000_configure_msix(struct e1000_adapter *adapter)
 	rx_ring->ims_val = E1000_IMS_RXQ0;
 	adapter->eiac_mask |= rx_ring->ims_val;
 	if (rx_ring->itr_val)
-		writel(1000000000 / (rx_ring->itr_val * 256),
+		pete_writel("drivers/net/ethernet/intel/e1000e/netdev.c:1997", 1000000000 / (rx_ring->itr_val * 256),
 		       rx_ring->itr_register);
 	else
-		writel(1, rx_ring->itr_register);
+		pete_writel("drivers/net/ethernet/intel/e1000e/netdev.c:2000", 1, rx_ring->itr_register);
 	ivar = E1000_IVAR_INT_ALLOC_VALID | vector;
 
 	/* Configure Tx vector */
 	tx_ring->ims_val = E1000_IMS_TXQ0;
 	vector++;
 	if (tx_ring->itr_val)
-		writel(1000000000 / (tx_ring->itr_val * 256),
+		pete_writel("drivers/net/ethernet/intel/e1000e/netdev.c:2007", 1000000000 / (tx_ring->itr_val * 256),
 		       tx_ring->itr_register);
 	else
-		writel(1, tx_ring->itr_register);
+		pete_writel("drivers/net/ethernet/intel/e1000e/netdev.c:2010", 1, tx_ring->itr_register);
 	adapter->eiac_mask |= tx_ring->ims_val;
 	ivar |= ((E1000_IVAR_INT_ALLOC_VALID | vector) << 8);
 
@@ -2015,10 +2015,10 @@ static void e1000_configure_msix(struct e1000_adapter *adapter)
 	vector++;
 	ivar |= ((E1000_IVAR_INT_ALLOC_VALID | vector) << 16);
 	if (rx_ring->itr_val)
-		writel(1000000000 / (rx_ring->itr_val * 256),
+		pete_writel("drivers/net/ethernet/intel/e1000e/netdev.c:2018", 1000000000 / (rx_ring->itr_val * 256),
 		       hw->hw_addr + E1000_EITR_82574(vector));
 	else
-		writel(1, hw->hw_addr + E1000_EITR_82574(vector));
+		pete_writel("drivers/net/ethernet/intel/e1000e/netdev.c:2021", 1, hw->hw_addr + E1000_EITR_82574(vector));
 
 	/* Cause Tx interrupts on every write back */
 	ivar |= BIT(31);
@@ -2627,7 +2627,7 @@ void e1000e_write_itr(struct e1000_adapter *adapter, u32 itr)
 		int vector;
 
 		for (vector = 0; vector < adapter->num_vectors; vector++)
-			writel(new_itr, hw->hw_addr + E1000_EITR_82574(vector));
+			pete_writel("drivers/net/ethernet/intel/e1000e/netdev.c:2630", new_itr, hw->hw_addr + E1000_EITR_82574(vector));
 	} else {
 		ew32(ITR, new_itr);
 	}
@@ -2939,11 +2939,11 @@ static void e1000_configure_tx(struct e1000_adapter *adapter)
 	tx_ring->head = adapter->hw.hw_addr + E1000_TDH(0);
 	tx_ring->tail = adapter->hw.hw_addr + E1000_TDT(0);
 
-	writel(0, tx_ring->head);
+	pete_writel("drivers/net/ethernet/intel/e1000e/netdev.c:2942", 0, tx_ring->head);
 	if (adapter->flags2 & FLAG2_PCIM2PCI_ARBITER_WA)
 		e1000e_update_tdt_wa(tx_ring, 0);
 	else
-		writel(0, tx_ring->tail);
+		pete_writel("drivers/net/ethernet/intel/e1000e/netdev.c:2946", 0, tx_ring->tail);
 
 	/* Set the Tx Interrupt Delay register */
 	ew32(TIDV, adapter->tx_int_delay);
@@ -3264,11 +3264,11 @@ static void e1000_configure_rx(struct e1000_adapter *adapter)
 	rx_ring->head = adapter->hw.hw_addr + E1000_RDH(0);
 	rx_ring->tail = adapter->hw.hw_addr + E1000_RDT(0);
 
-	writel(0, rx_ring->head);
+	pete_writel("drivers/net/ethernet/intel/e1000e/netdev.c:3267", 0, rx_ring->head);
 	if (adapter->flags2 & FLAG2_PCIM2PCI_ARBITER_WA)
 		e1000e_update_rdt_wa(rx_ring, 0);
 	else
-		writel(0, rx_ring->tail);
+		pete_writel("drivers/net/ethernet/intel/e1000e/netdev.c:3271", 0, rx_ring->tail);
 
 	/* Enable Receive Checksum Offload for TCP and UDP */
 	rxcsum = er32(RXCSUM);
@@ -5951,7 +5951,7 @@ static netdev_tx_t e1000_xmit_frame(struct sk_buff *skb,
 				e1000e_update_tdt_wa(tx_ring,
 						     tx_ring->next_to_use);
 			else
-				writel(tx_ring->next_to_use, tx_ring->tail);
+				pete_writel("drivers/net/ethernet/intel/e1000e/netdev.c:5954", tx_ring->next_to_use, tx_ring->tail);
 		}
 	} else {
 		dev_kfree_skb_any(skb);

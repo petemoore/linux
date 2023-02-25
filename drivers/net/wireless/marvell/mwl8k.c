@@ -4657,7 +4657,7 @@ static void mwl8k_tx_poll(struct tasklet_struct *t)
 	spin_unlock(&priv->tx_lock);
 
 	if (limit) {
-		writel(~MWL8K_A2H_INT_TX_DONE,
+		pete_writel("drivers/net/wireless/marvell/mwl8k.c:4660", ~MWL8K_A2H_INT_TX_DONE,
 		       priv->regs + MWL8K_HIU_A2H_INTERRUPT_STATUS);
 	} else {
 		tasklet_schedule(&priv->poll_tx_task);
@@ -4675,7 +4675,7 @@ static void mwl8k_rx_poll(struct tasklet_struct *t)
 	limit -= rxq_refill(hw, 0, limit);
 
 	if (limit) {
-		writel(~MWL8K_A2H_INT_RX_READY,
+		pete_writel("drivers/net/wireless/marvell/mwl8k.c:4678", ~MWL8K_A2H_INT_RX_READY,
 		       priv->regs + MWL8K_HIU_A2H_INTERRUPT_STATUS);
 	} else {
 		tasklet_schedule(&priv->poll_rx_task);

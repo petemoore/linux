@@ -48,8 +48,8 @@
 
 #define HVS_FIFO_LATENCY_PIX	6
 
-#define CRTC_WRITE(offset, val) writel(val, vc4_crtc->regs + (offset))
-#define CRTC_READ(offset) readl(vc4_crtc->regs + (offset))
+#define CRTC_WRITE(offset, val) pete_writel("drivers/gpu/drm/vc4/vc4_crtc.c:51", val, vc4_crtc->regs + (offset))
+#define CRTC_READ(offset) pete_readl("drivers/gpu/drm/vc4/vc4_crtc.c:52", vc4_crtc->regs + (offset))
 
 static const struct debugfs_reg32 crtc_regs[] = {
 	VC4_REG32(PV_CONTROL),

@@ -220,7 +220,7 @@ static void emac_get_regs(struct net_device *netdev,
 	regs->len = EMAC_MAX_REG_SIZE * sizeof(u32);
 
 	for (i = 0; i < EMAC_MAX_REG_SIZE; i++)
-		val[i] = readl(adpt->base + emac_regs[i]);
+		val[i] = pete_readl("drivers/net/ethernet/qualcomm/emac/emac-ethtool.c:223", adpt->base + emac_regs[i]);
 }
 
 static int emac_get_regs_len(struct net_device *netdev)

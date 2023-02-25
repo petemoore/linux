@@ -3939,7 +3939,7 @@ vxge_hw_vpath_check_leak(struct __vxge_hw_ring *ring)
 	if (ring == NULL)
 		return status;
 
-	rxd_new_count = readl(&ring->vp_reg->prc_rxd_doorbell);
+	rxd_new_count = pete_readl("drivers/net/ethernet/neterion/vxge/vxge-config.c:3942", &ring->vp_reg->prc_rxd_doorbell);
 	rxd_spat = readq(&ring->vp_reg->prc_cfg6);
 	rxd_spat = VXGE_HW_PRC_CFG6_RXD_SPAT(rxd_spat);
 
@@ -4909,7 +4909,7 @@ void vxge_hw_vpath_rx_doorbell_init(struct __vxge_hw_vpath_handle *vp)
 
 	writeq(VXGE_HW_PRC_RXD_DOORBELL_NEW_QW_CNT(val164),
 		&vpath->vp_reg->prc_rxd_doorbell);
-	readl(&vpath->vp_reg->prc_rxd_doorbell);
+	pete_readl("drivers/net/ethernet/neterion/vxge/vxge-config.c:4912", &vpath->vp_reg->prc_rxd_doorbell);
 
 	val164 /= 2;
 	val64 = readq(&vpath->vp_reg->prc_cfg6);

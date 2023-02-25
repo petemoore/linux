@@ -333,7 +333,7 @@ static int db2k_ai_insn_read(struct comedi_device *dev,
 	 * risk multiple samples to be put into the result FIFO.
 	 */
 	/* 1 second, should be long enough */
-	writel(1000000, dev->mmio + DB2K_REG_ACQ_PACER_CLOCK_DIV_LOW);
+	pete_writel("drivers/comedi/drivers/daqboard2000.c:336", 1000000, dev->mmio + DB2K_REG_ACQ_PACER_CLOCK_DIV_LOW);
 	writew(0, dev->mmio + DB2K_REG_ACQ_PACER_CLOCK_DIV_HIGH);
 
 	gain = CR_RANGE(insn->chanspec);
@@ -420,12 +420,12 @@ static void db2k_reset_local_bus(struct comedi_device *dev)
 	struct db2k_private *devpriv = dev->private;
 	u32 cntrl;
 
-	cntrl = readl(devpriv->plx + PLX_REG_CNTRL);
+	cntrl = pete_readl("drivers/comedi/drivers/daqboard2000.c:423", devpriv->plx + PLX_REG_CNTRL);
 	cntrl |= PLX_CNTRL_RESET;
-	writel(cntrl, devpriv->plx + PLX_REG_CNTRL);
+	pete_writel("drivers/comedi/drivers/daqboard2000.c:425", cntrl, devpriv->plx + PLX_REG_CNTRL);
 	mdelay(10);
 	cntrl &= ~PLX_CNTRL_RESET;
-	writel(cntrl, devpriv->plx + PLX_REG_CNTRL);
+	pete_writel("drivers/comedi/drivers/daqboard2000.c:428", cntrl, devpriv->plx + PLX_REG_CNTRL);
 	mdelay(10);
 }
 
@@ -434,15 +434,15 @@ static void db2k_reload_plx(struct comedi_device *dev)
 	struct db2k_private *devpriv = dev->private;
 	u32 cntrl;
 
-	cntrl = readl(devpriv->plx + PLX_REG_CNTRL);
+	cntrl = pete_readl("drivers/comedi/drivers/daqboard2000.c:437", devpriv->plx + PLX_REG_CNTRL);
 	cntrl &= ~PLX_CNTRL_EERELOAD;
-	writel(cntrl, devpriv->plx + PLX_REG_CNTRL);
+	pete_writel("drivers/comedi/drivers/daqboard2000.c:439", cntrl, devpriv->plx + PLX_REG_CNTRL);
 	mdelay(10);
 	cntrl |= PLX_CNTRL_EERELOAD;
-	writel(cntrl, devpriv->plx + PLX_REG_CNTRL);
+	pete_writel("drivers/comedi/drivers/daqboard2000.c:442", cntrl, devpriv->plx + PLX_REG_CNTRL);
 	mdelay(10);
 	cntrl &= ~PLX_CNTRL_EERELOAD;
-	writel(cntrl, devpriv->plx + PLX_REG_CNTRL);
+	pete_writel("drivers/comedi/drivers/daqboard2000.c:445", cntrl, devpriv->plx + PLX_REG_CNTRL);
 	mdelay(10);
 }
 
@@ -451,12 +451,12 @@ static void db2k_pulse_prog_pin(struct comedi_device *dev)
 	struct db2k_private *devpriv = dev->private;
 	u32 cntrl;
 
-	cntrl = readl(devpriv->plx + PLX_REG_CNTRL);
+	cntrl = pete_readl("drivers/comedi/drivers/daqboard2000.c:454", devpriv->plx + PLX_REG_CNTRL);
 	cntrl |= PLX_CNTRL_USERO;
-	writel(cntrl, devpriv->plx + PLX_REG_CNTRL);
+	pete_writel("drivers/comedi/drivers/daqboard2000.c:456", cntrl, devpriv->plx + PLX_REG_CNTRL);
 	mdelay(10);
 	cntrl &= ~PLX_CNTRL_USERO;
-	writel(cntrl, devpriv->plx + PLX_REG_CNTRL);
+	pete_writel("drivers/comedi/drivers/daqboard2000.c:459", cntrl, devpriv->plx + PLX_REG_CNTRL);
 	mdelay(10);	/* Not in the original code, but I like symmetry... */
 }
 
@@ -518,7 +518,7 @@ static int db2k_wait_fpga_programmed(struct comedi_device *dev)
 
 	/* Time out after 200 tries -> 20ms */
 	for (i = 0; i < 200; i++) {
-		u32 cntrl = readl(devpriv->plx + PLX_REG_CNTRL);
+		u32 cntrl = pete_readl("drivers/comedi/drivers/daqboard2000.c:521", devpriv->plx + PLX_REG_CNTRL);
 		/* General Purpose Input (USERI) set on FPGA "DONE". */
 		if (cntrl & PLX_CNTRL_USERI)
 			return 0;
@@ -559,7 +559,7 @@ static int db2k_load_firmware(struct comedi_device *dev, const u8 *cpld_array,
 	len -= i;
 
 	/* Check to make sure the serial eeprom is present on the board */
-	cntrl = readl(devpriv->plx + PLX_REG_CNTRL);
+	cntrl = pete_readl("drivers/comedi/drivers/daqboard2000.c:562", devpriv->plx + PLX_REG_CNTRL);
 	if (!(cntrl & PLX_CNTRL_EEPRESENT))
 		return -EIO;
 

@@ -155,17 +155,17 @@ static void rzg2l_pinctrl_set_pfc_mode(struct rzg2l_pinctrl *pctrl,
 	writeb(reg & ~BIT(pin), pctrl->base + PMC(port));
 
 	/* Set the PWPR register to allow PFC register to write */
-	writel(0x0, pctrl->base + PWPR);        /* B0WI=0, PFCWE=0 */
-	writel(PWPR_PFCWE, pctrl->base + PWPR);  /* B0WI=0, PFCWE=1 */
+	pete_writel("drivers/pinctrl/renesas/pinctrl-rzg2l.c:158", 0x0, pctrl->base + PWPR);        /* B0WI=0, PFCWE=0 */
+	pete_writel("drivers/pinctrl/renesas/pinctrl-rzg2l.c:159", PWPR_PFCWE, pctrl->base + PWPR);  /* B0WI=0, PFCWE=1 */
 
 	/* Select Pin function mode with PFC register */
-	reg = readl(pctrl->base + PFC(port));
+	reg = pete_readl("drivers/pinctrl/renesas/pinctrl-rzg2l.c:162", pctrl->base + PFC(port));
 	reg &= ~(PFC_MASK << (pin * 4));
-	writel(reg | (func << (pin * 4)), pctrl->base + PFC(port));
+	pete_writel("drivers/pinctrl/renesas/pinctrl-rzg2l.c:164", reg | (func << (pin * 4)), pctrl->base + PFC(port));
 
 	/* Set the PWPR register to be write-protected */
-	writel(0x0, pctrl->base + PWPR);        /* B0WI=0, PFCWE=0 */
-	writel(PWPR_B0WI, pctrl->base + PWPR);  /* B0WI=1, PFCWE=0 */
+	pete_writel("drivers/pinctrl/renesas/pinctrl-rzg2l.c:167", 0x0, pctrl->base + PWPR);        /* B0WI=0, PFCWE=0 */
+	pete_writel("drivers/pinctrl/renesas/pinctrl-rzg2l.c:168", PWPR_B0WI, pctrl->base + PWPR);  /* B0WI=1, PFCWE=0 */
 
 	/* Switch to Peripheral pin function with PMC register */
 	reg = readb(pctrl->base + PMC(port));
@@ -460,7 +460,7 @@ static int rzg2l_pinctrl_pinconf_get(struct pinctrl_dev *pctldev,
 			addr += 4;
 		}
 
-		reg = readl(addr) & (IEN_MASK << (bit * 8));
+		reg = pete_readl("drivers/pinctrl/renesas/pinctrl-rzg2l.c:463", addr) & (IEN_MASK << (bit * 8));
 		arg = (reg >> (bit * 8)) & 0x1;
 		spin_unlock_irqrestore(&pctrl->lock, flags);
 		break;
@@ -479,7 +479,7 @@ static int rzg2l_pinctrl_pinconf_get(struct pinctrl_dev *pctldev,
 
 		spin_lock_irqsave(&pctrl->lock, flags);
 		addr = pctrl->base + pwr_reg;
-		arg = (readl(addr) & PVDD_MASK) ? 1800 : 3300;
+		arg = (pete_readl("drivers/pinctrl/renesas/pinctrl-rzg2l.c:482", addr) & PVDD_MASK) ? 1800 : 3300;
 		spin_unlock_irqrestore(&pctrl->lock, flags);
 		break;
 	}
@@ -536,8 +536,8 @@ static int rzg2l_pinctrl_pinconf_set(struct pinctrl_dev *pctldev,
 			}
 
 			spin_lock_irqsave(&pctrl->lock, flags);
-			reg = readl(addr) & ~(IEN_MASK << (bit * 8));
-			writel(reg | (arg << (bit * 8)), addr);
+			reg = pete_readl("drivers/pinctrl/renesas/pinctrl-rzg2l.c:539", addr) & ~(IEN_MASK << (bit * 8));
+			pete_writel("drivers/pinctrl/renesas/pinctrl-rzg2l.c:540", reg | (arg << (bit * 8)), addr);
 			spin_unlock_irqrestore(&pctrl->lock, flags);
 			break;
 		}
@@ -560,7 +560,7 @@ static int rzg2l_pinctrl_pinconf_set(struct pinctrl_dev *pctldev,
 
 			addr = pctrl->base + pwr_reg;
 			spin_lock_irqsave(&pctrl->lock, flags);
-			writel((mV == 1800) ? PVDD_1800 : PVDD_3300, addr);
+			pete_writel("drivers/pinctrl/renesas/pinctrl-rzg2l.c:563", (mV == 1800) ? PVDD_1800 : PVDD_3300, addr);
 			spin_unlock_irqrestore(&pctrl->lock, flags);
 			break;
 		}

@@ -241,22 +241,22 @@ static void ismt_gen_reg_dump(struct ismt_priv *priv)
 	dev_dbg(dev, "Dump of the iSMT General Registers\n");
 	dev_dbg(dev, "  GCTRL.... : (0x%p)=0x%X\n",
 		priv->smba + ISMT_GR_GCTRL,
-		readl(priv->smba + ISMT_GR_GCTRL));
+		pete_readl("drivers/i2c/busses/i2c-ismt.c:244", priv->smba + ISMT_GR_GCTRL));
 	dev_dbg(dev, "  SMTICL... : (0x%p)=0x%016llX\n",
 		priv->smba + ISMT_GR_SMTICL,
 		(long long unsigned int)readq(priv->smba + ISMT_GR_SMTICL));
 	dev_dbg(dev, "  ERRINTMSK : (0x%p)=0x%X\n",
 		priv->smba + ISMT_GR_ERRINTMSK,
-		readl(priv->smba + ISMT_GR_ERRINTMSK));
+		pete_readl("drivers/i2c/busses/i2c-ismt.c:250", priv->smba + ISMT_GR_ERRINTMSK));
 	dev_dbg(dev, "  ERRAERMSK : (0x%p)=0x%X\n",
 		priv->smba + ISMT_GR_ERRAERMSK,
-		readl(priv->smba + ISMT_GR_ERRAERMSK));
+		pete_readl("drivers/i2c/busses/i2c-ismt.c:253", priv->smba + ISMT_GR_ERRAERMSK));
 	dev_dbg(dev, "  ERRSTS... : (0x%p)=0x%X\n",
 		priv->smba + ISMT_GR_ERRSTS,
-		readl(priv->smba + ISMT_GR_ERRSTS));
+		pete_readl("drivers/i2c/busses/i2c-ismt.c:256", priv->smba + ISMT_GR_ERRSTS));
 	dev_dbg(dev, "  ERRINFO.. : (0x%p)=0x%X\n",
 		priv->smba + ISMT_GR_ERRINFO,
-		readl(priv->smba + ISMT_GR_ERRINFO));
+		pete_readl("drivers/i2c/busses/i2c-ismt.c:259", priv->smba + ISMT_GR_ERRINFO));
 }
 
 /**
@@ -273,19 +273,19 @@ static void ismt_mstr_reg_dump(struct ismt_priv *priv)
 		(long long unsigned int)readq(priv->smba + ISMT_MSTR_MDBA));
 	dev_dbg(dev, "  MCTRL.... : (0x%p)=0x%X\n",
 		priv->smba + ISMT_MSTR_MCTRL,
-		readl(priv->smba + ISMT_MSTR_MCTRL));
+		pete_readl("drivers/i2c/busses/i2c-ismt.c:276", priv->smba + ISMT_MSTR_MCTRL));
 	dev_dbg(dev, "  MSTS..... : (0x%p)=0x%X\n",
 		priv->smba + ISMT_MSTR_MSTS,
-		readl(priv->smba + ISMT_MSTR_MSTS));
+		pete_readl("drivers/i2c/busses/i2c-ismt.c:279", priv->smba + ISMT_MSTR_MSTS));
 	dev_dbg(dev, "  MDS...... : (0x%p)=0x%X\n",
 		priv->smba + ISMT_MSTR_MDS,
-		readl(priv->smba + ISMT_MSTR_MDS));
+		pete_readl("drivers/i2c/busses/i2c-ismt.c:282", priv->smba + ISMT_MSTR_MDS));
 	dev_dbg(dev, "  RPOLICY.. : (0x%p)=0x%X\n",
 		priv->smba + ISMT_MSTR_RPOLICY,
-		readl(priv->smba + ISMT_MSTR_RPOLICY));
+		pete_readl("drivers/i2c/busses/i2c-ismt.c:285", priv->smba + ISMT_MSTR_RPOLICY));
 	dev_dbg(dev, "  SPGT..... : (0x%p)=0x%X\n",
 		priv->smba + ISMT_SPGT,
-		readl(priv->smba + ISMT_SPGT));
+		pete_readl("drivers/i2c/busses/i2c-ismt.c:288", priv->smba + ISMT_SPGT));
 }
 
 /**
@@ -303,13 +303,13 @@ static void ismt_submit_desc(struct ismt_priv *priv)
 
 	/* Set the FMHP (Firmware Master Head Pointer)*/
 	fmhp = ((priv->head + 1) % ISMT_DESC_ENTRIES) << 16;
-	val = readl(priv->smba + ISMT_MSTR_MCTRL);
-	writel((val & ~ISMT_MCTRL_FMHP) | fmhp,
+	val = pete_readl("drivers/i2c/busses/i2c-ismt.c:306", priv->smba + ISMT_MSTR_MCTRL);
+	pete_writel("drivers/i2c/busses/i2c-ismt.c:307", (val & ~ISMT_MCTRL_FMHP) | fmhp,
 	       priv->smba + ISMT_MSTR_MCTRL);
 
 	/* Set the start bit */
-	val = readl(priv->smba + ISMT_MSTR_MCTRL);
-	writel(val | ISMT_MCTRL_SS,
+	val = pete_readl("drivers/i2c/busses/i2c-ismt.c:311", priv->smba + ISMT_MSTR_MCTRL);
+	pete_writel("drivers/i2c/busses/i2c-ismt.c:312", val | ISMT_MCTRL_SS,
 	       priv->smba + ISMT_MSTR_MCTRL);
 }
 
@@ -687,12 +687,12 @@ static irqreturn_t ismt_do_interrupt(int vec, void *data)
 	 * check to see it's our interrupt, return IRQ_NONE if not ours
 	 * since we are sharing interrupt
 	 */
-	val = readl(priv->smba + ISMT_MSTR_MSTS);
+	val = pete_readl("drivers/i2c/busses/i2c-ismt.c:690", priv->smba + ISMT_MSTR_MSTS);
 
 	if (!(val & (ISMT_MSTS_MIS | ISMT_MSTS_MEIS)))
 		return IRQ_NONE;
 	else
-		writel(val | ISMT_MSTS_MIS | ISMT_MSTS_MEIS,
+		pete_writel("drivers/i2c/busses/i2c-ismt.c:695", val | ISMT_MSTS_MIS | ISMT_MSTS_MEIS,
 		       priv->smba + ISMT_MSTR_MSTS);
 
 	return ismt_handle_isr(priv);
@@ -723,21 +723,21 @@ static void ismt_hw_init(struct ismt_priv *priv)
 	writeq(priv->log_dma, priv->smba + ISMT_GR_SMTICL);
 
 	/* initialize the Master Control Register (MCTRL) */
-	writel(ISMT_MCTRL_MEIE, priv->smba + ISMT_MSTR_MCTRL);
+	pete_writel("drivers/i2c/busses/i2c-ismt.c:726", ISMT_MCTRL_MEIE, priv->smba + ISMT_MSTR_MCTRL);
 
 	/* initialize the Master Status Register (MSTS) */
-	writel(0, priv->smba + ISMT_MSTR_MSTS);
+	pete_writel("drivers/i2c/busses/i2c-ismt.c:729", 0, priv->smba + ISMT_MSTR_MSTS);
 
 	/* initialize the Master Descriptor Size (MDS) */
-	val = readl(priv->smba + ISMT_MSTR_MDS);
-	writel((val & ~ISMT_MDS_MASK) | (ISMT_DESC_ENTRIES - 1),
+	val = pete_readl("drivers/i2c/busses/i2c-ismt.c:732", priv->smba + ISMT_MSTR_MDS);
+	pete_writel("drivers/i2c/busses/i2c-ismt.c:733", (val & ~ISMT_MDS_MASK) | (ISMT_DESC_ENTRIES - 1),
 		priv->smba + ISMT_MSTR_MDS);
 
 	/*
 	 * Set the SMBus speed (could use this for slow HW debuggers)
 	 */
 
-	val = readl(priv->smba + ISMT_SPGT);
+	val = pete_readl("drivers/i2c/busses/i2c-ismt.c:740", priv->smba + ISMT_SPGT);
 
 	switch (bus_speed) {
 	case 0:
@@ -745,25 +745,25 @@ static void ismt_hw_init(struct ismt_priv *priv)
 
 	case 80:
 		dev_dbg(dev, "Setting SMBus clock to 80 kHz\n");
-		writel(((val & ~ISMT_SPGT_SPD_MASK) | ISMT_SPGT_SPD_80K),
+		pete_writel("drivers/i2c/busses/i2c-ismt.c:748", ((val & ~ISMT_SPGT_SPD_MASK) | ISMT_SPGT_SPD_80K),
 			priv->smba + ISMT_SPGT);
 		break;
 
 	case 100:
 		dev_dbg(dev, "Setting SMBus clock to 100 kHz\n");
-		writel(((val & ~ISMT_SPGT_SPD_MASK) | ISMT_SPGT_SPD_100K),
+		pete_writel("drivers/i2c/busses/i2c-ismt.c:754", ((val & ~ISMT_SPGT_SPD_MASK) | ISMT_SPGT_SPD_100K),
 			priv->smba + ISMT_SPGT);
 		break;
 
 	case 400:
 		dev_dbg(dev, "Setting SMBus clock to 400 kHz\n");
-		writel(((val & ~ISMT_SPGT_SPD_MASK) | ISMT_SPGT_SPD_400K),
+		pete_writel("drivers/i2c/busses/i2c-ismt.c:760", ((val & ~ISMT_SPGT_SPD_MASK) | ISMT_SPGT_SPD_400K),
 			priv->smba + ISMT_SPGT);
 		break;
 
 	case 1000:
 		dev_dbg(dev, "Setting SMBus clock to 1000 kHz\n");
-		writel(((val & ~ISMT_SPGT_SPD_MASK) | ISMT_SPGT_SPD_1M),
+		pete_writel("drivers/i2c/busses/i2c-ismt.c:766", ((val & ~ISMT_SPGT_SPD_MASK) | ISMT_SPGT_SPD_1M),
 			priv->smba + ISMT_SPGT);
 		break;
 
@@ -772,7 +772,7 @@ static void ismt_hw_init(struct ismt_priv *priv)
 		break;
 	}
 
-	val = readl(priv->smba + ISMT_SPGT);
+	val = pete_readl("drivers/i2c/busses/i2c-ismt.c:775", priv->smba + ISMT_SPGT);
 
 	switch (val & ISMT_SPGT_SPD_MASK) {
 	case ISMT_SPGT_SPD_80K:

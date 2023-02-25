@@ -46,16 +46,16 @@ static void vf610_dac_init(struct vf610_dac *info)
 	info->conv_mode = VF610_DAC_CONV_LOW_POWER;
 	val = VF610_DAC_DACEN | VF610_DAC_DACRFS |
 		VF610_DAC_LPEN;
-	writel(val, info->regs + VF610_DACx_STATCTRL);
+	pete_writel("drivers/iio/dac/vf610_dac.c:49", val, info->regs + VF610_DACx_STATCTRL);
 }
 
 static void vf610_dac_exit(struct vf610_dac *info)
 {
 	int val;
 
-	val = readl(info->regs + VF610_DACx_STATCTRL);
+	val = pete_readl("drivers/iio/dac/vf610_dac.c:56", info->regs + VF610_DACx_STATCTRL);
 	val &= ~VF610_DAC_DACEN;
-	writel(val, info->regs + VF610_DACx_STATCTRL);
+	pete_writel("drivers/iio/dac/vf610_dac.c:58", val, info->regs + VF610_DACx_STATCTRL);
 }
 
 static int vf610_set_conversion_mode(struct iio_dev *indio_dev,
@@ -67,12 +67,12 @@ static int vf610_set_conversion_mode(struct iio_dev *indio_dev,
 
 	mutex_lock(&info->lock);
 	info->conv_mode = mode;
-	val = readl(info->regs + VF610_DACx_STATCTRL);
+	val = pete_readl("drivers/iio/dac/vf610_dac.c:70", info->regs + VF610_DACx_STATCTRL);
 	if (mode)
 		val |= VF610_DAC_LPEN;
 	else
 		val &= ~VF610_DAC_LPEN;
-	writel(val, info->regs + VF610_DACx_STATCTRL);
+	pete_writel("drivers/iio/dac/vf610_dac.c:75", val, info->regs + VF610_DACx_STATCTRL);
 	mutex_unlock(&info->lock);
 
 	return 0;
@@ -122,7 +122,7 @@ static int vf610_read_raw(struct iio_dev *indio_dev,
 
 	switch (mask) {
 	case IIO_CHAN_INFO_RAW:
-		*val = VF610_DAC_DAT0(readl(info->regs));
+		*val = VF610_DAC_DAT0(pete_readl("drivers/iio/dac/vf610_dac.c:125", info->regs));
 		return IIO_VAL_INT;
 	case IIO_CHAN_INFO_SCALE:
 		/*
@@ -149,7 +149,7 @@ static int vf610_write_raw(struct iio_dev *indio_dev,
 	switch (mask) {
 	case IIO_CHAN_INFO_RAW:
 		mutex_lock(&info->lock);
-		writel(VF610_DAC_DAT0(val), info->regs);
+		pete_writel("drivers/iio/dac/vf610_dac.c:152", VF610_DAC_DAT0(val), info->regs);
 		mutex_unlock(&info->lock);
 		return 0;
 

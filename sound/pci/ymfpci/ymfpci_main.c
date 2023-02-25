@@ -53,12 +53,12 @@ static inline void snd_ymfpci_writew(struct snd_ymfpci *chip, u32 offset, u16 va
 
 static inline u32 snd_ymfpci_readl(struct snd_ymfpci *chip, u32 offset)
 {
-	return readl(chip->reg_area_virt + offset);
+	return pete_readl("sound/pci/ymfpci/ymfpci_main.c:56", chip->reg_area_virt + offset);
 }
 
 static inline void snd_ymfpci_writel(struct snd_ymfpci *chip, u32 offset, u32 val)
 {
-	writel(val, chip->reg_area_virt + offset);
+	pete_writel("sound/pci/ymfpci/ymfpci_main.c:61", val, chip->reg_area_virt + offset);
 }
 
 static int snd_ymfpci_codec_ready(struct snd_ymfpci *chip, int secondary)

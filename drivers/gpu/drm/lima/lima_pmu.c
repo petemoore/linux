@@ -8,8 +8,8 @@
 #include "lima_pmu.h"
 #include "lima_regs.h"
 
-#define pmu_write(reg, data) writel(data, ip->iomem + reg)
-#define pmu_read(reg) readl(ip->iomem + reg)
+#define pmu_write(reg, data) pete_writel("drivers/gpu/drm/lima/lima_pmu.c:11", data, ip->iomem + reg)
+#define pmu_read(reg) pete_readl("drivers/gpu/drm/lima/lima_pmu.c:12", ip->iomem + reg)
 
 static int lima_pmu_wait_cmd(struct lima_ip *ip)
 {

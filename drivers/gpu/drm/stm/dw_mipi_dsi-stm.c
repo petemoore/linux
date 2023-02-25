@@ -86,12 +86,12 @@ struct dw_mipi_dsi_stm {
 
 static inline void dsi_write(struct dw_mipi_dsi_stm *dsi, u32 reg, u32 val)
 {
-	writel(val, dsi->base + reg);
+	pete_writel("drivers/gpu/drm/stm/dw_mipi_dsi-stm.c:89", val, dsi->base + reg);
 }
 
 static inline u32 dsi_read(struct dw_mipi_dsi_stm *dsi, u32 reg)
 {
-	return readl(dsi->base + reg);
+	return pete_readl("drivers/gpu/drm/stm/dw_mipi_dsi-stm.c:94", dsi->base + reg);
 }
 
 static inline void dsi_set(struct dw_mipi_dsi_stm *dsi, u32 reg, u32 mask)

@@ -2387,7 +2387,7 @@ static int qedr_update_qp_state(struct qedr_dev *dev,
 			 */
 
 			if (rdma_protocol_roce(&dev->ibdev, 1)) {
-				writel(qp->rq.db_data.raw, qp->rq.db);
+				pete_writel("drivers/infiniband/hw/qedr/verbs.c:2390", qp->rq.db_data.raw, qp->rq.db);
 			}
 			break;
 		case QED_ROCE_QP_STATE_ERR:
@@ -3808,7 +3808,7 @@ int qedr_post_send(struct ib_qp *ibqp, const struct ib_send_wr *wr,
 	 * cqe. This covers for the smp_rmb as well.
 	 */
 	smp_wmb();
-	writel(qp->sq.db_data.raw, qp->sq.db);
+	pete_writel("drivers/infiniband/hw/qedr/verbs.c:3811", qp->sq.db_data.raw, qp->sq.db);
 
 	spin_unlock_irqrestore(&qp->q_lock, flags);
 
@@ -3990,10 +3990,10 @@ int qedr_post_recv(struct ib_qp *ibqp, const struct ib_recv_wr *wr,
 
 		qp->rq.db_data.data.value++;
 
-		writel(qp->rq.db_data.raw, qp->rq.db);
+		pete_writel("drivers/infiniband/hw/qedr/verbs.c:3993", qp->rq.db_data.raw, qp->rq.db);
 
 		if (rdma_protocol_iwarp(&dev->ibdev, 1)) {
-			writel(qp->rq.iwarp_db2_data.raw, qp->rq.iwarp_db2);
+			pete_writel("drivers/infiniband/hw/qedr/verbs.c:3996", qp->rq.iwarp_db2_data.raw, qp->rq.iwarp_db2);
 		}
 
 		wr = wr->next;

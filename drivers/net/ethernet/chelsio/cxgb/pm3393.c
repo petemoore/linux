@@ -151,9 +151,9 @@ static int pm3393_interrupt_enable(struct cmac *cmac)
 		0 /*SUNI1x10GEXP_BITMSK_TOP_INTE */ );
 
 	/* TERMINATOR - PL_INTERUPTS_EXT */
-	pl_intr = readl(cmac->adapter->regs + A_PL_ENABLE);
+	pl_intr = pete_readl("drivers/net/ethernet/chelsio/cxgb/pm3393.c:154", cmac->adapter->regs + A_PL_ENABLE);
 	pl_intr |= F_PL_INTR_EXT;
-	writel(pl_intr, cmac->adapter->regs + A_PL_ENABLE);
+	pete_writel("drivers/net/ethernet/chelsio/cxgb/pm3393.c:156", pl_intr, cmac->adapter->regs + A_PL_ENABLE);
 	return 0;
 }
 
@@ -233,9 +233,9 @@ static int pm3393_interrupt_clear(struct cmac *cmac)
 
 	/* TERMINATOR - PL_INTERUPTS_EXT
 	 */
-	pl_intr = readl(cmac->adapter->regs + A_PL_CAUSE);
+	pl_intr = pete_readl("drivers/net/ethernet/chelsio/cxgb/pm3393.c:236", cmac->adapter->regs + A_PL_CAUSE);
 	pl_intr |= F_PL_INTR_EXT;
-	writel(pl_intr, cmac->adapter->regs + A_PL_CAUSE);
+	pete_writel("drivers/net/ethernet/chelsio/cxgb/pm3393.c:238", pl_intr, cmac->adapter->regs + A_PL_CAUSE);
 
 	return 0;
 }

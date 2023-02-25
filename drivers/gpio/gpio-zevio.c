@@ -61,14 +61,14 @@ static inline u32 zevio_gpio_port_get(struct zevio_gpio *c, unsigned pin,
 					unsigned port_offset)
 {
 	unsigned section_offset = ((pin >> 3) & 3)*ZEVIO_GPIO_SECTION_SIZE;
-	return readl(IOMEM(c->chip.regs + section_offset + port_offset));
+	return pete_readl("drivers/gpio/gpio-zevio.c:64", IOMEM(c->chip.regs + section_offset + port_offset));
 }
 
 static inline void zevio_gpio_port_set(struct zevio_gpio *c, unsigned pin,
 					unsigned port_offset, u32 val)
 {
 	unsigned section_offset = ((pin >> 3) & 3)*ZEVIO_GPIO_SECTION_SIZE;
-	writel(val, IOMEM(c->chip.regs + section_offset + port_offset));
+	pete_writel("drivers/gpio/gpio-zevio.c:71", val, IOMEM(c->chip.regs + section_offset + port_offset));
 }
 
 /* Functions for struct gpio_chip */

@@ -234,11 +234,11 @@ static inline u32 qib_read_ureg32(const struct qib_devdata *dd,
 		return 0;
 
 	if (dd->userbase)
-		return readl(regno + (u64 __iomem *)
+		return pete_readl("drivers/infiniband/hw/qib/qib_iba7220.c:237", regno + (u64 __iomem *)
 			     ((char __iomem *)dd->userbase +
 			      dd->ureg_align * ctxt));
 	else
-		return readl(regno + (u64 __iomem *)
+		return pete_readl("drivers/infiniband/hw/qib/qib_iba7220.c:241", regno + (u64 __iomem *)
 			     (dd->uregbase +
 			      (char __iomem *)dd->kregbase +
 			      dd->ureg_align * ctxt));
@@ -304,7 +304,7 @@ static inline u32 read_7220_creg32(const struct qib_devdata *dd, u16 regno)
 {
 	if (!dd->cspec->cregbase || !(dd->flags & QIB_PRESENT))
 		return 0;
-	return readl(&dd->cspec->cregbase[regno]);
+	return pete_readl("drivers/infiniband/hw/qib/qib_iba7220.c:307", &dd->cspec->cregbase[regno]);
 }
 
 /* kr_revision bits */

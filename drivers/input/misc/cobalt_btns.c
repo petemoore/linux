@@ -38,7 +38,7 @@ static void handle_buttons(struct input_dev *input)
 	uint32_t status;
 	int i;
 
-	status = ~readl(bdev->reg) >> 24;
+	status = ~pete_readl("drivers/input/misc/cobalt_btns.c:41", bdev->reg) >> 24;
 
 	for (i = 0; i < ARRAY_SIZE(bdev->keymap); i++) {
 		if (status & (1U << i)) {

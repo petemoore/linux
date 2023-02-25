@@ -491,7 +491,7 @@ static int __init lance_probe1(struct net_device *dev, int ioaddr, int irq, int 
 		return -ENOMEM;
 	if (readw(bios + 0x12) == 0x5048)  {
 		static const short ioaddr_table[] = { 0x300, 0x320, 0x340, 0x360};
-		int hp_port = (readl(bios + 1) & 1)  ? 0x499 : 0x99;
+		int hp_port = (pete_readl("drivers/net/ethernet/amd/lance.c:494", bios + 1) & 1)  ? 0x499 : 0x99;
 		/* We can have boards other than the built-in!  Verify this is on-board. */
 		if ((inb(hp_port) & 0xc0) == 0x80 &&
 		    ioaddr_table[inb(hp_port) & 3] == ioaddr)

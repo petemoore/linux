@@ -72,10 +72,10 @@ static unsigned short int max_mbox_busy_wait = MBOX_BUSY_WAIT;
 module_param(max_mbox_busy_wait, ushort, 0);
 MODULE_PARM_DESC(max_mbox_busy_wait, "Maximum wait for mailbox in microseconds if busy (default=MBOX_BUSY_WAIT=10)");
 
-#define RDINDOOR(adapter)	readl((adapter)->mmio_base + 0x20)
-#define RDOUTDOOR(adapter)	readl((adapter)->mmio_base + 0x2C)
-#define WRINDOOR(adapter,value)	 writel(value, (adapter)->mmio_base + 0x20)
-#define WROUTDOOR(adapter,value) writel(value, (adapter)->mmio_base + 0x2C)
+#define RDINDOOR(adapter)	pete_readl("drivers/scsi/megaraid.c:75", (adapter)->mmio_base + 0x20)
+#define RDOUTDOOR(adapter)	pete_readl("drivers/scsi/megaraid.c:76", (adapter)->mmio_base + 0x2C)
+#define WRINDOOR(adapter,value)	 pete_writel("drivers/scsi/megaraid.c:77", value, (adapter)->mmio_base + 0x20)
+#define WROUTDOOR(adapter,value) pete_writel("drivers/scsi/megaraid.c:78", value, (adapter)->mmio_base + 0x2C)
 
 /*
  * Global variables

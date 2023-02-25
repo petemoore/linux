@@ -8,7 +8,7 @@
 
 static u32 mana_gd_r32(struct gdma_context *g, u64 offset)
 {
-	return readl(g->bar0_va + offset);
+	return pete_readl("drivers/net/ethernet/microsoft/mana/gdma_main.c:11", g->bar0_va + offset);
 }
 
 static u64 mana_gd_r64(struct gdma_context *g, u64 offset)

@@ -131,15 +131,15 @@ static void lpss_uart_setup(struct lpss_private_data *pdata)
 	u32 val;
 
 	offset = pdata->dev_desc->prv_offset + LPSS_TX_INT;
-	val = readl(pdata->mmio_base + offset);
-	writel(val | LPSS_TX_INT_MASK, pdata->mmio_base + offset);
+	val = pete_readl("drivers/acpi/acpi_lpss.c:134", pdata->mmio_base + offset);
+	pete_writel("drivers/acpi/acpi_lpss.c:135", val | LPSS_TX_INT_MASK, pdata->mmio_base + offset);
 
-	val = readl(pdata->mmio_base + LPSS_UART_CPR);
+	val = pete_readl("drivers/acpi/acpi_lpss.c:137", pdata->mmio_base + LPSS_UART_CPR);
 	if (!(val & LPSS_UART_CPR_AFCE)) {
 		offset = pdata->dev_desc->prv_offset + LPSS_GENERAL;
-		val = readl(pdata->mmio_base + offset);
+		val = pete_readl("drivers/acpi/acpi_lpss.c:140", pdata->mmio_base + offset);
 		val |= LPSS_GENERAL_UART_RTS_OVRD;
-		writel(val, pdata->mmio_base + offset);
+		pete_writel("drivers/acpi/acpi_lpss.c:142", val, pdata->mmio_base + offset);
 	}
 }
 
@@ -149,9 +149,9 @@ static void lpss_deassert_reset(struct lpss_private_data *pdata)
 	u32 val;
 
 	offset = pdata->dev_desc->prv_offset + LPSS_RESETS;
-	val = readl(pdata->mmio_base + offset);
+	val = pete_readl("drivers/acpi/acpi_lpss.c:152", pdata->mmio_base + offset);
 	val |= LPSS_RESETS_RESET_APB | LPSS_RESETS_RESET_FUNC;
-	writel(val, pdata->mmio_base + offset);
+	pete_writel("drivers/acpi/acpi_lpss.c:154", val, pdata->mmio_base + offset);
 }
 
 /*
@@ -195,10 +195,10 @@ static void byt_i2c_setup(struct lpss_private_data *pdata)
 
 	lpss_deassert_reset(pdata);
 
-	if (readl(pdata->mmio_base + pdata->dev_desc->prv_offset))
+	if (pete_readl("drivers/acpi/acpi_lpss.c:198", pdata->mmio_base + pdata->dev_desc->prv_offset))
 		pdata->fixed_clk_rate = 133000000;
 
-	writel(0, pdata->mmio_base + LPSS_I2C_ENABLE);
+	pete_writel("drivers/acpi/acpi_lpss.c:201", 0, pdata->mmio_base + LPSS_I2C_ENABLE);
 }
 
 /* BSW PWM used for backlight control by the i915 driver */
@@ -432,8 +432,8 @@ static int register_device_clock(struct acpi_device *adev,
 
 	if (dev_desc->flags & LPSS_CLK_DIVIDER) {
 		/* Prevent division by zero */
-		if (!readl(prv_base))
-			writel(LPSS_CLK_DIVIDER_DEF_MASK, prv_base);
+		if (!pete_readl("drivers/acpi/acpi_lpss.c:435", prv_base))
+			pete_writel("drivers/acpi/acpi_lpss.c:436", LPSS_CLK_DIVIDER_DEF_MASK, prv_base);
 
 		clk_name = kasprintf(GFP_KERNEL, "%s-div", devname);
 		if (!clk_name)
@@ -704,13 +704,13 @@ static int acpi_lpss_create_device(struct acpi_device *adev,
 
 static u32 __lpss_reg_read(struct lpss_private_data *pdata, unsigned int reg)
 {
-	return readl(pdata->mmio_base + pdata->dev_desc->prv_offset + reg);
+	return pete_readl("drivers/acpi/acpi_lpss.c:707", pdata->mmio_base + pdata->dev_desc->prv_offset + reg);
 }
 
 static void __lpss_reg_write(u32 val, struct lpss_private_data *pdata,
 			     unsigned int reg)
 {
-	writel(val, pdata->mmio_base + pdata->dev_desc->prv_offset + reg);
+	pete_writel("drivers/acpi/acpi_lpss.c:713", val, pdata->mmio_base + pdata->dev_desc->prv_offset + reg);
 }
 
 static int lpss_reg_read(struct device *dev, unsigned int reg, u32 *val)

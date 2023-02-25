@@ -511,7 +511,7 @@ static int spi_engine_probe(struct platform_device *pdev)
 		goto err_ref_clk_disable;
 	}
 
-	version = readl(spi_engine->base + SPI_ENGINE_REG_VERSION);
+	version = pete_readl("drivers/spi/spi-axi-spi-engine.c:514", spi_engine->base + SPI_ENGINE_REG_VERSION);
 	if (SPI_ENGINE_VERSION_MAJOR(version) != 1) {
 		dev_err(&pdev->dev, "Unsupported peripheral version %u.%u.%c\n",
 			SPI_ENGINE_VERSION_MAJOR(version),

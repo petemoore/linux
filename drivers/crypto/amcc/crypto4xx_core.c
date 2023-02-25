@@ -57,7 +57,7 @@ static void crypto4xx_hw_init(struct crypto4xx_device *dev)
 	union ce_pe_dma_cfg pe_dma_cfg;
 	u32 device_ctrl;
 
-	writel(PPC4XX_BYTE_ORDER, dev->ce_base + CRYPTO4XX_BYTE_ORDER_CFG);
+	pete_writel("drivers/crypto/amcc/crypto4xx_core.c:60", PPC4XX_BYTE_ORDER, dev->ce_base + CRYPTO4XX_BYTE_ORDER_CFG);
 	/* setup pe dma, include reset sg, pdr and pe, then release reset */
 	pe_dma_cfg.w = 0;
 	pe_dma_cfg.bf.bo_sgpd_en = 1;
@@ -68,67 +68,67 @@ static void crypto4xx_hw_init(struct crypto4xx_device *dev)
 	pe_dma_cfg.bf.reset_sg = 1;
 	pe_dma_cfg.bf.reset_pdr = 1;
 	pe_dma_cfg.bf.reset_pe = 1;
-	writel(pe_dma_cfg.w, dev->ce_base + CRYPTO4XX_PE_DMA_CFG);
+	pete_writel("drivers/crypto/amcc/crypto4xx_core.c:71", pe_dma_cfg.w, dev->ce_base + CRYPTO4XX_PE_DMA_CFG);
 	/* un reset pe,sg and pdr */
 	pe_dma_cfg.bf.pe_mode = 0;
 	pe_dma_cfg.bf.reset_sg = 0;
 	pe_dma_cfg.bf.reset_pdr = 0;
 	pe_dma_cfg.bf.reset_pe = 0;
 	pe_dma_cfg.bf.bo_td_en = 0;
-	writel(pe_dma_cfg.w, dev->ce_base + CRYPTO4XX_PE_DMA_CFG);
-	writel(dev->pdr_pa, dev->ce_base + CRYPTO4XX_PDR_BASE);
-	writel(dev->pdr_pa, dev->ce_base + CRYPTO4XX_RDR_BASE);
-	writel(PPC4XX_PRNG_CTRL_AUTO_EN, dev->ce_base + CRYPTO4XX_PRNG_CTRL);
+	pete_writel("drivers/crypto/amcc/crypto4xx_core.c:78", pe_dma_cfg.w, dev->ce_base + CRYPTO4XX_PE_DMA_CFG);
+	pete_writel("drivers/crypto/amcc/crypto4xx_core.c:79", dev->pdr_pa, dev->ce_base + CRYPTO4XX_PDR_BASE);
+	pete_writel("drivers/crypto/amcc/crypto4xx_core.c:80", dev->pdr_pa, dev->ce_base + CRYPTO4XX_RDR_BASE);
+	pete_writel("drivers/crypto/amcc/crypto4xx_core.c:81", PPC4XX_PRNG_CTRL_AUTO_EN, dev->ce_base + CRYPTO4XX_PRNG_CTRL);
 	get_random_bytes(&rand_num, sizeof(rand_num));
-	writel(rand_num, dev->ce_base + CRYPTO4XX_PRNG_SEED_L);
+	pete_writel("drivers/crypto/amcc/crypto4xx_core.c:83", rand_num, dev->ce_base + CRYPTO4XX_PRNG_SEED_L);
 	get_random_bytes(&rand_num, sizeof(rand_num));
-	writel(rand_num, dev->ce_base + CRYPTO4XX_PRNG_SEED_H);
+	pete_writel("drivers/crypto/amcc/crypto4xx_core.c:85", rand_num, dev->ce_base + CRYPTO4XX_PRNG_SEED_H);
 	ring_size.w = 0;
 	ring_size.bf.ring_offset = PPC4XX_PD_SIZE;
 	ring_size.bf.ring_size   = PPC4XX_NUM_PD;
-	writel(ring_size.w, dev->ce_base + CRYPTO4XX_RING_SIZE);
+	pete_writel("drivers/crypto/amcc/crypto4xx_core.c:89", ring_size.w, dev->ce_base + CRYPTO4XX_RING_SIZE);
 	ring_ctrl.w = 0;
-	writel(ring_ctrl.w, dev->ce_base + CRYPTO4XX_RING_CTRL);
-	device_ctrl = readl(dev->ce_base + CRYPTO4XX_DEVICE_CTRL);
+	pete_writel("drivers/crypto/amcc/crypto4xx_core.c:91", ring_ctrl.w, dev->ce_base + CRYPTO4XX_RING_CTRL);
+	device_ctrl = pete_readl("drivers/crypto/amcc/crypto4xx_core.c:92", dev->ce_base + CRYPTO4XX_DEVICE_CTRL);
 	device_ctrl |= PPC4XX_DC_3DES_EN;
-	writel(device_ctrl, dev->ce_base + CRYPTO4XX_DEVICE_CTRL);
-	writel(dev->gdr_pa, dev->ce_base + CRYPTO4XX_GATH_RING_BASE);
-	writel(dev->sdr_pa, dev->ce_base + CRYPTO4XX_SCAT_RING_BASE);
+	pete_writel("drivers/crypto/amcc/crypto4xx_core.c:94", device_ctrl, dev->ce_base + CRYPTO4XX_DEVICE_CTRL);
+	pete_writel("drivers/crypto/amcc/crypto4xx_core.c:95", dev->gdr_pa, dev->ce_base + CRYPTO4XX_GATH_RING_BASE);
+	pete_writel("drivers/crypto/amcc/crypto4xx_core.c:96", dev->sdr_pa, dev->ce_base + CRYPTO4XX_SCAT_RING_BASE);
 	part_ring_size.w = 0;
 	part_ring_size.bf.sdr_size = PPC4XX_SDR_SIZE;
 	part_ring_size.bf.gdr_size = PPC4XX_GDR_SIZE;
-	writel(part_ring_size.w, dev->ce_base + CRYPTO4XX_PART_RING_SIZE);
-	writel(PPC4XX_SD_BUFFER_SIZE, dev->ce_base + CRYPTO4XX_PART_RING_CFG);
+	pete_writel("drivers/crypto/amcc/crypto4xx_core.c:100", part_ring_size.w, dev->ce_base + CRYPTO4XX_PART_RING_SIZE);
+	pete_writel("drivers/crypto/amcc/crypto4xx_core.c:101", PPC4XX_SD_BUFFER_SIZE, dev->ce_base + CRYPTO4XX_PART_RING_CFG);
 	io_threshold.w = 0;
 	io_threshold.bf.output_threshold = PPC4XX_OUTPUT_THRESHOLD;
 	io_threshold.bf.input_threshold  = PPC4XX_INPUT_THRESHOLD;
-	writel(io_threshold.w, dev->ce_base + CRYPTO4XX_IO_THRESHOLD);
-	writel(0, dev->ce_base + CRYPTO4XX_PDR_BASE_UADDR);
-	writel(0, dev->ce_base + CRYPTO4XX_RDR_BASE_UADDR);
-	writel(0, dev->ce_base + CRYPTO4XX_PKT_SRC_UADDR);
-	writel(0, dev->ce_base + CRYPTO4XX_PKT_DEST_UADDR);
-	writel(0, dev->ce_base + CRYPTO4XX_SA_UADDR);
-	writel(0, dev->ce_base + CRYPTO4XX_GATH_RING_BASE_UADDR);
-	writel(0, dev->ce_base + CRYPTO4XX_SCAT_RING_BASE_UADDR);
+	pete_writel("drivers/crypto/amcc/crypto4xx_core.c:105", io_threshold.w, dev->ce_base + CRYPTO4XX_IO_THRESHOLD);
+	pete_writel("drivers/crypto/amcc/crypto4xx_core.c:106", 0, dev->ce_base + CRYPTO4XX_PDR_BASE_UADDR);
+	pete_writel("drivers/crypto/amcc/crypto4xx_core.c:107", 0, dev->ce_base + CRYPTO4XX_RDR_BASE_UADDR);
+	pete_writel("drivers/crypto/amcc/crypto4xx_core.c:108", 0, dev->ce_base + CRYPTO4XX_PKT_SRC_UADDR);
+	pete_writel("drivers/crypto/amcc/crypto4xx_core.c:109", 0, dev->ce_base + CRYPTO4XX_PKT_DEST_UADDR);
+	pete_writel("drivers/crypto/amcc/crypto4xx_core.c:110", 0, dev->ce_base + CRYPTO4XX_SA_UADDR);
+	pete_writel("drivers/crypto/amcc/crypto4xx_core.c:111", 0, dev->ce_base + CRYPTO4XX_GATH_RING_BASE_UADDR);
+	pete_writel("drivers/crypto/amcc/crypto4xx_core.c:112", 0, dev->ce_base + CRYPTO4XX_SCAT_RING_BASE_UADDR);
 	/* un reset pe,sg and pdr */
 	pe_dma_cfg.bf.pe_mode = 1;
 	pe_dma_cfg.bf.reset_sg = 0;
 	pe_dma_cfg.bf.reset_pdr = 0;
 	pe_dma_cfg.bf.reset_pe = 0;
 	pe_dma_cfg.bf.bo_td_en = 0;
-	writel(pe_dma_cfg.w, dev->ce_base + CRYPTO4XX_PE_DMA_CFG);
+	pete_writel("drivers/crypto/amcc/crypto4xx_core.c:119", pe_dma_cfg.w, dev->ce_base + CRYPTO4XX_PE_DMA_CFG);
 	/*clear all pending interrupt*/
-	writel(PPC4XX_INTERRUPT_CLR, dev->ce_base + CRYPTO4XX_INT_CLR);
-	writel(PPC4XX_INT_DESCR_CNT, dev->ce_base + CRYPTO4XX_INT_DESCR_CNT);
-	writel(PPC4XX_INT_DESCR_CNT, dev->ce_base + CRYPTO4XX_INT_DESCR_CNT);
-	writel(PPC4XX_INT_CFG, dev->ce_base + CRYPTO4XX_INT_CFG);
+	pete_writel("drivers/crypto/amcc/crypto4xx_core.c:121", PPC4XX_INTERRUPT_CLR, dev->ce_base + CRYPTO4XX_INT_CLR);
+	pete_writel("drivers/crypto/amcc/crypto4xx_core.c:122", PPC4XX_INT_DESCR_CNT, dev->ce_base + CRYPTO4XX_INT_DESCR_CNT);
+	pete_writel("drivers/crypto/amcc/crypto4xx_core.c:123", PPC4XX_INT_DESCR_CNT, dev->ce_base + CRYPTO4XX_INT_DESCR_CNT);
+	pete_writel("drivers/crypto/amcc/crypto4xx_core.c:124", PPC4XX_INT_CFG, dev->ce_base + CRYPTO4XX_INT_CFG);
 	if (dev->is_revb) {
-		writel(PPC4XX_INT_TIMEOUT_CNT_REVB << 10,
+		pete_writel("drivers/crypto/amcc/crypto4xx_core.c:126", PPC4XX_INT_TIMEOUT_CNT_REVB << 10,
 		       dev->ce_base + CRYPTO4XX_INT_TIMEOUT_CNT);
-		writel(PPC4XX_PD_DONE_INT | PPC4XX_TMO_ERR_INT,
+		pete_writel("drivers/crypto/amcc/crypto4xx_core.c:128", PPC4XX_PD_DONE_INT | PPC4XX_TMO_ERR_INT,
 		       dev->ce_base + CRYPTO4XX_INT_EN);
 	} else {
-		writel(PPC4XX_PD_DONE_INT, dev->ce_base + CRYPTO4XX_INT_EN);
+		pete_writel("drivers/crypto/amcc/crypto4xx_core.c:131", PPC4XX_PD_DONE_INT, dev->ce_base + CRYPTO4XX_INT_EN);
 	}
 }
 
@@ -925,8 +925,8 @@ int crypto4xx_build_pd(struct crypto_async_request *req,
 
 	wmb();
 	/* write any value to push engine to read a pd */
-	writel(0, dev->ce_base + CRYPTO4XX_INT_DESCR_RD);
-	writel(1, dev->ce_base + CRYPTO4XX_INT_DESCR_RD);
+	pete_writel("drivers/crypto/amcc/crypto4xx_core.c:928", 0, dev->ce_base + CRYPTO4XX_INT_DESCR_RD);
+	pete_writel("drivers/crypto/amcc/crypto4xx_core.c:929", 1, dev->ce_base + CRYPTO4XX_INT_DESCR_RD);
 	return is_busy ? -EBUSY : -EINPROGRESS;
 }
 
@@ -1106,7 +1106,7 @@ static inline irqreturn_t crypto4xx_interrupt_handler(int irq, void *data,
 	struct device *dev = (struct device *)data;
 	struct crypto4xx_core_device *core_dev = dev_get_drvdata(dev);
 
-	writel(clr_val, core_dev->dev->ce_base + CRYPTO4XX_INT_CLR);
+	pete_writel("drivers/crypto/amcc/crypto4xx_core.c:1109", clr_val, core_dev->dev->ce_base + CRYPTO4XX_INT_CLR);
 	tasklet_schedule(&core_dev->tasklet);
 
 	return IRQ_HANDLED;
@@ -1131,12 +1131,12 @@ static int ppc4xx_prng_data_read(struct crypto4xx_device *dev,
 
 	do {
 		/* trigger PRN generation */
-		writel(PPC4XX_PRNG_CTRL_AUTO_EN,
+		pete_writel("drivers/crypto/amcc/crypto4xx_core.c:1134", PPC4XX_PRNG_CTRL_AUTO_EN,
 		       dev->ce_base + CRYPTO4XX_PRNG_CTRL);
 
 		for (i = 0; i < 1024; i++) {
 			/* usually 19 iterations are enough */
-			if ((readl(dev->ce_base + CRYPTO4XX_PRNG_STAT) &
+			if ((pete_readl("drivers/crypto/amcc/crypto4xx_core.c:1139", dev->ce_base + CRYPTO4XX_PRNG_STAT) &
 			     CRYPTO4XX_PRNG_STAT_BUSY))
 				continue;
 

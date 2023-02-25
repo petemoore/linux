@@ -113,12 +113,12 @@ int intel_pmc_gcr_update(struct intel_pmc_dev *pmc, u32 offset, u32 mask, u32 va
 		return -EINVAL;
 
 	spin_lock(&pmc->gcr_lock);
-	new_val = readl(pmc->gcr_mem_base + offset);
+	new_val = pete_readl("drivers/mfd/intel_pmc_bxt.c:116", pmc->gcr_mem_base + offset);
 
 	new_val = (new_val & ~mask) | (val & mask);
-	writel(new_val, pmc->gcr_mem_base + offset);
+	pete_writel("drivers/mfd/intel_pmc_bxt.c:119", new_val, pmc->gcr_mem_base + offset);
 
-	new_val = readl(pmc->gcr_mem_base + offset);
+	new_val = pete_readl("drivers/mfd/intel_pmc_bxt.c:121", pmc->gcr_mem_base + offset);
 	spin_unlock(&pmc->gcr_lock);
 
 	/* Check whether the bit update is successful */

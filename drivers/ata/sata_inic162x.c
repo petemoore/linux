@@ -295,7 +295,7 @@ static int inic_scr_read(struct ata_link *link, unsigned sc_reg, u32 *val)
 	if (unlikely(sc_reg >= ARRAY_SIZE(scr_map)))
 		return -EINVAL;
 
-	*val = readl(scr_addr + scr_map[sc_reg] * 4);
+	*val = pete_readl("drivers/ata/sata_inic162x.c:298", scr_addr + scr_map[sc_reg] * 4);
 
 	/* this controller has stuck DIAG.N, ignore it */
 	if (sc_reg == SCR_ERROR)
@@ -310,7 +310,7 @@ static int inic_scr_write(struct ata_link *link, unsigned sc_reg, u32 val)
 	if (unlikely(sc_reg >= ARRAY_SIZE(scr_map)))
 		return -EINVAL;
 
-	writel(val, scr_addr + scr_map[sc_reg] * 4);
+	pete_writel("drivers/ata/sata_inic162x.c:313", val, scr_addr + scr_map[sc_reg] * 4);
 	return 0;
 }
 
@@ -688,7 +688,7 @@ static void init_port(struct ata_port *ap)
 	memset(pp->cpb_tbl, 0, IDMA_CPB_TBL_SIZE);
 
 	/* setup CPB lookup table addresses */
-	writel(pp->cpb_tbl_dma, port_base + PORT_CPB_CPBLAR);
+	pete_writel("drivers/ata/sata_inic162x.c:691", pp->cpb_tbl_dma, port_base + PORT_CPB_CPBLAR);
 }
 
 static int inic_port_resume(struct ata_port *ap)

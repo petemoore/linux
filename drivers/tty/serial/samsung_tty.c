@@ -2939,7 +2939,7 @@ static void wr_reg_barrier(struct uart_port *port, u32 reg, u32 val)
 		writeb(val, portaddr(port, reg));
 		break;
 	case UPIO_MEM32:
-		writel(val, portaddr(port, reg));
+		pete_writel("drivers/tty/serial/samsung_tty.c:2942", val, portaddr(port, reg));
 		break;
 	}
 }
@@ -2950,7 +2950,7 @@ struct samsung_early_console_data {
 
 static void samsung_early_busyuart(struct uart_port *port)
 {
-	while (!(readl(port->membase + S3C2410_UTRSTAT) & S3C2410_UTRSTAT_TXFE))
+	while (!(pete_readl("drivers/tty/serial/samsung_tty.c:2953", port->membase + S3C2410_UTRSTAT) & S3C2410_UTRSTAT_TXFE))
 		;
 }
 
@@ -2958,13 +2958,13 @@ static void samsung_early_busyuart_fifo(struct uart_port *port)
 {
 	struct samsung_early_console_data *data = port->private_data;
 
-	while (readl(port->membase + S3C2410_UFSTAT) & data->txfull_mask)
+	while (pete_readl("drivers/tty/serial/samsung_tty.c:2961", port->membase + S3C2410_UFSTAT) & data->txfull_mask)
 		;
 }
 
 static void samsung_early_putc(struct uart_port *port, int c)
 {
-	if (readl(port->membase + S3C2410_UFCON) & S3C2410_UFCON_FIFOMODE)
+	if (pete_readl("drivers/tty/serial/samsung_tty.c:2967", port->membase + S3C2410_UFCON) & S3C2410_UFCON_FIFOMODE)
 		samsung_early_busyuart_fifo(port);
 	else
 		samsung_early_busyuart(port);

@@ -909,19 +909,19 @@ irqreturn_t cpqhp_ctrl_intr(int IRQ, void *data)
 
 	if (misc & 0x0008) {
 		/* General-interrupt-input interrupt Pending */
-		Diff = readl(ctrl->hpc_reg + INT_INPUT_CLEAR) ^ ctrl->ctrl_int_comp;
+		Diff = pete_readl("drivers/pci/hotplug/cpqphp_ctrl.c:912", ctrl->hpc_reg + INT_INPUT_CLEAR) ^ ctrl->ctrl_int_comp;
 
-		ctrl->ctrl_int_comp = readl(ctrl->hpc_reg + INT_INPUT_CLEAR);
+		ctrl->ctrl_int_comp = pete_readl("drivers/pci/hotplug/cpqphp_ctrl.c:914", ctrl->hpc_reg + INT_INPUT_CLEAR);
 
 		/* Clear the interrupt */
-		writel(Diff, ctrl->hpc_reg + INT_INPUT_CLEAR);
+		pete_writel("drivers/pci/hotplug/cpqphp_ctrl.c:917", Diff, ctrl->hpc_reg + INT_INPUT_CLEAR);
 
 		/* Read it back to clear any posted writes */
-		temp_dword = readl(ctrl->hpc_reg + INT_INPUT_CLEAR);
+		temp_dword = pete_readl("drivers/pci/hotplug/cpqphp_ctrl.c:920", ctrl->hpc_reg + INT_INPUT_CLEAR);
 
 		if (!Diff)
 			/* Clear all interrupts */
-			writel(0xFFFFFFFF, ctrl->hpc_reg + INT_INPUT_CLEAR);
+			pete_writel("drivers/pci/hotplug/cpqphp_ctrl.c:924", 0xFFFFFFFF, ctrl->hpc_reg + INT_INPUT_CLEAR);
 
 		schedule_flag += handle_switch_change((u8)(Diff & 0xFFL), ctrl);
 		schedule_flag += handle_presence_change((u16)((Diff & 0xFFFF0000L) >> 16), ctrl);
@@ -1119,7 +1119,7 @@ static u8 set_controller_speed(struct controller *ctrl, u8 adapter_speed, u8 hp_
 	u8 reg;
 	u8 slot_power = readb(ctrl->hpc_reg + SLOT_POWER);
 	u16 reg16;
-	u32 leds = readl(ctrl->hpc_reg + LED_CONTROL);
+	u32 leds = pete_readl("drivers/pci/hotplug/cpqphp_ctrl.c:1122", ctrl->hpc_reg + LED_CONTROL);
 
 	if (bus->cur_bus_speed == adapter_speed)
 		return 0;
@@ -1161,7 +1161,7 @@ static u8 set_controller_speed(struct controller *ctrl, u8 adapter_speed, u8 hp_
 		adapter_speed = bus->max_bus_speed;
 	}
 
-	writel(0x0L, ctrl->hpc_reg + LED_CONTROL);
+	pete_writel("drivers/pci/hotplug/cpqphp_ctrl.c:1164", 0x0L, ctrl->hpc_reg + LED_CONTROL);
 	writeb(0x00, ctrl->hpc_reg + SLOT_ENABLE);
 
 	set_SOGO(ctrl);
@@ -1203,7 +1203,7 @@ static u8 set_controller_speed(struct controller *ctrl, u8 adapter_speed, u8 hp_
 	mdelay(5);
 
 	/* Reenable interrupts */
-	writel(0, ctrl->hpc_reg + INT_MASK);
+	pete_writel("drivers/pci/hotplug/cpqphp_ctrl.c:1206", 0, ctrl->hpc_reg + INT_MASK);
 
 	pci_write_config_byte(ctrl->pci_dev, 0x41, reg);
 
@@ -1221,7 +1221,7 @@ static u8 set_controller_speed(struct controller *ctrl, u8 adapter_speed, u8 hp_
 	mdelay(1100);
 
 	/* Restore LED/Slot state */
-	writel(leds, ctrl->hpc_reg + LED_CONTROL);
+	pete_writel("drivers/pci/hotplug/cpqphp_ctrl.c:1224", leds, ctrl->hpc_reg + LED_CONTROL);
 	writeb(slot_power, ctrl->hpc_reg + SLOT_ENABLE);
 
 	set_SOGO(ctrl);
@@ -1264,7 +1264,7 @@ static u32 board_replaced(struct pci_func *func, struct controller *ctrl)
 	/*
 	 * The switch is open.
 	 */
-	if (readl(ctrl->hpc_reg + INT_INPUT_CLEAR) & (0x01L << hp_slot))
+	if (pete_readl("drivers/pci/hotplug/cpqphp_ctrl.c:1267", ctrl->hpc_reg + INT_INPUT_CLEAR) & (0x01L << hp_slot))
 		rc = INTERLOCK_OPEN;
 	/*
 	 * The board is already on
@@ -1962,7 +1962,7 @@ int cpqhp_process_SI(struct controller *ctrl, struct pci_func *func)
 		physical_slot = p_slot->number;
 
 	/* Check to see if the interlock is closed */
-	tempdword = readl(ctrl->hpc_reg + INT_INPUT_CLEAR);
+	tempdword = pete_readl("drivers/pci/hotplug/cpqphp_ctrl.c:1965", ctrl->hpc_reg + INT_INPUT_CLEAR);
 
 	if (tempdword & (0x01 << hp_slot))
 		return 1;
@@ -2115,7 +2115,7 @@ static void switch_leds(struct controller *ctrl, const int num_of_slots,
 			*work_LED = *work_LED >> 1;
 		else
 			*work_LED = *work_LED << 1;
-		writel(*work_LED, ctrl->hpc_reg + LED_CONTROL);
+		pete_writel("drivers/pci/hotplug/cpqphp_ctrl.c:2118", *work_LED, ctrl->hpc_reg + LED_CONTROL);
 
 		set_SOGO(ctrl);
 
@@ -2149,7 +2149,7 @@ int cpqhp_hardware_test(struct controller *ctrl, int test_num)
 
 		/* Do that funky LED thing */
 		/* so we can restore them later */
-		save_LED = readl(ctrl->hpc_reg + LED_CONTROL);
+		save_LED = pete_readl("drivers/pci/hotplug/cpqphp_ctrl.c:2152", ctrl->hpc_reg + LED_CONTROL);
 		work_LED = 0x01010101;
 		switch_leds(ctrl, num_of_slots, &work_LED, 0);
 		switch_leds(ctrl, num_of_slots, &work_LED, 1);
@@ -2157,16 +2157,16 @@ int cpqhp_hardware_test(struct controller *ctrl, int test_num)
 		switch_leds(ctrl, num_of_slots, &work_LED, 1);
 
 		work_LED = 0x01010000;
-		writel(work_LED, ctrl->hpc_reg + LED_CONTROL);
+		pete_writel("drivers/pci/hotplug/cpqphp_ctrl.c:2160", work_LED, ctrl->hpc_reg + LED_CONTROL);
 		switch_leds(ctrl, num_of_slots, &work_LED, 0);
 		switch_leds(ctrl, num_of_slots, &work_LED, 1);
 		work_LED = 0x00000101;
-		writel(work_LED, ctrl->hpc_reg + LED_CONTROL);
+		pete_writel("drivers/pci/hotplug/cpqphp_ctrl.c:2164", work_LED, ctrl->hpc_reg + LED_CONTROL);
 		switch_leds(ctrl, num_of_slots, &work_LED, 0);
 		switch_leds(ctrl, num_of_slots, &work_LED, 1);
 
 		work_LED = 0x01010000;
-		writel(work_LED, ctrl->hpc_reg + LED_CONTROL);
+		pete_writel("drivers/pci/hotplug/cpqphp_ctrl.c:2169", work_LED, ctrl->hpc_reg + LED_CONTROL);
 		for (loop = 0; loop < num_of_slots; loop++) {
 			set_SOGO(ctrl);
 
@@ -2176,7 +2176,7 @@ int cpqhp_hardware_test(struct controller *ctrl, int test_num)
 			/* Get ready for next iteration */
 			long_delay((3*HZ)/10);
 			work_LED = work_LED >> 16;
-			writel(work_LED, ctrl->hpc_reg + LED_CONTROL);
+			pete_writel("drivers/pci/hotplug/cpqphp_ctrl.c:2179", work_LED, ctrl->hpc_reg + LED_CONTROL);
 
 			set_SOGO(ctrl);
 
@@ -2186,13 +2186,13 @@ int cpqhp_hardware_test(struct controller *ctrl, int test_num)
 			/* Get ready for next iteration */
 			long_delay((3*HZ)/10);
 			work_LED = work_LED << 16;
-			writel(work_LED, ctrl->hpc_reg + LED_CONTROL);
+			pete_writel("drivers/pci/hotplug/cpqphp_ctrl.c:2189", work_LED, ctrl->hpc_reg + LED_CONTROL);
 			work_LED = work_LED << 1;
-			writel(work_LED, ctrl->hpc_reg + LED_CONTROL);
+			pete_writel("drivers/pci/hotplug/cpqphp_ctrl.c:2191", work_LED, ctrl->hpc_reg + LED_CONTROL);
 		}
 
 		/* put it back the way it was */
-		writel(save_LED, ctrl->hpc_reg + LED_CONTROL);
+		pete_writel("drivers/pci/hotplug/cpqphp_ctrl.c:2195", save_LED, ctrl->hpc_reg + LED_CONTROL);
 
 		set_SOGO(ctrl);
 

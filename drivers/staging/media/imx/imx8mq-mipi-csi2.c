@@ -226,7 +226,7 @@ static const struct csi2_pix_format *find_csi2_format(u32 code)
 
 static inline void imx8mq_mipi_csi_write(struct csi_state *state, u32 reg, u32 val)
 {
-	writel(val, state->regs + reg);
+	pete_writel("drivers/staging/media/imx/imx8mq-mipi-csi2.c:229", val, state->regs + reg);
 }
 
 static int imx8mq_mipi_csi_sw_reset(struct csi_state *state)

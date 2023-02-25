@@ -70,7 +70,7 @@ static void socfpga_dwmac_fix_mac_speed(void *priv, unsigned int speed)
 		       sgmii_adapter_base + SGMII_ADAPTER_CTRL_REG);
 
 	if (splitter_base) {
-		val = readl(splitter_base + EMAC_SPLITTER_CTRL_REG);
+		val = pete_readl("drivers/net/ethernet/stmicro/stmmac/dwmac-socfpga.c:73", splitter_base + EMAC_SPLITTER_CTRL_REG);
 		val &= ~EMAC_SPLITTER_CTRL_SPEED_MASK;
 
 		switch (speed) {
@@ -86,7 +86,7 @@ static void socfpga_dwmac_fix_mac_speed(void *priv, unsigned int speed)
 		default:
 			return;
 		}
-		writel(val, splitter_base + EMAC_SPLITTER_CTRL_REG);
+		pete_writel("drivers/net/ethernet/stmicro/stmmac/dwmac-socfpga.c:89", val, splitter_base + EMAC_SPLITTER_CTRL_REG);
 	}
 
 	if (phy_dev && sgmii_adapter_base) {

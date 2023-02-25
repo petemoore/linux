@@ -124,7 +124,7 @@ static int sdhci_remove(struct platform_device *pdev)
 	int dead = 0;
 	u32 scratch;
 
-	scratch = readl(host->ioaddr + SDHCI_INT_STATUS);
+	scratch = pete_readl("drivers/mmc/host/sdhci-spear.c:127", host->ioaddr + SDHCI_INT_STATUS);
 	if (scratch == (u32)-1)
 		dead = 1;
 

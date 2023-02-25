@@ -186,7 +186,7 @@ static int pcic_read_config_dword(unsigned int busno, unsigned int devfn,
 	pcic_speculative = 1;
 	pcic_trapped = 0;
 #endif
-	writel(CONFIG_CMD(busno, devfn, where), pcic->pcic_config_space_addr);
+	pete_writel("arch/sparc/kernel/pcic.c:189", CONFIG_CMD(busno, devfn, where), pcic->pcic_config_space_addr);
 #if 0 /* does not fail here */
 	nop();
 	if (pcic_trapped) {
@@ -197,7 +197,7 @@ static int pcic_read_config_dword(unsigned int busno, unsigned int devfn,
 #endif
 	pcic_speculative = 2;
 	pcic_trapped = 0;
-	*value = readl(pcic->pcic_config_space_data + (where&4));
+	*value = pete_readl("arch/sparc/kernel/pcic.c:200", pcic->pcic_config_space_data + (where&4));
 	nop();
 	if (pcic_trapped) {
 		pcic_speculative = 0;
@@ -243,8 +243,8 @@ static int pcic_write_config_dword(unsigned int busno, unsigned int devfn,
 	pcic = &pcic0;
 
 	local_irq_save(flags);
-	writel(CONFIG_CMD(busno, devfn, where), pcic->pcic_config_space_addr);
-	writel(value, pcic->pcic_config_space_data + (where&4));
+	pete_writel("arch/sparc/kernel/pcic.c:246", CONFIG_CMD(busno, devfn, where), pcic->pcic_config_space_addr);
+	pete_writel("arch/sparc/kernel/pcic.c:247", value, pcic->pcic_config_space_data + (where&4));
 	local_irq_restore(flags);
 	return 0;
 }
@@ -430,8 +430,8 @@ static int __init pcic_init(void)
 	 *      Should be done in that order (size first, address second).
 	 *      Why we couldn't set up 4GB and forget about it? XXX
 	 */
-	writel(0xF0000000UL, pcic->pcic_regs+PCI_SIZE_0);
-	writel(0+PCI_BASE_ADDRESS_SPACE_MEMORY, 
+	pete_writel("arch/sparc/kernel/pcic.c:433", 0xF0000000UL, pcic->pcic_regs+PCI_SIZE_0);
+	pete_writel("arch/sparc/kernel/pcic.c:434", 0+PCI_BASE_ADDRESS_SPACE_MEMORY, 
 	       pcic->pcic_regs+PCI_BASE_ADDRESS_0);
 
 	pcic_pbm_scan_bus(pcic);
@@ -674,7 +674,7 @@ static volatile int pcic_timer_dummy;
 
 static void pcic_clear_clock_irq(void)
 {
-	pcic_timer_dummy = readl(pcic0.pcic_regs+PCI_SYS_LIMIT);
+	pcic_timer_dummy = pete_readl("arch/sparc/kernel/pcic.c:677", pcic0.pcic_regs+PCI_SYS_LIMIT);
 }
 
 /* CPU frequency is 100 MHz, timer increments every 4 CPU clocks */
@@ -685,7 +685,7 @@ static unsigned int pcic_cycles_offset(void)
 {
 	u32 value, count;
 
-	value = readl(pcic0.pcic_regs + PCI_SYS_COUNTER);
+	value = pete_readl("arch/sparc/kernel/pcic.c:688", pcic0.pcic_regs + PCI_SYS_COUNTER);
 	count = value & ~PCI_SYS_COUNTER_OVERFLOW;
 
 	if (value & PCI_SYS_COUNTER_OVERFLOW)
@@ -774,7 +774,7 @@ static void pcic_mask_irq(struct irq_data *data)
 
 	mask = (unsigned long)data->chip_data;
 	local_irq_save(flags);
-	writel(mask, pcic0.pcic_regs+PCI_SYS_INT_TARGET_MASK_SET);
+	pete_writel("arch/sparc/kernel/pcic.c:777", mask, pcic0.pcic_regs+PCI_SYS_INT_TARGET_MASK_SET);
 	local_irq_restore(flags);
 }
 
@@ -784,7 +784,7 @@ static void pcic_unmask_irq(struct irq_data *data)
 
 	mask = (unsigned long)data->chip_data;
 	local_irq_save(flags);
-	writel(mask, pcic0.pcic_regs+PCI_SYS_INT_TARGET_MASK_CLEAR);
+	pete_writel("arch/sparc/kernel/pcic.c:787", mask, pcic0.pcic_regs+PCI_SYS_INT_TARGET_MASK_CLEAR);
 	local_irq_restore(flags);
 }
 

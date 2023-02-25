@@ -89,12 +89,12 @@ struct sun4i_spi {
 
 static inline u32 sun4i_spi_read(struct sun4i_spi *sspi, u32 reg)
 {
-	return readl(sspi->base_addr + reg);
+	return pete_readl("drivers/spi/spi-sun4i.c:92", sspi->base_addr + reg);
 }
 
 static inline void sun4i_spi_write(struct sun4i_spi *sspi, u32 reg, u32 value)
 {
-	writel(value, sspi->base_addr + reg);
+	pete_writel("drivers/spi/spi-sun4i.c:97", value, sspi->base_addr + reg);
 }
 
 static inline u32 sun4i_spi_get_tx_fifo_count(struct sun4i_spi *sspi)

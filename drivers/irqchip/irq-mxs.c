@@ -229,7 +229,7 @@ static int __init asm9260_of_init(struct device_node *np,
 	 * manually.
 	 */
 	for (i = 0; i < 16 * 0x10; i += 0x10)
-		writel(0, icoll_priv.intr + i);
+		pete_writel("drivers/irqchip/irq-mxs.c:232", 0, icoll_priv.intr + i);
 
 	icoll_add_domain(np, ASM9260_NUM_IRQS);
 	set_handle_irq(icoll_handle_irq);

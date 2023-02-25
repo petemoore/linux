@@ -801,7 +801,7 @@ static u64 snb_uncore_imc_read_counter(struct intel_uncore_box *box, struct perf
 	 * 32-bits but not okay for plain uncore_read_counter() as invoked
 	 * in uncore_pmu_event_start().
 	 */
-	return (u64)readl(box->io_addr + hwc->event_base);
+	return (u64)pete_readl("arch/x86/events/intel/uncore_snb.c:804", box->io_addr + hwc->event_base);
 }
 
 static struct pmu snb_uncore_imc_pmu = {

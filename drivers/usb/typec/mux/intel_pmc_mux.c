@@ -152,7 +152,7 @@ static void update_port_status(struct pmc_usb_port *port)
 	/* SoC expects the USB Type-C port numbers to start with 0 */
 	port_num = port->usb3_port - 1;
 
-	port->iom_status = readl(port->pmc->iom_base +
+	port->iom_status = pete_readl("drivers/usb/typec/mux/intel_pmc_mux.c:155", port->pmc->iom_base +
 				 port->pmc->iom_port_status_offset +
 				 port_num * sizeof(u32));
 }

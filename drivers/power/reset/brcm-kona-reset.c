@@ -33,10 +33,10 @@ static int kona_reset_handler(struct notifier_block *this,
 	 * register. To write to that register we must first write the password
 	 * and the enable bit in the write access enable register.
 	 */
-	writel((RSTMGR_WR_PASSWORD << RSTMGR_WR_PASSWORD_SHIFT) |
+	pete_writel("drivers/power/reset/brcm-kona-reset.c:36", (RSTMGR_WR_PASSWORD << RSTMGR_WR_PASSWORD_SHIFT) |
 		RSTMGR_WR_ACCESS_ENABLE,
 		kona_reset_base + RSTMGR_REG_WR_ACCESS_OFFSET);
-	writel(0, kona_reset_base + RSTMGR_REG_CHIP_SOFT_RST_OFFSET);
+	pete_writel("drivers/power/reset/brcm-kona-reset.c:39", 0, kona_reset_base + RSTMGR_REG_CHIP_SOFT_RST_OFFSET);
 
 	return NOTIFY_DONE;
 }

@@ -53,7 +53,7 @@ static int regmap_atmel_hlcdc_reg_write(void *context, unsigned int reg,
 		}
 	}
 
-	writel(val, hregmap->regs + reg);
+	pete_writel("drivers/mfd/atmel-hlcdc.c:56", val, hregmap->regs + reg);
 
 	return 0;
 }
@@ -63,7 +63,7 @@ static int regmap_atmel_hlcdc_reg_read(void *context, unsigned int reg,
 {
 	struct atmel_hlcdc_regmap *hregmap = context;
 
-	*val = readl(hregmap->regs + reg);
+	*val = pete_readl("drivers/mfd/atmel-hlcdc.c:66", hregmap->regs + reg);
 
 	return 0;
 }

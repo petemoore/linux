@@ -82,10 +82,10 @@ void vc4_hvs_dump_state(struct vc4_hvs *hvs)
 	for (i = 0; i < 64; i += 4) {
 		DRM_INFO("0x%08x (%s): 0x%08x 0x%08x 0x%08x 0x%08x\n",
 			 i * 4, i < HVS_BOOTLOADER_DLIST_END ? "B" : "D",
-			 readl((u32 __iomem *)hvs->dlist + i + 0),
-			 readl((u32 __iomem *)hvs->dlist + i + 1),
-			 readl((u32 __iomem *)hvs->dlist + i + 2),
-			 readl((u32 __iomem *)hvs->dlist + i + 3));
+			 pete_readl("drivers/gpu/drm/vc4/vc4_hvs.c:85", (u32 __iomem *)hvs->dlist + i + 0),
+			 pete_readl("drivers/gpu/drm/vc4/vc4_hvs.c:86", (u32 __iomem *)hvs->dlist + i + 1),
+			 pete_readl("drivers/gpu/drm/vc4/vc4_hvs.c:87", (u32 __iomem *)hvs->dlist + i + 2),
+			 pete_readl("drivers/gpu/drm/vc4/vc4_hvs.c:88", (u32 __iomem *)hvs->dlist + i + 3));
 	}
 
 	drm_dev_exit(idx);
@@ -126,7 +126,7 @@ static int vc4_hvs_debugfs_dlist(struct seq_file *m, void *data)
 		drm_printf(&p, "HVS chan %u:\n", i);
 
 		for (j = HVS_READ(SCALER_DISPLISTX(i)); j < 256; j++) {
-			dlist_word = readl((u32 __iomem *)vc4->hvs->dlist + j);
+			dlist_word = pete_readl("drivers/gpu/drm/vc4/vc4_hvs.c:129", (u32 __iomem *)vc4->hvs->dlist + j);
 			drm_printf(&p, "dlist: %02d: 0x%08x\n", j,
 				   dlist_word);
 			if (!next_entry_start ||
@@ -279,9 +279,9 @@ static int vc4_hvs_upload_linear_kernel(struct vc4_hvs *hvs,
 
 	for (i = 0; i < VC4_KERNEL_DWORDS; i++) {
 		if (i < VC4_LINEAR_PHASE_KERNEL_DWORDS)
-			writel(kernel[i], &dst_kernel[i]);
+			pete_writel("drivers/gpu/drm/vc4/vc4_hvs.c:282", kernel[i], &dst_kernel[i]);
 		else {
-			writel(kernel[VC4_KERNEL_DWORDS - i - 1],
+			pete_writel("drivers/gpu/drm/vc4/vc4_hvs.c:284", kernel[VC4_KERNEL_DWORDS - i - 1],
 			       &dst_kernel[i]);
 		}
 	}
@@ -967,7 +967,7 @@ void vc4_hvs_atomic_flush(struct drm_crtc *crtc,
 		zpos++;
 	} while (found);
 
-	writel(SCALER_CTL0_END, dlist_next);
+	pete_writel("drivers/gpu/drm/vc4/vc4_hvs.c:970", SCALER_CTL0_END, dlist_next);
 	dlist_next++;
 
 	WARN_ON(!vc4_state->mm);

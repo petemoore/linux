@@ -109,22 +109,22 @@ static int vt8500lcd_set_par(struct fb_info *info)
 			reg_bpp = i;
 	}
 
-	control0 = readl(fbi->regbase) & ~0xf;
-	writel(0, fbi->regbase);
-	while (readl(fbi->regbase + 0x38) & 0x10)
+	control0 = pete_readl("drivers/video/fbdev/vt8500lcdfb.c:112", fbi->regbase) & ~0xf;
+	pete_writel("drivers/video/fbdev/vt8500lcdfb.c:113", 0, fbi->regbase);
+	while (pete_readl("drivers/video/fbdev/vt8500lcdfb.c:114", fbi->regbase + 0x38) & 0x10)
 		/* wait */;
-	writel((((info->var.hsync_len - 1) & 0x3f) << 26)
+	pete_writel("drivers/video/fbdev/vt8500lcdfb.c:116", (((info->var.hsync_len - 1) & 0x3f) << 26)
 		| ((info->var.left_margin & 0xff) << 18)
 		| (((info->var.xres - 1) & 0x3ff) << 8)
 		| (info->var.right_margin & 0xff), fbi->regbase + 0x4);
-	writel((((info->var.vsync_len - 1) & 0x3f) << 26)
+	pete_writel("drivers/video/fbdev/vt8500lcdfb.c:120", (((info->var.vsync_len - 1) & 0x3f) << 26)
 		| ((info->var.upper_margin & 0xff) << 18)
 		| (((info->var.yres - 1) & 0x3ff) << 8)
 		| (info->var.lower_margin & 0xff), fbi->regbase + 0x8);
-	writel((((info->var.yres - 1) & 0x400) << 2)
+	pete_writel("drivers/video/fbdev/vt8500lcdfb.c:124", (((info->var.yres - 1) & 0x400) << 2)
 		| ((info->var.xres - 1) & 0x400), fbi->regbase + 0x10);
-	writel(0x80000000, fbi->regbase + 0x20);
-	writel(control0 | (reg_bpp << 1) | 0x100, fbi->regbase);
+	pete_writel("drivers/video/fbdev/vt8500lcdfb.c:126", 0x80000000, fbi->regbase + 0x20);
+	pete_writel("drivers/video/fbdev/vt8500lcdfb.c:127", control0 | (reg_bpp << 1) | 0x100, fbi->regbase);
 
 	return 0;
 }
@@ -183,11 +183,11 @@ static int vt8500lcd_ioctl(struct fb_info *info, unsigned int cmd,
 
 	if (cmd == FBIO_WAITFORVSYNC) {
 		/* Unmask End of Frame interrupt */
-		writel(0xffffffff ^ (1 << 3), fbi->regbase + 0x3c);
+		pete_writel("drivers/video/fbdev/vt8500lcdfb.c:186", 0xffffffff ^ (1 << 3), fbi->regbase + 0x3c);
 		ret = wait_event_interruptible_timeout(fbi->wait,
-			readl(fbi->regbase + 0x38) & (1 << 3), HZ / 10);
+			pete_readl("drivers/video/fbdev/vt8500lcdfb.c:188", fbi->regbase + 0x38) & (1 << 3), HZ / 10);
 		/* Mask back to reduce unwanted interrupt traffic */
-		writel(0xffffffff, fbi->regbase + 0x3c);
+		pete_writel("drivers/video/fbdev/vt8500lcdfb.c:190", 0xffffffff, fbi->regbase + 0x3c);
 		if (ret < 0)
 			return ret;
 		if (ret == 0)
@@ -205,7 +205,7 @@ static int vt8500lcd_pan_display(struct fb_var_screeninfo *var,
 		      + info->fix.line_length * var->yoffset;
 	struct vt8500lcd_info *fbi = to_vt8500lcd_info(info);
 
-	writel((1 << 31)
+	pete_writel("drivers/video/fbdev/vt8500lcdfb.c:208", (1 << 31)
 	     | (((info->var.xres_virtual - info->var.xres) * pixlen / 4) << 20)
 	     | (off >> 2), fbi->regbase + 0x20);
 	return 0;
@@ -256,10 +256,10 @@ static irqreturn_t vt8500lcd_handle_irq(int irq, void *dev_id)
 {
 	struct vt8500lcd_info *fbi = dev_id;
 
-	if (readl(fbi->regbase + 0x38) & (1 << 3))
+	if (pete_readl("drivers/video/fbdev/vt8500lcdfb.c:259", fbi->regbase + 0x38) & (1 << 3))
 		wake_up_interruptible(&fbi->wait);
 
-	writel(0xffffffff, fbi->regbase + 0x38);
+	pete_writel("drivers/video/fbdev/vt8500lcdfb.c:262", 0xffffffff, fbi->regbase + 0x38);
 	return IRQ_HANDLED;
 }
 
@@ -405,8 +405,8 @@ static int vt8500lcd_probe(struct platform_device *pdev)
 		goto failed_free_cmap;
 	}
 
-	writel(fbi->fb.fix.smem_start >> 22, fbi->regbase + 0x1c);
-	writel((fbi->palette_phys & 0xfffffe00) | 1, fbi->regbase + 0x18);
+	pete_writel("drivers/video/fbdev/vt8500lcdfb.c:408", fbi->fb.fix.smem_start >> 22, fbi->regbase + 0x1c);
+	pete_writel("drivers/video/fbdev/vt8500lcdfb.c:409", (fbi->palette_phys & 0xfffffe00) | 1, fbi->regbase + 0x18);
 
 	platform_set_drvdata(pdev, fbi);
 
@@ -420,7 +420,7 @@ static int vt8500lcd_probe(struct platform_device *pdev)
 	/*
 	 * Ok, now enable the LCD controller
 	 */
-	writel(readl(fbi->regbase) | 1, fbi->regbase);
+	pete_writel("drivers/video/fbdev/vt8500lcdfb.c:423", pete_readl("drivers/video/fbdev/vt8500lcdfb.c:423", fbi->regbase) | 1, fbi->regbase);
 
 	return 0;
 
@@ -447,7 +447,7 @@ static int vt8500lcd_remove(struct platform_device *pdev)
 
 	unregister_framebuffer(&fbi->fb);
 
-	writel(0, fbi->regbase);
+	pete_writel("drivers/video/fbdev/vt8500lcdfb.c:450", 0, fbi->regbase);
 
 	if (fbi->fb.cmap.len)
 		fb_dealloc_cmap(&fbi->fb.cmap);

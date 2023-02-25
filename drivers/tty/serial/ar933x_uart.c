@@ -57,13 +57,13 @@ struct ar933x_uart_port {
 static inline unsigned int ar933x_uart_read(struct ar933x_uart_port *up,
 					    int offset)
 {
-	return readl(up->port.membase + offset);
+	return pete_readl("drivers/tty/serial/ar933x_uart.c:60", up->port.membase + offset);
 }
 
 static inline void ar933x_uart_write(struct ar933x_uart_port *up,
 				     int offset, unsigned int value)
 {
-	writel(value, up->port.membase + offset);
+	pete_writel("drivers/tty/serial/ar933x_uart.c:66", value, up->port.membase + offset);
 }
 
 static inline void ar933x_uart_rmw(struct ar933x_uart_port *up,

@@ -14,7 +14,7 @@
 					   (reg_offset))
 #define internal_print_wrapper_reg(dev, base_address, reg_name, reg_offset) {\
 		int val;\
-		val = readl((base_address) + (reg_offset));\
+		val = pete_readl("drivers/media/platform/imx-jpeg/mxc-jpeg-hw.c:17", (base_address) + (reg_offset));\
 		dev_dbg(dev, "Wrapper reg %s = 0x%x\n", reg_name, val);\
 }
 
@@ -76,14 +76,14 @@ void print_wrapper_info(struct device *dev, void __iomem *reg)
 
 void mxc_jpeg_enable_irq(void __iomem *reg, int slot)
 {
-	writel(0xFFFFFFFF, reg + MXC_SLOT_OFFSET(slot, SLOT_STATUS));
-	writel(0xF0C, reg + MXC_SLOT_OFFSET(slot, SLOT_IRQ_EN));
+	pete_writel("drivers/media/platform/imx-jpeg/mxc-jpeg-hw.c:79", 0xFFFFFFFF, reg + MXC_SLOT_OFFSET(slot, SLOT_STATUS));
+	pete_writel("drivers/media/platform/imx-jpeg/mxc-jpeg-hw.c:80", 0xF0C, reg + MXC_SLOT_OFFSET(slot, SLOT_IRQ_EN));
 }
 
 void mxc_jpeg_disable_irq(void __iomem *reg, int slot)
 {
-	writel(0x0, reg + MXC_SLOT_OFFSET(slot, SLOT_IRQ_EN));
-	writel(0xFFFFFFFF, reg + MXC_SLOT_OFFSET(slot, SLOT_STATUS));
+	pete_writel("drivers/media/platform/imx-jpeg/mxc-jpeg-hw.c:85", 0x0, reg + MXC_SLOT_OFFSET(slot, SLOT_IRQ_EN));
+	pete_writel("drivers/media/platform/imx-jpeg/mxc-jpeg-hw.c:86", 0xFFFFFFFF, reg + MXC_SLOT_OFFSET(slot, SLOT_STATUS));
 }
 
 void mxc_jpeg_sw_reset(void __iomem *reg)
@@ -94,7 +94,7 @@ void mxc_jpeg_sw_reset(void __iomem *reg)
 	 * the registers may remain inconsistent with the internal state
 	 * so, on purpose, at least let GLB_CTRL bits clear after this reset
 	 */
-	writel(GLB_CTRL_SFT_RST, reg + GLB_CTRL);
+	pete_writel("drivers/media/platform/imx-jpeg/mxc-jpeg-hw.c:97", GLB_CTRL_SFT_RST, reg + GLB_CTRL);
 }
 
 void mxc_jpeg_enc_mode_conf(struct device *dev, void __iomem *reg)
@@ -103,13 +103,13 @@ void mxc_jpeg_enc_mode_conf(struct device *dev, void __iomem *reg)
 	/*
 	 * "Config_Mode" enabled, "Config_Mode auto clear enabled",
 	 */
-	writel(0xa0, reg + CAST_MODE);
+	pete_writel("drivers/media/platform/imx-jpeg/mxc-jpeg-hw.c:106", 0xa0, reg + CAST_MODE);
 
 	/* all markers and segments */
-	writel(0x3ff, reg + CAST_CFG_MODE);
+	pete_writel("drivers/media/platform/imx-jpeg/mxc-jpeg-hw.c:109", 0x3ff, reg + CAST_CFG_MODE);
 
 	/* quality factor */
-	writel(0x4b, reg + CAST_QUALITY);
+	pete_writel("drivers/media/platform/imx-jpeg/mxc-jpeg-hw.c:112", 0x4b, reg + CAST_QUALITY);
 }
 
 void mxc_jpeg_enc_mode_go(struct device *dev, void __iomem *reg)
@@ -118,21 +118,21 @@ void mxc_jpeg_enc_mode_go(struct device *dev, void __iomem *reg)
 	/*
 	 * "GO" enabled, "GO bit auto clear" enabled
 	 */
-	writel(0x140, reg + CAST_MODE);
+	pete_writel("drivers/media/platform/imx-jpeg/mxc-jpeg-hw.c:121", 0x140, reg + CAST_MODE);
 }
 
 void mxc_jpeg_dec_mode_go(struct device *dev, void __iomem *reg)
 {
 	dev_dbg(dev, "CAST Decoder GO...\n");
-	writel(MXC_DEC_EXIT_IDLE_MODE, reg + CAST_CTRL);
+	pete_writel("drivers/media/platform/imx-jpeg/mxc-jpeg-hw.c:127", MXC_DEC_EXIT_IDLE_MODE, reg + CAST_CTRL);
 }
 
 int mxc_jpeg_enable(void __iomem *reg)
 {
 	u32 regval;
 
-	writel(GLB_CTRL_JPG_EN, reg + GLB_CTRL);
-	regval = readl(reg);
+	pete_writel("drivers/media/platform/imx-jpeg/mxc-jpeg-hw.c:134", GLB_CTRL_JPG_EN, reg + GLB_CTRL);
+	regval = pete_readl("drivers/media/platform/imx-jpeg/mxc-jpeg-hw.c:135", reg);
 	return regval;
 }
 
@@ -140,17 +140,17 @@ void mxc_jpeg_enable_slot(void __iomem *reg, int slot)
 {
 	u32 regval;
 
-	regval = readl(reg + GLB_CTRL);
-	writel(GLB_CTRL_SLOT_EN(slot) | regval, reg + GLB_CTRL);
+	regval = pete_readl("drivers/media/platform/imx-jpeg/mxc-jpeg-hw.c:143", reg + GLB_CTRL);
+	pete_writel("drivers/media/platform/imx-jpeg/mxc-jpeg-hw.c:144", GLB_CTRL_SLOT_EN(slot) | regval, reg + GLB_CTRL);
 }
 
 void mxc_jpeg_set_l_endian(void __iomem *reg, int le)
 {
 	u32 regval;
 
-	regval = readl(reg + GLB_CTRL);
+	regval = pete_readl("drivers/media/platform/imx-jpeg/mxc-jpeg-hw.c:151", reg + GLB_CTRL);
 	regval &= ~GLB_CTRL_L_ENDIAN(1); /* clear */
-	writel(GLB_CTRL_L_ENDIAN(le) | regval, reg + GLB_CTRL); /* set */
+	pete_writel("drivers/media/platform/imx-jpeg/mxc-jpeg-hw.c:153", GLB_CTRL_L_ENDIAN(le) | regval, reg + GLB_CTRL); /* set */
 }
 
 void mxc_jpeg_set_bufsize(struct mxc_jpeg_desc *desc,  u32 bufsize)
@@ -170,6 +170,6 @@ void mxc_jpeg_set_line_pitch(struct mxc_jpeg_desc *desc, u32 line_pitch)
 
 void mxc_jpeg_set_desc(u32 desc, void __iomem *reg, int slot)
 {
-	writel(desc | MXC_NXT_DESCPT_EN,
+	pete_writel("drivers/media/platform/imx-jpeg/mxc-jpeg-hw.c:173", desc | MXC_NXT_DESCPT_EN,
 	       reg + MXC_SLOT_OFFSET(slot, SLOT_NXT_DESCPT_PTR));
 }

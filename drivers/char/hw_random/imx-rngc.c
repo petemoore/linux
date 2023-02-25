@@ -76,27 +76,27 @@ static inline void imx_rngc_irq_mask_clear(struct imx_rngc *rngc)
 	u32 ctrl, cmd;
 
 	/* mask interrupts */
-	ctrl = readl(rngc->base + RNGC_CONTROL);
+	ctrl = pete_readl("drivers/char/hw_random/imx-rngc.c:79", rngc->base + RNGC_CONTROL);
 	ctrl |= RNGC_CTRL_MASK_DONE | RNGC_CTRL_MASK_ERROR;
-	writel(ctrl, rngc->base + RNGC_CONTROL);
+	pete_writel("drivers/char/hw_random/imx-rngc.c:81", ctrl, rngc->base + RNGC_CONTROL);
 
 	/*
 	 * CLR_INT clears the interrupt only if there's no error
 	 * CLR_ERR clear the interrupt and the error register if there
 	 * is an error
 	 */
-	cmd = readl(rngc->base + RNGC_COMMAND);
+	cmd = pete_readl("drivers/char/hw_random/imx-rngc.c:88", rngc->base + RNGC_COMMAND);
 	cmd |= RNGC_CMD_CLR_INT | RNGC_CMD_CLR_ERR;
-	writel(cmd, rngc->base + RNGC_COMMAND);
+	pete_writel("drivers/char/hw_random/imx-rngc.c:90", cmd, rngc->base + RNGC_COMMAND);
 }
 
 static inline void imx_rngc_irq_unmask(struct imx_rngc *rngc)
 {
 	u32 ctrl;
 
-	ctrl = readl(rngc->base + RNGC_CONTROL);
+	ctrl = pete_readl("drivers/char/hw_random/imx-rngc.c:97", rngc->base + RNGC_CONTROL);
 	ctrl &= ~(RNGC_CTRL_MASK_DONE | RNGC_CTRL_MASK_ERROR);
-	writel(ctrl, rngc->base + RNGC_CONTROL);
+	pete_writel("drivers/char/hw_random/imx-rngc.c:99", ctrl, rngc->base + RNGC_CONTROL);
 }
 
 static int imx_rngc_self_test(struct imx_rngc *rngc)
@@ -107,8 +107,8 @@ static int imx_rngc_self_test(struct imx_rngc *rngc)
 	imx_rngc_irq_unmask(rngc);
 
 	/* run self test */
-	cmd = readl(rngc->base + RNGC_COMMAND);
-	writel(cmd | RNGC_CMD_SELF_TEST, rngc->base + RNGC_COMMAND);
+	cmd = pete_readl("drivers/char/hw_random/imx-rngc.c:110", rngc->base + RNGC_COMMAND);
+	pete_writel("drivers/char/hw_random/imx-rngc.c:111", cmd | RNGC_CMD_SELF_TEST, rngc->base + RNGC_COMMAND);
 
 	ret = wait_for_completion_timeout(&rngc->rng_op_done, RNGC_TIMEOUT);
 	imx_rngc_irq_mask_clear(rngc);
@@ -126,7 +126,7 @@ static int imx_rngc_read(struct hwrng *rng, void *data, size_t max, bool wait)
 	int retval = 0;
 
 	while (max >= sizeof(u32)) {
-		status = readl(rngc->base + RNGC_STATUS);
+		status = pete_readl("drivers/char/hw_random/imx-rngc.c:129", rngc->base + RNGC_STATUS);
 
 		/* is there some error while reading this random number? */
 		if (status & RNGC_STATUS_ERROR)
@@ -138,7 +138,7 @@ static int imx_rngc_read(struct hwrng *rng, void *data, size_t max, bool wait)
 
 		if (level) {
 			/* retrieve a random number from FIFO */
-			*(u32 *)data = readl(rngc->base + RNGC_FIFO);
+			*(u32 *)data = pete_readl("drivers/char/hw_random/imx-rngc.c:141", rngc->base + RNGC_FIFO);
 
 			retval += sizeof(u32);
 			data += sizeof(u32);
@@ -158,8 +158,8 @@ static irqreturn_t imx_rngc_irq(int irq, void *priv)
 	 * clearing the interrupt will also clear the error register
 	 * read error and status before clearing
 	 */
-	status = readl(rngc->base + RNGC_STATUS);
-	rngc->err_reg = readl(rngc->base + RNGC_ERROR);
+	status = pete_readl("drivers/char/hw_random/imx-rngc.c:161", rngc->base + RNGC_STATUS);
+	rngc->err_reg = pete_readl("drivers/char/hw_random/imx-rngc.c:162", rngc->base + RNGC_ERROR);
 
 	imx_rngc_irq_mask_clear(rngc);
 
@@ -176,16 +176,16 @@ static int imx_rngc_init(struct hwrng *rng)
 	int ret;
 
 	/* clear error */
-	cmd = readl(rngc->base + RNGC_COMMAND);
-	writel(cmd | RNGC_CMD_CLR_ERR, rngc->base + RNGC_COMMAND);
+	cmd = pete_readl("drivers/char/hw_random/imx-rngc.c:179", rngc->base + RNGC_COMMAND);
+	pete_writel("drivers/char/hw_random/imx-rngc.c:180", cmd | RNGC_CMD_CLR_ERR, rngc->base + RNGC_COMMAND);
 
 	imx_rngc_irq_unmask(rngc);
 
 	/* create seed, repeat while there is some statistical error */
 	do {
 		/* seed creation */
-		cmd = readl(rngc->base + RNGC_COMMAND);
-		writel(cmd | RNGC_CMD_SEED, rngc->base + RNGC_COMMAND);
+		cmd = pete_readl("drivers/char/hw_random/imx-rngc.c:187", rngc->base + RNGC_COMMAND);
+		pete_writel("drivers/char/hw_random/imx-rngc.c:188", cmd | RNGC_CMD_SEED, rngc->base + RNGC_COMMAND);
 
 		ret = wait_for_completion_timeout(&rngc->rng_op_done,
 				RNGC_TIMEOUT);
@@ -206,9 +206,9 @@ static int imx_rngc_init(struct hwrng *rng)
 	 * enable automatic seeding, the rngc creates a new seed automatically
 	 * after serving 2^20 random 160-bit words
 	 */
-	ctrl = readl(rngc->base + RNGC_CONTROL);
+	ctrl = pete_readl("drivers/char/hw_random/imx-rngc.c:209", rngc->base + RNGC_CONTROL);
 	ctrl |= RNGC_CTRL_AUTO_SEED;
-	writel(ctrl, rngc->base + RNGC_CONTROL);
+	pete_writel("drivers/char/hw_random/imx-rngc.c:211", ctrl, rngc->base + RNGC_CONTROL);
 
 	/*
 	 * if initialisation was successful, we keep the interrupt
@@ -259,7 +259,7 @@ static int imx_rngc_probe(struct platform_device *pdev)
 	if (ret)
 		return ret;
 
-	ver_id = readl(rngc->base + RNGC_VER_ID);
+	ver_id = pete_readl("drivers/char/hw_random/imx-rngc.c:262", rngc->base + RNGC_VER_ID);
 	rng_type = ver_id >> RNGC_TYPE_SHIFT;
 	/*
 	 * This driver supports only RNGC and RNGB. (There's a different

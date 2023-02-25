@@ -20,7 +20,7 @@ static void __iomem * sched_clk_base;
 
 static u64 notrace integrator_read_sched_clock(void)
 {
-	return -readl(sched_clk_base + TIMER_VALUE);
+	return -pete_readl("drivers/clocksource/timer-integrator-ap.c:23", sched_clk_base + TIMER_VALUE);
 }
 
 static int __init integrator_clocksource_init(unsigned long inrate,
@@ -35,8 +35,8 @@ static int __init integrator_clocksource_init(unsigned long inrate,
 		ctrl |= TIMER_CTRL_DIV16;
 	}
 
-	writel(0xffff, base + TIMER_LOAD);
-	writel(ctrl, base + TIMER_CTRL);
+	pete_writel("drivers/clocksource/timer-integrator-ap.c:38", 0xffff, base + TIMER_LOAD);
+	pete_writel("drivers/clocksource/timer-integrator-ap.c:39", ctrl, base + TIMER_CTRL);
 
 	ret = clocksource_mmio_init(base + TIMER_VALUE, "timer2",
 				    rate, 200, 16, clocksource_mmio_readl_down);
@@ -60,7 +60,7 @@ static irqreturn_t integrator_timer_interrupt(int irq, void *dev_id)
 	struct clock_event_device *evt = dev_id;
 
 	/* clear the interrupt */
-	writel(1, clkevt_base + TIMER_INTCLR);
+	pete_writel("drivers/clocksource/timer-integrator-ap.c:63", 1, clkevt_base + TIMER_INTCLR);
 
 	evt->event_handler(evt);
 
@@ -69,44 +69,44 @@ static irqreturn_t integrator_timer_interrupt(int irq, void *dev_id)
 
 static int clkevt_shutdown(struct clock_event_device *evt)
 {
-	u32 ctrl = readl(clkevt_base + TIMER_CTRL) & ~TIMER_CTRL_ENABLE;
+	u32 ctrl = pete_readl("drivers/clocksource/timer-integrator-ap.c:72", clkevt_base + TIMER_CTRL) & ~TIMER_CTRL_ENABLE;
 
 	/* Disable timer */
-	writel(ctrl, clkevt_base + TIMER_CTRL);
+	pete_writel("drivers/clocksource/timer-integrator-ap.c:75", ctrl, clkevt_base + TIMER_CTRL);
 	return 0;
 }
 
 static int clkevt_set_oneshot(struct clock_event_device *evt)
 {
-	u32 ctrl = readl(clkevt_base + TIMER_CTRL) &
+	u32 ctrl = pete_readl("drivers/clocksource/timer-integrator-ap.c:81", clkevt_base + TIMER_CTRL) &
 		   ~(TIMER_CTRL_ENABLE | TIMER_CTRL_PERIODIC);
 
 	/* Leave the timer disabled, .set_next_event will enable it */
-	writel(ctrl, clkevt_base + TIMER_CTRL);
+	pete_writel("drivers/clocksource/timer-integrator-ap.c:85", ctrl, clkevt_base + TIMER_CTRL);
 	return 0;
 }
 
 static int clkevt_set_periodic(struct clock_event_device *evt)
 {
-	u32 ctrl = readl(clkevt_base + TIMER_CTRL) & ~TIMER_CTRL_ENABLE;
+	u32 ctrl = pete_readl("drivers/clocksource/timer-integrator-ap.c:91", clkevt_base + TIMER_CTRL) & ~TIMER_CTRL_ENABLE;
 
 	/* Disable timer */
-	writel(ctrl, clkevt_base + TIMER_CTRL);
+	pete_writel("drivers/clocksource/timer-integrator-ap.c:94", ctrl, clkevt_base + TIMER_CTRL);
 
 	/* Enable the timer and start the periodic tick */
-	writel(timer_reload, clkevt_base + TIMER_LOAD);
+	pete_writel("drivers/clocksource/timer-integrator-ap.c:97", timer_reload, clkevt_base + TIMER_LOAD);
 	ctrl |= TIMER_CTRL_PERIODIC | TIMER_CTRL_ENABLE;
-	writel(ctrl, clkevt_base + TIMER_CTRL);
+	pete_writel("drivers/clocksource/timer-integrator-ap.c:99", ctrl, clkevt_base + TIMER_CTRL);
 	return 0;
 }
 
 static int clkevt_set_next_event(unsigned long next, struct clock_event_device *evt)
 {
-	unsigned long ctrl = readl(clkevt_base + TIMER_CTRL);
+	unsigned long ctrl = pete_readl("drivers/clocksource/timer-integrator-ap.c:105", clkevt_base + TIMER_CTRL);
 
-	writel(ctrl & ~TIMER_CTRL_ENABLE, clkevt_base + TIMER_CTRL);
-	writel(next, clkevt_base + TIMER_LOAD);
-	writel(ctrl | TIMER_CTRL_ENABLE, clkevt_base + TIMER_CTRL);
+	pete_writel("drivers/clocksource/timer-integrator-ap.c:107", ctrl & ~TIMER_CTRL_ENABLE, clkevt_base + TIMER_CTRL);
+	pete_writel("drivers/clocksource/timer-integrator-ap.c:108", next, clkevt_base + TIMER_LOAD);
+	pete_writel("drivers/clocksource/timer-integrator-ap.c:109", ctrl | TIMER_CTRL_ENABLE, clkevt_base + TIMER_CTRL);
 
 	return 0;
 }
@@ -140,7 +140,7 @@ static int integrator_clockevent_init(unsigned long inrate,
 		ctrl |= TIMER_CTRL_DIV16;
 	}
 	timer_reload = rate / HZ;
-	writel(ctrl, clkevt_base + TIMER_CTRL);
+	pete_writel("drivers/clocksource/timer-integrator-ap.c:143", ctrl, clkevt_base + TIMER_CTRL);
 
 	ret = request_irq(irq, integrator_timer_interrupt,
 			  IRQF_TIMER | IRQF_IRQPOLL, "timer",
@@ -176,7 +176,7 @@ static int __init integrator_ap_timer_init_of(struct device_node *node)
 	}
 	clk_prepare_enable(clk);
 	rate = clk_get_rate(clk);
-	writel(0, base + TIMER_CTRL);
+	pete_writel("drivers/clocksource/timer-integrator-ap.c:179", 0, base + TIMER_CTRL);
 
 	err = of_property_read_string(of_aliases,
 				"arm,timer-primary", &path);

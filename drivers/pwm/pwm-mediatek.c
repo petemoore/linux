@@ -111,7 +111,7 @@ static inline void pwm_mediatek_writel(struct pwm_mediatek_chip *chip,
 				       unsigned int num, unsigned int offset,
 				       u32 value)
 {
-	writel(value, chip->regs + pwm_mediatek_reg_offset[num] + offset);
+	pete_writel("drivers/pwm/pwm-mediatek.c:114", value, chip->regs + pwm_mediatek_reg_offset[num] + offset);
 }
 
 static int pwm_mediatek_config(struct pwm_chip *chip, struct pwm_device *pwm,
@@ -130,7 +130,7 @@ static int pwm_mediatek_config(struct pwm_chip *chip, struct pwm_device *pwm,
 
 	/* Make sure we use the bus clock and not the 26MHz clock */
 	if (pc->soc->has_ck_26m_sel)
-		writel(0, pc->regs + PWM_CK_26M_SEL);
+		pete_writel("drivers/pwm/pwm-mediatek.c:133", 0, pc->regs + PWM_CK_26M_SEL);
 
 	/* Using resolution in picosecond gets accuracy higher */
 	resolution = (u64)NSEC_PER_SEC * 1000;
@@ -179,9 +179,9 @@ static int pwm_mediatek_enable(struct pwm_chip *chip, struct pwm_device *pwm)
 	if (ret < 0)
 		return ret;
 
-	value = readl(pc->regs);
+	value = pete_readl("drivers/pwm/pwm-mediatek.c:182", pc->regs);
 	value |= BIT(pwm->hwpwm);
-	writel(value, pc->regs);
+	pete_writel("drivers/pwm/pwm-mediatek.c:184", value, pc->regs);
 
 	return 0;
 }
@@ -191,9 +191,9 @@ static void pwm_mediatek_disable(struct pwm_chip *chip, struct pwm_device *pwm)
 	struct pwm_mediatek_chip *pc = to_pwm_mediatek_chip(chip);
 	u32 value;
 
-	value = readl(pc->regs);
+	value = pete_readl("drivers/pwm/pwm-mediatek.c:194", pc->regs);
 	value &= ~BIT(pwm->hwpwm);
-	writel(value, pc->regs);
+	pete_writel("drivers/pwm/pwm-mediatek.c:196", value, pc->regs);
 
 	pwm_mediatek_clk_disable(chip, pwm);
 }

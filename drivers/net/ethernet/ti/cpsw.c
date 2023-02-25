@@ -657,7 +657,7 @@ static inline void cpsw_add_default_vlan(struct cpsw_priv *priv)
 	reg = (cpsw->version == CPSW_VERSION_1) ? CPSW1_PORT_VLAN :
 	       CPSW2_PORT_VLAN;
 
-	writel(vlan, &cpsw->host_port_regs->port_vlan);
+	pete_writel("drivers/net/ethernet/ti/cpsw.c:660", vlan, &cpsw->host_port_regs->port_vlan);
 
 	for (i = 0; i < cpsw->data.slaves; i++)
 		slave_write(cpsw->slaves + i, vlan, reg);
@@ -685,12 +685,12 @@ static void cpsw_init_host_port(struct cpsw_priv *priv)
 	/* switch to vlan unaware mode */
 	cpsw_ale_control_set(cpsw->ale, HOST_PORT_NUM, ALE_VLAN_AWARE,
 			     CPSW_ALE_VLAN_AWARE);
-	control_reg = readl(&cpsw->regs->control);
+	control_reg = pete_readl("drivers/net/ethernet/ti/cpsw.c:688", &cpsw->regs->control);
 	control_reg |= CPSW_VLAN_AWARE | CPSW_RX_VLAN_ENCAP;
-	writel(control_reg, &cpsw->regs->control);
+	pete_writel("drivers/net/ethernet/ti/cpsw.c:690", control_reg, &cpsw->regs->control);
 	fifo_mode = (cpsw->data.dual_emac) ? CPSW_FIFO_DUAL_MAC_MODE :
 		     CPSW_FIFO_NORMAL_MODE;
-	writel(fifo_mode, &cpsw->host_port_regs->tx_in_ctl);
+	pete_writel("drivers/net/ethernet/ti/cpsw.c:693", fifo_mode, &cpsw->host_port_regs->tx_in_ctl);
 
 	/* setup host port priority mapping */
 	writel_relaxed(CPDMA_TX_PRIORITY_MAP,
@@ -804,7 +804,7 @@ static int cpsw_ndo_open(struct net_device *ndev)
 		writel_relaxed(0x7, &cpsw->regs->stat_port_en);
 
 		/* Enable internal fifo flow control */
-		writel(0x7, &cpsw->regs->flow_control);
+		pete_writel("drivers/net/ethernet/ti/cpsw.c:807", 0x7, &cpsw->regs->flow_control);
 
 		napi_enable(&cpsw->napi_rx);
 		napi_enable(&cpsw->napi_tx);
@@ -834,7 +834,7 @@ static int cpsw_ndo_open(struct net_device *ndev)
 			if (cpts_register(cpsw->cpts))
 				dev_err(priv->dev, "error registering cpts device\n");
 			else
-				writel(0x10, &cpsw->wr_regs->misc_en);
+				pete_writel("drivers/net/ethernet/ti/cpsw.c:837", 0x10, &cpsw->wr_regs->misc_en);
 		}
 	}
 

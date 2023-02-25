@@ -246,7 +246,7 @@ static unsigned long xgene_clk_pmd_recalc_rate(struct clk_hw *hw,
 	else
 		__acquire(fd->lock);
 
-	val = readl(fd->reg);
+	val = pete_readl("drivers/clk/clk-xgene.c:249", fd->reg);
 
 	if (fd->lock)
 		spin_unlock_irqrestore(fd->lock, flags);
@@ -317,10 +317,10 @@ static int xgene_clk_pmd_set_rate(struct clk_hw *hw, unsigned long rate,
 	else
 		__acquire(fd->lock);
 
-	val = readl(fd->reg);
+	val = pete_readl("drivers/clk/clk-xgene.c:320", fd->reg);
 	val &= ~fd->mask;
 	val |= (scale << fd->shift);
-	writel(val, fd->reg);
+	pete_writel("drivers/clk/clk-xgene.c:323", val, fd->reg);
 
 	if (fd->lock)
 		spin_unlock_irqrestore(fd->lock, flags);

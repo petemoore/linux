@@ -86,17 +86,17 @@ static int mxs_spi_setup_transfer(struct spi_device *dev,
 		 */
 	}
 
-	writel(BM_SSP_CTRL0_LOCK_CS,
+	pete_writel("drivers/spi/spi-mxs.c:89", BM_SSP_CTRL0_LOCK_CS,
 		ssp->base + HW_SSP_CTRL0 + STMP_OFFSET_REG_SET);
 
-	writel(BF_SSP_CTRL1_SSP_MODE(BV_SSP_CTRL1_SSP_MODE__SPI) |
+	pete_writel("drivers/spi/spi-mxs.c:92", BF_SSP_CTRL1_SSP_MODE(BV_SSP_CTRL1_SSP_MODE__SPI) |
 	       BF_SSP_CTRL1_WORD_LENGTH(BV_SSP_CTRL1_WORD_LENGTH__EIGHT_BITS) |
 	       ((dev->mode & SPI_CPOL) ? BM_SSP_CTRL1_POLARITY : 0) |
 	       ((dev->mode & SPI_CPHA) ? BM_SSP_CTRL1_PHASE : 0),
 	       ssp->base + HW_SSP_CTRL1(ssp));
 
-	writel(0x0, ssp->base + HW_SSP_CMD0);
-	writel(0x0, ssp->base + HW_SSP_CMD1);
+	pete_writel("drivers/spi/spi-mxs.c:98", 0x0, ssp->base + HW_SSP_CMD0);
+	pete_writel("drivers/spi/spi-mxs.c:99", 0x0, ssp->base + HW_SSP_CMD1);
 
 	return 0;
 }
@@ -155,8 +155,8 @@ static irqreturn_t mxs_ssp_irq_handler(int irq, void *dev_id)
 
 	dev_err(ssp->dev, "%s[%i] CTRL1=%08x STATUS=%08x\n",
 		__func__, __LINE__,
-		readl(ssp->base + HW_SSP_CTRL1(ssp)),
-		readl(ssp->base + HW_SSP_STATUS(ssp)));
+		pete_readl("drivers/spi/spi-mxs.c:158", ssp->base + HW_SSP_CTRL1(ssp)),
+		pete_readl("drivers/spi/spi-mxs.c:159", ssp->base + HW_SSP_STATUS(ssp)));
 	return IRQ_HANDLED;
 }
 
@@ -188,7 +188,7 @@ static int mxs_spi_txrx_dma(struct mxs_spi *spi,
 	reinit_completion(&spi->c);
 
 	/* Chip select was already programmed into CTRL0 */
-	ctrl0 = readl(ssp->base + HW_SSP_CTRL0);
+	ctrl0 = pete_readl("drivers/spi/spi-mxs.c:191", ssp->base + HW_SSP_CTRL0);
 	ctrl0 &= ~(BM_SSP_CTRL0_XFER_COUNT | BM_SSP_CTRL0_IGNORE_CRC |
 		 BM_SSP_CTRL0_READ);
 	ctrl0 |= BM_SSP_CTRL0_DATA_XFER;
@@ -301,40 +301,40 @@ static int mxs_spi_txrx_pio(struct mxs_spi *spi,
 {
 	struct mxs_ssp *ssp = &spi->ssp;
 
-	writel(BM_SSP_CTRL0_IGNORE_CRC,
+	pete_writel("drivers/spi/spi-mxs.c:304", BM_SSP_CTRL0_IGNORE_CRC,
 	       ssp->base + HW_SSP_CTRL0 + STMP_OFFSET_REG_CLR);
 
 	while (len--) {
 		if (len == 0 && (flags & TXRX_DEASSERT_CS))
-			writel(BM_SSP_CTRL0_IGNORE_CRC,
+			pete_writel("drivers/spi/spi-mxs.c:309", BM_SSP_CTRL0_IGNORE_CRC,
 			       ssp->base + HW_SSP_CTRL0 + STMP_OFFSET_REG_SET);
 
 		if (ssp->devid == IMX23_SSP) {
-			writel(BM_SSP_CTRL0_XFER_COUNT,
+			pete_writel("drivers/spi/spi-mxs.c:313", BM_SSP_CTRL0_XFER_COUNT,
 				ssp->base + HW_SSP_CTRL0 + STMP_OFFSET_REG_CLR);
-			writel(1,
+			pete_writel("drivers/spi/spi-mxs.c:315", 1,
 				ssp->base + HW_SSP_CTRL0 + STMP_OFFSET_REG_SET);
 		} else {
-			writel(1, ssp->base + HW_SSP_XFER_SIZE);
+			pete_writel("drivers/spi/spi-mxs.c:318", 1, ssp->base + HW_SSP_XFER_SIZE);
 		}
 
 		if (flags & TXRX_WRITE)
-			writel(BM_SSP_CTRL0_READ,
+			pete_writel("drivers/spi/spi-mxs.c:322", BM_SSP_CTRL0_READ,
 				ssp->base + HW_SSP_CTRL0 + STMP_OFFSET_REG_CLR);
 		else
-			writel(BM_SSP_CTRL0_READ,
+			pete_writel("drivers/spi/spi-mxs.c:325", BM_SSP_CTRL0_READ,
 				ssp->base + HW_SSP_CTRL0 + STMP_OFFSET_REG_SET);
 
-		writel(BM_SSP_CTRL0_RUN,
+		pete_writel("drivers/spi/spi-mxs.c:328", BM_SSP_CTRL0_RUN,
 				ssp->base + HW_SSP_CTRL0 + STMP_OFFSET_REG_SET);
 
 		if (mxs_ssp_wait(spi, HW_SSP_CTRL0, BM_SSP_CTRL0_RUN, 1))
 			return -ETIMEDOUT;
 
 		if (flags & TXRX_WRITE)
-			writel(*buf, ssp->base + HW_SSP_DATA(ssp));
+			pete_writel("drivers/spi/spi-mxs.c:335", *buf, ssp->base + HW_SSP_DATA(ssp));
 
-		writel(BM_SSP_CTRL0_DATA_XFER,
+		pete_writel("drivers/spi/spi-mxs.c:337", BM_SSP_CTRL0_DATA_XFER,
 			     ssp->base + HW_SSP_CTRL0 + STMP_OFFSET_REG_SET);
 
 		if (!(flags & TXRX_WRITE)) {
@@ -342,7 +342,7 @@ static int mxs_spi_txrx_pio(struct mxs_spi *spi,
 						BM_SSP_STATUS_FIFO_EMPTY, 0))
 				return -ETIMEDOUT;
 
-			*buf = (readl(ssp->base + HW_SSP_DATA(ssp)) & 0xff);
+			*buf = (pete_readl("drivers/spi/spi-mxs.c:345", ssp->base + HW_SSP_DATA(ssp)) & 0xff);
 		}
 
 		if (mxs_ssp_wait(spi, HW_SSP_CTRL0, BM_SSP_CTRL0_RUN, 0))
@@ -367,9 +367,9 @@ static int mxs_spi_transfer_one(struct spi_master *master,
 	int status = 0;
 
 	/* Program CS register bits here, it will be used for all transfers. */
-	writel(BM_SSP_CTRL0_WAIT_FOR_CMD | BM_SSP_CTRL0_WAIT_FOR_IRQ,
+	pete_writel("drivers/spi/spi-mxs.c:370", BM_SSP_CTRL0_WAIT_FOR_CMD | BM_SSP_CTRL0_WAIT_FOR_IRQ,
 	       ssp->base + HW_SSP_CTRL0 + STMP_OFFSET_REG_CLR);
-	writel(mxs_spi_cs_to_reg(m->spi->chip_select),
+	pete_writel("drivers/spi/spi-mxs.c:372", mxs_spi_cs_to_reg(m->spi->chip_select),
 	       ssp->base + HW_SSP_CTRL0 + STMP_OFFSET_REG_SET);
 
 	list_for_each_entry(t, &m->transfers, transfer_list) {
@@ -394,7 +394,7 @@ static int mxs_spi_transfer_one(struct spi_master *master,
 		 * Combined: 1.676276 seconds, 610.9KB/s
 		 */
 		if (t->len < 32) {
-			writel(BM_SSP_CTRL1_DMA_ENABLE,
+			pete_writel("drivers/spi/spi-mxs.c:397", BM_SSP_CTRL1_DMA_ENABLE,
 				ssp->base + HW_SSP_CTRL1(ssp) +
 				STMP_OFFSET_REG_CLR);
 
@@ -407,7 +407,7 @@ static int mxs_spi_transfer_one(struct spi_master *master,
 						t->rx_buf, t->len,
 						flag);
 		} else {
-			writel(BM_SSP_CTRL1_DMA_ENABLE,
+			pete_writel("drivers/spi/spi-mxs.c:410", BM_SSP_CTRL1_DMA_ENABLE,
 				ssp->base + HW_SSP_CTRL1(ssp) +
 				STMP_OFFSET_REG_SET);
 

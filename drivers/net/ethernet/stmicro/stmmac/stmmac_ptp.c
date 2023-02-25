@@ -204,7 +204,7 @@ static int stmmac_enable(struct ptp_clock_info *ptp,
 	case PTP_CLK_REQ_EXTTS:
 		priv->plat->ext_snapshot_en = on;
 		mutex_lock(&priv->aux_ts_lock);
-		acr_value = readl(ptpaddr + PTP_ACR);
+		acr_value = pete_readl("drivers/net/ethernet/stmicro/stmmac/stmmac_ptp.c:207", ptpaddr + PTP_ACR);
 		acr_value &= ~PTP_ACR_MASK;
 		if (on) {
 			/* Enable External snapshot trigger */
@@ -214,20 +214,20 @@ static int stmmac_enable(struct ptp_clock_info *ptp,
 				   priv->plat->ext_snapshot_num >>
 				   PTP_ACR_ATSEN_SHIFT);
 			/* Enable Timestamp Interrupt */
-			intr_value = readl(ioaddr + GMAC_INT_EN);
+			intr_value = pete_readl("drivers/net/ethernet/stmicro/stmmac/stmmac_ptp.c:217", ioaddr + GMAC_INT_EN);
 			intr_value |= GMAC_INT_TSIE;
-			writel(intr_value, ioaddr + GMAC_INT_EN);
+			pete_writel("drivers/net/ethernet/stmicro/stmmac/stmmac_ptp.c:219", intr_value, ioaddr + GMAC_INT_EN);
 
 		} else {
 			netdev_dbg(priv->dev, "Auxiliary Snapshot %d disabled.\n",
 				   priv->plat->ext_snapshot_num >>
 				   PTP_ACR_ATSEN_SHIFT);
 			/* Disable Timestamp Interrupt */
-			intr_value = readl(ioaddr + GMAC_INT_EN);
+			intr_value = pete_readl("drivers/net/ethernet/stmicro/stmmac/stmmac_ptp.c:226", ioaddr + GMAC_INT_EN);
 			intr_value &= ~GMAC_INT_TSIE;
-			writel(intr_value, ioaddr + GMAC_INT_EN);
+			pete_writel("drivers/net/ethernet/stmicro/stmmac/stmmac_ptp.c:228", intr_value, ioaddr + GMAC_INT_EN);
 		}
-		writel(acr_value, ptpaddr + PTP_ACR);
+		pete_writel("drivers/net/ethernet/stmicro/stmmac/stmmac_ptp.c:230", acr_value, ptpaddr + PTP_ACR);
 		mutex_unlock(&priv->aux_ts_lock);
 		/* wait for auxts fifo clear to finish */
 		ret = readl_poll_timeout(ptpaddr + PTP_ACR, acr_value,

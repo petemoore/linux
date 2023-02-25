@@ -179,25 +179,25 @@ static void uniphier_u3hsphy_set_param(struct uniphier_u3hsphy_priv *priv,
 	u32 field_mask = GENMASK(p->field.msb, p->field.lsb);
 	u8 data;
 
-	val = readl(priv->base + HSPHY_CFG1);
+	val = pete_readl("drivers/phy/socionext/phy-uniphier-usb3hs.c:182", priv->base + HSPHY_CFG1);
 	val &= ~HSPHY_CFG1_ADR_MASK;
 	val |= FIELD_PREP(HSPHY_CFG1_ADR_MASK, p->field.reg_no)
 		| HSPHY_CFG1_ADR_EN;
-	writel(val, priv->base + HSPHY_CFG1);
+	pete_writel("drivers/phy/socionext/phy-uniphier-usb3hs.c:186", val, priv->base + HSPHY_CFG1);
 
-	val = readl(priv->base + HSPHY_CFG1);
+	val = pete_readl("drivers/phy/socionext/phy-uniphier-usb3hs.c:188", priv->base + HSPHY_CFG1);
 	val &= ~HSPHY_CFG1_ADR_EN;
-	writel(val, priv->base + HSPHY_CFG1);
+	pete_writel("drivers/phy/socionext/phy-uniphier-usb3hs.c:190", val, priv->base + HSPHY_CFG1);
 
-	val = readl(priv->base + HSPHY_CFG1);
+	val = pete_readl("drivers/phy/socionext/phy-uniphier-usb3hs.c:192", priv->base + HSPHY_CFG1);
 	val &= ~FIELD_PREP(HSPHY_CFG1_DAT_MASK, field_mask);
 	data = field_mask & (p->value << p->field.lsb);
 	val |=  FIELD_PREP(HSPHY_CFG1_DAT_MASK, data) | HSPHY_CFG1_DAT_EN;
-	writel(val, priv->base + HSPHY_CFG1);
+	pete_writel("drivers/phy/socionext/phy-uniphier-usb3hs.c:196", val, priv->base + HSPHY_CFG1);
 
-	val = readl(priv->base + HSPHY_CFG1);
+	val = pete_readl("drivers/phy/socionext/phy-uniphier-usb3hs.c:198", priv->base + HSPHY_CFG1);
 	val &= ~HSPHY_CFG1_DAT_EN;
-	writel(val, priv->base + HSPHY_CFG1);
+	pete_writel("drivers/phy/socionext/phy-uniphier-usb3hs.c:200", val, priv->base + HSPHY_CFG1);
 }
 
 static int uniphier_u3hsphy_power_on(struct phy *phy)
@@ -282,8 +282,8 @@ static int uniphier_u3hsphy_init(struct phy *phy)
 	if (ret)
 		goto out_rst_assert;
 
-	writel(config0, priv->base + HSPHY_CFG0);
-	writel(config1, priv->base + HSPHY_CFG1);
+	pete_writel("drivers/phy/socionext/phy-uniphier-usb3hs.c:285", config0, priv->base + HSPHY_CFG0);
+	pete_writel("drivers/phy/socionext/phy-uniphier-usb3hs.c:286", config1, priv->base + HSPHY_CFG1);
 
 	for (i = 0; i < priv->data->nparams; i++)
 		uniphier_u3hsphy_set_param(priv, &priv->data->param[i]);

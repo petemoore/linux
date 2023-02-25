@@ -170,7 +170,7 @@ static void qcom_qspi_pio_xfer_cfg(struct qcom_qspi *ctrl)
 	const struct qspi_xfer *xfer;
 
 	xfer = &ctrl->xfer;
-	pio_xfer_cfg = readl(ctrl->base + PIO_XFER_CFG);
+	pio_xfer_cfg = pete_readl("drivers/spi/spi-qcom-qspi.c:173", ctrl->base + PIO_XFER_CFG);
 	pio_xfer_cfg &= ~TRANSFER_DIRECTION;
 	pio_xfer_cfg |= xfer->dir;
 	if (xfer->is_last)
@@ -180,17 +180,17 @@ static void qcom_qspi_pio_xfer_cfg(struct qcom_qspi *ctrl)
 	pio_xfer_cfg &= ~MULTI_IO_MODE_MSK;
 	pio_xfer_cfg |= qspi_buswidth_to_iomode(ctrl, xfer->buswidth);
 
-	writel(pio_xfer_cfg, ctrl->base + PIO_XFER_CFG);
+	pete_writel("drivers/spi/spi-qcom-qspi.c:183", pio_xfer_cfg, ctrl->base + PIO_XFER_CFG);
 }
 
 static void qcom_qspi_pio_xfer_ctrl(struct qcom_qspi *ctrl)
 {
 	u32 pio_xfer_ctrl;
 
-	pio_xfer_ctrl = readl(ctrl->base + PIO_XFER_CTRL);
+	pio_xfer_ctrl = pete_readl("drivers/spi/spi-qcom-qspi.c:190", ctrl->base + PIO_XFER_CTRL);
 	pio_xfer_ctrl &= ~REQUEST_COUNT_MSK;
 	pio_xfer_ctrl |= ctrl->xfer.rem_bytes;
-	writel(pio_xfer_ctrl, ctrl->base + PIO_XFER_CTRL);
+	pete_writel("drivers/spi/spi-qcom-qspi.c:193", pio_xfer_ctrl, ctrl->base + PIO_XFER_CTRL);
 }
 
 static void qcom_qspi_pio_xfer(struct qcom_qspi *ctrl)
@@ -200,14 +200,14 @@ static void qcom_qspi_pio_xfer(struct qcom_qspi *ctrl)
 	qcom_qspi_pio_xfer_cfg(ctrl);
 
 	/* Ack any previous interrupts that might be hanging around */
-	writel(QSPI_ALL_IRQS, ctrl->base + MSTR_INT_STATUS);
+	pete_writel("drivers/spi/spi-qcom-qspi.c:203", QSPI_ALL_IRQS, ctrl->base + MSTR_INT_STATUS);
 
 	/* Setup new interrupts */
 	if (ctrl->xfer.dir == QSPI_WRITE)
 		ints = QSPI_ERR_IRQS | WR_FIFO_EMPTY;
 	else
 		ints = QSPI_ERR_IRQS | RESP_FIFO_RDY;
-	writel(ints, ctrl->base + MSTR_INT_EN);
+	pete_writel("drivers/spi/spi-qcom-qspi.c:210", ints, ctrl->base + MSTR_INT_EN);
 
 	/* Kick off the transfer */
 	qcom_qspi_pio_xfer_ctrl(ctrl);
@@ -220,7 +220,7 @@ static void qcom_qspi_handle_err(struct spi_master *master,
 	unsigned long flags;
 
 	spin_lock_irqsave(&ctrl->lock, flags);
-	writel(0, ctrl->base + MSTR_INT_EN);
+	pete_writel("drivers/spi/spi-qcom-qspi.c:223", 0, ctrl->base + MSTR_INT_EN);
 	ctrl->xfer.rem_bytes = 0;
 	spin_unlock_irqrestore(&ctrl->lock, flags);
 }
@@ -309,7 +309,7 @@ static int qcom_qspi_prepare_message(struct spi_master *master,
 	ctrl = spi_master_get_devdata(master);
 	spin_lock_irqsave(&ctrl->lock, flags);
 
-	mstr_cfg = readl(ctrl->base + MSTR_CONFIG);
+	mstr_cfg = pete_readl("drivers/spi/spi-qcom-qspi.c:312", ctrl->base + MSTR_CONFIG);
 	mstr_cfg &= ~CHIP_SELECT_NUM;
 	if (message->spi->chip_select)
 		mstr_cfg |= CHIP_SELECT_NUM;
@@ -321,7 +321,7 @@ static int qcom_qspi_prepare_message(struct spi_master *master,
 	mstr_cfg |= tx_data_delay << TX_DATA_DELAY_SHFT;
 	mstr_cfg &= ~DMA_ENABLE;
 
-	writel(mstr_cfg, ctrl->base + MSTR_CONFIG);
+	pete_writel("drivers/spi/spi-qcom-qspi.c:324", mstr_cfg, ctrl->base + MSTR_CONFIG);
 	spin_unlock_irqrestore(&ctrl->lock, flags);
 
 	return 0;
@@ -338,7 +338,7 @@ static irqreturn_t pio_read(struct qcom_qspi *ctrl)
 	u8 *byte_buf;
 	int i;
 
-	rd_fifo_status = readl(ctrl->base + RD_FIFO_STATUS);
+	rd_fifo_status = pete_readl("drivers/spi/spi-qcom-qspi.c:341", ctrl->base + RD_FIFO_STATUS);
 
 	if (!(rd_fifo_status & FIFO_RDY)) {
 		dev_dbg(ctrl->dev, "Spurious IRQ %#x\n", rd_fifo_status);
@@ -360,7 +360,7 @@ static irqreturn_t pio_read(struct qcom_qspi *ctrl)
 
 	if (bytes_to_read) {
 		byte_buf = ctrl->xfer.rx_buf;
-		rd_fifo = readl(ctrl->base + RD_FIFO);
+		rd_fifo = pete_readl("drivers/spi/spi-qcom-qspi.c:363", ctrl->base + RD_FIFO);
 		ctrl->xfer.rem_bytes -= bytes_to_read;
 		for (i = 0; i < bytes_to_read; i++)
 			*byte_buf++ = rd_fifo >> (i * BITS_PER_BYTE);
@@ -380,7 +380,7 @@ static irqreturn_t pio_write(struct qcom_qspi *ctrl)
 	unsigned int wr_size;
 	unsigned int rem_words;
 
-	wr_fifo_bytes = readl(ctrl->base + PIO_XFER_STATUS);
+	wr_fifo_bytes = pete_readl("drivers/spi/spi-qcom-qspi.c:383", ctrl->base + PIO_XFER_STATUS);
 	wr_fifo_bytes >>= WR_FIFO_BYTES_SHFT;
 
 	if (ctrl->xfer.rem_bytes < QSPI_BYTES_PER_WORD) {
@@ -390,7 +390,7 @@ static irqreturn_t pio_write(struct qcom_qspi *ctrl)
 
 		byte_buf = xfer_buf;
 		while (wr_size--)
-			writel(*byte_buf++,
+			pete_writel("drivers/spi/spi-qcom-qspi.c:393", *byte_buf++,
 			       ctrl->base + PIO_DATAOUT_1B);
 		ctrl->xfer.tx_buf = byte_buf;
 	} else {
@@ -422,8 +422,8 @@ static irqreturn_t qcom_qspi_irq(int irq, void *dev_id)
 
 	spin_lock(&ctrl->lock);
 
-	int_status = readl(ctrl->base + MSTR_INT_STATUS);
-	writel(int_status, ctrl->base + MSTR_INT_STATUS);
+	int_status = pete_readl("drivers/spi/spi-qcom-qspi.c:425", ctrl->base + MSTR_INT_STATUS);
+	pete_writel("drivers/spi/spi-qcom-qspi.c:426", int_status, ctrl->base + MSTR_INT_STATUS);
 
 	if (ctrl->xfer.dir == QSPI_WRITE) {
 		if (int_status & WR_FIFO_EMPTY)
@@ -444,7 +444,7 @@ static irqreturn_t qcom_qspi_irq(int irq, void *dev_id)
 	}
 
 	if (!ctrl->xfer.rem_bytes) {
-		writel(0, ctrl->base + MSTR_INT_EN);
+		pete_writel("drivers/spi/spi-qcom-qspi.c:447", 0, ctrl->base + MSTR_INT_EN);
 		spi_finalize_current_transfer(dev_get_drvdata(ctrl->dev));
 	}
 

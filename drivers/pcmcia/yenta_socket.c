@@ -83,7 +83,7 @@ MODULE_PARM_DESC(override_bios, "yenta ignore bios resource allocation");
  */
 static inline u32 cb_readl(struct yenta_socket *socket, unsigned reg)
 {
-	u32 val = readl(socket->base + reg);
+	u32 val = pete_readl("drivers/pcmcia/yenta_socket.c:86", socket->base + reg);
 	debug("%04x %08x\n", socket, reg, val);
 	return val;
 }
@@ -91,8 +91,8 @@ static inline u32 cb_readl(struct yenta_socket *socket, unsigned reg)
 static inline void cb_writel(struct yenta_socket *socket, unsigned reg, u32 val)
 {
 	debug("%04x %08x\n", socket, reg, val);
-	writel(val, socket->base + reg);
-	readl(socket->base + reg); /* avoid problems with PCI write posting */
+	pete_writel("drivers/pcmcia/yenta_socket.c:94", val, socket->base + reg);
+	pete_readl("drivers/pcmcia/yenta_socket.c:95", socket->base + reg); /* avoid problems with PCI write posting */
 }
 
 static inline u8 config_readb(struct yenta_socket *socket, unsigned offset)

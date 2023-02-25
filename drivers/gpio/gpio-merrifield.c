@@ -96,7 +96,7 @@ static int mrfld_gpio_get(struct gpio_chip *chip, unsigned int offset)
 {
 	void __iomem *gplr = gpio_reg(chip, offset, GPLR);
 
-	return !!(readl(gplr) & BIT(offset % 32));
+	return !!(pete_readl("drivers/gpio/gpio-merrifield.c:99", gplr) & BIT(offset % 32));
 }
 
 static void mrfld_gpio_set(struct gpio_chip *chip, unsigned int offset,
@@ -110,10 +110,10 @@ static void mrfld_gpio_set(struct gpio_chip *chip, unsigned int offset,
 
 	if (value) {
 		gpsr = gpio_reg(chip, offset, GPSR);
-		writel(BIT(offset % 32), gpsr);
+		pete_writel("drivers/gpio/gpio-merrifield.c:113", BIT(offset % 32), gpsr);
 	} else {
 		gpcr = gpio_reg(chip, offset, GPCR);
-		writel(BIT(offset % 32), gpcr);
+		pete_writel("drivers/gpio/gpio-merrifield.c:116", BIT(offset % 32), gpcr);
 	}
 
 	raw_spin_unlock_irqrestore(&priv->lock, flags);
@@ -129,9 +129,9 @@ static int mrfld_gpio_direction_input(struct gpio_chip *chip,
 
 	raw_spin_lock_irqsave(&priv->lock, flags);
 
-	value = readl(gpdr);
+	value = pete_readl("drivers/gpio/gpio-merrifield.c:132", gpdr);
 	value &= ~BIT(offset % 32);
-	writel(value, gpdr);
+	pete_writel("drivers/gpio/gpio-merrifield.c:134", value, gpdr);
 
 	raw_spin_unlock_irqrestore(&priv->lock, flags);
 
@@ -149,9 +149,9 @@ static int mrfld_gpio_direction_output(struct gpio_chip *chip,
 
 	raw_spin_lock_irqsave(&priv->lock, flags);
 
-	value = readl(gpdr);
+	value = pete_readl("drivers/gpio/gpio-merrifield.c:152", gpdr);
 	value |= BIT(offset % 32);
-	writel(value, gpdr);
+	pete_writel("drivers/gpio/gpio-merrifield.c:154", value, gpdr);
 
 	raw_spin_unlock_irqrestore(&priv->lock, flags);
 
@@ -162,7 +162,7 @@ static int mrfld_gpio_get_direction(struct gpio_chip *chip, unsigned int offset)
 {
 	void __iomem *gpdr = gpio_reg(chip, offset, GPDR);
 
-	if (readl(gpdr) & BIT(offset % 32))
+	if (pete_readl("drivers/gpio/gpio-merrifield.c:165", gpdr) & BIT(offset % 32))
 		return GPIO_LINE_DIRECTION_OUT;
 
 	return GPIO_LINE_DIRECTION_IN;
@@ -179,10 +179,10 @@ static int mrfld_gpio_set_debounce(struct gpio_chip *chip, unsigned int offset,
 	raw_spin_lock_irqsave(&priv->lock, flags);
 
 	if (debounce)
-		value = readl(gfbr) & ~BIT(offset % 32);
+		value = pete_readl("drivers/gpio/gpio-merrifield.c:182", gfbr) & ~BIT(offset % 32);
 	else
-		value = readl(gfbr) | BIT(offset % 32);
-	writel(value, gfbr);
+		value = pete_readl("drivers/gpio/gpio-merrifield.c:184", gfbr) | BIT(offset % 32);
+	pete_writel("drivers/gpio/gpio-merrifield.c:185", value, gfbr);
 
 	raw_spin_unlock_irqrestore(&priv->lock, flags);
 
@@ -215,7 +215,7 @@ static void mrfld_irq_ack(struct irq_data *d)
 
 	raw_spin_lock_irqsave(&priv->lock, flags);
 
-	writel(BIT(gpio % 32), gisr);
+	pete_writel("drivers/gpio/gpio-merrifield.c:218", BIT(gpio % 32), gisr);
 
 	raw_spin_unlock_irqrestore(&priv->lock, flags);
 }
@@ -231,10 +231,10 @@ static void mrfld_irq_unmask_mask(struct irq_data *d, bool unmask)
 	raw_spin_lock_irqsave(&priv->lock, flags);
 
 	if (unmask)
-		value = readl(gimr) | BIT(gpio % 32);
+		value = pete_readl("drivers/gpio/gpio-merrifield.c:234", gimr) | BIT(gpio % 32);
 	else
-		value = readl(gimr) & ~BIT(gpio % 32);
-	writel(value, gimr);
+		value = pete_readl("drivers/gpio/gpio-merrifield.c:236", gimr) & ~BIT(gpio % 32);
+	pete_writel("drivers/gpio/gpio-merrifield.c:237", value, gimr);
 
 	raw_spin_unlock_irqrestore(&priv->lock, flags);
 }
@@ -264,35 +264,35 @@ static int mrfld_irq_set_type(struct irq_data *d, unsigned int type)
 	raw_spin_lock_irqsave(&priv->lock, flags);
 
 	if (type & IRQ_TYPE_EDGE_RISING)
-		value = readl(grer) | BIT(gpio % 32);
+		value = pete_readl("drivers/gpio/gpio-merrifield.c:267", grer) | BIT(gpio % 32);
 	else
-		value = readl(grer) & ~BIT(gpio % 32);
-	writel(value, grer);
+		value = pete_readl("drivers/gpio/gpio-merrifield.c:269", grer) & ~BIT(gpio % 32);
+	pete_writel("drivers/gpio/gpio-merrifield.c:270", value, grer);
 
 	if (type & IRQ_TYPE_EDGE_FALLING)
-		value = readl(gfer) | BIT(gpio % 32);
+		value = pete_readl("drivers/gpio/gpio-merrifield.c:273", gfer) | BIT(gpio % 32);
 	else
-		value = readl(gfer) & ~BIT(gpio % 32);
-	writel(value, gfer);
+		value = pete_readl("drivers/gpio/gpio-merrifield.c:275", gfer) & ~BIT(gpio % 32);
+	pete_writel("drivers/gpio/gpio-merrifield.c:276", value, gfer);
 
 	/*
 	 * To prevent glitches from triggering an unintended level interrupt,
 	 * configure GLPR register first and then configure GITR.
 	 */
 	if (type & IRQ_TYPE_LEVEL_LOW)
-		value = readl(glpr) | BIT(gpio % 32);
+		value = pete_readl("drivers/gpio/gpio-merrifield.c:283", glpr) | BIT(gpio % 32);
 	else
-		value = readl(glpr) & ~BIT(gpio % 32);
-	writel(value, glpr);
+		value = pete_readl("drivers/gpio/gpio-merrifield.c:285", glpr) & ~BIT(gpio % 32);
+	pete_writel("drivers/gpio/gpio-merrifield.c:286", value, glpr);
 
 	if (type & IRQ_TYPE_LEVEL_MASK) {
-		value = readl(gitr) | BIT(gpio % 32);
-		writel(value, gitr);
+		value = pete_readl("drivers/gpio/gpio-merrifield.c:289", gitr) | BIT(gpio % 32);
+		pete_writel("drivers/gpio/gpio-merrifield.c:290", value, gitr);
 
 		irq_set_handler_locked(d, handle_level_irq);
 	} else if (type & IRQ_TYPE_EDGE_BOTH) {
-		value = readl(gitr) & ~BIT(gpio % 32);
-		writel(value, gitr);
+		value = pete_readl("drivers/gpio/gpio-merrifield.c:294", gitr) & ~BIT(gpio % 32);
+		pete_writel("drivers/gpio/gpio-merrifield.c:295", value, gitr);
 
 		irq_set_handler_locked(d, handle_edge_irq);
 	}
@@ -315,13 +315,13 @@ static int mrfld_irq_set_wake(struct irq_data *d, unsigned int on)
 	raw_spin_lock_irqsave(&priv->lock, flags);
 
 	/* Clear the existing wake status */
-	writel(BIT(gpio % 32), gwsr);
+	pete_writel("drivers/gpio/gpio-merrifield.c:318", BIT(gpio % 32), gwsr);
 
 	if (on)
-		value = readl(gwmr) | BIT(gpio % 32);
+		value = pete_readl("drivers/gpio/gpio-merrifield.c:321", gwmr) | BIT(gpio % 32);
 	else
-		value = readl(gwmr) & ~BIT(gpio % 32);
-	writel(value, gwmr);
+		value = pete_readl("drivers/gpio/gpio-merrifield.c:323", gwmr) & ~BIT(gpio % 32);
+	pete_writel("drivers/gpio/gpio-merrifield.c:324", value, gwmr);
 
 	raw_spin_unlock_irqrestore(&priv->lock, flags);
 
@@ -353,8 +353,8 @@ static void mrfld_irq_handler(struct irq_desc *desc)
 		void __iomem *gimr = gpio_reg(&priv->chip, base, GIMR);
 		unsigned long pending, enabled;
 
-		pending = readl(gisr);
-		enabled = readl(gimr);
+		pending = pete_readl("drivers/gpio/gpio-merrifield.c:356", gisr);
+		enabled = pete_readl("drivers/gpio/gpio-merrifield.c:357", gimr);
 
 		/* Only interrupts that are enabled */
 		pending &= enabled;
@@ -375,10 +375,10 @@ static int mrfld_irq_init_hw(struct gpio_chip *chip)
 	for (base = 0; base < priv->chip.ngpio; base += 32) {
 		/* Clear the rising-edge detect register */
 		reg = gpio_reg(&priv->chip, base, GRER);
-		writel(0, reg);
+		pete_writel("drivers/gpio/gpio-merrifield.c:378", 0, reg);
 		/* Clear the falling-edge detect register */
 		reg = gpio_reg(&priv->chip, base, GFER);
-		writel(0, reg);
+		pete_writel("drivers/gpio/gpio-merrifield.c:381", 0, reg);
 	}
 
 	return 0;
@@ -444,8 +444,8 @@ static int mrfld_gpio_probe(struct pci_dev *pdev, const struct pci_device_id *id
 
 	base = pcim_iomap_table(pdev)[1];
 
-	irq_base = readl(base + 0 * sizeof(u32));
-	gpio_base = readl(base + 1 * sizeof(u32));
+	irq_base = pete_readl("drivers/gpio/gpio-merrifield.c:447", base + 0 * sizeof(u32));
+	gpio_base = pete_readl("drivers/gpio/gpio-merrifield.c:448", base + 1 * sizeof(u32));
 
 	/* Release the IO mapping, since we already get the info from BAR1 */
 	pcim_iounmap_regions(pdev, BIT(1));

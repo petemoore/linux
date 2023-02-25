@@ -51,12 +51,12 @@ static inline struct rcar_pwm_chip *to_rcar_pwm_chip(struct pwm_chip *chip)
 static void rcar_pwm_write(struct rcar_pwm_chip *rp, u32 data,
 			   unsigned int offset)
 {
-	writel(data, rp->base + offset);
+	pete_writel("drivers/pwm/pwm-rcar.c:54", data, rp->base + offset);
 }
 
 static u32 rcar_pwm_read(struct rcar_pwm_chip *rp, unsigned int offset)
 {
-	return readl(rp->base + offset);
+	return pete_readl("drivers/pwm/pwm-rcar.c:59", rp->base + offset);
 }
 
 static void rcar_pwm_update(struct rcar_pwm_chip *rp, u32 mask, u32 data,

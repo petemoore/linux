@@ -115,9 +115,9 @@ static void mv_cesa_skcipher_std_step(struct skcipher_request *req)
 
 	mv_cesa_set_int_mask(engine, CESA_SA_INT_ACCEL0_DONE);
 	writel_relaxed(CESA_SA_CFG_PARA_DIS, engine->regs + CESA_SA_CFG);
-	WARN_ON(readl(engine->regs + CESA_SA_CMD) &
+	WARN_ON(pete_readl("drivers/crypto/marvell/cesa/cipher.c:118", engine->regs + CESA_SA_CMD) &
 		CESA_SA_CMD_EN_CESA_SA_ACCL0);
-	writel(CESA_SA_CMD_EN_CESA_SA_ACCL0, engine->regs + CESA_SA_CMD);
+	pete_writel("drivers/crypto/marvell/cesa/cipher.c:120", CESA_SA_CMD_EN_CESA_SA_ACCL0, engine->regs + CESA_SA_CMD);
 }
 
 static int mv_cesa_skcipher_std_process(struct skcipher_request *req,

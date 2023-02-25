@@ -191,9 +191,9 @@ static inline void sbic_arm_write(AS_Host *host, unsigned int reg, unsigned int 
 static inline int sbic_arm_read(AS_Host *host, unsigned int reg)
 {
     if(reg == SBIC_ASR)
-	   return readl(host->base + SBIC_REGIDX) & 255;
+	   return pete_readl("drivers/scsi/arm/acornscsi.c:194", host->base + SBIC_REGIDX) & 255;
     writeb(reg, host->base + SBIC_REGIDX);
-    return readl(host->base + SBIC_REGVAL) & 255;
+    return pete_readl("drivers/scsi/arm/acornscsi.c:196", host->base + SBIC_REGVAL) & 255;
 }
 
 #define sbic_arm_writenext(host, val)	writeb((val), (host)->base + SBIC_REGVAL)

@@ -246,11 +246,11 @@ static void ringbuf_set_initial(void __iomem *audio_io,
 	 */
 	fmark_val = periodsize - PERIOD_BYTES_MIN;
 
-	writel(start, audio_io + p_rbuf->baseaddr);
-	writel(end, audio_io + p_rbuf->endaddr);
-	writel(fmark_val, audio_io + p_rbuf->fmark);
-	writel(initial_rd, audio_io + p_rbuf->rdaddr);
-	writel(initial_wr, audio_io + p_rbuf->wraddr);
+	pete_writel("sound/soc/bcm/cygnus-pcm.c:249", start, audio_io + p_rbuf->baseaddr);
+	pete_writel("sound/soc/bcm/cygnus-pcm.c:250", end, audio_io + p_rbuf->endaddr);
+	pete_writel("sound/soc/bcm/cygnus-pcm.c:251", fmark_val, audio_io + p_rbuf->fmark);
+	pete_writel("sound/soc/bcm/cygnus-pcm.c:252", initial_rd, audio_io + p_rbuf->rdaddr);
+	pete_writel("sound/soc/bcm/cygnus-pcm.c:253", initial_wr, audio_io + p_rbuf->wraddr);
 }
 
 static int configure_ringbuf_regs(struct snd_pcm_substream *substream)
@@ -329,23 +329,23 @@ static void enable_intr(struct snd_pcm_substream *substream)
 
 	if (substream->stream == SNDRV_PCM_STREAM_PLAYBACK) {
 		/* Clear interrupt status before enabling them */
-		writel(clear_mask, aio->cygaud->audio + ESR0_STATUS_CLR_OFFSET);
-		writel(clear_mask, aio->cygaud->audio + ESR1_STATUS_CLR_OFFSET);
-		writel(clear_mask, aio->cygaud->audio + ESR3_STATUS_CLR_OFFSET);
+		pete_writel("sound/soc/bcm/cygnus-pcm.c:332", clear_mask, aio->cygaud->audio + ESR0_STATUS_CLR_OFFSET);
+		pete_writel("sound/soc/bcm/cygnus-pcm.c:333", clear_mask, aio->cygaud->audio + ESR1_STATUS_CLR_OFFSET);
+		pete_writel("sound/soc/bcm/cygnus-pcm.c:334", clear_mask, aio->cygaud->audio + ESR3_STATUS_CLR_OFFSET);
 		/* Unmask the interrupts of the given port*/
-		writel(clear_mask, aio->cygaud->audio + ESR0_MASK_CLR_OFFSET);
-		writel(clear_mask, aio->cygaud->audio + ESR1_MASK_CLR_OFFSET);
-		writel(clear_mask, aio->cygaud->audio + ESR3_MASK_CLR_OFFSET);
+		pete_writel("sound/soc/bcm/cygnus-pcm.c:336", clear_mask, aio->cygaud->audio + ESR0_MASK_CLR_OFFSET);
+		pete_writel("sound/soc/bcm/cygnus-pcm.c:337", clear_mask, aio->cygaud->audio + ESR1_MASK_CLR_OFFSET);
+		pete_writel("sound/soc/bcm/cygnus-pcm.c:338", clear_mask, aio->cygaud->audio + ESR3_MASK_CLR_OFFSET);
 
-		writel(ANY_PLAYBACK_IRQ,
+		pete_writel("sound/soc/bcm/cygnus-pcm.c:340", ANY_PLAYBACK_IRQ,
 			aio->cygaud->audio + INTH_R5F_MASK_CLEAR_OFFSET);
 	} else {
-		writel(clear_mask, aio->cygaud->audio + ESR2_STATUS_CLR_OFFSET);
-		writel(clear_mask, aio->cygaud->audio + ESR4_STATUS_CLR_OFFSET);
-		writel(clear_mask, aio->cygaud->audio + ESR2_MASK_CLR_OFFSET);
-		writel(clear_mask, aio->cygaud->audio + ESR4_MASK_CLR_OFFSET);
+		pete_writel("sound/soc/bcm/cygnus-pcm.c:343", clear_mask, aio->cygaud->audio + ESR2_STATUS_CLR_OFFSET);
+		pete_writel("sound/soc/bcm/cygnus-pcm.c:344", clear_mask, aio->cygaud->audio + ESR4_STATUS_CLR_OFFSET);
+		pete_writel("sound/soc/bcm/cygnus-pcm.c:345", clear_mask, aio->cygaud->audio + ESR2_MASK_CLR_OFFSET);
+		pete_writel("sound/soc/bcm/cygnus-pcm.c:346", clear_mask, aio->cygaud->audio + ESR4_MASK_CLR_OFFSET);
 
-		writel(ANY_CAPTURE_IRQ,
+		pete_writel("sound/soc/bcm/cygnus-pcm.c:348", ANY_CAPTURE_IRQ,
 			aio->cygaud->audio + INTH_R5F_MASK_CLEAR_OFFSET);
 	}
 
@@ -366,12 +366,12 @@ static void disable_intr(struct snd_pcm_substream *substream)
 
 	if (substream->stream == SNDRV_PCM_STREAM_PLAYBACK) {
 		/* Mask the interrupts of the given port*/
-		writel(set_mask, aio->cygaud->audio + ESR0_MASK_SET_OFFSET);
-		writel(set_mask, aio->cygaud->audio + ESR1_MASK_SET_OFFSET);
-		writel(set_mask, aio->cygaud->audio + ESR3_MASK_SET_OFFSET);
+		pete_writel("sound/soc/bcm/cygnus-pcm.c:369", set_mask, aio->cygaud->audio + ESR0_MASK_SET_OFFSET);
+		pete_writel("sound/soc/bcm/cygnus-pcm.c:370", set_mask, aio->cygaud->audio + ESR1_MASK_SET_OFFSET);
+		pete_writel("sound/soc/bcm/cygnus-pcm.c:371", set_mask, aio->cygaud->audio + ESR3_MASK_SET_OFFSET);
 	} else {
-		writel(set_mask, aio->cygaud->audio + ESR2_MASK_SET_OFFSET);
-		writel(set_mask, aio->cygaud->audio + ESR4_MASK_SET_OFFSET);
+		pete_writel("sound/soc/bcm/cygnus-pcm.c:373", set_mask, aio->cygaud->audio + ESR2_MASK_SET_OFFSET);
+		pete_writel("sound/soc/bcm/cygnus-pcm.c:374", set_mask, aio->cygaud->audio + ESR4_MASK_SET_OFFSET);
 	}
 
 }
@@ -416,13 +416,13 @@ static void cygnus_pcm_period_elapsed(struct snd_pcm_substream *substream)
 
 	if (substream->stream == SNDRV_PCM_STREAM_PLAYBACK) {
 		/* Set the ring buffer to full */
-		regval = readl(aio->cygaud->audio + p_rbuf->rdaddr);
+		regval = pete_readl("sound/soc/bcm/cygnus-pcm.c:419", aio->cygaud->audio + p_rbuf->rdaddr);
 		regval = regval ^ BIT(31);
-		writel(regval, aio->cygaud->audio + p_rbuf->wraddr);
+		pete_writel("sound/soc/bcm/cygnus-pcm.c:421", regval, aio->cygaud->audio + p_rbuf->wraddr);
 	} else {
 		/* Set the ring buffer to empty */
-		regval = readl(aio->cygaud->audio + p_rbuf->wraddr);
-		writel(regval, aio->cygaud->audio + p_rbuf->rdaddr);
+		regval = pete_readl("sound/soc/bcm/cygnus-pcm.c:424", aio->cygaud->audio + p_rbuf->wraddr);
+		pete_writel("sound/soc/bcm/cygnus-pcm.c:425", regval, aio->cygaud->audio + p_rbuf->rdaddr);
 	}
 }
 
@@ -447,12 +447,12 @@ static void handle_playback_irq(struct cygnus_audio *cygaud)
 	 * disable status and use it to determine which ESR status
 	 * should be serviced.
 	 */
-	esr_status0 = readl(audio_io + ESR0_STATUS_OFFSET);
-	esr_status0 &= ~readl(audio_io + ESR0_MASK_STATUS_OFFSET);
-	esr_status1 = readl(audio_io + ESR1_STATUS_OFFSET);
-	esr_status1 &= ~readl(audio_io + ESR1_MASK_STATUS_OFFSET);
-	esr_status3 = readl(audio_io + ESR3_STATUS_OFFSET);
-	esr_status3 &= ~readl(audio_io + ESR3_MASK_STATUS_OFFSET);
+	esr_status0 = pete_readl("sound/soc/bcm/cygnus-pcm.c:450", audio_io + ESR0_STATUS_OFFSET);
+	esr_status0 &= ~pete_readl("sound/soc/bcm/cygnus-pcm.c:451", audio_io + ESR0_MASK_STATUS_OFFSET);
+	esr_status1 = pete_readl("sound/soc/bcm/cygnus-pcm.c:452", audio_io + ESR1_STATUS_OFFSET);
+	esr_status1 &= ~pete_readl("sound/soc/bcm/cygnus-pcm.c:453", audio_io + ESR1_MASK_STATUS_OFFSET);
+	esr_status3 = pete_readl("sound/soc/bcm/cygnus-pcm.c:454", audio_io + ESR3_STATUS_OFFSET);
+	esr_status3 &= ~pete_readl("sound/soc/bcm/cygnus-pcm.c:455", audio_io + ESR3_MASK_STATUS_OFFSET);
 
 	for (port = 0; port < CYGNUS_MAX_PLAYBACK_PORTS; port++) {
 		u32 esrmask = BIT(port);
@@ -483,11 +483,11 @@ static void handle_playback_irq(struct cygnus_audio *cygaud)
 	}
 
 	/* Clear ESR interrupt */
-	writel(esr_status0, audio_io + ESR0_STATUS_CLR_OFFSET);
-	writel(esr_status1, audio_io + ESR1_STATUS_CLR_OFFSET);
-	writel(esr_status3, audio_io + ESR3_STATUS_CLR_OFFSET);
+	pete_writel("sound/soc/bcm/cygnus-pcm.c:486", esr_status0, audio_io + ESR0_STATUS_CLR_OFFSET);
+	pete_writel("sound/soc/bcm/cygnus-pcm.c:487", esr_status1, audio_io + ESR1_STATUS_CLR_OFFSET);
+	pete_writel("sound/soc/bcm/cygnus-pcm.c:488", esr_status3, audio_io + ESR3_STATUS_CLR_OFFSET);
 	/* Rearm freemark logic by writing 1 to the correct bit */
-	writel(esr_status3, audio_io + BF_REARM_FREE_MARK_OFFSET);
+	pete_writel("sound/soc/bcm/cygnus-pcm.c:490", esr_status3, audio_io + BF_REARM_FREE_MARK_OFFSET);
 }
 
 /*
@@ -510,10 +510,10 @@ static void handle_capture_irq(struct cygnus_audio *cygaud)
 	 * disable status and use it to determine which ESR status
 	 * should be serviced.
 	 */
-	esr_status2 = readl(audio_io + ESR2_STATUS_OFFSET);
-	esr_status2 &= ~readl(audio_io + ESR2_MASK_STATUS_OFFSET);
-	esr_status4 = readl(audio_io + ESR4_STATUS_OFFSET);
-	esr_status4 &= ~readl(audio_io + ESR4_MASK_STATUS_OFFSET);
+	esr_status2 = pete_readl("sound/soc/bcm/cygnus-pcm.c:513", audio_io + ESR2_STATUS_OFFSET);
+	esr_status2 &= ~pete_readl("sound/soc/bcm/cygnus-pcm.c:514", audio_io + ESR2_MASK_STATUS_OFFSET);
+	esr_status4 = pete_readl("sound/soc/bcm/cygnus-pcm.c:515", audio_io + ESR4_STATUS_OFFSET);
+	esr_status4 &= ~pete_readl("sound/soc/bcm/cygnus-pcm.c:516", audio_io + ESR4_MASK_STATUS_OFFSET);
 
 	for (port = 0; port < CYGNUS_MAX_CAPTURE_PORTS; port++) {
 		u32 esrmask = BIT(port);
@@ -537,10 +537,10 @@ static void handle_capture_irq(struct cygnus_audio *cygaud)
 		}
 	}
 
-	writel(esr_status2, audio_io + ESR2_STATUS_CLR_OFFSET);
-	writel(esr_status4, audio_io + ESR4_STATUS_CLR_OFFSET);
+	pete_writel("sound/soc/bcm/cygnus-pcm.c:540", esr_status2, audio_io + ESR2_STATUS_CLR_OFFSET);
+	pete_writel("sound/soc/bcm/cygnus-pcm.c:541", esr_status4, audio_io + ESR4_STATUS_CLR_OFFSET);
 	/* Rearm fullmark logic by writing 1 to the correct bit */
-	writel(esr_status4, audio_io + BF_REARM_FULL_MARK_OFFSET);
+	pete_writel("sound/soc/bcm/cygnus-pcm.c:543", esr_status4, audio_io + BF_REARM_FULL_MARK_OFFSET);
 }
 
 static irqreturn_t cygnus_dma_irq(int irq, void *data)
@@ -556,7 +556,7 @@ static irqreturn_t cygnus_dma_irq(int irq, void *data)
 	 *  3		ESR3 (Freemark play. interrupt)
 	 *  4		ESR4 (Fullmark capt. interrupt)
 	 */
-	r5_status = readl(cygaud->audio + INTH_R5F_STATUS_OFFSET);
+	r5_status = pete_readl("sound/soc/bcm/cygnus-pcm.c:559", cygaud->audio + INTH_R5F_STATUS_OFFSET);
 
 	if (!(r5_status & (ANY_PLAYBACK_IRQ | ANY_CAPTURE_IRQ)))
 		return IRQ_NONE;
@@ -564,14 +564,14 @@ static irqreturn_t cygnus_dma_irq(int irq, void *data)
 	/* If playback interrupt happened */
 	if (ANY_PLAYBACK_IRQ & r5_status) {
 		handle_playback_irq(cygaud);
-		writel(ANY_PLAYBACK_IRQ & r5_status,
+		pete_writel("sound/soc/bcm/cygnus-pcm.c:567", ANY_PLAYBACK_IRQ & r5_status,
 			cygaud->audio + INTH_R5F_CLEAR_OFFSET);
 	}
 
 	/* If  capture interrupt happened */
 	if (ANY_CAPTURE_IRQ & r5_status) {
 		handle_capture_irq(cygaud);
-		writel(ANY_CAPTURE_IRQ & r5_status,
+		pete_writel("sound/soc/bcm/cygnus-pcm.c:574", ANY_CAPTURE_IRQ & r5_status,
 			cygaud->audio + INTH_R5F_CLEAR_OFFSET);
 	}
 
@@ -685,11 +685,11 @@ static snd_pcm_uframes_t cygnus_pcm_pointer(struct snd_soc_component *component,
 	 */
 	p_rbuf = get_ringbuf(substream);
 	if (substream->stream == SNDRV_PCM_STREAM_PLAYBACK)
-		cur = readl(aio->cygaud->audio + p_rbuf->rdaddr);
+		cur = pete_readl("sound/soc/bcm/cygnus-pcm.c:688", aio->cygaud->audio + p_rbuf->rdaddr);
 	else
-		cur = readl(aio->cygaud->audio + p_rbuf->wraddr);
+		cur = pete_readl("sound/soc/bcm/cygnus-pcm.c:690", aio->cygaud->audio + p_rbuf->wraddr);
 
-	base = readl(aio->cygaud->audio + p_rbuf->baseaddr);
+	base = pete_readl("sound/soc/bcm/cygnus-pcm.c:692", aio->cygaud->audio + p_rbuf->baseaddr);
 
 	/*
 	 * Mask off the MSB of the rdaddr,wraddr and baseaddr

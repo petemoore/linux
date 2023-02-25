@@ -36,7 +36,7 @@ void qla4xxx_dump_registers(struct scsi_qla_host *ha)
 	if (is_qla8022(ha)) {
 		for (i = 1; i < MBOX_REG_COUNT; i++)
 			printk(KERN_INFO "mailbox[%d]     = 0x%08X\n",
-			    i, readl(&ha->qla4_82xx_reg->mailbox_in[i]));
+			    i, pete_readl("drivers/scsi/qla4xxx/ql4_dbg.c:39", &ha->qla4_82xx_reg->mailbox_in[i]));
 		return;
 	}
 
@@ -121,12 +121,12 @@ void qla4xxx_dump_registers(struct scsi_qla_host *ha)
 		    offsetof(struct isp_reg, u2.isp4022.p0.port_err_status),
 		    readw(&ha->reg->u2.isp4022.p0.port_err_status));
 		printk(KERN_INFO "Page 1 Registers:\n");
-		writel(HOST_MEM_CFG_PAGE & set_rmask(CSR_SCSI_PAGE_SELECT),
+		pete_writel("drivers/scsi/qla4xxx/ql4_dbg.c:124", HOST_MEM_CFG_PAGE & set_rmask(CSR_SCSI_PAGE_SELECT),
 		    &ha->reg->ctrl_status);
 		printk(KERN_INFO "0x%02X req_q_out        = 0x%08X\n",
 		    (uint8_t) offsetof(struct isp_reg, u2.isp4022.p1.req_q_out),
 		    readw(&ha->reg->u2.isp4022.p1.req_q_out));
-		writel(PORT_CTRL_STAT_PAGE & set_rmask(CSR_SCSI_PAGE_SELECT),
+		pete_writel("drivers/scsi/qla4xxx/ql4_dbg.c:129", PORT_CTRL_STAT_PAGE & set_rmask(CSR_SCSI_PAGE_SELECT),
 		    &ha->reg->ctrl_status);
 	}
 }

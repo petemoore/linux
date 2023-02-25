@@ -160,13 +160,13 @@ static void c_can_plat_write_reg32(const struct c_can_priv *priv,
 
 static u32 d_can_plat_read_reg32(const struct c_can_priv *priv, enum reg index)
 {
-	return readl(priv->base + priv->regs[index]);
+	return pete_readl("drivers/net/can/c_can/c_can_platform.c:163", priv->base + priv->regs[index]);
 }
 
 static void d_can_plat_write_reg32(const struct c_can_priv *priv,
 				   enum reg index, u32 val)
 {
-	writel(val, priv->base + priv->regs[index]);
+	pete_writel("drivers/net/can/c_can/c_can_platform.c:169", val, priv->base + priv->regs[index]);
 }
 
 static void c_can_hw_raminit_wait(const struct c_can_priv *priv, u32 mask)

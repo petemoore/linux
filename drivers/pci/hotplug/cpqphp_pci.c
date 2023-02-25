@@ -1187,7 +1187,7 @@ int cpqhp_find_available_resources(struct controller *ctrl, void __iomem *rom_st
 		return -ENODEV;
 
 	/* Sum all resources and setup resource maps */
-	unused_IRQ = readl(rom_resource_table + UNUSED_IRQ);
+	unused_IRQ = pete_readl("drivers/pci/hotplug/cpqphp_pci.c:1190", rom_resource_table + UNUSED_IRQ);
 	dbg("unused_IRQ = %x\n", unused_IRQ);
 
 	temp = 0;
@@ -1214,7 +1214,7 @@ int cpqhp_find_available_resources(struct controller *ctrl, void __iomem *rom_st
 	}
 
 	dbg("cpqhp_nic_irq= %d\n", cpqhp_nic_irq);
-	unused_IRQ = readl(rom_resource_table + PCIIRQ);
+	unused_IRQ = pete_readl("drivers/pci/hotplug/cpqphp_pci.c:1217", rom_resource_table + PCIIRQ);
 
 	temp = 0;
 

@@ -25,7 +25,7 @@ u32 fjes_hw_rd32(struct fjes_hw *hw, u32 reg)
 	u8 *base = hw->base;
 	u32 value = 0;
 
-	value = readl(&base[reg]);
+	value = pete_readl("drivers/net/fjes/fjes_hw.c:28", &base[reg]);
 
 	return value;
 }

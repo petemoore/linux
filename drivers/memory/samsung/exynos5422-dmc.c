@@ -383,20 +383,20 @@ static int exynos5_init_freq_table(struct exynos5_dmc *dmc,
  */
 static void exynos5_set_bypass_dram_timings(struct exynos5_dmc *dmc)
 {
-	writel(EXYNOS5_AREF_NORMAL,
+	pete_writel("drivers/memory/samsung/exynos5422-dmc.c:386", EXYNOS5_AREF_NORMAL,
 	       dmc->base_drexi0 + EXYNOS5_DREXI_TIMINGAREF);
 
-	writel(dmc->bypass_timing_row,
+	pete_writel("drivers/memory/samsung/exynos5422-dmc.c:389", dmc->bypass_timing_row,
 	       dmc->base_drexi0 + EXYNOS5_DREXI_TIMINGROW1);
-	writel(dmc->bypass_timing_row,
+	pete_writel("drivers/memory/samsung/exynos5422-dmc.c:391", dmc->bypass_timing_row,
 	       dmc->base_drexi1 + EXYNOS5_DREXI_TIMINGROW1);
-	writel(dmc->bypass_timing_data,
+	pete_writel("drivers/memory/samsung/exynos5422-dmc.c:393", dmc->bypass_timing_data,
 	       dmc->base_drexi0 + EXYNOS5_DREXI_TIMINGDATA1);
-	writel(dmc->bypass_timing_data,
+	pete_writel("drivers/memory/samsung/exynos5422-dmc.c:395", dmc->bypass_timing_data,
 	       dmc->base_drexi1 + EXYNOS5_DREXI_TIMINGDATA1);
-	writel(dmc->bypass_timing_power,
+	pete_writel("drivers/memory/samsung/exynos5422-dmc.c:397", dmc->bypass_timing_power,
 	       dmc->base_drexi0 + EXYNOS5_DREXI_TIMINGPOWER1);
-	writel(dmc->bypass_timing_power,
+	pete_writel("drivers/memory/samsung/exynos5422-dmc.c:399", dmc->bypass_timing_power,
 	       dmc->base_drexi1 + EXYNOS5_DREXI_TIMINGPOWER1);
 }
 
@@ -423,20 +423,20 @@ static int exynos5_dram_change_timings(struct exynos5_dmc *dmc,
 	if (idx < 0)
 		return -EINVAL;
 
-	writel(EXYNOS5_AREF_NORMAL,
+	pete_writel("drivers/memory/samsung/exynos5422-dmc.c:426", EXYNOS5_AREF_NORMAL,
 	       dmc->base_drexi0 + EXYNOS5_DREXI_TIMINGAREF);
 
-	writel(dmc->timing_row[idx],
+	pete_writel("drivers/memory/samsung/exynos5422-dmc.c:429", dmc->timing_row[idx],
 	       dmc->base_drexi0 + EXYNOS5_DREXI_TIMINGROW0);
-	writel(dmc->timing_row[idx],
+	pete_writel("drivers/memory/samsung/exynos5422-dmc.c:431", dmc->timing_row[idx],
 	       dmc->base_drexi1 + EXYNOS5_DREXI_TIMINGROW0);
-	writel(dmc->timing_data[idx],
+	pete_writel("drivers/memory/samsung/exynos5422-dmc.c:433", dmc->timing_data[idx],
 	       dmc->base_drexi0 + EXYNOS5_DREXI_TIMINGDATA0);
-	writel(dmc->timing_data[idx],
+	pete_writel("drivers/memory/samsung/exynos5422-dmc.c:435", dmc->timing_data[idx],
 	       dmc->base_drexi1 + EXYNOS5_DREXI_TIMINGDATA0);
-	writel(dmc->timing_power[idx],
+	pete_writel("drivers/memory/samsung/exynos5422-dmc.c:437", dmc->timing_power[idx],
 	       dmc->base_drexi0 + EXYNOS5_DREXI_TIMINGPOWER0);
-	writel(dmc->timing_power[idx],
+	pete_writel("drivers/memory/samsung/exynos5422-dmc.c:439", dmc->timing_power[idx],
 	       dmc->base_drexi1 + EXYNOS5_DREXI_TIMINGPOWER0);
 
 	return 0;
@@ -763,31 +763,31 @@ static void exynos5_dmc_start_perf_events(struct exynos5_dmc *dmc,
 					  u32 beg_value)
 {
 	/* Enable interrupts for counter 2 */
-	writel(PERF_CNT2, dmc->base_drexi0 + DREX_INTENS_PPC);
-	writel(PERF_CNT2, dmc->base_drexi1 + DREX_INTENS_PPC);
+	pete_writel("drivers/memory/samsung/exynos5422-dmc.c:766", PERF_CNT2, dmc->base_drexi0 + DREX_INTENS_PPC);
+	pete_writel("drivers/memory/samsung/exynos5422-dmc.c:767", PERF_CNT2, dmc->base_drexi1 + DREX_INTENS_PPC);
 
 	/* Enable counter 2 and CCNT  */
-	writel(PERF_CNT2 | PERF_CCNT, dmc->base_drexi0 + DREX_CNTENS_PPC);
-	writel(PERF_CNT2 | PERF_CCNT, dmc->base_drexi1 + DREX_CNTENS_PPC);
+	pete_writel("drivers/memory/samsung/exynos5422-dmc.c:770", PERF_CNT2 | PERF_CCNT, dmc->base_drexi0 + DREX_CNTENS_PPC);
+	pete_writel("drivers/memory/samsung/exynos5422-dmc.c:771", PERF_CNT2 | PERF_CCNT, dmc->base_drexi1 + DREX_CNTENS_PPC);
 
 	/* Clear overflow flag for all counters */
-	writel(PERF_CNT2 | PERF_CCNT, dmc->base_drexi0 + DREX_FLAG_PPC);
-	writel(PERF_CNT2 | PERF_CCNT, dmc->base_drexi1 + DREX_FLAG_PPC);
+	pete_writel("drivers/memory/samsung/exynos5422-dmc.c:774", PERF_CNT2 | PERF_CCNT, dmc->base_drexi0 + DREX_FLAG_PPC);
+	pete_writel("drivers/memory/samsung/exynos5422-dmc.c:775", PERF_CNT2 | PERF_CCNT, dmc->base_drexi1 + DREX_FLAG_PPC);
 
 	/* Reset all counters */
-	writel(CC_RESET | PPC_COUNTER_RESET, dmc->base_drexi0 + DREX_PMNC_PPC);
-	writel(CC_RESET | PPC_COUNTER_RESET, dmc->base_drexi1 + DREX_PMNC_PPC);
+	pete_writel("drivers/memory/samsung/exynos5422-dmc.c:778", CC_RESET | PPC_COUNTER_RESET, dmc->base_drexi0 + DREX_PMNC_PPC);
+	pete_writel("drivers/memory/samsung/exynos5422-dmc.c:779", CC_RESET | PPC_COUNTER_RESET, dmc->base_drexi1 + DREX_PMNC_PPC);
 
 	/*
 	 * Set start value for the counters, the number of samples that
 	 * will be gathered is calculated as: 0xffffffff - beg_value
 	 */
-	writel(beg_value, dmc->base_drexi0 + DREX_PMCNT2_PPC);
-	writel(beg_value, dmc->base_drexi1 + DREX_PMCNT2_PPC);
+	pete_writel("drivers/memory/samsung/exynos5422-dmc.c:785", beg_value, dmc->base_drexi0 + DREX_PMCNT2_PPC);
+	pete_writel("drivers/memory/samsung/exynos5422-dmc.c:786", beg_value, dmc->base_drexi1 + DREX_PMCNT2_PPC);
 
 	/* Start all counters */
-	writel(PPC_ENABLE, dmc->base_drexi0 + DREX_PMNC_PPC);
-	writel(PPC_ENABLE, dmc->base_drexi1 + DREX_PMNC_PPC);
+	pete_writel("drivers/memory/samsung/exynos5422-dmc.c:789", PPC_ENABLE, dmc->base_drexi0 + DREX_PMNC_PPC);
+	pete_writel("drivers/memory/samsung/exynos5422-dmc.c:790", PPC_ENABLE, dmc->base_drexi1 + DREX_PMNC_PPC);
 }
 
 /**
@@ -845,17 +845,17 @@ static void exynos5_dmc_perf_events_check(struct exynos5_dmc *dmc)
 	ts = ktime_get_ns();
 
 	/* Stop all counters */
-	writel(0, dmc->base_drexi0 + DREX_PMNC_PPC);
-	writel(0, dmc->base_drexi1 + DREX_PMNC_PPC);
+	pete_writel("drivers/memory/samsung/exynos5422-dmc.c:848", 0, dmc->base_drexi0 + DREX_PMNC_PPC);
+	pete_writel("drivers/memory/samsung/exynos5422-dmc.c:849", 0, dmc->base_drexi1 + DREX_PMNC_PPC);
 
 	/* Check the source in interrupt flag registers (which channel) */
-	val = readl(dmc->base_drexi0 + DREX_FLAG_PPC);
+	val = pete_readl("drivers/memory/samsung/exynos5422-dmc.c:852", dmc->base_drexi0 + DREX_FLAG_PPC);
 	if (val) {
 		diff_ts = ts - dmc->last_overflow_ts[0];
 		dmc->last_overflow_ts[0] = ts;
 		dev_dbg(dmc->dev, "drex0 0xE050 val= 0x%08x\n",  val);
 	} else {
-		val = readl(dmc->base_drexi1 + DREX_FLAG_PPC);
+		val = pete_readl("drivers/memory/samsung/exynos5422-dmc.c:858", dmc->base_drexi1 + DREX_FLAG_PPC);
 		diff_ts = ts - dmc->last_overflow_ts[1];
 		dmc->last_overflow_ts[1] = ts;
 		dev_dbg(dmc->dev, "drex1 0xE050 val= 0x%08x\n",  val);
@@ -877,12 +877,12 @@ static void exynos5_dmc_enable_perf_events(struct exynos5_dmc *dmc)
 	u64 ts;
 
 	/* Enable Performance Event Clock */
-	writel(PEREV_CLK_EN, dmc->base_drexi0 + DREX_PPCCLKCON);
-	writel(PEREV_CLK_EN, dmc->base_drexi1 + DREX_PPCCLKCON);
+	pete_writel("drivers/memory/samsung/exynos5422-dmc.c:880", PEREV_CLK_EN, dmc->base_drexi0 + DREX_PPCCLKCON);
+	pete_writel("drivers/memory/samsung/exynos5422-dmc.c:881", PEREV_CLK_EN, dmc->base_drexi1 + DREX_PPCCLKCON);
 
 	/* Select read transfers as performance event2 */
-	writel(READ_TRANSFER_CH0, dmc->base_drexi0 + DREX_PEREV2CONFIG);
-	writel(READ_TRANSFER_CH1, dmc->base_drexi1 + DREX_PEREV2CONFIG);
+	pete_writel("drivers/memory/samsung/exynos5422-dmc.c:884", READ_TRANSFER_CH0, dmc->base_drexi0 + DREX_PEREV2CONFIG);
+	pete_writel("drivers/memory/samsung/exynos5422-dmc.c:885", READ_TRANSFER_CH1, dmc->base_drexi1 + DREX_PEREV2CONFIG);
 
 	ts = ktime_get_ns();
 	dmc->last_overflow_ts[0] = ts;
@@ -902,20 +902,20 @@ static void exynos5_dmc_enable_perf_events(struct exynos5_dmc *dmc)
 static void exynos5_dmc_disable_perf_events(struct exynos5_dmc *dmc)
 {
 	/* Stop all counters */
-	writel(0, dmc->base_drexi0 + DREX_PMNC_PPC);
-	writel(0, dmc->base_drexi1 + DREX_PMNC_PPC);
+	pete_writel("drivers/memory/samsung/exynos5422-dmc.c:905", 0, dmc->base_drexi0 + DREX_PMNC_PPC);
+	pete_writel("drivers/memory/samsung/exynos5422-dmc.c:906", 0, dmc->base_drexi1 + DREX_PMNC_PPC);
 
 	/* Disable interrupts for counter 2 */
-	writel(PERF_CNT2, dmc->base_drexi0 + DREX_INTENC_PPC);
-	writel(PERF_CNT2, dmc->base_drexi1 + DREX_INTENC_PPC);
+	pete_writel("drivers/memory/samsung/exynos5422-dmc.c:909", PERF_CNT2, dmc->base_drexi0 + DREX_INTENC_PPC);
+	pete_writel("drivers/memory/samsung/exynos5422-dmc.c:910", PERF_CNT2, dmc->base_drexi1 + DREX_INTENC_PPC);
 
 	/* Disable counter 2 and CCNT  */
-	writel(PERF_CNT2 | PERF_CCNT, dmc->base_drexi0 + DREX_CNTENC_PPC);
-	writel(PERF_CNT2 | PERF_CCNT, dmc->base_drexi1 + DREX_CNTENC_PPC);
+	pete_writel("drivers/memory/samsung/exynos5422-dmc.c:913", PERF_CNT2 | PERF_CCNT, dmc->base_drexi0 + DREX_CNTENC_PPC);
+	pete_writel("drivers/memory/samsung/exynos5422-dmc.c:914", PERF_CNT2 | PERF_CCNT, dmc->base_drexi1 + DREX_CNTENC_PPC);
 
 	/* Clear overflow flag for all counters */
-	writel(PERF_CNT2 | PERF_CCNT, dmc->base_drexi0 + DREX_FLAG_PPC);
-	writel(PERF_CNT2 | PERF_CCNT, dmc->base_drexi1 + DREX_FLAG_PPC);
+	pete_writel("drivers/memory/samsung/exynos5422-dmc.c:917", PERF_CNT2 | PERF_CCNT, dmc->base_drexi0 + DREX_FLAG_PPC);
+	pete_writel("drivers/memory/samsung/exynos5422-dmc.c:918", PERF_CNT2 | PERF_CCNT, dmc->base_drexi1 + DREX_FLAG_PPC);
 }
 
 /**

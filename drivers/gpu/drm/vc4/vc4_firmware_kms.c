@@ -1214,14 +1214,14 @@ static irqreturn_t vc4_crtc_irq_handler(int irq, void *data)
 {
 	struct vc4_crtc **crtc_list = data;
 	int i;
-	u32 stat = readl(crtc_list[0]->regs + SMICS);
+	u32 stat = pete_readl("drivers/gpu/drm/vc4/vc4_firmware_kms.c:1217", crtc_list[0]->regs + SMICS);
 	irqreturn_t ret = IRQ_NONE;
 	u32 chan;
 
 	if (stat & SMICS_INTERRUPTS) {
-		writel(0, crtc_list[0]->regs + SMICS);
+		pete_writel("drivers/gpu/drm/vc4/vc4_firmware_kms.c:1222", 0, crtc_list[0]->regs + SMICS);
 
-		chan = readl(crtc_list[0]->regs + SMIDSW0);
+		chan = pete_readl("drivers/gpu/drm/vc4/vc4_firmware_kms.c:1224", crtc_list[0]->regs + SMIDSW0);
 
 		if ((chan & 0xFFFF0000) != SMI_NEW) {
 			/* Older firmware. Treat the one interrupt as vblank/
@@ -1234,7 +1234,7 @@ static irqreturn_t vc4_crtc_irq_handler(int irq, void *data)
 			}
 		} else {
 			if (chan & 1) {
-				writel(SMI_NEW, crtc_list[0]->regs + SMIDSW0);
+				pete_writel("drivers/gpu/drm/vc4/vc4_firmware_kms.c:1237", SMI_NEW, crtc_list[0]->regs + SMIDSW0);
 				if (crtc_list[0]->vblank_enabled)
 					drm_crtc_handle_vblank(&crtc_list[0]->base);
 				vc4_crtc_handle_page_flip(crtc_list[0]);
@@ -1242,10 +1242,10 @@ static irqreturn_t vc4_crtc_irq_handler(int irq, void *data)
 
 			if (crtc_list[1]) {
 				/* Check for the secondary display too */
-				chan = readl(crtc_list[0]->regs + SMIDSW1);
+				chan = pete_readl("drivers/gpu/drm/vc4/vc4_firmware_kms.c:1245", crtc_list[0]->regs + SMIDSW1);
 
 				if (chan & 1) {
-					writel(SMI_NEW, crtc_list[0]->regs + SMIDSW1);
+					pete_writel("drivers/gpu/drm/vc4/vc4_firmware_kms.c:1248", SMI_NEW, crtc_list[0]->regs + SMIDSW1);
 
 					if (crtc_list[1]->vblank_enabled)
 						drm_crtc_handle_vblank(&crtc_list[1]->base);
@@ -1985,7 +1985,7 @@ static int vc4_fkms_bind(struct device *dev, struct device *master, void *data)
 		if (IS_ERR(crtc_list[0]->regs))
 			DRM_ERROR("Oh dear, failed to map registers\n");
 
-		writel(0, crtc_list[0]->regs + SMICS);
+		pete_writel("drivers/gpu/drm/vc4/vc4_firmware_kms.c:1988", 0, crtc_list[0]->regs + SMICS);
 		ret = devm_request_irq(dev, platform_get_irq(pdev, 0),
 				       vc4_crtc_irq_handler, 0,
 				       "vc4 firmware kms", crtc_list);

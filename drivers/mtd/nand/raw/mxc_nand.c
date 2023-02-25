@@ -343,12 +343,12 @@ static int check_int_v3(struct mxc_nand_host *host)
 {
 	uint32_t tmp;
 
-	tmp = readl(NFC_V3_IPC);
+	tmp = pete_readl("drivers/mtd/nand/raw/mxc_nand.c:346", NFC_V3_IPC);
 	if (!(tmp & NFC_V3_IPC_INT))
 		return 0;
 
 	tmp &= ~NFC_V3_IPC_INT;
-	writel(tmp, NFC_V3_IPC);
+	pete_writel("drivers/mtd/nand/raw/mxc_nand.c:351", tmp, NFC_V3_IPC);
 
 	return 1;
 }
@@ -385,14 +385,14 @@ static void irq_control_v3(struct mxc_nand_host *host, int activate)
 {
 	uint32_t tmp;
 
-	tmp = readl(NFC_V3_CONFIG2);
+	tmp = pete_readl("drivers/mtd/nand/raw/mxc_nand.c:388", NFC_V3_CONFIG2);
 
 	if (activate)
 		tmp &= ~NFC_V3_CONFIG2_INT_MSK;
 	else
 		tmp |= NFC_V3_CONFIG2_INT_MSK;
 
-	writel(tmp, NFC_V3_CONFIG2);
+	pete_writel("drivers/mtd/nand/raw/mxc_nand.c:395", tmp, NFC_V3_CONFIG2);
 }
 
 static void irq_control(struct mxc_nand_host *host, int activate)
@@ -414,12 +414,12 @@ static u32 get_ecc_status_v1(struct mxc_nand_host *host)
 
 static u32 get_ecc_status_v2(struct mxc_nand_host *host)
 {
-	return readl(NFC_V1_V2_ECC_STATUS_RESULT);
+	return pete_readl("drivers/mtd/nand/raw/mxc_nand.c:417", NFC_V1_V2_ECC_STATUS_RESULT);
 }
 
 static u32 get_ecc_status_v3(struct mxc_nand_host *host)
 {
-	return readl(NFC_V3_ECC_STATUS_RESULT);
+	return pete_readl("drivers/mtd/nand/raw/mxc_nand.c:422", NFC_V3_ECC_STATUS_RESULT);
 }
 
 static irqreturn_t mxc_nfc_irq(int irq, void *dev_id)
@@ -489,10 +489,10 @@ static int wait_op_done(struct mxc_nand_host *host, int useirq)
 static void send_cmd_v3(struct mxc_nand_host *host, uint16_t cmd, int useirq)
 {
 	/* fill command */
-	writel(cmd, NFC_V3_FLASH_CMD);
+	pete_writel("drivers/mtd/nand/raw/mxc_nand.c:492", cmd, NFC_V3_FLASH_CMD);
 
 	/* send out command */
-	writel(NFC_CMD, NFC_V3_LAUNCH);
+	pete_writel("drivers/mtd/nand/raw/mxc_nand.c:495", NFC_CMD, NFC_V3_LAUNCH);
 
 	/* Wait for operation to complete */
 	wait_op_done(host, useirq);
@@ -528,10 +528,10 @@ static void send_cmd_v1_v2(struct mxc_nand_host *host, uint16_t cmd, int useirq)
 static void send_addr_v3(struct mxc_nand_host *host, uint16_t addr, int islast)
 {
 	/* fill address */
-	writel(addr, NFC_V3_FLASH_ADDR0);
+	pete_writel("drivers/mtd/nand/raw/mxc_nand.c:531", addr, NFC_V3_FLASH_ADDR0);
 
 	/* send out address */
-	writel(NFC_ADDR, NFC_V3_LAUNCH);
+	pete_writel("drivers/mtd/nand/raw/mxc_nand.c:534", NFC_ADDR, NFC_V3_LAUNCH);
 
 	wait_op_done(host, 0);
 }
@@ -556,12 +556,12 @@ static void send_page_v3(struct mtd_info *mtd, unsigned int ops)
 	struct mxc_nand_host *host = nand_get_controller_data(nand_chip);
 	uint32_t tmp;
 
-	tmp = readl(NFC_V3_CONFIG1);
+	tmp = pete_readl("drivers/mtd/nand/raw/mxc_nand.c:559", NFC_V3_CONFIG1);
 	tmp &= ~(7 << 4);
-	writel(tmp, NFC_V3_CONFIG1);
+	pete_writel("drivers/mtd/nand/raw/mxc_nand.c:561", tmp, NFC_V3_CONFIG1);
 
 	/* transfer data from NFC ram to nand */
-	writel(ops, NFC_V3_LAUNCH);
+	pete_writel("drivers/mtd/nand/raw/mxc_nand.c:564", ops, NFC_V3_LAUNCH);
 
 	wait_op_done(host, false);
 }
@@ -606,7 +606,7 @@ static void send_page_v1(struct mtd_info *mtd, unsigned int ops)
 static void send_read_id_v3(struct mxc_nand_host *host)
 {
 	/* Read ID into main buffer */
-	writel(NFC_ID, NFC_V3_LAUNCH);
+	pete_writel("drivers/mtd/nand/raw/mxc_nand.c:609", NFC_ID, NFC_V3_LAUNCH);
 
 	wait_op_done(host, true);
 
@@ -632,7 +632,7 @@ static uint16_t get_dev_status_v3(struct mxc_nand_host *host)
 	writew(NFC_STATUS, NFC_V3_LAUNCH);
 	wait_op_done(host, true);
 
-	return readl(NFC_V3_CONFIG1) >> 16;
+	return pete_readl("drivers/mtd/nand/raw/mxc_nand.c:635", NFC_V3_CONFIG1) >> 16;
 }
 
 /* This function requests the NANDFC to perform a read of the
@@ -650,14 +650,14 @@ static uint16_t get_dev_status_v1_v2(struct mxc_nand_host *host)
 	 * prevent corruption of the buffer save the value
 	 * and restore it afterwards.
 	 */
-	store = readl(main_buf);
+	store = pete_readl("drivers/mtd/nand/raw/mxc_nand.c:653", main_buf);
 
 	writew(NFC_STATUS, NFC_V1_V2_CONFIG2);
 	wait_op_done(host, true);
 
 	ret = readw(main_buf);
 
-	writel(store, main_buf);
+	pete_writel("drivers/mtd/nand/raw/mxc_nand.c:660", store, main_buf);
 
 	return ret;
 }
@@ -688,14 +688,14 @@ static void mxc_nand_enable_hwecc_v3(struct nand_chip *chip, bool enable)
 	if (chip->ecc.engine_type != NAND_ECC_ENGINE_TYPE_ON_HOST)
 		return;
 
-	config2 = readl(NFC_V3_CONFIG2);
+	config2 = pete_readl("drivers/mtd/nand/raw/mxc_nand.c:691", NFC_V3_CONFIG2);
 
 	if (enable)
 		config2 |= NFC_V3_CONFIG2_ECC_EN;
 	else
 		config2 &= ~NFC_V3_CONFIG2_ECC_EN;
 
-	writel(config2, NFC_V3_CONFIG2);
+	pete_writel("drivers/mtd/nand/raw/mxc_nand.c:698", config2, NFC_V3_CONFIG2);
 }
 
 /* This functions is used by upper layer to checks if device is ready */
@@ -1268,18 +1268,18 @@ static void preset_v3(struct mtd_info *mtd)
 	uint32_t config2, config3;
 	int i, addr_phases;
 
-	writel(NFC_V3_CONFIG1_RBA(0), NFC_V3_CONFIG1);
-	writel(NFC_V3_IPC_CREQ, NFC_V3_IPC);
+	pete_writel("drivers/mtd/nand/raw/mxc_nand.c:1271", NFC_V3_CONFIG1_RBA(0), NFC_V3_CONFIG1);
+	pete_writel("drivers/mtd/nand/raw/mxc_nand.c:1272", NFC_V3_IPC_CREQ, NFC_V3_IPC);
 
 	/* Unlock the internal RAM Buffer */
-	writel(NFC_V3_WRPROT_BLS_UNLOCK | NFC_V3_WRPROT_UNLOCK,
+	pete_writel("drivers/mtd/nand/raw/mxc_nand.c:1275", NFC_V3_WRPROT_BLS_UNLOCK | NFC_V3_WRPROT_UNLOCK,
 			NFC_V3_WRPROT);
 
 	/* Blocks to be unlocked */
 	for (i = 0; i < NAND_MAX_CHIPS; i++)
-		writel(0xffff << 16, NFC_V3_WRPROT_UNLOCK_BLK_ADD0 + (i << 2));
+		pete_writel("drivers/mtd/nand/raw/mxc_nand.c:1280", 0xffff << 16, NFC_V3_WRPROT_UNLOCK_BLK_ADD0 + (i << 2));
 
-	writel(0, NFC_V3_IPC);
+	pete_writel("drivers/mtd/nand/raw/mxc_nand.c:1282", 0, NFC_V3_IPC);
 
 	config2 = NFC_V3_CONFIG2_ONE_CYCLE |
 		NFC_V3_CONFIG2_2CMD_PHASES |
@@ -1313,7 +1313,7 @@ static void preset_v3(struct mtd_info *mtd)
 			config2 |= NFC_V3_CONFIG2_ECC_MODE_8;
 	}
 
-	writel(config2, NFC_V3_CONFIG2);
+	pete_writel("drivers/mtd/nand/raw/mxc_nand.c:1316", config2, NFC_V3_CONFIG2);
 
 	config3 = NFC_V3_CONFIG3_NUM_OF_DEVICES(0) |
 			NFC_V3_CONFIG3_NO_SDMA |
@@ -1324,9 +1324,9 @@ static void preset_v3(struct mtd_info *mtd)
 	if (!(chip->options & NAND_BUSWIDTH_16))
 		config3 |= NFC_V3_CONFIG3_FW8;
 
-	writel(config3, NFC_V3_CONFIG3);
+	pete_writel("drivers/mtd/nand/raw/mxc_nand.c:1327", config3, NFC_V3_CONFIG3);
 
-	writel(0, NFC_V3_DELAY_LINE);
+	pete_writel("drivers/mtd/nand/raw/mxc_nand.c:1329", 0, NFC_V3_DELAY_LINE);
 }
 
 /* Used by the upper layer to write command to NAND Flash for

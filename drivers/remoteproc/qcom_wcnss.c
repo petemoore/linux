@@ -163,9 +163,9 @@ static void wcnss_indicate_nv_download(struct qcom_wcnss *wcnss)
 	u32 val;
 
 	/* Indicate NV download capability */
-	val = readl(wcnss->spare_out);
+	val = pete_readl("drivers/remoteproc/qcom_wcnss.c:166", wcnss->spare_out);
 	val |= WCNSS_SPARE_NVBIN_DLND;
-	writel(val, wcnss->spare_out);
+	pete_writel("drivers/remoteproc/qcom_wcnss.c:168", val, wcnss->spare_out);
 }
 
 static void wcnss_configure_iris(struct qcom_wcnss *wcnss)
@@ -173,10 +173,10 @@ static void wcnss_configure_iris(struct qcom_wcnss *wcnss)
 	u32 val;
 
 	/* Clear PMU cfg register */
-	writel(0, wcnss->pmu_cfg);
+	pete_writel("drivers/remoteproc/qcom_wcnss.c:176", 0, wcnss->pmu_cfg);
 
 	val = WCNSS_PMU_GC_BUS_MUX_SEL_TOP | WCNSS_PMU_IRIS_XO_EN;
-	writel(val, wcnss->pmu_cfg);
+	pete_writel("drivers/remoteproc/qcom_wcnss.c:179", val, wcnss->pmu_cfg);
 
 	/* Clear XO_MODE */
 	val &= ~WCNSS_PMU_XO_MODE_MASK;
@@ -184,32 +184,32 @@ static void wcnss_configure_iris(struct qcom_wcnss *wcnss)
 		val |= WCNSS_PMU_XO_MODE_48 << 1;
 	else
 		val |= WCNSS_PMU_XO_MODE_19p2 << 1;
-	writel(val, wcnss->pmu_cfg);
+	pete_writel("drivers/remoteproc/qcom_wcnss.c:187", val, wcnss->pmu_cfg);
 
 	/* Reset IRIS */
 	val |= WCNSS_PMU_IRIS_RESET;
-	writel(val, wcnss->pmu_cfg);
+	pete_writel("drivers/remoteproc/qcom_wcnss.c:191", val, wcnss->pmu_cfg);
 
 	/* Wait for PMU.iris_reg_reset_sts */
-	while (readl(wcnss->pmu_cfg) & WCNSS_PMU_IRIS_RESET_STS)
+	while (pete_readl("drivers/remoteproc/qcom_wcnss.c:194", wcnss->pmu_cfg) & WCNSS_PMU_IRIS_RESET_STS)
 		cpu_relax();
 
 	/* Clear IRIS reset */
 	val &= ~WCNSS_PMU_IRIS_RESET;
-	writel(val, wcnss->pmu_cfg);
+	pete_writel("drivers/remoteproc/qcom_wcnss.c:199", val, wcnss->pmu_cfg);
 
 	/* Start IRIS XO configuration */
 	val |= WCNSS_PMU_IRIS_XO_CFG;
-	writel(val, wcnss->pmu_cfg);
+	pete_writel("drivers/remoteproc/qcom_wcnss.c:203", val, wcnss->pmu_cfg);
 
 	/* Wait for XO configuration to finish */
-	while (readl(wcnss->pmu_cfg) & WCNSS_PMU_IRIS_XO_CFG_STS)
+	while (pete_readl("drivers/remoteproc/qcom_wcnss.c:206", wcnss->pmu_cfg) & WCNSS_PMU_IRIS_XO_CFG_STS)
 		cpu_relax();
 
 	/* Stop IRIS XO configuration */
 	val &= ~WCNSS_PMU_GC_BUS_MUX_SEL_TOP;
 	val &= ~WCNSS_PMU_IRIS_XO_CFG;
-	writel(val, wcnss->pmu_cfg);
+	pete_writel("drivers/remoteproc/qcom_wcnss.c:212", val, wcnss->pmu_cfg);
 
 	/* Add some delay for XO to settle */
 	msleep(20);

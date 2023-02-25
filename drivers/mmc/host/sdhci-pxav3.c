@@ -94,20 +94,20 @@ static int mv_conf_mbus_windows(struct platform_device *pdev,
 	}
 
 	for (i = 0; i < SDHCI_MAX_WIN_NUM; i++) {
-		writel(0, regs + SDHCI_WINDOW_CTRL(i));
-		writel(0, regs + SDHCI_WINDOW_BASE(i));
+		pete_writel("drivers/mmc/host/sdhci-pxav3.c:97", 0, regs + SDHCI_WINDOW_CTRL(i));
+		pete_writel("drivers/mmc/host/sdhci-pxav3.c:98", 0, regs + SDHCI_WINDOW_BASE(i));
 	}
 
 	for (i = 0; i < dram->num_cs; i++) {
 		const struct mbus_dram_window *cs = dram->cs + i;
 
 		/* Write size, attributes and target id to control register */
-		writel(((cs->size - 1) & 0xffff0000) |
+		pete_writel("drivers/mmc/host/sdhci-pxav3.c:105", ((cs->size - 1) & 0xffff0000) |
 			(cs->mbus_attr << 8) |
 			(dram->mbus_dram_target_id << 4) | 1,
 			regs + SDHCI_WINDOW_CTRL(i));
 		/* Write base address to base register */
-		writel(cs->base, regs + SDHCI_WINDOW_BASE(i));
+		pete_writel("drivers/mmc/host/sdhci-pxav3.c:110", cs->base, regs + SDHCI_WINDOW_BASE(i));
 	}
 
 	iounmap(regs);

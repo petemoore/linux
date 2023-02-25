@@ -102,7 +102,7 @@ static void gt_compare_set(unsigned long delta, int periodic)
 	unsigned long ctrl;
 
 	counter += delta;
-	ctrl = readl(gt_base + GT_CONTROL);
+	ctrl = pete_readl("drivers/clocksource/arm_global_timer.c:105", gt_base + GT_CONTROL);
 	ctrl &= ~(GT_CONTROL_COMP_ENABLE | GT_CONTROL_IRQ_ENABLE |
 		  GT_CONTROL_AUTO_INC);
 	ctrl |= GT_CONTROL_TIMER_ENABLE;
@@ -123,10 +123,10 @@ static int gt_clockevent_shutdown(struct clock_event_device *evt)
 {
 	unsigned long ctrl;
 
-	ctrl = readl(gt_base + GT_CONTROL);
+	ctrl = pete_readl("drivers/clocksource/arm_global_timer.c:126", gt_base + GT_CONTROL);
 	ctrl &= ~(GT_CONTROL_COMP_ENABLE | GT_CONTROL_IRQ_ENABLE |
 		  GT_CONTROL_AUTO_INC);
-	writel(ctrl, gt_base + GT_CONTROL);
+	pete_writel("drivers/clocksource/arm_global_timer.c:129", ctrl, gt_base + GT_CONTROL);
 	return 0;
 }
 
@@ -210,10 +210,10 @@ static void gt_resume(struct clocksource *cs)
 {
 	unsigned long ctrl;
 
-	ctrl = readl(gt_base + GT_CONTROL);
+	ctrl = pete_readl("drivers/clocksource/arm_global_timer.c:213", gt_base + GT_CONTROL);
 	if (!(ctrl & GT_CONTROL_TIMER_ENABLE))
 		/* re-enable timer on resume */
-		writel(GT_CONTROL_TIMER_ENABLE, gt_base + GT_CONTROL);
+		pete_writel("drivers/clocksource/arm_global_timer.c:216", GT_CONTROL_TIMER_ENABLE, gt_base + GT_CONTROL);
 }
 
 static struct clocksource gt_clocksource = {
@@ -245,17 +245,17 @@ static void gt_write_presc(u32 psv)
 {
 	u32 reg;
 
-	reg = readl(gt_base + GT_CONTROL);
+	reg = pete_readl("drivers/clocksource/arm_global_timer.c:248", gt_base + GT_CONTROL);
 	reg &= ~GT_CONTROL_PRESCALER_MASK;
 	reg |= psv << GT_CONTROL_PRESCALER_SHIFT;
-	writel(reg, gt_base + GT_CONTROL);
+	pete_writel("drivers/clocksource/arm_global_timer.c:251", reg, gt_base + GT_CONTROL);
 }
 
 static u32 gt_read_presc(void)
 {
 	u32 reg;
 
-	reg = readl(gt_base + GT_CONTROL);
+	reg = pete_readl("drivers/clocksource/arm_global_timer.c:258", gt_base + GT_CONTROL);
 	reg &= GT_CONTROL_PRESCALER_MASK;
 	return reg >> GT_CONTROL_PRESCALER_SHIFT;
 }
@@ -268,11 +268,11 @@ static void __init gt_delay_timer_init(void)
 
 static int __init gt_clocksource_init(void)
 {
-	writel(0, gt_base + GT_CONTROL);
-	writel(0, gt_base + GT_COUNTER0);
-	writel(0, gt_base + GT_COUNTER1);
+	pete_writel("drivers/clocksource/arm_global_timer.c:271", 0, gt_base + GT_CONTROL);
+	pete_writel("drivers/clocksource/arm_global_timer.c:272", 0, gt_base + GT_COUNTER0);
+	pete_writel("drivers/clocksource/arm_global_timer.c:273", 0, gt_base + GT_COUNTER1);
 	/* set prescaler and enable timer on all the cores */
-	writel(((CONFIG_ARM_GT_INITIAL_PRESCALER_VAL - 1) <<
+	pete_writel("drivers/clocksource/arm_global_timer.c:275", ((CONFIG_ARM_GT_INITIAL_PRESCALER_VAL - 1) <<
 		GT_CONTROL_PRESCALER_SHIFT)
 	       | GT_CONTROL_TIMER_ENABLE, gt_base + GT_CONTROL);
 

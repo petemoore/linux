@@ -128,7 +128,7 @@ MODULE_PARM_DESC(nowayout,
 static u64 sbsa_gwdt_reg_read(struct sbsa_gwdt *gwdt)
 {
 	if (gwdt->version == 0)
-		return readl(gwdt->control_base + SBSA_GWDT_WOR);
+		return pete_readl("drivers/watchdog/sbsa_gwdt.c:131", gwdt->control_base + SBSA_GWDT_WOR);
 	else
 		return lo_hi_readq(gwdt->control_base + SBSA_GWDT_WOR);
 }
@@ -136,7 +136,7 @@ static u64 sbsa_gwdt_reg_read(struct sbsa_gwdt *gwdt)
 static void sbsa_gwdt_reg_write(u64 val, struct sbsa_gwdt *gwdt)
 {
 	if (gwdt->version == 0)
-		writel((u32)val, gwdt->control_base + SBSA_GWDT_WOR);
+		pete_writel("drivers/watchdog/sbsa_gwdt.c:139", (u32)val, gwdt->control_base + SBSA_GWDT_WOR);
 	else
 		lo_hi_writeq(val, gwdt->control_base + SBSA_GWDT_WOR);
 }
@@ -175,7 +175,7 @@ static unsigned int sbsa_gwdt_get_timeleft(struct watchdog_device *wdd)
 	 * timeleft = WOR + (WCV - system counter)
 	 */
 	if (!action &&
-	    !(readl(gwdt->control_base + SBSA_GWDT_WCS) & SBSA_GWDT_WCS_WS0))
+	    !(pete_readl("drivers/watchdog/sbsa_gwdt.c:178", gwdt->control_base + SBSA_GWDT_WCS) & SBSA_GWDT_WCS_WS0))
 		timeleft += sbsa_gwdt_reg_read(gwdt);
 
 	timeleft += lo_hi_readq(gwdt->control_base + SBSA_GWDT_WCV) -
@@ -194,7 +194,7 @@ static int sbsa_gwdt_keepalive(struct watchdog_device *wdd)
 	 * Writing WRR for an explicit watchdog refresh.
 	 * You can write anyting (like 0).
 	 */
-	writel(0, gwdt->refresh_base + SBSA_GWDT_WRR);
+	pete_writel("drivers/watchdog/sbsa_gwdt.c:197", 0, gwdt->refresh_base + SBSA_GWDT_WRR);
 
 	return 0;
 }
@@ -204,7 +204,7 @@ static void sbsa_gwdt_get_version(struct watchdog_device *wdd)
 	struct sbsa_gwdt *gwdt = watchdog_get_drvdata(wdd);
 	int ver;
 
-	ver = readl(gwdt->control_base + SBSA_GWDT_W_IIDR);
+	ver = pete_readl("drivers/watchdog/sbsa_gwdt.c:207", gwdt->control_base + SBSA_GWDT_W_IIDR);
 	ver = (ver >> SBSA_GWDT_VERSION_SHIFT) & SBSA_GWDT_VERSION_MASK;
 
 	gwdt->version = ver;
@@ -215,7 +215,7 @@ static int sbsa_gwdt_start(struct watchdog_device *wdd)
 	struct sbsa_gwdt *gwdt = watchdog_get_drvdata(wdd);
 
 	/* writing WCS will cause an explicit watchdog refresh */
-	writel(SBSA_GWDT_WCS_EN, gwdt->control_base + SBSA_GWDT_WCS);
+	pete_writel("drivers/watchdog/sbsa_gwdt.c:218", SBSA_GWDT_WCS_EN, gwdt->control_base + SBSA_GWDT_WCS);
 
 	return 0;
 }
@@ -225,7 +225,7 @@ static int sbsa_gwdt_stop(struct watchdog_device *wdd)
 	struct sbsa_gwdt *gwdt = watchdog_get_drvdata(wdd);
 
 	/* Simply write 0 to WCS to clean WCS_EN bit */
-	writel(0, gwdt->control_base + SBSA_GWDT_WCS);
+	pete_writel("drivers/watchdog/sbsa_gwdt.c:228", 0, gwdt->control_base + SBSA_GWDT_WCS);
 
 	return 0;
 }
@@ -299,7 +299,7 @@ static int sbsa_gwdt_probe(struct platform_device *pdev)
 	else
 		wdd->max_hw_heartbeat_ms = GENMASK_ULL(47, 0) / gwdt->clk * 1000;
 
-	status = readl(cf_base + SBSA_GWDT_WCS);
+	status = pete_readl("drivers/watchdog/sbsa_gwdt.c:302", cf_base + SBSA_GWDT_WCS);
 	if (status & SBSA_GWDT_WCS_WS1) {
 		dev_warn(dev, "System reset by WDT.\n");
 		wdd->bootstatus |= WDIOF_CARDRESET;
@@ -317,7 +317,7 @@ static int sbsa_gwdt_probe(struct platform_device *pdev)
 			 * In case there is a pending ws0 interrupt, just ping
 			 * the watchdog before registering the interrupt routine
 			 */
-			writel(0, rf_base + SBSA_GWDT_WRR);
+			pete_writel("drivers/watchdog/sbsa_gwdt.c:320", 0, rf_base + SBSA_GWDT_WRR);
 			if (devm_request_irq(dev, irq, sbsa_gwdt_interrupt, 0,
 					     pdev->name, gwdt)) {
 				action = 0;

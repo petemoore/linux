@@ -86,7 +86,7 @@ static int vsc_sata_scr_read(struct ata_link *link,
 {
 	if (sc_reg > SCR_CONTROL)
 		return -EINVAL;
-	*val = readl(link->ap->ioaddr.scr_addr + (sc_reg * 4));
+	*val = pete_readl("drivers/ata/sata_vsc.c:89", link->ap->ioaddr.scr_addr + (sc_reg * 4));
 	return 0;
 }
 
@@ -96,7 +96,7 @@ static int vsc_sata_scr_write(struct ata_link *link,
 {
 	if (sc_reg > SCR_CONTROL)
 		return -EINVAL;
-	writel(val, link->ap->ioaddr.scr_addr + (sc_reg * 4));
+	pete_writel("drivers/ata/sata_vsc.c:99", val, link->ap->ioaddr.scr_addr + (sc_reg * 4));
 	return 0;
 }
 
@@ -252,7 +252,7 @@ static irqreturn_t vsc_sata_interrupt(int irq, void *dev_instance)
 	unsigned int handled = 0;
 	u32 status;
 
-	status = readl(host->iomap[VSC_MMIO_BAR] + VSC_SATA_INT_STAT_OFFSET);
+	status = pete_readl("drivers/ata/sata_vsc.c:255", host->iomap[VSC_MMIO_BAR] + VSC_SATA_INT_STAT_OFFSET);
 
 	if (unlikely(status == 0xffffffff || status == 0)) {
 		if (status)
@@ -312,8 +312,8 @@ static void vsc_sata_setup_port(struct ata_ioports *port, void __iomem *base)
 	port->ctl_addr		= base + VSC_SATA_TF_CTL_OFFSET;
 	port->bmdma_addr	= base + VSC_SATA_DMA_CMD_OFFSET;
 	port->scr_addr		= base + VSC_SATA_SCR_STATUS_OFFSET;
-	writel(0, base + VSC_SATA_UP_DESCRIPTOR_OFFSET);
-	writel(0, base + VSC_SATA_UP_DATA_BUFFER_OFFSET);
+	pete_writel("drivers/ata/sata_vsc.c:315", 0, base + VSC_SATA_UP_DESCRIPTOR_OFFSET);
+	pete_writel("drivers/ata/sata_vsc.c:316", 0, base + VSC_SATA_UP_DATA_BUFFER_OFFSET);
 }
 
 

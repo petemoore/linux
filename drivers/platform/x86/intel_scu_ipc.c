@@ -191,7 +191,7 @@ EXPORT_SYMBOL_GPL(devm_intel_scu_ipc_dev_get);
 static inline void ipc_command(struct intel_scu_ipc_dev *scu, u32 cmd)
 {
 	reinit_completion(&scu->cmd_complete);
-	writel(cmd | IPC_IOC, scu->ipc_base);
+	pete_writel("drivers/platform/x86/intel_scu_ipc.c:194", cmd | IPC_IOC, scu->ipc_base);
 }
 
 /*
@@ -202,7 +202,7 @@ static inline void ipc_command(struct intel_scu_ipc_dev *scu, u32 cmd)
  */
 static inline void ipc_data_writel(struct intel_scu_ipc_dev *scu, u32 data, u32 offset)
 {
-	writel(data, scu->ipc_base + IPC_WRITE_BUFFER + offset);
+	pete_writel("drivers/platform/x86/intel_scu_ipc.c:205", data, scu->ipc_base + IPC_WRITE_BUFFER + offset);
 }
 
 /*
@@ -226,7 +226,7 @@ static inline u8 ipc_data_readb(struct intel_scu_ipc_dev *scu, u32 offset)
 /* Read ipc u32 data */
 static inline u32 ipc_data_readl(struct intel_scu_ipc_dev *scu, u32 offset)
 {
-	return readl(scu->ipc_base + IPC_READ_BUFFER + offset);
+	return pete_readl("drivers/platform/x86/intel_scu_ipc.c:229", scu->ipc_base + IPC_READ_BUFFER + offset);
 }
 
 /* Wait till scu status is busy */
@@ -528,7 +528,7 @@ static irqreturn_t ioc(int irq, void *dev_id)
 	struct intel_scu_ipc_dev *scu = dev_id;
 	int status = ipc_read_status(scu);
 
-	writel(status | IPC_STATUS_IRQ, scu->ipc_base + IPC_STATUS);
+	pete_writel("drivers/platform/x86/intel_scu_ipc.c:531", status | IPC_STATUS_IRQ, scu->ipc_base + IPC_STATUS);
 	complete(&scu->cmd_complete);
 
 	return IRQ_HANDLED;

@@ -78,7 +78,7 @@ int nfp_app_set_vf_mac(struct net_device *netdev, int vf, u8 *mac)
 
 	/* Write MAC to VF entry in VF config symbol */
 	vf_offset = NFP_NET_VF_CFG_MB_SZ + vf * NFP_NET_VF_CFG_SZ;
-	writel(get_unaligned_be32(mac), app->pf->vfcfg_tbl2 + vf_offset);
+	pete_writel("drivers/net/ethernet/netronome/nfp/nfp_net_sriov.c:81", get_unaligned_be32(mac), app->pf->vfcfg_tbl2 + vf_offset);
 	writew(get_unaligned_be16(mac + 4),
 	       app->pf->vfcfg_tbl2 + vf_offset + NFP_NET_VF_CFG_MAC_LO);
 
@@ -221,7 +221,7 @@ int nfp_app_get_vf_config(struct net_device *netdev, int vf,
 
 	vf_offset = NFP_NET_VF_CFG_MB_SZ + vf * NFP_NET_VF_CFG_SZ;
 
-	mac_hi = readl(app->pf->vfcfg_tbl2 + vf_offset);
+	mac_hi = pete_readl("drivers/net/ethernet/netronome/nfp/nfp_net_sriov.c:224", app->pf->vfcfg_tbl2 + vf_offset);
 	mac_lo = readw(app->pf->vfcfg_tbl2 + vf_offset + NFP_NET_VF_CFG_MAC_LO);
 
 	flags = readb(app->pf->vfcfg_tbl2 + vf_offset + NFP_NET_VF_CFG_CTRL);

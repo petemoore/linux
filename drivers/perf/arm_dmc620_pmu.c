@@ -237,14 +237,14 @@ static inline
 u32 dmc620_pmu_creg_read(struct dmc620_pmu *dmc620_pmu,
 			unsigned int idx, unsigned int reg)
 {
-	return readl(dmc620_pmu->base + DMC620_PMU_COUNTERn_OFFSET(idx) + reg);
+	return pete_readl("drivers/perf/arm_dmc620_pmu.c:240", dmc620_pmu->base + DMC620_PMU_COUNTERn_OFFSET(idx) + reg);
 }
 
 static inline
 void dmc620_pmu_creg_write(struct dmc620_pmu *dmc620_pmu,
 			unsigned int idx, unsigned int reg, u32 val)
 {
-	writel(val, dmc620_pmu->base + DMC620_PMU_COUNTERn_OFFSET(idx) + reg);
+	pete_writel("drivers/perf/arm_dmc620_pmu.c:247", val, dmc620_pmu->base + DMC620_PMU_COUNTERn_OFFSET(idx) + reg);
 }
 
 static
@@ -360,8 +360,8 @@ static irqreturn_t dmc620_pmu_handle_irq(int irq_num, void *data)
 			dmc620_pmu_disable_counter(event);
 		}
 
-		status = readl(dmc620_pmu->base + DMC620_PMU_OVERFLOW_STATUS_CLKDIV2);
-		status |= (readl(dmc620_pmu->base + DMC620_PMU_OVERFLOW_STATUS_CLK) <<
+		status = pete_readl("drivers/perf/arm_dmc620_pmu.c:363", dmc620_pmu->base + DMC620_PMU_OVERFLOW_STATUS_CLKDIV2);
+		status |= (pete_readl("drivers/perf/arm_dmc620_pmu.c:364", dmc620_pmu->base + DMC620_PMU_OVERFLOW_STATUS_CLK) <<
 				DMC620_PMU_CLKDIV2_MAX_COUNTERS);
 		if (status) {
 			for_each_set_bit(idx, &status,
@@ -374,11 +374,11 @@ static irqreturn_t dmc620_pmu_handle_irq(int irq_num, void *data)
 			}
 
 			if (status & DMC620_PMU_OVERFLOW_STATUS_CLKDIV2_MASK)
-				writel(0, dmc620_pmu->base + DMC620_PMU_OVERFLOW_STATUS_CLKDIV2);
+				pete_writel("drivers/perf/arm_dmc620_pmu.c:377", 0, dmc620_pmu->base + DMC620_PMU_OVERFLOW_STATUS_CLKDIV2);
 
 			if ((status >> DMC620_PMU_CLKDIV2_MAX_COUNTERS) &
 				DMC620_PMU_OVERFLOW_STATUS_CLK_MASK)
-				writel(0, dmc620_pmu->base + DMC620_PMU_OVERFLOW_STATUS_CLK);
+				pete_writel("drivers/perf/arm_dmc620_pmu.c:381", 0, dmc620_pmu->base + DMC620_PMU_OVERFLOW_STATUS_CLK);
 		}
 
 		for (idx = 0; idx < DMC620_PMU_MAX_COUNTERS; idx++) {
@@ -663,8 +663,8 @@ static int dmc620_pmu_device_probe(struct platform_device *pdev)
 	/* Make sure device is reset before enabling interrupt */
 	for (i = 0; i < DMC620_PMU_MAX_COUNTERS; i++)
 		dmc620_pmu_creg_write(dmc620_pmu, i, DMC620_PMU_COUNTERn_CONTROL, 0);
-	writel(0, dmc620_pmu->base + DMC620_PMU_OVERFLOW_STATUS_CLKDIV2);
-	writel(0, dmc620_pmu->base + DMC620_PMU_OVERFLOW_STATUS_CLK);
+	pete_writel("drivers/perf/arm_dmc620_pmu.c:666", 0, dmc620_pmu->base + DMC620_PMU_OVERFLOW_STATUS_CLKDIV2);
+	pete_writel("drivers/perf/arm_dmc620_pmu.c:667", 0, dmc620_pmu->base + DMC620_PMU_OVERFLOW_STATUS_CLK);
 
 	irq_num = platform_get_irq(pdev, 0);
 	if (irq_num < 0)

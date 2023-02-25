@@ -82,12 +82,12 @@ static unsigned long bgpio_read16(void __iomem *reg)
 
 static void bgpio_write32(void __iomem *reg, unsigned long data)
 {
-	writel(data, reg);
+	pete_writel("drivers/gpio/gpio-mmio.c:85", data, reg);
 }
 
 static unsigned long bgpio_read32(void __iomem *reg)
 {
-	return readl(reg);
+	return pete_readl("drivers/gpio/gpio-mmio.c:90", reg);
 }
 
 #if BITS_PER_LONG >= 64

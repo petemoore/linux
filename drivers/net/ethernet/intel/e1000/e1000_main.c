@@ -2005,8 +2005,8 @@ static void e1000_clean_tx_ring(struct e1000_adapter *adapter,
 	tx_ring->next_to_clean = 0;
 	tx_ring->last_tx_tso = false;
 
-	writel(0, hw->hw_addr + tx_ring->tdh);
-	writel(0, hw->hw_addr + tx_ring->tdt);
+	pete_writel("drivers/net/ethernet/intel/e1000/e1000_main.c:2008", 0, hw->hw_addr + tx_ring->tdh);
+	pete_writel("drivers/net/ethernet/intel/e1000/e1000_main.c:2009", 0, hw->hw_addr + tx_ring->tdt);
 }
 
 /**
@@ -2128,8 +2128,8 @@ static void e1000_clean_rx_ring(struct e1000_adapter *adapter,
 	rx_ring->next_to_clean = 0;
 	rx_ring->next_to_use = 0;
 
-	writel(0, hw->hw_addr + rx_ring->rdh);
-	writel(0, hw->hw_addr + rx_ring->rdt);
+	pete_writel("drivers/net/ethernet/intel/e1000/e1000_main.c:2131", 0, hw->hw_addr + rx_ring->rdh);
+	pete_writel("drivers/net/ethernet/intel/e1000/e1000_main.c:2132", 0, hw->hw_addr + rx_ring->rdt);
 }
 
 /**
@@ -3270,7 +3270,7 @@ static netdev_tx_t e1000_xmit_frame(struct sk_buff *skb,
 
 		if (!netdev_xmit_more() ||
 		    netif_xmit_stopped(netdev_get_tx_queue(netdev, 0))) {
-			writel(tx_ring->next_to_use, hw->hw_addr + tx_ring->tdt);
+			pete_writel("drivers/net/ethernet/intel/e1000/e1000_main.c:3273", tx_ring->next_to_use, hw->hw_addr + tx_ring->tdt);
 		}
 	} else {
 		dev_kfree_skb_any(skb);
@@ -3467,20 +3467,20 @@ rx_ring_summary:
 	for (i = 0x6000; i <= 0x63FF ; i += 0x10) {
 		pr_info("R%04X: %08X|%08X %08X|%08X\n",
 			i,
-			readl(adapter->hw.hw_addr + i+4),
-			readl(adapter->hw.hw_addr + i),
-			readl(adapter->hw.hw_addr + i+12),
-			readl(adapter->hw.hw_addr + i+8));
+			pete_readl("drivers/net/ethernet/intel/e1000/e1000_main.c:3470", adapter->hw.hw_addr + i+4),
+			pete_readl("drivers/net/ethernet/intel/e1000/e1000_main.c:3471", adapter->hw.hw_addr + i),
+			pete_readl("drivers/net/ethernet/intel/e1000/e1000_main.c:3472", adapter->hw.hw_addr + i+12),
+			pete_readl("drivers/net/ethernet/intel/e1000/e1000_main.c:3473", adapter->hw.hw_addr + i+8));
 	}
 	/* tx */
 	pr_info("Tx descriptor cache in 64bit format\n");
 	for (i = 0x7000; i <= 0x73FF ; i += 0x10) {
 		pr_info("T%04X: %08X|%08X %08X|%08X\n",
 			i,
-			readl(adapter->hw.hw_addr + i+4),
-			readl(adapter->hw.hw_addr + i),
-			readl(adapter->hw.hw_addr + i+12),
-			readl(adapter->hw.hw_addr + i+8));
+			pete_readl("drivers/net/ethernet/intel/e1000/e1000_main.c:3480", adapter->hw.hw_addr + i+4),
+			pete_readl("drivers/net/ethernet/intel/e1000/e1000_main.c:3481", adapter->hw.hw_addr + i),
+			pete_readl("drivers/net/ethernet/intel/e1000/e1000_main.c:3482", adapter->hw.hw_addr + i+12),
+			pete_readl("drivers/net/ethernet/intel/e1000/e1000_main.c:3483", adapter->hw.hw_addr + i+8));
 	}
 exit:
 	return;
@@ -3912,8 +3912,8 @@ static bool e1000_clean_tx_irq(struct e1000_adapter *adapter,
 			      "  jiffies              <%lx>\n"
 			      "  next_to_watch.status <%x>\n",
 				(unsigned long)(tx_ring - adapter->tx_ring),
-				readl(hw->hw_addr + tx_ring->tdh),
-				readl(hw->hw_addr + tx_ring->tdt),
+				pete_readl("drivers/net/ethernet/intel/e1000/e1000_main.c:3915", hw->hw_addr + tx_ring->tdh),
+				pete_readl("drivers/net/ethernet/intel/e1000/e1000_main.c:3916", hw->hw_addr + tx_ring->tdt),
 				tx_ring->next_to_use,
 				tx_ring->next_to_clean,
 				tx_ring->buffer_info[eop].time_stamp,
@@ -4548,7 +4548,7 @@ e1000_alloc_jumbo_rx_buffers(struct e1000_adapter *adapter,
 		 * such as IA-64).
 		 */
 		dma_wmb();
-		writel(i, adapter->hw.hw_addr + rx_ring->rdt);
+		pete_writel("drivers/net/ethernet/intel/e1000/e1000_main.c:4551", i, adapter->hw.hw_addr + rx_ring->rdt);
 	}
 }
 
@@ -4665,7 +4665,7 @@ static void e1000_alloc_rx_buffers(struct e1000_adapter *adapter,
 		 * such as IA-64).
 		 */
 		dma_wmb();
-		writel(i, hw->hw_addr + rx_ring->rdt);
+		pete_writel("drivers/net/ethernet/intel/e1000/e1000_main.c:4668", i, hw->hw_addr + rx_ring->rdt);
 	}
 }
 

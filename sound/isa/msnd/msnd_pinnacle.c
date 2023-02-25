@@ -356,8 +356,8 @@ static int snd_msnd_init_sma(struct snd_msnd *chip)
 	writew(mastVolLeft, chip->SMA + SMA_wCurrMastVolLeft);
 	writew(mastVolRight, chip->SMA + SMA_wCurrMastVolRight);
 #ifndef MSND_CLASSIC
-	writel(0x00010000, chip->SMA + SMA_dwCurrPlayPitch);
-	writel(0x00000001, chip->SMA + SMA_dwCurrPlayRate);
+	pete_writel("sound/isa/msnd/msnd_pinnacle.c:359", 0x00010000, chip->SMA + SMA_dwCurrPlayPitch);
+	pete_writel("sound/isa/msnd/msnd_pinnacle.c:360", 0x00000001, chip->SMA + SMA_dwCurrPlayRate);
 #endif
 	writew(0x303, chip->SMA + SMA_wCurrInputTagBits);
 

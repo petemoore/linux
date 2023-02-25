@@ -49,8 +49,8 @@
 #define sca_out(value, reg, card)    writeb(value, (card)->scabase + (reg))
 #define sca_inw(reg, card)	     readw((card)->scabase + (reg))
 #define sca_outw(value, reg, card)   writew(value, (card)->scabase + (reg))
-#define sca_inl(reg, card)	     readl((card)->scabase + (reg))
-#define sca_outl(value, reg, card)   writel(value, (card)->scabase + (reg))
+#define sca_inl(reg, card)	     pete_readl("drivers/net/wan/hd64572.c:52", (card)->scabase + (reg))
+#define sca_outl(value, reg, card)   pete_writel("drivers/net/wan/hd64572.c:53", value, (card)->scabase + (reg))
 
 static int sca_poll(struct napi_struct *napi, int budget);
 
@@ -136,8 +136,8 @@ static void sca_init_port(port_t *port)
 			u16 chain_off = desc_offset(port, i + 1, transmit);
 			u32 buff_off = buffer_offset(port, i, transmit);
 
-			writel(chain_off, &desc->cp);
-			writel(buff_off, &desc->bp);
+			pete_writel("drivers/net/wan/hd64572.c:139", chain_off, &desc->cp);
+			pete_writel("drivers/net/wan/hd64572.c:140", buff_off, &desc->bp);
 			writew(0, &desc->len);
 			writeb(0, &desc->stat);
 		}
@@ -608,11 +608,11 @@ static u32 sca_detect_ram(card_t *card, u8 __iomem *rambase, u32 ramsize)
 
 	do {
 		i -= 4;
-		writel(i ^ 0x12345678, rambase + i);
+		pete_writel("drivers/net/wan/hd64572.c:611", i ^ 0x12345678, rambase + i);
 	} while (i > 0);
 
 	for (i = 0; i < ramsize ; i += 4) {
-		if (readl(rambase + i) != (i ^ 0x12345678))
+		if (pete_readl("drivers/net/wan/hd64572.c:615", rambase + i) != (i ^ 0x12345678))
 			break;
 	}
 

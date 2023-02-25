@@ -513,9 +513,9 @@ static void cpsw_init_host_port_switch(struct cpsw_common *cpsw)
 {
 	int vlan = cpsw->data.default_vlan;
 
-	writel(CPSW_FIFO_NORMAL_MODE, &cpsw->host_port_regs->tx_in_ctl);
+	pete_writel("drivers/net/ethernet/ti/cpsw_new.c:516", CPSW_FIFO_NORMAL_MODE, &cpsw->host_port_regs->tx_in_ctl);
 
-	writel(vlan, &cpsw->host_port_regs->port_vlan);
+	pete_writel("drivers/net/ethernet/ti/cpsw_new.c:518", vlan, &cpsw->host_port_regs->port_vlan);
 
 	cpsw_ale_add_vlan(cpsw->ale, vlan, ALE_ALL_PORTS,
 			  ALE_ALL_PORTS, ALE_ALL_PORTS,
@@ -532,12 +532,12 @@ static void cpsw_init_host_port_dual_mac(struct cpsw_common *cpsw)
 {
 	int vlan = cpsw->data.default_vlan;
 
-	writel(CPSW_FIFO_DUAL_MAC_MODE, &cpsw->host_port_regs->tx_in_ctl);
+	pete_writel("drivers/net/ethernet/ti/cpsw_new.c:535", CPSW_FIFO_DUAL_MAC_MODE, &cpsw->host_port_regs->tx_in_ctl);
 
 	cpsw_ale_control_set(cpsw->ale, HOST_PORT_NUM, ALE_P0_UNI_FLOOD, 0);
 	dev_dbg(cpsw->dev, "unset P0_UNI_FLOOD\n");
 
-	writel(vlan, &cpsw->host_port_regs->port_vlan);
+	pete_writel("drivers/net/ethernet/ti/cpsw_new.c:540", vlan, &cpsw->host_port_regs->port_vlan);
 
 	cpsw_ale_add_vlan(cpsw->ale, vlan, ALE_ALL_PORTS, ALE_ALL_PORTS, 0, 0);
 	/* learning make no sense in dual_mac mode */
@@ -556,9 +556,9 @@ static void cpsw_init_host_port(struct cpsw_priv *priv)
 	/* switch to vlan unaware mode */
 	cpsw_ale_control_set(cpsw->ale, HOST_PORT_NUM, ALE_VLAN_AWARE,
 			     CPSW_ALE_VLAN_AWARE);
-	control_reg = readl(&cpsw->regs->control);
+	control_reg = pete_readl("drivers/net/ethernet/ti/cpsw_new.c:559", &cpsw->regs->control);
 	control_reg |= CPSW_VLAN_AWARE | CPSW_RX_VLAN_ENCAP;
-	writel(control_reg, &cpsw->regs->control);
+	pete_writel("drivers/net/ethernet/ti/cpsw_new.c:561", control_reg, &cpsw->regs->control);
 
 	/* setup host port priority mapping */
 	writel_relaxed(CPDMA_TX_PRIORITY_MAP,
@@ -572,7 +572,7 @@ static void cpsw_init_host_port(struct cpsw_priv *priv)
 	writel_relaxed(0x7, &cpsw->regs->stat_port_en);
 
 	/* Enable internal fifo flow control */
-	writel(0x7, &cpsw->regs->flow_control);
+	pete_writel("drivers/net/ethernet/ti/cpsw_new.c:575", 0x7, &cpsw->regs->flow_control);
 
 	if (cpsw_is_switch_en(cpsw))
 		cpsw_init_host_port_switch(cpsw);
@@ -870,7 +870,7 @@ static int cpsw_ndo_open(struct net_device *ndev)
 			if (cpts_register(cpsw->cpts))
 				dev_err(priv->dev, "error registering cpts device\n");
 			else
-				writel(0x10, &cpsw->wr_regs->misc_en);
+				pete_writel("drivers/net/ethernet/ti/cpsw_new.c:873", 0x10, &cpsw->wr_regs->misc_en);
 		}
 
 		napi_enable(&cpsw->napi_rx);

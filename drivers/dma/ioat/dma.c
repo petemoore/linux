@@ -106,7 +106,7 @@ irqreturn_t ioat_dma_do_interrupt(int irq, void *data)
 		return IRQ_NONE;
 	}
 
-	attnstatus = readl(instance->reg_base + IOAT_ATTNSTATUS_OFFSET);
+	attnstatus = pete_readl("drivers/dma/ioat/dma.c:109", instance->reg_base + IOAT_ATTNSTATUS_OFFSET);
 	for_each_set_bit(bit, &attnstatus, BITS_PER_LONG) {
 		ioat_chan = ioat_chan_by_index(instance, bit);
 		if (test_bit(IOAT_RUN, &ioat_chan->state))
@@ -678,7 +678,7 @@ static void ioat_cleanup(struct ioatdma_chan *ioat_chan)
 		__cleanup(ioat_chan, phys_complete);
 
 	if (is_ioat_halted(*ioat_chan->completion)) {
-		u32 chanerr = readl(ioat_chan->reg_base + IOAT_CHANERR_OFFSET);
+		u32 chanerr = pete_readl("drivers/dma/ioat/dma.c:681", ioat_chan->reg_base + IOAT_CHANERR_OFFSET);
 
 		if (chanerr &
 		    (IOAT_CHANERR_HANDLE_MASK | IOAT_CHANERR_RECOVER_MASK)) {
@@ -705,9 +705,9 @@ static void ioat_restart_channel(struct ioatdma_chan *ioat_chan)
 	u64 phys_complete;
 
 	/* set the completion address register again */
-	writel(lower_32_bits(ioat_chan->completion_dma),
+	pete_writel("drivers/dma/ioat/dma.c:708", lower_32_bits(ioat_chan->completion_dma),
 	       ioat_chan->reg_base + IOAT_CHANCMP_OFFSET_LOW);
-	writel(upper_32_bits(ioat_chan->completion_dma),
+	pete_writel("drivers/dma/ioat/dma.c:710", upper_32_bits(ioat_chan->completion_dma),
 	       ioat_chan->reg_base + IOAT_CHANCMP_OFFSET_HIGH);
 
 	ioat_quiesce(ioat_chan, 0);
@@ -788,7 +788,7 @@ static void ioat_eh(struct ioatdma_chan *ioat_chan)
 	if (ioat_cleanup_preamble(ioat_chan, &phys_complete))
 		__cleanup(ioat_chan, phys_complete);
 
-	chanerr = readl(ioat_chan->reg_base + IOAT_CHANERR_OFFSET);
+	chanerr = pete_readl("drivers/dma/ioat/dma.c:791", ioat_chan->reg_base + IOAT_CHANERR_OFFSET);
 	pci_read_config_dword(pdev, IOAT_PCI_CHANERR_INT_OFFSET, &chanerr_int);
 
 	dev_dbg(to_dev(ioat_chan), "%s: error = %x:%x\n",
@@ -864,7 +864,7 @@ static void ioat_eh(struct ioatdma_chan *ioat_chan)
 		ioat_reset_hw(ioat_chan);
 	}
 
-	writel(chanerr, ioat_chan->reg_base + IOAT_CHANERR_OFFSET);
+	pete_writel("drivers/dma/ioat/dma.c:867", chanerr, ioat_chan->reg_base + IOAT_CHANERR_OFFSET);
 	pci_write_config_dword(pdev, IOAT_PCI_CHANERR_INT_OFFSET, chanerr_int);
 
 	ioat_restart_channel(ioat_chan);
@@ -913,7 +913,7 @@ void ioat_timer_event(struct timer_list *t)
 	if (is_ioat_halted(status)) {
 		u32 chanerr;
 
-		chanerr = readl(ioat_chan->reg_base + IOAT_CHANERR_OFFSET);
+		chanerr = pete_readl("drivers/dma/ioat/dma.c:916", ioat_chan->reg_base + IOAT_CHANERR_OFFSET);
 		dev_err(to_dev(ioat_chan), "%s: Channel halted (%x)\n",
 			__func__, chanerr);
 		dev_err(to_dev(ioat_chan), "Errors:\n");
@@ -954,7 +954,7 @@ void ioat_timer_event(struct timer_list *t)
 	if (test_bit(IOAT_COMPLETION_ACK, &ioat_chan->state)) {
 		u32 chanerr;
 
-		chanerr = readl(ioat_chan->reg_base + IOAT_CHANERR_OFFSET);
+		chanerr = pete_readl("drivers/dma/ioat/dma.c:957", ioat_chan->reg_base + IOAT_CHANERR_OFFSET);
 		dev_err(to_dev(ioat_chan), "CHANSTS: %#Lx CHANERR: %#x\n",
 			status, chanerr);
 		dev_err(to_dev(ioat_chan), "Errors:\n");
@@ -1012,8 +1012,8 @@ int ioat_reset_hw(struct ioatdma_chan *ioat_chan)
 
 	ioat_quiesce(ioat_chan, msecs_to_jiffies(100));
 
-	chanerr = readl(ioat_chan->reg_base + IOAT_CHANERR_OFFSET);
-	writel(chanerr, ioat_chan->reg_base + IOAT_CHANERR_OFFSET);
+	chanerr = pete_readl("drivers/dma/ioat/dma.c:1015", ioat_chan->reg_base + IOAT_CHANERR_OFFSET);
+	pete_writel("drivers/dma/ioat/dma.c:1016", chanerr, ioat_chan->reg_base + IOAT_CHANERR_OFFSET);
 
 	if (ioat_dma->version < IOAT_VER_3_3) {
 		/* clear any pending errors */

@@ -4195,7 +4195,7 @@ static int goya_debugfs_read32(struct hl_device *hdev, u64 addr,
 	} else if ((addr >= SRAM_BASE_ADDR) &&
 			(addr < SRAM_BASE_ADDR + SRAM_SIZE)) {
 
-		*val = readl(hdev->pcie_bar[SRAM_CFG_BAR_ID] +
+		*val = pete_readl("drivers/misc/habanalabs/goya/goya.c:4198", hdev->pcie_bar[SRAM_CFG_BAR_ID] +
 				(addr - SRAM_BASE_ADDR));
 
 	} else if (addr < DRAM_PHYS_BASE + hdev->asic_prop.dram_size) {
@@ -4205,7 +4205,7 @@ static int goya_debugfs_read32(struct hl_device *hdev, u64 addr,
 
 		ddr_bar_addr = goya_set_ddr_bar_base(hdev, bar_base_addr);
 		if (ddr_bar_addr != U64_MAX) {
-			*val = readl(hdev->pcie_bar[DDR_BAR_ID] +
+			*val = pete_readl("drivers/misc/habanalabs/goya/goya.c:4208", hdev->pcie_bar[DDR_BAR_ID] +
 						(addr - bar_base_addr));
 
 			ddr_bar_addr = goya_set_ddr_bar_base(hdev,
@@ -4255,7 +4255,7 @@ static int goya_debugfs_write32(struct hl_device *hdev, u64 addr,
 	} else if ((addr >= SRAM_BASE_ADDR) &&
 			(addr < SRAM_BASE_ADDR + SRAM_SIZE)) {
 
-		writel(val, hdev->pcie_bar[SRAM_CFG_BAR_ID] +
+		pete_writel("drivers/misc/habanalabs/goya/goya.c:4258", val, hdev->pcie_bar[SRAM_CFG_BAR_ID] +
 					(addr - SRAM_BASE_ADDR));
 
 	} else if (addr < DRAM_PHYS_BASE + hdev->asic_prop.dram_size) {
@@ -4265,7 +4265,7 @@ static int goya_debugfs_write32(struct hl_device *hdev, u64 addr,
 
 		ddr_bar_addr = goya_set_ddr_bar_base(hdev, bar_base_addr);
 		if (ddr_bar_addr != U64_MAX) {
-			writel(val, hdev->pcie_bar[DDR_BAR_ID] +
+			pete_writel("drivers/misc/habanalabs/goya/goya.c:4268", val, hdev->pcie_bar[DDR_BAR_ID] +
 						(addr - bar_base_addr));
 
 			ddr_bar_addr = goya_set_ddr_bar_base(hdev,

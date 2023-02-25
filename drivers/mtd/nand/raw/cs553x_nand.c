@@ -233,7 +233,7 @@ static int cs_calculate_ecc(struct nand_chip *this, const u_char *dat,
 	struct cs553x_nand_controller *cs553x = to_cs553x(this->controller);
 	uint32_t ecc;
 
-	ecc = readl(cs553x->mmio + MM_NAND_STS);
+	ecc = pete_readl("drivers/mtd/nand/raw/cs553x_nand.c:236", cs553x->mmio + MM_NAND_STS);
 
 	ecc_code[1] = ecc >> 8;
 	ecc_code[0] = ecc >> 16;

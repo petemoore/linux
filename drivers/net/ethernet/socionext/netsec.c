@@ -330,12 +330,12 @@ struct netsec_rx_pkt_info {
 
 static void netsec_write(struct netsec_priv *priv, u32 reg_addr, u32 val)
 {
-	writel(val, priv->ioaddr + reg_addr);
+	pete_writel("drivers/net/ethernet/socionext/netsec.c:333", val, priv->ioaddr + reg_addr);
 }
 
 static u32 netsec_read(struct netsec_priv *priv, u32 reg_addr)
 {
-	return readl(priv->ioaddr + reg_addr);
+	return pete_readl("drivers/net/ethernet/socionext/netsec.c:338", priv->ioaddr + reg_addr);
 }
 
 /************* MDIO BUS OPS FOLLOW *************/
@@ -1359,7 +1359,7 @@ static int netsec_netdev_load_ucode_region(struct netsec_priv *priv, u32 reg,
 		return -ENOMEM;
 
 	for (i = 0; i < size; i++)
-		netsec_write(priv, reg, readl(ucode + i * 4));
+		netsec_write(priv, reg, pete_readl("drivers/net/ethernet/socionext/netsec.c:1362", ucode + i * 4));
 
 	iounmap(ucode);
 	return 0;
@@ -1370,25 +1370,25 @@ static int netsec_netdev_load_microcode(struct netsec_priv *priv)
 	u32 addr_h, addr_l, size;
 	int err;
 
-	addr_h = readl(priv->eeprom_base + NETSEC_EEPROM_HM_ME_ADDRESS_H);
-	addr_l = readl(priv->eeprom_base + NETSEC_EEPROM_HM_ME_ADDRESS_L);
-	size = readl(priv->eeprom_base + NETSEC_EEPROM_HM_ME_SIZE);
+	addr_h = pete_readl("drivers/net/ethernet/socionext/netsec.c:1373", priv->eeprom_base + NETSEC_EEPROM_HM_ME_ADDRESS_H);
+	addr_l = pete_readl("drivers/net/ethernet/socionext/netsec.c:1374", priv->eeprom_base + NETSEC_EEPROM_HM_ME_ADDRESS_L);
+	size = pete_readl("drivers/net/ethernet/socionext/netsec.c:1375", priv->eeprom_base + NETSEC_EEPROM_HM_ME_SIZE);
 	err = netsec_netdev_load_ucode_region(priv, NETSEC_REG_DMAC_HM_CMD_BUF,
 					      addr_h, addr_l, size);
 	if (err)
 		return err;
 
-	addr_h = readl(priv->eeprom_base + NETSEC_EEPROM_MH_ME_ADDRESS_H);
-	addr_l = readl(priv->eeprom_base + NETSEC_EEPROM_MH_ME_ADDRESS_L);
-	size = readl(priv->eeprom_base + NETSEC_EEPROM_MH_ME_SIZE);
+	addr_h = pete_readl("drivers/net/ethernet/socionext/netsec.c:1381", priv->eeprom_base + NETSEC_EEPROM_MH_ME_ADDRESS_H);
+	addr_l = pete_readl("drivers/net/ethernet/socionext/netsec.c:1382", priv->eeprom_base + NETSEC_EEPROM_MH_ME_ADDRESS_L);
+	size = pete_readl("drivers/net/ethernet/socionext/netsec.c:1383", priv->eeprom_base + NETSEC_EEPROM_MH_ME_SIZE);
 	err = netsec_netdev_load_ucode_region(priv, NETSEC_REG_DMAC_MH_CMD_BUF,
 					      addr_h, addr_l, size);
 	if (err)
 		return err;
 
 	addr_h = 0;
-	addr_l = readl(priv->eeprom_base + NETSEC_EEPROM_PKT_ME_ADDRESS);
-	size = readl(priv->eeprom_base + NETSEC_EEPROM_PKT_ME_SIZE);
+	addr_l = pete_readl("drivers/net/ethernet/socionext/netsec.c:1390", priv->eeprom_base + NETSEC_EEPROM_PKT_ME_ADDRESS);
+	size = pete_readl("drivers/net/ethernet/socionext/netsec.c:1391", priv->eeprom_base + NETSEC_EEPROM_PKT_ME_SIZE);
 	err = netsec_netdev_load_ucode_region(priv, NETSEC_REG_PKT_CMD_BUF,
 					      addr_h, addr_l, size);
 	if (err)

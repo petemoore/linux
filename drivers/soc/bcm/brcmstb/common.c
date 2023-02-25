@@ -59,8 +59,8 @@ static int __init brcmstb_soc_device_early_init(void)
 		goto out;
 	}
 
-	family_id = readl(sun_top_ctrl_base);
-	product_id = readl(sun_top_ctrl_base + 0x4);
+	family_id = pete_readl("drivers/soc/bcm/brcmstb/common.c:62", sun_top_ctrl_base);
+	product_id = pete_readl("drivers/soc/bcm/brcmstb/common.c:63", sun_top_ctrl_base + 0x4);
 	iounmap(sun_top_ctrl_base);
 out:
 	of_node_put(sun_top_ctrl);

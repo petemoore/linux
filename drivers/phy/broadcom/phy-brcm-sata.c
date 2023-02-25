@@ -220,10 +220,10 @@ static void brcm_sata_phy_wr(struct brcm_sata_port *port, u32 bank,
 	else
 		pcb_base += (port->portnum * SATA_PCB_REG_28NM_SPACE_SIZE);
 
-	writel(bank, pcb_base + SATA_PCB_BANK_OFFSET);
-	tmp = readl(pcb_base + SATA_PCB_REG_OFFSET(ofs));
+	pete_writel("drivers/phy/broadcom/phy-brcm-sata.c:223", bank, pcb_base + SATA_PCB_BANK_OFFSET);
+	tmp = pete_readl("drivers/phy/broadcom/phy-brcm-sata.c:224", pcb_base + SATA_PCB_REG_OFFSET(ofs));
 	tmp = (tmp & msk) | value;
-	writel(tmp, pcb_base + SATA_PCB_REG_OFFSET(ofs));
+	pete_writel("drivers/phy/broadcom/phy-brcm-sata.c:226", tmp, pcb_base + SATA_PCB_REG_OFFSET(ofs));
 }
 
 static u32 brcm_sata_phy_rd(struct brcm_sata_port *port, u32 bank, u32 ofs)
@@ -236,8 +236,8 @@ static u32 brcm_sata_phy_rd(struct brcm_sata_port *port, u32 bank, u32 ofs)
 	else
 		pcb_base += (port->portnum * SATA_PCB_REG_28NM_SPACE_SIZE);
 
-	writel(bank, pcb_base + SATA_PCB_BANK_OFFSET);
-	return readl(pcb_base + SATA_PCB_REG_OFFSET(ofs));
+	pete_writel("drivers/phy/broadcom/phy-brcm-sata.c:239", bank, pcb_base + SATA_PCB_BANK_OFFSET);
+	return pete_readl("drivers/phy/broadcom/phy-brcm-sata.c:240", pcb_base + SATA_PCB_REG_OFFSET(ofs));
 }
 
 /* These defaults were characterized by H/W group */
@@ -459,9 +459,9 @@ static int brcm_ns2_sata_init(struct brcm_sata_port *port)
 			 BLOCK0_SPARE_OOB_CLK_SEL_REFBY2);
 
 	/* Strobe PHY reset using PHY control register */
-	writel(PHY_CTRL_1_RESET, ctrl_base + PHY_CTRL_1);
+	pete_writel("drivers/phy/broadcom/phy-brcm-sata.c:462", PHY_CTRL_1_RESET, ctrl_base + PHY_CTRL_1);
 	mdelay(1);
-	writel(0x0, ctrl_base + PHY_CTRL_1);
+	pete_writel("drivers/phy/broadcom/phy-brcm-sata.c:464", 0x0, ctrl_base + PHY_CTRL_1);
 	mdelay(1);
 
 	/* Wait for PHY PLL lock by polling pll_lock bit */

@@ -48,29 +48,29 @@ static int wm8505fb_init_hw(struct fb_info *info)
 
 	/* I know the purpose only of few registers, so clear unknown */
 	for (i = 0; i < 0x200; i += 4)
-		writel(0, fbi->regbase + i);
+		pete_writel("drivers/video/fbdev/wm8505fb.c:51", 0, fbi->regbase + i);
 
 	/* Set frame buffer address */
-	writel(fbi->fb.fix.smem_start, fbi->regbase + WMT_GOVR_FBADDR);
-	writel(fbi->fb.fix.smem_start, fbi->regbase + WMT_GOVR_FBADDR1);
+	pete_writel("drivers/video/fbdev/wm8505fb.c:54", fbi->fb.fix.smem_start, fbi->regbase + WMT_GOVR_FBADDR);
+	pete_writel("drivers/video/fbdev/wm8505fb.c:55", fbi->fb.fix.smem_start, fbi->regbase + WMT_GOVR_FBADDR1);
 
 	/*
 	 * Set in-memory picture format to RGB
 	 * 0x31C sets the correct color mode (RGB565) for WM8650
 	 * Bit 8+9 (0x300) are ignored on WM8505 as reserved
 	 */
-	writel(0x31c,		       fbi->regbase + WMT_GOVR_COLORSPACE);
-	writel(1,		       fbi->regbase + WMT_GOVR_COLORSPACE1);
+	pete_writel("drivers/video/fbdev/wm8505fb.c:62", 0x31c,		       fbi->regbase + WMT_GOVR_COLORSPACE);
+	pete_writel("drivers/video/fbdev/wm8505fb.c:63", 1,		       fbi->regbase + WMT_GOVR_COLORSPACE1);
 
 	/* Virtual buffer size */
-	writel(info->var.xres,	       fbi->regbase + WMT_GOVR_XRES);
-	writel(info->var.xres_virtual, fbi->regbase + WMT_GOVR_XRES_VIRTUAL);
+	pete_writel("drivers/video/fbdev/wm8505fb.c:66", info->var.xres,	       fbi->regbase + WMT_GOVR_XRES);
+	pete_writel("drivers/video/fbdev/wm8505fb.c:67", info->var.xres_virtual, fbi->regbase + WMT_GOVR_XRES_VIRTUAL);
 
 	/* black magic ;) */
-	writel(0xf,		       fbi->regbase + WMT_GOVR_FHI);
-	writel(4,		       fbi->regbase + WMT_GOVR_DVO_SET);
-	writel(1,		       fbi->regbase + WMT_GOVR_MIF_ENABLE);
-	writel(1,		       fbi->regbase + WMT_GOVR_REG_UPDATE);
+	pete_writel("drivers/video/fbdev/wm8505fb.c:70", 0xf,		       fbi->regbase + WMT_GOVR_FHI);
+	pete_writel("drivers/video/fbdev/wm8505fb.c:71", 4,		       fbi->regbase + WMT_GOVR_DVO_SET);
+	pete_writel("drivers/video/fbdev/wm8505fb.c:72", 1,		       fbi->regbase + WMT_GOVR_MIF_ENABLE);
+	pete_writel("drivers/video/fbdev/wm8505fb.c:73", 1,		       fbi->regbase + WMT_GOVR_REG_UPDATE);
 
 	return 0;
 }
@@ -89,19 +89,19 @@ static int wm8505fb_set_timing(struct fb_info *info)
 	int v_all = v_end + info->var.lower_margin;
 	int v_sync = info->var.vsync_len;
 
-	writel(0, fbi->regbase + WMT_GOVR_TG);
+	pete_writel("drivers/video/fbdev/wm8505fb.c:92", 0, fbi->regbase + WMT_GOVR_TG);
 
-	writel(h_start, fbi->regbase + WMT_GOVR_TIMING_H_START);
-	writel(h_end,   fbi->regbase + WMT_GOVR_TIMING_H_END);
-	writel(h_all,   fbi->regbase + WMT_GOVR_TIMING_H_ALL);
-	writel(h_sync,  fbi->regbase + WMT_GOVR_TIMING_H_SYNC);
+	pete_writel("drivers/video/fbdev/wm8505fb.c:94", h_start, fbi->regbase + WMT_GOVR_TIMING_H_START);
+	pete_writel("drivers/video/fbdev/wm8505fb.c:95", h_end,   fbi->regbase + WMT_GOVR_TIMING_H_END);
+	pete_writel("drivers/video/fbdev/wm8505fb.c:96", h_all,   fbi->regbase + WMT_GOVR_TIMING_H_ALL);
+	pete_writel("drivers/video/fbdev/wm8505fb.c:97", h_sync,  fbi->regbase + WMT_GOVR_TIMING_H_SYNC);
 
-	writel(v_start, fbi->regbase + WMT_GOVR_TIMING_V_START);
-	writel(v_end,   fbi->regbase + WMT_GOVR_TIMING_V_END);
-	writel(v_all,   fbi->regbase + WMT_GOVR_TIMING_V_ALL);
-	writel(v_sync,  fbi->regbase + WMT_GOVR_TIMING_V_SYNC);
+	pete_writel("drivers/video/fbdev/wm8505fb.c:99", v_start, fbi->regbase + WMT_GOVR_TIMING_V_START);
+	pete_writel("drivers/video/fbdev/wm8505fb.c:100", v_end,   fbi->regbase + WMT_GOVR_TIMING_V_END);
+	pete_writel("drivers/video/fbdev/wm8505fb.c:101", v_all,   fbi->regbase + WMT_GOVR_TIMING_V_ALL);
+	pete_writel("drivers/video/fbdev/wm8505fb.c:102", v_sync,  fbi->regbase + WMT_GOVR_TIMING_V_SYNC);
 
-	writel(1, fbi->regbase + WMT_GOVR_TG);
+	pete_writel("drivers/video/fbdev/wm8505fb.c:104", 1, fbi->regbase + WMT_GOVR_TG);
 
 	return 0;
 }
@@ -142,7 +142,7 @@ static int wm8505fb_set_par(struct fb_info *info)
 
 	wm8505fb_set_timing(info);
 
-	writel(fbi->contrast<<16 | fbi->contrast<<8 | fbi->contrast,
+	pete_writel("drivers/video/fbdev/wm8505fb.c:145", fbi->contrast<<16 | fbi->contrast<<8 | fbi->contrast,
 		fbi->regbase + WMT_GOVR_CONTRAST);
 
 	return 0;
@@ -225,8 +225,8 @@ static int wm8505fb_pan_display(struct fb_var_screeninfo *var,
 {
 	struct wm8505fb_info *fbi = to_wm8505fb_info(info);
 
-	writel(var->xoffset, fbi->regbase + WMT_GOVR_XPAN);
-	writel(var->yoffset, fbi->regbase + WMT_GOVR_YPAN);
+	pete_writel("drivers/video/fbdev/wm8505fb.c:228", var->xoffset, fbi->regbase + WMT_GOVR_XPAN);
+	pete_writel("drivers/video/fbdev/wm8505fb.c:229", var->yoffset, fbi->regbase + WMT_GOVR_YPAN);
 	return 0;
 }
 
@@ -239,7 +239,7 @@ static int wm8505fb_blank(int blank, struct fb_info *info)
 		wm8505fb_set_timing(info);
 		break;
 	default:
-		writel(0,  fbi->regbase + WMT_GOVR_TIMING_V_SYNC);
+		pete_writel("drivers/video/fbdev/wm8505fb.c:242", 0,  fbi->regbase + WMT_GOVR_TIMING_V_SYNC);
 		break;
 	}
 
@@ -380,7 +380,7 @@ static int wm8505fb_remove(struct platform_device *pdev)
 
 	unregister_framebuffer(&fbi->fb);
 
-	writel(0, fbi->regbase);
+	pete_writel("drivers/video/fbdev/wm8505fb.c:383", 0, fbi->regbase);
 
 	if (fbi->fb.cmap.len)
 		fb_dealloc_cmap(&fbi->fb.cmap);

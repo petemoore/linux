@@ -412,7 +412,7 @@ static int cdns_regmap_dptx_write(void *context, unsigned int reg,
 	struct cdns_regmap_cdb_context *ctx = context;
 	u32 offset = reg;
 
-	writel(val, ctx->base + offset);
+	pete_writel("drivers/phy/cadence/phy-cadence-torrent.c:415", val, ctx->base + offset);
 
 	return 0;
 }
@@ -423,7 +423,7 @@ static int cdns_regmap_dptx_read(void *context, unsigned int reg,
 	struct cdns_regmap_cdb_context *ctx = context;
 	u32 offset = reg;
 
-	*val = readl(ctx->base + offset);
+	*val = pete_readl("drivers/phy/cadence/phy-cadence-torrent.c:426", ctx->base + offset);
 	return 0;
 }
 

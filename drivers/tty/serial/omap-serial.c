@@ -1468,7 +1468,7 @@ static void omap_serial_fill_features_erratas(struct uart_omap_port *up)
 	u32 mvr, scheme;
 	u16 revision, major, minor;
 
-	mvr = readl(up->port.membase + (UART_OMAP_MVER << up->port.regshift));
+	mvr = pete_readl("drivers/tty/serial/omap-serial.c:1471", up->port.membase + (UART_OMAP_MVER << up->port.regshift));
 
 	/* Check revision register scheme */
 	scheme = mvr >> OMAP_UART_MVR_SCHEME_SHIFT;

@@ -61,8 +61,8 @@ MODULE_PARM_DESC(msi, "Control MSI interrupts: 0-disable (default), 1-enable");
 
 static void ddb_irq_disable(struct ddb *dev)
 {
-	ddbwritel(dev, 0, INTERRUPT_ENABLE);
-	ddbwritel(dev, 0, MSI1_ENABLE);
+	ddbpete_writel("drivers/media/pci/ddbridge/ddbridge-main.c:64", dev, 0, INTERRUPT_ENABLE);
+	ddbpete_writel("drivers/media/pci/ddbridge/ddbridge-main.c:65", dev, 0, MSI1_ENABLE);
 }
 
 static void ddb_msi_exit(struct ddb *dev)
@@ -123,14 +123,14 @@ static int ddb_irq_init(struct ddb *dev)
 	int stat;
 	int irq_flag = IRQF_SHARED;
 
-	ddbwritel(dev, 0x00000000, INTERRUPT_ENABLE);
-	ddbwritel(dev, 0x00000000, MSI1_ENABLE);
-	ddbwritel(dev, 0x00000000, MSI2_ENABLE);
-	ddbwritel(dev, 0x00000000, MSI3_ENABLE);
-	ddbwritel(dev, 0x00000000, MSI4_ENABLE);
-	ddbwritel(dev, 0x00000000, MSI5_ENABLE);
-	ddbwritel(dev, 0x00000000, MSI6_ENABLE);
-	ddbwritel(dev, 0x00000000, MSI7_ENABLE);
+	ddbpete_writel("drivers/media/pci/ddbridge/ddbridge-main.c:126", dev, 0x00000000, INTERRUPT_ENABLE);
+	ddbpete_writel("drivers/media/pci/ddbridge/ddbridge-main.c:127", dev, 0x00000000, MSI1_ENABLE);
+	ddbpete_writel("drivers/media/pci/ddbridge/ddbridge-main.c:128", dev, 0x00000000, MSI2_ENABLE);
+	ddbpete_writel("drivers/media/pci/ddbridge/ddbridge-main.c:129", dev, 0x00000000, MSI3_ENABLE);
+	ddbpete_writel("drivers/media/pci/ddbridge/ddbridge-main.c:130", dev, 0x00000000, MSI4_ENABLE);
+	ddbpete_writel("drivers/media/pci/ddbridge/ddbridge-main.c:131", dev, 0x00000000, MSI5_ENABLE);
+	ddbpete_writel("drivers/media/pci/ddbridge/ddbridge-main.c:132", dev, 0x00000000, MSI6_ENABLE);
+	ddbpete_writel("drivers/media/pci/ddbridge/ddbridge-main.c:133", dev, 0x00000000, MSI7_ENABLE);
 
 #ifdef CONFIG_PCI_MSI
 	ddb_irq_msi(dev, 2);
@@ -160,11 +160,11 @@ static int ddb_irq_init(struct ddb *dev)
 			return stat;
 	}
 	if (dev->msi == 2) {
-		ddbwritel(dev, 0x0fffff00, INTERRUPT_ENABLE);
-		ddbwritel(dev, 0x0000000f, MSI1_ENABLE);
+		ddbpete_writel("drivers/media/pci/ddbridge/ddbridge-main.c:163", dev, 0x0fffff00, INTERRUPT_ENABLE);
+		ddbpete_writel("drivers/media/pci/ddbridge/ddbridge-main.c:164", dev, 0x0000000f, MSI1_ENABLE);
 	} else {
-		ddbwritel(dev, 0x0fffff0f, INTERRUPT_ENABLE);
-		ddbwritel(dev, 0x00000000, MSI1_ENABLE);
+		ddbpete_writel("drivers/media/pci/ddbridge/ddbridge-main.c:166", dev, 0x0fffff0f, INTERRUPT_ENABLE);
+		ddbpete_writel("drivers/media/pci/ddbridge/ddbridge-main.c:167", dev, 0x00000000, MSI1_ENABLE);
 	}
 	return stat;
 }
@@ -215,20 +215,20 @@ static int ddb_probe(struct pci_dev *pdev,
 		stat = -ENOMEM;
 		goto fail;
 	}
-	if (ddbreadl(dev, 0) == 0xffffffff) {
+	if (ddbpete_readl("drivers/media/pci/ddbridge/ddbridge-main.c:218", dev, 0) == 0xffffffff) {
 		dev_err(&pdev->dev, "cannot read registers\n");
 		stat = -ENODEV;
 		goto fail;
 	}
 
-	dev->link[0].ids.hwid = ddbreadl(dev, 0);
-	dev->link[0].ids.regmapid = ddbreadl(dev, 4);
+	dev->link[0].ids.hwid = ddbpete_readl("drivers/media/pci/ddbridge/ddbridge-main.c:224", dev, 0);
+	dev->link[0].ids.regmapid = ddbpete_readl("drivers/media/pci/ddbridge/ddbridge-main.c:225", dev, 4);
 
 	dev_info(&pdev->dev, "HW %08x REGMAP %08x\n",
 		 dev->link[0].ids.hwid, dev->link[0].ids.regmapid);
 
-	ddbwritel(dev, 0, DMA_BASE_READ);
-	ddbwritel(dev, 0, DMA_BASE_WRITE);
+	ddbpete_writel("drivers/media/pci/ddbridge/ddbridge-main.c:230", dev, 0, DMA_BASE_READ);
+	ddbpete_writel("drivers/media/pci/ddbridge/ddbridge-main.c:231", dev, 0, DMA_BASE_WRITE);
 
 	stat = ddb_irq_init(dev);
 	if (stat < 0)

@@ -229,9 +229,9 @@ static int ns_pinctrl_set_mux(struct pinctrl_dev *pctrl_dev,
 		unset |= BIT(pin_number);
 	}
 
-	tmp = readl(ns_pinctrl->base);
+	tmp = pete_readl("drivers/pinctrl/bcm/pinctrl-ns.c:232", ns_pinctrl->base);
 	tmp &= ~unset;
-	writel(tmp, ns_pinctrl->base);
+	pete_writel("drivers/pinctrl/bcm/pinctrl-ns.c:234", tmp, ns_pinctrl->base);
 
 	return 0;
 }

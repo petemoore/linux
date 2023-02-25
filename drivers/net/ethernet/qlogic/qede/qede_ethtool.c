@@ -1507,7 +1507,7 @@ static int qede_selftest_transmit_traffic(struct qede_dev *edev,
 	 */
 	wmb();
 	barrier();
-	writel(txq->tx_db.raw, txq->doorbell_addr);
+	pete_writel("drivers/net/ethernet/qlogic/qede/qede_ethtool.c:1510", txq->tx_db.raw, txq->doorbell_addr);
 
 	for (i = 0; i < QEDE_SELFTEST_POLL_COUNT; i++) {
 		if (qede_txq_has_work(txq))

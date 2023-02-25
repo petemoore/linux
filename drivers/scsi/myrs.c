@@ -2397,35 +2397,35 @@ static inline void DAC960_GEM_hw_mbox_new_cmd(void __iomem *base)
 {
 	__le32 val = cpu_to_le32(DAC960_GEM_IDB_HWMBOX_NEW_CMD << 24);
 
-	writel(val, base + DAC960_GEM_IDB_READ_OFFSET);
+	pete_writel("drivers/scsi/myrs.c:2400", val, base + DAC960_GEM_IDB_READ_OFFSET);
 }
 
 static inline void DAC960_GEM_ack_hw_mbox_status(void __iomem *base)
 {
 	__le32 val = cpu_to_le32(DAC960_GEM_IDB_HWMBOX_ACK_STS << 24);
 
-	writel(val, base + DAC960_GEM_IDB_CLEAR_OFFSET);
+	pete_writel("drivers/scsi/myrs.c:2407", val, base + DAC960_GEM_IDB_CLEAR_OFFSET);
 }
 
 static inline void DAC960_GEM_reset_ctrl(void __iomem *base)
 {
 	__le32 val = cpu_to_le32(DAC960_GEM_IDB_CTRL_RESET << 24);
 
-	writel(val, base + DAC960_GEM_IDB_READ_OFFSET);
+	pete_writel("drivers/scsi/myrs.c:2414", val, base + DAC960_GEM_IDB_READ_OFFSET);
 }
 
 static inline void DAC960_GEM_mem_mbox_new_cmd(void __iomem *base)
 {
 	__le32 val = cpu_to_le32(DAC960_GEM_IDB_HWMBOX_NEW_CMD << 24);
 
-	writel(val, base + DAC960_GEM_IDB_READ_OFFSET);
+	pete_writel("drivers/scsi/myrs.c:2421", val, base + DAC960_GEM_IDB_READ_OFFSET);
 }
 
 static inline bool DAC960_GEM_hw_mbox_is_full(void __iomem *base)
 {
 	__le32 val;
 
-	val = readl(base + DAC960_GEM_IDB_READ_OFFSET);
+	val = pete_readl("drivers/scsi/myrs.c:2428", base + DAC960_GEM_IDB_READ_OFFSET);
 	return (le32_to_cpu(val) >> 24) & DAC960_GEM_IDB_HWMBOX_FULL;
 }
 
@@ -2433,7 +2433,7 @@ static inline bool DAC960_GEM_init_in_progress(void __iomem *base)
 {
 	__le32 val;
 
-	val = readl(base + DAC960_GEM_IDB_READ_OFFSET);
+	val = pete_readl("drivers/scsi/myrs.c:2436", base + DAC960_GEM_IDB_READ_OFFSET);
 	return (le32_to_cpu(val) >> 24) & DAC960_GEM_IDB_INIT_IN_PROGRESS;
 }
 
@@ -2441,7 +2441,7 @@ static inline void DAC960_GEM_ack_hw_mbox_intr(void __iomem *base)
 {
 	__le32 val = cpu_to_le32(DAC960_GEM_ODB_HWMBOX_ACK_IRQ << 24);
 
-	writel(val, base + DAC960_GEM_ODB_CLEAR_OFFSET);
+	pete_writel("drivers/scsi/myrs.c:2444", val, base + DAC960_GEM_ODB_CLEAR_OFFSET);
 }
 
 static inline void DAC960_GEM_ack_intr(void __iomem *base)
@@ -2449,14 +2449,14 @@ static inline void DAC960_GEM_ack_intr(void __iomem *base)
 	__le32 val = cpu_to_le32((DAC960_GEM_ODB_HWMBOX_ACK_IRQ |
 				  DAC960_GEM_ODB_MMBOX_ACK_IRQ) << 24);
 
-	writel(val, base + DAC960_GEM_ODB_CLEAR_OFFSET);
+	pete_writel("drivers/scsi/myrs.c:2452", val, base + DAC960_GEM_ODB_CLEAR_OFFSET);
 }
 
 static inline bool DAC960_GEM_hw_mbox_status_available(void __iomem *base)
 {
 	__le32 val;
 
-	val = readl(base + DAC960_GEM_ODB_READ_OFFSET);
+	val = pete_readl("drivers/scsi/myrs.c:2459", base + DAC960_GEM_ODB_READ_OFFSET);
 	return (le32_to_cpu(val) >> 24) & DAC960_GEM_ODB_HWMBOX_STS_AVAIL;
 }
 
@@ -2464,14 +2464,14 @@ static inline void DAC960_GEM_enable_intr(void __iomem *base)
 {
 	__le32 val = cpu_to_le32((DAC960_GEM_IRQMASK_HWMBOX_IRQ |
 				  DAC960_GEM_IRQMASK_MMBOX_IRQ) << 24);
-	writel(val, base + DAC960_GEM_IRQMASK_CLEAR_OFFSET);
+	pete_writel("drivers/scsi/myrs.c:2467", val, base + DAC960_GEM_IRQMASK_CLEAR_OFFSET);
 }
 
 static inline void DAC960_GEM_disable_intr(void __iomem *base)
 {
 	__le32 val = 0;
 
-	writel(val, base + DAC960_GEM_IRQMASK_READ_OFFSET);
+	pete_writel("drivers/scsi/myrs.c:2474", val, base + DAC960_GEM_IRQMASK_READ_OFFSET);
 }
 
 static inline void DAC960_GEM_write_cmd_mbox(union myrs_cmd_mbox *mem_mbox,
@@ -2503,13 +2503,13 @@ DAC960_GEM_read_error_status(void __iomem *base, unsigned char *error,
 {
 	__le32 val;
 
-	val = readl(base + DAC960_GEM_ERRSTS_READ_OFFSET);
+	val = pete_readl("drivers/scsi/myrs.c:2506", base + DAC960_GEM_ERRSTS_READ_OFFSET);
 	if (!((le32_to_cpu(val) >> 24) & DAC960_GEM_ERRSTS_PENDING))
 		return false;
 	*error = val & ~(DAC960_GEM_ERRSTS_PENDING << 24);
 	*param0 = readb(base + DAC960_GEM_CMDMBX_OFFSET + 0);
 	*param1 = readb(base + DAC960_GEM_CMDMBX_OFFSET + 1);
-	writel(0x03000000, base + DAC960_GEM_ERRSTS_CLEAR_OFFSET);
+	pete_writel("drivers/scsi/myrs.c:2512", 0x03000000, base + DAC960_GEM_ERRSTS_CLEAR_OFFSET);
 	return true;
 }
 

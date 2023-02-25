@@ -31,7 +31,7 @@ static inline u32 clk_div_readl(struct clk_divider *divider)
 	if (divider->flags & CLK_DIVIDER_BIG_ENDIAN)
 		return ioread32be(divider->reg);
 
-	return readl(divider->reg);
+	return pete_readl("drivers/clk/clk-divider.c:34", divider->reg);
 }
 
 static inline void clk_div_writel(struct clk_divider *divider, u32 val)
@@ -39,7 +39,7 @@ static inline void clk_div_writel(struct clk_divider *divider, u32 val)
 	if (divider->flags & CLK_DIVIDER_BIG_ENDIAN)
 		iowrite32be(val, divider->reg);
 	else
-		writel(val, divider->reg);
+		pete_writel("drivers/clk/clk-divider.c:42", val, divider->reg);
 }
 
 static unsigned int _get_table_maxdiv(const struct clk_div_table *table,

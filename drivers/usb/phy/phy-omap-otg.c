@@ -41,10 +41,10 @@ static void omap_otg_ctrl(struct otg_device *otg_dev, u32 outputs)
 {
 	u32 l;
 
-	l = readl(otg_dev->base + OMAP_OTG_CTRL);
+	l = pete_readl("drivers/usb/phy/phy-omap-otg.c:44", otg_dev->base + OMAP_OTG_CTRL);
 	l &= ~OMAP_OTG_XCEIV_OUTPUTS;
 	l |= outputs;
-	writel(l, otg_dev->base + OMAP_OTG_CTRL);
+	pete_writel("drivers/usb/phy/phy-omap-otg.c:47", l, otg_dev->base + OMAP_OTG_CTRL);
 }
 
 static void omap_otg_set_mode(struct otg_device *otg_dev)
@@ -125,7 +125,7 @@ static int omap_otg_probe(struct platform_device *pdev)
 	otg_dev->vbus = extcon_get_state(extcon, EXTCON_USB);
 	omap_otg_set_mode(otg_dev);
 
-	rev = readl(otg_dev->base);
+	rev = pete_readl("drivers/usb/phy/phy-omap-otg.c:128", otg_dev->base);
 
 	dev_info(&pdev->dev,
 		 "OMAP USB OTG controller rev %d.%d (%s, id=%d, vbus=%d)\n",

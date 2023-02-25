@@ -29,7 +29,7 @@ static unsigned long clk_divider_gate_recalc_rate_ro(struct clk_hw *hw,
 	struct clk_divider *div = to_clk_divider(hw);
 	unsigned int val;
 
-	val = readl(div->reg) >> div->shift;
+	val = pete_readl("drivers/clk/imx/clk-divider-gate.c:32", div->reg) >> div->shift;
 	val &= clk_div_mask(div->width);
 	if (!val)
 		return 0;
@@ -51,7 +51,7 @@ static unsigned long clk_divider_gate_recalc_rate(struct clk_hw *hw,
 	if (!clk_hw_is_enabled(hw)) {
 		val = div_gate->cached_val;
 	} else {
-		val = readl(div->reg) >> div->shift;
+		val = pete_readl("drivers/clk/imx/clk-divider-gate.c:54", div->reg) >> div->shift;
 		val &= clk_div_mask(div->width);
 	}
 
@@ -87,10 +87,10 @@ static int clk_divider_gate_set_rate(struct clk_hw *hw, unsigned long rate,
 	spin_lock_irqsave(div->lock, flags);
 
 	if (clk_hw_is_enabled(hw)) {
-		val = readl(div->reg);
+		val = pete_readl("drivers/clk/imx/clk-divider-gate.c:90", div->reg);
 		val &= ~(clk_div_mask(div->width) << div->shift);
 		val |= (u32)value << div->shift;
-		writel(val, div->reg);
+		pete_writel("drivers/clk/imx/clk-divider-gate.c:93", val, div->reg);
 	} else {
 		div_gate->cached_val = value;
 	}
@@ -114,9 +114,9 @@ static int clk_divider_enable(struct clk_hw *hw)
 
 	spin_lock_irqsave(div->lock, flags);
 	/* restore div val */
-	val = readl(div->reg);
+	val = pete_readl("drivers/clk/imx/clk-divider-gate.c:117", div->reg);
 	val |= div_gate->cached_val << div->shift;
-	writel(val, div->reg);
+	pete_writel("drivers/clk/imx/clk-divider-gate.c:119", val, div->reg);
 
 	spin_unlock_irqrestore(div->lock, flags);
 
@@ -133,10 +133,10 @@ static void clk_divider_disable(struct clk_hw *hw)
 	spin_lock_irqsave(div->lock, flags);
 
 	/* store the current div val */
-	val = readl(div->reg) >> div->shift;
+	val = pete_readl("drivers/clk/imx/clk-divider-gate.c:136", div->reg) >> div->shift;
 	val &= clk_div_mask(div->width);
 	div_gate->cached_val = val;
-	writel(0, div->reg);
+	pete_writel("drivers/clk/imx/clk-divider-gate.c:139", 0, div->reg);
 
 	spin_unlock_irqrestore(div->lock, flags);
 }
@@ -146,7 +146,7 @@ static int clk_divider_is_enabled(struct clk_hw *hw)
 	struct clk_divider *div = to_clk_divider(hw);
 	u32 val;
 
-	val = readl(div->reg) >> div->shift;
+	val = pete_readl("drivers/clk/imx/clk-divider-gate.c:149", div->reg) >> div->shift;
 	val &= clk_div_mask(div->width);
 
 	return val ? 1 : 0;
@@ -206,7 +206,7 @@ struct clk_hw *imx_clk_hw_divider_gate(const char *name, const char *parent_name
 	div_gate->divider.hw.init = &init;
 	div_gate->divider.flags = CLK_DIVIDER_ONE_BASED | clk_divider_flags;
 	/* cache gate status */
-	val = readl(reg) >> shift;
+	val = pete_readl("drivers/clk/imx/clk-divider-gate.c:209", reg) >> shift;
 	val &= clk_div_mask(width);
 	div_gate->cached_val = val;
 

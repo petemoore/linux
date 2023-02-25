@@ -176,7 +176,7 @@ int cpsw_set_coalesce(struct net_device *ndev, struct ethtool_coalesce *coal,
 
 	coal_intvl = coal->rx_coalesce_usecs;
 
-	int_ctrl =  readl(&cpsw->wr_regs->int_control);
+	int_ctrl =  pete_readl("drivers/net/ethernet/ti/cpsw_ethtool.c:179", &cpsw->wr_regs->int_control);
 	prescale = cpsw->bus_freq_mhz * 4;
 
 	if (!coal->rx_coalesce_usecs) {
@@ -205,15 +205,15 @@ int cpsw_set_coalesce(struct net_device *ndev, struct ethtool_coalesce *coal,
 	}
 
 	num_interrupts = (1000 * addnl_dvdr) / coal_intvl;
-	writel(num_interrupts, &cpsw->wr_regs->rx_imax);
-	writel(num_interrupts, &cpsw->wr_regs->tx_imax);
+	pete_writel("drivers/net/ethernet/ti/cpsw_ethtool.c:208", num_interrupts, &cpsw->wr_regs->rx_imax);
+	pete_writel("drivers/net/ethernet/ti/cpsw_ethtool.c:209", num_interrupts, &cpsw->wr_regs->tx_imax);
 
 	int_ctrl |= CPSW_INTPACEEN;
 	int_ctrl &= (~CPSW_INTPRESCALE_MASK);
 	int_ctrl |= (prescale & CPSW_INTPRESCALE_MASK);
 
 update_return:
-	writel(int_ctrl, &cpsw->wr_regs->int_control);
+	pete_writel("drivers/net/ethernet/ti/cpsw_ethtool.c:216", int_ctrl, &cpsw->wr_regs->int_control);
 
 	cpsw_notice(priv, timer, "Set coalesce to %d usecs.\n", coal_intvl);
 	cpsw->coal_intvl = coal_intvl;
@@ -282,7 +282,7 @@ void cpsw_get_ethtool_stats(struct net_device *ndev,
 
 	/* Collect Davinci CPDMA stats for Rx and Tx Channel */
 	for (l = 0; l < CPSW_STATS_COMMON_LEN; l++)
-		data[l] = readl(cpsw->hw_stats +
+		data[l] = pete_readl("drivers/net/ethernet/ti/cpsw_ethtool.c:285", cpsw->hw_stats +
 				cpsw_gstrings_stats[l].stat_offset);
 
 	for (ch = 0; ch < cpsw->rx_ch_num; ch++) {

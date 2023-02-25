@@ -71,7 +71,7 @@ static void cs46xx_dsp_proc_scb_info_read (struct snd_info_entry *entry,
 			snd_iprintf(buffer,"\n");
 			col = 0;
 		}
-		snd_iprintf(buffer,"%08x ",readl(dst + (scb->address + j) * sizeof(u32)));
+		snd_iprintf(buffer,"%08x ",pete_readl("sound/pci/cs46xx/dsp_spos_scb_lib.c:74", dst + (scb->address + j) * sizeof(u32)));
 	}
   
 	snd_iprintf(buffer,"\n");
@@ -152,7 +152,7 @@ static void _dsp_clear_sample_buffer (struct snd_cs46xx *chip, u32 sample_buffer
 	int i;
   
 	for (i = 0; i < dword_count ; ++i ) {
-		writel(0, dst);
+		pete_writel("sound/pci/cs46xx/dsp_spos_scb_lib.c:155", 0, dst);
 		dst += 4;
 	}  
 }

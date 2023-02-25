@@ -130,10 +130,10 @@ static inline u32 ti_abb_rmw(u32 mask, u32 value, void __iomem *reg)
 {
 	u32 val;
 
-	val = readl(reg);
+	val = pete_readl("drivers/regulator/ti-abb-regulator.c:133", reg);
 	val &= ~mask;
 	val |= (value << __ffs(mask)) & mask;
-	writel(val, reg);
+	pete_writel("drivers/regulator/ti-abb-regulator.c:136", val, reg);
 
 	return val;
 }
@@ -146,7 +146,7 @@ static inline u32 ti_abb_rmw(u32 mask, u32 value, void __iomem *reg)
  */
 static inline bool ti_abb_check_txdone(const struct ti_abb *abb)
 {
-	return !!(readl(abb->int_base) & abb->txdone_mask);
+	return !!(pete_readl("drivers/regulator/ti-abb-regulator.c:149", abb->int_base) & abb->txdone_mask);
 }
 
 /**
@@ -155,7 +155,7 @@ static inline bool ti_abb_check_txdone(const struct ti_abb *abb)
  */
 static inline void ti_abb_clear_txdone(const struct ti_abb *abb)
 {
-	writel(abb->txdone_mask, abb->int_base);
+	pete_writel("drivers/regulator/ti-abb-regulator.c:158", abb->txdone_mask, abb->int_base);
 };
 
 /**
@@ -179,7 +179,7 @@ static int ti_abb_wait_txdone(struct device *dev, struct ti_abb *abb)
 	}
 
 	dev_warn_ratelimited(dev, "%s:TRANXDONE timeout(%duS) int=0x%08x\n",
-			     __func__, timeout, readl(abb->int_base));
+			     __func__, timeout, pete_readl("drivers/regulator/ti-abb-regulator.c:182", abb->int_base));
 	return -ETIMEDOUT;
 }
 
@@ -206,7 +206,7 @@ static int ti_abb_clear_all_txdone(struct device *dev, const struct ti_abb *abb)
 	}
 
 	dev_warn_ratelimited(dev, "%s:TRANXDONE timeout(%duS) int=0x%08x\n",
-			     __func__, timeout, readl(abb->int_base));
+			     __func__, timeout, pete_readl("drivers/regulator/ti-abb-regulator.c:209", abb->int_base));
 	return -ETIMEDOUT;
 }
 
@@ -221,7 +221,7 @@ static void ti_abb_program_ldovbb(struct device *dev, const struct ti_abb *abb,
 {
 	u32 val;
 
-	val = readl(abb->ldo_base);
+	val = pete_readl("drivers/regulator/ti-abb-regulator.c:224", abb->ldo_base);
 	/* clear up previous values */
 	val &= ~(abb->ldovbb_override_mask | abb->ldovbb_vset_mask);
 
@@ -233,7 +233,7 @@ static void ti_abb_program_ldovbb(struct device *dev, const struct ti_abb *abb,
 		break;
 	}
 
-	writel(val, abb->ldo_base);
+	pete_writel("drivers/regulator/ti-abb-regulator.c:236", val, abb->ldo_base);
 }
 
 /**
@@ -585,7 +585,7 @@ static int ti_abb_init_table(struct device *dev, struct ti_abb *abb,
 			goto check_abb;
 		}
 
-		efuse_val = readl(abb->efuse_base + efuse_offset);
+		efuse_val = pete_readl("drivers/regulator/ti-abb-regulator.c:588", abb->efuse_base + efuse_offset);
 
 		/* Use ABB recommendation from Efuse */
 		if (efuse_val & rbb_mask)

@@ -2451,7 +2451,7 @@ static u32 read_blk_stat(struct nfit_blk *nfit_blk, unsigned int bw)
 	if (mmio->num_lines)
 		offset = to_interleave_offset(offset, mmio);
 
-	return readl(mmio->addr.base + offset) & STATUS_MASK;
+	return pete_readl("drivers/acpi/nfit/core.c:2454", mmio->addr.base + offset) & STATUS_MASK;
 }
 
 static void write_blk_ctl(struct nfit_blk *nfit_blk, unsigned int bw,

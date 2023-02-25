@@ -817,10 +817,10 @@ static int cygnus_pinmux_set(struct cygnus_pinctrl *pinctrl,
 
 	spin_lock_irqsave(&pinctrl->lock, flags);
 
-	val = readl(pinctrl->base0 + grp->mux.offset);
+	val = pete_readl("drivers/pinctrl/bcm/pinctrl-cygnus-mux.c:820", pinctrl->base0 + grp->mux.offset);
 	val &= ~(mask << grp->mux.shift);
 	val |= grp->mux.alt << grp->mux.shift;
-	writel(val, pinctrl->base0 + grp->mux.offset);
+	pete_writel("drivers/pinctrl/bcm/pinctrl-cygnus-mux.c:823", val, pinctrl->base0 + grp->mux.offset);
 
 	spin_unlock_irqrestore(&pinctrl->lock, flags);
 
@@ -859,9 +859,9 @@ static int cygnus_gpio_request_enable(struct pinctrl_dev *pctrl_dev,
 
 	spin_lock_irqsave(&pinctrl->lock, flags);
 
-	val = readl(pinctrl->base1 + mux->offset);
+	val = pete_readl("drivers/pinctrl/bcm/pinctrl-cygnus-mux.c:862", pinctrl->base1 + mux->offset);
 	val |= 0x3 << mux->shift;
-	writel(val, pinctrl->base1 + mux->offset);
+	pete_writel("drivers/pinctrl/bcm/pinctrl-cygnus-mux.c:864", val, pinctrl->base1 + mux->offset);
 
 	spin_unlock_irqrestore(&pinctrl->lock, flags);
 
@@ -886,9 +886,9 @@ static void cygnus_gpio_disable_free(struct pinctrl_dev *pctrl_dev,
 
 	spin_lock_irqsave(&pinctrl->lock, flags);
 
-	val = readl(pinctrl->base1 + mux->offset);
+	val = pete_readl("drivers/pinctrl/bcm/pinctrl-cygnus-mux.c:889", pinctrl->base1 + mux->offset);
 	val &= ~(0x3 << mux->shift);
-	writel(val, pinctrl->base1 + mux->offset);
+	pete_writel("drivers/pinctrl/bcm/pinctrl-cygnus-mux.c:891", val, pinctrl->base1 + mux->offset);
 
 	spin_unlock_irqrestore(&pinctrl->lock, flags);
 

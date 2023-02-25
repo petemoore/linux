@@ -69,7 +69,7 @@ static unsigned long ccu_nk_recalc_rate(struct clk_hw *hw,
 	unsigned long rate, n, k;
 	u32 reg;
 
-	reg = readl(nk->common.base + nk->common.reg);
+	reg = pete_readl("drivers/clk/sunxi-ng/ccu_nk.c:72", nk->common.base + nk->common.reg);
 
 	n = reg >> nk->n.shift;
 	n &= (1 << nk->n.width) - 1;
@@ -133,13 +133,13 @@ static int ccu_nk_set_rate(struct clk_hw *hw, unsigned long rate,
 
 	spin_lock_irqsave(nk->common.lock, flags);
 
-	reg = readl(nk->common.base + nk->common.reg);
+	reg = pete_readl("drivers/clk/sunxi-ng/ccu_nk.c:136", nk->common.base + nk->common.reg);
 	reg &= ~GENMASK(nk->n.width + nk->n.shift - 1, nk->n.shift);
 	reg &= ~GENMASK(nk->k.width + nk->k.shift - 1, nk->k.shift);
 
 	reg |= (_nk.k - nk->k.offset) << nk->k.shift;
 	reg |= (_nk.n - nk->n.offset) << nk->n.shift;
-	writel(reg, nk->common.base + nk->common.reg);
+	pete_writel("drivers/clk/sunxi-ng/ccu_nk.c:142", reg, nk->common.base + nk->common.reg);
 
 	spin_unlock_irqrestore(nk->common.lock, flags);
 

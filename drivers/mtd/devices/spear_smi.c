@@ -226,12 +226,12 @@ static int spear_smi_read_sr(struct spear_smi *dev, u32 bank)
 	mutex_lock(&dev->lock);
 	dev->status = 0; /* Will be set in interrupt handler */
 
-	ctrlreg1 = readl(dev->io_base + SMI_CR1);
+	ctrlreg1 = pete_readl("drivers/mtd/devices/spear_smi.c:229", dev->io_base + SMI_CR1);
 	/* program smi in hw mode */
-	writel(ctrlreg1 & ~(SW_MODE | WB_MODE), dev->io_base + SMI_CR1);
+	pete_writel("drivers/mtd/devices/spear_smi.c:231", ctrlreg1 & ~(SW_MODE | WB_MODE), dev->io_base + SMI_CR1);
 
 	/* performing a rsr instruction in hw mode */
-	writel((bank << BANK_SHIFT) | RD_STATUS_REG | TFIE,
+	pete_writel("drivers/mtd/devices/spear_smi.c:234", (bank << BANK_SHIFT) | RD_STATUS_REG | TFIE,
 			dev->io_base + SMI_CR2);
 
 	/* wait for tff */
@@ -245,8 +245,8 @@ static int spear_smi_read_sr(struct spear_smi *dev, u32 bank)
 		ret = -ETIMEDOUT;
 
 	/* restore the ctrl regs state */
-	writel(ctrlreg1, dev->io_base + SMI_CR1);
-	writel(0, dev->io_base + SMI_CR2);
+	pete_writel("drivers/mtd/devices/spear_smi.c:248", ctrlreg1, dev->io_base + SMI_CR1);
+	pete_writel("drivers/mtd/devices/spear_smi.c:249", 0, dev->io_base + SMI_CR2);
 	mutex_unlock(&dev->lock);
 
 	return ret;
@@ -298,13 +298,13 @@ static irqreturn_t spear_smi_int_handler(int irq, void *dev_id)
 	u32 status = 0;
 	struct spear_smi *dev = dev_id;
 
-	status = readl(dev->io_base + SMI_SR);
+	status = pete_readl("drivers/mtd/devices/spear_smi.c:301", dev->io_base + SMI_SR);
 
 	if (unlikely(!status))
 		return IRQ_NONE;
 
 	/* clear all interrupt conditions */
-	writel(0, dev->io_base + SMI_SR);
+	pete_writel("drivers/mtd/devices/spear_smi.c:307", 0, dev->io_base + SMI_SR);
 
 	/* copy the status register in dev->status */
 	dev->status |= status;
@@ -340,9 +340,9 @@ static void spear_smi_hw_init(struct spear_smi *dev)
 
 	mutex_lock(&dev->lock);
 	/* clear all interrupt conditions */
-	writel(0, dev->io_base + SMI_SR);
+	pete_writel("drivers/mtd/devices/spear_smi.c:343", 0, dev->io_base + SMI_SR);
 
-	writel(val, dev->io_base + SMI_CR1);
+	pete_writel("drivers/mtd/devices/spear_smi.c:345", val, dev->io_base + SMI_CR1);
 	mutex_unlock(&dev->lock);
 }
 
@@ -384,19 +384,19 @@ static int spear_smi_write_enable(struct spear_smi *dev, u32 bank)
 	mutex_lock(&dev->lock);
 	dev->status = 0; /* Will be set in interrupt handler */
 
-	ctrlreg1 = readl(dev->io_base + SMI_CR1);
+	ctrlreg1 = pete_readl("drivers/mtd/devices/spear_smi.c:387", dev->io_base + SMI_CR1);
 	/* program smi in h/w mode */
-	writel(ctrlreg1 & ~SW_MODE, dev->io_base + SMI_CR1);
+	pete_writel("drivers/mtd/devices/spear_smi.c:389", ctrlreg1 & ~SW_MODE, dev->io_base + SMI_CR1);
 
 	/* give the flash, write enable command */
-	writel((bank << BANK_SHIFT) | WE | TFIE, dev->io_base + SMI_CR2);
+	pete_writel("drivers/mtd/devices/spear_smi.c:392", (bank << BANK_SHIFT) | WE | TFIE, dev->io_base + SMI_CR2);
 
 	ret = wait_event_interruptible_timeout(dev->cmd_complete,
 			dev->status & TFF, SMI_CMD_TIMEOUT);
 
 	/* restore the ctrl regs state */
-	writel(ctrlreg1, dev->io_base + SMI_CR1);
-	writel(0, dev->io_base + SMI_CR2);
+	pete_writel("drivers/mtd/devices/spear_smi.c:398", ctrlreg1, dev->io_base + SMI_CR1);
+	pete_writel("drivers/mtd/devices/spear_smi.c:399", 0, dev->io_base + SMI_CR2);
 
 	if (ret == 0) {
 		ret = -EIO;
@@ -457,13 +457,13 @@ static int spear_smi_erase_sector(struct spear_smi *dev,
 
 	mutex_lock(&dev->lock);
 
-	ctrlreg1 = readl(dev->io_base + SMI_CR1);
-	writel((ctrlreg1 | SW_MODE) & ~WB_MODE, dev->io_base + SMI_CR1);
+	ctrlreg1 = pete_readl("drivers/mtd/devices/spear_smi.c:460", dev->io_base + SMI_CR1);
+	pete_writel("drivers/mtd/devices/spear_smi.c:461", (ctrlreg1 | SW_MODE) & ~WB_MODE, dev->io_base + SMI_CR1);
 
 	/* send command in sw mode */
-	writel(command, dev->io_base + SMI_TR);
+	pete_writel("drivers/mtd/devices/spear_smi.c:464", command, dev->io_base + SMI_TR);
 
-	writel((bank << BANK_SHIFT) | SEND | TFIE | (bytes << TX_LEN_SHIFT),
+	pete_writel("drivers/mtd/devices/spear_smi.c:466", (bank << BANK_SHIFT) | SEND | TFIE | (bytes << TX_LEN_SHIFT),
 			dev->io_base + SMI_CR2);
 
 	ret = wait_event_interruptible_timeout(dev->cmd_complete,
@@ -476,8 +476,8 @@ static int spear_smi_erase_sector(struct spear_smi *dev,
 		ret = 0; /* success */
 
 	/* restore ctrl regs */
-	writel(ctrlreg1, dev->io_base + SMI_CR1);
-	writel(0, dev->io_base + SMI_CR2);
+	pete_writel("drivers/mtd/devices/spear_smi.c:479", ctrlreg1, dev->io_base + SMI_CR1);
+	pete_writel("drivers/mtd/devices/spear_smi.c:480", 0, dev->io_base + SMI_CR2);
 
 	mutex_unlock(&dev->lock);
 	return ret;
@@ -573,17 +573,17 @@ static int spear_mtd_read(struct mtd_info *mtd, loff_t from, size_t len,
 
 	mutex_lock(&dev->lock);
 	/* put smi in hw mode not wbt mode */
-	ctrlreg1 = val = readl(dev->io_base + SMI_CR1);
+	ctrlreg1 = val = pete_readl("drivers/mtd/devices/spear_smi.c:576", dev->io_base + SMI_CR1);
 	val &= ~(SW_MODE | WB_MODE);
 	if (flash->fast_mode)
 		val |= FAST_MODE;
 
-	writel(val, dev->io_base + SMI_CR1);
+	pete_writel("drivers/mtd/devices/spear_smi.c:581", val, dev->io_base + SMI_CR1);
 
 	memcpy_fromio(buf, src, len);
 
 	/* restore ctrl reg1 */
-	writel(ctrlreg1, dev->io_base + SMI_CR1);
+	pete_writel("drivers/mtd/devices/spear_smi.c:586", ctrlreg1, dev->io_base + SMI_CR1);
 	mutex_unlock(&dev->lock);
 
 	*retlen = len;
@@ -631,8 +631,8 @@ static inline int spear_smi_cpy_toio(struct spear_smi *dev, u32 bank,
 	/* put smi in hw, write burst mode */
 	mutex_lock(&dev->lock);
 
-	ctrlreg1 = readl(dev->io_base + SMI_CR1);
-	writel((ctrlreg1 | WB_MODE) & ~SW_MODE, dev->io_base + SMI_CR1);
+	ctrlreg1 = pete_readl("drivers/mtd/devices/spear_smi.c:634", dev->io_base + SMI_CR1);
+	pete_writel("drivers/mtd/devices/spear_smi.c:635", (ctrlreg1 | WB_MODE) & ~SW_MODE, dev->io_base + SMI_CR1);
 
 	/*
 	 * In Write Burst mode (WB_MODE), the specs states that writes must be:
@@ -652,7 +652,7 @@ static inline int spear_smi_cpy_toio(struct spear_smi *dev, u32 bank,
 	else
 		spear_smi_memcpy_toio_b(dest, src, len);
 
-	writel(ctrlreg1, dev->io_base + SMI_CR1);
+	pete_writel("drivers/mtd/devices/spear_smi.c:655", ctrlreg1, dev->io_base + SMI_CR1);
 
 	mutex_unlock(&dev->lock);
 	return 0;
@@ -755,15 +755,15 @@ static int spear_smi_probe_flash(struct spear_smi *dev, u32 bank)
 
 	dev->status = 0; /* Will be set in interrupt handler */
 	/* put smi in sw mode */
-	val = readl(dev->io_base + SMI_CR1);
-	writel(val | SW_MODE, dev->io_base + SMI_CR1);
+	val = pete_readl("drivers/mtd/devices/spear_smi.c:758", dev->io_base + SMI_CR1);
+	pete_writel("drivers/mtd/devices/spear_smi.c:759", val | SW_MODE, dev->io_base + SMI_CR1);
 
 	/* send readid command in sw mode */
-	writel(OPCODE_RDID, dev->io_base + SMI_TR);
+	pete_writel("drivers/mtd/devices/spear_smi.c:762", OPCODE_RDID, dev->io_base + SMI_TR);
 
 	val = (bank << BANK_SHIFT) | SEND | (1 << TX_LEN_SHIFT) |
 		(3 << RX_LEN_SHIFT) | TFIE;
-	writel(val, dev->io_base + SMI_CR2);
+	pete_writel("drivers/mtd/devices/spear_smi.c:766", val, dev->io_base + SMI_CR2);
 
 	/* wait for TFF */
 	ret = wait_event_interruptible_timeout(dev->cmd_complete,
@@ -774,14 +774,14 @@ static int spear_smi_probe_flash(struct spear_smi *dev, u32 bank)
 	}
 
 	/* get memory chip id */
-	val = readl(dev->io_base + SMI_RR);
+	val = pete_readl("drivers/mtd/devices/spear_smi.c:777", dev->io_base + SMI_RR);
 	val &= 0x00ffffff;
 	ret = get_flash_index(val);
 
 err_probe:
 	/* clear sw mode */
-	val = readl(dev->io_base + SMI_CR1);
-	writel(val & ~SW_MODE, dev->io_base + SMI_CR1);
+	val = pete_readl("drivers/mtd/devices/spear_smi.c:783", dev->io_base + SMI_CR1);
+	pete_writel("drivers/mtd/devices/spear_smi.c:784", val & ~SW_MODE, dev->io_base + SMI_CR1);
 
 	mutex_unlock(&dev->lock);
 	return ret;

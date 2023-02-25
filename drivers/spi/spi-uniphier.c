@@ -110,9 +110,9 @@ static inline void uniphier_spi_irq_enable(struct uniphier_spi_priv *priv,
 {
 	u32 val;
 
-	val = readl(priv->base + SSI_IE);
+	val = pete_readl("drivers/spi/spi-uniphier.c:113", priv->base + SSI_IE);
 	val |= mask;
-	writel(val, priv->base + SSI_IE);
+	pete_writel("drivers/spi/spi-uniphier.c:115", val, priv->base + SSI_IE);
 }
 
 static inline void uniphier_spi_irq_disable(struct uniphier_spi_priv *priv,
@@ -120,9 +120,9 @@ static inline void uniphier_spi_irq_disable(struct uniphier_spi_priv *priv,
 {
 	u32 val;
 
-	val = readl(priv->base + SSI_IE);
+	val = pete_readl("drivers/spi/spi-uniphier.c:123", priv->base + SSI_IE);
 	val &= ~mask;
-	writel(val, priv->base + SSI_IE);
+	pete_writel("drivers/spi/spi-uniphier.c:125", val, priv->base + SSI_IE);
 }
 
 static void uniphier_spi_set_mode(struct spi_device *spi)
@@ -168,14 +168,14 @@ static void uniphier_spi_set_mode(struct spi_device *spi)
 	if (!(spi->mode & SPI_CS_HIGH))
 		val2 |= SSI_FPS_FSPOL;
 
-	writel(val1, priv->base + SSI_CKS);
-	writel(val2, priv->base + SSI_FPS);
+	pete_writel("drivers/spi/spi-uniphier.c:171", val1, priv->base + SSI_CKS);
+	pete_writel("drivers/spi/spi-uniphier.c:172", val2, priv->base + SSI_FPS);
 
 	val1 = 0;
 	if (spi->mode & SPI_LSB_FIRST)
 		val1 |= FIELD_PREP(SSI_TXWDS_TDTF_MASK, 1);
-	writel(val1, priv->base + SSI_TXWDS);
-	writel(val1, priv->base + SSI_RXWDS);
+	pete_writel("drivers/spi/spi-uniphier.c:177", val1, priv->base + SSI_TXWDS);
+	pete_writel("drivers/spi/spi-uniphier.c:178", val1, priv->base + SSI_RXWDS);
 }
 
 static void uniphier_spi_set_transfer_size(struct spi_device *spi, int size)
@@ -183,16 +183,16 @@ static void uniphier_spi_set_transfer_size(struct spi_device *spi, int size)
 	struct uniphier_spi_priv *priv = spi_master_get_devdata(spi->master);
 	u32 val;
 
-	val = readl(priv->base + SSI_TXWDS);
+	val = pete_readl("drivers/spi/spi-uniphier.c:186", priv->base + SSI_TXWDS);
 	val &= ~(SSI_TXWDS_WDLEN_MASK | SSI_TXWDS_DTLEN_MASK);
 	val |= FIELD_PREP(SSI_TXWDS_WDLEN_MASK, size);
 	val |= FIELD_PREP(SSI_TXWDS_DTLEN_MASK, size);
-	writel(val, priv->base + SSI_TXWDS);
+	pete_writel("drivers/spi/spi-uniphier.c:190", val, priv->base + SSI_TXWDS);
 
-	val = readl(priv->base + SSI_RXWDS);
+	val = pete_readl("drivers/spi/spi-uniphier.c:192", priv->base + SSI_RXWDS);
 	val &= ~SSI_RXWDS_DTLEN_MASK;
 	val |= FIELD_PREP(SSI_RXWDS_DTLEN_MASK, size);
-	writel(val, priv->base + SSI_RXWDS);
+	pete_writel("drivers/spi/spi-uniphier.c:195", val, priv->base + SSI_RXWDS);
 }
 
 static void uniphier_spi_set_baudrate(struct spi_device *spi,
@@ -208,10 +208,10 @@ static void uniphier_spi_set_baudrate(struct spi_device *spi,
 	ckdiv = DIV_ROUND_UP(clk_get_rate(priv->clk), speed);
 	ckdiv = round_up(ckdiv, 2);
 
-	val = readl(priv->base + SSI_CKS);
+	val = pete_readl("drivers/spi/spi-uniphier.c:211", priv->base + SSI_CKS);
 	val &= ~SSI_CKS_CKRAT_MASK;
 	val |= ckdiv & SSI_CKS_CKRAT_MASK;
-	writel(val, priv->base + SSI_CKS);
+	pete_writel("drivers/spi/spi-uniphier.c:214", val, priv->base + SSI_CKS);
 }
 
 static void uniphier_spi_setup_transfer(struct spi_device *spi,
@@ -245,7 +245,7 @@ static void uniphier_spi_setup_transfer(struct spi_device *spi,
 
 	/* reset FIFOs */
 	val = SSI_FC_TXFFL | SSI_FC_RXFFL;
-	writel(val, priv->base + SSI_FC);
+	pete_writel("drivers/spi/spi-uniphier.c:248", val, priv->base + SSI_FC);
 }
 
 static void uniphier_spi_send(struct uniphier_spi_priv *priv)
@@ -272,7 +272,7 @@ static void uniphier_spi_send(struct uniphier_spi_priv *priv)
 		priv->tx_buf += wsize;
 	}
 
-	writel(val, priv->base + SSI_TXDR);
+	pete_writel("drivers/spi/spi-uniphier.c:275", val, priv->base + SSI_TXDR);
 }
 
 static void uniphier_spi_recv(struct uniphier_spi_priv *priv)
@@ -283,7 +283,7 @@ static void uniphier_spi_recv(struct uniphier_spi_priv *priv)
 	rsize = min(bytes_per_word(priv->bits_per_word), priv->rx_bytes);
 	priv->rx_bytes -= rsize;
 
-	val = readl(priv->base + SSI_RXDR);
+	val = pete_readl("drivers/spi/spi-uniphier.c:286", priv->base + SSI_RXDR);
 
 	if (priv->rx_buf) {
 		switch (rsize) {
@@ -307,11 +307,11 @@ static void uniphier_spi_set_fifo_threshold(struct uniphier_spi_priv *priv,
 {
 	u32 val;
 
-	val = readl(priv->base + SSI_FC);
+	val = pete_readl("drivers/spi/spi-uniphier.c:310", priv->base + SSI_FC);
 	val &= ~(SSI_FC_TXFTH_MASK | SSI_FC_RXFTH_MASK);
 	val |= FIELD_PREP(SSI_FC_TXFTH_MASK, SSI_FIFO_DEPTH - threshold);
 	val |= FIELD_PREP(SSI_FC_RXFTH_MASK, threshold);
-	writel(val, priv->base + SSI_FC);
+	pete_writel("drivers/spi/spi-uniphier.c:314", val, priv->base + SSI_FC);
 }
 
 static void uniphier_spi_fill_tx_fifo(struct uniphier_spi_priv *priv)
@@ -336,14 +336,14 @@ static void uniphier_spi_set_cs(struct spi_device *spi, bool enable)
 	struct uniphier_spi_priv *priv = spi_master_get_devdata(spi->master);
 	u32 val;
 
-	val = readl(priv->base + SSI_FPS);
+	val = pete_readl("drivers/spi/spi-uniphier.c:339", priv->base + SSI_FPS);
 
 	if (enable)
 		val |= SSI_FPS_FSPOL;
 	else
 		val &= ~SSI_FPS_FSPOL;
 
-	writel(val, priv->base + SSI_FPS);
+	pete_writel("drivers/spi/spi-uniphier.c:346", val, priv->base + SSI_FPS);
 }
 
 static bool uniphier_spi_can_dma(struct spi_master *master,
@@ -506,7 +506,7 @@ static int uniphier_spi_transfer_one_poll(struct spi_master *master,
 		uniphier_spi_fill_tx_fifo(priv);
 
 		while ((priv->rx_bytes - priv->tx_bytes) > 0) {
-			while (!(readl(priv->base + SSI_SR) & SSI_SR_RNE)
+			while (!(pete_readl("drivers/spi/spi-uniphier.c:509", priv->base + SSI_SR) & SSI_SR_RNE)
 								&& loop--)
 				ndelay(100);
 
@@ -557,7 +557,7 @@ static int uniphier_spi_prepare_transfer_hardware(struct spi_master *master)
 {
 	struct uniphier_spi_priv *priv = spi_master_get_devdata(master);
 
-	writel(SSI_CTL_EN, priv->base + SSI_CTL);
+	pete_writel("drivers/spi/spi-uniphier.c:560", SSI_CTL_EN, priv->base + SSI_CTL);
 
 	return 0;
 }
@@ -566,7 +566,7 @@ static int uniphier_spi_unprepare_transfer_hardware(struct spi_master *master)
 {
 	struct uniphier_spi_priv *priv = spi_master_get_devdata(master);
 
-	writel(0, priv->base + SSI_CTL);
+	pete_writel("drivers/spi/spi-uniphier.c:569", 0, priv->base + SSI_CTL);
 
 	return 0;
 }
@@ -578,11 +578,11 @@ static void uniphier_spi_handle_err(struct spi_master *master,
 	u32 val;
 
 	/* stop running spi transfer */
-	writel(0, priv->base + SSI_CTL);
+	pete_writel("drivers/spi/spi-uniphier.c:581", 0, priv->base + SSI_CTL);
 
 	/* reset FIFOs */
 	val = SSI_FC_TXFFL | SSI_FC_RXFFL;
-	writel(val, priv->base + SSI_FC);
+	pete_writel("drivers/spi/spi-uniphier.c:585", val, priv->base + SSI_FC);
 
 	uniphier_spi_irq_disable(priv, SSI_IE_ALL_MASK);
 
@@ -602,9 +602,9 @@ static irqreturn_t uniphier_spi_handler(int irq, void *dev_id)
 	struct uniphier_spi_priv *priv = dev_id;
 	u32 val, stat;
 
-	stat = readl(priv->base + SSI_IS);
+	stat = pete_readl("drivers/spi/spi-uniphier.c:605", priv->base + SSI_IS);
 	val = SSI_IC_TCIC | SSI_IC_RCIC | SSI_IC_RORIC;
-	writel(val, priv->base + SSI_IC);
+	pete_writel("drivers/spi/spi-uniphier.c:607", val, priv->base + SSI_IC);
 
 	/* rx fifo overrun */
 	if (stat & SSI_IS_RORID) {
@@ -614,11 +614,11 @@ static irqreturn_t uniphier_spi_handler(int irq, void *dev_id)
 
 	/* rx complete */
 	if ((stat & SSI_IS_RCID) && (stat & SSI_IS_RXRS)) {
-		while ((readl(priv->base + SSI_SR) & SSI_SR_RNE) &&
+		while ((pete_readl("drivers/spi/spi-uniphier.c:617", priv->base + SSI_SR) & SSI_SR_RNE) &&
 				(priv->rx_bytes - priv->tx_bytes) > 0)
 			uniphier_spi_recv(priv);
 
-		if ((readl(priv->base + SSI_SR) & SSI_SR_RNE) ||
+		if ((pete_readl("drivers/spi/spi-uniphier.c:621", priv->base + SSI_SR) & SSI_SR_RNE) ||
 				(priv->rx_bytes != priv->tx_bytes)) {
 			priv->error = -EIO;
 			goto done;

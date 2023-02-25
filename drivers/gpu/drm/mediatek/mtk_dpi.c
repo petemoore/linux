@@ -123,10 +123,10 @@ struct mtk_dpi_conf {
 
 static void mtk_dpi_mask(struct mtk_dpi *dpi, u32 offset, u32 val, u32 mask)
 {
-	u32 tmp = readl(dpi->regs + offset) & ~mask;
+	u32 tmp = pete_readl("drivers/gpu/drm/mediatek/mtk_dpi.c:126", dpi->regs + offset) & ~mask;
 
 	tmp |= (val & mask);
-	writel(tmp, dpi->regs + offset);
+	pete_writel("drivers/gpu/drm/mediatek/mtk_dpi.c:129", tmp, dpi->regs + offset);
 }
 
 static void mtk_dpi_sw_reset(struct mtk_dpi *dpi, bool reset)

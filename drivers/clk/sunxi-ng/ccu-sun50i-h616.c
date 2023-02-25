@@ -1096,9 +1096,9 @@ static void __init sun50i_h616_ccu_setup(struct device_node *node)
 
 	/* Enable the lock bits and the output enable bits on all PLLs */
 	for (i = 0; i < ARRAY_SIZE(pll_regs); i++) {
-		val = readl(reg + pll_regs[i]);
+		val = pete_readl("drivers/clk/sunxi-ng/ccu-sun50i-h616.c:1099", reg + pll_regs[i]);
 		val |= BIT(29) | BIT(27);
-		writel(val, reg + pll_regs[i]);
+		pete_writel("drivers/clk/sunxi-ng/ccu-sun50i-h616.c:1101", val, reg + pll_regs[i]);
 	}
 
 	/*
@@ -1107,9 +1107,9 @@ static void __init sun50i_h616_ccu_setup(struct device_node *node)
 	 * See the comment before pll-video0 definition for the reason.
 	 */
 	for (i = 0; i < ARRAY_SIZE(pll_video_regs); i++) {
-		val = readl(reg + pll_video_regs[i]);
+		val = pete_readl("drivers/clk/sunxi-ng/ccu-sun50i-h616.c:1110", reg + pll_video_regs[i]);
 		val &= ~BIT(0);
-		writel(val, reg + pll_video_regs[i]);
+		pete_writel("drivers/clk/sunxi-ng/ccu-sun50i-h616.c:1112", val, reg + pll_video_regs[i]);
 	}
 
 	/*
@@ -1119,27 +1119,27 @@ static void __init sun50i_h616_ccu_setup(struct device_node *node)
 	 * it to have a valid clock parent.
 	 */
 	for (i = 0; i < ARRAY_SIZE(usb2_clk_regs); i++) {
-		val = readl(reg + usb2_clk_regs[i]);
+		val = pete_readl("drivers/clk/sunxi-ng/ccu-sun50i-h616.c:1122", reg + usb2_clk_regs[i]);
 		val &= ~GENMASK(25, 24);
-		writel(val, reg + usb2_clk_regs[i]);
+		pete_writel("drivers/clk/sunxi-ng/ccu-sun50i-h616.c:1124", val, reg + usb2_clk_regs[i]);
 	}
 
 	/*
 	 * Force the post-divider of pll-audio to 12 and the output divider
 	 * of it to 2, so 24576000 and 22579200 rates can be set exactly.
 	 */
-	val = readl(reg + SUN50I_H616_PLL_AUDIO_REG);
+	val = pete_readl("drivers/clk/sunxi-ng/ccu-sun50i-h616.c:1131", reg + SUN50I_H616_PLL_AUDIO_REG);
 	val &= ~(GENMASK(21, 16) | BIT(0));
-	writel(val | (11 << 16) | BIT(0), reg + SUN50I_H616_PLL_AUDIO_REG);
+	pete_writel("drivers/clk/sunxi-ng/ccu-sun50i-h616.c:1133", val | (11 << 16) | BIT(0), reg + SUN50I_H616_PLL_AUDIO_REG);
 
 	/*
 	 * First clock parent (osc32K) is unusable for CEC. But since there
 	 * is no good way to force parent switch (both run with same frequency),
 	 * just set second clock parent here.
 	 */
-	val = readl(reg + SUN50I_H616_HDMI_CEC_CLK_REG);
+	val = pete_readl("drivers/clk/sunxi-ng/ccu-sun50i-h616.c:1140", reg + SUN50I_H616_HDMI_CEC_CLK_REG);
 	val |= BIT(24);
-	writel(val, reg + SUN50I_H616_HDMI_CEC_CLK_REG);
+	pete_writel("drivers/clk/sunxi-ng/ccu-sun50i-h616.c:1142", val, reg + SUN50I_H616_HDMI_CEC_CLK_REG);
 
 	of_sunxi_ccu_probe(node, reg, &sun50i_h616_ccu_desc);
 }

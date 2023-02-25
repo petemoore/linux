@@ -346,7 +346,7 @@ static int me2600_xilinx_download(struct comedi_device *dev,
 	unsigned int i;
 
 	/* disable irq's on PLX */
-	writel(0x00, devpriv->plx_regbase + PLX9052_INTCSR);
+	pete_writel("drivers/comedi/drivers/me_daq.c:349", 0x00, devpriv->plx_regbase + PLX9052_INTCSR);
 
 	/* First, make a dummy read to reset xilinx */
 	value = readw(dev->mmio + XILINX_DOWNLOAD_RESET);
@@ -386,10 +386,10 @@ static int me2600_xilinx_download(struct comedi_device *dev,
 		writeb(0x00, dev->mmio + 0x0);
 
 	/* Test if there was an error during download -> INTB was thrown */
-	value = readl(devpriv->plx_regbase + PLX9052_INTCSR);
+	value = pete_readl("drivers/comedi/drivers/me_daq.c:389", devpriv->plx_regbase + PLX9052_INTCSR);
 	if (value & PLX9052_INTCSR_LI2STAT) {
 		/* Disable interrupt */
-		writel(0x00, devpriv->plx_regbase + PLX9052_INTCSR);
+		pete_writel("drivers/comedi/drivers/me_daq.c:392", 0x00, devpriv->plx_regbase + PLX9052_INTCSR);
 		dev_err(dev->class_dev, "Xilinx download failed\n");
 		return -EIO;
 	}
@@ -398,7 +398,7 @@ static int me2600_xilinx_download(struct comedi_device *dev,
 	sleep(1);
 
 	/* Enable PLX-Interrupts */
-	writel(PLX9052_INTCSR_LI1ENAB |
+	pete_writel("drivers/comedi/drivers/me_daq.c:401", PLX9052_INTCSR_LI1ENAB |
 	       PLX9052_INTCSR_LI1POL |
 	       PLX9052_INTCSR_PCIENAB,
 	       devpriv->plx_regbase + PLX9052_INTCSR);

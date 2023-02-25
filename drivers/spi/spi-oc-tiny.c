@@ -73,8 +73,8 @@ static int tiny_spi_setup_transfer(struct spi_device *spi,
 		if (t->speed_hz && t->speed_hz != hw->speed_hz)
 			baud = tiny_spi_baud(spi, t->speed_hz);
 	}
-	writel(baud, hw->base + TINY_SPI_BAUD);
-	writel(hw->mode, hw->base + TINY_SPI_CONTROL);
+	pete_writel("drivers/spi/spi-oc-tiny.c:76", baud, hw->base + TINY_SPI_BAUD);
+	pete_writel("drivers/spi/spi-oc-tiny.c:77", hw->mode, hw->base + TINY_SPI_CONTROL);
 	return 0;
 }
 

@@ -167,11 +167,11 @@ static int esb_timer_set_heartbeat(struct watchdog_device *wdd,
 
 	/* Write timer 1 */
 	esb_unlock_registers(edev);
-	writel(val, ESB_TIMER1_REG(edev));
+	pete_writel("drivers/watchdog/i6300esb.c:170", val, ESB_TIMER1_REG(edev));
 
 	/* Write timer 2 */
 	esb_unlock_registers(edev);
-	writel(val, ESB_TIMER2_REG(edev));
+	pete_writel("drivers/watchdog/i6300esb.c:174", val, ESB_TIMER2_REG(edev));
 
 	/* Reload */
 	esb_unlock_registers(edev);

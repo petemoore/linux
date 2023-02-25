@@ -371,16 +371,16 @@ int bdisp_hw_reset(struct bdisp_dev *bdisp)
 	dev_dbg(bdisp->dev, "%s\n", __func__);
 
 	/* Mask Interrupt */
-	writel(0, bdisp->regs + BLT_ITM0);
+	pete_writel("drivers/media/platform/sti/bdisp/bdisp-hw.c:374", 0, bdisp->regs + BLT_ITM0);
 
 	/* Reset */
-	writel(readl(bdisp->regs + BLT_CTL) | BLT_CTL_RESET,
+	pete_writel("drivers/media/platform/sti/bdisp/bdisp-hw.c:377", pete_readl("drivers/media/platform/sti/bdisp/bdisp-hw.c:377", bdisp->regs + BLT_CTL) | BLT_CTL_RESET,
 	       bdisp->regs + BLT_CTL);
-	writel(0, bdisp->regs + BLT_CTL);
+	pete_writel("drivers/media/platform/sti/bdisp/bdisp-hw.c:379", 0, bdisp->regs + BLT_CTL);
 
 	/* Wait for reset done */
 	for (i = 0; i < POLL_RST_MAX; i++) {
-		if (readl(bdisp->regs + BLT_STA1) & BLT_STA1_IDLE)
+		if (pete_readl("drivers/media/platform/sti/bdisp/bdisp-hw.c:383", bdisp->regs + BLT_STA1) & BLT_STA1_IDLE)
 			break;
 		udelay(POLL_RST_DELAY_MS * 1000);
 	}
@@ -403,18 +403,18 @@ int bdisp_hw_get_and_clear_irq(struct bdisp_dev *bdisp)
 {
 	u32 its;
 
-	its = readl(bdisp->regs + BLT_ITS);
+	its = pete_readl("drivers/media/platform/sti/bdisp/bdisp-hw.c:406", bdisp->regs + BLT_ITS);
 
 	/* Check for the only expected IT: LastNode of AQ1 */
 	if (!(its & BLT_ITS_AQ1_LNA)) {
 		dev_dbg(bdisp->dev, "Unexpected IT status: 0x%08X\n", its);
-		writel(its, bdisp->regs + BLT_ITS);
+		pete_writel("drivers/media/platform/sti/bdisp/bdisp-hw.c:411", its, bdisp->regs + BLT_ITS);
 		return -1;
 	}
 
 	/* Clear and mask */
-	writel(its, bdisp->regs + BLT_ITS);
-	writel(0, bdisp->regs + BLT_ITM0);
+	pete_writel("drivers/media/platform/sti/bdisp/bdisp-hw.c:416", its, bdisp->regs + BLT_ITS);
+	pete_writel("drivers/media/platform/sti/bdisp/bdisp-hw.c:417", 0, bdisp->regs + BLT_ITM0);
 
 	return 0;
 }
@@ -1101,18 +1101,18 @@ int bdisp_hw_update(struct bdisp_ctx *ctx)
 	bdisp_hw_save_request(ctx);
 
 	/* Configure interrupt to 'Last Node Reached for AQ1' */
-	writel(BLT_AQ1_CTL_CFG, bdisp->regs + BLT_AQ1_CTL);
-	writel(BLT_ITS_AQ1_LNA, bdisp->regs + BLT_ITM0);
+	pete_writel("drivers/media/platform/sti/bdisp/bdisp-hw.c:1104", BLT_AQ1_CTL_CFG, bdisp->regs + BLT_AQ1_CTL);
+	pete_writel("drivers/media/platform/sti/bdisp/bdisp-hw.c:1105", BLT_ITS_AQ1_LNA, bdisp->regs + BLT_ITM0);
 
 	/* Write first node addr */
-	writel(ctx->node_paddr[0], bdisp->regs + BLT_AQ1_IP);
+	pete_writel("drivers/media/platform/sti/bdisp/bdisp-hw.c:1108", ctx->node_paddr[0], bdisp->regs + BLT_AQ1_IP);
 
 	/* Find and write last node addr : this starts the HW processing */
 	for (node_id = 0; node_id < MAX_NB_NODE - 1; node_id++) {
 		if (!ctx->node[node_id]->nip)
 			break;
 	}
-	writel(ctx->node_paddr[node_id], bdisp->regs + BLT_AQ1_LNA);
+	pete_writel("drivers/media/platform/sti/bdisp/bdisp-hw.c:1115", ctx->node_paddr[node_id], bdisp->regs + BLT_AQ1_LNA);
 
 	return 0;
 }

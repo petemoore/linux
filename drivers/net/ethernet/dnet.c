@@ -346,7 +346,7 @@ static void dnet_update_stats(struct dnet *bp)
 		(DNET_RX_BYTE_CNT - DNET_RX_PKT_IGNR_CNT) / 4);
 
 	for (; p < end; p++, reg++)
-		*p += readl(reg);
+		*p += pete_readl("drivers/net/ethernet/dnet.c:349", reg);
 
 	reg = bp->regs + DNET_TX_UNICAST_CNT;
 	p = &bp->hw_stats.tx_unicast;
@@ -356,7 +356,7 @@ static void dnet_update_stats(struct dnet *bp)
 		(DNET_TX_BYTE_CNT - DNET_TX_UNICAST_CNT) / 4);
 
 	for (; p < end; p++, reg++)
-		*p += readl(reg);
+		*p += pete_readl("drivers/net/ethernet/dnet.c:359", reg);
 }
 
 static int dnet_poll(struct napi_struct *napi, int budget)

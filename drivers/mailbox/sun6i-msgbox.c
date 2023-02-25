@@ -70,8 +70,8 @@ static irqreturn_t sun6i_msgbox_irq(int irq, void *dev_id)
 	int n;
 
 	/* Only examine channels that are currently enabled. */
-	status = readl(mbox->regs + LOCAL_IRQ_EN_REG) &
-		 readl(mbox->regs + LOCAL_IRQ_STAT_REG);
+	status = pete_readl("drivers/mailbox/sun6i-msgbox.c:73", mbox->regs + LOCAL_IRQ_EN_REG) &
+		 pete_readl("drivers/mailbox/sun6i-msgbox.c:74", mbox->regs + LOCAL_IRQ_STAT_REG);
 
 	if (!(status & RX_IRQ_MASK))
 		return IRQ_NONE;
@@ -83,14 +83,14 @@ static irqreturn_t sun6i_msgbox_irq(int irq, void *dev_id)
 			continue;
 
 		while (sun6i_msgbox_peek_data(chan)) {
-			uint32_t msg = readl(mbox->regs + MSG_DATA_REG(n));
+			uint32_t msg = pete_readl("drivers/mailbox/sun6i-msgbox.c:86", mbox->regs + MSG_DATA_REG(n));
 
 			mbox_dbg(mbox, "Channel %d received 0x%08x\n", n, msg);
 			mbox_chan_received_data(chan, &msg);
 		}
 
 		/* The IRQ can be cleared only once the FIFO is empty. */
-		writel(RX_IRQ(n), mbox->regs + LOCAL_IRQ_STAT_REG);
+		pete_writel("drivers/mailbox/sun6i-msgbox.c:93", RX_IRQ(n), mbox->regs + LOCAL_IRQ_STAT_REG);
 	}
 
 	return IRQ_HANDLED;
@@ -103,10 +103,10 @@ static int sun6i_msgbox_send_data(struct mbox_chan *chan, void *data)
 	uint32_t msg = *(uint32_t *)data;
 
 	/* Using a channel backwards gets the hardware into a bad state. */
-	if (WARN_ON_ONCE(!(readl(mbox->regs + CTRL_REG(n)) & CTRL_TX(n))))
+	if (WARN_ON_ONCE(!(pete_readl("drivers/mailbox/sun6i-msgbox.c:106", mbox->regs + CTRL_REG(n)) & CTRL_TX(n))))
 		return 0;
 
-	writel(msg, mbox->regs + MSG_DATA_REG(n));
+	pete_writel("drivers/mailbox/sun6i-msgbox.c:109", msg, mbox->regs + MSG_DATA_REG(n));
 	mbox_dbg(mbox, "Channel %d sent 0x%08x\n", n, msg);
 
 	return 0;
@@ -118,15 +118,15 @@ static int sun6i_msgbox_startup(struct mbox_chan *chan)
 	int n = channel_number(chan);
 
 	/* The coprocessor is responsible for setting channel directions. */
-	if (readl(mbox->regs + CTRL_REG(n)) & CTRL_RX(n)) {
+	if (pete_readl("drivers/mailbox/sun6i-msgbox.c:121", mbox->regs + CTRL_REG(n)) & CTRL_RX(n)) {
 		/* Flush the receive FIFO. */
 		while (sun6i_msgbox_peek_data(chan))
-			readl(mbox->regs + MSG_DATA_REG(n));
-		writel(RX_IRQ(n), mbox->regs + LOCAL_IRQ_STAT_REG);
+			pete_readl("drivers/mailbox/sun6i-msgbox.c:124", mbox->regs + MSG_DATA_REG(n));
+		pete_writel("drivers/mailbox/sun6i-msgbox.c:125", RX_IRQ(n), mbox->regs + LOCAL_IRQ_STAT_REG);
 
 		/* Enable the receive IRQ. */
 		spin_lock(&mbox->lock);
-		writel(readl(mbox->regs + LOCAL_IRQ_EN_REG) | RX_IRQ(n),
+		pete_writel("drivers/mailbox/sun6i-msgbox.c:129", pete_readl("drivers/mailbox/sun6i-msgbox.c:129", mbox->regs + LOCAL_IRQ_EN_REG) | RX_IRQ(n),
 		       mbox->regs + LOCAL_IRQ_EN_REG);
 		spin_unlock(&mbox->lock);
 	}
@@ -141,19 +141,19 @@ static void sun6i_msgbox_shutdown(struct mbox_chan *chan)
 	struct sun6i_msgbox *mbox = to_sun6i_msgbox(chan);
 	int n = channel_number(chan);
 
-	if (readl(mbox->regs + CTRL_REG(n)) & CTRL_RX(n)) {
+	if (pete_readl("drivers/mailbox/sun6i-msgbox.c:144", mbox->regs + CTRL_REG(n)) & CTRL_RX(n)) {
 		/* Disable the receive IRQ. */
 		spin_lock(&mbox->lock);
-		writel(readl(mbox->regs + LOCAL_IRQ_EN_REG) & ~RX_IRQ(n),
+		pete_writel("drivers/mailbox/sun6i-msgbox.c:147", pete_readl("drivers/mailbox/sun6i-msgbox.c:147", mbox->regs + LOCAL_IRQ_EN_REG) & ~RX_IRQ(n),
 		       mbox->regs + LOCAL_IRQ_EN_REG);
 		spin_unlock(&mbox->lock);
 
 		/* Attempt to flush the FIFO until the IRQ is cleared. */
 		do {
 			while (sun6i_msgbox_peek_data(chan))
-				readl(mbox->regs + MSG_DATA_REG(n));
-			writel(RX_IRQ(n), mbox->regs + LOCAL_IRQ_STAT_REG);
-		} while (readl(mbox->regs + LOCAL_IRQ_STAT_REG) & RX_IRQ(n));
+				pete_readl("drivers/mailbox/sun6i-msgbox.c:154", mbox->regs + MSG_DATA_REG(n));
+			pete_writel("drivers/mailbox/sun6i-msgbox.c:155", RX_IRQ(n), mbox->regs + LOCAL_IRQ_STAT_REG);
+		} while (pete_readl("drivers/mailbox/sun6i-msgbox.c:156", mbox->regs + LOCAL_IRQ_STAT_REG) & RX_IRQ(n));
 	}
 
 	mbox_dbg(mbox, "Channel %d shutdown complete\n", n);
@@ -173,7 +173,7 @@ static bool sun6i_msgbox_last_tx_done(struct mbox_chan *chan)
 	 * recipient an opportunity to perform minimal processing before
 	 * acknowledging the message.
 	 */
-	return !(readl(mbox->regs + REMOTE_IRQ_STAT_REG) & RX_IRQ(n));
+	return !(pete_readl("drivers/mailbox/sun6i-msgbox.c:176", mbox->regs + REMOTE_IRQ_STAT_REG) & RX_IRQ(n));
 }
 
 static bool sun6i_msgbox_peek_data(struct mbox_chan *chan)
@@ -181,7 +181,7 @@ static bool sun6i_msgbox_peek_data(struct mbox_chan *chan)
 	struct sun6i_msgbox *mbox = to_sun6i_msgbox(chan);
 	int n = channel_number(chan);
 
-	return readl(mbox->regs + MSG_STAT_REG(n)) & MSG_STAT_MASK;
+	return pete_readl("drivers/mailbox/sun6i-msgbox.c:184", mbox->regs + MSG_STAT_REG(n)) & MSG_STAT_MASK;
 }
 
 static const struct mbox_chan_ops sun6i_msgbox_chan_ops = {
@@ -260,7 +260,7 @@ static int sun6i_msgbox_probe(struct platform_device *pdev)
 	}
 
 	/* Disable all IRQs for this end of the msgbox. */
-	writel(0, mbox->regs + LOCAL_IRQ_EN_REG);
+	pete_writel("drivers/mailbox/sun6i-msgbox.c:263", 0, mbox->regs + LOCAL_IRQ_EN_REG);
 
 	ret = devm_request_irq(dev, irq_of_parse_and_map(dev->of_node, 0),
 			       sun6i_msgbox_irq, 0, dev_name(dev), mbox);

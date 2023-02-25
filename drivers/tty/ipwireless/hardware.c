@@ -1050,7 +1050,7 @@ static int is_card_present(struct ipw_hardware *hw)
 	if (hw->hw_version == HW_VERSION_1)
 		return inw(hw->base_port + IOIR) != 0xFFFF;
 	else
-		return readl(&hw->memory_info_regs->memreg_card_present) ==
+		return pete_readl("drivers/tty/ipwireless/hardware.c:1053", &hw->memory_info_regs->memreg_card_present) ==
 		    CARD_PRESENT_VALUE;
 }
 

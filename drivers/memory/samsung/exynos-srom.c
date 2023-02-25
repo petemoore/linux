@@ -161,7 +161,7 @@ static void exynos_srom_save(void __iomem *base,
 			     unsigned int num_regs)
 {
 	for (; num_regs > 0; --num_regs, ++rd)
-		rd->value = readl(base + rd->offset);
+		rd->value = pete_readl("drivers/memory/samsung/exynos-srom.c:164", base + rd->offset);
 }
 
 static void exynos_srom_restore(void __iomem *base,
@@ -169,7 +169,7 @@ static void exynos_srom_restore(void __iomem *base,
 				unsigned int num_regs)
 {
 	for (; num_regs > 0; --num_regs, ++rd)
-		writel(rd->value, base + rd->offset);
+		pete_writel("drivers/memory/samsung/exynos-srom.c:172", rd->value, base + rd->offset);
 }
 
 static int exynos_srom_suspend(struct device *dev)

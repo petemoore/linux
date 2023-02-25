@@ -108,7 +108,7 @@ static int read_register(void __iomem *vaddr, u64 *val, unsigned int bit_width)
 		*val = readw(vaddr);
 		break;
 	case 32:
-		*val = readl(vaddr);
+		*val = pete_readl("drivers/mailbox/pcc.c:111", vaddr);
 		break;
 	case 64:
 		*val = readq(vaddr);
@@ -134,7 +134,7 @@ static int write_register(void __iomem *vaddr, u64 val, unsigned int bit_width)
 		writew(val, vaddr);
 		break;
 	case 32:
-		writel(val, vaddr);
+		pete_writel("drivers/mailbox/pcc.c:137", val, vaddr);
 		break;
 	case 64:
 		writeq(val, vaddr);

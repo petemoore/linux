@@ -153,14 +153,14 @@ static u8 i2c_ctrl_read(struct controller *ctlr_ptr, void __iomem *WPGBbar, u8 i
 
 	wpg_data = swab32(data);	// swap data before writing
 	wpg_addr = WPGBbar + WPG_I2CMOSUP_OFFSET;
-	writel(wpg_data, wpg_addr);
+	pete_writel("drivers/pci/hotplug/ibmphp_hpc.c:156", wpg_data, wpg_addr);
 
 	//--------------------------------------------------------------------
 	// READ - step 2 : clear the message buffer
 	data = 0x00000000;
 	wpg_data = swab32(data);
 	wpg_addr = WPGBbar + WPG_I2CMBUFL_OFFSET;
-	writel(wpg_data, wpg_addr);
+	pete_writel("drivers/pci/hotplug/ibmphp_hpc.c:163", wpg_data, wpg_addr);
 
 	//--------------------------------------------------------------------
 	// READ - step 3 : issue start operation, I2C master control bit 30:ON
@@ -168,7 +168,7 @@ static u8 i2c_ctrl_read(struct controller *ctlr_ptr, void __iomem *WPGBbar, u8 i
 	data = WPG_I2CMCNTL_STARTOP_MASK;
 	wpg_data = swab32(data);
 	wpg_addr = WPGBbar + WPG_I2CMCNTL_OFFSET + WPG_I2C_OR;
-	writel(wpg_data, wpg_addr);
+	pete_writel("drivers/pci/hotplug/ibmphp_hpc.c:171", wpg_data, wpg_addr);
 
 	//--------------------------------------------------------------------
 	// READ - step 4 : wait until start operation bit clears
@@ -176,7 +176,7 @@ static u8 i2c_ctrl_read(struct controller *ctlr_ptr, void __iomem *WPGBbar, u8 i
 	while (i) {
 		msleep(10);
 		wpg_addr = WPGBbar + WPG_I2CMCNTL_OFFSET;
-		wpg_data = readl(wpg_addr);
+		wpg_data = pete_readl("drivers/pci/hotplug/ibmphp_hpc.c:179", wpg_addr);
 		data = swab32(wpg_data);
 		if (!(data & WPG_I2CMCNTL_STARTOP_MASK))
 			break;
@@ -192,7 +192,7 @@ static u8 i2c_ctrl_read(struct controller *ctlr_ptr, void __iomem *WPGBbar, u8 i
 	while (i) {
 		msleep(10);
 		wpg_addr = WPGBbar + WPG_I2CSTAT_OFFSET;
-		wpg_data = readl(wpg_addr);
+		wpg_data = pete_readl("drivers/pci/hotplug/ibmphp_hpc.c:195", wpg_addr);
 		data = swab32(wpg_data);
 		if (HPC_I2CSTATUS_CHECK(data))
 			break;
@@ -206,7 +206,7 @@ static u8 i2c_ctrl_read(struct controller *ctlr_ptr, void __iomem *WPGBbar, u8 i
 	//--------------------------------------------------------------------
 	// READ - step 6 : get DATA
 	wpg_addr = WPGBbar + WPG_I2CMBUFL_OFFSET;
-	wpg_data = readl(wpg_addr);
+	wpg_data = pete_readl("drivers/pci/hotplug/ibmphp_hpc.c:209", wpg_addr);
 	data = swab32(wpg_data);
 
 	status = (u8) data;
@@ -264,14 +264,14 @@ static u8 i2c_ctrl_write(struct controller *ctlr_ptr, void __iomem *WPGBbar, u8 
 
 	wpg_data = swab32(data);	// swap data before writing
 	wpg_addr = WPGBbar + WPG_I2CMOSUP_OFFSET;
-	writel(wpg_data, wpg_addr);
+	pete_writel("drivers/pci/hotplug/ibmphp_hpc.c:267", wpg_data, wpg_addr);
 
 	//--------------------------------------------------------------------
 	// WRITE - step 2 : clear the message buffer
 	data = 0x00000000 | (unsigned long)cmd;
 	wpg_data = swab32(data);
 	wpg_addr = WPGBbar + WPG_I2CMBUFL_OFFSET;
-	writel(wpg_data, wpg_addr);
+	pete_writel("drivers/pci/hotplug/ibmphp_hpc.c:274", wpg_data, wpg_addr);
 
 	//--------------------------------------------------------------------
 	// WRITE - step 3 : issue start operation,I2C master control bit 30:ON
@@ -279,7 +279,7 @@ static u8 i2c_ctrl_write(struct controller *ctlr_ptr, void __iomem *WPGBbar, u8 
 	data = WPG_I2CMCNTL_STARTOP_MASK;
 	wpg_data = swab32(data);
 	wpg_addr = WPGBbar + WPG_I2CMCNTL_OFFSET + WPG_I2C_OR;
-	writel(wpg_data, wpg_addr);
+	pete_writel("drivers/pci/hotplug/ibmphp_hpc.c:282", wpg_data, wpg_addr);
 
 	//--------------------------------------------------------------------
 	// WRITE - step 4 : wait until start operation bit clears
@@ -287,7 +287,7 @@ static u8 i2c_ctrl_write(struct controller *ctlr_ptr, void __iomem *WPGBbar, u8 
 	while (i) {
 		msleep(10);
 		wpg_addr = WPGBbar + WPG_I2CMCNTL_OFFSET;
-		wpg_data = readl(wpg_addr);
+		wpg_data = pete_readl("drivers/pci/hotplug/ibmphp_hpc.c:290", wpg_addr);
 		data = swab32(wpg_data);
 		if (!(data & WPG_I2CMCNTL_STARTOP_MASK))
 			break;
@@ -304,7 +304,7 @@ static u8 i2c_ctrl_write(struct controller *ctlr_ptr, void __iomem *WPGBbar, u8 
 	while (i) {
 		msleep(10);
 		wpg_addr = WPGBbar + WPG_I2CSTAT_OFFSET;
-		wpg_data = readl(wpg_addr);
+		wpg_data = pete_readl("drivers/pci/hotplug/ibmphp_hpc.c:307", wpg_addr);
 		data = swab32(wpg_data);
 		if (HPC_I2CSTATUS_CHECK(data))
 			break;

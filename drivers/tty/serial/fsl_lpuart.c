@@ -342,7 +342,7 @@ static inline u32 lpuart32_read(struct uart_port *port, u32 off)
 {
 	switch (port->iotype) {
 	case UPIO_MEM32:
-		return readl(port->membase + off);
+		return pete_readl("drivers/tty/serial/fsl_lpuart.c:345", port->membase + off);
 	case UPIO_MEM32BE:
 		return ioread32be(port->membase + off);
 	default:
@@ -355,7 +355,7 @@ static inline void lpuart32_write(struct uart_port *port, u32 val,
 {
 	switch (port->iotype) {
 	case UPIO_MEM32:
-		writel(val, port->membase + off);
+		pete_writel("drivers/tty/serial/fsl_lpuart.c:358", val, port->membase + off);
 		break;
 	case UPIO_MEM32BE:
 		iowrite32be(val, port->membase + off);
@@ -2655,9 +2655,9 @@ static int lpuart_global_reset(struct lpuart_port *sport)
 		}
 
 		global_addr = port->membase + UART_GLOBAL - IMX_REG_OFF;
-		writel(UART_GLOBAL_RST, global_addr);
+		pete_writel("drivers/tty/serial/fsl_lpuart.c:2658", UART_GLOBAL_RST, global_addr);
 		usleep_range(GLOBAL_RST_MIN_US, GLOBAL_RST_MAX_US);
-		writel(0, global_addr);
+		pete_writel("drivers/tty/serial/fsl_lpuart.c:2660", 0, global_addr);
 		usleep_range(GLOBAL_RST_MIN_US, GLOBAL_RST_MAX_US);
 
 		/* Recover the transmitter for earlycon. */

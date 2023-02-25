@@ -158,43 +158,43 @@ static int mv_usb2_phy_28nm_init(struct phy *phy)
 	clk_prepare_enable(mv_phy->clk);
 
 	/* PHY_28NM_PLL_REG0 */
-	reg = readl(base + PHY_28NM_PLL_REG0) &
+	reg = pete_readl("drivers/phy/marvell/phy-pxa-28nm-usb2.c:161", base + PHY_28NM_PLL_REG0) &
 		~(PHY_28NM_PLL_SELLPFR_MASK | PHY_28NM_PLL_FBDIV_MASK
 		| PHY_28NM_PLL_ICP_MASK	| PHY_28NM_PLL_REFDIV_MASK);
-	writel(reg | (0x1 << PHY_28NM_PLL_SELLPFR_SHIFT
+	pete_writel("drivers/phy/marvell/phy-pxa-28nm-usb2.c:164", reg | (0x1 << PHY_28NM_PLL_SELLPFR_SHIFT
 		| 0xf0 << PHY_28NM_PLL_FBDIV_SHIFT
 		| 0x3 << PHY_28NM_PLL_ICP_SHIFT
 		| 0xd << PHY_28NM_PLL_REFDIV_SHIFT),
 		base + PHY_28NM_PLL_REG0);
 
 	/* PHY_28NM_PLL_REG1 */
-	reg = readl(base + PHY_28NM_PLL_REG1);
-	writel(reg | PHY_28NM_PLL_PU_PLL | PHY_28NM_PLL_PU_BY_REG,
+	reg = pete_readl("drivers/phy/marvell/phy-pxa-28nm-usb2.c:171", base + PHY_28NM_PLL_REG1);
+	pete_writel("drivers/phy/marvell/phy-pxa-28nm-usb2.c:172", reg | PHY_28NM_PLL_PU_PLL | PHY_28NM_PLL_PU_BY_REG,
 		base + PHY_28NM_PLL_REG1);
 
 	/* PHY_28NM_TX_REG0 */
-	reg = readl(base + PHY_28NM_TX_REG0) & ~PHY_28NM_TX_AMP_MASK;
-	writel(reg | PHY_28NM_TX_PU_BY_REG | 0x3 << PHY_28NM_TX_AMP_SHIFT |
+	reg = pete_readl("drivers/phy/marvell/phy-pxa-28nm-usb2.c:176", base + PHY_28NM_TX_REG0) & ~PHY_28NM_TX_AMP_MASK;
+	pete_writel("drivers/phy/marvell/phy-pxa-28nm-usb2.c:177", reg | PHY_28NM_TX_PU_BY_REG | 0x3 << PHY_28NM_TX_AMP_SHIFT |
 		PHY_28NM_TX_PU_ANA,
 		base + PHY_28NM_TX_REG0);
 
 	/* PHY_28NM_RX_REG0 */
-	reg = readl(base + PHY_28NM_RX_REG0) & ~PHY_28NM_RX_SQ_THRESH_MASK;
-	writel(reg | 0xa << PHY_28NM_RX_SQ_THRESH_SHIFT,
+	reg = pete_readl("drivers/phy/marvell/phy-pxa-28nm-usb2.c:182", base + PHY_28NM_RX_REG0) & ~PHY_28NM_RX_SQ_THRESH_MASK;
+	pete_writel("drivers/phy/marvell/phy-pxa-28nm-usb2.c:183", reg | 0xa << PHY_28NM_RX_SQ_THRESH_SHIFT,
 		base + PHY_28NM_RX_REG0);
 
 	/* PHY_28NM_DIG_REG0 */
-	reg = readl(base + PHY_28NM_DIG_REG0) &
+	reg = pete_readl("drivers/phy/marvell/phy-pxa-28nm-usb2.c:187", base + PHY_28NM_DIG_REG0) &
 		~(PHY_28NM_DIG_BITSTAFFING_ERR | PHY_28NM_DIG_SYNC_ERR |
 		PHY_28NM_DIG_SQ_FILT_MASK | PHY_28NM_DIG_SQ_BLK_MASK |
 		PHY_28NM_DIG_SYNC_NUM_MASK);
-	writel(reg | (0x1 << PHY_28NM_DIG_SYNC_NUM_SHIFT |
+	pete_writel("drivers/phy/marvell/phy-pxa-28nm-usb2.c:191", reg | (0x1 << PHY_28NM_DIG_SYNC_NUM_SHIFT |
 		PHY_28NM_PLL_LOCK_BYPASS),
 		base + PHY_28NM_DIG_REG0);
 
 	/* PHY_28NM_OTG_REG */
-	reg = readl(base + PHY_28NM_OTG_REG) | PHY_28NM_OTG_PU_OTG;
-	writel(reg & ~PHY_28NM_OTG_CONTROL_BY_PIN, base + PHY_28NM_OTG_REG);
+	reg = pete_readl("drivers/phy/marvell/phy-pxa-28nm-usb2.c:196", base + PHY_28NM_OTG_REG) | PHY_28NM_OTG_PU_OTG;
+	pete_writel("drivers/phy/marvell/phy-pxa-28nm-usb2.c:197", reg & ~PHY_28NM_OTG_CONTROL_BY_PIN, base + PHY_28NM_OTG_REG);
 
 	/*
 	 *  Calibration Timing
@@ -237,7 +237,7 @@ static int mv_usb2_phy_28nm_power_on(struct phy *phy)
 	struct mv_usb2_phy *mv_phy = phy_get_drvdata(phy);
 	void __iomem *base = mv_phy->base;
 
-	writel(readl(base + PHY_28NM_CTRL_REG3) |
+	pete_writel("drivers/phy/marvell/phy-pxa-28nm-usb2.c:240", pete_readl("drivers/phy/marvell/phy-pxa-28nm-usb2.c:240", base + PHY_28NM_CTRL_REG3) |
 		(PHY_28NM_CTRL3_OVERWRITE | PHY_28NM_CTRL3_VBUS_VALID |
 		PHY_28NM_CTRL3_AVALID | PHY_28NM_CTRL3_BVALID),
 		base + PHY_28NM_CTRL_REG3);
@@ -250,7 +250,7 @@ static int mv_usb2_phy_28nm_power_off(struct phy *phy)
 	struct mv_usb2_phy *mv_phy = phy_get_drvdata(phy);
 	void __iomem *base = mv_phy->base;
 
-	writel(readl(base + PHY_28NM_CTRL_REG3) |
+	pete_writel("drivers/phy/marvell/phy-pxa-28nm-usb2.c:253", pete_readl("drivers/phy/marvell/phy-pxa-28nm-usb2.c:253", base + PHY_28NM_CTRL_REG3) |
 		~(PHY_28NM_CTRL3_OVERWRITE | PHY_28NM_CTRL3_VBUS_VALID
 		| PHY_28NM_CTRL3_AVALID	| PHY_28NM_CTRL3_BVALID),
 		base + PHY_28NM_CTRL_REG3);

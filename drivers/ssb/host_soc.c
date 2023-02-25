@@ -34,7 +34,7 @@ static u32 ssb_host_soc_read32(struct ssb_device *dev, u16 offset)
 	struct ssb_bus *bus = dev->bus;
 
 	offset += dev->core_index * SSB_CORE_SIZE;
-	return readl(bus->mmio + offset);
+	return pete_readl("drivers/ssb/host_soc.c:37", bus->mmio + offset);
 }
 
 #ifdef CONFIG_SSB_BLOCKIO
@@ -107,7 +107,7 @@ static void ssb_host_soc_write32(struct ssb_device *dev, u16 offset, u32 value)
 	struct ssb_bus *bus = dev->bus;
 
 	offset += dev->core_index * SSB_CORE_SIZE;
-	writel(value, bus->mmio + offset);
+	pete_writel("drivers/ssb/host_soc.c:110", value, bus->mmio + offset);
 }
 
 #ifdef CONFIG_SSB_BLOCKIO

@@ -128,11 +128,11 @@ static unsigned long sun4i_tmds_recalc_rate(struct clk_hw *hw,
 	struct sun4i_tmds *tmds = hw_to_tmds(hw);
 	u32 reg;
 
-	reg = readl(tmds->hdmi->base + SUN4I_HDMI_PAD_CTRL1_REG);
+	reg = pete_readl("drivers/gpu/drm/sun4i/sun4i_hdmi_tmds_clk.c:131", tmds->hdmi->base + SUN4I_HDMI_PAD_CTRL1_REG);
 	if (reg & SUN4I_HDMI_PAD_CTRL1_HALVE_CLK)
 		parent_rate /= 2;
 
-	reg = readl(tmds->hdmi->base + SUN4I_HDMI_PLL_CTRL_REG);
+	reg = pete_readl("drivers/gpu/drm/sun4i/sun4i_hdmi_tmds_clk.c:135", tmds->hdmi->base + SUN4I_HDMI_PLL_CTRL_REG);
 	reg = ((reg >> 4) & 0xf) + tmds->div_offset;
 	if (!reg)
 		reg = 1;
@@ -151,15 +151,15 @@ static int sun4i_tmds_set_rate(struct clk_hw *hw, unsigned long rate,
 	sun4i_tmds_calc_divider(rate, parent_rate, tmds->div_offset,
 				&div, &half);
 
-	reg = readl(tmds->hdmi->base + SUN4I_HDMI_PAD_CTRL1_REG);
+	reg = pete_readl("drivers/gpu/drm/sun4i/sun4i_hdmi_tmds_clk.c:154", tmds->hdmi->base + SUN4I_HDMI_PAD_CTRL1_REG);
 	reg &= ~SUN4I_HDMI_PAD_CTRL1_HALVE_CLK;
 	if (half)
 		reg |= SUN4I_HDMI_PAD_CTRL1_HALVE_CLK;
-	writel(reg, tmds->hdmi->base + SUN4I_HDMI_PAD_CTRL1_REG);
+	pete_writel("drivers/gpu/drm/sun4i/sun4i_hdmi_tmds_clk.c:158", reg, tmds->hdmi->base + SUN4I_HDMI_PAD_CTRL1_REG);
 
-	reg = readl(tmds->hdmi->base + SUN4I_HDMI_PLL_CTRL_REG);
+	reg = pete_readl("drivers/gpu/drm/sun4i/sun4i_hdmi_tmds_clk.c:160", tmds->hdmi->base + SUN4I_HDMI_PLL_CTRL_REG);
 	reg &= ~SUN4I_HDMI_PLL_CTRL_DIV_MASK;
-	writel(reg | SUN4I_HDMI_PLL_CTRL_DIV(div - tmds->div_offset),
+	pete_writel("drivers/gpu/drm/sun4i/sun4i_hdmi_tmds_clk.c:162", reg | SUN4I_HDMI_PLL_CTRL_DIV(div - tmds->div_offset),
 	       tmds->hdmi->base + SUN4I_HDMI_PLL_CTRL_REG);
 
 	return 0;
@@ -170,7 +170,7 @@ static u8 sun4i_tmds_get_parent(struct clk_hw *hw)
 	struct sun4i_tmds *tmds = hw_to_tmds(hw);
 	u32 reg;
 
-	reg = readl(tmds->hdmi->base + SUN4I_HDMI_PLL_DBG0_REG);
+	reg = pete_readl("drivers/gpu/drm/sun4i/sun4i_hdmi_tmds_clk.c:173", tmds->hdmi->base + SUN4I_HDMI_PLL_DBG0_REG);
 	return ((reg & SUN4I_HDMI_PLL_DBG0_TMDS_PARENT_MASK) >>
 		SUN4I_HDMI_PLL_DBG0_TMDS_PARENT_SHIFT);
 }
@@ -183,9 +183,9 @@ static int sun4i_tmds_set_parent(struct clk_hw *hw, u8 index)
 	if (index > 1)
 		return -EINVAL;
 
-	reg = readl(tmds->hdmi->base + SUN4I_HDMI_PLL_DBG0_REG);
+	reg = pete_readl("drivers/gpu/drm/sun4i/sun4i_hdmi_tmds_clk.c:186", tmds->hdmi->base + SUN4I_HDMI_PLL_DBG0_REG);
 	reg &= ~SUN4I_HDMI_PLL_DBG0_TMDS_PARENT_MASK;
-	writel(reg | SUN4I_HDMI_PLL_DBG0_TMDS_PARENT(index),
+	pete_writel("drivers/gpu/drm/sun4i/sun4i_hdmi_tmds_clk.c:188", reg | SUN4I_HDMI_PLL_DBG0_TMDS_PARENT(index),
 	       tmds->hdmi->base + SUN4I_HDMI_PLL_DBG0_REG);
 
 	return 0;

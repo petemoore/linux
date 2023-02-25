@@ -48,14 +48,14 @@ static void davinci_vcif_start(struct snd_pcm_substream *substream)
 	u32 w;
 
 	/* Start the sample generator and enable transmitter/receiver */
-	w = readl(davinci_vc->base + DAVINCI_VC_CTRL);
+	w = pete_readl("sound/soc/ti/davinci-vcif.c:51", davinci_vc->base + DAVINCI_VC_CTRL);
 
 	if (substream->stream == SNDRV_PCM_STREAM_PLAYBACK)
 		MOD_REG_BIT(w, DAVINCI_VC_CTRL_RSTDAC, 0);
 	else
 		MOD_REG_BIT(w, DAVINCI_VC_CTRL_RSTADC, 0);
 
-	writel(w, davinci_vc->base + DAVINCI_VC_CTRL);
+	pete_writel("sound/soc/ti/davinci-vcif.c:58", w, davinci_vc->base + DAVINCI_VC_CTRL);
 }
 
 static void davinci_vcif_stop(struct snd_pcm_substream *substream)
@@ -67,13 +67,13 @@ static void davinci_vcif_stop(struct snd_pcm_substream *substream)
 	u32 w;
 
 	/* Reset transmitter/receiver and sample rate/frame sync generators */
-	w = readl(davinci_vc->base + DAVINCI_VC_CTRL);
+	w = pete_readl("sound/soc/ti/davinci-vcif.c:70", davinci_vc->base + DAVINCI_VC_CTRL);
 	if (substream->stream == SNDRV_PCM_STREAM_PLAYBACK)
 		MOD_REG_BIT(w, DAVINCI_VC_CTRL_RSTDAC, 1);
 	else
 		MOD_REG_BIT(w, DAVINCI_VC_CTRL_RSTADC, 1);
 
-	writel(w, davinci_vc->base + DAVINCI_VC_CTRL);
+	pete_writel("sound/soc/ti/davinci-vcif.c:76", w, davinci_vc->base + DAVINCI_VC_CTRL);
 }
 
 static int davinci_vcif_hw_params(struct snd_pcm_substream *substream,
@@ -89,13 +89,13 @@ static int davinci_vcif_hw_params(struct snd_pcm_substream *substream,
 	davinci_vcif_start(substream);
 
 	/* General line settings */
-	writel(DAVINCI_VC_CTRL_MASK, davinci_vc->base + DAVINCI_VC_CTRL);
+	pete_writel("sound/soc/ti/davinci-vcif.c:92", DAVINCI_VC_CTRL_MASK, davinci_vc->base + DAVINCI_VC_CTRL);
 
-	writel(DAVINCI_VC_INT_MASK, davinci_vc->base + DAVINCI_VC_INTCLR);
+	pete_writel("sound/soc/ti/davinci-vcif.c:94", DAVINCI_VC_INT_MASK, davinci_vc->base + DAVINCI_VC_INTCLR);
 
-	writel(DAVINCI_VC_INT_MASK, davinci_vc->base + DAVINCI_VC_INTEN);
+	pete_writel("sound/soc/ti/davinci-vcif.c:96", DAVINCI_VC_INT_MASK, davinci_vc->base + DAVINCI_VC_INTEN);
 
-	w = readl(davinci_vc->base + DAVINCI_VC_CTRL);
+	w = pete_readl("sound/soc/ti/davinci-vcif.c:98", davinci_vc->base + DAVINCI_VC_CTRL);
 
 	/* Determine xfer data type */
 	switch (params_format(params)) {
@@ -123,7 +123,7 @@ static int davinci_vcif_hw_params(struct snd_pcm_substream *substream,
 		return -EINVAL;
 	}
 
-	writel(w, davinci_vc->base + DAVINCI_VC_CTRL);
+	pete_writel("sound/soc/ti/davinci-vcif.c:126", w, davinci_vc->base + DAVINCI_VC_CTRL);
 
 	return 0;
 }

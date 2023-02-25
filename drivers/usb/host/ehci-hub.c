@@ -1026,7 +1026,7 @@ int ehci_hub_control(
 			/* If the debug port is active any port
 			 * feature requests should get denied */
 			if (wIndex == HCS_DEBUG_PORT(ehci->hcs_params) &&
-			    (readl(&ehci->debug->control) & DBGP_ENABLED)) {
+			    (pete_readl("drivers/usb/host/ehci-hub.c:1029", &ehci->debug->control) & DBGP_ENABLED)) {
 				retval = -ENODEV;
 				goto error_exit;
 			}

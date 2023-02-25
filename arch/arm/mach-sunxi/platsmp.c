@@ -82,36 +82,36 @@ static int sun6i_smp_boot_secondary(unsigned int cpu,
 	spin_lock(&cpu_lock);
 
 	/* Set CPU boot address */
-	writel(__pa_symbol(secondary_startup),
+	pete_writel("arch/arm/mach-sunxi/platsmp.c:85", __pa_symbol(secondary_startup),
 	       cpucfg_membase + CPUCFG_PRIVATE0_REG);
 
 	/* Assert the CPU core in reset */
-	writel(0, cpucfg_membase + CPUCFG_CPU_RST_CTRL_REG(cpu));
+	pete_writel("arch/arm/mach-sunxi/platsmp.c:89", 0, cpucfg_membase + CPUCFG_CPU_RST_CTRL_REG(cpu));
 
 	/* Assert the L1 cache in reset */
-	reg = readl(cpucfg_membase + CPUCFG_GEN_CTRL_REG);
-	writel(reg & ~BIT(cpu), cpucfg_membase + CPUCFG_GEN_CTRL_REG);
+	reg = pete_readl("arch/arm/mach-sunxi/platsmp.c:92", cpucfg_membase + CPUCFG_GEN_CTRL_REG);
+	pete_writel("arch/arm/mach-sunxi/platsmp.c:93", reg & ~BIT(cpu), cpucfg_membase + CPUCFG_GEN_CTRL_REG);
 
 	/* Disable external debug access */
-	reg = readl(cpucfg_membase + CPUCFG_DBG_CTL1_REG);
-	writel(reg & ~BIT(cpu), cpucfg_membase + CPUCFG_DBG_CTL1_REG);
+	reg = pete_readl("arch/arm/mach-sunxi/platsmp.c:96", cpucfg_membase + CPUCFG_DBG_CTL1_REG);
+	pete_writel("arch/arm/mach-sunxi/platsmp.c:97", reg & ~BIT(cpu), cpucfg_membase + CPUCFG_DBG_CTL1_REG);
 
 	/* Power up the CPU */
 	for (i = 0; i <= 8; i++)
-		writel(0xff >> i, prcm_membase + PRCM_CPU_PWR_CLAMP_REG(cpu));
+		pete_writel("arch/arm/mach-sunxi/platsmp.c:101", 0xff >> i, prcm_membase + PRCM_CPU_PWR_CLAMP_REG(cpu));
 	mdelay(10);
 
 	/* Clear CPU power-off gating */
-	reg = readl(prcm_membase + PRCM_CPU_PWROFF_REG);
-	writel(reg & ~BIT(cpu), prcm_membase + PRCM_CPU_PWROFF_REG);
+	reg = pete_readl("arch/arm/mach-sunxi/platsmp.c:105", prcm_membase + PRCM_CPU_PWROFF_REG);
+	pete_writel("arch/arm/mach-sunxi/platsmp.c:106", reg & ~BIT(cpu), prcm_membase + PRCM_CPU_PWROFF_REG);
 	mdelay(1);
 
 	/* Deassert the CPU core reset */
-	writel(3, cpucfg_membase + CPUCFG_CPU_RST_CTRL_REG(cpu));
+	pete_writel("arch/arm/mach-sunxi/platsmp.c:110", 3, cpucfg_membase + CPUCFG_CPU_RST_CTRL_REG(cpu));
 
 	/* Enable back the external debug accesses */
-	reg = readl(cpucfg_membase + CPUCFG_DBG_CTL1_REG);
-	writel(reg | BIT(cpu), cpucfg_membase + CPUCFG_DBG_CTL1_REG);
+	reg = pete_readl("arch/arm/mach-sunxi/platsmp.c:113", cpucfg_membase + CPUCFG_DBG_CTL1_REG);
+	pete_writel("arch/arm/mach-sunxi/platsmp.c:114", reg | BIT(cpu), cpucfg_membase + CPUCFG_DBG_CTL1_REG);
 
 	spin_unlock(&cpu_lock);
 
@@ -166,23 +166,23 @@ static int sun8i_smp_boot_secondary(unsigned int cpu,
 	spin_lock(&cpu_lock);
 
 	/* Set CPU boot address */
-	writel(__pa_symbol(secondary_startup),
+	pete_writel("arch/arm/mach-sunxi/platsmp.c:169", __pa_symbol(secondary_startup),
 	       cpucfg_membase + CPUCFG_PRIVATE0_REG);
 
 	/* Assert the CPU core in reset */
-	writel(0, cpucfg_membase + CPUCFG_CPU_RST_CTRL_REG(cpu));
+	pete_writel("arch/arm/mach-sunxi/platsmp.c:173", 0, cpucfg_membase + CPUCFG_CPU_RST_CTRL_REG(cpu));
 
 	/* Assert the L1 cache in reset */
-	reg = readl(cpucfg_membase + CPUCFG_GEN_CTRL_REG);
-	writel(reg & ~BIT(cpu), cpucfg_membase + CPUCFG_GEN_CTRL_REG);
+	reg = pete_readl("arch/arm/mach-sunxi/platsmp.c:176", cpucfg_membase + CPUCFG_GEN_CTRL_REG);
+	pete_writel("arch/arm/mach-sunxi/platsmp.c:177", reg & ~BIT(cpu), cpucfg_membase + CPUCFG_GEN_CTRL_REG);
 
 	/* Clear CPU power-off gating */
-	reg = readl(prcm_membase + PRCM_CPU_PWROFF_REG);
-	writel(reg & ~BIT(cpu), prcm_membase + PRCM_CPU_PWROFF_REG);
+	reg = pete_readl("arch/arm/mach-sunxi/platsmp.c:180", prcm_membase + PRCM_CPU_PWROFF_REG);
+	pete_writel("arch/arm/mach-sunxi/platsmp.c:181", reg & ~BIT(cpu), prcm_membase + PRCM_CPU_PWROFF_REG);
 	mdelay(1);
 
 	/* Deassert the CPU core reset */
-	writel(3, cpucfg_membase + CPUCFG_CPU_RST_CTRL_REG(cpu));
+	pete_writel("arch/arm/mach-sunxi/platsmp.c:185", 3, cpucfg_membase + CPUCFG_CPU_RST_CTRL_REG(cpu));
 
 	spin_unlock(&cpu_lock);
 

@@ -102,7 +102,7 @@ static int pic32_rtc_setaie(struct device *dev, unsigned int enabled)
 
 	clk_enable(pdata->clk);
 
-	writel(PIC32_RTCALRM_ALRMEN,
+	pete_writel("drivers/rtc/rtc-pic32.c:105", PIC32_RTCALRM_ALRMEN,
 	       base + (enabled ? PIC32_SET(PIC32_RTCALRM) :
 		       PIC32_CLR(PIC32_RTCALRM)));
 
@@ -120,9 +120,9 @@ static int pic32_rtc_setfreq(struct device *dev, int freq)
 
 	clk_enable(pdata->clk);
 
-	writel(PIC32_RTCALRM_AMASK, base + PIC32_CLR(PIC32_RTCALRM));
-	writel(freq << 8, base + PIC32_SET(PIC32_RTCALRM));
-	writel(PIC32_RTCALRM_CHIME, base + PIC32_SET(PIC32_RTCALRM));
+	pete_writel("drivers/rtc/rtc-pic32.c:123", PIC32_RTCALRM_AMASK, base + PIC32_CLR(PIC32_RTCALRM));
+	pete_writel("drivers/rtc/rtc-pic32.c:124", freq << 8, base + PIC32_SET(PIC32_RTCALRM));
+	pete_writel("drivers/rtc/rtc-pic32.c:125", PIC32_RTCALRM_CHIME, base + PIC32_SET(PIC32_RTCALRM));
 
 	clk_disable(pdata->clk);
 
@@ -228,8 +228,8 @@ static int pic32_rtc_setalarm(struct device *dev, struct rtc_wkalrm *alrm)
 	clk_enable(pdata->clk);
 	dev_dbg(dev, "setalarm: %d, %ptR\n", alrm->enabled, tm);
 
-	writel(0x00, base + PIC32_ALRMTIME);
-	writel(0x00, base + PIC32_ALRMDATE);
+	pete_writel("drivers/rtc/rtc-pic32.c:231", 0x00, base + PIC32_ALRMTIME);
+	pete_writel("drivers/rtc/rtc-pic32.c:232", 0x00, base + PIC32_ALRMDATE);
 
 	pic32_rtc_setaie(dev, alrm->enabled);
 
@@ -271,15 +271,15 @@ static void pic32_rtc_enable(struct pic32_rtc_dev *pdata, int en)
 
 	clk_enable(pdata->clk);
 	if (!en) {
-		writel(PIC32_RTCCON_ON, base + PIC32_CLR(PIC32_RTCCON));
+		pete_writel("drivers/rtc/rtc-pic32.c:274", PIC32_RTCCON_ON, base + PIC32_CLR(PIC32_RTCCON));
 	} else {
 		pic32_syskey_unlock();
 
-		writel(PIC32_RTCCON_RTCWREN, base + PIC32_SET(PIC32_RTCCON));
-		writel(3 << 9, base + PIC32_CLR(PIC32_RTCCON));
+		pete_writel("drivers/rtc/rtc-pic32.c:278", PIC32_RTCCON_RTCWREN, base + PIC32_SET(PIC32_RTCCON));
+		pete_writel("drivers/rtc/rtc-pic32.c:279", 3 << 9, base + PIC32_CLR(PIC32_RTCCON));
 
-		if (!(readl(base + PIC32_RTCCON) & PIC32_RTCCON_ON))
-			writel(PIC32_RTCCON_ON, base + PIC32_SET(PIC32_RTCCON));
+		if (!(pete_readl("drivers/rtc/rtc-pic32.c:281", base + PIC32_RTCCON) & PIC32_RTCCON_ON))
+			pete_writel("drivers/rtc/rtc-pic32.c:282", PIC32_RTCCON_ON, base + PIC32_SET(PIC32_RTCCON));
 	}
 	clk_disable(pdata->clk);
 }

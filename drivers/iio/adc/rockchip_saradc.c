@@ -74,7 +74,7 @@ static int rockchip_saradc_conversion(struct rockchip_saradc *info,
 	info->last_chan = chan;
 
 	/* Select the channel to be used and trigger conversion */
-	writel(SARADC_CTRL_POWER_CTRL
+	pete_writel("drivers/iio/adc/rockchip_saradc.c:77", SARADC_CTRL_POWER_CTRL
 			| (chan->channel & SARADC_CTRL_CHN_MASK)
 			| SARADC_CTRL_IRQ_ENABLE,
 		   info->regs + SARADC_CTRL);

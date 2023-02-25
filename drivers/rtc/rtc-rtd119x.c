@@ -61,7 +61,7 @@ static void rtd119x_rtc_reset(struct device *dev)
 	writel_relaxed(val, data->base + RTD_RTCCR);
 
 	val &= ~RTD_RTCCR_RTCRST;
-	writel(val, data->base + RTD_RTCCR);
+	pete_writel("drivers/rtc/rtc-rtd119x.c:64", val, data->base + RTD_RTCCR);
 }
 
 static void rtd119x_rtc_set_enabled(struct device *dev, bool enable)

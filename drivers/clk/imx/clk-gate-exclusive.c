@@ -31,7 +31,7 @@ static int clk_gate_exclusive_enable(struct clk_hw *hw)
 	struct clk_gate *gate = to_clk_gate(hw);
 	struct clk_gate_exclusive *exgate = container_of(gate,
 					struct clk_gate_exclusive, gate);
-	u32 val = readl(gate->reg);
+	u32 val = pete_readl("drivers/clk/imx/clk-gate-exclusive.c:34", gate->reg);
 
 	if (val & exgate->exclusive_mask)
 		return -EBUSY;

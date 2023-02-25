@@ -2594,9 +2594,9 @@ static inline void DAC960_LA_write_cmd_mbox(union myrb_cmd_mbox *mem_mbox,
 static inline void DAC960_LA_write_hw_mbox(void __iomem *base,
 		union myrb_cmd_mbox *mbox)
 {
-	writel(mbox->words[0], base + DAC960_LA_CMDOP_OFFSET);
-	writel(mbox->words[1], base + DAC960_LA_MBOX4_OFFSET);
-	writel(mbox->words[2], base + DAC960_LA_MBOX8_OFFSET);
+	pete_writel("drivers/scsi/myrb.c:2597", mbox->words[0], base + DAC960_LA_CMDOP_OFFSET);
+	pete_writel("drivers/scsi/myrb.c:2598", mbox->words[1], base + DAC960_LA_MBOX4_OFFSET);
+	pete_writel("drivers/scsi/myrb.c:2599", mbox->words[2], base + DAC960_LA_MBOX8_OFFSET);
 	writeb(mbox->bytes[12], base + DAC960_LA_MBOX12_OFFSET);
 }
 
@@ -2759,52 +2759,52 @@ static struct myrb_privdata DAC960_LA_privdata = {
  */
 static inline void DAC960_PG_hw_mbox_new_cmd(void __iomem *base)
 {
-	writel(DAC960_PG_IDB_HWMBOX_NEW_CMD, base + DAC960_PG_IDB_OFFSET);
+	pete_writel("drivers/scsi/myrb.c:2762", DAC960_PG_IDB_HWMBOX_NEW_CMD, base + DAC960_PG_IDB_OFFSET);
 }
 
 static inline void DAC960_PG_ack_hw_mbox_status(void __iomem *base)
 {
-	writel(DAC960_PG_IDB_HWMBOX_ACK_STS, base + DAC960_PG_IDB_OFFSET);
+	pete_writel("drivers/scsi/myrb.c:2767", DAC960_PG_IDB_HWMBOX_ACK_STS, base + DAC960_PG_IDB_OFFSET);
 }
 
 static inline void DAC960_PG_reset_ctrl(void __iomem *base)
 {
-	writel(DAC960_PG_IDB_CTRL_RESET, base + DAC960_PG_IDB_OFFSET);
+	pete_writel("drivers/scsi/myrb.c:2772", DAC960_PG_IDB_CTRL_RESET, base + DAC960_PG_IDB_OFFSET);
 }
 
 static inline void DAC960_PG_mem_mbox_new_cmd(void __iomem *base)
 {
-	writel(DAC960_PG_IDB_MMBOX_NEW_CMD, base + DAC960_PG_IDB_OFFSET);
+	pete_writel("drivers/scsi/myrb.c:2777", DAC960_PG_IDB_MMBOX_NEW_CMD, base + DAC960_PG_IDB_OFFSET);
 }
 
 static inline bool DAC960_PG_hw_mbox_is_full(void __iomem *base)
 {
-	unsigned char idb = readl(base + DAC960_PG_IDB_OFFSET);
+	unsigned char idb = pete_readl("drivers/scsi/myrb.c:2782", base + DAC960_PG_IDB_OFFSET);
 
 	return idb & DAC960_PG_IDB_HWMBOX_FULL;
 }
 
 static inline bool DAC960_PG_init_in_progress(void __iomem *base)
 {
-	unsigned char idb = readl(base + DAC960_PG_IDB_OFFSET);
+	unsigned char idb = pete_readl("drivers/scsi/myrb.c:2789", base + DAC960_PG_IDB_OFFSET);
 
 	return idb & DAC960_PG_IDB_INIT_IN_PROGRESS;
 }
 
 static inline void DAC960_PG_ack_hw_mbox_intr(void __iomem *base)
 {
-	writel(DAC960_PG_ODB_HWMBOX_ACK_IRQ, base + DAC960_PG_ODB_OFFSET);
+	pete_writel("drivers/scsi/myrb.c:2796", DAC960_PG_ODB_HWMBOX_ACK_IRQ, base + DAC960_PG_ODB_OFFSET);
 }
 
 static inline void DAC960_PG_ack_intr(void __iomem *base)
 {
-	writel(DAC960_PG_ODB_HWMBOX_ACK_IRQ | DAC960_PG_ODB_MMBOX_ACK_IRQ,
+	pete_writel("drivers/scsi/myrb.c:2801", DAC960_PG_ODB_HWMBOX_ACK_IRQ | DAC960_PG_ODB_MMBOX_ACK_IRQ,
 	       base + DAC960_PG_ODB_OFFSET);
 }
 
 static inline bool DAC960_PG_hw_mbox_status_available(void __iomem *base)
 {
-	unsigned char odb = readl(base + DAC960_PG_ODB_OFFSET);
+	unsigned char odb = pete_readl("drivers/scsi/myrb.c:2807", base + DAC960_PG_ODB_OFFSET);
 
 	return odb & DAC960_PG_ODB_HWMBOX_STS_AVAIL;
 }
@@ -2814,14 +2814,14 @@ static inline void DAC960_PG_enable_intr(void __iomem *base)
 	unsigned int imask = (unsigned int)-1;
 
 	imask &= ~DAC960_PG_IRQMASK_DISABLE_IRQ;
-	writel(imask, base + DAC960_PG_IRQMASK_OFFSET);
+	pete_writel("drivers/scsi/myrb.c:2817", imask, base + DAC960_PG_IRQMASK_OFFSET);
 }
 
 static inline void DAC960_PG_disable_intr(void __iomem *base)
 {
 	unsigned int imask = (unsigned int)-1;
 
-	writel(imask, base + DAC960_PG_IRQMASK_OFFSET);
+	pete_writel("drivers/scsi/myrb.c:2824", imask, base + DAC960_PG_IRQMASK_OFFSET);
 }
 
 static inline void DAC960_PG_write_cmd_mbox(union myrb_cmd_mbox *mem_mbox,
@@ -2840,9 +2840,9 @@ static inline void DAC960_PG_write_cmd_mbox(union myrb_cmd_mbox *mem_mbox,
 static inline void DAC960_PG_write_hw_mbox(void __iomem *base,
 		union myrb_cmd_mbox *mbox)
 {
-	writel(mbox->words[0], base + DAC960_PG_CMDOP_OFFSET);
-	writel(mbox->words[1], base + DAC960_PG_MBOX4_OFFSET);
-	writel(mbox->words[2], base + DAC960_PG_MBOX8_OFFSET);
+	pete_writel("drivers/scsi/myrb.c:2843", mbox->words[0], base + DAC960_PG_CMDOP_OFFSET);
+	pete_writel("drivers/scsi/myrb.c:2844", mbox->words[1], base + DAC960_PG_MBOX4_OFFSET);
+	pete_writel("drivers/scsi/myrb.c:2845", mbox->words[2], base + DAC960_PG_MBOX8_OFFSET);
 	writeb(mbox->bytes[12], base + DAC960_PG_MBOX12_OFFSET);
 }
 
@@ -3059,9 +3059,9 @@ static inline void DAC960_PD_disable_intr(void __iomem *base)
 static inline void DAC960_PD_write_cmd_mbox(void __iomem *base,
 		union myrb_cmd_mbox *mbox)
 {
-	writel(mbox->words[0], base + DAC960_PD_CMDOP_OFFSET);
-	writel(mbox->words[1], base + DAC960_PD_MBOX4_OFFSET);
-	writel(mbox->words[2], base + DAC960_PD_MBOX8_OFFSET);
+	pete_writel("drivers/scsi/myrb.c:3062", mbox->words[0], base + DAC960_PD_CMDOP_OFFSET);
+	pete_writel("drivers/scsi/myrb.c:3063", mbox->words[1], base + DAC960_PD_MBOX4_OFFSET);
+	pete_writel("drivers/scsi/myrb.c:3064", mbox->words[2], base + DAC960_PD_MBOX8_OFFSET);
 	writeb(mbox->bytes[12], base + DAC960_PD_MBOX12_OFFSET);
 }
 

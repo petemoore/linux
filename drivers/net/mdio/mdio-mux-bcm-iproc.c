@@ -60,9 +60,9 @@ static void mdio_mux_iproc_config(struct iproc_mdiomux_desc *md)
 	u32 val;
 
 	/* Disable external mdio master access */
-	val = readl(md->base + MDIO_SCAN_CTRL_OFFSET);
+	val = pete_readl("drivers/net/mdio/mdio-mux-bcm-iproc.c:63", md->base + MDIO_SCAN_CTRL_OFFSET);
 	val |= BIT(MDIO_SCAN_CTRL_OVRIDE_EXT_MSTR);
-	writel(val, md->base + MDIO_SCAN_CTRL_OFFSET);
+	pete_writel("drivers/net/mdio/mdio-mux-bcm-iproc.c:65", val, md->base + MDIO_SCAN_CTRL_OFFSET);
 
 	if (md->core_clk) {
 		/* use rate adjust regs to derive the mdio's operating
@@ -72,8 +72,8 @@ static void mdio_mux_iproc_config(struct iproc_mdiomux_desc *md)
 		divisor = divisor / (MDIO_RATE_ADJ_DIVIDENT + 1);
 		val = divisor;
 		val |= MDIO_RATE_ADJ_DIVIDENT << MDIO_RATE_ADJ_DIVIDENT_SHIFT;
-		writel(val, md->base + MDIO_RATE_ADJ_EXT_OFFSET);
-		writel(val, md->base + MDIO_RATE_ADJ_INT_OFFSET);
+		pete_writel("drivers/net/mdio/mdio-mux-bcm-iproc.c:75", val, md->base + MDIO_RATE_ADJ_EXT_OFFSET);
+		pete_writel("drivers/net/mdio/mdio-mux-bcm-iproc.c:76", val, md->base + MDIO_RATE_ADJ_INT_OFFSET);
 	}
 }
 
@@ -104,29 +104,29 @@ static int start_miim_ops(void __iomem *base,
 	u32 param;
 	int ret;
 
-	writel(0, base + MDIO_CTRL_OFFSET);
+	pete_writel("drivers/net/mdio/mdio-mux-bcm-iproc.c:107", 0, base + MDIO_CTRL_OFFSET);
 	ret = iproc_mdio_wait_for_idle(base, 0);
 	if (ret)
 		goto err;
 
-	param = readl(base + MDIO_PARAM_OFFSET);
+	param = pete_readl("drivers/net/mdio/mdio-mux-bcm-iproc.c:112", base + MDIO_PARAM_OFFSET);
 	param |= phyid << MDIO_PARAM_PHY_ID;
 	param |= val << MDIO_PARAM_PHY_DATA;
 	if (reg & MII_ADDR_C45)
 		param |= BIT(MDIO_PARAM_C45_SEL);
 
-	writel(param, base + MDIO_PARAM_OFFSET);
+	pete_writel("drivers/net/mdio/mdio-mux-bcm-iproc.c:118", param, base + MDIO_PARAM_OFFSET);
 
-	writel(reg, base + MDIO_ADDR_OFFSET);
+	pete_writel("drivers/net/mdio/mdio-mux-bcm-iproc.c:120", reg, base + MDIO_ADDR_OFFSET);
 
-	writel(op, base + MDIO_CTRL_OFFSET);
+	pete_writel("drivers/net/mdio/mdio-mux-bcm-iproc.c:122", op, base + MDIO_CTRL_OFFSET);
 
 	ret = iproc_mdio_wait_for_idle(base, 1);
 	if (ret)
 		goto err;
 
 	if (op == MDIO_CTRL_READ_OP)
-		ret = readl(base + MDIO_READ_OFFSET) & MDIO_READ_DATA_MASK;
+		ret = pete_readl("drivers/net/mdio/mdio-mux-bcm-iproc.c:129", base + MDIO_READ_OFFSET) & MDIO_READ_DATA_MASK;
 err:
 	return ret;
 }
@@ -171,7 +171,7 @@ static int mdio_mux_iproc_switch_fn(int current_child, int desired_child,
 	param = (bus_dir ? 1 : 0) << MDIO_PARAM_INTERNAL_SEL;
 	param |= (bus_id << MDIO_PARAM_BUS_ID);
 
-	writel(param, md->base + MDIO_PARAM_OFFSET);
+	pete_writel("drivers/net/mdio/mdio-mux-bcm-iproc.c:174", param, md->base + MDIO_PARAM_OFFSET);
 	return 0;
 }
 

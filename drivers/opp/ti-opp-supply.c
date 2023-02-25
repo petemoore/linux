@@ -138,7 +138,7 @@ static int _store_optimized_voltages(struct device *dev,
 		table->reference_uv = be32_to_cpup(val++);
 		efuse_offset = be32_to_cpup(val++);
 
-		tmp = readl(base + efuse_offset);
+		tmp = pete_readl("drivers/opp/ti-opp-supply.c:141", base + efuse_offset);
 		tmp &= of_data->efuse_voltage_mask;
 		tmp >>= __ffs(of_data->efuse_voltage_mask);
 

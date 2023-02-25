@@ -44,7 +44,7 @@ struct ssphy_priv {
 
 static inline void qcom_ssphy_updatel(void __iomem *addr, u32 mask, u32 val)
 {
-	writel((readl(addr) & ~mask) | val, addr);
+	pete_writel("drivers/phy/qualcomm/phy-qcom-usb-ss.c:47", (pete_readl("drivers/phy/qualcomm/phy-qcom-usb-ss.c:47", addr) & ~mask) | val, addr);
 }
 
 static int qcom_ssphy_do_reset(struct ssphy_priv *priv)

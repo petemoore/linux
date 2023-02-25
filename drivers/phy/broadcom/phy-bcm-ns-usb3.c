@@ -91,7 +91,7 @@ static int bcm_ns_usb3_phy_init_ns_bx(struct bcm_ns_usb3 *usb3)
 	bcm_ns_usb3_mdio_phy_write(usb3, BCM_NS_USB3_PLLA_CONTROL1, 0x8000);
 
 	/* Deasserting USB3 system reset */
-	writel(0, usb3->dmp + BCMA_RESET_CTL);
+	pete_writel("drivers/phy/broadcom/phy-bcm-ns-usb3.c:94", 0, usb3->dmp + BCMA_RESET_CTL);
 
 	/* PLL frequency monitor enable */
 	bcm_ns_usb3_mdio_phy_write(usb3, BCM_NS_USB3_PLL_CONTROL, 0x9000);
@@ -141,7 +141,7 @@ static int bcm_ns_usb3_phy_init_ns_ax(struct bcm_ns_usb3 *usb3)
 	bcm_ns_usb3_mdio_phy_write(usb3, BCM_NS_USB3_TX_PMD_CONTROL1, 0x1003);
 
 	/* Deasserting USB3 system reset */
-	writel(0, usb3->dmp + BCMA_RESET_CTL);
+	pete_writel("drivers/phy/broadcom/phy-bcm-ns-usb3.c:144", 0, usb3->dmp + BCMA_RESET_CTL);
 
 	return 0;
 }
@@ -152,7 +152,7 @@ static int bcm_ns_usb3_phy_init(struct phy *phy)
 	int err;
 
 	/* Perform USB3 system soft reset */
-	writel(BCMA_RESET_CTL_RESET, usb3->dmp + BCMA_RESET_CTL);
+	pete_writel("drivers/phy/broadcom/phy-bcm-ns-usb3.c:155", BCMA_RESET_CTL_RESET, usb3->dmp + BCMA_RESET_CTL);
 
 	switch (usb3->family) {
 	case BCM_NS_AX:

@@ -183,11 +183,11 @@ static int amd_ntb_mw_set_trans(struct ntb_dev *ntb, int pidx, int idx,
 		}
 
 		/* set and verify setting the limit */
-		writel(limit, peer_mmio + limit_reg);
-		reg_val = readl(peer_mmio + limit_reg);
+		pete_writel("drivers/ntb/hw/amd/ntb_hw_amd.c:186", limit, peer_mmio + limit_reg);
+		reg_val = pete_readl("drivers/ntb/hw/amd/ntb_hw_amd.c:187", peer_mmio + limit_reg);
 		if (reg_val != limit) {
-			writel(base_addr, mmio + limit_reg);
-			writel(0, peer_mmio + xlat_reg);
+			pete_writel("drivers/ntb/hw/amd/ntb_hw_amd.c:189", base_addr, mmio + limit_reg);
+			pete_writel("drivers/ntb/hw/amd/ntb_hw_amd.c:190", 0, peer_mmio + xlat_reg);
 			return -EIO;
 		}
 	}
@@ -347,7 +347,7 @@ static int amd_ntb_link_enable(struct ntb_dev *ntb,
 
 	/* Enable event interrupt */
 	ndev->int_mask &= ~AMD_EVENT_INTMASK;
-	writel(ndev->int_mask, mmio + AMD_INTMASK_OFFSET);
+	pete_writel("drivers/ntb/hw/amd/ntb_hw_amd.c:350", ndev->int_mask, mmio + AMD_INTMASK_OFFSET);
 
 	if (ndev->ntb.topo == NTB_TOPO_SEC)
 		return -EINVAL;
@@ -363,7 +363,7 @@ static int amd_ntb_link_disable(struct ntb_dev *ntb)
 
 	/* Disable event interrupt */
 	ndev->int_mask |= AMD_EVENT_INTMASK;
-	writel(ndev->int_mask, mmio + AMD_INTMASK_OFFSET);
+	pete_writel("drivers/ntb/hw/amd/ntb_hw_amd.c:366", ndev->int_mask, mmio + AMD_INTMASK_OFFSET);
 
 	if (ndev->ntb.topo == NTB_TOPO_SEC)
 		return -EINVAL;
@@ -494,7 +494,7 @@ static u32 amd_ntb_spad_read(struct ntb_dev *ntb, int idx)
 		return 0;
 
 	offset = ndev->self_spad + (idx << 2);
-	return readl(mmio + AMD_SPAD_OFFSET + offset);
+	return pete_readl("drivers/ntb/hw/amd/ntb_hw_amd.c:497", mmio + AMD_SPAD_OFFSET + offset);
 }
 
 static int amd_ntb_spad_write(struct ntb_dev *ntb,
@@ -508,7 +508,7 @@ static int amd_ntb_spad_write(struct ntb_dev *ntb,
 		return -EINVAL;
 
 	offset = ndev->self_spad + (idx << 2);
-	writel(val, mmio + AMD_SPAD_OFFSET + offset);
+	pete_writel("drivers/ntb/hw/amd/ntb_hw_amd.c:511", val, mmio + AMD_SPAD_OFFSET + offset);
 
 	return 0;
 }
@@ -523,7 +523,7 @@ static u32 amd_ntb_peer_spad_read(struct ntb_dev *ntb, int pidx, int sidx)
 		return -EINVAL;
 
 	offset = ndev->peer_spad + (sidx << 2);
-	return readl(mmio + AMD_SPAD_OFFSET + offset);
+	return pete_readl("drivers/ntb/hw/amd/ntb_hw_amd.c:526", mmio + AMD_SPAD_OFFSET + offset);
 }
 
 static int amd_ntb_peer_spad_write(struct ntb_dev *ntb, int pidx,
@@ -537,7 +537,7 @@ static int amd_ntb_peer_spad_write(struct ntb_dev *ntb, int pidx,
 		return -EINVAL;
 
 	offset = ndev->peer_spad + (sidx << 2);
-	writel(val, mmio + AMD_SPAD_OFFSET + offset);
+	pete_writel("drivers/ntb/hw/amd/ntb_hw_amd.c:540", val, mmio + AMD_SPAD_OFFSET + offset);
 
 	return 0;
 }
@@ -571,9 +571,9 @@ static void amd_ack_smu(struct amd_ntb_dev *ndev, u32 bit)
 	void __iomem *mmio = ndev->self_mmio;
 	int reg;
 
-	reg = readl(mmio + AMD_SMUACK_OFFSET);
+	reg = pete_readl("drivers/ntb/hw/amd/ntb_hw_amd.c:574", mmio + AMD_SMUACK_OFFSET);
 	reg |= bit;
-	writel(reg, mmio + AMD_SMUACK_OFFSET);
+	pete_writel("drivers/ntb/hw/amd/ntb_hw_amd.c:576", reg, mmio + AMD_SMUACK_OFFSET);
 }
 
 static void amd_handle_event(struct amd_ntb_dev *ndev, int vec)
@@ -582,7 +582,7 @@ static void amd_handle_event(struct amd_ntb_dev *ndev, int vec)
 	struct device *dev = &ndev->ntb.pdev->dev;
 	u32 status;
 
-	status = readl(mmio + AMD_INTSTAT_OFFSET);
+	status = pete_readl("drivers/ntb/hw/amd/ntb_hw_amd.c:585", mmio + AMD_INTSTAT_OFFSET);
 	if (!(status & AMD_EVENT_INTMASK))
 		return;
 
@@ -625,7 +625,7 @@ static void amd_handle_event(struct amd_ntb_dev *ndev, int vec)
 		break;
 	case AMD_PEER_D0_EVENT:
 		mmio = ndev->peer_mmio;
-		status = readl(mmio + AMD_PMESTAT_OFFSET);
+		status = pete_readl("drivers/ntb/hw/amd/ntb_hw_amd.c:628", mmio + AMD_PMESTAT_OFFSET);
 		/* check if this is WAKEUP event */
 		if (status & 0x1)
 			dev_info(dev, "Wakeup is done.\n");
@@ -644,7 +644,7 @@ static void amd_handle_event(struct amd_ntb_dev *ndev, int vec)
 	}
 
 	/* Clear the interrupt status */
-	writel(status, mmio + AMD_INTSTAT_OFFSET);
+	pete_writel("drivers/ntb/hw/amd/ntb_hw_amd.c:647", status, mmio + AMD_INTSTAT_OFFSET);
 }
 
 static void amd_handle_db_event(struct amd_ntb_dev *ndev, int vec)
@@ -817,7 +817,7 @@ static void ndev_deinit_isr(struct amd_ntb_dev *ndev)
 
 	/* Mask all doorbell interrupts */
 	ndev->db_mask = ndev->db_valid_mask;
-	writel(ndev->db_mask, mmio + AMD_DBMASK_OFFSET);
+	pete_writel("drivers/ntb/hw/amd/ntb_hw_amd.c:820", ndev->db_mask, mmio + AMD_DBMASK_OFFSET);
 
 	if (ndev->msix) {
 		i = ndev->msix_vec_count;
@@ -892,11 +892,11 @@ static ssize_t ndev_debugfs_read(struct file *filp, char __user *ubuf,
 	off += scnprintf(buf + off, buf_size - off,
 			 "Doorbell Valid Mask -\t%#llx\n", ndev->db_valid_mask);
 
-	u.v32 = readl(ndev->self_mmio + AMD_DBMASK_OFFSET);
+	u.v32 = pete_readl("drivers/ntb/hw/amd/ntb_hw_amd.c:895", ndev->self_mmio + AMD_DBMASK_OFFSET);
 	off += scnprintf(buf + off, buf_size - off,
 			 "Doorbell Mask -\t\t\t%#06x\n", u.v32);
 
-	u.v32 = readl(mmio + AMD_DBSTAT_OFFSET);
+	u.v32 = pete_readl("drivers/ntb/hw/amd/ntb_hw_amd.c:899", mmio + AMD_DBSTAT_OFFSET);
 	off += scnprintf(buf + off, buf_size - off,
 			 "Doorbell Bell -\t\t\t%#06x\n", u.v32);
 
@@ -915,7 +915,7 @@ static ssize_t ndev_debugfs_read(struct file *filp, char __user *ubuf,
 	off += scnprintf(buf + off, buf_size - off,
 			 "XLAT45 -\t\t%#018llx\n", u.v64);
 
-	u.v32 = readl(mmio + AMD_BAR1LMT_OFFSET);
+	u.v32 = pete_readl("drivers/ntb/hw/amd/ntb_hw_amd.c:918", mmio + AMD_BAR1LMT_OFFSET);
 	off += scnprintf(buf + off, buf_size - off,
 			 "LMT1 -\t\t\t%#06x\n", u.v32);
 
@@ -971,7 +971,7 @@ static int amd_poll_link(struct amd_ntb_dev *ndev)
 	void __iomem *mmio = ndev->peer_mmio;
 	u32 reg;
 
-	reg = readl(mmio + AMD_SIDEINFO_OFFSET);
+	reg = pete_readl("drivers/ntb/hw/amd/ntb_hw_amd.c:974", mmio + AMD_SIDEINFO_OFFSET);
 	reg &= AMD_SIDE_READY;
 
 	dev_dbg(&ndev->ntb.pdev->dev, "%s: reg_val = 0x%x.\n", __func__, reg);
@@ -1009,10 +1009,10 @@ static void amd_set_side_info_reg(struct amd_ntb_dev *ndev, bool peer)
 	else
 		mmio = ndev->self_mmio;
 
-	reg = readl(mmio + AMD_SIDEINFO_OFFSET);
+	reg = pete_readl("drivers/ntb/hw/amd/ntb_hw_amd.c:1012", mmio + AMD_SIDEINFO_OFFSET);
 	if (!(reg & AMD_SIDE_READY)) {
 		reg |= AMD_SIDE_READY;
-		writel(reg, mmio + AMD_SIDEINFO_OFFSET);
+		pete_writel("drivers/ntb/hw/amd/ntb_hw_amd.c:1015", reg, mmio + AMD_SIDEINFO_OFFSET);
 	}
 }
 
@@ -1026,11 +1026,11 @@ static void amd_clear_side_info_reg(struct amd_ntb_dev *ndev, bool peer)
 	else
 		mmio = ndev->self_mmio;
 
-	reg = readl(mmio + AMD_SIDEINFO_OFFSET);
+	reg = pete_readl("drivers/ntb/hw/amd/ntb_hw_amd.c:1029", mmio + AMD_SIDEINFO_OFFSET);
 	if (reg & AMD_SIDE_READY) {
 		reg &= ~AMD_SIDE_READY;
-		writel(reg, mmio + AMD_SIDEINFO_OFFSET);
-		readl(mmio + AMD_SIDEINFO_OFFSET);
+		pete_writel("drivers/ntb/hw/amd/ntb_hw_amd.c:1032", reg, mmio + AMD_SIDEINFO_OFFSET);
+		pete_readl("drivers/ntb/hw/amd/ntb_hw_amd.c:1033", mmio + AMD_SIDEINFO_OFFSET);
 	}
 }
 
@@ -1041,9 +1041,9 @@ static void amd_init_side_info(struct amd_ntb_dev *ndev)
 
 	amd_set_side_info_reg(ndev, false);
 
-	ntb_ctl = readl(mmio + AMD_CNTL_OFFSET);
+	ntb_ctl = pete_readl("drivers/ntb/hw/amd/ntb_hw_amd.c:1044", mmio + AMD_CNTL_OFFSET);
 	ntb_ctl |= (PMM_REG_CTL | SMM_REG_CTL);
-	writel(ntb_ctl, mmio + AMD_CNTL_OFFSET);
+	pete_writel("drivers/ntb/hw/amd/ntb_hw_amd.c:1046", ntb_ctl, mmio + AMD_CNTL_OFFSET);
 }
 
 static void amd_deinit_side_info(struct amd_ntb_dev *ndev)
@@ -1053,9 +1053,9 @@ static void amd_deinit_side_info(struct amd_ntb_dev *ndev)
 
 	amd_clear_side_info_reg(ndev, false);
 
-	ntb_ctl = readl(mmio + AMD_CNTL_OFFSET);
+	ntb_ctl = pete_readl("drivers/ntb/hw/amd/ntb_hw_amd.c:1056", mmio + AMD_CNTL_OFFSET);
 	ntb_ctl &= ~(PMM_REG_CTL | SMM_REG_CTL);
-	writel(ntb_ctl, mmio + AMD_CNTL_OFFSET);
+	pete_writel("drivers/ntb/hw/amd/ntb_hw_amd.c:1058", ntb_ctl, mmio + AMD_CNTL_OFFSET);
 }
 
 static int amd_init_ntb(struct amd_ntb_dev *ndev)
@@ -1089,7 +1089,7 @@ static int amd_init_ntb(struct amd_ntb_dev *ndev)
 	}
 
 	/* Mask event interrupts */
-	writel(ndev->int_mask, mmio + AMD_INTMASK_OFFSET);
+	pete_writel("drivers/ntb/hw/amd/ntb_hw_amd.c:1092", ndev->int_mask, mmio + AMD_INTMASK_OFFSET);
 
 	return 0;
 }
@@ -1099,7 +1099,7 @@ static enum ntb_topo amd_get_topo(struct amd_ntb_dev *ndev)
 	void __iomem *mmio = ndev->self_mmio;
 	u32 info;
 
-	info = readl(mmio + AMD_SIDEINFO_OFFSET);
+	info = pete_readl("drivers/ntb/hw/amd/ntb_hw_amd.c:1102", mmio + AMD_SIDEINFO_OFFSET);
 	if (info & AMD_SIDE_MASK)
 		return NTB_TOPO_SEC;
 	else
@@ -1147,7 +1147,7 @@ static int amd_init_dev(struct amd_ntb_dev *ndev)
 
 	/* Enable Link-Up and Link-Down event interrupts */
 	ndev->int_mask &= ~(AMD_LINK_UP_EVENT | AMD_LINK_DOWN_EVENT);
-	writel(ndev->int_mask, mmio + AMD_INTMASK_OFFSET);
+	pete_writel("drivers/ntb/hw/amd/ntb_hw_amd.c:1150", ndev->int_mask, mmio + AMD_INTMASK_OFFSET);
 
 	return 0;
 }

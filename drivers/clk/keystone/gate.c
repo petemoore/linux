@@ -74,30 +74,30 @@ static void psc_config(void __iomem *control_base, void __iomem *domain_base,
 	u32 ptcmd, pdstat, pdctl, mdstat, mdctl, ptstat;
 	u32 count = STATE_TRANS_MAX_COUNT;
 
-	mdctl = readl(control_base + MDCTL);
+	mdctl = pete_readl("drivers/clk/keystone/gate.c:77", control_base + MDCTL);
 	mdctl &= ~MDSTAT_STATE_MASK;
 	mdctl |= next_state;
 	/* For disable, we always put the module in local reset */
 	if (next_state == PSC_STATE_DISABLE)
 		mdctl &= ~MDCTL_LRESET;
-	writel(mdctl, control_base + MDCTL);
+	pete_writel("drivers/clk/keystone/gate.c:83", mdctl, control_base + MDCTL);
 
-	pdstat = readl(domain_base + PDSTAT);
+	pdstat = pete_readl("drivers/clk/keystone/gate.c:85", domain_base + PDSTAT);
 	if (!(pdstat & PDSTAT_STATE_MASK)) {
-		pdctl = readl(domain_base + PDCTL);
+		pdctl = pete_readl("drivers/clk/keystone/gate.c:87", domain_base + PDCTL);
 		pdctl |= PDCTL_NEXT;
-		writel(pdctl, domain_base + PDCTL);
+		pete_writel("drivers/clk/keystone/gate.c:89", pdctl, domain_base + PDCTL);
 	}
 
 	ptcmd = 1 << domain_id;
-	writel(ptcmd, domain_transition_base + PTCMD);
+	pete_writel("drivers/clk/keystone/gate.c:93", ptcmd, domain_transition_base + PTCMD);
 	do {
-		ptstat = readl(domain_transition_base + PTSTAT);
+		ptstat = pete_readl("drivers/clk/keystone/gate.c:95", domain_transition_base + PTSTAT);
 	} while (((ptstat >> domain_id) & 1) && count--);
 
 	count = STATE_TRANS_MAX_COUNT;
 	do {
-		mdstat = readl(control_base + MDSTAT);
+		mdstat = pete_readl("drivers/clk/keystone/gate.c:100", control_base + MDSTAT);
 	} while (!((mdstat & MDSTAT_STATE_MASK) == next_state) && count--);
 }
 
@@ -105,7 +105,7 @@ static int keystone_clk_is_enabled(struct clk_hw *hw)
 {
 	struct clk_psc *psc = to_clk_psc(hw);
 	struct clk_psc_data *data = psc->psc_data;
-	u32 mdstat = readl(data->control_base + MDSTAT);
+	u32 mdstat = pete_readl("drivers/clk/keystone/gate.c:108", data->control_base + MDSTAT);
 
 	return (mdstat & MDSTAT_MCKOUT) ? 1 : 0;
 }

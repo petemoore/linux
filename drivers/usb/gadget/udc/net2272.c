@@ -644,7 +644,7 @@ net2272_request_dma(struct net2272 *dev, unsigned ep, u32 buf,
 	switch (dev->dev_id) {
 	case PCI_DEVICE_ID_RDK1:
 		/* Setup PLX 9054 DMA mode */
-		writel((1 << LOCAL_BUS_WIDTH) |
+		pete_writel("drivers/usb/gadget/udc/net2272.c:647", (1 << LOCAL_BUS_WIDTH) |
 			(1 << TA_READY_INPUT_ENABLE) |
 			(0 << LOCAL_BURST_ENABLE) |
 			(1 << DONE_INTERRUPT_ENABLE) |
@@ -655,14 +655,14 @@ net2272_request_dma(struct net2272 *dev, unsigned ep, u32 buf,
 			(1 << DMA_CHANNEL_INTERRUPT_SELECT),
 			dev->rdk1.plx9054_base_addr + DMAMODE0);
 
-		writel(0x100000, dev->rdk1.plx9054_base_addr + DMALADR0);
-		writel(buf, dev->rdk1.plx9054_base_addr + DMAPADR0);
-		writel(len, dev->rdk1.plx9054_base_addr + DMASIZ0);
-		writel((dir << DIRECTION_OF_TRANSFER) |
+		pete_writel("drivers/usb/gadget/udc/net2272.c:658", 0x100000, dev->rdk1.plx9054_base_addr + DMALADR0);
+		pete_writel("drivers/usb/gadget/udc/net2272.c:659", buf, dev->rdk1.plx9054_base_addr + DMAPADR0);
+		pete_writel("drivers/usb/gadget/udc/net2272.c:660", len, dev->rdk1.plx9054_base_addr + DMASIZ0);
+		pete_writel("drivers/usb/gadget/udc/net2272.c:661", (dir << DIRECTION_OF_TRANSFER) |
 			(1 << INTERRUPT_AFTER_TERMINAL_COUNT),
 			dev->rdk1.plx9054_base_addr + DMADPR0);
-		writel((1 << LOCAL_DMA_CHANNEL_0_INTERRUPT_ENABLE) |
-			readl(dev->rdk1.plx9054_base_addr + INTCSR),
+		pete_writel("drivers/usb/gadget/udc/net2272.c:664", (1 << LOCAL_DMA_CHANNEL_0_INTERRUPT_ENABLE) |
+			pete_readl("drivers/usb/gadget/udc/net2272.c:665", dev->rdk1.plx9054_base_addr + INTCSR),
 			dev->rdk1.plx9054_base_addr + INTCSR);
 
 		break;
@@ -2066,15 +2066,15 @@ static irqreturn_t net2272_irq(int irq, void *_dev)
 #endif
 	spin_lock(&dev->lock);
 #if defined(PLX_PCI_RDK)
-	intcsr = readl(dev->rdk1.plx9054_base_addr + INTCSR);
+	intcsr = pete_readl("drivers/usb/gadget/udc/net2272.c:2069", dev->rdk1.plx9054_base_addr + INTCSR);
 
 	if ((intcsr & LOCAL_INTERRUPT_TEST) == LOCAL_INTERRUPT_TEST) {
-		writel(intcsr & ~(1 << PCI_INTERRUPT_ENABLE),
+		pete_writel("drivers/usb/gadget/udc/net2272.c:2072", intcsr & ~(1 << PCI_INTERRUPT_ENABLE),
 				dev->rdk1.plx9054_base_addr + INTCSR);
 		net2272_handle_stat1_irqs(dev, net2272_read(dev, IRQSTAT1));
 		net2272_handle_stat0_irqs(dev, net2272_read(dev, IRQSTAT0));
-		intcsr = readl(dev->rdk1.plx9054_base_addr + INTCSR);
-		writel(intcsr | (1 << PCI_INTERRUPT_ENABLE),
+		intcsr = pete_readl("drivers/usb/gadget/udc/net2272.c:2076", dev->rdk1.plx9054_base_addr + INTCSR);
+		pete_writel("drivers/usb/gadget/udc/net2272.c:2077", intcsr | (1 << PCI_INTERRUPT_ENABLE),
 			dev->rdk1.plx9054_base_addr + INTCSR);
 	}
 	if ((intcsr & DMA_CHANNEL_0_TEST) == DMA_CHANNEL_0_TEST) {
@@ -2090,7 +2090,7 @@ static irqreturn_t net2272_irq(int irq, void *_dev)
 #endif
 #if defined(PLX_PCI_RDK2)
 	/* see if PCI int for us by checking irqstat */
-	intcsr = readl(dev->rdk2.fpga_base_addr + RDK2_IRQSTAT);
+	intcsr = pete_readl("drivers/usb/gadget/udc/net2272.c:2093", dev->rdk2.fpga_base_addr + RDK2_IRQSTAT);
 	if (!(intcsr & (1 << NET2272_PCI_IRQ))) {
 		spin_unlock(&dev->lock);
 		return IRQ_NONE;
@@ -2353,12 +2353,12 @@ net2272_rdk1_probe(struct pci_dev *pdev, struct net2272 *dev)
 	dev->base_addr = mem_mapped_addr[3];
 
 	/* Set PLX 9054 bus width (16 bits) */
-	tmp = readl(dev->rdk1.plx9054_base_addr + LBRD1);
-	writel((tmp & ~(3 << MEMORY_SPACE_LOCAL_BUS_WIDTH)) | W16_BIT,
+	tmp = pete_readl("drivers/usb/gadget/udc/net2272.c:2356", dev->rdk1.plx9054_base_addr + LBRD1);
+	pete_writel("drivers/usb/gadget/udc/net2272.c:2357", (tmp & ~(3 << MEMORY_SPACE_LOCAL_BUS_WIDTH)) | W16_BIT,
 			dev->rdk1.plx9054_base_addr + LBRD1);
 
 	/* Enable PLX 9054 Interrupts */
-	writel(readl(dev->rdk1.plx9054_base_addr + INTCSR) |
+	pete_writel("drivers/usb/gadget/udc/net2272.c:2361", pete_readl("drivers/usb/gadget/udc/net2272.c:2361", dev->rdk1.plx9054_base_addr + INTCSR) |
 			(1 << PCI_INTERRUPT_ENABLE) |
 			(1 << LOCAL_INTERRUPT_INPUT_ENABLE),
 			dev->rdk1.plx9054_base_addr + INTCSR);
@@ -2433,14 +2433,14 @@ net2272_rdk2_probe(struct pci_dev *pdev, struct net2272 *dev)
 
 	mb();
 	/* Set 2272 bus width (16 bits) and reset */
-	writel((1 << CHIP_RESET), dev->rdk2.fpga_base_addr + RDK2_LOCCTLRDK);
+	pete_writel("drivers/usb/gadget/udc/net2272.c:2436", (1 << CHIP_RESET), dev->rdk2.fpga_base_addr + RDK2_LOCCTLRDK);
 	udelay(200);
-	writel((1 << BUS_WIDTH), dev->rdk2.fpga_base_addr + RDK2_LOCCTLRDK);
+	pete_writel("drivers/usb/gadget/udc/net2272.c:2438", (1 << BUS_WIDTH), dev->rdk2.fpga_base_addr + RDK2_LOCCTLRDK);
 	/* Print fpga version number */
 	dev_info(dev->dev, "RDK2 FPGA version %08x\n",
-		readl(dev->rdk2.fpga_base_addr + RDK2_FPGAREV));
+		pete_readl("drivers/usb/gadget/udc/net2272.c:2441", dev->rdk2.fpga_base_addr + RDK2_FPGAREV));
 	/* Enable FPGA Interrupts */
-	writel((1 << NET2272_PCI_IRQ), dev->rdk2.fpga_base_addr + RDK2_IRQENB);
+	pete_writel("drivers/usb/gadget/udc/net2272.c:2443", (1 << NET2272_PCI_IRQ), dev->rdk2.fpga_base_addr + RDK2_IRQENB);
 
 	return 0;
 
@@ -2502,7 +2502,7 @@ net2272_rdk1_remove(struct pci_dev *pdev, struct net2272 *dev)
 	int i;
 
 	/* disable PLX 9054 interrupts */
-	writel(readl(dev->rdk1.plx9054_base_addr + INTCSR) &
+	pete_writel("drivers/usb/gadget/udc/net2272.c:2505", pete_readl("drivers/usb/gadget/udc/net2272.c:2505", dev->rdk1.plx9054_base_addr + INTCSR) &
 		~(1 << PCI_INTERRUPT_ENABLE),
 		dev->rdk1.plx9054_base_addr + INTCSR);
 
@@ -2524,7 +2524,7 @@ net2272_rdk2_remove(struct pci_dev *pdev, struct net2272 *dev)
 	int i;
 
 	/* disable fpga interrupts
-	writel(readl(dev->rdk1.plx9054_base_addr + INTCSR) &
+	pete_writel("drivers/usb/gadget/udc/net2272.c:2527", pete_readl("drivers/usb/gadget/udc/net2272.c:2527", dev->rdk1.plx9054_base_addr + INTCSR) &
 			~(1 << PCI_INTERRUPT_ENABLE),
 			dev->rdk1.plx9054_base_addr + INTCSR);
 	*/

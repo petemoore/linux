@@ -201,7 +201,7 @@ static void adma_reinit_engine(struct ata_port *ap)
 	writew(0x100, chan + ADMA_FIFO_IN);
 
 	/* set CPB pointer */
-	writel((u32)pp->pkt_dma, chan + ADMA_CPB_NEXT);
+	pete_writel("drivers/ata/pdc_adma.c:204", (u32)pp->pkt_dma, chan + ADMA_CPB_NEXT);
 
 	/* set out-FIFO threshold to 0x100 */
 	writew(0x100, chan + ADMA_FIFO_OUT);

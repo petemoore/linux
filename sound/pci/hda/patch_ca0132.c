@@ -3669,34 +3669,34 @@ static void ca0113_mmio_command_set(struct hda_codec *codec, unsigned int group,
 	struct ca0132_spec *spec = codec->spec;
 	unsigned int write_val;
 
-	writel(0x0000007e, spec->mem_base + 0x210);
-	readl(spec->mem_base + 0x210);
-	writel(0x0000005a, spec->mem_base + 0x210);
-	readl(spec->mem_base + 0x210);
-	readl(spec->mem_base + 0x210);
+	pete_writel("sound/pci/hda/patch_ca0132.c:3672", 0x0000007e, spec->mem_base + 0x210);
+	pete_readl("sound/pci/hda/patch_ca0132.c:3673", spec->mem_base + 0x210);
+	pete_writel("sound/pci/hda/patch_ca0132.c:3674", 0x0000005a, spec->mem_base + 0x210);
+	pete_readl("sound/pci/hda/patch_ca0132.c:3675", spec->mem_base + 0x210);
+	pete_readl("sound/pci/hda/patch_ca0132.c:3676", spec->mem_base + 0x210);
 
-	writel(0x00800005, spec->mem_base + 0x20c);
-	writel(group, spec->mem_base + 0x804);
+	pete_writel("sound/pci/hda/patch_ca0132.c:3678", 0x00800005, spec->mem_base + 0x20c);
+	pete_writel("sound/pci/hda/patch_ca0132.c:3679", group, spec->mem_base + 0x804);
 
-	writel(0x00800005, spec->mem_base + 0x20c);
+	pete_writel("sound/pci/hda/patch_ca0132.c:3681", 0x00800005, spec->mem_base + 0x20c);
 	write_val = (target & 0xff);
 	write_val |= (value << 8);
 
 
-	writel(write_val, spec->mem_base + 0x204);
+	pete_writel("sound/pci/hda/patch_ca0132.c:3686", write_val, spec->mem_base + 0x204);
 	/*
 	 * Need delay here or else it goes too fast and works inconsistently.
 	 */
 	msleep(20);
 
-	readl(spec->mem_base + 0x860);
-	readl(spec->mem_base + 0x854);
-	readl(spec->mem_base + 0x840);
+	pete_readl("sound/pci/hda/patch_ca0132.c:3692", spec->mem_base + 0x860);
+	pete_readl("sound/pci/hda/patch_ca0132.c:3693", spec->mem_base + 0x854);
+	pete_readl("sound/pci/hda/patch_ca0132.c:3694", spec->mem_base + 0x840);
 
-	writel(0x00800004, spec->mem_base + 0x20c);
-	writel(0x00000000, spec->mem_base + 0x210);
-	readl(spec->mem_base + 0x210);
-	readl(spec->mem_base + 0x210);
+	pete_writel("sound/pci/hda/patch_ca0132.c:3696", 0x00800004, spec->mem_base + 0x20c);
+	pete_writel("sound/pci/hda/patch_ca0132.c:3697", 0x00000000, spec->mem_base + 0x210);
+	pete_readl("sound/pci/hda/patch_ca0132.c:3698", spec->mem_base + 0x210);
+	pete_readl("sound/pci/hda/patch_ca0132.c:3699", spec->mem_base + 0x210);
 }
 
 /*
@@ -3708,30 +3708,30 @@ static void ca0113_mmio_command_set_type2(struct hda_codec *codec,
 	struct ca0132_spec *spec = codec->spec;
 	unsigned int write_val;
 
-	writel(0x0000007e, spec->mem_base + 0x210);
-	readl(spec->mem_base + 0x210);
-	writel(0x0000005a, spec->mem_base + 0x210);
-	readl(spec->mem_base + 0x210);
-	readl(spec->mem_base + 0x210);
+	pete_writel("sound/pci/hda/patch_ca0132.c:3711", 0x0000007e, spec->mem_base + 0x210);
+	pete_readl("sound/pci/hda/patch_ca0132.c:3712", spec->mem_base + 0x210);
+	pete_writel("sound/pci/hda/patch_ca0132.c:3713", 0x0000005a, spec->mem_base + 0x210);
+	pete_readl("sound/pci/hda/patch_ca0132.c:3714", spec->mem_base + 0x210);
+	pete_readl("sound/pci/hda/patch_ca0132.c:3715", spec->mem_base + 0x210);
 
-	writel(0x00800003, spec->mem_base + 0x20c);
-	writel(group, spec->mem_base + 0x804);
+	pete_writel("sound/pci/hda/patch_ca0132.c:3717", 0x00800003, spec->mem_base + 0x20c);
+	pete_writel("sound/pci/hda/patch_ca0132.c:3718", group, spec->mem_base + 0x804);
 
-	writel(0x00800005, spec->mem_base + 0x20c);
+	pete_writel("sound/pci/hda/patch_ca0132.c:3720", 0x00800005, spec->mem_base + 0x20c);
 	write_val = (target & 0xff);
 	write_val |= (value << 8);
 
 
-	writel(write_val, spec->mem_base + 0x204);
+	pete_writel("sound/pci/hda/patch_ca0132.c:3725", write_val, spec->mem_base + 0x204);
 	msleep(20);
-	readl(spec->mem_base + 0x860);
-	readl(spec->mem_base + 0x854);
-	readl(spec->mem_base + 0x840);
+	pete_readl("sound/pci/hda/patch_ca0132.c:3727", spec->mem_base + 0x860);
+	pete_readl("sound/pci/hda/patch_ca0132.c:3728", spec->mem_base + 0x854);
+	pete_readl("sound/pci/hda/patch_ca0132.c:3729", spec->mem_base + 0x840);
 
-	writel(0x00800004, spec->mem_base + 0x20c);
-	writel(0x00000000, spec->mem_base + 0x210);
-	readl(spec->mem_base + 0x210);
-	readl(spec->mem_base + 0x210);
+	pete_writel("sound/pci/hda/patch_ca0132.c:3731", 0x00800004, spec->mem_base + 0x20c);
+	pete_writel("sound/pci/hda/patch_ca0132.c:3732", 0x00000000, spec->mem_base + 0x210);
+	pete_readl("sound/pci/hda/patch_ca0132.c:3733", spec->mem_base + 0x210);
+	pete_readl("sound/pci/hda/patch_ca0132.c:3734", spec->mem_base + 0x210);
 }
 
 /*
@@ -9156,8 +9156,8 @@ static void sbz_pre_dsp_setup(struct hda_codec *codec)
 {
 	struct ca0132_spec *spec = codec->spec;
 
-	writel(0x00820680, spec->mem_base + 0x01C);
-	writel(0x00820680, spec->mem_base + 0x01C);
+	pete_writel("sound/pci/hda/patch_ca0132.c:9159", 0x00820680, spec->mem_base + 0x01C);
+	pete_writel("sound/pci/hda/patch_ca0132.c:9160", 0x00820680, spec->mem_base + 0x01C);
 
 	chipio_write(codec, 0x18b0a4, 0x000000c2);
 
@@ -9273,7 +9273,7 @@ static void ca0132_mmio_init_sbz(struct hda_codec *codec)
 
 	addr = ca0113_mmio_init_address_sbz;
 	for (i = 0; i < 3; i++)
-		writel(0x00000000, spec->mem_base + addr[i]);
+		pete_writel("sound/pci/hda/patch_ca0132.c:9276", 0x00000000, spec->mem_base + addr[i]);
 
 	cur_addr = i;
 	switch (ca0132_quirk(spec)) {
@@ -9296,7 +9296,7 @@ static void ca0132_mmio_init_sbz(struct hda_codec *codec)
 	}
 
 	for (i = 0; i < 2; i++)
-		writel(tmp[i], spec->mem_base + addr[cur_addr + i]);
+		pete_writel("sound/pci/hda/patch_ca0132.c:9299", tmp[i], spec->mem_base + addr[cur_addr + i]);
 
 	cur_addr += i;
 
@@ -9312,7 +9312,7 @@ static void ca0132_mmio_init_sbz(struct hda_codec *codec)
 	}
 
 	for (i = 0; i < count; i++)
-		writel(data[i], spec->mem_base + addr[cur_addr + i]);
+		pete_writel("sound/pci/hda/patch_ca0132.c:9315", data[i], spec->mem_base + addr[cur_addr + i]);
 }
 
 static void ca0132_mmio_init_ae5(struct hda_codec *codec)
@@ -9326,8 +9326,8 @@ static void ca0132_mmio_init_ae5(struct hda_codec *codec)
 	count = ARRAY_SIZE(ca0113_mmio_init_data_ae5);
 
 	if (ca0132_quirk(spec) == QUIRK_AE7) {
-		writel(0x00000680, spec->mem_base + 0x1c);
-		writel(0x00880680, spec->mem_base + 0x1c);
+		pete_writel("sound/pci/hda/patch_ca0132.c:9329", 0x00000680, spec->mem_base + 0x1c);
+		pete_writel("sound/pci/hda/patch_ca0132.c:9330", 0x00880680, spec->mem_base + 0x1c);
 	}
 
 	for (i = 0; i < count; i++) {
@@ -9336,15 +9336,15 @@ static void ca0132_mmio_init_ae5(struct hda_codec *codec)
 		 * a different value to 0x20c.
 		 */
 		if (i == 21 && ca0132_quirk(spec) == QUIRK_AE7) {
-			writel(0x00800001, spec->mem_base + addr[i]);
+			pete_writel("sound/pci/hda/patch_ca0132.c:9339", 0x00800001, spec->mem_base + addr[i]);
 			continue;
 		}
 
-		writel(data[i], spec->mem_base + addr[i]);
+		pete_writel("sound/pci/hda/patch_ca0132.c:9343", data[i], spec->mem_base + addr[i]);
 	}
 
 	if (ca0132_quirk(spec) == QUIRK_AE5)
-		writel(0x00880680, spec->mem_base + 0x1c);
+		pete_writel("sound/pci/hda/patch_ca0132.c:9347", 0x00880680, spec->mem_base + 0x1c);
 }
 
 static void ca0132_mmio_init(struct hda_codec *codec)
@@ -9416,9 +9416,9 @@ static void ae5_register_set(struct hda_codec *codec)
 		writeb(data[i], spec->mem_base + addr[cur_addr]);
 
 	for (; cur_addr < count; i++, cur_addr++)
-		writel(data[i], spec->mem_base + addr[cur_addr]);
+		pete_writel("sound/pci/hda/patch_ca0132.c:9419", data[i], spec->mem_base + addr[cur_addr]);
 
-	writel(0x00800001, spec->mem_base + 0x20c);
+	pete_writel("sound/pci/hda/patch_ca0132.c:9421", 0x00800001, spec->mem_base + 0x20c);
 
 	if (ca0132_quirk(spec) == QUIRK_AE7) {
 		ca0113_mmio_command_set_type2(codec, 0x48, 0x07, 0x83);

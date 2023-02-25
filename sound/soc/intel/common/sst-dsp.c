@@ -22,13 +22,13 @@
 /* Internal generic low-level SST IO functions - can be overidden */
 void sst_shim32_write(void __iomem *addr, u32 offset, u32 value)
 {
-	writel(value, addr + offset);
+	pete_writel("sound/soc/intel/common/sst-dsp.c:25", value, addr + offset);
 }
 EXPORT_SYMBOL_GPL(sst_shim32_write);
 
 u32 sst_shim32_read(void __iomem *addr, u32 offset)
 {
-	return readl(addr + offset);
+	return pete_readl("sound/soc/intel/common/sst-dsp.c:31", addr + offset);
 }
 EXPORT_SYMBOL_GPL(sst_shim32_read);
 

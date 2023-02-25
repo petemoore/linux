@@ -226,7 +226,7 @@ static void eesoxscsi_buffer_in(void *buf, int length, void __iomem *base)
 		 * Align buffer.
 		 */
 		if (((u32)buf) & 2 && status >= 2) {
-			*(u16 *)buf = readl(reg_dmadata);
+			*(u16 *)buf = pete_readl("drivers/scsi/arm/eesox.c:229", reg_dmadata);
 			buf += 2;
 			status -= 2;
 			length -= 2;
@@ -235,10 +235,10 @@ static void eesoxscsi_buffer_in(void *buf, int length, void __iomem *base)
 		if (status >= 8) {
 			unsigned long l1, l2;
 
-			l1 = readl(reg_dmadata) & mask;
-			l1 |= readl(reg_dmadata) << 16;
-			l2 = readl(reg_dmadata) & mask;
-			l2 |= readl(reg_dmadata) << 16;
+			l1 = pete_readl("drivers/scsi/arm/eesox.c:238", reg_dmadata) & mask;
+			l1 |= pete_readl("drivers/scsi/arm/eesox.c:239", reg_dmadata) << 16;
+			l2 = pete_readl("drivers/scsi/arm/eesox.c:240", reg_dmadata) & mask;
+			l2 |= pete_readl("drivers/scsi/arm/eesox.c:241", reg_dmadata) << 16;
 			*(u32 *)buf = l1;
 			buf += 4;
 			*(u32 *)buf = l2;
@@ -250,8 +250,8 @@ static void eesoxscsi_buffer_in(void *buf, int length, void __iomem *base)
 		if (status >= 4) {
 			unsigned long l1;
 
-			l1 = readl(reg_dmadata) & mask;
-			l1 |= readl(reg_dmadata) << 16;
+			l1 = pete_readl("drivers/scsi/arm/eesox.c:253", reg_dmadata) & mask;
+			l1 |= pete_readl("drivers/scsi/arm/eesox.c:254", reg_dmadata) << 16;
 
 			*(u32 *)buf = l1;
 			buf += 4;
@@ -260,7 +260,7 @@ static void eesoxscsi_buffer_in(void *buf, int length, void __iomem *base)
 		}
 
 		if (status >= 2) {
-			*(u16 *)buf = readl(reg_dmadata);
+			*(u16 *)buf = pete_readl("drivers/scsi/arm/eesox.c:263", reg_dmadata);
 			buf += 2;
 			length -= 2;
 		}
@@ -305,7 +305,7 @@ static void eesoxscsi_buffer_out(void *buf, int length, void __iomem *base)
 		 * Align buffer.
 		 */
 		if (((u32)buf) & 2 && status >= 2) {
-			writel(*(u16 *)buf << 16, reg_dmadata);
+			pete_writel("drivers/scsi/arm/eesox.c:308", *(u16 *)buf << 16, reg_dmadata);
 			buf += 2;
 			status -= 2;
 			length -= 2;
@@ -319,10 +319,10 @@ static void eesoxscsi_buffer_out(void *buf, int length, void __iomem *base)
 			l2 = *(u32 *)buf;
 			buf += 4;
 
-			writel(l1 << 16, reg_dmadata);
-			writel(l1, reg_dmadata);
-			writel(l2 << 16, reg_dmadata);
-			writel(l2, reg_dmadata);
+			pete_writel("drivers/scsi/arm/eesox.c:322", l1 << 16, reg_dmadata);
+			pete_writel("drivers/scsi/arm/eesox.c:323", l1, reg_dmadata);
+			pete_writel("drivers/scsi/arm/eesox.c:324", l2 << 16, reg_dmadata);
+			pete_writel("drivers/scsi/arm/eesox.c:325", l2, reg_dmadata);
 			length -= 8;
 			continue;
 		}
@@ -333,14 +333,14 @@ static void eesoxscsi_buffer_out(void *buf, int length, void __iomem *base)
 			l1 = *(u32 *)buf;
 			buf += 4;
 
-			writel(l1 << 16, reg_dmadata);
-			writel(l1, reg_dmadata);
+			pete_writel("drivers/scsi/arm/eesox.c:336", l1 << 16, reg_dmadata);
+			pete_writel("drivers/scsi/arm/eesox.c:337", l1, reg_dmadata);
 			length -= 4;
 			continue;
 		}
 
 		if (status >= 2) {
-			writel(*(u16 *)buf << 16, reg_dmadata);
+			pete_writel("drivers/scsi/arm/eesox.c:343", *(u16 *)buf << 16, reg_dmadata);
 			buf += 2;
 			length -= 2;
 		}

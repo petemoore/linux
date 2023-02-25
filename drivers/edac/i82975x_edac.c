@@ -440,8 +440,8 @@ static void i82975x_print_dram_timings(void __iomem *mch_window)
 	static const int caslats[4] = { 5, 4, 3, 6 };
 	u32	dtreg[2];
 
-	dtreg[0] = readl(mch_window + 0x114);
-	dtreg[1] = readl(mch_window + 0x194);
+	dtreg[0] = pete_readl("drivers/edac/i82975x_edac.c:443", mch_window + 0x114);
+	dtreg[1] = pete_readl("drivers/edac/i82975x_edac.c:444", mch_window + 0x194);
 	i82975x_printk(KERN_INFO, "DRAM Timings :     Ch0    Ch1\n"
 		"                RAS Active Min = %d     %d\n"
 		"                CAS latency    =  %d      %d\n"
@@ -512,8 +512,8 @@ static int i82975x_probe1(struct pci_dev *pdev, int dev_idx)
 	i82975x_printk(KERN_INFO, "DRBCH1R3 = 0x%02x\n", c1drb[3]);
 #endif
 
-	drc[0] = readl(mch_window + I82975X_DRC_CH0M0);
-	drc[1] = readl(mch_window + I82975X_DRC_CH1M0);
+	drc[0] = pete_readl("drivers/edac/i82975x_edac.c:515", mch_window + I82975X_DRC_CH0M0);
+	drc[1] = pete_readl("drivers/edac/i82975x_edac.c:516", mch_window + I82975X_DRC_CH1M0);
 #ifdef i82975x_DEBUG_IOMEM
 	i82975x_printk(KERN_INFO, "DRC_CH0 = %0x, %s\n", drc[0],
 			((drc[0] >> 21) & 3) == 1 ?

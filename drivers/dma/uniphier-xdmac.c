@@ -167,31 +167,31 @@ static void uniphier_xdmac_chan_start(struct uniphier_xdmac_chan *xc,
 	/* setup transfer factor */
 	val = FIELD_PREP(XDMAC_TFA_MCNT_MASK, XDMAC_INTERVAL_CLKS);
 	val |= FIELD_PREP(XDMAC_TFA_MASK, xc->req_factor);
-	writel(val, xc->reg_ch_base + XDMAC_TFA);
+	pete_writel("drivers/dma/uniphier-xdmac.c:170", val, xc->reg_ch_base + XDMAC_TFA);
 
 	/* setup the channel */
-	writel(lower_32_bits(src_addr), xc->reg_ch_base + XDMAC_SAD);
-	writel(upper_32_bits(src_addr), xc->reg_ch_base + XDMAC_EXSAD);
+	pete_writel("drivers/dma/uniphier-xdmac.c:173", lower_32_bits(src_addr), xc->reg_ch_base + XDMAC_SAD);
+	pete_writel("drivers/dma/uniphier-xdmac.c:174", upper_32_bits(src_addr), xc->reg_ch_base + XDMAC_EXSAD);
 
-	writel(lower_32_bits(dst_addr), xc->reg_ch_base + XDMAC_DAD);
-	writel(upper_32_bits(dst_addr), xc->reg_ch_base + XDMAC_EXDAD);
+	pete_writel("drivers/dma/uniphier-xdmac.c:176", lower_32_bits(dst_addr), xc->reg_ch_base + XDMAC_DAD);
+	pete_writel("drivers/dma/uniphier-xdmac.c:177", upper_32_bits(dst_addr), xc->reg_ch_base + XDMAC_EXDAD);
 
 	src_mode |= src_width;
 	dst_mode |= dst_width;
-	writel(src_mode, xc->reg_ch_base + XDMAC_SADM);
-	writel(dst_mode, xc->reg_ch_base + XDMAC_DADM);
+	pete_writel("drivers/dma/uniphier-xdmac.c:181", src_mode, xc->reg_ch_base + XDMAC_SADM);
+	pete_writel("drivers/dma/uniphier-xdmac.c:182", dst_mode, xc->reg_ch_base + XDMAC_DADM);
 
-	writel(its, xc->reg_ch_base + XDMAC_ITS);
-	writel(tnum, xc->reg_ch_base + XDMAC_TNUM);
+	pete_writel("drivers/dma/uniphier-xdmac.c:184", its, xc->reg_ch_base + XDMAC_ITS);
+	pete_writel("drivers/dma/uniphier-xdmac.c:185", tnum, xc->reg_ch_base + XDMAC_TNUM);
 
 	/* enable interrupt */
-	writel(XDMAC_IEN_ENDIEN | XDMAC_IEN_ERRIEN,
+	pete_writel("drivers/dma/uniphier-xdmac.c:188", XDMAC_IEN_ENDIEN | XDMAC_IEN_ERRIEN,
 	       xc->reg_ch_base + XDMAC_IEN);
 
 	/* start XDMAC */
-	val = readl(xc->reg_ch_base + XDMAC_TSS);
+	val = pete_readl("drivers/dma/uniphier-xdmac.c:192", xc->reg_ch_base + XDMAC_TSS);
 	val |= XDMAC_TSS_REQ;
-	writel(val, xc->reg_ch_base + XDMAC_TSS);
+	pete_writel("drivers/dma/uniphier-xdmac.c:194", val, xc->reg_ch_base + XDMAC_TSS);
 }
 
 /* xc->vc.lock must be held by caller */
@@ -200,14 +200,14 @@ static int uniphier_xdmac_chan_stop(struct uniphier_xdmac_chan *xc)
 	u32 val;
 
 	/* disable interrupt */
-	val = readl(xc->reg_ch_base + XDMAC_IEN);
+	val = pete_readl("drivers/dma/uniphier-xdmac.c:203", xc->reg_ch_base + XDMAC_IEN);
 	val &= ~(XDMAC_IEN_ENDIEN | XDMAC_IEN_ERRIEN);
-	writel(val, xc->reg_ch_base + XDMAC_IEN);
+	pete_writel("drivers/dma/uniphier-xdmac.c:205", val, xc->reg_ch_base + XDMAC_IEN);
 
 	/* stop XDMAC */
-	val = readl(xc->reg_ch_base + XDMAC_TSS);
+	val = pete_readl("drivers/dma/uniphier-xdmac.c:208", xc->reg_ch_base + XDMAC_TSS);
 	val &= ~XDMAC_TSS_REQ;
-	writel(0, xc->reg_ch_base + XDMAC_TSS);
+	pete_writel("drivers/dma/uniphier-xdmac.c:210", 0, xc->reg_ch_base + XDMAC_TSS);
 
 	/* wait until transfer is stopped */
 	return readl_poll_timeout_atomic(xc->reg_ch_base + XDMAC_STAT, val,
@@ -234,7 +234,7 @@ static void uniphier_xdmac_chan_irq(struct uniphier_xdmac_chan *xc)
 
 	spin_lock(&xc->vc.lock);
 
-	stat = readl(xc->reg_ch_base + XDMAC_ID);
+	stat = pete_readl("drivers/dma/uniphier-xdmac.c:237", xc->reg_ch_base + XDMAC_ID);
 
 	if (stat & XDMAC_ID_ERRIDF) {
 		ret = uniphier_xdmac_chan_stop(xc);
@@ -256,7 +256,7 @@ static void uniphier_xdmac_chan_irq(struct uniphier_xdmac_chan *xc)
 	}
 
 	/* write bits to clear */
-	writel(stat, xc->reg_ch_base + XDMAC_IR);
+	pete_writel("drivers/dma/uniphier-xdmac.c:259", stat, xc->reg_ch_base + XDMAC_IR);
 
 	spin_unlock(&xc->vc.lock);
 }

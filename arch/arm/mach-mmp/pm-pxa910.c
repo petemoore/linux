@@ -201,7 +201,7 @@ static int pxa910_pm_enter(suspend_state_t state)
 	/* disable L2 */
 	outer_disable();
 	/* wait for l2 idle */
-	while (!(readl(CIU_REG(0x8)) & (1 << 16)))
+	while (!(pete_readl("arch/arm/mach-mmp/pm-pxa910.c:204", CIU_REG(0x8)) & (1 << 16)))
 		udelay(1);
 
 	cpu_do_idle();
@@ -209,7 +209,7 @@ static int pxa910_pm_enter(suspend_state_t state)
 	/* enable L2 */
 	outer_resume();
 	/* wait for l2 idle */
-	while (!(readl(CIU_REG(0x8)) & (1 << 16)))
+	while (!(pete_readl("arch/arm/mach-mmp/pm-pxa910.c:212", CIU_REG(0x8)) & (1 << 16)))
 		udelay(1);
 
 	idle_cfg = __raw_readl(APMU_MOH_IDLE_CFG);

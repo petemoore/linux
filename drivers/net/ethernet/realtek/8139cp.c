@@ -354,10 +354,10 @@ struct cp_private {
 
 #define cpr8(reg)	readb(cp->regs + (reg))
 #define cpr16(reg)	readw(cp->regs + (reg))
-#define cpr32(reg)	readl(cp->regs + (reg))
+#define cpr32(reg)	pete_readl("drivers/net/ethernet/realtek/8139cp.c:357", cp->regs + (reg))
 #define cpw8(reg,val)	writeb((val), cp->regs + (reg))
 #define cpw16(reg,val)	writew((val), cp->regs + (reg))
-#define cpw32(reg,val)	writel((val), cp->regs + (reg))
+#define cpw32(reg,val)	pete_writel("drivers/net/ethernet/realtek/8139cp.c:360", (val), cp->regs + (reg))
 #define cpw8_f(reg,val) do {			\
 	writeb((val), cp->regs + (reg));	\
 	readb(cp->regs + (reg));		\
@@ -367,8 +367,8 @@ struct cp_private {
 	readw(cp->regs + (reg));		\
 	} while (0)
 #define cpw32_f(reg,val) do {			\
-	writel((val), cp->regs + (reg));	\
-	readl(cp->regs + (reg));		\
+	pete_writel("drivers/net/ethernet/realtek/8139cp.c:370", (val), cp->regs + (reg));	\
+	pete_readl("drivers/net/ethernet/realtek/8139cp.c:371", cp->regs + (reg));		\
 	} while (0)
 
 

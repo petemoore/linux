@@ -151,7 +151,7 @@ static void bochs_hw_set_big_endian(struct bochs_device *bochs)
 	if (bochs->qext_size < 8)
 		return;
 
-	writel(0xbebebebe, bochs->mmio + 0x604);
+	pete_writel("drivers/gpu/drm/tiny/bochs.c:154", 0xbebebebe, bochs->mmio + 0x604);
 }
 
 static void bochs_hw_set_little_endian(struct bochs_device *bochs)
@@ -159,7 +159,7 @@ static void bochs_hw_set_little_endian(struct bochs_device *bochs)
 	if (bochs->qext_size < 8)
 		return;
 
-	writel(0x1e1e1e1e, bochs->mmio + 0x604);
+	pete_writel("drivers/gpu/drm/tiny/bochs.c:162", 0x1e1e1e1e, bochs->mmio + 0x604);
 }
 
 #ifdef __BIG_ENDIAN
@@ -272,7 +272,7 @@ static int bochs_hw_init(struct drm_device *dev)
 		 ioaddr);
 
 	if (bochs->mmio && pdev->revision >= 2) {
-		bochs->qext_size = readl(bochs->mmio + 0x600);
+		bochs->qext_size = pete_readl("drivers/gpu/drm/tiny/bochs.c:275", bochs->mmio + 0x600);
 		if (bochs->qext_size < 4 || bochs->qext_size > iosize) {
 			bochs->qext_size = 0;
 			goto noext;

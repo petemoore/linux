@@ -133,13 +133,13 @@ static struct cfgmgr_mode cfgmgr_modes[] = {
 
 static u32 socfpga_fpga_readl(struct socfpga_fpga_priv *priv, u32 reg_offset)
 {
-	return readl(priv->fpga_base_addr + reg_offset);
+	return pete_readl("drivers/fpga/socfpga.c:136", priv->fpga_base_addr + reg_offset);
 }
 
 static void socfpga_fpga_writel(struct socfpga_fpga_priv *priv, u32 reg_offset,
 				u32 value)
 {
-	writel(value, priv->fpga_base_addr + reg_offset);
+	pete_writel("drivers/fpga/socfpga.c:142", value, priv->fpga_base_addr + reg_offset);
 }
 
 static u32 socfpga_fpga_raw_readl(struct socfpga_fpga_priv *priv,
@@ -156,7 +156,7 @@ static void socfpga_fpga_raw_writel(struct socfpga_fpga_priv *priv,
 
 static void socfpga_fpga_data_writel(struct socfpga_fpga_priv *priv, u32 value)
 {
-	writel(value, priv->fpga_data_addr);
+	pete_writel("drivers/fpga/socfpga.c:159", value, priv->fpga_data_addr);
 }
 
 static inline void socfpga_fpga_set_bitsl(struct socfpga_fpga_priv *priv,

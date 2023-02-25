@@ -90,9 +90,9 @@ static int loongson_pcibios_config_access(unsigned char access_type,
 
 	addrp = CFG_SPACE_REG(addr & 0xffff);
 	if (access_type == PCI_ACCESS_WRITE)
-		writel(cpu_to_le32(*data), addrp);
+		pete_writel("arch/mips/pci/ops-loongson2.c:93", cpu_to_le32(*data), addrp);
 	else
-		*data = le32_to_cpu(readl(addrp));
+		*data = le32_to_cpu(pete_readl("arch/mips/pci/ops-loongson2.c:95", addrp));
 
 	/* Detect Master/Target abort */
 	if (LOONGSON_PCICMD & (LOONGSON_PCICMD_MABORT_CLR |

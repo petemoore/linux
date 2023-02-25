@@ -850,16 +850,16 @@ static u64 arm_ccn_pmu_read_counter(struct arm_ccn *ccn, int idx)
 		res = readq(ccn->dt.base + CCN_DT_PMCCNTR);
 #else
 		/* 40 bit counter, can do snapshot and read in two parts */
-		writel(0x1, ccn->dt.base + CCN_DT_PMSR_REQ);
-		while (!(readl(ccn->dt.base + CCN_DT_PMSR) & 0x1))
+		pete_writel("drivers/perf/arm-ccn.c:853", 0x1, ccn->dt.base + CCN_DT_PMSR_REQ);
+		while (!(pete_readl("drivers/perf/arm-ccn.c:854", ccn->dt.base + CCN_DT_PMSR) & 0x1))
 			;
-		writel(0x1, ccn->dt.base + CCN_DT_PMSR_CLR);
-		res = readl(ccn->dt.base + CCN_DT_PMCCNTRSR + 4) & 0xff;
+		pete_writel("drivers/perf/arm-ccn.c:856", 0x1, ccn->dt.base + CCN_DT_PMSR_CLR);
+		res = pete_readl("drivers/perf/arm-ccn.c:857", ccn->dt.base + CCN_DT_PMCCNTRSR + 4) & 0xff;
 		res <<= 32;
-		res |= readl(ccn->dt.base + CCN_DT_PMCCNTRSR);
+		res |= pete_readl("drivers/perf/arm-ccn.c:859", ccn->dt.base + CCN_DT_PMCCNTRSR);
 #endif
 	} else {
-		res = readl(ccn->dt.base + CCN_DT_PMEVCNT(idx));
+		res = pete_readl("drivers/perf/arm-ccn.c:862", ccn->dt.base + CCN_DT_PMEVCNT(idx));
 	}
 
 	return res;
@@ -905,11 +905,11 @@ static void arm_ccn_pmu_xp_dt_config(struct perf_event *event, int enable)
 
 	spin_lock(&ccn->dt.config_lock);
 
-	val = readl(xp->base + CCN_XP_DT_CONFIG);
+	val = pete_readl("drivers/perf/arm-ccn.c:908", xp->base + CCN_XP_DT_CONFIG);
 	val &= ~(CCN_XP_DT_CONFIG__DT_CFG__MASK <<
 			CCN_XP_DT_CONFIG__DT_CFG__SHIFT(hw->idx));
 	val |= dt_cfg << CCN_XP_DT_CONFIG__DT_CFG__SHIFT(hw->idx);
-	writel(val, xp->base + CCN_XP_DT_CONFIG);
+	pete_writel("drivers/perf/arm-ccn.c:912", val, xp->base + CCN_XP_DT_CONFIG);
 
 	spin_unlock(&ccn->dt.config_lock);
 }
@@ -956,7 +956,7 @@ static void arm_ccn_pmu_xp_watchpoint_config(struct perf_event *event)
 	hw->event_base = CCN_XP_DT_CONFIG__DT_CFG__WATCHPOINT(wp);
 
 	/* Direction (RX/TX), device (port) & virtual channel */
-	val = readl(source->base + CCN_XP_DT_INTERFACE_SEL);
+	val = pete_readl("drivers/perf/arm-ccn.c:959", source->base + CCN_XP_DT_INTERFACE_SEL);
 	val &= ~(CCN_XP_DT_INTERFACE_SEL__DT_IO_SEL__MASK <<
 			CCN_XP_DT_INTERFACE_SEL__DT_IO_SEL__SHIFT(wp));
 	val |= CCN_CONFIG_DIR(event->attr.config) <<
@@ -969,22 +969,22 @@ static void arm_ccn_pmu_xp_watchpoint_config(struct perf_event *event)
 			CCN_XP_DT_INTERFACE_SEL__DT_VC_SEL__SHIFT(wp));
 	val |= CCN_CONFIG_VC(event->attr.config) <<
 			CCN_XP_DT_INTERFACE_SEL__DT_VC_SEL__SHIFT(wp);
-	writel(val, source->base + CCN_XP_DT_INTERFACE_SEL);
+	pete_writel("drivers/perf/arm-ccn.c:972", val, source->base + CCN_XP_DT_INTERFACE_SEL);
 
 	/* Comparison values */
-	writel(cmp_l & 0xffffffff, source->base + CCN_XP_DT_CMP_VAL_L(wp));
-	writel((cmp_l >> 32) & 0x7fffffff,
+	pete_writel("drivers/perf/arm-ccn.c:975", cmp_l & 0xffffffff, source->base + CCN_XP_DT_CMP_VAL_L(wp));
+	pete_writel("drivers/perf/arm-ccn.c:976", (cmp_l >> 32) & 0x7fffffff,
 			source->base + CCN_XP_DT_CMP_VAL_L(wp) + 4);
-	writel(cmp_h & 0xffffffff, source->base + CCN_XP_DT_CMP_VAL_H(wp));
-	writel((cmp_h >> 32) & 0x0fffffff,
+	pete_writel("drivers/perf/arm-ccn.c:978", cmp_h & 0xffffffff, source->base + CCN_XP_DT_CMP_VAL_H(wp));
+	pete_writel("drivers/perf/arm-ccn.c:979", (cmp_h >> 32) & 0x0fffffff,
 			source->base + CCN_XP_DT_CMP_VAL_H(wp) + 4);
 
 	/* Mask */
-	writel(mask_l & 0xffffffff, source->base + CCN_XP_DT_CMP_MASK_L(wp));
-	writel((mask_l >> 32) & 0x7fffffff,
+	pete_writel("drivers/perf/arm-ccn.c:983", mask_l & 0xffffffff, source->base + CCN_XP_DT_CMP_MASK_L(wp));
+	pete_writel("drivers/perf/arm-ccn.c:984", (mask_l >> 32) & 0x7fffffff,
 			source->base + CCN_XP_DT_CMP_MASK_L(wp) + 4);
-	writel(mask_h & 0xffffffff, source->base + CCN_XP_DT_CMP_MASK_H(wp));
-	writel((mask_h >> 32) & 0x0fffffff,
+	pete_writel("drivers/perf/arm-ccn.c:986", mask_h & 0xffffffff, source->base + CCN_XP_DT_CMP_MASK_H(wp));
+	pete_writel("drivers/perf/arm-ccn.c:987", (mask_h >> 32) & 0x0fffffff,
 			source->base + CCN_XP_DT_CMP_MASK_H(wp) + 4);
 }
 
@@ -1002,11 +1002,11 @@ static void arm_ccn_pmu_xp_event_config(struct perf_event *event)
 			(CCN_CONFIG_BUS(event->attr.config) << 3) |
 			(CCN_CONFIG_EVENT(event->attr.config) << 0);
 
-	val = readl(source->base + CCN_XP_PMU_EVENT_SEL);
+	val = pete_readl("drivers/perf/arm-ccn.c:1005", source->base + CCN_XP_PMU_EVENT_SEL);
 	val &= ~(CCN_XP_PMU_EVENT_SEL__ID__MASK <<
 			CCN_XP_PMU_EVENT_SEL__ID__SHIFT(hw->config_base));
 	val |= id << CCN_XP_PMU_EVENT_SEL__ID__SHIFT(hw->config_base);
-	writel(val, source->base + CCN_XP_PMU_EVENT_SEL);
+	pete_writel("drivers/perf/arm-ccn.c:1009", val, source->base + CCN_XP_PMU_EVENT_SEL);
 }
 
 static void arm_ccn_pmu_node_event_config(struct perf_event *event)
@@ -1038,12 +1038,12 @@ static void arm_ccn_pmu_node_event_config(struct perf_event *event)
 		return;
 
 	/* Set the event id for the pre-allocated counter */
-	val = readl(source->base + CCN_HNF_PMU_EVENT_SEL);
+	val = pete_readl("drivers/perf/arm-ccn.c:1041", source->base + CCN_HNF_PMU_EVENT_SEL);
 	val &= ~(CCN_HNF_PMU_EVENT_SEL__ID__MASK <<
 		CCN_HNF_PMU_EVENT_SEL__ID__SHIFT(hw->config_base));
 	val |= CCN_CONFIG_EVENT(event->attr.config) <<
 		CCN_HNF_PMU_EVENT_SEL__ID__SHIFT(hw->config_base);
-	writel(val, source->base + CCN_HNF_PMU_EVENT_SEL);
+	pete_writel("drivers/perf/arm-ccn.c:1046", val, source->base + CCN_HNF_PMU_EVENT_SEL);
 }
 
 static void arm_ccn_pmu_event_config(struct perf_event *event)
@@ -1065,11 +1065,11 @@ static void arm_ccn_pmu_event_config(struct perf_event *event)
 
 	/* Set the DT bus "distance" register */
 	offset = (hw->idx / 4) * 4;
-	val = readl(ccn->dt.base + CCN_DT_ACTIVE_DSM + offset);
+	val = pete_readl("drivers/perf/arm-ccn.c:1068", ccn->dt.base + CCN_DT_ACTIVE_DSM + offset);
 	val &= ~(CCN_DT_ACTIVE_DSM__DSM_ID__MASK <<
 			CCN_DT_ACTIVE_DSM__DSM_ID__SHIFT(hw->idx % 4));
 	val |= xp << CCN_DT_ACTIVE_DSM__DSM_ID__SHIFT(hw->idx % 4);
-	writel(val, ccn->dt.base + CCN_DT_ACTIVE_DSM + offset);
+	pete_writel("drivers/perf/arm-ccn.c:1072", val, ccn->dt.base + CCN_DT_ACTIVE_DSM + offset);
 
 	if (CCN_CONFIG_TYPE(event->attr.config) == CCN_TYPE_XP) {
 		if (CCN_CONFIG_EVENT(event->attr.config) ==
@@ -1140,29 +1140,29 @@ static void arm_ccn_pmu_enable(struct pmu *pmu)
 {
 	struct arm_ccn *ccn = pmu_to_arm_ccn(pmu);
 
-	u32 val = readl(ccn->dt.base + CCN_DT_PMCR);
+	u32 val = pete_readl("drivers/perf/arm-ccn.c:1143", ccn->dt.base + CCN_DT_PMCR);
 	val |= CCN_DT_PMCR__PMU_EN;
-	writel(val, ccn->dt.base + CCN_DT_PMCR);
+	pete_writel("drivers/perf/arm-ccn.c:1145", val, ccn->dt.base + CCN_DT_PMCR);
 }
 
 static void arm_ccn_pmu_disable(struct pmu *pmu)
 {
 	struct arm_ccn *ccn = pmu_to_arm_ccn(pmu);
 
-	u32 val = readl(ccn->dt.base + CCN_DT_PMCR);
+	u32 val = pete_readl("drivers/perf/arm-ccn.c:1152", ccn->dt.base + CCN_DT_PMCR);
 	val &= ~CCN_DT_PMCR__PMU_EN;
-	writel(val, ccn->dt.base + CCN_DT_PMCR);
+	pete_writel("drivers/perf/arm-ccn.c:1154", val, ccn->dt.base + CCN_DT_PMCR);
 }
 
 static irqreturn_t arm_ccn_pmu_overflow_handler(struct arm_ccn_dt *dt)
 {
-	u32 pmovsr = readl(dt->base + CCN_DT_PMOVSR);
+	u32 pmovsr = pete_readl("drivers/perf/arm-ccn.c:1159", dt->base + CCN_DT_PMOVSR);
 	int idx;
 
 	if (!pmovsr)
 		return IRQ_NONE;
 
-	writel(pmovsr, dt->base + CCN_DT_PMOVSR_CLR);
+	pete_writel("drivers/perf/arm-ccn.c:1165", pmovsr, dt->base + CCN_DT_PMOVSR_CLR);
 
 	BUILD_BUG_ON(CCN_IDX_PMU_CYCLE_COUNTER != CCN_NUM_PMU_EVENT_COUNTERS);
 
@@ -1226,14 +1226,14 @@ static int arm_ccn_pmu_init(struct arm_ccn *ccn)
 	/* Initialize DT subsystem */
 	ccn->dt.base = ccn->base + CCN_REGION_SIZE;
 	spin_lock_init(&ccn->dt.config_lock);
-	writel(CCN_DT_PMOVSR_CLR__MASK, ccn->dt.base + CCN_DT_PMOVSR_CLR);
-	writel(CCN_DT_CTL__DT_EN, ccn->dt.base + CCN_DT_CTL);
-	writel(CCN_DT_PMCR__OVFL_INTR_EN | CCN_DT_PMCR__PMU_EN,
+	pete_writel("drivers/perf/arm-ccn.c:1229", CCN_DT_PMOVSR_CLR__MASK, ccn->dt.base + CCN_DT_PMOVSR_CLR);
+	pete_writel("drivers/perf/arm-ccn.c:1230", CCN_DT_CTL__DT_EN, ccn->dt.base + CCN_DT_CTL);
+	pete_writel("drivers/perf/arm-ccn.c:1231", CCN_DT_PMCR__OVFL_INTR_EN | CCN_DT_PMCR__PMU_EN,
 			ccn->dt.base + CCN_DT_PMCR);
-	writel(0x1, ccn->dt.base + CCN_DT_PMSR_CLR);
+	pete_writel("drivers/perf/arm-ccn.c:1233", 0x1, ccn->dt.base + CCN_DT_PMSR_CLR);
 	for (i = 0; i < ccn->num_xps; i++) {
-		writel(0, ccn->xp[i].base + CCN_XP_DT_CONFIG);
-		writel((CCN_XP_DT_CONTROL__WP_ARM_SEL__ALWAYS <<
+		pete_writel("drivers/perf/arm-ccn.c:1235", 0, ccn->xp[i].base + CCN_XP_DT_CONFIG);
+		pete_writel("drivers/perf/arm-ccn.c:1236", (CCN_XP_DT_CONTROL__WP_ARM_SEL__ALWAYS <<
 				CCN_XP_DT_CONTROL__WP_ARM_SEL__SHIFT(0)) |
 				(CCN_XP_DT_CONTROL__WP_ARM_SEL__ALWAYS <<
 				CCN_XP_DT_CONTROL__WP_ARM_SEL__SHIFT(1)) |
@@ -1314,8 +1314,8 @@ error_set_affinity:
 error_choose_name:
 	ida_simple_remove(&arm_ccn_pmu_ida, ccn->dt.id);
 	for (i = 0; i < ccn->num_xps; i++)
-		writel(0, ccn->xp[i].base + CCN_XP_DT_CONTROL);
-	writel(0, ccn->dt.base + CCN_DT_PMCR);
+		pete_writel("drivers/perf/arm-ccn.c:1317", 0, ccn->xp[i].base + CCN_XP_DT_CONTROL);
+	pete_writel("drivers/perf/arm-ccn.c:1318", 0, ccn->dt.base + CCN_DT_PMCR);
 	return err;
 }
 
@@ -1326,8 +1326,8 @@ static void arm_ccn_pmu_cleanup(struct arm_ccn *ccn)
 	cpuhp_state_remove_instance_nocalls(CPUHP_AP_PERF_ARM_CCN_ONLINE,
 					    &ccn->dt.node);
 	for (i = 0; i < ccn->num_xps; i++)
-		writel(0, ccn->xp[i].base + CCN_XP_DT_CONTROL);
-	writel(0, ccn->dt.base + CCN_DT_PMCR);
+		pete_writel("drivers/perf/arm-ccn.c:1329", 0, ccn->xp[i].base + CCN_XP_DT_CONTROL);
+	pete_writel("drivers/perf/arm-ccn.c:1330", 0, ccn->dt.base + CCN_DT_PMCR);
 	perf_pmu_unregister(&ccn->dt.pmu);
 	ida_simple_remove(&arm_ccn_pmu_ida, ccn->dt.id);
 }
@@ -1343,13 +1343,13 @@ static int arm_ccn_for_each_valid_region(struct arm_ccn *ccn,
 		void __iomem *base;
 		int err;
 
-		val = readl(ccn->base + CCN_MN_OLY_COMP_LIST_63_0 +
+		val = pete_readl("drivers/perf/arm-ccn.c:1346", ccn->base + CCN_MN_OLY_COMP_LIST_63_0 +
 				4 * (region / 32));
 		if (!(val & (1 << (region % 32))))
 			continue;
 
 		base = ccn->base + region * CCN_REGION_SIZE;
-		val = readl(base + CCN_ALL_OLY_ID);
+		val = pete_readl("drivers/perf/arm-ccn.c:1352", base + CCN_ALL_OLY_ID);
 		type = (val >> CCN_ALL_OLY_ID__OLY_ID__SHIFT) &
 				CCN_ALL_OLY_ID__OLY_ID__MASK;
 		id = (val >> CCN_ALL_OLY_ID__NODE_ID__SHIFT) &
@@ -1418,7 +1418,7 @@ static irqreturn_t arm_ccn_error_handler(struct arm_ccn *ccn,
 			err_sig_val[5], err_sig_val[4], err_sig_val[3],
 			err_sig_val[2], err_sig_val[1], err_sig_val[0]);
 	dev_err(ccn->dev, "Disabling interrupt generation for all errors.\n");
-	writel(CCN_MN_ERRINT_STATUS__ALL_ERRORS__DISABLE,
+	pete_writel("drivers/perf/arm-ccn.c:1421", CCN_MN_ERRINT_STATUS__ALL_ERRORS__DISABLE,
 			ccn->base + CCN_MN_ERRINT_STATUS);
 
 	return IRQ_HANDLED;
@@ -1434,7 +1434,7 @@ static irqreturn_t arm_ccn_irq_handler(int irq, void *dev_id)
 	int i;
 
 	/* PMU overflow is a special case */
-	err_or = err_sig_val[0] = readl(ccn->base + CCN_MN_ERR_SIG_VAL_63_0);
+	err_or = err_sig_val[0] = pete_readl("drivers/perf/arm-ccn.c:1437", ccn->base + CCN_MN_ERR_SIG_VAL_63_0);
 	if (err_or & CCN_MN_ERR_SIG_VAL_63_0__DT) {
 		err_or &= ~CCN_MN_ERR_SIG_VAL_63_0__DT;
 		res = arm_ccn_pmu_overflow_handler(&ccn->dt);
@@ -1442,7 +1442,7 @@ static irqreturn_t arm_ccn_irq_handler(int irq, void *dev_id)
 
 	/* Have to read all err_sig_vals to clear them */
 	for (i = 1; i < ARRAY_SIZE(err_sig_val); i++) {
-		err_sig_val[i] = readl(ccn->base +
+		err_sig_val[i] = pete_readl("drivers/perf/arm-ccn.c:1445", ccn->base +
 				CCN_MN_ERR_SIG_VAL_63_0 + i * 4);
 		err_or |= err_sig_val[i];
 	}
@@ -1450,7 +1450,7 @@ static irqreturn_t arm_ccn_irq_handler(int irq, void *dev_id)
 		res |= arm_ccn_error_handler(ccn, err_sig_val);
 
 	if (res != IRQ_NONE)
-		writel(CCN_MN_ERRINT_STATUS__INTREQ__DESSERT,
+		pete_writel("drivers/perf/arm-ccn.c:1453", CCN_MN_ERRINT_STATUS__INTREQ__DESSERT,
 				ccn->base + CCN_MN_ERRINT_STATUS);
 
 	return res;
@@ -1480,12 +1480,12 @@ static int arm_ccn_probe(struct platform_device *pdev)
 	irq = res->start;
 
 	/* Check if we can use the interrupt */
-	writel(CCN_MN_ERRINT_STATUS__PMU_EVENTS__DISABLE,
+	pete_writel("drivers/perf/arm-ccn.c:1483", CCN_MN_ERRINT_STATUS__PMU_EVENTS__DISABLE,
 			ccn->base + CCN_MN_ERRINT_STATUS);
-	if (readl(ccn->base + CCN_MN_ERRINT_STATUS) &
+	if (pete_readl("drivers/perf/arm-ccn.c:1485", ccn->base + CCN_MN_ERRINT_STATUS) &
 			CCN_MN_ERRINT_STATUS__PMU_EVENTS__DISABLED) {
 		/* Can set 'disable' bits, so can acknowledge interrupts */
-		writel(CCN_MN_ERRINT_STATUS__PMU_EVENTS__ENABLE,
+		pete_writel("drivers/perf/arm-ccn.c:1488", CCN_MN_ERRINT_STATUS__PMU_EVENTS__ENABLE,
 				ccn->base + CCN_MN_ERRINT_STATUS);
 		err = devm_request_irq(ccn->dev, irq, arm_ccn_irq_handler,
 				       IRQF_NOBALANCING | IRQF_NO_THREAD,

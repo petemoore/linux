@@ -577,7 +577,7 @@ static void velocity_rx_reset(struct velocity_info *vptr)
 		vptr->rx.ring[i].rdesc0.len |= OWNED_BY_NIC;
 
 	writew(vptr->options.numrx, &regs->RBRDU);
-	writel(vptr->rx.pool_dma, &regs->RDBaseLo);
+	pete_writel("drivers/net/ethernet/via/via-velocity.c:580", vptr->rx.pool_dma, &regs->RDBaseLo);
 	writew(0, &regs->RDIdx);
 	writew(vptr->options.numrx - 1, &regs->RDCSize);
 }
@@ -1060,34 +1060,34 @@ static void enable_flow_control_ability(struct velocity_info *vptr)
 
 	case FLOW_CNTL_DEFAULT:
 		if (BYTE_REG_BITS_IS_ON(PHYSR0_RXFLC, &regs->PHYSR0))
-			writel(CR0_FDXRFCEN, &regs->CR0Set);
+			pete_writel("drivers/net/ethernet/via/via-velocity.c:1063", CR0_FDXRFCEN, &regs->CR0Set);
 		else
-			writel(CR0_FDXRFCEN, &regs->CR0Clr);
+			pete_writel("drivers/net/ethernet/via/via-velocity.c:1065", CR0_FDXRFCEN, &regs->CR0Clr);
 
 		if (BYTE_REG_BITS_IS_ON(PHYSR0_TXFLC, &regs->PHYSR0))
-			writel(CR0_FDXTFCEN, &regs->CR0Set);
+			pete_writel("drivers/net/ethernet/via/via-velocity.c:1068", CR0_FDXTFCEN, &regs->CR0Set);
 		else
-			writel(CR0_FDXTFCEN, &regs->CR0Clr);
+			pete_writel("drivers/net/ethernet/via/via-velocity.c:1070", CR0_FDXTFCEN, &regs->CR0Clr);
 		break;
 
 	case FLOW_CNTL_TX:
-		writel(CR0_FDXTFCEN, &regs->CR0Set);
-		writel(CR0_FDXRFCEN, &regs->CR0Clr);
+		pete_writel("drivers/net/ethernet/via/via-velocity.c:1074", CR0_FDXTFCEN, &regs->CR0Set);
+		pete_writel("drivers/net/ethernet/via/via-velocity.c:1075", CR0_FDXRFCEN, &regs->CR0Clr);
 		break;
 
 	case FLOW_CNTL_RX:
-		writel(CR0_FDXRFCEN, &regs->CR0Set);
-		writel(CR0_FDXTFCEN, &regs->CR0Clr);
+		pete_writel("drivers/net/ethernet/via/via-velocity.c:1079", CR0_FDXRFCEN, &regs->CR0Set);
+		pete_writel("drivers/net/ethernet/via/via-velocity.c:1080", CR0_FDXTFCEN, &regs->CR0Clr);
 		break;
 
 	case FLOW_CNTL_TX_RX:
-		writel(CR0_FDXTFCEN, &regs->CR0Set);
-		writel(CR0_FDXRFCEN, &regs->CR0Set);
+		pete_writel("drivers/net/ethernet/via/via-velocity.c:1084", CR0_FDXTFCEN, &regs->CR0Set);
+		pete_writel("drivers/net/ethernet/via/via-velocity.c:1085", CR0_FDXRFCEN, &regs->CR0Set);
 		break;
 
 	case FLOW_CNTL_DISABLE:
-		writel(CR0_FDXRFCEN, &regs->CR0Clr);
-		writel(CR0_FDXTFCEN, &regs->CR0Clr);
+		pete_writel("drivers/net/ethernet/via/via-velocity.c:1089", CR0_FDXRFCEN, &regs->CR0Clr);
+		pete_writel("drivers/net/ethernet/via/via-velocity.c:1090", CR0_FDXTFCEN, &regs->CR0Clr);
 		break;
 
 	default:
@@ -1108,7 +1108,7 @@ static int velocity_soft_reset(struct velocity_info *vptr)
 	struct mac_regs __iomem *regs = vptr->mac_regs;
 	int i = 0;
 
-	writel(CR0_SFRST, &regs->CR0Set);
+	pete_writel("drivers/net/ethernet/via/via-velocity.c:1111", CR0_SFRST, &regs->CR0Set);
 
 	for (i = 0; i < W_MAX_TIMEOUT; i++) {
 		udelay(5);
@@ -1117,7 +1117,7 @@ static int velocity_soft_reset(struct velocity_info *vptr)
 	}
 
 	if (i == W_MAX_TIMEOUT) {
-		writel(CR0_FORSRST, &regs->CR0Set);
+		pete_writel("drivers/net/ethernet/via/via-velocity.c:1120", CR0_FORSRST, &regs->CR0Set);
 		/* FIXME: PCI POSTING */
 		/* delay 2ms */
 		mdelay(2);
@@ -1142,13 +1142,13 @@ static void velocity_set_multi(struct net_device *dev)
 	struct netdev_hw_addr *ha;
 
 	if (dev->flags & IFF_PROMISC) {	/* Set promiscuous. */
-		writel(0xffffffff, &regs->MARCAM[0]);
-		writel(0xffffffff, &regs->MARCAM[4]);
+		pete_writel("drivers/net/ethernet/via/via-velocity.c:1145", 0xffffffff, &regs->MARCAM[0]);
+		pete_writel("drivers/net/ethernet/via/via-velocity.c:1146", 0xffffffff, &regs->MARCAM[4]);
 		rx_mode = (RCR_AM | RCR_AB | RCR_PROM);
 	} else if ((netdev_mc_count(dev) > vptr->multicast_limit) ||
 		   (dev->flags & IFF_ALLMULTI)) {
-		writel(0xffffffff, &regs->MARCAM[0]);
-		writel(0xffffffff, &regs->MARCAM[4]);
+		pete_writel("drivers/net/ethernet/via/via-velocity.c:1150", 0xffffffff, &regs->MARCAM[0]);
+		pete_writel("drivers/net/ethernet/via/via-velocity.c:1151", 0xffffffff, &regs->MARCAM[4]);
 		rx_mode = (RCR_AM | RCR_AB);
 	} else {
 		int offset = MCAM_SIZE - vptr->multicast_limit;
@@ -1357,8 +1357,8 @@ static void velocity_init_registers(struct velocity_info *vptr,
 		enable_flow_control_ability(vptr);
 
 		mac_clear_isr(regs);
-		writel(CR0_STOP, &regs->CR0Clr);
-		writel((CR0_DPOLL | CR0_TXON | CR0_RXON | CR0_STRT),
+		pete_writel("drivers/net/ethernet/via/via-velocity.c:1360", CR0_STOP, &regs->CR0Clr);
+		pete_writel("drivers/net/ethernet/via/via-velocity.c:1361", (CR0_DPOLL | CR0_TXON | CR0_RXON | CR0_STRT),
 							&regs->CR0Set);
 
 		break;
@@ -1407,7 +1407,7 @@ static void velocity_init_registers(struct velocity_info *vptr,
 
 		setup_adaptive_interrupts(vptr);
 
-		writel(vptr->rx.pool_dma, &regs->RDBaseLo);
+		pete_writel("drivers/net/ethernet/via/via-velocity.c:1410", vptr->rx.pool_dma, &regs->RDBaseLo);
 		writew(vptr->options.numrx - 1, &regs->RDCSize);
 		mac_rx_queue_run(regs);
 		mac_rx_queue_wake(regs);
@@ -1415,14 +1415,14 @@ static void velocity_init_registers(struct velocity_info *vptr,
 		writew(vptr->options.numtx - 1, &regs->TDCSize);
 
 		for (i = 0; i < vptr->tx.numq; i++) {
-			writel(vptr->tx.pool_dma[i], &regs->TDBaseLo[i]);
+			pete_writel("drivers/net/ethernet/via/via-velocity.c:1418", vptr->tx.pool_dma[i], &regs->TDBaseLo[i]);
 			mac_tx_queue_run(regs, i);
 		}
 
 		init_flow_control_register(vptr);
 
-		writel(CR0_STOP, &regs->CR0Clr);
-		writel((CR0_DPOLL | CR0_TXON | CR0_RXON | CR0_STRT), &regs->CR0Set);
+		pete_writel("drivers/net/ethernet/via/via-velocity.c:1424", CR0_STOP, &regs->CR0Clr);
+		pete_writel("drivers/net/ethernet/via/via-velocity.c:1425", (CR0_DPOLL | CR0_TXON | CR0_RXON | CR0_STRT), &regs->CR0Set);
 
 		mii_status = velocity_get_opt_media_mode(vptr);
 		netif_stop_queue(netdev);
@@ -2272,7 +2272,7 @@ static void velocity_shutdown(struct velocity_info *vptr)
 {
 	struct mac_regs __iomem *regs = vptr->mac_regs;
 	mac_disable_int(regs);
-	writel(CR0_STOP, &regs->CR0Set);
+	pete_writel("drivers/net/ethernet/via/via-velocity.c:2275", CR0_STOP, &regs->CR0Set);
 	writew(0xFFFF, &regs->TDCSRClr);
 	writeb(0xFF, &regs->RDCSRClr);
 	safe_disable_mii_autopoll(regs);
@@ -3040,7 +3040,7 @@ static int velocity_set_wol(struct velocity_info *vptr)
 		memset(buf, 0, sizeof(struct arp_packet) + 7);
 
 		for (i = 0; i < 4; i++)
-			writel(mask_pattern[0][i], &regs->ByteMask[0][i]);
+			pete_writel("drivers/net/ethernet/via/via-velocity.c:3043", mask_pattern[0][i], &regs->ByteMask[0][i]);
 
 		arp->type = htons(ETH_P_ARP);
 		arp->ar_op = htons(1);
@@ -3112,13 +3112,13 @@ static void velocity_save_context(struct velocity_info *vptr, struct velocity_co
 	u8 __iomem *ptr = (u8 __iomem *)regs;
 
 	for (i = MAC_REG_PAR; i < MAC_REG_CR0_CLR; i += 4)
-		*((u32 *) (context->mac_reg + i)) = readl(ptr + i);
+		*((u32 *) (context->mac_reg + i)) = pete_readl("drivers/net/ethernet/via/via-velocity.c:3115", ptr + i);
 
 	for (i = MAC_REG_MAR; i < MAC_REG_TDCSR_CLR; i += 4)
-		*((u32 *) (context->mac_reg + i)) = readl(ptr + i);
+		*((u32 *) (context->mac_reg + i)) = pete_readl("drivers/net/ethernet/via/via-velocity.c:3118", ptr + i);
 
 	for (i = MAC_REG_RDBASE_LO; i < MAC_REG_FIFO_TEST0; i += 4)
-		*((u32 *) (context->mac_reg + i)) = readl(ptr + i);
+		*((u32 *) (context->mac_reg + i)) = pete_readl("drivers/net/ethernet/via/via-velocity.c:3121", ptr + i);
 
 }
 
@@ -3172,7 +3172,7 @@ static void velocity_restore_context(struct velocity_info *vptr, struct velocity
 	u8 __iomem *ptr = (u8 __iomem *)regs;
 
 	for (i = MAC_REG_PAR; i < MAC_REG_CR0_SET; i += 4)
-		writel(*((u32 *) (context->mac_reg + i)), ptr + i);
+		pete_writel("drivers/net/ethernet/via/via-velocity.c:3175", *((u32 *) (context->mac_reg + i)), ptr + i);
 
 	/* Just skip cr0 */
 	for (i = MAC_REG_CR1_SET; i < MAC_REG_CR0_CLR; i++) {
@@ -3183,10 +3183,10 @@ static void velocity_restore_context(struct velocity_info *vptr, struct velocity
 	}
 
 	for (i = MAC_REG_MAR; i < MAC_REG_IMR; i += 4)
-		writel(*((u32 *) (context->mac_reg + i)), ptr + i);
+		pete_writel("drivers/net/ethernet/via/via-velocity.c:3186", *((u32 *) (context->mac_reg + i)), ptr + i);
 
 	for (i = MAC_REG_RDBASE_LO; i < MAC_REG_FIFO_TEST0; i += 4)
-		writel(*((u32 *) (context->mac_reg + i)), ptr + i);
+		pete_writel("drivers/net/ethernet/via/via-velocity.c:3189", *((u32 *) (context->mac_reg + i)), ptr + i);
 
 	for (i = MAC_REG_TDCSR_SET; i <= MAC_REG_RDCSR_SET; i++)
 		writeb(*((u8 *) (context->mac_reg + i)), ptr + i);

@@ -213,13 +213,13 @@ packet_buffer_put(struct packet_buffer *buffer, void *data, size_t length)
 static inline void
 reg_write(struct pcilynx *lynx, int offset, u32 data)
 {
-	writel(data, lynx->registers + offset);
+	pete_writel("drivers/firewire/nosy.c:216", data, lynx->registers + offset);
 }
 
 static inline u32
 reg_read(struct pcilynx *lynx, int offset)
 {
-	return readl(lynx->registers + offset);
+	return pete_readl("drivers/firewire/nosy.c:222", lynx->registers + offset);
 }
 
 static inline void

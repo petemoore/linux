@@ -146,7 +146,7 @@ static inline int is_imx53_ecspi(struct spi_imx_data *d)
 #define MXC_SPI_BUF_RX(type)						\
 static void spi_imx_buf_rx_##type(struct spi_imx_data *spi_imx)		\
 {									\
-	unsigned int val = readl(spi_imx->base + MXC_CSPIRXDATA);	\
+	unsigned int val = pete_readl("drivers/spi/spi-imx.c:149", spi_imx->base + MXC_CSPIRXDATA);	\
 									\
 	if (spi_imx->rx_buf) {						\
 		*(type *)spi_imx->rx_buf = val;				\
@@ -168,7 +168,7 @@ static void spi_imx_buf_tx_##type(struct spi_imx_data *spi_imx)		\
 									\
 	spi_imx->count -= sizeof(type);					\
 									\
-	writel(val, spi_imx->base + MXC_CSPITXDATA);			\
+	pete_writel("drivers/spi/spi-imx.c:171", val, spi_imx->base + MXC_CSPITXDATA);			\
 }
 
 MXC_SPI_BUF_RX(u8)
@@ -288,7 +288,7 @@ static bool spi_imx_can_dma(struct spi_master *master, struct spi_device *spi,
 
 static void spi_imx_buf_rx_swap_u32(struct spi_imx_data *spi_imx)
 {
-	unsigned int val = readl(spi_imx->base + MXC_CSPIRXDATA);
+	unsigned int val = pete_readl("drivers/spi/spi-imx.c:291", spi_imx->base + MXC_CSPIRXDATA);
 #ifdef __LITTLE_ENDIAN
 	unsigned int bytes_per_word;
 #endif
@@ -325,7 +325,7 @@ static void spi_imx_buf_rx_swap(struct spi_imx_data *spi_imx)
 		return;
 	}
 
-	val = readl(spi_imx->base + MXC_CSPIRXDATA);
+	val = pete_readl("drivers/spi/spi-imx.c:328", spi_imx->base + MXC_CSPIRXDATA);
 
 	while (unaligned--) {
 		if (spi_imx->rx_buf) {
@@ -357,7 +357,7 @@ static void spi_imx_buf_tx_swap_u32(struct spi_imx_data *spi_imx)
 	else if (bytes_per_word == 2)
 		val = (val << 16) | (val >> 16);
 #endif
-	writel(val, spi_imx->base + MXC_CSPITXDATA);
+	pete_writel("drivers/spi/spi-imx.c:360", val, spi_imx->base + MXC_CSPITXDATA);
 }
 
 static void spi_imx_buf_tx_swap(struct spi_imx_data *spi_imx)
@@ -385,12 +385,12 @@ static void spi_imx_buf_tx_swap(struct spi_imx_data *spi_imx)
 		spi_imx->count--;
 	}
 
-	writel(val, spi_imx->base + MXC_CSPITXDATA);
+	pete_writel("drivers/spi/spi-imx.c:388", val, spi_imx->base + MXC_CSPITXDATA);
 }
 
 static void mx53_ecspi_rx_slave(struct spi_imx_data *spi_imx)
 {
-	u32 val = be32_to_cpu(readl(spi_imx->base + MXC_CSPIRXDATA));
+	u32 val = be32_to_cpu(pete_readl("drivers/spi/spi-imx.c:393", spi_imx->base + MXC_CSPIRXDATA));
 
 	if (spi_imx->rx_buf) {
 		int n_bytes = spi_imx->slave_burst % sizeof(val);
@@ -425,7 +425,7 @@ static void mx53_ecspi_tx_slave(struct spi_imx_data *spi_imx)
 
 	spi_imx->count -= n_bytes;
 
-	writel(val, spi_imx->base + MXC_CSPITXDATA);
+	pete_writel("drivers/spi/spi-imx.c:428", val, spi_imx->base + MXC_CSPITXDATA);
 }
 
 /* MX51 eCSPI */
@@ -479,30 +479,30 @@ static void mx51_ecspi_intctrl(struct spi_imx_data *spi_imx, int enable)
 	if (enable & MXC_INT_RDR)
 		val |= MX51_ECSPI_INT_RDREN;
 
-	writel(val, spi_imx->base + MX51_ECSPI_INT);
+	pete_writel("drivers/spi/spi-imx.c:482", val, spi_imx->base + MX51_ECSPI_INT);
 }
 
 static void mx51_ecspi_trigger(struct spi_imx_data *spi_imx)
 {
 	u32 reg;
 
-	reg = readl(spi_imx->base + MX51_ECSPI_CTRL);
+	reg = pete_readl("drivers/spi/spi-imx.c:489", spi_imx->base + MX51_ECSPI_CTRL);
 	reg |= MX51_ECSPI_CTRL_XCH;
-	writel(reg, spi_imx->base + MX51_ECSPI_CTRL);
+	pete_writel("drivers/spi/spi-imx.c:491", reg, spi_imx->base + MX51_ECSPI_CTRL);
 }
 
 static void mx51_disable_dma(struct spi_imx_data *spi_imx)
 {
-	writel(0, spi_imx->base + MX51_ECSPI_DMA);
+	pete_writel("drivers/spi/spi-imx.c:496", 0, spi_imx->base + MX51_ECSPI_DMA);
 }
 
 static void mx51_ecspi_disable(struct spi_imx_data *spi_imx)
 {
 	u32 ctrl;
 
-	ctrl = readl(spi_imx->base + MX51_ECSPI_CTRL);
+	ctrl = pete_readl("drivers/spi/spi-imx.c:503", spi_imx->base + MX51_ECSPI_CTRL);
 	ctrl &= ~MX51_ECSPI_CTRL_ENABLE;
-	writel(ctrl, spi_imx->base + MX51_ECSPI_CTRL);
+	pete_writel("drivers/spi/spi-imx.c:505", ctrl, spi_imx->base + MX51_ECSPI_CTRL);
 }
 
 static int mx51_ecspi_prepare_message(struct spi_imx_data *spi_imx,
@@ -513,7 +513,7 @@ static int mx51_ecspi_prepare_message(struct spi_imx_data *spi_imx,
 	u32 ctrl = MX51_ECSPI_CTRL_ENABLE;
 	u32 min_speed_hz = ~0U;
 	u32 testreg, delay;
-	u32 cfg = readl(spi_imx->base + MX51_ECSPI_CONFIG);
+	u32 cfg = pete_readl("drivers/spi/spi-imx.c:516", spi_imx->base + MX51_ECSPI_CONFIG);
 
 	/* set Master or Slave mode */
 	if (spi_imx->slave_mode)
@@ -534,14 +534,14 @@ static int mx51_ecspi_prepare_message(struct spi_imx_data *spi_imx,
 	 * The ctrl register must be written first, with the EN bit set other
 	 * registers must not be written to.
 	 */
-	writel(ctrl, spi_imx->base + MX51_ECSPI_CTRL);
+	pete_writel("drivers/spi/spi-imx.c:537", ctrl, spi_imx->base + MX51_ECSPI_CTRL);
 
-	testreg = readl(spi_imx->base + MX51_ECSPI_TESTREG);
+	testreg = pete_readl("drivers/spi/spi-imx.c:539", spi_imx->base + MX51_ECSPI_TESTREG);
 	if (spi->mode & SPI_LOOP)
 		testreg |= MX51_ECSPI_TESTREG_LBC;
 	else
 		testreg &= ~MX51_ECSPI_TESTREG_LBC;
-	writel(testreg, spi_imx->base + MX51_ECSPI_TESTREG);
+	pete_writel("drivers/spi/spi-imx.c:544", testreg, spi_imx->base + MX51_ECSPI_TESTREG);
 
 	/*
 	 * eCSPI burst completion by Chip Select signal in Slave mode
@@ -571,7 +571,7 @@ static int mx51_ecspi_prepare_message(struct spi_imx_data *spi_imx,
 	else
 		cfg &= ~MX51_ECSPI_CONFIG_SSBPOL(spi->chip_select);
 
-	writel(cfg, spi_imx->base + MX51_ECSPI_CONFIG);
+	pete_writel("drivers/spi/spi-imx.c:574", cfg, spi_imx->base + MX51_ECSPI_CONFIG);
 
 	/*
 	 * Wait until the changes in the configuration register CONFIGREG
@@ -608,7 +608,7 @@ static int mx51_ecspi_prepare_message(struct spi_imx_data *spi_imx,
 static int mx51_ecspi_prepare_transfer(struct spi_imx_data *spi_imx,
 				       struct spi_device *spi)
 {
-	u32 ctrl = readl(spi_imx->base + MX51_ECSPI_CTRL);
+	u32 ctrl = pete_readl("drivers/spi/spi-imx.c:611", spi_imx->base + MX51_ECSPI_CTRL);
 	u32 clk;
 
 	/* Clear BL field and set the right value */
@@ -635,7 +635,7 @@ static int mx51_ecspi_prepare_transfer(struct spi_imx_data *spi_imx,
 	else
 		ctrl &= ~MX51_ECSPI_CTRL_SMC;
 
-	writel(ctrl, spi_imx->base + MX51_ECSPI_CTRL);
+	pete_writel("drivers/spi/spi-imx.c:638", ctrl, spi_imx->base + MX51_ECSPI_CTRL);
 
 	return 0;
 }
@@ -650,7 +650,7 @@ static void mx51_setup_wml(struct spi_imx_data *spi_imx)
 	 * Configure the DMA register: setup the watermark
 	 * and enable DMA request.
 	 */
-	writel(MX51_ECSPI_DMA_RX_WML(spi_imx->wml - 1) |
+	pete_writel("drivers/spi/spi-imx.c:653", MX51_ECSPI_DMA_RX_WML(spi_imx->wml - 1) |
 		MX51_ECSPI_DMA_TX_WML(tx_wml) |
 		MX51_ECSPI_DMA_RXT_WML(spi_imx->wml) |
 		MX51_ECSPI_DMA_TEDEN | MX51_ECSPI_DMA_RXDEN |
@@ -659,14 +659,14 @@ static void mx51_setup_wml(struct spi_imx_data *spi_imx)
 
 static int mx51_ecspi_rx_available(struct spi_imx_data *spi_imx)
 {
-	return readl(spi_imx->base + MX51_ECSPI_STAT) & MX51_ECSPI_STAT_RR;
+	return pete_readl("drivers/spi/spi-imx.c:662", spi_imx->base + MX51_ECSPI_STAT) & MX51_ECSPI_STAT_RR;
 }
 
 static void mx51_ecspi_reset(struct spi_imx_data *spi_imx)
 {
 	/* drain receive buffer */
 	while (mx51_ecspi_rx_available(spi_imx))
-		readl(spi_imx->base + MXC_CSPIRXDATA);
+		pete_readl("drivers/spi/spi-imx.c:669", spi_imx->base + MXC_CSPIRXDATA);
 }
 
 #define MX31_INTREG_TEEN	(1 << 0)
@@ -709,16 +709,16 @@ static void mx31_intctrl(struct spi_imx_data *spi_imx, int enable)
 	if (enable & MXC_INT_RR)
 		val |= MX31_INTREG_RREN;
 
-	writel(val, spi_imx->base + MXC_CSPIINT);
+	pete_writel("drivers/spi/spi-imx.c:712", val, spi_imx->base + MXC_CSPIINT);
 }
 
 static void mx31_trigger(struct spi_imx_data *spi_imx)
 {
 	unsigned int reg;
 
-	reg = readl(spi_imx->base + MXC_CSPICTRL);
+	reg = pete_readl("drivers/spi/spi-imx.c:719", spi_imx->base + MXC_CSPICTRL);
 	reg |= MX31_CSPICTRL_XCH;
-	writel(reg, spi_imx->base + MXC_CSPICTRL);
+	pete_writel("drivers/spi/spi-imx.c:721", reg, spi_imx->base + MXC_CSPICTRL);
 }
 
 static int mx31_prepare_message(struct spi_imx_data *spi_imx,
@@ -758,21 +758,21 @@ static int mx31_prepare_transfer(struct spi_imx_data *spi_imx,
 	if (spi_imx->usedma)
 		reg |= MX31_CSPICTRL_SMC;
 
-	writel(reg, spi_imx->base + MXC_CSPICTRL);
+	pete_writel("drivers/spi/spi-imx.c:761", reg, spi_imx->base + MXC_CSPICTRL);
 
-	reg = readl(spi_imx->base + MX31_CSPI_TESTREG);
+	reg = pete_readl("drivers/spi/spi-imx.c:763", spi_imx->base + MX31_CSPI_TESTREG);
 	if (spi->mode & SPI_LOOP)
 		reg |= MX31_TEST_LBC;
 	else
 		reg &= ~MX31_TEST_LBC;
-	writel(reg, spi_imx->base + MX31_CSPI_TESTREG);
+	pete_writel("drivers/spi/spi-imx.c:768", reg, spi_imx->base + MX31_CSPI_TESTREG);
 
 	if (spi_imx->usedma) {
 		/*
 		 * configure DMA requests when RXFIFO is half full and
 		 * when TXFIFO is half empty
 		 */
-		writel(MX31_DMAREG_RH_DEN | MX31_DMAREG_TH_DEN,
+		pete_writel("drivers/spi/spi-imx.c:775", MX31_DMAREG_RH_DEN | MX31_DMAREG_TH_DEN,
 			spi_imx->base + MX31_CSPI_DMAREG);
 	}
 
@@ -781,14 +781,14 @@ static int mx31_prepare_transfer(struct spi_imx_data *spi_imx,
 
 static int mx31_rx_available(struct spi_imx_data *spi_imx)
 {
-	return readl(spi_imx->base + MX31_CSPISTATUS) & MX31_STATUS_RR;
+	return pete_readl("drivers/spi/spi-imx.c:784", spi_imx->base + MX31_CSPISTATUS) & MX31_STATUS_RR;
 }
 
 static void mx31_reset(struct spi_imx_data *spi_imx)
 {
 	/* drain receive buffer */
-	while (readl(spi_imx->base + MX31_CSPISTATUS) & MX31_STATUS_RR)
-		readl(spi_imx->base + MXC_CSPIRXDATA);
+	while (pete_readl("drivers/spi/spi-imx.c:790", spi_imx->base + MX31_CSPISTATUS) & MX31_STATUS_RR)
+		pete_readl("drivers/spi/spi-imx.c:791", spi_imx->base + MXC_CSPIRXDATA);
 }
 
 #define MX21_INTREG_RR		(1 << 4)
@@ -813,16 +813,16 @@ static void mx21_intctrl(struct spi_imx_data *spi_imx, int enable)
 	if (enable & MXC_INT_RR)
 		val |= MX21_INTREG_RREN;
 
-	writel(val, spi_imx->base + MXC_CSPIINT);
+	pete_writel("drivers/spi/spi-imx.c:816", val, spi_imx->base + MXC_CSPIINT);
 }
 
 static void mx21_trigger(struct spi_imx_data *spi_imx)
 {
 	unsigned int reg;
 
-	reg = readl(spi_imx->base + MXC_CSPICTRL);
+	reg = pete_readl("drivers/spi/spi-imx.c:823", spi_imx->base + MXC_CSPICTRL);
 	reg |= MX21_CSPICTRL_XCH;
-	writel(reg, spi_imx->base + MXC_CSPICTRL);
+	pete_writel("drivers/spi/spi-imx.c:825", reg, spi_imx->base + MXC_CSPICTRL);
 }
 
 static int mx21_prepare_message(struct spi_imx_data *spi_imx,
@@ -853,19 +853,19 @@ static int mx21_prepare_transfer(struct spi_imx_data *spi_imx,
 	if (!spi->cs_gpiod)
 		reg |= spi->chip_select << MX21_CSPICTRL_CS_SHIFT;
 
-	writel(reg, spi_imx->base + MXC_CSPICTRL);
+	pete_writel("drivers/spi/spi-imx.c:856", reg, spi_imx->base + MXC_CSPICTRL);
 
 	return 0;
 }
 
 static int mx21_rx_available(struct spi_imx_data *spi_imx)
 {
-	return readl(spi_imx->base + MXC_CSPIINT) & MX21_INTREG_RR;
+	return pete_readl("drivers/spi/spi-imx.c:863", spi_imx->base + MXC_CSPIINT) & MX21_INTREG_RR;
 }
 
 static void mx21_reset(struct spi_imx_data *spi_imx)
 {
-	writel(1, spi_imx->base + MXC_RESET);
+	pete_writel("drivers/spi/spi-imx.c:868", 1, spi_imx->base + MXC_RESET);
 }
 
 #define MX1_INTREG_RR		(1 << 3)
@@ -888,16 +888,16 @@ static void mx1_intctrl(struct spi_imx_data *spi_imx, int enable)
 	if (enable & MXC_INT_RR)
 		val |= MX1_INTREG_RREN;
 
-	writel(val, spi_imx->base + MXC_CSPIINT);
+	pete_writel("drivers/spi/spi-imx.c:891", val, spi_imx->base + MXC_CSPIINT);
 }
 
 static void mx1_trigger(struct spi_imx_data *spi_imx)
 {
 	unsigned int reg;
 
-	reg = readl(spi_imx->base + MXC_CSPICTRL);
+	reg = pete_readl("drivers/spi/spi-imx.c:898", spi_imx->base + MXC_CSPICTRL);
 	reg |= MX1_CSPICTRL_XCH;
-	writel(reg, spi_imx->base + MXC_CSPICTRL);
+	pete_writel("drivers/spi/spi-imx.c:900", reg, spi_imx->base + MXC_CSPICTRL);
 }
 
 static int mx1_prepare_message(struct spi_imx_data *spi_imx,
@@ -923,19 +923,19 @@ static int mx1_prepare_transfer(struct spi_imx_data *spi_imx,
 	if (spi->mode & SPI_CPOL)
 		reg |= MX1_CSPICTRL_POL;
 
-	writel(reg, spi_imx->base + MXC_CSPICTRL);
+	pete_writel("drivers/spi/spi-imx.c:926", reg, spi_imx->base + MXC_CSPICTRL);
 
 	return 0;
 }
 
 static int mx1_rx_available(struct spi_imx_data *spi_imx)
 {
-	return readl(spi_imx->base + MXC_CSPIINT) & MX1_INTREG_RR;
+	return pete_readl("drivers/spi/spi-imx.c:933", spi_imx->base + MXC_CSPIINT) & MX1_INTREG_RR;
 }
 
 static void mx1_reset(struct spi_imx_data *spi_imx)
 {
-	writel(1, spi_imx->base + MXC_RESET);
+	pete_writel("drivers/spi/spi-imx.c:938", 1, spi_imx->base + MXC_RESET);
 }
 
 static struct spi_imx_devtype_data imx1_cspi_devtype_data = {
@@ -1076,10 +1076,10 @@ static void spi_imx_set_burst_len(struct spi_imx_data *spi_imx, int n_bits)
 {
 	u32 ctrl;
 
-	ctrl = readl(spi_imx->base + MX51_ECSPI_CTRL);
+	ctrl = pete_readl("drivers/spi/spi-imx.c:1079", spi_imx->base + MX51_ECSPI_CTRL);
 	ctrl &= ~MX51_ECSPI_CTRL_BL_MASK;
 	ctrl |= ((n_bits - 1) << MX51_ECSPI_CTRL_BL_OFFSET);
-	writel(ctrl, spi_imx->base + MX51_ECSPI_CTRL);
+	pete_writel("drivers/spi/spi-imx.c:1082", ctrl, spi_imx->base + MX51_ECSPI_CTRL);
 }
 
 static void spi_imx_push(struct spi_imx_data *spi_imx)
@@ -1523,7 +1523,7 @@ static int spi_imx_transfer(struct spi_device *spi,
 
 	/* flush rxfifo before transfer */
 	while (spi_imx->devtype_data->rx_available(spi_imx))
-		readl(spi_imx->base + MXC_CSPIRXDATA);
+		pete_readl("drivers/spi/spi-imx.c:1526", spi_imx->base + MXC_CSPIRXDATA);
 
 	if (spi_imx->slave_mode)
 		return spi_imx_pio_transfer_slave(spi, transfer);
@@ -1777,7 +1777,7 @@ static int spi_imx_remove(struct platform_device *pdev)
 		return ret;
 	}
 
-	writel(0, spi_imx->base + MXC_CSPICTRL);
+	pete_writel("drivers/spi/spi-imx.c:1780", 0, spi_imx->base + MXC_CSPICTRL);
 
 	pm_runtime_dont_use_autosuspend(spi_imx->dev);
 	pm_runtime_put_sync(spi_imx->dev);

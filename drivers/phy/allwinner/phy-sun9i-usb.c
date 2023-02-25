@@ -53,14 +53,14 @@ static void sun9i_usb_phy_passby(struct sun9i_usb_phy *phy, int enable)
 		bits |= SUNXI_HSIC | SUNXI_EHCI_HS_FORCE |
 			SUNXI_HSIC_CONNECT_DET | SUNXI_HSIC_CONNECT_INT;
 
-	reg_value = readl(phy->pmu);
+	reg_value = pete_readl("drivers/phy/allwinner/phy-sun9i-usb.c:56", phy->pmu);
 
 	if (enable)
 		reg_value |= bits;
 	else
 		reg_value &= ~bits;
 
-	writel(reg_value, phy->pmu);
+	pete_writel("drivers/phy/allwinner/phy-sun9i-usb.c:63", reg_value, phy->pmu);
 }
 
 static int sun9i_usb_phy_init(struct phy *_phy)

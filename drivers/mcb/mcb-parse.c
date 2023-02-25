@@ -22,7 +22,7 @@ static inline uint32_t get_next_dtype(void __iomem *p)
 {
 	uint32_t dtype;
 
-	dtype = readl(p);
+	dtype = pete_readl("drivers/mcb/mcb-parse.c:25", p);
 	return dtype >> 28;
 }
 
@@ -51,10 +51,10 @@ static int chameleon_parse_gdd(struct mcb_bus *bus,
 	if (!mdev)
 		return -ENOMEM;
 
-	reg1 = readl(&gdd->reg1);
-	reg2 = readl(&gdd->reg2);
-	offset = readl(&gdd->offset);
-	size = readl(&gdd->size);
+	reg1 = pete_readl("drivers/mcb/mcb-parse.c:54", &gdd->reg1);
+	reg2 = pete_readl("drivers/mcb/mcb-parse.c:55", &gdd->reg2);
+	offset = pete_readl("drivers/mcb/mcb-parse.c:56", &gdd->offset);
+	size = pete_readl("drivers/mcb/mcb-parse.c:57", &gdd->size);
 
 	mdev->id = GDD_DEV(reg1);
 	mdev->rev = GDD_REV(reg1);
@@ -123,8 +123,8 @@ static void chameleon_parse_bar(void __iomem *base,
 	p += sizeof(__le32);
 
 	for (i = 0; i < bar_count; i++) {
-		cb[i].addr = readl(p);
-		cb[i].size = readl(p + 4);
+		cb[i].addr = pete_readl("drivers/mcb/mcb-parse.c:126", p);
+		cb[i].size = pete_readl("drivers/mcb/mcb-parse.c:127", p + 4);
 
 		p += sizeof(struct chameleon_bar);
 	}
@@ -147,7 +147,7 @@ static int chameleon_get_bar(char __iomem **base, phys_addr_t mapbase,
 	 */
 	dtype = get_next_dtype(*base);
 	if (dtype == CHAMELEON_DTYPE_BAR) {
-		reg = readl(*base);
+		reg = pete_readl("drivers/mcb/mcb-parse.c:150", *base);
 
 		bar_count = BAR_CNT(reg);
 		if (bar_count <= 0 || bar_count > CHAMELEON_BAR_MAX)

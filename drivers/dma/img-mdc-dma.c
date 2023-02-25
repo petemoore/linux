@@ -148,12 +148,12 @@ struct mdc_dma {
 
 static inline u32 mdc_readl(struct mdc_dma *mdma, u32 reg)
 {
-	return readl(mdma->regs + reg);
+	return pete_readl("drivers/dma/img-mdc-dma.c:151", mdma->regs + reg);
 }
 
 static inline void mdc_writel(struct mdc_dma *mdma, u32 val, u32 reg)
 {
-	writel(val, mdma->regs + reg);
+	pete_writel("drivers/dma/img-mdc-dma.c:156", val, mdma->regs + reg);
 }
 
 static inline u32 mdc_chan_readl(struct mdc_chan *mchan, u32 reg)

@@ -16,7 +16,7 @@ static __init int eisa_bus_probe(void)
 		return 0;
 
 	p = ioremap(0x0FFFD9, 4);
-	if (p && readl(p) == 'E' + ('I' << 8) + ('S' << 16) + ('A' << 24))
+	if (p && pete_readl("arch/x86/kernel/eisa.c:19", p) == 'E' + ('I' << 8) + ('S' << 16) + ('A' << 24))
 		EISA_bus = 1;
 	iounmap(p);
 	return 0;

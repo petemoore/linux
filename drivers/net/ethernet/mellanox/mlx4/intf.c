@@ -226,7 +226,7 @@ void mlx4_unregister_device(struct mlx4_dev *dev)
 	    mlx4_is_slave(dev)) {
 		/* In mlx4_remove_one on a VF */
 		u32 slave_read =
-			swab32(readl(&mlx4_priv(dev)->mfunc.comm->slave_read));
+			swab32(pete_readl("drivers/net/ethernet/mellanox/mlx4/intf.c:229", &mlx4_priv(dev)->mfunc.comm->slave_read));
 
 		if (mlx4_comm_internal_err(slave_read)) {
 			mlx4_dbg(dev, "%s: comm channel is down, entering error state.\n",

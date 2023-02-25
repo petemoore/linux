@@ -108,7 +108,7 @@ static unsigned long jz4780_otg_phy_recalc_rate(struct clk_hw *hw,
 	u32 usbpcr1;
 	unsigned refclk_div;
 
-	usbpcr1 = readl(cgu->base + CGU_REG_USBPCR1);
+	usbpcr1 = pete_readl("drivers/clk/ingenic/jz4780-cgu.c:111", cgu->base + CGU_REG_USBPCR1);
 	refclk_div = usbpcr1 & USBPCR1_REFCLKDIV_MASK;
 
 	switch (refclk_div) {
@@ -172,10 +172,10 @@ static int jz4780_otg_phy_set_rate(struct clk_hw *hw, unsigned long req_rate,
 
 	spin_lock_irqsave(&cgu->lock, flags);
 
-	usbpcr1 = readl(cgu->base + CGU_REG_USBPCR1);
+	usbpcr1 = pete_readl("drivers/clk/ingenic/jz4780-cgu.c:175", cgu->base + CGU_REG_USBPCR1);
 	usbpcr1 &= ~USBPCR1_REFCLKDIV_MASK;
 	usbpcr1 |= div_bits;
-	writel(usbpcr1, cgu->base + CGU_REG_USBPCR1);
+	pete_writel("drivers/clk/ingenic/jz4780-cgu.c:178", usbpcr1, cgu->base + CGU_REG_USBPCR1);
 
 	spin_unlock_irqrestore(&cgu->lock, flags);
 	return 0;
@@ -186,8 +186,8 @@ static int jz4780_otg_phy_enable(struct clk_hw *hw)
 	void __iomem *reg_opcr		= cgu->base + CGU_REG_OPCR;
 	void __iomem *reg_usbpcr	= cgu->base + CGU_REG_USBPCR;
 
-	writel(readl(reg_opcr) | OPCR_SPENDN0, reg_opcr);
-	writel(readl(reg_usbpcr) & ~USBPCR_OTG_DISABLE & ~USBPCR_SIDDQ, reg_usbpcr);
+	pete_writel("drivers/clk/ingenic/jz4780-cgu.c:189", pete_readl("drivers/clk/ingenic/jz4780-cgu.c:189", reg_opcr) | OPCR_SPENDN0, reg_opcr);
+	pete_writel("drivers/clk/ingenic/jz4780-cgu.c:190", pete_readl("drivers/clk/ingenic/jz4780-cgu.c:190", reg_usbpcr) & ~USBPCR_OTG_DISABLE & ~USBPCR_SIDDQ, reg_usbpcr);
 	return 0;
 }
 
@@ -196,8 +196,8 @@ static void jz4780_otg_phy_disable(struct clk_hw *hw)
 	void __iomem *reg_opcr		= cgu->base + CGU_REG_OPCR;
 	void __iomem *reg_usbpcr	= cgu->base + CGU_REG_USBPCR;
 
-	writel(readl(reg_opcr) & ~OPCR_SPENDN0, reg_opcr);
-	writel(readl(reg_usbpcr) | USBPCR_OTG_DISABLE | USBPCR_SIDDQ, reg_usbpcr);
+	pete_writel("drivers/clk/ingenic/jz4780-cgu.c:199", pete_readl("drivers/clk/ingenic/jz4780-cgu.c:199", reg_opcr) & ~OPCR_SPENDN0, reg_opcr);
+	pete_writel("drivers/clk/ingenic/jz4780-cgu.c:200", pete_readl("drivers/clk/ingenic/jz4780-cgu.c:200", reg_usbpcr) | USBPCR_OTG_DISABLE | USBPCR_SIDDQ, reg_usbpcr);
 }
 
 static int jz4780_otg_phy_is_enabled(struct clk_hw *hw)
@@ -205,9 +205,9 @@ static int jz4780_otg_phy_is_enabled(struct clk_hw *hw)
 	void __iomem *reg_opcr		= cgu->base + CGU_REG_OPCR;
 	void __iomem *reg_usbpcr	= cgu->base + CGU_REG_USBPCR;
 
-	return (readl(reg_opcr) & OPCR_SPENDN0) &&
-		!(readl(reg_usbpcr) & USBPCR_SIDDQ) &&
-		!(readl(reg_usbpcr) & USBPCR_OTG_DISABLE);
+	return (pete_readl("drivers/clk/ingenic/jz4780-cgu.c:208", reg_opcr) & OPCR_SPENDN0) &&
+		!(pete_readl("drivers/clk/ingenic/jz4780-cgu.c:209", reg_usbpcr) & USBPCR_SIDDQ) &&
+		!(pete_readl("drivers/clk/ingenic/jz4780-cgu.c:210", reg_usbpcr) & USBPCR_OTG_DISABLE);
 }
 
 static const struct clk_ops jz4780_otg_phy_ops = {
@@ -231,13 +231,13 @@ static int jz4780_core1_enable(struct clk_hw *hw)
 
 	spin_lock_irqsave(&cgu->lock, flags);
 
-	lcr = readl(cgu->base + CGU_REG_LCR);
+	lcr = pete_readl("drivers/clk/ingenic/jz4780-cgu.c:234", cgu->base + CGU_REG_LCR);
 	lcr &= ~LCR_PD_SCPU;
-	writel(lcr, cgu->base + CGU_REG_LCR);
+	pete_writel("drivers/clk/ingenic/jz4780-cgu.c:236", lcr, cgu->base + CGU_REG_LCR);
 
-	clkgr1 = readl(cgu->base + CGU_REG_CLKGR1);
+	clkgr1 = pete_readl("drivers/clk/ingenic/jz4780-cgu.c:238", cgu->base + CGU_REG_CLKGR1);
 	clkgr1 &= ~CLKGR1_CORE1;
-	writel(clkgr1, cgu->base + CGU_REG_CLKGR1);
+	pete_writel("drivers/clk/ingenic/jz4780-cgu.c:240", clkgr1, cgu->base + CGU_REG_CLKGR1);
 
 	spin_unlock_irqrestore(&cgu->lock, flags);
 

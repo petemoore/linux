@@ -28,13 +28,13 @@ static int mci_reset(struct mci *state)
 	u32 status = 0;
 	u32 timeout = 40;
 
-	ddblwritel(link, MCI_CONTROL_RESET, MCI_CONTROL);
-	ddblwritel(link, 0, MCI_CONTROL + 4); /* 1= no internal init */
+	ddblpete_writel("drivers/media/pci/ddbridge/ddbridge-mci.c:31", link, MCI_CONTROL_RESET, MCI_CONTROL);
+	ddblpete_writel("drivers/media/pci/ddbridge/ddbridge-mci.c:32", link, 0, MCI_CONTROL + 4); /* 1= no internal init */
 	msleep(300);
-	ddblwritel(link, 0, MCI_CONTROL);
+	ddblpete_writel("drivers/media/pci/ddbridge/ddbridge-mci.c:34", link, 0, MCI_CONTROL);
 
 	while (1) {
-		status = ddblreadl(link, MCI_CONTROL);
+		status = ddblpete_readl("drivers/media/pci/ddbridge/ddbridge-mci.c:37", link, MCI_CONTROL);
 		if ((status & MCI_CONTROL_READY) == MCI_CONTROL_READY)
 			break;
 		if (--timeout == 0)
@@ -44,7 +44,7 @@ static int mci_reset(struct mci *state)
 	if ((status & MCI_CONTROL_READY) == 0)
 		return -1;
 	if (link->ids.device == 0x0009)
-		ddblwritel(link, SX8_TSCONFIG_MODE_NORMAL, SX8_TSCONFIG);
+		ddblpete_writel("drivers/media/pci/ddbridge/ddbridge-mci.c:47", link, SX8_TSCONFIG_MODE_NORMAL, SX8_TSCONFIG);
 	return 0;
 }
 
@@ -54,7 +54,7 @@ int ddb_mci_config(struct mci *state, u32 config)
 
 	if (link->ids.device != 0x0009)
 		return -EINVAL;
-	ddblwritel(link, config, SX8_TSCONFIG);
+	ddblpete_writel("drivers/media/pci/ddbridge/ddbridge-mci.c:57", link, config, SX8_TSCONFIG);
 	return 0;
 }
 
@@ -66,14 +66,14 @@ static int _mci_cmd_unlocked(struct mci *state,
 	u32 i, val;
 	unsigned long stat;
 
-	val = ddblreadl(link, MCI_CONTROL);
+	val = ddblpete_readl("drivers/media/pci/ddbridge/ddbridge-mci.c:69", link, MCI_CONTROL);
 	if (val & (MCI_CONTROL_RESET | MCI_CONTROL_START_COMMAND))
 		return -EIO;
 	if (cmd && cmd_len)
 		for (i = 0; i < cmd_len; i++)
-			ddblwritel(link, cmd[i], MCI_COMMAND + i * 4);
+			ddblpete_writel("drivers/media/pci/ddbridge/ddbridge-mci.c:74", link, cmd[i], MCI_COMMAND + i * 4);
 	val |= (MCI_CONTROL_START_COMMAND | MCI_CONTROL_ENABLE_DONE_INTERRUPT);
-	ddblwritel(link, val, MCI_CONTROL);
+	ddblpete_writel("drivers/media/pci/ddbridge/ddbridge-mci.c:76", link, val, MCI_CONTROL);
 
 	stat = wait_for_completion_timeout(&state->base->completion, HZ);
 	if (stat == 0) {
@@ -82,7 +82,7 @@ static int _mci_cmd_unlocked(struct mci *state,
 	}
 	if (res && res_len)
 		for (i = 0; i < res_len; i++)
-			res[i] = ddblreadl(link, MCI_RESULT + i * 4);
+			res[i] = ddblpete_readl("drivers/media/pci/ddbridge/ddbridge-mci.c:85", link, MCI_RESULT + i * 4);
 	return 0;
 }
 

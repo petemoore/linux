@@ -136,13 +136,13 @@ struct keystone_pcie {
 
 static u32 ks_pcie_app_readl(struct keystone_pcie *ks_pcie, u32 offset)
 {
-	return readl(ks_pcie->va_app_base + offset);
+	return pete_readl("drivers/pci/controller/dwc/pci-keystone.c:139", ks_pcie->va_app_base + offset);
 }
 
 static void ks_pcie_app_writel(struct keystone_pcie *ks_pcie, u32 offset,
 			       u32 val)
 {
-	writel(val, ks_pcie->va_app_base + offset);
+	pete_writel("drivers/pci/controller/dwc/pci-keystone.c:145", val, ks_pcie->va_app_base + offset);
 }
 
 static void ks_pcie_msi_irq_ack(struct irq_data *data)

@@ -141,9 +141,9 @@ static int tegra210_bpmp_channel_init(struct tegra_bpmp_channel *channel,
 	void *p;
 
 	/* Retrieve channel base address from BPMP */
-	writel(index << TRIGGER_ID_SHIFT | TRIGGER_CMD_GET,
+	pete_writel("drivers/firmware/tegra/bpmp-tegra210.c:144", index << TRIGGER_ID_SHIFT | TRIGGER_CMD_GET,
 	       priv->atomics + TRIGGER_OFFSET);
-	address = readl(priv->atomics + RESULT_OFFSET(index));
+	address = pete_readl("drivers/firmware/tegra/bpmp-tegra210.c:146", priv->atomics + RESULT_OFFSET(index));
 
 	p = devm_ioremap(bpmp->dev, address, 0x80);
 	if (!p)

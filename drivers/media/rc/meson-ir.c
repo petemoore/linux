@@ -70,10 +70,10 @@ static void meson_ir_set_mask(struct meson_ir *ir, unsigned int reg,
 {
 	u32 data;
 
-	data = readl(ir->reg + reg);
+	data = pete_readl("drivers/media/rc/meson-ir.c:73", ir->reg + reg);
 	data &= ~mask;
 	data |= (value & mask);
-	writel(data, ir->reg + reg);
+	pete_writel("drivers/media/rc/meson-ir.c:76", data, ir->reg + reg);
 }
 
 static irqreturn_t meson_ir_irq(int irqno, void *dev_id)

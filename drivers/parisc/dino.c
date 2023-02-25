@@ -190,7 +190,7 @@ static int dino_cfg_read(struct pci_bus *bus, unsigned int devfn, int where,
 	} else if (size == 2) {
 		*val = readw(base_addr + DINO_CONFIG_DATA + (where & 2));
 	} else if (size == 4) {
-		*val = readl(base_addr + DINO_CONFIG_DATA);
+		*val = pete_readl("drivers/parisc/dino.c:193", base_addr + DINO_CONFIG_DATA);
 	}
 
 	spin_unlock_irqrestore(&d->dinosaur_pen, flags);
@@ -228,7 +228,7 @@ static int dino_cfg_write(struct pci_bus *bus, unsigned int devfn, int where,
 	} else if (size == 2) {
 		writew(val, base_addr + DINO_CONFIG_DATA + (where & 2));
 	} else if (size == 4) {
-		writel(val, base_addr + DINO_CONFIG_DATA);
+		pete_writel("drivers/parisc/dino.c:231", val, base_addr + DINO_CONFIG_DATA);
 	}
 
 	spin_unlock_irqrestore(&d->dinosaur_pen, flags);

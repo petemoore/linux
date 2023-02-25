@@ -52,7 +52,7 @@ static irqreturn_t goldfish_fb_interrupt(int irq, void *dev_id)
 	u32 status;
 
 	spin_lock_irqsave(&fb->lock, irq_flags);
-	status = readl(fb->reg_base + FB_INT_STATUS);
+	status = pete_readl("drivers/video/fbdev/goldfishfb.c:55", fb->reg_base + FB_INT_STATUS);
 	if (status & FB_INT_BASE_UPDATE_DONE) {
 		fb->base_update_count++;
 		wake_up(&fb->wait);
@@ -120,7 +120,7 @@ static int goldfish_fb_set_par(struct fb_info *info)
 	if (fb->rotation != fb->fb.var.rotate) {
 		info->fix.line_length = info->var.xres * 2;
 		fb->rotation = fb->fb.var.rotate;
-		writel(fb->rotation, fb->reg_base + FB_SET_ROTATION);
+		pete_writel("drivers/video/fbdev/goldfishfb.c:123", fb->rotation, fb->reg_base + FB_SET_ROTATION);
 	}
 	return 0;
 }
@@ -135,7 +135,7 @@ static int goldfish_fb_pan_display(struct fb_var_screeninfo *var,
 
 	spin_lock_irqsave(&fb->lock, irq_flags);
 	base_update_count = fb->base_update_count;
-	writel(fb->fb.fix.smem_start + fb->fb.var.xres * 2 * var->yoffset,
+	pete_writel("drivers/video/fbdev/goldfishfb.c:138", fb->fb.fix.smem_start + fb->fb.var.xres * 2 * var->yoffset,
 						fb->reg_base + FB_SET_BASE);
 	spin_unlock_irqrestore(&fb->lock, irq_flags);
 	wait_event_timeout(fb->wait,
@@ -151,10 +151,10 @@ static int goldfish_fb_blank(int blank, struct fb_info *info)
 
 	switch (blank) {
 	case FB_BLANK_NORMAL:
-		writel(1, fb->reg_base + FB_SET_BLANK);
+		pete_writel("drivers/video/fbdev/goldfishfb.c:154", 1, fb->reg_base + FB_SET_BLANK);
 		break;
 	case FB_BLANK_UNBLANK:
-		writel(0, fb->reg_base + FB_SET_BLANK);
+		pete_writel("drivers/video/fbdev/goldfishfb.c:157", 0, fb->reg_base + FB_SET_BLANK);
 		break;
 	}
 	return 0;
@@ -208,8 +208,8 @@ static int goldfish_fb_probe(struct platform_device *pdev)
 		goto err_no_irq;
 	}
 
-	width = readl(fb->reg_base + FB_GET_WIDTH);
-	height = readl(fb->reg_base + FB_GET_HEIGHT);
+	width = pete_readl("drivers/video/fbdev/goldfishfb.c:211", fb->reg_base + FB_GET_WIDTH);
+	height = pete_readl("drivers/video/fbdev/goldfishfb.c:212", fb->reg_base + FB_GET_HEIGHT);
 
 	fb->fb.fbops		= &goldfish_fb_ops;
 	fb->fb.flags		= FBINFO_FLAG_DEFAULT;
@@ -226,8 +226,8 @@ static int goldfish_fb_probe(struct platform_device *pdev)
 	fb->fb.var.yres_virtual	= height * 2;
 	fb->fb.var.bits_per_pixel = 16;
 	fb->fb.var.activate	= FB_ACTIVATE_NOW;
-	fb->fb.var.height	= readl(fb->reg_base + FB_GET_PHYS_HEIGHT);
-	fb->fb.var.width	= readl(fb->reg_base + FB_GET_PHYS_WIDTH);
+	fb->fb.var.height	= pete_readl("drivers/video/fbdev/goldfishfb.c:229", fb->reg_base + FB_GET_PHYS_HEIGHT);
+	fb->fb.var.width	= pete_readl("drivers/video/fbdev/goldfishfb.c:230", fb->reg_base + FB_GET_PHYS_WIDTH);
 	fb->fb.var.pixclock	= 0;
 
 	fb->fb.var.red.offset = 11;
@@ -259,7 +259,7 @@ static int goldfish_fb_probe(struct platform_device *pdev)
 	if (ret)
 		goto err_request_irq_failed;
 
-	writel(FB_INT_BASE_UPDATE_DONE, fb->reg_base + FB_INT_ENABLE);
+	pete_writel("drivers/video/fbdev/goldfishfb.c:262", FB_INT_BASE_UPDATE_DONE, fb->reg_base + FB_INT_ENABLE);
 	goldfish_fb_pan_display(&fb->fb.var, &fb->fb); /* updates base */
 
 	ret = register_framebuffer(&fb->fb);

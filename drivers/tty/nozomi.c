@@ -405,7 +405,7 @@ static void read_mem32(u32 *buf, const void __iomem *mem_addr_start,
 		*buf16 = __le16_to_cpu(readw(ptr));
 		goto out;
 	case 4:	/* 4 bytes */
-		*(buf) = __le32_to_cpu(readl(ptr));
+		*(buf) = __le32_to_cpu(pete_readl("drivers/tty/nozomi.c:408", ptr));
 		goto out;
 	}
 
@@ -417,7 +417,7 @@ static void read_mem32(u32 *buf, const void __iomem *mem_addr_start,
 			i += 2;
 		} else {
 			/* Read 4 bytes */
-			*(buf) = __le32_to_cpu(readl(ptr));
+			*(buf) = __le32_to_cpu(pete_readl("drivers/tty/nozomi.c:420", ptr));
 			i += 4;
 		}
 		buf++;
@@ -454,7 +454,7 @@ static u32 write_mem32(void __iomem *mem_addr_start, const u32 *buf,
 		 */
 		fallthrough;
 	case 4: /* 4 bytes */
-		writel(__cpu_to_le32(*buf), ptr);
+		pete_writel("drivers/tty/nozomi.c:457", __cpu_to_le32(*buf), ptr);
 		return 4;
 	}
 
@@ -466,7 +466,7 @@ static u32 write_mem32(void __iomem *mem_addr_start, const u32 *buf,
 			i += 2;
 		} else {
 			/* 4 bytes */
-			writel(__cpu_to_le32(*buf), ptr);
+			pete_writel("drivers/tty/nozomi.c:469", __cpu_to_le32(*buf), ptr);
 			i += 4;
 		}
 		buf++;
@@ -776,7 +776,7 @@ static int receive_data(enum port_type index, struct nozomi *dc)
 	struct tty_struct *tty = tty_port_tty_get(&port->port);
 	int i, ret;
 
-	size = __le32_to_cpu(readl(addr));
+	size = __le32_to_cpu(pete_readl("drivers/tty/nozomi.c:779", addr));
 
 	if (tty && tty_throttled(tty)) {
 		DBG1("No room in tty, don't read data, don't ack interrupt, "

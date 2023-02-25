@@ -39,7 +39,7 @@ void socfpga_init_l2_ecc(void)
 	}
 
 	/* Enable ECC */
-	writel(0x01, mapped_l2_edac_addr);
+	pete_writel("arch/arm/mach-socfpga/l2_cache.c:42", 0x01, mapped_l2_edac_addr);
 	iounmap(mapped_l2_edac_addr);
 }
 
@@ -67,12 +67,12 @@ void socfpga_init_arria10_l2_ecc(void)
 		goto exit;
 	}
 	/* Clear any pending IRQs */
-	writel(A10_SYSMGR_MPU_CLEAR_L2_ECC, (sys_manager_base_addr +
+	pete_writel("arch/arm/mach-socfpga/l2_cache.c:70", A10_SYSMGR_MPU_CLEAR_L2_ECC, (sys_manager_base_addr +
 	       A10_SYSMGR_MPU_CLEAR_L2_ECC_OFST));
 	/* Enable ECC */
-	writel(A10_SYSMGR_ECC_INTMASK_CLR_L2, sys_manager_base_addr +
+	pete_writel("arch/arm/mach-socfpga/l2_cache.c:73", A10_SYSMGR_ECC_INTMASK_CLR_L2, sys_manager_base_addr +
 	       A10_SYSMGR_ECC_INTMASK_CLR_OFST);
-	writel(A10_MPU_CTRL_L2_ECC_EN, mapped_l2_edac_addr +
+	pete_writel("arch/arm/mach-socfpga/l2_cache.c:75", A10_MPU_CTRL_L2_ECC_EN, mapped_l2_edac_addr +
 	       A10_MPU_CTRL_L2_ECC_OFST);
 exit:
 	iounmap(mapped_l2_edac_addr);

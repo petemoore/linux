@@ -1160,15 +1160,15 @@ static void __enqueue_cmd_and_start_io(struct ctlr_info *h,
 	switch (c->cmd_type) {
 	case CMD_IOACCEL1:
 		set_ioaccel1_performant_mode(h, c, reply_queue);
-		writel(c->busaddr, h->vaddr + SA5_REQUEST_PORT_OFFSET);
+		pete_writel("drivers/scsi/hpsa.c:1163", c->busaddr, h->vaddr + SA5_REQUEST_PORT_OFFSET);
 		break;
 	case CMD_IOACCEL2:
 		set_ioaccel2_performant_mode(h, c, reply_queue);
-		writel(c->busaddr, h->vaddr + IOACCEL2_INBOUND_POSTQ_32);
+		pete_writel("drivers/scsi/hpsa.c:1167", c->busaddr, h->vaddr + IOACCEL2_INBOUND_POSTQ_32);
 		break;
 	case IOACCEL2_TMF:
 		set_ioaccel2_tmf_performant_mode(h, c, reply_queue);
-		writel(c->busaddr, h->vaddr + IOACCEL2_INBOUND_POSTQ_32);
+		pete_writel("drivers/scsi/hpsa.c:1171", c->busaddr, h->vaddr + IOACCEL2_INBOUND_POSTQ_32);
 		break;
 	default:
 		set_performant_mode(h, c, reply_queue);
@@ -7145,10 +7145,10 @@ static int hpsa_message(struct pci_dev *pdev, unsigned char opcode,
 			cpu_to_le64((le32_to_cpu(paddr32) + sizeof(*cmd)));
 	cmd->ErrorDescriptor.Len = cpu_to_le32(sizeof(struct ErrorInfo));
 
-	writel(le32_to_cpu(paddr32), vaddr + SA5_REQUEST_PORT_OFFSET);
+	pete_writel("drivers/scsi/hpsa.c:7148", le32_to_cpu(paddr32), vaddr + SA5_REQUEST_PORT_OFFSET);
 
 	for (i = 0; i < HPSA_MSG_SEND_RETRY_LIMIT; i++) {
-		tag = readl(vaddr + SA5_REPLY_PORT_OFFSET);
+		tag = pete_readl("drivers/scsi/hpsa.c:7151", vaddr + SA5_REPLY_PORT_OFFSET);
 		if ((tag & ~HPSA_SIMPLE_ERROR_BITS) == paddr64)
 			break;
 		msleep(HPSA_MSG_SEND_RETRY_INTERVAL_MSECS);
@@ -7190,7 +7190,7 @@ static int hpsa_controller_hard_reset(struct pci_dev *pdev,
 		 * other way using the doorbell register.
 		 */
 		dev_info(&pdev->dev, "using doorbell to reset controller\n");
-		writel(use_doorbell, vaddr + SA5_DOORBELL);
+		pete_writel("drivers/scsi/hpsa.c:7193", use_doorbell, vaddr + SA5_DOORBELL);
 
 		/* PMC hardware guys tell us we need a 10 second delay after
 		 * doorbell reset and before any attempt to talk to the board
@@ -7353,7 +7353,7 @@ static int hpsa_kdump_hard_reset_controller(struct pci_dev *pdev, u32 board_id)
 	/* If reset via doorbell register is supported, use that.
 	 * There are two such methods.  Favor the newest method.
 	 */
-	misc_fw_support = readl(&cfgtable->misc_fw_support);
+	misc_fw_support = pete_readl("drivers/scsi/hpsa.c:7356", &cfgtable->misc_fw_support);
 	use_doorbell = misc_fw_support & MISC_FW_DOORBELL_RESET2;
 	if (use_doorbell) {
 		use_doorbell = DOORBELL_CTLR_RESET2;
@@ -7421,26 +7421,26 @@ static void print_cfg_table(struct device *dev, struct CfgTable __iomem *tb)
 		temp_name[i] = readb(&(tb->Signature[i]));
 	temp_name[4] = '\0';
 	dev_info(dev, "   Signature = %s\n", temp_name);
-	dev_info(dev, "   Spec Number = %d\n", readl(&(tb->SpecValence)));
+	dev_info(dev, "   Spec Number = %d\n", pete_readl("drivers/scsi/hpsa.c:7424", &(tb->SpecValence)));
 	dev_info(dev, "   Transport methods supported = 0x%x\n",
-	       readl(&(tb->TransportSupport)));
+	       pete_readl("drivers/scsi/hpsa.c:7426", &(tb->TransportSupport)));
 	dev_info(dev, "   Transport methods active = 0x%x\n",
-	       readl(&(tb->TransportActive)));
+	       pete_readl("drivers/scsi/hpsa.c:7428", &(tb->TransportActive)));
 	dev_info(dev, "   Requested transport Method = 0x%x\n",
-	       readl(&(tb->HostWrite.TransportRequest)));
+	       pete_readl("drivers/scsi/hpsa.c:7430", &(tb->HostWrite.TransportRequest)));
 	dev_info(dev, "   Coalesce Interrupt Delay = 0x%x\n",
-	       readl(&(tb->HostWrite.CoalIntDelay)));
+	       pete_readl("drivers/scsi/hpsa.c:7432", &(tb->HostWrite.CoalIntDelay)));
 	dev_info(dev, "   Coalesce Interrupt Count = 0x%x\n",
-	       readl(&(tb->HostWrite.CoalIntCount)));
+	       pete_readl("drivers/scsi/hpsa.c:7434", &(tb->HostWrite.CoalIntCount)));
 	dev_info(dev, "   Max outstanding commands = %d\n",
-	       readl(&(tb->CmdsOutMax)));
-	dev_info(dev, "   Bus Types = 0x%x\n", readl(&(tb->BusTypes)));
+	       pete_readl("drivers/scsi/hpsa.c:7436", &(tb->CmdsOutMax)));
+	dev_info(dev, "   Bus Types = 0x%x\n", pete_readl("drivers/scsi/hpsa.c:7437", &(tb->BusTypes)));
 	for (i = 0; i < 16; i++)
 		temp_name[i] = readb(&(tb->ServerName[i]));
 	temp_name[16] = '\0';
 	dev_info(dev, "   Server Name = %s\n", temp_name);
 	dev_info(dev, "   Heartbeat Counter = 0x%x\n\n\n",
-		readl(&(tb->HeartBeat)));
+		pete_readl("drivers/scsi/hpsa.c:7443", &(tb->HeartBeat)));
 #endif				/* HPSA_DEBUG */
 }
 
@@ -7597,7 +7597,7 @@ static int hpsa_wait_for_board_state(struct pci_dev *pdev, void __iomem *vaddr,
 		iterations = HPSA_BOARD_NOT_READY_ITERATIONS;
 
 	for (i = 0; i < iterations; i++) {
-		scratchpad = readl(vaddr + SA5_SCRATCHPAD_OFFSET);
+		scratchpad = pete_readl("drivers/scsi/hpsa.c:7600", vaddr + SA5_SCRATCHPAD_OFFSET);
 		if (wait_for_ready) {
 			if (scratchpad == HPSA_FIRMWARE_READY)
 				return 0;
@@ -7615,8 +7615,8 @@ static int hpsa_find_cfg_addrs(struct pci_dev *pdev, void __iomem *vaddr,
 			       u32 *cfg_base_addr, u64 *cfg_base_addr_index,
 			       u64 *cfg_offset)
 {
-	*cfg_base_addr = readl(vaddr + SA5_CTCFG_OFFSET);
-	*cfg_offset = readl(vaddr + SA5_CTMEM_OFFSET);
+	*cfg_base_addr = pete_readl("drivers/scsi/hpsa.c:7618", vaddr + SA5_CTCFG_OFFSET);
+	*cfg_offset = pete_readl("drivers/scsi/hpsa.c:7619", vaddr + SA5_CTMEM_OFFSET);
 	*cfg_base_addr &= (u32) 0x0000ffff;
 	*cfg_base_addr_index = find_PCI_BAR_index(pdev, *cfg_base_addr);
 	if (*cfg_base_addr_index == -1) {
@@ -7663,7 +7663,7 @@ static int hpsa_find_cfgtables(struct ctlr_info *h)
 	if (rc)
 		return rc;
 	/* Find performant mode table. */
-	trans_offset = readl(&h->cfgtable->TransMethodOffset);
+	trans_offset = pete_readl("drivers/scsi/hpsa.c:7666", &h->cfgtable->TransMethodOffset);
 	h->transtable = remap_pci_mem(pci_resource_start(h->pdev,
 				cfg_base_addr_index)+cfg_offset+trans_offset,
 				sizeof(*h->transtable));
@@ -7680,7 +7680,7 @@ static void hpsa_get_max_perf_mode_cmds(struct ctlr_info *h)
 #define MIN_MAX_COMMANDS 16
 	BUILD_BUG_ON(MIN_MAX_COMMANDS <= HPSA_NRESERVED_CMDS);
 
-	h->max_commands = readl(&h->cfgtable->MaxPerformantModeCommands);
+	h->max_commands = pete_readl("drivers/scsi/hpsa.c:7683", &h->cfgtable->MaxPerformantModeCommands);
 
 	/* Limit commands in memory limited kdump scenario. */
 	if (reset_devices && h->max_commands > 32)
@@ -7712,8 +7712,8 @@ static void hpsa_find_board_params(struct ctlr_info *h)
 {
 	hpsa_get_max_perf_mode_cmds(h);
 	h->nr_cmds = h->max_commands;
-	h->maxsgentries = readl(&(h->cfgtable->MaxScatterGatherElements));
-	h->fw_support = readl(&(h->cfgtable->misc_fw_support));
+	h->maxsgentries = pete_readl("drivers/scsi/hpsa.c:7715", &(h->cfgtable->MaxScatterGatherElements));
+	h->fw_support = pete_readl("drivers/scsi/hpsa.c:7716", &(h->cfgtable->misc_fw_support));
 	if (hpsa_supports_chained_sg_blocks(h)) {
 		/* Limit in-command s/g elements to 32 save dma'able memory. */
 		h->max_cmd_sg_entries = 32;
@@ -7731,7 +7731,7 @@ static void hpsa_find_board_params(struct ctlr_info *h)
 	}
 
 	/* Find out what task management functions are supported and cache */
-	h->TMFSupportFlags = readl(&(h->cfgtable->TMFSupportFlags));
+	h->TMFSupportFlags = pete_readl("drivers/scsi/hpsa.c:7734", &(h->cfgtable->TMFSupportFlags));
 	if (!(HPSATMF_PHYS_TASK_ABORT & h->TMFSupportFlags))
 		dev_warn(&h->pdev->dev, "Physical aborts not supported\n");
 	if (!(HPSATMF_LOG_TASK_ABORT & h->TMFSupportFlags))
@@ -7753,13 +7753,13 @@ static inline void hpsa_set_driver_support_bits(struct ctlr_info *h)
 {
 	u32 driver_support;
 
-	driver_support = readl(&(h->cfgtable->driver_support));
+	driver_support = pete_readl("drivers/scsi/hpsa.c:7756", &(h->cfgtable->driver_support));
 	/* Need to enable prefetch in the SCSI core for 6400 in x86 */
 #ifdef CONFIG_X86
 	driver_support |= ENABLE_SCSI_PREFETCH;
 #endif
 	driver_support |= ENABLE_UNIT_ATTN;
-	writel(driver_support, &(h->cfgtable->driver_support));
+	pete_writel("drivers/scsi/hpsa.c:7762", driver_support, &(h->cfgtable->driver_support));
 }
 
 /* Disable DMA prefetch for the P600.  Otherwise an ASIC bug may result
@@ -7771,9 +7771,9 @@ static inline void hpsa_p600_dma_prefetch_quirk(struct ctlr_info *h)
 
 	if (h->board_id != 0x3225103C)
 		return;
-	dma_prefetch = readl(h->vaddr + I2O_DMA1_CFG);
+	dma_prefetch = pete_readl("drivers/scsi/hpsa.c:7774", h->vaddr + I2O_DMA1_CFG);
 	dma_prefetch |= 0x8000;
-	writel(dma_prefetch, h->vaddr + I2O_DMA1_CFG);
+	pete_writel("drivers/scsi/hpsa.c:7776", dma_prefetch, h->vaddr + I2O_DMA1_CFG);
 }
 
 static int hpsa_wait_for_clear_event_notify_ack(struct ctlr_info *h)
@@ -7784,7 +7784,7 @@ static int hpsa_wait_for_clear_event_notify_ack(struct ctlr_info *h)
 	/* wait until the clear_event_notify bit 6 is cleared by controller. */
 	for (i = 0; i < MAX_CLEAR_EVENT_WAIT; i++) {
 		spin_lock_irqsave(&h->lock, flags);
-		doorbell_value = readl(h->vaddr + SA5_DOORBELL);
+		doorbell_value = pete_readl("drivers/scsi/hpsa.c:7787", h->vaddr + SA5_DOORBELL);
 		spin_unlock_irqrestore(&h->lock, flags);
 		if (!(doorbell_value & DOORBELL_CLEAR_EVENTS))
 			goto done;
@@ -7810,7 +7810,7 @@ static int hpsa_wait_for_mode_change_ack(struct ctlr_info *h)
 		if (h->remove_in_progress)
 			goto done;
 		spin_lock_irqsave(&h->lock, flags);
-		doorbell_value = readl(h->vaddr + SA5_DOORBELL);
+		doorbell_value = pete_readl("drivers/scsi/hpsa.c:7813", h->vaddr + SA5_DOORBELL);
 		spin_unlock_irqrestore(&h->lock, flags);
 		if (!(doorbell_value & CFGTBL_ChangeReq))
 			goto done;
@@ -7827,20 +7827,20 @@ static int hpsa_enter_simple_mode(struct ctlr_info *h)
 {
 	u32 trans_support;
 
-	trans_support = readl(&(h->cfgtable->TransportSupport));
+	trans_support = pete_readl("drivers/scsi/hpsa.c:7830", &(h->cfgtable->TransportSupport));
 	if (!(trans_support & SIMPLE_MODE))
 		return -ENOTSUPP;
 
-	h->max_commands = readl(&(h->cfgtable->CmdsOutMax));
+	h->max_commands = pete_readl("drivers/scsi/hpsa.c:7834", &(h->cfgtable->CmdsOutMax));
 
 	/* Update the field, and then ring the doorbell */
-	writel(CFGTBL_Trans_Simple, &(h->cfgtable->HostWrite.TransportRequest));
-	writel(0, &h->cfgtable->HostWrite.command_pool_addr_hi);
-	writel(CFGTBL_ChangeReq, h->vaddr + SA5_DOORBELL);
+	pete_writel("drivers/scsi/hpsa.c:7837", CFGTBL_Trans_Simple, &(h->cfgtable->HostWrite.TransportRequest));
+	pete_writel("drivers/scsi/hpsa.c:7838", 0, &h->cfgtable->HostWrite.command_pool_addr_hi);
+	pete_writel("drivers/scsi/hpsa.c:7839", CFGTBL_ChangeReq, h->vaddr + SA5_DOORBELL);
 	if (hpsa_wait_for_mode_change_ack(h))
 		goto error;
 	print_cfg_table(&h->pdev->dev, h->cfgtable);
-	if (!(readl(&(h->cfgtable->TransportActive)) & CFGTBL_Trans_Simple))
+	if (!(pete_readl("drivers/scsi/hpsa.c:7843", &(h->cfgtable->TransportActive)) & CFGTBL_Trans_Simple))
 		goto error;
 	h->transMethod = CFGTBL_Trans_Simple;
 	return 0;
@@ -7996,7 +7996,7 @@ static int hpsa_init_reset_devices(struct pci_dev *pdev, u32 board_id)
 		rc = -ENOMEM;
 		goto out_disable;
 	}
-	writel(SA5_INTR_OFF, vaddr + SA5_REPLY_INTR_MASK_OFFSET);
+	pete_writel("drivers/scsi/hpsa.c:7999", SA5_INTR_OFF, vaddr + SA5_REPLY_INTR_MASK_OFFSET);
 	iounmap(vaddr);
 
 	/* Reset the controller with a PCI power-cycle or via doorbell */
@@ -8273,7 +8273,7 @@ static void controller_lockup_detected(struct ctlr_info *h)
 
 	h->access.set_intr_mask(h, HPSA_INTR_OFF);
 	spin_lock_irqsave(&h->lock, flags);
-	lockup_detected = readl(h->vaddr + SA5_SCRATCHPAD_OFFSET);
+	lockup_detected = pete_readl("drivers/scsi/hpsa.c:8276", h->vaddr + SA5_SCRATCHPAD_OFFSET);
 	if (!lockup_detected) {
 		/* no heartbeat, but controller gave us a zero. */
 		dev_warn(&h->pdev->dev,
@@ -8287,7 +8287,7 @@ static void controller_lockup_detected(struct ctlr_info *h)
 			lockup_detected, h->heartbeat_sample_interval / HZ);
 	if (lockup_detected == 0xffff0000) {
 		dev_warn(&h->pdev->dev, "Telling controller to do a CHKPT\n");
-		writel(DOORBELL_GENERATE_CHKPT, h->vaddr + SA5_DOORBELL);
+		pete_writel("drivers/scsi/hpsa.c:8290", DOORBELL_GENERATE_CHKPT, h->vaddr + SA5_DOORBELL);
 	}
 	pci_disable_device(h->pdev);
 	fail_all_outstanding_cmds(h);
@@ -8316,7 +8316,7 @@ static int detect_controller_lockup(struct ctlr_info *h)
 
 	/* If heartbeat has not changed since we last looked, we're not ok. */
 	spin_lock_irqsave(&h->lock, flags);
-	heartbeat = readl(&h->cfgtable->HeartBeat);
+	heartbeat = pete_readl("drivers/scsi/hpsa.c:8319", &h->cfgtable->HeartBeat);
 	spin_unlock_irqrestore(&h->lock, flags);
 	if (h->last_heartbeat == heartbeat) {
 		controller_lockup_detected(h);
@@ -8436,16 +8436,16 @@ static void hpsa_ack_ctlr_events(struct ctlr_info *h)
 		dev_warn(&h->pdev->dev,
 			"Acknowledging event: 0x%08x (HP SSD Smart Path %s)\n",
 			h->events, event_type);
-		writel(h->events, &(h->cfgtable->clear_event_notify));
+		pete_writel("drivers/scsi/hpsa.c:8439", h->events, &(h->cfgtable->clear_event_notify));
 		/* Set the "clear event notify field update" bit 6 */
-		writel(DOORBELL_CLEAR_EVENTS, h->vaddr + SA5_DOORBELL);
+		pete_writel("drivers/scsi/hpsa.c:8441", DOORBELL_CLEAR_EVENTS, h->vaddr + SA5_DOORBELL);
 		/* Wait until ctlr clears 'clear event notify field', bit 6 */
 		hpsa_wait_for_clear_event_notify_ack(h);
 		scsi_unblock_requests(h->scsi_host);
 	} else {
 		/* Acknowledge controller notification events. */
-		writel(h->events, &(h->cfgtable->clear_event_notify));
-		writel(DOORBELL_CLEAR_EVENTS, h->vaddr + SA5_DOORBELL);
+		pete_writel("drivers/scsi/hpsa.c:8447", h->events, &(h->cfgtable->clear_event_notify));
+		pete_writel("drivers/scsi/hpsa.c:8448", DOORBELL_CLEAR_EVENTS, h->vaddr + SA5_DOORBELL);
 		hpsa_wait_for_clear_event_notify_ack(h);
 	}
 	return;
@@ -8466,7 +8466,7 @@ static int hpsa_ctlr_needs_rescan(struct ctlr_info *h)
 	if (!(h->fw_support & MISC_FW_EVENT_NOTIFY))
 		return 0;
 
-	h->events = readl(&(h->cfgtable->event_notify));
+	h->events = pete_readl("drivers/scsi/hpsa.c:8469", &(h->cfgtable->event_notify));
 	return h->events & RESCAN_REQUIRED_EVENT_BITS;
 }
 
@@ -9224,7 +9224,7 @@ static int hpsa_enter_performant_mode(struct ctlr_info *h, u32 trans_support)
 
 	/* If the controller supports either ioaccel method then
 	 * we can also use the RAID stack submit path that does not
-	 * perform the superfluous readl() after each command submission.
+	 * perform the superfluous pete_readl("drivers/scsi/hpsa.c:9227", ) after each command submission.
 	 */
 	if (trans_support & (CFGTBL_Trans_io_accel1 | CFGTBL_Trans_io_accel2))
 		access = SA5_performant_access_no_read;
@@ -9237,39 +9237,39 @@ static int hpsa_enter_performant_mode(struct ctlr_info *h, u32 trans_support)
 	calc_bucket_map(bft, ARRAY_SIZE(bft),
 				SG_ENTRIES_IN_CMD, 4, h->blockFetchTable);
 	for (i = 0; i < 8; i++)
-		writel(bft[i], &h->transtable->BlockFetch[i]);
+		pete_writel("drivers/scsi/hpsa.c:9240", bft[i], &h->transtable->BlockFetch[i]);
 
 	/* size of controller ring buffer */
-	writel(h->max_commands, &h->transtable->RepQSize);
-	writel(h->nreply_queues, &h->transtable->RepQCount);
-	writel(0, &h->transtable->RepQCtrAddrLow32);
-	writel(0, &h->transtable->RepQCtrAddrHigh32);
+	pete_writel("drivers/scsi/hpsa.c:9243", h->max_commands, &h->transtable->RepQSize);
+	pete_writel("drivers/scsi/hpsa.c:9244", h->nreply_queues, &h->transtable->RepQCount);
+	pete_writel("drivers/scsi/hpsa.c:9245", 0, &h->transtable->RepQCtrAddrLow32);
+	pete_writel("drivers/scsi/hpsa.c:9246", 0, &h->transtable->RepQCtrAddrHigh32);
 
 	for (i = 0; i < h->nreply_queues; i++) {
-		writel(0, &h->transtable->RepQAddr[i].upper);
-		writel(h->reply_queue[i].busaddr,
+		pete_writel("drivers/scsi/hpsa.c:9249", 0, &h->transtable->RepQAddr[i].upper);
+		pete_writel("drivers/scsi/hpsa.c:9250", h->reply_queue[i].busaddr,
 			&h->transtable->RepQAddr[i].lower);
 	}
 
-	writel(0, &h->cfgtable->HostWrite.command_pool_addr_hi);
-	writel(transMethod, &(h->cfgtable->HostWrite.TransportRequest));
+	pete_writel("drivers/scsi/hpsa.c:9254", 0, &h->cfgtable->HostWrite.command_pool_addr_hi);
+	pete_writel("drivers/scsi/hpsa.c:9255", transMethod, &(h->cfgtable->HostWrite.TransportRequest));
 	/*
 	 * enable outbound interrupt coalescing in accelerator mode;
 	 */
 	if (trans_support & CFGTBL_Trans_io_accel1) {
 		access = SA5_ioaccel_mode1_access;
-		writel(10, &h->cfgtable->HostWrite.CoalIntDelay);
-		writel(4, &h->cfgtable->HostWrite.CoalIntCount);
+		pete_writel("drivers/scsi/hpsa.c:9261", 10, &h->cfgtable->HostWrite.CoalIntDelay);
+		pete_writel("drivers/scsi/hpsa.c:9262", 4, &h->cfgtable->HostWrite.CoalIntCount);
 	} else
 		if (trans_support & CFGTBL_Trans_io_accel2)
 			access = SA5_ioaccel_mode2_access;
-	writel(CFGTBL_ChangeReq, h->vaddr + SA5_DOORBELL);
+	pete_writel("drivers/scsi/hpsa.c:9266", CFGTBL_ChangeReq, h->vaddr + SA5_DOORBELL);
 	if (hpsa_wait_for_mode_change_ack(h)) {
 		dev_err(&h->pdev->dev,
 			"performant mode problem - doorbell timeout\n");
 		return -ENODEV;
 	}
-	register_value = readl(&(h->cfgtable->TransportActive));
+	register_value = pete_readl("drivers/scsi/hpsa.c:9272", &(h->cfgtable->TransportActive));
 	if (!(register_value & CFGTBL_Trans_Performant)) {
 		dev_err(&h->pdev->dev,
 			"performant mode problem - transport not active\n");
@@ -9286,9 +9286,9 @@ static int hpsa_enter_performant_mode(struct ctlr_info *h, u32 trans_support)
 	if (trans_support & CFGTBL_Trans_io_accel1) {
 		/* Set up I/O accelerator mode */
 		for (i = 0; i < h->nreply_queues; i++) {
-			writel(i, h->vaddr + IOACCEL_MODE1_REPLY_QUEUE_INDEX);
+			pete_writel("drivers/scsi/hpsa.c:9289", i, h->vaddr + IOACCEL_MODE1_REPLY_QUEUE_INDEX);
 			h->reply_queue[i].current_entry =
-				readl(h->vaddr + IOACCEL_MODE1_PRODUCER_INDEX);
+				pete_readl("drivers/scsi/hpsa.c:9291", h->vaddr + IOACCEL_MODE1_PRODUCER_INDEX);
 		}
 		bft[7] = h->ioaccel_maxsg + 8;
 		calc_bucket_map(bft, ARRAY_SIZE(bft), h->ioaccel_maxsg, 8,
@@ -9331,7 +9331,7 @@ static int hpsa_enter_performant_mode(struct ctlr_info *h, u32 trans_support)
 		bft2[15] = h->ioaccel_maxsg + HPSA_IOACCEL2_HEADER_SZ;
 		calc_bucket_map(bft2, ARRAY_SIZE(bft2), h->ioaccel_maxsg,
 				4, h->ioaccel2_blockFetchTable);
-		bft2_offset = readl(&h->cfgtable->io_accel_request_size_offset);
+		bft2_offset = pete_readl("drivers/scsi/hpsa.c:9334", &h->cfgtable->io_accel_request_size_offset);
 		BUILD_BUG_ON(offsetof(struct CfgTable,
 				io_accel_request_size_offset) != 0xb8);
 		h->ioaccel2_bft2_regs =
@@ -9341,9 +9341,9 @@ static int hpsa_enter_performant_mode(struct ctlr_info *h, u32 trans_support)
 					ARRAY_SIZE(bft2) *
 					sizeof(*h->ioaccel2_bft2_regs));
 		for (i = 0; i < ARRAY_SIZE(bft2); i++)
-			writel(bft2[i], &h->ioaccel2_bft2_regs[i]);
+			pete_writel("drivers/scsi/hpsa.c:9344", bft2[i], &h->ioaccel2_bft2_regs[i]);
 	}
-	writel(CFGTBL_ChangeReq, h->vaddr + SA5_DOORBELL);
+	pete_writel("drivers/scsi/hpsa.c:9346", CFGTBL_ChangeReq, h->vaddr + SA5_DOORBELL);
 	if (hpsa_wait_for_mode_change_ack(h)) {
 		dev_err(&h->pdev->dev,
 			"performant mode problem - enabling ioaccel mode\n");
@@ -9371,7 +9371,7 @@ static void hpsa_free_ioaccel1_cmd_and_bft(struct ctlr_info *h)
 static int hpsa_alloc_ioaccel1_cmd_and_bft(struct ctlr_info *h)
 {
 	h->ioaccel_maxsg =
-		readl(&(h->cfgtable->io_accel_max_embedded_sg_count));
+		pete_readl("drivers/scsi/hpsa.c:9374", &(h->cfgtable->io_accel_max_embedded_sg_count));
 	if (h->ioaccel_maxsg > IOACCEL1_MAXSGENTRIES)
 		h->ioaccel_maxsg = IOACCEL1_MAXSGENTRIES;
 
@@ -9428,7 +9428,7 @@ static int hpsa_alloc_ioaccel2_cmd_and_bft(struct ctlr_info *h)
 	/* Allocate ioaccel2 mode command blocks and block fetch table */
 
 	h->ioaccel_maxsg =
-		readl(&(h->cfgtable->io_accel_max_embedded_sg_count));
+		pete_readl("drivers/scsi/hpsa.c:9431", &(h->cfgtable->io_accel_max_embedded_sg_count));
 	if (h->ioaccel_maxsg > IOACCEL2_MAXSGENTRIES)
 		h->ioaccel_maxsg = IOACCEL2_MAXSGENTRIES;
 
@@ -9485,7 +9485,7 @@ static int hpsa_put_ctlr_into_performant_mode(struct ctlr_info *h)
 	if (hpsa_simple_mode)
 		return 0;
 
-	trans_support = readl(&(h->cfgtable->TransportSupport));
+	trans_support = pete_readl("drivers/scsi/hpsa.c:9488", &(h->cfgtable->TransportSupport));
 	if (!(trans_support & PERFORMANT_MODE))
 		return 0;
 

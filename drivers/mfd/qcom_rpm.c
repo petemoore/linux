@@ -499,7 +499,7 @@ static irqreturn_t qcom_rpm_ack_interrupt(int irq, void *dev)
 	for (i = 0; i < rpm->data->ack_sel_size; i++)
 		writel_relaxed(0,
 			RPM_CTRL_REG(rpm, rpm->data->ack_sel_off + i));
-	writel(0, RPM_CTRL_REG(rpm, rpm->data->ack_ctx_off));
+	pete_writel("drivers/mfd/qcom_rpm.c:502", 0, RPM_CTRL_REG(rpm, rpm->data->ack_ctx_off));
 
 	if (ack & RPM_NOTIFICATION) {
 		dev_warn(rpm->dev, "ignoring notification!\n");
@@ -610,9 +610,9 @@ static int qcom_rpm_probe(struct platform_device *pdev)
 
 	dev_set_drvdata(&pdev->dev, rpm);
 
-	fw_version[0] = readl(RPM_STATUS_REG(rpm, 0));
-	fw_version[1] = readl(RPM_STATUS_REG(rpm, 1));
-	fw_version[2] = readl(RPM_STATUS_REG(rpm, 2));
+	fw_version[0] = pete_readl("drivers/mfd/qcom_rpm.c:613", RPM_STATUS_REG(rpm, 0));
+	fw_version[1] = pete_readl("drivers/mfd/qcom_rpm.c:614", RPM_STATUS_REG(rpm, 1));
+	fw_version[2] = pete_readl("drivers/mfd/qcom_rpm.c:615", RPM_STATUS_REG(rpm, 2));
 	if (fw_version[0] != rpm->data->version) {
 		dev_err(&pdev->dev,
 			"RPM version %u.%u.%u incompatible with driver version %u",
@@ -623,9 +623,9 @@ static int qcom_rpm_probe(struct platform_device *pdev)
 		return -EFAULT;
 	}
 
-	writel(fw_version[0], RPM_CTRL_REG(rpm, 0));
-	writel(fw_version[1], RPM_CTRL_REG(rpm, 1));
-	writel(fw_version[2], RPM_CTRL_REG(rpm, 2));
+	pete_writel("drivers/mfd/qcom_rpm.c:626", fw_version[0], RPM_CTRL_REG(rpm, 0));
+	pete_writel("drivers/mfd/qcom_rpm.c:627", fw_version[1], RPM_CTRL_REG(rpm, 1));
+	pete_writel("drivers/mfd/qcom_rpm.c:628", fw_version[2], RPM_CTRL_REG(rpm, 2));
 
 	dev_info(&pdev->dev, "RPM firmware %u.%u.%u\n", fw_version[0],
 							fw_version[1],

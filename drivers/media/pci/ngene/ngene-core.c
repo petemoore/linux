@@ -39,9 +39,9 @@ MODULE_PARM_DESC(debug, "Print debugging information.");
 DVB_DEFINE_MOD_OPT_ADAPTER_NR(adapter_nr);
 
 #define ngwriteb(dat, adr)         writeb((dat), dev->iomem + (adr))
-#define ngwritel(dat, adr)         writel((dat), dev->iomem + (adr))
+#define ngpete_writel("drivers/media/pci/ngene/ngene-core.c:42", dat, adr)         pete_writel("drivers/media/pci/ngene/ngene-core.c:42", (dat), dev->iomem + (adr))
 #define ngwriteb(dat, adr)         writeb((dat), dev->iomem + (adr))
-#define ngreadl(adr)               readl(dev->iomem + (adr))
+#define ngpete_readl("drivers/media/pci/ngene/ngene-core.c:44", adr)               pete_readl("drivers/media/pci/ngene/ngene-core.c:44", dev->iomem + (adr))
 #define ngreadb(adr)               readb(dev->iomem + (adr))
 #define ngcpyto(adr, src, count)   memcpy_toio(dev->iomem + (adr), (src), (count))
 #define ngcpyfrom(dst, adr, count) memcpy_fromio((dst), dev->iomem + (adr), (count))
@@ -165,9 +165,9 @@ static irqreturn_t irq_handler(int irq, void *dev_id)
 	u8 *tmpCmdDoneByte;
 
 	if (dev->BootFirmware) {
-		icounts = ngreadl(NGENE_INT_COUNTS);
+		icounts = ngpete_readl("drivers/media/pci/ngene/ngene-core.c:168", NGENE_INT_COUNTS);
 		if (icounts != dev->icounts) {
-			ngwritel(0, FORCE_NMI);
+			ngpete_writel("drivers/media/pci/ngene/ngene-core.c:170", 0, FORCE_NMI);
 			dev->cmd_done = 1;
 			wake_up(&dev->cmd_wq);
 			dev->icounts = icounts;
@@ -176,7 +176,7 @@ static irqreturn_t irq_handler(int irq, void *dev_id)
 		return rc;
 	}
 
-	ngwritel(0, FORCE_NMI);
+	ngpete_writel("drivers/media/pci/ngene/ngene-core.c:179", 0, FORCE_NMI);
 
 	spin_lock(&dev->cmd_lock);
 	tmpCmdDoneByte = dev->CmdDoneByte;
@@ -261,22 +261,22 @@ static int ngene_command_mutex(struct ngene *dev, struct ngene_command *com)
 
 	if (com->cmd.hdr.Opcode == CMD_FWLOAD_PREPARE) {
 		dev->BootFirmware = 1;
-		dev->icounts = ngreadl(NGENE_INT_COUNTS);
-		ngwritel(0, NGENE_COMMAND);
-		ngwritel(0, NGENE_COMMAND_HI);
-		ngwritel(0, NGENE_STATUS);
-		ngwritel(0, NGENE_STATUS_HI);
-		ngwritel(0, NGENE_EVENT);
-		ngwritel(0, NGENE_EVENT_HI);
+		dev->icounts = ngpete_readl("drivers/media/pci/ngene/ngene-core.c:264", NGENE_INT_COUNTS);
+		ngpete_writel("drivers/media/pci/ngene/ngene-core.c:265", 0, NGENE_COMMAND);
+		ngpete_writel("drivers/media/pci/ngene/ngene-core.c:266", 0, NGENE_COMMAND_HI);
+		ngpete_writel("drivers/media/pci/ngene/ngene-core.c:267", 0, NGENE_STATUS);
+		ngpete_writel("drivers/media/pci/ngene/ngene-core.c:268", 0, NGENE_STATUS_HI);
+		ngpete_writel("drivers/media/pci/ngene/ngene-core.c:269", 0, NGENE_EVENT);
+		ngpete_writel("drivers/media/pci/ngene/ngene-core.c:270", 0, NGENE_EVENT_HI);
 	} else if (com->cmd.hdr.Opcode == CMD_FWLOAD_FINISH) {
 		u64 fwio = dev->PAFWInterfaceBuffer;
 
-		ngwritel(fwio & 0xffffffff, NGENE_COMMAND);
-		ngwritel(fwio >> 32, NGENE_COMMAND_HI);
-		ngwritel((fwio + 256) & 0xffffffff, NGENE_STATUS);
-		ngwritel((fwio + 256) >> 32, NGENE_STATUS_HI);
-		ngwritel((fwio + 512) & 0xffffffff, NGENE_EVENT);
-		ngwritel((fwio + 512) >> 32, NGENE_EVENT_HI);
+		ngpete_writel("drivers/media/pci/ngene/ngene-core.c:274", fwio & 0xffffffff, NGENE_COMMAND);
+		ngpete_writel("drivers/media/pci/ngene/ngene-core.c:275", fwio >> 32, NGENE_COMMAND_HI);
+		ngpete_writel("drivers/media/pci/ngene/ngene-core.c:276", (fwio + 256) & 0xffffffff, NGENE_STATUS);
+		ngpete_writel("drivers/media/pci/ngene/ngene-core.c:277", (fwio + 256) >> 32, NGENE_STATUS_HI);
+		ngpete_writel("drivers/media/pci/ngene/ngene-core.c:278", (fwio + 512) & 0xffffffff, NGENE_EVENT);
+		ngpete_writel("drivers/media/pci/ngene/ngene-core.c:279", (fwio + 512) >> 32, NGENE_EVENT_HI);
 	}
 
 	memcpy(dev->FWInterfaceBuffer, com->cmd.raw8, com->in_len + 2);
@@ -295,11 +295,11 @@ static int ngene_command_mutex(struct ngene *dev, struct ngene_command *com)
 	spin_unlock_irq(&dev->cmd_lock);
 
 	/* Notify 8051. */
-	ngwritel(1, FORCE_INT);
+	ngpete_writel("drivers/media/pci/ngene/ngene-core.c:298", 1, FORCE_INT);
 
 	ret = wait_event_timeout(dev->cmd_wq, dev->cmd_done == 1, 2 * HZ);
 	if (!ret) {
-		/*ngwritel(0, FORCE_NMI);*/
+		/*ngpete_writel("drivers/media/pci/ngene/ngene-core.c:302", 0, FORCE_NMI);*/
 
 		dev_err(pdev, "Command timeout cmd=%02x prev=%02x\n",
 			com->cmd.hdr.Opcode, dev->prev_cmd);
@@ -711,7 +711,7 @@ void set_transfer(struct ngene_channel *chan, int state)
 		spin_lock_irq(&chan->state_lock);
 
 		/* dev_info(pdev, "lock=%08x\n",
-			  ngreadl(0x9310)); */
+			  ngpete_readl("drivers/media/pci/ngene/ngene-core.c:714", 0x9310)); */
 		dvb_ringbuffer_flush(&dev->tsout_rbuf);
 		control = 0x80;
 		if (chan->mode & (NGENE_IO_TSIN | NGENE_IO_TSOUT)) {
@@ -729,7 +729,7 @@ void set_transfer(struct ngene_channel *chan, int state)
 		spin_unlock_irq(&chan->state_lock);
 	}
 		/* else dev_info(pdev, "lock=%08x\n",
-			   ngreadl(0x9310)); */
+			   ngpete_readl("drivers/media/pci/ngene/ngene-core.c:732", 0x9310)); */
 
 	mutex_lock(&dev->stream_mutex);
 	ret = ngene_command_stream_control(dev, chan->number,
@@ -1193,11 +1193,11 @@ static void ngene_init(struct ngene *dev)
 
 	dev->fw_interface_version = 0;
 
-	ngwritel(0, NGENE_INT_ENABLE);
+	ngpete_writel("drivers/media/pci/ngene/ngene-core.c:1196", 0, NGENE_INT_ENABLE);
 
-	dev->icounts = ngreadl(NGENE_INT_COUNTS);
+	dev->icounts = ngpete_readl("drivers/media/pci/ngene/ngene-core.c:1198", NGENE_INT_COUNTS);
 
-	dev->device_version = ngreadl(DEV_VER) & 0x0f;
+	dev->device_version = ngpete_readl("drivers/media/pci/ngene/ngene-core.c:1200", DEV_VER) & 0x0f;
 	dev_info(pdev, "Device version %d\n", dev->device_version);
 }
 
@@ -1263,13 +1263,13 @@ static void ngene_stop(struct ngene *dev)
 	mutex_destroy(&dev->cmd_mutex);
 	i2c_del_adapter(&(dev->channel[0].i2c_adapter));
 	i2c_del_adapter(&(dev->channel[1].i2c_adapter));
-	ngwritel(0, NGENE_INT_ENABLE);
-	ngwritel(0, NGENE_COMMAND);
-	ngwritel(0, NGENE_COMMAND_HI);
-	ngwritel(0, NGENE_STATUS);
-	ngwritel(0, NGENE_STATUS_HI);
-	ngwritel(0, NGENE_EVENT);
-	ngwritel(0, NGENE_EVENT_HI);
+	ngpete_writel("drivers/media/pci/ngene/ngene-core.c:1266", 0, NGENE_INT_ENABLE);
+	ngpete_writel("drivers/media/pci/ngene/ngene-core.c:1267", 0, NGENE_COMMAND);
+	ngpete_writel("drivers/media/pci/ngene/ngene-core.c:1268", 0, NGENE_COMMAND_HI);
+	ngpete_writel("drivers/media/pci/ngene/ngene-core.c:1269", 0, NGENE_STATUS);
+	ngpete_writel("drivers/media/pci/ngene/ngene-core.c:1270", 0, NGENE_STATUS_HI);
+	ngpete_writel("drivers/media/pci/ngene/ngene-core.c:1271", 0, NGENE_EVENT);
+	ngpete_writel("drivers/media/pci/ngene/ngene-core.c:1272", 0, NGENE_EVENT_HI);
 	free_irq(dev->pci_dev->irq, dev);
 #ifdef CONFIG_PCI_MSI
 	if (dev->msi_enabled)
@@ -1330,9 +1330,9 @@ static int ngene_start(struct ngene *dev)
 	spin_lock_init(&dev->cmd_lock);
 	for (i = 0; i < MAX_STREAM; i++)
 		spin_lock_init(&dev->channel[i].state_lock);
-	ngwritel(1, TIMESTAMPS);
+	ngpete_writel("drivers/media/pci/ngene/ngene-core.c:1333", 1, TIMESTAMPS);
 
-	ngwritel(1, NGENE_INT_ENABLE);
+	ngpete_writel("drivers/media/pci/ngene/ngene-core.c:1335", 1, NGENE_INT_ENABLE);
 
 	stat = ngene_load_firm(dev);
 	if (stat < 0)
@@ -1344,7 +1344,7 @@ static int ngene_start(struct ngene *dev)
 		struct device *pdev = &dev->pci_dev->dev;
 		unsigned long flags;
 
-		ngwritel(0, NGENE_INT_ENABLE);
+		ngpete_writel("drivers/media/pci/ngene/ngene-core.c:1347", 0, NGENE_INT_ENABLE);
 		free_irq(dev->pci_dev->irq, dev);
 		stat = pci_enable_msi(dev->pci_dev);
 		if (stat) {
@@ -1358,7 +1358,7 @@ static int ngene_start(struct ngene *dev)
 					flags, "nGene", dev);
 		if (stat < 0)
 			goto fail2;
-		ngwritel(1, NGENE_INT_ENABLE);
+		ngpete_writel("drivers/media/pci/ngene/ngene-core.c:1361", 1, NGENE_INT_ENABLE);
 	}
 #endif
 
@@ -1373,7 +1373,7 @@ static int ngene_start(struct ngene *dev)
 	return 0;
 
 fail:
-	ngwritel(0, NGENE_INT_ENABLE);
+	ngpete_writel("drivers/media/pci/ngene/ngene-core.c:1376", 0, NGENE_INT_ENABLE);
 	free_irq(dev->pci_dev->irq, dev);
 #ifdef CONFIG_PCI_MSI
 fail2:
@@ -1621,7 +1621,7 @@ static void ngene_unlink(struct ngene *dev)
 	com.out_len = 1;
 
 	mutex_lock(&dev->cmd_mutex);
-	ngwritel(0, NGENE_INT_ENABLE);
+	ngpete_writel("drivers/media/pci/ngene/ngene-core.c:1624", 0, NGENE_INT_ENABLE);
 	ngene_command_mutex(dev, &com);
 	mutex_unlock(&dev->cmd_mutex);
 }

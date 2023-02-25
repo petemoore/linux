@@ -38,7 +38,7 @@ static irqreturn_t cplds_irq_handler(int in_irq, void *d)
 	unsigned int bit;
 
 	do {
-		pending = readl(fpga->base + FPGA_IRQ_SET_CLR) & fpga->irq_mask;
+		pending = pete_readl("arch/arm/mach-pxa/pxa_cplds_irqs.c:41", fpga->base + FPGA_IRQ_SET_CLR) & fpga->irq_mask;
 		for_each_set_bit(bit, &pending, CPLDS_NB_IRQ)
 			generic_handle_domain_irq(fpga->irqdomain, bit);
 	} while (pending);
@@ -53,7 +53,7 @@ static void cplds_irq_mask(struct irq_data *d)
 	unsigned int bit = BIT(cplds_irq);
 
 	fpga->irq_mask &= ~bit;
-	writel(fpga->irq_mask, fpga->base + FPGA_IRQ_MASK_EN);
+	pete_writel("arch/arm/mach-pxa/pxa_cplds_irqs.c:56", fpga->irq_mask, fpga->base + FPGA_IRQ_MASK_EN);
 }
 
 static void cplds_irq_unmask(struct irq_data *d)
@@ -62,11 +62,11 @@ static void cplds_irq_unmask(struct irq_data *d)
 	unsigned int cplds_irq = irqd_to_hwirq(d);
 	unsigned int set, bit = BIT(cplds_irq);
 
-	set = readl(fpga->base + FPGA_IRQ_SET_CLR);
-	writel(set & ~bit, fpga->base + FPGA_IRQ_SET_CLR);
+	set = pete_readl("arch/arm/mach-pxa/pxa_cplds_irqs.c:65", fpga->base + FPGA_IRQ_SET_CLR);
+	pete_writel("arch/arm/mach-pxa/pxa_cplds_irqs.c:66", set & ~bit, fpga->base + FPGA_IRQ_SET_CLR);
 
 	fpga->irq_mask |= bit;
-	writel(fpga->irq_mask, fpga->base + FPGA_IRQ_MASK_EN);
+	pete_writel("arch/arm/mach-pxa/pxa_cplds_irqs.c:69", fpga->irq_mask, fpga->base + FPGA_IRQ_MASK_EN);
 }
 
 static struct irq_chip cplds_irq_chip = {
@@ -97,7 +97,7 @@ static int cplds_resume(struct platform_device *pdev)
 {
 	struct cplds *fpga = platform_get_drvdata(pdev);
 
-	writel(fpga->irq_mask, fpga->base + FPGA_IRQ_MASK_EN);
+	pete_writel("arch/arm/mach-pxa/pxa_cplds_irqs.c:100", fpga->irq_mask, fpga->base + FPGA_IRQ_MASK_EN);
 
 	return 0;
 }
@@ -134,8 +134,8 @@ static int cplds_probe(struct platform_device *pdev)
 
 	platform_set_drvdata(pdev, fpga);
 
-	writel(fpga->irq_mask, fpga->base + FPGA_IRQ_MASK_EN);
-	writel(0, fpga->base + FPGA_IRQ_SET_CLR);
+	pete_writel("arch/arm/mach-pxa/pxa_cplds_irqs.c:137", fpga->irq_mask, fpga->base + FPGA_IRQ_MASK_EN);
+	pete_writel("arch/arm/mach-pxa/pxa_cplds_irqs.c:138", 0, fpga->base + FPGA_IRQ_SET_CLR);
 
 	irqflags = irq_get_trigger_type(fpga->irq);
 	ret = devm_request_irq(&pdev->dev, fpga->irq, cplds_irq_handler,

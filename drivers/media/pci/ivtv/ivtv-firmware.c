@@ -170,10 +170,10 @@ static volatile struct ivtv_mailbox __iomem *ivtv_search_mailbox(const volatile 
 	/* mailbox is preceded by a 16 byte 'magic cookie' starting at a 256-byte
 	   address boundary */
 	for (i = 0; i < size; i += 0x100) {
-		if (readl(mem + i)      == 0x12345678 &&
-		    readl(mem + i + 4)  == 0x34567812 &&
-		    readl(mem + i + 8)  == 0x56781234 &&
-		    readl(mem + i + 12) == 0x78123456) {
+		if (pete_readl("drivers/media/pci/ivtv/ivtv-firmware.c:173", mem + i)      == 0x12345678 &&
+		    pete_readl("drivers/media/pci/ivtv/ivtv-firmware.c:174", mem + i + 4)  == 0x34567812 &&
+		    pete_readl("drivers/media/pci/ivtv/ivtv-firmware.c:175", mem + i + 8)  == 0x56781234 &&
+		    pete_readl("drivers/media/pci/ivtv/ivtv-firmware.c:176", mem + i + 12) == 0x78123456) {
 			return (volatile struct ivtv_mailbox __iomem *)(mem + i + 16);
 		}
 	}

@@ -261,7 +261,7 @@ static int wmt_mci_send_command(struct mmc_host *mmc, u8 command, u8 cmdtype,
 
 	/* write command, arg, resptype registers */
 	writeb(command, priv->sdmmc_base + SDMMC_CMD);
-	writel(arg, priv->sdmmc_base + SDMMC_ARG);
+	pete_writel("drivers/mmc/host/wmt-sdmmc.c:264", arg, priv->sdmmc_base + SDMMC_ARG);
 	writeb(rsptype, priv->sdmmc_base + SDMMC_RSPTYPE);
 
 	/* reset response FIFO */
@@ -287,8 +287,8 @@ static int wmt_mci_send_command(struct mmc_host *mmc, u8 command, u8 cmdtype,
 
 static void wmt_mci_disable_dma(struct wmt_mci_priv *priv)
 {
-	writel(DMA_ISR_INT_STS, priv->sdmmc_base + SDDMA_ISR);
-	writel(0, priv->sdmmc_base + SDDMA_IER);
+	pete_writel("drivers/mmc/host/wmt-sdmmc.c:290", DMA_ISR_INT_STS, priv->sdmmc_base + SDDMA_ISR);
+	pete_writel("drivers/mmc/host/wmt-sdmmc.c:291", 0, priv->sdmmc_base + SDDMA_IER);
 }
 
 static void wmt_complete_data_request(struct wmt_mci_priv *priv)
@@ -338,7 +338,7 @@ static irqreturn_t wmt_mci_dma_isr(int irq_num, void *data)
 
 	priv = (struct wmt_mci_priv *)data;
 
-	status = readl(priv->sdmmc_base + SDDMA_CCR) & 0x0F;
+	status = pete_readl("drivers/mmc/host/wmt-sdmmc.c:341", priv->sdmmc_base + SDDMA_CCR) & 0x0F;
 
 	if (status != DMA_CCR_EVT_SUCCESS) {
 		dev_err(priv->dev, "DMA Error: Status = %d\n", status);
@@ -504,9 +504,9 @@ static int wmt_dma_init(struct mmc_host *mmc)
 
 	priv = mmc_priv(mmc);
 
-	writel(DMA_GCR_SOFT_RESET, priv->sdmmc_base + SDDMA_GCR);
-	writel(DMA_GCR_DMA_EN, priv->sdmmc_base + SDDMA_GCR);
-	if ((readl(priv->sdmmc_base + SDDMA_GCR) & DMA_GCR_DMA_EN) != 0)
+	pete_writel("drivers/mmc/host/wmt-sdmmc.c:507", DMA_GCR_SOFT_RESET, priv->sdmmc_base + SDDMA_GCR);
+	pete_writel("drivers/mmc/host/wmt-sdmmc.c:508", DMA_GCR_DMA_EN, priv->sdmmc_base + SDDMA_GCR);
+	if ((pete_readl("drivers/mmc/host/wmt-sdmmc.c:509", priv->sdmmc_base + SDDMA_GCR) & DMA_GCR_DMA_EN) != 0)
 		return 0;
 	else
 		return 1;
@@ -530,20 +530,20 @@ static void wmt_dma_config(struct mmc_host *mmc, u32 descaddr, u8 dir)
 	priv = mmc_priv(mmc);
 
 	/* Enable DMA Interrupts */
-	writel(DMA_IER_INT_EN, priv->sdmmc_base + SDDMA_IER);
+	pete_writel("drivers/mmc/host/wmt-sdmmc.c:533", DMA_IER_INT_EN, priv->sdmmc_base + SDDMA_IER);
 
 	/* Write DMA Descriptor Pointer Register */
-	writel(descaddr, priv->sdmmc_base + SDDMA_DESPR);
+	pete_writel("drivers/mmc/host/wmt-sdmmc.c:536", descaddr, priv->sdmmc_base + SDDMA_DESPR);
 
-	writel(0x00, priv->sdmmc_base + SDDMA_CCR);
+	pete_writel("drivers/mmc/host/wmt-sdmmc.c:538", 0x00, priv->sdmmc_base + SDDMA_CCR);
 
 	if (dir == PDMA_WRITE) {
-		reg_tmp = readl(priv->sdmmc_base + SDDMA_CCR);
-		writel(reg_tmp & DMA_CCR_IF_TO_PERIPHERAL, priv->sdmmc_base +
+		reg_tmp = pete_readl("drivers/mmc/host/wmt-sdmmc.c:541", priv->sdmmc_base + SDDMA_CCR);
+		pete_writel("drivers/mmc/host/wmt-sdmmc.c:542", reg_tmp & DMA_CCR_IF_TO_PERIPHERAL, priv->sdmmc_base +
 		       SDDMA_CCR);
 	} else {
-		reg_tmp = readl(priv->sdmmc_base + SDDMA_CCR);
-		writel(reg_tmp | DMA_CCR_PERIPHERAL_TO_IF, priv->sdmmc_base +
+		reg_tmp = pete_readl("drivers/mmc/host/wmt-sdmmc.c:545", priv->sdmmc_base + SDDMA_CCR);
+		pete_writel("drivers/mmc/host/wmt-sdmmc.c:546", reg_tmp | DMA_CCR_PERIPHERAL_TO_IF, priv->sdmmc_base +
 		       SDDMA_CCR);
 	}
 }
@@ -552,8 +552,8 @@ static void wmt_dma_start(struct wmt_mci_priv *priv)
 {
 	u32 reg_tmp;
 
-	reg_tmp = readl(priv->sdmmc_base + SDDMA_CCR);
-	writel(reg_tmp | DMA_CCR_RUN, priv->sdmmc_base + SDDMA_CCR);
+	reg_tmp = pete_readl("drivers/mmc/host/wmt-sdmmc.c:555", priv->sdmmc_base + SDDMA_CCR);
+	pete_writel("drivers/mmc/host/wmt-sdmmc.c:556", reg_tmp | DMA_CCR_RUN, priv->sdmmc_base + SDDMA_CCR);
 }
 
 static void wmt_mci_request(struct mmc_host *mmc, struct mmc_request *req)
@@ -897,7 +897,7 @@ static int wmt_mci_remove(struct platform_device *pdev)
 
 	/* reset SD controller */
 	reg_tmp = readb(priv->sdmmc_base + SDMMC_BUSMODE);
-	writel(reg_tmp | BM_SOFT_RESET, priv->sdmmc_base + SDMMC_BUSMODE);
+	pete_writel("drivers/mmc/host/wmt-sdmmc.c:900", reg_tmp | BM_SOFT_RESET, priv->sdmmc_base + SDMMC_BUSMODE);
 	reg_tmp = readw(priv->sdmmc_base + SDMMC_BLKLEN);
 	writew(reg_tmp & ~(0xA000), priv->sdmmc_base + SDMMC_BLKLEN);
 	writeb(0xFF, priv->sdmmc_base + SDMMC_STS0);

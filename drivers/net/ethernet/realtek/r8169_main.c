@@ -78,10 +78,10 @@
 /* write/read MMIO register */
 #define RTL_W8(tp, reg, val8)	writeb((val8), tp->mmio_addr + (reg))
 #define RTL_W16(tp, reg, val16)	writew((val16), tp->mmio_addr + (reg))
-#define RTL_W32(tp, reg, val32)	writel((val32), tp->mmio_addr + (reg))
+#define RTL_W32(tp, reg, val32)	pete_writel("drivers/net/ethernet/realtek/r8169_main.c:81", (val32), tp->mmio_addr + (reg))
 #define RTL_R8(tp, reg)		readb(tp->mmio_addr + (reg))
 #define RTL_R16(tp, reg)		readw(tp->mmio_addr + (reg))
-#define RTL_R32(tp, reg)		readl(tp->mmio_addr + (reg))
+#define RTL_R32(tp, reg)		pete_readl("drivers/net/ethernet/realtek/r8169_main.c:84", tp->mmio_addr + (reg))
 
 #define JUMBO_4K	(4 * SZ_1K - VLAN_ETH_HLEN - ETH_FCS_LEN)
 #define JUMBO_6K	(6 * SZ_1K - VLAN_ETH_HLEN - ETH_FCS_LEN)

@@ -13,25 +13,25 @@ inline struct mtk_mipi_tx *mtk_mipi_tx_from_clk_hw(struct clk_hw *hw)
 void mtk_mipi_tx_clear_bits(struct mtk_mipi_tx *mipi_tx, u32 offset,
 			    u32 bits)
 {
-	u32 temp = readl(mipi_tx->regs + offset);
+	u32 temp = pete_readl("drivers/phy/mediatek/phy-mtk-mipi-dsi.c:16", mipi_tx->regs + offset);
 
-	writel(temp & ~bits, mipi_tx->regs + offset);
+	pete_writel("drivers/phy/mediatek/phy-mtk-mipi-dsi.c:18", temp & ~bits, mipi_tx->regs + offset);
 }
 
 void mtk_mipi_tx_set_bits(struct mtk_mipi_tx *mipi_tx, u32 offset,
 			  u32 bits)
 {
-	u32 temp = readl(mipi_tx->regs + offset);
+	u32 temp = pete_readl("drivers/phy/mediatek/phy-mtk-mipi-dsi.c:24", mipi_tx->regs + offset);
 
-	writel(temp | bits, mipi_tx->regs + offset);
+	pete_writel("drivers/phy/mediatek/phy-mtk-mipi-dsi.c:26", temp | bits, mipi_tx->regs + offset);
 }
 
 void mtk_mipi_tx_update_bits(struct mtk_mipi_tx *mipi_tx, u32 offset,
 			     u32 mask, u32 data)
 {
-	u32 temp = readl(mipi_tx->regs + offset);
+	u32 temp = pete_readl("drivers/phy/mediatek/phy-mtk-mipi-dsi.c:32", mipi_tx->regs + offset);
 
-	writel((temp & ~mask) | (data & mask), mipi_tx->regs + offset);
+	pete_writel("drivers/phy/mediatek/phy-mtk-mipi-dsi.c:34", (temp & ~mask) | (data & mask), mipi_tx->regs + offset);
 }
 
 int mtk_mipi_tx_pll_set_rate(struct clk_hw *hw, unsigned long rate,

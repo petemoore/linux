@@ -28,7 +28,7 @@ EXPORT_SYMBOL(ioread16be);
 
 unsigned int ioread32(const void __iomem *addr)
 {
-	return readl(addr);
+	return pete_readl("arch/sh/kernel/iomap.c:31", addr);
 }
 EXPORT_SYMBOL(ioread32);
 
@@ -58,7 +58,7 @@ EXPORT_SYMBOL(iowrite16be);
 
 void iowrite32(u32 val, void __iomem *addr)
 {
-	writel(val, addr);
+	pete_writel("arch/sh/kernel/iomap.c:61", val, addr);
 }
 EXPORT_SYMBOL(iowrite32);
 

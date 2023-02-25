@@ -1084,7 +1084,7 @@ static u32 cn23xx_update_read_index(struct octeon_instr_queue *iq)
 {
 	u32 new_idx;
 	u32 last_done;
-	u32 pkt_in_done = readl(iq->inst_cnt_reg);
+	u32 pkt_in_done = pete_readl("drivers/net/ethernet/cavium/liquidio/cn23xx_pf_device.c:1087", iq->inst_cnt_reg);
 
 	last_done = pkt_in_done - iq->pkt_in_done;
 	iq->pkt_in_done = pkt_in_done;

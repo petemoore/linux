@@ -314,8 +314,8 @@ static const struct visconti_mux gpio_mux_tmpv7700[] = {
 
 static void tmpv7700_pinctrl_unlock(void __iomem *base)
 {
-	writel(1, base + REG_KEY_CTRL);
-	writel(tmpv7700_MAGIC_NUM, base + REG_KEY_CMD);
+	pete_writel("drivers/pinctrl/visconti/pinctrl-tmpv7700.c:317", 1, base + REG_KEY_CTRL);
+	pete_writel("drivers/pinctrl/visconti/pinctrl-tmpv7700.c:318", tmpv7700_MAGIC_NUM, base + REG_KEY_CMD);
 }
 
 /* chip dependent data */

@@ -48,9 +48,9 @@ static int cpg_div6_clock_enable(struct clk_hw *hw)
 	struct div6_clock *clock = to_div6_clock(hw);
 	u32 val;
 
-	val = (readl(clock->reg) & ~(CPG_DIV6_DIV_MASK | CPG_DIV6_CKSTP))
+	val = (pete_readl("drivers/clk/renesas/clk-div6.c:51", clock->reg) & ~(CPG_DIV6_DIV_MASK | CPG_DIV6_CKSTP))
 	    | CPG_DIV6_DIV(clock->div - 1);
-	writel(val, clock->reg);
+	pete_writel("drivers/clk/renesas/clk-div6.c:53", val, clock->reg);
 
 	return 0;
 }
@@ -60,7 +60,7 @@ static void cpg_div6_clock_disable(struct clk_hw *hw)
 	struct div6_clock *clock = to_div6_clock(hw);
 	u32 val;
 
-	val = readl(clock->reg);
+	val = pete_readl("drivers/clk/renesas/clk-div6.c:63", clock->reg);
 	val |= CPG_DIV6_CKSTP;
 	/*
 	 * DIV6 clocks require the divisor field to be non-zero when stopping
@@ -70,14 +70,14 @@ static void cpg_div6_clock_disable(struct clk_hw *hw)
 	 */
 	if (!(val & CPG_DIV6_DIV_MASK))
 		val |= CPG_DIV6_DIV_MASK;
-	writel(val, clock->reg);
+	pete_writel("drivers/clk/renesas/clk-div6.c:73", val, clock->reg);
 }
 
 static int cpg_div6_clock_is_enabled(struct clk_hw *hw)
 {
 	struct div6_clock *clock = to_div6_clock(hw);
 
-	return !(readl(clock->reg) & CPG_DIV6_CKSTP);
+	return !(pete_readl("drivers/clk/renesas/clk-div6.c:80", clock->reg) & CPG_DIV6_CKSTP);
 }
 
 static unsigned long cpg_div6_clock_recalc_rate(struct clk_hw *hw,
@@ -154,10 +154,10 @@ static int cpg_div6_clock_set_rate(struct clk_hw *hw, unsigned long rate,
 
 	clock->div = div;
 
-	val = readl(clock->reg) & ~CPG_DIV6_DIV_MASK;
+	val = pete_readl("drivers/clk/renesas/clk-div6.c:157", clock->reg) & ~CPG_DIV6_DIV_MASK;
 	/* Only program the new divisor if the clock isn't stopped. */
 	if (!(val & CPG_DIV6_CKSTP))
-		writel(val | CPG_DIV6_DIV(clock->div - 1), clock->reg);
+		pete_writel("drivers/clk/renesas/clk-div6.c:160", val | CPG_DIV6_DIV(clock->div - 1), clock->reg);
 
 	return 0;
 }
@@ -171,7 +171,7 @@ static u8 cpg_div6_clock_get_parent(struct clk_hw *hw)
 	if (clock->src_mask == 0)
 		return 0;
 
-	hw_index = (readl(clock->reg) & clock->src_mask) >>
+	hw_index = (pete_readl("drivers/clk/renesas/clk-div6.c:174", clock->reg) & clock->src_mask) >>
 		   __ffs(clock->src_mask);
 	for (i = 0; i < clk_hw_get_num_parents(hw); i++) {
 		if (clock->parents[i] == hw_index)
@@ -192,7 +192,7 @@ static int cpg_div6_clock_set_parent(struct clk_hw *hw, u8 index)
 		return -EINVAL;
 
 	src = clock->parents[index] << __ffs(clock->src_mask);
-	writel((readl(clock->reg) & ~clock->src_mask) | src, clock->reg);
+	pete_writel("drivers/clk/renesas/clk-div6.c:195", (pete_readl("drivers/clk/renesas/clk-div6.c:195", clock->reg) & ~clock->src_mask) | src, clock->reg);
 	return 0;
 }
 
@@ -261,7 +261,7 @@ struct clk * __init cpg_div6_register(const char *name,
 	 * Read the divisor. Disabling the clock overwrites the divisor, so we
 	 * need to cache its value for the enable operation.
 	 */
-	clock->div = (readl(clock->reg) & CPG_DIV6_DIV_MASK) + 1;
+	clock->div = (pete_readl("drivers/clk/renesas/clk-div6.c:264", clock->reg) & CPG_DIV6_DIV_MASK) + 1;
 
 	switch (num_parents) {
 	case 1:

@@ -116,14 +116,14 @@ static int __init sp804_clocksource_and_sched_clock_init(void __iomem *base,
 
 	clkevt = sp804_clkevt_get(base);
 
-	writel(0, clkevt->ctrl);
-	writel(0xffffffff, clkevt->load);
-	writel(0xffffffff, clkevt->value);
+	pete_writel("drivers/clocksource/timer-sp804.c:119", 0, clkevt->ctrl);
+	pete_writel("drivers/clocksource/timer-sp804.c:120", 0xffffffff, clkevt->load);
+	pete_writel("drivers/clocksource/timer-sp804.c:121", 0xffffffff, clkevt->value);
 	if (clkevt->width == 64) {
-		writel(0xffffffff, clkevt->load_h);
-		writel(0xffffffff, clkevt->value_h);
+		pete_writel("drivers/clocksource/timer-sp804.c:123", 0xffffffff, clkevt->load_h);
+		pete_writel("drivers/clocksource/timer-sp804.c:124", 0xffffffff, clkevt->value_h);
 	}
-	writel(TIMER_CTRL_32BIT | TIMER_CTRL_ENABLE | TIMER_CTRL_PERIODIC,
+	pete_writel("drivers/clocksource/timer-sp804.c:126", TIMER_CTRL_32BIT | TIMER_CTRL_ENABLE | TIMER_CTRL_PERIODIC,
 		clkevt->ctrl);
 
 	clocksource_mmio_init(clkevt->value, name,
@@ -148,7 +148,7 @@ static irqreturn_t sp804_timer_interrupt(int irq, void *dev_id)
 	struct clock_event_device *evt = dev_id;
 
 	/* clear the interrupt */
-	writel(1, common_clkevt->intclr);
+	pete_writel("drivers/clocksource/timer-sp804.c:151", 1, common_clkevt->intclr);
 
 	evt->event_handler(evt);
 
@@ -157,7 +157,7 @@ static irqreturn_t sp804_timer_interrupt(int irq, void *dev_id)
 
 static inline void timer_shutdown(struct clock_event_device *evt)
 {
-	writel(0, common_clkevt->ctrl);
+	pete_writel("drivers/clocksource/timer-sp804.c:160", 0, common_clkevt->ctrl);
 }
 
 static int sp804_shutdown(struct clock_event_device *evt)
@@ -172,8 +172,8 @@ static int sp804_set_periodic(struct clock_event_device *evt)
 			     TIMER_CTRL_PERIODIC | TIMER_CTRL_ENABLE;
 
 	timer_shutdown(evt);
-	writel(common_clkevt->reload, common_clkevt->load);
-	writel(ctrl, common_clkevt->ctrl);
+	pete_writel("drivers/clocksource/timer-sp804.c:175", common_clkevt->reload, common_clkevt->load);
+	pete_writel("drivers/clocksource/timer-sp804.c:176", ctrl, common_clkevt->ctrl);
 	return 0;
 }
 
@@ -183,8 +183,8 @@ static int sp804_set_next_event(unsigned long next,
 	unsigned long ctrl = TIMER_CTRL_32BIT | TIMER_CTRL_IE |
 			     TIMER_CTRL_ONESHOT | TIMER_CTRL_ENABLE;
 
-	writel(next, common_clkevt->load);
-	writel(ctrl, common_clkevt->ctrl);
+	pete_writel("drivers/clocksource/timer-sp804.c:186", next, common_clkevt->load);
+	pete_writel("drivers/clocksource/timer-sp804.c:187", ctrl, common_clkevt->ctrl);
 
 	return 0;
 }
@@ -217,7 +217,7 @@ static int __init sp804_clockevents_init(void __iomem *base, unsigned int irq,
 	evt->irq = irq;
 	evt->cpumask = cpu_possible_mask;
 
-	writel(0, common_clkevt->ctrl);
+	pete_writel("drivers/clocksource/timer-sp804.c:220", 0, common_clkevt->ctrl);
 
 	if (request_irq(irq, sp804_timer_interrupt, IRQF_TIMER | IRQF_IRQPOLL,
 			"timer", &sp804_clockevent))
@@ -272,8 +272,8 @@ static int __init sp804_of_init(struct device_node *np, struct sp804_timer *time
 	timer2_base = base + timer->timer_base[1];
 
 	/* Ensure timers are disabled */
-	writel(0, timer1_base + timer->ctrl);
-	writel(0, timer2_base + timer->ctrl);
+	pete_writel("drivers/clocksource/timer-sp804.c:275", 0, timer1_base + timer->ctrl);
+	pete_writel("drivers/clocksource/timer-sp804.c:276", 0, timer2_base + timer->ctrl);
 
 	clk1 = of_clk_get(np, 0);
 	if (IS_ERR(clk1))
@@ -359,7 +359,7 @@ static int __init integrator_cp_of_init(struct device_node *np)
 	}
 
 	/* Ensure timer is disabled */
-	writel(0, base + arm_sp804_timer.ctrl);
+	pete_writel("drivers/clocksource/timer-sp804.c:362", 0, base + arm_sp804_timer.ctrl);
 
 	if (init_count == 2 || !of_device_is_available(np))
 		goto err;

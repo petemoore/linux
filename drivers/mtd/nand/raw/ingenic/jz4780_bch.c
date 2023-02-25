@@ -65,25 +65,25 @@ static void jz4780_bch_reset(struct ingenic_ecc *bch,
 	u32 reg;
 
 	/* Clear interrupt status. */
-	writel(readl(bch->base + BCH_BHINT), bch->base + BCH_BHINT);
+	pete_writel("drivers/mtd/nand/raw/ingenic/jz4780_bch.c:68", pete_readl("drivers/mtd/nand/raw/ingenic/jz4780_bch.c:68", bch->base + BCH_BHINT), bch->base + BCH_BHINT);
 
 	/* Set up BCH count register. */
 	reg = params->size << BCH_BHCNT_BLOCKSIZE_SHIFT;
 	reg |= params->bytes << BCH_BHCNT_PARITYSIZE_SHIFT;
-	writel(reg, bch->base + BCH_BHCNT);
+	pete_writel("drivers/mtd/nand/raw/ingenic/jz4780_bch.c:73", reg, bch->base + BCH_BHCNT);
 
 	/* Initialise and enable BCH. */
 	reg = BCH_BHCR_BCHE | BCH_BHCR_INIT;
 	reg |= params->strength << BCH_BHCR_BSEL_SHIFT;
 	if (encode)
 		reg |= BCH_BHCR_ENCE;
-	writel(reg, bch->base + BCH_BHCR);
+	pete_writel("drivers/mtd/nand/raw/ingenic/jz4780_bch.c:80", reg, bch->base + BCH_BHCR);
 }
 
 static void jz4780_bch_disable(struct ingenic_ecc *bch)
 {
-	writel(readl(bch->base + BCH_BHINT), bch->base + BCH_BHINT);
-	writel(BCH_BHCR_BCHE, bch->base + BCH_BHCCR);
+	pete_writel("drivers/mtd/nand/raw/ingenic/jz4780_bch.c:85", pete_readl("drivers/mtd/nand/raw/ingenic/jz4780_bch.c:85", bch->base + BCH_BHINT), bch->base + BCH_BHINT);
+	pete_writel("drivers/mtd/nand/raw/ingenic/jz4780_bch.c:86", BCH_BHCR_BCHE, bch->base + BCH_BHCCR);
 }
 
 static void jz4780_bch_write_data(struct ingenic_ecc *bch, const void *buf,
@@ -96,7 +96,7 @@ static void jz4780_bch_write_data(struct ingenic_ecc *bch, const void *buf,
 
 	src32 = (const u32 *)buf;
 	while (size32--)
-		writel(*src32++, bch->base + BCH_BHDR);
+		pete_writel("drivers/mtd/nand/raw/ingenic/jz4780_bch.c:99", *src32++, bch->base + BCH_BHDR);
 
 	src8 = (const u8 *)src32;
 	while (size8--)
@@ -114,12 +114,12 @@ static void jz4780_bch_read_parity(struct ingenic_ecc *bch, void *buf,
 
 	dest32 = (u32 *)buf;
 	while (size32--) {
-		*dest32++ = readl(bch->base + BCH_BHPAR0 + offset);
+		*dest32++ = pete_readl("drivers/mtd/nand/raw/ingenic/jz4780_bch.c:117", bch->base + BCH_BHPAR0 + offset);
 		offset += sizeof(u32);
 	}
 
 	dest8 = (u8 *)dest32;
-	val = readl(bch->base + BCH_BHPAR0 + offset);
+	val = pete_readl("drivers/mtd/nand/raw/ingenic/jz4780_bch.c:122", bch->base + BCH_BHPAR0 + offset);
 	switch (size8) {
 	case 3:
 		dest8[2] = (val >> 16) & 0xff;
@@ -153,7 +153,7 @@ static bool jz4780_bch_wait_complete(struct ingenic_ecc *bch, unsigned int irq,
 	if (status)
 		*status = reg;
 
-	writel(reg, bch->base + BCH_BHINT);
+	pete_writel("drivers/mtd/nand/raw/ingenic/jz4780_bch.c:156", reg, bch->base + BCH_BHINT);
 	return true;
 }
 
@@ -211,7 +211,7 @@ static int jz4780_correct(struct ingenic_ecc *bch,
 		ret = (reg & BCH_BHINT_TERRC_MASK) >> BCH_BHINT_TERRC_SHIFT;
 
 		for (i = 0; i < count; i++) {
-			reg = readl(bch->base + BCH_BHERR0 + (i * 4));
+			reg = pete_readl("drivers/mtd/nand/raw/ingenic/jz4780_bch.c:214", bch->base + BCH_BHERR0 + (i * 4));
 			mask = (reg & BCH_BHERR_MASK_MASK) >>
 						BCH_BHERR_MASK_SHIFT;
 			index = (reg & BCH_BHERR_INDEX_MASK) >>

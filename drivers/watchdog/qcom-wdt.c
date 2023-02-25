@@ -76,11 +76,11 @@ static int qcom_wdt_start(struct watchdog_device *wdd)
 	struct qcom_wdt *wdt = to_qcom_wdt(wdd);
 	unsigned int bark = wdd->timeout - wdd->pretimeout;
 
-	writel(0, wdt_addr(wdt, WDT_EN));
-	writel(1, wdt_addr(wdt, WDT_RST));
-	writel(bark * wdt->rate, wdt_addr(wdt, WDT_BARK_TIME));
-	writel(wdd->timeout * wdt->rate, wdt_addr(wdt, WDT_BITE_TIME));
-	writel(QCOM_WDT_ENABLE, wdt_addr(wdt, WDT_EN));
+	pete_writel("drivers/watchdog/qcom-wdt.c:79", 0, wdt_addr(wdt, WDT_EN));
+	pete_writel("drivers/watchdog/qcom-wdt.c:80", 1, wdt_addr(wdt, WDT_RST));
+	pete_writel("drivers/watchdog/qcom-wdt.c:81", bark * wdt->rate, wdt_addr(wdt, WDT_BARK_TIME));
+	pete_writel("drivers/watchdog/qcom-wdt.c:82", wdd->timeout * wdt->rate, wdt_addr(wdt, WDT_BITE_TIME));
+	pete_writel("drivers/watchdog/qcom-wdt.c:83", QCOM_WDT_ENABLE, wdt_addr(wdt, WDT_EN));
 	return 0;
 }
 
@@ -88,7 +88,7 @@ static int qcom_wdt_stop(struct watchdog_device *wdd)
 {
 	struct qcom_wdt *wdt = to_qcom_wdt(wdd);
 
-	writel(0, wdt_addr(wdt, WDT_EN));
+	pete_writel("drivers/watchdog/qcom-wdt.c:91", 0, wdt_addr(wdt, WDT_EN));
 	return 0;
 }
 
@@ -96,7 +96,7 @@ static int qcom_wdt_ping(struct watchdog_device *wdd)
 {
 	struct qcom_wdt *wdt = to_qcom_wdt(wdd);
 
-	writel(1, wdt_addr(wdt, WDT_RST));
+	pete_writel("drivers/watchdog/qcom-wdt.c:99", 1, wdt_addr(wdt, WDT_RST));
 	return 0;
 }
 
@@ -126,11 +126,11 @@ static int qcom_wdt_restart(struct watchdog_device *wdd, unsigned long action,
 	 */
 	timeout = 128 * wdt->rate / 1000;
 
-	writel(0, wdt_addr(wdt, WDT_EN));
-	writel(1, wdt_addr(wdt, WDT_RST));
-	writel(timeout, wdt_addr(wdt, WDT_BARK_TIME));
-	writel(timeout, wdt_addr(wdt, WDT_BITE_TIME));
-	writel(QCOM_WDT_ENABLE, wdt_addr(wdt, WDT_EN));
+	pete_writel("drivers/watchdog/qcom-wdt.c:129", 0, wdt_addr(wdt, WDT_EN));
+	pete_writel("drivers/watchdog/qcom-wdt.c:130", 1, wdt_addr(wdt, WDT_RST));
+	pete_writel("drivers/watchdog/qcom-wdt.c:131", timeout, wdt_addr(wdt, WDT_BARK_TIME));
+	pete_writel("drivers/watchdog/qcom-wdt.c:132", timeout, wdt_addr(wdt, WDT_BITE_TIME));
+	pete_writel("drivers/watchdog/qcom-wdt.c:133", QCOM_WDT_ENABLE, wdt_addr(wdt, WDT_EN));
 
 	/*
 	 * Actually make sure the above sequence hits hardware before sleeping.
@@ -145,7 +145,7 @@ static int qcom_wdt_is_running(struct watchdog_device *wdd)
 {
 	struct qcom_wdt *wdt = to_qcom_wdt(wdd);
 
-	return (readl(wdt_addr(wdt, WDT_EN)) & QCOM_WDT_ENABLE);
+	return (pete_readl("drivers/watchdog/qcom-wdt.c:148", wdt_addr(wdt, WDT_EN)) & QCOM_WDT_ENABLE);
 }
 
 static const struct watchdog_ops qcom_wdt_ops = {
@@ -279,7 +279,7 @@ static int qcom_wdt_probe(struct platform_device *pdev)
 	wdt->wdd.parent = dev;
 	wdt->layout = data->offset;
 
-	if (readl(wdt_addr(wdt, WDT_STS)) & 1)
+	if (pete_readl("drivers/watchdog/qcom-wdt.c:282", wdt_addr(wdt, WDT_STS)) & 1)
 		wdt->wdd.bootstatus = WDIOF_CARDRESET;
 
 	/*

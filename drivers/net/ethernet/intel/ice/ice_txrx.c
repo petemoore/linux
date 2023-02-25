@@ -95,7 +95,7 @@ ice_prgm_fdir_fltr(struct ice_vsi *vsi, struct ice_fltr_desc *fdir_desc,
 	/* mark the data descriptor to be watched */
 	first->next_to_watch = tx_desc;
 
-	writel(tx_ring->next_to_use, tx_ring->tail);
+	pete_writel("drivers/net/ethernet/intel/ice/ice_txrx.c:98", tx_ring->next_to_use, tx_ring->tail);
 
 	return 0;
 }
@@ -1628,7 +1628,7 @@ ice_tx_map(struct ice_ring *tx_ring, struct ice_tx_buf *first,
 
 	/* notify HW of packet */
 	if (netif_xmit_stopped(txring_txq(tx_ring)) || !netdev_xmit_more())
-		writel(i, tx_ring->tail);
+		pete_writel("drivers/net/ethernet/intel/ice/ice_txrx.c:1631", i, tx_ring->tail);
 
 	return;
 

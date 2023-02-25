@@ -109,7 +109,7 @@ static u32 ade_read_reload_bit(void __iomem *base, u32 bit_num)
 	bit_ofst = bit_num % 32;
 	reg_num = bit_num / 32;
 
-	tmp = readl(base + ADE_RELOAD_DIS(reg_num));
+	tmp = pete_readl("drivers/gpu/drm/hisilicon/kirin/kirin_drm_ade.c:112", base + ADE_RELOAD_DIS(reg_num));
 	return !!(BIT(bit_ofst) & tmp);
 }
 
@@ -121,14 +121,14 @@ static void ade_init(struct ade_hw_ctx *ctx)
 	ade_update_bits(base + ADE_CTRL1, AUTO_CLK_GATE_EN_OFST,
 			AUTO_CLK_GATE_EN, ADE_ENABLE);
 	/* clear overlay */
-	writel(0, base + ADE_OVLY1_TRANS_CFG);
-	writel(0, base + ADE_OVLY_CTL);
-	writel(0, base + ADE_OVLYX_CTL(OUT_OVLY));
+	pete_writel("drivers/gpu/drm/hisilicon/kirin/kirin_drm_ade.c:124", 0, base + ADE_OVLY1_TRANS_CFG);
+	pete_writel("drivers/gpu/drm/hisilicon/kirin/kirin_drm_ade.c:125", 0, base + ADE_OVLY_CTL);
+	pete_writel("drivers/gpu/drm/hisilicon/kirin/kirin_drm_ade.c:126", 0, base + ADE_OVLYX_CTL(OUT_OVLY));
 	/* clear reset and reload regs */
-	writel(MASK(32), base + ADE_SOFT_RST_SEL(0));
-	writel(MASK(32), base + ADE_SOFT_RST_SEL(1));
-	writel(MASK(32), base + ADE_RELOAD_DIS(0));
-	writel(MASK(32), base + ADE_RELOAD_DIS(1));
+	pete_writel("drivers/gpu/drm/hisilicon/kirin/kirin_drm_ade.c:128", MASK(32), base + ADE_SOFT_RST_SEL(0));
+	pete_writel("drivers/gpu/drm/hisilicon/kirin/kirin_drm_ade.c:129", MASK(32), base + ADE_SOFT_RST_SEL(1));
+	pete_writel("drivers/gpu/drm/hisilicon/kirin/kirin_drm_ade.c:130", MASK(32), base + ADE_RELOAD_DIS(0));
+	pete_writel("drivers/gpu/drm/hisilicon/kirin/kirin_drm_ade.c:131", MASK(32), base + ADE_RELOAD_DIS(1));
 	/*
 	 * for video mode, all the ade registers should
 	 * become effective at frame end.
@@ -190,25 +190,25 @@ static void ade_ldi_set_mode(struct ade_hw_ctx *ctx,
 		vsw = 15;
 	}
 
-	writel((hbp << HBP_OFST) | hfp, base + LDI_HRZ_CTRL0);
+	pete_writel("drivers/gpu/drm/hisilicon/kirin/kirin_drm_ade.c:193", (hbp << HBP_OFST) | hfp, base + LDI_HRZ_CTRL0);
 	 /* the configured value is actual value - 1 */
-	writel(hsw - 1, base + LDI_HRZ_CTRL1);
-	writel((vbp << VBP_OFST) | vfp, base + LDI_VRT_CTRL0);
+	pete_writel("drivers/gpu/drm/hisilicon/kirin/kirin_drm_ade.c:195", hsw - 1, base + LDI_HRZ_CTRL1);
+	pete_writel("drivers/gpu/drm/hisilicon/kirin/kirin_drm_ade.c:196", (vbp << VBP_OFST) | vfp, base + LDI_VRT_CTRL0);
 	 /* the configured value is actual value - 1 */
-	writel(vsw - 1, base + LDI_VRT_CTRL1);
+	pete_writel("drivers/gpu/drm/hisilicon/kirin/kirin_drm_ade.c:198", vsw - 1, base + LDI_VRT_CTRL1);
 	 /* the configured value is actual value - 1 */
-	writel(((height - 1) << VSIZE_OFST) | (width - 1),
+	pete_writel("drivers/gpu/drm/hisilicon/kirin/kirin_drm_ade.c:200", ((height - 1) << VSIZE_OFST) | (width - 1),
 	       base + LDI_DSP_SIZE);
-	writel(plr_flags, base + LDI_PLR_CTRL);
+	pete_writel("drivers/gpu/drm/hisilicon/kirin/kirin_drm_ade.c:202", plr_flags, base + LDI_PLR_CTRL);
 
 	/* set overlay compositor output size */
-	writel(((width - 1) << OUTPUT_XSIZE_OFST) | (height - 1),
+	pete_writel("drivers/gpu/drm/hisilicon/kirin/kirin_drm_ade.c:205", ((width - 1) << OUTPUT_XSIZE_OFST) | (height - 1),
 	       base + ADE_OVLY_OUTPUT_SIZE(OUT_OVLY));
 
 	/* ctran6 setting */
-	writel(CTRAN_BYPASS_ON, base + ADE_CTRAN_DIS(ADE_CTRAN6));
+	pete_writel("drivers/gpu/drm/hisilicon/kirin/kirin_drm_ade.c:209", CTRAN_BYPASS_ON, base + ADE_CTRAN_DIS(ADE_CTRAN6));
 	 /* the configured value is actual value - 1 */
-	writel(width * height - 1, base + ADE_CTRAN_IMAGE_SIZE(ADE_CTRAN6));
+	pete_writel("drivers/gpu/drm/hisilicon/kirin/kirin_drm_ade.c:211", width * height - 1, base + ADE_CTRAN_IMAGE_SIZE(ADE_CTRAN6));
 	ade_update_reload_bit(base, CTRAN_OFST + ADE_CTRAN6, 0);
 
 	ade_set_pix_clk(ctx, mode, adj_mode);
@@ -247,9 +247,9 @@ static void ade_power_down(struct ade_hw_ctx *ctx)
 {
 	void __iomem *base = ctx->base;
 
-	writel(ADE_DISABLE, base + LDI_CTRL);
+	pete_writel("drivers/gpu/drm/hisilicon/kirin/kirin_drm_ade.c:250", ADE_DISABLE, base + LDI_CTRL);
 	/* dsi pixel off */
-	writel(DSI_PCLK_OFF, base + LDI_HDMI_DSI_GT);
+	pete_writel("drivers/gpu/drm/hisilicon/kirin/kirin_drm_ade.c:252", DSI_PCLK_OFF, base + LDI_HDMI_DSI_GT);
 
 	clk_disable_unprepare(ctx->ade_core_clk);
 	reset_control_assert(ctx->reset);
@@ -309,7 +309,7 @@ static irqreturn_t ade_irq_handler(int irq, void *data)
 	void __iomem *base = ctx->base;
 	u32 status;
 
-	status = readl(base + LDI_MSK_INT);
+	status = pete_readl("drivers/gpu/drm/hisilicon/kirin/kirin_drm_ade.c:312", base + LDI_MSK_INT);
 	DRM_DEBUG_VBL("LDI IRQ: status=0x%X\n", status);
 
 	/* vblank irq */
@@ -328,20 +328,20 @@ static void ade_display_enable(struct ade_hw_ctx *ctx)
 	u32 out_fmt = LDI_OUT_RGB_888;
 
 	/* enable output overlay compositor */
-	writel(ADE_ENABLE, base + ADE_OVLYX_CTL(OUT_OVLY));
+	pete_writel("drivers/gpu/drm/hisilicon/kirin/kirin_drm_ade.c:331", ADE_ENABLE, base + ADE_OVLYX_CTL(OUT_OVLY));
 	ade_update_reload_bit(base, OVLY_OFST + OUT_OVLY, 0);
 
 	/* display source setting */
-	writel(DISP_SRC_OVLY2, base + ADE_DISP_SRC_CFG);
+	pete_writel("drivers/gpu/drm/hisilicon/kirin/kirin_drm_ade.c:335", DISP_SRC_OVLY2, base + ADE_DISP_SRC_CFG);
 
 	/* enable ade */
-	writel(ADE_ENABLE, base + ADE_EN);
+	pete_writel("drivers/gpu/drm/hisilicon/kirin/kirin_drm_ade.c:338", ADE_ENABLE, base + ADE_EN);
 	/* enable ldi */
-	writel(NORMAL_MODE, base + LDI_WORK_MODE);
-	writel((out_fmt << BPP_OFST) | DATA_GATE_EN | LDI_EN,
+	pete_writel("drivers/gpu/drm/hisilicon/kirin/kirin_drm_ade.c:340", NORMAL_MODE, base + LDI_WORK_MODE);
+	pete_writel("drivers/gpu/drm/hisilicon/kirin/kirin_drm_ade.c:341", (out_fmt << BPP_OFST) | DATA_GATE_EN | LDI_EN,
 	       base + LDI_CTRL);
 	/* dsi pixel on */
-	writel(DSI_PCLK_ON, base + LDI_HDMI_DSI_GT);
+	pete_writel("drivers/gpu/drm/hisilicon/kirin/kirin_drm_ade.c:344", DSI_PCLK_ON, base + LDI_HDMI_DSI_GT);
 }
 
 #if ADE_DEBUG
@@ -359,17 +359,17 @@ static void ade_rdma_dump_regs(void __iomem *base, u32 ch)
 
 	val = ade_read_reload_bit(base, RDMA_OFST + ch);
 	DRM_DEBUG_DRIVER("[rdma%d]: reload(%d)\n", ch + 1, val);
-	val = readl(base + reg_ctrl);
+	val = pete_readl("drivers/gpu/drm/hisilicon/kirin/kirin_drm_ade.c:362", base + reg_ctrl);
 	DRM_DEBUG_DRIVER("[rdma%d]: reg_ctrl(0x%08x)\n", ch + 1, val);
-	val = readl(base + reg_addr);
+	val = pete_readl("drivers/gpu/drm/hisilicon/kirin/kirin_drm_ade.c:364", base + reg_addr);
 	DRM_DEBUG_DRIVER("[rdma%d]: reg_addr(0x%08x)\n", ch + 1, val);
-	val = readl(base + reg_size);
+	val = pete_readl("drivers/gpu/drm/hisilicon/kirin/kirin_drm_ade.c:366", base + reg_size);
 	DRM_DEBUG_DRIVER("[rdma%d]: reg_size(0x%08x)\n", ch + 1, val);
-	val = readl(base + reg_stride);
+	val = pete_readl("drivers/gpu/drm/hisilicon/kirin/kirin_drm_ade.c:368", base + reg_stride);
 	DRM_DEBUG_DRIVER("[rdma%d]: reg_stride(0x%08x)\n", ch + 1, val);
-	val = readl(base + reg_space);
+	val = pete_readl("drivers/gpu/drm/hisilicon/kirin/kirin_drm_ade.c:370", base + reg_space);
 	DRM_DEBUG_DRIVER("[rdma%d]: reg_space(0x%08x)\n", ch + 1, val);
-	val = readl(base + reg_en);
+	val = pete_readl("drivers/gpu/drm/hisilicon/kirin/kirin_drm_ade.c:372", base + reg_en);
 	DRM_DEBUG_DRIVER("[rdma%d]: reg_en(0x%08x)\n", ch + 1, val);
 }
 
@@ -379,11 +379,11 @@ static void ade_clip_dump_regs(void __iomem *base, u32 ch)
 
 	val = ade_read_reload_bit(base, CLIP_OFST + ch);
 	DRM_DEBUG_DRIVER("[clip%d]: reload(%d)\n", ch + 1, val);
-	val = readl(base + ADE_CLIP_DISABLE(ch));
+	val = pete_readl("drivers/gpu/drm/hisilicon/kirin/kirin_drm_ade.c:382", base + ADE_CLIP_DISABLE(ch));
 	DRM_DEBUG_DRIVER("[clip%d]: reg_clip_disable(0x%08x)\n", ch + 1, val);
-	val = readl(base + ADE_CLIP_SIZE0(ch));
+	val = pete_readl("drivers/gpu/drm/hisilicon/kirin/kirin_drm_ade.c:384", base + ADE_CLIP_SIZE0(ch));
 	DRM_DEBUG_DRIVER("[clip%d]: reg_clip_size0(0x%08x)\n", ch + 1, val);
-	val = readl(base + ADE_CLIP_SIZE1(ch));
+	val = pete_readl("drivers/gpu/drm/hisilicon/kirin/kirin_drm_ade.c:386", base + ADE_CLIP_SIZE1(ch));
 	DRM_DEBUG_DRIVER("[clip%d]: reg_clip_size1(0x%08x)\n", ch + 1, val);
 }
 
@@ -392,11 +392,11 @@ static void ade_compositor_routing_dump_regs(void __iomem *base, u32 ch)
 	u8 ovly_ch = 0; /* TODO: Only primary plane now */
 	u32 val;
 
-	val = readl(base + ADE_OVLY_CH_XY0(ovly_ch));
+	val = pete_readl("drivers/gpu/drm/hisilicon/kirin/kirin_drm_ade.c:395", base + ADE_OVLY_CH_XY0(ovly_ch));
 	DRM_DEBUG_DRIVER("[overlay ch%d]: reg_ch_xy0(0x%08x)\n", ovly_ch, val);
-	val = readl(base + ADE_OVLY_CH_XY1(ovly_ch));
+	val = pete_readl("drivers/gpu/drm/hisilicon/kirin/kirin_drm_ade.c:397", base + ADE_OVLY_CH_XY1(ovly_ch));
 	DRM_DEBUG_DRIVER("[overlay ch%d]: reg_ch_xy1(0x%08x)\n", ovly_ch, val);
-	val = readl(base + ADE_OVLY_CH_CTL(ovly_ch));
+	val = pete_readl("drivers/gpu/drm/hisilicon/kirin/kirin_drm_ade.c:399", base + ADE_OVLY_CH_CTL(ovly_ch));
 	DRM_DEBUG_DRIVER("[overlay ch%d]: reg_ch_ctl(0x%08x)\n", ovly_ch, val);
 }
 
@@ -406,9 +406,9 @@ static void ade_dump_overlay_compositor_regs(void __iomem *base, u32 comp)
 
 	val = ade_read_reload_bit(base, OVLY_OFST + comp);
 	DRM_DEBUG_DRIVER("[overlay%d]: reload(%d)\n", comp + 1, val);
-	writel(ADE_ENABLE, base + ADE_OVLYX_CTL(comp));
+	pete_writel("drivers/gpu/drm/hisilicon/kirin/kirin_drm_ade.c:409", ADE_ENABLE, base + ADE_OVLYX_CTL(comp));
 	DRM_DEBUG_DRIVER("[overlay%d]: reg_ctl(0x%08x)\n", comp + 1, val);
-	val = readl(base + ADE_OVLY_CTL);
+	val = pete_readl("drivers/gpu/drm/hisilicon/kirin/kirin_drm_ade.c:411", base + ADE_OVLY_CTL);
 	DRM_DEBUG_DRIVER("ovly_ctl(0x%08x)\n", val);
 }
 
@@ -510,7 +510,7 @@ static void ade_crtc_atomic_flush(struct drm_crtc *crtc,
 	if (kcrtc->enable) {
 		ade_dump_regs(base);
 		/* flush ade registers */
-		writel(ADE_ENABLE, base + ADE_EN);
+		pete_writel("drivers/gpu/drm/hisilicon/kirin/kirin_drm_ade.c:513", ADE_ENABLE, base + ADE_EN);
 	}
 
 	if (event) {
@@ -570,12 +570,12 @@ static void ade_rdma_set(void __iomem *base, struct drm_framebuffer *fb,
 	/*
 	 * TODO: set rotation
 	 */
-	writel((fmt << 16) & 0x1f0000, base + reg_ctrl);
-	writel(addr, base + reg_addr);
-	writel((in_h << 16) | stride, base + reg_size);
-	writel(stride, base + reg_stride);
-	writel(in_h * stride, base + reg_space);
-	writel(ADE_ENABLE, base + reg_en);
+	pete_writel("drivers/gpu/drm/hisilicon/kirin/kirin_drm_ade.c:573", (fmt << 16) & 0x1f0000, base + reg_ctrl);
+	pete_writel("drivers/gpu/drm/hisilicon/kirin/kirin_drm_ade.c:574", addr, base + reg_addr);
+	pete_writel("drivers/gpu/drm/hisilicon/kirin/kirin_drm_ade.c:575", (in_h << 16) | stride, base + reg_size);
+	pete_writel("drivers/gpu/drm/hisilicon/kirin/kirin_drm_ade.c:576", stride, base + reg_stride);
+	pete_writel("drivers/gpu/drm/hisilicon/kirin/kirin_drm_ade.c:577", in_h * stride, base + reg_space);
+	pete_writel("drivers/gpu/drm/hisilicon/kirin/kirin_drm_ade.c:578", ADE_ENABLE, base + reg_en);
 	ade_update_reload_bit(base, RDMA_OFST + ch, 0);
 }
 
@@ -585,7 +585,7 @@ static void ade_rdma_disable(void __iomem *base, u32 ch)
 
 	/* get reg offset */
 	reg_en = RD_CH_EN(ch);
-	writel(0, base + reg_en);
+	pete_writel("drivers/gpu/drm/hisilicon/kirin/kirin_drm_ade.c:588", 0, base + reg_en);
 	ade_update_reload_bit(base, RDMA_OFST + ch, 1);
 }
 
@@ -612,15 +612,15 @@ static void ade_clip_set(void __iomem *base, u32 ch, u32 fb_w, u32 x,
 	DRM_DEBUG_DRIVER("clip%d: clip_left=%d, clip_right=%d\n",
 			 ch + 1, clip_left, clip_right);
 
-	writel(disable_val, base + ADE_CLIP_DISABLE(ch));
-	writel((fb_w - 1) << 16 | (in_h - 1), base + ADE_CLIP_SIZE0(ch));
-	writel(clip_left << 16 | clip_right, base + ADE_CLIP_SIZE1(ch));
+	pete_writel("drivers/gpu/drm/hisilicon/kirin/kirin_drm_ade.c:615", disable_val, base + ADE_CLIP_DISABLE(ch));
+	pete_writel("drivers/gpu/drm/hisilicon/kirin/kirin_drm_ade.c:616", (fb_w - 1) << 16 | (in_h - 1), base + ADE_CLIP_SIZE0(ch));
+	pete_writel("drivers/gpu/drm/hisilicon/kirin/kirin_drm_ade.c:617", clip_left << 16 | clip_right, base + ADE_CLIP_SIZE1(ch));
 	ade_update_reload_bit(base, CLIP_OFST + ch, 0);
 }
 
 static void ade_clip_disable(void __iomem *base, u32 ch)
 {
-	writel(1, base + ADE_CLIP_DISABLE(ch));
+	pete_writel("drivers/gpu/drm/hisilicon/kirin/kirin_drm_ade.c:623", 1, base + ADE_CLIP_DISABLE(ch));
 	ade_update_reload_bit(base, CLIP_OFST + ch, 1);
 }
 
@@ -677,14 +677,14 @@ static void ade_compositor_routing_set(void __iomem *base, u8 ch,
 
 	/* overlay routing setting
 	 */
-	writel(x0 << 16 | y0, base + ADE_OVLY_CH_XY0(ovly_ch));
-	writel(x1 << 16 | y1, base + ADE_OVLY_CH_XY1(ovly_ch));
+	pete_writel("drivers/gpu/drm/hisilicon/kirin/kirin_drm_ade.c:680", x0 << 16 | y0, base + ADE_OVLY_CH_XY0(ovly_ch));
+	pete_writel("drivers/gpu/drm/hisilicon/kirin/kirin_drm_ade.c:681", x1 << 16 | y1, base + ADE_OVLY_CH_XY1(ovly_ch));
 	val = (ch + 1) << CH_SEL_OFST | BIT(CH_EN_OFST) |
 		alp_sel << CH_ALP_SEL_OFST |
 		under_alp_sel << CH_UNDER_ALP_SEL_OFST |
 		glb_alpha << CH_ALP_GBL_OFST |
 		alp_mode << CH_ALP_MODE_OFST;
-	writel(val, base + ADE_OVLY_CH_CTL(ovly_ch));
+	pete_writel("drivers/gpu/drm/hisilicon/kirin/kirin_drm_ade.c:687", val, base + ADE_OVLY_CH_CTL(ovly_ch));
 	/* connect this plane/channel to overlay2 compositor */
 	ade_update_bits(base + ADE_OVLY_CTL, CH_OVLY_SEL_OFST(ovly_ch),
 			CH_OVLY_SEL_MASK, CH_OVLY_SEL_VAL(OUT_OVLY));

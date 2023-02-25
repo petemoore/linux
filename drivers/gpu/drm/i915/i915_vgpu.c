@@ -94,7 +94,7 @@ void intel_vgpu_detect(struct drm_i915_private *dev_priv)
 		goto out;
 	}
 
-	dev_priv->vgpu.caps = readl(shared_area + vgtif_offset(vgt_caps));
+	dev_priv->vgpu.caps = pete_readl("drivers/gpu/drm/i915/i915_vgpu.c:97", shared_area + vgtif_offset(vgt_caps));
 
 	dev_priv->vgpu.active = true;
 	mutex_init(&dev_priv->vgpu.lock);

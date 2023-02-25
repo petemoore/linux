@@ -24,7 +24,7 @@ static int ar7_gpio_get_value(struct gpio_chip *chip, unsigned gpio)
 	struct ar7_gpio_chip *gpch = gpiochip_get_data(chip);
 	void __iomem *gpio_in = gpch->regs + AR7_GPIO_INPUT;
 
-	return !!(readl(gpio_in) & (1 << gpio));
+	return !!(pete_readl("arch/mips/ar7/gpio.c:27", gpio_in) & (1 << gpio));
 }
 
 static int titan_gpio_get_value(struct gpio_chip *chip, unsigned gpio)
@@ -33,7 +33,7 @@ static int titan_gpio_get_value(struct gpio_chip *chip, unsigned gpio)
 	void __iomem *gpio_in0 = gpch->regs + TITAN_GPIO_INPUT_0;
 	void __iomem *gpio_in1 = gpch->regs + TITAN_GPIO_INPUT_1;
 
-	return readl(gpio >> 5 ? gpio_in1 : gpio_in0) & (1 << (gpio & 0x1f));
+	return pete_readl("arch/mips/ar7/gpio.c:36", gpio >> 5 ? gpio_in1 : gpio_in0) & (1 << (gpio & 0x1f));
 }
 
 static void ar7_gpio_set_value(struct gpio_chip *chip,
@@ -43,10 +43,10 @@ static void ar7_gpio_set_value(struct gpio_chip *chip,
 	void __iomem *gpio_out = gpch->regs + AR7_GPIO_OUTPUT;
 	unsigned tmp;
 
-	tmp = readl(gpio_out) & ~(1 << gpio);
+	tmp = pete_readl("arch/mips/ar7/gpio.c:46", gpio_out) & ~(1 << gpio);
 	if (value)
 		tmp |= 1 << gpio;
-	writel(tmp, gpio_out);
+	pete_writel("arch/mips/ar7/gpio.c:49", tmp, gpio_out);
 }
 
 static void titan_gpio_set_value(struct gpio_chip *chip,
@@ -57,10 +57,10 @@ static void titan_gpio_set_value(struct gpio_chip *chip,
 	void __iomem *gpio_out1 = gpch->regs + TITAN_GPIO_OUTPUT_1;
 	unsigned tmp;
 
-	tmp = readl(gpio >> 5 ? gpio_out1 : gpio_out0) & ~(1 << (gpio & 0x1f));
+	tmp = pete_readl("arch/mips/ar7/gpio.c:60", gpio >> 5 ? gpio_out1 : gpio_out0) & ~(1 << (gpio & 0x1f));
 	if (value)
 		tmp |= 1 << (gpio & 0x1f);
-	writel(tmp, gpio >> 5 ? gpio_out1 : gpio_out0);
+	pete_writel("arch/mips/ar7/gpio.c:63", tmp, gpio >> 5 ? gpio_out1 : gpio_out0);
 }
 
 static int ar7_gpio_direction_input(struct gpio_chip *chip, unsigned gpio)
@@ -68,7 +68,7 @@ static int ar7_gpio_direction_input(struct gpio_chip *chip, unsigned gpio)
 	struct ar7_gpio_chip *gpch = gpiochip_get_data(chip);
 	void __iomem *gpio_dir = gpch->regs + AR7_GPIO_DIR;
 
-	writel(readl(gpio_dir) | (1 << gpio), gpio_dir);
+	pete_writel("arch/mips/ar7/gpio.c:71", pete_readl("arch/mips/ar7/gpio.c:71", gpio_dir) | (1 << gpio), gpio_dir);
 
 	return 0;
 }
@@ -82,7 +82,7 @@ static int titan_gpio_direction_input(struct gpio_chip *chip, unsigned gpio)
 	if (gpio >= TITAN_GPIO_MAX)
 		return -EINVAL;
 
-	writel(readl(gpio >> 5 ? gpio_dir1 : gpio_dir0) | (1 << (gpio & 0x1f)),
+	pete_writel("arch/mips/ar7/gpio.c:85", pete_readl("arch/mips/ar7/gpio.c:85", gpio >> 5 ? gpio_dir1 : gpio_dir0) | (1 << (gpio & 0x1f)),
 			gpio >> 5 ? gpio_dir1 : gpio_dir0);
 	return 0;
 }
@@ -94,7 +94,7 @@ static int ar7_gpio_direction_output(struct gpio_chip *chip,
 	void __iomem *gpio_dir = gpch->regs + AR7_GPIO_DIR;
 
 	ar7_gpio_set_value(chip, gpio, value);
-	writel(readl(gpio_dir) & ~(1 << gpio), gpio_dir);
+	pete_writel("arch/mips/ar7/gpio.c:97", pete_readl("arch/mips/ar7/gpio.c:97", gpio_dir) & ~(1 << gpio), gpio_dir);
 
 	return 0;
 }
@@ -110,7 +110,7 @@ static int titan_gpio_direction_output(struct gpio_chip *chip,
 		return -EINVAL;
 
 	titan_gpio_set_value(chip, gpio, value);
-	writel(readl(gpio >> 5 ? gpio_dir1 : gpio_dir0) & ~(1 <<
+	pete_writel("arch/mips/ar7/gpio.c:113", pete_readl("arch/mips/ar7/gpio.c:113", gpio >> 5 ? gpio_dir1 : gpio_dir0) & ~(1 <<
 		(gpio & 0x1f)), gpio >> 5 ? gpio_dir1 : gpio_dir0);
 
 	return 0;
@@ -144,7 +144,7 @@ static inline int ar7_gpio_enable_ar7(unsigned gpio)
 {
 	void __iomem *gpio_en = ar7_gpio_chip.regs + AR7_GPIO_ENABLE;
 
-	writel(readl(gpio_en) | (1 << gpio), gpio_en);
+	pete_writel("arch/mips/ar7/gpio.c:147", pete_readl("arch/mips/ar7/gpio.c:147", gpio_en) | (1 << gpio), gpio_en);
 
 	return 0;
 }
@@ -154,7 +154,7 @@ static inline int ar7_gpio_enable_titan(unsigned gpio)
 	void __iomem *gpio_en0 = titan_gpio_chip.regs  + TITAN_GPIO_ENBL_0;
 	void __iomem *gpio_en1 = titan_gpio_chip.regs  + TITAN_GPIO_ENBL_1;
 
-	writel(readl(gpio >> 5 ? gpio_en1 : gpio_en0) | (1 << (gpio & 0x1f)),
+	pete_writel("arch/mips/ar7/gpio.c:157", pete_readl("arch/mips/ar7/gpio.c:157", gpio >> 5 ? gpio_en1 : gpio_en0) | (1 << (gpio & 0x1f)),
 		gpio >> 5 ? gpio_en1 : gpio_en0);
 
 	return 0;
@@ -171,7 +171,7 @@ static inline int ar7_gpio_disable_ar7(unsigned gpio)
 {
 	void __iomem *gpio_en = ar7_gpio_chip.regs + AR7_GPIO_ENABLE;
 
-	writel(readl(gpio_en) & ~(1 << gpio), gpio_en);
+	pete_writel("arch/mips/ar7/gpio.c:174", pete_readl("arch/mips/ar7/gpio.c:174", gpio_en) & ~(1 << gpio), gpio_en);
 
 	return 0;
 }
@@ -181,7 +181,7 @@ static inline int ar7_gpio_disable_titan(unsigned gpio)
 	void __iomem *gpio_en0 = titan_gpio_chip.regs + TITAN_GPIO_ENBL_0;
 	void __iomem *gpio_en1 = titan_gpio_chip.regs + TITAN_GPIO_ENBL_1;
 
-	writel(readl(gpio >> 5 ? gpio_en1 : gpio_en0) & ~(1 << (gpio & 0x1f)),
+	pete_writel("arch/mips/ar7/gpio.c:184", pete_readl("arch/mips/ar7/gpio.c:184", gpio >> 5 ? gpio_en1 : gpio_en0) & ~(1 << (gpio & 0x1f)),
 			gpio >> 5 ? gpio_en1 : gpio_en0);
 
 	return 0;
@@ -268,16 +268,16 @@ static int titan_gpio_pinsel(unsigned gpio)
 	gpio_cfg = titan_gpio_table[gpio];
 	pin_sel_reg = gpio_cfg.reg - 1;
 
-	mux_status = (readl(pin_sel + pin_sel_reg) >> gpio_cfg.shift) & 0x3;
+	mux_status = (pete_readl("arch/mips/ar7/gpio.c:271", pin_sel + pin_sel_reg) >> gpio_cfg.shift) & 0x3;
 
 	/* Check the mux status */
 	if (!((mux_status == 0) || (mux_status == gpio_cfg.func)))
 		return 0;
 
 	/* Set the pin sel value */
-	tmp = readl(pin_sel + pin_sel_reg);
+	tmp = pete_readl("arch/mips/ar7/gpio.c:278", pin_sel + pin_sel_reg);
 	tmp |= ((gpio_cfg.func & 0x3) << gpio_cfg.shift);
-	writel(tmp, pin_sel + pin_sel_reg);
+	pete_writel("arch/mips/ar7/gpio.c:280", tmp, pin_sel + pin_sel_reg);
 
 	return 0;
 }

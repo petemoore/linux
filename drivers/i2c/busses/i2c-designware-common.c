@@ -148,7 +148,7 @@ int i2c_dw_init_regmap(struct dw_i2c_dev *dev)
 	if (ret)
 		return ret;
 
-	reg = readl(dev->base + DW_IC_COMP_TYPE);
+	reg = pete_readl("drivers/i2c/busses/i2c-designware-common.c:151", dev->base + DW_IC_COMP_TYPE);
 	i2c_dw_release_lock(dev);
 
 	if ((dev->flags & MODEL_MASK) == MODEL_AMD_NAVI_GPU)

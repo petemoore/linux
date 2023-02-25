@@ -137,14 +137,14 @@ static void gumstix_setup_bt_clock(void)
 {
 	int timeout = 500;
 
-	if (!(readl(OSCC) & OSCC_OOK))
+	if (!(pete_readl("arch/arm/mach-pxa/gumstix.c:140", OSCC) & OSCC_OOK))
 		pr_warn("32kHz clock was not on. Bootloader may need to be updated\n");
 	else
 		return;
 
-	writel(readl(OSCC) | OSCC_OON, OSCC);
+	pete_writel("arch/arm/mach-pxa/gumstix.c:145", pete_readl("arch/arm/mach-pxa/gumstix.c:145", OSCC) | OSCC_OON, OSCC);
 	do {
-		if (readl(OSCC) & OSCC_OOK)
+		if (pete_readl("arch/arm/mach-pxa/gumstix.c:147", OSCC) & OSCC_OOK)
 			break;
 		udelay(1);
 	} while (--timeout);

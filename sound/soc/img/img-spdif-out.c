@@ -83,12 +83,12 @@ static int img_spdif_out_runtime_resume(struct device *dev)
 static inline void img_spdif_out_writel(struct img_spdif_out *spdif, u32 val,
 				u32 reg)
 {
-	writel(val, spdif->base + reg);
+	pete_writel("sound/soc/img/img-spdif-out.c:86", val, spdif->base + reg);
 }
 
 static inline u32 img_spdif_out_readl(struct img_spdif_out *spdif, u32 reg)
 {
-	return readl(spdif->base + reg);
+	return pete_readl("sound/soc/img/img-spdif-out.c:91", spdif->base + reg);
 }
 
 static void img_spdif_out_reset(struct img_spdif_out *spdif)

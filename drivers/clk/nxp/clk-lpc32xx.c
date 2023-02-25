@@ -377,12 +377,12 @@ static inline bool pll_is_valid(u64 val0, u64 val1, u64 min, u64 max)
 
 static inline u32 lpc32xx_usb_clk_read(struct lpc32xx_usb_clk *clk)
 {
-	return readl(usb_clk_vbase + LPC32XX_USB_CLK_STS);
+	return pete_readl("drivers/clk/nxp/clk-lpc32xx.c:380", usb_clk_vbase + LPC32XX_USB_CLK_STS);
 }
 
 static inline void lpc32xx_usb_clk_write(struct lpc32xx_usb_clk *clk, u32 val)
 {
-	writel(val, usb_clk_vbase + LPC32XX_USB_CLK_CTRL);
+	pete_writel("drivers/clk/nxp/clk-lpc32xx.c:385", val, usb_clk_vbase + LPC32XX_USB_CLK_CTRL);
 }
 
 static int clk_mask_enable(struct clk_hw *hw)

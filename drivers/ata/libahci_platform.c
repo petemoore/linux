@@ -708,9 +708,9 @@ void ahci_platform_shutdown(struct platform_device *pdev)
 	}
 
 	/* Disable and clear host interrupts */
-	writel(readl(mmio + HOST_CTL) & ~HOST_IRQ_EN, mmio + HOST_CTL);
-	readl(mmio + HOST_CTL); /* flush */
-	writel(GENMASK(host->n_ports, 0), mmio + HOST_IRQ_STAT);
+	pete_writel("drivers/ata/libahci_platform.c:711", pete_readl("drivers/ata/libahci_platform.c:711", mmio + HOST_CTL) & ~HOST_IRQ_EN, mmio + HOST_CTL);
+	pete_readl("drivers/ata/libahci_platform.c:712", mmio + HOST_CTL); /* flush */
+	pete_writel("drivers/ata/libahci_platform.c:713", GENMASK(host->n_ports, 0), mmio + HOST_IRQ_STAT);
 }
 EXPORT_SYMBOL_GPL(ahci_platform_shutdown);
 
@@ -743,10 +743,10 @@ int ahci_platform_suspend_host(struct device *dev)
 	 * Software must disable interrupts prior to requesting a
 	 * transition of the HBA to D3 state.
 	 */
-	ctl = readl(mmio + HOST_CTL);
+	ctl = pete_readl("drivers/ata/libahci_platform.c:746", mmio + HOST_CTL);
 	ctl &= ~HOST_IRQ_EN;
-	writel(ctl, mmio + HOST_CTL);
-	readl(mmio + HOST_CTL); /* flush */
+	pete_writel("drivers/ata/libahci_platform.c:748", ctl, mmio + HOST_CTL);
+	pete_readl("drivers/ata/libahci_platform.c:749", mmio + HOST_CTL); /* flush */
 
 	if (hpriv->flags & AHCI_HFLAG_SUSPEND_PHYS)
 		ahci_platform_disable_phys(hpriv);

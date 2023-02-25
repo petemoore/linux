@@ -52,8 +52,8 @@ static int sun4i_a10_display_assert(struct reset_controller_dev *rcdev,
 
 	spin_lock_irqsave(data->lock, flags);
 
-	reg = readl(data->reg);
-	writel(reg & ~BIT(data->offset + id), data->reg);
+	reg = pete_readl("drivers/clk/sunxi/clk-sun4i-display.c:55", data->reg);
+	pete_writel("drivers/clk/sunxi/clk-sun4i-display.c:56", reg & ~BIT(data->offset + id), data->reg);
 
 	spin_unlock_irqrestore(data->lock, flags);
 
@@ -69,8 +69,8 @@ static int sun4i_a10_display_deassert(struct reset_controller_dev *rcdev,
 
 	spin_lock_irqsave(data->lock, flags);
 
-	reg = readl(data->reg);
-	writel(reg | BIT(data->offset + id), data->reg);
+	reg = pete_readl("drivers/clk/sunxi/clk-sun4i-display.c:72", data->reg);
+	pete_writel("drivers/clk/sunxi/clk-sun4i-display.c:73", reg | BIT(data->offset + id), data->reg);
 
 	spin_unlock_irqrestore(data->lock, flags);
 
@@ -82,7 +82,7 @@ static int sun4i_a10_display_status(struct reset_controller_dev *rcdev,
 {
 	struct reset_data *data = rcdev_to_reset_data(rcdev);
 
-	return !(readl(data->reg) & BIT(data->offset + id));
+	return !(pete_readl("drivers/clk/sunxi/clk-sun4i-display.c:85", data->reg) & BIT(data->offset + id));
 }
 
 static const struct reset_control_ops sun4i_a10_display_reset_ops = {

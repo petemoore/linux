@@ -162,10 +162,10 @@ static void sun4i_usb_phy0_update_iscr(struct phy *_phy, u32 clr, u32 set)
 	struct sun4i_usb_phy_data *data = to_sun4i_usb_phy_data(phy);
 	u32 iscr;
 
-	iscr = readl(data->base + REG_ISCR);
+	iscr = pete_readl("drivers/phy/allwinner/phy-sun4i-usb.c:165", data->base + REG_ISCR);
 	iscr &= ~clr;
 	iscr |= set;
-	writel(iscr, data->base + REG_ISCR);
+	pete_writel("drivers/phy/allwinner/phy-sun4i-usb.c:168", iscr, data->base + REG_ISCR);
 }
 
 static void sun4i_usb_phy0_set_id_detect(struct phy *phy, u32 val)
@@ -201,18 +201,18 @@ static void sun4i_usb_phy_write(struct sun4i_usb_phy *phy, u32 addr, u32 data,
 
 	if (phy_data->cfg->phyctl_offset == REG_PHYCTL_A33) {
 		/* SoCs newer than A33 need us to set phyctl to 0 explicitly */
-		writel(0, phyctl);
+		pete_writel("drivers/phy/allwinner/phy-sun4i-usb.c:204", 0, phyctl);
 	}
 
 	for (i = 0; i < len; i++) {
-		temp = readl(phyctl);
+		temp = pete_readl("drivers/phy/allwinner/phy-sun4i-usb.c:208", phyctl);
 
 		/* clear the address portion */
 		temp &= ~(0xff << 8);
 
 		/* set the address */
 		temp |= ((addr + i) << 8);
-		writel(temp, phyctl);
+		pete_writel("drivers/phy/allwinner/phy-sun4i-usb.c:215", temp, phyctl);
 
 		/* set the data bit and clear usbc bit*/
 		temp = readb(phyctl);
@@ -254,14 +254,14 @@ static void sun4i_usb_phy_passby(struct sun4i_usb_phy *phy, int enable)
 		bits |= SUNXI_EHCI_HS_FORCE | SUNXI_HSIC_CONNECT_INT |
 			SUNXI_HSIC;
 
-	reg_value = readl(phy->pmu);
+	reg_value = pete_readl("drivers/phy/allwinner/phy-sun4i-usb.c:257", phy->pmu);
 
 	if (enable)
 		reg_value |= bits;
 	else
 		reg_value &= ~bits;
 
-	writel(reg_value, phy->pmu);
+	pete_writel("drivers/phy/allwinner/phy-sun4i-usb.c:264", reg_value, phy->pmu);
 }
 
 static int sun4i_usb_phy_init(struct phy *_phy)
@@ -291,15 +291,15 @@ static int sun4i_usb_phy_init(struct phy *_phy)
 	if (data->cfg->type == sun8i_a83t_phy ||
 	    data->cfg->type == sun50i_h6_phy) {
 		if (phy->index == 0) {
-			val = readl(data->base + data->cfg->phyctl_offset);
+			val = pete_readl("drivers/phy/allwinner/phy-sun4i-usb.c:294", data->base + data->cfg->phyctl_offset);
 			val |= PHY_CTL_VBUSVLDEXT;
 			val &= ~PHY_CTL_SIDDQ;
-			writel(val, data->base + data->cfg->phyctl_offset);
+			pete_writel("drivers/phy/allwinner/phy-sun4i-usb.c:297", val, data->base + data->cfg->phyctl_offset);
 		}
 	} else {
 		if (phy->pmu && data->cfg->enable_pmu_unk1) {
-			val = readl(phy->pmu + REG_PMU_UNK1);
-			writel(val & ~2, phy->pmu + REG_PMU_UNK1);
+			val = pete_readl("drivers/phy/allwinner/phy-sun4i-usb.c:301", phy->pmu + REG_PMU_UNK1);
+			pete_writel("drivers/phy/allwinner/phy-sun4i-usb.c:302", val & ~2, phy->pmu + REG_PMU_UNK1);
 		}
 
 		/* Enable USB 45 Ohm resistor calibration */
@@ -343,7 +343,7 @@ static int sun4i_usb_phy_exit(struct phy *_phy)
 			void __iomem *phyctl = data->base +
 				data->cfg->phyctl_offset;
 
-			writel(readl(phyctl) | PHY_CTL_SIDDQ, phyctl);
+			pete_writel("drivers/phy/allwinner/phy-sun4i-usb.c:346", pete_readl("drivers/phy/allwinner/phy-sun4i-usb.c:346", phyctl) | PHY_CTL_SIDDQ, phyctl);
 		}
 
 		/* Disable pull-ups */
@@ -530,7 +530,7 @@ static void sun4i_usb_phy0_reroute(struct sun4i_usb_phy_data *data, int id_det)
 {
 	u32 regval;
 
-	regval = readl(data->base + REG_PHY_OTGCTL);
+	regval = pete_readl("drivers/phy/allwinner/phy-sun4i-usb.c:533", data->base + REG_PHY_OTGCTL);
 	if (id_det == 0) {
 		/* Host mode. Route phy0 to EHCI/OHCI */
 		regval &= ~OTGCTL_ROUTE_MUSB;
@@ -538,7 +538,7 @@ static void sun4i_usb_phy0_reroute(struct sun4i_usb_phy_data *data, int id_det)
 		/* Peripheral mode. Route phy0 to MUSB */
 		regval |= OTGCTL_ROUTE_MUSB;
 	}
-	writel(regval, data->base + REG_PHY_OTGCTL);
+	pete_writel("drivers/phy/allwinner/phy-sun4i-usb.c:541", regval, data->base + REG_PHY_OTGCTL);
 }
 
 static void sun4i_usb_phy0_id_vbus_det_scan(struct work_struct *work)

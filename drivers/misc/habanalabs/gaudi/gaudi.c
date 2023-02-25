@@ -6174,7 +6174,7 @@ static int gaudi_debugfs_read32(struct hl_device *hdev, u64 addr,
 
 	} else if ((addr >= SRAM_BASE_ADDR) &&
 			(addr < SRAM_BASE_ADDR + SRAM_BAR_SIZE)) {
-		*val = readl(hdev->pcie_bar[SRAM_BAR_ID] +
+		*val = pete_readl("drivers/misc/habanalabs/gaudi/gaudi.c:6177", hdev->pcie_bar[SRAM_BAR_ID] +
 				(addr - SRAM_BASE_ADDR));
 	} else if (addr < DRAM_PHYS_BASE + hdev->asic_prop.dram_size) {
 		u64 bar_base_addr = DRAM_PHYS_BASE +
@@ -6182,7 +6182,7 @@ static int gaudi_debugfs_read32(struct hl_device *hdev, u64 addr,
 
 		hbm_bar_addr = gaudi_set_hbm_bar_base(hdev, bar_base_addr);
 		if (hbm_bar_addr != U64_MAX) {
-			*val = readl(hdev->pcie_bar[HBM_BAR_ID] +
+			*val = pete_readl("drivers/misc/habanalabs/gaudi/gaudi.c:6185", hdev->pcie_bar[HBM_BAR_ID] +
 						(addr - bar_base_addr));
 
 			hbm_bar_addr = gaudi_set_hbm_bar_base(hdev,
@@ -6225,7 +6225,7 @@ static int gaudi_debugfs_write32(struct hl_device *hdev, u64 addr,
 
 	} else if ((addr >= SRAM_BASE_ADDR) &&
 			(addr < SRAM_BASE_ADDR + SRAM_BAR_SIZE)) {
-		writel(val, hdev->pcie_bar[SRAM_BAR_ID] +
+		pete_writel("drivers/misc/habanalabs/gaudi/gaudi.c:6228", val, hdev->pcie_bar[SRAM_BAR_ID] +
 					(addr - SRAM_BASE_ADDR));
 	} else if (addr < DRAM_PHYS_BASE + hdev->asic_prop.dram_size) {
 		u64 bar_base_addr = DRAM_PHYS_BASE +
@@ -6233,7 +6233,7 @@ static int gaudi_debugfs_write32(struct hl_device *hdev, u64 addr,
 
 		hbm_bar_addr = gaudi_set_hbm_bar_base(hdev, bar_base_addr);
 		if (hbm_bar_addr != U64_MAX) {
-			writel(val, hdev->pcie_bar[HBM_BAR_ID] +
+			pete_writel("drivers/misc/habanalabs/gaudi/gaudi.c:6236", val, hdev->pcie_bar[HBM_BAR_ID] +
 						(addr - bar_base_addr));
 
 			hbm_bar_addr = gaudi_set_hbm_bar_base(hdev,

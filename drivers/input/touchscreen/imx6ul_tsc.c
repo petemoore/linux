@@ -110,7 +110,7 @@ static int imx6ul_adc_init(struct imx6ul_tsc *tsc)
 
 	reinit_completion(&tsc->completion);
 
-	adc_cfg = readl(tsc->adc_regs + REG_ADC_CFG);
+	adc_cfg = pete_readl("drivers/input/touchscreen/imx6ul_tsc.c:113", tsc->adc_regs + REG_ADC_CFG);
 	adc_cfg &= ~(ADC_CONV_MODE_MASK | ADC_INPUT_CLK_MASK);
 	adc_cfg |= ADC_12BIT_MODE | ADC_IPG_CLK;
 	adc_cfg &= ~(ADC_CLK_DIV_MASK | ADC_SAMPLE_MODE_MASK);
@@ -120,19 +120,19 @@ static int imx6ul_adc_init(struct imx6ul_tsc *tsc)
 		adc_cfg |= (tsc->average_select) << ADC_AVGS_SHIFT;
 	}
 	adc_cfg &= ~ADC_HARDWARE_TRIGGER;
-	writel(adc_cfg, tsc->adc_regs + REG_ADC_CFG);
+	pete_writel("drivers/input/touchscreen/imx6ul_tsc.c:123", adc_cfg, tsc->adc_regs + REG_ADC_CFG);
 
 	/* enable calibration interrupt */
 	adc_hc |= ADC_AIEN;
 	adc_hc |= ADC_CONV_DISABLE;
-	writel(adc_hc, tsc->adc_regs + REG_ADC_HC0);
+	pete_writel("drivers/input/touchscreen/imx6ul_tsc.c:128", adc_hc, tsc->adc_regs + REG_ADC_HC0);
 
 	/* start ADC calibration */
-	adc_gc = readl(tsc->adc_regs + REG_ADC_GC);
+	adc_gc = pete_readl("drivers/input/touchscreen/imx6ul_tsc.c:131", tsc->adc_regs + REG_ADC_GC);
 	adc_gc |= ADC_CAL;
 	if (tsc->average_enable)
 		adc_gc |= ADC_AVGE;
-	writel(adc_gc, tsc->adc_regs + REG_ADC_GC);
+	pete_writel("drivers/input/touchscreen/imx6ul_tsc.c:135", adc_gc, tsc->adc_regs + REG_ADC_GC);
 
 	timeout = wait_for_completion_timeout
 			(&tsc->completion, ADC_TIMEOUT);
@@ -141,16 +141,16 @@ static int imx6ul_adc_init(struct imx6ul_tsc *tsc)
 		return -ETIMEDOUT;
 	}
 
-	adc_gs = readl(tsc->adc_regs + REG_ADC_GS);
+	adc_gs = pete_readl("drivers/input/touchscreen/imx6ul_tsc.c:144", tsc->adc_regs + REG_ADC_GS);
 	if (adc_gs & ADC_CALF) {
 		dev_err(tsc->dev, "ADC calibration failed\n");
 		return -EINVAL;
 	}
 
 	/* TSC need the ADC work in hardware trigger */
-	adc_cfg = readl(tsc->adc_regs + REG_ADC_CFG);
+	adc_cfg = pete_readl("drivers/input/touchscreen/imx6ul_tsc.c:151", tsc->adc_regs + REG_ADC_CFG);
 	adc_cfg |= ADC_HARDWARE_TRIGGER;
-	writel(adc_cfg, tsc->adc_regs + REG_ADC_CFG);
+	pete_writel("drivers/input/touchscreen/imx6ul_tsc.c:153", adc_cfg, tsc->adc_regs + REG_ADC_CFG);
 
 	return 0;
 }
@@ -165,19 +165,19 @@ static void imx6ul_tsc_channel_config(struct imx6ul_tsc *tsc)
 	u32 adc_hc0, adc_hc1, adc_hc2, adc_hc3, adc_hc4;
 
 	adc_hc0 = DISABLE_CONVERSION_INT;
-	writel(adc_hc0, tsc->adc_regs + REG_ADC_HC0);
+	pete_writel("drivers/input/touchscreen/imx6ul_tsc.c:168", adc_hc0, tsc->adc_regs + REG_ADC_HC0);
 
 	adc_hc1 = DISABLE_CONVERSION_INT | SELECT_CHANNEL_4;
-	writel(adc_hc1, tsc->adc_regs + REG_ADC_HC1);
+	pete_writel("drivers/input/touchscreen/imx6ul_tsc.c:171", adc_hc1, tsc->adc_regs + REG_ADC_HC1);
 
 	adc_hc2 = DISABLE_CONVERSION_INT;
-	writel(adc_hc2, tsc->adc_regs + REG_ADC_HC2);
+	pete_writel("drivers/input/touchscreen/imx6ul_tsc.c:174", adc_hc2, tsc->adc_regs + REG_ADC_HC2);
 
 	adc_hc3 = DISABLE_CONVERSION_INT | SELECT_CHANNEL_1;
-	writel(adc_hc3, tsc->adc_regs + REG_ADC_HC3);
+	pete_writel("drivers/input/touchscreen/imx6ul_tsc.c:177", adc_hc3, tsc->adc_regs + REG_ADC_HC3);
 
 	adc_hc4 = DISABLE_CONVERSION_INT;
-	writel(adc_hc4, tsc->adc_regs + REG_ADC_HC4);
+	pete_writel("drivers/input/touchscreen/imx6ul_tsc.c:180", adc_hc4, tsc->adc_regs + REG_ADC_HC4);
 }
 
 /*
@@ -192,20 +192,20 @@ static void imx6ul_tsc_set(struct imx6ul_tsc *tsc)
 
 	basic_setting |= tsc->measure_delay_time << 8;
 	basic_setting |= DETECT_4_WIRE_MODE | AUTO_MEASURE;
-	writel(basic_setting, tsc->tsc_regs + REG_TSC_BASIC_SETING);
+	pete_writel("drivers/input/touchscreen/imx6ul_tsc.c:195", basic_setting, tsc->tsc_regs + REG_TSC_BASIC_SETING);
 
-	writel(DE_GLITCH_2, tsc->tsc_regs + REG_TSC_DEBUG_MODE2);
+	pete_writel("drivers/input/touchscreen/imx6ul_tsc.c:197", DE_GLITCH_2, tsc->tsc_regs + REG_TSC_DEBUG_MODE2);
 
-	writel(tsc->pre_charge_time, tsc->tsc_regs + REG_TSC_PRE_CHARGE_TIME);
-	writel(MEASURE_INT_EN, tsc->tsc_regs + REG_TSC_INT_EN);
-	writel(MEASURE_SIG_EN | VALID_SIG_EN,
+	pete_writel("drivers/input/touchscreen/imx6ul_tsc.c:199", tsc->pre_charge_time, tsc->tsc_regs + REG_TSC_PRE_CHARGE_TIME);
+	pete_writel("drivers/input/touchscreen/imx6ul_tsc.c:200", MEASURE_INT_EN, tsc->tsc_regs + REG_TSC_INT_EN);
+	pete_writel("drivers/input/touchscreen/imx6ul_tsc.c:201", MEASURE_SIG_EN | VALID_SIG_EN,
 		tsc->tsc_regs + REG_TSC_INT_SIG_EN);
 
 	/* start sense detection */
-	start = readl(tsc->tsc_regs + REG_TSC_FLOW_CONTROL);
+	start = pete_readl("drivers/input/touchscreen/imx6ul_tsc.c:205", tsc->tsc_regs + REG_TSC_FLOW_CONTROL);
 	start |= START_SENSE;
 	start &= ~TSC_DISABLE;
-	writel(start, tsc->tsc_regs + REG_TSC_FLOW_CONTROL);
+	pete_writel("drivers/input/touchscreen/imx6ul_tsc.c:208", start, tsc->tsc_regs + REG_TSC_FLOW_CONTROL);
 }
 
 static int imx6ul_tsc_init(struct imx6ul_tsc *tsc)
@@ -227,14 +227,14 @@ static void imx6ul_tsc_disable(struct imx6ul_tsc *tsc)
 	u32 adc_cfg;
 
 	/* TSC controller enters to idle status */
-	tsc_flow = readl(tsc->tsc_regs + REG_TSC_FLOW_CONTROL);
+	tsc_flow = pete_readl("drivers/input/touchscreen/imx6ul_tsc.c:230", tsc->tsc_regs + REG_TSC_FLOW_CONTROL);
 	tsc_flow |= TSC_DISABLE;
-	writel(tsc_flow, tsc->tsc_regs + REG_TSC_FLOW_CONTROL);
+	pete_writel("drivers/input/touchscreen/imx6ul_tsc.c:232", tsc_flow, tsc->tsc_regs + REG_TSC_FLOW_CONTROL);
 
 	/* ADC controller enters to stop mode */
-	adc_cfg = readl(tsc->adc_regs + REG_ADC_HC0);
+	adc_cfg = pete_readl("drivers/input/touchscreen/imx6ul_tsc.c:235", tsc->adc_regs + REG_ADC_HC0);
 	adc_cfg |= ADC_CONV_DISABLE;
-	writel(adc_cfg, tsc->adc_regs + REG_ADC_HC0);
+	pete_writel("drivers/input/touchscreen/imx6ul_tsc.c:237", adc_cfg, tsc->adc_regs + REG_ADC_HC0);
 }
 
 /* Delay some time (max 2ms), wait the pre-charge done. */
@@ -249,7 +249,7 @@ static bool tsc_wait_detect_mode(struct imx6ul_tsc *tsc)
 			return false;
 
 		usleep_range(200, 400);
-		debug_mode2 = readl(tsc->tsc_regs + REG_TSC_DEBUG_MODE2);
+		debug_mode2 = pete_readl("drivers/input/touchscreen/imx6ul_tsc.c:252", tsc->tsc_regs + REG_TSC_DEBUG_MODE2);
 		state_machine = (debug_mode2 >> 20) & 0x7;
 	} while (state_machine != DETECT_MODE);
 
@@ -265,19 +265,19 @@ static irqreturn_t tsc_irq_fn(int irq, void *dev_id)
 	u32 x, y;
 	u32 start;
 
-	status = readl(tsc->tsc_regs + REG_TSC_INT_STATUS);
+	status = pete_readl("drivers/input/touchscreen/imx6ul_tsc.c:268", tsc->tsc_regs + REG_TSC_INT_STATUS);
 
 	/* write 1 to clear the bit measure-signal */
-	writel(MEASURE_SIGNAL | DETECT_SIGNAL,
+	pete_writel("drivers/input/touchscreen/imx6ul_tsc.c:271", MEASURE_SIGNAL | DETECT_SIGNAL,
 		tsc->tsc_regs + REG_TSC_INT_STATUS);
 
 	/* It's a HW self-clean bit. Set this bit and start sense detection */
-	start = readl(tsc->tsc_regs + REG_TSC_FLOW_CONTROL);
+	start = pete_readl("drivers/input/touchscreen/imx6ul_tsc.c:275", tsc->tsc_regs + REG_TSC_FLOW_CONTROL);
 	start |= START_SENSE;
-	writel(start, tsc->tsc_regs + REG_TSC_FLOW_CONTROL);
+	pete_writel("drivers/input/touchscreen/imx6ul_tsc.c:277", start, tsc->tsc_regs + REG_TSC_FLOW_CONTROL);
 
 	if (status & MEASURE_SIGNAL) {
-		value = readl(tsc->tsc_regs + REG_TSC_MEASURE_VALUE);
+		value = pete_readl("drivers/input/touchscreen/imx6ul_tsc.c:280", tsc->tsc_regs + REG_TSC_MEASURE_VALUE);
 		x = (value >> 16) & 0x0fff;
 		y = value & 0x0fff;
 
@@ -305,9 +305,9 @@ static irqreturn_t adc_irq_fn(int irq, void *dev_id)
 	struct imx6ul_tsc *tsc = dev_id;
 	u32 coco;
 
-	coco = readl(tsc->adc_regs + REG_ADC_HS);
+	coco = pete_readl("drivers/input/touchscreen/imx6ul_tsc.c:308", tsc->adc_regs + REG_ADC_HS);
 	if (coco & 0x01) {
-		readl(tsc->adc_regs + REG_ADC_R0);
+		pete_readl("drivers/input/touchscreen/imx6ul_tsc.c:310", tsc->adc_regs + REG_ADC_R0);
 		complete(&tsc->completion);
 	}
 

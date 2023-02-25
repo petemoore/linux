@@ -25,14 +25,14 @@ static void *uartbase;
 #if defined(CONFIG_SERIAL_ALTERA_JTAGUART_CONSOLE_BYPASS)
 static void jtag_putc(int ch)
 {
-	if (readl(uartbase + ALTERA_JTAGUART_CONTROL_REG) &
+	if (pete_readl("arch/nios2/boot/compressed/console.c:28", uartbase + ALTERA_JTAGUART_CONTROL_REG) &
 		ALTERA_JTAGUART_CONTROL_WSPACE_MSK)
 		writeb(ch, uartbase + ALTERA_JTAGUART_DATA_REG);
 }
 #else
 static void jtag_putc(int ch)
 {
-	while ((readl(uartbase + ALTERA_JTAGUART_CONTROL_REG) &
+	while ((pete_readl("arch/nios2/boot/compressed/console.c:35", uartbase + ALTERA_JTAGUART_CONTROL_REG) &
 		ALTERA_JTAGUART_CONTROL_WSPACE_MSK) == 0)
 		;
 	writeb(ch, uartbase + ALTERA_JTAGUART_DATA_REG);
@@ -48,7 +48,7 @@ static int putchar(int ch)
 static void console_init(void)
 {
 	uartbase = my_ioremap((unsigned long) JTAG_UART_BASE);
-	writel(ALTERA_JTAGUART_CONTROL_AC_MSK,
+	pete_writel("arch/nios2/boot/compressed/console.c:51", ALTERA_JTAGUART_CONTROL_AC_MSK,
 		uartbase + ALTERA_JTAGUART_CONTROL_REG);
 }
 

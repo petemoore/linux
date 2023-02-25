@@ -931,7 +931,7 @@ static void qedi_ring_doorbell(struct qedi_conn *qedi_conn)
 
 	/* wmb - Make sure fw idx is coherent */
 	wmb();
-	writel(*(u32 *)&qedi_conn->ep->db_data, qedi_conn->ep->p_doorbell);
+	pete_writel("drivers/scsi/qedi/qedi_fw.c:934", *(u32 *)&qedi_conn->ep->db_data, qedi_conn->ep->p_doorbell);
 
 	/* Make sure fw write idx is coherent, and include both memory barriers
 	 * as a failsafe as for some architectures the call is the same but on

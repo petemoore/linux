@@ -395,7 +395,7 @@ static int vmd_pci_read(struct pci_bus *bus, unsigned int devfn, int reg,
 		*value = readw(addr);
 		break;
 	case 4:
-		*value = readl(addr);
+		*value = pete_readl("drivers/pci/controller/vmd.c:398", addr);
 		break;
 	default:
 		ret = -EINVAL;
@@ -432,8 +432,8 @@ static int vmd_pci_write(struct pci_bus *bus, unsigned int devfn, int reg,
 		readw(addr);
 		break;
 	case 4:
-		writel(value, addr);
-		readl(addr);
+		pete_writel("drivers/pci/controller/vmd.c:435", value, addr);
+		pete_readl("drivers/pci/controller/vmd.c:436", addr);
 		break;
 	default:
 		ret = -EINVAL;

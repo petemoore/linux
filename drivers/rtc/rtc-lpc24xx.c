@@ -56,8 +56,8 @@
 #define CT1_YEAR(x)		(((x) >> 16) & 0xfff)
 #define CT2_DOY(x)		(((x) >> 0)  & 0xfff)
 
-#define rtc_readl(dev, reg)		readl((dev)->rtc_base + (reg))
-#define rtc_writel(dev, reg, val)	writel((val), (dev)->rtc_base + (reg))
+#define rtc_readl(dev, reg)		pete_readl("drivers/rtc/rtc-lpc24xx.c:59", (dev)->rtc_base + (reg))
+#define rtc_writel(dev, reg, val)	pete_writel("drivers/rtc/rtc-lpc24xx.c:60", (val), (dev)->rtc_base + (reg))
 
 struct lpc24xx_rtc {
 	void __iomem *rtc_base;

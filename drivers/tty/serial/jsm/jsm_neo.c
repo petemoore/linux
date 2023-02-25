@@ -1115,7 +1115,7 @@ static irqreturn_t neo_intr(int irq, void *voidbrd)
 	 * Bits 0-7: What port triggered the interrupt.
 	 * Bits 8-31: Each 3bits indicate what type of interrupt occurred.
 	 */
-	uart_poll = readl(brd->re_map_membase + UART_17158_POLL_ADDR_OFFSET);
+	uart_poll = pete_readl("drivers/tty/serial/jsm/jsm_neo.c:1118", brd->re_map_membase + UART_17158_POLL_ADDR_OFFSET);
 
 	jsm_dbg(INTR, &brd->pci_dev, "%s:%d uart_poll: %x\n",
 		__FILE__, __LINE__, uart_poll);

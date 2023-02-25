@@ -64,8 +64,8 @@ void __init zynq_pm_late_init(void)
 		 * entering/exiting the correct mode depending
 		 * on activity state.
 		 */
-		reg = readl(ddrc_base + DDRC_DRAM_PARAM_REG3_OFFS);
+		reg = pete_readl("arch/arm/mach-zynq/pm.c:67", ddrc_base + DDRC_DRAM_PARAM_REG3_OFFS);
 		reg |= DDRC_CLOCKSTOP_MASK;
-		writel(reg, ddrc_base + DDRC_DRAM_PARAM_REG3_OFFS);
+		pete_writel("arch/arm/mach-zynq/pm.c:69", reg, ddrc_base + DDRC_DRAM_PARAM_REG3_OFFS);
 	}
 }

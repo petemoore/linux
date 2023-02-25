@@ -659,7 +659,7 @@ static int bcm_to_v_msg_enqueue(struct bcm_vk *vk, struct bcm_vk_wkent *entry)
 	}
 
 	/* flush the write pointer */
-	writel(wr_idx, &msgq->wr_idx);
+	pete_writel("drivers/misc/bcm-vk/bcm_vk_msg.c:662", wr_idx, &msgq->wr_idx);
 
 	/* log new info for debugging */
 	dev_dbg(dev,
@@ -858,7 +858,7 @@ s32 bcm_to_h_msg_dequeue(struct bcm_vk *vk)
 			}
 
 			/* flush rd pointer after a message is dequeued */
-			writel(rd_idx, &msgq->rd_idx);
+			pete_writel("drivers/misc/bcm-vk/bcm_vk_msg.c:861", rd_idx, &msgq->rd_idx);
 
 			/* log new info for debugging */
 			dev_dbg(dev,
@@ -908,7 +908,7 @@ s32 bcm_to_h_msg_dequeue(struct bcm_vk *vk)
 				kfree(data);
 			}
 			/* Fetch wr_idx to handle more back-to-back events */
-			wr_idx = readl(&msgq->wr_idx);
+			wr_idx = pete_readl("drivers/misc/bcm-vk/bcm_vk_msg.c:911", &msgq->wr_idx);
 
 			/*
 			 * cap the max so that even we try to handle more back-to-back events,

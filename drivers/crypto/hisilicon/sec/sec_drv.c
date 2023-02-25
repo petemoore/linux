@@ -687,8 +687,8 @@ static irqreturn_t sec_isr_handle(int irq, void *q)
 	void __iomem *base = queue->regs;
 	int q_id;
 
-	ooo_read = readl(base + SEC_Q_OUTORDER_RD_PTR_REG);
-	ooo_write = readl(base + SEC_Q_OUTORDER_WR_PTR_REG);
+	ooo_read = pete_readl("drivers/crypto/hisilicon/sec/sec_drv.c:690", base + SEC_Q_OUTORDER_RD_PTR_REG);
+	ooo_write = pete_readl("drivers/crypto/hisilicon/sec/sec_drv.c:691", base + SEC_Q_OUTORDER_WR_PTR_REG);
 	outorder_msg = cq_ring->vaddr + ooo_read;
 	q_id = outorder_msg->data & SEC_OUT_BD_INFO_Q_ID_M;
 	msg = msg_ring->vaddr + q_id;
@@ -713,8 +713,8 @@ static irqreturn_t sec_isr_handle(int irq, void *q)
 			}
 
 		ooo_read = (ooo_read + 1) % SEC_QUEUE_LEN;
-		writel(ooo_read, base + SEC_Q_OUTORDER_RD_PTR_REG);
-		ooo_write = readl(base + SEC_Q_OUTORDER_WR_PTR_REG);
+		pete_writel("drivers/crypto/hisilicon/sec/sec_drv.c:716", ooo_read, base + SEC_Q_OUTORDER_RD_PTR_REG);
+		ooo_write = pete_readl("drivers/crypto/hisilicon/sec/sec_drv.c:717", base + SEC_Q_OUTORDER_WR_PTR_REG);
 		outorder_msg = cq_ring->vaddr + ooo_read;
 		q_id = outorder_msg->data & SEC_OUT_BD_INFO_Q_ID_M;
 		msg = msg_ring->vaddr + q_id;
@@ -862,8 +862,8 @@ int sec_queue_send(struct sec_queue *queue, struct sec_bd_info *msg, void *ctx)
 	u32 write, read;
 
 	mutex_lock(&msg_ring->lock);
-	read = readl(base + SEC_Q_RD_PTR_REG);
-	write = readl(base + SEC_Q_WR_PTR_REG);
+	read = pete_readl("drivers/crypto/hisilicon/sec/sec_drv.c:865", base + SEC_Q_RD_PTR_REG);
+	write = pete_readl("drivers/crypto/hisilicon/sec/sec_drv.c:866", base + SEC_Q_WR_PTR_REG);
 	if (write == read && atomic_read(&msg_ring->used) == SEC_QUEUE_LEN) {
 		mutex_unlock(&msg_ring->lock);
 		return -EAGAIN;
@@ -874,7 +874,7 @@ int sec_queue_send(struct sec_queue *queue, struct sec_bd_info *msg, void *ctx)
 
 	/* Ensure content updated before queue advance */
 	wmb();
-	writel(write, base + SEC_Q_WR_PTR_REG);
+	pete_writel("drivers/crypto/hisilicon/sec/sec_drv.c:877", write, base + SEC_Q_WR_PTR_REG);
 
 	atomic_inc(&msg_ring->used);
 	mutex_unlock(&msg_ring->lock);

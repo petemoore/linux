@@ -73,7 +73,7 @@ static void dw_spi_mscc_set_cs(struct spi_device *spi, bool enable)
 		if (!enable)
 			sw_mode |= MSCC_SPI_MST_SW_MODE_SW_SPI_CS(BIT(cs));
 
-		writel(sw_mode, dwsmscc->spi_mst + MSCC_SPI_MST_SW_MODE);
+		pete_writel("drivers/spi/spi-dw-mmio.c:76", sw_mode, dwsmscc->spi_mst + MSCC_SPI_MST_SW_MODE);
 	}
 
 	dw_spi_set_cs(spi, enable);
@@ -100,7 +100,7 @@ static int dw_spi_mscc_init(struct platform_device *pdev,
 		return PTR_ERR(dwsmscc->syscon);
 
 	/* Deassert all CS */
-	writel(0, dwsmscc->spi_mst + MSCC_SPI_MST_SW_MODE);
+	pete_writel("drivers/spi/spi-dw-mmio.c:103", 0, dwsmscc->spi_mst + MSCC_SPI_MST_SW_MODE);
 
 	/* Select the owner of the SI interface */
 	regmap_update_bits(dwsmscc->syscon, MSCC_CPU_SYSTEM_CTRL_GENERAL_CTRL,

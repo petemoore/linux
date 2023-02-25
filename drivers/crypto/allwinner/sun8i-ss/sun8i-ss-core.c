@@ -103,16 +103,16 @@ int sun8i_ss_run_task(struct sun8i_ss_dev *ss, struct sun8i_cipher_req_ctx *rctx
 			break;
 
 		mutex_lock(&ss->mlock);
-		writel(rctx->p_key, ss->base + SS_KEY_ADR_REG);
+		pete_writel("drivers/crypto/allwinner/sun8i-ss/sun8i-ss-core.c:106", rctx->p_key, ss->base + SS_KEY_ADR_REG);
 
 		if (ivlen) {
 			if (rctx->op_dir == SS_ENCRYPTION) {
 				if (i == 0)
-					writel(rctx->p_iv[0], ss->base + SS_IV_ADR_REG);
+					pete_writel("drivers/crypto/allwinner/sun8i-ss/sun8i-ss-core.c:111", rctx->p_iv[0], ss->base + SS_IV_ADR_REG);
 				else
-					writel(rctx->t_dst[i - 1].addr + rctx->t_dst[i - 1].len * 4 - ivlen, ss->base + SS_IV_ADR_REG);
+					pete_writel("drivers/crypto/allwinner/sun8i-ss/sun8i-ss-core.c:113", rctx->t_dst[i - 1].addr + rctx->t_dst[i - 1].len * 4 - ivlen, ss->base + SS_IV_ADR_REG);
 			} else {
-				writel(rctx->p_iv[i], ss->base + SS_IV_ADR_REG);
+				pete_writel("drivers/crypto/allwinner/sun8i-ss/sun8i-ss-core.c:115", rctx->p_iv[i], ss->base + SS_IV_ADR_REG);
 			}
 		}
 
@@ -123,15 +123,15 @@ int sun8i_ss_run_task(struct sun8i_ss_dev *ss, struct sun8i_cipher_req_ctx *rctx
 			rctx->method, rctx->op_mode,
 			rctx->op_dir, rctx->t_src[i].len);
 
-		writel(rctx->t_src[i].addr, ss->base + SS_SRC_ADR_REG);
-		writel(rctx->t_dst[i].addr, ss->base + SS_DST_ADR_REG);
-		writel(rctx->t_src[i].len, ss->base + SS_LEN_ADR_REG);
+		pete_writel("drivers/crypto/allwinner/sun8i-ss/sun8i-ss-core.c:126", rctx->t_src[i].addr, ss->base + SS_SRC_ADR_REG);
+		pete_writel("drivers/crypto/allwinner/sun8i-ss/sun8i-ss-core.c:127", rctx->t_dst[i].addr, ss->base + SS_DST_ADR_REG);
+		pete_writel("drivers/crypto/allwinner/sun8i-ss/sun8i-ss-core.c:128", rctx->t_src[i].len, ss->base + SS_LEN_ADR_REG);
 
 		reinit_completion(&ss->flows[flow].complete);
 		ss->flows[flow].status = 0;
 		wmb();
 
-		writel(v, ss->base + SS_CTL_REG);
+		pete_writel("drivers/crypto/allwinner/sun8i-ss/sun8i-ss-core.c:134", v, ss->base + SS_CTL_REG);
 		mutex_unlock(&ss->mlock);
 		wait_for_completion_interruptible_timeout(&ss->flows[flow].complete,
 							  msecs_to_jiffies(2000));
@@ -150,10 +150,10 @@ static irqreturn_t ss_irq_handler(int irq, void *data)
 	int flow = 0;
 	u32 p;
 
-	p = readl(ss->base + SS_INT_STA_REG);
+	p = pete_readl("drivers/crypto/allwinner/sun8i-ss/sun8i-ss-core.c:153", ss->base + SS_INT_STA_REG);
 	for (flow = 0; flow < MAXFLOW; flow++) {
 		if (p & (BIT(flow))) {
-			writel(BIT(flow), ss->base + SS_INT_STA_REG);
+			pete_writel("drivers/crypto/allwinner/sun8i-ss/sun8i-ss-core.c:156", BIT(flow), ss->base + SS_INT_STA_REG);
 			ss->flows[flow].status = 1;
 			complete(&ss->flows[flow].complete);
 		}
@@ -559,7 +559,7 @@ static int sun8i_ss_pm_resume(struct device *dev)
 		goto error;
 	}
 	/* enable interrupts for all flows */
-	writel(BIT(0) | BIT(1), ss->base + SS_INT_CTL_REG);
+	pete_writel("drivers/crypto/allwinner/sun8i-ss/sun8i-ss-core.c:562", BIT(0) | BIT(1), ss->base + SS_INT_CTL_REG);
 
 	return 0;
 error:
@@ -789,7 +789,7 @@ static int sun8i_ss_probe(struct platform_device *pdev)
 	if (err < 0)
 		goto error_alg;
 
-	v = readl(ss->base + SS_CTL_REG);
+	v = pete_readl("drivers/crypto/allwinner/sun8i-ss/sun8i-ss-core.c:792", ss->base + SS_CTL_REG);
 	v >>= SS_DIE_ID_SHIFT;
 	v &= SS_DIE_ID_MASK;
 	dev_info(&pdev->dev, "Security System Die ID %x\n", v);

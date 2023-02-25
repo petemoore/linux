@@ -523,13 +523,13 @@ static void adm_start_dma(struct adm_chan *achan)
 
 	if (!achan->initialized) {
 		/* enable interrupts */
-		writel(ADM_CH_CONF_SHADOW_EN |
+		pete_writel("drivers/dma/qcom/qcom_adm.c:526", ADM_CH_CONF_SHADOW_EN |
 		       ADM_CH_CONF_PERM_MPU_CONF |
 		       ADM_CH_CONF_MPU_DISABLE |
 		       ADM_CH_CONF_SEC_DOMAIN(adev->ee),
 		       adev->regs + ADM_CH_CONF(achan->id));
 
-		writel(ADM_CH_RSLT_CONF_IRQ_EN | ADM_CH_RSLT_CONF_FLUSH_EN,
+		pete_writel("drivers/dma/qcom/qcom_adm.c:532", ADM_CH_RSLT_CONF_IRQ_EN | ADM_CH_RSLT_CONF_FLUSH_EN,
 		       adev->regs + ADM_CH_RSLT_CONF(achan->id, adev->ee));
 
 		achan->initialized = 1;
@@ -537,7 +537,7 @@ static void adm_start_dma(struct adm_chan *achan)
 
 	/* set the crci block size if this transaction requires CRCI */
 	if (async_desc->crci) {
-		writel(async_desc->mux | async_desc->blk_size,
+		pete_writel("drivers/dma/qcom/qcom_adm.c:540", async_desc->mux | async_desc->blk_size,
 		       adev->regs + ADM_CRCI_CTL(async_desc->crci, adev->ee));
 	}
 
@@ -545,7 +545,7 @@ static void adm_start_dma(struct adm_chan *achan)
 	wmb();
 
 	/* write next command list out to the CMD FIFO */
-	writel(ALIGN(async_desc->dma_addr, ADM_DESC_ALIGN) >> 3,
+	pete_writel("drivers/dma/qcom/qcom_adm.c:548", ALIGN(async_desc->dma_addr, ADM_DESC_ALIGN) >> 3,
 	       adev->regs + ADM_CH_CMD_PTR(achan->id, adev->ee));
 }
 
@@ -792,17 +792,17 @@ static int adm_dma_probe(struct platform_device *pdev)
 
 	/* reset CRCIs */
 	for (i = 0; i < 16; i++)
-		writel(ADM_CRCI_CTL_RST, adev->regs +
+		pete_writel("drivers/dma/qcom/qcom_adm.c:795", ADM_CRCI_CTL_RST, adev->regs +
 			ADM_CRCI_CTL(i, adev->ee));
 
 	/* configure client interfaces */
-	writel(ADM_CI_RANGE_START(0x40) | ADM_CI_RANGE_END(0xb0) |
+	pete_writel("drivers/dma/qcom/qcom_adm.c:799", ADM_CI_RANGE_START(0x40) | ADM_CI_RANGE_END(0xb0) |
 	       ADM_CI_BURST_8_WORDS, adev->regs + ADM_CI_CONF(0));
-	writel(ADM_CI_RANGE_START(0x2a) | ADM_CI_RANGE_END(0x2c) |
+	pete_writel("drivers/dma/qcom/qcom_adm.c:801", ADM_CI_RANGE_START(0x2a) | ADM_CI_RANGE_END(0x2c) |
 	       ADM_CI_BURST_8_WORDS, adev->regs + ADM_CI_CONF(1));
-	writel(ADM_CI_RANGE_START(0x12) | ADM_CI_RANGE_END(0x28) |
+	pete_writel("drivers/dma/qcom/qcom_adm.c:803", ADM_CI_RANGE_START(0x12) | ADM_CI_RANGE_END(0x28) |
 	       ADM_CI_BURST_8_WORDS, adev->regs + ADM_CI_CONF(2));
-	writel(ADM_GP_CTL_LP_EN | ADM_GP_CTL_LP_CNT(0xf),
+	pete_writel("drivers/dma/qcom/qcom_adm.c:805", ADM_GP_CTL_LP_EN | ADM_GP_CTL_LP_CNT(0xf),
 	       adev->regs + ADM_GP_CTL);
 
 	ret = devm_request_irq(adev->dev, adev->irq, adm_dma_irq,
@@ -869,7 +869,7 @@ static int adm_dma_remove(struct platform_device *pdev)
 		achan = &adev->channels[i];
 
 		/* mask IRQs for this channel/EE pair */
-		writel(0, adev->regs + ADM_CH_RSLT_CONF(achan->id, adev->ee));
+		pete_writel("drivers/dma/qcom/qcom_adm.c:872", 0, adev->regs + ADM_CH_RSLT_CONF(achan->id, adev->ee));
 
 		tasklet_kill(&adev->channels[i].vc.task);
 		adm_terminate_all(&adev->channels[i].vc.chan);

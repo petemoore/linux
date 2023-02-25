@@ -111,13 +111,13 @@ static inline void nsp_set_bit(struct nsp_gpio *chip, enum base_type address,
 	else
 		base_address = chip->base;
 
-	val = readl(base_address + reg);
+	val = pete_readl("drivers/pinctrl/bcm/pinctrl-nsp-gpio.c:114", base_address + reg);
 	if (set)
 		val |= BIT(gpio);
 	else
 		val &= ~BIT(gpio);
 
-	writel(val, base_address + reg);
+	pete_writel("drivers/pinctrl/bcm/pinctrl-nsp-gpio.c:120", val, base_address + reg);
 }
 
 /*
@@ -128,9 +128,9 @@ static inline bool nsp_get_bit(struct nsp_gpio *chip, enum base_type address,
 			       unsigned int reg, unsigned gpio)
 {
 	if (address == IO_CTRL)
-		return !!(readl(chip->io_ctrl + reg) & BIT(gpio));
+		return !!(pete_readl("drivers/pinctrl/bcm/pinctrl-nsp-gpio.c:131", chip->io_ctrl + reg) & BIT(gpio));
 	else
-		return !!(readl(chip->base + reg) & BIT(gpio));
+		return !!(pete_readl("drivers/pinctrl/bcm/pinctrl-nsp-gpio.c:133", chip->base + reg) & BIT(gpio));
 }
 
 static irqreturn_t nsp_gpio_irq_handler(int irq, void *data)
@@ -142,16 +142,16 @@ static irqreturn_t nsp_gpio_irq_handler(int irq, void *data)
 	u32 int_status;
 
 	/* go through the entire GPIOs and handle all interrupts */
-	int_status = readl(chip->base + NSP_CHIP_A_INT_STATUS);
+	int_status = pete_readl("drivers/pinctrl/bcm/pinctrl-nsp-gpio.c:145", chip->base + NSP_CHIP_A_INT_STATUS);
 	if (int_status & NSP_CHIP_A_GPIO_INT_BIT) {
 		unsigned int event, level;
 
 		/* Get level and edge interrupts */
-		event = readl(chip->base + NSP_GPIO_EVENT_INT_MASK) &
-			      readl(chip->base + NSP_GPIO_EVENT);
-		level = readl(chip->base + NSP_GPIO_DATA_IN) ^
-			      readl(chip->base + NSP_GPIO_INT_POLARITY);
-		level &= readl(chip->base + NSP_GPIO_INT_MASK);
+		event = pete_readl("drivers/pinctrl/bcm/pinctrl-nsp-gpio.c:150", chip->base + NSP_GPIO_EVENT_INT_MASK) &
+			      pete_readl("drivers/pinctrl/bcm/pinctrl-nsp-gpio.c:151", chip->base + NSP_GPIO_EVENT);
+		level = pete_readl("drivers/pinctrl/bcm/pinctrl-nsp-gpio.c:152", chip->base + NSP_GPIO_DATA_IN) ^
+			      pete_readl("drivers/pinctrl/bcm/pinctrl-nsp-gpio.c:153", chip->base + NSP_GPIO_INT_POLARITY);
+		level &= pete_readl("drivers/pinctrl/bcm/pinctrl-nsp-gpio.c:154", chip->base + NSP_GPIO_INT_MASK);
 		int_bits = level | event;
 
 		for_each_set_bit(bit, &int_bits, gc->ngpio)
@@ -171,7 +171,7 @@ static void nsp_gpio_irq_ack(struct irq_data *d)
 
 	trigger_type = irq_get_trigger_type(d->irq);
 	if (trigger_type & (IRQ_TYPE_EDGE_FALLING | IRQ_TYPE_EDGE_RISING))
-		writel(val, chip->base + NSP_GPIO_EVENT);
+		pete_writel("drivers/pinctrl/bcm/pinctrl-nsp-gpio.c:174", val, chip->base + NSP_GPIO_EVENT);
 }
 
 /*
@@ -325,7 +325,7 @@ static int nsp_gpio_get(struct gpio_chip *gc, unsigned gpio)
 {
 	struct nsp_gpio *chip = gpiochip_get_data(gc);
 
-	return !!(readl(chip->base + NSP_GPIO_DATA_IN) & BIT(gpio));
+	return !!(pete_readl("drivers/pinctrl/bcm/pinctrl-nsp-gpio.c:328", chip->base + NSP_GPIO_DATA_IN) & BIT(gpio));
 }
 
 static int nsp_get_groups_count(struct pinctrl_dev *pctldev)
@@ -404,10 +404,10 @@ static int nsp_gpio_set_strength(struct nsp_gpio *chip, unsigned gpio,
 	raw_spin_lock_irqsave(&chip->lock, flags);
 	strength = (strength / 2) - 1;
 	for (i = GPIO_DRV_STRENGTH_BITS; i > 0; i--) {
-		val = readl(chip->io_ctrl + offset);
+		val = pete_readl("drivers/pinctrl/bcm/pinctrl-nsp-gpio.c:407", chip->io_ctrl + offset);
 		val &= ~BIT(shift);
 		val |= ((strength >> (i-1)) & 0x1) << shift;
-		writel(val, chip->io_ctrl + offset);
+		pete_writel("drivers/pinctrl/bcm/pinctrl-nsp-gpio.c:410", val, chip->io_ctrl + offset);
 		offset += 4;
 	}
 	raw_spin_unlock_irqrestore(&chip->lock, flags);
@@ -429,7 +429,7 @@ static int nsp_gpio_get_strength(struct nsp_gpio *chip, unsigned gpio,
 	raw_spin_lock_irqsave(&chip->lock, flags);
 	*strength = 0;
 	for (i = (GPIO_DRV_STRENGTH_BITS - 1); i >= 0; i--) {
-		val = readl(chip->io_ctrl + offset) & BIT(shift);
+		val = pete_readl("drivers/pinctrl/bcm/pinctrl-nsp-gpio.c:432", chip->io_ctrl + offset) & BIT(shift);
 		val >>= shift;
 		*strength += (val << i);
 		offset += 4;
@@ -670,9 +670,9 @@ static int nsp_gpio_probe(struct platform_device *pdev)
 		irqc->irq_unmask = nsp_gpio_irq_unmask;
 		irqc->irq_set_type = nsp_gpio_irq_set_type;
 
-		val = readl(chip->base + NSP_CHIP_A_INT_MASK);
+		val = pete_readl("drivers/pinctrl/bcm/pinctrl-nsp-gpio.c:673", chip->base + NSP_CHIP_A_INT_MASK);
 		val = val | NSP_CHIP_A_GPIO_INT_BIT;
-		writel(val, (chip->base + NSP_CHIP_A_INT_MASK));
+		pete_writel("drivers/pinctrl/bcm/pinctrl-nsp-gpio.c:675", val, (chip->base + NSP_CHIP_A_INT_MASK));
 
 		/* Install ISR for this GPIO controller. */
 		ret = devm_request_irq(dev, irq, nsp_gpio_irq_handler,

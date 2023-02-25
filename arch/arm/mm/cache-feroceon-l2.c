@@ -380,9 +380,9 @@ int __init feroceon_of_init(void)
 			return -ENOMEM;
 
 		if (l2_wt_override)
-			writel(readl(base) | L2_WRITETHROUGH_KIRKWOOD, base);
+			pete_writel("arch/arm/mm/cache-feroceon-l2.c:383", pete_readl("arch/arm/mm/cache-feroceon-l2.c:383", base) | L2_WRITETHROUGH_KIRKWOOD, base);
 		else
-			writel(readl(base) & ~L2_WRITETHROUGH_KIRKWOOD, base);
+			pete_writel("arch/arm/mm/cache-feroceon-l2.c:385", pete_readl("arch/arm/mm/cache-feroceon-l2.c:385", base) & ~L2_WRITETHROUGH_KIRKWOOD, base);
 	}
 
 	feroceon_l2_init(l2_wt_override);

@@ -284,7 +284,7 @@ void lio_cn6xxx_setup_iq_regs(struct octeon_device *oct, u32 iq_no)
 	/* Store the current instruction counter
 	 * (used in flush_iq calculation)
 	 */
-	iq->reset_instr_cnt = readl(iq->inst_cnt_reg);
+	iq->reset_instr_cnt = pete_readl("drivers/net/ethernet/cavium/liquidio/cn66xx_device.c:287", iq->inst_cnt_reg);
 }
 
 static void lio_cn66xx_setup_iq_regs(struct octeon_device *oct, u32 iq_no)
@@ -448,7 +448,7 @@ u32 lio_cn6xxx_bar1_idx_read(struct octeon_device *oct, u32 idx)
 u32
 lio_cn6xxx_update_read_index(struct octeon_instr_queue *iq)
 {
-	u32 new_idx = readl(iq->inst_cnt_reg);
+	u32 new_idx = pete_readl("drivers/net/ethernet/cavium/liquidio/cn66xx_device.c:451", iq->inst_cnt_reg);
 
 	/* The new instr cnt reg is a 32-bit counter that can roll over. We have
 	 * noted the counter's initial value at init time into

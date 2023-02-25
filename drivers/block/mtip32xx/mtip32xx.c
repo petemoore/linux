@@ -181,10 +181,10 @@ static int mtip_hba_reset(struct driver_data *dd)
 	unsigned long timeout;
 
 	/* Set the reset bit */
-	writel(HOST_RESET, dd->mmio + HOST_CTL);
+	pete_writel("drivers/block/mtip32xx/mtip32xx.c:184", HOST_RESET, dd->mmio + HOST_CTL);
 
 	/* Flush */
-	readl(dd->mmio + HOST_CTL);
+	pete_readl("drivers/block/mtip32xx/mtip32xx.c:187", dd->mmio + HOST_CTL);
 
 	/*
 	 * Spin for up to 10 seconds waiting for reset acknowledgement. Spec
@@ -196,10 +196,10 @@ static int mtip_hba_reset(struct driver_data *dd)
 		if (test_bit(MTIP_DDF_REMOVE_PENDING_BIT, &dd->dd_flag))
 			return -1;
 
-	} while ((readl(dd->mmio + HOST_CTL) & HOST_RESET)
+	} while ((pete_readl("drivers/block/mtip32xx/mtip32xx.c:199", dd->mmio + HOST_CTL) & HOST_RESET)
 		 && time_before(jiffies, timeout));
 
-	if (readl(dd->mmio + HOST_CTL) & HOST_RESET)
+	if (pete_readl("drivers/block/mtip32xx/mtip32xx.c:202", dd->mmio + HOST_CTL) & HOST_RESET)
 		return -1;
 
 	return 0;
@@ -223,9 +223,9 @@ static inline void mtip_issue_ncq_command(struct mtip_port *port, int tag)
 
 	/* guard SACT and CI registers */
 	spin_lock(&port->cmd_issue_lock[group]);
-	writel((1 << MTIP_TAG_BIT(tag)),
+	pete_writel("drivers/block/mtip32xx/mtip32xx.c:226", (1 << MTIP_TAG_BIT(tag)),
 			port->s_active[MTIP_TAG_INDEX(tag)]);
-	writel((1 << MTIP_TAG_BIT(tag)),
+	pete_writel("drivers/block/mtip32xx/mtip32xx.c:228", (1 << MTIP_TAG_BIT(tag)),
 			port->cmd_issue[MTIP_TAG_INDEX(tag)]);
 	spin_unlock(&port->cmd_issue_lock[group]);
 }
@@ -244,14 +244,14 @@ static int mtip_enable_fis(struct mtip_port *port, int enable)
 	u32 tmp;
 
 	/* enable FIS reception */
-	tmp = readl(port->mmio + PORT_CMD);
+	tmp = pete_readl("drivers/block/mtip32xx/mtip32xx.c:247", port->mmio + PORT_CMD);
 	if (enable)
-		writel(tmp | PORT_CMD_FIS_RX, port->mmio + PORT_CMD);
+		pete_writel("drivers/block/mtip32xx/mtip32xx.c:249", tmp | PORT_CMD_FIS_RX, port->mmio + PORT_CMD);
 	else
-		writel(tmp & ~PORT_CMD_FIS_RX, port->mmio + PORT_CMD);
+		pete_writel("drivers/block/mtip32xx/mtip32xx.c:251", tmp & ~PORT_CMD_FIS_RX, port->mmio + PORT_CMD);
 
 	/* Flush */
-	readl(port->mmio + PORT_CMD);
+	pete_readl("drivers/block/mtip32xx/mtip32xx.c:254", port->mmio + PORT_CMD);
 
 	return (((tmp & PORT_CMD_FIS_RX) == PORT_CMD_FIS_RX));
 }
@@ -270,13 +270,13 @@ static int mtip_enable_engine(struct mtip_port *port, int enable)
 	u32 tmp;
 
 	/* enable FIS reception */
-	tmp = readl(port->mmio + PORT_CMD);
+	tmp = pete_readl("drivers/block/mtip32xx/mtip32xx.c:273", port->mmio + PORT_CMD);
 	if (enable)
-		writel(tmp | PORT_CMD_START, port->mmio + PORT_CMD);
+		pete_writel("drivers/block/mtip32xx/mtip32xx.c:275", tmp | PORT_CMD_START, port->mmio + PORT_CMD);
 	else
-		writel(tmp & ~PORT_CMD_START, port->mmio + PORT_CMD);
+		pete_writel("drivers/block/mtip32xx/mtip32xx.c:277", tmp & ~PORT_CMD_START, port->mmio + PORT_CMD);
 
-	readl(port->mmio + PORT_CMD);
+	pete_readl("drivers/block/mtip32xx/mtip32xx.c:279", port->mmio + PORT_CMD);
 	return (((tmp & PORT_CMD_START) == PORT_CMD_START));
 }
 
@@ -307,7 +307,7 @@ static inline void mtip_start_port(struct mtip_port *port)
 static inline void mtip_deinit_port(struct mtip_port *port)
 {
 	/* Disable interrupts on this port */
-	writel(0, port->mmio + PORT_IRQ_MASK);
+	pete_writel("drivers/block/mtip32xx/mtip32xx.c:310", 0, port->mmio + PORT_IRQ_MASK);
 
 	/* Disable the DMA engine */
 	mtip_enable_engine(port, 0);
@@ -335,34 +335,34 @@ static void mtip_init_port(struct mtip_port *port)
 	mtip_deinit_port(port);
 
 	/* Program the command list base and FIS base addresses */
-	if (readl(port->dd->mmio + HOST_CAP) & HOST_CAP_64) {
-		writel((port->command_list_dma >> 16) >> 16,
+	if (pete_readl("drivers/block/mtip32xx/mtip32xx.c:338", port->dd->mmio + HOST_CAP) & HOST_CAP_64) {
+		pete_writel("drivers/block/mtip32xx/mtip32xx.c:339", (port->command_list_dma >> 16) >> 16,
 			 port->mmio + PORT_LST_ADDR_HI);
-		writel((port->rxfis_dma >> 16) >> 16,
+		pete_writel("drivers/block/mtip32xx/mtip32xx.c:341", (port->rxfis_dma >> 16) >> 16,
 			 port->mmio + PORT_FIS_ADDR_HI);
 		set_bit(MTIP_PF_HOST_CAP_64, &port->flags);
 	}
 
-	writel(port->command_list_dma & 0xFFFFFFFF,
+	pete_writel("drivers/block/mtip32xx/mtip32xx.c:346", port->command_list_dma & 0xFFFFFFFF,
 			port->mmio + PORT_LST_ADDR);
-	writel(port->rxfis_dma & 0xFFFFFFFF, port->mmio + PORT_FIS_ADDR);
+	pete_writel("drivers/block/mtip32xx/mtip32xx.c:348", port->rxfis_dma & 0xFFFFFFFF, port->mmio + PORT_FIS_ADDR);
 
 	/* Clear SError */
-	writel(readl(port->mmio + PORT_SCR_ERR), port->mmio + PORT_SCR_ERR);
+	pete_writel("drivers/block/mtip32xx/mtip32xx.c:351", pete_readl("drivers/block/mtip32xx/mtip32xx.c:351", port->mmio + PORT_SCR_ERR), port->mmio + PORT_SCR_ERR);
 
 	/* reset the completed registers.*/
 	for (i = 0; i < port->dd->slot_groups; i++)
-		writel(0xFFFFFFFF, port->completed[i]);
+		pete_writel("drivers/block/mtip32xx/mtip32xx.c:355", 0xFFFFFFFF, port->completed[i]);
 
 	/* Clear any pending interrupts for this port */
-	writel(readl(port->mmio + PORT_IRQ_STAT), port->mmio + PORT_IRQ_STAT);
+	pete_writel("drivers/block/mtip32xx/mtip32xx.c:358", pete_readl("drivers/block/mtip32xx/mtip32xx.c:358", port->mmio + PORT_IRQ_STAT), port->mmio + PORT_IRQ_STAT);
 
 	/* Clear any pending interrupts on the HBA. */
-	writel(readl(port->dd->mmio + HOST_IRQ_STAT),
+	pete_writel("drivers/block/mtip32xx/mtip32xx.c:361", pete_readl("drivers/block/mtip32xx/mtip32xx.c:361", port->dd->mmio + HOST_IRQ_STAT),
 					port->dd->mmio + HOST_IRQ_STAT);
 
 	/* Enable port interrupts */
-	writel(DEF_PORT_IRQ, port->mmio + PORT_IRQ_MASK);
+	pete_writel("drivers/block/mtip32xx/mtip32xx.c:365", DEF_PORT_IRQ, port->mmio + PORT_IRQ_MASK);
 }
 
 /*
@@ -382,7 +382,7 @@ static void mtip_restart_port(struct mtip_port *port)
 
 	/* Chip quirk: wait up to 500ms for PxCMD.CR == 0 */
 	timeout = jiffies + msecs_to_jiffies(500);
-	while ((readl(port->mmio + PORT_CMD) & PORT_CMD_LIST_ON)
+	while ((pete_readl("drivers/block/mtip32xx/mtip32xx.c:385", port->mmio + PORT_CMD) & PORT_CMD_LIST_ON)
 		 && time_before(jiffies, timeout))
 		;
 
@@ -393,7 +393,7 @@ static void mtip_restart_port(struct mtip_port *port)
 	 * Chip quirk: escalate to hba reset if
 	 * PxCMD.CR not clear after 500 ms
 	 */
-	if (readl(port->mmio + PORT_CMD) & PORT_CMD_LIST_ON) {
+	if (pete_readl("drivers/block/mtip32xx/mtip32xx.c:396", port->mmio + PORT_CMD) & PORT_CMD_LIST_ON) {
 		dev_warn(&port->dd->pdev->dev,
 			"PxCMD.CR not clear, escalating reset\n");
 
@@ -408,9 +408,9 @@ static void mtip_restart_port(struct mtip_port *port)
 	dev_warn(&port->dd->pdev->dev, "Issuing COM reset\n");
 
 	/* Set PxSCTL.DET */
-	writel(readl(port->mmio + PORT_SCR_CTL) |
+	pete_writel("drivers/block/mtip32xx/mtip32xx.c:411", pete_readl("drivers/block/mtip32xx/mtip32xx.c:411", port->mmio + PORT_SCR_CTL) |
 			 1, port->mmio + PORT_SCR_CTL);
-	readl(port->mmio + PORT_SCR_CTL);
+	pete_readl("drivers/block/mtip32xx/mtip32xx.c:413", port->mmio + PORT_SCR_CTL);
 
 	/* Wait 1 ms to quiesce chip function */
 	timeout = jiffies + msecs_to_jiffies(1);
@@ -421,20 +421,20 @@ static void mtip_restart_port(struct mtip_port *port)
 		return;
 
 	/* Clear PxSCTL.DET */
-	writel(readl(port->mmio + PORT_SCR_CTL) & ~1,
+	pete_writel("drivers/block/mtip32xx/mtip32xx.c:424", pete_readl("drivers/block/mtip32xx/mtip32xx.c:424", port->mmio + PORT_SCR_CTL) & ~1,
 			 port->mmio + PORT_SCR_CTL);
-	readl(port->mmio + PORT_SCR_CTL);
+	pete_readl("drivers/block/mtip32xx/mtip32xx.c:426", port->mmio + PORT_SCR_CTL);
 
 	/* Wait 500 ms for bit 0 of PORT_SCR_STS to be set */
 	timeout = jiffies + msecs_to_jiffies(500);
-	while (((readl(port->mmio + PORT_SCR_STAT) & 0x01) == 0)
+	while (((pete_readl("drivers/block/mtip32xx/mtip32xx.c:430", port->mmio + PORT_SCR_STAT) & 0x01) == 0)
 			 && time_before(jiffies, timeout))
 		;
 
 	if (test_bit(MTIP_DDF_REMOVE_PENDING_BIT, &port->dd->dd_flag))
 		return;
 
-	if ((readl(port->mmio + PORT_SCR_STAT) & 0x01) == 0)
+	if ((pete_readl("drivers/block/mtip32xx/mtip32xx.c:437", port->mmio + PORT_SCR_STAT) & 0x01) == 0)
 		dev_warn(&port->dd->pdev->dev,
 			"COM reset failed\n");
 
@@ -458,7 +458,7 @@ static int mtip_device_reset(struct driver_data *dd)
 	mtip_start_port(dd->port);
 
 	/* Enable interrupts on the HBA. */
-	writel(readl(dd->mmio + HOST_CTL) | HOST_IRQ_EN,
+	pete_writel("drivers/block/mtip32xx/mtip32xx.c:461", pete_readl("drivers/block/mtip32xx/mtip32xx.c:461", dd->mmio + HOST_CTL) | HOST_IRQ_EN,
 					dd->mmio + HOST_CTL);
 	return rv;
 }
@@ -533,12 +533,12 @@ static void mtip_handle_tfe(struct driver_data *dd)
 
 	/* Loop through all the groups */
 	for (group = 0; group < dd->slot_groups; group++) {
-		completed = readl(port->completed[group]);
+		completed = pete_readl("drivers/block/mtip32xx/mtip32xx.c:536", port->completed[group]);
 
 		dev_warn(&dd->pdev->dev, "g=%u, comp=%x\n", group, completed);
 
 		/* clear completed status register in the hardware.*/
-		writel(completed, port->completed[group]);
+		pete_writel("drivers/block/mtip32xx/mtip32xx.c:541", completed, port->completed[group]);
 
 		/* Process successfully completed commands */
 		for (bit = 0; bit < 32 && completed; bit++) {
@@ -667,7 +667,7 @@ static inline void mtip_workq_sdbfx(struct mtip_port *port, int group,
 		return;
 	}
 	/* clear completed status register in the hardware.*/
-	writel(completed, port->completed[group]);
+	pete_writel("drivers/block/mtip32xx/mtip32xx.c:670", completed, port->completed[group]);
 
 	/* Process completed commands. */
 	for (bit = 0; (bit < 32) && completed; bit++) {
@@ -686,7 +686,7 @@ static inline void mtip_workq_sdbfx(struct mtip_port *port, int group,
 
 	/* If last, re-enable interrupts */
 	if (atomic_dec_return(&dd->irq_workers_active) == 0)
-		writel(0xffffffff, dd->mmio + HOST_IRQ_STAT);
+		pete_writel("drivers/block/mtip32xx/mtip32xx.c:689", 0xffffffff, dd->mmio + HOST_IRQ_STAT);
 }
 
 /*
@@ -699,7 +699,7 @@ static inline void mtip_process_legacy(struct driver_data *dd, u32 port_stat)
 
 	if (test_bit(MTIP_PF_IC_ACTIVE_BIT, &port->flags) && cmd) {
 		int group = MTIP_TAG_INDEX(MTIP_TAG_INTERNAL);
-		int status = readl(port->cmd_issue[group]);
+		int status = pete_readl("drivers/block/mtip32xx/mtip32xx.c:702", port->cmd_issue[group]);
 
 		if (!(status & (1 << MTIP_TAG_BIT(MTIP_TAG_INTERNAL))))
 			mtip_complete_command(cmd, 0);
@@ -714,13 +714,13 @@ static inline void mtip_process_errors(struct driver_data *dd, u32 port_stat)
 	if (unlikely(port_stat & PORT_IRQ_CONNECT)) {
 		dev_warn(&dd->pdev->dev,
 			"Clearing PxSERR.DIAG.x\n");
-		writel((1 << 26), dd->port->mmio + PORT_SCR_ERR);
+		pete_writel("drivers/block/mtip32xx/mtip32xx.c:717", (1 << 26), dd->port->mmio + PORT_SCR_ERR);
 	}
 
 	if (unlikely(port_stat & PORT_IRQ_PHYRDY)) {
 		dev_warn(&dd->pdev->dev,
 			"Clearing PxSERR.DIAG.n\n");
-		writel((1 << 16), dd->port->mmio + PORT_SCR_ERR);
+		pete_writel("drivers/block/mtip32xx/mtip32xx.c:723", (1 << 16), dd->port->mmio + PORT_SCR_ERR);
 	}
 
 	if (unlikely(port_stat & ~PORT_IRQ_HANDLED)) {
@@ -745,17 +745,17 @@ static inline irqreturn_t mtip_handle_irq(struct driver_data *data)
 	int do_irq_enable = 1, i, workers;
 	struct mtip_work *twork;
 
-	hba_stat = readl(dd->mmio + HOST_IRQ_STAT);
+	hba_stat = pete_readl("drivers/block/mtip32xx/mtip32xx.c:748", dd->mmio + HOST_IRQ_STAT);
 	if (hba_stat) {
 		rv = IRQ_HANDLED;
 
 		/* Acknowledge the interrupt status on the port.*/
-		port_stat = readl(port->mmio + PORT_IRQ_STAT);
+		port_stat = pete_readl("drivers/block/mtip32xx/mtip32xx.c:753", port->mmio + PORT_IRQ_STAT);
 		if (unlikely(port_stat == 0xFFFFFFFF)) {
 			mtip_check_surprise_removal(dd->pdev);
 			return IRQ_HANDLED;
 		}
-		writel(port_stat, port->mmio + PORT_IRQ_STAT);
+		pete_writel("drivers/block/mtip32xx/mtip32xx.c:758", port_stat, port->mmio + PORT_IRQ_STAT);
 
 		/* Demux port status */
 		if (likely(port_stat & PORT_IRQ_SDB_FIS)) {
@@ -766,7 +766,7 @@ static inline irqreturn_t mtip_handle_irq(struct driver_data *data)
 			for (i = 0, workers = 0; i < MTIP_MAX_SLOT_GROUPS;
 									i++) {
 				twork = &dd->work[i];
-				twork->completed = readl(port->completed[i]);
+				twork->completed = pete_readl("drivers/block/mtip32xx/mtip32xx.c:769", port->completed[i]);
 				if (twork->completed)
 					workers++;
 			}
@@ -813,7 +813,7 @@ static inline irqreturn_t mtip_handle_irq(struct driver_data *data)
 
 	/* acknowledge interrupt */
 	if (unlikely(do_irq_enable))
-		writel(hba_stat, dd->mmio + HOST_IRQ_STAT);
+		pete_writel("drivers/block/mtip32xx/mtip32xx.c:816", hba_stat, dd->mmio + HOST_IRQ_STAT);
 
 	return rv;
 }
@@ -837,7 +837,7 @@ static irqreturn_t mtip_irq_handler(int irq, void *instance)
 
 static void mtip_issue_non_ncq_command(struct mtip_port *port, int tag)
 {
-	writel(1 << MTIP_TAG_BIT(tag), port->cmd_issue[MTIP_TAG_INDEX(tag)]);
+	pete_writel("drivers/block/mtip32xx/mtip32xx.c:840", 1 << MTIP_TAG_BIT(tag), port->cmd_issue[MTIP_TAG_INDEX(tag)]);
 }
 
 static bool mtip_pause_ncq(struct mtip_port *port,
@@ -845,7 +845,7 @@ static bool mtip_pause_ncq(struct mtip_port *port,
 {
 	unsigned long task_file_data;
 
-	task_file_data = readl(port->mmio+PORT_TFDATA);
+	task_file_data = pete_readl("drivers/block/mtip32xx/mtip32xx.c:848", port->mmio+PORT_TFDATA);
 	if ((task_file_data & 1))
 		return false;
 
@@ -881,9 +881,9 @@ static bool mtip_commands_active(struct mtip_port *port)
 	 * Ignore s_active bit 0 of array element 0.
 	 * This bit will always be set
 	 */
-	active = readl(port->s_active[0]) & 0xFFFFFFFE;
+	active = pete_readl("drivers/block/mtip32xx/mtip32xx.c:884", port->s_active[0]) & 0xFFFFFFFE;
 	for (n = 1; n < port->dd->slot_groups; n++)
-		active |= readl(port->s_active[n]);
+		active |= pete_readl("drivers/block/mtip32xx/mtip32xx.c:886", port->s_active[n]);
 
 	return active != 0;
 }
@@ -1036,7 +1036,7 @@ static int mtip_exec_internal_command(struct mtip_port *port,
 		goto exec_ic_exit;
 	}
 
-	if (readl(port->cmd_issue[MTIP_TAG_INDEX(MTIP_TAG_INTERNAL)])
+	if (pete_readl("drivers/block/mtip32xx/mtip32xx.c:1039", port->cmd_issue[MTIP_TAG_INDEX(MTIP_TAG_INTERNAL)])
 			& (1 << MTIP_TAG_BIT(MTIP_TAG_INTERNAL))) {
 		rv = -ENXIO;
 		if (!test_bit(MTIP_DDF_REMOVE_PENDING_BIT, &dd->dd_flag)) {
@@ -1860,7 +1860,7 @@ static int exec_drive_taskfile(struct driver_data *dd,
 		goto abort;
 	}
 
-	task_file_data = readl(dd->port->mmio+PORT_TFDATA);
+	task_file_data = pete_readl("drivers/block/mtip32xx/mtip32xx.c:1863", dd->port->mmio+PORT_TFDATA);
 
 	if ((req_task->data_phase == TASKFILE_IN) && !(task_file_data & 1)) {
 		reply = dd->port->rxfis + RX_FIS_PIO_SETUP;
@@ -2294,27 +2294,27 @@ static ssize_t mtip_hw_read_registers(struct file *f, char __user *ubuf,
 
 	for (n = dd->slot_groups-1; n >= 0; n--)
 		size += sprintf(&buf[size], "%08X ",
-					 readl(dd->port->s_active[n]));
+					 pete_readl("drivers/block/mtip32xx/mtip32xx.c:2297", dd->port->s_active[n]));
 
 	size += sprintf(&buf[size], "]\n");
 	size += sprintf(&buf[size], "H/ Command Issue : [ 0x");
 
 	for (n = dd->slot_groups-1; n >= 0; n--)
 		size += sprintf(&buf[size], "%08X ",
-					readl(dd->port->cmd_issue[n]));
+					pete_readl("drivers/block/mtip32xx/mtip32xx.c:2304", dd->port->cmd_issue[n]));
 
 	size += sprintf(&buf[size], "]\n");
 	size += sprintf(&buf[size], "H/ Completed     : [ 0x");
 
 	for (n = dd->slot_groups-1; n >= 0; n--)
 		size += sprintf(&buf[size], "%08X ",
-				readl(dd->port->completed[n]));
+				pete_readl("drivers/block/mtip32xx/mtip32xx.c:2311", dd->port->completed[n]));
 
 	size += sprintf(&buf[size], "]\n");
 	size += sprintf(&buf[size], "H/ PORT IRQ STAT : [ 0x%08X ]\n",
-				readl(dd->port->mmio + PORT_IRQ_STAT));
+				pete_readl("drivers/block/mtip32xx/mtip32xx.c:2315", dd->port->mmio + PORT_IRQ_STAT));
 	size += sprintf(&buf[size], "H/ HOST IRQ STAT : [ 0x%08X ]\n",
-				readl(dd->mmio + HOST_IRQ_STAT));
+				pete_readl("drivers/block/mtip32xx/mtip32xx.c:2317", dd->mmio + HOST_IRQ_STAT));
 	size += sprintf(&buf[size], "\n");
 
 	size += sprintf(&buf[size], "L/ Commands in Q : [ 0x");
@@ -2425,10 +2425,10 @@ static void mtip_hw_debugfs_exit(struct driver_data *dd)
 static inline void hba_setup(struct driver_data *dd)
 {
 	u32 hwdata;
-	hwdata = readl(dd->mmio + HOST_HSORG);
+	hwdata = pete_readl("drivers/block/mtip32xx/mtip32xx.c:2428", dd->mmio + HOST_HSORG);
 
 	/* interrupt bug workaround: use only 1 IS bit.*/
-	writel(hwdata |
+	pete_writel("drivers/block/mtip32xx/mtip32xx.c:2431", hwdata |
 		HSORG_DISABLE_SLOTGRP_INTR |
 		HSORG_DISABLE_SLOTGRP_PXIS,
 		dd->mmio + HOST_HSORG);
@@ -2461,7 +2461,7 @@ static void mtip_detect_product(struct driver_data *dd)
 	 * [   3] asic-style interface
 	 * [ 2:0] number of slot groups, minus 1 (only valid for asic-style).
 	 */
-	hwdata = readl(dd->mmio + HOST_HSORG);
+	hwdata = pete_readl("drivers/block/mtip32xx/mtip32xx.c:2464", dd->mmio + HOST_HSORG);
 
 	dd->product_type = MTIP_PRODUCT_UNKNOWN;
 	dd->slot_groups = 1;
@@ -2887,7 +2887,7 @@ static int mtip_hw_init(struct driver_data *dd)
 
 	timetaken = jiffies;
 	timeout = jiffies + msecs_to_jiffies(30000);
-	while (((readl(dd->port->mmio + PORT_SCR_STAT) & 0x0F) != 0x03) &&
+	while (((pete_readl("drivers/block/mtip32xx/mtip32xx.c:2890", dd->port->mmio + PORT_SCR_STAT) & 0x0F) != 0x03) &&
 		 time_before(jiffies, timeout)) {
 		mdelay(100);
 	}
@@ -2909,7 +2909,7 @@ static int mtip_hw_init(struct driver_data *dd)
 	}
 
 	/* Conditionally reset the HBA. */
-	if (!(readl(dd->mmio + HOST_CAP) & HOST_CAP_NZDMA)) {
+	if (!(pete_readl("drivers/block/mtip32xx/mtip32xx.c:2912", dd->mmio + HOST_CAP) & HOST_CAP_NZDMA)) {
 		if (mtip_hba_reset(dd) < 0) {
 			dev_err(&dd->pdev->dev,
 				"Card did not reset within timeout\n");
@@ -2918,7 +2918,7 @@ static int mtip_hw_init(struct driver_data *dd)
 		}
 	} else {
 		/* Clear any pending interrupts on the HBA */
-		writel(readl(dd->mmio + HOST_IRQ_STAT),
+		pete_writel("drivers/block/mtip32xx/mtip32xx.c:2921", pete_readl("drivers/block/mtip32xx/mtip32xx.c:2921", dd->mmio + HOST_IRQ_STAT),
 			dd->mmio + HOST_IRQ_STAT);
 	}
 
@@ -2936,7 +2936,7 @@ static int mtip_hw_init(struct driver_data *dd)
 	irq_set_affinity_hint(dd->pdev->irq, get_cpu_mask(dd->isr_binding));
 
 	/* Enable interrupts on the HBA. */
-	writel(readl(dd->mmio + HOST_CTL) | HOST_IRQ_EN,
+	pete_writel("drivers/block/mtip32xx/mtip32xx.c:2939", pete_readl("drivers/block/mtip32xx/mtip32xx.c:2939", dd->mmio + HOST_CTL) | HOST_IRQ_EN,
 					dd->mmio + HOST_CTL);
 
 	init_waitqueue_head(&dd->port->svc_wait);
@@ -2950,7 +2950,7 @@ static int mtip_hw_init(struct driver_data *dd)
 
 out3:
 	/* Disable interrupts on the HBA. */
-	writel(readl(dd->mmio + HOST_CTL) & ~HOST_IRQ_EN,
+	pete_writel("drivers/block/mtip32xx/mtip32xx.c:2953", pete_readl("drivers/block/mtip32xx/mtip32xx.c:2953", dd->mmio + HOST_CTL) & ~HOST_IRQ_EN,
 			dd->mmio + HOST_CTL);
 
 	/* Release the IRQ. */
@@ -3004,7 +3004,7 @@ static int mtip_hw_exit(struct driver_data *dd)
 		mtip_deinit_port(dd->port);
 
 		/* Disable interrupts on the HBA. */
-		writel(readl(dd->mmio + HOST_CTL) & ~HOST_IRQ_EN,
+		pete_writel("drivers/block/mtip32xx/mtip32xx.c:3007", pete_readl("drivers/block/mtip32xx/mtip32xx.c:3007", dd->mmio + HOST_CTL) & ~HOST_IRQ_EN,
 				dd->mmio + HOST_CTL);
 	}
 
@@ -3070,7 +3070,7 @@ static int mtip_hw_suspend(struct driver_data *dd)
 	}
 
 	/* Disable interrupts on the HBA.*/
-	writel(readl(dd->mmio + HOST_CTL) & ~HOST_IRQ_EN,
+	pete_writel("drivers/block/mtip32xx/mtip32xx.c:3073", pete_readl("drivers/block/mtip32xx/mtip32xx.c:3073", dd->mmio + HOST_CTL) & ~HOST_IRQ_EN,
 			dd->mmio + HOST_CTL);
 	mtip_deinit_port(dd->port);
 
@@ -3109,7 +3109,7 @@ static int mtip_hw_resume(struct driver_data *dd)
 	mtip_start_port(dd->port);
 
 	/* Enable interrupts on the HBA.*/
-	writel(readl(dd->mmio + HOST_CTL) | HOST_IRQ_EN,
+	pete_writel("drivers/block/mtip32xx/mtip32xx.c:3112", pete_readl("drivers/block/mtip32xx/mtip32xx.c:3112", dd->mmio + HOST_CTL) | HOST_IRQ_EN,
 			dd->mmio + HOST_CTL);
 
 	return 0;

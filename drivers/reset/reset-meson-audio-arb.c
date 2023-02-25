@@ -64,14 +64,14 @@ static int meson_audio_arb_update(struct reset_controller_dev *rcdev,
 		container_of(rcdev, struct meson_audio_arb_data, rstc);
 
 	spin_lock(&arb->lock);
-	val = readl(arb->regs);
+	val = pete_readl("drivers/reset/reset-meson-audio-arb.c:67", arb->regs);
 
 	if (assert)
 		val &= ~BIT(arb->reset_bits[id]);
 	else
 		val |= BIT(arb->reset_bits[id]);
 
-	writel(val, arb->regs);
+	pete_writel("drivers/reset/reset-meson-audio-arb.c:74", val, arb->regs);
 	spin_unlock(&arb->lock);
 
 	return 0;
@@ -84,7 +84,7 @@ static int meson_audio_arb_status(struct reset_controller_dev *rcdev,
 	struct meson_audio_arb_data *arb =
 		container_of(rcdev, struct meson_audio_arb_data, rstc);
 
-	val = readl(arb->regs);
+	val = pete_readl("drivers/reset/reset-meson-audio-arb.c:87", arb->regs);
 
 	return !(val & BIT(arb->reset_bits[id]));
 }
@@ -125,7 +125,7 @@ static int meson_audio_arb_remove(struct platform_device *pdev)
 
 	/* Disable all access */
 	spin_lock(&arb->lock);
-	writel(0, arb->regs);
+	pete_writel("drivers/reset/reset-meson-audio-arb.c:128", 0, arb->regs);
 	spin_unlock(&arb->lock);
 
 	clk_disable_unprepare(arb->clk);
@@ -179,7 +179,7 @@ static int meson_audio_arb_probe(struct platform_device *pdev)
 		dev_err(dev, "failed to enable arb clock\n");
 		return ret;
 	}
-	writel(BIT(ARB_GENERAL_BIT), arb->regs);
+	pete_writel("drivers/reset/reset-meson-audio-arb.c:182", BIT(ARB_GENERAL_BIT), arb->regs);
 
 	/* Register reset controller */
 	ret = devm_reset_controller_register(dev, &arb->rstc);

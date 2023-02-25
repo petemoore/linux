@@ -59,9 +59,9 @@
 #define QCOM_ICE_FORCE_HW_KEY1_SETTING_MASK	0x4
 
 #define qcom_ice_writel(host, val, reg)	\
-	writel((val), (host)->ice_mmio + (reg))
+	pete_writel("drivers/scsi/ufs/ufs-qcom-ice.c:62", (val), (host)->ice_mmio + (reg))
 #define qcom_ice_readl(host, reg)	\
-	readl((host)->ice_mmio + (reg))
+	pete_readl("drivers/scsi/ufs/ufs-qcom-ice.c:64", (host)->ice_mmio + (reg))
 
 static bool qcom_ice_supported(struct ufs_qcom_host *host)
 {

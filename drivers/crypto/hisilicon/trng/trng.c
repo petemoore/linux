@@ -76,7 +76,7 @@ static void hisi_trng_set_seed(struct hisi_trng *trng, const u8 *seed)
 		val |= seed[i + 3UL];
 
 		seed_reg = (i >> SW_DRBG_NUM_SHIFT) % SW_DRBG_SEED_REGS_NUM;
-		writel(val, trng->base + SW_DRBG_SEED(seed_reg));
+		pete_writel("drivers/crypto/hisilicon/trng/trng.c:79", val, trng->base + SW_DRBG_SEED(seed_reg));
 	}
 }
 
@@ -94,12 +94,12 @@ static int hisi_trng_seed(struct crypto_rng *tfm, const u8 *seed,
 		return -EINVAL;
 	}
 
-	writel(0x0, trng->base + SW_DRBG_BLOCKS);
+	pete_writel("drivers/crypto/hisilicon/trng/trng.c:97", 0x0, trng->base + SW_DRBG_BLOCKS);
 	hisi_trng_set_seed(trng, seed);
 
-	writel(SW_DRBG_BLOCKS_NUM | (0x1 << SW_DRBG_ENABLE_SHIFT),
+	pete_writel("drivers/crypto/hisilicon/trng/trng.c:100", SW_DRBG_BLOCKS_NUM | (0x1 << SW_DRBG_ENABLE_SHIFT),
 	       trng->base + SW_DRBG_BLOCKS);
-	writel(0x1, trng->base + SW_DRBG_INIT);
+	pete_writel("drivers/crypto/hisilicon/trng/trng.c:102", 0x1, trng->base + SW_DRBG_INIT);
 
 	ret = readl_relaxed_poll_timeout(trng->base + SW_DRBG_STATUS,
 					val, val & BIT(0), SLEEP_US, TIMEOUT_US);
@@ -135,7 +135,7 @@ static int hisi_trng_generate(struct crypto_rng *tfm, const u8 *src,
 		}
 
 		for (i = 0; i < SW_DRBG_DATA_NUM; i++)
-			data[i] = readl(trng->base + SW_DRBG_DATA(i));
+			data[i] = pete_readl("drivers/crypto/hisilicon/trng/trng.c:138", trng->base + SW_DRBG_DATA(i));
 
 		if (dlen - currsize >= SW_DRBG_BYTES) {
 			memcpy(dstn + currsize, data, SW_DRBG_BYTES);
@@ -145,7 +145,7 @@ static int hisi_trng_generate(struct crypto_rng *tfm, const u8 *src,
 			currsize = dlen;
 		}
 
-		writel(0x1, trng->base + SW_DRBG_GEN);
+		pete_writel("drivers/crypto/hisilicon/trng/trng.c:148", 0x1, trng->base + SW_DRBG_GEN);
 	} while (currsize < dlen);
 
 	return ret;
@@ -263,7 +263,7 @@ static int hisi_trng_probe(struct platform_device *pdev)
 		return PTR_ERR(trng->base);
 
 	trng->is_used = false;
-	trng->ver = readl(trng->base + HISI_TRNG_VERSION);
+	trng->ver = pete_readl("drivers/crypto/hisilicon/trng/trng.c:266", trng->base + HISI_TRNG_VERSION);
 	if (!trng_devices.is_init) {
 		INIT_LIST_HEAD(&trng_devices.list);
 		mutex_init(&trng_devices.lock);

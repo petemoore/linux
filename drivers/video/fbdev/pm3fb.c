@@ -1274,7 +1274,7 @@ static unsigned long pm3fb_size_memory(struct pm3_par *par)
 	if (memsize + 1 == i) {
 		for (i = 0; i < 32; i++) {
 			/* Clear first 32MB ; 0 is 0, no need to byteswap */
-			writel(0x0000000, (screen_mem + (i * 1048576)));
+			pete_writel("drivers/video/fbdev/pm3fb.c:1277", 0x0000000, (screen_mem + (i * 1048576)));
 		}
 		wmb();
 

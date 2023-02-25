@@ -83,13 +83,13 @@ static inline struct tegra_pwm_chip *to_tegra_pwm_chip(struct pwm_chip *chip)
 
 static inline u32 pwm_readl(struct tegra_pwm_chip *chip, unsigned int num)
 {
-	return readl(chip->regs + (num << 4));
+	return pete_readl("drivers/pwm/pwm-tegra.c:86", chip->regs + (num << 4));
 }
 
 static inline void pwm_writel(struct tegra_pwm_chip *chip, unsigned int num,
 			     unsigned long val)
 {
-	writel(val, chip->regs + (num << 4));
+	pete_writel("drivers/pwm/pwm-tegra.c:92", val, chip->regs + (num << 4));
 }
 
 static int tegra_pwm_config(struct pwm_chip *chip, struct pwm_device *pwm,

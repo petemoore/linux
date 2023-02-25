@@ -141,24 +141,24 @@ struct ep93xx_pata_data {
 
 static void ep93xx_pata_clear_regs(void __iomem *base)
 {
-	writel(IDECTRL_CS0N | IDECTRL_CS1N | IDECTRL_DIORN |
+	pete_writel("drivers/ata/pata_ep93xx.c:144", IDECTRL_CS0N | IDECTRL_CS1N | IDECTRL_DIORN |
 		IDECTRL_DIOWN, base + IDECTRL);
 
-	writel(0, base + IDECFG);
-	writel(0, base + IDEMDMAOP);
-	writel(0, base + IDEUDMAOP);
-	writel(0, base + IDEDATAOUT);
-	writel(0, base + IDEDATAIN);
-	writel(0, base + IDEMDMADATAOUT);
-	writel(0, base + IDEMDMADATAIN);
-	writel(0, base + IDEUDMADATAOUT);
-	writel(0, base + IDEUDMADATAIN);
-	writel(0, base + IDEUDMADEBUG);
+	pete_writel("drivers/ata/pata_ep93xx.c:147", 0, base + IDECFG);
+	pete_writel("drivers/ata/pata_ep93xx.c:148", 0, base + IDEMDMAOP);
+	pete_writel("drivers/ata/pata_ep93xx.c:149", 0, base + IDEUDMAOP);
+	pete_writel("drivers/ata/pata_ep93xx.c:150", 0, base + IDEDATAOUT);
+	pete_writel("drivers/ata/pata_ep93xx.c:151", 0, base + IDEDATAIN);
+	pete_writel("drivers/ata/pata_ep93xx.c:152", 0, base + IDEMDMADATAOUT);
+	pete_writel("drivers/ata/pata_ep93xx.c:153", 0, base + IDEMDMADATAIN);
+	pete_writel("drivers/ata/pata_ep93xx.c:154", 0, base + IDEUDMADATAOUT);
+	pete_writel("drivers/ata/pata_ep93xx.c:155", 0, base + IDEUDMADATAIN);
+	pete_writel("drivers/ata/pata_ep93xx.c:156", 0, base + IDEUDMADEBUG);
 }
 
 static bool ep93xx_pata_check_iordy(void __iomem *base)
 {
-	return !!(readl(base + IDECTRL) & IDECTRL_IORDY);
+	return !!(pete_readl("drivers/ata/pata_ep93xx.c:161", base + IDECTRL) & IDECTRL_IORDY);
 }
 
 /*
@@ -191,7 +191,7 @@ static int ep93xx_pata_get_wst(int pio_mode)
 
 static void ep93xx_pata_enable_pio(void __iomem *base, int pio_mode)
 {
-	writel(IDECFG_IDEEN | IDECFG_PIO |
+	pete_writel("drivers/ata/pata_ep93xx.c:194", IDECFG_IDEEN | IDECFG_PIO |
 		ep93xx_pata_get_wst(pio_mode) |
 		(pio_mode << IDECFG_MODE_SHIFT), base + IDECFG);
 }
@@ -239,7 +239,7 @@ static unsigned long ep93xx_pata_wait_for_iordy(void __iomem *base,
 static void ep93xx_pata_rw_begin(void __iomem *base, unsigned long addr,
 				 unsigned long t1)
 {
-	writel(IDECTRL_DIOWN | IDECTRL_DIORN | addr, base + IDECTRL);
+	pete_writel("drivers/ata/pata_ep93xx.c:242", IDECTRL_DIOWN | IDECTRL_DIORN | addr, base + IDECTRL);
 	ep93xx_pata_delay(t1);
 }
 
@@ -252,7 +252,7 @@ static void ep93xx_pata_rw_end(void __iomem *base, unsigned long addr,
 	/* lengthen t2 if needed */
 	if (iordy)
 		t2 += ep93xx_pata_wait_for_iordy(base, t2);
-	writel(IDECTRL_DIOWN | IDECTRL_DIORN | addr, base + IDECTRL);
+	pete_writel("drivers/ata/pata_ep93xx.c:255", IDECTRL_DIOWN | IDECTRL_DIORN | addr, base + IDECTRL);
 	if (t0 > t2 && t0 - t2 > t2i)
 		ep93xx_pata_delay(t0 - t2);
 	else
@@ -270,13 +270,13 @@ static u16 ep93xx_pata_read(struct ep93xx_pata_data *drv_data,
 	unsigned long t2i = reg ? t->rec8b : t->recover;
 
 	ep93xx_pata_rw_begin(base, addr, t->setup);
-	writel(IDECTRL_DIOWN | addr, base + IDECTRL);
+	pete_writel("drivers/ata/pata_ep93xx.c:273", IDECTRL_DIOWN | addr, base + IDECTRL);
 	/*
 	 * The IDEDATAIN register is loaded from the DD pins at the positive
 	 * edge of the DIORN signal. (EP93xx UG p27-14)
 	 */
 	ep93xx_pata_rw_end(base, addr, drv_data->iordy, t0, t2, t2i);
-	return readl(base + IDEDATAIN);
+	return pete_readl("drivers/ata/pata_ep93xx.c:279", base + IDEDATAIN);
 }
 
 /* IDE register read */
@@ -308,8 +308,8 @@ static void ep93xx_pata_write(struct ep93xx_pata_data *drv_data,
 	 * Value from IDEDATAOUT register is driven onto the DD pins when
 	 * DIOWN is low. (EP93xx UG p27-13)
 	 */
-	writel(value, base + IDEDATAOUT);
-	writel(IDECTRL_DIORN | addr, base + IDECTRL);
+	pete_writel("drivers/ata/pata_ep93xx.c:311", value, base + IDEDATAOUT);
+	pete_writel("drivers/ata/pata_ep93xx.c:312", IDECTRL_DIORN | addr, base + IDECTRL);
 	ep93xx_pata_rw_end(base, addr, drv_data->iordy, t0, t2, t2i);
 }
 
@@ -731,11 +731,11 @@ static void ep93xx_pata_dma_start(struct ata_queued_cmd *qc)
 	 * 2) perform dummy read of the register,
 	 * 3) set the UEN bit.
 	 */
-	writel(v, base + IDEUDMAOP);
-	readl(base + IDEUDMAOP);
-	writel(v | IDEUDMAOP_UEN, base + IDEUDMAOP);
+	pete_writel("drivers/ata/pata_ep93xx.c:734", v, base + IDEUDMAOP);
+	pete_readl("drivers/ata/pata_ep93xx.c:735", base + IDEUDMAOP);
+	pete_writel("drivers/ata/pata_ep93xx.c:736", v | IDEUDMAOP_UEN, base + IDEUDMAOP);
 
-	writel(IDECFG_IDEEN | IDECFG_UDMA |
+	pete_writel("drivers/ata/pata_ep93xx.c:738", IDECFG_IDEEN | IDECFG_UDMA |
 		((adev->xfer_mode - XFER_UDMA_0) << IDECFG_MODE_SHIFT),
 		base + IDECFG);
 }
@@ -753,8 +753,8 @@ static void ep93xx_pata_dma_stop(struct ata_queued_cmd *qc)
 	 * To properly stop IDE-DMA, IDEUDMAOP register must to be cleared
 	 * and IDECTRL register must be set to default value.
 	 */
-	writel(0, base + IDEUDMAOP);
-	writel(readl(base + IDECTRL) | IDECTRL_DIOWN | IDECTRL_DIORN |
+	pete_writel("drivers/ata/pata_ep93xx.c:756", 0, base + IDEUDMAOP);
+	pete_writel("drivers/ata/pata_ep93xx.c:757", pete_readl("drivers/ata/pata_ep93xx.c:757", base + IDECTRL) | IDECTRL_DIOWN | IDECTRL_DIORN |
 		IDECTRL_CS0N | IDECTRL_CS1N, base + IDECTRL);
 
 	ep93xx_pata_enable_pio(drv_data->ide_base,
@@ -771,7 +771,7 @@ static void ep93xx_pata_dma_setup(struct ata_queued_cmd *qc)
 static u8 ep93xx_pata_dma_status(struct ata_port *ap)
 {
 	struct ep93xx_pata_data *drv_data = ap->host->private_data;
-	u32 val = readl(drv_data->ide_base + IDEUDMASTS);
+	u32 val = pete_readl("drivers/ata/pata_ep93xx.c:774", drv_data->ide_base + IDEUDMASTS);
 
 	/*
 	 * UDMA Status Register bits:
@@ -791,7 +791,7 @@ static u8 ep93xx_pata_dma_status(struct ata_port *ap)
 		return ATA_DMA_ERR;
 
 	/* read INTRQ (INT[3]) pin input state */
-	if (readl(drv_data->ide_base + IDECTRL) & IDECTRL_INTRQ)
+	if (pete_readl("drivers/ata/pata_ep93xx.c:794", drv_data->ide_base + IDECTRL) & IDECTRL_INTRQ)
 		return ATA_DMA_INTR;
 
 	if (val & IDEUDMASTS_SBUSY || val & IDEUDMASTS_DMAIDE)

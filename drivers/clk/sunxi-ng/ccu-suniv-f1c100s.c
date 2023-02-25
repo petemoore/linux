@@ -534,9 +534,9 @@ static void __init suniv_f1c100s_ccu_setup(struct device_node *node)
 	}
 
 	/* Force the PLL-Audio-1x divider to 4 */
-	val = readl(reg + SUNIV_PLL_AUDIO_REG);
+	val = pete_readl("drivers/clk/sunxi-ng/ccu-suniv-f1c100s.c:537", reg + SUNIV_PLL_AUDIO_REG);
 	val &= ~GENMASK(19, 16);
-	writel(val | (3 << 16), reg + SUNIV_PLL_AUDIO_REG);
+	pete_writel("drivers/clk/sunxi-ng/ccu-suniv-f1c100s.c:539", val | (3 << 16), reg + SUNIV_PLL_AUDIO_REG);
 
 	of_sunxi_ccu_probe(node, reg, &suniv_ccu_desc);
 

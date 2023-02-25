@@ -54,9 +54,9 @@ static struct platform_device heartbeat_device = {
 static void sh7757_eth_set_mdio_gate(void *addr)
 {
 	if (((unsigned long)addr & 0x00000fff) < 0x0800)
-		writel(readl(GBECONT) | GBECONT_RMII0, GBECONT);
+		pete_writel("arch/sh/boards/board-sh7757lcr.c:57", pete_readl("arch/sh/boards/board-sh7757lcr.c:57", GBECONT) | GBECONT_RMII0, GBECONT);
 	else
-		writel(readl(GBECONT) | GBECONT_RMII1, GBECONT);
+		pete_writel("arch/sh/boards/board-sh7757lcr.c:59", pete_readl("arch/sh/boards/board-sh7757lcr.c:59", GBECONT) | GBECONT_RMII1, GBECONT);
 }
 
 static struct resource sh_eth0_resources[] = {
@@ -117,10 +117,10 @@ static void sh7757_eth_giga_set_mdio_gate(void *addr)
 {
 	if (((unsigned long)addr & 0x00000fff) < 0x0800) {
 		gpio_set_value(GPIO_PTT4, 1);
-		writel(readl(GBECONT) & ~GBECONT_RMII0, GBECONT);
+		pete_writel("arch/sh/boards/board-sh7757lcr.c:120", pete_readl("arch/sh/boards/board-sh7757lcr.c:120", GBECONT) & ~GBECONT_RMII0, GBECONT);
 	} else {
 		gpio_set_value(GPIO_PTT4, 0);
-		writel(readl(GBECONT) & ~GBECONT_RMII1, GBECONT);
+		pete_writel("arch/sh/boards/board-sh7757lcr.c:123", pete_readl("arch/sh/boards/board-sh7757lcr.c:123", GBECONT) & ~GBECONT_RMII1, GBECONT);
 	}
 }
 

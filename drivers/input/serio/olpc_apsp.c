@@ -82,9 +82,9 @@ static int olpc_apsp_write(struct serio *port, unsigned char val)
 
 	dev_dbg(priv->dev, "olpc_apsp_write which=%x val=%x\n", which, val);
 	for (i = 0; i < 50; i++) {
-		u32 sts = readl(priv->base + COMMAND_FIFO_STATUS);
+		u32 sts = pete_readl("drivers/input/serio/olpc_apsp.c:85", priv->base + COMMAND_FIFO_STATUS);
 		if ((sts & CMD_CNTR_MASK) < MAX_PENDING_CMDS) {
-			writel(which | val,
+			pete_writel("drivers/input/serio/olpc_apsp.c:87", which | val,
 			       priv->base + SECURE_PROCESSOR_COMMAND);
 			return 0;
 		}
@@ -93,7 +93,7 @@ static int olpc_apsp_write(struct serio *port, unsigned char val)
 	}
 
 	dev_dbg(priv->dev, "olpc_apsp_write timeout, status=%x\n",
-		readl(priv->base + COMMAND_FIFO_STATUS));
+		pete_readl("drivers/input/serio/olpc_apsp.c:96", priv->base + COMMAND_FIFO_STATUS));
 
 	return -ETIMEDOUT;
 }
@@ -108,13 +108,13 @@ static irqreturn_t olpc_apsp_rx(int irq, void *dev_id)
 	 * Write 1 to PJ_RST_INTERRUPT to acknowledge and clear the interrupt
 	 * Write 0xff00 to SECURE_PROCESSOR_COMMAND.
 	 */
-	tmp = readl(priv->base + PJ_RST_INTERRUPT);
+	tmp = pete_readl("drivers/input/serio/olpc_apsp.c:111", priv->base + PJ_RST_INTERRUPT);
 	if (!(tmp & SP_COMMAND_COMPLETE_RESET)) {
 		dev_warn(priv->dev, "spurious interrupt?\n");
 		return IRQ_NONE;
 	}
 
-	w = readl(priv->base + COMMAND_RETURN_STATUS);
+	w = pete_readl("drivers/input/serio/olpc_apsp.c:117", priv->base + COMMAND_RETURN_STATUS);
 	dev_dbg(priv->dev, "olpc_apsp_rx %x\n", w);
 
 	if (w >> PORT_SHIFT == KEYBOARD_PORT)
@@ -125,8 +125,8 @@ static irqreturn_t olpc_apsp_rx(int irq, void *dev_id)
 	serio_interrupt(serio, w & DATA_MASK, 0);
 
 	/* Ack and clear interrupt */
-	writel(tmp | SP_COMMAND_COMPLETE_RESET, priv->base + PJ_RST_INTERRUPT);
-	writel(PORT_MASK, priv->base + SECURE_PROCESSOR_COMMAND);
+	pete_writel("drivers/input/serio/olpc_apsp.c:128", tmp | SP_COMMAND_COMPLETE_RESET, priv->base + PJ_RST_INTERRUPT);
+	pete_writel("drivers/input/serio/olpc_apsp.c:129", PORT_MASK, priv->base + SECURE_PROCESSOR_COMMAND);
 
 	pm_wakeup_event(priv->dev, 1000);
 	return IRQ_HANDLED;
@@ -139,15 +139,15 @@ static int olpc_apsp_open(struct serio *port)
 	unsigned long l;
 
 	if (priv->open_count++ == 0) {
-		l = readl(priv->base + COMMAND_FIFO_STATUS);
+		l = pete_readl("drivers/input/serio/olpc_apsp.c:142", priv->base + COMMAND_FIFO_STATUS);
 		if (!(l & CMD_STS_MASK)) {
 			dev_err(priv->dev, "SP cannot accept commands.\n");
 			return -EIO;
 		}
 
 		/* Enable interrupt 0 by clearing its bit */
-		tmp = readl(priv->base + PJ_INTERRUPT_MASK);
-		writel(tmp & ~INT_0, priv->base + PJ_INTERRUPT_MASK);
+		tmp = pete_readl("drivers/input/serio/olpc_apsp.c:149", priv->base + PJ_INTERRUPT_MASK);
+		pete_writel("drivers/input/serio/olpc_apsp.c:150", tmp & ~INT_0, priv->base + PJ_INTERRUPT_MASK);
 	}
 
 	return 0;
@@ -160,8 +160,8 @@ static void olpc_apsp_close(struct serio *port)
 
 	if (--priv->open_count == 0) {
 		/* Disable interrupt 0 */
-		tmp = readl(priv->base + PJ_INTERRUPT_MASK);
-		writel(tmp | INT_0, priv->base + PJ_INTERRUPT_MASK);
+		tmp = pete_readl("drivers/input/serio/olpc_apsp.c:163", priv->base + PJ_INTERRUPT_MASK);
+		pete_writel("drivers/input/serio/olpc_apsp.c:164", tmp | INT_0, priv->base + PJ_INTERRUPT_MASK);
 	}
 }
 

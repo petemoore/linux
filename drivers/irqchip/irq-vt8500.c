@@ -77,10 +77,10 @@ static void vt8500_irq_mask(struct irq_data *d)
 
 	edge = readb(base + VT8500_ICDC + d->hwirq) & VT8500_EDGE;
 	if (edge) {
-		status = readl(stat_reg);
+		status = pete_readl("drivers/irqchip/irq-vt8500.c:80", stat_reg);
 
 		status |= (1 << (d->hwirq & 0x1f));
-		writel(status, stat_reg);
+		pete_writel("drivers/irqchip/irq-vt8500.c:83", status, stat_reg);
 	} else {
 		dctr = readb(base + VT8500_ICDC + d->hwirq);
 		dctr &= ~VT8500_INT_ENABLE;
@@ -142,8 +142,8 @@ static void __init vt8500_init_irq_hw(void __iomem *base)
 	u32 i;
 
 	/* Enable rotating priority for IRQ */
-	writel(ICPC_ROTATE, base + VT8500_ICPC_IRQ);
-	writel(0x00, base + VT8500_ICPC_FIQ);
+	pete_writel("drivers/irqchip/irq-vt8500.c:145", ICPC_ROTATE, base + VT8500_ICPC_IRQ);
+	pete_writel("drivers/irqchip/irq-vt8500.c:146", 0x00, base + VT8500_ICPC_FIQ);
 
 	/* Disable all interrupts and route them to IRQ */
 	for (i = 0; i < 64; i++)

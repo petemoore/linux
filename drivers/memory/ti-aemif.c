@@ -206,10 +206,10 @@ static int aemif_config_abus(struct platform_device *pdev, int csnum)
 	if (data->enable_ss)
 		set |= ACR_SSTROBE_MASK;
 
-	val = readl(aemif->base + offset);
+	val = pete_readl("drivers/memory/ti-aemif.c:209", aemif->base + offset);
 	val &= ~CONFIG_MASK;
 	val |= set;
-	writel(val, aemif->base + offset);
+	pete_writel("drivers/memory/ti-aemif.c:212", val, aemif->base + offset);
 
 	return 0;
 }
@@ -236,7 +236,7 @@ static void aemif_get_hw_params(struct platform_device *pdev, int csnum)
 	u32 val, offset;
 
 	offset = A1CR_OFFSET + (data->cs - aemif->cs_offset) * 4;
-	val = readl(aemif->base + offset);
+	val = pete_readl("drivers/memory/ti-aemif.c:239", aemif->base + offset);
 
 	data->ta = aemif_cycles_to_nsec(TA_VAL(val), clk_rate);
 	data->rhold = aemif_cycles_to_nsec(RHOLD_VAL(val), clk_rate);

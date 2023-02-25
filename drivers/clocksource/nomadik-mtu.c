@@ -76,7 +76,7 @@ static u64 notrace nomadik_read_sched_clock(void)
 	if (unlikely(!mtu_base))
 		return 0;
 
-	return -readl(mtu_base + MTU_VAL(0));
+	return -pete_readl("drivers/clocksource/nomadik-mtu.c:79", mtu_base + MTU_VAL(0));
 }
 
 static unsigned long nmdk_timer_read_current_timer(void)
@@ -87,10 +87,10 @@ static unsigned long nmdk_timer_read_current_timer(void)
 /* Clockevent device: use one-shot mode */
 static int nmdk_clkevt_next(unsigned long evt, struct clock_event_device *ev)
 {
-	writel(1 << 1, mtu_base + MTU_IMSC);
-	writel(evt, mtu_base + MTU_LR(1));
+	pete_writel("drivers/clocksource/nomadik-mtu.c:90", 1 << 1, mtu_base + MTU_IMSC);
+	pete_writel("drivers/clocksource/nomadik-mtu.c:91", evt, mtu_base + MTU_LR(1));
 	/* Load highest value, enable device, enable interrupts */
-	writel(MTU_CRn_ONESHOT | clk_prescale |
+	pete_writel("drivers/clocksource/nomadik-mtu.c:93", MTU_CRn_ONESHOT | clk_prescale |
 	       MTU_CRn_32BITS | MTU_CRn_ENA,
 	       mtu_base + MTU_CR(1));
 
@@ -101,13 +101,13 @@ static void nmdk_clkevt_reset(void)
 {
 	if (clkevt_periodic) {
 		/* Timer: configure load and background-load, and fire it up */
-		writel(nmdk_cycle, mtu_base + MTU_LR(1));
-		writel(nmdk_cycle, mtu_base + MTU_BGLR(1));
+		pete_writel("drivers/clocksource/nomadik-mtu.c:104", nmdk_cycle, mtu_base + MTU_LR(1));
+		pete_writel("drivers/clocksource/nomadik-mtu.c:105", nmdk_cycle, mtu_base + MTU_BGLR(1));
 
-		writel(MTU_CRn_PERIODIC | clk_prescale |
+		pete_writel("drivers/clocksource/nomadik-mtu.c:107", MTU_CRn_PERIODIC | clk_prescale |
 		       MTU_CRn_32BITS | MTU_CRn_ENA,
 		       mtu_base + MTU_CR(1));
-		writel(1 << 1, mtu_base + MTU_IMSC);
+		pete_writel("drivers/clocksource/nomadik-mtu.c:110", 1 << 1, mtu_base + MTU_IMSC);
 	} else {
 		/* Generate an interrupt to start the clockevent again */
 		(void) nmdk_clkevt_next(nmdk_cycle, NULL);
@@ -116,11 +116,11 @@ static void nmdk_clkevt_reset(void)
 
 static int nmdk_clkevt_shutdown(struct clock_event_device *evt)
 {
-	writel(0, mtu_base + MTU_IMSC);
+	pete_writel("drivers/clocksource/nomadik-mtu.c:119", 0, mtu_base + MTU_IMSC);
 	/* disable timer */
-	writel(0, mtu_base + MTU_CR(1));
+	pete_writel("drivers/clocksource/nomadik-mtu.c:121", 0, mtu_base + MTU_CR(1));
 	/* load some high default value */
-	writel(0xffffffff, mtu_base + MTU_LR(1));
+	pete_writel("drivers/clocksource/nomadik-mtu.c:123", 0xffffffff, mtu_base + MTU_LR(1));
 	return 0;
 }
 
@@ -140,13 +140,13 @@ static int nmdk_clkevt_set_periodic(struct clock_event_device *evt)
 static void nmdk_clksrc_reset(void)
 {
 	/* Disable */
-	writel(0, mtu_base + MTU_CR(0));
+	pete_writel("drivers/clocksource/nomadik-mtu.c:143", 0, mtu_base + MTU_CR(0));
 
 	/* ClockSource: configure load and background-load, and fire it up */
-	writel(nmdk_cycle, mtu_base + MTU_LR(0));
-	writel(nmdk_cycle, mtu_base + MTU_BGLR(0));
+	pete_writel("drivers/clocksource/nomadik-mtu.c:146", nmdk_cycle, mtu_base + MTU_LR(0));
+	pete_writel("drivers/clocksource/nomadik-mtu.c:147", nmdk_cycle, mtu_base + MTU_BGLR(0));
 
-	writel(clk_prescale | MTU_CRn_32BITS | MTU_CRn_ENA,
+	pete_writel("drivers/clocksource/nomadik-mtu.c:149", clk_prescale | MTU_CRn_32BITS | MTU_CRn_ENA,
 	       mtu_base + MTU_CR(0));
 }
 
@@ -176,7 +176,7 @@ static irqreturn_t nmdk_timer_interrupt(int irq, void *dev_id)
 {
 	struct clock_event_device *evdev = dev_id;
 
-	writel(1 << 1, mtu_base + MTU_ICR); /* Interrupt clear reg */
+	pete_writel("drivers/clocksource/nomadik-mtu.c:179", 1 << 1, mtu_base + MTU_ICR); /* Interrupt clear reg */
 	evdev->event_handler(evdev);
 	return IRQ_HANDLED;
 }

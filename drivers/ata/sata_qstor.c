@@ -215,7 +215,7 @@ static int qs_scr_read(struct ata_link *link, unsigned int sc_reg, u32 *val)
 {
 	if (sc_reg > SCR_CONTROL)
 		return -EINVAL;
-	*val = readl(link->ap->ioaddr.scr_addr + (sc_reg * 8));
+	*val = pete_readl("drivers/ata/sata_qstor.c:218", link->ap->ioaddr.scr_addr + (sc_reg * 8));
 	return 0;
 }
 
@@ -229,7 +229,7 @@ static int qs_scr_write(struct ata_link *link, unsigned int sc_reg, u32 val)
 {
 	if (sc_reg > SCR_CONTROL)
 		return -EINVAL;
-	writel(val, link->ap->ioaddr.scr_addr + (sc_reg * 8));
+	pete_writel("drivers/ata/sata_qstor.c:232", val, link->ap->ioaddr.scr_addr + (sc_reg * 8));
 	return 0;
 }
 
@@ -308,8 +308,8 @@ static inline void qs_packet_start(struct ata_queued_cmd *qc)
 
 	writeb(QS_CTR0_CLER, chan + QS_CCT_CTR0);
 	wmb();                             /* flush PRDs and pkt to memory */
-	writel(QS_CCF_RUN_PKT, chan + QS_CCT_CFF);
-	readl(chan + QS_CCT_CFF);          /* flush */
+	pete_writel("drivers/ata/sata_qstor.c:311", QS_CCF_RUN_PKT, chan + QS_CCT_CFF);
+	pete_readl("drivers/ata/sata_qstor.c:312", chan + QS_CCT_CFF);          /* flush */
 }
 
 static unsigned int qs_qc_issue(struct ata_queued_cmd *qc)
@@ -361,8 +361,8 @@ static inline unsigned int qs_intr_pkt(struct ata_host *host)
 	u8 __iomem *mmio_base = qs_mmio_base(host);
 
 	do {
-		u32 sff0 = readl(mmio_base + QS_HST_SFF);
-		u32 sff1 = readl(mmio_base + QS_HST_SFF + 4);
+		u32 sff0 = pete_readl("drivers/ata/sata_qstor.c:364", mmio_base + QS_HST_SFF);
+		u32 sff1 = pete_readl("drivers/ata/sata_qstor.c:365", mmio_base + QS_HST_SFF + 4);
 		u8 sEVLD = (sff1 >> 30) & 0x01;	/* valid flag */
 		sFFE  = sff1 >> 31;		/* empty flag */
 
@@ -483,8 +483,8 @@ static int qs_port_start(struct ata_port *ap)
 
 	qs_enter_reg_mode(ap);
 	addr = (u64)pp->pkt_dma;
-	writel((u32) addr,        chan + QS_CCF_CPBA);
-	writel((u32)(addr >> 32), chan + QS_CCF_CPBA + 4);
+	pete_writel("drivers/ata/sata_qstor.c:486", (u32) addr,        chan + QS_CCF_CPBA);
+	pete_writel("drivers/ata/sata_qstor.c:487", (u32)(addr >> 32), chan + QS_CCF_CPBA + 4);
 	return 0;
 }
 
@@ -538,7 +538,7 @@ static void qs_host_init(struct ata_host *host, unsigned int chip_id)
  */
 static int qs_set_dma_masks(struct pci_dev *pdev, void __iomem *mmio_base)
 {
-	u32 bus_info = readl(mmio_base + QS_HID_HPHY);
+	u32 bus_info = pete_readl("drivers/ata/sata_qstor.c:541", mmio_base + QS_HID_HPHY);
 	int dma_bits = (bus_info & QS_HPHY_64BIT) ? 64 : 32;
 	int rc;
 

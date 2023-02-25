@@ -430,7 +430,7 @@ static int ice_setup_rx_ctx(struct ice_ring *ring)
 
 	/* init queue specific tail register */
 	ring->tail = hw->hw_addr + QRX_TAIL(pf_q);
-	writel(0, ring->tail);
+	pete_writel("drivers/net/ethernet/intel/ice/ice_base.c:433", 0, ring->tail);
 
 	return 0;
 }

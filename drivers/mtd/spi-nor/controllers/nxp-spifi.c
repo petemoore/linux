@@ -79,7 +79,7 @@ static int nxp_spifi_reset(struct nxp_spifi *spifi)
 	u8 stat;
 	int ret;
 
-	writel(SPIFI_STAT_RESET, spifi->io_base + SPIFI_STAT);
+	pete_writel("drivers/mtd/spi-nor/controllers/nxp-spifi.c:82", SPIFI_STAT_RESET, spifi->io_base + SPIFI_STAT);
 	ret = readb_poll_timeout(spifi->io_base + SPIFI_STAT, stat,
 				 !(stat & SPIFI_STAT_RESET), 10, 30);
 	if (ret)
@@ -112,7 +112,7 @@ static int nxp_spifi_set_memory_mode_on(struct nxp_spifi *spifi)
 	if (spifi->memory_mode)
 		return 0;
 
-	writel(spifi->mcmd, spifi->io_base + SPIFI_MCMD);
+	pete_writel("drivers/mtd/spi-nor/controllers/nxp-spifi.c:115", spifi->mcmd, spifi->io_base + SPIFI_MCMD);
 	ret = readb_poll_timeout(spifi->io_base + SPIFI_STAT, stat,
 				 stat & SPIFI_STAT_MCINIT, 10, 30);
 	if (ret)
@@ -138,7 +138,7 @@ static int nxp_spifi_read_reg(struct spi_nor *nor, u8 opcode, u8 *buf,
 	      SPIFI_CMD_OPCODE(opcode) |
 	      SPIFI_CMD_FIELDFORM_ALL_SERIAL |
 	      SPIFI_CMD_FRAMEFORM_OPCODE_ONLY;
-	writel(cmd, spifi->io_base + SPIFI_CMD);
+	pete_writel("drivers/mtd/spi-nor/controllers/nxp-spifi.c:141", cmd, spifi->io_base + SPIFI_CMD);
 
 	while (len--)
 		*buf++ = readb(spifi->io_base + SPIFI_DATA);
@@ -162,7 +162,7 @@ static int nxp_spifi_write_reg(struct spi_nor *nor, u8 opcode, const u8 *buf,
 	      SPIFI_CMD_OPCODE(opcode) |
 	      SPIFI_CMD_FIELDFORM_ALL_SERIAL |
 	      SPIFI_CMD_FRAMEFORM_OPCODE_ONLY;
-	writel(cmd, spifi->io_base + SPIFI_CMD);
+	pete_writel("drivers/mtd/spi-nor/controllers/nxp-spifi.c:165", cmd, spifi->io_base + SPIFI_CMD);
 
 	while (len--)
 		writeb(*buf++, spifi->io_base + SPIFI_DATA);
@@ -197,14 +197,14 @@ static ssize_t nxp_spifi_write(struct spi_nor *nor, loff_t to, size_t len,
 	if (ret)
 		return ret;
 
-	writel(to, spifi->io_base + SPIFI_ADDR);
+	pete_writel("drivers/mtd/spi-nor/controllers/nxp-spifi.c:200", to, spifi->io_base + SPIFI_ADDR);
 
 	cmd = SPIFI_CMD_DOUT |
 	      SPIFI_CMD_DATALEN(len) |
 	      SPIFI_CMD_FIELDFORM_ALL_SERIAL |
 	      SPIFI_CMD_OPCODE(nor->program_opcode) |
 	      SPIFI_CMD_FRAMEFORM(spifi->nor.addr_width + 1);
-	writel(cmd, spifi->io_base + SPIFI_CMD);
+	pete_writel("drivers/mtd/spi-nor/controllers/nxp-spifi.c:207", cmd, spifi->io_base + SPIFI_CMD);
 
 	for (i = 0; i < len; i++)
 		writeb(buf[i], spifi->io_base + SPIFI_DATA);
@@ -226,12 +226,12 @@ static int nxp_spifi_erase(struct spi_nor *nor, loff_t offs)
 	if (ret)
 		return ret;
 
-	writel(offs, spifi->io_base + SPIFI_ADDR);
+	pete_writel("drivers/mtd/spi-nor/controllers/nxp-spifi.c:229", offs, spifi->io_base + SPIFI_ADDR);
 
 	cmd = SPIFI_CMD_FIELDFORM_ALL_SERIAL |
 	      SPIFI_CMD_OPCODE(nor->erase_opcode) |
 	      SPIFI_CMD_FRAMEFORM(spifi->nor.addr_width + 1);
-	writel(cmd, spifi->io_base + SPIFI_CMD);
+	pete_writel("drivers/mtd/spi-nor/controllers/nxp-spifi.c:234", cmd, spifi->io_base + SPIFI_CMD);
 
 	return nxp_spifi_wait_for_cmd(spifi);
 }
@@ -338,7 +338,7 @@ static int nxp_spifi_setup_flash(struct nxp_spifi *spifi,
 		return -EINVAL;
 	}
 
-	writel(ctrl, spifi->io_base + SPIFI_CTRL);
+	pete_writel("drivers/mtd/spi-nor/controllers/nxp-spifi.c:341", ctrl, spifi->io_base + SPIFI_CTRL);
 
 	spifi->nor.dev   = spifi->dev;
 	spi_nor_set_flash_node(&spifi->nor, np);
@@ -427,8 +427,8 @@ static int nxp_spifi_probe(struct platform_device *pdev)
 
 	/* Initialize and reset device */
 	nxp_spifi_reset(spifi);
-	writel(0, spifi->io_base + SPIFI_IDATA);
-	writel(0, spifi->io_base + SPIFI_MCMD);
+	pete_writel("drivers/mtd/spi-nor/controllers/nxp-spifi.c:430", 0, spifi->io_base + SPIFI_IDATA);
+	pete_writel("drivers/mtd/spi-nor/controllers/nxp-spifi.c:431", 0, spifi->io_base + SPIFI_MCMD);
 	nxp_spifi_reset(spifi);
 
 	flash_np = of_get_next_available_child(pdev->dev.of_node, NULL);

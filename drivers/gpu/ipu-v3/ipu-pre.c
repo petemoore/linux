@@ -142,14 +142,14 @@ int ipu_pre_get(struct ipu_pre *pre)
 		return -EBUSY;
 
 	/* first get the engine out of reset and remove clock gating */
-	writel(0, pre->regs + IPU_PRE_CTRL);
+	pete_writel("drivers/gpu/ipu-v3/ipu-pre.c:145", 0, pre->regs + IPU_PRE_CTRL);
 
 	/* init defaults that should be applied to all streams */
 	val = IPU_PRE_CTRL_HANDSHAKE_ABORT_SKIP_EN |
 	      IPU_PRE_CTRL_HANDSHAKE_EN |
 	      IPU_PRE_CTRL_TPR_REST_SEL |
 	      IPU_PRE_CTRL_SDW_UPDATE;
-	writel(val, pre->regs + IPU_PRE_CTRL);
+	pete_writel("drivers/gpu/ipu-v3/ipu-pre.c:152", val, pre->regs + IPU_PRE_CTRL);
 
 	pre->in_use = true;
 	return 0;
@@ -157,7 +157,7 @@ int ipu_pre_get(struct ipu_pre *pre)
 
 void ipu_pre_put(struct ipu_pre *pre)
 {
-	writel(IPU_PRE_CTRL_SFTRST, pre->regs + IPU_PRE_CTRL);
+	pete_writel("drivers/gpu/ipu-v3/ipu-pre.c:160", IPU_PRE_CTRL_SFTRST, pre->regs + IPU_PRE_CTRL);
 
 	pre->in_use = false;
 }
@@ -176,8 +176,8 @@ void ipu_pre_configure(struct ipu_pre *pre, unsigned int width,
 	else
 		pre->safe_window_end = DIV_ROUND_UP(height, 4) - 1;
 
-	writel(bufaddr, pre->regs + IPU_PRE_CUR_BUF);
-	writel(bufaddr, pre->regs + IPU_PRE_NEXT_BUF);
+	pete_writel("drivers/gpu/ipu-v3/ipu-pre.c:179", bufaddr, pre->regs + IPU_PRE_CUR_BUF);
+	pete_writel("drivers/gpu/ipu-v3/ipu-pre.c:180", bufaddr, pre->regs + IPU_PRE_NEXT_BUF);
 	pre->last_bufaddr = bufaddr;
 
 	val = IPU_PRE_PREF_ENG_CTRL_INPUT_PIXEL_FORMAT(0) |
@@ -185,30 +185,30 @@ void ipu_pre_configure(struct ipu_pre *pre, unsigned int width,
 	      IPU_PRE_PREF_ENG_CTRL_RD_NUM_BYTES(4) |
 	      IPU_PRE_PREF_ENG_CTRL_SHIFT_BYPASS |
 	      IPU_PRE_PREF_ENG_CTRL_PREFETCH_EN;
-	writel(val, pre->regs + IPU_PRE_PREFETCH_ENG_CTRL);
+	pete_writel("drivers/gpu/ipu-v3/ipu-pre.c:188", val, pre->regs + IPU_PRE_PREFETCH_ENG_CTRL);
 
 	val = IPU_PRE_PREFETCH_ENG_INPUT_SIZE_WIDTH(width) |
 	      IPU_PRE_PREFETCH_ENG_INPUT_SIZE_HEIGHT(height);
-	writel(val, pre->regs + IPU_PRE_PREFETCH_ENG_INPUT_SIZE);
+	pete_writel("drivers/gpu/ipu-v3/ipu-pre.c:192", val, pre->regs + IPU_PRE_PREFETCH_ENG_INPUT_SIZE);
 
 	val = IPU_PRE_PREFETCH_ENG_PITCH_Y(stride);
-	writel(val, pre->regs + IPU_PRE_PREFETCH_ENG_PITCH);
+	pete_writel("drivers/gpu/ipu-v3/ipu-pre.c:195", val, pre->regs + IPU_PRE_PREFETCH_ENG_PITCH);
 
 	val = IPU_PRE_STORE_ENG_CTRL_OUTPUT_ACTIVE_BPP(active_bpp) |
 	      IPU_PRE_STORE_ENG_CTRL_WR_NUM_BYTES(4) |
 	      IPU_PRE_STORE_ENG_CTRL_STORE_EN;
-	writel(val, pre->regs + IPU_PRE_STORE_ENG_CTRL);
+	pete_writel("drivers/gpu/ipu-v3/ipu-pre.c:200", val, pre->regs + IPU_PRE_STORE_ENG_CTRL);
 
 	val = IPU_PRE_STORE_ENG_SIZE_INPUT_WIDTH(width) |
 	      IPU_PRE_STORE_ENG_SIZE_INPUT_HEIGHT(height);
-	writel(val, pre->regs + IPU_PRE_STORE_ENG_SIZE);
+	pete_writel("drivers/gpu/ipu-v3/ipu-pre.c:204", val, pre->regs + IPU_PRE_STORE_ENG_SIZE);
 
 	val = IPU_PRE_STORE_ENG_PITCH_OUT_PITCH(stride);
-	writel(val, pre->regs + IPU_PRE_STORE_ENG_PITCH);
+	pete_writel("drivers/gpu/ipu-v3/ipu-pre.c:207", val, pre->regs + IPU_PRE_STORE_ENG_PITCH);
 
-	writel(pre->buffer_paddr, pre->regs + IPU_PRE_STORE_ENG_ADDR);
+	pete_writel("drivers/gpu/ipu-v3/ipu-pre.c:209", pre->buffer_paddr, pre->regs + IPU_PRE_STORE_ENG_ADDR);
 
-	val = readl(pre->regs + IPU_PRE_TPR_CTRL);
+	val = pete_readl("drivers/gpu/ipu-v3/ipu-pre.c:211", pre->regs + IPU_PRE_TPR_CTRL);
 	val &= ~IPU_PRE_TPR_CTRL_TILE_FORMAT_MASK;
 	if (modifier != DRM_FORMAT_MOD_LINEAR) {
 		/* only support single buffer formats for now */
@@ -218,16 +218,16 @@ void ipu_pre_configure(struct ipu_pre *pre, unsigned int width,
 		if (info->cpp[0] == 2)
 			val |= IPU_PRE_TPR_CTRL_TILE_FORMAT_16_BIT;
 	}
-	writel(val, pre->regs + IPU_PRE_TPR_CTRL);
+	pete_writel("drivers/gpu/ipu-v3/ipu-pre.c:221", val, pre->regs + IPU_PRE_TPR_CTRL);
 
-	val = readl(pre->regs + IPU_PRE_CTRL);
+	val = pete_readl("drivers/gpu/ipu-v3/ipu-pre.c:223", pre->regs + IPU_PRE_CTRL);
 	val |= IPU_PRE_CTRL_EN_REPEAT | IPU_PRE_CTRL_ENABLE |
 	       IPU_PRE_CTRL_SDW_UPDATE;
 	if (modifier == DRM_FORMAT_MOD_LINEAR)
 		val &= ~IPU_PRE_CTRL_BLOCK_EN;
 	else
 		val |= IPU_PRE_CTRL_BLOCK_EN;
-	writel(val, pre->regs + IPU_PRE_CTRL);
+	pete_writel("drivers/gpu/ipu-v3/ipu-pre.c:230", val, pre->regs + IPU_PRE_CTRL);
 }
 
 void ipu_pre_update(struct ipu_pre *pre, unsigned int bufaddr)
@@ -239,7 +239,7 @@ void ipu_pre_update(struct ipu_pre *pre, unsigned int bufaddr)
 	if (bufaddr == pre->last_bufaddr)
 		return;
 
-	writel(bufaddr, pre->regs + IPU_PRE_NEXT_BUF);
+	pete_writel("drivers/gpu/ipu-v3/ipu-pre.c:242", bufaddr, pre->regs + IPU_PRE_NEXT_BUF);
 	pre->last_bufaddr = bufaddr;
 
 	do {
@@ -248,13 +248,13 @@ void ipu_pre_update(struct ipu_pre *pre, unsigned int bufaddr)
 			return;
 		}
 
-		val = readl(pre->regs + IPU_PRE_STORE_ENG_STATUS);
+		val = pete_readl("drivers/gpu/ipu-v3/ipu-pre.c:251", pre->regs + IPU_PRE_STORE_ENG_STATUS);
 		current_yblock =
 			(val >> IPU_PRE_STORE_ENG_STATUS_STORE_BLOCK_Y_SHIFT) &
 			IPU_PRE_STORE_ENG_STATUS_STORE_BLOCK_Y_MASK;
 	} while (current_yblock == 0 || current_yblock >= pre->safe_window_end);
 
-	writel(IPU_PRE_CTRL_SDW_UPDATE, pre->regs + IPU_PRE_CTRL_SET);
+	pete_writel("drivers/gpu/ipu-v3/ipu-pre.c:257", IPU_PRE_CTRL_SDW_UPDATE, pre->regs + IPU_PRE_CTRL_SET);
 }
 
 bool ipu_pre_update_pending(struct ipu_pre *pre)

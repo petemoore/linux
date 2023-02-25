@@ -41,10 +41,10 @@ static int moxart_mdio_read(struct mii_bus *bus, int mii_id, int regnum)
 	ctrl |= MIIRD | ((mii_id << 16) & PHYAD_MASK) |
 		((regnum << 21) & REGAD_MASK);
 
-	writel(ctrl, data->base + REG_PHY_CTRL);
+	pete_writel("drivers/net/mdio/mdio-moxart.c:44", ctrl, data->base + REG_PHY_CTRL);
 
 	do {
-		ctrl = readl(data->base + REG_PHY_CTRL);
+		ctrl = pete_readl("drivers/net/mdio/mdio-moxart.c:47", data->base + REG_PHY_CTRL);
 
 		if (!(ctrl & MIIRD))
 			return ctrl & MIIRDATA_MASK;
@@ -72,11 +72,11 @@ static int moxart_mdio_write(struct mii_bus *bus, int mii_id,
 
 	value &= MIIWDATA_MASK;
 
-	writel(value, data->base + REG_PHY_WRITE_DATA);
-	writel(ctrl, data->base + REG_PHY_CTRL);
+	pete_writel("drivers/net/mdio/mdio-moxart.c:75", value, data->base + REG_PHY_WRITE_DATA);
+	pete_writel("drivers/net/mdio/mdio-moxart.c:76", ctrl, data->base + REG_PHY_CTRL);
 
 	do {
-		ctrl = readl(data->base + REG_PHY_CTRL);
+		ctrl = pete_readl("drivers/net/mdio/mdio-moxart.c:79", data->base + REG_PHY_CTRL);
 
 		if (!(ctrl & MIIWR))
 			return 0;

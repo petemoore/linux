@@ -214,11 +214,11 @@ nfp_bpf_parse_cap_adjust_head(struct nfp_app_bpf *bpf, void __iomem *value,
 		return -EINVAL;
 	}
 
-	bpf->adjust_head.flags = readl(&cap->flags);
-	bpf->adjust_head.off_min = readl(&cap->off_min);
-	bpf->adjust_head.off_max = readl(&cap->off_max);
-	bpf->adjust_head.guaranteed_sub = readl(&cap->guaranteed_sub);
-	bpf->adjust_head.guaranteed_add = readl(&cap->guaranteed_add);
+	bpf->adjust_head.flags = pete_readl("drivers/net/ethernet/netronome/nfp/bpf/main.c:217", &cap->flags);
+	bpf->adjust_head.off_min = pete_readl("drivers/net/ethernet/netronome/nfp/bpf/main.c:218", &cap->off_min);
+	bpf->adjust_head.off_max = pete_readl("drivers/net/ethernet/netronome/nfp/bpf/main.c:219", &cap->off_max);
+	bpf->adjust_head.guaranteed_sub = pete_readl("drivers/net/ethernet/netronome/nfp/bpf/main.c:220", &cap->guaranteed_sub);
+	bpf->adjust_head.guaranteed_add = pete_readl("drivers/net/ethernet/netronome/nfp/bpf/main.c:221", &cap->guaranteed_add);
 
 	if (bpf->adjust_head.off_min > bpf->adjust_head.off_max) {
 		nfp_err(cpp, "invalid adjust_head TLV: min > max\n");
@@ -244,18 +244,18 @@ nfp_bpf_parse_cap_func(struct nfp_app_bpf *bpf, void __iomem *value, u32 length)
 		return -EINVAL;
 	}
 
-	switch (readl(&cap->func_id)) {
+	switch (pete_readl("drivers/net/ethernet/netronome/nfp/bpf/main.c:247", &cap->func_id)) {
 	case BPF_FUNC_map_lookup_elem:
-		bpf->helpers.map_lookup = readl(&cap->func_addr);
+		bpf->helpers.map_lookup = pete_readl("drivers/net/ethernet/netronome/nfp/bpf/main.c:249", &cap->func_addr);
 		break;
 	case BPF_FUNC_map_update_elem:
-		bpf->helpers.map_update = readl(&cap->func_addr);
+		bpf->helpers.map_update = pete_readl("drivers/net/ethernet/netronome/nfp/bpf/main.c:252", &cap->func_addr);
 		break;
 	case BPF_FUNC_map_delete_elem:
-		bpf->helpers.map_delete = readl(&cap->func_addr);
+		bpf->helpers.map_delete = pete_readl("drivers/net/ethernet/netronome/nfp/bpf/main.c:255", &cap->func_addr);
 		break;
 	case BPF_FUNC_perf_event_output:
-		bpf->helpers.perf_event_output = readl(&cap->func_addr);
+		bpf->helpers.perf_event_output = pete_readl("drivers/net/ethernet/netronome/nfp/bpf/main.c:258", &cap->func_addr);
 		break;
 	}
 
@@ -272,12 +272,12 @@ nfp_bpf_parse_cap_maps(struct nfp_app_bpf *bpf, void __iomem *value, u32 length)
 		return -EINVAL;
 	}
 
-	bpf->maps.types = readl(&cap->types);
-	bpf->maps.max_maps = readl(&cap->max_maps);
-	bpf->maps.max_elems = readl(&cap->max_elems);
-	bpf->maps.max_key_sz = readl(&cap->max_key_sz);
-	bpf->maps.max_val_sz = readl(&cap->max_val_sz);
-	bpf->maps.max_elem_sz = readl(&cap->max_elem_sz);
+	bpf->maps.types = pete_readl("drivers/net/ethernet/netronome/nfp/bpf/main.c:275", &cap->types);
+	bpf->maps.max_maps = pete_readl("drivers/net/ethernet/netronome/nfp/bpf/main.c:276", &cap->max_maps);
+	bpf->maps.max_elems = pete_readl("drivers/net/ethernet/netronome/nfp/bpf/main.c:277", &cap->max_elems);
+	bpf->maps.max_key_sz = pete_readl("drivers/net/ethernet/netronome/nfp/bpf/main.c:278", &cap->max_key_sz);
+	bpf->maps.max_val_sz = pete_readl("drivers/net/ethernet/netronome/nfp/bpf/main.c:279", &cap->max_val_sz);
+	bpf->maps.max_elem_sz = pete_readl("drivers/net/ethernet/netronome/nfp/bpf/main.c:280", &cap->max_elem_sz);
 
 	return 0;
 }
@@ -323,7 +323,7 @@ nfp_bpf_parse_cap_abi_version(struct nfp_app_bpf *bpf, void __iomem *value,
 		return -EINVAL;
 	}
 
-	bpf->abi_version = readl(value);
+	bpf->abi_version = pete_readl("drivers/net/ethernet/netronome/nfp/bpf/main.c:326", value);
 	if (bpf->abi_version < 2 || bpf->abi_version > 3) {
 		nfp_warn(bpf->app->cpp, "unsupported BPF ABI version: %d\n",
 			 bpf->abi_version);
@@ -349,8 +349,8 @@ static int nfp_bpf_parse_capabilities(struct nfp_app *app)
 		u8 __iomem *value;
 		u32 type, length;
 
-		type = readl(mem);
-		length = readl(mem + 4);
+		type = pete_readl("drivers/net/ethernet/netronome/nfp/bpf/main.c:352", mem);
+		length = pete_readl("drivers/net/ethernet/netronome/nfp/bpf/main.c:353", mem + 4);
 		value = mem + 8;
 
 		mem += 8 + length;

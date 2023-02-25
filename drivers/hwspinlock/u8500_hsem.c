@@ -51,13 +51,13 @@ static int u8500_hsem_trylock(struct hwspinlock *lock)
 {
 	void __iomem *lock_addr = lock->priv;
 
-	writel(HSEM_MASTER_ID, lock_addr);
+	pete_writel("drivers/hwspinlock/u8500_hsem.c:54", HSEM_MASTER_ID, lock_addr);
 
 	/* get only first 4 bit and compare to masterID.
 	 * if equal, we have the semaphore, otherwise
 	 * someone else has it.
 	 */
-	return (HSEM_MASTER_ID == (0x0F & readl(lock_addr)));
+	return (HSEM_MASTER_ID == (0x0F & pete_readl("drivers/hwspinlock/u8500_hsem.c:60", lock_addr)));
 }
 
 static void u8500_hsem_unlock(struct hwspinlock *lock)
@@ -65,7 +65,7 @@ static void u8500_hsem_unlock(struct hwspinlock *lock)
 	void __iomem *lock_addr = lock->priv;
 
 	/* release the lock by writing 0 to it */
-	writel(RESET_SEMAPHORE, lock_addr);
+	pete_writel("drivers/hwspinlock/u8500_hsem.c:68", RESET_SEMAPHORE, lock_addr);
 }
 
 /*
@@ -99,11 +99,11 @@ static int u8500_hsem_probe(struct platform_device *pdev)
 		return PTR_ERR(io_base);
 
 	/* make sure protocol 1 is selected */
-	val = readl(io_base + HSEM_CTRL_REG);
-	writel((val & ~HSEM_PROTOCOL_1), io_base + HSEM_CTRL_REG);
+	val = pete_readl("drivers/hwspinlock/u8500_hsem.c:102", io_base + HSEM_CTRL_REG);
+	pete_writel("drivers/hwspinlock/u8500_hsem.c:103", (val & ~HSEM_PROTOCOL_1), io_base + HSEM_CTRL_REG);
 
 	/* clear all interrupts */
-	writel(0xFFFF, io_base + HSEM_ICRALL);
+	pete_writel("drivers/hwspinlock/u8500_hsem.c:106", 0xFFFF, io_base + HSEM_ICRALL);
 
 	bank = devm_kzalloc(&pdev->dev, struct_size(bank, lock, num_locks),
 			    GFP_KERNEL);
@@ -126,7 +126,7 @@ static int u8500_hsem_remove(struct platform_device *pdev)
 	void __iomem *io_base = bank->lock[0].priv - HSEM_REGISTER_OFFSET;
 
 	/* clear all interrupts */
-	writel(0xFFFF, io_base + HSEM_ICRALL);
+	pete_writel("drivers/hwspinlock/u8500_hsem.c:129", 0xFFFF, io_base + HSEM_ICRALL);
 
 	return 0;
 }

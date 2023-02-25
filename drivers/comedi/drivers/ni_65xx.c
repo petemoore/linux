@@ -283,7 +283,7 @@ static void ni_65xx_disable_input_filters(struct comedi_device *dev)
 		writeb(0x00, dev->mmio + NI_65XX_FILTER_ENA(i));
 
 	/* set filter interval to 0 (32bit reg) */
-	writel(0x00000000, dev->mmio + NI_65XX_FILTER_REG);
+	pete_writel("drivers/comedi/drivers/ni_65xx.c:286", 0x00000000, dev->mmio + NI_65XX_FILTER_REG);
 }
 
 /* updates edge detection for base_chan to base_chan+31 */
@@ -374,7 +374,7 @@ static int ni_65xx_dio_insn_config(struct comedi_device *dev,
 		 */
 		val = readb(dev->mmio + NI_65XX_FILTER_ENA(port));
 		if (interval) {
-			writel(interval, dev->mmio + NI_65XX_FILTER_REG);
+			pete_writel("drivers/comedi/drivers/ni_65xx.c:377", interval, dev->mmio + NI_65XX_FILTER_REG);
 			val |= chan_mask;
 		} else {
 			val &= ~chan_mask;
@@ -619,7 +619,7 @@ static int ni_65xx_mite_init(struct pci_dev *pcidev)
 
 	/* set data window to main registers (BAR 1) */
 	main_phys_addr = pci_resource_start(pcidev, 1);
-	writel(main_phys_addr | WENAB, mite_base + MITE_IODWBSR);
+	pete_writel("drivers/comedi/drivers/ni_65xx.c:622", main_phys_addr | WENAB, mite_base + MITE_IODWBSR);
 
 	/* finished with MITE registers */
 	iounmap(mite_base);

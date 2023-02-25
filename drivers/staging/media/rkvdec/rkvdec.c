@@ -923,11 +923,11 @@ static irqreturn_t rkvdec_irq_handler(int irq, void *priv)
 	enum vb2_buffer_state state;
 	u32 status;
 
-	status = readl(rkvdec->regs + RKVDEC_REG_INTERRUPT);
+	status = pete_readl("drivers/staging/media/rkvdec/rkvdec.c:926", rkvdec->regs + RKVDEC_REG_INTERRUPT);
 	state = (status & RKVDEC_RDY_STA) ?
 		VB2_BUF_STATE_DONE : VB2_BUF_STATE_ERROR;
 
-	writel(0, rkvdec->regs + RKVDEC_REG_INTERRUPT);
+	pete_writel("drivers/staging/media/rkvdec/rkvdec.c:930", 0, rkvdec->regs + RKVDEC_REG_INTERRUPT);
 	if (cancel_delayed_work(&rkvdec->watchdog_work)) {
 		struct rkvdec_ctx *ctx;
 
@@ -948,8 +948,8 @@ static void rkvdec_watchdog_func(struct work_struct *work)
 	ctx = v4l2_m2m_get_curr_priv(rkvdec->m2m_dev);
 	if (ctx) {
 		dev_err(rkvdec->dev, "Frame processing timed out!\n");
-		writel(RKVDEC_IRQ_DIS, rkvdec->regs + RKVDEC_REG_INTERRUPT);
-		writel(0, rkvdec->regs + RKVDEC_REG_SYSCTRL);
+		pete_writel("drivers/staging/media/rkvdec/rkvdec.c:951", RKVDEC_IRQ_DIS, rkvdec->regs + RKVDEC_REG_INTERRUPT);
+		pete_writel("drivers/staging/media/rkvdec/rkvdec.c:952", 0, rkvdec->regs + RKVDEC_REG_SYSCTRL);
 		rkvdec_job_finish(ctx, VB2_BUF_STATE_ERROR);
 	}
 }

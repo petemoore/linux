@@ -59,7 +59,7 @@ static unsigned int tsi_serial_in(struct uart_port *p, int offset)
 	unsigned int tmp;
 	offset = offset << p->regshift;
 	if (offset == UART_IIR) {
-		tmp = readl(p->membase + (UART_IIR & ~3));
+		tmp = pete_readl("arch/powerpc/kernel/legacy_serial.c:62", p->membase + (UART_IIR & ~3));
 		return (tmp >> 16) & 0xff; /* UART_IIR % 4 == 2 */
 	} else
 		return readb(p->membase + offset);

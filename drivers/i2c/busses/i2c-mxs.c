@@ -143,11 +143,11 @@ static int mxs_i2c_reset(struct mxs_i2c_dev *i2c)
 	 *
 	 * For details, see i.MX233 [25.4.2 - 25.4.4] and i.MX28 [27.5.2 - 27.5.4].
 	 */
-	writel(i2c->timing0, i2c->regs + MXS_I2C_TIMING0);
-	writel(i2c->timing1, i2c->regs + MXS_I2C_TIMING1);
-	writel(i2c->timing2, i2c->regs + MXS_I2C_TIMING2);
+	pete_writel("drivers/i2c/busses/i2c-mxs.c:146", i2c->timing0, i2c->regs + MXS_I2C_TIMING0);
+	pete_writel("drivers/i2c/busses/i2c-mxs.c:147", i2c->timing1, i2c->regs + MXS_I2C_TIMING1);
+	pete_writel("drivers/i2c/busses/i2c-mxs.c:148", i2c->timing2, i2c->regs + MXS_I2C_TIMING2);
 
-	writel(MXS_I2C_IRQ_MASK << 8, i2c->regs + MXS_I2C_CTRL1_SET);
+	pete_writel("drivers/i2c/busses/i2c-mxs.c:150", MXS_I2C_IRQ_MASK << 8, i2c->regs + MXS_I2C_CTRL1_SET);
 
 	return 0;
 }
@@ -305,8 +305,8 @@ static int mxs_i2c_pio_wait_xfer_end(struct mxs_i2c_dev *i2c)
 {
 	unsigned long timeout = jiffies + msecs_to_jiffies(1000);
 
-	while (readl(i2c->regs + MXS_I2C_CTRL0) & MXS_I2C_CTRL0_RUN) {
-		if (readl(i2c->regs + MXS_I2C_CTRL1) &
+	while (pete_readl("drivers/i2c/busses/i2c-mxs.c:308", i2c->regs + MXS_I2C_CTRL0) & MXS_I2C_CTRL0_RUN) {
+		if (pete_readl("drivers/i2c/busses/i2c-mxs.c:309", i2c->regs + MXS_I2C_CTRL1) &
 				MXS_I2C_CTRL1_NO_SLAVE_ACK_IRQ)
 			return -ENXIO;
 		if (time_after(jiffies, timeout))
@@ -321,7 +321,7 @@ static int mxs_i2c_pio_check_error_state(struct mxs_i2c_dev *i2c)
 {
 	u32 state;
 
-	state = readl(i2c->regs + MXS_I2C_CTRL1_CLR) & MXS_I2C_IRQ_MASK;
+	state = pete_readl("drivers/i2c/busses/i2c-mxs.c:324", i2c->regs + MXS_I2C_CTRL1_CLR) & MXS_I2C_IRQ_MASK;
 
 	if (state & MXS_I2C_CTRL1_NO_SLAVE_ACK_IRQ)
 		i2c->cmd_err = -ENXIO;
@@ -338,12 +338,12 @@ static void mxs_i2c_pio_trigger_cmd(struct mxs_i2c_dev *i2c, u32 cmd)
 {
 	u32 reg;
 
-	writel(cmd, i2c->regs + MXS_I2C_CTRL0);
+	pete_writel("drivers/i2c/busses/i2c-mxs.c:341", cmd, i2c->regs + MXS_I2C_CTRL0);
 
 	/* readback makes sure the write is latched into hardware */
-	reg = readl(i2c->regs + MXS_I2C_CTRL0);
+	reg = pete_readl("drivers/i2c/busses/i2c-mxs.c:344", i2c->regs + MXS_I2C_CTRL0);
 	reg |= MXS_I2C_CTRL0_RUN;
-	writel(reg, i2c->regs + MXS_I2C_CTRL0);
+	pete_writel("drivers/i2c/busses/i2c-mxs.c:346", reg, i2c->regs + MXS_I2C_CTRL0);
 }
 
 /*
@@ -357,13 +357,13 @@ static void mxs_i2c_pio_trigger_cmd(struct mxs_i2c_dev *i2c, u32 cmd)
 static void mxs_i2c_pio_trigger_write_cmd(struct mxs_i2c_dev *i2c, u32 cmd,
 					  u32 data)
 {
-	writel(cmd, i2c->regs + MXS_I2C_CTRL0);
+	pete_writel("drivers/i2c/busses/i2c-mxs.c:360", cmd, i2c->regs + MXS_I2C_CTRL0);
 
 	if (i2c->dev_type == MXS_I2C_V1)
-		writel(MXS_I2C_CTRL0_PIO_MODE, i2c->regs + MXS_I2C_CTRL0_SET);
+		pete_writel("drivers/i2c/busses/i2c-mxs.c:363", MXS_I2C_CTRL0_PIO_MODE, i2c->regs + MXS_I2C_CTRL0_SET);
 
-	writel(data, i2c->regs + MXS_I2C_DATA(i2c));
-	writel(MXS_I2C_CTRL0_RUN, i2c->regs + MXS_I2C_CTRL0_SET);
+	pete_writel("drivers/i2c/busses/i2c-mxs.c:365", data, i2c->regs + MXS_I2C_DATA(i2c));
+	pete_writel("drivers/i2c/busses/i2c-mxs.c:366", MXS_I2C_CTRL0_RUN, i2c->regs + MXS_I2C_CTRL0_SET);
 }
 
 static int mxs_i2c_pio_setup_xfer(struct i2c_adapter *adap,
@@ -376,7 +376,7 @@ static int mxs_i2c_pio_setup_xfer(struct i2c_adapter *adap,
 	uint32_t start;
 
 	/* Mute IRQs coming from this block. */
-	writel(MXS_I2C_IRQ_MASK << 8, i2c->regs + MXS_I2C_CTRL1_CLR);
+	pete_writel("drivers/i2c/busses/i2c-mxs.c:379", MXS_I2C_IRQ_MASK << 8, i2c->regs + MXS_I2C_CTRL1_CLR);
 
 	/*
 	 * MX23 idea:
@@ -433,7 +433,7 @@ static int mxs_i2c_pio_setup_xfer(struct i2c_adapter *adap,
 			goto cleanup;
 		}
 
-		data = readl(i2c->regs + MXS_I2C_DATA(i2c));
+		data = pete_readl("drivers/i2c/busses/i2c-mxs.c:436", i2c->regs + MXS_I2C_DATA(i2c));
 		for (i = 0; i < msg->len; i++) {
 			msg->buf[i] = data & 0xff;
 			data >>= 8;
@@ -510,7 +510,7 @@ static int mxs_i2c_pio_setup_xfer(struct i2c_adapter *adap,
 				start & MXS_I2C_CTRL0_POST_SEND_STOP ? "E" : "",
 				start & MXS_I2C_CTRL0_RETAIN_CLOCK ? "C" : "");
 
-			writel(MXS_I2C_DEBUG0_DMAREQ,
+			pete_writel("drivers/i2c/busses/i2c-mxs.c:513", MXS_I2C_DEBUG0_DMAREQ,
 			       i2c->regs + MXS_I2C_DEBUG0_CLR(i2c));
 
 			mxs_i2c_pio_trigger_write_cmd(i2c,
@@ -530,7 +530,7 @@ static int mxs_i2c_pio_setup_xfer(struct i2c_adapter *adap,
 			}
 
 			/* Check NAK here. */
-			ret = readl(i2c->regs + MXS_I2C_STAT) &
+			ret = pete_readl("drivers/i2c/busses/i2c-mxs.c:533", i2c->regs + MXS_I2C_STAT) &
 				    MXS_I2C_STAT_GOT_A_NAK;
 			if (ret) {
 				ret = -ENXIO;
@@ -544,12 +544,12 @@ static int mxs_i2c_pio_setup_xfer(struct i2c_adapter *adap,
 
 cleanup:
 	/* Clear any dangling IRQs and re-enable interrupts. */
-	writel(MXS_I2C_IRQ_MASK, i2c->regs + MXS_I2C_CTRL1_CLR);
-	writel(MXS_I2C_IRQ_MASK << 8, i2c->regs + MXS_I2C_CTRL1_SET);
+	pete_writel("drivers/i2c/busses/i2c-mxs.c:547", MXS_I2C_IRQ_MASK, i2c->regs + MXS_I2C_CTRL1_CLR);
+	pete_writel("drivers/i2c/busses/i2c-mxs.c:548", MXS_I2C_IRQ_MASK << 8, i2c->regs + MXS_I2C_CTRL1_SET);
 
 	/* Clear the PIO_MODE on i.MX23 */
 	if (i2c->dev_type == MXS_I2C_V1)
-		writel(MXS_I2C_CTRL0_PIO_MODE, i2c->regs + MXS_I2C_CTRL0_CLR);
+		pete_writel("drivers/i2c/busses/i2c-mxs.c:552", MXS_I2C_CTRL0_PIO_MODE, i2c->regs + MXS_I2C_CTRL0_CLR);
 
 	return ret;
 }
@@ -606,7 +606,7 @@ static int mxs_i2c_xfer_msg(struct i2c_adapter *adap, struct i2c_msg *msg,
 		 * If the transfer fails with a NAK from the slave the
 		 * controller halts until it gets told to return to idle state.
 		 */
-		writel(MXS_I2C_CTRL1_CLR_GOT_A_NAK,
+		pete_writel("drivers/i2c/busses/i2c-mxs.c:609", MXS_I2C_CTRL1_CLR_GOT_A_NAK,
 		       i2c->regs + MXS_I2C_CTRL1_SET);
 	}
 
@@ -661,7 +661,7 @@ static u32 mxs_i2c_func(struct i2c_adapter *adap)
 static irqreturn_t mxs_i2c_isr(int this_irq, void *dev_id)
 {
 	struct mxs_i2c_dev *i2c = dev_id;
-	u32 stat = readl(i2c->regs + MXS_I2C_CTRL1) & MXS_I2C_IRQ_MASK;
+	u32 stat = pete_readl("drivers/i2c/busses/i2c-mxs.c:664", i2c->regs + MXS_I2C_CTRL1) & MXS_I2C_IRQ_MASK;
 
 	if (!stat)
 		return IRQ_NONE;
@@ -674,7 +674,7 @@ static irqreturn_t mxs_i2c_isr(int this_irq, void *dev_id)
 		/* MXS_I2C_CTRL1_OVERSIZE_XFER_TERM_IRQ is only for slaves */
 		i2c->cmd_err = -EIO;
 
-	writel(stat, i2c->regs + MXS_I2C_CTRL1_CLR);
+	pete_writel("drivers/i2c/busses/i2c-mxs.c:677", stat, i2c->regs + MXS_I2C_CTRL1_CLR);
 
 	return IRQ_HANDLED;
 }
@@ -848,7 +848,7 @@ static int mxs_i2c_probe(struct platform_device *pdev)
 	i2c_set_adapdata(adap, i2c);
 	err = i2c_add_numbered_adapter(adap);
 	if (err) {
-		writel(MXS_I2C_CTRL0_SFTRST,
+		pete_writel("drivers/i2c/busses/i2c-mxs.c:851", MXS_I2C_CTRL0_SFTRST,
 				i2c->regs + MXS_I2C_CTRL0_SET);
 		return err;
 	}
@@ -865,7 +865,7 @@ static int mxs_i2c_remove(struct platform_device *pdev)
 	if (i2c->dmach)
 		dma_release_channel(i2c->dmach);
 
-	writel(MXS_I2C_CTRL0_SFTRST, i2c->regs + MXS_I2C_CTRL0_SET);
+	pete_writel("drivers/i2c/busses/i2c-mxs.c:868", MXS_I2C_CTRL0_SFTRST, i2c->regs + MXS_I2C_CTRL0_SET);
 
 	return 0;
 }

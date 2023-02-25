@@ -709,14 +709,14 @@ static inline void __iomem *ns_ioaddr(struct net_device *dev)
 
 static inline void natsemi_irq_enable(struct net_device *dev)
 {
-	writel(1, ns_ioaddr(dev) + IntrEnable);
-	readl(ns_ioaddr(dev) + IntrEnable);
+	pete_writel("drivers/net/ethernet/natsemi/natsemi.c:712", 1, ns_ioaddr(dev) + IntrEnable);
+	pete_readl("drivers/net/ethernet/natsemi/natsemi.c:713", ns_ioaddr(dev) + IntrEnable);
 }
 
 static inline void natsemi_irq_disable(struct net_device *dev)
 {
-	writel(0, ns_ioaddr(dev) + IntrEnable);
-	readl(ns_ioaddr(dev) + IntrEnable);
+	pete_writel("drivers/net/ethernet/natsemi/natsemi.c:718", 0, ns_ioaddr(dev) + IntrEnable);
+	pete_readl("drivers/net/ethernet/natsemi/natsemi.c:719", ns_ioaddr(dev) + IntrEnable);
 }
 
 static void move_int_phy(struct net_device *dev, int addr)
@@ -893,7 +893,7 @@ static int natsemi_probe1(struct pci_dev *pdev, const struct pci_device_id *ent)
 	 * The address would be used to access a phy over the mii bus, but
 	 * the internal phy is accessed through mapped registers.
 	 */
-	if (np->ignore_phy || readl(ioaddr + ChipConfig) & CfgExtPhy)
+	if (np->ignore_phy || pete_readl("drivers/net/ethernet/natsemi/natsemi.c:896", ioaddr + ChipConfig) & CfgExtPhy)
 		dev->if_port = PORT_MII;
 	else
 		dev->if_port = PORT_TP;
@@ -941,7 +941,7 @@ static int natsemi_probe1(struct pci_dev *pdev, const struct pci_device_id *ent)
 	natsemi_init_media(dev);
 
 	/* save the silicon revision for later querying */
-	np->srr = readl(ioaddr + SiliconRev);
+	np->srr = pete_readl("drivers/net/ethernet/natsemi/natsemi.c:944", ioaddr + SiliconRev);
 	if (netif_msg_hw(np))
 		printk(KERN_INFO "natsemi %s: silicon revision %#04x.\n",
 				pci_name(np->pci_dev), np->srr);
@@ -990,7 +990,7 @@ static int natsemi_probe1(struct pci_dev *pdev, const struct pci_device_id *ent)
    The old method of using an ISA access as a delay, __SLOW_DOWN_IO__, is
    deprecated.
 */
-#define eeprom_delay(ee_addr)	readl(ee_addr)
+#define eeprom_delay(ee_addr)	pete_readl("drivers/net/ethernet/natsemi/natsemi.c:993", ee_addr)
 
 #define EE_Write0 (EE_ChipSelect)
 #define EE_Write1 (EE_ChipSelect | EE_DataIn)
@@ -1007,30 +1007,30 @@ static int eeprom_read(void __iomem *addr, int location)
 	void __iomem *ee_addr = addr + EECtrl;
 	int read_cmd = location | EE_ReadCmd;
 
-	writel(EE_Write0, ee_addr);
+	pete_writel("drivers/net/ethernet/natsemi/natsemi.c:1010", EE_Write0, ee_addr);
 
 	/* Shift the read command bits out. */
 	for (i = 10; i >= 0; i--) {
 		short dataval = (read_cmd & (1 << i)) ? EE_Write1 : EE_Write0;
-		writel(dataval, ee_addr);
+		pete_writel("drivers/net/ethernet/natsemi/natsemi.c:1015", dataval, ee_addr);
 		eeprom_delay(ee_addr);
-		writel(dataval | EE_ShiftClk, ee_addr);
+		pete_writel("drivers/net/ethernet/natsemi/natsemi.c:1017", dataval | EE_ShiftClk, ee_addr);
 		eeprom_delay(ee_addr);
 	}
-	writel(EE_ChipSelect, ee_addr);
+	pete_writel("drivers/net/ethernet/natsemi/natsemi.c:1020", EE_ChipSelect, ee_addr);
 	eeprom_delay(ee_addr);
 
 	for (i = 0; i < 16; i++) {
-		writel(EE_ChipSelect | EE_ShiftClk, ee_addr);
+		pete_writel("drivers/net/ethernet/natsemi/natsemi.c:1024", EE_ChipSelect | EE_ShiftClk, ee_addr);
 		eeprom_delay(ee_addr);
-		retval |= (readl(ee_addr) & EE_DataOut) ? 1 << i : 0;
-		writel(EE_ChipSelect, ee_addr);
+		retval |= (pete_readl("drivers/net/ethernet/natsemi/natsemi.c:1026", ee_addr) & EE_DataOut) ? 1 << i : 0;
+		pete_writel("drivers/net/ethernet/natsemi/natsemi.c:1027", EE_ChipSelect, ee_addr);
 		eeprom_delay(ee_addr);
 	}
 
 	/* Terminate the EEPROM access. */
-	writel(EE_Write0, ee_addr);
-	writel(0, ee_addr);
+	pete_writel("drivers/net/ethernet/natsemi/natsemi.c:1032", EE_Write0, ee_addr);
+	pete_writel("drivers/net/ethernet/natsemi/natsemi.c:1033", 0, ee_addr);
 	return retval;
 }
 
@@ -1043,16 +1043,16 @@ static int eeprom_read(void __iomem *addr, int location)
 /* clock transitions >= 20ns (25MHz)
  * One readl should be good to PCI @ 100MHz
  */
-#define mii_delay(ioaddr)  readl(ioaddr + EECtrl)
+#define mii_delay(ioaddr)  pete_readl("drivers/net/ethernet/natsemi/natsemi.c:1046", ioaddr + EECtrl)
 
 static int mii_getbit (struct net_device *dev)
 {
 	int data;
 	void __iomem *ioaddr = ns_ioaddr(dev);
 
-	writel(MII_ShiftClk, ioaddr + EECtrl);
-	data = readl(ioaddr + EECtrl);
-	writel(0, ioaddr + EECtrl);
+	pete_writel("drivers/net/ethernet/natsemi/natsemi.c:1053", MII_ShiftClk, ioaddr + EECtrl);
+	data = pete_readl("drivers/net/ethernet/natsemi/natsemi.c:1054", ioaddr + EECtrl);
+	pete_writel("drivers/net/ethernet/natsemi/natsemi.c:1055", 0, ioaddr + EECtrl);
 	mii_delay(ioaddr);
 	return (data & MII_Data)? 1 : 0;
 }
@@ -1065,12 +1065,12 @@ static void mii_send_bits (struct net_device *dev, u32 data, int len)
 	for (i = (1 << (len-1)); i; i >>= 1)
 	{
 		u32 mdio_val = MII_Write | ((data & i)? MII_Data : 0);
-		writel(mdio_val, ioaddr + EECtrl);
+		pete_writel("drivers/net/ethernet/natsemi/natsemi.c:1068", mdio_val, ioaddr + EECtrl);
 		mii_delay(ioaddr);
-		writel(mdio_val | MII_ShiftClk, ioaddr + EECtrl);
+		pete_writel("drivers/net/ethernet/natsemi/natsemi.c:1070", mdio_val | MII_ShiftClk, ioaddr + EECtrl);
 		mii_delay(ioaddr);
 	}
-	writel(0, ioaddr + EECtrl);
+	pete_writel("drivers/net/ethernet/natsemi/natsemi.c:1073", 0, ioaddr + EECtrl);
 	mii_delay(ioaddr);
 }
 
@@ -1175,7 +1175,7 @@ static void init_phy_fixup(struct net_device *dev)
 		 */
 	}
 	mdio_write(dev, MII_BMCR, tmp);
-	readl(ioaddr + ChipConfig);
+	pete_readl("drivers/net/ethernet/natsemi/natsemi.c:1178", ioaddr + ChipConfig);
 	udelay(1);
 
 	/* find out what phy this is */
@@ -1197,7 +1197,7 @@ static void init_phy_fixup(struct net_device *dev)
 	default:
 		break;
 	}
-	cfg = readl(ioaddr + ChipConfig);
+	cfg = pete_readl("drivers/net/ethernet/natsemi/natsemi.c:1200", ioaddr + ChipConfig);
 	if (cfg & CfgExtPhy)
 		return;
 
@@ -1223,7 +1223,7 @@ static void init_phy_fixup(struct net_device *dev)
 		writew(np->dspcfg, ioaddr + DSPCFG);
 		writew(SDCFG_VAL, ioaddr + SDCFG);
 		writew(0, ioaddr + PGSEL);
-		readl(ioaddr + ChipConfig);
+		pete_readl("drivers/net/ethernet/natsemi/natsemi.c:1226", ioaddr + ChipConfig);
 		udelay(10);
 
 		writew(1, ioaddr + PGSEL);
@@ -1259,7 +1259,7 @@ static int switch_port_external(struct net_device *dev)
 	void __iomem *ioaddr = ns_ioaddr(dev);
 	u32 cfg;
 
-	cfg = readl(ioaddr + ChipConfig);
+	cfg = pete_readl("drivers/net/ethernet/natsemi/natsemi.c:1262", ioaddr + ChipConfig);
 	if (cfg & CfgExtPhy)
 		return 0;
 
@@ -1269,8 +1269,8 @@ static int switch_port_external(struct net_device *dev)
 	}
 
 	/* 1) switch back to external phy */
-	writel(cfg | (CfgExtPhy | CfgPhyDis), ioaddr + ChipConfig);
-	readl(ioaddr + ChipConfig);
+	pete_writel("drivers/net/ethernet/natsemi/natsemi.c:1272", cfg | (CfgExtPhy | CfgPhyDis), ioaddr + ChipConfig);
+	pete_readl("drivers/net/ethernet/natsemi/natsemi.c:1273", ioaddr + ChipConfig);
 	udelay(1);
 
 	/* 2) reset the external phy: */
@@ -1294,7 +1294,7 @@ static int switch_port_internal(struct net_device *dev)
 	u32 cfg;
 	u16 bmcr;
 
-	cfg = readl(ioaddr + ChipConfig);
+	cfg = pete_readl("drivers/net/ethernet/natsemi/natsemi.c:1297", ioaddr + ChipConfig);
 	if (!(cfg &CfgExtPhy))
 		return 0;
 
@@ -1304,14 +1304,14 @@ static int switch_port_internal(struct net_device *dev)
 	}
 	/* 1) switch back to internal phy: */
 	cfg = cfg & ~(CfgExtPhy | CfgPhyDis);
-	writel(cfg, ioaddr + ChipConfig);
-	readl(ioaddr + ChipConfig);
+	pete_writel("drivers/net/ethernet/natsemi/natsemi.c:1307", cfg, ioaddr + ChipConfig);
+	pete_readl("drivers/net/ethernet/natsemi/natsemi.c:1308", ioaddr + ChipConfig);
 	udelay(1);
 
 	/* 2) reset the internal phy: */
 	bmcr = readw(ioaddr+BasicControl+(MII_BMCR<<2));
-	writel(bmcr | BMCR_RESET, ioaddr+BasicControl+(MII_BMCR<<2));
-	readl(ioaddr + ChipConfig);
+	pete_writel("drivers/net/ethernet/natsemi/natsemi.c:1313", bmcr | BMCR_RESET, ioaddr+BasicControl+(MII_BMCR<<2));
+	pete_readl("drivers/net/ethernet/natsemi/natsemi.c:1314", ioaddr + ChipConfig);
 	udelay(10);
 	for (i=0;i<NATSEMI_HW_TIMEOUT;i++) {
 		bmcr = readw(ioaddr+BasicControl+(MII_BMCR<<2));
@@ -1401,26 +1401,26 @@ static void natsemi_reset(struct net_device *dev)
 	 */
 
 	/* CFG */
-	cfg = readl(ioaddr + ChipConfig) & CFG_RESET_SAVE;
+	cfg = pete_readl("drivers/net/ethernet/natsemi/natsemi.c:1404", ioaddr + ChipConfig) & CFG_RESET_SAVE;
 	/* WCSR */
-	wcsr = readl(ioaddr + WOLCmd) & WCSR_RESET_SAVE;
+	wcsr = pete_readl("drivers/net/ethernet/natsemi/natsemi.c:1406", ioaddr + WOLCmd) & WCSR_RESET_SAVE;
 	/* RFCR */
-	rfcr = readl(ioaddr + RxFilterAddr) & RFCR_RESET_SAVE;
+	rfcr = pete_readl("drivers/net/ethernet/natsemi/natsemi.c:1408", ioaddr + RxFilterAddr) & RFCR_RESET_SAVE;
 	/* PMATCH */
 	for (i = 0; i < 3; i++) {
-		writel(i*2, ioaddr + RxFilterAddr);
+		pete_writel("drivers/net/ethernet/natsemi/natsemi.c:1411", i*2, ioaddr + RxFilterAddr);
 		pmatch[i] = readw(ioaddr + RxFilterData);
 	}
 	/* SOPAS */
 	for (i = 0; i < 3; i++) {
-		writel(0xa+(i*2), ioaddr + RxFilterAddr);
+		pete_writel("drivers/net/ethernet/natsemi/natsemi.c:1416", 0xa+(i*2), ioaddr + RxFilterAddr);
 		sopass[i] = readw(ioaddr + RxFilterData);
 	}
 
 	/* now whack the chip */
-	writel(ChipReset, ioaddr + ChipCmd);
+	pete_writel("drivers/net/ethernet/natsemi/natsemi.c:1421", ChipReset, ioaddr + ChipCmd);
 	for (i=0;i<NATSEMI_HW_TIMEOUT;i++) {
-		if (!(readl(ioaddr + ChipCmd) & ChipReset))
+		if (!(pete_readl("drivers/net/ethernet/natsemi/natsemi.c:1423", ioaddr + ChipCmd) & ChipReset))
 			break;
 		udelay(5);
 	}
@@ -1433,29 +1433,29 @@ static void natsemi_reset(struct net_device *dev)
 	}
 
 	/* restore CFG */
-	cfg |= readl(ioaddr + ChipConfig) & ~CFG_RESET_SAVE;
+	cfg |= pete_readl("drivers/net/ethernet/natsemi/natsemi.c:1436", ioaddr + ChipConfig) & ~CFG_RESET_SAVE;
 	/* turn on external phy if it was selected */
 	if (dev->if_port == PORT_TP)
 		cfg &= ~(CfgExtPhy | CfgPhyDis);
 	else
 		cfg |= (CfgExtPhy | CfgPhyDis);
-	writel(cfg, ioaddr + ChipConfig);
+	pete_writel("drivers/net/ethernet/natsemi/natsemi.c:1442", cfg, ioaddr + ChipConfig);
 	/* restore WCSR */
-	wcsr |= readl(ioaddr + WOLCmd) & ~WCSR_RESET_SAVE;
-	writel(wcsr, ioaddr + WOLCmd);
+	wcsr |= pete_readl("drivers/net/ethernet/natsemi/natsemi.c:1444", ioaddr + WOLCmd) & ~WCSR_RESET_SAVE;
+	pete_writel("drivers/net/ethernet/natsemi/natsemi.c:1445", wcsr, ioaddr + WOLCmd);
 	/* read RFCR */
-	rfcr |= readl(ioaddr + RxFilterAddr) & ~RFCR_RESET_SAVE;
+	rfcr |= pete_readl("drivers/net/ethernet/natsemi/natsemi.c:1447", ioaddr + RxFilterAddr) & ~RFCR_RESET_SAVE;
 	/* restore PMATCH */
 	for (i = 0; i < 3; i++) {
-		writel(i*2, ioaddr + RxFilterAddr);
+		pete_writel("drivers/net/ethernet/natsemi/natsemi.c:1450", i*2, ioaddr + RxFilterAddr);
 		writew(pmatch[i], ioaddr + RxFilterData);
 	}
 	for (i = 0; i < 3; i++) {
-		writel(0xa+(i*2), ioaddr + RxFilterAddr);
+		pete_writel("drivers/net/ethernet/natsemi/natsemi.c:1454", 0xa+(i*2), ioaddr + RxFilterAddr);
 		writew(sopass[i], ioaddr + RxFilterData);
 	}
 	/* restore RFCR */
-	writel(rfcr, ioaddr + RxFilterAddr);
+	pete_writel("drivers/net/ethernet/natsemi/natsemi.c:1458", rfcr, ioaddr + RxFilterAddr);
 }
 
 static void reset_rx(struct net_device *dev)
@@ -1466,10 +1466,10 @@ static void reset_rx(struct net_device *dev)
 
 	np->intr_status &= ~RxResetDone;
 
-	writel(RxReset, ioaddr + ChipCmd);
+	pete_writel("drivers/net/ethernet/natsemi/natsemi.c:1469", RxReset, ioaddr + ChipCmd);
 
 	for (i=0;i<NATSEMI_HW_TIMEOUT;i++) {
-		np->intr_status |= readl(ioaddr + IntrStatus);
+		np->intr_status |= pete_readl("drivers/net/ethernet/natsemi/natsemi.c:1472", ioaddr + IntrStatus);
 		if (np->intr_status & RxResetDone)
 			break;
 		udelay(15);
@@ -1489,10 +1489,10 @@ static void natsemi_reload_eeprom(struct net_device *dev)
 	void __iomem *ioaddr = ns_ioaddr(dev);
 	int i;
 
-	writel(EepromReload, ioaddr + PCIBusCfg);
+	pete_writel("drivers/net/ethernet/natsemi/natsemi.c:1492", EepromReload, ioaddr + PCIBusCfg);
 	for (i=0;i<NATSEMI_HW_TIMEOUT;i++) {
 		udelay(50);
-		if (!(readl(ioaddr + PCIBusCfg) & EepromReload))
+		if (!(pete_readl("drivers/net/ethernet/natsemi/natsemi.c:1495", ioaddr + PCIBusCfg) & EepromReload))
 			break;
 	}
 	if (i==NATSEMI_HW_TIMEOUT) {
@@ -1510,9 +1510,9 @@ static void natsemi_stop_rxtx(struct net_device *dev)
 	struct netdev_private *np = netdev_priv(dev);
 	int i;
 
-	writel(RxOff | TxOff, ioaddr + ChipCmd);
+	pete_writel("drivers/net/ethernet/natsemi/natsemi.c:1513", RxOff | TxOff, ioaddr + ChipCmd);
 	for(i=0;i< NATSEMI_HW_TIMEOUT;i++) {
-		if ((readl(ioaddr + ChipCmd) & (TxOn|RxOn)) == 0)
+		if ((pete_readl("drivers/net/ethernet/natsemi/natsemi.c:1515", ioaddr + ChipCmd) & (TxOn|RxOn)) == 0)
 			break;
 		udelay(5);
 	}
@@ -1555,17 +1555,17 @@ static int netdev_open(struct net_device *dev)
 	for (i = 0; i < 3; i++) {
 		u16 mac = (dev->dev_addr[2*i+1]<<8) + dev->dev_addr[2*i];
 
-		writel(i*2, ioaddr + RxFilterAddr);
+		pete_writel("drivers/net/ethernet/natsemi/natsemi.c:1558", i*2, ioaddr + RxFilterAddr);
 		writew(mac, ioaddr + RxFilterData);
 	}
-	writel(np->cur_rx_mode, ioaddr + RxFilterAddr);
+	pete_writel("drivers/net/ethernet/natsemi/natsemi.c:1561", np->cur_rx_mode, ioaddr + RxFilterAddr);
 	spin_unlock_irq(&np->lock);
 
 	netif_start_queue(dev);
 
 	if (netif_msg_ifup(np))
 		printk(KERN_DEBUG "%s: Done netdev_open(), status: %#08x.\n",
-			dev->name, (int)readl(ioaddr + ChipCmd));
+			dev->name, (int)pete_readl("drivers/net/ethernet/natsemi/natsemi.c:1568", ioaddr + ChipCmd));
 
 	/* Set the timer to check for link beat. */
 	timer_setup(&np->timer, netdev_timer, 0);
@@ -1592,7 +1592,7 @@ static void do_cable_magic(struct net_device *dev)
 	 * activity LED while idle.  This process is based on instructions
 	 * from engineers at National.
 	 */
-	if (readl(ioaddr + ChipConfig) & CfgSpeed100) {
+	if (pete_readl("drivers/net/ethernet/natsemi/natsemi.c:1595", ioaddr + ChipConfig) & CfgSpeed100) {
 		u16 data;
 
 		writew(1, ioaddr + PGSEL);
@@ -1700,8 +1700,8 @@ propagate_state:
 			np->rx_config &= ~RxAcceptTx;
 			np->tx_config &= ~(TxCarrierIgn | TxHeartIgn);
 		}
-		writel(np->tx_config, ioaddr + TxConfig);
-		writel(np->rx_config, ioaddr + RxConfig);
+		pete_writel("drivers/net/ethernet/natsemi/natsemi.c:1703", np->tx_config, ioaddr + TxConfig);
+		pete_writel("drivers/net/ethernet/natsemi/natsemi.c:1704", np->rx_config, ioaddr + RxConfig);
 	}
 }
 
@@ -1713,10 +1713,10 @@ static void init_registers(struct net_device *dev)
 	init_phy_fixup(dev);
 
 	/* clear any interrupts that are pending, such as wake events */
-	readl(ioaddr + IntrStatus);
+	pete_readl("drivers/net/ethernet/natsemi/natsemi.c:1716", ioaddr + IntrStatus);
 
-	writel(np->ring_dma, ioaddr + RxRingPtr);
-	writel(np->ring_dma + RX_RING_SIZE * sizeof(struct netdev_desc),
+	pete_writel("drivers/net/ethernet/natsemi/natsemi.c:1718", np->ring_dma, ioaddr + RxRingPtr);
+	pete_writel("drivers/net/ethernet/natsemi/natsemi.c:1719", np->ring_dma + RX_RING_SIZE * sizeof(struct netdev_desc),
 		ioaddr + TxRingPtr);
 
 	/* Initialize other registers.
@@ -1735,7 +1735,7 @@ static void init_registers(struct net_device *dev)
 	 */
 	np->tx_config = TxAutoPad | TxCollRetry | TxMxdma_256 |
 				TX_FLTH_VAL | TX_DRTH_VAL_START;
-	writel(np->tx_config, ioaddr + TxConfig);
+	pete_writel("drivers/net/ethernet/natsemi/natsemi.c:1738", np->tx_config, ioaddr + TxConfig);
 
 	/* DRTH 0x10: start copying to memory if 128 bytes are in the fifo
 	 * MXDMA 0: up to 256 byte bursts
@@ -1745,7 +1745,7 @@ static void init_registers(struct net_device *dev)
 	if (np->rx_buf_sz > NATSEMI_LONGPKT)
 		np->rx_config |= RxAcceptLong;
 
-	writel(np->rx_config, ioaddr + RxConfig);
+	pete_writel("drivers/net/ethernet/natsemi/natsemi.c:1748", np->rx_config, ioaddr + RxConfig);
 
 	/* Disable PME:
 	 * The PME bit is initialized from the EEPROM contents.
@@ -1753,22 +1753,22 @@ static void init_registers(struct net_device *dev)
 	 * implementations may have PME set to enable WakeOnLan.
 	 * With PME set the chip will scan incoming packets but
 	 * nothing will be written to memory. */
-	np->SavedClkRun = readl(ioaddr + ClkRun);
-	writel(np->SavedClkRun & ~PMEEnable, ioaddr + ClkRun);
+	np->SavedClkRun = pete_readl("drivers/net/ethernet/natsemi/natsemi.c:1756", ioaddr + ClkRun);
+	pete_writel("drivers/net/ethernet/natsemi/natsemi.c:1757", np->SavedClkRun & ~PMEEnable, ioaddr + ClkRun);
 	if (np->SavedClkRun & PMEStatus && netif_msg_wol(np)) {
 		printk(KERN_NOTICE "%s: Wake-up event %#08x\n",
-			dev->name, readl(ioaddr + WOLCmd));
+			dev->name, pete_readl("drivers/net/ethernet/natsemi/natsemi.c:1760", ioaddr + WOLCmd));
 	}
 
 	check_link(dev);
 	__set_rx_mode(dev);
 
 	/* Enable interrupts by setting the interrupt mask. */
-	writel(DEFAULT_INTR, ioaddr + IntrMask);
+	pete_writel("drivers/net/ethernet/natsemi/natsemi.c:1767", DEFAULT_INTR, ioaddr + IntrMask);
 	natsemi_irq_enable(dev);
 
-	writel(RxOn | TxOn, ioaddr + ChipCmd);
-	writel(StatsClear, ioaddr + StatsCtrl); /* Clear Stats */
+	pete_writel("drivers/net/ethernet/natsemi/natsemi.c:1770", RxOn | TxOn, ioaddr + ChipCmd);
+	pete_writel("drivers/net/ethernet/natsemi/natsemi.c:1771", StatsClear, ioaddr + StatsCtrl); /* Clear Stats */
 }
 
 /*
@@ -1843,7 +1843,7 @@ static void netdev_timer(struct timer_list *t)
 		refill_rx(dev);
 		enable_irq(irq);
 		if (!np->oom) {
-			writel(RxOn, ioaddr + ChipCmd);
+			pete_writel("drivers/net/ethernet/natsemi/natsemi.c:1846", RxOn, ioaddr + ChipCmd);
 		} else {
 			next_tick = 1;
 		}
@@ -1891,7 +1891,7 @@ static void ns_tx_timeout(struct net_device *dev, unsigned int txqueue)
 			printk(KERN_WARNING
 				"%s: Transmit timed out, status %#08x,"
 				" resetting...\n",
-				dev->name, readl(ioaddr + IntrStatus));
+				dev->name, pete_readl("drivers/net/ethernet/natsemi/natsemi.c:1894", ioaddr + IntrStatus));
 		dump_ring(dev);
 
 		natsemi_reset(dev);
@@ -2122,7 +2122,7 @@ static netdev_tx_t start_tx(struct sk_buff *skb, struct net_device *dev)
 				netif_stop_queue(dev);
 		}
 		/* Wake the potentially-idle transmit channel. */
-		writel(TxOn, ioaddr + ChipCmd);
+		pete_writel("drivers/net/ethernet/natsemi/natsemi.c:2125", TxOn, ioaddr + ChipCmd);
 	} else {
 		dev_kfree_skb_irq(skb);
 		dev->stats.tx_dropped++;
@@ -2189,10 +2189,10 @@ static irqreturn_t intr_handler(int irq, void *dev_instance)
 	/* Reading IntrStatus automatically acknowledges so don't do
 	 * that while interrupts are disabled, (for example, while a
 	 * poll is scheduled).  */
-	if (np->hands_off || !readl(ioaddr + IntrEnable))
+	if (np->hands_off || !pete_readl("drivers/net/ethernet/natsemi/natsemi.c:2192", ioaddr + IntrEnable))
 		return IRQ_NONE;
 
-	np->intr_status = readl(ioaddr + IntrStatus);
+	np->intr_status = pete_readl("drivers/net/ethernet/natsemi/natsemi.c:2195", ioaddr + IntrStatus);
 
 	if (!np->intr_status)
 		return IRQ_NONE;
@@ -2201,7 +2201,7 @@ static irqreturn_t intr_handler(int irq, void *dev_instance)
 		printk(KERN_DEBUG
 		       "%s: Interrupt, status %#08x, mask %#08x.\n",
 		       dev->name, np->intr_status,
-		       readl(ioaddr + IntrMask));
+		       pete_readl("drivers/net/ethernet/natsemi/natsemi.c:2204", ioaddr + IntrMask));
 
 	prefetch(&np->rx_skbuff[np->cur_rx % RX_RING_SIZE]);
 
@@ -2213,7 +2213,7 @@ static irqreturn_t intr_handler(int irq, void *dev_instance)
 		printk(KERN_WARNING
 	       	       "%s: Ignoring interrupt, status %#08x, mask %#08x.\n",
 		       dev->name, np->intr_status,
-		       readl(ioaddr + IntrMask));
+		       pete_readl("drivers/net/ethernet/natsemi/natsemi.c:2216", ioaddr + IntrMask));
 
 	return IRQ_HANDLED;
 }
@@ -2233,7 +2233,7 @@ static int natsemi_poll(struct napi_struct *napi, int budget)
 			printk(KERN_DEBUG
 			       "%s: Poll, status %#08x, mask %#08x.\n",
 			       dev->name, np->intr_status,
-			       readl(ioaddr + IntrMask));
+			       pete_readl("drivers/net/ethernet/natsemi/natsemi.c:2236", ioaddr + IntrMask));
 
 		/* netdev_rx() may read IntrStatus again if the RX state
 		 * machine falls over so do it first. */
@@ -2257,7 +2257,7 @@ static int natsemi_poll(struct napi_struct *napi, int budget)
 		if (work_done >= budget)
 			return work_done;
 
-		np->intr_status = readl(ioaddr + IntrStatus);
+		np->intr_status = pete_readl("drivers/net/ethernet/natsemi/natsemi.c:2260", ioaddr + IntrStatus);
 	} while (np->intr_status);
 
 	napi_complete_done(napi, work_done);
@@ -2320,7 +2320,7 @@ static void netdev_rx(struct net_device *dev, int *work_done, int work_to_do)
 				spin_lock_irqsave(&np->lock, flags);
 				reset_rx(dev);
 				reinit_rx(dev);
-				writel(np->ring_dma, ioaddr + RxRingPtr);
+				pete_writel("drivers/net/ethernet/natsemi/natsemi.c:2323", np->ring_dma, ioaddr + RxRingPtr);
 				check_link(dev);
 				spin_unlock_irqrestore(&np->lock, flags);
 
@@ -2388,7 +2388,7 @@ static void netdev_rx(struct net_device *dev, int *work_done, int work_to_do)
 	if (np->oom)
 		mod_timer(&np->timer, jiffies + 1);
 	else
-		writel(RxOn, ioaddr + ChipCmd);
+		pete_writel("drivers/net/ethernet/natsemi/natsemi.c:2391", RxOn, ioaddr + ChipCmd);
 }
 
 static void netdev_error(struct net_device *dev, int intr_status)
@@ -2427,10 +2427,10 @@ static void netdev_error(struct net_device *dev, int intr_status)
 					"%s: tx underrun with maximum tx threshold, txcfg %#08x.\n",
 					dev->name, np->tx_config);
 		}
-		writel(np->tx_config, ioaddr + TxConfig);
+		pete_writel("drivers/net/ethernet/natsemi/natsemi.c:2430", np->tx_config, ioaddr + TxConfig);
 	}
 	if (intr_status & WOLPkt && netif_msg_wol(np)) {
-		int wol_status = readl(ioaddr + WOLCmd);
+		int wol_status = pete_readl("drivers/net/ethernet/natsemi/natsemi.c:2433", ioaddr + WOLCmd);
 		printk(KERN_NOTICE "%s: Link wake-up event %#08x\n",
 			dev->name, wol_status);
 	}
@@ -2459,8 +2459,8 @@ static void __get_stats(struct net_device *dev)
 	void __iomem * ioaddr = ns_ioaddr(dev);
 
 	/* The chip only need report frame silently dropped. */
-	dev->stats.rx_crc_errors += readl(ioaddr + RxCRCErrs);
-	dev->stats.rx_missed_errors += readl(ioaddr + RxMissed);
+	dev->stats.rx_crc_errors += pete_readl("drivers/net/ethernet/natsemi/natsemi.c:2462", ioaddr + RxCRCErrs);
+	dev->stats.rx_missed_errors += pete_readl("drivers/net/ethernet/natsemi/natsemi.c:2463", ioaddr + RxMissed);
 }
 
 static struct net_device_stats *get_stats(struct net_device *dev)
@@ -2515,12 +2515,12 @@ static void __set_rx_mode(struct net_device *dev)
 		rx_mode = RxFilterEnable | AcceptBroadcast
 			| AcceptMulticast | AcceptMyPhys;
 		for (i = 0; i < 64; i += 2) {
-			writel(HASH_TABLE + i, ioaddr + RxFilterAddr);
-			writel((mc_filter[i + 1] << 8) + mc_filter[i],
+			pete_writel("drivers/net/ethernet/natsemi/natsemi.c:2518", HASH_TABLE + i, ioaddr + RxFilterAddr);
+			pete_writel("drivers/net/ethernet/natsemi/natsemi.c:2519", (mc_filter[i + 1] << 8) + mc_filter[i],
 			       ioaddr + RxFilterData);
 		}
 	}
-	writel(rx_mode, ioaddr + RxFilterAddr);
+	pete_writel("drivers/net/ethernet/natsemi/natsemi.c:2523", rx_mode, ioaddr + RxFilterAddr);
 	np->cur_rx_mode = rx_mode;
 }
 
@@ -2543,9 +2543,9 @@ static int natsemi_change_mtu(struct net_device *dev, int new_mtu)
 		/* change buffers */
 		set_bufsize(dev);
 		reinit_rx(dev);
-		writel(np->ring_dma, ioaddr + RxRingPtr);
+		pete_writel("drivers/net/ethernet/natsemi/natsemi.c:2546", np->ring_dma, ioaddr + RxRingPtr);
 		/* restart engines */
-		writel(RxOn | TxOn, ioaddr + ChipCmd);
+		pete_writel("drivers/net/ethernet/natsemi/natsemi.c:2548", RxOn | TxOn, ioaddr + ChipCmd);
 		spin_unlock(&np->lock);
 		enable_irq(irq);
 	}
@@ -2703,7 +2703,7 @@ static int netdev_set_wol(struct net_device *dev, u32 newval)
 {
 	struct netdev_private *np = netdev_priv(dev);
 	void __iomem * ioaddr = ns_ioaddr(dev);
-	u32 data = readl(ioaddr + WOLCmd) & ~WakeOptsSummary;
+	u32 data = pete_readl("drivers/net/ethernet/natsemi/natsemi.c:2706", ioaddr + WOLCmd) & ~WakeOptsSummary;
 
 	/* translate to bitmasks this chip understands */
 	if (newval & WAKE_PHY)
@@ -2724,7 +2724,7 @@ static int netdev_set_wol(struct net_device *dev, u32 newval)
 		}
 	}
 
-	writel(data, ioaddr + WOLCmd);
+	pete_writel("drivers/net/ethernet/natsemi/natsemi.c:2727", data, ioaddr + WOLCmd);
 
 	return 0;
 }
@@ -2733,7 +2733,7 @@ static int netdev_get_wol(struct net_device *dev, u32 *supported, u32 *cur)
 {
 	struct netdev_private *np = netdev_priv(dev);
 	void __iomem * ioaddr = ns_ioaddr(dev);
-	u32 regval = readl(ioaddr + WOLCmd);
+	u32 regval = pete_readl("drivers/net/ethernet/natsemi/natsemi.c:2736", ioaddr + WOLCmd);
 
 	*supported = (WAKE_PHY | WAKE_UCAST | WAKE_MCAST | WAKE_BCAST
 			| WAKE_ARP | WAKE_MAGIC);
@@ -2777,22 +2777,22 @@ static int netdev_set_sopass(struct net_device *dev, u8 *newval)
 	}
 
 	/* enable writing to these registers by disabling the RX filter */
-	addr = readl(ioaddr + RxFilterAddr) & ~RFCRAddressMask;
+	addr = pete_readl("drivers/net/ethernet/natsemi/natsemi.c:2780", ioaddr + RxFilterAddr) & ~RFCRAddressMask;
 	addr &= ~RxFilterEnable;
-	writel(addr, ioaddr + RxFilterAddr);
+	pete_writel("drivers/net/ethernet/natsemi/natsemi.c:2782", addr, ioaddr + RxFilterAddr);
 
 	/* write the three words to (undocumented) RFCR vals 0xa, 0xc, 0xe */
-	writel(addr | 0xa, ioaddr + RxFilterAddr);
+	pete_writel("drivers/net/ethernet/natsemi/natsemi.c:2785", addr | 0xa, ioaddr + RxFilterAddr);
 	writew(sval[0], ioaddr + RxFilterData);
 
-	writel(addr | 0xc, ioaddr + RxFilterAddr);
+	pete_writel("drivers/net/ethernet/natsemi/natsemi.c:2788", addr | 0xc, ioaddr + RxFilterAddr);
 	writew(sval[1], ioaddr + RxFilterData);
 
-	writel(addr | 0xe, ioaddr + RxFilterAddr);
+	pete_writel("drivers/net/ethernet/natsemi/natsemi.c:2791", addr | 0xe, ioaddr + RxFilterAddr);
 	writew(sval[2], ioaddr + RxFilterData);
 
 	/* re-enable the RX filter */
-	writel(addr | RxFilterEnable, ioaddr + RxFilterAddr);
+	pete_writel("drivers/net/ethernet/natsemi/natsemi.c:2795", addr | RxFilterEnable, ioaddr + RxFilterAddr);
 
 	return 0;
 }
@@ -2810,18 +2810,18 @@ static int netdev_get_sopass(struct net_device *dev, u8 *data)
 	}
 
 	/* read the three words from (undocumented) RFCR vals 0xa, 0xc, 0xe */
-	addr = readl(ioaddr + RxFilterAddr) & ~RFCRAddressMask;
+	addr = pete_readl("drivers/net/ethernet/natsemi/natsemi.c:2813", ioaddr + RxFilterAddr) & ~RFCRAddressMask;
 
-	writel(addr | 0xa, ioaddr + RxFilterAddr);
+	pete_writel("drivers/net/ethernet/natsemi/natsemi.c:2815", addr | 0xa, ioaddr + RxFilterAddr);
 	sval[0] = readw(ioaddr + RxFilterData);
 
-	writel(addr | 0xc, ioaddr + RxFilterAddr);
+	pete_writel("drivers/net/ethernet/natsemi/natsemi.c:2818", addr | 0xc, ioaddr + RxFilterAddr);
 	sval[1] = readw(ioaddr + RxFilterData);
 
-	writel(addr | 0xe, ioaddr + RxFilterAddr);
+	pete_writel("drivers/net/ethernet/natsemi/natsemi.c:2821", addr | 0xe, ioaddr + RxFilterAddr);
 	sval[2] = readw(ioaddr + RxFilterData);
 
-	writel(addr, ioaddr + RxFilterAddr);
+	pete_writel("drivers/net/ethernet/natsemi/natsemi.c:2824", addr, ioaddr + RxFilterAddr);
 
 	return 0;
 }
@@ -3009,7 +3009,7 @@ static int netdev_get_regs(struct net_device *dev, u8 *buf)
 
 	/* read non-mii page 0 of registers */
 	for (i = 0; i < NATSEMI_PG0_NREGS/2; i++) {
-		rbuf[i] = readl(ioaddr + i*4);
+		rbuf[i] = pete_readl("drivers/net/ethernet/natsemi/natsemi.c:3012", ioaddr + i*4);
 	}
 
 	/* read current mii registers */
@@ -3025,12 +3025,12 @@ static int netdev_get_regs(struct net_device *dev, u8 *buf)
 	writew(0, ioaddr + PGSEL);
 
 	/* read RFCR indexed registers */
-	rfcr = readl(ioaddr + RxFilterAddr);
+	rfcr = pete_readl("drivers/net/ethernet/natsemi/natsemi.c:3028", ioaddr + RxFilterAddr);
 	for (j = 0; j < NATSEMI_RFDR_NREGS; j++) {
-		writel(j*2, ioaddr + RxFilterAddr);
+		pete_writel("drivers/net/ethernet/natsemi/natsemi.c:3030", j*2, ioaddr + RxFilterAddr);
 		rbuf[i++] = readw(ioaddr + RxFilterData);
 	}
-	writel(rfcr, ioaddr + RxFilterAddr);
+	pete_writel("drivers/net/ethernet/natsemi/natsemi.c:3033", rfcr, ioaddr + RxFilterAddr);
 
 	/* the interrupt status is clear-on-read - see if we missed any */
 	if (rbuf[4] & rbuf[5]) {
@@ -3134,22 +3134,22 @@ static void enable_wol_mode(struct net_device *dev, int enable_intr)
 	 * Write NULL to the RxRingPtr. Only possible if
 	 * rx process is stopped
 	 */
-	writel(0, ioaddr + RxRingPtr);
+	pete_writel("drivers/net/ethernet/natsemi/natsemi.c:3137", 0, ioaddr + RxRingPtr);
 
 	/* read WoL status to clear */
-	readl(ioaddr + WOLCmd);
+	pete_readl("drivers/net/ethernet/natsemi/natsemi.c:3140", ioaddr + WOLCmd);
 
 	/* PME on, clear status */
-	writel(np->SavedClkRun | PMEEnable | PMEStatus, ioaddr + ClkRun);
+	pete_writel("drivers/net/ethernet/natsemi/natsemi.c:3143", np->SavedClkRun | PMEEnable | PMEStatus, ioaddr + ClkRun);
 
 	/* and restart the rx process */
-	writel(RxOn, ioaddr + ChipCmd);
+	pete_writel("drivers/net/ethernet/natsemi/natsemi.c:3146", RxOn, ioaddr + ChipCmd);
 
 	if (enable_intr) {
 		/* enable the WOL interrupt.
 		 * Could be used to send a netlink message.
 		 */
-		writel(WOLPkt | LinkChange, ioaddr + IntrMask);
+		pete_writel("drivers/net/ethernet/natsemi/natsemi.c:3152", WOLPkt | LinkChange, ioaddr + IntrMask);
 		natsemi_irq_enable(dev);
 	}
 }
@@ -3163,7 +3163,7 @@ static int netdev_close(struct net_device *dev)
 	if (netif_msg_ifdown(np))
 		printk(KERN_DEBUG
 			"%s: Shutting down ethercard, status was %#04x.\n",
-			dev->name, (int)readl(ioaddr + ChipCmd));
+			dev->name, (int)pete_readl("drivers/net/ethernet/natsemi/natsemi.c:3166", ioaddr + ChipCmd));
 	if (netif_msg_pktdata(np))
 		printk(KERN_DEBUG
 			"%s: Queue pointers were Tx %d / %d,  Rx %d / %d.\n",
@@ -3195,11 +3195,11 @@ static int netdev_close(struct net_device *dev)
 	 */
 	spin_lock_irq(&np->lock);
 	np->hands_off = 0;
-	readl(ioaddr + IntrMask);
+	pete_readl("drivers/net/ethernet/natsemi/natsemi.c:3198", ioaddr + IntrMask);
 	readw(ioaddr + MIntrStatus);
 
 	/* Freeze Stats */
-	writel(StatsFreeze, ioaddr + StatsCtrl);
+	pete_writel("drivers/net/ethernet/natsemi/natsemi.c:3202", StatsFreeze, ioaddr + StatsCtrl);
 
 	/* Stop the chip's Tx and Rx processes. */
 	natsemi_stop_rxtx(dev);
@@ -3216,7 +3216,7 @@ static int netdev_close(struct net_device *dev)
 	free_ring(dev);
 
 	{
-		u32 wol = readl(ioaddr + WOLCmd) & WakeOptsSummary;
+		u32 wol = pete_readl("drivers/net/ethernet/natsemi/natsemi.c:3219", ioaddr + WOLCmd) & WakeOptsSummary;
 		if (wol) {
 			/* restart the NIC in WOL mode.
 			 * The nic must be stopped for this.
@@ -3224,7 +3224,7 @@ static int netdev_close(struct net_device *dev)
 			enable_wol_mode(dev, 0);
 		} else {
 			/* Restore PME enable bit unmolested */
-			writel(np->SavedClkRun, ioaddr + ClkRun);
+			pete_writel("drivers/net/ethernet/natsemi/natsemi.c:3227", np->SavedClkRun, ioaddr + ClkRun);
 		}
 	}
 	return 0;
@@ -3299,7 +3299,7 @@ static int __maybe_unused natsemi_suspend(struct device *dev_d)
 		/* pci_power_off(pdev, -1); */
 		drain_ring(dev);
 		{
-			u32 wol = readl(ioaddr + WOLCmd) & WakeOptsSummary;
+			u32 wol = pete_readl("drivers/net/ethernet/natsemi/natsemi.c:3302", ioaddr + WOLCmd) & WakeOptsSummary;
 			/* Restore PME enable bit */
 			if (wol) {
 				/* restart the NIC in WOL mode.
@@ -3309,7 +3309,7 @@ static int __maybe_unused natsemi_suspend(struct device *dev_d)
 				enable_wol_mode(dev, 0);
 			} else {
 				/* Restore PME enable bit unmolested */
-				writel(np->SavedClkRun, ioaddr + ClkRun);
+				pete_writel("drivers/net/ethernet/natsemi/natsemi.c:3312", np->SavedClkRun, ioaddr + ClkRun);
 			}
 		}
 	}

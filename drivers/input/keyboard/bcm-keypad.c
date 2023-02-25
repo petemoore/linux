@@ -109,9 +109,9 @@ static void bcm_kp_report_keys(struct bcm_kp *kp, int reg_num, int pull_mode)
 	unsigned int keycode;
 
 	/* Clear interrupts */
-	writel(0xFFFFFFFF, kp->base + KPICRN_OFFSET(reg_num));
+	pete_writel("drivers/input/keyboard/bcm-keypad.c:112", 0xFFFFFFFF, kp->base + KPICRN_OFFSET(reg_num));
 
-	state = readl(kp->base + KPSSRN_OFFSET(reg_num));
+	state = pete_readl("drivers/input/keyboard/bcm-keypad.c:114", kp->base + KPSSRN_OFFSET(reg_num));
 	change = kp->last_state[reg_num] ^ state;
 	kp->last_state[reg_num] = state;
 
@@ -150,23 +150,23 @@ static int bcm_kp_start(struct bcm_kp *kp)
 			return error;
 	}
 
-	writel(kp->kpior, kp->base + KPIOR_OFFSET);
+	pete_writel("drivers/input/keyboard/bcm-keypad.c:153", kp->kpior, kp->base + KPIOR_OFFSET);
 
-	writel(kp->imr0_val, kp->base + KPIMR0_OFFSET);
-	writel(kp->imr1_val, kp->base + KPIMR1_OFFSET);
+	pete_writel("drivers/input/keyboard/bcm-keypad.c:155", kp->imr0_val, kp->base + KPIMR0_OFFSET);
+	pete_writel("drivers/input/keyboard/bcm-keypad.c:156", kp->imr1_val, kp->base + KPIMR1_OFFSET);
 
-	writel(kp->kpemr, kp->base + KPEMR0_OFFSET);
-	writel(kp->kpemr, kp->base + KPEMR1_OFFSET);
-	writel(kp->kpemr, kp->base + KPEMR2_OFFSET);
-	writel(kp->kpemr, kp->base + KPEMR3_OFFSET);
+	pete_writel("drivers/input/keyboard/bcm-keypad.c:158", kp->kpemr, kp->base + KPEMR0_OFFSET);
+	pete_writel("drivers/input/keyboard/bcm-keypad.c:159", kp->kpemr, kp->base + KPEMR1_OFFSET);
+	pete_writel("drivers/input/keyboard/bcm-keypad.c:160", kp->kpemr, kp->base + KPEMR2_OFFSET);
+	pete_writel("drivers/input/keyboard/bcm-keypad.c:161", kp->kpemr, kp->base + KPEMR3_OFFSET);
 
-	writel(0xFFFFFFFF, kp->base + KPICR0_OFFSET);
-	writel(0xFFFFFFFF, kp->base + KPICR1_OFFSET);
+	pete_writel("drivers/input/keyboard/bcm-keypad.c:163", 0xFFFFFFFF, kp->base + KPICR0_OFFSET);
+	pete_writel("drivers/input/keyboard/bcm-keypad.c:164", 0xFFFFFFFF, kp->base + KPICR1_OFFSET);
 
-	kp->last_state[0] = readl(kp->base + KPSSR0_OFFSET);
-	kp->last_state[0] = readl(kp->base + KPSSR1_OFFSET);
+	kp->last_state[0] = pete_readl("drivers/input/keyboard/bcm-keypad.c:166", kp->base + KPSSR0_OFFSET);
+	kp->last_state[0] = pete_readl("drivers/input/keyboard/bcm-keypad.c:167", kp->base + KPSSR1_OFFSET);
 
-	writel(kp->kpcr | KPCR_ENABLE, kp->base + KPCR_OFFSET);
+	pete_writel("drivers/input/keyboard/bcm-keypad.c:169", kp->kpcr | KPCR_ENABLE, kp->base + KPCR_OFFSET);
 
 	return 0;
 }
@@ -175,13 +175,13 @@ static void bcm_kp_stop(const struct bcm_kp *kp)
 {
 	u32 val;
 
-	val = readl(kp->base + KPCR_OFFSET);
+	val = pete_readl("drivers/input/keyboard/bcm-keypad.c:178", kp->base + KPCR_OFFSET);
 	val &= ~KPCR_ENABLE;
-	writel(0, kp->base + KPCR_OFFSET);
-	writel(0, kp->base + KPIMR0_OFFSET);
-	writel(0, kp->base + KPIMR1_OFFSET);
-	writel(0xFFFFFFFF, kp->base + KPICR0_OFFSET);
-	writel(0xFFFFFFFF, kp->base + KPICR1_OFFSET);
+	pete_writel("drivers/input/keyboard/bcm-keypad.c:180", 0, kp->base + KPCR_OFFSET);
+	pete_writel("drivers/input/keyboard/bcm-keypad.c:181", 0, kp->base + KPIMR0_OFFSET);
+	pete_writel("drivers/input/keyboard/bcm-keypad.c:182", 0, kp->base + KPIMR1_OFFSET);
+	pete_writel("drivers/input/keyboard/bcm-keypad.c:183", 0xFFFFFFFF, kp->base + KPICR0_OFFSET);
+	pete_writel("drivers/input/keyboard/bcm-keypad.c:184", 0xFFFFFFFF, kp->base + KPICR1_OFFSET);
 
 	if (kp->clk)
 		clk_disable_unprepare(kp->clk);

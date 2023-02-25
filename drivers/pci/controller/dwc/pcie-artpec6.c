@@ -159,7 +159,7 @@ static void artpec6_pcie_wait_for_phy_a6(struct artpec6_pcie *artpec6_pcie)
 	retries = 50;
 	do {
 		usleep_range(1000, 2000);
-		val = readl(artpec6_pcie->phy_base + PHY_STATUS);
+		val = pete_readl("drivers/pci/controller/dwc/pcie-artpec6.c:162", artpec6_pcie->phy_base + PHY_STATUS);
 		retries--;
 	} while (retries && !(val & PHY_COSPLLLOCK));
 	if (!retries)

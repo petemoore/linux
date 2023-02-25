@@ -1239,9 +1239,9 @@ static int init_nic(struct s2io_nic *nic)
 	val64 = readq(&bar0->mac_cfg);
 	val64 |= MAC_RMAC_BCAST_ENABLE;
 	writeq(RMAC_CFG_KEY(0x4C0D), &bar0->rmac_cfg_key);
-	writel((u32)val64, add);
+	pete_writel("drivers/net/ethernet/neterion/s2io.c:1242", (u32)val64, add);
 	writeq(RMAC_CFG_KEY(0x4C0D), &bar0->rmac_cfg_key);
-	writel((u32) (val64 >> 32), (add + 4));
+	pete_writel("drivers/net/ethernet/neterion/s2io.c:1244", (u32) (val64 >> 32), (add + 4));
 
 	/* Read registers in all blocks */
 	val64 = readq(&bar0->mac_int_mask);
@@ -1732,9 +1732,9 @@ static int init_nic(struct s2io_nic *nic)
 	val64 = readq(&bar0->mac_cfg);
 	val64 &= ~(MAC_CFG_RMAC_STRIP_PAD);
 	writeq(RMAC_CFG_KEY(0x4C0D), &bar0->rmac_cfg_key);
-	writel((u32) (val64), add);
+	pete_writel("drivers/net/ethernet/neterion/s2io.c:1735", (u32) (val64), add);
 	writeq(RMAC_CFG_KEY(0x4C0D), &bar0->rmac_cfg_key);
-	writel((u32) (val64 >> 32), (add + 4));
+	pete_writel("drivers/net/ethernet/neterion/s2io.c:1737", (u32) (val64 >> 32), (add + 4));
 	val64 = readq(&bar0->mac_cfg);
 
 	/* Enable FCS stripping by adapter */
@@ -1745,9 +1745,9 @@ static int init_nic(struct s2io_nic *nic)
 		writeq(val64, &bar0->mac_cfg);
 	else {
 		writeq(RMAC_CFG_KEY(0x4C0D), &bar0->rmac_cfg_key);
-		writel((u32) (val64), add);
+		pete_writel("drivers/net/ethernet/neterion/s2io.c:1748", (u32) (val64), add);
 		writeq(RMAC_CFG_KEY(0x4C0D), &bar0->rmac_cfg_key);
-		writel((u32) (val64 >> 32), (add + 4));
+		pete_writel("drivers/net/ethernet/neterion/s2io.c:1750", (u32) (val64 >> 32), (add + 4));
 	}
 
 	/*
@@ -2812,7 +2812,7 @@ static int s2io_poll_inta(struct napi_struct *napi, int budget)
 		napi_complete_done(napi, pkts_processed);
 		/* Re enable the Rx interrupts for the ring */
 		writeq(0, &bar0->rx_traffic_mask);
-		readl(&bar0->rx_traffic_mask);
+		pete_readl("drivers/net/ethernet/neterion/s2io.c:2815", &bar0->rx_traffic_mask);
 	}
 	return pkts_processed;
 }
@@ -4258,7 +4258,7 @@ static irqreturn_t s2io_msix_fifo_handle(int irq, void *dev_id)
 			tx_intr_handler(&fifos[i]);
 
 		writeq(sp->general_int_mask, &bar0->general_int_mask);
-		readl(&bar0->general_int_status);
+		pete_readl("drivers/net/ethernet/neterion/s2io.c:4261", &bar0->general_int_status);
 		return IRQ_HANDLED;
 	}
 	/* The interrupt was not raised by us */
@@ -4700,7 +4700,7 @@ static irqreturn_t s2io_isr(int irq, void *dev_id)
 				napi_schedule(&sp->napi);
 				writeq(S2IO_MINUS_ONE, &bar0->rx_traffic_mask);
 				writeq(S2IO_MINUS_ONE, &bar0->rx_traffic_int);
-				readl(&bar0->rx_traffic_int);
+				pete_readl("drivers/net/ethernet/neterion/s2io.c:4703", &bar0->rx_traffic_int);
 			}
 		} else {
 			/*
@@ -4743,7 +4743,7 @@ static irqreturn_t s2io_isr(int irq, void *dev_id)
 			}
 		}
 		writeq(sp->general_int_mask, &bar0->general_int_mask);
-		readl(&bar0->general_int_status);
+		pete_readl("drivers/net/ethernet/neterion/s2io.c:4746", &bar0->general_int_status);
 
 		return IRQ_HANDLED;
 
@@ -4938,9 +4938,9 @@ static void s2io_set_multicast(struct net_device *dev, bool may_sleep)
 		val64 |= MAC_CFG_RMAC_PROM_ENABLE;
 
 		writeq(RMAC_CFG_KEY(0x4C0D), &bar0->rmac_cfg_key);
-		writel((u32)val64, add);
+		pete_writel("drivers/net/ethernet/neterion/s2io.c:4941", (u32)val64, add);
 		writeq(RMAC_CFG_KEY(0x4C0D), &bar0->rmac_cfg_key);
-		writel((u32) (val64 >> 32), (add + 4));
+		pete_writel("drivers/net/ethernet/neterion/s2io.c:4943", (u32) (val64 >> 32), (add + 4));
 
 		if (vlan_tag_strip != 1) {
 			val64 = readq(&bar0->rx_pa_cfg);
@@ -4960,9 +4960,9 @@ static void s2io_set_multicast(struct net_device *dev, bool may_sleep)
 		val64 &= ~MAC_CFG_RMAC_PROM_ENABLE;
 
 		writeq(RMAC_CFG_KEY(0x4C0D), &bar0->rmac_cfg_key);
-		writel((u32)val64, add);
+		pete_writel("drivers/net/ethernet/neterion/s2io.c:4963", (u32)val64, add);
 		writeq(RMAC_CFG_KEY(0x4C0D), &bar0->rmac_cfg_key);
-		writel((u32) (val64 >> 32), (add + 4));
+		pete_writel("drivers/net/ethernet/neterion/s2io.c:4965", (u32) (val64 >> 32), (add + 4));
 
 		if (vlan_tag_strip != 0) {
 			val64 = readq(&bar0->rx_pa_cfg);

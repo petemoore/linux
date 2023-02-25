@@ -240,12 +240,12 @@ void __init prom_init(void)
 #define PORT(offset) (KSEG1ADDR(AR7_REGS_UART0 + (offset * 4)))
 static inline unsigned int serial_in(int offset)
 {
-	return readl((void *)PORT(offset));
+	return pete_readl("arch/mips/ar7/prom.c:243", (void *)PORT(offset));
 }
 
 static inline void serial_out(int offset, int value)
 {
-	writel(value, (void *)PORT(offset));
+	pete_writel("arch/mips/ar7/prom.c:248", value, (void *)PORT(offset));
 }
 
 void prom_putchar(char c)

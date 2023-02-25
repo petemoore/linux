@@ -217,7 +217,7 @@ static void bnx2i_ring_577xx_doorbell(struct bnx2i_conn *conn)
 			      B577XX_DOORBELL_HDR_CONN_TYPE_SHIFT);
 	msg = *((u32 *)&dbell);
 	/* TODO : get doorbell register mapping */
-	writel(cpu_to_le32(msg), conn->ep->qp.ctx_base);
+	pete_writel("drivers/scsi/bnx2i/bnx2i_hwi.c:220", cpu_to_le32(msg), conn->ep->qp.ctx_base);
 }
 
 

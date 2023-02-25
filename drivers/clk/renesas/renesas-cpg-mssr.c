@@ -207,12 +207,12 @@ static int cpg_mstp_clock_endisable(struct clk_hw *hw, bool enable)
 		readb(priv->base + priv->control_regs[reg]);
 		barrier_data(priv->base + priv->control_regs[reg]);
 	} else {
-		value = readl(priv->base + priv->control_regs[reg]);
+		value = pete_readl("drivers/clk/renesas/renesas-cpg-mssr.c:210", priv->base + priv->control_regs[reg]);
 		if (enable)
 			value &= ~bitmask;
 		else
 			value |= bitmask;
-		writel(value, priv->base + priv->control_regs[reg]);
+		pete_writel("drivers/clk/renesas/renesas-cpg-mssr.c:215", value, priv->base + priv->control_regs[reg]);
 	}
 
 	spin_unlock_irqrestore(&priv->rmw_lock, flags);
@@ -221,7 +221,7 @@ static int cpg_mstp_clock_endisable(struct clk_hw *hw, bool enable)
 		return 0;
 
 	for (i = 1000; i > 0; --i) {
-		if (!(readl(priv->base + priv->status_regs[reg]) & bitmask))
+		if (!(pete_readl("drivers/clk/renesas/renesas-cpg-mssr.c:224", priv->base + priv->status_regs[reg]) & bitmask))
 			break;
 		cpu_relax();
 	}
@@ -254,7 +254,7 @@ static int cpg_mstp_clock_is_enabled(struct clk_hw *hw)
 	if (priv->reg_layout == CLK_REG_LAYOUT_RZ_A)
 		value = readb(priv->base + priv->control_regs[clock->index / 32]);
 	else
-		value = readl(priv->base + priv->status_regs[clock->index / 32]);
+		value = pete_readl("drivers/clk/renesas/renesas-cpg-mssr.c:257", priv->base + priv->status_regs[clock->index / 32]);
 
 	return !(value & BIT(clock->index % 32));
 }
@@ -356,7 +356,7 @@ static void __init cpg_mssr_register_core_clk(const struct cpg_core_clk *core,
 
 		if (core->type == CLK_TYPE_DIV6_RO)
 			/* Multiply with the DIV6 register value */
-			div *= (readl(priv->base + core->offset) & 0x3f) + 1;
+			div *= (pete_readl("drivers/clk/renesas/renesas-cpg-mssr.c:359", priv->base + core->offset) & 0x3f) + 1;
 
 		if (core->type == CLK_TYPE_DIV6P1) {
 			clk = cpg_div6_register(core->name, 1, &parent_name,
@@ -596,13 +596,13 @@ static int cpg_mssr_reset(struct reset_controller_dev *rcdev,
 	dev_dbg(priv->dev, "reset %u%02u\n", reg, bit);
 
 	/* Reset module */
-	writel(bitmask, priv->base + priv->reset_regs[reg]);
+	pete_writel("drivers/clk/renesas/renesas-cpg-mssr.c:599", bitmask, priv->base + priv->reset_regs[reg]);
 
 	/* Wait for at least one cycle of the RCLK clock (@ ca. 32 kHz) */
 	udelay(35);
 
 	/* Release module from reset state */
-	writel(bitmask, priv->base + priv->reset_clear_regs[reg]);
+	pete_writel("drivers/clk/renesas/renesas-cpg-mssr.c:605", bitmask, priv->base + priv->reset_clear_regs[reg]);
 
 	return 0;
 }
@@ -616,7 +616,7 @@ static int cpg_mssr_assert(struct reset_controller_dev *rcdev, unsigned long id)
 
 	dev_dbg(priv->dev, "assert %u%02u\n", reg, bit);
 
-	writel(bitmask, priv->base + priv->reset_regs[reg]);
+	pete_writel("drivers/clk/renesas/renesas-cpg-mssr.c:619", bitmask, priv->base + priv->reset_regs[reg]);
 	return 0;
 }
 
@@ -630,7 +630,7 @@ static int cpg_mssr_deassert(struct reset_controller_dev *rcdev,
 
 	dev_dbg(priv->dev, "deassert %u%02u\n", reg, bit);
 
-	writel(bitmask, priv->base + priv->reset_clear_regs[reg]);
+	pete_writel("drivers/clk/renesas/renesas-cpg-mssr.c:633", bitmask, priv->base + priv->reset_clear_regs[reg]);
 	return 0;
 }
 
@@ -642,7 +642,7 @@ static int cpg_mssr_status(struct reset_controller_dev *rcdev,
 	unsigned int bit = id % 32;
 	u32 bitmask = BIT(bit);
 
-	return !!(readl(priv->base + priv->reset_regs[reg]) & bitmask);
+	return !!(pete_readl("drivers/clk/renesas/renesas-cpg-mssr.c:645", priv->base + priv->reset_regs[reg]) & bitmask);
 }
 
 static const struct reset_control_ops cpg_mssr_reset_ops = {
@@ -852,7 +852,7 @@ static int cpg_mssr_suspend_noirq(struct device *dev)
 			priv->smstpcr_saved[reg].val =
 				priv->reg_layout == CLK_REG_LAYOUT_RZ_A ?
 				readb(priv->base + priv->control_regs[reg]) :
-				readl(priv->base + priv->control_regs[reg]);
+				pete_readl("drivers/clk/renesas/renesas-cpg-mssr.c:855", priv->base + priv->control_regs[reg]);
 	}
 
 	/* Save core clocks */
@@ -883,7 +883,7 @@ static int cpg_mssr_resume_noirq(struct device *dev)
 		if (priv->reg_layout == CLK_REG_LAYOUT_RZ_A)
 			oldval = readb(priv->base + priv->control_regs[reg]);
 		else
-			oldval = readl(priv->base + priv->control_regs[reg]);
+			oldval = pete_readl("drivers/clk/renesas/renesas-cpg-mssr.c:886", priv->base + priv->control_regs[reg]);
 		newval = oldval & ~mask;
 		newval |= priv->smstpcr_saved[reg].val & mask;
 		if (newval == oldval)
@@ -896,7 +896,7 @@ static int cpg_mssr_resume_noirq(struct device *dev)
 			barrier_data(priv->base + priv->control_regs[reg]);
 			continue;
 		} else
-			writel(newval, priv->base + priv->control_regs[reg]);
+			pete_writel("drivers/clk/renesas/renesas-cpg-mssr.c:899", newval, priv->base + priv->control_regs[reg]);
 
 		/* Wait until enabled clocks are really enabled */
 		mask &= ~priv->smstpcr_saved[reg].val;
@@ -904,7 +904,7 @@ static int cpg_mssr_resume_noirq(struct device *dev)
 			continue;
 
 		for (i = 1000; i > 0; --i) {
-			oldval = readl(priv->base + priv->status_regs[reg]);
+			oldval = pete_readl("drivers/clk/renesas/renesas-cpg-mssr.c:907", priv->base + priv->status_regs[reg]);
 			if (!(oldval & mask))
 				break;
 			cpu_relax();

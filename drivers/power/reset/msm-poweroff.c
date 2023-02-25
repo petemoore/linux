@@ -17,7 +17,7 @@ static void __iomem *msm_ps_hold;
 static int deassert_pshold(struct notifier_block *nb, unsigned long action,
 			   void *data)
 {
-	writel(0, msm_ps_hold);
+	pete_writel("drivers/power/reset/msm-poweroff.c:20", 0, msm_ps_hold);
 	mdelay(10000);
 
 	return NOTIFY_DONE;

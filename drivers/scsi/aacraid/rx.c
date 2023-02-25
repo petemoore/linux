@@ -168,14 +168,14 @@ static int rx_sync_cmd(struct aac_dev *dev, u32 command,
 	/*
 	 *	Write the command into Mailbox 0
 	 */
-	writel(command, &dev->IndexRegs->Mailbox[0]);
+	pete_writel("drivers/scsi/aacraid/rx.c:171", command, &dev->IndexRegs->Mailbox[0]);
 	/*
 	 *	Write the parameters into Mailboxes 1 - 6
 	 */
-	writel(p1, &dev->IndexRegs->Mailbox[1]);
-	writel(p2, &dev->IndexRegs->Mailbox[2]);
-	writel(p3, &dev->IndexRegs->Mailbox[3]);
-	writel(p4, &dev->IndexRegs->Mailbox[4]);
+	pete_writel("drivers/scsi/aacraid/rx.c:175", p1, &dev->IndexRegs->Mailbox[1]);
+	pete_writel("drivers/scsi/aacraid/rx.c:176", p2, &dev->IndexRegs->Mailbox[2]);
+	pete_writel("drivers/scsi/aacraid/rx.c:177", p3, &dev->IndexRegs->Mailbox[3]);
+	pete_writel("drivers/scsi/aacraid/rx.c:178", p4, &dev->IndexRegs->Mailbox[4]);
 	/*
 	 *	Clear the synch command doorbell to start on a clean slate.
 	 */
@@ -230,15 +230,15 @@ static int rx_sync_cmd(struct aac_dev *dev, u32 command,
 	 *	Pull the synch status from Mailbox 0.
 	 */
 	if (status)
-		*status = readl(&dev->IndexRegs->Mailbox[0]);
+		*status = pete_readl("drivers/scsi/aacraid/rx.c:233", &dev->IndexRegs->Mailbox[0]);
 	if (r1)
-		*r1 = readl(&dev->IndexRegs->Mailbox[1]);
+		*r1 = pete_readl("drivers/scsi/aacraid/rx.c:235", &dev->IndexRegs->Mailbox[1]);
 	if (r2)
-		*r2 = readl(&dev->IndexRegs->Mailbox[2]);
+		*r2 = pete_readl("drivers/scsi/aacraid/rx.c:237", &dev->IndexRegs->Mailbox[2]);
 	if (r3)
-		*r3 = readl(&dev->IndexRegs->Mailbox[3]);
+		*r3 = pete_readl("drivers/scsi/aacraid/rx.c:239", &dev->IndexRegs->Mailbox[3]);
 	if (r4)
-		*r4 = readl(&dev->IndexRegs->Mailbox[4]);
+		*r4 = pete_readl("drivers/scsi/aacraid/rx.c:241", &dev->IndexRegs->Mailbox[4]);
 	/*
 	 *	Clear the synch command doorbell.
 	 */
@@ -441,11 +441,11 @@ static int aac_rx_deliver_message(struct fib * fib)
 	}
 	device = dev->base + Index;
 	addr = fib->hw_fib_pa;
-	writel((u32)(addr & 0xffffffff), device);
+	pete_writel("drivers/scsi/aacraid/rx.c:444", (u32)(addr & 0xffffffff), device);
 	device += sizeof(u32);
-	writel((u32)(addr >> 32), device);
+	pete_writel("drivers/scsi/aacraid/rx.c:446", (u32)(addr >> 32), device);
 	device += sizeof(u32);
-	writel(le16_to_cpu(fib->hw_fib_va->header.Size), device);
+	pete_writel("drivers/scsi/aacraid/rx.c:448", le16_to_cpu(fib->hw_fib_va->header.Size), device);
 	rx_writel(dev, MUnit.InboundQueue, Index);
 	return 0;
 }

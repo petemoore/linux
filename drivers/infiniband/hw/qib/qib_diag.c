@@ -444,7 +444,7 @@ static int qib_read_umem32(struct qib_devdata *dd, void __user *uaddr,
 
 	/* not very efficient, but it works for now */
 	while (reg_addr < reg_end) {
-		u32 data = readl(reg_addr);
+		u32 data = pete_readl("drivers/infiniband/hw/qib/qib_diag.c:447", reg_addr);
 
 		if (copy_to_user(uaddr, &data, sizeof(data))) {
 			ret = -EFAULT;
@@ -495,7 +495,7 @@ static int qib_write_umem32(struct qib_devdata *dd, u32 regoffs,
 			ret = -EFAULT;
 			goto bail;
 		}
-		writel(data, reg_addr);
+		pete_writel("drivers/infiniband/hw/qib/qib_diag.c:498", data, reg_addr);
 
 		reg_addr++;
 		uaddr += sizeof(u32);

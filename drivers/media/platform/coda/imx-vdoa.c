@@ -104,7 +104,7 @@ static irqreturn_t vdoa_irq_handler(int irq, void *data)
 	u32 val;
 
 	/* Disable interrupts */
-	writel(0, vdoa->regs + VDOAIE);
+	pete_writel("drivers/media/platform/coda/imx-vdoa.c:107", 0, vdoa->regs + VDOAIE);
 
 	curr_ctx = vdoa->curr_ctx;
 	if (!curr_ctx) {
@@ -113,10 +113,10 @@ static irqreturn_t vdoa_irq_handler(int irq, void *data)
 		return IRQ_HANDLED;
 	}
 
-	val = readl(vdoa->regs + VDOAIST);
-	writel(val, vdoa->regs + VDOAIST);
+	val = pete_readl("drivers/media/platform/coda/imx-vdoa.c:116", vdoa->regs + VDOAIST);
+	pete_writel("drivers/media/platform/coda/imx-vdoa.c:117", val, vdoa->regs + VDOAIST);
 	if (val & VDOAIST_TERR) {
-		val = readl(vdoa->regs + VDOASR) & VDOASR_ERRW;
+		val = pete_readl("drivers/media/platform/coda/imx-vdoa.c:119", vdoa->regs + VDOASR) & VDOASR_ERRW;
 		dev_err(vdoa->dev, "AXI %s error\n", val ? "write" : "read");
 	} else if (!(val & VDOAIST_EOT)) {
 		dev_warn(vdoa->dev, "Spurious interrupt\n");
@@ -167,15 +167,15 @@ void vdoa_device_run(struct vdoa_ctx *ctx, dma_addr_t dst, dma_addr_t src)
 		val = VDOAC_PFS;
 	else
 		val = 0;
-	writel(val, vdoa->regs + VDOAC);
+	pete_writel("drivers/media/platform/coda/imx-vdoa.c:170", val, vdoa->regs + VDOAC);
 
-	writel(dst_q_data->height << 16 | dst_q_data->width,
+	pete_writel("drivers/media/platform/coda/imx-vdoa.c:172", dst_q_data->height << 16 | dst_q_data->width,
 	       vdoa->regs + VDOAFP);
 
 	val = dst;
-	writel(val, vdoa->regs + VDOAIEBA00);
+	pete_writel("drivers/media/platform/coda/imx-vdoa.c:176", val, vdoa->regs + VDOAIEBA00);
 
-	writel(src_q_data->bytesperline << 16 | dst_q_data->bytesperline,
+	pete_writel("drivers/media/platform/coda/imx-vdoa.c:178", src_q_data->bytesperline << 16 | dst_q_data->bytesperline,
 	       vdoa->regs + VDOASL);
 
 	if (dst_q_data->pixelformat == V4L2_PIX_FMT_NV12 ||
@@ -183,16 +183,16 @@ void vdoa_device_run(struct vdoa_ctx *ctx, dma_addr_t dst, dma_addr_t src)
 		val = dst_q_data->bytesperline * dst_q_data->height;
 	else
 		val = 0;
-	writel(val, vdoa->regs + VDOAIUBO);
+	pete_writel("drivers/media/platform/coda/imx-vdoa.c:186", val, vdoa->regs + VDOAIUBO);
 
 	val = src;
-	writel(val, vdoa->regs + VDOAVEBA0);
+	pete_writel("drivers/media/platform/coda/imx-vdoa.c:189", val, vdoa->regs + VDOAVEBA0);
 	val = round_up(src_q_data->bytesperline * src_q_data->height, 4096);
-	writel(val, vdoa->regs + VDOAVUBO);
+	pete_writel("drivers/media/platform/coda/imx-vdoa.c:191", val, vdoa->regs + VDOAVUBO);
 
 	/* Enable interrupts and start transfer */
-	writel(VDOAIE_EITERR | VDOAIE_EIEOT, vdoa->regs + VDOAIE);
-	writel(VDOASRR_START, vdoa->regs + VDOASRR);
+	pete_writel("drivers/media/platform/coda/imx-vdoa.c:194", VDOAIE_EITERR | VDOAIE_EIEOT, vdoa->regs + VDOAIE);
+	pete_writel("drivers/media/platform/coda/imx-vdoa.c:195", VDOASRR_START, vdoa->regs + VDOASRR);
 }
 EXPORT_SYMBOL(vdoa_device_run);
 

@@ -37,7 +37,7 @@ static int m10v_boot_secondary(unsigned int l_cpu, struct task_struct *idle)
 	pr_info("%s: cpu %u l_cpu %u cluster %u\n",
 			__func__, cpu, l_cpu, cluster);
 
-	writel(__pa_symbol(secondary_startup), m10v_smp_base + cpu * 4);
+	pete_writel("arch/arm/mach-milbeaut/platsmp.c:40", __pa_symbol(secondary_startup), m10v_smp_base + cpu * 4);
 	arch_send_wakeup_ipi_mask(cpumask_of(l_cpu));
 
 	return 0;
@@ -62,7 +62,7 @@ static void m10v_smp_init(unsigned int max_cpus)
 	pr_info("MCPM boot on cpu_%u cluster_%u\n", cpu, cluster);
 
 	for (cpu = 0; cpu < M10V_MAX_CPU; cpu++)
-		writel(KERNEL_UNBOOT_FLAG, m10v_smp_base + cpu * 4);
+		pete_writel("arch/arm/mach-milbeaut/platsmp.c:65", KERNEL_UNBOOT_FLAG, m10v_smp_base + cpu * 4);
 }
 
 #ifdef CONFIG_HOTPLUG_CPU
@@ -80,7 +80,7 @@ static int m10v_cpu_kill(unsigned int l_cpu)
 	mpidr = cpu_logical_map(l_cpu);
 	cpu = MPIDR_AFFINITY_LEVEL(mpidr, 0);
 
-	writel(KERNEL_UNBOOT_FLAG, m10v_smp_base + cpu * 4);
+	pete_writel("arch/arm/mach-milbeaut/platsmp.c:83", KERNEL_UNBOOT_FLAG, m10v_smp_base + cpu * 4);
 
 	return 1;
 }

@@ -538,7 +538,7 @@ static inline void reg_block_dump(struct adapter *ap, void *buf,
 	u32 *p = buf + start;
 
 	for ( ; start <= end; start += sizeof(u32))
-		*p++ = readl(ap->regs + start);
+		*p++ = pete_readl("drivers/net/ethernet/chelsio/cxgb/cxgb2.c:541", ap->regs + start);
 }
 
 static void get_regs(struct net_device *dev, struct ethtool_regs *regs,

@@ -209,12 +209,12 @@ static void uart_clps711x_break_ctl(struct uart_port *port, int break_state)
 {
 	unsigned int ubrlcr;
 
-	ubrlcr = readl(port->membase + UBRLCR_OFFSET);
+	ubrlcr = pete_readl("drivers/tty/serial/clps711x.c:212", port->membase + UBRLCR_OFFSET);
 	if (break_state)
 		ubrlcr |= UBRLCR_BREAK;
 	else
 		ubrlcr &= ~UBRLCR_BREAK;
-	writel(ubrlcr, port->membase + UBRLCR_OFFSET);
+	pete_writel("drivers/tty/serial/clps711x.c:217", ubrlcr, port->membase + UBRLCR_OFFSET);
 }
 
 static void uart_clps711x_set_ldisc(struct uart_port *port,
@@ -233,7 +233,7 @@ static int uart_clps711x_startup(struct uart_port *port)
 	struct clps711x_port *s = dev_get_drvdata(port->dev);
 
 	/* Disable break */
-	writel(readl(port->membase + UBRLCR_OFFSET) & ~UBRLCR_BREAK,
+	pete_writel("drivers/tty/serial/clps711x.c:236", pete_readl("drivers/tty/serial/clps711x.c:236", port->membase + UBRLCR_OFFSET) & ~UBRLCR_BREAK,
 	       port->membase + UBRLCR_OFFSET);
 
 	/* Enable the port */
@@ -306,7 +306,7 @@ static void uart_clps711x_set_termios(struct uart_port *port,
 
 	uart_update_timeout(port, termios->c_cflag, baud);
 
-	writel(ubrlcr | (quot - 1), port->membase + UBRLCR_OFFSET);
+	pete_writel("drivers/tty/serial/clps711x.c:309", ubrlcr | (quot - 1), port->membase + UBRLCR_OFFSET);
 }
 
 static const char *uart_clps711x_type(struct uart_port *port)
@@ -399,7 +399,7 @@ static int uart_clps711x_console_setup(struct console *co, char *options)
 
 		regmap_read(s->syscon, SYSCON_OFFSET, &syscon);
 		if (syscon & SYSCON_UARTEN) {
-			ubrlcr = readl(port->membase + UBRLCR_OFFSET);
+			ubrlcr = pete_readl("drivers/tty/serial/clps711x.c:402", port->membase + UBRLCR_OFFSET);
 
 			if (ubrlcr & UBRLCR_PRTEN) {
 				if (ubrlcr & UBRLCR_EVENPRT)

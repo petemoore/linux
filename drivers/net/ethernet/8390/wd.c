@@ -420,12 +420,12 @@ wd_get_8390_hdr(struct net_device *dev, struct e8390_pkt_hdr *hdr, int ring_page
 		outb(ISA16 | ei_status.reg5, wd_cmdreg+WD_CMDREG5);
 
 #ifdef __BIG_ENDIAN
-	/* Officially this is what we are doing, but the readl() is faster */
+	/* Officially this is what we are doing, but the pete_readl("drivers/net/ethernet/8390/wd.c:423", ) is faster */
 	/* unfortunately it isn't endian aware of the struct               */
 	memcpy_fromio(hdr, hdr_start, sizeof(struct e8390_pkt_hdr));
 	hdr->count = le16_to_cpu(hdr->count);
 #else
-	((unsigned int*)hdr)[0] = readl(hdr_start);
+	((unsigned int*)hdr)[0] = pete_readl("drivers/net/ethernet/8390/wd.c:428", hdr_start);
 #endif
 }
 

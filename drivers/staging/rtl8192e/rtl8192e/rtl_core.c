@@ -100,7 +100,7 @@ u8 rtl92e_readb(struct net_device *dev, int x)
 
 u32 rtl92e_readl(struct net_device *dev, int x)
 {
-	return readl((u8 __iomem *)dev->mem_start + x);
+	return pete_readl("drivers/staging/rtl8192e/rtl8192e/rtl_core.c:103", (u8 __iomem *)dev->mem_start + x);
 }
 
 u16 rtl92e_readw(struct net_device *dev, int x)
@@ -117,7 +117,7 @@ void rtl92e_writeb(struct net_device *dev, int x, u8 y)
 
 void rtl92e_writel(struct net_device *dev, int x, u32 y)
 {
-	writel(y, (u8 __iomem *)dev->mem_start + x);
+	pete_writel("drivers/staging/rtl8192e/rtl8192e/rtl_core.c:120", y, (u8 __iomem *)dev->mem_start + x);
 
 	udelay(20);
 }

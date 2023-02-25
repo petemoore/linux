@@ -184,15 +184,15 @@ static unsigned long hs_tx_buf = UDC_EPIN_BUFF_SIZE;
 static void print_regs(struct udc *dev)
 {
 	DBG(dev, "------- Device registers -------\n");
-	DBG(dev, "dev config     = %08x\n", readl(&dev->regs->cfg));
-	DBG(dev, "dev control    = %08x\n", readl(&dev->regs->ctl));
-	DBG(dev, "dev status     = %08x\n", readl(&dev->regs->sts));
+	DBG(dev, "dev config     = %08x\n", pete_readl("drivers/usb/gadget/udc/snps_udc_core.c:187", &dev->regs->cfg));
+	DBG(dev, "dev control    = %08x\n", pete_readl("drivers/usb/gadget/udc/snps_udc_core.c:188", &dev->regs->ctl));
+	DBG(dev, "dev status     = %08x\n", pete_readl("drivers/usb/gadget/udc/snps_udc_core.c:189", &dev->regs->sts));
 	DBG(dev, "\n");
-	DBG(dev, "dev int's      = %08x\n", readl(&dev->regs->irqsts));
-	DBG(dev, "dev intmask    = %08x\n", readl(&dev->regs->irqmsk));
+	DBG(dev, "dev int's      = %08x\n", pete_readl("drivers/usb/gadget/udc/snps_udc_core.c:191", &dev->regs->irqsts));
+	DBG(dev, "dev intmask    = %08x\n", pete_readl("drivers/usb/gadget/udc/snps_udc_core.c:192", &dev->regs->irqmsk));
 	DBG(dev, "\n");
-	DBG(dev, "dev ep int's   = %08x\n", readl(&dev->regs->ep_irqsts));
-	DBG(dev, "dev ep intmask = %08x\n", readl(&dev->regs->ep_irqmsk));
+	DBG(dev, "dev ep int's   = %08x\n", pete_readl("drivers/usb/gadget/udc/snps_udc_core.c:194", &dev->regs->ep_irqsts));
+	DBG(dev, "dev ep intmask = %08x\n", pete_readl("drivers/usb/gadget/udc/snps_udc_core.c:195", &dev->regs->ep_irqmsk));
 	DBG(dev, "\n");
 	DBG(dev, "USE DMA        = %d\n", use_dma);
 	if (use_dma && use_dma_ppb && !use_dma_ppb_du) {
@@ -227,10 +227,10 @@ int udc_mask_unused_interrupts(struct udc *dev)
 		AMD_BIT(UDC_DEVINT_SI) |
 		AMD_BIT(UDC_DEVINT_SOF)|
 		AMD_BIT(UDC_DEVINT_SC);
-	writel(tmp, &dev->regs->irqmsk);
+	pete_writel("drivers/usb/gadget/udc/snps_udc_core.c:230", tmp, &dev->regs->irqmsk);
 
 	/* mask all ep interrupts */
-	writel(UDC_EPINT_MSK_DISABLE_ALL, &dev->regs->ep_irqmsk);
+	pete_writel("drivers/usb/gadget/udc/snps_udc_core.c:233", UDC_EPINT_MSK_DISABLE_ALL, &dev->regs->ep_irqmsk);
 
 	return 0;
 }
@@ -244,11 +244,11 @@ static int udc_enable_ep0_interrupts(struct udc *dev)
 	DBG(dev, "udc_enable_ep0_interrupts()\n");
 
 	/* read irq mask */
-	tmp = readl(&dev->regs->ep_irqmsk);
+	tmp = pete_readl("drivers/usb/gadget/udc/snps_udc_core.c:247", &dev->regs->ep_irqmsk);
 	/* enable ep0 irq's */
 	tmp &= AMD_UNMASK_BIT(UDC_EPINT_IN_EP0)
 		& AMD_UNMASK_BIT(UDC_EPINT_OUT_EP0);
-	writel(tmp, &dev->regs->ep_irqmsk);
+	pete_writel("drivers/usb/gadget/udc/snps_udc_core.c:251", tmp, &dev->regs->ep_irqmsk);
 
 	return 0;
 }
@@ -261,7 +261,7 @@ int udc_enable_dev_setup_interrupts(struct udc *dev)
 	DBG(dev, "enable device interrupts for setup data\n");
 
 	/* read irq mask */
-	tmp = readl(&dev->regs->irqmsk);
+	tmp = pete_readl("drivers/usb/gadget/udc/snps_udc_core.c:264", &dev->regs->irqmsk);
 
 	/* enable SET_INTERFACE, SET_CONFIG and other needed irq's */
 	tmp &= AMD_UNMASK_BIT(UDC_DEVINT_SI)
@@ -269,7 +269,7 @@ int udc_enable_dev_setup_interrupts(struct udc *dev)
 		& AMD_UNMASK_BIT(UDC_DEVINT_UR)
 		& AMD_UNMASK_BIT(UDC_DEVINT_SVC)
 		& AMD_UNMASK_BIT(UDC_DEVINT_ENUM);
-	writel(tmp, &dev->regs->irqmsk);
+	pete_writel("drivers/usb/gadget/udc/snps_udc_core.c:272", tmp, &dev->regs->irqmsk);
 
 	return 0;
 }
@@ -292,7 +292,7 @@ static int udc_set_txfifo_addr(struct udc_ep *ep)
 	for (i = 0; i < ep->num; i++) {
 		if (dev->ep[i].regs) {
 			/* read fifo size */
-			tmp = readl(&dev->ep[i].regs->bufin_framenum);
+			tmp = pete_readl("drivers/usb/gadget/udc/snps_udc_core.c:295", &dev->ep[i].regs->bufin_framenum);
 			tmp = AMD_GETBITS(tmp, UDC_EPIN_BUFF_SIZE);
 			ep->txfifo += tmp;
 		}
@@ -305,7 +305,7 @@ static u32 cnak_pending;
 
 static void UDC_QUEUE_CNAK(struct udc_ep *ep, unsigned num)
 {
-	if (readl(&ep->regs->ctl) & AMD_BIT(UDC_EPCTL_NAK)) {
+	if (pete_readl("drivers/usb/gadget/udc/snps_udc_core.c:308", &ep->regs->ctl) & AMD_BIT(UDC_EPCTL_NAK)) {
 		DBG(ep->dev, "NAK could not be cleared for ep%d\n", num);
 		cnak_pending |= 1 << (num);
 		ep->naking = 1;
@@ -345,16 +345,16 @@ udc_ep_enable(struct usb_ep *usbep, const struct usb_endpoint_descriptor *desc)
 	ep->halted = 0;
 
 	/* set traffic type */
-	tmp = readl(&dev->ep[ep->num].regs->ctl);
+	tmp = pete_readl("drivers/usb/gadget/udc/snps_udc_core.c:348", &dev->ep[ep->num].regs->ctl);
 	tmp = AMD_ADDBITS(tmp, desc->bmAttributes, UDC_EPCTL_ET);
-	writel(tmp, &dev->ep[ep->num].regs->ctl);
+	pete_writel("drivers/usb/gadget/udc/snps_udc_core.c:350", tmp, &dev->ep[ep->num].regs->ctl);
 
 	/* set max packet size */
 	maxpacket = usb_endpoint_maxp(desc);
-	tmp = readl(&dev->ep[ep->num].regs->bufout_maxpkt);
+	tmp = pete_readl("drivers/usb/gadget/udc/snps_udc_core.c:354", &dev->ep[ep->num].regs->bufout_maxpkt);
 	tmp = AMD_ADDBITS(tmp, maxpacket, UDC_EP_MAX_PKT_SIZE);
 	ep->ep.maxpacket = maxpacket;
-	writel(tmp, &dev->ep[ep->num].regs->bufout_maxpkt);
+	pete_writel("drivers/usb/gadget/udc/snps_udc_core.c:357", tmp, &dev->ep[ep->num].regs->bufout_maxpkt);
 
 	/* IN ep */
 	if (ep->in) {
@@ -363,22 +363,22 @@ udc_ep_enable(struct usb_ep *usbep, const struct usb_endpoint_descriptor *desc)
 		udc_csr_epix = ep->num;
 
 		/* set buffer size (tx fifo entries) */
-		tmp = readl(&dev->ep[ep->num].regs->bufin_framenum);
+		tmp = pete_readl("drivers/usb/gadget/udc/snps_udc_core.c:366", &dev->ep[ep->num].regs->bufin_framenum);
 		/* double buffering: fifo size = 2 x max packet size */
 		tmp = AMD_ADDBITS(
 				tmp,
 				maxpacket * UDC_EPIN_BUFF_SIZE_MULT
 					  / UDC_DWORD_BYTES,
 				UDC_EPIN_BUFF_SIZE);
-		writel(tmp, &dev->ep[ep->num].regs->bufin_framenum);
+		pete_writel("drivers/usb/gadget/udc/snps_udc_core.c:373", tmp, &dev->ep[ep->num].regs->bufin_framenum);
 
 		/* calc. tx fifo base addr */
 		udc_set_txfifo_addr(ep);
 
 		/* flush fifo */
-		tmp = readl(&ep->regs->ctl);
+		tmp = pete_readl("drivers/usb/gadget/udc/snps_udc_core.c:379", &ep->regs->ctl);
 		tmp |= AMD_BIT(UDC_EPCTL_F);
-		writel(tmp, &ep->regs->ctl);
+		pete_writel("drivers/usb/gadget/udc/snps_udc_core.c:381", tmp, &ep->regs->ctl);
 
 	/* OUT ep */
 	} else {
@@ -386,10 +386,10 @@ udc_ep_enable(struct usb_ep *usbep, const struct usb_endpoint_descriptor *desc)
 		udc_csr_epix = ep->num - UDC_CSR_EP_OUT_IX_OFS;
 
 		/* set max packet size UDC CSR	*/
-		tmp = readl(&dev->csr->ne[ep->num - UDC_CSR_EP_OUT_IX_OFS]);
+		tmp = pete_readl("drivers/usb/gadget/udc/snps_udc_core.c:389", &dev->csr->ne[ep->num - UDC_CSR_EP_OUT_IX_OFS]);
 		tmp = AMD_ADDBITS(tmp, maxpacket,
 					UDC_CSR_NE_MAX_PKT);
-		writel(tmp, &dev->csr->ne[ep->num - UDC_CSR_EP_OUT_IX_OFS]);
+		pete_writel("drivers/usb/gadget/udc/snps_udc_core.c:392", tmp, &dev->csr->ne[ep->num - UDC_CSR_EP_OUT_IX_OFS]);
 
 		if (use_dma && !ep->in) {
 			/* alloc and init BNA dummy request */
@@ -402,7 +402,7 @@ udc_ep_enable(struct usb_ep *usbep, const struct usb_endpoint_descriptor *desc)
 	}
 
 	/* set ep values */
-	tmp = readl(&dev->csr->ne[udc_csr_epix]);
+	tmp = pete_readl("drivers/usb/gadget/udc/snps_udc_core.c:405", &dev->csr->ne[udc_csr_epix]);
 	/* max packet */
 	tmp = AMD_ADDBITS(tmp, maxpacket, UDC_CSR_NE_MAX_PKT);
 	/* ep number */
@@ -418,21 +418,21 @@ udc_ep_enable(struct usb_ep *usbep, const struct usb_endpoint_descriptor *desc)
 	/* ep alt */
 	tmp = AMD_ADDBITS(tmp, ep->dev->cur_alt, UDC_CSR_NE_ALT);
 	/* write reg */
-	writel(tmp, &dev->csr->ne[udc_csr_epix]);
+	pete_writel("drivers/usb/gadget/udc/snps_udc_core.c:421", tmp, &dev->csr->ne[udc_csr_epix]);
 
 	/* enable ep irq */
-	tmp = readl(&dev->regs->ep_irqmsk);
+	tmp = pete_readl("drivers/usb/gadget/udc/snps_udc_core.c:424", &dev->regs->ep_irqmsk);
 	tmp &= AMD_UNMASK_BIT(ep->num);
-	writel(tmp, &dev->regs->ep_irqmsk);
+	pete_writel("drivers/usb/gadget/udc/snps_udc_core.c:426", tmp, &dev->regs->ep_irqmsk);
 
 	/*
 	 * clear NAK by writing CNAK
 	 * avoid BNA for OUT DMA, don't clear NAK until DMA desc. written
 	 */
 	if (!use_dma || ep->in) {
-		tmp = readl(&ep->regs->ctl);
+		tmp = pete_readl("drivers/usb/gadget/udc/snps_udc_core.c:433", &ep->regs->ctl);
 		tmp |= AMD_BIT(UDC_EPCTL_CNAK);
-		writel(tmp, &ep->regs->ctl);
+		pete_writel("drivers/usb/gadget/udc/snps_udc_core.c:435", tmp, &ep->regs->ctl);
 		ep->naking = 0;
 		UDC_QUEUE_CNAK(ep, ep->num);
 	}
@@ -455,34 +455,34 @@ static void ep_init(struct udc_regs __iomem *regs, struct udc_ep *ep)
 
 	usb_ep_set_maxpacket_limit(&ep->ep,(u16) ~0);
 	/* set NAK */
-	tmp = readl(&ep->regs->ctl);
+	tmp = pete_readl("drivers/usb/gadget/udc/snps_udc_core.c:458", &ep->regs->ctl);
 	tmp |= AMD_BIT(UDC_EPCTL_SNAK);
-	writel(tmp, &ep->regs->ctl);
+	pete_writel("drivers/usb/gadget/udc/snps_udc_core.c:460", tmp, &ep->regs->ctl);
 	ep->naking = 1;
 
 	/* disable interrupt */
-	tmp = readl(&regs->ep_irqmsk);
+	tmp = pete_readl("drivers/usb/gadget/udc/snps_udc_core.c:464", &regs->ep_irqmsk);
 	tmp |= AMD_BIT(ep->num);
-	writel(tmp, &regs->ep_irqmsk);
+	pete_writel("drivers/usb/gadget/udc/snps_udc_core.c:466", tmp, &regs->ep_irqmsk);
 
 	if (ep->in) {
 		/* unset P and IN bit of potential former DMA */
-		tmp = readl(&ep->regs->ctl);
+		tmp = pete_readl("drivers/usb/gadget/udc/snps_udc_core.c:470", &ep->regs->ctl);
 		tmp &= AMD_UNMASK_BIT(UDC_EPCTL_P);
-		writel(tmp, &ep->regs->ctl);
+		pete_writel("drivers/usb/gadget/udc/snps_udc_core.c:472", tmp, &ep->regs->ctl);
 
-		tmp = readl(&ep->regs->sts);
+		tmp = pete_readl("drivers/usb/gadget/udc/snps_udc_core.c:474", &ep->regs->sts);
 		tmp |= AMD_BIT(UDC_EPSTS_IN);
-		writel(tmp, &ep->regs->sts);
+		pete_writel("drivers/usb/gadget/udc/snps_udc_core.c:476", tmp, &ep->regs->sts);
 
 		/* flush the fifo */
-		tmp = readl(&ep->regs->ctl);
+		tmp = pete_readl("drivers/usb/gadget/udc/snps_udc_core.c:479", &ep->regs->ctl);
 		tmp |= AMD_BIT(UDC_EPCTL_F);
-		writel(tmp, &ep->regs->ctl);
+		pete_writel("drivers/usb/gadget/udc/snps_udc_core.c:481", tmp, &ep->regs->ctl);
 
 	}
 	/* reset desc pointer */
-	writel(0, &ep->regs->desptr);
+	pete_writel("drivers/usb/gadget/udc/snps_udc_core.c:485", 0, &ep->regs->desptr);
 }
 
 /* Disables endpoint, is called by gadget driver */
@@ -664,7 +664,7 @@ udc_txfifo_write(struct udc_ep *ep, struct usb_request *req)
 
 	/* dwords first */
 	for (i = 0; i < bytes / UDC_DWORD_BYTES; i++)
-		writel(*(buf + i), ep->txfifo);
+		pete_writel("drivers/usb/gadget/udc/snps_udc_core.c:667", *(buf + i), ep->txfifo);
 
 	/* remaining bytes must be written by byte access */
 	for (j = 0; j < bytes % UDC_DWORD_BYTES; j++) {
@@ -673,7 +673,7 @@ udc_txfifo_write(struct udc_ep *ep, struct usb_request *req)
 	}
 
 	/* dummy write confirm */
-	writel(0, &ep->regs->confirm);
+	pete_writel("drivers/usb/gadget/udc/snps_udc_core.c:676", 0, &ep->regs->confirm);
 }
 
 /* Read dwords from RX fifo for OUT transfers */
@@ -684,7 +684,7 @@ static int udc_rxfifo_read_dwords(struct udc *dev, u32 *buf, int dwords)
 	VDBG(dev, "udc_read_dwords(): %d dwords\n", dwords);
 
 	for (i = 0; i < dwords; i++)
-		*(buf + i) = readl(dev->rxfifo);
+		*(buf + i) = pete_readl("drivers/usb/gadget/udc/snps_udc_core.c:687", dev->rxfifo);
 	return 0;
 }
 
@@ -698,11 +698,11 @@ static int udc_rxfifo_read_bytes(struct udc *dev, u8 *buf, int bytes)
 
 	/* dwords first */
 	for (i = 0; i < bytes / UDC_DWORD_BYTES; i++)
-		*((u32 *)(buf + (i<<2))) = readl(dev->rxfifo);
+		*((u32 *)(buf + (i<<2))) = pete_readl("drivers/usb/gadget/udc/snps_udc_core.c:701", dev->rxfifo);
 
 	/* remaining bytes must be read by byte access */
 	if (bytes % UDC_DWORD_BYTES) {
-		tmp = readl(dev->rxfifo);
+		tmp = pete_readl("drivers/usb/gadget/udc/snps_udc_core.c:705", dev->rxfifo);
 		for (j = 0; j < bytes % UDC_DWORD_BYTES; j++) {
 			*(buf + (i<<2) + j) = (u8)(tmp & UDC_BYTE_MASK);
 			tmp = tmp >> UDC_BITS_PER_BYTE;
@@ -722,7 +722,7 @@ udc_rxfifo_read(struct udc_ep *ep, struct udc_request *req)
 	unsigned finished = 0;
 
 	/* received number bytes */
-	bytes = readl(&ep->regs->sts);
+	bytes = pete_readl("drivers/usb/gadget/udc/snps_udc_core.c:725", &ep->regs->sts);
 	bytes = AMD_GETBITS(bytes, UDC_EPSTS_RX_PKT_SIZE);
 
 	buf_space = req->req.length - req->req.actual;
@@ -943,9 +943,9 @@ static int prep_dma(struct udc_ep *ep, struct udc_request *req, gfp_t gfp)
 
 		/* clear NAK by writing CNAK */
 		if (ep->naking) {
-			tmp = readl(&ep->regs->ctl);
+			tmp = pete_readl("drivers/usb/gadget/udc/snps_udc_core.c:946", &ep->regs->ctl);
 			tmp |= AMD_BIT(UDC_EPCTL_CNAK);
-			writel(tmp, &ep->regs->ctl);
+			pete_writel("drivers/usb/gadget/udc/snps_udc_core.c:948", tmp, &ep->regs->ctl);
 			ep->naking = 0;
 			UDC_QUEUE_CNAK(ep, ep->num);
 		}
@@ -1038,9 +1038,9 @@ static void udc_set_rde(struct udc *dev)
 		mod_timer(&udc_timer, jiffies - 1);
 	}
 	/* set RDE */
-	tmp = readl(&dev->regs->ctl);
+	tmp = pete_readl("drivers/usb/gadget/udc/snps_udc_core.c:1041", &dev->regs->ctl);
 	tmp |= AMD_BIT(UDC_DEVCTL_RDE);
-	writel(tmp, &dev->regs->ctl);
+	pete_writel("drivers/usb/gadget/udc/snps_udc_core.c:1043", tmp, &dev->regs->ctl);
 }
 
 /* Queues a request packet, called by gadget driver */
@@ -1101,17 +1101,17 @@ udc_queue(struct usb_ep *usbep, struct usb_request *usbreq, gfp_t gfp)
 			 * then set CSR_DONE
 			 */
 			if (dev->set_cfg_not_acked) {
-				tmp = readl(&dev->regs->ctl);
+				tmp = pete_readl("drivers/usb/gadget/udc/snps_udc_core.c:1104", &dev->regs->ctl);
 				tmp |= AMD_BIT(UDC_DEVCTL_CSR_DONE);
-				writel(tmp, &dev->regs->ctl);
+				pete_writel("drivers/usb/gadget/udc/snps_udc_core.c:1106", tmp, &dev->regs->ctl);
 				dev->set_cfg_not_acked = 0;
 			}
 			/* setup command is ACK'ed now by zlp */
 			if (dev->waiting_zlp_ack_ep0in) {
 				/* clear NAK by writing CNAK in EP0_IN */
-				tmp = readl(&dev->ep[UDC_EP0IN_IX].regs->ctl);
+				tmp = pete_readl("drivers/usb/gadget/udc/snps_udc_core.c:1112", &dev->ep[UDC_EP0IN_IX].regs->ctl);
 				tmp |= AMD_BIT(UDC_EPCTL_CNAK);
-				writel(tmp, &dev->ep[UDC_EP0IN_IX].regs->ctl);
+				pete_writel("drivers/usb/gadget/udc/snps_udc_core.c:1114", tmp, &dev->ep[UDC_EP0IN_IX].regs->ctl);
 				dev->ep[UDC_EP0IN_IX].naking = 0;
 				UDC_QUEUE_CNAK(&dev->ep[UDC_EP0IN_IX],
 							UDC_EP0IN_IX);
@@ -1140,9 +1140,9 @@ udc_queue(struct usb_ep *usbep, struct usb_request *usbreq, gfp_t gfp)
 					mod_timer(&udc_timer, jiffies - 1);
 				}
 				/* clear RDE */
-				tmp = readl(&dev->regs->ctl);
+				tmp = pete_readl("drivers/usb/gadget/udc/snps_udc_core.c:1143", &dev->regs->ctl);
 				tmp &= AMD_UNMASK_BIT(UDC_DEVCTL_RDE);
-				writel(tmp, &dev->regs->ctl);
+				pete_writel("drivers/usb/gadget/udc/snps_udc_core.c:1145", tmp, &dev->regs->ctl);
 				open_rxfifo = 1;
 
 				/*
@@ -1157,28 +1157,28 @@ udc_queue(struct usb_ep *usbep, struct usb_request *usbreq, gfp_t gfp)
 				}
 			}
 			/* write desc pointer */
-			writel(req->td_phys, &ep->regs->desptr);
+			pete_writel("drivers/usb/gadget/udc/snps_udc_core.c:1160", req->td_phys, &ep->regs->desptr);
 
 			/* clear NAK by writing CNAK */
 			if (ep->naking) {
-				tmp = readl(&ep->regs->ctl);
+				tmp = pete_readl("drivers/usb/gadget/udc/snps_udc_core.c:1164", &ep->regs->ctl);
 				tmp |= AMD_BIT(UDC_EPCTL_CNAK);
-				writel(tmp, &ep->regs->ctl);
+				pete_writel("drivers/usb/gadget/udc/snps_udc_core.c:1166", tmp, &ep->regs->ctl);
 				ep->naking = 0;
 				UDC_QUEUE_CNAK(ep, ep->num);
 			}
 
 			if (ep->in) {
 				/* enable ep irq */
-				tmp = readl(&dev->regs->ep_irqmsk);
+				tmp = pete_readl("drivers/usb/gadget/udc/snps_udc_core.c:1173", &dev->regs->ep_irqmsk);
 				tmp &= AMD_UNMASK_BIT(ep->num);
-				writel(tmp, &dev->regs->ep_irqmsk);
+				pete_writel("drivers/usb/gadget/udc/snps_udc_core.c:1175", tmp, &dev->regs->ep_irqmsk);
 			}
 		} else if (ep->in) {
 				/* enable ep irq */
-				tmp = readl(&dev->regs->ep_irqmsk);
+				tmp = pete_readl("drivers/usb/gadget/udc/snps_udc_core.c:1179", &dev->regs->ep_irqmsk);
 				tmp &= AMD_UNMASK_BIT(ep->num);
-				writel(tmp, &dev->regs->ep_irqmsk);
+				pete_writel("drivers/usb/gadget/udc/snps_udc_core.c:1181", tmp, &dev->regs->ep_irqmsk);
 			}
 
 	} else if (ep->dma) {
@@ -1273,8 +1273,8 @@ static int udc_dequeue(struct usb_ep *usbep, struct usb_request *usbreq)
 				u32 tmp;
 				u32 dma_sts;
 				/* stop potential receive DMA */
-				tmp = readl(&udc->regs->ctl);
-				writel(tmp & AMD_UNMASK_BIT(UDC_DEVCTL_RDE),
+				tmp = pete_readl("drivers/usb/gadget/udc/snps_udc_core.c:1276", &udc->regs->ctl);
+				pete_writel("drivers/usb/gadget/udc/snps_udc_core.c:1277", tmp & AMD_UNMASK_BIT(UDC_DEVCTL_RDE),
 							&udc->regs->ctl);
 				/*
 				 * Cancel transfer later in ISR
@@ -1286,10 +1286,10 @@ static int udc_dequeue(struct usb_ep *usbep, struct usb_request *usbreq)
 					ep->cancel_transfer = 1;
 				else {
 					udc_init_bna_dummy(ep->req);
-					writel(ep->bna_dummy_req->td_phys,
+					pete_writel("drivers/usb/gadget/udc/snps_udc_core.c:1289", ep->bna_dummy_req->td_phys,
 						&ep->regs->desptr);
 				}
-				writel(tmp, &udc->regs->ctl);
+				pete_writel("drivers/usb/gadget/udc/snps_udc_core.c:1292", tmp, &udc->regs->ctl);
 			}
 		}
 	}
@@ -1330,9 +1330,9 @@ udc_set_halt(struct usb_ep *usbep, int halt)
 			 * set STALL
 			 * rxfifo empty not taken into acount
 			 */
-			tmp = readl(&ep->regs->ctl);
+			tmp = pete_readl("drivers/usb/gadget/udc/snps_udc_core.c:1333", &ep->regs->ctl);
 			tmp |= AMD_BIT(UDC_EPCTL_S);
-			writel(tmp, &ep->regs->ctl);
+			pete_writel("drivers/usb/gadget/udc/snps_udc_core.c:1335", tmp, &ep->regs->ctl);
 			ep->halted = 1;
 
 			/* setup poll timer */
@@ -1349,12 +1349,12 @@ udc_set_halt(struct usb_ep *usbep, int halt)
 	} else {
 		/* ep is halted by set_halt() before */
 		if (ep->halted) {
-			tmp = readl(&ep->regs->ctl);
+			tmp = pete_readl("drivers/usb/gadget/udc/snps_udc_core.c:1352", &ep->regs->ctl);
 			/* clear stall bit */
 			tmp = tmp & AMD_CLEAR_BIT(UDC_EPCTL_S);
 			/* clear NAK by writing CNAK */
 			tmp |= AMD_BIT(UDC_EPCTL_CNAK);
-			writel(tmp, &ep->regs->ctl);
+			pete_writel("drivers/usb/gadget/udc/snps_udc_core.c:1357", tmp, &ep->regs->ctl);
 			ep->halted = 0;
 			UDC_QUEUE_CNAK(ep, ep->num);
 		}
@@ -1396,11 +1396,11 @@ static int udc_remote_wakeup(struct udc *dev)
 
 	spin_lock_irqsave(&dev->lock, flags);
 
-	tmp = readl(&dev->regs->ctl);
+	tmp = pete_readl("drivers/usb/gadget/udc/snps_udc_core.c:1399", &dev->regs->ctl);
 	tmp |= AMD_BIT(UDC_DEVCTL_RES);
-	writel(tmp, &dev->regs->ctl);
+	pete_writel("drivers/usb/gadget/udc/snps_udc_core.c:1401", tmp, &dev->regs->ctl);
 	tmp &= AMD_CLEAR_BIT(UDC_DEVCTL_RES);
-	writel(tmp, &dev->regs->ctl);
+	pete_writel("drivers/usb/gadget/udc/snps_udc_core.c:1403", tmp, &dev->regs->ctl);
 
 	spin_unlock_irqrestore(&dev->lock, flags);
 	return 0;
@@ -1469,19 +1469,19 @@ void udc_basic_init(struct udc *dev)
 	if (timer_pending(&udc_pollstall_timer))
 		mod_timer(&udc_pollstall_timer, jiffies - 1);
 	/* disable DMA */
-	tmp = readl(&dev->regs->ctl);
+	tmp = pete_readl("drivers/usb/gadget/udc/snps_udc_core.c:1472", &dev->regs->ctl);
 	tmp &= AMD_UNMASK_BIT(UDC_DEVCTL_RDE);
 	tmp &= AMD_UNMASK_BIT(UDC_DEVCTL_TDE);
-	writel(tmp, &dev->regs->ctl);
+	pete_writel("drivers/usb/gadget/udc/snps_udc_core.c:1475", tmp, &dev->regs->ctl);
 
 	/* enable dynamic CSR programming */
-	tmp = readl(&dev->regs->cfg);
+	tmp = pete_readl("drivers/usb/gadget/udc/snps_udc_core.c:1478", &dev->regs->cfg);
 	tmp |= AMD_BIT(UDC_DEVCFG_CSR_PRG);
 	/* set self powered */
 	tmp |= AMD_BIT(UDC_DEVCFG_SP);
 	/* set remote wakeupable */
 	tmp |= AMD_BIT(UDC_DEVCFG_RWKP);
-	writel(tmp, &dev->regs->cfg);
+	pete_writel("drivers/usb/gadget/udc/snps_udc_core.c:1484", tmp, &dev->regs->cfg);
 
 	make_ep_lists(dev);
 
@@ -1507,12 +1507,12 @@ static int startup_registers(struct udc *dev)
 	udc_setup_endpoints(dev);
 
 	/* program speed */
-	tmp = readl(&dev->regs->cfg);
+	tmp = pete_readl("drivers/usb/gadget/udc/snps_udc_core.c:1510", &dev->regs->cfg);
 	if (use_fullspeed)
 		tmp = AMD_ADDBITS(tmp, UDC_DEVCFG_SPD_FS, UDC_DEVCFG_SPD);
 	else
 		tmp = AMD_ADDBITS(tmp, UDC_DEVCFG_SPD_HS, UDC_DEVCFG_SPD);
-	writel(tmp, &dev->regs->cfg);
+	pete_writel("drivers/usb/gadget/udc/snps_udc_core.c:1515", tmp, &dev->regs->cfg);
 
 	return 0;
 }
@@ -1527,7 +1527,7 @@ static void udc_setup_endpoints(struct udc *dev)
 	DBG(dev, "udc_setup_endpoints()\n");
 
 	/* read enum speed */
-	tmp = readl(&dev->regs->sts);
+	tmp = pete_readl("drivers/usb/gadget/udc/snps_udc_core.c:1530", &dev->regs->sts);
 	tmp = AMD_GETBITS(tmp, UDC_DEVSTS_ENUM_SPEED);
 	if (tmp == UDC_DEVSTS_ENUM_SPEED_HIGH)
 		dev->gadget.speed = USB_SPEED_HIGH;
@@ -1574,9 +1574,9 @@ static void udc_setup_endpoints(struct udc *dev)
 			if (tmp != UDC_EP0IN_IX && tmp != UDC_EP0OUT_IX
 						&& tmp > UDC_EPIN_NUM) {
 				/* set NAK */
-				reg = readl(&dev->ep[tmp].regs->ctl);
+				reg = pete_readl("drivers/usb/gadget/udc/snps_udc_core.c:1577", &dev->ep[tmp].regs->ctl);
 				reg |= AMD_BIT(UDC_EPCTL_SNAK);
-				writel(reg, &dev->ep[tmp].regs->ctl);
+				pete_writel("drivers/usb/gadget/udc/snps_udc_core.c:1579", reg, &dev->ep[tmp].regs->ctl);
 				dev->ep[tmp].naking = 1;
 
 			}
@@ -1669,9 +1669,9 @@ static void usb_disconnect(struct udc *dev)
 	udc_enable_dev_setup_interrupts(dev);
 	/* back to full speed ? */
 	if (use_fullspeed) {
-		tmp = readl(&dev->regs->cfg);
+		tmp = pete_readl("drivers/usb/gadget/udc/snps_udc_core.c:1672", &dev->regs->cfg);
 		tmp = AMD_ADDBITS(tmp, UDC_DEVCFG_SPD_FS, UDC_DEVCFG_SPD);
-		writel(tmp, &dev->regs->cfg);
+		pete_writel("drivers/usb/gadget/udc/snps_udc_core.c:1674", tmp, &dev->regs->cfg);
 	}
 }
 
@@ -1686,17 +1686,17 @@ static void udc_soft_reset(struct udc *dev)
 	 * status is lost after soft reset,
 	 * ep int. status reset
 	 */
-	writel(UDC_EPINT_MSK_DISABLE_ALL, &dev->regs->ep_irqsts);
+	pete_writel("drivers/usb/gadget/udc/snps_udc_core.c:1689", UDC_EPINT_MSK_DISABLE_ALL, &dev->regs->ep_irqsts);
 	/* device int. status reset */
-	writel(UDC_DEV_MSK_DISABLE, &dev->regs->irqsts);
+	pete_writel("drivers/usb/gadget/udc/snps_udc_core.c:1691", UDC_DEV_MSK_DISABLE, &dev->regs->irqsts);
 
 	/* Don't do this for Broadcom UDC since this is a reserved
 	 * bit.
 	 */
 	if (dev->chiprev != UDC_BCM_REV) {
 		spin_lock_irqsave(&udc_irq_spinlock, flags);
-		writel(AMD_BIT(UDC_DEVCFG_SOFTRESET), &dev->regs->cfg);
-		readl(&dev->regs->cfg);
+		pete_writel("drivers/usb/gadget/udc/snps_udc_core.c:1698", AMD_BIT(UDC_DEVCFG_SOFTRESET), &dev->regs->cfg);
+		pete_readl("drivers/usb/gadget/udc/snps_udc_core.c:1699", &dev->regs->cfg);
 		spin_unlock_irqrestore(&udc_irq_spinlock, flags);
 	}
 }
@@ -1715,11 +1715,11 @@ static void udc_timer_function(struct timer_list *unused)
 		 */
 		if (set_rde > 1) {
 			/* set RDE to receive setup data */
-			tmp = readl(&udc->regs->ctl);
+			tmp = pete_readl("drivers/usb/gadget/udc/snps_udc_core.c:1718", &udc->regs->ctl);
 			tmp |= AMD_BIT(UDC_DEVCTL_RDE);
-			writel(tmp, &udc->regs->ctl);
+			pete_writel("drivers/usb/gadget/udc/snps_udc_core.c:1720", tmp, &udc->regs->ctl);
 			set_rde = -1;
-		} else if (readl(&udc->regs->sts)
+		} else if (pete_readl("drivers/usb/gadget/udc/snps_udc_core.c:1722", &udc->regs->sts)
 				& AMD_BIT(UDC_DEVSTS_RXFIFO_EMPTY)) {
 			/*
 			 * if fifo empty setup polling, do not just
@@ -1757,7 +1757,7 @@ static void udc_handle_halt_state(struct udc_ep *ep)
 	u32 tmp;
 	/* set stall as long not halted */
 	if (ep->halted == 1) {
-		tmp = readl(&ep->regs->ctl);
+		tmp = pete_readl("drivers/usb/gadget/udc/snps_udc_core.c:1760", &ep->regs->ctl);
 		/* STALL cleared ? */
 		if (!(tmp & AMD_BIT(UDC_EPCTL_S))) {
 			/*
@@ -1770,11 +1770,11 @@ static void udc_handle_halt_state(struct udc_ep *ep)
 			 *
 			DBG(ep->dev, "ep %d: set STALL again\n", ep->num);
 			tmp |= AMD_BIT(UDC_EPCTL_S);
-			writel(tmp, &ep->regs->ctl);*/
+			pete_writel("drivers/usb/gadget/udc/snps_udc_core.c:1773", tmp, &ep->regs->ctl);*/
 
 			/* clear NAK by writing CNAK */
 			tmp |= AMD_BIT(UDC_EPCTL_CNAK);
-			writel(tmp, &ep->regs->ctl);
+			pete_writel("drivers/usb/gadget/udc/snps_udc_core.c:1777", tmp, &ep->regs->ctl);
 			ep->halted = 0;
 			UDC_QUEUE_CNAK(ep, ep->num);
 		}
@@ -1823,61 +1823,61 @@ static void activate_control_endpoints(struct udc *dev)
 	DBG(dev, "activate_control_endpoints\n");
 
 	/* flush fifo */
-	tmp = readl(&dev->ep[UDC_EP0IN_IX].regs->ctl);
+	tmp = pete_readl("drivers/usb/gadget/udc/snps_udc_core.c:1826", &dev->ep[UDC_EP0IN_IX].regs->ctl);
 	tmp |= AMD_BIT(UDC_EPCTL_F);
-	writel(tmp, &dev->ep[UDC_EP0IN_IX].regs->ctl);
+	pete_writel("drivers/usb/gadget/udc/snps_udc_core.c:1828", tmp, &dev->ep[UDC_EP0IN_IX].regs->ctl);
 
 	/* set ep0 directions */
 	dev->ep[UDC_EP0IN_IX].in = 1;
 	dev->ep[UDC_EP0OUT_IX].in = 0;
 
 	/* set buffer size (tx fifo entries) of EP0_IN */
-	tmp = readl(&dev->ep[UDC_EP0IN_IX].regs->bufin_framenum);
+	tmp = pete_readl("drivers/usb/gadget/udc/snps_udc_core.c:1835", &dev->ep[UDC_EP0IN_IX].regs->bufin_framenum);
 	if (dev->gadget.speed == USB_SPEED_FULL)
 		tmp = AMD_ADDBITS(tmp, UDC_FS_EPIN0_BUFF_SIZE,
 					UDC_EPIN_BUFF_SIZE);
 	else if (dev->gadget.speed == USB_SPEED_HIGH)
 		tmp = AMD_ADDBITS(tmp, UDC_EPIN0_BUFF_SIZE,
 					UDC_EPIN_BUFF_SIZE);
-	writel(tmp, &dev->ep[UDC_EP0IN_IX].regs->bufin_framenum);
+	pete_writel("drivers/usb/gadget/udc/snps_udc_core.c:1842", tmp, &dev->ep[UDC_EP0IN_IX].regs->bufin_framenum);
 
 	/* set max packet size of EP0_IN */
-	tmp = readl(&dev->ep[UDC_EP0IN_IX].regs->bufout_maxpkt);
+	tmp = pete_readl("drivers/usb/gadget/udc/snps_udc_core.c:1845", &dev->ep[UDC_EP0IN_IX].regs->bufout_maxpkt);
 	if (dev->gadget.speed == USB_SPEED_FULL)
 		tmp = AMD_ADDBITS(tmp, UDC_FS_EP0IN_MAX_PKT_SIZE,
 					UDC_EP_MAX_PKT_SIZE);
 	else if (dev->gadget.speed == USB_SPEED_HIGH)
 		tmp = AMD_ADDBITS(tmp, UDC_EP0IN_MAX_PKT_SIZE,
 				UDC_EP_MAX_PKT_SIZE);
-	writel(tmp, &dev->ep[UDC_EP0IN_IX].regs->bufout_maxpkt);
+	pete_writel("drivers/usb/gadget/udc/snps_udc_core.c:1852", tmp, &dev->ep[UDC_EP0IN_IX].regs->bufout_maxpkt);
 
 	/* set max packet size of EP0_OUT */
-	tmp = readl(&dev->ep[UDC_EP0OUT_IX].regs->bufout_maxpkt);
+	tmp = pete_readl("drivers/usb/gadget/udc/snps_udc_core.c:1855", &dev->ep[UDC_EP0OUT_IX].regs->bufout_maxpkt);
 	if (dev->gadget.speed == USB_SPEED_FULL)
 		tmp = AMD_ADDBITS(tmp, UDC_FS_EP0OUT_MAX_PKT_SIZE,
 					UDC_EP_MAX_PKT_SIZE);
 	else if (dev->gadget.speed == USB_SPEED_HIGH)
 		tmp = AMD_ADDBITS(tmp, UDC_EP0OUT_MAX_PKT_SIZE,
 					UDC_EP_MAX_PKT_SIZE);
-	writel(tmp, &dev->ep[UDC_EP0OUT_IX].regs->bufout_maxpkt);
+	pete_writel("drivers/usb/gadget/udc/snps_udc_core.c:1862", tmp, &dev->ep[UDC_EP0OUT_IX].regs->bufout_maxpkt);
 
 	/* set max packet size of EP0 in UDC CSR */
-	tmp = readl(&dev->csr->ne[0]);
+	tmp = pete_readl("drivers/usb/gadget/udc/snps_udc_core.c:1865", &dev->csr->ne[0]);
 	if (dev->gadget.speed == USB_SPEED_FULL)
 		tmp = AMD_ADDBITS(tmp, UDC_FS_EP0OUT_MAX_PKT_SIZE,
 					UDC_CSR_NE_MAX_PKT);
 	else if (dev->gadget.speed == USB_SPEED_HIGH)
 		tmp = AMD_ADDBITS(tmp, UDC_EP0OUT_MAX_PKT_SIZE,
 					UDC_CSR_NE_MAX_PKT);
-	writel(tmp, &dev->csr->ne[0]);
+	pete_writel("drivers/usb/gadget/udc/snps_udc_core.c:1872", tmp, &dev->csr->ne[0]);
 
 	if (use_dma) {
 		dev->ep[UDC_EP0OUT_IX].td->status |=
 			AMD_BIT(UDC_DMA_OUT_STS_L);
 		/* write dma desc address */
-		writel(dev->ep[UDC_EP0OUT_IX].td_stp_dma,
+		pete_writel("drivers/usb/gadget/udc/snps_udc_core.c:1878", dev->ep[UDC_EP0OUT_IX].td_stp_dma,
 			&dev->ep[UDC_EP0OUT_IX].regs->subptr);
-		writel(dev->ep[UDC_EP0OUT_IX].td_phys,
+		pete_writel("drivers/usb/gadget/udc/snps_udc_core.c:1880", dev->ep[UDC_EP0OUT_IX].td_phys,
 			&dev->ep[UDC_EP0OUT_IX].regs->desptr);
 		/* stop RDE timer */
 		if (timer_pending(&udc_timer)) {
@@ -1888,7 +1888,7 @@ static void activate_control_endpoints(struct udc *dev)
 		if (timer_pending(&udc_pollstall_timer))
 			mod_timer(&udc_pollstall_timer, jiffies - 1);
 		/* enable DMA */
-		tmp = readl(&dev->regs->ctl);
+		tmp = pete_readl("drivers/usb/gadget/udc/snps_udc_core.c:1891", &dev->regs->ctl);
 		tmp |= AMD_BIT(UDC_DEVCTL_MODE)
 				| AMD_BIT(UDC_DEVCTL_RDE)
 				| AMD_BIT(UDC_DEVCTL_TDE);
@@ -1896,20 +1896,20 @@ static void activate_control_endpoints(struct udc *dev)
 			tmp |= AMD_BIT(UDC_DEVCTL_BF);
 		else if (use_dma_ppb_du)
 			tmp |= AMD_BIT(UDC_DEVCTL_DU);
-		writel(tmp, &dev->regs->ctl);
+		pete_writel("drivers/usb/gadget/udc/snps_udc_core.c:1899", tmp, &dev->regs->ctl);
 	}
 
 	/* clear NAK by writing CNAK for EP0IN */
-	tmp = readl(&dev->ep[UDC_EP0IN_IX].regs->ctl);
+	tmp = pete_readl("drivers/usb/gadget/udc/snps_udc_core.c:1903", &dev->ep[UDC_EP0IN_IX].regs->ctl);
 	tmp |= AMD_BIT(UDC_EPCTL_CNAK);
-	writel(tmp, &dev->ep[UDC_EP0IN_IX].regs->ctl);
+	pete_writel("drivers/usb/gadget/udc/snps_udc_core.c:1905", tmp, &dev->ep[UDC_EP0IN_IX].regs->ctl);
 	dev->ep[UDC_EP0IN_IX].naking = 0;
 	UDC_QUEUE_CNAK(&dev->ep[UDC_EP0IN_IX], UDC_EP0IN_IX);
 
 	/* clear NAK by writing CNAK for EP0OUT */
-	tmp = readl(&dev->ep[UDC_EP0OUT_IX].regs->ctl);
+	tmp = pete_readl("drivers/usb/gadget/udc/snps_udc_core.c:1910", &dev->ep[UDC_EP0OUT_IX].regs->ctl);
 	tmp |= AMD_BIT(UDC_EPCTL_CNAK);
-	writel(tmp, &dev->ep[UDC_EP0OUT_IX].regs->ctl);
+	pete_writel("drivers/usb/gadget/udc/snps_udc_core.c:1912", tmp, &dev->ep[UDC_EP0OUT_IX].regs->ctl);
 	dev->ep[UDC_EP0OUT_IX].naking = 0;
 	UDC_QUEUE_CNAK(&dev->ep[UDC_EP0OUT_IX], UDC_EP0OUT_IX);
 }
@@ -1946,9 +1946,9 @@ static int amd5536_udc_start(struct usb_gadget *g,
 	setup_ep0(dev);
 
 	/* clear SD */
-	tmp = readl(&dev->regs->ctl);
+	tmp = pete_readl("drivers/usb/gadget/udc/snps_udc_core.c:1949", &dev->regs->ctl);
 	tmp = tmp & AMD_CLEAR_BIT(UDC_DEVCTL_SD);
-	writel(tmp, &dev->regs->ctl);
+	pete_writel("drivers/usb/gadget/udc/snps_udc_core.c:1951", tmp, &dev->regs->ctl);
 
 	usb_connect(dev);
 
@@ -1987,9 +1987,9 @@ static int amd5536_udc_stop(struct usb_gadget *g)
 	dev->driver = NULL;
 
 	/* set SD */
-	tmp = readl(&dev->regs->ctl);
+	tmp = pete_readl("drivers/usb/gadget/udc/snps_udc_core.c:1990", &dev->regs->ctl);
 	tmp |= AMD_BIT(UDC_DEVCTL_SD);
-	writel(tmp, &dev->regs->ctl);
+	pete_writel("drivers/usb/gadget/udc/snps_udc_core.c:1992", tmp, &dev->regs->ctl);
 
 	return 0;
 }
@@ -2006,9 +2006,9 @@ static void udc_process_cnak_queue(struct udc *dev)
 		if (cnak_pending & (1 << tmp)) {
 			DBG(dev, "CNAK pending for ep%d\n", tmp);
 			/* clear NAK by writing CNAK */
-			reg = readl(&dev->ep[tmp].regs->ctl);
+			reg = pete_readl("drivers/usb/gadget/udc/snps_udc_core.c:2009", &dev->ep[tmp].regs->ctl);
 			reg |= AMD_BIT(UDC_EPCTL_CNAK);
-			writel(reg, &dev->ep[tmp].regs->ctl);
+			pete_writel("drivers/usb/gadget/udc/snps_udc_core.c:2011", reg, &dev->ep[tmp].regs->ctl);
 			dev->ep[tmp].naking = 0;
 			UDC_QUEUE_CNAK(&dev->ep[tmp], dev->ep[tmp].num);
 		}
@@ -2017,9 +2017,9 @@ static void udc_process_cnak_queue(struct udc *dev)
 	if (cnak_pending & (1 << UDC_EP0OUT_IX)) {
 		DBG(dev, "CNAK pending for ep%d\n", UDC_EP0OUT_IX);
 		/* clear NAK by writing CNAK */
-		reg = readl(&dev->ep[UDC_EP0OUT_IX].regs->ctl);
+		reg = pete_readl("drivers/usb/gadget/udc/snps_udc_core.c:2020", &dev->ep[UDC_EP0OUT_IX].regs->ctl);
 		reg |= AMD_BIT(UDC_EPCTL_CNAK);
-		writel(reg, &dev->ep[UDC_EP0OUT_IX].regs->ctl);
+		pete_writel("drivers/usb/gadget/udc/snps_udc_core.c:2022", reg, &dev->ep[UDC_EP0OUT_IX].regs->ctl);
 		dev->ep[UDC_EP0OUT_IX].naking = 0;
 		UDC_QUEUE_CNAK(&dev->ep[UDC_EP0OUT_IX],
 				dev->ep[UDC_EP0OUT_IX].num);
@@ -2067,14 +2067,14 @@ static irqreturn_t udc_data_out_isr(struct udc *dev, int ep_ix)
 	VDBG(dev, "ep%d irq\n", ep_ix);
 	ep = &dev->ep[ep_ix];
 
-	tmp = readl(&ep->regs->sts);
+	tmp = pete_readl("drivers/usb/gadget/udc/snps_udc_core.c:2070", &ep->regs->sts);
 	if (use_dma) {
 		/* BNA event ? */
 		if (tmp & AMD_BIT(UDC_EPSTS_BNA)) {
 			DBG(dev, "BNA ep%dout occurred - DESPTR = %x\n",
-					ep->num, readl(&ep->regs->desptr));
+					ep->num, pete_readl("drivers/usb/gadget/udc/snps_udc_core.c:2075", &ep->regs->desptr));
 			/* clear BNA */
-			writel(tmp | AMD_BIT(UDC_EPSTS_BNA), &ep->regs->sts);
+			pete_writel("drivers/usb/gadget/udc/snps_udc_core.c:2077", tmp | AMD_BIT(UDC_EPSTS_BNA), &ep->regs->sts);
 			if (!ep->cancel_transfer)
 				ep->bna_occurred = 1;
 			else
@@ -2088,7 +2088,7 @@ static irqreturn_t udc_data_out_isr(struct udc *dev, int ep_ix)
 		dev_err(dev->dev, "HE ep%dout occurred\n", ep->num);
 
 		/* clear HE */
-		writel(tmp | AMD_BIT(UDC_EPSTS_HE), &ep->regs->sts);
+		pete_writel("drivers/usb/gadget/udc/snps_udc_core.c:2091", tmp | AMD_BIT(UDC_EPSTS_HE), &ep->regs->sts);
 		ret_val = IRQ_HANDLED;
 		goto finished;
 	}
@@ -2205,7 +2205,7 @@ static irqreturn_t udc_data_out_isr(struct udc *dev, int ep_ix)
 					if (prep_dma(ep, req, GFP_ATOMIC) != 0)
 						goto finished;
 					/* write desc pointer */
-					writel(req->td_phys,
+					pete_writel("drivers/usb/gadget/udc/snps_udc_core.c:2208", req->td_phys,
 						&ep->regs->desptr);
 					req->dma_going = 1;
 					/* enable DMA */
@@ -2218,7 +2218,7 @@ static irqreturn_t udc_data_out_isr(struct udc *dev, int ep_ix)
 				 */
 				if (ep->bna_dummy_req) {
 					/* write desc pointer */
-					writel(ep->bna_dummy_req->td_phys,
+					pete_writel("drivers/usb/gadget/udc/snps_udc_core.c:2221", ep->bna_dummy_req->td_phys,
 						&ep->regs->desptr);
 					ep->bna_occurred = 0;
 				}
@@ -2257,12 +2257,12 @@ static irqreturn_t udc_data_out_isr(struct udc *dev, int ep_ix)
 	/* check pending CNAKS */
 	if (cnak_pending) {
 		/* CNAk processing when rxfifo empty only */
-		if (readl(&dev->regs->sts) & AMD_BIT(UDC_DEVSTS_RXFIFO_EMPTY))
+		if (pete_readl("drivers/usb/gadget/udc/snps_udc_core.c:2260", &dev->regs->sts) & AMD_BIT(UDC_DEVSTS_RXFIFO_EMPTY))
 			udc_process_cnak_queue(dev);
 	}
 
 	/* clear OUT bits in ep status */
-	writel(UDC_EPSTS_OUT_CLEAR, &ep->regs->sts);
+	pete_writel("drivers/usb/gadget/udc/snps_udc_core.c:2265", UDC_EPSTS_OUT_CLEAR, &ep->regs->sts);
 finished:
 	return ret_val;
 }
@@ -2280,17 +2280,17 @@ static irqreturn_t udc_data_in_isr(struct udc *dev, int ep_ix)
 
 	ep = &dev->ep[ep_ix];
 
-	epsts = readl(&ep->regs->sts);
+	epsts = pete_readl("drivers/usb/gadget/udc/snps_udc_core.c:2283", &ep->regs->sts);
 	if (use_dma) {
 		/* BNA ? */
 		if (epsts & AMD_BIT(UDC_EPSTS_BNA)) {
 			dev_err(dev->dev,
 				"BNA ep%din occurred - DESPTR = %08lx\n",
 				ep->num,
-				(unsigned long) readl(&ep->regs->desptr));
+				(unsigned long) pete_readl("drivers/usb/gadget/udc/snps_udc_core.c:2290", &ep->regs->desptr));
 
 			/* clear BNA */
-			writel(epsts, &ep->regs->sts);
+			pete_writel("drivers/usb/gadget/udc/snps_udc_core.c:2293", epsts, &ep->regs->sts);
 			ret_val = IRQ_HANDLED;
 			goto finished;
 		}
@@ -2299,10 +2299,10 @@ static irqreturn_t udc_data_in_isr(struct udc *dev, int ep_ix)
 	if (epsts & AMD_BIT(UDC_EPSTS_HE)) {
 		dev_err(dev->dev,
 			"HE ep%dn occurred - DESPTR = %08lx\n",
-			ep->num, (unsigned long) readl(&ep->regs->desptr));
+			ep->num, (unsigned long) pete_readl("drivers/usb/gadget/udc/snps_udc_core.c:2302", &ep->regs->desptr));
 
 		/* clear HE */
-		writel(epsts | AMD_BIT(UDC_EPSTS_HE), &ep->regs->sts);
+		pete_writel("drivers/usb/gadget/udc/snps_udc_core.c:2305", epsts | AMD_BIT(UDC_EPSTS_HE), &ep->regs->sts);
 		ret_val = IRQ_HANDLED;
 		goto finished;
 	}
@@ -2334,9 +2334,9 @@ static irqreturn_t udc_data_in_isr(struct udc *dev, int ep_ix)
 				/* further request available ? */
 				if (list_empty(&ep->queue)) {
 					/* disable interrupt */
-					tmp = readl(&dev->regs->ep_irqmsk);
+					tmp = pete_readl("drivers/usb/gadget/udc/snps_udc_core.c:2337", &dev->regs->ep_irqmsk);
 					tmp |= AMD_BIT(ep->num);
-					writel(tmp, &dev->regs->ep_irqmsk);
+					pete_writel("drivers/usb/gadget/udc/snps_udc_core.c:2339", tmp, &dev->regs->ep_irqmsk);
 				}
 			}
 		}
@@ -2387,7 +2387,7 @@ static irqreturn_t udc_data_in_isr(struct udc *dev, int ep_ix)
 					}
 
 					/* write desc pointer */
-					writel(req->td_phys, &ep->regs->desptr);
+					pete_writel("drivers/usb/gadget/udc/snps_udc_core.c:2390", req->td_phys, &ep->regs->desptr);
 
 					/* set HOST READY */
 					req->td_data->status =
@@ -2397,23 +2397,23 @@ static irqreturn_t udc_data_in_isr(struct udc *dev, int ep_ix)
 						UDC_DMA_IN_STS_BS);
 
 					/* set poll demand bit */
-					tmp = readl(&ep->regs->ctl);
+					tmp = pete_readl("drivers/usb/gadget/udc/snps_udc_core.c:2400", &ep->regs->ctl);
 					tmp |= AMD_BIT(UDC_EPCTL_P);
-					writel(tmp, &ep->regs->ctl);
+					pete_writel("drivers/usb/gadget/udc/snps_udc_core.c:2402", tmp, &ep->regs->ctl);
 				}
 			}
 
 		} else if (!use_dma && ep->in) {
 			/* disable interrupt */
-			tmp = readl(
+			tmp = pete_readl("drivers/usb/gadget/udc/snps_udc_core.c:2408", 
 				&dev->regs->ep_irqmsk);
 			tmp |= AMD_BIT(ep->num);
-			writel(tmp,
+			pete_writel("drivers/usb/gadget/udc/snps_udc_core.c:2411", tmp,
 				&dev->regs->ep_irqmsk);
 		}
 	}
 	/* clear status bits */
-	writel(epsts, &ep->regs->sts);
+	pete_writel("drivers/usb/gadget/udc/snps_udc_core.c:2416", epsts, &ep->regs->sts);
 
 finished:
 	return ret_val;
@@ -2436,13 +2436,13 @@ __acquires(dev->lock)
 	ep = &dev->ep[UDC_EP0OUT_IX];
 
 	/* clear irq */
-	writel(AMD_BIT(UDC_EPINT_OUT_EP0), &dev->regs->ep_irqsts);
+	pete_writel("drivers/usb/gadget/udc/snps_udc_core.c:2439", AMD_BIT(UDC_EPINT_OUT_EP0), &dev->regs->ep_irqsts);
 
-	tmp = readl(&dev->ep[UDC_EP0OUT_IX].regs->sts);
+	tmp = pete_readl("drivers/usb/gadget/udc/snps_udc_core.c:2441", &dev->ep[UDC_EP0OUT_IX].regs->sts);
 	/* check BNA and clear if set */
 	if (tmp & AMD_BIT(UDC_EPSTS_BNA)) {
 		VDBG(dev, "ep0: BNA set\n");
-		writel(AMD_BIT(UDC_EPSTS_BNA),
+		pete_writel("drivers/usb/gadget/udc/snps_udc_core.c:2445", AMD_BIT(UDC_EPSTS_BNA),
 			&dev->ep[UDC_EP0OUT_IX].regs->sts);
 		ep->bna_occurred = 1;
 		ret_val = IRQ_HANDLED;
@@ -2461,15 +2461,15 @@ __acquires(dev->lock)
 		dev->waiting_zlp_ack_ep0in = 0;
 
 		/* set NAK for EP0_IN */
-		tmp = readl(&dev->ep[UDC_EP0IN_IX].regs->ctl);
+		tmp = pete_readl("drivers/usb/gadget/udc/snps_udc_core.c:2464", &dev->ep[UDC_EP0IN_IX].regs->ctl);
 		tmp |= AMD_BIT(UDC_EPCTL_SNAK);
-		writel(tmp, &dev->ep[UDC_EP0IN_IX].regs->ctl);
+		pete_writel("drivers/usb/gadget/udc/snps_udc_core.c:2466", tmp, &dev->ep[UDC_EP0IN_IX].regs->ctl);
 		dev->ep[UDC_EP0IN_IX].naking = 1;
 		/* get setup data */
 		if (use_dma) {
 
 			/* clear OUT bits in ep status */
-			writel(UDC_EPSTS_OUT_CLEAR,
+			pete_writel("drivers/usb/gadget/udc/snps_udc_core.c:2472", UDC_EPSTS_OUT_CLEAR,
 				&dev->ep[UDC_EP0OUT_IX].regs->sts);
 
 			setup_data.data[0] =
@@ -2498,7 +2498,7 @@ __acquires(dev->lock)
 			 */
 			if (ep->bna_dummy_req) {
 				/* write desc pointer */
-				writel(ep->bna_dummy_req->td_phys,
+				pete_writel("drivers/usb/gadget/udc/snps_udc_core.c:2501", ep->bna_dummy_req->td_phys,
 					&dev->ep[UDC_EP0OUT_IX].regs->desptr);
 				ep->bna_occurred = 0;
 			}
@@ -2543,43 +2543,43 @@ __acquires(dev->lock)
 						&setup_data.request);
 		spin_lock(&dev->lock);
 
-		tmp = readl(&dev->ep[UDC_EP0IN_IX].regs->ctl);
+		tmp = pete_readl("drivers/usb/gadget/udc/snps_udc_core.c:2546", &dev->ep[UDC_EP0IN_IX].regs->ctl);
 		/* ep0 in returns data (not zlp) on IN phase */
 		if (setup_supported >= 0 && setup_supported <
 				UDC_EP0IN_MAXPACKET) {
 			/* clear NAK by writing CNAK in EP0_IN */
 			tmp |= AMD_BIT(UDC_EPCTL_CNAK);
-			writel(tmp, &dev->ep[UDC_EP0IN_IX].regs->ctl);
+			pete_writel("drivers/usb/gadget/udc/snps_udc_core.c:2552", tmp, &dev->ep[UDC_EP0IN_IX].regs->ctl);
 			dev->ep[UDC_EP0IN_IX].naking = 0;
 			UDC_QUEUE_CNAK(&dev->ep[UDC_EP0IN_IX], UDC_EP0IN_IX);
 
 		/* if unsupported request then stall */
 		} else if (setup_supported < 0) {
 			tmp |= AMD_BIT(UDC_EPCTL_S);
-			writel(tmp, &dev->ep[UDC_EP0IN_IX].regs->ctl);
+			pete_writel("drivers/usb/gadget/udc/snps_udc_core.c:2559", tmp, &dev->ep[UDC_EP0IN_IX].regs->ctl);
 		} else
 			dev->waiting_zlp_ack_ep0in = 1;
 
 
 		/* clear NAK by writing CNAK in EP0_OUT */
 		if (!set) {
-			tmp = readl(&dev->ep[UDC_EP0OUT_IX].regs->ctl);
+			tmp = pete_readl("drivers/usb/gadget/udc/snps_udc_core.c:2566", &dev->ep[UDC_EP0OUT_IX].regs->ctl);
 			tmp |= AMD_BIT(UDC_EPCTL_CNAK);
-			writel(tmp, &dev->ep[UDC_EP0OUT_IX].regs->ctl);
+			pete_writel("drivers/usb/gadget/udc/snps_udc_core.c:2568", tmp, &dev->ep[UDC_EP0OUT_IX].regs->ctl);
 			dev->ep[UDC_EP0OUT_IX].naking = 0;
 			UDC_QUEUE_CNAK(&dev->ep[UDC_EP0OUT_IX], UDC_EP0OUT_IX);
 		}
 
 		if (!use_dma) {
 			/* clear OUT bits in ep status */
-			writel(UDC_EPSTS_OUT_CLEAR,
+			pete_writel("drivers/usb/gadget/udc/snps_udc_core.c:2575", UDC_EPSTS_OUT_CLEAR,
 				&dev->ep[UDC_EP0OUT_IX].regs->sts);
 		}
 
 	/* data packet 0 bytes */
 	} else if (tmp == UDC_EPSTS_OUT_DATA) {
 		/* clear OUT bits in ep status */
-		writel(UDC_EPSTS_OUT_CLEAR, &dev->ep[UDC_EP0OUT_IX].regs->sts);
+		pete_writel("drivers/usb/gadget/udc/snps_udc_core.c:2582", UDC_EPSTS_OUT_CLEAR, &dev->ep[UDC_EP0OUT_IX].regs->sts);
 
 		/* get setup data: only 0 packet */
 		if (use_dma) {
@@ -2601,7 +2601,7 @@ __acquires(dev->lock)
 				/* control write */
 				ret_val |= udc_data_out_isr(dev, UDC_EP0OUT_IX);
 				/* re-program desc. pointer for possible ZLPs */
-				writel(dev->ep[UDC_EP0OUT_IX].td_phys,
+				pete_writel("drivers/usb/gadget/udc/snps_udc_core.c:2604", dev->ep[UDC_EP0OUT_IX].td_phys,
 					&dev->ep[UDC_EP0OUT_IX].regs->desptr);
 				/* enable RDE */
 				udc_ep0_set_rde(dev);
@@ -2609,7 +2609,7 @@ __acquires(dev->lock)
 		} else {
 
 			/* received number bytes */
-			count = readl(&dev->ep[UDC_EP0OUT_IX].regs->sts);
+			count = pete_readl("drivers/usb/gadget/udc/snps_udc_core.c:2612", &dev->ep[UDC_EP0OUT_IX].regs->sts);
 			count = AMD_GETBITS(count, UDC_EPSTS_RX_PKT_SIZE);
 			/* out data for fifo mode not working */
 			count = 0;
@@ -2619,7 +2619,7 @@ __acquires(dev->lock)
 				ret_val |= udc_data_out_isr(dev, UDC_EP0OUT_IX);
 			} else {
 				/* dummy read confirm */
-				readl(&dev->ep[UDC_EP0OUT_IX].regs->confirm);
+				pete_readl("drivers/usb/gadget/udc/snps_udc_core.c:2622", &dev->ep[UDC_EP0OUT_IX].regs->confirm);
 				ret_val = IRQ_HANDLED;
 			}
 		}
@@ -2628,7 +2628,7 @@ __acquires(dev->lock)
 	/* check pending CNAKS */
 	if (cnak_pending) {
 		/* CNAk processing when rxfifo empty only */
-		if (readl(&dev->regs->sts) & AMD_BIT(UDC_DEVSTS_RXFIFO_EMPTY))
+		if (pete_readl("drivers/usb/gadget/udc/snps_udc_core.c:2631", &dev->regs->sts) & AMD_BIT(UDC_DEVSTS_RXFIFO_EMPTY))
 			udc_process_cnak_queue(dev);
 	}
 
@@ -2648,16 +2648,16 @@ static irqreturn_t udc_control_in_isr(struct udc *dev)
 	ep = &dev->ep[UDC_EP0IN_IX];
 
 	/* clear irq */
-	writel(AMD_BIT(UDC_EPINT_IN_EP0), &dev->regs->ep_irqsts);
+	pete_writel("drivers/usb/gadget/udc/snps_udc_core.c:2651", AMD_BIT(UDC_EPINT_IN_EP0), &dev->regs->ep_irqsts);
 
-	tmp = readl(&dev->ep[UDC_EP0IN_IX].regs->sts);
+	tmp = pete_readl("drivers/usb/gadget/udc/snps_udc_core.c:2653", &dev->ep[UDC_EP0IN_IX].regs->sts);
 	/* DMA completion */
 	if (tmp & AMD_BIT(UDC_EPSTS_TDC)) {
 		VDBG(dev, "isr: TDC clear\n");
 		ret_val = IRQ_HANDLED;
 
 		/* clear TDC bit */
-		writel(AMD_BIT(UDC_EPSTS_TDC),
+		pete_writel("drivers/usb/gadget/udc/snps_udc_core.c:2660", AMD_BIT(UDC_EPSTS_TDC),
 				&dev->ep[UDC_EP0IN_IX].regs->sts);
 
 	/* status reg has IN bit set ? */
@@ -2666,15 +2666,15 @@ static irqreturn_t udc_control_in_isr(struct udc *dev)
 
 		if (ep->dma) {
 			/* clear IN bit */
-			writel(AMD_BIT(UDC_EPSTS_IN),
+			pete_writel("drivers/usb/gadget/udc/snps_udc_core.c:2669", AMD_BIT(UDC_EPSTS_IN),
 				&dev->ep[UDC_EP0IN_IX].regs->sts);
 		}
 		if (dev->stall_ep0in) {
 			DBG(dev, "stall ep0in\n");
 			/* halt ep0in */
-			tmp = readl(&ep->regs->ctl);
+			tmp = pete_readl("drivers/usb/gadget/udc/snps_udc_core.c:2675", &ep->regs->ctl);
 			tmp |= AMD_BIT(UDC_EPCTL_S);
-			writel(tmp, &ep->regs->ctl);
+			pete_writel("drivers/usb/gadget/udc/snps_udc_core.c:2677", tmp, &ep->regs->ctl);
 		} else {
 			if (!list_empty(&ep->queue)) {
 				/* next request */
@@ -2683,7 +2683,7 @@ static irqreturn_t udc_control_in_isr(struct udc *dev)
 
 				if (ep->dma) {
 					/* write desc pointer */
-					writel(req->td_phys, &ep->regs->desptr);
+					pete_writel("drivers/usb/gadget/udc/snps_udc_core.c:2686", req->td_phys, &ep->regs->desptr);
 					/* set HOST READY */
 					req->td_data->status =
 						AMD_ADDBITS(
@@ -2693,9 +2693,9 @@ static irqreturn_t udc_control_in_isr(struct udc *dev)
 
 					/* set poll demand bit */
 					tmp =
-					readl(&dev->ep[UDC_EP0IN_IX].regs->ctl);
+					pete_readl("drivers/usb/gadget/udc/snps_udc_core.c:2696", &dev->ep[UDC_EP0IN_IX].regs->ctl);
 					tmp |= AMD_BIT(UDC_EPCTL_P);
-					writel(tmp,
+					pete_writel("drivers/usb/gadget/udc/snps_udc_core.c:2698", tmp,
 					&dev->ep[UDC_EP0IN_IX].regs->ctl);
 
 					/* all bytes will be transferred */
@@ -2727,7 +2727,7 @@ static irqreturn_t udc_control_in_isr(struct udc *dev)
 		dev->stall_ep0in = 0;
 		if (!ep->dma) {
 			/* clear IN bit */
-			writel(AMD_BIT(UDC_EPSTS_IN),
+			pete_writel("drivers/usb/gadget/udc/snps_udc_core.c:2730", AMD_BIT(UDC_EPSTS_IN),
 				&dev->ep[UDC_EP0IN_IX].regs->sts);
 		}
 	}
@@ -2753,7 +2753,7 @@ __acquires(dev->lock)
 		ret_val = IRQ_HANDLED;
 
 		/* read config value */
-		tmp = readl(&dev->regs->sts);
+		tmp = pete_readl("drivers/usb/gadget/udc/snps_udc_core.c:2756", &dev->regs->sts);
 		cfg = AMD_GETBITS(tmp, UDC_DEVSTS_CFG);
 		DBG(dev, "SET_CONFIG interrupt: config=%d\n", cfg);
 		dev->cur_config = cfg;
@@ -2779,18 +2779,18 @@ __acquires(dev->lock)
 				udc_csr_epix = ep->num - UDC_CSR_EP_OUT_IX_OFS;
 			}
 
-			tmp = readl(&dev->csr->ne[udc_csr_epix]);
+			tmp = pete_readl("drivers/usb/gadget/udc/snps_udc_core.c:2782", &dev->csr->ne[udc_csr_epix]);
 			/* ep cfg */
 			tmp = AMD_ADDBITS(tmp, ep->dev->cur_config,
 						UDC_CSR_NE_CFG);
 			/* write reg */
-			writel(tmp, &dev->csr->ne[udc_csr_epix]);
+			pete_writel("drivers/usb/gadget/udc/snps_udc_core.c:2787", tmp, &dev->csr->ne[udc_csr_epix]);
 
 			/* clear stall bits */
 			ep->halted = 0;
-			tmp = readl(&ep->regs->ctl);
+			tmp = pete_readl("drivers/usb/gadget/udc/snps_udc_core.c:2791", &ep->regs->ctl);
 			tmp = tmp & AMD_CLEAR_BIT(UDC_EPCTL_S);
-			writel(tmp, &ep->regs->ctl);
+			pete_writel("drivers/usb/gadget/udc/snps_udc_core.c:2793", tmp, &ep->regs->ctl);
 		}
 		/* call gadget zero with setup data received */
 		spin_unlock(&dev->lock);
@@ -2803,7 +2803,7 @@ __acquires(dev->lock)
 
 		dev->set_cfg_not_acked = 1;
 		/* read interface and alt setting values */
-		tmp = readl(&dev->regs->sts);
+		tmp = pete_readl("drivers/usb/gadget/udc/snps_udc_core.c:2806", &dev->regs->sts);
 		dev->cur_alt = AMD_GETBITS(tmp, UDC_DEVSTS_ALT);
 		dev->cur_intf = AMD_GETBITS(tmp, UDC_DEVSTS_INTF);
 
@@ -2834,7 +2834,7 @@ __acquires(dev->lock)
 
 			/* UDC CSR reg */
 			/* set ep values */
-			tmp = readl(&dev->csr->ne[udc_csr_epix]);
+			tmp = pete_readl("drivers/usb/gadget/udc/snps_udc_core.c:2837", &dev->csr->ne[udc_csr_epix]);
 			/* ep interface */
 			tmp = AMD_ADDBITS(tmp, ep->dev->cur_intf,
 						UDC_CSR_NE_INTF);
@@ -2843,13 +2843,13 @@ __acquires(dev->lock)
 			tmp = AMD_ADDBITS(tmp, ep->dev->cur_alt,
 						UDC_CSR_NE_ALT);
 			/* write reg */
-			writel(tmp, &dev->csr->ne[udc_csr_epix]);
+			pete_writel("drivers/usb/gadget/udc/snps_udc_core.c:2846", tmp, &dev->csr->ne[udc_csr_epix]);
 
 			/* clear stall bits */
 			ep->halted = 0;
-			tmp = readl(&ep->regs->ctl);
+			tmp = pete_readl("drivers/usb/gadget/udc/snps_udc_core.c:2850", &ep->regs->ctl);
 			tmp = tmp & AMD_CLEAR_BIT(UDC_EPCTL_S);
-			writel(tmp, &ep->regs->ctl);
+			pete_writel("drivers/usb/gadget/udc/snps_udc_core.c:2852", tmp, &ep->regs->ctl);
 		}
 
 		/* call gadget zero with setup data received */
@@ -2885,7 +2885,7 @@ __acquires(dev->lock)
 		ep_init(dev->regs, &dev->ep[UDC_EP0IN_IX]);
 
 		/* soft reset when rxfifo not empty */
-		tmp = readl(&dev->regs->sts);
+		tmp = pete_readl("drivers/usb/gadget/udc/snps_udc_core.c:2888", &dev->regs->sts);
 		if (!(tmp & AMD_BIT(UDC_DEVSTS_RXFIFO_EMPTY))
 				&& !soft_reset_after_usbreset_occured) {
 			udc_soft_reset(dev);
@@ -2898,9 +2898,9 @@ __acquires(dev->lock)
 		 * disconnect()
 		 */
 		DBG(dev, "DMA machine reset\n");
-		tmp = readl(&dev->regs->cfg);
-		writel(tmp | AMD_BIT(UDC_DEVCFG_DMARST), &dev->regs->cfg);
-		writel(tmp, &dev->regs->cfg);
+		tmp = pete_readl("drivers/usb/gadget/udc/snps_udc_core.c:2901", &dev->regs->cfg);
+		pete_writel("drivers/usb/gadget/udc/snps_udc_core.c:2902", tmp | AMD_BIT(UDC_DEVCFG_DMARST), &dev->regs->cfg);
+		pete_writel("drivers/usb/gadget/udc/snps_udc_core.c:2903", tmp, &dev->regs->cfg);
 
 		/* put into initial config */
 		udc_basic_init(dev);
@@ -2909,9 +2909,9 @@ __acquires(dev->lock)
 		udc_enable_dev_setup_interrupts(dev);
 
 		/* enable suspend interrupt */
-		tmp = readl(&dev->regs->irqmsk);
+		tmp = pete_readl("drivers/usb/gadget/udc/snps_udc_core.c:2912", &dev->regs->irqmsk);
 		tmp &= AMD_UNMASK_BIT(UDC_DEVINT_US);
-		writel(tmp, &dev->regs->irqmsk);
+		pete_writel("drivers/usb/gadget/udc/snps_udc_core.c:2914", tmp, &dev->regs->irqmsk);
 
 	} /* USB suspend */
 	if (dev_irq & AMD_BIT(UDC_DEVINT_US)) {
@@ -2950,12 +2950,12 @@ __acquires(dev->lock)
 		ret_val = IRQ_HANDLED;
 
 		/* check that session is not valid to detect disconnect */
-		tmp = readl(&dev->regs->sts);
+		tmp = pete_readl("drivers/usb/gadget/udc/snps_udc_core.c:2953", &dev->regs->sts);
 		if (!(tmp & AMD_BIT(UDC_DEVSTS_SESSVLD))) {
 			/* disable suspend interrupt */
-			tmp = readl(&dev->regs->irqmsk);
+			tmp = pete_readl("drivers/usb/gadget/udc/snps_udc_core.c:2956", &dev->regs->irqmsk);
 			tmp |= AMD_BIT(UDC_DEVINT_US);
-			writel(tmp, &dev->regs->irqmsk);
+			pete_writel("drivers/usb/gadget/udc/snps_udc_core.c:2958", tmp, &dev->regs->irqmsk);
 			DBG(dev, "USB Disconnect (session valid low)\n");
 			/* cleanup on disconnect */
 			usb_disconnect(udc);
@@ -2978,7 +2978,7 @@ irqreturn_t udc_irq(int irq, void *pdev)
 	spin_lock(&dev->lock);
 
 	/* check for ep irq */
-	reg = readl(&dev->regs->ep_irqsts);
+	reg = pete_readl("drivers/usb/gadget/udc/snps_udc_core.c:2981", &dev->regs->ep_irqsts);
 	if (reg) {
 		if (reg & AMD_BIT(UDC_EPINT_OUT_EP0))
 			ret_val |= udc_control_out_isr(dev);
@@ -2995,7 +2995,7 @@ irqreturn_t udc_irq(int irq, void *pdev)
 				continue;
 
 			/* clear irq status */
-			writel(ep_irq, &dev->regs->ep_irqsts);
+			pete_writel("drivers/usb/gadget/udc/snps_udc_core.c:2998", ep_irq, &dev->regs->ep_irqsts);
 
 			/* irq for out ep ? */
 			if (i > UDC_EPIN_NUM)
@@ -3008,10 +3008,10 @@ irqreturn_t udc_irq(int irq, void *pdev)
 
 
 	/* check for dev irq */
-	reg = readl(&dev->regs->irqsts);
+	reg = pete_readl("drivers/usb/gadget/udc/snps_udc_core.c:3011", &dev->regs->irqsts);
 	if (reg) {
 		/* clear irq */
-		writel(reg, &dev->regs->irqsts);
+		pete_writel("drivers/usb/gadget/udc/snps_udc_core.c:3014", reg, &dev->regs->irqsts);
 		ret_val |= udc_dev_isr(dev, reg);
 	}
 
@@ -3174,9 +3174,9 @@ int udc_probe(struct udc *dev)
 	timer_setup(&udc_pollstall_timer, udc_pollstall_timer_function, 0);
 
 	/* set SD */
-	reg = readl(&dev->regs->ctl);
+	reg = pete_readl("drivers/usb/gadget/udc/snps_udc_core.c:3177", &dev->regs->ctl);
 	reg |= AMD_BIT(UDC_DEVCTL_SD);
-	writel(reg, &dev->regs->ctl);
+	pete_writel("drivers/usb/gadget/udc/snps_udc_core.c:3179", reg, &dev->regs->ctl);
 
 	/* print dev register info */
 	print_regs(dev);

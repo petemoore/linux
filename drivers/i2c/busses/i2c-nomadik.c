@@ -196,12 +196,12 @@ static const char *abort_causes[] = {
 
 static inline void i2c_set_bit(void __iomem *reg, u32 mask)
 {
-	writel(readl(reg) | mask, reg);
+	pete_writel("drivers/i2c/busses/i2c-nomadik.c:199", pete_readl("drivers/i2c/busses/i2c-nomadik.c:199", reg) | mask, reg);
 }
 
 static inline void i2c_clr_bit(void __iomem *reg, u32 mask)
 {
-	writel(readl(reg) & ~mask, reg);
+	pete_writel("drivers/i2c/busses/i2c-nomadik.c:204", pete_readl("drivers/i2c/busses/i2c-nomadik.c:204", reg) & ~mask, reg);
 }
 
 /**
@@ -224,13 +224,13 @@ static int flush_i2c_fifo(struct nmk_i2c_dev *dev)
 	 * bits, until then no one must access Tx, Rx FIFO and
 	 * should poll on these bits waiting for the completion.
 	 */
-	writel((I2C_CR_FTX | I2C_CR_FRX), dev->virtbase + I2C_CR);
+	pete_writel("drivers/i2c/busses/i2c-nomadik.c:227", (I2C_CR_FTX | I2C_CR_FRX), dev->virtbase + I2C_CR);
 
 	for (i = 0; i < LOOP_ATTEMPTS; i++) {
 		timeout = jiffies + dev->adap.timeout;
 
 		while (!time_after(jiffies, timeout)) {
-			if ((readl(dev->virtbase + I2C_CR) &
+			if ((pete_readl("drivers/i2c/busses/i2c-nomadik.c:233", dev->virtbase + I2C_CR) &
 				(I2C_CR_FTX | I2C_CR_FRX)) == 0)
 					return 0;
 		}
@@ -250,7 +250,7 @@ static int flush_i2c_fifo(struct nmk_i2c_dev *dev)
 static void disable_all_interrupts(struct nmk_i2c_dev *dev)
 {
 	u32 mask = IRQ_MASK(0);
-	writel(mask, dev->virtbase + I2C_IMSCR);
+	pete_writel("drivers/i2c/busses/i2c-nomadik.c:253", mask, dev->virtbase + I2C_IMSCR);
 }
 
 /**
@@ -261,7 +261,7 @@ static void clear_all_interrupts(struct nmk_i2c_dev *dev)
 {
 	u32 mask;
 	mask = IRQ_MASK(I2C_CLEAR_ALL_INTS);
-	writel(mask, dev->virtbase + I2C_ICR);
+	pete_writel("drivers/i2c/busses/i2c-nomadik.c:264", mask, dev->virtbase + I2C_ICR);
 }
 
 /**
@@ -352,11 +352,11 @@ static void setup_i2c_controller(struct nmk_i2c_dev *dev)
 	u32 ns;
 	u16 slsu;
 
-	writel(0x0, dev->virtbase + I2C_CR);
-	writel(0x0, dev->virtbase + I2C_HSMCR);
-	writel(0x0, dev->virtbase + I2C_TFTR);
-	writel(0x0, dev->virtbase + I2C_RFTR);
-	writel(0x0, dev->virtbase + I2C_DMAR);
+	pete_writel("drivers/i2c/busses/i2c-nomadik.c:355", 0x0, dev->virtbase + I2C_CR);
+	pete_writel("drivers/i2c/busses/i2c-nomadik.c:356", 0x0, dev->virtbase + I2C_HSMCR);
+	pete_writel("drivers/i2c/busses/i2c-nomadik.c:357", 0x0, dev->virtbase + I2C_TFTR);
+	pete_writel("drivers/i2c/busses/i2c-nomadik.c:358", 0x0, dev->virtbase + I2C_RFTR);
+	pete_writel("drivers/i2c/busses/i2c-nomadik.c:359", 0x0, dev->virtbase + I2C_DMAR);
 
 	i2c_clk = clk_get_rate(dev->clk);
 
@@ -389,7 +389,7 @@ static void setup_i2c_controller(struct nmk_i2c_dev *dev)
 	slsu += 1;
 
 	dev_dbg(&dev->adev->dev, "calculated SLSU = %04x\n", slsu);
-	writel(slsu << 16, dev->virtbase + I2C_SCR);
+	pete_writel("drivers/i2c/busses/i2c-nomadik.c:392", slsu << 16, dev->virtbase + I2C_SCR);
 
 	/*
 	 * The spec says, in case of std. mode the divider is
@@ -409,7 +409,7 @@ static void setup_i2c_controller(struct nmk_i2c_dev *dev)
 	brcr2 = (i2c_clk/(dev->clk_freq * div)) & 0xffff;
 
 	/* set the baud rate counter register */
-	writel((brcr1 | brcr2), dev->virtbase + I2C_BRCR);
+	pete_writel("drivers/i2c/busses/i2c-nomadik.c:412", (brcr1 | brcr2), dev->virtbase + I2C_BRCR);
 
 	/*
 	 * set the speed mode. Currently we support
@@ -421,15 +421,15 @@ static void setup_i2c_controller(struct nmk_i2c_dev *dev)
 		dev_err(&dev->adev->dev,
 			"do not support this mode defaulting to std. mode\n");
 		brcr2 = i2c_clk / (I2C_MAX_STANDARD_MODE_FREQ * 2) & 0xffff;
-		writel((brcr1 | brcr2), dev->virtbase + I2C_BRCR);
-		writel(I2C_FREQ_MODE_STANDARD << 4,
+		pete_writel("drivers/i2c/busses/i2c-nomadik.c:424", (brcr1 | brcr2), dev->virtbase + I2C_BRCR);
+		pete_writel("drivers/i2c/busses/i2c-nomadik.c:425", I2C_FREQ_MODE_STANDARD << 4,
 				dev->virtbase + I2C_CR);
 	}
-	writel(dev->sm << 4, dev->virtbase + I2C_CR);
+	pete_writel("drivers/i2c/busses/i2c-nomadik.c:428", dev->sm << 4, dev->virtbase + I2C_CR);
 
 	/* set the Tx and Rx FIFO threshold */
-	writel(dev->tft, dev->virtbase + I2C_TFTR);
-	writel(dev->rft, dev->virtbase + I2C_RFTR);
+	pete_writel("drivers/i2c/busses/i2c-nomadik.c:431", dev->tft, dev->virtbase + I2C_TFTR);
+	pete_writel("drivers/i2c/busses/i2c-nomadik.c:432", dev->rft, dev->virtbase + I2C_RFTR);
 }
 
 /**
@@ -448,10 +448,10 @@ static int read_i2c(struct nmk_i2c_dev *dev, u16 flags)
 	unsigned long timeout;
 
 	mcr = load_i2c_mcr_reg(dev, flags);
-	writel(mcr, dev->virtbase + I2C_MCR);
+	pete_writel("drivers/i2c/busses/i2c-nomadik.c:451", mcr, dev->virtbase + I2C_MCR);
 
 	/* load the current CR value */
-	writel(readl(dev->virtbase + I2C_CR) | DEFAULT_I2C_REG_CR,
+	pete_writel("drivers/i2c/busses/i2c-nomadik.c:454", pete_readl("drivers/i2c/busses/i2c-nomadik.c:454", dev->virtbase + I2C_CR) | DEFAULT_I2C_REG_CR,
 			dev->virtbase + I2C_CR);
 
 	/* enable the controller */
@@ -470,7 +470,7 @@ static int read_i2c(struct nmk_i2c_dev *dev, u16 flags)
 
 	irq_mask = I2C_CLEAR_ALL_INTS & IRQ_MASK(irq_mask);
 
-	writel(readl(dev->virtbase + I2C_IMSCR) | irq_mask,
+	pete_writel("drivers/i2c/busses/i2c-nomadik.c:473", pete_readl("drivers/i2c/busses/i2c-nomadik.c:473", dev->virtbase + I2C_IMSCR) | irq_mask,
 			dev->virtbase + I2C_IMSCR);
 
 	timeout = wait_for_completion_timeout(
@@ -518,10 +518,10 @@ static int write_i2c(struct nmk_i2c_dev *dev, u16 flags)
 
 	mcr = load_i2c_mcr_reg(dev, flags);
 
-	writel(mcr, dev->virtbase + I2C_MCR);
+	pete_writel("drivers/i2c/busses/i2c-nomadik.c:521", mcr, dev->virtbase + I2C_MCR);
 
 	/* load the current CR value */
-	writel(readl(dev->virtbase + I2C_CR) | DEFAULT_I2C_REG_CR,
+	pete_writel("drivers/i2c/busses/i2c-nomadik.c:524", pete_readl("drivers/i2c/busses/i2c-nomadik.c:524", dev->virtbase + I2C_CR) | DEFAULT_I2C_REG_CR,
 			dev->virtbase + I2C_CR);
 
 	/* enable the controller */
@@ -550,7 +550,7 @@ static int write_i2c(struct nmk_i2c_dev *dev, u16 flags)
 
 	irq_mask = I2C_CLEAR_ALL_INTS & IRQ_MASK(irq_mask);
 
-	writel(readl(dev->virtbase + I2C_IMSCR) | irq_mask,
+	pete_writel("drivers/i2c/busses/i2c-nomadik.c:553", pete_readl("drivers/i2c/busses/i2c-nomadik.c:553", dev->virtbase + I2C_IMSCR) | irq_mask,
 			dev->virtbase + I2C_IMSCR);
 
 	timeout = wait_for_completion_timeout(
@@ -589,7 +589,7 @@ static int nmk_i2c_xfer_one(struct nmk_i2c_dev *dev, u16 flags)
 		u32 i2c_sr;
 		u32 cause;
 
-		i2c_sr = readl(dev->virtbase + I2C_SR);
+		i2c_sr = pete_readl("drivers/i2c/busses/i2c-nomadik.c:592", dev->virtbase + I2C_SR);
 		/*
 		 * Check if the controller I2C operation status
 		 * is set to ABORT(11b).
@@ -705,7 +705,7 @@ static int nmk_i2c_xfer(struct i2c_adapter *i2c_adap,
 static int disable_interrupts(struct nmk_i2c_dev *dev, u32 irq)
 {
 	irq = IRQ_MASK(irq);
-	writel(readl(dev->virtbase + I2C_IMSCR) & ~(I2C_CLEAR_ALL_INTS & irq),
+	pete_writel("drivers/i2c/busses/i2c-nomadik.c:708", pete_readl("drivers/i2c/busses/i2c-nomadik.c:708", dev->virtbase + I2C_IMSCR) & ~(I2C_CLEAR_ALL_INTS & irq),
 			dev->virtbase + I2C_IMSCR);
 	return 0;
 }
@@ -729,11 +729,11 @@ static irqreturn_t i2c_irq_handler(int irq, void *arg)
 	u32 misr, src;
 
 	/* load Tx FIFO and Rx FIFO threshold values */
-	tft = readl(dev->virtbase + I2C_TFTR);
-	rft = readl(dev->virtbase + I2C_RFTR);
+	tft = pete_readl("drivers/i2c/busses/i2c-nomadik.c:732", dev->virtbase + I2C_TFTR);
+	rft = pete_readl("drivers/i2c/busses/i2c-nomadik.c:733", dev->virtbase + I2C_RFTR);
 
 	/* read interrupt status register */
-	misr = readl(dev->virtbase + I2C_MISR);
+	misr = pete_readl("drivers/i2c/busses/i2c-nomadik.c:736", dev->virtbase + I2C_MISR);
 
 	src = __ffs(misr);
 	switch ((1 << src)) {
@@ -789,7 +789,7 @@ static irqreturn_t i2c_irq_handler(int irq, void *arg)
 	case I2C_IT_MTD:
 	case I2C_IT_MTDWS:
 		if (dev->cli.operation == I2C_READ) {
-			while (!(readl(dev->virtbase + I2C_RISR)
+			while (!(pete_readl("drivers/i2c/busses/i2c-nomadik.c:792", dev->virtbase + I2C_RISR)
 				 & I2C_IT_RXFE)) {
 				if (dev->cli.count == 0)
 					break;
@@ -833,7 +833,7 @@ static irqreturn_t i2c_irq_handler(int irq, void *arg)
 	case I2C_IT_BERR:
 		dev->result = -EIO;
 		/* get the status */
-		if (((readl(dev->virtbase + I2C_SR) >> 2) & 0x3) == I2C_ABORT)
+		if (((pete_readl("drivers/i2c/busses/i2c-nomadik.c:836", dev->virtbase + I2C_SR) >> 2) & 0x3) == I2C_ABORT)
 			(void) init_hw(dev);
 
 		i2c_set_bit(dev->virtbase + I2C_ICR, I2C_IT_BERR);

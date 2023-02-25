@@ -554,7 +554,7 @@ static void restore_state(struct pl022 *pl022)
 	struct chip_data *chip = pl022->cur_chip;
 
 	if (pl022->vendor->extended_cr)
-		writel(chip->cr0, SSP_CR0(pl022->virtbase));
+		pete_writel("drivers/spi/spi-pl022.c:557", chip->cr0, SSP_CR0(pl022->virtbase));
 	else
 		writew(chip->cr0, SSP_CR0(pl022->virtbase));
 	writew(chip->cr1, SSP_CR1(pl022->virtbase));
@@ -642,10 +642,10 @@ static void restore_state(struct pl022 *pl022)
 static void load_ssp_default_config(struct pl022 *pl022)
 {
 	if (pl022->vendor->pl023) {
-		writel(DEFAULT_SSP_REG_CR0_ST_PL023, SSP_CR0(pl022->virtbase));
+		pete_writel("drivers/spi/spi-pl022.c:645", DEFAULT_SSP_REG_CR0_ST_PL023, SSP_CR0(pl022->virtbase));
 		writew(DEFAULT_SSP_REG_CR1_ST_PL023, SSP_CR1(pl022->virtbase));
 	} else if (pl022->vendor->extended_cr) {
-		writel(DEFAULT_SSP_REG_CR0_ST, SSP_CR0(pl022->virtbase));
+		pete_writel("drivers/spi/spi-pl022.c:648", DEFAULT_SSP_REG_CR0_ST, SSP_CR0(pl022->virtbase));
 		writew(DEFAULT_SSP_REG_CR1_ST, SSP_CR1(pl022->virtbase));
 	} else {
 		writew(DEFAULT_SSP_REG_CR0, SSP_CR0(pl022->virtbase));
@@ -695,7 +695,7 @@ static void readwriter(struct pl022 *pl022)
 			break;
 		case READING_U32:
 			*(u32 *) (pl022->rx) =
-				readl(SSP_DR(pl022->virtbase));
+				pete_readl("drivers/spi/spi-pl022.c:698", SSP_DR(pl022->virtbase));
 			break;
 		}
 		pl022->rx += (pl022->cur_chip->n_bytes);
@@ -717,7 +717,7 @@ static void readwriter(struct pl022 *pl022)
 			writew((*(u16 *) (pl022->tx)), SSP_DR(pl022->virtbase));
 			break;
 		case WRITING_U32:
-			writel(*(u32 *) (pl022->tx), SSP_DR(pl022->virtbase));
+			pete_writel("drivers/spi/spi-pl022.c:720", *(u32 *) (pl022->tx), SSP_DR(pl022->virtbase));
 			break;
 		}
 		pl022->tx += (pl022->cur_chip->n_bytes);
@@ -744,7 +744,7 @@ static void readwriter(struct pl022 *pl022)
 				break;
 			case READING_U32:
 				*(u32 *) (pl022->rx) =
-					readl(SSP_DR(pl022->virtbase));
+					pete_readl("drivers/spi/spi-pl022.c:747", SSP_DR(pl022->virtbase));
 				break;
 			}
 			pl022->rx += (pl022->cur_chip->n_bytes);
@@ -1477,7 +1477,7 @@ static void print_current_status(struct pl022 *pl022)
 	u16 read_cr1, read_dmacr, read_sr;
 
 	if (pl022->vendor->extended_cr)
-		read_cr0 = readl(SSP_CR0(pl022->virtbase));
+		read_cr0 = pete_readl("drivers/spi/spi-pl022.c:1480", SSP_CR0(pl022->virtbase));
 	else
 		read_cr0 = readw(SSP_CR0(pl022->virtbase));
 	read_cr1 = readw(SSP_CR1(pl022->virtbase));

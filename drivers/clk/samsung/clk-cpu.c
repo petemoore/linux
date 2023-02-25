@@ -71,11 +71,11 @@ static void wait_until_divider_stable(void __iomem *div_reg, unsigned long mask)
 	unsigned long timeout = jiffies + msecs_to_jiffies(10);
 
 	do {
-		if (!(readl(div_reg) & mask))
+		if (!(pete_readl("drivers/clk/samsung/clk-cpu.c:74", div_reg) & mask))
 			return;
 	} while (time_before(jiffies, timeout));
 
-	if (!(readl(div_reg) & mask))
+	if (!(pete_readl("drivers/clk/samsung/clk-cpu.c:78", div_reg) & mask))
 		return;
 
 	pr_err("%s: timeout in divider stablization\n", __func__);
@@ -91,11 +91,11 @@ static void wait_until_mux_stable(void __iomem *mux_reg, u32 mux_pos,
 	unsigned long timeout = jiffies + msecs_to_jiffies(10);
 
 	do {
-		if (((readl(mux_reg) >> mux_pos) & MUX_MASK) == mux_value)
+		if (((pete_readl("drivers/clk/samsung/clk-cpu.c:94", mux_reg) >> mux_pos) & MUX_MASK) == mux_value)
 			return;
 	} while (time_before(jiffies, timeout));
 
-	if (((readl(mux_reg) >> mux_pos) & MUX_MASK) == mux_value)
+	if (((pete_readl("drivers/clk/samsung/clk-cpu.c:98", mux_reg) >> mux_pos) & MUX_MASK) == mux_value)
 		return;
 
 	pr_err("%s: re-parenting mux timed-out\n", __func__);
@@ -139,9 +139,9 @@ static void exynos_set_safe_div(void __iomem *base, unsigned long div,
 {
 	unsigned long div0;
 
-	div0 = readl(base + E4210_DIV_CPU0);
+	div0 = pete_readl("drivers/clk/samsung/clk-cpu.c:142", base + E4210_DIV_CPU0);
 	div0 = (div0 & ~mask) | (div & mask);
-	writel(div0, base + E4210_DIV_CPU0);
+	pete_writel("drivers/clk/samsung/clk-cpu.c:144", div0, base + E4210_DIV_CPU0);
 	wait_until_divider_stable(base + E4210_DIV_STAT_CPU0, mask);
 }
 
@@ -172,8 +172,8 @@ static int exynos_cpuclk_pre_rate_change(struct clk_notifier_data *ndata,
 	div0 = cfg_data->div0;
 	if (cpuclk->flags & CLK_CPU_HAS_DIV1) {
 		div1 = cfg_data->div1;
-		if (readl(base + E4210_SRC_CPU) & E4210_MUX_HPM_MASK)
-			div1 = readl(base + E4210_DIV_CPU1) &
+		if (pete_readl("drivers/clk/samsung/clk-cpu.c:175", base + E4210_SRC_CPU) & E4210_MUX_HPM_MASK)
+			div1 = pete_readl("drivers/clk/samsung/clk-cpu.c:176", base + E4210_DIV_CPU1) &
 				(E4210_DIV1_HPM_MASK | E4210_DIV1_COPY_MASK);
 	}
 
@@ -204,16 +204,16 @@ static int exynos_cpuclk_pre_rate_change(struct clk_notifier_data *ndata,
 	}
 
 	/* select sclk_mpll as the alternate parent */
-	mux_reg = readl(base + E4210_SRC_CPU);
-	writel(mux_reg | (1 << 16), base + E4210_SRC_CPU);
+	mux_reg = pete_readl("drivers/clk/samsung/clk-cpu.c:207", base + E4210_SRC_CPU);
+	pete_writel("drivers/clk/samsung/clk-cpu.c:208", mux_reg | (1 << 16), base + E4210_SRC_CPU);
 	wait_until_mux_stable(base + E4210_STAT_CPU, 16, 2);
 
 	/* alternate parent is active now. set the dividers */
-	writel(div0, base + E4210_DIV_CPU0);
+	pete_writel("drivers/clk/samsung/clk-cpu.c:212", div0, base + E4210_DIV_CPU0);
 	wait_until_divider_stable(base + E4210_DIV_STAT_CPU0, DIV_MASK_ALL);
 
 	if (cpuclk->flags & CLK_CPU_HAS_DIV1) {
-		writel(div1, base + E4210_DIV_CPU1);
+		pete_writel("drivers/clk/samsung/clk-cpu.c:216", div1, base + E4210_DIV_CPU1);
 		wait_until_divider_stable(base + E4210_DIV_STAT_CPU1,
 				DIV_MASK_ALL);
 	}
@@ -243,8 +243,8 @@ static int exynos_cpuclk_post_rate_change(struct clk_notifier_data *ndata,
 	spin_lock_irqsave(cpuclk->lock, flags);
 
 	/* select mout_apll as the alternate parent */
-	mux_reg = readl(base + E4210_SRC_CPU);
-	writel(mux_reg & ~(1 << 16), base + E4210_SRC_CPU);
+	mux_reg = pete_readl("drivers/clk/samsung/clk-cpu.c:246", base + E4210_SRC_CPU);
+	pete_writel("drivers/clk/samsung/clk-cpu.c:247", mux_reg & ~(1 << 16), base + E4210_SRC_CPU);
 	wait_until_mux_stable(base + E4210_STAT_CPU, 16, 1);
 
 	if (cpuclk->flags & CLK_CPU_NEEDS_DEBUG_ALT_DIV) {
@@ -267,9 +267,9 @@ static void exynos5433_set_safe_div(void __iomem *base, unsigned long div,
 {
 	unsigned long div0;
 
-	div0 = readl(base + E5433_DIV_CPU0);
+	div0 = pete_readl("drivers/clk/samsung/clk-cpu.c:270", base + E5433_DIV_CPU0);
 	div0 = (div0 & ~mask) | (div & mask);
-	writel(div0, base + E5433_DIV_CPU0);
+	pete_writel("drivers/clk/samsung/clk-cpu.c:272", div0, base + E5433_DIV_CPU0);
 	wait_until_divider_stable(base + E5433_DIV_STAT_CPU0, mask);
 }
 
@@ -318,15 +318,15 @@ static int exynos5433_cpuclk_pre_rate_change(struct clk_notifier_data *ndata,
 	}
 
 	/* select the alternate parent */
-	mux_reg = readl(base + E5433_MUX_SEL2);
-	writel(mux_reg | 1, base + E5433_MUX_SEL2);
+	mux_reg = pete_readl("drivers/clk/samsung/clk-cpu.c:321", base + E5433_MUX_SEL2);
+	pete_writel("drivers/clk/samsung/clk-cpu.c:322", mux_reg | 1, base + E5433_MUX_SEL2);
 	wait_until_mux_stable(base + E5433_MUX_STAT2, 0, 2);
 
 	/* alternate parent is active now. set the dividers */
-	writel(div0, base + E5433_DIV_CPU0);
+	pete_writel("drivers/clk/samsung/clk-cpu.c:326", div0, base + E5433_DIV_CPU0);
 	wait_until_divider_stable(base + E5433_DIV_STAT_CPU0, DIV_MASK_ALL);
 
-	writel(div1, base + E5433_DIV_CPU1);
+	pete_writel("drivers/clk/samsung/clk-cpu.c:329", div1, base + E5433_DIV_CPU1);
 	wait_until_divider_stable(base + E5433_DIV_STAT_CPU1, DIV_MASK_ALL);
 
 	spin_unlock_irqrestore(cpuclk->lock, flags);
@@ -344,8 +344,8 @@ static int exynos5433_cpuclk_post_rate_change(struct clk_notifier_data *ndata,
 	spin_lock_irqsave(cpuclk->lock, flags);
 
 	/* select apll as the alternate parent */
-	mux_reg = readl(base + E5433_MUX_SEL2);
-	writel(mux_reg & ~1, base + E5433_MUX_SEL2);
+	mux_reg = pete_readl("drivers/clk/samsung/clk-cpu.c:347", base + E5433_MUX_SEL2);
+	pete_writel("drivers/clk/samsung/clk-cpu.c:348", mux_reg & ~1, base + E5433_MUX_SEL2);
 	wait_until_mux_stable(base + E5433_MUX_STAT2, 0, 1);
 
 	exynos5433_set_safe_div(base, div, div_mask);

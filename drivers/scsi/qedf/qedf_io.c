@@ -788,7 +788,7 @@ void qedf_ring_doorbell(struct qedf_rport *fcport)
 	 */
 	wmb();
 	barrier();
-	writel(*(u32 *)&dbell, fcport->p_doorbell);
+	pete_writel("drivers/scsi/qedf/qedf_io.c:791", *(u32 *)&dbell, fcport->p_doorbell);
 	/*
 	 * Fence required to flush the write combined buffer, since another
 	 * CPU may write to the same doorbell address and data may be lost

@@ -169,14 +169,14 @@ megasas_enable_intr_fusion(struct megasas_instance *instance)
 
 	instance->mask_interrupts = 0;
 	/* For Thunderbolt/Invader also clear intr on enable */
-	writel(~0, &regs->outbound_intr_status);
-	readl(&regs->outbound_intr_status);
+	pete_writel("drivers/scsi/megaraid/megaraid_sas_fusion.c:172", ~0, &regs->outbound_intr_status);
+	pete_readl("drivers/scsi/megaraid/megaraid_sas_fusion.c:173", &regs->outbound_intr_status);
 
-	writel(~MFI_FUSION_ENABLE_INTERRUPT_MASK, &(regs)->outbound_intr_mask);
+	pete_writel("drivers/scsi/megaraid/megaraid_sas_fusion.c:175", ~MFI_FUSION_ENABLE_INTERRUPT_MASK, &(regs)->outbound_intr_mask);
 
 	/* Dummy readl to force pci flush */
 	dev_info(&instance->pdev->dev, "%s is called outbound_intr_mask:0x%08x\n",
-		 __func__, readl(&regs->outbound_intr_mask));
+		 __func__, pete_readl("drivers/scsi/megaraid/megaraid_sas_fusion.c:179", &regs->outbound_intr_mask));
 }
 
 /**
@@ -191,10 +191,10 @@ megasas_disable_intr_fusion(struct megasas_instance *instance)
 	regs = instance->reg_set;
 	instance->mask_interrupts = 1;
 
-	writel(mask, &regs->outbound_intr_mask);
+	pete_writel("drivers/scsi/megaraid/megaraid_sas_fusion.c:194", mask, &regs->outbound_intr_mask);
 	/* Dummy readl to force pci flush */
 	dev_info(&instance->pdev->dev, "%s is called outbound_intr_mask:0x%08x\n",
-		 __func__, readl(&regs->outbound_intr_mask));
+		 __func__, pete_readl("drivers/scsi/megaraid/megaraid_sas_fusion.c:197", &regs->outbound_intr_mask));
 }
 
 int
@@ -210,8 +210,8 @@ megasas_clear_intr_fusion(struct megasas_instance *instance)
 			       &regs->outbound_intr_status);
 
 	if (status & 1) {
-		writel(status, &regs->outbound_intr_status);
-		readl(&regs->outbound_intr_status);
+		pete_writel("drivers/scsi/megaraid/megaraid_sas_fusion.c:213", status, &regs->outbound_intr_status);
+		pete_readl("drivers/scsi/megaraid/megaraid_sas_fusion.c:214", &regs->outbound_intr_status);
 		return 1;
 	}
 	if (!(status & MFI_FUSION_ENABLE_INTERRUPT_MASK))
@@ -300,9 +300,9 @@ megasas_write_64bit_req_desc(struct megasas_instance *instance,
 #else
 	unsigned long flags;
 	spin_lock_irqsave(&instance->hba_lock, flags);
-	writel(le32_to_cpu(req_desc->u.low),
+	pete_writel("drivers/scsi/megaraid/megaraid_sas_fusion.c:303", le32_to_cpu(req_desc->u.low),
 		&instance->reg_set->inbound_low_queue_port);
-	writel(le32_to_cpu(req_desc->u.high),
+	pete_writel("drivers/scsi/megaraid/megaraid_sas_fusion.c:305", le32_to_cpu(req_desc->u.high),
 		&instance->reg_set->inbound_high_queue_port);
 	spin_unlock_irqrestore(&instance->hba_lock, flags);
 #endif
@@ -321,7 +321,7 @@ megasas_fire_cmd_fusion(struct megasas_instance *instance,
 		union MEGASAS_REQUEST_DESCRIPTOR_UNION *req_desc)
 {
 	if (instance->atomic_desc_support)
-		writel(le32_to_cpu(req_desc->u.low),
+		pete_writel("drivers/scsi/megaraid/megaraid_sas_fusion.c:324", le32_to_cpu(req_desc->u.low),
 			&instance->reg_set->inbound_single_queue_port);
 	else
 		megasas_write_64bit_req_desc(instance, req_desc);
@@ -3649,11 +3649,11 @@ complete_cmd_fusion(struct megasas_instance *instance, u32 MSIxIndex,
 		 */
 		if (threshold_reply_count >= instance->threshold_reply_count) {
 			if (instance->msix_combined)
-				writel(((MSIxIndex & 0x7) << 24) |
+				pete_writel("drivers/scsi/megaraid/megaraid_sas_fusion.c:3652", ((MSIxIndex & 0x7) << 24) |
 					fusion->last_reply_idx[MSIxIndex],
 					instance->reply_post_host_index_addr[MSIxIndex/8]);
 			else
-				writel((MSIxIndex << 24) |
+				pete_writel("drivers/scsi/megaraid/megaraid_sas_fusion.c:3656", (MSIxIndex << 24) |
 					fusion->last_reply_idx[MSIxIndex],
 					instance->reply_post_host_index_addr[0]);
 			threshold_reply_count = 0;
@@ -3672,11 +3672,11 @@ complete_cmd_fusion(struct megasas_instance *instance, u32 MSIxIndex,
 	if (num_completed) {
 		wmb();
 		if (instance->msix_combined)
-			writel(((MSIxIndex & 0x7) << 24) |
+			pete_writel("drivers/scsi/megaraid/megaraid_sas_fusion.c:3675", ((MSIxIndex & 0x7) << 24) |
 				fusion->last_reply_idx[MSIxIndex],
 				instance->reply_post_host_index_addr[MSIxIndex/8]);
 		else
-			writel((MSIxIndex << 24) |
+			pete_writel("drivers/scsi/megaraid/megaraid_sas_fusion.c:3679", (MSIxIndex << 24) |
 				fusion->last_reply_idx[MSIxIndex],
 				instance->reply_post_host_index_addr[0]);
 		megasas_check_and_restore_queue_depth(instance);
@@ -4022,13 +4022,13 @@ megasas_adp_reset_fusion(struct megasas_instance *instance,
 	u32 host_diag, abs_state, retry;
 
 	/* Now try to reset the chip */
-	writel(MPI2_WRSEQ_FLUSH_KEY_VALUE, &instance->reg_set->fusion_seq_offset);
-	writel(MPI2_WRSEQ_1ST_KEY_VALUE, &instance->reg_set->fusion_seq_offset);
-	writel(MPI2_WRSEQ_2ND_KEY_VALUE, &instance->reg_set->fusion_seq_offset);
-	writel(MPI2_WRSEQ_3RD_KEY_VALUE, &instance->reg_set->fusion_seq_offset);
-	writel(MPI2_WRSEQ_4TH_KEY_VALUE, &instance->reg_set->fusion_seq_offset);
-	writel(MPI2_WRSEQ_5TH_KEY_VALUE, &instance->reg_set->fusion_seq_offset);
-	writel(MPI2_WRSEQ_6TH_KEY_VALUE, &instance->reg_set->fusion_seq_offset);
+	pete_writel("drivers/scsi/megaraid/megaraid_sas_fusion.c:4025", MPI2_WRSEQ_FLUSH_KEY_VALUE, &instance->reg_set->fusion_seq_offset);
+	pete_writel("drivers/scsi/megaraid/megaraid_sas_fusion.c:4026", MPI2_WRSEQ_1ST_KEY_VALUE, &instance->reg_set->fusion_seq_offset);
+	pete_writel("drivers/scsi/megaraid/megaraid_sas_fusion.c:4027", MPI2_WRSEQ_2ND_KEY_VALUE, &instance->reg_set->fusion_seq_offset);
+	pete_writel("drivers/scsi/megaraid/megaraid_sas_fusion.c:4028", MPI2_WRSEQ_3RD_KEY_VALUE, &instance->reg_set->fusion_seq_offset);
+	pete_writel("drivers/scsi/megaraid/megaraid_sas_fusion.c:4029", MPI2_WRSEQ_4TH_KEY_VALUE, &instance->reg_set->fusion_seq_offset);
+	pete_writel("drivers/scsi/megaraid/megaraid_sas_fusion.c:4030", MPI2_WRSEQ_5TH_KEY_VALUE, &instance->reg_set->fusion_seq_offset);
+	pete_writel("drivers/scsi/megaraid/megaraid_sas_fusion.c:4031", MPI2_WRSEQ_6TH_KEY_VALUE, &instance->reg_set->fusion_seq_offset);
 
 	/* Check that the diag write enable (DRWE) bit is on */
 	host_diag = megasas_readl(instance, &instance->reg_set->fusion_host_diag);
@@ -4048,7 +4048,7 @@ megasas_adp_reset_fusion(struct megasas_instance *instance,
 		return -1;
 
 	/* Send chip reset command */
-	writel(host_diag | HOST_DIAG_RESET_ADAPTER,
+	pete_writel("drivers/scsi/megaraid/megaraid_sas_fusion.c:4051", host_diag | HOST_DIAG_RESET_ADAPTER,
 		&instance->reg_set->fusion_host_diag);
 	msleep(3000);
 
@@ -4111,9 +4111,9 @@ static inline void megasas_trigger_snap_dump(struct megasas_instance *instance)
 
 	if (!instance->disableOnlineCtrlReset) {
 		dev_info(&instance->pdev->dev, "Trigger snap dump\n");
-		writel(MFI_ADP_TRIGGER_SNAP_DUMP,
+		pete_writel("drivers/scsi/megaraid/megaraid_sas_fusion.c:4114", MFI_ADP_TRIGGER_SNAP_DUMP,
 		       &instance->reg_set->doorbell);
-		readl(&instance->reg_set->doorbell);
+		pete_readl("drivers/scsi/megaraid/megaraid_sas_fusion.c:4116", &instance->reg_set->doorbell);
 	}
 
 	for (j = 0; j < instance->snapdump_wait_time; j++) {
@@ -4904,9 +4904,9 @@ int megasas_reset_fusion(struct Scsi_Host *shost, int reason)
 			"forcibly FAULT Firmware\n");
 		atomic_set(&instance->adprecovery, MEGASAS_ADPRESET_SM_INFAULT);
 		status_reg = megasas_readl(instance, &instance->reg_set->doorbell);
-		writel(status_reg | MFI_STATE_FORCE_OCR,
+		pete_writel("drivers/scsi/megaraid/megaraid_sas_fusion.c:4907", status_reg | MFI_STATE_FORCE_OCR,
 			&instance->reg_set->doorbell);
-		readl(&instance->reg_set->doorbell);
+		pete_readl("drivers/scsi/megaraid/megaraid_sas_fusion.c:4909", &instance->reg_set->doorbell);
 		mutex_unlock(&instance->reset_mutex);
 		do {
 			ssleep(3);
@@ -5181,9 +5181,9 @@ static void  megasas_fusion_crash_dump(struct megasas_instance *instance)
 				"not yet copied by application, ignoring this "
 				"crash dump and initiating OCR\n");
 			status_reg |= MFI_STATE_CRASH_DUMP_DONE;
-			writel(status_reg,
+			pete_writel("drivers/scsi/megaraid/megaraid_sas_fusion.c:5184", status_reg,
 				&instance->reg_set->outbound_scratch_pad_0);
-			readl(&instance->reg_set->outbound_scratch_pad_0);
+			pete_readl("drivers/scsi/megaraid/megaraid_sas_fusion.c:5186", &instance->reg_set->outbound_scratch_pad_0);
 			return;
 		}
 		megasas_alloc_host_crash_buffer(instance);
@@ -5221,8 +5221,8 @@ static void  megasas_fusion_crash_dump(struct megasas_instance *instance)
 			status_reg &= ~MFI_STATE_DMADONE;
 		}
 
-		writel(status_reg, &instance->reg_set->outbound_scratch_pad_0);
-		readl(&instance->reg_set->outbound_scratch_pad_0);
+		pete_writel("drivers/scsi/megaraid/megaraid_sas_fusion.c:5224", status_reg, &instance->reg_set->outbound_scratch_pad_0);
+		pete_readl("drivers/scsi/megaraid/megaraid_sas_fusion.c:5225", &instance->reg_set->outbound_scratch_pad_0);
 
 		msleep(MEGASAS_WAIT_FOR_NEXT_DMA_MSECS);
 		status_reg = instance->instancet->read_fw_status_reg(instance);
@@ -5234,8 +5234,8 @@ static void  megasas_fusion_crash_dump(struct megasas_instance *instance)
 		instance->fw_crash_buffer_size =  instance->drv_buf_index;
 		instance->fw_crash_state = AVAILABLE;
 		instance->drv_buf_index = 0;
-		writel(status_reg, &instance->reg_set->outbound_scratch_pad_0);
-		readl(&instance->reg_set->outbound_scratch_pad_0);
+		pete_writel("drivers/scsi/megaraid/megaraid_sas_fusion.c:5237", status_reg, &instance->reg_set->outbound_scratch_pad_0);
+		pete_readl("drivers/scsi/megaraid/megaraid_sas_fusion.c:5238", &instance->reg_set->outbound_scratch_pad_0);
 		if (!partial_copy)
 			megasas_reset_fusion(instance->host, 0);
 	}

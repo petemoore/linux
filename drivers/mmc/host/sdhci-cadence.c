@@ -104,17 +104,17 @@ static int sdhci_cdns_write_phy_reg(struct sdhci_cdns_priv *priv,
 
 	tmp = FIELD_PREP(SDHCI_CDNS_HRS04_WDATA, data) |
 	      FIELD_PREP(SDHCI_CDNS_HRS04_ADDR, addr);
-	writel(tmp, reg);
+	pete_writel("drivers/mmc/host/sdhci-cadence.c:107", tmp, reg);
 
 	tmp |= SDHCI_CDNS_HRS04_WR;
-	writel(tmp, reg);
+	pete_writel("drivers/mmc/host/sdhci-cadence.c:110", tmp, reg);
 
 	ret = readl_poll_timeout(reg, tmp, tmp & SDHCI_CDNS_HRS04_ACK, 0, 10);
 	if (ret)
 		return ret;
 
 	tmp &= ~SDHCI_CDNS_HRS04_WR;
-	writel(tmp, reg);
+	pete_writel("drivers/mmc/host/sdhci-cadence.c:117", tmp, reg);
 
 	ret = readl_poll_timeout(reg, tmp, !(tmp & SDHCI_CDNS_HRS04_ACK),
 				 0, 10);
@@ -188,17 +188,17 @@ static void sdhci_cdns_set_emmc_mode(struct sdhci_cdns_priv *priv, u32 mode)
 	u32 tmp;
 
 	/* The speed mode for eMMC is selected by HRS06 register */
-	tmp = readl(priv->hrs_addr + SDHCI_CDNS_HRS06);
+	tmp = pete_readl("drivers/mmc/host/sdhci-cadence.c:191", priv->hrs_addr + SDHCI_CDNS_HRS06);
 	tmp &= ~SDHCI_CDNS_HRS06_MODE;
 	tmp |= FIELD_PREP(SDHCI_CDNS_HRS06_MODE, mode);
-	writel(tmp, priv->hrs_addr + SDHCI_CDNS_HRS06);
+	pete_writel("drivers/mmc/host/sdhci-cadence.c:194", tmp, priv->hrs_addr + SDHCI_CDNS_HRS06);
 }
 
 static u32 sdhci_cdns_get_emmc_mode(struct sdhci_cdns_priv *priv)
 {
 	u32 tmp;
 
-	tmp = readl(priv->hrs_addr + SDHCI_CDNS_HRS06);
+	tmp = pete_readl("drivers/mmc/host/sdhci-cadence.c:201", priv->hrs_addr + SDHCI_CDNS_HRS06);
 	return FIELD_GET(SDHCI_CDNS_HRS06_MODE, tmp);
 }
 
@@ -212,7 +212,7 @@ static int sdhci_cdns_set_tune_val(struct sdhci_host *host, unsigned int val)
 	if (WARN_ON(!FIELD_FIT(SDHCI_CDNS_HRS06_TUNE, val)))
 		return -EINVAL;
 
-	tmp = readl(reg);
+	tmp = pete_readl("drivers/mmc/host/sdhci-cadence.c:215", reg);
 	tmp &= ~SDHCI_CDNS_HRS06_TUNE;
 	tmp |= FIELD_PREP(SDHCI_CDNS_HRS06_TUNE, val);
 
@@ -223,7 +223,7 @@ static int sdhci_cdns_set_tune_val(struct sdhci_host *host, unsigned int val)
 	 */
 	for (i = 0; i < 2; i++) {
 		tmp |= SDHCI_CDNS_HRS06_TUNE_UP;
-		writel(tmp, reg);
+		pete_writel("drivers/mmc/host/sdhci-cadence.c:226", tmp, reg);
 
 		ret = readl_poll_timeout(reg, tmp,
 					 !(tmp & SDHCI_CDNS_HRS06_TUNE_UP),

@@ -335,29 +335,29 @@ static void zynqmp_dma_init(struct zynqmp_dma_chan *chan)
 {
 	u32 val;
 
-	writel(ZYNQMP_DMA_IDS_DEFAULT_MASK, chan->regs + ZYNQMP_DMA_IDS);
-	val = readl(chan->regs + ZYNQMP_DMA_ISR);
-	writel(val, chan->regs + ZYNQMP_DMA_ISR);
+	pete_writel("drivers/dma/xilinx/zynqmp_dma.c:338", ZYNQMP_DMA_IDS_DEFAULT_MASK, chan->regs + ZYNQMP_DMA_IDS);
+	val = pete_readl("drivers/dma/xilinx/zynqmp_dma.c:339", chan->regs + ZYNQMP_DMA_ISR);
+	pete_writel("drivers/dma/xilinx/zynqmp_dma.c:340", val, chan->regs + ZYNQMP_DMA_ISR);
 
 	if (chan->is_dmacoherent) {
 		val = ZYNQMP_DMA_AXCOHRNT;
 		val = (val & ~ZYNQMP_DMA_AXCACHE) |
 			(ZYNQMP_DMA_AXCACHE_VAL << ZYNQMP_DMA_AXCACHE_OFST);
-		writel(val, chan->regs + ZYNQMP_DMA_DSCR_ATTR);
+		pete_writel("drivers/dma/xilinx/zynqmp_dma.c:346", val, chan->regs + ZYNQMP_DMA_DSCR_ATTR);
 	}
 
-	val = readl(chan->regs + ZYNQMP_DMA_DATA_ATTR);
+	val = pete_readl("drivers/dma/xilinx/zynqmp_dma.c:349", chan->regs + ZYNQMP_DMA_DATA_ATTR);
 	if (chan->is_dmacoherent) {
 		val = (val & ~ZYNQMP_DMA_ARCACHE) |
 			(ZYNQMP_DMA_AXCACHE_VAL << ZYNQMP_DMA_ARCACHE_OFST);
 		val = (val & ~ZYNQMP_DMA_AWCACHE) |
 			(ZYNQMP_DMA_AXCACHE_VAL << ZYNQMP_DMA_AWCACHE_OFST);
 	}
-	writel(val, chan->regs + ZYNQMP_DMA_DATA_ATTR);
+	pete_writel("drivers/dma/xilinx/zynqmp_dma.c:356", val, chan->regs + ZYNQMP_DMA_DATA_ATTR);
 
 	/* Clearing the interrupt account rgisters */
-	val = readl(chan->regs + ZYNQMP_DMA_IRQ_SRC_ACCT);
-	val = readl(chan->regs + ZYNQMP_DMA_IRQ_DST_ACCT);
+	val = pete_readl("drivers/dma/xilinx/zynqmp_dma.c:359", chan->regs + ZYNQMP_DMA_IRQ_SRC_ACCT);
+	val = pete_readl("drivers/dma/xilinx/zynqmp_dma.c:360", chan->regs + ZYNQMP_DMA_IRQ_DST_ACCT);
 
 	chan->idle = true;
 }
@@ -514,10 +514,10 @@ static int zynqmp_dma_alloc_chan_resources(struct dma_chan *dchan)
  */
 static void zynqmp_dma_start(struct zynqmp_dma_chan *chan)
 {
-	writel(ZYNQMP_DMA_INT_EN_DEFAULT_MASK, chan->regs + ZYNQMP_DMA_IER);
-	writel(0, chan->regs + ZYNQMP_DMA_TOTAL_BYTE);
+	pete_writel("drivers/dma/xilinx/zynqmp_dma.c:517", ZYNQMP_DMA_INT_EN_DEFAULT_MASK, chan->regs + ZYNQMP_DMA_IER);
+	pete_writel("drivers/dma/xilinx/zynqmp_dma.c:518", 0, chan->regs + ZYNQMP_DMA_TOTAL_BYTE);
 	chan->idle = false;
-	writel(ZYNQMP_DMA_ENABLE, chan->regs + ZYNQMP_DMA_CTRL2);
+	pete_writel("drivers/dma/xilinx/zynqmp_dma.c:520", ZYNQMP_DMA_ENABLE, chan->regs + ZYNQMP_DMA_CTRL2);
 }
 
 /**
@@ -528,29 +528,29 @@ static void zynqmp_dma_start(struct zynqmp_dma_chan *chan)
 static void zynqmp_dma_handle_ovfl_int(struct zynqmp_dma_chan *chan, u32 status)
 {
 	if (status & ZYNQMP_DMA_BYTE_CNT_OVRFL)
-		writel(0, chan->regs + ZYNQMP_DMA_TOTAL_BYTE);
+		pete_writel("drivers/dma/xilinx/zynqmp_dma.c:531", 0, chan->regs + ZYNQMP_DMA_TOTAL_BYTE);
 	if (status & ZYNQMP_DMA_IRQ_DST_ACCT_ERR)
-		readl(chan->regs + ZYNQMP_DMA_IRQ_DST_ACCT);
+		pete_readl("drivers/dma/xilinx/zynqmp_dma.c:533", chan->regs + ZYNQMP_DMA_IRQ_DST_ACCT);
 	if (status & ZYNQMP_DMA_IRQ_SRC_ACCT_ERR)
-		readl(chan->regs + ZYNQMP_DMA_IRQ_SRC_ACCT);
+		pete_readl("drivers/dma/xilinx/zynqmp_dma.c:535", chan->regs + ZYNQMP_DMA_IRQ_SRC_ACCT);
 }
 
 static void zynqmp_dma_config(struct zynqmp_dma_chan *chan)
 {
 	u32 val, burst_val;
 
-	val = readl(chan->regs + ZYNQMP_DMA_CTRL0);
+	val = pete_readl("drivers/dma/xilinx/zynqmp_dma.c:542", chan->regs + ZYNQMP_DMA_CTRL0);
 	val |= ZYNQMP_DMA_POINT_TYPE_SG;
-	writel(val, chan->regs + ZYNQMP_DMA_CTRL0);
+	pete_writel("drivers/dma/xilinx/zynqmp_dma.c:544", val, chan->regs + ZYNQMP_DMA_CTRL0);
 
-	val = readl(chan->regs + ZYNQMP_DMA_DATA_ATTR);
+	val = pete_readl("drivers/dma/xilinx/zynqmp_dma.c:546", chan->regs + ZYNQMP_DMA_DATA_ATTR);
 	burst_val = __ilog2_u32(chan->src_burst_len);
 	val = (val & ~ZYNQMP_DMA_ARLEN) |
 		((burst_val << ZYNQMP_DMA_ARLEN_OFST) & ZYNQMP_DMA_ARLEN);
 	burst_val = __ilog2_u32(chan->dst_burst_len);
 	val = (val & ~ZYNQMP_DMA_AWLEN) |
 		((burst_val << ZYNQMP_DMA_AWLEN_OFST) & ZYNQMP_DMA_AWLEN);
-	writel(val, chan->regs + ZYNQMP_DMA_DATA_ATTR);
+	pete_writel("drivers/dma/xilinx/zynqmp_dma.c:553", val, chan->regs + ZYNQMP_DMA_DATA_ATTR);
 }
 
 /**
@@ -690,7 +690,7 @@ static void zynqmp_dma_free_chan_resources(struct dma_chan *dchan)
  */
 static void zynqmp_dma_reset(struct zynqmp_dma_chan *chan)
 {
-	writel(ZYNQMP_DMA_IDS_DEFAULT_MASK, chan->regs + ZYNQMP_DMA_IDS);
+	pete_writel("drivers/dma/xilinx/zynqmp_dma.c:693", ZYNQMP_DMA_IDS_DEFAULT_MASK, chan->regs + ZYNQMP_DMA_IDS);
 
 	zynqmp_dma_complete_descriptor(chan);
 	zynqmp_dma_chan_desc_cleanup(chan);
@@ -711,11 +711,11 @@ static irqreturn_t zynqmp_dma_irq_handler(int irq, void *data)
 	u32 isr, imr, status;
 	irqreturn_t ret = IRQ_NONE;
 
-	isr = readl(chan->regs + ZYNQMP_DMA_ISR);
-	imr = readl(chan->regs + ZYNQMP_DMA_IMR);
+	isr = pete_readl("drivers/dma/xilinx/zynqmp_dma.c:714", chan->regs + ZYNQMP_DMA_ISR);
+	imr = pete_readl("drivers/dma/xilinx/zynqmp_dma.c:715", chan->regs + ZYNQMP_DMA_IMR);
 	status = isr & ~imr;
 
-	writel(isr, chan->regs + ZYNQMP_DMA_ISR);
+	pete_writel("drivers/dma/xilinx/zynqmp_dma.c:718", isr, chan->regs + ZYNQMP_DMA_ISR);
 	if (status & ZYNQMP_DMA_INT_DONE) {
 		tasklet_schedule(&chan->tasklet);
 		ret = IRQ_HANDLED;
@@ -758,7 +758,7 @@ static void zynqmp_dma_do_tasklet(struct tasklet_struct *t)
 		goto unlock;
 	}
 
-	count = readl(chan->regs + ZYNQMP_DMA_IRQ_DST_ACCT);
+	count = pete_readl("drivers/dma/xilinx/zynqmp_dma.c:761", chan->regs + ZYNQMP_DMA_IRQ_DST_ACCT);
 
 	while (count) {
 		zynqmp_dma_complete_descriptor(chan);
@@ -785,7 +785,7 @@ static int zynqmp_dma_device_terminate_all(struct dma_chan *dchan)
 	unsigned long irqflags;
 
 	spin_lock_irqsave(&chan->lock, irqflags);
-	writel(ZYNQMP_DMA_IDS_DEFAULT_MASK, chan->regs + ZYNQMP_DMA_IDS);
+	pete_writel("drivers/dma/xilinx/zynqmp_dma.c:788", ZYNQMP_DMA_IDS_DEFAULT_MASK, chan->regs + ZYNQMP_DMA_IDS);
 	zynqmp_dma_free_descriptors(chan);
 	spin_unlock_irqrestore(&chan->lock, irqflags);
 

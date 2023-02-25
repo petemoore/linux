@@ -310,11 +310,11 @@ static inline u32 qib_read_ureg32(const struct qib_devdata *dd,
 		return 0;
 
 	if (dd->userbase)
-		return readl(regno + (u64 __iomem *)
+		return pete_readl("drivers/infiniband/hw/qib/qib_iba6120.c:313", regno + (u64 __iomem *)
 			     ((char __iomem *)dd->userbase +
 			      dd->ureg_align * ctxt));
 	else
-		return readl(regno + (u64 __iomem *)
+		return pete_readl("drivers/infiniband/hw/qib/qib_iba6120.c:317", regno + (u64 __iomem *)
 			     (dd->uregbase +
 			      (char __iomem *)dd->kregbase +
 			      dd->ureg_align * ctxt));
@@ -353,7 +353,7 @@ static inline u32 qib_read_kreg32(const struct qib_devdata *dd,
 {
 	if (!dd->kregbase || !(dd->flags & QIB_PRESENT))
 		return -1;
-	return readl((u32 __iomem *)&dd->kregbase[regno]);
+	return pete_readl("drivers/infiniband/hw/qib/qib_iba6120.c:356", (u32 __iomem *)&dd->kregbase[regno]);
 }
 
 static inline u64 qib_read_kreg64(const struct qib_devdata *dd,
@@ -404,7 +404,7 @@ static inline u32 read_6120_creg32(const struct qib_devdata *dd, u16 regno)
 {
 	if (!dd->cspec->cregbase || !(dd->flags & QIB_PRESENT))
 		return 0;
-	return readl(&dd->cspec->cregbase[regno]);
+	return pete_readl("drivers/infiniband/hw/qib/qib_iba6120.c:407", &dd->cspec->cregbase[regno]);
 }
 
 /* kr_control bits */
@@ -1881,7 +1881,7 @@ static void qib_6120_put_tid(struct qib_devdata *dd, u64 __iomem *tidptr,
 		? &dd->cspec->kernel_tid_lock : &dd->cspec->user_tid_lock;
 	spin_lock_irqsave(tidlockp, flags);
 	qib_write_kreg(dd, kr_scratch, 0xfeeddeaf);
-	writel(pa, tidp32);
+	pete_writel("drivers/infiniband/hw/qib/qib_iba6120.c:1884", pa, tidp32);
 	qib_write_kreg(dd, kr_scratch, 0xdeadbeef);
 	spin_unlock_irqrestore(tidlockp, flags);
 }
@@ -1925,7 +1925,7 @@ static void qib_6120_put_tid_2(struct qib_devdata *dd, u64 __iomem *tidptr,
 		else /* for now, always full 4KB page */
 			pa |= 2 << 29;
 	}
-	writel(pa, tidp32);
+	pete_writel("drivers/infiniband/hw/qib/qib_iba6120.c:1928", pa, tidp32);
 }
 
 

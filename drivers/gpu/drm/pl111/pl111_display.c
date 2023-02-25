@@ -28,7 +28,7 @@ irqreturn_t pl111_irq(int irq, void *data)
 	u32 irq_stat;
 	irqreturn_t status = IRQ_NONE;
 
-	irq_stat = readl(priv->regs + CLCD_PL111_MIS);
+	irq_stat = pete_readl("drivers/gpu/drm/pl111/pl111_display.c:31", priv->regs + CLCD_PL111_MIS);
 
 	if (!irq_stat)
 		return IRQ_NONE;
@@ -40,7 +40,7 @@ irqreturn_t pl111_irq(int irq, void *data)
 	}
 
 	/* Clear the interrupt once done */
-	writel(irq_stat, priv->regs + CLCD_PL111_ICR);
+	pete_writel("drivers/gpu/drm/pl111/pl111_display.c:43", irq_stat, priv->regs + CLCD_PL111_ICR);
 
 	return status;
 }
@@ -154,12 +154,12 @@ static void pl111_display_enable(struct drm_simple_display_pipe *pipe,
 
 	cpl = mode->hdisplay - 1;
 
-	writel((ppl << 2) |
+	pete_writel("drivers/gpu/drm/pl111/pl111_display.c:157", (ppl << 2) |
 	       (hsw << 8) |
 	       (hfp << 16) |
 	       (hbp << 24),
 	       priv->regs + CLCD_TIM0);
-	writel(lpp |
+	pete_writel("drivers/gpu/drm/pl111/pl111_display.c:162", lpp |
 	       (vsw << 10) |
 	       (vfp << 16) |
 	       (vbp << 24),
@@ -167,7 +167,7 @@ static void pl111_display_enable(struct drm_simple_display_pipe *pipe,
 
 	spin_lock(&priv->tim2_lock);
 
-	tim2 = readl(priv->regs + CLCD_TIM2);
+	tim2 = pete_readl("drivers/gpu/drm/pl111/pl111_display.c:170", priv->regs + CLCD_TIM2);
 	tim2 &= (TIM2_BCD | TIM2_PCD_LO_MASK | TIM2_PCD_HI_MASK);
 
 	if (priv->variant->broken_clockdivider)
@@ -226,10 +226,10 @@ static void pl111_display_enable(struct drm_simple_display_pipe *pipe,
 	}
 
 	tim2 |= cpl << 16;
-	writel(tim2, priv->regs + CLCD_TIM2);
+	pete_writel("drivers/gpu/drm/pl111/pl111_display.c:229", tim2, priv->regs + CLCD_TIM2);
 	spin_unlock(&priv->tim2_lock);
 
-	writel(0, priv->regs + CLCD_TIM3);
+	pete_writel("drivers/gpu/drm/pl111/pl111_display.c:232", 0, priv->regs + CLCD_TIM3);
 
 	/*
 	 * Detect grayscale bus format. We do not support a grayscale mode
@@ -333,7 +333,7 @@ static void pl111_display_enable(struct drm_simple_display_pipe *pipe,
 		cntl &= ~CNTL_BGR;
 
 	/* Power sequence: first enable and chill */
-	writel(cntl, priv->regs + priv->ctrl);
+	pete_writel("drivers/gpu/drm/pl111/pl111_display.c:336", cntl, priv->regs + priv->ctrl);
 
 	/*
 	 * We expect this delay to stabilize the contrast
@@ -346,7 +346,7 @@ static void pl111_display_enable(struct drm_simple_display_pipe *pipe,
 
 	/* Power Up */
 	cntl |= CNTL_LCDPWR;
-	writel(cntl, priv->regs + priv->ctrl);
+	pete_writel("drivers/gpu/drm/pl111/pl111_display.c:349", cntl, priv->regs + priv->ctrl);
 
 	if (!priv->variant->broken_vblank)
 		drm_crtc_vblank_on(crtc);
@@ -363,10 +363,10 @@ static void pl111_display_disable(struct drm_simple_display_pipe *pipe)
 		drm_crtc_vblank_off(crtc);
 
 	/* Power Down */
-	cntl = readl(priv->regs + priv->ctrl);
+	cntl = pete_readl("drivers/gpu/drm/pl111/pl111_display.c:366", priv->regs + priv->ctrl);
 	if (cntl & CNTL_LCDPWR) {
 		cntl &= ~CNTL_LCDPWR;
-		writel(cntl, priv->regs + priv->ctrl);
+		pete_writel("drivers/gpu/drm/pl111/pl111_display.c:369", cntl, priv->regs + priv->ctrl);
 	}
 
 	/*
@@ -379,7 +379,7 @@ static void pl111_display_disable(struct drm_simple_display_pipe *pipe)
 		priv->variant_display_disable(drm);
 
 	/* Disable */
-	writel(0, priv->regs + priv->ctrl);
+	pete_writel("drivers/gpu/drm/pl111/pl111_display.c:382", 0, priv->regs + priv->ctrl);
 
 	clk_disable_unprepare(priv->clk);
 }
@@ -398,7 +398,7 @@ static void pl111_display_update(struct drm_simple_display_pipe *pipe,
 	if (fb) {
 		u32 addr = drm_fb_cma_get_gem_addr(fb, pstate, 0);
 
-		writel(addr, priv->regs + CLCD_UBAS);
+		pete_writel("drivers/gpu/drm/pl111/pl111_display.c:401", addr, priv->regs + CLCD_UBAS);
 	}
 
 	if (event) {
@@ -419,7 +419,7 @@ static int pl111_display_enable_vblank(struct drm_simple_display_pipe *pipe)
 	struct drm_device *drm = crtc->dev;
 	struct pl111_drm_dev_private *priv = drm->dev_private;
 
-	writel(CLCD_IRQ_NEXTBASE_UPDATE, priv->regs + priv->ienb);
+	pete_writel("drivers/gpu/drm/pl111/pl111_display.c:422", CLCD_IRQ_NEXTBASE_UPDATE, priv->regs + priv->ienb);
 
 	return 0;
 }
@@ -430,7 +430,7 @@ static void pl111_display_disable_vblank(struct drm_simple_display_pipe *pipe)
 	struct drm_device *drm = crtc->dev;
 	struct pl111_drm_dev_private *priv = drm->dev_private;
 
-	writel(0, priv->regs + priv->ienb);
+	pete_writel("drivers/gpu/drm/pl111/pl111_display.c:433", 0, priv->regs + priv->ienb);
 }
 
 static struct drm_simple_display_pipe_funcs pl111_display_funcs = {
@@ -484,7 +484,7 @@ static unsigned long pl111_clk_div_recalc_rate(struct clk_hw *hw,
 {
 	struct pl111_drm_dev_private *priv =
 		container_of(hw, struct pl111_drm_dev_private, clk_div);
-	u32 tim2 = readl(priv->regs + CLCD_TIM2);
+	u32 tim2 = pete_readl("drivers/gpu/drm/pl111/pl111_display.c:487", priv->regs + CLCD_TIM2);
 	int div;
 
 	if (tim2 & TIM2_BCD)
@@ -507,7 +507,7 @@ static int pl111_clk_div_set_rate(struct clk_hw *hw, unsigned long rate,
 	u32 tim2;
 
 	spin_lock(&priv->tim2_lock);
-	tim2 = readl(priv->regs + CLCD_TIM2);
+	tim2 = pete_readl("drivers/gpu/drm/pl111/pl111_display.c:510", priv->regs + CLCD_TIM2);
 	tim2 &= ~(TIM2_BCD | TIM2_PCD_LO_MASK | TIM2_PCD_HI_MASK);
 
 	if (div == 1) {
@@ -518,7 +518,7 @@ static int pl111_clk_div_set_rate(struct clk_hw *hw, unsigned long rate,
 		tim2 |= (div >> TIM2_PCD_LO_BITS) << TIM2_PCD_HI_SHIFT;
 	}
 
-	writel(tim2, priv->regs + CLCD_TIM2);
+	pete_writel("drivers/gpu/drm/pl111/pl111_display.c:521", tim2, priv->regs + CLCD_TIM2);
 	spin_unlock(&priv->tim2_lock);
 
 	return 0;

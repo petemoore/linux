@@ -116,8 +116,8 @@ static irqreturn_t iomd_dma_handle(int irq, void *dev_id)
 			cur = CURB;
 			end = ENDB;
 		}
-		writel(idma->cur_addr, base + cur);
-		writel(idma->cur_len, base + end);
+		pete_writel("arch/arm/mach-rpc/dma.c:119", idma->cur_addr, base + cur);
+		pete_writel("arch/arm/mach-rpc/dma.c:120", idma->cur_len, base + end);
 
 		if (status & DMA_ST_OFL &&
 		    idma->cur_len == (DMA_END_S|DMA_END_L))

@@ -30,17 +30,17 @@
 
 static void sgmii_write_reg(void __iomem *base, int reg, u32 val)
 {
-	writel(val, base + reg);
+	pete_writel("drivers/net/ethernet/ti/netcp_sgmii.c:33", val, base + reg);
 }
 
 static u32 sgmii_read_reg(void __iomem *base, int reg)
 {
-	return readl(base + reg);
+	return pete_readl("drivers/net/ethernet/ti/netcp_sgmii.c:38", base + reg);
 }
 
 static void sgmii_write_reg_bit(void __iomem *base, int reg, u32 val)
 {
-	writel((readl(base + reg) | val), base + reg);
+	pete_writel("drivers/net/ethernet/ti/netcp_sgmii.c:43", (pete_readl("drivers/net/ethernet/ti/netcp_sgmii.c:43", base + reg) | val), base + reg);
 }
 
 /* port is 0 based */

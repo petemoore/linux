@@ -160,7 +160,7 @@ static int pll_wait_for_lock(struct iproc_pll *pll)
 	const struct iproc_pll_ctrl *ctrl = pll->ctrl;
 
 	for (i = 0; i < LOCK_DELAY; i++) {
-		u32 val = readl(pll->status_base + ctrl->status.offset);
+		u32 val = pete_readl("drivers/clk/bcm/clk-iproc-pll.c:163", pll->status_base + ctrl->status.offset);
 
 		if (val & (1 << ctrl->status.shift))
 			return 0;
@@ -175,11 +175,11 @@ static void iproc_pll_write(const struct iproc_pll *pll, void __iomem *base,
 {
 	const struct iproc_pll_ctrl *ctrl = pll->ctrl;
 
-	writel(val, base + offset);
+	pete_writel("drivers/clk/bcm/clk-iproc-pll.c:178", val, base + offset);
 
 	if (unlikely(ctrl->flags & IPROC_CLK_NEEDS_READ_BACK &&
 		     (base == pll->status_base || base == pll->control_base)))
-		val = readl(base + offset);
+		val = pete_readl("drivers/clk/bcm/clk-iproc-pll.c:182", base + offset);
 }
 
 static void __pll_disable(struct iproc_pll *pll)
@@ -188,20 +188,20 @@ static void __pll_disable(struct iproc_pll *pll)
 	u32 val;
 
 	if (ctrl->flags & IPROC_CLK_PLL_ASIU) {
-		val = readl(pll->asiu_base + ctrl->asiu.offset);
+		val = pete_readl("drivers/clk/bcm/clk-iproc-pll.c:191", pll->asiu_base + ctrl->asiu.offset);
 		val &= ~(1 << ctrl->asiu.en_shift);
 		iproc_pll_write(pll, pll->asiu_base, ctrl->asiu.offset, val);
 	}
 
 	if (ctrl->flags & IPROC_CLK_EMBED_PWRCTRL) {
-		val = readl(pll->control_base + ctrl->aon.offset);
+		val = pete_readl("drivers/clk/bcm/clk-iproc-pll.c:197", pll->control_base + ctrl->aon.offset);
 		val |= bit_mask(ctrl->aon.pwr_width) << ctrl->aon.pwr_shift;
 		iproc_pll_write(pll, pll->control_base, ctrl->aon.offset, val);
 	}
 
 	if (pll->pwr_base) {
 		/* latch input value so core power can be shut down */
-		val = readl(pll->pwr_base + ctrl->aon.offset);
+		val = pete_readl("drivers/clk/bcm/clk-iproc-pll.c:204", pll->pwr_base + ctrl->aon.offset);
 		val |= 1 << ctrl->aon.iso_shift;
 		iproc_pll_write(pll, pll->pwr_base, ctrl->aon.offset, val);
 
@@ -217,14 +217,14 @@ static int __pll_enable(struct iproc_pll *pll)
 	u32 val;
 
 	if (ctrl->flags & IPROC_CLK_EMBED_PWRCTRL) {
-		val = readl(pll->control_base + ctrl->aon.offset);
+		val = pete_readl("drivers/clk/bcm/clk-iproc-pll.c:220", pll->control_base + ctrl->aon.offset);
 		val &= ~(bit_mask(ctrl->aon.pwr_width) << ctrl->aon.pwr_shift);
 		iproc_pll_write(pll, pll->control_base, ctrl->aon.offset, val);
 	}
 
 	if (pll->pwr_base) {
 		/* power up the PLL and make sure it's not latched */
-		val = readl(pll->pwr_base + ctrl->aon.offset);
+		val = pete_readl("drivers/clk/bcm/clk-iproc-pll.c:227", pll->pwr_base + ctrl->aon.offset);
 		val |= bit_mask(ctrl->aon.pwr_width) << ctrl->aon.pwr_shift;
 		val &= ~(1 << ctrl->aon.iso_shift);
 		iproc_pll_write(pll, pll->pwr_base, ctrl->aon.offset, val);
@@ -232,7 +232,7 @@ static int __pll_enable(struct iproc_pll *pll)
 
 	/* certain PLLs also need to be ungated from the ASIU top level */
 	if (ctrl->flags & IPROC_CLK_PLL_ASIU) {
-		val = readl(pll->asiu_base + ctrl->asiu.offset);
+		val = pete_readl("drivers/clk/bcm/clk-iproc-pll.c:235", pll->asiu_base + ctrl->asiu.offset);
 		val |= (1 << ctrl->asiu.en_shift);
 		iproc_pll_write(pll, pll->asiu_base, ctrl->asiu.offset, val);
 	}
@@ -246,7 +246,7 @@ static void __pll_put_in_reset(struct iproc_pll *pll)
 	const struct iproc_pll_ctrl *ctrl = pll->ctrl;
 	const struct iproc_pll_reset_ctrl *reset = &ctrl->reset;
 
-	val = readl(pll->control_base + reset->offset);
+	val = pete_readl("drivers/clk/bcm/clk-iproc-pll.c:249", pll->control_base + reset->offset);
 	if (ctrl->flags & IPROC_CLK_PLL_RESET_ACTIVE_LOW)
 		val |= BIT(reset->reset_shift) | BIT(reset->p_reset_shift);
 	else
@@ -262,7 +262,7 @@ static void __pll_bring_out_reset(struct iproc_pll *pll, unsigned int kp,
 	const struct iproc_pll_reset_ctrl *reset = &ctrl->reset;
 	const struct iproc_pll_dig_filter_ctrl *dig_filter = &ctrl->dig_filter;
 
-	val = readl(pll->control_base + dig_filter->offset);
+	val = pete_readl("drivers/clk/bcm/clk-iproc-pll.c:265", pll->control_base + dig_filter->offset);
 	val &= ~(bit_mask(dig_filter->ki_width) << dig_filter->ki_shift |
 		bit_mask(dig_filter->kp_width) << dig_filter->kp_shift |
 		bit_mask(dig_filter->ka_width) << dig_filter->ka_shift);
@@ -270,7 +270,7 @@ static void __pll_bring_out_reset(struct iproc_pll *pll, unsigned int kp,
 	       ka << dig_filter->ka_shift;
 	iproc_pll_write(pll, pll->control_base, dig_filter->offset, val);
 
-	val = readl(pll->control_base + reset->offset);
+	val = pete_readl("drivers/clk/bcm/clk-iproc-pll.c:273", pll->control_base + reset->offset);
 	if (ctrl->flags & IPROC_CLK_PLL_RESET_ACTIVE_LOW)
 		val &= ~(BIT(reset->reset_shift) | BIT(reset->p_reset_shift));
 	else
@@ -292,18 +292,18 @@ static bool pll_fractional_change_only(struct iproc_pll *pll,
 	unsigned int pdiv;
 
 	/* PLL needs to be locked */
-	val = readl(pll->status_base + ctrl->status.offset);
+	val = pete_readl("drivers/clk/bcm/clk-iproc-pll.c:295", pll->status_base + ctrl->status.offset);
 	if ((val & (1 << ctrl->status.shift)) == 0)
 		return false;
 
-	val = readl(pll->control_base + ctrl->ndiv_int.offset);
+	val = pete_readl("drivers/clk/bcm/clk-iproc-pll.c:299", pll->control_base + ctrl->ndiv_int.offset);
 	ndiv_int = (val >> ctrl->ndiv_int.shift) &
 		bit_mask(ctrl->ndiv_int.width);
 
 	if (ndiv_int != vco->ndiv_int)
 		return false;
 
-	val = readl(pll->control_base + ctrl->pdiv.offset);
+	val = pete_readl("drivers/clk/bcm/clk-iproc-pll.c:306", pll->control_base + ctrl->pdiv.offset);
 	pdiv = (val >> ctrl->pdiv.shift) & bit_mask(ctrl->pdiv.width);
 
 	if (pdiv != vco->pdiv)
@@ -364,7 +364,7 @@ static int pll_set_rate(struct iproc_clk *clk, struct iproc_pll_vco_param *vco,
 	if (pll_fractional_change_only(clk->pll, vco)) {
 		/* program fractional part of NDIV */
 		if (ctrl->flags & IPROC_CLK_PLL_HAS_NDIV_FRAC) {
-			val = readl(pll->control_base + ctrl->ndiv_frac.offset);
+			val = pete_readl("drivers/clk/bcm/clk-iproc-pll.c:367", pll->control_base + ctrl->ndiv_frac.offset);
 			val &= ~(bit_mask(ctrl->ndiv_frac.width) <<
 				 ctrl->ndiv_frac.shift);
 			val |= vco->ndiv_frac << ctrl->ndiv_frac.shift;
@@ -379,7 +379,7 @@ static int pll_set_rate(struct iproc_clk *clk, struct iproc_pll_vco_param *vco,
 
 	/* set PLL in user mode before modifying PLL controls */
 	if (ctrl->flags & IPROC_CLK_PLL_USER_MODE_ON) {
-		val = readl(pll->control_base + ctrl->macro_mode.offset);
+		val = pete_readl("drivers/clk/bcm/clk-iproc-pll.c:382", pll->control_base + ctrl->macro_mode.offset);
 		val &= ~(bit_mask(ctrl->macro_mode.width) <<
 			ctrl->macro_mode.shift);
 		val |= PLL_USER_MODE << ctrl->macro_mode.shift;
@@ -389,7 +389,7 @@ static int pll_set_rate(struct iproc_clk *clk, struct iproc_pll_vco_param *vco,
 
 	iproc_pll_write(pll, pll->control_base, ctrl->vco_ctrl.u_offset, 0);
 
-	val = readl(pll->control_base + ctrl->vco_ctrl.l_offset);
+	val = pete_readl("drivers/clk/bcm/clk-iproc-pll.c:392", pll->control_base + ctrl->vco_ctrl.l_offset);
 
 	if (rate >= VCO_LOW && rate < VCO_MID)
 		val |= (1 << PLL_VCO_LOW_SHIFT);
@@ -402,14 +402,14 @@ static int pll_set_rate(struct iproc_clk *clk, struct iproc_pll_vco_param *vco,
 	iproc_pll_write(pll, pll->control_base, ctrl->vco_ctrl.l_offset, val);
 
 	/* program integer part of NDIV */
-	val = readl(pll->control_base + ctrl->ndiv_int.offset);
+	val = pete_readl("drivers/clk/bcm/clk-iproc-pll.c:405", pll->control_base + ctrl->ndiv_int.offset);
 	val &= ~(bit_mask(ctrl->ndiv_int.width) << ctrl->ndiv_int.shift);
 	val |= vco->ndiv_int << ctrl->ndiv_int.shift;
 	iproc_pll_write(pll, pll->control_base, ctrl->ndiv_int.offset, val);
 
 	/* program fractional part of NDIV */
 	if (ctrl->flags & IPROC_CLK_PLL_HAS_NDIV_FRAC) {
-		val = readl(pll->control_base + ctrl->ndiv_frac.offset);
+		val = pete_readl("drivers/clk/bcm/clk-iproc-pll.c:412", pll->control_base + ctrl->ndiv_frac.offset);
 		val &= ~(bit_mask(ctrl->ndiv_frac.width) <<
 			 ctrl->ndiv_frac.shift);
 		val |= vco->ndiv_frac << ctrl->ndiv_frac.shift;
@@ -418,7 +418,7 @@ static int pll_set_rate(struct iproc_clk *clk, struct iproc_pll_vco_param *vco,
 	}
 
 	/* program PDIV */
-	val = readl(pll->control_base + ctrl->pdiv.offset);
+	val = pete_readl("drivers/clk/bcm/clk-iproc-pll.c:421", pll->control_base + ctrl->pdiv.offset);
 	val &= ~(bit_mask(ctrl->pdiv.width) << ctrl->pdiv.shift);
 	val |= vco->pdiv << ctrl->pdiv.shift;
 	iproc_pll_write(pll, pll->control_base, ctrl->pdiv.offset, val);
@@ -469,7 +469,7 @@ static unsigned long iproc_pll_recalc_rate(struct clk_hw *hw,
 		return 0;
 
 	/* PLL needs to be locked */
-	val = readl(pll->status_base + ctrl->status.offset);
+	val = pete_readl("drivers/clk/bcm/clk-iproc-pll.c:472", pll->status_base + ctrl->status.offset);
 	if ((val & (1 << ctrl->status.shift)) == 0)
 		return 0;
 
@@ -478,19 +478,19 @@ static unsigned long iproc_pll_recalc_rate(struct clk_hw *hw,
 	 *
 	 * ((ndiv_int + ndiv_frac / 2^20) * (parent clock rate / pdiv)
 	 */
-	val = readl(pll->control_base + ctrl->ndiv_int.offset);
+	val = pete_readl("drivers/clk/bcm/clk-iproc-pll.c:481", pll->control_base + ctrl->ndiv_int.offset);
 	ndiv_int = (val >> ctrl->ndiv_int.shift) &
 		bit_mask(ctrl->ndiv_int.width);
 	ndiv = ndiv_int << 20;
 
 	if (ctrl->flags & IPROC_CLK_PLL_HAS_NDIV_FRAC) {
-		val = readl(pll->control_base + ctrl->ndiv_frac.offset);
+		val = pete_readl("drivers/clk/bcm/clk-iproc-pll.c:487", pll->control_base + ctrl->ndiv_frac.offset);
 		ndiv_frac = (val >> ctrl->ndiv_frac.shift) &
 			bit_mask(ctrl->ndiv_frac.width);
 		ndiv += ndiv_frac;
 	}
 
-	val = readl(pll->control_base + ctrl->pdiv.offset);
+	val = pete_readl("drivers/clk/bcm/clk-iproc-pll.c:493", pll->control_base + ctrl->pdiv.offset);
 	pdiv = (val >> ctrl->pdiv.shift) & bit_mask(ctrl->pdiv.width);
 
 	rate = (ndiv * parent_rate) >> 20;
@@ -590,12 +590,12 @@ static int iproc_clk_enable(struct clk_hw *hw)
 	u32 val;
 
 	/* channel enable is active low */
-	val = readl(pll->control_base + ctrl->enable.offset);
+	val = pete_readl("drivers/clk/bcm/clk-iproc-pll.c:593", pll->control_base + ctrl->enable.offset);
 	val &= ~(1 << ctrl->enable.enable_shift);
 	iproc_pll_write(pll, pll->control_base, ctrl->enable.offset, val);
 
 	/* also make sure channel is not held */
-	val = readl(pll->control_base + ctrl->enable.offset);
+	val = pete_readl("drivers/clk/bcm/clk-iproc-pll.c:598", pll->control_base + ctrl->enable.offset);
 	val &= ~(1 << ctrl->enable.hold_shift);
 	iproc_pll_write(pll, pll->control_base, ctrl->enable.offset, val);
 
@@ -612,7 +612,7 @@ static void iproc_clk_disable(struct clk_hw *hw)
 	if (ctrl->flags & IPROC_CLK_AON)
 		return;
 
-	val = readl(pll->control_base + ctrl->enable.offset);
+	val = pete_readl("drivers/clk/bcm/clk-iproc-pll.c:615", pll->control_base + ctrl->enable.offset);
 	val |= 1 << ctrl->enable.enable_shift;
 	iproc_pll_write(pll, pll->control_base, ctrl->enable.offset, val);
 }
@@ -630,7 +630,7 @@ static unsigned long iproc_clk_recalc_rate(struct clk_hw *hw,
 	if (parent_rate == 0)
 		return 0;
 
-	val = readl(pll->control_base + ctrl->mdiv.offset);
+	val = pete_readl("drivers/clk/bcm/clk-iproc-pll.c:633", pll->control_base + ctrl->mdiv.offset);
 	mdiv = (val >> ctrl->mdiv.shift) & bit_mask(ctrl->mdiv.width);
 	if (mdiv == 0)
 		mdiv = 256;
@@ -684,7 +684,7 @@ static int iproc_clk_set_rate(struct clk_hw *hw, unsigned long rate,
 	if (div > 256)
 		return -EINVAL;
 
-	val = readl(pll->control_base + ctrl->mdiv.offset);
+	val = pete_readl("drivers/clk/bcm/clk-iproc-pll.c:687", pll->control_base + ctrl->mdiv.offset);
 	if (div == 256) {
 		val &= ~(bit_mask(ctrl->mdiv.width) << ctrl->mdiv.shift);
 	} else {
@@ -715,7 +715,7 @@ static void iproc_pll_sw_cfg(struct iproc_pll *pll)
 	if (ctrl->flags & IPROC_CLK_PLL_NEEDS_SW_CFG) {
 		u32 val;
 
-		val = readl(pll->control_base + ctrl->sw_ctrl.offset);
+		val = pete_readl("drivers/clk/bcm/clk-iproc-pll.c:718", pll->control_base + ctrl->sw_ctrl.offset);
 		val |= BIT(ctrl->sw_ctrl.shift);
 		iproc_pll_write(pll, pll->control_base, ctrl->sw_ctrl.offset,
 				val);

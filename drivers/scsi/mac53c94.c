@@ -111,7 +111,7 @@ static int mac53c94_host_reset(struct scsi_cmnd *cmd)
 
 	spin_lock_irqsave(cmd->device->host->host_lock, flags);
 
-	writel((RUN|PAUSE|FLUSH|WAKE) << 16, &dma->control);
+	pete_writel("drivers/scsi/mac53c94.c:114", (RUN|PAUSE|FLUSH|WAKE) << 16, &dma->control);
 	writeb(CMD_SCSI_RESET, &regs->command);	/* assert RST */
 	udelay(100);			/* leave it on for a while (>= 25us) */
 	writeb(CMD_RESET, &regs->command);
@@ -137,7 +137,7 @@ static void mac53c94_init(struct fsc_state *state)
 	writeb(0, &regs->sync_period);
 	writeb(0, &regs->sync_offset);
 	x = readb(&regs->interrupt);
-	writel((RUN|PAUSE|FLUSH|WAKE) << 16, &dma->control);
+	pete_writel("drivers/scsi/mac53c94.c:140", (RUN|PAUSE|FLUSH|WAKE) << 16, &dma->control);
 }
 
 /*
@@ -217,7 +217,7 @@ static void mac53c94_interrupt(int irq, void *dev_id)
 		/* SCSI bus was reset */
 		printk(KERN_INFO "external SCSI bus reset detected\n");
 		writeb(CMD_NOP, &regs->command);
-		writel(RUN << 16, &dma->control);	/* stop dma */
+		pete_writel("drivers/scsi/mac53c94.c:220", RUN << 16, &dma->control);	/* stop dma */
 		cmd_done(state, DID_RESET << 16);
 		return;
 	}
@@ -273,8 +273,8 @@ static void mac53c94_interrupt(int irq, void *dev_id)
 			writeb(nb, &regs->count_lo);
 			writeb(nb >> 8, &regs->count_mid);
 			writeb(CMD_DMA_MODE + CMD_NOP, &regs->command);
-			writel(virt_to_phys(state->dma_cmds), &dma->cmdptr);
-			writel((RUN << 16) | RUN, &dma->control);
+			pete_writel("drivers/scsi/mac53c94.c:276", virt_to_phys(state->dma_cmds), &dma->cmdptr);
+			pete_writel("drivers/scsi/mac53c94.c:277", (RUN << 16) | RUN, &dma->control);
 			writeb(CMD_DMA_MODE + CMD_XFER_DATA, &regs->command);
 			state->phase = dataing;
 			break;
@@ -312,7 +312,7 @@ static void mac53c94_interrupt(int irq, void *dev_id)
 		if ((stat & STAT_PHASE) != STAT_CD + STAT_IO) {
 			printk(KERN_DEBUG "intr %x before data xfer complete\n", intr);
 		}
-		writel(RUN << 16, &dma->control);	/* stop dma */
+		pete_writel("drivers/scsi/mac53c94.c:315", RUN << 16, &dma->control);	/* stop dma */
 		scsi_dma_unmap(cmd);
 		/* should check dma status */
 		writeb(CMD_I_COMPLETE, &regs->command);

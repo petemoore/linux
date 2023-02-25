@@ -291,7 +291,7 @@ static int pl111_amba_probe(struct amba_device *amba_dev,
 	pl111_nomadik_init(dev);
 
 	/* turn off interrupts before requesting the irq */
-	writel(0, priv->regs + priv->ienb);
+	pete_writel("drivers/gpu/drm/pl111/pl111_drv.c:294", 0, priv->regs + priv->ienb);
 
 	ret = devm_request_irq(dev, amba_dev->irq[0], pl111_irq, 0,
 			       variant->name, priv);

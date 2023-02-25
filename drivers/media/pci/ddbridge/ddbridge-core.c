@@ -140,8 +140,8 @@ static void ddb_set_dma_table(struct ddb_io *io)
 		return;
 	for (i = 0; i < dma->num; i++) {
 		mem = dma->pbuf[i];
-		ddbwritel(dev, mem & 0xffffffff, dma->bufregs + i * 8);
-		ddbwritel(dev, mem >> 32, dma->bufregs + i * 8 + 4);
+		ddbpete_writel("drivers/media/pci/ddbridge/ddbridge-core.c:143", dev, mem & 0xffffffff, dma->bufregs + i * 8);
+		ddbpete_writel("drivers/media/pci/ddbridge/ddbridge-core.c:144", dev, mem >> 32, dma->bufregs + i * 8 + 4);
 	}
 	dma->bufval = ((dma->div & 0x0f) << 16) |
 		((dma->num & 0x1f) << 11) |
@@ -177,8 +177,8 @@ static void ddb_redirect_dma(struct ddb *dev,
 	base = sdma->bufregs;
 	for (i = 0; i < ddma->num; i++) {
 		mem = ddma->pbuf[i];
-		ddbwritel(dev, mem & 0xffffffff, base + i * 8);
-		ddbwritel(dev, mem >> 32, base + i * 8 + 4);
+		ddbpete_writel("drivers/media/pci/ddbridge/ddbridge-core.c:180", dev, mem & 0xffffffff, base + i * 8);
+		ddbpete_writel("drivers/media/pci/ddbridge/ddbridge-core.c:181", dev, mem >> 32, base + i * 8 + 4);
 	}
 }
 
@@ -463,26 +463,26 @@ static void ddb_output_start(struct ddb_output *output)
 	output->dma->cbuf = 0;
 	output->dma->coff = 0;
 	output->dma->stat = 0;
-	ddbwritel(dev, 0, DMA_BUFFER_CONTROL(output->dma));
+	ddbpete_writel("drivers/media/pci/ddbridge/ddbridge-core.c:466", dev, 0, DMA_BUFFER_CONTROL(output->dma));
 
 	if (output->port->input[0]->port->class == DDB_PORT_LOOP)
 		con = (1UL << 13) | 0x14;
 	else
 		calc_con(output, &con, &con2, 0);
 
-	ddbwritel(dev, 0, TS_CONTROL(output));
-	ddbwritel(dev, 2, TS_CONTROL(output));
-	ddbwritel(dev, 0, TS_CONTROL(output));
-	ddbwritel(dev, con, TS_CONTROL(output));
-	ddbwritel(dev, con2, TS_CONTROL2(output));
+	ddbpete_writel("drivers/media/pci/ddbridge/ddbridge-core.c:473", dev, 0, TS_CONTROL(output));
+	ddbpete_writel("drivers/media/pci/ddbridge/ddbridge-core.c:474", dev, 2, TS_CONTROL(output));
+	ddbpete_writel("drivers/media/pci/ddbridge/ddbridge-core.c:475", dev, 0, TS_CONTROL(output));
+	ddbpete_writel("drivers/media/pci/ddbridge/ddbridge-core.c:476", dev, con, TS_CONTROL(output));
+	ddbpete_writel("drivers/media/pci/ddbridge/ddbridge-core.c:477", dev, con2, TS_CONTROL2(output));
 
-	ddbwritel(dev, output->dma->bufval,
+	ddbpete_writel("drivers/media/pci/ddbridge/ddbridge-core.c:479", dev, output->dma->bufval,
 		  DMA_BUFFER_SIZE(output->dma));
-	ddbwritel(dev, 0, DMA_BUFFER_ACK(output->dma));
-	ddbwritel(dev, 1, DMA_BASE_READ);
-	ddbwritel(dev, 7, DMA_BUFFER_CONTROL(output->dma));
+	ddbpete_writel("drivers/media/pci/ddbridge/ddbridge-core.c:481", dev, 0, DMA_BUFFER_ACK(output->dma));
+	ddbpete_writel("drivers/media/pci/ddbridge/ddbridge-core.c:482", dev, 1, DMA_BASE_READ);
+	ddbpete_writel("drivers/media/pci/ddbridge/ddbridge-core.c:483", dev, 7, DMA_BUFFER_CONTROL(output->dma));
 
-	ddbwritel(dev, con | 1, TS_CONTROL(output));
+	ddbpete_writel("drivers/media/pci/ddbridge/ddbridge-core.c:485", dev, con | 1, TS_CONTROL(output));
 
 	output->dma->running = 1;
 	spin_unlock_irq(&output->dma->lock);
@@ -494,9 +494,9 @@ static void ddb_output_stop(struct ddb_output *output)
 
 	spin_lock_irq(&output->dma->lock);
 
-	ddbwritel(dev, 0, TS_CONTROL(output));
+	ddbpete_writel("drivers/media/pci/ddbridge/ddbridge-core.c:497", dev, 0, TS_CONTROL(output));
 
-	ddbwritel(dev, 0, DMA_BUFFER_CONTROL(output->dma));
+	ddbpete_writel("drivers/media/pci/ddbridge/ddbridge-core.c:499", dev, 0, DMA_BUFFER_CONTROL(output->dma));
 	output->dma->running = 0;
 	spin_unlock_irq(&output->dma->lock);
 }
@@ -508,9 +508,9 @@ static void ddb_input_stop(struct ddb_input *input)
 
 	spin_lock_irq(&input->dma->lock);
 
-	ddbwritel(dev, 0, tag | TS_CONTROL(input));
+	ddbpete_writel("drivers/media/pci/ddbridge/ddbridge-core.c:511", dev, 0, tag | TS_CONTROL(input));
 
-	ddbwritel(dev, 0, DMA_BUFFER_CONTROL(input->dma));
+	ddbpete_writel("drivers/media/pci/ddbridge/ddbridge-core.c:513", dev, 0, DMA_BUFFER_CONTROL(input->dma));
 	input->dma->running = 0;
 	spin_unlock_irq(&input->dma->lock);
 }
@@ -523,22 +523,22 @@ static void ddb_input_start(struct ddb_input *input)
 	input->dma->cbuf = 0;
 	input->dma->coff = 0;
 	input->dma->stat = 0;
-	ddbwritel(dev, 0, DMA_BUFFER_CONTROL(input->dma));
+	ddbpete_writel("drivers/media/pci/ddbridge/ddbridge-core.c:526", dev, 0, DMA_BUFFER_CONTROL(input->dma));
 
-	ddbwritel(dev, 0, TS_CONTROL(input));
-	ddbwritel(dev, 2, TS_CONTROL(input));
-	ddbwritel(dev, 0, TS_CONTROL(input));
+	ddbpete_writel("drivers/media/pci/ddbridge/ddbridge-core.c:528", dev, 0, TS_CONTROL(input));
+	ddbpete_writel("drivers/media/pci/ddbridge/ddbridge-core.c:529", dev, 2, TS_CONTROL(input));
+	ddbpete_writel("drivers/media/pci/ddbridge/ddbridge-core.c:530", dev, 0, TS_CONTROL(input));
 
-	ddbwritel(dev, input->dma->bufval,
+	ddbpete_writel("drivers/media/pci/ddbridge/ddbridge-core.c:532", dev, input->dma->bufval,
 		  DMA_BUFFER_SIZE(input->dma));
-	ddbwritel(dev, 0, DMA_BUFFER_ACK(input->dma));
-	ddbwritel(dev, 1, DMA_BASE_WRITE);
-	ddbwritel(dev, 3, DMA_BUFFER_CONTROL(input->dma));
+	ddbpete_writel("drivers/media/pci/ddbridge/ddbridge-core.c:534", dev, 0, DMA_BUFFER_ACK(input->dma));
+	ddbpete_writel("drivers/media/pci/ddbridge/ddbridge-core.c:535", dev, 1, DMA_BASE_WRITE);
+	ddbpete_writel("drivers/media/pci/ddbridge/ddbridge-core.c:536", dev, 3, DMA_BUFFER_CONTROL(input->dma));
 
-	ddbwritel(dev, 0x09, TS_CONTROL(input));
+	ddbpete_writel("drivers/media/pci/ddbridge/ddbridge-core.c:538", dev, 0x09, TS_CONTROL(input));
 
 	if (input->port->type == DDB_TUNER_DUMMY)
-		ddbwritel(dev, 0x000fff01, TS_CONTROL2(input));
+		ddbpete_writel("drivers/media/pci/ddbridge/ddbridge-core.c:541", dev, 0x000fff01, TS_CONTROL2(input));
 
 	input->dma->running = 1;
 	spin_unlock_irq(&input->dma->lock);
@@ -642,7 +642,7 @@ static ssize_t ddb_output_write(struct ddb_output *output,
 			output->dma->cbuf = ((output->dma->cbuf + 1) %
 					     output->dma->num);
 		}
-		ddbwritel(dev,
+		ddbpete_writel("drivers/media/pci/ddbridge/ddbridge-core.c:645", dev,
 			  (output->dma->cbuf << 11) |
 			  (output->dma->coff >> 7),
 			  DMA_BUFFER_ACK(output->dma));
@@ -654,14 +654,14 @@ static u32 ddb_input_avail(struct ddb_input *input)
 {
 	struct ddb *dev = input->port->dev;
 	u32 idx, off, stat = input->dma->stat;
-	u32 ctrl = ddbreadl(dev, DMA_BUFFER_CONTROL(input->dma));
+	u32 ctrl = ddbpete_readl("drivers/media/pci/ddbridge/ddbridge-core.c:657", dev, DMA_BUFFER_CONTROL(input->dma));
 
 	idx = (stat >> 11) & 0x1f;
 	off = (stat & 0x7ff) << 7;
 
 	if (ctrl & 4) {
 		dev_err(dev->dev, "IA %d %d %08x\n", idx, off, ctrl);
-		ddbwritel(dev, stat, DMA_BUFFER_ACK(input->dma));
+		ddbpete_writel("drivers/media/pci/ddbridge/ddbridge-core.c:664", dev, stat, DMA_BUFFER_ACK(input->dma));
 		return 0;
 	}
 	if (input->dma->cbuf != idx)
@@ -702,7 +702,7 @@ static ssize_t ddb_input_read(struct ddb_input *input,
 		}
 		left -= free;
 		buf += free;
-		ddbwritel(dev,
+		ddbpete_writel("drivers/media/pci/ddbridge/ddbridge-core.c:705", dev,
 			  (input->dma->cbuf << 11) | (input->dma->coff >> 7),
 			  DMA_BUFFER_ACK(input->dma));
 	}
@@ -1883,7 +1883,7 @@ static void ddb_port_probe(struct ddb_port *port)
 		port->class = DDB_PORT_TUNER;
 		port->type = DDB_TUNER_MXL5XX;
 		if (port->i2c)
-			ddbwritel(dev, I2C_SPEED_400,
+			ddbpete_writel("drivers/media/pci/ddbridge/ddbridge-core.c:1886", dev, I2C_SPEED_400,
 				  port->i2c->regs + I2C_TIMING);
 		return;
 	}
@@ -1916,7 +1916,7 @@ static void ddb_port_probe(struct ddb_port *port)
 			port->type_name = "CXD2099";
 			port->class = DDB_PORT_CI;
 			port->type = DDB_CI_EXTERNAL_SONY;
-			ddbwritel(dev, I2C_SPEED_400,
+			ddbpete_writel("drivers/media/pci/ddbridge/ddbridge-core.c:1919", dev, I2C_SPEED_400,
 				  port->i2c->regs + I2C_TIMING);
 		} else {
 			dev_info(dev->dev, "Port %d: Uninitialized DuoFlex\n",
@@ -1924,7 +1924,7 @@ static void ddb_port_probe(struct ddb_port *port)
 			return;
 		}
 	} else if (port_has_xo2(port, &type, &id)) {
-		ddbwritel(dev, I2C_SPEED_400, port->i2c->regs + I2C_TIMING);
+		ddbpete_writel("drivers/media/pci/ddbridge/ddbridge-core.c:1927", dev, I2C_SPEED_400, port->i2c->regs + I2C_TIMING);
 		/*dev_info(dev->dev, "XO2 ID %02x\n", id);*/
 		if (type == 2) {
 			port->name = "DuoFlex CI";
@@ -1971,13 +1971,13 @@ static void ddb_port_probe(struct ddb_port *port)
 			return;
 		}
 		port->class = DDB_PORT_TUNER;
-		ddbwritel(dev, I2C_SPEED_400, port->i2c->regs + I2C_TIMING);
+		ddbpete_writel("drivers/media/pci/ddbridge/ddbridge-core.c:1974", dev, I2C_SPEED_400, port->i2c->regs + I2C_TIMING);
 	} else if (port_has_stv0900(port)) {
 		port->name = "DUAL DVB-S2";
 		port->class = DDB_PORT_TUNER;
 		port->type = DDB_TUNER_DVBS_ST;
 		port->type_name = "DVBS_ST";
-		ddbwritel(dev, I2C_SPEED_100, port->i2c->regs + I2C_TIMING);
+		ddbpete_writel("drivers/media/pci/ddbridge/ddbridge-core.c:1980", dev, I2C_SPEED_100, port->i2c->regs + I2C_TIMING);
 	} else if (port_has_stv0900_aa(port, &id)) {
 		port->name = "DUAL DVB-S2";
 		port->class = DDB_PORT_TUNER;
@@ -1992,19 +1992,19 @@ static void ddb_port_probe(struct ddb_port *port)
 			port->type = DDB_TUNER_DVBS_ST_AA;
 			port->type_name = "DVBS_ST_AA";
 		}
-		ddbwritel(dev, I2C_SPEED_100, port->i2c->regs + I2C_TIMING);
+		ddbpete_writel("drivers/media/pci/ddbridge/ddbridge-core.c:1995", dev, I2C_SPEED_100, port->i2c->regs + I2C_TIMING);
 	} else if (port_has_drxks(port)) {
 		port->name = "DUAL DVB-C/T";
 		port->class = DDB_PORT_TUNER;
 		port->type = DDB_TUNER_DVBCT_TR;
 		port->type_name = "DVBCT_TR";
-		ddbwritel(dev, I2C_SPEED_400, port->i2c->regs + I2C_TIMING);
+		ddbpete_writel("drivers/media/pci/ddbridge/ddbridge-core.c:2001", dev, I2C_SPEED_400, port->i2c->regs + I2C_TIMING);
 	} else if (port_has_stv0367(port)) {
 		port->name = "DUAL DVB-C/T";
 		port->class = DDB_PORT_TUNER;
 		port->type = DDB_TUNER_DVBCT_ST;
 		port->type_name = "DVBCT_ST";
-		ddbwritel(dev, I2C_SPEED_100, port->i2c->regs + I2C_TIMING);
+		ddbpete_writel("drivers/media/pci/ddbridge/ddbridge-core.c:2007", dev, I2C_SPEED_100, port->i2c->regs + I2C_TIMING);
 	} else if (port_has_encti(port)) {
 		port->name = "ENCTI";
 		port->class = DDB_PORT_LOOP;
@@ -2118,7 +2118,7 @@ void ddb_ports_detach(struct ddb *dev)
 static void input_write_output(struct ddb_input *input,
 			       struct ddb_output *output)
 {
-	ddbwritel(output->port->dev,
+	ddbpete_writel("drivers/media/pci/ddbridge/ddbridge-core.c:2121", output->port->dev,
 		  input->dma->stat, DMA_BUFFER_ACK(output->dma));
 	output->dma->cbuf = (input->dma->stat >> 11) & 0x1f;
 	output->dma->coff = (input->dma->stat & 0x7ff) << 7;
@@ -2127,7 +2127,7 @@ static void input_write_output(struct ddb_input *input,
 static void output_ack_input(struct ddb_output *output,
 			     struct ddb_input *input)
 {
-	ddbwritel(input->port->dev,
+	ddbpete_writel("drivers/media/pci/ddbridge/ddbridge-core.c:2130", input->port->dev,
 		  output->dma->stat, DMA_BUFFER_ACK(input->dma));
 }
 
@@ -2163,10 +2163,10 @@ static void input_write_dvb(struct ddb_input *input,
 					 dma2->size / 188);
 		dma->cbuf = (dma->cbuf + 1) % dma2->num;
 		if (ack)
-			ddbwritel(dev, (dma->cbuf << 11),
+			ddbpete_writel("drivers/media/pci/ddbridge/ddbridge-core.c:2166", dev, (dma->cbuf << 11),
 				  DMA_BUFFER_ACK(dma));
-		dma->stat = safe_ddbreadl(dev, DMA_BUFFER_CURRENT(dma));
-		dma->ctrl = safe_ddbreadl(dev, DMA_BUFFER_CONTROL(dma));
+		dma->stat = safe_ddbpete_readl("drivers/media/pci/ddbridge/ddbridge-core.c:2168", dev, DMA_BUFFER_CURRENT(dma));
+		dma->ctrl = safe_ddbpete_readl("drivers/media/pci/ddbridge/ddbridge-core.c:2169", dev, DMA_BUFFER_CONTROL(dma));
 	}
 }
 
@@ -2182,8 +2182,8 @@ static void input_work(struct work_struct *work)
 		spin_unlock_irqrestore(&dma->lock, flags);
 		return;
 	}
-	dma->stat = ddbreadl(dev, DMA_BUFFER_CURRENT(dma));
-	dma->ctrl = ddbreadl(dev, DMA_BUFFER_CONTROL(dma));
+	dma->stat = ddbpete_readl("drivers/media/pci/ddbridge/ddbridge-core.c:2185", dev, DMA_BUFFER_CURRENT(dma));
+	dma->ctrl = ddbpete_readl("drivers/media/pci/ddbridge/ddbridge-core.c:2186", dev, DMA_BUFFER_CONTROL(dma));
 
 	if (input->redi)
 		input_write_dvb(input, input->redi);
@@ -2211,8 +2211,8 @@ static void output_work(struct work_struct *work)
 	spin_lock_irqsave(&dma->lock, flags);
 	if (!dma->running)
 		goto unlock_exit;
-	dma->stat = ddbreadl(dev, DMA_BUFFER_CURRENT(dma));
-	dma->ctrl = ddbreadl(dev, DMA_BUFFER_CONTROL(dma));
+	dma->stat = ddbpete_readl("drivers/media/pci/ddbridge/ddbridge-core.c:2214", dev, DMA_BUFFER_CURRENT(dma));
+	dma->ctrl = ddbpete_readl("drivers/media/pci/ddbridge/ddbridge-core.c:2215", dev, DMA_BUFFER_CONTROL(dma));
 	if (output->redi)
 		output_ack_input(output, output->redi);
 	wake_up(&dma->wq);
@@ -2272,7 +2272,7 @@ static void ddb_dma_init(struct ddb_io *io, int nr, int out)
 		dma->size = dma_buf_size * 128 * 47;
 		dma->div = 1;
 	}
-	ddbwritel(io->port->dev, 0, DMA_BUFFER_ACK(dma));
+	ddbpete_writel("drivers/media/pci/ddbridge/ddbridge-core.c:2275", io->port->dev, 0, DMA_BUFFER_ACK(dma));
 	dev_dbg(io->port->dev->dev, "init link %u, io %u, dma %u, dmaregs %08x bufregs %08x\n",
 		io->port->lnr, io->nr, nr, dma->regs, dma->bufregs);
 }
@@ -2520,16 +2520,16 @@ irqreturn_t ddb_irq_handler0(int irq, void *dev_id)
 {
 	struct ddb *dev = (struct ddb *)dev_id;
 	u32 mask = 0x8fffff00;
-	u32 s = mask & ddbreadl(dev, INTERRUPT_STATUS);
+	u32 s = mask & ddbpete_readl("drivers/media/pci/ddbridge/ddbridge-core.c:2523", dev, INTERRUPT_STATUS);
 
 	if (!s)
 		return IRQ_NONE;
 	do {
 		if (s & 0x80000000)
 			return IRQ_NONE;
-		ddbwritel(dev, s, INTERRUPT_ACK);
+		ddbpete_writel("drivers/media/pci/ddbridge/ddbridge-core.c:2530", dev, s, INTERRUPT_ACK);
 		irq_handle_io(dev, s);
-	} while ((s = mask & ddbreadl(dev, INTERRUPT_STATUS)));
+	} while ((s = mask & ddbpete_readl("drivers/media/pci/ddbridge/ddbridge-core.c:2532", dev, INTERRUPT_STATUS)));
 
 	return IRQ_HANDLED;
 }
@@ -2538,16 +2538,16 @@ irqreturn_t ddb_irq_handler1(int irq, void *dev_id)
 {
 	struct ddb *dev = (struct ddb *)dev_id;
 	u32 mask = 0x8000000f;
-	u32 s = mask & ddbreadl(dev, INTERRUPT_STATUS);
+	u32 s = mask & ddbpete_readl("drivers/media/pci/ddbridge/ddbridge-core.c:2541", dev, INTERRUPT_STATUS);
 
 	if (!s)
 		return IRQ_NONE;
 	do {
 		if (s & 0x80000000)
 			return IRQ_NONE;
-		ddbwritel(dev, s, INTERRUPT_ACK);
+		ddbpete_writel("drivers/media/pci/ddbridge/ddbridge-core.c:2548", dev, s, INTERRUPT_ACK);
 		irq_handle_msg(dev, s);
-	} while ((s = mask & ddbreadl(dev, INTERRUPT_STATUS)));
+	} while ((s = mask & ddbpete_readl("drivers/media/pci/ddbridge/ddbridge-core.c:2550", dev, INTERRUPT_STATUS)));
 
 	return IRQ_HANDLED;
 }
@@ -2555,7 +2555,7 @@ irqreturn_t ddb_irq_handler1(int irq, void *dev_id)
 irqreturn_t ddb_irq_handler(int irq, void *dev_id)
 {
 	struct ddb *dev = (struct ddb *)dev_id;
-	u32 s = ddbreadl(dev, INTERRUPT_STATUS);
+	u32 s = ddbpete_readl("drivers/media/pci/ddbridge/ddbridge-core.c:2558", dev, INTERRUPT_STATUS);
 	int ret = IRQ_HANDLED;
 
 	if (!s)
@@ -2563,13 +2563,13 @@ irqreturn_t ddb_irq_handler(int irq, void *dev_id)
 	do {
 		if (s & 0x80000000)
 			return IRQ_NONE;
-		ddbwritel(dev, s, INTERRUPT_ACK);
+		ddbpete_writel("drivers/media/pci/ddbridge/ddbridge-core.c:2566", dev, s, INTERRUPT_ACK);
 
 		if (s & 0x0000000f)
 			irq_handle_msg(dev, s);
 		if (s & 0x0fffff00)
 			irq_handle_io(dev, s);
-	} while ((s = ddbreadl(dev, INTERRUPT_STATUS)));
+	} while ((s = ddbpete_readl("drivers/media/pci/ddbridge/ddbridge-core.c:2572", dev, INTERRUPT_STATUS)));
 
 	return ret;
 }
@@ -2582,7 +2582,7 @@ static int reg_wait(struct ddb *dev, u32 reg, u32 bit)
 {
 	u32 count = 0;
 
-	while (safe_ddbreadl(dev, reg) & bit) {
+	while (safe_ddbpete_readl("drivers/media/pci/ddbridge/ddbridge-core.c:2585", dev, reg) & bit) {
 		ndelay(10);
 		if (++count == 100)
 			return -1;
@@ -2599,21 +2599,21 @@ static int flashio(struct ddb *dev, u32 lnr, u8 *wbuf, u32 wlen, u8 *rbuf,
 
 	mutex_lock(&link->flash_mutex);
 	if (wlen > 4)
-		ddbwritel(dev, 1, tag | SPI_CONTROL);
+		ddbpete_writel("drivers/media/pci/ddbridge/ddbridge-core.c:2602", dev, 1, tag | SPI_CONTROL);
 	while (wlen > 4) {
 		/* FIXME: check for big-endian */
 		data = swab32(*(u32 *)wbuf);
 		wbuf += 4;
 		wlen -= 4;
-		ddbwritel(dev, data, tag | SPI_DATA);
+		ddbpete_writel("drivers/media/pci/ddbridge/ddbridge-core.c:2608", dev, data, tag | SPI_DATA);
 		if (reg_wait(dev, tag | SPI_CONTROL, 4))
 			goto fail;
 	}
 	if (rlen)
-		ddbwritel(dev, 0x0001 | ((wlen << (8 + 3)) & 0x1f00),
+		ddbpete_writel("drivers/media/pci/ddbridge/ddbridge-core.c:2613", dev, 0x0001 | ((wlen << (8 + 3)) & 0x1f00),
 			  tag | SPI_CONTROL);
 	else
-		ddbwritel(dev, 0x0003 | ((wlen << (8 + 3)) & 0x1f00),
+		ddbpete_writel("drivers/media/pci/ddbridge/ddbridge-core.c:2616", dev, 0x0003 | ((wlen << (8 + 3)) & 0x1f00),
 			  tag | SPI_CONTROL);
 
 	data = 0;
@@ -2626,34 +2626,34 @@ static int flashio(struct ddb *dev, u32 lnr, u8 *wbuf, u32 wlen, u8 *rbuf,
 	}
 	if (shift)
 		data <<= shift;
-	ddbwritel(dev, data, tag | SPI_DATA);
+	ddbpete_writel("drivers/media/pci/ddbridge/ddbridge-core.c:2629", dev, data, tag | SPI_DATA);
 	if (reg_wait(dev, tag | SPI_CONTROL, 4))
 		goto fail;
 
 	if (!rlen) {
-		ddbwritel(dev, 0, tag | SPI_CONTROL);
+		ddbpete_writel("drivers/media/pci/ddbridge/ddbridge-core.c:2634", dev, 0, tag | SPI_CONTROL);
 		goto exit;
 	}
 	if (rlen > 4)
-		ddbwritel(dev, 1, tag | SPI_CONTROL);
+		ddbpete_writel("drivers/media/pci/ddbridge/ddbridge-core.c:2638", dev, 1, tag | SPI_CONTROL);
 
 	while (rlen > 4) {
-		ddbwritel(dev, 0xffffffff, tag | SPI_DATA);
+		ddbpete_writel("drivers/media/pci/ddbridge/ddbridge-core.c:2641", dev, 0xffffffff, tag | SPI_DATA);
 		if (reg_wait(dev, tag | SPI_CONTROL, 4))
 			goto fail;
-		data = ddbreadl(dev, tag | SPI_DATA);
+		data = ddbpete_readl("drivers/media/pci/ddbridge/ddbridge-core.c:2644", dev, tag | SPI_DATA);
 		*(u32 *)rbuf = swab32(data);
 		rbuf += 4;
 		rlen -= 4;
 	}
-	ddbwritel(dev, 0x0003 | ((rlen << (8 + 3)) & 0x1F00),
+	ddbpete_writel("drivers/media/pci/ddbridge/ddbridge-core.c:2649", dev, 0x0003 | ((rlen << (8 + 3)) & 0x1F00),
 		  tag | SPI_CONTROL);
-	ddbwritel(dev, 0xffffffff, tag | SPI_DATA);
+	ddbpete_writel("drivers/media/pci/ddbridge/ddbridge-core.c:2651", dev, 0xffffffff, tag | SPI_DATA);
 	if (reg_wait(dev, tag | SPI_CONTROL, 4))
 		goto fail;
 
-	data = ddbreadl(dev, tag | SPI_DATA);
-	ddbwritel(dev, 0, tag | SPI_CONTROL);
+	data = ddbpete_readl("drivers/media/pci/ddbridge/ddbridge-core.c:2655", dev, tag | SPI_DATA);
+	ddbpete_writel("drivers/media/pci/ddbridge/ddbridge-core.c:2656", dev, 0, tag | SPI_CONTROL);
 
 	if (rlen < 4)
 		data <<= ((4 - rlen) * 8);
@@ -2772,7 +2772,7 @@ static ssize_t fan_show(struct device *device,
 	struct ddb *dev = dev_get_drvdata(device);
 	u32 val;
 
-	val = ddbreadl(dev, GPIO_OUTPUT) & 1;
+	val = ddbpete_readl("drivers/media/pci/ddbridge/ddbridge-core.c:2775", dev, GPIO_OUTPUT) & 1;
 	return sprintf(buf, "%d\n", val);
 }
 
@@ -2784,8 +2784,8 @@ static ssize_t fan_store(struct device *device, struct device_attribute *d,
 
 	if (sscanf(buf, "%u\n", &val) != 1)
 		return -EINVAL;
-	ddbwritel(dev, 1, GPIO_DIRECTION);
-	ddbwritel(dev, val & 1, GPIO_OUTPUT);
+	ddbpete_writel("drivers/media/pci/ddbridge/ddbridge-core.c:2787", dev, 1, GPIO_DIRECTION);
+	ddbpete_writel("drivers/media/pci/ddbridge/ddbridge-core.c:2788", dev, val & 1, GPIO_OUTPUT);
 	return count;
 }
 
@@ -2797,7 +2797,7 @@ static ssize_t fanspeed_show(struct device *device,
 	struct ddb_link *link = &dev->link[num];
 	u32 spd;
 
-	spd = ddblreadl(link, TEMPMON_FANCONTROL) & 0xff;
+	spd = ddblpete_readl("drivers/media/pci/ddbridge/ddbridge-core.c:2800", link, TEMPMON_FANCONTROL) & 0xff;
 	return sprintf(buf, "%u\n", spd * 100);
 }
 
@@ -3248,21 +3248,21 @@ static void tempmon_setfan(struct ddb_link *link)
 {
 	u32 temp, temp2, pwm;
 
-	if ((ddblreadl(link, TEMPMON_CONTROL) &
+	if ((ddblpete_readl("drivers/media/pci/ddbridge/ddbridge-core.c:3251", link, TEMPMON_CONTROL) &
 	    TEMPMON_CONTROL_OVERTEMP) != 0) {
 		dev_info(link->dev->dev, "Over temperature condition\n");
 		link->overtemperature_error = 1;
 	}
-	temp  = (ddblreadl(link, TEMPMON_SENSOR0) >> 8) & 0xFF;
+	temp  = (ddblpete_readl("drivers/media/pci/ddbridge/ddbridge-core.c:3256", link, TEMPMON_SENSOR0) >> 8) & 0xFF;
 	if (temp & 0x80)
 		temp = 0;
-	temp2  = (ddblreadl(link, TEMPMON_SENSOR1) >> 8) & 0xFF;
+	temp2  = (ddblpete_readl("drivers/media/pci/ddbridge/ddbridge-core.c:3259", link, TEMPMON_SENSOR1) >> 8) & 0xFF;
 	if (temp2 & 0x80)
 		temp2 = 0;
 	if (temp2 > temp)
 		temp = temp2;
 
-	pwm = (ddblreadl(link, TEMPMON_FANCONTROL) >> 8) & 0x0F;
+	pwm = (ddblpete_readl("drivers/media/pci/ddbridge/ddbridge-core.c:3265", link, TEMPMON_FANCONTROL) >> 8) & 0x0F;
 	if (pwm > 10)
 		pwm = 10;
 
@@ -3273,7 +3273,7 @@ static void tempmon_setfan(struct ddb_link *link)
 		while (pwm > 1 && temp < link->temp_tab[pwm - 2])
 			pwm -= 1;
 	}
-	ddblwritel(link, (pwm << 8), TEMPMON_FANCONTROL);
+	ddblpete_writel("drivers/media/pci/ddbridge/ddbridge-core.c:3276", link, (pwm << 8), TEMPMON_FANCONTROL);
 }
 
 static void temp_handler(void *data)
@@ -3300,13 +3300,13 @@ static int tempmon_init(struct ddb_link *link, int first_time)
 		       sizeof(temperature_table));
 	}
 	ddb_irq_set(dev, l, link->info->tempmon_irq, temp_handler, link);
-	ddblwritel(link, (TEMPMON_CONTROL_OVERTEMP | TEMPMON_CONTROL_AUTOSCAN |
+	ddblpete_writel("drivers/media/pci/ddbridge/ddbridge-core.c:3303", link, (TEMPMON_CONTROL_OVERTEMP | TEMPMON_CONTROL_AUTOSCAN |
 			  TEMPMON_CONTROL_INTENABLE),
 		   TEMPMON_CONTROL);
-	ddblwritel(link, (3 << 8), TEMPMON_FANCONTROL);
+	ddblpete_writel("drivers/media/pci/ddbridge/ddbridge-core.c:3306", link, (3 << 8), TEMPMON_FANCONTROL);
 
 	link->overtemperature_error =
-		((ddblreadl(link, TEMPMON_CONTROL) &
+		((ddblpete_readl("drivers/media/pci/ddbridge/ddbridge-core.c:3309", link, TEMPMON_CONTROL) &
 			TEMPMON_CONTROL_OVERTEMP) != 0);
 	if (link->overtemperature_error) {
 		dev_info(link->dev->dev, "Over temperature condition\n");
@@ -3348,12 +3348,12 @@ static int ddb_init_boards(struct ddb *dev)
 		if (!info)
 			continue;
 		if (info->board_control) {
-			ddbwritel(dev, 0, DDB_LINK_TAG(l) | BOARD_CONTROL);
+			ddbpete_writel("drivers/media/pci/ddbridge/ddbridge-core.c:3351", dev, 0, DDB_LINK_TAG(l) | BOARD_CONTROL);
 			msleep(100);
-			ddbwritel(dev, info->board_control_2,
+			ddbpete_writel("drivers/media/pci/ddbridge/ddbridge-core.c:3353", dev, info->board_control_2,
 				  DDB_LINK_TAG(l) | BOARD_CONTROL);
 			usleep_range(2000, 3000);
-			ddbwritel(dev,
+			ddbpete_writel("drivers/media/pci/ddbridge/ddbridge-core.c:3356", dev,
 				  info->board_control_2 | info->board_control,
 				  DDB_LINK_TAG(l) | BOARD_CONTROL);
 			usleep_range(2000, 3000);
@@ -3387,8 +3387,8 @@ int ddb_init(struct ddb *dev)
 	ddb_device_create(dev);
 
 	if (dev->link[0].info->fan_num)	{
-		ddbwritel(dev, 1, GPIO_DIRECTION);
-		ddbwritel(dev, 1, GPIO_OUTPUT);
+		ddbpete_writel("drivers/media/pci/ddbridge/ddbridge-core.c:3390", dev, 1, GPIO_DIRECTION);
+		ddbpete_writel("drivers/media/pci/ddbridge/ddbridge-core.c:3391", dev, 1, GPIO_OUTPUT);
 	}
 	return 0;
 

@@ -106,15 +106,15 @@ static void print_hw_id(struct pci_dev *pdev)
 	pr_info("%s%s\n", BDX_NIC_NAME,
 		nic->port_num == 1 ? "" : ", 2-Port");
 	pr_info("srom 0x%x fpga %d build %u lane# %d max_pl 0x%x mrrs 0x%x\n",
-		readl(nic->regs + SROM_VER), readl(nic->regs + FPGA_VER) & 0xFFF,
-		readl(nic->regs + FPGA_SEED),
+		pete_readl("drivers/net/ethernet/tehuti/tehuti.c:109", nic->regs + SROM_VER), pete_readl("drivers/net/ethernet/tehuti/tehuti.c:109", nic->regs + FPGA_VER) & 0xFFF,
+		pete_readl("drivers/net/ethernet/tehuti/tehuti.c:110", nic->regs + FPGA_SEED),
 		GET_LINK_STATUS_LANES(pci_link_status),
 		GET_DEV_CTRL_MAXPL(pci_ctrl), GET_DEV_CTRL_MRRS(pci_ctrl));
 }
 
 static void print_fw_id(struct pci_nic *nic)
 {
-	pr_info("fw 0x%x\n", readl(nic->regs + FW_VER));
+	pr_info("fw 0x%x\n", pete_readl("drivers/net/ethernet/tehuti/tehuti.c:117", nic->regs + FW_VER));
 }
 
 static void print_eth_id(struct net_device *ndev)
@@ -455,17 +455,17 @@ static int bdx_hw_reset_direct(void __iomem *regs)
 	ENTER;
 
 	/* reset sequences: read, write 1, read, write 0 */
-	val = readl(regs + regCLKPLL);
-	writel((val | CLKPLL_SFTRST) + 0x8, regs + regCLKPLL);
+	val = pete_readl("drivers/net/ethernet/tehuti/tehuti.c:458", regs + regCLKPLL);
+	pete_writel("drivers/net/ethernet/tehuti/tehuti.c:459", (val | CLKPLL_SFTRST) + 0x8, regs + regCLKPLL);
 	udelay(50);
-	val = readl(regs + regCLKPLL);
-	writel(val & ~CLKPLL_SFTRST, regs + regCLKPLL);
+	val = pete_readl("drivers/net/ethernet/tehuti/tehuti.c:461", regs + regCLKPLL);
+	pete_writel("drivers/net/ethernet/tehuti/tehuti.c:462", val & ~CLKPLL_SFTRST, regs + regCLKPLL);
 
 	/* check that the PLLs are locked and reset ended */
 	for (i = 0; i < 70; i++, mdelay(10))
-		if ((readl(regs + regCLKPLL) & CLKPLL_LKD) == CLKPLL_LKD) {
+		if ((pete_readl("drivers/net/ethernet/tehuti/tehuti.c:466", regs + regCLKPLL) & CLKPLL_LKD) == CLKPLL_LKD) {
 			/* do any PCI-E read transaction */
-			readl(regs + regRXD_CFG0_0);
+			pete_readl("drivers/net/ethernet/tehuti/tehuti.c:468", regs + regRXD_CFG0_0);
 			return 0;
 		}
 	pr_err("HW reset failed\n");
@@ -1954,7 +1954,7 @@ bdx_probe(struct pci_dev *pdev, const struct pci_device_id *ent)
 
 	nic->irq_type = IRQ_INTX;
 #ifdef BDX_MSI
-	if ((readl(nic->regs + FPGA_VER) & 0xFFF) >= 378) {
+	if ((pete_readl("drivers/net/ethernet/tehuti/tehuti.c:1957", nic->regs + FPGA_VER) & 0xFFF) >= 378) {
 		err = pci_enable_msi(pdev);
 		if (err)
 			pr_err("Can't enable msi. error is %d\n", err);
@@ -2002,7 +2002,7 @@ bdx_probe(struct pci_dev *pdev, const struct pci_device_id *ent)
 
 		netif_napi_add(ndev, &priv->napi, bdx_poll, 64);
 
-		if ((readl(nic->regs + FPGA_VER) & 0xFFF) == 308) {
+		if ((pete_readl("drivers/net/ethernet/tehuti/tehuti.c:2005", nic->regs + FPGA_VER) & 0xFFF) == 308) {
 			DBG("HW statistics not supported\n");
 			priv->stats_flag = 0;
 		} else {

@@ -58,7 +58,7 @@ static int serverworks_create_page_map(struct serverworks_page_map *page_map)
 	page_map->remapped = page_map->real;
 
 	for (i = 0; i < PAGE_SIZE / sizeof(unsigned long); i++)
-		writel(agp_bridge->scratch_page, page_map->remapped+i);
+		pete_writel("drivers/char/agp/sworks-agp.c:61", agp_bridge->scratch_page, page_map->remapped+i);
 		/* Red Pen: Everyone else does pci posting flush here */
 
 	return 0;
@@ -155,8 +155,8 @@ static int serverworks_create_gatt_table(struct agp_bridge_data *bridge)
 	}
 	/* Create a fake scratch directory */
 	for (i = 0; i < 1024; i++) {
-		writel(agp_bridge->scratch_page, serverworks_private.scratch_dir.remapped+i);
-		writel(virt_to_phys(serverworks_private.scratch_dir.real) | 1, page_dir.remapped+i);
+		pete_writel("drivers/char/agp/sworks-agp.c:158", agp_bridge->scratch_page, serverworks_private.scratch_dir.remapped+i);
+		pete_writel("drivers/char/agp/sworks-agp.c:159", virt_to_phys(serverworks_private.scratch_dir.real) | 1, page_dir.remapped+i);
 	}
 
 	retval = serverworks_create_gatt_pages(value->num_entries / 1024);
@@ -180,7 +180,7 @@ static int serverworks_create_gatt_table(struct agp_bridge_data *bridge)
 
 	/* Calculate the agp offset */
 	for (i = 0; i < value->num_entries / 1024; i++)
-		writel(virt_to_phys(serverworks_private.gatt_pages[i]->real)|1, page_dir.remapped+i);
+		pete_writel("drivers/char/agp/sworks-agp.c:183", virt_to_phys(serverworks_private.gatt_pages[i]->real)|1, page_dir.remapped+i);
 
 	return 0;
 }
@@ -248,9 +248,9 @@ static void serverworks_tlbflush(struct agp_memory *temp)
 		}
 	}
 
-	writel(1, serverworks_private.registers+SVWRKS_DIRFLUSH);
+	pete_writel("drivers/char/agp/sworks-agp.c:251", 1, serverworks_private.registers+SVWRKS_DIRFLUSH);
 	timeout = jiffies + 3*HZ;
-	while (readl(serverworks_private.registers+SVWRKS_DIRFLUSH) == 1) {
+	while (pete_readl("drivers/char/agp/sworks-agp.c:253", serverworks_private.registers+SVWRKS_DIRFLUSH) == 1) {
 		cpu_relax();
 		if (time_after(jiffies, timeout)) {
 			dev_err(&serverworks_private.svrwrks_dev->dev,
@@ -281,8 +281,8 @@ static int serverworks_configure(void)
 	writeb(0xA, serverworks_private.registers+SVWRKS_GART_CACHE);
 	readb(serverworks_private.registers+SVWRKS_GART_CACHE);	/* PCI Posting. */
 
-	writel(agp_bridge->gatt_bus_addr, serverworks_private.registers+SVWRKS_GATTBASE);
-	readl(serverworks_private.registers+SVWRKS_GATTBASE);	/* PCI Posting. */
+	pete_writel("drivers/char/agp/sworks-agp.c:284", agp_bridge->gatt_bus_addr, serverworks_private.registers+SVWRKS_GATTBASE);
+	pete_readl("drivers/char/agp/sworks-agp.c:285", serverworks_private.registers+SVWRKS_GATTBASE);	/* PCI Posting. */
 
 	cap_reg = readw(serverworks_private.registers+SVWRKS_COMMAND);
 	cap_reg &= ~0x0007;
@@ -337,7 +337,7 @@ static int serverworks_insert_memory(struct agp_memory *mem,
 	while (j < (pg_start + mem->page_count)) {
 		addr = (j * PAGE_SIZE) + agp_bridge->gart_bus_addr;
 		cur_gatt = SVRWRKS_GET_GATT(addr);
-		if (!PGE_EMPTY(agp_bridge, readl(cur_gatt+GET_GATT_OFF(addr))))
+		if (!PGE_EMPTY(agp_bridge, pete_readl("drivers/char/agp/sworks-agp.c:340", cur_gatt+GET_GATT_OFF(addr))))
 			return -EBUSY;
 		j++;
 	}
@@ -350,7 +350,7 @@ static int serverworks_insert_memory(struct agp_memory *mem,
 	for (i = 0, j = pg_start; i < mem->page_count; i++, j++) {
 		addr = (j * PAGE_SIZE) + agp_bridge->gart_bus_addr;
 		cur_gatt = SVRWRKS_GET_GATT(addr);
-		writel(agp_bridge->driver->mask_memory(agp_bridge, 
+		pete_writel("drivers/char/agp/sworks-agp.c:353", agp_bridge->driver->mask_memory(agp_bridge, 
 				page_to_phys(mem->pages[i]), mem->type),
 		       cur_gatt+GET_GATT_OFF(addr));
 	}
@@ -375,7 +375,7 @@ static int serverworks_remove_memory(struct agp_memory *mem, off_t pg_start,
 	for (i = pg_start; i < (mem->page_count + pg_start); i++) {
 		addr = (i * PAGE_SIZE) + agp_bridge->gart_bus_addr;
 		cur_gatt = SVRWRKS_GET_GATT(addr);
-		writel(agp_bridge->scratch_page, cur_gatt+GET_GATT_OFF(addr));
+		pete_writel("drivers/char/agp/sworks-agp.c:378", agp_bridge->scratch_page, cur_gatt+GET_GATT_OFF(addr));
 	}
 
 	serverworks_tlbflush(mem);

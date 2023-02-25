@@ -314,19 +314,19 @@ void wtm_init(void)
 void scm_init(void)
 {
 	/* All masters are trusted */
-	writel(0x77777777, MCF_SCM_MPR);
+	pete_writel("arch/m68k/coldfire/m53xx.c:317", 0x77777777, MCF_SCM_MPR);
     
 	/* Allow supervisor/user, read/write, and trusted/untrusted
 	   access to all slaves */
-	writel(0, MCF_SCM_PACRA);
-	writel(0, MCF_SCM_PACRB);
-	writel(0, MCF_SCM_PACRC);
-	writel(0, MCF_SCM_PACRD);
-	writel(0, MCF_SCM_PACRE);
-	writel(0, MCF_SCM_PACRF);
+	pete_writel("arch/m68k/coldfire/m53xx.c:321", 0, MCF_SCM_PACRA);
+	pete_writel("arch/m68k/coldfire/m53xx.c:322", 0, MCF_SCM_PACRB);
+	pete_writel("arch/m68k/coldfire/m53xx.c:323", 0, MCF_SCM_PACRC);
+	pete_writel("arch/m68k/coldfire/m53xx.c:324", 0, MCF_SCM_PACRD);
+	pete_writel("arch/m68k/coldfire/m53xx.c:325", 0, MCF_SCM_PACRE);
+	pete_writel("arch/m68k/coldfire/m53xx.c:326", 0, MCF_SCM_PACRF);
 
 	/* Enable bursts */
-	writel(MCF_SCM_BCR_GBR | MCF_SCM_BCR_GBW, MCF_SCM_BCR);
+	pete_writel("arch/m68k/coldfire/m53xx.c:329", MCF_SCM_BCR_GBR | MCF_SCM_BCR_GBW, MCF_SCM_BCR);
 }
 
 
@@ -335,32 +335,32 @@ void fbcs_init(void)
 	writeb(0x3E, MCFGPIO_PAR_CS);
 
 	/* Latch chip select */
-	writel(0x10080000, MCF_FBCS1_CSAR);
+	pete_writel("arch/m68k/coldfire/m53xx.c:338", 0x10080000, MCF_FBCS1_CSAR);
 
-	writel(0x002A3780, MCF_FBCS1_CSCR);
-	writel(MCF_FBCS_CSMR_BAM_2M | MCF_FBCS_CSMR_V, MCF_FBCS1_CSMR);
+	pete_writel("arch/m68k/coldfire/m53xx.c:340", 0x002A3780, MCF_FBCS1_CSCR);
+	pete_writel("arch/m68k/coldfire/m53xx.c:341", MCF_FBCS_CSMR_BAM_2M | MCF_FBCS_CSMR_V, MCF_FBCS1_CSMR);
 
 	/* Initialize latch to drive signals to inactive states */
 	writew(0xffff, 0x10080000);
 
 	/* External SRAM */
-	writel(EXT_SRAM_ADDRESS, MCF_FBCS1_CSAR);
-	writel(MCF_FBCS_CSCR_PS_16 |
+	pete_writel("arch/m68k/coldfire/m53xx.c:347", EXT_SRAM_ADDRESS, MCF_FBCS1_CSAR);
+	pete_writel("arch/m68k/coldfire/m53xx.c:348", MCF_FBCS_CSCR_PS_16 |
 		MCF_FBCS_CSCR_AA |
 		MCF_FBCS_CSCR_SBM |
 		MCF_FBCS_CSCR_WS(1),
 		MCF_FBCS1_CSCR);
-	writel(MCF_FBCS_CSMR_BAM_512K | MCF_FBCS_CSMR_V, MCF_FBCS1_CSMR);
+	pete_writel("arch/m68k/coldfire/m53xx.c:353", MCF_FBCS_CSMR_BAM_512K | MCF_FBCS_CSMR_V, MCF_FBCS1_CSMR);
 
 	/* Boot Flash connected to FBCS0 */
-	writel(FLASH_ADDRESS, MCF_FBCS0_CSAR);
-	writel(MCF_FBCS_CSCR_PS_16 |
+	pete_writel("arch/m68k/coldfire/m53xx.c:356", FLASH_ADDRESS, MCF_FBCS0_CSAR);
+	pete_writel("arch/m68k/coldfire/m53xx.c:357", MCF_FBCS_CSCR_PS_16 |
 		MCF_FBCS_CSCR_BEM |
 		MCF_FBCS_CSCR_AA |
 		MCF_FBCS_CSCR_SBM |
 		MCF_FBCS_CSCR_WS(7),
 		MCF_FBCS0_CSCR);
-	writel(MCF_FBCS_CSMR_BAM_32M | MCF_FBCS_CSMR_V, MCF_FBCS0_CSMR);
+	pete_writel("arch/m68k/coldfire/m53xx.c:363", MCF_FBCS_CSMR_BAM_32M | MCF_FBCS_CSMR_V, MCF_FBCS0_CSMR);
 }
 
 void sdramc_init(void)
@@ -369,18 +369,18 @@ void sdramc_init(void)
 	 * Check to see if the SDRAM has already been initialized
 	 * by a run control tool
 	 */
-	if (!(readl(MCF_SDRAMC_SDCR) & MCF_SDRAMC_SDCR_REF)) {
+	if (!(pete_readl("arch/m68k/coldfire/m53xx.c:372", MCF_SDRAMC_SDCR) & MCF_SDRAMC_SDCR_REF)) {
 		/* SDRAM chip select initialization */
 		
 		/* Initialize SDRAM chip select */
-		writel(MCF_SDRAMC_SDCS_BA(SDRAM_ADDRESS) |
+		pete_writel("arch/m68k/coldfire/m53xx.c:376", MCF_SDRAMC_SDCS_BA(SDRAM_ADDRESS) |
 			MCF_SDRAMC_SDCS_CSSZ(MCF_SDRAMC_SDCS_CSSZ_32MBYTE),
 			MCF_SDRAMC_SDCS0);
 
 	/*
 	 * Basic configuration and initialization
 	 */
-	writel(MCF_SDRAMC_SDCFG1_SRD2RW((int)((SDRAM_CASL + 2) + 0.5)) |
+	pete_writel("arch/m68k/coldfire/m53xx.c:383", MCF_SDRAMC_SDCFG1_SRD2RW((int)((SDRAM_CASL + 2) + 0.5)) |
 		MCF_SDRAMC_SDCFG1_SWT2RD(SDRAM_TWR + 1) |
 		MCF_SDRAMC_SDCFG1_RDLAT((int)((SDRAM_CASL * 2) + 2)) |
 		MCF_SDRAMC_SDCFG1_ACT2RW((int)(SDRAM_TRCD + 0.5)) |
@@ -388,7 +388,7 @@ void sdramc_init(void)
 		MCF_SDRAMC_SDCFG1_REF2ACT((int)(SDRAM_TRFC + 0.5)) |
 		MCF_SDRAMC_SDCFG1_WTLAT(3),
 		MCF_SDRAMC_SDCFG1);
-	writel(MCF_SDRAMC_SDCFG2_BRD2PRE(SDRAM_BL / 2 + 1) |
+	pete_writel("arch/m68k/coldfire/m53xx.c:391", MCF_SDRAMC_SDCFG2_BRD2PRE(SDRAM_BL / 2 + 1) |
 		MCF_SDRAMC_SDCFG2_BWT2RW(SDRAM_BL / 2 + SDRAM_TWR) |
 		MCF_SDRAMC_SDCFG2_BRD2WT((int)((SDRAM_CASL + SDRAM_BL / 2 - 1.0) + 0.5)) |
 		MCF_SDRAMC_SDCFG2_BL(SDRAM_BL - 1),
@@ -398,7 +398,7 @@ void sdramc_init(void)
 	/*
 	 * Precharge and enable write to SDMR
 	 */
-	writel(MCF_SDRAMC_SDCR_MODE_EN |
+	pete_writel("arch/m68k/coldfire/m53xx.c:401", MCF_SDRAMC_SDCR_MODE_EN |
 		MCF_SDRAMC_SDCR_CKE |
 		MCF_SDRAMC_SDCR_DDR |
 		MCF_SDRAMC_SDCR_MUX(1) |
@@ -410,7 +410,7 @@ void sdramc_init(void)
 	/*
 	 * Write extended mode register
 	 */
-	writel(MCF_SDRAMC_SDMR_BNKAD_LEMR |
+	pete_writel("arch/m68k/coldfire/m53xx.c:413", MCF_SDRAMC_SDMR_BNKAD_LEMR |
 		MCF_SDRAMC_SDMR_AD(0x0) |
 		MCF_SDRAMC_SDMR_CMD,
 		MCF_SDRAMC_SDMR);
@@ -418,7 +418,7 @@ void sdramc_init(void)
 	/*
 	 * Write mode register and reset DLL
 	 */
-	writel(MCF_SDRAMC_SDMR_BNKAD_LMR |
+	pete_writel("arch/m68k/coldfire/m53xx.c:421", MCF_SDRAMC_SDMR_BNKAD_LMR |
 		MCF_SDRAMC_SDMR_AD(0x163) |
 		MCF_SDRAMC_SDMR_CMD,
 		MCF_SDRAMC_SDMR);
@@ -426,18 +426,18 @@ void sdramc_init(void)
 	/*
 	 * Execute a PALL command
 	 */
-	writel(readl(MCF_SDRAMC_SDCR) | MCF_SDRAMC_SDCR_IPALL, MCF_SDRAMC_SDCR);
+	pete_writel("arch/m68k/coldfire/m53xx.c:429", pete_readl("arch/m68k/coldfire/m53xx.c:429", MCF_SDRAMC_SDCR) | MCF_SDRAMC_SDCR_IPALL, MCF_SDRAMC_SDCR);
 
 	/*
 	 * Perform two REF cycles
 	 */
-	writel(readl(MCF_SDRAMC_SDCR) | MCF_SDRAMC_SDCR_IREF, MCF_SDRAMC_SDCR);
-	writel(readl(MCF_SDRAMC_SDCR) | MCF_SDRAMC_SDCR_IREF, MCF_SDRAMC_SDCR);
+	pete_writel("arch/m68k/coldfire/m53xx.c:434", pete_readl("arch/m68k/coldfire/m53xx.c:434", MCF_SDRAMC_SDCR) | MCF_SDRAMC_SDCR_IREF, MCF_SDRAMC_SDCR);
+	pete_writel("arch/m68k/coldfire/m53xx.c:435", pete_readl("arch/m68k/coldfire/m53xx.c:435", MCF_SDRAMC_SDCR) | MCF_SDRAMC_SDCR_IREF, MCF_SDRAMC_SDCR);
 
 	/*
 	 * Write mode register and clear reset DLL
 	 */
-	writel(MCF_SDRAMC_SDMR_BNKAD_LMR |
+	pete_writel("arch/m68k/coldfire/m53xx.c:440", MCF_SDRAMC_SDMR_BNKAD_LMR |
 		MCF_SDRAMC_SDMR_AD(0x063) |
 		MCF_SDRAMC_SDMR_CMD,
 		MCF_SDRAMC_SDMR);
@@ -445,9 +445,9 @@ void sdramc_init(void)
 	/*
 	 * Enable auto refresh and lock SDMR
 	 */
-	writel(readl(MCF_SDRAMC_SDCR) & ~MCF_SDRAMC_SDCR_MODE_EN,
+	pete_writel("arch/m68k/coldfire/m53xx.c:448", pete_readl("arch/m68k/coldfire/m53xx.c:448", MCF_SDRAMC_SDCR) & ~MCF_SDRAMC_SDCR_MODE_EN,
 		MCF_SDRAMC_SDCR);
-	writel(MCF_SDRAMC_SDCR_REF | MCF_SDRAMC_SDCR_DQS_OE(0xC),
+	pete_writel("arch/m68k/coldfire/m53xx.c:450", MCF_SDRAMC_SDCR_REF | MCF_SDRAMC_SDCR_DQS_OE(0xC),
 		MCF_SDRAMC_SDCR);
 	}
 }
@@ -502,9 +502,9 @@ int clock_pll(int fsys, int flags)
 	 * If it has then the SDRAM needs to be put into self refresh
 	 * mode before reprogramming the PLL.
 	 */
-	if (readl(MCF_SDRAMC_SDCR) & MCF_SDRAMC_SDCR_REF)
+	if (pete_readl("arch/m68k/coldfire/m53xx.c:505", MCF_SDRAMC_SDCR) & MCF_SDRAMC_SDCR_REF)
 		/* Put SDRAM into self refresh mode */
-		writel(readl(MCF_SDRAMC_SDCR) & ~MCF_SDRAMC_SDCR_CKE,
+		pete_writel("arch/m68k/coldfire/m53xx.c:507", pete_readl("arch/m68k/coldfire/m53xx.c:507", MCF_SDRAMC_SDCR) & ~MCF_SDRAMC_SDCR_CKE,
 			MCF_SDRAMC_SDCR);
 
 	/*
@@ -527,13 +527,13 @@ int clock_pll(int fsys, int flags)
 	/*
 	 * Return the SDRAM to normal operation if it is in use.
 	 */
-	if (readl(MCF_SDRAMC_SDCR) & MCF_SDRAMC_SDCR_REF)
+	if (pete_readl("arch/m68k/coldfire/m53xx.c:530", MCF_SDRAMC_SDCR) & MCF_SDRAMC_SDCR_REF)
 		/* Exit self refresh mode */
-		writel(readl(MCF_SDRAMC_SDCR) | MCF_SDRAMC_SDCR_CKE,
+		pete_writel("arch/m68k/coldfire/m53xx.c:532", pete_readl("arch/m68k/coldfire/m53xx.c:532", MCF_SDRAMC_SDCR) | MCF_SDRAMC_SDCR_CKE,
 			MCF_SDRAMC_SDCR);
 
 	/* Errata - workaround for SDRAM opeartion after exiting LIMP mode */
-	writel(MCF_SDRAMC_REFRESH, MCF_SDRAMC_LIMP_FIX);
+	pete_writel("arch/m68k/coldfire/m53xx.c:536", MCF_SDRAMC_REFRESH, MCF_SDRAMC_LIMP_FIX);
 
 	/* wait for DQS logic to relock */
 	for (i = 0; i < 0x200; i++)

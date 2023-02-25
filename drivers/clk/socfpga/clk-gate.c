@@ -33,15 +33,15 @@ static u8 socfpga_clk_get_parent(struct clk_hw *hwclk)
 	const char *name = clk_hw_get_name(hwclk);
 
 	if (streq(name, SOCFPGA_L4_MP_CLK)) {
-		l4_src = readl(clk_mgr_base_addr + CLKMGR_L4SRC);
+		l4_src = pete_readl("drivers/clk/socfpga/clk-gate.c:36", clk_mgr_base_addr + CLKMGR_L4SRC);
 		return l4_src &= 0x1;
 	}
 	if (streq(name, SOCFPGA_L4_SP_CLK)) {
-		l4_src = readl(clk_mgr_base_addr + CLKMGR_L4SRC);
+		l4_src = pete_readl("drivers/clk/socfpga/clk-gate.c:40", clk_mgr_base_addr + CLKMGR_L4SRC);
 		return !!(l4_src & 2);
 	}
 
-	perpll_src = readl(clk_mgr_base_addr + CLKMGR_PERPLL_SRC);
+	perpll_src = pete_readl("drivers/clk/socfpga/clk-gate.c:44", clk_mgr_base_addr + CLKMGR_PERPLL_SRC);
 	if (streq(name, SOCFPGA_MMC_CLK))
 		return perpll_src &= 0x3;
 	if (streq(name, SOCFPGA_NAND_CLK) ||
@@ -59,17 +59,17 @@ static int socfpga_clk_set_parent(struct clk_hw *hwclk, u8 parent)
 	const char *name = clk_hw_get_name(hwclk);
 
 	if (streq(name, SOCFPGA_L4_MP_CLK)) {
-		src_reg = readl(clk_mgr_base_addr + CLKMGR_L4SRC);
+		src_reg = pete_readl("drivers/clk/socfpga/clk-gate.c:62", clk_mgr_base_addr + CLKMGR_L4SRC);
 		src_reg &= ~0x1;
 		src_reg |= parent;
-		writel(src_reg, clk_mgr_base_addr + CLKMGR_L4SRC);
+		pete_writel("drivers/clk/socfpga/clk-gate.c:65", src_reg, clk_mgr_base_addr + CLKMGR_L4SRC);
 	} else if (streq(name, SOCFPGA_L4_SP_CLK)) {
-		src_reg = readl(clk_mgr_base_addr + CLKMGR_L4SRC);
+		src_reg = pete_readl("drivers/clk/socfpga/clk-gate.c:67", clk_mgr_base_addr + CLKMGR_L4SRC);
 		src_reg &= ~0x2;
 		src_reg |= (parent << 1);
-		writel(src_reg, clk_mgr_base_addr + CLKMGR_L4SRC);
+		pete_writel("drivers/clk/socfpga/clk-gate.c:70", src_reg, clk_mgr_base_addr + CLKMGR_L4SRC);
 	} else {
-		src_reg = readl(clk_mgr_base_addr + CLKMGR_PERPLL_SRC);
+		src_reg = pete_readl("drivers/clk/socfpga/clk-gate.c:72", clk_mgr_base_addr + CLKMGR_PERPLL_SRC);
 		if (streq(name, SOCFPGA_MMC_CLK)) {
 			src_reg &= ~0x3;
 			src_reg |= parent;
@@ -81,7 +81,7 @@ static int socfpga_clk_set_parent(struct clk_hw *hwclk, u8 parent)
 			src_reg &= ~0x30;
 			src_reg |= (parent << 4);
 		}
-		writel(src_reg, clk_mgr_base_addr + CLKMGR_PERPLL_SRC);
+		pete_writel("drivers/clk/socfpga/clk-gate.c:84", src_reg, clk_mgr_base_addr + CLKMGR_PERPLL_SRC);
 	}
 
 	return 0;
@@ -96,7 +96,7 @@ static unsigned long socfpga_clk_recalc_rate(struct clk_hw *hwclk,
 	if (socfpgaclk->fixed_div)
 		div = socfpgaclk->fixed_div;
 	else if (socfpgaclk->div_reg) {
-		val = readl(socfpgaclk->div_reg) >> socfpgaclk->shift;
+		val = pete_readl("drivers/clk/socfpga/clk-gate.c:99", socfpgaclk->div_reg) >> socfpgaclk->shift;
 		val &= GENMASK(socfpgaclk->width - 1, 0);
 		/* Check for GPIO_DB_CLK by its offset */
 		if ((uintptr_t) socfpgaclk->div_reg & SOCFPGA_GPIO_DB_CLK_OFFSET)

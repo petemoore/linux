@@ -222,20 +222,20 @@ static void bcm2835_dumpregs(struct bcm2835_host *host)
 	}
 
 	dev_dbg(dev, "=========== REGISTER DUMP ===========\n");
-	dev_dbg(dev, "SDCMD  0x%08x\n", readl(host->ioaddr + SDCMD));
-	dev_dbg(dev, "SDARG  0x%08x\n", readl(host->ioaddr + SDARG));
-	dev_dbg(dev, "SDTOUT 0x%08x\n", readl(host->ioaddr + SDTOUT));
-	dev_dbg(dev, "SDCDIV 0x%08x\n", readl(host->ioaddr + SDCDIV));
-	dev_dbg(dev, "SDRSP0 0x%08x\n", readl(host->ioaddr + SDRSP0));
-	dev_dbg(dev, "SDRSP1 0x%08x\n", readl(host->ioaddr + SDRSP1));
-	dev_dbg(dev, "SDRSP2 0x%08x\n", readl(host->ioaddr + SDRSP2));
-	dev_dbg(dev, "SDRSP3 0x%08x\n", readl(host->ioaddr + SDRSP3));
-	dev_dbg(dev, "SDHSTS 0x%08x\n", readl(host->ioaddr + SDHSTS));
-	dev_dbg(dev, "SDVDD  0x%08x\n", readl(host->ioaddr + SDVDD));
-	dev_dbg(dev, "SDEDM  0x%08x\n", readl(host->ioaddr + SDEDM));
-	dev_dbg(dev, "SDHCFG 0x%08x\n", readl(host->ioaddr + SDHCFG));
-	dev_dbg(dev, "SDHBCT 0x%08x\n", readl(host->ioaddr + SDHBCT));
-	dev_dbg(dev, "SDHBLC 0x%08x\n", readl(host->ioaddr + SDHBLC));
+	dev_dbg(dev, "SDCMD  0x%08x\n", pete_readl("drivers/mmc/host/bcm2835.c:225", host->ioaddr + SDCMD));
+	dev_dbg(dev, "SDARG  0x%08x\n", pete_readl("drivers/mmc/host/bcm2835.c:226", host->ioaddr + SDARG));
+	dev_dbg(dev, "SDTOUT 0x%08x\n", pete_readl("drivers/mmc/host/bcm2835.c:227", host->ioaddr + SDTOUT));
+	dev_dbg(dev, "SDCDIV 0x%08x\n", pete_readl("drivers/mmc/host/bcm2835.c:228", host->ioaddr + SDCDIV));
+	dev_dbg(dev, "SDRSP0 0x%08x\n", pete_readl("drivers/mmc/host/bcm2835.c:229", host->ioaddr + SDRSP0));
+	dev_dbg(dev, "SDRSP1 0x%08x\n", pete_readl("drivers/mmc/host/bcm2835.c:230", host->ioaddr + SDRSP1));
+	dev_dbg(dev, "SDRSP2 0x%08x\n", pete_readl("drivers/mmc/host/bcm2835.c:231", host->ioaddr + SDRSP2));
+	dev_dbg(dev, "SDRSP3 0x%08x\n", pete_readl("drivers/mmc/host/bcm2835.c:232", host->ioaddr + SDRSP3));
+	dev_dbg(dev, "SDHSTS 0x%08x\n", pete_readl("drivers/mmc/host/bcm2835.c:233", host->ioaddr + SDHSTS));
+	dev_dbg(dev, "SDVDD  0x%08x\n", pete_readl("drivers/mmc/host/bcm2835.c:234", host->ioaddr + SDVDD));
+	dev_dbg(dev, "SDEDM  0x%08x\n", pete_readl("drivers/mmc/host/bcm2835.c:235", host->ioaddr + SDEDM));
+	dev_dbg(dev, "SDHCFG 0x%08x\n", pete_readl("drivers/mmc/host/bcm2835.c:236", host->ioaddr + SDHCFG));
+	dev_dbg(dev, "SDHBCT 0x%08x\n", pete_readl("drivers/mmc/host/bcm2835.c:237", host->ioaddr + SDHBCT));
+	dev_dbg(dev, "SDHBLC 0x%08x\n", pete_readl("drivers/mmc/host/bcm2835.c:238", host->ioaddr + SDHBLC));
 	dev_dbg(dev, "===========================================\n");
 }
 
@@ -243,29 +243,29 @@ static void bcm2835_reset_internal(struct bcm2835_host *host)
 {
 	u32 temp;
 
-	writel(SDVDD_POWER_OFF, host->ioaddr + SDVDD);
-	writel(0, host->ioaddr + SDCMD);
-	writel(0, host->ioaddr + SDARG);
-	writel(0xf00000, host->ioaddr + SDTOUT);
-	writel(0, host->ioaddr + SDCDIV);
-	writel(0x7f8, host->ioaddr + SDHSTS); /* Write 1s to clear */
-	writel(0, host->ioaddr + SDHCFG);
-	writel(0, host->ioaddr + SDHBCT);
-	writel(0, host->ioaddr + SDHBLC);
+	pete_writel("drivers/mmc/host/bcm2835.c:246", SDVDD_POWER_OFF, host->ioaddr + SDVDD);
+	pete_writel("drivers/mmc/host/bcm2835.c:247", 0, host->ioaddr + SDCMD);
+	pete_writel("drivers/mmc/host/bcm2835.c:248", 0, host->ioaddr + SDARG);
+	pete_writel("drivers/mmc/host/bcm2835.c:249", 0xf00000, host->ioaddr + SDTOUT);
+	pete_writel("drivers/mmc/host/bcm2835.c:250", 0, host->ioaddr + SDCDIV);
+	pete_writel("drivers/mmc/host/bcm2835.c:251", 0x7f8, host->ioaddr + SDHSTS); /* Write 1s to clear */
+	pete_writel("drivers/mmc/host/bcm2835.c:252", 0, host->ioaddr + SDHCFG);
+	pete_writel("drivers/mmc/host/bcm2835.c:253", 0, host->ioaddr + SDHBCT);
+	pete_writel("drivers/mmc/host/bcm2835.c:254", 0, host->ioaddr + SDHBLC);
 
 	/* Limit fifo usage due to silicon bug */
-	temp = readl(host->ioaddr + SDEDM);
+	temp = pete_readl("drivers/mmc/host/bcm2835.c:257", host->ioaddr + SDEDM);
 	temp &= ~((SDEDM_THRESHOLD_MASK << SDEDM_READ_THRESHOLD_SHIFT) |
 		  (SDEDM_THRESHOLD_MASK << SDEDM_WRITE_THRESHOLD_SHIFT));
 	temp |= (FIFO_READ_THRESHOLD << SDEDM_READ_THRESHOLD_SHIFT) |
 		(FIFO_WRITE_THRESHOLD << SDEDM_WRITE_THRESHOLD_SHIFT);
-	writel(temp, host->ioaddr + SDEDM);
+	pete_writel("drivers/mmc/host/bcm2835.c:262", temp, host->ioaddr + SDEDM);
 	msleep(20);
-	writel(SDVDD_POWER_ON, host->ioaddr + SDVDD);
+	pete_writel("drivers/mmc/host/bcm2835.c:264", SDVDD_POWER_ON, host->ioaddr + SDVDD);
 	msleep(20);
 	host->clock = 0;
-	writel(host->hcfg, host->ioaddr + SDHCFG);
-	writel(host->cdiv, host->ioaddr + SDCDIV);
+	pete_writel("drivers/mmc/host/bcm2835.c:267", host->hcfg, host->ioaddr + SDHCFG);
+	pete_writel("drivers/mmc/host/bcm2835.c:268", host->cdiv, host->ioaddr + SDCDIV);
 }
 
 static void bcm2835_reset(struct mmc_host *mmc)
@@ -293,14 +293,14 @@ static void bcm2835_wait_transfer_complete(struct bcm2835_host *host)
 	while (1) {
 		u32 edm, fsm;
 
-		edm = readl(host->ioaddr + SDEDM);
+		edm = pete_readl("drivers/mmc/host/bcm2835.c:296", host->ioaddr + SDEDM);
 		fsm = edm & SDEDM_FSM_MASK;
 
 		if ((fsm == SDEDM_FSM_IDENTMODE) ||
 		    (fsm == SDEDM_FSM_DATAMODE))
 			break;
 		if (fsm == alternate_idle) {
-			writel(edm | SDEDM_FORCE_DATA_MODE,
+			pete_writel("drivers/mmc/host/bcm2835.c:303", edm | SDEDM_FORCE_DATA_MODE,
 			       host->ioaddr + SDEDM);
 			break;
 		}
@@ -366,7 +366,7 @@ static void bcm2835_transfer_block_pio(struct bcm2835_host *host, bool is_read)
 			u32 edm;
 
 			burst_words = min(SDDATA_FIFO_PIO_BURST, copy_words);
-			edm = readl(host->ioaddr + SDEDM);
+			edm = pete_readl("drivers/mmc/host/bcm2835.c:369", host->ioaddr + SDEDM);
 			if (is_read)
 				words = ((edm >> 4) & 0x1f);
 			else
@@ -384,7 +384,7 @@ static void bcm2835_transfer_block_pio(struct bcm2835_host *host, bool is_read)
 				     (fsm_state != SDEDM_FSM_WRITEDATA &&
 				      fsm_state != SDEDM_FSM_WRITESTART1 &&
 				      fsm_state != SDEDM_FSM_WRITESTART2))) {
-					hsts = readl(host->ioaddr + SDHSTS);
+					hsts = pete_readl("drivers/mmc/host/bcm2835.c:387", host->ioaddr + SDHSTS);
 					dev_err(dev, "fsm %x, hsts %08x\n",
 						fsm_state, hsts);
 					if (hsts & SDHSTS_ERROR_MASK)
@@ -409,9 +409,9 @@ static void bcm2835_transfer_block_pio(struct bcm2835_host *host, bool is_read)
 
 			while (words) {
 				if (is_read)
-					*(buf++) = readl(host->ioaddr + SDDATA);
+					*(buf++) = pete_readl("drivers/mmc/host/bcm2835.c:412", host->ioaddr + SDDATA);
 				else
-					writel(*(buf++), host->ioaddr + SDDATA);
+					pete_writel("drivers/mmc/host/bcm2835.c:414", *(buf++), host->ioaddr + SDDATA);
 				words--;
 			}
 		}
@@ -434,7 +434,7 @@ static void bcm2835_transfer_pio(struct bcm2835_host *host)
 	is_read = (host->data->flags & MMC_DATA_READ) != 0;
 	bcm2835_transfer_block_pio(host, is_read);
 
-	sdhsts = readl(host->ioaddr + SDHSTS);
+	sdhsts = pete_readl("drivers/mmc/host/bcm2835.c:437", host->ioaddr + SDHSTS);
 	if (sdhsts & (SDHSTS_CRC16_ERROR |
 		      SDHSTS_CRC7_ERROR |
 		      SDHSTS_FIFO_ERROR)) {
@@ -538,7 +538,7 @@ static void bcm2835_set_transfer_irqs(struct bcm2835_host *host)
 			SDHCFG_BUSY_IRPT_EN;
 	}
 
-	writel(host->hcfg, host->ioaddr + SDHCFG);
+	pete_writel("drivers/mmc/host/bcm2835.c:541", host->hcfg, host->ioaddr + SDHCFG);
 }
 
 static
@@ -569,8 +569,8 @@ void bcm2835_prepare_data(struct bcm2835_host *host, struct mmc_command *cmd)
 
 	bcm2835_set_transfer_irqs(host);
 
-	writel(data->blksz, host->ioaddr + SDHBCT);
-	writel(data->blocks, host->ioaddr + SDHBLC);
+	pete_writel("drivers/mmc/host/bcm2835.c:572", data->blksz, host->ioaddr + SDHBCT);
+	pete_writel("drivers/mmc/host/bcm2835.c:573", data->blocks, host->ioaddr + SDHBLC);
 }
 
 static u32 bcm2835_read_wait_sdcmd(struct bcm2835_host *host, u32 max_ms)
@@ -647,9 +647,9 @@ bool bcm2835_send_command(struct bcm2835_host *host, struct mmc_command *cmd)
 	host->cmd = cmd;
 
 	/* Clear any error flags */
-	sdhsts = readl(host->ioaddr + SDHSTS);
+	sdhsts = pete_readl("drivers/mmc/host/bcm2835.c:650", host->ioaddr + SDHSTS);
 	if (sdhsts & SDHSTS_ERROR_MASK)
-		writel(sdhsts, host->ioaddr + SDHSTS);
+		pete_writel("drivers/mmc/host/bcm2835.c:652", sdhsts, host->ioaddr + SDHSTS);
 
 	if ((cmd->flags & MMC_RSP_136) && (cmd->flags & MMC_RSP_BUSY)) {
 		dev_err(dev, "unsupported response type!\n");
@@ -660,7 +660,7 @@ bool bcm2835_send_command(struct bcm2835_host *host, struct mmc_command *cmd)
 
 	bcm2835_prepare_data(host, cmd);
 
-	writel(cmd->arg, host->ioaddr + SDARG);
+	pete_writel("drivers/mmc/host/bcm2835.c:663", cmd->arg, host->ioaddr + SDARG);
 
 	sdcmd = cmd->opcode & SDCMD_CMD_MASK;
 
@@ -683,7 +683,7 @@ bool bcm2835_send_command(struct bcm2835_host *host, struct mmc_command *cmd)
 			sdcmd |= SDCMD_READ_CMD;
 	}
 
-	writel(sdcmd | SDCMD_NEW_FLAG, host->ioaddr + SDCMD);
+	pete_writel("drivers/mmc/host/bcm2835.c:686", sdcmd | SDCMD_NEW_FLAG, host->ioaddr + SDCMD);
 
 	return true;
 }
@@ -721,7 +721,7 @@ static void bcm2835_finish_data(struct bcm2835_host *host)
 	data = host->data;
 
 	host->hcfg &= ~(SDHCFG_DATA_IRPT_EN | SDHCFG_BLOCK_IRPT_EN);
-	writel(host->hcfg, host->ioaddr + SDHCFG);
+	pete_writel("drivers/mmc/host/bcm2835.c:724", host->hcfg, host->ioaddr + SDHCFG);
 
 	data->bytes_xfered = data->error ? 0 : (data->blksz * data->blocks);
 
@@ -733,7 +733,7 @@ static void bcm2835_finish_data(struct bcm2835_host *host)
 		 * things in the proper order.
 		 */
 		dev_dbg(dev, "Finished early - HSTS %08x\n",
-			readl(host->ioaddr + SDHSTS));
+			pete_readl("drivers/mmc/host/bcm2835.c:736", host->ioaddr + SDHSTS));
 	} else {
 		bcm2835_transfer_complete(host);
 	}
@@ -755,10 +755,10 @@ static void bcm2835_finish_command(struct bcm2835_host *host)
 		bcm2835_finish_request(host);
 		return;
 	} else if (sdcmd & SDCMD_FAIL_FLAG) {
-		u32 sdhsts = readl(host->ioaddr + SDHSTS);
+		u32 sdhsts = pete_readl("drivers/mmc/host/bcm2835.c:758", host->ioaddr + SDHSTS);
 
 		/* Clear the errors */
-		writel(SDHSTS_ERROR_MASK, host->ioaddr + SDHSTS);
+		pete_writel("drivers/mmc/host/bcm2835.c:761", SDHSTS_ERROR_MASK, host->ioaddr + SDHSTS);
 
 		if (!(sdhsts & SDHSTS_CRC7_ERROR) ||
 		    (host->cmd->opcode != MMC_SEND_OP_COND)) {
@@ -772,12 +772,12 @@ static void bcm2835_finish_command(struct bcm2835_host *host)
 				bcm2835_dumpregs(host);
 				host->cmd->error = -EILSEQ;
 			}
-			edm = readl(host->ioaddr + SDEDM);
+			edm = pete_readl("drivers/mmc/host/bcm2835.c:775", host->ioaddr + SDEDM);
 			fsm = edm & SDEDM_FSM_MASK;
 			if (fsm == SDEDM_FSM_READWAIT ||
 			    fsm == SDEDM_FSM_WRITESTART1)
 				/* Kick the FSM out of its wait */
-				writel(edm | SDEDM_FORCE_DATA_MODE,
+				pete_writel("drivers/mmc/host/bcm2835.c:780", edm | SDEDM_FORCE_DATA_MODE,
 				       host->ioaddr + SDEDM);
 			bcm2835_finish_request(host);
 			return;
@@ -790,10 +790,10 @@ static void bcm2835_finish_command(struct bcm2835_host *host)
 
 			for (i = 0; i < 4; i++) {
 				cmd->resp[3 - i] =
-					readl(host->ioaddr + SDRSP0 + i * 4);
+					pete_readl("drivers/mmc/host/bcm2835.c:793", host->ioaddr + SDRSP0 + i * 4);
 			}
 		} else {
-			cmd->resp[0] = readl(host->ioaddr + SDRSP0);
+			cmd->resp[0] = pete_readl("drivers/mmc/host/bcm2835.c:796", host->ioaddr + SDRSP0);
 		}
 	}
 
@@ -930,7 +930,7 @@ static void bcm2835_data_irq(struct bcm2835_host *host, u32 intmask)
 		/* Use the block interrupt for writes after the first block */
 		host->hcfg &= ~(SDHCFG_DATA_IRPT_EN);
 		host->hcfg |= SDHCFG_BLOCK_IRPT_EN;
-		writel(host->hcfg, host->ioaddr + SDHCFG);
+		pete_writel("drivers/mmc/host/bcm2835.c:933", host->hcfg, host->ioaddr + SDHCFG);
 		bcm2835_transfer_pio(host);
 	} else {
 		bcm2835_transfer_pio(host);
@@ -942,7 +942,7 @@ static void bcm2835_data_irq(struct bcm2835_host *host, u32 intmask)
 
 finished:
 	host->hcfg &= ~(SDHCFG_DATA_IRPT_EN | SDHCFG_BLOCK_IRPT_EN);
-	writel(host->hcfg, host->ioaddr + SDHCFG);
+	pete_writel("drivers/mmc/host/bcm2835.c:945", host->hcfg, host->ioaddr + SDHCFG);
 }
 
 static void bcm2835_data_threaded_irq(struct bcm2835_host *host)
@@ -979,9 +979,9 @@ static irqreturn_t bcm2835_irq(int irq, void *dev_id)
 
 	spin_lock(&host->lock);
 
-	intmask = readl(host->ioaddr + SDHSTS);
+	intmask = pete_readl("drivers/mmc/host/bcm2835.c:982", host->ioaddr + SDHSTS);
 
-	writel(SDHSTS_BUSY_IRPT |
+	pete_writel("drivers/mmc/host/bcm2835.c:984", SDHSTS_BUSY_IRPT |
 	       SDHSTS_BLOCK_IRPT |
 	       SDHSTS_SDIO_IRPT |
 	       SDHSTS_DATA_FLAG,
@@ -1081,10 +1081,10 @@ static void bcm2835_dma_complete_work(struct work_struct *work)
 		buf = page + host->drain_offset;
 
 		while (host->drain_words) {
-			u32 edm = readl(host->ioaddr + SDEDM);
+			u32 edm = pete_readl("drivers/mmc/host/bcm2835.c:1084", host->ioaddr + SDEDM);
 
 			if ((edm >> 4) & 0x1f)
-				*(buf++) = readl(host->ioaddr + SDDATA);
+				*(buf++) = pete_readl("drivers/mmc/host/bcm2835.c:1087", host->ioaddr + SDDATA);
 			host->drain_words--;
 		}
 
@@ -1128,7 +1128,7 @@ static void bcm2835_set_clock(struct bcm2835_host *host, unsigned int clock)
 		 * to show willing
 		 */
 		host->cdiv = SDCDIV_MAX_CDIV;
-		writel(host->cdiv, host->ioaddr + SDCDIV);
+		pete_writel("drivers/mmc/host/bcm2835.c:1131", host->cdiv, host->ioaddr + SDCDIV);
 		return;
 	}
 
@@ -1151,10 +1151,10 @@ static void bcm2835_set_clock(struct bcm2835_host *host, unsigned int clock)
 		((mmc->caps & MMC_CAP_4_BIT_DATA) ? 8 : 32);
 
 	host->cdiv = div;
-	writel(host->cdiv, host->ioaddr + SDCDIV);
+	pete_writel("drivers/mmc/host/bcm2835.c:1154", host->cdiv, host->ioaddr + SDCDIV);
 
 	/* Set the timeout to 500ms */
-	writel(mmc->actual_clock / 2, host->ioaddr + SDTOUT);
+	pete_writel("drivers/mmc/host/bcm2835.c:1157", mmc->actual_clock / 2, host->ioaddr + SDTOUT);
 }
 
 static void bcm2835_request(struct mmc_host *mmc, struct mmc_request *mrq)
@@ -1189,13 +1189,13 @@ static void bcm2835_request(struct mmc_host *mmc, struct mmc_request *mrq)
 	WARN_ON(host->mrq);
 	host->mrq = mrq;
 
-	edm = readl(host->ioaddr + SDEDM);
+	edm = pete_readl("drivers/mmc/host/bcm2835.c:1192", host->ioaddr + SDEDM);
 	fsm = edm & SDEDM_FSM_MASK;
 
 	if ((fsm != SDEDM_FSM_IDENTMODE) &&
 	    (fsm != SDEDM_FSM_DATAMODE)) {
 		dev_err(dev, "previous command (%d) not complete (EDM %08x)\n",
-			readl(host->ioaddr + SDCMD) & SDCMD_CMD_MASK,
+			pete_readl("drivers/mmc/host/bcm2835.c:1198", host->ioaddr + SDCMD) & SDCMD_CMD_MASK,
 			edm);
 		bcm2835_dumpregs(host);
 
@@ -1251,7 +1251,7 @@ static void bcm2835_set_ios(struct mmc_host *mmc, struct mmc_ios *ios)
 	/* Disable clever clock switching, to cope with fast core clocks */
 	host->hcfg |= SDHCFG_SLOW_CARD;
 
-	writel(host->hcfg, host->ioaddr + SDHCFG);
+	pete_writel("drivers/mmc/host/bcm2835.c:1254", host->hcfg, host->ioaddr + SDHCFG);
 
 	mutex_unlock(&host->mutex);
 }
@@ -1448,7 +1448,7 @@ static int bcm2835_remove(struct platform_device *pdev)
 
 	mmc_remove_host(mmc);
 
-	writel(SDVDD_POWER_OFF, host->ioaddr + SDVDD);
+	pete_writel("drivers/mmc/host/bcm2835.c:1451", SDVDD_POWER_OFF, host->ioaddr + SDVDD);
 
 	free_irq(host->irq, host);
 

@@ -173,27 +173,27 @@ static void bcm_kona_i2c_send_cmd_to_ctrl(struct bcm_kona_i2c_dev *dev,
 
 	switch (cmd) {
 	case BCM_CMD_NOACTION:
-		writel((CS_CMD_CMD_NO_ACTION << CS_CMD_SHIFT) |
+		pete_writel("drivers/i2c/busses/i2c-bcm-kona.c:176", (CS_CMD_CMD_NO_ACTION << CS_CMD_SHIFT) |
 		       (CS_EN_CMD_ENABLE_BSC << CS_EN_SHIFT),
 		       dev->base + CS_OFFSET);
 		break;
 
 	case BCM_CMD_START:
-		writel((CS_ACK_CMD_GEN_START << CS_ACK_SHIFT) |
+		pete_writel("drivers/i2c/busses/i2c-bcm-kona.c:182", (CS_ACK_CMD_GEN_START << CS_ACK_SHIFT) |
 		       (CS_CMD_CMD_START_RESTART << CS_CMD_SHIFT) |
 		       (CS_EN_CMD_ENABLE_BSC << CS_EN_SHIFT),
 		       dev->base + CS_OFFSET);
 		break;
 
 	case BCM_CMD_RESTART:
-		writel((CS_ACK_CMD_GEN_RESTART << CS_ACK_SHIFT) |
+		pete_writel("drivers/i2c/busses/i2c-bcm-kona.c:189", (CS_ACK_CMD_GEN_RESTART << CS_ACK_SHIFT) |
 		       (CS_CMD_CMD_START_RESTART << CS_CMD_SHIFT) |
 		       (CS_EN_CMD_ENABLE_BSC << CS_EN_SHIFT),
 		       dev->base + CS_OFFSET);
 		break;
 
 	case BCM_CMD_STOP:
-		writel((CS_CMD_CMD_STOP << CS_CMD_SHIFT) |
+		pete_writel("drivers/i2c/busses/i2c-bcm-kona.c:196", (CS_CMD_CMD_STOP << CS_CMD_SHIFT) |
 		       (CS_EN_CMD_ENABLE_BSC << CS_EN_SHIFT),
 		       dev->base + CS_OFFSET);
 		break;
@@ -205,30 +205,30 @@ static void bcm_kona_i2c_send_cmd_to_ctrl(struct bcm_kona_i2c_dev *dev,
 
 static void bcm_kona_i2c_enable_clock(struct bcm_kona_i2c_dev *dev)
 {
-	writel(readl(dev->base + CLKEN_OFFSET) | CLKEN_CLKEN_MASK,
+	pete_writel("drivers/i2c/busses/i2c-bcm-kona.c:208", pete_readl("drivers/i2c/busses/i2c-bcm-kona.c:208", dev->base + CLKEN_OFFSET) | CLKEN_CLKEN_MASK,
 	       dev->base + CLKEN_OFFSET);
 }
 
 static void bcm_kona_i2c_disable_clock(struct bcm_kona_i2c_dev *dev)
 {
-	writel(readl(dev->base + CLKEN_OFFSET) & ~CLKEN_CLKEN_MASK,
+	pete_writel("drivers/i2c/busses/i2c-bcm-kona.c:214", pete_readl("drivers/i2c/busses/i2c-bcm-kona.c:214", dev->base + CLKEN_OFFSET) & ~CLKEN_CLKEN_MASK,
 	       dev->base + CLKEN_OFFSET);
 }
 
 static irqreturn_t bcm_kona_i2c_isr(int irq, void *devid)
 {
 	struct bcm_kona_i2c_dev *dev = devid;
-	uint32_t status = readl(dev->base + ISR_OFFSET);
+	uint32_t status = pete_readl("drivers/i2c/busses/i2c-bcm-kona.c:221", dev->base + ISR_OFFSET);
 
 	if ((status & ~ISR_RESERVED_MASK) == 0)
 		return IRQ_NONE;
 
 	/* Must flush the TX FIFO when NAK detected */
 	if (status & ISR_NOACK_MASK)
-		writel(TXFCR_FIFO_FLUSH_MASK | TXFCR_FIFO_EN_MASK,
+		pete_writel("drivers/i2c/busses/i2c-bcm-kona.c:228", TXFCR_FIFO_FLUSH_MASK | TXFCR_FIFO_EN_MASK,
 		       dev->base + TXFCR_OFFSET);
 
-	writel(status & ~ISR_RESERVED_MASK, dev->base + ISR_OFFSET);
+	pete_writel("drivers/i2c/busses/i2c-bcm-kona.c:231", status & ~ISR_RESERVED_MASK, dev->base + ISR_OFFSET);
 	complete(&dev->done);
 
 	return IRQ_HANDLED;
@@ -239,7 +239,7 @@ static int bcm_kona_i2c_wait_if_busy(struct bcm_kona_i2c_dev *dev)
 {
 	unsigned long timeout = jiffies + msecs_to_jiffies(I2C_TIMEOUT);
 
-	while (readl(dev->base + ISR_OFFSET) & ISR_CMDBUSY_MASK)
+	while (pete_readl("drivers/i2c/busses/i2c-bcm-kona.c:242", dev->base + ISR_OFFSET) & ISR_CMDBUSY_MASK)
 		if (time_after(jiffies, timeout)) {
 			dev_err(dev->device, "CMDBUSY timeout\n");
 			return -ETIMEDOUT;
@@ -261,7 +261,7 @@ static int bcm_kona_send_i2c_cmd(struct bcm_kona_i2c_dev *dev,
 		return rc;
 
 	/* Unmask the session done interrupt */
-	writel(IER_I2C_INT_EN_MASK, dev->base + IER_OFFSET);
+	pete_writel("drivers/i2c/busses/i2c-bcm-kona.c:264", IER_I2C_INT_EN_MASK, dev->base + IER_OFFSET);
 
 	/* Mark as incomplete before sending the command */
 	reinit_completion(&dev->done);
@@ -273,7 +273,7 @@ static int bcm_kona_send_i2c_cmd(struct bcm_kona_i2c_dev *dev,
 	time_left = wait_for_completion_timeout(&dev->done, time_left);
 
 	/* Mask all interrupts */
-	writel(0, dev->base + IER_OFFSET);
+	pete_writel("drivers/i2c/busses/i2c-bcm-kona.c:276", 0, dev->base + IER_OFFSET);
 
 	if (!time_left) {
 		dev_err(dev->device, "controller timed out\n");
@@ -297,10 +297,10 @@ static int bcm_kona_i2c_read_fifo_single(struct bcm_kona_i2c_dev *dev,
 	reinit_completion(&dev->done);
 
 	/* Unmask the read complete interrupt */
-	writel(IER_READ_COMPLETE_INT_MASK, dev->base + IER_OFFSET);
+	pete_writel("drivers/i2c/busses/i2c-bcm-kona.c:300", IER_READ_COMPLETE_INT_MASK, dev->base + IER_OFFSET);
 
 	/* Start the RX FIFO */
-	writel((last_byte_nak << RXFCR_NACK_EN_SHIFT) |
+	pete_writel("drivers/i2c/busses/i2c-bcm-kona.c:303", (last_byte_nak << RXFCR_NACK_EN_SHIFT) |
 	       (len << RXFCR_READ_COUNT_SHIFT),
 		dev->base + RXFCR_OFFSET);
 
@@ -308,7 +308,7 @@ static int bcm_kona_i2c_read_fifo_single(struct bcm_kona_i2c_dev *dev,
 	time_left = wait_for_completion_timeout(&dev->done, time_left);
 
 	/* Mask all interrupts */
-	writel(0, dev->base + IER_OFFSET);
+	pete_writel("drivers/i2c/busses/i2c-bcm-kona.c:311", 0, dev->base + IER_OFFSET);
 
 	if (!time_left) {
 		dev_err(dev->device, "RX FIFO time out\n");
@@ -317,7 +317,7 @@ static int bcm_kona_i2c_read_fifo_single(struct bcm_kona_i2c_dev *dev,
 
 	/* Read data from FIFO */
 	for (; len > 0; len--, buf++)
-		*buf = readl(dev->base + RXFIFORDOUT_OFFSET);
+		*buf = pete_readl("drivers/i2c/busses/i2c-bcm-kona.c:320", dev->base + RXFIFORDOUT_OFFSET);
 
 	return 0;
 }
@@ -365,29 +365,29 @@ static int bcm_kona_i2c_write_byte(struct bcm_kona_i2c_dev *dev, uint8_t data,
 		return rc;
 
 	/* Clear pending session done interrupt */
-	writel(ISR_SES_DONE_MASK, dev->base + ISR_OFFSET);
+	pete_writel("drivers/i2c/busses/i2c-bcm-kona.c:368", ISR_SES_DONE_MASK, dev->base + ISR_OFFSET);
 
 	/* Unmask the session done interrupt */
-	writel(IER_I2C_INT_EN_MASK, dev->base + IER_OFFSET);
+	pete_writel("drivers/i2c/busses/i2c-bcm-kona.c:371", IER_I2C_INT_EN_MASK, dev->base + IER_OFFSET);
 
 	/* Mark as incomplete before sending the data */
 	reinit_completion(&dev->done);
 
 	/* Send one byte of data */
-	writel(data, dev->base + DAT_OFFSET);
+	pete_writel("drivers/i2c/busses/i2c-bcm-kona.c:377", data, dev->base + DAT_OFFSET);
 
 	/* Wait for byte to be written */
 	time_left = wait_for_completion_timeout(&dev->done, time_left);
 
 	/* Mask all interrupts */
-	writel(0, dev->base + IER_OFFSET);
+	pete_writel("drivers/i2c/busses/i2c-bcm-kona.c:383", 0, dev->base + IER_OFFSET);
 
 	if (!time_left) {
 		dev_dbg(dev->device, "controller timed out\n");
 		return -ETIMEDOUT;
 	}
 
-	nak_received = readl(dev->base + CS_OFFSET) & CS_ACK_MASK ? 1 : 0;
+	nak_received = pete_readl("drivers/i2c/busses/i2c-bcm-kona.c:390", dev->base + CS_OFFSET) & CS_ACK_MASK ? 1 : 0;
 
 	if (nak_received ^ nak_expected) {
 		dev_dbg(dev->device, "unexpected NAK/ACK\n");
@@ -409,7 +409,7 @@ static int bcm_kona_i2c_write_fifo_single(struct bcm_kona_i2c_dev *dev,
 	reinit_completion(&dev->done);
 
 	/* Unmask the fifo empty and nak interrupt */
-	writel(IER_FIFO_INT_EN_MASK | IER_NOACK_EN_MASK,
+	pete_writel("drivers/i2c/busses/i2c-bcm-kona.c:412", IER_FIFO_INT_EN_MASK | IER_NOACK_EN_MASK,
 	       dev->base + IER_OFFSET);
 
 	/* Disable IRQ to load a FIFO worth of data without interruption */
@@ -417,7 +417,7 @@ static int bcm_kona_i2c_write_fifo_single(struct bcm_kona_i2c_dev *dev,
 
 	/* Write data into FIFO */
 	for (k = 0; k < len; k++)
-		writel(buf[k], (dev->base + DAT_OFFSET));
+		pete_writel("drivers/i2c/busses/i2c-bcm-kona.c:420", buf[k], (dev->base + DAT_OFFSET));
 
 	/* Enable IRQ now that data has been loaded */
 	enable_irq(dev->irq);
@@ -425,14 +425,14 @@ static int bcm_kona_i2c_write_fifo_single(struct bcm_kona_i2c_dev *dev,
 	/* Wait for FIFO to empty */
 	do {
 		time_left = wait_for_completion_timeout(&dev->done, time_left);
-		fifo_status = readl(dev->base + FIFO_STATUS_OFFSET);
+		fifo_status = pete_readl("drivers/i2c/busses/i2c-bcm-kona.c:428", dev->base + FIFO_STATUS_OFFSET);
 	} while (time_left && !(fifo_status & FIFO_STATUS_TXFIFO_EMPTY_MASK));
 
 	/* Mask all interrupts */
-	writel(0, dev->base + IER_OFFSET);
+	pete_writel("drivers/i2c/busses/i2c-bcm-kona.c:432", 0, dev->base + IER_OFFSET);
 
 	/* Check if there was a NAK */
-	if (readl(dev->base + CS_OFFSET) & CS_ACK_MASK) {
+	if (pete_readl("drivers/i2c/busses/i2c-bcm-kona.c:435", dev->base + CS_OFFSET) & CS_ACK_MASK) {
 		dev_err(dev->device, "unexpected NAK\n");
 		return -EREMOTEIO;
 	}
@@ -512,22 +512,22 @@ static int bcm_kona_i2c_do_addr(struct bcm_kona_i2c_dev *dev,
 
 static void bcm_kona_i2c_enable_autosense(struct bcm_kona_i2c_dev *dev)
 {
-	writel(readl(dev->base + CLKEN_OFFSET) & ~CLKEN_AUTOSENSE_OFF_MASK,
+	pete_writel("drivers/i2c/busses/i2c-bcm-kona.c:515", pete_readl("drivers/i2c/busses/i2c-bcm-kona.c:515", dev->base + CLKEN_OFFSET) & ~CLKEN_AUTOSENSE_OFF_MASK,
 	       dev->base + CLKEN_OFFSET);
 }
 
 static void bcm_kona_i2c_config_timing(struct bcm_kona_i2c_dev *dev)
 {
-	writel(readl(dev->base + HSTIM_OFFSET) & ~HSTIM_HS_MODE_MASK,
+	pete_writel("drivers/i2c/busses/i2c-bcm-kona.c:521", pete_readl("drivers/i2c/busses/i2c-bcm-kona.c:521", dev->base + HSTIM_OFFSET) & ~HSTIM_HS_MODE_MASK,
 	       dev->base + HSTIM_OFFSET);
 
-	writel((dev->std_cfg->prescale << TIM_PRESCALE_SHIFT) |
+	pete_writel("drivers/i2c/busses/i2c-bcm-kona.c:524", (dev->std_cfg->prescale << TIM_PRESCALE_SHIFT) |
 	       (dev->std_cfg->time_p << TIM_P_SHIFT) |
 	       (dev->std_cfg->no_div << TIM_NO_DIV_SHIFT) |
 	       (dev->std_cfg->time_div	<< TIM_DIV_SHIFT),
 	       dev->base + TIM_OFFSET);
 
-	writel((dev->std_cfg->time_m << CLKEN_M_SHIFT) |
+	pete_writel("drivers/i2c/busses/i2c-bcm-kona.c:530", (dev->std_cfg->time_m << CLKEN_M_SHIFT) |
 	       (dev->std_cfg->time_n << CLKEN_N_SHIFT) |
 	       CLKEN_CLKEN_MASK,
 	       dev->base + CLKEN_OFFSET);
@@ -535,18 +535,18 @@ static void bcm_kona_i2c_config_timing(struct bcm_kona_i2c_dev *dev)
 
 static void bcm_kona_i2c_config_timing_hs(struct bcm_kona_i2c_dev *dev)
 {
-	writel((dev->hs_cfg->prescale << TIM_PRESCALE_SHIFT) |
+	pete_writel("drivers/i2c/busses/i2c-bcm-kona.c:538", (dev->hs_cfg->prescale << TIM_PRESCALE_SHIFT) |
 	       (dev->hs_cfg->time_p << TIM_P_SHIFT) |
 	       (dev->hs_cfg->no_div << TIM_NO_DIV_SHIFT) |
 	       (dev->hs_cfg->time_div << TIM_DIV_SHIFT),
 	       dev->base + TIM_OFFSET);
 
-	writel((dev->hs_cfg->hs_hold << HSTIM_HS_HOLD_SHIFT) |
+	pete_writel("drivers/i2c/busses/i2c-bcm-kona.c:544", (dev->hs_cfg->hs_hold << HSTIM_HS_HOLD_SHIFT) |
 	       (dev->hs_cfg->hs_high_phase << HSTIM_HS_HIGH_PHASE_SHIFT) |
 	       (dev->hs_cfg->hs_setup << HSTIM_HS_SETUP_SHIFT),
 	       dev->base + HSTIM_OFFSET);
 
-	writel(readl(dev->base + HSTIM_OFFSET) | HSTIM_HS_MODE_MASK,
+	pete_writel("drivers/i2c/busses/i2c-bcm-kona.c:549", pete_readl("drivers/i2c/busses/i2c-bcm-kona.c:549", dev->base + HSTIM_OFFSET) | HSTIM_HS_MODE_MASK,
 	       dev->base + HSTIM_OFFSET);
 }
 
@@ -614,7 +614,7 @@ static int bcm_kona_i2c_xfer(struct i2c_adapter *adapter,
 	}
 
 	/* Enable pad output */
-	writel(0, dev->base + PADCTL_OFFSET);
+	pete_writel("drivers/i2c/busses/i2c-bcm-kona.c:617", 0, dev->base + PADCTL_OFFSET);
 
 	/* Enable internal clocks */
 	bcm_kona_i2c_enable_clock(dev);
@@ -690,7 +690,7 @@ xfer_send_stop:
 
 xfer_disable_pad:
 	/* Disable pad output */
-	writel(PADCTL_PAD_OUT_EN_MASK, dev->base + PADCTL_OFFSET);
+	pete_writel("drivers/i2c/busses/i2c-bcm-kona.c:693", PADCTL_PAD_OUT_EN_MASK, dev->base + PADCTL_OFFSET);
 
 	/* Stop internal clock */
 	bcm_kona_i2c_disable_clock(dev);
@@ -797,20 +797,20 @@ static int bcm_kona_i2c_probe(struct platform_device *pdev)
 	bcm_kona_i2c_config_timing(dev);
 
 	/* Disable timeout */
-	writel(0, dev->base + TOUT_OFFSET);
+	pete_writel("drivers/i2c/busses/i2c-bcm-kona.c:800", 0, dev->base + TOUT_OFFSET);
 
 	/* Enable autosense */
 	bcm_kona_i2c_enable_autosense(dev);
 
 	/* Enable TX FIFO */
-	writel(TXFCR_FIFO_FLUSH_MASK | TXFCR_FIFO_EN_MASK,
+	pete_writel("drivers/i2c/busses/i2c-bcm-kona.c:806", TXFCR_FIFO_FLUSH_MASK | TXFCR_FIFO_EN_MASK,
 	       dev->base + TXFCR_OFFSET);
 
 	/* Mask all interrupts */
-	writel(0, dev->base + IER_OFFSET);
+	pete_writel("drivers/i2c/busses/i2c-bcm-kona.c:810", 0, dev->base + IER_OFFSET);
 
 	/* Clear all pending interrupts */
-	writel(ISR_CMDBUSY_MASK |
+	pete_writel("drivers/i2c/busses/i2c-bcm-kona.c:813", ISR_CMDBUSY_MASK |
 	       ISR_READ_COMPLETE_MASK |
 	       ISR_SES_DONE_MASK |
 	       ISR_ERR_MASK |
@@ -837,7 +837,7 @@ static int bcm_kona_i2c_probe(struct platform_device *pdev)
 	bcm_kona_i2c_send_cmd_to_ctrl(dev, BCM_CMD_NOACTION);
 
 	/* Disable pad output */
-	writel(PADCTL_PAD_OUT_EN_MASK, dev->base + PADCTL_OFFSET);
+	pete_writel("drivers/i2c/busses/i2c-bcm-kona.c:840", PADCTL_PAD_OUT_EN_MASK, dev->base + PADCTL_OFFSET);
 
 	/* Disable internal clock */
 	bcm_kona_i2c_disable_clock(dev);

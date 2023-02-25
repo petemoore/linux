@@ -37,7 +37,7 @@ static int npcm_rng_init(struct hwrng *rng)
 {
 	struct npcm_rng *priv = to_npcm_rng(rng);
 
-	writel(NPCM_RNG_CLK_SET_25MHZ | NPCM_RNG_ENABLE,
+	pete_writel("drivers/char/hw_random/npcm-rng.c:40", NPCM_RNG_CLK_SET_25MHZ | NPCM_RNG_ENABLE,
 	       priv->base + NPCM_RNGCS_REG);
 
 	return 0;
@@ -47,7 +47,7 @@ static void npcm_rng_cleanup(struct hwrng *rng)
 {
 	struct npcm_rng *priv = to_npcm_rng(rng);
 
-	writel(NPCM_RNG_CLK_SET_25MHZ, priv->base + NPCM_RNGCS_REG);
+	pete_writel("drivers/char/hw_random/npcm-rng.c:50", NPCM_RNG_CLK_SET_25MHZ, priv->base + NPCM_RNGCS_REG);
 }
 
 static int npcm_rng_read(struct hwrng *rng, void *buf, size_t max, bool wait)
@@ -111,7 +111,7 @@ static int npcm_rng_probe(struct platform_device *pdev)
 	priv->rng.priv = (unsigned long)&pdev->dev;
 	priv->rng.quality = 1000;
 
-	writel(NPCM_RNG_M1ROSEL, priv->base + NPCM_RNGMODE_REG);
+	pete_writel("drivers/char/hw_random/npcm-rng.c:114", NPCM_RNG_M1ROSEL, priv->base + NPCM_RNGMODE_REG);
 
 	ret = devm_hwrng_register(&pdev->dev, &priv->rng);
 	if (ret) {

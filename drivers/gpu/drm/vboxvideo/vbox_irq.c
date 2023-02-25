@@ -24,7 +24,7 @@ static void vbox_clear_irq(void)
 
 static u32 vbox_get_flags(struct vbox_private *vbox)
 {
-	return readl(vbox->guest_heap + HOST_FLAGS_OFFSET);
+	return pete_readl("drivers/gpu/drm/vboxvideo/vbox_irq.c:27", vbox->guest_heap + HOST_FLAGS_OFFSET);
 }
 
 void vbox_report_hotplug(struct vbox_private *vbox)

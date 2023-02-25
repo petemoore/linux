@@ -32,7 +32,7 @@ static int wait_for_mbox_ready(struct proc_thermal_device *proc_priv)
 	/* Poll for rb bit == 0 */
 	retries = MBOX_RETRY_COUNT;
 	do {
-		data = readl(proc_priv->mmio_base + MBOX_OFFSET_INTERFACE);
+		data = pete_readl("drivers/thermal/intel/int340x_thermal/processor_thermal_mbox.c:35", proc_priv->mmio_base + MBOX_OFFSET_INTERFACE);
 		if (data & BIT_ULL(MBOX_BUSY_BIT)) {
 			ret = -EBUSY;
 			continue;
@@ -58,10 +58,10 @@ static int send_mbox_write_cmd(struct pci_dev *pdev, u16 id, u32 data)
 	if (ret)
 		goto unlock_mbox;
 
-	writel(data, (proc_priv->mmio_base + MBOX_OFFSET_DATA));
+	pete_writel("drivers/thermal/intel/int340x_thermal/processor_thermal_mbox.c:61", data, (proc_priv->mmio_base + MBOX_OFFSET_DATA));
 	/* Write command register */
 	reg_data = BIT_ULL(MBOX_BUSY_BIT) | id;
-	writel(reg_data, (proc_priv->mmio_base + MBOX_OFFSET_INTERFACE));
+	pete_writel("drivers/thermal/intel/int340x_thermal/processor_thermal_mbox.c:64", reg_data, (proc_priv->mmio_base + MBOX_OFFSET_INTERFACE));
 
 	ret = wait_for_mbox_ready(proc_priv);
 
@@ -86,14 +86,14 @@ static int send_mbox_read_cmd(struct pci_dev *pdev, u16 id, u64 *resp)
 
 	/* Write command register */
 	reg_data = BIT_ULL(MBOX_BUSY_BIT) | id;
-	writel(reg_data, (proc_priv->mmio_base + MBOX_OFFSET_INTERFACE));
+	pete_writel("drivers/thermal/intel/int340x_thermal/processor_thermal_mbox.c:89", reg_data, (proc_priv->mmio_base + MBOX_OFFSET_INTERFACE));
 
 	ret = wait_for_mbox_ready(proc_priv);
 	if (ret)
 		goto unlock_mbox;
 
 	if (id == MBOX_CMD_WORKLOAD_TYPE_READ)
-		*resp = readl(proc_priv->mmio_base + MBOX_OFFSET_DATA);
+		*resp = pete_readl("drivers/thermal/intel/int340x_thermal/processor_thermal_mbox.c:96", proc_priv->mmio_base + MBOX_OFFSET_DATA);
 	else
 		*resp = readq(proc_priv->mmio_base + MBOX_OFFSET_DATA);
 

@@ -279,7 +279,7 @@ static u64 fme_read_perf_cntr_reg(void __iomem *addr)
 	 */
 	do {
 		v = readq(addr);
-		low = readl(addr);
+		low = pete_readl("drivers/fpga/dfl-fme-perf.c:282", addr);
 	} while (((u32)v) > low);
 
 	return v;

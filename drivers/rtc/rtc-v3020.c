@@ -83,12 +83,12 @@ static void v3020_mmio_unmap(struct v3020 *chip)
 
 static void v3020_mmio_write_bit(struct v3020 *chip, unsigned char bit)
 {
-	writel(bit << chip->leftshift, chip->ioaddress);
+	pete_writel("drivers/rtc/rtc-v3020.c:86", bit << chip->leftshift, chip->ioaddress);
 }
 
 static unsigned char v3020_mmio_read_bit(struct v3020 *chip)
 {
-	return !!(readl(chip->ioaddress) & (1 << chip->leftshift));
+	return !!(pete_readl("drivers/rtc/rtc-v3020.c:91", chip->ioaddress) & (1 << chip->leftshift));
 }
 
 static const struct v3020_chip_ops v3020_mmio_ops = {

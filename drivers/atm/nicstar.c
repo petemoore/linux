@@ -102,7 +102,7 @@
 
 /* Macros */
 
-#define CMD_BUSY(card) (readl((card)->membase + STAT) & NS_STAT_CMDBZ)
+#define CMD_BUSY(card) (pete_readl("drivers/atm/nicstar.c:105", (card)->membase + STAT) & NS_STAT_CMDBZ)
 
 #define NS_DELAY mdelay(1)
 
@@ -213,7 +213,7 @@ static void nicstar_remove_one(struct pci_dev *pcidev)
 		card->atmdev->phy->stop(card->atmdev);
 
 	/* Stop everything */
-	writel(0x00000000, card->membase + CFG);
+	pete_writel("drivers/atm/nicstar.c:216", 0x00000000, card->membase + CFG);
 
 	/* De-register device */
 	atm_dev_deregister(card->atmdev);
@@ -315,9 +315,9 @@ static u32 ns_read_sram(ns_dev * card, u32 sram_address)
 	sram_address |= 0x50000000;	/* SRAM read command */
 	spin_lock_irqsave(&card->res_lock, flags);
 	while (CMD_BUSY(card)) ;
-	writel(sram_address, card->membase + CMD);
+	pete_writel("drivers/atm/nicstar.c:318", sram_address, card->membase + CMD);
 	while (CMD_BUSY(card)) ;
-	data = readl(card->membase + DR0);
+	data = pete_readl("drivers/atm/nicstar.c:320", card->membase + DR0);
 	spin_unlock_irqrestore(&card->res_lock, flags);
 	return data;
 }
@@ -333,13 +333,13 @@ static void ns_write_sram(ns_dev * card, u32 sram_address, u32 * value,
 	spin_lock_irqsave(&card->res_lock, flags);
 	while (CMD_BUSY(card)) ;
 	for (i = 0; i <= c; i += 4)
-		writel(*(value++), card->membase + i);
+		pete_writel("drivers/atm/nicstar.c:336", *(value++), card->membase + i);
 	/* Note: DR# registers are the first 4 dwords in nicstar's memspace,
 	   so card->membase + DR0 == card->membase */
 	sram_address <<= 2;
 	sram_address &= 0x0007FFFC;
 	sram_address |= (0x40000000 | count);
-	writel(sram_address, card->membase + CMD);
+	pete_writel("drivers/atm/nicstar.c:342", sram_address, card->membase + CMD);
 	spin_unlock_irqrestore(&card->res_lock, flags);
 }
 
@@ -428,42 +428,42 @@ static int ns_init_card(int i, struct pci_dev *pcidev)
 #endif /* NS_PCI_LATENCY */
 
 	/* Clear timer overflow */
-	data = readl(card->membase + STAT);
+	data = pete_readl("drivers/atm/nicstar.c:431", card->membase + STAT);
 	if (data & NS_STAT_TMROF)
-		writel(NS_STAT_TMROF, card->membase + STAT);
+		pete_writel("drivers/atm/nicstar.c:433", NS_STAT_TMROF, card->membase + STAT);
 
 	/* Software reset */
-	writel(NS_CFG_SWRST, card->membase + CFG);
+	pete_writel("drivers/atm/nicstar.c:436", NS_CFG_SWRST, card->membase + CFG);
 	NS_DELAY;
-	writel(0x00000000, card->membase + CFG);
+	pete_writel("drivers/atm/nicstar.c:438", 0x00000000, card->membase + CFG);
 
 	/* PHY reset */
-	writel(0x00000008, card->membase + GP);
+	pete_writel("drivers/atm/nicstar.c:441", 0x00000008, card->membase + GP);
 	NS_DELAY;
-	writel(0x00000001, card->membase + GP);
+	pete_writel("drivers/atm/nicstar.c:443", 0x00000001, card->membase + GP);
 	NS_DELAY;
 	while (CMD_BUSY(card)) ;
-	writel(NS_CMD_WRITE_UTILITY | 0x00000100, card->membase + CMD);	/* Sync UTOPIA with SAR clock */
+	pete_writel("drivers/atm/nicstar.c:446", NS_CMD_WRITE_UTILITY | 0x00000100, card->membase + CMD);	/* Sync UTOPIA with SAR clock */
 	NS_DELAY;
 
 	/* Detect PHY type */
 	while (CMD_BUSY(card)) ;
-	writel(NS_CMD_READ_UTILITY | 0x00000200, card->membase + CMD);
+	pete_writel("drivers/atm/nicstar.c:451", NS_CMD_READ_UTILITY | 0x00000200, card->membase + CMD);
 	while (CMD_BUSY(card)) ;
-	data = readl(card->membase + DR0);
+	data = pete_readl("drivers/atm/nicstar.c:453", card->membase + DR0);
 	switch (data) {
 	case 0x00000009:
 		printk("nicstar%d: PHY seems to be 25 Mbps.\n", i);
 		card->max_pcr = ATM_25_PCR;
 		while (CMD_BUSY(card)) ;
-		writel(0x00000008, card->membase + DR0);
-		writel(NS_CMD_WRITE_UTILITY | 0x00000200, card->membase + CMD);
+		pete_writel("drivers/atm/nicstar.c:459", 0x00000008, card->membase + DR0);
+		pete_writel("drivers/atm/nicstar.c:460", NS_CMD_WRITE_UTILITY | 0x00000200, card->membase + CMD);
 		/* Clear an eventual pending interrupt */
-		writel(NS_STAT_SFBQF, card->membase + STAT);
+		pete_writel("drivers/atm/nicstar.c:462", NS_STAT_SFBQF, card->membase + STAT);
 #ifdef PHY_LOOPBACK
 		while (CMD_BUSY(card)) ;
-		writel(0x00000022, card->membase + DR0);
-		writel(NS_CMD_WRITE_UTILITY | 0x00000202, card->membase + CMD);
+		pete_writel("drivers/atm/nicstar.c:465", 0x00000022, card->membase + DR0);
+		pete_writel("drivers/atm/nicstar.c:466", NS_CMD_WRITE_UTILITY | 0x00000202, card->membase + CMD);
 #endif /* PHY_LOOPBACK */
 		break;
 	case 0x00000030:
@@ -472,8 +472,8 @@ static int ns_init_card(int i, struct pci_dev *pcidev)
 		card->max_pcr = ATM_OC3_PCR;
 #ifdef PHY_LOOPBACK
 		while (CMD_BUSY(card)) ;
-		writel(0x00000002, card->membase + DR0);
-		writel(NS_CMD_WRITE_UTILITY | 0x00000205, card->membase + CMD);
+		pete_writel("drivers/atm/nicstar.c:475", 0x00000002, card->membase + DR0);
+		pete_writel("drivers/atm/nicstar.c:476", NS_CMD_WRITE_UTILITY | 0x00000205, card->membase + CMD);
 #endif /* PHY_LOOPBACK */
 		break;
 	default:
@@ -482,7 +482,7 @@ static int ns_init_card(int i, struct pci_dev *pcidev)
 		ns_init_card_error(card, error);
 		return error;
 	}
-	writel(0x00000000, card->membase + GP);
+	pete_writel("drivers/atm/nicstar.c:485", 0x00000000, card->membase + GP);
 
 	/* Determine SRAM size */
 	data = 0x76543210;
@@ -525,7 +525,7 @@ static int ns_init_card(int i, struct pci_dev *pcidev)
 		nicstar_init_eprom(card->membase);
 
 	/* Set the VPI/VCI MSb mask to zero so we can receive OAM cells */
-	writel(0x00000000, card->membase + VPM);
+	pete_writel("drivers/atm/nicstar.c:528", 0x00000000, card->membase + VPM);
 
 	card->intcnt = 0;
 	if (request_irq
@@ -551,8 +551,8 @@ static int ns_init_card(int i, struct pci_dev *pcidev)
 	card->tsq.last = card->tsq.base + (NS_TSQ_NUM_ENTRIES - 1);
 	for (j = 0; j < NS_TSQ_NUM_ENTRIES; j++)
 		ns_tsi_init(card->tsq.base + j);
-	writel(0x00000000, card->membase + TSQH);
-	writel(ALIGN(card->tsq.dma, NS_TSQ_ALIGNMENT), card->membase + TSQB);
+	pete_writel("drivers/atm/nicstar.c:554", 0x00000000, card->membase + TSQH);
+	pete_writel("drivers/atm/nicstar.c:555", ALIGN(card->tsq.dma, NS_TSQ_ALIGNMENT), card->membase + TSQB);
 	PRINTK("nicstar%d: TSQ base at 0x%p.\n", i, card->tsq.base);
 
 	/* Initialize RSQ */
@@ -570,8 +570,8 @@ static int ns_init_card(int i, struct pci_dev *pcidev)
 	card->rsq.last = card->rsq.base + (NS_RSQ_NUM_ENTRIES - 1);
 	for (j = 0; j < NS_RSQ_NUM_ENTRIES; j++)
 		ns_rsqe_init(card->rsq.base + j);
-	writel(0x00000000, card->membase + RSQH);
-	writel(ALIGN(card->rsq.dma, NS_RSQ_ALIGNMENT), card->membase + RSQB);
+	pete_writel("drivers/atm/nicstar.c:573", 0x00000000, card->membase + RSQH);
+	pete_writel("drivers/atm/nicstar.c:574", ALIGN(card->rsq.dma, NS_RSQ_ALIGNMENT), card->membase + RSQB);
 	PRINTK("nicstar%d: RSQ base at 0x%p.\n", i, card->rsq.base);
 
 	/* Initialize SCQ0, the only VBR SCQ used */
@@ -608,7 +608,7 @@ static int ns_init_card(int i, struct pci_dev *pcidev)
 	ns_write_sram(card, NS_TST1 + NS_TST_NUM_ENTRIES, &data, 1);
 	for (j = 0; j < NS_TST_NUM_ENTRIES; j++)
 		card->tste2vc[j] = NULL;
-	writel(NS_TST0 << 2, card->membase + TSTB);
+	pete_writel("drivers/atm/nicstar.c:611", NS_TST0 << 2, card->membase + TSTB);
 
 	/* Initialize RCT. AAL type is set on opening the VC. */
 #ifdef RCQ_SUPPORT
@@ -696,7 +696,7 @@ static int ns_init_card(int i, struct pci_dev *pcidev)
 	}
 	/* Test for strange behaviour which leads to crashes */
 	if ((bcount =
-	     ns_stat_lfbqc_get(readl(card->membase + STAT))) < card->lbnr.min) {
+	     ns_stat_lfbqc_get(pete_readl("drivers/atm/nicstar.c:699", card->membase + STAT))) < card->lbnr.min) {
 		printk
 		    ("nicstar%d: Strange... Just allocated %d large buffers and lfbqc = %d.\n",
 		     i, j, bcount);
@@ -726,7 +726,7 @@ static int ns_init_card(int i, struct pci_dev *pcidev)
 	}
 	/* Test for strange behaviour which leads to crashes */
 	if ((bcount =
-	     ns_stat_sfbqc_get(readl(card->membase + STAT))) < card->sbnr.min) {
+	     ns_stat_sfbqc_get(pete_readl("drivers/atm/nicstar.c:729", card->membase + STAT))) < card->sbnr.min) {
 		printk
 		    ("nicstar%d: Strange... Just allocated %d small buffers and sfbqc = %d.\n",
 		     i, j, bcount);
@@ -803,7 +803,7 @@ static int ns_init_card(int i, struct pci_dev *pcidev)
 	if (card->atmdev->phy && card->atmdev->phy->start)
 		card->atmdev->phy->start(card->atmdev);
 
-	writel(NS_CFG_RXPATH | NS_CFG_SMBUFSIZE | NS_CFG_LGBUFSIZE | NS_CFG_EFBIE | NS_CFG_RSQSIZE | NS_CFG_VPIBITS | ns_cfg_rctsize | NS_CFG_RXINT_NODELAY | NS_CFG_RAWIE |	/* Only enabled if RCQ_SUPPORT */
+	pete_writel("drivers/atm/nicstar.c:806", NS_CFG_RXPATH | NS_CFG_SMBUFSIZE | NS_CFG_LGBUFSIZE | NS_CFG_EFBIE | NS_CFG_RSQSIZE | NS_CFG_VPIBITS | ns_cfg_rctsize | NS_CFG_RXINT_NODELAY | NS_CFG_RAWIE |	/* Only enabled if RCQ_SUPPORT */
 	       NS_CFG_RSQAFIE | NS_CFG_TXEN | NS_CFG_TXIE | NS_CFG_TSQFIE_OPT |	/* Only enabled if ENABLE_TSQFIE */
 	       NS_CFG_PHYIE, card->membase + CFG);
 
@@ -815,7 +815,7 @@ static int ns_init_card(int i, struct pci_dev *pcidev)
 static void ns_init_card_error(ns_dev *card, int error)
 {
 	if (error >= 17) {
-		writel(0x00000000, card->membase + CFG);
+		pete_writel("drivers/atm/nicstar.c:818", 0x00000000, card->membase + CFG);
 	}
 	if (error >= 16) {
 		struct sk_buff *iovb;
@@ -968,7 +968,7 @@ static void push_rxbufs(ns_dev * card, struct sk_buff *skb)
 		       card->index);
 #endif /* GENERAL_DEBUG */
 
-	stat = readl(card->membase + STAT);
+	stat = pete_readl("drivers/atm/nicstar.c:971", card->membase + STAT);
 	card->sbfqc = ns_stat_sfbqc_get(stat);
 	card->lbfqc = ns_stat_lfbqc_get(stat);
 	if (NS_PRV_BUFTYPE(skb) == BUF_SM) {
@@ -1032,11 +1032,11 @@ static void push_rxbufs(ns_dev * card, struct sk_buff *skb)
 
 		spin_lock_irqsave(&card->res_lock, flags);
 		while (CMD_BUSY(card)) ;
-		writel(addr2, card->membase + DR3);
-		writel(id2, card->membase + DR2);
-		writel(addr1, card->membase + DR1);
-		writel(id1, card->membase + DR0);
-		writel(NS_CMD_WRITE_FREEBUFQ | NS_PRV_BUFTYPE(skb),
+		pete_writel("drivers/atm/nicstar.c:1035", addr2, card->membase + DR3);
+		pete_writel("drivers/atm/nicstar.c:1036", id2, card->membase + DR2);
+		pete_writel("drivers/atm/nicstar.c:1037", addr1, card->membase + DR1);
+		pete_writel("drivers/atm/nicstar.c:1038", id1, card->membase + DR0);
+		pete_writel("drivers/atm/nicstar.c:1039", NS_CMD_WRITE_FREEBUFQ | NS_PRV_BUFTYPE(skb),
 		       card->membase + CMD);
 		spin_unlock_irqrestore(&card->res_lock, flags);
 
@@ -1049,7 +1049,7 @@ static void push_rxbufs(ns_dev * card, struct sk_buff *skb)
 	if (!card->efbie && card->sbfqc >= card->sbnr.min &&
 	    card->lbfqc >= card->lbnr.min) {
 		card->efbie = 1;
-		writel((readl(card->membase + CFG) | NS_CFG_EFBIE),
+		pete_writel("drivers/atm/nicstar.c:1052", (pete_readl("drivers/atm/nicstar.c:1052", card->membase + CFG) | NS_CFG_EFBIE),
 		       card->membase + CFG);
 	}
 
@@ -1072,38 +1072,38 @@ static irqreturn_t ns_irq_handler(int irq, void *dev_id)
 
 	spin_lock_irqsave(&card->int_lock, flags);
 
-	stat_r = readl(card->membase + STAT);
+	stat_r = pete_readl("drivers/atm/nicstar.c:1075", card->membase + STAT);
 
 	/* Transmit Status Indicator has been written to T. S. Queue */
 	if (stat_r & NS_STAT_TSIF) {
 		TXPRINTK("nicstar%d: TSI interrupt\n", card->index);
 		process_tsq(card);
-		writel(NS_STAT_TSIF, card->membase + STAT);
+		pete_writel("drivers/atm/nicstar.c:1081", NS_STAT_TSIF, card->membase + STAT);
 	}
 
 	/* Incomplete CS-PDU has been transmitted */
 	if (stat_r & NS_STAT_TXICP) {
-		writel(NS_STAT_TXICP, card->membase + STAT);
+		pete_writel("drivers/atm/nicstar.c:1086", NS_STAT_TXICP, card->membase + STAT);
 		TXPRINTK("nicstar%d: Incomplete CS-PDU transmitted.\n",
 			 card->index);
 	}
 
 	/* Transmit Status Queue 7/8 full */
 	if (stat_r & NS_STAT_TSQF) {
-		writel(NS_STAT_TSQF, card->membase + STAT);
+		pete_writel("drivers/atm/nicstar.c:1093", NS_STAT_TSQF, card->membase + STAT);
 		PRINTK("nicstar%d: TSQ full.\n", card->index);
 		process_tsq(card);
 	}
 
 	/* Timer overflow */
 	if (stat_r & NS_STAT_TMROF) {
-		writel(NS_STAT_TMROF, card->membase + STAT);
+		pete_writel("drivers/atm/nicstar.c:1100", NS_STAT_TMROF, card->membase + STAT);
 		PRINTK("nicstar%d: Timer overflow.\n", card->index);
 	}
 
 	/* PHY device interrupt signal active */
 	if (stat_r & NS_STAT_PHYI) {
-		writel(NS_STAT_PHYI, card->membase + STAT);
+		pete_writel("drivers/atm/nicstar.c:1106", NS_STAT_PHYI, card->membase + STAT);
 		PRINTK("nicstar%d: PHY interrupt.\n", card->index);
 		if (dev->phy && dev->phy->interrupt) {
 			dev->phy->interrupt(dev);
@@ -1112,21 +1112,21 @@ static irqreturn_t ns_irq_handler(int irq, void *dev_id)
 
 	/* Small Buffer Queue is full */
 	if (stat_r & NS_STAT_SFBQF) {
-		writel(NS_STAT_SFBQF, card->membase + STAT);
+		pete_writel("drivers/atm/nicstar.c:1115", NS_STAT_SFBQF, card->membase + STAT);
 		printk("nicstar%d: Small free buffer queue is full.\n",
 		       card->index);
 	}
 
 	/* Large Buffer Queue is full */
 	if (stat_r & NS_STAT_LFBQF) {
-		writel(NS_STAT_LFBQF, card->membase + STAT);
+		pete_writel("drivers/atm/nicstar.c:1122", NS_STAT_LFBQF, card->membase + STAT);
 		printk("nicstar%d: Large free buffer queue is full.\n",
 		       card->index);
 	}
 
 	/* Receive Status Queue is full */
 	if (stat_r & NS_STAT_RSQF) {
-		writel(NS_STAT_RSQF, card->membase + STAT);
+		pete_writel("drivers/atm/nicstar.c:1129", NS_STAT_RSQF, card->membase + STAT);
 		printk("nicstar%d: RSQ full.\n", card->index);
 		process_rsq(card);
 	}
@@ -1135,12 +1135,12 @@ static irqreturn_t ns_irq_handler(int irq, void *dev_id)
 	if (stat_r & NS_STAT_EOPDU) {
 		RXPRINTK("nicstar%d: End of CS-PDU received.\n", card->index);
 		process_rsq(card);
-		writel(NS_STAT_EOPDU, card->membase + STAT);
+		pete_writel("drivers/atm/nicstar.c:1138", NS_STAT_EOPDU, card->membase + STAT);
 	}
 
 	/* Raw cell received */
 	if (stat_r & NS_STAT_RAWCF) {
-		writel(NS_STAT_RAWCF, card->membase + STAT);
+		pete_writel("drivers/atm/nicstar.c:1143", NS_STAT_RAWCF, card->membase + STAT);
 #ifndef RCQ_SUPPORT
 		printk("nicstar%d: Raw cell received and no support yet...\n",
 		       card->index);
@@ -1148,7 +1148,7 @@ static irqreturn_t ns_irq_handler(int irq, void *dev_id)
 		/* NOTE: the following procedure may keep a raw cell pending until the
 		   next interrupt. As this preliminary support is only meant to
 		   avoid buffer leakage, this is not an issue. */
-		while (readl(card->membase + RAWCT) != card->rawch) {
+		while (pete_readl("drivers/atm/nicstar.c:1151", card->membase + RAWCT) != card->rawch) {
 
 			if (ns_rcqe_islast(card->rawcell)) {
 				struct sk_buff *oldbuf;
@@ -1172,13 +1172,13 @@ static irqreturn_t ns_irq_handler(int irq, void *dev_id)
 		int i;
 		struct sk_buff *sb;
 
-		writel(NS_STAT_SFBQE, card->membase + STAT);
+		pete_writel("drivers/atm/nicstar.c:1175", NS_STAT_SFBQE, card->membase + STAT);
 		printk("nicstar%d: Small free buffer queue empty.\n",
 		       card->index);
 		for (i = 0; i < card->sbnr.min; i++) {
 			sb = dev_alloc_skb(NS_SMSKBSIZE);
 			if (sb == NULL) {
-				writel(readl(card->membase + CFG) &
+				pete_writel("drivers/atm/nicstar.c:1181", pete_readl("drivers/atm/nicstar.c:1181", card->membase + CFG) &
 				       ~NS_CFG_EFBIE, card->membase + CFG);
 				card->efbie = 0;
 				break;
@@ -1197,13 +1197,13 @@ static irqreturn_t ns_irq_handler(int irq, void *dev_id)
 		int i;
 		struct sk_buff *lb;
 
-		writel(NS_STAT_LFBQE, card->membase + STAT);
+		pete_writel("drivers/atm/nicstar.c:1200", NS_STAT_LFBQE, card->membase + STAT);
 		printk("nicstar%d: Large free buffer queue empty.\n",
 		       card->index);
 		for (i = 0; i < card->lbnr.min; i++) {
 			lb = dev_alloc_skb(NS_LGSKBSIZE);
 			if (lb == NULL) {
-				writel(readl(card->membase + CFG) &
+				pete_writel("drivers/atm/nicstar.c:1206", pete_readl("drivers/atm/nicstar.c:1206", card->membase + CFG) &
 				       ~NS_CFG_EFBIE, card->membase + CFG);
 				card->efbie = 0;
 				break;
@@ -1219,7 +1219,7 @@ static irqreturn_t ns_irq_handler(int irq, void *dev_id)
 
 	/* Receive Status Queue is 7/8 full */
 	if (stat_r & NS_STAT_RSQAF) {
-		writel(NS_STAT_RSQAF, card->membase + STAT);
+		pete_writel("drivers/atm/nicstar.c:1222", NS_STAT_RSQAF, card->membase + STAT);
 		RXPRINTK("nicstar%d: RSQ almost full.\n", card->index);
 		process_rsq(card);
 	}
@@ -1434,7 +1434,7 @@ static void ns_close(struct atm_vcc *vcc)
 		    (vcc->vpi << card->vcibits | vcc->vci) * NS_RCT_ENTRY_SIZE;
 		spin_lock_irqsave(&card->res_lock, flags);
 		while (CMD_BUSY(card)) ;
-		writel(NS_CMD_CLOSE_CONNECTION | addr << 2,
+		pete_writel("drivers/atm/nicstar.c:1437", NS_CMD_CLOSE_CONNECTION | addr << 2,
 		       card->membase + CMD);
 		spin_unlock_irqrestore(&card->res_lock, flags);
 
@@ -1443,7 +1443,7 @@ static void ns_close(struct atm_vcc *vcc)
 			struct sk_buff *iovb;
 			u32 stat;
 
-			stat = readl(card->membase + STAT);
+			stat = pete_readl("drivers/atm/nicstar.c:1446", card->membase + STAT);
 			card->sbfqc = ns_stat_sfbqc_get(stat);
 			card->lbfqc = ns_stat_lfbqc_get(stat);
 
@@ -1552,17 +1552,17 @@ static void ns_close(struct atm_vcc *vcc)
 #ifdef RX_DEBUG
 	{
 		u32 stat, cfg;
-		stat = readl(card->membase + STAT);
-		cfg = readl(card->membase + CFG);
+		stat = pete_readl("drivers/atm/nicstar.c:1555", card->membase + STAT);
+		cfg = pete_readl("drivers/atm/nicstar.c:1556", card->membase + CFG);
 		printk("STAT = 0x%08X  CFG = 0x%08X  \n", stat, cfg);
 		printk
 		    ("TSQ: base = 0x%p  next = 0x%p  last = 0x%p  TSQT = 0x%08X \n",
 		     card->tsq.base, card->tsq.next,
-		     card->tsq.last, readl(card->membase + TSQT));
+		     card->tsq.last, pete_readl("drivers/atm/nicstar.c:1561", card->membase + TSQT));
 		printk
 		    ("RSQ: base = 0x%p  next = 0x%p  last = 0x%p  RSQT = 0x%08X \n",
 		     card->rsq.base, card->rsq.next,
-		     card->rsq.last, readl(card->membase + RSQT));
+		     card->rsq.last, pete_readl("drivers/atm/nicstar.c:1565", card->membase + RSQT));
 		printk("Empty free buffer queue interrupt %s \n",
 		       card->efbie ? "enabled" : "disabled");
 		printk("SBCNT = %d  count = %d   LBCNT = %d count = %d \n",
@@ -1913,7 +1913,7 @@ static void process_tsq(ns_dev * card)
 	}
 
 	if (serviced_entries)
-		writel(PTR_DIFF(previous, card->tsq.base),
+		pete_writel("drivers/atm/nicstar.c:1916", PTR_DIFF(previous, card->tsq.base),
 		       card->membase + TSQH);
 }
 
@@ -1974,7 +1974,7 @@ static void process_rsq(ns_dev * card)
 		else
 			card->rsq.next++;
 	} while (ns_rsqe_valid(card->rsq.next));
-	writel(PTR_DIFF(previous, card->rsq.base), card->membase + RSQH);
+	pete_writel("drivers/atm/nicstar.c:1977", PTR_DIFF(previous, card->rsq.base), card->membase + RSQH);
 }
 
 static void dequeue_rx(ns_dev * card, ns_rsqe * rsqe)
@@ -1990,7 +1990,7 @@ static void dequeue_rx(ns_dev * card, ns_rsqe * rsqe)
 	u32 stat;
 	u32 id;
 
-	stat = readl(card->membase + STAT);
+	stat = pete_readl("drivers/atm/nicstar.c:1993", card->membase + STAT);
 	card->sbfqc = ns_stat_sfbqc_get(stat);
 	card->lbfqc = ns_stat_lfbqc_get(stat);
 
@@ -2416,7 +2416,7 @@ static int ns_proc_read(struct atm_dev *dev, loff_t * pos, char *page)
 
 	left = (int)*pos;
 	card = (ns_dev *) dev->dev_data;
-	stat = readl(card->membase + STAT);
+	stat = pete_readl("drivers/atm/nicstar.c:2419", card->membase + STAT);
 	if (!left--)
 		return sprintf(page, "Pool   count    min   init    max \n");
 	if (!left--)
@@ -2452,10 +2452,10 @@ static int ns_proc_read(struct atm_dev *dev, loff_t * pos, char *page)
 
 		for (i = 0; i < 4; i++) {
 			while (CMD_BUSY(card)) ;
-			writel(NS_CMD_READ_UTILITY | 0x00000200 | i,
+			pete_writel("drivers/atm/nicstar.c:2455", NS_CMD_READ_UTILITY | 0x00000200 | i,
 			       card->membase + CMD);
 			while (CMD_BUSY(card)) ;
-			phy_regs[i] = readl(card->membase + DR0) & 0x000000FF;
+			phy_regs[i] = pete_readl("drivers/atm/nicstar.c:2458", card->membase + DR0) & 0x000000FF;
 		}
 
 		return sprintf(page, "PHY regs: 0x%02X 0x%02X 0x%02X 0x%02X \n",
@@ -2493,7 +2493,7 @@ static int ns_ioctl(struct atm_dev *dev, unsigned int cmd, void __user * arg)
 		switch (pl.buftype) {
 		case NS_BUFTYPE_SMALL:
 			pl.count =
-			    ns_stat_sfbqc_get(readl(card->membase + STAT));
+			    ns_stat_sfbqc_get(pete_readl("drivers/atm/nicstar.c:2496", card->membase + STAT));
 			pl.level.min = card->sbnr.min;
 			pl.level.init = card->sbnr.init;
 			pl.level.max = card->sbnr.max;
@@ -2501,7 +2501,7 @@ static int ns_ioctl(struct atm_dev *dev, unsigned int cmd, void __user * arg)
 
 		case NS_BUFTYPE_LARGE:
 			pl.count =
-			    ns_stat_lfbqc_get(readl(card->membase + STAT));
+			    ns_stat_lfbqc_get(pete_readl("drivers/atm/nicstar.c:2504", card->membase + STAT));
 			pl.level.min = card->lbnr.min;
 			pl.level.init = card->lbnr.init;
 			pl.level.max = card->lbnr.max;
@@ -2712,7 +2712,7 @@ static void ns_poll(struct timer_list *unused)
 		}
 
 		stat_w = 0;
-		stat_r = readl(card->membase + STAT);
+		stat_r = pete_readl("drivers/atm/nicstar.c:2715", card->membase + STAT);
 		if (stat_r & NS_STAT_TSIF)
 			stat_w |= NS_STAT_TSIF;
 		if (stat_r & NS_STAT_EOPDU)
@@ -2721,7 +2721,7 @@ static void ns_poll(struct timer_list *unused)
 		process_tsq(card);
 		process_rsq(card);
 
-		writel(stat_w, card->membase + STAT);
+		pete_writel("drivers/atm/nicstar.c:2724", stat_w, card->membase + STAT);
 		spin_unlock_irqrestore(&card->int_lock, flags);
 	}
 	mod_timer(&ns_timer, jiffies + NS_POLL_PERIOD);
@@ -2737,8 +2737,8 @@ static void ns_phy_put(struct atm_dev *dev, unsigned char value,
 	card = dev->dev_data;
 	spin_lock_irqsave(&card->res_lock, flags);
 	while (CMD_BUSY(card)) ;
-	writel((u32) value, card->membase + DR0);
-	writel(NS_CMD_WRITE_UTILITY | 0x00000200 | (addr & 0x000000FF),
+	pete_writel("drivers/atm/nicstar.c:2740", (u32) value, card->membase + DR0);
+	pete_writel("drivers/atm/nicstar.c:2741", NS_CMD_WRITE_UTILITY | 0x00000200 | (addr & 0x000000FF),
 	       card->membase + CMD);
 	spin_unlock_irqrestore(&card->res_lock, flags);
 }
@@ -2752,10 +2752,10 @@ static unsigned char ns_phy_get(struct atm_dev *dev, unsigned long addr)
 	card = dev->dev_data;
 	spin_lock_irqsave(&card->res_lock, flags);
 	while (CMD_BUSY(card)) ;
-	writel(NS_CMD_READ_UTILITY | 0x00000200 | (addr & 0x000000FF),
+	pete_writel("drivers/atm/nicstar.c:2755", NS_CMD_READ_UTILITY | 0x00000200 | (addr & 0x000000FF),
 	       card->membase + CMD);
 	while (CMD_BUSY(card)) ;
-	data = readl(card->membase + DR0) & 0x000000FF;
+	data = pete_readl("drivers/atm/nicstar.c:2758", card->membase + DR0) & 0x000000FF;
 	spin_unlock_irqrestore(&card->res_lock, flags);
 	return (unsigned char)data;
 }

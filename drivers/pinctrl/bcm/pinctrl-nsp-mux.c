@@ -444,10 +444,10 @@ static int nsp_pinmux_set(struct nsp_pinctrl *pinctrl,
 	}
 
 	spin_lock_irqsave(&pinctrl->lock, flags);
-	val = readl(base_address);
+	val = pete_readl("drivers/pinctrl/bcm/pinctrl-nsp-mux.c:447", base_address);
 	val &= ~(mask << grp->mux.shift);
 	val |= grp->mux.alt << grp->mux.shift;
-	writel(val, base_address);
+	pete_writel("drivers/pinctrl/bcm/pinctrl-nsp-mux.c:450", val, base_address);
 	spin_unlock_irqrestore(&pinctrl->lock, flags);
 
 	return 0;
@@ -487,11 +487,11 @@ static int nsp_gpio_request_enable(struct pinctrl_dev *pctrl_dev,
 	unsigned long flags;
 
 	spin_lock_irqsave(&pinctrl->lock, flags);
-	val = readl(pinctrl->base0);
+	val = pete_readl("drivers/pinctrl/bcm/pinctrl-nsp-mux.c:490", pinctrl->base0);
 	if ((val & BIT(pin)) != (*gpio_select << pin)) {
 		val &= ~BIT(pin);
 		val |= *gpio_select << pin;
-		writel(val, pinctrl->base0);
+		pete_writel("drivers/pinctrl/bcm/pinctrl-nsp-mux.c:494", val, pinctrl->base0);
 	}
 	spin_unlock_irqrestore(&pinctrl->lock, flags);
 
@@ -508,12 +508,12 @@ static void nsp_gpio_disable_free(struct pinctrl_dev *pctrl_dev,
 	unsigned long flags;
 
 	spin_lock_irqsave(&pinctrl->lock, flags);
-	val = readl(pinctrl->base0);
+	val = pete_readl("drivers/pinctrl/bcm/pinctrl-nsp-mux.c:511", pinctrl->base0);
 	if ((val & (1 << pin)) == (*gpio_select << pin)) {
 		val &= ~(1 << pin);
 		if (!(*gpio_select))
 			val |= (1 << pin);
-		writel(val, pinctrl->base0);
+		pete_writel("drivers/pinctrl/bcm/pinctrl-nsp-mux.c:516", val, pinctrl->base0);
 	}
 	spin_unlock_irqrestore(&pinctrl->lock, flags);
 }

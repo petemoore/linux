@@ -108,13 +108,13 @@ ad1889_writew(struct snd_ad1889 *chip, unsigned reg, u16 val)
 static inline u32
 ad1889_readl(struct snd_ad1889 *chip, unsigned reg)
 {
-	return readl(chip->iobase + reg);
+	return pete_readl("sound/pci/ad1889.c:111", chip->iobase + reg);
 }
 
 static inline void
 ad1889_writel(struct snd_ad1889 *chip, unsigned reg, u32 val)
 {
-	writel(val, chip->iobase + reg);
+	pete_writel("sound/pci/ad1889.c:117", val, chip->iobase + reg);
 }
 
 static inline void

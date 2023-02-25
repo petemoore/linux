@@ -23,8 +23,8 @@
 #include "exynos_drm_ipp.h"
 #include "regs-scaler.h"
 
-#define scaler_read(offset)		readl(scaler->regs + (offset))
-#define scaler_write(cfg, offset)	writel(cfg, scaler->regs + (offset))
+#define scaler_read(offset)		pete_readl("drivers/gpu/drm/exynos/exynos_drm_scaler.c:26", scaler->regs + (offset))
+#define scaler_write(cfg, offset)	pete_writel("drivers/gpu/drm/exynos/exynos_drm_scaler.c:27", cfg, scaler->regs + (offset))
 #define SCALER_MAX_CLK			4
 #define SCALER_AUTOSUSPEND_DELAY	2000
 #define SCALER_RESET_WAIT_RETRIES	100

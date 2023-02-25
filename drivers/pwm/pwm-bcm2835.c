@@ -40,10 +40,10 @@ static int bcm2835_pwm_request(struct pwm_chip *chip, struct pwm_device *pwm)
 	struct bcm2835_pwm *pc = to_bcm2835_pwm(chip);
 	u32 value;
 
-	value = readl(pc->base + PWM_CONTROL);
+	value = pete_readl("drivers/pwm/pwm-bcm2835.c:43", pc->base + PWM_CONTROL);
 	value &= ~(PWM_CONTROL_MASK << PWM_CONTROL_SHIFT(pwm->hwpwm));
 	value |= (PWM_MODE << PWM_CONTROL_SHIFT(pwm->hwpwm));
-	writel(value, pc->base + PWM_CONTROL);
+	pete_writel("drivers/pwm/pwm-bcm2835.c:46", value, pc->base + PWM_CONTROL);
 
 	return 0;
 }
@@ -53,9 +53,9 @@ static void bcm2835_pwm_free(struct pwm_chip *chip, struct pwm_device *pwm)
 	struct bcm2835_pwm *pc = to_bcm2835_pwm(chip);
 	u32 value;
 
-	value = readl(pc->base + PWM_CONTROL);
+	value = pete_readl("drivers/pwm/pwm-bcm2835.c:56", pc->base + PWM_CONTROL);
 	value &= ~(PWM_CONTROL_MASK << PWM_CONTROL_SHIFT(pwm->hwpwm));
-	writel(value, pc->base + PWM_CONTROL);
+	pete_writel("drivers/pwm/pwm-bcm2835.c:58", value, pc->base + PWM_CONTROL);
 }
 
 static int bcm2835_pwm_apply(struct pwm_chip *chip, struct pwm_device *pwm,
@@ -100,14 +100,14 @@ static int bcm2835_pwm_apply(struct pwm_chip *chip, struct pwm_device *pwm,
 	if (period_cycles < PERIOD_MIN)
 		return -EINVAL;
 
-	writel(period_cycles, pc->base + PERIOD(pwm->hwpwm));
+	pete_writel("drivers/pwm/pwm-bcm2835.c:103", period_cycles, pc->base + PERIOD(pwm->hwpwm));
 
 	/* set duty cycle */
 	val = DIV_ROUND_CLOSEST_ULL(state->duty_cycle * rate, NSEC_PER_SEC);
-	writel(val, pc->base + DUTY(pwm->hwpwm));
+	pete_writel("drivers/pwm/pwm-bcm2835.c:107", val, pc->base + DUTY(pwm->hwpwm));
 
 	/* set polarity */
-	val = readl(pc->base + PWM_CONTROL);
+	val = pete_readl("drivers/pwm/pwm-bcm2835.c:110", pc->base + PWM_CONTROL);
 
 	if (state->polarity == PWM_POLARITY_NORMAL)
 		val &= ~(PWM_POLARITY << PWM_CONTROL_SHIFT(pwm->hwpwm));
@@ -120,7 +120,7 @@ static int bcm2835_pwm_apply(struct pwm_chip *chip, struct pwm_device *pwm,
 	else
 		val &= ~(PWM_ENABLE << PWM_CONTROL_SHIFT(pwm->hwpwm));
 
-	writel(val, pc->base + PWM_CONTROL);
+	pete_writel("drivers/pwm/pwm-bcm2835.c:123", val, pc->base + PWM_CONTROL);
 
 	return 0;
 }

@@ -132,7 +132,7 @@ static int ssb_extpci_read_config(struct ssb_pcicore *pc,
 		goto unmap;
 	}
 
-	val = readl(mmio);
+	val = pete_readl("drivers/ssb/driver_pcicore.c:135", mmio);
 	val >>= (8 * (off & 3));
 
 	switch (len) {
@@ -180,12 +180,12 @@ static int ssb_extpci_write_config(struct ssb_pcicore *pc,
 
 	switch (len) {
 	case 1:
-		val = readl(mmio);
+		val = pete_readl("drivers/ssb/driver_pcicore.c:183", mmio);
 		val &= ~(0xFF << (8 * (off & 3)));
 		val |= *((const u8 *)buf) << (8 * (off & 3));
 		break;
 	case 2:
-		val = readl(mmio);
+		val = pete_readl("drivers/ssb/driver_pcicore.c:188", mmio);
 		val &= ~(0xFFFF << (8 * (off & 3)));
 		val |= *((const u16 *)buf) << (8 * (off & 3));
 		break;
@@ -193,7 +193,7 @@ static int ssb_extpci_write_config(struct ssb_pcicore *pc,
 		val = *((const u32 *)buf);
 		break;
 	}
-	writel(val, mmio);
+	pete_writel("drivers/ssb/driver_pcicore.c:196", val, mmio);
 
 	err = 0;
 unmap:

@@ -189,11 +189,11 @@ static void sc520cdp_setup_par(void)
 	*/
 	for(i = 0; i < NUM_FLASH_BANKS; i++) {		/* for each par_table entry  */
 		for(j = 0; j < NUM_SC520_PAR; j++) {	/* for each PAR register     */
-			mmcr_val = readl(&mmcr[SC520_PAR(j)]);
+			mmcr_val = pete_readl("drivers/mtd/maps/sc520cdp.c:192", &mmcr[SC520_PAR(j)]);
 			/* if target device field matches, reprogram the PAR */
 			if((mmcr_val & SC520_PAR_TRGDEV) == par_table[i].trgdev)
 			{
-				writel(par_table[i].new_par, &mmcr[SC520_PAR(j)]);
+				pete_writel("drivers/mtd/maps/sc520cdp.c:196", par_table[i].new_par, &mmcr[SC520_PAR(j)]);
 				break;
 			}
 		}

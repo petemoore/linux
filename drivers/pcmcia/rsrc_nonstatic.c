@@ -309,7 +309,7 @@ static int checksum(struct pcmcia_socket *s, struct resource *res,
 
 		/* Don't bother checking every word... */
 		for (i = 0; i < s->map_size; i += 44) {
-			d = readl(virt+i);
+			d = pete_readl("drivers/pcmcia/rsrc_nonstatic.c:312", virt+i);
 			a += d;
 			b &= d;
 		}

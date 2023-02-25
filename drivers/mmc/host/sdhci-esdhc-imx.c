@@ -371,7 +371,7 @@ static inline void esdhc_clrset_le(struct sdhci_host *host, u32 mask, u32 val, i
 	void __iomem *base = host->ioaddr + (reg & ~0x3);
 	u32 shift = (reg & 0x3) * 8;
 
-	writel(((readl(base) & ~(mask << shift)) | (val << shift)), base);
+	pete_writel("drivers/mmc/host/sdhci-esdhc-imx.c:374", ((pete_readl("drivers/mmc/host/sdhci-esdhc-imx.c:374", base) & ~(mask << shift)) | (val << shift)), base);
 }
 
 #define DRIVER_NAME "sdhci-esdhc-imx"
@@ -418,7 +418,7 @@ static inline void usdhc_auto_tuning_mode_sel(struct sdhci_host *host)
 {
 	u32 buswidth, auto_tune_buswidth;
 
-	buswidth = USDHC_GET_BUSWIDTH(readl(host->ioaddr + SDHCI_HOST_CONTROL));
+	buswidth = USDHC_GET_BUSWIDTH(pete_readl("drivers/mmc/host/sdhci-esdhc-imx.c:421", host->ioaddr + SDHCI_HOST_CONTROL));
 
 	switch (buswidth) {
 	case ESDHC_CTRL_8BITBUS:
@@ -441,7 +441,7 @@ static u32 esdhc_readl_le(struct sdhci_host *host, int reg)
 {
 	struct sdhci_pltfm_host *pltfm_host = sdhci_priv(host);
 	struct pltfm_imx_data *imx_data = sdhci_pltfm_priv(pltfm_host);
-	u32 val = readl(host->ioaddr + reg);
+	u32 val = pete_readl("drivers/mmc/host/sdhci-esdhc-imx.c:444", host->ioaddr + reg);
 
 	if (unlikely(reg == SDHCI_PRESENT_STATE)) {
 		u32 fsl_prss = val;
@@ -474,7 +474,7 @@ static u32 esdhc_readl_le(struct sdhci_host *host, int reg)
 	if (unlikely(reg == SDHCI_CAPABILITIES_1)) {
 		if (esdhc_is_usdhc(imx_data)) {
 			if (imx_data->socdata->flags & ESDHC_FLAG_HAVE_CAP1)
-				val = readl(host->ioaddr + SDHCI_CAPABILITIES) & 0xFFFF;
+				val = pete_readl("drivers/mmc/host/sdhci-esdhc-imx.c:477", host->ioaddr + SDHCI_CAPABILITIES) & 0xFFFF;
 			else
 				/* imx6q/dl does not have cap_1 register, fake one */
 				val = SDHCI_SUPPORT_DDR50 | SDHCI_SUPPORT_SDR104
@@ -514,7 +514,7 @@ static u32 esdhc_readl_le(struct sdhci_host *host, int reg)
 		if ((imx_data->multiblock_status == WAIT_FOR_INT) &&
 		    ((val & SDHCI_INT_RESPONSE) == SDHCI_INT_RESPONSE)) {
 			val &= ~SDHCI_INT_RESPONSE;
-			writel(SDHCI_INT_RESPONSE, host->ioaddr +
+			pete_writel("drivers/mmc/host/sdhci-esdhc-imx.c:517", SDHCI_INT_RESPONSE, host->ioaddr +
 						   SDHCI_INT_STATUS);
 			imx_data->multiblock_status = NO_CMD_PENDING;
 		}
@@ -540,11 +540,11 @@ static void esdhc_writel_le(struct sdhci_host *host, u32 val, int reg)
 			 * interrupt. In case a card interrupt was lost,
 			 * re-sample it by the following steps.
 			 */
-			data = readl(host->ioaddr + SDHCI_HOST_CONTROL);
+			data = pete_readl("drivers/mmc/host/sdhci-esdhc-imx.c:543", host->ioaddr + SDHCI_HOST_CONTROL);
 			data &= ~ESDHC_CTRL_D3CD;
-			writel(data, host->ioaddr + SDHCI_HOST_CONTROL);
+			pete_writel("drivers/mmc/host/sdhci-esdhc-imx.c:545", data, host->ioaddr + SDHCI_HOST_CONTROL);
 			data |= ESDHC_CTRL_D3CD;
-			writel(data, host->ioaddr + SDHCI_HOST_CONTROL);
+			pete_writel("drivers/mmc/host/sdhci-esdhc-imx.c:547", data, host->ioaddr + SDHCI_HOST_CONTROL);
 		}
 
 		if (val & SDHCI_INT_ADMA_ERROR) {
@@ -557,21 +557,21 @@ static void esdhc_writel_le(struct sdhci_host *host, u32 val, int reg)
 				&& (reg == SDHCI_INT_STATUS)
 				&& (val & SDHCI_INT_DATA_END))) {
 			u32 v;
-			v = readl(host->ioaddr + ESDHC_VENDOR_SPEC);
+			v = pete_readl("drivers/mmc/host/sdhci-esdhc-imx.c:560", host->ioaddr + ESDHC_VENDOR_SPEC);
 			v &= ~ESDHC_VENDOR_SPEC_SDIO_QUIRK;
-			writel(v, host->ioaddr + ESDHC_VENDOR_SPEC);
+			pete_writel("drivers/mmc/host/sdhci-esdhc-imx.c:562", v, host->ioaddr + ESDHC_VENDOR_SPEC);
 
 			if (imx_data->multiblock_status == MULTIBLK_IN_PROCESS)
 			{
 				/* send a manual CMD12 with RESPTYP=none */
 				data = MMC_STOP_TRANSMISSION << 24 |
 				       SDHCI_CMD_ABORTCMD << 16;
-				writel(data, host->ioaddr + SDHCI_TRANSFER_MODE);
+				pete_writel("drivers/mmc/host/sdhci-esdhc-imx.c:569", data, host->ioaddr + SDHCI_TRANSFER_MODE);
 				imx_data->multiblock_status = WAIT_FOR_INT;
 			}
 	}
 
-	writel(val, host->ioaddr + reg);
+	pete_writel("drivers/mmc/host/sdhci-esdhc-imx.c:574", val, host->ioaddr + reg);
 }
 
 static u16 esdhc_readw_le(struct sdhci_host *host, int reg)
@@ -593,16 +593,16 @@ static u16 esdhc_readw_le(struct sdhci_host *host, int reg)
 	}
 
 	if (unlikely(reg == SDHCI_HOST_CONTROL2)) {
-		val = readl(host->ioaddr + ESDHC_VENDOR_SPEC);
+		val = pete_readl("drivers/mmc/host/sdhci-esdhc-imx.c:596", host->ioaddr + ESDHC_VENDOR_SPEC);
 		if (val & ESDHC_VENDOR_SPEC_VSELECT)
 			ret |= SDHCI_CTRL_VDD_180;
 
 		if (esdhc_is_usdhc(imx_data)) {
 			if (imx_data->socdata->flags & ESDHC_FLAG_MAN_TUNING)
-				val = readl(host->ioaddr + ESDHC_MIX_CTRL);
+				val = pete_readl("drivers/mmc/host/sdhci-esdhc-imx.c:602", host->ioaddr + ESDHC_MIX_CTRL);
 			else if (imx_data->socdata->flags & ESDHC_FLAG_STD_TUNING)
 				/* the std tuning bits is in ACMD12_ERR for imx6sl */
-				val = readl(host->ioaddr + SDHCI_AUTO_CMD_STATUS);
+				val = pete_readl("drivers/mmc/host/sdhci-esdhc-imx.c:605", host->ioaddr + SDHCI_AUTO_CMD_STATUS);
 		}
 
 		if (val & ESDHC_MIX_CTRL_EXE_TUNE)
@@ -617,7 +617,7 @@ static u16 esdhc_readw_le(struct sdhci_host *host, int reg)
 
 	if (unlikely(reg == SDHCI_TRANSFER_MODE)) {
 		if (esdhc_is_usdhc(imx_data)) {
-			u32 m = readl(host->ioaddr + ESDHC_MIX_CTRL);
+			u32 m = pete_readl("drivers/mmc/host/sdhci-esdhc-imx.c:620", host->ioaddr + ESDHC_MIX_CTRL);
 			ret = m & ESDHC_MIX_CTRL_SDHCI_MASK;
 			/* Swap AC23 bit */
 			if (m & ESDHC_MIX_CTRL_AC23EN) {
@@ -642,25 +642,25 @@ static void esdhc_writew_le(struct sdhci_host *host, u16 val, int reg)
 
 	switch (reg) {
 	case SDHCI_CLOCK_CONTROL:
-		new_val = readl(host->ioaddr + ESDHC_VENDOR_SPEC);
+		new_val = pete_readl("drivers/mmc/host/sdhci-esdhc-imx.c:645", host->ioaddr + ESDHC_VENDOR_SPEC);
 		if (val & SDHCI_CLOCK_CARD_EN)
 			new_val |= ESDHC_VENDOR_SPEC_FRC_SDCLK_ON;
 		else
 			new_val &= ~ESDHC_VENDOR_SPEC_FRC_SDCLK_ON;
-		writel(new_val, host->ioaddr + ESDHC_VENDOR_SPEC);
+		pete_writel("drivers/mmc/host/sdhci-esdhc-imx.c:650", new_val, host->ioaddr + ESDHC_VENDOR_SPEC);
 		if (!(new_val & ESDHC_VENDOR_SPEC_FRC_SDCLK_ON))
 			esdhc_wait_for_card_clock_gate_off(host);
 		return;
 	case SDHCI_HOST_CONTROL2:
-		new_val = readl(host->ioaddr + ESDHC_VENDOR_SPEC);
+		new_val = pete_readl("drivers/mmc/host/sdhci-esdhc-imx.c:655", host->ioaddr + ESDHC_VENDOR_SPEC);
 		if (val & SDHCI_CTRL_VDD_180)
 			new_val |= ESDHC_VENDOR_SPEC_VSELECT;
 		else
 			new_val &= ~ESDHC_VENDOR_SPEC_VSELECT;
-		writel(new_val, host->ioaddr + ESDHC_VENDOR_SPEC);
+		pete_writel("drivers/mmc/host/sdhci-esdhc-imx.c:660", new_val, host->ioaddr + ESDHC_VENDOR_SPEC);
 		if (imx_data->socdata->flags & ESDHC_FLAG_STD_TUNING) {
-			u32 v = readl(host->ioaddr + SDHCI_AUTO_CMD_STATUS);
-			u32 m = readl(host->ioaddr + ESDHC_MIX_CTRL);
+			u32 v = pete_readl("drivers/mmc/host/sdhci-esdhc-imx.c:662", host->ioaddr + SDHCI_AUTO_CMD_STATUS);
+			u32 m = pete_readl("drivers/mmc/host/sdhci-esdhc-imx.c:663", host->ioaddr + ESDHC_MIX_CTRL);
 			if (val & SDHCI_CTRL_TUNED_CLK) {
 				v |= ESDHC_MIX_CTRL_SMPCLK_SEL;
 			} else {
@@ -678,8 +678,8 @@ static void esdhc_writew_le(struct sdhci_host *host, u16 val, int reg)
 				v &= ~ESDHC_MIX_CTRL_EXE_TUNE;
 			}
 
-			writel(v, host->ioaddr + SDHCI_AUTO_CMD_STATUS);
-			writel(m, host->ioaddr + ESDHC_MIX_CTRL);
+			pete_writel("drivers/mmc/host/sdhci-esdhc-imx.c:681", v, host->ioaddr + SDHCI_AUTO_CMD_STATUS);
+			pete_writel("drivers/mmc/host/sdhci-esdhc-imx.c:682", m, host->ioaddr + ESDHC_MIX_CTRL);
 		}
 		return;
 	case SDHCI_TRANSFER_MODE:
@@ -688,27 +688,27 @@ static void esdhc_writew_le(struct sdhci_host *host, u16 val, int reg)
 				&& (host->cmd->data->blocks > 1)
 				&& (host->cmd->data->flags & MMC_DATA_READ)) {
 			u32 v;
-			v = readl(host->ioaddr + ESDHC_VENDOR_SPEC);
+			v = pete_readl("drivers/mmc/host/sdhci-esdhc-imx.c:691", host->ioaddr + ESDHC_VENDOR_SPEC);
 			v |= ESDHC_VENDOR_SPEC_SDIO_QUIRK;
-			writel(v, host->ioaddr + ESDHC_VENDOR_SPEC);
+			pete_writel("drivers/mmc/host/sdhci-esdhc-imx.c:693", v, host->ioaddr + ESDHC_VENDOR_SPEC);
 		}
 
 		if (esdhc_is_usdhc(imx_data)) {
 			u32 wml;
-			u32 m = readl(host->ioaddr + ESDHC_MIX_CTRL);
+			u32 m = pete_readl("drivers/mmc/host/sdhci-esdhc-imx.c:698", host->ioaddr + ESDHC_MIX_CTRL);
 			/* Swap AC23 bit */
 			if (val & SDHCI_TRNS_AUTO_CMD23) {
 				val &= ~SDHCI_TRNS_AUTO_CMD23;
 				val |= ESDHC_MIX_CTRL_AC23EN;
 			}
 			m = val | (m & ~ESDHC_MIX_CTRL_SDHCI_MASK);
-			writel(m, host->ioaddr + ESDHC_MIX_CTRL);
+			pete_writel("drivers/mmc/host/sdhci-esdhc-imx.c:705", m, host->ioaddr + ESDHC_MIX_CTRL);
 
 			/* Set watermark levels for PIO access to maximum value
 			 * (128 words) to accommodate full 512 bytes buffer.
 			 * For DMA access restore the levels to default value.
 			 */
-			m = readl(host->ioaddr + ESDHC_WTMK_LVL);
+			m = pete_readl("drivers/mmc/host/sdhci-esdhc-imx.c:711", host->ioaddr + ESDHC_WTMK_LVL);
 			if (val & SDHCI_TRNS_DMA) {
 				wml = ESDHC_WTMK_LVL_WML_VAL_DEF;
 			} else {
@@ -731,7 +731,7 @@ static void esdhc_writew_le(struct sdhci_host *host, u16 val, int reg)
 			       ESDHC_WTMK_LVL_WR_WML_MASK);
 			m |= (wml << ESDHC_WTMK_LVL_RD_WML_SHIFT) |
 			     (wml << ESDHC_WTMK_LVL_WR_WML_SHIFT);
-			writel(m, host->ioaddr + ESDHC_WTMK_LVL);
+			pete_writel("drivers/mmc/host/sdhci-esdhc-imx.c:734", m, host->ioaddr + ESDHC_WTMK_LVL);
 		} else {
 			/*
 			 * Postpone this write, we must do it together with a
@@ -749,10 +749,10 @@ static void esdhc_writew_le(struct sdhci_host *host, u16 val, int reg)
 			imx_data->multiblock_status = MULTIBLK_IN_PROCESS;
 
 		if (esdhc_is_usdhc(imx_data))
-			writel(val << 16,
+			pete_writel("drivers/mmc/host/sdhci-esdhc-imx.c:752", val << 16,
 			       host->ioaddr + SDHCI_TRANSFER_MODE);
 		else
-			writel(val << 16 | imx_data->scratchpad,
+			pete_writel("drivers/mmc/host/sdhci-esdhc-imx.c:755", val << 16 | imx_data->scratchpad,
 			       host->ioaddr + SDHCI_TRANSFER_MODE);
 		return;
 	case SDHCI_BLOCK_SIZE:
@@ -769,7 +769,7 @@ static u8 esdhc_readb_le(struct sdhci_host *host, int reg)
 
 	switch (reg) {
 	case SDHCI_HOST_CONTROL:
-		val = readl(host->ioaddr + reg);
+		val = pete_readl("drivers/mmc/host/sdhci-esdhc-imx.c:772", host->ioaddr + reg);
 
 		ret = val & SDHCI_CTRL_LED;
 		ret |= (val >> 5) & SDHCI_CTRL_DMA_MASK;
@@ -818,7 +818,7 @@ static void esdhc_writeb_le(struct sdhci_host *host, u8 val, int reg)
 		return;
 	case SDHCI_SOFTWARE_RESET:
 		if (val & SDHCI_RESET_DATA)
-			new_val = readl(host->ioaddr + SDHCI_HOST_CONTROL);
+			new_val = pete_readl("drivers/mmc/host/sdhci-esdhc-imx.c:821", host->ioaddr + SDHCI_HOST_CONTROL);
 		break;
 	}
 	esdhc_clrset_le(host, 0xff, val, reg);
@@ -843,8 +843,8 @@ static void esdhc_writeb_le(struct sdhci_host *host, u8 val, int reg)
 				/*
 				 * the tuning bits should be kept during reset
 				 */
-				new_val = readl(host->ioaddr + ESDHC_MIX_CTRL);
-				writel(new_val & ESDHC_MIX_CTRL_TUNING_MASK,
+				new_val = pete_readl("drivers/mmc/host/sdhci-esdhc-imx.c:846", host->ioaddr + ESDHC_MIX_CTRL);
+				pete_writel("drivers/mmc/host/sdhci-esdhc-imx.c:847", new_val & ESDHC_MIX_CTRL_TUNING_MASK,
 						host->ioaddr + ESDHC_MIX_CTRL);
 				imx_data->is_ddr = 0;
 			}
@@ -887,8 +887,8 @@ static inline void esdhc_pltfm_set_clock(struct sdhci_host *host,
 	u32 temp, val;
 
 	if (esdhc_is_usdhc(imx_data)) {
-		val = readl(host->ioaddr + ESDHC_VENDOR_SPEC);
-		writel(val & ~ESDHC_VENDOR_SPEC_FRC_SDCLK_ON,
+		val = pete_readl("drivers/mmc/host/sdhci-esdhc-imx.c:890", host->ioaddr + ESDHC_VENDOR_SPEC);
+		pete_writel("drivers/mmc/host/sdhci-esdhc-imx.c:891", val & ~ESDHC_VENDOR_SPEC_FRC_SDCLK_ON,
 			host->ioaddr + ESDHC_VENDOR_SPEC);
 		esdhc_wait_for_card_clock_gate_off(host);
 	}
@@ -904,10 +904,10 @@ static inline void esdhc_pltfm_set_clock(struct sdhci_host *host,
 		 * According to the i.MX53 reference manual, if DLLCTRL[10] can
 		 * be set, then the controller is eSDHCv3, else it is eSDHCv2.
 		 */
-		val = readl(host->ioaddr + ESDHC_DLL_CTRL);
-		writel(val | BIT(10), host->ioaddr + ESDHC_DLL_CTRL);
-		temp = readl(host->ioaddr + ESDHC_DLL_CTRL);
-		writel(val, host->ioaddr + ESDHC_DLL_CTRL);
+		val = pete_readl("drivers/mmc/host/sdhci-esdhc-imx.c:907", host->ioaddr + ESDHC_DLL_CTRL);
+		pete_writel("drivers/mmc/host/sdhci-esdhc-imx.c:908", val | BIT(10), host->ioaddr + ESDHC_DLL_CTRL);
+		temp = pete_readl("drivers/mmc/host/sdhci-esdhc-imx.c:909", host->ioaddr + ESDHC_DLL_CTRL);
+		pete_writel("drivers/mmc/host/sdhci-esdhc-imx.c:910", val, host->ioaddr + ESDHC_DLL_CTRL);
 		if (temp & BIT(10))
 			pre_div = 2;
 	}
@@ -952,8 +952,8 @@ static inline void esdhc_pltfm_set_clock(struct sdhci_host *host,
 		dev_warn(mmc_dev(host->mmc), "card clock still not stable in 100us!.\n");
 
 	if (esdhc_is_usdhc(imx_data)) {
-		val = readl(host->ioaddr + ESDHC_VENDOR_SPEC);
-		writel(val | ESDHC_VENDOR_SPEC_FRC_SDCLK_ON,
+		val = pete_readl("drivers/mmc/host/sdhci-esdhc-imx.c:955", host->ioaddr + ESDHC_VENDOR_SPEC);
+		pete_writel("drivers/mmc/host/sdhci-esdhc-imx.c:956", val | ESDHC_VENDOR_SPEC_FRC_SDCLK_ON,
 			host->ioaddr + ESDHC_VENDOR_SPEC);
 	}
 
@@ -969,7 +969,7 @@ static unsigned int esdhc_pltfm_get_ro(struct sdhci_host *host)
 	case ESDHC_WP_GPIO:
 		return mmc_gpio_get_ro(host->mmc);
 	case ESDHC_WP_CONTROLLER:
-		return !(readl(host->ioaddr + SDHCI_PRESENT_STATE) &
+		return !(pete_readl("drivers/mmc/host/sdhci-esdhc-imx.c:972", host->ioaddr + SDHCI_PRESENT_STATE) &
 			       SDHCI_WRITE_PROTECT);
 	case ESDHC_WP_NONE:
 		break;
@@ -1029,14 +1029,14 @@ static void esdhc_prepare_tuning(struct sdhci_host *host, u32 val)
 		dev_warn(mmc_dev(host->mmc),
 		"warning! RESET_ALL never complete before sending tuning command\n");
 
-	reg = readl(host->ioaddr + ESDHC_MIX_CTRL);
+	reg = pete_readl("drivers/mmc/host/sdhci-esdhc-imx.c:1032", host->ioaddr + ESDHC_MIX_CTRL);
 	reg |= ESDHC_MIX_CTRL_EXE_TUNE | ESDHC_MIX_CTRL_SMPCLK_SEL |
 			ESDHC_MIX_CTRL_FBCLK_SEL;
-	writel(reg, host->ioaddr + ESDHC_MIX_CTRL);
-	writel(val << 8, host->ioaddr + ESDHC_TUNE_CTRL_STATUS);
+	pete_writel("drivers/mmc/host/sdhci-esdhc-imx.c:1035", reg, host->ioaddr + ESDHC_MIX_CTRL);
+	pete_writel("drivers/mmc/host/sdhci-esdhc-imx.c:1036", val << 8, host->ioaddr + ESDHC_TUNE_CTRL_STATUS);
 	dev_dbg(mmc_dev(host->mmc),
 		"tuning with delay 0x%x ESDHC_TUNE_CTRL_STATUS 0x%x\n",
-			val, readl(host->ioaddr + ESDHC_TUNE_CTRL_STATUS));
+			val, pete_readl("drivers/mmc/host/sdhci-esdhc-imx.c:1039", host->ioaddr + ESDHC_TUNE_CTRL_STATUS));
 }
 
 static void esdhc_post_tuning(struct sdhci_host *host)
@@ -1045,10 +1045,10 @@ static void esdhc_post_tuning(struct sdhci_host *host)
 
 	usdhc_auto_tuning_mode_sel(host);
 
-	reg = readl(host->ioaddr + ESDHC_MIX_CTRL);
+	reg = pete_readl("drivers/mmc/host/sdhci-esdhc-imx.c:1048", host->ioaddr + ESDHC_MIX_CTRL);
 	reg &= ~ESDHC_MIX_CTRL_EXE_TUNE;
 	reg |= ESDHC_MIX_CTRL_AUTO_TUNE_EN;
-	writel(reg, host->ioaddr + ESDHC_MIX_CTRL);
+	pete_writel("drivers/mmc/host/sdhci-esdhc-imx.c:1051", reg, host->ioaddr + ESDHC_MIX_CTRL);
 }
 
 static int esdhc_executing_tuning(struct sdhci_host *host, u32 opcode)
@@ -1092,12 +1092,12 @@ static void esdhc_hs400_enhanced_strobe(struct mmc_host *mmc, struct mmc_ios *io
 	struct sdhci_host *host = mmc_priv(mmc);
 	u32 m;
 
-	m = readl(host->ioaddr + ESDHC_MIX_CTRL);
+	m = pete_readl("drivers/mmc/host/sdhci-esdhc-imx.c:1095", host->ioaddr + ESDHC_MIX_CTRL);
 	if (ios->enhanced_strobe)
 		m |= ESDHC_MIX_CTRL_HS400_ES_EN;
 	else
 		m &= ~ESDHC_MIX_CTRL_HS400_ES_EN;
-	writel(m, host->ioaddr + ESDHC_MIX_CTRL);
+	pete_writel("drivers/mmc/host/sdhci-esdhc-imx.c:1100", m, host->ioaddr + ESDHC_MIX_CTRL);
 }
 
 static int esdhc_change_pinstate(struct sdhci_host *host,
@@ -1150,16 +1150,16 @@ static void esdhc_set_strobe_dll(struct sdhci_host *host)
 	int ret;
 
 	/* disable clock before enabling strobe dll */
-	writel(readl(host->ioaddr + ESDHC_VENDOR_SPEC) &
+	pete_writel("drivers/mmc/host/sdhci-esdhc-imx.c:1153", pete_readl("drivers/mmc/host/sdhci-esdhc-imx.c:1153", host->ioaddr + ESDHC_VENDOR_SPEC) &
 		~ESDHC_VENDOR_SPEC_FRC_SDCLK_ON,
 		host->ioaddr + ESDHC_VENDOR_SPEC);
 	esdhc_wait_for_card_clock_gate_off(host);
 
 	/* force a reset on strobe dll */
-	writel(ESDHC_STROBE_DLL_CTRL_RESET,
+	pete_writel("drivers/mmc/host/sdhci-esdhc-imx.c:1159", ESDHC_STROBE_DLL_CTRL_RESET,
 		host->ioaddr + ESDHC_STROBE_DLL_CTRL);
 	/* clear the reset bit on strobe dll before any setting */
-	writel(0, host->ioaddr + ESDHC_STROBE_DLL_CTRL);
+	pete_writel("drivers/mmc/host/sdhci-esdhc-imx.c:1162", 0, host->ioaddr + ESDHC_STROBE_DLL_CTRL);
 
 	/*
 	 * enable strobe dll ctrl and adjust the delay target
@@ -1172,7 +1172,7 @@ static void esdhc_set_strobe_dll(struct sdhci_host *host)
 	v = ESDHC_STROBE_DLL_CTRL_ENABLE |
 		ESDHC_STROBE_DLL_CTRL_SLV_UPDATE_INT_DEFAULT |
 		(strobe_delay << ESDHC_STROBE_DLL_CTRL_SLV_DLY_TARGET_SHIFT);
-	writel(v, host->ioaddr + ESDHC_STROBE_DLL_CTRL);
+	pete_writel("drivers/mmc/host/sdhci-esdhc-imx.c:1175", v, host->ioaddr + ESDHC_STROBE_DLL_CTRL);
 
 	/* wait max 50us to get the REF/SLV lock */
 	ret = readl_poll_timeout(host->ioaddr + ESDHC_STROBE_DLL_STATUS, v,
@@ -1192,16 +1192,16 @@ static void esdhc_reset_tuning(struct sdhci_host *host)
 	/* Reset the tuning circuit */
 	if (esdhc_is_usdhc(imx_data)) {
 		if (imx_data->socdata->flags & ESDHC_FLAG_MAN_TUNING) {
-			ctrl = readl(host->ioaddr + ESDHC_MIX_CTRL);
+			ctrl = pete_readl("drivers/mmc/host/sdhci-esdhc-imx.c:1195", host->ioaddr + ESDHC_MIX_CTRL);
 			ctrl &= ~ESDHC_MIX_CTRL_SMPCLK_SEL;
 			ctrl &= ~ESDHC_MIX_CTRL_FBCLK_SEL;
-			writel(ctrl, host->ioaddr + ESDHC_MIX_CTRL);
-			writel(0, host->ioaddr + ESDHC_TUNE_CTRL_STATUS);
+			pete_writel("drivers/mmc/host/sdhci-esdhc-imx.c:1198", ctrl, host->ioaddr + ESDHC_MIX_CTRL);
+			pete_writel("drivers/mmc/host/sdhci-esdhc-imx.c:1199", 0, host->ioaddr + ESDHC_TUNE_CTRL_STATUS);
 		} else if (imx_data->socdata->flags & ESDHC_FLAG_STD_TUNING) {
-			ctrl = readl(host->ioaddr + SDHCI_AUTO_CMD_STATUS);
+			ctrl = pete_readl("drivers/mmc/host/sdhci-esdhc-imx.c:1201", host->ioaddr + SDHCI_AUTO_CMD_STATUS);
 			ctrl &= ~ESDHC_MIX_CTRL_SMPCLK_SEL;
 			ctrl &= ~ESDHC_MIX_CTRL_EXE_TUNE;
-			writel(ctrl, host->ioaddr + SDHCI_AUTO_CMD_STATUS);
+			pete_writel("drivers/mmc/host/sdhci-esdhc-imx.c:1204", ctrl, host->ioaddr + SDHCI_AUTO_CMD_STATUS);
 			/* Make sure ESDHC_MIX_CTRL_EXE_TUNE cleared */
 			ret = readl_poll_timeout(host->ioaddr + SDHCI_AUTO_CMD_STATUS,
 				ctrl, !(ctrl & ESDHC_MIX_CTRL_EXE_TUNE), 1, 50);
@@ -1213,9 +1213,9 @@ static void esdhc_reset_tuning(struct sdhci_host *host)
 			 * usdhc IP internal logic flag execute_tuning_with_clr_buf, which
 			 * will finally make sure the normal data transfer logic correct.
 			 */
-			ctrl = readl(host->ioaddr + SDHCI_INT_STATUS);
+			ctrl = pete_readl("drivers/mmc/host/sdhci-esdhc-imx.c:1216", host->ioaddr + SDHCI_INT_STATUS);
 			ctrl |= SDHCI_INT_DATA_AVAIL;
-			writel(ctrl, host->ioaddr + SDHCI_INT_STATUS);
+			pete_writel("drivers/mmc/host/sdhci-esdhc-imx.c:1218", ctrl, host->ioaddr + SDHCI_INT_STATUS);
 		}
 	}
 }
@@ -1228,7 +1228,7 @@ static void esdhc_set_uhs_signaling(struct sdhci_host *host, unsigned timing)
 	struct esdhc_platform_data *boarddata = &imx_data->boarddata;
 
 	/* disable ddr mode and disable HS400 mode */
-	m = readl(host->ioaddr + ESDHC_MIX_CTRL);
+	m = pete_readl("drivers/mmc/host/sdhci-esdhc-imx.c:1231", host->ioaddr + ESDHC_MIX_CTRL);
 	m &= ~(ESDHC_MIX_CTRL_DDREN | ESDHC_MIX_CTRL_HS400_EN);
 	imx_data->is_ddr = 0;
 
@@ -1239,12 +1239,12 @@ static void esdhc_set_uhs_signaling(struct sdhci_host *host, unsigned timing)
 	case MMC_TIMING_UHS_SDR104:
 	case MMC_TIMING_MMC_HS:
 	case MMC_TIMING_MMC_HS200:
-		writel(m, host->ioaddr + ESDHC_MIX_CTRL);
+		pete_writel("drivers/mmc/host/sdhci-esdhc-imx.c:1242", m, host->ioaddr + ESDHC_MIX_CTRL);
 		break;
 	case MMC_TIMING_UHS_DDR50:
 	case MMC_TIMING_MMC_DDR52:
 		m |= ESDHC_MIX_CTRL_DDREN;
-		writel(m, host->ioaddr + ESDHC_MIX_CTRL);
+		pete_writel("drivers/mmc/host/sdhci-esdhc-imx.c:1247", m, host->ioaddr + ESDHC_MIX_CTRL);
 		imx_data->is_ddr = 1;
 		if (boarddata->delay_line) {
 			u32 v;
@@ -1253,12 +1253,12 @@ static void esdhc_set_uhs_signaling(struct sdhci_host *host, unsigned timing)
 				(1 << ESDHC_DLL_OVERRIDE_EN_SHIFT);
 			if (is_imx53_esdhc(imx_data))
 				v <<= 1;
-			writel(v, host->ioaddr + ESDHC_DLL_CTRL);
+			pete_writel("drivers/mmc/host/sdhci-esdhc-imx.c:1256", v, host->ioaddr + ESDHC_DLL_CTRL);
 		}
 		break;
 	case MMC_TIMING_MMC_HS400:
 		m |= ESDHC_MIX_CTRL_DDREN | ESDHC_MIX_CTRL_HS400_EN;
-		writel(m, host->ioaddr + ESDHC_MIX_CTRL);
+		pete_writel("drivers/mmc/host/sdhci-esdhc-imx.c:1261", m, host->ioaddr + ESDHC_MIX_CTRL);
 		imx_data->is_ddr = 1;
 		/* update clock after enable DDR for strobe DLL lock */
 		host->ops->set_clock(host, host->clock);
@@ -1354,7 +1354,7 @@ static void sdhci_esdhc_imx_hwinit(struct sdhci_host *host)
 		 * The imx6q ROM code will change the default watermark
 		 * level setting to something insane.  Change it back here.
 		 */
-		writel(ESDHC_WTMK_DEFAULT_VAL, host->ioaddr + ESDHC_WTMK_LVL);
+		pete_writel("drivers/mmc/host/sdhci-esdhc-imx.c:1357", ESDHC_WTMK_DEFAULT_VAL, host->ioaddr + ESDHC_WTMK_LVL);
 
 		/*
 		 * ROM code will change the bit burst_length_enable setting
@@ -1367,7 +1367,7 @@ static void sdhci_esdhc_imx_hwinit(struct sdhci_host *host)
 		 * advance. And without burst length indicator, AHB INCR
 		 * transfer can only be converted to singles on the AXI side.
 		 */
-		writel(readl(host->ioaddr + SDHCI_HOST_CONTROL)
+		pete_writel("drivers/mmc/host/sdhci-esdhc-imx.c:1370", pete_readl("drivers/mmc/host/sdhci-esdhc-imx.c:1370", host->ioaddr + SDHCI_HOST_CONTROL)
 			| ESDHC_BURST_LEN_EN_INCR,
 			host->ioaddr + SDHCI_HOST_CONTROL);
 
@@ -1375,11 +1375,11 @@ static void sdhci_esdhc_imx_hwinit(struct sdhci_host *host)
 		 * erratum ESDHC_FLAG_ERR004536 fix for MX6Q TO1.2 and MX6DL
 		 * TO1.1, it's harmless for MX6SL
 		 */
-		writel(readl(host->ioaddr + 0x6c) & ~BIT(7),
+		pete_writel("drivers/mmc/host/sdhci-esdhc-imx.c:1378", pete_readl("drivers/mmc/host/sdhci-esdhc-imx.c:1378", host->ioaddr + 0x6c) & ~BIT(7),
 			host->ioaddr + 0x6c);
 
 		/* disable DLL_CTRL delay line settings */
-		writel(0x0, host->ioaddr + ESDHC_DLL_CTRL);
+		pete_writel("drivers/mmc/host/sdhci-esdhc-imx.c:1382", 0x0, host->ioaddr + ESDHC_DLL_CTRL);
 
 		/*
 		 * For the case of command with busy, if set the bit
@@ -1391,15 +1391,15 @@ static void sdhci_esdhc_imx_hwinit(struct sdhci_host *host)
 		 * hardware interrupt issue.
 		 */
 		if (imx_data->socdata->flags & ESDHC_FLAG_CQHCI) {
-			tmp = readl(host->ioaddr + ESDHC_VEND_SPEC2);
+			tmp = pete_readl("drivers/mmc/host/sdhci-esdhc-imx.c:1394", host->ioaddr + ESDHC_VEND_SPEC2);
 			tmp |= ESDHC_VEND_SPEC2_EN_BUSY_IRQ;
-			writel(tmp, host->ioaddr + ESDHC_VEND_SPEC2);
+			pete_writel("drivers/mmc/host/sdhci-esdhc-imx.c:1396", tmp, host->ioaddr + ESDHC_VEND_SPEC2);
 
 			host->quirks &= ~SDHCI_QUIRK_NO_BUSY_IRQ;
 		}
 
 		if (imx_data->socdata->flags & ESDHC_FLAG_STD_TUNING) {
-			tmp = readl(host->ioaddr + ESDHC_TUNING_CTRL);
+			tmp = pete_readl("drivers/mmc/host/sdhci-esdhc-imx.c:1402", host->ioaddr + ESDHC_TUNING_CTRL);
 			tmp |= ESDHC_STD_TUNING_EN;
 
 			/*
@@ -1431,16 +1431,16 @@ static void sdhci_esdhc_imx_hwinit(struct sdhci_host *host)
 			 * after the whole tuning procedure always can't get any response.
 			 */
 			tmp |= ESDHC_TUNING_CMD_CRC_CHECK_DISABLE;
-			writel(tmp, host->ioaddr + ESDHC_TUNING_CTRL);
+			pete_writel("drivers/mmc/host/sdhci-esdhc-imx.c:1434", tmp, host->ioaddr + ESDHC_TUNING_CTRL);
 		} else if (imx_data->socdata->flags & ESDHC_FLAG_MAN_TUNING) {
 			/*
 			 * ESDHC_STD_TUNING_EN may be configed in bootloader
 			 * or ROM code, so clear this bit here to make sure
 			 * the manual tuning can work.
 			 */
-			tmp = readl(host->ioaddr + ESDHC_TUNING_CTRL);
+			tmp = pete_readl("drivers/mmc/host/sdhci-esdhc-imx.c:1441", host->ioaddr + ESDHC_TUNING_CTRL);
 			tmp &= ~ESDHC_STD_TUNING_EN;
-			writel(tmp, host->ioaddr + ESDHC_TUNING_CTRL);
+			pete_writel("drivers/mmc/host/sdhci-esdhc-imx.c:1443", tmp, host->ioaddr + ESDHC_TUNING_CTRL);
 		}
 
 		/*
@@ -1641,9 +1641,9 @@ static int sdhci_esdhc_imx_probe(struct platform_device *pdev)
 			host->quirks2 |= SDHCI_QUIRK2_BROKEN_HS200;
 
 		/* clear tuning bits in case ROM has set it already */
-		writel(0x0, host->ioaddr + ESDHC_MIX_CTRL);
-		writel(0x0, host->ioaddr + SDHCI_AUTO_CMD_STATUS);
-		writel(0x0, host->ioaddr + ESDHC_TUNE_CTRL_STATUS);
+		pete_writel("drivers/mmc/host/sdhci-esdhc-imx.c:1644", 0x0, host->ioaddr + ESDHC_MIX_CTRL);
+		pete_writel("drivers/mmc/host/sdhci-esdhc-imx.c:1645", 0x0, host->ioaddr + SDHCI_AUTO_CMD_STATUS);
+		pete_writel("drivers/mmc/host/sdhci-esdhc-imx.c:1646", 0x0, host->ioaddr + ESDHC_TUNE_CTRL_STATUS);
 
 		/*
 		 * Link usdhc specific mmc_host_ops execute_tuning function,
@@ -1736,7 +1736,7 @@ static int sdhci_esdhc_imx_remove(struct platform_device *pdev)
 	int dead;
 
 	pm_runtime_get_sync(&pdev->dev);
-	dead = (readl(host->ioaddr + SDHCI_INT_STATUS) == 0xffffffff);
+	dead = (pete_readl("drivers/mmc/host/sdhci-esdhc-imx.c:1739", host->ioaddr + SDHCI_INT_STATUS) == 0xffffffff);
 	pm_runtime_disable(&pdev->dev);
 	pm_runtime_put_noidle(&pdev->dev);
 

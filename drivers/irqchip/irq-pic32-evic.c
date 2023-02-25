@@ -44,7 +44,7 @@ asmlinkage void __weak plat_irq_dispatch(void)
 {
 	unsigned int hwirq;
 
-	hwirq = readl(evic_base + REG_INTSTAT) & 0xFF;
+	hwirq = pete_readl("drivers/irqchip/irq-pic32-evic.c:47", evic_base + REG_INTSTAT) & 0xFF;
 	do_domain_IRQ(evic_irq_domain, hwirq);
 }
 
@@ -61,10 +61,10 @@ static int pic32_set_ext_polarity(int bit, u32 type)
 	 */
 	switch (type) {
 	case IRQ_TYPE_EDGE_RISING:
-		writel(BIT(bit), evic_base + PIC32_SET(REG_INTCON));
+		pete_writel("drivers/irqchip/irq-pic32-evic.c:64", BIT(bit), evic_base + PIC32_SET(REG_INTCON));
 		break;
 	case IRQ_TYPE_EDGE_FALLING:
-		writel(BIT(bit), evic_base + PIC32_CLR(REG_INTCON));
+		pete_writel("drivers/irqchip/irq-pic32-evic.c:67", BIT(bit), evic_base + PIC32_CLR(REG_INTCON));
 		break;
 	default:
 		return -EINVAL;
@@ -99,7 +99,7 @@ static int pic32_set_type_edge(struct irq_data *data,
 
 static void pic32_bind_evic_interrupt(int irq, int set)
 {
-	writel(set, evic_base + REG_OFF_OFFSET + irq * 4);
+	pete_writel("drivers/irqchip/irq-pic32-evic.c:102", set, evic_base + REG_OFF_OFFSET + irq * 4);
 }
 
 static void pic32_set_irq_priority(int irq, int priority)
@@ -109,9 +109,9 @@ static void pic32_set_irq_priority(int irq, int priority)
 	reg = irq / 4;
 	shift = (irq % 4) * 8;
 
-	writel(PRIORITY_MASK << shift,
+	pete_writel("drivers/irqchip/irq-pic32-evic.c:112", PRIORITY_MASK << shift,
 		evic_base + PIC32_CLR(REG_IPC_OFFSET + reg * 0x10));
-	writel(priority << shift,
+	pete_writel("drivers/irqchip/irq-pic32-evic.c:114", priority << shift,
 		evic_base + PIC32_SET(REG_IPC_OFFSET + reg * 0x10));
 }
 
@@ -152,8 +152,8 @@ static int pic32_irq_domain_map(struct irq_domain *d, unsigned int virq,
 	ifsclr = PIC32_CLR(REG_IFS_OFFSET + reg * 0x10);
 
 	/* mask and clear flag */
-	writel(mask, evic_base + iecclr);
-	writel(mask, evic_base + ifsclr);
+	pete_writel("drivers/irqchip/irq-pic32-evic.c:155", mask, evic_base + iecclr);
+	pete_writel("drivers/irqchip/irq-pic32-evic.c:156", mask, evic_base + ifsclr);
 
 	/* default priority is required */
 	pic32_set_irq_priority(hw, PIC32_INT_PRI(2, 0));

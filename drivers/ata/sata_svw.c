@@ -107,7 +107,7 @@ static int k2_sata_scr_read(struct ata_link *link,
 {
 	if (sc_reg > SCR_CONTROL)
 		return -EINVAL;
-	*val = readl(link->ap->ioaddr.scr_addr + (sc_reg * 4));
+	*val = pete_readl("drivers/ata/sata_svw.c:110", link->ap->ioaddr.scr_addr + (sc_reg * 4));
 	return 0;
 }
 
@@ -117,7 +117,7 @@ static int k2_sata_scr_write(struct ata_link *link,
 {
 	if (sc_reg > SCR_CONTROL)
 		return -EINVAL;
-	writel(val, link->ap->ioaddr.scr_addr + (sc_reg * 4));
+	pete_writel("drivers/ata/sata_svw.c:120", val, link->ap->ioaddr.scr_addr + (sc_reg * 4));
 	return 0;
 }
 
@@ -236,7 +236,7 @@ static void k2_bmdma_setup_mmio(struct ata_queued_cmd *qc)
 
 	/* load PRD table addr. */
 	mb();	/* make sure PRD table writes are visible to controller */
-	writel(ap->bmdma_prd_dma, mmio + ATA_DMA_TABLE_OFS);
+	pete_writel("drivers/ata/sata_svw.c:239", ap->bmdma_prd_dma, mmio + ATA_DMA_TABLE_OFS);
 
 	/* specify data direction, triple-check start bit is clear */
 	dmactl = readb(mmio + ATA_DMA_CMD);
@@ -297,7 +297,7 @@ static void k2_bmdma_start_mmio(struct ata_queued_cmd *qc)
 
 static u8 k2_stat_check_status(struct ata_port *ap)
 {
-	return readl(ap->ioaddr.status_addr);
+	return pete_readl("drivers/ata/sata_svw.c:300", ap->ioaddr.status_addr);
 }
 
 static int k2_sata_show_info(struct seq_file *m, struct Scsi_Host *shost)
@@ -479,12 +479,12 @@ static int k2_sata_init_one(struct pci_dev *pdev, const struct pci_device_id *en
 	 * some funky seagate drives (though so far, those were already
 	 * set by the firmware on the machines I had access to)
 	 */
-	writel(readl(mmio_base + K2_SATA_SICR1_OFFSET) & ~0x00040000,
+	pete_writel("drivers/ata/sata_svw.c:482", pete_readl("drivers/ata/sata_svw.c:482", mmio_base + K2_SATA_SICR1_OFFSET) & ~0x00040000,
 	       mmio_base + K2_SATA_SICR1_OFFSET);
 
 	/* Clear SATA error & interrupts we don't use */
-	writel(0xffffffff, mmio_base + K2_SATA_SCR_ERROR_OFFSET);
-	writel(0x0, mmio_base + K2_SATA_SIM_OFFSET);
+	pete_writel("drivers/ata/sata_svw.c:486", 0xffffffff, mmio_base + K2_SATA_SCR_ERROR_OFFSET);
+	pete_writel("drivers/ata/sata_svw.c:487", 0x0, mmio_base + K2_SATA_SIM_OFFSET);
 
 	pci_set_master(pdev);
 	return ata_host_activate(host, pdev->irq, ata_bmdma_interrupt,

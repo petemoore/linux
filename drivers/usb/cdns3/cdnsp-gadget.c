@@ -74,7 +74,7 @@ int cdnsp_find_next_ext_cap(void __iomem *base, u32 start, int id)
 	u32 val;
 
 	if (!start || start == HCC_PARAMS_OFFSET) {
-		val = readl(base + HCC_PARAMS_OFFSET);
+		val = pete_readl("drivers/usb/cdns3/cdnsp-gadget.c:77", base + HCC_PARAMS_OFFSET);
 		if (val == ~0)
 			return 0;
 
@@ -84,7 +84,7 @@ int cdnsp_find_next_ext_cap(void __iomem *base, u32 start, int id)
 	};
 
 	do {
-		val = readl(base + offset);
+		val = pete_readl("drivers/usb/cdns3/cdnsp-gadget.c:87", base + offset);
 		if (val == ~0)
 			return 0;
 
@@ -105,10 +105,10 @@ void cdnsp_set_link_state(struct cdnsp_device *pdev,
 	int port_num = 0xFF;
 	u32 temp;
 
-	temp = readl(port_regs);
+	temp = pete_readl("drivers/usb/cdns3/cdnsp-gadget.c:108", port_regs);
 	temp = cdnsp_port_state_to_neutral(temp);
 	temp |= PORT_WKCONN_E | PORT_WKDISC_E;
-	writel(temp, port_regs);
+	pete_writel("drivers/usb/cdns3/cdnsp-gadget.c:111", temp, port_regs);
 
 	temp &= ~PORT_PLS_MASK;
 	temp |= PORT_LINK_STROBE | link_state;
@@ -116,25 +116,25 @@ void cdnsp_set_link_state(struct cdnsp_device *pdev,
 	if (pdev->active_port)
 		port_num = pdev->active_port->port_num;
 
-	trace_cdnsp_handle_port_status(port_num, readl(port_regs));
-	writel(temp, port_regs);
-	trace_cdnsp_link_state_changed(port_num, readl(port_regs));
+	trace_cdnsp_handle_port_status(port_num, pete_readl("drivers/usb/cdns3/cdnsp-gadget.c:119", port_regs));
+	pete_writel("drivers/usb/cdns3/cdnsp-gadget.c:120", temp, port_regs);
+	trace_cdnsp_link_state_changed(port_num, pete_readl("drivers/usb/cdns3/cdnsp-gadget.c:121", port_regs));
 }
 
 static void cdnsp_disable_port(struct cdnsp_device *pdev,
 			       __le32 __iomem *port_regs)
 {
-	u32 temp = cdnsp_port_state_to_neutral(readl(port_regs));
+	u32 temp = cdnsp_port_state_to_neutral(pete_readl("drivers/usb/cdns3/cdnsp-gadget.c:127", port_regs));
 
-	writel(temp | PORT_PED, port_regs);
+	pete_writel("drivers/usb/cdns3/cdnsp-gadget.c:129", temp | PORT_PED, port_regs);
 }
 
 static void cdnsp_clear_port_change_bit(struct cdnsp_device *pdev,
 					__le32 __iomem *port_regs)
 {
-	u32 portsc = readl(port_regs);
+	u32 portsc = pete_readl("drivers/usb/cdns3/cdnsp-gadget.c:135", port_regs);
 
-	writel(cdnsp_port_state_to_neutral(portsc) |
+	pete_writel("drivers/usb/cdns3/cdnsp-gadget.c:137", cdnsp_port_state_to_neutral(portsc) |
 	       (portsc & PORT_CHANGE_BITS), port_regs);
 }
 
@@ -148,8 +148,8 @@ static void cdnsp_set_chicken_bits_2(struct cdnsp_device *pdev, u32 bit)
 	offset = cdnsp_find_next_ext_cap(base, offset, D_XEC_PRE_REGS_CAP);
 	reg = base + offset + REG_CHICKEN_BITS_2_OFFSET;
 
-	bit = readl(reg) | bit;
-	writel(bit, reg);
+	bit = pete_readl("drivers/usb/cdns3/cdnsp-gadget.c:151", reg) | bit;
+	pete_writel("drivers/usb/cdns3/cdnsp-gadget.c:152", bit, reg);
 }
 
 static void cdnsp_clear_chicken_bits_2(struct cdnsp_device *pdev, u32 bit)
@@ -162,8 +162,8 @@ static void cdnsp_clear_chicken_bits_2(struct cdnsp_device *pdev, u32 bit)
 	offset = cdnsp_find_next_ext_cap(base, offset, D_XEC_PRE_REGS_CAP);
 	reg = base + offset + REG_CHICKEN_BITS_2_OFFSET;
 
-	bit = readl(reg) & ~bit;
-	writel(bit, reg);
+	bit = pete_readl("drivers/usb/cdns3/cdnsp-gadget.c:165", reg) & ~bit;
+	pete_writel("drivers/usb/cdns3/cdnsp-gadget.c:166", bit, reg);
 }
 
 /*
@@ -177,13 +177,13 @@ static void cdnsp_quiesce(struct cdnsp_device *pdev)
 
 	mask = ~(u32)(CDNSP_IRQS);
 
-	halted = readl(&pdev->op_regs->status) & STS_HALT;
+	halted = pete_readl("drivers/usb/cdns3/cdnsp-gadget.c:180", &pdev->op_regs->status) & STS_HALT;
 	if (!halted)
 		mask &= ~(CMD_R_S | CMD_DEVEN);
 
-	cmd = readl(&pdev->op_regs->command);
+	cmd = pete_readl("drivers/usb/cdns3/cdnsp-gadget.c:184", &pdev->op_regs->command);
 	cmd &= mask;
-	writel(cmd, &pdev->op_regs->command);
+	pete_writel("drivers/usb/cdns3/cdnsp-gadget.c:186", cmd, &pdev->op_regs->command);
 }
 
 /*
@@ -234,9 +234,9 @@ static int cdnsp_start(struct cdnsp_device *pdev)
 	u32 temp;
 	int ret;
 
-	temp = readl(&pdev->op_regs->command);
+	temp = pete_readl("drivers/usb/cdns3/cdnsp-gadget.c:237", &pdev->op_regs->command);
 	temp |= (CMD_R_S | CMD_DEVEN);
-	writel(temp, &pdev->op_regs->command);
+	pete_writel("drivers/usb/cdns3/cdnsp-gadget.c:239", temp, &pdev->op_regs->command);
 
 	pdev->cdnsp_state = 0;
 
@@ -268,7 +268,7 @@ int cdnsp_reset(struct cdnsp_device *pdev)
 	u32 temp;
 	int ret;
 
-	temp = readl(&pdev->op_regs->status);
+	temp = pete_readl("drivers/usb/cdns3/cdnsp-gadget.c:271", &pdev->op_regs->status);
 
 	if (temp == ~(u32)0) {
 		dev_err(pdev->dev, "Device not accessible, reset failed.\n");
@@ -280,9 +280,9 @@ int cdnsp_reset(struct cdnsp_device *pdev)
 		return -EINVAL;
 	}
 
-	command = readl(&pdev->op_regs->command);
+	command = pete_readl("drivers/usb/cdns3/cdnsp-gadget.c:283", &pdev->op_regs->command);
 	command |= CMD_RESET;
-	writel(command, &pdev->op_regs->command);
+	pete_writel("drivers/usb/cdns3/cdnsp-gadget.c:285", command, &pdev->op_regs->command);
 
 	ret = readl_poll_timeout_atomic(&pdev->op_regs->command, temp,
 					!(temp & CMD_RESET), 1,
@@ -912,15 +912,15 @@ void cdnsp_set_usb2_hardware_lpm(struct cdnsp_device *pdev,
 	trace_cdnsp_lpm(enable);
 
 	if (enable)
-		writel(PORT_BESL(CDNSP_DEFAULT_BESL) | PORT_L1S_NYET | PORT_HLE,
+		pete_writel("drivers/usb/cdns3/cdnsp-gadget.c:915", PORT_BESL(CDNSP_DEFAULT_BESL) | PORT_L1S_NYET | PORT_HLE,
 		       &pdev->active_port->regs->portpmsc);
 	else
-		writel(PORT_L1S_NYET, &pdev->active_port->regs->portpmsc);
+		pete_writel("drivers/usb/cdns3/cdnsp-gadget.c:918", PORT_L1S_NYET, &pdev->active_port->regs->portpmsc);
 }
 
 static int cdnsp_get_frame(struct cdnsp_device *pdev)
 {
-	return readl(&pdev->run_regs->microframe_index) >> 3;
+	return pete_readl("drivers/usb/cdns3/cdnsp-gadget.c:923", &pdev->run_regs->microframe_index) >> 3;
 }
 
 static int cdnsp_gadget_ep_enable(struct usb_ep *ep,
@@ -1245,12 +1245,12 @@ static int cdnsp_run(struct cdnsp_device *pdev,
 
 	temp_64 = cdnsp_read_64(&pdev->ir_set->erst_dequeue);
 	temp_64 &= ~ERST_PTR_MASK;
-	temp = readl(&pdev->ir_set->irq_control);
+	temp = pete_readl("drivers/usb/cdns3/cdnsp-gadget.c:1248", &pdev->ir_set->irq_control);
 	temp &= ~IMOD_INTERVAL_MASK;
 	temp |= ((IMOD_DEFAULT_INTERVAL / 250) & IMOD_INTERVAL_MASK);
-	writel(temp, &pdev->ir_set->irq_control);
+	pete_writel("drivers/usb/cdns3/cdnsp-gadget.c:1251", temp, &pdev->ir_set->irq_control);
 
-	temp = readl(&pdev->port3x_regs->mode_addr);
+	temp = pete_readl("drivers/usb/cdns3/cdnsp-gadget.c:1253", &pdev->port3x_regs->mode_addr);
 
 	switch (speed) {
 	case USB_SPEED_SUPER_PLUS:
@@ -1275,7 +1275,7 @@ static int cdnsp_run(struct cdnsp_device *pdev,
 	}
 
 	if (speed >= USB_SPEED_SUPER) {
-		writel(temp, &pdev->port3x_regs->mode_addr);
+		pete_writel("drivers/usb/cdns3/cdnsp-gadget.c:1278", temp, &pdev->port3x_regs->mode_addr);
 		cdnsp_set_link_state(pdev, &pdev->usb3_port.regs->portsc,
 				     XDEV_RXDETECT);
 	} else {
@@ -1287,7 +1287,7 @@ static int cdnsp_run(struct cdnsp_device *pdev,
 
 	cdnsp_gadget_ep0_desc.wMaxPacketSize = cpu_to_le16(512);
 
-	writel(PORT_REG6_L1_L0_HW_EN | fs_speed, &pdev->port20_regs->port_reg6);
+	pete_writel("drivers/usb/cdns3/cdnsp-gadget.c:1290", PORT_REG6_L1_L0_HW_EN | fs_speed, &pdev->port20_regs->port_reg6);
 
 	ret = cdnsp_start(pdev);
 	if (ret) {
@@ -1295,12 +1295,12 @@ static int cdnsp_run(struct cdnsp_device *pdev,
 		goto err;
 	}
 
-	temp = readl(&pdev->op_regs->command);
+	temp = pete_readl("drivers/usb/cdns3/cdnsp-gadget.c:1298", &pdev->op_regs->command);
 	temp |= (CMD_INTE);
-	writel(temp, &pdev->op_regs->command);
+	pete_writel("drivers/usb/cdns3/cdnsp-gadget.c:1300", temp, &pdev->op_regs->command);
 
-	temp = readl(&pdev->ir_set->irq_pending);
-	writel(IMAN_IE_SET(temp), &pdev->ir_set->irq_pending);
+	temp = pete_readl("drivers/usb/cdns3/cdnsp-gadget.c:1302", &pdev->ir_set->irq_pending);
+	pete_writel("drivers/usb/cdns3/cdnsp-gadget.c:1303", IMAN_IE_SET(temp), &pdev->ir_set->irq_pending);
 
 	trace_cdnsp_init("Controller ready to work");
 	return 0;
@@ -1440,18 +1440,18 @@ static void cdnsp_stop(struct cdnsp_device *pdev)
 	cdnsp_disable_slot(pdev);
 	cdnsp_halt(pdev);
 
-	temp = readl(&pdev->op_regs->status);
-	writel((temp & ~0x1fff) | STS_EINT, &pdev->op_regs->status);
-	temp = readl(&pdev->ir_set->irq_pending);
-	writel(IMAN_IE_CLEAR(temp), &pdev->ir_set->irq_pending);
+	temp = pete_readl("drivers/usb/cdns3/cdnsp-gadget.c:1443", &pdev->op_regs->status);
+	pete_writel("drivers/usb/cdns3/cdnsp-gadget.c:1444", (temp & ~0x1fff) | STS_EINT, &pdev->op_regs->status);
+	temp = pete_readl("drivers/usb/cdns3/cdnsp-gadget.c:1445", &pdev->ir_set->irq_pending);
+	pete_writel("drivers/usb/cdns3/cdnsp-gadget.c:1446", IMAN_IE_CLEAR(temp), &pdev->ir_set->irq_pending);
 
 	cdnsp_clear_port_change_bit(pdev, &pdev->usb2_port.regs->portsc);
 	cdnsp_clear_port_change_bit(pdev, &pdev->usb3_port.regs->portsc);
 
 	/* Clear interrupt line */
-	temp = readl(&pdev->ir_set->irq_pending);
+	temp = pete_readl("drivers/usb/cdns3/cdnsp-gadget.c:1452", &pdev->ir_set->irq_pending);
 	temp |= IMAN_IP;
-	writel(temp, &pdev->ir_set->irq_pending);
+	pete_writel("drivers/usb/cdns3/cdnsp-gadget.c:1454", temp, &pdev->ir_set->irq_pending);
 
 	cdnsp_consume_all_events(pdev);
 	cdnsp_clear_cmd_ring(pdev);
@@ -1490,11 +1490,11 @@ static void __cdnsp_gadget_wakeup(struct cdnsp_device *pdev)
 	u32 portpm, portsc;
 
 	port_regs = pdev->active_port->regs;
-	portsc = readl(&port_regs->portsc) & PORT_PLS_MASK;
+	portsc = pete_readl("drivers/usb/cdns3/cdnsp-gadget.c:1493", &port_regs->portsc) & PORT_PLS_MASK;
 
 	/* Remote wakeup feature is not enabled by host. */
 	if (pdev->gadget.speed < USB_SPEED_SUPER && portsc == XDEV_U2) {
-		portpm = readl(&port_regs->portpmsc);
+		portpm = pete_readl("drivers/usb/cdns3/cdnsp-gadget.c:1497", &port_regs->portpmsc);
 
 		if (!(portpm & PORT_RWE))
 			return;
@@ -1579,8 +1579,8 @@ static void cdnsp_get_ep_buffering(struct cdnsp_device *pdev,
 	reg += cdnsp_find_next_ext_cap(reg, 0, XBUF_CAP_ID);
 
 	if (!pep->direction) {
-		pep->buffering = readl(reg + XBUF_RX_TAG_MASK_0_OFFSET);
-		pep->buffering_period = readl(reg + XBUF_RX_TAG_MASK_1_OFFSET);
+		pep->buffering = pete_readl("drivers/usb/cdns3/cdnsp-gadget.c:1582", reg + XBUF_RX_TAG_MASK_0_OFFSET);
+		pep->buffering_period = pete_readl("drivers/usb/cdns3/cdnsp-gadget.c:1583", reg + XBUF_RX_TAG_MASK_1_OFFSET);
 		pep->buffering = (pep->buffering + 1) / 2;
 		pep->buffering_period = (pep->buffering_period + 1) / 2;
 		return;
@@ -1593,7 +1593,7 @@ static void cdnsp_get_ep_buffering(struct cdnsp_device *pdev,
 	/* Set reg to XBUF_TX_TAG_MASK_N related with this endpoint. */
 	reg += pep->number * sizeof(u32) * 2;
 
-	pep->buffering = (readl(reg) + 1) / 2;
+	pep->buffering = (pete_readl("drivers/usb/cdns3/cdnsp-gadget.c:1596", reg) + 1) / 2;
 	pep->buffering_period = pep->buffering;
 }
 
@@ -1741,7 +1741,7 @@ void cdnsp_irq_reset(struct cdnsp_device *pdev)
 	cdnsp_reset_device(pdev);
 
 	port_regs = pdev->active_port->regs;
-	pdev->gadget.speed = cdnsp_port_speed(readl(port_regs));
+	pdev->gadget.speed = cdnsp_port_speed(pete_readl("drivers/usb/cdns3/cdnsp-gadget.c:1744", port_regs));
 
 	spin_unlock(&pdev->lock);
 	usb_gadget_udc_reset(&pdev->gadget, pdev->gadget_driver);
@@ -1777,11 +1777,11 @@ static void cdnsp_get_rev_cap(struct cdnsp_device *pdev)
 	pdev->rev_cap  = reg;
 
 	dev_info(pdev->dev, "Rev: %08x/%08x, eps: %08x, buff: %08x/%08x\n",
-		 readl(&pdev->rev_cap->ctrl_revision),
-		 readl(&pdev->rev_cap->rtl_revision),
-		 readl(&pdev->rev_cap->ep_supported),
-		 readl(&pdev->rev_cap->rx_buff_size),
-		 readl(&pdev->rev_cap->tx_buff_size));
+		 pete_readl("drivers/usb/cdns3/cdnsp-gadget.c:1780", &pdev->rev_cap->ctrl_revision),
+		 pete_readl("drivers/usb/cdns3/cdnsp-gadget.c:1781", &pdev->rev_cap->rtl_revision),
+		 pete_readl("drivers/usb/cdns3/cdnsp-gadget.c:1782", &pdev->rev_cap->ep_supported),
+		 pete_readl("drivers/usb/cdns3/cdnsp-gadget.c:1783", &pdev->rev_cap->rx_buff_size),
+		 pete_readl("drivers/usb/cdns3/cdnsp-gadget.c:1784", &pdev->rev_cap->tx_buff_size));
 }
 
 static int cdnsp_gen_setup(struct cdnsp_device *pdev)
@@ -1791,15 +1791,15 @@ static int cdnsp_gen_setup(struct cdnsp_device *pdev)
 
 	pdev->cap_regs = pdev->regs;
 	pdev->op_regs = pdev->regs +
-		HC_LENGTH(readl(&pdev->cap_regs->hc_capbase));
+		HC_LENGTH(pete_readl("drivers/usb/cdns3/cdnsp-gadget.c:1794", &pdev->cap_regs->hc_capbase));
 	pdev->run_regs = pdev->regs +
-		(readl(&pdev->cap_regs->run_regs_off) & RTSOFF_MASK);
+		(pete_readl("drivers/usb/cdns3/cdnsp-gadget.c:1796", &pdev->cap_regs->run_regs_off) & RTSOFF_MASK);
 
 	/* Cache read-only capability registers */
-	pdev->hcs_params1 = readl(&pdev->cap_regs->hcs_params1);
-	pdev->hcc_params = readl(&pdev->cap_regs->hc_capbase);
+	pdev->hcs_params1 = pete_readl("drivers/usb/cdns3/cdnsp-gadget.c:1799", &pdev->cap_regs->hcs_params1);
+	pdev->hcc_params = pete_readl("drivers/usb/cdns3/cdnsp-gadget.c:1800", &pdev->cap_regs->hc_capbase);
 	pdev->hci_version = HC_VERSION(pdev->hcc_params);
-	pdev->hcc_params = readl(&pdev->cap_regs->hcc_params);
+	pdev->hcc_params = pete_readl("drivers/usb/cdns3/cdnsp-gadget.c:1802", &pdev->cap_regs->hcc_params);
 
 	cdnsp_get_rev_cap(pdev);
 
@@ -1845,9 +1845,9 @@ static int cdnsp_gen_setup(struct cdnsp_device *pdev)
 	 * to U1 the controller starts gating clock, and in some cases,
 	 * it causes that controller stack.
 	 */
-	reg = readl(&pdev->port3x_regs->mode_2);
+	reg = pete_readl("drivers/usb/cdns3/cdnsp-gadget.c:1848", &pdev->port3x_regs->mode_2);
 	reg &= ~CFG_3XPORT_U1_PIPE_CLK_GATE_EN;
-	writel(reg, &pdev->port3x_regs->mode_2);
+	pete_writel("drivers/usb/cdns3/cdnsp-gadget.c:1850", reg, &pdev->port3x_regs->mode_2);
 
 	return 0;
 }

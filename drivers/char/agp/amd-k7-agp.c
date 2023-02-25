@@ -46,8 +46,8 @@ static int amd_create_page_map(struct amd_page_map *page_map)
 	page_map->remapped = page_map->real;
 
 	for (i = 0; i < PAGE_SIZE / sizeof(unsigned long); i++) {
-		writel(agp_bridge->scratch_page, page_map->remapped+i);
-		readl(page_map->remapped+i);	/* PCI Posting. */
+		pete_writel("drivers/char/agp/amd-k7-agp.c:49", agp_bridge->scratch_page, page_map->remapped+i);
+		pete_readl("drivers/char/agp/amd-k7-agp.c:50", page_map->remapped+i);	/* PCI Posting. */
 	}
 
 	return 0;
@@ -155,16 +155,16 @@ static int amd_create_gatt_table(struct agp_bridge_data *bridge)
 
 	/* Calculate the agp offset */
 	for (i = 0; i < value->num_entries / 1024; i++, addr += 0x00400000) {
-		writel(virt_to_phys(amd_irongate_private.gatt_pages[i]->real) | 1,
+		pete_writel("drivers/char/agp/amd-k7-agp.c:158", virt_to_phys(amd_irongate_private.gatt_pages[i]->real) | 1,
 			page_dir.remapped+GET_PAGE_DIR_OFF(addr));
-		readl(page_dir.remapped+GET_PAGE_DIR_OFF(addr));	/* PCI Posting. */
+		pete_readl("drivers/char/agp/amd-k7-agp.c:160", page_dir.remapped+GET_PAGE_DIR_OFF(addr));	/* PCI Posting. */
 	}
 
 	for (i = 0; i < value->num_entries; i++) {
 		addr = (i * PAGE_SIZE) + agp_bridge->gart_bus_addr;
 		cur_gatt = GET_GATT(addr);
-		writel(agp_bridge->scratch_page, cur_gatt+GET_GATT_OFF(addr));
-		readl(cur_gatt+GET_GATT_OFF(addr));	/* PCI Posting. */
+		pete_writel("drivers/char/agp/amd-k7-agp.c:166", agp_bridge->scratch_page, cur_gatt+GET_GATT_OFF(addr));
+		pete_readl("drivers/char/agp/amd-k7-agp.c:167", cur_gatt+GET_GATT_OFF(addr));	/* PCI Posting. */
 	}
 
 	return 0;
@@ -222,8 +222,8 @@ static int amd_irongate_configure(void)
 	}
 
 	/* Write out the address of the gatt table */
-	writel(agp_bridge->gatt_bus_addr, amd_irongate_private.registers+AMD_ATTBASE);
-	readl(amd_irongate_private.registers+AMD_ATTBASE);	/* PCI Posting. */
+	pete_writel("drivers/char/agp/amd-k7-agp.c:225", agp_bridge->gatt_bus_addr, amd_irongate_private.registers+AMD_ATTBASE);
+	pete_readl("drivers/char/agp/amd-k7-agp.c:226", amd_irongate_private.registers+AMD_ATTBASE);	/* PCI Posting. */
 
 	/* Write the Sync register */
 	pci_write_config_byte(agp_bridge->dev, AMD_MODECNTL, 0x80);
@@ -243,8 +243,8 @@ static int amd_irongate_configure(void)
 	pci_write_config_dword(agp_bridge->dev, AMD_APSIZE, temp);
 
 	/* Flush the tlb */
-	writel(1, amd_irongate_private.registers+AMD_TLBFLUSH);
-	readl(amd_irongate_private.registers+AMD_TLBFLUSH);	/* PCI Posting.*/
+	pete_writel("drivers/char/agp/amd-k7-agp.c:246", 1, amd_irongate_private.registers+AMD_TLBFLUSH);
+	pete_readl("drivers/char/agp/amd-k7-agp.c:247", amd_irongate_private.registers+AMD_TLBFLUSH);	/* PCI Posting.*/
 	return 0;
 }
 
@@ -278,8 +278,8 @@ static void amd_irongate_cleanup(void)
 
 static void amd_irongate_tlbflush(struct agp_memory *temp)
 {
-	writel(1, amd_irongate_private.registers+AMD_TLBFLUSH);
-	readl(amd_irongate_private.registers+AMD_TLBFLUSH);	/* PCI Posting. */
+	pete_writel("drivers/char/agp/amd-k7-agp.c:281", 1, amd_irongate_private.registers+AMD_TLBFLUSH);
+	pete_readl("drivers/char/agp/amd-k7-agp.c:282", amd_irongate_private.registers+AMD_TLBFLUSH);	/* PCI Posting. */
 }
 
 static int amd_insert_memory(struct agp_memory *mem, off_t pg_start, int type)
@@ -301,7 +301,7 @@ static int amd_insert_memory(struct agp_memory *mem, off_t pg_start, int type)
 	while (j < (pg_start + mem->page_count)) {
 		addr = (j * PAGE_SIZE) + agp_bridge->gart_bus_addr;
 		cur_gatt = GET_GATT(addr);
-		if (!PGE_EMPTY(agp_bridge, readl(cur_gatt+GET_GATT_OFF(addr))))
+		if (!PGE_EMPTY(agp_bridge, pete_readl("drivers/char/agp/amd-k7-agp.c:304", cur_gatt+GET_GATT_OFF(addr))))
 			return -EBUSY;
 		j++;
 	}
@@ -314,11 +314,11 @@ static int amd_insert_memory(struct agp_memory *mem, off_t pg_start, int type)
 	for (i = 0, j = pg_start; i < mem->page_count; i++, j++) {
 		addr = (j * PAGE_SIZE) + agp_bridge->gart_bus_addr;
 		cur_gatt = GET_GATT(addr);
-		writel(agp_generic_mask_memory(agp_bridge,
+		pete_writel("drivers/char/agp/amd-k7-agp.c:317", agp_generic_mask_memory(agp_bridge,
 					       page_to_phys(mem->pages[i]),
 					       mem->type),
 		       cur_gatt+GET_GATT_OFF(addr));
-		readl(cur_gatt+GET_GATT_OFF(addr));	/* PCI Posting. */
+		pete_readl("drivers/char/agp/amd-k7-agp.c:321", cur_gatt+GET_GATT_OFF(addr));	/* PCI Posting. */
 	}
 	amd_irongate_tlbflush(mem);
 	return 0;
@@ -337,8 +337,8 @@ static int amd_remove_memory(struct agp_memory *mem, off_t pg_start, int type)
 	for (i = pg_start; i < (mem->page_count + pg_start); i++) {
 		addr = (i * PAGE_SIZE) + agp_bridge->gart_bus_addr;
 		cur_gatt = GET_GATT(addr);
-		writel(agp_bridge->scratch_page, cur_gatt+GET_GATT_OFF(addr));
-		readl(cur_gatt+GET_GATT_OFF(addr));	/* PCI Posting. */
+		pete_writel("drivers/char/agp/amd-k7-agp.c:340", agp_bridge->scratch_page, cur_gatt+GET_GATT_OFF(addr));
+		pete_readl("drivers/char/agp/amd-k7-agp.c:341", cur_gatt+GET_GATT_OFF(addr));	/* PCI Posting. */
 	}
 
 	amd_irongate_tlbflush(mem);

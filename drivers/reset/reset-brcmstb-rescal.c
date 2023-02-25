@@ -29,9 +29,9 @@ static int brcm_rescal_reset_set(struct reset_controller_dev *rcdev,
 	u32 reg;
 	int ret;
 
-	reg = readl(base + BRCM_RESCAL_START);
-	writel(reg | BRCM_RESCAL_START_BIT, base + BRCM_RESCAL_START);
-	reg = readl(base + BRCM_RESCAL_START);
+	reg = pete_readl("drivers/reset/reset-brcmstb-rescal.c:32", base + BRCM_RESCAL_START);
+	pete_writel("drivers/reset/reset-brcmstb-rescal.c:33", reg | BRCM_RESCAL_START_BIT, base + BRCM_RESCAL_START);
+	reg = pete_readl("drivers/reset/reset-brcmstb-rescal.c:34", base + BRCM_RESCAL_START);
 	if (!(reg & BRCM_RESCAL_START_BIT)) {
 		dev_err(data->dev, "failed to start SATA/PCIe rescal\n");
 		return -EIO;
@@ -44,8 +44,8 @@ static int brcm_rescal_reset_set(struct reset_controller_dev *rcdev,
 		return ret;
 	}
 
-	reg = readl(base + BRCM_RESCAL_START);
-	writel(reg & ~BRCM_RESCAL_START_BIT, base + BRCM_RESCAL_START);
+	reg = pete_readl("drivers/reset/reset-brcmstb-rescal.c:47", base + BRCM_RESCAL_START);
+	pete_writel("drivers/reset/reset-brcmstb-rescal.c:48", reg & ~BRCM_RESCAL_START_BIT, base + BRCM_RESCAL_START);
 
 	dev_dbg(data->dev, "SATA/PCIe rescal success\n");
 

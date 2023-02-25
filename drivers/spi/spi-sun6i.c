@@ -104,12 +104,12 @@ struct sun6i_spi {
 
 static inline u32 sun6i_spi_read(struct sun6i_spi *sspi, u32 reg)
 {
-	return readl(sspi->base_addr + reg);
+	return pete_readl("drivers/spi/spi-sun6i.c:107", sspi->base_addr + reg);
 }
 
 static inline void sun6i_spi_write(struct sun6i_spi *sspi, u32 reg, u32 value)
 {
-	writel(value, sspi->base_addr + reg);
+	pete_writel("drivers/spi/spi-sun6i.c:112", value, sspi->base_addr + reg);
 }
 
 static inline u32 sun6i_spi_get_rx_fifo_count(struct sun6i_spi *sspi)

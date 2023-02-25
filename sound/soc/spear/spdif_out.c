@@ -43,18 +43,18 @@ struct spdif_out_dev {
 
 static void spdif_out_configure(struct spdif_out_dev *host)
 {
-	writel(SPDIF_OUT_RESET, host->io_base + SPDIF_OUT_SOFT_RST);
+	pete_writel("sound/soc/spear/spdif_out.c:46", SPDIF_OUT_RESET, host->io_base + SPDIF_OUT_SOFT_RST);
 	mdelay(1);
-	writel(readl(host->io_base + SPDIF_OUT_SOFT_RST) & ~SPDIF_OUT_RESET,
+	pete_writel("sound/soc/spear/spdif_out.c:48", pete_readl("sound/soc/spear/spdif_out.c:48", host->io_base + SPDIF_OUT_SOFT_RST) & ~SPDIF_OUT_RESET,
 			host->io_base + SPDIF_OUT_SOFT_RST);
 
-	writel(SPDIF_OUT_FDMA_TRIG_16 | SPDIF_OUT_MEMFMT_16_16 |
+	pete_writel("sound/soc/spear/spdif_out.c:51", SPDIF_OUT_FDMA_TRIG_16 | SPDIF_OUT_MEMFMT_16_16 |
 			SPDIF_OUT_VALID_HW | SPDIF_OUT_USER_HW |
 			SPDIF_OUT_CHNLSTA_HW | SPDIF_OUT_PARITY_HW,
 			host->io_base + SPDIF_OUT_CFG);
 
-	writel(0x7F, host->io_base + SPDIF_OUT_INT_STA_CLR);
-	writel(0x7F, host->io_base + SPDIF_OUT_INT_EN_CLR);
+	pete_writel("sound/soc/spear/spdif_out.c:56", 0x7F, host->io_base + SPDIF_OUT_INT_STA_CLR);
+	pete_writel("sound/soc/spear/spdif_out.c:57", 0x7F, host->io_base + SPDIF_OUT_INT_EN_CLR);
 }
 
 static int spdif_out_startup(struct snd_pcm_substream *substream,
@@ -96,10 +96,10 @@ static void spdif_out_clock(struct spdif_out_dev *host, u32 core_freq,
 	clk_set_rate(host->clk, core_freq);
 	divider = DIV_ROUND_CLOSEST(clk_get_rate(host->clk), (rate * 128));
 
-	ctrl = readl(host->io_base + SPDIF_OUT_CTRL);
+	ctrl = pete_readl("sound/soc/spear/spdif_out.c:99", host->io_base + SPDIF_OUT_CTRL);
 	ctrl &= ~SPDIF_DIVIDER_MASK;
 	ctrl |= (divider << SPDIF_DIVIDER_SHIFT) & SPDIF_DIVIDER_MASK;
-	writel(ctrl, host->io_base + SPDIF_OUT_CTRL);
+	pete_writel("sound/soc/spear/spdif_out.c:102", ctrl, host->io_base + SPDIF_OUT_CTRL);
 }
 
 static int spdif_out_hw_params(struct snd_pcm_substream *substream,
@@ -162,23 +162,23 @@ static int spdif_out_trigger(struct snd_pcm_substream *substream, int cmd,
 	case SNDRV_PCM_TRIGGER_START:
 	case SNDRV_PCM_TRIGGER_RESUME:
 	case SNDRV_PCM_TRIGGER_PAUSE_RELEASE:
-			ctrl = readl(host->io_base + SPDIF_OUT_CTRL);
+			ctrl = pete_readl("sound/soc/spear/spdif_out.c:165", host->io_base + SPDIF_OUT_CTRL);
 			ctrl &= ~SPDIF_OPMODE_MASK;
 			if (!host->saved_params.mute)
 				ctrl |= SPDIF_OPMODE_AUD_DATA |
 					SPDIF_STATE_NORMAL;
 			else
 				ctrl |= SPDIF_OPMODE_MUTE_PCM;
-			writel(ctrl, host->io_base + SPDIF_OUT_CTRL);
+			pete_writel("sound/soc/spear/spdif_out.c:172", ctrl, host->io_base + SPDIF_OUT_CTRL);
 		break;
 
 	case SNDRV_PCM_TRIGGER_STOP:
 	case SNDRV_PCM_TRIGGER_SUSPEND:
 	case SNDRV_PCM_TRIGGER_PAUSE_PUSH:
-		ctrl = readl(host->io_base + SPDIF_OUT_CTRL);
+		ctrl = pete_readl("sound/soc/spear/spdif_out.c:178", host->io_base + SPDIF_OUT_CTRL);
 		ctrl &= ~SPDIF_OPMODE_MASK;
 		ctrl |= SPDIF_OPMODE_OFF;
-		writel(ctrl, host->io_base + SPDIF_OUT_CTRL);
+		pete_writel("sound/soc/spear/spdif_out.c:181", ctrl, host->io_base + SPDIF_OUT_CTRL);
 		break;
 
 	default:
@@ -194,7 +194,7 @@ static int spdif_mute(struct snd_soc_dai *dai, int mute, int direction)
 	u32 val;
 
 	host->saved_params.mute = mute;
-	val = readl(host->io_base + SPDIF_OUT_CTRL);
+	val = pete_readl("sound/soc/spear/spdif_out.c:197", host->io_base + SPDIF_OUT_CTRL);
 	val &= ~SPDIF_OPMODE_MASK;
 
 	if (mute)
@@ -206,7 +206,7 @@ static int spdif_mute(struct snd_soc_dai *dai, int mute, int direction)
 			val |= SPDIF_OPMODE_OFF;
 	}
 
-	writel(val, host->io_base + SPDIF_OUT_CTRL);
+	pete_writel("sound/soc/spear/spdif_out.c:209", val, host->io_base + SPDIF_OUT_CTRL);
 	return 0;
 }
 

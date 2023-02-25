@@ -291,7 +291,7 @@ static int hidma_handle_tre_completion(struct hidma_lldev *lldev)
 		u32 evre_read_off = (lldev->evre_processed_off +
 				     HIDMA_EVRE_SIZE * num_completed);
 		evre_read_off = evre_read_off % evre_ring_size;
-		writel(evre_read_off, lldev->evca + HIDMA_EVCA_DOORBELL_REG);
+		pete_writel("drivers/dma/qcom/hidma_ll.c:294", evre_read_off, lldev->evca + HIDMA_EVCA_DOORBELL_REG);
 
 		/* record the last processed tre offset */
 		lldev->evre_processed_off = evre_read_off;
@@ -314,10 +314,10 @@ static int hidma_ll_reset(struct hidma_lldev *lldev)
 	u32 val;
 	int ret;
 
-	val = readl(lldev->trca + HIDMA_TRCA_CTRLSTS_REG);
+	val = pete_readl("drivers/dma/qcom/hidma_ll.c:317", lldev->trca + HIDMA_TRCA_CTRLSTS_REG);
 	val &= ~(HIDMA_CH_CONTROL_MASK << 16);
 	val |= HIDMA_CH_RESET << 16;
-	writel(val, lldev->trca + HIDMA_TRCA_CTRLSTS_REG);
+	pete_writel("drivers/dma/qcom/hidma_ll.c:320", val, lldev->trca + HIDMA_TRCA_CTRLSTS_REG);
 
 	/*
 	 * Delay 10ms after reset to allow DMA logic to quiesce.
@@ -331,10 +331,10 @@ static int hidma_ll_reset(struct hidma_lldev *lldev)
 		return ret;
 	}
 
-	val = readl(lldev->evca + HIDMA_EVCA_CTRLSTS_REG);
+	val = pete_readl("drivers/dma/qcom/hidma_ll.c:334", lldev->evca + HIDMA_EVCA_CTRLSTS_REG);
 	val &= ~(HIDMA_CH_CONTROL_MASK << 16);
 	val |= HIDMA_CH_RESET << 16;
-	writel(val, lldev->evca + HIDMA_EVCA_CTRLSTS_REG);
+	pete_writel("drivers/dma/qcom/hidma_ll.c:337", val, lldev->evca + HIDMA_EVCA_CTRLSTS_REG);
 
 	/*
 	 * Delay 10ms after reset to allow DMA logic to quiesce.
@@ -392,7 +392,7 @@ static void hidma_ll_int_handler_internal(struct hidma_lldev *lldev, int cause)
 				cause);
 
 		/* Clear out pending interrupts */
-		writel(cause, lldev->evca + HIDMA_EVCA_IRQ_CLR_REG);
+		pete_writel("drivers/dma/qcom/hidma_ll.c:395", cause, lldev->evca + HIDMA_EVCA_IRQ_CLR_REG);
 
 		/* No further submissions. */
 		hidma_ll_disable(lldev);
@@ -460,10 +460,10 @@ int hidma_ll_enable(struct hidma_lldev *lldev)
 	u32 val;
 	int ret;
 
-	val = readl(lldev->evca + HIDMA_EVCA_CTRLSTS_REG);
+	val = pete_readl("drivers/dma/qcom/hidma_ll.c:463", lldev->evca + HIDMA_EVCA_CTRLSTS_REG);
 	val &= ~(HIDMA_CH_CONTROL_MASK << 16);
 	val |= HIDMA_CH_ENABLE << 16;
-	writel(val, lldev->evca + HIDMA_EVCA_CTRLSTS_REG);
+	pete_writel("drivers/dma/qcom/hidma_ll.c:466", val, lldev->evca + HIDMA_EVCA_CTRLSTS_REG);
 
 	ret = readl_poll_timeout(lldev->evca + HIDMA_EVCA_CTRLSTS_REG, val,
 				 hidma_is_chan_enabled(HIDMA_CH_STATE(val)),
@@ -473,10 +473,10 @@ int hidma_ll_enable(struct hidma_lldev *lldev)
 		return ret;
 	}
 
-	val = readl(lldev->trca + HIDMA_TRCA_CTRLSTS_REG);
+	val = pete_readl("drivers/dma/qcom/hidma_ll.c:476", lldev->trca + HIDMA_TRCA_CTRLSTS_REG);
 	val &= ~(HIDMA_CH_CONTROL_MASK << 16);
 	val |= HIDMA_CH_ENABLE << 16;
-	writel(val, lldev->trca + HIDMA_TRCA_CTRLSTS_REG);
+	pete_writel("drivers/dma/qcom/hidma_ll.c:479", val, lldev->trca + HIDMA_TRCA_CTRLSTS_REG);
 
 	ret = readl_poll_timeout(lldev->trca + HIDMA_TRCA_CTRLSTS_REG, val,
 				 hidma_is_chan_enabled(HIDMA_CH_STATE(val)),
@@ -490,7 +490,7 @@ int hidma_ll_enable(struct hidma_lldev *lldev)
 	lldev->evch_state = HIDMA_CH_ENABLED;
 
 	/* enable irqs */
-	writel(ENABLE_IRQS, lldev->evca + HIDMA_EVCA_IRQ_EN_REG);
+	pete_writel("drivers/dma/qcom/hidma_ll.c:493", ENABLE_IRQS, lldev->evca + HIDMA_EVCA_IRQ_EN_REG);
 
 	return 0;
 }
@@ -500,7 +500,7 @@ void hidma_ll_start(struct hidma_lldev *lldev)
 	unsigned long irqflags;
 
 	spin_lock_irqsave(&lldev->lock, irqflags);
-	writel(lldev->tre_write_offset, lldev->trca + HIDMA_TRCA_DOORBELL_REG);
+	pete_writel("drivers/dma/qcom/hidma_ll.c:503", lldev->tre_write_offset, lldev->trca + HIDMA_TRCA_DOORBELL_REG);
 	spin_unlock_irqrestore(&lldev->lock, irqflags);
 }
 
@@ -508,9 +508,9 @@ bool hidma_ll_isenabled(struct hidma_lldev *lldev)
 {
 	u32 val;
 
-	val = readl(lldev->trca + HIDMA_TRCA_CTRLSTS_REG);
+	val = pete_readl("drivers/dma/qcom/hidma_ll.c:511", lldev->trca + HIDMA_TRCA_CTRLSTS_REG);
 	lldev->trch_state = HIDMA_CH_STATE(val);
-	val = readl(lldev->evca + HIDMA_EVCA_CTRLSTS_REG);
+	val = pete_readl("drivers/dma/qcom/hidma_ll.c:513", lldev->evca + HIDMA_EVCA_CTRLSTS_REG);
 	lldev->evch_state = HIDMA_CH_STATE(val);
 
 	/* both channels have to be enabled before calling this function */
@@ -557,10 +557,10 @@ int hidma_ll_disable(struct hidma_lldev *lldev)
 	if (!hidma_ll_isenabled(lldev))
 		return 0;
 
-	val = readl(lldev->trca + HIDMA_TRCA_CTRLSTS_REG);
+	val = pete_readl("drivers/dma/qcom/hidma_ll.c:560", lldev->trca + HIDMA_TRCA_CTRLSTS_REG);
 	val &= ~(HIDMA_CH_CONTROL_MASK << 16);
 	val |= HIDMA_CH_SUSPEND << 16;
-	writel(val, lldev->trca + HIDMA_TRCA_CTRLSTS_REG);
+	pete_writel("drivers/dma/qcom/hidma_ll.c:563", val, lldev->trca + HIDMA_TRCA_CTRLSTS_REG);
 
 	/*
 	 * Start the wait right after the suspend is confirmed.
@@ -572,10 +572,10 @@ int hidma_ll_disable(struct hidma_lldev *lldev)
 	if (ret)
 		return ret;
 
-	val = readl(lldev->evca + HIDMA_EVCA_CTRLSTS_REG);
+	val = pete_readl("drivers/dma/qcom/hidma_ll.c:575", lldev->evca + HIDMA_EVCA_CTRLSTS_REG);
 	val &= ~(HIDMA_CH_CONTROL_MASK << 16);
 	val |= HIDMA_CH_SUSPEND << 16;
-	writel(val, lldev->evca + HIDMA_EVCA_CTRLSTS_REG);
+	pete_writel("drivers/dma/qcom/hidma_ll.c:578", val, lldev->evca + HIDMA_EVCA_CTRLSTS_REG);
 
 	/*
 	 * Start the wait right after the suspend is confirmed
@@ -591,7 +591,7 @@ int hidma_ll_disable(struct hidma_lldev *lldev)
 	lldev->evch_state = HIDMA_CH_SUSPENDED;
 
 	/* disable interrupts */
-	writel(0, lldev->evca + HIDMA_EVCA_IRQ_EN_REG);
+	pete_writel("drivers/dma/qcom/hidma_ll.c:594", 0, lldev->evca + HIDMA_EVCA_IRQ_EN_REG);
 	return 0;
 }
 
@@ -643,11 +643,11 @@ int hidma_ll_setup(struct hidma_lldev *lldev)
 	lldev->tre_write_offset = 0;
 
 	/* disable interrupts */
-	writel(0, lldev->evca + HIDMA_EVCA_IRQ_EN_REG);
+	pete_writel("drivers/dma/qcom/hidma_ll.c:646", 0, lldev->evca + HIDMA_EVCA_IRQ_EN_REG);
 
 	/* clear all pending interrupts */
-	val = readl(lldev->evca + HIDMA_EVCA_IRQ_STAT_REG);
-	writel(val, lldev->evca + HIDMA_EVCA_IRQ_CLR_REG);
+	val = pete_readl("drivers/dma/qcom/hidma_ll.c:649", lldev->evca + HIDMA_EVCA_IRQ_STAT_REG);
+	pete_writel("drivers/dma/qcom/hidma_ll.c:650", val, lldev->evca + HIDMA_EVCA_IRQ_CLR_REG);
 
 	rc = hidma_ll_reset(lldev);
 	if (rc)
@@ -657,21 +657,21 @@ int hidma_ll_setup(struct hidma_lldev *lldev)
 	 * Clear all pending interrupts again.
 	 * Otherwise, we observe reset complete interrupts.
 	 */
-	val = readl(lldev->evca + HIDMA_EVCA_IRQ_STAT_REG);
-	writel(val, lldev->evca + HIDMA_EVCA_IRQ_CLR_REG);
+	val = pete_readl("drivers/dma/qcom/hidma_ll.c:660", lldev->evca + HIDMA_EVCA_IRQ_STAT_REG);
+	pete_writel("drivers/dma/qcom/hidma_ll.c:661", val, lldev->evca + HIDMA_EVCA_IRQ_CLR_REG);
 
 	/* disable interrupts again after reset */
-	writel(0, lldev->evca + HIDMA_EVCA_IRQ_EN_REG);
+	pete_writel("drivers/dma/qcom/hidma_ll.c:664", 0, lldev->evca + HIDMA_EVCA_IRQ_EN_REG);
 
 	addr = lldev->tre_dma;
-	writel(lower_32_bits(addr), lldev->trca + HIDMA_TRCA_RING_LOW_REG);
-	writel(upper_32_bits(addr), lldev->trca + HIDMA_TRCA_RING_HIGH_REG);
-	writel(lldev->tre_ring_size, lldev->trca + HIDMA_TRCA_RING_LEN_REG);
+	pete_writel("drivers/dma/qcom/hidma_ll.c:667", lower_32_bits(addr), lldev->trca + HIDMA_TRCA_RING_LOW_REG);
+	pete_writel("drivers/dma/qcom/hidma_ll.c:668", upper_32_bits(addr), lldev->trca + HIDMA_TRCA_RING_HIGH_REG);
+	pete_writel("drivers/dma/qcom/hidma_ll.c:669", lldev->tre_ring_size, lldev->trca + HIDMA_TRCA_RING_LEN_REG);
 
 	addr = lldev->evre_dma;
-	writel(lower_32_bits(addr), lldev->evca + HIDMA_EVCA_RING_LOW_REG);
-	writel(upper_32_bits(addr), lldev->evca + HIDMA_EVCA_RING_HIGH_REG);
-	writel(HIDMA_EVRE_SIZE * nr_tres,
+	pete_writel("drivers/dma/qcom/hidma_ll.c:672", lower_32_bits(addr), lldev->evca + HIDMA_EVCA_RING_LOW_REG);
+	pete_writel("drivers/dma/qcom/hidma_ll.c:673", upper_32_bits(addr), lldev->evca + HIDMA_EVCA_RING_HIGH_REG);
+	pete_writel("drivers/dma/qcom/hidma_ll.c:674", HIDMA_EVRE_SIZE * nr_tres,
 			lldev->evca + HIDMA_EVCA_RING_LEN_REG);
 
 	/* configure interrupts */
@@ -691,19 +691,19 @@ void hidma_ll_setup_irq(struct hidma_lldev *lldev, bool msi)
 	lldev->msi_support = msi;
 
 	/* disable interrupts again after reset */
-	writel(0, lldev->evca + HIDMA_EVCA_IRQ_CLR_REG);
-	writel(0, lldev->evca + HIDMA_EVCA_IRQ_EN_REG);
+	pete_writel("drivers/dma/qcom/hidma_ll.c:694", 0, lldev->evca + HIDMA_EVCA_IRQ_CLR_REG);
+	pete_writel("drivers/dma/qcom/hidma_ll.c:695", 0, lldev->evca + HIDMA_EVCA_IRQ_EN_REG);
 
 	/* support IRQ by default */
-	val = readl(lldev->evca + HIDMA_EVCA_INTCTRL_REG);
+	val = pete_readl("drivers/dma/qcom/hidma_ll.c:698", lldev->evca + HIDMA_EVCA_INTCTRL_REG);
 	val &= ~0xF;
 	if (!lldev->msi_support)
 		val = val | 0x1;
-	writel(val, lldev->evca + HIDMA_EVCA_INTCTRL_REG);
+	pete_writel("drivers/dma/qcom/hidma_ll.c:702", val, lldev->evca + HIDMA_EVCA_INTCTRL_REG);
 
 	/* clear all pending interrupts and enable them */
-	writel(ENABLE_IRQS, lldev->evca + HIDMA_EVCA_IRQ_CLR_REG);
-	writel(ENABLE_IRQS, lldev->evca + HIDMA_EVCA_IRQ_EN_REG);
+	pete_writel("drivers/dma/qcom/hidma_ll.c:705", ENABLE_IRQS, lldev->evca + HIDMA_EVCA_IRQ_CLR_REG);
+	pete_writel("drivers/dma/qcom/hidma_ll.c:706", ENABLE_IRQS, lldev->evca + HIDMA_EVCA_IRQ_EN_REG);
 }
 
 struct hidma_lldev *hidma_ll_init(struct device *dev, u32 nr_tres,
@@ -794,7 +794,7 @@ struct hidma_lldev *hidma_ll_init(struct device *dev, u32 nr_tres,
 	spin_lock_init(&lldev->lock);
 	tasklet_setup(&lldev->task, hidma_ll_tre_complete);
 	lldev->initialized = 1;
-	writel(ENABLE_IRQS, lldev->evca + HIDMA_EVCA_IRQ_EN_REG);
+	pete_writel("drivers/dma/qcom/hidma_ll.c:797", ENABLE_IRQS, lldev->evca + HIDMA_EVCA_IRQ_EN_REG);
 	return lldev;
 }
 
@@ -825,9 +825,9 @@ int hidma_ll_uninit(struct hidma_lldev *lldev)
 	 * Clear all pending interrupts again.
 	 * Otherwise, we observe reset complete interrupts.
 	 */
-	val = readl(lldev->evca + HIDMA_EVCA_IRQ_STAT_REG);
-	writel(val, lldev->evca + HIDMA_EVCA_IRQ_CLR_REG);
-	writel(0, lldev->evca + HIDMA_EVCA_IRQ_EN_REG);
+	val = pete_readl("drivers/dma/qcom/hidma_ll.c:828", lldev->evca + HIDMA_EVCA_IRQ_STAT_REG);
+	pete_writel("drivers/dma/qcom/hidma_ll.c:829", val, lldev->evca + HIDMA_EVCA_IRQ_CLR_REG);
+	pete_writel("drivers/dma/qcom/hidma_ll.c:830", 0, lldev->evca + HIDMA_EVCA_IRQ_EN_REG);
 	return rc;
 }
 

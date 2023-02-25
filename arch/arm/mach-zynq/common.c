@@ -83,7 +83,7 @@ static int __init zynq_get_revision(void)
 		return -1;
 	}
 
-	revision = readl(zynq_devcfg_base + ZYNQ_DEVCFG_MCTRL);
+	revision = pete_readl("arch/arm/mach-zynq/common.c:86", zynq_devcfg_base + ZYNQ_DEVCFG_MCTRL);
 	revision >>= ZYNQ_DEVCFG_PS_VERSION_SHIFT;
 	revision &= ZYNQ_DEVCFG_PS_VERSION_MASK;
 

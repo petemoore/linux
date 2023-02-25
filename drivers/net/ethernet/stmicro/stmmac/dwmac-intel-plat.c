@@ -152,7 +152,7 @@ static int intel_eth_plat_probe(struct platform_device *pdev)
 		u32 tx_lpi_usec;
 
 		tx_lpi_usec = (plat_dat->eee_usecs_rate / 1000000) - 1;
-		writel(tx_lpi_usec, stmmac_res.addr + GMAC_1US_TIC_COUNTER);
+		pete_writel("drivers/net/ethernet/stmicro/stmmac/dwmac-intel-plat.c:155", tx_lpi_usec, stmmac_res.addr + GMAC_1US_TIC_COUNTER);
 	}
 
 	ret = stmmac_dvr_probe(&pdev->dev, plat_dat, &stmmac_res);

@@ -48,7 +48,7 @@ static inline void r852_write_reg(struct r852_device *dev,
 /* read dword sized register */
 static inline uint32_t r852_read_reg_dword(struct r852_device *dev, int address)
 {
-	uint32_t reg = le32_to_cpu(readl(dev->mmio + address));
+	uint32_t reg = le32_to_cpu(pete_readl("drivers/mtd/nand/raw/r852.c:51", dev->mmio + address));
 	return reg;
 }
 
@@ -56,7 +56,7 @@ static inline uint32_t r852_read_reg_dword(struct r852_device *dev, int address)
 static inline void r852_write_reg_dword(struct r852_device *dev,
 							int address, uint32_t value)
 {
-	writel(cpu_to_le32(value), dev->mmio + address);
+	pete_writel("drivers/mtd/nand/raw/r852.c:59", cpu_to_le32(value), dev->mmio + address);
 }
 
 /* returns pointer to our private structure */

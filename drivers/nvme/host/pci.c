@@ -489,7 +489,7 @@ static inline void nvme_write_sq_db(struct nvme_queue *nvmeq, bool write_sq)
 
 	if (nvme_dbbuf_update_and_check_event(nvmeq->sq_tail,
 			nvmeq->dbbuf_sq_db, nvmeq->dbbuf_sq_ei))
-		writel(nvmeq->sq_tail, nvmeq->q_db);
+		pete_writel("drivers/nvme/host/pci.c:492", nvmeq->sq_tail, nvmeq->q_db);
 	nvmeq->last_sq_tail = nvmeq->sq_tail;
 }
 
@@ -988,7 +988,7 @@ static inline void nvme_ring_cq_doorbell(struct nvme_queue *nvmeq)
 
 	if (nvme_dbbuf_update_and_check_event(head, nvmeq->dbbuf_cq_db,
 					      nvmeq->dbbuf_cq_ei))
-		writel(head, nvmeq->q_db + nvmeq->dev->db_stride);
+		pete_writel("drivers/nvme/host/pci.c:991", head, nvmeq->q_db + nvmeq->dev->db_stride);
 }
 
 static inline struct blk_mq_tags *nvme_queue_tagset(struct nvme_queue *nvmeq)
@@ -1253,7 +1253,7 @@ static enum blk_eh_timer_return nvme_timeout(struct request *req, bool reserved)
 	struct nvme_dev *dev = nvmeq->dev;
 	struct request *abort_req;
 	struct nvme_command cmd = { };
-	u32 csts = readl(dev->bar + NVME_REG_CSTS);
+	u32 csts = pete_readl("drivers/nvme/host/pci.c:1256", dev->bar + NVME_REG_CSTS);
 
 	/* If PCI error recovery process is happening, we cannot reset or
 	 * the recovery mechanism will surely fail.
@@ -1733,12 +1733,12 @@ static int nvme_pci_configure_admin_queue(struct nvme_dev *dev)
 	if (result < 0)
 		return result;
 
-	dev->subsystem = readl(dev->bar + NVME_REG_VS) >= NVME_VS(1, 1, 0) ?
+	dev->subsystem = pete_readl("drivers/nvme/host/pci.c:1736", dev->bar + NVME_REG_VS) >= NVME_VS(1, 1, 0) ?
 				NVME_CAP_NSSRC(dev->ctrl.cap) : 0;
 
 	if (dev->subsystem &&
-	    (readl(dev->bar + NVME_REG_CSTS) & NVME_CSTS_NSSRO))
-		writel(NVME_CSTS_NSSRO, dev->bar + NVME_REG_CSTS);
+	    (pete_readl("drivers/nvme/host/pci.c:1740", dev->bar + NVME_REG_CSTS) & NVME_CSTS_NSSRO))
+		pete_writel("drivers/nvme/host/pci.c:1741", NVME_CSTS_NSSRO, dev->bar + NVME_REG_CSTS);
 
 	result = nvme_disable_ctrl(&dev->ctrl);
 	if (result < 0)
@@ -1754,7 +1754,7 @@ static int nvme_pci_configure_admin_queue(struct nvme_dev *dev)
 	aqa = nvmeq->q_depth - 1;
 	aqa |= aqa << 16;
 
-	writel(aqa, dev->bar + NVME_REG_AQA);
+	pete_writel("drivers/nvme/host/pci.c:1757", aqa, dev->bar + NVME_REG_AQA);
 	lo_hi_writeq(nvmeq->sq_dma_addr, dev->bar + NVME_REG_ASQ);
 	lo_hi_writeq(nvmeq->cq_dma_addr, dev->bar + NVME_REG_ACQ);
 
@@ -1834,12 +1834,12 @@ static void nvme_map_cmb(struct nvme_dev *dev)
 		return;
 
 	if (NVME_CAP_CMBS(dev->ctrl.cap))
-		writel(NVME_CMBMSC_CRE, dev->bar + NVME_REG_CMBMSC);
+		pete_writel("drivers/nvme/host/pci.c:1837", NVME_CMBMSC_CRE, dev->bar + NVME_REG_CMBMSC);
 
-	dev->cmbsz = readl(dev->bar + NVME_REG_CMBSZ);
+	dev->cmbsz = pete_readl("drivers/nvme/host/pci.c:1839", dev->bar + NVME_REG_CMBSZ);
 	if (!dev->cmbsz)
 		return;
-	dev->cmbloc = readl(dev->bar + NVME_REG_CMBLOC);
+	dev->cmbloc = pete_readl("drivers/nvme/host/pci.c:1842", dev->bar + NVME_REG_CMBLOC);
 
 	size = nvme_cmb_size_unit(dev) * nvme_cmb_size(dev);
 	offset = nvme_cmb_size_unit(dev) * NVME_CMB_OFST(dev->cmbloc);
@@ -2487,7 +2487,7 @@ static int nvme_pci_enable(struct nvme_dev *dev)
 	if (dma_set_mask_and_coherent(dev->dev, DMA_BIT_MASK(dma_address_bits)))
 		goto disable;
 
-	if (readl(dev->bar + NVME_REG_CSTS) == -1) {
+	if (pete_readl("drivers/nvme/host/pci.c:2490", dev->bar + NVME_REG_CSTS) == -1) {
 		result = -ENODEV;
 		goto disable;
 	}
@@ -2585,7 +2585,7 @@ static void nvme_dev_disable(struct nvme_dev *dev, bool shutdown)
 
 	mutex_lock(&dev->shutdown_lock);
 	if (pci_is_enabled(pdev)) {
-		u32 csts = readl(dev->bar + NVME_REG_CSTS);
+		u32 csts = pete_readl("drivers/nvme/host/pci.c:2588", dev->bar + NVME_REG_CSTS);
 
 		if (dev->ctrl.state == NVME_CTRL_LIVE ||
 		    dev->ctrl.state == NVME_CTRL_RESETTING) {
@@ -2856,13 +2856,13 @@ static void nvme_remove_dead_ctrl_work(struct work_struct *work)
 
 static int nvme_pci_reg_read32(struct nvme_ctrl *ctrl, u32 off, u32 *val)
 {
-	*val = readl(to_nvme_dev(ctrl)->bar + off);
+	*val = pete_readl("drivers/nvme/host/pci.c:2859", to_nvme_dev(ctrl)->bar + off);
 	return 0;
 }
 
 static int nvme_pci_reg_write32(struct nvme_ctrl *ctrl, u32 off, u32 val)
 {
-	writel(val, to_nvme_dev(ctrl)->bar + off);
+	pete_writel("drivers/nvme/host/pci.c:2865", val, to_nvme_dev(ctrl)->bar + off);
 	return 0;
 }
 

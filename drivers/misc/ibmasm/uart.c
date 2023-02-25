@@ -27,7 +27,7 @@ void ibmasm_register_uart(struct service_processor *sp)
 	/* read the uart scratch register to determine if the UART
 	 * is dedicated to the service processor or if the OS can use it
 	 */
-	if (0 == readl(iomem_base + UART_SCR)) {
+	if (0 == pete_readl("drivers/misc/ibmasm/uart.c:30", iomem_base + UART_SCR)) {
 		dev_info(sp->dev, "IBM SP UART not registered, owned by service processor\n");
 		sp->serial_line = -1;
 		return;

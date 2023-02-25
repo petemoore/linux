@@ -815,8 +815,8 @@ static void intel_cache_ltr(struct sdhci_pci_slot *slot)
 	struct intel_host *intel_host = sdhci_pci_priv(slot);
 	struct sdhci_host *host = slot->host;
 
-	intel_host->active_ltr = readl(host->ioaddr + INTEL_ACTIVELTR);
-	intel_host->idle_ltr = readl(host->ioaddr + INTEL_IDLELTR);
+	intel_host->active_ltr = pete_readl("drivers/mmc/host/sdhci-pci-core.c:818", host->ioaddr + INTEL_ACTIVELTR);
+	intel_host->idle_ltr = pete_readl("drivers/mmc/host/sdhci-pci-core.c:819", host->ioaddr + INTEL_IDLELTR);
 }
 
 static void intel_ltr_set(struct device *dev, s32 val)
@@ -834,7 +834,7 @@ static void intel_ltr_set(struct device *dev, s32 val)
 	 * by the PM QoS layer or disable it in case we were passed
 	 * negative value or PM_QOS_LATENCY_ANY.
 	 */
-	ltr = readl(host->ioaddr + INTEL_ACTIVELTR);
+	ltr = pete_readl("drivers/mmc/host/sdhci-pci-core.c:837", host->ioaddr + INTEL_ACTIVELTR);
 
 	if (val == PM_QOS_LATENCY_ANY || val < 0) {
 		ltr &= ~INTEL_LTR_REQ;
@@ -856,8 +856,8 @@ static void intel_ltr_set(struct device *dev, s32 val)
 	if (ltr == intel_host->active_ltr)
 		goto out;
 
-	writel(ltr, host->ioaddr + INTEL_ACTIVELTR);
-	writel(ltr, host->ioaddr + INTEL_IDLELTR);
+	pete_writel("drivers/mmc/host/sdhci-pci-core.c:859", ltr, host->ioaddr + INTEL_ACTIVELTR);
+	pete_writel("drivers/mmc/host/sdhci-pci-core.c:860", ltr, host->ioaddr + INTEL_IDLELTR);
 
 	/* Cache the values into lpss structure */
 	intel_cache_ltr(slot);
@@ -1500,7 +1500,7 @@ static int jmicron_probe_slot(struct sdhci_pci_slot *slot)
 	if (slot->chip->pdev->revision == 0) {
 		u16 version;
 
-		version = readl(slot->host->ioaddr + SDHCI_HOST_VERSION);
+		version = pete_readl("drivers/mmc/host/sdhci-pci-core.c:1503", slot->host->ioaddr + SDHCI_HOST_VERSION);
 		version = (version & SDHCI_VENDOR_VER_MASK) >>
 			SDHCI_VENDOR_VER_SHIFT;
 
@@ -2279,7 +2279,7 @@ static void sdhci_pci_remove_slot(struct sdhci_pci_slot *slot)
 	sdhci_pci_remove_own_cd(slot);
 
 	dead = 0;
-	scratch = readl(slot->host->ioaddr + SDHCI_INT_STATUS);
+	scratch = pete_readl("drivers/mmc/host/sdhci-pci-core.c:2282", slot->host->ioaddr + SDHCI_INT_STATUS);
 	if (scratch == (u32)-1)
 		dead = 1;
 

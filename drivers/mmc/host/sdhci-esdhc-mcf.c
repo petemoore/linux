@@ -55,7 +55,7 @@ static inline void esdhc_clrset_be(struct sdhci_host *host,
 	if (reg == SDHCI_HOST_CONTROL)
 		val |= ESDHC_PROCTL_D3CD;
 
-	writel((readl(base) & ~mask) | val, base);
+	pete_writel("drivers/mmc/host/sdhci-esdhc-mcf.c:58", (pete_readl("drivers/mmc/host/sdhci-esdhc-mcf.c:58", base) & ~mask) | val, base);
 }
 
 /*
@@ -82,12 +82,12 @@ static void esdhc_mcf_writeb_be(struct sdhci_host *host, u8 val, int reg)
 		 */
 		host_ctrl |= val;
 		host_ctrl |= (dma_bits << 8);
-		writel(host_ctrl, host->ioaddr + SDHCI_HOST_CONTROL);
+		pete_writel("drivers/mmc/host/sdhci-esdhc-mcf.c:85", host_ctrl, host->ioaddr + SDHCI_HOST_CONTROL);
 
 		return;
 	}
 
-	writel((readl(base) & mask) | (val << shift), base);
+	pete_writel("drivers/mmc/host/sdhci-esdhc-mcf.c:90", (pete_readl("drivers/mmc/host/sdhci-esdhc-mcf.c:90", base) & mask) | (val << shift), base);
 }
 
 static void esdhc_mcf_writew_be(struct sdhci_host *host, u16 val, int reg)
@@ -110,17 +110,17 @@ static void esdhc_mcf_writew_be(struct sdhci_host *host, u16 val, int reg)
 		 * As for the fsl driver,
 		 * we have to set the mode in a single write here.
 		 */
-		writel(val << 16 | mcf_data->aside,
+		pete_writel("drivers/mmc/host/sdhci-esdhc-mcf.c:113", val << 16 | mcf_data->aside,
 		       host->ioaddr + SDHCI_TRANSFER_MODE);
 		return;
 	}
 
-	writel((readl(base) & mask) | (val << shift), base);
+	pete_writel("drivers/mmc/host/sdhci-esdhc-mcf.c:118", (pete_readl("drivers/mmc/host/sdhci-esdhc-mcf.c:118", base) & mask) | (val << shift), base);
 }
 
 static void esdhc_mcf_writel_be(struct sdhci_host *host, u32 val, int reg)
 {
-	writel(val, host->ioaddr + reg);
+	pete_writel("drivers/mmc/host/sdhci-esdhc-mcf.c:123", val, host->ioaddr + reg);
 }
 
 static u8 esdhc_mcf_readb_be(struct sdhci_host *host, int reg)
@@ -156,7 +156,7 @@ static u32 esdhc_mcf_readl_be(struct sdhci_host *host, int reg)
 {
 	u32 val;
 
-	val = readl(host->ioaddr + reg);
+	val = pete_readl("drivers/mmc/host/sdhci-esdhc-mcf.c:159", host->ioaddr + reg);
 
 	/*
 	 * RM (25.3.9) sd pin clock must never exceed 25Mhz.
@@ -245,7 +245,7 @@ static void esdhc_mcf_pltfm_set_clock(struct sdhci_host *host,
 	 * fvco = fsys * outdvi1 + 1
 	 * fshdc = fvco / outdiv3 + 1
 	 */
-	temp = readl(pll_dr);
+	temp = pete_readl("drivers/mmc/host/sdhci-esdhc-mcf.c:248", pll_dr);
 	fsys = pltfm_host->clock;
 	fvco = fsys * ((temp & 0x1f) + 1);
 	fesdhc = fvco / (((temp >> 10) & 0x1f) + 1);

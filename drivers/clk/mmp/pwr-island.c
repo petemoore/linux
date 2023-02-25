@@ -32,30 +32,30 @@ static int mmp_pm_domain_power_on(struct generic_pm_domain *genpd)
 	if (pm_domain->lock)
 		spin_lock_irqsave(pm_domain->lock, flags);
 
-	val = readl(pm_domain->reg);
+	val = pete_readl("drivers/clk/mmp/pwr-island.c:35", pm_domain->reg);
 
 	/* Turn on the power island */
 	val |= pm_domain->power_on;
-	writel(val, pm_domain->reg);
+	pete_writel("drivers/clk/mmp/pwr-island.c:39", val, pm_domain->reg);
 
 	/* Disable isolation */
 	val |= 0x100;
-	writel(val, pm_domain->reg);
+	pete_writel("drivers/clk/mmp/pwr-island.c:43", val, pm_domain->reg);
 
 	/* Some blocks need to be reset after a power up */
 	if (pm_domain->reset || pm_domain->clock_enable) {
 		u32 after_power_on = val;
 
 		val &= ~pm_domain->reset;
-		writel(val, pm_domain->reg);
+		pete_writel("drivers/clk/mmp/pwr-island.c:50", val, pm_domain->reg);
 
 		val |= pm_domain->clock_enable;
-		writel(val, pm_domain->reg);
+		pete_writel("drivers/clk/mmp/pwr-island.c:53", val, pm_domain->reg);
 
 		val |= pm_domain->reset;
-		writel(val, pm_domain->reg);
+		pete_writel("drivers/clk/mmp/pwr-island.c:56", val, pm_domain->reg);
 
-		writel(after_power_on, pm_domain->reg);
+		pete_writel("drivers/clk/mmp/pwr-island.c:58", after_power_on, pm_domain->reg);
 	}
 
 	if (pm_domain->lock)
@@ -77,10 +77,10 @@ static int mmp_pm_domain_power_off(struct generic_pm_domain *genpd)
 		spin_lock_irqsave(pm_domain->lock, flags);
 
 	/* Turn off and isolate the the power island. */
-	val = readl(pm_domain->reg);
+	val = pete_readl("drivers/clk/mmp/pwr-island.c:80", pm_domain->reg);
 	val &= ~pm_domain->power_on;
 	val &= ~0x100;
-	writel(val, pm_domain->reg);
+	pete_writel("drivers/clk/mmp/pwr-island.c:83", val, pm_domain->reg);
 
 	if (pm_domain->lock)
 		spin_unlock_irqrestore(pm_domain->lock, flags);

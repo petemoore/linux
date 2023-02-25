@@ -142,7 +142,7 @@ static unsigned int __i8254_read(struct comedi_8254 *i8254, unsigned int reg)
 		break;
 	case I8254_IO32:
 		if (i8254->mmio)
-			val = readl(i8254->mmio + reg_offset);
+			val = pete_readl("drivers/comedi/drivers/comedi_8254.c:145", i8254->mmio + reg_offset);
 		else
 			val = inl(i8254->iobase + reg_offset);
 		break;
@@ -171,7 +171,7 @@ static void __i8254_write(struct comedi_8254 *i8254,
 		break;
 	case I8254_IO32:
 		if (i8254->mmio)
-			writel(val, i8254->mmio + reg_offset);
+			pete_writel("drivers/comedi/drivers/comedi_8254.c:174", val, i8254->mmio + reg_offset);
 		else
 			outl(val, i8254->iobase + reg_offset);
 		break;

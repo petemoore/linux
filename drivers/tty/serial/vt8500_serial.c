@@ -111,12 +111,12 @@ static DECLARE_BITMAP(vt8500_ports_in_use, VT8500_MAX_PORTS);
 static inline void vt8500_write(struct uart_port *port, unsigned int val,
 			     unsigned int off)
 {
-	writel(val, port->membase + off);
+	pete_writel("drivers/tty/serial/vt8500_serial.c:114", val, port->membase + off);
 }
 
 static inline unsigned int vt8500_read(struct uart_port *port, unsigned int off)
 {
-	return readl(port->membase + off);
+	return pete_readl("drivers/tty/serial/vt8500_serial.c:119", port->membase + off);
 }
 
 static void vt8500_stop_tx(struct uart_port *port)

@@ -69,7 +69,7 @@ static int imx_src_reset_module(struct reset_controller_dev *rcdev,
 	spin_unlock_irqrestore(&scr_lock, flags);
 
 	timeout = jiffies + msecs_to_jiffies(1000);
-	while (readl(src_base + SRC_SCR) & bit) {
+	while (pete_readl("arch/arm/mach-imx/src.c:72", src_base + SRC_SCR) & bit) {
 		if (time_after(jiffies, timeout))
 			return -ETIME;
 		cpu_relax();

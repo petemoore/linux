@@ -256,7 +256,7 @@ static void dm9000_dumpblk_32bit(void __iomem *reg, int count)
 	count = (count + 3) >> 2;
 
 	for (i = 0; i < count; i++)
-		readl(reg);
+		pete_readl("drivers/net/ethernet/davicom/dm9000.c:259", reg);
 }
 
 /*

@@ -91,10 +91,10 @@ static int ni_670x_ao_insn_write(struct comedi_device *dev,
 	for (i = 0; i < insn->n; i++) {
 		val = data[i];
 		/* First write in channel register which channel to use */
-		writel(((chan & 15) << 1) | ((chan & 16) >> 4),
+		pete_writel("drivers/comedi/drivers/ni_670x.c:94", ((chan & 15) << 1) | ((chan & 16) >> 4),
 		       dev->mmio + AO_CHAN_OFFSET);
 		/* write channel value */
-		writel(val, dev->mmio + AO_VALUE_OFFSET);
+		pete_writel("drivers/comedi/drivers/ni_670x.c:97", val, dev->mmio + AO_VALUE_OFFSET);
 	}
 	s->readback[chan] = val;
 
@@ -107,9 +107,9 @@ static int ni_670x_dio_insn_bits(struct comedi_device *dev,
 				 unsigned int *data)
 {
 	if (comedi_dio_update_state(s, data))
-		writel(s->state, dev->mmio + DIO_PORT0_DATA_OFFSET);
+		pete_writel("drivers/comedi/drivers/ni_670x.c:110", s->state, dev->mmio + DIO_PORT0_DATA_OFFSET);
 
-	data[1] = readl(dev->mmio + DIO_PORT0_DATA_OFFSET);
+	data[1] = pete_readl("drivers/comedi/drivers/ni_670x.c:112", dev->mmio + DIO_PORT0_DATA_OFFSET);
 
 	return insn->n;
 }
@@ -125,7 +125,7 @@ static int ni_670x_dio_insn_config(struct comedi_device *dev,
 	if (ret)
 		return ret;
 
-	writel(s->io_bits, dev->mmio + DIO_PORT0_DIR_OFFSET);
+	pete_writel("drivers/comedi/drivers/ni_670x.c:128", s->io_bits, dev->mmio + DIO_PORT0_DIR_OFFSET);
 
 	return insn->n;
 }
@@ -146,7 +146,7 @@ static int ni_670x_mite_init(struct pci_dev *pcidev)
 
 	/* set data window to main registers (BAR 1) */
 	main_phys_addr = pci_resource_start(pcidev, 1);
-	writel(main_phys_addr | WENAB, mite_base + MITE_IODWBSR);
+	pete_writel("drivers/comedi/drivers/ni_670x.c:149", main_phys_addr | WENAB, mite_base + MITE_IODWBSR);
 
 	/* finished with MITE registers */
 	iounmap(mite_base);
@@ -229,9 +229,9 @@ static int ni_670x_auto_attach(struct comedi_device *dev,
 	s->insn_config = ni_670x_dio_insn_config;
 
 	/* Config of misc registers */
-	writel(0x10, dev->mmio + MISC_CONTROL_OFFSET);
+	pete_writel("drivers/comedi/drivers/ni_670x.c:232", 0x10, dev->mmio + MISC_CONTROL_OFFSET);
 	/* Config of ao registers */
-	writel(0x00, dev->mmio + AO_CONTROL_OFFSET);
+	pete_writel("drivers/comedi/drivers/ni_670x.c:234", 0x00, dev->mmio + AO_CONTROL_OFFSET);
 
 	return 0;
 }

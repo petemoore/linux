@@ -338,12 +338,12 @@ struct cprman_plat_data {
 
 static inline void cprman_write(struct bcm2835_cprman *cprman, u32 reg, u32 val)
 {
-	writel(CM_PASSWORD | val, cprman->regs + reg);
+	pete_writel("drivers/clk/bcm/clk-bcm2835.c:341", CM_PASSWORD | val, cprman->regs + reg);
 }
 
 static inline u32 cprman_read(struct bcm2835_cprman *cprman, u32 reg)
 {
-	return readl(cprman->regs + reg);
+	return pete_readl("drivers/clk/bcm/clk-bcm2835.c:346", cprman->regs + reg);
 }
 
 /* Does a cycle of measuring a clock through the TCNT clock, which may

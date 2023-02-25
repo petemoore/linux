@@ -69,7 +69,7 @@ static void c8sectpfe_timer_interrupt(struct timer_list *t)
 		channel = fei->channel_data[chan_num];
 
 		/* is this descriptor initialised and TP enabled */
-		if (channel->irec && readl(channel->irec + DMA_PRDS_TPENABLE))
+		if (channel->irec && pete_readl("drivers/media/platform/sti/c8sectpfe/c8sectpfe-core.c:72", channel->irec + DMA_PRDS_TPENABLE))
 			tasklet_schedule(&channel->tsklet);
 	}
 
@@ -90,8 +90,8 @@ static void channel_swdemux_tsklet(struct tasklet_struct *t)
 
 	fei = channel->fei;
 
-	wp = readl(channel->irec + DMA_PRDS_BUSWP_TP(0));
-	rp = readl(channel->irec + DMA_PRDS_BUSRP_TP(0));
+	wp = pete_readl("drivers/media/platform/sti/c8sectpfe/c8sectpfe-core.c:93", channel->irec + DMA_PRDS_BUSWP_TP(0));
+	rp = pete_readl("drivers/media/platform/sti/c8sectpfe/c8sectpfe-core.c:94", channel->irec + DMA_PRDS_BUSRP_TP(0));
 
 	pos = rp - channel->back_buffer_busaddr;
 
@@ -125,10 +125,10 @@ static void channel_swdemux_tsklet(struct tasklet_struct *t)
 
 	/* advance the read pointer */
 	if (wp == (channel->back_buffer_busaddr + FEI_BUFFER_SIZE))
-		writel(channel->back_buffer_busaddr, channel->irec +
+		pete_writel("drivers/media/platform/sti/c8sectpfe/c8sectpfe-core.c:128", channel->back_buffer_busaddr, channel->irec +
 			DMA_PRDS_BUSRP_TP(0));
 	else
-		writel(wp, channel->irec + DMA_PRDS_BUSRP_TP(0));
+		pete_writel("drivers/media/platform/sti/c8sectpfe/c8sectpfe-core.c:131", wp, channel->irec + DMA_PRDS_BUSRP_TP(0));
 }
 
 static int c8sectpfe_start_feed(struct dvb_demux_feed *dvbdmxfeed)
@@ -181,9 +181,9 @@ static int c8sectpfe_start_feed(struct dvb_demux_feed *dvbdmxfeed)
 
 	/* 8192 is a special PID */
 	if (dvbdmxfeed->pid == 8192) {
-		tmp = readl(fei->io + C8SECTPFE_IB_PID_SET(channel->tsin_id));
+		tmp = pete_readl("drivers/media/platform/sti/c8sectpfe/c8sectpfe-core.c:184", fei->io + C8SECTPFE_IB_PID_SET(channel->tsin_id));
 		tmp &= ~C8SECTPFE_PID_ENABLE;
-		writel(tmp, fei->io + C8SECTPFE_IB_PID_SET(channel->tsin_id));
+		pete_writel("drivers/media/platform/sti/c8sectpfe/c8sectpfe-core.c:186", tmp, fei->io + C8SECTPFE_IB_PID_SET(channel->tsin_id));
 
 	} else {
 		bitmap_set(bitmap, dvbdmxfeed->pid, 1);
@@ -211,33 +211,33 @@ static int c8sectpfe_start_feed(struct dvb_demux_feed *dvbdmxfeed)
 		tasklet_setup(&channel->tsklet, channel_swdemux_tsklet);
 
 		/* Reset the internal inputblock sram pointers */
-		writel(channel->fifo,
+		pete_writel("drivers/media/platform/sti/c8sectpfe/c8sectpfe-core.c:214", channel->fifo,
 			fei->io + C8SECTPFE_IB_BUFF_STRT(channel->tsin_id));
-		writel(channel->fifo + FIFO_LEN - 1,
+		pete_writel("drivers/media/platform/sti/c8sectpfe/c8sectpfe-core.c:216", channel->fifo + FIFO_LEN - 1,
 			fei->io + C8SECTPFE_IB_BUFF_END(channel->tsin_id));
 
-		writel(channel->fifo,
+		pete_writel("drivers/media/platform/sti/c8sectpfe/c8sectpfe-core.c:219", channel->fifo,
 			fei->io + C8SECTPFE_IB_READ_PNT(channel->tsin_id));
-		writel(channel->fifo,
+		pete_writel("drivers/media/platform/sti/c8sectpfe/c8sectpfe-core.c:221", channel->fifo,
 			fei->io + C8SECTPFE_IB_WRT_PNT(channel->tsin_id));
 
 
 		/* reset read / write memdma ptrs for this channel */
-		writel(channel->back_buffer_busaddr, channel->irec +
+		pete_writel("drivers/media/platform/sti/c8sectpfe/c8sectpfe-core.c:226", channel->back_buffer_busaddr, channel->irec +
 			DMA_PRDS_BUSBASE_TP(0));
 
 		tmp = channel->back_buffer_busaddr + FEI_BUFFER_SIZE - 1;
-		writel(tmp, channel->irec + DMA_PRDS_BUSTOP_TP(0));
+		pete_writel("drivers/media/platform/sti/c8sectpfe/c8sectpfe-core.c:230", tmp, channel->irec + DMA_PRDS_BUSTOP_TP(0));
 
-		writel(channel->back_buffer_busaddr, channel->irec +
+		pete_writel("drivers/media/platform/sti/c8sectpfe/c8sectpfe-core.c:232", channel->back_buffer_busaddr, channel->irec +
 			DMA_PRDS_BUSWP_TP(0));
 
 		/* Issue a reset and enable InputBlock */
-		writel(C8SECTPFE_SYS_ENABLE | C8SECTPFE_SYS_RESET
+		pete_writel("drivers/media/platform/sti/c8sectpfe/c8sectpfe-core.c:236", C8SECTPFE_SYS_ENABLE | C8SECTPFE_SYS_RESET
 			, fei->io + C8SECTPFE_IB_SYS(channel->tsin_id));
 
 		/* and enable the tp */
-		writel(0x1, channel->irec + DMA_PRDS_TPENABLE);
+		pete_writel("drivers/media/platform/sti/c8sectpfe/c8sectpfe-core.c:240", 0x1, channel->irec + DMA_PRDS_TPENABLE);
 
 		dev_dbg(fei->dev, "%s:%d Starting DMA feed on stdemux=%p\n"
 			, __func__, __LINE__, stdemux);
@@ -276,9 +276,9 @@ static int c8sectpfe_stop_feed(struct dvb_demux_feed *dvbdmxfeed)
 	bitmap = (unsigned long *) channel->pid_buffer_aligned;
 
 	if (dvbdmxfeed->pid == 8192) {
-		tmp = readl(fei->io + C8SECTPFE_IB_PID_SET(channel->tsin_id));
+		tmp = pete_readl("drivers/media/platform/sti/c8sectpfe/c8sectpfe-core.c:279", fei->io + C8SECTPFE_IB_PID_SET(channel->tsin_id));
 		tmp |= C8SECTPFE_PID_ENABLE;
-		writel(tmp, fei->io + C8SECTPFE_IB_PID_SET(channel->tsin_id));
+		pete_writel("drivers/media/platform/sti/c8sectpfe/c8sectpfe-core.c:281", tmp, fei->io + C8SECTPFE_IB_PID_SET(channel->tsin_id));
 	} else {
 		bitmap_clear(bitmap, dvbdmxfeed->pid, 1);
 	}
@@ -296,16 +296,16 @@ static int c8sectpfe_stop_feed(struct dvb_demux_feed *dvbdmxfeed)
 		/* TP re-configuration on page 168 of functional spec */
 
 		/* disable IB (prevents more TS data going to memdma) */
-		writel(0, fei->io + C8SECTPFE_IB_SYS(channel->tsin_id));
+		pete_writel("drivers/media/platform/sti/c8sectpfe/c8sectpfe-core.c:299", 0, fei->io + C8SECTPFE_IB_SYS(channel->tsin_id));
 
 		/* disable this channels descriptor */
-		writel(0,  channel->irec + DMA_PRDS_TPENABLE);
+		pete_writel("drivers/media/platform/sti/c8sectpfe/c8sectpfe-core.c:302", 0,  channel->irec + DMA_PRDS_TPENABLE);
 
 		tasklet_disable(&channel->tsklet);
 
 		/* now request memdma channel goes idle */
 		idlereq = (1 << channel->tsin_id) | IDLEREQ;
-		writel(idlereq, fei->io + DMA_IDLE_REQ);
+		pete_writel("drivers/media/platform/sti/c8sectpfe/c8sectpfe-core.c:308", idlereq, fei->io + DMA_IDLE_REQ);
 
 		/* wait for idle irq handler to signal completion */
 		ret = wait_for_completion_timeout(&channel->idle_completion,
@@ -320,13 +320,13 @@ static int c8sectpfe_stop_feed(struct dvb_demux_feed *dvbdmxfeed)
 
 		/* reset read / write ptrs for this channel */
 
-		writel(channel->back_buffer_busaddr,
+		pete_writel("drivers/media/platform/sti/c8sectpfe/c8sectpfe-core.c:323", channel->back_buffer_busaddr,
 			channel->irec + DMA_PRDS_BUSBASE_TP(0));
 
 		tmp = channel->back_buffer_busaddr + FEI_BUFFER_SIZE - 1;
-		writel(tmp, channel->irec + DMA_PRDS_BUSTOP_TP(0));
+		pete_writel("drivers/media/platform/sti/c8sectpfe/c8sectpfe-core.c:327", tmp, channel->irec + DMA_PRDS_BUSTOP_TP(0));
 
-		writel(channel->back_buffer_busaddr,
+		pete_writel("drivers/media/platform/sti/c8sectpfe/c8sectpfe-core.c:329", channel->back_buffer_busaddr,
 			channel->irec + DMA_PRDS_BUSWP_TP(0));
 
 		dev_dbg(fei->dev,
@@ -377,13 +377,13 @@ static void c8sectpfe_getconfig(struct c8sectpfei *fei)
 {
 	struct c8sectpfe_hw *hw = &fei->hw_stats;
 
-	hw->num_ib = readl(fei->io + SYS_CFG_NUM_IB);
-	hw->num_mib = readl(fei->io + SYS_CFG_NUM_MIB);
-	hw->num_swts = readl(fei->io + SYS_CFG_NUM_SWTS);
-	hw->num_tsout = readl(fei->io + SYS_CFG_NUM_TSOUT);
-	hw->num_ccsc = readl(fei->io + SYS_CFG_NUM_CCSC);
-	hw->num_ram = readl(fei->io + SYS_CFG_NUM_RAM);
-	hw->num_tp = readl(fei->io + SYS_CFG_NUM_TP);
+	hw->num_ib = pete_readl("drivers/media/platform/sti/c8sectpfe/c8sectpfe-core.c:380", fei->io + SYS_CFG_NUM_IB);
+	hw->num_mib = pete_readl("drivers/media/platform/sti/c8sectpfe/c8sectpfe-core.c:381", fei->io + SYS_CFG_NUM_MIB);
+	hw->num_swts = pete_readl("drivers/media/platform/sti/c8sectpfe/c8sectpfe-core.c:382", fei->io + SYS_CFG_NUM_SWTS);
+	hw->num_tsout = pete_readl("drivers/media/platform/sti/c8sectpfe/c8sectpfe-core.c:383", fei->io + SYS_CFG_NUM_TSOUT);
+	hw->num_ccsc = pete_readl("drivers/media/platform/sti/c8sectpfe/c8sectpfe-core.c:384", fei->io + SYS_CFG_NUM_CCSC);
+	hw->num_ram = pete_readl("drivers/media/platform/sti/c8sectpfe/c8sectpfe-core.c:385", fei->io + SYS_CFG_NUM_RAM);
+	hw->num_tp = pete_readl("drivers/media/platform/sti/c8sectpfe/c8sectpfe-core.c:386", fei->io + SYS_CFG_NUM_TP);
 
 	dev_info(fei->dev, "C8SECTPFE hw supports the following:\n");
 	dev_info(fei->dev, "Input Blocks: %d\n", hw->num_ib);
@@ -402,7 +402,7 @@ static irqreturn_t c8sectpfe_idle_irq_handler(int irq, void *priv)
 	struct c8sectpfei *fei = priv;
 	struct channel_info *chan;
 	int bit;
-	unsigned long tmp = readl(fei->io + DMA_IDLE_REQ);
+	unsigned long tmp = pete_readl("drivers/media/platform/sti/c8sectpfe/c8sectpfe-core.c:405", fei->io + DMA_IDLE_REQ);
 
 	/* page 168 of functional spec: Clear the idle request
 	   by writing 0 to the C8SECTPFE_DMA_IDLE_REQ register. */
@@ -416,7 +416,7 @@ static irqreturn_t c8sectpfe_idle_irq_handler(int irq, void *priv)
 			complete(&chan->idle_completion);
 	}
 
-	writel(0, fei->io + DMA_IDLE_REQ);
+	pete_writel("drivers/media/platform/sti/c8sectpfe/c8sectpfe-core.c:419", 0, fei->io + DMA_IDLE_REQ);
 
 	return IRQ_HANDLED;
 }
@@ -547,9 +547,9 @@ static int configure_memdma_and_inputblock(struct c8sectpfei *fei,
 	}
 
 	/* Enable this input block */
-	tmp = readl(fei->io + SYS_INPUT_CLKEN);
+	tmp = pete_readl("drivers/media/platform/sti/c8sectpfe/c8sectpfe-core.c:550", fei->io + SYS_INPUT_CLKEN);
 	tmp |= BIT(tsin->tsin_id);
-	writel(tmp, fei->io + SYS_INPUT_CLKEN);
+	pete_writel("drivers/media/platform/sti/c8sectpfe/c8sectpfe-core.c:552", tmp, fei->io + SYS_INPUT_CLKEN);
 
 	if (tsin->serial_not_parallel)
 		tmp |= C8SECTPFE_SERIAL_NOT_PARALLEL;
@@ -562,31 +562,31 @@ static int configure_memdma_and_inputblock(struct c8sectpfei *fei,
 
 	tmp |= C8SECTPFE_ALIGN_BYTE_SOP | C8SECTPFE_BYTE_ENDIANNESS_MSB;
 
-	writel(tmp, fei->io + C8SECTPFE_IB_IP_FMT_CFG(tsin->tsin_id));
+	pete_writel("drivers/media/platform/sti/c8sectpfe/c8sectpfe-core.c:565", tmp, fei->io + C8SECTPFE_IB_IP_FMT_CFG(tsin->tsin_id));
 
-	writel(C8SECTPFE_SYNC(0x9) |
+	pete_writel("drivers/media/platform/sti/c8sectpfe/c8sectpfe-core.c:567", C8SECTPFE_SYNC(0x9) |
 		C8SECTPFE_DROP(0x9) |
 		C8SECTPFE_TOKEN(0x47),
 		fei->io + C8SECTPFE_IB_SYNCLCKDRP_CFG(tsin->tsin_id));
 
-	writel(TS_PKT_SIZE, fei->io + C8SECTPFE_IB_PKT_LEN(tsin->tsin_id));
+	pete_writel("drivers/media/platform/sti/c8sectpfe/c8sectpfe-core.c:572", TS_PKT_SIZE, fei->io + C8SECTPFE_IB_PKT_LEN(tsin->tsin_id));
 
 	/* Place the FIFO's at the end of the irec descriptors */
 
 	tsin->fifo = (tsin->tsin_id * FIFO_LEN);
 
-	writel(tsin->fifo, fei->io + C8SECTPFE_IB_BUFF_STRT(tsin->tsin_id));
-	writel(tsin->fifo + FIFO_LEN - 1,
+	pete_writel("drivers/media/platform/sti/c8sectpfe/c8sectpfe-core.c:578", tsin->fifo, fei->io + C8SECTPFE_IB_BUFF_STRT(tsin->tsin_id));
+	pete_writel("drivers/media/platform/sti/c8sectpfe/c8sectpfe-core.c:579", tsin->fifo + FIFO_LEN - 1,
 		fei->io + C8SECTPFE_IB_BUFF_END(tsin->tsin_id));
 
-	writel(tsin->fifo, fei->io + C8SECTPFE_IB_READ_PNT(tsin->tsin_id));
-	writel(tsin->fifo, fei->io + C8SECTPFE_IB_WRT_PNT(tsin->tsin_id));
+	pete_writel("drivers/media/platform/sti/c8sectpfe/c8sectpfe-core.c:582", tsin->fifo, fei->io + C8SECTPFE_IB_READ_PNT(tsin->tsin_id));
+	pete_writel("drivers/media/platform/sti/c8sectpfe/c8sectpfe-core.c:583", tsin->fifo, fei->io + C8SECTPFE_IB_WRT_PNT(tsin->tsin_id));
 
-	writel(tsin->pid_buffer_busaddr,
+	pete_writel("drivers/media/platform/sti/c8sectpfe/c8sectpfe-core.c:585", tsin->pid_buffer_busaddr,
 		fei->io + PIDF_BASE(tsin->tsin_id));
 
 	dev_dbg(fei->dev, "chan=%d PIDF_BASE=0x%x pid_bus_addr=%pad\n",
-		tsin->tsin_id, readl(fei->io + PIDF_BASE(tsin->tsin_id)),
+		tsin->tsin_id, pete_readl("drivers/media/platform/sti/c8sectpfe/c8sectpfe-core.c:589", fei->io + PIDF_BASE(tsin->tsin_id)),
 		&tsin->pid_buffer_busaddr);
 
 	/* Configure and enable HW PID filtering */
@@ -600,41 +600,41 @@ static int configure_memdma_and_inputblock(struct c8sectpfei *fei,
 	tmp = (C8SECTPFE_PID_ENABLE | C8SECTPFE_PID_NUMBITS(13)
 		| C8SECTPFE_PID_OFFSET(40));
 
-	writel(tmp, fei->io + C8SECTPFE_IB_PID_SET(tsin->tsin_id));
+	pete_writel("drivers/media/platform/sti/c8sectpfe/c8sectpfe-core.c:603", tmp, fei->io + C8SECTPFE_IB_PID_SET(tsin->tsin_id));
 
 	dev_dbg(fei->dev, "chan=%d setting wp: %d, rp: %d, buf: %d-%d\n",
 		tsin->tsin_id,
-		readl(fei->io + C8SECTPFE_IB_WRT_PNT(tsin->tsin_id)),
-		readl(fei->io + C8SECTPFE_IB_READ_PNT(tsin->tsin_id)),
-		readl(fei->io + C8SECTPFE_IB_BUFF_STRT(tsin->tsin_id)),
-		readl(fei->io + C8SECTPFE_IB_BUFF_END(tsin->tsin_id)));
+		pete_readl("drivers/media/platform/sti/c8sectpfe/c8sectpfe-core.c:607", fei->io + C8SECTPFE_IB_WRT_PNT(tsin->tsin_id)),
+		pete_readl("drivers/media/platform/sti/c8sectpfe/c8sectpfe-core.c:608", fei->io + C8SECTPFE_IB_READ_PNT(tsin->tsin_id)),
+		pete_readl("drivers/media/platform/sti/c8sectpfe/c8sectpfe-core.c:609", fei->io + C8SECTPFE_IB_BUFF_STRT(tsin->tsin_id)),
+		pete_readl("drivers/media/platform/sti/c8sectpfe/c8sectpfe-core.c:610", fei->io + C8SECTPFE_IB_BUFF_END(tsin->tsin_id)));
 
 	/* Get base addpress of pointer record block from DMEM */
 	tsin->irec = fei->io + DMA_MEMDMA_OFFSET + DMA_DMEM_OFFSET +
-			readl(fei->io + DMA_PTRREC_BASE);
+			pete_readl("drivers/media/platform/sti/c8sectpfe/c8sectpfe-core.c:614", fei->io + DMA_PTRREC_BASE);
 
 	/* fill out pointer record data structure */
 
 	/* advance pointer record block to our channel */
 	tsin->irec += (tsin->tsin_id * DMA_PRDS_SIZE);
 
-	writel(tsin->fifo, tsin->irec + DMA_PRDS_MEMBASE);
+	pete_writel("drivers/media/platform/sti/c8sectpfe/c8sectpfe-core.c:621", tsin->fifo, tsin->irec + DMA_PRDS_MEMBASE);
 
-	writel(tsin->fifo + FIFO_LEN - 1, tsin->irec + DMA_PRDS_MEMTOP);
+	pete_writel("drivers/media/platform/sti/c8sectpfe/c8sectpfe-core.c:623", tsin->fifo + FIFO_LEN - 1, tsin->irec + DMA_PRDS_MEMTOP);
 
-	writel((188 + 7)&~7, tsin->irec + DMA_PRDS_PKTSIZE);
+	pete_writel("drivers/media/platform/sti/c8sectpfe/c8sectpfe-core.c:625", (188 + 7)&~7, tsin->irec + DMA_PRDS_PKTSIZE);
 
-	writel(0x1, tsin->irec + DMA_PRDS_TPENABLE);
+	pete_writel("drivers/media/platform/sti/c8sectpfe/c8sectpfe-core.c:627", 0x1, tsin->irec + DMA_PRDS_TPENABLE);
 
 	/* read/write pointers with physical bus address */
 
-	writel(tsin->back_buffer_busaddr, tsin->irec + DMA_PRDS_BUSBASE_TP(0));
+	pete_writel("drivers/media/platform/sti/c8sectpfe/c8sectpfe-core.c:631", tsin->back_buffer_busaddr, tsin->irec + DMA_PRDS_BUSBASE_TP(0));
 
 	tmp = tsin->back_buffer_busaddr + FEI_BUFFER_SIZE - 1;
-	writel(tmp, tsin->irec + DMA_PRDS_BUSTOP_TP(0));
+	pete_writel("drivers/media/platform/sti/c8sectpfe/c8sectpfe-core.c:634", tmp, tsin->irec + DMA_PRDS_BUSTOP_TP(0));
 
-	writel(tsin->back_buffer_busaddr, tsin->irec + DMA_PRDS_BUSWP_TP(0));
-	writel(tsin->back_buffer_busaddr, tsin->irec + DMA_PRDS_BUSRP_TP(0));
+	pete_writel("drivers/media/platform/sti/c8sectpfe/c8sectpfe-core.c:636", tsin->back_buffer_busaddr, tsin->irec + DMA_PRDS_BUSWP_TP(0));
+	pete_writel("drivers/media/platform/sti/c8sectpfe/c8sectpfe-core.c:637", tsin->back_buffer_busaddr, tsin->irec + DMA_PRDS_BUSRP_TP(0));
 
 	/* initialize tasklet */
 	tasklet_setup(&tsin->tsklet, channel_swdemux_tsklet);
@@ -713,10 +713,10 @@ static int c8sectpfe_probe(struct platform_device *pdev)
 	}
 
 	/* to save power disable all IP's (on by default) */
-	writel(0, fei->io + SYS_INPUT_CLKEN);
+	pete_writel("drivers/media/platform/sti/c8sectpfe/c8sectpfe-core.c:716", 0, fei->io + SYS_INPUT_CLKEN);
 
 	/* Enable memdma clock */
-	writel(MEMDMAENABLE, fei->io + SYS_OTHER_CLKEN);
+	pete_writel("drivers/media/platform/sti/c8sectpfe/c8sectpfe-core.c:719", MEMDMAENABLE, fei->io + SYS_OTHER_CLKEN);
 
 	/* clear internal sram */
 	memset_io(fei->sram, 0x0, fei->sram_size);
@@ -906,15 +906,15 @@ static int c8sectpfe_remove(struct platform_device *pdev)
 	c8sectpfe_debugfs_exit(fei);
 
 	dev_info(fei->dev, "Stopping memdma SLIM core\n");
-	if (readl(fei->io + DMA_CPU_RUN))
-		writel(0x0,  fei->io + DMA_CPU_RUN);
+	if (pete_readl("drivers/media/platform/sti/c8sectpfe/c8sectpfe-core.c:909", fei->io + DMA_CPU_RUN))
+		pete_writel("drivers/media/platform/sti/c8sectpfe/c8sectpfe-core.c:910", 0x0,  fei->io + DMA_CPU_RUN);
 
 	/* unclock all internal IP's */
-	if (readl(fei->io + SYS_INPUT_CLKEN))
-		writel(0, fei->io + SYS_INPUT_CLKEN);
+	if (pete_readl("drivers/media/platform/sti/c8sectpfe/c8sectpfe-core.c:913", fei->io + SYS_INPUT_CLKEN))
+		pete_writel("drivers/media/platform/sti/c8sectpfe/c8sectpfe-core.c:914", 0, fei->io + SYS_INPUT_CLKEN);
 
-	if (readl(fei->io + SYS_OTHER_CLKEN))
-		writel(0, fei->io + SYS_OTHER_CLKEN);
+	if (pete_readl("drivers/media/platform/sti/c8sectpfe/c8sectpfe-core.c:916", fei->io + SYS_OTHER_CLKEN))
+		pete_writel("drivers/media/platform/sti/c8sectpfe/c8sectpfe-core.c:917", 0, fei->io + SYS_OTHER_CLKEN);
 
 	if (fei->c8sectpfeclk)
 		clk_disable_unprepare(fei->c8sectpfeclk);
@@ -1170,10 +1170,10 @@ static int load_c8sectpfe_fw(struct c8sectpfei *fei)
 	 * STBus target port can access IMEM and DMEM ports
 	 * without waiting for CPU
 	 */
-	writel(0x1, fei->io + DMA_PER_STBUS_SYNC);
+	pete_writel("drivers/media/platform/sti/c8sectpfe/c8sectpfe-core.c:1173", 0x1, fei->io + DMA_PER_STBUS_SYNC);
 
 	dev_info(fei->dev, "Boot the memdma SLIM core\n");
-	writel(0x1,  fei->io + DMA_CPU_RUN);
+	pete_writel("drivers/media/platform/sti/c8sectpfe/c8sectpfe-core.c:1176", 0x1,  fei->io + DMA_CPU_RUN);
 
 	atomic_set(&fei->fw_loaded, 1);
 

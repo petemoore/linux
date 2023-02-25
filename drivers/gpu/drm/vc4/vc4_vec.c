@@ -207,8 +207,8 @@ struct vc4_vec {
 	struct debugfs_regset32 regset;
 };
 
-#define VEC_READ(offset) readl(vec->regs + (offset))
-#define VEC_WRITE(offset, val) writel(val, vec->regs + (offset))
+#define VEC_READ(offset) pete_readl("drivers/gpu/drm/vc4/vc4_vec.c:210", vec->regs + (offset))
+#define VEC_WRITE(offset, val) pete_writel("drivers/gpu/drm/vc4/vc4_vec.c:211", val, vec->regs + (offset))
 
 static inline struct vc4_vec *
 encoder_to_vc4_vec(struct drm_encoder *encoder)

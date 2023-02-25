@@ -577,10 +577,10 @@ static inline void vdma_desc_write_64(struct xilinx_dma_chan *chan, u32 reg,
 				      u32 value_lsb, u32 value_msb)
 {
 	/* Write the lsb 32 bits*/
-	writel(value_lsb, chan->xdev->regs + chan->desc_offset + reg);
+	pete_writel("drivers/dma/xilinx/xilinx_dma.c:580", value_lsb, chan->xdev->regs + chan->desc_offset + reg);
 
 	/* Write the msb 32 bits */
-	writel(value_msb, chan->xdev->regs + chan->desc_offset + reg + 4);
+	pete_writel("drivers/dma/xilinx/xilinx_dma.c:583", value_msb, chan->xdev->regs + chan->desc_offset + reg + 4);
 }
 
 static inline void dma_writeq(struct xilinx_dma_chan *chan, u32 reg, u64 value)

@@ -35,7 +35,7 @@ static int xgene_restart_handler(struct notifier_block *this,
 			     restart_handler);
 
 	/* Issue the reboot */
-	writel(ctx->mask, ctx->csr);
+	pete_writel("drivers/power/reset/xgene-reboot.c:38", ctx->mask, ctx->csr);
 
 	mdelay(1000);
 

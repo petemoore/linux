@@ -116,12 +116,12 @@ struct a3700_spi {
 
 static u32 spireg_read(struct a3700_spi *a3700_spi, u32 offset)
 {
-	return readl(a3700_spi->base + offset);
+	return pete_readl("drivers/spi/spi-armada-3700.c:119", a3700_spi->base + offset);
 }
 
 static void spireg_write(struct a3700_spi *a3700_spi, u32 offset, u32 data)
 {
-	writel(data, a3700_spi->base + offset);
+	pete_writel("drivers/spi/spi-armada-3700.c:124", data, a3700_spi->base + offset);
 }
 
 static void a3700_spi_auto_cs_unset(struct a3700_spi *a3700_spi)

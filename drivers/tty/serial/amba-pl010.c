@@ -64,7 +64,7 @@ static void pl010_stop_tx(struct uart_port *port)
 
 	cr = readb(uap->port.membase + UART010_CR);
 	cr &= ~UART010_CR_TIE;
-	writel(cr, uap->port.membase + UART010_CR);
+	pete_writel("drivers/tty/serial/amba-pl010.c:67", cr, uap->port.membase + UART010_CR);
 }
 
 static void pl010_start_tx(struct uart_port *port)
@@ -75,7 +75,7 @@ static void pl010_start_tx(struct uart_port *port)
 
 	cr = readb(uap->port.membase + UART010_CR);
 	cr |= UART010_CR_TIE;
-	writel(cr, uap->port.membase + UART010_CR);
+	pete_writel("drivers/tty/serial/amba-pl010.c:78", cr, uap->port.membase + UART010_CR);
 }
 
 static void pl010_stop_rx(struct uart_port *port)
@@ -86,7 +86,7 @@ static void pl010_stop_rx(struct uart_port *port)
 
 	cr = readb(uap->port.membase + UART010_CR);
 	cr &= ~(UART010_CR_RIE | UART010_CR_RTIE);
-	writel(cr, uap->port.membase + UART010_CR);
+	pete_writel("drivers/tty/serial/amba-pl010.c:89", cr, uap->port.membase + UART010_CR);
 }
 
 static void pl010_disable_ms(struct uart_port *port)
@@ -96,7 +96,7 @@ static void pl010_disable_ms(struct uart_port *port)
 
 	cr = readb(uap->port.membase + UART010_CR);
 	cr &= ~UART010_CR_MSIE;
-	writel(cr, uap->port.membase + UART010_CR);
+	pete_writel("drivers/tty/serial/amba-pl010.c:99", cr, uap->port.membase + UART010_CR);
 }
 
 static void pl010_enable_ms(struct uart_port *port)
@@ -107,7 +107,7 @@ static void pl010_enable_ms(struct uart_port *port)
 
 	cr = readb(uap->port.membase + UART010_CR);
 	cr |= UART010_CR_MSIE;
-	writel(cr, uap->port.membase + UART010_CR);
+	pete_writel("drivers/tty/serial/amba-pl010.c:110", cr, uap->port.membase + UART010_CR);
 }
 
 static void pl010_rx_chars(struct uart_amba_port *uap)
@@ -127,7 +127,7 @@ static void pl010_rx_chars(struct uart_amba_port *uap)
 		 */
 		rsr = readb(uap->port.membase + UART01x_RSR) | UART_DUMMY_RSR_RX;
 		if (unlikely(rsr & UART01x_RSR_ANY)) {
-			writel(0, uap->port.membase + UART01x_ECR);
+			pete_writel("drivers/tty/serial/amba-pl010.c:130", 0, uap->port.membase + UART01x_ECR);
 
 			if (rsr & UART01x_RSR_BE) {
 				rsr &= ~(UART01x_RSR_FE | UART01x_RSR_PE);
@@ -168,7 +168,7 @@ static void pl010_tx_chars(struct uart_amba_port *uap)
 	int count;
 
 	if (uap->port.x_char) {
-		writel(uap->port.x_char, uap->port.membase + UART01x_DR);
+		pete_writel("drivers/tty/serial/amba-pl010.c:171", uap->port.x_char, uap->port.membase + UART01x_DR);
 		uap->port.icount.tx++;
 		uap->port.x_char = 0;
 		return;
@@ -180,7 +180,7 @@ static void pl010_tx_chars(struct uart_amba_port *uap)
 
 	count = uap->port.fifosize >> 1;
 	do {
-		writel(xmit->buf[xmit->tail], uap->port.membase + UART01x_DR);
+		pete_writel("drivers/tty/serial/amba-pl010.c:183", xmit->buf[xmit->tail], uap->port.membase + UART01x_DR);
 		xmit->tail = (xmit->tail + 1) & (UART_XMIT_SIZE - 1);
 		uap->port.icount.tx++;
 		if (uart_circ_empty(xmit))
@@ -198,7 +198,7 @@ static void pl010_modem_status(struct uart_amba_port *uap)
 {
 	unsigned int status, delta;
 
-	writel(0, uap->port.membase + UART010_ICR);
+	pete_writel("drivers/tty/serial/amba-pl010.c:201", 0, uap->port.membase + UART010_ICR);
 
 	status = readb(uap->port.membase + UART01x_FR) & UART01x_FR_MODEM_ANY;
 
@@ -300,7 +300,7 @@ static void pl010_break_ctl(struct uart_port *port, int break_state)
 		lcr_h |= UART01x_LCRH_BRK;
 	else
 		lcr_h &= ~UART01x_LCRH_BRK;
-	writel(lcr_h, uap->port.membase + UART010_LCRH);
+	pete_writel("drivers/tty/serial/amba-pl010.c:303", lcr_h, uap->port.membase + UART010_LCRH);
 	spin_unlock_irqrestore(&uap->port.lock, flags);
 }
 
@@ -334,7 +334,7 @@ static int pl010_startup(struct uart_port *port)
 	/*
 	 * Finally, enable interrupts
 	 */
-	writel(UART01x_CR_UARTEN | UART010_CR_RIE | UART010_CR_RTIE,
+	pete_writel("drivers/tty/serial/amba-pl010.c:337", UART01x_CR_UARTEN | UART010_CR_RIE | UART010_CR_RTIE,
 	       uap->port.membase + UART010_CR);
 
 	return 0;
@@ -358,10 +358,10 @@ static void pl010_shutdown(struct uart_port *port)
 	/*
 	 * disable all interrupts, disable the port
 	 */
-	writel(0, uap->port.membase + UART010_CR);
+	pete_writel("drivers/tty/serial/amba-pl010.c:361", 0, uap->port.membase + UART010_CR);
 
 	/* disable break condition and fifos */
-	writel(readb(uap->port.membase + UART010_LCRH) &
+	pete_writel("drivers/tty/serial/amba-pl010.c:364", readb(uap->port.membase + UART010_LCRH) &
 		~(UART01x_LCRH_BRK | UART01x_LCRH_FEN),
 	       uap->port.membase + UART010_LCRH);
 
@@ -453,16 +453,16 @@ pl010_set_termios(struct uart_port *port, struct ktermios *termios,
 
 	/* Set baud rate */
 	quot -= 1;
-	writel((quot & 0xf00) >> 8, uap->port.membase + UART010_LCRM);
-	writel(quot & 0xff, uap->port.membase + UART010_LCRL);
+	pete_writel("drivers/tty/serial/amba-pl010.c:456", (quot & 0xf00) >> 8, uap->port.membase + UART010_LCRM);
+	pete_writel("drivers/tty/serial/amba-pl010.c:457", quot & 0xff, uap->port.membase + UART010_LCRL);
 
 	/*
 	 * ----------v----------v----------v----------v-----
 	 * NOTE: MUST BE WRITTEN AFTER UARTLCR_M & UARTLCR_L
 	 * ----------^----------^----------^----------^-----
 	 */
-	writel(lcr_h, uap->port.membase + UART010_LCRH);
-	writel(old_cr, uap->port.membase + UART010_CR);
+	pete_writel("drivers/tty/serial/amba-pl010.c:464", lcr_h, uap->port.membase + UART010_LCRH);
+	pete_writel("drivers/tty/serial/amba-pl010.c:465", old_cr, uap->port.membase + UART010_CR);
 
 	spin_unlock_irqrestore(&uap->port.lock, flags);
 }
@@ -566,7 +566,7 @@ static void pl010_console_putchar(struct uart_port *port, int ch)
 		status = readb(uap->port.membase + UART01x_FR);
 		barrier();
 	} while (!UART_TX_READY(status));
-	writel(ch, uap->port.membase + UART01x_DR);
+	pete_writel("drivers/tty/serial/amba-pl010.c:569", ch, uap->port.membase + UART01x_DR);
 }
 
 static void
@@ -581,7 +581,7 @@ pl010_console_write(struct console *co, const char *s, unsigned int count)
 	 *	First save the CR then disable the interrupts
 	 */
 	old_cr = readb(uap->port.membase + UART010_CR);
-	writel(UART01x_CR_UARTEN, uap->port.membase + UART010_CR);
+	pete_writel("drivers/tty/serial/amba-pl010.c:584", UART01x_CR_UARTEN, uap->port.membase + UART010_CR);
 
 	uart_console_write(&uap->port, s, count, pl010_console_putchar);
 
@@ -593,7 +593,7 @@ pl010_console_write(struct console *co, const char *s, unsigned int count)
 		status = readb(uap->port.membase + UART01x_FR);
 		barrier();
 	} while (status & UART01x_FR_BUSY);
-	writel(old_cr, uap->port.membase + UART010_CR);
+	pete_writel("drivers/tty/serial/amba-pl010.c:596", old_cr, uap->port.membase + UART010_CR);
 
 	clk_disable(uap->clk);
 }

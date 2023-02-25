@@ -43,7 +43,7 @@ static void asd_write_dword(struct asd_ha_struct *asd_ha,
 		outl(val,
 		     (unsigned long)asd_ha->io_handle[0].addr + (offs & 0xFF));
 	else
-		writel(val, asd_ha->io_handle[0].addr + offs);
+		pete_writel("drivers/scsi/aic94xx/aic94xx_reg.c:46", val, asd_ha->io_handle[0].addr + offs);
 	wmb();
 }
 
@@ -82,7 +82,7 @@ static u32 asd_read_dword(struct asd_ha_struct *asd_ha,
 		val = inl((unsigned long) asd_ha->io_handle[0].addr
 			  + (offs & 0xFF));
 	else
-		val = readl(asd_ha->io_handle[0].addr + offs);
+		val = pete_readl("drivers/scsi/aic94xx/aic94xx_reg.c:85", asd_ha->io_handle[0].addr + offs);
 	rmb();
 	return val;
 }

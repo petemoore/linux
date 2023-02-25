@@ -273,7 +273,7 @@ snd_nm256_readw(struct nm256 *chip, int offset)
 static inline u32
 snd_nm256_readl(struct nm256 *chip, int offset)
 {
-	return readl(chip->cport + offset);
+	return pete_readl("sound/pci/nm256/nm256.c:276", chip->cport + offset);
 }
 
 static inline void
@@ -291,7 +291,7 @@ snd_nm256_writew(struct nm256 *chip, int offset, u16 val)
 static inline void
 snd_nm256_writel(struct nm256 *chip, int offset, u32 val)
 {
-	writel(val, chip->cport + offset);
+	pete_writel("sound/pci/nm256/nm256.c:294", val, chip->cport + offset);
 }
 
 static inline void
@@ -1358,9 +1358,9 @@ snd_nm256_peek_for_sig(struct nm256 *chip)
 		return -EBUSY;
 	}
 
-	sig = readl(temp);
+	sig = pete_readl("sound/pci/nm256/nm256.c:1361", temp);
 	if ((sig & NM_SIG_MASK) == NM_SIGNATURE) {
-		u32 pointer = readl(temp + 4);
+		u32 pointer = pete_readl("sound/pci/nm256/nm256.c:1363", temp + 4);
 
 		/*
 		 * If it's obviously invalid, don't use it

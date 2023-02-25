@@ -67,7 +67,7 @@ static void udc_pci_remove(struct pci_dev *pdev)
 	free_dma_pools(dev);
 
 	/* reset controller */
-	writel(AMD_BIT(UDC_DEVCFG_SOFTRESET), &dev->regs->cfg);
+	pete_writel("drivers/usb/gadget/udc/amd5536udc_pci.c:70", AMD_BIT(UDC_DEVCFG_SOFTRESET), &dev->regs->cfg);
 	free_irq(pdev->irq, dev);
 	iounmap(dev->virt_addr);
 	release_mem_region(pci_resource_start(pdev, 0),

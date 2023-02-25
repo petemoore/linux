@@ -81,16 +81,16 @@ static int ecap_pwm_config(struct pwm_chip *chip, struct pwm_device *pwm,
 
 	if (!enabled) {
 		/* Update active registers if not running */
-		writel(duty_cycles, pc->mmio_base + CAP2);
-		writel(period_cycles, pc->mmio_base + CAP1);
+		pete_writel("drivers/pwm/pwm-tiecap.c:84", duty_cycles, pc->mmio_base + CAP2);
+		pete_writel("drivers/pwm/pwm-tiecap.c:85", period_cycles, pc->mmio_base + CAP1);
 	} else {
 		/*
 		 * Update shadow registers to configure period and
 		 * compare values. This helps current PWM period to
 		 * complete on reconfiguring
 		 */
-		writel(duty_cycles, pc->mmio_base + CAP4);
-		writel(period_cycles, pc->mmio_base + CAP3);
+		pete_writel("drivers/pwm/pwm-tiecap.c:92", duty_cycles, pc->mmio_base + CAP4);
+		pete_writel("drivers/pwm/pwm-tiecap.c:93", period_cycles, pc->mmio_base + CAP3);
 	}
 
 	if (!enabled) {
@@ -277,15 +277,15 @@ static void ecap_pwm_save_context(struct ecap_pwm_chip *pc)
 {
 	pm_runtime_get_sync(pc->chip.dev);
 	pc->ctx.ecctl2 = readw(pc->mmio_base + ECCTL2);
-	pc->ctx.cap4 = readl(pc->mmio_base + CAP4);
-	pc->ctx.cap3 = readl(pc->mmio_base + CAP3);
+	pc->ctx.cap4 = pete_readl("drivers/pwm/pwm-tiecap.c:280", pc->mmio_base + CAP4);
+	pc->ctx.cap3 = pete_readl("drivers/pwm/pwm-tiecap.c:281", pc->mmio_base + CAP3);
 	pm_runtime_put_sync(pc->chip.dev);
 }
 
 static void ecap_pwm_restore_context(struct ecap_pwm_chip *pc)
 {
-	writel(pc->ctx.cap3, pc->mmio_base + CAP3);
-	writel(pc->ctx.cap4, pc->mmio_base + CAP4);
+	pete_writel("drivers/pwm/pwm-tiecap.c:287", pc->ctx.cap3, pc->mmio_base + CAP3);
+	pete_writel("drivers/pwm/pwm-tiecap.c:288", pc->ctx.cap4, pc->mmio_base + CAP4);
 	writew(pc->ctx.ecctl2, pc->mmio_base + ECCTL2);
 }
 

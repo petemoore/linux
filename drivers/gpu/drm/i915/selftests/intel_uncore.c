@@ -217,7 +217,7 @@ static int live_forcewake_ops(void *arg)
 		}
 
 		intel_uncore_forcewake_get(uncore, fw_domains);
-		val = readl(reg);
+		val = pete_readl("drivers/gpu/drm/i915/selftests/intel_uncore.c:220", reg);
 		intel_uncore_forcewake_put(uncore, fw_domains);
 
 		/* Flush the forcewake release (delayed onto a timer) */
@@ -244,9 +244,9 @@ static int live_forcewake_ops(void *arg)
 		}
 
 		/* We then expect the read to return 0 outside of the fw */
-		if (wait_for(readl(reg) == 0, 100)) {
+		if (wait_for(pete_readl("drivers/gpu/drm/i915/selftests/intel_uncore.c:247", reg) == 0, 100)) {
 			pr_err("%s:%s=%0x, fw_domains 0x%x still up after 100ms!\n",
-			       engine->name, r->name, readl(reg), fw_domains);
+			       engine->name, r->name, pete_readl("drivers/gpu/drm/i915/selftests/intel_uncore.c:249", reg), fw_domains);
 			err = -ETIMEDOUT;
 			goto out_rpm;
 		}

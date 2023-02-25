@@ -46,7 +46,7 @@ static map_word mtd_pci_read32(struct map_info *_map, unsigned long ofs)
 {
 	struct map_pci_info *map = (struct map_pci_info *)_map;
 	map_word val;
-	val.x[0] = readl(map->base + map->translate(map, ofs));
+	val.x[0] = pete_readl("drivers/mtd/maps/pci.c:49", map->base + map->translate(map, ofs));
 	return val;
 }
 
@@ -65,7 +65,7 @@ static void mtd_pci_write8(struct map_info *_map, map_word val, unsigned long of
 static void mtd_pci_write32(struct map_info *_map, map_word val, unsigned long ofs)
 {
 	struct map_pci_info *map = (struct map_pci_info *)_map;
-	writel(val.x[0], map->base + map->translate(map, ofs));
+	pete_writel("drivers/mtd/maps/pci.c:68", val.x[0], map->base + map->translate(map, ofs));
 }
 
 static void mtd_pci_copyto(struct map_info *_map, unsigned long to, const void *from, ssize_t len)
@@ -130,11 +130,11 @@ intel_iq80310_translate(struct map_pci_info *map, unsigned long ofs)
 	 * the first 80 bytes (they appear to read nonsense).
 	 */
 	if (page_addr) {
-		writel(0x00000008, map->base + 0x1558);
-		writel(0x00000000, map->base + 0x1550);
+		pete_writel("drivers/mtd/maps/pci.c:133", 0x00000008, map->base + 0x1558);
+		pete_writel("drivers/mtd/maps/pci.c:134", 0x00000000, map->base + 0x1550);
 	} else {
-		writel(0x00000007, map->base + 0x1558);
-		writel(0x00800000, map->base + 0x1550);
+		pete_writel("drivers/mtd/maps/pci.c:136", 0x00000007, map->base + 0x1558);
+		pete_writel("drivers/mtd/maps/pci.c:137", 0x00800000, map->base + 0x1550);
 		ofs += 0x00800000;
 	}
 

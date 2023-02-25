@@ -295,12 +295,12 @@ static void stop_processor(struct icom_port *icom_port)
 	else
 		stop_proc[port].global_control_reg = &icom_port->global_reg->control_2;
 
-	temp = readl(stop_proc[port].global_control_reg);
+	temp = pete_readl("drivers/tty/serial/icom.c:298", stop_proc[port].global_control_reg);
 	temp = (temp & ~start_proc[port].processor_id) | stop_proc[port].processor_id;
-	writel(temp, stop_proc[port].global_control_reg);
+	pete_writel("drivers/tty/serial/icom.c:300", temp, stop_proc[port].global_control_reg);
 
 	/* write flush */
-	readl(stop_proc[port].global_control_reg);
+	pete_readl("drivers/tty/serial/icom.c:303", stop_proc[port].global_control_reg);
 
 unlock:
 	spin_unlock_irqrestore(&icom_lock, flags);
@@ -326,12 +326,12 @@ static void start_processor(struct icom_port *icom_port)
 	else
 		start_proc[port].global_control_reg = &icom_port->global_reg->control_2;
 
-	temp = readl(start_proc[port].global_control_reg);
+	temp = pete_readl("drivers/tty/serial/icom.c:329", start_proc[port].global_control_reg);
 	temp = (temp & ~stop_proc[port].processor_id) | start_proc[port].processor_id;
-	writel(temp, start_proc[port].global_control_reg);
+	pete_writel("drivers/tty/serial/icom.c:331", temp, start_proc[port].global_control_reg);
 
 	/* write flush */
-	readl(start_proc[port].global_control_reg);
+	pete_readl("drivers/tty/serial/icom.c:334", start_proc[port].global_control_reg);
 
 unlock:
 	spin_unlock_irqrestore(&icom_lock, flags);
@@ -443,7 +443,7 @@ static void load_code(struct icom_port *icom_port)
 		new_page[index] = fw->data[index];
 
 	writeb((char) ((fw->size + 16)/16), &icom_port->dram->mac_length);
-	writel(temp_pci, &icom_port->dram->mac_load_addr);
+	pete_writel("drivers/tty/serial/icom.c:446", temp_pci, &icom_port->dram->mac_load_addr);
 
 	release_firmware(fw);
 
@@ -562,11 +562,11 @@ static int startup(struct icom_port *icom_port)
 	else
 		writew(0x3F00, icom_port->int_reg);
 
-	temp = readl(int_mask_tbl[port].global_int_mask);
-	writel(temp & ~int_mask_tbl[port].processor_id, int_mask_tbl[port].global_int_mask);
+	temp = pete_readl("drivers/tty/serial/icom.c:565", int_mask_tbl[port].global_int_mask);
+	pete_writel("drivers/tty/serial/icom.c:566", temp & ~int_mask_tbl[port].processor_id, int_mask_tbl[port].global_int_mask);
 
 	/* write flush */
-	readl(int_mask_tbl[port].global_int_mask);
+	pete_readl("drivers/tty/serial/icom.c:569", int_mask_tbl[port].global_int_mask);
 
 unlock:
 	spin_unlock_irqrestore(&icom_lock, flags);
@@ -597,11 +597,11 @@ static void shutdown(struct icom_port *icom_port)
 	else
 		int_mask_tbl[port].global_int_mask = &icom_port->global_reg->int_mask_2;
 
-	temp = readl(int_mask_tbl[port].global_int_mask);
-	writel(temp | int_mask_tbl[port].processor_id, int_mask_tbl[port].global_int_mask);
+	temp = pete_readl("drivers/tty/serial/icom.c:600", int_mask_tbl[port].global_int_mask);
+	pete_writel("drivers/tty/serial/icom.c:601", temp | int_mask_tbl[port].processor_id, int_mask_tbl[port].global_int_mask);
 
 	/* write flush */
-	readl(int_mask_tbl[port].global_int_mask);
+	pete_readl("drivers/tty/serial/icom.c:604", int_mask_tbl[port].global_int_mask);
 
 unlock:
 	spin_unlock_irqrestore(&icom_lock, flags);
@@ -862,7 +862,7 @@ static irqreturn_t icom_interrupt(int irq, void *dev_id)
 	if (icom_adapter->version == ADAPTER_V2) {
 		int_reg = icom_adapter->base_addr + 0x8024;
 
-		adapter_interrupts = readl(int_reg);
+		adapter_interrupts = pete_readl("drivers/tty/serial/icom.c:865", int_reg);
 
 		if (adapter_interrupts & 0x00003FFF) {
 			/* port 2 interrupt,  NOTE:  for all ADAPTER_V2, port 2 will be active */
@@ -883,14 +883,14 @@ static irqreturn_t icom_interrupt(int irq, void *dev_id)
 		}
 
 		/* Clear out any pending interrupts */
-		writel(adapter_interrupts, int_reg);
+		pete_writel("drivers/tty/serial/icom.c:886", adapter_interrupts, int_reg);
 
 		int_reg = icom_adapter->base_addr + 0x8004;
 	} else {
 		int_reg = icom_adapter->base_addr + 0x4004;
 	}
 
-	adapter_interrupts = readl(int_reg);
+	adapter_interrupts = pete_readl("drivers/tty/serial/icom.c:893", int_reg);
 
 	if (adapter_interrupts & 0x00003FFF) {
 		/* port 0 interrupt, NOTE:  for all adapters, port 0 will be active */
@@ -910,10 +910,10 @@ static irqreturn_t icom_interrupt(int irq, void *dev_id)
 	}
 
 	/* Clear out any pending interrupts */
-	writel(adapter_interrupts, int_reg);
+	pete_writel("drivers/tty/serial/icom.c:913", adapter_interrupts, int_reg);
 
 	/* flush the write */
-	adapter_interrupts = readl(int_reg);
+	adapter_interrupts = pete_readl("drivers/tty/serial/icom.c:916", int_reg);
 
 	return IRQ_HANDLED;
 }
@@ -1240,12 +1240,12 @@ static void icom_set_termios(struct uart_port *port,
 	offset =
 	    (unsigned long) &ICOM_PORT->statStg->rcv[0] -
 	    (unsigned long) ICOM_PORT->statStg;
-	writel(ICOM_PORT->statStg_pci + offset,
+	pete_writel("drivers/tty/serial/icom.c:1243", ICOM_PORT->statStg_pci + offset,
 	       &ICOM_PORT->dram->RcvStatusAddr);
 	ICOM_PORT->next_rcv = 0;
 	ICOM_PORT->put_length = 0;
 	*ICOM_PORT->xmitRestart = 0;
-	writel(ICOM_PORT->xmitRestart_pci,
+	pete_writel("drivers/tty/serial/icom.c:1248", ICOM_PORT->xmitRestart_pci,
 	       &ICOM_PORT->dram->XmitStatusAddr);
 	trace(ICOM_PORT, "XR_ENAB", 0);
 	writeb(CMD_XMIT_RCV_ENABLE, &ICOM_PORT->dram->CmdReg);

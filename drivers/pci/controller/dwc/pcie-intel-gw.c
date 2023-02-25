@@ -76,16 +76,16 @@ static void pcie_update_bits(void __iomem *base, u32 ofs, u32 mask, u32 val)
 {
 	u32 old;
 
-	old = readl(base + ofs);
+	old = pete_readl("drivers/pci/controller/dwc/pcie-intel-gw.c:79", base + ofs);
 	val = (old & ~mask) | (val & mask);
 
 	if (val != old)
-		writel(val, base + ofs);
+		pete_writel("drivers/pci/controller/dwc/pcie-intel-gw.c:83", val, base + ofs);
 }
 
 static inline void pcie_app_wr(struct intel_pcie_port *lpp, u32 ofs, u32 val)
 {
-	writel(val, lpp->app_base + ofs);
+	pete_writel("drivers/pci/controller/dwc/pcie-intel-gw.c:88", val, lpp->app_base + ofs);
 }
 
 static void pcie_app_wr_mask(struct intel_pcie_port *lpp, u32 ofs,

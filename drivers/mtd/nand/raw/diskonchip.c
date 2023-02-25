@@ -333,7 +333,7 @@ static void doc2000_readbuf(struct nand_chip *this, u_char *buf, int len)
 			buf[i] = ReadDOC(docptr, 2k_CDSN_IO + i);
 	} else {
 		for (i = 0; i < len / 4; i++)
-			buf32[i] = readl(docptr + DoC_2k_CDSN_IO + i);
+			buf32[i] = pete_readl("drivers/mtd/nand/raw/diskonchip.c:336", docptr + DoC_2k_CDSN_IO + i);
 	}
 }
 
@@ -380,7 +380,7 @@ static uint16_t __init doc200x_ident_chip(struct mtd_info *mtd, int nr)
 
 		doc200x_readid(this, nr, NULL);
 
-		ident.dword = readl(docptr + DoC_2k_CDSN_IO);
+		ident.dword = pete_readl("drivers/mtd/nand/raw/diskonchip.c:383", docptr + DoC_2k_CDSN_IO);
 		if (((ident.byte[0] << 8) | ident.byte[1]) == ret) {
 			pr_info("DiskOnChip 2000 responds to DWORD access\n");
 			doc->supports_32b_reads = true;

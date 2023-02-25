@@ -1237,7 +1237,7 @@ static void tegra124_wait_cpu_in_reset(u32 cpu)
 	unsigned int reg;
 
 	do {
-		reg = readl(clk_base + CLK_RST_CONTROLLER_CPU_CMPLX_STATUS);
+		reg = pete_readl("drivers/clk/tegra/clk-tegra124.c:1240", clk_base + CLK_RST_CONTROLLER_CPU_CMPLX_STATUS);
 		cpu_relax();
 	} while (!(reg & (1 << cpu)));  /* check CPU been reset or not */
 }
@@ -1252,23 +1252,23 @@ static void tegra124_cpu_clock_suspend(void)
 {
 	/* switch coresite to clk_m, save off original source */
 	tegra124_cpu_clk_sctx.clk_csite_src =
-				readl(clk_base + CLK_SOURCE_CSITE);
-	writel(3 << 30, clk_base + CLK_SOURCE_CSITE);
+				pete_readl("drivers/clk/tegra/clk-tegra124.c:1255", clk_base + CLK_SOURCE_CSITE);
+	pete_writel("drivers/clk/tegra/clk-tegra124.c:1256", 3 << 30, clk_base + CLK_SOURCE_CSITE);
 
 	tegra124_cpu_clk_sctx.cclkg_burst =
-				readl(clk_base + CCLKG_BURST_POLICY);
+				pete_readl("drivers/clk/tegra/clk-tegra124.c:1259", clk_base + CCLKG_BURST_POLICY);
 	tegra124_cpu_clk_sctx.cclkg_divider =
-				readl(clk_base + CCLKG_BURST_POLICY + 4);
+				pete_readl("drivers/clk/tegra/clk-tegra124.c:1261", clk_base + CCLKG_BURST_POLICY + 4);
 }
 
 static void tegra124_cpu_clock_resume(void)
 {
-	writel(tegra124_cpu_clk_sctx.clk_csite_src,
+	pete_writel("drivers/clk/tegra/clk-tegra124.c:1266", tegra124_cpu_clk_sctx.clk_csite_src,
 				clk_base + CLK_SOURCE_CSITE);
 
-	writel(tegra124_cpu_clk_sctx.cclkg_burst,
+	pete_writel("drivers/clk/tegra/clk-tegra124.c:1269", tegra124_cpu_clk_sctx.cclkg_burst,
 					clk_base + CCLKG_BURST_POLICY);
-	writel(tegra124_cpu_clk_sctx.cclkg_divider,
+	pete_writel("drivers/clk/tegra/clk-tegra124.c:1271", tegra124_cpu_clk_sctx.cclkg_divider,
 					clk_base + CCLKG_BURST_POLICY + 4);
 }
 #endif
@@ -1495,9 +1495,9 @@ static void __init tegra124_132_clock_init_pre(struct device_node *np)
 			     ARRAY_SIZE(tegra124_audio_plls), 24576000);
 
 	/* For Tegra124 & Tegra132, PLLD is the only source for DSIA & DSIB */
-	plld_base = readl(clk_base + PLLD_BASE);
+	plld_base = pete_readl("drivers/clk/tegra/clk-tegra124.c:1498", clk_base + PLLD_BASE);
 	plld_base &= ~BIT(25);
-	writel(plld_base, clk_base + PLLD_BASE);
+	pete_writel("drivers/clk/tegra/clk-tegra124.c:1500", plld_base, clk_base + PLLD_BASE);
 }
 
 static struct clk *tegra124_clk_src_onecell_get(struct of_phandle_args *clkspec,

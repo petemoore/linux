@@ -1319,26 +1319,26 @@ static int sun8i_r40_ccu_probe(struct platform_device *pdev)
 		return PTR_ERR(reg);
 
 	/* Force the PLL-Audio-1x divider to 1 */
-	val = readl(reg + SUN8I_R40_PLL_AUDIO_REG);
+	val = pete_readl("drivers/clk/sunxi-ng/ccu-sun8i-r40.c:1322", reg + SUN8I_R40_PLL_AUDIO_REG);
 	val &= ~GENMASK(19, 16);
-	writel(val | (0 << 16), reg + SUN8I_R40_PLL_AUDIO_REG);
+	pete_writel("drivers/clk/sunxi-ng/ccu-sun8i-r40.c:1324", val | (0 << 16), reg + SUN8I_R40_PLL_AUDIO_REG);
 
 	/* Force PLL-MIPI to MIPI mode */
-	val = readl(reg + SUN8I_R40_PLL_MIPI_REG);
+	val = pete_readl("drivers/clk/sunxi-ng/ccu-sun8i-r40.c:1327", reg + SUN8I_R40_PLL_MIPI_REG);
 	val &= ~BIT(16);
-	writel(val, reg + SUN8I_R40_PLL_MIPI_REG);
+	pete_writel("drivers/clk/sunxi-ng/ccu-sun8i-r40.c:1329", val, reg + SUN8I_R40_PLL_MIPI_REG);
 
 	/* Force OHCI 12M parent to 12M divided from 48M */
-	val = readl(reg + SUN8I_R40_USB_CLK_REG);
+	val = pete_readl("drivers/clk/sunxi-ng/ccu-sun8i-r40.c:1332", reg + SUN8I_R40_USB_CLK_REG);
 	val &= ~GENMASK(25, 20);
-	writel(val, reg + SUN8I_R40_USB_CLK_REG);
+	pete_writel("drivers/clk/sunxi-ng/ccu-sun8i-r40.c:1334", val, reg + SUN8I_R40_USB_CLK_REG);
 
 	/*
 	 * Force SYS 32k (otherwise known as LOSC throughout the CCU)
 	 * clock parent to LOSC output from RTC module instead of the
 	 * CCU's internal RC oscillator divided output.
 	 */
-	writel(SUN8I_R40_SYS_32K_CLK_KEY | BIT(8),
+	pete_writel("drivers/clk/sunxi-ng/ccu-sun8i-r40.c:1341", SUN8I_R40_SYS_32K_CLK_KEY | BIT(8),
 	       reg + SUN8I_R40_SYS_32K_CLK_REG);
 
 	regmap = devm_regmap_init_mmio(&pdev->dev, reg,

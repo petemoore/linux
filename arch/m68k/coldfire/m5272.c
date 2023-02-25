@@ -56,13 +56,13 @@ static void __init m5272_uarts_init(void)
 	u32 v;
 
 	/* Enable the output lines for the serial ports */
-	v = readl(MCFSIM_PBCNT);
+	v = pete_readl("arch/m68k/coldfire/m5272.c:59", MCFSIM_PBCNT);
 	v = (v & ~0x000000ff) | 0x00000055;
-	writel(v, MCFSIM_PBCNT);
+	pete_writel("arch/m68k/coldfire/m5272.c:61", v, MCFSIM_PBCNT);
 
-	v = readl(MCFSIM_PDCNT);
+	v = pete_readl("arch/m68k/coldfire/m5272.c:63", MCFSIM_PDCNT);
 	v = (v & ~0x000003fc) | 0x000002a8;
-	writel(v, MCFSIM_PDCNT);
+	pete_writel("arch/m68k/coldfire/m5272.c:65", v, MCFSIM_PDCNT);
 }
 
 /***************************************************************************/

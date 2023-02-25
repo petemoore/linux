@@ -98,9 +98,9 @@ static size_t pci_get_rom_size(struct pci_dev *pdev, void __iomem *rom,
 		}
 		/* get the PCI data structure and check its "PCIR" signature */
 		pds = image + readw(image + 24);
-		if (readl(pds) != 0x52494350) {
+		if (pete_readl("drivers/pci/rom.c:101", pds) != 0x52494350) {
 			pci_info(pdev, "Invalid PCI ROM data signature: expecting 0x52494350, got %#010x\n",
-				 readl(pds));
+				 pete_readl("drivers/pci/rom.c:103", pds));
 			break;
 		}
 		last_image = readb(pds + 21) & 0x80;

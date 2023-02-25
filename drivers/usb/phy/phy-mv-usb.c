@@ -140,12 +140,12 @@ static int mv_otg_reset(struct mv_otg *mvotg)
 	int ret;
 
 	/* Stop the controller */
-	tmp = readl(&mvotg->op_regs->usbcmd);
+	tmp = pete_readl("drivers/usb/phy/phy-mv-usb.c:143", &mvotg->op_regs->usbcmd);
 	tmp &= ~USBCMD_RUN_STOP;
-	writel(tmp, &mvotg->op_regs->usbcmd);
+	pete_writel("drivers/usb/phy/phy-mv-usb.c:145", tmp, &mvotg->op_regs->usbcmd);
 
 	/* Reset the controller to get default values */
-	writel(USBCMD_CTRL_RESET, &mvotg->op_regs->usbcmd);
+	pete_writel("drivers/usb/phy/phy-mv-usb.c:148", USBCMD_CTRL_RESET, &mvotg->op_regs->usbcmd);
 
 	ret = readl_poll_timeout_atomic(&mvotg->op_regs->usbcmd, tmp,
 				(tmp & USBCMD_CTRL_RESET), 10, 10000);
@@ -155,9 +155,9 @@ static int mv_otg_reset(struct mv_otg *mvotg)
 		return ret;
 	}
 
-	writel(0x0, &mvotg->op_regs->usbintr);
-	tmp = readl(&mvotg->op_regs->usbsts);
-	writel(tmp, &mvotg->op_regs->usbsts);
+	pete_writel("drivers/usb/phy/phy-mv-usb.c:158", 0x0, &mvotg->op_regs->usbintr);
+	tmp = pete_readl("drivers/usb/phy/phy-mv-usb.c:159", &mvotg->op_regs->usbsts);
+	pete_writel("drivers/usb/phy/phy-mv-usb.c:160", tmp, &mvotg->op_regs->usbsts);
 
 	return 0;
 }
@@ -183,9 +183,9 @@ static void mv_otg_init_irq(struct mv_otg *mvotg)
 		mvotg->irq_status |= OTGSC_INTSTS_USB_ID;
 	}
 
-	otgsc = readl(&mvotg->op_regs->otgsc);
+	otgsc = pete_readl("drivers/usb/phy/phy-mv-usb.c:186", &mvotg->op_regs->otgsc);
 	otgsc |= mvotg->irq_en;
-	writel(otgsc, &mvotg->op_regs->otgsc);
+	pete_writel("drivers/usb/phy/phy-mv-usb.c:188", otgsc, &mvotg->op_regs->otgsc);
 }
 
 static void mv_otg_start_host(struct mv_otg *mvotg, int on)
@@ -290,7 +290,7 @@ static void mv_otg_update_inputs(struct mv_otg *mvotg)
 	struct mv_otg_ctrl *otg_ctrl = &mvotg->otg_ctrl;
 	u32 otgsc;
 
-	otgsc = readl(&mvotg->op_regs->otgsc);
+	otgsc = pete_readl("drivers/usb/phy/phy-mv-usb.c:293", &mvotg->op_regs->otgsc);
 
 	if (mvotg->pdata->vbus) {
 		if (mvotg->pdata->vbus->poll() == VBUS_HIGH) {
@@ -479,8 +479,8 @@ static irqreturn_t mv_otg_irq(int irq, void *dev)
 	struct mv_otg *mvotg = dev;
 	u32 otgsc;
 
-	otgsc = readl(&mvotg->op_regs->otgsc);
-	writel(otgsc, &mvotg->op_regs->otgsc);
+	otgsc = pete_readl("drivers/usb/phy/phy-mv-usb.c:482", &mvotg->op_regs->otgsc);
+	pete_writel("drivers/usb/phy/phy-mv-usb.c:483", otgsc, &mvotg->op_regs->otgsc);
 
 	/*
 	 * if we have vbus, then the vbus detection for B-device
@@ -753,7 +753,7 @@ static int mv_otg_probe(struct platform_device *pdev)
 
 	mvotg->op_regs =
 		(struct mv_otg_regs __iomem *) ((unsigned long) mvotg->cap_regs
-			+ (readl(mvotg->cap_regs) & CAPLENGTH_MASK));
+			+ (pete_readl("drivers/usb/phy/phy-mv-usb.c:756", mvotg->cap_regs) & CAPLENGTH_MASK));
 
 	if (pdata->id) {
 		retval = devm_request_threaded_irq(&pdev->dev, pdata->id->irq,
@@ -857,9 +857,9 @@ static int mv_otg_resume(struct platform_device *pdev)
 	if (!mvotg->clock_gating) {
 		mv_otg_enable_internal(mvotg);
 
-		otgsc = readl(&mvotg->op_regs->otgsc);
+		otgsc = pete_readl("drivers/usb/phy/phy-mv-usb.c:860", &mvotg->op_regs->otgsc);
 		otgsc |= mvotg->irq_en;
-		writel(otgsc, &mvotg->op_regs->otgsc);
+		pete_writel("drivers/usb/phy/phy-mv-usb.c:862", otgsc, &mvotg->op_regs->otgsc);
 
 		if (spin_trylock(&mvotg->wq_lock)) {
 			mv_otg_run_state_machine(mvotg, 0);

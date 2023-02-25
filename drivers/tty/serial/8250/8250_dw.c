@@ -109,7 +109,7 @@ static void dw8250_check_lcr(struct uart_port *p, int value)
 		else
 #endif
 		if (p->iotype == UPIO_MEM32)
-			writel(value, offset);
+			pete_writel("drivers/tty/serial/8250/8250_dw.c:112", value, offset);
 		else if (p->iotype == UPIO_MEM32BE)
 			iowrite32be(value, offset);
 		else
@@ -205,7 +205,7 @@ static void dw8250_serial_out32(struct uart_port *p, int offset, int value)
 {
 	struct dw8250_data *d = to_dw8250_data(p->private_data);
 
-	writel(value, p->membase + (offset << p->regshift));
+	pete_writel("drivers/tty/serial/8250/8250_dw.c:208", value, p->membase + (offset << p->regshift));
 
 	if (offset == UART_LCR && !d->uart_16550_compatible)
 		dw8250_check_lcr(p, value);
@@ -213,7 +213,7 @@ static void dw8250_serial_out32(struct uart_port *p, int offset, int value)
 
 static unsigned int dw8250_serial_in32(struct uart_port *p, int offset)
 {
-	unsigned int value = readl(p->membase + (offset << p->regshift));
+	unsigned int value = pete_readl("drivers/tty/serial/8250/8250_dw.c:216", p->membase + (offset << p->regshift));
 
 	return dw8250_modify_msr(p, offset, value);
 }

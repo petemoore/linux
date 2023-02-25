@@ -81,14 +81,14 @@ static u32 hisi_ddrc_pmu_v2_get_counter_offset(int cntr_idx)
 static u64 hisi_ddrc_pmu_v1_read_counter(struct hisi_pmu *ddrc_pmu,
 				      struct hw_perf_event *hwc)
 {
-	return readl(ddrc_pmu->base +
+	return pete_readl("drivers/perf/hisilicon/hisi_uncore_ddrc_pmu.c:84", ddrc_pmu->base +
 		     hisi_ddrc_pmu_v1_get_counter_offset(hwc->idx));
 }
 
 static void hisi_ddrc_pmu_v1_write_counter(struct hisi_pmu *ddrc_pmu,
 					struct hw_perf_event *hwc, u64 val)
 {
-	writel((u32)val,
+	pete_writel("drivers/perf/hisilicon/hisi_uncore_ddrc_pmu.c:91", (u32)val,
 	       ddrc_pmu->base + hisi_ddrc_pmu_v1_get_counter_offset(hwc->idx));
 }
 
@@ -118,7 +118,7 @@ static void hisi_ddrc_pmu_write_evtype(struct hisi_pmu *hha_pmu, int idx,
 
 	if (hha_pmu->identifier >= HISI_PMU_V2) {
 		offset = DDRC_V2_EVENT_TYPE + 4 * idx;
-		writel(type, hha_pmu->base + offset);
+		pete_writel("drivers/perf/hisilicon/hisi_uncore_ddrc_pmu.c:121", type, hha_pmu->base + offset);
 	}
 }
 
@@ -127,9 +127,9 @@ static void hisi_ddrc_pmu_v1_start_counters(struct hisi_pmu *ddrc_pmu)
 	u32 val;
 
 	/* Set perf_enable in DDRC_PERF_CTRL to start event counting */
-	val = readl(ddrc_pmu->base + DDRC_PERF_CTRL);
+	val = pete_readl("drivers/perf/hisilicon/hisi_uncore_ddrc_pmu.c:130", ddrc_pmu->base + DDRC_PERF_CTRL);
 	val |= DDRC_V1_PERF_CTRL_EN;
-	writel(val, ddrc_pmu->base + DDRC_PERF_CTRL);
+	pete_writel("drivers/perf/hisilicon/hisi_uncore_ddrc_pmu.c:132", val, ddrc_pmu->base + DDRC_PERF_CTRL);
 }
 
 static void hisi_ddrc_pmu_v1_stop_counters(struct hisi_pmu *ddrc_pmu)
@@ -137,9 +137,9 @@ static void hisi_ddrc_pmu_v1_stop_counters(struct hisi_pmu *ddrc_pmu)
 	u32 val;
 
 	/* Clear perf_enable in DDRC_PERF_CTRL to stop event counting */
-	val = readl(ddrc_pmu->base + DDRC_PERF_CTRL);
+	val = pete_readl("drivers/perf/hisilicon/hisi_uncore_ddrc_pmu.c:140", ddrc_pmu->base + DDRC_PERF_CTRL);
 	val &= ~DDRC_V1_PERF_CTRL_EN;
-	writel(val, ddrc_pmu->base + DDRC_PERF_CTRL);
+	pete_writel("drivers/perf/hisilicon/hisi_uncore_ddrc_pmu.c:142", val, ddrc_pmu->base + DDRC_PERF_CTRL);
 }
 
 static void hisi_ddrc_pmu_v1_enable_counter(struct hisi_pmu *ddrc_pmu,
@@ -148,9 +148,9 @@ static void hisi_ddrc_pmu_v1_enable_counter(struct hisi_pmu *ddrc_pmu,
 	u32 val;
 
 	/* Set counter index(event code) in DDRC_EVENT_CTRL register */
-	val = readl(ddrc_pmu->base + DDRC_EVENT_CTRL);
+	val = pete_readl("drivers/perf/hisilicon/hisi_uncore_ddrc_pmu.c:151", ddrc_pmu->base + DDRC_EVENT_CTRL);
 	val |= (1 << GET_DDRC_EVENTID(hwc));
-	writel(val, ddrc_pmu->base + DDRC_EVENT_CTRL);
+	pete_writel("drivers/perf/hisilicon/hisi_uncore_ddrc_pmu.c:153", val, ddrc_pmu->base + DDRC_EVENT_CTRL);
 }
 
 static void hisi_ddrc_pmu_v1_disable_counter(struct hisi_pmu *ddrc_pmu,
@@ -159,9 +159,9 @@ static void hisi_ddrc_pmu_v1_disable_counter(struct hisi_pmu *ddrc_pmu,
 	u32 val;
 
 	/* Clear counter index(event code) in DDRC_EVENT_CTRL register */
-	val = readl(ddrc_pmu->base + DDRC_EVENT_CTRL);
+	val = pete_readl("drivers/perf/hisilicon/hisi_uncore_ddrc_pmu.c:162", ddrc_pmu->base + DDRC_EVENT_CTRL);
 	val &= ~(1 << GET_DDRC_EVENTID(hwc));
-	writel(val, ddrc_pmu->base + DDRC_EVENT_CTRL);
+	pete_writel("drivers/perf/hisilicon/hisi_uncore_ddrc_pmu.c:164", val, ddrc_pmu->base + DDRC_EVENT_CTRL);
 }
 
 static int hisi_ddrc_pmu_v1_get_event_idx(struct perf_event *event)
@@ -189,18 +189,18 @@ static void hisi_ddrc_pmu_v2_start_counters(struct hisi_pmu *ddrc_pmu)
 {
 	u32 val;
 
-	val = readl(ddrc_pmu->base + DDRC_V2_PERF_CTRL);
+	val = pete_readl("drivers/perf/hisilicon/hisi_uncore_ddrc_pmu.c:192", ddrc_pmu->base + DDRC_V2_PERF_CTRL);
 	val |= DDRC_V2_PERF_CTRL_EN;
-	writel(val, ddrc_pmu->base + DDRC_V2_PERF_CTRL);
+	pete_writel("drivers/perf/hisilicon/hisi_uncore_ddrc_pmu.c:194", val, ddrc_pmu->base + DDRC_V2_PERF_CTRL);
 }
 
 static void hisi_ddrc_pmu_v2_stop_counters(struct hisi_pmu *ddrc_pmu)
 {
 	u32 val;
 
-	val = readl(ddrc_pmu->base + DDRC_V2_PERF_CTRL);
+	val = pete_readl("drivers/perf/hisilicon/hisi_uncore_ddrc_pmu.c:201", ddrc_pmu->base + DDRC_V2_PERF_CTRL);
 	val &= ~DDRC_V2_PERF_CTRL_EN;
-	writel(val, ddrc_pmu->base + DDRC_V2_PERF_CTRL);
+	pete_writel("drivers/perf/hisilicon/hisi_uncore_ddrc_pmu.c:203", val, ddrc_pmu->base + DDRC_V2_PERF_CTRL);
 }
 
 static void hisi_ddrc_pmu_v2_enable_counter(struct hisi_pmu *ddrc_pmu,
@@ -208,9 +208,9 @@ static void hisi_ddrc_pmu_v2_enable_counter(struct hisi_pmu *ddrc_pmu,
 {
 	u32 val;
 
-	val = readl(ddrc_pmu->base + DDRC_V2_EVENT_CTRL);
+	val = pete_readl("drivers/perf/hisilicon/hisi_uncore_ddrc_pmu.c:211", ddrc_pmu->base + DDRC_V2_EVENT_CTRL);
 	val |= 1 << hwc->idx;
-	writel(val, ddrc_pmu->base + DDRC_V2_EVENT_CTRL);
+	pete_writel("drivers/perf/hisilicon/hisi_uncore_ddrc_pmu.c:213", val, ddrc_pmu->base + DDRC_V2_EVENT_CTRL);
 }
 
 static void hisi_ddrc_pmu_v2_disable_counter(struct hisi_pmu *ddrc_pmu,
@@ -218,9 +218,9 @@ static void hisi_ddrc_pmu_v2_disable_counter(struct hisi_pmu *ddrc_pmu,
 {
 	u32 val;
 
-	val = readl(ddrc_pmu->base + DDRC_V2_EVENT_CTRL);
+	val = pete_readl("drivers/perf/hisilicon/hisi_uncore_ddrc_pmu.c:221", ddrc_pmu->base + DDRC_V2_EVENT_CTRL);
 	val &= ~(1 << hwc->idx);
-	writel(val, ddrc_pmu->base + DDRC_V2_EVENT_CTRL);
+	pete_writel("drivers/perf/hisilicon/hisi_uncore_ddrc_pmu.c:223", val, ddrc_pmu->base + DDRC_V2_EVENT_CTRL);
 }
 
 static void hisi_ddrc_pmu_v1_enable_counter_int(struct hisi_pmu *ddrc_pmu,
@@ -229,9 +229,9 @@ static void hisi_ddrc_pmu_v1_enable_counter_int(struct hisi_pmu *ddrc_pmu,
 	u32 val;
 
 	/* Write 0 to enable interrupt */
-	val = readl(ddrc_pmu->base + DDRC_INT_MASK);
+	val = pete_readl("drivers/perf/hisilicon/hisi_uncore_ddrc_pmu.c:232", ddrc_pmu->base + DDRC_INT_MASK);
 	val &= ~(1 << hwc->idx);
-	writel(val, ddrc_pmu->base + DDRC_INT_MASK);
+	pete_writel("drivers/perf/hisilicon/hisi_uncore_ddrc_pmu.c:234", val, ddrc_pmu->base + DDRC_INT_MASK);
 }
 
 static void hisi_ddrc_pmu_v1_disable_counter_int(struct hisi_pmu *ddrc_pmu,
@@ -240,9 +240,9 @@ static void hisi_ddrc_pmu_v1_disable_counter_int(struct hisi_pmu *ddrc_pmu,
 	u32 val;
 
 	/* Write 1 to mask interrupt */
-	val = readl(ddrc_pmu->base + DDRC_INT_MASK);
+	val = pete_readl("drivers/perf/hisilicon/hisi_uncore_ddrc_pmu.c:243", ddrc_pmu->base + DDRC_INT_MASK);
 	val |= 1 << hwc->idx;
-	writel(val, ddrc_pmu->base + DDRC_INT_MASK);
+	pete_writel("drivers/perf/hisilicon/hisi_uncore_ddrc_pmu.c:245", val, ddrc_pmu->base + DDRC_INT_MASK);
 }
 
 static void hisi_ddrc_pmu_v2_enable_counter_int(struct hisi_pmu *ddrc_pmu,
@@ -250,9 +250,9 @@ static void hisi_ddrc_pmu_v2_enable_counter_int(struct hisi_pmu *ddrc_pmu,
 {
 	u32 val;
 
-	val = readl(ddrc_pmu->base + DDRC_V2_INT_MASK);
+	val = pete_readl("drivers/perf/hisilicon/hisi_uncore_ddrc_pmu.c:253", ddrc_pmu->base + DDRC_V2_INT_MASK);
 	val &= ~(1 << hwc->idx);
-	writel(val, ddrc_pmu->base + DDRC_V2_INT_MASK);
+	pete_writel("drivers/perf/hisilicon/hisi_uncore_ddrc_pmu.c:255", val, ddrc_pmu->base + DDRC_V2_INT_MASK);
 }
 
 static void hisi_ddrc_pmu_v2_disable_counter_int(struct hisi_pmu *ddrc_pmu,
@@ -260,31 +260,31 @@ static void hisi_ddrc_pmu_v2_disable_counter_int(struct hisi_pmu *ddrc_pmu,
 {
 	u32 val;
 
-	val = readl(ddrc_pmu->base + DDRC_V2_INT_MASK);
+	val = pete_readl("drivers/perf/hisilicon/hisi_uncore_ddrc_pmu.c:263", ddrc_pmu->base + DDRC_V2_INT_MASK);
 	val |= 1 << hwc->idx;
-	writel(val, ddrc_pmu->base + DDRC_V2_INT_MASK);
+	pete_writel("drivers/perf/hisilicon/hisi_uncore_ddrc_pmu.c:265", val, ddrc_pmu->base + DDRC_V2_INT_MASK);
 }
 
 static u32 hisi_ddrc_pmu_v1_get_int_status(struct hisi_pmu *ddrc_pmu)
 {
-	return readl(ddrc_pmu->base + DDRC_INT_STATUS);
+	return pete_readl("drivers/perf/hisilicon/hisi_uncore_ddrc_pmu.c:270", ddrc_pmu->base + DDRC_INT_STATUS);
 }
 
 static void hisi_ddrc_pmu_v1_clear_int_status(struct hisi_pmu *ddrc_pmu,
 					      int idx)
 {
-	writel(1 << idx, ddrc_pmu->base + DDRC_INT_CLEAR);
+	pete_writel("drivers/perf/hisilicon/hisi_uncore_ddrc_pmu.c:276", 1 << idx, ddrc_pmu->base + DDRC_INT_CLEAR);
 }
 
 static u32 hisi_ddrc_pmu_v2_get_int_status(struct hisi_pmu *ddrc_pmu)
 {
-	return readl(ddrc_pmu->base + DDRC_V2_INT_STATUS);
+	return pete_readl("drivers/perf/hisilicon/hisi_uncore_ddrc_pmu.c:281", ddrc_pmu->base + DDRC_V2_INT_STATUS);
 }
 
 static void hisi_ddrc_pmu_v2_clear_int_status(struct hisi_pmu *ddrc_pmu,
 					      int idx)
 {
-	writel(1 << idx, ddrc_pmu->base + DDRC_V2_INT_CLEAR);
+	pete_writel("drivers/perf/hisilicon/hisi_uncore_ddrc_pmu.c:287", 1 << idx, ddrc_pmu->base + DDRC_V2_INT_CLEAR);
 }
 
 static const struct acpi_device_id hisi_ddrc_pmu_acpi_match[] = {
@@ -321,7 +321,7 @@ static int hisi_ddrc_pmu_init_data(struct platform_device *pdev,
 		return PTR_ERR(ddrc_pmu->base);
 	}
 
-	ddrc_pmu->identifier = readl(ddrc_pmu->base + DDRC_VERSION);
+	ddrc_pmu->identifier = pete_readl("drivers/perf/hisilicon/hisi_uncore_ddrc_pmu.c:324", ddrc_pmu->base + DDRC_VERSION);
 	if (ddrc_pmu->identifier >= HISI_PMU_V2) {
 		if (device_property_read_u32(&pdev->dev, "hisilicon,sub-id",
 					     &ddrc_pmu->sub_id)) {

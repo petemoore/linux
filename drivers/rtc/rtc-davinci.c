@@ -112,12 +112,12 @@ struct davinci_rtc {
 static inline void rtcif_write(struct davinci_rtc *davinci_rtc,
 			       u32 val, u32 addr)
 {
-	writel(val, davinci_rtc->base + addr);
+	pete_writel("drivers/rtc/rtc-davinci.c:115", val, davinci_rtc->base + addr);
 }
 
 static inline u32 rtcif_read(struct davinci_rtc *davinci_rtc, u32 addr)
 {
-	return readl(davinci_rtc->base + addr);
+	return pete_readl("drivers/rtc/rtc-davinci.c:120", davinci_rtc->base + addr);
 }
 
 static inline void rtcif_wait(struct davinci_rtc *davinci_rtc)

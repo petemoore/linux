@@ -860,7 +860,7 @@ static const struct pinctrl_pin_desc keembay_pins[] = {
 
 static inline u32 keembay_read_reg(void __iomem *base, unsigned int pin)
 {
-	return readl(base + KEEMBAY_GPIO_REG_OFFSET(pin));
+	return pete_readl("drivers/pinctrl/pinctrl-keembay.c:863", base + KEEMBAY_GPIO_REG_OFFSET(pin));
 }
 
 static inline u32 keembay_read_gpio_reg(void __iomem *base, unsigned int pin)
@@ -877,7 +877,7 @@ static inline u32 keembay_read_pin(void __iomem *base, unsigned int pin)
 
 static inline void keembay_write_reg(u32 val, void __iomem *base, unsigned int pin)
 {
-	writel(val, base + KEEMBAY_GPIO_REG_OFFSET(pin));
+	pete_writel("drivers/pinctrl/pinctrl-keembay.c:880", val, base + KEEMBAY_GPIO_REG_OFFSET(pin));
 }
 
 static inline void keembay_write_gpio_reg(u32 val, void __iomem *base, unsigned int pin)
