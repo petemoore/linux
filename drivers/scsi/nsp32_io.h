@@ -58,7 +58,7 @@ static inline void nsp32_mmio_write1(unsigned long base,
 
 	ptr = (unsigned char *)(base + NSP32_MMIO_OFFSET + index);
 
-	writeb(val, ptr);
+	pete_writeb("drivers/scsi/nsp32_io.h:61", val, ptr);
 }
 
 static inline unsigned char nsp32_mmio_read1(unsigned long base,
@@ -68,7 +68,7 @@ static inline unsigned char nsp32_mmio_read1(unsigned long base,
 
 	ptr = (unsigned char *)(base + NSP32_MMIO_OFFSET + index);
 
-	return readb(ptr);
+	return pete_readb("drivers/scsi/nsp32_io.h:71", ptr);
 }
 
 static inline void nsp32_mmio_write2(unsigned long  base,
@@ -79,7 +79,7 @@ static inline void nsp32_mmio_write2(unsigned long  base,
 
 	ptr = (unsigned short *)(base + NSP32_MMIO_OFFSET + index);
 
-	writew(cpu_to_le16(val), ptr);
+	pete_writew("drivers/scsi/nsp32_io.h:82", cpu_to_le16(val), ptr);
 }
 
 static inline unsigned short nsp32_mmio_read2(unsigned long base,
@@ -89,7 +89,7 @@ static inline unsigned short nsp32_mmio_read2(unsigned long base,
 
 	ptr = (unsigned short *)(base + NSP32_MMIO_OFFSET + index);
 
-	return le16_to_cpu(readw(ptr));
+	return le16_to_cpu(pete_readw("drivers/scsi/nsp32_io.h:92", ptr));
 }
 
 static inline void nsp32_mmio_write4(unsigned long base,
@@ -100,7 +100,7 @@ static inline void nsp32_mmio_write4(unsigned long base,
 
 	ptr = (unsigned long *)(base + NSP32_MMIO_OFFSET + index);
 
-	writel(cpu_to_le32(val), ptr);
+	pete_writel("drivers/scsi/nsp32_io.h:103", cpu_to_le32(val), ptr);
 }
 
 static inline unsigned long nsp32_mmio_read4(unsigned long base,
@@ -110,7 +110,7 @@ static inline unsigned long nsp32_mmio_read4(unsigned long base,
 
 	ptr = (unsigned long *)(base + NSP32_MMIO_OFFSET + index);
 
-	return le32_to_cpu(readl(ptr));
+	return le32_to_cpu(pete_readl("drivers/scsi/nsp32_io.h:113", ptr));
 }
 
 /*==============================================*/
@@ -181,8 +181,8 @@ static inline unsigned char nsp32_mmio_index_read1(unsigned long base,
 	index_ptr = (unsigned short *)(base + NSP32_MMIO_OFFSET + INDEX_REG);
 	data_ptr  = (unsigned short *)(base + NSP32_MMIO_OFFSET + DATA_REG_LOW);
 
-	writeb(reg, index_ptr);
-	return readb(data_ptr);
+	pete_writeb("drivers/scsi/nsp32_io.h:184", reg, index_ptr);
+	return pete_readb("drivers/scsi/nsp32_io.h:185", data_ptr);
 }
 
 static inline void nsp32_mmio_index_write1(unsigned long base,
@@ -194,8 +194,8 @@ static inline void nsp32_mmio_index_write1(unsigned long base,
 	index_ptr = (unsigned short *)(base + NSP32_MMIO_OFFSET + INDEX_REG);
 	data_ptr  = (unsigned short *)(base + NSP32_MMIO_OFFSET + DATA_REG_LOW);
 
-	writeb(reg, index_ptr);
-	writeb(val, data_ptr );
+	pete_writeb("drivers/scsi/nsp32_io.h:197", reg, index_ptr);
+	pete_writeb("drivers/scsi/nsp32_io.h:198", val, data_ptr );
 }
 
 static inline unsigned short nsp32_mmio_index_read2(unsigned long base,
@@ -206,8 +206,8 @@ static inline unsigned short nsp32_mmio_index_read2(unsigned long base,
 	index_ptr = (unsigned short *)(base + NSP32_MMIO_OFFSET + INDEX_REG);
 	data_ptr  = (unsigned short *)(base + NSP32_MMIO_OFFSET + DATA_REG_LOW);
 
-	writeb(reg, index_ptr);
-	return le16_to_cpu(readw(data_ptr));
+	pete_writeb("drivers/scsi/nsp32_io.h:209", reg, index_ptr);
+	return le16_to_cpu(pete_readw("drivers/scsi/nsp32_io.h:210", data_ptr));
 }
 
 static inline void nsp32_mmio_index_write2(unsigned long  base,
@@ -219,8 +219,8 @@ static inline void nsp32_mmio_index_write2(unsigned long  base,
 	index_ptr = (unsigned short *)(base + NSP32_MMIO_OFFSET + INDEX_REG);
 	data_ptr  = (unsigned short *)(base + NSP32_MMIO_OFFSET + DATA_REG_LOW);
 
-	writeb(reg,              index_ptr);
-	writew(cpu_to_le16(val), data_ptr );
+	pete_writeb("drivers/scsi/nsp32_io.h:222", reg,              index_ptr);
+	pete_writew("drivers/scsi/nsp32_io.h:223", cpu_to_le16(val), data_ptr );
 }
 
 /*==============================================*/

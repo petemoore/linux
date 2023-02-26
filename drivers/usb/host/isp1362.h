@@ -586,7 +586,7 @@ static void isp1362_write_addr(struct isp1362_hcd *isp1362_hcd, isp1362_reg_t re
 {
 	REG_ACCESS_TEST(reg);
 	DUMMY_DELAY_ACCESS;
-	writew(ISP1362_REG_NO(reg), isp1362_hcd->addr_reg);
+	pete_writew("drivers/usb/host/isp1362.h:589", ISP1362_REG_NO(reg), isp1362_hcd->addr_reg);
 	DUMMY_DELAY_ACCESS;
 	isp1362_delay(isp1362_hcd, 1);
 }
@@ -594,7 +594,7 @@ static void isp1362_write_addr(struct isp1362_hcd *isp1362_hcd, isp1362_reg_t re
 static void isp1362_write_data16(struct isp1362_hcd *isp1362_hcd, u16 val)
 {
 	DUMMY_DELAY_ACCESS;
-	writew(val, isp1362_hcd->data_reg);
+	pete_writew("drivers/usb/host/isp1362.h:597", val, isp1362_hcd->data_reg);
 }
 
 static u16 isp1362_read_data16(struct isp1362_hcd *isp1362_hcd)
@@ -602,7 +602,7 @@ static u16 isp1362_read_data16(struct isp1362_hcd *isp1362_hcd)
 	u16 val;
 
 	DUMMY_DELAY_ACCESS;
-	val = readw(isp1362_hcd->data_reg);
+	val = pete_readw("drivers/usb/host/isp1362.h:605", isp1362_hcd->data_reg);
 
 	return val;
 }
@@ -611,12 +611,12 @@ static void isp1362_write_data32(struct isp1362_hcd *isp1362_hcd, u32 val)
 {
 #if USE_32BIT
 	DUMMY_DELAY_ACCESS;
-	writel(val, isp1362_hcd->data_reg);
+	pete_writel("drivers/usb/host/isp1362.h:614", val, isp1362_hcd->data_reg);
 #else
 	DUMMY_DELAY_ACCESS;
-	writew((u16)val, isp1362_hcd->data_reg);
+	pete_writew("drivers/usb/host/isp1362.h:617", (u16)val, isp1362_hcd->data_reg);
 	DUMMY_DELAY_ACCESS;
-	writew(val >> 16, isp1362_hcd->data_reg);
+	pete_writew("drivers/usb/host/isp1362.h:619", val >> 16, isp1362_hcd->data_reg);
 #endif
 }
 
@@ -626,12 +626,12 @@ static u32 isp1362_read_data32(struct isp1362_hcd *isp1362_hcd)
 
 #if USE_32BIT
 	DUMMY_DELAY_ACCESS;
-	val = readl(isp1362_hcd->data_reg);
+	val = pete_readl("drivers/usb/host/isp1362.h:629", isp1362_hcd->data_reg);
 #else
 	DUMMY_DELAY_ACCESS;
-	val = (u32)readw(isp1362_hcd->data_reg);
+	val = (u32)pete_readw("drivers/usb/host/isp1362.h:632", isp1362_hcd->data_reg);
 	DUMMY_DELAY_ACCESS;
-	val |= (u32)readw(isp1362_hcd->data_reg) << 16;
+	val |= (u32)pete_readw("drivers/usb/host/isp1362.h:634", isp1362_hcd->data_reg) << 16;
 #endif
 	return val;
 }

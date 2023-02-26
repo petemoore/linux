@@ -98,8 +98,8 @@
 
 #define MFC_MAX_CLOCKS		4
 
-#define mfc_read(dev, offset)		readl(dev->regs_base + (offset))
-#define mfc_write(dev, data, offset)	writel((data), dev->regs_base + \
+#define mfc_read(dev, offset)		pete_readl("drivers/media/platform/s5p-mfc/s5p_mfc_common.h:101", dev->regs_base + (offset))
+#define mfc_write(dev, data, offset)	pete_writel("drivers/media/platform/s5p-mfc/s5p_mfc_common.h:102", (data), dev->regs_base + \
 								(offset))
 
 /*

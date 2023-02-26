@@ -609,7 +609,7 @@ struct fotg210_fstn {
 static inline unsigned int
 fotg210_get_speed(struct fotg210_hcd *fotg210, unsigned int portsc)
 {
-	return (readl(&fotg210->regs->otgcsr)
+	return (pete_readl("drivers/usb/host/fotg210.h:612", &fotg210->regs->otgcsr)
 		& OTGCSR_HOST_SPD_TYP) >> 22;
 }
 
@@ -649,13 +649,13 @@ fotg210_port_speed(struct fotg210_hcd *fotg210, unsigned int portsc)
 static inline unsigned int fotg210_readl(const struct fotg210_hcd *fotg210,
 		__u32 __iomem *regs)
 {
-	return readl(regs);
+	return pete_readl("drivers/usb/host/fotg210.h:652", regs);
 }
 
 static inline void fotg210_writel(const struct fotg210_hcd *fotg210,
 		const unsigned int val, __u32 __iomem *regs)
 {
-	writel(val, regs);
+	pete_writel("drivers/usb/host/fotg210.h:658", val, regs);
 }
 
 /* cpu to fotg210 */

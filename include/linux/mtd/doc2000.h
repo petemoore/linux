@@ -100,8 +100,8 @@ static inline void WriteDOC_(u8 data, u16 __iomem *addr, unsigned long reg)
 }
 #define DOC_IOREMAP_LEN 0x4000
 #else
-#define ReadDOC_(adr, reg)      readb((void __iomem *)(adr) + (reg))
-#define WriteDOC_(d, adr, reg)  writeb(d, (void __iomem *)(adr) + (reg))
+#define ReadDOC_(adr, reg)      pete_readb("include/linux/mtd/doc2000.h:103", (void __iomem *)(adr) + (reg))
+#define WriteDOC_(d, adr, reg)  pete_writeb("include/linux/mtd/doc2000.h:104", d, (void __iomem *)(adr) + (reg))
 #define DOC_IOREMAP_LEN 0x2000
 
 #endif

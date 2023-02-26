@@ -163,13 +163,13 @@ struct tw5864_dev {
 	u32 irqmask;
 };
 
-#define tw_readl(reg) readl(dev->mmio + reg)
+#define tw_readl(reg) pete_readl("drivers/media/pci/tw5864/tw5864.h:166", dev->mmio + reg)
 #define tw_mask_readl(reg, mask) \
 	(tw_readl(reg) & (mask))
 #define tw_mask_shift_readl(reg, mask, shift) \
 	(tw_mask_readl((reg), ((mask) << (shift))) >> (shift))
 
-#define tw_writel(reg, value) writel((value), dev->mmio + reg)
+#define tw_writel(reg, value) pete_writel("drivers/media/pci/tw5864/tw5864.h:172", (value), dev->mmio + reg)
 #define tw_mask_writel(reg, mask, value) \
 	tw_writel(reg, (tw_readl(reg) & ~(mask)) | ((value) & (mask)))
 #define tw_mask_shift_writel(reg, mask, shift, value) \

@@ -81,10 +81,10 @@ struct qtnf_bus *qtnf_pcie_topaz_alloc(struct pci_dev *pdev);
 
 static inline void qtnf_non_posted_write(u32 val, void __iomem *basereg)
 {
-	writel(val, basereg);
+	pete_writel("drivers/net/wireless/quantenna/qtnfmac/pcie/pcie_priv.h:84", val, basereg);
 
 	/* flush posted write */
-	readl(basereg);
+	pete_readl("drivers/net/wireless/quantenna/qtnfmac/pcie/pcie_priv.h:87", basereg);
 }
 
 #endif /* _QTN_FMAC_PCIE_H_ */

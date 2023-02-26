@@ -139,10 +139,10 @@ extern int num_io_requests;
  * for the adapter.
  */
 #define esas2r_read_register_dword(a, reg)                             \
-	readl((void __iomem *)a->regs + (reg) + MW_REG_OFFSET_HWREG)
+	pete_readl("drivers/scsi/esas2r/esas2r.h:142", (void __iomem *)a->regs + (reg) + MW_REG_OFFSET_HWREG)
 
 #define esas2r_write_register_dword(a, reg, data)                      \
-	writel(data, (void __iomem *)(a->regs + (reg) + MW_REG_OFFSET_HWREG))
+	pete_writel("drivers/scsi/esas2r/esas2r.h:145", data, (void __iomem *)(a->regs + (reg) + MW_REG_OFFSET_HWREG))
 
 #define esas2r_flush_register_dword(a, r) esas2r_read_register_dword(a, r)
 
@@ -151,7 +151,7 @@ extern int num_io_requests;
  * for the adapter.
  */
 #define esas2r_read_data_byte(a, reg)                                  \
-	readb((void __iomem *)a->data_window + (reg))
+	pete_readb("drivers/scsi/esas2r/esas2r.h:154", (void __iomem *)a->data_window + (reg))
 
 /* ATTO vendor and device Ids */
 #define ATTO_VENDOR_ID          0x117C

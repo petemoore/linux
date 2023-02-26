@@ -201,13 +201,13 @@ struct ipu_soc {
 
 static inline u32 ipu_idmac_read(struct ipu_soc *ipu, unsigned offset)
 {
-	return readl(ipu->idmac_reg + offset);
+	return pete_readl("drivers/gpu/ipu-v3/ipu-prv.h:204", ipu->idmac_reg + offset);
 }
 
 static inline void ipu_idmac_write(struct ipu_soc *ipu, u32 value,
 				   unsigned offset)
 {
-	writel(value, ipu->idmac_reg + offset);
+	pete_writel("drivers/gpu/ipu-v3/ipu-prv.h:210", value, ipu->idmac_reg + offset);
 }
 
 void ipu_srm_dp_update(struct ipu_soc *ipu, bool sync);

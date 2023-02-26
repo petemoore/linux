@@ -165,6 +165,6 @@ struct sm501_platdata {
 #define smc501_readl(addr)		ioread32be((addr))
 #define smc501_writel(val, addr)	iowrite32be((val), (addr))
 #else
-#define smc501_readl(addr)		readl(addr)
-#define smc501_writel(val, addr)	writel(val, addr)
+#define smc501_readl(addr)		pete_readl("include/linux/sm501.h:168", addr)
+#define smc501_writel(val, addr)	pete_writel("include/linux/sm501.h:169", val, addr)
 #endif

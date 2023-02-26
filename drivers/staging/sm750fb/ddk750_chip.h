@@ -15,12 +15,12 @@ extern void __iomem *mmio750;
 /* software control endianness */
 static inline u32 peek32(u32 addr)
 {
-	return readl(addr + mmio750);
+	return pete_readl("drivers/staging/sm750fb/ddk750_chip.h:18", addr + mmio750);
 }
 
 static inline void poke32(u32 addr, u32 data)
 {
-	writel(data, addr + mmio750);
+	pete_writel("drivers/staging/sm750fb/ddk750_chip.h:23", data, addr + mmio750);
 }
 
 /* This is all the chips recognized by this library */

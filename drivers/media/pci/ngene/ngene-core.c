@@ -43,6 +43,11 @@ DVB_DEFINE_MOD_OPT_ADAPTER_NR(adapter_nr);
 #define ngpete_writeb("drivers/media/pci/ngene/ngene-core.c:43", dat, adr)         pete_writeb("drivers/media/pci/ngene/ngene-core.c:43", (dat), dev->iomem + (adr))
 #define ngpete_readl("drivers/media/pci/ngene/ngene-core.c:44", adr)               pete_readl("drivers/media/pci/ngene/ngene-core.c:44", dev->iomem + (adr))
 #define ngpete_readb("drivers/media/pci/ngene/ngene-core.c:45", adr)               pete_readb("drivers/media/pci/ngene/ngene-core.c:45", dev->iomem + (adr))
+#define ngwriteb(dat, adr)         pete_writeb("drivers/media/pci/ngene/ngene-core.c:41", (dat), dev->iomem + (adr))
+#define ngwritel(dat, adr)         pete_writel("drivers/media/pci/ngene/ngene-core.c:42", (dat), dev->iomem + (adr))
+#define ngwriteb(dat, adr)         pete_writeb("drivers/media/pci/ngene/ngene-core.c:43", (dat), dev->iomem + (adr))
+#define ngreadl(adr)               pete_readl("drivers/media/pci/ngene/ngene-core.c:44", dev->iomem + (adr))
+#define ngreadb(adr)               pete_readb("drivers/media/pci/ngene/ngene-core.c:45", dev->iomem + (adr))
 #define ngcpyto(adr, src, count)   memcpy_toio(dev->iomem + (adr), (src), (count))
 #define ngcpyfrom(dst, adr, count) memcpy_fromio((dst), dev->iomem + (adr), (count))
 

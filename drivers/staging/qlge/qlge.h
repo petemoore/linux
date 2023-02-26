@@ -2179,7 +2179,7 @@ struct qlge_adapter {
  */
 static inline u32 qlge_read32(const struct qlge_adapter *qdev, int reg)
 {
-	return readl(qdev->reg_base + reg);
+	return pete_readl("drivers/staging/qlge/qlge.h:2182", qdev->reg_base + reg);
 }
 
 /*
@@ -2187,7 +2187,7 @@ static inline u32 qlge_read32(const struct qlge_adapter *qdev, int reg)
  */
 static inline void qlge_write32(const struct qlge_adapter *qdev, int reg, u32 val)
 {
-	writel(val, qdev->reg_base + reg);
+	pete_writel("drivers/staging/qlge/qlge.h:2190", val, qdev->reg_base + reg);
 }
 
 /*
@@ -2202,7 +2202,7 @@ static inline void qlge_write32(const struct qlge_adapter *qdev, int reg, u32 va
  */
 static inline void qlge_write_db_reg(u32 val, void __iomem *addr)
 {
-	writel(val, addr);
+	pete_writel("drivers/staging/qlge/qlge.h:2205", val, addr);
 }
 
 /*

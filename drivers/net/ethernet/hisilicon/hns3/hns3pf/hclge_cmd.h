@@ -1243,7 +1243,7 @@ struct hclge_caps_bit_map {
 int hclge_cmd_init(struct hclge_dev *hdev);
 static inline void hclge_write_reg(void __iomem *base, u32 reg, u32 value)
 {
-	writel(value, base + reg);
+	pete_writel("drivers/net/ethernet/hisilicon/hns3/hns3pf/hclge_cmd.h:1246", value, base + reg);
 }
 
 #define hclge_write_dev(a, reg, value) \
@@ -1255,7 +1255,7 @@ static inline u32 hclge_read_reg(u8 __iomem *base, u32 reg)
 {
 	u8 __iomem *reg_addr = READ_ONCE(base);
 
-	return readl(reg_addr + reg);
+	return pete_readl("drivers/net/ethernet/hisilicon/hns3/hns3pf/hclge_cmd.h:1258", reg_addr + reg);
 }
 
 #define HCLGE_SEND_SYNC(flag) \

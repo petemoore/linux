@@ -114,10 +114,10 @@ static inline unsigned int SMC_inl(struct smc911x_local *lp, int reg)
 	void __iomem *ioaddr = lp->base + reg;
 
 	if (lp->cfg.flags & SMC911X_USE_32BIT)
-		return readl(ioaddr);
+		return pete_readl("drivers/net/ethernet/smsc/smc911x.h:117", ioaddr);
 
 	if (lp->cfg.flags & SMC911X_USE_16BIT)
-		return readw(ioaddr) | (readw(ioaddr + 2) << 16);
+		return pete_readw("drivers/net/ethernet/smsc/smc911x.h:120", ioaddr) | (pete_readw("drivers/net/ethernet/smsc/smc911x.h:120", ioaddr + 2) << 16);
 
 	BUG();
 }
@@ -128,13 +128,13 @@ static inline void SMC_outl(unsigned int value, struct smc911x_local *lp,
 	void __iomem *ioaddr = lp->base + reg;
 
 	if (lp->cfg.flags & SMC911X_USE_32BIT) {
-		writel(value, ioaddr);
+		pete_writel("drivers/net/ethernet/smsc/smc911x.h:131", value, ioaddr);
 		return;
 	}
 
 	if (lp->cfg.flags & SMC911X_USE_16BIT) {
-		writew(value & 0xffff, ioaddr);
-		writew(value >> 16, ioaddr + 2);
+		pete_writew("drivers/net/ethernet/smsc/smc911x.h:136", value & 0xffff, ioaddr);
+		pete_writew("drivers/net/ethernet/smsc/smc911x.h:137", value >> 16, ioaddr + 2);
 		return;
 	}
 
@@ -178,18 +178,18 @@ static inline void SMC_outsl(struct smc911x_local *lp, int reg,
 }
 #else
 #if	SMC_USE_16BIT
-#define SMC_inl(lp, r)		 ((readw((lp)->base + (r)) & 0xFFFF) + (readw((lp)->base + (r) + 2) << 16))
+#define SMC_inl(lp, r)		 ((pete_readw("drivers/net/ethernet/smsc/smc911x.h:181", (lp)->base + (r)) & 0xFFFF) + (pete_readw("drivers/net/ethernet/smsc/smc911x.h:181", (lp)->base + (r) + 2) << 16))
 #define SMC_outl(v, lp, r) 			 \
 	do{					 \
-		 writew(v & 0xFFFF, (lp)->base + (r));	 \
-		 writew(v >> 16, (lp)->base + (r) + 2); \
+		 pete_writew("drivers/net/ethernet/smsc/smc911x.h:184", v & 0xFFFF, (lp)->base + (r));	 \
+		 pete_writew("drivers/net/ethernet/smsc/smc911x.h:185", v >> 16, (lp)->base + (r) + 2); \
 	 } while (0)
 #define SMC_insl(lp, r, p, l)	 ioread16_rep((short*)((lp)->base + (r)), p, l*2)
 #define SMC_outsl(lp, r, p, l)	 iowrite16_rep((short*)((lp)->base + (r)), p, l*2)
 
 #elif	SMC_USE_32BIT
-#define SMC_inl(lp, r)		 readl((lp)->base + (r))
-#define SMC_outl(v, lp, r)	 writel(v, (lp)->base + (r))
+#define SMC_inl(lp, r)		 pete_readl("drivers/net/ethernet/smsc/smc911x.h:191", (lp)->base + (r))
+#define SMC_outl(v, lp, r)	 pete_writel("drivers/net/ethernet/smsc/smc911x.h:192", v, (lp)->base + (r))
 #define SMC_insl(lp, r, p, l)	 ioread32_rep((int*)((lp)->base + (r)), p, l)
 #define SMC_outsl(lp, r, p, l)	 iowrite32_rep((int*)((lp)->base + (r)), p, l)
 

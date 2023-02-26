@@ -17,13 +17,13 @@
 /* PCI is not supported in nios2, set this to 0. */
 #define IO_SPACE_LIMIT 0
 
-#define readb_relaxed(addr)	readb(addr)
-#define readw_relaxed(addr)	readw(addr)
-#define readl_relaxed(addr)	readl(addr)
+#define readb_relaxed(addr)	pete_readb("arch/nios2/include/asm/io.h:20", addr)
+#define readw_relaxed(addr)	pete_readw("arch/nios2/include/asm/io.h:21", addr)
+#define readl_relaxed(addr)	pete_readl("arch/nios2/include/asm/io.h:22", addr)
 
-#define writeb_relaxed(x, addr)	writeb(x, addr)
-#define writew_relaxed(x, addr)	writew(x, addr)
-#define writel_relaxed(x, addr)	writel(x, addr)
+#define writeb_relaxed(x, addr)	pete_writeb("arch/nios2/include/asm/io.h:24", x, addr)
+#define writew_relaxed(x, addr)	pete_writew("arch/nios2/include/asm/io.h:25", x, addr)
+#define writel_relaxed(x, addr)	pete_writel("arch/nios2/include/asm/io.h:26", x, addr)
 
 void __iomem *ioremap(unsigned long physaddr, unsigned long size);
 void iounmap(void __iomem *addr);

@@ -917,7 +917,7 @@ void tegra_clk_periph_resume(void);
 /* Combined read fence with delay */
 #define fence_udelay(delay, reg)	\
 	do {				\
-		readl(reg);		\
+		pete_readl("drivers/clk/tegra/clk.h:920", reg);		\
 		udelay(delay);		\
 	} while (0)
 

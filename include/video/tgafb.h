@@ -227,13 +227,13 @@ struct tga_par {
 static inline void
 TGA_WRITE_REG(struct tga_par *par, u32 v, u32 r)
 {
-	writel(v, par->tga_regs_base +r);
+	pete_writel("include/video/tgafb.h:230", v, par->tga_regs_base +r);
 }
 
 static inline u32
 TGA_READ_REG(struct tga_par *par, u32 r)
 {
-	return readl(par->tga_regs_base +r);
+	return pete_readl("include/video/tgafb.h:236", par->tga_regs_base +r);
 }
 
 static inline void

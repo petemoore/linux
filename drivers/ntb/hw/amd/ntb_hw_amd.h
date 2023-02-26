@@ -67,8 +67,8 @@ static inline u64 _read64(void __iomem *mmio)
 {
 	u64 low, high;
 
-	low = readl(mmio);
-	high = readl(mmio + sizeof(u32));
+	low = pete_readl("drivers/ntb/hw/amd/ntb_hw_amd.h:70", mmio);
+	high = pete_readl("drivers/ntb/hw/amd/ntb_hw_amd.h:71", mmio + sizeof(u32));
 	return low | (high << 32);
 }
 #endif
@@ -81,8 +81,8 @@ static inline u64 _read64(void __iomem *mmio)
 #define write64 _write64
 static inline void _write64(u64 val, void __iomem *mmio)
 {
-	writel(val, mmio);
-	writel(val >> 32, mmio + sizeof(u32));
+	pete_writel("drivers/ntb/hw/amd/ntb_hw_amd.h:84", val, mmio);
+	pete_writel("drivers/ntb/hw/amd/ntb_hw_amd.h:85", val >> 32, mmio + sizeof(u32));
 }
 #endif
 #endif

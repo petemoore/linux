@@ -558,18 +558,18 @@ struct csio_hw {
 /* Register access macros */
 #define csio_reg(_b, _r)		((_b) + (_r))
 
-#define	csio_rd_reg8(_h, _r)		readb(csio_reg((_h)->regstart, (_r)))
-#define	csio_rd_reg16(_h, _r)		readw(csio_reg((_h)->regstart, (_r)))
-#define	csio_rd_reg32(_h, _r)		readl(csio_reg((_h)->regstart, (_r)))
-#define	csio_rd_reg64(_h, _r)		readq(csio_reg((_h)->regstart, (_r)))
+#define	csio_rd_reg8(_h, _r)		pete_readb("drivers/scsi/csiostor/csio_hw.h:561", csio_reg((_h)->regstart, (_r)))
+#define	csio_rd_reg16(_h, _r)		pete_readw("drivers/scsi/csiostor/csio_hw.h:562", csio_reg((_h)->regstart, (_r)))
+#define	csio_rd_reg32(_h, _r)		pete_readl("drivers/scsi/csiostor/csio_hw.h:563", csio_reg((_h)->regstart, (_r)))
+#define	csio_rd_reg64(_h, _r)		pete_readq("drivers/scsi/csiostor/csio_hw.h:564", csio_reg((_h)->regstart, (_r)))
 
-#define	csio_wr_reg8(_h, _v, _r)	writeb((_v), \
+#define	csio_wr_reg8(_h, _v, _r)	pete_writeb("drivers/scsi/csiostor/csio_hw.h:566", (_v), \
 						csio_reg((_h)->regstart, (_r)))
-#define	csio_wr_reg16(_h, _v, _r)	writew((_v), \
+#define	csio_wr_reg16(_h, _v, _r)	pete_writew("drivers/scsi/csiostor/csio_hw.h:568", (_v), \
 						csio_reg((_h)->regstart, (_r)))
-#define	csio_wr_reg32(_h, _v, _r)	writel((_v), \
+#define	csio_wr_reg32(_h, _v, _r)	pete_writel("drivers/scsi/csiostor/csio_hw.h:570", (_v), \
 						csio_reg((_h)->regstart, (_r)))
-#define	csio_wr_reg64(_h, _v, _r)	writeq((_v), \
+#define	csio_wr_reg64(_h, _v, _r)	pete_writeq("drivers/scsi/csiostor/csio_hw.h:572", (_v), \
 						csio_reg((_h)->regstart, (_r)))
 
 void csio_set_reg_field(struct csio_hw *, uint32_t, uint32_t, uint32_t);

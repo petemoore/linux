@@ -34,8 +34,8 @@
 #define _HNS_ROCE_COMMON_H
 #include <linux/bitfield.h>
 
-#define roce_write(dev, reg, val)	writel((val), (dev)->reg_base + (reg))
-#define roce_read(dev, reg)		readl((dev)->reg_base + (reg))
+#define roce_write(dev, reg, val)	pete_writel("drivers/infiniband/hw/hns/hns_roce_common.h:37", (val), (dev)->reg_base + (reg))
+#define roce_read(dev, reg)		pete_readl("drivers/infiniband/hw/hns/hns_roce_common.h:38", (dev)->reg_base + (reg))
 #define roce_raw_write(value, addr) \
 	__raw_writel((__force u32)cpu_to_le32(value), (addr))
 

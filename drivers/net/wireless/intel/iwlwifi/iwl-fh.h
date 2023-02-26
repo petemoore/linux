@@ -16,7 +16,7 @@
 /****************************/
 
 /**
- * This I/O area is directly read/writable by driver (e.g. Linux uses writel())
+ * This I/O area is directly read/writable by driver (e.g. Linux uses pete_writel("drivers/net/wireless/intel/iwlwifi/iwl-fh.h:19", ))
  * Addresses are offsets from device's PCI hardware base address.
  */
 #define FH_MEM_LOWER_BOUND                   (0x1000)

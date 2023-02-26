@@ -25,12 +25,12 @@ struct hdlcd_drm_private {
 static inline void hdlcd_write(struct hdlcd_drm_private *hdlcd,
 			       unsigned int reg, u32 value)
 {
-	writel(value, hdlcd->mmio + reg);
+	pete_writel("drivers/gpu/drm/arm/hdlcd_drv.h:28", value, hdlcd->mmio + reg);
 }
 
 static inline u32 hdlcd_read(struct hdlcd_drm_private *hdlcd, unsigned int reg)
 {
-	return readl(hdlcd->mmio + reg);
+	return pete_readl("drivers/gpu/drm/arm/hdlcd_drv.h:33", hdlcd->mmio + reg);
 }
 
 int hdlcd_setup_crtc(struct drm_device *dev);

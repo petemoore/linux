@@ -87,8 +87,8 @@ extern void __iomem *atl2c_base;
 #include <asm/io.h>
 #include <asm/bitfield.h>
 
-#define L2C_R_REG(offset)               readl(atl2c_base + offset)
-#define L2C_W_REG(offset, value)        writel(value, atl2c_base + offset)
+#define L2C_R_REG(offset)               pete_readl("arch/nds32/include/asm/l2_cache.h:90", atl2c_base + offset)
+#define L2C_W_REG(offset, value)        pete_writel("arch/nds32/include/asm/l2_cache.h:91", value, atl2c_base + offset)
 
 #define L2_CMD_RDY()    \
         do{;}while((L2C_R_REG(L2_CCTL_STATUS_OFF) & L2_CCTL_STATUS_mskCMD_COMP) == 0)

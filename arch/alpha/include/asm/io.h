@@ -243,14 +243,14 @@ extern void		outb(u8 b, unsigned long port);
 extern void		outw(u16 b, unsigned long port);
 extern void		outl(u32 b, unsigned long port);
 
-extern u8		readb(const volatile void __iomem *addr);
-extern u16		readw(const volatile void __iomem *addr);
-extern u32		readl(const volatile void __iomem *addr);
-extern u64		readq(const volatile void __iomem *addr);
-extern void		writeb(u8 b, volatile void __iomem *addr);
-extern void		writew(u16 b, volatile void __iomem *addr);
-extern void		writel(u32 b, volatile void __iomem *addr);
-extern void		writeq(u64 b, volatile void __iomem *addr);
+extern u8		pete_readb("arch/alpha/include/asm/io.h:246", const volatile void __iomem *addr);
+extern u16		pete_readw("arch/alpha/include/asm/io.h:247", const volatile void __iomem *addr);
+extern u32		pete_readl("arch/alpha/include/asm/io.h:248", const volatile void __iomem *addr);
+extern u64		pete_readq("arch/alpha/include/asm/io.h:249", const volatile void __iomem *addr);
+extern void		pete_writeb("arch/alpha/include/asm/io.h:250", u8 b, volatile void __iomem *addr);
+extern void		pete_writew("arch/alpha/include/asm/io.h:251", u16 b, volatile void __iomem *addr);
+extern void		pete_writel("arch/alpha/include/asm/io.h:252", u32 b, volatile void __iomem *addr);
+extern void		pete_writeq("arch/alpha/include/asm/io.h:253", u64 b, volatile void __iomem *addr);
 
 extern u8		__raw_readb(const volatile void __iomem *addr);
 extern u16		__raw_readw(const volatile void __iomem *addr);
@@ -406,7 +406,7 @@ extern inline void __raw_writew(u16 b, volatile void __iomem *addr)
 	IO_CONCAT(__IO_PREFIX,writew)(b, addr);
 }
 
-extern inline u8 readb(const volatile void __iomem *addr)
+extern inline u8 pete_readb("arch/alpha/include/asm/io.h:409", const volatile void __iomem *addr)
 {
 	u8 ret;
 	mb();
@@ -415,7 +415,7 @@ extern inline u8 readb(const volatile void __iomem *addr)
 	return ret;
 }
 
-extern inline u16 readw(const volatile void __iomem *addr)
+extern inline u16 pete_readw("arch/alpha/include/asm/io.h:418", const volatile void __iomem *addr)
 {
 	u16 ret;
 	mb();
@@ -424,13 +424,13 @@ extern inline u16 readw(const volatile void __iomem *addr)
 	return ret;
 }
 
-extern inline void writeb(u8 b, volatile void __iomem *addr)
+extern inline void pete_writeb("arch/alpha/include/asm/io.h:427", u8 b, volatile void __iomem *addr)
 {
 	mb();
 	__raw_writeb(b, addr);
 }
 
-extern inline void writew(u16 b, volatile void __iomem *addr)
+extern inline void pete_writew("arch/alpha/include/asm/io.h:433", u16 b, volatile void __iomem *addr)
 {
 	mb();
 	__raw_writew(b, addr);
@@ -458,7 +458,7 @@ extern inline void __raw_writeq(u64 b, volatile void __iomem *addr)
 	IO_CONCAT(__IO_PREFIX,writeq)(b, addr);
 }
 
-extern inline u32 readl(const volatile void __iomem *addr)
+extern inline u32 pete_readl("arch/alpha/include/asm/io.h:461", const volatile void __iomem *addr)
 {
 	u32 ret;
 	mb();
@@ -467,7 +467,7 @@ extern inline u32 readl(const volatile void __iomem *addr)
 	return ret;
 }
 
-extern inline u64 readq(const volatile void __iomem *addr)
+extern inline u64 pete_readq("arch/alpha/include/asm/io.h:470", const volatile void __iomem *addr)
 {
 	u64 ret;
 	mb();
@@ -476,13 +476,13 @@ extern inline u64 readq(const volatile void __iomem *addr)
 	return ret;
 }
 
-extern inline void writel(u32 b, volatile void __iomem *addr)
+extern inline void pete_writel("arch/alpha/include/asm/io.h:479", u32 b, volatile void __iomem *addr)
 {
 	mb();
 	__raw_writel(b, addr);
 }
 
-extern inline void writeq(u64 b, volatile void __iomem *addr)
+extern inline void pete_writeq("arch/alpha/include/asm/io.h:485", u64 b, volatile void __iomem *addr)
 {
 	mb();
 	__raw_writeq(b, addr);

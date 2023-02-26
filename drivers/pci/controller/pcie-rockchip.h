@@ -304,13 +304,13 @@ struct rockchip_pcie {
 
 static u32 rockchip_pcie_read(struct rockchip_pcie *rockchip, u32 reg)
 {
-	return readl(rockchip->apb_base + reg);
+	return pete_readl("drivers/pci/controller/pcie-rockchip.h:307", rockchip->apb_base + reg);
 }
 
 static void rockchip_pcie_write(struct rockchip_pcie *rockchip, u32 val,
 				u32 reg)
 {
-	writel(val, rockchip->apb_base + reg);
+	pete_writel("drivers/pci/controller/pcie-rockchip.h:313", val, rockchip->apb_base + reg);
 }
 
 int rockchip_pcie_parse_dt(struct rockchip_pcie *rockchip);

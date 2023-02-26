@@ -6,22 +6,22 @@
 
 static inline u16 get_u16(const u32 __iomem *p)
 {
-	return (u16)readl(p);
+	return (u16)pete_readl("drivers/comedi/drivers/jr3_pci.h:9", p);
 }
 
 static inline void set_u16(u32 __iomem *p, u16 val)
 {
-	writel(val, p);
+	pete_writel("drivers/comedi/drivers/jr3_pci.h:14", val, p);
 }
 
 static inline s16 get_s16(const s32 __iomem *p)
 {
-	return (s16)readl(p);
+	return (s16)pete_readl("drivers/comedi/drivers/jr3_pci.h:19", p);
 }
 
 static inline void set_s16(s32 __iomem *p, s16 val)
 {
-	writel(val, p);
+	pete_writel("drivers/comedi/drivers/jr3_pci.h:24", val, p);
 }
 
 /*

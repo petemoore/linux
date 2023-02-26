@@ -240,7 +240,7 @@ ioat_chan_by_index(struct ioatdma_device *ioat_dma, int index)
 
 static inline u64 ioat_chansts(struct ioatdma_chan *ioat_chan)
 {
-	return readq(ioat_chan->reg_base + IOAT_CHANSTS_OFFSET);
+	return pete_readq("drivers/dma/ioat/dma.h:243", ioat_chan->reg_base + IOAT_CHANSTS_OFFSET);
 }
 
 static inline u64 ioat_chansts_to_addr(u64 status)
@@ -250,14 +250,14 @@ static inline u64 ioat_chansts_to_addr(u64 status)
 
 static inline u32 ioat_chanerr(struct ioatdma_chan *ioat_chan)
 {
-	return readl(ioat_chan->reg_base + IOAT_CHANERR_OFFSET);
+	return pete_readl("drivers/dma/ioat/dma.h:253", ioat_chan->reg_base + IOAT_CHANERR_OFFSET);
 }
 
 static inline void ioat_suspend(struct ioatdma_chan *ioat_chan)
 {
 	u8 ver = ioat_chan->ioat_dma->version;
 
-	writeb(IOAT_CHANCMD_SUSPEND,
+	pete_writeb("drivers/dma/ioat/dma.h:260", IOAT_CHANCMD_SUSPEND,
 	       ioat_chan->reg_base + IOAT_CHANCMD_OFFSET(ver));
 }
 
@@ -265,7 +265,7 @@ static inline void ioat_reset(struct ioatdma_chan *ioat_chan)
 {
 	u8 ver = ioat_chan->ioat_dma->version;
 
-	writeb(IOAT_CHANCMD_RESET,
+	pete_writeb("drivers/dma/ioat/dma.h:268", IOAT_CHANCMD_RESET,
 	       ioat_chan->reg_base + IOAT_CHANCMD_OFFSET(ver));
 }
 
@@ -274,7 +274,7 @@ static inline bool ioat_reset_pending(struct ioatdma_chan *ioat_chan)
 	u8 ver = ioat_chan->ioat_dma->version;
 	u8 cmd;
 
-	cmd = readb(ioat_chan->reg_base + IOAT_CHANCMD_OFFSET(ver));
+	cmd = pete_readb("drivers/dma/ioat/dma.h:277", ioat_chan->reg_base + IOAT_CHANCMD_OFFSET(ver));
 	return (cmd & IOAT_CHANCMD_RESET) == IOAT_CHANCMD_RESET;
 }
 
@@ -347,9 +347,9 @@ ioat_get_ring_ent(struct ioatdma_chan *ioat_chan, u16 idx)
 static inline void
 ioat_set_chainaddr(struct ioatdma_chan *ioat_chan, u64 addr)
 {
-	writel(addr & 0x00000000FFFFFFFF,
+	pete_writel("drivers/dma/ioat/dma.h:350", addr & 0x00000000FFFFFFFF,
 	       ioat_chan->reg_base + IOAT2_CHAINADDR_OFFSET_LOW);
-	writel(addr >> 32,
+	pete_writel("drivers/dma/ioat/dma.h:352", addr >> 32,
 	       ioat_chan->reg_base + IOAT2_CHAINADDR_OFFSET_HIGH);
 }
 

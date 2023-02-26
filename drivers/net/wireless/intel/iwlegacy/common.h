@@ -1980,20 +1980,20 @@ static inline bool il_need_reclaim(struct il_priv *il, struct il_rx_pkt *pkt)
 static inline void
 _il_write8(struct il_priv *il, u32 ofs, u8 val)
 {
-	writeb(val, il->hw_base + ofs);
+	pete_writeb("drivers/net/wireless/intel/iwlegacy/common.h:1983", val, il->hw_base + ofs);
 }
 #define il_write8(il, ofs, val) _il_write8(il, ofs, val)
 
 static inline void
 _il_wr(struct il_priv *il, u32 ofs, u32 val)
 {
-	writel(val, il->hw_base + ofs);
+	pete_writel("drivers/net/wireless/intel/iwlegacy/common.h:1990", val, il->hw_base + ofs);
 }
 
 static inline u32
 _il_rd(struct il_priv *il, u32 ofs)
 {
-	return readl(il->hw_base + ofs);
+	return pete_readl("drivers/net/wireless/intel/iwlegacy/common.h:1996", il->hw_base + ofs);
 }
 
 static inline void

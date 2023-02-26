@@ -589,13 +589,13 @@ static inline u32 uhci_readl(const struct uhci_hcd *uhci, int reg)
 	if (uhci_has_pci_registers(uhci))
 		return inl(uhci->io_addr + reg);
 	else if (uhci_is_aspeed(uhci))
-		return readl(uhci->regs + uhci_aspeed_reg(reg));
+		return pete_readl("drivers/usb/host/uhci-hcd.h:592", uhci->regs + uhci_aspeed_reg(reg));
 #ifdef CONFIG_USB_UHCI_BIG_ENDIAN_MMIO
 	else if (uhci_big_endian_mmio(uhci))
 		return readl_be(uhci->regs + reg);
 #endif
 	else
-		return readl(uhci->regs + reg);
+		return pete_readl("drivers/usb/host/uhci-hcd.h:598", uhci->regs + reg);
 }
 
 static inline void uhci_writel(const struct uhci_hcd *uhci, u32 val, int reg)
@@ -603,13 +603,13 @@ static inline void uhci_writel(const struct uhci_hcd *uhci, u32 val, int reg)
 	if (uhci_has_pci_registers(uhci))
 		outl(val, uhci->io_addr + reg);
 	else if (uhci_is_aspeed(uhci))
-		writel(val, uhci->regs + uhci_aspeed_reg(reg));
+		pete_writel("drivers/usb/host/uhci-hcd.h:606", val, uhci->regs + uhci_aspeed_reg(reg));
 #ifdef CONFIG_USB_UHCI_BIG_ENDIAN_MMIO
 	else if (uhci_big_endian_mmio(uhci))
 		writel_be(val, uhci->regs + reg);
 #endif
 	else
-		writel(val, uhci->regs + reg);
+		pete_writel("drivers/usb/host/uhci-hcd.h:612", val, uhci->regs + reg);
 }
 
 static inline u16 uhci_readw(const struct uhci_hcd *uhci, int reg)
@@ -617,13 +617,13 @@ static inline u16 uhci_readw(const struct uhci_hcd *uhci, int reg)
 	if (uhci_has_pci_registers(uhci))
 		return inw(uhci->io_addr + reg);
 	else if (uhci_is_aspeed(uhci))
-		return readl(uhci->regs + uhci_aspeed_reg(reg));
+		return pete_readl("drivers/usb/host/uhci-hcd.h:620", uhci->regs + uhci_aspeed_reg(reg));
 #ifdef CONFIG_USB_UHCI_BIG_ENDIAN_MMIO
 	else if (uhci_big_endian_mmio(uhci))
 		return readw_be(uhci->regs + reg);
 #endif
 	else
-		return readw(uhci->regs + reg);
+		return pete_readw("drivers/usb/host/uhci-hcd.h:626", uhci->regs + reg);
 }
 
 static inline void uhci_writew(const struct uhci_hcd *uhci, u16 val, int reg)
@@ -631,13 +631,13 @@ static inline void uhci_writew(const struct uhci_hcd *uhci, u16 val, int reg)
 	if (uhci_has_pci_registers(uhci))
 		outw(val, uhci->io_addr + reg);
 	else if (uhci_is_aspeed(uhci))
-		writel(val, uhci->regs + uhci_aspeed_reg(reg));
+		pete_writel("drivers/usb/host/uhci-hcd.h:634", val, uhci->regs + uhci_aspeed_reg(reg));
 #ifdef CONFIG_USB_UHCI_BIG_ENDIAN_MMIO
 	else if (uhci_big_endian_mmio(uhci))
 		writew_be(val, uhci->regs + reg);
 #endif
 	else
-		writew(val, uhci->regs + reg);
+		pete_writew("drivers/usb/host/uhci-hcd.h:640", val, uhci->regs + reg);
 }
 
 static inline u8 uhci_readb(const struct uhci_hcd *uhci, int reg)
@@ -645,13 +645,13 @@ static inline u8 uhci_readb(const struct uhci_hcd *uhci, int reg)
 	if (uhci_has_pci_registers(uhci))
 		return inb(uhci->io_addr + reg);
 	else if (uhci_is_aspeed(uhci))
-		return readl(uhci->regs + uhci_aspeed_reg(reg));
+		return pete_readl("drivers/usb/host/uhci-hcd.h:648", uhci->regs + uhci_aspeed_reg(reg));
 #ifdef CONFIG_USB_UHCI_BIG_ENDIAN_MMIO
 	else if (uhci_big_endian_mmio(uhci))
 		return readb_be(uhci->regs + reg);
 #endif
 	else
-		return readb(uhci->regs + reg);
+		return pete_readb("drivers/usb/host/uhci-hcd.h:654", uhci->regs + reg);
 }
 
 static inline void uhci_writeb(const struct uhci_hcd *uhci, u8 val, int reg)
@@ -659,13 +659,13 @@ static inline void uhci_writeb(const struct uhci_hcd *uhci, u8 val, int reg)
 	if (uhci_has_pci_registers(uhci))
 		outb(val, uhci->io_addr + reg);
 	else if (uhci_is_aspeed(uhci))
-		writel(val, uhci->regs + uhci_aspeed_reg(reg));
+		pete_writel("drivers/usb/host/uhci-hcd.h:662", val, uhci->regs + uhci_aspeed_reg(reg));
 #ifdef CONFIG_USB_UHCI_BIG_ENDIAN_MMIO
 	else if (uhci_big_endian_mmio(uhci))
 		writeb_be(val, uhci->regs + reg);
 #endif
 	else
-		writeb(val, uhci->regs + reg);
+		pete_writeb("drivers/usb/host/uhci-hcd.h:668", val, uhci->regs + reg);
 }
 #endif /* CONFIG_USB_UHCI_SUPPORT_NON_PCI_HC */
 

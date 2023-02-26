@@ -48,8 +48,8 @@ enum sis_family {
 	SIS_CHIP_315 = 1,
 };
 
-#define SIS_READ(reg)         readl(((void __iomem *)dev_priv->mmio->handle) + (reg))
-#define SIS_WRITE(reg, val)   writel(val, ((void __iomem *)dev_priv->mmio->handle) + (reg))
+#define SIS_READ(reg)         pete_readl("drivers/gpu/drm/sis/sis_drv.h:51", ((void __iomem *)dev_priv->mmio->handle) + (reg))
+#define SIS_WRITE(reg, val)   pete_writel("drivers/gpu/drm/sis/sis_drv.h:52", val, ((void __iomem *)dev_priv->mmio->handle) + (reg))
 
 typedef struct drm_sis_private {
 	drm_local_map_t *mmio;

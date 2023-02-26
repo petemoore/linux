@@ -149,12 +149,12 @@
 	((cdev)->lpe_ba + (cdev)->ipc.config.outbox_offset)
 
 #define catpt_writel_ssp(cdev, ssp, reg, val) \
-	writel(val, catpt_ssp_addr(cdev, ssp) + (reg))
+	pete_writel("sound/soc/intel/catpt/registers.h:152", val, catpt_ssp_addr(cdev, ssp) + (reg))
 
 #define catpt_readl_shim(cdev, reg) \
-	readl(catpt_shim_addr(cdev) + CATPT_SHIM_##reg)
+	pete_readl("sound/soc/intel/catpt/registers.h:155", catpt_shim_addr(cdev) + CATPT_SHIM_##reg)
 #define catpt_writel_shim(cdev, reg, val) \
-	writel(val, catpt_shim_addr(cdev) + CATPT_SHIM_##reg)
+	pete_writel("sound/soc/intel/catpt/registers.h:157", val, catpt_shim_addr(cdev) + CATPT_SHIM_##reg)
 #define catpt_updatel_shim(cdev, reg, mask, val) \
 	catpt_writel_shim(cdev, reg, \
 			  (catpt_readl_shim(cdev, reg) & ~(mask)) | (val))
@@ -164,9 +164,9 @@
 			   val, cond, delay_us, timeout_us)
 
 #define catpt_readl_pci(cdev, reg) \
-	readl(cdev->pci_ba + CATPT_PCI_##reg)
+	pete_readl("sound/soc/intel/catpt/registers.h:167", cdev->pci_ba + CATPT_PCI_##reg)
 #define catpt_writel_pci(cdev, reg, val) \
-	writel(val, cdev->pci_ba + CATPT_PCI_##reg)
+	pete_writel("sound/soc/intel/catpt/registers.h:169", val, cdev->pci_ba + CATPT_PCI_##reg)
 #define catpt_updatel_pci(cdev, reg, mask, val) \
 	catpt_writel_pci(cdev, reg, \
 			 (catpt_readl_pci(cdev, reg) & ~(mask)) | (val))

@@ -149,7 +149,7 @@ void flite_hw_mask_dma_buffer(struct fimc_lite *dev, u32 index);
 
 static inline void flite_hw_set_dma_buf_mask(struct fimc_lite *dev, u32 mask)
 {
-	writel(mask, dev->regs + FLITE_REG_CIFCNTSEQ);
+	pete_writel("drivers/media/platform/exynos4-is/fimc-lite-reg.h:152", mask, dev->regs + FLITE_REG_CIFCNTSEQ);
 }
 
 #endif /* FIMC_LITE_REG_H */

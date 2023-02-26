@@ -21,14 +21,14 @@ struct clkgen_field {
 static inline unsigned long clkgen_read(void __iomem	*base,
 					  struct clkgen_field *field)
 {
-	return (readl(base + field->offset) >> field->shift) & field->mask;
+	return (pete_readl("drivers/clk/st/clkgen.h:24", base + field->offset) >> field->shift) & field->mask;
 }
 
 
 static inline void clkgen_write(void __iomem *base, struct clkgen_field *field,
 				  unsigned long val)
 {
-	writel((readl(base + field->offset) &
+	pete_writel("drivers/clk/st/clkgen.h:31", (pete_readl("drivers/clk/st/clkgen.h:31", base + field->offset) &
 	       ~(field->mask << field->shift)) | (val << field->shift),
 	       base + field->offset);
 

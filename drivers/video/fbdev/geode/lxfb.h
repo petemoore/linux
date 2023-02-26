@@ -375,42 +375,42 @@ enum fp_registers {
 
 static inline uint32_t read_gp(struct lxfb_par *par, int reg)
 {
-	return readl(par->gp_regs + 4*reg);
+	return pete_readl("drivers/video/fbdev/geode/lxfb.h:378", par->gp_regs + 4*reg);
 }
 
 static inline void write_gp(struct lxfb_par *par, int reg, uint32_t val)
 {
-	writel(val, par->gp_regs + 4*reg);
+	pete_writel("drivers/video/fbdev/geode/lxfb.h:383", val, par->gp_regs + 4*reg);
 }
 
 static inline uint32_t read_dc(struct lxfb_par *par, int reg)
 {
-	return readl(par->dc_regs + 4*reg);
+	return pete_readl("drivers/video/fbdev/geode/lxfb.h:388", par->dc_regs + 4*reg);
 }
 
 static inline void write_dc(struct lxfb_par *par, int reg, uint32_t val)
 {
-	writel(val, par->dc_regs + 4*reg);
+	pete_writel("drivers/video/fbdev/geode/lxfb.h:393", val, par->dc_regs + 4*reg);
 }
 
 static inline uint32_t read_vp(struct lxfb_par *par, int reg)
 {
-	return readl(par->vp_regs + 8*reg);
+	return pete_readl("drivers/video/fbdev/geode/lxfb.h:398", par->vp_regs + 8*reg);
 }
 
 static inline void write_vp(struct lxfb_par *par, int reg, uint32_t val)
 {
-	writel(val, par->vp_regs + 8*reg);
+	pete_writel("drivers/video/fbdev/geode/lxfb.h:403", val, par->vp_regs + 8*reg);
 }
 
 static inline uint32_t read_fp(struct lxfb_par *par, int reg)
 {
-	return readl(par->vp_regs + 8*reg + VP_FP_START);
+	return pete_readl("drivers/video/fbdev/geode/lxfb.h:408", par->vp_regs + 8*reg + VP_FP_START);
 }
 
 static inline void write_fp(struct lxfb_par *par, int reg, uint32_t val)
 {
-	writel(val, par->vp_regs + 8*reg + VP_FP_START);
+	pete_writel("drivers/video/fbdev/geode/lxfb.h:413", val, par->vp_regs + 8*reg + VP_FP_START);
 }
 
 

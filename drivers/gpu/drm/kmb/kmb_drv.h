@@ -77,12 +77,12 @@ static inline struct kmb_drm_private *crtc_to_kmb_priv(const struct drm_crtc *x)
 static inline void kmb_write_lcd(struct kmb_drm_private *dev_p,
 				 unsigned int reg, u32 value)
 {
-	writel(value, (dev_p->lcd_mmio + reg));
+	pete_writel("drivers/gpu/drm/kmb/kmb_drv.h:80", value, (dev_p->lcd_mmio + reg));
 }
 
 static inline u32 kmb_read_lcd(struct kmb_drm_private *dev_p, unsigned int reg)
 {
-	return readl(dev_p->lcd_mmio + reg);
+	return pete_readl("drivers/gpu/drm/kmb/kmb_drv.h:85", dev_p->lcd_mmio + reg);
 }
 
 static inline void kmb_set_bitmask_lcd(struct kmb_drm_private *dev_p,

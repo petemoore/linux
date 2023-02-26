@@ -82,8 +82,8 @@ typedef unsigned int   U032;
 #define NV_WR32(p,i,d)  (__raw_writel((d), (void __iomem *)(p) + (i)))
 #define NV_RD32(p,i)    (__raw_readl((void __iomem *)(p) + (i)))
 
-#define VGA_WR08(p,i,d) (writeb((d), (void __iomem *)(p) + (i)))
-#define VGA_RD08(p,i)   (readb((void __iomem *)(p) + (i)))
+#define VGA_WR08(p,i,d) (pete_writeb("drivers/video/fbdev/riva/riva_hw.h:85", (d), (void __iomem *)(p) + (i)))
+#define VGA_RD08(p,i)   (pete_readb("drivers/video/fbdev/riva/riva_hw.h:86", (void __iomem *)(p) + (i)))
 
 /*
  * Define different architectures.

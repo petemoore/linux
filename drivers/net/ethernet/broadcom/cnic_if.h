@@ -350,11 +350,11 @@ struct cnic_dev {
 	void		*cnic_priv;
 };
 
-#define CNIC_WR(dev, off, val)		writel(val, dev->regview + off)
-#define CNIC_WR16(dev, off, val)	writew(val, dev->regview + off)
-#define CNIC_WR8(dev, off, val)		writeb(val, dev->regview + off)
-#define CNIC_RD(dev, off)		readl(dev->regview + off)
-#define CNIC_RD16(dev, off)		readw(dev->regview + off)
+#define CNIC_WR(dev, off, val)		pete_writel("drivers/net/ethernet/broadcom/cnic_if.h:353", val, dev->regview + off)
+#define CNIC_WR16(dev, off, val)	pete_writew("drivers/net/ethernet/broadcom/cnic_if.h:354", val, dev->regview + off)
+#define CNIC_WR8(dev, off, val)		pete_writeb("drivers/net/ethernet/broadcom/cnic_if.h:355", val, dev->regview + off)
+#define CNIC_RD(dev, off)		pete_readl("drivers/net/ethernet/broadcom/cnic_if.h:356", dev->regview + off)
+#define CNIC_RD16(dev, off)		pete_readw("drivers/net/ethernet/broadcom/cnic_if.h:357", dev->regview + off)
 
 struct cnic_ulp_ops {
 	/* Calls to these functions are protected by RCU.  When

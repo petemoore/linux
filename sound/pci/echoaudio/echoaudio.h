@@ -461,13 +461,13 @@ static inline void clear_handshake(struct echoaudio *chip)
 
 static inline u32 get_dsp_register(struct echoaudio *chip, u32 index)
 {
-	return readl(&chip->dsp_registers[index]);
+	return pete_readl("sound/pci/echoaudio/echoaudio.h:464", &chip->dsp_registers[index]);
 }
 
 static inline void set_dsp_register(struct echoaudio *chip, u32 index,
 				    u32 value)
 {
-	writel(value, &chip->dsp_registers[index]);
+	pete_writel("sound/pci/echoaudio/echoaudio.h:470", value, &chip->dsp_registers[index]);
 }
 
 

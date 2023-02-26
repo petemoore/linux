@@ -29,8 +29,8 @@
 #define CSW fd_routine[can_use_virtual_dma & 1]
 
 
-#define fd_inb(base, reg)		readb((base) + (reg))
-#define fd_outb(value, base, reg)	writeb(value, (base) + (reg))
+#define fd_inb(base, reg)		pete_readb("arch/parisc/include/asm/floppy.h:32", (base) + (reg))
+#define fd_outb(value, base, reg)	pete_writeb("arch/parisc/include/asm/floppy.h:33", value, (base) + (reg))
 
 #define fd_request_dma()        CSW._request_dma(FLOPPY_DMA,"floppy")
 #define fd_free_dma()           CSW._free_dma(FLOPPY_DMA)

@@ -195,13 +195,13 @@ static char *twl_aen_severity_table[] =
 #define TWL_SCRPD3_REG_ADDR(x)					\
 	((unsigned char __iomem *)x->base_addr + TWL_SCRPD3)
 #define TWL_MASK_INTERRUPTS(x)					\
-	(writel(~0, TWL_HIMASK_REG_ADDR(tw_dev)))
+	(pete_writel("drivers/scsi/3w-sas.h:198", ~0, TWL_HIMASK_REG_ADDR(tw_dev)))
 #define TWL_UNMASK_INTERRUPTS(x)				\
-	(writel(~TWL_HISTATUS_VALID_INTERRUPT, TWL_HIMASK_REG_ADDR(tw_dev)))
+	(pete_writel("drivers/scsi/3w-sas.h:200", ~TWL_HISTATUS_VALID_INTERRUPT, TWL_HIMASK_REG_ADDR(tw_dev)))
 #define TWL_CLEAR_DB_INTERRUPT(x)				\
-	(writel(~0, TWL_HOBDBC_REG_ADDR(tw_dev)))
+	(pete_writel("drivers/scsi/3w-sas.h:202", ~0, TWL_HOBDBC_REG_ADDR(tw_dev)))
 #define TWL_SOFT_RESET(x)					\
-	(writel(TWL_ISSUE_SOFT_RESET, TWL_HIBDB_REG_ADDR(tw_dev)))
+	(pete_writel("drivers/scsi/3w-sas.h:204", TWL_ISSUE_SOFT_RESET, TWL_HIBDB_REG_ADDR(tw_dev)))
 
 /* Macros */
 #define TW_PRINTK(h,a,b,c) { \

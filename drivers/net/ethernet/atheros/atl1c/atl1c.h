@@ -550,43 +550,43 @@ struct atl1c_adapter {
 };
 
 #define AT_WRITE_REG(a, reg, value) ( \
-		writel((value), ((a)->hw_addr + reg)))
+		pete_writel("drivers/net/ethernet/atheros/atl1c/atl1c.h:553", (value), ((a)->hw_addr + reg)))
 
 #define AT_WRITE_FLUSH(a) (\
-		readl((a)->hw_addr))
+		pete_readl("drivers/net/ethernet/atheros/atl1c/atl1c.h:556", (a)->hw_addr))
 
 #define AT_READ_REG(a, reg, pdata) do {					\
 		if (unlikely((a)->hibernate)) {				\
-			readl((a)->hw_addr + reg);			\
-			*(u32 *)pdata = readl((a)->hw_addr + reg);	\
+			pete_readl("drivers/net/ethernet/atheros/atl1c/atl1c.h:560", (a)->hw_addr + reg);			\
+			*(u32 *)pdata = pete_readl("drivers/net/ethernet/atheros/atl1c/atl1c.h:561", (a)->hw_addr + reg);	\
 		} else {						\
-			*(u32 *)pdata = readl((a)->hw_addr + reg);	\
+			*(u32 *)pdata = pete_readl("drivers/net/ethernet/atheros/atl1c/atl1c.h:563", (a)->hw_addr + reg);	\
 		}							\
 	} while (0)
 
 #define AT_WRITE_REGB(a, reg, value) (\
-		writeb((value), ((a)->hw_addr + reg)))
+		pete_writeb("drivers/net/ethernet/atheros/atl1c/atl1c.h:568", (value), ((a)->hw_addr + reg)))
 
 #define AT_READ_REGB(a, reg) (\
-		readb((a)->hw_addr + reg))
+		pete_readb("drivers/net/ethernet/atheros/atl1c/atl1c.h:571", (a)->hw_addr + reg))
 
 #define AT_WRITE_REGW(a, reg, value) (\
-		writew((value), ((a)->hw_addr + reg)))
+		pete_writew("drivers/net/ethernet/atheros/atl1c/atl1c.h:574", (value), ((a)->hw_addr + reg)))
 
 #define AT_READ_REGW(a, reg, pdata) do {				\
 		if (unlikely((a)->hibernate)) {				\
-			readw((a)->hw_addr + reg);			\
-			*(u16 *)pdata = readw((a)->hw_addr + reg);	\
+			pete_readw("drivers/net/ethernet/atheros/atl1c/atl1c.h:578", (a)->hw_addr + reg);			\
+			*(u16 *)pdata = pete_readw("drivers/net/ethernet/atheros/atl1c/atl1c.h:579", (a)->hw_addr + reg);	\
 		} else {						\
-			*(u16 *)pdata = readw((a)->hw_addr + reg);	\
+			*(u16 *)pdata = pete_readw("drivers/net/ethernet/atheros/atl1c/atl1c.h:581", (a)->hw_addr + reg);	\
 		}							\
 	} while (0)
 
 #define AT_WRITE_REG_ARRAY(a, reg, offset, value) ( \
-		writel((value), (((a)->hw_addr + reg) + ((offset) << 2))))
+		pete_writel("drivers/net/ethernet/atheros/atl1c/atl1c.h:586", (value), (((a)->hw_addr + reg) + ((offset) << 2))))
 
 #define AT_READ_REG_ARRAY(a, reg, offset) ( \
-		readl(((a)->hw_addr + reg) + ((offset) << 2)))
+		pete_readl("drivers/net/ethernet/atheros/atl1c/atl1c.h:589", ((a)->hw_addr + reg) + ((offset) << 2)))
 
 extern char atl1c_driver_name[];
 

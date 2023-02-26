@@ -581,12 +581,12 @@ struct cx8802_dev {
 
 /* ----------------------------------------------------------- */
 
-#define cx_read(reg)             readl(core->lmmio + ((reg) >> 2))
-#define cx_write(reg, value)     writel((value), core->lmmio + ((reg) >> 2))
-#define cx_writeb(reg, value)    writeb((value), core->bmmio + (reg))
+#define cx_read(reg)             pete_readl("drivers/media/pci/cx88/cx88.h:584", core->lmmio + ((reg) >> 2))
+#define cx_write(reg, value)     pete_writel("drivers/media/pci/cx88/cx88.h:585", (value), core->lmmio + ((reg) >> 2))
+#define cx_writeb(reg, value)    pete_writeb("drivers/media/pci/cx88/cx88.h:586", (value), core->bmmio + (reg))
 
 #define cx_andor(reg, mask, value) \
-	writel((readl(core->lmmio + ((reg) >> 2)) & ~(mask)) |\
+	pete_writel("drivers/media/pci/cx88/cx88.h:589", (pete_readl("drivers/media/pci/cx88/cx88.h:589", core->lmmio + ((reg) >> 2)) & ~(mask)) |\
 	((value) & (mask)), core->lmmio + ((reg) >> 2))
 #define cx_set(reg, bit)         cx_andor((reg), (bit), (bit))
 #define cx_clear(reg, bit)       cx_andor((reg), (bit), 0)
@@ -597,11 +597,11 @@ struct cx8802_dev {
 #define cx_sread(sreg)		    (core->shadow[sreg])
 #define cx_swrite(sreg, reg, value) \
 	(core->shadow[sreg] = value, \
-	writel(core->shadow[sreg], core->lmmio + ((reg) >> 2)))
+	pete_writel("drivers/media/pci/cx88/cx88.h:600", core->shadow[sreg], core->lmmio + ((reg) >> 2)))
 #define cx_sandor(sreg, reg, mask, value) \
 	(core->shadow[sreg] = (core->shadow[sreg] & ~(mask)) | \
 			       ((value) & (mask)), \
-				writel(core->shadow[sreg], \
+				pete_writel("drivers/media/pci/cx88/cx88.h:604", core->shadow[sreg], \
 				       core->lmmio + ((reg) >> 2)))
 
 /* ----------------------------------------------------------- */

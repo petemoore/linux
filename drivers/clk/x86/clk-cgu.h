@@ -306,9 +306,9 @@ static inline void lgm_set_clk_val(void __iomem *membase, u32 reg,
 	u32 mask = (GENMASK(width - 1, 0) << shift);
 	u32 regval;
 
-	regval = readl(membase + reg);
+	regval = pete_readl("drivers/clk/x86/clk-cgu.h:309", membase + reg);
 	regval = (regval & ~mask) | ((set_val << shift) & mask);
-	writel(regval, membase + reg);
+	pete_writel("drivers/clk/x86/clk-cgu.h:311", regval, membase + reg);
 }
 
 static inline u32 lgm_get_clk_val(void __iomem *membase, u32 reg,
@@ -317,7 +317,7 @@ static inline u32 lgm_get_clk_val(void __iomem *membase, u32 reg,
 	u32 mask = (GENMASK(width - 1, 0) << shift);
 	u32 val;
 
-	val = readl(membase + reg);
+	val = pete_readl("drivers/clk/x86/clk-cgu.h:320", membase + reg);
 	val = (val & mask) >> shift;
 
 	return val;

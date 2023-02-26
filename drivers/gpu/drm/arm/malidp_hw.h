@@ -259,14 +259,14 @@ struct malidp_hw_device {
 static inline u32 malidp_hw_read(struct malidp_hw_device *hwdev, u32 reg)
 {
 	WARN_ON(hwdev->pm_suspended);
-	return readl(hwdev->regs + reg);
+	return pete_readl("drivers/gpu/drm/arm/malidp_hw.h:262", hwdev->regs + reg);
 }
 
 static inline void malidp_hw_write(struct malidp_hw_device *hwdev,
 				   u32 value, u32 reg)
 {
 	WARN_ON(hwdev->pm_suspended);
-	writel(value, hwdev->regs + reg);
+	pete_writel("drivers/gpu/drm/arm/malidp_hw.h:269", value, hwdev->regs + reg);
 }
 
 static inline void malidp_hw_setbits(struct malidp_hw_device *hwdev,

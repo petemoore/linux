@@ -94,8 +94,8 @@
 #   define CPU_CHIP_SWAP16(x) (x)
 #endif
 
-#define READ_REG(pp, reg)         readl(pp->pBdxRegs + reg)
-#define WRITE_REG(pp, reg, val)   writel(val, pp->pBdxRegs + reg)
+#define READ_REG(pp, reg)         pete_readl("drivers/net/ethernet/tehuti/tehuti.h:97", pp->pBdxRegs + reg)
+#define WRITE_REG(pp, reg, val)   pete_writel("drivers/net/ethernet/tehuti/tehuti.h:98", val, pp->pBdxRegs + reg)
 
 #ifndef NET_IP_ALIGN
 #   define NET_IP_ALIGN 2

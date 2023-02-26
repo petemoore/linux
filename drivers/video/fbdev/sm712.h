@@ -24,9 +24,9 @@
 #define dac_val	(0x3c9)
 
 extern void __iomem *smtc_regbaseaddress;
-#define smtc_mmiowb(dat, reg)	writeb(dat, smtc_regbaseaddress + reg)
+#define smtc_mmiowb(dat, reg)	pete_writeb("drivers/video/fbdev/sm712.h:27", dat, smtc_regbaseaddress + reg)
 
-#define smtc_mmiorb(reg)	readb(smtc_regbaseaddress + reg)
+#define smtc_mmiorb(reg)	pete_readb("drivers/video/fbdev/sm712.h:29", smtc_regbaseaddress + reg)
 
 #define SIZE_SR00_SR04      (0x04 - 0x00 + 1)
 #define SIZE_SR10_SR24      (0x24 - 0x10 + 1)

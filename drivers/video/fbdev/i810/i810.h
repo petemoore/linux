@@ -288,11 +288,11 @@ struct i810fb_par {
 /* 
  * Register I/O
  */
-#define i810_readb(where, mmio) readb(mmio + where)
-#define i810_readw(where, mmio) readw(mmio + where)
-#define i810_readl(where, mmio) readl(mmio + where)
-#define i810_writeb(where, mmio, val) writeb(val, mmio + where) 
-#define i810_writew(where, mmio, val) writew(val, mmio + where)
-#define i810_writel(where, mmio, val) writel(val, mmio + where)
+#define i810_readb(where, mmio) pete_readb("drivers/video/fbdev/i810/i810.h:291", mmio + where)
+#define i810_readw(where, mmio) pete_readw("drivers/video/fbdev/i810/i810.h:292", mmio + where)
+#define i810_readl(where, mmio) pete_readl("drivers/video/fbdev/i810/i810.h:293", mmio + where)
+#define i810_writeb(where, mmio, val) pete_writeb("drivers/video/fbdev/i810/i810.h:294", val, mmio + where) 
+#define i810_writew(where, mmio, val) pete_writew("drivers/video/fbdev/i810/i810.h:295", val, mmio + where)
+#define i810_writel(where, mmio, val) pete_writel("drivers/video/fbdev/i810/i810.h:296", val, mmio + where)
 
 #endif /* __I810_H__ */

@@ -562,12 +562,12 @@ static inline unsigned long *uv_global_mmr32_address(int pnode, unsigned long of
 
 static inline void uv_write_global_mmr32(int pnode, unsigned long offset, unsigned long val)
 {
-	writeq(val, uv_global_mmr32_address(pnode, offset));
+	pete_writeq("arch/x86/include/asm/uv/uv_hub.h:565", val, uv_global_mmr32_address(pnode, offset));
 }
 
 static inline unsigned long uv_read_global_mmr32(int pnode, unsigned long offset)
 {
-	return readq(uv_global_mmr32_address(pnode, offset));
+	return pete_readq("arch/x86/include/asm/uv/uv_hub.h:570", uv_global_mmr32_address(pnode, offset));
 }
 
 /*
@@ -582,22 +582,22 @@ static inline volatile void __iomem *uv_global_mmr64_address(int pnode, unsigned
 
 static inline void uv_write_global_mmr64(int pnode, unsigned long offset, unsigned long val)
 {
-	writeq(val, uv_global_mmr64_address(pnode, offset));
+	pete_writeq("arch/x86/include/asm/uv/uv_hub.h:585", val, uv_global_mmr64_address(pnode, offset));
 }
 
 static inline unsigned long uv_read_global_mmr64(int pnode, unsigned long offset)
 {
-	return readq(uv_global_mmr64_address(pnode, offset));
+	return pete_readq("arch/x86/include/asm/uv/uv_hub.h:590", uv_global_mmr64_address(pnode, offset));
 }
 
 static inline void uv_write_global_mmr8(int pnode, unsigned long offset, unsigned char val)
 {
-	writeb(val, uv_global_mmr64_address(pnode, offset));
+	pete_writeb("arch/x86/include/asm/uv/uv_hub.h:595", val, uv_global_mmr64_address(pnode, offset));
 }
 
 static inline unsigned char uv_read_global_mmr8(int pnode, unsigned long offset)
 {
-	return readb(uv_global_mmr64_address(pnode, offset));
+	return pete_readb("arch/x86/include/asm/uv/uv_hub.h:600", uv_global_mmr64_address(pnode, offset));
 }
 
 /*
@@ -611,22 +611,22 @@ static inline unsigned long *uv_local_mmr_address(unsigned long offset)
 
 static inline unsigned long uv_read_local_mmr(unsigned long offset)
 {
-	return readq(uv_local_mmr_address(offset));
+	return pete_readq("arch/x86/include/asm/uv/uv_hub.h:614", uv_local_mmr_address(offset));
 }
 
 static inline void uv_write_local_mmr(unsigned long offset, unsigned long val)
 {
-	writeq(val, uv_local_mmr_address(offset));
+	pete_writeq("arch/x86/include/asm/uv/uv_hub.h:619", val, uv_local_mmr_address(offset));
 }
 
 static inline unsigned char uv_read_local_mmr8(unsigned long offset)
 {
-	return readb(uv_local_mmr_address(offset));
+	return pete_readb("arch/x86/include/asm/uv/uv_hub.h:624", uv_local_mmr_address(offset));
 }
 
 static inline void uv_write_local_mmr8(unsigned long offset, unsigned char val)
 {
-	writeb(val, uv_local_mmr_address(offset));
+	pete_writeb("arch/x86/include/asm/uv/uv_hub.h:629", val, uv_local_mmr_address(offset));
 }
 
 /* Blade-local cpu number of current cpu. Numbered 0 .. <# cpus on the blade> */
