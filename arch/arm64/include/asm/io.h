@@ -145,8 +145,15 @@ static inline u64 __raw_readq(const volatile void __iomem *addr)
 ///////////////////////////////////////////////////////////////
 //
 // Added by pmoore for rpi400 debugging...
+#define pete_readb(loc, addr) ({ u8 value = readb((addr)); printk(KERN_INFO "%s Read 8 bits [0x%px]=%#0x\n", (loc), (void*)(addr), (value)); value;})
+#define pete_readw(loc, addr) ({ u16 value = readw((addr)); printk(KERN_INFO "%s Read 16 bits [0x%px]=%#0x\n", (loc), (void*)(addr), (value)); value;})
 #define pete_readl(loc, addr) ({ u32 value = readl((addr)); printk(KERN_INFO "%s Read 32 bits [0x%px]=%#0x\n", (loc), (void*)(addr), (value)); value;})
+#define pete_readq(loc, addr) ({ u64 value = readq((addr)); printk(KERN_INFO "%s Read 64 bits [0x%px]=%#0x\n", (loc), (void*)(addr), (value)); value;})
+//
+#define pete_writeb(loc, value, addr) ({ printk(KERN_INFO "%s Write 8 bits [0x%px]=%#0x\n", (loc), (void*)(addr), (__force u8)(value)); writeb((value), (addr));})
+#define pete_writew(loc, value, addr) ({ printk(KERN_INFO "%s Write 16 bits [0x%px]=%#0x\n", (loc), (void*)(addr), (__force u16)(value)); writew((value), (addr));})
 #define pete_writel(loc, value, addr) ({ printk(KERN_INFO "%s Write 32 bits [0x%px]=%#0x\n", (loc), (void*)(addr), (__force u32)(value)); writel((value), (addr));})
+#define pete_writeq(loc, value, addr) ({ printk(KERN_INFO "%s Write 64 bits [0x%px]=%#0x\n", (loc), (void*)(addr), (__force u64)(value)); writeq((value), (addr));})
 //
 ///////////////////////////////////////////////////////////////
 
