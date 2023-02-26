@@ -305,7 +305,7 @@ static int qla4xxx_isp_check_reg(struct scsi_qla_host *ha)
 	else if (is_qla8032(ha) || is_qla8042(ha))
 		reg_val = qla4_8xxx_rd_direct(ha, QLA8XXX_PEG_ALIVE_COUNTER);
 	else
-		reg_val = readw(&ha->reg->ctrl_status);
+		reg_val = pete_readw("drivers/scsi/qla4xxx/ql4_os.c:308", &ha->reg->ctrl_status);
 
 	if (reg_val == QL4_ISP_REG_DISCONNECT)
 		rval = QLA_ERROR;
@@ -4672,7 +4672,7 @@ int qla4xxx_hw_reset(struct scsi_qla_host *ha)
 	 * If the SCSI Reset Interrupt bit is set, clear it.
 	 * Otherwise, the Soft Reset won't work.
 	 */
-	ctrl_status = readw(&ha->reg->ctrl_status);
+	ctrl_status = pete_readw("drivers/scsi/qla4xxx/ql4_os.c:4675", &ha->reg->ctrl_status);
 	if ((ctrl_status & CSR_SCSI_RESET_INTR) != 0)
 		pete_writel("drivers/scsi/qla4xxx/ql4_os.c:4677", set_rmask(CSR_SCSI_RESET_INTR), &ha->reg->ctrl_status);
 
@@ -4704,7 +4704,7 @@ int qla4xxx_soft_reset(struct scsi_qla_host *ha)
 	max_wait_time = RESET_INTR_TOV;
 	do {
 		spin_lock_irqsave(&ha->hardware_lock, flags);
-		ctrl_status = readw(&ha->reg->ctrl_status);
+		ctrl_status = pete_readw("drivers/scsi/qla4xxx/ql4_os.c:4707", &ha->reg->ctrl_status);
 		spin_unlock_irqrestore(&ha->hardware_lock, flags);
 
 		if ((ctrl_status & CSR_NET_RESET_INTR) == 0)
@@ -4728,7 +4728,7 @@ int qla4xxx_soft_reset(struct scsi_qla_host *ha)
 	max_wait_time = SOFT_RESET_TOV;
 	do {
 		spin_lock_irqsave(&ha->hardware_lock, flags);
-		ctrl_status = readw(&ha->reg->ctrl_status);
+		ctrl_status = pete_readw("drivers/scsi/qla4xxx/ql4_os.c:4731", &ha->reg->ctrl_status);
 		spin_unlock_irqrestore(&ha->hardware_lock, flags);
 
 		if ((ctrl_status & CSR_SOFT_RESET) == 0) {
@@ -4744,7 +4744,7 @@ int qla4xxx_soft_reset(struct scsi_qla_host *ha)
 	 * after the soft reset has taken place.
 	 */
 	spin_lock_irqsave(&ha->hardware_lock, flags);
-	ctrl_status = readw(&ha->reg->ctrl_status);
+	ctrl_status = pete_readw("drivers/scsi/qla4xxx/ql4_os.c:4747", &ha->reg->ctrl_status);
 	if ((ctrl_status & CSR_SCSI_RESET_INTR) != 0) {
 		pete_writel("drivers/scsi/qla4xxx/ql4_os.c:4749", set_rmask(CSR_SCSI_RESET_INTR), &ha->reg->ctrl_status);
 		pete_readl("drivers/scsi/qla4xxx/ql4_os.c:4750", &ha->reg->ctrl_status);
@@ -4767,7 +4767,7 @@ int qla4xxx_soft_reset(struct scsi_qla_host *ha)
 		max_wait_time = SOFT_RESET_TOV;
 		do {
 			spin_lock_irqsave(&ha->hardware_lock, flags);
-			ctrl_status = readw(&ha->reg->ctrl_status);
+			ctrl_status = pete_readw("drivers/scsi/qla4xxx/ql4_os.c:4770", &ha->reg->ctrl_status);
 			spin_unlock_irqrestore(&ha->hardware_lock, flags);
 
 			if ((ctrl_status & CSR_FORCE_SOFT_RESET) == 0) {
@@ -5397,7 +5397,7 @@ static void qla4xxx_do_dpc(struct work_struct *work)
 		if (test_bit(DPC_RESET_HA_INTR, &ha->dpc_flags)) {
 			uint8_t wait_time = RESET_INTR_TOV;
 
-			while ((readw(&ha->reg->ctrl_status) &
+			while ((pete_readw("drivers/scsi/qla4xxx/ql4_os.c:5400", &ha->reg->ctrl_status) &
 				(CSR_SOFT_RESET | CSR_FORCE_SOFT_RESET)) != 0) {
 				if (--wait_time == 0)
 					break;

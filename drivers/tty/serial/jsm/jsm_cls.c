@@ -51,26 +51,26 @@ static struct {
 
 static void cls_set_cts_flow_control(struct jsm_channel *ch)
 {
-	u8 lcrb = readb(&ch->ch_cls_uart->lcr);
-	u8 ier = readb(&ch->ch_cls_uart->ier);
+	u8 lcrb = pete_readb("drivers/tty/serial/jsm/jsm_cls.c:54", &ch->ch_cls_uart->lcr);
+	u8 ier = pete_readb("drivers/tty/serial/jsm/jsm_cls.c:55", &ch->ch_cls_uart->ier);
 	u8 isr_fcr = 0;
 
 	/*
 	 * The Enhanced Register Set may only be accessed when
 	 * the Line Control Register is set to 0xBFh.
 	 */
-	writeb(UART_EXAR654_ENHANCED_REGISTER_SET, &ch->ch_cls_uart->lcr);
+	pete_writeb("drivers/tty/serial/jsm/jsm_cls.c:62", UART_EXAR654_ENHANCED_REGISTER_SET, &ch->ch_cls_uart->lcr);
 
-	isr_fcr = readb(&ch->ch_cls_uart->isr_fcr);
+	isr_fcr = pete_readb("drivers/tty/serial/jsm/jsm_cls.c:64", &ch->ch_cls_uart->isr_fcr);
 
 	/* Turn on CTS flow control, turn off IXON flow control */
 	isr_fcr |= (UART_EXAR654_EFR_ECB | UART_EXAR654_EFR_CTSDSR);
 	isr_fcr &= ~(UART_EXAR654_EFR_IXON);
 
-	writeb(isr_fcr, &ch->ch_cls_uart->isr_fcr);
+	pete_writeb("drivers/tty/serial/jsm/jsm_cls.c:70", isr_fcr, &ch->ch_cls_uart->isr_fcr);
 
 	/* Write old LCR value back out, which turns enhanced access off */
-	writeb(lcrb, &ch->ch_cls_uart->lcr);
+	pete_writeb("drivers/tty/serial/jsm/jsm_cls.c:73", lcrb, &ch->ch_cls_uart->lcr);
 
 	/*
 	 * Enable interrupts for CTS flow, turn off interrupts for
@@ -78,12 +78,12 @@ static void cls_set_cts_flow_control(struct jsm_channel *ch)
 	 */
 	ier |= (UART_EXAR654_IER_CTSDSR);
 	ier &= ~(UART_EXAR654_IER_XOFF);
-	writeb(ier, &ch->ch_cls_uart->ier);
+	pete_writeb("drivers/tty/serial/jsm/jsm_cls.c:81", ier, &ch->ch_cls_uart->ier);
 
 	/* Set the usual FIFO values */
-	writeb((UART_FCR_ENABLE_FIFO), &ch->ch_cls_uart->isr_fcr);
+	pete_writeb("drivers/tty/serial/jsm/jsm_cls.c:84", (UART_FCR_ENABLE_FIFO), &ch->ch_cls_uart->isr_fcr);
 
-	writeb((UART_FCR_ENABLE_FIFO | UART_16654_FCR_RXTRIGGER_56 |
+	pete_writeb("drivers/tty/serial/jsm/jsm_cls.c:86", (UART_FCR_ENABLE_FIFO | UART_16654_FCR_RXTRIGGER_56 |
 		UART_16654_FCR_TXTRIGGER_16 | UART_FCR_CLEAR_RCVR),
 		&ch->ch_cls_uart->isr_fcr);
 
@@ -92,32 +92,32 @@ static void cls_set_cts_flow_control(struct jsm_channel *ch)
 
 static void cls_set_ixon_flow_control(struct jsm_channel *ch)
 {
-	u8 lcrb = readb(&ch->ch_cls_uart->lcr);
-	u8 ier = readb(&ch->ch_cls_uart->ier);
+	u8 lcrb = pete_readb("drivers/tty/serial/jsm/jsm_cls.c:95", &ch->ch_cls_uart->lcr);
+	u8 ier = pete_readb("drivers/tty/serial/jsm/jsm_cls.c:96", &ch->ch_cls_uart->ier);
 	u8 isr_fcr = 0;
 
 	/*
 	 * The Enhanced Register Set may only be accessed when
 	 * the Line Control Register is set to 0xBFh.
 	 */
-	writeb(UART_EXAR654_ENHANCED_REGISTER_SET, &ch->ch_cls_uart->lcr);
+	pete_writeb("drivers/tty/serial/jsm/jsm_cls.c:103", UART_EXAR654_ENHANCED_REGISTER_SET, &ch->ch_cls_uart->lcr);
 
-	isr_fcr = readb(&ch->ch_cls_uart->isr_fcr);
+	isr_fcr = pete_readb("drivers/tty/serial/jsm/jsm_cls.c:105", &ch->ch_cls_uart->isr_fcr);
 
 	/* Turn on IXON flow control, turn off CTS flow control */
 	isr_fcr |= (UART_EXAR654_EFR_ECB | UART_EXAR654_EFR_IXON);
 	isr_fcr &= ~(UART_EXAR654_EFR_CTSDSR);
 
-	writeb(isr_fcr, &ch->ch_cls_uart->isr_fcr);
+	pete_writeb("drivers/tty/serial/jsm/jsm_cls.c:111", isr_fcr, &ch->ch_cls_uart->isr_fcr);
 
 	/* Now set our current start/stop chars while in enhanced mode */
-	writeb(ch->ch_startc, &ch->ch_cls_uart->mcr);
-	writeb(0, &ch->ch_cls_uart->lsr);
-	writeb(ch->ch_stopc, &ch->ch_cls_uart->msr);
-	writeb(0, &ch->ch_cls_uart->spr);
+	pete_writeb("drivers/tty/serial/jsm/jsm_cls.c:114", ch->ch_startc, &ch->ch_cls_uart->mcr);
+	pete_writeb("drivers/tty/serial/jsm/jsm_cls.c:115", 0, &ch->ch_cls_uart->lsr);
+	pete_writeb("drivers/tty/serial/jsm/jsm_cls.c:116", ch->ch_stopc, &ch->ch_cls_uart->msr);
+	pete_writeb("drivers/tty/serial/jsm/jsm_cls.c:117", 0, &ch->ch_cls_uart->spr);
 
 	/* Write old LCR value back out, which turns enhanced access off */
-	writeb(lcrb, &ch->ch_cls_uart->lcr);
+	pete_writeb("drivers/tty/serial/jsm/jsm_cls.c:120", lcrb, &ch->ch_cls_uart->lcr);
 
 	/*
 	 * Disable interrupts for CTS flow, turn on interrupts for
@@ -125,38 +125,38 @@ static void cls_set_ixon_flow_control(struct jsm_channel *ch)
 	 */
 	ier &= ~(UART_EXAR654_IER_CTSDSR);
 	ier |= (UART_EXAR654_IER_XOFF);
-	writeb(ier, &ch->ch_cls_uart->ier);
+	pete_writeb("drivers/tty/serial/jsm/jsm_cls.c:128", ier, &ch->ch_cls_uart->ier);
 
 	/* Set the usual FIFO values */
-	writeb((UART_FCR_ENABLE_FIFO), &ch->ch_cls_uart->isr_fcr);
+	pete_writeb("drivers/tty/serial/jsm/jsm_cls.c:131", (UART_FCR_ENABLE_FIFO), &ch->ch_cls_uart->isr_fcr);
 
-	writeb((UART_FCR_ENABLE_FIFO | UART_16654_FCR_RXTRIGGER_16 |
+	pete_writeb("drivers/tty/serial/jsm/jsm_cls.c:133", (UART_FCR_ENABLE_FIFO | UART_16654_FCR_RXTRIGGER_16 |
 		UART_16654_FCR_TXTRIGGER_16 | UART_FCR_CLEAR_RCVR),
 		&ch->ch_cls_uart->isr_fcr);
 }
 
 static void cls_set_no_output_flow_control(struct jsm_channel *ch)
 {
-	u8 lcrb = readb(&ch->ch_cls_uart->lcr);
-	u8 ier = readb(&ch->ch_cls_uart->ier);
+	u8 lcrb = pete_readb("drivers/tty/serial/jsm/jsm_cls.c:140", &ch->ch_cls_uart->lcr);
+	u8 ier = pete_readb("drivers/tty/serial/jsm/jsm_cls.c:141", &ch->ch_cls_uart->ier);
 	u8 isr_fcr = 0;
 
 	/*
 	 * The Enhanced Register Set may only be accessed when
 	 * the Line Control Register is set to 0xBFh.
 	 */
-	writeb(UART_EXAR654_ENHANCED_REGISTER_SET, &ch->ch_cls_uart->lcr);
+	pete_writeb("drivers/tty/serial/jsm/jsm_cls.c:148", UART_EXAR654_ENHANCED_REGISTER_SET, &ch->ch_cls_uart->lcr);
 
-	isr_fcr = readb(&ch->ch_cls_uart->isr_fcr);
+	isr_fcr = pete_readb("drivers/tty/serial/jsm/jsm_cls.c:150", &ch->ch_cls_uart->isr_fcr);
 
 	/* Turn off IXON flow control, turn off CTS flow control */
 	isr_fcr |= (UART_EXAR654_EFR_ECB);
 	isr_fcr &= ~(UART_EXAR654_EFR_CTSDSR | UART_EXAR654_EFR_IXON);
 
-	writeb(isr_fcr, &ch->ch_cls_uart->isr_fcr);
+	pete_writeb("drivers/tty/serial/jsm/jsm_cls.c:156", isr_fcr, &ch->ch_cls_uart->isr_fcr);
 
 	/* Write old LCR value back out, which turns enhanced access off */
-	writeb(lcrb, &ch->ch_cls_uart->lcr);
+	pete_writeb("drivers/tty/serial/jsm/jsm_cls.c:159", lcrb, &ch->ch_cls_uart->lcr);
 
 	/*
 	 * Disable interrupts for CTS flow, turn off interrupts for
@@ -164,12 +164,12 @@ static void cls_set_no_output_flow_control(struct jsm_channel *ch)
 	 */
 	ier &= ~(UART_EXAR654_IER_CTSDSR);
 	ier &= ~(UART_EXAR654_IER_XOFF);
-	writeb(ier, &ch->ch_cls_uart->ier);
+	pete_writeb("drivers/tty/serial/jsm/jsm_cls.c:167", ier, &ch->ch_cls_uart->ier);
 
 	/* Set the usual FIFO values */
-	writeb((UART_FCR_ENABLE_FIFO), &ch->ch_cls_uart->isr_fcr);
+	pete_writeb("drivers/tty/serial/jsm/jsm_cls.c:170", (UART_FCR_ENABLE_FIFO), &ch->ch_cls_uart->isr_fcr);
 
-	writeb((UART_FCR_ENABLE_FIFO | UART_16654_FCR_RXTRIGGER_16 |
+	pete_writeb("drivers/tty/serial/jsm/jsm_cls.c:172", (UART_FCR_ENABLE_FIFO | UART_16654_FCR_RXTRIGGER_16 |
 		UART_16654_FCR_TXTRIGGER_16 | UART_FCR_CLEAR_RCVR),
 		&ch->ch_cls_uart->isr_fcr);
 
@@ -180,35 +180,35 @@ static void cls_set_no_output_flow_control(struct jsm_channel *ch)
 
 static void cls_set_rts_flow_control(struct jsm_channel *ch)
 {
-	u8 lcrb = readb(&ch->ch_cls_uart->lcr);
-	u8 ier = readb(&ch->ch_cls_uart->ier);
+	u8 lcrb = pete_readb("drivers/tty/serial/jsm/jsm_cls.c:183", &ch->ch_cls_uart->lcr);
+	u8 ier = pete_readb("drivers/tty/serial/jsm/jsm_cls.c:184", &ch->ch_cls_uart->ier);
 	u8 isr_fcr = 0;
 
 	/*
 	 * The Enhanced Register Set may only be accessed when
 	 * the Line Control Register is set to 0xBFh.
 	 */
-	writeb(UART_EXAR654_ENHANCED_REGISTER_SET, &ch->ch_cls_uart->lcr);
+	pete_writeb("drivers/tty/serial/jsm/jsm_cls.c:191", UART_EXAR654_ENHANCED_REGISTER_SET, &ch->ch_cls_uart->lcr);
 
-	isr_fcr = readb(&ch->ch_cls_uart->isr_fcr);
+	isr_fcr = pete_readb("drivers/tty/serial/jsm/jsm_cls.c:193", &ch->ch_cls_uart->isr_fcr);
 
 	/* Turn on RTS flow control, turn off IXOFF flow control */
 	isr_fcr |= (UART_EXAR654_EFR_ECB | UART_EXAR654_EFR_RTSDTR);
 	isr_fcr &= ~(UART_EXAR654_EFR_IXOFF);
 
-	writeb(isr_fcr, &ch->ch_cls_uart->isr_fcr);
+	pete_writeb("drivers/tty/serial/jsm/jsm_cls.c:199", isr_fcr, &ch->ch_cls_uart->isr_fcr);
 
 	/* Write old LCR value back out, which turns enhanced access off */
-	writeb(lcrb, &ch->ch_cls_uart->lcr);
+	pete_writeb("drivers/tty/serial/jsm/jsm_cls.c:202", lcrb, &ch->ch_cls_uart->lcr);
 
 	/* Enable interrupts for RTS flow */
 	ier |= (UART_EXAR654_IER_RTSDTR);
-	writeb(ier, &ch->ch_cls_uart->ier);
+	pete_writeb("drivers/tty/serial/jsm/jsm_cls.c:206", ier, &ch->ch_cls_uart->ier);
 
 	/* Set the usual FIFO values */
-	writeb((UART_FCR_ENABLE_FIFO), &ch->ch_cls_uart->isr_fcr);
+	pete_writeb("drivers/tty/serial/jsm/jsm_cls.c:209", (UART_FCR_ENABLE_FIFO), &ch->ch_cls_uart->isr_fcr);
 
-	writeb((UART_FCR_ENABLE_FIFO | UART_16654_FCR_RXTRIGGER_56 |
+	pete_writeb("drivers/tty/serial/jsm/jsm_cls.c:211", (UART_FCR_ENABLE_FIFO | UART_16654_FCR_RXTRIGGER_56 |
 		UART_16654_FCR_TXTRIGGER_16 | UART_FCR_CLEAR_RCVR),
 		&ch->ch_cls_uart->isr_fcr);
 
@@ -218,76 +218,76 @@ static void cls_set_rts_flow_control(struct jsm_channel *ch)
 
 static void cls_set_ixoff_flow_control(struct jsm_channel *ch)
 {
-	u8 lcrb = readb(&ch->ch_cls_uart->lcr);
-	u8 ier = readb(&ch->ch_cls_uart->ier);
+	u8 lcrb = pete_readb("drivers/tty/serial/jsm/jsm_cls.c:221", &ch->ch_cls_uart->lcr);
+	u8 ier = pete_readb("drivers/tty/serial/jsm/jsm_cls.c:222", &ch->ch_cls_uart->ier);
 	u8 isr_fcr = 0;
 
 	/*
 	 * The Enhanced Register Set may only be accessed when
 	 * the Line Control Register is set to 0xBFh.
 	 */
-	writeb(UART_EXAR654_ENHANCED_REGISTER_SET, &ch->ch_cls_uart->lcr);
+	pete_writeb("drivers/tty/serial/jsm/jsm_cls.c:229", UART_EXAR654_ENHANCED_REGISTER_SET, &ch->ch_cls_uart->lcr);
 
-	isr_fcr = readb(&ch->ch_cls_uart->isr_fcr);
+	isr_fcr = pete_readb("drivers/tty/serial/jsm/jsm_cls.c:231", &ch->ch_cls_uart->isr_fcr);
 
 	/* Turn on IXOFF flow control, turn off RTS flow control */
 	isr_fcr |= (UART_EXAR654_EFR_ECB | UART_EXAR654_EFR_IXOFF);
 	isr_fcr &= ~(UART_EXAR654_EFR_RTSDTR);
 
-	writeb(isr_fcr, &ch->ch_cls_uart->isr_fcr);
+	pete_writeb("drivers/tty/serial/jsm/jsm_cls.c:237", isr_fcr, &ch->ch_cls_uart->isr_fcr);
 
 	/* Now set our current start/stop chars while in enhanced mode */
-	writeb(ch->ch_startc, &ch->ch_cls_uart->mcr);
-	writeb(0, &ch->ch_cls_uart->lsr);
-	writeb(ch->ch_stopc, &ch->ch_cls_uart->msr);
-	writeb(0, &ch->ch_cls_uart->spr);
+	pete_writeb("drivers/tty/serial/jsm/jsm_cls.c:240", ch->ch_startc, &ch->ch_cls_uart->mcr);
+	pete_writeb("drivers/tty/serial/jsm/jsm_cls.c:241", 0, &ch->ch_cls_uart->lsr);
+	pete_writeb("drivers/tty/serial/jsm/jsm_cls.c:242", ch->ch_stopc, &ch->ch_cls_uart->msr);
+	pete_writeb("drivers/tty/serial/jsm/jsm_cls.c:243", 0, &ch->ch_cls_uart->spr);
 
 	/* Write old LCR value back out, which turns enhanced access off */
-	writeb(lcrb, &ch->ch_cls_uart->lcr);
+	pete_writeb("drivers/tty/serial/jsm/jsm_cls.c:246", lcrb, &ch->ch_cls_uart->lcr);
 
 	/* Disable interrupts for RTS flow */
 	ier &= ~(UART_EXAR654_IER_RTSDTR);
-	writeb(ier, &ch->ch_cls_uart->ier);
+	pete_writeb("drivers/tty/serial/jsm/jsm_cls.c:250", ier, &ch->ch_cls_uart->ier);
 
 	/* Set the usual FIFO values */
-	writeb((UART_FCR_ENABLE_FIFO), &ch->ch_cls_uart->isr_fcr);
+	pete_writeb("drivers/tty/serial/jsm/jsm_cls.c:253", (UART_FCR_ENABLE_FIFO), &ch->ch_cls_uart->isr_fcr);
 
-	writeb((UART_FCR_ENABLE_FIFO | UART_16654_FCR_RXTRIGGER_16 |
+	pete_writeb("drivers/tty/serial/jsm/jsm_cls.c:255", (UART_FCR_ENABLE_FIFO | UART_16654_FCR_RXTRIGGER_16 |
 		UART_16654_FCR_TXTRIGGER_16 | UART_FCR_CLEAR_RCVR),
 		&ch->ch_cls_uart->isr_fcr);
 }
 
 static void cls_set_no_input_flow_control(struct jsm_channel *ch)
 {
-	u8 lcrb = readb(&ch->ch_cls_uart->lcr);
-	u8 ier = readb(&ch->ch_cls_uart->ier);
+	u8 lcrb = pete_readb("drivers/tty/serial/jsm/jsm_cls.c:262", &ch->ch_cls_uart->lcr);
+	u8 ier = pete_readb("drivers/tty/serial/jsm/jsm_cls.c:263", &ch->ch_cls_uart->ier);
 	u8 isr_fcr = 0;
 
 	/*
 	 * The Enhanced Register Set may only be accessed when
 	 * the Line Control Register is set to 0xBFh.
 	 */
-	writeb(UART_EXAR654_ENHANCED_REGISTER_SET, &ch->ch_cls_uart->lcr);
+	pete_writeb("drivers/tty/serial/jsm/jsm_cls.c:270", UART_EXAR654_ENHANCED_REGISTER_SET, &ch->ch_cls_uart->lcr);
 
-	isr_fcr = readb(&ch->ch_cls_uart->isr_fcr);
+	isr_fcr = pete_readb("drivers/tty/serial/jsm/jsm_cls.c:272", &ch->ch_cls_uart->isr_fcr);
 
 	/* Turn off IXOFF flow control, turn off RTS flow control */
 	isr_fcr |= (UART_EXAR654_EFR_ECB);
 	isr_fcr &= ~(UART_EXAR654_EFR_RTSDTR | UART_EXAR654_EFR_IXOFF);
 
-	writeb(isr_fcr, &ch->ch_cls_uart->isr_fcr);
+	pete_writeb("drivers/tty/serial/jsm/jsm_cls.c:278", isr_fcr, &ch->ch_cls_uart->isr_fcr);
 
 	/* Write old LCR value back out, which turns enhanced access off */
-	writeb(lcrb, &ch->ch_cls_uart->lcr);
+	pete_writeb("drivers/tty/serial/jsm/jsm_cls.c:281", lcrb, &ch->ch_cls_uart->lcr);
 
 	/* Disable interrupts for RTS flow */
 	ier &= ~(UART_EXAR654_IER_RTSDTR);
-	writeb(ier, &ch->ch_cls_uart->ier);
+	pete_writeb("drivers/tty/serial/jsm/jsm_cls.c:285", ier, &ch->ch_cls_uart->ier);
 
 	/* Set the usual FIFO values */
-	writeb((UART_FCR_ENABLE_FIFO), &ch->ch_cls_uart->isr_fcr);
+	pete_writeb("drivers/tty/serial/jsm/jsm_cls.c:288", (UART_FCR_ENABLE_FIFO), &ch->ch_cls_uart->isr_fcr);
 
-	writeb((UART_FCR_ENABLE_FIFO | UART_16654_FCR_RXTRIGGER_16 |
+	pete_writeb("drivers/tty/serial/jsm/jsm_cls.c:290", (UART_FCR_ENABLE_FIFO | UART_16654_FCR_RXTRIGGER_16 |
 		UART_16654_FCR_TXTRIGGER_16 | UART_FCR_CLEAR_RCVR),
 		&ch->ch_cls_uart->isr_fcr);
 
@@ -310,9 +310,9 @@ static void cls_clear_break(struct jsm_channel *ch)
 
 	/* Turn break off, and unset some variables */
 	if (ch->ch_flags & CH_BREAK_SENDING) {
-		u8 temp = readb(&ch->ch_cls_uart->lcr);
+		u8 temp = pete_readb("drivers/tty/serial/jsm/jsm_cls.c:313", &ch->ch_cls_uart->lcr);
 
-		writeb((temp & ~UART_LCR_SBC), &ch->ch_cls_uart->lcr);
+		pete_writeb("drivers/tty/serial/jsm/jsm_cls.c:315", (temp & ~UART_LCR_SBC), &ch->ch_cls_uart->lcr);
 
 		ch->ch_flags &= ~(CH_BREAK_SENDING);
 		jsm_dbg(IOCTL, &ch->ch_bd->pci_dev,
@@ -324,18 +324,18 @@ static void cls_clear_break(struct jsm_channel *ch)
 
 static void cls_disable_receiver(struct jsm_channel *ch)
 {
-	u8 tmp = readb(&ch->ch_cls_uart->ier);
+	u8 tmp = pete_readb("drivers/tty/serial/jsm/jsm_cls.c:327", &ch->ch_cls_uart->ier);
 
 	tmp &= ~(UART_IER_RDI);
-	writeb(tmp, &ch->ch_cls_uart->ier);
+	pete_writeb("drivers/tty/serial/jsm/jsm_cls.c:330", tmp, &ch->ch_cls_uart->ier);
 }
 
 static void cls_enable_receiver(struct jsm_channel *ch)
 {
-	u8 tmp = readb(&ch->ch_cls_uart->ier);
+	u8 tmp = pete_readb("drivers/tty/serial/jsm/jsm_cls.c:335", &ch->ch_cls_uart->ier);
 
 	tmp |= (UART_IER_RDI);
-	writeb(tmp, &ch->ch_cls_uart->ier);
+	pete_writeb("drivers/tty/serial/jsm/jsm_cls.c:338", tmp, &ch->ch_cls_uart->ier);
 }
 
 /* Make the UART raise any of the output signals we want up */
@@ -344,7 +344,7 @@ static void cls_assert_modem_signals(struct jsm_channel *ch)
 	if (!ch)
 		return;
 
-	writeb(ch->ch_mostat, &ch->ch_cls_uart->mcr);
+	pete_writeb("drivers/tty/serial/jsm/jsm_cls.c:347", ch->ch_mostat, &ch->ch_cls_uart->mcr);
 }
 
 static void cls_copy_data_from_uart_to_queue(struct jsm_channel *ch)
@@ -386,7 +386,7 @@ static void cls_copy_data_from_uart_to_queue(struct jsm_channel *ch)
 		 * Grab the linestatus register, we need to
 		 * check to see if there is any data to read
 		 */
-		linestatus = readb(&ch->ch_cls_uart->lsr);
+		linestatus = pete_readb("drivers/tty/serial/jsm/jsm_cls.c:389", &ch->ch_cls_uart->lsr);
 
 		/* Break out if there is no data to fetch */
 		if (!(linestatus & UART_LSR_DR))
@@ -398,7 +398,7 @@ static void cls_copy_data_from_uart_to_queue(struct jsm_channel *ch)
 		 */
 		if (linestatus & error_mask)  {
 			linestatus = 0;
-			readb(&ch->ch_cls_uart->txrx);
+			pete_readb("drivers/tty/serial/jsm/jsm_cls.c:401", &ch->ch_cls_uart->txrx);
 			continue;
 		}
 
@@ -419,7 +419,7 @@ static void cls_copy_data_from_uart_to_queue(struct jsm_channel *ch)
 
 		ch->ch_equeue[head] = linestatus & (UART_LSR_BI | UART_LSR_PE
 								 | UART_LSR_FE);
-		ch->ch_rqueue[head] = readb(&ch->ch_cls_uart->txrx);
+		ch->ch_rqueue[head] = pete_readb("drivers/tty/serial/jsm/jsm_cls.c:422", &ch->ch_cls_uart->txrx);
 
 		qleft--;
 
@@ -479,7 +479,7 @@ static void cls_copy_data_from_queue_to_uart(struct jsm_channel *ch)
 	n = min(n, qlen);
 
 	while (n > 0) {
-		writeb(circ->buf[tail], &ch->ch_cls_uart->txrx);
+		pete_writeb("drivers/tty/serial/jsm/jsm_cls.c:482", circ->buf[tail], &ch->ch_cls_uart->txrx);
 		tail = (tail + 1) & (UART_XMIT_SIZE - 1);
 		n--;
 		ch->ch_txcount++;
@@ -568,7 +568,7 @@ static inline void cls_parse_isr(struct jsm_board *brd, uint port)
 
 	/* Here we try to figure out what caused the interrupt to happen */
 	while (1) {
-		isr = readb(&ch->ch_cls_uart->isr_fcr);
+		isr = pete_readb("drivers/tty/serial/jsm/jsm_cls.c:571", &ch->ch_cls_uart->isr_fcr);
 
 		/* Bail if no pending interrupt on port */
 		if (isr & UART_IIR_NO_INT)
@@ -597,7 +597,7 @@ static inline void cls_parse_isr(struct jsm_board *brd, uint port)
 		 */
 
 		/* Parse any modem signal changes */
-		cls_parse_modem(ch, readb(&ch->ch_cls_uart->msr));
+		cls_parse_modem(ch, pete_readb("drivers/tty/serial/jsm/jsm_cls.c:600", &ch->ch_cls_uart->msr));
 	}
 }
 
@@ -610,12 +610,12 @@ static void cls_flush_uart_write(struct jsm_channel *ch)
 	if (!ch)
 		return;
 
-	writeb((UART_FCR_ENABLE_FIFO | UART_FCR_CLEAR_XMIT),
+	pete_writeb("drivers/tty/serial/jsm/jsm_cls.c:613", (UART_FCR_ENABLE_FIFO | UART_FCR_CLEAR_XMIT),
 						&ch->ch_cls_uart->isr_fcr);
 
 	for (i = 0; i < 10; i++) {
 		/* Check to see if the UART feels it completely flushed FIFO */
-		tmp = readb(&ch->ch_cls_uart->isr_fcr);
+		tmp = pete_readb("drivers/tty/serial/jsm/jsm_cls.c:618", &ch->ch_cls_uart->isr_fcr);
 		if (tmp & UART_FCR_CLEAR_XMIT) {
 			jsm_dbg(IOCTL, &ch->ch_bd->pci_dev,
 				"Still flushing TX UART... i: %d\n", i);
@@ -654,7 +654,7 @@ static void cls_send_start_character(struct jsm_channel *ch)
 
 	if (ch->ch_startc != __DISABLED_CHAR) {
 		ch->ch_xon_sends++;
-		writeb(ch->ch_startc, &ch->ch_cls_uart->txrx);
+		pete_writeb("drivers/tty/serial/jsm/jsm_cls.c:657", ch->ch_startc, &ch->ch_cls_uart->txrx);
 	}
 }
 
@@ -665,7 +665,7 @@ static void cls_send_stop_character(struct jsm_channel *ch)
 
 	if (ch->ch_stopc != __DISABLED_CHAR) {
 		ch->ch_xoff_sends++;
-		writeb(ch->ch_stopc, &ch->ch_cls_uart->txrx);
+		pete_writeb("drivers/tty/serial/jsm/jsm_cls.c:668", ch->ch_stopc, &ch->ch_cls_uart->txrx);
 	}
 }
 
@@ -753,27 +753,27 @@ static void cls_param(struct jsm_channel *ch)
 		break;
 	}
 
-	ier = readb(&ch->ch_cls_uart->ier);
-	uart_lcr = readb(&ch->ch_cls_uart->lcr);
+	ier = pete_readb("drivers/tty/serial/jsm/jsm_cls.c:756", &ch->ch_cls_uart->ier);
+	uart_lcr = pete_readb("drivers/tty/serial/jsm/jsm_cls.c:757", &ch->ch_cls_uart->lcr);
 
 	quot = ch->ch_bd->bd_dividend / baud;
 
 	if (quot != 0) {
-		writeb(UART_LCR_DLAB, &ch->ch_cls_uart->lcr);
-		writeb((quot & 0xff), &ch->ch_cls_uart->txrx);
-		writeb((quot >> 8), &ch->ch_cls_uart->ier);
-		writeb(lcr, &ch->ch_cls_uart->lcr);
+		pete_writeb("drivers/tty/serial/jsm/jsm_cls.c:762", UART_LCR_DLAB, &ch->ch_cls_uart->lcr);
+		pete_writeb("drivers/tty/serial/jsm/jsm_cls.c:763", (quot & 0xff), &ch->ch_cls_uart->txrx);
+		pete_writeb("drivers/tty/serial/jsm/jsm_cls.c:764", (quot >> 8), &ch->ch_cls_uart->ier);
+		pete_writeb("drivers/tty/serial/jsm/jsm_cls.c:765", lcr, &ch->ch_cls_uart->lcr);
 	}
 
 	if (uart_lcr != lcr)
-		writeb(lcr, &ch->ch_cls_uart->lcr);
+		pete_writeb("drivers/tty/serial/jsm/jsm_cls.c:769", lcr, &ch->ch_cls_uart->lcr);
 
 	if (ch->ch_c_cflag & CREAD)
 		ier |= (UART_IER_RDI | UART_IER_RLSI);
 
 	ier |= (UART_IER_THRI | UART_IER_MSI);
 
-	writeb(ier, &ch->ch_cls_uart->ier);
+	pete_writeb("drivers/tty/serial/jsm/jsm_cls.c:776", ier, &ch->ch_cls_uart->ier);
 
 	if (ch->ch_c_cflag & CRTSCTS)
 		cls_set_cts_flow_control(ch);
@@ -808,7 +808,7 @@ static void cls_param(struct jsm_channel *ch)
 	cls_assert_modem_signals(ch);
 
 	/* get current status of the modem signals now */
-	cls_parse_modem(ch, readb(&ch->ch_cls_uart->msr));
+	cls_parse_modem(ch, pete_readb("drivers/tty/serial/jsm/jsm_cls.c:811", &ch->ch_cls_uart->msr));
 }
 
 /*
@@ -830,7 +830,7 @@ static irqreturn_t cls_intr(int irq, void *voidbrd)
 	 * Check the board's global interrupt offset to see if we
 	 * acctually do have an interrupt pending on us.
 	 */
-	uart_poll = readb(brd->re_map_membase + UART_CLASSIC_POLL_ADDR_OFFSET);
+	uart_poll = pete_readb("drivers/tty/serial/jsm/jsm_cls.c:833", brd->re_map_membase + UART_CLASSIC_POLL_ADDR_OFFSET);
 
 	jsm_dbg(INTR, &brd->pci_dev, "%s:%d uart_poll: %x\n",
 		__FILE__, __LINE__, uart_poll);
@@ -856,38 +856,38 @@ static irqreturn_t cls_intr(int irq, void *voidbrd)
 /* Inits UART */
 static void cls_uart_init(struct jsm_channel *ch)
 {
-	unsigned char lcrb = readb(&ch->ch_cls_uart->lcr);
+	unsigned char lcrb = pete_readb("drivers/tty/serial/jsm/jsm_cls.c:859", &ch->ch_cls_uart->lcr);
 	unsigned char isr_fcr = 0;
 
-	writeb(0, &ch->ch_cls_uart->ier);
+	pete_writeb("drivers/tty/serial/jsm/jsm_cls.c:862", 0, &ch->ch_cls_uart->ier);
 
 	/*
 	 * The Enhanced Register Set may only be accessed when
 	 * the Line Control Register is set to 0xBFh.
 	 */
-	writeb(UART_EXAR654_ENHANCED_REGISTER_SET, &ch->ch_cls_uart->lcr);
+	pete_writeb("drivers/tty/serial/jsm/jsm_cls.c:868", UART_EXAR654_ENHANCED_REGISTER_SET, &ch->ch_cls_uart->lcr);
 
-	isr_fcr = readb(&ch->ch_cls_uart->isr_fcr);
+	isr_fcr = pete_readb("drivers/tty/serial/jsm/jsm_cls.c:870", &ch->ch_cls_uart->isr_fcr);
 
 	/* Turn on Enhanced/Extended controls */
 	isr_fcr |= (UART_EXAR654_EFR_ECB);
 
-	writeb(isr_fcr, &ch->ch_cls_uart->isr_fcr);
+	pete_writeb("drivers/tty/serial/jsm/jsm_cls.c:875", isr_fcr, &ch->ch_cls_uart->isr_fcr);
 
 	/* Write old LCR value back out, which turns enhanced access off */
-	writeb(lcrb, &ch->ch_cls_uart->lcr);
+	pete_writeb("drivers/tty/serial/jsm/jsm_cls.c:878", lcrb, &ch->ch_cls_uart->lcr);
 
 	/* Clear out UART and FIFO */
-	readb(&ch->ch_cls_uart->txrx);
+	pete_readb("drivers/tty/serial/jsm/jsm_cls.c:881", &ch->ch_cls_uart->txrx);
 
-	writeb((UART_FCR_ENABLE_FIFO|UART_FCR_CLEAR_RCVR|UART_FCR_CLEAR_XMIT),
+	pete_writeb("drivers/tty/serial/jsm/jsm_cls.c:883", (UART_FCR_ENABLE_FIFO|UART_FCR_CLEAR_RCVR|UART_FCR_CLEAR_XMIT),
 						 &ch->ch_cls_uart->isr_fcr);
 	udelay(10);
 
 	ch->ch_flags |= (CH_FIFO_ENABLED | CH_TX_FIFO_EMPTY | CH_TX_FIFO_LWM);
 
-	readb(&ch->ch_cls_uart->lsr);
-	readb(&ch->ch_cls_uart->msr);
+	pete_readb("drivers/tty/serial/jsm/jsm_cls.c:889", &ch->ch_cls_uart->lsr);
+	pete_readb("drivers/tty/serial/jsm/jsm_cls.c:890", &ch->ch_cls_uart->msr);
 }
 
 /*
@@ -896,7 +896,7 @@ static void cls_uart_init(struct jsm_channel *ch)
 static void cls_uart_off(struct jsm_channel *ch)
 {
 	/* Stop all interrupts from accurring. */
-	writeb(0, &ch->ch_cls_uart->ier);
+	pete_writeb("drivers/tty/serial/jsm/jsm_cls.c:899", 0, &ch->ch_cls_uart->ier);
 }
 
 /*
@@ -908,7 +908,7 @@ static void cls_uart_off(struct jsm_channel *ch)
 static u32 cls_get_uart_bytes_left(struct jsm_channel *ch)
 {
 	u8 left = 0;
-	u8 lsr = readb(&ch->ch_cls_uart->lsr);
+	u8 lsr = pete_readb("drivers/tty/serial/jsm/jsm_cls.c:911", &ch->ch_cls_uart->lsr);
 
 	/* Determine whether the Transmitter is empty or not */
 	if (!(lsr & UART_LSR_TEMT))
@@ -931,9 +931,9 @@ static void cls_send_break(struct jsm_channel *ch)
 {
 	/* Tell the UART to start sending the break */
 	if (!(ch->ch_flags & CH_BREAK_SENDING)) {
-		u8 temp = readb(&ch->ch_cls_uart->lcr);
+		u8 temp = pete_readb("drivers/tty/serial/jsm/jsm_cls.c:934", &ch->ch_cls_uart->lcr);
 
-		writeb((temp | UART_LCR_SBC), &ch->ch_cls_uart->lcr);
+		pete_writeb("drivers/tty/serial/jsm/jsm_cls.c:936", (temp | UART_LCR_SBC), &ch->ch_cls_uart->lcr);
 		ch->ch_flags |= (CH_BREAK_SENDING);
 	}
 }
@@ -947,7 +947,7 @@ static void cls_send_break(struct jsm_channel *ch)
  */
 static void cls_send_immediate_char(struct jsm_channel *ch, unsigned char c)
 {
-	writeb(c, &ch->ch_cls_uart->txrx);
+	pete_writeb("drivers/tty/serial/jsm/jsm_cls.c:950", c, &ch->ch_cls_uart->txrx);
 }
 
 struct board_ops jsm_cls_ops = {

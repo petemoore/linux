@@ -330,7 +330,7 @@ static int qfprom_reg_read(void *context,
 		base = priv->qfpraw;
 
 	while (words--)
-		*val++ = readb(base + reg + i++);
+		*val++ = pete_readb("drivers/nvmem/qfprom.c:333", base + reg + i++);
 
 	return 0;
 }

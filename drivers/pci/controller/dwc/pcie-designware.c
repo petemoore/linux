@@ -106,9 +106,9 @@ int dw_pcie_read(void __iomem *addr, int size, u32 *val)
 	if (size == 4) {
 		*val = pete_readl("drivers/pci/controller/dwc/pcie-designware.c:107", addr);
 	} else if (size == 2) {
-		*val = readw(addr);
+		*val = pete_readw("drivers/pci/controller/dwc/pcie-designware.c:109", addr);
 	} else if (size == 1) {
-		*val = readb(addr);
+		*val = pete_readb("drivers/pci/controller/dwc/pcie-designware.c:111", addr);
 	} else {
 		*val = 0;
 		return PCIBIOS_BAD_REGISTER_NUMBER;
@@ -126,9 +126,9 @@ int dw_pcie_write(void __iomem *addr, int size, u32 val)
 	if (size == 4)
 		pete_writel("drivers/pci/controller/dwc/pcie-designware.c:127", val, addr);
 	else if (size == 2)
-		writew(val, addr);
+		pete_writew("drivers/pci/controller/dwc/pcie-designware.c:129", val, addr);
 	else if (size == 1)
-		writeb(val, addr);
+		pete_writeb("drivers/pci/controller/dwc/pcie-designware.c:131", val, addr);
 	else
 		return PCIBIOS_BAD_REGISTER_NUMBER;
 

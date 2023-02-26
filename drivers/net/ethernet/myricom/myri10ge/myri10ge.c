@@ -614,7 +614,7 @@ static int myri10ge_load_hotplug_firmware(struct myri10ge_priv *mgp, u32 * size)
 				  fw->data + i,
 				  min(256U, (unsigned)(fw->size - i)));
 		mb();
-		readb(mgp->sram);
+		pete_readb("drivers/net/ethernet/myricom/myri10ge/myri10ge.c:617", mgp->sram);
 	}
 	fw_readback = vmalloc(fw->size);
 	if (!fw_readback) {

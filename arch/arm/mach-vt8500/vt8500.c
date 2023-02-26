@@ -54,7 +54,7 @@ static void __init vt8500_map_io(void)
 static void vt8500_power_off(void)
 {
 	local_irq_disable();
-	writew(5, pmc_base + VT8500_HCR_REG);
+	pete_writew("arch/arm/mach-vt8500/vt8500.c:57", 5, pmc_base + VT8500_HCR_REG);
 	asm("mcr p15, 0, %0, c7, c0, 4" : : "r" (0));
 }
 

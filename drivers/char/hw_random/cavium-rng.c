@@ -39,7 +39,7 @@ static int cavium_rng_probe(struct pci_dev *pdev,
 	}
 
 	/* Enable the RNG hardware and entropy source */
-	writeq(THUNDERX_RNM_RNG_EN | THUNDERX_RNM_ENT_EN,
+	pete_writeq("drivers/char/hw_random/cavium-rng.c:42", THUNDERX_RNM_RNG_EN | THUNDERX_RNM_ENT_EN,
 		rng->control_status);
 
 	pci_set_drvdata(pdev, rng);
@@ -48,7 +48,7 @@ static int cavium_rng_probe(struct pci_dev *pdev,
 	iov_err = pci_enable_sriov(pdev, 1);
 	if (iov_err != 0) {
 		/* Disable the RNG hardware and entropy source */
-		writeq(0, rng->control_status);
+		pete_writeq("drivers/char/hw_random/cavium-rng.c:51", 0, rng->control_status);
 		dev_err(&pdev->dev,
 			"Error initializing RNG virtual function,(%i).\n",
 			iov_err);
@@ -69,7 +69,7 @@ static void cavium_rng_remove(struct pci_dev *pdev)
 	pci_disable_sriov(pdev);
 
 	/* Disable the RNG hardware and entropy source */
-	writeq(0, rng->control_status);
+	pete_writeq("drivers/char/hw_random/cavium-rng.c:72", 0, rng->control_status);
 }
 
 static const struct pci_device_id cavium_rng_pf_id_table[] = {

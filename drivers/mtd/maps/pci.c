@@ -38,7 +38,7 @@ static map_word mtd_pci_read8(struct map_info *_map, unsigned long ofs)
 {
 	struct map_pci_info *map = (struct map_pci_info *)_map;
 	map_word val;
-	val.x[0]= readb(map->base + map->translate(map, ofs));
+	val.x[0]= pete_readb("drivers/mtd/maps/pci.c:41", map->base + map->translate(map, ofs));
 	return val;
 }
 
@@ -59,7 +59,7 @@ static void mtd_pci_copyfrom(struct map_info *_map, void *to, unsigned long from
 static void mtd_pci_write8(struct map_info *_map, map_word val, unsigned long ofs)
 {
 	struct map_pci_info *map = (struct map_pci_info *)_map;
-	writeb(val.x[0], map->base + map->translate(map, ofs));
+	pete_writeb("drivers/mtd/maps/pci.c:62", val.x[0], map->base + map->translate(map, ofs));
 }
 
 static void mtd_pci_write32(struct map_info *_map, map_word val, unsigned long ofs)

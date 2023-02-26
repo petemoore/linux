@@ -142,7 +142,7 @@ static void sprd_i2c_write_bytes(struct sprd_i2c *i2c_dev, u8 *buf, u32 len)
 	u32 i;
 
 	for (i = 0; i < len; i++)
-		writeb(buf[i], i2c_dev->base + I2C_TX);
+		pete_writeb("drivers/i2c/busses/i2c-sprd.c:145", buf[i], i2c_dev->base + I2C_TX);
 }
 
 static void sprd_i2c_read_bytes(struct sprd_i2c *i2c_dev, u8 *buf, u32 len)
@@ -150,7 +150,7 @@ static void sprd_i2c_read_bytes(struct sprd_i2c *i2c_dev, u8 *buf, u32 len)
 	u32 i;
 
 	for (i = 0; i < len; i++)
-		buf[i] = readb(i2c_dev->base + I2C_RX);
+		buf[i] = pete_readb("drivers/i2c/busses/i2c-sprd.c:153", i2c_dev->base + I2C_RX);
 }
 
 static void sprd_i2c_set_full_thld(struct sprd_i2c *i2c_dev, u32 full_thld)

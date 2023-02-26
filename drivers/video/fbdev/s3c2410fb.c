@@ -741,7 +741,7 @@ static void s3c2410fb_write_palette(struct s3c2410fb_info *fbi)
 		 * to see if the value verifies ok
 		 */
 
-		if (readw(regs + S3C2410_TFTPAL(i)) == ent)
+		if (pete_readw("drivers/video/fbdev/s3c2410fb.c:744", regs + S3C2410_TFTPAL(i)) == ent)
 			fbi->palette_buffer[i] = PALETTE_BUFF_CLEAR;
 		else
 			fbi->palette_ready = 1;   /* retry */

@@ -13,7 +13,7 @@
 #if defined(writeq) && defined(CONFIG_64BIT)
 static inline void mpi3mr_writeq(__u64 b, volatile void __iomem *addr)
 {
-	writeq(b, addr);
+	pete_writeq("drivers/scsi/mpi3mr/mpi3mr_fw.c:16", b, addr);
 }
 #else
 static inline void mpi3mr_writeq(__u64 b, volatile void __iomem *addr)

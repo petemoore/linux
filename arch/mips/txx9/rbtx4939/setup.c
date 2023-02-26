@@ -29,8 +29,8 @@
 static void rbtx4939_machine_restart(char *command)
 {
 	local_irq_disable();
-	writeb(1, rbtx4939_reseten_addr);
-	writeb(1, rbtx4939_softreset_addr);
+	pete_writeb("arch/mips/txx9/rbtx4939/setup.c:32", 1, rbtx4939_reseten_addr);
+	pete_writeb("arch/mips/txx9/rbtx4939/setup.c:33", 1, rbtx4939_softreset_addr);
 	while (1)
 		;
 }
@@ -112,9 +112,9 @@ static void __init rbtx4939_update_ioc_pen(void)
 {
 	__u64 pcfg = ____raw_readq(&tx4939_ccfgptr->pcfg);
 	__u64 ccfg = ____raw_readq(&tx4939_ccfgptr->ccfg);
-	__u8 pe1 = readb(rbtx4939_pe1_addr);
-	__u8 pe2 = readb(rbtx4939_pe2_addr);
-	__u8 pe3 = readb(rbtx4939_pe3_addr);
+	__u8 pe1 = pete_readb("arch/mips/txx9/rbtx4939/setup.c:115", rbtx4939_pe1_addr);
+	__u8 pe2 = pete_readb("arch/mips/txx9/rbtx4939/setup.c:116", rbtx4939_pe2_addr);
+	__u8 pe3 = pete_readb("arch/mips/txx9/rbtx4939/setup.c:117", rbtx4939_pe3_addr);
 	if (pcfg & TX4939_PCFG_ATA0MODE)
 		pe1 |= RBTX4939_PE1_ATA(0);
 	else
@@ -179,9 +179,9 @@ static void __init rbtx4939_update_ioc_pen(void)
 		pe2 |= RBTX4939_PE2_GPIO;
 	else
 		pe2 &= ~RBTX4939_PE2_GPIO;
-	writeb(pe1, rbtx4939_pe1_addr);
-	writeb(pe2, rbtx4939_pe2_addr);
-	writeb(pe3, rbtx4939_pe3_addr);
+	pete_writeb("arch/mips/txx9/rbtx4939/setup.c:182", pe1, rbtx4939_pe1_addr);
+	pete_writeb("arch/mips/txx9/rbtx4939/setup.c:183", pe2, rbtx4939_pe2_addr);
+	pete_writeb("arch/mips/txx9/rbtx4939/setup.c:184", pe3, rbtx4939_pe3_addr);
 }
 
 #define RBTX4939_MAX_7SEGLEDS	8
@@ -205,7 +205,7 @@ static void rbtx4939_led_brightness_set(struct led_classdev *led_cdev,
 
 	local_irq_save(flags);
 	led_val[num] = (led_val[num] & 0x7f) | (value ? 0x80 : 0);
-	writeb(led_val[num], rbtx4939_7seg_addr(num / 4, num % 4));
+	pete_writeb("arch/mips/txx9/rbtx4939/setup.c:208", led_val[num], rbtx4939_7seg_addr(num / 4, num % 4));
 	local_irq_restore(flags);
 }
 
@@ -269,7 +269,7 @@ static void __rbtx4939_7segled_putc(unsigned int pos, unsigned char val)
 	val = led_val[pos];
 	local_irq_restore(flags);
 #endif
-	writeb(val, rbtx4939_7seg_addr(pos / 4, pos % 4));
+	pete_writeb("arch/mips/txx9/rbtx4939/setup.c:272", val, rbtx4939_7seg_addr(pos / 4, pos % 4));
 }
 
 static void rbtx4939_7segled_putc(unsigned int pos, unsigned char val)
@@ -289,7 +289,7 @@ static void rbtx4939_7segled_putc(unsigned int pos, unsigned char val)
 /* special mapping for boot rom */
 static unsigned long rbtx4939_flash_fixup_ofs(unsigned long ofs)
 {
-	u8 bdipsw = readb(rbtx4939_bdipsw_addr) & 0x0f;
+	u8 bdipsw = pete_readb("arch/mips/txx9/rbtx4939/setup.c:292", rbtx4939_bdipsw_addr) & 0x0f;
 	unsigned char shift;
 
 	if (bdipsw & 8) {
@@ -326,7 +326,7 @@ static void rbtx4939_flash_write16(struct map_info *map, const map_word datum,
 static void rbtx4939_flash_copy_from(struct map_info *map, void *to,
 				     unsigned long from, ssize_t len)
 {
-	u8 bdipsw = readb(rbtx4939_bdipsw_addr) & 0x0f;
+	u8 bdipsw = pete_readb("arch/mips/txx9/rbtx4939/setup.c:329", rbtx4939_bdipsw_addr) & 0x0f;
 	unsigned char shift;
 	ssize_t curlen;
 
@@ -382,7 +382,7 @@ static void __init rbtx4939_mtd_init(void)
 	static char names[4][8];
 	static struct mtd_partition parts[4];
 	struct rbtx4939_flash_data *boot_pdata = &pdevs[0].data;
-	u8 bdipsw = readb(rbtx4939_bdipsw_addr) & 0x0f;
+	u8 bdipsw = pete_readb("arch/mips/txx9/rbtx4939/setup.c:385", rbtx4939_bdipsw_addr) & 0x0f;
 
 	if (bdipsw & 8) {
 		/* BOOT Mode: USER ROM1 / USER ROM2 */
@@ -464,7 +464,7 @@ static void __init rbtx4939_device_init(void)
 #if IS_ENABLED(CONFIG_TC35815)
 	int i, j;
 	unsigned char ethaddr[2][6];
-	u8 bdipsw = readb(rbtx4939_bdipsw_addr) & 0x0f;
+	u8 bdipsw = pete_readb("arch/mips/txx9/rbtx4939/setup.c:467", rbtx4939_bdipsw_addr) & 0x0f;
 
 	for (i = 0; i < 2; i++) {
 		unsigned long area = CKSEG1 + 0x1fff0000 + (i * 0x10);
@@ -527,8 +527,8 @@ static void __init rbtx4939_setup(void)
 	for (i = 0; i < RBTX4939_MAX_7SEGLEDS; i++)
 		txx9_7segled_putc(i, '-');
 	pr_info("RBTX4939 (Rev %02x) --- FPGA(Rev %02x) DIPSW:%02x,%02x\n",
-		readb(rbtx4939_board_rev_addr), readb(rbtx4939_ioc_rev_addr),
-		readb(rbtx4939_udipsw_addr), readb(rbtx4939_bdipsw_addr));
+		pete_readb("arch/mips/txx9/rbtx4939/setup.c:530", rbtx4939_board_rev_addr), pete_readb("arch/mips/txx9/rbtx4939/setup.c:530", rbtx4939_ioc_rev_addr),
+		pete_readb("arch/mips/txx9/rbtx4939/setup.c:531", rbtx4939_udipsw_addr), pete_readb("arch/mips/txx9/rbtx4939/setup.c:531", rbtx4939_bdipsw_addr));
 
 #ifdef CONFIG_PCI
 	txx9_alloc_pci_controller(&txx9_primary_pcic, 0, 0, 0, 0);

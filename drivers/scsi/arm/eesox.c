@@ -86,7 +86,7 @@ eesoxscsi_irqenable(struct expansion_card *ec, int irqnr)
 
 	info->control |= EESOX_INTR_ENABLE;
 
-	writeb(info->control, info->ctl_port);
+	pete_writeb("drivers/scsi/arm/eesox.c:89", info->control, info->ctl_port);
 }
 
 /* Prototype: void eesoxscsi_irqdisable(ec, irqnr)
@@ -101,7 +101,7 @@ eesoxscsi_irqdisable(struct expansion_card *ec, int irqnr)
 
 	info->control &= ~EESOX_INTR_ENABLE;
 
-	writeb(info->control, info->ctl_port);
+	pete_writeb("drivers/scsi/arm/eesox.c:104", info->control, info->ctl_port);
 }
 
 static const expansioncard_ops_t eesoxscsi_ops = {
@@ -126,7 +126,7 @@ eesoxscsi_terminator_ctl(struct Scsi_Host *host, int on_off)
 	else
 		info->control &= ~EESOX_TERM_ENABLE;
 
-	writeb(info->control, info->ctl_port);
+	pete_writeb("drivers/scsi/arm/eesox.c:129", info->control, info->ctl_port);
 	spin_unlock_irqrestore(host->host_lock, flags);
 }
 
@@ -202,21 +202,21 @@ static void eesoxscsi_buffer_in(void *buf, int length, void __iomem *base)
 		/*
 		 * Interrupt request?
 		 */
-		status = readb(reg_fas + (REG_STAT << EESOX_FAS216_SHIFT));
+		status = pete_readb("drivers/scsi/arm/eesox.c:205", reg_fas + (REG_STAT << EESOX_FAS216_SHIFT));
 		if (status & STAT_INT)
 			break;
 
 		/*
 		 * DMA request active?
 		 */
-		status = readb(reg_dmastat);
+		status = pete_readb("drivers/scsi/arm/eesox.c:212", reg_dmastat);
 		if (!(status & EESOX_STAT_DMA))
 			continue;
 
 		/*
 		 * Get number of bytes in FIFO
 		 */
-		status = readb(reg_fas + (REG_CFIS << EESOX_FAS216_SHIFT)) & CFIS_CF;
+		status = pete_readb("drivers/scsi/arm/eesox.c:219", reg_fas + (REG_CFIS << EESOX_FAS216_SHIFT)) & CFIS_CF;
 		if (status > 16)
 			status = 16;
 		if (status > length)
@@ -279,21 +279,21 @@ static void eesoxscsi_buffer_out(void *buf, int length, void __iomem *base)
 		/*
 		 * Interrupt request?
 		 */
-		status = readb(reg_fas + (REG_STAT << EESOX_FAS216_SHIFT));
+		status = pete_readb("drivers/scsi/arm/eesox.c:282", reg_fas + (REG_STAT << EESOX_FAS216_SHIFT));
 		if (status & STAT_INT)
 			break;
 
 		/*
 		 * DMA request active?
 		 */
-		status = readb(reg_dmastat);
+		status = pete_readb("drivers/scsi/arm/eesox.c:289", reg_dmastat);
 		if (!(status & EESOX_STAT_DMA))
 			continue;
 
 		/*
 		 * Get number of bytes in FIFO
 		 */
-		status = readb(reg_fas + (REG_CFIS << EESOX_FAS216_SHIFT)) & CFIS_CF;
+		status = pete_readb("drivers/scsi/arm/eesox.c:296", reg_fas + (REG_CFIS << EESOX_FAS216_SHIFT)) & CFIS_CF;
 		if (status > 16)
 			status = 16;
 		status = 16 - status;
@@ -459,7 +459,7 @@ static ssize_t eesoxscsi_store_term(struct device *dev, struct device_attribute 
 		} else {
 			info->control &= ~EESOX_TERM_ENABLE;
 		}
-		writeb(info->control, info->ctl_port);
+		pete_writeb("drivers/scsi/arm/eesox.c:462", info->control, info->ctl_port);
 		spin_unlock_irqrestore(host->host_lock, flags);
 	}
 
@@ -518,7 +518,7 @@ static int eesoxscsi_probe(struct expansion_card *ec, const struct ecard_id *id)
 	info->base	= base;
 	info->ctl_port	= base + EESOX_CONTROL;
 	info->control	= term[ec->slot_no] ? EESOX_TERM_ENABLE : 0;
-	writeb(info->control, info->ctl_port);
+	pete_writeb("drivers/scsi/arm/eesox.c:521", info->control, info->ctl_port);
 
 	info->info.scsi.io_base		= base + EESOX_FAS216_OFFSET;
 	info->info.scsi.io_shift	= EESOX_FAS216_SHIFT;

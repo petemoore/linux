@@ -2936,7 +2936,7 @@ static void wr_reg_barrier(struct uart_port *port, u32 reg, u32 val)
 {
 	switch (port->iotype) {
 	case UPIO_MEM:
-		writeb(val, portaddr(port, reg));
+		pete_writeb("drivers/tty/serial/samsung_tty.c:2939", val, portaddr(port, reg));
 		break;
 	case UPIO_MEM32:
 		pete_writel("drivers/tty/serial/samsung_tty.c:2942", val, portaddr(port, reg));

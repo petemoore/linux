@@ -739,8 +739,8 @@ static void move_int_phy(struct net_device *dev, int addr)
 		target--;
 	if (target == np->phy_addr_external)
 		target--;
-	writew(target, ioaddr + PhyCtrl);
-	readw(ioaddr + PhyCtrl);
+	pete_writew("drivers/net/ethernet/natsemi/natsemi.c:742", target, ioaddr + PhyCtrl);
+	pete_readw("drivers/net/ethernet/natsemi/natsemi.c:743", ioaddr + PhyCtrl);
 	udelay(1);
 }
 
@@ -1123,7 +1123,7 @@ static int mdio_read(struct net_device *dev, int reg)
 	 * - an external mii bus
 	 */
 	if (dev->if_port == PORT_TP)
-		return readw(ioaddr+BasicControl+(reg<<2));
+		return pete_readw("drivers/net/ethernet/natsemi/natsemi.c:1126", ioaddr+BasicControl+(reg<<2));
 	else
 		return miiport_read(dev, np->phy_addr_external, reg);
 }
@@ -1135,7 +1135,7 @@ static void mdio_write(struct net_device *dev, int reg, u16 data)
 
 	/* The 83815 series has an internal transceiver; handle separately */
 	if (dev->if_port == PORT_TP)
-		writew(data, ioaddr+BasicControl+(reg<<2));
+		pete_writew("drivers/net/ethernet/natsemi/natsemi.c:1138", data, ioaddr+BasicControl+(reg<<2));
 	else
 		miiport_write(dev, np->phy_addr_external, reg, data);
 }
@@ -1215,20 +1215,20 @@ static void init_phy_fixup(struct net_device *dev)
 	for (i=0;i<NATSEMI_HW_TIMEOUT;i++) {
 
 		int dspcfg;
-		writew(1, ioaddr + PGSEL);
-		writew(PMDCSR_VAL, ioaddr + PMDCSR);
-		writew(TSTDAT_VAL, ioaddr + TSTDAT);
+		pete_writew("drivers/net/ethernet/natsemi/natsemi.c:1218", 1, ioaddr + PGSEL);
+		pete_writew("drivers/net/ethernet/natsemi/natsemi.c:1219", PMDCSR_VAL, ioaddr + PMDCSR);
+		pete_writew("drivers/net/ethernet/natsemi/natsemi.c:1220", TSTDAT_VAL, ioaddr + TSTDAT);
 		np->dspcfg = (np->srr <= SRR_DP83815_C)?
-			DSPCFG_VAL : (DSPCFG_COEF | readw(ioaddr + DSPCFG));
-		writew(np->dspcfg, ioaddr + DSPCFG);
-		writew(SDCFG_VAL, ioaddr + SDCFG);
-		writew(0, ioaddr + PGSEL);
+			DSPCFG_VAL : (DSPCFG_COEF | pete_readw("drivers/net/ethernet/natsemi/natsemi.c:1222", ioaddr + DSPCFG));
+		pete_writew("drivers/net/ethernet/natsemi/natsemi.c:1223", np->dspcfg, ioaddr + DSPCFG);
+		pete_writew("drivers/net/ethernet/natsemi/natsemi.c:1224", SDCFG_VAL, ioaddr + SDCFG);
+		pete_writew("drivers/net/ethernet/natsemi/natsemi.c:1225", 0, ioaddr + PGSEL);
 		pete_readl("drivers/net/ethernet/natsemi/natsemi.c:1226", ioaddr + ChipConfig);
 		udelay(10);
 
-		writew(1, ioaddr + PGSEL);
-		dspcfg = readw(ioaddr + DSPCFG);
-		writew(0, ioaddr + PGSEL);
+		pete_writew("drivers/net/ethernet/natsemi/natsemi.c:1229", 1, ioaddr + PGSEL);
+		dspcfg = pete_readw("drivers/net/ethernet/natsemi/natsemi.c:1230", ioaddr + DSPCFG);
+		pete_writew("drivers/net/ethernet/natsemi/natsemi.c:1231", 0, ioaddr + PGSEL);
 		if (np->dspcfg == dspcfg)
 			break;
 	}
@@ -1249,8 +1249,8 @@ static void init_phy_fixup(struct net_device *dev)
 	 * and Auto-Negotiation Completion are among the affected.
 	 * Read the intr status to clear it (needed for wake events).
 	 */
-	readw(ioaddr + MIntrStatus);
-	writew(MICRIntEn, ioaddr + MIntrCtrl);
+	pete_readw("drivers/net/ethernet/natsemi/natsemi.c:1252", ioaddr + MIntrStatus);
+	pete_writew("drivers/net/ethernet/natsemi/natsemi.c:1253", MICRIntEn, ioaddr + MIntrCtrl);
 }
 
 static int switch_port_external(struct net_device *dev)
@@ -1309,12 +1309,12 @@ static int switch_port_internal(struct net_device *dev)
 	udelay(1);
 
 	/* 2) reset the internal phy: */
-	bmcr = readw(ioaddr+BasicControl+(MII_BMCR<<2));
+	bmcr = pete_readw("drivers/net/ethernet/natsemi/natsemi.c:1312", ioaddr+BasicControl+(MII_BMCR<<2));
 	pete_writel("drivers/net/ethernet/natsemi/natsemi.c:1313", bmcr | BMCR_RESET, ioaddr+BasicControl+(MII_BMCR<<2));
 	pete_readl("drivers/net/ethernet/natsemi/natsemi.c:1314", ioaddr + ChipConfig);
 	udelay(10);
 	for (i=0;i<NATSEMI_HW_TIMEOUT;i++) {
-		bmcr = readw(ioaddr+BasicControl+(MII_BMCR<<2));
+		bmcr = pete_readw("drivers/net/ethernet/natsemi/natsemi.c:1317", ioaddr+BasicControl+(MII_BMCR<<2));
 		if (!(bmcr & BMCR_RESET))
 			break;
 		udelay(10);
@@ -1409,12 +1409,12 @@ static void natsemi_reset(struct net_device *dev)
 	/* PMATCH */
 	for (i = 0; i < 3; i++) {
 		pete_writel("drivers/net/ethernet/natsemi/natsemi.c:1411", i*2, ioaddr + RxFilterAddr);
-		pmatch[i] = readw(ioaddr + RxFilterData);
+		pmatch[i] = pete_readw("drivers/net/ethernet/natsemi/natsemi.c:1412", ioaddr + RxFilterData);
 	}
 	/* SOPAS */
 	for (i = 0; i < 3; i++) {
 		pete_writel("drivers/net/ethernet/natsemi/natsemi.c:1416", 0xa+(i*2), ioaddr + RxFilterAddr);
-		sopass[i] = readw(ioaddr + RxFilterData);
+		sopass[i] = pete_readw("drivers/net/ethernet/natsemi/natsemi.c:1417", ioaddr + RxFilterData);
 	}
 
 	/* now whack the chip */
@@ -1448,11 +1448,11 @@ static void natsemi_reset(struct net_device *dev)
 	/* restore PMATCH */
 	for (i = 0; i < 3; i++) {
 		pete_writel("drivers/net/ethernet/natsemi/natsemi.c:1450", i*2, ioaddr + RxFilterAddr);
-		writew(pmatch[i], ioaddr + RxFilterData);
+		pete_writew("drivers/net/ethernet/natsemi/natsemi.c:1451", pmatch[i], ioaddr + RxFilterData);
 	}
 	for (i = 0; i < 3; i++) {
 		pete_writel("drivers/net/ethernet/natsemi/natsemi.c:1454", 0xa+(i*2), ioaddr + RxFilterAddr);
-		writew(sopass[i], ioaddr + RxFilterData);
+		pete_writew("drivers/net/ethernet/natsemi/natsemi.c:1455", sopass[i], ioaddr + RxFilterData);
 	}
 	/* restore RFCR */
 	pete_writel("drivers/net/ethernet/natsemi/natsemi.c:1458", rfcr, ioaddr + RxFilterAddr);
@@ -1556,7 +1556,7 @@ static int netdev_open(struct net_device *dev)
 		u16 mac = (dev->dev_addr[2*i+1]<<8) + dev->dev_addr[2*i];
 
 		pete_writel("drivers/net/ethernet/natsemi/natsemi.c:1558", i*2, ioaddr + RxFilterAddr);
-		writew(mac, ioaddr + RxFilterData);
+		pete_writew("drivers/net/ethernet/natsemi/natsemi.c:1559", mac, ioaddr + RxFilterData);
 	}
 	pete_writel("drivers/net/ethernet/natsemi/natsemi.c:1561", np->cur_rx_mode, ioaddr + RxFilterAddr);
 	spin_unlock_irq(&np->lock);
@@ -1595,12 +1595,12 @@ static void do_cable_magic(struct net_device *dev)
 	if (pete_readl("drivers/net/ethernet/natsemi/natsemi.c:1595", ioaddr + ChipConfig) & CfgSpeed100) {
 		u16 data;
 
-		writew(1, ioaddr + PGSEL);
+		pete_writew("drivers/net/ethernet/natsemi/natsemi.c:1598", 1, ioaddr + PGSEL);
 		/*
 		 * coefficient visibility should already be enabled via
 		 * DSPCFG | 0x1000
 		 */
-		data = readw(ioaddr + TSTDAT) & 0xff;
+		data = pete_readw("drivers/net/ethernet/natsemi/natsemi.c:1603", ioaddr + TSTDAT) & 0xff;
 		/*
 		 * the value must be negative, and within certain values
 		 * (these values all come from National)
@@ -1609,13 +1609,13 @@ static void do_cable_magic(struct net_device *dev)
 			np = netdev_priv(dev);
 
 			/* the bug has been triggered - fix the coefficient */
-			writew(TSTDAT_FIXED, ioaddr + TSTDAT);
+			pete_writew("drivers/net/ethernet/natsemi/natsemi.c:1612", TSTDAT_FIXED, ioaddr + TSTDAT);
 			/* lock the value */
-			data = readw(ioaddr + DSPCFG);
+			data = pete_readw("drivers/net/ethernet/natsemi/natsemi.c:1614", ioaddr + DSPCFG);
 			np->dspcfg = data | DSPCFG_LOCK;
-			writew(np->dspcfg, ioaddr + DSPCFG);
+			pete_writew("drivers/net/ethernet/natsemi/natsemi.c:1616", np->dspcfg, ioaddr + DSPCFG);
 		}
-		writew(0, ioaddr + PGSEL);
+		pete_writew("drivers/net/ethernet/natsemi/natsemi.c:1618", 0, ioaddr + PGSEL);
 	}
 }
 
@@ -1631,12 +1631,12 @@ static void undo_cable_magic(struct net_device *dev)
 	if (np->srr >= SRR_DP83816_A5)
 		return;
 
-	writew(1, ioaddr + PGSEL);
+	pete_writew("drivers/net/ethernet/natsemi/natsemi.c:1634", 1, ioaddr + PGSEL);
 	/* make sure the lock bit is clear */
-	data = readw(ioaddr + DSPCFG);
+	data = pete_readw("drivers/net/ethernet/natsemi/natsemi.c:1636", ioaddr + DSPCFG);
 	np->dspcfg = data & ~DSPCFG_LOCK;
-	writew(np->dspcfg, ioaddr + DSPCFG);
-	writew(0, ioaddr + PGSEL);
+	pete_writew("drivers/net/ethernet/natsemi/natsemi.c:1638", np->dspcfg, ioaddr + DSPCFG);
+	pete_writew("drivers/net/ethernet/natsemi/natsemi.c:1639", 0, ioaddr + PGSEL);
 }
 
 static void check_link(struct net_device *dev)
@@ -1805,9 +1805,9 @@ static void netdev_timer(struct timer_list *t)
 
 		spin_lock_irq(&np->lock);
 		/* check for a nasty random phy-reset - use dspcfg as a flag */
-		writew(1, ioaddr+PGSEL);
-		dspcfg = readw(ioaddr+DSPCFG);
-		writew(0, ioaddr+PGSEL);
+		pete_writew("drivers/net/ethernet/natsemi/natsemi.c:1808", 1, ioaddr+PGSEL);
+		dspcfg = pete_readw("drivers/net/ethernet/natsemi/natsemi.c:1809", ioaddr+DSPCFG);
+		pete_writew("drivers/net/ethernet/natsemi/natsemi.c:1810", 0, ioaddr+PGSEL);
 		if (np->dspcfg_workaround && dspcfg != np->dspcfg) {
 			if (!netif_queue_stopped(dev)) {
 				spin_unlock_irq(&np->lock);
@@ -2408,7 +2408,7 @@ static void netdev_error(struct net_device *dev, int intr_status)
 		}
 
 		/* read MII int status to clear the flag */
-		readw(ioaddr + MIntrStatus);
+		pete_readw("drivers/net/ethernet/natsemi/natsemi.c:2411", ioaddr + MIntrStatus);
 		check_link(dev);
 	}
 	if (intr_status & StatsMax) {
@@ -2783,13 +2783,13 @@ static int netdev_set_sopass(struct net_device *dev, u8 *newval)
 
 	/* write the three words to (undocumented) RFCR vals 0xa, 0xc, 0xe */
 	pete_writel("drivers/net/ethernet/natsemi/natsemi.c:2785", addr | 0xa, ioaddr + RxFilterAddr);
-	writew(sval[0], ioaddr + RxFilterData);
+	pete_writew("drivers/net/ethernet/natsemi/natsemi.c:2786", sval[0], ioaddr + RxFilterData);
 
 	pete_writel("drivers/net/ethernet/natsemi/natsemi.c:2788", addr | 0xc, ioaddr + RxFilterAddr);
-	writew(sval[1], ioaddr + RxFilterData);
+	pete_writew("drivers/net/ethernet/natsemi/natsemi.c:2789", sval[1], ioaddr + RxFilterData);
 
 	pete_writel("drivers/net/ethernet/natsemi/natsemi.c:2791", addr | 0xe, ioaddr + RxFilterAddr);
-	writew(sval[2], ioaddr + RxFilterData);
+	pete_writew("drivers/net/ethernet/natsemi/natsemi.c:2792", sval[2], ioaddr + RxFilterData);
 
 	/* re-enable the RX filter */
 	pete_writel("drivers/net/ethernet/natsemi/natsemi.c:2795", addr | RxFilterEnable, ioaddr + RxFilterAddr);
@@ -2813,13 +2813,13 @@ static int netdev_get_sopass(struct net_device *dev, u8 *data)
 	addr = pete_readl("drivers/net/ethernet/natsemi/natsemi.c:2813", ioaddr + RxFilterAddr) & ~RFCRAddressMask;
 
 	pete_writel("drivers/net/ethernet/natsemi/natsemi.c:2815", addr | 0xa, ioaddr + RxFilterAddr);
-	sval[0] = readw(ioaddr + RxFilterData);
+	sval[0] = pete_readw("drivers/net/ethernet/natsemi/natsemi.c:2816", ioaddr + RxFilterData);
 
 	pete_writel("drivers/net/ethernet/natsemi/natsemi.c:2818", addr | 0xc, ioaddr + RxFilterAddr);
-	sval[1] = readw(ioaddr + RxFilterData);
+	sval[1] = pete_readw("drivers/net/ethernet/natsemi/natsemi.c:2819", ioaddr + RxFilterData);
 
 	pete_writel("drivers/net/ethernet/natsemi/natsemi.c:2821", addr | 0xe, ioaddr + RxFilterAddr);
-	sval[2] = readw(ioaddr + RxFilterData);
+	sval[2] = pete_readw("drivers/net/ethernet/natsemi/natsemi.c:2822", ioaddr + RxFilterData);
 
 	pete_writel("drivers/net/ethernet/natsemi/natsemi.c:2824", addr, ioaddr + RxFilterAddr);
 
@@ -3017,18 +3017,18 @@ static int netdev_get_regs(struct net_device *dev, u8 *buf)
 		rbuf[i] = mdio_read(dev, i & 0x1f);
 
 	/* read only the 'magic' registers from page 1 */
-	writew(1, ioaddr + PGSEL);
-	rbuf[i++] = readw(ioaddr + PMDCSR);
-	rbuf[i++] = readw(ioaddr + TSTDAT);
-	rbuf[i++] = readw(ioaddr + DSPCFG);
-	rbuf[i++] = readw(ioaddr + SDCFG);
-	writew(0, ioaddr + PGSEL);
+	pete_writew("drivers/net/ethernet/natsemi/natsemi.c:3020", 1, ioaddr + PGSEL);
+	rbuf[i++] = pete_readw("drivers/net/ethernet/natsemi/natsemi.c:3021", ioaddr + PMDCSR);
+	rbuf[i++] = pete_readw("drivers/net/ethernet/natsemi/natsemi.c:3022", ioaddr + TSTDAT);
+	rbuf[i++] = pete_readw("drivers/net/ethernet/natsemi/natsemi.c:3023", ioaddr + DSPCFG);
+	rbuf[i++] = pete_readw("drivers/net/ethernet/natsemi/natsemi.c:3024", ioaddr + SDCFG);
+	pete_writew("drivers/net/ethernet/natsemi/natsemi.c:3025", 0, ioaddr + PGSEL);
 
 	/* read RFCR indexed registers */
 	rfcr = pete_readl("drivers/net/ethernet/natsemi/natsemi.c:3028", ioaddr + RxFilterAddr);
 	for (j = 0; j < NATSEMI_RFDR_NREGS; j++) {
 		pete_writel("drivers/net/ethernet/natsemi/natsemi.c:3030", j*2, ioaddr + RxFilterAddr);
-		rbuf[i++] = readw(ioaddr + RxFilterData);
+		rbuf[i++] = pete_readw("drivers/net/ethernet/natsemi/natsemi.c:3031", ioaddr + RxFilterData);
 	}
 	pete_writel("drivers/net/ethernet/natsemi/natsemi.c:3033", rfcr, ioaddr + RxFilterAddr);
 
@@ -3196,7 +3196,7 @@ static int netdev_close(struct net_device *dev)
 	spin_lock_irq(&np->lock);
 	np->hands_off = 0;
 	pete_readl("drivers/net/ethernet/natsemi/natsemi.c:3198", ioaddr + IntrMask);
-	readw(ioaddr + MIntrStatus);
+	pete_readw("drivers/net/ethernet/natsemi/natsemi.c:3199", ioaddr + MIntrStatus);
 
 	/* Freeze Stats */
 	pete_writel("drivers/net/ethernet/natsemi/natsemi.c:3202", StatsFreeze, ioaddr + StatsCtrl);

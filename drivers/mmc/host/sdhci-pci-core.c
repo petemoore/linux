@@ -1485,14 +1485,14 @@ static void jmicron_enable_mmc(struct sdhci_host *host, int on)
 {
 	u8 scratch;
 
-	scratch = readb(host->ioaddr + 0xC0);
+	scratch = pete_readb("drivers/mmc/host/sdhci-pci-core.c:1488", host->ioaddr + 0xC0);
 
 	if (on)
 		scratch |= 0x01;
 	else
 		scratch &= ~0x01;
 
-	writeb(scratch, host->ioaddr + 0xC0);
+	pete_writeb("drivers/mmc/host/sdhci-pci-core.c:1495", scratch, host->ioaddr + 0xC0);
 }
 
 static int jmicron_probe_slot(struct sdhci_pci_slot *slot)
@@ -1627,8 +1627,8 @@ static int syskt_probe_slot(struct sdhci_pci_slot *slot)
 {
 	int tm, ps;
 
-	u8 board_rev = readb(slot->host->ioaddr + SYSKT_BOARD_REV);
-	u8  chip_rev = readb(slot->host->ioaddr + SYSKT_CHIP_REV);
+	u8 board_rev = pete_readb("drivers/mmc/host/sdhci-pci-core.c:1630", slot->host->ioaddr + SYSKT_BOARD_REV);
+	u8  chip_rev = pete_readb("drivers/mmc/host/sdhci-pci-core.c:1631", slot->host->ioaddr + SYSKT_CHIP_REV);
 	dev_info(&slot->chip->pdev->dev, "SysKonnect CardBus2SDIO, "
 					 "board rev %d.%d, chip rev %d.%d\n",
 					 board_rev >> 4, board_rev & 0xf,
@@ -1636,12 +1636,12 @@ static int syskt_probe_slot(struct sdhci_pci_slot *slot)
 	if (chip_rev >= 0x20)
 		slot->host->quirks |= SDHCI_QUIRK_FORCE_DMA;
 
-	writeb(SYSKT_POWER_330, slot->host->ioaddr + SYSKT_POWER_DATA);
-	writeb(SYSKT_POWER_START, slot->host->ioaddr + SYSKT_POWER_CMD);
+	pete_writeb("drivers/mmc/host/sdhci-pci-core.c:1639", SYSKT_POWER_330, slot->host->ioaddr + SYSKT_POWER_DATA);
+	pete_writeb("drivers/mmc/host/sdhci-pci-core.c:1640", SYSKT_POWER_START, slot->host->ioaddr + SYSKT_POWER_CMD);
 	udelay(50);
 	tm = 10;  /* Wait max 1 ms */
 	do {
-		ps = readw(slot->host->ioaddr + SYSKT_POWER_STATUS);
+		ps = pete_readw("drivers/mmc/host/sdhci-pci-core.c:1644", slot->host->ioaddr + SYSKT_POWER_STATUS);
 		if (ps & SYSKT_POWER_STATUS_OK)
 			break;
 		udelay(100);
@@ -1649,7 +1649,7 @@ static int syskt_probe_slot(struct sdhci_pci_slot *slot)
 	if (!tm) {
 		dev_err(&slot->chip->pdev->dev,
 			"power regulator never stabilized");
-		writeb(0, slot->host->ioaddr + SYSKT_POWER_CMD);
+		pete_writeb("drivers/mmc/host/sdhci-pci-core.c:1652", 0, slot->host->ioaddr + SYSKT_POWER_CMD);
 		return -ENODEV;
 	}
 

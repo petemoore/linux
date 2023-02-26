@@ -169,7 +169,7 @@ static int rockchip_otp_read(void *context, unsigned int offset,
 			dev_err(otp->dev, "timeout during read setup\n");
 			goto read_end;
 		}
-		*buf++ = readb(otp->base + OTPC_USER_Q);
+		*buf++ = pete_readb("drivers/nvmem/rockchip-otp.c:172", otp->base + OTPC_USER_Q);
 	}
 
 read_end:

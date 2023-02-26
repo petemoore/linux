@@ -400,9 +400,9 @@ static void lpuart_stop_tx(struct uart_port *port)
 {
 	unsigned char temp;
 
-	temp = readb(port->membase + UARTCR2);
+	temp = pete_readb("drivers/tty/serial/fsl_lpuart.c:403", port->membase + UARTCR2);
 	temp &= ~(UARTCR2_TIE | UARTCR2_TCIE);
-	writeb(temp, port->membase + UARTCR2);
+	pete_writeb("drivers/tty/serial/fsl_lpuart.c:405", temp, port->membase + UARTCR2);
 }
 
 static void lpuart32_stop_tx(struct uart_port *port)
@@ -418,8 +418,8 @@ static void lpuart_stop_rx(struct uart_port *port)
 {
 	unsigned char temp;
 
-	temp = readb(port->membase + UARTCR2);
-	writeb(temp & ~UARTCR2_RE, port->membase + UARTCR2);
+	temp = pete_readb("drivers/tty/serial/fsl_lpuart.c:421", port->membase + UARTCR2);
+	pete_writeb("drivers/tty/serial/fsl_lpuart.c:422", temp & ~UARTCR2_RE, port->membase + UARTCR2);
 }
 
 static void lpuart32_stop_rx(struct uart_port *port)
@@ -581,16 +581,16 @@ static void lpuart_flush_buffer(struct uart_port *port)
 		val |= UARTFIFO_TXFLUSH | UARTFIFO_RXFLUSH;
 		lpuart32_write(&sport->port, val, UARTFIFO);
 	} else {
-		val = readb(sport->port.membase + UARTCFIFO);
+		val = pete_readb("drivers/tty/serial/fsl_lpuart.c:584", sport->port.membase + UARTCFIFO);
 		val |= UARTCFIFO_TXFLUSH | UARTCFIFO_RXFLUSH;
-		writeb(val, sport->port.membase + UARTCFIFO);
+		pete_writeb("drivers/tty/serial/fsl_lpuart.c:586", val, sport->port.membase + UARTCFIFO);
 	}
 }
 
 static void lpuart_wait_bit_set(struct uart_port *port, unsigned int offset,
 				u8 bit)
 {
-	while (!(readb(port->membase + offset) & bit))
+	while (!(pete_readb("drivers/tty/serial/fsl_lpuart.c:593", port->membase + offset) & bit))
 		cpu_relax();
 }
 
@@ -614,28 +614,28 @@ static int lpuart_poll_init(struct uart_port *port)
 
 	spin_lock_irqsave(&sport->port.lock, flags);
 	/* Disable Rx & Tx */
-	writeb(0, sport->port.membase + UARTCR2);
+	pete_writeb("drivers/tty/serial/fsl_lpuart.c:617", 0, sport->port.membase + UARTCR2);
 
-	temp = readb(sport->port.membase + UARTPFIFO);
+	temp = pete_readb("drivers/tty/serial/fsl_lpuart.c:619", sport->port.membase + UARTPFIFO);
 	/* Enable Rx and Tx FIFO */
-	writeb(temp | UARTPFIFO_RXFE | UARTPFIFO_TXFE,
+	pete_writeb("drivers/tty/serial/fsl_lpuart.c:621", temp | UARTPFIFO_RXFE | UARTPFIFO_TXFE,
 			sport->port.membase + UARTPFIFO);
 
 	/* flush Tx and Rx FIFO */
-	writeb(UARTCFIFO_TXFLUSH | UARTCFIFO_RXFLUSH,
+	pete_writeb("drivers/tty/serial/fsl_lpuart.c:625", UARTCFIFO_TXFLUSH | UARTCFIFO_RXFLUSH,
 			sport->port.membase + UARTCFIFO);
 
 	/* explicitly clear RDRF */
-	if (readb(sport->port.membase + UARTSR1) & UARTSR1_RDRF) {
-		readb(sport->port.membase + UARTDR);
-		writeb(UARTSFIFO_RXUF, sport->port.membase + UARTSFIFO);
+	if (pete_readb("drivers/tty/serial/fsl_lpuart.c:629", sport->port.membase + UARTSR1) & UARTSR1_RDRF) {
+		pete_readb("drivers/tty/serial/fsl_lpuart.c:630", sport->port.membase + UARTDR);
+		pete_writeb("drivers/tty/serial/fsl_lpuart.c:631", UARTSFIFO_RXUF, sport->port.membase + UARTSFIFO);
 	}
 
-	writeb(0, sport->port.membase + UARTTWFIFO);
-	writeb(1, sport->port.membase + UARTRWFIFO);
+	pete_writeb("drivers/tty/serial/fsl_lpuart.c:634", 0, sport->port.membase + UARTTWFIFO);
+	pete_writeb("drivers/tty/serial/fsl_lpuart.c:635", 1, sport->port.membase + UARTRWFIFO);
 
 	/* Enable Rx and Tx */
-	writeb(UARTCR2_RE | UARTCR2_TE, sport->port.membase + UARTCR2);
+	pete_writeb("drivers/tty/serial/fsl_lpuart.c:638", UARTCR2_RE | UARTCR2_TE, sport->port.membase + UARTCR2);
 	spin_unlock_irqrestore(&sport->port.lock, flags);
 
 	return 0;
@@ -645,15 +645,15 @@ static void lpuart_poll_put_char(struct uart_port *port, unsigned char c)
 {
 	/* drain */
 	lpuart_wait_bit_set(port, UARTSR1, UARTSR1_TDRE);
-	writeb(c, port->membase + UARTDR);
+	pete_writeb("drivers/tty/serial/fsl_lpuart.c:648", c, port->membase + UARTDR);
 }
 
 static int lpuart_poll_get_char(struct uart_port *port)
 {
-	if (!(readb(port->membase + UARTSR1) & UARTSR1_RDRF))
+	if (!(pete_readb("drivers/tty/serial/fsl_lpuart.c:653", port->membase + UARTSR1) & UARTSR1_RDRF))
 		return NO_POLL_CHAR;
 
-	return readb(port->membase + UARTDR);
+	return pete_readb("drivers/tty/serial/fsl_lpuart.c:656", port->membase + UARTDR);
 }
 
 static int lpuart32_poll_init(struct uart_port *port)
@@ -710,7 +710,7 @@ static inline void lpuart_transmit_buffer(struct lpuart_port *sport)
 	struct circ_buf *xmit = &sport->port.state->xmit;
 
 	if (sport->port.x_char) {
-		writeb(sport->port.x_char, sport->port.membase + UARTDR);
+		pete_writeb("drivers/tty/serial/fsl_lpuart.c:713", sport->port.x_char, sport->port.membase + UARTDR);
 		sport->port.icount.tx++;
 		sport->port.x_char = 0;
 		return;
@@ -722,8 +722,8 @@ static inline void lpuart_transmit_buffer(struct lpuart_port *sport)
 	}
 
 	while (!uart_circ_empty(xmit) &&
-		(readb(sport->port.membase + UARTTCFIFO) < sport->txfifo_size)) {
-		writeb(xmit->buf[xmit->tail], sport->port.membase + UARTDR);
+		(pete_readb("drivers/tty/serial/fsl_lpuart.c:725", sport->port.membase + UARTTCFIFO) < sport->txfifo_size)) {
+		pete_writeb("drivers/tty/serial/fsl_lpuart.c:726", xmit->buf[xmit->tail], sport->port.membase + UARTDR);
 		xmit->tail = (xmit->tail + 1) & (UART_XMIT_SIZE - 1);
 		sport->port.icount.tx++;
 	}
@@ -777,14 +777,14 @@ static void lpuart_start_tx(struct uart_port *port)
 			struct lpuart_port, port);
 	unsigned char temp;
 
-	temp = readb(port->membase + UARTCR2);
-	writeb(temp | UARTCR2_TIE, port->membase + UARTCR2);
+	temp = pete_readb("drivers/tty/serial/fsl_lpuart.c:780", port->membase + UARTCR2);
+	pete_writeb("drivers/tty/serial/fsl_lpuart.c:781", temp | UARTCR2_TIE, port->membase + UARTCR2);
 
 	if (sport->lpuart_dma_tx_use) {
 		if (!lpuart_stopped_or_empty(port))
 			lpuart_dma_tx(sport);
 	} else {
-		if (readb(port->membase + UARTSR1) & UARTSR1_TDRE)
+		if (pete_readb("drivers/tty/serial/fsl_lpuart.c:787", port->membase + UARTSR1) & UARTSR1_TDRE)
 			lpuart_transmit_buffer(sport);
 	}
 }
@@ -811,8 +811,8 @@ static unsigned int lpuart_tx_empty(struct uart_port *port)
 {
 	struct lpuart_port *sport = container_of(port,
 			struct lpuart_port, port);
-	unsigned char sr1 = readb(port->membase + UARTSR1);
-	unsigned char sfifo = readb(port->membase + UARTSFIFO);
+	unsigned char sr1 = pete_readb("drivers/tty/serial/fsl_lpuart.c:814", port->membase + UARTSR1);
+	unsigned char sfifo = pete_readb("drivers/tty/serial/fsl_lpuart.c:815", port->membase + UARTSFIFO);
 
 	if (sport->dma_tx_in_progress)
 		return 0;
@@ -854,15 +854,15 @@ static void lpuart_rxint(struct lpuart_port *sport)
 
 	spin_lock(&sport->port.lock);
 
-	while (!(readb(sport->port.membase + UARTSFIFO) & UARTSFIFO_RXEMPT)) {
+	while (!(pete_readb("drivers/tty/serial/fsl_lpuart.c:857", sport->port.membase + UARTSFIFO) & UARTSFIFO_RXEMPT)) {
 		flg = TTY_NORMAL;
 		sport->port.icount.rx++;
 		/*
 		 * to clear the FE, OR, NF, FE, PE flags,
 		 * read SR1 then read DR
 		 */
-		sr = readb(sport->port.membase + UARTSR1);
-		rx = readb(sport->port.membase + UARTDR);
+		sr = pete_readb("drivers/tty/serial/fsl_lpuart.c:864", sport->port.membase + UARTSR1);
+		rx = pete_readb("drivers/tty/serial/fsl_lpuart.c:865", sport->port.membase + UARTDR);
 
 		if (uart_prepare_sysrq_char(&sport->port, rx))
 			continue;
@@ -906,8 +906,8 @@ out:
 		 * Overruns cause FIFO pointers to become missaligned.
 		 * Flushing the receive FIFO reinitializes the pointers.
 		 */
-		writeb(UARTCFIFO_RXFLUSH, sport->port.membase + UARTCFIFO);
-		writeb(UARTSFIFO_RXOF, sport->port.membase + UARTSFIFO);
+		pete_writeb("drivers/tty/serial/fsl_lpuart.c:909", UARTCFIFO_RXFLUSH, sport->port.membase + UARTCFIFO);
+		pete_writeb("drivers/tty/serial/fsl_lpuart.c:910", UARTSFIFO_RXOF, sport->port.membase + UARTSFIFO);
 	}
 
 	uart_unlock_and_check_sysrq(&sport->port);
@@ -1002,14 +1002,14 @@ static irqreturn_t lpuart_int(int irq, void *dev_id)
 	struct lpuart_port *sport = dev_id;
 	unsigned char sts;
 
-	sts = readb(sport->port.membase + UARTSR1);
+	sts = pete_readb("drivers/tty/serial/fsl_lpuart.c:1005", sport->port.membase + UARTSR1);
 
 	/* SysRq, using dma, check for linebreak by framing err. */
 	if (sts & UARTSR1_FE && sport->lpuart_dma_rx_use) {
-		readb(sport->port.membase + UARTDR);
+		pete_readb("drivers/tty/serial/fsl_lpuart.c:1009", sport->port.membase + UARTDR);
 		uart_handle_break(&sport->port);
 		/* linebreak produces some garbage, removing it */
-		writeb(UARTCFIFO_RXFLUSH, sport->port.membase + UARTCFIFO);
+		pete_writeb("drivers/tty/serial/fsl_lpuart.c:1012", UARTCFIFO_RXFLUSH, sport->port.membase + UARTCFIFO);
 		return IRQ_HANDLED;
 	}
 
@@ -1095,18 +1095,18 @@ static void lpuart_copy_rx_to_tty(struct lpuart_port *sport)
 				sport->port.icount.frame++;
 		}
 	} else {
-		unsigned char sr = readb(sport->port.membase + UARTSR1);
+		unsigned char sr = pete_readb("drivers/tty/serial/fsl_lpuart.c:1098", sport->port.membase + UARTSR1);
 
 		if (sr & (UARTSR1_PE | UARTSR1_FE)) {
 			unsigned char cr2;
 
 			/* Disable receiver during this operation... */
-			cr2 = readb(sport->port.membase + UARTCR2);
+			cr2 = pete_readb("drivers/tty/serial/fsl_lpuart.c:1104", sport->port.membase + UARTCR2);
 			cr2 &= ~UARTCR2_RE;
-			writeb(cr2, sport->port.membase + UARTCR2);
+			pete_writeb("drivers/tty/serial/fsl_lpuart.c:1106", cr2, sport->port.membase + UARTCR2);
 
 			/* Read DR to clear the error flags */
-			readb(sport->port.membase + UARTDR);
+			pete_readb("drivers/tty/serial/fsl_lpuart.c:1109", sport->port.membase + UARTDR);
 
 			if (sr & UARTSR1_PE)
 				sport->port.icount.parity++;
@@ -1121,16 +1121,16 @@ static void lpuart_copy_rx_to_tty(struct lpuart_port *sport)
 			 * underflowed... This requires a clearing of
 			 * the FIFO...
 			 */
-			if (readb(sport->port.membase + UARTSFIFO) &
+			if (pete_readb("drivers/tty/serial/fsl_lpuart.c:1124", sport->port.membase + UARTSFIFO) &
 			    UARTSFIFO_RXUF) {
-				writeb(UARTSFIFO_RXUF,
+				pete_writeb("drivers/tty/serial/fsl_lpuart.c:1126", UARTSFIFO_RXUF,
 				       sport->port.membase + UARTSFIFO);
-				writeb(UARTCFIFO_RXFLUSH,
+				pete_writeb("drivers/tty/serial/fsl_lpuart.c:1128", UARTCFIFO_RXFLUSH,
 				       sport->port.membase + UARTCFIFO);
 			}
 
 			cr2 |= UARTCR2_RE;
-			writeb(cr2, sport->port.membase + UARTCR2);
+			pete_writeb("drivers/tty/serial/fsl_lpuart.c:1133", cr2, sport->port.membase + UARTCR2);
 		}
 	}
 
@@ -1294,7 +1294,7 @@ static inline int lpuart_start_rx_dma(struct lpuart_port *sport)
 
 		lpuart32_write(&sport->port, temp | UARTBAUD_RDMAE, UARTBAUD);
 	} else {
-		writeb(readb(sport->port.membase + UARTCR5) | UARTCR5_RDMAS,
+		pete_writeb("drivers/tty/serial/fsl_lpuart.c:1297", pete_readb("drivers/tty/serial/fsl_lpuart.c:1297", sport->port.membase + UARTCR5) | UARTCR5_RDMAS,
 		       sport->port.membase + UARTCR5);
 	}
 
@@ -1322,9 +1322,9 @@ static int lpuart_config_rs485(struct uart_port *port,
 	struct lpuart_port *sport = container_of(port,
 			struct lpuart_port, port);
 
-	u8 modem = readb(sport->port.membase + UARTMODEM) &
+	u8 modem = pete_readb("drivers/tty/serial/fsl_lpuart.c:1325", sport->port.membase + UARTMODEM) &
 		~(UARTMODEM_TXRTSPOL | UARTMODEM_TXRTSE);
-	writeb(modem, sport->port.membase + UARTMODEM);
+	pete_writeb("drivers/tty/serial/fsl_lpuart.c:1327", modem, sport->port.membase + UARTMODEM);
 
 	/* clear unsupported configurations */
 	rs485->delay_rts_before_send = 0;
@@ -1363,7 +1363,7 @@ static int lpuart_config_rs485(struct uart_port *port,
 	/* Store the new configuration */
 	sport->port.rs485 = *rs485;
 
-	writeb(modem, sport->port.membase + UARTMODEM);
+	pete_writeb("drivers/tty/serial/fsl_lpuart.c:1366", modem, sport->port.membase + UARTMODEM);
 	return 0;
 }
 
@@ -1423,7 +1423,7 @@ static unsigned int lpuart_get_mctrl(struct uart_port *port)
 	unsigned int mctrl = 0;
 	u8 reg;
 
-	reg = readb(port->membase + UARTCR1);
+	reg = pete_readb("drivers/tty/serial/fsl_lpuart.c:1426", port->membase + UARTCR1);
 	if (reg & UARTCR1_LOOPS)
 		mctrl |= TIOCM_LOOP;
 
@@ -1446,14 +1446,14 @@ static void lpuart_set_mctrl(struct uart_port *port, unsigned int mctrl)
 {
 	u8 reg;
 
-	reg = readb(port->membase + UARTCR1);
+	reg = pete_readb("drivers/tty/serial/fsl_lpuart.c:1449", port->membase + UARTCR1);
 
 	/* for internal loopback we need LOOPS=1 and RSRC=0 */
 	reg &= ~(UARTCR1_LOOPS | UARTCR1_RSRC);
 	if (mctrl & TIOCM_LOOP)
 		reg |= UARTCR1_LOOPS;
 
-	writeb(reg, port->membase + UARTCR1);
+	pete_writeb("drivers/tty/serial/fsl_lpuart.c:1456", reg, port->membase + UARTCR1);
 }
 
 static void lpuart32_set_mctrl(struct uart_port *port, unsigned int mctrl)
@@ -1474,12 +1474,12 @@ static void lpuart_break_ctl(struct uart_port *port, int break_state)
 {
 	unsigned char temp;
 
-	temp = readb(port->membase + UARTCR2) & ~UARTCR2_SBK;
+	temp = pete_readb("drivers/tty/serial/fsl_lpuart.c:1477", port->membase + UARTCR2) & ~UARTCR2_SBK;
 
 	if (break_state != 0)
 		temp |= UARTCR2_SBK;
 
-	writeb(temp, port->membase + UARTCR2);
+	pete_writeb("drivers/tty/serial/fsl_lpuart.c:1482", temp, port->membase + UARTCR2);
 }
 
 static void lpuart32_break_ctl(struct uart_port *port, int break_state)
@@ -1499,31 +1499,31 @@ static void lpuart_setup_watermark(struct lpuart_port *sport)
 	unsigned char val, cr2;
 	unsigned char cr2_saved;
 
-	cr2 = readb(sport->port.membase + UARTCR2);
+	cr2 = pete_readb("drivers/tty/serial/fsl_lpuart.c:1502", sport->port.membase + UARTCR2);
 	cr2_saved = cr2;
 	cr2 &= ~(UARTCR2_TIE | UARTCR2_TCIE | UARTCR2_TE |
 			UARTCR2_RIE | UARTCR2_RE);
-	writeb(cr2, sport->port.membase + UARTCR2);
+	pete_writeb("drivers/tty/serial/fsl_lpuart.c:1506", cr2, sport->port.membase + UARTCR2);
 
-	val = readb(sport->port.membase + UARTPFIFO);
-	writeb(val | UARTPFIFO_TXFE | UARTPFIFO_RXFE,
+	val = pete_readb("drivers/tty/serial/fsl_lpuart.c:1508", sport->port.membase + UARTPFIFO);
+	pete_writeb("drivers/tty/serial/fsl_lpuart.c:1509", val | UARTPFIFO_TXFE | UARTPFIFO_RXFE,
 			sport->port.membase + UARTPFIFO);
 
 	/* flush Tx and Rx FIFO */
-	writeb(UARTCFIFO_TXFLUSH | UARTCFIFO_RXFLUSH,
+	pete_writeb("drivers/tty/serial/fsl_lpuart.c:1513", UARTCFIFO_TXFLUSH | UARTCFIFO_RXFLUSH,
 			sport->port.membase + UARTCFIFO);
 
 	/* explicitly clear RDRF */
-	if (readb(sport->port.membase + UARTSR1) & UARTSR1_RDRF) {
-		readb(sport->port.membase + UARTDR);
-		writeb(UARTSFIFO_RXUF, sport->port.membase + UARTSFIFO);
+	if (pete_readb("drivers/tty/serial/fsl_lpuart.c:1517", sport->port.membase + UARTSR1) & UARTSR1_RDRF) {
+		pete_readb("drivers/tty/serial/fsl_lpuart.c:1518", sport->port.membase + UARTDR);
+		pete_writeb("drivers/tty/serial/fsl_lpuart.c:1519", UARTSFIFO_RXUF, sport->port.membase + UARTSFIFO);
 	}
 
-	writeb(0, sport->port.membase + UARTTWFIFO);
-	writeb(1, sport->port.membase + UARTRWFIFO);
+	pete_writeb("drivers/tty/serial/fsl_lpuart.c:1522", 0, sport->port.membase + UARTTWFIFO);
+	pete_writeb("drivers/tty/serial/fsl_lpuart.c:1523", 1, sport->port.membase + UARTRWFIFO);
 
 	/* Restore cr2 */
-	writeb(cr2_saved, sport->port.membase + UARTCR2);
+	pete_writeb("drivers/tty/serial/fsl_lpuart.c:1526", cr2_saved, sport->port.membase + UARTCR2);
 }
 
 static void lpuart_setup_watermark_enable(struct lpuart_port *sport)
@@ -1532,9 +1532,9 @@ static void lpuart_setup_watermark_enable(struct lpuart_port *sport)
 
 	lpuart_setup_watermark(sport);
 
-	cr2 = readb(sport->port.membase + UARTCR2);
+	cr2 = pete_readb("drivers/tty/serial/fsl_lpuart.c:1535", sport->port.membase + UARTCR2);
 	cr2 |= UARTCR2_RIE | UARTCR2_RE | UARTCR2_TE;
-	writeb(cr2, sport->port.membase + UARTCR2);
+	pete_writeb("drivers/tty/serial/fsl_lpuart.c:1537", cr2, sport->port.membase + UARTCR2);
 }
 
 static void lpuart32_setup_watermark(struct lpuart_port *sport)
@@ -1621,7 +1621,7 @@ static void lpuart_tx_dma_startup(struct lpuart_port *sport)
 		lpuart32_write(&sport->port,
 			       uartbaud | UARTBAUD_TDMAE, UARTBAUD);
 	} else {
-		writeb(readb(sport->port.membase + UARTCR5) |
+		pete_writeb("drivers/tty/serial/fsl_lpuart.c:1624", pete_readb("drivers/tty/serial/fsl_lpuart.c:1624", sport->port.membase + UARTCR5) |
 		       UARTCR5_TDMAS, sport->port.membase + UARTCR5);
 	}
 
@@ -1655,9 +1655,9 @@ static void lpuart_rx_dma_startup(struct lpuart_port *sport)
 	rx_dma_timer_init(sport);
 
 	if (sport->port.has_sysrq && !lpuart_is_32(sport)) {
-		cr3 = readb(sport->port.membase + UARTCR3);
+		cr3 = pete_readb("drivers/tty/serial/fsl_lpuart.c:1658", sport->port.membase + UARTCR3);
 		cr3 |= UARTCR3_FEIE;
-		writeb(cr3, sport->port.membase + UARTCR3);
+		pete_writeb("drivers/tty/serial/fsl_lpuart.c:1660", cr3, sport->port.membase + UARTCR3);
 	}
 
 	return;
@@ -1673,7 +1673,7 @@ static int lpuart_startup(struct uart_port *port)
 	unsigned char temp;
 
 	/* determine FIFO size and enable FIFO mode */
-	temp = readb(sport->port.membase + UARTPFIFO);
+	temp = pete_readb("drivers/tty/serial/fsl_lpuart.c:1676", sport->port.membase + UARTPFIFO);
 
 	sport->txfifo_size = UARTFIFO_DEPTH((temp >> UARTPFIFO_TXSIZE_OFF) &
 					    UARTPFIFO_FIFOSIZE_MASK);
@@ -1788,10 +1788,10 @@ static void lpuart_shutdown(struct uart_port *port)
 	spin_lock_irqsave(&port->lock, flags);
 
 	/* disable Rx/Tx and interrupts */
-	temp = readb(port->membase + UARTCR2);
+	temp = pete_readb("drivers/tty/serial/fsl_lpuart.c:1791", port->membase + UARTCR2);
 	temp &= ~(UARTCR2_TE | UARTCR2_RE |
 			UARTCR2_TIE | UARTCR2_TCIE | UARTCR2_RIE);
-	writeb(temp, port->membase + UARTCR2);
+	pete_writeb("drivers/tty/serial/fsl_lpuart.c:1794", temp, port->membase + UARTCR2);
 
 	spin_unlock_irqrestore(&port->lock, flags);
 
@@ -1829,12 +1829,12 @@ lpuart_set_termios(struct uart_port *port, struct ktermios *termios,
 	unsigned int old_csize = old ? old->c_cflag & CSIZE : CS8;
 	unsigned int sbr, brfa;
 
-	cr1 = old_cr1 = readb(sport->port.membase + UARTCR1);
-	old_cr2 = readb(sport->port.membase + UARTCR2);
-	cr3 = readb(sport->port.membase + UARTCR3);
-	cr4 = readb(sport->port.membase + UARTCR4);
-	bdh = readb(sport->port.membase + UARTBDH);
-	modem = readb(sport->port.membase + UARTMODEM);
+	cr1 = old_cr1 = pete_readb("drivers/tty/serial/fsl_lpuart.c:1832", sport->port.membase + UARTCR1);
+	old_cr2 = pete_readb("drivers/tty/serial/fsl_lpuart.c:1833", sport->port.membase + UARTCR2);
+	cr3 = pete_readb("drivers/tty/serial/fsl_lpuart.c:1834", sport->port.membase + UARTCR3);
+	cr4 = pete_readb("drivers/tty/serial/fsl_lpuart.c:1835", sport->port.membase + UARTCR4);
+	bdh = pete_readb("drivers/tty/serial/fsl_lpuart.c:1836", sport->port.membase + UARTBDH);
+	modem = pete_readb("drivers/tty/serial/fsl_lpuart.c:1837", sport->port.membase + UARTMODEM);
 	/*
 	 * only support CS8 and CS7, and for CS7 must enable PE.
 	 * supported mode:
@@ -1944,7 +1944,7 @@ lpuart_set_termios(struct uart_port *port, struct ktermios *termios,
 	lpuart_wait_bit_set(&sport->port, UARTSR1, UARTSR1_TC);
 
 	/* disable transmit and receive */
-	writeb(old_cr2 & ~(UARTCR2_TE | UARTCR2_RE),
+	pete_writeb("drivers/tty/serial/fsl_lpuart.c:1947", old_cr2 & ~(UARTCR2_TE | UARTCR2_RE),
 			sport->port.membase + UARTCR2);
 
 	sbr = sport->port.uartclk / (16 * baud);
@@ -1953,15 +1953,15 @@ lpuart_set_termios(struct uart_port *port, struct ktermios *termios,
 	bdh |= (sbr >> 8) & 0x1F;
 	cr4 &= ~UARTCR4_BRFA_MASK;
 	brfa &= UARTCR4_BRFA_MASK;
-	writeb(cr4 | brfa, sport->port.membase + UARTCR4);
-	writeb(bdh, sport->port.membase + UARTBDH);
-	writeb(sbr & 0xFF, sport->port.membase + UARTBDL);
-	writeb(cr3, sport->port.membase + UARTCR3);
-	writeb(cr1, sport->port.membase + UARTCR1);
-	writeb(modem, sport->port.membase + UARTMODEM);
+	pete_writeb("drivers/tty/serial/fsl_lpuart.c:1956", cr4 | brfa, sport->port.membase + UARTCR4);
+	pete_writeb("drivers/tty/serial/fsl_lpuart.c:1957", bdh, sport->port.membase + UARTBDH);
+	pete_writeb("drivers/tty/serial/fsl_lpuart.c:1958", sbr & 0xFF, sport->port.membase + UARTBDL);
+	pete_writeb("drivers/tty/serial/fsl_lpuart.c:1959", cr3, sport->port.membase + UARTCR3);
+	pete_writeb("drivers/tty/serial/fsl_lpuart.c:1960", cr1, sport->port.membase + UARTCR1);
+	pete_writeb("drivers/tty/serial/fsl_lpuart.c:1961", modem, sport->port.membase + UARTMODEM);
 
 	/* restore control register */
-	writeb(old_cr2, sport->port.membase + UARTCR2);
+	pete_writeb("drivers/tty/serial/fsl_lpuart.c:1964", old_cr2, sport->port.membase + UARTCR2);
 
 	if (old && sport->lpuart_dma_rx_use) {
 		if (!lpuart_start_rx_dma(sport))
@@ -2297,7 +2297,7 @@ static struct lpuart_port *lpuart_ports[UART_NR];
 static void lpuart_console_putchar(struct uart_port *port, int ch)
 {
 	lpuart_wait_bit_set(port, UARTSR1, UARTSR1_TDRE);
-	writeb(ch, port->membase + UARTDR);
+	pete_writeb("drivers/tty/serial/fsl_lpuart.c:2300", ch, port->membase + UARTDR);
 }
 
 static void lpuart32_console_putchar(struct uart_port *port, int ch)
@@ -2320,17 +2320,17 @@ lpuart_console_write(struct console *co, const char *s, unsigned int count)
 		spin_lock_irqsave(&sport->port.lock, flags);
 
 	/* first save CR2 and then disable interrupts */
-	cr2 = old_cr2 = readb(sport->port.membase + UARTCR2);
+	cr2 = old_cr2 = pete_readb("drivers/tty/serial/fsl_lpuart.c:2323", sport->port.membase + UARTCR2);
 	cr2 |= UARTCR2_TE | UARTCR2_RE;
 	cr2 &= ~(UARTCR2_TIE | UARTCR2_TCIE | UARTCR2_RIE);
-	writeb(cr2, sport->port.membase + UARTCR2);
+	pete_writeb("drivers/tty/serial/fsl_lpuart.c:2326", cr2, sport->port.membase + UARTCR2);
 
 	uart_console_write(&sport->port, s, count, lpuart_console_putchar);
 
 	/* wait for transmitter finish complete and restore CR2 */
 	lpuart_wait_bit_set(&sport->port, UARTSR1, UARTSR1_TC);
 
-	writeb(old_cr2, sport->port.membase + UARTCR2);
+	pete_writeb("drivers/tty/serial/fsl_lpuart.c:2333", old_cr2, sport->port.membase + UARTCR2);
 
 	if (locked)
 		spin_unlock_irqrestore(&sport->port.lock, flags);
@@ -2377,14 +2377,14 @@ lpuart_console_get_options(struct lpuart_port *sport, int *baud,
 	unsigned char cr, bdh, bdl, brfa;
 	unsigned int sbr, uartclk, baud_raw;
 
-	cr = readb(sport->port.membase + UARTCR2);
+	cr = pete_readb("drivers/tty/serial/fsl_lpuart.c:2380", sport->port.membase + UARTCR2);
 	cr &= UARTCR2_TE | UARTCR2_RE;
 	if (!cr)
 		return;
 
 	/* ok, the port was enabled */
 
-	cr = readb(sport->port.membase + UARTCR1);
+	cr = pete_readb("drivers/tty/serial/fsl_lpuart.c:2387", sport->port.membase + UARTCR1);
 
 	*parity = 'n';
 	if (cr & UARTCR1_PE) {
@@ -2399,13 +2399,13 @@ lpuart_console_get_options(struct lpuart_port *sport, int *baud,
 	else
 		*bits = 8;
 
-	bdh = readb(sport->port.membase + UARTBDH);
+	bdh = pete_readb("drivers/tty/serial/fsl_lpuart.c:2402", sport->port.membase + UARTBDH);
 	bdh &= UARTBDH_SBR_MASK;
-	bdl = readb(sport->port.membase + UARTBDL);
+	bdl = pete_readb("drivers/tty/serial/fsl_lpuart.c:2404", sport->port.membase + UARTBDL);
 	sbr = bdh;
 	sbr <<= 8;
 	sbr |= bdl;
-	brfa = readb(sport->port.membase + UARTCR4);
+	brfa = pete_readb("drivers/tty/serial/fsl_lpuart.c:2408", sport->port.membase + UARTCR4);
 	brfa &= UARTCR4_BRFA_MASK;
 
 	uartclk = lpuart_get_baud_clk_rate(sport);
@@ -2822,9 +2822,9 @@ static int __maybe_unused lpuart_suspend(struct device *dev)
 		lpuart32_write(&sport->port, temp, UARTCTRL);
 	} else {
 		/* disable Rx/Tx and interrupts */
-		temp = readb(sport->port.membase + UARTCR2);
+		temp = pete_readb("drivers/tty/serial/fsl_lpuart.c:2825", sport->port.membase + UARTCR2);
 		temp &= ~(UARTCR2_TE | UARTCR2_TIE | UARTCR2_TCIE);
-		writeb(temp, sport->port.membase + UARTCR2);
+		pete_writeb("drivers/tty/serial/fsl_lpuart.c:2827", temp, sport->port.membase + UARTCR2);
 	}
 
 	uart_suspend_port(&lpuart_reg, &sport->port);
@@ -2851,7 +2851,7 @@ static int __maybe_unused lpuart_suspend(struct device *dev)
 			lpuart32_write(&sport->port, temp & ~UARTBAUD_RDMAE,
 				       UARTBAUD);
 		} else {
-			writeb(readb(sport->port.membase + UARTCR5) &
+			pete_writeb("drivers/tty/serial/fsl_lpuart.c:2854", pete_readb("drivers/tty/serial/fsl_lpuart.c:2854", sport->port.membase + UARTCR5) &
 			       ~UARTCR5_RDMAS, sport->port.membase + UARTCR5);
 		}
 	}

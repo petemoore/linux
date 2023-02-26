@@ -453,12 +453,12 @@ static int amd8111e_restart(struct net_device *dev)
 	pete_writel("drivers/net/ethernet/amd/amd8111e.c:453", (u32)lp->tx_ring_dma_addr, mmio + XMT_RING_BASE_ADDR0);
 	pete_writel("drivers/net/ethernet/amd/amd8111e.c:454", (u32)lp->rx_ring_dma_addr, mmio + RCV_RING_BASE_ADDR0);
 
-	writew((u32)NUM_TX_RING_DR, mmio + XMT_RING_LEN0);
-	writew((u16)NUM_RX_RING_DR, mmio + RCV_RING_LEN0);
+	pete_writew("drivers/net/ethernet/amd/amd8111e.c:456", (u32)NUM_TX_RING_DR, mmio + XMT_RING_LEN0);
+	pete_writew("drivers/net/ethernet/amd/amd8111e.c:457", (u16)NUM_RX_RING_DR, mmio + RCV_RING_LEN0);
 
 	/* set default IPG to 96 */
-	writew((u32)DEFAULT_IPG, mmio + IPG);
-	writew((u32)(DEFAULT_IPG-IFS1_DELTA), mmio + IFS1);
+	pete_writew("drivers/net/ethernet/amd/amd8111e.c:460", (u32)DEFAULT_IPG, mmio + IPG);
+	pete_writew("drivers/net/ethernet/amd/amd8111e.c:461", (u32)(DEFAULT_IPG-IFS1_DELTA), mmio + IFS1);
 
 	if (lp->options & OPTION_JUMBO_ENABLE) {
 		pete_writel("drivers/net/ethernet/amd/amd8111e.c:464", (u32)VAL2|JUMBO, mmio + CMD3);
@@ -478,7 +478,7 @@ static int amd8111e_restart(struct net_device *dev)
 
 	/* Setting the MAC address to the device */
 	for (i = 0; i < ETH_ALEN; i++)
-		writeb(dev->dev_addr[i], mmio + PADR + i);
+		pete_writeb("drivers/net/ethernet/amd/amd8111e.c:481", dev->dev_addr[i], mmio + PADR + i);
 
 	/* Enable interrupt coalesce */
 	if (lp->options & OPTION_INTR_COAL_ENABLE) {
@@ -507,7 +507,7 @@ static void amd8111e_init_hw_default(struct amd8111e_priv *lp)
 	pete_writel("drivers/net/ethernet/amd/amd8111e.c:507", RUN, mmio + CMD0);
 
 	/* AUTOPOLL0 Register *//*TBD default value is 8100 in FPS */
-	writew( 0x8100 | lp->ext_phy_addr, mmio + AUTOPOLL0);
+	pete_writew("drivers/net/ethernet/amd/amd8111e.c:510",  0x8100 | lp->ext_phy_addr, mmio + AUTOPOLL0);
 
 	/* Clear RCV_RING_BASE_ADDR */
 	pete_writel("drivers/net/ethernet/amd/amd8111e.c:513", 0, mmio + RCV_RING_BASE_ADDR0);
@@ -563,7 +563,7 @@ static void amd8111e_init_hw_default(struct amd8111e_priv *lp)
 	pete_writel("drivers/net/ethernet/amd/amd8111e.c:563", 0x0, mmio + XMT_RING_LIMIT);
 
 	/* Clear MIB */
-	writew(MIB_CLEAR, mmio + MIB_ADDR);
+	pete_writew("drivers/net/ethernet/amd/amd8111e.c:566", MIB_CLEAR, mmio + MIB_ADDR);
 
 	/* Clear LARF */
 	amd8111e_writeq(*(u64 *)logic_filter, mmio + LADRF);
@@ -839,9 +839,9 @@ static int amd8111e_read_mib(void __iomem *mmio, u8 MIB_COUNTER)
 	unsigned  int data;
 	unsigned int repeat = REPEAT_CNT;
 
-	writew(MIB_RD_CMD | MIB_COUNTER, mmio + MIB_ADDR);
+	pete_writew("drivers/net/ethernet/amd/amd8111e.c:842", MIB_RD_CMD | MIB_COUNTER, mmio + MIB_ADDR);
 	do {
-		status = readw(mmio + MIB_ADDR);
+		status = pete_readw("drivers/net/ethernet/amd/amd8111e.c:844", mmio + MIB_ADDR);
 		udelay(2);	/* controller takes MAX 2 us to get mib data */
 	}
 	while (--repeat && (status & MIB_CMD_ACTIVE));
@@ -940,7 +940,7 @@ static struct net_device_stats *amd8111e_get_stats(struct net_device *dev)
 		amd8111e_read_mib(mmio, xmt_late_collision);
 
 	/* Reset the mibs for collecting new statistics */
-	/* writew(MIB_CLEAR, mmio + MIB_ADDR);*/
+	/* pete_writew("drivers/net/ethernet/amd/amd8111e.c:943", MIB_CLEAR, mmio + MIB_ADDR);*/
 
 	spin_unlock_irqrestore(&lp->lock, flags);
 
@@ -1504,7 +1504,7 @@ static int amd8111e_set_mac_address(struct net_device *dev, void *p)
 	spin_lock_irq(&lp->lock);
 	/* Setting the MAC address to the device */
 	for (i = 0; i < ETH_ALEN; i++)
-		writeb(dev->dev_addr[i], lp->mmio + PADR + i);
+		pete_writeb("drivers/net/ethernet/amd/amd8111e.c:1507", dev->dev_addr[i], lp->mmio + PADR + i);
 
 	spin_unlock_irq(&lp->lock);
 
@@ -1692,8 +1692,8 @@ static void amd8111e_config_ipg(struct timer_list *t)
 			tmp_ipg = ipg_data->ipg;
 			ipg_data->ipg_state = SSTATE;
 		}
-		writew((u32)tmp_ipg, mmio + IPG);
-		writew((u32)(tmp_ipg - IFS1_DELTA), mmio + IFS1);
+		pete_writew("drivers/net/ethernet/amd/amd8111e.c:1695", (u32)tmp_ipg, mmio + IPG);
+		pete_writew("drivers/net/ethernet/amd/amd8111e.c:1696", (u32)(tmp_ipg - IFS1_DELTA), mmio + IFS1);
 	}
 	mod_timer(&lp->ipg_data.ipg_timer, jiffies + IPG_CONVERGE_JIFFIES);
 	return;
@@ -1809,7 +1809,7 @@ static int amd8111e_probe_one(struct pci_dev *pdev,
 
 	/* Initializing MAC address */
 	for (i = 0; i < ETH_ALEN; i++)
-		dev->dev_addr[i] = readb(lp->mmio + PADR + i);
+		dev->dev_addr[i] = pete_readb("drivers/net/ethernet/amd/amd8111e.c:1812", lp->mmio + PADR + i);
 
 	/* Setting user defined parametrs */
 	lp->ext_phy_option = speed_duplex[card_idx];

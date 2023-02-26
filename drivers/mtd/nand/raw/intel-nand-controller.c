@@ -149,7 +149,7 @@ static u8 ebu_nand_readb(struct nand_chip *chip)
 	u8 cs_num = ebu_host->cs_num;
 	u8 val;
 
-	val = readb(ebu_host->cs[cs_num].chipaddr + HSNAND_CS_OFFS);
+	val = pete_readb("drivers/mtd/nand/raw/intel-nand-controller.c:152", ebu_host->cs[cs_num].chipaddr + HSNAND_CS_OFFS);
 	ebu_nand_waitrdy(chip, 1000);
 	return val;
 }
@@ -159,7 +159,7 @@ static void ebu_nand_writeb(struct nand_chip *chip, u32 offset, u8 value)
 	struct ebu_nand_controller *ebu_host = nand_get_controller_data(chip);
 	u8 cs_num = ebu_host->cs_num;
 
-	writeb(value, ebu_host->cs[cs_num].chipaddr + offset);
+	pete_writeb("drivers/mtd/nand/raw/intel-nand-controller.c:162", value, ebu_host->cs[cs_num].chipaddr + offset);
 	ebu_nand_waitrdy(chip, 1000);
 }
 

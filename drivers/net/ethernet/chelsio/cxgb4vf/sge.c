@@ -1015,7 +1015,7 @@ static inline void ring_tx_db(struct adapter *adapter, struct sge_txq *tq,
 				 * doesn't understand the endian swizzling
 				 * going on
 				 */
-				writeq((__force u64)*src, dst);
+				pete_writeq("drivers/net/ethernet/chelsio/cxgb4vf/sge.c:1018", (__force u64)*src, dst);
 				src++;
 				dst++;
 				count--;

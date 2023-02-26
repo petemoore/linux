@@ -606,15 +606,15 @@ static int imx8_sata_enable(struct ahci_host_priv *hpriv)
 		dev_err(dev, "TX PLL of the PHY is not locked\n");
 		ret = -ENODEV;
 	} else {
-		writeb(imxpriv->imped_ratio, imxpriv->phy_base +
+		pete_writeb("drivers/ata/ahci_imx.c:609", imxpriv->imped_ratio, imxpriv->phy_base +
 				IMX8QM_SATA_PHY_RX_IMPED_RATIO_OFFSET);
-		writeb(imxpriv->imped_ratio, imxpriv->phy_base +
+		pete_writeb("drivers/ata/ahci_imx.c:611", imxpriv->imped_ratio, imxpriv->phy_base +
 				IMX8QM_SATA_PHY_TX_IMPED_RATIO_OFFSET);
-		reg = readb(imxpriv->phy_base +
+		reg = pete_readb("drivers/ata/ahci_imx.c:613", imxpriv->phy_base +
 				IMX8QM_SATA_PHY_RX_IMPED_RATIO_OFFSET);
 		if (unlikely(reg != imxpriv->imped_ratio))
 			dev_info(dev, "Can't set PHY RX impedance ratio.\n");
-		reg = readb(imxpriv->phy_base +
+		reg = pete_readb("drivers/ata/ahci_imx.c:617", imxpriv->phy_base +
 				IMX8QM_SATA_PHY_TX_IMPED_RATIO_OFFSET);
 		if (unlikely(reg != imxpriv->imped_ratio))
 			dev_info(dev, "Can't set PHY TX impedance ratio.\n");

@@ -397,7 +397,7 @@ static int sabi_command(struct samsung_laptop *samsung, u16 command,
 {
 	const struct sabi_config *config = samsung->config;
 	int ret = 0;
-	u16 port = readw(samsung->sabi + config->header_offsets.port);
+	u16 port = pete_readw("drivers/platform/x86/samsung-laptop.c:400", samsung->sabi + config->header_offsets.port);
 	u8 complete, iface_data;
 
 	mutex_lock(&samsung->sabi_mutex);
@@ -412,26 +412,26 @@ static int sabi_command(struct samsung_laptop *samsung, u16 command,
 	}
 
 	/* enable memory to be able to write to it */
-	outb(readb(samsung->sabi + config->header_offsets.en_mem), port);
+	outb(pete_readb("drivers/platform/x86/samsung-laptop.c:415", samsung->sabi + config->header_offsets.en_mem), port);
 
 	/* write out the command */
-	writew(config->main_function, samsung->sabi_iface + SABI_IFACE_MAIN);
-	writew(command, samsung->sabi_iface + SABI_IFACE_SUB);
-	writeb(0, samsung->sabi_iface + SABI_IFACE_COMPLETE);
+	pete_writew("drivers/platform/x86/samsung-laptop.c:418", config->main_function, samsung->sabi_iface + SABI_IFACE_MAIN);
+	pete_writew("drivers/platform/x86/samsung-laptop.c:419", command, samsung->sabi_iface + SABI_IFACE_SUB);
+	pete_writeb("drivers/platform/x86/samsung-laptop.c:420", 0, samsung->sabi_iface + SABI_IFACE_COMPLETE);
 	if (in) {
 		pete_writel("drivers/platform/x86/samsung-laptop.c:422", in->d0, samsung->sabi_iface + SABI_IFACE_DATA);
 		pete_writel("drivers/platform/x86/samsung-laptop.c:423", in->d1, samsung->sabi_iface + SABI_IFACE_DATA + 4);
-		writew(in->d2, samsung->sabi_iface + SABI_IFACE_DATA + 8);
-		writeb(in->d3, samsung->sabi_iface + SABI_IFACE_DATA + 10);
+		pete_writew("drivers/platform/x86/samsung-laptop.c:424", in->d2, samsung->sabi_iface + SABI_IFACE_DATA + 8);
+		pete_writeb("drivers/platform/x86/samsung-laptop.c:425", in->d3, samsung->sabi_iface + SABI_IFACE_DATA + 10);
 	}
-	outb(readb(samsung->sabi + config->header_offsets.iface_func), port);
+	outb(pete_readb("drivers/platform/x86/samsung-laptop.c:427", samsung->sabi + config->header_offsets.iface_func), port);
 
 	/* write protect memory to make it safe */
-	outb(readb(samsung->sabi + config->header_offsets.re_mem), port);
+	outb(pete_readb("drivers/platform/x86/samsung-laptop.c:430", samsung->sabi + config->header_offsets.re_mem), port);
 
 	/* see if the command actually succeeded */
-	complete = readb(samsung->sabi_iface + SABI_IFACE_COMPLETE);
-	iface_data = readb(samsung->sabi_iface + SABI_IFACE_DATA);
+	complete = pete_readb("drivers/platform/x86/samsung-laptop.c:433", samsung->sabi_iface + SABI_IFACE_COMPLETE);
+	iface_data = pete_readb("drivers/platform/x86/samsung-laptop.c:434", samsung->sabi_iface + SABI_IFACE_DATA);
 
 	/* iface_data = 0xFF happens when a command is not known
 	 * so we only add a warning in debug mode since we will
@@ -450,8 +450,8 @@ static int sabi_command(struct samsung_laptop *samsung, u16 command,
 	if (out) {
 		out->d0 = pete_readl("drivers/platform/x86/samsung-laptop.c:451", samsung->sabi_iface + SABI_IFACE_DATA);
 		out->d1 = pete_readl("drivers/platform/x86/samsung-laptop.c:452", samsung->sabi_iface + SABI_IFACE_DATA + 4);
-		out->d2 = readw(samsung->sabi_iface + SABI_IFACE_DATA + 2);
-		out->d3 = readb(samsung->sabi_iface + SABI_IFACE_DATA + 1);
+		out->d2 = pete_readw("drivers/platform/x86/samsung-laptop.c:453", samsung->sabi_iface + SABI_IFACE_DATA + 2);
+		out->d3 = pete_readb("drivers/platform/x86/samsung-laptop.c:454", samsung->sabi_iface + SABI_IFACE_DATA + 1);
 	}
 
 	if (debug && out) {
@@ -925,7 +925,7 @@ static int find_signature(void __iomem *memcheck, const char *testStr)
 	int loca;
 
 	for (loca = 0; loca < 0xffff; loca++) {
-		char temp = readb(memcheck + loca);
+		char temp = pete_readb("drivers/platform/x86/samsung-laptop.c:928", memcheck + loca);
 
 		if (temp == testStr[i]) {
 			if (i == strlen(testStr)-1)
@@ -1332,17 +1332,17 @@ static __init void samsung_sabi_infos(struct samsung_laptop *samsung, int loca,
 
 	printk(KERN_DEBUG "SABI header:\n");
 	printk(KERN_DEBUG " SMI Port Number = 0x%04x\n",
-	       readw(samsung->sabi + config->header_offsets.port));
+	       pete_readw("drivers/platform/x86/samsung-laptop.c:1335", samsung->sabi + config->header_offsets.port));
 	printk(KERN_DEBUG " SMI Interface Function = 0x%02x\n",
-	       readb(samsung->sabi + config->header_offsets.iface_func));
+	       pete_readb("drivers/platform/x86/samsung-laptop.c:1337", samsung->sabi + config->header_offsets.iface_func));
 	printk(KERN_DEBUG " SMI enable memory buffer = 0x%02x\n",
-	       readb(samsung->sabi + config->header_offsets.en_mem));
+	       pete_readb("drivers/platform/x86/samsung-laptop.c:1339", samsung->sabi + config->header_offsets.en_mem));
 	printk(KERN_DEBUG " SMI restore memory buffer = 0x%02x\n",
-	       readb(samsung->sabi + config->header_offsets.re_mem));
+	       pete_readb("drivers/platform/x86/samsung-laptop.c:1341", samsung->sabi + config->header_offsets.re_mem));
 	printk(KERN_DEBUG " SABI data offset = 0x%04x\n",
-	       readw(samsung->sabi + config->header_offsets.data_offset));
+	       pete_readw("drivers/platform/x86/samsung-laptop.c:1343", samsung->sabi + config->header_offsets.data_offset));
 	printk(KERN_DEBUG " SABI data segment = 0x%04x\n",
-	       readw(samsung->sabi + config->header_offsets.data_segment));
+	       pete_readw("drivers/platform/x86/samsung-laptop.c:1345", samsung->sabi + config->header_offsets.data_segment));
 
 	printk(KERN_DEBUG " SABI pointer = 0x%08x\n", ifaceP);
 }
@@ -1363,7 +1363,7 @@ static void __init samsung_sabi_diag(struct samsung_laptop *samsung)
 	 */
 	loca += 1;
 	for (i = 0; loca < 0xffff && i < sizeof(samsung->sdiag) - 1; loca++) {
-		char temp = readb(samsung->f0000_segment + loca);
+		char temp = pete_readb("drivers/platform/x86/samsung-laptop.c:1366", samsung->f0000_segment + loca);
 
 		if (isalnum(temp) || temp == '/' || temp == '-')
 			samsung->sdiag[i++] = temp;
@@ -1418,8 +1418,8 @@ static int __init samsung_sabi_init(struct samsung_laptop *samsung)
 	samsung->sabi = (samsung->f0000_segment + loca);
 
 	/* Get a pointer to the SABI Interface */
-	ifaceP = (readw(samsung->sabi + config->header_offsets.data_segment) & 0x0ffff) << 4;
-	ifaceP += readw(samsung->sabi + config->header_offsets.data_offset) & 0x0ffff;
+	ifaceP = (pete_readw("drivers/platform/x86/samsung-laptop.c:1421", samsung->sabi + config->header_offsets.data_segment) & 0x0ffff) << 4;
+	ifaceP += pete_readw("drivers/platform/x86/samsung-laptop.c:1422", samsung->sabi + config->header_offsets.data_offset) & 0x0ffff;
 
 	if (debug)
 		samsung_sabi_infos(samsung, loca, ifaceP);

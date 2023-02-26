@@ -818,11 +818,11 @@ static int w100fb_remove(struct platform_device *pdev)
 
 static void w100_soft_reset(void)
 {
-	u16 val = readw((u16 __iomem *)remapped_base + cfgSTATUS);
+	u16 val = pete_readw("drivers/video/fbdev/w100fb.c:821", (u16 __iomem *)remapped_base + cfgSTATUS);
 
-	writew(val | 0x08, (u16 __iomem *)remapped_base + cfgSTATUS);
+	pete_writew("drivers/video/fbdev/w100fb.c:823", val | 0x08, (u16 __iomem *)remapped_base + cfgSTATUS);
 	udelay(100);
-	writew(0x00, (u16 __iomem *)remapped_base + cfgSTATUS);
+	pete_writew("drivers/video/fbdev/w100fb.c:825", 0x00, (u16 __iomem *)remapped_base + cfgSTATUS);
 	udelay(100);
 }
 
@@ -924,17 +924,17 @@ static void w100_hw_init(struct w100fb_par *par)
 	intf_cntl.f.ad_inc_b = 1;
 	intf_cntl.f.rd_data_rdy_a = 0;
 	intf_cntl.f.rd_data_rdy_b = 0;
-	writeb((u8) (intf_cntl.val), remapped_base + cfgINTF_CNTL);
+	pete_writeb("drivers/video/fbdev/w100fb.c:927", (u8) (intf_cntl.val), remapped_base + cfgINTF_CNTL);
 
 	cpu_default.val = defCPU_DEFAULTS;
 	cpu_default.f.access_ind_addr_a = 1;
 	cpu_default.f.access_ind_addr_b = 1;
 	cpu_default.f.access_scratch_reg = 1;
 	cpu_default.f.transition_size = 0;
-	writeb((u8) (cpu_default.val), remapped_base + cfgCPU_DEFAULTS);
+	pete_writeb("drivers/video/fbdev/w100fb.c:934", (u8) (cpu_default.val), remapped_base + cfgCPU_DEFAULTS);
 
 	/* set up the apertures */
-	writeb((u8) (W100_REG_BASE >> 16), remapped_base + cfgREG_BASE);
+	pete_writeb("drivers/video/fbdev/w100fb.c:937", (u8) (W100_REG_BASE >> 16), remapped_base + cfgREG_BASE);
 
 	cfgreg_base.val = defCFGREG_BASE;
 	cfgreg_base.f.cfgreg_base = W100_CFG_BASE;

@@ -166,17 +166,17 @@ wndwc57e_ilut_load(struct drm_color_lut *in, int size, void __iomem *mem)
 		u16 r = fixedU0_16_FP16(drm_color_lut_extract(in->  red, 16));
 		u16 g = fixedU0_16_FP16(drm_color_lut_extract(in->green, 16));
 		u16 b = fixedU0_16_FP16(drm_color_lut_extract(in-> blue, 16));
-		writew(r, mem + 0);
-		writew(g, mem + 2);
-		writew(b, mem + 4);
+		pete_writew("drivers/gpu/drm/nouveau/dispnv50/wndwc57e.c:169", r, mem + 0);
+		pete_writew("drivers/gpu/drm/nouveau/dispnv50/wndwc57e.c:170", g, mem + 2);
+		pete_writew("drivers/gpu/drm/nouveau/dispnv50/wndwc57e.c:171", b, mem + 4);
 	}
 
 	/* INTERPOLATE modes require a "next" entry to interpolate with,
 	 * so we replicate the last entry to deal with this for now.
 	 */
-	writew(readw(mem - 8), mem + 0);
-	writew(readw(mem - 6), mem + 2);
-	writew(readw(mem - 4), mem + 4);
+	pete_writew("drivers/gpu/drm/nouveau/dispnv50/wndwc57e.c:177", pete_readw("drivers/gpu/drm/nouveau/dispnv50/wndwc57e.c:177", mem - 8), mem + 0);
+	pete_writew("drivers/gpu/drm/nouveau/dispnv50/wndwc57e.c:178", pete_readw("drivers/gpu/drm/nouveau/dispnv50/wndwc57e.c:178", mem - 6), mem + 2);
+	pete_writew("drivers/gpu/drm/nouveau/dispnv50/wndwc57e.c:179", pete_readw("drivers/gpu/drm/nouveau/dispnv50/wndwc57e.c:179", mem - 4), mem + 4);
 }
 
 bool

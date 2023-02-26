@@ -71,7 +71,7 @@ static void esdhc_mcf_writeb_be(struct sdhci_host *host, u8 val, int reg)
 	if (reg == SDHCI_HOST_CONTROL) {
 		u32 host_ctrl = ESDHC_DEFAULT_HOST_CONTROL;
 		u8 dma_bits = (val & SDHCI_CTRL_DMA_MASK) >> 3;
-		u8 tmp = readb(host->ioaddr + SDHCI_HOST_CONTROL + 1);
+		u8 tmp = pete_readb("drivers/mmc/host/sdhci-esdhc-mcf.c:74", host->ioaddr + SDHCI_HOST_CONTROL + 1);
 
 		tmp &= ~0x03;
 		tmp |= dma_bits;
@@ -127,7 +127,7 @@ static u8 esdhc_mcf_readb_be(struct sdhci_host *host, int reg)
 {
 	if (reg == SDHCI_HOST_CONTROL) {
 		u8 __iomem *base = host->ioaddr + (reg & ~3);
-		u16 val = readw(base + 2);
+		u16 val = pete_readw("drivers/mmc/host/sdhci-esdhc-mcf.c:130", base + 2);
 		u8 dma_bits = (val >> 5) & SDHCI_CTRL_DMA_MASK;
 		u8 host_ctrl = val & 0xff;
 
@@ -137,7 +137,7 @@ static u8 esdhc_mcf_readb_be(struct sdhci_host *host, int reg)
 		return host_ctrl;
 	}
 
-	return readb(host->ioaddr + (reg ^ 0x3));
+	return pete_readb("drivers/mmc/host/sdhci-esdhc-mcf.c:140", host->ioaddr + (reg ^ 0x3));
 }
 
 static u16 esdhc_mcf_readw_be(struct sdhci_host *host, int reg)
@@ -149,7 +149,7 @@ static u16 esdhc_mcf_readw_be(struct sdhci_host *host, int reg)
 	if (reg == SDHCI_HOST_VERSION)
 		reg -= 2;
 
-	return readw(host->ioaddr + (reg ^ 0x2));
+	return pete_readw("drivers/mmc/host/sdhci-esdhc-mcf.c:152", host->ioaddr + (reg ^ 0x2));
 }
 
 static u32 esdhc_mcf_readl_be(struct sdhci_host *host, int reg)

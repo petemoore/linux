@@ -151,7 +151,7 @@ static void ata_outb(struct ata_host *host, u8 addr, void __iomem *reg)
 	struct s3c_ide_info *info = host->private_data;
 
 	wait_for_host_ready(info);
-	writeb(addr, reg);
+	pete_writeb("drivers/ata/pata_samsung_cf.c:154", addr, reg);
 }
 
 /*
@@ -163,9 +163,9 @@ static u8 ata_inb(struct ata_host *host, void __iomem *reg)
 	u8 temp;
 
 	wait_for_host_ready(info);
-	(void) readb(reg);
+	(void) pete_readb("drivers/ata/pata_samsung_cf.c:166", reg);
 	wait_for_host_ready(info);
-	temp = readb(info->ide_addr + S3C_ATA_PIO_RDATA);
+	temp = pete_readb("drivers/ata/pata_samsung_cf.c:168", info->ide_addr + S3C_ATA_PIO_RDATA);
 	return temp;
 }
 
@@ -274,15 +274,15 @@ static unsigned int pata_s3c_data_xfer(struct ata_queued_cmd *qc,
 	if (rw == READ)
 		for (i = 0; i < words; i++, data_ptr++) {
 			wait_for_host_ready(info);
-			(void) readw(data_addr);
+			(void) pete_readw("drivers/ata/pata_samsung_cf.c:277", data_addr);
 			wait_for_host_ready(info);
-			*data_ptr = readw(info->ide_addr
+			*data_ptr = pete_readw("drivers/ata/pata_samsung_cf.c:279", info->ide_addr
 					+ S3C_ATA_PIO_RDATA);
 		}
 	else
 		for (i = 0; i < words; i++, data_ptr++) {
 			wait_for_host_ready(info);
-			writew(*data_ptr, data_addr);
+			pete_writew("drivers/ata/pata_samsung_cf.c:285", *data_ptr, data_addr);
 		}
 
 	if (buflen & 0x01)

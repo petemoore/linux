@@ -36,12 +36,12 @@ static void early_vga_write(struct console *con, const char *str, unsigned n)
 			/* scroll 1 line up */
 			for (k = 1, j = 0; k < max_ypos; k++, j++) {
 				for (i = 0; i < max_xpos; i++) {
-					writew(readw(VGABASE+2*(max_xpos*k+i)),
+					pete_writew("arch/x86/kernel/early_printk.c:39", pete_readw("arch/x86/kernel/early_printk.c:39", VGABASE+2*(max_xpos*k+i)),
 					       VGABASE + 2*(max_xpos*j + i));
 				}
 			}
 			for (i = 0; i < max_xpos; i++)
-				writew(0x720, VGABASE + 2*(max_xpos*j + i));
+				pete_writew("arch/x86/kernel/early_printk.c:44", 0x720, VGABASE + 2*(max_xpos*j + i));
 			current_ypos = max_ypos-1;
 		}
 #ifdef CONFIG_KGDB_KDB
@@ -56,7 +56,7 @@ static void early_vga_write(struct console *con, const char *str, unsigned n)
 			current_xpos = 0;
 			current_ypos++;
 		} else if (c != '\r')  {
-			writew(((0x7 << 8) | (unsigned short) c),
+			pete_writew("arch/x86/kernel/early_printk.c:59", ((0x7 << 8) | (unsigned short) c),
 			       VGABASE + 2*(max_xpos*current_ypos +
 						current_xpos++));
 			if (current_xpos >= max_xpos) {

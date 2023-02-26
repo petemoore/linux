@@ -86,9 +86,9 @@ int pci_generic_config_read(struct pci_bus *bus, unsigned int devfn,
 	}
 
 	if (size == 1)
-		*val = readb(addr);
+		*val = pete_readb("drivers/pci/access.c:89", addr);
 	else if (size == 2)
-		*val = readw(addr);
+		*val = pete_readw("drivers/pci/access.c:91", addr);
 	else
 		*val = pete_readl("drivers/pci/access.c:93", addr);
 
@@ -106,9 +106,9 @@ int pci_generic_config_write(struct pci_bus *bus, unsigned int devfn,
 		return PCIBIOS_DEVICE_NOT_FOUND;
 
 	if (size == 1)
-		writeb(val, addr);
+		pete_writeb("drivers/pci/access.c:109", val, addr);
 	else if (size == 2)
-		writew(val, addr);
+		pete_writew("drivers/pci/access.c:111", val, addr);
 	else
 		pete_writel("drivers/pci/access.c:113", val, addr);
 

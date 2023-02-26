@@ -350,8 +350,8 @@ static int dual_channel_active(void __iomem *mch_window)
 	int    dualch;
 
 	for (dualch = 1, row = 0; dualch && (row < 4); row++) {
-		drb[row][0] = readb(mch_window + I82975X_DRB + row);
-		drb[row][1] = readb(mch_window + I82975X_DRB + row + 0x80);
+		drb[row][0] = pete_readb("drivers/edac/i82975x_edac.c:353", mch_window + I82975X_DRB + row);
+		drb[row][1] = pete_readb("drivers/edac/i82975x_edac.c:354", mch_window + I82975X_DRB + row + 0x80);
 		dualch = dualch && (drb[row][0] == drb[row][1]);
 	}
 	return dualch;
@@ -381,7 +381,7 @@ static void i82975x_init_csrows(struct mem_ctl_info *mci,
 	for (index = 0; index < mci->nr_csrows; index++) {
 		csrow = mci->csrows[index];
 
-		value = readb(mch_window + I82975X_DRB + index +
+		value = pete_readb("drivers/edac/i82975x_edac.c:384", mch_window + I82975X_DRB + index +
 					((index >= 4) ? 0x80 : 0));
 		cumul_size = value;
 		cumul_size <<= (I82975X_DRB_SHIFT - PAGE_SHIFT);
@@ -494,14 +494,14 @@ static int i82975x_probe1(struct pci_dev *pdev, int dev_idx)
 	i82975x_printk(KERN_INFO, "MCHBAR real = %0x, remapped = %p\n",
 					mchbar, mch_window);
 
-	c0drb[0] = readb(mch_window + I82975X_DRB_CH0R0);
-	c0drb[1] = readb(mch_window + I82975X_DRB_CH0R1);
-	c0drb[2] = readb(mch_window + I82975X_DRB_CH0R2);
-	c0drb[3] = readb(mch_window + I82975X_DRB_CH0R3);
-	c1drb[0] = readb(mch_window + I82975X_DRB_CH1R0);
-	c1drb[1] = readb(mch_window + I82975X_DRB_CH1R1);
-	c1drb[2] = readb(mch_window + I82975X_DRB_CH1R2);
-	c1drb[3] = readb(mch_window + I82975X_DRB_CH1R3);
+	c0drb[0] = pete_readb("drivers/edac/i82975x_edac.c:497", mch_window + I82975X_DRB_CH0R0);
+	c0drb[1] = pete_readb("drivers/edac/i82975x_edac.c:498", mch_window + I82975X_DRB_CH0R1);
+	c0drb[2] = pete_readb("drivers/edac/i82975x_edac.c:499", mch_window + I82975X_DRB_CH0R2);
+	c0drb[3] = pete_readb("drivers/edac/i82975x_edac.c:500", mch_window + I82975X_DRB_CH0R3);
+	c1drb[0] = pete_readb("drivers/edac/i82975x_edac.c:501", mch_window + I82975X_DRB_CH1R0);
+	c1drb[1] = pete_readb("drivers/edac/i82975x_edac.c:502", mch_window + I82975X_DRB_CH1R1);
+	c1drb[2] = pete_readb("drivers/edac/i82975x_edac.c:503", mch_window + I82975X_DRB_CH1R2);
+	c1drb[3] = pete_readb("drivers/edac/i82975x_edac.c:504", mch_window + I82975X_DRB_CH1R3);
 	i82975x_printk(KERN_INFO, "DRBCH0R0 = 0x%02x\n", c0drb[0]);
 	i82975x_printk(KERN_INFO, "DRBCH0R1 = 0x%02x\n", c0drb[1]);
 	i82975x_printk(KERN_INFO, "DRBCH0R2 = 0x%02x\n", c0drb[2]);
@@ -523,9 +523,9 @@ static int i82975x_probe1(struct pci_dev *pdev, int dev_idx)
 				"ECC enabled" : "ECC disabled");
 
 	i82975x_printk(KERN_INFO, "C0 BNKARC = %0x\n",
-		readw(mch_window + I82975X_C0BNKARC));
+		pete_readw("drivers/edac/i82975x_edac.c:526", mch_window + I82975X_C0BNKARC));
 	i82975x_printk(KERN_INFO, "C1 BNKARC = %0x\n",
-		readw(mch_window + I82975X_C1BNKARC));
+		pete_readw("drivers/edac/i82975x_edac.c:528", mch_window + I82975X_C1BNKARC));
 	i82975x_print_dram_timings(mch_window);
 	goto fail1;
 #endif

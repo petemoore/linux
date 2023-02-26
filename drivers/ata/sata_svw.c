@@ -127,12 +127,12 @@ static int k2_sata_softreset(struct ata_link *link,
 	u8 dmactl;
 	void __iomem *mmio = link->ap->ioaddr.bmdma_addr;
 
-	dmactl = readb(mmio + ATA_DMA_CMD);
+	dmactl = pete_readb("drivers/ata/sata_svw.c:130", mmio + ATA_DMA_CMD);
 
 	/* Clear the start bit */
 	if (dmactl & ATA_DMA_START) {
 		dmactl &= ~ATA_DMA_START;
-		writeb(dmactl, mmio + ATA_DMA_CMD);
+		pete_writeb("drivers/ata/sata_svw.c:135", dmactl, mmio + ATA_DMA_CMD);
 	}
 
 	return ata_sff_softreset(link, class, deadline);
@@ -144,12 +144,12 @@ static int k2_sata_hardreset(struct ata_link *link,
 	u8 dmactl;
 	void __iomem *mmio = link->ap->ioaddr.bmdma_addr;
 
-	dmactl = readb(mmio + ATA_DMA_CMD);
+	dmactl = pete_readb("drivers/ata/sata_svw.c:147", mmio + ATA_DMA_CMD);
 
 	/* Clear the start bit */
 	if (dmactl & ATA_DMA_START) {
 		dmactl &= ~ATA_DMA_START;
-		writeb(dmactl, mmio + ATA_DMA_CMD);
+		pete_writeb("drivers/ata/sata_svw.c:152", dmactl, mmio + ATA_DMA_CMD);
 	}
 
 	return sata_sff_hardreset(link, class, deadline);
@@ -161,31 +161,31 @@ static void k2_sata_tf_load(struct ata_port *ap, const struct ata_taskfile *tf)
 	unsigned int is_addr = tf->flags & ATA_TFLAG_ISADDR;
 
 	if (tf->ctl != ap->last_ctl) {
-		writeb(tf->ctl, ioaddr->ctl_addr);
+		pete_writeb("drivers/ata/sata_svw.c:164", tf->ctl, ioaddr->ctl_addr);
 		ap->last_ctl = tf->ctl;
 		ata_wait_idle(ap);
 	}
 	if (is_addr && (tf->flags & ATA_TFLAG_LBA48)) {
-		writew(tf->feature | (((u16)tf->hob_feature) << 8),
+		pete_writew("drivers/ata/sata_svw.c:169", tf->feature | (((u16)tf->hob_feature) << 8),
 		       ioaddr->feature_addr);
-		writew(tf->nsect | (((u16)tf->hob_nsect) << 8),
+		pete_writew("drivers/ata/sata_svw.c:171", tf->nsect | (((u16)tf->hob_nsect) << 8),
 		       ioaddr->nsect_addr);
-		writew(tf->lbal | (((u16)tf->hob_lbal) << 8),
+		pete_writew("drivers/ata/sata_svw.c:173", tf->lbal | (((u16)tf->hob_lbal) << 8),
 		       ioaddr->lbal_addr);
-		writew(tf->lbam | (((u16)tf->hob_lbam) << 8),
+		pete_writew("drivers/ata/sata_svw.c:175", tf->lbam | (((u16)tf->hob_lbam) << 8),
 		       ioaddr->lbam_addr);
-		writew(tf->lbah | (((u16)tf->hob_lbah) << 8),
+		pete_writew("drivers/ata/sata_svw.c:177", tf->lbah | (((u16)tf->hob_lbah) << 8),
 		       ioaddr->lbah_addr);
 	} else if (is_addr) {
-		writew(tf->feature, ioaddr->feature_addr);
-		writew(tf->nsect, ioaddr->nsect_addr);
-		writew(tf->lbal, ioaddr->lbal_addr);
-		writew(tf->lbam, ioaddr->lbam_addr);
-		writew(tf->lbah, ioaddr->lbah_addr);
+		pete_writew("drivers/ata/sata_svw.c:180", tf->feature, ioaddr->feature_addr);
+		pete_writew("drivers/ata/sata_svw.c:181", tf->nsect, ioaddr->nsect_addr);
+		pete_writew("drivers/ata/sata_svw.c:182", tf->lbal, ioaddr->lbal_addr);
+		pete_writew("drivers/ata/sata_svw.c:183", tf->lbam, ioaddr->lbam_addr);
+		pete_writew("drivers/ata/sata_svw.c:184", tf->lbah, ioaddr->lbah_addr);
 	}
 
 	if (tf->flags & ATA_TFLAG_DEVICE)
-		writeb(tf->device, ioaddr->device_addr);
+		pete_writeb("drivers/ata/sata_svw.c:188", tf->device, ioaddr->device_addr);
 
 	ata_wait_idle(ap);
 }
@@ -197,12 +197,12 @@ static void k2_sata_tf_read(struct ata_port *ap, struct ata_taskfile *tf)
 	u16 nsect, lbal, lbam, lbah, error;
 
 	tf->status = k2_stat_check_status(ap);
-	tf->device = readw(ioaddr->device_addr);
-	error = readw(ioaddr->error_addr);
-	nsect = readw(ioaddr->nsect_addr);
-	lbal = readw(ioaddr->lbal_addr);
-	lbam = readw(ioaddr->lbam_addr);
-	lbah = readw(ioaddr->lbah_addr);
+	tf->device = pete_readw("drivers/ata/sata_svw.c:200", ioaddr->device_addr);
+	error = pete_readw("drivers/ata/sata_svw.c:201", ioaddr->error_addr);
+	nsect = pete_readw("drivers/ata/sata_svw.c:202", ioaddr->nsect_addr);
+	lbal = pete_readw("drivers/ata/sata_svw.c:203", ioaddr->lbal_addr);
+	lbam = pete_readw("drivers/ata/sata_svw.c:204", ioaddr->lbam_addr);
+	lbah = pete_readw("drivers/ata/sata_svw.c:205", ioaddr->lbah_addr);
 
 	tf->error = error;
 	tf->nsect = nsect;
@@ -239,11 +239,11 @@ static void k2_bmdma_setup_mmio(struct ata_queued_cmd *qc)
 	pete_writel("drivers/ata/sata_svw.c:239", ap->bmdma_prd_dma, mmio + ATA_DMA_TABLE_OFS);
 
 	/* specify data direction, triple-check start bit is clear */
-	dmactl = readb(mmio + ATA_DMA_CMD);
+	dmactl = pete_readb("drivers/ata/sata_svw.c:242", mmio + ATA_DMA_CMD);
 	dmactl &= ~(ATA_DMA_WR | ATA_DMA_START);
 	if (!rw)
 		dmactl |= ATA_DMA_WR;
-	writeb(dmactl, mmio + ATA_DMA_CMD);
+	pete_writeb("drivers/ata/sata_svw.c:246", dmactl, mmio + ATA_DMA_CMD);
 
 	/* issue r/w command if this is not a ATA DMA command*/
 	if (qc->tf.protocol != ATA_PROT_DMA)
@@ -265,8 +265,8 @@ static void k2_bmdma_start_mmio(struct ata_queued_cmd *qc)
 	u8 dmactl;
 
 	/* start host DMA transaction */
-	dmactl = readb(mmio + ATA_DMA_CMD);
-	writeb(dmactl | ATA_DMA_START, mmio + ATA_DMA_CMD);
+	dmactl = pete_readb("drivers/ata/sata_svw.c:268", mmio + ATA_DMA_CMD);
+	pete_writeb("drivers/ata/sata_svw.c:269", dmactl | ATA_DMA_START, mmio + ATA_DMA_CMD);
 	/* This works around possible data corruption.
 
 	   On certain SATA controllers that can be seen when the r/w

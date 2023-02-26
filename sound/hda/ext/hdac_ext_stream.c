@@ -114,7 +114,7 @@ void snd_hdac_ext_stream_decouple_locked(struct hdac_bus *bus,
 	u32 val;
 	int mask = AZX_PPCTL_PROCEN(hstream->index);
 
-	val = readw(bus->ppcap + AZX_REG_PP_PPCTL) & mask;
+	val = pete_readw("sound/hda/ext/hdac_ext_stream.c:117", bus->ppcap + AZX_REG_PP_PPCTL) & mask;
 
 	if (decouple && !val)
 		snd_hdac_updatel(bus->ppcap, AZX_REG_PP_PPCTL, mask, mask);
@@ -218,7 +218,7 @@ int snd_hdac_ext_link_stream_setup(struct hdac_ext_stream *stream, int fmt)
 	pete_writel("sound/hda/ext/hdac_ext_stream.c:218", val, stream->pplc_addr + AZX_REG_PPLCCTL);
 
 	/* program the stream format */
-	writew(fmt, stream->pplc_addr + AZX_REG_PPLCFMT);
+	pete_writew("sound/hda/ext/hdac_ext_stream.c:221", fmt, stream->pplc_addr + AZX_REG_PPLCFMT);
 
 	return 0;
 }

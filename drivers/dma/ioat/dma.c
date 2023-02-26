@@ -96,13 +96,13 @@ irqreturn_t ioat_dma_do_interrupt(int irq, void *data)
 	int bit;
 	u8 intrctrl;
 
-	intrctrl = readb(instance->reg_base + IOAT_INTRCTRL_OFFSET);
+	intrctrl = pete_readb("drivers/dma/ioat/dma.c:99", instance->reg_base + IOAT_INTRCTRL_OFFSET);
 
 	if (!(intrctrl & IOAT_INTRCTRL_MASTER_INT_EN))
 		return IRQ_NONE;
 
 	if (!(intrctrl & IOAT_INTRCTRL_INT_STATUS)) {
-		writeb(intrctrl, instance->reg_base + IOAT_INTRCTRL_OFFSET);
+		pete_writeb("drivers/dma/ioat/dma.c:105", intrctrl, instance->reg_base + IOAT_INTRCTRL_OFFSET);
 		return IRQ_NONE;
 	}
 
@@ -113,7 +113,7 @@ irqreturn_t ioat_dma_do_interrupt(int irq, void *data)
 			tasklet_schedule(&ioat_chan->cleanup_task);
 	}
 
-	writeb(intrctrl, instance->reg_base + IOAT_INTRCTRL_OFFSET);
+	pete_writeb("drivers/dma/ioat/dma.c:116", intrctrl, instance->reg_base + IOAT_INTRCTRL_OFFSET);
 	return IRQ_HANDLED;
 }
 
@@ -172,7 +172,7 @@ static void __ioat_issue_pending(struct ioatdma_chan *ioat_chan)
 {
 	ioat_chan->dmacount += ioat_ring_pending(ioat_chan);
 	ioat_chan->issued = ioat_chan->head;
-	writew(ioat_chan->dmacount,
+	pete_writew("drivers/dma/ioat/dma.c:175", ioat_chan->dmacount,
 	       ioat_chan->reg_base + IOAT_CHAN_DMACOUNT_OFFSET);
 	dev_dbg(to_dev(ioat_chan),
 		"%s: head: %#x tail: %#x issued: %#x count: %#x\n",
@@ -448,7 +448,7 @@ ioat_alloc_ring(struct dma_chan *c, int order, gfp_t flags)
 		if (chunks == 1)
 			drsctl |= IOAT_CHAN_DRS_AUTOWRAP;
 
-		writew(drsctl, ioat_chan->reg_base + IOAT_CHAN_DRSCTL_OFFSET);
+		pete_writew("drivers/dma/ioat/dma.c:451", drsctl, ioat_chan->reg_base + IOAT_CHAN_DRSCTL_OFFSET);
 
 	}
 
@@ -661,7 +661,7 @@ static void __cleanup(struct ioatdma_chan *ioat_chan, dma_addr_t phys_complete)
 
 	/* microsecond delay by sysfs variable  per pending descriptor */
 	if (ioat_chan->intr_coalesce != ioat_chan->prev_intr_coalesce) {
-		writew(min((ioat_chan->intr_coalesce * (active - i)),
+		pete_writew("drivers/dma/ioat/dma.c:664", min((ioat_chan->intr_coalesce * (active - i)),
 		       IOAT_INTRDELAY_MASK),
 		       ioat_chan->ioat_dma->reg_base + IOAT_INTRDELAY_OFFSET);
 		ioat_chan->prev_intr_coalesce = ioat_chan->intr_coalesce;
@@ -697,7 +697,7 @@ void ioat_cleanup_event(struct tasklet_struct *t)
 	ioat_cleanup(ioat_chan);
 	if (!test_bit(IOAT_RUN, &ioat_chan->state))
 		return;
-	writew(IOAT_CHANCTRL_RUN, ioat_chan->reg_base + IOAT_CHANCTRL_OFFSET);
+	pete_writew("drivers/dma/ioat/dma.c:700", IOAT_CHANCTRL_RUN, ioat_chan->reg_base + IOAT_CHANCTRL_OFFSET);
 }
 
 static void ioat_restart_channel(struct ioatdma_chan *ioat_chan)
@@ -1039,18 +1039,18 @@ int ioat_reset_hw(struct ioatdma_chan *ioat_chan)
 	}
 
 	if (is_bwd_ioat(pdev) && (ioat_dma->irq_mode == IOAT_MSIX)) {
-		ioat_dma->msixtba0 = readq(ioat_dma->reg_base + 0x1000);
-		ioat_dma->msixdata0 = readq(ioat_dma->reg_base + 0x1008);
-		ioat_dma->msixpba = readq(ioat_dma->reg_base + 0x1800);
+		ioat_dma->msixtba0 = pete_readq("drivers/dma/ioat/dma.c:1042", ioat_dma->reg_base + 0x1000);
+		ioat_dma->msixdata0 = pete_readq("drivers/dma/ioat/dma.c:1043", ioat_dma->reg_base + 0x1008);
+		ioat_dma->msixpba = pete_readq("drivers/dma/ioat/dma.c:1044", ioat_dma->reg_base + 0x1800);
 	}
 
 
 	err = ioat_reset_sync(ioat_chan, msecs_to_jiffies(200));
 	if (!err) {
 		if (is_bwd_ioat(pdev) && (ioat_dma->irq_mode == IOAT_MSIX)) {
-			writeq(ioat_dma->msixtba0, ioat_dma->reg_base + 0x1000);
-			writeq(ioat_dma->msixdata0, ioat_dma->reg_base + 0x1008);
-			writeq(ioat_dma->msixpba, ioat_dma->reg_base + 0x1800);
+			pete_writeq("drivers/dma/ioat/dma.c:1051", ioat_dma->msixtba0, ioat_dma->reg_base + 0x1000);
+			pete_writeq("drivers/dma/ioat/dma.c:1052", ioat_dma->msixdata0, ioat_dma->reg_base + 0x1008);
+			pete_writeq("drivers/dma/ioat/dma.c:1053", ioat_dma->msixpba, ioat_dma->reg_base + 0x1800);
 		}
 	}
 

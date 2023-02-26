@@ -45,7 +45,7 @@ void cobalt_machine_halt(void)
 
 void cobalt_machine_restart(char *command)
 {
-	writeb(RESET, RESET_PORT);
+	pete_writeb("arch/mips/cobalt/reset.c:48", RESET, RESET_PORT);
 
 	/* we should never get here */
 	cobalt_machine_halt();

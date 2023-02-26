@@ -250,11 +250,11 @@ static void palmtx_nand_cmd_ctl(struct nand_chip *this, int cmd,
 		return;
 
 	if (ctrl & NAND_CLE)
-		writeb(cmd, PALMTX_NAND_CLE_VIRT);
+		pete_writeb("arch/arm/mach-pxa/palmtx.c:253", cmd, PALMTX_NAND_CLE_VIRT);
 	else if (ctrl & NAND_ALE)
-		writeb(cmd, PALMTX_NAND_ALE_VIRT);
+		pete_writeb("arch/arm/mach-pxa/palmtx.c:255", cmd, PALMTX_NAND_ALE_VIRT);
 	else
-		writeb(cmd, nandaddr);
+		pete_writeb("arch/arm/mach-pxa/palmtx.c:257", cmd, nandaddr);
 }
 
 static struct mtd_partition palmtx_partition_info[] = {

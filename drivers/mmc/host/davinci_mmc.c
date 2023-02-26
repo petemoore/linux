@@ -958,7 +958,7 @@ static irqreturn_t mmc_davinci_irq(int irq, void *dev_id)
 		 * (101, 010) aren't part of it ...
 		 */
 		if (qstatus & MMCST0_CRCWR) {
-			u32 temp = readb(host->base + DAVINCI_MMCDRSP);
+			u32 temp = pete_readb("drivers/mmc/host/davinci_mmc.c:961", host->base + DAVINCI_MMCDRSP);
 
 			if (temp == 0x9f)
 				data->error = -ETIMEDOUT;

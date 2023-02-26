@@ -196,15 +196,15 @@ static int cpg_mstp_clock_endisable(struct clk_hw *hw, bool enable)
 	spin_lock_irqsave(&priv->rmw_lock, flags);
 
 	if (priv->reg_layout == CLK_REG_LAYOUT_RZ_A) {
-		value = readb(priv->base + priv->control_regs[reg]);
+		value = pete_readb("drivers/clk/renesas/renesas-cpg-mssr.c:199", priv->base + priv->control_regs[reg]);
 		if (enable)
 			value &= ~bitmask;
 		else
 			value |= bitmask;
-		writeb(value, priv->base + priv->control_regs[reg]);
+		pete_writeb("drivers/clk/renesas/renesas-cpg-mssr.c:204", value, priv->base + priv->control_regs[reg]);
 
 		/* dummy read to ensure write has completed */
-		readb(priv->base + priv->control_regs[reg]);
+		pete_readb("drivers/clk/renesas/renesas-cpg-mssr.c:207", priv->base + priv->control_regs[reg]);
 		barrier_data(priv->base + priv->control_regs[reg]);
 	} else {
 		value = pete_readl("drivers/clk/renesas/renesas-cpg-mssr.c:210", priv->base + priv->control_regs[reg]);
@@ -252,7 +252,7 @@ static int cpg_mstp_clock_is_enabled(struct clk_hw *hw)
 	u32 value;
 
 	if (priv->reg_layout == CLK_REG_LAYOUT_RZ_A)
-		value = readb(priv->base + priv->control_regs[clock->index / 32]);
+		value = pete_readb("drivers/clk/renesas/renesas-cpg-mssr.c:255", priv->base + priv->control_regs[clock->index / 32]);
 	else
 		value = pete_readl("drivers/clk/renesas/renesas-cpg-mssr.c:257", priv->base + priv->status_regs[clock->index / 32]);
 
@@ -851,7 +851,7 @@ static int cpg_mssr_suspend_noirq(struct device *dev)
 		if (priv->smstpcr_saved[reg].mask)
 			priv->smstpcr_saved[reg].val =
 				priv->reg_layout == CLK_REG_LAYOUT_RZ_A ?
-				readb(priv->base + priv->control_regs[reg]) :
+				pete_readb("drivers/clk/renesas/renesas-cpg-mssr.c:854", priv->base + priv->control_regs[reg]) :
 				pete_readl("drivers/clk/renesas/renesas-cpg-mssr.c:855", priv->base + priv->control_regs[reg]);
 	}
 
@@ -881,7 +881,7 @@ static int cpg_mssr_resume_noirq(struct device *dev)
 			continue;
 
 		if (priv->reg_layout == CLK_REG_LAYOUT_RZ_A)
-			oldval = readb(priv->base + priv->control_regs[reg]);
+			oldval = pete_readb("drivers/clk/renesas/renesas-cpg-mssr.c:884", priv->base + priv->control_regs[reg]);
 		else
 			oldval = pete_readl("drivers/clk/renesas/renesas-cpg-mssr.c:886", priv->base + priv->control_regs[reg]);
 		newval = oldval & ~mask;
@@ -890,9 +890,9 @@ static int cpg_mssr_resume_noirq(struct device *dev)
 			continue;
 
 		if (priv->reg_layout == CLK_REG_LAYOUT_RZ_A) {
-			writeb(newval, priv->base + priv->control_regs[reg]);
+			pete_writeb("drivers/clk/renesas/renesas-cpg-mssr.c:893", newval, priv->base + priv->control_regs[reg]);
 			/* dummy read to ensure write has completed */
-			readb(priv->base + priv->control_regs[reg]);
+			pete_readb("drivers/clk/renesas/renesas-cpg-mssr.c:895", priv->base + priv->control_regs[reg]);
 			barrier_data(priv->base + priv->control_regs[reg]);
 			continue;
 		} else

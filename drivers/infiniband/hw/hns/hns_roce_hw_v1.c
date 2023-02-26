@@ -1711,8 +1711,8 @@ static int hns_roce_v1_post_mbox(struct hns_roce_dev *hr_dev, u64 in_param,
 		       ROCEE_MB6_ROCEE_MB_TOKEN_S, token);
 
 	val = le32_to_cpu(tmp);
-	writeq(in_param, hcr + 0);
-	writeq(out_param, hcr + 2);
+	pete_writeq("drivers/infiniband/hw/hns/hns_roce_hw_v1.c:1714", in_param, hcr + 0);
+	pete_writeq("drivers/infiniband/hw/hns/hns_roce_hw_v1.c:1715", out_param, hcr + 2);
 	pete_writel("drivers/infiniband/hw/hns/hns_roce_hw_v1.c:1716", in_modifier, hcr + 4);
 	/* Memory barrier */
 	wmb();

@@ -483,7 +483,7 @@ static inline u32 pqi_read_heartbeat_counter(struct pqi_ctrl_info *ctrl_info)
 
 static inline u8 pqi_read_soft_reset_status(struct pqi_ctrl_info *ctrl_info)
 {
-	return readb(ctrl_info->soft_reset_status);
+	return pete_readb("drivers/scsi/smartpqi/smartpqi_init.c:486", ctrl_info->soft_reset_status);
 }
 
 static inline void pqi_clear_soft_reset_status(struct pqi_ctrl_info *ctrl_info)
@@ -492,7 +492,7 @@ static inline void pqi_clear_soft_reset_status(struct pqi_ctrl_info *ctrl_info)
 
 	status = pqi_read_soft_reset_status(ctrl_info);
 	status &= ~PQI_SOFT_RESET_ABORT;
-	writeb(status, ctrl_info->soft_reset_status);
+	pete_writeb("drivers/scsi/smartpqi/smartpqi_init.c:495", status, ctrl_info->soft_reset_status);
 }
 
 static int pqi_map_single(struct pci_dev *pci_dev,
@@ -2870,7 +2870,7 @@ static int pqi_wait_for_pqi_mode_ready(struct pqi_ctrl_info *ctrl_info)
 	timeout = (PQI_MODE_READY_TIMEOUT_SECS * PQI_HZ) + jiffies;
 
 	while (1) {
-		signature = readq(&pqi_registers->signature);
+		signature = pete_readq("drivers/scsi/smartpqi/smartpqi_init.c:2873", &pqi_registers->signature);
 		if (memcmp(&signature, PQI_DEVICE_SIGNATURE,
 			sizeof(signature)) == 0)
 			break;
@@ -2883,7 +2883,7 @@ static int pqi_wait_for_pqi_mode_ready(struct pqi_ctrl_info *ctrl_info)
 	}
 
 	while (1) {
-		status = readb(&pqi_registers->function_and_status_code);
+		status = pete_readb("drivers/scsi/smartpqi/smartpqi_init.c:2886", &pqi_registers->function_and_status_code);
 		if (status == PQI_STATUS_IDLE)
 			break;
 		if (time_after(jiffies, timeout)) {
@@ -4091,13 +4091,13 @@ static int pqi_create_admin_queues(struct pqi_ctrl_info *ctrl_info)
 	pqi_registers = ctrl_info->pqi_registers;
 	admin_queues = &ctrl_info->admin_queues;
 
-	writeq((u64)admin_queues->iq_element_array_bus_addr,
+	pete_writeq("drivers/scsi/smartpqi/smartpqi_init.c:4094", (u64)admin_queues->iq_element_array_bus_addr,
 		&pqi_registers->admin_iq_element_array_addr);
-	writeq((u64)admin_queues->oq_element_array_bus_addr,
+	pete_writeq("drivers/scsi/smartpqi/smartpqi_init.c:4096", (u64)admin_queues->oq_element_array_bus_addr,
 		&pqi_registers->admin_oq_element_array_addr);
-	writeq((u64)admin_queues->iq_ci_bus_addr,
+	pete_writeq("drivers/scsi/smartpqi/smartpqi_init.c:4098", (u64)admin_queues->iq_ci_bus_addr,
 		&pqi_registers->admin_iq_ci_addr);
-	writeq((u64)admin_queues->oq_pi_bus_addr,
+	pete_writeq("drivers/scsi/smartpqi/smartpqi_init.c:4100", (u64)admin_queues->oq_pi_bus_addr,
 		&pqi_registers->admin_oq_pi_addr);
 
 	reg = PQI_ADMIN_IQ_NUM_ELEMENTS |
@@ -4110,7 +4110,7 @@ static int pqi_create_admin_queues(struct pqi_ctrl_info *ctrl_info)
 
 	timeout = PQI_ADMIN_QUEUE_CREATE_TIMEOUT_JIFFIES + jiffies;
 	while (1) {
-		status = readb(&pqi_registers->function_and_status_code);
+		status = pete_readb("drivers/scsi/smartpqi/smartpqi_init.c:4113", &pqi_registers->function_and_status_code);
 		if (status == PQI_STATUS_IDLE)
 			break;
 		if (time_after(jiffies, timeout))
@@ -4125,10 +4125,10 @@ static int pqi_create_admin_queues(struct pqi_ctrl_info *ctrl_info)
 	 */
 	admin_queues->iq_pi = ctrl_info->iomem_base +
 		PQI_DEVICE_REGISTERS_OFFSET +
-		readq(&pqi_registers->admin_iq_pi_offset);
+		pete_readq("drivers/scsi/smartpqi/smartpqi_init.c:4128", &pqi_registers->admin_iq_pi_offset);
 	admin_queues->oq_ci = ctrl_info->iomem_base +
 		PQI_DEVICE_REGISTERS_OFFSET +
-		readq(&pqi_registers->admin_oq_ci_offset);
+		pete_readq("drivers/scsi/smartpqi/smartpqi_init.c:4131", &pqi_registers->admin_oq_ci_offset);
 
 	return 0;
 }
@@ -7051,7 +7051,7 @@ static int pqi_wait_for_pqi_reset_completion(struct pqi_ctrl_info *ctrl_info)
 	union pqi_reset_register reset_reg;
 
 	pqi_registers = ctrl_info->pqi_registers;
-	timeout_msecs = readw(&pqi_registers->max_reset_timeout) * 100;
+	timeout_msecs = pete_readw("drivers/scsi/smartpqi/smartpqi_init.c:7054", &pqi_registers->max_reset_timeout) * 100;
 	timeout = msecs_to_jiffies(timeout_msecs) + jiffies;
 
 	while (1) {
@@ -7267,7 +7267,7 @@ static int pqi_enable_firmware_features(struct pqi_ctrl_info *ctrl_info,
 			features_requested_iomem_addr +
 			(le16_to_cpu(firmware_features->num_elements) * 2) +
 			sizeof(__le16);
-		writew(PQI_FIRMWARE_FEATURE_MAXIMUM,
+		pete_writew("drivers/scsi/smartpqi/smartpqi_init.c:7270", PQI_FIRMWARE_FEATURE_MAXIMUM,
 			host_max_known_feature_iomem_addr);
 	}
 

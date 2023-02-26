@@ -367,8 +367,8 @@ static void pdc_fpdma_clear_interrupt_flag(struct ata_port *ap)
 
 	/* It's not allowed to write to the entire FPDMA_CTLSTAT register
 	   when NCQ is running. So do a byte-sized write to bits 10 and 11. */
-	writeb(tmp >> 8, sata_mmio + PDC_FPDMA_CTLSTAT + 1);
-	readb(sata_mmio + PDC_FPDMA_CTLSTAT + 1); /* flush */
+	pete_writeb("drivers/ata/sata_promise.c:370", tmp >> 8, sata_mmio + PDC_FPDMA_CTLSTAT + 1);
+	pete_readb("drivers/ata/sata_promise.c:371", sata_mmio + PDC_FPDMA_CTLSTAT + 1); /* flush */
 }
 
 static void pdc_fpdma_reset(struct ata_port *ap)
@@ -379,11 +379,11 @@ static void pdc_fpdma_reset(struct ata_port *ap)
 	tmp = (u8)pete_readl("drivers/ata/sata_promise.c:379", sata_mmio + PDC_FPDMA_CTLSTAT);
 	tmp &= 0x7F;
 	tmp |= PDC_FPDMA_CTLSTAT_RESET;
-	writeb(tmp, sata_mmio + PDC_FPDMA_CTLSTAT);
+	pete_writeb("drivers/ata/sata_promise.c:382", tmp, sata_mmio + PDC_FPDMA_CTLSTAT);
 	pete_readl("drivers/ata/sata_promise.c:383", sata_mmio + PDC_FPDMA_CTLSTAT); /* flush */
 	udelay(100);
 	tmp &= ~PDC_FPDMA_CTLSTAT_RESET;
-	writeb(tmp, sata_mmio + PDC_FPDMA_CTLSTAT);
+	pete_writeb("drivers/ata/sata_promise.c:386", tmp, sata_mmio + PDC_FPDMA_CTLSTAT);
 	pete_readl("drivers/ata/sata_promise.c:387", sata_mmio + PDC_FPDMA_CTLSTAT); /* flush */
 
 	pdc_fpdma_clear_interrupt_flag(ap);
@@ -452,7 +452,7 @@ static int pdc_pata_cable_detect(struct ata_port *ap)
 	u8 tmp;
 	void __iomem *ata_mmio = ap->ioaddr.cmd_addr;
 
-	tmp = readb(ata_mmio + PDC_CTLSTAT + 3);
+	tmp = pete_readb("drivers/ata/sata_promise.c:455", ata_mmio + PDC_CTLSTAT + 3);
 	if (tmp & 0x01)
 		return ATA_CBL_PATA40;
 	return ATA_CBL_PATA80;
@@ -789,14 +789,14 @@ static void pdc_hard_reset_port(struct ata_port *ap)
 
 	spin_lock(&hpriv->hard_reset_lock);
 
-	tmp = readb(pcictl_b1_mmio);
+	tmp = pete_readb("drivers/ata/sata_promise.c:792", pcictl_b1_mmio);
 	tmp &= ~(0x10 << ata_no);
-	writeb(tmp, pcictl_b1_mmio);
-	readb(pcictl_b1_mmio); /* flush */
+	pete_writeb("drivers/ata/sata_promise.c:794", tmp, pcictl_b1_mmio);
+	pete_readb("drivers/ata/sata_promise.c:795", pcictl_b1_mmio); /* flush */
 	udelay(100);
 	tmp |= (0x10 << ata_no);
-	writeb(tmp, pcictl_b1_mmio);
-	readb(pcictl_b1_mmio); /* flush */
+	pete_writeb("drivers/ata/sata_promise.c:798", tmp, pcictl_b1_mmio);
+	pete_readb("drivers/ata/sata_promise.c:799", pcictl_b1_mmio); /* flush */
 
 	spin_unlock(&hpriv->hard_reset_lock);
 }
@@ -1193,7 +1193,7 @@ static int pdc_ata_init_one(struct pci_dev *pdev,
 		ppi[i] = pi;
 
 	if (pi->flags & PDC_FLAG_SATA_PATA) {
-		u8 tmp = readb(host_mmio + PDC_FLASH_CTL + 1);
+		u8 tmp = pete_readb("drivers/ata/sata_promise.c:1196", host_mmio + PDC_FLASH_CTL + 1);
 		if (!(tmp & 0x80))
 			ppi[n_ports++] = pi + 1;
 	}

@@ -91,11 +91,11 @@ static int mstarv7_boot_secondary(unsigned int cpu, struct task_struct *idle)
 		return -ENODEV;
 
 	/* set the boot address for the second cpu */
-	writew(bootaddr & 0xffff, smpctrl + MSTARV7_CPU1_BOOT_ADDR_LOW);
-	writew((bootaddr >> 16) & 0xffff, smpctrl + MSTARV7_CPU1_BOOT_ADDR_HIGH);
+	pete_writew("arch/arm/mach-mstar/mstarv7.c:94", bootaddr & 0xffff, smpctrl + MSTARV7_CPU1_BOOT_ADDR_LOW);
+	pete_writew("arch/arm/mach-mstar/mstarv7.c:95", (bootaddr >> 16) & 0xffff, smpctrl + MSTARV7_CPU1_BOOT_ADDR_HIGH);
 
 	/* unlock the second cpu */
-	writew(MSTARV7_CPU1_UNLOCK_MAGIC, smpctrl + MSTARV7_CPU1_UNLOCK);
+	pete_writew("arch/arm/mach-mstar/mstarv7.c:98", MSTARV7_CPU1_UNLOCK_MAGIC, smpctrl + MSTARV7_CPU1_UNLOCK);
 
 	/* and away we go...*/
 	arch_send_wakeup_ipi_mask(cpumask_of(cpu));

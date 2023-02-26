@@ -409,25 +409,25 @@ static void hub6_serial_out(struct uart_port *p, int offset, int value)
 static unsigned int mem_serial_in(struct uart_port *p, int offset)
 {
 	offset = offset << p->regshift;
-	return readb(p->membase + offset);
+	return pete_readb("drivers/tty/serial/8250/8250_port.c:412", p->membase + offset);
 }
 
 static void mem_serial_out(struct uart_port *p, int offset, int value)
 {
 	offset = offset << p->regshift;
-	writeb(value, p->membase + offset);
+	pete_writeb("drivers/tty/serial/8250/8250_port.c:418", value, p->membase + offset);
 }
 
 static void mem16_serial_out(struct uart_port *p, int offset, int value)
 {
 	offset = offset << p->regshift;
-	writew(value, p->membase + offset);
+	pete_writew("drivers/tty/serial/8250/8250_port.c:424", value, p->membase + offset);
 }
 
 static unsigned int mem16_serial_in(struct uart_port *p, int offset)
 {
 	offset = offset << p->regshift;
-	return readw(p->membase + offset);
+	return pete_readw("drivers/tty/serial/8250/8250_port.c:430", p->membase + offset);
 }
 
 static void mem32_serial_out(struct uart_port *p, int offset, int value)

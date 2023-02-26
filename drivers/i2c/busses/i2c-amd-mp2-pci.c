@@ -99,7 +99,7 @@ int amd_mp2_rw(struct amd_i2c_common *i2c_common, enum i2c_cmd reqcmd)
 				    i2c_common->msg->len);
 	} else {
 		i2c_cmd_base.s.mem_type = use_dram;
-		writeq((u64)i2c_common->dma_addr,
+		pete_writeq("drivers/i2c/busses/i2c-amd-mp2-pci.c:102", (u64)i2c_common->dma_addr,
 		       privdata->mmio + AMD_C2P_MSG2);
 	}
 

@@ -175,23 +175,23 @@ MODULE_LICENSE("GPL");
 
 static void cpwd_writew(u16 val, void __iomem *addr)
 {
-	writew(cpu_to_le16(val), addr);
+	pete_writew("drivers/watchdog/cpwd.c:178", cpu_to_le16(val), addr);
 }
 static u16 cpwd_readw(void __iomem *addr)
 {
-	u16 val = readw(addr);
+	u16 val = pete_readw("drivers/watchdog/cpwd.c:182", addr);
 
 	return le16_to_cpu(val);
 }
 
 static void cpwd_writeb(u8 val, void __iomem *addr)
 {
-	writeb(val, addr);
+	pete_writeb("drivers/watchdog/cpwd.c:189", val, addr);
 }
 
 static u8 cpwd_readb(void __iomem *addr)
 {
-	return readb(addr);
+	return pete_readb("drivers/watchdog/cpwd.c:194", addr);
 }
 
 /* Enable or disable watchdog interrupts

@@ -23,14 +23,14 @@ static void rbtx4939_ioc_irq_unmask(struct irq_data *d)
 {
 	int ioc_nr = d->irq - RBTX4939_IRQ_IOC;
 
-	writeb(readb(rbtx4939_ien_addr) | (1 << ioc_nr), rbtx4939_ien_addr);
+	pete_writeb("arch/mips/txx9/rbtx4939/irq.c:26", pete_readb("arch/mips/txx9/rbtx4939/irq.c:26", rbtx4939_ien_addr) | (1 << ioc_nr), rbtx4939_ien_addr);
 }
 
 static void rbtx4939_ioc_irq_mask(struct irq_data *d)
 {
 	int ioc_nr = d->irq - RBTX4939_IRQ_IOC;
 
-	writeb(readb(rbtx4939_ien_addr) & ~(1 << ioc_nr), rbtx4939_ien_addr);
+	pete_writeb("arch/mips/txx9/rbtx4939/irq.c:33", pete_readb("arch/mips/txx9/rbtx4939/irq.c:33", rbtx4939_ien_addr) & ~(1 << ioc_nr), rbtx4939_ien_addr);
 	mmiowb();
 }
 
@@ -43,7 +43,7 @@ static struct irq_chip rbtx4939_ioc_irq_chip = {
 
 static inline int rbtx4939_ioc_irqroute(void)
 {
-	unsigned char istat = readb(rbtx4939_ifac2_addr);
+	unsigned char istat = pete_readb("arch/mips/txx9/rbtx4939/irq.c:46", rbtx4939_ifac2_addr);
 
 	if (unlikely(istat == 0))
 		return -1;
@@ -78,10 +78,10 @@ void __init rbtx4939_irq_setup(void)
 	int i;
 
 	/* mask all IOC interrupts */
-	writeb(0, rbtx4939_ien_addr);
+	pete_writeb("arch/mips/txx9/rbtx4939/irq.c:81", 0, rbtx4939_ien_addr);
 
 	/* clear SoftInt interrupts */
-	writeb(0, rbtx4939_softint_addr);
+	pete_writeb("arch/mips/txx9/rbtx4939/irq.c:84", 0, rbtx4939_softint_addr);
 
 	txx9_irq_dispatch = rbtx4939_irq_dispatch;
 

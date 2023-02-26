@@ -220,7 +220,7 @@ static inline u8 ipc_read_status(struct intel_scu_ipc_dev *scu)
 /* Read ipc byte data */
 static inline u8 ipc_data_readb(struct intel_scu_ipc_dev *scu, u32 offset)
 {
-	return readb(scu->ipc_base + IPC_READ_BUFFER + offset);
+	return pete_readb("drivers/platform/x86/intel_scu_ipc.c:223", scu->ipc_base + IPC_READ_BUFFER + offset);
 }
 
 /* Read ipc u32 data */

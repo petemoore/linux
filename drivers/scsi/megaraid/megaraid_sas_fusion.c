@@ -296,7 +296,7 @@ megasas_write_64bit_req_desc(struct megasas_instance *instance,
 #if defined(writeq) && defined(CONFIG_64BIT)
 	u64 req_data = (((u64)le32_to_cpu(req_desc->u.high) << 32) |
 		le32_to_cpu(req_desc->u.low));
-	writeq(req_data, &instance->reg_set->inbound_low_queue_port);
+	pete_writeq("drivers/scsi/megaraid/megaraid_sas_fusion.c:299", req_data, &instance->reg_set->inbound_low_queue_port);
 #else
 	unsigned long flags;
 	spin_lock_irqsave(&instance->hba_lock, flags);

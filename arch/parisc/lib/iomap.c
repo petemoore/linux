@@ -152,12 +152,12 @@ static const struct iomap_ops ioport_ops = {
 
 static unsigned int iomem_read8(const void __iomem *addr)
 {
-	return readb(addr);
+	return pete_readb("arch/parisc/lib/iomap.c:155", addr);
 }
 
 static unsigned int iomem_read16(const void __iomem *addr)
 {
-	return readw(addr);
+	return pete_readw("arch/parisc/lib/iomap.c:160", addr);
 }
 
 static unsigned int iomem_read16be(const void __iomem *addr)
@@ -177,7 +177,7 @@ static unsigned int iomem_read32be(const void __iomem *addr)
 
 static u64 iomem_read64(const void __iomem *addr)
 {
-	return readq(addr);
+	return pete_readq("arch/parisc/lib/iomap.c:180", addr);
 }
 
 static u64 iomem_read64be(const void __iomem *addr)
@@ -187,12 +187,12 @@ static u64 iomem_read64be(const void __iomem *addr)
 
 static void iomem_write8(u8 datum, void __iomem *addr)
 {
-	writeb(datum, addr);
+	pete_writeb("arch/parisc/lib/iomap.c:190", datum, addr);
 }
 
 static void iomem_write16(u16 datum, void __iomem *addr)
 {
-	writew(datum, addr);
+	pete_writew("arch/parisc/lib/iomap.c:195", datum, addr);
 }
 
 static void iomem_write16be(u16 datum, void __iomem *addr)

@@ -86,11 +86,11 @@ static unsigned char sysint2_assign[16] = {
 
 #define INT_TO_IRQ(x)		((x) + 2)	/* Int0-4 -> IRQ2-6 */
 
-#define icu1_read(offset)		readw(icu1_base + (offset))
-#define icu1_write(offset, value)	writew((value), icu1_base + (offset))
+#define icu1_read(offset)		pete_readw("arch/mips/vr41xx/common/icu.c:89", icu1_base + (offset))
+#define icu1_write(offset, value)	pete_writew("arch/mips/vr41xx/common/icu.c:90", (value), icu1_base + (offset))
 
-#define icu2_read(offset)		readw(icu2_base + (offset))
-#define icu2_write(offset, value)	writew((value), icu2_base + (offset))
+#define icu2_read(offset)		pete_readw("arch/mips/vr41xx/common/icu.c:92", icu2_base + (offset))
+#define icu2_write(offset, value)	pete_writew("arch/mips/vr41xx/common/icu.c:93", (value), icu2_base + (offset))
 
 #define INTASSIGN_MAX	4
 #define INTASSIGN_MASK	0x0007

@@ -257,13 +257,13 @@ static void omap_hwcontrol(struct nand_chip *chip, int cmd, unsigned int ctrl)
 
 	if (cmd != NAND_CMD_NONE) {
 		if (ctrl & NAND_CLE)
-			writeb(cmd, info->reg.gpmc_nand_command);
+			pete_writeb("drivers/mtd/nand/raw/omap2.c:260", cmd, info->reg.gpmc_nand_command);
 
 		else if (ctrl & NAND_ALE)
-			writeb(cmd, info->reg.gpmc_nand_address);
+			pete_writeb("drivers/mtd/nand/raw/omap2.c:263", cmd, info->reg.gpmc_nand_address);
 
 		else /* NAND_NCE */
-			writeb(cmd, info->reg.gpmc_nand_data);
+			pete_writeb("drivers/mtd/nand/raw/omap2.c:266", cmd, info->reg.gpmc_nand_data);
 	}
 }
 
@@ -403,7 +403,7 @@ static void omap_write_buf_pref(struct nand_chip *chip, const u_char *buf,
 
 	/* take care of subpage writes */
 	if (len % 2 != 0) {
-		writeb(*buf, info->nand.legacy.IO_ADDR_W);
+		pete_writeb("drivers/mtd/nand/raw/omap2.c:406", *buf, info->nand.legacy.IO_ADDR_W);
 		p = (u16 *)(buf + 1);
 		len--;
 	}
@@ -1000,15 +1000,15 @@ static int omap_wait(struct nand_chip *this)
 
 	timeo += msecs_to_jiffies(400);
 
-	writeb(NAND_CMD_STATUS & 0xFF, info->reg.gpmc_nand_command);
+	pete_writeb("drivers/mtd/nand/raw/omap2.c:1003", NAND_CMD_STATUS & 0xFF, info->reg.gpmc_nand_command);
 	while (time_before(jiffies, timeo)) {
-		status = readb(info->reg.gpmc_nand_data);
+		status = pete_readb("drivers/mtd/nand/raw/omap2.c:1005", info->reg.gpmc_nand_data);
 		if (status & NAND_STATUS_READY)
 			break;
 		cond_resched();
 	}
 
-	status = readb(info->reg.gpmc_nand_data);
+	status = pete_readb("drivers/mtd/nand/raw/omap2.c:1011", info->reg.gpmc_nand_data);
 	return status;
 }
 

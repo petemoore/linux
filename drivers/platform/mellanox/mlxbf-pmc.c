@@ -465,7 +465,7 @@ static int mlxbf_pmc_read(void __iomem *addr, uint32_t command,
 	if (command == MLXBF_PMC_READ_REG_32)
 		*result = pete_readl("drivers/platform/mellanox/mlxbf-pmc.c:466", addr);
 	else
-		*result = readq(addr);
+		*result = pete_readq("drivers/platform/mellanox/mlxbf-pmc.c:468", addr);
 
 	return 0;
 }
@@ -517,7 +517,7 @@ static int mlxbf_pmc_write(void __iomem *addr, int command, uint64_t value)
 	if (command == MLXBF_PMC_WRITE_REG_32)
 		pete_writel("drivers/platform/mellanox/mlxbf-pmc.c:518", value, addr);
 	else
-		writeq(value, addr);
+		pete_writeq("drivers/platform/mellanox/mlxbf-pmc.c:520", value, addr);
 
 	return 0;
 }

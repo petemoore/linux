@@ -49,7 +49,7 @@ static ssize_t pcie0_errors_show(struct device *dev,
 	base = dfl_get_feature_ioaddr_by_id(dev, FME_FEATURE_ID_GLOBAL_ERR);
 
 	mutex_lock(&pdata->lock);
-	value = readq(base + PCIE0_ERROR);
+	value = pete_readq("drivers/fpga/dfl-fme-error.c:52", base + PCIE0_ERROR);
 	mutex_unlock(&pdata->lock);
 
 	return sprintf(buf, "0x%llx\n", (unsigned long long)value);
@@ -70,15 +70,15 @@ static ssize_t pcie0_errors_store(struct device *dev,
 	base = dfl_get_feature_ioaddr_by_id(dev, FME_FEATURE_ID_GLOBAL_ERR);
 
 	mutex_lock(&pdata->lock);
-	writeq(GENMASK_ULL(63, 0), base + PCIE0_ERROR_MASK);
+	pete_writeq("drivers/fpga/dfl-fme-error.c:73", GENMASK_ULL(63, 0), base + PCIE0_ERROR_MASK);
 
-	v = readq(base + PCIE0_ERROR);
+	v = pete_readq("drivers/fpga/dfl-fme-error.c:75", base + PCIE0_ERROR);
 	if (val == v)
-		writeq(v, base + PCIE0_ERROR);
+		pete_writeq("drivers/fpga/dfl-fme-error.c:77", v, base + PCIE0_ERROR);
 	else
 		ret = -EINVAL;
 
-	writeq(0ULL, base + PCIE0_ERROR_MASK);
+	pete_writeq("drivers/fpga/dfl-fme-error.c:81", 0ULL, base + PCIE0_ERROR_MASK);
 	mutex_unlock(&pdata->lock);
 	return ret ? ret : count;
 }
@@ -94,7 +94,7 @@ static ssize_t pcie1_errors_show(struct device *dev,
 	base = dfl_get_feature_ioaddr_by_id(dev, FME_FEATURE_ID_GLOBAL_ERR);
 
 	mutex_lock(&pdata->lock);
-	value = readq(base + PCIE1_ERROR);
+	value = pete_readq("drivers/fpga/dfl-fme-error.c:97", base + PCIE1_ERROR);
 	mutex_unlock(&pdata->lock);
 
 	return sprintf(buf, "0x%llx\n", (unsigned long long)value);
@@ -115,15 +115,15 @@ static ssize_t pcie1_errors_store(struct device *dev,
 	base = dfl_get_feature_ioaddr_by_id(dev, FME_FEATURE_ID_GLOBAL_ERR);
 
 	mutex_lock(&pdata->lock);
-	writeq(GENMASK_ULL(63, 0), base + PCIE1_ERROR_MASK);
+	pete_writeq("drivers/fpga/dfl-fme-error.c:118", GENMASK_ULL(63, 0), base + PCIE1_ERROR_MASK);
 
-	v = readq(base + PCIE1_ERROR);
+	v = pete_readq("drivers/fpga/dfl-fme-error.c:120", base + PCIE1_ERROR);
 	if (val == v)
-		writeq(v, base + PCIE1_ERROR);
+		pete_writeq("drivers/fpga/dfl-fme-error.c:122", v, base + PCIE1_ERROR);
 	else
 		ret = -EINVAL;
 
-	writeq(0ULL, base + PCIE1_ERROR_MASK);
+	pete_writeq("drivers/fpga/dfl-fme-error.c:126", 0ULL, base + PCIE1_ERROR_MASK);
 	mutex_unlock(&pdata->lock);
 	return ret ? ret : count;
 }
@@ -137,7 +137,7 @@ static ssize_t nonfatal_errors_show(struct device *dev,
 	base = dfl_get_feature_ioaddr_by_id(dev, FME_FEATURE_ID_GLOBAL_ERR);
 
 	return sprintf(buf, "0x%llx\n",
-		       (unsigned long long)readq(base + RAS_NONFAT_ERROR));
+		       (unsigned long long)pete_readq("drivers/fpga/dfl-fme-error.c:140", base + RAS_NONFAT_ERROR));
 }
 static DEVICE_ATTR_RO(nonfatal_errors);
 
@@ -149,7 +149,7 @@ static ssize_t catfatal_errors_show(struct device *dev,
 	base = dfl_get_feature_ioaddr_by_id(dev, FME_FEATURE_ID_GLOBAL_ERR);
 
 	return sprintf(buf, "0x%llx\n",
-		       (unsigned long long)readq(base + RAS_CATFAT_ERROR));
+		       (unsigned long long)pete_readq("drivers/fpga/dfl-fme-error.c:152", base + RAS_CATFAT_ERROR));
 }
 static DEVICE_ATTR_RO(catfatal_errors);
 
@@ -163,7 +163,7 @@ static ssize_t inject_errors_show(struct device *dev,
 	base = dfl_get_feature_ioaddr_by_id(dev, FME_FEATURE_ID_GLOBAL_ERR);
 
 	mutex_lock(&pdata->lock);
-	v = readq(base + RAS_ERROR_INJECT);
+	v = pete_readq("drivers/fpga/dfl-fme-error.c:166", base + RAS_ERROR_INJECT);
 	mutex_unlock(&pdata->lock);
 
 	return sprintf(buf, "0x%llx\n",
@@ -188,10 +188,10 @@ static ssize_t inject_errors_store(struct device *dev,
 	base = dfl_get_feature_ioaddr_by_id(dev, FME_FEATURE_ID_GLOBAL_ERR);
 
 	mutex_lock(&pdata->lock);
-	v = readq(base + RAS_ERROR_INJECT);
+	v = pete_readq("drivers/fpga/dfl-fme-error.c:191", base + RAS_ERROR_INJECT);
 	v &= ~INJECT_ERROR_MASK;
 	v |= FIELD_PREP(INJECT_ERROR_MASK, inject_error);
-	writeq(v, base + RAS_ERROR_INJECT);
+	pete_writeq("drivers/fpga/dfl-fme-error.c:194", v, base + RAS_ERROR_INJECT);
 	mutex_unlock(&pdata->lock);
 
 	return count;
@@ -208,7 +208,7 @@ static ssize_t fme_errors_show(struct device *dev,
 	base = dfl_get_feature_ioaddr_by_id(dev, FME_FEATURE_ID_GLOBAL_ERR);
 
 	mutex_lock(&pdata->lock);
-	value = readq(base + FME_ERROR);
+	value = pete_readq("drivers/fpga/dfl-fme-error.c:211", base + FME_ERROR);
 	mutex_unlock(&pdata->lock);
 
 	return sprintf(buf, "0x%llx\n", (unsigned long long)value);
@@ -229,16 +229,16 @@ static ssize_t fme_errors_store(struct device *dev,
 	base = dfl_get_feature_ioaddr_by_id(dev, FME_FEATURE_ID_GLOBAL_ERR);
 
 	mutex_lock(&pdata->lock);
-	writeq(GENMASK_ULL(63, 0), base + FME_ERROR_MASK);
+	pete_writeq("drivers/fpga/dfl-fme-error.c:232", GENMASK_ULL(63, 0), base + FME_ERROR_MASK);
 
-	v = readq(base + FME_ERROR);
+	v = pete_readq("drivers/fpga/dfl-fme-error.c:234", base + FME_ERROR);
 	if (val == v)
-		writeq(v, base + FME_ERROR);
+		pete_writeq("drivers/fpga/dfl-fme-error.c:236", v, base + FME_ERROR);
 	else
 		ret = -EINVAL;
 
 	/* Workaround: disable MBP_ERROR if feature revision is 0 */
-	writeq(dfl_feature_revision(base) ? 0ULL : MBP_ERROR,
+	pete_writeq("drivers/fpga/dfl-fme-error.c:241", dfl_feature_revision(base) ? 0ULL : MBP_ERROR,
 	       base + FME_ERROR_MASK);
 	mutex_unlock(&pdata->lock);
 	return ret ? ret : count;
@@ -255,7 +255,7 @@ static ssize_t first_error_show(struct device *dev,
 	base = dfl_get_feature_ioaddr_by_id(dev, FME_FEATURE_ID_GLOBAL_ERR);
 
 	mutex_lock(&pdata->lock);
-	value = readq(base + FME_FIRST_ERROR);
+	value = pete_readq("drivers/fpga/dfl-fme-error.c:258", base + FME_FIRST_ERROR);
 	mutex_unlock(&pdata->lock);
 
 	return sprintf(buf, "0x%llx\n", (unsigned long long)value);
@@ -272,7 +272,7 @@ static ssize_t next_error_show(struct device *dev,
 	base = dfl_get_feature_ioaddr_by_id(dev, FME_FEATURE_ID_GLOBAL_ERR);
 
 	mutex_lock(&pdata->lock);
-	value = readq(base + FME_NEXT_ERROR);
+	value = pete_readq("drivers/fpga/dfl-fme-error.c:275", base + FME_NEXT_ERROR);
 	mutex_unlock(&pdata->lock);
 
 	return sprintf(buf, "0x%llx\n", (unsigned long long)value);
@@ -323,14 +323,14 @@ static void fme_err_mask(struct device *dev, bool mask)
 
 	/* Workaround: keep MBP_ERROR always masked if revision is 0 */
 	if (dfl_feature_revision(base))
-		writeq(mask ? ERROR_MASK : 0, base + FME_ERROR_MASK);
+		pete_writeq("drivers/fpga/dfl-fme-error.c:326", mask ? ERROR_MASK : 0, base + FME_ERROR_MASK);
 	else
-		writeq(mask ? ERROR_MASK : MBP_ERROR, base + FME_ERROR_MASK);
+		pete_writeq("drivers/fpga/dfl-fme-error.c:328", mask ? ERROR_MASK : MBP_ERROR, base + FME_ERROR_MASK);
 
-	writeq(mask ? ERROR_MASK : 0, base + PCIE0_ERROR_MASK);
-	writeq(mask ? ERROR_MASK : 0, base + PCIE1_ERROR_MASK);
-	writeq(mask ? ERROR_MASK : 0, base + RAS_NONFAT_ERROR_MASK);
-	writeq(mask ? ERROR_MASK : 0, base + RAS_CATFAT_ERROR_MASK);
+	pete_writeq("drivers/fpga/dfl-fme-error.c:330", mask ? ERROR_MASK : 0, base + PCIE0_ERROR_MASK);
+	pete_writeq("drivers/fpga/dfl-fme-error.c:331", mask ? ERROR_MASK : 0, base + PCIE1_ERROR_MASK);
+	pete_writeq("drivers/fpga/dfl-fme-error.c:332", mask ? ERROR_MASK : 0, base + RAS_NONFAT_ERROR_MASK);
+	pete_writeq("drivers/fpga/dfl-fme-error.c:333", mask ? ERROR_MASK : 0, base + RAS_CATFAT_ERROR_MASK);
 
 	mutex_unlock(&pdata->lock);
 }

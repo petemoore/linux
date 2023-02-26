@@ -950,7 +950,7 @@ static int snd_korg1212_WriteADCSensitivity(struct snd_korg1212 *korg1212)
                 // ----------------------------------------------------------------------------
                 ClearBitInWord(&controlValue, SET_SENS_LOADSHIFT_BITPOS);
                 ClearBitInWord(&controlValue, SET_SENS_DATA_BITPOS);
-                writew(controlValue, korg1212->sensRegPtr);                          // load/shift goes low
+                pete_writew("sound/pci/korg1212/korg1212.c:953", controlValue, korg1212->sensRegPtr);                          // load/shift goes low
                 udelay(LOADSHIFT_DELAY);
 
                 for (bitPosition = 15; bitPosition >= 0; bitPosition--) {       // for all the bits
@@ -967,10 +967,10 @@ static int snd_korg1212_WriteADCSensitivity(struct snd_korg1212 *korg1212)
 			}
 
                         ClearBitInWord(&controlValue, SET_SENS_CLOCK_BITPOS);
-                        writew(controlValue, korg1212->sensRegPtr);                       // clock goes low
+                        pete_writew("sound/pci/korg1212/korg1212.c:970", controlValue, korg1212->sensRegPtr);                       // clock goes low
                         udelay(SENSCLKPULSE_WIDTH);
                         SetBitInWord(&controlValue, SET_SENS_CLOCK_BITPOS);
-                        writew(controlValue, korg1212->sensRegPtr);                       // clock goes high
+                        pete_writew("sound/pci/korg1212/korg1212.c:973", controlValue, korg1212->sensRegPtr);                       // clock goes high
                         udelay(SENSCLKPULSE_WIDTH);
                 }
 
@@ -981,19 +981,19 @@ static int snd_korg1212_WriteADCSensitivity(struct snd_korg1212 *korg1212)
                 ClearBitInWord(&controlValue, SET_SENS_DATA_BITPOS);
                 ClearBitInWord(&controlValue, SET_SENS_CLOCK_BITPOS);
                 SetBitInWord(&controlValue, SET_SENS_LOADSHIFT_BITPOS);
-                writew(controlValue, korg1212->sensRegPtr);                   // load shift goes high - clk low
+                pete_writew("sound/pci/korg1212/korg1212.c:984", controlValue, korg1212->sensRegPtr);                   // load shift goes high - clk low
                 udelay(SENSCLKPULSE_WIDTH);
 
                 if (clkIs48K)
                         SetBitInWord(&controlValue, SET_SENS_DATA_BITPOS);
 
-                writew(controlValue, korg1212->sensRegPtr);                   // set/clear data bit
+                pete_writew("sound/pci/korg1212/korg1212.c:990", controlValue, korg1212->sensRegPtr);                   // set/clear data bit
                 udelay(ONE_RTC_TICK);
                 SetBitInWord(&controlValue, SET_SENS_CLOCK_BITPOS);
-                writew(controlValue, korg1212->sensRegPtr);                   // clock goes high
+                pete_writew("sound/pci/korg1212/korg1212.c:993", controlValue, korg1212->sensRegPtr);                   // clock goes high
                 udelay(SENSCLKPULSE_WIDTH);
                 ClearBitInWord(&controlValue, SET_SENS_CLOCK_BITPOS);
-                writew(controlValue, korg1212->sensRegPtr);                   // clock goes low
+                pete_writew("sound/pci/korg1212/korg1212.c:996", controlValue, korg1212->sensRegPtr);                   // clock goes low
                 udelay(SENSCLKPULSE_WIDTH);
         }
 

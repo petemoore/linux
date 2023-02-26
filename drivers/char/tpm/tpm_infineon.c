@@ -54,7 +54,7 @@ static inline void tpm_data_out(unsigned char data, unsigned char offset)
 	if (tpm_dev.iotype == TPM_INF_IO_PORT)
 		outb(data, tpm_dev.data_regs + offset);
 	else
-		writeb(data, tpm_dev.mem_base + tpm_dev.data_regs + offset);
+		pete_writeb("drivers/char/tpm/tpm_infineon.c:57", data, tpm_dev.mem_base + tpm_dev.data_regs + offset);
 }
 
 static inline unsigned char tpm_data_in(unsigned char offset)
@@ -62,7 +62,7 @@ static inline unsigned char tpm_data_in(unsigned char offset)
 	if (tpm_dev.iotype == TPM_INF_IO_PORT)
 		return inb(tpm_dev.data_regs + offset);
 	else
-		return readb(tpm_dev.mem_base + tpm_dev.data_regs + offset);
+		return pete_readb("drivers/char/tpm/tpm_infineon.c:65", tpm_dev.mem_base + tpm_dev.data_regs + offset);
 }
 
 static inline void tpm_config_out(unsigned char data, unsigned char offset)
@@ -70,7 +70,7 @@ static inline void tpm_config_out(unsigned char data, unsigned char offset)
 	if (tpm_dev.iotype == TPM_INF_IO_PORT)
 		outb(data, tpm_dev.config_port + offset);
 	else
-		writeb(data, tpm_dev.mem_base + tpm_dev.index_off + offset);
+		pete_writeb("drivers/char/tpm/tpm_infineon.c:73", data, tpm_dev.mem_base + tpm_dev.index_off + offset);
 }
 
 static inline unsigned char tpm_config_in(unsigned char offset)
@@ -78,7 +78,7 @@ static inline unsigned char tpm_config_in(unsigned char offset)
 	if (tpm_dev.iotype == TPM_INF_IO_PORT)
 		return inb(tpm_dev.config_port + offset);
 	else
-		return readb(tpm_dev.mem_base + tpm_dev.index_off + offset);
+		return pete_readb("drivers/char/tpm/tpm_infineon.c:81", tpm_dev.mem_base + tpm_dev.index_off + offset);
 }
 
 /* TPM header definitions */

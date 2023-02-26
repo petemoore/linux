@@ -940,7 +940,7 @@ static void quirk_usb_disable_ehci(struct pci_dev *pdev)
 	if (base == NULL)
 		return;
 
-	cap_length = readb(base);
+	cap_length = pete_readb("drivers/usb/host/pci-quirks.c:943", base);
 	op_reg_base = base + cap_length;
 
 	/* EHCI 0.96 and later may have "extended capabilities"

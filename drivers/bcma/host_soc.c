@@ -15,12 +15,12 @@
 
 static u8 bcma_host_soc_read8(struct bcma_device *core, u16 offset)
 {
-	return readb(core->io_addr + offset);
+	return pete_readb("drivers/bcma/host_soc.c:18", core->io_addr + offset);
 }
 
 static u16 bcma_host_soc_read16(struct bcma_device *core, u16 offset)
 {
-	return readw(core->io_addr + offset);
+	return pete_readw("drivers/bcma/host_soc.c:23", core->io_addr + offset);
 }
 
 static u32 bcma_host_soc_read32(struct bcma_device *core, u16 offset)
@@ -31,13 +31,13 @@ static u32 bcma_host_soc_read32(struct bcma_device *core, u16 offset)
 static void bcma_host_soc_write8(struct bcma_device *core, u16 offset,
 				 u8 value)
 {
-	writeb(value, core->io_addr + offset);
+	pete_writeb("drivers/bcma/host_soc.c:34", value, core->io_addr + offset);
 }
 
 static void bcma_host_soc_write16(struct bcma_device *core, u16 offset,
 				 u16 value)
 {
-	writew(value, core->io_addr + offset);
+	pete_writew("drivers/bcma/host_soc.c:40", value, core->io_addr + offset);
 }
 
 static void bcma_host_soc_write32(struct bcma_device *core, u16 offset,

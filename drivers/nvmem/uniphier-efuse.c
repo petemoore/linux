@@ -24,7 +24,7 @@ static int uniphier_reg_read(void *context,
 	int offs;
 
 	for (offs = 0; offs < bytes; offs += sizeof(u8))
-		*val++ = readb(priv->base + reg + offs);
+		*val++ = pete_readb("drivers/nvmem/uniphier-efuse.c:27", priv->base + reg + offs);
 
 	return 0;
 }

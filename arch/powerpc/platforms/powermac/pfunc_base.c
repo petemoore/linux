@@ -53,11 +53,11 @@ static int macio_do_gpio_write(PMF_STD_ARGS, u8 value, u8 mask)
 
 	/* Toggle the GPIO */
 	raw_spin_lock_irqsave(&feature_lock, flags);
-	tmp = readb(addr);
+	tmp = pete_readb("arch/powerpc/platforms/powermac/pfunc_base.c:56", addr);
 	tmp = (tmp & ~mask) | (value & mask);
 	DBG("Do write 0x%02x to GPIO %pOF (%p)\n",
 	    tmp, func->node, addr);
-	writeb(tmp, addr);
+	pete_writeb("arch/powerpc/platforms/powermac/pfunc_base.c:60", tmp, addr);
 	raw_spin_unlock_irqrestore(&feature_lock, flags);
 
 	return 0;
@@ -72,7 +72,7 @@ static int macio_do_gpio_read(PMF_STD_ARGS, u8 mask, int rshift, u8 xor)
 	if (args == NULL || args->count == 0 || args->u[0].p == NULL)
 		return -EINVAL;
 
-	value = readb(addr);
+	value = pete_readb("arch/powerpc/platforms/powermac/pfunc_base.c:75", addr);
 	*args->u[0].p = ((value & mask) >> rshift) ^ xor;
 
 	return 0;

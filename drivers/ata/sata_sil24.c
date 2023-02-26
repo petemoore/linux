@@ -530,12 +530,12 @@ static void sil24_config_port(struct ata_port *ap)
 		pete_writel("drivers/ata/sata_sil24.c:530", PORT_CS_IRQ_WOC, port + PORT_CTRL_CLR);
 
 	/* zero error counters. */
-	writew(0x8000, port + PORT_DECODE_ERR_THRESH);
-	writew(0x8000, port + PORT_CRC_ERR_THRESH);
-	writew(0x8000, port + PORT_HSHK_ERR_THRESH);
-	writew(0x0000, port + PORT_DECODE_ERR_CNT);
-	writew(0x0000, port + PORT_CRC_ERR_CNT);
-	writew(0x0000, port + PORT_HSHK_ERR_CNT);
+	pete_writew("drivers/ata/sata_sil24.c:533", 0x8000, port + PORT_DECODE_ERR_THRESH);
+	pete_writew("drivers/ata/sata_sil24.c:534", 0x8000, port + PORT_CRC_ERR_THRESH);
+	pete_writew("drivers/ata/sata_sil24.c:535", 0x8000, port + PORT_HSHK_ERR_THRESH);
+	pete_writew("drivers/ata/sata_sil24.c:536", 0x0000, port + PORT_DECODE_ERR_CNT);
+	pete_writew("drivers/ata/sata_sil24.c:537", 0x0000, port + PORT_CRC_ERR_CNT);
+	pete_writew("drivers/ata/sata_sil24.c:538", 0x0000, port + PORT_HSHK_ERR_CNT);
 
 	/* always use 64bit activation */
 	pete_writel("drivers/ata/sata_sil24.c:541", PORT_CS_32BIT_ACTV, port + PORT_CTRL_CLR);

@@ -1144,7 +1144,7 @@ static irqreturn_t genwqe_pf_isr(int irq, void *dev_id)
 			 * detected by the platform until we do a non-raw
 			 * MMIO or config space read
 			 */
-			readq(cd->mmio + IO_SLC_CFGREG_GFIR);
+			pete_readq("drivers/misc/genwqe/card_ddcb.c:1147", cd->mmio + IO_SLC_CFGREG_GFIR);
 
 			/* Don't do anything if the PCI channel is frozen */
 			if (pci_channel_offline(pci_dev))

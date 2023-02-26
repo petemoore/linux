@@ -90,11 +90,11 @@ static void ep0_write_fifo(struct mtu3_ep *mep, const u8 *src, u16 len)
 		index = len & ~0x03;
 	}
 	if (len & 0x02) {
-		writew(*(u16 *)&src[index], fifo);
+		pete_writew("drivers/usb/mtu3/mtu3_gadget_ep0.c:93", *(u16 *)&src[index], fifo);
 		index += 2;
 	}
 	if (len & 0x01)
-		writeb(src[index], fifo);
+		pete_writeb("drivers/usb/mtu3/mtu3_gadget_ep0.c:97", src[index], fifo);
 }
 
 static void ep0_read_fifo(struct mtu3_ep *mep, u8 *dst, u16 len)

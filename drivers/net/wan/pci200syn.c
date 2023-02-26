@@ -98,7 +98,7 @@ static inline void new_memcpy_toio(char __iomem *dest, char *src, int length)
 		dest += len;
 		src += len;
 		length -= len;
-		readb(dest);
+		pete_readb("drivers/net/wan/pci200syn.c:101", dest);
 	} while (len);
 }
 
@@ -352,7 +352,7 @@ static int pci200_pci_init_one(struct pci_dev *pdev,
 
 	/* Enable interrupts on the PCI bridge */
 	p = &card->plxbase->intr_ctrl_stat;
-	writew(readw(p) | 0x0040, p);
+	pete_writew("drivers/net/wan/pci200syn.c:355", pete_readw("drivers/net/wan/pci200syn.c:355", p) | 0x0040, p);
 
 	/* Allocate IRQ */
 	if (request_irq(pdev->irq, sca_intr, IRQF_SHARED, "pci200syn", card)) {

@@ -897,7 +897,7 @@ static void arcmsr_message_isr_bh_fn(struct work_struct *work)
 		return;
 	for (target = 0; target < ARCMSR_MAX_TARGETID - 1;
 		target++) {
-		temp = readb(devicemap);
+		temp = pete_readb("drivers/scsi/arcmsr/arcmsr_hba.c:900", devicemap);
 		diff = (*acb_dev_map) ^ temp;
 		if (diff != 0) {
 			*acb_dev_map = temp;
@@ -2242,7 +2242,7 @@ arcmsr_Read_iop_rqbuffer_data(struct AdapterControlBlock *acb,
 	iop_len = pete_readl("drivers/scsi/arcmsr/arcmsr_hba.c:2242", &prbuffer->data_len);
 	while (iop_len > 0) {
 		pQbuffer = &acb->rqbuffer[acb->rqbuf_putIndex];
-		*pQbuffer = readb(iop_data);
+		*pQbuffer = pete_readb("drivers/scsi/arcmsr/arcmsr_hba.c:2245", iop_data);
 		acb->rqbuf_putIndex++;
 		acb->rqbuf_putIndex %= ARCMSR_MAX_QBUFFER;
 		iop_data++;
@@ -2333,7 +2333,7 @@ arcmsr_write_ioctldata2iop(struct AdapterControlBlock *acb)
 		while ((acb->wqbuf_getIndex != acb->wqbuf_putIndex)
 			&& (allxfer_len < 124)) {
 			pQbuffer = &acb->wqbuffer[acb->wqbuf_getIndex];
-			writeb(*pQbuffer, iop_data);
+			pete_writeb("drivers/scsi/arcmsr/arcmsr_hba.c:2336", *pQbuffer, iop_data);
 			acb->wqbuf_getIndex++;
 			acb->wqbuf_getIndex %= ARCMSR_MAX_QBUFFER;
 			iop_data++;

@@ -758,10 +758,10 @@ static void wd719x_read_eeprom(struct wd719x *wd)
 	wd719x_writeb(wd, WD719X_PCI_GPIO_CONTROL, gpio);
 
 	/* read EEPROM header */
-	eeprom_93cx6_multireadb(&eeprom, 0, (u8 *)&header, sizeof(header));
+	eeprom_93cx6_multipete_readb("drivers/scsi/wd719x.c:761", &eeprom, 0, (u8 *)&header, sizeof(header));
 
 	if (header.sig1 == 'W' && header.sig2 == 'D')
-		eeprom_93cx6_multireadb(&eeprom, header.cfg_offset,
+		eeprom_93cx6_multipete_readb("drivers/scsi/wd719x.c:764", &eeprom, header.cfg_offset,
 					(u8 *)wd->params,
 					sizeof(struct wd719x_host_param));
 	else { /* default EEPROM values */

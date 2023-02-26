@@ -286,17 +286,17 @@ void
 head907d_olut_load(struct drm_color_lut *in, int size, void __iomem *mem)
 {
 	for (; size--; in++, mem += 8) {
-		writew(drm_color_lut_extract(in->  red, 14) + 0x6000, mem + 0);
-		writew(drm_color_lut_extract(in->green, 14) + 0x6000, mem + 2);
-		writew(drm_color_lut_extract(in-> blue, 14) + 0x6000, mem + 4);
+		pete_writew("drivers/gpu/drm/nouveau/dispnv50/head907d.c:289", drm_color_lut_extract(in->  red, 14) + 0x6000, mem + 0);
+		pete_writew("drivers/gpu/drm/nouveau/dispnv50/head907d.c:290", drm_color_lut_extract(in->green, 14) + 0x6000, mem + 2);
+		pete_writew("drivers/gpu/drm/nouveau/dispnv50/head907d.c:291", drm_color_lut_extract(in-> blue, 14) + 0x6000, mem + 4);
 	}
 
 	/* INTERPOLATE modes require a "next" entry to interpolate with,
 	 * so we replicate the last entry to deal with this for now.
 	 */
-	writew(readw(mem - 8), mem + 0);
-	writew(readw(mem - 6), mem + 2);
-	writew(readw(mem - 4), mem + 4);
+	pete_writew("drivers/gpu/drm/nouveau/dispnv50/head907d.c:297", pete_readw("drivers/gpu/drm/nouveau/dispnv50/head907d.c:297", mem - 8), mem + 0);
+	pete_writew("drivers/gpu/drm/nouveau/dispnv50/head907d.c:298", pete_readw("drivers/gpu/drm/nouveau/dispnv50/head907d.c:298", mem - 6), mem + 2);
+	pete_writew("drivers/gpu/drm/nouveau/dispnv50/head907d.c:299", pete_readw("drivers/gpu/drm/nouveau/dispnv50/head907d.c:299", mem - 4), mem + 4);
 }
 
 bool

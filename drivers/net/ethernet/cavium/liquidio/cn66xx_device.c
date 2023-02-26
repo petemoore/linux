@@ -474,7 +474,7 @@ void lio_cn6xxx_enable_interrupt(struct octeon_device *oct,
 	u64 mask = cn6xxx->intr_mask64 | CN6XXX_INTR_DMA0_FORCE;
 
 	/* Enable Interrupt */
-	writeq(mask, cn6xxx->intr_enb_reg64);
+	pete_writeq("drivers/net/ethernet/cavium/liquidio/cn66xx_device.c:477", mask, cn6xxx->intr_enb_reg64);
 }
 
 void lio_cn6xxx_disable_interrupt(struct octeon_device *oct,
@@ -483,7 +483,7 @@ void lio_cn6xxx_disable_interrupt(struct octeon_device *oct,
 	struct octeon_cn6xxx *cn6xxx = (struct octeon_cn6xxx *)oct->chip;
 
 	/* Disable Interrupts */
-	writeq(0, cn6xxx->intr_enb_reg64);
+	pete_writeq("drivers/net/ethernet/cavium/liquidio/cn66xx_device.c:486", 0, cn6xxx->intr_enb_reg64);
 }
 
 static void lio_cn6xxx_get_pcie_qlmport(struct octeon_device *oct)
@@ -573,7 +573,7 @@ irqreturn_t lio_cn6xxx_process_interrupt_regs(void *dev)
 	struct octeon_cn6xxx *cn6xxx = (struct octeon_cn6xxx *)oct->chip;
 	u64 intr64;
 
-	intr64 = readq(cn6xxx->intr_sum_reg64);
+	intr64 = pete_readq("drivers/net/ethernet/cavium/liquidio/cn66xx_device.c:576", cn6xxx->intr_sum_reg64);
 
 	/* If our device has interrupted, then proceed.
 	 * Also check for all f's if interrupt was triggered on an error
@@ -599,7 +599,7 @@ irqreturn_t lio_cn6xxx_process_interrupt_regs(void *dev)
 		oct->int_status |= OCT_DEV_INTR_DMA1_FORCE;
 
 	/* Clear the current interrupts */
-	writeq(intr64, cn6xxx->intr_sum_reg64);
+	pete_writeq("drivers/net/ethernet/cavium/liquidio/cn66xx_device.c:602", intr64, cn6xxx->intr_sum_reg64);
 
 	return IRQ_HANDLED;
 }

@@ -2048,12 +2048,12 @@ static int netsec_probe(struct platform_device *pdev)
 		void __iomem *macp = priv->eeprom_base +
 					NETSEC_EEPROM_MAC_ADDRESS;
 
-		ndev->dev_addr[0] = readb(macp + 3);
-		ndev->dev_addr[1] = readb(macp + 2);
-		ndev->dev_addr[2] = readb(macp + 1);
-		ndev->dev_addr[3] = readb(macp + 0);
-		ndev->dev_addr[4] = readb(macp + 7);
-		ndev->dev_addr[5] = readb(macp + 6);
+		ndev->dev_addr[0] = pete_readb("drivers/net/ethernet/socionext/netsec.c:2051", macp + 3);
+		ndev->dev_addr[1] = pete_readb("drivers/net/ethernet/socionext/netsec.c:2052", macp + 2);
+		ndev->dev_addr[2] = pete_readb("drivers/net/ethernet/socionext/netsec.c:2053", macp + 1);
+		ndev->dev_addr[3] = pete_readb("drivers/net/ethernet/socionext/netsec.c:2054", macp + 0);
+		ndev->dev_addr[4] = pete_readb("drivers/net/ethernet/socionext/netsec.c:2055", macp + 7);
+		ndev->dev_addr[5] = pete_readb("drivers/net/ethernet/socionext/netsec.c:2056", macp + 6);
 	}
 
 	if (!is_valid_ether_addr(ndev->dev_addr)) {

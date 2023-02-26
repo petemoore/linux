@@ -201,7 +201,7 @@ static void sis_update_sso(struct voice *voice, u16 period)
 		voice->sso = 8;
 
 	/* The SSO is in the upper 16 bits of the register. */
-	writew(voice->sso & 0xffff, base + SIS_PLAY_DMA_SSO_ESO + 2);
+	pete_writew("sound/pci/sis7019.c:204", voice->sso & 0xffff, base + SIS_PLAY_DMA_SSO_ESO + 2);
 }
 
 static void sis_update_voice(struct voice *voice)
@@ -229,7 +229,7 @@ static void sis_update_voice(struct voice *voice)
 		 * consider ourselves wrapped.
 		 */
 		sync = voice->sync_cso;
-		sync -= readw(voice->sync_base + SIS_CAPTURE_DMA_FORMAT_CSO);
+		sync -= pete_readw("sound/pci/sis7019.c:232", voice->sync_base + SIS_CAPTURE_DMA_FORMAT_CSO);
 		if (sync > (voice->sync_buffer_size / 2))
 			sync -= voice->sync_buffer_size;
 

@@ -219,13 +219,13 @@ static int lola_mixer_set_src_gain(struct lola *chip, unsigned int id,
 		val &= ~(1 << id);
 	/* test if values unchanged */
 	if ((val == oldval) &&
-	    (gain == readw(&chip->mixer.array->src_gain[id])))
+	    (gain == pete_readw("sound/pci/lola/lola_mixer.c:222", &chip->mixer.array->src_gain[id])))
 		return 0;
 
 	dev_dbg(chip->card->dev,
 		"lola_mixer_set_src_gain (id=%d, gain=%d) enable=%x\n",
 			id, gain, val);
-	writew(gain, &chip->mixer.array->src_gain[id]);
+	pete_writew("sound/pci/lola/lola_mixer.c:228", gain, &chip->mixer.array->src_gain[id]);
 	pete_writel("sound/pci/lola/lola_mixer.c:229", val, &chip->mixer.array->src_gain_enable);
 	lola_codec_flush(chip);
 	/* inform micro-controller about the new source gain */
@@ -243,7 +243,7 @@ static int lola_mixer_set_src_gains(struct lola *chip, unsigned int mask,
 		return -EINVAL;
 	for (i = 0; i < LOLA_MIXER_DIM; i++) {
 		if (mask & (1 << i)) {
-			writew(*gains, &chip->mixer.array->src_gain[i]);
+			pete_writew("sound/pci/lola/lola_mixer.c:246", *gains, &chip->mixer.array->src_gain[i]);
 			gains++;
 		}
 	}
@@ -275,7 +275,7 @@ static int lola_mixer_set_mapping_gain(struct lola *chip,
 	    !(chip->mixer.dest_mask & (1 << dest)))
 		return -EINVAL;
 	if (on)
-		writew(gain, &chip->mixer.array->dest_mix_gain[dest][src]);
+		pete_writew("sound/pci/lola/lola_mixer.c:278", gain, &chip->mixer.array->dest_mix_gain[dest][src]);
 	val = pete_readl("sound/pci/lola/lola_mixer.c:279", &chip->mixer.array->dest_mix_gain_enable[dest]);
 	if (on)
 		val |= (1 << src);
@@ -298,7 +298,7 @@ static int lola_mixer_set_dest_gains(struct lola *chip, unsigned int id,
 		return -EINVAL;
 	for (i = 0; i < LOLA_MIXER_DIM; i++) {
 		if (mask & (1 << i)) {
-			writew(*gains, &chip->mixer.array->dest_mix_gain[id][i]);
+			pete_writew("sound/pci/lola/lola_mixer.c:301", *gains, &chip->mixer.array->dest_mix_gain[id][i]);
 			gains++;
 		}
 	}
@@ -683,7 +683,7 @@ static int lola_src_gain_get(struct snd_kcontrol *kcontrol,
 		if (!(chip->mixer.src_mask & (1 << idx)))
 			return -EINVAL;
 		if (mask & (1 << idx))
-			val = readw(&chip->mixer.array->src_gain[idx]) + 1;
+			val = pete_readw("sound/pci/lola/lola_mixer.c:686", &chip->mixer.array->src_gain[idx]) + 1;
 		else
 			val = 0;
 		ucontrol->value.integer.value[i] = val;
@@ -766,7 +766,7 @@ static int lola_dest_gain_get(struct snd_kcontrol *kcontrol,
 		if (!(chip->mixer.src_mask & (1 << src)))
 			return -EINVAL;
 		if (mask & (1 << dst))
-			val = readw(&chip->mixer.array->dest_mix_gain[dst][src]) + 1;
+			val = pete_readw("sound/pci/lola/lola_mixer.c:769", &chip->mixer.array->dest_mix_gain[dst][src]) + 1;
 		else
 			val = 0;
 		ucontrol->value.integer.value[i] = val;

@@ -107,8 +107,8 @@ static int cs553x_write_ctrl_byte(struct cs553x_nand_controller *cs553x,
 	u8 status;
 	int ret;
 
-	writeb(ctl, cs553x->mmio + MM_NAND_CTL);
-	writeb(data, cs553x->mmio + MM_NAND_IO);
+	pete_writeb("drivers/mtd/nand/raw/cs553x_nand.c:110", ctl, cs553x->mmio + MM_NAND_CTL);
+	pete_writeb("drivers/mtd/nand/raw/cs553x_nand.c:111", data, cs553x->mmio + MM_NAND_IO);
 	ret = readb_poll_timeout_atomic(cs553x->mmio + MM_NAND_STS, status,
 					!(status & CS_NAND_CTLR_BUSY), 1,
 					100000);
@@ -121,7 +121,7 @@ static int cs553x_write_ctrl_byte(struct cs553x_nand_controller *cs553x,
 static void cs553x_data_in(struct cs553x_nand_controller *cs553x, void *buf,
 			   unsigned int len)
 {
-	writeb(0, cs553x->mmio + MM_NAND_CTL);
+	pete_writeb("drivers/mtd/nand/raw/cs553x_nand.c:124", 0, cs553x->mmio + MM_NAND_CTL);
 	while (unlikely(len > 0x800)) {
 		memcpy_fromio(buf, cs553x->mmio, 0x800);
 		buf += 0x800;
@@ -133,7 +133,7 @@ static void cs553x_data_in(struct cs553x_nand_controller *cs553x, void *buf,
 static void cs553x_data_out(struct cs553x_nand_controller *cs553x,
 			    const void *buf, unsigned int len)
 {
-	writeb(0, cs553x->mmio + MM_NAND_CTL);
+	pete_writeb("drivers/mtd/nand/raw/cs553x_nand.c:136", 0, cs553x->mmio + MM_NAND_CTL);
 	while (unlikely(len > 0x800)) {
 		memcpy_toio(cs553x->mmio, buf, 0x800);
 		buf += 0x800;
@@ -207,7 +207,7 @@ static int cs553x_exec_op(struct nand_chip *this,
 		return true;
 
 	/* De-assert the CE pin */
-	writeb(0, cs553x->mmio + MM_NAND_CTL);
+	pete_writeb("drivers/mtd/nand/raw/cs553x_nand.c:210", 0, cs553x->mmio + MM_NAND_CTL);
 	for (i = 0; i < op->ninstrs; i++) {
 		ret = cs553x_exec_instr(cs553x, &op->instrs[i]);
 		if (ret)
@@ -215,7 +215,7 @@ static int cs553x_exec_op(struct nand_chip *this,
 	}
 
 	/* Re-assert the CE pin. */
-	writeb(CS_NAND_CTL_CE, cs553x->mmio + MM_NAND_CTL);
+	pete_writeb("drivers/mtd/nand/raw/cs553x_nand.c:218", CS_NAND_CTL_CE, cs553x->mmio + MM_NAND_CTL);
 
 	return ret;
 }
@@ -224,7 +224,7 @@ static void cs_enable_hwecc(struct nand_chip *this, int mode)
 {
 	struct cs553x_nand_controller *cs553x = to_cs553x(this->controller);
 
-	writeb(0x07, cs553x->mmio + MM_NAND_ECC_CTL);
+	pete_writeb("drivers/mtd/nand/raw/cs553x_nand.c:227", 0x07, cs553x->mmio + MM_NAND_ECC_CTL);
 }
 
 static int cs_calculate_ecc(struct nand_chip *this, const u_char *dat,

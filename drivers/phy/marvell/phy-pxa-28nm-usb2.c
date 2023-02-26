@@ -264,19 +264,19 @@ static int mv_usb2_phy_28nm_exit(struct phy *phy)
 	void __iomem *base = mv_phy->base;
 	unsigned int val;
 
-	val = readw(base + PHY_28NM_PLL_REG1);
+	val = pete_readw("drivers/phy/marvell/phy-pxa-28nm-usb2.c:267", base + PHY_28NM_PLL_REG1);
 	val &= ~PHY_28NM_PLL_PU_PLL;
-	writew(val, base + PHY_28NM_PLL_REG1);
+	pete_writew("drivers/phy/marvell/phy-pxa-28nm-usb2.c:269", val, base + PHY_28NM_PLL_REG1);
 
 	/* power down PHY Analog part */
-	val = readw(base + PHY_28NM_TX_REG0);
+	val = pete_readw("drivers/phy/marvell/phy-pxa-28nm-usb2.c:272", base + PHY_28NM_TX_REG0);
 	val &= ~PHY_28NM_TX_PU_ANA;
-	writew(val, base + PHY_28NM_TX_REG0);
+	pete_writew("drivers/phy/marvell/phy-pxa-28nm-usb2.c:274", val, base + PHY_28NM_TX_REG0);
 
 	/* power down PHY OTG part */
-	val = readw(base + PHY_28NM_OTG_REG);
+	val = pete_readw("drivers/phy/marvell/phy-pxa-28nm-usb2.c:277", base + PHY_28NM_OTG_REG);
 	val &= ~PHY_28NM_OTG_PU_OTG;
-	writew(val, base + PHY_28NM_OTG_REG);
+	pete_writew("drivers/phy/marvell/phy-pxa-28nm-usb2.c:279", val, base + PHY_28NM_OTG_REG);
 
 	clk_disable_unprepare(mv_phy->clk);
 	return 0;

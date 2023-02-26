@@ -292,7 +292,7 @@ static int exynos_tmu_initialize(struct platform_device *pdev)
 	if (!IS_ERR(data->clk_sec))
 		clk_enable(data->clk_sec);
 
-	status = readb(data->base + EXYNOS_TMU_REG_STATUS);
+	status = pete_readb("drivers/thermal/samsung/exynos_tmu.c:295", data->base + EXYNOS_TMU_REG_STATUS);
 	if (!status) {
 		ret = -EBUSY;
 	} else {
@@ -370,11 +370,11 @@ static void exynos4210_tmu_set_trip_temp(struct exynos_tmu_data *data,
 
 	if (trip == 0) {
 		th_code = temp_to_code(data, ref);
-		writeb(th_code, data->base + EXYNOS4210_TMU_REG_THRESHOLD_TEMP);
+		pete_writeb("drivers/thermal/samsung/exynos_tmu.c:373", th_code, data->base + EXYNOS4210_TMU_REG_THRESHOLD_TEMP);
 	}
 
 	temp -= ref;
-	writeb(temp, data->base + EXYNOS4210_TMU_REG_TRIG_LEVEL0 + trip * 4);
+	pete_writeb("drivers/thermal/samsung/exynos_tmu.c:377", temp, data->base + EXYNOS4210_TMU_REG_TRIG_LEVEL0 + trip * 4);
 }
 
 /* failing thresholds are not supported on Exynos4210 */
@@ -756,7 +756,7 @@ static int exynos_tmu_set_emulation(void *drv_data, int temp)
 
 static int exynos4210_tmu_read(struct exynos_tmu_data *data)
 {
-	int ret = readb(data->base + EXYNOS_TMU_REG_CURRENT_TEMP);
+	int ret = pete_readb("drivers/thermal/samsung/exynos_tmu.c:759", data->base + EXYNOS_TMU_REG_CURRENT_TEMP);
 
 	/* "temp_code" should range between 75 and 175 */
 	return (ret < 75 || ret > 175) ? -ENODATA : ret;
@@ -764,12 +764,12 @@ static int exynos4210_tmu_read(struct exynos_tmu_data *data)
 
 static int exynos4412_tmu_read(struct exynos_tmu_data *data)
 {
-	return readb(data->base + EXYNOS_TMU_REG_CURRENT_TEMP);
+	return pete_readb("drivers/thermal/samsung/exynos_tmu.c:767", data->base + EXYNOS_TMU_REG_CURRENT_TEMP);
 }
 
 static int exynos7_tmu_read(struct exynos_tmu_data *data)
 {
-	return readw(data->base + EXYNOS_TMU_REG_CURRENT_TEMP) &
+	return pete_readw("drivers/thermal/samsung/exynos_tmu.c:772", data->base + EXYNOS_TMU_REG_CURRENT_TEMP) &
 		EXYNOS7_TMU_TEMP_MASK;
 }
 

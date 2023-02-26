@@ -92,17 +92,17 @@ static int mlxbf_gpio_suspend(struct platform_device *pdev, pm_message_t state)
 {
 	struct mlxbf_gpio_state *gs = platform_get_drvdata(pdev);
 
-	gs->csave_regs.scratchpad = readq(gs->base + MLXBF_GPIO_SCRATCHPAD);
+	gs->csave_regs.scratchpad = pete_readq("drivers/gpio/gpio-mlxbf.c:95", gs->base + MLXBF_GPIO_SCRATCHPAD);
 	gs->csave_regs.pad_control[0] =
-		readq(gs->base + MLXBF_GPIO_PAD_CONTROL_FIRST_WORD);
+		pete_readq("drivers/gpio/gpio-mlxbf.c:97", gs->base + MLXBF_GPIO_PAD_CONTROL_FIRST_WORD);
 	gs->csave_regs.pad_control[1] =
-		readq(gs->base + MLXBF_GPIO_PAD_CONTROL_1_FIRST_WORD);
+		pete_readq("drivers/gpio/gpio-mlxbf.c:99", gs->base + MLXBF_GPIO_PAD_CONTROL_1_FIRST_WORD);
 	gs->csave_regs.pad_control[2] =
-		readq(gs->base + MLXBF_GPIO_PAD_CONTROL_2_FIRST_WORD);
+		pete_readq("drivers/gpio/gpio-mlxbf.c:101", gs->base + MLXBF_GPIO_PAD_CONTROL_2_FIRST_WORD);
 	gs->csave_regs.pad_control[3] =
-		readq(gs->base + MLXBF_GPIO_PAD_CONTROL_3_FIRST_WORD);
-	gs->csave_regs.pin_dir_i = readq(gs->base + MLXBF_GPIO_PIN_DIR_I);
-	gs->csave_regs.pin_dir_o = readq(gs->base + MLXBF_GPIO_PIN_DIR_O);
+		pete_readq("drivers/gpio/gpio-mlxbf.c:103", gs->base + MLXBF_GPIO_PAD_CONTROL_3_FIRST_WORD);
+	gs->csave_regs.pin_dir_i = pete_readq("drivers/gpio/gpio-mlxbf.c:104", gs->base + MLXBF_GPIO_PIN_DIR_I);
+	gs->csave_regs.pin_dir_o = pete_readq("drivers/gpio/gpio-mlxbf.c:105", gs->base + MLXBF_GPIO_PIN_DIR_O);
 
 	return 0;
 }
@@ -111,17 +111,17 @@ static int mlxbf_gpio_resume(struct platform_device *pdev)
 {
 	struct mlxbf_gpio_state *gs = platform_get_drvdata(pdev);
 
-	writeq(gs->csave_regs.scratchpad, gs->base + MLXBF_GPIO_SCRATCHPAD);
-	writeq(gs->csave_regs.pad_control[0],
+	pete_writeq("drivers/gpio/gpio-mlxbf.c:114", gs->csave_regs.scratchpad, gs->base + MLXBF_GPIO_SCRATCHPAD);
+	pete_writeq("drivers/gpio/gpio-mlxbf.c:115", gs->csave_regs.pad_control[0],
 	       gs->base + MLXBF_GPIO_PAD_CONTROL_FIRST_WORD);
-	writeq(gs->csave_regs.pad_control[1],
+	pete_writeq("drivers/gpio/gpio-mlxbf.c:117", gs->csave_regs.pad_control[1],
 	       gs->base + MLXBF_GPIO_PAD_CONTROL_1_FIRST_WORD);
-	writeq(gs->csave_regs.pad_control[2],
+	pete_writeq("drivers/gpio/gpio-mlxbf.c:119", gs->csave_regs.pad_control[2],
 	       gs->base + MLXBF_GPIO_PAD_CONTROL_2_FIRST_WORD);
-	writeq(gs->csave_regs.pad_control[3],
+	pete_writeq("drivers/gpio/gpio-mlxbf.c:121", gs->csave_regs.pad_control[3],
 	       gs->base + MLXBF_GPIO_PAD_CONTROL_3_FIRST_WORD);
-	writeq(gs->csave_regs.pin_dir_i, gs->base + MLXBF_GPIO_PIN_DIR_I);
-	writeq(gs->csave_regs.pin_dir_o, gs->base + MLXBF_GPIO_PIN_DIR_O);
+	pete_writeq("drivers/gpio/gpio-mlxbf.c:123", gs->csave_regs.pin_dir_i, gs->base + MLXBF_GPIO_PIN_DIR_I);
+	pete_writeq("drivers/gpio/gpio-mlxbf.c:124", gs->csave_regs.pin_dir_o, gs->base + MLXBF_GPIO_PIN_DIR_O);
 
 	return 0;
 }

@@ -76,17 +76,17 @@ static int rza_wdt_start(struct watchdog_device *wdev)
 	struct rza_wdt *priv = watchdog_get_drvdata(wdev);
 
 	/* Stop timer */
-	writew(WTCSR_MAGIC | 0, priv->base + WTCSR);
+	pete_writew("drivers/watchdog/rza_wdt.c:79", WTCSR_MAGIC | 0, priv->base + WTCSR);
 
 	/* Must dummy read WRCSR:WOVF at least once before clearing */
-	readb(priv->base + WRCSR);
-	writew(WRCSR_CLEAR_WOVF, priv->base + WRCSR);
+	pete_readb("drivers/watchdog/rza_wdt.c:82", priv->base + WRCSR);
+	pete_writew("drivers/watchdog/rza_wdt.c:83", WRCSR_CLEAR_WOVF, priv->base + WRCSR);
 
 	rza_wdt_calc_timeout(priv, wdev->timeout);
 
-	writew(WRCSR_MAGIC | WRCSR_RSTE, priv->base + WRCSR);
-	writew(WTCNT_MAGIC | priv->count, priv->base + WTCNT);
-	writew(WTCSR_MAGIC | WTSCR_WT | WTSCR_TME |
+	pete_writew("drivers/watchdog/rza_wdt.c:87", WRCSR_MAGIC | WRCSR_RSTE, priv->base + WRCSR);
+	pete_writew("drivers/watchdog/rza_wdt.c:88", WTCNT_MAGIC | priv->count, priv->base + WTCNT);
+	pete_writew("drivers/watchdog/rza_wdt.c:89", WTCSR_MAGIC | WTSCR_WT | WTSCR_TME |
 	       WTSCR_CKS(priv->cks), priv->base + WTCSR);
 
 	return 0;
@@ -96,7 +96,7 @@ static int rza_wdt_stop(struct watchdog_device *wdev)
 {
 	struct rza_wdt *priv = watchdog_get_drvdata(wdev);
 
-	writew(WTCSR_MAGIC | 0, priv->base + WTCSR);
+	pete_writew("drivers/watchdog/rza_wdt.c:99", WTCSR_MAGIC | 0, priv->base + WTCSR);
 
 	return 0;
 }
@@ -105,7 +105,7 @@ static int rza_wdt_ping(struct watchdog_device *wdev)
 {
 	struct rza_wdt *priv = watchdog_get_drvdata(wdev);
 
-	writew(WTCNT_MAGIC | priv->count, priv->base + WTCNT);
+	pete_writew("drivers/watchdog/rza_wdt.c:108", WTCNT_MAGIC | priv->count, priv->base + WTCNT);
 
 	pr_debug("%s: timeout = %u\n", __func__, wdev->timeout);
 
@@ -125,19 +125,19 @@ static int rza_wdt_restart(struct watchdog_device *wdev, unsigned long action,
 	struct rza_wdt *priv = watchdog_get_drvdata(wdev);
 
 	/* Stop timer */
-	writew(WTCSR_MAGIC | 0, priv->base + WTCSR);
+	pete_writew("drivers/watchdog/rza_wdt.c:128", WTCSR_MAGIC | 0, priv->base + WTCSR);
 
 	/* Must dummy read WRCSR:WOVF at least once before clearing */
-	readb(priv->base + WRCSR);
-	writew(WRCSR_CLEAR_WOVF, priv->base + WRCSR);
+	pete_readb("drivers/watchdog/rza_wdt.c:131", priv->base + WRCSR);
+	pete_writew("drivers/watchdog/rza_wdt.c:132", WRCSR_CLEAR_WOVF, priv->base + WRCSR);
 
 	/*
 	 * Start timer with fastest clock source and only 1 clock left before
 	 * overflow with reset option enabled.
 	 */
-	writew(WRCSR_MAGIC | WRCSR_RSTE, priv->base + WRCSR);
-	writew(WTCNT_MAGIC | 255, priv->base + WTCNT);
-	writew(WTCSR_MAGIC | WTSCR_WT | WTSCR_TME, priv->base + WTCSR);
+	pete_writew("drivers/watchdog/rza_wdt.c:138", WRCSR_MAGIC | WRCSR_RSTE, priv->base + WRCSR);
+	pete_writew("drivers/watchdog/rza_wdt.c:139", WTCNT_MAGIC | 255, priv->base + WTCNT);
+	pete_writew("drivers/watchdog/rza_wdt.c:140", WTCSR_MAGIC | WTSCR_WT | WTSCR_TME, priv->base + WTCSR);
 
 	/*
 	 * Actually make sure the above sequence hits hardware before sleeping.

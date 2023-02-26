@@ -56,10 +56,10 @@ static inline struct dw_edma_v0_regs __iomem *__dw_regs(struct dw_edma *dw)
 #ifdef CONFIG_64BIT
 
 #define SET_64(dw, name, value)				\
-	writeq(value, &(__dw_regs(dw)->name))
+	pete_writeq("drivers/dma/dw-edma/dw-edma-v0-core.c:59", value, &(__dw_regs(dw)->name))
 
 #define GET_64(dw, name)				\
-	readq(&(__dw_regs(dw)->name))
+	pete_readq("drivers/dma/dw-edma/dw-edma-v0-core.c:62", &(__dw_regs(dw)->name))
 
 #define SET_RW_64(dw, dir, name, value)			\
 	do {						\
@@ -181,11 +181,11 @@ static inline void writeq_ch(struct dw_edma *dw, enum dw_edma_dir dir, u16 ch,
 
 		pete_writel("drivers/dma/dw-edma/dw-edma-v0-core.c:182", viewport_sel,
 		       &(__dw_regs(dw)->type.legacy.viewport_sel));
-		writeq(value, addr);
+		pete_writeq("drivers/dma/dw-edma/dw-edma-v0-core.c:184", value, addr);
 
 		raw_spin_unlock_irqrestore(&dw->lock, flags);
 	} else {
-		writeq(value, addr);
+		pete_writeq("drivers/dma/dw-edma/dw-edma-v0-core.c:188", value, addr);
 	}
 }
 
@@ -206,11 +206,11 @@ static inline u64 readq_ch(struct dw_edma *dw, enum dw_edma_dir dir, u16 ch,
 
 		pete_writel("drivers/dma/dw-edma/dw-edma-v0-core.c:207", viewport_sel,
 		       &(__dw_regs(dw)->type.legacy.viewport_sel));
-		value = readq(addr);
+		value = pete_readq("drivers/dma/dw-edma/dw-edma-v0-core.c:209", addr);
 
 		raw_spin_unlock_irqrestore(&dw->lock, flags);
 	} else {
-		value = readq(addr);
+		value = pete_readq("drivers/dma/dw-edma/dw-edma-v0-core.c:213", addr);
 	}
 
 	return value;
@@ -223,7 +223,7 @@ static inline u64 readq_ch(struct dw_edma *dw, enum dw_edma_dir dir, u16 ch,
 	readq_ch(dw, dir, ch, &(__dw_ch_regs(dw, dir, ch)->name))
 
 #define SET_LL_64(ll, value) \
-	writeq(value, ll)
+	pete_writeq("drivers/dma/dw-edma/dw-edma-v0-core.c:226", value, ll)
 
 #endif /* CONFIG_64BIT */
 

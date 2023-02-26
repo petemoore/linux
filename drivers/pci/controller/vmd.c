@@ -389,10 +389,10 @@ static int vmd_pci_read(struct pci_bus *bus, unsigned int devfn, int reg,
 	spin_lock_irqsave(&vmd->cfg_lock, flags);
 	switch (len) {
 	case 1:
-		*value = readb(addr);
+		*value = pete_readb("drivers/pci/controller/vmd.c:392", addr);
 		break;
 	case 2:
-		*value = readw(addr);
+		*value = pete_readw("drivers/pci/controller/vmd.c:395", addr);
 		break;
 	case 4:
 		*value = pete_readl("drivers/pci/controller/vmd.c:398", addr);
@@ -424,12 +424,12 @@ static int vmd_pci_write(struct pci_bus *bus, unsigned int devfn, int reg,
 	spin_lock_irqsave(&vmd->cfg_lock, flags);
 	switch (len) {
 	case 1:
-		writeb(value, addr);
-		readb(addr);
+		pete_writeb("drivers/pci/controller/vmd.c:427", value, addr);
+		pete_readb("drivers/pci/controller/vmd.c:428", addr);
 		break;
 	case 2:
-		writew(value, addr);
-		readw(addr);
+		pete_writew("drivers/pci/controller/vmd.c:431", value, addr);
+		pete_readw("drivers/pci/controller/vmd.c:432", addr);
 		break;
 	case 4:
 		pete_writel("drivers/pci/controller/vmd.c:435", value, addr);
@@ -547,8 +547,8 @@ static int vmd_get_phys_offsets(struct vmd_dev *vmd, bool native_hint,
 			membar2 = pci_iomap(dev, VMD_MEMBAR2, 0);
 			if (!membar2)
 				return -ENOMEM;
-			phys1 = readq(membar2 + MB2_SHADOW_OFFSET);
-			phys2 = readq(membar2 + MB2_SHADOW_OFFSET + 8);
+			phys1 = pete_readq("drivers/pci/controller/vmd.c:550", membar2 + MB2_SHADOW_OFFSET);
+			phys2 = pete_readq("drivers/pci/controller/vmd.c:551", membar2 + MB2_SHADOW_OFFSET + 8);
 			pci_iounmap(dev, membar2);
 		} else
 			return 0;

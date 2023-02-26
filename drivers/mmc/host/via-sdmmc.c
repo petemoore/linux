@@ -354,12 +354,12 @@ static void via_print_pcictrl(struct via_crdr_mmc_host *host)
 
 	pr_debug("PCI Control Registers:\n");
 	pr_debug("PCICLKGATT=%02x, PCISDCCLK=%02x, PCIDMACLK=%02x\n",
-		 readb(addrbase + VIA_CRDR_PCICLKGATT),
-		 readb(addrbase + VIA_CRDR_PCISDCCLK),
-		 readb(addrbase + VIA_CRDR_PCIDMACLK));
+		 pete_readb("drivers/mmc/host/via-sdmmc.c:357", addrbase + VIA_CRDR_PCICLKGATT),
+		 pete_readb("drivers/mmc/host/via-sdmmc.c:358", addrbase + VIA_CRDR_PCISDCCLK),
+		 pete_readb("drivers/mmc/host/via-sdmmc.c:359", addrbase + VIA_CRDR_PCIDMACLK));
 	pr_debug("PCIINTCTRL=%02x, PCIINTSTATUS=%02x\n",
-		 readb(addrbase + VIA_CRDR_PCIINTCTRL),
-		 readb(addrbase + VIA_CRDR_PCIINTSTATUS));
+		 pete_readb("drivers/mmc/host/via-sdmmc.c:361", addrbase + VIA_CRDR_PCIINTCTRL),
+		 pete_readb("drivers/mmc/host/via-sdmmc.c:362", addrbase + VIA_CRDR_PCIINTSTATUS));
 }
 
 static void via_save_pcictrlreg(struct via_crdr_mmc_host *host)
@@ -370,15 +370,15 @@ static void via_save_pcictrlreg(struct via_crdr_mmc_host *host)
 	pm_pcictrl_reg = &(host->pm_pcictrl_reg);
 	addrbase = host->pcictrl_mmiobase;
 
-	pm_pcictrl_reg->pciclkgat_reg = readb(addrbase + VIA_CRDR_PCICLKGATT);
+	pm_pcictrl_reg->pciclkgat_reg = pete_readb("drivers/mmc/host/via-sdmmc.c:373", addrbase + VIA_CRDR_PCICLKGATT);
 	pm_pcictrl_reg->pciclkgat_reg |=
 		VIA_CRDR_PCICLKGATT_3V3 | VIA_CRDR_PCICLKGATT_PAD_PWRON;
-	pm_pcictrl_reg->pcisdclk_reg = readb(addrbase + VIA_CRDR_PCISDCCLK);
-	pm_pcictrl_reg->pcidmaclk_reg = readb(addrbase + VIA_CRDR_PCIDMACLK);
-	pm_pcictrl_reg->pciintctrl_reg = readb(addrbase + VIA_CRDR_PCIINTCTRL);
+	pm_pcictrl_reg->pcisdclk_reg = pete_readb("drivers/mmc/host/via-sdmmc.c:376", addrbase + VIA_CRDR_PCISDCCLK);
+	pm_pcictrl_reg->pcidmaclk_reg = pete_readb("drivers/mmc/host/via-sdmmc.c:377", addrbase + VIA_CRDR_PCIDMACLK);
+	pm_pcictrl_reg->pciintctrl_reg = pete_readb("drivers/mmc/host/via-sdmmc.c:378", addrbase + VIA_CRDR_PCIINTCTRL);
 	pm_pcictrl_reg->pciintstatus_reg =
-		readb(addrbase + VIA_CRDR_PCIINTSTATUS);
-	pm_pcictrl_reg->pcitmoctrl_reg = readb(addrbase + VIA_CRDR_PCITMOCTRL);
+		pete_readb("drivers/mmc/host/via-sdmmc.c:380", addrbase + VIA_CRDR_PCIINTSTATUS);
+	pm_pcictrl_reg->pcitmoctrl_reg = pete_readb("drivers/mmc/host/via-sdmmc.c:381", addrbase + VIA_CRDR_PCITMOCTRL);
 }
 
 static void via_restore_pcictrlreg(struct via_crdr_mmc_host *host)
@@ -389,13 +389,13 @@ static void via_restore_pcictrlreg(struct via_crdr_mmc_host *host)
 	pm_pcictrl_reg = &(host->pm_pcictrl_reg);
 	addrbase = host->pcictrl_mmiobase;
 
-	writeb(pm_pcictrl_reg->pciclkgat_reg, addrbase + VIA_CRDR_PCICLKGATT);
-	writeb(pm_pcictrl_reg->pcisdclk_reg, addrbase + VIA_CRDR_PCISDCCLK);
-	writeb(pm_pcictrl_reg->pcidmaclk_reg, addrbase + VIA_CRDR_PCIDMACLK);
-	writeb(pm_pcictrl_reg->pciintctrl_reg, addrbase + VIA_CRDR_PCIINTCTRL);
-	writeb(pm_pcictrl_reg->pciintstatus_reg,
+	pete_writeb("drivers/mmc/host/via-sdmmc.c:392", pm_pcictrl_reg->pciclkgat_reg, addrbase + VIA_CRDR_PCICLKGATT);
+	pete_writeb("drivers/mmc/host/via-sdmmc.c:393", pm_pcictrl_reg->pcisdclk_reg, addrbase + VIA_CRDR_PCISDCCLK);
+	pete_writeb("drivers/mmc/host/via-sdmmc.c:394", pm_pcictrl_reg->pcidmaclk_reg, addrbase + VIA_CRDR_PCIDMACLK);
+	pete_writeb("drivers/mmc/host/via-sdmmc.c:395", pm_pcictrl_reg->pciintctrl_reg, addrbase + VIA_CRDR_PCIINTCTRL);
+	pete_writeb("drivers/mmc/host/via-sdmmc.c:396", pm_pcictrl_reg->pciintstatus_reg,
 		addrbase + VIA_CRDR_PCIINTSTATUS);
-	writeb(pm_pcictrl_reg->pcitmoctrl_reg, addrbase + VIA_CRDR_PCITMOCTRL);
+	pete_writeb("drivers/mmc/host/via-sdmmc.c:398", pm_pcictrl_reg->pcitmoctrl_reg, addrbase + VIA_CRDR_PCITMOCTRL);
 }
 
 static void via_save_sdcreg(struct via_crdr_mmc_host *host)
@@ -468,9 +468,9 @@ static void via_set_ddma(struct via_crdr_mmc_host *host,
 	/* It seems that our DMA can not work normally with 375kHz clock */
 	/* FIXME: don't brute-force 8MHz but use PIO at 375kHz !! */
 	addrbase = host->pcictrl_mmiobase;
-	if (readb(addrbase + VIA_CRDR_PCISDCCLK) == PCI_CLK_375K) {
+	if (pete_readb("drivers/mmc/host/via-sdmmc.c:471", addrbase + VIA_CRDR_PCISDCCLK) == PCI_CLK_375K) {
 		dev_info(host->mmc->parent, "forcing card speed to 8MHz\n");
-		writeb(PCI_CLK_8M, addrbase + VIA_CRDR_PCISDCCLK);
+		pete_writeb("drivers/mmc/host/via-sdmmc.c:473", PCI_CLK_8M, addrbase + VIA_CRDR_PCISDCCLK);
 	}
 }
 
@@ -670,16 +670,16 @@ static void via_sdc_request(struct mmc_host *mmc, struct mmc_request *mrq)
 	spin_lock_irqsave(&host->lock, flags);
 
 	addrbase = host->pcictrl_mmiobase;
-	writeb(VIA_CRDR_PCIDMACLK_SDC, addrbase + VIA_CRDR_PCIDMACLK);
+	pete_writeb("drivers/mmc/host/via-sdmmc.c:673", VIA_CRDR_PCIDMACLK_SDC, addrbase + VIA_CRDR_PCIDMACLK);
 
-	status = readw(host->sdhc_mmiobase + VIA_CRDR_SDSTATUS);
+	status = pete_readw("drivers/mmc/host/via-sdmmc.c:675", host->sdhc_mmiobase + VIA_CRDR_SDSTATUS);
 	status &= VIA_CRDR_SDSTS_W1C_MASK;
-	writew(status, host->sdhc_mmiobase + VIA_CRDR_SDSTATUS);
+	pete_writew("drivers/mmc/host/via-sdmmc.c:677", status, host->sdhc_mmiobase + VIA_CRDR_SDSTATUS);
 
 	WARN_ON(host->mrq != NULL);
 	host->mrq = mrq;
 
-	status = readw(host->sdhc_mmiobase + VIA_CRDR_SDSTATUS);
+	status = pete_readw("drivers/mmc/host/via-sdmmc.c:682", host->sdhc_mmiobase + VIA_CRDR_SDSTATUS);
 	if (!(status & VIA_CRDR_SDSTS_SLOTG) || host->reject) {
 		host->mrq->cmd->error = -ENOMEDIUM;
 		tasklet_schedule(&host->finish_tasklet);
@@ -700,7 +700,7 @@ static void via_sdc_set_power(struct via_crdr_mmc_host *host,
 
 	host->power = (1 << power);
 
-	gatt = readb(host->pcictrl_mmiobase + VIA_CRDR_PCICLKGATT);
+	gatt = pete_readb("drivers/mmc/host/via-sdmmc.c:703", host->pcictrl_mmiobase + VIA_CRDR_PCICLKGATT);
 	if (host->power == MMC_VDD_165_195)
 		gatt &= ~VIA_CRDR_PCICLKGATT_3V3;
 	else
@@ -709,7 +709,7 @@ static void via_sdc_set_power(struct via_crdr_mmc_host *host,
 		gatt |= VIA_CRDR_PCICLKGATT_PAD_PWRON;
 	else
 		gatt &= ~VIA_CRDR_PCICLKGATT_PAD_PWRON;
-	writeb(gatt, host->pcictrl_mmiobase + VIA_CRDR_PCICLKGATT);
+	pete_writeb("drivers/mmc/host/via-sdmmc.c:712", gatt, host->pcictrl_mmiobase + VIA_CRDR_PCICLKGATT);
 
 	spin_unlock_irqrestore(&host->lock, flags);
 
@@ -766,8 +766,8 @@ static void via_sdc_set_ios(struct mmc_host *mmc, struct mmc_ios *ios)
 		clock = PCI_CLK_375K;
 
 	addrbase = host->pcictrl_mmiobase;
-	if (readb(addrbase + VIA_CRDR_PCISDCCLK) != clock)
-		writeb(clock, addrbase + VIA_CRDR_PCISDCCLK);
+	if (pete_readb("drivers/mmc/host/via-sdmmc.c:769", addrbase + VIA_CRDR_PCISDCCLK) != clock)
+		pete_writeb("drivers/mmc/host/via-sdmmc.c:770", clock, addrbase + VIA_CRDR_PCISDCCLK);
 
 	spin_unlock_irqrestore(&host->lock, flags);
 
@@ -787,7 +787,7 @@ static int via_sdc_get_ro(struct mmc_host *mmc)
 
 	spin_lock_irqsave(&host->lock, flags);
 
-	status = readw(host->sdhc_mmiobase + VIA_CRDR_SDSTATUS);
+	status = pete_readw("drivers/mmc/host/via-sdmmc.c:790", host->sdhc_mmiobase + VIA_CRDR_SDSTATUS);
 
 	spin_unlock_irqrestore(&host->lock, flags);
 
@@ -817,10 +817,10 @@ static void via_reset_pcictrl(struct via_crdr_mmc_host *host)
 		gatt &= VIA_CRDR_PCICLKGATT_3V3;
 	else
 		gatt |= VIA_CRDR_PCICLKGATT_3V3;
-	writeb(gatt, host->pcictrl_mmiobase + VIA_CRDR_PCICLKGATT);
+	pete_writeb("drivers/mmc/host/via-sdmmc.c:820", gatt, host->pcictrl_mmiobase + VIA_CRDR_PCICLKGATT);
 	via_pwron_sleep(host);
 	gatt |= VIA_CRDR_PCICLKGATT_SFTRST;
-	writeb(gatt, host->pcictrl_mmiobase + VIA_CRDR_PCICLKGATT);
+	pete_writeb("drivers/mmc/host/via-sdmmc.c:823", gatt, host->pcictrl_mmiobase + VIA_CRDR_PCICLKGATT);
 	msleep(3);
 
 	spin_lock_irqsave(&host->lock, flags);
@@ -882,14 +882,14 @@ static irqreturn_t via_sdc_isr(int irq, void *dev_id)
 	spin_lock(&sdhost->lock);
 
 	addrbase = sdhost->pcictrl_mmiobase;
-	pci_status = readb(addrbase + VIA_CRDR_PCIINTSTATUS);
+	pci_status = pete_readb("drivers/mmc/host/via-sdmmc.c:885", addrbase + VIA_CRDR_PCIINTSTATUS);
 	if (!(pci_status & VIA_CRDR_PCIINTSTATUS_SDC)) {
 		result = IRQ_NONE;
 		goto out;
 	}
 
 	addrbase = sdhost->sdhc_mmiobase;
-	sd_status = readw(addrbase + VIA_CRDR_SDSTATUS);
+	sd_status = pete_readw("drivers/mmc/host/via-sdmmc.c:892", addrbase + VIA_CRDR_SDSTATUS);
 	sd_status &= VIA_CRDR_SDSTS_INT_MASK;
 	sd_status &= ~VIA_CRDR_SDSTS_IGN_MASK;
 	if (!sd_status) {
@@ -898,7 +898,7 @@ static irqreturn_t via_sdc_isr(int irq, void *dev_id)
 	}
 
 	if (sd_status & VIA_CRDR_SDSTS_CIR) {
-		writew(sd_status & VIA_CRDR_SDSTS_CIR,
+		pete_writew("drivers/mmc/host/via-sdmmc.c:901", sd_status & VIA_CRDR_SDSTS_CIR,
 			addrbase + VIA_CRDR_SDSTATUS);
 
 		schedule_work(&sdhost->carddet_work);
@@ -906,12 +906,12 @@ static irqreturn_t via_sdc_isr(int irq, void *dev_id)
 
 	sd_status &= ~VIA_CRDR_SDSTS_CIR;
 	if (sd_status & VIA_CRDR_SDSTS_CMD_MASK) {
-		writew(sd_status & VIA_CRDR_SDSTS_CMD_MASK,
+		pete_writew("drivers/mmc/host/via-sdmmc.c:909", sd_status & VIA_CRDR_SDSTS_CMD_MASK,
 			addrbase + VIA_CRDR_SDSTATUS);
 		via_sdc_cmd_isr(sdhost, sd_status & VIA_CRDR_SDSTS_CMD_MASK);
 	}
 	if (sd_status & VIA_CRDR_SDSTS_DATA_MASK) {
-		writew(sd_status & VIA_CRDR_SDSTS_DATA_MASK,
+		pete_writew("drivers/mmc/host/via-sdmmc.c:914", sd_status & VIA_CRDR_SDSTS_DATA_MASK,
 			addrbase + VIA_CRDR_SDSTATUS);
 		via_sdc_data_isr(sdhost, sd_status & VIA_CRDR_SDSTS_DATA_MASK);
 	}
@@ -920,7 +920,7 @@ static irqreturn_t via_sdc_isr(int irq, void *dev_id)
 	if (sd_status) {
 		pr_err("%s: Unexpected interrupt 0x%x\n",
 		       mmc_hostname(sdhost->mmc), sd_status);
-		writew(sd_status, addrbase + VIA_CRDR_SDSTATUS);
+		pete_writew("drivers/mmc/host/via-sdmmc.c:923", sd_status, addrbase + VIA_CRDR_SDSTATUS);
 	}
 
 	result = IRQ_HANDLED;
@@ -996,10 +996,10 @@ static void via_sdc_card_detect(struct work_struct *work)
 	spin_lock_irqsave(&host->lock, flags);
 
 	addrbase = host->pcictrl_mmiobase;
-	writeb(VIA_CRDR_PCIDMACLK_SDC, addrbase + VIA_CRDR_PCIDMACLK);
+	pete_writeb("drivers/mmc/host/via-sdmmc.c:999", VIA_CRDR_PCIDMACLK_SDC, addrbase + VIA_CRDR_PCIDMACLK);
 
 	addrbase = host->sdhc_mmiobase;
-	status = readw(addrbase + VIA_CRDR_SDSTATUS);
+	status = pete_readw("drivers/mmc/host/via-sdmmc.c:1002", addrbase + VIA_CRDR_SDSTATUS);
 	if (!(status & VIA_CRDR_SDSTS_SLOTG)) {
 		if (host->mrq) {
 			pr_err("%s: Card removed during transfer!\n",
@@ -1060,15 +1060,15 @@ static void via_init_mmc_host(struct via_crdr_mmc_host *host)
 	lenreg = VIA_CRDR_SDBLKLEN_GPIDET | VIA_CRDR_SDBLKLEN_INTEN;
 	pete_writel("drivers/mmc/host/via-sdmmc.c:1061", lenreg, addrbase + VIA_CRDR_SDBLKLEN);
 
-	status = readw(addrbase + VIA_CRDR_SDSTATUS);
+	status = pete_readw("drivers/mmc/host/via-sdmmc.c:1063", addrbase + VIA_CRDR_SDSTATUS);
 	status &= VIA_CRDR_SDSTS_W1C_MASK;
-	writew(status, addrbase + VIA_CRDR_SDSTATUS);
+	pete_writew("drivers/mmc/host/via-sdmmc.c:1065", status, addrbase + VIA_CRDR_SDSTATUS);
 
-	status = readw(addrbase + VIA_CRDR_SDSTATUS2);
+	status = pete_readw("drivers/mmc/host/via-sdmmc.c:1067", addrbase + VIA_CRDR_SDSTATUS2);
 	status |= VIA_CRDR_SDSTS_CFE;
-	writew(status, addrbase + VIA_CRDR_SDSTATUS2);
+	pete_writew("drivers/mmc/host/via-sdmmc.c:1069", status, addrbase + VIA_CRDR_SDSTATUS2);
 
-	writeb(0x0, addrbase + VIA_CRDR_SDEXTCTRL);
+	pete_writeb("drivers/mmc/host/via-sdmmc.c:1071", 0x0, addrbase + VIA_CRDR_SDEXTCTRL);
 
 	pete_writel("drivers/mmc/host/via-sdmmc.c:1073", VIA_CRDR_SDACTIVE_INTMASK, addrbase + VIA_CRDR_SDINTMASK);
 	msleep(1);
@@ -1127,10 +1127,10 @@ static int via_sd_probe(struct pci_dev *pcidev,
 	sdhost->power = MMC_VDD_165_195;
 
 	gatt = VIA_CRDR_PCICLKGATT_3V3 | VIA_CRDR_PCICLKGATT_PAD_PWRON;
-	writeb(gatt, sdhost->pcictrl_mmiobase + VIA_CRDR_PCICLKGATT);
+	pete_writeb("drivers/mmc/host/via-sdmmc.c:1130", gatt, sdhost->pcictrl_mmiobase + VIA_CRDR_PCICLKGATT);
 	via_pwron_sleep(sdhost);
 	gatt |= VIA_CRDR_PCICLKGATT_SFTRST;
-	writeb(gatt, sdhost->pcictrl_mmiobase + VIA_CRDR_PCICLKGATT);
+	pete_writeb("drivers/mmc/host/via-sdmmc.c:1133", gatt, sdhost->pcictrl_mmiobase + VIA_CRDR_PCICLKGATT);
 	msleep(3);
 
 	via_init_mmc_host(sdhost);
@@ -1141,9 +1141,9 @@ static int via_sd_probe(struct pci_dev *pcidev,
 	if (ret)
 		goto unmap;
 
-	writeb(VIA_CRDR_PCIINTCTRL_SDCIRQEN,
+	pete_writeb("drivers/mmc/host/via-sdmmc.c:1144", VIA_CRDR_PCIINTCTRL_SDCIRQEN,
 	       sdhost->pcictrl_mmiobase + VIA_CRDR_PCIINTCTRL);
-	writeb(VIA_CRDR_PCITMOCTRL_1024MS,
+	pete_writeb("drivers/mmc/host/via-sdmmc.c:1146", VIA_CRDR_PCITMOCTRL_1024MS,
 	       sdhost->pcictrl_mmiobase + VIA_CRDR_PCITMOCTRL);
 
 	/* device-specific quirks */
@@ -1182,7 +1182,7 @@ static void via_sd_remove(struct pci_dev *pcidev)
 	sdhost->reject = 1;
 
 	/* Disable generating further interrupts */
-	writeb(0x0, sdhost->pcictrl_mmiobase + VIA_CRDR_PCIINTCTRL);
+	pete_writeb("drivers/mmc/host/via-sdmmc.c:1185", 0x0, sdhost->pcictrl_mmiobase + VIA_CRDR_PCIINTCTRL);
 
 	if (sdhost->mrq) {
 		pr_err("%s: Controller removed during "
@@ -1207,9 +1207,9 @@ static void via_sd_remove(struct pci_dev *pcidev)
 	tasklet_kill(&sdhost->finish_tasklet);
 
 	/* switch off power */
-	gatt = readb(sdhost->pcictrl_mmiobase + VIA_CRDR_PCICLKGATT);
+	gatt = pete_readb("drivers/mmc/host/via-sdmmc.c:1210", sdhost->pcictrl_mmiobase + VIA_CRDR_PCICLKGATT);
 	gatt &= ~VIA_CRDR_PCICLKGATT_PAD_PWRON;
-	writeb(gatt, sdhost->pcictrl_mmiobase + VIA_CRDR_PCICLKGATT);
+	pete_writeb("drivers/mmc/host/via-sdmmc.c:1212", gatt, sdhost->pcictrl_mmiobase + VIA_CRDR_PCICLKGATT);
 
 	iounmap(sdhost->mmiobase);
 	dev_set_drvdata(&pcidev->dev, NULL);
@@ -1237,13 +1237,13 @@ static void __maybe_unused via_init_sdc_pm(struct via_crdr_mmc_host *host)
 	lenreg = VIA_CRDR_SDBLKLEN_GPIDET | VIA_CRDR_SDBLKLEN_INTEN;
 	pete_writel("drivers/mmc/host/via-sdmmc.c:1238", lenreg, addrbase + VIA_CRDR_SDBLKLEN);
 
-	status = readw(addrbase + VIA_CRDR_SDSTATUS);
+	status = pete_readw("drivers/mmc/host/via-sdmmc.c:1240", addrbase + VIA_CRDR_SDSTATUS);
 	status &= VIA_CRDR_SDSTS_W1C_MASK;
-	writew(status, addrbase + VIA_CRDR_SDSTATUS);
+	pete_writew("drivers/mmc/host/via-sdmmc.c:1242", status, addrbase + VIA_CRDR_SDSTATUS);
 
-	status = readw(addrbase + VIA_CRDR_SDSTATUS2);
+	status = pete_readw("drivers/mmc/host/via-sdmmc.c:1244", addrbase + VIA_CRDR_SDSTATUS2);
 	status |= VIA_CRDR_SDSTS_CFE;
-	writew(status, addrbase + VIA_CRDR_SDSTATUS2);
+	pete_writew("drivers/mmc/host/via-sdmmc.c:1246", status, addrbase + VIA_CRDR_SDSTATUS2);
 
 	pete_writel("drivers/mmc/host/via-sdmmc.c:1248", pm_sdhcreg->sdcontrol_reg, addrbase + VIA_CRDR_SDCTRL);
 	pete_writel("drivers/mmc/host/via-sdmmc.c:1249", pm_sdhcreg->sdcmdarg_reg, addrbase + VIA_CRDR_SDCARG);
@@ -1285,10 +1285,10 @@ static int __maybe_unused via_sd_resume(struct device *dev)
 		gatt &= ~VIA_CRDR_PCICLKGATT_3V3;
 	else
 		gatt |= VIA_CRDR_PCICLKGATT_3V3;
-	writeb(gatt, sdhost->pcictrl_mmiobase + VIA_CRDR_PCICLKGATT);
+	pete_writeb("drivers/mmc/host/via-sdmmc.c:1288", gatt, sdhost->pcictrl_mmiobase + VIA_CRDR_PCICLKGATT);
 	via_pwron_sleep(sdhost);
 	gatt |= VIA_CRDR_PCICLKGATT_SFTRST;
-	writeb(gatt, sdhost->pcictrl_mmiobase + VIA_CRDR_PCICLKGATT);
+	pete_writeb("drivers/mmc/host/via-sdmmc.c:1291", gatt, sdhost->pcictrl_mmiobase + VIA_CRDR_PCICLKGATT);
 	msleep(3);
 
 	msleep(100);

@@ -44,7 +44,7 @@ void set_latch_u5(unsigned char or_mask, unsigned char nand_mask)
 	spin_lock_irqsave(&dev3.lock, flags);
 
 	dev3.state = (dev3.state | or_mask) & ~nand_mask;
-	writeb(dev3.state, dev3.base);
+	pete_writeb("arch/mips/rb532/devices.c:47", dev3.state, dev3.base);
 
 	spin_unlock_irqrestore(&dev3.lock, flags);
 }
@@ -148,7 +148,7 @@ static void rb532_cmd_ctrl(struct nand_chip *chip, int cmd, unsigned int ctrl)
 		set_latch_u5(orbits, nandbits);
 	}
 	if (cmd != NAND_CMD_NONE)
-		writeb(cmd, chip->legacy.IO_ADDR_W);
+		pete_writeb("arch/mips/rb532/devices.c:151", cmd, chip->legacy.IO_ADDR_W);
 }
 
 static struct resource nand_slot0_res[] = {

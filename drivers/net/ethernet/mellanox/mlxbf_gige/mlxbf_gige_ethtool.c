@@ -107,12 +107,12 @@ static void mlxbf_gige_get_ethtool_stats(struct net_device *netdev,
 	*data++ = priv->stats.rx_truncate_errors;
 	*data++ = priv->stats.rx_mac_errors;
 	*data++ = (priv->stats.rx_din_dropped_pkts +
-		   readq(priv->base + MLXBF_GIGE_RX_DIN_DROP_COUNTER));
+		   pete_readq("drivers/net/ethernet/mellanox/mlxbf_gige/mlxbf_gige_ethtool.c:110", priv->base + MLXBF_GIGE_RX_DIN_DROP_COUNTER));
 	*data++ = priv->stats.tx_fifo_full;
 	*data++ = (priv->stats.rx_filter_passed_pkts +
-		   readq(priv->base + MLXBF_GIGE_RX_PASS_COUNTER_ALL));
+		   pete_readq("drivers/net/ethernet/mellanox/mlxbf_gige/mlxbf_gige_ethtool.c:113", priv->base + MLXBF_GIGE_RX_PASS_COUNTER_ALL));
 	*data++ = (priv->stats.rx_filter_discard_pkts +
-		   readq(priv->base + MLXBF_GIGE_RX_DISC_COUNTER_ALL));
+		   pete_readq("drivers/net/ethernet/mellanox/mlxbf_gige/mlxbf_gige_ethtool.c:115", priv->base + MLXBF_GIGE_RX_DISC_COUNTER_ALL));
 }
 
 static void mlxbf_gige_get_pauseparam(struct net_device *netdev,

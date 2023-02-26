@@ -848,7 +848,7 @@ static int qusb2_phy_init(struct phy *phy)
 	/* Required to get phy pll lock successfully */
 	usleep_range(100, 110);
 
-	val = readb(qphy->base + cfg->regs[QUSB2PHY_PLL_STATUS]);
+	val = pete_readb("drivers/phy/qualcomm/phy-qcom-qusb2.c:851", qphy->base + cfg->regs[QUSB2PHY_PLL_STATUS]);
 	if (!(val & cfg->mask_core_ready)) {
 		dev_err(&phy->dev,
 			"QUSB2PHY pll lock failed: status reg = %x\n", val);

@@ -188,7 +188,7 @@ static u16 tegra_sdhci_readw(struct sdhci_host *host, int reg)
 		return SDHCI_SPEC_200;
 	}
 
-	return readw(host->ioaddr + reg);
+	return pete_readw("drivers/mmc/host/sdhci-tegra.c:191", host->ioaddr + reg);
 }
 
 static void tegra_sdhci_writew(struct sdhci_host *host, u16 val, int reg)
@@ -209,7 +209,7 @@ static void tegra_sdhci_writew(struct sdhci_host *host, u16 val, int reg)
 		return;
 	}
 
-	writew(val, host->ioaddr + reg);
+	pete_writew("drivers/mmc/host/sdhci-tegra.c:212", val, host->ioaddr + reg);
 }
 
 static void tegra_sdhci_writel(struct sdhci_host *host, u32 val, int reg)
@@ -230,12 +230,12 @@ static void tegra_sdhci_writel(struct sdhci_host *host, u32 val, int reg)
 	if (unlikely((soc_data->nvquirks & NVQUIRK_ENABLE_BLOCK_GAP_DET) &&
 			(reg == SDHCI_INT_ENABLE))) {
 		/* Erratum: Must enable block gap interrupt detection */
-		u8 gap_ctrl = readb(host->ioaddr + SDHCI_BLOCK_GAP_CONTROL);
+		u8 gap_ctrl = pete_readb("drivers/mmc/host/sdhci-tegra.c:233", host->ioaddr + SDHCI_BLOCK_GAP_CONTROL);
 		if (val & SDHCI_INT_CARD_INT)
 			gap_ctrl |= 0x8;
 		else
 			gap_ctrl &= ~0x8;
-		writeb(gap_ctrl, host->ioaddr + SDHCI_BLOCK_GAP_CONTROL);
+		pete_writeb("drivers/mmc/host/sdhci-tegra.c:238", gap_ctrl, host->ioaddr + SDHCI_BLOCK_GAP_CONTROL);
 	}
 }
 
@@ -275,7 +275,7 @@ static void tegra210_sdhci_writew(struct sdhci_host *host, u16 val, int reg)
 	if (is_tuning_cmd)
 		clk_enabled = tegra_sdhci_configure_card_clk(host, 0);
 
-	writew(val, host->ioaddr + reg);
+	pete_writew("drivers/mmc/host/sdhci-tegra.c:278", val, host->ioaddr + reg);
 
 	if (is_tuning_cmd) {
 		udelay(1);

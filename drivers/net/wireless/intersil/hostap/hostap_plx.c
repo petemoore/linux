@@ -282,11 +282,11 @@ static void prism2_plx_cor_sreset(local_info_t *local)
 		mdelay(2);
 	} else {
 		/* PLX9052 */
-		corsave = readb(hw_priv->attr_mem + hw_priv->cor_offset);
-		writeb(corsave | COR_SRESET,
+		corsave = pete_readb("drivers/net/wireless/intersil/hostap/hostap_plx.c:285", hw_priv->attr_mem + hw_priv->cor_offset);
+		pete_writeb("drivers/net/wireless/intersil/hostap/hostap_plx.c:286", corsave | COR_SRESET,
 		       hw_priv->attr_mem + hw_priv->cor_offset);
 		mdelay(2);
-		writeb(corsave & ~COR_SRESET,
+		pete_writeb("drivers/net/wireless/intersil/hostap/hostap_plx.c:289", corsave & ~COR_SRESET,
 		       hw_priv->attr_mem + hw_priv->cor_offset);
 		mdelay(2);
 	}
@@ -309,13 +309,13 @@ static void prism2_plx_genesis_reset(local_info_t *local, int hcr)
 		mdelay(10);
 	} else {
 		/* PLX9052 */
-		corsave = readb(hw_priv->attr_mem + hw_priv->cor_offset);
-		writeb(corsave | COR_SRESET,
+		corsave = pete_readb("drivers/net/wireless/intersil/hostap/hostap_plx.c:312", hw_priv->attr_mem + hw_priv->cor_offset);
+		pete_writeb("drivers/net/wireless/intersil/hostap/hostap_plx.c:313", corsave | COR_SRESET,
 		       hw_priv->attr_mem + hw_priv->cor_offset);
 		mdelay(10);
-		writeb(hcr, hw_priv->attr_mem + hw_priv->cor_offset + 2);
+		pete_writeb("drivers/net/wireless/intersil/hostap/hostap_plx.c:316", hcr, hw_priv->attr_mem + hw_priv->cor_offset + 2);
 		mdelay(10);
-		writeb(corsave & ~COR_SRESET,
+		pete_writeb("drivers/net/wireless/intersil/hostap/hostap_plx.c:318", corsave & ~COR_SRESET,
 		       hw_priv->attr_mem + hw_priv->cor_offset);
 		mdelay(10);
 	}
@@ -350,7 +350,7 @@ static int prism2_plx_check_cis(void __iomem *attr_mem, int attr_len,
 
 	/* read CIS; it is in even offsets in the beginning of attr_mem */
 	for (i = 0; i < CIS_MAX_LEN; i++)
-		cis[i] = readb(attr_mem + 2 * i);
+		cis[i] = pete_readb("drivers/net/wireless/intersil/hostap/hostap_plx.c:353", attr_mem + 2 * i);
 	printk(KERN_DEBUG "%s: CIS: %6ph ...\n", dev_info, cis);
 
 	/* set reasonable defaults for Prism2 cards just in case CIS parsing
@@ -507,7 +507,7 @@ static int prism2_plx_probe(struct pci_dev *pdev,
 		       "adapter\n");
 
 		/* Write COR to enable PC Card */
-		writeb(cor_index | COR_LEVLREQ | COR_ENABLE_FUNC,
+		pete_writeb("drivers/net/wireless/intersil/hostap/hostap_plx.c:510", cor_index | COR_LEVLREQ | COR_ENABLE_FUNC,
 		       attr_mem + cor_offset);
 
 		/* Enable PCI interrupts if they are not already enabled */

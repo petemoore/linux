@@ -2255,14 +2255,14 @@ ips_get_bios_version(ips_ha_t * ha, int intr)
 			if (ha->pcidev->revision == IPS_REVID_TROMBONE64)
 				udelay(25);	/* 25 us */
 
-			if (readb(ha->mem_ptr + IPS_REG_FLDP) != 0x55)
+			if (pete_readb("drivers/scsi/ips.c:2258", ha->mem_ptr + IPS_REG_FLDP) != 0x55)
 				return;
 
 			pete_writel("drivers/scsi/ips.c:2261", 1, ha->mem_ptr + IPS_REG_FLAP);
 			if (ha->pcidev->revision == IPS_REVID_TROMBONE64)
 				udelay(25);	/* 25 us */
 
-			if (readb(ha->mem_ptr + IPS_REG_FLDP) != 0xAA)
+			if (pete_readb("drivers/scsi/ips.c:2265", ha->mem_ptr + IPS_REG_FLDP) != 0xAA)
 				return;
 
 			/* Get Major version */
@@ -2270,19 +2270,19 @@ ips_get_bios_version(ips_ha_t * ha, int intr)
 			if (ha->pcidev->revision == IPS_REVID_TROMBONE64)
 				udelay(25);	/* 25 us */
 
-			major = readb(ha->mem_ptr + IPS_REG_FLDP);
+			major = pete_readb("drivers/scsi/ips.c:2273", ha->mem_ptr + IPS_REG_FLDP);
 
 			/* Get Minor version */
 			pete_writel("drivers/scsi/ips.c:2276", 0x1FE, ha->mem_ptr + IPS_REG_FLAP);
 			if (ha->pcidev->revision == IPS_REVID_TROMBONE64)
 				udelay(25);	/* 25 us */
-			minor = readb(ha->mem_ptr + IPS_REG_FLDP);
+			minor = pete_readb("drivers/scsi/ips.c:2279", ha->mem_ptr + IPS_REG_FLDP);
 
 			/* Get SubMinor version */
 			pete_writel("drivers/scsi/ips.c:2282", 0x1FD, ha->mem_ptr + IPS_REG_FLAP);
 			if (ha->pcidev->revision == IPS_REVID_TROMBONE64)
 				udelay(25);	/* 25 us */
-			subminor = readb(ha->mem_ptr + IPS_REG_FLDP);
+			subminor = pete_readb("drivers/scsi/ips.c:2285", ha->mem_ptr + IPS_REG_FLDP);
 
 		} else {
 			/* Programmed I/O */
@@ -4505,8 +4505,8 @@ ips_isinit_copperhead_memio(ips_ha_t * ha)
 
 	METHOD_TRACE("ips_is_init_copperhead_memio", 1);
 
-	isr = readb(ha->mem_ptr + IPS_REG_HISR);
-	scpr = readb(ha->mem_ptr + IPS_REG_SCPR);
+	isr = pete_readb("drivers/scsi/ips.c:4508", ha->mem_ptr + IPS_REG_HISR);
+	scpr = pete_readb("drivers/scsi/ips.c:4509", ha->mem_ptr + IPS_REG_SCPR);
 
 	if (((isr & IPS_BIT_EI) == 0) && ((scpr & IPS_BIT_EBM) == 0))
 		return (0);
@@ -4664,8 +4664,8 @@ ips_enable_int_copperhead_memio(ips_ha_t * ha)
 {
 	METHOD_TRACE("ips_enable_int_copperhead_memio", 1);
 
-	writeb(IPS_BIT_EI, ha->mem_ptr + IPS_REG_HISR);
-	readb(ha->mem_ptr + IPS_REG_HISR);	/*Ensure PCI Posting Completes*/
+	pete_writeb("drivers/scsi/ips.c:4667", IPS_BIT_EI, ha->mem_ptr + IPS_REG_HISR);
+	pete_readb("drivers/scsi/ips.c:4668", ha->mem_ptr + IPS_REG_HISR);	/*Ensure PCI Posting Completes*/
 }
 
 /****************************************************************************/
@@ -4803,7 +4803,7 @@ ips_init_copperhead_memio(ips_ha_t * ha)
 
 	for (i = 0; i < IPS_MAX_POST_BYTES; i++) {
 		for (j = 0; j < 45; j++) {
-			Isr = readb(ha->mem_ptr + IPS_REG_HISR);
+			Isr = pete_readb("drivers/scsi/ips.c:4806", ha->mem_ptr + IPS_REG_HISR);
 			if (Isr & IPS_BIT_GHI)
 				break;
 
@@ -4815,8 +4815,8 @@ ips_init_copperhead_memio(ips_ha_t * ha)
 			/* error occurred */
 			return (0);
 
-		PostByte[i] = readb(ha->mem_ptr + IPS_REG_ISPR);
-		writeb(Isr, ha->mem_ptr + IPS_REG_HISR);
+		PostByte[i] = pete_readb("drivers/scsi/ips.c:4818", ha->mem_ptr + IPS_REG_ISPR);
+		pete_writeb("drivers/scsi/ips.c:4819", Isr, ha->mem_ptr + IPS_REG_HISR);
 	}
 
 	if (PostByte[0] < IPS_GOOD_POST_STATUS) {
@@ -4829,7 +4829,7 @@ ips_init_copperhead_memio(ips_ha_t * ha)
 
 	for (i = 0; i < IPS_MAX_CONFIG_BYTES; i++) {
 		for (j = 0; j < 240; j++) {
-			Isr = readb(ha->mem_ptr + IPS_REG_HISR);
+			Isr = pete_readb("drivers/scsi/ips.c:4832", ha->mem_ptr + IPS_REG_HISR);
 			if (Isr & IPS_BIT_GHI)
 				break;
 
@@ -4841,12 +4841,12 @@ ips_init_copperhead_memio(ips_ha_t * ha)
 			/* error occurred */
 			return (0);
 
-		readb(ha->mem_ptr + IPS_REG_ISPR);
-		writeb(Isr, ha->mem_ptr + IPS_REG_HISR);
+		pete_readb("drivers/scsi/ips.c:4844", ha->mem_ptr + IPS_REG_ISPR);
+		pete_writeb("drivers/scsi/ips.c:4845", Isr, ha->mem_ptr + IPS_REG_HISR);
 	}
 
 	for (i = 0; i < 240; i++) {
-		Cbsp = readb(ha->mem_ptr + IPS_REG_CBSP);
+		Cbsp = pete_readb("drivers/scsi/ips.c:4849", ha->mem_ptr + IPS_REG_CBSP);
 
 		if ((Cbsp & IPS_BIT_OP) == 0)
 			break;
@@ -4863,14 +4863,14 @@ ips_init_copperhead_memio(ips_ha_t * ha)
 	pete_writel("drivers/scsi/ips.c:4863", 0x1010, ha->mem_ptr + IPS_REG_CCCR);
 
 	/* Enable busmastering */
-	writeb(IPS_BIT_EBM, ha->mem_ptr + IPS_REG_SCPR);
+	pete_writeb("drivers/scsi/ips.c:4866", IPS_BIT_EBM, ha->mem_ptr + IPS_REG_SCPR);
 
 	if (ha->pcidev->revision == IPS_REVID_TROMBONE64)
 		/* fix for anaconda64 */
 		pete_writel("drivers/scsi/ips.c:4870", 0, ha->mem_ptr + IPS_REG_NDAE);
 
 	/* Enable interrupts */
-	writeb(IPS_BIT_EI, ha->mem_ptr + IPS_REG_HISR);
+	pete_writeb("drivers/scsi/ips.c:4873", IPS_BIT_EI, ha->mem_ptr + IPS_REG_HISR);
 
 	/* if we get here then everything went OK */
 	return (1);
@@ -5062,12 +5062,12 @@ ips_reset_copperhead_memio(ips_ha_t * ha)
 	while (reset_counter < 2) {
 		reset_counter++;
 
-		writeb(IPS_BIT_RST, ha->mem_ptr + IPS_REG_SCPR);
+		pete_writeb("drivers/scsi/ips.c:5065", IPS_BIT_RST, ha->mem_ptr + IPS_REG_SCPR);
 
 		/* Delay for 1 Second */
 		MDELAY(IPS_ONE_SEC);
 
-		writeb(0, ha->mem_ptr + IPS_REG_SCPR);
+		pete_writeb("drivers/scsi/ips.c:5070", 0, ha->mem_ptr + IPS_REG_SCPR);
 
 		/* Delay for 1 Second */
 		MDELAY(IPS_ONE_SEC);
@@ -5484,7 +5484,7 @@ ips_isintr_copperhead_memio(ips_ha_t * ha)
 
 	METHOD_TRACE("ips_isintr_memio", 2);
 
-	Isr = readb(ha->mem_ptr + IPS_REG_HISR);
+	Isr = pete_readb("drivers/scsi/ips.c:5487", ha->mem_ptr + IPS_REG_HISR);
 
 	if (Isr == 0xFF)
 		/* ?!?! Nothing really there */
@@ -5495,7 +5495,7 @@ ips_isintr_copperhead_memio(ips_ha_t * ha)
 	else if (Isr & (IPS_BIT_SQO | IPS_BIT_GHI)) {
 		/* status queue overflow or GHI */
 		/* just clear the interrupt */
-		writeb(Isr, ha->mem_ptr + IPS_REG_HISR);
+		pete_writeb("drivers/scsi/ips.c:5498", Isr, ha->mem_ptr + IPS_REG_HISR);
 	}
 
 	return (0);
@@ -6141,22 +6141,22 @@ ips_erase_bios_memio(ips_ha_t * ha)
 	if (ha->pcidev->revision == IPS_REVID_TROMBONE64)
 		udelay(25);	/* 25 us */
 
-	writeb(0x50, ha->mem_ptr + IPS_REG_FLDP);
+	pete_writeb("drivers/scsi/ips.c:6144", 0x50, ha->mem_ptr + IPS_REG_FLDP);
 	if (ha->pcidev->revision == IPS_REVID_TROMBONE64)
 		udelay(25);	/* 25 us */
 
 	/* Erase Setup */
-	writeb(0x20, ha->mem_ptr + IPS_REG_FLDP);
+	pete_writeb("drivers/scsi/ips.c:6149", 0x20, ha->mem_ptr + IPS_REG_FLDP);
 	if (ha->pcidev->revision == IPS_REVID_TROMBONE64)
 		udelay(25);	/* 25 us */
 
 	/* Erase Confirm */
-	writeb(0xD0, ha->mem_ptr + IPS_REG_FLDP);
+	pete_writeb("drivers/scsi/ips.c:6154", 0xD0, ha->mem_ptr + IPS_REG_FLDP);
 	if (ha->pcidev->revision == IPS_REVID_TROMBONE64)
 		udelay(25);	/* 25 us */
 
 	/* Erase Status */
-	writeb(0x70, ha->mem_ptr + IPS_REG_FLDP);
+	pete_writeb("drivers/scsi/ips.c:6159", 0x70, ha->mem_ptr + IPS_REG_FLDP);
 	if (ha->pcidev->revision == IPS_REVID_TROMBONE64)
 		udelay(25);	/* 25 us */
 
@@ -6168,7 +6168,7 @@ ips_erase_bios_memio(ips_ha_t * ha)
 			udelay(25);	/* 25 us */
 		}
 
-		status = readb(ha->mem_ptr + IPS_REG_FLDP);
+		status = pete_readb("drivers/scsi/ips.c:6171", ha->mem_ptr + IPS_REG_FLDP);
 
 		if (status & 0x80)
 			break;
@@ -6182,7 +6182,7 @@ ips_erase_bios_memio(ips_ha_t * ha)
 		/* timeout */
 
 		/* try to suspend the erase */
-		writeb(0xB0, ha->mem_ptr + IPS_REG_FLDP);
+		pete_writeb("drivers/scsi/ips.c:6185", 0xB0, ha->mem_ptr + IPS_REG_FLDP);
 		if (ha->pcidev->revision == IPS_REVID_TROMBONE64)
 			udelay(25);	/* 25 us */
 
@@ -6194,7 +6194,7 @@ ips_erase_bios_memio(ips_ha_t * ha)
 				udelay(25);	/* 25 us */
 			}
 
-			status = readb(ha->mem_ptr + IPS_REG_FLDP);
+			status = pete_readb("drivers/scsi/ips.c:6197", ha->mem_ptr + IPS_REG_FLDP);
 
 			if (status & 0xC0)
 				break;
@@ -6218,12 +6218,12 @@ ips_erase_bios_memio(ips_ha_t * ha)
 
 	/* Otherwise, we were successful */
 	/* clear status */
-	writeb(0x50, ha->mem_ptr + IPS_REG_FLDP);
+	pete_writeb("drivers/scsi/ips.c:6221", 0x50, ha->mem_ptr + IPS_REG_FLDP);
 	if (ha->pcidev->revision == IPS_REVID_TROMBONE64)
 		udelay(25);	/* 25 us */
 
 	/* enable reads */
-	writeb(0xFF, ha->mem_ptr + IPS_REG_FLDP);
+	pete_writeb("drivers/scsi/ips.c:6226", 0xFF, ha->mem_ptr + IPS_REG_FLDP);
 	if (ha->pcidev->revision == IPS_REVID_TROMBONE64)
 		udelay(25);	/* 25 us */
 
@@ -6347,11 +6347,11 @@ ips_program_bios_memio(ips_ha_t * ha, char *buffer, uint32_t buffersize,
 		if (ha->pcidev->revision == IPS_REVID_TROMBONE64)
 			udelay(25);	/* 25 us */
 
-		writeb(0x40, ha->mem_ptr + IPS_REG_FLDP);
+		pete_writeb("drivers/scsi/ips.c:6350", 0x40, ha->mem_ptr + IPS_REG_FLDP);
 		if (ha->pcidev->revision == IPS_REVID_TROMBONE64)
 			udelay(25);	/* 25 us */
 
-		writeb(buffer[i], ha->mem_ptr + IPS_REG_FLDP);
+		pete_writeb("drivers/scsi/ips.c:6354", buffer[i], ha->mem_ptr + IPS_REG_FLDP);
 		if (ha->pcidev->revision == IPS_REVID_TROMBONE64)
 			udelay(25);	/* 25 us */
 
@@ -6363,7 +6363,7 @@ ips_program_bios_memio(ips_ha_t * ha, char *buffer, uint32_t buffersize,
 				udelay(25);	/* 25 us */
 			}
 
-			status = readb(ha->mem_ptr + IPS_REG_FLDP);
+			status = pete_readb("drivers/scsi/ips.c:6366", ha->mem_ptr + IPS_REG_FLDP);
 
 			if (status & 0x80)
 				break;
@@ -6378,7 +6378,7 @@ ips_program_bios_memio(ips_ha_t * ha, char *buffer, uint32_t buffersize,
 			if (ha->pcidev->revision == IPS_REVID_TROMBONE64)
 				udelay(25);	/* 25 us */
 
-			writeb(0xFF, ha->mem_ptr + IPS_REG_FLDP);
+			pete_writeb("drivers/scsi/ips.c:6381", 0xFF, ha->mem_ptr + IPS_REG_FLDP);
 			if (ha->pcidev->revision == IPS_REVID_TROMBONE64)
 				udelay(25);	/* 25 us */
 
@@ -6392,7 +6392,7 @@ ips_program_bios_memio(ips_ha_t * ha, char *buffer, uint32_t buffersize,
 			if (ha->pcidev->revision == IPS_REVID_TROMBONE64)
 				udelay(25);	/* 25 us */
 
-			writeb(0xFF, ha->mem_ptr + IPS_REG_FLDP);
+			pete_writeb("drivers/scsi/ips.c:6395", 0xFF, ha->mem_ptr + IPS_REG_FLDP);
 			if (ha->pcidev->revision == IPS_REVID_TROMBONE64)
 				udelay(25);	/* 25 us */
 
@@ -6405,7 +6405,7 @@ ips_program_bios_memio(ips_ha_t * ha, char *buffer, uint32_t buffersize,
 	if (ha->pcidev->revision == IPS_REVID_TROMBONE64)
 		udelay(25);	/* 25 us */
 
-	writeb(0xFF, ha->mem_ptr + IPS_REG_FLDP);
+	pete_writeb("drivers/scsi/ips.c:6408", 0xFF, ha->mem_ptr + IPS_REG_FLDP);
 	if (ha->pcidev->revision == IPS_REVID_TROMBONE64)
 		udelay(25);	/* 25 us */
 
@@ -6483,13 +6483,13 @@ ips_verify_bios_memio(ips_ha_t * ha, char *buffer, uint32_t buffersize,
 	if (ha->pcidev->revision == IPS_REVID_TROMBONE64)
 		udelay(25);	/* 25 us */
 
-	if (readb(ha->mem_ptr + IPS_REG_FLDP) != 0x55)
+	if (pete_readb("drivers/scsi/ips.c:6486", ha->mem_ptr + IPS_REG_FLDP) != 0x55)
 		return (1);
 
 	pete_writel("drivers/scsi/ips.c:6489", 1, ha->mem_ptr + IPS_REG_FLAP);
 	if (ha->pcidev->revision == IPS_REVID_TROMBONE64)
 		udelay(25);	/* 25 us */
-	if (readb(ha->mem_ptr + IPS_REG_FLDP) != 0xAA)
+	if (pete_readb("drivers/scsi/ips.c:6492", ha->mem_ptr + IPS_REG_FLDP) != 0xAA)
 		return (1);
 
 	checksum = 0xff;
@@ -6500,7 +6500,7 @@ ips_verify_bios_memio(ips_ha_t * ha, char *buffer, uint32_t buffersize,
 			udelay(25);	/* 25 us */
 
 		checksum =
-		    (uint8_t) checksum + readb(ha->mem_ptr + IPS_REG_FLDP);
+		    (uint8_t) checksum + pete_readb("drivers/scsi/ips.c:6503", ha->mem_ptr + IPS_REG_FLDP);
 	}
 
 	if (checksum != 0)

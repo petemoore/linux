@@ -70,16 +70,16 @@ static void pata_imx_set_timing(struct ata_device *adev,
 
 	mode = adev->pio_mode - XFER_PIO_0;
 
-	writeb(3, priv->host_regs + PATA_IMX_ATA_TIME_OFF);
-	writeb(3, priv->host_regs + PATA_IMX_ATA_TIME_ON);
-	writeb(timing.setup, priv->host_regs + PATA_IMX_ATA_TIME_1);
-	writeb(timing.act8b, priv->host_regs + PATA_IMX_ATA_TIME_2W);
-	writeb(timing.act8b, priv->host_regs + PATA_IMX_ATA_TIME_2R);
-	writeb(1, priv->host_regs + PATA_IMX_ATA_TIME_PIO_RDX);
+	pete_writeb("drivers/ata/pata_imx.c:73", 3, priv->host_regs + PATA_IMX_ATA_TIME_OFF);
+	pete_writeb("drivers/ata/pata_imx.c:74", 3, priv->host_regs + PATA_IMX_ATA_TIME_ON);
+	pete_writeb("drivers/ata/pata_imx.c:75", timing.setup, priv->host_regs + PATA_IMX_ATA_TIME_1);
+	pete_writeb("drivers/ata/pata_imx.c:76", timing.act8b, priv->host_regs + PATA_IMX_ATA_TIME_2W);
+	pete_writeb("drivers/ata/pata_imx.c:77", timing.act8b, priv->host_regs + PATA_IMX_ATA_TIME_2R);
+	pete_writeb("drivers/ata/pata_imx.c:78", 1, priv->host_regs + PATA_IMX_ATA_TIME_PIO_RDX);
 
-	writeb(pio_t4[mode] / T + 1, priv->host_regs + PATA_IMX_ATA_TIME_4);
-	writeb(pio_t9[mode] / T + 1, priv->host_regs + PATA_IMX_ATA_TIME_9);
-	writeb(pio_tA[mode] / T + 1, priv->host_regs + PATA_IMX_ATA_TIME_AX);
+	pete_writeb("drivers/ata/pata_imx.c:80", pio_t4[mode] / T + 1, priv->host_regs + PATA_IMX_ATA_TIME_4);
+	pete_writeb("drivers/ata/pata_imx.c:81", pio_t9[mode] / T + 1, priv->host_regs + PATA_IMX_ATA_TIME_9);
+	pete_writeb("drivers/ata/pata_imx.c:82", pio_tA[mode] / T + 1, priv->host_regs + PATA_IMX_ATA_TIME_AX);
 }
 
 static void pata_imx_set_piomode(struct ata_port *ap, struct ata_device *adev)

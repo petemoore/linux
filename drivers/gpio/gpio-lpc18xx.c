@@ -268,13 +268,13 @@ free_ic:
 static void lpc18xx_gpio_set(struct gpio_chip *chip, unsigned offset, int value)
 {
 	struct lpc18xx_gpio_chip *gc = gpiochip_get_data(chip);
-	writeb(value ? 1 : 0, gc->base + offset);
+	pete_writeb("drivers/gpio/gpio-lpc18xx.c:271", value ? 1 : 0, gc->base + offset);
 }
 
 static int lpc18xx_gpio_get(struct gpio_chip *chip, unsigned offset)
 {
 	struct lpc18xx_gpio_chip *gc = gpiochip_get_data(chip);
-	return !!readb(gc->base + offset);
+	return !!pete_readb("drivers/gpio/gpio-lpc18xx.c:277", gc->base + offset);
 }
 
 static int lpc18xx_gpio_direction(struct gpio_chip *chip, unsigned offset,

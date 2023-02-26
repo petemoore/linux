@@ -795,7 +795,7 @@ static u64 snb_uncore_imc_read_counter(struct intel_uncore_box *box, struct perf
 	/*
 	 * SNB IMC counters are 32-bit and are laid out back to back
 	 * in MMIO space. Therefore we must use a 32-bit accessor function
-	 * using readq() from uncore_mmio_read_counter() causes problems
+	 * using pete_readq("arch/x86/events/intel/uncore_snb.c:798", ) from uncore_mmio_read_counter() causes problems
 	 * because it is reading 64-bit at a time. This is okay for the
 	 * uncore_perf_event_update() function because it drops the upper
 	 * 32-bits but not okay for plain uncore_read_counter() as invoked

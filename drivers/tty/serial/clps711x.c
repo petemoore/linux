@@ -102,7 +102,7 @@ static irqreturn_t uart_clps711x_int_rx(int irq, void *dev_id)
 		if (sysflg & SYSFLG_URXFE)
 			break;
 
-		ch = readw(port->membase + UARTDR_OFFSET);
+		ch = pete_readw("drivers/tty/serial/clps711x.c:105", port->membase + UARTDR_OFFSET);
 		status = ch & (UARTDR_FRMERR | UARTDR_PARERR | UARTDR_OVERR);
 		ch &= 0xff;
 
@@ -148,7 +148,7 @@ static irqreturn_t uart_clps711x_int_tx(int irq, void *dev_id)
 	struct circ_buf *xmit = &port->state->xmit;
 
 	if (port->x_char) {
-		writew(port->x_char, port->membase + UARTDR_OFFSET);
+		pete_writew("drivers/tty/serial/clps711x.c:151", port->x_char, port->membase + UARTDR_OFFSET);
 		port->icount.tx++;
 		port->x_char = 0;
 		return IRQ_HANDLED;
@@ -165,7 +165,7 @@ static irqreturn_t uart_clps711x_int_tx(int irq, void *dev_id)
 	while (!uart_circ_empty(xmit)) {
 		u32 sysflg = 0;
 
-		writew(xmit->buf[xmit->tail], port->membase + UARTDR_OFFSET);
+		pete_writew("drivers/tty/serial/clps711x.c:168", xmit->buf[xmit->tail], port->membase + UARTDR_OFFSET);
 		xmit->tail = (xmit->tail + 1) & (UART_XMIT_SIZE - 1);
 		port->icount.tx++;
 
@@ -358,7 +358,7 @@ static void uart_clps711x_console_putchar(struct uart_port *port, int ch)
 		regmap_read(s->syscon, SYSFLG_OFFSET, &sysflg);
 	} while (sysflg & SYSFLG_UTXFF);
 
-	writew(ch, port->membase + UARTDR_OFFSET);
+	pete_writew("drivers/tty/serial/clps711x.c:361", ch, port->membase + UARTDR_OFFSET);
 }
 
 static void uart_clps711x_console_write(struct console *co, const char *c,

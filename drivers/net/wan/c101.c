@@ -77,14 +77,14 @@ typedef card_t port_t;
 static card_t *first_card;
 static card_t **new_card = &first_card;
 
-#define sca_in(reg, card)	   readb((card)->win0base + C101_SCA + (reg))
-#define sca_out(value, reg, card)  writeb(value, (card)->win0base + C101_SCA + (reg))
-#define sca_inw(reg, card)	   readw((card)->win0base + C101_SCA + (reg))
+#define sca_in(reg, card)	   pete_readb("drivers/net/wan/c101.c:80", (card)->win0base + C101_SCA + (reg))
+#define sca_out(value, reg, card)  pete_writeb("drivers/net/wan/c101.c:81", value, (card)->win0base + C101_SCA + (reg))
+#define sca_inw(reg, card)	   pete_readw("drivers/net/wan/c101.c:82", (card)->win0base + C101_SCA + (reg))
 
 /* EDA address register must be set in EDAL, EDAH order - 8 bit ISA bus */
 #define sca_outw(value, reg, card) do { \
-	writeb(value & 0xFF, (card)->win0base + C101_SCA + (reg)); \
-	writeb((value >> 8) & 0xFF, (card)->win0base + C101_SCA + (reg + 1));\
+	pete_writeb("drivers/net/wan/c101.c:86", value & 0xFF, (card)->win0base + C101_SCA + (reg)); \
+	pete_writeb("drivers/net/wan/c101.c:87", (value >> 8) & 0xFF, (card)->win0base + C101_SCA + (reg + 1));\
 } while (0)
 
 #define port_to_card(port)	   (port)
@@ -104,7 +104,7 @@ static inline u8 sca_get_page(card_t *card)
 static inline void openwin(card_t *card, u8 page)
 {
 	card->page = page;
-	writeb(page, card->win0base + C101_PAGE);
+	pete_writeb("drivers/net/wan/c101.c:107", page, card->win0base + C101_PAGE);
 }
 
 #include "hd64570.c"
@@ -180,7 +180,7 @@ static int c101_open(struct net_device *dev)
 	if (result)
 		return result;
 
-	writeb(1, port->win0base + C101_DTR);
+	pete_writeb("drivers/net/wan/c101.c:183", 1, port->win0base + C101_DTR);
 	sca_out(0, MSCI1_OFFSET + CTL, port); /* RTS uses ch#2 output */
 	sca_open(dev);
 	/* DCD is connected to port 2 !@#$%^& - disable MSCI0 CDCD interrupt */
@@ -202,7 +202,7 @@ static int c101_close(struct net_device *dev)
 	port_t *port = dev_to_port(dev);
 
 	sca_close(dev);
-	writeb(0, port->win0base + C101_DTR);
+	pete_writeb("drivers/net/wan/c101.c:205", 0, port->win0base + C101_DTR);
 	sca_out(CTL_NORTS, MSCI1_OFFSET + CTL, port);
 	hdlc_close(dev);
 	return 0;
@@ -273,7 +273,7 @@ static int c101_ioctl(struct net_device *dev, struct if_settings *ifs)
 
 static void c101_destroy_card(card_t *card)
 {
-	readb(card->win0base + C101_PAGE); /* Resets SCA? */
+	pete_readb("drivers/net/wan/c101.c:276", card->win0base + C101_PAGE); /* Resets SCA? */
 
 	if (card->irq)
 		free_irq(card->irq, card);
@@ -348,10 +348,10 @@ static int __init c101_run(unsigned long irq, unsigned long winbase)
 	card->rx_ring_buffers = RX_RING_BUFFERS;
 	card->buff_offset = C101_WINDOW_SIZE; /* Bytes 1D00-1FFF reserved */
 
-	readb(card->win0base + C101_PAGE); /* Resets SCA? */
+	pete_readb("drivers/net/wan/c101.c:351", card->win0base + C101_PAGE); /* Resets SCA? */
 	udelay(100);
-	writeb(0, card->win0base + C101_PAGE);
-	writeb(0, card->win0base + C101_DTR); /* Power-up for RAM? */
+	pete_writeb("drivers/net/wan/c101.c:353", 0, card->win0base + C101_PAGE);
+	pete_writeb("drivers/net/wan/c101.c:354", 0, card->win0base + C101_DTR); /* Power-up for RAM? */
 
 	sca_init(card, 0);
 

@@ -154,13 +154,13 @@ MODULE_PARM_DESC(no_fwh_detect, "Skip FWH detection:\n"
 
 static inline u8 hwstatus_get(void __iomem *mem)
 {
-	return readb(mem + INTEL_RNG_HW_STATUS);
+	return pete_readb("drivers/char/hw_random/intel-rng.c:157", mem + INTEL_RNG_HW_STATUS);
 }
 
 static inline u8 hwstatus_set(void __iomem *mem,
 			      u8 hw_status)
 {
-	writeb(hw_status, mem + INTEL_RNG_HW_STATUS);
+	pete_writeb("drivers/char/hw_random/intel-rng.c:163", hw_status, mem + INTEL_RNG_HW_STATUS);
 	return hwstatus_get(mem);
 }
 
@@ -170,7 +170,7 @@ static int intel_rng_data_present(struct hwrng *rng, int wait)
 	int data, i;
 
 	for (i = 0; i < 20; i++) {
-		data = !!(readb(mem + INTEL_RNG_STATUS) &
+		data = !!(pete_readb("drivers/char/hw_random/intel-rng.c:173", mem + INTEL_RNG_STATUS) &
 			  INTEL_RNG_DATA_PRESENT);
 		if (data || !wait)
 			break;
@@ -183,7 +183,7 @@ static int intel_rng_data_read(struct hwrng *rng, u32 *data)
 {
 	void __iomem *mem = (void __iomem *)rng->priv;
 
-	*data = readb(mem + INTEL_RNG_DATA);
+	*data = pete_readb("drivers/char/hw_random/intel-rng.c:186", mem + INTEL_RNG_DATA);
 
 	return 1;
 }
@@ -255,11 +255,11 @@ static int __init intel_rng_hw_init(void *_intel_rng_hw)
 		                      intel_rng_hw->bios_cntl_val |
 				      BIOS_CNTL_WRITE_ENABLE_MASK);
 
-	writeb(INTEL_FWH_RESET_CMD, intel_rng_hw->mem);
-	writeb(INTEL_FWH_READ_ID_CMD, intel_rng_hw->mem);
-	mfc = readb(intel_rng_hw->mem + INTEL_FWH_MANUFACTURER_CODE_ADDRESS);
-	dvc = readb(intel_rng_hw->mem + INTEL_FWH_DEVICE_CODE_ADDRESS);
-	writeb(INTEL_FWH_RESET_CMD, intel_rng_hw->mem);
+	pete_writeb("drivers/char/hw_random/intel-rng.c:258", INTEL_FWH_RESET_CMD, intel_rng_hw->mem);
+	pete_writeb("drivers/char/hw_random/intel-rng.c:259", INTEL_FWH_READ_ID_CMD, intel_rng_hw->mem);
+	mfc = pete_readb("drivers/char/hw_random/intel-rng.c:260", intel_rng_hw->mem + INTEL_FWH_MANUFACTURER_CODE_ADDRESS);
+	dvc = pete_readb("drivers/char/hw_random/intel-rng.c:261", intel_rng_hw->mem + INTEL_FWH_DEVICE_CODE_ADDRESS);
+	pete_writeb("drivers/char/hw_random/intel-rng.c:262", INTEL_FWH_RESET_CMD, intel_rng_hw->mem);
 
 	if (!(intel_rng_hw->bios_cntl_val &
 	      (BIOS_CNTL_LOCK_ENABLE_MASK|BIOS_CNTL_WRITE_ENABLE_MASK)))

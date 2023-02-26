@@ -166,7 +166,7 @@ static void handle_rx(struct uart_port *port)
 		unsigned int c;
 		char flag = TTY_NORMAL;
 
-		c = readw(port->membase + VT8500_RXFIFO) & 0x3ff;
+		c = pete_readw("drivers/tty/serial/vt8500_serial.c:169", port->membase + VT8500_RXFIFO) & 0x3ff;
 
 		/* Mask conditions we're ignorning. */
 		c &= ~port->read_status_mask;
@@ -192,7 +192,7 @@ static void handle_tx(struct uart_port *port)
 	struct circ_buf *xmit = &port->state->xmit;
 
 	if (port->x_char) {
-		writeb(port->x_char, port->membase + VT8500_TXFIFO);
+		pete_writeb("drivers/tty/serial/vt8500_serial.c:195", port->x_char, port->membase + VT8500_TXFIFO);
 		port->icount.tx++;
 		port->x_char = 0;
 	}
@@ -205,7 +205,7 @@ static void handle_tx(struct uart_port *port)
 		if (uart_circ_empty(xmit))
 			break;
 
-		writeb(xmit->buf[xmit->tail], port->membase + VT8500_TXFIFO);
+		pete_writeb("drivers/tty/serial/vt8500_serial.c:208", xmit->buf[xmit->tail], port->membase + VT8500_TXFIFO);
 
 		xmit->tail = (xmit->tail + 1) & (UART_XMIT_SIZE - 1);
 		port->icount.tx++;
@@ -487,7 +487,7 @@ static void wait_for_xmitr(struct uart_port *port)
 static void vt8500_console_putchar(struct uart_port *port, int c)
 {
 	wait_for_xmitr(port);
-	writeb(c, port->membase + VT8500_TXFIFO);
+	pete_writeb("drivers/tty/serial/vt8500_serial.c:490", c, port->membase + VT8500_TXFIFO);
 }
 
 static void vt8500_console_write(struct console *co, const char *s,

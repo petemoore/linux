@@ -474,7 +474,7 @@ static int __init sh7757lcr_devices_setup(void)
 	gpio_request(GPIO_FN_COM1_RTS, NULL);
 	gpio_request(GPIO_FN_COM1_CTS, NULL);
 
-	writeb(0x10, 0xfe470000);	/* SMR0: SerMux mode 0 */
+	pete_writeb("arch/sh/boards/board-sh7757lcr.c:477", 0x10, 0xfe470000);	/* SMR0: SerMux mode 0 */
 
 	/* IIC (PTM, PTR, PTS) */
 	gpio_request(GPIO_FN_SDA7, NULL);

@@ -140,16 +140,16 @@ static void ts78xx_ts_nand_cmd_ctrl(struct nand_chip *this, int cmd,
 		bits |= ctrl & NAND_CLE;
 		bits |= (ctrl & NAND_ALE) >> 2;
 
-		writeb((readb(TS_NAND_CTRL) & ~0x7) | bits, TS_NAND_CTRL);
+		pete_writeb("arch/arm/mach-orion5x/ts78xx-setup.c:143", (pete_readb("arch/arm/mach-orion5x/ts78xx-setup.c:143", TS_NAND_CTRL) & ~0x7) | bits, TS_NAND_CTRL);
 	}
 
 	if (cmd != NAND_CMD_NONE)
-		writeb(cmd, this->legacy.IO_ADDR_W);
+		pete_writeb("arch/arm/mach-orion5x/ts78xx-setup.c:147", cmd, this->legacy.IO_ADDR_W);
 }
 
 static int ts78xx_ts_nand_dev_ready(struct nand_chip *chip)
 {
-	return readb(TS_NAND_CTRL) & 0x20;
+	return pete_readb("arch/arm/mach-orion5x/ts78xx-setup.c:152", TS_NAND_CTRL) & 0x20;
 }
 
 static void ts78xx_ts_nand_write_buf(struct nand_chip *chip,

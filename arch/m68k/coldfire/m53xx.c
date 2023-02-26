@@ -166,7 +166,7 @@ static void __init m53xx_qspi_init(void)
 {
 #if IS_ENABLED(CONFIG_SPI_COLDFIRE_QSPI)
 	/* setup QSPS pins for QSPI with gpio CS control */
-	writew(0x01f0, MCFGPIO_PAR_QSPI);
+	pete_writew("arch/m68k/coldfire/m53xx.c:169", 0x01f0, MCFGPIO_PAR_QSPI);
 #endif /* IS_ENABLED(CONFIG_SPI_COLDFIRE_QSPI) */
 }
 
@@ -177,9 +177,9 @@ static void __init m53xx_i2c_init(void)
 #if IS_ENABLED(CONFIG_I2C_IMX)
 	/* setup Port AS Pin Assignment Register for I2C */
 	/*  set PASPA0 to SCL and PASPA1 to SDA */
-	u8 r = readb(MCFGPIO_PAR_FECI2C);
+	u8 r = pete_readb("arch/m68k/coldfire/m53xx.c:180", MCFGPIO_PAR_FECI2C);
 	r |= 0x0f;
-	writeb(r, MCFGPIO_PAR_FECI2C);
+	pete_writeb("arch/m68k/coldfire/m53xx.c:182", r, MCFGPIO_PAR_FECI2C);
 #endif /* IS_ENABLED(CONFIG_I2C_IMX) */
 }
 
@@ -188,7 +188,7 @@ static void __init m53xx_i2c_init(void)
 static void __init m53xx_uarts_init(void)
 {
 	/* UART GPIO initialization */
-	writew(readw(MCFGPIO_PAR_UART) | 0x0FFF, MCFGPIO_PAR_UART);
+	pete_writew("arch/m68k/coldfire/m53xx.c:191", pete_readw("arch/m68k/coldfire/m53xx.c:191", MCFGPIO_PAR_UART) | 0x0FFF, MCFGPIO_PAR_UART);
 }
 
 /***************************************************************************/
@@ -198,14 +198,14 @@ static void __init m53xx_fec_init(void)
 	u8 v;
 
 	/* Set multi-function pins to ethernet mode for fec0 */
-	v = readb(MCFGPIO_PAR_FECI2C);
+	v = pete_readb("arch/m68k/coldfire/m53xx.c:201", MCFGPIO_PAR_FECI2C);
 	v |= MCF_GPIO_PAR_FECI2C_PAR_MDC_EMDC |
 		MCF_GPIO_PAR_FECI2C_PAR_MDIO_EMDIO;
-	writeb(v, MCFGPIO_PAR_FECI2C);
+	pete_writeb("arch/m68k/coldfire/m53xx.c:204", v, MCFGPIO_PAR_FECI2C);
 
-	v = readb(MCFGPIO_PAR_FEC);
+	v = pete_readb("arch/m68k/coldfire/m53xx.c:206", MCFGPIO_PAR_FEC);
 	v = MCF_GPIO_PAR_FEC_PAR_FEC_7W_FEC | MCF_GPIO_PAR_FEC_PAR_FEC_MII_FEC;
-	writeb(v, MCFGPIO_PAR_FEC);
+	pete_writeb("arch/m68k/coldfire/m53xx.c:208", v, MCFGPIO_PAR_FEC);
 }
 
 /***************************************************************************/
@@ -305,7 +305,7 @@ asmlinkage void __init sysinit(void)
 void wtm_init(void)
 {
 	/* Disable watchdog timer */
-	writew(0, MCF_WTM_WCR);
+	pete_writew("arch/m68k/coldfire/m53xx.c:308", 0, MCF_WTM_WCR);
 }
 
 #define MCF_SCM_BCR_GBW		(0x00000100)
@@ -332,7 +332,7 @@ void scm_init(void)
 
 void fbcs_init(void)
 {
-	writeb(0x3E, MCFGPIO_PAR_CS);
+	pete_writeb("arch/m68k/coldfire/m53xx.c:335", 0x3E, MCFGPIO_PAR_CS);
 
 	/* Latch chip select */
 	pete_writel("arch/m68k/coldfire/m53xx.c:338", 0x10080000, MCF_FBCS1_CSAR);
@@ -341,7 +341,7 @@ void fbcs_init(void)
 	pete_writel("arch/m68k/coldfire/m53xx.c:341", MCF_FBCS_CSMR_BAM_2M | MCF_FBCS_CSMR_V, MCF_FBCS1_CSMR);
 
 	/* Initialize latch to drive signals to inactive states */
-	writew(0xffff, 0x10080000);
+	pete_writew("arch/m68k/coldfire/m53xx.c:344", 0xffff, 0x10080000);
 
 	/* External SRAM */
 	pete_writel("arch/m68k/coldfire/m53xx.c:347", EXT_SRAM_ADDRESS, MCF_FBCS1_CSAR);
@@ -455,16 +455,16 @@ void sdramc_init(void)
 void gpio_init(void)
 {
 	/* Enable UART0 pins */
-	writew(MCF_GPIO_PAR_UART_PAR_URXD0 | MCF_GPIO_PAR_UART_PAR_UTXD0,
+	pete_writew("arch/m68k/coldfire/m53xx.c:458", MCF_GPIO_PAR_UART_PAR_URXD0 | MCF_GPIO_PAR_UART_PAR_UTXD0,
 		MCFGPIO_PAR_UART);
 
 	/*
 	 * Initialize TIN3 as a GPIO output to enable the write
 	 * half of the latch.
 	 */
-	writeb(0x00, MCFGPIO_PAR_TIMER);
-	writeb(0x08, MCFGPIO_PDDR_TIMER);
-	writeb(0x00, MCFGPIO_PCLRR_TIMER);
+	pete_writeb("arch/m68k/coldfire/m53xx.c:465", 0x00, MCFGPIO_PAR_TIMER);
+	pete_writeb("arch/m68k/coldfire/m53xx.c:466", 0x08, MCFGPIO_PDDR_TIMER);
+	pete_writeb("arch/m68k/coldfire/m53xx.c:467", 0x00, MCFGPIO_PCLRR_TIMER);
 }
 
 int clock_pll(int fsys, int flags)
@@ -476,7 +476,7 @@ int clock_pll(int fsys, int flags)
         
 	if (fsys == 0) {
 		/* Return current PLL output */
-		mfd = readb(MCF_PLL_PFDR);
+		mfd = pete_readb("arch/m68k/coldfire/m53xx.c:479", MCF_PLL_PFDR);
 
 		return (fref * mfd / (BUSDIV * 4));
 	}
@@ -516,10 +516,10 @@ int clock_pll(int fsys, int flags)
 	clock_limp(DEFAULT_LPD);
      					
 	/* Reprogram PLL for desired fsys */
-	writeb(MCF_PLL_PODR_CPUDIV(BUSDIV/3) | MCF_PLL_PODR_BUSDIV(BUSDIV),
+	pete_writeb("arch/m68k/coldfire/m53xx.c:519", MCF_PLL_PODR_CPUDIV(BUSDIV/3) | MCF_PLL_PODR_BUSDIV(BUSDIV),
 		MCF_PLL_PODR);
 						
-	writeb(mfd, MCF_PLL_PFDR);
+	pete_writeb("arch/m68k/coldfire/m53xx.c:522", mfd, MCF_PLL_PFDR);
 		
 	/* Exit LIMP mode */
 	clock_exit_limp();
@@ -554,12 +554,12 @@ int clock_limp(int div)
     
 	/* Save of the current value of the SSIDIV so we don't
 	   overwrite the value*/
-	temp = readw(MCF_CCM_CDR) & MCF_CCM_CDR_SSIDIV(0xF);
+	temp = pete_readw("arch/m68k/coldfire/m53xx.c:557", MCF_CCM_CDR) & MCF_CCM_CDR_SSIDIV(0xF);
       
 	/* Apply the divider to the system clock */
-	writew(MCF_CCM_CDR_LPDIV(div) | MCF_CCM_CDR_SSIDIV(temp), MCF_CCM_CDR);
+	pete_writew("arch/m68k/coldfire/m53xx.c:560", MCF_CCM_CDR_LPDIV(div) | MCF_CCM_CDR_SSIDIV(temp), MCF_CCM_CDR);
     
-	writew(readw(MCF_CCM_MISCCR) | MCF_CCM_MISCCR_LIMP, MCF_CCM_MISCCR);
+	pete_writew("arch/m68k/coldfire/m53xx.c:562", pete_readw("arch/m68k/coldfire/m53xx.c:562", MCF_CCM_MISCCR) | MCF_CCM_MISCCR_LIMP, MCF_CCM_MISCCR);
     
 	return (FREF/(3*(1 << div)));
 }
@@ -569,10 +569,10 @@ int clock_exit_limp(void)
 	int fout;
 	
 	/* Exit LIMP mode */
-	writew(readw(MCF_CCM_MISCCR) & ~MCF_CCM_MISCCR_LIMP, MCF_CCM_MISCCR);
+	pete_writew("arch/m68k/coldfire/m53xx.c:572", pete_readw("arch/m68k/coldfire/m53xx.c:572", MCF_CCM_MISCCR) & ~MCF_CCM_MISCCR_LIMP, MCF_CCM_MISCCR);
 
 	/* Wait for PLL to lock */
-	while (!(readw(MCF_CCM_MISCCR) & MCF_CCM_MISCCR_PLL_LOCK))
+	while (!(pete_readw("arch/m68k/coldfire/m53xx.c:575", MCF_CCM_MISCCR) & MCF_CCM_MISCCR_PLL_LOCK))
 		;
 	
 	fout = get_sys_clock();
@@ -585,10 +585,10 @@ int get_sys_clock(void)
 	int divider;
 	
 	/* Test to see if device is in LIMP mode */
-	if (readw(MCF_CCM_MISCCR) & MCF_CCM_MISCCR_LIMP) {
-		divider = readw(MCF_CCM_CDR) & MCF_CCM_CDR_LPDIV(0xF);
+	if (pete_readw("arch/m68k/coldfire/m53xx.c:588", MCF_CCM_MISCCR) & MCF_CCM_MISCCR_LIMP) {
+		divider = pete_readw("arch/m68k/coldfire/m53xx.c:589", MCF_CCM_CDR) & MCF_CCM_CDR_LPDIV(0xF);
 		return (FREF/(2 << divider));
 	}
 	else
-		return (FREF * readb(MCF_PLL_PFDR)) / (BUSDIV * 4);
+		return (FREF * pete_readb("arch/m68k/coldfire/m53xx.c:593", MCF_PLL_PFDR)) / (BUSDIV * 4);
 }

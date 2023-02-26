@@ -52,8 +52,8 @@ static int ts72xx_wdt_start(struct watchdog_device *wdd)
 {
 	struct ts72xx_wdt_priv *priv = watchdog_get_drvdata(wdd);
 
-	writeb(TS72XX_WDT_FEED_VAL, priv->feed_reg);
-	writeb(priv->regval, priv->control_reg);
+	pete_writeb("drivers/watchdog/ts72xx_wdt.c:55", TS72XX_WDT_FEED_VAL, priv->feed_reg);
+	pete_writeb("drivers/watchdog/ts72xx_wdt.c:56", priv->regval, priv->control_reg);
 
 	return 0;
 }
@@ -62,8 +62,8 @@ static int ts72xx_wdt_stop(struct watchdog_device *wdd)
 {
 	struct ts72xx_wdt_priv *priv = watchdog_get_drvdata(wdd);
 
-	writeb(TS72XX_WDT_FEED_VAL, priv->feed_reg);
-	writeb(TS72XX_WDT_CTRL_DISABLE, priv->control_reg);
+	pete_writeb("drivers/watchdog/ts72xx_wdt.c:65", TS72XX_WDT_FEED_VAL, priv->feed_reg);
+	pete_writeb("drivers/watchdog/ts72xx_wdt.c:66", TS72XX_WDT_CTRL_DISABLE, priv->control_reg);
 
 	return 0;
 }
@@ -72,7 +72,7 @@ static int ts72xx_wdt_ping(struct watchdog_device *wdd)
 {
 	struct ts72xx_wdt_priv *priv = watchdog_get_drvdata(wdd);
 
-	writeb(TS72XX_WDT_FEED_VAL, priv->feed_reg);
+	pete_writeb("drivers/watchdog/ts72xx_wdt.c:75", TS72XX_WDT_FEED_VAL, priv->feed_reg);
 
 	return 0;
 }

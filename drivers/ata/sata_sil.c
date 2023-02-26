@@ -662,7 +662,7 @@ static void sil_init_controller(struct ata_host *host)
 		cls >>= 3;
 		cls++;  /* cls = (line_size/8)+1 */
 		for (i = 0; i < host->n_ports; i++)
-			writew(cls << 8 | cls,
+			pete_writew("drivers/ata/sata_sil.c:665", cls << 8 | cls,
 			       mmio_base + sil_port[i].fifo_cfg);
 	} else
 		dev_warn(&pdev->dev,

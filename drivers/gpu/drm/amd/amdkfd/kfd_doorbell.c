@@ -221,7 +221,7 @@ void write_kernel_doorbell64(void __iomem *db, u64 value)
 	if (db) {
 		WARN(((unsigned long)db & 7) != 0,
 		     "Unaligned 64-bit doorbell");
-		writeq(value, (u64 __iomem *)db);
+		pete_writeq("drivers/gpu/drm/amd/amdkfd/kfd_doorbell.c:224", value, (u64 __iomem *)db);
 		pr_debug("writing %llu to doorbell address %p\n", value, db);
 	}
 }

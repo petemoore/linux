@@ -109,8 +109,8 @@ struct esb_dev {
  */
 static inline void esb_unlock_registers(struct esb_dev *edev)
 {
-	writew(ESB_UNLOCK1, ESB_RELOAD_REG(edev));
-	writew(ESB_UNLOCK2, ESB_RELOAD_REG(edev));
+	pete_writew("drivers/watchdog/i6300esb.c:112", ESB_UNLOCK1, ESB_RELOAD_REG(edev));
+	pete_writew("drivers/watchdog/i6300esb.c:113", ESB_UNLOCK2, ESB_RELOAD_REG(edev));
 }
 
 static int esb_timer_start(struct watchdog_device *wdd)
@@ -120,7 +120,7 @@ static int esb_timer_start(struct watchdog_device *wdd)
 	u8 val;
 
 	esb_unlock_registers(edev);
-	writew(ESB_WDT_RELOAD, ESB_RELOAD_REG(edev));
+	pete_writew("drivers/watchdog/i6300esb.c:123", ESB_WDT_RELOAD, ESB_RELOAD_REG(edev));
 	/* Enable or Enable + Lock? */
 	val = ESB_WDT_ENABLE | (_wdd_nowayout ? ESB_WDT_LOCK : 0x00);
 	pci_write_config_byte(edev->pdev, ESB_LOCK_REG, val);
@@ -134,7 +134,7 @@ static int esb_timer_stop(struct watchdog_device *wdd)
 
 	/* First, reset timers as suggested by the docs */
 	esb_unlock_registers(edev);
-	writew(ESB_WDT_RELOAD, ESB_RELOAD_REG(edev));
+	pete_writew("drivers/watchdog/i6300esb.c:137", ESB_WDT_RELOAD, ESB_RELOAD_REG(edev));
 	/* Then disable the WDT */
 	pci_write_config_byte(edev->pdev, ESB_LOCK_REG, 0x0);
 	pci_read_config_byte(edev->pdev, ESB_LOCK_REG, &val);
@@ -148,7 +148,7 @@ static int esb_timer_keepalive(struct watchdog_device *wdd)
 	struct esb_dev *edev = to_esb_dev(wdd);
 
 	esb_unlock_registers(edev);
-	writew(ESB_WDT_RELOAD, ESB_RELOAD_REG(edev));
+	pete_writew("drivers/watchdog/i6300esb.c:151", ESB_WDT_RELOAD, ESB_RELOAD_REG(edev));
 	/* FIXME: Do we need to flush anything here? */
 	return 0;
 }
@@ -175,7 +175,7 @@ static int esb_timer_set_heartbeat(struct watchdog_device *wdd,
 
 	/* Reload */
 	esb_unlock_registers(edev);
-	writew(ESB_WDT_RELOAD, ESB_RELOAD_REG(edev));
+	pete_writew("drivers/watchdog/i6300esb.c:178", ESB_WDT_RELOAD, ESB_RELOAD_REG(edev));
 
 	/* FIXME: Do we need to flush everything out? */
 
@@ -274,13 +274,13 @@ static void esb_initdevice(struct esb_dev *edev)
 
 	/* Check if the watchdog was previously triggered */
 	esb_unlock_registers(edev);
-	val2 = readw(ESB_RELOAD_REG(edev));
+	val2 = pete_readw("drivers/watchdog/i6300esb.c:277", ESB_RELOAD_REG(edev));
 	if (val2 & ESB_WDT_TIMEOUT)
 		edev->wdd.bootstatus = WDIOF_CARDRESET;
 
 	/* Reset WDT_TIMEOUT flag and timers */
 	esb_unlock_registers(edev);
-	writew((ESB_WDT_TIMEOUT | ESB_WDT_RELOAD), ESB_RELOAD_REG(edev));
+	pete_writew("drivers/watchdog/i6300esb.c:283", (ESB_WDT_TIMEOUT | ESB_WDT_RELOAD), ESB_RELOAD_REG(edev));
 
 	/* And set the correct timeout value */
 	esb_timer_set_heartbeat(&edev->wdd, edev->wdd.timeout);

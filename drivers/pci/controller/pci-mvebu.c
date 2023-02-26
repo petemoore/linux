@@ -278,10 +278,10 @@ static int mvebu_pcie_hw_wr_conf(struct mvebu_pcie_port *port,
 
 	switch (size) {
 	case 1:
-		writeb(val, conf_data + (where & 3));
+		pete_writeb("drivers/pci/controller/pci-mvebu.c:281", val, conf_data + (where & 3));
 		break;
 	case 2:
-		writew(val, conf_data + (where & 2));
+		pete_writew("drivers/pci/controller/pci-mvebu.c:284", val, conf_data + (where & 2));
 		break;
 	case 4:
 		pete_writel("drivers/pci/controller/pci-mvebu.c:287", val, conf_data);

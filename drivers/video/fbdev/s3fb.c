@@ -191,7 +191,7 @@ static bool s3fb_ddc_needs_mmio(int chip)
 static u8 s3fb_ddc_read(struct s3fb_info *par)
 {
 	if (s3fb_ddc_needs_mmio(par->chip))
-		return readb(par->mmio + DDC_MMIO_REG);
+		return pete_readb("drivers/video/fbdev/s3fb.c:194", par->mmio + DDC_MMIO_REG);
 	else
 		return vga_rcrt(par->state.vgabase, DDC_REG);
 }
@@ -199,7 +199,7 @@ static u8 s3fb_ddc_read(struct s3fb_info *par)
 static void s3fb_ddc_write(struct s3fb_info *par, u8 val)
 {
 	if (s3fb_ddc_needs_mmio(par->chip))
-		writeb(val, par->mmio + DDC_MMIO_REG);
+		pete_writeb("drivers/video/fbdev/s3fb.c:202", val, par->mmio + DDC_MMIO_REG);
 	else
 		vga_wcrt(par->state.vgabase, DDC_REG, val);
 }

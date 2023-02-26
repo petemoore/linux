@@ -3652,7 +3652,7 @@ static void ca0113_mmio_gpio_set(struct hda_codec *codec, unsigned int gpio_pin,
 	gpio_data = gpio_pin & 0xF;
 	gpio_data |= ((enable << 8) & 0x100);
 
-	writew(gpio_data, spec->mem_base + 0x320);
+	pete_writew("sound/pci/hda/patch_ca0132.c:3655", gpio_data, spec->mem_base + 0x320);
 }
 
 /*
@@ -7928,18 +7928,18 @@ static void ae5_post_dsp_register_set(struct hda_codec *codec)
 	chipio_8051_write_direct(codec, 0x93, 0x10);
 	chipio_8051_write_pll_pmu(codec, 0x44, 0xc2);
 
-	writeb(0xff, spec->mem_base + 0x304);
-	writeb(0xff, spec->mem_base + 0x304);
-	writeb(0xff, spec->mem_base + 0x304);
-	writeb(0xff, spec->mem_base + 0x304);
-	writeb(0x00, spec->mem_base + 0x100);
-	writeb(0xff, spec->mem_base + 0x304);
-	writeb(0x00, spec->mem_base + 0x100);
-	writeb(0xff, spec->mem_base + 0x304);
-	writeb(0x00, spec->mem_base + 0x100);
-	writeb(0xff, spec->mem_base + 0x304);
-	writeb(0x00, spec->mem_base + 0x100);
-	writeb(0xff, spec->mem_base + 0x304);
+	pete_writeb("sound/pci/hda/patch_ca0132.c:7931", 0xff, spec->mem_base + 0x304);
+	pete_writeb("sound/pci/hda/patch_ca0132.c:7932", 0xff, spec->mem_base + 0x304);
+	pete_writeb("sound/pci/hda/patch_ca0132.c:7933", 0xff, spec->mem_base + 0x304);
+	pete_writeb("sound/pci/hda/patch_ca0132.c:7934", 0xff, spec->mem_base + 0x304);
+	pete_writeb("sound/pci/hda/patch_ca0132.c:7935", 0x00, spec->mem_base + 0x100);
+	pete_writeb("sound/pci/hda/patch_ca0132.c:7936", 0xff, spec->mem_base + 0x304);
+	pete_writeb("sound/pci/hda/patch_ca0132.c:7937", 0x00, spec->mem_base + 0x100);
+	pete_writeb("sound/pci/hda/patch_ca0132.c:7938", 0xff, spec->mem_base + 0x304);
+	pete_writeb("sound/pci/hda/patch_ca0132.c:7939", 0x00, spec->mem_base + 0x100);
+	pete_writeb("sound/pci/hda/patch_ca0132.c:7940", 0xff, spec->mem_base + 0x304);
+	pete_writeb("sound/pci/hda/patch_ca0132.c:7941", 0x00, spec->mem_base + 0x100);
+	pete_writeb("sound/pci/hda/patch_ca0132.c:7942", 0xff, spec->mem_base + 0x304);
 
 	ca0113_mmio_command_set(codec, 0x30, 0x2b, 0x3f);
 	ca0113_mmio_command_set(codec, 0x30, 0x2d, 0x3f);
@@ -8872,9 +8872,9 @@ static void sbz_region2_exit(struct hda_codec *codec)
 	unsigned int i;
 
 	for (i = 0; i < 4; i++)
-		writeb(0x0, spec->mem_base + 0x100);
+		pete_writeb("sound/pci/hda/patch_ca0132.c:8875", 0x0, spec->mem_base + 0x100);
 	for (i = 0; i < 8; i++)
-		writeb(0xb3, spec->mem_base + 0x304);
+		pete_writeb("sound/pci/hda/patch_ca0132.c:8877", 0xb3, spec->mem_base + 0x304);
 
 	ca0113_mmio_gpio_set(codec, 0, false);
 	ca0113_mmio_gpio_set(codec, 1, false);
@@ -9406,14 +9406,14 @@ static void ae5_register_set(struct hda_codec *codec)
 	}
 
 	for (i = cur_addr = 0; i < 3; i++, cur_addr++)
-		writeb(tmp[i], spec->mem_base + addr[cur_addr]);
+		pete_writeb("sound/pci/hda/patch_ca0132.c:9409", tmp[i], spec->mem_base + addr[cur_addr]);
 
 	/*
 	 * First writes are in single bytes, final are in 4 bytes. So, we use
 	 * writeb, then writel.
 	 */
 	for (i = 0; cur_addr < 12; i++, cur_addr++)
-		writeb(data[i], spec->mem_base + addr[cur_addr]);
+		pete_writeb("sound/pci/hda/patch_ca0132.c:9416", data[i], spec->mem_base + addr[cur_addr]);
 
 	for (; cur_addr < count; i++, cur_addr++)
 		pete_writel("sound/pci/hda/patch_ca0132.c:9419", data[i], spec->mem_base + addr[cur_addr]);

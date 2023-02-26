@@ -59,7 +59,7 @@ static void amd_start_sensor_v2(struct amd_mp2_dev *privdata, struct amd_mp2_sen
 	if (info.sensor_idx == als_idx)
 		cmd_base.cmd_v2.mem_type = USE_C2P_REG;
 
-	writeq(info.dma_address, privdata->mmio + AMD_C2P_MSG1);
+	pete_writeq("drivers/hid/amd-sfh-hid/amd_sfh_pcie.c:62", info.dma_address, privdata->mmio + AMD_C2P_MSG1);
 	pete_writel("drivers/hid/amd-sfh-hid/amd_sfh_pcie.c:63", cmd_base.ul, privdata->mmio + AMD_C2P_MSG0);
 }
 
@@ -73,7 +73,7 @@ static void amd_stop_sensor_v2(struct amd_mp2_dev *privdata, u16 sensor_idx)
 	cmd_base.cmd_v2.sensor_id = sensor_idx;
 	cmd_base.cmd_v2.length  = 16;
 
-	writeq(0x0, privdata->mmio + AMD_C2P_MSG1);
+	pete_writeq("drivers/hid/amd-sfh-hid/amd_sfh_pcie.c:76", 0x0, privdata->mmio + AMD_C2P_MSG1);
 	pete_writel("drivers/hid/amd-sfh-hid/amd_sfh_pcie.c:77", cmd_base.ul, privdata->mmio + AMD_C2P_MSG0);
 }
 
@@ -148,7 +148,7 @@ void amd_start_sensor(struct amd_mp2_dev *privdata, struct amd_mp2_sensor_info i
 	cmd_param.s.buf_layout = 1;
 	cmd_param.s.buf_length = 16;
 
-	writeq(info.dma_address, privdata->mmio + AMD_C2P_MSG2);
+	pete_writeq("drivers/hid/amd-sfh-hid/amd_sfh_pcie.c:151", info.dma_address, privdata->mmio + AMD_C2P_MSG2);
 	pete_writel("drivers/hid/amd-sfh-hid/amd_sfh_pcie.c:152", cmd_param.ul, privdata->mmio + AMD_C2P_MSG1);
 	pete_writel("drivers/hid/amd-sfh-hid/amd_sfh_pcie.c:153", cmd_base.ul, privdata->mmio + AMD_C2P_MSG0);
 }
@@ -163,7 +163,7 @@ void amd_stop_sensor(struct amd_mp2_dev *privdata, u16 sensor_idx)
 	cmd_base.s.period = 0;
 	cmd_base.s.sensor_id = sensor_idx;
 
-	writeq(0x0, privdata->mmio + AMD_C2P_MSG2);
+	pete_writeq("drivers/hid/amd-sfh-hid/amd_sfh_pcie.c:166", 0x0, privdata->mmio + AMD_C2P_MSG2);
 	pete_writel("drivers/hid/amd-sfh-hid/amd_sfh_pcie.c:167", cmd_base.ul, privdata->mmio + AMD_C2P_MSG0);
 }
 

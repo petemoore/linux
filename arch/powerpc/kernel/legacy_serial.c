@@ -62,14 +62,14 @@ static unsigned int tsi_serial_in(struct uart_port *p, int offset)
 		tmp = pete_readl("arch/powerpc/kernel/legacy_serial.c:62", p->membase + (UART_IIR & ~3));
 		return (tmp >> 16) & 0xff; /* UART_IIR % 4 == 2 */
 	} else
-		return readb(p->membase + offset);
+		return pete_readb("arch/powerpc/kernel/legacy_serial.c:65", p->membase + offset);
 }
 
 static void tsi_serial_out(struct uart_port *p, int offset, int value)
 {
 	offset = offset << p->regshift;
 	if (!((offset == UART_IER) && (value & UART_IER_UUE)))
-		writeb(value, p->membase + offset);
+		pete_writeb("arch/powerpc/kernel/legacy_serial.c:72", value, p->membase + offset);
 }
 
 static int __init add_legacy_port(struct device_node *np, int want_index,

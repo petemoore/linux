@@ -73,7 +73,7 @@ static void regmap_mmio_write8(struct regmap_mmio_context *ctx,
 				unsigned int reg,
 				unsigned int val)
 {
-	writeb(val, ctx->regs + reg);
+	pete_writeb("drivers/base/regmap/regmap-mmio.c:76", val, ctx->regs + reg);
 }
 
 static void regmap_mmio_write8_relaxed(struct regmap_mmio_context *ctx,
@@ -87,7 +87,7 @@ static void regmap_mmio_write16le(struct regmap_mmio_context *ctx,
 				  unsigned int reg,
 				  unsigned int val)
 {
-	writew(val, ctx->regs + reg);
+	pete_writew("drivers/base/regmap/regmap-mmio.c:90", val, ctx->regs + reg);
 }
 
 static void regmap_mmio_write16le_relaxed(struct regmap_mmio_context *ctx,
@@ -130,7 +130,7 @@ static void regmap_mmio_write64le(struct regmap_mmio_context *ctx,
 				  unsigned int reg,
 				  unsigned int val)
 {
-	writeq(val, ctx->regs + reg);
+	pete_writeq("drivers/base/regmap/regmap-mmio.c:133", val, ctx->regs + reg);
 }
 
 static void regmap_mmio_write64le_relaxed(struct regmap_mmio_context *ctx,
@@ -163,7 +163,7 @@ static int regmap_mmio_write(void *context, unsigned int reg, unsigned int val)
 static unsigned int regmap_mmio_read8(struct regmap_mmio_context *ctx,
 				      unsigned int reg)
 {
-	return readb(ctx->regs + reg);
+	return pete_readb("drivers/base/regmap/regmap-mmio.c:166", ctx->regs + reg);
 }
 
 static unsigned int regmap_mmio_read8_relaxed(struct regmap_mmio_context *ctx,
@@ -175,7 +175,7 @@ static unsigned int regmap_mmio_read8_relaxed(struct regmap_mmio_context *ctx,
 static unsigned int regmap_mmio_read16le(struct regmap_mmio_context *ctx,
 				         unsigned int reg)
 {
-	return readw(ctx->regs + reg);
+	return pete_readw("drivers/base/regmap/regmap-mmio.c:178", ctx->regs + reg);
 }
 
 static unsigned int regmap_mmio_read16le_relaxed(struct regmap_mmio_context *ctx,
@@ -212,7 +212,7 @@ static unsigned int regmap_mmio_read32be(struct regmap_mmio_context *ctx,
 static unsigned int regmap_mmio_read64le(struct regmap_mmio_context *ctx,
 				         unsigned int reg)
 {
-	return readq(ctx->regs + reg);
+	return pete_readq("drivers/base/regmap/regmap-mmio.c:215", ctx->regs + reg);
 }
 
 static unsigned int regmap_mmio_read64le_relaxed(struct regmap_mmio_context *ctx,

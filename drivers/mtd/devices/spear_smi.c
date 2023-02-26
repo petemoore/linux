@@ -606,7 +606,7 @@ static void spear_smi_memcpy_toio_b(volatile void __iomem *dest,
 
 	while (len) {
 		len--;
-		writeb(*from, dest);
+		pete_writeb("drivers/mtd/devices/spear_smi.c:609", *from, dest);
 		from++;
 		dest++;
 	}

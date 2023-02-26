@@ -1268,7 +1268,7 @@ static void qcom_pcie_post_deinit_2_7_0(struct qcom_pcie *pcie)
 static int qcom_pcie_link_up(struct dw_pcie *pci)
 {
 	u16 offset = dw_pcie_find_capability(pci, PCI_CAP_ID_EXP);
-	u16 val = readw(pci->dbi_base + offset + PCI_EXP_LNKSTA);
+	u16 val = pete_readw("drivers/pci/controller/dwc/pcie-qcom.c:1271", pci->dbi_base + offset + PCI_EXP_LNKSTA);
 
 	return !!(val & PCI_EXP_LNKSTA_DLLLA);
 }

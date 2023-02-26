@@ -242,7 +242,7 @@ static unsigned int dw_hdmi_dwc_read(struct meson_dw_hdmi *dw_hdmi,
 static unsigned int dw_hdmi_g12a_dwc_read(struct meson_dw_hdmi *dw_hdmi,
 					  unsigned int addr)
 {
-	return readb(dw_hdmi->hdmitx + addr);
+	return pete_readb("drivers/gpu/drm/meson/meson_dw_hdmi.c:245", dw_hdmi->hdmitx + addr);
 }
 
 static inline void dw_hdmi_dwc_write(struct meson_dw_hdmi *dw_hdmi,
@@ -265,7 +265,7 @@ static inline void dw_hdmi_dwc_write(struct meson_dw_hdmi *dw_hdmi,
 static inline void dw_hdmi_g12a_dwc_write(struct meson_dw_hdmi *dw_hdmi,
 					  unsigned int addr, unsigned int data)
 {
-	writeb(data, dw_hdmi->hdmitx + addr);
+	pete_writeb("drivers/gpu/drm/meson/meson_dw_hdmi.c:268", data, dw_hdmi->hdmitx + addr);
 }
 
 /* Helper to change specific bits in controller registers */

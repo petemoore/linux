@@ -362,7 +362,7 @@ static resource_size_t intel_gtt_stolen_size(void)
 			stolen_size = MB(8);
 			break;
 		case I830_GMCH_GMS_LOCAL:
-			rdct = readb(intel_private.registers+I830_RDRAM_CHANNEL_TYPE);
+			rdct = pete_readb("drivers/char/agp/intel-gtt.c:365", intel_private.registers+I830_RDRAM_CHANNEL_TYPE);
 			stolen_size = (I830_RDRAM_ND(rdct) + 1) *
 					MB(ddt[I830_RDRAM_DDT(rdct)]);
 			local = 1;

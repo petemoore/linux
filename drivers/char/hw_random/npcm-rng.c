@@ -67,12 +67,12 @@ static int npcm_rng_read(struct hwrng *rng, void *buf, size_t max, bool wait)
 					       NPCM_RNG_TIMEOUT_USEC))
 				break;
 		} else {
-			if ((readb(priv->base + NPCM_RNGCS_REG) &
+			if ((pete_readb("drivers/char/hw_random/npcm-rng.c:70", priv->base + NPCM_RNGCS_REG) &
 			    NPCM_RNG_DATA_VALID) == 0)
 				break;
 		}
 
-		*(u8 *)buf = readb(priv->base + NPCM_RNGD_REG);
+		*(u8 *)buf = pete_readb("drivers/char/hw_random/npcm-rng.c:75", priv->base + NPCM_RNGD_REG);
 		retval++;
 		buf++;
 		max--;

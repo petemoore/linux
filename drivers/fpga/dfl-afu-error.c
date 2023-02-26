@@ -34,7 +34,7 @@ static void __afu_port_err_mask(struct device *dev, bool mask)
 
 	base = dfl_get_feature_ioaddr_by_id(dev, PORT_FEATURE_ID_ERROR);
 
-	writeq(mask ? ERROR_MASK : 0, base + PORT_ERROR_MASK);
+	pete_writeq("drivers/fpga/dfl-afu-error.c:37", mask ? ERROR_MASK : 0, base + PORT_ERROR_MASK);
 }
 
 static void afu_port_err_mask(struct device *dev, bool mask)
@@ -73,7 +73,7 @@ static int afu_port_err_clear(struct device *dev, u64 err)
 	 */
 
 	/* if device is still in AP6 power state, can not clear any error. */
-	v = readq(base_hdr + PORT_HDR_STS);
+	v = pete_readq("drivers/fpga/dfl-afu-error.c:76", base_hdr + PORT_HDR_STS);
 	if (FIELD_GET(PORT_STS_PWR_STATE, v) == PORT_STS_PWR_STATE_AP6) {
 		dev_err(dev, "Could not clear errors, device in AP6 state.\n");
 		goto done;
@@ -88,13 +88,13 @@ static int afu_port_err_clear(struct device *dev, u64 err)
 	__afu_port_err_mask(dev, true);
 
 	/* Clear errors if err input matches with current port errors.*/
-	v = readq(base_err + PORT_ERROR);
+	v = pete_readq("drivers/fpga/dfl-afu-error.c:91", base_err + PORT_ERROR);
 
 	if (v == err) {
-		writeq(v, base_err + PORT_ERROR);
+		pete_writeq("drivers/fpga/dfl-afu-error.c:94", v, base_err + PORT_ERROR);
 
-		v = readq(base_err + PORT_FIRST_ERROR);
-		writeq(v, base_err + PORT_FIRST_ERROR);
+		v = pete_readq("drivers/fpga/dfl-afu-error.c:96", base_err + PORT_FIRST_ERROR);
+		pete_writeq("drivers/fpga/dfl-afu-error.c:97", v, base_err + PORT_FIRST_ERROR);
 	} else {
 		dev_warn(dev, "%s: received 0x%llx, expected 0x%llx\n",
 			 __func__, v, err);
@@ -122,7 +122,7 @@ static ssize_t errors_show(struct device *dev, struct device_attribute *attr,
 	base = dfl_get_feature_ioaddr_by_id(dev, PORT_FEATURE_ID_ERROR);
 
 	mutex_lock(&pdata->lock);
-	error = readq(base + PORT_ERROR);
+	error = pete_readq("drivers/fpga/dfl-afu-error.c:125", base + PORT_ERROR);
 	mutex_unlock(&pdata->lock);
 
 	return sprintf(buf, "0x%llx\n", (unsigned long long)error);
@@ -153,7 +153,7 @@ static ssize_t first_error_show(struct device *dev,
 	base = dfl_get_feature_ioaddr_by_id(dev, PORT_FEATURE_ID_ERROR);
 
 	mutex_lock(&pdata->lock);
-	error = readq(base + PORT_FIRST_ERROR);
+	error = pete_readq("drivers/fpga/dfl-afu-error.c:156", base + PORT_FIRST_ERROR);
 	mutex_unlock(&pdata->lock);
 
 	return sprintf(buf, "0x%llx\n", (unsigned long long)error);
@@ -171,8 +171,8 @@ static ssize_t first_malformed_req_show(struct device *dev,
 	base = dfl_get_feature_ioaddr_by_id(dev, PORT_FEATURE_ID_ERROR);
 
 	mutex_lock(&pdata->lock);
-	req0 = readq(base + PORT_MALFORMED_REQ0);
-	req1 = readq(base + PORT_MALFORMED_REQ1);
+	req0 = pete_readq("drivers/fpga/dfl-afu-error.c:174", base + PORT_MALFORMED_REQ0);
+	req1 = pete_readq("drivers/fpga/dfl-afu-error.c:175", base + PORT_MALFORMED_REQ1);
 	mutex_unlock(&pdata->lock);
 
 	return sprintf(buf, "0x%016llx%016llx\n",

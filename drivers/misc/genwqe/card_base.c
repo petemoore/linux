@@ -997,7 +997,7 @@ static int genwqe_health_thread(void *data)
 		 * by the platform until we do a non-raw MMIO or config space
 		 * read
 		 */
-		readq(cd->mmio + IO_SLC_CFGREG_GFIR);
+		pete_readq("drivers/misc/genwqe/card_base.c:1000", cd->mmio + IO_SLC_CFGREG_GFIR);
 
 		/* We do nothing if the card is going over PCI recovery */
 		if (pci_channel_offline(pci_dev))

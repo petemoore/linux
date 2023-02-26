@@ -269,7 +269,7 @@ static inline void qib_write_ureg(const struct qib_devdata *dd,
 			 dd->ureg_align * ctxt);
 
 	if (dd->kregbase && (dd->flags & QIB_PRESENT))
-		writeq(value, &ubase[regno]);
+		pete_writeq("drivers/infiniband/hw/qib/qib_iba7220.c:272", value, &ubase[regno]);
 }
 
 /**
@@ -290,14 +290,14 @@ static inline void write_7220_creg(const struct qib_devdata *dd,
 				   u16 regno, u64 value)
 {
 	if (dd->cspec->cregbase && (dd->flags & QIB_PRESENT))
-		writeq(value, &dd->cspec->cregbase[regno]);
+		pete_writeq("drivers/infiniband/hw/qib/qib_iba7220.c:293", value, &dd->cspec->cregbase[regno]);
 }
 
 static inline u64 read_7220_creg(const struct qib_devdata *dd, u16 regno)
 {
 	if (!dd->cspec->cregbase || !(dd->flags & QIB_PRESENT))
 		return 0;
-	return readq(&dd->cspec->cregbase[regno]);
+	return pete_readq("drivers/infiniband/hw/qib/qib_iba7220.c:300", &dd->cspec->cregbase[regno]);
 }
 
 static inline u32 read_7220_creg32(const struct qib_devdata *dd, u16 regno)
@@ -2085,14 +2085,14 @@ static int qib_setup_7220_reset(struct qib_devdata *dd)
 
 	/*
 	 * Keep chip from being accessed until we are ready.  Use
-	 * writeq() directly, to allow the write even though QIB_PRESENT
+	 * pete_writeq("drivers/infiniband/hw/qib/qib_iba7220.c:2088", ) directly, to allow the write even though QIB_PRESENT
 	 * isn't set.
 	 */
 	dd->flags &= ~(QIB_INITTED | QIB_PRESENT);
 	/* so we check interrupts work again */
 	dd->z_int_counter = qib_int_counter(dd);
 	val = dd->control | QLOGIC_IB_C_RESET;
-	writeq(val, &dd->kregbase[kr_control]);
+	pete_writeq("drivers/infiniband/hw/qib/qib_iba7220.c:2095", val, &dd->kregbase[kr_control]);
 	mb(); /* prevent compiler reordering around actual reset */
 
 	for (i = 1; i <= 5; i++) {
@@ -2109,7 +2109,7 @@ static int qib_setup_7220_reset(struct qib_devdata *dd)
 		 * Use readq directly, so we don't need to mark it as PRESENT
 		 * until we get a successful indication that all is well.
 		 */
-		val = readq(&dd->kregbase[kr_revision]);
+		val = pete_readq("drivers/infiniband/hw/qib/qib_iba7220.c:2112", &dd->kregbase[kr_revision]);
 		if (val == dd->revision) {
 			dd->flags |= QIB_PRESENT; /* it's back */
 			ret = qib_reinit_intr(dd);
@@ -2174,7 +2174,7 @@ static void qib_7220_put_tid(struct qib_devdata *dd, u64 __iomem *tidptr,
 			chippa |= IBA7220_TID_SZ_4K;
 		pa = chippa;
 	}
-	writeq(pa, tidptr);
+	pete_writeq("drivers/infiniband/hw/qib/qib_iba7220.c:2177", pa, tidptr);
 }
 
 /**
@@ -3386,7 +3386,7 @@ static void autoneg_7220_sendpkt(struct qib_pportdata *ppd, u32 *hdr,
 		udelay(2);
 	}
 	sendctrl_7220_mod(dd->pport, QIB_SENDCTRL_DISARM_BUF(pnum));
-	writeq(pbc, piobuf);
+	pete_writeq("drivers/infiniband/hw/qib/qib_iba7220.c:3389", pbc, piobuf);
 	qib_flush_wc();
 	qib_pio_copy(piobuf + 2, hdr, 7);
 	qib_pio_copy(piobuf + 9, data, dcnt);
@@ -3973,7 +3973,7 @@ static int qib_init_7220_variables(struct qib_devdata *dd)
 	spin_lock_init(&dd->cspec->gpio_lock);
 
 	/* we haven't yet set QIB_PRESENT, so use read directly */
-	dd->revision = readq(&dd->kregbase[kr_revision]);
+	dd->revision = pete_readq("drivers/infiniband/hw/qib/qib_iba7220.c:3976", &dd->kregbase[kr_revision]);
 
 	if ((dd->revision & 0xffffffffU) == 0xffffffffU) {
 		qib_dev_err(dd,

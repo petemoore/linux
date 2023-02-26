@@ -120,7 +120,7 @@ static void empty_fifo(struct sh_flctl *flctl)
 
 static void start_translation(struct sh_flctl *flctl)
 {
-	writeb(TRSTRT, FLTRCR(flctl));
+	pete_writeb("drivers/mtd/nand/raw/sh_flctl.c:123", TRSTRT, FLTRCR(flctl));
 }
 
 static void timeout_error(struct sh_flctl *flctl, const char *str)
@@ -133,15 +133,15 @@ static void wait_completion(struct sh_flctl *flctl)
 	uint32_t timeout = LOOP_TIMEOUT_MAX;
 
 	while (timeout--) {
-		if (readb(FLTRCR(flctl)) & TREND) {
-			writeb(0x0, FLTRCR(flctl));
+		if (pete_readb("drivers/mtd/nand/raw/sh_flctl.c:136", FLTRCR(flctl)) & TREND) {
+			pete_writeb("drivers/mtd/nand/raw/sh_flctl.c:137", 0x0, FLTRCR(flctl));
 			return;
 		}
 		udelay(1);
 	}
 
 	timeout_error(flctl, __func__);
-	writeb(0x0, FLTRCR(flctl));
+	pete_writeb("drivers/mtd/nand/raw/sh_flctl.c:144", 0x0, FLTRCR(flctl));
 }
 
 static void flctl_dma_complete(void *param)

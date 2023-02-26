@@ -422,7 +422,7 @@ static u64 amd_ntb_db_read(struct ntb_dev *ntb)
 	struct amd_ntb_dev *ndev = ntb_ndev(ntb);
 	void __iomem *mmio = ndev->self_mmio;
 
-	return (u64)readw(mmio + AMD_DBSTAT_OFFSET);
+	return (u64)pete_readw("drivers/ntb/hw/amd/ntb_hw_amd.c:425", mmio + AMD_DBSTAT_OFFSET);
 }
 
 static int amd_ntb_db_clear(struct ntb_dev *ntb, u64 db_bits)
@@ -430,7 +430,7 @@ static int amd_ntb_db_clear(struct ntb_dev *ntb, u64 db_bits)
 	struct amd_ntb_dev *ndev = ntb_ndev(ntb);
 	void __iomem *mmio = ndev->self_mmio;
 
-	writew((u16)db_bits, mmio + AMD_DBSTAT_OFFSET);
+	pete_writew("drivers/ntb/hw/amd/ntb_hw_amd.c:433", (u16)db_bits, mmio + AMD_DBSTAT_OFFSET);
 
 	return 0;
 }
@@ -446,7 +446,7 @@ static int amd_ntb_db_set_mask(struct ntb_dev *ntb, u64 db_bits)
 
 	spin_lock_irqsave(&ndev->db_mask_lock, flags);
 	ndev->db_mask |= db_bits;
-	writew((u16)ndev->db_mask, mmio + AMD_DBMASK_OFFSET);
+	pete_writew("drivers/ntb/hw/amd/ntb_hw_amd.c:449", (u16)ndev->db_mask, mmio + AMD_DBMASK_OFFSET);
 	spin_unlock_irqrestore(&ndev->db_mask_lock, flags);
 
 	return 0;
@@ -463,7 +463,7 @@ static int amd_ntb_db_clear_mask(struct ntb_dev *ntb, u64 db_bits)
 
 	spin_lock_irqsave(&ndev->db_mask_lock, flags);
 	ndev->db_mask &= ~db_bits;
-	writew((u16)ndev->db_mask, mmio + AMD_DBMASK_OFFSET);
+	pete_writew("drivers/ntb/hw/amd/ntb_hw_amd.c:466", (u16)ndev->db_mask, mmio + AMD_DBMASK_OFFSET);
 	spin_unlock_irqrestore(&ndev->db_mask_lock, flags);
 
 	return 0;
@@ -474,7 +474,7 @@ static int amd_ntb_peer_db_set(struct ntb_dev *ntb, u64 db_bits)
 	struct amd_ntb_dev *ndev = ntb_ndev(ntb);
 	void __iomem *mmio = ndev->self_mmio;
 
-	writew((u16)db_bits, mmio + AMD_DBREQ_OFFSET);
+	pete_writew("drivers/ntb/hw/amd/ntb_hw_amd.c:477", (u16)db_bits, mmio + AMD_DBREQ_OFFSET);
 
 	return 0;
 }
@@ -1137,7 +1137,7 @@ static int amd_init_dev(struct amd_ntb_dev *ndev)
 	ndev->db_last_bit =
 			find_last_bit((unsigned long *)&ndev->db_valid_mask,
 				      hweight64(ndev->db_valid_mask));
-	writew((u16)~BIT(ndev->db_last_bit), mmio + AMD_DBMASK_OFFSET);
+	pete_writew("drivers/ntb/hw/amd/ntb_hw_amd.c:1140", (u16)~BIT(ndev->db_last_bit), mmio + AMD_DBMASK_OFFSET);
 	/*
 	 * Since now there is one less bit to account for, the DB count
 	 * and DB mask should be adjusted accordingly.

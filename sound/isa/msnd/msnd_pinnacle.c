@@ -162,16 +162,16 @@ static irqreturn_t snd_msnd_interrupt(int irq, void *dev_id)
 	/* inb(chip->io + HP_RXL); */
 
 	/* Evaluate queued DSP messages */
-	head = readw(chip->DSPQ + JQS_wHead);
-	tail = readw(chip->DSPQ + JQS_wTail);
-	size = readw(chip->DSPQ + JQS_wSize);
+	head = pete_readw("sound/isa/msnd/msnd_pinnacle.c:165", chip->DSPQ + JQS_wHead);
+	tail = pete_readw("sound/isa/msnd/msnd_pinnacle.c:166", chip->DSPQ + JQS_wTail);
+	size = pete_readw("sound/isa/msnd/msnd_pinnacle.c:167", chip->DSPQ + JQS_wSize);
 	if (head > size || tail > size)
 		goto out;
 	while (head != tail) {
-		snd_msnd_eval_dsp_msg(chip, readw(pwDSPQData + 2 * head));
+		snd_msnd_eval_dsp_msg(chip, pete_readw("sound/isa/msnd/msnd_pinnacle.c:171", pwDSPQData + 2 * head));
 		if (++head > size)
 			head = 0;
-		writew(head, chip->DSPQ + JQS_wHead);
+		pete_writew("sound/isa/msnd/msnd_pinnacle.c:174", head, chip->DSPQ + JQS_wHead);
 	}
  out:
 	/* Send ack to DSP */
@@ -312,8 +312,8 @@ static int snd_msnd_init_sma(struct snd_msnd *chip)
 	chip->SMA = chip->mappedbase + SMA_STRUCT_START;
 
 	if (initted) {
-		mastVolLeft = readw(chip->SMA + SMA_wCurrMastVolLeft);
-		mastVolRight = readw(chip->SMA + SMA_wCurrMastVolRight);
+		mastVolLeft = pete_readw("sound/isa/msnd/msnd_pinnacle.c:315", chip->SMA + SMA_wCurrMastVolLeft);
+		mastVolRight = pete_readw("sound/isa/msnd/msnd_pinnacle.c:316", chip->SMA + SMA_wCurrMastVolRight);
 	} else
 		mastVolLeft = mastVolRight = 0;
 	memset_io(chip->mappedbase, 0, 0x8000);
@@ -347,19 +347,19 @@ static int snd_msnd_init_sma(struct snd_msnd *chip)
 
 	/* Setup some DSP values */
 #ifndef MSND_CLASSIC
-	writew(1, chip->SMA + SMA_wCurrPlayFormat);
-	writew(chip->play_sample_size, chip->SMA + SMA_wCurrPlaySampleSize);
-	writew(chip->play_channels, chip->SMA + SMA_wCurrPlayChannels);
-	writew(chip->play_sample_rate, chip->SMA + SMA_wCurrPlaySampleRate);
+	pete_writew("sound/isa/msnd/msnd_pinnacle.c:350", 1, chip->SMA + SMA_wCurrPlayFormat);
+	pete_writew("sound/isa/msnd/msnd_pinnacle.c:351", chip->play_sample_size, chip->SMA + SMA_wCurrPlaySampleSize);
+	pete_writew("sound/isa/msnd/msnd_pinnacle.c:352", chip->play_channels, chip->SMA + SMA_wCurrPlayChannels);
+	pete_writew("sound/isa/msnd/msnd_pinnacle.c:353", chip->play_sample_rate, chip->SMA + SMA_wCurrPlaySampleRate);
 #endif
-	writew(chip->play_sample_rate, chip->SMA + SMA_wCalFreqAtoD);
-	writew(mastVolLeft, chip->SMA + SMA_wCurrMastVolLeft);
-	writew(mastVolRight, chip->SMA + SMA_wCurrMastVolRight);
+	pete_writew("sound/isa/msnd/msnd_pinnacle.c:355", chip->play_sample_rate, chip->SMA + SMA_wCalFreqAtoD);
+	pete_writew("sound/isa/msnd/msnd_pinnacle.c:356", mastVolLeft, chip->SMA + SMA_wCurrMastVolLeft);
+	pete_writew("sound/isa/msnd/msnd_pinnacle.c:357", mastVolRight, chip->SMA + SMA_wCurrMastVolRight);
 #ifndef MSND_CLASSIC
 	pete_writel("sound/isa/msnd/msnd_pinnacle.c:359", 0x00010000, chip->SMA + SMA_dwCurrPlayPitch);
 	pete_writel("sound/isa/msnd/msnd_pinnacle.c:360", 0x00000001, chip->SMA + SMA_dwCurrPlayRate);
 #endif
-	writew(0x303, chip->SMA + SMA_wCurrInputTagBits);
+	pete_writew("sound/isa/msnd/msnd_pinnacle.c:362", 0x303, chip->SMA + SMA_wCurrInputTagBits);
 
 	initted = 1;
 
@@ -441,7 +441,7 @@ static int snd_msnd_initialize(struct snd_card *card)
 
 	timeout = 200;
 
-	while (readw(chip->mappedbase)) {
+	while (pete_readw("sound/isa/msnd/msnd_pinnacle.c:444", chip->mappedbase)) {
 		msleep(1);
 		if (!timeout--) {
 			snd_printd(KERN_ERR LOGNAME ": DSP reset timeout\n");
@@ -484,12 +484,12 @@ static int snd_msnd_send_dsp_cmd_chk(struct snd_msnd *chip, u8 cmd)
 static int snd_msnd_calibrate_adc(struct snd_msnd *chip, u16 srate)
 {
 	snd_printdd("snd_msnd_calibrate_adc(%i)\n", srate);
-	writew(srate, chip->SMA + SMA_wCalFreqAtoD);
+	pete_writew("sound/isa/msnd/msnd_pinnacle.c:487", srate, chip->SMA + SMA_wCalFreqAtoD);
 	if (chip->calibrate_signal == 0)
-		writew(readw(chip->SMA + SMA_wCurrHostStatusFlags)
+		pete_writew("sound/isa/msnd/msnd_pinnacle.c:489", pete_readw("sound/isa/msnd/msnd_pinnacle.c:489", chip->SMA + SMA_wCurrHostStatusFlags)
 		       | 0x0001, chip->SMA + SMA_wCurrHostStatusFlags);
 	else
-		writew(readw(chip->SMA + SMA_wCurrHostStatusFlags)
+		pete_writew("sound/isa/msnd/msnd_pinnacle.c:492", pete_readw("sound/isa/msnd/msnd_pinnacle.c:492", chip->SMA + SMA_wCurrHostStatusFlags)
 		       & ~0x0001, chip->SMA + SMA_wCurrHostStatusFlags);
 	if (snd_msnd_send_word(chip, 0, 0, HDEXAR_CAL_A_TO_D) == 0 &&
 	    snd_msnd_send_dsp_cmd_chk(chip, HDEX_AUX_REQ) == 0) {

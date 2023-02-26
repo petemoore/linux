@@ -402,7 +402,7 @@ static void read_mem32(u32 *buf, const void __iomem *mem_addr_start,
 	switch (size_bytes) {
 	case 2:	/* 2 bytes */
 		buf16 = (u16 *) buf;
-		*buf16 = __le16_to_cpu(readw(ptr));
+		*buf16 = __le16_to_cpu(pete_readw("drivers/tty/nozomi.c:405", ptr));
 		goto out;
 	case 4:	/* 4 bytes */
 		*(buf) = __le32_to_cpu(pete_readl("drivers/tty/nozomi.c:408", ptr));
@@ -413,7 +413,7 @@ static void read_mem32(u32 *buf, const void __iomem *mem_addr_start,
 		if (size_bytes - i == 2) {
 			/* Handle 2 bytes in the end */
 			buf16 = (u16 *) buf;
-			*(buf16) = __le16_to_cpu(readw(ptr));
+			*(buf16) = __le16_to_cpu(pete_readw("drivers/tty/nozomi.c:416", ptr));
 			i += 2;
 		} else {
 			/* Read 4 bytes */
@@ -446,7 +446,7 @@ static u32 write_mem32(void __iomem *mem_addr_start, const u32 *buf,
 	switch (size_bytes) {
 	case 2:	/* 2 bytes */
 		buf16 = (const u16 *)buf;
-		writew(__cpu_to_le16(*buf16), ptr);
+		pete_writew("drivers/tty/nozomi.c:449", __cpu_to_le16(*buf16), ptr);
 		return 2;
 	case 1: /*
 		 * also needs to write 4 bytes in this case
@@ -462,7 +462,7 @@ static u32 write_mem32(void __iomem *mem_addr_start, const u32 *buf,
 		if (size_bytes - i == 2) {
 			/* 2 bytes */
 			buf16 = (const u16 *)buf;
-			writew(__cpu_to_le16(*buf16), ptr);
+			pete_writew("drivers/tty/nozomi.c:465", __cpu_to_le16(*buf16), ptr);
 			i += 2;
 		} else {
 			/* 4 bytes */
@@ -642,7 +642,7 @@ static int nozomi_read_config_table(struct nozomi *dc)
 
 		/* Enable control channel */
 		dc->last_ier = dc->last_ier | CTRL_DL;
-		writew(dc->last_ier, dc->reg_ier);
+		pete_writew("drivers/tty/nozomi.c:645", dc->last_ier, dc->reg_ier);
 
 		dc->state = NOZOMI_STATE_ALLOCATED;
 		dev_info(&dc->pdev->dev, "Initialization OK!\n");
@@ -671,7 +671,7 @@ static int nozomi_read_config_table(struct nozomi *dc)
 		write_mem32(dc->port[PORT_MDM].ul_addr[CH_B],
 			(u32 *) &offset, 4);
 
-		writew(MDM_UL | DIAG_DL | MDM_DL, dc->reg_fcr);
+		pete_writew("drivers/tty/nozomi.c:674", MDM_UL | DIAG_DL | MDM_DL, dc->reg_fcr);
 
 		DBG1("First phase done");
 	}
@@ -686,7 +686,7 @@ static void enable_transmit_ul(enum port_type port, struct nozomi *dc)
 
 	if (port < NOZOMI_MAX_PORTS) {
 		dc->last_ier |= mask[port];
-		writew(dc->last_ier, dc->reg_ier);
+		pete_writew("drivers/tty/nozomi.c:689", dc->last_ier, dc->reg_ier);
 	} else {
 		dev_err(&dc->pdev->dev, "Called with wrong port?\n");
 	}
@@ -700,7 +700,7 @@ static void disable_transmit_ul(enum port_type port, struct nozomi *dc)
 
 	if (port < NOZOMI_MAX_PORTS) {
 		dc->last_ier &= mask[port];
-		writew(dc->last_ier, dc->reg_ier);
+		pete_writew("drivers/tty/nozomi.c:703", dc->last_ier, dc->reg_ier);
 	} else {
 		dev_err(&dc->pdev->dev, "Called with wrong port?\n");
 	}
@@ -713,7 +713,7 @@ static void enable_transmit_dl(enum port_type port, struct nozomi *dc)
 
 	if (port < NOZOMI_MAX_PORTS) {
 		dc->last_ier |= mask[port];
-		writew(dc->last_ier, dc->reg_ier);
+		pete_writew("drivers/tty/nozomi.c:716", dc->last_ier, dc->reg_ier);
 	} else {
 		dev_err(&dc->pdev->dev, "Called with wrong port?\n");
 	}
@@ -727,7 +727,7 @@ static void disable_transmit_dl(enum port_type port, struct nozomi *dc)
 
 	if (port < NOZOMI_MAX_PORTS) {
 		dc->last_ier &= mask[port];
-		writew(dc->last_ier, dc->reg_ier);
+		pete_writew("drivers/tty/nozomi.c:730", dc->last_ier, dc->reg_ier);
 	} else {
 		dev_err(&dc->pdev->dev, "Called with wrong port?\n");
 	}
@@ -1017,25 +1017,25 @@ static int handle_data_dl(struct nozomi *dc, enum port_type port, u8 *toggle,
 {
 	if (*toggle == 0 && read_iir & mask1) {
 		if (receive_data(port, dc)) {
-			writew(mask1, dc->reg_fcr);
+			pete_writew("drivers/tty/nozomi.c:1020", mask1, dc->reg_fcr);
 			*toggle = !(*toggle);
 		}
 
 		if (read_iir & mask2) {
 			if (receive_data(port, dc)) {
-				writew(mask2, dc->reg_fcr);
+				pete_writew("drivers/tty/nozomi.c:1026", mask2, dc->reg_fcr);
 				*toggle = !(*toggle);
 			}
 		}
 	} else if (*toggle == 1 && read_iir & mask2) {
 		if (receive_data(port, dc)) {
-			writew(mask2, dc->reg_fcr);
+			pete_writew("drivers/tty/nozomi.c:1032", mask2, dc->reg_fcr);
 			*toggle = !(*toggle);
 		}
 
 		if (read_iir & mask1) {
 			if (receive_data(port, dc)) {
-				writew(mask1, dc->reg_fcr);
+				pete_writew("drivers/tty/nozomi.c:1038", mask1, dc->reg_fcr);
 				*toggle = !(*toggle);
 			}
 		}
@@ -1058,47 +1058,47 @@ static int handle_data_ul(struct nozomi *dc, enum port_type port, u16 read_iir)
 
 	if (*toggle == 0 && read_iir & MDM_UL1) {
 		dc->last_ier &= ~MDM_UL;
-		writew(dc->last_ier, dc->reg_ier);
+		pete_writew("drivers/tty/nozomi.c:1061", dc->last_ier, dc->reg_ier);
 		if (send_data(port, dc)) {
-			writew(MDM_UL1, dc->reg_fcr);
+			pete_writew("drivers/tty/nozomi.c:1063", MDM_UL1, dc->reg_fcr);
 			dc->last_ier = dc->last_ier | MDM_UL;
-			writew(dc->last_ier, dc->reg_ier);
+			pete_writew("drivers/tty/nozomi.c:1065", dc->last_ier, dc->reg_ier);
 			*toggle = !*toggle;
 		}
 
 		if (read_iir & MDM_UL2) {
 			dc->last_ier &= ~MDM_UL;
-			writew(dc->last_ier, dc->reg_ier);
+			pete_writew("drivers/tty/nozomi.c:1071", dc->last_ier, dc->reg_ier);
 			if (send_data(port, dc)) {
-				writew(MDM_UL2, dc->reg_fcr);
+				pete_writew("drivers/tty/nozomi.c:1073", MDM_UL2, dc->reg_fcr);
 				dc->last_ier = dc->last_ier | MDM_UL;
-				writew(dc->last_ier, dc->reg_ier);
+				pete_writew("drivers/tty/nozomi.c:1075", dc->last_ier, dc->reg_ier);
 				*toggle = !*toggle;
 			}
 		}
 
 	} else if (*toggle == 1 && read_iir & MDM_UL2) {
 		dc->last_ier &= ~MDM_UL;
-		writew(dc->last_ier, dc->reg_ier);
+		pete_writew("drivers/tty/nozomi.c:1082", dc->last_ier, dc->reg_ier);
 		if (send_data(port, dc)) {
-			writew(MDM_UL2, dc->reg_fcr);
+			pete_writew("drivers/tty/nozomi.c:1084", MDM_UL2, dc->reg_fcr);
 			dc->last_ier = dc->last_ier | MDM_UL;
-			writew(dc->last_ier, dc->reg_ier);
+			pete_writew("drivers/tty/nozomi.c:1086", dc->last_ier, dc->reg_ier);
 			*toggle = !*toggle;
 		}
 
 		if (read_iir & MDM_UL1) {
 			dc->last_ier &= ~MDM_UL;
-			writew(dc->last_ier, dc->reg_ier);
+			pete_writew("drivers/tty/nozomi.c:1092", dc->last_ier, dc->reg_ier);
 			if (send_data(port, dc)) {
-				writew(MDM_UL1, dc->reg_fcr);
+				pete_writew("drivers/tty/nozomi.c:1094", MDM_UL1, dc->reg_fcr);
 				dc->last_ier = dc->last_ier | MDM_UL;
-				writew(dc->last_ier, dc->reg_ier);
+				pete_writew("drivers/tty/nozomi.c:1096", dc->last_ier, dc->reg_ier);
 				*toggle = !*toggle;
 			}
 		}
 	} else {
-		writew(read_iir & MDM_UL, dc->reg_fcr);
+		pete_writew("drivers/tty/nozomi.c:1101", read_iir & MDM_UL, dc->reg_fcr);
 		dev_err(&dc->pdev->dev, "port out of sync!\n");
 		return 0;
 	}
@@ -1115,7 +1115,7 @@ static irqreturn_t interrupt_handler(int irq, void *dev_id)
 		return IRQ_NONE;
 
 	spin_lock(&dc->spin_mutex);
-	read_iir = readw(dc->reg_iir);
+	read_iir = pete_readw("drivers/tty/nozomi.c:1118", dc->reg_iir);
 
 	/* Card removed */
 	if (read_iir == (u16)-1)
@@ -1136,11 +1136,11 @@ static irqreturn_t interrupt_handler(int irq, void *dev_id)
 	if (read_iir & RESET) {
 		if (unlikely(!nozomi_read_config_table(dc))) {
 			dc->last_ier = 0x0;
-			writew(dc->last_ier, dc->reg_ier);
+			pete_writew("drivers/tty/nozomi.c:1139", dc->last_ier, dc->reg_ier);
 			dev_err(&dc->pdev->dev, "Could not read status from "
 				"card, we should disable interface\n");
 		} else {
-			writew(RESET, dc->reg_fcr);
+			pete_writew("drivers/tty/nozomi.c:1143", RESET, dc->reg_fcr);
 		}
 		/* No more useful info if this was the reset interrupt. */
 		goto exit_handler;
@@ -1148,16 +1148,16 @@ static irqreturn_t interrupt_handler(int irq, void *dev_id)
 	if (read_iir & CTRL_UL) {
 		DBG1("CTRL_UL");
 		dc->last_ier &= ~CTRL_UL;
-		writew(dc->last_ier, dc->reg_ier);
+		pete_writew("drivers/tty/nozomi.c:1151", dc->last_ier, dc->reg_ier);
 		if (send_flow_control(dc)) {
-			writew(CTRL_UL, dc->reg_fcr);
+			pete_writew("drivers/tty/nozomi.c:1153", CTRL_UL, dc->reg_fcr);
 			dc->last_ier = dc->last_ier | CTRL_UL;
-			writew(dc->last_ier, dc->reg_ier);
+			pete_writew("drivers/tty/nozomi.c:1155", dc->last_ier, dc->reg_ier);
 		}
 	}
 	if (read_iir & CTRL_DL) {
 		receive_flow_control(dc);
-		writew(CTRL_DL, dc->reg_fcr);
+		pete_writew("drivers/tty/nozomi.c:1160", CTRL_DL, dc->reg_fcr);
 	}
 	if (read_iir & MDM_DL) {
 		if (!handle_data_dl(dc, PORT_MDM,
@@ -1183,37 +1183,37 @@ static irqreturn_t interrupt_handler(int irq, void *dev_id)
 	}
 	if (read_iir & DIAG_UL) {
 		dc->last_ier &= ~DIAG_UL;
-		writew(dc->last_ier, dc->reg_ier);
+		pete_writew("drivers/tty/nozomi.c:1186", dc->last_ier, dc->reg_ier);
 		if (send_data(PORT_DIAG, dc)) {
-			writew(DIAG_UL, dc->reg_fcr);
+			pete_writew("drivers/tty/nozomi.c:1188", DIAG_UL, dc->reg_fcr);
 			dc->last_ier = dc->last_ier | DIAG_UL;
-			writew(dc->last_ier, dc->reg_ier);
+			pete_writew("drivers/tty/nozomi.c:1190", dc->last_ier, dc->reg_ier);
 		}
 	}
 	if (read_iir & APP1_DL) {
 		if (receive_data(PORT_APP1, dc))
-			writew(APP1_DL, dc->reg_fcr);
+			pete_writew("drivers/tty/nozomi.c:1195", APP1_DL, dc->reg_fcr);
 	}
 	if (read_iir & APP1_UL) {
 		dc->last_ier &= ~APP1_UL;
-		writew(dc->last_ier, dc->reg_ier);
+		pete_writew("drivers/tty/nozomi.c:1199", dc->last_ier, dc->reg_ier);
 		if (send_data(PORT_APP1, dc)) {
-			writew(APP1_UL, dc->reg_fcr);
+			pete_writew("drivers/tty/nozomi.c:1201", APP1_UL, dc->reg_fcr);
 			dc->last_ier = dc->last_ier | APP1_UL;
-			writew(dc->last_ier, dc->reg_ier);
+			pete_writew("drivers/tty/nozomi.c:1203", dc->last_ier, dc->reg_ier);
 		}
 	}
 	if (read_iir & APP2_DL) {
 		if (receive_data(PORT_APP2, dc))
-			writew(APP2_DL, dc->reg_fcr);
+			pete_writew("drivers/tty/nozomi.c:1208", APP2_DL, dc->reg_fcr);
 	}
 	if (read_iir & APP2_UL) {
 		dc->last_ier &= ~APP2_UL;
-		writew(dc->last_ier, dc->reg_ier);
+		pete_writew("drivers/tty/nozomi.c:1212", dc->last_ier, dc->reg_ier);
 		if (send_data(PORT_APP2, dc)) {
-			writew(APP2_UL, dc->reg_fcr);
+			pete_writew("drivers/tty/nozomi.c:1214", APP2_UL, dc->reg_fcr);
 			dc->last_ier = dc->last_ier | APP2_UL;
-			writew(dc->last_ier, dc->reg_ier);
+			pete_writew("drivers/tty/nozomi.c:1216", dc->last_ier, dc->reg_ier);
 		}
 	}
 
@@ -1372,7 +1372,7 @@ static int nozomi_card_init(struct pci_dev *pdev,
 
 	/* Disable all interrupts */
 	dc->last_ier = 0;
-	writew(dc->last_ier, dc->reg_ier);
+	pete_writew("drivers/tty/nozomi.c:1375", dc->last_ier, dc->reg_ier);
 
 	ret = request_irq(pdev->irq, &interrupt_handler, IRQF_SHARED,
 			NOZOMI_NAME, dc);
@@ -1465,7 +1465,7 @@ static void nozomi_card_exit(struct pci_dev *pdev)
 
 	/* Disable all interrupts */
 	dc->last_ier = 0;
-	writew(dc->last_ier, dc->reg_ier);
+	pete_writew("drivers/tty/nozomi.c:1468", dc->last_ier, dc->reg_ier);
 
 	tty_exit(dc);
 
@@ -1479,7 +1479,7 @@ static void nozomi_card_exit(struct pci_dev *pdev)
 
 	/* Setup dc->reg addresses to we can use defines here */
 	write_mem32(dc->port[PORT_CTRL].ul_addr[0], (u32 *)&ctrl, 2);
-	writew(CTRL_UL, dc->reg_fcr);	/* push the token to the card. */
+	pete_writew("drivers/tty/nozomi.c:1482", CTRL_UL, dc->reg_fcr);	/* push the token to the card. */
 
 	remove_sysfs_files(dc);
 
@@ -1554,7 +1554,7 @@ static int ntty_activate(struct tty_port *tport, struct tty_struct *tty)
 	DBG1("open: %d", port->token_dl);
 	spin_lock_irqsave(&dc->spin_mutex, flags);
 	dc->last_ier = dc->last_ier | port->token_dl;
-	writew(dc->last_ier, dc->reg_ier);
+	pete_writew("drivers/tty/nozomi.c:1557", dc->last_ier, dc->reg_ier);
 	dc->open_ttys++;
 	spin_unlock_irqrestore(&dc->spin_mutex, flags);
 	printk("noz: activated %d: %p\n", tty->index, tport);
@@ -1576,7 +1576,7 @@ static void ntty_shutdown(struct tty_port *tport)
 	DBG1("close: %d", port->token_dl);
 	spin_lock_irqsave(&dc->spin_mutex, flags);
 	dc->last_ier &= ~(port->token_dl);
-	writew(dc->last_ier, dc->reg_ier);
+	pete_writew("drivers/tty/nozomi.c:1579", dc->last_ier, dc->reg_ier);
 	dc->open_ttys--;
 	spin_unlock_irqrestore(&dc->spin_mutex, flags);
 	printk("noz: shutdown %p\n", tport);

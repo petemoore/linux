@@ -163,7 +163,7 @@ const struct seq_operations cpuinfo_op = {
 #define get_wait(base, addr) ({		\
 	int baddr;			\
 	baddr = ((addr) / 0x200000 * 2);			     \
-	w *= (readw((base) + 2) & (3 << baddr)) + 1;		     \
+	w *= (pete_readw("arch/h8300/kernel/setup.c:166", (base) + 2) & (3 << baddr)) + 1;		     \
 	})
 #endif
 #if defined(CONFIG_CPU_H8S)
@@ -184,8 +184,8 @@ static __init int access_timing(void)
 
 	bsc = of_find_compatible_node(NULL, NULL, "renesas,h8300-bsc");
 	base = of_iomap(bsc, 0);
-	w = (readb(base + 0) & bit)?2:1;
-	if (readb(base + 1) & bit)
+	w = (pete_readb("arch/h8300/kernel/setup.c:187", base + 0) & bit)?2:1;
+	if (pete_readb("arch/h8300/kernel/setup.c:188", base + 1) & bit)
 		w *= get_wait(base, addr);
 	else
 		w *= 2;

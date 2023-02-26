@@ -749,7 +749,7 @@ static void ipr_mask_and_clear_interrupts(struct ipr_ioa_cfg *ioa_cfg,
 
 	/* Set interrupt mask to stop all new interrupts */
 	if (ioa_cfg->sis64)
-		writeq(~0, ioa_cfg->regs.set_interrupt_mask_reg);
+		pete_writeq("drivers/scsi/ipr.c:752", ~0, ioa_cfg->regs.set_interrupt_mask_reg);
 	else
 		pete_writel("drivers/scsi/ipr.c:754", ~0, ioa_cfg->regs.set_interrupt_mask_reg);
 
@@ -957,7 +957,7 @@ static void ipr_send_command(struct ipr_cmnd *ipr_cmd)
 		   then use a 512 byte ioarcb */
 		if (ipr_cmd->dma_use_sg * sizeof(struct ipr_ioadl64_desc) > 128 )
 			send_dma_addr |= 0x4;
-		writeq(send_dma_addr, ioa_cfg->regs.ioarrin_reg);
+		pete_writeq("drivers/scsi/ipr.c:960", send_dma_addr, ioa_cfg->regs.ioarrin_reg);
 	} else
 		pete_writel("drivers/scsi/ipr.c:962", send_dma_addr, ioa_cfg->regs.ioarrin_reg);
 }
@@ -8412,7 +8412,7 @@ static int ipr_reset_next_stage(struct ipr_cmnd *ipr_cmd)
 			ipr_cmd->job_step = ipr_ioafp_identify_hrrq;
 			maskval = IPR_PCII_IPL_STAGE_CHANGE;
 			maskval = (maskval << 32) | IPR_PCII_IOA_TRANS_TO_OPER;
-			writeq(maskval, ioa_cfg->regs.set_interrupt_mask_reg);
+			pete_writeq("drivers/scsi/ipr.c:8415", maskval, ioa_cfg->regs.set_interrupt_mask_reg);
 			int_reg = pete_readl("drivers/scsi/ipr.c:8416", ioa_cfg->regs.sense_interrupt_mask_reg);
 			return IPR_RC_JOB_CONTINUE;
 		}
@@ -8475,7 +8475,7 @@ static int ipr_reset_enable_ioa(struct ipr_cmnd *ipr_cmd)
 	if (ioa_cfg->sis64) {
 		maskval = IPR_PCII_IPL_STAGE_CHANGE;
 		maskval = (maskval << 32) | IPR_PCII_OPER_INTERRUPTS;
-		writeq(maskval, ioa_cfg->regs.clr_interrupt_mask_reg);
+		pete_writeq("drivers/scsi/ipr.c:8478", maskval, ioa_cfg->regs.clr_interrupt_mask_reg);
 	} else
 		pete_writel("drivers/scsi/ipr.c:8480", IPR_PCII_OPER_INTERRUPTS, ioa_cfg->regs.clr_interrupt_mask_reg32);
 

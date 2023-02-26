@@ -693,16 +693,16 @@ static int qla82xx_pci_mem_read_direct(struct qla_hw_data *ha,
 
 	switch (size) {
 	case 1:
-		*(u8  *)data = readb(addr);
+		*(u8  *)data = pete_readb("drivers/scsi/qla2xxx/qla_nx.c:696", addr);
 		break;
 	case 2:
-		*(u16 *)data = readw(addr);
+		*(u16 *)data = pete_readw("drivers/scsi/qla2xxx/qla_nx.c:699", addr);
 		break;
 	case 4:
 		*(u32 *)data = pete_readl("drivers/scsi/qla2xxx/qla_nx.c:702", addr);
 		break;
 	case 8:
-		*(u64 *)data = readq(addr);
+		*(u64 *)data = pete_readq("drivers/scsi/qla2xxx/qla_nx.c:705", addr);
 		break;
 	default:
 		ret = -1;
@@ -764,16 +764,16 @@ qla82xx_pci_mem_write_direct(struct qla_hw_data *ha,
 
 	switch (size) {
 	case 1:
-		writeb(*(u8  *)data, addr);
+		pete_writeb("drivers/scsi/qla2xxx/qla_nx.c:767", *(u8  *)data, addr);
 		break;
 	case 2:
-		writew(*(u16 *)data, addr);
+		pete_writew("drivers/scsi/qla2xxx/qla_nx.c:770", *(u16 *)data, addr);
 		break;
 	case 4:
 		pete_writel("drivers/scsi/qla2xxx/qla_nx.c:773", *(u32 *)data, addr);
 		break;
 	case 8:
-		writeq(*(u64 *)data, addr);
+		pete_writeq("drivers/scsi/qla2xxx/qla_nx.c:776", *(u64 *)data, addr);
 		break;
 	default:
 		ret = -1;

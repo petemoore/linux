@@ -104,7 +104,7 @@ void memset_io(volatile void __iomem *dst, int c, unsigned long count)
 {
         while (count) {
                 count--;
-                writeb(c, dst);
+                pete_writeb("arch/sh/kernel/io.c:107", c, dst);
                 dst++;
         }
 }

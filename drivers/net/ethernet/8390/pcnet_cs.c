@@ -298,11 +298,11 @@ static struct hw_info *get_hwinfo(struct pcmcia_device *link)
 	pcmcia_map_mem_page(link, link->resource[2],
 		hw_info[i].offset & ~(resource_size(link->resource[2])-1));
 	base = &virt[hw_info[i].offset & (resource_size(link->resource[2])-1)];
-	if ((readb(base+0) == hw_info[i].a0) &&
-	    (readb(base+2) == hw_info[i].a1) &&
-	    (readb(base+4) == hw_info[i].a2)) {
+	if ((pete_readb("drivers/net/ethernet/8390/pcnet_cs.c:301", base+0) == hw_info[i].a0) &&
+	    (pete_readb("drivers/net/ethernet/8390/pcnet_cs.c:302", base+2) == hw_info[i].a1) &&
+	    (pete_readb("drivers/net/ethernet/8390/pcnet_cs.c:303", base+4) == hw_info[i].a2)) {
 		for (j = 0; j < 6; j++)
-		    dev->dev_addr[j] = readb(base + (j<<1));
+		    dev->dev_addr[j] = pete_readb("drivers/net/ethernet/8390/pcnet_cs.c:305", base + (j<<1));
 		break;
 	}
     }
@@ -1330,7 +1330,7 @@ static void copyin(void *dest, void __iomem *src, int c)
     }
     /* get last byte by fetching a word and masking */
     if (odd)
-	*((u_char *)d) = readw(s) & 0xff;
+	*((u_char *)d) = pete_readw("drivers/net/ethernet/8390/pcnet_cs.c:1333", s) & 0xff;
 }
 
 static void copyout(void __iomem *dest, const void *src, int c)
@@ -1348,7 +1348,7 @@ static void copyout(void __iomem *dest, const void *src, int c)
     }
     /* copy last byte doing a read-modify-write */
     if (odd)
-	writew((readw(d) & 0xff00) | *(u_char *)s, d);
+	pete_writew("drivers/net/ethernet/8390/pcnet_cs.c:1351", (pete_readw("drivers/net/ethernet/8390/pcnet_cs.c:1351", d) & 0xff00) | *(u_char *)s, d);
 }
 
 /*====================================================================*/

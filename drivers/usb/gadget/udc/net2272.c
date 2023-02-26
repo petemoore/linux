@@ -402,7 +402,7 @@ net2272_write_packet(struct net2272_ep *ep, u8 *buf,
 
 	while (likely(count >= 2)) {
 		/* no byte-swap required; chip endian set during init */
-		writew(*bufp++, ep_data);
+		pete_writew("drivers/usb/gadget/udc/net2272.c:405", *bufp++, ep_data);
 		count -= 2;
 	}
 	buf = (u8 *)bufp;
@@ -411,7 +411,7 @@ net2272_write_packet(struct net2272_ep *ep, u8 *buf,
 	if (unlikely(count)) {
 		tmp = net2272_read(ep->dev, LOCCTL);
 		net2272_write(ep->dev, LOCCTL, tmp & ~(1 << DATA_WIDTH));
-		writeb(*buf, ep_data);
+		pete_writeb("drivers/usb/gadget/udc/net2272.c:414", *buf, ep_data);
 		net2272_write(ep->dev, LOCCTL, tmp);
 	}
 	return length;
@@ -507,7 +507,7 @@ net2272_read_packet(struct net2272_ep *ep, u8 *buf,
 
 	if (unlikely(avail == 0)) {
 		/* remove any zlp from the buffer */
-		(void)readw(ep_data);
+		(void)pete_readw("drivers/usb/gadget/udc/net2272.c:510", ep_data);
 		return is_short;
 	}
 
@@ -517,7 +517,7 @@ net2272_read_packet(struct net2272_ep *ep, u8 *buf,
 	bufp = (u16 *)buf;
 
 	do {
-		*bufp++ = readw(ep_data);
+		*bufp++ = pete_readw("drivers/usb/gadget/udc/net2272.c:520", ep_data);
 		avail -= 2;
 	} while (avail);
 
@@ -690,7 +690,7 @@ net2272_start_dma(struct net2272 *dev)
 #ifdef CONFIG_USB_PCI
 	switch (dev->dev_id) {
 	case PCI_DEVICE_ID_RDK1:
-		writeb((1 << CHANNEL_ENABLE) | (1 << CHANNEL_START),
+		pete_writeb("drivers/usb/gadget/udc/net2272.c:693", (1 << CHANNEL_ENABLE) | (1 << CHANNEL_START),
 			dev->rdk1.plx9054_base_addr + DMACSR0);
 		break;
 	}
@@ -786,14 +786,14 @@ static void net2272_cancel_dma(struct net2272 *dev)
 #ifdef CONFIG_USB_PCI
 	switch (dev->dev_id) {
 	case PCI_DEVICE_ID_RDK1:
-		writeb(0, dev->rdk1.plx9054_base_addr + DMACSR0);
-		writeb(1 << CHANNEL_ABORT, dev->rdk1.plx9054_base_addr + DMACSR0);
-		while (!(readb(dev->rdk1.plx9054_base_addr + DMACSR0) &
+		pete_writeb("drivers/usb/gadget/udc/net2272.c:789", 0, dev->rdk1.plx9054_base_addr + DMACSR0);
+		pete_writeb("drivers/usb/gadget/udc/net2272.c:790", 1 << CHANNEL_ABORT, dev->rdk1.plx9054_base_addr + DMACSR0);
+		while (!(pete_readb("drivers/usb/gadget/udc/net2272.c:791", dev->rdk1.plx9054_base_addr + DMACSR0) &
 		         (1 << CHANNEL_DONE)))
 			continue;	/* wait for dma to stabalize */
 
 		/* dma abort generates an interrupt */
-		writeb(1 << CHANNEL_CLEAR_INTERRUPT,
+		pete_writeb("drivers/usb/gadget/udc/net2272.c:796", 1 << CHANNEL_CLEAR_INTERRUPT,
 			dev->rdk1.plx9054_base_addr + DMACSR0);
 		break;
 	}
@@ -1832,7 +1832,7 @@ net2272_handle_stat0_irqs(struct net2272 *dev, u8 stat)
 
 				/* don't bother with a request object! */
 				net2272_ep_write(&dev->ep[0], EP_IRQENB, 0);
-				writew(status, net2272_reg_addr(dev, EP_DATA));
+				pete_writew("drivers/usb/gadget/udc/net2272.c:1835", status, net2272_reg_addr(dev, EP_DATA));
 				set_fifo_bytecount(&dev->ep[0], 0);
 				allow_status(ep);
 				dev_vdbg(dev->dev, "%s stat %02x\n",
@@ -1846,7 +1846,7 @@ net2272_handle_stat0_irqs(struct net2272 *dev, u8 stat)
 
 				/* don't bother with a request object! */
 				net2272_ep_write(&dev->ep[0], EP_IRQENB, 0);
-				writew(status, net2272_reg_addr(dev, EP_DATA));
+				pete_writew("drivers/usb/gadget/udc/net2272.c:1849", status, net2272_reg_addr(dev, EP_DATA));
 				set_fifo_bytecount(&dev->ep[0], 0);
 				allow_status(ep);
 				dev_vdbg(dev->dev, "device stat %02x\n", status);
@@ -1857,7 +1857,7 @@ net2272_handle_stat0_irqs(struct net2272 *dev, u8 stat)
 
 				/* don't bother with a request object! */
 				net2272_ep_write(&dev->ep[0], EP_IRQENB, 0);
-				writew(status, net2272_reg_addr(dev, EP_DATA));
+				pete_writew("drivers/usb/gadget/udc/net2272.c:1860", status, net2272_reg_addr(dev, EP_DATA));
 				set_fifo_bytecount(&dev->ep[0], 0);
 				allow_status(ep);
 				dev_vdbg(dev->dev, "interface status %02x\n", status);
@@ -2078,7 +2078,7 @@ static irqreturn_t net2272_irq(int irq, void *_dev)
 			dev->rdk1.plx9054_base_addr + INTCSR);
 	}
 	if ((intcsr & DMA_CHANNEL_0_TEST) == DMA_CHANNEL_0_TEST) {
-		writeb((1 << CHANNEL_CLEAR_INTERRUPT | (0 << CHANNEL_ENABLE)),
+		pete_writeb("drivers/usb/gadget/udc/net2272.c:2081", (1 << CHANNEL_CLEAR_INTERRUPT | (0 << CHANNEL_ENABLE)),
 				dev->rdk1.plx9054_base_addr + DMACSR0);
 
 		dmareq = net2272_read(dev, DMAREQ);
@@ -2363,11 +2363,11 @@ net2272_rdk1_probe(struct pci_dev *pdev, struct net2272 *dev)
 			(1 << LOCAL_INTERRUPT_INPUT_ENABLE),
 			dev->rdk1.plx9054_base_addr + INTCSR);
 
-	writeb((1 << CHANNEL_CLEAR_INTERRUPT | (0 << CHANNEL_ENABLE)),
+	pete_writeb("drivers/usb/gadget/udc/net2272.c:2366", (1 << CHANNEL_CLEAR_INTERRUPT | (0 << CHANNEL_ENABLE)),
 			dev->rdk1.plx9054_base_addr + DMACSR0);
 
 	/* reset */
-	writeb((1 << EPLD_DMA_ENABLE) |
+	pete_writeb("drivers/usb/gadget/udc/net2272.c:2370", (1 << EPLD_DMA_ENABLE) |
 		(1 << DMA_CTL_DACK) |
 		(1 << DMA_TIMEOUT_ENABLE) |
 		(1 << USER) |
@@ -2377,7 +2377,7 @@ net2272_rdk1_probe(struct pci_dev *pdev, struct net2272 *dev)
 		dev->base_addr + EPLD_IO_CONTROL_REGISTER);
 
 	mb();
-	writeb(readb(dev->base_addr + EPLD_IO_CONTROL_REGISTER) &
+	pete_writeb("drivers/usb/gadget/udc/net2272.c:2380", pete_readb("drivers/usb/gadget/udc/net2272.c:2380", dev->base_addr + EPLD_IO_CONTROL_REGISTER) &
 		~(1 << NET2272_RESET),
 		dev->base_addr + EPLD_IO_CONTROL_REGISTER);
 	udelay(200);

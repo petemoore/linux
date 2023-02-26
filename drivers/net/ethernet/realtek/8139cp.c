@@ -352,19 +352,19 @@ struct cp_private {
 	struct mii_if_info	mii_if;
 };
 
-#define cpr8(reg)	readb(cp->regs + (reg))
-#define cpr16(reg)	readw(cp->regs + (reg))
+#define cpr8(reg)	pete_readb("drivers/net/ethernet/realtek/8139cp.c:355", cp->regs + (reg))
+#define cpr16(reg)	pete_readw("drivers/net/ethernet/realtek/8139cp.c:356", cp->regs + (reg))
 #define cpr32(reg)	pete_readl("drivers/net/ethernet/realtek/8139cp.c:357", cp->regs + (reg))
-#define cpw8(reg,val)	writeb((val), cp->regs + (reg))
-#define cpw16(reg,val)	writew((val), cp->regs + (reg))
+#define cpw8(reg,val)	pete_writeb("drivers/net/ethernet/realtek/8139cp.c:358", (val), cp->regs + (reg))
+#define cpw16(reg,val)	pete_writew("drivers/net/ethernet/realtek/8139cp.c:359", (val), cp->regs + (reg))
 #define cpw32(reg,val)	pete_writel("drivers/net/ethernet/realtek/8139cp.c:360", (val), cp->regs + (reg))
 #define cpw8_f(reg,val) do {			\
-	writeb((val), cp->regs + (reg));	\
-	readb(cp->regs + (reg));		\
+	pete_writeb("drivers/net/ethernet/realtek/8139cp.c:362", (val), cp->regs + (reg));	\
+	pete_readb("drivers/net/ethernet/realtek/8139cp.c:363", cp->regs + (reg));		\
 	} while (0)
 #define cpw16_f(reg,val) do {			\
-	writew((val), cp->regs + (reg));	\
-	readw(cp->regs + (reg));		\
+	pete_writew("drivers/net/ethernet/realtek/8139cp.c:366", (val), cp->regs + (reg));	\
+	pete_readw("drivers/net/ethernet/realtek/8139cp.c:367", cp->regs + (reg));		\
 	} while (0)
 #define cpw32_f(reg,val) do {			\
 	pete_writel("drivers/net/ethernet/realtek/8139cp.c:370", (val), cp->regs + (reg));	\
@@ -1305,7 +1305,7 @@ static int mdio_read(struct net_device *dev, int phy_id, int location)
 	struct cp_private *cp = netdev_priv(dev);
 
 	return location < 8 && mii_2_8139_map[location] ?
-	       readw(cp->regs + mii_2_8139_map[location]) : 0;
+	       pete_readw("drivers/net/ethernet/realtek/8139cp.c:1308", cp->regs + mii_2_8139_map[location]) : 0;
 }
 
 
@@ -1653,7 +1653,7 @@ static int cp_set_mac_address(struct net_device *dev, void *p)
    No extra delay is needed with 33Mhz PCI, but 66Mhz may change this.
  */
 
-#define eeprom_delay()	readb(ee_addr)
+#define eeprom_delay()	pete_readb("drivers/net/ethernet/realtek/8139cp.c:1656", ee_addr)
 
 /* The EEPROM commands include the alway-set leading bit. */
 #define EE_EXTEND_CMD	(4)
@@ -1693,7 +1693,7 @@ static void eeprom_cmd(void __iomem *ee_addr, int cmd, int cmd_len)
 
 static void eeprom_cmd_end(void __iomem *ee_addr)
 {
-	writeb(0, ee_addr);
+	pete_writeb("drivers/net/ethernet/realtek/8139cp.c:1696", 0, ee_addr);
 	eeprom_delay ();
 }
 
@@ -1748,7 +1748,7 @@ static void write_eeprom(void __iomem *ioaddr, int location, u16 val,
 
 	eeprom_cmd_start(ee_addr);
 	for (i = 0; i < 20000; i++)
-		if (readb(ee_addr) & EE_DATA_READ)
+		if (pete_readb("drivers/net/ethernet/realtek/8139cp.c:1751", ee_addr) & EE_DATA_READ)
 			break;
 	eeprom_cmd_end(ee_addr);
 

@@ -140,7 +140,7 @@ static s32 e1000_oem_bits_config_ich8lan(struct e1000_hw *hw, bool d0_state);
 
 static inline u16 __er16flash(struct e1000_hw *hw, unsigned long reg)
 {
-	return readw(hw->flash_address + reg);
+	return pete_readw("drivers/net/ethernet/intel/e1000e/ich8lan.c:143", hw->flash_address + reg);
 }
 
 static inline u32 __er32flash(struct e1000_hw *hw, unsigned long reg)
@@ -150,7 +150,7 @@ static inline u32 __er32flash(struct e1000_hw *hw, unsigned long reg)
 
 static inline void __ew16flash(struct e1000_hw *hw, unsigned long reg, u16 val)
 {
-	writew(val, hw->flash_address + reg);
+	pete_writew("drivers/net/ethernet/intel/e1000e/ich8lan.c:153", val, hw->flash_address + reg);
 }
 
 static inline void __ew32flash(struct e1000_hw *hw, unsigned long reg, u32 val)

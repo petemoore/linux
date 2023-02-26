@@ -166,10 +166,10 @@ static void sca_init_port(port_t *port)
 			u16 chain_off = desc_offset(port, i + 1, transmit);
 			u32 buff_off = buffer_offset(port, i, transmit);
 
-			writew(chain_off, &desc->cp);
+			pete_writew("drivers/net/wan/hd64570.c:169", chain_off, &desc->cp);
 			pete_writel("drivers/net/wan/hd64570.c:170", buff_off, &desc->bp);
-			writew(0, &desc->len);
-			writeb(0, &desc->stat);
+			pete_writew("drivers/net/wan/hd64570.c:171", 0, &desc->len);
+			pete_writeb("drivers/net/wan/hd64570.c:172", 0, &desc->stat);
 		}
 
 		/* DMA disable - to halt state */
@@ -244,7 +244,7 @@ static inline void sca_rx(card_t *card, port_t *port, pkt_desc __iomem *desc,
 	u32 maxlen;
 	u8 page;
 
-	len = readw(&desc->len);
+	len = pete_readw("drivers/net/wan/hd64570.c:247", &desc->len);
 	skb = dev_alloc_skb(len);
 	if (!skb) {
 		dev->stats.rx_dropped++;
@@ -305,7 +305,7 @@ static inline void sca_rx_intr(port_t *port)
 			break;	/* No frame received */
 
 		desc = desc_address(port, port->rxin, 0);
-		stat = readb(&desc->stat);
+		stat = pete_readb("drivers/net/wan/hd64570.c:308", &desc->stat);
 		if (!(stat & ST_RX_EOM))
 			port->rxpart = 1; /* partial frame received */
 		else if ((stat & ST_ERROR_MASK) || port->rxpart) {
@@ -359,8 +359,8 @@ static inline void sca_tx_intr(port_t *port)
 
 		desc = desc_address(port, port->txlast, 1);
 		dev->stats.tx_packets++;
-		dev->stats.tx_bytes += readw(&desc->len);
-		writeb(0, &desc->stat);	/* Free descriptor */
+		dev->stats.tx_bytes += pete_readw("drivers/net/wan/hd64570.c:362", &desc->len);
+		pete_writeb("drivers/net/wan/hd64570.c:363", 0, &desc->stat);	/* Free descriptor */
 		port->txlast = next_desc(port, port->txlast, 1);
 	}
 
@@ -587,7 +587,7 @@ static void sca_dump_rings(struct net_device *dev)
 	       sca_in(DSR_RX(phy_node(port)), card), port->rxin,
 	       sca_in(DSR_RX(phy_node(port)), card) & DSR_DE ? "" : "in");
 	for (cnt = 0; cnt < port_to_card(port)->rx_ring_buffers; cnt++)
-		pr_cont(" %02X", readb(&(desc_address(port, cnt, 0)->stat)));
+		pr_cont(" %02X", pete_readb("drivers/net/wan/hd64570.c:590", &(desc_address(port, cnt, 0)->stat)));
 	pr_cont("\n");
 
 	printk(KERN_DEBUG "TX ring: CDA=%u EDA=%u DSR=%02X in=%u "
@@ -598,7 +598,7 @@ static void sca_dump_rings(struct net_device *dev)
 	       sca_in(DSR_TX(phy_node(port)), card) & DSR_DE ? "" : "in");
 
 	for (cnt = 0; cnt < port_to_card(port)->tx_ring_buffers; cnt++)
-		pr_cont(" %02X", readb(&(desc_address(port, cnt, 1)->stat)));
+		pr_cont(" %02X", pete_readb("drivers/net/wan/hd64570.c:601", &(desc_address(port, cnt, 1)->stat)));
 	pr_cont("\n");
 
 	printk(KERN_DEBUG "MSCI: MD: %02x %02x %02x, ST: %02x %02x %02x %02x,"
@@ -635,7 +635,7 @@ static netdev_tx_t sca_xmit(struct sk_buff *skb, struct net_device *dev)
 	spin_lock_irq(&port->lock);
 
 	desc = desc_address(port, port->txin + 1, 1);
-	BUG_ON(readb(&desc->stat)); /* previous xmit should stop queue */
+	BUG_ON(pete_readb("drivers/net/wan/hd64570.c:638", &desc->stat)); /* previous xmit should stop queue */
 
 #ifdef DEBUG_PKT
 	printk(KERN_DEBUG "%s TX(%i):", dev->name, skb->len);
@@ -661,8 +661,8 @@ static netdev_tx_t sca_xmit(struct sk_buff *skb, struct net_device *dev)
 #ifndef PAGE0_ALWAYS_MAPPED
 	openwin(card, 0);	/* select pkt_desc table page back */
 #endif
-	writew(len, &desc->len);
-	writeb(ST_TX_EOM, &desc->stat);
+	pete_writew("drivers/net/wan/hd64570.c:664", len, &desc->len);
+	pete_writeb("drivers/net/wan/hd64570.c:665", ST_TX_EOM, &desc->stat);
 
 	port->txin = next_desc(port, port->txin, 1);
 	sca_outw(desc_offset(port, port->txin, 1),
@@ -671,7 +671,7 @@ static netdev_tx_t sca_xmit(struct sk_buff *skb, struct net_device *dev)
 	sca_out(DSR_DE, DSR_TX(phy_node(port)), card); /* Enable TX DMA */
 
 	desc = desc_address(port, port->txin + 1, 1);
-	if (readb(&desc->stat)) /* allow 1 packet gap */
+	if (pete_readb("drivers/net/wan/hd64570.c:674", &desc->stat)) /* allow 1 packet gap */
 		netif_stop_queue(dev);
 
 	spin_unlock_irq(&port->lock);

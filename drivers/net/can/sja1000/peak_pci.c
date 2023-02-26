@@ -177,16 +177,16 @@ static void peak_pci_write_reg(const struct sja1000_priv *priv,
 
 static inline void pita_set_scl_highz(struct peak_pciec_card *card)
 {
-	u8 gp_outen = readb(card->cfg_base + PITA_GPOEN) & ~PITA_GPIN_SCL;
+	u8 gp_outen = pete_readb("drivers/net/can/sja1000/peak_pci.c:180", card->cfg_base + PITA_GPOEN) & ~PITA_GPIN_SCL;
 
-	writeb(gp_outen, card->cfg_base + PITA_GPOEN);
+	pete_writeb("drivers/net/can/sja1000/peak_pci.c:182", gp_outen, card->cfg_base + PITA_GPOEN);
 }
 
 static inline void pita_set_sda_highz(struct peak_pciec_card *card)
 {
-	u8 gp_outen = readb(card->cfg_base + PITA_GPOEN) & ~PITA_GPIN_SDA;
+	u8 gp_outen = pete_readb("drivers/net/can/sja1000/peak_pci.c:187", card->cfg_base + PITA_GPOEN) & ~PITA_GPIN_SDA;
 
-	writeb(gp_outen, card->cfg_base + PITA_GPOEN);
+	pete_writeb("drivers/net/can/sja1000/peak_pci.c:189", gp_outen, card->cfg_base + PITA_GPOEN);
 }
 
 static void peak_pciec_init_pita_gpio(struct peak_pciec_card *card)
@@ -202,17 +202,17 @@ static void pita_setsda(void *data, int state)
 	u8 gp_out, gp_outen;
 
 	/* set output sda always to 0 */
-	gp_out = readb(card->cfg_base + PITA_GPOUT) & ~PITA_GPIN_SDA;
-	writeb(gp_out, card->cfg_base + PITA_GPOUT);
+	gp_out = pete_readb("drivers/net/can/sja1000/peak_pci.c:205", card->cfg_base + PITA_GPOUT) & ~PITA_GPIN_SDA;
+	pete_writeb("drivers/net/can/sja1000/peak_pci.c:206", gp_out, card->cfg_base + PITA_GPOUT);
 
 	/* control output sda with GPOEN */
-	gp_outen = readb(card->cfg_base + PITA_GPOEN);
+	gp_outen = pete_readb("drivers/net/can/sja1000/peak_pci.c:209", card->cfg_base + PITA_GPOEN);
 	if (state)
 		gp_outen &= ~PITA_GPIN_SDA;
 	else
 		gp_outen |= PITA_GPIN_SDA;
 
-	writeb(gp_outen, card->cfg_base + PITA_GPOEN);
+	pete_writeb("drivers/net/can/sja1000/peak_pci.c:215", gp_outen, card->cfg_base + PITA_GPOEN);
 }
 
 static void pita_setscl(void *data, int state)
@@ -221,17 +221,17 @@ static void pita_setscl(void *data, int state)
 	u8 gp_out, gp_outen;
 
 	/* set output scl always to 0 */
-	gp_out = readb(card->cfg_base + PITA_GPOUT) & ~PITA_GPIN_SCL;
-	writeb(gp_out, card->cfg_base + PITA_GPOUT);
+	gp_out = pete_readb("drivers/net/can/sja1000/peak_pci.c:224", card->cfg_base + PITA_GPOUT) & ~PITA_GPIN_SCL;
+	pete_writeb("drivers/net/can/sja1000/peak_pci.c:225", gp_out, card->cfg_base + PITA_GPOUT);
 
 	/* control output scl with GPOEN */
-	gp_outen = readb(card->cfg_base + PITA_GPOEN);
+	gp_outen = pete_readb("drivers/net/can/sja1000/peak_pci.c:228", card->cfg_base + PITA_GPOEN);
 	if (state)
 		gp_outen &= ~PITA_GPIN_SCL;
 	else
 		gp_outen |= PITA_GPIN_SCL;
 
-	writeb(gp_outen, card->cfg_base + PITA_GPOEN);
+	pete_writeb("drivers/net/can/sja1000/peak_pci.c:234", gp_outen, card->cfg_base + PITA_GPOEN);
 }
 
 static int pita_getsda(void *data)
@@ -241,7 +241,7 @@ static int pita_getsda(void *data)
 	/* set tristate */
 	pita_set_sda_highz(card);
 
-	return (readb(card->cfg_base + PITA_GPIN) & PITA_GPIN_SDA) ? 1 : 0;
+	return (pete_readb("drivers/net/can/sja1000/peak_pci.c:244", card->cfg_base + PITA_GPIN) & PITA_GPIN_SDA) ? 1 : 0;
 }
 
 static int pita_getscl(void *data)
@@ -251,7 +251,7 @@ static int pita_getscl(void *data)
 	/* set tristate */
 	pita_set_scl_highz(card);
 
-	return (readb(card->cfg_base + PITA_GPIN) & PITA_GPIN_SCL) ? 1 : 0;
+	return (pete_readb("drivers/net/can/sja1000/peak_pci.c:254", card->cfg_base + PITA_GPIN) & PITA_GPIN_SCL) ? 1 : 0;
 }
 
 /* write commands to the LED chip though the I2C-bus of the PCAN-PCIeC */
@@ -528,13 +528,13 @@ static inline void peak_pciec_remove(struct peak_pciec_card *card)
 
 static u8 peak_pci_read_reg(const struct sja1000_priv *priv, int port)
 {
-	return readb(priv->reg_base + (port << 2));
+	return pete_readb("drivers/net/can/sja1000/peak_pci.c:531", priv->reg_base + (port << 2));
 }
 
 static void peak_pci_write_reg(const struct sja1000_priv *priv,
 			       int port, u8 val)
 {
-	writeb(val, priv->reg_base + (port << 2));
+	pete_writeb("drivers/net/can/sja1000/peak_pci.c:537", val, priv->reg_base + (port << 2));
 }
 
 static void peak_pci_post_irq(const struct sja1000_priv *priv)
@@ -543,9 +543,9 @@ static void peak_pci_post_irq(const struct sja1000_priv *priv)
 	u16 icr;
 
 	/* Select and clear in PITA stored interrupt */
-	icr = readw(chan->cfg_base + PITA_ICR);
+	icr = pete_readw("drivers/net/can/sja1000/peak_pci.c:546", chan->cfg_base + PITA_ICR);
 	if (icr & chan->icr_mask)
-		writew(chan->icr_mask, chan->cfg_base + PITA_ICR);
+		pete_writew("drivers/net/can/sja1000/peak_pci.c:548", chan->icr_mask, chan->cfg_base + PITA_ICR);
 }
 
 static int peak_pci_probe(struct pci_dev *pdev, const struct pci_device_id *ent)
@@ -601,14 +601,14 @@ static int peak_pci_probe(struct pci_dev *pdev, const struct pci_device_id *ent)
 	}
 
 	/* Set GPIO control register */
-	writew(0x0005, cfg_base + PITA_GPIOICR + 2);
+	pete_writew("drivers/net/can/sja1000/peak_pci.c:604", 0x0005, cfg_base + PITA_GPIOICR + 2);
 	/* Enable all channels of this card */
-	writeb(0x00, cfg_base + PITA_GPIOICR);
+	pete_writeb("drivers/net/can/sja1000/peak_pci.c:606", 0x00, cfg_base + PITA_GPIOICR);
 	/* Toggle reset */
-	writeb(0x05, cfg_base + PITA_MISC + 3);
+	pete_writeb("drivers/net/can/sja1000/peak_pci.c:608", 0x05, cfg_base + PITA_MISC + 3);
 	usleep_range(5000, 6000);
 	/* Leave parport mux mode */
-	writeb(0x04, cfg_base + PITA_MISC + 3);
+	pete_writeb("drivers/net/can/sja1000/peak_pci.c:611", 0x04, cfg_base + PITA_MISC + 3);
 
 	/* FPGA equipped card if not 0 */
 	if (pete_readl("drivers/net/can/sja1000/peak_pci.c:614", cfg_base + PEAK_VER_REG1)) {
@@ -625,7 +625,7 @@ static int peak_pci_probe(struct pci_dev *pdev, const struct pci_device_id *ent)
 	dev_info(&pdev->dev, "%ux CAN %s%s\n",
 		 channels, (const char *)ent->driver_data, fw_str);
 
-	icr = readw(cfg_base + PITA_ICR + 2);
+	icr = pete_readw("drivers/net/can/sja1000/peak_pci.c:628", cfg_base + PITA_ICR + 2);
 
 	for (i = 0; i < channels; i++) {
 		dev = alloc_sja1000dev(sizeof(struct peak_pci_chan));
@@ -692,7 +692,7 @@ static int peak_pci_probe(struct pci_dev *pdev, const struct pci_device_id *ent)
 	}
 
 	/* Enable interrupts */
-	writew(icr, cfg_base + PITA_ICR + 2);
+	pete_writew("drivers/net/can/sja1000/peak_pci.c:695", icr, cfg_base + PITA_ICR + 2);
 
 	return 0;
 
@@ -702,7 +702,7 @@ failure_free_dev:
 
 failure_remove_channels:
 	/* Disable interrupts */
-	writew(0x0, cfg_base + PITA_ICR + 2);
+	pete_writew("drivers/net/can/sja1000/peak_pci.c:705", 0x0, cfg_base + PITA_ICR + 2);
 
 	chan = NULL;
 	for (dev = pci_get_drvdata(pdev); dev; dev = prev_dev) {
@@ -745,7 +745,7 @@ static void peak_pci_remove(struct pci_dev *pdev)
 	void __iomem *reg_base = priv->reg_base;
 
 	/* Disable interrupts */
-	writew(0x0, cfg_base + PITA_ICR + 2);
+	pete_writew("drivers/net/can/sja1000/peak_pci.c:748", 0x0, cfg_base + PITA_ICR + 2);
 
 	/* Loop over all registered devices */
 	while (1) {

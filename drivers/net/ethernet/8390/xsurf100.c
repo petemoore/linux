@@ -57,7 +57,7 @@ static int is_xsurf100_network_irq(struct platform_device *pdev)
 {
 	struct xsurf100_ax_plat_data *xs100 = dev_get_platdata(&pdev->dev);
 
-	return (readw(xs100->base_regs + XS100_IRQSTATUS_BASE) & 0xaaaa) != 0;
+	return (pete_readw("drivers/net/ethernet/8390/xsurf100.c:60", xs100->base_regs + XS100_IRQSTATUS_BASE) & 0xaaaa) != 0;
 }
 
 /* These functions guarantee that the iomem is accessed with 32 bit

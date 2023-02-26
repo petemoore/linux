@@ -121,13 +121,13 @@ static inline struct ehrpwm_pwm_chip *to_ehrpwm_pwm_chip(struct pwm_chip *chip)
 
 static inline u16 ehrpwm_read(void __iomem *base, unsigned int offset)
 {
-	return readw(base + offset);
+	return pete_readw("drivers/pwm/pwm-tiehrpwm.c:124", base + offset);
 }
 
 static inline void ehrpwm_write(void __iomem *base, unsigned int offset,
 				u16 value)
 {
-	writew(value, base + offset);
+	pete_writew("drivers/pwm/pwm-tiehrpwm.c:130", value, base + offset);
 }
 
 static void ehrpwm_modify(void __iomem *base, unsigned int offset, u16 mask,
@@ -135,10 +135,10 @@ static void ehrpwm_modify(void __iomem *base, unsigned int offset, u16 mask,
 {
 	unsigned short val;
 
-	val = readw(base + offset);
+	val = pete_readw("drivers/pwm/pwm-tiehrpwm.c:138", base + offset);
 	val &= ~mask;
 	val |= value & mask;
-	writew(val, base + offset);
+	pete_writew("drivers/pwm/pwm-tiehrpwm.c:141", val, base + offset);
 }
 
 /**

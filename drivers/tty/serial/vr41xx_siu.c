@@ -52,8 +52,8 @@ static struct uart_port siu_uart_ports[SIU_PORTS_MAX] = {
 static uint8_t lsr_break_flag[SIU_PORTS_MAX];
 #endif
 
-#define siu_read(port, offset)		readb((port)->membase + (offset))
-#define siu_write(port, offset, value)	writeb((value), (port)->membase + (offset))
+#define siu_read(port, offset)		pete_readb("drivers/tty/serial/vr41xx_siu.c:55", (port)->membase + (offset))
+#define siu_write(port, offset, value)	pete_writeb("drivers/tty/serial/vr41xx_siu.c:56", (value), (port)->membase + (offset))
 
 void vr41xx_select_siu_interface(siu_interface_t interface)
 {

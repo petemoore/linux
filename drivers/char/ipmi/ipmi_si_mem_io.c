@@ -6,26 +6,26 @@
 static unsigned char intf_mem_inb(const struct si_sm_io *io,
 				  unsigned int offset)
 {
-	return readb((io->addr)+(offset * io->regspacing));
+	return pete_readb("drivers/char/ipmi/ipmi_si_mem_io.c:9", (io->addr)+(offset * io->regspacing));
 }
 
 static void intf_mem_outb(const struct si_sm_io *io, unsigned int offset,
 			  unsigned char b)
 {
-	writeb(b, (io->addr)+(offset * io->regspacing));
+	pete_writeb("drivers/char/ipmi/ipmi_si_mem_io.c:15", b, (io->addr)+(offset * io->regspacing));
 }
 
 static unsigned char intf_mem_inw(const struct si_sm_io *io,
 				  unsigned int offset)
 {
-	return (readw((io->addr)+(offset * io->regspacing)) >> io->regshift)
+	return (pete_readw("drivers/char/ipmi/ipmi_si_mem_io.c:21", (io->addr)+(offset * io->regspacing)) >> io->regshift)
 		& 0xff;
 }
 
 static void intf_mem_outw(const struct si_sm_io *io, unsigned int offset,
 			  unsigned char b)
 {
-	writeb(b << io->regshift, (io->addr)+(offset * io->regspacing));
+	pete_writeb("drivers/char/ipmi/ipmi_si_mem_io.c:28", b << io->regshift, (io->addr)+(offset * io->regspacing));
 }
 
 static unsigned char intf_mem_inl(const struct si_sm_io *io,
@@ -44,14 +44,14 @@ static void intf_mem_outl(const struct si_sm_io *io, unsigned int offset,
 #ifdef readq
 static unsigned char mem_inq(const struct si_sm_io *io, unsigned int offset)
 {
-	return (readq((io->addr)+(offset * io->regspacing)) >> io->regshift)
+	return (pete_readq("drivers/char/ipmi/ipmi_si_mem_io.c:47", (io->addr)+(offset * io->regspacing)) >> io->regshift)
 		& 0xff;
 }
 
 static void mem_outq(const struct si_sm_io *io, unsigned int offset,
 		     unsigned char b)
 {
-	writeq((u64)b << io->regshift, (io->addr)+(offset * io->regspacing));
+	pete_writeq("drivers/char/ipmi/ipmi_si_mem_io.c:54", (u64)b << io->regshift, (io->addr)+(offset * io->regspacing));
 }
 #endif
 

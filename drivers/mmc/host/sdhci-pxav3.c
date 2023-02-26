@@ -178,11 +178,11 @@ static void pxav3_reset(struct sdhci_host *host, u8 mask)
 		if (pdata && 0 != pdata->clk_delay_cycles) {
 			u16 tmp;
 
-			tmp = readw(host->ioaddr + SD_CLOCK_BURST_SIZE_SETUP);
+			tmp = pete_readw("drivers/mmc/host/sdhci-pxav3.c:181", host->ioaddr + SD_CLOCK_BURST_SIZE_SETUP);
 			tmp |= (pdata->clk_delay_cycles & SDCLK_DELAY_MASK)
 				<< SDCLK_DELAY_SHIFT;
 			tmp |= SDCLK_SEL;
-			writew(tmp, host->ioaddr + SD_CLOCK_BURST_SIZE_SETUP);
+			pete_writew("drivers/mmc/host/sdhci-pxav3.c:185", tmp, host->ioaddr + SD_CLOCK_BURST_SIZE_SETUP);
 		}
 	}
 }
@@ -206,21 +206,21 @@ static void pxav3_gen_init_74_clocks(struct sdhci_host *host, u8 power_mode)
 				power_mode);
 
 		/* set we want notice of when 74 clocks are sent */
-		tmp = readw(host->ioaddr + SD_CE_ATA_2);
+		tmp = pete_readw("drivers/mmc/host/sdhci-pxav3.c:209", host->ioaddr + SD_CE_ATA_2);
 		tmp |= SDCE_MISC_INT_EN;
-		writew(tmp, host->ioaddr + SD_CE_ATA_2);
+		pete_writew("drivers/mmc/host/sdhci-pxav3.c:211", tmp, host->ioaddr + SD_CE_ATA_2);
 
 		/* start sending the 74 clocks */
-		tmp = readw(host->ioaddr + SD_CFG_FIFO_PARAM);
+		tmp = pete_readw("drivers/mmc/host/sdhci-pxav3.c:214", host->ioaddr + SD_CFG_FIFO_PARAM);
 		tmp |= SDCFG_GEN_PAD_CLK_ON;
-		writew(tmp, host->ioaddr + SD_CFG_FIFO_PARAM);
+		pete_writew("drivers/mmc/host/sdhci-pxav3.c:216", tmp, host->ioaddr + SD_CFG_FIFO_PARAM);
 
 		/* slowest speed is about 100KHz or 10usec per clock */
 		udelay(740);
 		count = 0;
 
 		while (count++ < MAX_WAIT_COUNT) {
-			if ((readw(host->ioaddr + SD_CE_ATA_2)
+			if ((pete_readw("drivers/mmc/host/sdhci-pxav3.c:223", host->ioaddr + SD_CE_ATA_2)
 						& SDCE_MISC_INT) == 0)
 				break;
 			udelay(10);
@@ -230,9 +230,9 @@ static void pxav3_gen_init_74_clocks(struct sdhci_host *host, u8 power_mode)
 			dev_warn(mmc_dev(host->mmc), "74 clock interrupt not cleared\n");
 
 		/* clear the interrupt bit if posted */
-		tmp = readw(host->ioaddr + SD_CE_ATA_2);
+		tmp = pete_readw("drivers/mmc/host/sdhci-pxav3.c:233", host->ioaddr + SD_CE_ATA_2);
 		tmp |= SDCE_MISC_INT;
-		writew(tmp, host->ioaddr + SD_CE_ATA_2);
+		pete_writew("drivers/mmc/host/sdhci-pxav3.c:235", tmp, host->ioaddr + SD_CE_ATA_2);
 	}
 	pxa->power_mode = power_mode;
 }
@@ -275,7 +275,7 @@ static void pxav3_set_uhs_signaling(struct sdhci_host *host, unsigned int uhs)
 	 * FE-2946959
 	 */
 	if (pxa->sdio3_conf_reg) {
-		u8 reg_val  = readb(pxa->sdio3_conf_reg);
+		u8 reg_val  = pete_readb("drivers/mmc/host/sdhci-pxav3.c:278", pxa->sdio3_conf_reg);
 
 		if (uhs == MMC_TIMING_UHS_SDR50 ||
 		    uhs == MMC_TIMING_UHS_DDR50) {
@@ -288,7 +288,7 @@ static void pxav3_set_uhs_signaling(struct sdhci_host *host, unsigned int uhs)
 			reg_val |= SDIO3_CONF_CLK_INV;
 			reg_val &= ~SDIO3_CONF_SD_FB_CLK;
 		}
-		writeb(reg_val, pxa->sdio3_conf_reg);
+		pete_writeb("drivers/mmc/host/sdhci-pxav3.c:291", reg_val, pxa->sdio3_conf_reg);
 	}
 
 	sdhci_writew(host, ctrl_2, SDHCI_HOST_CONTROL2);

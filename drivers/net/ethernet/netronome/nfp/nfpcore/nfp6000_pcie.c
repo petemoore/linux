@@ -1209,7 +1209,7 @@ nfp6000_explicit_do(struct nfp_cpp_explicit *expl,
 	}
 
 	/* Issue the 'kickoff' transaction */
-	readb(priv->addr + (address & ((1 << priv->bitsize) - 1)));
+	pete_readb("drivers/net/ethernet/netronome/nfp/nfpcore/nfp6000_pcie.c:1212", priv->addr + (address & ((1 << priv->bitsize) - 1)));
 
 	return sigmask;
 }

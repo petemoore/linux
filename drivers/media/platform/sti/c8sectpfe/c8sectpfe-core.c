@@ -1041,13 +1041,13 @@ static void load_imem_segment(struct c8sectpfei *fei, Elf32_Phdr *phdr,
 
 	for (i = 0; i < phdr->p_filesz; i++) {
 
-		writeb(readb((void __iomem *)imem_src), (void __iomem *)dest);
+		pete_writeb("drivers/media/platform/sti/c8sectpfe/c8sectpfe-core.c:1044", pete_readb("drivers/media/platform/sti/c8sectpfe/c8sectpfe-core.c:1044", (void __iomem *)imem_src), (void __iomem *)dest);
 
 		/* Every 3 bytes, add an additional
 		 * padding zero in destination */
 		if (i % 3 == 2) {
 			dest++;
-			writeb(0x00, (void __iomem *)dest);
+			pete_writeb("drivers/media/platform/sti/c8sectpfe/c8sectpfe-core.c:1050", 0x00, (void __iomem *)dest);
 		}
 
 		dest++;

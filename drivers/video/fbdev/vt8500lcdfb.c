@@ -165,7 +165,7 @@ static int vt8500lcd_setcolreg(unsigned regno, unsigned red, unsigned green,
 
 	case FB_VISUAL_STATIC_PSEUDOCOLOR:
 	case FB_VISUAL_PSEUDOCOLOR:
-		writew((red & 0xf800)
+		pete_writew("drivers/video/fbdev/vt8500lcdfb.c:168", (red & 0xf800)
 		      | ((green >> 5) & 0x7e0)
 		      | ((blue >> 11) & 0x1f),
 		       fbi->palette_cpu + sizeof(u16) * regno);

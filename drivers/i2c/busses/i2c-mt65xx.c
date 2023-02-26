@@ -420,13 +420,13 @@ MODULE_DEVICE_TABLE(of, mtk_i2c_of_match);
 
 static u16 mtk_i2c_readw(struct mtk_i2c *i2c, enum I2C_REGS_OFFSET reg)
 {
-	return readw(i2c->base + i2c->dev_comp->regs[reg]);
+	return pete_readw("drivers/i2c/busses/i2c-mt65xx.c:423", i2c->base + i2c->dev_comp->regs[reg]);
 }
 
 static void mtk_i2c_writew(struct mtk_i2c *i2c, u16 val,
 			   enum I2C_REGS_OFFSET reg)
 {
-	writew(val, i2c->base + i2c->dev_comp->regs[reg]);
+	pete_writew("drivers/i2c/busses/i2c-mt65xx.c:429", val, i2c->base + i2c->dev_comp->regs[reg]);
 }
 
 static int mtk_i2c_clock_enable(struct mtk_i2c *i2c)

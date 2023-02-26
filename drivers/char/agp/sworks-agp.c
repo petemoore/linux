@@ -237,9 +237,9 @@ static void serverworks_tlbflush(struct agp_memory *temp)
 {
 	unsigned long timeout;
 
-	writeb(1, serverworks_private.registers+SVWRKS_POSTFLUSH);
+	pete_writeb("drivers/char/agp/sworks-agp.c:240", 1, serverworks_private.registers+SVWRKS_POSTFLUSH);
 	timeout = jiffies + 3*HZ;
-	while (readb(serverworks_private.registers+SVWRKS_POSTFLUSH) == 1) {
+	while (pete_readb("drivers/char/agp/sworks-agp.c:242", serverworks_private.registers+SVWRKS_POSTFLUSH) == 1) {
 		cpu_relax();
 		if (time_after(jiffies, timeout)) {
 			dev_err(&serverworks_private.svrwrks_dev->dev,
@@ -278,17 +278,17 @@ static int serverworks_configure(void)
 		return -ENOMEM;
 	}
 
-	writeb(0xA, serverworks_private.registers+SVWRKS_GART_CACHE);
-	readb(serverworks_private.registers+SVWRKS_GART_CACHE);	/* PCI Posting. */
+	pete_writeb("drivers/char/agp/sworks-agp.c:281", 0xA, serverworks_private.registers+SVWRKS_GART_CACHE);
+	pete_readb("drivers/char/agp/sworks-agp.c:282", serverworks_private.registers+SVWRKS_GART_CACHE);	/* PCI Posting. */
 
 	pete_writel("drivers/char/agp/sworks-agp.c:284", agp_bridge->gatt_bus_addr, serverworks_private.registers+SVWRKS_GATTBASE);
 	pete_readl("drivers/char/agp/sworks-agp.c:285", serverworks_private.registers+SVWRKS_GATTBASE);	/* PCI Posting. */
 
-	cap_reg = readw(serverworks_private.registers+SVWRKS_COMMAND);
+	cap_reg = pete_readw("drivers/char/agp/sworks-agp.c:287", serverworks_private.registers+SVWRKS_COMMAND);
 	cap_reg &= ~0x0007;
 	cap_reg |= 0x4;
-	writew(cap_reg, serverworks_private.registers+SVWRKS_COMMAND);
-	readw(serverworks_private.registers+SVWRKS_COMMAND);
+	pete_writew("drivers/char/agp/sworks-agp.c:290", cap_reg, serverworks_private.registers+SVWRKS_COMMAND);
+	pete_readw("drivers/char/agp/sworks-agp.c:291", serverworks_private.registers+SVWRKS_COMMAND);
 
 	pci_read_config_byte(serverworks_private.svrwrks_dev,SVWRKS_AGP_ENABLE, &enable_reg);
 	enable_reg |= 0x1; /* Agp Enable bit */

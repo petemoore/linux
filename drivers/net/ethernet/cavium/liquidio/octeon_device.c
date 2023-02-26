@@ -1343,7 +1343,7 @@ u64 lio_pci_readq(struct octeon_device *oct, u64 addr)
 	pete_writel("drivers/net/ethernet/cavium/liquidio/octeon_device.c:1343", addr & 0xffffffff, oct->reg_list.pci_win_rd_addr_lo);
 	pete_readl("drivers/net/ethernet/cavium/liquidio/octeon_device.c:1344", oct->reg_list.pci_win_rd_addr_lo);
 
-	val64 = readq(oct->reg_list.pci_win_rd_data);
+	val64 = pete_readq("drivers/net/ethernet/cavium/liquidio/octeon_device.c:1346", oct->reg_list.pci_win_rd_data);
 
 	spin_unlock_irqrestore(&oct->pci_win_lock, flags);
 
@@ -1358,7 +1358,7 @@ void lio_pci_writeq(struct octeon_device *oct,
 
 	spin_lock_irqsave(&oct->pci_win_lock, flags);
 
-	writeq(addr, oct->reg_list.pci_win_wr_addr);
+	pete_writeq("drivers/net/ethernet/cavium/liquidio/octeon_device.c:1361", addr, oct->reg_list.pci_win_wr_addr);
 
 	/* The write happens when the LSB is written. So write MSB first. */
 	pete_writel("drivers/net/ethernet/cavium/liquidio/octeon_device.c:1364", val >> 32, oct->reg_list.pci_win_wr_data_hi);
@@ -1452,11 +1452,11 @@ void lio_enable_irq(struct octeon_droq *droq, struct octeon_instr_queue *iq)
 	 */
 	if (oct && (OCTEON_CN23XX_PF(oct) || OCTEON_CN23XX_VF(oct))) {
 		if (droq)
-			writeq(CN23XX_INTR_RESEND, droq->pkts_sent_reg);
+			pete_writeq("drivers/net/ethernet/cavium/liquidio/octeon_device.c:1455", CN23XX_INTR_RESEND, droq->pkts_sent_reg);
 		/*we race with firmrware here. read and write the IN_DONE_CNTS*/
 		else if (iq) {
-			instr_cnt =  readq(iq->inst_cnt_reg);
-			writeq(((instr_cnt & 0xFFFFFFFF00000000ULL) |
+			instr_cnt =  pete_readq("drivers/net/ethernet/cavium/liquidio/octeon_device.c:1458", iq->inst_cnt_reg);
+			pete_writeq("drivers/net/ethernet/cavium/liquidio/octeon_device.c:1459", ((instr_cnt & 0xFFFFFFFF00000000ULL) |
 				CN23XX_INTR_RESEND),
 			       iq->inst_cnt_reg);
 		}

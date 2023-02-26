@@ -111,7 +111,7 @@ static unsigned int serial_in(struct uart_sunsu_port *up, int offset)
 		return inb(up->port.iobase + 1);
 
 	case UPIO_MEM:
-		return readb(up->port.membase + offset);
+		return pete_readb("drivers/tty/serial/sunsu.c:114", up->port.membase + offset);
 
 	default:
 		return inb(up->port.iobase + offset);
@@ -141,7 +141,7 @@ static void serial_out(struct uart_sunsu_port *up, int offset, int value)
 		break;
 
 	case UPIO_MEM:
-		writeb(value, up->port.membase + offset);
+		pete_writeb("drivers/tty/serial/sunsu.c:144", value, up->port.membase + offset);
 		break;
 
 	default:

@@ -37,7 +37,7 @@ static uint32_t core0_c0count[NR_CPUS];
 /* read a 32bit value from ipi register */
 #define loongson3_ipi_read32(addr) pete_readl("arch/mips/loongson64/smp.c:38", addr)
 /* read a 64bit value from ipi register */
-#define loongson3_ipi_read64(addr) readq(addr)
+#define loongson3_ipi_read64(addr) pete_readq("arch/mips/loongson64/smp.c:40", addr)
 /* write a 32bit value to ipi register */
 #define loongson3_ipi_write32(action, addr)	\
 	do {					\
@@ -47,7 +47,7 @@ static uint32_t core0_c0count[NR_CPUS];
 /* write a 64bit value to ipi register */
 #define loongson3_ipi_write64(action, addr)	\
 	do {					\
-		writeq(action, addr);		\
+		pete_writeq("arch/mips/loongson64/smp.c:50", action, addr);		\
 		__wbflush();			\
 	} while (0)
 

@@ -105,18 +105,18 @@ MODULE_DEVICE_TABLE(pci, ems_pci_tbl);
  */
 static u8 ems_pci_v1_readb(struct ems_pci_card *card, unsigned int port)
 {
-	return readb(card->base_addr + (port * 4));
+	return pete_readb("drivers/net/can/sja1000/ems_pci.c:108", card->base_addr + (port * 4));
 }
 
 static u8 ems_pci_v1_read_reg(const struct sja1000_priv *priv, int port)
 {
-	return readb(priv->reg_base + (port * 4));
+	return pete_readb("drivers/net/can/sja1000/ems_pci.c:113", priv->reg_base + (port * 4));
 }
 
 static void ems_pci_v1_write_reg(const struct sja1000_priv *priv,
 				 int port, u8 val)
 {
-	writeb(val, priv->reg_base + (port * 4));
+	pete_writeb("drivers/net/can/sja1000/ems_pci.c:119", val, priv->reg_base + (port * 4));
 }
 
 static void ems_pci_v1_post_irq(const struct sja1000_priv *priv)
@@ -130,13 +130,13 @@ static void ems_pci_v1_post_irq(const struct sja1000_priv *priv)
 
 static u8 ems_pci_v2_read_reg(const struct sja1000_priv *priv, int port)
 {
-	return readb(priv->reg_base + port);
+	return pete_readb("drivers/net/can/sja1000/ems_pci.c:133", priv->reg_base + port);
 }
 
 static void ems_pci_v2_write_reg(const struct sja1000_priv *priv,
 				 int port, u8 val)
 {
-	writeb(val, priv->reg_base + port);
+	pete_writeb("drivers/net/can/sja1000/ems_pci.c:139", val, priv->reg_base + port);
 }
 
 static void ems_pci_v2_post_irq(const struct sja1000_priv *priv)
@@ -199,7 +199,7 @@ static void ems_pci_del_card(struct pci_dev *pdev)
 static void ems_pci_card_reset(struct ems_pci_card *card)
 {
 	/* Request board reset */
-	writeb(0, card->base_addr);
+	pete_writeb("drivers/net/can/sja1000/ems_pci.c:202", 0, card->base_addr);
 }
 
 /*

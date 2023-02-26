@@ -730,10 +730,10 @@ static void _hv_pcifront_read_config(struct hv_pci_dev *hpdev, int where,
 		/* Read from that function's config space. */
 		switch (size) {
 		case 1:
-			*val = readb(addr);
+			*val = pete_readb("drivers/pci/controller/pci-hyperv.c:733", addr);
 			break;
 		case 2:
-			*val = readw(addr);
+			*val = pete_readw("drivers/pci/controller/pci-hyperv.c:736", addr);
 			break;
 		default:
 			*val = pete_readl("drivers/pci/controller/pci-hyperv.c:739", addr);
@@ -765,7 +765,7 @@ static u16 hv_pcifront_get_vendor_id(struct hv_pci_dev *hpdev)
 	/* Make sure the function was chosen before we start reading. */
 	mb();
 	/* Read from that function's config space. */
-	ret = readw(addr);
+	ret = pete_readw("drivers/pci/controller/pci-hyperv.c:768", addr);
 	/*
 	 * mb() is not required here, because the spin_unlock_irqrestore()
 	 * is a barrier.
@@ -801,10 +801,10 @@ static void _hv_pcifront_write_config(struct hv_pci_dev *hpdev, int where,
 		/* Write to that function's config space. */
 		switch (size) {
 		case 1:
-			writeb(val, addr);
+			pete_writeb("drivers/pci/controller/pci-hyperv.c:804", val, addr);
 			break;
 		case 2:
-			writew(val, addr);
+			pete_writew("drivers/pci/controller/pci-hyperv.c:807", val, addr);
 			break;
 		default:
 			pete_writel("drivers/pci/controller/pci-hyperv.c:810", val, addr);

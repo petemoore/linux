@@ -2343,10 +2343,10 @@ static void quirk_e100_interrupt(struct pci_dev *dev)
 		return;
 	}
 
-	cmd_hi = readb(csr + 3);
+	cmd_hi = pete_readb("drivers/pci/quirks.c:2346", csr + 3);
 	if (cmd_hi == 0) {
 		pci_warn(dev, "Firmware left e100 interrupts enabled; disabling\n");
-		writeb(1, csr + 3);
+		pete_writeb("drivers/pci/quirks.c:2349", 1, csr + 3);
 	}
 
 	iounmap(csr);

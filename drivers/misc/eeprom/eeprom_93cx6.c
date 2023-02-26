@@ -275,7 +275,7 @@ EXPORT_SYMBOL_GPL(eeprom_93cx6_readb);
  * This function will read all requested bytes from the eeprom,
  * this is done by calling eeprom_93cx6_readb() multiple times.
  */
-void eeprom_93cx6_multireadb(struct eeprom_93cx6 *eeprom, const u8 byte,
+void eeprom_93cx6_multipete_readb("drivers/misc/eeprom/eeprom_93cx6.c:278", struct eeprom_93cx6 *eeprom, const u8 byte,
 	u8 *data, const u16 bytes)
 {
 	unsigned int i;

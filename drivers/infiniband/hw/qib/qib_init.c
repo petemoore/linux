@@ -998,7 +998,7 @@ static void qib_verify_pioperf(struct qib_devdata *dd)
 	/*
 	 * length 0, no dwords actually sent
 	 */
-	writeq(0, piobuf);
+	pete_writeq("drivers/infiniband/hw/qib/qib_init.c:1001", 0, piobuf);
 	qib_flush_wc();
 
 	/*

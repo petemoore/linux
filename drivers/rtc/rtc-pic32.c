@@ -138,12 +138,12 @@ static int pic32_rtc_gettime(struct device *dev, struct rtc_time *rtc_tm)
 	clk_enable(pdata->clk);
 
 	do {
-		rtc_tm->tm_hour = readb(base + PIC32_RTCHOUR);
-		rtc_tm->tm_min = readb(base + PIC32_RTCMIN);
-		rtc_tm->tm_mon  = readb(base + PIC32_RTCMON);
-		rtc_tm->tm_mday = readb(base + PIC32_RTCDAY);
-		rtc_tm->tm_year = readb(base + PIC32_RTCYEAR);
-		rtc_tm->tm_sec  = readb(base + PIC32_RTCSEC);
+		rtc_tm->tm_hour = pete_readb("drivers/rtc/rtc-pic32.c:141", base + PIC32_RTCHOUR);
+		rtc_tm->tm_min = pete_readb("drivers/rtc/rtc-pic32.c:142", base + PIC32_RTCMIN);
+		rtc_tm->tm_mon  = pete_readb("drivers/rtc/rtc-pic32.c:143", base + PIC32_RTCMON);
+		rtc_tm->tm_mday = pete_readb("drivers/rtc/rtc-pic32.c:144", base + PIC32_RTCDAY);
+		rtc_tm->tm_year = pete_readb("drivers/rtc/rtc-pic32.c:145", base + PIC32_RTCYEAR);
+		rtc_tm->tm_sec  = pete_readb("drivers/rtc/rtc-pic32.c:146", base + PIC32_RTCSEC);
 
 		/*
 		 * The only way to work out whether the system was mid-update
@@ -176,12 +176,12 @@ static int pic32_rtc_settime(struct device *dev, struct rtc_time *tm)
 	dev_dbg(dev, "set time %ptR\n", tm);
 
 	clk_enable(pdata->clk);
-	writeb(bin2bcd(tm->tm_sec),  base + PIC32_RTCSEC);
-	writeb(bin2bcd(tm->tm_min),  base + PIC32_RTCMIN);
-	writeb(bin2bcd(tm->tm_hour), base + PIC32_RTCHOUR);
-	writeb(bin2bcd(tm->tm_mday), base + PIC32_RTCDAY);
-	writeb(bin2bcd(tm->tm_mon + 1), base + PIC32_RTCMON);
-	writeb(bin2bcd(tm->tm_year - 100), base + PIC32_RTCYEAR);
+	pete_writeb("drivers/rtc/rtc-pic32.c:179", bin2bcd(tm->tm_sec),  base + PIC32_RTCSEC);
+	pete_writeb("drivers/rtc/rtc-pic32.c:180", bin2bcd(tm->tm_min),  base + PIC32_RTCMIN);
+	pete_writeb("drivers/rtc/rtc-pic32.c:181", bin2bcd(tm->tm_hour), base + PIC32_RTCHOUR);
+	pete_writeb("drivers/rtc/rtc-pic32.c:182", bin2bcd(tm->tm_mday), base + PIC32_RTCDAY);
+	pete_writeb("drivers/rtc/rtc-pic32.c:183", bin2bcd(tm->tm_mon + 1), base + PIC32_RTCMON);
+	pete_writeb("drivers/rtc/rtc-pic32.c:184", bin2bcd(tm->tm_year - 100), base + PIC32_RTCYEAR);
 	clk_disable(pdata->clk);
 
 	return 0;
@@ -195,14 +195,14 @@ static int pic32_rtc_getalarm(struct device *dev, struct rtc_wkalrm *alrm)
 	unsigned int alm_en;
 
 	clk_enable(pdata->clk);
-	alm_tm->tm_sec  = readb(base + PIC32_ALRMSEC);
-	alm_tm->tm_min  = readb(base + PIC32_ALRMMIN);
-	alm_tm->tm_hour = readb(base + PIC32_ALRMHOUR);
-	alm_tm->tm_mon  = readb(base + PIC32_ALRMMON);
-	alm_tm->tm_mday = readb(base + PIC32_ALRMDAY);
-	alm_tm->tm_year = readb(base + PIC32_ALRMYEAR);
+	alm_tm->tm_sec  = pete_readb("drivers/rtc/rtc-pic32.c:198", base + PIC32_ALRMSEC);
+	alm_tm->tm_min  = pete_readb("drivers/rtc/rtc-pic32.c:199", base + PIC32_ALRMMIN);
+	alm_tm->tm_hour = pete_readb("drivers/rtc/rtc-pic32.c:200", base + PIC32_ALRMHOUR);
+	alm_tm->tm_mon  = pete_readb("drivers/rtc/rtc-pic32.c:201", base + PIC32_ALRMMON);
+	alm_tm->tm_mday = pete_readb("drivers/rtc/rtc-pic32.c:202", base + PIC32_ALRMDAY);
+	alm_tm->tm_year = pete_readb("drivers/rtc/rtc-pic32.c:203", base + PIC32_ALRMYEAR);
 
-	alm_en = readb(base + PIC32_RTCALRM);
+	alm_en = pete_readb("drivers/rtc/rtc-pic32.c:205", base + PIC32_RTCALRM);
 
 	alrm->enabled = (alm_en & PIC32_RTCALRM_ALRMEN) ? 1 : 0;
 
@@ -245,7 +245,7 @@ static int pic32_rtc_proc(struct device *dev, struct seq_file *seq)
 
 	clk_enable(pdata->clk);
 
-	repeat = readw(base + PIC32_RTCALRM);
+	repeat = pete_readw("drivers/rtc/rtc-pic32.c:248", base + PIC32_RTCALRM);
 	repeat &= PIC32_RTCALRM_ARPT;
 	seq_printf(seq, "periodic_IRQ\t: %s\n", repeat  ? "yes" : "no");
 

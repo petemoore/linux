@@ -711,14 +711,14 @@ static int mtk_pcie_startup_port_v2(struct mtk_pcie_port *port)
 	/* Set up vendor ID and class code */
 	if (soc->need_fix_class_id) {
 		val = PCI_VENDOR_ID_MEDIATEK;
-		writew(val, port->base + PCIE_CONF_VEND_ID);
+		pete_writew("drivers/pci/controller/pcie-mediatek.c:714", val, port->base + PCIE_CONF_VEND_ID);
 
 		val = PCI_CLASS_BRIDGE_PCI;
-		writew(val, port->base + PCIE_CONF_CLASS_ID);
+		pete_writew("drivers/pci/controller/pcie-mediatek.c:717", val, port->base + PCIE_CONF_CLASS_ID);
 	}
 
 	if (soc->need_fix_device_id)
-		writew(soc->device_id, port->base + PCIE_CONF_DEVICE_ID);
+		pete_writew("drivers/pci/controller/pcie-mediatek.c:721", soc->device_id, port->base + PCIE_CONF_DEVICE_ID);
 
 	/* 100ms timeout value should be enough for Gen1/2 training */
 	err = readl_poll_timeout(port->base + PCIE_LINK_STATUS_V2, val,

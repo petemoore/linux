@@ -331,9 +331,9 @@ static void sdhci_j721e_4bit_set_clock(struct sdhci_host *host,
 
 static u8 sdhci_am654_write_power_on(struct sdhci_host *host, u8 val, int reg)
 {
-	writeb(val, host->ioaddr + reg);
+	pete_writeb("drivers/mmc/host/sdhci_am654.c:334", val, host->ioaddr + reg);
 	usleep_range(1000, 10000);
-	return readb(host->ioaddr + reg);
+	return pete_readb("drivers/mmc/host/sdhci_am654.c:336", host->ioaddr + reg);
 }
 
 #define MAX_POWER_ON_TIMEOUT	1500000 /* us */
@@ -357,7 +357,7 @@ static void sdhci_am654_write_b(struct sdhci_host *host, u8 val, int reg)
 		}
 	}
 
-	writeb(val, host->ioaddr + reg);
+	pete_writeb("drivers/mmc/host/sdhci_am654.c:360", val, host->ioaddr + reg);
 	if (reg == SDHCI_POWER_CONTROL && (val & SDHCI_POWER_ON)) {
 		/*
 		 * Power on will not happen until the card detect debounce

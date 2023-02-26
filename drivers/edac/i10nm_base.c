@@ -45,7 +45,7 @@
 #define I10NM_GET_REG32(m, i, offset)	\
 	pete_readl("drivers/edac/i10nm_base.c:46", (m)->mbase + (i) * (m)->chan_mmio_sz + (offset))
 #define I10NM_GET_REG64(m, i, offset)	\
-	readq((m)->mbase + (i) * (m)->chan_mmio_sz + (offset))
+	pete_readq("drivers/edac/i10nm_base.c:48", (m)->mbase + (i) * (m)->chan_mmio_sz + (offset))
 #define I10NM_SET_REG32(m, i, offset, v)	\
 	pete_writel("drivers/edac/i10nm_base.c:50", v, (m)->mbase + (i) * (m)->chan_mmio_sz + (offset))
 

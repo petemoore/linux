@@ -198,7 +198,7 @@ static const unsigned char ffchars[] = {
  */
 static unsigned short onenand_readw(void __iomem *addr)
 {
-	return readw(addr);
+	return pete_readw("drivers/mtd/nand/onenand/onenand_base.c:201", addr);
 }
 
 /**
@@ -210,7 +210,7 @@ static unsigned short onenand_readw(void __iomem *addr)
  */
 static void onenand_writew(unsigned short value, void __iomem *addr)
 {
-	writew(value, addr);
+	pete_writew("drivers/mtd/nand/onenand/onenand_base.c:213", value, addr);
 }
 
 /**

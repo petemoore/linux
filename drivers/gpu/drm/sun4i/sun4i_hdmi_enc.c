@@ -64,7 +64,7 @@ static int sun4i_hdmi_setup_avi_infoframes(struct sun4i_hdmi *hdmi,
 	}
 
 	for (i = 0; i < sizeof(buffer); i++)
-		writeb(buffer[i], hdmi->base + SUN4I_HDMI_AVI_INFOFRAME_REG(i));
+		pete_writeb("drivers/gpu/drm/sun4i/sun4i_hdmi_enc.c:67", buffer[i], hdmi->base + SUN4I_HDMI_AVI_INFOFRAME_REG(i));
 
 	return 0;
 }

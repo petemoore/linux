@@ -61,19 +61,19 @@ static int ds1742_rtc_set_time(struct device *dev, struct rtc_time *tm)
 
 	century = bin2bcd((tm->tm_year + 1900) / 100);
 
-	writeb(RTC_WRITE, ioaddr + RTC_CONTROL);
+	pete_writeb("drivers/rtc/rtc-ds1742.c:64", RTC_WRITE, ioaddr + RTC_CONTROL);
 
-	writeb(bin2bcd(tm->tm_year % 100), ioaddr + RTC_YEAR);
-	writeb(bin2bcd(tm->tm_mon + 1), ioaddr + RTC_MONTH);
-	writeb(bin2bcd(tm->tm_wday) & RTC_DAY_MASK, ioaddr + RTC_DAY);
-	writeb(bin2bcd(tm->tm_mday), ioaddr + RTC_DATE);
-	writeb(bin2bcd(tm->tm_hour), ioaddr + RTC_HOURS);
-	writeb(bin2bcd(tm->tm_min), ioaddr + RTC_MINUTES);
-	writeb(bin2bcd(tm->tm_sec) & RTC_SECONDS_MASK, ioaddr + RTC_SECONDS);
+	pete_writeb("drivers/rtc/rtc-ds1742.c:66", bin2bcd(tm->tm_year % 100), ioaddr + RTC_YEAR);
+	pete_writeb("drivers/rtc/rtc-ds1742.c:67", bin2bcd(tm->tm_mon + 1), ioaddr + RTC_MONTH);
+	pete_writeb("drivers/rtc/rtc-ds1742.c:68", bin2bcd(tm->tm_wday) & RTC_DAY_MASK, ioaddr + RTC_DAY);
+	pete_writeb("drivers/rtc/rtc-ds1742.c:69", bin2bcd(tm->tm_mday), ioaddr + RTC_DATE);
+	pete_writeb("drivers/rtc/rtc-ds1742.c:70", bin2bcd(tm->tm_hour), ioaddr + RTC_HOURS);
+	pete_writeb("drivers/rtc/rtc-ds1742.c:71", bin2bcd(tm->tm_min), ioaddr + RTC_MINUTES);
+	pete_writeb("drivers/rtc/rtc-ds1742.c:72", bin2bcd(tm->tm_sec) & RTC_SECONDS_MASK, ioaddr + RTC_SECONDS);
 
 	/* RTC_CENTURY and RTC_CONTROL share same register */
-	writeb(RTC_WRITE | (century & RTC_CENTURY_MASK), ioaddr + RTC_CENTURY);
-	writeb(century & RTC_CENTURY_MASK, ioaddr + RTC_CONTROL);
+	pete_writeb("drivers/rtc/rtc-ds1742.c:75", RTC_WRITE | (century & RTC_CENTURY_MASK), ioaddr + RTC_CENTURY);
+	pete_writeb("drivers/rtc/rtc-ds1742.c:76", century & RTC_CENTURY_MASK, ioaddr + RTC_CONTROL);
 	return 0;
 }
 
@@ -88,16 +88,16 @@ static int ds1742_rtc_read_time(struct device *dev, struct rtc_time *tm)
 	if (pdata->last_jiffies == jiffies)
 		msleep(1);
 	pdata->last_jiffies = jiffies;
-	writeb(RTC_READ, ioaddr + RTC_CONTROL);
-	second = readb(ioaddr + RTC_SECONDS) & RTC_SECONDS_MASK;
-	minute = readb(ioaddr + RTC_MINUTES);
-	hour = readb(ioaddr + RTC_HOURS);
-	day = readb(ioaddr + RTC_DATE);
-	week = readb(ioaddr + RTC_DAY) & RTC_DAY_MASK;
-	month = readb(ioaddr + RTC_MONTH);
-	year = readb(ioaddr + RTC_YEAR);
-	century = readb(ioaddr + RTC_CENTURY) & RTC_CENTURY_MASK;
-	writeb(0, ioaddr + RTC_CONTROL);
+	pete_writeb("drivers/rtc/rtc-ds1742.c:91", RTC_READ, ioaddr + RTC_CONTROL);
+	second = pete_readb("drivers/rtc/rtc-ds1742.c:92", ioaddr + RTC_SECONDS) & RTC_SECONDS_MASK;
+	minute = pete_readb("drivers/rtc/rtc-ds1742.c:93", ioaddr + RTC_MINUTES);
+	hour = pete_readb("drivers/rtc/rtc-ds1742.c:94", ioaddr + RTC_HOURS);
+	day = pete_readb("drivers/rtc/rtc-ds1742.c:95", ioaddr + RTC_DATE);
+	week = pete_readb("drivers/rtc/rtc-ds1742.c:96", ioaddr + RTC_DAY) & RTC_DAY_MASK;
+	month = pete_readb("drivers/rtc/rtc-ds1742.c:97", ioaddr + RTC_MONTH);
+	year = pete_readb("drivers/rtc/rtc-ds1742.c:98", ioaddr + RTC_YEAR);
+	century = pete_readb("drivers/rtc/rtc-ds1742.c:99", ioaddr + RTC_CENTURY) & RTC_CENTURY_MASK;
+	pete_writeb("drivers/rtc/rtc-ds1742.c:100", 0, ioaddr + RTC_CONTROL);
 	tm->tm_sec = bcd2bin(second);
 	tm->tm_min = bcd2bin(minute);
 	tm->tm_hour = bcd2bin(hour);
@@ -123,7 +123,7 @@ static int ds1742_nvram_read(void *priv, unsigned int pos, void *val,
 	u8 *buf = val;
 
 	for (; bytes; bytes--)
-		*buf++ = readb(ioaddr + pos++);
+		*buf++ = pete_readb("drivers/rtc/rtc-ds1742.c:126", ioaddr + pos++);
 	return 0;
 }
 
@@ -135,7 +135,7 @@ static int ds1742_nvram_write(void *priv, unsigned int pos, void *val,
 	u8 *buf = val;
 
 	for (; bytes; bytes--)
-		writeb(*buf++, ioaddr + pos++);
+		pete_writeb("drivers/rtc/rtc-ds1742.c:138", *buf++, ioaddr + pos++);
 	return 0;
 }
 
@@ -171,15 +171,15 @@ static int ds1742_rtc_probe(struct platform_device *pdev)
 
 	/* turn RTC on if it was not on */
 	ioaddr = pdata->ioaddr_rtc;
-	sec = readb(ioaddr + RTC_SECONDS);
+	sec = pete_readb("drivers/rtc/rtc-ds1742.c:174", ioaddr + RTC_SECONDS);
 	if (sec & RTC_STOP) {
 		sec &= RTC_SECONDS_MASK;
-		cen = readb(ioaddr + RTC_CENTURY) & RTC_CENTURY_MASK;
-		writeb(RTC_WRITE, ioaddr + RTC_CONTROL);
-		writeb(sec, ioaddr + RTC_SECONDS);
-		writeb(cen & RTC_CENTURY_MASK, ioaddr + RTC_CONTROL);
+		cen = pete_readb("drivers/rtc/rtc-ds1742.c:177", ioaddr + RTC_CENTURY) & RTC_CENTURY_MASK;
+		pete_writeb("drivers/rtc/rtc-ds1742.c:178", RTC_WRITE, ioaddr + RTC_CONTROL);
+		pete_writeb("drivers/rtc/rtc-ds1742.c:179", sec, ioaddr + RTC_SECONDS);
+		pete_writeb("drivers/rtc/rtc-ds1742.c:180", cen & RTC_CENTURY_MASK, ioaddr + RTC_CONTROL);
 	}
-	if (!(readb(ioaddr + RTC_DAY) & RTC_BATT_FLAG))
+	if (!(pete_readb("drivers/rtc/rtc-ds1742.c:182", ioaddr + RTC_DAY) & RTC_BATT_FLAG))
 		dev_warn(&pdev->dev, "voltage-low detected.\n");
 
 	pdata->last_jiffies = jiffies;

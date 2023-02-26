@@ -1692,7 +1692,7 @@ static int get_esi_fpga(struct atm_dev *dev, void __iomem *base)
 	int i;
 
 	mac_base = base+EPROM_SIZE-sizeof(struct midway_eprom);
-	for (i = 0; i < ESI_LEN; i++) dev->esi[i] = readb(mac_base+(i^3));
+	for (i = 0; i < ESI_LEN; i++) dev->esi[i] = pete_readb("drivers/atm/eni.c:1695", mac_base+(i^3));
 	return 0;
 }
 

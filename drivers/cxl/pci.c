@@ -342,7 +342,7 @@ static int __cxl_mem_mbox_send_cmd(struct cxl_mem *cxlm,
 	}
 
 	/* #2, #3 */
-	writeq(cmd_reg, cxlm->regs.mbox + CXLDEV_MBOX_CMD_OFFSET);
+	pete_writeq("drivers/cxl/pci.c:345", cmd_reg, cxlm->regs.mbox + CXLDEV_MBOX_CMD_OFFSET);
 
 	/* #4 */
 	dev_dbg(&cxlm->pdev->dev, "Sending command\n");
@@ -357,7 +357,7 @@ static int __cxl_mem_mbox_send_cmd(struct cxl_mem *cxlm,
 	}
 
 	/* #6 */
-	status_reg = readq(cxlm->regs.mbox + CXLDEV_MBOX_STATUS_OFFSET);
+	status_reg = pete_readq("drivers/cxl/pci.c:360", cxlm->regs.mbox + CXLDEV_MBOX_STATUS_OFFSET);
 	mbox_cmd->return_code =
 		FIELD_GET(CXLDEV_MBOX_STATUS_RET_CODE_MASK, status_reg);
 
@@ -367,7 +367,7 @@ static int __cxl_mem_mbox_send_cmd(struct cxl_mem *cxlm,
 	}
 
 	/* #7 */
-	cmd_reg = readq(cxlm->regs.mbox + CXLDEV_MBOX_CMD_OFFSET);
+	cmd_reg = pete_readq("drivers/cxl/pci.c:370", cxlm->regs.mbox + CXLDEV_MBOX_CMD_OFFSET);
 	out_len = FIELD_GET(CXLDEV_MBOX_CMD_PAYLOAD_LENGTH_MASK, cmd_reg);
 
 	/* #8 */
@@ -428,7 +428,7 @@ static int cxl_mem_mbox_get(struct cxl_mem *cxlm)
 		goto out;
 	}
 
-	md_status = readq(cxlm->regs.memdev + CXLMDEV_STATUS_OFFSET);
+	md_status = pete_readq("drivers/cxl/pci.c:431", cxlm->regs.memdev + CXLMDEV_STATUS_OFFSET);
 	if (!(md_status & CXLMDEV_MBOX_IF_READY && CXLMDEV_READY(md_status))) {
 		dev_err(dev, "mbox: reported doorbell ready, but not mbox ready\n");
 		rc = -EBUSY;

@@ -95,7 +95,7 @@ static void _rtl92e_restart(void *data);
 
 u8 rtl92e_readb(struct net_device *dev, int x)
 {
-	return 0xff & readb((u8 __iomem *)dev->mem_start + x);
+	return 0xff & pete_readb("drivers/staging/rtl8192e/rtl8192e/rtl_core.c:98", (u8 __iomem *)dev->mem_start + x);
 }
 
 u32 rtl92e_readl(struct net_device *dev, int x)
@@ -105,12 +105,12 @@ u32 rtl92e_readl(struct net_device *dev, int x)
 
 u16 rtl92e_readw(struct net_device *dev, int x)
 {
-	return readw((u8 __iomem *)dev->mem_start + x);
+	return pete_readw("drivers/staging/rtl8192e/rtl8192e/rtl_core.c:108", (u8 __iomem *)dev->mem_start + x);
 }
 
 void rtl92e_writeb(struct net_device *dev, int x, u8 y)
 {
-	writeb(y, (u8 __iomem *)dev->mem_start + x);
+	pete_writeb("drivers/staging/rtl8192e/rtl8192e/rtl_core.c:113", y, (u8 __iomem *)dev->mem_start + x);
 
 	udelay(20);
 }
@@ -124,7 +124,7 @@ void rtl92e_writel(struct net_device *dev, int x, u32 y)
 
 void rtl92e_writew(struct net_device *dev, int x, u16 y)
 {
-	writew(y, (u8 __iomem *)dev->mem_start + x);
+	pete_writew("drivers/staging/rtl8192e/rtl8192e/rtl_core.c:127", y, (u8 __iomem *)dev->mem_start + x);
 
 	udelay(20);
 }

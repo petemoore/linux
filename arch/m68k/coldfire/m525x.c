@@ -49,7 +49,7 @@ static void __init m525x_qspi_init(void)
 	pete_writel("arch/m68k/coldfire/m525x.c:49", f, MCFSIM2_GPIOFUNC);
 
 	/* QSPI irq setup */
-	writeb(MCFSIM_ICR_AUTOVEC | MCFSIM_ICR_LEVEL4 | MCFSIM_ICR_PRI0,
+	pete_writeb("arch/m68k/coldfire/m525x.c:52", MCFSIM_ICR_AUTOVEC | MCFSIM_ICR_LEVEL4 | MCFSIM_ICR_PRI0,
 	       MCFSIM_QSPIICR);
 	mcf_mapirq2imr(MCF_IRQ_QSPI, MCFINTC_QSPI);
 #endif /* IS_ENABLED(CONFIG_SPI_COLDFIRE_QSPI) */
@@ -61,7 +61,7 @@ static void __init m525x_i2c_init(void)
 	u32 r;
 
 	/* first I2C controller uses regular irq setup */
-	writeb(MCFSIM_ICR_AUTOVEC | MCFSIM_ICR_LEVEL5 | MCFSIM_ICR_PRI0,
+	pete_writeb("arch/m68k/coldfire/m525x.c:64", MCFSIM_ICR_AUTOVEC | MCFSIM_ICR_LEVEL5 | MCFSIM_ICR_PRI0,
 	       MCFSIM_I2CICR);
 	mcf_mapirq2imr(MCF_IRQ_I2C0, MCFINTC_I2C);
 

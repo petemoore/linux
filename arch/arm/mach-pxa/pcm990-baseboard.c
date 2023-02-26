@@ -64,12 +64,12 @@ static void __iomem *pcm990_cpld_base;
 
 static u8 pcm990_cpld_readb(unsigned int reg)
 {
-	return readb(pcm990_cpld_base + reg);
+	return pete_readb("arch/arm/mach-pxa/pcm990-baseboard.c:67", pcm990_cpld_base + reg);
 }
 
 static void pcm990_cpld_writeb(u8 value, unsigned int reg)
 {
-	writeb(value, pcm990_cpld_base + reg);
+	pete_writeb("arch/arm/mach-pxa/pcm990-baseboard.c:72", value, pcm990_cpld_base + reg);
 }
 
 /*

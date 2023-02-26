@@ -150,7 +150,7 @@ static int netup_unidvb_tuner_ctrl(void *priv, int is_dvb_tc)
 	ndev = dma->ndev;
 	dev_dbg(&ndev->pci_dev->dev, "%s(): num %d is_dvb_tc %d\n",
 		__func__, dma->num, is_dvb_tc);
-	reg = readb(ndev->bmmio0 + GPIO_REG_IO);
+	reg = pete_readb("drivers/media/pci/netup_unidvb/netup_unidvb_core.c:153", ndev->bmmio0 + GPIO_REG_IO);
 	mask = (dma->num == 0) ? GPIO_RFA_CTL : GPIO_RFB_CTL;
 
 	/* inverted tuner control in hw rev. 1.4 */
@@ -161,7 +161,7 @@ static int netup_unidvb_tuner_ctrl(void *priv, int is_dvb_tc)
 		reg |= mask;
 	else
 		reg &= ~mask;
-	writeb(reg, ndev->bmmio0 + GPIO_REG_IO);
+	pete_writeb("drivers/media/pci/netup_unidvb/netup_unidvb_core.c:164", reg, ndev->bmmio0 + GPIO_REG_IO);
 	return 0;
 }
 
@@ -172,17 +172,17 @@ static void netup_unidvb_dev_enable(struct netup_unidvb_dev *ndev)
 	/* enable PCI-E interrupts */
 	pete_writel("drivers/media/pci/netup_unidvb/netup_unidvb_core.c:173", AVL_IRQ_ENABLE, ndev->bmmio0 + AVL_PCIE_IENR);
 	/* unreset frontends bits[0:1] */
-	writeb(0x00, ndev->bmmio0 + GPIO_REG_IO);
+	pete_writeb("drivers/media/pci/netup_unidvb/netup_unidvb_core.c:175", 0x00, ndev->bmmio0 + GPIO_REG_IO);
 	msleep(100);
 	gpio_reg =
 		GPIO_FEA_RESET | GPIO_FEB_RESET |
 		GPIO_FEA_TU_RESET | GPIO_FEB_TU_RESET |
 		GPIO_RFA_CTL | GPIO_RFB_CTL;
-	writeb(gpio_reg, ndev->bmmio0 + GPIO_REG_IO);
+	pete_writeb("drivers/media/pci/netup_unidvb/netup_unidvb_core.c:181", gpio_reg, ndev->bmmio0 + GPIO_REG_IO);
 	dev_dbg(&ndev->pci_dev->dev,
 		"%s(): AVL_PCIE_IENR 0x%x GPIO_REG_IO 0x%x\n",
 		__func__, pete_readl("drivers/media/pci/netup_unidvb/netup_unidvb_core.c:184", ndev->bmmio0 + AVL_PCIE_IENR),
-		(int)readb(ndev->bmmio0 + GPIO_REG_IO));
+		(int)pete_readb("drivers/media/pci/netup_unidvb/netup_unidvb_core.c:185", ndev->bmmio0 + GPIO_REG_IO));
 
 }
 
@@ -195,10 +195,10 @@ static void netup_unidvb_dma_enable(struct netup_dma *dma, int enable)
 		"%s(): DMA%d enable %d\n", __func__, dma->num, enable);
 	if (enable) {
 		pete_writel("drivers/media/pci/netup_unidvb/netup_unidvb_core.c:197", BIT_DMA_RUN, &dma->regs->ctrlstat_set);
-		writew(irq_mask, dma->ndev->bmmio0 + REG_IMASK_SET);
+		pete_writew("drivers/media/pci/netup_unidvb/netup_unidvb_core.c:198", irq_mask, dma->ndev->bmmio0 + REG_IMASK_SET);
 	} else {
 		pete_writel("drivers/media/pci/netup_unidvb/netup_unidvb_core.c:200", BIT_DMA_RUN, &dma->regs->ctrlstat_clear);
-		writew(irq_mask, dma->ndev->bmmio0 + REG_IMASK_CLEAR);
+		pete_writew("drivers/media/pci/netup_unidvb/netup_unidvb_core.c:201", irq_mask, dma->ndev->bmmio0 + REG_IMASK_CLEAR);
 	}
 }
 
@@ -257,7 +257,7 @@ static irqreturn_t netup_unidvb_isr(int irq, void *dev_id)
 	reg40 = pete_readl("drivers/media/pci/netup_unidvb/netup_unidvb_core.c:257", ndev->bmmio0 + AVL_PCIE_ISR);
 	if ((reg40 & AVL_IRQ_ASSERTED) != 0) {
 		/* IRQ is being signaled */
-		reg_isr = readw(ndev->bmmio0 + REG_ISR);
+		reg_isr = pete_readw("drivers/media/pci/netup_unidvb/netup_unidvb_core.c:260", ndev->bmmio0 + REG_ISR);
 		if (reg_isr & NETUP_UNIDVB_IRQ_SPI)
 			iret = netup_spi_interrupt(ndev->spi);
 		else if (!ndev->old_fw) {
@@ -722,7 +722,7 @@ static int netup_unidvb_ci_setup(struct netup_unidvb_dev *ndev,
 {
 	int res;
 
-	writew(NETUP_UNIDVB_IRQ_CI, ndev->bmmio0 + REG_IMASK_SET);
+	pete_writew("drivers/media/pci/netup_unidvb/netup_unidvb_core.c:725", NETUP_UNIDVB_IRQ_CI, ndev->bmmio0 + REG_IMASK_SET);
 	res = netup_unidvb_ci_register(ndev, 0, pci_dev);
 	if (res)
 		return res;
@@ -918,7 +918,7 @@ static int netup_unidvb_initdev(struct pci_dev *pci_dev,
 		goto i2c_setup_err;
 	}
 	/* enable I2C IRQs */
-	writew(NETUP_UNIDVB_IRQ_I2C0 | NETUP_UNIDVB_IRQ_I2C1,
+	pete_writew("drivers/media/pci/netup_unidvb/netup_unidvb_core.c:921", NETUP_UNIDVB_IRQ_I2C0 | NETUP_UNIDVB_IRQ_I2C1,
 		ndev->bmmio0 + REG_IMASK_SET);
 	usleep_range(5000, 10000);
 	if (netup_unidvb_dvb_setup(ndev)) {
@@ -990,7 +990,7 @@ static void netup_unidvb_finidev(struct pci_dev *pci_dev)
 	}
 	if (ndev->spi)
 		netup_spi_release(ndev);
-	writew(0xffff, ndev->bmmio0 + REG_IMASK_CLEAR);
+	pete_writew("drivers/media/pci/netup_unidvb/netup_unidvb_core.c:993", 0xffff, ndev->bmmio0 + REG_IMASK_CLEAR);
 	dma_free_coherent(&ndev->pci_dev->dev, ndev->dma_size,
 			ndev->dma_virt, ndev->dma_phys);
 	free_irq(pci_dev->irq, pci_dev);

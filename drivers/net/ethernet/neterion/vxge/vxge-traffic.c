@@ -47,7 +47,7 @@ enum vxge_hw_status vxge_hw_vpath_intr_enable(struct __vxge_hw_vpath_handle *vp)
 
 	vp_reg = vpath->vp_reg;
 
-	writeq(VXGE_HW_INTR_MASK_ALL, &vp_reg->kdfcctl_errors_reg);
+	pete_writeq("drivers/net/ethernet/neterion/vxge/vxge-traffic.c:50", VXGE_HW_INTR_MASK_ALL, &vp_reg->kdfcctl_errors_reg);
 
 	__vxge_hw_pio_mem_write32_upper((u32)VXGE_HW_INTR_MASK_ALL,
 			&vp_reg->general_errors_reg);
@@ -82,7 +82,7 @@ enum vxge_hw_status vxge_hw_vpath_intr_enable(struct __vxge_hw_vpath_handle *vp)
 	__vxge_hw_pio_mem_write32_upper((u32)VXGE_HW_INTR_MASK_ALL,
 			&vp_reg->xgmac_vp_int_status);
 
-	readq(&vp_reg->vpath_general_int_status);
+	pete_readq("drivers/net/ethernet/neterion/vxge/vxge-traffic.c:85", &vp_reg->vpath_general_int_status);
 
 	/* Mask unwanted interrupts */
 
@@ -103,7 +103,7 @@ enum vxge_hw_status vxge_hw_vpath_intr_enable(struct __vxge_hw_vpath_handle *vp)
 
 	/* Unmask the individual interrupts */
 
-	writeq((u32)vxge_bVALn((VXGE_HW_GENERAL_ERRORS_REG_DBLGEN_FIFO1_OVRFLOW|
+	pete_writeq("drivers/net/ethernet/neterion/vxge/vxge-traffic.c:106", (u32)vxge_bVALn((VXGE_HW_GENERAL_ERRORS_REG_DBLGEN_FIFO1_OVRFLOW|
 		VXGE_HW_GENERAL_ERRORS_REG_DBLGEN_FIFO2_OVRFLOW|
 		VXGE_HW_GENERAL_ERRORS_REG_STATSB_DROP_TIMEOUT_REQ|
 		VXGE_HW_GENERAL_ERRORS_REG_STATSB_PIF_CHAIN_ERR), 0, 32),
@@ -175,7 +175,7 @@ enum vxge_hw_status vxge_hw_vpath_intr_disable(
 		(u32)VXGE_HW_INTR_MASK_ALL,
 		&vp_reg->vpath_general_int_mask);
 
-	writeq(VXGE_HW_INTR_MASK_ALL, &vp_reg->kdfcctl_errors_mask);
+	pete_writeq("drivers/net/ethernet/neterion/vxge/vxge-traffic.c:178", VXGE_HW_INTR_MASK_ALL, &vp_reg->kdfcctl_errors_mask);
 
 	__vxge_hw_pio_mem_write32_upper((u32)VXGE_HW_INTR_MASK_ALL,
 			&vp_reg->general_errors_mask);
@@ -228,10 +228,10 @@ void vxge_hw_vpath_tti_ci_set(struct __vxge_hw_fifo *fifo)
 
 	if (config->tti.timer_ci_en != VXGE_HW_TIM_TIMER_CI_ENABLE) {
 		config->tti.timer_ci_en = VXGE_HW_TIM_TIMER_CI_ENABLE;
-		val64 = readq(&vp_reg->tim_cfg1_int_num[VXGE_HW_VPATH_INTR_TX]);
+		val64 = pete_readq("drivers/net/ethernet/neterion/vxge/vxge-traffic.c:231", &vp_reg->tim_cfg1_int_num[VXGE_HW_VPATH_INTR_TX]);
 		val64 |= VXGE_HW_TIM_CFG1_INT_NUM_TIMER_CI;
 		fifo->tim_tti_cfg1_saved = val64;
-		writeq(val64, &vp_reg->tim_cfg1_int_num[VXGE_HW_VPATH_INTR_TX]);
+		pete_writeq("drivers/net/ethernet/neterion/vxge/vxge-traffic.c:234", val64, &vp_reg->tim_cfg1_int_num[VXGE_HW_VPATH_INTR_TX]);
 	}
 }
 
@@ -241,7 +241,7 @@ void vxge_hw_vpath_dynamic_rti_ci_set(struct __vxge_hw_ring *ring)
 
 	val64 |= VXGE_HW_TIM_CFG1_INT_NUM_TIMER_CI;
 	ring->tim_rti_cfg1_saved = val64;
-	writeq(val64, &ring->vp_reg->tim_cfg1_int_num[VXGE_HW_VPATH_INTR_RX]);
+	pete_writeq("drivers/net/ethernet/neterion/vxge/vxge-traffic.c:244", val64, &ring->vp_reg->tim_cfg1_int_num[VXGE_HW_VPATH_INTR_RX]);
 }
 
 void vxge_hw_vpath_dynamic_tti_rtimer_set(struct __vxge_hw_fifo *fifo)
@@ -254,7 +254,7 @@ void vxge_hw_vpath_dynamic_tti_rtimer_set(struct __vxge_hw_fifo *fifo)
 		val64 |= VXGE_HW_TIM_CFG3_INT_NUM_RTIMER_VAL(timer) |
 			VXGE_HW_TIM_CFG3_INT_NUM_RTIMER_EVENT_SF(5);
 
-	writeq(val64, &fifo->vp_reg->tim_cfg3_int_num[VXGE_HW_VPATH_INTR_TX]);
+	pete_writeq("drivers/net/ethernet/neterion/vxge/vxge-traffic.c:257", val64, &fifo->vp_reg->tim_cfg3_int_num[VXGE_HW_VPATH_INTR_TX]);
 	/* tti_cfg3_saved is not updated again because it is
 	 * initialized at one place only - init time.
 	 */
@@ -270,7 +270,7 @@ void vxge_hw_vpath_dynamic_rti_rtimer_set(struct __vxge_hw_ring *ring)
 		val64 |= VXGE_HW_TIM_CFG3_INT_NUM_RTIMER_VAL(timer) |
 			VXGE_HW_TIM_CFG3_INT_NUM_RTIMER_EVENT_SF(4);
 
-	writeq(val64, &ring->vp_reg->tim_cfg3_int_num[VXGE_HW_VPATH_INTR_RX]);
+	pete_writeq("drivers/net/ethernet/neterion/vxge/vxge-traffic.c:273", val64, &ring->vp_reg->tim_cfg3_int_num[VXGE_HW_VPATH_INTR_RX]);
 	/* rti_cfg3_saved is not updated again because it is
 	 * initialized at one place only - init time.
 	 */
@@ -378,9 +378,9 @@ void vxge_hw_device_intr_enable(struct __vxge_hw_device *hldev)
 			hldev->tim_int_mask0[VXGE_HW_VPATH_INTR_RX];
 
 		if (val64 != 0) {
-			writeq(val64, &hldev->common_reg->tim_int_status0);
+			pete_writeq("drivers/net/ethernet/neterion/vxge/vxge-traffic.c:381", val64, &hldev->common_reg->tim_int_status0);
 
-			writeq(~val64, &hldev->common_reg->tim_int_mask0);
+			pete_writeq("drivers/net/ethernet/neterion/vxge/vxge-traffic.c:383", ~val64, &hldev->common_reg->tim_int_mask0);
 		}
 
 		val32 = hldev->tim_int_mask1[VXGE_HW_VPATH_INTR_TX] |
@@ -395,7 +395,7 @@ void vxge_hw_device_intr_enable(struct __vxge_hw_device *hldev)
 		}
 	}
 
-	val64 = readq(&hldev->common_reg->titan_general_int_status);
+	val64 = pete_readq("drivers/net/ethernet/neterion/vxge/vxge-traffic.c:398", &hldev->common_reg->titan_general_int_status);
 
 	vxge_hw_device_unmask_all(hldev);
 }
@@ -415,7 +415,7 @@ void vxge_hw_device_intr_disable(struct __vxge_hw_device *hldev)
 	vxge_hw_device_mask_all(hldev);
 
 	/* mask all the tim interrupts */
-	writeq(VXGE_HW_INTR_MASK_ALL, &hldev->common_reg->tim_int_mask0);
+	pete_writeq("drivers/net/ethernet/neterion/vxge/vxge-traffic.c:418", VXGE_HW_INTR_MASK_ALL, &hldev->common_reg->tim_int_mask0);
 	__vxge_hw_pio_mem_write32_upper(VXGE_HW_DEFAULT_32,
 		&hldev->common_reg->tim_int_mask1);
 
@@ -608,7 +608,7 @@ __vxge_hw_vpath_alarm_process(struct __vxge_hw_virtualpath *vpath,
 
 	hldev = vpath->hldev;
 	vp_reg = vpath->vp_reg;
-	alarm_status = readq(&vp_reg->vpath_general_int_status);
+	alarm_status = pete_readq("drivers/net/ethernet/neterion/vxge/vxge-traffic.c:611", &vp_reg->vpath_general_int_status);
 
 	if (alarm_status == VXGE_HW_ALL_FOXES) {
 		alarm_event = VXGE_HW_SET_LEVEL(VXGE_HW_EVENT_SLOT_FREEZE,
@@ -632,12 +632,12 @@ __vxge_hw_vpath_alarm_process(struct __vxge_hw_virtualpath *vpath,
 
 	if (alarm_status & VXGE_HW_VPATH_GENERAL_INT_STATUS_XMAC_INT) {
 
-		val64 = readq(&vp_reg->xgmac_vp_int_status);
+		val64 = pete_readq("drivers/net/ethernet/neterion/vxge/vxge-traffic.c:635", &vp_reg->xgmac_vp_int_status);
 
 		if (val64 &
 		VXGE_HW_XGMAC_VP_INT_STATUS_ASIC_NTWK_VP_ERR_ASIC_NTWK_VP_INT) {
 
-			val64 = readq(&vp_reg->asic_ntwk_vp_err_reg);
+			val64 = pete_readq("drivers/net/ethernet/neterion/vxge/vxge-traffic.c:640", &vp_reg->asic_ntwk_vp_err_reg);
 
 			if (((val64 &
 			      VXGE_HW_ASIC_NW_VP_ERR_REG_XMACJ_STN_FLT) &&
@@ -650,7 +650,7 @@ __vxge_hw_vpath_alarm_process(struct __vxge_hw_virtualpath *vpath,
 				     ))) {
 				sw_stats->error_stats.network_sustained_fault++;
 
-				writeq(
+				pete_writeq("drivers/net/ethernet/neterion/vxge/vxge-traffic.c:653", 
 				VXGE_HW_ASIC_NW_VP_ERR_REG_XMACJ_STN_FLT,
 					&vp_reg->asic_ntwk_vp_err_mask);
 
@@ -671,7 +671,7 @@ __vxge_hw_vpath_alarm_process(struct __vxge_hw_virtualpath *vpath,
 
 				sw_stats->error_stats.network_sustained_ok++;
 
-				writeq(
+				pete_writeq("drivers/net/ethernet/neterion/vxge/vxge-traffic.c:674", 
 				VXGE_HW_ASIC_NW_VP_ERR_REG_XMACJ_STN_OK,
 					&vp_reg->asic_ntwk_vp_err_mask);
 
@@ -680,7 +680,7 @@ __vxge_hw_vpath_alarm_process(struct __vxge_hw_virtualpath *vpath,
 					VXGE_HW_EVENT_LINK_UP, alarm_event);
 			}
 
-			writeq(VXGE_HW_INTR_MASK_ALL,
+			pete_writeq("drivers/net/ethernet/neterion/vxge/vxge-traffic.c:683", VXGE_HW_INTR_MASK_ALL,
 				&vp_reg->asic_ntwk_vp_err_reg);
 
 			alarm_event = VXGE_HW_SET_LEVEL(
@@ -693,13 +693,13 @@ __vxge_hw_vpath_alarm_process(struct __vxge_hw_virtualpath *vpath,
 
 	if (alarm_status & VXGE_HW_VPATH_GENERAL_INT_STATUS_PIC_INT) {
 
-		pic_status = readq(&vp_reg->vpath_ppif_int_status);
+		pic_status = pete_readq("drivers/net/ethernet/neterion/vxge/vxge-traffic.c:696", &vp_reg->vpath_ppif_int_status);
 
 		if (pic_status &
 		    VXGE_HW_VPATH_PPIF_INT_STATUS_GENERAL_ERRORS_GENERAL_INT) {
 
-			val64 = readq(&vp_reg->general_errors_reg);
-			mask64 = readq(&vp_reg->general_errors_mask);
+			val64 = pete_readq("drivers/net/ethernet/neterion/vxge/vxge-traffic.c:701", &vp_reg->general_errors_reg);
+			mask64 = pete_readq("drivers/net/ethernet/neterion/vxge/vxge-traffic.c:702", &vp_reg->general_errors_mask);
 
 			if ((val64 &
 				VXGE_HW_GENERAL_ERRORS_REG_INI_SERR_DET) &
@@ -735,7 +735,7 @@ __vxge_hw_vpath_alarm_process(struct __vxge_hw_virtualpath *vpath,
 				sw_stats->error_stats.target_illegal_access++;
 
 			if (!skip_alarms) {
-				writeq(VXGE_HW_INTR_MASK_ALL,
+				pete_writeq("drivers/net/ethernet/neterion/vxge/vxge-traffic.c:738", VXGE_HW_INTR_MASK_ALL,
 					&vp_reg->general_errors_reg);
 				alarm_event = VXGE_HW_SET_LEVEL(
 					VXGE_HW_EVENT_ALARM_CLEARED,
@@ -746,8 +746,8 @@ __vxge_hw_vpath_alarm_process(struct __vxge_hw_virtualpath *vpath,
 		if (pic_status &
 		    VXGE_HW_VPATH_PPIF_INT_STATUS_KDFCCTL_ERRORS_KDFCCTL_INT) {
 
-			val64 = readq(&vp_reg->kdfcctl_errors_reg);
-			mask64 = readq(&vp_reg->kdfcctl_errors_mask);
+			val64 = pete_readq("drivers/net/ethernet/neterion/vxge/vxge-traffic.c:749", &vp_reg->kdfcctl_errors_reg);
+			mask64 = pete_readq("drivers/net/ethernet/neterion/vxge/vxge-traffic.c:750", &vp_reg->kdfcctl_errors_mask);
 
 			if ((val64 &
 			    VXGE_HW_KDFCCTL_ERRORS_REG_KDFCCTL_FIFO0_OVRWR) &
@@ -780,7 +780,7 @@ __vxge_hw_vpath_alarm_process(struct __vxge_hw_virtualpath *vpath,
 			}
 
 			if (!skip_alarms) {
-				writeq(VXGE_HW_INTR_MASK_ALL,
+				pete_writeq("drivers/net/ethernet/neterion/vxge/vxge-traffic.c:783", VXGE_HW_INTR_MASK_ALL,
 					&vp_reg->kdfcctl_errors_reg);
 				alarm_event = VXGE_HW_SET_LEVEL(
 					VXGE_HW_EVENT_ALARM_CLEARED,
@@ -792,12 +792,12 @@ __vxge_hw_vpath_alarm_process(struct __vxge_hw_virtualpath *vpath,
 
 	if (alarm_status & VXGE_HW_VPATH_GENERAL_INT_STATUS_WRDMA_INT) {
 
-		val64 = readq(&vp_reg->wrdma_alarm_status);
+		val64 = pete_readq("drivers/net/ethernet/neterion/vxge/vxge-traffic.c:795", &vp_reg->wrdma_alarm_status);
 
 		if (val64 & VXGE_HW_WRDMA_ALARM_STATUS_PRC_ALARM_PRC_INT) {
 
-			val64 = readq(&vp_reg->prc_alarm_reg);
-			mask64 = readq(&vp_reg->prc_alarm_mask);
+			val64 = pete_readq("drivers/net/ethernet/neterion/vxge/vxge-traffic.c:799", &vp_reg->prc_alarm_reg);
+			mask64 = pete_readq("drivers/net/ethernet/neterion/vxge/vxge-traffic.c:800", &vp_reg->prc_alarm_mask);
 
 			if ((val64 & VXGE_HW_PRC_ALARM_REG_PRC_RING_BUMP)&
 				~mask64)
@@ -831,7 +831,7 @@ __vxge_hw_vpath_alarm_process(struct __vxge_hw_virtualpath *vpath,
 			}
 
 			if (!skip_alarms) {
-				writeq(VXGE_HW_INTR_MASK_ALL,
+				pete_writeq("drivers/net/ethernet/neterion/vxge/vxge-traffic.c:834", VXGE_HW_INTR_MASK_ALL,
 					&vp_reg->prc_alarm_reg);
 				alarm_event = VXGE_HW_SET_LEVEL(
 						VXGE_HW_EVENT_ALARM_CLEARED,
@@ -885,7 +885,7 @@ enum vxge_hw_status vxge_hw_device_begin_irq(struct __vxge_hw_device *hldev,
 	u64 vpath_mask;
 	enum vxge_hw_status ret = VXGE_HW_OK;
 
-	val64 = readq(&hldev->common_reg->titan_general_int_status);
+	val64 = pete_readq("drivers/net/ethernet/neterion/vxge/vxge-traffic.c:888", &hldev->common_reg->titan_general_int_status);
 
 	if (unlikely(!val64)) {
 		/* not Titan interrupt	*/
@@ -896,7 +896,7 @@ enum vxge_hw_status vxge_hw_device_begin_irq(struct __vxge_hw_device *hldev,
 
 	if (unlikely(val64 == VXGE_HW_ALL_FOXES)) {
 
-		adapter_status = readq(&hldev->common_reg->adapter_status);
+		adapter_status = pete_readq("drivers/net/ethernet/neterion/vxge/vxge-traffic.c:899", &hldev->common_reg->adapter_status);
 
 		if (adapter_status == VXGE_HW_ALL_FOXES) {
 
@@ -967,7 +967,7 @@ void vxge_hw_device_clear_tx_rx(struct __vxge_hw_device *hldev)
 
 	if ((hldev->tim_int_mask0[VXGE_HW_VPATH_INTR_TX] != 0) ||
 	   (hldev->tim_int_mask0[VXGE_HW_VPATH_INTR_RX] != 0)) {
-		writeq((hldev->tim_int_mask0[VXGE_HW_VPATH_INTR_TX] |
+		pete_writeq("drivers/net/ethernet/neterion/vxge/vxge-traffic.c:970", (hldev->tim_int_mask0[VXGE_HW_VPATH_INTR_TX] |
 				 hldev->tim_int_mask0[VXGE_HW_VPATH_INTR_RX]),
 				&hldev->common_reg->tim_int_status0);
 	}
@@ -1382,12 +1382,12 @@ exit:
 static void __vxge_hw_non_offload_db_post(struct __vxge_hw_fifo *fifo,
 	u64 txdl_ptr, u32 num_txds, u32 no_snoop)
 {
-	writeq(VXGE_HW_NODBW_TYPE(VXGE_HW_NODBW_TYPE_NODBW) |
+	pete_writeq("drivers/net/ethernet/neterion/vxge/vxge-traffic.c:1385", VXGE_HW_NODBW_TYPE(VXGE_HW_NODBW_TYPE_NODBW) |
 		VXGE_HW_NODBW_LAST_TXD_NUMBER(num_txds) |
 		VXGE_HW_NODBW_GET_NO_SNOOP(no_snoop),
 		&fifo->nofl_db->control_0);
 
-	writeq(txdl_ptr, &fifo->nofl_db->txdl_ptr);
+	pete_writeq("drivers/net/ethernet/neterion/vxge/vxge-traffic.c:1390", txdl_ptr, &fifo->nofl_db->txdl_ptr);
 }
 
 /**
@@ -1980,7 +1980,7 @@ enum vxge_hw_status vxge_hw_vpath_promisc_enable(
 		VXGE_HW_DEVICE_ACCESS_RIGHT_MRPCIM))
 		return VXGE_HW_OK;
 
-	val64 = readq(&vpath->vp_reg->rxmac_vcfg0);
+	val64 = pete_readq("drivers/net/ethernet/neterion/vxge/vxge-traffic.c:1983", &vpath->vp_reg->rxmac_vcfg0);
 
 	if (!(val64 & VXGE_HW_RXMAC_VCFG0_UCAST_ALL_ADDR_EN)) {
 
@@ -1989,7 +1989,7 @@ enum vxge_hw_status vxge_hw_vpath_promisc_enable(
 			 VXGE_HW_RXMAC_VCFG0_BCAST_EN |
 			 VXGE_HW_RXMAC_VCFG0_ALL_VID_EN;
 
-		writeq(val64, &vpath->vp_reg->rxmac_vcfg0);
+		pete_writeq("drivers/net/ethernet/neterion/vxge/vxge-traffic.c:1992", val64, &vpath->vp_reg->rxmac_vcfg0);
 	}
 exit:
 	return status;
@@ -2017,7 +2017,7 @@ enum vxge_hw_status vxge_hw_vpath_promisc_disable(
 
 	vpath = vp->vpath;
 
-	val64 = readq(&vpath->vp_reg->rxmac_vcfg0);
+	val64 = pete_readq("drivers/net/ethernet/neterion/vxge/vxge-traffic.c:2020", &vpath->vp_reg->rxmac_vcfg0);
 
 	if (val64 & VXGE_HW_RXMAC_VCFG0_UCAST_ALL_ADDR_EN) {
 
@@ -2025,7 +2025,7 @@ enum vxge_hw_status vxge_hw_vpath_promisc_disable(
 			   VXGE_HW_RXMAC_VCFG0_MCAST_ALL_ADDR_EN |
 			   VXGE_HW_RXMAC_VCFG0_ALL_VID_EN);
 
-		writeq(val64, &vpath->vp_reg->rxmac_vcfg0);
+		pete_writeq("drivers/net/ethernet/neterion/vxge/vxge-traffic.c:2028", val64, &vpath->vp_reg->rxmac_vcfg0);
 	}
 exit:
 	return status;
@@ -2051,11 +2051,11 @@ enum vxge_hw_status vxge_hw_vpath_bcast_enable(
 
 	vpath = vp->vpath;
 
-	val64 = readq(&vpath->vp_reg->rxmac_vcfg0);
+	val64 = pete_readq("drivers/net/ethernet/neterion/vxge/vxge-traffic.c:2054", &vpath->vp_reg->rxmac_vcfg0);
 
 	if (!(val64 & VXGE_HW_RXMAC_VCFG0_BCAST_EN)) {
 		val64 |= VXGE_HW_RXMAC_VCFG0_BCAST_EN;
-		writeq(val64, &vpath->vp_reg->rxmac_vcfg0);
+		pete_writeq("drivers/net/ethernet/neterion/vxge/vxge-traffic.c:2058", val64, &vpath->vp_reg->rxmac_vcfg0);
 	}
 exit:
 	return status;
@@ -2083,11 +2083,11 @@ enum vxge_hw_status vxge_hw_vpath_mcast_enable(
 
 	vpath = vp->vpath;
 
-	val64 = readq(&vpath->vp_reg->rxmac_vcfg0);
+	val64 = pete_readq("drivers/net/ethernet/neterion/vxge/vxge-traffic.c:2086", &vpath->vp_reg->rxmac_vcfg0);
 
 	if (!(val64 & VXGE_HW_RXMAC_VCFG0_MCAST_ALL_ADDR_EN)) {
 		val64 |= VXGE_HW_RXMAC_VCFG0_MCAST_ALL_ADDR_EN;
-		writeq(val64, &vpath->vp_reg->rxmac_vcfg0);
+		pete_writeq("drivers/net/ethernet/neterion/vxge/vxge-traffic.c:2090", val64, &vpath->vp_reg->rxmac_vcfg0);
 	}
 exit:
 	return status;
@@ -2116,11 +2116,11 @@ vxge_hw_vpath_mcast_disable(struct __vxge_hw_vpath_handle *vp)
 
 	vpath = vp->vpath;
 
-	val64 = readq(&vpath->vp_reg->rxmac_vcfg0);
+	val64 = pete_readq("drivers/net/ethernet/neterion/vxge/vxge-traffic.c:2119", &vpath->vp_reg->rxmac_vcfg0);
 
 	if (val64 & VXGE_HW_RXMAC_VCFG0_MCAST_ALL_ADDR_EN) {
 		val64 &= ~VXGE_HW_RXMAC_VCFG0_MCAST_ALL_ADDR_EN;
-		writeq(val64, &vpath->vp_reg->rxmac_vcfg0);
+		pete_writeq("drivers/net/ethernet/neterion/vxge/vxge-traffic.c:2123", val64, &vpath->vp_reg->rxmac_vcfg0);
 	}
 exit:
 	return status;
@@ -2176,9 +2176,9 @@ vxge_hw_vpath_msix_set(struct __vxge_hw_vpath_handle *vp, int *tim_msix_id,
 		 VXGE_HW_INTERRUPT_CFG0_GROUP1_MSIX_FOR_TXTI(
 		  (vp_id * 4) + tim_msix_id[1]);
 
-	writeq(val64, &vp_reg->interrupt_cfg0);
+	pete_writeq("drivers/net/ethernet/neterion/vxge/vxge-traffic.c:2179", val64, &vp_reg->interrupt_cfg0);
 
-	writeq(VXGE_HW_INTERRUPT_CFG2_ALARM_MAP_TO_MSG(
+	pete_writeq("drivers/net/ethernet/neterion/vxge/vxge-traffic.c:2181", VXGE_HW_INTERRUPT_CFG2_ALARM_MAP_TO_MSG(
 			(vpath->hldev->first_vp_id * 4) + alarm_msix_id),
 			&vp_reg->interrupt_cfg2);
 
@@ -2282,11 +2282,11 @@ void vxge_hw_vpath_inta_mask_tx_rx(struct __vxge_hw_vpath_handle *vp)
 	VXGE_HW_DEVICE_TIM_INT_MASK_SET(tim_int_mask0,
 		tim_int_mask1, vp->vpath->vp_id);
 
-	val64 = readq(&hldev->common_reg->tim_int_mask0);
+	val64 = pete_readq("drivers/net/ethernet/neterion/vxge/vxge-traffic.c:2285", &hldev->common_reg->tim_int_mask0);
 
 	if ((tim_int_mask0[VXGE_HW_VPATH_INTR_TX] != 0) ||
 		(tim_int_mask0[VXGE_HW_VPATH_INTR_RX] != 0)) {
-		writeq((tim_int_mask0[VXGE_HW_VPATH_INTR_TX] |
+		pete_writeq("drivers/net/ethernet/neterion/vxge/vxge-traffic.c:2289", (tim_int_mask0[VXGE_HW_VPATH_INTR_TX] |
 			tim_int_mask0[VXGE_HW_VPATH_INTR_RX] | val64),
 			&hldev->common_reg->tim_int_mask0);
 	}
@@ -2320,11 +2320,11 @@ void vxge_hw_vpath_inta_unmask_tx_rx(struct __vxge_hw_vpath_handle *vp)
 	VXGE_HW_DEVICE_TIM_INT_MASK_SET(tim_int_mask0,
 		tim_int_mask1, vp->vpath->vp_id);
 
-	val64 = readq(&hldev->common_reg->tim_int_mask0);
+	val64 = pete_readq("drivers/net/ethernet/neterion/vxge/vxge-traffic.c:2323", &hldev->common_reg->tim_int_mask0);
 
 	if ((tim_int_mask0[VXGE_HW_VPATH_INTR_TX] != 0) ||
 	   (tim_int_mask0[VXGE_HW_VPATH_INTR_RX] != 0)) {
-		writeq((~(tim_int_mask0[VXGE_HW_VPATH_INTR_TX] |
+		pete_writeq("drivers/net/ethernet/neterion/vxge/vxge-traffic.c:2327", (~(tim_int_mask0[VXGE_HW_VPATH_INTR_TX] |
 			tim_int_mask0[VXGE_HW_VPATH_INTR_RX])) & val64,
 			&hldev->common_reg->tim_int_mask0);
 	}
@@ -2382,7 +2382,7 @@ enum vxge_hw_status vxge_hw_vpath_poll_rx(struct __vxge_hw_ring *ring)
 				/* Reset total count */
 				ring->total_db_cnt %= ring->rxds_per_block;
 			}
-			writeq(VXGE_HW_PRC_RXD_DOORBELL_NEW_QW_CNT(new_count),
+			pete_writeq("drivers/net/ethernet/neterion/vxge/vxge-traffic.c:2385", VXGE_HW_PRC_RXD_DOORBELL_NEW_QW_CNT(new_count),
 				&ring->vp_reg->prc_rxd_doorbell);
 			pete_readl("drivers/net/ethernet/neterion/vxge/vxge-traffic.c:2387", &ring->common_reg->titan_general_int_status);
 			ring->doorbell_cnt = 0;

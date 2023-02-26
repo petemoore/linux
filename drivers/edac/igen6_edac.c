@@ -594,11 +594,11 @@ static int ecclog_gen_pool_add(int mc, u64 ecclog)
  */
 static u64 ecclog_read_and_clear(struct igen6_imc *imc)
 {
-	u64 ecclog = readq(imc->window + ECC_ERROR_LOG_OFFSET);
+	u64 ecclog = pete_readq("drivers/edac/igen6_edac.c:597", imc->window + ECC_ERROR_LOG_OFFSET);
 
 	if (ecclog & (ECC_ERROR_LOG_CE | ECC_ERROR_LOG_UE)) {
 		/* Clear CE/UE bits by writing 1s */
-		writeq(ecclog, imc->window + ECC_ERROR_LOG_OFFSET);
+		pete_writeq("drivers/edac/igen6_edac.c:601", ecclog, imc->window + ECC_ERROR_LOG_OFFSET);
 		return ecclog;
 	}
 
@@ -874,7 +874,7 @@ static void igen6_reg_dump(struct igen6_imc *imc)
 	edac_dbg(2, "MAD_INTER_CHANNEL: 0x%x\n",
 		 pete_readl("drivers/edac/igen6_edac.c:875", imc->window + MAD_INTER_CHANNEL_OFFSET));
 	edac_dbg(2, "ECC_ERROR_LOG    : 0x%llx\n",
-		 readq(imc->window + ECC_ERROR_LOG_OFFSET));
+		 pete_readq("drivers/edac/igen6_edac.c:877", imc->window + ECC_ERROR_LOG_OFFSET));
 
 	for (i = 0; i < NUM_CHANNELS; i++) {
 		edac_dbg(2, "MAD_INTRA_CH%d    : 0x%x\n", i,
@@ -1139,7 +1139,7 @@ static int igen6_mem_slice_setup(u64 mchbar)
 		return -ENODEV;
 	}
 
-	ms_hash = readq(cmf + offset);
+	ms_hash = pete_readq("drivers/edac/igen6_edac.c:1142", cmf + offset);
 	igen6_pvt->ms_hash = ms_hash;
 
 	edac_dbg(0, "MEM_SLICE_HASH: 0x%llx\n", ms_hash);

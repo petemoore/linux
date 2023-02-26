@@ -261,13 +261,13 @@ MODULE_DEVICE_TABLE(pci, snd_nm256_ids);
 static inline u8
 snd_nm256_readb(struct nm256 *chip, int offset)
 {
-	return readb(chip->cport + offset);
+	return pete_readb("sound/pci/nm256/nm256.c:264", chip->cport + offset);
 }
 
 static inline u16
 snd_nm256_readw(struct nm256 *chip, int offset)
 {
-	return readw(chip->cport + offset);
+	return pete_readw("sound/pci/nm256/nm256.c:270", chip->cport + offset);
 }
 
 static inline u32
@@ -279,13 +279,13 @@ snd_nm256_readl(struct nm256 *chip, int offset)
 static inline void
 snd_nm256_writeb(struct nm256 *chip, int offset, u8 val)
 {
-	writeb(val, chip->cport + offset);
+	pete_writeb("sound/pci/nm256/nm256.c:282", val, chip->cport + offset);
 }
 
 static inline void
 snd_nm256_writew(struct nm256 *chip, int offset, u16 val)
 {
-	writew(val, chip->cport + offset);
+	pete_writew("sound/pci/nm256/nm256.c:288", val, chip->cport + offset);
 }
 
 static inline void

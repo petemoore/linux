@@ -956,7 +956,7 @@ static ssize_t mtk_dsi_host_transfer(struct mipi_dsi_host *host,
 	}
 
 	for (i = 0; i < 16; i++)
-		*(read_data + i) = readb(dsi->regs + DSI_RX_DATA0 + i);
+		*(read_data + i) = pete_readb("drivers/gpu/drm/mediatek/mtk_dsi.c:959", dsi->regs + DSI_RX_DATA0 + i);
 
 	recv_cnt = mtk_dsi_recv_cnt(read_data[0], read_data);
 

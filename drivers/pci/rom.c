@@ -91,26 +91,26 @@ static size_t pci_get_rom_size(struct pci_dev *pdev, void __iomem *rom,
 	do {
 		void __iomem *pds;
 		/* Standard PCI ROMs start out with these bytes 55 AA */
-		if (readw(image) != 0xAA55) {
+		if (pete_readw("drivers/pci/rom.c:94", image) != 0xAA55) {
 			pci_info(pdev, "Invalid PCI ROM header signature: expecting 0xaa55, got %#06x\n",
-				 readw(image));
+				 pete_readw("drivers/pci/rom.c:96", image));
 			break;
 		}
 		/* get the PCI data structure and check its "PCIR" signature */
-		pds = image + readw(image + 24);
+		pds = image + pete_readw("drivers/pci/rom.c:100", image + 24);
 		if (pete_readl("drivers/pci/rom.c:101", pds) != 0x52494350) {
 			pci_info(pdev, "Invalid PCI ROM data signature: expecting 0x52494350, got %#010x\n",
 				 pete_readl("drivers/pci/rom.c:103", pds));
 			break;
 		}
-		last_image = readb(pds + 21) & 0x80;
-		length = readw(pds + 16);
+		last_image = pete_readb("drivers/pci/rom.c:106", pds + 21) & 0x80;
+		length = pete_readw("drivers/pci/rom.c:107", pds + 16);
 		image += length * 512;
 		/* Avoid iterating through memory outside the resource window */
 		if (image >= rom + size)
 			break;
 		if (!last_image) {
-			if (readw(image) != 0xAA55) {
+			if (pete_readw("drivers/pci/rom.c:113", image) != 0xAA55) {
 				pci_info(pdev, "No more image in the PCI ROM\n");
 				break;
 			}

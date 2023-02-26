@@ -84,7 +84,7 @@ void __init config_BSP(char *commandp, int size)
 {
 #if defined (CONFIG_MOD5272)
 	/* Set base of device vectors to be 64 */
-	writeb(0x40, MCFSIM_PIVR);
+	pete_writeb("arch/m68k/coldfire/m5272.c:87", 0x40, MCFSIM_PIVR);
 #endif
 
 #if defined(CONFIG_NETtel) || defined(CONFIG_SCALES)

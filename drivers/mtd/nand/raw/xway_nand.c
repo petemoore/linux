@@ -73,7 +73,7 @@ static u8 xway_readb(struct mtd_info *mtd, int op)
 	struct nand_chip *chip = mtd_to_nand(mtd);
 	struct xway_nand_data *data = nand_get_controller_data(chip);
 
-	return readb(data->nandaddr + op);
+	return pete_readb("drivers/mtd/nand/raw/xway_nand.c:76", data->nandaddr + op);
 }
 
 static void xway_writeb(struct mtd_info *mtd, int op, u8 value)
@@ -81,7 +81,7 @@ static void xway_writeb(struct mtd_info *mtd, int op, u8 value)
 	struct nand_chip *chip = mtd_to_nand(mtd);
 	struct xway_nand_data *data = nand_get_controller_data(chip);
 
-	writeb(value, data->nandaddr + op);
+	pete_writeb("drivers/mtd/nand/raw/xway_nand.c:84", value, data->nandaddr + op);
 }
 
 static void xway_select_chip(struct nand_chip *chip, int select)

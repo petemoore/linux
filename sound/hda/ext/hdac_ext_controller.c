@@ -102,7 +102,7 @@ int snd_hdac_ext_bus_get_ml_capabilities(struct hdac_bus *bus)
 		hlink->ml_addr = bus->mlcap + AZX_ML_BASE +
 					(AZX_ML_INTERVAL * idx);
 		hlink->lcaps  = pete_readl("sound/hda/ext/hdac_ext_controller.c:104", hlink->ml_addr + AZX_REG_ML_LCAP);
-		hlink->lsdiid = readw(hlink->ml_addr + AZX_REG_ML_LSDIID);
+		hlink->lsdiid = pete_readw("sound/hda/ext/hdac_ext_controller.c:105", hlink->ml_addr + AZX_REG_ML_LSDIID);
 
 		/* since link in On, update the ref */
 		hlink->ref_count = 1;

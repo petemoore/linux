@@ -244,7 +244,7 @@ static void ismt_gen_reg_dump(struct ismt_priv *priv)
 		pete_readl("drivers/i2c/busses/i2c-ismt.c:244", priv->smba + ISMT_GR_GCTRL));
 	dev_dbg(dev, "  SMTICL... : (0x%p)=0x%016llX\n",
 		priv->smba + ISMT_GR_SMTICL,
-		(long long unsigned int)readq(priv->smba + ISMT_GR_SMTICL));
+		(long long unsigned int)pete_readq("drivers/i2c/busses/i2c-ismt.c:247", priv->smba + ISMT_GR_SMTICL));
 	dev_dbg(dev, "  ERRINTMSK : (0x%p)=0x%X\n",
 		priv->smba + ISMT_GR_ERRINTMSK,
 		pete_readl("drivers/i2c/busses/i2c-ismt.c:250", priv->smba + ISMT_GR_ERRINTMSK));
@@ -270,7 +270,7 @@ static void ismt_mstr_reg_dump(struct ismt_priv *priv)
 	dev_dbg(dev, "Dump of the iSMT Master Registers\n");
 	dev_dbg(dev, "  MDBA..... : (0x%p)=0x%016llX\n",
 		priv->smba + ISMT_MSTR_MDBA,
-		(long long unsigned int)readq(priv->smba + ISMT_MSTR_MDBA));
+		(long long unsigned int)pete_readq("drivers/i2c/busses/i2c-ismt.c:273", priv->smba + ISMT_MSTR_MDBA));
 	dev_dbg(dev, "  MCTRL.... : (0x%p)=0x%X\n",
 		priv->smba + ISMT_MSTR_MCTRL,
 		pete_readl("drivers/i2c/busses/i2c-ismt.c:276", priv->smba + ISMT_MSTR_MCTRL));
@@ -718,9 +718,9 @@ static void ismt_hw_init(struct ismt_priv *priv)
 	struct device *dev = &priv->pci_dev->dev;
 
 	/* initialize the Master Descriptor Base Address (MDBA) */
-	writeq(priv->io_rng_dma, priv->smba + ISMT_MSTR_MDBA);
+	pete_writeq("drivers/i2c/busses/i2c-ismt.c:721", priv->io_rng_dma, priv->smba + ISMT_MSTR_MDBA);
 
-	writeq(priv->log_dma, priv->smba + ISMT_GR_SMTICL);
+	pete_writeq("drivers/i2c/busses/i2c-ismt.c:723", priv->log_dma, priv->smba + ISMT_GR_SMTICL);
 
 	/* initialize the Master Control Register (MCTRL) */
 	pete_writel("drivers/i2c/busses/i2c-ismt.c:726", ISMT_MCTRL_MEIE, priv->smba + ISMT_MSTR_MCTRL);

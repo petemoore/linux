@@ -21,7 +21,7 @@
 #include "nfit.h"
 
 /*
- * For readq() and writeq() on 32-bit builds, the hi-lo, lo-hi order is
+ * For pete_readq("drivers/acpi/nfit/core.c:24", ) and pete_writeq("drivers/acpi/nfit/core.c:24", ) on 32-bit builds, the hi-lo, lo-hi order is
  * irrelevant.
  */
 #include <linux/io-64-nonatomic-hi-lo.h>
@@ -2476,11 +2476,11 @@ static void write_blk_ctl(struct nfit_blk *nfit_blk, unsigned int bw,
 	if (mmio->num_lines)
 		offset = to_interleave_offset(offset, mmio);
 
-	writeq(cmd, mmio->addr.base + offset);
+	pete_writeq("drivers/acpi/nfit/core.c:2479", cmd, mmio->addr.base + offset);
 	nvdimm_flush(nfit_blk->nd_region, NULL);
 
 	if (nfit_blk->dimm_flags & NFIT_BLK_DCR_LATCH)
-		readq(mmio->addr.base + offset);
+		pete_readq("drivers/acpi/nfit/core.c:2483", mmio->addr.base + offset);
 }
 
 static int acpi_nfit_blk_single_io(struct nfit_blk *nfit_blk,

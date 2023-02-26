@@ -1396,9 +1396,9 @@ netxen_nic_pci_mem_access_direct(struct netxen_adapter *adapter, u64 off,
 	}
 noremap:
 	if (op == 0)	/* read */
-		*data = readq(addr);
+		*data = pete_readq("drivers/net/ethernet/qlogic/netxen/netxen_nic_hw.c:1399", addr);
 	else		/* write */
-		writeq(*data, addr);
+		pete_writeq("drivers/net/ethernet/qlogic/netxen/netxen_nic_hw.c:1401", *data, addr);
 
 unlock:
 	spin_unlock(&adapter->ahw.mem_lock);
@@ -1415,7 +1415,7 @@ netxen_pci_camqm_read_2M(struct netxen_adapter *adapter, u64 off, u64 *data)
 		NETXEN_PCI_CAMQM_2M_BASE + (off - NETXEN_PCI_CAMQM);
 
 	spin_lock(&adapter->ahw.mem_lock);
-	*data = readq(addr);
+	*data = pete_readq("drivers/net/ethernet/qlogic/netxen/netxen_nic_hw.c:1418", addr);
 	spin_unlock(&adapter->ahw.mem_lock);
 }
 
@@ -1426,7 +1426,7 @@ netxen_pci_camqm_write_2M(struct netxen_adapter *adapter, u64 off, u64 data)
 		NETXEN_PCI_CAMQM_2M_BASE + (off - NETXEN_PCI_CAMQM);
 
 	spin_lock(&adapter->ahw.mem_lock);
-	writeq(data, addr);
+	pete_writeq("drivers/net/ethernet/qlogic/netxen/netxen_nic_hw.c:1429", data, addr);
 	spin_unlock(&adapter->ahw.mem_lock);
 }
 

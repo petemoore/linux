@@ -304,7 +304,7 @@ static int sprom_do_write(struct ssb_bus *bus, const u16 *sprom)
 			pr_cont("75%%");
 		else if (i % 2)
 			pr_cont(".");
-		writew(sprom[i], bus->mmio + bus->sprom_offset + (i * 2));
+		pete_writew("drivers/ssb/pci.c:307", sprom[i], bus->mmio + bus->sprom_offset + (i * 2));
 		msleep(20);
 	}
 	err = pci_read_config_dword(pdev, SSB_SPROMCTL, &spromctl);

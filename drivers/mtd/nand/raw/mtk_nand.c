@@ -233,12 +233,12 @@ static inline void nfi_writel(struct mtk_nfc *nfc, u32 val, u32 reg)
 
 static inline void nfi_writew(struct mtk_nfc *nfc, u16 val, u32 reg)
 {
-	writew(val, nfc->regs + reg);
+	pete_writew("drivers/mtd/nand/raw/mtk_nand.c:236", val, nfc->regs + reg);
 }
 
 static inline void nfi_writeb(struct mtk_nfc *nfc, u8 val, u32 reg)
 {
-	writeb(val, nfc->regs + reg);
+	pete_writeb("drivers/mtd/nand/raw/mtk_nand.c:241", val, nfc->regs + reg);
 }
 
 static inline u32 nfi_readl(struct mtk_nfc *nfc, u32 reg)

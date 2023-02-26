@@ -278,7 +278,7 @@ HFC_outb_pcimem(struct hfc_multi *hc, u_char reg, u_char val,
 	HFC_outb_pcimem(struct hfc_multi *hc, u_char reg, u_char val)
 #endif
 {
-	writeb(val, hc->pci_membase + reg);
+	pete_writeb("drivers/isdn/hardware/mISDN/hfcmulti.c:281", val, hc->pci_membase + reg);
 }
 static u_char
 #ifdef HFC_REGISTER_DEBUG
@@ -287,7 +287,7 @@ HFC_inb_pcimem(struct hfc_multi *hc, u_char reg, const char *function, int line)
 	HFC_inb_pcimem(struct hfc_multi *hc, u_char reg)
 #endif
 {
-	return readb(hc->pci_membase + reg);
+	return pete_readb("drivers/isdn/hardware/mISDN/hfcmulti.c:290", hc->pci_membase + reg);
 }
 static u_short
 #ifdef HFC_REGISTER_DEBUG
@@ -296,7 +296,7 @@ HFC_inw_pcimem(struct hfc_multi *hc, u_char reg, const char *function, int line)
 	HFC_inw_pcimem(struct hfc_multi *hc, u_char reg)
 #endif
 {
-	return readw(hc->pci_membase + reg);
+	return pete_readw("drivers/isdn/hardware/mISDN/hfcmulti.c:299", hc->pci_membase + reg);
 }
 static void
 #ifdef HFC_REGISTER_DEBUG
@@ -305,7 +305,7 @@ HFC_wait_pcimem(struct hfc_multi *hc, const char *function, int line)
 	HFC_wait_pcimem(struct hfc_multi *hc)
 #endif
 {
-	while (readb(hc->pci_membase + R_STATUS) & V_BUSY)
+	while (pete_readb("drivers/isdn/hardware/mISDN/hfcmulti.c:308", hc->pci_membase + R_STATUS) & V_BUSY)
 		cpu_relax();
 }
 
@@ -475,13 +475,13 @@ write_fifo_pcimem(struct hfc_multi *hc, u_char *data, int len)
 		len -= 4;
 	}
 	while (len >> 1) {
-		writew(cpu_to_le16(*(u16 *)data),
+		pete_writew("drivers/isdn/hardware/mISDN/hfcmulti.c:478", cpu_to_le16(*(u16 *)data),
 		       hc->pci_membase + A_FIFO_DATA0);
 		data += 2;
 		len -= 2;
 	}
 	while (len) {
-		writeb(*data, hc->pci_membase + A_FIFO_DATA0);
+		pete_writeb("drivers/isdn/hardware/mISDN/hfcmulti.c:484", *data, hc->pci_membase + A_FIFO_DATA0);
 		data++;
 		len--;
 	}
@@ -521,12 +521,12 @@ read_fifo_pcimem(struct hfc_multi *hc, u_char *data, int len)
 	}
 	while (len >> 1) {
 		*(u16 *)data =
-			le16_to_cpu(readw(hc->pci_membase + A_FIFO_DATA0));
+			le16_to_cpu(pete_readw("drivers/isdn/hardware/mISDN/hfcmulti.c:524", hc->pci_membase + A_FIFO_DATA0));
 		data += 2;
 		len -= 2;
 	}
 	while (len) {
-		*data = readb(hc->pci_membase + A_FIFO_DATA0);
+		*data = pete_readb("drivers/isdn/hardware/mISDN/hfcmulti.c:529", hc->pci_membase + A_FIFO_DATA0);
 		data++;
 		len--;
 	}
@@ -2709,7 +2709,7 @@ hfcmulti_interrupt(int intno, void *dev_id)
 	if (test_bit(HFC_CHIP_PLXSD, &hc->chip)) {
 		spin_lock_irqsave(&plx_lock, flags);
 		plx_acc = hc->plx_membase + PLX_INTCSR;
-		wval = readw(plx_acc);
+		wval = pete_readw("drivers/isdn/hardware/mISDN/hfcmulti.c:2712", plx_acc);
 		spin_unlock_irqrestore(&plx_lock, flags);
 		if (!(wval & PLX_INTCSR_LINTI1_STATUS))
 			goto irq_notforus;
@@ -4273,7 +4273,7 @@ init_card(struct hfc_multi *hc)
 	if (test_bit(HFC_CHIP_PLXSD, &hc->chip)) {
 		spin_lock_irqsave(&plx_lock, plx_flags);
 		plx_acc = hc->plx_membase + PLX_INTCSR;
-		writew((PLX_INTCSR_PCIINT_ENABLE | PLX_INTCSR_LINTI1_ENABLE),
+		pete_writew("drivers/isdn/hardware/mISDN/hfcmulti.c:4276", (PLX_INTCSR_PCIINT_ENABLE | PLX_INTCSR_LINTI1_ENABLE),
 		       plx_acc); /* enable PCI & LINT1 irq */
 		spin_unlock_irqrestore(&plx_lock, plx_flags);
 	}
@@ -4322,7 +4322,7 @@ error:
 	if (test_bit(HFC_CHIP_PLXSD, &hc->chip)) {
 		spin_lock_irqsave(&plx_lock, plx_flags);
 		plx_acc = hc->plx_membase + PLX_INTCSR;
-		writew(0x00, plx_acc); /*disable IRQs*/
+		pete_writew("drivers/isdn/hardware/mISDN/hfcmulti.c:4325", 0x00, plx_acc); /*disable IRQs*/
 		spin_unlock_irqrestore(&plx_lock, plx_flags);
 	}
 

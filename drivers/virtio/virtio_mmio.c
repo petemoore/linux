@@ -159,17 +159,17 @@ static void vm_get(struct virtio_device *vdev, unsigned offset,
 		int i;
 
 		for (i = 0; i < len; i++)
-			ptr[i] = readb(base + offset + i);
+			ptr[i] = pete_readb("drivers/virtio/virtio_mmio.c:162", base + offset + i);
 		return;
 	}
 
 	switch (len) {
 	case 1:
-		b = readb(base + offset);
+		b = pete_readb("drivers/virtio/virtio_mmio.c:168", base + offset);
 		memcpy(buf, &b, sizeof b);
 		break;
 	case 2:
-		w = cpu_to_le16(readw(base + offset));
+		w = cpu_to_le16(pete_readw("drivers/virtio/virtio_mmio.c:172", base + offset));
 		memcpy(buf, &w, sizeof w);
 		break;
 	case 4:
@@ -201,7 +201,7 @@ static void vm_set(struct virtio_device *vdev, unsigned offset,
 		int i;
 
 		for (i = 0; i < len; i++)
-			writeb(ptr[i], base + offset + i);
+			pete_writeb("drivers/virtio/virtio_mmio.c:204", ptr[i], base + offset + i);
 
 		return;
 	}
@@ -209,11 +209,11 @@ static void vm_set(struct virtio_device *vdev, unsigned offset,
 	switch (len) {
 	case 1:
 		memcpy(&b, buf, sizeof b);
-		writeb(b, base + offset);
+		pete_writeb("drivers/virtio/virtio_mmio.c:212", b, base + offset);
 		break;
 	case 2:
 		memcpy(&w, buf, sizeof w);
-		writew(le16_to_cpu(w), base + offset);
+		pete_writew("drivers/virtio/virtio_mmio.c:216", le16_to_cpu(w), base + offset);
 		break;
 	case 4:
 		memcpy(&l, buf, sizeof l);

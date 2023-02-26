@@ -143,7 +143,7 @@ static inline void sun6i_spi_drain_fifo(struct sun6i_spi *sspi)
 	len = sun6i_spi_get_rx_fifo_count(sspi);
 
 	while (len--) {
-		byte = readb(sspi->base_addr + SUN6I_RXDATA_REG);
+		byte = pete_readb("drivers/spi/spi-sun6i.c:146", sspi->base_addr + SUN6I_RXDATA_REG);
 		if (sspi->rx_buf)
 			*sspi->rx_buf++ = byte;
 	}
@@ -162,7 +162,7 @@ static inline void sun6i_spi_fill_fifo(struct sun6i_spi *sspi)
 
 	while (len--) {
 		byte = sspi->tx_buf ? *sspi->tx_buf++ : 0;
-		writeb(byte, sspi->base_addr + SUN6I_TXDATA_REG);
+		pete_writeb("drivers/spi/spi-sun6i.c:165", byte, sspi->base_addr + SUN6I_TXDATA_REG);
 		sspi->len--;
 	}
 }

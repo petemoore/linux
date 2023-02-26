@@ -62,7 +62,7 @@ u64 aq_hw_read_reg64(struct aq_hw_s *hw, u32 reg)
 	u64 value = U64_MAX;
 
 	if (hw->aq_nic_cfg->aq_hw_caps->op64bit)
-		value = readq(hw->mmio + reg);
+		value = pete_readq("drivers/net/ethernet/aquantia/atlantic/aq_hw_utils.c:65", hw->mmio + reg);
 	else
 		value = lo_hi_readq(hw->mmio + reg);
 
@@ -76,7 +76,7 @@ u64 aq_hw_read_reg64(struct aq_hw_s *hw, u32 reg)
 void aq_hw_write_reg64(struct aq_hw_s *hw, u32 reg, u64 value)
 {
 	if (hw->aq_nic_cfg->aq_hw_caps->op64bit)
-		writeq(value, hw->mmio + reg);
+		pete_writeq("drivers/net/ethernet/aquantia/atlantic/aq_hw_utils.c:79", value, hw->mmio + reg);
 	else
 		lo_hi_writeq(value, hw->mmio + reg);
 }

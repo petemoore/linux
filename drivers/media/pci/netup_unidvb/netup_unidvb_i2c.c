@@ -69,8 +69,8 @@ irqreturn_t netup_i2c_interrupt(struct netup_i2c *i2c)
 	irqreturn_t iret = IRQ_HANDLED;
 
 	spin_lock_irqsave(&i2c->lock, flags);
-	reg = readw(&i2c->regs->twi_ctrl0_stat);
-	writew(reg & ~TWI_IRQEN, &i2c->regs->twi_ctrl0_stat);
+	reg = pete_readw("drivers/media/pci/netup_unidvb/netup_unidvb_i2c.c:72", &i2c->regs->twi_ctrl0_stat);
+	pete_writew("drivers/media/pci/netup_unidvb/netup_unidvb_i2c.c:73", reg & ~TWI_IRQEN, &i2c->regs->twi_ctrl0_stat);
 	dev_dbg(i2c->adap.dev.parent,
 		"%s(): twi_ctrl0_state 0x%x\n", __func__, reg);
 	if ((reg & TWI_IRQEN_COMPL) != 0 && (reg & TWI_IRQ_COMPL)) {
@@ -92,16 +92,16 @@ irqreturn_t netup_i2c_interrupt(struct netup_i2c *i2c)
 		goto irq_ok;
 	}
 	if ((reg & TWI_IRQ_RX) != 0) {
-		tmp = readw(&i2c->regs->rx_fifo.stat_ctrl);
-		writew(tmp & ~FIFO_IRQEN, &i2c->regs->rx_fifo.stat_ctrl);
+		tmp = pete_readw("drivers/media/pci/netup_unidvb/netup_unidvb_i2c.c:95", &i2c->regs->rx_fifo.stat_ctrl);
+		pete_writew("drivers/media/pci/netup_unidvb/netup_unidvb_i2c.c:96", tmp & ~FIFO_IRQEN, &i2c->regs->rx_fifo.stat_ctrl);
 		i2c->state = STATE_WANT_READ;
 		dev_dbg(i2c->adap.dev.parent,
 			"%s(): want read\n", __func__);
 		goto irq_ok;
 	}
 	if ((reg & TWI_IRQ_TX) != 0) {
-		tmp = readw(&i2c->regs->tx_fifo.stat_ctrl);
-		writew(tmp & ~FIFO_IRQEN, &i2c->regs->tx_fifo.stat_ctrl);
+		tmp = pete_readw("drivers/media/pci/netup_unidvb/netup_unidvb_i2c.c:103", &i2c->regs->tx_fifo.stat_ctrl);
+		pete_writew("drivers/media/pci/netup_unidvb/netup_unidvb_i2c.c:104", tmp & ~FIFO_IRQEN, &i2c->regs->tx_fifo.stat_ctrl);
 		i2c->state = STATE_WANT_WRITE;
 		dev_dbg(i2c->adap.dev.parent,
 			"%s(): want write\n", __func__);
@@ -120,32 +120,32 @@ static void netup_i2c_reset(struct netup_i2c *i2c)
 {
 	dev_dbg(i2c->adap.dev.parent, "%s()\n", __func__);
 	i2c->state = STATE_DONE;
-	writew(TWI_SOFT_RESET, &i2c->regs->twi_addr_ctrl1);
-	writew(TWI_CLKDIV, &i2c->regs->clkdiv);
-	writew(FIFO_RESET, &i2c->regs->tx_fifo.stat_ctrl);
-	writew(FIFO_RESET, &i2c->regs->rx_fifo.stat_ctrl);
-	writew(0x800, &i2c->regs->tx_fifo.stat_ctrl);
-	writew(0x800, &i2c->regs->rx_fifo.stat_ctrl);
+	pete_writew("drivers/media/pci/netup_unidvb/netup_unidvb_i2c.c:123", TWI_SOFT_RESET, &i2c->regs->twi_addr_ctrl1);
+	pete_writew("drivers/media/pci/netup_unidvb/netup_unidvb_i2c.c:124", TWI_CLKDIV, &i2c->regs->clkdiv);
+	pete_writew("drivers/media/pci/netup_unidvb/netup_unidvb_i2c.c:125", FIFO_RESET, &i2c->regs->tx_fifo.stat_ctrl);
+	pete_writew("drivers/media/pci/netup_unidvb/netup_unidvb_i2c.c:126", FIFO_RESET, &i2c->regs->rx_fifo.stat_ctrl);
+	pete_writew("drivers/media/pci/netup_unidvb/netup_unidvb_i2c.c:127", 0x800, &i2c->regs->tx_fifo.stat_ctrl);
+	pete_writew("drivers/media/pci/netup_unidvb/netup_unidvb_i2c.c:128", 0x800, &i2c->regs->rx_fifo.stat_ctrl);
 }
 
 static void netup_i2c_fifo_tx(struct netup_i2c *i2c)
 {
 	u8 data;
 	u32 fifo_space = FIFO_SIZE -
-		(readw(&i2c->regs->tx_fifo.stat_ctrl) & 0x3f);
+		(pete_readw("drivers/media/pci/netup_unidvb/netup_unidvb_i2c.c:135", &i2c->regs->tx_fifo.stat_ctrl) & 0x3f);
 	u32 msg_length = i2c->msg->len - i2c->xmit_size;
 
 	msg_length = (msg_length < fifo_space ? msg_length : fifo_space);
 	while (msg_length--) {
 		data = i2c->msg->buf[i2c->xmit_size++];
-		writeb(data, &i2c->regs->tx_fifo.data8);
+		pete_writeb("drivers/media/pci/netup_unidvb/netup_unidvb_i2c.c:141", data, &i2c->regs->tx_fifo.data8);
 		dev_dbg(i2c->adap.dev.parent,
 			"%s(): write 0x%02x\n", __func__, data);
 	}
 	if (i2c->xmit_size < i2c->msg->len) {
 		dev_dbg(i2c->adap.dev.parent,
 			"%s(): TX IRQ enabled\n", __func__);
-		writew(readw(&i2c->regs->tx_fifo.stat_ctrl) | FIFO_IRQEN,
+		pete_writew("drivers/media/pci/netup_unidvb/netup_unidvb_i2c.c:148", pete_readw("drivers/media/pci/netup_unidvb/netup_unidvb_i2c.c:148", &i2c->regs->tx_fifo.stat_ctrl) | FIFO_IRQEN,
 			&i2c->regs->tx_fifo.stat_ctrl);
 	}
 }
@@ -153,12 +153,12 @@ static void netup_i2c_fifo_tx(struct netup_i2c *i2c)
 static void netup_i2c_fifo_rx(struct netup_i2c *i2c)
 {
 	u8 data;
-	u32 fifo_size = readw(&i2c->regs->rx_fifo.stat_ctrl) & 0x3f;
+	u32 fifo_size = pete_readw("drivers/media/pci/netup_unidvb/netup_unidvb_i2c.c:156", &i2c->regs->rx_fifo.stat_ctrl) & 0x3f;
 
 	dev_dbg(i2c->adap.dev.parent,
 		"%s(): RX fifo size %d\n", __func__, fifo_size);
 	while (fifo_size--) {
-		data = readb(&i2c->regs->rx_fifo.data8);
+		data = pete_readb("drivers/media/pci/netup_unidvb/netup_unidvb_i2c.c:161", &i2c->regs->rx_fifo.data8);
 		if ((i2c->msg->flags & I2C_M_RD) != 0 &&
 					i2c->xmit_size < i2c->msg->len) {
 			i2c->msg->buf[i2c->xmit_size++] = data;
@@ -169,7 +169,7 @@ static void netup_i2c_fifo_rx(struct netup_i2c *i2c)
 	if (i2c->xmit_size < i2c->msg->len) {
 		dev_dbg(i2c->adap.dev.parent,
 			"%s(): RX IRQ enabled\n", __func__);
-		writew(readw(&i2c->regs->rx_fifo.stat_ctrl) | FIFO_IRQEN,
+		pete_writew("drivers/media/pci/netup_unidvb/netup_unidvb_i2c.c:172", pete_readw("drivers/media/pci/netup_unidvb/netup_unidvb_i2c.c:172", &i2c->regs->rx_fifo.stat_ctrl) | FIFO_IRQEN,
 			&i2c->regs->rx_fifo.stat_ctrl);
 	}
 }
@@ -177,23 +177,23 @@ static void netup_i2c_fifo_rx(struct netup_i2c *i2c)
 static void netup_i2c_start_xfer(struct netup_i2c *i2c)
 {
 	u16 rdflag = ((i2c->msg->flags & I2C_M_RD) ? 1 : 0);
-	u16 reg = readw(&i2c->regs->twi_ctrl0_stat);
+	u16 reg = pete_readw("drivers/media/pci/netup_unidvb/netup_unidvb_i2c.c:180", &i2c->regs->twi_ctrl0_stat);
 
-	writew(TWI_IRQEN | reg, &i2c->regs->twi_ctrl0_stat);
-	writew(i2c->msg->len, &i2c->regs->length);
-	writew(TWI_TRANSFER | (i2c->msg->addr << 1) | rdflag,
+	pete_writew("drivers/media/pci/netup_unidvb/netup_unidvb_i2c.c:182", TWI_IRQEN | reg, &i2c->regs->twi_ctrl0_stat);
+	pete_writew("drivers/media/pci/netup_unidvb/netup_unidvb_i2c.c:183", i2c->msg->len, &i2c->regs->length);
+	pete_writew("drivers/media/pci/netup_unidvb/netup_unidvb_i2c.c:184", TWI_TRANSFER | (i2c->msg->addr << 1) | rdflag,
 		&i2c->regs->twi_addr_ctrl1);
 	dev_dbg(i2c->adap.dev.parent,
 		"%s(): length %d twi_addr_ctrl1 0x%x twi_ctrl0_stat 0x%x\n",
-		__func__, readw(&i2c->regs->length),
-		readw(&i2c->regs->twi_addr_ctrl1),
-		readw(&i2c->regs->twi_ctrl0_stat));
+		__func__, pete_readw("drivers/media/pci/netup_unidvb/netup_unidvb_i2c.c:188", &i2c->regs->length),
+		pete_readw("drivers/media/pci/netup_unidvb/netup_unidvb_i2c.c:189", &i2c->regs->twi_addr_ctrl1),
+		pete_readw("drivers/media/pci/netup_unidvb/netup_unidvb_i2c.c:190", &i2c->regs->twi_ctrl0_stat));
 	i2c->state = STATE_WAIT;
 	i2c->xmit_size = 0;
 	if (!rdflag)
 		netup_i2c_fifo_tx(i2c);
 	else
-		writew(FIFO_IRQEN | readw(&i2c->regs->rx_fifo.stat_ctrl),
+		pete_writew("drivers/media/pci/netup_unidvb/netup_unidvb_i2c.c:196", FIFO_IRQEN | pete_readw("drivers/media/pci/netup_unidvb/netup_unidvb_i2c.c:196", &i2c->regs->rx_fifo.stat_ctrl),
 			&i2c->regs->rx_fifo.stat_ctrl);
 }
 
@@ -254,9 +254,9 @@ static int netup_i2c_xfer(struct i2c_adapter *adap,
 				}
 				if (!trans_done) {
 					i2c->state = STATE_WAIT;
-					reg = readw(
+					reg = pete_readw("drivers/media/pci/netup_unidvb/netup_unidvb_i2c.c:257", 
 						&i2c->regs->twi_ctrl0_stat);
-					writew(TWI_IRQEN | reg,
+					pete_writew("drivers/media/pci/netup_unidvb/netup_unidvb_i2c.c:259", TWI_IRQEN | reg,
 						&i2c->regs->twi_ctrl0_stat);
 				}
 				spin_unlock_irqrestore(&i2c->lock, flags);

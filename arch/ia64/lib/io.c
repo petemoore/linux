@@ -14,7 +14,7 @@ void memcpy_fromio(void *to, const volatile void __iomem *from, long count)
 
 	while (count) {
 		count--;
-		*dst++ = readb(from++);
+		*dst++ = pete_readb("arch/ia64/lib/io.c:17", from++);
 	}
 }
 EXPORT_SYMBOL(memcpy_fromio);
@@ -29,7 +29,7 @@ void memcpy_toio(volatile void __iomem *to, const void *from, long count)
 
 	while (count) {
 		count--;
-		writeb(*src++, to++);
+		pete_writeb("arch/ia64/lib/io.c:32", *src++, to++);
 	}
 }
 EXPORT_SYMBOL(memcpy_toio);
@@ -44,7 +44,7 @@ void memset_io(volatile void __iomem *dst, int c, long count)
 
 	while (count) {
 		count--;
-		writeb(ch, dst);
+		pete_writeb("arch/ia64/lib/io.c:47", ch, dst);
 		dst++;
 	}
 }

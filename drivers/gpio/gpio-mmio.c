@@ -62,22 +62,22 @@ o        `                     ~~~~\___/~~~~    ` controller in FPGA is ,.`
 
 static void bgpio_write8(void __iomem *reg, unsigned long data)
 {
-	writeb(data, reg);
+	pete_writeb("drivers/gpio/gpio-mmio.c:65", data, reg);
 }
 
 static unsigned long bgpio_read8(void __iomem *reg)
 {
-	return readb(reg);
+	return pete_readb("drivers/gpio/gpio-mmio.c:70", reg);
 }
 
 static void bgpio_write16(void __iomem *reg, unsigned long data)
 {
-	writew(data, reg);
+	pete_writew("drivers/gpio/gpio-mmio.c:75", data, reg);
 }
 
 static unsigned long bgpio_read16(void __iomem *reg)
 {
-	return readw(reg);
+	return pete_readw("drivers/gpio/gpio-mmio.c:80", reg);
 }
 
 static void bgpio_write32(void __iomem *reg, unsigned long data)
@@ -93,12 +93,12 @@ static unsigned long bgpio_read32(void __iomem *reg)
 #if BITS_PER_LONG >= 64
 static void bgpio_write64(void __iomem *reg, unsigned long data)
 {
-	writeq(data, reg);
+	pete_writeq("drivers/gpio/gpio-mmio.c:96", data, reg);
 }
 
 static unsigned long bgpio_read64(void __iomem *reg)
 {
-	return readq(reg);
+	return pete_readq("drivers/gpio/gpio-mmio.c:101", reg);
 }
 #endif /* BITS_PER_LONG >= 64 */
 

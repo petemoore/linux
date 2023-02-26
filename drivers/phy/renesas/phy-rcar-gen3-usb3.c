@@ -62,7 +62,7 @@ static void write_clkset1_for_usb_extal(struct rcar_gen3_usb3 *r, bool reset)
 	if (reset)
 		val |= CLKSET1_PHYRESET;
 
-	writew(val, r->base + USB30_CLKSET1);
+	pete_writew("drivers/phy/renesas/phy-rcar-gen3-usb3.c:65", val, r->base + USB30_CLKSET1);
 }
 
 static void rcar_gen3_phy_usb3_enable_ssc(struct rcar_gen3_usb3 *r)
@@ -85,7 +85,7 @@ static void rcar_gen3_phy_usb3_enable_ssc(struct rcar_gen3_usb3 *r)
 		return;
 	}
 
-	writew(val, r->base + USB30_SSC_SET);
+	pete_writew("drivers/phy/renesas/phy-rcar-gen3-usb3.c:88", val, r->base + USB30_SSC_SET);
 }
 
 static void rcar_gen3_phy_usb3_select_usb_extal(struct rcar_gen3_usb3 *r)
@@ -93,9 +93,9 @@ static void rcar_gen3_phy_usb3_select_usb_extal(struct rcar_gen3_usb3 *r)
 	write_clkset1_for_usb_extal(r, false);
 	if (r->ssc_range)
 		rcar_gen3_phy_usb3_enable_ssc(r);
-	writew(CLKSET0_PRIVATE | CLKSET0_USB30_FSEL_USB_EXTAL,
+	pete_writew("drivers/phy/renesas/phy-rcar-gen3-usb3.c:96", CLKSET0_PRIVATE | CLKSET0_USB30_FSEL_USB_EXTAL,
 	       r->base + USB30_CLKSET0);
-	writew(PHY_ENABLE_RESET_EN, r->base + USB30_PHY_ENABLE);
+	pete_writew("drivers/phy/renesas/phy-rcar-gen3-usb3.c:98", PHY_ENABLE_RESET_EN, r->base + USB30_PHY_ENABLE);
 	write_clkset1_for_usb_extal(r, true);
 	usleep_range(10, 20);
 	write_clkset1_for_usb_extal(r, false);
@@ -112,7 +112,7 @@ static int rcar_gen3_phy_usb3_init(struct phy *p)
 		rcar_gen3_phy_usb3_select_usb_extal(r);
 
 	/* Enables VBUS detection anyway */
-	writew(VBUS_EN_VBUS_EN, r->base + USB30_VBUS_EN);
+	pete_writew("drivers/phy/renesas/phy-rcar-gen3-usb3.c:115", VBUS_EN_VBUS_EN, r->base + USB30_VBUS_EN);
 
 	return 0;
 }

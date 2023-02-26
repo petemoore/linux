@@ -51,25 +51,25 @@ struct c_can_pci_data {
 static u16 c_can_pci_read_reg_aligned_to_16bit(const struct c_can_priv *priv,
 					       enum reg index)
 {
-	return readw(priv->base + priv->regs[index]);
+	return pete_readw("drivers/net/can/c_can/c_can_pci.c:54", priv->base + priv->regs[index]);
 }
 
 static void c_can_pci_write_reg_aligned_to_16bit(const struct c_can_priv *priv,
 						 enum reg index, u16 val)
 {
-	writew(val, priv->base + priv->regs[index]);
+	pete_writew("drivers/net/can/c_can/c_can_pci.c:60", val, priv->base + priv->regs[index]);
 }
 
 static u16 c_can_pci_read_reg_aligned_to_32bit(const struct c_can_priv *priv,
 					       enum reg index)
 {
-	return readw(priv->base + 2 * priv->regs[index]);
+	return pete_readw("drivers/net/can/c_can/c_can_pci.c:66", priv->base + 2 * priv->regs[index]);
 }
 
 static void c_can_pci_write_reg_aligned_to_32bit(const struct c_can_priv *priv,
 						 enum reg index, u16 val)
 {
-	writew(val, priv->base + 2 * priv->regs[index]);
+	pete_writew("drivers/net/can/c_can/c_can_pci.c:72", val, priv->base + 2 * priv->regs[index]);
 }
 
 static u16 c_can_pci_read_reg_32bit(const struct c_can_priv *priv,

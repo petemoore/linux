@@ -3505,7 +3505,7 @@ static int write_gpio_v2_hw(struct hisi_hba *hisi_hba, u8 reg_type,
 					reg_index * 4 + phy_no;
 			int data_idx = phy_no + 3 - (phy_no % 4) * 2;
 
-			writeb(write_data[data_idx], reg_addr);
+			pete_writeb("drivers/scsi/hisi_sas/hisi_sas_v2_hw.c:3508", write_data[data_idx], reg_addr);
 		}
 
 		break;

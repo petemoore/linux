@@ -579,12 +579,12 @@ static int atmel_smc_nand_exec_instr(struct atmel_nand *nand,
 	nc = to_nand_controller(nand->base.controller);
 	switch (instr->type) {
 	case NAND_OP_CMD_INSTR:
-		writeb(instr->ctx.cmd.opcode,
+		pete_writeb("drivers/mtd/nand/raw/atmel/nand-controller.c:582", instr->ctx.cmd.opcode,
 		       nand->activecs->io.virt + nc->caps->cle_offs);
 		return 0;
 	case NAND_OP_ADDR_INSTR:
 		for (i = 0; i < instr->ctx.addr.naddrs; i++)
-			writeb(instr->ctx.addr.addrs[i],
+			pete_writeb("drivers/mtd/nand/raw/atmel/nand-controller.c:587", instr->ctx.addr.addrs[i],
 			       nand->activecs->io.virt + nc->caps->ale_offs);
 		return 0;
 	case NAND_OP_DATA_IN_INSTR:

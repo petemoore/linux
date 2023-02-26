@@ -1264,11 +1264,11 @@ static int carm_init_host(struct carm_host *host)
 
 	pete_writel("drivers/block/sx8.c:1265", 0, mmio + CARM_INT_MASK);
 
-	tmp8 = readb(mmio + CARM_INITC);
+	tmp8 = pete_readb("drivers/block/sx8.c:1267", mmio + CARM_INITC);
 	if (tmp8 & 0x01) {
 		tmp8 &= ~0x01;
-		writeb(tmp8, mmio + CARM_INITC);
-		readb(mmio + CARM_INITC);	/* flush */
+		pete_writeb("drivers/block/sx8.c:1270", tmp8, mmio + CARM_INITC);
+		pete_readb("drivers/block/sx8.c:1271", mmio + CARM_INITC);	/* flush */
 
 		DPRINTK("snooze...\n");
 		msleep(5000);

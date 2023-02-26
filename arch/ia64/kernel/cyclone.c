@@ -24,7 +24,7 @@ static void __iomem *cyclone_mc;
 
 static u64 read_cyclone(struct clocksource *cs)
 {
-	return (u64)readq((void __iomem *)cyclone_mc);
+	return (u64)pete_readq("arch/ia64/kernel/cyclone.c:27", (void __iomem *)cyclone_mc);
 }
 
 static struct clocksource clocksource_cyclone = {
@@ -57,7 +57,7 @@ int __init init_cyclone_clock(void)
 		use_cyclone = 0;
 		return -ENODEV;
 	}
-	base = readq(reg);
+	base = pete_readq("arch/ia64/kernel/cyclone.c:60", reg);
 	iounmap(reg);
 	if(!base){
 		printk(KERN_ERR "Summit chipset: Could not find valid CBAR"

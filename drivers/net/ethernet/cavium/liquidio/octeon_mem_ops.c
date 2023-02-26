@@ -45,14 +45,14 @@ octeon_pci_fastwrite(struct octeon_device *oct, u8 __iomem *mapped_addr,
 		     u8 *hostbuf, u32 len)
 {
 	while ((len) && ((unsigned long)mapped_addr) & 7) {
-		writeb(*(hostbuf++), mapped_addr++);
+		pete_writeb("drivers/net/ethernet/cavium/liquidio/octeon_mem_ops.c:48", *(hostbuf++), mapped_addr++);
 		len--;
 	}
 
 	octeon_toggle_bar1_swapmode(oct, MEMOPS_IDX);
 
 	while (len >= 8) {
-		writeq(*((u64 *)hostbuf), mapped_addr);
+		pete_writeq("drivers/net/ethernet/cavium/liquidio/octeon_mem_ops.c:55", *((u64 *)hostbuf), mapped_addr);
 		mapped_addr += 8;
 		hostbuf += 8;
 		len -= 8;
@@ -61,7 +61,7 @@ octeon_pci_fastwrite(struct octeon_device *oct, u8 __iomem *mapped_addr,
 	octeon_toggle_bar1_swapmode(oct, MEMOPS_IDX);
 
 	while (len--)
-		writeb(*(hostbuf++), mapped_addr++);
+		pete_writeb("drivers/net/ethernet/cavium/liquidio/octeon_mem_ops.c:64", *(hostbuf++), mapped_addr++);
 }
 
 static void
@@ -69,14 +69,14 @@ octeon_pci_fastread(struct octeon_device *oct, u8 __iomem *mapped_addr,
 		    u8 *hostbuf, u32 len)
 {
 	while ((len) && ((unsigned long)mapped_addr) & 7) {
-		*(hostbuf++) = readb(mapped_addr++);
+		*(hostbuf++) = pete_readb("drivers/net/ethernet/cavium/liquidio/octeon_mem_ops.c:72", mapped_addr++);
 		len--;
 	}
 
 	octeon_toggle_bar1_swapmode(oct, MEMOPS_IDX);
 
 	while (len >= 8) {
-		*((u64 *)hostbuf) = readq(mapped_addr);
+		*((u64 *)hostbuf) = pete_readq("drivers/net/ethernet/cavium/liquidio/octeon_mem_ops.c:79", mapped_addr);
 		mapped_addr += 8;
 		hostbuf += 8;
 		len -= 8;
@@ -85,7 +85,7 @@ octeon_pci_fastread(struct octeon_device *oct, u8 __iomem *mapped_addr,
 	octeon_toggle_bar1_swapmode(oct, MEMOPS_IDX);
 
 	while (len--)
-		*(hostbuf++) = readb(mapped_addr++);
+		*(hostbuf++) = pete_readb("drivers/net/ethernet/cavium/liquidio/octeon_mem_ops.c:88", mapped_addr++);
 }
 
 /* Core mem read/write with temporary bar1 settings. */

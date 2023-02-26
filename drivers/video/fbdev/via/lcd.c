@@ -954,26 +954,26 @@ bool viafb_lcd_get_mobile_state(bool *mobile)
 	u16 start_pattern;
 
 	biosptr = ioremap(romaddr, 0x10000);
-	start_pattern = readw(biosptr);
+	start_pattern = pete_readw("drivers/video/fbdev/via/lcd.c:957", biosptr);
 
 	/* Compare pattern */
 	if (start_pattern == 0xAA55) {
 		/* Get the start of Table */
 		/* 0x1B means BIOS offset position */
 		romptr = biosptr + 0x1B;
-		tableptr = biosptr + readw(romptr);
+		tableptr = biosptr + pete_readw("drivers/video/fbdev/via/lcd.c:964", romptr);
 
 		/* Get the start of biosver structure */
 		/* 18 means BIOS version position. */
 		romptr = tableptr + 18;
-		romptr = biosptr + readw(romptr);
+		romptr = biosptr + pete_readw("drivers/video/fbdev/via/lcd.c:969", romptr);
 
 		/* The offset should be 44, but the
 		   actual image is less three char. */
 		/* pRom += 44; */
 		romptr += 41;
 
-		core_base = readb(romptr);
+		core_base = pete_readb("drivers/video/fbdev/via/lcd.c:976", romptr);
 
 		if (core_base & 0x8)
 			*mobile = false;

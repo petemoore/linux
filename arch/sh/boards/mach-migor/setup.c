@@ -173,11 +173,11 @@ static void migor_nand_flash_cmd_ctl(struct nand_chip *chip, int cmd,
 		return;
 
 	if (ctrl & NAND_CLE)
-		writeb(cmd, chip->legacy.IO_ADDR_W + 0x00400000);
+		pete_writeb("arch/sh/boards/mach-migor/setup.c:176", cmd, chip->legacy.IO_ADDR_W + 0x00400000);
 	else if (ctrl & NAND_ALE)
-		writeb(cmd, chip->legacy.IO_ADDR_W + 0x00800000);
+		pete_writeb("arch/sh/boards/mach-migor/setup.c:178", cmd, chip->legacy.IO_ADDR_W + 0x00800000);
 	else
-		writeb(cmd, chip->legacy.IO_ADDR_W);
+		pete_writeb("arch/sh/boards/mach-migor/setup.c:180", cmd, chip->legacy.IO_ADDR_W);
 }
 
 static int migor_nand_flash_ready(struct nand_chip *chip)

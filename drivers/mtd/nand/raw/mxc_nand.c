@@ -357,12 +357,12 @@ static int check_int_v1_v2(struct mxc_nand_host *host)
 {
 	uint32_t tmp;
 
-	tmp = readw(NFC_V1_V2_CONFIG2);
+	tmp = pete_readw("drivers/mtd/nand/raw/mxc_nand.c:360", NFC_V1_V2_CONFIG2);
 	if (!(tmp & NFC_V1_V2_CONFIG2_INT))
 		return 0;
 
 	if (!host->devtype_data->irqpending_quirk)
-		writew(tmp & ~NFC_V1_V2_CONFIG2_INT, NFC_V1_V2_CONFIG2);
+		pete_writew("drivers/mtd/nand/raw/mxc_nand.c:365", tmp & ~NFC_V1_V2_CONFIG2_INT, NFC_V1_V2_CONFIG2);
 
 	return 1;
 }
@@ -371,14 +371,14 @@ static void irq_control_v1_v2(struct mxc_nand_host *host, int activate)
 {
 	uint16_t tmp;
 
-	tmp = readw(NFC_V1_V2_CONFIG1);
+	tmp = pete_readw("drivers/mtd/nand/raw/mxc_nand.c:374", NFC_V1_V2_CONFIG1);
 
 	if (activate)
 		tmp &= ~NFC_V1_V2_CONFIG1_INT_MSK;
 	else
 		tmp |= NFC_V1_V2_CONFIG1_INT_MSK;
 
-	writew(tmp, NFC_V1_V2_CONFIG1);
+	pete_writew("drivers/mtd/nand/raw/mxc_nand.c:381", tmp, NFC_V1_V2_CONFIG1);
 }
 
 static void irq_control_v3(struct mxc_nand_host *host, int activate)
@@ -409,7 +409,7 @@ static void irq_control(struct mxc_nand_host *host, int activate)
 
 static u32 get_ecc_status_v1(struct mxc_nand_host *host)
 {
-	return readw(NFC_V1_V2_ECC_STATUS_RESULT);
+	return pete_readw("drivers/mtd/nand/raw/mxc_nand.c:412", NFC_V1_V2_ECC_STATUS_RESULT);
 }
 
 static u32 get_ecc_status_v2(struct mxc_nand_host *host)
@@ -504,15 +504,15 @@ static void send_cmd_v1_v2(struct mxc_nand_host *host, uint16_t cmd, int useirq)
 {
 	dev_dbg(host->dev, "send_cmd(host, 0x%x, %d)\n", cmd, useirq);
 
-	writew(cmd, NFC_V1_V2_FLASH_CMD);
-	writew(NFC_CMD, NFC_V1_V2_CONFIG2);
+	pete_writew("drivers/mtd/nand/raw/mxc_nand.c:507", cmd, NFC_V1_V2_FLASH_CMD);
+	pete_writew("drivers/mtd/nand/raw/mxc_nand.c:508", NFC_CMD, NFC_V1_V2_CONFIG2);
 
 	if (host->devtype_data->irqpending_quirk && (cmd == NAND_CMD_RESET)) {
 		int max_retries = 100;
 		/* Reset completion is indicated by NFC_CONFIG2 */
 		/* being set to 0 */
 		while (max_retries-- > 0) {
-			if (readw(NFC_V1_V2_CONFIG2) == 0) {
+			if (pete_readw("drivers/mtd/nand/raw/mxc_nand.c:515", NFC_V1_V2_CONFIG2) == 0) {
 				break;
 			}
 			udelay(1);
@@ -543,8 +543,8 @@ static void send_addr_v1_v2(struct mxc_nand_host *host, uint16_t addr, int islas
 {
 	dev_dbg(host->dev, "send_addr(host, 0x%x %d)\n", addr, islast);
 
-	writew(addr, NFC_V1_V2_FLASH_ADDR);
-	writew(NFC_ADDR, NFC_V1_V2_CONFIG2);
+	pete_writew("drivers/mtd/nand/raw/mxc_nand.c:546", addr, NFC_V1_V2_FLASH_ADDR);
+	pete_writew("drivers/mtd/nand/raw/mxc_nand.c:547", NFC_ADDR, NFC_V1_V2_CONFIG2);
 
 	/* Wait for operation to complete */
 	wait_op_done(host, islast);
@@ -572,9 +572,9 @@ static void send_page_v2(struct mtd_info *mtd, unsigned int ops)
 	struct mxc_nand_host *host = nand_get_controller_data(nand_chip);
 
 	/* NANDFC buffer 0 is used for page read/write */
-	writew(host->active_cs << 4, NFC_V1_V2_BUF_ADDR);
+	pete_writew("drivers/mtd/nand/raw/mxc_nand.c:575", host->active_cs << 4, NFC_V1_V2_BUF_ADDR);
 
-	writew(ops, NFC_V1_V2_CONFIG2);
+	pete_writew("drivers/mtd/nand/raw/mxc_nand.c:577", ops, NFC_V1_V2_CONFIG2);
 
 	/* Wait for operation to complete */
 	wait_op_done(host, true);
@@ -594,9 +594,9 @@ static void send_page_v1(struct mtd_info *mtd, unsigned int ops)
 	for (i = 0; i < bufs; i++) {
 
 		/* NANDFC buffer 0 is used for page read/write */
-		writew((host->active_cs << 4) | i, NFC_V1_V2_BUF_ADDR);
+		pete_writew("drivers/mtd/nand/raw/mxc_nand.c:597", (host->active_cs << 4) | i, NFC_V1_V2_BUF_ADDR);
 
-		writew(ops, NFC_V1_V2_CONFIG2);
+		pete_writew("drivers/mtd/nand/raw/mxc_nand.c:599", ops, NFC_V1_V2_CONFIG2);
 
 		/* Wait for operation to complete */
 		wait_op_done(host, true);
@@ -617,9 +617,9 @@ static void send_read_id_v3(struct mxc_nand_host *host)
 static void send_read_id_v1_v2(struct mxc_nand_host *host)
 {
 	/* NANDFC buffer 0 is used for device ID output */
-	writew(host->active_cs << 4, NFC_V1_V2_BUF_ADDR);
+	pete_writew("drivers/mtd/nand/raw/mxc_nand.c:620", host->active_cs << 4, NFC_V1_V2_BUF_ADDR);
 
-	writew(NFC_ID, NFC_V1_V2_CONFIG2);
+	pete_writew("drivers/mtd/nand/raw/mxc_nand.c:622", NFC_ID, NFC_V1_V2_CONFIG2);
 
 	/* Wait for operation to complete */
 	wait_op_done(host, true);
@@ -629,7 +629,7 @@ static void send_read_id_v1_v2(struct mxc_nand_host *host)
 
 static uint16_t get_dev_status_v3(struct mxc_nand_host *host)
 {
-	writew(NFC_STATUS, NFC_V3_LAUNCH);
+	pete_writew("drivers/mtd/nand/raw/mxc_nand.c:632", NFC_STATUS, NFC_V3_LAUNCH);
 	wait_op_done(host, true);
 
 	return pete_readl("drivers/mtd/nand/raw/mxc_nand.c:635", NFC_V3_CONFIG1) >> 16;
@@ -643,7 +643,7 @@ static uint16_t get_dev_status_v1_v2(struct mxc_nand_host *host)
 	uint32_t store;
 	uint16_t ret;
 
-	writew(host->active_cs << 4, NFC_V1_V2_BUF_ADDR);
+	pete_writew("drivers/mtd/nand/raw/mxc_nand.c:646", host->active_cs << 4, NFC_V1_V2_BUF_ADDR);
 
 	/*
 	 * The device status is stored in main_area0. To
@@ -652,10 +652,10 @@ static uint16_t get_dev_status_v1_v2(struct mxc_nand_host *host)
 	 */
 	store = pete_readl("drivers/mtd/nand/raw/mxc_nand.c:653", main_buf);
 
-	writew(NFC_STATUS, NFC_V1_V2_CONFIG2);
+	pete_writew("drivers/mtd/nand/raw/mxc_nand.c:655", NFC_STATUS, NFC_V1_V2_CONFIG2);
 	wait_op_done(host, true);
 
-	ret = readw(main_buf);
+	ret = pete_readw("drivers/mtd/nand/raw/mxc_nand.c:658", main_buf);
 
 	pete_writel("drivers/mtd/nand/raw/mxc_nand.c:660", store, main_buf);
 
@@ -670,14 +670,14 @@ static void mxc_nand_enable_hwecc_v1_v2(struct nand_chip *chip, bool enable)
 	if (chip->ecc.engine_type != NAND_ECC_ENGINE_TYPE_ON_HOST)
 		return;
 
-	config1 = readw(NFC_V1_V2_CONFIG1);
+	config1 = pete_readw("drivers/mtd/nand/raw/mxc_nand.c:673", NFC_V1_V2_CONFIG1);
 
 	if (enable)
 		config1 |= NFC_V1_V2_CONFIG1_ECC_EN;
 	else
 		config1 &= ~NFC_V1_V2_CONFIG1_ECC_EN;
 
-	writew(config1, NFC_V1_V2_CONFIG1);
+	pete_writew("drivers/mtd/nand/raw/mxc_nand.c:680", config1, NFC_V1_V2_CONFIG1);
 }
 
 static void mxc_nand_enable_hwecc_v3(struct nand_chip *chip, bool enable)
@@ -731,9 +731,9 @@ static int mxc_nand_read_page_v1(struct nand_chip *chip, void *buf, void *oob,
 		uint16_t ecc_stats;
 
 		/* NANDFC buffer 0 is used for page read/write */
-		writew((host->active_cs << 4) | i, NFC_V1_V2_BUF_ADDR);
+		pete_writew("drivers/mtd/nand/raw/mxc_nand.c:734", (host->active_cs << 4) | i, NFC_V1_V2_BUF_ADDR);
 
-		writew(NFC_OUTPUT, NFC_V1_V2_CONFIG2);
+		pete_writew("drivers/mtd/nand/raw/mxc_nand.c:736", NFC_OUTPUT, NFC_V1_V2_CONFIG2);
 
 		/* Wait for operation to complete */
 		wait_op_done(host, true);
@@ -995,7 +995,7 @@ static void mxc_nand_select_chip_v2(struct nand_chip *nand_chip, int chip)
 	}
 
 	host->active_cs = chip;
-	writew(host->active_cs << 4, NFC_V1_V2_BUF_ADDR);
+	pete_writew("drivers/mtd/nand/raw/mxc_nand.c:998", host->active_cs << 4, NFC_V1_V2_BUF_ADDR);
 }
 
 #define MXC_V1_ECCBYTES		5
@@ -1124,18 +1124,18 @@ static void preset_v1(struct mtd_info *mtd)
 
 	host->eccsize = 1;
 
-	writew(config1, NFC_V1_V2_CONFIG1);
+	pete_writew("drivers/mtd/nand/raw/mxc_nand.c:1127", config1, NFC_V1_V2_CONFIG1);
 	/* preset operation */
 
 	/* Unlock the internal RAM Buffer */
-	writew(0x2, NFC_V1_V2_CONFIG);
+	pete_writew("drivers/mtd/nand/raw/mxc_nand.c:1131", 0x2, NFC_V1_V2_CONFIG);
 
 	/* Blocks to be unlocked */
-	writew(0x0, NFC_V1_UNLOCKSTART_BLKADDR);
-	writew(0xffff, NFC_V1_UNLOCKEND_BLKADDR);
+	pete_writew("drivers/mtd/nand/raw/mxc_nand.c:1134", 0x0, NFC_V1_UNLOCKSTART_BLKADDR);
+	pete_writew("drivers/mtd/nand/raw/mxc_nand.c:1135", 0xffff, NFC_V1_UNLOCKEND_BLKADDR);
 
 	/* Unlock Block Command for given address range */
-	writew(0x4, NFC_V1_V2_WRPROT);
+	pete_writew("drivers/mtd/nand/raw/mxc_nand.c:1138", 0x4, NFC_V1_V2_WRPROT);
 }
 
 static int mxc_nand_v2_setup_interface(struct nand_chip *chip, int csline,
@@ -1151,7 +1151,7 @@ static int mxc_nand_v2_setup_interface(struct nand_chip *chip, int csline,
 	if (IS_ERR(timings))
 		return -ENOTSUPP;
 
-	config1 = readw(NFC_V1_V2_CONFIG1);
+	config1 = pete_readw("drivers/mtd/nand/raw/mxc_nand.c:1154", NFC_V1_V2_CONFIG1);
 
 	tRC_min_ns = timings->tRC_min / 1000;
 	rate = 1000000000 / tRC_min_ns;
@@ -1203,7 +1203,7 @@ static int mxc_nand_v2_setup_interface(struct nand_chip *chip, int csline,
 	if (ret)
 		return ret;
 
-	writew(config1, NFC_V1_V2_CONFIG1);
+	pete_writew("drivers/mtd/nand/raw/mxc_nand.c:1206", config1, NFC_V1_V2_CONFIG1);
 
 	dev_dbg(host->dev, "Setting rate to %ldHz, %s mode\n", rate_round,
 		config1 & NFC_V2_CONFIG1_ONE_CYCLE ? "One cycle (EDO)" :
@@ -1238,27 +1238,27 @@ static void preset_v2(struct mtd_info *mtd)
 		host->eccsize = 1;
 	}
 
-	writew(config1, NFC_V1_V2_CONFIG1);
+	pete_writew("drivers/mtd/nand/raw/mxc_nand.c:1241", config1, NFC_V1_V2_CONFIG1);
 	/* preset operation */
 
 	/* spare area size in 16-bit half-words */
-	writew(mtd->oobsize / 2, NFC_V21_RSLTSPARE_AREA);
+	pete_writew("drivers/mtd/nand/raw/mxc_nand.c:1245", mtd->oobsize / 2, NFC_V21_RSLTSPARE_AREA);
 
 	/* Unlock the internal RAM Buffer */
-	writew(0x2, NFC_V1_V2_CONFIG);
+	pete_writew("drivers/mtd/nand/raw/mxc_nand.c:1248", 0x2, NFC_V1_V2_CONFIG);
 
 	/* Blocks to be unlocked */
-	writew(0x0, NFC_V21_UNLOCKSTART_BLKADDR0);
-	writew(0x0, NFC_V21_UNLOCKSTART_BLKADDR1);
-	writew(0x0, NFC_V21_UNLOCKSTART_BLKADDR2);
-	writew(0x0, NFC_V21_UNLOCKSTART_BLKADDR3);
-	writew(0xffff, NFC_V21_UNLOCKEND_BLKADDR0);
-	writew(0xffff, NFC_V21_UNLOCKEND_BLKADDR1);
-	writew(0xffff, NFC_V21_UNLOCKEND_BLKADDR2);
-	writew(0xffff, NFC_V21_UNLOCKEND_BLKADDR3);
+	pete_writew("drivers/mtd/nand/raw/mxc_nand.c:1251", 0x0, NFC_V21_UNLOCKSTART_BLKADDR0);
+	pete_writew("drivers/mtd/nand/raw/mxc_nand.c:1252", 0x0, NFC_V21_UNLOCKSTART_BLKADDR1);
+	pete_writew("drivers/mtd/nand/raw/mxc_nand.c:1253", 0x0, NFC_V21_UNLOCKSTART_BLKADDR2);
+	pete_writew("drivers/mtd/nand/raw/mxc_nand.c:1254", 0x0, NFC_V21_UNLOCKSTART_BLKADDR3);
+	pete_writew("drivers/mtd/nand/raw/mxc_nand.c:1255", 0xffff, NFC_V21_UNLOCKEND_BLKADDR0);
+	pete_writew("drivers/mtd/nand/raw/mxc_nand.c:1256", 0xffff, NFC_V21_UNLOCKEND_BLKADDR1);
+	pete_writew("drivers/mtd/nand/raw/mxc_nand.c:1257", 0xffff, NFC_V21_UNLOCKEND_BLKADDR2);
+	pete_writew("drivers/mtd/nand/raw/mxc_nand.c:1258", 0xffff, NFC_V21_UNLOCKEND_BLKADDR3);
 
 	/* Unlock Block Command for given address range */
-	writew(0x4, NFC_V1_V2_WRPROT);
+	pete_writew("drivers/mtd/nand/raw/mxc_nand.c:1261", 0x4, NFC_V1_V2_WRPROT);
 }
 
 static void preset_v3(struct mtd_info *mtd)

@@ -326,7 +326,7 @@ static void rk_nfc_write_buf(struct rk_nfc *nfc, const u8 *buf, int len)
 	int i;
 
 	for (i = 0; i < len; i++)
-		writeb(buf[i], nfc->regs + nfc->band_offset + BANK_DATA);
+		pete_writeb("drivers/mtd/nand/raw/rockchip-nand-controller.c:329", buf[i], nfc->regs + nfc->band_offset + BANK_DATA);
 }
 
 static int rk_nfc_cmd(struct nand_chip *chip,
@@ -345,7 +345,7 @@ static int rk_nfc_cmd(struct nand_chip *chip,
 
 		switch (instr->type) {
 		case NAND_OP_CMD_INSTR:
-			writeb(instr->ctx.cmd.opcode,
+			pete_writeb("drivers/mtd/nand/raw/rockchip-nand-controller.c:348", instr->ctx.cmd.opcode,
 			       nfc->regs + reg_offset + BANK_CMD);
 			break;
 
@@ -354,7 +354,7 @@ static int rk_nfc_cmd(struct nand_chip *chip,
 			start = nand_subop_get_addr_start_off(subop, i);
 
 			for (j = 0; j < 8 && j + start < remaining; j++)
-				writeb(instr->ctx.addr.addrs[j + start],
+				pete_writeb("drivers/mtd/nand/raw/rockchip-nand-controller.c:357", instr->ctx.addr.addrs[j + start],
 				       nfc->regs + reg_offset + BANK_ADDR);
 			break;
 

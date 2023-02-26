@@ -1007,7 +1007,7 @@ static void cxgb_pio_copy(u64 __iomem *dst, u64 *src)
 	int count = 8;
 
 	while (count) {
-		writeq(*src, dst);
+		pete_writeq("drivers/net/ethernet/chelsio/cxgb4/sge.c:1010", *src, dst);
 		src++;
 		dst++;
 		count--;

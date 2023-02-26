@@ -17,13 +17,13 @@
 static void otx_cpt_disable_mbox_interrupts(struct otx_cpt_device *cpt)
 {
 	/* Disable mbox(0) interrupts for all VFs */
-	writeq(~0ull, cpt->reg_base + OTX_CPT_PF_MBOX_ENA_W1CX(0));
+	pete_writeq("drivers/crypto/marvell/octeontx/otx_cptpf_main.c:20", ~0ull, cpt->reg_base + OTX_CPT_PF_MBOX_ENA_W1CX(0));
 }
 
 static void otx_cpt_enable_mbox_interrupts(struct otx_cpt_device *cpt)
 {
 	/* Enable mbox(0) interrupts for all VFs */
-	writeq(~0ull, cpt->reg_base + OTX_CPT_PF_MBOX_ENA_W1SX(0));
+	pete_writeq("drivers/crypto/marvell/octeontx/otx_cptpf_main.c:26", ~0ull, cpt->reg_base + OTX_CPT_PF_MBOX_ENA_W1SX(0));
 }
 
 static irqreturn_t otx_cpt_mbx0_intr_handler(int __always_unused irq,
@@ -36,14 +36,14 @@ static irqreturn_t otx_cpt_mbx0_intr_handler(int __always_unused irq,
 
 static void otx_cpt_reset(struct otx_cpt_device *cpt)
 {
-	writeq(1, cpt->reg_base + OTX_CPT_PF_RESET);
+	pete_writeq("drivers/crypto/marvell/octeontx/otx_cptpf_main.c:39", 1, cpt->reg_base + OTX_CPT_PF_RESET);
 }
 
 static void otx_cpt_find_max_enabled_cores(struct otx_cpt_device *cpt)
 {
 	union otx_cptx_pf_constants pf_cnsts = {0};
 
-	pf_cnsts.u = readq(cpt->reg_base + OTX_CPT_PF_CONSTANTS);
+	pf_cnsts.u = pete_readq("drivers/crypto/marvell/octeontx/otx_cptpf_main.c:46", cpt->reg_base + OTX_CPT_PF_CONSTANTS);
 	cpt->eng_grps.avail.max_se_cnt = pf_cnsts.s.se;
 	cpt->eng_grps.avail.max_ae_cnt = pf_cnsts.s.ae;
 }
@@ -52,7 +52,7 @@ static u32 otx_cpt_check_bist_status(struct otx_cpt_device *cpt)
 {
 	union otx_cptx_pf_bist_status bist_sts = {0};
 
-	bist_sts.u = readq(cpt->reg_base + OTX_CPT_PF_BIST_STATUS);
+	bist_sts.u = pete_readq("drivers/crypto/marvell/octeontx/otx_cptpf_main.c:55", cpt->reg_base + OTX_CPT_PF_BIST_STATUS);
 	return bist_sts.u;
 }
 
@@ -60,7 +60,7 @@ static u64 otx_cpt_check_exe_bist_status(struct otx_cpt_device *cpt)
 {
 	union otx_cptx_pf_exe_bist_status bist_sts = {0};
 
-	bist_sts.u = readq(cpt->reg_base + OTX_CPT_PF_EXE_BIST_STATUS);
+	bist_sts.u = pete_readq("drivers/crypto/marvell/octeontx/otx_cptpf_main.c:63", cpt->reg_base + OTX_CPT_PF_EXE_BIST_STATUS);
 	return bist_sts.u;
 }
 

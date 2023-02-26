@@ -355,7 +355,7 @@ static void pl35x_nand_read_data_op(struct nand_chip *chip, u8 *in,
 
 	/* No working extra flags on unaligned data accesses */
 	for (i = in_start; i < len; i++)
-		buf8[i] = readb(nfc->io_regs + PL35X_SMC_DATA_PHASE);
+		buf8[i] = pete_readb("drivers/mtd/nand/raw/pl35x-nand-controller.c:358", nfc->io_regs + PL35X_SMC_DATA_PHASE);
 
 	if (force_8bit)
 		pl35x_smc_force_byte_access(chip, false);
@@ -387,7 +387,7 @@ static void pl35x_nand_write_data_op(struct nand_chip *chip, const u8 *out,
 
 	/* No working extra flags on unaligned data accesses */
 	for (i = in_start; i < len; i++)
-		writeb(buf8[i], nfc->io_regs + PL35X_SMC_DATA_PHASE);
+		pete_writeb("drivers/mtd/nand/raw/pl35x-nand-controller.c:390", buf8[i], nfc->io_regs + PL35X_SMC_DATA_PHASE);
 
 	if (force_8bit)
 		pl35x_smc_force_byte_access(chip, false);

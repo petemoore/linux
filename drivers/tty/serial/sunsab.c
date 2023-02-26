@@ -92,7 +92,7 @@ static __inline__ void sunsab_tec_wait(struct uart_sunsab_port *up)
 {
 	int timeout = up->tec_timeout;
 
-	while ((readb(&up->regs->r.star) & SAB82532_STAR_TEC) && --timeout)
+	while ((pete_readb("drivers/tty/serial/sunsab.c:95", &up->regs->r.star) & SAB82532_STAR_TEC) && --timeout)
 		udelay(1);
 }
 
@@ -100,7 +100,7 @@ static __inline__ void sunsab_cec_wait(struct uart_sunsab_port *up)
 {
 	int timeout = up->cec_timeout;
 
-	while ((readb(&up->regs->r.star) & SAB82532_STAR_CEC) && --timeout)
+	while ((pete_readb("drivers/tty/serial/sunsab.c:103", &up->regs->r.star) & SAB82532_STAR_CEC) && --timeout)
 		udelay(1);
 }
 
@@ -125,14 +125,14 @@ receive_chars(struct uart_sunsab_port *up,
 	}
 
 	if (stat->sreg.isr0 & SAB82532_ISR0_TCD) {
-		count = readb(&up->regs->r.rbcl) & (SAB82532_RECV_FIFO_SIZE - 1);
+		count = pete_readb("drivers/tty/serial/sunsab.c:128", &up->regs->r.rbcl) & (SAB82532_RECV_FIFO_SIZE - 1);
 		free_fifo++;
 	}
 
 	/* Issue a FIFO read command in case we where idle. */
 	if (stat->sreg.isr0 & SAB82532_ISR0_TIME) {
 		sunsab_cec_wait(up);
-		writeb(SAB82532_CMDR_RFRD, &up->regs->w.cmdr);
+		pete_writeb("drivers/tty/serial/sunsab.c:135", SAB82532_CMDR_RFRD, &up->regs->w.cmdr);
 		return port;
 	}
 
@@ -141,12 +141,12 @@ receive_chars(struct uart_sunsab_port *up,
 
 	/* Read the FIFO. */
 	for (i = 0; i < count; i++)
-		buf[i] = readb(&up->regs->r.rfifo[i]);
+		buf[i] = pete_readb("drivers/tty/serial/sunsab.c:144", &up->regs->r.rfifo[i]);
 
 	/* Issue Receive Message Complete command. */
 	if (free_fifo) {
 		sunsab_cec_wait(up);
-		writeb(SAB82532_CMDR_RMC, &up->regs->w.cmdr);
+		pete_writeb("drivers/tty/serial/sunsab.c:149", SAB82532_CMDR_RMC, &up->regs->w.cmdr);
 	}
 
 	/* Count may be zero for BRK, so we check for it here */
@@ -236,7 +236,7 @@ static void transmit_chars(struct uart_sunsab_port *up,
 
 	if (stat->sreg.isr1 & SAB82532_ISR1_ALLS) {
 		up->interrupt_mask1 |= SAB82532_IMR1_ALLS;
-		writeb(up->interrupt_mask1, &up->regs->w.imr1);
+		pete_writeb("drivers/tty/serial/sunsab.c:239", up->interrupt_mask1, &up->regs->w.imr1);
 		set_bit(SAB82532_ALLS, &up->irqflags);
 	}
 
@@ -245,7 +245,7 @@ static void transmit_chars(struct uart_sunsab_port *up,
 		return;
 #endif
 
-	if (!(readb(&up->regs->r.star) & SAB82532_STAR_XFW))
+	if (!(pete_readb("drivers/tty/serial/sunsab.c:248", &up->regs->r.star) & SAB82532_STAR_XFW))
 		return;
 
 	set_bit(SAB82532_XPR, &up->irqflags);
@@ -253,18 +253,18 @@ static void transmit_chars(struct uart_sunsab_port *up,
 
 	if (uart_circ_empty(xmit) || uart_tx_stopped(&up->port)) {
 		up->interrupt_mask1 |= SAB82532_IMR1_XPR;
-		writeb(up->interrupt_mask1, &up->regs->w.imr1);
+		pete_writeb("drivers/tty/serial/sunsab.c:256", up->interrupt_mask1, &up->regs->w.imr1);
 		return;
 	}
 
 	up->interrupt_mask1 &= ~(SAB82532_IMR1_ALLS|SAB82532_IMR1_XPR);
-	writeb(up->interrupt_mask1, &up->regs->w.imr1);
+	pete_writeb("drivers/tty/serial/sunsab.c:261", up->interrupt_mask1, &up->regs->w.imr1);
 	clear_bit(SAB82532_ALLS, &up->irqflags);
 
 	/* Stuff 32 bytes into Transmit FIFO. */
 	clear_bit(SAB82532_XPR, &up->irqflags);
 	for (i = 0; i < up->port.fifosize; i++) {
-		writeb(xmit->buf[xmit->tail],
+		pete_writeb("drivers/tty/serial/sunsab.c:267", xmit->buf[xmit->tail],
 		       &up->regs->w.xfifo[i]);
 		xmit->tail = (xmit->tail + 1) & (UART_XMIT_SIZE - 1);
 		up->port.icount.tx++;
@@ -274,7 +274,7 @@ static void transmit_chars(struct uart_sunsab_port *up,
 
 	/* Issue a Transmit Frame command. */
 	sunsab_cec_wait(up);
-	writeb(SAB82532_CMDR_XF, &up->regs->w.cmdr);
+	pete_writeb("drivers/tty/serial/sunsab.c:277", SAB82532_CMDR_XF, &up->regs->w.cmdr);
 
 	if (uart_circ_chars_pending(xmit) < WAKEUP_CHARS)
 		uart_write_wakeup(&up->port);
@@ -288,14 +288,14 @@ static void check_status(struct uart_sunsab_port *up,
 {
 	if (stat->sreg.isr0 & SAB82532_ISR0_CDSC)
 		uart_handle_dcd_change(&up->port,
-				       !(readb(&up->regs->r.vstr) & SAB82532_VSTR_CD));
+				       !(pete_readb("drivers/tty/serial/sunsab.c:291", &up->regs->r.vstr) & SAB82532_VSTR_CD));
 
 	if (stat->sreg.isr1 & SAB82532_ISR1_CSC)
 		uart_handle_cts_change(&up->port,
-				       (readb(&up->regs->r.star) & SAB82532_STAR_CTS));
+				       (pete_readb("drivers/tty/serial/sunsab.c:295", &up->regs->r.star) & SAB82532_STAR_CTS));
 
-	if ((readb(&up->regs->r.pvr) & up->pvr_dsr_bit) ^ up->dsr) {
-		up->dsr = (readb(&up->regs->r.pvr) & up->pvr_dsr_bit) ? 0 : 1;
+	if ((pete_readb("drivers/tty/serial/sunsab.c:297", &up->regs->r.pvr) & up->pvr_dsr_bit) ^ up->dsr) {
+		up->dsr = (pete_readb("drivers/tty/serial/sunsab.c:298", &up->regs->r.pvr) & up->pvr_dsr_bit) ? 0 : 1;
 		up->port.icount.dsr++;
 	}
 
@@ -313,11 +313,11 @@ static irqreturn_t sunsab_interrupt(int irq, void *dev_id)
 	spin_lock_irqsave(&up->port.lock, flags);
 
 	status.stat = 0;
-	gis = readb(&up->regs->r.gis) >> up->gis_shift;
+	gis = pete_readb("drivers/tty/serial/sunsab.c:316", &up->regs->r.gis) >> up->gis_shift;
 	if (gis & 1)
-		status.sreg.isr0 = readb(&up->regs->r.isr0);
+		status.sreg.isr0 = pete_readb("drivers/tty/serial/sunsab.c:318", &up->regs->r.isr0);
 	if (gis & 2)
-		status.sreg.isr1 = readb(&up->regs->r.isr1);
+		status.sreg.isr1 = pete_readb("drivers/tty/serial/sunsab.c:320", &up->regs->r.isr1);
 
 	if (status.stat) {
 		if ((status.sreg.isr0 & (SAB82532_ISR0_TCD | SAB82532_ISR0_TIME |
@@ -389,13 +389,13 @@ static unsigned int sunsab_get_mctrl(struct uart_port *port)
 
 	result = 0;
 
-	val = readb(&up->regs->r.pvr);
+	val = pete_readb("drivers/tty/serial/sunsab.c:392", &up->regs->r.pvr);
 	result |= (val & up->pvr_dsr_bit) ? 0 : TIOCM_DSR;
 
-	val = readb(&up->regs->r.vstr);
+	val = pete_readb("drivers/tty/serial/sunsab.c:395", &up->regs->r.vstr);
 	result |= (val & SAB82532_VSTR_CD) ? 0 : TIOCM_CAR;
 
-	val = readb(&up->regs->r.star);
+	val = pete_readb("drivers/tty/serial/sunsab.c:398", &up->regs->r.star);
 	result |= (val & SAB82532_STAR_CTS) ? TIOCM_CTS : 0;
 
 	return result;
@@ -408,7 +408,7 @@ static void sunsab_stop_tx(struct uart_port *port)
 		container_of(port, struct uart_sunsab_port, port);
 
 	up->interrupt_mask1 |= SAB82532_IMR1_XPR;
-	writeb(up->interrupt_mask1, &up->regs->w.imr1);
+	pete_writeb("drivers/tty/serial/sunsab.c:411", up->interrupt_mask1, &up->regs->w.imr1);
 }
 
 /* port->lock held by caller.  */
@@ -418,15 +418,15 @@ static void sunsab_tx_idle(struct uart_sunsab_port *up)
 		u8 tmp;
 
 		clear_bit(SAB82532_REGS_PENDING, &up->irqflags);
-		writeb(up->cached_mode, &up->regs->rw.mode);
-		writeb(up->cached_pvr, &up->regs->rw.pvr);
-		writeb(up->cached_dafo, &up->regs->w.dafo);
+		pete_writeb("drivers/tty/serial/sunsab.c:421", up->cached_mode, &up->regs->rw.mode);
+		pete_writeb("drivers/tty/serial/sunsab.c:422", up->cached_pvr, &up->regs->rw.pvr);
+		pete_writeb("drivers/tty/serial/sunsab.c:423", up->cached_dafo, &up->regs->w.dafo);
 
-		writeb(up->cached_ebrg & 0xff, &up->regs->w.bgr);
-		tmp = readb(&up->regs->rw.ccr2);
+		pete_writeb("drivers/tty/serial/sunsab.c:425", up->cached_ebrg & 0xff, &up->regs->w.bgr);
+		tmp = pete_readb("drivers/tty/serial/sunsab.c:426", &up->regs->rw.ccr2);
 		tmp &= ~0xc0;
 		tmp |= (up->cached_ebrg >> 2) & 0xc0;
-		writeb(tmp, &up->regs->rw.ccr2);
+		pete_writeb("drivers/tty/serial/sunsab.c:429", tmp, &up->regs->rw.ccr2);
 	}
 }
 
@@ -442,7 +442,7 @@ static void sunsab_start_tx(struct uart_port *port)
 		return;
 
 	up->interrupt_mask1 &= ~(SAB82532_IMR1_ALLS|SAB82532_IMR1_XPR);
-	writeb(up->interrupt_mask1, &up->regs->w.imr1);
+	pete_writeb("drivers/tty/serial/sunsab.c:445", up->interrupt_mask1, &up->regs->w.imr1);
 	
 	if (!test_bit(SAB82532_XPR, &up->irqflags))
 		return;
@@ -451,7 +451,7 @@ static void sunsab_start_tx(struct uart_port *port)
 	clear_bit(SAB82532_XPR, &up->irqflags);
 
 	for (i = 0; i < up->port.fifosize; i++) {
-		writeb(xmit->buf[xmit->tail],
+		pete_writeb("drivers/tty/serial/sunsab.c:454", xmit->buf[xmit->tail],
 		       &up->regs->w.xfifo[i]);
 		xmit->tail = (xmit->tail + 1) & (UART_XMIT_SIZE - 1);
 		up->port.icount.tx++;
@@ -461,7 +461,7 @@ static void sunsab_start_tx(struct uart_port *port)
 
 	/* Issue a Transmit Frame command.  */
 	sunsab_cec_wait(up);
-	writeb(SAB82532_CMDR_XF, &up->regs->w.cmdr);
+	pete_writeb("drivers/tty/serial/sunsab.c:464", SAB82532_CMDR_XF, &up->regs->w.cmdr);
 }
 
 /* port->lock is not held.  */
@@ -477,7 +477,7 @@ static void sunsab_send_xchar(struct uart_port *port, char ch)
 	spin_lock_irqsave(&up->port.lock, flags);
 
 	sunsab_tec_wait(up);
-	writeb(ch, &up->regs->w.tic);
+	pete_writeb("drivers/tty/serial/sunsab.c:480", ch, &up->regs->w.tic);
 
 	spin_unlock_irqrestore(&up->port.lock, flags);
 }
@@ -489,7 +489,7 @@ static void sunsab_stop_rx(struct uart_port *port)
 		container_of(port, struct uart_sunsab_port, port);
 
 	up->interrupt_mask0 |= SAB82532_IMR0_TCD;
-	writeb(up->interrupt_mask1, &up->regs->w.imr0);
+	pete_writeb("drivers/tty/serial/sunsab.c:492", up->interrupt_mask1, &up->regs->w.imr0);
 }
 
 /* port->lock is not held.  */
@@ -539,47 +539,47 @@ static int sunsab_startup(struct uart_port *port)
 	/*
 	 * Clear the FIFO buffers.
 	 */
-	writeb(SAB82532_CMDR_RRES, &up->regs->w.cmdr);
+	pete_writeb("drivers/tty/serial/sunsab.c:542", SAB82532_CMDR_RRES, &up->regs->w.cmdr);
 	sunsab_cec_wait(up);
-	writeb(SAB82532_CMDR_XRES, &up->regs->w.cmdr);
+	pete_writeb("drivers/tty/serial/sunsab.c:544", SAB82532_CMDR_XRES, &up->regs->w.cmdr);
 
 	/*
 	 * Clear the interrupt registers.
 	 */
-	(void) readb(&up->regs->r.isr0);
-	(void) readb(&up->regs->r.isr1);
+	(void) pete_readb("drivers/tty/serial/sunsab.c:549", &up->regs->r.isr0);
+	(void) pete_readb("drivers/tty/serial/sunsab.c:550", &up->regs->r.isr1);
 
 	/*
 	 * Now, initialize the UART 
 	 */
-	writeb(0, &up->regs->w.ccr0);				/* power-down */
-	writeb(SAB82532_CCR0_MCE | SAB82532_CCR0_SC_NRZ |
+	pete_writeb("drivers/tty/serial/sunsab.c:555", 0, &up->regs->w.ccr0);				/* power-down */
+	pete_writeb("drivers/tty/serial/sunsab.c:556", SAB82532_CCR0_MCE | SAB82532_CCR0_SC_NRZ |
 	       SAB82532_CCR0_SM_ASYNC, &up->regs->w.ccr0);
-	writeb(SAB82532_CCR1_ODS | SAB82532_CCR1_BCR | 7, &up->regs->w.ccr1);
-	writeb(SAB82532_CCR2_BDF | SAB82532_CCR2_SSEL |
+	pete_writeb("drivers/tty/serial/sunsab.c:558", SAB82532_CCR1_ODS | SAB82532_CCR1_BCR | 7, &up->regs->w.ccr1);
+	pete_writeb("drivers/tty/serial/sunsab.c:559", SAB82532_CCR2_BDF | SAB82532_CCR2_SSEL |
 	       SAB82532_CCR2_TOE, &up->regs->w.ccr2);
-	writeb(0, &up->regs->w.ccr3);
-	writeb(SAB82532_CCR4_MCK4 | SAB82532_CCR4_EBRG, &up->regs->w.ccr4);
+	pete_writeb("drivers/tty/serial/sunsab.c:561", 0, &up->regs->w.ccr3);
+	pete_writeb("drivers/tty/serial/sunsab.c:562", SAB82532_CCR4_MCK4 | SAB82532_CCR4_EBRG, &up->regs->w.ccr4);
 	up->cached_mode = (SAB82532_MODE_RTS | SAB82532_MODE_FCTS |
 			   SAB82532_MODE_RAC);
-	writeb(up->cached_mode, &up->regs->w.mode);
-	writeb(SAB82532_RFC_DPS|SAB82532_RFC_RFTH_32, &up->regs->w.rfc);
+	pete_writeb("drivers/tty/serial/sunsab.c:565", up->cached_mode, &up->regs->w.mode);
+	pete_writeb("drivers/tty/serial/sunsab.c:566", SAB82532_RFC_DPS|SAB82532_RFC_RFTH_32, &up->regs->w.rfc);
 	
-	tmp = readb(&up->regs->rw.ccr0);
+	tmp = pete_readb("drivers/tty/serial/sunsab.c:568", &up->regs->rw.ccr0);
 	tmp |= SAB82532_CCR0_PU;	/* power-up */
-	writeb(tmp, &up->regs->rw.ccr0);
+	pete_writeb("drivers/tty/serial/sunsab.c:570", tmp, &up->regs->rw.ccr0);
 
 	/*
 	 * Finally, enable interrupts
 	 */
 	up->interrupt_mask0 = (SAB82532_IMR0_PERR | SAB82532_IMR0_FERR |
 			       SAB82532_IMR0_PLLA);
-	writeb(up->interrupt_mask0, &up->regs->w.imr0);
+	pete_writeb("drivers/tty/serial/sunsab.c:577", up->interrupt_mask0, &up->regs->w.imr0);
 	up->interrupt_mask1 = (SAB82532_IMR1_BRKT | SAB82532_IMR1_ALLS |
 			       SAB82532_IMR1_XOFF | SAB82532_IMR1_TIN |
 			       SAB82532_IMR1_CSC | SAB82532_IMR1_XON |
 			       SAB82532_IMR1_XPR);
-	writeb(up->interrupt_mask1, &up->regs->w.imr1);
+	pete_writeb("drivers/tty/serial/sunsab.c:582", up->interrupt_mask1, &up->regs->w.imr1);
 	set_bit(SAB82532_ALLS, &up->irqflags);
 	set_bit(SAB82532_XPR, &up->irqflags);
 
@@ -599,18 +599,18 @@ static void sunsab_shutdown(struct uart_port *port)
 
 	/* Disable Interrupts */
 	up->interrupt_mask0 = 0xff;
-	writeb(up->interrupt_mask0, &up->regs->w.imr0);
+	pete_writeb("drivers/tty/serial/sunsab.c:602", up->interrupt_mask0, &up->regs->w.imr0);
 	up->interrupt_mask1 = 0xff;
-	writeb(up->interrupt_mask1, &up->regs->w.imr1);
+	pete_writeb("drivers/tty/serial/sunsab.c:604", up->interrupt_mask1, &up->regs->w.imr1);
 
 	/* Disable break condition */
-	up->cached_dafo = readb(&up->regs->rw.dafo);
+	up->cached_dafo = pete_readb("drivers/tty/serial/sunsab.c:607", &up->regs->rw.dafo);
 	up->cached_dafo &= ~SAB82532_DAFO_XBRK;
-	writeb(up->cached_dafo, &up->regs->rw.dafo);
+	pete_writeb("drivers/tty/serial/sunsab.c:609", up->cached_dafo, &up->regs->rw.dafo);
 
 	/* Disable Receiver */	
 	up->cached_mode &= ~SAB82532_MODE_RAC;
-	writeb(up->cached_mode, &up->regs->rw.mode);
+	pete_writeb("drivers/tty/serial/sunsab.c:613", up->cached_mode, &up->regs->rw.mode);
 
 	/*
 	 * XXX FIXME
@@ -624,9 +624,9 @@ static void sunsab_shutdown(struct uart_port *port)
 	 */
 #if 0
 	/* Power Down */	
-	tmp = readb(&up->regs->rw.ccr0);
+	tmp = pete_readb("drivers/tty/serial/sunsab.c:627", &up->regs->rw.ccr0);
 	tmp &= ~SAB82532_CCR0_PU;
-	writeb(tmp, &up->regs->rw.ccr0);
+	pete_writeb("drivers/tty/serial/sunsab.c:629", tmp, &up->regs->rw.ccr0);
 #endif
 
 	spin_unlock_irqrestore(&up->port.lock, flags);
@@ -852,7 +852,7 @@ static void sunsab_console_putchar(struct uart_port *port, int c)
 		container_of(port, struct uart_sunsab_port, port);
 
 	sunsab_tec_wait(up);
-	writeb(c, &up->regs->w.tic);
+	pete_writeb("drivers/tty/serial/sunsab.c:855", c, &up->regs->w.tic);
 }
 
 static void sunsab_console_write(struct console *con, const char *s, unsigned n)
@@ -926,12 +926,12 @@ static int sunsab_console_setup(struct console *con, char *options)
 	 */
 	up->interrupt_mask0 = SAB82532_IMR0_PERR | SAB82532_IMR0_FERR |
 				SAB82532_IMR0_PLLA | SAB82532_IMR0_CDSC;
-	writeb(up->interrupt_mask0, &up->regs->w.imr0);
+	pete_writeb("drivers/tty/serial/sunsab.c:929", up->interrupt_mask0, &up->regs->w.imr0);
 	up->interrupt_mask1 = SAB82532_IMR1_BRKT | SAB82532_IMR1_ALLS |
 				SAB82532_IMR1_XOFF | SAB82532_IMR1_TIN |
 				SAB82532_IMR1_CSC | SAB82532_IMR1_XON |
 				SAB82532_IMR1_XPR;
-	writeb(up->interrupt_mask1, &up->regs->w.imr1);
+	pete_writeb("drivers/tty/serial/sunsab.c:934", up->interrupt_mask1, &up->regs->w.imr1);
 
 	quot = uart_get_divisor(&up->port, baud);
 	sunsab_convert_to_sab(up, con->cflag, 0, baud, quot);
@@ -983,15 +983,15 @@ static int sunsab_init_one(struct uart_sunsab_port *up,
 	up->port.iotype = UPIO_MEM;
 	up->port.has_sysrq = IS_ENABLED(CONFIG_SERIAL_SUNSAB_CONSOLE);
 
-	writeb(SAB82532_IPC_IC_ACT_LOW, &up->regs->w.ipc);
+	pete_writeb("drivers/tty/serial/sunsab.c:986", SAB82532_IPC_IC_ACT_LOW, &up->regs->w.ipc);
 
 	up->port.ops = &sunsab_pops;
 	up->port.type = PORT_SUNSAB;
 	up->port.uartclk = SAB_BASE_BAUD;
 
-	up->type = readb(&up->regs->r.vstr) & 0x0f;
-	writeb(~((1 << 1) | (1 << 2) | (1 << 4)), &up->regs->w.pcr);
-	writeb(0xff, &up->regs->w.pim);
+	up->type = pete_readb("drivers/tty/serial/sunsab.c:992", &up->regs->r.vstr) & 0x0f;
+	pete_writeb("drivers/tty/serial/sunsab.c:993", ~((1 << 1) | (1 << 2) | (1 << 4)), &up->regs->w.pcr);
+	pete_writeb("drivers/tty/serial/sunsab.c:994", 0xff, &up->regs->w.pim);
 	if ((up->port.line & 0x1) == 0) {
 		up->pvr_dsr_bit = (1 << 0);
 		up->pvr_dtr_bit = (1 << 1);
@@ -1002,12 +1002,12 @@ static int sunsab_init_one(struct uart_sunsab_port *up,
 		up->gis_shift = 0;
 	}
 	up->cached_pvr = (1 << 1) | (1 << 2) | (1 << 4);
-	writeb(up->cached_pvr, &up->regs->w.pvr);
-	up->cached_mode = readb(&up->regs->rw.mode);
+	pete_writeb("drivers/tty/serial/sunsab.c:1005", up->cached_pvr, &up->regs->w.pvr);
+	up->cached_mode = pete_readb("drivers/tty/serial/sunsab.c:1006", &up->regs->rw.mode);
 	up->cached_mode |= SAB82532_MODE_FRTS;
-	writeb(up->cached_mode, &up->regs->rw.mode);
+	pete_writeb("drivers/tty/serial/sunsab.c:1008", up->cached_mode, &up->regs->rw.mode);
 	up->cached_mode |= SAB82532_MODE_RTS;
-	writeb(up->cached_mode, &up->regs->rw.mode);
+	pete_writeb("drivers/tty/serial/sunsab.c:1010", up->cached_mode, &up->regs->rw.mode);
 
 	up->tec_timeout = SAB82532_MAX_TEC_TIMEOUT;
 	up->cec_timeout = SAB82532_MAX_CEC_TIMEOUT;

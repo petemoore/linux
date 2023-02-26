@@ -2739,19 +2739,19 @@ static int find_eth_addr_in_vpd(void __iomem *rom_base, int len, unsigned char *
 		void __iomem *p = rom_base + this_offset;
 		int i;
 
-		if (readb(p + 0) != 0x90 ||
-		    readb(p + 1) != 0x00 ||
-		    readb(p + 2) != 0x09 ||
-		    readb(p + 3) != 0x4e ||
-		    readb(p + 4) != 0x41 ||
-		    readb(p + 5) != 0x06)
+		if (pete_readb("drivers/net/ethernet/sun/sungem.c:2742", p + 0) != 0x90 ||
+		    pete_readb("drivers/net/ethernet/sun/sungem.c:2743", p + 1) != 0x00 ||
+		    pete_readb("drivers/net/ethernet/sun/sungem.c:2744", p + 2) != 0x09 ||
+		    pete_readb("drivers/net/ethernet/sun/sungem.c:2745", p + 3) != 0x4e ||
+		    pete_readb("drivers/net/ethernet/sun/sungem.c:2746", p + 4) != 0x41 ||
+		    pete_readb("drivers/net/ethernet/sun/sungem.c:2747", p + 5) != 0x06)
 			continue;
 
 		this_offset += 6;
 		p += 6;
 
 		for (i = 0; i < 6; i++)
-			dev_addr[i] = readb(p + i);
+			dev_addr[i] = pete_readb("drivers/net/ethernet/sun/sungem.c:2754", p + i);
 		return 1;
 	}
 	return 0;
@@ -2765,8 +2765,8 @@ static void get_gem_mac_nonobp(struct pci_dev *pdev, unsigned char *dev_addr)
 	if (p) {
 		int found;
 
-		found = readb(p) == 0x55 &&
-			readb(p + 1) == 0xaa &&
+		found = pete_readb("drivers/net/ethernet/sun/sungem.c:2768", p) == 0x55 &&
+			pete_readb("drivers/net/ethernet/sun/sungem.c:2769", p + 1) == 0xaa &&
 			find_eth_addr_in_vpd(p, (64 * 1024), dev_addr);
 		pci_unmap_rom(pdev, p);
 		if (found)

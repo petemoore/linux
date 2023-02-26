@@ -1266,7 +1266,7 @@ static int mbox_show(struct seq_file *seq, void *v)
 
 	for (i = 0; i < MBOX_LEN; i += 8)
 		seq_printf(seq, "%016llx\n",
-			   (unsigned long long)readq(addr + i));
+			   (unsigned long long)pete_readq("drivers/net/ethernet/chelsio/cxgb4/cxgb4_debugfs.c:1269", addr + i));
 	return 0;
 }
 
@@ -1308,7 +1308,7 @@ static ssize_t mbox_write(struct file *file, const char __user *buf,
 		return -EBUSY;
 
 	for (i = 0; i < 8; i++)
-		writeq(data[i], addr + 8 * i);
+		pete_writeq("drivers/net/ethernet/chelsio/cxgb4/cxgb4_debugfs.c:1311", data[i], addr + 8 * i);
 
 	pete_writel("drivers/net/ethernet/chelsio/cxgb4/cxgb4_debugfs.c:1313", MBMSGVALID_F | MBOWNER_V(X_MBOWNER_FW), ctrl);
 	return count;

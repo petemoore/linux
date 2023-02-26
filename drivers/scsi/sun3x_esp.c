@@ -53,12 +53,12 @@
 
 static void sun3x_esp_write8(struct esp *esp, u8 val, unsigned long reg)
 {
-	writeb(val, esp->regs + (reg * 4UL));
+	pete_writeb("drivers/scsi/sun3x_esp.c:56", val, esp->regs + (reg * 4UL));
 }
 
 static u8 sun3x_esp_read8(struct esp *esp, unsigned long reg)
 {
-	return readb(esp->regs + (reg * 4UL));
+	return pete_readb("drivers/scsi/sun3x_esp.c:61", esp->regs + (reg * 4UL));
 }
 
 static int sun3x_esp_irq_pending(struct esp *esp)

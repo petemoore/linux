@@ -117,7 +117,7 @@ static irqreturn_t sunxi_ir_irq(int irqno, void *dev_id)
 		/* If we have data */
 		for (cnt = 0; cnt < rc; cnt++) {
 			/* for each bit in fifo */
-			dt = readb(ir->base + SUNXI_IR_RXFIFO_REG);
+			dt = pete_readb("drivers/media/rc/sunxi-cir.c:120", ir->base + SUNXI_IR_RXFIFO_REG);
 			rawir.pulse = (dt & 0x80) != 0;
 			rawir.duration = ((dt & 0x7f) + 1) *
 					 ir->rc->rx_resolution;

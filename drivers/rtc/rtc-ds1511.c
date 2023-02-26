@@ -101,13 +101,13 @@ static u32 reg_spacing = 1;
 static noinline void
 rtc_write(uint8_t val, uint32_t reg)
 {
-	writeb(val, ds1511_base + (reg * reg_spacing));
+	pete_writeb("drivers/rtc/rtc-ds1511.c:104", val, ds1511_base + (reg * reg_spacing));
 }
 
 static noinline uint8_t
 rtc_read(enum ds1511reg reg)
 {
-	return readb(ds1511_base + (reg * reg_spacing));
+	return pete_readb("drivers/rtc/rtc-ds1511.c:110", ds1511_base + (reg * reg_spacing));
 }
 
 static inline void

@@ -136,7 +136,7 @@ static inline void sun4i_spi_drain_fifo(struct sun4i_spi *sspi, int len)
 		len = cnt;
 
 	while (len--) {
-		byte = readb(sspi->base_addr + SUN4I_RXDATA_REG);
+		byte = pete_readb("drivers/spi/spi-sun4i.c:139", sspi->base_addr + SUN4I_RXDATA_REG);
 		if (sspi->rx_buf)
 			*sspi->rx_buf++ = byte;
 	}
@@ -154,7 +154,7 @@ static inline void sun4i_spi_fill_fifo(struct sun4i_spi *sspi, int len)
 
 	while (len--) {
 		byte = sspi->tx_buf ? *sspi->tx_buf++ : 0;
-		writeb(byte, sspi->base_addr + SUN4I_TXDATA_REG);
+		pete_writeb("drivers/spi/spi-sun4i.c:157", byte, sspi->base_addr + SUN4I_TXDATA_REG);
 		sspi->len--;
 	}
 }

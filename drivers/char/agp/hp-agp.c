@@ -83,7 +83,7 @@ static int __init hp_zx1_ioc_shared(void)
 	 *	- IOVA space is 1Gb in size
 	 *	- first 512Mb is IOMMU, second 512Mb is GART
 	 */
-	hp->io_tlb_ps = readq(hp->ioc_regs+HP_ZX1_TCNFG);
+	hp->io_tlb_ps = pete_readq("drivers/char/agp/hp-agp.c:86", hp->ioc_regs+HP_ZX1_TCNFG);
 	switch (hp->io_tlb_ps) {
 		case 0: hp->io_tlb_shift = 12; break;
 		case 1: hp->io_tlb_shift = 13; break;
@@ -99,13 +99,13 @@ static int __init hp_zx1_ioc_shared(void)
 	hp->io_page_size = 1 << hp->io_tlb_shift;
 	hp->io_pages_per_kpage = PAGE_SIZE / hp->io_page_size;
 
-	hp->iova_base = readq(hp->ioc_regs+HP_ZX1_IBASE) & ~0x1;
+	hp->iova_base = pete_readq("drivers/char/agp/hp-agp.c:102", hp->ioc_regs+HP_ZX1_IBASE) & ~0x1;
 	hp->gart_base = hp->iova_base + HP_ZX1_IOVA_SIZE - HP_ZX1_GART_SIZE;
 
 	hp->gart_size = HP_ZX1_GART_SIZE;
 	hp->gatt_entries = hp->gart_size / hp->io_page_size;
 
-	hp->io_pdir = phys_to_virt(readq(hp->ioc_regs+HP_ZX1_PDIR_BASE));
+	hp->io_pdir = phys_to_virt(pete_readq("drivers/char/agp/hp-agp.c:108", hp->ioc_regs+HP_ZX1_PDIR_BASE));
 	hp->gatt = &hp->io_pdir[HP_ZX1_IOVA_TO_PDIR(hp->gart_base)];
 
 	if (hp->gatt[0] != HP_ZX1_SBA_IOMMU_COOKIE) {
@@ -169,7 +169,7 @@ hp_zx1_ioc_init (u64 hpa)
 	 * If the IOTLB is currently disabled, we can take it over.
 	 * Otherwise, we have to share with sba_iommu.
 	 */
-	hp->io_pdir_owner = (readq(hp->ioc_regs+HP_ZX1_IBASE) & 0x1) == 0;
+	hp->io_pdir_owner = (pete_readq("drivers/char/agp/hp-agp.c:172", hp->ioc_regs+HP_ZX1_IBASE) & 0x1) == 0;
 
 	if (hp->io_pdir_owner)
 		return hp_zx1_ioc_owner();
@@ -184,18 +184,18 @@ hp_zx1_lba_find_capability (volatile u8 __iomem *hpa, int cap)
 	u8 pos, id;
 	int ttl = 48;
 
-	status = readw(hpa+PCI_STATUS);
+	status = pete_readw("drivers/char/agp/hp-agp.c:187", hpa+PCI_STATUS);
 	if (!(status & PCI_STATUS_CAP_LIST))
 		return 0;
-	pos = readb(hpa+PCI_CAPABILITY_LIST);
+	pos = pete_readb("drivers/char/agp/hp-agp.c:190", hpa+PCI_CAPABILITY_LIST);
 	while (ttl-- && pos >= 0x40) {
 		pos &= ~3;
-		id = readb(hpa+pos+PCI_CAP_LIST_ID);
+		id = pete_readb("drivers/char/agp/hp-agp.c:193", hpa+pos+PCI_CAP_LIST_ID);
 		if (id == 0xff)
 			break;
 		if (id == cap)
 			return pos;
-		pos = readb(hpa+pos+PCI_CAP_LIST_NEXT);
+		pos = pete_readb("drivers/char/agp/hp-agp.c:198", hpa+pos+PCI_CAP_LIST_NEXT);
 	}
 	return 0;
 }
@@ -266,8 +266,8 @@ hp_zx1_cleanup (void)
 
 	if (hp->ioc_regs) {
 		if (hp->io_pdir_owner) {
-			writeq(0, hp->ioc_regs+HP_ZX1_IBASE);
-			readq(hp->ioc_regs+HP_ZX1_IBASE);
+			pete_writeq("drivers/char/agp/hp-agp.c:269", 0, hp->ioc_regs+HP_ZX1_IBASE);
+			pete_readq("drivers/char/agp/hp-agp.c:270", hp->ioc_regs+HP_ZX1_IBASE);
 		}
 		iounmap(hp->ioc_regs);
 	}
@@ -280,8 +280,8 @@ hp_zx1_tlbflush (struct agp_memory *mem)
 {
 	struct _hp_private *hp = &hp_private;
 
-	writeq(hp->gart_base | ilog2(hp->gart_size), hp->ioc_regs+HP_ZX1_PCOM);
-	readq(hp->ioc_regs+HP_ZX1_PCOM);
+	pete_writeq("drivers/char/agp/hp-agp.c:283", hp->gart_base | ilog2(hp->gart_size), hp->ioc_regs+HP_ZX1_PCOM);
+	pete_readq("drivers/char/agp/hp-agp.c:284", hp->ioc_regs+HP_ZX1_PCOM);
 }
 
 static int

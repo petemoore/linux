@@ -34,13 +34,13 @@ EXPORT_SYMBOL_GPL(sst_shim32_read);
 
 void sst_shim32_write64(void __iomem *addr, u32 offset, u64 value)
 {
-	writeq(value, addr + offset);
+	pete_writeq("sound/soc/intel/common/sst-dsp.c:37", value, addr + offset);
 }
 EXPORT_SYMBOL_GPL(sst_shim32_write64);
 
 u64 sst_shim32_read64(void __iomem *addr, u32 offset)
 {
-	return readq(addr + offset);
+	return pete_readq("sound/soc/intel/common/sst-dsp.c:43", addr + offset);
 }
 EXPORT_SYMBOL_GPL(sst_shim32_read64);
 

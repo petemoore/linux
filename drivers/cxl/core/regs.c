@@ -108,7 +108,7 @@ void cxl_probe_device_regs(struct device *dev, void __iomem *base,
 
 	*map = (struct cxl_device_reg_map){ 0 };
 
-	cap_array = readq(base + CXLDEV_CAP_ARRAY_OFFSET);
+	cap_array = pete_readq("drivers/cxl/core/regs.c:111", base + CXLDEV_CAP_ARRAY_OFFSET);
 	if (FIELD_GET(CXLDEV_CAP_ARRAY_ID_MASK, cap_array) !=
 	    CXLDEV_CAP_ARRAY_CAP_ID)
 		return;

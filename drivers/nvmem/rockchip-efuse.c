@@ -78,7 +78,7 @@ static int rockchip_rk3288_efuse_read(void *context, unsigned int offset,
 		pete_writel("drivers/nvmem/rockchip-efuse.c:78", pete_readl("drivers/nvmem/rockchip-efuse.c:78", efuse->base + REG_EFUSE_CTRL) |
 			     RK3288_STROBE, efuse->base + REG_EFUSE_CTRL);
 		udelay(1);
-		*buf++ = readb(efuse->base + REG_EFUSE_DOUT);
+		*buf++ = pete_readb("drivers/nvmem/rockchip-efuse.c:81", efuse->base + REG_EFUSE_DOUT);
 		pete_writel("drivers/nvmem/rockchip-efuse.c:82", pete_readl("drivers/nvmem/rockchip-efuse.c:82", efuse->base + REG_EFUSE_CTRL) &
 		       (~RK3288_STROBE), efuse->base + REG_EFUSE_CTRL);
 		udelay(1);

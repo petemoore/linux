@@ -36,13 +36,13 @@ EXPORT_SYMBOL(sof_io_read);
 
 void sof_io_write64(struct snd_sof_dev *sdev, void __iomem *addr, u64 value)
 {
-	writeq(value, addr);
+	pete_writeq("sound/soc/sof/utils.c:39", value, addr);
 }
 EXPORT_SYMBOL(sof_io_write64);
 
 u64 sof_io_read64(struct snd_sof_dev *sdev, void __iomem *addr)
 {
-	return readq(addr);
+	return pete_readq("sound/soc/sof/utils.c:45", addr);
 }
 EXPORT_SYMBOL(sof_io_read64);
 

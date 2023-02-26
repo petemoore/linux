@@ -243,7 +243,7 @@ static void lpc32xx_nand_setup(struct lpc32xx_nand_host *host)
 
 	/* Unlock MLC_ICR
 	 * (among others, will be locked again automatically) */
-	writew(MLCLOCKPR_MAGIC, MLC_LOCK_PR(host->io_base));
+	pete_writew("drivers/mtd/nand/raw/lpc32xx_mlc.c:246", MLCLOCKPR_MAGIC, MLC_LOCK_PR(host->io_base));
 
 	/* Configure MLC Controller: Large Block, 5 Byte Address */
 	tmp = MLCICR_LARGEBLOCK | MLCICR_LONGADDR;
@@ -251,7 +251,7 @@ static void lpc32xx_nand_setup(struct lpc32xx_nand_host *host)
 
 	/* Unlock MLC_TIME_REG
 	 * (among others, will be locked again automatically) */
-	writew(MLCLOCKPR_MAGIC, MLC_LOCK_PR(host->io_base));
+	pete_writew("drivers/mtd/nand/raw/lpc32xx_mlc.c:254", MLCLOCKPR_MAGIC, MLC_LOCK_PR(host->io_base));
 
 	/* Compute clock setup values, see LPC and NAND manual */
 	tmp = 0;
@@ -265,7 +265,7 @@ static void lpc32xx_nand_setup(struct lpc32xx_nand_host *host)
 	pete_writel("drivers/mtd/nand/raw/lpc32xx_mlc.c:265", tmp, MLC_TIME_REG(host->io_base));
 
 	/* Enable IRQ for CONTROLLER_READY and NAND_READY */
-	writeb(MLCIRQ_CONTROLLER_READY | MLCIRQ_NAND_READY,
+	pete_writeb("drivers/mtd/nand/raw/lpc32xx_mlc.c:268", MLCIRQ_CONTROLLER_READY | MLCIRQ_NAND_READY,
 			MLC_IRQ_MR(host->io_base));
 
 	/* Normal nCE operation: nCE controlled by controller */
@@ -295,7 +295,7 @@ static int lpc32xx_nand_device_ready(struct nand_chip *nand_chip)
 {
 	struct lpc32xx_nand_host *host = nand_get_controller_data(nand_chip);
 
-	if ((readb(MLC_ISR(host->io_base)) &
+	if ((pete_readb("drivers/mtd/nand/raw/lpc32xx_mlc.c:298", MLC_ISR(host->io_base)) &
 	     (MLCISR_CONTROLLER_READY | MLCISR_NAND_READY)) ==
 	    (MLCISR_CONTROLLER_READY | MLCISR_NAND_READY))
 		return  1;
@@ -308,7 +308,7 @@ static irqreturn_t lpc3xxx_nand_irq(int irq, struct lpc32xx_nand_host *host)
 	uint8_t sr;
 
 	/* Clear interrupt flag by reading status */
-	sr = readb(MLC_IRQ_SR(host->io_base));
+	sr = pete_readb("drivers/mtd/nand/raw/lpc32xx_mlc.c:311", MLC_IRQ_SR(host->io_base));
 	if (sr & MLCIRQ_NAND_READY)
 		complete(&host->comp_nand);
 	if (sr & MLCIRQ_CONTROLLER_READY)
@@ -322,12 +322,12 @@ static int lpc32xx_waitfunc_nand(struct nand_chip *chip)
 	struct mtd_info *mtd = nand_to_mtd(chip);
 	struct lpc32xx_nand_host *host = nand_get_controller_data(chip);
 
-	if (readb(MLC_ISR(host->io_base)) & MLCISR_NAND_READY)
+	if (pete_readb("drivers/mtd/nand/raw/lpc32xx_mlc.c:325", MLC_ISR(host->io_base)) & MLCISR_NAND_READY)
 		goto exit;
 
 	wait_for_completion(&host->comp_nand);
 
-	while (!(readb(MLC_ISR(host->io_base)) & MLCISR_NAND_READY)) {
+	while (!(pete_readb("drivers/mtd/nand/raw/lpc32xx_mlc.c:330", MLC_ISR(host->io_base)) & MLCISR_NAND_READY)) {
 		/* Seems to be delayed sometimes by controller */
 		dev_dbg(&mtd->dev, "Warning: NAND not ready.\n");
 		cpu_relax();
@@ -342,12 +342,12 @@ static int lpc32xx_waitfunc_controller(struct nand_chip *chip)
 	struct mtd_info *mtd = nand_to_mtd(chip);
 	struct lpc32xx_nand_host *host = nand_get_controller_data(chip);
 
-	if (readb(MLC_ISR(host->io_base)) & MLCISR_CONTROLLER_READY)
+	if (pete_readb("drivers/mtd/nand/raw/lpc32xx_mlc.c:345", MLC_ISR(host->io_base)) & MLCISR_CONTROLLER_READY)
 		goto exit;
 
 	wait_for_completion(&host->comp_controller);
 
-	while (!(readb(MLC_ISR(host->io_base)) &
+	while (!(pete_readb("drivers/mtd/nand/raw/lpc32xx_mlc.c:350", MLC_ISR(host->io_base)) &
 		 MLCISR_CONTROLLER_READY)) {
 		dev_dbg(&mtd->dev, "Warning: Controller not ready.\n");
 		cpu_relax();
@@ -456,7 +456,7 @@ static int lpc32xx_read_page(struct nand_chip *chip, uint8_t *buf,
 	/* For all sub-pages */
 	for (i = 0; i < host->mlcsubpages; i++) {
 		/* Start Auto Decode Command */
-		writeb(0x00, MLC_ECC_AUTO_DEC_REG(host->io_base));
+		pete_writeb("drivers/mtd/nand/raw/lpc32xx_mlc.c:459", 0x00, MLC_ECC_AUTO_DEC_REG(host->io_base));
 
 		/* Wait for Controller Ready */
 		lpc32xx_waitfunc_controller(chip);
@@ -516,7 +516,7 @@ static int lpc32xx_write_page_lowlevel(struct nand_chip *chip,
 
 	for (i = 0; i < host->mlcsubpages; i++) {
 		/* Start Encode */
-		writeb(0x00, MLC_ECC_ENC_REG(host->io_base));
+		pete_writeb("drivers/mtd/nand/raw/lpc32xx_mlc.c:519", 0x00, MLC_ECC_ENC_REG(host->io_base));
 
 		/* Write 512 + 6 Bytes to Buffer */
 		if (use_dma) {
@@ -533,11 +533,11 @@ static int lpc32xx_write_page_lowlevel(struct nand_chip *chip,
 		}
 		pete_writel("drivers/mtd/nand/raw/lpc32xx_mlc.c:534", *((uint32_t *)(oobbuf)), MLC_BUFF(host->io_base));
 		oobbuf += 4;
-		writew(*((uint16_t *)(oobbuf)), MLC_BUFF(host->io_base));
+		pete_writew("drivers/mtd/nand/raw/lpc32xx_mlc.c:536", *((uint16_t *)(oobbuf)), MLC_BUFF(host->io_base));
 		oobbuf += 12;
 
 		/* Auto Encode w/ Bit 8 = 0 (see LPC MLC Controller manual) */
-		writeb(0x00, MLC_ECC_AUTO_ENC_REG(host->io_base));
+		pete_writeb("drivers/mtd/nand/raw/lpc32xx_mlc.c:540", 0x00, MLC_ECC_AUTO_ENC_REG(host->io_base));
 
 		/* Wait for Controller Ready */
 		lpc32xx_waitfunc_controller(chip);
@@ -768,7 +768,7 @@ static int lpc32xx_nand_probe(struct platform_device *pdev)
 	}
 
 	/* initially clear interrupt status */
-	readb(MLC_IRQ_SR(host->io_base));
+	pete_readb("drivers/mtd/nand/raw/lpc32xx_mlc.c:771", MLC_IRQ_SR(host->io_base));
 
 	init_completion(&host->comp_nand);
 	init_completion(&host->comp_controller);

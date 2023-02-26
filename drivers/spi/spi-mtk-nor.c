@@ -140,11 +140,11 @@ static void mtk_nor_set_addr(struct mtk_nor *sp, const struct spi_mem_op *op)
 	int i;
 
 	for (i = 0; i < 3; i++) {
-		writeb(addr & 0xff, sp->base + MTK_NOR_REG_RADR(i));
+		pete_writeb("drivers/spi/spi-mtk-nor.c:143", addr & 0xff, sp->base + MTK_NOR_REG_RADR(i));
 		addr >>= 8;
 	}
 	if (op->addr.nbytes == 4) {
-		writeb(addr & 0xff, sp->base + MTK_NOR_REG_RADR3);
+		pete_writeb("drivers/spi/spi-mtk-nor.c:147", addr & 0xff, sp->base + MTK_NOR_REG_RADR3);
 		mtk_nor_rmw(sp, MTK_NOR_REG_BUSCFG, MTK_NOR_4B_ADDR, 0);
 	} else {
 		mtk_nor_rmw(sp, MTK_NOR_REG_BUSCFG, 0, MTK_NOR_4B_ADDR);
@@ -320,12 +320,12 @@ static void mtk_nor_setup_bus(struct mtk_nor *sp, const struct spi_mem_op *op)
 
 	if (op->data.buswidth == 4) {
 		reg |= MTK_NOR_QUAD_READ;
-		writeb(op->cmd.opcode, sp->base + MTK_NOR_REG_PRGDATA(4));
+		pete_writeb("drivers/spi/spi-mtk-nor.c:323", op->cmd.opcode, sp->base + MTK_NOR_REG_PRGDATA(4));
 		if (op->addr.buswidth == 4)
 			reg |= MTK_NOR_QUAD_ADDR;
 	} else if (op->data.buswidth == 2) {
 		reg |= MTK_NOR_DUAL_READ;
-		writeb(op->cmd.opcode, sp->base + MTK_NOR_REG_PRGDATA(3));
+		pete_writeb("drivers/spi/spi-mtk-nor.c:328", op->cmd.opcode, sp->base + MTK_NOR_REG_PRGDATA(3));
 		if (op->addr.buswidth == 2)
 			reg |= MTK_NOR_DUAL_ADDR;
 	} else {
@@ -426,7 +426,7 @@ static int mtk_nor_read_pio(struct mtk_nor *sp, const struct spi_mem_op *op)
 
 	ret = mtk_nor_cmd_exec(sp, MTK_NOR_CMD_READ, 6 * BITS_PER_BYTE);
 	if (!ret)
-		buf[0] = readb(sp->base + MTK_NOR_REG_RDATA);
+		buf[0] = pete_readb("drivers/spi/spi-mtk-nor.c:429", sp->base + MTK_NOR_REG_RDATA);
 	return ret;
 }
 
@@ -491,7 +491,7 @@ static int mtk_nor_pp_unbuffered(struct mtk_nor *sp,
 	ret = mtk_nor_write_buffer_disable(sp);
 	if (ret < 0)
 		return ret;
-	writeb(buf[0], sp->base + MTK_NOR_REG_WDATA);
+	pete_writeb("drivers/spi/spi-mtk-nor.c:494", buf[0], sp->base + MTK_NOR_REG_WDATA);
 	return mtk_nor_cmd_exec(sp, MTK_NOR_CMD_WRITE, 6 * BITS_PER_BYTE);
 }
 
@@ -527,30 +527,30 @@ static int mtk_nor_spi_mem_prg(struct mtk_nor *sp, const struct spi_mem_op *op)
 	for (i = op->cmd.nbytes; i > 0; i--, reg_offset--) {
 		reg = sp->base + MTK_NOR_REG_PRGDATA(reg_offset);
 		bufbyte = (op->cmd.opcode >> ((i - 1) * BITS_PER_BYTE)) & 0xff;
-		writeb(bufbyte, reg);
+		pete_writeb("drivers/spi/spi-mtk-nor.c:530", bufbyte, reg);
 	}
 
 	for (i = op->addr.nbytes; i > 0; i--, reg_offset--) {
 		reg = sp->base + MTK_NOR_REG_PRGDATA(reg_offset);
 		bufbyte = (op->addr.val >> ((i - 1) * BITS_PER_BYTE)) & 0xff;
-		writeb(bufbyte, reg);
+		pete_writeb("drivers/spi/spi-mtk-nor.c:536", bufbyte, reg);
 	}
 
 	if (op->data.dir == SPI_MEM_DATA_OUT) {
 		for (i = 0; i < op->dummy.nbytes; i++, reg_offset--) {
 			reg = sp->base + MTK_NOR_REG_PRGDATA(reg_offset);
-			writeb(0, reg);
+			pete_writeb("drivers/spi/spi-mtk-nor.c:542", 0, reg);
 		}
 
 		for (i = 0; i < op->data.nbytes; i++, reg_offset--) {
 			reg = sp->base + MTK_NOR_REG_PRGDATA(reg_offset);
-			writeb(((const u8 *)(op->data.buf.out))[i], reg);
+			pete_writeb("drivers/spi/spi-mtk-nor.c:547", ((const u8 *)(op->data.buf.out))[i], reg);
 		}
 	}
 
 	for (; reg_offset >= 0; reg_offset--) {
 		reg = sp->base + MTK_NOR_REG_PRGDATA(reg_offset);
-		writeb(0, reg);
+		pete_writeb("drivers/spi/spi-mtk-nor.c:553", 0, reg);
 	}
 
 	// trigger op
@@ -565,7 +565,7 @@ static int mtk_nor_spi_mem_prg(struct mtk_nor *sp, const struct spi_mem_op *op)
 	if (op->data.dir == SPI_MEM_DATA_IN) {
 		for (i = op->data.nbytes - 1; i >= 0; i--, reg_offset++) {
 			reg = sp->base + MTK_NOR_REG_SHIFT(reg_offset);
-			((u8 *)(op->data.buf.in))[i] = readb(reg);
+			((u8 *)(op->data.buf.in))[i] = pete_readb("drivers/spi/spi-mtk-nor.c:568", reg);
 		}
 	}
 
@@ -583,7 +583,7 @@ static int mtk_nor_exec_op(struct spi_mem *mem, const struct spi_mem_op *op)
 
 	if (op->data.dir == SPI_MEM_DATA_OUT) {
 		mtk_nor_set_addr(sp, op);
-		writeb(op->cmd.opcode, sp->base + MTK_NOR_REG_PRGDATA0);
+		pete_writeb("drivers/spi/spi-mtk-nor.c:586", op->cmd.opcode, sp->base + MTK_NOR_REG_PRGDATA0);
 		if (op->data.nbytes == MTK_NOR_PP_SIZE)
 			return mtk_nor_pp_buffered(sp, op);
 		return mtk_nor_pp_unbuffered(sp, op);
@@ -637,9 +637,9 @@ static int mtk_nor_transfer_one_message(struct spi_controller *master,
 		for (i = 0; i < t->len; i++, reg_offset--) {
 			reg = sp->base + MTK_NOR_REG_PRGDATA(reg_offset);
 			if (txbuf)
-				writeb(txbuf[i], reg);
+				pete_writeb("drivers/spi/spi-mtk-nor.c:640", txbuf[i], reg);
 			else
-				writeb(0, reg);
+				pete_writeb("drivers/spi/spi-mtk-nor.c:642", 0, reg);
 		}
 		trx_len += t->len;
 	}
@@ -657,7 +657,7 @@ static int mtk_nor_transfer_one_message(struct spi_controller *master,
 		for (i = 0; i < t->len; i++, reg_offset--) {
 			reg = sp->base + MTK_NOR_REG_SHIFT(reg_offset);
 			if (rxbuf)
-				rxbuf[i] = readb(reg);
+				rxbuf[i] = pete_readb("drivers/spi/spi-mtk-nor.c:660", reg);
 		}
 	}
 

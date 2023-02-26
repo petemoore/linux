@@ -1078,7 +1078,7 @@ static void __init input_apanel_init(void)
 	p = bios_signature(bios);
 	if (p) {
 		/* just use the first address */
-		apanel_addr = readb(p + 8 + 3) >> 1;
+		apanel_addr = pete_readb("drivers/i2c/busses/i2c-i801.c:1081", p + 8 + 3) >> 1;
 	}
 	iounmap(bios);
 }

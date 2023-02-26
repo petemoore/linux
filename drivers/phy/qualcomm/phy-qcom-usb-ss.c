@@ -104,7 +104,7 @@ static int qcom_ssphy_power_on(struct phy *phy)
 	if (ret)
 		goto err_disable_clock;
 
-	writeb(SWI_PCS_CLK_SEL, priv->base + PHY_CTRL0);
+	pete_writeb("drivers/phy/qualcomm/phy-qcom-usb-ss.c:107", SWI_PCS_CLK_SEL, priv->base + PHY_CTRL0);
 	qcom_ssphy_updatel(priv->base + PHY_CTRL4, LANE0_PWR_ON, LANE0_PWR_ON);
 	qcom_ssphy_updatel(priv->base + PHY_CTRL2, REF_PHY_EN, REF_PHY_EN);
 	qcom_ssphy_updatel(priv->base + PHY_CTRL4, TST_PWR_DOWN, 0);

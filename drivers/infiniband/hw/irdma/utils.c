@@ -127,7 +127,7 @@ inline u32 rd32(struct irdma_hw *hw, u32 reg)
  */
 inline u64 rd64(struct irdma_hw *hw, u32 reg)
 {
-	return readq(hw->hw_addr + reg);
+	return pete_readq("drivers/infiniband/hw/irdma/utils.c:130", hw->hw_addr + reg);
 }
 
 static void irdma_gid_change_event(struct ib_device *ibdev)

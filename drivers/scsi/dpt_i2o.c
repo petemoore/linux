@@ -165,8 +165,8 @@ static inline u32 dma_low(dma_addr_t addr)
 static u8 adpt_read_blink_led(adpt_hba* host)
 {
 	if (host->FwDebugBLEDflag_P) {
-		if( readb(host->FwDebugBLEDflag_P) == 0xbc ){
-			return readb(host->FwDebugBLEDvalue_P);
+		if( pete_readb("drivers/scsi/dpt_i2o.c:168", host->FwDebugBLEDflag_P) == 0xbc ){
+			return pete_readb("drivers/scsi/dpt_i2o.c:169", host->FwDebugBLEDvalue_P);
 		}
 	}
 	return 0;

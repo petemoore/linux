@@ -1832,7 +1832,7 @@ static void iwl_trans_pcie_op_mode_leave(struct iwl_trans *trans)
 
 static void iwl_trans_pcie_write8(struct iwl_trans *trans, u32 ofs, u8 val)
 {
-	writeb(val, IWL_TRANS_GET_PCIE_TRANS(trans)->hw_base + ofs);
+	pete_writeb("drivers/net/wireless/intel/iwlwifi/pcie/trans.c:1835", val, IWL_TRANS_GET_PCIE_TRANS(trans)->hw_base + ofs);
 }
 
 static void iwl_trans_pcie_write32(struct iwl_trans *trans, u32 ofs, u32 val)

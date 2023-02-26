@@ -7251,7 +7251,7 @@ static int write_driver_ver_to_cfgtable(struct CfgTable __iomem *cfgtable)
 
 	init_driver_version(driver_version, size);
 	for (i = 0; i < size; i++)
-		writeb(driver_version[i], &cfgtable->driver_version[i]);
+		pete_writeb("drivers/scsi/hpsa.c:7254", driver_version[i], &cfgtable->driver_version[i]);
 	kfree(driver_version);
 	return 0;
 }
@@ -7262,7 +7262,7 @@ static void read_driver_ver_from_cfgtable(struct CfgTable __iomem *cfgtable,
 	int i;
 
 	for (i = 0; i < sizeof(cfgtable->driver_version); i++)
-		driver_ver[i] = readb(&cfgtable->driver_version[i]);
+		driver_ver[i] = pete_readb("drivers/scsi/hpsa.c:7265", &cfgtable->driver_version[i]);
 }
 
 static int controller_reset_failed(struct CfgTable __iomem *cfgtable)
@@ -7418,7 +7418,7 @@ static void print_cfg_table(struct device *dev, struct CfgTable __iomem *tb)
 	dev_info(dev, "Controller Configuration information\n");
 	dev_info(dev, "------------------------------------\n");
 	for (i = 0; i < 4; i++)
-		temp_name[i] = readb(&(tb->Signature[i]));
+		temp_name[i] = pete_readb("drivers/scsi/hpsa.c:7421", &(tb->Signature[i]));
 	temp_name[4] = '\0';
 	dev_info(dev, "   Signature = %s\n", temp_name);
 	dev_info(dev, "   Spec Number = %d\n", pete_readl("drivers/scsi/hpsa.c:7424", &(tb->SpecValence)));
@@ -7436,7 +7436,7 @@ static void print_cfg_table(struct device *dev, struct CfgTable __iomem *tb)
 	       pete_readl("drivers/scsi/hpsa.c:7436", &(tb->CmdsOutMax)));
 	dev_info(dev, "   Bus Types = 0x%x\n", pete_readl("drivers/scsi/hpsa.c:7437", &(tb->BusTypes)));
 	for (i = 0; i < 16; i++)
-		temp_name[i] = readb(&(tb->ServerName[i]));
+		temp_name[i] = pete_readb("drivers/scsi/hpsa.c:7439", &(tb->ServerName[i]));
 	temp_name[16] = '\0';
 	dev_info(dev, "   Server Name = %s\n", temp_name);
 	dev_info(dev, "   Heartbeat Counter = 0x%x\n\n\n",

@@ -17,7 +17,7 @@ static void ql4xxx_set_mac_number(struct scsi_qla_host *ha)
 
 	/* Get the function number */
 	spin_lock_irqsave(&ha->hardware_lock, flags);
-	value = readw(&ha->reg->ctrl_status);
+	value = pete_readw("drivers/scsi/qla4xxx/ql4_init.c:20", &ha->reg->ctrl_status);
 	spin_unlock_irqrestore(&ha->hardware_lock, flags);
 
 	switch (value & ISP_CONTROL_FN_MASK) {
@@ -721,8 +721,8 @@ static int qla4xxx_start_firmware_from_flash(struct scsi_qla_host *ha)
 		uint32_t ctrl_status;
 
 		spin_lock_irqsave(&ha->hardware_lock, flags);
-		ctrl_status = readw(&ha->reg->ctrl_status);
-		mbox_status = readw(&ha->reg->mailbox[0]);
+		ctrl_status = pete_readw("drivers/scsi/qla4xxx/ql4_init.c:724", &ha->reg->ctrl_status);
+		mbox_status = pete_readw("drivers/scsi/qla4xxx/ql4_init.c:725", &ha->reg->mailbox[0]);
 		spin_unlock_irqrestore(&ha->hardware_lock, flags);
 
 		if (ctrl_status & set_rmask(CSR_SCSI_PROCESSOR_INTR))
@@ -804,17 +804,17 @@ int qla4xxx_start_firmware(struct scsi_qla_host *ha)
 	spin_lock_irqsave(&ha->hardware_lock, flags);
 
 	DEBUG2(printk("scsi%ld: %s: port_ctrl	= 0x%08X\n", ha->host_no,
-		      __func__, readw(isp_port_ctrl(ha))));
+		      __func__, pete_readw("drivers/scsi/qla4xxx/ql4_init.c:807", isp_port_ctrl(ha))));
 	DEBUG(printk("scsi%ld: %s: port_status = 0x%08X\n", ha->host_no,
-		     __func__, readw(isp_port_status(ha))));
+		     __func__, pete_readw("drivers/scsi/qla4xxx/ql4_init.c:809", isp_port_status(ha))));
 
 	/* Is Hardware already initialized? */
-	if ((readw(isp_port_ctrl(ha)) & 0x8000) != 0) {
+	if ((pete_readw("drivers/scsi/qla4xxx/ql4_init.c:812", isp_port_ctrl(ha)) & 0x8000) != 0) {
 		DEBUG(printk("scsi%ld: %s: Hardware has already been "
 			     "initialized\n", ha->host_no, __func__));
 
 		/* Receive firmware boot acknowledgement */
-		mbox_status = readw(&ha->reg->mailbox[0]);
+		mbox_status = pete_readw("drivers/scsi/qla4xxx/ql4_init.c:817", &ha->reg->mailbox[0]);
 
 		DEBUG2(printk("scsi%ld: %s: H/W Config complete - mbox[0]= "
 			      "0x%x\n", ha->host_no, __func__, mbox_status));

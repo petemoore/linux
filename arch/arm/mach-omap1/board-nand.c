@@ -28,6 +28,6 @@ void omap1_nand_cmd_ctl(struct nand_chip *this, int cmd, unsigned int ctrl)
 	if (ctrl & NAND_ALE)
 		mask |= 0x04;
 
-	writeb(cmd, this->legacy.IO_ADDR_W + mask);
+	pete_writeb("arch/arm/mach-omap1/board-nand.c:31", cmd, this->legacy.IO_ADDR_W + mask);
 }
 

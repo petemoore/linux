@@ -92,14 +92,14 @@ static int tiny_spi_setup(struct spi_device *spi)
 
 static inline void tiny_spi_wait_txr(struct tiny_spi *hw)
 {
-	while (!(readb(hw->base + TINY_SPI_STATUS) &
+	while (!(pete_readb("drivers/spi/spi-oc-tiny.c:95", hw->base + TINY_SPI_STATUS) &
 		 TINY_SPI_STATUS_TXR))
 		cpu_relax();
 }
 
 static inline void tiny_spi_wait_txe(struct tiny_spi *hw)
 {
-	while (!(readb(hw->base + TINY_SPI_STATUS) &
+	while (!(pete_readb("drivers/spi/spi-oc-tiny.c:102", hw->base + TINY_SPI_STATUS) &
 		 TINY_SPI_STATUS_TXE))
 		cpu_relax();
 }
@@ -121,35 +121,35 @@ static int tiny_spi_txrx_bufs(struct spi_device *spi, struct spi_transfer *t)
 
 		/* send the first byte */
 		if (t->len > 1) {
-			writeb(hw->txp ? *hw->txp++ : 0,
+			pete_writeb("drivers/spi/spi-oc-tiny.c:124", hw->txp ? *hw->txp++ : 0,
 			       hw->base + TINY_SPI_TXDATA);
 			hw->txc++;
-			writeb(hw->txp ? *hw->txp++ : 0,
+			pete_writeb("drivers/spi/spi-oc-tiny.c:127", hw->txp ? *hw->txp++ : 0,
 			       hw->base + TINY_SPI_TXDATA);
 			hw->txc++;
-			writeb(TINY_SPI_STATUS_TXR, hw->base + TINY_SPI_STATUS);
+			pete_writeb("drivers/spi/spi-oc-tiny.c:130", TINY_SPI_STATUS_TXR, hw->base + TINY_SPI_STATUS);
 		} else {
-			writeb(hw->txp ? *hw->txp++ : 0,
+			pete_writeb("drivers/spi/spi-oc-tiny.c:132", hw->txp ? *hw->txp++ : 0,
 			       hw->base + TINY_SPI_TXDATA);
 			hw->txc++;
-			writeb(TINY_SPI_STATUS_TXE, hw->base + TINY_SPI_STATUS);
+			pete_writeb("drivers/spi/spi-oc-tiny.c:135", TINY_SPI_STATUS_TXE, hw->base + TINY_SPI_STATUS);
 		}
 
 		wait_for_completion(&hw->done);
 	} else {
 		/* we need to tighten the transfer loop */
-		writeb(txp ? *txp++ : 0, hw->base + TINY_SPI_TXDATA);
+		pete_writeb("drivers/spi/spi-oc-tiny.c:141", txp ? *txp++ : 0, hw->base + TINY_SPI_TXDATA);
 		for (i = 1; i < t->len; i++) {
-			writeb(txp ? *txp++ : 0, hw->base + TINY_SPI_TXDATA);
+			pete_writeb("drivers/spi/spi-oc-tiny.c:143", txp ? *txp++ : 0, hw->base + TINY_SPI_TXDATA);
 
 			if (rxp || (i != t->len - 1))
 				tiny_spi_wait_txr(hw);
 			if (rxp)
-				*rxp++ = readb(hw->base + TINY_SPI_TXDATA);
+				*rxp++ = pete_readb("drivers/spi/spi-oc-tiny.c:148", hw->base + TINY_SPI_TXDATA);
 		}
 		tiny_spi_wait_txe(hw);
 		if (rxp)
-			*rxp++ = readb(hw->base + TINY_SPI_RXDATA);
+			*rxp++ = pete_readb("drivers/spi/spi-oc-tiny.c:152", hw->base + TINY_SPI_RXDATA);
 	}
 
 	return t->len;
@@ -159,24 +159,24 @@ static irqreturn_t tiny_spi_irq(int irq, void *dev)
 {
 	struct tiny_spi *hw = dev;
 
-	writeb(0, hw->base + TINY_SPI_STATUS);
+	pete_writeb("drivers/spi/spi-oc-tiny.c:162", 0, hw->base + TINY_SPI_STATUS);
 	if (hw->rxc + 1 == hw->len) {
 		if (hw->rxp)
-			*hw->rxp++ = readb(hw->base + TINY_SPI_RXDATA);
+			*hw->rxp++ = pete_readb("drivers/spi/spi-oc-tiny.c:165", hw->base + TINY_SPI_RXDATA);
 		hw->rxc++;
 		complete(&hw->done);
 	} else {
 		if (hw->rxp)
-			*hw->rxp++ = readb(hw->base + TINY_SPI_TXDATA);
+			*hw->rxp++ = pete_readb("drivers/spi/spi-oc-tiny.c:170", hw->base + TINY_SPI_TXDATA);
 		hw->rxc++;
 		if (hw->txc < hw->len) {
-			writeb(hw->txp ? *hw->txp++ : 0,
+			pete_writeb("drivers/spi/spi-oc-tiny.c:173", hw->txp ? *hw->txp++ : 0,
 			       hw->base + TINY_SPI_TXDATA);
 			hw->txc++;
-			writeb(TINY_SPI_STATUS_TXR,
+			pete_writeb("drivers/spi/spi-oc-tiny.c:176", TINY_SPI_STATUS_TXR,
 			       hw->base + TINY_SPI_STATUS);
 		} else {
-			writeb(TINY_SPI_STATUS_TXE,
+			pete_writeb("drivers/spi/spi-oc-tiny.c:179", TINY_SPI_STATUS_TXE,
 			       hw->base + TINY_SPI_STATUS);
 		}
 	}

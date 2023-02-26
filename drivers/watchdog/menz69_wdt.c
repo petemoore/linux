@@ -36,9 +36,9 @@ static int men_z069_wdt_start(struct watchdog_device *wdt)
 	struct men_z069_drv *drv = watchdog_get_drvdata(wdt);
 	u16 val;
 
-	val = readw(drv->base + MEN_Z069_WTR);
+	val = pete_readw("drivers/watchdog/menz69_wdt.c:39", drv->base + MEN_Z069_WTR);
 	val |= MEN_Z069_WTR_WDEN;
-	writew(val, drv->base + MEN_Z069_WTR);
+	pete_writew("drivers/watchdog/menz69_wdt.c:41", val, drv->base + MEN_Z069_WTR);
 
 	return 0;
 }
@@ -48,9 +48,9 @@ static int men_z069_wdt_stop(struct watchdog_device *wdt)
 	struct men_z069_drv *drv = watchdog_get_drvdata(wdt);
 	u16 val;
 
-	val = readw(drv->base + MEN_Z069_WTR);
+	val = pete_readw("drivers/watchdog/menz69_wdt.c:51", drv->base + MEN_Z069_WTR);
 	val &= ~MEN_Z069_WTR_WDEN;
-	writew(val, drv->base + MEN_Z069_WTR);
+	pete_writew("drivers/watchdog/menz69_wdt.c:53", val, drv->base + MEN_Z069_WTR);
 
 	return 0;
 }
@@ -61,9 +61,9 @@ static int men_z069_wdt_ping(struct watchdog_device *wdt)
 	u16 val;
 
 	/* The watchdog trigger value toggles between 0x5555 and 0xaaaa */
-	val = readw(drv->base + MEN_Z069_WVR);
+	val = pete_readw("drivers/watchdog/menz69_wdt.c:64", drv->base + MEN_Z069_WVR);
 	val ^= 0xffff;
-	writew(val, drv->base + MEN_Z069_WVR);
+	pete_writew("drivers/watchdog/menz69_wdt.c:66", val, drv->base + MEN_Z069_WVR);
 
 	return 0;
 }
@@ -77,10 +77,10 @@ static int men_z069_wdt_set_timeout(struct watchdog_device *wdt,
 	wdt->timeout = timeout;
 	val = timeout * MEN_Z069_TIMER_FREQ;
 
-	reg = readw(drv->base + MEN_Z069_WVR);
+	reg = pete_readw("drivers/watchdog/menz69_wdt.c:80", drv->base + MEN_Z069_WVR);
 	ena = reg & MEN_Z069_WTR_WDEN;
 	reg = ena | val;
-	writew(reg, drv->base + MEN_Z069_WTR);
+	pete_writew("drivers/watchdog/menz69_wdt.c:83", reg, drv->base + MEN_Z069_WTR);
 
 	return 0;
 }

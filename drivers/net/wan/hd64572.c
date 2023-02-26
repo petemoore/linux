@@ -45,10 +45,10 @@
 #define get_dmac_rx(port) ((port)->chan ? DMAC1RX_OFFSET : DMAC0RX_OFFSET)
 #define get_dmac_tx(port) ((port)->chan ? DMAC1TX_OFFSET : DMAC0TX_OFFSET)
 
-#define sca_in(reg, card)	     readb((card)->scabase + (reg))
-#define sca_out(value, reg, card)    writeb(value, (card)->scabase + (reg))
-#define sca_inw(reg, card)	     readw((card)->scabase + (reg))
-#define sca_outw(value, reg, card)   writew(value, (card)->scabase + (reg))
+#define sca_in(reg, card)	     pete_readb("drivers/net/wan/hd64572.c:48", (card)->scabase + (reg))
+#define sca_out(value, reg, card)    pete_writeb("drivers/net/wan/hd64572.c:49", value, (card)->scabase + (reg))
+#define sca_inw(reg, card)	     pete_readw("drivers/net/wan/hd64572.c:50", (card)->scabase + (reg))
+#define sca_outw(value, reg, card)   pete_writew("drivers/net/wan/hd64572.c:51", value, (card)->scabase + (reg))
 #define sca_inl(reg, card)	     pete_readl("drivers/net/wan/hd64572.c:52", (card)->scabase + (reg))
 #define sca_outl(value, reg, card)   pete_writel("drivers/net/wan/hd64572.c:53", value, (card)->scabase + (reg))
 
@@ -138,8 +138,8 @@ static void sca_init_port(port_t *port)
 
 			pete_writel("drivers/net/wan/hd64572.c:139", chain_off, &desc->cp);
 			pete_writel("drivers/net/wan/hd64572.c:140", buff_off, &desc->bp);
-			writew(0, &desc->len);
-			writeb(0, &desc->stat);
+			pete_writew("drivers/net/wan/hd64572.c:141", 0, &desc->len);
+			pete_writeb("drivers/net/wan/hd64572.c:142", 0, &desc->stat);
 		}
 	}
 
@@ -197,7 +197,7 @@ static inline void sca_rx(card_t *card, port_t *port, pkt_desc __iomem *desc,
 	u16 len;
 	u32 buff;
 
-	len = readw(&desc->len);
+	len = pete_readw("drivers/net/wan/hd64572.c:200", &desc->len);
 	skb = dev_alloc_skb(len);
 	if (!skb) {
 		dev->stats.rx_dropped++;
@@ -244,7 +244,7 @@ static inline int sca_rx_done(port_t *port, int budget)
 			break;	/* No frame received */
 
 		desc = desc_address(port, port->rxin, 0);
-		stat = readb(&desc->stat);
+		stat = pete_readb("drivers/net/wan/hd64572.c:247", &desc->stat);
 		if (!(stat & ST_RX_EOM))
 			port->rxpart = 1; /* partial frame received */
 		else if ((stat & ST_ERROR_MASK) || port->rxpart) {
@@ -291,7 +291,7 @@ static inline void sca_tx_done(port_t *port)
 
 	while (1) {
 		pkt_desc __iomem *desc = desc_address(port, port->txlast, 1);
-		u8 stat = readb(&desc->stat);
+		u8 stat = pete_readb("drivers/net/wan/hd64572.c:294", &desc->stat);
 
 		if (!(stat & ST_TX_OWNRSHP))
 			break; /* not yet transmitted */
@@ -300,9 +300,9 @@ static inline void sca_tx_done(port_t *port)
 			dev->stats.tx_fifo_errors++;
 		} else {
 			dev->stats.tx_packets++;
-			dev->stats.tx_bytes += readw(&desc->len);
+			dev->stats.tx_bytes += pete_readw("drivers/net/wan/hd64572.c:303", &desc->len);
 		}
-		writeb(0, &desc->stat);	/* Free descriptor */
+		pete_writeb("drivers/net/wan/hd64572.c:305", 0, &desc->stat);	/* Free descriptor */
 		count++;
 		port->txlast = (port->txlast + 1) % card->tx_ring_buffers;
 	}
@@ -527,7 +527,7 @@ static void sca_dump_rings(struct net_device *dev)
 	       sca_in(DSR_RX(port->chan), card), port->rxin,
 	       sca_in(DSR_RX(port->chan), card) & DSR_DE ? "" : "in");
 	for (cnt = 0; cnt < port->card->rx_ring_buffers; cnt++)
-		pr_cont(" %02X", readb(&(desc_address(port, cnt, 0)->stat)));
+		pr_cont(" %02X", pete_readb("drivers/net/wan/hd64572.c:530", &(desc_address(port, cnt, 0)->stat)));
 	pr_cont("\n");
 
 	printk(KERN_DEBUG "TX ring: CDA=%u EDA=%u DSR=%02X in=%u "
@@ -538,7 +538,7 @@ static void sca_dump_rings(struct net_device *dev)
 	       sca_in(DSR_TX(port->chan), card) & DSR_DE ? "" : "in");
 
 	for (cnt = 0; cnt < port->card->tx_ring_buffers; cnt++)
-		pr_cont(" %02X", readb(&(desc_address(port, cnt, 1)->stat)));
+		pr_cont(" %02X", pete_readb("drivers/net/wan/hd64572.c:541", &(desc_address(port, cnt, 1)->stat)));
 	pr_cont("\n");
 
 	printk(KERN_DEBUG "MSCI: MD: %02x %02x %02x,"
@@ -570,7 +570,7 @@ static netdev_tx_t sca_xmit(struct sk_buff *skb, struct net_device *dev)
 	spin_lock_irq(&port->lock);
 
 	desc = desc_address(port, port->txin + 1, 1);
-	BUG_ON(readb(&desc->stat)); /* previous xmit should stop queue */
+	BUG_ON(pete_readb("drivers/net/wan/hd64572.c:573", &desc->stat)); /* previous xmit should stop queue */
 
 #ifdef DEBUG_PKT
 	printk(KERN_DEBUG "%s TX(%i):", dev->name, skb->len);
@@ -582,8 +582,8 @@ static netdev_tx_t sca_xmit(struct sk_buff *skb, struct net_device *dev)
 	len = skb->len;
 	memcpy_toio(card->rambase + buff, skb->data, len);
 
-	writew(len, &desc->len);
-	writeb(ST_TX_EOM, &desc->stat);
+	pete_writew("drivers/net/wan/hd64572.c:585", len, &desc->len);
+	pete_writeb("drivers/net/wan/hd64572.c:586", ST_TX_EOM, &desc->stat);
 
 	port->txin = (port->txin + 1) % card->tx_ring_buffers;
 	sca_outl(desc_offset(port, port->txin, 1),
@@ -592,7 +592,7 @@ static netdev_tx_t sca_xmit(struct sk_buff *skb, struct net_device *dev)
 	sca_out(DSR_DE, DSR_TX(port->chan), card); /* Enable TX DMA */
 
 	desc = desc_address(port, port->txin + 1, 1);
-	if (readb(&desc->stat)) /* allow 1 packet gap */
+	if (pete_readb("drivers/net/wan/hd64572.c:595", &desc->stat)) /* allow 1 packet gap */
 		netif_stop_queue(dev);
 
 	spin_unlock_irq(&port->lock);

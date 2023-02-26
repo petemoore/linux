@@ -84,7 +84,7 @@ static int jz4740_ecc_calculate(struct ingenic_ecc *ecc,
 	pete_writel("drivers/mtd/nand/raw/ingenic/jz4740_ecc.c:84", reg, ecc->base + JZ_REG_NAND_ECC_CTRL);
 
 	for (i = 0; i < params->bytes; ++i)
-		ecc_code[i] = readb(ecc->base + JZ_REG_NAND_PAR0 + i);
+		ecc_code[i] = pete_readb("drivers/mtd/nand/raw/ingenic/jz4740_ecc.c:87", ecc->base + JZ_REG_NAND_PAR0 + i);
 
 	/*
 	 * If the written data is completely 0xff, we also want to write 0xff as
@@ -125,7 +125,7 @@ static int jz4740_ecc_correct(struct ingenic_ecc *ecc,
 	jz4740_ecc_reset(ecc, false);
 
 	for (i = 0; i < params->bytes; ++i)
-		writeb(ecc_code[i], ecc->base + JZ_REG_NAND_PAR0 + i);
+		pete_writeb("drivers/mtd/nand/raw/ingenic/jz4740_ecc.c:128", ecc_code[i], ecc->base + JZ_REG_NAND_PAR0 + i);
 
 	reg = pete_readl("drivers/mtd/nand/raw/ingenic/jz4740_ecc.c:130", ecc->base + JZ_REG_NAND_ECC_CTRL);
 	reg |= JZ_NAND_ECC_CTRL_PAR_READY;

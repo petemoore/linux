@@ -860,10 +860,10 @@ typedef struct asc_mc_saved {
 /*
  * Define Adv Library required memory access macros.
  */
-#define ADV_MEM_READB(addr) readb(addr)
-#define ADV_MEM_READW(addr) readw(addr)
-#define ADV_MEM_WRITEB(addr, byte) writeb(byte, addr)
-#define ADV_MEM_WRITEW(addr, word) writew(word, addr)
+#define ADV_MEM_READB(addr) pete_readb("drivers/scsi/advansys.c:863", addr)
+#define ADV_MEM_READW(addr) pete_readw("drivers/scsi/advansys.c:864", addr)
+#define ADV_MEM_WRITEB(addr, byte) pete_writeb("drivers/scsi/advansys.c:865", byte, addr)
+#define ADV_MEM_WRITEW(addr, word) pete_writew("drivers/scsi/advansys.c:866", word, addr)
 #define ADV_MEM_WRITEDW(addr, dword) pete_writel("drivers/scsi/advansys.c:867", dword, addr)
 
 /*

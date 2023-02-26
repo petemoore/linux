@@ -232,10 +232,10 @@ static int amd_irongate_configure(void)
 	pci_write_config_byte(agp_bridge->dev, AMD_MODECNTL2, 0x00);
 
 	/* Write the enable register */
-	enable_reg = readw(amd_irongate_private.registers+AMD_GARTENABLE);
+	enable_reg = pete_readw("drivers/char/agp/amd-k7-agp.c:235", amd_irongate_private.registers+AMD_GARTENABLE);
 	enable_reg = (enable_reg | 0x0004);
-	writew(enable_reg, amd_irongate_private.registers+AMD_GARTENABLE);
-	readw(amd_irongate_private.registers+AMD_GARTENABLE);	/* PCI Posting. */
+	pete_writew("drivers/char/agp/amd-k7-agp.c:237", enable_reg, amd_irongate_private.registers+AMD_GARTENABLE);
+	pete_readw("drivers/char/agp/amd-k7-agp.c:238", amd_irongate_private.registers+AMD_GARTENABLE);	/* PCI Posting. */
 
 	/* Write out the size register */
 	pci_read_config_dword(agp_bridge->dev, AMD_APSIZE, &temp);
@@ -256,10 +256,10 @@ static void amd_irongate_cleanup(void)
 
 	previous_size = A_SIZE_LVL2(agp_bridge->previous_size);
 
-	enable_reg = readw(amd_irongate_private.registers+AMD_GARTENABLE);
+	enable_reg = pete_readw("drivers/char/agp/amd-k7-agp.c:259", amd_irongate_private.registers+AMD_GARTENABLE);
 	enable_reg = (enable_reg & ~(0x0004));
-	writew(enable_reg, amd_irongate_private.registers+AMD_GARTENABLE);
-	readw(amd_irongate_private.registers+AMD_GARTENABLE);	/* PCI Posting. */
+	pete_writew("drivers/char/agp/amd-k7-agp.c:261", enable_reg, amd_irongate_private.registers+AMD_GARTENABLE);
+	pete_readw("drivers/char/agp/amd-k7-agp.c:262", amd_irongate_private.registers+AMD_GARTENABLE);	/* PCI Posting. */
 
 	/* Write back the previous size and disable gart translation */
 	pci_read_config_dword(agp_bridge->dev, AMD_APSIZE, &temp);

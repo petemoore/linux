@@ -33,14 +33,14 @@ struct qlcnic_ms_reg_ctrl {
 };
 
 #ifndef readq
-static inline u64 readq(void __iomem *addr)
+static inline u64 pete_readq("drivers/net/ethernet/qlogic/qlcnic/qlcnic_hw.c:36", void __iomem *addr)
 {
 	return pete_readl("drivers/net/ethernet/qlogic/qlcnic/qlcnic_hw.c:38", addr) | (((u64) pete_readl("drivers/net/ethernet/qlogic/qlcnic/qlcnic_hw.c:38", addr + 4)) << 32LL);
 }
 #endif
 
 #ifndef writeq
-static inline void writeq(u64 val, void __iomem *addr)
+static inline void pete_writeq("drivers/net/ethernet/qlogic/qlcnic/qlcnic_hw.c:43", u64 val, void __iomem *addr)
 {
 	pete_writel("drivers/net/ethernet/qlogic/qlcnic/qlcnic_hw.c:45", ((u32) (val)), (addr));
 	pete_writel("drivers/net/ethernet/qlogic/qlcnic/qlcnic_hw.c:46", ((u32) (val >> 32)), (addr + 4));
@@ -1257,9 +1257,9 @@ static int qlcnic_pci_mem_access_direct(struct qlcnic_adapter *adapter,
 	addr = adapter->ahw->pci_base0 + start;
 
 	if (op == 0)	/* read */
-		*data = readq(addr);
+		*data = pete_readq("drivers/net/ethernet/qlogic/qlcnic/qlcnic_hw.c:1260", addr);
 	else		/* write */
-		writeq(*data, addr);
+		pete_writeq("drivers/net/ethernet/qlogic/qlcnic/qlcnic_hw.c:1262", *data, addr);
 
 	/* Set window to 0 */
 	pete_writel("drivers/net/ethernet/qlogic/qlcnic/qlcnic_hw.c:1265", 0, adapter->ahw->ocm_win_crb);
@@ -1276,7 +1276,7 @@ qlcnic_pci_camqm_read_2M(struct qlcnic_adapter *adapter, u64 off, u64 *data)
 		QLCNIC_PCI_CAMQM_2M_BASE + (off - QLCNIC_PCI_CAMQM);
 
 	mutex_lock(&adapter->ahw->mem_lock);
-	*data = readq(addr);
+	*data = pete_readq("drivers/net/ethernet/qlogic/qlcnic/qlcnic_hw.c:1279", addr);
 	mutex_unlock(&adapter->ahw->mem_lock);
 }
 
@@ -1287,7 +1287,7 @@ qlcnic_pci_camqm_write_2M(struct qlcnic_adapter *adapter, u64 off, u64 data)
 		QLCNIC_PCI_CAMQM_2M_BASE + (off - QLCNIC_PCI_CAMQM);
 
 	mutex_lock(&adapter->ahw->mem_lock);
-	writeq(data, addr);
+	pete_writeq("drivers/net/ethernet/qlogic/qlcnic/qlcnic_hw.c:1290", data, addr);
 	mutex_unlock(&adapter->ahw->mem_lock);
 }
 

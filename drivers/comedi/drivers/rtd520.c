@@ -494,7 +494,7 @@ static int rtd520_probe_fifo_depth(struct comedi_device *dev)
 	for (i = 0; i < limit; ++i) {
 		unsigned int fifo_status;
 		/* trigger conversion */
-		writew(0, dev->mmio + LAS0_ADC);
+		pete_writew("drivers/comedi/drivers/rtd520.c:497", 0, dev->mmio + LAS0_ADC);
 		usleep_range(1, 1000);
 		fifo_status = pete_readl("drivers/comedi/drivers/rtd520.c:499", dev->mmio + LAS0_ADC);
 		if ((fifo_status & FS_ADC_HEMPTY) == 0) {
@@ -551,14 +551,14 @@ static int rtd_ai_rinsn(struct comedi_device *dev,
 	for (n = 0; n < insn->n; n++) {
 		unsigned short d;
 		/* trigger conversion */
-		writew(0, dev->mmio + LAS0_ADC);
+		pete_writew("drivers/comedi/drivers/rtd520.c:554", 0, dev->mmio + LAS0_ADC);
 
 		ret = comedi_timeout(dev, s, insn, rtd_ai_eoc, 0);
 		if (ret)
 			return ret;
 
 		/* read data */
-		d = readw(devpriv->las1 + LAS1_ADC_FIFO);
+		d = pete_readw("drivers/comedi/drivers/rtd520.c:561", devpriv->las1 + LAS1_ADC_FIFO);
 		d >>= 3;	/* low 3 bits are marker lines */
 
 		/* convert bipolar data to comedi unsigned data */
@@ -585,11 +585,11 @@ static int ai_read_n(struct comedi_device *dev, struct comedi_subdevice *s,
 		unsigned short d;
 
 		if (devpriv->ai_count == 0) {	/* done */
-			d = readw(devpriv->las1 + LAS1_ADC_FIFO);
+			d = pete_readw("drivers/comedi/drivers/rtd520.c:588", devpriv->las1 + LAS1_ADC_FIFO);
 			continue;
 		}
 
-		d = readw(devpriv->las1 + LAS1_ADC_FIFO);
+		d = pete_readw("drivers/comedi/drivers/rtd520.c:592", devpriv->las1 + LAS1_ADC_FIFO);
 		d >>= 3;	/* low 3 bits are marker lines */
 
 		/* convert bipolar data to comedi unsigned data */
@@ -623,7 +623,7 @@ static irqreturn_t rtd_interrupt(int irq, void *d)
 	if (!(fifo_status & FS_ADC_NOT_FULL))	/* 0 -> full */
 		goto xfer_abort;
 
-	status = readw(dev->mmio + LAS0_IT);
+	status = pete_readw("drivers/comedi/drivers/rtd520.c:626", dev->mmio + LAS0_IT);
 	/* if interrupt was not caused by our board, or handled above */
 	if (status == 0)
 		return IRQ_HANDLED;
@@ -659,8 +659,8 @@ static irqreturn_t rtd_interrupt(int irq, void *d)
 		goto xfer_abort;
 
 	/* clear the interrupt */
-	writew(status, dev->mmio + LAS0_CLEAR);
-	readw(dev->mmio + LAS0_CLEAR);
+	pete_writew("drivers/comedi/drivers/rtd520.c:662", status, dev->mmio + LAS0_CLEAR);
+	pete_readw("drivers/comedi/drivers/rtd520.c:663", dev->mmio + LAS0_CLEAR);
 
 	comedi_handle_events(dev, s);
 
@@ -673,9 +673,9 @@ xfer_done:
 	s->async->events |= COMEDI_CB_EOA;
 
 	/* clear the interrupt */
-	status = readw(dev->mmio + LAS0_IT);
-	writew(status, dev->mmio + LAS0_CLEAR);
-	readw(dev->mmio + LAS0_CLEAR);
+	status = pete_readw("drivers/comedi/drivers/rtd520.c:676", dev->mmio + LAS0_IT);
+	pete_writew("drivers/comedi/drivers/rtd520.c:677", status, dev->mmio + LAS0_CLEAR);
+	pete_readw("drivers/comedi/drivers/rtd520.c:678", dev->mmio + LAS0_CLEAR);
 
 	fifo_status = pete_readl("drivers/comedi/drivers/rtd520.c:680", dev->mmio + LAS0_ADC);
 	overrun = pete_readl("drivers/comedi/drivers/rtd520.c:681", dev->mmio + LAS0_OVERRUN) & 0xffff;
@@ -837,7 +837,7 @@ static int rtd_ai_cmd(struct comedi_device *dev, struct comedi_subdevice *s)
 	pete_writel("drivers/comedi/drivers/rtd520.c:837", 0, dev->mmio + LAS0_PACER_STOP);
 	pete_writel("drivers/comedi/drivers/rtd520.c:838", 0, dev->mmio + LAS0_PACER);	/* stop pacer */
 	pete_writel("drivers/comedi/drivers/rtd520.c:839", 0, dev->mmio + LAS0_ADC_CONVERSION);
-	writew(0, dev->mmio + LAS0_IT);
+	pete_writew("drivers/comedi/drivers/rtd520.c:840", 0, dev->mmio + LAS0_IT);
 	pete_writel("drivers/comedi/drivers/rtd520.c:841", 0, dev->mmio + LAS0_ADC_FIFO_CLEAR);
 	pete_writel("drivers/comedi/drivers/rtd520.c:842", 0, dev->mmio + LAS0_OVERRUN);
 
@@ -963,12 +963,12 @@ static int rtd_ai_cmd(struct comedi_device *dev, struct comedi_subdevice *s)
 	 * This doesn't seem to work.  There is no way to clear an interrupt
 	 * that the priority controller has queued!
 	 */
-	writew(~0, dev->mmio + LAS0_CLEAR);
-	readw(dev->mmio + LAS0_CLEAR);
+	pete_writew("drivers/comedi/drivers/rtd520.c:966", ~0, dev->mmio + LAS0_CLEAR);
+	pete_readw("drivers/comedi/drivers/rtd520.c:967", dev->mmio + LAS0_CLEAR);
 
 	/* TODO: allow multiple interrupt sources */
 	/* transfer every N samples */
-	writew(IRQM_ADC_ABOUT_CNT, dev->mmio + LAS0_IT);
+	pete_writew("drivers/comedi/drivers/rtd520.c:971", IRQM_ADC_ABOUT_CNT, dev->mmio + LAS0_IT);
 
 	/* BUG: start_src is ASSUMED to be TRIG_NOW */
 	/* BUG? it seems like things are running before the "start" */
@@ -984,7 +984,7 @@ static int rtd_ai_cancel(struct comedi_device *dev, struct comedi_subdevice *s)
 	pete_writel("drivers/comedi/drivers/rtd520.c:984", 0, dev->mmio + LAS0_PACER_STOP);
 	pete_writel("drivers/comedi/drivers/rtd520.c:985", 0, dev->mmio + LAS0_PACER);	/* stop pacer */
 	pete_writel("drivers/comedi/drivers/rtd520.c:986", 0, dev->mmio + LAS0_ADC_CONVERSION);
-	writew(0, dev->mmio + LAS0_IT);
+	pete_writew("drivers/comedi/drivers/rtd520.c:987", 0, dev->mmio + LAS0_IT);
 	devpriv->ai_count = 0;	/* stop and don't transfer any more */
 	pete_writel("drivers/comedi/drivers/rtd520.c:989", 0, dev->mmio + LAS0_ADC_FIFO_CLEAR);
 	return 0;
@@ -1017,7 +1017,7 @@ static int rtd_ao_insn_write(struct comedi_device *dev,
 	int i;
 
 	/* Configure the output range (table index matches the range values) */
-	writew(range & 7, dev->mmio + LAS0_DAC_CTRL(chan));
+	pete_writew("drivers/comedi/drivers/rtd520.c:1020", range & 7, dev->mmio + LAS0_DAC_CTRL(chan));
 
 	for (i = 0; i < insn->n; ++i) {
 		unsigned int val = data[i];
@@ -1031,8 +1031,8 @@ static int rtd_ao_insn_write(struct comedi_device *dev,
 		/* shift the 12-bit data (+ sign) to match the register */
 		val <<= 3;
 
-		writew(val, devpriv->las1 + LAS1_DAC_FIFO(chan));
-		writew(0, dev->mmio + LAS0_UPDATE_DAC(chan));
+		pete_writew("drivers/comedi/drivers/rtd520.c:1034", val, devpriv->las1 + LAS1_DAC_FIFO(chan));
+		pete_writew("drivers/comedi/drivers/rtd520.c:1035", 0, dev->mmio + LAS0_UPDATE_DAC(chan));
 
 		ret = comedi_timeout(dev, s, insn, rtd_ao_eoc, 0);
 		if (ret)
@@ -1050,9 +1050,9 @@ static int rtd_dio_insn_bits(struct comedi_device *dev,
 			     unsigned int *data)
 {
 	if (comedi_dio_update_state(s, data))
-		writew(s->state & 0xff, dev->mmio + LAS0_DIO0);
+		pete_writew("drivers/comedi/drivers/rtd520.c:1053", s->state & 0xff, dev->mmio + LAS0_DIO0);
 
-	data[1] = readw(dev->mmio + LAS0_DIO0) & 0xff;
+	data[1] = pete_readw("drivers/comedi/drivers/rtd520.c:1055", dev->mmio + LAS0_DIO0) & 0xff;
 
 	return insn->n;
 }
@@ -1071,11 +1071,11 @@ static int rtd_dio_insn_config(struct comedi_device *dev,
 	/* TODO support digital match interrupts and strobes */
 
 	/* set direction */
-	writew(0x01, dev->mmio + LAS0_DIO_STATUS);
-	writew(s->io_bits & 0xff, dev->mmio + LAS0_DIO0_CTRL);
+	pete_writew("drivers/comedi/drivers/rtd520.c:1074", 0x01, dev->mmio + LAS0_DIO_STATUS);
+	pete_writew("drivers/comedi/drivers/rtd520.c:1075", s->io_bits & 0xff, dev->mmio + LAS0_DIO0_CTRL);
 
 	/* clear interrupts */
-	writew(0x00, dev->mmio + LAS0_DIO_STATUS);
+	pete_writew("drivers/comedi/drivers/rtd520.c:1078", 0x00, dev->mmio + LAS0_DIO_STATUS);
 
 	/* port1 can only be all input or all output */
 
@@ -1111,7 +1111,7 @@ static int rtd_counter_insn_config(struct comedi_device *dev,
 			return -EINVAL;
 
 		devpriv->timer_gate_src[chan] = src;
-		writeb(src, dev->mmio + LAS0_8254_GATE_SEL(chan));
+		pete_writeb("drivers/comedi/drivers/rtd520.c:1114", src, dev->mmio + LAS0_8254_GATE_SEL(chan));
 		break;
 	case INSN_CONFIG_GET_GATE_SRC:
 		data[2] = devpriv->timer_gate_src[chan];
@@ -1145,7 +1145,7 @@ static int rtd_counter_insn_config(struct comedi_device *dev,
 			return -EINVAL;
 
 		devpriv->timer_clk_src[chan] = src;
-		writeb(src, dev->mmio + LAS0_8254_CLK_SEL(chan));
+		pete_writeb("drivers/comedi/drivers/rtd520.c:1148", src, dev->mmio + LAS0_8254_CLK_SEL(chan));
 		break;
 	case INSN_CONFIG_GET_CLOCK_SRC:
 		src = devpriv->timer_clk_src[chan];
@@ -1166,9 +1166,9 @@ static void rtd_reset(struct comedi_device *dev)
 	pete_writel("drivers/comedi/drivers/rtd520.c:1166", 0, dev->mmio + LAS0_BOARD_RESET);
 	usleep_range(100, 1000);	/* needed? */
 	pete_writel("drivers/comedi/drivers/rtd520.c:1168", 0, devpriv->lcfg + PLX_REG_INTCSR);
-	writew(0, dev->mmio + LAS0_IT);
-	writew(~0, dev->mmio + LAS0_CLEAR);
-	readw(dev->mmio + LAS0_CLEAR);
+	pete_writew("drivers/comedi/drivers/rtd520.c:1169", 0, dev->mmio + LAS0_IT);
+	pete_writew("drivers/comedi/drivers/rtd520.c:1170", ~0, dev->mmio + LAS0_CLEAR);
+	pete_readw("drivers/comedi/drivers/rtd520.c:1171", dev->mmio + LAS0_CLEAR);
 }
 
 /*
@@ -1185,7 +1185,7 @@ static void rtd_init_board(struct comedi_device *dev)
 	pete_writel("drivers/comedi/drivers/rtd520.c:1185", 0, dev->mmio + LAS0_DAC_RESET(0));
 	pete_writel("drivers/comedi/drivers/rtd520.c:1186", 0, dev->mmio + LAS0_DAC_RESET(1));
 	/* clear digital IO fifo */
-	writew(0, dev->mmio + LAS0_DIO_STATUS);
+	pete_writew("drivers/comedi/drivers/rtd520.c:1188", 0, dev->mmio + LAS0_DIO_STATUS);
 	/* TODO: set user out source ??? */
 }
 

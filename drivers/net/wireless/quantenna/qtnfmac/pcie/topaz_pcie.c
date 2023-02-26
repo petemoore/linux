@@ -860,7 +860,7 @@ static int qtnf_pre_init_ep(struct qtnf_bus *bus)
 		return ret;
 	}
 
-	writeb(ts->base.msi_enabled, &ts->bda->bda_rc_msi_enabled);
+	pete_writeb("drivers/net/wireless/quantenna/qtnfmac/pcie/topaz_pcie.c:863", ts->base.msi_enabled, &ts->bda->bda_rc_msi_enabled);
 	qtnf_reset_dma_offset(ts);
 
 	/* notify card about driver type and boot mode */

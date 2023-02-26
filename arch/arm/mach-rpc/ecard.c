@@ -160,7 +160,7 @@ static void ecard_task_readbytes(struct ecard_request *req)
 		 * greater than the offset, reset the hardware index counter.
 		 */
 		if (off == 0 || index > off) {
-			writeb(0, base);
+			pete_writeb("arch/arm/mach-rpc/ecard.c:163", 0, base);
 			index = 0;
 		}
 
@@ -169,12 +169,12 @@ static void ecard_task_readbytes(struct ecard_request *req)
 		 * required offset.  The read bytes are discarded.
 		 */
 		while (index < off) {
-			readb(base + page);
+			pete_readb("arch/arm/mach-rpc/ecard.c:172", base + page);
 			index += 1;
 		}
 
 		while (len--) {
-			*buf++ = readb(base + page);
+			*buf++ = pete_readb("arch/arm/mach-rpc/ecard.c:177", base + page);
 			index += 1;
 		}
 	} else {
@@ -186,7 +186,7 @@ static void ecard_task_readbytes(struct ecard_request *req)
 		if (!req->use_loader || !ec->loader) {
 			off *= 4;
 			while (len--) {
-				*buf++ = readb(pbase + off);
+				*buf++ = pete_readb("arch/arm/mach-rpc/ecard.c:189", pbase + off);
 				off += 4;
 			}
 		} else {
@@ -392,7 +392,7 @@ static void ecard_def_irq_disable(ecard_t *ec, int irqnr)
 
 static int ecard_def_irq_pending(ecard_t *ec)
 {
-	return !ec->irqmask || readb(ec->irqaddr) & ec->irqmask;
+	return !ec->irqmask || pete_readb("arch/arm/mach-rpc/ecard.c:395", ec->irqaddr) & ec->irqmask;
 }
 
 static void ecard_def_fiq_enable(ecard_t *ec, int fiqnr)
@@ -407,7 +407,7 @@ static void ecard_def_fiq_disable(ecard_t *ec, int fiqnr)
 
 static int ecard_def_fiq_pending(ecard_t *ec)
 {
-	return !ec->fiqmask || readb(ec->fiqaddr) & ec->fiqmask;
+	return !ec->fiqmask || pete_readb("arch/arm/mach-rpc/ecard.c:410", ec->fiqaddr) & ec->fiqmask;
 }
 
 static expansioncard_ops_t ecard_default_ops = {
@@ -512,7 +512,7 @@ static void ecard_dump_irq_state(void)
 		else
 			printk("  %d: %sclaimed irqaddr %p, mask = %02X, status = %02X\n",
 			       ec->slot_no, claimed,
-			       ec->irqaddr, ec->irqmask, readb(ec->irqaddr));
+			       ec->irqaddr, ec->irqmask, pete_readb("arch/arm/mach-rpc/ecard.c:515", ec->irqaddr));
 	}
 }
 
@@ -879,7 +879,7 @@ static void atomwide_3p_quirk(ecard_t *ec)
 
 	/* Disable interrupts on each port */
 	for (i = 0x2000; i <= 0x2800; i += 0x0400)
-		writeb(0, addr + i + 4);	
+		pete_writeb("arch/arm/mach-rpc/ecard.c:882", 0, addr + i + 4);	
 }
 
 /*

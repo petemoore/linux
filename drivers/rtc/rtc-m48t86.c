@@ -48,8 +48,8 @@ static unsigned char m48t86_readb(struct device *dev, unsigned long addr)
 	struct m48t86_rtc_info *info = dev_get_drvdata(dev);
 	unsigned char value;
 
-	writeb(addr, info->index_reg);
-	value = readb(info->data_reg);
+	pete_writeb("drivers/rtc/rtc-m48t86.c:51", addr, info->index_reg);
+	value = pete_readb("drivers/rtc/rtc-m48t86.c:52", info->data_reg);
 
 	return value;
 }
@@ -59,8 +59,8 @@ static void m48t86_writeb(struct device *dev,
 {
 	struct m48t86_rtc_info *info = dev_get_drvdata(dev);
 
-	writeb(addr, info->index_reg);
-	writeb(value, info->data_reg);
+	pete_writeb("drivers/rtc/rtc-m48t86.c:62", addr, info->index_reg);
+	pete_writeb("drivers/rtc/rtc-m48t86.c:63", value, info->data_reg);
 }
 
 static int m48t86_rtc_read_time(struct device *dev, struct rtc_time *tm)

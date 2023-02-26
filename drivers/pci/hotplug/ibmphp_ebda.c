@@ -241,14 +241,14 @@ int __init ibmphp_access_ebda(void)
 	io_mem = ioremap((0x40 << 4) + 0x0e, 2);
 	if (!io_mem)
 		return -ENOMEM;
-	ebda_seg = readw(io_mem);
+	ebda_seg = pete_readw("drivers/pci/hotplug/ibmphp_ebda.c:244", io_mem);
 	iounmap(io_mem);
 	debug("returned ebda segment: %x\n", ebda_seg);
 
 	io_mem = ioremap(ebda_seg<<4, 1);
 	if (!io_mem)
 		return -ENOMEM;
-	ebda_sz = readb(io_mem);
+	ebda_sz = pete_readb("drivers/pci/hotplug/ibmphp_ebda.c:251", io_mem);
 	iounmap(io_mem);
 	debug("ebda size: %d(KiB)\n", ebda_sz);
 	if (ebda_sz == 0)
@@ -267,12 +267,12 @@ int __init ibmphp_access_ebda(void)
 			 "ibmphp_ebda: next read is beyond ebda_sz\n"))
 			break;
 
-		next_offset = readw(io_mem + offset);	/* offset of next blk */
+		next_offset = pete_readw("drivers/pci/hotplug/ibmphp_ebda.c:270", io_mem + offset);	/* offset of next blk */
 
 		offset += 2;
 		if (next_offset == 0)	/* 0 indicate it's last blk */
 			break;
-		blk_id = readw(io_mem + offset);	/* this blk id */
+		blk_id = pete_readw("drivers/pci/hotplug/ibmphp_ebda.c:275", io_mem + offset);	/* this blk id */
 
 		offset += 2;
 		/* check if it is hot swap block or rio block */
@@ -282,7 +282,7 @@ int __init ibmphp_access_ebda(void)
 		if (blk_id == 0x4853) {
 			debug("now enter hot swap block---\n");
 			debug("hot blk id: %x\n", blk_id);
-			format = readb(io_mem + offset);
+			format = pete_readb("drivers/pci/hotplug/ibmphp_ebda.c:285", io_mem + offset);
 
 			offset += 1;
 			if (format != 4)
@@ -292,16 +292,16 @@ int __init ibmphp_access_ebda(void)
 			base = offset;
 
 			sub_addr = base;
-			re = readw(io_mem + sub_addr);	/* next sub blk */
+			re = pete_readw("drivers/pci/hotplug/ibmphp_ebda.c:295", io_mem + sub_addr);	/* next sub blk */
 
 			sub_addr += 2;
-			rc_id = readw(io_mem + sub_addr);	/* sub blk id */
+			rc_id = pete_readw("drivers/pci/hotplug/ibmphp_ebda.c:298", io_mem + sub_addr);	/* sub blk id */
 
 			sub_addr += 2;
 			if (rc_id != 0x5243)
 				goto error_nodev;
 			/* rc sub blk signature  */
-			num_ctlrs = readb(io_mem + sub_addr);
+			num_ctlrs = pete_readb("drivers/pci/hotplug/ibmphp_ebda.c:304", io_mem + sub_addr);
 
 			sub_addr += 1;
 			hpc_list_ptr = alloc_ebda_hpc_list();
@@ -319,17 +319,17 @@ int __init ibmphp_access_ebda(void)
 
 			sub_addr = base + re;	/* re sub blk */
 			/* FIXME: rc is never used/checked */
-			rc = readw(io_mem + sub_addr);	/* next sub blk */
+			rc = pete_readw("drivers/pci/hotplug/ibmphp_ebda.c:322", io_mem + sub_addr);	/* next sub blk */
 
 			sub_addr += 2;
-			re_id = readw(io_mem + sub_addr);	/* sub blk id */
+			re_id = pete_readw("drivers/pci/hotplug/ibmphp_ebda.c:325", io_mem + sub_addr);	/* sub blk id */
 
 			sub_addr += 2;
 			if (re_id != 0x5245)
 				goto error_nodev;
 
 			/* signature of re */
-			num_entries = readw(io_mem + sub_addr);
+			num_entries = pete_readw("drivers/pci/hotplug/ibmphp_ebda.c:332", io_mem + sub_addr);
 
 			sub_addr += 2;	/* offset of RSRC_ENTRIES blk */
 			rsrc_list_ptr = alloc_ebda_rsrc_list();
@@ -357,9 +357,9 @@ int __init ibmphp_access_ebda(void)
 				rc = -ENOMEM;
 				goto out;
 			}
-			rio_table_ptr->ver_num = readb(io_mem + offset);
-			rio_table_ptr->scal_count = readb(io_mem + offset + 1);
-			rio_table_ptr->riodev_count = readb(io_mem + offset + 2);
+			rio_table_ptr->ver_num = pete_readb("drivers/pci/hotplug/ibmphp_ebda.c:360", io_mem + offset);
+			rio_table_ptr->scal_count = pete_readb("drivers/pci/hotplug/ibmphp_ebda.c:361", io_mem + offset + 1);
+			rio_table_ptr->riodev_count = pete_readb("drivers/pci/hotplug/ibmphp_ebda.c:362", io_mem + offset + 2);
 			rio_table_ptr->offset = offset + 3 ;
 
 			debug("info about rio table hdr ---\n");
@@ -411,18 +411,18 @@ static int __init ebda_rio_table(void)
 		rio_detail_ptr = kzalloc(sizeof(struct rio_detail), GFP_KERNEL);
 		if (!rio_detail_ptr)
 			return -ENOMEM;
-		rio_detail_ptr->rio_node_id = readb(io_mem + offset);
+		rio_detail_ptr->rio_node_id = pete_readb("drivers/pci/hotplug/ibmphp_ebda.c:414", io_mem + offset);
 		rio_detail_ptr->bbar = pete_readl("drivers/pci/hotplug/ibmphp_ebda.c:415", io_mem + offset + 1);
-		rio_detail_ptr->rio_type = readb(io_mem + offset + 5);
-		rio_detail_ptr->owner_id = readb(io_mem + offset + 6);
-		rio_detail_ptr->port0_node_connect = readb(io_mem + offset + 7);
-		rio_detail_ptr->port0_port_connect = readb(io_mem + offset + 8);
-		rio_detail_ptr->port1_node_connect = readb(io_mem + offset + 9);
-		rio_detail_ptr->port1_port_connect = readb(io_mem + offset + 10);
-		rio_detail_ptr->first_slot_num = readb(io_mem + offset + 11);
-		rio_detail_ptr->status = readb(io_mem + offset + 12);
-		rio_detail_ptr->wpindex = readb(io_mem + offset + 13);
-		rio_detail_ptr->chassis_num = readb(io_mem + offset + 14);
+		rio_detail_ptr->rio_type = pete_readb("drivers/pci/hotplug/ibmphp_ebda.c:416", io_mem + offset + 5);
+		rio_detail_ptr->owner_id = pete_readb("drivers/pci/hotplug/ibmphp_ebda.c:417", io_mem + offset + 6);
+		rio_detail_ptr->port0_node_connect = pete_readb("drivers/pci/hotplug/ibmphp_ebda.c:418", io_mem + offset + 7);
+		rio_detail_ptr->port0_port_connect = pete_readb("drivers/pci/hotplug/ibmphp_ebda.c:419", io_mem + offset + 8);
+		rio_detail_ptr->port1_node_connect = pete_readb("drivers/pci/hotplug/ibmphp_ebda.c:420", io_mem + offset + 9);
+		rio_detail_ptr->port1_port_connect = pete_readb("drivers/pci/hotplug/ibmphp_ebda.c:421", io_mem + offset + 10);
+		rio_detail_ptr->first_slot_num = pete_readb("drivers/pci/hotplug/ibmphp_ebda.c:422", io_mem + offset + 11);
+		rio_detail_ptr->status = pete_readb("drivers/pci/hotplug/ibmphp_ebda.c:423", io_mem + offset + 12);
+		rio_detail_ptr->wpindex = pete_readb("drivers/pci/hotplug/ibmphp_ebda.c:424", io_mem + offset + 13);
+		rio_detail_ptr->chassis_num = pete_readb("drivers/pci/hotplug/ibmphp_ebda.c:425", io_mem + offset + 14);
 //		debug("rio_node_id: %x\nbbar: %x\nrio_type: %x\nowner_id: %x\nport0_node: %x\nport0_port: %x\nport1_node: %x\nport1_port: %x\nfirst_slot_num: %x\nstatus: %x\n", rio_detail_ptr->rio_node_id, rio_detail_ptr->bbar, rio_detail_ptr->rio_type, rio_detail_ptr->owner_id, rio_detail_ptr->port0_node_connect, rio_detail_ptr->port0_port_connect, rio_detail_ptr->port1_node_connect, rio_detail_ptr->port1_port_connect, rio_detail_ptr->first_slot_num, rio_detail_ptr->status);
 		//create linked list of chassis
 		if (rio_detail_ptr->rio_type == 4 || rio_detail_ptr->rio_type == 5)
@@ -695,20 +695,20 @@ static int __init ebda_rsrc_controller(void)
 	addr = hpc_list_ptr->phys_addr;
 	for (ctlr = 0; ctlr < hpc_list_ptr->num_ctlrs; ctlr++) {
 		bus_index = 1;
-		ctlr_id = readb(io_mem + addr);
+		ctlr_id = pete_readb("drivers/pci/hotplug/ibmphp_ebda.c:698", io_mem + addr);
 		addr += 1;
-		slot_num = readb(io_mem + addr);
+		slot_num = pete_readb("drivers/pci/hotplug/ibmphp_ebda.c:700", io_mem + addr);
 
 		addr += 1;
 		addr_slot = addr;	/* offset of slot structure */
 		addr += (slot_num * 4);
 
-		bus_num = readb(io_mem + addr);
+		bus_num = pete_readb("drivers/pci/hotplug/ibmphp_ebda.c:706", io_mem + addr);
 
 		addr += 1;
 		addr_bus = addr;	/* offset of bus */
 		addr += (bus_num * 9);	/* offset of ctlr_type */
-		temp = readb(io_mem + addr);
+		temp = pete_readb("drivers/pci/hotplug/ibmphp_ebda.c:711", io_mem + addr);
 
 		addr += 1;
 		/* init hpc structure */
@@ -729,10 +729,10 @@ static int __init ebda_rsrc_controller(void)
 		/* init slot structure, fetch slot, bus, cap... */
 		slot_ptr = hpc_ptr->slots;
 		for (slot = 0; slot < slot_num; slot++) {
-			slot_ptr->slot_num = readb(io_mem + addr_slot);
-			slot_ptr->slot_bus_num = readb(io_mem + addr_slot + slot_num);
-			slot_ptr->ctl_index = readb(io_mem + addr_slot + 2*slot_num);
-			slot_ptr->slot_cap = readb(io_mem + addr_slot + 3*slot_num);
+			slot_ptr->slot_num = pete_readb("drivers/pci/hotplug/ibmphp_ebda.c:732", io_mem + addr_slot);
+			slot_ptr->slot_bus_num = pete_readb("drivers/pci/hotplug/ibmphp_ebda.c:733", io_mem + addr_slot + slot_num);
+			slot_ptr->ctl_index = pete_readb("drivers/pci/hotplug/ibmphp_ebda.c:734", io_mem + addr_slot + 2*slot_num);
+			slot_ptr->slot_cap = pete_readb("drivers/pci/hotplug/ibmphp_ebda.c:735", io_mem + addr_slot + 3*slot_num);
 
 			// create bus_info lined list --- if only one slot per bus: slot_min = slot_max
 
@@ -771,15 +771,15 @@ static int __init ebda_rsrc_controller(void)
 		/* init bus structure */
 		bus_ptr = hpc_ptr->buses;
 		for (bus = 0; bus < bus_num; bus++) {
-			bus_ptr->bus_num = readb(io_mem + addr_bus + bus);
-			bus_ptr->slots_at_33_conv = readb(io_mem + addr_bus + bus_num + 8 * bus);
-			bus_ptr->slots_at_66_conv = readb(io_mem + addr_bus + bus_num + 8 * bus + 1);
+			bus_ptr->bus_num = pete_readb("drivers/pci/hotplug/ibmphp_ebda.c:774", io_mem + addr_bus + bus);
+			bus_ptr->slots_at_33_conv = pete_readb("drivers/pci/hotplug/ibmphp_ebda.c:775", io_mem + addr_bus + bus_num + 8 * bus);
+			bus_ptr->slots_at_66_conv = pete_readb("drivers/pci/hotplug/ibmphp_ebda.c:776", io_mem + addr_bus + bus_num + 8 * bus + 1);
 
-			bus_ptr->slots_at_66_pcix = readb(io_mem + addr_bus + bus_num + 8 * bus + 2);
+			bus_ptr->slots_at_66_pcix = pete_readb("drivers/pci/hotplug/ibmphp_ebda.c:778", io_mem + addr_bus + bus_num + 8 * bus + 2);
 
-			bus_ptr->slots_at_100_pcix = readb(io_mem + addr_bus + bus_num + 8 * bus + 3);
+			bus_ptr->slots_at_100_pcix = pete_readb("drivers/pci/hotplug/ibmphp_ebda.c:780", io_mem + addr_bus + bus_num + 8 * bus + 3);
 
-			bus_ptr->slots_at_133_pcix = readb(io_mem + addr_bus + bus_num + 8 * bus + 4);
+			bus_ptr->slots_at_133_pcix = pete_readb("drivers/pci/hotplug/ibmphp_ebda.c:782", io_mem + addr_bus + bus_num + 8 * bus + 4);
 
 			bus_info_ptr2 = ibmphp_find_same_bus_num(bus_ptr->bus_num);
 			if (bus_info_ptr2) {
@@ -796,9 +796,9 @@ static int __init ebda_rsrc_controller(void)
 
 		switch (hpc_ptr->ctlr_type) {
 			case 1:
-				hpc_ptr->u.pci_ctlr.bus = readb(io_mem + addr);
-				hpc_ptr->u.pci_ctlr.dev_fun = readb(io_mem + addr + 1);
-				hpc_ptr->irq = readb(io_mem + addr + 2);
+				hpc_ptr->u.pci_ctlr.bus = pete_readb("drivers/pci/hotplug/ibmphp_ebda.c:799", io_mem + addr);
+				hpc_ptr->u.pci_ctlr.dev_fun = pete_readb("drivers/pci/hotplug/ibmphp_ebda.c:800", io_mem + addr + 1);
+				hpc_ptr->irq = pete_readb("drivers/pci/hotplug/ibmphp_ebda.c:801", io_mem + addr + 2);
 				addr += 3;
 				debug("ctrl bus = %x, ctlr devfun = %x, irq = %x\n",
 					hpc_ptr->u.pci_ctlr.bus,
@@ -806,23 +806,23 @@ static int __init ebda_rsrc_controller(void)
 				break;
 
 			case 0:
-				hpc_ptr->u.isa_ctlr.io_start = readw(io_mem + addr);
-				hpc_ptr->u.isa_ctlr.io_end = readw(io_mem + addr + 2);
+				hpc_ptr->u.isa_ctlr.io_start = pete_readw("drivers/pci/hotplug/ibmphp_ebda.c:809", io_mem + addr);
+				hpc_ptr->u.isa_ctlr.io_end = pete_readw("drivers/pci/hotplug/ibmphp_ebda.c:810", io_mem + addr + 2);
 				if (!request_region(hpc_ptr->u.isa_ctlr.io_start,
 						     (hpc_ptr->u.isa_ctlr.io_end - hpc_ptr->u.isa_ctlr.io_start + 1),
 						     "ibmphp")) {
 					rc = -ENODEV;
 					goto error_no_slot;
 				}
-				hpc_ptr->irq = readb(io_mem + addr + 4);
+				hpc_ptr->irq = pete_readb("drivers/pci/hotplug/ibmphp_ebda.c:817", io_mem + addr + 4);
 				addr += 5;
 				break;
 
 			case 2:
 			case 4:
 				hpc_ptr->u.wpeg_ctlr.wpegbbar = pete_readl("drivers/pci/hotplug/ibmphp_ebda.c:823", io_mem + addr);
-				hpc_ptr->u.wpeg_ctlr.i2c_addr = readb(io_mem + addr + 4);
-				hpc_ptr->irq = readb(io_mem + addr + 5);
+				hpc_ptr->u.wpeg_ctlr.i2c_addr = pete_readb("drivers/pci/hotplug/ibmphp_ebda.c:824", io_mem + addr + 4);
+				hpc_ptr->irq = pete_readb("drivers/pci/hotplug/ibmphp_ebda.c:825", io_mem + addr + 5);
 				addr += 6;
 				break;
 			default:
@@ -928,7 +928,7 @@ static int __init ebda_rsrc_rsrc(void)
 	debug("offset of rsrc: %x\n", rsrc_list_ptr->phys_addr);
 
 	for (rsrc = 0; rsrc < rsrc_list_ptr->num_entries; rsrc++) {
-		type = readb(io_mem + addr);
+		type = pete_readb("drivers/pci/hotplug/ibmphp_ebda.c:931", io_mem + addr);
 
 		addr += 1;
 		rsrc_type = type & EBDA_RSRC_TYPE_MASK;
@@ -941,10 +941,10 @@ static int __init ebda_rsrc_rsrc(void)
 			}
 			rsrc_ptr->rsrc_type = type;
 
-			rsrc_ptr->bus_num = readb(io_mem + addr);
-			rsrc_ptr->dev_fun = readb(io_mem + addr + 1);
-			rsrc_ptr->start_addr = readw(io_mem + addr + 2);
-			rsrc_ptr->end_addr = readw(io_mem + addr + 4);
+			rsrc_ptr->bus_num = pete_readb("drivers/pci/hotplug/ibmphp_ebda.c:944", io_mem + addr);
+			rsrc_ptr->dev_fun = pete_readb("drivers/pci/hotplug/ibmphp_ebda.c:945", io_mem + addr + 1);
+			rsrc_ptr->start_addr = pete_readw("drivers/pci/hotplug/ibmphp_ebda.c:946", io_mem + addr + 2);
+			rsrc_ptr->end_addr = pete_readw("drivers/pci/hotplug/ibmphp_ebda.c:947", io_mem + addr + 4);
 			addr += 6;
 
 			debug("rsrc from io type ----\n");
@@ -962,8 +962,8 @@ static int __init ebda_rsrc_rsrc(void)
 			}
 			rsrc_ptr->rsrc_type = type;
 
-			rsrc_ptr->bus_num = readb(io_mem + addr);
-			rsrc_ptr->dev_fun = readb(io_mem + addr + 1);
+			rsrc_ptr->bus_num = pete_readb("drivers/pci/hotplug/ibmphp_ebda.c:965", io_mem + addr);
+			rsrc_ptr->dev_fun = pete_readb("drivers/pci/hotplug/ibmphp_ebda.c:966", io_mem + addr + 1);
 			rsrc_ptr->start_addr = pete_readl("drivers/pci/hotplug/ibmphp_ebda.c:967", io_mem + addr + 2);
 			rsrc_ptr->end_addr = pete_readl("drivers/pci/hotplug/ibmphp_ebda.c:968", io_mem + addr + 6);
 			addr += 10;

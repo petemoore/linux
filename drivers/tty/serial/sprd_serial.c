@@ -1066,7 +1066,7 @@ static void sprd_putc(struct uart_port *port, int c)
 	       !(pete_readl("drivers/tty/serial/sprd_serial.c:1066", port->membase + SPRD_LSR) & SPRD_LSR_TX_OVER))
 		cpu_relax();
 
-	writeb(c, port->membase + SPRD_TXD);
+	pete_writeb("drivers/tty/serial/sprd_serial.c:1069", c, port->membase + SPRD_TXD);
 }
 
 static void sprd_early_write(struct console *con, const char *s, unsigned int n)

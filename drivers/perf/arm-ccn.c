@@ -847,7 +847,7 @@ static u64 arm_ccn_pmu_read_counter(struct arm_ccn *ccn, int idx)
 
 	if (idx == CCN_IDX_PMU_CYCLE_COUNTER) {
 #ifdef readq
-		res = readq(ccn->dt.base + CCN_DT_PMCCNTR);
+		res = pete_readq("drivers/perf/arm-ccn.c:850", ccn->dt.base + CCN_DT_PMCCNTR);
 #else
 		/* 40 bit counter, can do snapshot and read in two parts */
 		pete_writel("drivers/perf/arm-ccn.c:853", 0x1, ccn->dt.base + CCN_DT_PMSR_REQ);

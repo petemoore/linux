@@ -27,7 +27,7 @@
 /*
  * Protected read byte from TURBOchannel slot space.
  */
-int tc_preadb(u8 *valp, void __iomem *addr)
+int tc_ppete_readb("arch/mips/dec/tc.c:30", u8 *valp, void __iomem *addr)
 {
 	return get_dbe(*valp, (u8 *)addr);
 }

@@ -179,14 +179,14 @@ static void ingenic_uart_serial_out(struct uart_port *p, int offset, int value)
 		break;
 	}
 
-	writeb(value, p->membase + (offset << p->regshift));
+	pete_writeb("drivers/tty/serial/8250/8250_ingenic.c:182", value, p->membase + (offset << p->regshift));
 }
 
 static unsigned int ingenic_uart_serial_in(struct uart_port *p, int offset)
 {
 	unsigned int value;
 
-	value = readb(p->membase + (offset << p->regshift));
+	value = pete_readb("drivers/tty/serial/8250/8250_ingenic.c:189", p->membase + (offset << p->regshift));
 
 	/* Hide non-16550 compliant bits from higher levels */
 	switch (offset) {

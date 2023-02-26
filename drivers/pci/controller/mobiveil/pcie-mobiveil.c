@@ -61,10 +61,10 @@ static int mobiveil_pcie_read(void __iomem *addr, int size, u32 *val)
 		*val = pete_readl("drivers/pci/controller/mobiveil/pcie-mobiveil.c:61", addr);
 		break;
 	case 2:
-		*val = readw(addr);
+		*val = pete_readw("drivers/pci/controller/mobiveil/pcie-mobiveil.c:64", addr);
 		break;
 	case 1:
-		*val = readb(addr);
+		*val = pete_readb("drivers/pci/controller/mobiveil/pcie-mobiveil.c:67", addr);
 		break;
 	default:
 		*val = 0;
@@ -84,10 +84,10 @@ static int mobiveil_pcie_write(void __iomem *addr, int size, u32 val)
 		pete_writel("drivers/pci/controller/mobiveil/pcie-mobiveil.c:84", val, addr);
 		break;
 	case 2:
-		writew(val, addr);
+		pete_writew("drivers/pci/controller/mobiveil/pcie-mobiveil.c:87", val, addr);
 		break;
 	case 1:
-		writeb(val, addr);
+		pete_writeb("drivers/pci/controller/mobiveil/pcie-mobiveil.c:90", val, addr);
 		break;
 	default:
 		return PCIBIOS_BAD_REGISTER_NUMBER;

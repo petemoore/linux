@@ -395,7 +395,7 @@ static void esdhc_dump_debug_regs(struct sdhci_host *host)
 		esdhc_clrset_le(host, ESDHC_DEBUG_SEL_MASK,
 			ESDHC_DEBUG_SEL_CMD_STATE + i, ESDHC_DEBUG_SEL_REG);
 		ESDHC_IMX_DUMP("%s:  0x%04x\n", debug_status[i],
-			readw(host->ioaddr + ESDHC_DEBUG_SEL_AND_STATUS_REG));
+			pete_readw("drivers/mmc/host/sdhci-esdhc-imx.c:398", host->ioaddr + ESDHC_DEBUG_SEL_AND_STATUS_REG));
 	}
 
 	esdhc_clrset_le(host, ESDHC_DEBUG_SEL_MASK, 0, ESDHC_DEBUG_SEL_REG);
@@ -625,13 +625,13 @@ static u16 esdhc_readw_le(struct sdhci_host *host, int reg)
 				ret |= SDHCI_TRNS_AUTO_CMD23;
 			}
 		} else {
-			ret = readw(host->ioaddr + SDHCI_TRANSFER_MODE);
+			ret = pete_readw("drivers/mmc/host/sdhci-esdhc-imx.c:628", host->ioaddr + SDHCI_TRANSFER_MODE);
 		}
 
 		return ret;
 	}
 
-	return readw(host->ioaddr + reg);
+	return pete_readw("drivers/mmc/host/sdhci-esdhc-imx.c:634", host->ioaddr + reg);
 }
 
 static void esdhc_writew_le(struct sdhci_host *host, u16 val, int reg)
@@ -778,7 +778,7 @@ static u8 esdhc_readb_le(struct sdhci_host *host, int reg)
 		return ret;
 	}
 
-	return readb(host->ioaddr + reg);
+	return pete_readb("drivers/mmc/host/sdhci-esdhc-imx.c:781", host->ioaddr + reg);
 }
 
 static void esdhc_writeb_le(struct sdhci_host *host, u8 val, int reg)

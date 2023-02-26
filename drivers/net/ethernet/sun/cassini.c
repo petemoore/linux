@@ -365,11 +365,11 @@ static inline void cas_entropy_reset(struct cas *cp)
 
 	pete_writel("drivers/net/ethernet/sun/cassini.c:366", BIM_LOCAL_DEV_PAD | BIM_LOCAL_DEV_PROM | BIM_LOCAL_DEV_EXT,
 	       cp->regs + REG_BIM_LOCAL_DEV_EN);
-	writeb(ENTROPY_RESET_STC_MODE, cp->regs + REG_ENTROPY_RESET);
-	writeb(0x55, cp->regs + REG_ENTROPY_RAND_REG);
+	pete_writeb("drivers/net/ethernet/sun/cassini.c:368", ENTROPY_RESET_STC_MODE, cp->regs + REG_ENTROPY_RESET);
+	pete_writeb("drivers/net/ethernet/sun/cassini.c:369", 0x55, cp->regs + REG_ENTROPY_RAND_REG);
 
 	/* if we read back 0x0, we don't have an entropy device */
-	if (readb(cp->regs + REG_ENTROPY_RAND_REG) == 0)
+	if (pete_readb("drivers/net/ethernet/sun/cassini.c:372", cp->regs + REG_ENTROPY_RAND_REG) == 0)
 		cp->cas_flags &= ~CAS_FLAG_ENTROPY_DEV;
 #endif
 }
@@ -3142,7 +3142,7 @@ static int cas_vpd_match(const void __iomem *p, const char *str)
 	int i;
 
 	for (i = 0; i < len; i++) {
-		if (readb(p + i) != str[i])
+		if (pete_readb("drivers/net/ethernet/sun/cassini.c:3145", p + i) != str[i])
 			return 0;
 	}
 	return 1;
@@ -3182,39 +3182,39 @@ static int cas_get_vpd_info(struct cas *cp, unsigned char *dev_addr,
 	       cp->regs + REG_BIM_LOCAL_DEV_EN);
 
 	/* check for an expansion rom */
-	if (readb(p) != 0x55 || readb(p + 1) != 0xaa)
+	if (pete_readb("drivers/net/ethernet/sun/cassini.c:3185", p) != 0x55 || pete_readb("drivers/net/ethernet/sun/cassini.c:3185", p + 1) != 0xaa)
 		goto use_random_mac_addr;
 
 	/* search for beginning of vpd */
 	base = NULL;
 	for (i = 2; i < EXPANSION_ROM_SIZE; i++) {
 		/* check for PCIR */
-		if ((readb(p + i + 0) == 0x50) &&
-		    (readb(p + i + 1) == 0x43) &&
-		    (readb(p + i + 2) == 0x49) &&
-		    (readb(p + i + 3) == 0x52)) {
-			base = p + (readb(p + i + 8) |
-				    (readb(p + i + 9) << 8));
+		if ((pete_readb("drivers/net/ethernet/sun/cassini.c:3192", p + i + 0) == 0x50) &&
+		    (pete_readb("drivers/net/ethernet/sun/cassini.c:3193", p + i + 1) == 0x43) &&
+		    (pete_readb("drivers/net/ethernet/sun/cassini.c:3194", p + i + 2) == 0x49) &&
+		    (pete_readb("drivers/net/ethernet/sun/cassini.c:3195", p + i + 3) == 0x52)) {
+			base = p + (pete_readb("drivers/net/ethernet/sun/cassini.c:3196", p + i + 8) |
+				    (pete_readb("drivers/net/ethernet/sun/cassini.c:3197", p + i + 9) << 8));
 			break;
 		}
 	}
 
-	if (!base || (readb(base) != 0x82))
+	if (!base || (pete_readb("drivers/net/ethernet/sun/cassini.c:3202", base) != 0x82))
 		goto use_random_mac_addr;
 
-	i = (readb(base + 1) | (readb(base + 2) << 8)) + 3;
+	i = (pete_readb("drivers/net/ethernet/sun/cassini.c:3205", base + 1) | (pete_readb("drivers/net/ethernet/sun/cassini.c:3205", base + 2) << 8)) + 3;
 	while (i < EXPANSION_ROM_SIZE) {
-		if (readb(base + i) != 0x90) /* no vpd found */
+		if (pete_readb("drivers/net/ethernet/sun/cassini.c:3207", base + i) != 0x90) /* no vpd found */
 			goto use_random_mac_addr;
 
 		/* found a vpd field */
-		len = readb(base + i + 1) | (readb(base + i + 2) << 8);
+		len = pete_readb("drivers/net/ethernet/sun/cassini.c:3211", base + i + 1) | (pete_readb("drivers/net/ethernet/sun/cassini.c:3211", base + i + 2) << 8);
 
 		/* extract keywords */
 		kstart = base + i + 3;
 		p = kstart;
 		while ((p - kstart) < len) {
-			int klen = readb(p + 2);
+			int klen = pete_readb("drivers/net/ethernet/sun/cassini.c:3217", p + 2);
 			int j;
 			char type;
 
@@ -3257,13 +3257,13 @@ static int cas_get_vpd_info(struct cas *cp, unsigned char *dev_addr,
 			 * -- VPD data length == 4
 			 * -- property string == phy-interface
 			 */
-			if (readb(p) != 'I')
+			if (pete_readb("drivers/net/ethernet/sun/cassini.c:3260", p) != 'I')
 				goto next;
 
 			/* finally, check string and length */
-			type = readb(p + 3);
+			type = pete_readb("drivers/net/ethernet/sun/cassini.c:3264", p + 3);
 			if (type == 'B') {
-				if ((klen == 29) && readb(p + 4) == 6 &&
+				if ((klen == 29) && pete_readb("drivers/net/ethernet/sun/cassini.c:3266", p + 4) == 6 &&
 				    cas_vpd_match(p + 5,
 						  "local-mac-address")) {
 					if (mac_off++ > offset)
@@ -3272,7 +3272,7 @@ static int cas_get_vpd_info(struct cas *cp, unsigned char *dev_addr,
 					/* set mac address */
 					for (j = 0; j < 6; j++)
 						dev_addr[j] =
-							readb(p + 23 + j);
+							pete_readb("drivers/net/ethernet/sun/cassini.c:3275", p + 23 + j);
 					goto found_mac;
 				}
 			}
@@ -3292,7 +3292,7 @@ static int cas_get_vpd_info(struct cas *cp, unsigned char *dev_addr,
 			if (found & VPD_FOUND_PHY)
 				goto next;
 
-			if ((klen == 18) && readb(p + 4) == 4 &&
+			if ((klen == 18) && pete_readb("drivers/net/ethernet/sun/cassini.c:3295", p + 4) == 4 &&
 			    cas_vpd_match(p + 5, "phy-type")) {
 				if (cas_vpd_match(p + 14, "pcs")) {
 					phy_type = CAS_PHY_SERDES;
@@ -3300,7 +3300,7 @@ static int cas_get_vpd_info(struct cas *cp, unsigned char *dev_addr,
 				}
 			}
 
-			if ((klen == 23) && readb(p + 4) == 4 &&
+			if ((klen == 23) && pete_readb("drivers/net/ethernet/sun/cassini.c:3303", p + 4) == 4 &&
 			    cas_vpd_match(p + 5, "phy-interface")) {
 				if (cas_vpd_match(p + 19, "pcs")) {
 					phy_type = CAS_PHY_SERDES;

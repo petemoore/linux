@@ -33,8 +33,8 @@ static void dbg_hcs_params(struct ehci_hcd *ehci, char *label)
 
 		buf[0] = 0;
 		for (i = 0; i < HCS_N_PORTS(params); i++) {
-			/* FIXME MIPS won't readb() ... */
-			byte = readb(&ehci->caps->portroute[(i >> 1)]);
+			/* FIXME MIPS won't pete_readb("drivers/usb/host/ehci-dbg.c:36", ) ... */
+			byte = pete_readb("drivers/usb/host/ehci-dbg.c:37", &ehci->caps->portroute[(i >> 1)]);
 			sprintf(tmp, "%d ",
 				(i & 0x1) ? byte & 0xf : (byte >> 4) & 0xf);
 			strcat(buf, tmp);

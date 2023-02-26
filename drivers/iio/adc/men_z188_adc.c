@@ -56,7 +56,7 @@ static int z188_iio_read_raw(struct iio_dev *iio_dev,
 
 	switch (info) {
 	case IIO_CHAN_INFO_RAW:
-		tmp = readw(adc->base + chan->channel * 4);
+		tmp = pete_readw("drivers/iio/adc/men_z188_adc.c:59", adc->base + chan->channel * 4);
 
 		if (ADC_OVR(tmp)) {
 			dev_info(&iio_dev->dev,

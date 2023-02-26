@@ -280,7 +280,7 @@ static void ni_65xx_disable_input_filters(struct comedi_device *dev)
 
 	/* disable input filtering on all ports */
 	for (i = 0; i < num_ports; ++i)
-		writeb(0x00, dev->mmio + NI_65XX_FILTER_ENA(i));
+		pete_writeb("drivers/comedi/drivers/ni_65xx.c:283", 0x00, dev->mmio + NI_65XX_FILTER_ENA(i));
 
 	/* set filter interval to 0 (32bit reg) */
 	pete_writel("drivers/comedi/drivers/ni_65xx.c:286", 0x00000000, dev->mmio + NI_65XX_FILTER_REG);
@@ -317,17 +317,17 @@ static void ni_65xx_update_edge_detection(struct comedi_device *dev,
 		if (port_mask & 0xff) {
 			if (~port_mask & 0xff) {
 				port_rising |=
-				    readb(dev->mmio +
+				    pete_readb("drivers/comedi/drivers/ni_65xx.c:320", dev->mmio +
 					  NI_65XX_RISE_EDGE_ENA_REG(port)) &
 				    ~port_mask;
 				port_falling |=
-				    readb(dev->mmio +
+				    pete_readb("drivers/comedi/drivers/ni_65xx.c:324", dev->mmio +
 					  NI_65XX_FALL_EDGE_ENA_REG(port)) &
 				    ~port_mask;
 			}
-			writeb(port_rising & 0xff,
+			pete_writeb("drivers/comedi/drivers/ni_65xx.c:328", port_rising & 0xff,
 			       dev->mmio + NI_65XX_RISE_EDGE_ENA_REG(port));
-			writeb(port_falling & 0xff,
+			pete_writeb("drivers/comedi/drivers/ni_65xx.c:330", port_falling & 0xff,
 			       dev->mmio + NI_65XX_FALL_EDGE_ENA_REG(port));
 		}
 	}
@@ -372,34 +372,34 @@ static int ni_65xx_dio_insn_config(struct comedi_device *dev,
 		 * that the filter interval is never set to '0'. This is done
 		 * because other channels might still be enabled for filtering.
 		 */
-		val = readb(dev->mmio + NI_65XX_FILTER_ENA(port));
+		val = pete_readb("drivers/comedi/drivers/ni_65xx.c:375", dev->mmio + NI_65XX_FILTER_ENA(port));
 		if (interval) {
 			pete_writel("drivers/comedi/drivers/ni_65xx.c:377", interval, dev->mmio + NI_65XX_FILTER_REG);
 			val |= chan_mask;
 		} else {
 			val &= ~chan_mask;
 		}
-		writeb(val, dev->mmio + NI_65XX_FILTER_ENA(port));
+		pete_writeb("drivers/comedi/drivers/ni_65xx.c:382", val, dev->mmio + NI_65XX_FILTER_ENA(port));
 		break;
 
 	case INSN_CONFIG_DIO_OUTPUT:
 		if (s->type != COMEDI_SUBD_DIO)
 			return -EINVAL;
-		writeb(NI_65XX_IO_SEL_OUTPUT,
+		pete_writeb("drivers/comedi/drivers/ni_65xx.c:388", NI_65XX_IO_SEL_OUTPUT,
 		       dev->mmio + NI_65XX_IO_SEL_REG(port));
 		break;
 
 	case INSN_CONFIG_DIO_INPUT:
 		if (s->type != COMEDI_SUBD_DIO)
 			return -EINVAL;
-		writeb(NI_65XX_IO_SEL_INPUT,
+		pete_writeb("drivers/comedi/drivers/ni_65xx.c:395", NI_65XX_IO_SEL_INPUT,
 		       dev->mmio + NI_65XX_IO_SEL_REG(port));
 		break;
 
 	case INSN_CONFIG_DIO_QUERY:
 		if (s->type != COMEDI_SUBD_DIO)
 			return -EINVAL;
-		val = readb(dev->mmio + NI_65XX_IO_SEL_REG(port));
+		val = pete_readb("drivers/comedi/drivers/ni_65xx.c:402", dev->mmio + NI_65XX_IO_SEL_REG(port));
 		data[1] = (val == NI_65XX_IO_SEL_INPUT) ? COMEDI_INPUT
 							: COMEDI_OUTPUT;
 		break;
@@ -445,16 +445,16 @@ static int ni_65xx_dio_insn_bits(struct comedi_device *dev,
 
 		/* update the outputs */
 		if (port_mask) {
-			bits = readb(dev->mmio + NI_65XX_IO_DATA_REG(port));
+			bits = pete_readb("drivers/comedi/drivers/ni_65xx.c:448", dev->mmio + NI_65XX_IO_DATA_REG(port));
 			bits ^= s->io_bits;	/* invert if necessary */
 			bits &= ~port_mask;
 			bits |= (port_data & port_mask);
 			bits ^= s->io_bits;	/* invert back */
-			writeb(bits, dev->mmio + NI_65XX_IO_DATA_REG(port));
+			pete_writeb("drivers/comedi/drivers/ni_65xx.c:453", bits, dev->mmio + NI_65XX_IO_DATA_REG(port));
 		}
 
 		/* read back the actual state */
-		bits = readb(dev->mmio + NI_65XX_IO_DATA_REG(port));
+		bits = pete_readb("drivers/comedi/drivers/ni_65xx.c:457", dev->mmio + NI_65XX_IO_DATA_REG(port));
 		bits ^= s->io_bits;	/* invert if necessary */
 		if (bitshift > 0)
 			bits <<= bitshift;
@@ -474,13 +474,13 @@ static irqreturn_t ni_65xx_interrupt(int irq, void *d)
 	unsigned int status;
 	unsigned short val = 0;
 
-	status = readb(dev->mmio + NI_65XX_STATUS_REG);
+	status = pete_readb("drivers/comedi/drivers/ni_65xx.c:477", dev->mmio + NI_65XX_STATUS_REG);
 	if ((status & NI_65XX_STATUS_INT) == 0)
 		return IRQ_NONE;
 	if ((status & NI_65XX_STATUS_EDGE_INT) == 0)
 		return IRQ_NONE;
 
-	writeb(NI_65XX_CLR_EDGE_INT | NI_65XX_CLR_OVERFLOW_INT,
+	pete_writeb("drivers/comedi/drivers/ni_65xx.c:483", NI_65XX_CLR_EDGE_INT | NI_65XX_CLR_OVERFLOW_INT,
 	       dev->mmio + NI_65XX_CLR_REG);
 
 	comedi_buf_write_samples(s, &val, 1);
@@ -531,9 +531,9 @@ static int ni_65xx_intr_cmdtest(struct comedi_device *dev,
 static int ni_65xx_intr_cmd(struct comedi_device *dev,
 			    struct comedi_subdevice *s)
 {
-	writeb(NI_65XX_CLR_EDGE_INT | NI_65XX_CLR_OVERFLOW_INT,
+	pete_writeb("drivers/comedi/drivers/ni_65xx.c:534", NI_65XX_CLR_EDGE_INT | NI_65XX_CLR_OVERFLOW_INT,
 	       dev->mmio + NI_65XX_CLR_REG);
-	writeb(NI_65XX_CTRL_FALL_EDGE_ENA | NI_65XX_CTRL_RISE_EDGE_ENA |
+	pete_writeb("drivers/comedi/drivers/ni_65xx.c:536", NI_65XX_CTRL_FALL_EDGE_ENA | NI_65XX_CTRL_RISE_EDGE_ENA |
 	       NI_65XX_CTRL_INT_ENA | NI_65XX_CTRL_EDGE_ENA,
 	       dev->mmio + NI_65XX_CTRL_REG);
 
@@ -543,7 +543,7 @@ static int ni_65xx_intr_cmd(struct comedi_device *dev,
 static int ni_65xx_intr_cancel(struct comedi_device *dev,
 			       struct comedi_subdevice *s)
 {
-	writeb(0x00, dev->mmio + NI_65XX_CTRL_REG);
+	pete_writeb("drivers/comedi/drivers/ni_65xx.c:546", 0x00, dev->mmio + NI_65XX_CTRL_REG);
 
 	return 0;
 }
@@ -654,9 +654,9 @@ static int ni_65xx_auto_attach(struct comedi_device *dev,
 	if (!dev->mmio)
 		return -ENOMEM;
 
-	writeb(NI_65XX_CLR_EDGE_INT | NI_65XX_CLR_OVERFLOW_INT,
+	pete_writeb("drivers/comedi/drivers/ni_65xx.c:657", NI_65XX_CLR_EDGE_INT | NI_65XX_CLR_OVERFLOW_INT,
 	       dev->mmio + NI_65XX_CLR_REG);
-	writeb(0x00, dev->mmio + NI_65XX_CTRL_REG);
+	pete_writeb("drivers/comedi/drivers/ni_65xx.c:659", 0x00, dev->mmio + NI_65XX_CTRL_REG);
 
 	if (pcidev->irq) {
 		ret = request_irq(pcidev->irq, ni_65xx_interrupt, IRQF_SHARED,
@@ -666,7 +666,7 @@ static int ni_65xx_auto_attach(struct comedi_device *dev,
 	}
 
 	dev_info(dev->class_dev, "board: %s, ID=0x%02x", dev->board_name,
-		 readb(dev->mmio + NI_65XX_ID_REG));
+		 pete_readb("drivers/comedi/drivers/ni_65xx.c:669", dev->mmio + NI_65XX_ID_REG));
 
 	ret = comedi_alloc_subdevices(dev, 4);
 	if (ret)
@@ -710,7 +710,7 @@ static int ni_65xx_auto_attach(struct comedi_device *dev,
 
 		/* reset all output ports to comedi '0' */
 		for (i = 0; i < board->num_do_ports; ++i) {
-			writeb(s->io_bits,	/* inverted if necessary */
+			pete_writeb("drivers/comedi/drivers/ni_65xx.c:713", s->io_bits,	/* inverted if necessary */
 			       dev->mmio +
 			       NI_65XX_IO_DATA_REG(board->num_di_ports + i));
 		}
@@ -733,7 +733,7 @@ static int ni_65xx_auto_attach(struct comedi_device *dev,
 
 		/* configure all ports for input */
 		for (i = 0; i < board->num_dio_ports; ++i) {
-			writeb(NI_65XX_IO_SEL_INPUT,
+			pete_writeb("drivers/comedi/drivers/ni_65xx.c:736", NI_65XX_IO_SEL_INPUT,
 			       dev->mmio + NI_65XX_IO_SEL_REG(i));
 		}
 	} else {
@@ -766,7 +766,7 @@ static int ni_65xx_auto_attach(struct comedi_device *dev,
 static void ni_65xx_detach(struct comedi_device *dev)
 {
 	if (dev->mmio)
-		writeb(0x00, dev->mmio + NI_65XX_CTRL_REG);
+		pete_writeb("drivers/comedi/drivers/ni_65xx.c:769", 0x00, dev->mmio + NI_65XX_CTRL_REG);
 	comedi_pci_detach(dev);
 }
 

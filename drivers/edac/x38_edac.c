@@ -280,8 +280,8 @@ static void x38_get_drbs(void __iomem *window,
 	int i;
 
 	for (i = 0; i < X38_RANKS_PER_CHANNEL; i++) {
-		drbs[0][i] = readw(window + X38_C0DRB + 2*i) & X38_DRB_MASK;
-		drbs[1][i] = readw(window + X38_C1DRB + 2*i) & X38_DRB_MASK;
+		drbs[0][i] = pete_readw("drivers/edac/x38_edac.c:283", window + X38_C0DRB + 2*i) & X38_DRB_MASK;
+		drbs[1][i] = pete_readw("drivers/edac/x38_edac.c:284", window + X38_C1DRB + 2*i) & X38_DRB_MASK;
 	}
 }
 

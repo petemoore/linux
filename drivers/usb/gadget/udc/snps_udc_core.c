@@ -668,7 +668,7 @@ udc_txfifo_write(struct udc_ep *ep, struct usb_request *req)
 
 	/* remaining bytes must be written by byte access */
 	for (j = 0; j < bytes % UDC_DWORD_BYTES; j++) {
-		writeb((u8)(*(buf + i) >> (j << UDC_BITS_PER_BYTE_SHIFT)),
+		pete_writeb("drivers/usb/gadget/udc/snps_udc_core.c:671", (u8)(*(buf + i) >> (j << UDC_BITS_PER_BYTE_SHIFT)),
 							ep->txfifo);
 	}
 

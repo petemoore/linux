@@ -490,7 +490,7 @@ uint8_t amdgpu_mm_rreg8(struct amdgpu_device *adev, uint32_t offset)
 		return 0;
 
 	if (offset < adev->rmmio_size)
-		return (readb(adev->rmmio + offset));
+		return (pete_readb("drivers/gpu/drm/amd/amdgpu/amdgpu_device.c:493", adev->rmmio + offset));
 	BUG();
 }
 
@@ -515,7 +515,7 @@ void amdgpu_mm_wreg8(struct amdgpu_device *adev, uint32_t offset, uint8_t value)
 		return;
 
 	if (offset < adev->rmmio_size)
-		writeb(value, adev->rmmio + offset);
+		pete_writeb("drivers/gpu/drm/amd/amdgpu/amdgpu_device.c:518", value, adev->rmmio + offset);
 	else
 		BUG();
 }

@@ -173,13 +173,13 @@ static void serial_omap_mdr1_errataset(struct uart_omap_port *up, u8 mdr1);
 static inline unsigned int serial_in(struct uart_omap_port *up, int offset)
 {
 	offset <<= up->port.regshift;
-	return readw(up->port.membase + offset);
+	return pete_readw("drivers/tty/serial/omap-serial.c:176", up->port.membase + offset);
 }
 
 static inline void serial_out(struct uart_omap_port *up, int offset, int value)
 {
 	offset <<= up->port.regshift;
-	writew(value, up->port.membase + offset);
+	pete_writew("drivers/tty/serial/omap-serial.c:182", value, up->port.membase + offset);
 }
 
 static inline void serial_omap_clear_fifos(struct uart_omap_port *up)
@@ -1184,14 +1184,14 @@ out:
 static unsigned int omap_serial_early_in(struct uart_port *port, int offset)
 {
 	offset <<= port->regshift;
-	return readw(port->membase + offset);
+	return pete_readw("drivers/tty/serial/omap-serial.c:1187", port->membase + offset);
 }
 
 static void omap_serial_early_out(struct uart_port *port, int offset,
 				  int value)
 {
 	offset <<= port->regshift;
-	writew(value, port->membase + offset);
+	pete_writew("drivers/tty/serial/omap-serial.c:1194", value, port->membase + offset);
 }
 
 static void omap_serial_early_putc(struct uart_port *port, int c)

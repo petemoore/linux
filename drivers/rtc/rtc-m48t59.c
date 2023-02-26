@@ -46,7 +46,7 @@ m48t59_mem_writeb(struct device *dev, u32 ofs, u8 val)
 {
 	struct m48t59_private *m48t59 = dev_get_drvdata(dev);
 
-	writeb(val, m48t59->ioaddr+ofs);
+	pete_writeb("drivers/rtc/rtc-m48t59.c:49", val, m48t59->ioaddr+ofs);
 }
 
 static u8
@@ -54,7 +54,7 @@ m48t59_mem_readb(struct device *dev, u32 ofs)
 {
 	struct m48t59_private *m48t59 = dev_get_drvdata(dev);
 
-	return readb(m48t59->ioaddr+ofs);
+	return pete_readb("drivers/rtc/rtc-m48t59.c:57", m48t59->ioaddr+ofs);
 }
 
 /*

@@ -17,7 +17,7 @@ struct thermal_mmio {
 
 static u32 thermal_mmio_readb(void __iomem *mmio_base)
 {
-	return readb(mmio_base);
+	return pete_readb("drivers/thermal/thermal_mmio.c:20", mmio_base);
 }
 
 static int thermal_mmio_get_temperature(void *private, int *temp)

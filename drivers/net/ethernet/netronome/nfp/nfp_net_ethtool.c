@@ -565,13 +565,13 @@ nfp_vnic_get_hw_stats(u64 *data, u8 __iomem *mem, unsigned int num_vecs)
 	unsigned int i;
 
 	for (i = 0; i < NN_ET_GLOBAL_STATS_LEN; i++)
-		*data++ = readq(mem + nfp_net_et_stats[i].off);
+		*data++ = pete_readq("drivers/net/ethernet/netronome/nfp/nfp_net_ethtool.c:568", mem + nfp_net_et_stats[i].off);
 
 	for (i = 0; i < num_vecs; i++) {
-		*data++ = readq(mem + NFP_NET_CFG_RXR_STATS(i));
-		*data++ = readq(mem + NFP_NET_CFG_RXR_STATS(i) + 8);
-		*data++ = readq(mem + NFP_NET_CFG_TXR_STATS(i));
-		*data++ = readq(mem + NFP_NET_CFG_TXR_STATS(i) + 8);
+		*data++ = pete_readq("drivers/net/ethernet/netronome/nfp/nfp_net_ethtool.c:571", mem + NFP_NET_CFG_RXR_STATS(i));
+		*data++ = pete_readq("drivers/net/ethernet/netronome/nfp/nfp_net_ethtool.c:572", mem + NFP_NET_CFG_RXR_STATS(i) + 8);
+		*data++ = pete_readq("drivers/net/ethernet/netronome/nfp/nfp_net_ethtool.c:573", mem + NFP_NET_CFG_TXR_STATS(i));
+		*data++ = pete_readq("drivers/net/ethernet/netronome/nfp/nfp_net_ethtool.c:574", mem + NFP_NET_CFG_TXR_STATS(i) + 8);
 	}
 
 	return data;
@@ -591,7 +591,7 @@ static u8 *nfp_vnic_get_tlv_stats_strings(struct nfp_net *nn, u8 *data)
 	mem = nn->dp.ctrl_bar + nn->tlv_caps.vnic_stats_off;
 	for (i = 0; i < nn->tlv_caps.vnic_stats_cnt; i++) {
 		if (!(i % 4))
-			id_word = readq(mem + i * 2);
+			id_word = pete_readq("drivers/net/ethernet/netronome/nfp/nfp_net_ethtool.c:594", mem + i * 2);
 
 		id = (u16)id_word;
 		id_word >>= 16;
@@ -623,14 +623,14 @@ static u64 *nfp_vnic_get_tlv_stats(struct nfp_net *nn, u64 *data)
 	mem = nn->dp.ctrl_bar + nn->tlv_caps.vnic_stats_off;
 	mem += roundup(2 * nn->tlv_caps.vnic_stats_cnt, 8);
 	for (i = 0; i < nn->tlv_caps.vnic_stats_cnt; i++)
-		*data++ = readq(mem + i * 8);
+		*data++ = pete_readq("drivers/net/ethernet/netronome/nfp/nfp_net_ethtool.c:626", mem + i * 8);
 
 	mem = nn->dp.ctrl_bar;
 	for (i = 0; i < nn->max_r_vecs; i++) {
-		*data++ = readq(mem + NFP_NET_CFG_RXR_STATS(i));
-		*data++ = readq(mem + NFP_NET_CFG_RXR_STATS(i) + 8);
-		*data++ = readq(mem + NFP_NET_CFG_TXR_STATS(i));
-		*data++ = readq(mem + NFP_NET_CFG_TXR_STATS(i) + 8);
+		*data++ = pete_readq("drivers/net/ethernet/netronome/nfp/nfp_net_ethtool.c:630", mem + NFP_NET_CFG_RXR_STATS(i));
+		*data++ = pete_readq("drivers/net/ethernet/netronome/nfp/nfp_net_ethtool.c:631", mem + NFP_NET_CFG_RXR_STATS(i) + 8);
+		*data++ = pete_readq("drivers/net/ethernet/netronome/nfp/nfp_net_ethtool.c:632", mem + NFP_NET_CFG_TXR_STATS(i));
+		*data++ = pete_readq("drivers/net/ethernet/netronome/nfp/nfp_net_ethtool.c:633", mem + NFP_NET_CFG_TXR_STATS(i) + 8);
 	}
 
 	return data;
@@ -672,7 +672,7 @@ static u64 *nfp_mac_get_stats(struct net_device *netdev, u64 *data)
 		return data;
 
 	for (i = 0; i < ARRAY_SIZE(nfp_mac_et_stats); i++)
-		*data++ = readq(port->eth_stats + nfp_mac_et_stats[i].off);
+		*data++ = pete_readq("drivers/net/ethernet/netronome/nfp/nfp_net_ethtool.c:675", port->eth_stats + nfp_mac_et_stats[i].off);
 
 	return data;
 }

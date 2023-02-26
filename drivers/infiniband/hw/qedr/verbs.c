@@ -859,7 +859,7 @@ static void doorbell_cq(struct qedr_cq *cq, u32 cons, u8 flags)
 {
 	cq->db.data.agg_flags = flags;
 	cq->db.data.value = cpu_to_le32(cons);
-	writeq(cq->db.raw, cq->db_addr);
+	pete_writeq("drivers/infiniband/hw/qedr/verbs.c:862", cq->db.raw, cq->db_addr);
 }
 
 int qedr_arm_cq(struct ib_cq *ibcq, enum ib_cq_notify_flags flags)

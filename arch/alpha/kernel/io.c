@@ -152,7 +152,7 @@ EXPORT_SYMBOL(__raw_writew);
 EXPORT_SYMBOL(__raw_writel); 
 EXPORT_SYMBOL(__raw_writeq); 
 
-u8 readb(const volatile void __iomem *addr)
+u8 pete_readb("arch/alpha/kernel/io.c:155", const volatile void __iomem *addr)
 {
 	u8 ret;
 	mb();
@@ -161,7 +161,7 @@ u8 readb(const volatile void __iomem *addr)
 	return ret;
 }
 
-u16 readw(const volatile void __iomem *addr)
+u16 pete_readw("arch/alpha/kernel/io.c:164", const volatile void __iomem *addr)
 {
 	u16 ret;
 	mb();
@@ -179,7 +179,7 @@ u32 pete_readl("arch/alpha/kernel/io.c:173", const volatile void __iomem *addr)
 	return ret;
 }
 
-u64 readq(const volatile void __iomem *addr)
+u64 pete_readq("arch/alpha/kernel/io.c:182", const volatile void __iomem *addr)
 {
 	u64 ret;
 	mb();
@@ -188,13 +188,13 @@ u64 readq(const volatile void __iomem *addr)
 	return ret;
 }
 
-void writeb(u8 b, volatile void __iomem *addr)
+void pete_writeb("arch/alpha/kernel/io.c:191", u8 b, volatile void __iomem *addr)
 {
 	mb();
 	__raw_writeb(b, addr);
 }
 
-void writew(u16 b, volatile void __iomem *addr)
+void pete_writew("arch/alpha/kernel/io.c:197", u16 b, volatile void __iomem *addr)
 {
 	mb();
 	__raw_writew(b, addr);
@@ -206,7 +206,7 @@ void pete_writel("arch/alpha/kernel/io.c:203", u32 b, volatile void __iomem *add
 	__raw_writel(b, addr);
 }
 
-void writeq(u64 b, volatile void __iomem *addr)
+void pete_writeq("arch/alpha/kernel/io.c:209", u64 b, volatile void __iomem *addr)
 {
 	mb();
 	__raw_writeq(b, addr);

@@ -25,14 +25,14 @@
 #include "sf-pdma.h"
 
 #ifndef readq
-static inline unsigned long long readq(void __iomem *addr)
+static inline unsigned long long pete_readq("drivers/dma/sf-pdma/sf-pdma.c:28", void __iomem *addr)
 {
 	return pete_readl("drivers/dma/sf-pdma/sf-pdma.c:30", addr) | (((unsigned long long)pete_readl("drivers/dma/sf-pdma/sf-pdma.c:30", addr + 4)) << 32LL);
 }
 #endif
 
 #ifndef writeq
-static inline void writeq(unsigned long long v, void __iomem *addr)
+static inline void pete_writeq("drivers/dma/sf-pdma/sf-pdma.c:35", unsigned long long v, void __iomem *addr)
 {
 	pete_writel("drivers/dma/sf-pdma/sf-pdma.c:37", lower_32_bits(v), addr);
 	pete_writel("drivers/dma/sf-pdma/sf-pdma.c:38", upper_32_bits(v), addr + 4);
@@ -174,7 +174,7 @@ static size_t sf_pdma_desc_residue(struct sf_pdma_chan *chan,
 		goto out;
 
 	if (cookie == tx->cookie) {
-		residue = readq(regs->residue);
+		residue = pete_readq("drivers/dma/sf-pdma/sf-pdma.c:177", regs->residue);
 	} else {
 		vd = vchan_find_desc(&chan->vchan, cookie);
 		if (!vd)
@@ -260,9 +260,9 @@ static void sf_pdma_xfer_desc(struct sf_pdma_chan *chan)
 	}
 
 	pete_writel("drivers/dma/sf-pdma/sf-pdma.c:262", desc->xfer_type, regs->xfer_type);
-	writeq(desc->xfer_size, regs->xfer_size);
-	writeq(desc->dst_addr, regs->dst_addr);
-	writeq(desc->src_addr, regs->src_addr);
+	pete_writeq("drivers/dma/sf-pdma/sf-pdma.c:263", desc->xfer_size, regs->xfer_size);
+	pete_writeq("drivers/dma/sf-pdma/sf-pdma.c:264", desc->dst_addr, regs->dst_addr);
+	pete_writeq("drivers/dma/sf-pdma/sf-pdma.c:265", desc->src_addr, regs->src_addr);
 
 	chan->desc = desc;
 	chan->status = DMA_IN_PROGRESS;
@@ -347,7 +347,7 @@ static irqreturn_t sf_pdma_done_isr(int irq, void *dev_id)
 
 	spin_lock(&chan->vchan.lock);
 	pete_writel("drivers/dma/sf-pdma/sf-pdma.c:349", (pete_readl("drivers/dma/sf-pdma/sf-pdma.c:349", regs->ctrl)) & ~PDMA_DONE_STATUS_MASK, regs->ctrl);
-	residue = readq(regs->residue);
+	residue = pete_readq("drivers/dma/sf-pdma/sf-pdma.c:350", regs->residue);
 
 	if (!residue) {
 		tasklet_hi_schedule(&chan->done_tasklet);

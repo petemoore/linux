@@ -169,14 +169,14 @@ static u64 hisi_hha_pmu_read_counter(struct hisi_pmu *hha_pmu,
 				     struct hw_perf_event *hwc)
 {
 	/* Read 64 bits and like L3C, top 16 bits are RAZ */
-	return readq(hha_pmu->base + hisi_hha_pmu_get_counter_offset(hwc->idx));
+	return pete_readq("drivers/perf/hisilicon/hisi_uncore_hha_pmu.c:172", hha_pmu->base + hisi_hha_pmu_get_counter_offset(hwc->idx));
 }
 
 static void hisi_hha_pmu_write_counter(struct hisi_pmu *hha_pmu,
 				       struct hw_perf_event *hwc, u64 val)
 {
 	/* Write 64 bits and like L3C, top 16 bits are WI */
-	writeq(val, hha_pmu->base + hisi_hha_pmu_get_counter_offset(hwc->idx));
+	pete_writeq("drivers/perf/hisilicon/hisi_uncore_hha_pmu.c:179", val, hha_pmu->base + hisi_hha_pmu_get_counter_offset(hwc->idx));
 }
 
 static void hisi_hha_pmu_write_evtype(struct hisi_pmu *hha_pmu, int idx,

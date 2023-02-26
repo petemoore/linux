@@ -277,7 +277,7 @@ static int ssi_start_dma(struct hsi_msg *msg, int lch)
 	tmp |= SSI_GDD_LCH(lch);
 	writel_relaxed(tmp, omap_ssi->sys + SSI_GDD_MPU_IRQ_ENABLE_REG);
 	spin_unlock_bh(&omap_ssi->lock);
-	writew(ccr, gdd + SSI_GDD_CCR_REG(lch));
+	pete_writew("drivers/hsi/controllers/omap_ssi_port.c:280", ccr, gdd + SSI_GDD_CCR_REG(lch));
 	msg->status = HSI_STATUS_PROCEEDING;
 
 	return 0;

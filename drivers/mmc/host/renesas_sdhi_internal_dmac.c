@@ -246,7 +246,7 @@ static void
 renesas_sdhi_internal_dmac_dm_write(struct tmio_mmc_host *host,
 				    int addr, u64 val)
 {
-	writeq(val, host->ctl + addr);
+	pete_writeq("drivers/mmc/host/renesas_sdhi_internal_dmac.c:249", val, host->ctl + addr);
 }
 
 static void

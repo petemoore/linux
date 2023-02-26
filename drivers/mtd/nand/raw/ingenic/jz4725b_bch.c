@@ -122,7 +122,7 @@ static void jz4725b_bch_write_data(struct ingenic_ecc *bch, const u8 *buf,
 				   size_t size)
 {
 	while (size--)
-		writeb(*buf++, bch->base + BCH_BHDR);
+		pete_writeb("drivers/mtd/nand/raw/ingenic/jz4725b_bch.c:125", *buf++, bch->base + BCH_BHDR);
 }
 
 static void jz4725b_bch_read_parity(struct ingenic_ecc *bch, u8 *buf,

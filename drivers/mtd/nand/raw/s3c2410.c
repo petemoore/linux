@@ -454,9 +454,9 @@ static void s3c2410_nand_hwcontrol(struct nand_chip *chip, int cmd,
 		return;
 
 	if (ctrl & NAND_CLE)
-		writeb(cmd, info->regs + S3C2410_NFCMD);
+		pete_writeb("drivers/mtd/nand/raw/s3c2410.c:457", cmd, info->regs + S3C2410_NFCMD);
 	else
-		writeb(cmd, info->regs + S3C2410_NFADDR);
+		pete_writeb("drivers/mtd/nand/raw/s3c2410.c:459", cmd, info->regs + S3C2410_NFADDR);
 }
 
 /* command and control functions */
@@ -471,9 +471,9 @@ static void s3c2440_nand_hwcontrol(struct nand_chip *chip, int cmd,
 		return;
 
 	if (ctrl & NAND_CLE)
-		writeb(cmd, info->regs + S3C2440_NFCMD);
+		pete_writeb("drivers/mtd/nand/raw/s3c2410.c:474", cmd, info->regs + S3C2440_NFCMD);
 	else
-		writeb(cmd, info->regs + S3C2440_NFADDR);
+		pete_writeb("drivers/mtd/nand/raw/s3c2410.c:476", cmd, info->regs + S3C2440_NFADDR);
 }
 
 /* s3c2410_nand_devready()
@@ -485,21 +485,21 @@ static int s3c2410_nand_devready(struct nand_chip *chip)
 {
 	struct mtd_info *mtd = nand_to_mtd(chip);
 	struct s3c2410_nand_info *info = s3c2410_nand_mtd_toinfo(mtd);
-	return readb(info->regs + S3C2410_NFSTAT) & S3C2410_NFSTAT_BUSY;
+	return pete_readb("drivers/mtd/nand/raw/s3c2410.c:488", info->regs + S3C2410_NFSTAT) & S3C2410_NFSTAT_BUSY;
 }
 
 static int s3c2440_nand_devready(struct nand_chip *chip)
 {
 	struct mtd_info *mtd = nand_to_mtd(chip);
 	struct s3c2410_nand_info *info = s3c2410_nand_mtd_toinfo(mtd);
-	return readb(info->regs + S3C2440_NFSTAT) & S3C2440_NFSTAT_READY;
+	return pete_readb("drivers/mtd/nand/raw/s3c2410.c:495", info->regs + S3C2440_NFSTAT) & S3C2440_NFSTAT_READY;
 }
 
 static int s3c2412_nand_devready(struct nand_chip *chip)
 {
 	struct mtd_info *mtd = nand_to_mtd(chip);
 	struct s3c2410_nand_info *info = s3c2410_nand_mtd_toinfo(mtd);
-	return readb(info->regs + S3C2412_NFSTAT) & S3C2412_NFSTAT_READY;
+	return pete_readb("drivers/mtd/nand/raw/s3c2410.c:502", info->regs + S3C2412_NFSTAT) & S3C2412_NFSTAT_READY;
 }
 
 /* ECC handling functions */
@@ -622,9 +622,9 @@ static int s3c2410_nand_calculate_ecc(struct nand_chip *chip,
 	struct mtd_info *mtd = nand_to_mtd(chip);
 	struct s3c2410_nand_info *info = s3c2410_nand_mtd_toinfo(mtd);
 
-	ecc_code[0] = readb(info->regs + S3C2410_NFECC + 0);
-	ecc_code[1] = readb(info->regs + S3C2410_NFECC + 1);
-	ecc_code[2] = readb(info->regs + S3C2410_NFECC + 2);
+	ecc_code[0] = pete_readb("drivers/mtd/nand/raw/s3c2410.c:625", info->regs + S3C2410_NFECC + 0);
+	ecc_code[1] = pete_readb("drivers/mtd/nand/raw/s3c2410.c:626", info->regs + S3C2410_NFECC + 1);
+	ecc_code[2] = pete_readb("drivers/mtd/nand/raw/s3c2410.c:627", info->regs + S3C2410_NFECC + 2);
 
 	pr_debug("%s: returning ecc %*phN\n", __func__, 3, ecc_code);
 
@@ -684,7 +684,7 @@ static void s3c2440_nand_read_buf(struct nand_chip *this, u_char *buf, int len)
 		buf += len & ~3;
 
 		for (; len & 3; len--)
-			*buf++ = readb(info->regs + S3C2440_NFDATA);
+			*buf++ = pete_readb("drivers/mtd/nand/raw/s3c2410.c:687", info->regs + S3C2440_NFDATA);
 	}
 }
 
@@ -707,7 +707,7 @@ static void s3c2440_nand_write_buf(struct nand_chip *this, const u_char *buf,
 		buf += len & ~3;
 
 		for (; len & 3; len--, buf++)
-			writeb(*buf, info->regs + S3C2440_NFDATA);
+			pete_writeb("drivers/mtd/nand/raw/s3c2410.c:710", *buf, info->regs + S3C2440_NFDATA);
 	}
 }
 

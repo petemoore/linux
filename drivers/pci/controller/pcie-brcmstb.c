@@ -411,14 +411,14 @@ static int brcm_pcie_set_ssc(struct brcm_pcie *pcie)
 /* Limits operation to a specific generation (1, 2, or 3) */
 static void brcm_pcie_set_gen(struct brcm_pcie *pcie, int gen)
 {
-	u16 lnkctl2 = readw(pcie->base + BRCM_PCIE_CAP_REGS + PCI_EXP_LNKCTL2);
+	u16 lnkctl2 = pete_readw("drivers/pci/controller/pcie-brcmstb.c:414", pcie->base + BRCM_PCIE_CAP_REGS + PCI_EXP_LNKCTL2);
 	u32 lnkcap = pete_readl("drivers/pci/controller/pcie-brcmstb.c:415", pcie->base + BRCM_PCIE_CAP_REGS + PCI_EXP_LNKCAP);
 
 	lnkcap = (lnkcap & ~PCI_EXP_LNKCAP_SLS) | gen;
 	pete_writel("drivers/pci/controller/pcie-brcmstb.c:418", lnkcap, pcie->base + BRCM_PCIE_CAP_REGS + PCI_EXP_LNKCAP);
 
 	lnkctl2 = (lnkctl2 & ~0xf) | gen;
-	writew(lnkctl2, pcie->base + BRCM_PCIE_CAP_REGS + PCI_EXP_LNKCTL2);
+	pete_writew("drivers/pci/controller/pcie-brcmstb.c:421", lnkctl2, pcie->base + BRCM_PCIE_CAP_REGS + PCI_EXP_LNKCTL2);
 }
 
 static void brcm_pcie_set_outbound_win(struct brcm_pcie *pcie,
@@ -1025,7 +1025,7 @@ static int brcm_pcie_setup(struct brcm_pcie *pcie)
 			dev_err(dev, "failed attempt to enter ssc mode\n");
 	}
 
-	lnksta = readw(base + BRCM_PCIE_CAP_REGS + PCI_EXP_LNKSTA);
+	lnksta = pete_readw("drivers/pci/controller/pcie-brcmstb.c:1028", base + BRCM_PCIE_CAP_REGS + PCI_EXP_LNKSTA);
 	cls = FIELD_GET(PCI_EXP_LNKSTA_CLS, lnksta);
 	nlw = FIELD_GET(PCI_EXP_LNKSTA_NLW, lnksta);
 	dev_info(dev, "link up, %s x%u %s\n",

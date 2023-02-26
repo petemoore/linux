@@ -137,7 +137,7 @@ static void liointc_resume(struct irq_chip_generic *gc)
 	pete_writel("drivers/irqchip/irq-loongson-liointc.c:137", 0xffffffff, gc->reg_base + LIOINTC_REG_INTC_DISABLE);
 	/* Restore map cache */
 	for (i = 0; i < LIOINTC_CHIP_IRQ; i++)
-		writeb(priv->map_cache[i], gc->reg_base + i);
+		pete_writeb("drivers/irqchip/irq-loongson-liointc.c:140", priv->map_cache[i], gc->reg_base + i);
 	/* Restore mask cache */
 	pete_writel("drivers/irqchip/irq-loongson-liointc.c:142", gc->mask_cache, gc->reg_base + LIOINTC_REG_INTC_ENABLE);
 	irq_gc_unlock_irqrestore(gc, flags);
@@ -260,7 +260,7 @@ static int __init liointc_of_init(struct device_node *node,
 	for (i = 0; i < LIOINTC_CHIP_IRQ; i++) {
 		/* Generate core part of map cache */
 		priv->map_cache[i] |= BIT(loongson_sysconf.boot_cpu_id);
-		writeb(priv->map_cache[i], base + i);
+		pete_writeb("drivers/irqchip/irq-loongson-liointc.c:263", priv->map_cache[i], base + i);
 	}
 
 	gc = irq_get_domain_generic_chip(domain, 0);

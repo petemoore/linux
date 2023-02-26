@@ -307,7 +307,7 @@ static int ni_pcidio_request_di_mite_channel(struct comedi_device *dev)
 		return -EBUSY;
 	}
 	devpriv->di_mite_chan->dir = COMEDI_INPUT;
-	writeb(primary_DMAChannel_bits(devpriv->di_mite_chan->channel) |
+	pete_writeb("drivers/comedi/drivers/ni_pcidio.c:310", primary_DMAChannel_bits(devpriv->di_mite_chan->channel) |
 	       secondary_DMAChannel_bits(devpriv->di_mite_chan->channel),
 	       dev->mmio + DMA_LINE_CONTROL_GROUP1);
 	spin_unlock_irqrestore(&devpriv->mite_channel_lock, flags);
@@ -323,7 +323,7 @@ static void ni_pcidio_release_di_mite_channel(struct comedi_device *dev)
 	if (devpriv->di_mite_chan) {
 		mite_release_channel(devpriv->di_mite_chan);
 		devpriv->di_mite_chan = NULL;
-		writeb(primary_DMAChannel_bits(0) |
+		pete_writeb("drivers/comedi/drivers/ni_pcidio.c:326", primary_DMAChannel_bits(0) |
 		       secondary_DMAChannel_bits(0),
 		       dev->mmio + DMA_LINE_CONTROL_GROUP1);
 	}
@@ -391,8 +391,8 @@ static irqreturn_t nidio_interrupt(int irq, void *d)
 	/* Lock to avoid race with comedi_poll */
 	spin_lock(&dev->spinlock);
 
-	status = readb(dev->mmio + INTERRUPT_AND_WINDOW_STATUS);
-	flags = readb(dev->mmio + GROUP_1_FLAGS);
+	status = pete_readb("drivers/comedi/drivers/ni_pcidio.c:394", dev->mmio + INTERRUPT_AND_WINDOW_STATUS);
+	flags = pete_readb("drivers/comedi/drivers/ni_pcidio.c:395", dev->mmio + GROUP_1_FLAGS);
 
 	spin_lock(&devpriv->mite_channel_lock);
 	if (devpriv->di_mite_chan) {
@@ -405,7 +405,7 @@ static irqreturn_t nidio_interrupt(int irq, void *d)
 		work++;
 		if (work > 20) {
 			dev_dbg(dev->class_dev, "too much work in interrupt\n");
-			writeb(0x00,
+			pete_writeb("drivers/comedi/drivers/ni_pcidio.c:408", 0x00,
 			       dev->mmio + MASTER_DMA_AND_INTERRUPT_CONTROL);
 			break;
 		}
@@ -418,46 +418,46 @@ static irqreturn_t nidio_interrupt(int irq, void *d)
 				if (work > 100) {
 					dev_dbg(dev->class_dev,
 						"too much work in interrupt\n");
-					writeb(0x00, dev->mmio +
+					pete_writeb("drivers/comedi/drivers/ni_pcidio.c:421", 0x00, dev->mmio +
 					       MASTER_DMA_AND_INTERRUPT_CONTROL
 					      );
 					goto out;
 				}
 				auxdata = pete_readl("drivers/comedi/drivers/ni_pcidio.c:426", dev->mmio + GROUP_1_FIFO);
 				comedi_buf_write_samples(s, &auxdata, 1);
-				flags = readb(dev->mmio + GROUP_1_FLAGS);
+				flags = pete_readb("drivers/comedi/drivers/ni_pcidio.c:428", dev->mmio + GROUP_1_FLAGS);
 			}
 		}
 
 		if (flags & COUNT_EXPIRED) {
-			writeb(CLEAR_EXPIRED, dev->mmio + GROUP_1_SECOND_CLEAR);
+			pete_writeb("drivers/comedi/drivers/ni_pcidio.c:433", CLEAR_EXPIRED, dev->mmio + GROUP_1_SECOND_CLEAR);
 			async->events |= COMEDI_CB_EOA;
 
-			writeb(0x00, dev->mmio + OP_MODE);
+			pete_writeb("drivers/comedi/drivers/ni_pcidio.c:436", 0x00, dev->mmio + OP_MODE);
 			break;
 		} else if (flags & WAITED) {
-			writeb(CLEAR_WAITED, dev->mmio + GROUP_1_FIRST_CLEAR);
+			pete_writeb("drivers/comedi/drivers/ni_pcidio.c:439", CLEAR_WAITED, dev->mmio + GROUP_1_FIRST_CLEAR);
 			async->events |= COMEDI_CB_ERROR;
 			break;
 		} else if (flags & PRIMARY_TC) {
-			writeb(CLEAR_PRIMARY_TC,
+			pete_writeb("drivers/comedi/drivers/ni_pcidio.c:443", CLEAR_PRIMARY_TC,
 			       dev->mmio + GROUP_1_FIRST_CLEAR);
 			async->events |= COMEDI_CB_EOA;
 		} else if (flags & SECONDARY_TC) {
-			writeb(CLEAR_SECONDARY_TC,
+			pete_writeb("drivers/comedi/drivers/ni_pcidio.c:447", CLEAR_SECONDARY_TC,
 			       dev->mmio + GROUP_1_FIRST_CLEAR);
 			async->events |= COMEDI_CB_EOA;
 		}
 
-		flags = readb(dev->mmio + GROUP_1_FLAGS);
-		status = readb(dev->mmio + INTERRUPT_AND_WINDOW_STATUS);
+		flags = pete_readb("drivers/comedi/drivers/ni_pcidio.c:452", dev->mmio + GROUP_1_FLAGS);
+		status = pete_readb("drivers/comedi/drivers/ni_pcidio.c:453", dev->mmio + INTERRUPT_AND_WINDOW_STATUS);
 	}
 
 out:
 	comedi_handle_events(dev, s);
 #if 0
 	if (!tag)
-		writeb(0x03, dev->mmio + MASTER_DMA_AND_INTERRUPT_CONTROL);
+		pete_writeb("drivers/comedi/drivers/ni_pcidio.c:460", 0x03, dev->mmio + MASTER_DMA_AND_INTERRUPT_CONTROL);
 #endif
 
 	spin_unlock(&dev->spinlock);
@@ -609,7 +609,7 @@ static int ni_pcidio_inttrig(struct comedi_device *dev,
 	if (trig_num != cmd->start_arg)
 		return -EINVAL;
 
-	writeb(devpriv->OP_MODEBits, dev->mmio + OP_MODE);
+	pete_writeb("drivers/comedi/drivers/ni_pcidio.c:612", devpriv->OP_MODEBits, dev->mmio + OP_MODE);
 	s->async->inttrig = NULL;
 
 	return 1;
@@ -625,62 +625,62 @@ static int ni_pcidio_cmd(struct comedi_device *dev, struct comedi_subdevice *s)
 
 	if (1) {
 		/* enable fifos A B C D */
-		writeb(0x0f, dev->mmio + DATA_PATH);
+		pete_writeb("drivers/comedi/drivers/ni_pcidio.c:628", 0x0f, dev->mmio + DATA_PATH);
 
 		/* set transfer width a 32 bits */
-		writeb(TRANSFER_WIDTH(0) | TRANSFER_LENGTH(0),
+		pete_writeb("drivers/comedi/drivers/ni_pcidio.c:631", TRANSFER_WIDTH(0) | TRANSFER_LENGTH(0),
 		       dev->mmio + TRANSFER_SIZE_CONTROL);
 	} else {
-		writeb(0x03, dev->mmio + DATA_PATH);
-		writeb(TRANSFER_WIDTH(3) | TRANSFER_LENGTH(0),
+		pete_writeb("drivers/comedi/drivers/ni_pcidio.c:634", 0x03, dev->mmio + DATA_PATH);
+		pete_writeb("drivers/comedi/drivers/ni_pcidio.c:635", TRANSFER_WIDTH(3) | TRANSFER_LENGTH(0),
 		       dev->mmio + TRANSFER_SIZE_CONTROL);
 	}
 
 	/* protocol configuration */
 	if (cmd->scan_begin_src == TRIG_TIMER) {
 		/* page 4-5, "input with internal REQs" */
-		writeb(0, dev->mmio + OP_MODE);
-		writeb(0x00, dev->mmio + CLOCK_REG);
-		writeb(1, dev->mmio + SEQUENCE);
-		writeb(0x04, dev->mmio + REQ_REG);
-		writeb(4, dev->mmio + BLOCK_MODE);
-		writeb(3, dev->mmio + LINE_POLARITIES);
-		writeb(0xc0, dev->mmio + ACK_SER);
+		pete_writeb("drivers/comedi/drivers/ni_pcidio.c:642", 0, dev->mmio + OP_MODE);
+		pete_writeb("drivers/comedi/drivers/ni_pcidio.c:643", 0x00, dev->mmio + CLOCK_REG);
+		pete_writeb("drivers/comedi/drivers/ni_pcidio.c:644", 1, dev->mmio + SEQUENCE);
+		pete_writeb("drivers/comedi/drivers/ni_pcidio.c:645", 0x04, dev->mmio + REQ_REG);
+		pete_writeb("drivers/comedi/drivers/ni_pcidio.c:646", 4, dev->mmio + BLOCK_MODE);
+		pete_writeb("drivers/comedi/drivers/ni_pcidio.c:647", 3, dev->mmio + LINE_POLARITIES);
+		pete_writeb("drivers/comedi/drivers/ni_pcidio.c:648", 0xc0, dev->mmio + ACK_SER);
 		pete_writel("drivers/comedi/drivers/ni_pcidio.c:649", ni_pcidio_ns_to_timer(&cmd->scan_begin_arg,
 					     CMDF_ROUND_NEAREST),
 		       dev->mmio + START_DELAY);
-		writeb(1, dev->mmio + REQ_DELAY);
-		writeb(1, dev->mmio + REQ_NOT_DELAY);
-		writeb(1, dev->mmio + ACK_DELAY);
-		writeb(0x0b, dev->mmio + ACK_NOT_DELAY);
-		writeb(0x01, dev->mmio + DATA_1_DELAY);
+		pete_writeb("drivers/comedi/drivers/ni_pcidio.c:652", 1, dev->mmio + REQ_DELAY);
+		pete_writeb("drivers/comedi/drivers/ni_pcidio.c:653", 1, dev->mmio + REQ_NOT_DELAY);
+		pete_writeb("drivers/comedi/drivers/ni_pcidio.c:654", 1, dev->mmio + ACK_DELAY);
+		pete_writeb("drivers/comedi/drivers/ni_pcidio.c:655", 0x0b, dev->mmio + ACK_NOT_DELAY);
+		pete_writeb("drivers/comedi/drivers/ni_pcidio.c:656", 0x01, dev->mmio + DATA_1_DELAY);
 		/*
 		 * manual, page 4-5:
 		 * CLOCK_SPEED comment is incorrectly listed on DAQ_OPTIONS
 		 */
-		writew(0, dev->mmio + CLOCK_SPEED);
-		writeb(0, dev->mmio + DAQ_OPTIONS);
+		pete_writew("drivers/comedi/drivers/ni_pcidio.c:661", 0, dev->mmio + CLOCK_SPEED);
+		pete_writeb("drivers/comedi/drivers/ni_pcidio.c:662", 0, dev->mmio + DAQ_OPTIONS);
 	} else {
 		/* TRIG_EXT */
 		/* page 4-5, "input with external REQs" */
-		writeb(0, dev->mmio + OP_MODE);
-		writeb(0x00, dev->mmio + CLOCK_REG);
-		writeb(0, dev->mmio + SEQUENCE);
-		writeb(0x00, dev->mmio + REQ_REG);
-		writeb(4, dev->mmio + BLOCK_MODE);
+		pete_writeb("drivers/comedi/drivers/ni_pcidio.c:666", 0, dev->mmio + OP_MODE);
+		pete_writeb("drivers/comedi/drivers/ni_pcidio.c:667", 0x00, dev->mmio + CLOCK_REG);
+		pete_writeb("drivers/comedi/drivers/ni_pcidio.c:668", 0, dev->mmio + SEQUENCE);
+		pete_writeb("drivers/comedi/drivers/ni_pcidio.c:669", 0x00, dev->mmio + REQ_REG);
+		pete_writeb("drivers/comedi/drivers/ni_pcidio.c:670", 4, dev->mmio + BLOCK_MODE);
 		if (!(cmd->scan_begin_arg & CR_INVERT))	/* Leading Edge */
-			writeb(0, dev->mmio + LINE_POLARITIES);
+			pete_writeb("drivers/comedi/drivers/ni_pcidio.c:672", 0, dev->mmio + LINE_POLARITIES);
 		else					/* Trailing Edge */
-			writeb(2, dev->mmio + LINE_POLARITIES);
-		writeb(0x00, dev->mmio + ACK_SER);
+			pete_writeb("drivers/comedi/drivers/ni_pcidio.c:674", 2, dev->mmio + LINE_POLARITIES);
+		pete_writeb("drivers/comedi/drivers/ni_pcidio.c:675", 0x00, dev->mmio + ACK_SER);
 		pete_writel("drivers/comedi/drivers/ni_pcidio.c:676", 1, dev->mmio + START_DELAY);
-		writeb(1, dev->mmio + REQ_DELAY);
-		writeb(1, dev->mmio + REQ_NOT_DELAY);
-		writeb(1, dev->mmio + ACK_DELAY);
-		writeb(0x0C, dev->mmio + ACK_NOT_DELAY);
-		writeb(0x10, dev->mmio + DATA_1_DELAY);
-		writew(0, dev->mmio + CLOCK_SPEED);
-		writeb(0x60, dev->mmio + DAQ_OPTIONS);
+		pete_writeb("drivers/comedi/drivers/ni_pcidio.c:677", 1, dev->mmio + REQ_DELAY);
+		pete_writeb("drivers/comedi/drivers/ni_pcidio.c:678", 1, dev->mmio + REQ_NOT_DELAY);
+		pete_writeb("drivers/comedi/drivers/ni_pcidio.c:679", 1, dev->mmio + ACK_DELAY);
+		pete_writeb("drivers/comedi/drivers/ni_pcidio.c:680", 0x0C, dev->mmio + ACK_NOT_DELAY);
+		pete_writeb("drivers/comedi/drivers/ni_pcidio.c:681", 0x10, dev->mmio + DATA_1_DELAY);
+		pete_writew("drivers/comedi/drivers/ni_pcidio.c:682", 0, dev->mmio + CLOCK_SPEED);
+		pete_writeb("drivers/comedi/drivers/ni_pcidio.c:683", 0x60, dev->mmio + DAQ_OPTIONS);
 	}
 
 	if (cmd->stop_src == TRIG_COUNT) {
@@ -691,7 +691,7 @@ static int ni_pcidio_cmd(struct comedi_device *dev, struct comedi_subdevice *s)
 	}
 
 #ifdef USE_DMA
-	writeb(CLEAR_PRIMARY_TC | CLEAR_SECONDARY_TC,
+	pete_writeb("drivers/comedi/drivers/ni_pcidio.c:694", CLEAR_PRIMARY_TC | CLEAR_SECONDARY_TC,
 	       dev->mmio + GROUP_1_FIRST_CLEAR);
 
 	{
@@ -701,16 +701,16 @@ static int ni_pcidio_cmd(struct comedi_device *dev, struct comedi_subdevice *s)
 			return retval;
 	}
 #else
-	writeb(0x00, dev->mmio + DMA_LINE_CONTROL_GROUP1);
+	pete_writeb("drivers/comedi/drivers/ni_pcidio.c:704", 0x00, dev->mmio + DMA_LINE_CONTROL_GROUP1);
 #endif
-	writeb(0x00, dev->mmio + DMA_LINE_CONTROL_GROUP2);
+	pete_writeb("drivers/comedi/drivers/ni_pcidio.c:706", 0x00, dev->mmio + DMA_LINE_CONTROL_GROUP2);
 
 	/* clear and enable interrupts */
-	writeb(0xff, dev->mmio + GROUP_1_FIRST_CLEAR);
-	/* writeb(CLEAR_EXPIRED, dev->mmio+GROUP_1_SECOND_CLEAR); */
+	pete_writeb("drivers/comedi/drivers/ni_pcidio.c:709", 0xff, dev->mmio + GROUP_1_FIRST_CLEAR);
+	/* pete_writeb("drivers/comedi/drivers/ni_pcidio.c:710", CLEAR_EXPIRED, dev->mmio+GROUP_1_SECOND_CLEAR); */
 
-	writeb(INT_EN, dev->mmio + INTERRUPT_CONTROL);
-	writeb(0x03, dev->mmio + MASTER_DMA_AND_INTERRUPT_CONTROL);
+	pete_writeb("drivers/comedi/drivers/ni_pcidio.c:712", INT_EN, dev->mmio + INTERRUPT_CONTROL);
+	pete_writeb("drivers/comedi/drivers/ni_pcidio.c:713", 0x03, dev->mmio + MASTER_DMA_AND_INTERRUPT_CONTROL);
 
 	if (cmd->stop_src == TRIG_NONE) {
 		devpriv->OP_MODEBits = DATA_LATCHING(0) | RUN_MODE(7);
@@ -719,7 +719,7 @@ static int ni_pcidio_cmd(struct comedi_device *dev, struct comedi_subdevice *s)
 	}
 	if (cmd->start_src == TRIG_NOW) {
 		/* start */
-		writeb(devpriv->OP_MODEBits, dev->mmio + OP_MODE);
+		pete_writeb("drivers/comedi/drivers/ni_pcidio.c:722", devpriv->OP_MODEBits, dev->mmio + OP_MODE);
 		s->async->inttrig = NULL;
 	} else {
 		/* TRIG_INT */
@@ -732,7 +732,7 @@ static int ni_pcidio_cmd(struct comedi_device *dev, struct comedi_subdevice *s)
 static int ni_pcidio_cancel(struct comedi_device *dev,
 			    struct comedi_subdevice *s)
 {
-	writeb(0x00, dev->mmio + MASTER_DMA_AND_INTERRUPT_CONTROL);
+	pete_writeb("drivers/comedi/drivers/ni_pcidio.c:735", 0x00, dev->mmio + MASTER_DMA_AND_INTERRUPT_CONTROL);
 	ni_pcidio_release_di_mite_channel(dev);
 
 	return 0;
@@ -762,10 +762,10 @@ static int pci_6534_load_fpga(struct comedi_device *dev,
 	int i;
 	size_t j;
 
-	writew(0x80 | fpga_index, dev->mmio + Firmware_Control_Register);
-	writew(0xc0 | fpga_index, dev->mmio + Firmware_Control_Register);
+	pete_writew("drivers/comedi/drivers/ni_pcidio.c:765", 0x80 | fpga_index, dev->mmio + Firmware_Control_Register);
+	pete_writew("drivers/comedi/drivers/ni_pcidio.c:766", 0xc0 | fpga_index, dev->mmio + Firmware_Control_Register);
 	for (i = 0;
-	     (readw(dev->mmio + Firmware_Status_Register) & 0x2) == 0 &&
+	     (pete_readw("drivers/comedi/drivers/ni_pcidio.c:768", dev->mmio + Firmware_Status_Register) & 0x2) == 0 &&
 	     i < timeout; ++i) {
 		udelay(1);
 	}
@@ -775,9 +775,9 @@ static int pci_6534_load_fpga(struct comedi_device *dev,
 			 fpga_index);
 		return -EIO;
 	}
-	writew(0x80 | fpga_index, dev->mmio + Firmware_Control_Register);
+	pete_writew("drivers/comedi/drivers/ni_pcidio.c:778", 0x80 | fpga_index, dev->mmio + Firmware_Control_Register);
 	for (i = 0;
-	     readw(dev->mmio + Firmware_Status_Register) != 0x3 &&
+	     pete_readw("drivers/comedi/drivers/ni_pcidio.c:780", dev->mmio + Firmware_Status_Register) != 0x3 &&
 	     i < timeout; ++i) {
 		udelay(1);
 	}
@@ -791,9 +791,9 @@ static int pci_6534_load_fpga(struct comedi_device *dev,
 		unsigned int value = data[j++];
 
 		value |= data[j++] << 8;
-		writew(value, dev->mmio + Firmware_Data_Register);
+		pete_writew("drivers/comedi/drivers/ni_pcidio.c:794", value, dev->mmio + Firmware_Data_Register);
 		for (i = 0;
-		     (readw(dev->mmio + Firmware_Status_Register) & 0x2) == 0
+		     (pete_readw("drivers/comedi/drivers/ni_pcidio.c:796", dev->mmio + Firmware_Status_Register) & 0x2) == 0
 		     && i < timeout; ++i) {
 			udelay(1);
 		}
@@ -806,7 +806,7 @@ static int pci_6534_load_fpga(struct comedi_device *dev,
 		if (need_resched())
 			schedule();
 	}
-	writew(0x0, dev->mmio + Firmware_Control_Register);
+	pete_writew("drivers/comedi/drivers/ni_pcidio.c:809", 0x0, dev->mmio + Firmware_Control_Register);
 	return 0;
 }
 
@@ -820,13 +820,13 @@ static int pci_6534_reset_fpgas(struct comedi_device *dev)
 	int ret;
 	int i;
 
-	writew(0x0, dev->mmio + Firmware_Control_Register);
+	pete_writew("drivers/comedi/drivers/ni_pcidio.c:823", 0x0, dev->mmio + Firmware_Control_Register);
 	for (i = 0; i < 3; ++i) {
 		ret = pci_6534_reset_fpga(dev, i);
 		if (ret < 0)
 			break;
 	}
-	writew(0x0, dev->mmio + Firmware_Mask_Register);
+	pete_writew("drivers/comedi/drivers/ni_pcidio.c:829", 0x0, dev->mmio + Firmware_Mask_Register);
 	return ret;
 }
 
@@ -874,7 +874,7 @@ static void nidio_reset_board(struct comedi_device *dev)
 	pete_writel("drivers/comedi/drivers/ni_pcidio.c:874", 0, dev->mmio + PORT_PIN_MASK(0));
 
 	/* disable interrupts on board */
-	writeb(0, dev->mmio + MASTER_DMA_AND_INTERRUPT_CONTROL);
+	pete_writeb("drivers/comedi/drivers/ni_pcidio.c:877", 0, dev->mmio + MASTER_DMA_AND_INTERRUPT_CONTROL);
 }
 
 static int nidio_auto_attach(struct comedi_device *dev,
@@ -925,7 +925,7 @@ static int nidio_auto_attach(struct comedi_device *dev,
 		return ret;
 
 	dev_info(dev->class_dev, "%s rev=%d\n", dev->board_name,
-		 readb(dev->mmio + CHIP_VERSION));
+		 pete_readb("drivers/comedi/drivers/ni_pcidio.c:928", dev->mmio + CHIP_VERSION));
 
 	s = &dev->subdevices[0];
 

@@ -53,12 +53,12 @@ pmt_memcpy64_fromio(void *to, const u64 __iomem *from, size_t count)
 		return -EFAULT;
 
 	for (i = 0; i < count/8; i++)
-		buf[i] = readq(&from[i]);
+		buf[i] = pete_readq("drivers/platform/x86/intel/pmt/class.c:56", &from[i]);
 
 	/* Copy any remaining bytes */
 	remain = count % 8;
 	if (remain) {
-		u64 tmp = readq(&from[i]);
+		u64 tmp = pete_readq("drivers/platform/x86/intel/pmt/class.c:61", &from[i]);
 
 		memcpy(&buf[i], &tmp, remain);
 	}

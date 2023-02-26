@@ -107,10 +107,10 @@ MODULE_PARM_DESC(default_font, "Default font name");
  * Our access methods.
  */
 #define cyber2000fb_writel(val, reg, cfb)	pete_writel("drivers/video/fbdev/cyber2000fb.c:109", val, (cfb)->regs + (reg))
-#define cyber2000fb_writew(val, reg, cfb)	writew(val, (cfb)->regs + (reg))
-#define cyber2000fb_writeb(val, reg, cfb)	writeb(val, (cfb)->regs + (reg))
+#define cyber2000fb_writew(val, reg, cfb)	pete_writew("drivers/video/fbdev/cyber2000fb.c:110", val, (cfb)->regs + (reg))
+#define cyber2000fb_writeb(val, reg, cfb)	pete_writeb("drivers/video/fbdev/cyber2000fb.c:111", val, (cfb)->regs + (reg))
 
-#define cyber2000fb_readb(reg, cfb)		readb((cfb)->regs + (reg))
+#define cyber2000fb_readb(reg, cfb)		pete_readb("drivers/video/fbdev/cyber2000fb.c:113", (cfb)->regs + (reg))
 
 static inline void
 cyber2000_crtcw(unsigned int reg, unsigned int val, struct cfb_info *cfb)
@@ -1668,11 +1668,11 @@ static int cyberpro_pci_enable_mmio(struct cfb_info *cfb)
 		return -ENOMEM;
 	}
 
-	writeb(0x18, iop + 0x46e8);
-	writeb(0x01, iop + 0x102);
-	writeb(0x08, iop + 0x46e8);
-	writeb(EXT_BIU_MISC, iop + 0x3ce);
-	writeb(EXT_BIU_MISC_LIN_ENABLE, iop + 0x3cf);
+	pete_writeb("drivers/video/fbdev/cyber2000fb.c:1671", 0x18, iop + 0x46e8);
+	pete_writeb("drivers/video/fbdev/cyber2000fb.c:1672", 0x01, iop + 0x102);
+	pete_writeb("drivers/video/fbdev/cyber2000fb.c:1673", 0x08, iop + 0x46e8);
+	pete_writeb("drivers/video/fbdev/cyber2000fb.c:1674", EXT_BIU_MISC, iop + 0x3ce);
+	pete_writeb("drivers/video/fbdev/cyber2000fb.c:1675", EXT_BIU_MISC_LIN_ENABLE, iop + 0x3cf);
 
 	iounmap(iop);
 #else

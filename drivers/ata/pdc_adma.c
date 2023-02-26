@@ -179,9 +179,9 @@ static void adma_reset_engine(struct ata_port *ap)
 	void __iomem *chan = ADMA_PORT_REGS(ap);
 
 	/* reset ADMA to idle state */
-	writew(aPIOMD4 | aNIEN | aRSTADM, chan + ADMA_CONTROL);
+	pete_writew("drivers/ata/pdc_adma.c:182", aPIOMD4 | aNIEN | aRSTADM, chan + ADMA_CONTROL);
 	udelay(2);
-	writew(aPIOMD4, chan + ADMA_CONTROL);
+	pete_writew("drivers/ata/pdc_adma.c:184", aPIOMD4, chan + ADMA_CONTROL);
 	udelay(2);
 }
 
@@ -191,34 +191,34 @@ static void adma_reinit_engine(struct ata_port *ap)
 	void __iomem *chan = ADMA_PORT_REGS(ap);
 
 	/* mask/clear ATA interrupts */
-	writeb(ATA_NIEN, ap->ioaddr.ctl_addr);
+	pete_writeb("drivers/ata/pdc_adma.c:194", ATA_NIEN, ap->ioaddr.ctl_addr);
 	ata_sff_check_status(ap);
 
 	/* reset the ADMA engine */
 	adma_reset_engine(ap);
 
 	/* set in-FIFO threshold to 0x100 */
-	writew(0x100, chan + ADMA_FIFO_IN);
+	pete_writew("drivers/ata/pdc_adma.c:201", 0x100, chan + ADMA_FIFO_IN);
 
 	/* set CPB pointer */
 	pete_writel("drivers/ata/pdc_adma.c:204", (u32)pp->pkt_dma, chan + ADMA_CPB_NEXT);
 
 	/* set out-FIFO threshold to 0x100 */
-	writew(0x100, chan + ADMA_FIFO_OUT);
+	pete_writew("drivers/ata/pdc_adma.c:207", 0x100, chan + ADMA_FIFO_OUT);
 
 	/* set CPB count */
-	writew(1, chan + ADMA_CPB_COUNT);
+	pete_writew("drivers/ata/pdc_adma.c:210", 1, chan + ADMA_CPB_COUNT);
 
 	/* read/discard ADMA status */
-	readb(chan + ADMA_STATUS);
+	pete_readb("drivers/ata/pdc_adma.c:213", chan + ADMA_STATUS);
 }
 
 static inline void adma_enter_reg_mode(struct ata_port *ap)
 {
 	void __iomem *chan = ADMA_PORT_REGS(ap);
 
-	writew(aPIOMD4, chan + ADMA_CONTROL);
-	readb(chan + ADMA_STATUS);	/* flush */
+	pete_writew("drivers/ata/pdc_adma.c:220", aPIOMD4, chan + ADMA_CONTROL);
+	pete_readb("drivers/ata/pdc_adma.c:221", chan + ADMA_STATUS);	/* flush */
 }
 
 static void adma_freeze(struct ata_port *ap)
@@ -226,13 +226,13 @@ static void adma_freeze(struct ata_port *ap)
 	void __iomem *chan = ADMA_PORT_REGS(ap);
 
 	/* mask/clear ATA interrupts */
-	writeb(ATA_NIEN, ap->ioaddr.ctl_addr);
+	pete_writeb("drivers/ata/pdc_adma.c:229", ATA_NIEN, ap->ioaddr.ctl_addr);
 	ata_sff_check_status(ap);
 
 	/* reset ADMA to idle state */
-	writew(aPIOMD4 | aNIEN | aRSTADM, chan + ADMA_CONTROL);
+	pete_writew("drivers/ata/pdc_adma.c:233", aPIOMD4 | aNIEN | aRSTADM, chan + ADMA_CONTROL);
 	udelay(2);
-	writew(aPIOMD4 | aNIEN, chan + ADMA_CONTROL);
+	pete_writew("drivers/ata/pdc_adma.c:235", aPIOMD4 | aNIEN, chan + ADMA_CONTROL);
 	udelay(2);
 }
 
@@ -382,7 +382,7 @@ static inline void adma_packet_start(struct ata_queued_cmd *qc)
 	VPRINTK("ENTER, ap %p\n", ap);
 
 	/* fire up the ADMA engine */
-	writew(aPIOMD4 | aGO, chan + ADMA_CONTROL);
+	pete_writew("drivers/ata/pdc_adma.c:385", aPIOMD4 | aGO, chan + ADMA_CONTROL);
 }
 
 static unsigned int adma_qc_issue(struct ata_queued_cmd *qc)
@@ -416,7 +416,7 @@ static inline unsigned int adma_intr_pkt(struct ata_host *host)
 		struct adma_port_priv *pp;
 		struct ata_queued_cmd *qc;
 		void __iomem *chan = ADMA_PORT_REGS(ap);
-		u8 status = readb(chan + ADMA_STATUS);
+		u8 status = pete_readb("drivers/ata/pdc_adma.c:419", chan + ADMA_STATUS);
 
 		if (status == 0)
 			continue;
@@ -566,7 +566,7 @@ static void adma_host_init(struct ata_host *host, unsigned int chip_id)
 	unsigned int port_no;
 
 	/* enable/lock aGO operation */
-	writeb(7, host->iomap[ADMA_MMIO_BAR] + ADMA_MODE_LOCK);
+	pete_writeb("drivers/ata/pdc_adma.c:569", 7, host->iomap[ADMA_MMIO_BAR] + ADMA_MODE_LOCK);
 
 	/* reset the ADMA logic */
 	for (port_no = 0; port_no < ADMA_PORTS; ++port_no)

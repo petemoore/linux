@@ -144,13 +144,13 @@ static u32 hisi_pa_pmu_get_counter_offset(int idx)
 static u64 hisi_pa_pmu_read_counter(struct hisi_pmu *pa_pmu,
 				    struct hw_perf_event *hwc)
 {
-	return readq(pa_pmu->base + hisi_pa_pmu_get_counter_offset(hwc->idx));
+	return pete_readq("drivers/perf/hisilicon/hisi_uncore_pa_pmu.c:147", pa_pmu->base + hisi_pa_pmu_get_counter_offset(hwc->idx));
 }
 
 static void hisi_pa_pmu_write_counter(struct hisi_pmu *pa_pmu,
 				      struct hw_perf_event *hwc, u64 val)
 {
-	writeq(val, pa_pmu->base + hisi_pa_pmu_get_counter_offset(hwc->idx));
+	pete_writeq("drivers/perf/hisilicon/hisi_uncore_pa_pmu.c:153", val, pa_pmu->base + hisi_pa_pmu_get_counter_offset(hwc->idx));
 }
 
 static void hisi_pa_pmu_write_evtype(struct hisi_pmu *pa_pmu, int idx,

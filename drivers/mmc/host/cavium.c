@@ -166,7 +166,7 @@ static void check_switch_errors(struct cvm_mmc_host *host)
 {
 	u64 emm_switch;
 
-	emm_switch = readq(host->base + MIO_EMM_SWITCH(host));
+	emm_switch = pete_readq("drivers/mmc/host/cavium.c:169", host->base + MIO_EMM_SWITCH(host));
 	if (emm_switch & MIO_EMM_SWITCH_ERR0)
 		dev_err(host->dev, "Switch power class error\n");
 	if (emm_switch & MIO_EMM_SWITCH_ERR1)
@@ -209,14 +209,14 @@ static void do_switch(struct cvm_mmc_host *host, u64 emm_switch)
 	 */
 	bus_id = get_bus_id(emm_switch);
 	clear_bus_id(&emm_switch);
-	writeq(emm_switch, host->base + MIO_EMM_SWITCH(host));
+	pete_writeq("drivers/mmc/host/cavium.c:212", emm_switch, host->base + MIO_EMM_SWITCH(host));
 
 	set_bus_id(&emm_switch, bus_id);
-	writeq(emm_switch, host->base + MIO_EMM_SWITCH(host));
+	pete_writeq("drivers/mmc/host/cavium.c:215", emm_switch, host->base + MIO_EMM_SWITCH(host));
 
 	/* wait for the switch to finish */
 	do {
-		rsp_sts = readq(host->base + MIO_EMM_RSP_STS(host));
+		rsp_sts = pete_readq("drivers/mmc/host/cavium.c:219", host->base + MIO_EMM_RSP_STS(host));
 		if (!(rsp_sts & MIO_EMM_RSP_STS_SWITCH_VAL))
 			break;
 		udelay(10);
@@ -244,7 +244,7 @@ static void set_wdog(struct cvm_mmc_slot *slot, unsigned int ns)
 		timeout = (slot->clock * ns) / NSEC_PER_SEC;
 	else
 		timeout = (slot->clock * 850ull) / 1000ull;
-	writeq(timeout, slot->host->base + MIO_EMM_WDOG(slot->host));
+	pete_writeq("drivers/mmc/host/cavium.c:247", timeout, slot->host->base + MIO_EMM_WDOG(slot->host));
 }
 
 static void cvm_mmc_reset_bus(struct cvm_mmc_slot *slot)
@@ -252,19 +252,19 @@ static void cvm_mmc_reset_bus(struct cvm_mmc_slot *slot)
 	struct cvm_mmc_host *host = slot->host;
 	u64 emm_switch, wdog;
 
-	emm_switch = readq(slot->host->base + MIO_EMM_SWITCH(host));
+	emm_switch = pete_readq("drivers/mmc/host/cavium.c:255", slot->host->base + MIO_EMM_SWITCH(host));
 	emm_switch &= ~(MIO_EMM_SWITCH_EXE | MIO_EMM_SWITCH_ERR0 |
 			MIO_EMM_SWITCH_ERR1 | MIO_EMM_SWITCH_ERR2);
 	set_bus_id(&emm_switch, slot->bus_id);
 
-	wdog = readq(slot->host->base + MIO_EMM_WDOG(host));
+	wdog = pete_readq("drivers/mmc/host/cavium.c:260", slot->host->base + MIO_EMM_WDOG(host));
 	do_switch(slot->host, emm_switch);
 
 	slot->cached_switch = emm_switch;
 
 	msleep(20);
 
-	writeq(wdog, slot->host->base + MIO_EMM_WDOG(host));
+	pete_writeq("drivers/mmc/host/cavium.c:267", wdog, slot->host->base + MIO_EMM_WDOG(host));
 }
 
 /* Switch to another slot if needed */
@@ -279,18 +279,18 @@ static void cvm_mmc_switch_to(struct cvm_mmc_slot *slot)
 
 	if (host->last_slot >= 0 && host->slot[host->last_slot]) {
 		old_slot = host->slot[host->last_slot];
-		old_slot->cached_switch = readq(host->base + MIO_EMM_SWITCH(host));
-		old_slot->cached_rca = readq(host->base + MIO_EMM_RCA(host));
+		old_slot->cached_switch = pete_readq("drivers/mmc/host/cavium.c:282", host->base + MIO_EMM_SWITCH(host));
+		old_slot->cached_rca = pete_readq("drivers/mmc/host/cavium.c:283", host->base + MIO_EMM_RCA(host));
 	}
 
-	writeq(slot->cached_rca, host->base + MIO_EMM_RCA(host));
+	pete_writeq("drivers/mmc/host/cavium.c:286", slot->cached_rca, host->base + MIO_EMM_RCA(host));
 	emm_switch = slot->cached_switch;
 	set_bus_id(&emm_switch, slot->bus_id);
 	do_switch(host, emm_switch);
 
 	emm_sample = FIELD_PREP(MIO_EMM_SAMPLE_CMD_CNT, slot->cmd_cnt) |
 		     FIELD_PREP(MIO_EMM_SAMPLE_DAT_CNT, slot->dat_cnt);
-	writeq(emm_sample, host->base + MIO_EMM_SAMPLE(host));
+	pete_writeq("drivers/mmc/host/cavium.c:293", emm_sample, host->base + MIO_EMM_SAMPLE(host));
 
 	host->last_slot = slot->bus_id;
 }
@@ -304,7 +304,7 @@ static void do_read(struct cvm_mmc_host *host, struct mmc_request *req,
 	u64 dat = 0;
 
 	/* Auto inc from offset zero */
-	writeq((0x10000 | (dbuf << 6)), host->base + MIO_EMM_BUF_IDX(host));
+	pete_writeq("drivers/mmc/host/cavium.c:307", (0x10000 | (dbuf << 6)), host->base + MIO_EMM_BUF_IDX(host));
 
 	for (bytes_xfered = 0; bytes_xfered < data_len;) {
 		if (smi->consumed >= smi->length) {
@@ -314,7 +314,7 @@ static void do_read(struct cvm_mmc_host *host, struct mmc_request *req,
 		}
 
 		if (shift < 0) {
-			dat = readq(host->base + MIO_EMM_BUF_DAT(host));
+			dat = pete_readq("drivers/mmc/host/cavium.c:317", host->base + MIO_EMM_BUF_DAT(host));
 			shift = 56;
 		}
 
@@ -345,7 +345,7 @@ static void set_cmd_response(struct cvm_mmc_host *host, struct mmc_request *req,
 	if (!(rsp_sts & MIO_EMM_RSP_STS_RSP_VAL))
 		return;
 
-	rsp_lo = readq(host->base + MIO_EMM_RSP_LO(host));
+	rsp_lo = pete_readq("drivers/mmc/host/cavium.c:348", host->base + MIO_EMM_RSP_LO(host));
 
 	switch (FIELD_GET(MIO_EMM_RSP_STS_RSP_TYPE, rsp_sts)) {
 	case 1:
@@ -358,7 +358,7 @@ static void set_cmd_response(struct cvm_mmc_host *host, struct mmc_request *req,
 	case 2:
 		req->cmd->resp[3] = rsp_lo & 0xffffffff;
 		req->cmd->resp[2] = (rsp_lo >> 32) & 0xffffffff;
-		rsp_hi = readq(host->base + MIO_EMM_RSP_HI(host));
+		rsp_hi = pete_readq("drivers/mmc/host/cavium.c:361", host->base + MIO_EMM_RSP_HI(host));
 		req->cmd->resp[1] = rsp_hi & 0xffffffff;
 		req->cmd->resp[0] = (rsp_hi >> 32) & 0xffffffff;
 		break;
@@ -384,7 +384,7 @@ static int finish_dma_sg(struct cvm_mmc_host *host, struct mmc_data *data)
 	int count;
 
 	/* Check if there are any pending requests left */
-	fifo_cfg = readq(host->dma_base + MIO_EMM_DMA_FIFO_CFG(host));
+	fifo_cfg = pete_readq("drivers/mmc/host/cavium.c:387", host->dma_base + MIO_EMM_DMA_FIFO_CFG(host));
 	count = FIELD_GET(MIO_EMM_DMA_FIFO_CFG_COUNT, fifo_cfg);
 	if (count)
 		dev_err(host->dev, "%u requests still pending\n", count);
@@ -393,7 +393,7 @@ static int finish_dma_sg(struct cvm_mmc_host *host, struct mmc_data *data)
 	data->error = 0;
 
 	/* Clear and disable FIFO */
-	writeq(BIT_ULL(16), host->dma_base + MIO_EMM_DMA_FIFO_CFG(host));
+	pete_writeq("drivers/mmc/host/cavium.c:396", BIT_ULL(16), host->dma_base + MIO_EMM_DMA_FIFO_CFG(host));
 	dma_unmap_sg(host->dev, data->sg, data->sg_len, get_dma_dir(data));
 	return 1;
 }
@@ -425,11 +425,11 @@ static void cleanup_dma(struct cvm_mmc_host *host, u64 rsp_sts)
 {
 	u64 emm_dma;
 
-	emm_dma = readq(host->base + MIO_EMM_DMA(host));
+	emm_dma = pete_readq("drivers/mmc/host/cavium.c:428", host->base + MIO_EMM_DMA(host));
 	emm_dma |= FIELD_PREP(MIO_EMM_DMA_VAL, 1) |
 		   FIELD_PREP(MIO_EMM_DMA_DAT_NULL, 1);
 	set_bus_id(&emm_dma, get_bus_id(rsp_sts));
-	writeq(emm_dma, host->base + MIO_EMM_DMA(host));
+	pete_writeq("drivers/mmc/host/cavium.c:432", emm_dma, host->base + MIO_EMM_DMA(host));
 }
 
 irqreturn_t cvm_mmc_interrupt(int irq, void *dev_id)
@@ -445,8 +445,8 @@ irqreturn_t cvm_mmc_interrupt(int irq, void *dev_id)
 		__acquire(&host->irq_handler_lock);
 
 	/* Clear interrupt bits (write 1 clears ). */
-	emm_int = readq(host->base + MIO_EMM_INT(host));
-	writeq(emm_int, host->base + MIO_EMM_INT(host));
+	emm_int = pete_readq("drivers/mmc/host/cavium.c:448", host->base + MIO_EMM_INT(host));
+	pete_writeq("drivers/mmc/host/cavium.c:449", emm_int, host->base + MIO_EMM_INT(host));
 
 	if (emm_int & MIO_EMM_INT_SWITCH_ERR)
 		check_switch_errors(host);
@@ -455,7 +455,7 @@ irqreturn_t cvm_mmc_interrupt(int irq, void *dev_id)
 	if (!req)
 		goto out;
 
-	rsp_sts = readq(host->base + MIO_EMM_RSP_STS(host));
+	rsp_sts = pete_readq("drivers/mmc/host/cavium.c:458", host->base + MIO_EMM_RSP_STS(host));
 	/*
 	 * dma_val set means DMA is still in progress. Don't touch
 	 * the request and wait for the interrupt indicating that
@@ -535,13 +535,13 @@ static u64 prepare_dma_single(struct cvm_mmc_host *host, struct mmc_data *data)
 	addr = sg_dma_address(&data->sg[0]);
 	if (!host->big_dma_addr)
 		dma_cfg |= FIELD_PREP(MIO_EMM_DMA_CFG_ADR, addr);
-	writeq(dma_cfg, host->dma_base + MIO_EMM_DMA_CFG(host));
+	pete_writeq("drivers/mmc/host/cavium.c:538", dma_cfg, host->dma_base + MIO_EMM_DMA_CFG(host));
 
 	pr_debug("[%s] sg_dma_len: %u  total sg_elem: %d\n",
 		 (rw) ? "W" : "R", sg_dma_len(&data->sg[0]), count);
 
 	if (host->big_dma_addr)
-		writeq(addr, host->dma_base + MIO_EMM_DMA_ADR(host));
+		pete_writeq("drivers/mmc/host/cavium.c:544", addr, host->dma_base + MIO_EMM_DMA_ADR(host));
 	return addr;
 }
 
@@ -563,14 +563,14 @@ static u64 prepare_dma_sg(struct cvm_mmc_host *host, struct mmc_data *data)
 		goto error;
 
 	/* Enable FIFO by removing CLR bit */
-	writeq(0, host->dma_base + MIO_EMM_DMA_FIFO_CFG(host));
+	pete_writeq("drivers/mmc/host/cavium.c:566", 0, host->dma_base + MIO_EMM_DMA_FIFO_CFG(host));
 
 	for_each_sg(data->sg, sg, count, i) {
 		/* Program DMA address */
 		addr = sg_dma_address(sg);
 		if (addr & 7)
 			goto error;
-		writeq(addr, host->dma_base + MIO_EMM_DMA_FIFO_ADR(host));
+		pete_writeq("drivers/mmc/host/cavium.c:573", addr, host->dma_base + MIO_EMM_DMA_FIFO_ADR(host));
 
 		/*
 		 * If we have scatter-gather support we also have an extra
@@ -593,7 +593,7 @@ static u64 prepare_dma_sg(struct cvm_mmc_host *host, struct mmc_data *data)
 		 * The write copies the address and the command to the FIFO
 		 * and increments the FIFO's COUNT field.
 		 */
-		writeq(fifo_cmd, host->dma_base + MIO_EMM_DMA_FIFO_CMD(host));
+		pete_writeq("drivers/mmc/host/cavium.c:596", fifo_cmd, host->dma_base + MIO_EMM_DMA_FIFO_CMD(host));
 		pr_debug("[%s] sg_dma_len: %u  sg_elem: %d/%d\n",
 			 (rw) ? "W" : "R", sg_dma_len(sg), i, count);
 	}
@@ -610,7 +610,7 @@ error:
 	WARN_ON_ONCE(1);
 	dma_unmap_sg(host->dev, data->sg, data->sg_len, get_dma_dir(data));
 	/* Disable FIFO */
-	writeq(BIT_ULL(16), host->dma_base + MIO_EMM_DMA_FIFO_CFG(host));
+	pete_writeq("drivers/mmc/host/cavium.c:613", BIT_ULL(16), host->dma_base + MIO_EMM_DMA_FIFO_CFG(host));
 	return 0;
 }
 
@@ -691,10 +691,10 @@ static void cvm_mmc_dma_request(struct mmc_host *mmc,
 	 * Otherwise, use the default power reset value.
 	 */
 	if (mmc_card_sd(mmc->card))
-		writeq(0x00b00000ull, host->base + MIO_EMM_STS_MASK(host));
+		pete_writeq("drivers/mmc/host/cavium.c:694", 0x00b00000ull, host->base + MIO_EMM_STS_MASK(host));
 	else
-		writeq(0xe4390080ull, host->base + MIO_EMM_STS_MASK(host));
-	writeq(emm_dma, host->base + MIO_EMM_DMA(host));
+		pete_writeq("drivers/mmc/host/cavium.c:696", 0xe4390080ull, host->base + MIO_EMM_STS_MASK(host));
+	pete_writeq("drivers/mmc/host/cavium.c:697", emm_dma, host->base + MIO_EMM_DMA(host));
 	return;
 
 error:
@@ -722,7 +722,7 @@ static void do_write_request(struct cvm_mmc_host *host, struct mmc_request *mrq)
 	sg_miter_start(smi, mrq->data->sg, mrq->data->sg_len, SG_MITER_FROM_SG);
 
 	/* Auto inc from offset zero, dbuf zero */
-	writeq(0x10000ull, host->base + MIO_EMM_BUF_IDX(host));
+	pete_writeq("drivers/mmc/host/cavium.c:725", 0x10000ull, host->base + MIO_EMM_BUF_IDX(host));
 
 	for (bytes_xfered = 0; bytes_xfered < data_len;) {
 		if (smi->consumed >= smi->length) {
@@ -739,7 +739,7 @@ static void do_write_request(struct cvm_mmc_host *host, struct mmc_request *mrq)
 		}
 
 		if (shift < 0) {
-			writeq(dat, host->base + MIO_EMM_BUF_DAT(host));
+			pete_writeq("drivers/mmc/host/cavium.c:742", dat, host->base + MIO_EMM_BUF_DAT(host));
 			shift = 56;
 			dat = 0;
 		}
@@ -802,10 +802,10 @@ static void cvm_mmc_request(struct mmc_host *mmc, struct mmc_request *mrq)
 		emm_cmd |= FIELD_PREP(MIO_EMM_CMD_OFFSET,
 				64 - ((cmd->data->blocks * cmd->data->blksz) / 8));
 
-	writeq(0, host->base + MIO_EMM_STS_MASK(host));
+	pete_writeq("drivers/mmc/host/cavium.c:805", 0, host->base + MIO_EMM_STS_MASK(host));
 
 retry:
-	rsp_sts = readq(host->base + MIO_EMM_RSP_STS(host));
+	rsp_sts = pete_readq("drivers/mmc/host/cavium.c:808", host->base + MIO_EMM_RSP_STS(host));
 	if (rsp_sts & MIO_EMM_RSP_STS_DMA_VAL ||
 	    rsp_sts & MIO_EMM_RSP_STS_CMD_VAL ||
 	    rsp_sts & MIO_EMM_RSP_STS_SWITCH_VAL ||
@@ -816,7 +816,7 @@ retry:
 	}
 	if (!retries)
 		dev_err(host->dev, "Bad status: %llx before command write\n", rsp_sts);
-	writeq(emm_cmd, host->base + MIO_EMM_CMD(host));
+	pete_writeq("drivers/mmc/host/cavium.c:819", emm_cmd, host->base + MIO_EMM_CMD(host));
 }
 
 static void cvm_mmc_set_ios(struct mmc_host *mmc, struct mmc_ios *ios)
@@ -917,7 +917,7 @@ static int cvm_mmc_init_lowlevel(struct cvm_mmc_slot *slot)
 
 	/* Enable this bus slot. */
 	host->emm_cfg |= (1ull << slot->bus_id);
-	writeq(host->emm_cfg, slot->host->base + MIO_EMM_CFG(host));
+	pete_writeq("drivers/mmc/host/cavium.c:920", host->emm_cfg, slot->host->base + MIO_EMM_CFG(host));
 	udelay(10);
 
 	/* Program initial clock speed and power. */
@@ -941,8 +941,8 @@ static int cvm_mmc_init_lowlevel(struct cvm_mmc_slot *slot)
 	 * to the CMD register for CMD7 transactions.
 	 */
 	set_wdog(slot, 0);
-	writeq(0xe4390080ull, host->base + MIO_EMM_STS_MASK(host));
-	writeq(1, host->base + MIO_EMM_RCA(host));
+	pete_writeq("drivers/mmc/host/cavium.c:944", 0xe4390080ull, host->base + MIO_EMM_STS_MASK(host));
+	pete_writeq("drivers/mmc/host/cavium.c:945", 1, host->base + MIO_EMM_RCA(host));
 	return 0;
 }
 

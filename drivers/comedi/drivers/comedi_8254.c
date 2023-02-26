@@ -130,13 +130,13 @@ static unsigned int __i8254_read(struct comedi_8254 *i8254, unsigned int reg)
 	default:
 	case I8254_IO8:
 		if (i8254->mmio)
-			val = readb(i8254->mmio + reg_offset);
+			val = pete_readb("drivers/comedi/drivers/comedi_8254.c:133", i8254->mmio + reg_offset);
 		else
 			val = inb(i8254->iobase + reg_offset);
 		break;
 	case I8254_IO16:
 		if (i8254->mmio)
-			val = readw(i8254->mmio + reg_offset);
+			val = pete_readw("drivers/comedi/drivers/comedi_8254.c:139", i8254->mmio + reg_offset);
 		else
 			val = inw(i8254->iobase + reg_offset);
 		break;
@@ -159,13 +159,13 @@ static void __i8254_write(struct comedi_8254 *i8254,
 	default:
 	case I8254_IO8:
 		if (i8254->mmio)
-			writeb(val, i8254->mmio + reg_offset);
+			pete_writeb("drivers/comedi/drivers/comedi_8254.c:162", val, i8254->mmio + reg_offset);
 		else
 			outb(val, i8254->iobase + reg_offset);
 		break;
 	case I8254_IO16:
 		if (i8254->mmio)
-			writew(val, i8254->mmio + reg_offset);
+			pete_writew("drivers/comedi/drivers/comedi_8254.c:168", val, i8254->mmio + reg_offset);
 		else
 			outw(val, i8254->iobase + reg_offset);
 		break;

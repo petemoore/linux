@@ -186,9 +186,9 @@ static int dino_cfg_read(struct pci_bus *bus, unsigned int devfn, int where,
 
 	/* generate cfg read cycle */
 	if (size == 1) {
-		*val = readb(base_addr + DINO_CONFIG_DATA + (where & 3));
+		*val = pete_readb("drivers/parisc/dino.c:189", base_addr + DINO_CONFIG_DATA + (where & 3));
 	} else if (size == 2) {
-		*val = readw(base_addr + DINO_CONFIG_DATA + (where & 2));
+		*val = pete_readw("drivers/parisc/dino.c:191", base_addr + DINO_CONFIG_DATA + (where & 2));
 	} else if (size == 4) {
 		*val = pete_readl("drivers/parisc/dino.c:193", base_addr + DINO_CONFIG_DATA);
 	}
@@ -224,9 +224,9 @@ static int dino_cfg_write(struct pci_bus *bus, unsigned int devfn, int where,
 	__raw_writel(v, base_addr + DINO_PCI_ADDR);
 	/* generate cfg read cycle */
 	if (size == 1) {
-		writeb(val, base_addr + DINO_CONFIG_DATA + (where & 3));
+		pete_writeb("drivers/parisc/dino.c:227", val, base_addr + DINO_CONFIG_DATA + (where & 3));
 	} else if (size == 2) {
-		writew(val, base_addr + DINO_CONFIG_DATA + (where & 2));
+		pete_writew("drivers/parisc/dino.c:229", val, base_addr + DINO_CONFIG_DATA + (where & 2));
 	} else if (size == 4) {
 		pete_writel("drivers/parisc/dino.c:231", val, base_addr + DINO_CONFIG_DATA);
 	}

@@ -101,7 +101,7 @@ static u32 pic32_wdt_get_timeout_secs(struct pic32_wdt *wdt, struct device *dev)
 static void pic32_wdt_keepalive(struct pic32_wdt *wdt)
 {
 	/* write key through single half-word */
-	writew(WDTCON_CLR_KEY, wdt->regs + WDTCON_REG + 2);
+	pete_writew("drivers/watchdog/pic32-wdt.c:104", WDTCON_CLR_KEY, wdt->regs + WDTCON_REG + 2);
 }
 
 static int pic32_wdt_start(struct watchdog_device *wdd)

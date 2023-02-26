@@ -1010,7 +1010,7 @@ static int s2io_verify_pci_mode(struct s2io_nic *nic)
 	register u64 val64 = 0;
 	int     mode;
 
-	val64 = readq(&bar0->pci_mode);
+	val64 = pete_readq("drivers/net/ethernet/neterion/s2io.c:1013", &bar0->pci_mode);
 	mode = (u8)GET_PCI_MODE(val64);
 
 	if (val64 & PCI_MODE_UNKNOWN_MODE)
@@ -1046,7 +1046,7 @@ static int s2io_print_pci_mode(struct s2io_nic *nic)
 	struct config_param *config = &nic->config;
 	const char *pcimode;
 
-	val64 = readq(&bar0->pci_mode);
+	val64 = pete_readq("drivers/net/ethernet/neterion/s2io.c:1049", &bar0->pci_mode);
 	mode = (u8)GET_PCI_MODE(val64);
 
 	if (val64 & PCI_MODE_UNKNOWN_MODE)
@@ -1134,7 +1134,7 @@ static int init_tti(struct s2io_nic *nic, int link, bool may_sleep)
 		if (i == 0)
 			if (use_continuous_tx_intrs && (link == LINK_UP))
 				val64 |= TTI_DATA1_MEM_TX_TIMER_CI_EN;
-		writeq(val64, &bar0->tti_data1_mem);
+		pete_writeq("drivers/net/ethernet/neterion/s2io.c:1137", val64, &bar0->tti_data1_mem);
 
 		if (nic->config.intr_type == MSI_X) {
 			val64 = TTI_DATA2_MEM_TX_UFC_A(0x10) |
@@ -1159,12 +1159,12 @@ static int init_tti(struct s2io_nic *nic, int link, bool may_sleep)
 					TTI_DATA2_MEM_TX_UFC_D(0x80);
 		}
 
-		writeq(val64, &bar0->tti_data2_mem);
+		pete_writeq("drivers/net/ethernet/neterion/s2io.c:1162", val64, &bar0->tti_data2_mem);
 
 		val64 = TTI_CMD_MEM_WE |
 			TTI_CMD_MEM_STROBE_NEW_CMD |
 			TTI_CMD_MEM_OFFSET(i);
-		writeq(val64, &bar0->tti_command_mem);
+		pete_writeq("drivers/net/ethernet/neterion/s2io.c:1167", val64, &bar0->tti_command_mem);
 
 		if (wait_for_cmd_complete(&bar0->tti_command_mem,
 					  TTI_CMD_MEM_STROBE_NEW_CMD,
@@ -1209,23 +1209,23 @@ static int init_nic(struct s2io_nic *nic)
 	 */
 	if (nic->device_type & XFRAME_II_DEVICE) {
 		val64 = 0xA500000000ULL;
-		writeq(val64, &bar0->sw_reset);
+		pete_writeq("drivers/net/ethernet/neterion/s2io.c:1212", val64, &bar0->sw_reset);
 		msleep(500);
-		val64 = readq(&bar0->sw_reset);
+		val64 = pete_readq("drivers/net/ethernet/neterion/s2io.c:1214", &bar0->sw_reset);
 	}
 
 	/* Remove XGXS from reset state */
 	val64 = 0;
-	writeq(val64, &bar0->sw_reset);
+	pete_writeq("drivers/net/ethernet/neterion/s2io.c:1219", val64, &bar0->sw_reset);
 	msleep(500);
-	val64 = readq(&bar0->sw_reset);
+	val64 = pete_readq("drivers/net/ethernet/neterion/s2io.c:1221", &bar0->sw_reset);
 
 	/* Ensure that it's safe to access registers by checking
 	 * RIC_RUNNING bit is reset. Check is valid only for XframeII.
 	 */
 	if (nic->device_type == XFRAME_II_DEVICE) {
 		for (i = 0; i < 50; i++) {
-			val64 = readq(&bar0->adapter_status);
+			val64 = pete_readq("drivers/net/ethernet/neterion/s2io.c:1228", &bar0->adapter_status);
 			if (!(val64 & ADAPTER_STATUS_RIC_RUNNING))
 				break;
 			msleep(10);
@@ -1236,21 +1236,21 @@ static int init_nic(struct s2io_nic *nic)
 
 	/*  Enable Receiving broadcasts */
 	add = &bar0->mac_cfg;
-	val64 = readq(&bar0->mac_cfg);
+	val64 = pete_readq("drivers/net/ethernet/neterion/s2io.c:1239", &bar0->mac_cfg);
 	val64 |= MAC_RMAC_BCAST_ENABLE;
-	writeq(RMAC_CFG_KEY(0x4C0D), &bar0->rmac_cfg_key);
+	pete_writeq("drivers/net/ethernet/neterion/s2io.c:1241", RMAC_CFG_KEY(0x4C0D), &bar0->rmac_cfg_key);
 	pete_writel("drivers/net/ethernet/neterion/s2io.c:1242", (u32)val64, add);
-	writeq(RMAC_CFG_KEY(0x4C0D), &bar0->rmac_cfg_key);
+	pete_writeq("drivers/net/ethernet/neterion/s2io.c:1243", RMAC_CFG_KEY(0x4C0D), &bar0->rmac_cfg_key);
 	pete_writel("drivers/net/ethernet/neterion/s2io.c:1244", (u32) (val64 >> 32), (add + 4));
 
 	/* Read registers in all blocks */
-	val64 = readq(&bar0->mac_int_mask);
-	val64 = readq(&bar0->mc_int_mask);
-	val64 = readq(&bar0->xgxs_int_mask);
+	val64 = pete_readq("drivers/net/ethernet/neterion/s2io.c:1247", &bar0->mac_int_mask);
+	val64 = pete_readq("drivers/net/ethernet/neterion/s2io.c:1248", &bar0->mc_int_mask);
+	val64 = pete_readq("drivers/net/ethernet/neterion/s2io.c:1249", &bar0->xgxs_int_mask);
 
 	/*  Set MTU */
 	val64 = dev->mtu;
-	writeq(vBIT(val64, 2, 14), &bar0->rmac_max_pyld_len);
+	pete_writeq("drivers/net/ethernet/neterion/s2io.c:1253", vBIT(val64, 2, 14), &bar0->rmac_max_pyld_len);
 
 	if (nic->device_type & XFRAME_II_DEVICE) {
 		while (herc_act_dtx_cfg[dtx_cnt] != END_SIGN) {
@@ -1264,17 +1264,17 @@ static int init_nic(struct s2io_nic *nic)
 		while (xena_dtx_cfg[dtx_cnt] != END_SIGN) {
 			SPECIAL_REG_WRITE(xena_dtx_cfg[dtx_cnt],
 					  &bar0->dtx_control, UF);
-			val64 = readq(&bar0->dtx_control);
+			val64 = pete_readq("drivers/net/ethernet/neterion/s2io.c:1267", &bar0->dtx_control);
 			dtx_cnt++;
 		}
 	}
 
 	/*  Tx DMA Initialization */
 	val64 = 0;
-	writeq(val64, &bar0->tx_fifo_partition_0);
-	writeq(val64, &bar0->tx_fifo_partition_1);
-	writeq(val64, &bar0->tx_fifo_partition_2);
-	writeq(val64, &bar0->tx_fifo_partition_3);
+	pete_writeq("drivers/net/ethernet/neterion/s2io.c:1274", val64, &bar0->tx_fifo_partition_0);
+	pete_writeq("drivers/net/ethernet/neterion/s2io.c:1275", val64, &bar0->tx_fifo_partition_1);
+	pete_writeq("drivers/net/ethernet/neterion/s2io.c:1276", val64, &bar0->tx_fifo_partition_2);
+	pete_writeq("drivers/net/ethernet/neterion/s2io.c:1277", val64, &bar0->tx_fifo_partition_3);
 
 	for (i = 0, j = 0; i < config->tx_fifo_num; i++) {
 		struct tx_fifo_config *tx_cfg = &config->tx_cfg[i];
@@ -1289,22 +1289,22 @@ static int init_nic(struct s2io_nic *nic)
 
 		switch (i) {
 		case 1:
-			writeq(val64, &bar0->tx_fifo_partition_0);
+			pete_writeq("drivers/net/ethernet/neterion/s2io.c:1292", val64, &bar0->tx_fifo_partition_0);
 			val64 = 0;
 			j = 0;
 			break;
 		case 3:
-			writeq(val64, &bar0->tx_fifo_partition_1);
+			pete_writeq("drivers/net/ethernet/neterion/s2io.c:1297", val64, &bar0->tx_fifo_partition_1);
 			val64 = 0;
 			j = 0;
 			break;
 		case 5:
-			writeq(val64, &bar0->tx_fifo_partition_2);
+			pete_writeq("drivers/net/ethernet/neterion/s2io.c:1302", val64, &bar0->tx_fifo_partition_2);
 			val64 = 0;
 			j = 0;
 			break;
 		case 7:
-			writeq(val64, &bar0->tx_fifo_partition_3);
+			pete_writeq("drivers/net/ethernet/neterion/s2io.c:1307", val64, &bar0->tx_fifo_partition_3);
 			val64 = 0;
 			j = 0;
 			break;
@@ -1319,9 +1319,9 @@ static int init_nic(struct s2io_nic *nic)
 	 * SXE-008 TRANSMIT DMA ARBITRATION ISSUE.
 	 */
 	if ((nic->device_type == XFRAME_I_DEVICE) && (nic->pdev->revision < 4))
-		writeq(PCC_ENABLE_FOUR, &bar0->pcc_enable);
+		pete_writeq("drivers/net/ethernet/neterion/s2io.c:1322", PCC_ENABLE_FOUR, &bar0->pcc_enable);
 
-	val64 = readq(&bar0->tx_fifo_partition_0);
+	val64 = pete_readq("drivers/net/ethernet/neterion/s2io.c:1324", &bar0->tx_fifo_partition_0);
 	DBG_PRINT(INIT_DBG, "Fifo partition at: 0x%p is: 0x%llx\n",
 		  &bar0->tx_fifo_partition_0, (unsigned long long)val64);
 
@@ -1329,12 +1329,12 @@ static int init_nic(struct s2io_nic *nic)
 	 * Initialization of Tx_PA_CONFIG register to ignore packet
 	 * integrity checking.
 	 */
-	val64 = readq(&bar0->tx_pa_cfg);
+	val64 = pete_readq("drivers/net/ethernet/neterion/s2io.c:1332", &bar0->tx_pa_cfg);
 	val64 |= TX_PA_CFG_IGNORE_FRM_ERR |
 		TX_PA_CFG_IGNORE_SNAP_OUI |
 		TX_PA_CFG_IGNORE_LLC_CTRL |
 		TX_PA_CFG_IGNORE_L2_ERR;
-	writeq(val64, &bar0->tx_pa_cfg);
+	pete_writeq("drivers/net/ethernet/neterion/s2io.c:1337", val64, &bar0->tx_pa_cfg);
 
 	/* Rx DMA initialization. */
 	val64 = 0;
@@ -1343,7 +1343,7 @@ static int init_nic(struct s2io_nic *nic)
 
 		val64 |= vBIT(rx_cfg->ring_priority, (5 + (i * 8)), 3);
 	}
-	writeq(val64, &bar0->rx_queue_priority);
+	pete_writeq("drivers/net/ethernet/neterion/s2io.c:1346", val64, &bar0->rx_queue_priority);
 
 	/*
 	 * Allocating equal share of memory to all the
@@ -1392,7 +1392,7 @@ static int init_nic(struct s2io_nic *nic)
 			continue;
 		}
 	}
-	writeq(val64, &bar0->rx_queue_cfg);
+	pete_writeq("drivers/net/ethernet/neterion/s2io.c:1395", val64, &bar0->rx_queue_cfg);
 
 	/*
 	 * Filling Tx round robin registers
@@ -1401,93 +1401,93 @@ static int init_nic(struct s2io_nic *nic)
 	switch (config->tx_fifo_num) {
 	case 1:
 		val64 = 0x0;
-		writeq(val64, &bar0->tx_w_round_robin_0);
-		writeq(val64, &bar0->tx_w_round_robin_1);
-		writeq(val64, &bar0->tx_w_round_robin_2);
-		writeq(val64, &bar0->tx_w_round_robin_3);
-		writeq(val64, &bar0->tx_w_round_robin_4);
+		pete_writeq("drivers/net/ethernet/neterion/s2io.c:1404", val64, &bar0->tx_w_round_robin_0);
+		pete_writeq("drivers/net/ethernet/neterion/s2io.c:1405", val64, &bar0->tx_w_round_robin_1);
+		pete_writeq("drivers/net/ethernet/neterion/s2io.c:1406", val64, &bar0->tx_w_round_robin_2);
+		pete_writeq("drivers/net/ethernet/neterion/s2io.c:1407", val64, &bar0->tx_w_round_robin_3);
+		pete_writeq("drivers/net/ethernet/neterion/s2io.c:1408", val64, &bar0->tx_w_round_robin_4);
 		break;
 	case 2:
 		val64 = 0x0001000100010001ULL;
-		writeq(val64, &bar0->tx_w_round_robin_0);
-		writeq(val64, &bar0->tx_w_round_robin_1);
-		writeq(val64, &bar0->tx_w_round_robin_2);
-		writeq(val64, &bar0->tx_w_round_robin_3);
+		pete_writeq("drivers/net/ethernet/neterion/s2io.c:1412", val64, &bar0->tx_w_round_robin_0);
+		pete_writeq("drivers/net/ethernet/neterion/s2io.c:1413", val64, &bar0->tx_w_round_robin_1);
+		pete_writeq("drivers/net/ethernet/neterion/s2io.c:1414", val64, &bar0->tx_w_round_robin_2);
+		pete_writeq("drivers/net/ethernet/neterion/s2io.c:1415", val64, &bar0->tx_w_round_robin_3);
 		val64 = 0x0001000100000000ULL;
-		writeq(val64, &bar0->tx_w_round_robin_4);
+		pete_writeq("drivers/net/ethernet/neterion/s2io.c:1417", val64, &bar0->tx_w_round_robin_4);
 		break;
 	case 3:
 		val64 = 0x0001020001020001ULL;
-		writeq(val64, &bar0->tx_w_round_robin_0);
+		pete_writeq("drivers/net/ethernet/neterion/s2io.c:1421", val64, &bar0->tx_w_round_robin_0);
 		val64 = 0x0200010200010200ULL;
-		writeq(val64, &bar0->tx_w_round_robin_1);
+		pete_writeq("drivers/net/ethernet/neterion/s2io.c:1423", val64, &bar0->tx_w_round_robin_1);
 		val64 = 0x0102000102000102ULL;
-		writeq(val64, &bar0->tx_w_round_robin_2);
+		pete_writeq("drivers/net/ethernet/neterion/s2io.c:1425", val64, &bar0->tx_w_round_robin_2);
 		val64 = 0x0001020001020001ULL;
-		writeq(val64, &bar0->tx_w_round_robin_3);
+		pete_writeq("drivers/net/ethernet/neterion/s2io.c:1427", val64, &bar0->tx_w_round_robin_3);
 		val64 = 0x0200010200000000ULL;
-		writeq(val64, &bar0->tx_w_round_robin_4);
+		pete_writeq("drivers/net/ethernet/neterion/s2io.c:1429", val64, &bar0->tx_w_round_robin_4);
 		break;
 	case 4:
 		val64 = 0x0001020300010203ULL;
-		writeq(val64, &bar0->tx_w_round_robin_0);
-		writeq(val64, &bar0->tx_w_round_robin_1);
-		writeq(val64, &bar0->tx_w_round_robin_2);
-		writeq(val64, &bar0->tx_w_round_robin_3);
+		pete_writeq("drivers/net/ethernet/neterion/s2io.c:1433", val64, &bar0->tx_w_round_robin_0);
+		pete_writeq("drivers/net/ethernet/neterion/s2io.c:1434", val64, &bar0->tx_w_round_robin_1);
+		pete_writeq("drivers/net/ethernet/neterion/s2io.c:1435", val64, &bar0->tx_w_round_robin_2);
+		pete_writeq("drivers/net/ethernet/neterion/s2io.c:1436", val64, &bar0->tx_w_round_robin_3);
 		val64 = 0x0001020300000000ULL;
-		writeq(val64, &bar0->tx_w_round_robin_4);
+		pete_writeq("drivers/net/ethernet/neterion/s2io.c:1438", val64, &bar0->tx_w_round_robin_4);
 		break;
 	case 5:
 		val64 = 0x0001020304000102ULL;
-		writeq(val64, &bar0->tx_w_round_robin_0);
+		pete_writeq("drivers/net/ethernet/neterion/s2io.c:1442", val64, &bar0->tx_w_round_robin_0);
 		val64 = 0x0304000102030400ULL;
-		writeq(val64, &bar0->tx_w_round_robin_1);
+		pete_writeq("drivers/net/ethernet/neterion/s2io.c:1444", val64, &bar0->tx_w_round_robin_1);
 		val64 = 0x0102030400010203ULL;
-		writeq(val64, &bar0->tx_w_round_robin_2);
+		pete_writeq("drivers/net/ethernet/neterion/s2io.c:1446", val64, &bar0->tx_w_round_robin_2);
 		val64 = 0x0400010203040001ULL;
-		writeq(val64, &bar0->tx_w_round_robin_3);
+		pete_writeq("drivers/net/ethernet/neterion/s2io.c:1448", val64, &bar0->tx_w_round_robin_3);
 		val64 = 0x0203040000000000ULL;
-		writeq(val64, &bar0->tx_w_round_robin_4);
+		pete_writeq("drivers/net/ethernet/neterion/s2io.c:1450", val64, &bar0->tx_w_round_robin_4);
 		break;
 	case 6:
 		val64 = 0x0001020304050001ULL;
-		writeq(val64, &bar0->tx_w_round_robin_0);
+		pete_writeq("drivers/net/ethernet/neterion/s2io.c:1454", val64, &bar0->tx_w_round_robin_0);
 		val64 = 0x0203040500010203ULL;
-		writeq(val64, &bar0->tx_w_round_robin_1);
+		pete_writeq("drivers/net/ethernet/neterion/s2io.c:1456", val64, &bar0->tx_w_round_robin_1);
 		val64 = 0x0405000102030405ULL;
-		writeq(val64, &bar0->tx_w_round_robin_2);
+		pete_writeq("drivers/net/ethernet/neterion/s2io.c:1458", val64, &bar0->tx_w_round_robin_2);
 		val64 = 0x0001020304050001ULL;
-		writeq(val64, &bar0->tx_w_round_robin_3);
+		pete_writeq("drivers/net/ethernet/neterion/s2io.c:1460", val64, &bar0->tx_w_round_robin_3);
 		val64 = 0x0203040500000000ULL;
-		writeq(val64, &bar0->tx_w_round_robin_4);
+		pete_writeq("drivers/net/ethernet/neterion/s2io.c:1462", val64, &bar0->tx_w_round_robin_4);
 		break;
 	case 7:
 		val64 = 0x0001020304050600ULL;
-		writeq(val64, &bar0->tx_w_round_robin_0);
+		pete_writeq("drivers/net/ethernet/neterion/s2io.c:1466", val64, &bar0->tx_w_round_robin_0);
 		val64 = 0x0102030405060001ULL;
-		writeq(val64, &bar0->tx_w_round_robin_1);
+		pete_writeq("drivers/net/ethernet/neterion/s2io.c:1468", val64, &bar0->tx_w_round_robin_1);
 		val64 = 0x0203040506000102ULL;
-		writeq(val64, &bar0->tx_w_round_robin_2);
+		pete_writeq("drivers/net/ethernet/neterion/s2io.c:1470", val64, &bar0->tx_w_round_robin_2);
 		val64 = 0x0304050600010203ULL;
-		writeq(val64, &bar0->tx_w_round_robin_3);
+		pete_writeq("drivers/net/ethernet/neterion/s2io.c:1472", val64, &bar0->tx_w_round_robin_3);
 		val64 = 0x0405060000000000ULL;
-		writeq(val64, &bar0->tx_w_round_robin_4);
+		pete_writeq("drivers/net/ethernet/neterion/s2io.c:1474", val64, &bar0->tx_w_round_robin_4);
 		break;
 	case 8:
 		val64 = 0x0001020304050607ULL;
-		writeq(val64, &bar0->tx_w_round_robin_0);
-		writeq(val64, &bar0->tx_w_round_robin_1);
-		writeq(val64, &bar0->tx_w_round_robin_2);
-		writeq(val64, &bar0->tx_w_round_robin_3);
+		pete_writeq("drivers/net/ethernet/neterion/s2io.c:1478", val64, &bar0->tx_w_round_robin_0);
+		pete_writeq("drivers/net/ethernet/neterion/s2io.c:1479", val64, &bar0->tx_w_round_robin_1);
+		pete_writeq("drivers/net/ethernet/neterion/s2io.c:1480", val64, &bar0->tx_w_round_robin_2);
+		pete_writeq("drivers/net/ethernet/neterion/s2io.c:1481", val64, &bar0->tx_w_round_robin_3);
 		val64 = 0x0001020300000000ULL;
-		writeq(val64, &bar0->tx_w_round_robin_4);
+		pete_writeq("drivers/net/ethernet/neterion/s2io.c:1483", val64, &bar0->tx_w_round_robin_4);
 		break;
 	}
 
 	/* Enable all configured Tx FIFO partitions */
-	val64 = readq(&bar0->tx_fifo_partition_0);
+	val64 = pete_readq("drivers/net/ethernet/neterion/s2io.c:1488", &bar0->tx_fifo_partition_0);
 	val64 |= (TX_FIFO_PARTITION_EN);
-	writeq(val64, &bar0->tx_fifo_partition_0);
+	pete_writeq("drivers/net/ethernet/neterion/s2io.c:1490", val64, &bar0->tx_fifo_partition_0);
 
 	/* Filling the Rx round robin registers as per the
 	 * number of Rings and steering based on QoS with
@@ -1496,122 +1496,122 @@ static int init_nic(struct s2io_nic *nic)
 	switch (config->rx_ring_num) {
 	case 1:
 		val64 = 0x0;
-		writeq(val64, &bar0->rx_w_round_robin_0);
-		writeq(val64, &bar0->rx_w_round_robin_1);
-		writeq(val64, &bar0->rx_w_round_robin_2);
-		writeq(val64, &bar0->rx_w_round_robin_3);
-		writeq(val64, &bar0->rx_w_round_robin_4);
+		pete_writeq("drivers/net/ethernet/neterion/s2io.c:1499", val64, &bar0->rx_w_round_robin_0);
+		pete_writeq("drivers/net/ethernet/neterion/s2io.c:1500", val64, &bar0->rx_w_round_robin_1);
+		pete_writeq("drivers/net/ethernet/neterion/s2io.c:1501", val64, &bar0->rx_w_round_robin_2);
+		pete_writeq("drivers/net/ethernet/neterion/s2io.c:1502", val64, &bar0->rx_w_round_robin_3);
+		pete_writeq("drivers/net/ethernet/neterion/s2io.c:1503", val64, &bar0->rx_w_round_robin_4);
 
 		val64 = 0x8080808080808080ULL;
-		writeq(val64, &bar0->rts_qos_steering);
+		pete_writeq("drivers/net/ethernet/neterion/s2io.c:1506", val64, &bar0->rts_qos_steering);
 		break;
 	case 2:
 		val64 = 0x0001000100010001ULL;
-		writeq(val64, &bar0->rx_w_round_robin_0);
-		writeq(val64, &bar0->rx_w_round_robin_1);
-		writeq(val64, &bar0->rx_w_round_robin_2);
-		writeq(val64, &bar0->rx_w_round_robin_3);
+		pete_writeq("drivers/net/ethernet/neterion/s2io.c:1510", val64, &bar0->rx_w_round_robin_0);
+		pete_writeq("drivers/net/ethernet/neterion/s2io.c:1511", val64, &bar0->rx_w_round_robin_1);
+		pete_writeq("drivers/net/ethernet/neterion/s2io.c:1512", val64, &bar0->rx_w_round_robin_2);
+		pete_writeq("drivers/net/ethernet/neterion/s2io.c:1513", val64, &bar0->rx_w_round_robin_3);
 		val64 = 0x0001000100000000ULL;
-		writeq(val64, &bar0->rx_w_round_robin_4);
+		pete_writeq("drivers/net/ethernet/neterion/s2io.c:1515", val64, &bar0->rx_w_round_robin_4);
 
 		val64 = 0x8080808040404040ULL;
-		writeq(val64, &bar0->rts_qos_steering);
+		pete_writeq("drivers/net/ethernet/neterion/s2io.c:1518", val64, &bar0->rts_qos_steering);
 		break;
 	case 3:
 		val64 = 0x0001020001020001ULL;
-		writeq(val64, &bar0->rx_w_round_robin_0);
+		pete_writeq("drivers/net/ethernet/neterion/s2io.c:1522", val64, &bar0->rx_w_round_robin_0);
 		val64 = 0x0200010200010200ULL;
-		writeq(val64, &bar0->rx_w_round_robin_1);
+		pete_writeq("drivers/net/ethernet/neterion/s2io.c:1524", val64, &bar0->rx_w_round_robin_1);
 		val64 = 0x0102000102000102ULL;
-		writeq(val64, &bar0->rx_w_round_robin_2);
+		pete_writeq("drivers/net/ethernet/neterion/s2io.c:1526", val64, &bar0->rx_w_round_robin_2);
 		val64 = 0x0001020001020001ULL;
-		writeq(val64, &bar0->rx_w_round_robin_3);
+		pete_writeq("drivers/net/ethernet/neterion/s2io.c:1528", val64, &bar0->rx_w_round_robin_3);
 		val64 = 0x0200010200000000ULL;
-		writeq(val64, &bar0->rx_w_round_robin_4);
+		pete_writeq("drivers/net/ethernet/neterion/s2io.c:1530", val64, &bar0->rx_w_round_robin_4);
 
 		val64 = 0x8080804040402020ULL;
-		writeq(val64, &bar0->rts_qos_steering);
+		pete_writeq("drivers/net/ethernet/neterion/s2io.c:1533", val64, &bar0->rts_qos_steering);
 		break;
 	case 4:
 		val64 = 0x0001020300010203ULL;
-		writeq(val64, &bar0->rx_w_round_robin_0);
-		writeq(val64, &bar0->rx_w_round_robin_1);
-		writeq(val64, &bar0->rx_w_round_robin_2);
-		writeq(val64, &bar0->rx_w_round_robin_3);
+		pete_writeq("drivers/net/ethernet/neterion/s2io.c:1537", val64, &bar0->rx_w_round_robin_0);
+		pete_writeq("drivers/net/ethernet/neterion/s2io.c:1538", val64, &bar0->rx_w_round_robin_1);
+		pete_writeq("drivers/net/ethernet/neterion/s2io.c:1539", val64, &bar0->rx_w_round_robin_2);
+		pete_writeq("drivers/net/ethernet/neterion/s2io.c:1540", val64, &bar0->rx_w_round_robin_3);
 		val64 = 0x0001020300000000ULL;
-		writeq(val64, &bar0->rx_w_round_robin_4);
+		pete_writeq("drivers/net/ethernet/neterion/s2io.c:1542", val64, &bar0->rx_w_round_robin_4);
 
 		val64 = 0x8080404020201010ULL;
-		writeq(val64, &bar0->rts_qos_steering);
+		pete_writeq("drivers/net/ethernet/neterion/s2io.c:1545", val64, &bar0->rts_qos_steering);
 		break;
 	case 5:
 		val64 = 0x0001020304000102ULL;
-		writeq(val64, &bar0->rx_w_round_robin_0);
+		pete_writeq("drivers/net/ethernet/neterion/s2io.c:1549", val64, &bar0->rx_w_round_robin_0);
 		val64 = 0x0304000102030400ULL;
-		writeq(val64, &bar0->rx_w_round_robin_1);
+		pete_writeq("drivers/net/ethernet/neterion/s2io.c:1551", val64, &bar0->rx_w_round_robin_1);
 		val64 = 0x0102030400010203ULL;
-		writeq(val64, &bar0->rx_w_round_robin_2);
+		pete_writeq("drivers/net/ethernet/neterion/s2io.c:1553", val64, &bar0->rx_w_round_robin_2);
 		val64 = 0x0400010203040001ULL;
-		writeq(val64, &bar0->rx_w_round_robin_3);
+		pete_writeq("drivers/net/ethernet/neterion/s2io.c:1555", val64, &bar0->rx_w_round_robin_3);
 		val64 = 0x0203040000000000ULL;
-		writeq(val64, &bar0->rx_w_round_robin_4);
+		pete_writeq("drivers/net/ethernet/neterion/s2io.c:1557", val64, &bar0->rx_w_round_robin_4);
 
 		val64 = 0x8080404020201008ULL;
-		writeq(val64, &bar0->rts_qos_steering);
+		pete_writeq("drivers/net/ethernet/neterion/s2io.c:1560", val64, &bar0->rts_qos_steering);
 		break;
 	case 6:
 		val64 = 0x0001020304050001ULL;
-		writeq(val64, &bar0->rx_w_round_robin_0);
+		pete_writeq("drivers/net/ethernet/neterion/s2io.c:1564", val64, &bar0->rx_w_round_robin_0);
 		val64 = 0x0203040500010203ULL;
-		writeq(val64, &bar0->rx_w_round_robin_1);
+		pete_writeq("drivers/net/ethernet/neterion/s2io.c:1566", val64, &bar0->rx_w_round_robin_1);
 		val64 = 0x0405000102030405ULL;
-		writeq(val64, &bar0->rx_w_round_robin_2);
+		pete_writeq("drivers/net/ethernet/neterion/s2io.c:1568", val64, &bar0->rx_w_round_robin_2);
 		val64 = 0x0001020304050001ULL;
-		writeq(val64, &bar0->rx_w_round_robin_3);
+		pete_writeq("drivers/net/ethernet/neterion/s2io.c:1570", val64, &bar0->rx_w_round_robin_3);
 		val64 = 0x0203040500000000ULL;
-		writeq(val64, &bar0->rx_w_round_robin_4);
+		pete_writeq("drivers/net/ethernet/neterion/s2io.c:1572", val64, &bar0->rx_w_round_robin_4);
 
 		val64 = 0x8080404020100804ULL;
-		writeq(val64, &bar0->rts_qos_steering);
+		pete_writeq("drivers/net/ethernet/neterion/s2io.c:1575", val64, &bar0->rts_qos_steering);
 		break;
 	case 7:
 		val64 = 0x0001020304050600ULL;
-		writeq(val64, &bar0->rx_w_round_robin_0);
+		pete_writeq("drivers/net/ethernet/neterion/s2io.c:1579", val64, &bar0->rx_w_round_robin_0);
 		val64 = 0x0102030405060001ULL;
-		writeq(val64, &bar0->rx_w_round_robin_1);
+		pete_writeq("drivers/net/ethernet/neterion/s2io.c:1581", val64, &bar0->rx_w_round_robin_1);
 		val64 = 0x0203040506000102ULL;
-		writeq(val64, &bar0->rx_w_round_robin_2);
+		pete_writeq("drivers/net/ethernet/neterion/s2io.c:1583", val64, &bar0->rx_w_round_robin_2);
 		val64 = 0x0304050600010203ULL;
-		writeq(val64, &bar0->rx_w_round_robin_3);
+		pete_writeq("drivers/net/ethernet/neterion/s2io.c:1585", val64, &bar0->rx_w_round_robin_3);
 		val64 = 0x0405060000000000ULL;
-		writeq(val64, &bar0->rx_w_round_robin_4);
+		pete_writeq("drivers/net/ethernet/neterion/s2io.c:1587", val64, &bar0->rx_w_round_robin_4);
 
 		val64 = 0x8080402010080402ULL;
-		writeq(val64, &bar0->rts_qos_steering);
+		pete_writeq("drivers/net/ethernet/neterion/s2io.c:1590", val64, &bar0->rts_qos_steering);
 		break;
 	case 8:
 		val64 = 0x0001020304050607ULL;
-		writeq(val64, &bar0->rx_w_round_robin_0);
-		writeq(val64, &bar0->rx_w_round_robin_1);
-		writeq(val64, &bar0->rx_w_round_robin_2);
-		writeq(val64, &bar0->rx_w_round_robin_3);
+		pete_writeq("drivers/net/ethernet/neterion/s2io.c:1594", val64, &bar0->rx_w_round_robin_0);
+		pete_writeq("drivers/net/ethernet/neterion/s2io.c:1595", val64, &bar0->rx_w_round_robin_1);
+		pete_writeq("drivers/net/ethernet/neterion/s2io.c:1596", val64, &bar0->rx_w_round_robin_2);
+		pete_writeq("drivers/net/ethernet/neterion/s2io.c:1597", val64, &bar0->rx_w_round_robin_3);
 		val64 = 0x0001020300000000ULL;
-		writeq(val64, &bar0->rx_w_round_robin_4);
+		pete_writeq("drivers/net/ethernet/neterion/s2io.c:1599", val64, &bar0->rx_w_round_robin_4);
 
 		val64 = 0x8040201008040201ULL;
-		writeq(val64, &bar0->rts_qos_steering);
+		pete_writeq("drivers/net/ethernet/neterion/s2io.c:1602", val64, &bar0->rts_qos_steering);
 		break;
 	}
 
 	/* UDP Fix */
 	val64 = 0;
 	for (i = 0; i < 8; i++)
-		writeq(val64, &bar0->rts_frm_len_n[i]);
+		pete_writeq("drivers/net/ethernet/neterion/s2io.c:1609", val64, &bar0->rts_frm_len_n[i]);
 
 	/* Set the default rts frame length for the rings configured */
 	val64 = MAC_RTS_FRM_LEN_SET(dev->mtu+22);
 	for (i = 0 ; i < config->rx_ring_num ; i++)
-		writeq(val64, &bar0->rts_frm_len_n[i]);
+		pete_writeq("drivers/net/ethernet/neterion/s2io.c:1614", val64, &bar0->rts_frm_len_n[i]);
 
 	/* Set the frame length for the configured rings
 	 * desired by the user
@@ -1624,7 +1624,7 @@ static int init_nic(struct s2io_nic *nic)
 		 * leave it as it is.
 		 */
 		if (rts_frm_len[i] != 0) {
-			writeq(MAC_RTS_FRM_LEN_SET(rts_frm_len[i]),
+			pete_writeq("drivers/net/ethernet/neterion/s2io.c:1627", MAC_RTS_FRM_LEN_SET(rts_frm_len[i]),
 			       &bar0->rts_frm_len_n[i]);
 		}
 	}
@@ -1640,11 +1640,11 @@ static int init_nic(struct s2io_nic *nic)
 	}
 
 	/* Program statistics memory */
-	writeq(mac_control->stats_mem_phy, &bar0->stat_addr);
+	pete_writeq("drivers/net/ethernet/neterion/s2io.c:1643", mac_control->stats_mem_phy, &bar0->stat_addr);
 
 	if (nic->device_type == XFRAME_II_DEVICE) {
 		val64 = STAT_BC(0x320);
-		writeq(val64, &bar0->stat_byte_cnt);
+		pete_writeq("drivers/net/ethernet/neterion/s2io.c:1647", val64, &bar0->stat_byte_cnt);
 	}
 
 	/*
@@ -1653,7 +1653,7 @@ static int init_nic(struct s2io_nic *nic)
 	 */
 	val64 = MAC_TX_LINK_UTIL_VAL(tmac_util_period) |
 		MAC_RX_LINK_UTIL_VAL(rmac_util_period);
-	writeq(val64, &bar0->mac_link_util);
+	pete_writeq("drivers/net/ethernet/neterion/s2io.c:1656", val64, &bar0->mac_link_util);
 
 	/*
 	 * Initializing the Transmit and Receive Traffic Interrupt
@@ -1679,7 +1679,7 @@ static int init_nic(struct s2io_nic *nic)
 		RTI_DATA1_MEM_RX_URNG_C(0x30) |
 		RTI_DATA1_MEM_RX_TIMER_AC_EN;
 
-	writeq(val64, &bar0->rti_data1_mem);
+	pete_writeq("drivers/net/ethernet/neterion/s2io.c:1682", val64, &bar0->rti_data1_mem);
 
 	val64 = RTI_DATA2_MEM_RX_UFC_A(0x1) |
 		RTI_DATA2_MEM_RX_UFC_B(0x2) ;
@@ -1689,13 +1689,13 @@ static int init_nic(struct s2io_nic *nic)
 	else
 		val64 |= (RTI_DATA2_MEM_RX_UFC_C(0x40) |
 			  RTI_DATA2_MEM_RX_UFC_D(0x80));
-	writeq(val64, &bar0->rti_data2_mem);
+	pete_writeq("drivers/net/ethernet/neterion/s2io.c:1692", val64, &bar0->rti_data2_mem);
 
 	for (i = 0; i < config->rx_ring_num; i++) {
 		val64 = RTI_CMD_MEM_WE |
 			RTI_CMD_MEM_STROBE_NEW_CMD |
 			RTI_CMD_MEM_OFFSET(i);
-		writeq(val64, &bar0->rti_command_mem);
+		pete_writeq("drivers/net/ethernet/neterion/s2io.c:1698", val64, &bar0->rti_command_mem);
 
 		/*
 		 * Once the operation completes, the Strobe bit of the
@@ -1706,7 +1706,7 @@ static int init_nic(struct s2io_nic *nic)
 		 */
 		time = 0;
 		while (true) {
-			val64 = readq(&bar0->rti_command_mem);
+			val64 = pete_readq("drivers/net/ethernet/neterion/s2io.c:1709", &bar0->rti_command_mem);
 			if (!(val64 & RTI_CMD_MEM_STROBE_NEW_CMD))
 				break;
 
@@ -1724,29 +1724,29 @@ static int init_nic(struct s2io_nic *nic)
 	 * Initializing proper values as Pause threshold into all
 	 * the 8 Queues on Rx side.
 	 */
-	writeq(0xffbbffbbffbbffbbULL, &bar0->mc_pause_thresh_q0q3);
-	writeq(0xffbbffbbffbbffbbULL, &bar0->mc_pause_thresh_q4q7);
+	pete_writeq("drivers/net/ethernet/neterion/s2io.c:1727", 0xffbbffbbffbbffbbULL, &bar0->mc_pause_thresh_q0q3);
+	pete_writeq("drivers/net/ethernet/neterion/s2io.c:1728", 0xffbbffbbffbbffbbULL, &bar0->mc_pause_thresh_q4q7);
 
 	/* Disable RMAC PAD STRIPPING */
 	add = &bar0->mac_cfg;
-	val64 = readq(&bar0->mac_cfg);
+	val64 = pete_readq("drivers/net/ethernet/neterion/s2io.c:1732", &bar0->mac_cfg);
 	val64 &= ~(MAC_CFG_RMAC_STRIP_PAD);
-	writeq(RMAC_CFG_KEY(0x4C0D), &bar0->rmac_cfg_key);
+	pete_writeq("drivers/net/ethernet/neterion/s2io.c:1734", RMAC_CFG_KEY(0x4C0D), &bar0->rmac_cfg_key);
 	pete_writel("drivers/net/ethernet/neterion/s2io.c:1735", (u32) (val64), add);
-	writeq(RMAC_CFG_KEY(0x4C0D), &bar0->rmac_cfg_key);
+	pete_writeq("drivers/net/ethernet/neterion/s2io.c:1736", RMAC_CFG_KEY(0x4C0D), &bar0->rmac_cfg_key);
 	pete_writel("drivers/net/ethernet/neterion/s2io.c:1737", (u32) (val64 >> 32), (add + 4));
-	val64 = readq(&bar0->mac_cfg);
+	val64 = pete_readq("drivers/net/ethernet/neterion/s2io.c:1738", &bar0->mac_cfg);
 
 	/* Enable FCS stripping by adapter */
 	add = &bar0->mac_cfg;
-	val64 = readq(&bar0->mac_cfg);
+	val64 = pete_readq("drivers/net/ethernet/neterion/s2io.c:1742", &bar0->mac_cfg);
 	val64 |= MAC_CFG_RMAC_STRIP_FCS;
 	if (nic->device_type == XFRAME_II_DEVICE)
-		writeq(val64, &bar0->mac_cfg);
+		pete_writeq("drivers/net/ethernet/neterion/s2io.c:1745", val64, &bar0->mac_cfg);
 	else {
-		writeq(RMAC_CFG_KEY(0x4C0D), &bar0->rmac_cfg_key);
+		pete_writeq("drivers/net/ethernet/neterion/s2io.c:1747", RMAC_CFG_KEY(0x4C0D), &bar0->rmac_cfg_key);
 		pete_writel("drivers/net/ethernet/neterion/s2io.c:1748", (u32) (val64), add);
-		writeq(RMAC_CFG_KEY(0x4C0D), &bar0->rmac_cfg_key);
+		pete_writeq("drivers/net/ethernet/neterion/s2io.c:1749", RMAC_CFG_KEY(0x4C0D), &bar0->rmac_cfg_key);
 		pete_writel("drivers/net/ethernet/neterion/s2io.c:1750", (u32) (val64 >> 32), (add + 4));
 	}
 
@@ -1754,10 +1754,10 @@ static int init_nic(struct s2io_nic *nic)
 	 * Set the time value to be inserted in the pause frame
 	 * generated by xena.
 	 */
-	val64 = readq(&bar0->rmac_pause_cfg);
+	val64 = pete_readq("drivers/net/ethernet/neterion/s2io.c:1757", &bar0->rmac_pause_cfg);
 	val64 &= ~(RMAC_PAUSE_HG_PTIME(0xffff));
 	val64 |= RMAC_PAUSE_HG_PTIME(nic->mac_control.rmac_pause_time);
-	writeq(val64, &bar0->rmac_pause_cfg);
+	pete_writeq("drivers/net/ethernet/neterion/s2io.c:1760", val64, &bar0->rmac_pause_cfg);
 
 	/*
 	 * Set the Threshold Limit for Generating the pause frame
@@ -1771,7 +1771,7 @@ static int init_nic(struct s2io_nic *nic)
 			   nic->mac_control.mc_pause_threshold_q0q3)
 			  << (i * 2 * 8));
 	}
-	writeq(val64, &bar0->mc_pause_thresh_q0q3);
+	pete_writeq("drivers/net/ethernet/neterion/s2io.c:1774", val64, &bar0->mc_pause_thresh_q0q3);
 
 	val64 = 0;
 	for (i = 0; i < 4; i++) {
@@ -1779,20 +1779,20 @@ static int init_nic(struct s2io_nic *nic)
 			   nic->mac_control.mc_pause_threshold_q4q7)
 			  << (i * 2 * 8));
 	}
-	writeq(val64, &bar0->mc_pause_thresh_q4q7);
+	pete_writeq("drivers/net/ethernet/neterion/s2io.c:1782", val64, &bar0->mc_pause_thresh_q4q7);
 
 	/*
 	 * TxDMA will stop Read request if the number of read split has
 	 * exceeded the limit pointed by shared_splits
 	 */
-	val64 = readq(&bar0->pic_control);
+	val64 = pete_readq("drivers/net/ethernet/neterion/s2io.c:1788", &bar0->pic_control);
 	val64 |= PIC_CNTL_SHARED_SPLITS(shared_splits);
-	writeq(val64, &bar0->pic_control);
+	pete_writeq("drivers/net/ethernet/neterion/s2io.c:1790", val64, &bar0->pic_control);
 
 	if (nic->config.bus_speed == 266) {
-		writeq(TXREQTO_VAL(0x7f) | TXREQTO_EN, &bar0->txreqtimeout);
-		writeq(0x0, &bar0->read_retry_delay);
-		writeq(0x0, &bar0->write_retry_delay);
+		pete_writeq("drivers/net/ethernet/neterion/s2io.c:1793", TXREQTO_VAL(0x7f) | TXREQTO_EN, &bar0->txreqtimeout);
+		pete_writeq("drivers/net/ethernet/neterion/s2io.c:1794", 0x0, &bar0->read_retry_delay);
+		pete_writeq("drivers/net/ethernet/neterion/s2io.c:1795", 0x0, &bar0->write_retry_delay);
 	}
 
 	/*
@@ -1802,14 +1802,14 @@ static int init_nic(struct s2io_nic *nic)
 	if (nic->device_type == XFRAME_II_DEVICE) {
 		val64 = FAULT_BEHAVIOUR | EXT_REQ_EN |
 			MISC_LINK_STABILITY_PRD(3);
-		writeq(val64, &bar0->misc_control);
-		val64 = readq(&bar0->pic_control2);
+		pete_writeq("drivers/net/ethernet/neterion/s2io.c:1805", val64, &bar0->misc_control);
+		val64 = pete_readq("drivers/net/ethernet/neterion/s2io.c:1806", &bar0->pic_control2);
 		val64 &= ~(s2BIT(13)|s2BIT(14)|s2BIT(15));
-		writeq(val64, &bar0->pic_control2);
+		pete_writeq("drivers/net/ethernet/neterion/s2io.c:1808", val64, &bar0->pic_control2);
 	}
 	if (strstr(nic->product_name, "CX4")) {
 		val64 = TMAC_AVG_IPG(0x17);
-		writeq(val64, &bar0->tmac_avg_ipg);
+		pete_writeq("drivers/net/ethernet/neterion/s2io.c:1812", val64, &bar0->tmac_avg_ipg);
 	}
 
 	return SUCCESS;
@@ -1838,13 +1838,13 @@ static void do_s2io_write_bits(u64 value, int flag, void __iomem *addr)
 {
 	u64 temp64;
 
-	temp64 = readq(addr);
+	temp64 = pete_readq("drivers/net/ethernet/neterion/s2io.c:1841", addr);
 
 	if (flag == ENABLE_INTRS)
 		temp64 &= ~((u64)value);
 	else
 		temp64 |= ((u64)value);
-	writeq(temp64, addr);
+	pete_writeq("drivers/net/ethernet/neterion/s2io.c:1847", temp64, addr);
 }
 
 static void en_dis_err_alarms(struct s2io_nic *nic, u16 mask, int flag)
@@ -1853,7 +1853,7 @@ static void en_dis_err_alarms(struct s2io_nic *nic, u16 mask, int flag)
 	register u64 gen_int_mask = 0;
 	u64 interruptible;
 
-	writeq(DISABLE_ALL_INTRS, &bar0->general_int_mask);
+	pete_writeq("drivers/net/ethernet/neterion/s2io.c:1856", DISABLE_ALL_INTRS, &bar0->general_int_mask);
 	if (mask & TX_DMA_INTR) {
 		gen_int_mask |= TXDMA_INT_M;
 
@@ -2011,13 +2011,13 @@ static void en_dis_able_nic_intrs(struct s2io_nic *nic, u16 mask, int flag)
 				do_s2io_write_bits(GPIO_INT_MASK_LINK_UP, flag,
 						   &bar0->gpio_int_mask);
 			} else
-				writeq(DISABLE_ALL_INTRS, &bar0->pic_int_mask);
+				pete_writeq("drivers/net/ethernet/neterion/s2io.c:2014", DISABLE_ALL_INTRS, &bar0->pic_int_mask);
 		} else if (flag == DISABLE_INTRS) {
 			/*
 			 * Disable PIC Intrs in the general
 			 * intr mask register
 			 */
-			writeq(DISABLE_ALL_INTRS, &bar0->pic_int_mask);
+			pete_writeq("drivers/net/ethernet/neterion/s2io.c:2020", DISABLE_ALL_INTRS, &bar0->pic_int_mask);
 		}
 	}
 
@@ -2029,13 +2029,13 @@ static void en_dis_able_nic_intrs(struct s2io_nic *nic, u16 mask, int flag)
 			 * Enable all the Tx side interrupts
 			 * writing 0 Enables all 64 TX interrupt levels
 			 */
-			writeq(0x0, &bar0->tx_traffic_mask);
+			pete_writeq("drivers/net/ethernet/neterion/s2io.c:2032", 0x0, &bar0->tx_traffic_mask);
 		} else if (flag == DISABLE_INTRS) {
 			/*
 			 * Disable Tx Traffic Intrs in the general intr mask
 			 * register.
 			 */
-			writeq(DISABLE_ALL_INTRS, &bar0->tx_traffic_mask);
+			pete_writeq("drivers/net/ethernet/neterion/s2io.c:2038", DISABLE_ALL_INTRS, &bar0->tx_traffic_mask);
 		}
 	}
 
@@ -2044,24 +2044,24 @@ static void en_dis_able_nic_intrs(struct s2io_nic *nic, u16 mask, int flag)
 		intr_mask |= RXTRAFFIC_INT_M;
 		if (flag == ENABLE_INTRS) {
 			/* writing 0 Enables all 8 RX interrupt levels */
-			writeq(0x0, &bar0->rx_traffic_mask);
+			pete_writeq("drivers/net/ethernet/neterion/s2io.c:2047", 0x0, &bar0->rx_traffic_mask);
 		} else if (flag == DISABLE_INTRS) {
 			/*
 			 * Disable Rx Traffic Intrs in the general intr mask
 			 * register.
 			 */
-			writeq(DISABLE_ALL_INTRS, &bar0->rx_traffic_mask);
+			pete_writeq("drivers/net/ethernet/neterion/s2io.c:2053", DISABLE_ALL_INTRS, &bar0->rx_traffic_mask);
 		}
 	}
 
-	temp64 = readq(&bar0->general_int_mask);
+	temp64 = pete_readq("drivers/net/ethernet/neterion/s2io.c:2057", &bar0->general_int_mask);
 	if (flag == ENABLE_INTRS)
 		temp64 &= ~((u64)intr_mask);
 	else
 		temp64 = DISABLE_ALL_INTRS;
-	writeq(temp64, &bar0->general_int_mask);
+	pete_writeq("drivers/net/ethernet/neterion/s2io.c:2062", temp64, &bar0->general_int_mask);
 
-	nic->general_int_mask = readq(&bar0->general_int_mask);
+	nic->general_int_mask = pete_readq("drivers/net/ethernet/neterion/s2io.c:2064", &bar0->general_int_mask);
 }
 
 /**
@@ -2076,7 +2076,7 @@ static int verify_pcc_quiescent(struct s2io_nic *sp, int flag)
 {
 	int ret = 0, herc;
 	struct XENA_dev_config __iomem *bar0 = sp->bar0;
-	u64 val64 = readq(&bar0->adapter_status);
+	u64 val64 = pete_readq("drivers/net/ethernet/neterion/s2io.c:2079", &bar0->adapter_status);
 
 	herc = (sp->device_type == XFRAME_II_DEVICE);
 
@@ -2118,7 +2118,7 @@ static int verify_xena_quiescence(struct s2io_nic *sp)
 {
 	int  mode;
 	struct XENA_dev_config __iomem *bar0 = sp->bar0;
-	u64 val64 = readq(&bar0->adapter_status);
+	u64 val64 = pete_readq("drivers/net/ethernet/neterion/s2io.c:2121", &bar0->adapter_status);
 	mode = s2io_verify_pci_mode(sp);
 
 	if (!(val64 & ADAPTER_STATUS_TDMA_READY)) {
@@ -2187,9 +2187,9 @@ static void fix_mac_address(struct s2io_nic *sp)
 	int i = 0;
 
 	while (fix_mac[i] != END_SIGN) {
-		writeq(fix_mac[i++], &bar0->gpio_control);
+		pete_writeq("drivers/net/ethernet/neterion/s2io.c:2190", fix_mac[i++], &bar0->gpio_control);
 		udelay(10);
-		(void) readq(&bar0->gpio_control);
+		(void) pete_readq("drivers/net/ethernet/neterion/s2io.c:2192", &bar0->gpio_control);
 	}
 }
 
@@ -2219,10 +2219,10 @@ static int start_nic(struct s2io_nic *nic)
 	for (i = 0; i < config->rx_ring_num; i++) {
 		struct ring_info *ring = &mac_control->rings[i];
 
-		writeq((u64)ring->rx_blocks[0].block_dma_addr,
+		pete_writeq("drivers/net/ethernet/neterion/s2io.c:2222", (u64)ring->rx_blocks[0].block_dma_addr,
 		       &bar0->prc_rxd0_n[i]);
 
-		val64 = readq(&bar0->prc_ctrl_n[i]);
+		val64 = pete_readq("drivers/net/ethernet/neterion/s2io.c:2225", &bar0->prc_ctrl_n[i]);
 		if (nic->rxd_mode == RXD_MODE_1)
 			val64 |= PRC_CTRL_RC_ENABLED;
 		else
@@ -2231,20 +2231,20 @@ static int start_nic(struct s2io_nic *nic)
 			val64 |= PRC_CTRL_GROUP_READS;
 		val64 &= ~PRC_CTRL_RXD_BACKOFF_INTERVAL(0xFFFFFF);
 		val64 |= PRC_CTRL_RXD_BACKOFF_INTERVAL(0x1000);
-		writeq(val64, &bar0->prc_ctrl_n[i]);
+		pete_writeq("drivers/net/ethernet/neterion/s2io.c:2234", val64, &bar0->prc_ctrl_n[i]);
 	}
 
 	if (nic->rxd_mode == RXD_MODE_3B) {
 		/* Enabling 2 buffer mode by writing into Rx_pa_cfg reg. */
-		val64 = readq(&bar0->rx_pa_cfg);
+		val64 = pete_readq("drivers/net/ethernet/neterion/s2io.c:2239", &bar0->rx_pa_cfg);
 		val64 |= RX_PA_CFG_IGNORE_L2_ERR;
-		writeq(val64, &bar0->rx_pa_cfg);
+		pete_writeq("drivers/net/ethernet/neterion/s2io.c:2241", val64, &bar0->rx_pa_cfg);
 	}
 
 	if (vlan_tag_strip == 0) {
-		val64 = readq(&bar0->rx_pa_cfg);
+		val64 = pete_readq("drivers/net/ethernet/neterion/s2io.c:2245", &bar0->rx_pa_cfg);
 		val64 &= ~RX_PA_CFG_STRIP_VLAN_TAG;
-		writeq(val64, &bar0->rx_pa_cfg);
+		pete_writeq("drivers/net/ethernet/neterion/s2io.c:2247", val64, &bar0->rx_pa_cfg);
 		nic->vlan_strip_flag = 0;
 	}
 
@@ -2253,23 +2253,23 @@ static int start_nic(struct s2io_nic *nic)
 	 * for around 100ms, which is approximately the time required
 	 * for the device to be ready for operation.
 	 */
-	val64 = readq(&bar0->mc_rldram_mrs);
+	val64 = pete_readq("drivers/net/ethernet/neterion/s2io.c:2256", &bar0->mc_rldram_mrs);
 	val64 |= MC_RLDRAM_QUEUE_SIZE_ENABLE | MC_RLDRAM_MRS_ENABLE;
 	SPECIAL_REG_WRITE(val64, &bar0->mc_rldram_mrs, UF);
-	val64 = readq(&bar0->mc_rldram_mrs);
+	val64 = pete_readq("drivers/net/ethernet/neterion/s2io.c:2259", &bar0->mc_rldram_mrs);
 
 	msleep(100);	/* Delay by around 100 ms. */
 
 	/* Enabling ECC Protection. */
-	val64 = readq(&bar0->adapter_control);
+	val64 = pete_readq("drivers/net/ethernet/neterion/s2io.c:2264", &bar0->adapter_control);
 	val64 &= ~ADAPTER_ECC_EN;
-	writeq(val64, &bar0->adapter_control);
+	pete_writeq("drivers/net/ethernet/neterion/s2io.c:2266", val64, &bar0->adapter_control);
 
 	/*
 	 * Verify if the device is ready to be enabled, if so enable
 	 * it.
 	 */
-	val64 = readq(&bar0->adapter_status);
+	val64 = pete_readq("drivers/net/ethernet/neterion/s2io.c:2272", &bar0->adapter_status);
 	if (!verify_xena_quiescence(nic)) {
 		DBG_PRINT(ERR_DBG, "%s: device is not ready, "
 			  "Adapter status reads: 0x%llx\n",
@@ -2286,9 +2286,9 @@ static int start_nic(struct s2io_nic *nic)
 	 */
 
 	/* Enabling Laser. */
-	val64 = readq(&bar0->adapter_control);
+	val64 = pete_readq("drivers/net/ethernet/neterion/s2io.c:2289", &bar0->adapter_control);
 	val64 |= ADAPTER_EOI_TX_ON;
-	writeq(val64, &bar0->adapter_control);
+	pete_writeq("drivers/net/ethernet/neterion/s2io.c:2291", val64, &bar0->adapter_control);
 
 	if (s2io_link_fault_indication(nic) == MAC_RMAC_ERR_TIMER) {
 		/*
@@ -2301,11 +2301,11 @@ static int start_nic(struct s2io_nic *nic)
 	subid = nic->pdev->subsystem_device;
 	if (((subid & 0xFF) >= 0x07) &&
 	    (nic->device_type == XFRAME_I_DEVICE)) {
-		val64 = readq(&bar0->gpio_control);
+		val64 = pete_readq("drivers/net/ethernet/neterion/s2io.c:2304", &bar0->gpio_control);
 		val64 |= 0x0000800000000000ULL;
-		writeq(val64, &bar0->gpio_control);
+		pete_writeq("drivers/net/ethernet/neterion/s2io.c:2306", val64, &bar0->gpio_control);
 		val64 = 0x0411040400000000ULL;
-		writeq(val64, (void __iomem *)bar0 + 0x2700);
+		pete_writeq("drivers/net/ethernet/neterion/s2io.c:2308", val64, (void __iomem *)bar0 + 0x2700);
 	}
 
 	return SUCCESS;
@@ -2422,9 +2422,9 @@ static void stop_nic(struct s2io_nic *nic)
 	en_dis_able_nic_intrs(nic, interruptible, DISABLE_INTRS);
 
 	/* Clearing Adapter_En bit of ADAPTER_CONTROL Register */
-	val64 = readq(&bar0->adapter_control);
+	val64 = pete_readq("drivers/net/ethernet/neterion/s2io.c:2425", &bar0->adapter_control);
 	val64 &= ~(ADAPTER_CNTL_EN);
-	writeq(val64, &bar0->adapter_control);
+	pete_writeq("drivers/net/ethernet/neterion/s2io.c:2427", val64, &bar0->adapter_control);
 }
 
 /**
@@ -2780,8 +2780,8 @@ static int s2io_poll_msix(struct napi_struct *napi, int budget)
 		addr = (u8 __iomem *)&bar0->xmsi_mask_reg;
 		addr += 7 - ring->ring_no;
 		val8 = (ring->ring_no == 0) ? 0x3f : 0xbf;
-		writeb(val8, addr);
-		val8 = readb(addr);
+		pete_writeb("drivers/net/ethernet/neterion/s2io.c:2783", val8, addr);
+		val8 = pete_readb("drivers/net/ethernet/neterion/s2io.c:2784", addr);
 	}
 	return pkts_processed;
 }
@@ -2811,7 +2811,7 @@ static int s2io_poll_inta(struct napi_struct *napi, int budget)
 	if (pkts_processed < budget_org) {
 		napi_complete_done(napi, pkts_processed);
 		/* Re enable the Rx interrupts for the ring */
-		writeq(0, &bar0->rx_traffic_mask);
+		pete_writeq("drivers/net/ethernet/neterion/s2io.c:2814", 0, &bar0->rx_traffic_mask);
 		pete_readl("drivers/net/ethernet/neterion/s2io.c:2815", &bar0->rx_traffic_mask);
 	}
 	return pkts_processed;
@@ -2842,8 +2842,8 @@ static void s2io_netpoll(struct net_device *dev)
 
 	disable_irq(irq);
 
-	writeq(val64, &bar0->rx_traffic_int);
-	writeq(val64, &bar0->tx_traffic_int);
+	pete_writeq("drivers/net/ethernet/neterion/s2io.c:2845", val64, &bar0->rx_traffic_int);
+	pete_writeq("drivers/net/ethernet/neterion/s2io.c:2846", val64, &bar0->tx_traffic_int);
 
 	/* we need to free up the transmitted skbufs or else netpoll will
 	 * run out of skbs and will fail and eventually netpoll application such
@@ -3093,9 +3093,9 @@ static void s2io_mdio_write(u32 mmd_type, u64 addr, u16 value,
 	val64 = MDIO_MMD_INDX_ADDR(addr) |
 		MDIO_MMD_DEV_ADDR(mmd_type) |
 		MDIO_MMS_PRT_ADDR(0x0);
-	writeq(val64, &bar0->mdio_control);
+	pete_writeq("drivers/net/ethernet/neterion/s2io.c:3096", val64, &bar0->mdio_control);
 	val64 = val64 | MDIO_CTRL_START_TRANS(0xE);
-	writeq(val64, &bar0->mdio_control);
+	pete_writeq("drivers/net/ethernet/neterion/s2io.c:3098", val64, &bar0->mdio_control);
 	udelay(100);
 
 	/* Data transaction */
@@ -3104,18 +3104,18 @@ static void s2io_mdio_write(u32 mmd_type, u64 addr, u16 value,
 		MDIO_MMS_PRT_ADDR(0x0) |
 		MDIO_MDIO_DATA(value) |
 		MDIO_OP(MDIO_OP_WRITE_TRANS);
-	writeq(val64, &bar0->mdio_control);
+	pete_writeq("drivers/net/ethernet/neterion/s2io.c:3107", val64, &bar0->mdio_control);
 	val64 = val64 | MDIO_CTRL_START_TRANS(0xE);
-	writeq(val64, &bar0->mdio_control);
+	pete_writeq("drivers/net/ethernet/neterion/s2io.c:3109", val64, &bar0->mdio_control);
 	udelay(100);
 
 	val64 = MDIO_MMD_INDX_ADDR(addr) |
 		MDIO_MMD_DEV_ADDR(mmd_type) |
 		MDIO_MMS_PRT_ADDR(0x0) |
 		MDIO_OP(MDIO_OP_READ_TRANS);
-	writeq(val64, &bar0->mdio_control);
+	pete_writeq("drivers/net/ethernet/neterion/s2io.c:3116", val64, &bar0->mdio_control);
 	val64 = val64 | MDIO_CTRL_START_TRANS(0xE);
-	writeq(val64, &bar0->mdio_control);
+	pete_writeq("drivers/net/ethernet/neterion/s2io.c:3118", val64, &bar0->mdio_control);
 	udelay(100);
 }
 
@@ -3139,9 +3139,9 @@ static u64 s2io_mdio_read(u32 mmd_type, u64 addr, struct net_device *dev)
 	val64 = val64 | (MDIO_MMD_INDX_ADDR(addr)
 			 | MDIO_MMD_DEV_ADDR(mmd_type)
 			 | MDIO_MMS_PRT_ADDR(0x0));
-	writeq(val64, &bar0->mdio_control);
+	pete_writeq("drivers/net/ethernet/neterion/s2io.c:3142", val64, &bar0->mdio_control);
 	val64 = val64 | MDIO_CTRL_START_TRANS(0xE);
-	writeq(val64, &bar0->mdio_control);
+	pete_writeq("drivers/net/ethernet/neterion/s2io.c:3144", val64, &bar0->mdio_control);
 	udelay(100);
 
 	/* Data transaction */
@@ -3149,13 +3149,13 @@ static u64 s2io_mdio_read(u32 mmd_type, u64 addr, struct net_device *dev)
 		MDIO_MMD_DEV_ADDR(mmd_type) |
 		MDIO_MMS_PRT_ADDR(0x0) |
 		MDIO_OP(MDIO_OP_READ_TRANS);
-	writeq(val64, &bar0->mdio_control);
+	pete_writeq("drivers/net/ethernet/neterion/s2io.c:3152", val64, &bar0->mdio_control);
 	val64 = val64 | MDIO_CTRL_START_TRANS(0xE);
-	writeq(val64, &bar0->mdio_control);
+	pete_writeq("drivers/net/ethernet/neterion/s2io.c:3154", val64, &bar0->mdio_control);
 	udelay(100);
 
 	/* Read the value from regs */
-	rval64 = readq(&bar0->mdio_control);
+	rval64 = pete_readq("drivers/net/ethernet/neterion/s2io.c:3158", &bar0->mdio_control);
 	rval64 = rval64 & 0xFFFF0000;
 	rval64 = rval64 >> 16;
 	return rval64;
@@ -3344,7 +3344,7 @@ static int wait_for_cmd_complete(void __iomem *addr, u64 busy_bit,
 		return FAILURE;
 
 	do {
-		val64 = readq(addr);
+		val64 = pete_readq("drivers/net/ethernet/neterion/s2io.c:3347", addr);
 		if (bit_state == S2IO_BIT_RESET) {
 			if (!(val64 & busy_bit)) {
 				ret = SUCCESS;
@@ -3416,7 +3416,7 @@ static void s2io_reset(struct s2io_nic *sp)
 	pci_read_config_word(sp->pdev, PCIX_COMMAND_REGISTER, &(pci_cmd));
 
 	val64 = SW_RESET_ALL;
-	writeq(val64, &bar0->sw_reset);
+	pete_writeq("drivers/net/ethernet/neterion/s2io.c:3419", val64, &bar0->sw_reset);
 	if (strstr(sp->product_name, "CX4"))
 		msleep(750);
 	msleep(250);
@@ -3456,7 +3456,7 @@ static void s2io_reset(struct s2io_nic *sp)
 		pci_write_config_dword(sp->pdev, 0x68, 0x7C);
 
 		/* Clearing PCI_STATUS error reflected here */
-		writeq(s2BIT(62), &bar0->txpic_int_reg);
+		pete_writeq("drivers/net/ethernet/neterion/s2io.c:3459", s2BIT(62), &bar0->txpic_int_reg);
 	}
 
 	/* Reset device statistics maintained by OS */
@@ -3491,11 +3491,11 @@ static void s2io_reset(struct s2io_nic *sp)
 	subid = sp->pdev->subsystem_device;
 	if (((subid & 0xFF) >= 0x07) &&
 	    (sp->device_type == XFRAME_I_DEVICE)) {
-		val64 = readq(&bar0->gpio_control);
+		val64 = pete_readq("drivers/net/ethernet/neterion/s2io.c:3494", &bar0->gpio_control);
 		val64 |= 0x0000800000000000ULL;
-		writeq(val64, &bar0->gpio_control);
+		pete_writeq("drivers/net/ethernet/neterion/s2io.c:3496", val64, &bar0->gpio_control);
 		val64 = 0x0411040400000000ULL;
-		writeq(val64, (void __iomem *)bar0 + 0x2700);
+		pete_writeq("drivers/net/ethernet/neterion/s2io.c:3498", val64, (void __iomem *)bar0 + 0x2700);
 	}
 
 	/*
@@ -3503,8 +3503,8 @@ static void s2io_reset(struct s2io_nic *sp)
 	 * XFRAME II cards after reset.
 	 */
 	if (sp->device_type == XFRAME_II_DEVICE) {
-		val64 = readq(&bar0->pcc_err_reg);
-		writeq(val64, &bar0->pcc_err_reg);
+		val64 = pete_readq("drivers/net/ethernet/neterion/s2io.c:3506", &bar0->pcc_err_reg);
+		pete_writeq("drivers/net/ethernet/neterion/s2io.c:3507", val64, &bar0->pcc_err_reg);
 	}
 
 	sp->device_enabled_once = false;
@@ -3531,7 +3531,7 @@ static int s2io_set_swapper(struct s2io_nic *sp)
 	 * the PIF Feed-back register.
 	 */
 
-	val64 = readq(&bar0->pif_rd_swapper_fb);
+	val64 = pete_readq("drivers/net/ethernet/neterion/s2io.c:3534", &bar0->pif_rd_swapper_fb);
 	if (val64 != 0x0123456789ABCDEFULL) {
 		int i = 0;
 		static const u64 value[] = {
@@ -3542,8 +3542,8 @@ static int s2io_set_swapper(struct s2io_nic *sp)
 		};
 
 		while (i < 4) {
-			writeq(value[i], &bar0->swapper_ctrl);
-			val64 = readq(&bar0->pif_rd_swapper_fb);
+			pete_writeq("drivers/net/ethernet/neterion/s2io.c:3545", value[i], &bar0->swapper_ctrl);
+			val64 = pete_readq("drivers/net/ethernet/neterion/s2io.c:3546", &bar0->pif_rd_swapper_fb);
 			if (val64 == 0x0123456789ABCDEFULL)
 				break;
 			i++;
@@ -3556,12 +3556,12 @@ static int s2io_set_swapper(struct s2io_nic *sp)
 		}
 		valr = value[i];
 	} else {
-		valr = readq(&bar0->swapper_ctrl);
+		valr = pete_readq("drivers/net/ethernet/neterion/s2io.c:3559", &bar0->swapper_ctrl);
 	}
 
 	valt = 0x0123456789ABCDEFULL;
-	writeq(valt, &bar0->xmsi_address);
-	val64 = readq(&bar0->xmsi_address);
+	pete_writeq("drivers/net/ethernet/neterion/s2io.c:3563", valt, &bar0->xmsi_address);
+	val64 = pete_readq("drivers/net/ethernet/neterion/s2io.c:3564", &bar0->xmsi_address);
 
 	if (val64 != valt) {
 		int i = 0;
@@ -3573,9 +3573,9 @@ static int s2io_set_swapper(struct s2io_nic *sp)
 		};
 
 		while (i < 4) {
-			writeq((value[i] | valr), &bar0->swapper_ctrl);
-			writeq(valt, &bar0->xmsi_address);
-			val64 = readq(&bar0->xmsi_address);
+			pete_writeq("drivers/net/ethernet/neterion/s2io.c:3576", (value[i] | valr), &bar0->swapper_ctrl);
+			pete_writeq("drivers/net/ethernet/neterion/s2io.c:3577", valt, &bar0->xmsi_address);
+			val64 = pete_readq("drivers/net/ethernet/neterion/s2io.c:3578", &bar0->xmsi_address);
 			if (val64 == valt)
 				break;
 			i++;
@@ -3587,7 +3587,7 @@ static int s2io_set_swapper(struct s2io_nic *sp)
 			return FAILURE;
 		}
 	}
-	val64 = readq(&bar0->swapper_ctrl);
+	val64 = pete_readq("drivers/net/ethernet/neterion/s2io.c:3590", &bar0->swapper_ctrl);
 	val64 &= 0xFFFF000000000000ULL;
 
 #ifdef __BIG_ENDIAN
@@ -3608,7 +3608,7 @@ static int s2io_set_swapper(struct s2io_nic *sp)
 		  SWAPPER_CTRL_STATS_SE);
 	if (sp->config.intr_type == INTA)
 		val64 |= SWAPPER_CTRL_XMSI_SE;
-	writeq(val64, &bar0->swapper_ctrl);
+	pete_writeq("drivers/net/ethernet/neterion/s2io.c:3611", val64, &bar0->swapper_ctrl);
 #else
 	/*
 	 * Initially we enable all bits to make it accessible by the
@@ -3632,15 +3632,15 @@ static int s2io_set_swapper(struct s2io_nic *sp)
 		  SWAPPER_CTRL_STATS_SE);
 	if (sp->config.intr_type == INTA)
 		val64 |= SWAPPER_CTRL_XMSI_SE;
-	writeq(val64, &bar0->swapper_ctrl);
+	pete_writeq("drivers/net/ethernet/neterion/s2io.c:3635", val64, &bar0->swapper_ctrl);
 #endif
-	val64 = readq(&bar0->swapper_ctrl);
+	val64 = pete_readq("drivers/net/ethernet/neterion/s2io.c:3637", &bar0->swapper_ctrl);
 
 	/*
 	 * Verifying if endian settings are accurate by reading a
 	 * feedback register.
 	 */
-	val64 = readq(&bar0->pif_rd_swapper_fb);
+	val64 = pete_readq("drivers/net/ethernet/neterion/s2io.c:3643", &bar0->pif_rd_swapper_fb);
 	if (val64 != 0x0123456789ABCDEFULL) {
 		/* Endian settings are incorrect, calls for another dekko. */
 		DBG_PRINT(ERR_DBG,
@@ -3659,7 +3659,7 @@ static int wait_for_msix_trans(struct s2io_nic *nic, int i)
 	int ret = 0, cnt = 0;
 
 	do {
-		val64 = readq(&bar0->xmsi_access);
+		val64 = pete_readq("drivers/net/ethernet/neterion/s2io.c:3662", &bar0->xmsi_access);
 		if (!(val64 & s2BIT(15)))
 			break;
 		mdelay(1);
@@ -3684,10 +3684,10 @@ static void restore_xmsi_data(struct s2io_nic *nic)
 
 	for (i = 0; i < MAX_REQUESTED_MSI_X; i++) {
 		msix_index = (i) ? ((i-1) * 8 + 1) : 0;
-		writeq(nic->msix_info[i].addr, &bar0->xmsi_address);
-		writeq(nic->msix_info[i].data, &bar0->xmsi_data);
+		pete_writeq("drivers/net/ethernet/neterion/s2io.c:3687", nic->msix_info[i].addr, &bar0->xmsi_address);
+		pete_writeq("drivers/net/ethernet/neterion/s2io.c:3688", nic->msix_info[i].data, &bar0->xmsi_data);
 		val64 = (s2BIT(7) | s2BIT(15) | vBIT(msix_index, 26, 6));
-		writeq(val64, &bar0->xmsi_access);
+		pete_writeq("drivers/net/ethernet/neterion/s2io.c:3690", val64, &bar0->xmsi_access);
 		if (wait_for_msix_trans(nic, msix_index))
 			DBG_PRINT(ERR_DBG, "%s: index: %d failed\n",
 				  __func__, msix_index);
@@ -3707,14 +3707,14 @@ static void store_xmsi_data(struct s2io_nic *nic)
 	for (i = 0; i < MAX_REQUESTED_MSI_X; i++) {
 		msix_index = (i) ? ((i-1) * 8 + 1) : 0;
 		val64 = (s2BIT(15) | vBIT(msix_index, 26, 6));
-		writeq(val64, &bar0->xmsi_access);
+		pete_writeq("drivers/net/ethernet/neterion/s2io.c:3710", val64, &bar0->xmsi_access);
 		if (wait_for_msix_trans(nic, msix_index)) {
 			DBG_PRINT(ERR_DBG, "%s: index: %d failed\n",
 				  __func__, msix_index);
 			continue;
 		}
-		addr = readq(&bar0->xmsi_address);
-		data = readq(&bar0->xmsi_data);
+		addr = pete_readq("drivers/net/ethernet/neterion/s2io.c:3716", &bar0->xmsi_address);
+		data = pete_readq("drivers/net/ethernet/neterion/s2io.c:3717", &bar0->xmsi_data);
 		if (addr && data) {
 			nic->msix_info[i].addr = addr;
 			nic->msix_info[i].data = data;
@@ -3768,7 +3768,7 @@ static int s2io_enable_msi_x(struct s2io_nic *nic)
 		nic->s2io_entries[i].in_use = 0;
 	}
 
-	rx_mat = readq(&bar0->rx_mat);
+	rx_mat = pete_readq("drivers/net/ethernet/neterion/s2io.c:3771", &bar0->rx_mat);
 	for (j = 0; j < nic->config.rx_ring_num; j++) {
 		rx_mat |= RX_MAT_SET(j, msix_indx);
 		nic->s2io_entries[j+1].arg = &nic->mac_control.rings[j];
@@ -3776,8 +3776,8 @@ static int s2io_enable_msi_x(struct s2io_nic *nic)
 		nic->s2io_entries[j+1].in_use = MSIX_FLG;
 		msix_indx += 8;
 	}
-	writeq(rx_mat, &bar0->rx_mat);
-	readq(&bar0->rx_mat);
+	pete_writeq("drivers/net/ethernet/neterion/s2io.c:3779", rx_mat, &bar0->rx_mat);
+	pete_readq("drivers/net/ethernet/neterion/s2io.c:3780", &bar0->rx_mat);
 
 	ret = pci_enable_msix_range(nic->pdev, nic->entries,
 				    nic->num_entries, nic->num_entries);
@@ -3836,11 +3836,11 @@ static int s2io_test_msi(struct s2io_nic *sp)
 	init_waitqueue_head(&sp->msi_wait);
 	sp->msi_detected = 0;
 
-	saved64 = val64 = readq(&bar0->scheduled_int_ctrl);
+	saved64 = val64 = pete_readq("drivers/net/ethernet/neterion/s2io.c:3839", &bar0->scheduled_int_ctrl);
 	val64 |= SCHED_INT_CTRL_ONE_SHOT;
 	val64 |= SCHED_INT_CTRL_TIMER_EN;
 	val64 |= SCHED_INT_CTRL_INT2MSI(1);
-	writeq(val64, &bar0->scheduled_int_ctrl);
+	pete_writeq("drivers/net/ethernet/neterion/s2io.c:3843", val64, &bar0->scheduled_int_ctrl);
 
 	wait_event_timeout(sp->msi_wait, sp->msi_detected, HZ/10);
 
@@ -3855,7 +3855,7 @@ static int s2io_test_msi(struct s2io_nic *sp)
 
 	free_irq(sp->entries[1].vector, sp);
 
-	writeq(saved64, &bar0->scheduled_int_ctrl);
+	pete_writeq("drivers/net/ethernet/neterion/s2io.c:3858", saved64, &bar0->scheduled_int_ctrl);
 
 	return err;
 }
@@ -4152,14 +4152,14 @@ static netdev_tx_t s2io_xmit(struct sk_buff *skb, struct net_device *dev)
 
 	tx_fifo = mac_control->tx_FIFO_start[queue];
 	val64 = fifo->list_info[put_off].list_phy_addr;
-	writeq(val64, &tx_fifo->TxDL_Pointer);
+	pete_writeq("drivers/net/ethernet/neterion/s2io.c:4155", val64, &tx_fifo->TxDL_Pointer);
 
 	val64 = (TX_FIFO_LAST_TXD_NUM(frg_cnt) | TX_FIFO_FIRST_LIST |
 		 TX_FIFO_LAST_LIST);
 	if (offload_type)
 		val64 |= TX_FIFO_SPECIAL_FUNC;
 
-	writeq(val64, &tx_fifo->List_Control);
+	pete_writeq("drivers/net/ethernet/neterion/s2io.c:4162", val64, &tx_fifo->List_Control);
 
 	put_off++;
 	if (put_off == fifo->tx_curr_put_info.fifo_len + 1)
@@ -4217,8 +4217,8 @@ static irqreturn_t s2io_msix_ring_handle(int irq, void *dev_id)
 		addr = (u8 __iomem *)&bar0->xmsi_mask_reg;
 		addr += (7 - ring->ring_no);
 		val8 = (ring->ring_no == 0) ? 0x7f : 0xff;
-		writeb(val8, addr);
-		val8 = readb(addr);
+		pete_writeb("drivers/net/ethernet/neterion/s2io.c:4220", val8, addr);
+		val8 = pete_readb("drivers/net/ethernet/neterion/s2io.c:4221", addr);
 		napi_schedule(&ring->napi);
 	} else {
 		rx_intr_handler(ring, 0);
@@ -4240,24 +4240,24 @@ static irqreturn_t s2io_msix_fifo_handle(int irq, void *dev_id)
 	if (unlikely(!is_s2io_card_up(sp)))
 		return IRQ_NONE;
 
-	reason = readq(&bar0->general_int_status);
+	reason = pete_readq("drivers/net/ethernet/neterion/s2io.c:4243", &bar0->general_int_status);
 	if (unlikely(reason == S2IO_MINUS_ONE))
 		/* Nothing much can be done. Get out */
 		return IRQ_HANDLED;
 
 	if (reason & (GEN_INTR_TXPIC | GEN_INTR_TXTRAFFIC)) {
-		writeq(S2IO_MINUS_ONE, &bar0->general_int_mask);
+		pete_writeq("drivers/net/ethernet/neterion/s2io.c:4249", S2IO_MINUS_ONE, &bar0->general_int_mask);
 
 		if (reason & GEN_INTR_TXPIC)
 			s2io_txpic_intr_handle(sp);
 
 		if (reason & GEN_INTR_TXTRAFFIC)
-			writeq(S2IO_MINUS_ONE, &bar0->tx_traffic_int);
+			pete_writeq("drivers/net/ethernet/neterion/s2io.c:4255", S2IO_MINUS_ONE, &bar0->tx_traffic_int);
 
 		for (i = 0; i < config->tx_fifo_num; i++)
 			tx_intr_handler(&fifos[i]);
 
-		writeq(sp->general_int_mask, &bar0->general_int_mask);
+		pete_writeq("drivers/net/ethernet/neterion/s2io.c:4260", sp->general_int_mask, &bar0->general_int_mask);
 		pete_readl("drivers/net/ethernet/neterion/s2io.c:4261", &bar0->general_int_status);
 		return IRQ_HANDLED;
 	}
@@ -4270,9 +4270,9 @@ static void s2io_txpic_intr_handle(struct s2io_nic *sp)
 	struct XENA_dev_config __iomem *bar0 = sp->bar0;
 	u64 val64;
 
-	val64 = readq(&bar0->pic_int_status);
+	val64 = pete_readq("drivers/net/ethernet/neterion/s2io.c:4273", &bar0->pic_int_status);
 	if (val64 & PIC_INT_GPIO) {
-		val64 = readq(&bar0->gpio_int_reg);
+		val64 = pete_readq("drivers/net/ethernet/neterion/s2io.c:4275", &bar0->gpio_int_reg);
 		if ((val64 & GPIO_INT_REG_LINK_DOWN) &&
 		    (val64 & GPIO_INT_REG_LINK_UP)) {
 			/*
@@ -4281,19 +4281,19 @@ static void s2io_txpic_intr_handle(struct s2io_nic *sp)
 			 */
 			val64 |= GPIO_INT_REG_LINK_DOWN;
 			val64 |= GPIO_INT_REG_LINK_UP;
-			writeq(val64, &bar0->gpio_int_reg);
-			val64 = readq(&bar0->gpio_int_mask);
+			pete_writeq("drivers/net/ethernet/neterion/s2io.c:4284", val64, &bar0->gpio_int_reg);
+			val64 = pete_readq("drivers/net/ethernet/neterion/s2io.c:4285", &bar0->gpio_int_mask);
 			val64 &= ~(GPIO_INT_MASK_LINK_UP |
 				   GPIO_INT_MASK_LINK_DOWN);
-			writeq(val64, &bar0->gpio_int_mask);
+			pete_writeq("drivers/net/ethernet/neterion/s2io.c:4288", val64, &bar0->gpio_int_mask);
 		} else if (val64 & GPIO_INT_REG_LINK_UP) {
-			val64 = readq(&bar0->adapter_status);
+			val64 = pete_readq("drivers/net/ethernet/neterion/s2io.c:4290", &bar0->adapter_status);
 			/* Enable Adapter */
-			val64 = readq(&bar0->adapter_control);
+			val64 = pete_readq("drivers/net/ethernet/neterion/s2io.c:4292", &bar0->adapter_control);
 			val64 |= ADAPTER_CNTL_EN;
-			writeq(val64, &bar0->adapter_control);
+			pete_writeq("drivers/net/ethernet/neterion/s2io.c:4294", val64, &bar0->adapter_control);
 			val64 |= ADAPTER_LED_ON;
-			writeq(val64, &bar0->adapter_control);
+			pete_writeq("drivers/net/ethernet/neterion/s2io.c:4296", val64, &bar0->adapter_control);
 			if (!sp->device_enabled_once)
 				sp->device_enabled_once = 1;
 
@@ -4302,27 +4302,27 @@ static void s2io_txpic_intr_handle(struct s2io_nic *sp)
 			 * unmask link down interrupt and mask link-up
 			 * intr
 			 */
-			val64 = readq(&bar0->gpio_int_mask);
+			val64 = pete_readq("drivers/net/ethernet/neterion/s2io.c:4305", &bar0->gpio_int_mask);
 			val64 &= ~GPIO_INT_MASK_LINK_DOWN;
 			val64 |= GPIO_INT_MASK_LINK_UP;
-			writeq(val64, &bar0->gpio_int_mask);
+			pete_writeq("drivers/net/ethernet/neterion/s2io.c:4308", val64, &bar0->gpio_int_mask);
 
 		} else if (val64 & GPIO_INT_REG_LINK_DOWN) {
-			val64 = readq(&bar0->adapter_status);
+			val64 = pete_readq("drivers/net/ethernet/neterion/s2io.c:4311", &bar0->adapter_status);
 			s2io_link(sp, LINK_DOWN);
 			/* Link is down so unmaks link up interrupt */
-			val64 = readq(&bar0->gpio_int_mask);
+			val64 = pete_readq("drivers/net/ethernet/neterion/s2io.c:4314", &bar0->gpio_int_mask);
 			val64 &= ~GPIO_INT_MASK_LINK_UP;
 			val64 |= GPIO_INT_MASK_LINK_DOWN;
-			writeq(val64, &bar0->gpio_int_mask);
+			pete_writeq("drivers/net/ethernet/neterion/s2io.c:4317", val64, &bar0->gpio_int_mask);
 
 			/* turn off LED */
-			val64 = readq(&bar0->adapter_control);
+			val64 = pete_readq("drivers/net/ethernet/neterion/s2io.c:4320", &bar0->adapter_control);
 			val64 = val64 & (~ADAPTER_LED_ON);
-			writeq(val64, &bar0->adapter_control);
+			pete_writeq("drivers/net/ethernet/neterion/s2io.c:4322", val64, &bar0->adapter_control);
 		}
 	}
-	val64 = readq(&bar0->gpio_int_mask);
+	val64 = pete_readq("drivers/net/ethernet/neterion/s2io.c:4325", &bar0->gpio_int_mask);
 }
 
 /**
@@ -4339,9 +4339,9 @@ static int do_s2io_chk_alarm_bit(u64 value, void __iomem *addr,
 				 unsigned long long *cnt)
 {
 	u64 val64;
-	val64 = readq(addr);
+	val64 = pete_readq("drivers/net/ethernet/neterion/s2io.c:4342", addr);
 	if (val64 & value) {
-		writeq(val64, addr);
+		pete_writeq("drivers/net/ethernet/neterion/s2io.c:4344", val64, addr);
 		(*cnt)++;
 		return 1;
 	}
@@ -4389,8 +4389,8 @@ static void s2io_handle_errors(void *dev_id)
 
 	/* Handling link status change error Intr */
 	if (s2io_link_fault_indication(sp) == MAC_RMAC_ERR_TIMER) {
-		val64 = readq(&bar0->mac_rmac_err_reg);
-		writeq(val64, &bar0->mac_rmac_err_reg);
+		val64 = pete_readq("drivers/net/ethernet/neterion/s2io.c:4392", &bar0->mac_rmac_err_reg);
+		pete_writeq("drivers/net/ethernet/neterion/s2io.c:4393", val64, &bar0->mac_rmac_err_reg);
 		if (val64 & RMAC_LINK_STATE_CHANGE_INT)
 			schedule_work(&sp->set_link_task);
 	}
@@ -4407,14 +4407,14 @@ static void s2io_handle_errors(void *dev_id)
 
 	/* Check for ring full counter */
 	if (sp->device_type == XFRAME_II_DEVICE) {
-		val64 = readq(&bar0->ring_bump_counter1);
+		val64 = pete_readq("drivers/net/ethernet/neterion/s2io.c:4410", &bar0->ring_bump_counter1);
 		for (i = 0; i < 4; i++) {
 			temp64 = (val64 & vBIT(0xFFFF, (i*16), 16));
 			temp64 >>= 64 - ((i+1)*16);
 			sw_stat->ring_full_cnt[i] += temp64;
 		}
 
-		val64 = readq(&bar0->ring_bump_counter2);
+		val64 = pete_readq("drivers/net/ethernet/neterion/s2io.c:4417", &bar0->ring_bump_counter2);
 		for (i = 0; i < 4; i++) {
 			temp64 = (val64 & vBIT(0xFFFF, (i*16), 16));
 			temp64 >>= 64 - ((i+1)*16);
@@ -4422,7 +4422,7 @@ static void s2io_handle_errors(void *dev_id)
 		}
 	}
 
-	val64 = readq(&bar0->txdma_int_status);
+	val64 = pete_readq("drivers/net/ethernet/neterion/s2io.c:4425", &bar0->txdma_int_status);
 	/*check for pfc_err*/
 	if (val64 & TXDMA_PFC_INT) {
 		if (do_s2io_chk_alarm_bit(PFC_ECC_DB_ERR | PFC_SM_ERR_ALARM |
@@ -4505,7 +4505,7 @@ static void s2io_handle_errors(void *dev_id)
 			goto reset;
 	}
 
-	val64 = readq(&bar0->mac_int_status);
+	val64 = pete_readq("drivers/net/ethernet/neterion/s2io.c:4508", &bar0->mac_int_status);
 	if (val64 & MAC_INT_STATUS_TMAC_INT) {
 		if (do_s2io_chk_alarm_bit(TMAC_TX_BUF_OVRN | TMAC_TX_SM_ERR,
 					  &bar0->mac_tmac_err_reg,
@@ -4518,7 +4518,7 @@ static void s2io_handle_errors(void *dev_id)
 				      &sw_stat->mac_tmac_err_cnt);
 	}
 
-	val64 = readq(&bar0->xgxs_int_status);
+	val64 = pete_readq("drivers/net/ethernet/neterion/s2io.c:4521", &bar0->xgxs_int_status);
 	if (val64 & XGXS_INT_STATUS_TXGXS) {
 		if (do_s2io_chk_alarm_bit(TXGXS_ESTORE_UFLOW | TXGXS_TX_SM_ERR,
 					  &bar0->xgxs_txgxs_err_reg,
@@ -4529,7 +4529,7 @@ static void s2io_handle_errors(void *dev_id)
 				      &sw_stat->xgxs_txgxs_err_cnt);
 	}
 
-	val64 = readq(&bar0->rxdma_int_status);
+	val64 = pete_readq("drivers/net/ethernet/neterion/s2io.c:4532", &bar0->rxdma_int_status);
 	if (val64 & RXDMA_INT_RC_INT_M) {
 		if (do_s2io_chk_alarm_bit(RC_PRCn_ECC_DB_ERR |
 					  RC_FTC_ECC_DB_ERR |
@@ -4592,7 +4592,7 @@ static void s2io_handle_errors(void *dev_id)
 				      &sw_stat->rti_err_cnt);
 	}
 
-	val64 = readq(&bar0->mac_int_status);
+	val64 = pete_readq("drivers/net/ethernet/neterion/s2io.c:4595", &bar0->mac_int_status);
 	if (val64 & MAC_INT_STATUS_RMAC_INT) {
 		if (do_s2io_chk_alarm_bit(RMAC_RX_BUFF_OVRN | RMAC_RX_SM_ERR,
 					  &bar0->mac_rmac_err_reg,
@@ -4605,7 +4605,7 @@ static void s2io_handle_errors(void *dev_id)
 				      &sw_stat->mac_rmac_err_cnt);
 	}
 
-	val64 = readq(&bar0->xgxs_int_status);
+	val64 = pete_readq("drivers/net/ethernet/neterion/s2io.c:4608", &bar0->xgxs_int_status);
 	if (val64 & XGXS_INT_STATUS_RXGXS) {
 		if (do_s2io_chk_alarm_bit(RXGXS_ESTORE_OFLOW | RXGXS_RX_SM_ERR,
 					  &bar0->xgxs_rxgxs_err_reg,
@@ -4613,7 +4613,7 @@ static void s2io_handle_errors(void *dev_id)
 			goto reset;
 	}
 
-	val64 = readq(&bar0->mc_int_status);
+	val64 = pete_readq("drivers/net/ethernet/neterion/s2io.c:4616", &bar0->mc_int_status);
 	if (val64 & MC_INT_STATUS_MC_INT) {
 		if (do_s2io_chk_alarm_bit(MC_ERR_REG_SM_ERR,
 					  &bar0->mc_err_reg,
@@ -4622,7 +4622,7 @@ static void s2io_handle_errors(void *dev_id)
 
 		/* Handling Ecc errors */
 		if (val64 & (MC_ERR_REG_ECC_ALL_SNG | MC_ERR_REG_ECC_ALL_DBL)) {
-			writeq(val64, &bar0->mc_err_reg);
+			pete_writeq("drivers/net/ethernet/neterion/s2io.c:4625", val64, &bar0->mc_err_reg);
 			if (val64 & MC_ERR_REG_ECC_ALL_DBL) {
 				sw_stat->double_ecc_errs++;
 				if (sp->device_type != XFRAME_II_DEVICE) {
@@ -4686,20 +4686,20 @@ static irqreturn_t s2io_isr(int irq, void *dev_id)
 	 * 2. Tx complete.
 	 * 3. Link down.
 	 */
-	reason = readq(&bar0->general_int_status);
+	reason = pete_readq("drivers/net/ethernet/neterion/s2io.c:4689", &bar0->general_int_status);
 
 	if (unlikely(reason == S2IO_MINUS_ONE))
 		return IRQ_HANDLED;	/* Nothing much can be done. Get out */
 
 	if (reason &
 	    (GEN_INTR_RXTRAFFIC | GEN_INTR_TXTRAFFIC | GEN_INTR_TXPIC)) {
-		writeq(S2IO_MINUS_ONE, &bar0->general_int_mask);
+		pete_writeq("drivers/net/ethernet/neterion/s2io.c:4696", S2IO_MINUS_ONE, &bar0->general_int_mask);
 
 		if (config->napi) {
 			if (reason & GEN_INTR_RXTRAFFIC) {
 				napi_schedule(&sp->napi);
-				writeq(S2IO_MINUS_ONE, &bar0->rx_traffic_mask);
-				writeq(S2IO_MINUS_ONE, &bar0->rx_traffic_int);
+				pete_writeq("drivers/net/ethernet/neterion/s2io.c:4701", S2IO_MINUS_ONE, &bar0->rx_traffic_mask);
+				pete_writeq("drivers/net/ethernet/neterion/s2io.c:4702", S2IO_MINUS_ONE, &bar0->rx_traffic_int);
 				pete_readl("drivers/net/ethernet/neterion/s2io.c:4703", &bar0->rx_traffic_int);
 			}
 		} else {
@@ -4709,7 +4709,7 @@ static irqreturn_t s2io_isr(int irq, void *dev_id)
 			 * get's cleared and hence a read can be avoided.
 			 */
 			if (reason & GEN_INTR_RXTRAFFIC)
-				writeq(S2IO_MINUS_ONE, &bar0->rx_traffic_int);
+				pete_writeq("drivers/net/ethernet/neterion/s2io.c:4712", S2IO_MINUS_ONE, &bar0->rx_traffic_int);
 
 			for (i = 0; i < config->rx_ring_num; i++) {
 				struct ring_info *ring = &mac_control->rings[i];
@@ -4724,7 +4724,7 @@ static irqreturn_t s2io_isr(int irq, void *dev_id)
 		 * cleared and hence a read can be avoided.
 		 */
 		if (reason & GEN_INTR_TXTRAFFIC)
-			writeq(S2IO_MINUS_ONE, &bar0->tx_traffic_int);
+			pete_writeq("drivers/net/ethernet/neterion/s2io.c:4727", S2IO_MINUS_ONE, &bar0->tx_traffic_int);
 
 		for (i = 0; i < config->tx_fifo_num; i++)
 			tx_intr_handler(&mac_control->fifos[i]);
@@ -4742,7 +4742,7 @@ static irqreturn_t s2io_isr(int irq, void *dev_id)
 				s2io_chk_rx_buffers(sp, ring);
 			}
 		}
-		writeq(sp->general_int_mask, &bar0->general_int_mask);
+		pete_writeq("drivers/net/ethernet/neterion/s2io.c:4745", sp->general_int_mask, &bar0->general_int_mask);
 		pete_readl("drivers/net/ethernet/neterion/s2io.c:4746", &bar0->general_int_status);
 
 		return IRQ_HANDLED;
@@ -4768,10 +4768,10 @@ static void s2io_updt_stats(struct s2io_nic *sp)
 		/* Apprx 30us on a 133 MHz bus */
 		val64 = SET_UPDT_CLICKS(10) |
 			STAT_CFG_ONE_SHOT_EN | STAT_CFG_STAT_EN;
-		writeq(val64, &bar0->stat_cfg);
+		pete_writeq("drivers/net/ethernet/neterion/s2io.c:4771", val64, &bar0->stat_cfg);
 		do {
 			udelay(100);
-			val64 = readq(&bar0->stat_cfg);
+			val64 = pete_readq("drivers/net/ethernet/neterion/s2io.c:4774", &bar0->stat_cfg);
 			if (!(val64 & s2BIT(0)))
 				break;
 			cnt++;
@@ -4897,14 +4897,14 @@ static void s2io_set_multicast(struct net_device *dev, bool may_sleep)
 
 	if ((dev->flags & IFF_ALLMULTI) && (!sp->m_cast_flg)) {
 		/*  Enable all Multicast addresses */
-		writeq(RMAC_ADDR_DATA0_MEM_ADDR(multi_mac),
+		pete_writeq("drivers/net/ethernet/neterion/s2io.c:4900", RMAC_ADDR_DATA0_MEM_ADDR(multi_mac),
 		       &bar0->rmac_addr_data0_mem);
-		writeq(RMAC_ADDR_DATA1_MEM_MASK(mask),
+		pete_writeq("drivers/net/ethernet/neterion/s2io.c:4902", RMAC_ADDR_DATA1_MEM_MASK(mask),
 		       &bar0->rmac_addr_data1_mem);
 		val64 = RMAC_ADDR_CMD_MEM_WE |
 			RMAC_ADDR_CMD_MEM_STROBE_NEW_CMD |
 			RMAC_ADDR_CMD_MEM_OFFSET(config->max_mc_addr - 1);
-		writeq(val64, &bar0->rmac_addr_cmd_mem);
+		pete_writeq("drivers/net/ethernet/neterion/s2io.c:4907", val64, &bar0->rmac_addr_cmd_mem);
 		/* Wait till command completes */
 		wait_for_cmd_complete(&bar0->rmac_addr_cmd_mem,
 				      RMAC_ADDR_CMD_MEM_STROBE_CMD_EXECUTING,
@@ -4914,14 +4914,14 @@ static void s2io_set_multicast(struct net_device *dev, bool may_sleep)
 		sp->all_multi_pos = config->max_mc_addr - 1;
 	} else if ((dev->flags & IFF_ALLMULTI) && (sp->m_cast_flg)) {
 		/*  Disable all Multicast addresses */
-		writeq(RMAC_ADDR_DATA0_MEM_ADDR(dis_addr),
+		pete_writeq("drivers/net/ethernet/neterion/s2io.c:4917", RMAC_ADDR_DATA0_MEM_ADDR(dis_addr),
 		       &bar0->rmac_addr_data0_mem);
-		writeq(RMAC_ADDR_DATA1_MEM_MASK(0x0),
+		pete_writeq("drivers/net/ethernet/neterion/s2io.c:4919", RMAC_ADDR_DATA1_MEM_MASK(0x0),
 		       &bar0->rmac_addr_data1_mem);
 		val64 = RMAC_ADDR_CMD_MEM_WE |
 			RMAC_ADDR_CMD_MEM_STROBE_NEW_CMD |
 			RMAC_ADDR_CMD_MEM_OFFSET(sp->all_multi_pos);
-		writeq(val64, &bar0->rmac_addr_cmd_mem);
+		pete_writeq("drivers/net/ethernet/neterion/s2io.c:4924", val64, &bar0->rmac_addr_cmd_mem);
 		/* Wait till command completes */
 		wait_for_cmd_complete(&bar0->rmac_addr_cmd_mem,
 				      RMAC_ADDR_CMD_MEM_STROBE_CMD_EXECUTING,
@@ -4934,44 +4934,44 @@ static void s2io_set_multicast(struct net_device *dev, bool may_sleep)
 	if ((dev->flags & IFF_PROMISC) && (!sp->promisc_flg)) {
 		/*  Put the NIC into promiscuous mode */
 		add = &bar0->mac_cfg;
-		val64 = readq(&bar0->mac_cfg);
+		val64 = pete_readq("drivers/net/ethernet/neterion/s2io.c:4937", &bar0->mac_cfg);
 		val64 |= MAC_CFG_RMAC_PROM_ENABLE;
 
-		writeq(RMAC_CFG_KEY(0x4C0D), &bar0->rmac_cfg_key);
+		pete_writeq("drivers/net/ethernet/neterion/s2io.c:4940", RMAC_CFG_KEY(0x4C0D), &bar0->rmac_cfg_key);
 		pete_writel("drivers/net/ethernet/neterion/s2io.c:4941", (u32)val64, add);
-		writeq(RMAC_CFG_KEY(0x4C0D), &bar0->rmac_cfg_key);
+		pete_writeq("drivers/net/ethernet/neterion/s2io.c:4942", RMAC_CFG_KEY(0x4C0D), &bar0->rmac_cfg_key);
 		pete_writel("drivers/net/ethernet/neterion/s2io.c:4943", (u32) (val64 >> 32), (add + 4));
 
 		if (vlan_tag_strip != 1) {
-			val64 = readq(&bar0->rx_pa_cfg);
+			val64 = pete_readq("drivers/net/ethernet/neterion/s2io.c:4946", &bar0->rx_pa_cfg);
 			val64 &= ~RX_PA_CFG_STRIP_VLAN_TAG;
-			writeq(val64, &bar0->rx_pa_cfg);
+			pete_writeq("drivers/net/ethernet/neterion/s2io.c:4948", val64, &bar0->rx_pa_cfg);
 			sp->vlan_strip_flag = 0;
 		}
 
-		val64 = readq(&bar0->mac_cfg);
+		val64 = pete_readq("drivers/net/ethernet/neterion/s2io.c:4952", &bar0->mac_cfg);
 		sp->promisc_flg = 1;
 		DBG_PRINT(INFO_DBG, "%s: entered promiscuous mode\n",
 			  dev->name);
 	} else if (!(dev->flags & IFF_PROMISC) && (sp->promisc_flg)) {
 		/*  Remove the NIC from promiscuous mode */
 		add = &bar0->mac_cfg;
-		val64 = readq(&bar0->mac_cfg);
+		val64 = pete_readq("drivers/net/ethernet/neterion/s2io.c:4959", &bar0->mac_cfg);
 		val64 &= ~MAC_CFG_RMAC_PROM_ENABLE;
 
-		writeq(RMAC_CFG_KEY(0x4C0D), &bar0->rmac_cfg_key);
+		pete_writeq("drivers/net/ethernet/neterion/s2io.c:4962", RMAC_CFG_KEY(0x4C0D), &bar0->rmac_cfg_key);
 		pete_writel("drivers/net/ethernet/neterion/s2io.c:4963", (u32)val64, add);
-		writeq(RMAC_CFG_KEY(0x4C0D), &bar0->rmac_cfg_key);
+		pete_writeq("drivers/net/ethernet/neterion/s2io.c:4964", RMAC_CFG_KEY(0x4C0D), &bar0->rmac_cfg_key);
 		pete_writel("drivers/net/ethernet/neterion/s2io.c:4965", (u32) (val64 >> 32), (add + 4));
 
 		if (vlan_tag_strip != 0) {
-			val64 = readq(&bar0->rx_pa_cfg);
+			val64 = pete_readq("drivers/net/ethernet/neterion/s2io.c:4968", &bar0->rx_pa_cfg);
 			val64 |= RX_PA_CFG_STRIP_VLAN_TAG;
-			writeq(val64, &bar0->rx_pa_cfg);
+			pete_writeq("drivers/net/ethernet/neterion/s2io.c:4970", val64, &bar0->rx_pa_cfg);
 			sp->vlan_strip_flag = 1;
 		}
 
-		val64 = readq(&bar0->mac_cfg);
+		val64 = pete_readq("drivers/net/ethernet/neterion/s2io.c:4974", &bar0->mac_cfg);
 		sp->promisc_flg = 0;
 		DBG_PRINT(INFO_DBG, "%s: left promiscuous mode\n", dev->name);
 	}
@@ -4992,15 +4992,15 @@ static void s2io_set_multicast(struct net_device *dev, bool may_sleep)
 
 		/* Clear out the previous list of Mc in the H/W. */
 		for (i = 0; i < prev_cnt; i++) {
-			writeq(RMAC_ADDR_DATA0_MEM_ADDR(dis_addr),
+			pete_writeq("drivers/net/ethernet/neterion/s2io.c:4995", RMAC_ADDR_DATA0_MEM_ADDR(dis_addr),
 			       &bar0->rmac_addr_data0_mem);
-			writeq(RMAC_ADDR_DATA1_MEM_MASK(0ULL),
+			pete_writeq("drivers/net/ethernet/neterion/s2io.c:4997", RMAC_ADDR_DATA1_MEM_MASK(0ULL),
 			       &bar0->rmac_addr_data1_mem);
 			val64 = RMAC_ADDR_CMD_MEM_WE |
 				RMAC_ADDR_CMD_MEM_STROBE_NEW_CMD |
 				RMAC_ADDR_CMD_MEM_OFFSET
 				(config->mc_start_offset + i);
-			writeq(val64, &bar0->rmac_addr_cmd_mem);
+			pete_writeq("drivers/net/ethernet/neterion/s2io.c:5003", val64, &bar0->rmac_addr_cmd_mem);
 
 			/* Wait for command completes */
 			if (wait_for_cmd_complete(&bar0->rmac_addr_cmd_mem,
@@ -5022,15 +5022,15 @@ static void s2io_set_multicast(struct net_device *dev, bool may_sleep)
 				mac_addr <<= 8;
 			}
 			mac_addr >>= 8;
-			writeq(RMAC_ADDR_DATA0_MEM_ADDR(mac_addr),
+			pete_writeq("drivers/net/ethernet/neterion/s2io.c:5025", RMAC_ADDR_DATA0_MEM_ADDR(mac_addr),
 			       &bar0->rmac_addr_data0_mem);
-			writeq(RMAC_ADDR_DATA1_MEM_MASK(0ULL),
+			pete_writeq("drivers/net/ethernet/neterion/s2io.c:5027", RMAC_ADDR_DATA1_MEM_MASK(0ULL),
 			       &bar0->rmac_addr_data1_mem);
 			val64 = RMAC_ADDR_CMD_MEM_WE |
 				RMAC_ADDR_CMD_MEM_STROBE_NEW_CMD |
 				RMAC_ADDR_CMD_MEM_OFFSET
 				(i + config->mc_start_offset);
-			writeq(val64, &bar0->rmac_addr_cmd_mem);
+			pete_writeq("drivers/net/ethernet/neterion/s2io.c:5033", val64, &bar0->rmac_addr_cmd_mem);
 
 			/* Wait for command completes */
 			if (wait_for_cmd_complete(&bar0->rmac_addr_cmd_mem,
@@ -5128,12 +5128,12 @@ static int do_s2io_add_mac(struct s2io_nic *sp, u64 addr, int off)
 	u64 val64;
 	struct XENA_dev_config __iomem *bar0 = sp->bar0;
 
-	writeq(RMAC_ADDR_DATA0_MEM_ADDR(addr),
+	pete_writeq("drivers/net/ethernet/neterion/s2io.c:5131", RMAC_ADDR_DATA0_MEM_ADDR(addr),
 	       &bar0->rmac_addr_data0_mem);
 
 	val64 =	RMAC_ADDR_CMD_MEM_WE | RMAC_ADDR_CMD_MEM_STROBE_NEW_CMD |
 		RMAC_ADDR_CMD_MEM_OFFSET(off);
-	writeq(val64, &bar0->rmac_addr_cmd_mem);
+	pete_writeq("drivers/net/ethernet/neterion/s2io.c:5136", val64, &bar0->rmac_addr_cmd_mem);
 
 	/* Wait till command completes */
 	if (wait_for_cmd_complete(&bar0->rmac_addr_cmd_mem,
@@ -5177,7 +5177,7 @@ static u64 do_s2io_read_unicast_mc(struct s2io_nic *sp, int offset)
 	/* read mac addr */
 	val64 =	RMAC_ADDR_CMD_MEM_RD | RMAC_ADDR_CMD_MEM_STROBE_NEW_CMD |
 		RMAC_ADDR_CMD_MEM_OFFSET(offset);
-	writeq(val64, &bar0->rmac_addr_cmd_mem);
+	pete_writeq("drivers/net/ethernet/neterion/s2io.c:5180", val64, &bar0->rmac_addr_cmd_mem);
 
 	/* Wait till command completes */
 	if (wait_for_cmd_complete(&bar0->rmac_addr_cmd_mem,
@@ -5186,7 +5186,7 @@ static u64 do_s2io_read_unicast_mc(struct s2io_nic *sp, int offset)
 		DBG_PRINT(INFO_DBG, "do_s2io_read_unicast_mc failed\n");
 		return FAILURE;
 	}
-	tmp64 = readq(&bar0->rmac_addr_data0_mem);
+	tmp64 = pete_readq("drivers/net/ethernet/neterion/s2io.c:5189", &bar0->rmac_addr_data0_mem);
 
 	return tmp64 >> 16;
 }
@@ -5378,7 +5378,7 @@ static void s2io_ethtool_gregs(struct net_device *dev,
 	regs->version = sp->pdev->subsystem_device;
 
 	for (i = 0; i < regs->len; i += 8) {
-		reg = readq(sp->bar0 + i);
+		reg = pete_readq("drivers/net/ethernet/neterion/s2io.c:5381", sp->bar0 + i);
 		memcpy((reg_space + i), &reg, 8);
 	}
 }
@@ -5394,21 +5394,21 @@ static void s2io_set_led(struct s2io_nic *sp, bool on)
 
 	if ((sp->device_type == XFRAME_II_DEVICE) ||
 	    ((subid & 0xFF) >= 0x07)) {
-		val64 = readq(&bar0->gpio_control);
+		val64 = pete_readq("drivers/net/ethernet/neterion/s2io.c:5397", &bar0->gpio_control);
 		if (on)
 			val64 |= GPIO_CTRL_GPIO_0;
 		else
 			val64 &= ~GPIO_CTRL_GPIO_0;
 
-		writeq(val64, &bar0->gpio_control);
+		pete_writeq("drivers/net/ethernet/neterion/s2io.c:5403", val64, &bar0->gpio_control);
 	} else {
-		val64 = readq(&bar0->adapter_control);
+		val64 = pete_readq("drivers/net/ethernet/neterion/s2io.c:5405", &bar0->adapter_control);
 		if (on)
 			val64 |= ADAPTER_LED_ON;
 		else
 			val64 &= ~ADAPTER_LED_ON;
 
-		writeq(val64, &bar0->adapter_control);
+		pete_writeq("drivers/net/ethernet/neterion/s2io.c:5411", val64, &bar0->adapter_control);
 	}
 
 }
@@ -5433,7 +5433,7 @@ static int s2io_ethtool_set_led(struct net_device *dev,
 	u16 subid = sp->pdev->subsystem_device;
 
 	if ((sp->device_type == XFRAME_I_DEVICE) && ((subid & 0xFF) < 0x07)) {
-		u64 val64 = readq(&bar0->adapter_control);
+		u64 val64 = pete_readq("drivers/net/ethernet/neterion/s2io.c:5436", &bar0->adapter_control);
 		if (!(val64 & ADAPTER_CNTL_EN)) {
 			pr_err("Adapter Link down, cannot blink LED\n");
 			return -EAGAIN;
@@ -5442,7 +5442,7 @@ static int s2io_ethtool_set_led(struct net_device *dev,
 
 	switch (state) {
 	case ETHTOOL_ID_ACTIVE:
-		sp->adapt_ctrl_org = readq(&bar0->gpio_control);
+		sp->adapt_ctrl_org = pete_readq("drivers/net/ethernet/neterion/s2io.c:5445", &bar0->gpio_control);
 		return 1;	/* cycle on/off once per second */
 
 	case ETHTOOL_ID_ON:
@@ -5455,7 +5455,7 @@ static int s2io_ethtool_set_led(struct net_device *dev,
 
 	case ETHTOOL_ID_INACTIVE:
 		if (CARDS_WITH_FAULTY_LINK_INDICATORS(sp->device_type, subid))
-			writeq(sp->adapt_ctrl_org, &bar0->gpio_control);
+			pete_writeq("drivers/net/ethernet/neterion/s2io.c:5458", sp->adapt_ctrl_org, &bar0->gpio_control);
 	}
 
 	return 0;
@@ -5504,7 +5504,7 @@ static void s2io_ethtool_getpause_data(struct net_device *dev,
 	struct s2io_nic *sp = netdev_priv(dev);
 	struct XENA_dev_config __iomem *bar0 = sp->bar0;
 
-	val64 = readq(&bar0->rmac_pause_cfg);
+	val64 = pete_readq("drivers/net/ethernet/neterion/s2io.c:5507", &bar0->rmac_pause_cfg);
 	if (val64 & RMAC_PAUSE_GEN_ENABLE)
 		ep->tx_pause = true;
 	if (val64 & RMAC_PAUSE_RX_ENABLE)
@@ -5530,7 +5530,7 @@ static int s2io_ethtool_setpause_data(struct net_device *dev,
 	struct s2io_nic *sp = netdev_priv(dev);
 	struct XENA_dev_config __iomem *bar0 = sp->bar0;
 
-	val64 = readq(&bar0->rmac_pause_cfg);
+	val64 = pete_readq("drivers/net/ethernet/neterion/s2io.c:5533", &bar0->rmac_pause_cfg);
 	if (ep->tx_pause)
 		val64 |= RMAC_PAUSE_GEN_ENABLE;
 	else
@@ -5539,7 +5539,7 @@ static int s2io_ethtool_setpause_data(struct net_device *dev,
 		val64 |= RMAC_PAUSE_RX_ENABLE;
 	else
 		val64 &= ~RMAC_PAUSE_RX_ENABLE;
-	writeq(val64, &bar0->rmac_pause_cfg);
+	pete_writeq("drivers/net/ethernet/neterion/s2io.c:5542", val64, &bar0->rmac_pause_cfg);
 	return 0;
 }
 
@@ -5575,7 +5575,7 @@ static int read_eeprom(struct s2io_nic *sp, int off, u64 *data)
 		SPECIAL_REG_WRITE(val64, &bar0->i2c_control, LF);
 
 		while (exit_cnt < 5) {
-			val64 = readq(&bar0->i2c_control);
+			val64 = pete_readq("drivers/net/ethernet/neterion/s2io.c:5578", &bar0->i2c_control);
 			if (I2C_CONTROL_CNTL_END(val64)) {
 				*data = I2C_CONTROL_GET_DATA(val64);
 				ret = 0;
@@ -5594,12 +5594,12 @@ static int read_eeprom(struct s2io_nic *sp, int off, u64 *data)
 		val64 |= SPI_CONTROL_REQ;
 		SPECIAL_REG_WRITE(val64, &bar0->spi_control, LF);
 		while (exit_cnt < 5) {
-			val64 = readq(&bar0->spi_control);
+			val64 = pete_readq("drivers/net/ethernet/neterion/s2io.c:5597", &bar0->spi_control);
 			if (val64 & SPI_CONTROL_NACK) {
 				ret = 1;
 				break;
 			} else if (val64 & SPI_CONTROL_DONE) {
-				*data = readq(&bar0->spi_data);
+				*data = pete_readq("drivers/net/ethernet/neterion/s2io.c:5602", &bar0->spi_data);
 				*data &= 0xffffff;
 				ret = 0;
 				break;
@@ -5641,7 +5641,7 @@ static int write_eeprom(struct s2io_nic *sp, int off, u64 data, int cnt)
 		SPECIAL_REG_WRITE(val64, &bar0->i2c_control, LF);
 
 		while (exit_cnt < 5) {
-			val64 = readq(&bar0->i2c_control);
+			val64 = pete_readq("drivers/net/ethernet/neterion/s2io.c:5644", &bar0->i2c_control);
 			if (I2C_CONTROL_CNTL_END(val64)) {
 				if (!(val64 & I2C_CONTROL_NACK))
 					ret = 0;
@@ -5654,7 +5654,7 @@ static int write_eeprom(struct s2io_nic *sp, int off, u64 data, int cnt)
 
 	if (sp->device_type == XFRAME_II_DEVICE) {
 		int write_cnt = (cnt == 8) ? 0 : cnt;
-		writeq(SPI_DATA_WRITE(data, (cnt << 3)), &bar0->spi_data);
+		pete_writeq("drivers/net/ethernet/neterion/s2io.c:5657", SPI_DATA_WRITE(data, (cnt << 3)), &bar0->spi_data);
 
 		val64 = SPI_CONTROL_KEY(0x9) | SPI_CONTROL_SEL1 |
 			SPI_CONTROL_BYTECNT(write_cnt) |
@@ -5663,7 +5663,7 @@ static int write_eeprom(struct s2io_nic *sp, int off, u64 data, int cnt)
 		val64 |= SPI_CONTROL_REQ;
 		SPECIAL_REG_WRITE(val64, &bar0->spi_control, LF);
 		while (exit_cnt < 5) {
-			val64 = readq(&bar0->spi_control);
+			val64 = pete_readq("drivers/net/ethernet/neterion/s2io.c:5666", &bar0->spi_control);
 			if (val64 & SPI_CONTROL_NACK) {
 				ret = 1;
 				break;
@@ -5853,19 +5853,19 @@ static int s2io_register_test(struct s2io_nic *sp, uint64_t *data)
 	u64 val64 = 0, exp_val;
 	int fail = 0;
 
-	val64 = readq(&bar0->pif_rd_swapper_fb);
+	val64 = pete_readq("drivers/net/ethernet/neterion/s2io.c:5856", &bar0->pif_rd_swapper_fb);
 	if (val64 != 0x123456789abcdefULL) {
 		fail = 1;
 		DBG_PRINT(INFO_DBG, "Read Test level %d fails\n", 1);
 	}
 
-	val64 = readq(&bar0->rmac_pause_cfg);
+	val64 = pete_readq("drivers/net/ethernet/neterion/s2io.c:5862", &bar0->rmac_pause_cfg);
 	if (val64 != 0xc000ffff00000000ULL) {
 		fail = 1;
 		DBG_PRINT(INFO_DBG, "Read Test level %d fails\n", 2);
 	}
 
-	val64 = readq(&bar0->rx_queue_cfg);
+	val64 = pete_readq("drivers/net/ethernet/neterion/s2io.c:5868", &bar0->rx_queue_cfg);
 	if (sp->device_type == XFRAME_II_DEVICE)
 		exp_val = 0x0404040404040404ULL;
 	else
@@ -5875,23 +5875,23 @@ static int s2io_register_test(struct s2io_nic *sp, uint64_t *data)
 		DBG_PRINT(INFO_DBG, "Read Test level %d fails\n", 3);
 	}
 
-	val64 = readq(&bar0->xgxs_efifo_cfg);
+	val64 = pete_readq("drivers/net/ethernet/neterion/s2io.c:5878", &bar0->xgxs_efifo_cfg);
 	if (val64 != 0x000000001923141EULL) {
 		fail = 1;
 		DBG_PRINT(INFO_DBG, "Read Test level %d fails\n", 4);
 	}
 
 	val64 = 0x5A5A5A5A5A5A5A5AULL;
-	writeq(val64, &bar0->xmsi_data);
-	val64 = readq(&bar0->xmsi_data);
+	pete_writeq("drivers/net/ethernet/neterion/s2io.c:5885", val64, &bar0->xmsi_data);
+	val64 = pete_readq("drivers/net/ethernet/neterion/s2io.c:5886", &bar0->xmsi_data);
 	if (val64 != 0x5A5A5A5A5A5A5A5AULL) {
 		fail = 1;
 		DBG_PRINT(ERR_DBG, "Write Test level %d fails\n", 1);
 	}
 
 	val64 = 0xA5A5A5A5A5A5A5A5ULL;
-	writeq(val64, &bar0->xmsi_data);
-	val64 = readq(&bar0->xmsi_data);
+	pete_writeq("drivers/net/ethernet/neterion/s2io.c:5893", val64, &bar0->xmsi_data);
+	val64 = pete_readq("drivers/net/ethernet/neterion/s2io.c:5894", &bar0->xmsi_data);
 	if (val64 != 0xA5A5A5A5A5A5A5A5ULL) {
 		fail = 1;
 		DBG_PRINT(ERR_DBG, "Write Test level %d fails\n", 2);
@@ -6057,7 +6057,7 @@ static int s2io_link_test(struct s2io_nic *sp, uint64_t *data)
 	struct XENA_dev_config __iomem *bar0 = sp->bar0;
 	u64 val64;
 
-	val64 = readq(&bar0->adapter_status);
+	val64 = pete_readq("drivers/net/ethernet/neterion/s2io.c:6060", &bar0->adapter_status);
 	if (!(LINK_IS_UP(val64)))
 		*data = 1;
 	else
@@ -6085,15 +6085,15 @@ static int s2io_rldram_test(struct s2io_nic *sp, uint64_t *data)
 	u64 val64;
 	int cnt, iteration = 0, test_fail = 0;
 
-	val64 = readq(&bar0->adapter_control);
+	val64 = pete_readq("drivers/net/ethernet/neterion/s2io.c:6088", &bar0->adapter_control);
 	val64 &= ~ADAPTER_ECC_EN;
-	writeq(val64, &bar0->adapter_control);
+	pete_writeq("drivers/net/ethernet/neterion/s2io.c:6090", val64, &bar0->adapter_control);
 
-	val64 = readq(&bar0->mc_rldram_test_ctrl);
+	val64 = pete_readq("drivers/net/ethernet/neterion/s2io.c:6092", &bar0->mc_rldram_test_ctrl);
 	val64 |= MC_RLDRAM_TEST_MODE;
 	SPECIAL_REG_WRITE(val64, &bar0->mc_rldram_test_ctrl, LF);
 
-	val64 = readq(&bar0->mc_rldram_mrs);
+	val64 = pete_readq("drivers/net/ethernet/neterion/s2io.c:6096", &bar0->mc_rldram_mrs);
 	val64 |= MC_RLDRAM_QUEUE_SIZE_ENABLE;
 	SPECIAL_REG_WRITE(val64, &bar0->mc_rldram_mrs, UF);
 
@@ -6104,20 +6104,20 @@ static int s2io_rldram_test(struct s2io_nic *sp, uint64_t *data)
 		val64 = 0x55555555aaaa0000ULL;
 		if (iteration == 1)
 			val64 ^= 0xFFFFFFFFFFFF0000ULL;
-		writeq(val64, &bar0->mc_rldram_test_d0);
+		pete_writeq("drivers/net/ethernet/neterion/s2io.c:6107", val64, &bar0->mc_rldram_test_d0);
 
 		val64 = 0xaaaa5a5555550000ULL;
 		if (iteration == 1)
 			val64 ^= 0xFFFFFFFFFFFF0000ULL;
-		writeq(val64, &bar0->mc_rldram_test_d1);
+		pete_writeq("drivers/net/ethernet/neterion/s2io.c:6112", val64, &bar0->mc_rldram_test_d1);
 
 		val64 = 0x55aaaaaaaa5a0000ULL;
 		if (iteration == 1)
 			val64 ^= 0xFFFFFFFFFFFF0000ULL;
-		writeq(val64, &bar0->mc_rldram_test_d2);
+		pete_writeq("drivers/net/ethernet/neterion/s2io.c:6117", val64, &bar0->mc_rldram_test_d2);
 
 		val64 = (u64) (0x0000003ffffe0100ULL);
-		writeq(val64, &bar0->mc_rldram_test_add);
+		pete_writeq("drivers/net/ethernet/neterion/s2io.c:6120", val64, &bar0->mc_rldram_test_add);
 
 		val64 = MC_RLDRAM_TEST_MODE |
 			MC_RLDRAM_TEST_WRITE |
@@ -6125,7 +6125,7 @@ static int s2io_rldram_test(struct s2io_nic *sp, uint64_t *data)
 		SPECIAL_REG_WRITE(val64, &bar0->mc_rldram_test_ctrl, LF);
 
 		for (cnt = 0; cnt < 5; cnt++) {
-			val64 = readq(&bar0->mc_rldram_test_ctrl);
+			val64 = pete_readq("drivers/net/ethernet/neterion/s2io.c:6128", &bar0->mc_rldram_test_ctrl);
 			if (val64 & MC_RLDRAM_TEST_DONE)
 				break;
 			msleep(200);
@@ -6138,7 +6138,7 @@ static int s2io_rldram_test(struct s2io_nic *sp, uint64_t *data)
 		SPECIAL_REG_WRITE(val64, &bar0->mc_rldram_test_ctrl, LF);
 
 		for (cnt = 0; cnt < 5; cnt++) {
-			val64 = readq(&bar0->mc_rldram_test_ctrl);
+			val64 = pete_readq("drivers/net/ethernet/neterion/s2io.c:6141", &bar0->mc_rldram_test_ctrl);
 			if (val64 & MC_RLDRAM_TEST_DONE)
 				break;
 			msleep(500);
@@ -6147,7 +6147,7 @@ static int s2io_rldram_test(struct s2io_nic *sp, uint64_t *data)
 		if (cnt == 5)
 			break;
 
-		val64 = readq(&bar0->mc_rldram_test_ctrl);
+		val64 = pete_readq("drivers/net/ethernet/neterion/s2io.c:6150", &bar0->mc_rldram_test_ctrl);
 		if (!(val64 & MC_RLDRAM_TEST_PASS))
 			test_fail = 1;
 
@@ -6655,7 +6655,7 @@ static int s2io_change_mtu(struct net_device *dev, int new_mtu)
 		struct XENA_dev_config __iomem *bar0 = sp->bar0;
 		u64 val64 = new_mtu;
 
-		writeq(vBIT(val64, 2, 14), &bar0->rmac_max_pyld_len);
+		pete_writeq("drivers/net/ethernet/neterion/s2io.c:6658", vBIT(val64, 2, 14), &bar0->rmac_max_pyld_len);
 	}
 
 	return ret;
@@ -6695,22 +6695,22 @@ static void s2io_set_link(struct work_struct *work)
 		msleep(100);
 	}
 
-	val64 = readq(&bar0->adapter_status);
+	val64 = pete_readq("drivers/net/ethernet/neterion/s2io.c:6698", &bar0->adapter_status);
 	if (LINK_IS_UP(val64)) {
-		if (!(readq(&bar0->adapter_control) & ADAPTER_CNTL_EN)) {
+		if (!(pete_readq("drivers/net/ethernet/neterion/s2io.c:6700", &bar0->adapter_control) & ADAPTER_CNTL_EN)) {
 			if (verify_xena_quiescence(nic)) {
-				val64 = readq(&bar0->adapter_control);
+				val64 = pete_readq("drivers/net/ethernet/neterion/s2io.c:6702", &bar0->adapter_control);
 				val64 |= ADAPTER_CNTL_EN;
-				writeq(val64, &bar0->adapter_control);
+				pete_writeq("drivers/net/ethernet/neterion/s2io.c:6704", val64, &bar0->adapter_control);
 				if (CARDS_WITH_FAULTY_LINK_INDICATORS(
 					    nic->device_type, subid)) {
-					val64 = readq(&bar0->gpio_control);
+					val64 = pete_readq("drivers/net/ethernet/neterion/s2io.c:6707", &bar0->gpio_control);
 					val64 |= GPIO_CTRL_GPIO_0;
-					writeq(val64, &bar0->gpio_control);
-					val64 = readq(&bar0->gpio_control);
+					pete_writeq("drivers/net/ethernet/neterion/s2io.c:6709", val64, &bar0->gpio_control);
+					val64 = pete_readq("drivers/net/ethernet/neterion/s2io.c:6710", &bar0->gpio_control);
 				} else {
 					val64 |= ADAPTER_LED_ON;
-					writeq(val64, &bar0->adapter_control);
+					pete_writeq("drivers/net/ethernet/neterion/s2io.c:6713", val64, &bar0->adapter_control);
 				}
 				nic->device_enabled_once = true;
 			} else {
@@ -6720,22 +6720,22 @@ static void s2io_set_link(struct work_struct *work)
 				s2io_stop_all_tx_queue(nic);
 			}
 		}
-		val64 = readq(&bar0->adapter_control);
+		val64 = pete_readq("drivers/net/ethernet/neterion/s2io.c:6723", &bar0->adapter_control);
 		val64 |= ADAPTER_LED_ON;
-		writeq(val64, &bar0->adapter_control);
+		pete_writeq("drivers/net/ethernet/neterion/s2io.c:6725", val64, &bar0->adapter_control);
 		s2io_link(nic, LINK_UP);
 	} else {
 		if (CARDS_WITH_FAULTY_LINK_INDICATORS(nic->device_type,
 						      subid)) {
-			val64 = readq(&bar0->gpio_control);
+			val64 = pete_readq("drivers/net/ethernet/neterion/s2io.c:6730", &bar0->gpio_control);
 			val64 &= ~GPIO_CTRL_GPIO_0;
-			writeq(val64, &bar0->gpio_control);
-			val64 = readq(&bar0->gpio_control);
+			pete_writeq("drivers/net/ethernet/neterion/s2io.c:6732", val64, &bar0->gpio_control);
+			val64 = pete_readq("drivers/net/ethernet/neterion/s2io.c:6733", &bar0->gpio_control);
 		}
 		/* turn off LED */
-		val64 = readq(&bar0->adapter_control);
+		val64 = pete_readq("drivers/net/ethernet/neterion/s2io.c:6736", &bar0->adapter_control);
 		val64 = val64 & (~ADAPTER_LED_ON);
-		writeq(val64, &bar0->adapter_control);
+		pete_writeq("drivers/net/ethernet/neterion/s2io.c:6738", val64, &bar0->adapter_control);
 		s2io_link(nic, LINK_DOWN);
 	}
 	clear_bit(__S2IO_STATE_LINK_TASK, &(nic->state));
@@ -7059,7 +7059,7 @@ static void do_s2io_card_down(struct s2io_nic *sp, int do_io)
 		 */
 		rxd_owner_bit_reset(sp);
 
-		val64 = readq(&bar0->adapter_status);
+		val64 = pete_readq("drivers/net/ethernet/neterion/s2io.c:7062", &bar0->adapter_status);
 		if (verify_xena_quiescence(sp)) {
 			if (verify_pcc_quiescent(sp, sp->device_enabled_once))
 				break;
@@ -7616,13 +7616,13 @@ static int rts_ds_steer(struct s2io_nic *nic, u8 ds_codepoint, u8 ring)
 		return FAILURE;
 
 	val64 = RTS_DS_MEM_DATA(ring);
-	writeq(val64, &bar0->rts_ds_mem_data);
+	pete_writeq("drivers/net/ethernet/neterion/s2io.c:7619", val64, &bar0->rts_ds_mem_data);
 
 	val64 = RTS_DS_MEM_CTRL_WE |
 		RTS_DS_MEM_CTRL_STROBE_NEW_CMD |
 		RTS_DS_MEM_CTRL_OFFSET(ds_codepoint);
 
-	writeq(val64, &bar0->rts_ds_mem_ctrl);
+	pete_writeq("drivers/net/ethernet/neterion/s2io.c:7625", val64, &bar0->rts_ds_mem_ctrl);
 
 	return wait_for_cmd_complete(&bar0->rts_ds_mem_ctrl,
 				     RTS_DS_MEM_CTRL_STROBE_CMD_BEING_EXECUTED,
@@ -7948,11 +7948,11 @@ s2io_init_nic(struct pci_dev *pdev, const struct pci_device_id *pre)
 	bar0 = sp->bar0;
 	val64 = RMAC_ADDR_CMD_MEM_RD | RMAC_ADDR_CMD_MEM_STROBE_NEW_CMD |
 		RMAC_ADDR_CMD_MEM_OFFSET(0 + S2IO_MAC_ADDR_START_OFFSET);
-	writeq(val64, &bar0->rmac_addr_cmd_mem);
+	pete_writeq("drivers/net/ethernet/neterion/s2io.c:7951", val64, &bar0->rmac_addr_cmd_mem);
 	wait_for_cmd_complete(&bar0->rmac_addr_cmd_mem,
 			      RMAC_ADDR_CMD_MEM_STROBE_CMD_EXECUTING,
 			      S2IO_BIT_RESET, true);
-	tmp64 = readq(&bar0->rmac_addr_data0_mem);
+	tmp64 = pete_readq("drivers/net/ethernet/neterion/s2io.c:7955", &bar0->rmac_addr_data0_mem);
 	mac_down = (u32)tmp64;
 	mac_up = (u32) (tmp64 >> 32);
 
@@ -8014,12 +8014,12 @@ s2io_init_nic(struct pci_dev *pdev, const struct pci_device_id *pre)
 	 */
 	subid = sp->pdev->subsystem_device;
 	if ((subid & 0xFF) >= 0x07) {
-		val64 = readq(&bar0->gpio_control);
+		val64 = pete_readq("drivers/net/ethernet/neterion/s2io.c:8017", &bar0->gpio_control);
 		val64 |= 0x0000800000000000ULL;
-		writeq(val64, &bar0->gpio_control);
+		pete_writeq("drivers/net/ethernet/neterion/s2io.c:8019", val64, &bar0->gpio_control);
 		val64 = 0x0411040400000000ULL;
-		writeq(val64, (void __iomem *)bar0 + 0x2700);
-		val64 = readq(&bar0->gpio_control);
+		pete_writeq("drivers/net/ethernet/neterion/s2io.c:8021", val64, (void __iomem *)bar0 + 0x2700);
+		val64 = pete_readq("drivers/net/ethernet/neterion/s2io.c:8022", &bar0->gpio_control);
 	}
 
 	sp->rx_csum = 1;	/* Rx chksum verify enabled by default */

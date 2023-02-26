@@ -693,7 +693,7 @@ static void txx9_iocled_set(struct gpio_chip *chip, unsigned int offset,
 		data->cur_val |= 1 << offset;
 	else
 		data->cur_val &= ~(1 << offset);
-	writeb(data->cur_val, data->mmioaddr);
+	pete_writeb("arch/mips/txx9/generic/setup.c:696", data->cur_val, data->mmioaddr);
 	mmiowb();
 	spin_unlock_irqrestore(&txx9_iocled_lock, flags);
 }

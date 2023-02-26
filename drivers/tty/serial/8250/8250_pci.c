@@ -406,12 +406,12 @@ static int sbs_init(struct pci_dev *dev)
 	if (p == NULL)
 		return -ENOMEM;
 	/* Set bit-4 Control Register (UART RESET) in to reset the uarts */
-	writeb(0x10, p + OCT_REG_CR_OFF);
+	pete_writeb("drivers/tty/serial/8250/8250_pci.c:409", 0x10, p + OCT_REG_CR_OFF);
 	udelay(50);
-	writeb(0x0, p + OCT_REG_CR_OFF);
+	pete_writeb("drivers/tty/serial/8250/8250_pci.c:411", 0x0, p + OCT_REG_CR_OFF);
 
 	/* Set bit-2 (INTENABLE) of Control Register */
-	writeb(0x4, p + OCT_REG_CR_OFF);
+	pete_writeb("drivers/tty/serial/8250/8250_pci.c:414", 0x4, p + OCT_REG_CR_OFF);
 	iounmap(p);
 
 	return 0;
@@ -428,7 +428,7 @@ static void sbs_exit(struct pci_dev *dev)
 	p = pci_ioremap_bar(dev, 0);
 	/* FIXME: What if resource_len < OCT_REG_CR_OFF */
 	if (p != NULL)
-		writeb(0, p + OCT_REG_CR_OFF);
+		pete_writeb("drivers/tty/serial/8250/8250_pci.c:431", 0, p + OCT_REG_CR_OFF);
 	iounmap(p);
 }
 
@@ -483,8 +483,8 @@ static int pci_siig10x_init(struct pci_dev *dev)
 	if (p == NULL)
 		return -ENOMEM;
 
-	writew(readw(p + 0x28) & data, p + 0x28);
-	readw(p + 0x28);
+	pete_writew("drivers/tty/serial/8250/8250_pci.c:486", pete_readw("drivers/tty/serial/8250/8250_pci.c:486", p + 0x28) & data, p + 0x28);
+	pete_readw("drivers/tty/serial/8250/8250_pci.c:487", p + 0x28);
 	iounmap(p);
 	return 0;
 }
@@ -769,7 +769,7 @@ pci_ni8430_setup(struct serial_private *priv,
 		return -ENOMEM;
 
 	/* enable the transceiver */
-	writeb(readb(p + offset + NI8430_PORTCON) | NI8430_PORTCON_TXVR_ENABLE,
+	pete_writeb("drivers/tty/serial/8250/8250_pci.c:772", pete_readb("drivers/tty/serial/8250/8250_pci.c:772", p + offset + NI8430_PORTCON) | NI8430_PORTCON_TXVR_ENABLE,
 	       p + offset + NI8430_PORTCON);
 
 	iounmap(p);
@@ -1802,8 +1802,8 @@ static void f815xxa_mem_serial_out(struct uart_port *p, int offset, int value)
 	unsigned long flags;
 
 	spin_lock_irqsave(&data->lock, flags);
-	writeb(value, p->membase + offset);
-	readb(p->membase + UART_SCR); /* Dummy read for flush pcie tx queue */
+	pete_writeb("drivers/tty/serial/8250/8250_pci.c:1805", value, p->membase + offset);
+	pete_readb("drivers/tty/serial/8250/8250_pci.c:1806", p->membase + UART_SCR); /* Dummy read for flush pcie tx queue */
 	spin_unlock_irqrestore(&data->lock, flags);
 }
 

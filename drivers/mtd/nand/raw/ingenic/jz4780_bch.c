@@ -100,7 +100,7 @@ static void jz4780_bch_write_data(struct ingenic_ecc *bch, const void *buf,
 
 	src8 = (const u8 *)src32;
 	while (size8--)
-		writeb(*src8++, bch->base + BCH_BHDR);
+		pete_writeb("drivers/mtd/nand/raw/ingenic/jz4780_bch.c:103", *src8++, bch->base + BCH_BHDR);
 }
 
 static void jz4780_bch_read_parity(struct ingenic_ecc *bch, void *buf,

@@ -277,7 +277,7 @@ static unsigned int rp2_uart_tx_empty(struct uart_port *port)
 	 * enabled.
 	 */
 	spin_lock_irqsave(&up->port.lock, flags);
-	tx_fifo_bytes = readw(up->base + RP2_TX_FIFO_COUNT);
+	tx_fifo_bytes = pete_readw("drivers/tty/serial/rp2.c:280", up->base + RP2_TX_FIFO_COUNT);
 	spin_unlock_irqrestore(&up->port.lock, flags);
 
 	return tx_fifo_bytes ? 0 : TIOCSER_TEMT;
@@ -340,7 +340,7 @@ static void __rp2_uart_set_termios(struct rp2_uart_port *up,
 				   unsigned int baud_div)
 {
 	/* baud rate divisor (calculated elsewhere).  0 = divide-by-1 */
-	writew(baud_div - 1, up->base + RP2_BAUD);
+	pete_writew("drivers/tty/serial/rp2.c:343", baud_div - 1, up->base + RP2_BAUD);
 
 	/* data bits and stop bits */
 	rp2_rmw(up, RP2_UART_CTL,
@@ -364,9 +364,9 @@ static void __rp2_uart_set_termios(struct rp2_uart_port *up,
 				    RP2_TXRX_CTL_CTSFLOW_m) : 0));
 
 	/* XON/XOFF software flow control */
-	writeb((ifl & IXON) ? RP2_TX_SWFLOW_ena : RP2_TX_SWFLOW_dis,
+	pete_writeb("drivers/tty/serial/rp2.c:367", (ifl & IXON) ? RP2_TX_SWFLOW_ena : RP2_TX_SWFLOW_dis,
 	       up->ucode + RP2_TX_SWFLOW);
-	writeb((ifl & IXOFF) ? RP2_RX_SWFLOW_ena : RP2_RX_SWFLOW_dis,
+	pete_writeb("drivers/tty/serial/rp2.c:369", (ifl & IXOFF) ? RP2_RX_SWFLOW_ena : RP2_RX_SWFLOW_dis,
 	       up->ucode + RP2_RX_SWFLOW);
 }
 
@@ -397,11 +397,11 @@ static void rp2_uart_set_termios(struct uart_port *port,
 
 static void rp2_rx_chars(struct rp2_uart_port *up)
 {
-	u16 bytes = readw(up->base + RP2_RX_FIFO_COUNT);
+	u16 bytes = pete_readw("drivers/tty/serial/rp2.c:400", up->base + RP2_RX_FIFO_COUNT);
 	struct tty_port *port = &up->port.state->port;
 
 	for (; bytes != 0; bytes--) {
-		u32 byte = readw(up->base + RP2_DATA_BYTE) | RP2_DUMMY_READ;
+		u32 byte = pete_readw("drivers/tty/serial/rp2.c:404", up->base + RP2_DATA_BYTE) | RP2_DUMMY_READ;
 		char ch = byte & 0xff;
 
 		if (likely(!(byte & RP2_DATA_BYTE_EXCEPTION_MASK))) {
@@ -428,7 +428,7 @@ static void rp2_rx_chars(struct rp2_uart_port *up)
 
 static void rp2_tx_chars(struct rp2_uart_port *up)
 {
-	u16 max_tx = FIFO_SIZE - readw(up->base + RP2_TX_FIFO_COUNT);
+	u16 max_tx = FIFO_SIZE - pete_readw("drivers/tty/serial/rp2.c:431", up->base + RP2_TX_FIFO_COUNT);
 	struct circ_buf *xmit = &up->port.state->xmit;
 
 	if (uart_tx_stopped(&up->port)) {
@@ -438,7 +438,7 @@ static void rp2_tx_chars(struct rp2_uart_port *up)
 
 	for (; max_tx != 0; max_tx--) {
 		if (up->port.x_char) {
-			writeb(up->port.x_char, up->base + RP2_DATA_BYTE);
+			pete_writeb("drivers/tty/serial/rp2.c:441", up->port.x_char, up->base + RP2_DATA_BYTE);
 			up->port.x_char = 0;
 			up->port.icount.tx++;
 			continue;
@@ -447,7 +447,7 @@ static void rp2_tx_chars(struct rp2_uart_port *up)
 			rp2_uart_stop_tx(&up->port);
 			break;
 		}
-		writeb(xmit->buf[xmit->tail], up->base + RP2_DATA_BYTE);
+		pete_writeb("drivers/tty/serial/rp2.c:450", xmit->buf[xmit->tail], up->base + RP2_DATA_BYTE);
 		xmit->tail = (xmit->tail + 1) & (UART_XMIT_SIZE - 1);
 		up->port.icount.tx++;
 	}
@@ -597,15 +597,15 @@ static void rp2_reset_asic(struct rp2_card *card, unsigned int asic_id)
 	void __iomem *base = card->bar1 + RP2_ASIC_OFFSET(asic_id);
 	u32 clk_cfg;
 
-	writew(1, base + RP2_GLOBAL_CMD);
-	readw(base + RP2_GLOBAL_CMD);
+	pete_writew("drivers/tty/serial/rp2.c:600", 1, base + RP2_GLOBAL_CMD);
+	pete_readw("drivers/tty/serial/rp2.c:601", base + RP2_GLOBAL_CMD);
 	msleep(100);
 	pete_writel("drivers/tty/serial/rp2.c:603", 0, base + RP2_CLK_PRESCALER);
 
 	/* TDM clock configuration */
-	clk_cfg = readw(base + RP2_ASIC_CFG);
+	clk_cfg = pete_readw("drivers/tty/serial/rp2.c:606", base + RP2_ASIC_CFG);
 	clk_cfg = (clk_cfg & ~BIT(8)) | BIT(9);
-	writew(clk_cfg, base + RP2_ASIC_CFG);
+	pete_writew("drivers/tty/serial/rp2.c:608", clk_cfg, base + RP2_ASIC_CFG);
 
 	/* IRQ routing */
 	pete_writel("drivers/tty/serial/rp2.c:611", ALL_PORTS_MASK, base + RP2_CH_IRQ_MASK);
@@ -640,12 +640,12 @@ static void rp2_init_port(struct rp2_uart_port *up, const struct firmware *fw)
 	rp2_flush_fifos(up);
 
 	for (i = 0; i < min_t(int, fw->size, RP2_UCODE_BYTES); i++)
-		writeb(fw->data[i], up->ucode + i);
+		pete_writeb("drivers/tty/serial/rp2.c:643", fw->data[i], up->ucode + i);
 
 	__rp2_uart_set_termios(up, CS8 | CREAD | CLOCAL, 0, DEFAULT_BAUD_DIV);
 	rp2_uart_set_mctrl(&up->port, 0);
 
-	writeb(RP2_RX_FIFO_ena, up->ucode + RP2_RX_FIFO);
+	pete_writeb("drivers/tty/serial/rp2.c:648", RP2_RX_FIFO_ena, up->ucode + RP2_RX_FIFO);
 	rp2_rmw(up, RP2_UART_CTL, RP2_UART_CTL_MODE_m,
 		RP2_UART_CTL_XMIT_EN_m | RP2_UART_CTL_MODE_rs232);
 	rp2_rmw_set(up, RP2_TXRX_CTL,

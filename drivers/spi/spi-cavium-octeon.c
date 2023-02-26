@@ -75,7 +75,7 @@ static int octeon_spi_remove(struct platform_device *pdev)
 	struct octeon_spi *p = spi_master_get_devdata(master);
 
 	/* Clear the CSENA* and put everything in a known state. */
-	writeq(0, p->register_base + OCTEON_SPI_CFG(p));
+	pete_writeq("drivers/spi/spi-cavium-octeon.c:78", 0, p->register_base + OCTEON_SPI_CFG(p));
 
 	return 0;
 }

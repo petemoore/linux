@@ -24,7 +24,7 @@ static void qtnf_shm_handle_new_data(struct qtnf_shm_ipc *ipc)
 
 	shm_reg_hdr = &ipc->shm_region->headroom.hdr;
 
-	size = readw(&shm_reg_hdr->data_len);
+	size = pete_readw("drivers/net/wireless/quantenna/qtnfmac/shm_ipc.c:27", &shm_reg_hdr->data_len);
 
 	if (unlikely(size == 0 || size > QTN_IPC_MAX_DATA_SZ)) {
 		pr_err("wrong rx packet size: %zu\n", size);
@@ -132,7 +132,7 @@ int qtnf_shm_ipc_send(struct qtnf_shm_ipc *ipc, const u8 *buf, size_t size)
 
 	ipc->tx_packet_count++;
 
-	writew(size, &shm_reg_hdr->data_len);
+	pete_writew("drivers/net/wireless/quantenna/qtnfmac/shm_ipc.c:135", size, &shm_reg_hdr->data_len);
 	memcpy_toio(ipc->shm_region->data, buf, size);
 
 	/* sync previous writes before proceeding */

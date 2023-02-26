@@ -674,7 +674,7 @@ static void qm_db_v1(struct hisi_qm *qm, u16 qn, u8 cmd, u16 index, u8 priority)
 		   ((u64)index << QM_DB_INDEX_SHIFT_V1)  |
 		   ((u64)priority << QM_DB_PRIORITY_SHIFT_V1);
 
-	writeq(doorbell, qm->io_base + QM_DOORBELL_BASE_V1);
+	pete_writeq("drivers/crypto/hisilicon/qm.c:677", doorbell, qm->io_base + QM_DOORBELL_BASE_V1);
 }
 
 static void qm_db_v2(struct hisi_qm *qm, u16 qn, u8 cmd, u16 index, u8 priority)
@@ -694,7 +694,7 @@ static void qm_db_v2(struct hisi_qm *qm, u16 qn, u8 cmd, u16 index, u8 priority)
 		   ((u64)index << QM_DB_INDEX_SHIFT_V2)	 |
 		   ((u64)priority << QM_DB_PRIORITY_SHIFT_V2);
 
-	writeq(doorbell, io_base);
+	pete_writeq("drivers/crypto/hisilicon/qm.c:697", doorbell, io_base);
 }
 
 static void qm_db(struct hisi_qm *qm, u16 qn, u8 cmd, u16 index, u8 priority)
@@ -2121,7 +2121,7 @@ static void qm_clear_cmd_interrupt(struct hisi_qm *qm, u64 vf_mask)
 	u32 val;
 
 	if (qm->fun_type == QM_HW_PF)
-		writeq(vf_mask, qm->io_base + QM_IFC_INT_SOURCE_P);
+		pete_writeq("drivers/crypto/hisilicon/qm.c:2124", vf_mask, qm->io_base + QM_IFC_INT_SOURCE_P);
 
 	val = pete_readl("drivers/crypto/hisilicon/qm.c:2126", qm->io_base + QM_IFC_INT_SOURCE_V);
 	val |= QM_IFC_INT_SOURCE_MASK;
@@ -2171,7 +2171,7 @@ static int qm_wait_vf_prepare_finish(struct hisi_qm *qm)
 		return 0;
 
 	while (true) {
-		val = readq(qm->io_base + QM_IFC_INT_SOURCE_P);
+		val = pete_readq("drivers/crypto/hisilicon/qm.c:2174", qm->io_base + QM_IFC_INT_SOURCE_P);
 		/* All VFs send command to PF, break */
 		if ((val & GENMASK(vfs_num, 1)) == GENMASK(vfs_num, 1))
 			break;
@@ -2240,7 +2240,7 @@ static int qm_ping_single_vf(struct hisi_qm *qm, u64 cmd, u32 fun_num)
 	qm_trigger_vf_interrupt(qm, fun_num);
 	while (true) {
 		msleep(QM_WAIT_DST_ACK);
-		val = readq(qm->io_base + QM_IFC_READY_STATUS);
+		val = pete_readq("drivers/crypto/hisilicon/qm.c:2243", qm->io_base + QM_IFC_READY_STATUS);
 		/* if VF respond, PF notifies VF successfully. */
 		if (!(val & BIT(fun_num)))
 			goto err_unlock;
@@ -2280,7 +2280,7 @@ static int qm_ping_all_vfs(struct hisi_qm *qm, u64 cmd)
 	qm_trigger_vf_interrupt(qm, QM_IFC_SEND_ALL_VFS);
 	while (true) {
 		msleep(QM_WAIT_DST_ACK);
-		val = readq(qm->io_base + QM_IFC_READY_STATUS);
+		val = pete_readq("drivers/crypto/hisilicon/qm.c:2283", qm->io_base + QM_IFC_READY_STATUS);
 		/* If all VFs acked, PF notifies VFs successfully. */
 		if (!(val & GENMASK(vfs_num, 1))) {
 			mutex_unlock(&qm->mailbox_lock);
@@ -5457,7 +5457,7 @@ static void qm_cmd_process(struct work_struct *cmd_process)
 	u32 i;
 
 	if (qm->fun_type == QM_HW_PF) {
-		val = readq(qm->io_base + QM_IFC_INT_SOURCE_P);
+		val = pete_readq("drivers/crypto/hisilicon/qm.c:5460", qm->io_base + QM_IFC_INT_SOURCE_P);
 		if (!val)
 			return;
 

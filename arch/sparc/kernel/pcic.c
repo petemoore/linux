@@ -422,7 +422,7 @@ static int __init pcic_init(void)
 	/*
 	 *      Switch off IOTLB translation.
 	 */
-	writeb(PCI_DVMA_CONTROL_IOTLB_DISABLE, 
+	pete_writeb("arch/sparc/kernel/pcic.c:425", PCI_DVMA_CONTROL_IOTLB_DISABLE, 
 	       pcic->pcic_regs+PCI_DVMA_CONTROL);
 
 	/*
@@ -559,10 +559,10 @@ pcic_fill_irq(struct linux_pcic *pcic, struct pci_dev *dev, int node)
 
 	i = p->pin;
 	if (i >= 0 && i < 4) {
-		ivec = readw(pcic->pcic_regs+PCI_INT_SELECT_LO);
+		ivec = pete_readw("arch/sparc/kernel/pcic.c:562", pcic->pcic_regs+PCI_INT_SELECT_LO);
 		real_irq = ivec >> (i << 2) & 0xF;
 	} else if (i >= 4 && i < 8) {
-		ivec = readw(pcic->pcic_regs+PCI_INT_SELECT_HI);
+		ivec = pete_readw("arch/sparc/kernel/pcic.c:565", pcic->pcic_regs+PCI_INT_SELECT_HI);
 		real_irq = ivec >> ((i-4) << 2) & 0xF;
 	} else {					/* Corrupted map */
 		pci_info(dev, "PCIC: BAD PIN %d\n", i); for (;;) {}
@@ -582,15 +582,15 @@ pcic_fill_irq(struct linux_pcic *pcic, struct pci_dev *dev, int node)
 
 		i = p->pin;
 		if (i >= 4) {
-			ivec = readw(pcic->pcic_regs+PCI_INT_SELECT_HI);
+			ivec = pete_readw("arch/sparc/kernel/pcic.c:585", pcic->pcic_regs+PCI_INT_SELECT_HI);
 			ivec &= ~(0xF << ((i - 4) << 2));
 			ivec |= p->irq << ((i - 4) << 2);
-			writew(ivec, pcic->pcic_regs+PCI_INT_SELECT_HI);
+			pete_writew("arch/sparc/kernel/pcic.c:588", ivec, pcic->pcic_regs+PCI_INT_SELECT_HI);
 		} else {
-			ivec = readw(pcic->pcic_regs+PCI_INT_SELECT_LO);
+			ivec = pete_readw("arch/sparc/kernel/pcic.c:590", pcic->pcic_regs+PCI_INT_SELECT_LO);
 			ivec &= ~(0xF << (i << 2));
 			ivec |= p->irq << (i << 2);
-			writew(ivec, pcic->pcic_regs+PCI_INT_SELECT_LO);
+			pete_writew("arch/sparc/kernel/pcic.c:593", ivec, pcic->pcic_regs+PCI_INT_SELECT_LO);
 		}
 	}
 	dev->irq = pcic_build_device_irq(NULL, real_irq);
@@ -720,7 +720,7 @@ void __init pci_time_init(void)
 
 	writel (TICK_TIMER_LIMIT, pcic->pcic_regs+PCI_SYS_LIMIT);
 	/* PROM should set appropriate irq */
-	v = readb(pcic->pcic_regs+PCI_COUNTER_IRQ);
+	v = pete_readb("arch/sparc/kernel/pcic.c:723", pcic->pcic_regs+PCI_COUNTER_IRQ);
 	timer_irq = PCI_COUNTER_IRQ_SYS(v);
 	writel (PCI_COUNTER_IRQ_SET(timer_irq, 0),
 		pcic->pcic_regs+PCI_COUNTER_IRQ);
@@ -737,7 +737,7 @@ void __init pci_time_init(void)
 
 #if 0
 static void watchdog_reset() {
-	writeb(0, pcic->pcic_regs+PCI_SYS_STATUS);
+	pete_writeb("arch/sparc/kernel/pcic.c:740", 0, pcic->pcic_regs+PCI_SYS_STATUS);
 }
 #endif
 

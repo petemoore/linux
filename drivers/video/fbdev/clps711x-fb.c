@@ -298,7 +298,7 @@ static int clps711x_fb_probe(struct platform_device *pdev)
 		goto out_fb_release;
 
 	/* Force disable LCD on any mismatch */
-	if (info->fix.smem_start != (readb(cfb->base + CLPS711X_FBADDR) << 28))
+	if (info->fix.smem_start != (pete_readb("drivers/video/fbdev/clps711x-fb.c:301", cfb->base + CLPS711X_FBADDR) << 28))
 		regmap_update_bits(cfb->syscon, SYSCON_OFFSET,
 				   SYSCON1_LCDEN, 0);
 
@@ -308,7 +308,7 @@ static int clps711x_fb_probe(struct platform_device *pdev)
 
 	if (!(val & SYSCON1_LCDEN)) {
 		/* Setup start FB address */
-		writeb(info->fix.smem_start >> 28, cfb->base + CLPS711X_FBADDR);
+		pete_writeb("drivers/video/fbdev/clps711x-fb.c:311", info->fix.smem_start >> 28, cfb->base + CLPS711X_FBADDR);
 		/* Clean FB memory */
 		memset_io(info->screen_base, 0, cfb->buffsize);
 	}

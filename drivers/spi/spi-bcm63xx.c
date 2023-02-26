@@ -154,7 +154,7 @@ struct bcm63xx_spi {
 static inline u8 bcm_spi_readb(struct bcm63xx_spi *bs,
 			       unsigned int offset)
 {
-	return readb(bs->regs + bs->reg_offsets[offset]);
+	return pete_readb("drivers/spi/spi-bcm63xx.c:157", bs->regs + bs->reg_offsets[offset]);
 }
 
 static inline u16 bcm_spi_readw(struct bcm63xx_spi *bs,
@@ -163,14 +163,14 @@ static inline u16 bcm_spi_readw(struct bcm63xx_spi *bs,
 #ifdef CONFIG_CPU_BIG_ENDIAN
 	return ioread16be(bs->regs + bs->reg_offsets[offset]);
 #else
-	return readw(bs->regs + bs->reg_offsets[offset]);
+	return pete_readw("drivers/spi/spi-bcm63xx.c:166", bs->regs + bs->reg_offsets[offset]);
 #endif
 }
 
 static inline void bcm_spi_writeb(struct bcm63xx_spi *bs,
 				  u8 value, unsigned int offset)
 {
-	writeb(value, bs->regs + bs->reg_offsets[offset]);
+	pete_writeb("drivers/spi/spi-bcm63xx.c:173", value, bs->regs + bs->reg_offsets[offset]);
 }
 
 static inline void bcm_spi_writew(struct bcm63xx_spi *bs,
@@ -179,7 +179,7 @@ static inline void bcm_spi_writew(struct bcm63xx_spi *bs,
 #ifdef CONFIG_CPU_BIG_ENDIAN
 	iowrite16be(value, bs->regs + bs->reg_offsets[offset]);
 #else
-	writew(value, bs->regs + bs->reg_offsets[offset]);
+	pete_writew("drivers/spi/spi-bcm63xx.c:182", value, bs->regs + bs->reg_offsets[offset]);
 #endif
 }
 

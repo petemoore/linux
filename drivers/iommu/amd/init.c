@@ -274,7 +274,7 @@ static void init_translation_status(struct amd_iommu *iommu)
 {
 	u64 ctrl;
 
-	ctrl = readq(iommu->mmio_base + MMIO_CONTROL_OFFSET);
+	ctrl = pete_readq("drivers/iommu/amd/init.c:277", iommu->mmio_base + MMIO_CONTROL_OFFSET);
 	if (ctrl & (1<<CONTROL_IOMMU_EN))
 		iommu->flags |= AMD_IOMMU_FLAG_TRANS_PRE_ENABLED;
 }
@@ -431,28 +431,28 @@ static void iommu_feature_enable(struct amd_iommu *iommu, u8 bit)
 {
 	u64 ctrl;
 
-	ctrl = readq(iommu->mmio_base +  MMIO_CONTROL_OFFSET);
+	ctrl = pete_readq("drivers/iommu/amd/init.c:434", iommu->mmio_base +  MMIO_CONTROL_OFFSET);
 	ctrl |= (1ULL << bit);
-	writeq(ctrl, iommu->mmio_base +  MMIO_CONTROL_OFFSET);
+	pete_writeq("drivers/iommu/amd/init.c:436", ctrl, iommu->mmio_base +  MMIO_CONTROL_OFFSET);
 }
 
 static void iommu_feature_disable(struct amd_iommu *iommu, u8 bit)
 {
 	u64 ctrl;
 
-	ctrl = readq(iommu->mmio_base + MMIO_CONTROL_OFFSET);
+	ctrl = pete_readq("drivers/iommu/amd/init.c:443", iommu->mmio_base + MMIO_CONTROL_OFFSET);
 	ctrl &= ~(1ULL << bit);
-	writeq(ctrl, iommu->mmio_base + MMIO_CONTROL_OFFSET);
+	pete_writeq("drivers/iommu/amd/init.c:445", ctrl, iommu->mmio_base + MMIO_CONTROL_OFFSET);
 }
 
 static void iommu_set_inv_tlb_timeout(struct amd_iommu *iommu, int timeout)
 {
 	u64 ctrl;
 
-	ctrl = readq(iommu->mmio_base + MMIO_CONTROL_OFFSET);
+	ctrl = pete_readq("drivers/iommu/amd/init.c:452", iommu->mmio_base + MMIO_CONTROL_OFFSET);
 	ctrl &= ~CTRL_INV_TO_MASK;
 	ctrl |= (timeout << CONTROL_INV_TIMEOUT) & CTRL_INV_TO_MASK;
-	writeq(ctrl, iommu->mmio_base + MMIO_CONTROL_OFFSET);
+	pete_writeq("drivers/iommu/amd/init.c:455", ctrl, iommu->mmio_base + MMIO_CONTROL_OFFSET);
 }
 
 /* Function to enable the hardware */
@@ -1788,7 +1788,7 @@ static void __init late_iommu_features_init(struct amd_iommu *iommu)
 		return;
 
 	/* read extended feature bits */
-	features = readq(iommu->mmio_base + MMIO_EXT_FEATURES);
+	features = pete_readq("drivers/iommu/amd/init.c:1791", iommu->mmio_base + MMIO_EXT_FEATURES);
 
 	if (!iommu->features) {
 		iommu->features = features;
@@ -2086,18 +2086,18 @@ static void intcapxt_unmask_irq(struct irq_data *irqd)
 	 * Current IOMMU implementation uses the same IRQ for all
 	 * 3 IOMMU interrupts.
 	 */
-	writeq(xt.capxt, iommu->mmio_base + MMIO_INTCAPXT_EVT_OFFSET);
-	writeq(xt.capxt, iommu->mmio_base + MMIO_INTCAPXT_PPR_OFFSET);
-	writeq(xt.capxt, iommu->mmio_base + MMIO_INTCAPXT_GALOG_OFFSET);
+	pete_writeq("drivers/iommu/amd/init.c:2089", xt.capxt, iommu->mmio_base + MMIO_INTCAPXT_EVT_OFFSET);
+	pete_writeq("drivers/iommu/amd/init.c:2090", xt.capxt, iommu->mmio_base + MMIO_INTCAPXT_PPR_OFFSET);
+	pete_writeq("drivers/iommu/amd/init.c:2091", xt.capxt, iommu->mmio_base + MMIO_INTCAPXT_GALOG_OFFSET);
 }
 
 static void intcapxt_mask_irq(struct irq_data *irqd)
 {
 	struct amd_iommu *iommu = irqd->chip_data;
 
-	writeq(0, iommu->mmio_base + MMIO_INTCAPXT_EVT_OFFSET);
-	writeq(0, iommu->mmio_base + MMIO_INTCAPXT_PPR_OFFSET);
-	writeq(0, iommu->mmio_base + MMIO_INTCAPXT_GALOG_OFFSET);
+	pete_writeq("drivers/iommu/amd/init.c:2098", 0, iommu->mmio_base + MMIO_INTCAPXT_EVT_OFFSET);
+	pete_writeq("drivers/iommu/amd/init.c:2099", 0, iommu->mmio_base + MMIO_INTCAPXT_PPR_OFFSET);
+	pete_writeq("drivers/iommu/amd/init.c:2100", 0, iommu->mmio_base + MMIO_INTCAPXT_GALOG_OFFSET);
 }
 
 

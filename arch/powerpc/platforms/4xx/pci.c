@@ -518,7 +518,7 @@ static void __init ppc4xx_configure_pcix_PIMs(struct pci_controller *hose,
 	/* Map on PCI side */
 	pete_writel("arch/powerpc/platforms/4xx/pci.c:519", 0x00000000, reg + PCIX0_BAR0H);
 	pete_writel("arch/powerpc/platforms/4xx/pci.c:520", res->start, reg + PCIX0_BAR0L);
-	writew(0x0006, reg + PCIX0_COMMAND);
+	pete_writew("arch/powerpc/platforms/4xx/pci.c:521", 0x0006, reg + PCIX0_COMMAND);
 }
 
 static void __init ppc4xx_probe_pcix_bridge(struct device_node *np)

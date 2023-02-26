@@ -191,11 +191,11 @@ void __init orion_pcie_setup(void __iomem *base)
 	/*
 	 * Master + slave enable.
 	 */
-	cmd = readw(base + PCIE_CMD_OFF);
+	cmd = pete_readw("arch/arm/plat-orion/pcie.c:194", base + PCIE_CMD_OFF);
 	cmd |= PCI_COMMAND_IO;
 	cmd |= PCI_COMMAND_MEMORY;
 	cmd |= PCI_COMMAND_MASTER;
-	writew(cmd, base + PCIE_CMD_OFF);
+	pete_writew("arch/arm/plat-orion/pcie.c:198", cmd, base + PCIE_CMD_OFF);
 
 	/*
 	 * Enable interrupt lines A-D.
@@ -277,9 +277,9 @@ int orion_pcie_wr_conf(void __iomem *base, struct pci_bus *bus,
 	if (size == 4) {
 		pete_writel("arch/arm/plat-orion/pcie.c:278", val, base + PCIE_CONF_DATA_OFF);
 	} else if (size == 2) {
-		writew(val, base + PCIE_CONF_DATA_OFF + (where & 3));
+		pete_writew("arch/arm/plat-orion/pcie.c:280", val, base + PCIE_CONF_DATA_OFF + (where & 3));
 	} else if (size == 1) {
-		writeb(val, base + PCIE_CONF_DATA_OFF + (where & 3));
+		pete_writeb("arch/arm/plat-orion/pcie.c:282", val, base + PCIE_CONF_DATA_OFF + (where & 3));
 	} else {
 		ret = PCIBIOS_BAD_REGISTER_NUMBER;
 	}

@@ -1075,8 +1075,8 @@ static u8 imgu_css_queue_pos(struct imgu_css *css, int queue, int thread)
 	struct imgu_abi_queues __iomem *q = base + IMGU_REG_SP_DMEM_BASE(sp) +
 						bi->info.sp.host_sp_queue;
 
-	return queue >= 0 ? readb(&q->host2sp_bufq_info[thread][queue].end) :
-			    readb(&q->host2sp_evtq_info.end);
+	return queue >= 0 ? pete_readb("drivers/staging/media/ipu3/ipu3-css.c:1078", &q->host2sp_bufq_info[thread][queue].end) :
+			    pete_readb("drivers/staging/media/ipu3/ipu3-css.c:1079", &q->host2sp_evtq_info.end);
 }
 
 /* Sent data to sp using given buffer queue, or if queue < 0, event queue. */
@@ -1091,13 +1091,13 @@ static int imgu_css_queue_data(struct imgu_css *css,
 	u8 size, start, end, end2;
 
 	if (queue >= 0) {
-		size = readb(&q->host2sp_bufq_info[thread][queue].size);
-		start = readb(&q->host2sp_bufq_info[thread][queue].start);
-		end = readb(&q->host2sp_bufq_info[thread][queue].end);
+		size = pete_readb("drivers/staging/media/ipu3/ipu3-css.c:1094", &q->host2sp_bufq_info[thread][queue].size);
+		start = pete_readb("drivers/staging/media/ipu3/ipu3-css.c:1095", &q->host2sp_bufq_info[thread][queue].start);
+		end = pete_readb("drivers/staging/media/ipu3/ipu3-css.c:1096", &q->host2sp_bufq_info[thread][queue].end);
 	} else {
-		size = readb(&q->host2sp_evtq_info.size);
-		start = readb(&q->host2sp_evtq_info.start);
-		end = readb(&q->host2sp_evtq_info.end);
+		size = pete_readb("drivers/staging/media/ipu3/ipu3-css.c:1098", &q->host2sp_evtq_info.size);
+		start = pete_readb("drivers/staging/media/ipu3/ipu3-css.c:1099", &q->host2sp_evtq_info.start);
+		end = pete_readb("drivers/staging/media/ipu3/ipu3-css.c:1100", &q->host2sp_evtq_info.end);
 	}
 
 	if (size == 0)
@@ -1109,10 +1109,10 @@ static int imgu_css_queue_data(struct imgu_css *css,
 
 	if (queue >= 0) {
 		pete_writel("drivers/staging/media/ipu3/ipu3-css.c:1111", data, &q->host2sp_bufq[thread][queue][end]);
-		writeb(end2, &q->host2sp_bufq_info[thread][queue].end);
+		pete_writeb("drivers/staging/media/ipu3/ipu3-css.c:1112", end2, &q->host2sp_bufq_info[thread][queue].end);
 	} else {
 		pete_writel("drivers/staging/media/ipu3/ipu3-css.c:1114", data, &q->host2sp_evtq[end]);
-		writeb(end2, &q->host2sp_evtq_info.end);
+		pete_writeb("drivers/staging/media/ipu3/ipu3-css.c:1115", end2, &q->host2sp_evtq_info.end);
 	}
 
 	return 0;
@@ -1129,13 +1129,13 @@ static int imgu_css_dequeue_data(struct imgu_css *css, int queue, u32 *data)
 	u8 size, start, end, start2;
 
 	if (queue >= 0) {
-		size = readb(&q->sp2host_bufq_info[queue].size);
-		start = readb(&q->sp2host_bufq_info[queue].start);
-		end = readb(&q->sp2host_bufq_info[queue].end);
+		size = pete_readb("drivers/staging/media/ipu3/ipu3-css.c:1132", &q->sp2host_bufq_info[queue].size);
+		start = pete_readb("drivers/staging/media/ipu3/ipu3-css.c:1133", &q->sp2host_bufq_info[queue].start);
+		end = pete_readb("drivers/staging/media/ipu3/ipu3-css.c:1134", &q->sp2host_bufq_info[queue].end);
 	} else {
-		size = readb(&q->sp2host_evtq_info.size);
-		start = readb(&q->sp2host_evtq_info.start);
-		end = readb(&q->sp2host_evtq_info.end);
+		size = pete_readb("drivers/staging/media/ipu3/ipu3-css.c:1136", &q->sp2host_evtq_info.size);
+		start = pete_readb("drivers/staging/media/ipu3/ipu3-css.c:1137", &q->sp2host_evtq_info.start);
+		end = pete_readb("drivers/staging/media/ipu3/ipu3-css.c:1138", &q->sp2host_evtq_info.end);
 	}
 
 	if (size == 0)
@@ -1148,12 +1148,12 @@ static int imgu_css_dequeue_data(struct imgu_css *css, int queue, u32 *data)
 
 	if (queue >= 0) {
 		*data = pete_readl("drivers/staging/media/ipu3/ipu3-css.c:1150", &q->sp2host_bufq[queue][start]);
-		writeb(start2, &q->sp2host_bufq_info[queue].start);
+		pete_writeb("drivers/staging/media/ipu3/ipu3-css.c:1151", start2, &q->sp2host_bufq_info[queue].start);
 	} else {
 		int r;
 
 		*data = pete_readl("drivers/staging/media/ipu3/ipu3-css.c:1155", &q->sp2host_evtq[start]);
-		writeb(start2, &q->sp2host_evtq_info.start);
+		pete_writeb("drivers/staging/media/ipu3/ipu3-css.c:1156", start2, &q->sp2host_evtq_info.start);
 
 		/* Acknowledge events dequeued from event queue */
 		r = imgu_css_queue_data(css, queue, 0,

@@ -78,12 +78,12 @@ static inline u32 sfb_read(struct pmagbbfb_par *par, unsigned int reg)
 
 static inline void dac_write(struct pmagbbfb_par *par, unsigned int reg, u8 v)
 {
-	writeb(v, par->dac + reg / 4);
+	pete_writeb("drivers/video/fbdev/pmagb-b-fb.c:81", v, par->dac + reg / 4);
 }
 
 static inline u8 dac_read(struct pmagbbfb_par *par, unsigned int reg)
 {
-	return readb(par->dac + reg / 4);
+	return pete_readb("drivers/video/fbdev/pmagb-b-fb.c:86", par->dac + reg / 4);
 }
 
 static inline void gp0_write(struct pmagbbfb_par *par, u32 v)

@@ -52,12 +52,12 @@ struct egpio_info {
 
 static inline void egpio_writew(u16 value, struct egpio_info *ei, int reg)
 {
-	writew(value, ei->base_addr + (reg << ei->bus_shift));
+	pete_writew("drivers/gpio/gpio-htc-egpio.c:55", value, ei->base_addr + (reg << ei->bus_shift));
 }
 
 static inline u16 egpio_readw(struct egpio_info *ei, int reg)
 {
-	return readw(ei->base_addr + (reg << ei->bus_shift));
+	return pete_readw("drivers/gpio/gpio-htc-egpio.c:60", ei->base_addr + (reg << ei->bus_shift));
 }
 
 /*
@@ -151,7 +151,7 @@ static int egpio_get(struct gpio_chip *chip, unsigned offset)
 		return !!(egpio->cached_values & (1 << offset));
 	} else {
 		value = egpio_readw(ei, reg);
-		pr_debug("readw(%p + %x) = %x\n",
+		pr_debug("pete_readw("drivers/gpio/gpio-htc-egpio.c:154", %p + %x) = %x\n",
 			 ei->base_addr, reg << ei->bus_shift, value);
 		return !!(value & bit);
 	}

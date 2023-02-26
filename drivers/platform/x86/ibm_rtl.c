@@ -263,7 +263,7 @@ static int __init ibm_rtl_init(void) {
 	for (i = 0 ; i < ebda_size/sizeof(unsigned int); i++) {
 		struct ibm_rtl_table __iomem * tmp;
 		tmp = (struct ibm_rtl_table __iomem *) (ebda_map+i);
-		if ((readq(&tmp->signature) & RTL_MASK) == RTL_SIGNATURE) {
+		if ((pete_readq("drivers/platform/x86/ibm_rtl.c:266", &tmp->signature) & RTL_MASK) == RTL_SIGNATURE) {
 			phys_addr_t addr;
 			unsigned int plen;
 			RTL_DEBUG("found RTL_SIGNATURE at %p\n", tmp);

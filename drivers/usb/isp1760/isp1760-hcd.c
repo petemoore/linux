@@ -399,7 +399,7 @@ static void isp1763_mem_read(struct usb_hcd *hcd, u16 srcaddr,
 	if (bytes <= 0)
 		return;
 
-	*((u8 *)dstptr) = (u8)(readw(priv->base + ISP1763_HC_DATA) & 0xFF);
+	*((u8 *)dstptr) = (u8)(pete_readw("drivers/usb/isp1760/isp1760-hcd.c:402", priv->base + ISP1763_HC_DATA) & 0xFF);
 }
 
 static void mem_read(struct usb_hcd *hcd, u32 src_offset, __u32 *dst,
@@ -472,7 +472,7 @@ static void isp1763_mem_write(struct usb_hcd *hcd, u16 dstaddr, u16 *src,
 	 * The only way to get here is if there is a single byte left,
 	 * get it and write it to the data reg;
 	 */
-	writew(*((u8 *)src), priv->base + ISP1763_HC_DATA);
+	pete_writew("drivers/usb/isp1760/isp1760-hcd.c:475", *((u8 *)src), priv->base + ISP1763_HC_DATA);
 }
 
 static void mem_write(struct usb_hcd *hcd, u32 dst_offset, __u32 *src,

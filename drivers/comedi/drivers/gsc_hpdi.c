@@ -202,10 +202,10 @@ static irqreturn_t gsc_hpdi_interrupt(int irq, void *d)
 
 	/* spin lock makes sure no one else changes plx dma control reg */
 	spin_lock_irqsave(&dev->spinlock, flags);
-	dma0_status = readb(devpriv->plx9080_mmio + PLX_REG_DMACSR0);
+	dma0_status = pete_readb("drivers/comedi/drivers/gsc_hpdi.c:205", devpriv->plx9080_mmio + PLX_REG_DMACSR0);
 	if (plx_status & PLX_INTCSR_DMA0IA) {
 		/* dma chan 0 interrupt */
-		writeb((dma0_status & PLX_DMACSR_ENABLE) | PLX_DMACSR_CLEARINTR,
+		pete_writeb("drivers/comedi/drivers/gsc_hpdi.c:208", (dma0_status & PLX_DMACSR_ENABLE) | PLX_DMACSR_CLEARINTR,
 		       devpriv->plx9080_mmio + PLX_REG_DMACSR0);
 
 		if (dma0_status & PLX_DMACSR_ENABLE)
@@ -215,10 +215,10 @@ static irqreturn_t gsc_hpdi_interrupt(int irq, void *d)
 
 	/* spin lock makes sure no one else changes plx dma control reg */
 	spin_lock_irqsave(&dev->spinlock, flags);
-	dma1_status = readb(devpriv->plx9080_mmio + PLX_REG_DMACSR1);
+	dma1_status = pete_readb("drivers/comedi/drivers/gsc_hpdi.c:218", devpriv->plx9080_mmio + PLX_REG_DMACSR1);
 	if (plx_status & PLX_INTCSR_DMA1IA) {
 		/* XXX */ /* dma chan 1 interrupt */
-		writeb((dma1_status & PLX_DMACSR_ENABLE) | PLX_DMACSR_CLEARINTR,
+		pete_writeb("drivers/comedi/drivers/gsc_hpdi.c:221", (dma1_status & PLX_DMACSR_ENABLE) | PLX_DMACSR_CLEARINTR,
 		       devpriv->plx9080_mmio + PLX_REG_DMACSR1);
 	}
 	spin_unlock_irqrestore(&dev->spinlock, flags);
@@ -307,7 +307,7 @@ static int gsc_hpdi_cmd(struct comedi_device *dev,
 
 	/* enable dma transfer */
 	spin_lock_irqsave(&dev->spinlock, flags);
-	writeb(PLX_DMACSR_ENABLE | PLX_DMACSR_START | PLX_DMACSR_CLEARINTR,
+	pete_writeb("drivers/comedi/drivers/gsc_hpdi.c:310", PLX_DMACSR_ENABLE | PLX_DMACSR_START | PLX_DMACSR_CLEARINTR,
 	       devpriv->plx9080_mmio + PLX_REG_DMACSR0);
 	spin_unlock_irqrestore(&dev->spinlock, flags);
 

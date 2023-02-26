@@ -215,22 +215,22 @@ static void sun4i_usb_phy_write(struct sun4i_usb_phy *phy, u32 addr, u32 data,
 		pete_writel("drivers/phy/allwinner/phy-sun4i-usb.c:215", temp, phyctl);
 
 		/* set the data bit and clear usbc bit*/
-		temp = readb(phyctl);
+		temp = pete_readb("drivers/phy/allwinner/phy-sun4i-usb.c:218", phyctl);
 		if (data & 0x1)
 			temp |= PHYCTL_DATA;
 		else
 			temp &= ~PHYCTL_DATA;
 		temp &= ~usbc_bit;
-		writeb(temp, phyctl);
+		pete_writeb("drivers/phy/allwinner/phy-sun4i-usb.c:224", temp, phyctl);
 
 		/* pulse usbc_bit */
-		temp = readb(phyctl);
+		temp = pete_readb("drivers/phy/allwinner/phy-sun4i-usb.c:227", phyctl);
 		temp |= usbc_bit;
-		writeb(temp, phyctl);
+		pete_writeb("drivers/phy/allwinner/phy-sun4i-usb.c:229", temp, phyctl);
 
-		temp = readb(phyctl);
+		temp = pete_readb("drivers/phy/allwinner/phy-sun4i-usb.c:231", phyctl);
 		temp &= ~usbc_bit;
-		writeb(temp, phyctl);
+		pete_writeb("drivers/phy/allwinner/phy-sun4i-usb.c:233", temp, phyctl);
 
 		data >>= 1;
 	}

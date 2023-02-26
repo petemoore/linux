@@ -821,7 +821,7 @@ s32 bcm_to_h_msg_dequeue(struct bcm_vk *vk)
 			 * able to catch this.
 			 */
 			src = msgq_blk_addr(qinfo, rd_idx & qinfo->q_mask);
-			src_size = readb(&src->size);
+			src_size = pete_readb("drivers/misc/bcm-vk/bcm_vk_msg.c:824", &src->size);
 
 			if ((rd_idx >= qinfo->q_size) ||
 			    (src_size > (qinfo->q_size - 1))) {

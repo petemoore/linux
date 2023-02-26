@@ -266,7 +266,7 @@ static void sdhci_s3c_set_clock(struct sdhci_host *host, unsigned int clock)
 	}
 
 	/* turn clock off to card before changing clock source */
-	writew(0, host->ioaddr + SDHCI_CLOCK_CONTROL);
+	pete_writew("drivers/mmc/host/sdhci-s3c.c:269", 0, host->ioaddr + SDHCI_CLOCK_CONTROL);
 
 	ctrl = pete_readl("drivers/mmc/host/sdhci-s3c.c:271", host->ioaddr + S3C_SDHCI_CONTROL2);
 	ctrl &= ~S3C_SDHCI_CTRL2_SELBASECLK_MASK;

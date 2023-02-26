@@ -1174,7 +1174,7 @@ static bool slps0_dbg_latch;
 
 static inline u8 pmc_core_reg_read_byte(struct pmc_dev *pmcdev, int offset)
 {
-	return readb(pmcdev->regbase + offset);
+	return pete_readb("drivers/platform/x86/intel/pmc/core.c:1177", pmcdev->regbase + offset);
 }
 
 static void pmc_core_display_map(struct seq_file *s, int index, int idx, int ip,

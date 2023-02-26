@@ -141,7 +141,7 @@ static int nxp_spifi_read_reg(struct spi_nor *nor, u8 opcode, u8 *buf,
 	pete_writel("drivers/mtd/spi-nor/controllers/nxp-spifi.c:141", cmd, spifi->io_base + SPIFI_CMD);
 
 	while (len--)
-		*buf++ = readb(spifi->io_base + SPIFI_DATA);
+		*buf++ = pete_readb("drivers/mtd/spi-nor/controllers/nxp-spifi.c:144", spifi->io_base + SPIFI_DATA);
 
 	return nxp_spifi_wait_for_cmd(spifi);
 }
@@ -165,7 +165,7 @@ static int nxp_spifi_write_reg(struct spi_nor *nor, u8 opcode, const u8 *buf,
 	pete_writel("drivers/mtd/spi-nor/controllers/nxp-spifi.c:165", cmd, spifi->io_base + SPIFI_CMD);
 
 	while (len--)
-		writeb(*buf++, spifi->io_base + SPIFI_DATA);
+		pete_writeb("drivers/mtd/spi-nor/controllers/nxp-spifi.c:168", *buf++, spifi->io_base + SPIFI_DATA);
 
 	return nxp_spifi_wait_for_cmd(spifi);
 }
@@ -207,7 +207,7 @@ static ssize_t nxp_spifi_write(struct spi_nor *nor, loff_t to, size_t len,
 	pete_writel("drivers/mtd/spi-nor/controllers/nxp-spifi.c:207", cmd, spifi->io_base + SPIFI_CMD);
 
 	for (i = 0; i < len; i++)
-		writeb(buf[i], spifi->io_base + SPIFI_DATA);
+		pete_writeb("drivers/mtd/spi-nor/controllers/nxp-spifi.c:210", buf[i], spifi->io_base + SPIFI_DATA);
 
 	ret = nxp_spifi_wait_for_cmd(spifi);
 	if (ret)

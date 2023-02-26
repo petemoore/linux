@@ -4081,23 +4081,23 @@ static int sisfb_check_rom(void __iomem *rom_base,
 	void __iomem *rom;
 	int romptr;
 
-	if((readb(rom_base) != 0x55) || (readb(rom_base + 1) != 0xaa))
+	if((pete_readb("drivers/video/fbdev/sis/sis_main.c:4084", rom_base) != 0x55) || (pete_readb("drivers/video/fbdev/sis/sis_main.c:4084", rom_base + 1) != 0xaa))
 		return 0;
 
-	romptr = (readb(rom_base + 0x18) | (readb(rom_base + 0x19) << 8));
+	romptr = (pete_readb("drivers/video/fbdev/sis/sis_main.c:4087", rom_base + 0x18) | (pete_readb("drivers/video/fbdev/sis/sis_main.c:4087", rom_base + 0x19) << 8));
 	if(romptr > (0x10000 - 8))
 		return 0;
 
 	rom = rom_base + romptr;
 
-	if((readb(rom)     != 'P') || (readb(rom + 1) != 'C') ||
-	   (readb(rom + 2) != 'I') || (readb(rom + 3) != 'R'))
+	if((pete_readb("drivers/video/fbdev/sis/sis_main.c:4093", rom)     != 'P') || (pete_readb("drivers/video/fbdev/sis/sis_main.c:4093", rom + 1) != 'C') ||
+	   (pete_readb("drivers/video/fbdev/sis/sis_main.c:4094", rom + 2) != 'I') || (pete_readb("drivers/video/fbdev/sis/sis_main.c:4094", rom + 3) != 'R'))
 		return 0;
 
-	if((readb(rom + 4) | (readb(rom + 5) << 8)) != ivideo->chip_vendor)
+	if((pete_readb("drivers/video/fbdev/sis/sis_main.c:4097", rom + 4) | (pete_readb("drivers/video/fbdev/sis/sis_main.c:4097", rom + 5) << 8)) != ivideo->chip_vendor)
 		return 0;
 
-	if((readb(rom + 6) | (readb(rom + 7) << 8)) != ivideo->chip_id)
+	if((pete_readb("drivers/video/fbdev/sis/sis_main.c:4100", rom + 6) | (pete_readb("drivers/video/fbdev/sis/sis_main.c:4100", rom + 7) << 8)) != ivideo->chip_id)
 		return 0;
 
 	return 1;
@@ -4203,8 +4203,8 @@ static int sisfb_post_300_buswidth(struct sis_video_info *ivideo)
 	for(i = 0; i < 2; i++) {
 		temp = 0x1234;
 		for(j = 0; j < 4; j++) {
-			writew(temp, FBAddress);
-			if(readw(FBAddress) == temp)
+			pete_writew("drivers/video/fbdev/sis/sis_main.c:4206", temp, FBAddress);
+			if(pete_readw("drivers/video/fbdev/sis/sis_main.c:4207", FBAddress) == temp)
 				break;
 			SiS_SetRegOR(SISSR, 0x3c, 0x01);
 			reg = SiS_GetReg(SISSR, 0x05);
@@ -4302,17 +4302,17 @@ static int sisfb_post_300_rwtest(struct sis_video_info *ivideo, int iteration,
 			continue;
 
 		/* Write data */
-		writew(((unsigned short)PhysicalAdrHigh),
+		pete_writew("drivers/video/fbdev/sis/sis_main.c:4305", ((unsigned short)PhysicalAdrHigh),
 				(FBAddr + BankNumHigh + PhysicalAdrHigh));
-		writew(((unsigned short)BankNumMid),
+		pete_writew("drivers/video/fbdev/sis/sis_main.c:4307", ((unsigned short)BankNumMid),
 				(FBAddr + BankNumMid  + PhysicalAdrHigh));
-		writew(((unsigned short)PhysicalAdrHalfPage),
+		pete_writew("drivers/video/fbdev/sis/sis_main.c:4309", ((unsigned short)PhysicalAdrHalfPage),
 				(FBAddr + BankNumHigh + PhysicalAdrHalfPage));
-		writew(((unsigned short)PhysicalAdrOtherPage),
+		pete_writew("drivers/video/fbdev/sis/sis_main.c:4311", ((unsigned short)PhysicalAdrOtherPage),
 				(FBAddr + BankNumHigh + PhysicalAdrOtherPage));
 
 		/* Read data */
-		if(readw(FBAddr + BankNumHigh + PhysicalAdrHigh) == PhysicalAdrHigh)
+		if(pete_readw("drivers/video/fbdev/sis/sis_main.c:4315", FBAddr + BankNumHigh + PhysicalAdrHigh) == PhysicalAdrHigh)
 			return 1;
 	}
 
@@ -6088,7 +6088,7 @@ static int sisfb_probe(struct pci_dev *pdev, const struct pci_device_id *ent)
 #if defined(__i386__) || defined(__x86_64__)
 		unsigned char __iomem *tt = ioremap(0x400, 0x100);
 		if(tt) {
-			ivideo->modeprechange = readb(tt + 0x49);
+			ivideo->modeprechange = pete_readb("drivers/video/fbdev/sis/sis_main.c:6091", tt + 0x49);
 			iounmap(tt);
 		}
 #endif

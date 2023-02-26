@@ -345,7 +345,7 @@ static inline void qib_write_ureg(const struct qib_devdata *dd,
 			 dd->ureg_align * ctxt);
 
 	if (dd->kregbase && (dd->flags & QIB_PRESENT))
-		writeq(value, &ubase[regno]);
+		pete_writeq("drivers/infiniband/hw/qib/qib_iba6120.c:348", value, &ubase[regno]);
 }
 
 static inline u32 qib_read_kreg32(const struct qib_devdata *dd,
@@ -362,14 +362,14 @@ static inline u64 qib_read_kreg64(const struct qib_devdata *dd,
 	if (!dd->kregbase || !(dd->flags & QIB_PRESENT))
 		return -1;
 
-	return readq(&dd->kregbase[regno]);
+	return pete_readq("drivers/infiniband/hw/qib/qib_iba6120.c:365", &dd->kregbase[regno]);
 }
 
 static inline void qib_write_kreg(const struct qib_devdata *dd,
 				  const u16 regno, u64 value)
 {
 	if (dd->kregbase && (dd->flags & QIB_PRESENT))
-		writeq(value, &dd->kregbase[regno]);
+		pete_writeq("drivers/infiniband/hw/qib/qib_iba6120.c:372", value, &dd->kregbase[regno]);
 }
 
 /**
@@ -390,14 +390,14 @@ static inline void write_6120_creg(const struct qib_devdata *dd,
 				   u16 regno, u64 value)
 {
 	if (dd->cspec->cregbase && (dd->flags & QIB_PRESENT))
-		writeq(value, &dd->cspec->cregbase[regno]);
+		pete_writeq("drivers/infiniband/hw/qib/qib_iba6120.c:393", value, &dd->cspec->cregbase[regno]);
 }
 
 static inline u64 read_6120_creg(const struct qib_devdata *dd, u16 regno)
 {
 	if (!dd->cspec->cregbase || !(dd->flags & QIB_PRESENT))
 		return 0;
-	return readq(&dd->cspec->cregbase[regno]);
+	return pete_readq("drivers/infiniband/hw/qib/qib_iba6120.c:400", &dd->cspec->cregbase[regno]);
 }
 
 static inline u32 read_6120_creg32(const struct qib_devdata *dd, u16 regno)
@@ -1771,14 +1771,14 @@ static int qib_6120_setup_reset(struct qib_devdata *dd)
 
 	/*
 	 * Keep chip from being accessed until we are ready.  Use
-	 * writeq() directly, to allow the write even though QIB_PRESENT
+	 * pete_writeq("drivers/infiniband/hw/qib/qib_iba6120.c:1774", ) directly, to allow the write even though QIB_PRESENT
 	 * isn't set.
 	 */
 	dd->flags &= ~(QIB_INITTED | QIB_PRESENT);
 	/* so we check interrupts work again */
 	dd->z_int_counter = qib_int_counter(dd);
 	val = dd->control | QLOGIC_IB_C_RESET;
-	writeq(val, &dd->kregbase[kr_control]);
+	pete_writeq("drivers/infiniband/hw/qib/qib_iba6120.c:1781", val, &dd->kregbase[kr_control]);
 	mb(); /* prevent compiler re-ordering around actual reset */
 
 	for (i = 1; i <= 5; i++) {
@@ -1795,7 +1795,7 @@ static int qib_6120_setup_reset(struct qib_devdata *dd)
 		 * Use readq directly, so we don't need to mark it as PRESENT
 		 * until we get a successful indication that all is well.
 		 */
-		val = readq(&dd->kregbase[kr_revision]);
+		val = pete_readq("drivers/infiniband/hw/qib/qib_iba6120.c:1798", &dd->kregbase[kr_revision]);
 		if (val == dd->revision) {
 			dd->flags |= QIB_PRESENT; /* it's back */
 			ret = qib_reinit_intr(dd);
@@ -3183,7 +3183,7 @@ static int init_6120_variables(struct qib_devdata *dd)
 	spin_lock_init(&dd->cspec->gpio_lock);
 
 	/* we haven't yet set QIB_PRESENT, so use read directly */
-	dd->revision = readq(&dd->kregbase[kr_revision]);
+	dd->revision = pete_readq("drivers/infiniband/hw/qib/qib_iba6120.c:3186", &dd->kregbase[kr_revision]);
 
 	if ((dd->revision & 0xffffffffU) == 0xffffffffU) {
 		qib_dev_err(dd,

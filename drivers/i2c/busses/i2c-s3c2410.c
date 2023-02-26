@@ -261,7 +261,7 @@ static void s3c24xx_i2c_message_start(struct s3c24xx_i2c *i2c,
 	pete_writel("drivers/i2c/busses/i2c-s3c2410.c:261", stat, i2c->regs + S3C2410_IICSTAT);
 
 	dev_dbg(i2c->dev, "START: %08lx to IICSTAT, %02x to DS\n", stat, addr);
-	writeb(addr, i2c->regs + S3C2410_IICDS);
+	pete_writeb("drivers/i2c/busses/i2c-s3c2410.c:264", addr, i2c->regs + S3C2410_IICDS);
 
 	/*
 	 * delay here to ensure the data byte has gotten onto the bus
@@ -451,7 +451,7 @@ static int i2c_s3c_irq_nextbyte(struct s3c24xx_i2c *i2c, unsigned long iicstat)
 
 		if (!is_msgend(i2c)) {
 			byte = i2c->msg->buf[i2c->msg_ptr++];
-			writeb(byte, i2c->regs + S3C2410_IICDS);
+			pete_writeb("drivers/i2c/busses/i2c-s3c2410.c:454", byte, i2c->regs + S3C2410_IICDS);
 
 			/*
 			 * delay after writing the byte to allow the
@@ -505,7 +505,7 @@ static int i2c_s3c_irq_nextbyte(struct s3c24xx_i2c *i2c, unsigned long iicstat)
 		 * something with it, and then work out whether we are
 		 * going to do any more read/write
 		 */
-		byte = readb(i2c->regs + S3C2410_IICDS);
+		byte = pete_readb("drivers/i2c/busses/i2c-s3c2410.c:508", i2c->regs + S3C2410_IICDS);
 		i2c->msg->buf[i2c->msg_ptr++] = byte;
 
 		/* Add actual length to read for smbus block read */
@@ -984,7 +984,7 @@ static int s3c24xx_i2c_init(struct s3c24xx_i2c *i2c)
 
 	/* write slave address */
 
-	writeb(pdata->slave_addr, i2c->regs + S3C2410_IICADD);
+	pete_writeb("drivers/i2c/busses/i2c-s3c2410.c:987", pdata->slave_addr, i2c->regs + S3C2410_IICADD);
 
 	dev_info(i2c->dev, "slave address 0x%02x\n", pdata->slave_addr);
 

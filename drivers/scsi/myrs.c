@@ -2494,7 +2494,7 @@ static inline void DAC960_GEM_write_hw_mbox(void __iomem *base,
 
 static inline unsigned char DAC960_GEM_read_cmd_status(void __iomem *base)
 {
-	return readw(base + DAC960_GEM_CMDSTS_OFFSET + 2);
+	return pete_readw("drivers/scsi/myrs.c:2497", base + DAC960_GEM_CMDSTS_OFFSET + 2);
 }
 
 static inline bool
@@ -2507,8 +2507,8 @@ DAC960_GEM_read_error_status(void __iomem *base, unsigned char *error,
 	if (!((le32_to_cpu(val) >> 24) & DAC960_GEM_ERRSTS_PENDING))
 		return false;
 	*error = val & ~(DAC960_GEM_ERRSTS_PENDING << 24);
-	*param0 = readb(base + DAC960_GEM_CMDMBX_OFFSET + 0);
-	*param1 = readb(base + DAC960_GEM_CMDMBX_OFFSET + 1);
+	*param0 = pete_readb("drivers/scsi/myrs.c:2510", base + DAC960_GEM_CMDMBX_OFFSET + 0);
+	*param1 = pete_readb("drivers/scsi/myrs.c:2511", base + DAC960_GEM_CMDMBX_OFFSET + 1);
 	pete_writel("drivers/scsi/myrs.c:2512", 0x03000000, base + DAC960_GEM_ERRSTS_CLEAR_OFFSET);
 	return true;
 }
@@ -2628,29 +2628,29 @@ static struct myrs_privdata DAC960_GEM_privdata = {
 
 static inline void DAC960_BA_hw_mbox_new_cmd(void __iomem *base)
 {
-	writeb(DAC960_BA_IDB_HWMBOX_NEW_CMD, base + DAC960_BA_IDB_OFFSET);
+	pete_writeb("drivers/scsi/myrs.c:2631", DAC960_BA_IDB_HWMBOX_NEW_CMD, base + DAC960_BA_IDB_OFFSET);
 }
 
 static inline void DAC960_BA_ack_hw_mbox_status(void __iomem *base)
 {
-	writeb(DAC960_BA_IDB_HWMBOX_ACK_STS, base + DAC960_BA_IDB_OFFSET);
+	pete_writeb("drivers/scsi/myrs.c:2636", DAC960_BA_IDB_HWMBOX_ACK_STS, base + DAC960_BA_IDB_OFFSET);
 }
 
 static inline void DAC960_BA_reset_ctrl(void __iomem *base)
 {
-	writeb(DAC960_BA_IDB_CTRL_RESET, base + DAC960_BA_IDB_OFFSET);
+	pete_writeb("drivers/scsi/myrs.c:2641", DAC960_BA_IDB_CTRL_RESET, base + DAC960_BA_IDB_OFFSET);
 }
 
 static inline void DAC960_BA_mem_mbox_new_cmd(void __iomem *base)
 {
-	writeb(DAC960_BA_IDB_MMBOX_NEW_CMD, base + DAC960_BA_IDB_OFFSET);
+	pete_writeb("drivers/scsi/myrs.c:2646", DAC960_BA_IDB_MMBOX_NEW_CMD, base + DAC960_BA_IDB_OFFSET);
 }
 
 static inline bool DAC960_BA_hw_mbox_is_full(void __iomem *base)
 {
 	u8 val;
 
-	val = readb(base + DAC960_BA_IDB_OFFSET);
+	val = pete_readb("drivers/scsi/myrs.c:2653", base + DAC960_BA_IDB_OFFSET);
 	return !(val & DAC960_BA_IDB_HWMBOX_EMPTY);
 }
 
@@ -2658,18 +2658,18 @@ static inline bool DAC960_BA_init_in_progress(void __iomem *base)
 {
 	u8 val;
 
-	val = readb(base + DAC960_BA_IDB_OFFSET);
+	val = pete_readb("drivers/scsi/myrs.c:2661", base + DAC960_BA_IDB_OFFSET);
 	return !(val & DAC960_BA_IDB_INIT_DONE);
 }
 
 static inline void DAC960_BA_ack_hw_mbox_intr(void __iomem *base)
 {
-	writeb(DAC960_BA_ODB_HWMBOX_ACK_IRQ, base + DAC960_BA_ODB_OFFSET);
+	pete_writeb("drivers/scsi/myrs.c:2667", DAC960_BA_ODB_HWMBOX_ACK_IRQ, base + DAC960_BA_ODB_OFFSET);
 }
 
 static inline void DAC960_BA_ack_intr(void __iomem *base)
 {
-	writeb(DAC960_BA_ODB_HWMBOX_ACK_IRQ | DAC960_BA_ODB_MMBOX_ACK_IRQ,
+	pete_writeb("drivers/scsi/myrs.c:2672", DAC960_BA_ODB_HWMBOX_ACK_IRQ | DAC960_BA_ODB_MMBOX_ACK_IRQ,
 	       base + DAC960_BA_ODB_OFFSET);
 }
 
@@ -2677,18 +2677,18 @@ static inline bool DAC960_BA_hw_mbox_status_available(void __iomem *base)
 {
 	u8 val;
 
-	val = readb(base + DAC960_BA_ODB_OFFSET);
+	val = pete_readb("drivers/scsi/myrs.c:2680", base + DAC960_BA_ODB_OFFSET);
 	return val & DAC960_BA_ODB_HWMBOX_STS_AVAIL;
 }
 
 static inline void DAC960_BA_enable_intr(void __iomem *base)
 {
-	writeb(~DAC960_BA_IRQMASK_DISABLE_IRQ, base + DAC960_BA_IRQMASK_OFFSET);
+	pete_writeb("drivers/scsi/myrs.c:2686", ~DAC960_BA_IRQMASK_DISABLE_IRQ, base + DAC960_BA_IRQMASK_OFFSET);
 }
 
 static inline void DAC960_BA_disable_intr(void __iomem *base)
 {
-	writeb(0xFF, base + DAC960_BA_IRQMASK_OFFSET);
+	pete_writeb("drivers/scsi/myrs.c:2691", 0xFF, base + DAC960_BA_IRQMASK_OFFSET);
 }
 
 static inline void DAC960_BA_write_cmd_mbox(union myrs_cmd_mbox *mem_mbox,
@@ -2712,7 +2712,7 @@ static inline void DAC960_BA_write_hw_mbox(void __iomem *base,
 
 static inline unsigned char DAC960_BA_read_cmd_status(void __iomem *base)
 {
-	return readw(base + DAC960_BA_CMDSTS_OFFSET + 2);
+	return pete_readw("drivers/scsi/myrs.c:2715", base + DAC960_BA_CMDSTS_OFFSET + 2);
 }
 
 static inline bool
@@ -2721,14 +2721,14 @@ DAC960_BA_read_error_status(void __iomem *base, unsigned char *error,
 {
 	u8 val;
 
-	val = readb(base + DAC960_BA_ERRSTS_OFFSET);
+	val = pete_readb("drivers/scsi/myrs.c:2724", base + DAC960_BA_ERRSTS_OFFSET);
 	if (!(val & DAC960_BA_ERRSTS_PENDING))
 		return false;
 	val &= ~DAC960_BA_ERRSTS_PENDING;
 	*error = val;
-	*param0 = readb(base + DAC960_BA_CMDMBX_OFFSET + 0);
-	*param1 = readb(base + DAC960_BA_CMDMBX_OFFSET + 1);
-	writeb(0xFF, base + DAC960_BA_ERRSTS_OFFSET);
+	*param0 = pete_readb("drivers/scsi/myrs.c:2729", base + DAC960_BA_CMDMBX_OFFSET + 0);
+	*param1 = pete_readb("drivers/scsi/myrs.c:2730", base + DAC960_BA_CMDMBX_OFFSET + 1);
+	pete_writeb("drivers/scsi/myrs.c:2731", 0xFF, base + DAC960_BA_ERRSTS_OFFSET);
 	return true;
 }
 
@@ -2847,29 +2847,29 @@ static struct myrs_privdata DAC960_BA_privdata = {
 
 static inline void DAC960_LP_hw_mbox_new_cmd(void __iomem *base)
 {
-	writeb(DAC960_LP_IDB_HWMBOX_NEW_CMD, base + DAC960_LP_IDB_OFFSET);
+	pete_writeb("drivers/scsi/myrs.c:2850", DAC960_LP_IDB_HWMBOX_NEW_CMD, base + DAC960_LP_IDB_OFFSET);
 }
 
 static inline void DAC960_LP_ack_hw_mbox_status(void __iomem *base)
 {
-	writeb(DAC960_LP_IDB_HWMBOX_ACK_STS, base + DAC960_LP_IDB_OFFSET);
+	pete_writeb("drivers/scsi/myrs.c:2855", DAC960_LP_IDB_HWMBOX_ACK_STS, base + DAC960_LP_IDB_OFFSET);
 }
 
 static inline void DAC960_LP_reset_ctrl(void __iomem *base)
 {
-	writeb(DAC960_LP_IDB_CTRL_RESET, base + DAC960_LP_IDB_OFFSET);
+	pete_writeb("drivers/scsi/myrs.c:2860", DAC960_LP_IDB_CTRL_RESET, base + DAC960_LP_IDB_OFFSET);
 }
 
 static inline void DAC960_LP_mem_mbox_new_cmd(void __iomem *base)
 {
-	writeb(DAC960_LP_IDB_MMBOX_NEW_CMD, base + DAC960_LP_IDB_OFFSET);
+	pete_writeb("drivers/scsi/myrs.c:2865", DAC960_LP_IDB_MMBOX_NEW_CMD, base + DAC960_LP_IDB_OFFSET);
 }
 
 static inline bool DAC960_LP_hw_mbox_is_full(void __iomem *base)
 {
 	u8 val;
 
-	val = readb(base + DAC960_LP_IDB_OFFSET);
+	val = pete_readb("drivers/scsi/myrs.c:2872", base + DAC960_LP_IDB_OFFSET);
 	return val & DAC960_LP_IDB_HWMBOX_FULL;
 }
 
@@ -2877,18 +2877,18 @@ static inline bool DAC960_LP_init_in_progress(void __iomem *base)
 {
 	u8 val;
 
-	val = readb(base + DAC960_LP_IDB_OFFSET);
+	val = pete_readb("drivers/scsi/myrs.c:2880", base + DAC960_LP_IDB_OFFSET);
 	return val & DAC960_LP_IDB_INIT_IN_PROGRESS;
 }
 
 static inline void DAC960_LP_ack_hw_mbox_intr(void __iomem *base)
 {
-	writeb(DAC960_LP_ODB_HWMBOX_ACK_IRQ, base + DAC960_LP_ODB_OFFSET);
+	pete_writeb("drivers/scsi/myrs.c:2886", DAC960_LP_ODB_HWMBOX_ACK_IRQ, base + DAC960_LP_ODB_OFFSET);
 }
 
 static inline void DAC960_LP_ack_intr(void __iomem *base)
 {
-	writeb(DAC960_LP_ODB_HWMBOX_ACK_IRQ | DAC960_LP_ODB_MMBOX_ACK_IRQ,
+	pete_writeb("drivers/scsi/myrs.c:2891", DAC960_LP_ODB_HWMBOX_ACK_IRQ | DAC960_LP_ODB_MMBOX_ACK_IRQ,
 	       base + DAC960_LP_ODB_OFFSET);
 }
 
@@ -2896,18 +2896,18 @@ static inline bool DAC960_LP_hw_mbox_status_available(void __iomem *base)
 {
 	u8 val;
 
-	val = readb(base + DAC960_LP_ODB_OFFSET);
+	val = pete_readb("drivers/scsi/myrs.c:2899", base + DAC960_LP_ODB_OFFSET);
 	return val & DAC960_LP_ODB_HWMBOX_STS_AVAIL;
 }
 
 static inline void DAC960_LP_enable_intr(void __iomem *base)
 {
-	writeb(~DAC960_LP_IRQMASK_DISABLE_IRQ, base + DAC960_LP_IRQMASK_OFFSET);
+	pete_writeb("drivers/scsi/myrs.c:2905", ~DAC960_LP_IRQMASK_DISABLE_IRQ, base + DAC960_LP_IRQMASK_OFFSET);
 }
 
 static inline void DAC960_LP_disable_intr(void __iomem *base)
 {
-	writeb(0xFF, base + DAC960_LP_IRQMASK_OFFSET);
+	pete_writeb("drivers/scsi/myrs.c:2910", 0xFF, base + DAC960_LP_IRQMASK_OFFSET);
 }
 
 static inline void DAC960_LP_write_cmd_mbox(union myrs_cmd_mbox *mem_mbox,
@@ -2930,7 +2930,7 @@ static inline void DAC960_LP_write_hw_mbox(void __iomem *base,
 
 static inline unsigned char DAC960_LP_read_cmd_status(void __iomem *base)
 {
-	return readw(base + DAC960_LP_CMDSTS_OFFSET + 2);
+	return pete_readw("drivers/scsi/myrs.c:2933", base + DAC960_LP_CMDSTS_OFFSET + 2);
 }
 
 static inline bool
@@ -2939,14 +2939,14 @@ DAC960_LP_read_error_status(void __iomem *base, unsigned char *error,
 {
 	u8 val;
 
-	val = readb(base + DAC960_LP_ERRSTS_OFFSET);
+	val = pete_readb("drivers/scsi/myrs.c:2942", base + DAC960_LP_ERRSTS_OFFSET);
 	if (!(val & DAC960_LP_ERRSTS_PENDING))
 		return false;
 	val &= ~DAC960_LP_ERRSTS_PENDING;
 	*error = val;
-	*param0 = readb(base + DAC960_LP_CMDMBX_OFFSET + 0);
-	*param1 = readb(base + DAC960_LP_CMDMBX_OFFSET + 1);
-	writeb(0xFF, base + DAC960_LP_ERRSTS_OFFSET);
+	*param0 = pete_readb("drivers/scsi/myrs.c:2947", base + DAC960_LP_CMDMBX_OFFSET + 0);
+	*param1 = pete_readb("drivers/scsi/myrs.c:2948", base + DAC960_LP_CMDMBX_OFFSET + 1);
+	pete_writeb("drivers/scsi/myrs.c:2949", 0xFF, base + DAC960_LP_ERRSTS_OFFSET);
 	return true;
 }
 

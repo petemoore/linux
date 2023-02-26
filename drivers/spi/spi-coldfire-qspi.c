@@ -67,42 +67,42 @@ struct mcfqspi {
 
 static void mcfqspi_wr_qmr(struct mcfqspi *mcfqspi, u16 val)
 {
-	writew(val, mcfqspi->iobase + MCFQSPI_QMR);
+	pete_writew("drivers/spi/spi-coldfire-qspi.c:70", val, mcfqspi->iobase + MCFQSPI_QMR);
 }
 
 static void mcfqspi_wr_qdlyr(struct mcfqspi *mcfqspi, u16 val)
 {
-	writew(val, mcfqspi->iobase + MCFQSPI_QDLYR);
+	pete_writew("drivers/spi/spi-coldfire-qspi.c:75", val, mcfqspi->iobase + MCFQSPI_QDLYR);
 }
 
 static u16 mcfqspi_rd_qdlyr(struct mcfqspi *mcfqspi)
 {
-	return readw(mcfqspi->iobase + MCFQSPI_QDLYR);
+	return pete_readw("drivers/spi/spi-coldfire-qspi.c:80", mcfqspi->iobase + MCFQSPI_QDLYR);
 }
 
 static void mcfqspi_wr_qwr(struct mcfqspi *mcfqspi, u16 val)
 {
-	writew(val, mcfqspi->iobase + MCFQSPI_QWR);
+	pete_writew("drivers/spi/spi-coldfire-qspi.c:85", val, mcfqspi->iobase + MCFQSPI_QWR);
 }
 
 static void mcfqspi_wr_qir(struct mcfqspi *mcfqspi, u16 val)
 {
-	writew(val, mcfqspi->iobase + MCFQSPI_QIR);
+	pete_writew("drivers/spi/spi-coldfire-qspi.c:90", val, mcfqspi->iobase + MCFQSPI_QIR);
 }
 
 static void mcfqspi_wr_qar(struct mcfqspi *mcfqspi, u16 val)
 {
-	writew(val, mcfqspi->iobase + MCFQSPI_QAR);
+	pete_writew("drivers/spi/spi-coldfire-qspi.c:95", val, mcfqspi->iobase + MCFQSPI_QAR);
 }
 
 static void mcfqspi_wr_qdr(struct mcfqspi *mcfqspi, u16 val)
 {
-	writew(val, mcfqspi->iobase + MCFQSPI_QDR);
+	pete_writew("drivers/spi/spi-coldfire-qspi.c:100", val, mcfqspi->iobase + MCFQSPI_QDR);
 }
 
 static u16 mcfqspi_rd_qdr(struct mcfqspi *mcfqspi)
 {
-	return readw(mcfqspi->iobase + MCFQSPI_QDR);
+	return pete_readw("drivers/spi/spi-coldfire-qspi.c:105", mcfqspi->iobase + MCFQSPI_QDR);
 }
 
 static void mcfqspi_cs_select(struct mcfqspi *mcfqspi, u8 chip_select,

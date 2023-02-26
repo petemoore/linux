@@ -408,7 +408,7 @@ static int pc300_pci_init_one(struct pci_dev *pdev,
 	}
 
 	/* Enable interrupts on the PCI bridge, LINTi1 active low */
-	writew(0x0041, &card->plxbase->intr_ctrl_stat);
+	pete_writew("drivers/net/wan/pc300too.c:411", 0x0041, &card->plxbase->intr_ctrl_stat);
 
 	/* Allocate IRQ */
 	if (request_irq(pdev->irq, sca_intr, IRQF_SHARED, "pc300", card)) {

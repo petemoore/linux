@@ -72,7 +72,7 @@ static irqreturn_t spi_clps711x_isr(int irq, void *dev_id)
 	u8 data;
 
 	/* Handle RX */
-	data = readb(hw->syncio);
+	data = pete_readb("drivers/spi/spi-clps711x.c:75", hw->syncio);
 	if (hw->rx_buf)
 		*hw->rx_buf++ = data;
 

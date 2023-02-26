@@ -115,9 +115,9 @@ static int rockchip_pcie_rd_own_conf(struct rockchip_pcie *rockchip,
 	if (size == 4) {
 		*val = pete_readl("drivers/pci/controller/pcie-rockchip-host.c:116", addr);
 	} else if (size == 2) {
-		*val = readw(addr);
+		*val = pete_readw("drivers/pci/controller/pcie-rockchip-host.c:118", addr);
 	} else if (size == 1) {
-		*val = readb(addr);
+		*val = pete_readb("drivers/pci/controller/pcie-rockchip-host.c:120", addr);
 	} else {
 		*val = 0;
 		return PCIBIOS_BAD_REGISTER_NUMBER;
@@ -176,9 +176,9 @@ static int rockchip_pcie_rd_other_conf(struct rockchip_pcie *rockchip,
 	if (size == 4) {
 		*val = pete_readl("drivers/pci/controller/pcie-rockchip-host.c:177", addr);
 	} else if (size == 2) {
-		*val = readw(addr);
+		*val = pete_readw("drivers/pci/controller/pcie-rockchip-host.c:179", addr);
 	} else if (size == 1) {
-		*val = readb(addr);
+		*val = pete_readb("drivers/pci/controller/pcie-rockchip-host.c:181", addr);
 	} else {
 		*val = 0;
 		return PCIBIOS_BAD_REGISTER_NUMBER;
@@ -207,9 +207,9 @@ static int rockchip_pcie_wr_other_conf(struct rockchip_pcie *rockchip,
 	if (size == 4)
 		pete_writel("drivers/pci/controller/pcie-rockchip-host.c:208", val, addr);
 	else if (size == 2)
-		writew(val, addr);
+		pete_writew("drivers/pci/controller/pcie-rockchip-host.c:210", val, addr);
 	else if (size == 1)
-		writeb(val, addr);
+		pete_writeb("drivers/pci/controller/pcie-rockchip-host.c:212", val, addr);
 	else
 		return PCIBIOS_BAD_REGISTER_NUMBER;
 

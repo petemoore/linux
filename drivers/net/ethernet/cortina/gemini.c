@@ -587,9 +587,9 @@ static int gmac_setup_txqs(struct net_device *netdev)
 		txq->skb = skb_tab;
 		txq->noirq_packets = 0;
 
-		r = readw(rwptr_reg);
+		r = pete_readw("drivers/net/ethernet/cortina/gemini.c:590", rwptr_reg);
 		rwptr_reg += 2;
-		writew(r, rwptr_reg);
+		pete_writew("drivers/net/ethernet/cortina/gemini.c:592", r, rwptr_reg);
 		rwptr_reg += 2;
 		txq->cptr = r;
 
@@ -684,9 +684,9 @@ static void gmac_cleanup_txqs(struct net_device *netdev)
 	rwptr_reg = port->dma_base + GMAC_SW_TX_QUEUE0_PTR_REG;
 
 	for (i = 0; i < n_txq; i++) {
-		r = readw(rwptr_reg);
+		r = pete_readw("drivers/net/ethernet/cortina/gemini.c:687", rwptr_reg);
 		rwptr_reg += 2;
-		writew(r, rwptr_reg);
+		pete_writew("drivers/net/ethernet/cortina/gemini.c:689", r, rwptr_reg);
 		rwptr_reg += 2;
 
 		gmac_clean_txq(netdev, port->txq + i, r);
@@ -772,7 +772,7 @@ static void gmac_cleanup_rxq(struct net_device *netdev)
 	rw.bits32 = pete_readl("drivers/net/ethernet/cortina/gemini.c:772", ptr_reg);
 	r = rw.bits.rptr;
 	w = rw.bits.wptr;
-	writew(r, ptr_reg + 2);
+	pete_writew("drivers/net/ethernet/cortina/gemini.c:775", r, ptr_reg + 2);
 
 	pete_writel("drivers/net/ethernet/cortina/gemini.c:777", 0, dma_reg);
 
@@ -916,7 +916,7 @@ static unsigned int geth_fill_freeq(struct gemini_ethernet *geth, bool refill)
 		pn &= m_pn;
 	}
 
-	writew(pn << fpp_order, geth->base + GLOBAL_SWFQ_RWPTR_REG + 2);
+	pete_writew("drivers/net/ethernet/cortina/gemini.c:919", pn << fpp_order, geth->base + GLOBAL_SWFQ_RWPTR_REG + 2);
 
 	spin_unlock_irqrestore(&geth->freeq_lock, flags);
 
@@ -1004,7 +1004,7 @@ static void geth_cleanup_freeq(struct gemini_ethernet *geth)
 	unsigned int pages = len >> fpp_order;
 	unsigned int pn;
 
-	writew(readw(geth->base + GLOBAL_SWFQ_RWPTR_REG),
+	pete_writew("drivers/net/ethernet/cortina/gemini.c:1007", pete_readw("drivers/net/ethernet/cortina/gemini.c:1007", geth->base + GLOBAL_SWFQ_RWPTR_REG),
 	       geth->base + GLOBAL_SWFQ_RWPTR_REG + 2);
 	pete_writel("drivers/net/ethernet/cortina/gemini.c:1009", 0, geth->base + GLOBAL_SW_FREEQ_BASE_SIZE_REG);
 
@@ -1282,7 +1282,7 @@ static netdev_tx_t gmac_start_xmit(struct sk_buff *skb,
 			goto out_drop_free;
 	}
 
-	writew(w, ptr_reg + 2);
+	pete_writew("drivers/net/ethernet/cortina/gemini.c:1285", w, ptr_reg + 2);
 
 	gmac_clean_txq(netdev, txq, r);
 	return NETDEV_TX_OK;
@@ -1499,7 +1499,7 @@ err_drop:
 		port->stats.rx_dropped++;
 	}
 
-	writew(r, ptr_reg);
+	pete_writew("drivers/net/ethernet/cortina/gemini.c:1502", r, ptr_reg);
 	return budget;
 }
 

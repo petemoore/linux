@@ -713,7 +713,7 @@ static void s3c_fb_update_palette(struct s3c_fb *sfb,
 	pete_writel("drivers/video/fbdev/s3c-fb.c:713", palcon | WPALCON_PAL_UPDATE, sfb->regs + WPALCON);
 
 	if (win->variant.palette_16bpp)
-		writew(value, palreg + (reg * 2));
+		pete_writew("drivers/video/fbdev/s3c-fb.c:716", value, palreg + (reg * 2));
 	else
 		pete_writel("drivers/video/fbdev/s3c-fb.c:718", value, palreg + (reg * 4));
 

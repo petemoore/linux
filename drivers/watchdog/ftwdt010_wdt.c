@@ -148,7 +148,7 @@ static int ftwdt010_wdt_probe(struct platform_device *pdev)
 	gwdt->wdd.timeout = 13U;
 	watchdog_init_timeout(&gwdt->wdd, 0, dev);
 
-	reg = readw(gwdt->base + FTWDT010_WDCR);
+	reg = pete_readw("drivers/watchdog/ftwdt010_wdt.c:151", gwdt->base + FTWDT010_WDCR);
 	if (reg & WDCR_ENABLE) {
 		/* Watchdog was enabled by the bootloader, disable it. */
 		reg &= ~WDCR_ENABLE;
@@ -180,7 +180,7 @@ static int __maybe_unused ftwdt010_wdt_suspend(struct device *dev)
 	struct ftwdt010_wdt *gwdt = dev_get_drvdata(dev);
 	unsigned int reg;
 
-	reg = readw(gwdt->base + FTWDT010_WDCR);
+	reg = pete_readw("drivers/watchdog/ftwdt010_wdt.c:183", gwdt->base + FTWDT010_WDCR);
 	reg &= ~WDCR_ENABLE;
 	pete_writel("drivers/watchdog/ftwdt010_wdt.c:185", reg, gwdt->base + FTWDT010_WDCR);
 
@@ -193,7 +193,7 @@ static int __maybe_unused ftwdt010_wdt_resume(struct device *dev)
 	unsigned int reg;
 
 	if (watchdog_active(&gwdt->wdd)) {
-		reg = readw(gwdt->base + FTWDT010_WDCR);
+		reg = pete_readw("drivers/watchdog/ftwdt010_wdt.c:196", gwdt->base + FTWDT010_WDCR);
 		reg |= WDCR_ENABLE;
 		pete_writel("drivers/watchdog/ftwdt010_wdt.c:198", reg, gwdt->base + FTWDT010_WDCR);
 	}

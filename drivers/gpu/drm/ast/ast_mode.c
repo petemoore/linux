@@ -702,7 +702,7 @@ static void ast_update_cursor_image(u8 __iomem *dst, const u8 *src, int width, i
 			srcdata32[0].ul = *((u32 *)srcxor) & 0xf0f0f0f0;
 			data16.b[0] = srcdata32[0].b[1] | (srcdata32[0].b[0] >> 4);
 			data16.b[1] = srcdata32[0].b[3] | (srcdata32[0].b[2] >> 4);
-			writew(data16.us, dstxor);
+			pete_writew("drivers/gpu/drm/ast/ast_mode.c:705", data16.us, dstxor);
 			csum += (u32)data16.us;
 
 			dstxor += 2;

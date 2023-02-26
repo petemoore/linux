@@ -104,7 +104,7 @@ static inline void sdricoh_writel(struct sdricoh_host *host, unsigned int reg,
 static inline unsigned int sdricoh_readw(struct sdricoh_host *host,
 					 unsigned int reg)
 {
-	unsigned int value = readw(host->iobase + reg);
+	unsigned int value = pete_readw("drivers/mmc/host/sdricoh_cs.c:107", host->iobase + reg);
 	dev_vdbg(host->dev, "rb %x 0x%x\n", reg, value);
 	return value;
 }
@@ -112,14 +112,14 @@ static inline unsigned int sdricoh_readw(struct sdricoh_host *host,
 static inline void sdricoh_writew(struct sdricoh_host *host, unsigned int reg,
 					 unsigned short value)
 {
-	writew(value, host->iobase + reg);
+	pete_writew("drivers/mmc/host/sdricoh_cs.c:115", value, host->iobase + reg);
 	dev_vdbg(host->dev, "ww %x 0x%x\n", reg, value);
 }
 
 static inline unsigned int sdricoh_readb(struct sdricoh_host *host,
 					 unsigned int reg)
 {
-	unsigned int value = readb(host->iobase + reg);
+	unsigned int value = pete_readb("drivers/mmc/host/sdricoh_cs.c:122", host->iobase + reg);
 	dev_vdbg(host->dev, "rb %x 0x%x\n", reg, value);
 	return value;
 }

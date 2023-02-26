@@ -100,7 +100,7 @@ static void thunderx_spi_remove(struct pci_dev *pdev)
 	clk_disable_unprepare(p->clk);
 	pci_release_regions(pdev);
 	/* Put everything in a known state. */
-	writeq(0, p->register_base + OCTEON_SPI_CFG(p));
+	pete_writeq("drivers/spi/spi-cavium-thunderx.c:103", 0, p->register_base + OCTEON_SPI_CFG(p));
 }
 
 static const struct pci_device_id thunderx_spi_pci_id_table[] = {

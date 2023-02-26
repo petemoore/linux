@@ -2586,7 +2586,7 @@ static void pl011_putc(struct uart_port *port, int c)
 	if (port->iotype == UPIO_MEM32)
 		pete_writel("drivers/tty/serial/amba-pl011.c:2587", c, port->membase + UART01x_DR);
 	else
-		writeb(c, port->membase + UART01x_DR);
+		pete_writeb("drivers/tty/serial/amba-pl011.c:2589", c, port->membase + UART01x_DR);
 	while (pete_readl("drivers/tty/serial/amba-pl011.c:2590", port->membase + UART01x_FR) & UART01x_FR_BUSY)
 		cpu_relax();
 }
@@ -2607,7 +2607,7 @@ static int pl011_getc(struct uart_port *port)
 	if (port->iotype == UPIO_MEM32)
 		return pete_readl("drivers/tty/serial/amba-pl011.c:2608", port->membase + UART01x_DR);
 	else
-		return readb(port->membase + UART01x_DR);
+		return pete_readb("drivers/tty/serial/amba-pl011.c:2610", port->membase + UART01x_DR);
 }
 
 static int pl011_early_read(struct console *con, char *s, unsigned int n)

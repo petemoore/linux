@@ -22,7 +22,7 @@ nfp_net_sriov_check(struct nfp_app *app, int vf, u16 cap, const char *msg)
 	if (!app || !app->pf->vfcfg_tbl2)
 		return -EOPNOTSUPP;
 
-	cap_vf = readw(app->pf->vfcfg_tbl2 + NFP_NET_VF_CFG_MB_CAP);
+	cap_vf = pete_readw("drivers/net/ethernet/netronome/nfp/nfp_net_sriov.c:25", app->pf->vfcfg_tbl2 + NFP_NET_VF_CFG_MB_CAP);
 	if ((cap_vf & cap) != cap) {
 		nfp_warn(app->pf->cpp, "ndo_set_vf_%s not supported\n", msg);
 		return -EOPNOTSUPP;
@@ -43,8 +43,8 @@ nfp_net_sriov_update(struct nfp_app *app, int vf, u16 update, const char *msg)
 	int ret;
 
 	/* Write update info to mailbox in VF config symbol */
-	writeb(vf, app->pf->vfcfg_tbl2 + NFP_NET_VF_CFG_MB_VF_NUM);
-	writew(update, app->pf->vfcfg_tbl2 + NFP_NET_VF_CFG_MB_UPD);
+	pete_writeb("drivers/net/ethernet/netronome/nfp/nfp_net_sriov.c:46", vf, app->pf->vfcfg_tbl2 + NFP_NET_VF_CFG_MB_VF_NUM);
+	pete_writew("drivers/net/ethernet/netronome/nfp/nfp_net_sriov.c:47", update, app->pf->vfcfg_tbl2 + NFP_NET_VF_CFG_MB_UPD);
 
 	nn = list_first_entry(&app->pf->vnics, struct nfp_net, vnic_list);
 	/* Signal VF reconfiguration */
@@ -52,7 +52,7 @@ nfp_net_sriov_update(struct nfp_app *app, int vf, u16 update, const char *msg)
 	if (ret)
 		return ret;
 
-	ret = readw(app->pf->vfcfg_tbl2 + NFP_NET_VF_CFG_MB_RET);
+	ret = pete_readw("drivers/net/ethernet/netronome/nfp/nfp_net_sriov.c:55", app->pf->vfcfg_tbl2 + NFP_NET_VF_CFG_MB_RET);
 	if (ret)
 		nfp_warn(app->pf->cpp,
 			 "FW refused VF %s update with errno: %d\n", msg, ret);
@@ -79,7 +79,7 @@ int nfp_app_set_vf_mac(struct net_device *netdev, int vf, u8 *mac)
 	/* Write MAC to VF entry in VF config symbol */
 	vf_offset = NFP_NET_VF_CFG_MB_SZ + vf * NFP_NET_VF_CFG_SZ;
 	pete_writel("drivers/net/ethernet/netronome/nfp/nfp_net_sriov.c:81", get_unaligned_be32(mac), app->pf->vfcfg_tbl2 + vf_offset);
-	writew(get_unaligned_be16(mac + 4),
+	pete_writew("drivers/net/ethernet/netronome/nfp/nfp_net_sriov.c:82", get_unaligned_be16(mac + 4),
 	       app->pf->vfcfg_tbl2 + vf_offset + NFP_NET_VF_CFG_MAC_LO);
 
 	err = nfp_net_sriov_update(app, vf, NFP_NET_VF_CFG_MB_UPD_MAC, "MAC");
@@ -116,7 +116,7 @@ int nfp_app_set_vf_vlan(struct net_device *netdev, int vf, u16 vlan, u8 qos,
 	vlan_tci = FIELD_PREP(NFP_NET_VF_CFG_VLAN_VID, vlan) |
 		FIELD_PREP(NFP_NET_VF_CFG_VLAN_QOS, qos);
 	vf_offset = NFP_NET_VF_CFG_MB_SZ + vf * NFP_NET_VF_CFG_SZ;
-	writew(vlan_tci, app->pf->vfcfg_tbl2 + vf_offset + NFP_NET_VF_CFG_VLAN);
+	pete_writew("drivers/net/ethernet/netronome/nfp/nfp_net_sriov.c:119", vlan_tci, app->pf->vfcfg_tbl2 + vf_offset + NFP_NET_VF_CFG_VLAN);
 
 	return nfp_net_sriov_update(app, vf, NFP_NET_VF_CFG_MB_UPD_VLAN,
 				    "vlan");
@@ -137,10 +137,10 @@ int nfp_app_set_vf_spoofchk(struct net_device *netdev, int vf, bool enable)
 	/* Write spoof check control bit to VF entry in VF config symbol */
 	vf_offset = NFP_NET_VF_CFG_MB_SZ + vf * NFP_NET_VF_CFG_SZ +
 		NFP_NET_VF_CFG_CTRL;
-	vf_ctrl = readb(app->pf->vfcfg_tbl2 + vf_offset);
+	vf_ctrl = pete_readb("drivers/net/ethernet/netronome/nfp/nfp_net_sriov.c:140", app->pf->vfcfg_tbl2 + vf_offset);
 	vf_ctrl &= ~NFP_NET_VF_CFG_CTRL_SPOOF;
 	vf_ctrl |= FIELD_PREP(NFP_NET_VF_CFG_CTRL_SPOOF, enable);
-	writeb(vf_ctrl, app->pf->vfcfg_tbl2 + vf_offset);
+	pete_writeb("drivers/net/ethernet/netronome/nfp/nfp_net_sriov.c:143", vf_ctrl, app->pf->vfcfg_tbl2 + vf_offset);
 
 	return nfp_net_sriov_update(app, vf, NFP_NET_VF_CFG_MB_UPD_SPOOF,
 				    "spoofchk");
@@ -161,10 +161,10 @@ int nfp_app_set_vf_trust(struct net_device *netdev, int vf, bool enable)
 	/* Write trust control bit to VF entry in VF config symbol */
 	vf_offset = NFP_NET_VF_CFG_MB_SZ + vf * NFP_NET_VF_CFG_SZ +
 		NFP_NET_VF_CFG_CTRL;
-	vf_ctrl = readb(app->pf->vfcfg_tbl2 + vf_offset);
+	vf_ctrl = pete_readb("drivers/net/ethernet/netronome/nfp/nfp_net_sriov.c:164", app->pf->vfcfg_tbl2 + vf_offset);
 	vf_ctrl &= ~NFP_NET_VF_CFG_CTRL_TRUST;
 	vf_ctrl |= FIELD_PREP(NFP_NET_VF_CFG_CTRL_TRUST, enable);
-	writeb(vf_ctrl, app->pf->vfcfg_tbl2 + vf_offset);
+	pete_writeb("drivers/net/ethernet/netronome/nfp/nfp_net_sriov.c:167", vf_ctrl, app->pf->vfcfg_tbl2 + vf_offset);
 
 	return nfp_net_sriov_update(app, vf, NFP_NET_VF_CFG_MB_UPD_TRUST,
 				    "trust");
@@ -195,10 +195,10 @@ int nfp_app_set_vf_link_state(struct net_device *netdev, int vf,
 	/* Write link state to VF entry in VF config symbol */
 	vf_offset = NFP_NET_VF_CFG_MB_SZ + vf * NFP_NET_VF_CFG_SZ +
 		NFP_NET_VF_CFG_CTRL;
-	vf_ctrl = readb(app->pf->vfcfg_tbl2 + vf_offset);
+	vf_ctrl = pete_readb("drivers/net/ethernet/netronome/nfp/nfp_net_sriov.c:198", app->pf->vfcfg_tbl2 + vf_offset);
 	vf_ctrl &= ~NFP_NET_VF_CFG_CTRL_LINK_STATE;
 	vf_ctrl |= FIELD_PREP(NFP_NET_VF_CFG_CTRL_LINK_STATE, link_state);
-	writeb(vf_ctrl, app->pf->vfcfg_tbl2 + vf_offset);
+	pete_writeb("drivers/net/ethernet/netronome/nfp/nfp_net_sriov.c:201", vf_ctrl, app->pf->vfcfg_tbl2 + vf_offset);
 
 	return nfp_net_sriov_update(app, vf, NFP_NET_VF_CFG_MB_UPD_LINK_STATE,
 				    "link state");
@@ -222,10 +222,10 @@ int nfp_app_get_vf_config(struct net_device *netdev, int vf,
 	vf_offset = NFP_NET_VF_CFG_MB_SZ + vf * NFP_NET_VF_CFG_SZ;
 
 	mac_hi = pete_readl("drivers/net/ethernet/netronome/nfp/nfp_net_sriov.c:224", app->pf->vfcfg_tbl2 + vf_offset);
-	mac_lo = readw(app->pf->vfcfg_tbl2 + vf_offset + NFP_NET_VF_CFG_MAC_LO);
+	mac_lo = pete_readw("drivers/net/ethernet/netronome/nfp/nfp_net_sriov.c:225", app->pf->vfcfg_tbl2 + vf_offset + NFP_NET_VF_CFG_MAC_LO);
 
-	flags = readb(app->pf->vfcfg_tbl2 + vf_offset + NFP_NET_VF_CFG_CTRL);
-	vlan_tci = readw(app->pf->vfcfg_tbl2 + vf_offset + NFP_NET_VF_CFG_VLAN);
+	flags = pete_readb("drivers/net/ethernet/netronome/nfp/nfp_net_sriov.c:227", app->pf->vfcfg_tbl2 + vf_offset + NFP_NET_VF_CFG_CTRL);
+	vlan_tci = pete_readw("drivers/net/ethernet/netronome/nfp/nfp_net_sriov.c:228", app->pf->vfcfg_tbl2 + vf_offset + NFP_NET_VF_CFG_VLAN);
 
 	memset(ivi, 0, sizeof(*ivi));
 	ivi->vf = vf;

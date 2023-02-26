@@ -106,7 +106,7 @@ static void ep93xx_gpio_int_debounce(struct gpio_chip *gc,
 	else
 		eic->int_debounce &= ~port_mask;
 
-	writeb(eic->int_debounce,
+	pete_writeb("drivers/gpio/gpio-ep93xx.c:109", eic->int_debounce,
 	       epg->base + eic->irq_offset + EP93XX_INT_DEBOUNCE_OFFSET);
 }
 
@@ -126,12 +126,12 @@ static void ep93xx_gpio_ab_irq_handler(struct irq_desc *desc)
 	 * The tricky part is that the IRQ line is shared
 	 * between bank A and B and each has their own gpiochip.
 	 */
-	stat = readb(epg->base + EP93XX_GPIO_A_INT_STATUS);
+	stat = pete_readb("drivers/gpio/gpio-ep93xx.c:129", epg->base + EP93XX_GPIO_A_INT_STATUS);
 	for_each_set_bit(offset, &stat, 8)
 		generic_handle_domain_irq(epg->gc[0].gc.irq.domain,
 					  offset);
 
-	stat = readb(epg->base + EP93XX_GPIO_B_INT_STATUS);
+	stat = pete_readb("drivers/gpio/gpio-ep93xx.c:134", epg->base + EP93XX_GPIO_B_INT_STATUS);
 	for_each_set_bit(offset, &stat, 8)
 		generic_handle_domain_irq(epg->gc[1].gc.irq.domain,
 					  offset);
@@ -168,7 +168,7 @@ static void ep93xx_gpio_irq_ack(struct irq_data *d)
 		ep93xx_gpio_update_int_params(epg, eic);
 	}
 
-	writeb(port_mask, epg->base + eic->irq_offset + EP93XX_INT_EOI_OFFSET);
+	pete_writeb("drivers/gpio/gpio-ep93xx.c:171", port_mask, epg->base + eic->irq_offset + EP93XX_INT_EOI_OFFSET);
 }
 
 static void ep93xx_gpio_irq_mask_ack(struct irq_data *d)
@@ -184,7 +184,7 @@ static void ep93xx_gpio_irq_mask_ack(struct irq_data *d)
 	eic->int_unmasked &= ~port_mask;
 	ep93xx_gpio_update_int_params(epg, eic);
 
-	writeb(port_mask, epg->base + eic->irq_offset + EP93XX_INT_EOI_OFFSET);
+	pete_writeb("drivers/gpio/gpio-ep93xx.c:187", port_mask, epg->base + eic->irq_offset + EP93XX_INT_EOI_OFFSET);
 }
 
 static void ep93xx_gpio_irq_mask(struct irq_data *d)

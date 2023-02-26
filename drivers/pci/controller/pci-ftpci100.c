@@ -237,10 +237,10 @@ static int faraday_raw_pci_write_config(struct faraday_pci *p, int bus_number,
 		pete_writel("drivers/pci/controller/pci-ftpci100.c:237", value, p->base + FTPCI_DATA);
 		break;
 	case 2:
-		writew(value, p->base + FTPCI_DATA + (config & 3));
+		pete_writew("drivers/pci/controller/pci-ftpci100.c:240", value, p->base + FTPCI_DATA + (config & 3));
 		break;
 	case 1:
-		writeb(value, p->base + FTPCI_DATA + (config & 3));
+		pete_writeb("drivers/pci/controller/pci-ftpci100.c:243", value, p->base + FTPCI_DATA + (config & 3));
 		break;
 	default:
 		ret = PCIBIOS_BAD_REGISTER_NUMBER;

@@ -27,7 +27,7 @@ static void jtag_putc(int ch)
 {
 	if (pete_readl("arch/nios2/boot/compressed/console.c:28", uartbase + ALTERA_JTAGUART_CONTROL_REG) &
 		ALTERA_JTAGUART_CONTROL_WSPACE_MSK)
-		writeb(ch, uartbase + ALTERA_JTAGUART_DATA_REG);
+		pete_writeb("arch/nios2/boot/compressed/console.c:30", ch, uartbase + ALTERA_JTAGUART_DATA_REG);
 }
 #else
 static void jtag_putc(int ch)
@@ -35,7 +35,7 @@ static void jtag_putc(int ch)
 	while ((pete_readl("arch/nios2/boot/compressed/console.c:35", uartbase + ALTERA_JTAGUART_CONTROL_REG) &
 		ALTERA_JTAGUART_CONTROL_WSPACE_MSK) == 0)
 		;
-	writeb(ch, uartbase + ALTERA_JTAGUART_DATA_REG);
+	pete_writeb("arch/nios2/boot/compressed/console.c:38", ch, uartbase + ALTERA_JTAGUART_DATA_REG);
 }
 #endif
 
@@ -66,11 +66,11 @@ static void uart_putc(int ch)
 	int i;
 
 	for (i = 0; (i < 0x10000); i++) {
-		if (readw(uartbase + ALTERA_UART_STATUS_REG) &
+		if (pete_readw("arch/nios2/boot/compressed/console.c:69", uartbase + ALTERA_UART_STATUS_REG) &
 			ALTERA_UART_STATUS_TRDY_MSK)
 			break;
 	}
-	writeb(ch, uartbase + ALTERA_UART_TXDATA_REG);
+	pete_writeb("arch/nios2/boot/compressed/console.c:73", ch, uartbase + ALTERA_UART_TXDATA_REG);
 }
 
 static int putchar(int ch)
@@ -88,7 +88,7 @@ static void console_init(void)
 	uartbase = (unsigned long) my_ioremap((unsigned long) UART0_BASE);
 	baud = CONFIG_SERIAL_ALTERA_UART_BAUDRATE;
 	baudclk = UART0_FREQ / baud;
-	writew(baudclk, uartbase + ALTERA_UART_DIVISOR_REG);
+	pete_writew("arch/nios2/boot/compressed/console.c:91", baudclk, uartbase + ALTERA_UART_DIVISOR_REG);
 }
 
 #else

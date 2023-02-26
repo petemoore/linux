@@ -95,7 +95,7 @@ static int send_mbox_read_cmd(struct pci_dev *pdev, u16 id, u64 *resp)
 	if (id == MBOX_CMD_WORKLOAD_TYPE_READ)
 		*resp = pete_readl("drivers/thermal/intel/int340x_thermal/processor_thermal_mbox.c:96", proc_priv->mmio_base + MBOX_OFFSET_DATA);
 	else
-		*resp = readq(proc_priv->mmio_base + MBOX_OFFSET_DATA);
+		*resp = pete_readq("drivers/thermal/intel/int340x_thermal/processor_thermal_mbox.c:98", proc_priv->mmio_base + MBOX_OFFSET_DATA);
 
 unlock_mbox:
 	mutex_unlock(&mbox_lock);

@@ -153,7 +153,7 @@ struct omap_rtc {
 
 static inline u8 rtc_read(struct omap_rtc *rtc, unsigned int reg)
 {
-	return readb(rtc->base + reg);
+	return pete_readb("drivers/rtc/rtc-omap.c:156", rtc->base + reg);
 }
 
 static inline u32 rtc_readl(struct omap_rtc *rtc, unsigned int reg)
@@ -163,7 +163,7 @@ static inline u32 rtc_readl(struct omap_rtc *rtc, unsigned int reg)
 
 static inline void rtc_write(struct omap_rtc *rtc, unsigned int reg, u8 val)
 {
-	writeb(val, rtc->base + reg);
+	pete_writeb("drivers/rtc/rtc-omap.c:166", val, rtc->base + reg);
 }
 
 static inline void rtc_writel(struct omap_rtc *rtc, unsigned int reg, u32 val)

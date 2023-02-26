@@ -350,7 +350,7 @@ static void plx_dma_issue_pending(struct dma_chan *chan)
 	 */
 	wmb();
 
-	writew(PLX_REG_CTRL_START_VAL, plxdev->bar + PLX_REG_CTRL);
+	pete_writew("drivers/dma/plx_dma.c:353", PLX_REG_CTRL_START_VAL, plxdev->bar + PLX_REG_CTRL);
 
 	rcu_read_unlock();
 }
@@ -360,7 +360,7 @@ static irqreturn_t plx_dma_isr(int irq, void *devid)
 	struct plx_dma_dev *plxdev = devid;
 	u32 status;
 
-	status = readw(plxdev->bar + PLX_REG_INTR_STATUS);
+	status = pete_readw("drivers/dma/plx_dma.c:363", plxdev->bar + PLX_REG_INTR_STATUS);
 
 	if (!status)
 		return IRQ_NONE;
@@ -368,7 +368,7 @@ static irqreturn_t plx_dma_isr(int irq, void *devid)
 	if (status & PLX_REG_INTR_STATUS_DESC_DONE && plxdev->ring_active)
 		tasklet_schedule(&plxdev->desc_task);
 
-	writew(status, plxdev->bar + PLX_REG_INTR_STATUS);
+	pete_writew("drivers/dma/plx_dma.c:371", status, plxdev->bar + PLX_REG_INTR_STATUS);
 
 	return IRQ_HANDLED;
 }

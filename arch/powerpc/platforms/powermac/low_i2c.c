@@ -193,13 +193,13 @@ static const char *__kw_state_names[] = {
 
 static inline u8 __kw_read_reg(struct pmac_i2c_host_kw *host, reg_t reg)
 {
-	return readb(host->base + (((unsigned int)reg) << host->bsteps));
+	return pete_readb("arch/powerpc/platforms/powermac/low_i2c.c:196", host->base + (((unsigned int)reg) << host->bsteps));
 }
 
 static inline void __kw_write_reg(struct pmac_i2c_host_kw *host,
 				  reg_t reg, u8 val)
 {
-	writeb(val, host->base + (((unsigned)reg) << host->bsteps));
+	pete_writeb("arch/powerpc/platforms/powermac/low_i2c.c:202", val, host->base + (((unsigned)reg) << host->bsteps));
 	(void)__kw_read_reg(host, reg_subaddr);
 }
 

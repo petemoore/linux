@@ -157,7 +157,7 @@ static u8 handle_presence_change(u16 change, struct controller *ctrl)
 
 			rc++;
 
-			p_slot = cpqhp_find_slot(ctrl, hp_slot + (readb(ctrl->hpc_reg + SLOT_MASK) >> 4));
+			p_slot = cpqhp_find_slot(ctrl, hp_slot + (pete_readb("drivers/pci/hotplug/cpqphp_ctrl.c:160", ctrl->hpc_reg + SLOT_MASK) >> 4));
 			if (!p_slot)
 				return 0;
 
@@ -884,7 +884,7 @@ irqreturn_t cpqhp_ctrl_intr(int IRQ, void *data)
 	u32 temp_dword;
 
 
-	misc = readw(ctrl->hpc_reg + MISC);
+	misc = pete_readw("drivers/pci/hotplug/cpqphp_ctrl.c:887", ctrl->hpc_reg + MISC);
 	/*
 	 * Check to see if it was our interrupt
 	 */
@@ -898,10 +898,10 @@ irqreturn_t cpqhp_ctrl_intr(int IRQ, void *data)
 
 		/* Clear the interrupt */
 		misc |= 0x0004;
-		writew(misc, ctrl->hpc_reg + MISC);
+		pete_writew("drivers/pci/hotplug/cpqphp_ctrl.c:901", misc, ctrl->hpc_reg + MISC);
 
 		/* Read to clear posted writes */
-		misc = readw(ctrl->hpc_reg + MISC);
+		misc = pete_readw("drivers/pci/hotplug/cpqphp_ctrl.c:904", ctrl->hpc_reg + MISC);
 
 		dbg("%s - waking up\n", __func__);
 		wake_up_interruptible(&ctrl->queue);
@@ -928,12 +928,12 @@ irqreturn_t cpqhp_ctrl_intr(int IRQ, void *data)
 		schedule_flag += handle_power_fault((u8)((Diff & 0xFF00L) >> 8), ctrl);
 	}
 
-	reset = readb(ctrl->hpc_reg + RESET_FREQ_MODE);
+	reset = pete_readb("drivers/pci/hotplug/cpqphp_ctrl.c:931", ctrl->hpc_reg + RESET_FREQ_MODE);
 	if (reset & 0x40) {
 		/* Bus reset has completed */
 		reset &= 0xCF;
-		writeb(reset, ctrl->hpc_reg + RESET_FREQ_MODE);
-		reset = readb(ctrl->hpc_reg + RESET_FREQ_MODE);
+		pete_writeb("drivers/pci/hotplug/cpqphp_ctrl.c:935", reset, ctrl->hpc_reg + RESET_FREQ_MODE);
+		reset = pete_readb("drivers/pci/hotplug/cpqphp_ctrl.c:936", ctrl->hpc_reg + RESET_FREQ_MODE);
 		wake_up_interruptible(&ctrl->queue);
 	}
 
@@ -1117,7 +1117,7 @@ static u8 set_controller_speed(struct controller *ctrl, u8 adapter_speed, u8 hp_
 	struct slot *slot;
 	struct pci_bus *bus = ctrl->pci_bus;
 	u8 reg;
-	u8 slot_power = readb(ctrl->hpc_reg + SLOT_POWER);
+	u8 slot_power = pete_readb("drivers/pci/hotplug/cpqphp_ctrl.c:1120", ctrl->hpc_reg + SLOT_POWER);
 	u16 reg16;
 	u32 leds = pete_readl("drivers/pci/hotplug/cpqphp_ctrl.c:1122", ctrl->hpc_reg + LED_CONTROL);
 
@@ -1162,7 +1162,7 @@ static u8 set_controller_speed(struct controller *ctrl, u8 adapter_speed, u8 hp_
 	}
 
 	pete_writel("drivers/pci/hotplug/cpqphp_ctrl.c:1164", 0x0L, ctrl->hpc_reg + LED_CONTROL);
-	writeb(0x00, ctrl->hpc_reg + SLOT_ENABLE);
+	pete_writeb("drivers/pci/hotplug/cpqphp_ctrl.c:1165", 0x00, ctrl->hpc_reg + SLOT_ENABLE);
 
 	set_SOGO(ctrl);
 	wait_for_ctrl_irq(ctrl);
@@ -1173,7 +1173,7 @@ static u8 set_controller_speed(struct controller *ctrl, u8 adapter_speed, u8 hp_
 		reg = 0xF4;
 	pci_write_config_byte(ctrl->pci_dev, 0x41, reg);
 
-	reg16 = readw(ctrl->hpc_reg + NEXT_CURR_FREQ);
+	reg16 = pete_readw("drivers/pci/hotplug/cpqphp_ctrl.c:1176", ctrl->hpc_reg + NEXT_CURR_FREQ);
 	reg16 &= ~0x000F;
 	switch (adapter_speed) {
 		case(PCI_SPEED_133MHz_PCIX):
@@ -1198,7 +1198,7 @@ static u8 set_controller_speed(struct controller *ctrl, u8 adapter_speed, u8 hp_
 
 	}
 	reg16 |= 0xB << 12;
-	writew(reg16, ctrl->hpc_reg + NEXT_CURR_FREQ);
+	pete_writew("drivers/pci/hotplug/cpqphp_ctrl.c:1201", reg16, ctrl->hpc_reg + NEXT_CURR_FREQ);
 
 	mdelay(5);
 
@@ -1222,7 +1222,7 @@ static u8 set_controller_speed(struct controller *ctrl, u8 adapter_speed, u8 hp_
 
 	/* Restore LED/Slot state */
 	pete_writel("drivers/pci/hotplug/cpqphp_ctrl.c:1224", leds, ctrl->hpc_reg + LED_CONTROL);
-	writeb(slot_power, ctrl->hpc_reg + SLOT_ENABLE);
+	pete_writeb("drivers/pci/hotplug/cpqphp_ctrl.c:1225", slot_power, ctrl->hpc_reg + SLOT_ENABLE);
 
 	set_SOGO(ctrl);
 	wait_for_ctrl_irq(ctrl);
@@ -1284,9 +1284,9 @@ static u32 board_replaced(struct pci_func *func, struct controller *ctrl)
 
 		/* Change bits in slot power register to force another shift out
 		 * NOTE: this is to work around the timer bug */
-		temp_byte = readb(ctrl->hpc_reg + SLOT_POWER);
-		writeb(0x00, ctrl->hpc_reg + SLOT_POWER);
-		writeb(temp_byte, ctrl->hpc_reg + SLOT_POWER);
+		temp_byte = pete_readb("drivers/pci/hotplug/cpqphp_ctrl.c:1287", ctrl->hpc_reg + SLOT_POWER);
+		pete_writeb("drivers/pci/hotplug/cpqphp_ctrl.c:1288", 0x00, ctrl->hpc_reg + SLOT_POWER);
+		pete_writeb("drivers/pci/hotplug/cpqphp_ctrl.c:1289", temp_byte, ctrl->hpc_reg + SLOT_POWER);
 
 		set_SOGO(ctrl);
 
@@ -1432,9 +1432,9 @@ static u32 board_added(struct pci_func *func, struct controller *ctrl)
 	/* Change bits in slot power register to force another shift out
 	 * NOTE: this is to work around the timer bug
 	 */
-	temp_byte = readb(ctrl->hpc_reg + SLOT_POWER);
-	writeb(0x00, ctrl->hpc_reg + SLOT_POWER);
-	writeb(temp_byte, ctrl->hpc_reg + SLOT_POWER);
+	temp_byte = pete_readb("drivers/pci/hotplug/cpqphp_ctrl.c:1435", ctrl->hpc_reg + SLOT_POWER);
+	pete_writeb("drivers/pci/hotplug/cpqphp_ctrl.c:1436", 0x00, ctrl->hpc_reg + SLOT_POWER);
+	pete_writeb("drivers/pci/hotplug/cpqphp_ctrl.c:1437", temp_byte, ctrl->hpc_reg + SLOT_POWER);
 
 	set_SOGO(ctrl);
 
@@ -1662,9 +1662,9 @@ static u32 remove_board(struct pci_func *func, u32 replace_flag, struct controll
 	set_SOGO(ctrl);
 
 	/* turn off SERR for slot */
-	temp_byte = readb(ctrl->hpc_reg + SLOT_SERR);
+	temp_byte = pete_readb("drivers/pci/hotplug/cpqphp_ctrl.c:1665", ctrl->hpc_reg + SLOT_SERR);
 	temp_byte &= ~(0x01 << hp_slot);
-	writeb(temp_byte, ctrl->hpc_reg + SLOT_SERR);
+	pete_writeb("drivers/pci/hotplug/cpqphp_ctrl.c:1667", temp_byte, ctrl->hpc_reg + SLOT_SERR);
 
 	/* Wait for SOBS to be unset */
 	wait_for_ctrl_irq(ctrl);
@@ -2141,7 +2141,7 @@ int cpqhp_hardware_test(struct controller *ctrl, int test_num)
 	int loop;
 	int num_of_slots;
 
-	num_of_slots = readb(ctrl->hpc_reg + SLOT_MASK) & 0x0f;
+	num_of_slots = pete_readb("drivers/pci/hotplug/cpqphp_ctrl.c:2144", ctrl->hpc_reg + SLOT_MASK) & 0x0f;
 
 	switch (test_num) {
 	case 1:

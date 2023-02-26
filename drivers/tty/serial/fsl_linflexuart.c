@@ -165,7 +165,7 @@ static inline void linflex_transmit_buffer(struct uart_port *sport)
 
 	while (!uart_circ_empty(xmit)) {
 		c = xmit->buf[xmit->tail];
-		writeb(c, sport->membase + BDRL);
+		pete_writeb("drivers/tty/serial/fsl_linflexuart.c:168", c, sport->membase + BDRL);
 
 		/* Waiting for data transmission completed. */
 		while (((status = pete_readl("drivers/tty/serial/fsl_linflexuart.c:171", sport->membase + UARTSR)) &
@@ -206,7 +206,7 @@ static irqreturn_t linflex_txint(int irq, void *dev_id)
 	spin_lock_irqsave(&sport->lock, flags);
 
 	if (sport->x_char) {
-		writeb(sport->x_char, sport->membase + BDRL);
+		pete_writeb("drivers/tty/serial/fsl_linflexuart.c:209", sport->x_char, sport->membase + BDRL);
 
 		/* waiting for data transmission completed */
 		while (((status = pete_readl("drivers/tty/serial/fsl_linflexuart.c:212", sport->membase + UARTSR)) &
@@ -247,7 +247,7 @@ static irqreturn_t linflex_rxint(int irq, void *dev_id)
 
 	status = pete_readl("drivers/tty/serial/fsl_linflexuart.c:248", sport->membase + UARTSR);
 	while (status & LINFLEXD_UARTSR_RMB) {
-		rx = readb(sport->membase + BDRM);
+		rx = pete_readb("drivers/tty/serial/fsl_linflexuart.c:250", sport->membase + BDRM);
 		brk = false;
 		flg = TTY_NORMAL;
 		sport->icount.rx++;
@@ -571,7 +571,7 @@ static void linflex_console_putchar(struct uart_port *port, int ch)
 
 	cr = pete_readl("drivers/tty/serial/fsl_linflexuart.c:572", port->membase + UARTCR);
 
-	writeb(ch, port->membase + BDRL);
+	pete_writeb("drivers/tty/serial/fsl_linflexuart.c:574", ch, port->membase + BDRL);
 
 	if (!(cr & LINFLEXD_UARTCR_TFBM))
 		while ((pete_readl("drivers/tty/serial/fsl_linflexuart.c:577", port->membase + UARTSR) &

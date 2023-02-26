@@ -16,13 +16,13 @@
 
 u16 hellcreek_ptp_read(struct hellcreek *hellcreek, unsigned int offset)
 {
-	return readw(hellcreek->ptp_base + offset);
+	return pete_readw("drivers/net/dsa/hirschmann/hellcreek_ptp.c:19", hellcreek->ptp_base + offset);
 }
 
 void hellcreek_ptp_write(struct hellcreek *hellcreek, u16 data,
 			 unsigned int offset)
 {
-	writew(data, hellcreek->ptp_base + offset);
+	pete_writew("drivers/net/dsa/hirschmann/hellcreek_ptp.c:25", data, hellcreek->ptp_base + offset);
 }
 
 /* Get nanoseconds from PTP clock */

@@ -48,7 +48,7 @@ static const unsigned Fref = 14318180;
 #define mmio_base (p->screen_base + 0x400000)
 
 #define mm_write_ind(num, val, ap, dp)	do { \
-	writeb((num), mmio_base + (ap)); writeb((val), mmio_base + (dp)); \
+	pete_writeb("drivers/video/fbdev/asiliantfb.c:51", (num), mmio_base + (ap)); pete_writeb("drivers/video/fbdev/asiliantfb.c:51", (val), mmio_base + (dp)); \
 } while (0)
 
 static void mm_write_xr(struct fb_info *p, u8 reg, u8 data)
@@ -83,7 +83,7 @@ static void mm_write_sr(struct fb_info *p, u8 reg, u8 data)
 
 static void mm_write_ar(struct fb_info *p, u8 reg, u8 data)
 {
-	readb(mmio_base + 0x7b4);
+	pete_readb("drivers/video/fbdev/asiliantfb.c:86", mmio_base + 0x7b4);
 	mm_write_ind(reg, data, 0x780, 0x780);
 }
 #define write_ar(num, val)	mm_write_ar(p, num, val)
@@ -216,9 +216,9 @@ static void asiliant_set_timing(struct fb_info *p)
 	write_cr(0x18, 0x00);
 
 	if (p->var.xres == 640) {
-	  writeb(0xc7, mmio_base + 0x784);	/* set misc output reg */
+	  pete_writeb("drivers/video/fbdev/asiliantfb.c:219", 0xc7, mmio_base + 0x784);	/* set misc output reg */
 	} else {
-	  writeb(0x07, mmio_base + 0x784);	/* set misc output reg */
+	  pete_writeb("drivers/video/fbdev/asiliantfb.c:221", 0x07, mmio_base + 0x784);	/* set misc output reg */
 	}
 }
 
@@ -316,11 +316,11 @@ static int asiliantfb_setcolreg(u_int regno, u_int red, u_int green, u_int blue,
 	blue >>= 8;
 
         /* Set hardware palete */
-	writeb(regno, mmio_base + 0x790);
+	pete_writeb("drivers/video/fbdev/asiliantfb.c:319", regno, mmio_base + 0x790);
 	udelay(1);
-	writeb(red, mmio_base + 0x791);
-	writeb(green, mmio_base + 0x791);
-	writeb(blue, mmio_base + 0x791);
+	pete_writeb("drivers/video/fbdev/asiliantfb.c:321", red, mmio_base + 0x791);
+	pete_writeb("drivers/video/fbdev/asiliantfb.c:322", green, mmio_base + 0x791);
+	pete_writeb("drivers/video/fbdev/asiliantfb.c:323", blue, mmio_base + 0x791);
 
 	if (regno < 16) {
 		switch(p->var.red.offset) {
@@ -470,7 +470,7 @@ static void chips_hw_init(struct fb_info *p)
 	for (i = 0; i < ARRAY_SIZE(chips_init_ar); ++i)
 		write_ar(chips_init_ar[i].addr, chips_init_ar[i].data);
 	/* Enable video output in attribute index register */
-	writeb(0x20, mmio_base + 0x780);
+	pete_writeb("drivers/video/fbdev/asiliantfb.c:473", 0x20, mmio_base + 0x780);
 	for (i = 0; i < ARRAY_SIZE(chips_init_cr); ++i)
 		write_cr(chips_init_cr[i].addr, chips_init_cr[i].data);
 	for (i = 0; i < ARRAY_SIZE(chips_init_fr); ++i)
@@ -533,7 +533,7 @@ static int init_asiliant(struct fb_info *p, unsigned long addr)
 	fb_info(p, "Asiliant 69000 frame buffer (%dK RAM detected)\n",
 		p->fix.smem_len / 1024);
 
-	writeb(0xff, mmio_base + 0x78c);
+	pete_writeb("drivers/video/fbdev/asiliantfb.c:536", 0xff, mmio_base + 0x78c);
 	chips_hw_init(p);
 	return 0;
 }
@@ -570,7 +570,7 @@ static int asiliantfb_pci_init(struct pci_dev *dp,
 	}
 
 	pci_write_config_dword(dp, 4, 0x02800083);
-	writeb(3, p->screen_base + 0x400784);
+	pete_writeb("drivers/video/fbdev/asiliantfb.c:573", 3, p->screen_base + 0x400784);
 
 	err = init_asiliant(p, addr);
 	if (err) {

@@ -350,7 +350,7 @@ static void load_code(struct icom_port *icom_port)
 	struct pci_dev *dev = icom_port->adapter->pci_dev;
 
 	/* Clear out any pending interrupts */
-	writew(0x3FFF, icom_port->int_reg);
+	pete_writew("drivers/tty/serial/icom.c:353", 0x3FFF, icom_port->int_reg);
 
 	trace(icom_port, "CLEAR_INTERRUPTS", 0);
 
@@ -376,7 +376,7 @@ static void load_code(struct icom_port *icom_port)
 
 	iram_ptr = (char __iomem *)icom_port->dram + ICOM_IRAM_OFFSET;
 	for (index = 0; index < fw->size; index++)
-		writeb(fw->data[index], &iram_ptr[index]);
+		pete_writeb("drivers/tty/serial/icom.c:379", fw->data[index], &iram_ptr[index]);
 
 	release_firmware(fw);
 
@@ -396,23 +396,23 @@ static void load_code(struct icom_port *icom_port)
 
 	iram_ptr = (char __iomem *) icom_port->dram + ICOM_IRAM_OFFSET;
 	for (index = ICOM_DCE_IRAM_OFFSET; index < fw->size; index++)
-		writeb(fw->data[index], &iram_ptr[index]);
+		pete_writeb("drivers/tty/serial/icom.c:399", fw->data[index], &iram_ptr[index]);
 
 	release_firmware(fw);
 
 	/* Set Hardware level */
 	if (icom_port->adapter->version == ADAPTER_V2)
-		writeb(V2_HARDWARE, &(icom_port->dram->misc_flags));
+		pete_writeb("drivers/tty/serial/icom.c:405", V2_HARDWARE, &(icom_port->dram->misc_flags));
 
 	/* Start the processor in Adapter */
 	start_processor(icom_port);
 
-	writeb((HDLC_PPP_PURE_ASYNC | HDLC_FF_FILL),
+	pete_writeb("drivers/tty/serial/icom.c:410", (HDLC_PPP_PURE_ASYNC | HDLC_FF_FILL),
 	       &(icom_port->dram->HDLCConfigReg));
-	writeb(0x04, &(icom_port->dram->FlagFillIdleTimer));	/* 0.5 seconds */
-	writeb(0x00, &(icom_port->dram->CmdReg));
-	writeb(0x10, &(icom_port->dram->async_config3));
-	writeb((ICOM_ACFG_DRIVE1 | ICOM_ACFG_NO_PARITY | ICOM_ACFG_8BPC |
+	pete_writeb("drivers/tty/serial/icom.c:412", 0x04, &(icom_port->dram->FlagFillIdleTimer));	/* 0.5 seconds */
+	pete_writeb("drivers/tty/serial/icom.c:413", 0x00, &(icom_port->dram->CmdReg));
+	pete_writeb("drivers/tty/serial/icom.c:414", 0x10, &(icom_port->dram->async_config3));
+	pete_writeb("drivers/tty/serial/icom.c:415", (ICOM_ACFG_DRIVE1 | ICOM_ACFG_NO_PARITY | ICOM_ACFG_8BPC |
 		ICOM_ACFG_1STOP_BIT), &(icom_port->dram->async_config2));
 
 	/*Set up data in icom DRAM to indicate where personality
@@ -442,7 +442,7 @@ static void load_code(struct icom_port *icom_port)
 	for (index = 0; index < fw->size; index++)
 		new_page[index] = fw->data[index];
 
-	writeb((char) ((fw->size + 16)/16), &icom_port->dram->mac_length);
+	pete_writeb("drivers/tty/serial/icom.c:445", (char) ((fw->size + 16)/16), &icom_port->dram->mac_length);
 	pete_writel("drivers/tty/serial/icom.c:446", temp_pci, &icom_port->dram->mac_load_addr);
 
 	release_firmware(fw);
@@ -456,12 +456,12 @@ static void load_code(struct icom_port *icom_port)
 	/* the wait loop below verifies this write operation has been done
 	   and processed
 	*/
-	writeb(START_DOWNLOAD, &icom_port->dram->sync);
+	pete_writeb("drivers/tty/serial/icom.c:459", START_DOWNLOAD, &icom_port->dram->sync);
 
 	/* Wait max 1 Sec for data download and processor to start */
 	for (index = 0; index < 10; index++) {
 		msleep(100);
-		if (readb(&icom_port->dram->misc_flags) & ICOM_HDW_ACTIVE)
+		if (pete_readb("drivers/tty/serial/icom.c:464", &icom_port->dram->misc_flags) & ICOM_HDW_ACTIVE)
 			break;
 	}
 
@@ -471,7 +471,7 @@ static void load_code(struct icom_port *icom_port)
 	/*
 	 * check Cable ID
 	 */
-	cable_id = readb(&icom_port->dram->cable_id);
+	cable_id = pete_readb("drivers/tty/serial/icom.c:474", &icom_port->dram->cable_id);
 
 	if (cable_id & ICOM_CABLE_ID_VALID) {
 		/* Get cable ID into the lower 4 bits (standard form) */
@@ -486,10 +486,10 @@ static void load_code(struct icom_port *icom_port)
 
 	if (status != 0) {
 		/* Clear out any pending interrupts */
-		writew(0x3FFF, icom_port->int_reg);
+		pete_writew("drivers/tty/serial/icom.c:489", 0x3FFF, icom_port->int_reg);
 
 		/* Turn off port */
-		writeb(ICOM_DISABLE, &(icom_port->dram->disable));
+		pete_writeb("drivers/tty/serial/icom.c:492", ICOM_DISABLE, &(icom_port->dram->disable));
 
 		/* Stop processor */
 		stop_processor(icom_port);
@@ -520,7 +520,7 @@ static int startup(struct icom_port *icom_port)
 	/*
 	 * check Cable ID
 	 */
-	raw_cable_id = readb(&icom_port->dram->cable_id);
+	raw_cable_id = pete_readb("drivers/tty/serial/icom.c:523", &icom_port->dram->cable_id);
 	trace(icom_port, "CABLE_ID", raw_cable_id);
 
 	/* Get cable ID into the lower 4 bits (standard form) */
@@ -534,7 +534,7 @@ static int startup(struct icom_port *icom_port)
 		load_code(icom_port);
 
 		/* still no sign of cable, error out */
-		raw_cable_id = readb(&icom_port->dram->cable_id);
+		raw_cable_id = pete_readb("drivers/tty/serial/icom.c:537", &icom_port->dram->cable_id);
 		cable_id = (raw_cable_id & ICOM_CABLE_ID_MASK) >> 4;
 		if (!(raw_cable_id & ICOM_CABLE_ID_VALID) ||
 		    (icom_port->cable_id == NO_CABLE))
@@ -558,9 +558,9 @@ static int startup(struct icom_port *icom_port)
 		int_mask_tbl[port].global_int_mask = &icom_port->global_reg->int_mask_2;
 
 	if (port == 0 || port == 2)
-		writew(0x00FF, icom_port->int_reg);
+		pete_writew("drivers/tty/serial/icom.c:561", 0x00FF, icom_port->int_reg);
 	else
-		writew(0x3F00, icom_port->int_reg);
+		pete_writew("drivers/tty/serial/icom.c:563", 0x3F00, icom_port->int_reg);
 
 	temp = pete_readl("drivers/tty/serial/icom.c:565", int_mask_tbl[port].global_int_mask);
 	pete_writel("drivers/tty/serial/icom.c:566", temp & ~int_mask_tbl[port].processor_id, int_mask_tbl[port].global_int_mask);
@@ -609,9 +609,9 @@ unlock:
 	/*
 	 * disable break condition
 	 */
-	cmdReg = readb(&icom_port->dram->CmdReg);
+	cmdReg = pete_readb("drivers/tty/serial/icom.c:612", &icom_port->dram->CmdReg);
 	if (cmdReg & CMD_SND_BREAK) {
-		writeb(cmdReg & ~CMD_SND_BREAK, &icom_port->dram->CmdReg);
+		pete_writeb("drivers/tty/serial/icom.c:614", cmdReg & ~CMD_SND_BREAK, &icom_port->dram->CmdReg);
 	}
 }
 
@@ -651,13 +651,13 @@ static int icom_write(struct uart_port *port)
 		    (unsigned long) ICOM_PORT->statStg;
 		*ICOM_PORT->xmitRestart =
 		    cpu_to_le32(ICOM_PORT->statStg_pci + offset);
-		cmdReg = readb(&ICOM_PORT->dram->CmdReg);
-		writeb(cmdReg | CMD_XMIT_RCV_ENABLE,
+		cmdReg = pete_readb("drivers/tty/serial/icom.c:654", &ICOM_PORT->dram->CmdReg);
+		pete_writeb("drivers/tty/serial/icom.c:655", cmdReg | CMD_XMIT_RCV_ENABLE,
 		       &ICOM_PORT->dram->CmdReg);
-		writeb(START_XMIT, &ICOM_PORT->dram->StartXmitCmd);
+		pete_writeb("drivers/tty/serial/icom.c:657", START_XMIT, &ICOM_PORT->dram->StartXmitCmd);
 		trace(ICOM_PORT, "WRITE_START", data_count);
 		/* write flush */
-		readb(&ICOM_PORT->dram->StartXmitCmd);
+		pete_readb("drivers/tty/serial/icom.c:660", &ICOM_PORT->dram->StartXmitCmd);
 	}
 
 	return data_count;
@@ -672,7 +672,7 @@ static inline void check_modem_status(struct icom_port *icom_port)
 	spin_lock(&icom_port->uart_port.lock);
 
 	/*modem input register */
-	status = readb(&icom_port->dram->isr);
+	status = pete_readb("drivers/tty/serial/icom.c:675", &icom_port->dram->isr);
 	trace(icom_port, "CHECK_MODEM", status);
 	delta_status = status ^ old_status;
 	if (delta_status) {
@@ -944,7 +944,7 @@ static void icom_set_mctrl(struct uart_port *port, unsigned int mctrl)
 	unsigned char local_osr;
 
 	trace(ICOM_PORT, "SET_MODEM", 0);
-	local_osr = readb(&ICOM_PORT->dram->osr);
+	local_osr = pete_readb("drivers/tty/serial/icom.c:947", &ICOM_PORT->dram->osr);
 
 	if (mctrl & TIOCM_RTS) {
 		trace(ICOM_PORT, "RAISE_RTS", 0);
@@ -962,7 +962,7 @@ static void icom_set_mctrl(struct uart_port *port, unsigned int mctrl)
 		local_osr &= ~ICOM_DTR;
 	}
 
-	writeb(local_osr, &ICOM_PORT->dram->osr);
+	pete_writeb("drivers/tty/serial/icom.c:965", local_osr, &ICOM_PORT->dram->osr);
 }
 
 static unsigned int icom_get_mctrl(struct uart_port *port)
@@ -972,7 +972,7 @@ static unsigned int icom_get_mctrl(struct uart_port *port)
 
 	trace(ICOM_PORT, "GET_MODEM", 0);
 
-	status = readb(&ICOM_PORT->dram->isr);
+	status = pete_readb("drivers/tty/serial/icom.c:975", &ICOM_PORT->dram->isr);
 
 	result = ((status & ICOM_DCD) ? TIOCM_CAR : 0)
 	    | ((status & ICOM_RI) ? TIOCM_RNG : 0)
@@ -986,8 +986,8 @@ static void icom_stop_tx(struct uart_port *port)
 	unsigned char cmdReg;
 
 	trace(ICOM_PORT, "STOP", 0);
-	cmdReg = readb(&ICOM_PORT->dram->CmdReg);
-	writeb(cmdReg | CMD_HOLD_XMIT, &ICOM_PORT->dram->CmdReg);
+	cmdReg = pete_readb("drivers/tty/serial/icom.c:989", &ICOM_PORT->dram->CmdReg);
+	pete_writeb("drivers/tty/serial/icom.c:990", cmdReg | CMD_HOLD_XMIT, &ICOM_PORT->dram->CmdReg);
 }
 
 static void icom_start_tx(struct uart_port *port)
@@ -995,9 +995,9 @@ static void icom_start_tx(struct uart_port *port)
 	unsigned char cmdReg;
 
 	trace(ICOM_PORT, "START", 0);
-	cmdReg = readb(&ICOM_PORT->dram->CmdReg);
+	cmdReg = pete_readb("drivers/tty/serial/icom.c:998", &ICOM_PORT->dram->CmdReg);
 	if ((cmdReg & CMD_HOLD_XMIT) == CMD_HOLD_XMIT)
-		writeb(cmdReg & ~CMD_HOLD_XMIT,
+		pete_writeb("drivers/tty/serial/icom.c:1000", cmdReg & ~CMD_HOLD_XMIT,
 		       &ICOM_PORT->dram->CmdReg);
 
 	icom_write(port);
@@ -1014,13 +1014,13 @@ static void icom_send_xchar(struct uart_port *port, char ch)
 	/* wait .1 sec to send char */
 	for (index = 0; index < 10; index++) {
 		spin_lock_irqsave(&port->lock, flags);
-		xdata = readb(&ICOM_PORT->dram->xchar);
+		xdata = pete_readb("drivers/tty/serial/icom.c:1017", &ICOM_PORT->dram->xchar);
 		if (xdata == 0x00) {
 			trace(ICOM_PORT, "QUICK_WRITE", 0);
-			writeb(ch, &ICOM_PORT->dram->xchar);
+			pete_writeb("drivers/tty/serial/icom.c:1020", ch, &ICOM_PORT->dram->xchar);
 
 			/* flush write operation */
-			xdata = readb(&ICOM_PORT->dram->xchar);
+			xdata = pete_readb("drivers/tty/serial/icom.c:1023", &ICOM_PORT->dram->xchar);
 			spin_unlock_irqrestore(&port->lock, flags);
 			break;
 		}
@@ -1033,8 +1033,8 @@ static void icom_stop_rx(struct uart_port *port)
 {
 	unsigned char cmdReg;
 
-	cmdReg = readb(&ICOM_PORT->dram->CmdReg);
-	writeb(cmdReg & ~CMD_RCV_ENABLE, &ICOM_PORT->dram->CmdReg);
+	cmdReg = pete_readb("drivers/tty/serial/icom.c:1036", &ICOM_PORT->dram->CmdReg);
+	pete_writeb("drivers/tty/serial/icom.c:1037", cmdReg & ~CMD_RCV_ENABLE, &ICOM_PORT->dram->CmdReg);
 }
 
 static void icom_break(struct uart_port *port, int break_state)
@@ -1044,11 +1044,11 @@ static void icom_break(struct uart_port *port, int break_state)
 
 	spin_lock_irqsave(&port->lock, flags);
 	trace(ICOM_PORT, "BREAK", 0);
-	cmdReg = readb(&ICOM_PORT->dram->CmdReg);
+	cmdReg = pete_readb("drivers/tty/serial/icom.c:1047", &ICOM_PORT->dram->CmdReg);
 	if (break_state == -1) {
-		writeb(cmdReg | CMD_SND_BREAK, &ICOM_PORT->dram->CmdReg);
+		pete_writeb("drivers/tty/serial/icom.c:1049", cmdReg | CMD_SND_BREAK, &ICOM_PORT->dram->CmdReg);
 	} else {
-		writeb(cmdReg & ~CMD_SND_BREAK, &ICOM_PORT->dram->CmdReg);
+		pete_writeb("drivers/tty/serial/icom.c:1051", cmdReg & ~CMD_SND_BREAK, &ICOM_PORT->dram->CmdReg);
 	}
 	spin_unlock_irqrestore(&port->lock, flags);
 }
@@ -1076,8 +1076,8 @@ static void icom_close(struct uart_port *port)
 	trace(ICOM_PORT, "CLOSE", 0);
 
 	/* stop receiver */
-	cmdReg = readb(&ICOM_PORT->dram->CmdReg);
-	writeb(cmdReg & ~CMD_RCV_ENABLE, &ICOM_PORT->dram->CmdReg);
+	cmdReg = pete_readb("drivers/tty/serial/icom.c:1079", &ICOM_PORT->dram->CmdReg);
+	pete_writeb("drivers/tty/serial/icom.c:1080", cmdReg & ~CMD_RCV_ENABLE, &ICOM_PORT->dram->CmdReg);
 
 	shutdown(ICOM_PORT);
 
@@ -1155,12 +1155,12 @@ static void icom_set_termios(struct uart_port *port,
 	uart_update_timeout(port, cflag, baud);
 
 	/* CTS flow control flag and modem status interrupts */
-	tmp_byte = readb(&(ICOM_PORT->dram->HDLCConfigReg));
+	tmp_byte = pete_readb("drivers/tty/serial/icom.c:1158", &(ICOM_PORT->dram->HDLCConfigReg));
 	if (cflag & CRTSCTS)
 		tmp_byte |= HDLC_HDW_FLOW;
 	else
 		tmp_byte &= ~HDLC_HDW_FLOW;
-	writeb(tmp_byte, &(ICOM_PORT->dram->HDLCConfigReg));
+	pete_writeb("drivers/tty/serial/icom.c:1163", tmp_byte, &(ICOM_PORT->dram->HDLCConfigReg));
 
 	/*
 	 * Set up parity check flag
@@ -1197,10 +1197,10 @@ static void icom_set_termios(struct uart_port *port,
 		ICOM_PORT->ignore_status_mask |= SA_FL_RCV_DONE;
 
 	/* Turn off Receiver to prepare for reset */
-	writeb(CMD_RCV_DISABLE, &ICOM_PORT->dram->CmdReg);
+	pete_writeb("drivers/tty/serial/icom.c:1200", CMD_RCV_DISABLE, &ICOM_PORT->dram->CmdReg);
 
 	for (index = 0; index < 10; index++) {
-		if (readb(&ICOM_PORT->dram->PrevCmdReg) == 0x00) {
+		if (pete_readb("drivers/tty/serial/icom.c:1203", &ICOM_PORT->dram->PrevCmdReg) == 0x00) {
 			break;
 		}
 	}
@@ -1219,19 +1219,19 @@ static void icom_set_termios(struct uart_port *port,
 
 	/* activate changes and start xmit and receiver here */
 	/* Enable the receiver */
-	writeb(new_config3, &(ICOM_PORT->dram->async_config3));
-	writeb(new_config2, &(ICOM_PORT->dram->async_config2));
-	tmp_byte = readb(&(ICOM_PORT->dram->HDLCConfigReg));
+	pete_writeb("drivers/tty/serial/icom.c:1222", new_config3, &(ICOM_PORT->dram->async_config3));
+	pete_writeb("drivers/tty/serial/icom.c:1223", new_config2, &(ICOM_PORT->dram->async_config2));
+	tmp_byte = pete_readb("drivers/tty/serial/icom.c:1224", &(ICOM_PORT->dram->HDLCConfigReg));
 	tmp_byte |= HDLC_PPP_PURE_ASYNC | HDLC_FF_FILL;
-	writeb(tmp_byte, &(ICOM_PORT->dram->HDLCConfigReg));
-	writeb(0x04, &(ICOM_PORT->dram->FlagFillIdleTimer));	/* 0.5 seconds */
-	writeb(0xFF, &(ICOM_PORT->dram->ier));	/* enable modem signal interrupts */
+	pete_writeb("drivers/tty/serial/icom.c:1226", tmp_byte, &(ICOM_PORT->dram->HDLCConfigReg));
+	pete_writeb("drivers/tty/serial/icom.c:1227", 0x04, &(ICOM_PORT->dram->FlagFillIdleTimer));	/* 0.5 seconds */
+	pete_writeb("drivers/tty/serial/icom.c:1228", 0xFF, &(ICOM_PORT->dram->ier));	/* enable modem signal interrupts */
 
 	/* reset processor */
-	writeb(CMD_RESTART, &ICOM_PORT->dram->CmdReg);
+	pete_writeb("drivers/tty/serial/icom.c:1231", CMD_RESTART, &ICOM_PORT->dram->CmdReg);
 
 	for (index = 0; index < 10; index++) {
-		if (readb(&ICOM_PORT->dram->CmdReg) == 0x00) {
+		if (pete_readb("drivers/tty/serial/icom.c:1234", &ICOM_PORT->dram->CmdReg) == 0x00) {
 			break;
 		}
 	}
@@ -1248,7 +1248,7 @@ static void icom_set_termios(struct uart_port *port,
 	pete_writel("drivers/tty/serial/icom.c:1248", ICOM_PORT->xmitRestart_pci,
 	       &ICOM_PORT->dram->XmitStatusAddr);
 	trace(ICOM_PORT, "XR_ENAB", 0);
-	writeb(CMD_XMIT_RCV_ENABLE, &ICOM_PORT->dram->CmdReg);
+	pete_writeb("drivers/tty/serial/icom.c:1251", CMD_XMIT_RCV_ENABLE, &ICOM_PORT->dram->CmdReg);
 
 	spin_unlock_irqrestore(&port->lock, flags);
 }
@@ -1448,7 +1448,7 @@ static void icom_remove_adapter(struct icom_adapter *icom_adapter)
 					     &icom_port->uart_port);
 
 			/* be sure that DTR and RTS are dropped */
-			writeb(0x00, &icom_port->dram->osr);
+			pete_writeb("drivers/tty/serial/icom.c:1451", 0x00, &icom_port->dram->osr);
 
 			/* Wait 0.1 Sec for simple Init to complete */
 			msleep(100);

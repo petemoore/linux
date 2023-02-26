@@ -208,7 +208,7 @@ static int stih_cec_adap_transmit(struct cec_adapter *adap, u8 attempts,
 
 	/* Copy message into registers */
 	for (i = 0; i < msg->len; i++)
-		writeb(msg->msg[i], cec->regs + CEC_TX_DATA_BASE + i);
+		pete_writeb("drivers/media/cec/platform/sti/stih-cec.c:211", msg->msg[i], cec->regs + CEC_TX_DATA_BASE + i);
 
 	/*
 	 * Start transmission, configure hardware to add start and stop bits

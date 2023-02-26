@@ -361,7 +361,7 @@ static void i82875p_init_csrows(struct mem_ctl_info *mci,
 	for (index = 0; index < mci->nr_csrows; index++) {
 		csrow = mci->csrows[index];
 
-		value = readb(ovrfl_window + I82875P_DRB + index);
+		value = pete_readb("drivers/edac/i82875p_edac.c:364", ovrfl_window + I82875P_DRB + index);
 		cumul_size = value << (I82875P_DRB_SHIFT - PAGE_SHIFT);
 		edac_dbg(3, "(%d) cumul_size 0x%x\n", index, cumul_size);
 		if (cumul_size == last_cumul_size)

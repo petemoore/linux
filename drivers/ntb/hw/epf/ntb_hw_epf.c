@@ -109,7 +109,7 @@ static int ntb_epf_send_command(struct ntb_epf_dev *ndev, u32 command,
 	timeout = ktime_add_ms(ktime_get(), NTB_EPF_COMMAND_TIMEOUT);
 	while (1) {
 		timedout = ktime_after(ktime_get(), timeout);
-		status = readw(ndev->ctrl_reg + NTB_EPF_CMD_STATUS);
+		status = pete_readw("drivers/ntb/hw/epf/ntb_hw_epf.c:112", ndev->ctrl_reg + NTB_EPF_CMD_STATUS);
 
 		if (status == COMMAND_STATUS_ERROR) {
 			ret = -EINVAL;
@@ -127,7 +127,7 @@ static int ntb_epf_send_command(struct ntb_epf_dev *ndev, u32 command,
 		usleep_range(5, 10);
 	}
 
-	writew(0, ndev->ctrl_reg + NTB_EPF_CMD_STATUS);
+	pete_writew("drivers/ntb/hw/epf/ntb_hw_epf.c:130", 0, ndev->ctrl_reg + NTB_EPF_CMD_STATUS);
 	mutex_unlock(&ndev->cmd_lock);
 
 	return ret;
@@ -195,7 +195,7 @@ static u64 ntb_epf_link_is_up(struct ntb_dev *ntb,
 	struct ntb_epf_dev *ndev = ntb_ndev(ntb);
 	u32 status;
 
-	status = readw(ndev->ctrl_reg + NTB_EPF_LINK_STATUS);
+	status = pete_readw("drivers/ntb/hw/epf/ntb_hw_epf.c:198", ndev->ctrl_reg + NTB_EPF_LINK_STATUS);
 
 	return status & LINK_STATUS_UP;
 }

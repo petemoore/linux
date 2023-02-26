@@ -95,14 +95,14 @@ static void hisi_ddrc_pmu_v1_write_counter(struct hisi_pmu *ddrc_pmu,
 static u64 hisi_ddrc_pmu_v2_read_counter(struct hisi_pmu *ddrc_pmu,
 					 struct hw_perf_event *hwc)
 {
-	return readq(ddrc_pmu->base +
+	return pete_readq("drivers/perf/hisilicon/hisi_uncore_ddrc_pmu.c:98", ddrc_pmu->base +
 		     hisi_ddrc_pmu_v2_get_counter_offset(hwc->idx));
 }
 
 static void hisi_ddrc_pmu_v2_write_counter(struct hisi_pmu *ddrc_pmu,
 					   struct hw_perf_event *hwc, u64 val)
 {
-	writeq(val,
+	pete_writeq("drivers/perf/hisilicon/hisi_uncore_ddrc_pmu.c:105", val,
 	       ddrc_pmu->base + hisi_ddrc_pmu_v2_get_counter_offset(hwc->idx));
 }
 

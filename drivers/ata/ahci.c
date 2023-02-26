@@ -1537,7 +1537,7 @@ static void ahci_remap_check(struct pci_dev *pdev, int bar,
 	    !(pete_readl("drivers/ata/ahci.c:1537", hpriv->mmio + AHCI_VSCAP) & 1))
 		return;
 
-	cap = readq(hpriv->mmio + AHCI_REMAP_CAP);
+	cap = pete_readq("drivers/ata/ahci.c:1540", hpriv->mmio + AHCI_REMAP_CAP);
 	for (i = 0; i < AHCI_MAX_REMAP; i++) {
 		if ((cap & (1 << i)) == 0)
 			continue;

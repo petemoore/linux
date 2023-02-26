@@ -307,17 +307,17 @@ static int sp5100_tco_timer_init(struct sp5100_tco *tco)
 
 static u8 efch_read_pm_reg8(void __iomem *addr, u8 index)
 {
-	return readb(addr + index);
+	return pete_readb("drivers/watchdog/sp5100_tco.c:310", addr + index);
 }
 
 static void efch_update_pm_reg8(void __iomem *addr, u8 index, u8 reset, u8 set)
 {
 	u8 val;
 
-	val = readb(addr + index);
+	val = pete_readb("drivers/watchdog/sp5100_tco.c:317", addr + index);
 	val &= reset;
 	val |= set;
-	writeb(val, addr + index);
+	pete_writeb("drivers/watchdog/sp5100_tco.c:320", val, addr + index);
 }
 
 static void tco_timer_enable_mmio(void __iomem *addr)

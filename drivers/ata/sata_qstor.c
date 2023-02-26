@@ -174,16 +174,16 @@ static inline void qs_enter_reg_mode(struct ata_port *ap)
 	struct qs_port_priv *pp = ap->private_data;
 
 	pp->state = qs_state_mmio;
-	writeb(QS_CTR0_REG, chan + QS_CCT_CTR0);
-	readb(chan + QS_CCT_CTR0);        /* flush */
+	pete_writeb("drivers/ata/sata_qstor.c:177", QS_CTR0_REG, chan + QS_CCT_CTR0);
+	pete_readb("drivers/ata/sata_qstor.c:178", chan + QS_CCT_CTR0);        /* flush */
 }
 
 static inline void qs_reset_channel_logic(struct ata_port *ap)
 {
 	u8 __iomem *chan = qs_mmio_base(ap->host) + (ap->port_no * 0x4000);
 
-	writeb(QS_CTR1_RCHN, chan + QS_CCT_CTR1);
-	readb(chan + QS_CCT_CTR0);        /* flush */
+	pete_writeb("drivers/ata/sata_qstor.c:185", QS_CTR1_RCHN, chan + QS_CCT_CTR1);
+	pete_readb("drivers/ata/sata_qstor.c:186", chan + QS_CCT_CTR0);        /* flush */
 	qs_enter_reg_mode(ap);
 }
 
@@ -191,7 +191,7 @@ static void qs_freeze(struct ata_port *ap)
 {
 	u8 __iomem *mmio_base = qs_mmio_base(ap->host);
 
-	writeb(0, mmio_base + QS_HCT_CTRL); /* disable host interrupts */
+	pete_writeb("drivers/ata/sata_qstor.c:194", 0, mmio_base + QS_HCT_CTRL); /* disable host interrupts */
 	qs_enter_reg_mode(ap);
 }
 
@@ -200,7 +200,7 @@ static void qs_thaw(struct ata_port *ap)
 	u8 __iomem *mmio_base = qs_mmio_base(ap->host);
 
 	qs_enter_reg_mode(ap);
-	writeb(1, mmio_base + QS_HCT_CTRL); /* enable host interrupts */
+	pete_writeb("drivers/ata/sata_qstor.c:203", 1, mmio_base + QS_HCT_CTRL); /* enable host interrupts */
 }
 
 static int qs_prereset(struct ata_link *link, unsigned long deadline)
@@ -306,7 +306,7 @@ static inline void qs_packet_start(struct ata_queued_cmd *qc)
 
 	VPRINTK("ENTER, ap %p\n", ap);
 
-	writeb(QS_CTR0_CLER, chan + QS_CCT_CTR0);
+	pete_writeb("drivers/ata/sata_qstor.c:309", QS_CTR0_CLER, chan + QS_CCT_CTR0);
 	wmb();                             /* flush PRDs and pkt to memory */
 	pete_writel("drivers/ata/sata_qstor.c:311", QS_CCF_RUN_PKT, chan + QS_CCT_CFF);
 	pete_readl("drivers/ata/sata_qstor.c:312", chan + QS_CCT_CFF);          /* flush */
@@ -492,8 +492,8 @@ static void qs_host_stop(struct ata_host *host)
 {
 	void __iomem *mmio_base = qs_mmio_base(host);
 
-	writeb(0, mmio_base + QS_HCT_CTRL); /* disable host interrupts */
-	writeb(QS_CNFG3_GSRST, mmio_base + QS_HCF_CNFG3); /* global reset */
+	pete_writeb("drivers/ata/sata_qstor.c:495", 0, mmio_base + QS_HCT_CTRL); /* disable host interrupts */
+	pete_writeb("drivers/ata/sata_qstor.c:496", QS_CNFG3_GSRST, mmio_base + QS_HCF_CNFG3); /* global reset */
 }
 
 static void qs_host_init(struct ata_host *host, unsigned int chip_id)
@@ -501,29 +501,29 @@ static void qs_host_init(struct ata_host *host, unsigned int chip_id)
 	void __iomem *mmio_base = host->iomap[QS_MMIO_BAR];
 	unsigned int port_no;
 
-	writeb(0, mmio_base + QS_HCT_CTRL); /* disable host interrupts */
-	writeb(QS_CNFG3_GSRST, mmio_base + QS_HCF_CNFG3); /* global reset */
+	pete_writeb("drivers/ata/sata_qstor.c:504", 0, mmio_base + QS_HCT_CTRL); /* disable host interrupts */
+	pete_writeb("drivers/ata/sata_qstor.c:505", QS_CNFG3_GSRST, mmio_base + QS_HCF_CNFG3); /* global reset */
 
 	/* reset each channel in turn */
 	for (port_no = 0; port_no < host->n_ports; ++port_no) {
 		u8 __iomem *chan = mmio_base + (port_no * 0x4000);
-		writeb(QS_CTR1_RDEV|QS_CTR1_RCHN, chan + QS_CCT_CTR1);
-		writeb(QS_CTR0_REG, chan + QS_CCT_CTR0);
-		readb(chan + QS_CCT_CTR0);        /* flush */
+		pete_writeb("drivers/ata/sata_qstor.c:510", QS_CTR1_RDEV|QS_CTR1_RCHN, chan + QS_CCT_CTR1);
+		pete_writeb("drivers/ata/sata_qstor.c:511", QS_CTR0_REG, chan + QS_CCT_CTR0);
+		pete_readb("drivers/ata/sata_qstor.c:512", chan + QS_CCT_CTR0);        /* flush */
 	}
-	writeb(QS_SERD3_PHY_ENA, mmio_base + QS_HVS_SERD3); /* enable phy */
+	pete_writeb("drivers/ata/sata_qstor.c:514", QS_SERD3_PHY_ENA, mmio_base + QS_HVS_SERD3); /* enable phy */
 
 	for (port_no = 0; port_no < host->n_ports; ++port_no) {
 		u8 __iomem *chan = mmio_base + (port_no * 0x4000);
 		/* set FIFO depths to same settings as Windows driver */
-		writew(32, chan + QS_CFC_HUFT);
-		writew(32, chan + QS_CFC_HDFT);
-		writew(10, chan + QS_CFC_DUFT);
-		writew( 8, chan + QS_CFC_DDFT);
+		pete_writew("drivers/ata/sata_qstor.c:519", 32, chan + QS_CFC_HUFT);
+		pete_writew("drivers/ata/sata_qstor.c:520", 32, chan + QS_CFC_HDFT);
+		pete_writew("drivers/ata/sata_qstor.c:521", 10, chan + QS_CFC_DUFT);
+		pete_writew("drivers/ata/sata_qstor.c:522",  8, chan + QS_CFC_DDFT);
 		/* set CPB size in bytes, as a power of two */
-		writeb(QS_CPB_ORDER,    chan + QS_CCF_CSEP);
+		pete_writeb("drivers/ata/sata_qstor.c:524", QS_CPB_ORDER,    chan + QS_CCF_CSEP);
 	}
-	writeb(1, mmio_base + QS_HCT_CTRL); /* enable host interrupts */
+	pete_writeb("drivers/ata/sata_qstor.c:526", 1, mmio_base + QS_HCT_CTRL); /* enable host interrupts */
 }
 
 /*

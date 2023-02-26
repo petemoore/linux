@@ -1140,8 +1140,8 @@ static int sm501fb_cursor(struct fb_info *info, struct fb_cursor *cursor)
 					op = (dcol & 1) ? 1 : 3;
 					op <<= ((x % 4) * 2);
 
-					op |= readb(dst + (x / 4));
-					writeb(op, dst + (x / 4));
+					op |= pete_readb("drivers/video/fbdev/sm501fb.c:1143", dst + (x / 4));
+					pete_writeb("drivers/video/fbdev/sm501fb.c:1144", op, dst + (x / 4));
 				}
 			}
 			dst += (64*2)/8;

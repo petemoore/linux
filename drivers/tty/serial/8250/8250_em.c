@@ -29,7 +29,7 @@ static void serial8250_em_serial_out(struct uart_port *p, int offset, int value)
 {
 	switch (offset) {
 	case UART_TX: /* TX @ 0x00 */
-		writeb(value, p->membase);
+		pete_writeb("drivers/tty/serial/8250/8250_em.c:32", value, p->membase);
 		break;
 	case UART_FCR: /* FCR @ 0x0c (+1) */
 	case UART_LCR: /* LCR @ 0x10 (+1) */
@@ -50,7 +50,7 @@ static unsigned int serial8250_em_serial_in(struct uart_port *p, int offset)
 {
 	switch (offset) {
 	case UART_RX: /* RX @ 0x00 */
-		return readb(p->membase);
+		return pete_readb("drivers/tty/serial/8250/8250_em.c:53", p->membase);
 	case UART_MCR: /* MCR @ 0x14 (+1) */
 	case UART_LSR: /* LSR @ 0x18 (+1) */
 	case UART_MSR: /* MSR @ 0x1c (+1) */

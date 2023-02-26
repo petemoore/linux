@@ -4303,7 +4303,7 @@ static int goya_debugfs_read64(struct hl_device *hdev, u64 addr,
 	} else if ((addr >= SRAM_BASE_ADDR) &&
 			(addr <= SRAM_BASE_ADDR + SRAM_SIZE - sizeof(u64))) {
 
-		*val = readq(hdev->pcie_bar[SRAM_CFG_BAR_ID] +
+		*val = pete_readq("drivers/misc/habanalabs/goya/goya.c:4306", hdev->pcie_bar[SRAM_CFG_BAR_ID] +
 				(addr - SRAM_BASE_ADDR));
 
 	} else if (addr <=
@@ -4314,7 +4314,7 @@ static int goya_debugfs_read64(struct hl_device *hdev, u64 addr,
 
 		ddr_bar_addr = goya_set_ddr_bar_base(hdev, bar_base_addr);
 		if (ddr_bar_addr != U64_MAX) {
-			*val = readq(hdev->pcie_bar[DDR_BAR_ID] +
+			*val = pete_readq("drivers/misc/habanalabs/goya/goya.c:4317", hdev->pcie_bar[DDR_BAR_ID] +
 						(addr - bar_base_addr));
 
 			ddr_bar_addr = goya_set_ddr_bar_base(hdev,
@@ -4350,7 +4350,7 @@ static int goya_debugfs_write64(struct hl_device *hdev, u64 addr,
 	} else if ((addr >= SRAM_BASE_ADDR) &&
 			(addr <= SRAM_BASE_ADDR + SRAM_SIZE - sizeof(u64))) {
 
-		writeq(val, hdev->pcie_bar[SRAM_CFG_BAR_ID] +
+		pete_writeq("drivers/misc/habanalabs/goya/goya.c:4353", val, hdev->pcie_bar[SRAM_CFG_BAR_ID] +
 					(addr - SRAM_BASE_ADDR));
 
 	} else if (addr <=
@@ -4361,7 +4361,7 @@ static int goya_debugfs_write64(struct hl_device *hdev, u64 addr,
 
 		ddr_bar_addr = goya_set_ddr_bar_base(hdev, bar_base_addr);
 		if (ddr_bar_addr != U64_MAX) {
-			writeq(val, hdev->pcie_bar[DDR_BAR_ID] +
+			pete_writeq("drivers/misc/habanalabs/goya/goya.c:4364", val, hdev->pcie_bar[DDR_BAR_ID] +
 						(addr - bar_base_addr));
 
 			ddr_bar_addr = goya_set_ddr_bar_base(hdev,
@@ -4395,7 +4395,7 @@ static u64 goya_read_pte(struct hl_device *hdev, u64 addr)
 	if (hdev->hard_reset_pending)
 		return U64_MAX;
 
-	return readq(hdev->pcie_bar[DDR_BAR_ID] +
+	return pete_readq("drivers/misc/habanalabs/goya/goya.c:4398", hdev->pcie_bar[DDR_BAR_ID] +
 			(addr - goya->ddr_bar_cur_addr));
 }
 
@@ -4406,7 +4406,7 @@ static void goya_write_pte(struct hl_device *hdev, u64 addr, u64 val)
 	if (hdev->hard_reset_pending)
 		return;
 
-	writeq(val, hdev->pcie_bar[DDR_BAR_ID] +
+	pete_writeq("drivers/misc/habanalabs/goya/goya.c:4409", val, hdev->pcie_bar[DDR_BAR_ID] +
 			(addr - goya->ddr_bar_cur_addr));
 }
 

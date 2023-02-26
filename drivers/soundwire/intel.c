@@ -64,12 +64,12 @@ static inline void intel_writel(void __iomem *base, int offset, int value)
 
 static inline u16 intel_readw(void __iomem *base, int offset)
 {
-	return readw(base + offset);
+	return pete_readw("drivers/soundwire/intel.c:67", base + offset);
 }
 
 static inline void intel_writew(void __iomem *base, int offset, u16 value)
 {
-	writew(value, base + offset);
+	pete_writew("drivers/soundwire/intel.c:72", value, base + offset);
 }
 
 static int intel_wait_bit(void __iomem *base, int offset, u32 mask, u32 target)

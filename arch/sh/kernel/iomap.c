@@ -10,13 +10,13 @@
 
 unsigned int ioread8(const void __iomem *addr)
 {
-	return readb(addr);
+	return pete_readb("arch/sh/kernel/iomap.c:13", addr);
 }
 EXPORT_SYMBOL(ioread8);
 
 unsigned int ioread16(const void __iomem *addr)
 {
-	return readw(addr);
+	return pete_readw("arch/sh/kernel/iomap.c:19", addr);
 }
 EXPORT_SYMBOL(ioread16);
 
@@ -40,13 +40,13 @@ EXPORT_SYMBOL(ioread32be);
 
 void iowrite8(u8 val, void __iomem *addr)
 {
-	writeb(val, addr);
+	pete_writeb("arch/sh/kernel/iomap.c:43", val, addr);
 }
 EXPORT_SYMBOL(iowrite8);
 
 void iowrite16(u16 val, void __iomem *addr)
 {
-	writew(val, addr);
+	pete_writew("arch/sh/kernel/iomap.c:49", val, addr);
 }
 EXPORT_SYMBOL(iowrite16);
 

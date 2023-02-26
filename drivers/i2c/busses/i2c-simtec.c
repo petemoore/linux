@@ -34,25 +34,25 @@ struct simtec_i2c_data {
 static void simtec_i2c_setsda(void *pw, int state)
 {
 	struct simtec_i2c_data *pd = pw;
-	writeb(CMD_SET_SDA | (state ? STATE_SDA : 0), pd->reg);
+	pete_writeb("drivers/i2c/busses/i2c-simtec.c:37", CMD_SET_SDA | (state ? STATE_SDA : 0), pd->reg);
 }
 
 static void simtec_i2c_setscl(void *pw, int state)
 {
 	struct simtec_i2c_data *pd = pw;
-	writeb(CMD_SET_SCL | (state ? STATE_SCL : 0), pd->reg);
+	pete_writeb("drivers/i2c/busses/i2c-simtec.c:43", CMD_SET_SCL | (state ? STATE_SCL : 0), pd->reg);
 }
 
 static int simtec_i2c_getsda(void *pw)
 {
 	struct simtec_i2c_data *pd = pw;
-	return readb(pd->reg) & STATE_SDA ? 1 : 0;
+	return pete_readb("drivers/i2c/busses/i2c-simtec.c:49", pd->reg) & STATE_SDA ? 1 : 0;
 }
 
 static int simtec_i2c_getscl(void *pw)
 {
 	struct simtec_i2c_data *pd = pw;
-	return readb(pd->reg) & STATE_SCL ? 1 : 0;
+	return pete_readb("drivers/i2c/busses/i2c-simtec.c:55", pd->reg) & STATE_SCL ? 1 : 0;
 }
 
 /* device registration */

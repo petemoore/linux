@@ -438,7 +438,7 @@ static int intel_spi_opcode_index(struct intel_spi *ispi, u8 opcode, int optype)
 
 	/* The lock is off, so just use index 0 */
 	pete_writel("drivers/mtd/spi-nor/controllers/intel-spi.c:440", opcode, ispi->sregs + OPMENU0);
-	preop = readw(ispi->sregs + PREOP_OPTYPE);
+	preop = pete_readw("drivers/mtd/spi-nor/controllers/intel-spi.c:441", ispi->sregs + PREOP_OPTYPE);
 	pete_writel("drivers/mtd/spi-nor/controllers/intel-spi.c:442", optype << 16 | preop, ispi->sregs + PREOP_OPTYPE);
 
 	return 0;
@@ -521,7 +521,7 @@ static int intel_spi_sw_cycle(struct intel_spi *ispi, u8 opcode, size_t len,
 		case OPTYPE_WRITE_NO_ADDR:
 		case OPTYPE_WRITE_WITH_ADDR:
 			/* Pick matching preopcode for the atomic sequence */
-			preop = readw(ispi->sregs + PREOP_OPTYPE);
+			preop = pete_readw("drivers/mtd/spi-nor/controllers/intel-spi.c:524", ispi->sregs + PREOP_OPTYPE);
 			if ((preop & 0xff) == atomic_preopcode)
 				; /* Do nothing */
 			else if ((preop >> 8) == atomic_preopcode)
@@ -595,7 +595,7 @@ static int intel_spi_write_reg(struct spi_nor *nor, u8 opcode, const u8 *buf,
 		if (!ispi->swseq_reg)
 			return 0;
 
-		preop = readw(ispi->sregs + PREOP_OPTYPE);
+		preop = pete_readw("drivers/mtd/spi-nor/controllers/intel-spi.c:598", ispi->sregs + PREOP_OPTYPE);
 		if ((preop & 0xff) != opcode && (preop >> 8) != opcode) {
 			if (ispi->locked)
 				return -EINVAL;

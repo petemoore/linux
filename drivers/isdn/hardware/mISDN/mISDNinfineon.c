@@ -286,14 +286,14 @@ diva20x_irq(int intno, void *dev_id)
 	u8 val;
 
 	spin_lock(&hw->lock);
-	val = readb(hw->cfg.p);
+	val = pete_readb("drivers/isdn/hardware/mISDN/mISDNinfineon.c:289", hw->cfg.p);
 	if (!(val & PITA_INT0_STATUS)) { /* for us or shared ? */
 		spin_unlock(&hw->lock);
 		return IRQ_NONE; /* shared */
 	}
 	hw->irqcnt++;
 	mISDNipac_irq(&hw->ipac, irqloops);
-	writeb(PITA_INT0_STATUS, hw->cfg.p); /* ACK PITA INT0 */
+	pete_writeb("drivers/isdn/hardware/mISDN/mISDNinfineon.c:296", PITA_INT0_STATUS, hw->cfg.p); /* ACK PITA INT0 */
 	spin_unlock(&hw->lock);
 	return IRQ_HANDLED;
 }

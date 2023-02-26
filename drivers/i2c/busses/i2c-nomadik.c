@@ -494,7 +494,7 @@ static void fill_tx_fifo(struct nmk_i2c_dev *dev, int no_bytes)
 			(dev->cli.count != 0);
 			count--) {
 		/* write to the Tx FIFO */
-		writeb(*dev->cli.buffer,
+		pete_writeb("drivers/i2c/busses/i2c-nomadik.c:497", *dev->cli.buffer,
 			dev->virtbase + I2C_TFR);
 		dev->cli.buffer++;
 		dev->cli.count--;
@@ -768,7 +768,7 @@ static irqreturn_t i2c_irq_handler(int irq, void *arg)
 	case I2C_IT_RXFNF:
 		for (count = rft; count > 0; count--) {
 			/* Read the Rx FIFO */
-			*dev->cli.buffer = readb(dev->virtbase + I2C_RFR);
+			*dev->cli.buffer = pete_readb("drivers/i2c/busses/i2c-nomadik.c:771", dev->virtbase + I2C_RFR);
 			dev->cli.buffer++;
 		}
 		dev->cli.count -= rft;
@@ -778,7 +778,7 @@ static irqreturn_t i2c_irq_handler(int irq, void *arg)
 	/* Rx FIFO full */
 	case I2C_IT_RXFF:
 		for (count = MAX_I2C_FIFO_THRESHOLD; count > 0; count--) {
-			*dev->cli.buffer = readb(dev->virtbase + I2C_RFR);
+			*dev->cli.buffer = pete_readb("drivers/i2c/busses/i2c-nomadik.c:781", dev->virtbase + I2C_RFR);
 			dev->cli.buffer++;
 		}
 		dev->cli.count -= MAX_I2C_FIFO_THRESHOLD;
@@ -794,7 +794,7 @@ static irqreturn_t i2c_irq_handler(int irq, void *arg)
 				if (dev->cli.count == 0)
 					break;
 				*dev->cli.buffer =
-					readb(dev->virtbase + I2C_RFR);
+					pete_readb("drivers/i2c/busses/i2c-nomadik.c:797", dev->virtbase + I2C_RFR);
 				dev->cli.buffer++;
 				dev->cli.count--;
 				dev->cli.xfer_bytes++;

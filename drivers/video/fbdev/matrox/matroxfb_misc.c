@@ -389,10 +389,10 @@ void matroxfb_vgaHWrestore(struct matrox_fb_info *minfo)
 }
 
 static void get_pins(unsigned char __iomem* pins, struct matrox_bios* bd) {
-	unsigned int b0 = readb(pins);
+	unsigned int b0 = pete_readb("drivers/video/fbdev/matrox/matroxfb_misc.c:392", pins);
 	
-	if (b0 == 0x2E && readb(pins+1) == 0x41) {
-		unsigned int pins_len = readb(pins+2);
+	if (b0 == 0x2E && pete_readb("drivers/video/fbdev/matrox/matroxfb_misc.c:394", pins+1) == 0x41) {
+		unsigned int pins_len = pete_readb("drivers/video/fbdev/matrox/matroxfb_misc.c:395", pins+2);
 		unsigned int i;
 		unsigned char cksum;
 		unsigned char* dst = bd->pins;
@@ -405,20 +405,20 @@ static void get_pins(unsigned char __iomem* pins, struct matrox_bios* bd) {
 		*dst++ = pins_len;
 		cksum = 0x2E + 0x41 + pins_len;
 		for (i = 3; i < pins_len; i++) {
-			cksum += *dst++ = readb(pins+i);
+			cksum += *dst++ = pete_readb("drivers/video/fbdev/matrox/matroxfb_misc.c:408", pins+i);
 		}
 		if (cksum) {
 			return;
 		}
 		bd->pins_len = pins_len;
-	} else if (b0 == 0x40 && readb(pins+1) == 0x00) {
+	} else if (b0 == 0x40 && pete_readb("drivers/video/fbdev/matrox/matroxfb_misc.c:414", pins+1) == 0x00) {
 		unsigned int i;
 		unsigned char* dst = bd->pins;
 
 		*dst++ = 0x40;
 		*dst++ = 0;
 		for (i = 2; i < 0x40; i++) {
-			*dst++ = readb(pins+i);
+			*dst++ = pete_readb("drivers/video/fbdev/matrox/matroxfb_misc.c:421", pins+i);
 		}
 		bd->pins_len = 0x40;
 	}
@@ -427,22 +427,22 @@ static void get_pins(unsigned char __iomem* pins, struct matrox_bios* bd) {
 static void get_bios_version(unsigned char __iomem * vbios, struct matrox_bios* bd) {
 	unsigned int pcir_offset;
 	
-	pcir_offset = readb(vbios + 24) | (readb(vbios + 25) << 8);
+	pcir_offset = pete_readb("drivers/video/fbdev/matrox/matroxfb_misc.c:430", vbios + 24) | (pete_readb("drivers/video/fbdev/matrox/matroxfb_misc.c:430", vbios + 25) << 8);
 	if (pcir_offset >= 26 && pcir_offset < 0xFFE0 &&
-	    readb(vbios + pcir_offset    ) == 'P' &&
-	    readb(vbios + pcir_offset + 1) == 'C' &&
-	    readb(vbios + pcir_offset + 2) == 'I' &&
-	    readb(vbios + pcir_offset + 3) == 'R') {
+	    pete_readb("drivers/video/fbdev/matrox/matroxfb_misc.c:432", vbios + pcir_offset    ) == 'P' &&
+	    pete_readb("drivers/video/fbdev/matrox/matroxfb_misc.c:433", vbios + pcir_offset + 1) == 'C' &&
+	    pete_readb("drivers/video/fbdev/matrox/matroxfb_misc.c:434", vbios + pcir_offset + 2) == 'I' &&
+	    pete_readb("drivers/video/fbdev/matrox/matroxfb_misc.c:435", vbios + pcir_offset + 3) == 'R') {
 		unsigned char h;
 
-		h = readb(vbios + pcir_offset + 0x12);
+		h = pete_readb("drivers/video/fbdev/matrox/matroxfb_misc.c:438", vbios + pcir_offset + 0x12);
 		bd->version.vMaj = (h >> 4) & 0xF;
 		bd->version.vMin = h & 0xF;
-		bd->version.vRev = readb(vbios + pcir_offset + 0x13);
+		bd->version.vRev = pete_readb("drivers/video/fbdev/matrox/matroxfb_misc.c:441", vbios + pcir_offset + 0x13);
 	} else {
 		unsigned char h;
 
-		h = readb(vbios + 5);
+		h = pete_readb("drivers/video/fbdev/matrox/matroxfb_misc.c:445", vbios + 5);
 		bd->version.vMaj = (h >> 4) & 0xF;
 		bd->version.vMin = h & 0xF;
 		bd->version.vRev = 0;
@@ -452,7 +452,7 @@ static void get_bios_version(unsigned char __iomem * vbios, struct matrox_bios* 
 static void get_bios_output(unsigned char __iomem* vbios, struct matrox_bios* bd) {
 	unsigned char b;
 	
-	b = readb(vbios + 0x7FF1);
+	b = pete_readb("drivers/video/fbdev/matrox/matroxfb_misc.c:455", vbios + 0x7FF1);
 	if (b == 0xFF) {
 		b = 0;
 	}
@@ -464,19 +464,19 @@ static void get_bios_tvout(unsigned char __iomem* vbios, struct matrox_bios* bd)
 	
 	/* Check for 'IBM .*(V....TVO' string - it means TVO BIOS */
 	bd->output.tvout = 0;
-	if (readb(vbios + 0x1D) != 'I' ||
-	    readb(vbios + 0x1E) != 'B' ||
-	    readb(vbios + 0x1F) != 'M' ||
-	    readb(vbios + 0x20) != ' ') {
+	if (pete_readb("drivers/video/fbdev/matrox/matroxfb_misc.c:467", vbios + 0x1D) != 'I' ||
+	    pete_readb("drivers/video/fbdev/matrox/matroxfb_misc.c:468", vbios + 0x1E) != 'B' ||
+	    pete_readb("drivers/video/fbdev/matrox/matroxfb_misc.c:469", vbios + 0x1F) != 'M' ||
+	    pete_readb("drivers/video/fbdev/matrox/matroxfb_misc.c:470", vbios + 0x20) != ' ') {
 	    	return;
 	}
 	for (i = 0x2D; i < 0x2D + 128; i++) {
-		unsigned char b = readb(vbios + i);
+		unsigned char b = pete_readb("drivers/video/fbdev/matrox/matroxfb_misc.c:474", vbios + i);
 		
-		if (b == '(' && readb(vbios + i + 1) == 'V') {
-			if (readb(vbios + i + 6) == 'T' &&
-			    readb(vbios + i + 7) == 'V' &&
-			    readb(vbios + i + 8) == 'O') {
+		if (b == '(' && pete_readb("drivers/video/fbdev/matrox/matroxfb_misc.c:476", vbios + i + 1) == 'V') {
+			if (pete_readb("drivers/video/fbdev/matrox/matroxfb_misc.c:477", vbios + i + 6) == 'T' &&
+			    pete_readb("drivers/video/fbdev/matrox/matroxfb_misc.c:478", vbios + i + 7) == 'V' &&
+			    pete_readb("drivers/video/fbdev/matrox/matroxfb_misc.c:479", vbios + i + 8) == 'O') {
 				bd->output.tvout = 1;
 			}
 			return;
@@ -489,7 +489,7 @@ static void get_bios_tvout(unsigned char __iomem* vbios, struct matrox_bios* bd)
 static void parse_bios(unsigned char __iomem* vbios, struct matrox_bios* bd) {
 	unsigned int pins_offset;
 	
-	if (readb(vbios) != 0x55 || readb(vbios + 1) != 0xAA) {
+	if (pete_readb("drivers/video/fbdev/matrox/matroxfb_misc.c:492", vbios) != 0x55 || pete_readb("drivers/video/fbdev/matrox/matroxfb_misc.c:492", vbios + 1) != 0xAA) {
 		return;
 	}
 	bd->bios_valid = 1;
@@ -508,9 +508,9 @@ static void parse_bios(unsigned char __iomem* vbios, struct matrox_bios* bd) {
 	for ( pins_offset = 0 ; pins_offset <= 0xFF80 ; pins_offset++ ) {
 		unsigned char header[3];
 
-		header[0] = readb(vbios + pins_offset);
-		header[1] = readb(vbios + pins_offset + 1);
-		header[2] = readb(vbios + pins_offset + 2);
+		header[0] = pete_readb("drivers/video/fbdev/matrox/matroxfb_misc.c:511", vbios + pins_offset);
+		header[1] = pete_readb("drivers/video/fbdev/matrox/matroxfb_misc.c:512", vbios + pins_offset + 1);
+		header[2] = pete_readb("drivers/video/fbdev/matrox/matroxfb_misc.c:513", vbios + pins_offset + 2);
 		if ( (header[0] == 0x2E) && (header[1] == 0x41)
 		     && ((header[2] == 0x40) || (header[2] == 0x80)) ) {
 			printk(KERN_INFO "PInS data found at offset %u\n",
@@ -520,7 +520,7 @@ static void parse_bios(unsigned char __iomem* vbios, struct matrox_bios* bd) {
 		}
 	}
 #else
-	pins_offset = readb(vbios + 0x7FFC) | (readb(vbios + 0x7FFD) << 8);
+	pins_offset = pete_readb("drivers/video/fbdev/matrox/matroxfb_misc.c:523", vbios + 0x7FFC) | (pete_readb("drivers/video/fbdev/matrox/matroxfb_misc.c:523", vbios + 0x7FFD) << 8);
 	if (pins_offset <= 0xFF80) {
 		get_pins(vbios + pins_offset, bd);
 	}
@@ -788,8 +788,8 @@ void matroxfb_read_pins(struct matrox_fb_info *minfo)
 		if (!b) {
 			printk(KERN_INFO "matroxfb: Unable to map legacy BIOS\n");
 		} else {
-			unsigned int ven = readb(b+0x64+0) | (readb(b+0x64+1) << 8);
-			unsigned int dev = readb(b+0x64+2) | (readb(b+0x64+3) << 8);
+			unsigned int ven = pete_readb("drivers/video/fbdev/matrox/matroxfb_misc.c:791", b+0x64+0) | (pete_readb("drivers/video/fbdev/matrox/matroxfb_misc.c:791", b+0x64+1) << 8);
+			unsigned int dev = pete_readb("drivers/video/fbdev/matrox/matroxfb_misc.c:792", b+0x64+2) | (pete_readb("drivers/video/fbdev/matrox/matroxfb_misc.c:792", b+0x64+3) << 8);
 			
 			if (ven != pdev->vendor || dev != pdev->device) {
 				printk(KERN_INFO "matroxfb: Legacy BIOS is for %04X:%04X, while this device is %04X:%04X\n",
