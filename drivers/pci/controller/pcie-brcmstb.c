@@ -726,7 +726,7 @@ static struct pci_ops brcm_pcie_ops = {
 	.read = pci_generic_config_read,
 	.write = pci_generic_config_write,
 };
-
+// sets bit 1 of [pcie->base+0x9210] to val
 static inline void brcm_pcie_bridge_sw_init_set_generic(struct brcm_pcie *pcie, u32 val)
 {
 	u32 tmp, mask =  RGR1_SW_INIT_1_INIT_GENERIC_MASK;
@@ -774,7 +774,7 @@ static inline void brcm_pcie_perst_set_generic(struct brcm_pcie *pcie, u32 val)
 
 	tmp = pete_readl("drivers/pci/controller/pcie-brcmstb.c:775", pcie->base + PCIE_RGR1_SW_INIT_1(pcie));
 	u32p_replace_bits(&tmp, val, PCIE_RGR1_SW_INIT_1_PERST_MASK);
-	pete_writel("drivers/pci/controller/pcie-brcmstb.c:777", tmp, pcie->base + PCIE_RGR1_SW_INIT_1(pcie));
+	pete_writel("drivers/pci/controller/pcie-brcmstb.c:777", tmp, pcie->base + PCIE_RGR1_SW_INIT_1(pcie)); // set bit 0 to val
 }
 
 static inline int brcm_pcie_get_rc_bar2_size_and_offset(struct brcm_pcie *pcie,
@@ -879,17 +879,17 @@ static int brcm_pcie_setup(struct brcm_pcie *pcie)
 	u32 tmp, burst, aspm_support;
 
 	/* Reset the bridge */
-	pcie->bridge_sw_init_set(pcie, 1);
-	pcie->perst_set(pcie, 1);
+	pcie->bridge_sw_init_set(pcie, 1); // calls brcm_pcie_bridge_sw_init_set_generic: set bit 1 of [pcie->base + 0x9210]
+	pcie->perst_set(pcie, 1); // calls brcm_pcie_perst_set_generic: set bit 0 of [pcie->base + 0x9210]
 
 	usleep_range(100, 200);
 
 	/* Take the bridge out of reset */
-	pcie->bridge_sw_init_set(pcie, 0);
+	pcie->bridge_sw_init_set(pcie, 0); // calls brcm_pcie_bridge_sw_init_set_generic: clear bit 1 of [pcie->base + 0x9210]
 
 	tmp = pete_readl("drivers/pci/controller/pcie-brcmstb.c:890", base + PCIE_MISC_HARD_PCIE_HARD_DEBUG);
 	tmp &= ~PCIE_MISC_HARD_PCIE_HARD_DEBUG_SERDES_IDDQ_MASK;
-	pete_writel("drivers/pci/controller/pcie-brcmstb.c:892", tmp, base + PCIE_MISC_HARD_PCIE_HARD_DEBUG);
+	pete_writel("drivers/pci/controller/pcie-brcmstb.c:892", tmp, base + PCIE_MISC_HARD_PCIE_HARD_DEBUG); // clear bit 27 of [pcie->base + 0x4204]
 	/* Wait for SerDes to be stable */
 	usleep_range(100, 200);
 
@@ -907,9 +907,9 @@ static int brcm_pcie_setup(struct brcm_pcie *pcie)
 
 	/* Set SCB_MAX_BURST_SIZE, CFG_READ_UR_MODE, SCB_ACCESS_EN */
 	tmp = pete_readl("drivers/pci/controller/pcie-brcmstb.c:909", base + PCIE_MISC_MISC_CTRL);
-	u32p_replace_bits(&tmp, 1, PCIE_MISC_MISC_CTRL_SCB_ACCESS_EN_MASK);
-	u32p_replace_bits(&tmp, 1, PCIE_MISC_MISC_CTRL_CFG_READ_UR_MODE_MASK);
-	u32p_replace_bits(&tmp, burst, PCIE_MISC_MISC_CTRL_MAX_BURST_SIZE_MASK);
+	u32p_replace_bits(&tmp, 1, PCIE_MISC_MISC_CTRL_SCB_ACCESS_EN_MASK); // set bit 12
+	u32p_replace_bits(&tmp, 1, PCIE_MISC_MISC_CTRL_CFG_READ_UR_MODE_MASK); // set bit 13
+	u32p_replace_bits(&tmp, burst, PCIE_MISC_MISC_CTRL_MAX_BURST_SIZE_MASK); // clear bits 20/21
 	pete_writel("drivers/pci/controller/pcie-brcmstb.c:913", tmp, base + PCIE_MISC_MISC_CTRL);
 
 	ret = brcm_pcie_get_rc_bar2_size_and_offset(pcie, &rc_bar2_size,
@@ -926,16 +926,16 @@ static int brcm_pcie_setup(struct brcm_pcie *pcie)
 
 	tmp = pete_readl("drivers/pci/controller/pcie-brcmstb.c:927", base + PCIE_MISC_MISC_CTRL);
 	for (memc = 0; memc < pcie->num_memc; memc++) {
-		u32 scb_size_val = ilog2(pcie->memc_size[memc]) - 15;
+		u32 scb_size_val = ilog2(pcie->memc_size[memc]) - 15; // ilog2(pcie->memc_size[0]) = 32
 
 		if (memc == 0)
-			u32p_replace_bits(&tmp, scb_size_val, SCB_SIZE_MASK(0));
+			u32p_replace_bits(&tmp, scb_size_val, SCB_SIZE_MASK(0)); // scb_size_val = 0b10001 (17)
 		else if (memc == 1)
 			u32p_replace_bits(&tmp, scb_size_val, SCB_SIZE_MASK(1));
 		else if (memc == 2)
 			u32p_replace_bits(&tmp, scb_size_val, SCB_SIZE_MASK(2));
 	}
-	pete_writel("drivers/pci/controller/pcie-brcmstb.c:938", tmp, base + PCIE_MISC_MISC_CTRL);
+	pete_writel("drivers/pci/controller/pcie-brcmstb.c:938", tmp, base + PCIE_MISC_MISC_CTRL); // set bits 27-31 to 0b10001
 
 	/*
 	 * We ideally want the MSI target address to be located in the 32bit
@@ -952,24 +952,24 @@ static int brcm_pcie_setup(struct brcm_pcie *pcie)
 	/* disable the PCIe->GISB memory window (RC_BAR1) */
 	tmp = pete_readl("drivers/pci/controller/pcie-brcmstb.c:953", base + PCIE_MISC_RC_BAR1_CONFIG_LO);
 	tmp &= ~PCIE_MISC_RC_BAR1_CONFIG_LO_SIZE_MASK;
-	pete_writel("drivers/pci/controller/pcie-brcmstb.c:955", tmp, base + PCIE_MISC_RC_BAR1_CONFIG_LO);
+	pete_writel("drivers/pci/controller/pcie-brcmstb.c:955", tmp, base + PCIE_MISC_RC_BAR1_CONFIG_LO); // clear bits 0-4
 
 	/* disable the PCIe->SCB memory window (RC_BAR3) */
 	tmp = pete_readl("drivers/pci/controller/pcie-brcmstb.c:958", base + PCIE_MISC_RC_BAR3_CONFIG_LO);
 	tmp &= ~PCIE_MISC_RC_BAR3_CONFIG_LO_SIZE_MASK;
-	pete_writel("drivers/pci/controller/pcie-brcmstb.c:960", tmp, base + PCIE_MISC_RC_BAR3_CONFIG_LO);
+	pete_writel("drivers/pci/controller/pcie-brcmstb.c:960", tmp, base + PCIE_MISC_RC_BAR3_CONFIG_LO); // clear bits 0-4
 
 	if (pcie->gen)
-		brcm_pcie_set_gen(pcie, pcie->gen);
+		brcm_pcie_set_gen(pcie, pcie->gen); // not called
 
 	/* Unassert the fundamental reset */
-	pcie->perst_set(pcie, 0);
+	pcie->perst_set(pcie, 0); // calls brcm_pcie_perst_set_generic: clear bit 0 of [pcie->base + 0x9210]
 
 	/*
 	 * Give the RC/EP time to wake up, before trying to configure RC.
 	 * Intermittently check status for link-up, up to a total of 100ms.
 	 */
-	for (i = 0; i < 100 && !brcm_pcie_link_up(pcie); i += 5)
+	for (i = 0; i < 100 && !brcm_pcie_link_up(pcie); i += 5) // wait for bits 4 and 5 to be set of [base + 0x4068]
 		msleep(5);
 
 	if (!brcm_pcie_link_up(pcie)) {
