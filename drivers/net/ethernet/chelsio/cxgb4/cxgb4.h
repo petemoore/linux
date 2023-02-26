@@ -1502,35 +1502,35 @@ static inline int is_ethofld(const struct adapter *adap)
 
 static inline u32 t4_read_reg(struct adapter *adap, u32 reg_addr)
 {
-	return readl(adap->regs + reg_addr);
+	return pete_readl("drivers/net/ethernet/chelsio/cxgb4/cxgb4.h:1505", adap->regs + reg_addr);
 }
 
 static inline void t4_write_reg(struct adapter *adap, u32 reg_addr, u32 val)
 {
-	writel(val, adap->regs + reg_addr);
+	pete_writel("drivers/net/ethernet/chelsio/cxgb4/cxgb4.h:1510", val, adap->regs + reg_addr);
 }
 
 #ifndef readq
-static inline u64 readq(const volatile void __iomem *addr)
+static inline u64 pete_readq("drivers/net/ethernet/chelsio/cxgb4/cxgb4.h:1514", const volatile void __iomem *addr)
 {
-	return readl(addr) + ((u64)readl(addr + 4) << 32);
+	return pete_readl("drivers/net/ethernet/chelsio/cxgb4/cxgb4.h:1516", addr) + ((u64)pete_readl("drivers/net/ethernet/chelsio/cxgb4/cxgb4.h:1516", addr + 4) << 32);
 }
 
-static inline void writeq(u64 val, volatile void __iomem *addr)
+static inline void pete_writeq("drivers/net/ethernet/chelsio/cxgb4/cxgb4.h:1519", u64 val, volatile void __iomem *addr)
 {
-	writel(val, addr);
-	writel(val >> 32, addr + 4);
+	pete_writel("drivers/net/ethernet/chelsio/cxgb4/cxgb4.h:1521", val, addr);
+	pete_writel("drivers/net/ethernet/chelsio/cxgb4/cxgb4.h:1522", val >> 32, addr + 4);
 }
 #endif
 
 static inline u64 t4_read_reg64(struct adapter *adap, u32 reg_addr)
 {
-	return readq(adap->regs + reg_addr);
+	return pete_readq("drivers/net/ethernet/chelsio/cxgb4/cxgb4.h:1528", adap->regs + reg_addr);
 }
 
 static inline void t4_write_reg64(struct adapter *adap, u32 reg_addr, u64 val)
 {
-	writeq(val, adap->regs + reg_addr);
+	pete_writeq("drivers/net/ethernet/chelsio/cxgb4/cxgb4.h:1533", val, adap->regs + reg_addr);
 }
 
 /**

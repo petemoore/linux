@@ -493,7 +493,7 @@ static int cdns_i3c_master_disable(struct cdns_i3c_master *master)
 {
 	u32 status;
 
-	writel(readl(master->regs + CTRL) & ~CTRL_DEV_EN, master->regs + CTRL);
+	pete_writel("drivers/i3c/master/i3c-master-cdns.c:496", pete_readl("drivers/i3c/master/i3c-master-cdns.c:496", master->regs + CTRL) & ~CTRL_DEV_EN, master->regs + CTRL);
 
 	return readl_poll_timeout(master->regs + MST_STATUS0, status,
 				  status & MST_STATUS0_IDLE, 10, 1000000);
@@ -501,7 +501,7 @@ static int cdns_i3c_master_disable(struct cdns_i3c_master *master)
 
 static void cdns_i3c_master_enable(struct cdns_i3c_master *master)
 {
-	writel(readl(master->regs + CTRL) | CTRL_DEV_EN, master->regs + CTRL);
+	pete_writel("drivers/i3c/master/i3c-master-cdns.c:504", pete_readl("drivers/i3c/master/i3c-master-cdns.c:504", master->regs + CTRL) | CTRL_DEV_EN, master->regs + CTRL);
 }
 
 static struct cdns_i3c_xfer *
@@ -533,7 +533,7 @@ static void cdns_i3c_master_start_xfer_locked(struct cdns_i3c_master *master)
 	if (!xfer)
 		return;
 
-	writel(MST_INT_CMDD_EMP, master->regs + MST_ICR);
+	pete_writel("drivers/i3c/master/i3c-master-cdns.c:536", MST_INT_CMDD_EMP, master->regs + MST_ICR);
 	for (i = 0; i < xfer->ncmds; i++) {
 		struct cdns_i3c_cmd *cmd = &xfer->cmds[i];
 
@@ -544,14 +544,14 @@ static void cdns_i3c_master_start_xfer_locked(struct cdns_i3c_master *master)
 	for (i = 0; i < xfer->ncmds; i++) {
 		struct cdns_i3c_cmd *cmd = &xfer->cmds[i];
 
-		writel(cmd->cmd1 | CMD1_FIFO_CMDID(i),
+		pete_writel("drivers/i3c/master/i3c-master-cdns.c:547", cmd->cmd1 | CMD1_FIFO_CMDID(i),
 		       master->regs + CMD1_FIFO);
-		writel(cmd->cmd0, master->regs + CMD0_FIFO);
+		pete_writel("drivers/i3c/master/i3c-master-cdns.c:549", cmd->cmd0, master->regs + CMD0_FIFO);
 	}
 
-	writel(readl(master->regs + CTRL) | CTRL_MCS,
+	pete_writel("drivers/i3c/master/i3c-master-cdns.c:552", pete_readl("drivers/i3c/master/i3c-master-cdns.c:552", master->regs + CTRL) | CTRL_MCS,
 	       master->regs + CTRL);
-	writel(MST_INT_CMDD_EMP, master->regs + MST_IER);
+	pete_writel("drivers/i3c/master/i3c-master-cdns.c:554", MST_INT_CMDD_EMP, master->regs + MST_IER);
 }
 
 static void cdns_i3c_master_end_xfer_locked(struct cdns_i3c_master *master,
@@ -567,15 +567,15 @@ static void cdns_i3c_master_end_xfer_locked(struct cdns_i3c_master *master,
 	if (!(isr & MST_INT_CMDD_EMP))
 		return;
 
-	writel(MST_INT_CMDD_EMP, master->regs + MST_IDR);
+	pete_writel("drivers/i3c/master/i3c-master-cdns.c:570", MST_INT_CMDD_EMP, master->regs + MST_IDR);
 
-	for (status0 = readl(master->regs + MST_STATUS0);
+	for (status0 = pete_readl("drivers/i3c/master/i3c-master-cdns.c:572", master->regs + MST_STATUS0);
 	     !(status0 & MST_STATUS0_CMDR_EMP);
-	     status0 = readl(master->regs + MST_STATUS0)) {
+	     status0 = pete_readl("drivers/i3c/master/i3c-master-cdns.c:574", master->regs + MST_STATUS0)) {
 		struct cdns_i3c_cmd *cmd;
 		u32 cmdr, rx_len, id;
 
-		cmdr = readl(master->regs + CMDR);
+		cmdr = pete_readl("drivers/i3c/master/i3c-master-cdns.c:578", master->regs + CMDR);
 		id = CMDR_CMDID(cmdr);
 		if (id == CMDR_CMDID_HJACK_DISEC ||
 		    id == CMDR_CMDID_HJACK_ENTDAA ||
@@ -653,17 +653,17 @@ static void cdns_i3c_master_unqueue_xfer(struct cdns_i3c_master *master,
 	if (master->xferqueue.cur == xfer) {
 		u32 status;
 
-		writel(readl(master->regs + CTRL) & ~CTRL_DEV_EN,
+		pete_writel("drivers/i3c/master/i3c-master-cdns.c:656", pete_readl("drivers/i3c/master/i3c-master-cdns.c:656", master->regs + CTRL) & ~CTRL_DEV_EN,
 		       master->regs + CTRL);
 		readl_poll_timeout_atomic(master->regs + MST_STATUS0, status,
 					  status & MST_STATUS0_IDLE, 10,
 					  1000000);
 		master->xferqueue.cur = NULL;
-		writel(FLUSH_RX_FIFO | FLUSH_TX_FIFO | FLUSH_CMD_FIFO |
+		pete_writel("drivers/i3c/master/i3c-master-cdns.c:662", FLUSH_RX_FIFO | FLUSH_TX_FIFO | FLUSH_CMD_FIFO |
 		       FLUSH_CMD_RESP,
 		       master->regs + FLUSH_CTRL);
-		writel(MST_INT_CMDD_EMP, master->regs + MST_IDR);
-		writel(readl(master->regs + CTRL) | CTRL_DEV_EN,
+		pete_writel("drivers/i3c/master/i3c-master-cdns.c:665", MST_INT_CMDD_EMP, master->regs + MST_IDR);
+		pete_writel("drivers/i3c/master/i3c-master-cdns.c:666", pete_readl("drivers/i3c/master/i3c-master-cdns.c:666", master->regs + CTRL) | CTRL_DEV_EN,
 		       master->regs + CTRL);
 	} else {
 		list_del_init(&xfer->node);
@@ -905,7 +905,7 @@ static void cdns_i3c_master_upd_i3c_addr(struct i3c_dev_desc *dev)
 	rr = prepare_rr0_dev_address(dev->info.dyn_addr ?
 				     dev->info.dyn_addr :
 				     dev->info.static_addr);
-	writel(DEV_ID_RR0_IS_I3C | rr, master->regs + DEV_ID_RR0(data->id));
+	pete_writel("drivers/i3c/master/i3c-master-cdns.c:908", DEV_ID_RR0_IS_I3C | rr, master->regs + DEV_ID_RR0(data->id));
 }
 
 static int cdns_i3c_master_get_rr_slot(struct cdns_i3c_master *master,
@@ -922,11 +922,11 @@ static int cdns_i3c_master_get_rr_slot(struct cdns_i3c_master *master,
 		return ffs(master->free_rr_slots) - 1;
 	}
 
-	activedevs = readl(master->regs + DEVS_CTRL) & DEVS_CTRL_DEVS_ACTIVE_MASK;
+	activedevs = pete_readl("drivers/i3c/master/i3c-master-cdns.c:925", master->regs + DEVS_CTRL) & DEVS_CTRL_DEVS_ACTIVE_MASK;
 	activedevs &= ~BIT(0);
 
 	for_each_set_bit(i, &activedevs, master->maxdevs + 1) {
-		rr = readl(master->regs + DEV_ID_RR0(i));
+		rr = pete_readl("drivers/i3c/master/i3c-master-cdns.c:929", master->regs + DEV_ID_RR0(i));
 		if (!(rr & DEV_ID_RR0_IS_I3C) ||
 		    DEV_ID_RR0_GET_DEV_ADDR(rr) != dyn_addr)
 			continue;
@@ -969,7 +969,7 @@ static int cdns_i3c_master_attach_i3c_dev(struct i3c_dev_desc *dev)
 
 	if (!dev->info.dyn_addr) {
 		cdns_i3c_master_upd_i3c_addr(dev);
-		writel(readl(master->regs + DEVS_CTRL) |
+		pete_writel("drivers/i3c/master/i3c-master-cdns.c:972", pete_readl("drivers/i3c/master/i3c-master-cdns.c:972", master->regs + DEVS_CTRL) |
 		       DEVS_CTRL_DEV_ACTIVE(data->id),
 		       master->regs + DEVS_CTRL);
 	}
@@ -983,7 +983,7 @@ static void cdns_i3c_master_detach_i3c_dev(struct i3c_dev_desc *dev)
 	struct cdns_i3c_master *master = to_cdns_i3c_master(m);
 	struct cdns_i3c_i2c_dev_data *data = i3c_dev_get_master_data(dev);
 
-	writel(readl(master->regs + DEVS_CTRL) |
+	pete_writel("drivers/i3c/master/i3c-master-cdns.c:986", pete_readl("drivers/i3c/master/i3c-master-cdns.c:986", master->regs + DEVS_CTRL) |
 	       DEVS_CTRL_DEV_CLR(data->id),
 	       master->regs + DEVS_CTRL);
 
@@ -1011,10 +1011,10 @@ static int cdns_i3c_master_attach_i2c_dev(struct i2c_dev_desc *dev)
 	master->free_rr_slots &= ~BIT(slot);
 	i2c_dev_set_master_data(dev, data);
 
-	writel(prepare_rr0_dev_address(dev->addr),
+	pete_writel("drivers/i3c/master/i3c-master-cdns.c:1014", prepare_rr0_dev_address(dev->addr),
 	       master->regs + DEV_ID_RR0(data->id));
-	writel(dev->lvr, master->regs + DEV_ID_RR2(data->id));
-	writel(readl(master->regs + DEVS_CTRL) |
+	pete_writel("drivers/i3c/master/i3c-master-cdns.c:1016", dev->lvr, master->regs + DEV_ID_RR2(data->id));
+	pete_writel("drivers/i3c/master/i3c-master-cdns.c:1017", pete_readl("drivers/i3c/master/i3c-master-cdns.c:1017", master->regs + DEVS_CTRL) |
 	       DEVS_CTRL_DEV_ACTIVE(data->id),
 	       master->regs + DEVS_CTRL);
 
@@ -1027,7 +1027,7 @@ static void cdns_i3c_master_detach_i2c_dev(struct i2c_dev_desc *dev)
 	struct cdns_i3c_master *master = to_cdns_i3c_master(m);
 	struct cdns_i3c_i2c_dev_data *data = i2c_dev_get_master_data(dev);
 
-	writel(readl(master->regs + DEVS_CTRL) |
+	pete_writel("drivers/i3c/master/i3c-master-cdns.c:1030", pete_readl("drivers/i3c/master/i3c-master-cdns.c:1030", master->regs + DEVS_CTRL) |
 	       DEVS_CTRL_DEV_CLR(data->id),
 	       master->regs + DEVS_CTRL);
 	master->free_rr_slots |= BIT(data->id);
@@ -1050,13 +1050,13 @@ static void cdns_i3c_master_dev_rr_to_info(struct cdns_i3c_master *master,
 	u32 rr;
 
 	memset(info, 0, sizeof(*info));
-	rr = readl(master->regs + DEV_ID_RR0(slot));
+	rr = pete_readl("drivers/i3c/master/i3c-master-cdns.c:1053", master->regs + DEV_ID_RR0(slot));
 	info->dyn_addr = DEV_ID_RR0_GET_DEV_ADDR(rr);
-	rr = readl(master->regs + DEV_ID_RR2(slot));
+	rr = pete_readl("drivers/i3c/master/i3c-master-cdns.c:1055", master->regs + DEV_ID_RR2(slot));
 	info->dcr = rr;
 	info->bcr = rr >> 8;
 	info->pid = rr >> 16;
-	info->pid |= (u64)readl(master->regs + DEV_ID_RR1(slot)) << 16;
+	info->pid |= (u64)pete_readl("drivers/i3c/master/i3c-master-cdns.c:1059", master->regs + DEV_ID_RR1(slot)) << 16;
 }
 
 static void cdns_i3c_master_upd_i3c_scl_lim(struct cdns_i3c_master *master)
@@ -1106,9 +1106,9 @@ static void cdns_i3c_master_upd_i3c_scl_lim(struct cdns_i3c_master *master)
 	pres_step = 1000000000UL / (bus->scl_rate.i3c * 4);
 
 	/* Configure PP_LOW to meet I3C slave limitations. */
-	prescl1 = readl(master->regs + PRESCL_CTRL1) &
+	prescl1 = pete_readl("drivers/i3c/master/i3c-master-cdns.c:1109", master->regs + PRESCL_CTRL1) &
 		  ~PRESCL_CTRL1_PP_LOW_MASK;
-	ctrl = readl(master->regs + CTRL);
+	ctrl = pete_readl("drivers/i3c/master/i3c-master-cdns.c:1111", master->regs + CTRL);
 
 	i3c_lim_period = DIV_ROUND_UP(1000000000, master->i3c_scl_lim);
 	ncycles = DIV_ROUND_UP(i3c_lim_period, pres_step);
@@ -1123,7 +1123,7 @@ static void cdns_i3c_master_upd_i3c_scl_lim(struct cdns_i3c_master *master)
 	if (ctrl & CTRL_DEV_EN)
 		cdns_i3c_master_disable(master);
 
-	writel(prescl1, master->regs + PRESCL_CTRL1);
+	pete_writel("drivers/i3c/master/i3c-master-cdns.c:1126", prescl1, master->regs + PRESCL_CTRL1);
 
 	if (ctrl & CTRL_DEV_EN)
 		cdns_i3c_master_enable(master);
@@ -1137,7 +1137,7 @@ static int cdns_i3c_master_do_daa(struct i3c_master_controller *m)
 	u8 addrs[MAX_DEVS] = { };
 	u8 last_addr = 0;
 
-	olddevs = readl(master->regs + DEVS_CTRL) & DEVS_CTRL_DEVS_ACTIVE_MASK;
+	olddevs = pete_readl("drivers/i3c/master/i3c-master-cdns.c:1140", master->regs + DEVS_CTRL) & DEVS_CTRL_DEVS_ACTIVE_MASK;
 	olddevs |= BIT(0);
 
 	/* Prepare RR slots before launching DAA. */
@@ -1148,17 +1148,17 @@ static int cdns_i3c_master_do_daa(struct i3c_master_controller *m)
 
 		last_addr = ret;
 		addrs[slot] = last_addr;
-		writel(prepare_rr0_dev_address(last_addr) | DEV_ID_RR0_IS_I3C,
+		pete_writel("drivers/i3c/master/i3c-master-cdns.c:1151", prepare_rr0_dev_address(last_addr) | DEV_ID_RR0_IS_I3C,
 		       master->regs + DEV_ID_RR0(slot));
-		writel(0, master->regs + DEV_ID_RR1(slot));
-		writel(0, master->regs + DEV_ID_RR2(slot));
+		pete_writel("drivers/i3c/master/i3c-master-cdns.c:1153", 0, master->regs + DEV_ID_RR1(slot));
+		pete_writel("drivers/i3c/master/i3c-master-cdns.c:1154", 0, master->regs + DEV_ID_RR2(slot));
 	}
 
 	ret = i3c_master_entdaa_locked(&master->base);
 	if (ret && ret != I3C_ERROR_M2)
 		return ret;
 
-	newdevs = readl(master->regs + DEVS_CTRL) & DEVS_CTRL_DEVS_ACTIVE_MASK;
+	newdevs = pete_readl("drivers/i3c/master/i3c-master-cdns.c:1161", master->regs + DEVS_CTRL) & DEVS_CTRL_DEVS_ACTIVE_MASK;
 	newdevs &= ~olddevs;
 
 	/*
@@ -1174,7 +1174,7 @@ static int cdns_i3c_master_do_daa(struct i3c_master_controller *m)
 	 * by the system but with a different address (in this case the device
 	 * already has a slot and does not need a new one).
 	 */
-	writel(readl(master->regs + DEVS_CTRL) |
+	pete_writel("drivers/i3c/master/i3c-master-cdns.c:1177", pete_readl("drivers/i3c/master/i3c-master-cdns.c:1177", master->regs + DEVS_CTRL) |
 	       master->free_rr_slots << DEVS_CTRL_DEV_CLR_SHIFT,
 	       master->regs + DEVS_CTRL);
 
@@ -1253,7 +1253,7 @@ static int cdns_i3c_master_bus_init(struct i3c_master_controller *m)
 	bus->scl_rate.i2c = sysclk_rate / ((pres + 1) * 5);
 
 	prescl0 |= PRESCL_CTRL0_I2C(pres);
-	writel(prescl0, master->regs + PRESCL_CTRL0);
+	pete_writel("drivers/i3c/master/i3c-master-cdns.c:1256", prescl0, master->regs + PRESCL_CTRL0);
 
 	/* Calculate OD and PP low. */
 	pres_step = 1000000000 / (bus->scl_rate.i3c * 4);
@@ -1261,14 +1261,14 @@ static int cdns_i3c_master_bus_init(struct i3c_master_controller *m)
 	if (ncycles < 0)
 		ncycles = 0;
 	prescl1 = PRESCL_CTRL1_OD_LOW(ncycles);
-	writel(prescl1, master->regs + PRESCL_CTRL1);
+	pete_writel("drivers/i3c/master/i3c-master-cdns.c:1264", prescl1, master->regs + PRESCL_CTRL1);
 
 	/* Get an address for the master. */
 	ret = i3c_master_get_free_addr(m, 0);
 	if (ret < 0)
 		return ret;
 
-	writel(prepare_rr0_dev_address(ret) | DEV_ID_RR0_IS_I3C,
+	pete_writel("drivers/i3c/master/i3c-master-cdns.c:1271", prepare_rr0_dev_address(ret) | DEV_ID_RR0_IS_I3C,
 	       master->regs + DEV_ID_RR0(0));
 
 	cdns_i3c_master_dev_rr_to_info(master, 0, &info);
@@ -1295,7 +1295,7 @@ static int cdns_i3c_master_bus_init(struct i3c_master_controller *m)
 	 * SoC outputs, regardless of PCB balancing.
 	 */
 	ctrl |= CTRL_THD_DELAY(cdns_i3c_master_calculate_thd_delay(master));
-	writel(ctrl, master->regs + CTRL);
+	pete_writel("drivers/i3c/master/i3c-master-cdns.c:1298", ctrl, master->regs + CTRL);
 
 	cdns_i3c_master_enable(master);
 
@@ -1352,7 +1352,7 @@ out:
 		int i;
 
 		for (i = 0; i < IBIR_XFER_BYTES(ibir); i += 4)
-			readl(master->regs + IBI_DATA_FIFO);
+			pete_readl("drivers/i3c/master/i3c-master-cdns.c:1355", master->regs + IBI_DATA_FIFO);
 	}
 }
 
@@ -1360,12 +1360,12 @@ static void cnds_i3c_master_demux_ibis(struct cdns_i3c_master *master)
 {
 	u32 status0;
 
-	writel(MST_INT_IBIR_THR, master->regs + MST_ICR);
+	pete_writel("drivers/i3c/master/i3c-master-cdns.c:1363", MST_INT_IBIR_THR, master->regs + MST_ICR);
 
-	for (status0 = readl(master->regs + MST_STATUS0);
+	for (status0 = pete_readl("drivers/i3c/master/i3c-master-cdns.c:1365", master->regs + MST_STATUS0);
 	     !(status0 & MST_STATUS0_IBIR_EMP);
-	     status0 = readl(master->regs + MST_STATUS0)) {
-		u32 ibir = readl(master->regs + IBIR);
+	     status0 = pete_readl("drivers/i3c/master/i3c-master-cdns.c:1367", master->regs + MST_STATUS0)) {
+		u32 ibir = pete_readl("drivers/i3c/master/i3c-master-cdns.c:1368", master->regs + IBIR);
 
 		switch (IBIR_TYPE(ibir)) {
 		case IBIR_TYPE_IBI:
@@ -1392,8 +1392,8 @@ static irqreturn_t cdns_i3c_master_interrupt(int irq, void *data)
 	struct cdns_i3c_master *master = data;
 	u32 status;
 
-	status = readl(master->regs + MST_ISR);
-	if (!(status & readl(master->regs + MST_IMR)))
+	status = pete_readl("drivers/i3c/master/i3c-master-cdns.c:1395", master->regs + MST_ISR);
+	if (!(status & pete_readl("drivers/i3c/master/i3c-master-cdns.c:1396", master->regs + MST_IMR)))
 		return IRQ_NONE;
 
 	spin_lock(&master->xferqueue.lock);
@@ -1421,11 +1421,11 @@ static int cdns_i3c_master_disable_ibi(struct i3c_dev_desc *dev)
 		return ret;
 
 	spin_lock_irqsave(&master->ibi.lock, flags);
-	sirmap = readl(master->regs + SIR_MAP_DEV_REG(data->ibi));
+	sirmap = pete_readl("drivers/i3c/master/i3c-master-cdns.c:1424", master->regs + SIR_MAP_DEV_REG(data->ibi));
 	sirmap &= ~SIR_MAP_DEV_CONF_MASK(data->ibi);
 	sirmap |= SIR_MAP_DEV_CONF(data->ibi,
 				   SIR_MAP_DEV_DA(I3C_BROADCAST_ADDR));
-	writel(sirmap, master->regs + SIR_MAP_DEV_REG(data->ibi));
+	pete_writel("drivers/i3c/master/i3c-master-cdns.c:1428", sirmap, master->regs + SIR_MAP_DEV_REG(data->ibi));
 	spin_unlock_irqrestore(&master->ibi.lock, flags);
 
 	return ret;
@@ -1441,7 +1441,7 @@ static int cdns_i3c_master_enable_ibi(struct i3c_dev_desc *dev)
 	int ret;
 
 	spin_lock_irqsave(&master->ibi.lock, flags);
-	sirmap = readl(master->regs + SIR_MAP_DEV_REG(data->ibi));
+	sirmap = pete_readl("drivers/i3c/master/i3c-master-cdns.c:1444", master->regs + SIR_MAP_DEV_REG(data->ibi));
 	sirmap &= ~SIR_MAP_DEV_CONF_MASK(data->ibi);
 	sircfg = SIR_MAP_DEV_ROLE(dev->info.bcr >> 6) |
 		 SIR_MAP_DEV_DA(dev->info.dyn_addr) |
@@ -1452,18 +1452,18 @@ static int cdns_i3c_master_enable_ibi(struct i3c_dev_desc *dev)
 		sircfg |= SIR_MAP_DEV_SLOW;
 
 	sirmap |= SIR_MAP_DEV_CONF(data->ibi, sircfg);
-	writel(sirmap, master->regs + SIR_MAP_DEV_REG(data->ibi));
+	pete_writel("drivers/i3c/master/i3c-master-cdns.c:1455", sirmap, master->regs + SIR_MAP_DEV_REG(data->ibi));
 	spin_unlock_irqrestore(&master->ibi.lock, flags);
 
 	ret = i3c_master_enec_locked(m, dev->info.dyn_addr,
 				     I3C_CCC_EVENT_SIR);
 	if (ret) {
 		spin_lock_irqsave(&master->ibi.lock, flags);
-		sirmap = readl(master->regs + SIR_MAP_DEV_REG(data->ibi));
+		sirmap = pete_readl("drivers/i3c/master/i3c-master-cdns.c:1462", master->regs + SIR_MAP_DEV_REG(data->ibi));
 		sirmap &= ~SIR_MAP_DEV_CONF_MASK(data->ibi);
 		sirmap |= SIR_MAP_DEV_CONF(data->ibi,
 					   SIR_MAP_DEV_DA(I3C_BROADCAST_ADDR));
-		writel(sirmap, master->regs + SIR_MAP_DEV_REG(data->ibi));
+		pete_writel("drivers/i3c/master/i3c-master-cdns.c:1466", sirmap, master->regs + SIR_MAP_DEV_REG(data->ibi));
 		spin_unlock_irqrestore(&master->ibi.lock, flags);
 	}
 
@@ -1601,7 +1601,7 @@ static int cdns_i3c_master_probe(struct platform_device *pdev)
 	if (ret)
 		goto err_disable_pclk;
 
-	if (readl(master->regs + DEV_ID) != DEV_ID_I3C_MASTER) {
+	if (pete_readl("drivers/i3c/master/i3c-master-cdns.c:1604", master->regs + DEV_ID) != DEV_ID_I3C_MASTER) {
 		ret = -EINVAL;
 		goto err_disable_sysclk;
 	}
@@ -1610,8 +1610,8 @@ static int cdns_i3c_master_probe(struct platform_device *pdev)
 	INIT_LIST_HEAD(&master->xferqueue.list);
 
 	INIT_WORK(&master->hj_work, cdns_i3c_master_hj);
-	writel(0xffffffff, master->regs + MST_IDR);
-	writel(0xffffffff, master->regs + SLV_IDR);
+	pete_writel("drivers/i3c/master/i3c-master-cdns.c:1613", 0xffffffff, master->regs + MST_IDR);
+	pete_writel("drivers/i3c/master/i3c-master-cdns.c:1614", 0xffffffff, master->regs + SLV_IDR);
 	ret = devm_request_irq(&pdev->dev, irq, cdns_i3c_master_interrupt, 0,
 			       dev_name(&pdev->dev), master);
 	if (ret)
@@ -1619,13 +1619,13 @@ static int cdns_i3c_master_probe(struct platform_device *pdev)
 
 	platform_set_drvdata(pdev, master);
 
-	val = readl(master->regs + CONF_STATUS0);
+	val = pete_readl("drivers/i3c/master/i3c-master-cdns.c:1622", master->regs + CONF_STATUS0);
 
 	/* Device ID0 is reserved to describe this master. */
 	master->maxdevs = CONF_STATUS0_DEVS_NUM(val);
 	master->free_rr_slots = GENMASK(master->maxdevs, 1);
 
-	val = readl(master->regs + CONF_STATUS1);
+	val = pete_readl("drivers/i3c/master/i3c-master-cdns.c:1628", master->regs + CONF_STATUS1);
 	master->caps.cmdfifodepth = CONF_STATUS1_CMD_DEPTH(val);
 	master->caps.rxfifodepth = CONF_STATUS1_RX_DEPTH(val);
 	master->caps.txfifodepth = CONF_STATUS1_TX_DEPTH(val);
@@ -1642,9 +1642,9 @@ static int cdns_i3c_master_probe(struct platform_device *pdev)
 		goto err_disable_sysclk;
 	}
 
-	writel(IBIR_THR(1), master->regs + CMD_IBI_THR_CTRL);
-	writel(MST_INT_IBIR_THR, master->regs + MST_IER);
-	writel(DEVS_CTRL_DEV_CLR_ALL, master->regs + DEVS_CTRL);
+	pete_writel("drivers/i3c/master/i3c-master-cdns.c:1645", IBIR_THR(1), master->regs + CMD_IBI_THR_CTRL);
+	pete_writel("drivers/i3c/master/i3c-master-cdns.c:1646", MST_INT_IBIR_THR, master->regs + MST_IER);
+	pete_writel("drivers/i3c/master/i3c-master-cdns.c:1647", DEVS_CTRL_DEV_CLR_ALL, master->regs + DEVS_CTRL);
 
 	ret = i3c_master_register(&master->base, &pdev->dev,
 				  &cdns_i3c_master_ops, false);

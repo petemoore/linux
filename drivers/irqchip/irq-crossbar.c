@@ -44,17 +44,17 @@ static struct crossbar_device *cb;
 
 static void crossbar_writel(int irq_no, int cb_no)
 {
-	writel(cb_no, cb->crossbar_base + cb->register_offsets[irq_no]);
+	pete_writel("drivers/irqchip/irq-crossbar.c:47", cb_no, cb->crossbar_base + cb->register_offsets[irq_no]);
 }
 
 static void crossbar_writew(int irq_no, int cb_no)
 {
-	writew(cb_no, cb->crossbar_base + cb->register_offsets[irq_no]);
+	pete_writew("drivers/irqchip/irq-crossbar.c:52", cb_no, cb->crossbar_base + cb->register_offsets[irq_no]);
 }
 
 static void crossbar_writeb(int irq_no, int cb_no)
 {
-	writeb(cb_no, cb->crossbar_base + cb->register_offsets[irq_no]);
+	pete_writeb("drivers/irqchip/irq-crossbar.c:57", cb_no, cb->crossbar_base + cb->register_offsets[irq_no]);
 }
 
 static struct irq_chip crossbar_chip = {

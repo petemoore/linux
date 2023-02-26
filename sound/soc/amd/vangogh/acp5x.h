@@ -137,12 +137,12 @@ union acp_i2stdm_mstrclkgen {
  */
 static inline u32 acp_readl(void __iomem *base_addr)
 {
-	return readl(base_addr - ACP5x_PHY_BASE_ADDRESS);
+	return pete_readl("sound/soc/amd/vangogh/acp5x.h:140", base_addr - ACP5x_PHY_BASE_ADDRESS);
 }
 
 static inline void acp_writel(u32 val, void __iomem *base_addr)
 {
-	writel(val, base_addr - ACP5x_PHY_BASE_ADDRESS);
+	pete_writel("sound/soc/amd/vangogh/acp5x.h:145", val, base_addr - ACP5x_PHY_BASE_ADDRESS);
 }
 
 static inline u64 acp_get_byte_count(struct i2s_stream_instance *rtd,

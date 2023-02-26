@@ -436,8 +436,8 @@ static inline int intel_uncore_write_and_verify(struct intel_uncore *uncore,
 }
 
 #define raw_reg_read(base, reg) \
-	readl(base + i915_mmio_reg_offset(reg))
+	pete_readl("drivers/gpu/drm/i915/intel_uncore.h:439", base + i915_mmio_reg_offset(reg))
 #define raw_reg_write(base, reg, value) \
-	writel(value, base + i915_mmio_reg_offset(reg))
+	pete_writel("drivers/gpu/drm/i915/intel_uncore.h:441", value, base + i915_mmio_reg_offset(reg))
 
 #endif /* !__INTEL_UNCORE_H__ */

@@ -21,7 +21,7 @@
 static inline u32 rt2x00mmio_register_read(struct rt2x00_dev *rt2x00dev,
 					   const unsigned int offset)
 {
-	return readl(rt2x00dev->csr.base + offset);
+	return pete_readl("drivers/net/wireless/ralink/rt2x00/rt2x00mmio.h:24", rt2x00dev->csr.base + offset);
 }
 
 static inline void rt2x00mmio_register_multiread(struct rt2x00_dev *rt2x00dev,
@@ -35,7 +35,7 @@ static inline void rt2x00mmio_register_write(struct rt2x00_dev *rt2x00dev,
 					     const unsigned int offset,
 					     u32 value)
 {
-	writel(value, rt2x00dev->csr.base + offset);
+	pete_writel("drivers/net/wireless/ralink/rt2x00/rt2x00mmio.h:38", value, rt2x00dev->csr.base + offset);
 }
 
 static inline void rt2x00mmio_register_multiwrite(struct rt2x00_dev *rt2x00dev,

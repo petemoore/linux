@@ -27,19 +27,19 @@ static void xhci_mvebu_mbus_config(void __iomem *base,
 
 	/* Clear all existing windows */
 	for (win = 0; win < USB3_MAX_WINDOWS; win++) {
-		writel(0, base + USB3_WIN_CTRL(win));
-		writel(0, base + USB3_WIN_BASE(win));
+		pete_writel("drivers/usb/host/xhci-mvebu.c:30", 0, base + USB3_WIN_CTRL(win));
+		pete_writel("drivers/usb/host/xhci-mvebu.c:31", 0, base + USB3_WIN_BASE(win));
 	}
 
 	/* Program each DRAM CS in a seperate window */
 	for (win = 0; win < dram->num_cs; win++) {
 		const struct mbus_dram_window *cs = dram->cs + win;
 
-		writel(((cs->size - 1) & 0xffff0000) | (cs->mbus_attr << 8) |
+		pete_writel("drivers/usb/host/xhci-mvebu.c:38", ((cs->size - 1) & 0xffff0000) | (cs->mbus_attr << 8) |
 		       (dram->mbus_dram_target_id << 4) | 1,
 		       base + USB3_WIN_CTRL(win));
 
-		writel((cs->base & 0xffff0000), base + USB3_WIN_BASE(win));
+		pete_writel("drivers/usb/host/xhci-mvebu.c:42", (cs->base & 0xffff0000), base + USB3_WIN_BASE(win));
 	}
 }
 

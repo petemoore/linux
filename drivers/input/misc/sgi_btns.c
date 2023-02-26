@@ -17,7 +17,7 @@ static inline u8 button_status(void)
 {
 	u8 status;
 
-	status = readb(&sgioc->panel) ^ 0xa0;
+	status = pete_readb("drivers/input/misc/sgi_btns.c:20", &sgioc->panel) ^ 0xa0;
 	return ((status & 0x80) >> 6) | ((status & 0x20) >> 5);
 }
 #endif
@@ -29,8 +29,8 @@ static inline u8 button_status(void)
 {
 	u64 status;
 
-	status = readq(&mace->perif.audio.control);
-	writeq(status & ~(3U << 23), &mace->perif.audio.control);
+	status = pete_readq("drivers/input/misc/sgi_btns.c:32", &mace->perif.audio.control);
+	pete_writeq("drivers/input/misc/sgi_btns.c:33", status & ~(3U << 23), &mace->perif.audio.control);
 
 	return (status >> 23) & 3;
 }

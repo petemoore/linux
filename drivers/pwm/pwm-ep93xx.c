@@ -72,7 +72,7 @@ static int ep93xx_pwm_apply(struct pwm_chip *chip, struct pwm_device *pwm,
 
 	if (state->polarity != pwm->state.polarity) {
 		if (enabled) {
-			writew(0x0, ep93xx_pwm->base + EP93XX_PWMx_ENABLE);
+			pete_writew("drivers/pwm/pwm-ep93xx.c:75", 0x0, ep93xx_pwm->base + EP93XX_PWMx_ENABLE);
 			clk_disable_unprepare(ep93xx_pwm->clk);
 			enabled = false;
 		}
@@ -86,16 +86,16 @@ static int ep93xx_pwm_apply(struct pwm_chip *chip, struct pwm_device *pwm,
 			return ret;
 
 		if (state->polarity == PWM_POLARITY_INVERSED)
-			writew(0x1, ep93xx_pwm->base + EP93XX_PWMx_INVERT);
+			pete_writew("drivers/pwm/pwm-ep93xx.c:89", 0x1, ep93xx_pwm->base + EP93XX_PWMx_INVERT);
 		else
-			writew(0x0, ep93xx_pwm->base + EP93XX_PWMx_INVERT);
+			pete_writew("drivers/pwm/pwm-ep93xx.c:91", 0x0, ep93xx_pwm->base + EP93XX_PWMx_INVERT);
 
 		clk_disable_unprepare(ep93xx_pwm->clk);
 	}
 
 	if (!state->enabled) {
 		if (enabled) {
-			writew(0x0, ep93xx_pwm->base + EP93XX_PWMx_ENABLE);
+			pete_writew("drivers/pwm/pwm-ep93xx.c:98", 0x0, ep93xx_pwm->base + EP93XX_PWMx_ENABLE);
 			clk_disable_unprepare(ep93xx_pwm->clk);
 		}
 
@@ -123,15 +123,15 @@ static int ep93xx_pwm_apply(struct pwm_chip *chip, struct pwm_device *pwm,
 	duty_cycles = c;
 
 	if (period_cycles < 0x10000 && duty_cycles < 0x10000) {
-		term = readw(base + EP93XX_PWMx_TERM_COUNT);
+		term = pete_readw("drivers/pwm/pwm-ep93xx.c:126", base + EP93XX_PWMx_TERM_COUNT);
 
 		/* Order is important if PWM is running */
 		if (period_cycles > term) {
-			writew(period_cycles, base + EP93XX_PWMx_TERM_COUNT);
-			writew(duty_cycles, base + EP93XX_PWMx_DUTY_CYCLE);
+			pete_writew("drivers/pwm/pwm-ep93xx.c:130", period_cycles, base + EP93XX_PWMx_TERM_COUNT);
+			pete_writew("drivers/pwm/pwm-ep93xx.c:131", duty_cycles, base + EP93XX_PWMx_DUTY_CYCLE);
 		} else {
-			writew(duty_cycles, base + EP93XX_PWMx_DUTY_CYCLE);
-			writew(period_cycles, base + EP93XX_PWMx_TERM_COUNT);
+			pete_writew("drivers/pwm/pwm-ep93xx.c:133", duty_cycles, base + EP93XX_PWMx_DUTY_CYCLE);
+			pete_writew("drivers/pwm/pwm-ep93xx.c:134", period_cycles, base + EP93XX_PWMx_TERM_COUNT);
 		}
 		ret = 0;
 	} else {
@@ -149,7 +149,7 @@ static int ep93xx_pwm_apply(struct pwm_chip *chip, struct pwm_device *pwm,
 		if (ret)
 			return ret;
 
-		writew(0x1, ep93xx_pwm->base + EP93XX_PWMx_ENABLE);
+		pete_writew("drivers/pwm/pwm-ep93xx.c:152", 0x1, ep93xx_pwm->base + EP93XX_PWMx_ENABLE);
 	}
 
 	return 0;

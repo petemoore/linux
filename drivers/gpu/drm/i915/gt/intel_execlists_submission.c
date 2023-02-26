@@ -709,11 +709,11 @@ static u64 execlists_update_context(struct i915_request *rq)
 static void write_desc(struct intel_engine_execlists *execlists, u64 desc, u32 port)
 {
 	if (execlists->ctrl_reg) {
-		writel(lower_32_bits(desc), execlists->submit_reg + port * 2);
-		writel(upper_32_bits(desc), execlists->submit_reg + port * 2 + 1);
+		pete_writel("drivers/gpu/drm/i915/gt/intel_execlists_submission.c:712", lower_32_bits(desc), execlists->submit_reg + port * 2);
+		pete_writel("drivers/gpu/drm/i915/gt/intel_execlists_submission.c:713", upper_32_bits(desc), execlists->submit_reg + port * 2 + 1);
 	} else {
-		writel(upper_32_bits(desc), execlists->submit_reg);
-		writel(lower_32_bits(desc), execlists->submit_reg);
+		pete_writel("drivers/gpu/drm/i915/gt/intel_execlists_submission.c:715", upper_32_bits(desc), execlists->submit_reg);
+		pete_writel("drivers/gpu/drm/i915/gt/intel_execlists_submission.c:716", lower_32_bits(desc), execlists->submit_reg);
 	}
 }
 
@@ -921,7 +921,7 @@ static void execlists_submit_ports(struct intel_engine_cs *engine)
 
 	/* we need to manually load the submit queue */
 	if (execlists->ctrl_reg)
-		writel(EL_CTRL_LOAD, execlists->ctrl_reg);
+		pete_writel("drivers/gpu/drm/i915/gt/intel_execlists_submission.c:924", EL_CTRL_LOAD, execlists->ctrl_reg);
 }
 
 static bool ctx_single_port_submission(const struct intel_context *ce)

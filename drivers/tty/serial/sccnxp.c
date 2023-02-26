@@ -225,7 +225,7 @@ static u8 sccnxp_read(struct uart_port *port, u8 reg)
 	struct sccnxp_port *s = dev_get_drvdata(port->dev);
 	u8 ret;
 
-	ret = readb(port->membase + (reg << port->regshift));
+	ret = pete_readb("drivers/tty/serial/sccnxp.c:228", port->membase + (reg << port->regshift));
 
 	ndelay(s->chip->trwd);
 
@@ -236,7 +236,7 @@ static void sccnxp_write(struct uart_port *port, u8 reg, u8 v)
 {
 	struct sccnxp_port *s = dev_get_drvdata(port->dev);
 
-	writeb(v, port->membase + (reg << port->regshift));
+	pete_writeb("drivers/tty/serial/sccnxp.c:239", v, port->membase + (reg << port->regshift));
 
 	ndelay(s->chip->trwd);
 }

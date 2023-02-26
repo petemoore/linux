@@ -43,10 +43,10 @@ static int axxia_boot_secondary(unsigned int cpu, struct task_struct *idle)
 	if (!syscon)
 		return -ENOMEM;
 
-	tmp = readl(syscon + SC_RST_CPU_HOLD);
-	writel(0xab, syscon + SC_CRIT_WRITE_KEY);
+	tmp = pete_readl("arch/arm/mach-axxia/platsmp.c:46", syscon + SC_RST_CPU_HOLD);
+	pete_writel("arch/arm/mach-axxia/platsmp.c:47", 0xab, syscon + SC_CRIT_WRITE_KEY);
 	tmp &= ~(1 << cpu);
-	writel(tmp, syscon + SC_RST_CPU_HOLD);
+	pete_writel("arch/arm/mach-axxia/platsmp.c:49", tmp, syscon + SC_RST_CPU_HOLD);
 
 	return 0;
 }

@@ -373,12 +373,12 @@ struct radeonfb_info {
 
 void _radeon_msleep(struct radeonfb_info *rinfo, unsigned long ms);
 
-#define INREG8(addr)		readb((rinfo->mmio_base)+addr)
-#define OUTREG8(addr,val)	writeb(val, (rinfo->mmio_base)+addr)
-#define INREG16(addr)		readw((rinfo->mmio_base)+addr)
-#define OUTREG16(addr,val)	writew(val, (rinfo->mmio_base)+addr)
-#define INREG(addr)		readl((rinfo->mmio_base)+addr)
-#define OUTREG(addr,val)	writel(val, (rinfo->mmio_base)+addr)
+#define INREG8(addr)		pete_readb("drivers/video/fbdev/aty/radeonfb.h:376", (rinfo->mmio_base)+addr)
+#define OUTREG8(addr,val)	pete_writeb("drivers/video/fbdev/aty/radeonfb.h:377", val, (rinfo->mmio_base)+addr)
+#define INREG16(addr)		pete_readw("drivers/video/fbdev/aty/radeonfb.h:378", (rinfo->mmio_base)+addr)
+#define OUTREG16(addr,val)	pete_writew("drivers/video/fbdev/aty/radeonfb.h:379", val, (rinfo->mmio_base)+addr)
+#define INREG(addr)		pete_readl("drivers/video/fbdev/aty/radeonfb.h:380", (rinfo->mmio_base)+addr)
+#define OUTREG(addr,val)	pete_writel("drivers/video/fbdev/aty/radeonfb.h:381", val, (rinfo->mmio_base)+addr)
 
 void _OUTREGP(struct radeonfb_info *rinfo, u32 addr, u32 val, u32 mask);
 
@@ -425,13 +425,13 @@ void __OUTPLLP(struct radeonfb_info *rinfo, unsigned int index,
 #define OUTPLLP(index, val, mask)	__OUTPLLP(rinfo, index, val, mask)
 
 
-#define BIOS_IN8(v)  	(readb(rinfo->bios_seg + (v)))
-#define BIOS_IN16(v) 	(readb(rinfo->bios_seg + (v)) | \
-			  (readb(rinfo->bios_seg + (v) + 1) << 8))
-#define BIOS_IN32(v) 	(readb(rinfo->bios_seg + (v)) | \
-			  (readb(rinfo->bios_seg + (v) + 1) << 8) | \
-			  (readb(rinfo->bios_seg + (v) + 2) << 16) | \
-			  (readb(rinfo->bios_seg + (v) + 3) << 24))
+#define BIOS_IN8(v)  	(pete_readb("drivers/video/fbdev/aty/radeonfb.h:428", rinfo->bios_seg + (v)))
+#define BIOS_IN16(v) 	(pete_readb("drivers/video/fbdev/aty/radeonfb.h:429", rinfo->bios_seg + (v)) | \
+			  (pete_readb("drivers/video/fbdev/aty/radeonfb.h:430", rinfo->bios_seg + (v) + 1) << 8))
+#define BIOS_IN32(v) 	(pete_readb("drivers/video/fbdev/aty/radeonfb.h:431", rinfo->bios_seg + (v)) | \
+			  (pete_readb("drivers/video/fbdev/aty/radeonfb.h:432", rinfo->bios_seg + (v) + 1) << 8) | \
+			  (pete_readb("drivers/video/fbdev/aty/radeonfb.h:433", rinfo->bios_seg + (v) + 2) << 16) | \
+			  (pete_readb("drivers/video/fbdev/aty/radeonfb.h:434", rinfo->bios_seg + (v) + 3) << 24))
 
 /*
  * Inline utilities

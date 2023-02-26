@@ -458,12 +458,12 @@ static int sun4i_ss_probe(struct platform_device *pdev)
 	if (err < 0)
 		goto error_pm;
 
-	writel(SS_ENABLED, ss->base + SS_CTL);
-	v = readl(ss->base + SS_CTL);
+	pete_writel("drivers/crypto/allwinner/sun4i-ss/sun4i-ss-core.c:461", SS_ENABLED, ss->base + SS_CTL);
+	v = pete_readl("drivers/crypto/allwinner/sun4i-ss/sun4i-ss-core.c:462", ss->base + SS_CTL);
 	v >>= 16;
 	v &= 0x07;
 	dev_info(&pdev->dev, "Die ID %d\n", v);
-	writel(0, ss->base + SS_CTL);
+	pete_writel("drivers/crypto/allwinner/sun4i-ss/sun4i-ss-core.c:466", 0, ss->base + SS_CTL);
 
 	pm_runtime_put_sync(ss->dev);
 

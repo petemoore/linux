@@ -83,18 +83,18 @@ static void qcom_snps_hsphy_enable_hv_interrupts(struct hsphy_priv *priv)
 	u32 val;
 
 	/* Clear any existing interrupts before enabling the interrupts */
-	val = readb(priv->base + PHY_INTR_CLEAR0);
+	val = pete_readb("drivers/phy/qualcomm/phy-qcom-usb-hs-28nm.c:86", priv->base + PHY_INTR_CLEAR0);
 	val |= DPDM_MASK;
-	writeb(val, priv->base + PHY_INTR_CLEAR0);
+	pete_writeb("drivers/phy/qualcomm/phy-qcom-usb-hs-28nm.c:88", val, priv->base + PHY_INTR_CLEAR0);
 
-	writeb(0x0, priv->base + PHY_IRQ_CMD);
+	pete_writeb("drivers/phy/qualcomm/phy-qcom-usb-hs-28nm.c:90", 0x0, priv->base + PHY_IRQ_CMD);
 	usleep_range(200, 220);
-	writeb(0x1, priv->base + PHY_IRQ_CMD);
+	pete_writeb("drivers/phy/qualcomm/phy-qcom-usb-hs-28nm.c:92", 0x1, priv->base + PHY_IRQ_CMD);
 
 	/* Make sure the interrupts are cleared */
 	usleep_range(200, 220);
 
-	val = readb(priv->base + PHY_INTR_MASK0);
+	val = pete_readb("drivers/phy/qualcomm/phy-qcom-usb-hs-28nm.c:97", priv->base + PHY_INTR_MASK0);
 	switch (priv->mode) {
 	case PHY_MODE_USB_HOST_HS:
 	case PHY_MODE_USB_HOST_FS:
@@ -111,26 +111,26 @@ static void qcom_snps_hsphy_enable_hv_interrupts(struct hsphy_priv *priv)
 		val |= DP_0_1 | DM_0_1;
 		break;
 	}
-	writeb(val, priv->base + PHY_INTR_MASK0);
+	pete_writeb("drivers/phy/qualcomm/phy-qcom-usb-hs-28nm.c:114", val, priv->base + PHY_INTR_MASK0);
 }
 
 static void qcom_snps_hsphy_disable_hv_interrupts(struct hsphy_priv *priv)
 {
 	u32 val;
 
-	val = readb(priv->base + PHY_INTR_MASK0);
+	val = pete_readb("drivers/phy/qualcomm/phy-qcom-usb-hs-28nm.c:121", priv->base + PHY_INTR_MASK0);
 	val &= ~DPDM_MASK;
-	writeb(val, priv->base + PHY_INTR_MASK0);
+	pete_writeb("drivers/phy/qualcomm/phy-qcom-usb-hs-28nm.c:123", val, priv->base + PHY_INTR_MASK0);
 
 	/* Clear any pending interrupts */
-	val = readb(priv->base + PHY_INTR_CLEAR0);
+	val = pete_readb("drivers/phy/qualcomm/phy-qcom-usb-hs-28nm.c:126", priv->base + PHY_INTR_CLEAR0);
 	val |= DPDM_MASK;
-	writeb(val, priv->base + PHY_INTR_CLEAR0);
+	pete_writeb("drivers/phy/qualcomm/phy-qcom-usb-hs-28nm.c:128", val, priv->base + PHY_INTR_CLEAR0);
 
-	writeb(0x0, priv->base + PHY_IRQ_CMD);
+	pete_writeb("drivers/phy/qualcomm/phy-qcom-usb-hs-28nm.c:130", 0x0, priv->base + PHY_IRQ_CMD);
 	usleep_range(200, 220);
 
-	writeb(0x1, priv->base + PHY_IRQ_CMD);
+	pete_writeb("drivers/phy/qualcomm/phy-qcom-usb-hs-28nm.c:133", 0x1, priv->base + PHY_IRQ_CMD);
 	usleep_range(200, 220);
 }
 
@@ -138,18 +138,18 @@ static void qcom_snps_hsphy_enter_retention(struct hsphy_priv *priv)
 {
 	u32 val;
 
-	val = readb(priv->base + PHY_CTRL_COMMON0);
+	val = pete_readb("drivers/phy/qualcomm/phy-qcom-usb-hs-28nm.c:141", priv->base + PHY_CTRL_COMMON0);
 	val |= SIDDQ;
-	writeb(val, priv->base + PHY_CTRL_COMMON0);
+	pete_writeb("drivers/phy/qualcomm/phy-qcom-usb-hs-28nm.c:143", val, priv->base + PHY_CTRL_COMMON0);
 }
 
 static void qcom_snps_hsphy_exit_retention(struct hsphy_priv *priv)
 {
 	u32 val;
 
-	val = readb(priv->base + PHY_CTRL_COMMON0);
+	val = pete_readb("drivers/phy/qualcomm/phy-qcom-usb-hs-28nm.c:150", priv->base + PHY_CTRL_COMMON0);
 	val &= ~SIDDQ;
-	writeb(val, priv->base + PHY_CTRL_COMMON0);
+	pete_writeb("drivers/phy/qualcomm/phy-qcom-usb-hs-28nm.c:152", val, priv->base + PHY_CTRL_COMMON0);
 }
 
 static int qcom_snps_hsphy_power_on(struct phy *phy)
@@ -210,7 +210,7 @@ static void qcom_snps_hsphy_init_sequence(struct hsphy_priv *priv)
 	seq = data->init_seq;
 
 	for (i = 0; i < data->init_seq_num; i++, seq++) {
-		writeb(seq->val, priv->base + seq->offset);
+		pete_writeb("drivers/phy/qualcomm/phy-qcom-usb-hs-28nm.c:213", seq->val, priv->base + seq->offset);
 		if (seq->delay)
 			usleep_range(seq->delay, seq->delay + 10);
 	}

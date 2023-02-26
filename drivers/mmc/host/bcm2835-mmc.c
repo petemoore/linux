@@ -135,7 +135,7 @@ static inline void bcm2835_mmc_writel(struct bcm2835_host *host, u32 val, int re
 {
 	unsigned delay;
 	lockdep_assert_held_once(&host->lock);
-	writel(val, host->ioaddr + reg);
+	pete_writel("drivers/mmc/host/bcm2835-mmc.c:138", val, host->ioaddr + reg);
 	udelay(BCM2835_SDHCI_WRITE_DELAY(max(host->clock, MIN_FREQ)));
 
 	delay = ((mmc_debug >> 16) & 0xf) << ((mmc_debug >> 20) & 0xf);
@@ -147,7 +147,7 @@ static inline void mmc_raw_writel(struct bcm2835_host *host, u32 val, int reg)
 {
 	unsigned delay;
 	lockdep_assert_held_once(&host->lock);
-	writel(val, host->ioaddr + reg);
+	pete_writel("drivers/mmc/host/bcm2835-mmc.c:150", val, host->ioaddr + reg);
 
 	delay = ((mmc_debug >> 24) & 0xf) << ((mmc_debug >> 28) & 0xf);
 	if (delay)
@@ -157,7 +157,7 @@ static inline void mmc_raw_writel(struct bcm2835_host *host, u32 val, int reg)
 static inline u32 bcm2835_mmc_readl(struct bcm2835_host *host, int reg)
 {
 	lockdep_assert_held_once(&host->lock);
-	return readl(host->ioaddr + reg);
+	return pete_readl("drivers/mmc/host/bcm2835-mmc.c:160", host->ioaddr + reg);
 }
 
 static inline void bcm2835_mmc_writew(struct bcm2835_host *host, u16 val, int reg)

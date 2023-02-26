@@ -284,12 +284,12 @@ static void armada_3700_soc_pad_voltage_set(struct sdhci_host *host,
 	struct xenon_emmc_phy_params *params = priv->phy_params;
 
 	if (params->pad_ctrl.pad_type == SOC_PAD_FIXED_1_8V) {
-		writel(ARMADA_3700_SOC_PAD_1_8V, params->pad_ctrl.reg);
+		pete_writel("drivers/mmc/host/sdhci-xenon-phy.c:287", ARMADA_3700_SOC_PAD_1_8V, params->pad_ctrl.reg);
 	} else if (params->pad_ctrl.pad_type == SOC_PAD_SD) {
 		if (signal_voltage == MMC_SIGNAL_VOLTAGE_180)
-			writel(ARMADA_3700_SOC_PAD_1_8V, params->pad_ctrl.reg);
+			pete_writel("drivers/mmc/host/sdhci-xenon-phy.c:290", ARMADA_3700_SOC_PAD_1_8V, params->pad_ctrl.reg);
 		else if (signal_voltage == MMC_SIGNAL_VOLTAGE_330)
-			writel(ARMADA_3700_SOC_PAD_3_3V, params->pad_ctrl.reg);
+			pete_writel("drivers/mmc/host/sdhci-xenon-phy.c:292", ARMADA_3700_SOC_PAD_3_3V, params->pad_ctrl.reg);
 	}
 }
 

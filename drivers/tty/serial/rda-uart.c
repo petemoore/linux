@@ -125,12 +125,12 @@ static struct rda_uart_port *rda_uart_ports[RDA_UART_PORT_NUM];
 static inline void rda_uart_write(struct uart_port *port, u32 val,
 				  unsigned int off)
 {
-	writel(val, port->membase + off);
+	pete_writel("drivers/tty/serial/rda-uart.c:128", val, port->membase + off);
 }
 
 static inline u32 rda_uart_read(struct uart_port *port, unsigned int off)
 {
-	return readl(port->membase + off);
+	return pete_readl("drivers/tty/serial/rda-uart.c:133", port->membase + off);
 }
 
 static unsigned int rda_uart_tx_empty(struct uart_port *port)

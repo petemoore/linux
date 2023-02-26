@@ -175,13 +175,13 @@ void hinic_set_msix_state(struct hinic_hwif *hwif, u16 msix_idx,
 			HINIC_PCI_MSIX_ENTRY_VECTOR_CTRL;
 	u32 mask_bits;
 
-	mask_bits = readl(hwif->intr_regs_base + offset);
+	mask_bits = pete_readl("drivers/net/ethernet/huawei/hinic/hinic_hw_if.c:178", hwif->intr_regs_base + offset);
 	mask_bits &= ~HINIC_PCI_MSIX_ENTRY_CTRL_MASKBIT;
 
 	if (flag)
 		mask_bits |= HINIC_PCI_MSIX_ENTRY_CTRL_MASKBIT;
 
-	writel(mask_bits, hwif->intr_regs_base + offset);
+	pete_writel("drivers/net/ethernet/huawei/hinic/hinic_hw_if.c:184", mask_bits, hwif->intr_regs_base + offset);
 }
 
 /**

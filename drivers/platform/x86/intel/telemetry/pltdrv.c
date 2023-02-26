@@ -879,22 +879,22 @@ static int telem_evtlog_read(enum telemetry_unit telem_unit,
 		len = unit_config->ssram_evts_used;
 
 	do {
-		timestamp_prev = readq(unit_config->regmap);
+		timestamp_prev = pete_readq("drivers/platform/x86/intel/telemetry/pltdrv.c:882", unit_config->regmap);
 		if (!timestamp_prev) {
 			pr_err("Ssram under update. Please Try Later\n");
 			return -EBUSY;
 		}
 
-		ssram_region->start_time = readq(unit_config->regmap +
+		ssram_region->start_time = pete_readq("drivers/platform/x86/intel/telemetry/pltdrv.c:888", unit_config->regmap +
 						 TELEM_SSRAM_STARTTIME_OFFSET);
 
 		for (index = 0; index < len; index++) {
 			ssram_region->events[index] =
-			readq(unit_config->regmap + TELEM_SSRAM_EVTLOG_OFFSET +
+			pete_readq("drivers/platform/x86/intel/telemetry/pltdrv.c:893", unit_config->regmap + TELEM_SSRAM_EVTLOG_OFFSET +
 			      BYTES_PER_LONG*index);
 		}
 
-		timestamp_next = readq(unit_config->regmap);
+		timestamp_next = pete_readq("drivers/platform/x86/intel/telemetry/pltdrv.c:897", unit_config->regmap);
 		if (!timestamp_next) {
 			pr_err("Ssram under update. Please Try Later\n");
 			return -EBUSY;

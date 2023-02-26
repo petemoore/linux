@@ -391,7 +391,7 @@ static inline void bnxt_qplib_ring_db32(struct bnxt_qplib_db_info *info,
 		(CMPL_DOORBELL_KEY_CMPL & CMPL_DOORBELL_KEY_MASK));
 	if (!arm)
 		key |= CMPL_DOORBELL_MASK;
-	writel(key, info->db);
+	pete_writel("drivers/infiniband/hw/bnxt_re/qplib_res.h:394", key, info->db);
 }
 
 static inline void bnxt_qplib_ring_db(struct bnxt_qplib_db_info *info,
@@ -403,7 +403,7 @@ static inline void bnxt_qplib_ring_db(struct bnxt_qplib_db_info *info,
 	key <<= 32;
 	key |= (info->hwq->cons & (info->hwq->max_elements - 1)) &
 		DBC_DBC_INDEX_MASK;
-	writeq(key, info->db);
+	pete_writeq("drivers/infiniband/hw/bnxt_re/qplib_res.h:406", key, info->db);
 }
 
 static inline void bnxt_qplib_ring_prod_db(struct bnxt_qplib_db_info *info,
@@ -414,7 +414,7 @@ static inline void bnxt_qplib_ring_prod_db(struct bnxt_qplib_db_info *info,
 	key = (info->xid & DBC_DBC_XID_MASK) | DBC_DBC_PATH_ROCE | type;
 	key <<= 32;
 	key |= ((info->hwq->prod / info->max_slot)) & DBC_DBC_INDEX_MASK;
-	writeq(key, info->db);
+	pete_writeq("drivers/infiniband/hw/bnxt_re/qplib_res.h:417", key, info->db);
 }
 
 static inline void bnxt_qplib_armen_db(struct bnxt_qplib_db_info *info,
@@ -424,7 +424,7 @@ static inline void bnxt_qplib_armen_db(struct bnxt_qplib_db_info *info,
 
 	key = (info->xid & DBC_DBC_XID_MASK) | DBC_DBC_PATH_ROCE | type;
 	key <<= 32;
-	writeq(key, info->priv_db);
+	pete_writeq("drivers/infiniband/hw/bnxt_re/qplib_res.h:427", key, info->priv_db);
 }
 
 static inline void bnxt_qplib_srq_arm_db(struct bnxt_qplib_db_info *info,
@@ -435,7 +435,7 @@ static inline void bnxt_qplib_srq_arm_db(struct bnxt_qplib_db_info *info,
 	key = (info->xid & DBC_DBC_XID_MASK) | DBC_DBC_PATH_ROCE | th;
 	key <<= 32;
 	key |=  th & DBC_DBC_INDEX_MASK;
-	writeq(key, info->priv_db);
+	pete_writeq("drivers/infiniband/hw/bnxt_re/qplib_res.h:438", key, info->priv_db);
 }
 
 static inline void bnxt_qplib_ring_nq_db(struct bnxt_qplib_db_info *info,

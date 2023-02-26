@@ -585,8 +585,8 @@ int sev_es_setup_ap_jump_table(struct real_mode_header *rmh)
 	if (!jump_table)
 		return -EIO;
 
-	writew(startup_ip, &jump_table[0]);
-	writew(startup_cs, &jump_table[1]);
+	pete_writew("arch/x86/kernel/sev.c:588", startup_ip, &jump_table[0]);
+	pete_writew("arch/x86/kernel/sev.c:589", startup_cs, &jump_table[1]);
 
 	iounmap(jump_table);
 

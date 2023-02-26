@@ -211,7 +211,7 @@ static void noinline sa11x0_dma_start_sg(struct sa11x0_dma_phy *p,
 
 	writel_relaxed(sg->addr, base + dbsx);
 	writel_relaxed(sg->len, base + dbtx);
-	writel(dcsr, base + DMA_DCSR_S);
+	pete_writel("drivers/dma/sa11x0-dma.c:214", dcsr, base + DMA_DCSR_S);
 
 	dev_dbg(p->dev->slave.dev, "pchan %u: load: DCSR:%02x DBS%c:%08x DBT%c:%08x\n",
 		p->num, dcsr,
@@ -711,7 +711,7 @@ static int sa11x0_dma_device_pause(struct dma_chan *chan)
 
 		p = c->phy;
 		if (p) {
-			writel(DCSR_RUN | DCSR_IE, p->base + DMA_DCSR_C);
+			pete_writel("drivers/dma/sa11x0-dma.c:714", DCSR_RUN | DCSR_IE, p->base + DMA_DCSR_C);
 		} else {
 			spin_lock(&d->lock);
 			list_del_init(&c->node);
@@ -737,7 +737,7 @@ static int sa11x0_dma_device_resume(struct dma_chan *chan)
 
 		p = c->phy;
 		if (p) {
-			writel(DCSR_RUN | DCSR_IE, p->base + DMA_DCSR_S);
+			pete_writel("drivers/dma/sa11x0-dma.c:740", DCSR_RUN | DCSR_IE, p->base + DMA_DCSR_S);
 		} else if (!list_empty(&c->vc.desc_issued)) {
 			spin_lock(&d->lock);
 			list_add_tail(&c->node, &d->chan_pending);
@@ -766,7 +766,7 @@ static int sa11x0_dma_device_terminate_all(struct dma_chan *chan)
 	if (p) {
 		dev_dbg(d->slave.dev, "pchan %u: terminating\n", p->num);
 		/* vchan is assigned to a pchan - stop the channel */
-		writel(DCSR_RUN | DCSR_IE |
+		pete_writel("drivers/dma/sa11x0-dma.c:769", DCSR_RUN | DCSR_IE |
 		       DCSR_STRTA | DCSR_DONEA |
 		       DCSR_STRTB | DCSR_DONEB,
 		       p->base + DMA_DCSR_C);
@@ -1012,7 +1012,7 @@ static int sa11x0_dma_suspend(struct device *dev)
 
 		dcsr = saved_dcsr = readl_relaxed(p->base + DMA_DCSR_R);
 		if (dcsr & DCSR_RUN) {
-			writel(DCSR_RUN | DCSR_IE, p->base + DMA_DCSR_C);
+			pete_writel("drivers/dma/sa11x0-dma.c:1015", DCSR_RUN | DCSR_IE, p->base + DMA_DCSR_C);
 			dcsr = readl_relaxed(p->base + DMA_DCSR_R);
 		}
 
@@ -1033,7 +1033,7 @@ static int sa11x0_dma_suspend(struct device *dev)
 		}
 		p->dcsr = saved_dcsr;
 
-		writel(DCSR_STRTA | DCSR_STRTB, p->base + DMA_DCSR_C);
+		pete_writel("drivers/dma/sa11x0-dma.c:1036", DCSR_STRTA | DCSR_STRTB, p->base + DMA_DCSR_C);
 	}
 
 	return 0;

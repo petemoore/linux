@@ -552,7 +552,7 @@ static int octeon_setup_droq(struct octeon_device *oct, int q_no, int num_descs,
 	/* Send Credit for Octeon Output queues. Credits are always
 	 * sent after the output queue is enabled.
 	 */
-	writel(oct->droq[q_no]->max_count, oct->droq[q_no]->pkts_credit_reg);
+	pete_writel("drivers/net/ethernet/cavium/liquidio/lio_core.c:555", oct->droq[q_no]->max_count, oct->droq[q_no]->pkts_credit_reg);
 
 	return ret_val;
 }

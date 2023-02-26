@@ -210,5 +210,5 @@ union fifo_area {
 	u_char fill[32768];
 };
 
-#define Write_hfc(a, b, c) (writeb(c, (a->hw.pci_io) + b))
-#define Read_hfc(a, b) (readb((a->hw.pci_io) + b))
+#define Write_hfc(a, b, c) (pete_writeb("drivers/isdn/hardware/mISDN/hfc_pci.h:213", c, (a->hw.pci_io) + b))
+#define Read_hfc(a, b) (pete_readb("drivers/isdn/hardware/mISDN/hfc_pci.h:214", (a->hw.pci_io) + b))

@@ -338,7 +338,7 @@ void drm_print_regset32(struct drm_printer *p, struct debugfs_regset32 *regset)
 	for (i = 0; i < regset->nregs; i++) {
 		drm_printf(p, "%*s = 0x%08x\n",
 			   namelen, regset->regs[i].name,
-			   readl(regset->base + regset->regs[i].offset));
+			   pete_readl("drivers/gpu/drm/drm_print.c:341", regset->base + regset->regs[i].offset));
 	}
 }
 EXPORT_SYMBOL(drm_print_regset32);

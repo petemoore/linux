@@ -73,7 +73,7 @@ void mtk_aal_start(struct device *dev)
 {
 	struct mtk_disp_aal *aal = dev_get_drvdata(dev);
 
-	writel(AAL_EN, aal->regs + DISP_AAL_EN);
+	pete_writel("drivers/gpu/drm/mediatek/mtk_disp_aal.c:76", AAL_EN, aal->regs + DISP_AAL_EN);
 }
 
 void mtk_aal_stop(struct device *dev)

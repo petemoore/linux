@@ -33,7 +33,7 @@ void atomic_io_modify(void __iomem *reg, u32 mask, u32 set)
 	raw_spin_lock_irqsave(&__io_lock, flags);
 	value = readl_relaxed(reg) & ~mask;
 	value |= (set & mask);
-	writel(value, reg);
+	pete_writel("arch/arm/kernel/io.c:36", value, reg);
 	raw_spin_unlock_irqrestore(&__io_lock, flags);
 }
 EXPORT_SYMBOL(atomic_io_modify);
@@ -47,7 +47,7 @@ void _memcpy_fromio(void *to, const volatile void __iomem *from, size_t count)
 	unsigned char *t = to;
 	while (count) {
 		count--;
-		*t = readb(from);
+		*t = pete_readb("arch/arm/kernel/io.c:50", from);
 		t++;
 		from++;
 	}
@@ -63,7 +63,7 @@ void _memcpy_toio(volatile void __iomem *to, const void *from, size_t count)
 	const unsigned char *f = from;
 	while (count) {
 		count--;
-		writeb(*f, to);
+		pete_writeb("arch/arm/kernel/io.c:66", *f, to);
 		f++;
 		to++;
 	}
@@ -78,7 +78,7 @@ void _memset_io(volatile void __iomem *dst, int c, size_t count)
 {
 	while (count) {
 		count--;
-		writeb(c, dst);
+		pete_writeb("arch/arm/kernel/io.c:81", c, dst);
 		dst++;
 	}
 }

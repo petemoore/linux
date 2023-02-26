@@ -57,9 +57,9 @@ static void gsta_gpio_set(struct gpio_chip *gpio, unsigned nr, int val)
 	u32 bit = BIT(nr % GSTA_GPIO_PER_BLOCK);
 
 	if (val)
-		writel(bit, &regs->dats);
+		pete_writel("drivers/gpio/gpio-sta2x11.c:60", bit, &regs->dats);
 	else
-		writel(bit, &regs->datc);
+		pete_writel("drivers/gpio/gpio-sta2x11.c:62", bit, &regs->datc);
 }
 
 static int gsta_gpio_get(struct gpio_chip *gpio, unsigned nr)
@@ -68,7 +68,7 @@ static int gsta_gpio_get(struct gpio_chip *gpio, unsigned nr)
 	struct gsta_regs __iomem *regs = chip->regs[nr / GSTA_GPIO_PER_BLOCK];
 	u32 bit = BIT(nr % GSTA_GPIO_PER_BLOCK);
 
-	return !!(readl(&regs->dat) & bit);
+	return !!(pete_readl("drivers/gpio/gpio-sta2x11.c:71", &regs->dat) & bit);
 }
 
 static int gsta_gpio_direction_output(struct gpio_chip *gpio, unsigned nr,
@@ -78,12 +78,12 @@ static int gsta_gpio_direction_output(struct gpio_chip *gpio, unsigned nr,
 	struct gsta_regs __iomem *regs = chip->regs[nr / GSTA_GPIO_PER_BLOCK];
 	u32 bit = BIT(nr % GSTA_GPIO_PER_BLOCK);
 
-	writel(bit, &regs->dirs);
+	pete_writel("drivers/gpio/gpio-sta2x11.c:81", bit, &regs->dirs);
 	/* Data register after direction, otherwise pullup/down is selected */
 	if (val)
-		writel(bit, &regs->dats);
+		pete_writel("drivers/gpio/gpio-sta2x11.c:84", bit, &regs->dats);
 	else
-		writel(bit, &regs->datc);
+		pete_writel("drivers/gpio/gpio-sta2x11.c:86", bit, &regs->datc);
 	return 0;
 }
 
@@ -93,7 +93,7 @@ static int gsta_gpio_direction_input(struct gpio_chip *gpio, unsigned nr)
 	struct gsta_regs __iomem *regs = chip->regs[nr / GSTA_GPIO_PER_BLOCK];
 	u32 bit = BIT(nr % GSTA_GPIO_PER_BLOCK);
 
-	writel(bit, &regs->dirc);
+	pete_writel("drivers/gpio/gpio-sta2x11.c:96", bit, &regs->dirc);
 	return 0;
 }
 
@@ -156,12 +156,12 @@ static void gsta_set_config(struct gsta_gpio *chip, int nr, unsigned cfg)
 
 	/* Alternate function or not? */
 	spin_lock_irqsave(&chip->lock, flags);
-	val = readl(&regs->afsela);
+	val = pete_readl("drivers/gpio/gpio-sta2x11.c:159", &regs->afsela);
 	if (cfg == PINMUX_TYPE_FUNCTION)
 		val |= bit;
 	else
 		val &= ~bit;
-	writel(val | bit, &regs->afsela);
+	pete_writel("drivers/gpio/gpio-sta2x11.c:164", val | bit, &regs->afsela);
 	if (cfg == PINMUX_TYPE_FUNCTION) {
 		spin_unlock_irqrestore(&chip->lock, flags);
 		return;
@@ -170,29 +170,29 @@ static void gsta_set_config(struct gsta_gpio *chip, int nr, unsigned cfg)
 	/* not alternate function: set details */
 	switch (cfg) {
 	case PINMUX_TYPE_OUTPUT_LOW:
-		writel(bit, &regs->dirs);
-		writel(bit, &regs->datc);
+		pete_writel("drivers/gpio/gpio-sta2x11.c:173", bit, &regs->dirs);
+		pete_writel("drivers/gpio/gpio-sta2x11.c:174", bit, &regs->datc);
 		break;
 	case PINMUX_TYPE_OUTPUT_HIGH:
-		writel(bit, &regs->dirs);
-		writel(bit, &regs->dats);
+		pete_writel("drivers/gpio/gpio-sta2x11.c:177", bit, &regs->dirs);
+		pete_writel("drivers/gpio/gpio-sta2x11.c:178", bit, &regs->dats);
 		break;
 	case PINMUX_TYPE_INPUT:
-		writel(bit, &regs->dirc);
-		val = readl(&regs->pdis) | bit;
-		writel(val, &regs->pdis);
+		pete_writel("drivers/gpio/gpio-sta2x11.c:181", bit, &regs->dirc);
+		val = pete_readl("drivers/gpio/gpio-sta2x11.c:182", &regs->pdis) | bit;
+		pete_writel("drivers/gpio/gpio-sta2x11.c:183", val, &regs->pdis);
 		break;
 	case PINMUX_TYPE_INPUT_PULLUP:
-		writel(bit, &regs->dirc);
-		val = readl(&regs->pdis) & ~bit;
-		writel(val, &regs->pdis);
-		writel(bit, &regs->dats);
+		pete_writel("drivers/gpio/gpio-sta2x11.c:186", bit, &regs->dirc);
+		val = pete_readl("drivers/gpio/gpio-sta2x11.c:187", &regs->pdis) & ~bit;
+		pete_writel("drivers/gpio/gpio-sta2x11.c:188", val, &regs->pdis);
+		pete_writel("drivers/gpio/gpio-sta2x11.c:189", bit, &regs->dats);
 		break;
 	case PINMUX_TYPE_INPUT_PULLDOWN:
-		writel(bit, &regs->dirc);
-		val = readl(&regs->pdis) & ~bit;
-		writel(val, &regs->pdis);
-		writel(bit, &regs->datc);
+		pete_writel("drivers/gpio/gpio-sta2x11.c:192", bit, &regs->dirc);
+		val = pete_readl("drivers/gpio/gpio-sta2x11.c:193", &regs->pdis) & ~bit;
+		pete_writel("drivers/gpio/gpio-sta2x11.c:194", val, &regs->pdis);
+		pete_writel("drivers/gpio/gpio-sta2x11.c:195", bit, &regs->datc);
 		break;
 	default:
 		err = 1;
@@ -219,12 +219,12 @@ static void gsta_irq_disable(struct irq_data *data)
 
 	spin_lock_irqsave(&chip->lock, flags);
 	if (chip->irq_type[nr] & IRQ_TYPE_EDGE_RISING) {
-		val = readl(&regs->rimsc) & ~bit;
-		writel(val, &regs->rimsc);
+		val = pete_readl("drivers/gpio/gpio-sta2x11.c:222", &regs->rimsc) & ~bit;
+		pete_writel("drivers/gpio/gpio-sta2x11.c:223", val, &regs->rimsc);
 	}
 	if (chip->irq_type[nr] & IRQ_TYPE_EDGE_FALLING) {
-		val = readl(&regs->fimsc) & ~bit;
-		writel(val, &regs->fimsc);
+		val = pete_readl("drivers/gpio/gpio-sta2x11.c:226", &regs->fimsc) & ~bit;
+		pete_writel("drivers/gpio/gpio-sta2x11.c:227", val, &regs->fimsc);
 	}
 	spin_unlock_irqrestore(&chip->lock, flags);
 	return;
@@ -244,16 +244,16 @@ static void gsta_irq_enable(struct irq_data *data)
 	type = chip->irq_type[nr];
 
 	spin_lock_irqsave(&chip->lock, flags);
-	val = readl(&regs->rimsc);
+	val = pete_readl("drivers/gpio/gpio-sta2x11.c:247", &regs->rimsc);
 	if (type & IRQ_TYPE_EDGE_RISING)
-		writel(val | bit, &regs->rimsc);
+		pete_writel("drivers/gpio/gpio-sta2x11.c:249", val | bit, &regs->rimsc);
 	else
-		writel(val & ~bit, &regs->rimsc);
-	val = readl(&regs->rimsc);
+		pete_writel("drivers/gpio/gpio-sta2x11.c:251", val & ~bit, &regs->rimsc);
+	val = pete_readl("drivers/gpio/gpio-sta2x11.c:252", &regs->rimsc);
 	if (type & IRQ_TYPE_EDGE_FALLING)
-		writel(val | bit, &regs->fimsc);
+		pete_writel("drivers/gpio/gpio-sta2x11.c:254", val | bit, &regs->fimsc);
 	else
-		writel(val & ~bit, &regs->fimsc);
+		pete_writel("drivers/gpio/gpio-sta2x11.c:256", val & ~bit, &regs->fimsc);
 	spin_unlock_irqrestore(&chip->lock, flags);
 	return;
 }
@@ -287,11 +287,11 @@ static irqreturn_t gsta_gpio_handler(int irq, void *dev_id)
 	for (i = 0; i < GSTA_NR_BLOCKS; i++) {
 		regs = chip->regs[i];
 		base = chip->irq_base + i * GSTA_GPIO_PER_BLOCK;
-		while ((is = readl(&regs->is))) {
+		while ((is = pete_readl("drivers/gpio/gpio-sta2x11.c:290", &regs->is))) {
 			nr = __ffs(is);
 			irq = base + nr;
 			generic_handle_irq(irq);
-			writel(1 << nr, &regs->ic);
+			pete_writel("drivers/gpio/gpio-sta2x11.c:294", 1 << nr, &regs->ic);
 			ret = IRQ_HANDLED;
 		}
 	}
@@ -366,9 +366,9 @@ static int gsta_probe(struct platform_device *dev)
 	for (i = 0; i < GSTA_NR_BLOCKS; i++) {
 		chip->regs[i] = chip->reg_base + i * 4096;
 		/* disable all irqs */
-		writel(0, &chip->regs[i]->rimsc);
-		writel(0, &chip->regs[i]->fimsc);
-		writel(~0, &chip->regs[i]->ic);
+		pete_writel("drivers/gpio/gpio-sta2x11.c:369", 0, &chip->regs[i]->rimsc);
+		pete_writel("drivers/gpio/gpio-sta2x11.c:370", 0, &chip->regs[i]->fimsc);
+		pete_writel("drivers/gpio/gpio-sta2x11.c:371", ~0, &chip->regs[i]->ic);
 	}
 	spin_lock_init(&chip->lock);
 	gsta_gpio_setup(chip);

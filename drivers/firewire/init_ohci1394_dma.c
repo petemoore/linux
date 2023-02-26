@@ -39,12 +39,12 @@ struct ohci {
 
 static inline void reg_write(const struct ohci *ohci, int offset, u32 data)
 {
-	writel(data, ohci->registers + offset);
+	pete_writel("drivers/firewire/init_ohci1394_dma.c:42", data, ohci->registers + offset);
 }
 
 static inline u32 reg_read(const struct ohci *ohci, int offset)
 {
-	return readl(ohci->registers + offset);
+	return pete_readl("drivers/firewire/init_ohci1394_dma.c:47", ohci->registers + offset);
 }
 
 #define OHCI_LOOP_COUNT		100	/* Number of loops for reg read waits */

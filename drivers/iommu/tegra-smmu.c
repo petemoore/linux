@@ -70,12 +70,12 @@ static struct tegra_smmu_as *to_smmu_as(struct iommu_domain *dom)
 static inline void smmu_writel(struct tegra_smmu *smmu, u32 value,
 			       unsigned long offset)
 {
-	writel(value, smmu->regs + offset);
+	pete_writel("drivers/iommu/tegra-smmu.c:73", value, smmu->regs + offset);
 }
 
 static inline u32 smmu_readl(struct tegra_smmu *smmu, unsigned long offset)
 {
-	return readl(smmu->regs + offset);
+	return pete_readl("drivers/iommu/tegra-smmu.c:78", smmu->regs + offset);
 }
 
 #define SMMU_CONFIG 0x010

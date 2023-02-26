@@ -153,29 +153,29 @@ static int mxs_lradc_adc_read_single(struct iio_dev *iio_dev, int chan,
 	 * used if doing raw sampling.
 	 */
 	if (lradc->soc == IMX28_LRADC)
-		writel(LRADC_CTRL1_LRADC_IRQ_EN(0),
+		pete_writel("drivers/iio/adc/mxs-lradc-adc.c:156", LRADC_CTRL1_LRADC_IRQ_EN(0),
 		       adc->base + LRADC_CTRL1 + STMP_OFFSET_REG_CLR);
-	writel(0x1, adc->base + LRADC_CTRL0 + STMP_OFFSET_REG_CLR);
+	pete_writel("drivers/iio/adc/mxs-lradc-adc.c:158", 0x1, adc->base + LRADC_CTRL0 + STMP_OFFSET_REG_CLR);
 
 	/* Enable / disable the divider per requirement */
 	if (test_bit(chan, &adc->is_divided))
-		writel(1 << LRADC_CTRL2_DIVIDE_BY_TWO_OFFSET,
+		pete_writel("drivers/iio/adc/mxs-lradc-adc.c:162", 1 << LRADC_CTRL2_DIVIDE_BY_TWO_OFFSET,
 		       adc->base + LRADC_CTRL2 + STMP_OFFSET_REG_SET);
 	else
-		writel(1 << LRADC_CTRL2_DIVIDE_BY_TWO_OFFSET,
+		pete_writel("drivers/iio/adc/mxs-lradc-adc.c:165", 1 << LRADC_CTRL2_DIVIDE_BY_TWO_OFFSET,
 		       adc->base + LRADC_CTRL2 + STMP_OFFSET_REG_CLR);
 
 	/* Clean the slot's previous content, then set new one. */
-	writel(LRADC_CTRL4_LRADCSELECT_MASK(0),
+	pete_writel("drivers/iio/adc/mxs-lradc-adc.c:169", LRADC_CTRL4_LRADCSELECT_MASK(0),
 	       adc->base + LRADC_CTRL4 + STMP_OFFSET_REG_CLR);
-	writel(chan, adc->base + LRADC_CTRL4 + STMP_OFFSET_REG_SET);
+	pete_writel("drivers/iio/adc/mxs-lradc-adc.c:171", chan, adc->base + LRADC_CTRL4 + STMP_OFFSET_REG_SET);
 
-	writel(0, adc->base + LRADC_CH(0));
+	pete_writel("drivers/iio/adc/mxs-lradc-adc.c:173", 0, adc->base + LRADC_CH(0));
 
 	/* Enable the IRQ and start sampling the channel. */
-	writel(LRADC_CTRL1_LRADC_IRQ_EN(0),
+	pete_writel("drivers/iio/adc/mxs-lradc-adc.c:176", LRADC_CTRL1_LRADC_IRQ_EN(0),
 	       adc->base + LRADC_CTRL1 + STMP_OFFSET_REG_SET);
-	writel(BIT(0), adc->base + LRADC_CTRL0 + STMP_OFFSET_REG_SET);
+	pete_writel("drivers/iio/adc/mxs-lradc-adc.c:178", BIT(0), adc->base + LRADC_CTRL0 + STMP_OFFSET_REG_SET);
 
 	/* Wait for completion on the channel, 1 second max. */
 	ret = wait_for_completion_killable_timeout(&adc->completion, HZ);
@@ -185,11 +185,11 @@ static int mxs_lradc_adc_read_single(struct iio_dev *iio_dev, int chan,
 		goto err;
 
 	/* Read the data. */
-	*val = readl(adc->base + LRADC_CH(0)) & LRADC_CH_VALUE_MASK;
+	*val = pete_readl("drivers/iio/adc/mxs-lradc-adc.c:188", adc->base + LRADC_CH(0)) & LRADC_CH_VALUE_MASK;
 	ret = IIO_VAL_INT;
 
 err:
-	writel(LRADC_CTRL1_LRADC_IRQ_EN(0),
+	pete_writel("drivers/iio/adc/mxs-lradc-adc.c:192", LRADC_CTRL1_LRADC_IRQ_EN(0),
 	       adc->base + LRADC_CTRL1 + STMP_OFFSET_REG_CLR);
 
 	iio_device_release_direct_mode(iio_dev);
@@ -386,7 +386,7 @@ static irqreturn_t mxs_lradc_adc_handle_irq(int irq, void *data)
 	struct iio_dev *iio = data;
 	struct mxs_lradc_adc *adc = iio_priv(iio);
 	struct mxs_lradc *lradc = adc->lradc;
-	unsigned long reg = readl(adc->base + LRADC_CTRL1);
+	unsigned long reg = pete_readl("drivers/iio/adc/mxs-lradc-adc.c:389", adc->base + LRADC_CTRL1);
 	unsigned long flags;
 
 	if (!(reg & mxs_lradc_irq_mask(lradc)))
@@ -402,7 +402,7 @@ static irqreturn_t mxs_lradc_adc_handle_irq(int irq, void *data)
 		complete(&adc->completion);
 	}
 
-	writel(reg & mxs_lradc_irq_mask(lradc),
+	pete_writel("drivers/iio/adc/mxs-lradc-adc.c:405", reg & mxs_lradc_irq_mask(lradc),
 	       adc->base + LRADC_CTRL1 + STMP_OFFSET_REG_CLR);
 
 	return IRQ_HANDLED;
@@ -420,8 +420,8 @@ static irqreturn_t mxs_lradc_adc_trigger_handler(int irq, void *p)
 	unsigned int i, j = 0;
 
 	for_each_set_bit(i, iio->active_scan_mask, LRADC_MAX_TOTAL_CHANS) {
-		adc->buffer[j] = readl(adc->base + LRADC_CH(j));
-		writel(chan_value, adc->base + LRADC_CH(j));
+		adc->buffer[j] = pete_readl("drivers/iio/adc/mxs-lradc-adc.c:423", adc->base + LRADC_CH(j));
+		pete_writel("drivers/iio/adc/mxs-lradc-adc.c:424", chan_value, adc->base + LRADC_CH(j));
 		adc->buffer[j] &= LRADC_CH_VALUE_MASK;
 		adc->buffer[j] /= LRADC_DELAY_TIMER_LOOP;
 		j++;
@@ -440,7 +440,7 @@ static int mxs_lradc_adc_configure_trigger(struct iio_trigger *trig, bool state)
 	struct mxs_lradc_adc *adc = iio_priv(iio);
 	const u32 st = state ? STMP_OFFSET_REG_SET : STMP_OFFSET_REG_CLR;
 
-	writel(LRADC_DELAY_KICK, adc->base + (LRADC_DELAY(0) + st));
+	pete_writel("drivers/iio/adc/mxs-lradc-adc.c:443", LRADC_DELAY_KICK, adc->base + (LRADC_DELAY(0) + st));
 
 	return 0;
 }
@@ -493,26 +493,26 @@ static int mxs_lradc_adc_buffer_preenable(struct iio_dev *iio)
 		((LRADC_DELAY_TIMER_LOOP - 1) << LRADC_CH_NUM_SAMPLES_OFFSET);
 
 	if (lradc->soc == IMX28_LRADC)
-		writel(lradc->buffer_vchans << LRADC_CTRL1_LRADC_IRQ_EN_OFFSET,
+		pete_writel("drivers/iio/adc/mxs-lradc-adc.c:496", lradc->buffer_vchans << LRADC_CTRL1_LRADC_IRQ_EN_OFFSET,
 		       adc->base + LRADC_CTRL1 + STMP_OFFSET_REG_CLR);
-	writel(lradc->buffer_vchans,
+	pete_writel("drivers/iio/adc/mxs-lradc-adc.c:498", lradc->buffer_vchans,
 	       adc->base + LRADC_CTRL0 + STMP_OFFSET_REG_CLR);
 
 	for_each_set_bit(chan, iio->active_scan_mask, LRADC_MAX_TOTAL_CHANS) {
 		ctrl4_set |= chan << LRADC_CTRL4_LRADCSELECT_OFFSET(ofs);
 		ctrl4_clr |= LRADC_CTRL4_LRADCSELECT_MASK(ofs);
 		ctrl1_irq |= LRADC_CTRL1_LRADC_IRQ_EN(ofs);
-		writel(chan_value, adc->base + LRADC_CH(ofs));
+		pete_writel("drivers/iio/adc/mxs-lradc-adc.c:505", chan_value, adc->base + LRADC_CH(ofs));
 		bitmap_set(&enable, ofs, 1);
 		ofs++;
 	}
 
-	writel(LRADC_DELAY_TRIGGER_LRADCS_MASK | LRADC_DELAY_KICK,
+	pete_writel("drivers/iio/adc/mxs-lradc-adc.c:510", LRADC_DELAY_TRIGGER_LRADCS_MASK | LRADC_DELAY_KICK,
 	       adc->base + LRADC_DELAY(0) + STMP_OFFSET_REG_CLR);
-	writel(ctrl4_clr, adc->base + LRADC_CTRL4 + STMP_OFFSET_REG_CLR);
-	writel(ctrl4_set, adc->base + LRADC_CTRL4 + STMP_OFFSET_REG_SET);
-	writel(ctrl1_irq, adc->base + LRADC_CTRL1 + STMP_OFFSET_REG_SET);
-	writel(enable << LRADC_DELAY_TRIGGER_LRADCS_OFFSET,
+	pete_writel("drivers/iio/adc/mxs-lradc-adc.c:512", ctrl4_clr, adc->base + LRADC_CTRL4 + STMP_OFFSET_REG_CLR);
+	pete_writel("drivers/iio/adc/mxs-lradc-adc.c:513", ctrl4_set, adc->base + LRADC_CTRL4 + STMP_OFFSET_REG_SET);
+	pete_writel("drivers/iio/adc/mxs-lradc-adc.c:514", ctrl1_irq, adc->base + LRADC_CTRL1 + STMP_OFFSET_REG_SET);
+	pete_writel("drivers/iio/adc/mxs-lradc-adc.c:515", enable << LRADC_DELAY_TRIGGER_LRADCS_OFFSET,
 	       adc->base + LRADC_DELAY(0) + STMP_OFFSET_REG_SET);
 
 	return 0;
@@ -523,13 +523,13 @@ static int mxs_lradc_adc_buffer_postdisable(struct iio_dev *iio)
 	struct mxs_lradc_adc *adc = iio_priv(iio);
 	struct mxs_lradc *lradc = adc->lradc;
 
-	writel(LRADC_DELAY_TRIGGER_LRADCS_MASK | LRADC_DELAY_KICK,
+	pete_writel("drivers/iio/adc/mxs-lradc-adc.c:526", LRADC_DELAY_TRIGGER_LRADCS_MASK | LRADC_DELAY_KICK,
 	       adc->base + LRADC_DELAY(0) + STMP_OFFSET_REG_CLR);
 
-	writel(lradc->buffer_vchans,
+	pete_writel("drivers/iio/adc/mxs-lradc-adc.c:529", lradc->buffer_vchans,
 	       adc->base + LRADC_CTRL0 + STMP_OFFSET_REG_CLR);
 	if (lradc->soc == IMX28_LRADC)
-		writel(lradc->buffer_vchans << LRADC_CTRL1_LRADC_IRQ_EN_OFFSET,
+		pete_writel("drivers/iio/adc/mxs-lradc-adc.c:532", lradc->buffer_vchans << LRADC_CTRL1_LRADC_IRQ_EN_OFFSET,
 		       adc->base + LRADC_CTRL1 + STMP_OFFSET_REG_CLR);
 
 	return 0;
@@ -670,19 +670,19 @@ static void mxs_lradc_adc_hw_init(struct mxs_lradc_adc *adc)
 		(LRADC_DELAY_TIMER_PER << LRADC_DELAY_DELAY_OFFSET);
 
 	/* Configure DELAY CHANNEL 0 for generic ADC sampling. */
-	writel(adc_cfg, adc->base + LRADC_DELAY(0));
+	pete_writel("drivers/iio/adc/mxs-lradc-adc.c:673", adc_cfg, adc->base + LRADC_DELAY(0));
 
 	/*
 	 * Start internal temperature sensing by clearing bit
 	 * HW_LRADC_CTRL2_TEMPSENSE_PWD. This bit can be left cleared
 	 * after power up.
 	 */
-	writel(0, adc->base + LRADC_CTRL2);
+	pete_writel("drivers/iio/adc/mxs-lradc-adc.c:680", 0, adc->base + LRADC_CTRL2);
 }
 
 static void mxs_lradc_adc_hw_stop(struct mxs_lradc_adc *adc)
 {
-	writel(0, adc->base + LRADC_DELAY(0));
+	pete_writel("drivers/iio/adc/mxs-lradc-adc.c:685", 0, adc->base + LRADC_DELAY(0));
 }
 
 static int mxs_lradc_adc_probe(struct platform_device *pdev)

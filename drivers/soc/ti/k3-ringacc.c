@@ -239,14 +239,14 @@ struct k3_ringacc_soc_data {
 
 static int k3_ringacc_ring_read_occ(struct k3_ring *ring)
 {
-	return readl(&ring->rt->occ) & K3_RINGACC_RT_OCC_MASK;
+	return pete_readl("drivers/soc/ti/k3-ringacc.c:242", &ring->rt->occ) & K3_RINGACC_RT_OCC_MASK;
 }
 
 static void k3_ringacc_ring_update_occ(struct k3_ring *ring)
 {
 	u32 val;
 
-	val = readl(&ring->rt->occ);
+	val = pete_readl("drivers/soc/ti/k3-ringacc.c:249", &ring->rt->occ);
 
 	ring->state.occ = val & K3_RINGACC_RT_OCC_MASK;
 	ring->state.tdown_complete = !!(val & K3_DMARING_RT_OCC_TDOWN_COMPLETE);
@@ -318,11 +318,11 @@ static void k3_ringacc_ring_dump(struct k3_ring *ring)
 		ring->elm_size, ring->size, ring->mode, ring->proxy_id);
 	dev_dbg(dev, "dump flags %08X\n", ring->flags);
 
-	dev_dbg(dev, "dump ring_rt_regs: db%08x\n", readl(&ring->rt->db));
-	dev_dbg(dev, "dump occ%08x\n", readl(&ring->rt->occ));
-	dev_dbg(dev, "dump indx%08x\n", readl(&ring->rt->indx));
-	dev_dbg(dev, "dump hwocc%08x\n", readl(&ring->rt->hwocc));
-	dev_dbg(dev, "dump hwindx%08x\n", readl(&ring->rt->hwindx));
+	dev_dbg(dev, "dump ring_rt_regs: db%08x\n", pete_readl("drivers/soc/ti/k3-ringacc.c:321", &ring->rt->db));
+	dev_dbg(dev, "dump occ%08x\n", pete_readl("drivers/soc/ti/k3-ringacc.c:322", &ring->rt->occ));
+	dev_dbg(dev, "dump indx%08x\n", pete_readl("drivers/soc/ti/k3-ringacc.c:323", &ring->rt->indx));
+	dev_dbg(dev, "dump hwocc%08x\n", pete_readl("drivers/soc/ti/k3-ringacc.c:324", &ring->rt->hwocc));
+	dev_dbg(dev, "dump hwindx%08x\n", pete_readl("drivers/soc/ti/k3-ringacc.c:325", &ring->rt->hwindx));
 
 	if (ring->ring_mem_virt)
 		print_hex_dump_debug("dump ring_mem_virt ", DUMP_PREFIX_NONE,
@@ -537,7 +537,7 @@ void k3_ringacc_ring_reset_dma(struct k3_ring *ring, u32 occ)
 			else
 				db_ring_cnt_cur = db_ring_cnt;
 
-			writel(db_ring_cnt_cur, &ring->rt->db);
+			pete_writel("drivers/soc/ti/k3-ringacc.c:540", db_ring_cnt_cur, &ring->rt->db);
 			db_ring_cnt -= db_ring_cnt_cur;
 		}
 
@@ -924,7 +924,7 @@ static int k3_ringacc_ring_cfg_proxy(struct k3_ring *ring,
 	val = ring->ring_id;
 	val |= K3_RINGACC_PROXY_MODE(mode);
 	val |= K3_RINGACC_PROXY_ELSIZE(ring->elm_size);
-	writel(val, &ring->proxy->control);
+	pete_writel("drivers/soc/ti/k3-ringacc.c:927", val, &ring->proxy->control);
 	return 0;
 }
 
@@ -1103,7 +1103,7 @@ static int k3_dmaring_fwd_pop(struct k3_ring *ring, void *elem)
 	k3_dmaring_remove_asel_from_elem(elem);
 
 	ring->state.occ--;
-	writel(-1, &ring->rt->db);
+	pete_writel("drivers/soc/ti/k3-ringacc.c:1106", -1, &ring->rt->db);
 
 	dev_dbg(ring->parent->dev, "%s: occ%d Windex%d Rindex%d pos_ptr%px\n",
 		__func__, ring->state.occ, ring->state.windex, elem_idx,
@@ -1123,12 +1123,12 @@ static int k3_dmaring_reverse_pop(struct k3_ring *ring, void *elem)
 
 		ring->state.rindex = (ring->state.rindex + 1) % ring->size;
 		ring->state.occ--;
-		writel(-1 & K3_DMARING_RT_DB_ENTRY_MASK, &ring->rt->db);
+		pete_writel("drivers/soc/ti/k3-ringacc.c:1126", -1 & K3_DMARING_RT_DB_ENTRY_MASK, &ring->rt->db);
 	} else if (ring->state.tdown_complete) {
 		dma_addr_t *value = elem;
 
 		*value = CPPI5_TDCM_MARKER;
-		writel(K3_DMARING_RT_DB_TDOWN_ACK, &ring->rt->db);
+		pete_writel("drivers/soc/ti/k3-ringacc.c:1131", K3_DMARING_RT_DB_TDOWN_ACK, &ring->rt->db);
 		ring->state.tdown_complete = false;
 	}
 
@@ -1152,7 +1152,7 @@ static int k3_ringacc_ring_push_mem(struct k3_ring *ring, void *elem)
 
 	ring->state.windex = (ring->state.windex + 1) % ring->size;
 	ring->state.free--;
-	writel(1, &ring->rt->db);
+	pete_writel("drivers/soc/ti/k3-ringacc.c:1155", 1, &ring->rt->db);
 
 	dev_dbg(ring->parent->dev, "ring_push_mem: free%d index%d\n",
 		ring->state.free, ring->state.windex);
@@ -1170,7 +1170,7 @@ static int k3_ringacc_ring_pop_mem(struct k3_ring *ring, void *elem)
 
 	ring->state.rindex = (ring->state.rindex + 1) % ring->size;
 	ring->state.occ--;
-	writel(-1, &ring->rt->db);
+	pete_writel("drivers/soc/ti/k3-ringacc.c:1173", -1, &ring->rt->db);
 
 	dev_dbg(ring->parent->dev, "ring_pop_mem: occ%d index%d pos_ptr%p\n",
 		ring->state.occ, ring->state.rindex, elem_ptr);
@@ -1395,7 +1395,7 @@ static int k3_ringacc_init(struct platform_device *pdev,
 	if (IS_ERR(ringacc->proxy_target_base))
 		return PTR_ERR(ringacc->proxy_target_base);
 
-	ringacc->num_proxies = readl(&ringacc->proxy_gcfg->config) &
+	ringacc->num_proxies = pete_readl("drivers/soc/ti/k3-ringacc.c:1398", &ringacc->proxy_gcfg->config) &
 				     K3_RINGACC_PROXY_CFG_THREADS_MASK;
 
 	ringacc->rings = devm_kzalloc(dev,
@@ -1432,7 +1432,7 @@ static int k3_ringacc_init(struct platform_device *pdev,
 	dev_info(dev, "dma-ring-reset-quirk: %s\n",
 		 ringacc->dma_ring_reset_quirk ? "enabled" : "disabled");
 	dev_info(dev, "RA Proxy rev. %08x, num_proxies:%u\n",
-		 readl(&ringacc->proxy_gcfg->revision), ringacc->num_proxies);
+		 pete_readl("drivers/soc/ti/k3-ringacc.c:1435", &ringacc->proxy_gcfg->revision), ringacc->num_proxies);
 
 	return 0;
 }

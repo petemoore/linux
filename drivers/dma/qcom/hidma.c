@@ -667,9 +667,9 @@ static void hidma_write_msi_msg(struct msi_desc *desc, struct msi_msg *msg)
 	struct hidma_dev *dmadev = dev_get_drvdata(dev);
 
 	if (!desc->platform.msi_index) {
-		writel(msg->address_lo, dmadev->dev_evca + 0x118);
-		writel(msg->address_hi, dmadev->dev_evca + 0x11C);
-		writel(msg->data, dmadev->dev_evca + 0x120);
+		pete_writel("drivers/dma/qcom/hidma.c:670", msg->address_lo, dmadev->dev_evca + 0x118);
+		pete_writel("drivers/dma/qcom/hidma.c:671", msg->address_hi, dmadev->dev_evca + 0x11C);
+		pete_writel("drivers/dma/qcom/hidma.c:672", msg->data, dmadev->dev_evca + 0x120);
 	}
 }
 #endif
@@ -836,9 +836,9 @@ static int hidma_probe(struct platform_device *pdev)
 		dmadev->nr_descriptors = HIDMA_NR_DEFAULT_DESC;
 
 	if (hidma_test_capability(&pdev->dev, HIDMA_IDENTITY_CAP))
-		dmadev->chidx = readl(dmadev->dev_trca + 0x40);
+		dmadev->chidx = pete_readl("drivers/dma/qcom/hidma.c:839", dmadev->dev_trca + 0x40);
 	else
-		dmadev->chidx = readl(dmadev->dev_trca + 0x28);
+		dmadev->chidx = pete_readl("drivers/dma/qcom/hidma.c:841", dmadev->dev_trca + 0x28);
 
 	/* Set DMA mask to 64 bits. */
 	rc = dma_set_mask_and_coherent(&pdev->dev, DMA_BIT_MASK(64));

@@ -13,15 +13,15 @@
 #if defined(writeq) && defined(CONFIG_64BIT)
 static inline void mpi3mr_writeq(__u64 b, volatile void __iomem *addr)
 {
-	writeq(b, addr);
+	pete_writeq("drivers/scsi/mpi3mr/mpi3mr_fw.c:16", b, addr);
 }
 #else
 static inline void mpi3mr_writeq(__u64 b, volatile void __iomem *addr)
 {
 	__u64 data_out = b;
 
-	writel((u32)(data_out), addr);
-	writel((u32)(data_out >> 32), (addr + 4));
+	pete_writel("drivers/scsi/mpi3mr/mpi3mr_fw.c:23", (u32)(data_out), addr);
+	pete_writel("drivers/scsi/mpi3mr/mpi3mr_fw.c:24", (u32)(data_out >> 32), (addr + 4));
 }
 #endif
 
@@ -132,7 +132,7 @@ static void mpi3mr_repost_reply_buf(struct mpi3mr_ioc *mrioc,
 	    (mrioc->reply_free_qsz - 1)) ? 0 :
 	    (mrioc->reply_free_queue_host_index + 1));
 	mrioc->reply_free_q[old_idx] = cpu_to_le64(reply_dma);
-	writel(mrioc->reply_free_queue_host_index,
+	pete_writel("drivers/scsi/mpi3mr/mpi3mr_fw.c:135", mrioc->reply_free_queue_host_index,
 	    &mrioc->sysif_regs->reply_free_host_index);
 	spin_unlock(&mrioc->reply_free_queue_lock);
 }
@@ -148,7 +148,7 @@ void mpi3mr_repost_sense_buf(struct mpi3mr_ioc *mrioc,
 	    (mrioc->sense_buf_q_sz - 1)) ? 0 :
 	    (mrioc->sbq_host_index + 1));
 	mrioc->sense_buf_q[old_idx] = cpu_to_le64(sense_buf_dma);
-	writel(mrioc->sbq_host_index,
+	pete_writel("drivers/scsi/mpi3mr/mpi3mr_fw.c:151", mrioc->sbq_host_index,
 	    &mrioc->sysif_regs->sense_buffer_free_host_index);
 	spin_unlock(&mrioc->sbq_lock);
 }
@@ -417,7 +417,7 @@ static int mpi3mr_process_admin_reply_q(struct mpi3mr_ioc *mrioc)
 			break;
 	} while (1);
 
-	writel(admin_reply_ci, &mrioc->sysif_regs->admin_reply_queue_ci);
+	pete_writel("drivers/scsi/mpi3mr/mpi3mr_fw.c:420", admin_reply_ci, &mrioc->sysif_regs->admin_reply_queue_ci);
 	mrioc->admin_reply_ci = admin_reply_ci;
 	mrioc->admin_reply_ephase = exp_phase;
 
@@ -506,7 +506,7 @@ static int mpi3mr_process_op_reply_q(struct mpi3mr_ioc *mrioc,
 
 	} while (1);
 
-	writel(reply_ci,
+	pete_writel("drivers/scsi/mpi3mr/mpi3mr_fw.c:509", reply_ci,
 	    &mrioc->sysif_regs->oper_queue_indexes[reply_qidx].consumer_index);
 	op_reply_q->ci = reply_ci;
 	op_reply_q->ephase = exp_phase;
@@ -864,13 +864,13 @@ static void mpi3mr_print_fault_info(struct mpi3mr_ioc *mrioc)
 {
 	u32 ioc_status, code, code1, code2, code3;
 
-	ioc_status = readl(&mrioc->sysif_regs->ioc_status);
+	ioc_status = pete_readl("drivers/scsi/mpi3mr/mpi3mr_fw.c:867", &mrioc->sysif_regs->ioc_status);
 
 	if (ioc_status & MPI3_SYSIF_IOC_STATUS_FAULT) {
-		code = readl(&mrioc->sysif_regs->fault);
-		code1 = readl(&mrioc->sysif_regs->fault_info[0]);
-		code2 = readl(&mrioc->sysif_regs->fault_info[1]);
-		code3 = readl(&mrioc->sysif_regs->fault_info[2]);
+		code = pete_readl("drivers/scsi/mpi3mr/mpi3mr_fw.c:870", &mrioc->sysif_regs->fault);
+		code1 = pete_readl("drivers/scsi/mpi3mr/mpi3mr_fw.c:871", &mrioc->sysif_regs->fault_info[0]);
+		code2 = pete_readl("drivers/scsi/mpi3mr/mpi3mr_fw.c:872", &mrioc->sysif_regs->fault_info[1]);
+		code3 = pete_readl("drivers/scsi/mpi3mr/mpi3mr_fw.c:873", &mrioc->sysif_regs->fault_info[2]);
 
 		ioc_info(mrioc,
 		    "fault code(0x%08X): Additional code: (0x%08X:0x%08X:0x%08X)\n",
@@ -892,8 +892,8 @@ enum mpi3mr_iocstate mpi3mr_get_iocstate(struct mpi3mr_ioc *mrioc)
 	u32 ioc_status, ioc_config;
 	u8 ready, enabled;
 
-	ioc_status = readl(&mrioc->sysif_regs->ioc_status);
-	ioc_config = readl(&mrioc->sysif_regs->ioc_configuration);
+	ioc_status = pete_readl("drivers/scsi/mpi3mr/mpi3mr_fw.c:895", &mrioc->sysif_regs->ioc_status);
+	ioc_config = pete_readl("drivers/scsi/mpi3mr/mpi3mr_fw.c:896", &mrioc->sysif_regs->ioc_configuration);
 
 	if (mrioc->unrecoverable)
 		return MRIOC_STATE_UNRECOVERABLE;
@@ -926,9 +926,9 @@ static inline void mpi3mr_clear_reset_history(struct mpi3mr_ioc *mrioc)
 {
 	u32 ioc_status;
 
-	ioc_status = readl(&mrioc->sysif_regs->ioc_status);
+	ioc_status = pete_readl("drivers/scsi/mpi3mr/mpi3mr_fw.c:929", &mrioc->sysif_regs->ioc_status);
 	if (ioc_status & MPI3_SYSIF_IOC_STATUS_RESET_HISTORY)
-		writel(ioc_status, &mrioc->sysif_regs->ioc_status);
+		pete_writel("drivers/scsi/mpi3mr/mpi3mr_fw.c:931", ioc_status, &mrioc->sysif_regs->ioc_status);
 }
 
 /**
@@ -953,18 +953,18 @@ static int mpi3mr_issue_and_process_mur(struct mpi3mr_ioc *mrioc,
 		return retval;
 	}
 	mpi3mr_clear_reset_history(mrioc);
-	writel(reset_reason, &mrioc->sysif_regs->scratchpad[0]);
-	ioc_config = readl(&mrioc->sysif_regs->ioc_configuration);
+	pete_writel("drivers/scsi/mpi3mr/mpi3mr_fw.c:956", reset_reason, &mrioc->sysif_regs->scratchpad[0]);
+	ioc_config = pete_readl("drivers/scsi/mpi3mr/mpi3mr_fw.c:957", &mrioc->sysif_regs->ioc_configuration);
 	ioc_config &= ~MPI3_SYSIF_IOC_CONFIG_ENABLE_IOC;
-	writel(ioc_config, &mrioc->sysif_regs->ioc_configuration);
+	pete_writel("drivers/scsi/mpi3mr/mpi3mr_fw.c:959", ioc_config, &mrioc->sysif_regs->ioc_configuration);
 
 	timeout = mrioc->ready_timeout * 10;
 	do {
-		ioc_status = readl(&mrioc->sysif_regs->ioc_status);
+		ioc_status = pete_readl("drivers/scsi/mpi3mr/mpi3mr_fw.c:963", &mrioc->sysif_regs->ioc_status);
 		if ((ioc_status & MPI3_SYSIF_IOC_STATUS_RESET_HISTORY)) {
 			mpi3mr_clear_reset_history(mrioc);
 			ioc_config =
-			    readl(&mrioc->sysif_regs->ioc_configuration);
+			    pete_readl("drivers/scsi/mpi3mr/mpi3mr_fw.c:967", &mrioc->sysif_regs->ioc_configuration);
 			if (!((ioc_status & MPI3_SYSIF_IOC_STATUS_READY) ||
 			      (ioc_status & MPI3_SYSIF_IOC_STATUS_FAULT) ||
 			    (ioc_config & MPI3_SYSIF_IOC_CONFIG_ENABLE_IOC))) {
@@ -975,8 +975,8 @@ static int mpi3mr_issue_and_process_mur(struct mpi3mr_ioc *mrioc,
 		msleep(100);
 	} while (--timeout);
 
-	ioc_status = readl(&mrioc->sysif_regs->ioc_status);
-	ioc_config = readl(&mrioc->sysif_regs->ioc_configuration);
+	ioc_status = pete_readl("drivers/scsi/mpi3mr/mpi3mr_fw.c:978", &mrioc->sysif_regs->ioc_status);
+	ioc_config = pete_readl("drivers/scsi/mpi3mr/mpi3mr_fw.c:979", &mrioc->sysif_regs->ioc_configuration);
 
 	ioc_info(mrioc, "Base IOC Sts/Config after %s MUR is (0x%x)/(0x%x)\n",
 	    (!retval) ? "successful" : "failed", ioc_status, ioc_config);
@@ -997,9 +997,9 @@ static int mpi3mr_bring_ioc_ready(struct mpi3mr_ioc *mrioc)
 	u32 ioc_config, timeout;
 	enum mpi3mr_iocstate current_state;
 
-	ioc_config = readl(&mrioc->sysif_regs->ioc_configuration);
+	ioc_config = pete_readl("drivers/scsi/mpi3mr/mpi3mr_fw.c:1000", &mrioc->sysif_regs->ioc_configuration);
 	ioc_config |= MPI3_SYSIF_IOC_CONFIG_ENABLE_IOC;
-	writel(ioc_config, &mrioc->sysif_regs->ioc_configuration);
+	pete_writel("drivers/scsi/mpi3mr/mpi3mr_fw.c:1002", ioc_config, &mrioc->sysif_regs->ioc_configuration);
 
 	timeout = mrioc->ready_timeout * 10;
 	do {
@@ -1048,7 +1048,7 @@ static inline bool mpi3mr_diagfault_success(struct mpi3mr_ioc *mrioc,
 
 	if (!(ioc_status & MPI3_SYSIF_IOC_STATUS_FAULT))
 		return false;
-	fault = readl(&mrioc->sysif_regs->fault) & MPI3_SYSIF_FAULT_CODE_MASK;
+	fault = pete_readl("drivers/scsi/mpi3mr/mpi3mr_fw.c:1051", &mrioc->sysif_regs->fault) & MPI3_SYSIF_FAULT_CODE_MASK;
 	if (fault == MPI3_SYSIF_FAULT_CODE_DIAG_FAULT_RESET)
 		return true;
 	return false;
@@ -1067,9 +1067,9 @@ static inline void mpi3mr_set_diagsave(struct mpi3mr_ioc *mrioc)
 {
 	u32 ioc_config;
 
-	ioc_config = readl(&mrioc->sysif_regs->ioc_configuration);
+	ioc_config = pete_readl("drivers/scsi/mpi3mr/mpi3mr_fw.c:1070", &mrioc->sysif_regs->ioc_configuration);
 	ioc_config |= MPI3_SYSIF_IOC_CONFIG_DIAG_SAVE;
-	writel(ioc_config, &mrioc->sysif_regs->ioc_configuration);
+	pete_writel("drivers/scsi/mpi3mr/mpi3mr_fw.c:1072", ioc_config, &mrioc->sysif_regs->ioc_configuration);
 }
 
 /**
@@ -1106,47 +1106,47 @@ retry_reset:
 		    "Write magic sequence to unlock host diag register (retry=%d)\n",
 		    ++unlock_retry_count);
 		if (unlock_retry_count >= MPI3MR_HOSTDIAG_UNLOCK_RETRY_COUNT) {
-			writel(reset_reason, &mrioc->sysif_regs->scratchpad[0]);
+			pete_writel("drivers/scsi/mpi3mr/mpi3mr_fw.c:1109", reset_reason, &mrioc->sysif_regs->scratchpad[0]);
 			mrioc->unrecoverable = 1;
 			goto out;
 		}
 
-		writel(MPI3_SYSIF_WRITE_SEQUENCE_KEY_VALUE_FLUSH,
+		pete_writel("drivers/scsi/mpi3mr/mpi3mr_fw.c:1114", MPI3_SYSIF_WRITE_SEQUENCE_KEY_VALUE_FLUSH,
 		    &mrioc->sysif_regs->write_sequence);
-		writel(MPI3_SYSIF_WRITE_SEQUENCE_KEY_VALUE_1ST,
+		pete_writel("drivers/scsi/mpi3mr/mpi3mr_fw.c:1116", MPI3_SYSIF_WRITE_SEQUENCE_KEY_VALUE_1ST,
 		    &mrioc->sysif_regs->write_sequence);
-		writel(MPI3_SYSIF_WRITE_SEQUENCE_KEY_VALUE_2ND,
+		pete_writel("drivers/scsi/mpi3mr/mpi3mr_fw.c:1118", MPI3_SYSIF_WRITE_SEQUENCE_KEY_VALUE_2ND,
 		    &mrioc->sysif_regs->write_sequence);
-		writel(MPI3_SYSIF_WRITE_SEQUENCE_KEY_VALUE_3RD,
+		pete_writel("drivers/scsi/mpi3mr/mpi3mr_fw.c:1120", MPI3_SYSIF_WRITE_SEQUENCE_KEY_VALUE_3RD,
 		    &mrioc->sysif_regs->write_sequence);
-		writel(MPI3_SYSIF_WRITE_SEQUENCE_KEY_VALUE_4TH,
+		pete_writel("drivers/scsi/mpi3mr/mpi3mr_fw.c:1122", MPI3_SYSIF_WRITE_SEQUENCE_KEY_VALUE_4TH,
 		    &mrioc->sysif_regs->write_sequence);
-		writel(MPI3_SYSIF_WRITE_SEQUENCE_KEY_VALUE_5TH,
+		pete_writel("drivers/scsi/mpi3mr/mpi3mr_fw.c:1124", MPI3_SYSIF_WRITE_SEQUENCE_KEY_VALUE_5TH,
 		    &mrioc->sysif_regs->write_sequence);
-		writel(MPI3_SYSIF_WRITE_SEQUENCE_KEY_VALUE_6TH,
+		pete_writel("drivers/scsi/mpi3mr/mpi3mr_fw.c:1126", MPI3_SYSIF_WRITE_SEQUENCE_KEY_VALUE_6TH,
 		    &mrioc->sysif_regs->write_sequence);
 		usleep_range(1000, 1100);
-		host_diagnostic = readl(&mrioc->sysif_regs->host_diagnostic);
+		host_diagnostic = pete_readl("drivers/scsi/mpi3mr/mpi3mr_fw.c:1129", &mrioc->sysif_regs->host_diagnostic);
 		ioc_info(mrioc,
 		    "wrote magic sequence: retry_count(%d), host_diagnostic(0x%08x)\n",
 		    unlock_retry_count, host_diagnostic);
 	} while (!(host_diagnostic & MPI3_SYSIF_HOST_DIAG_DIAG_WRITE_ENABLE));
 
-	writel(reset_reason, &mrioc->sysif_regs->scratchpad[0]);
+	pete_writel("drivers/scsi/mpi3mr/mpi3mr_fw.c:1135", reset_reason, &mrioc->sysif_regs->scratchpad[0]);
 	ioc_info(mrioc, "%s reset due to %s(0x%x)\n",
 	    mpi3mr_reset_type_name(reset_type),
 	    mpi3mr_reset_rc_name(reset_reason), reset_reason);
-	writel(host_diagnostic | reset_type,
+	pete_writel("drivers/scsi/mpi3mr/mpi3mr_fw.c:1139", host_diagnostic | reset_type,
 	    &mrioc->sysif_regs->host_diagnostic);
 	timeout = mrioc->ready_timeout * 10;
 	if (reset_type == MPI3_SYSIF_HOST_DIAG_RESET_ACTION_SOFT_RESET) {
 		do {
-			ioc_status = readl(&mrioc->sysif_regs->ioc_status);
+			ioc_status = pete_readl("drivers/scsi/mpi3mr/mpi3mr_fw.c:1144", &mrioc->sysif_regs->ioc_status);
 			if (ioc_status &
 			    MPI3_SYSIF_IOC_STATUS_RESET_HISTORY) {
 				mpi3mr_clear_reset_history(mrioc);
 				ioc_config =
-				    readl(&mrioc->sysif_regs->ioc_configuration);
+				    pete_readl("drivers/scsi/mpi3mr/mpi3mr_fw.c:1149", &mrioc->sysif_regs->ioc_configuration);
 				if (mpi3mr_soft_reset_success(ioc_status,
 				    ioc_config)) {
 					retval = 0;
@@ -1155,11 +1155,11 @@ retry_reset:
 			}
 			msleep(100);
 		} while (--timeout);
-		writel(MPI3_SYSIF_WRITE_SEQUENCE_KEY_VALUE_2ND,
+		pete_writel("drivers/scsi/mpi3mr/mpi3mr_fw.c:1158", MPI3_SYSIF_WRITE_SEQUENCE_KEY_VALUE_2ND,
 		    &mrioc->sysif_regs->write_sequence);
 	} else if (reset_type == MPI3_SYSIF_HOST_DIAG_RESET_ACTION_DIAG_FAULT) {
 		do {
-			ioc_status = readl(&mrioc->sysif_regs->ioc_status);
+			ioc_status = pete_readl("drivers/scsi/mpi3mr/mpi3mr_fw.c:1162", &mrioc->sysif_regs->ioc_status);
 			if (mpi3mr_diagfault_success(mrioc, ioc_status)) {
 				retval = 0;
 				break;
@@ -1167,12 +1167,12 @@ retry_reset:
 			msleep(100);
 		} while (--timeout);
 		mpi3mr_clear_reset_history(mrioc);
-		writel(MPI3_SYSIF_WRITE_SEQUENCE_KEY_VALUE_2ND,
+		pete_writel("drivers/scsi/mpi3mr/mpi3mr_fw.c:1170", MPI3_SYSIF_WRITE_SEQUENCE_KEY_VALUE_2ND,
 		    &mrioc->sysif_regs->write_sequence);
 	}
 	if (retval && ((++reset_retry_count) < MPI3MR_MAX_RESET_RETRY_COUNT)) {
-		ioc_status = readl(&mrioc->sysif_regs->ioc_status);
-		ioc_config = readl(&mrioc->sysif_regs->ioc_configuration);
+		ioc_status = pete_readl("drivers/scsi/mpi3mr/mpi3mr_fw.c:1174", &mrioc->sysif_regs->ioc_status);
+		ioc_config = pete_readl("drivers/scsi/mpi3mr/mpi3mr_fw.c:1175", &mrioc->sysif_regs->ioc_configuration);
 		ioc_info(mrioc,
 		    "Base IOC Sts/Config after reset try %d is (0x%x)/(0x%x)\n",
 		    reset_retry_count, ioc_status, ioc_config);
@@ -1181,8 +1181,8 @@ retry_reset:
 
 out:
 	pci_cfg_access_unlock(mrioc->pdev);
-	ioc_status = readl(&mrioc->sysif_regs->ioc_status);
-	ioc_config = readl(&mrioc->sysif_regs->ioc_configuration);
+	ioc_status = pete_readl("drivers/scsi/mpi3mr/mpi3mr_fw.c:1184", &mrioc->sysif_regs->ioc_status);
+	ioc_config = pete_readl("drivers/scsi/mpi3mr/mpi3mr_fw.c:1185", &mrioc->sysif_regs->ioc_configuration);
 
 	ioc_info(mrioc,
 	    "Base IOC Sts/Config after %s reset is (0x%x)/(0x%x)\n",
@@ -1241,7 +1241,7 @@ int mpi3mr_admin_request_post(struct mpi3mr_ioc *mrioc, void *admin_req,
 		areq_pi = 0;
 	mrioc->admin_req_pi = areq_pi;
 
-	writel(mrioc->admin_req_pi, &mrioc->sysif_regs->admin_request_queue_pi);
+	pete_writel("drivers/scsi/mpi3mr/mpi3mr_fw.c:1244", mrioc->admin_req_pi, &mrioc->sysif_regs->admin_request_queue_pi);
 
 out:
 	spin_unlock_irqrestore(&mrioc->admin_req_lock, flags);
@@ -1894,7 +1894,7 @@ int mpi3mr_op_request_post(struct mpi3mr_ioc *mrioc,
 	    > MPI3MR_IRQ_POLL_TRIGGER_IOCOUNT)
 		mrioc->op_reply_qinfo[reply_qidx].enable_irq_poll = true;
 
-	writel(op_req_q->pi,
+	pete_writel("drivers/scsi/mpi3mr/mpi3mr_fw.c:1897", op_req_q->pi,
 	    &mrioc->sysif_regs->oper_queue_indexes[reply_qidx].producer_index);
 
 out:
@@ -1996,9 +1996,9 @@ static void mpi3mr_watchdog_work(struct work_struct *work)
 	/*Check for fault state every one second and issue Soft reset*/
 	ioc_state = mpi3mr_get_iocstate(mrioc);
 	if (ioc_state == MRIOC_STATE_FAULT) {
-		fault = readl(&mrioc->sysif_regs->fault) &
+		fault = pete_readl("drivers/scsi/mpi3mr/mpi3mr_fw.c:1999", &mrioc->sysif_regs->fault) &
 		    MPI3_SYSIF_FAULT_CODE_MASK;
-		host_diagnostic = readl(&mrioc->sysif_regs->host_diagnostic);
+		host_diagnostic = pete_readl("drivers/scsi/mpi3mr/mpi3mr_fw.c:2001", &mrioc->sysif_regs->host_diagnostic);
 		if (host_diagnostic & MPI3_SYSIF_HOST_DIAG_SAVE_IN_PROGRESS) {
 			if (!mrioc->diagsave_timeout) {
 				mpi3mr_print_fault_info(mrioc);
@@ -2181,13 +2181,13 @@ static int mpi3mr_setup_admin_qpair(struct mpi3mr_ioc *mrioc)
 
 	num_admin_entries = (mrioc->num_admin_replies << 16) |
 	    (mrioc->num_admin_req);
-	writel(num_admin_entries, &mrioc->sysif_regs->admin_queue_num_entries);
+	pete_writel("drivers/scsi/mpi3mr/mpi3mr_fw.c:2184", num_admin_entries, &mrioc->sysif_regs->admin_queue_num_entries);
 	mpi3mr_writeq(mrioc->admin_req_dma,
 	    &mrioc->sysif_regs->admin_request_queue_address);
 	mpi3mr_writeq(mrioc->admin_reply_dma,
 	    &mrioc->sysif_regs->admin_reply_queue_address);
-	writel(mrioc->admin_req_pi, &mrioc->sysif_regs->admin_request_queue_pi);
-	writel(mrioc->admin_reply_ci, &mrioc->sysif_regs->admin_reply_queue_ci);
+	pete_writel("drivers/scsi/mpi3mr/mpi3mr_fw.c:2189", mrioc->admin_req_pi, &mrioc->sysif_regs->admin_request_queue_pi);
+	pete_writel("drivers/scsi/mpi3mr/mpi3mr_fw.c:2190", mrioc->admin_reply_ci, &mrioc->sysif_regs->admin_reply_queue_ci);
 	return retval;
 
 out_failed:
@@ -2344,7 +2344,7 @@ static void mpi3mr_process_factsdata(struct mpi3mr_ioc *mrioc,
 		    le16_to_cpu(facts_data->ioc_facts_data_length) * 4);
 	}
 
-	ioc_config = readl(&mrioc->sysif_regs->ioc_configuration);
+	ioc_config = pete_readl("drivers/scsi/mpi3mr/mpi3mr_fw.c:2347", &mrioc->sysif_regs->ioc_configuration);
 	req_sz = 1 << ((ioc_config & MPI3_SYSIF_IOC_CONFIG_OPER_REQ_ENT_SZ) >>
 	    MPI3_SYSIF_IOC_CONFIG_OPER_REQ_ENT_SZ_SHIFT);
 	if (le16_to_cpu(facts_data->ioc_request_frame_size) != (req_sz / 4)) {
@@ -3241,8 +3241,8 @@ int mpi3mr_init_ioc(struct mpi3mr_ioc *mrioc, u8 init_type)
 		}
 	}
 
-	ioc_status = readl(&mrioc->sysif_regs->ioc_status);
-	ioc_config = readl(&mrioc->sysif_regs->ioc_configuration);
+	ioc_status = pete_readl("drivers/scsi/mpi3mr/mpi3mr_fw.c:3244", &mrioc->sysif_regs->ioc_status);
+	ioc_config = pete_readl("drivers/scsi/mpi3mr/mpi3mr_fw.c:3245", &mrioc->sysif_regs->ioc_configuration);
 
 	ioc_info(mrioc, "SOD status %x configuration %x\n",
 	    ioc_status, ioc_config);
@@ -3369,11 +3369,11 @@ int mpi3mr_init_ioc(struct mpi3mr_ioc *mrioc, u8 init_type)
 		goto out_failed;
 	}
 	mrioc->reply_free_queue_host_index = mrioc->num_reply_bufs;
-	writel(mrioc->reply_free_queue_host_index,
+	pete_writel("drivers/scsi/mpi3mr/mpi3mr_fw.c:3372", mrioc->reply_free_queue_host_index,
 	    &mrioc->sysif_regs->reply_free_host_index);
 
 	mrioc->sbq_host_index = mrioc->num_sense_bufs;
-	writel(mrioc->sbq_host_index,
+	pete_writel("drivers/scsi/mpi3mr/mpi3mr_fw.c:3376", mrioc->sbq_host_index,
 	    &mrioc->sysif_regs->sense_buffer_free_host_index);
 
 	if (init_type != MPI3MR_IT_RESET) {
@@ -3670,24 +3670,24 @@ static void mpi3mr_issue_ioc_shutdown(struct mpi3mr_ioc *mrioc)
 		    "IOC is unrecoverable shutdown is not issued\n");
 		return;
 	}
-	ioc_status = readl(&mrioc->sysif_regs->ioc_status);
+	ioc_status = pete_readl("drivers/scsi/mpi3mr/mpi3mr_fw.c:3673", &mrioc->sysif_regs->ioc_status);
 	if ((ioc_status & MPI3_SYSIF_IOC_STATUS_SHUTDOWN_MASK)
 	    == MPI3_SYSIF_IOC_STATUS_SHUTDOWN_IN_PROGRESS) {
 		ioc_info(mrioc, "shutdown already in progress\n");
 		return;
 	}
 
-	ioc_config = readl(&mrioc->sysif_regs->ioc_configuration);
+	ioc_config = pete_readl("drivers/scsi/mpi3mr/mpi3mr_fw.c:3680", &mrioc->sysif_regs->ioc_configuration);
 	ioc_config |= MPI3_SYSIF_IOC_CONFIG_SHUTDOWN_NORMAL;
 	ioc_config |= MPI3_SYSIF_IOC_CONFIG_DEVICE_SHUTDOWN;
 
-	writel(ioc_config, &mrioc->sysif_regs->ioc_configuration);
+	pete_writel("drivers/scsi/mpi3mr/mpi3mr_fw.c:3684", ioc_config, &mrioc->sysif_regs->ioc_configuration);
 
 	if (mrioc->facts.shutdown_timeout)
 		timeout = mrioc->facts.shutdown_timeout * 10;
 
 	do {
-		ioc_status = readl(&mrioc->sysif_regs->ioc_status);
+		ioc_status = pete_readl("drivers/scsi/mpi3mr/mpi3mr_fw.c:3690", &mrioc->sysif_regs->ioc_status);
 		if ((ioc_status & MPI3_SYSIF_IOC_STATUS_SHUTDOWN_MASK)
 		    == MPI3_SYSIF_IOC_STATUS_SHUTDOWN_COMPLETE) {
 			retval = 0;
@@ -3696,8 +3696,8 @@ static void mpi3mr_issue_ioc_shutdown(struct mpi3mr_ioc *mrioc)
 		msleep(100);
 	} while (--timeout);
 
-	ioc_status = readl(&mrioc->sysif_regs->ioc_status);
-	ioc_config = readl(&mrioc->sysif_regs->ioc_configuration);
+	ioc_status = pete_readl("drivers/scsi/mpi3mr/mpi3mr_fw.c:3699", &mrioc->sysif_regs->ioc_status);
+	ioc_config = pete_readl("drivers/scsi/mpi3mr/mpi3mr_fw.c:3700", &mrioc->sysif_regs->ioc_configuration);
 
 	if (retval) {
 		if ((ioc_status & MPI3_SYSIF_IOC_STATUS_SHUTDOWN_MASK)
@@ -3904,7 +3904,7 @@ int mpi3mr_soft_reset_handler(struct mpi3mr_ioc *mrioc,
 		if (!retval) {
 			do {
 				host_diagnostic =
-				    readl(&mrioc->sysif_regs->host_diagnostic);
+				    pete_readl("drivers/scsi/mpi3mr/mpi3mr_fw.c:3907", &mrioc->sysif_regs->host_diagnostic);
 				if (!(host_diagnostic &
 				    MPI3_SYSIF_HOST_DIAG_SAVE_IN_PROGRESS))
 					break;

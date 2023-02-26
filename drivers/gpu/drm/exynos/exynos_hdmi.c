@@ -683,13 +683,13 @@ static inline u32 hdmi_map_reg(struct hdmi_context *hdata, u32 reg_id)
 
 static inline u32 hdmi_reg_read(struct hdmi_context *hdata, u32 reg_id)
 {
-	return readl(hdata->regs + hdmi_map_reg(hdata, reg_id));
+	return pete_readl("drivers/gpu/drm/exynos/exynos_hdmi.c:686", hdata->regs + hdmi_map_reg(hdata, reg_id));
 }
 
 static inline void hdmi_reg_writeb(struct hdmi_context *hdata,
 				 u32 reg_id, u8 value)
 {
-	writel(value, hdata->regs + hdmi_map_reg(hdata, reg_id));
+	pete_writel("drivers/gpu/drm/exynos/exynos_hdmi.c:692", value, hdata->regs + hdmi_map_reg(hdata, reg_id));
 }
 
 static inline void hdmi_reg_writev(struct hdmi_context *hdata, u32 reg_id,
@@ -698,7 +698,7 @@ static inline void hdmi_reg_writev(struct hdmi_context *hdata, u32 reg_id,
 	reg_id = hdmi_map_reg(hdata, reg_id);
 
 	while (--bytes >= 0) {
-		writel(val & 0xff, hdata->regs + reg_id);
+		pete_writel("drivers/gpu/drm/exynos/exynos_hdmi.c:701", val & 0xff, hdata->regs + reg_id);
 		val >>= 8;
 		reg_id += 4;
 	}
@@ -708,7 +708,7 @@ static inline void hdmi_reg_write_buf(struct hdmi_context *hdata, u32 reg_id,
 				      u8 *buf, int size)
 {
 	for (reg_id = hdmi_map_reg(hdata, reg_id); size; --size, reg_id += 4)
-		writel(*buf++, hdata->regs + reg_id);
+		pete_writel("drivers/gpu/drm/exynos/exynos_hdmi.c:711", *buf++, hdata->regs + reg_id);
 }
 
 static inline void hdmi_reg_writemask(struct hdmi_context *hdata,
@@ -717,9 +717,9 @@ static inline void hdmi_reg_writemask(struct hdmi_context *hdata,
 	u32 old;
 
 	reg_id = hdmi_map_reg(hdata, reg_id);
-	old = readl(hdata->regs + reg_id);
+	old = pete_readl("drivers/gpu/drm/exynos/exynos_hdmi.c:720", hdata->regs + reg_id);
 	value = (value & mask) | (old & ~mask);
-	writel(value, hdata->regs + reg_id);
+	pete_writel("drivers/gpu/drm/exynos/exynos_hdmi.c:722", value, hdata->regs + reg_id);
 }
 
 static int hdmiphy_reg_write_buf(struct hdmi_context *hdata,
@@ -738,7 +738,7 @@ static int hdmiphy_reg_write_buf(struct hdmi_context *hdata,
 	} else {
 		int i;
 		for (i = 0; i < len; i++)
-			writel(buf[i], hdata->regs_hdmiphy +
+			pete_writel("drivers/gpu/drm/exynos/exynos_hdmi.c:741", buf[i], hdata->regs_hdmiphy +
 				((reg_offset + i)<<2));
 		return 0;
 	}
@@ -1426,7 +1426,7 @@ static void hdmiphy_enable_mode_set(struct hdmi_context *hdata, bool enable)
 	u8 v = enable ? HDMI_PHY_ENABLE_MODE_SET : HDMI_PHY_DISABLE_MODE_SET;
 
 	if (hdata->drv_data == &exynos5433_hdmi_driver_data)
-		writel(v, hdata->regs_hdmiphy + HDMIPHY5433_MODE_SET_DONE);
+		pete_writel("drivers/gpu/drm/exynos/exynos_hdmi.c:1429", v, hdata->regs_hdmiphy + HDMIPHY5433_MODE_SET_DONE);
 }
 
 static void hdmiphy_conf_apply(struct hdmi_context *hdata)

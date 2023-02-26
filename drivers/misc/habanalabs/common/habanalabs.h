@@ -2125,11 +2125,11 @@ void hl_wreg(struct hl_device *hdev, u32 reg, u32 val);
 					(u64) HL_SIM_MAX_TIMEOUT_US)); \
 	might_sleep_if(sleep_us); \
 	for (;;) { \
-		(val) = readl(addr); \
+		(val) = pete_readl("drivers/misc/habanalabs/common/habanalabs.h:2128", addr); \
 		if (cond) \
 			break; \
 		if (timeout_us && ktime_compare(ktime_get(), __timeout) > 0) { \
-			(val) = readl(addr); \
+			(val) = pete_readl("drivers/misc/habanalabs/common/habanalabs.h:2132", addr); \
 			break; \
 		} \
 		if (sleep_us) \

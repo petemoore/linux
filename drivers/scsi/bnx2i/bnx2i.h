@@ -126,9 +126,9 @@
 #define CNIC_DISARM_CQE			0
 
 #define REG_RD(__hba, offset)				\
-		readl(__hba->regview + offset)
+		pete_readl("drivers/scsi/bnx2i/bnx2i.h:129", __hba->regview + offset)
 #define REG_WR(__hba, offset, val)			\
-		writel(val, __hba->regview + offset)
+		pete_writel("drivers/scsi/bnx2i/bnx2i.h:131", val, __hba->regview + offset)
 
 #ifdef CONFIG_32BIT
 #define GET_STATS_64(__hba, dst, field)				\

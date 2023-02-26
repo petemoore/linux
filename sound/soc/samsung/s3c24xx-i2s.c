@@ -48,9 +48,9 @@ static void s3c24xx_snd_txctrl(int on)
 	u32 iiscon;
 	u32 iismod;
 
-	iisfcon = readl(s3c24xx_i2s.regs + S3C2410_IISFCON);
-	iiscon  = readl(s3c24xx_i2s.regs + S3C2410_IISCON);
-	iismod  = readl(s3c24xx_i2s.regs + S3C2410_IISMOD);
+	iisfcon = pete_readl("sound/soc/samsung/s3c24xx-i2s.c:51", s3c24xx_i2s.regs + S3C2410_IISFCON);
+	iiscon  = pete_readl("sound/soc/samsung/s3c24xx-i2s.c:52", s3c24xx_i2s.regs + S3C2410_IISCON);
+	iismod  = pete_readl("sound/soc/samsung/s3c24xx-i2s.c:53", s3c24xx_i2s.regs + S3C2410_IISMOD);
 
 	pr_debug("r: IISCON: %x IISMOD: %x IISFCON: %x\n", iiscon, iismod, iisfcon);
 
@@ -60,9 +60,9 @@ static void s3c24xx_snd_txctrl(int on)
 		iiscon  &= ~S3C2410_IISCON_TXIDLE;
 		iismod  |= S3C2410_IISMOD_TXMODE;
 
-		writel(iismod,  s3c24xx_i2s.regs + S3C2410_IISMOD);
-		writel(iisfcon, s3c24xx_i2s.regs + S3C2410_IISFCON);
-		writel(iiscon,  s3c24xx_i2s.regs + S3C2410_IISCON);
+		pete_writel("sound/soc/samsung/s3c24xx-i2s.c:63", iismod,  s3c24xx_i2s.regs + S3C2410_IISMOD);
+		pete_writel("sound/soc/samsung/s3c24xx-i2s.c:64", iisfcon, s3c24xx_i2s.regs + S3C2410_IISFCON);
+		pete_writel("sound/soc/samsung/s3c24xx-i2s.c:65", iiscon,  s3c24xx_i2s.regs + S3C2410_IISCON);
 	} else {
 		/* note, we have to disable the FIFOs otherwise bad things
 		 * seem to happen when the DMA stops. According to the
@@ -77,9 +77,9 @@ static void s3c24xx_snd_txctrl(int on)
 		iiscon  &= ~S3C2410_IISCON_TXDMAEN;
 		iismod  &= ~S3C2410_IISMOD_TXMODE;
 
-		writel(iiscon,  s3c24xx_i2s.regs + S3C2410_IISCON);
-		writel(iisfcon, s3c24xx_i2s.regs + S3C2410_IISFCON);
-		writel(iismod,  s3c24xx_i2s.regs + S3C2410_IISMOD);
+		pete_writel("sound/soc/samsung/s3c24xx-i2s.c:80", iiscon,  s3c24xx_i2s.regs + S3C2410_IISCON);
+		pete_writel("sound/soc/samsung/s3c24xx-i2s.c:81", iisfcon, s3c24xx_i2s.regs + S3C2410_IISFCON);
+		pete_writel("sound/soc/samsung/s3c24xx-i2s.c:82", iismod,  s3c24xx_i2s.regs + S3C2410_IISMOD);
 	}
 
 	pr_debug("w: IISCON: %x IISMOD: %x IISFCON: %x\n", iiscon, iismod, iisfcon);
@@ -91,9 +91,9 @@ static void s3c24xx_snd_rxctrl(int on)
 	u32 iiscon;
 	u32 iismod;
 
-	iisfcon = readl(s3c24xx_i2s.regs + S3C2410_IISFCON);
-	iiscon  = readl(s3c24xx_i2s.regs + S3C2410_IISCON);
-	iismod  = readl(s3c24xx_i2s.regs + S3C2410_IISMOD);
+	iisfcon = pete_readl("sound/soc/samsung/s3c24xx-i2s.c:94", s3c24xx_i2s.regs + S3C2410_IISFCON);
+	iiscon  = pete_readl("sound/soc/samsung/s3c24xx-i2s.c:95", s3c24xx_i2s.regs + S3C2410_IISCON);
+	iismod  = pete_readl("sound/soc/samsung/s3c24xx-i2s.c:96", s3c24xx_i2s.regs + S3C2410_IISMOD);
 
 	pr_debug("r: IISCON: %x IISMOD: %x IISFCON: %x\n", iiscon, iismod, iisfcon);
 
@@ -103,9 +103,9 @@ static void s3c24xx_snd_rxctrl(int on)
 		iiscon  &= ~S3C2410_IISCON_RXIDLE;
 		iismod  |= S3C2410_IISMOD_RXMODE;
 
-		writel(iismod,  s3c24xx_i2s.regs + S3C2410_IISMOD);
-		writel(iisfcon, s3c24xx_i2s.regs + S3C2410_IISFCON);
-		writel(iiscon,  s3c24xx_i2s.regs + S3C2410_IISCON);
+		pete_writel("sound/soc/samsung/s3c24xx-i2s.c:106", iismod,  s3c24xx_i2s.regs + S3C2410_IISMOD);
+		pete_writel("sound/soc/samsung/s3c24xx-i2s.c:107", iisfcon, s3c24xx_i2s.regs + S3C2410_IISFCON);
+		pete_writel("sound/soc/samsung/s3c24xx-i2s.c:108", iiscon,  s3c24xx_i2s.regs + S3C2410_IISCON);
 	} else {
 		/* note, we have to disable the FIFOs otherwise bad things
 		 * seem to happen when the DMA stops. According to the
@@ -120,9 +120,9 @@ static void s3c24xx_snd_rxctrl(int on)
 		iiscon  &= ~S3C2410_IISCON_RXDMAEN;
 		iismod  &= ~S3C2410_IISMOD_RXMODE;
 
-		writel(iisfcon, s3c24xx_i2s.regs + S3C2410_IISFCON);
-		writel(iiscon,  s3c24xx_i2s.regs + S3C2410_IISCON);
-		writel(iismod,  s3c24xx_i2s.regs + S3C2410_IISMOD);
+		pete_writel("sound/soc/samsung/s3c24xx-i2s.c:123", iisfcon, s3c24xx_i2s.regs + S3C2410_IISFCON);
+		pete_writel("sound/soc/samsung/s3c24xx-i2s.c:124", iiscon,  s3c24xx_i2s.regs + S3C2410_IISCON);
+		pete_writel("sound/soc/samsung/s3c24xx-i2s.c:125", iismod,  s3c24xx_i2s.regs + S3C2410_IISMOD);
 	}
 
 	pr_debug("w: IISCON: %x IISMOD: %x IISFCON: %x\n", iiscon, iismod, iisfcon);
@@ -138,7 +138,7 @@ static int s3c24xx_snd_lrsync(void)
 	int timeout = 50; /* 5ms */
 
 	while (1) {
-		iiscon = readl(s3c24xx_i2s.regs + S3C2410_IISCON);
+		iiscon = pete_readl("sound/soc/samsung/s3c24xx-i2s.c:141", s3c24xx_i2s.regs + S3C2410_IISCON);
 		if (iiscon & S3C2410_IISCON_LRINDEX)
 			break;
 
@@ -155,7 +155,7 @@ static int s3c24xx_snd_lrsync(void)
  */
 static inline int s3c24xx_snd_is_clkmaster(void)
 {
-	return (readl(s3c24xx_i2s.regs + S3C2410_IISMOD) & S3C2410_IISMOD_SLAVE) ? 0:1;
+	return (pete_readl("sound/soc/samsung/s3c24xx-i2s.c:158", s3c24xx_i2s.regs + S3C2410_IISMOD) & S3C2410_IISMOD_SLAVE) ? 0:1;
 }
 
 /*
@@ -166,7 +166,7 @@ static int s3c24xx_i2s_set_fmt(struct snd_soc_dai *cpu_dai,
 {
 	u32 iismod;
 
-	iismod = readl(s3c24xx_i2s.regs + S3C2410_IISMOD);
+	iismod = pete_readl("sound/soc/samsung/s3c24xx-i2s.c:169", s3c24xx_i2s.regs + S3C2410_IISMOD);
 	pr_debug("hw_params r: IISMOD: %x \n", iismod);
 
 	switch (fmt & SND_SOC_DAIFMT_MASTER_MASK) {
@@ -191,7 +191,7 @@ static int s3c24xx_i2s_set_fmt(struct snd_soc_dai *cpu_dai,
 		return -EINVAL;
 	}
 
-	writel(iismod, s3c24xx_i2s.regs + S3C2410_IISMOD);
+	pete_writel("sound/soc/samsung/s3c24xx-i2s.c:194", iismod, s3c24xx_i2s.regs + S3C2410_IISMOD);
 	pr_debug("hw_params w: IISMOD: %x \n", iismod);
 
 	return 0;
@@ -207,7 +207,7 @@ static int s3c24xx_i2s_hw_params(struct snd_pcm_substream *substream,
 	dma_data = snd_soc_dai_get_dma_data(dai, substream);
 
 	/* Working copies of register */
-	iismod = readl(s3c24xx_i2s.regs + S3C2410_IISMOD);
+	iismod = pete_readl("sound/soc/samsung/s3c24xx-i2s.c:210", s3c24xx_i2s.regs + S3C2410_IISMOD);
 	pr_debug("hw_params r: IISMOD: %x\n", iismod);
 
 	switch (params_width(params)) {
@@ -223,7 +223,7 @@ static int s3c24xx_i2s_hw_params(struct snd_pcm_substream *substream,
 		return -EINVAL;
 	}
 
-	writel(iismod, s3c24xx_i2s.regs + S3C2410_IISMOD);
+	pete_writel("sound/soc/samsung/s3c24xx-i2s.c:226", iismod, s3c24xx_i2s.regs + S3C2410_IISMOD);
 	pr_debug("hw_params w: IISMOD: %x\n", iismod);
 
 	return 0;
@@ -273,7 +273,7 @@ exit_err:
 static int s3c24xx_i2s_set_sysclk(struct snd_soc_dai *cpu_dai,
 	int clk_id, unsigned int freq, int dir)
 {
-	u32 iismod = readl(s3c24xx_i2s.regs + S3C2410_IISMOD);
+	u32 iismod = pete_readl("sound/soc/samsung/s3c24xx-i2s.c:276", s3c24xx_i2s.regs + S3C2410_IISMOD);
 
 	iismod &= ~S3C2440_IISMOD_MPLL;
 
@@ -287,7 +287,7 @@ static int s3c24xx_i2s_set_sysclk(struct snd_soc_dai *cpu_dai,
 		return -EINVAL;
 	}
 
-	writel(iismod, s3c24xx_i2s.regs + S3C2410_IISMOD);
+	pete_writel("sound/soc/samsung/s3c24xx-i2s.c:290", iismod, s3c24xx_i2s.regs + S3C2410_IISMOD);
 	return 0;
 }
 
@@ -301,17 +301,17 @@ static int s3c24xx_i2s_set_clkdiv(struct snd_soc_dai *cpu_dai,
 
 	switch (div_id) {
 	case S3C24XX_DIV_BCLK:
-		reg = readl(s3c24xx_i2s.regs + S3C2410_IISMOD) & ~S3C2410_IISMOD_FS_MASK;
-		writel(reg | div, s3c24xx_i2s.regs + S3C2410_IISMOD);
+		reg = pete_readl("sound/soc/samsung/s3c24xx-i2s.c:304", s3c24xx_i2s.regs + S3C2410_IISMOD) & ~S3C2410_IISMOD_FS_MASK;
+		pete_writel("sound/soc/samsung/s3c24xx-i2s.c:305", reg | div, s3c24xx_i2s.regs + S3C2410_IISMOD);
 		break;
 	case S3C24XX_DIV_MCLK:
-		reg = readl(s3c24xx_i2s.regs + S3C2410_IISMOD) & ~(S3C2410_IISMOD_384FS);
-		writel(reg | div, s3c24xx_i2s.regs + S3C2410_IISMOD);
+		reg = pete_readl("sound/soc/samsung/s3c24xx-i2s.c:308", s3c24xx_i2s.regs + S3C2410_IISMOD) & ~(S3C2410_IISMOD_384FS);
+		pete_writel("sound/soc/samsung/s3c24xx-i2s.c:309", reg | div, s3c24xx_i2s.regs + S3C2410_IISMOD);
 		break;
 	case S3C24XX_DIV_PRESCALER:
-		writel(div, s3c24xx_i2s.regs + S3C2410_IISPSR);
-		reg = readl(s3c24xx_i2s.regs + S3C2410_IISCON);
-		writel(reg | S3C2410_IISCON_PSCEN, s3c24xx_i2s.regs + S3C2410_IISCON);
+		pete_writel("sound/soc/samsung/s3c24xx-i2s.c:312", div, s3c24xx_i2s.regs + S3C2410_IISPSR);
+		reg = pete_readl("sound/soc/samsung/s3c24xx-i2s.c:313", s3c24xx_i2s.regs + S3C2410_IISCON);
+		pete_writel("sound/soc/samsung/s3c24xx-i2s.c:314", reg | S3C2410_IISCON_PSCEN, s3c24xx_i2s.regs + S3C2410_IISCON);
 		break;
 	default:
 		return -EINVAL;
@@ -345,7 +345,7 @@ static int s3c24xx_i2s_probe(struct snd_soc_dai *dai)
 	if (ret)
 		return ret;
 
-	writel(S3C2410_IISCON_IISEN, s3c24xx_i2s.regs + S3C2410_IISCON);
+	pete_writel("sound/soc/samsung/s3c24xx-i2s.c:348", S3C2410_IISCON_IISEN, s3c24xx_i2s.regs + S3C2410_IISCON);
 
 	s3c24xx_snd_txctrl(0);
 	s3c24xx_snd_rxctrl(0);
@@ -356,10 +356,10 @@ static int s3c24xx_i2s_probe(struct snd_soc_dai *dai)
 #ifdef CONFIG_PM
 static int s3c24xx_i2s_suspend(struct snd_soc_component *component)
 {
-	s3c24xx_i2s.iiscon = readl(s3c24xx_i2s.regs + S3C2410_IISCON);
-	s3c24xx_i2s.iismod = readl(s3c24xx_i2s.regs + S3C2410_IISMOD);
-	s3c24xx_i2s.iisfcon = readl(s3c24xx_i2s.regs + S3C2410_IISFCON);
-	s3c24xx_i2s.iispsr = readl(s3c24xx_i2s.regs + S3C2410_IISPSR);
+	s3c24xx_i2s.iiscon = pete_readl("sound/soc/samsung/s3c24xx-i2s.c:359", s3c24xx_i2s.regs + S3C2410_IISCON);
+	s3c24xx_i2s.iismod = pete_readl("sound/soc/samsung/s3c24xx-i2s.c:360", s3c24xx_i2s.regs + S3C2410_IISMOD);
+	s3c24xx_i2s.iisfcon = pete_readl("sound/soc/samsung/s3c24xx-i2s.c:361", s3c24xx_i2s.regs + S3C2410_IISFCON);
+	s3c24xx_i2s.iispsr = pete_readl("sound/soc/samsung/s3c24xx-i2s.c:362", s3c24xx_i2s.regs + S3C2410_IISPSR);
 
 	clk_disable_unprepare(s3c24xx_i2s.iis_clk);
 
@@ -374,10 +374,10 @@ static int s3c24xx_i2s_resume(struct snd_soc_component *component)
 	if (ret)
 		return ret;
 
-	writel(s3c24xx_i2s.iiscon, s3c24xx_i2s.regs + S3C2410_IISCON);
-	writel(s3c24xx_i2s.iismod, s3c24xx_i2s.regs + S3C2410_IISMOD);
-	writel(s3c24xx_i2s.iisfcon, s3c24xx_i2s.regs + S3C2410_IISFCON);
-	writel(s3c24xx_i2s.iispsr, s3c24xx_i2s.regs + S3C2410_IISPSR);
+	pete_writel("sound/soc/samsung/s3c24xx-i2s.c:377", s3c24xx_i2s.iiscon, s3c24xx_i2s.regs + S3C2410_IISCON);
+	pete_writel("sound/soc/samsung/s3c24xx-i2s.c:378", s3c24xx_i2s.iismod, s3c24xx_i2s.regs + S3C2410_IISMOD);
+	pete_writel("sound/soc/samsung/s3c24xx-i2s.c:379", s3c24xx_i2s.iisfcon, s3c24xx_i2s.regs + S3C2410_IISFCON);
+	pete_writel("sound/soc/samsung/s3c24xx-i2s.c:380", s3c24xx_i2s.iispsr, s3c24xx_i2s.regs + S3C2410_IISPSR);
 
 	return 0;
 }

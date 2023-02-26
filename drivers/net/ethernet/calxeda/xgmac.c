@@ -505,10 +505,10 @@ static inline int desc_get_rx_frame_len(struct xgmac_dma_desc *p)
 static void xgmac_dma_flush_tx_fifo(void __iomem *ioaddr)
 {
 	int timeout = 1000;
-	u32 reg = readl(ioaddr + XGMAC_OMR);
-	writel(reg | XGMAC_OMR_FTF, ioaddr + XGMAC_OMR);
+	u32 reg = pete_readl("drivers/net/ethernet/calxeda/xgmac.c:508", ioaddr + XGMAC_OMR);
+	pete_writel("drivers/net/ethernet/calxeda/xgmac.c:509", reg | XGMAC_OMR_FTF, ioaddr + XGMAC_OMR);
 
-	while ((timeout-- > 0) && readl(ioaddr + XGMAC_OMR) & XGMAC_OMR_FTF)
+	while ((timeout-- > 0) && pete_readl("drivers/net/ethernet/calxeda/xgmac.c:511", ioaddr + XGMAC_OMR) & XGMAC_OMR_FTF)
 		udelay(1);
 }
 
@@ -587,24 +587,24 @@ static int desc_get_rx_status(struct xgmac_priv *priv, struct xgmac_dma_desc *p)
 
 static inline void xgmac_mac_enable(void __iomem *ioaddr)
 {
-	u32 value = readl(ioaddr + XGMAC_CONTROL);
+	u32 value = pete_readl("drivers/net/ethernet/calxeda/xgmac.c:590", ioaddr + XGMAC_CONTROL);
 	value |= MAC_ENABLE_RX | MAC_ENABLE_TX;
-	writel(value, ioaddr + XGMAC_CONTROL);
+	pete_writel("drivers/net/ethernet/calxeda/xgmac.c:592", value, ioaddr + XGMAC_CONTROL);
 
-	value = readl(ioaddr + XGMAC_DMA_CONTROL);
+	value = pete_readl("drivers/net/ethernet/calxeda/xgmac.c:594", ioaddr + XGMAC_DMA_CONTROL);
 	value |= DMA_CONTROL_ST | DMA_CONTROL_SR;
-	writel(value, ioaddr + XGMAC_DMA_CONTROL);
+	pete_writel("drivers/net/ethernet/calxeda/xgmac.c:596", value, ioaddr + XGMAC_DMA_CONTROL);
 }
 
 static inline void xgmac_mac_disable(void __iomem *ioaddr)
 {
-	u32 value = readl(ioaddr + XGMAC_DMA_CONTROL);
+	u32 value = pete_readl("drivers/net/ethernet/calxeda/xgmac.c:601", ioaddr + XGMAC_DMA_CONTROL);
 	value &= ~(DMA_CONTROL_ST | DMA_CONTROL_SR);
-	writel(value, ioaddr + XGMAC_DMA_CONTROL);
+	pete_writel("drivers/net/ethernet/calxeda/xgmac.c:603", value, ioaddr + XGMAC_DMA_CONTROL);
 
-	value = readl(ioaddr + XGMAC_CONTROL);
+	value = pete_readl("drivers/net/ethernet/calxeda/xgmac.c:605", ioaddr + XGMAC_CONTROL);
 	value &= ~(MAC_ENABLE_TX | MAC_ENABLE_RX);
-	writel(value, ioaddr + XGMAC_CONTROL);
+	pete_writel("drivers/net/ethernet/calxeda/xgmac.c:607", value, ioaddr + XGMAC_CONTROL);
 }
 
 static void xgmac_set_mac_addr(void __iomem *ioaddr, unsigned char *addr,
@@ -614,12 +614,12 @@ static void xgmac_set_mac_addr(void __iomem *ioaddr, unsigned char *addr,
 
 	if (addr) {
 		data = (addr[5] << 8) | addr[4] | (num ? XGMAC_ADDR_AE : 0);
-		writel(data, ioaddr + XGMAC_ADDR_HIGH(num));
+		pete_writel("drivers/net/ethernet/calxeda/xgmac.c:617", data, ioaddr + XGMAC_ADDR_HIGH(num));
 		data = (addr[3] << 24) | (addr[2] << 16) | (addr[1] << 8) | addr[0];
-		writel(data, ioaddr + XGMAC_ADDR_LOW(num));
+		pete_writel("drivers/net/ethernet/calxeda/xgmac.c:619", data, ioaddr + XGMAC_ADDR_LOW(num));
 	} else {
-		writel(0, ioaddr + XGMAC_ADDR_HIGH(num));
-		writel(0, ioaddr + XGMAC_ADDR_LOW(num));
+		pete_writel("drivers/net/ethernet/calxeda/xgmac.c:621", 0, ioaddr + XGMAC_ADDR_HIGH(num));
+		pete_writel("drivers/net/ethernet/calxeda/xgmac.c:622", 0, ioaddr + XGMAC_ADDR_LOW(num));
 	}
 }
 
@@ -629,8 +629,8 @@ static void xgmac_get_mac_addr(void __iomem *ioaddr, unsigned char *addr,
 	u32 hi_addr, lo_addr;
 
 	/* Read the MAC address from the hardware */
-	hi_addr = readl(ioaddr + XGMAC_ADDR_HIGH(num));
-	lo_addr = readl(ioaddr + XGMAC_ADDR_LOW(num));
+	hi_addr = pete_readl("drivers/net/ethernet/calxeda/xgmac.c:632", ioaddr + XGMAC_ADDR_HIGH(num));
+	lo_addr = pete_readl("drivers/net/ethernet/calxeda/xgmac.c:633", ioaddr + XGMAC_ADDR_LOW(num));
 
 	/* Extract the MAC address from the high and low words */
 	addr[0] = lo_addr & 0xff;
@@ -658,17 +658,17 @@ static int xgmac_set_flow_ctrl(struct xgmac_priv *priv, int rx, int tx)
 		flow |= XGMAC_FLOW_CTRL_PLT | XGMAC_FLOW_CTRL_UP;
 		flow |= (PAUSE_TIME << XGMAC_FLOW_CTRL_PT_SHIFT);
 
-		writel(flow, priv->base + XGMAC_FLOW_CTRL);
+		pete_writel("drivers/net/ethernet/calxeda/xgmac.c:661", flow, priv->base + XGMAC_FLOW_CTRL);
 
-		reg = readl(priv->base + XGMAC_OMR);
+		reg = pete_readl("drivers/net/ethernet/calxeda/xgmac.c:663", priv->base + XGMAC_OMR);
 		reg |= XGMAC_OMR_EFC;
-		writel(reg, priv->base + XGMAC_OMR);
+		pete_writel("drivers/net/ethernet/calxeda/xgmac.c:665", reg, priv->base + XGMAC_OMR);
 	} else {
-		writel(0, priv->base + XGMAC_FLOW_CTRL);
+		pete_writel("drivers/net/ethernet/calxeda/xgmac.c:667", 0, priv->base + XGMAC_FLOW_CTRL);
 
-		reg = readl(priv->base + XGMAC_OMR);
+		reg = pete_readl("drivers/net/ethernet/calxeda/xgmac.c:669", priv->base + XGMAC_OMR);
 		reg &= ~XGMAC_OMR_EFC;
-		writel(reg, priv->base + XGMAC_OMR);
+		pete_writel("drivers/net/ethernet/calxeda/xgmac.c:671", reg, priv->base + XGMAC_OMR);
 	}
 
 	return 0;
@@ -770,8 +770,8 @@ static int xgmac_dma_desc_rings_init(struct net_device *dev)
 	priv->tx_head = 0;
 	desc_init_tx_desc(priv->dma_tx, DMA_TX_RING_SZ);
 
-	writel(priv->dma_tx_phy, priv->base + XGMAC_DMA_TX_BASE_ADDR);
-	writel(priv->dma_rx_phy, priv->base + XGMAC_DMA_RX_BASE_ADDR);
+	pete_writel("drivers/net/ethernet/calxeda/xgmac.c:773", priv->dma_tx_phy, priv->base + XGMAC_DMA_TX_BASE_ADDR);
+	pete_writel("drivers/net/ethernet/calxeda/xgmac.c:774", priv->dma_rx_phy, priv->base + XGMAC_DMA_RX_BASE_ADDR);
 
 	return 0;
 
@@ -909,24 +909,24 @@ static void xgmac_tx_timeout_work(struct work_struct *work)
 
 	napi_disable(&priv->napi);
 
-	writel(0, priv->base + XGMAC_DMA_INTR_ENA);
+	pete_writel("drivers/net/ethernet/calxeda/xgmac.c:912", 0, priv->base + XGMAC_DMA_INTR_ENA);
 
 	netif_tx_lock(priv->dev);
 
-	reg = readl(priv->base + XGMAC_DMA_CONTROL);
-	writel(reg & ~DMA_CONTROL_ST, priv->base + XGMAC_DMA_CONTROL);
+	reg = pete_readl("drivers/net/ethernet/calxeda/xgmac.c:916", priv->base + XGMAC_DMA_CONTROL);
+	pete_writel("drivers/net/ethernet/calxeda/xgmac.c:917", reg & ~DMA_CONTROL_ST, priv->base + XGMAC_DMA_CONTROL);
 	do {
-		value = readl(priv->base + XGMAC_DMA_STATUS) & 0x700000;
+		value = pete_readl("drivers/net/ethernet/calxeda/xgmac.c:919", priv->base + XGMAC_DMA_STATUS) & 0x700000;
 	} while (value && (value != 0x600000));
 
 	xgmac_free_tx_skbufs(priv);
 	desc_init_tx_desc(priv->dma_tx, DMA_TX_RING_SZ);
 	priv->tx_tail = 0;
 	priv->tx_head = 0;
-	writel(priv->dma_tx_phy, priv->base + XGMAC_DMA_TX_BASE_ADDR);
-	writel(reg | DMA_CONTROL_ST, priv->base + XGMAC_DMA_CONTROL);
+	pete_writel("drivers/net/ethernet/calxeda/xgmac.c:926", priv->dma_tx_phy, priv->base + XGMAC_DMA_TX_BASE_ADDR);
+	pete_writel("drivers/net/ethernet/calxeda/xgmac.c:927", reg | DMA_CONTROL_ST, priv->base + XGMAC_DMA_CONTROL);
 
-	writel(DMA_STATUS_TU | DMA_STATUS_TPS | DMA_STATUS_NIS | DMA_STATUS_AIS,
+	pete_writel("drivers/net/ethernet/calxeda/xgmac.c:929", DMA_STATUS_TU | DMA_STATUS_TPS | DMA_STATUS_NIS | DMA_STATUS_AIS,
 		priv->base + XGMAC_DMA_STATUS);
 
 	netif_tx_unlock(priv->dev);
@@ -935,8 +935,8 @@ static void xgmac_tx_timeout_work(struct work_struct *work)
 	napi_enable(&priv->napi);
 
 	/* Enable interrupts */
-	writel(DMA_INTR_DEFAULT_MASK, priv->base + XGMAC_DMA_STATUS);
-	writel(DMA_INTR_DEFAULT_MASK, priv->base + XGMAC_DMA_INTR_ENA);
+	pete_writel("drivers/net/ethernet/calxeda/xgmac.c:938", DMA_INTR_DEFAULT_MASK, priv->base + XGMAC_DMA_STATUS);
+	pete_writel("drivers/net/ethernet/calxeda/xgmac.c:939", DMA_INTR_DEFAULT_MASK, priv->base + XGMAC_DMA_INTR_ENA);
 }
 
 static int xgmac_hw_init(struct net_device *dev)
@@ -947,14 +947,14 @@ static int xgmac_hw_init(struct net_device *dev)
 	void __iomem *ioaddr = priv->base;
 
 	/* Save the ctrl register value */
-	ctrl = readl(ioaddr + XGMAC_CONTROL) & XGMAC_CONTROL_SPD_MASK;
+	ctrl = pete_readl("drivers/net/ethernet/calxeda/xgmac.c:950", ioaddr + XGMAC_CONTROL) & XGMAC_CONTROL_SPD_MASK;
 
 	/* SW reset */
 	value = DMA_BUS_MODE_SFT_RESET;
-	writel(value, ioaddr + XGMAC_DMA_BUS_MODE);
+	pete_writel("drivers/net/ethernet/calxeda/xgmac.c:954", value, ioaddr + XGMAC_DMA_BUS_MODE);
 	limit = 15000;
 	while (limit-- &&
-		(readl(ioaddr + XGMAC_DMA_BUS_MODE) & DMA_BUS_MODE_SFT_RESET))
+		(pete_readl("drivers/net/ethernet/calxeda/xgmac.c:957", ioaddr + XGMAC_DMA_BUS_MODE) & DMA_BUS_MODE_SFT_RESET))
 		cpu_relax();
 	if (limit < 0)
 		return -EBUSY;
@@ -962,31 +962,31 @@ static int xgmac_hw_init(struct net_device *dev)
 	value = (0x10 << DMA_BUS_MODE_PBL_SHIFT) |
 		(0x10 << DMA_BUS_MODE_RPBL_SHIFT) |
 		DMA_BUS_MODE_FB | DMA_BUS_MODE_ATDS | DMA_BUS_MODE_AAL;
-	writel(value, ioaddr + XGMAC_DMA_BUS_MODE);
+	pete_writel("drivers/net/ethernet/calxeda/xgmac.c:965", value, ioaddr + XGMAC_DMA_BUS_MODE);
 
-	writel(0, ioaddr + XGMAC_DMA_INTR_ENA);
+	pete_writel("drivers/net/ethernet/calxeda/xgmac.c:967", 0, ioaddr + XGMAC_DMA_INTR_ENA);
 
 	/* Mask power mgt interrupt */
-	writel(XGMAC_INT_STAT_PMTIM, ioaddr + XGMAC_INT_STAT);
+	pete_writel("drivers/net/ethernet/calxeda/xgmac.c:970", XGMAC_INT_STAT_PMTIM, ioaddr + XGMAC_INT_STAT);
 
 	/* XGMAC requires AXI bus init. This is a 'magic number' for now */
-	writel(0x0077000E, ioaddr + XGMAC_DMA_AXI_BUS);
+	pete_writel("drivers/net/ethernet/calxeda/xgmac.c:973", 0x0077000E, ioaddr + XGMAC_DMA_AXI_BUS);
 
 	ctrl |= XGMAC_CONTROL_DDIC | XGMAC_CONTROL_JE | XGMAC_CONTROL_ACS |
 		XGMAC_CONTROL_CAR;
 	if (dev->features & NETIF_F_RXCSUM)
 		ctrl |= XGMAC_CONTROL_IPC;
-	writel(ctrl, ioaddr + XGMAC_CONTROL);
+	pete_writel("drivers/net/ethernet/calxeda/xgmac.c:979", ctrl, ioaddr + XGMAC_CONTROL);
 
-	writel(DMA_CONTROL_OSF, ioaddr + XGMAC_DMA_CONTROL);
+	pete_writel("drivers/net/ethernet/calxeda/xgmac.c:981", DMA_CONTROL_OSF, ioaddr + XGMAC_DMA_CONTROL);
 
 	/* Set the HW DMA mode and the COE */
-	writel(XGMAC_OMR_TSF | XGMAC_OMR_RFD | XGMAC_OMR_RFA |
+	pete_writel("drivers/net/ethernet/calxeda/xgmac.c:984", XGMAC_OMR_TSF | XGMAC_OMR_RFD | XGMAC_OMR_RFA |
 		XGMAC_OMR_RTC_256,
 		ioaddr + XGMAC_OMR);
 
 	/* Reset the MMC counters */
-	writel(1, ioaddr + XGMAC_MMC_CTRL);
+	pete_writel("drivers/net/ethernet/calxeda/xgmac.c:989", 1, ioaddr + XGMAC_MMC_CTRL);
 	return 0;
 }
 
@@ -1033,8 +1033,8 @@ static int xgmac_open(struct net_device *dev)
 	netif_start_queue(dev);
 
 	/* Enable interrupts */
-	writel(DMA_INTR_DEFAULT_MASK, ioaddr + XGMAC_DMA_STATUS);
-	writel(DMA_INTR_DEFAULT_MASK, ioaddr + XGMAC_DMA_INTR_ENA);
+	pete_writel("drivers/net/ethernet/calxeda/xgmac.c:1036", DMA_INTR_DEFAULT_MASK, ioaddr + XGMAC_DMA_STATUS);
+	pete_writel("drivers/net/ethernet/calxeda/xgmac.c:1037", DMA_INTR_DEFAULT_MASK, ioaddr + XGMAC_DMA_INTR_ENA);
 
 	return 0;
 }
@@ -1049,10 +1049,10 @@ static int xgmac_stop(struct net_device *dev)
 {
 	struct xgmac_priv *priv = netdev_priv(dev);
 
-	if (readl(priv->base + XGMAC_DMA_INTR_ENA))
+	if (pete_readl("drivers/net/ethernet/calxeda/xgmac.c:1052", priv->base + XGMAC_DMA_INTR_ENA))
 		napi_disable(&priv->napi);
 
-	writel(0, priv->base + XGMAC_DMA_INTR_ENA);
+	pete_writel("drivers/net/ethernet/calxeda/xgmac.c:1055", 0, priv->base + XGMAC_DMA_INTR_ENA);
 
 	netif_tx_disable(dev);
 
@@ -1131,7 +1131,7 @@ static netdev_tx_t xgmac_xmit(struct sk_buff *skb, struct net_device *dev)
 	wmb();
 	desc_set_tx_owner(first, desc_flags | TXDESC_FIRST_SEG);
 
-	writel(1, priv->base + XGMAC_DMA_TX_POLL);
+	pete_writel("drivers/net/ethernet/calxeda/xgmac.c:1134", 1, priv->base + XGMAC_DMA_TX_POLL);
 
 	priv->tx_head = dma_ring_incr(entry, DMA_TX_RING_SZ);
 
@@ -1334,9 +1334,9 @@ out:
 	for (i = reg; i <= priv->max_macs; i++)
 		xgmac_set_mac_addr(ioaddr, NULL, i);
 	for (i = 0; i < XGMAC_NUM_HASH; i++)
-		writel(hash_filter[i], ioaddr + XGMAC_HASH(i));
+		pete_writel("drivers/net/ethernet/calxeda/xgmac.c:1337", hash_filter[i], ioaddr + XGMAC_HASH(i));
 
-	writel(value, ioaddr + XGMAC_FRAME_FILTER);
+	pete_writel("drivers/net/ethernet/calxeda/xgmac.c:1339", value, ioaddr + XGMAC_FRAME_FILTER);
 }
 
 /**
@@ -1373,7 +1373,7 @@ static irqreturn_t xgmac_pmt_interrupt(int irq, void *dev_id)
 	if (intr_status & XGMAC_INT_STAT_PMT) {
 		netdev_dbg(priv->dev, "received Magic frame\n");
 		/* clear the PMT bits 5 and 6 by reading the PMT */
-		readl(ioaddr + XGMAC_PMT);
+		pete_readl("drivers/net/ethernet/calxeda/xgmac.c:1376", ioaddr + XGMAC_PMT);
 	}
 	return IRQ_HANDLED;
 }
@@ -1447,26 +1447,26 @@ xgmac_get_stats64(struct net_device *dev,
 	u32 count;
 
 	spin_lock_bh(&priv->stats_lock);
-	writel(XGMAC_MMC_CTRL_CNT_FRZ, base + XGMAC_MMC_CTRL);
+	pete_writel("drivers/net/ethernet/calxeda/xgmac.c:1450", XGMAC_MMC_CTRL_CNT_FRZ, base + XGMAC_MMC_CTRL);
 
-	storage->rx_bytes = readl(base + XGMAC_MMC_RXOCTET_G_LO);
-	storage->rx_bytes |= (u64)(readl(base + XGMAC_MMC_RXOCTET_G_HI)) << 32;
+	storage->rx_bytes = pete_readl("drivers/net/ethernet/calxeda/xgmac.c:1452", base + XGMAC_MMC_RXOCTET_G_LO);
+	storage->rx_bytes |= (u64)(pete_readl("drivers/net/ethernet/calxeda/xgmac.c:1453", base + XGMAC_MMC_RXOCTET_G_HI)) << 32;
 
-	storage->rx_packets = readl(base + XGMAC_MMC_RXFRAME_GB_LO);
-	storage->multicast = readl(base + XGMAC_MMC_RXMCFRAME_G);
-	storage->rx_crc_errors = readl(base + XGMAC_MMC_RXCRCERR);
-	storage->rx_length_errors = readl(base + XGMAC_MMC_RXLENGTHERR);
-	storage->rx_missed_errors = readl(base + XGMAC_MMC_RXOVERFLOW);
+	storage->rx_packets = pete_readl("drivers/net/ethernet/calxeda/xgmac.c:1455", base + XGMAC_MMC_RXFRAME_GB_LO);
+	storage->multicast = pete_readl("drivers/net/ethernet/calxeda/xgmac.c:1456", base + XGMAC_MMC_RXMCFRAME_G);
+	storage->rx_crc_errors = pete_readl("drivers/net/ethernet/calxeda/xgmac.c:1457", base + XGMAC_MMC_RXCRCERR);
+	storage->rx_length_errors = pete_readl("drivers/net/ethernet/calxeda/xgmac.c:1458", base + XGMAC_MMC_RXLENGTHERR);
+	storage->rx_missed_errors = pete_readl("drivers/net/ethernet/calxeda/xgmac.c:1459", base + XGMAC_MMC_RXOVERFLOW);
 
-	storage->tx_bytes = readl(base + XGMAC_MMC_TXOCTET_G_LO);
-	storage->tx_bytes |= (u64)(readl(base + XGMAC_MMC_TXOCTET_G_HI)) << 32;
+	storage->tx_bytes = pete_readl("drivers/net/ethernet/calxeda/xgmac.c:1461", base + XGMAC_MMC_TXOCTET_G_LO);
+	storage->tx_bytes |= (u64)(pete_readl("drivers/net/ethernet/calxeda/xgmac.c:1462", base + XGMAC_MMC_TXOCTET_G_HI)) << 32;
 
-	count = readl(base + XGMAC_MMC_TXFRAME_GB_LO);
-	storage->tx_errors = count - readl(base + XGMAC_MMC_TXFRAME_G_LO);
+	count = pete_readl("drivers/net/ethernet/calxeda/xgmac.c:1464", base + XGMAC_MMC_TXFRAME_GB_LO);
+	storage->tx_errors = count - pete_readl("drivers/net/ethernet/calxeda/xgmac.c:1465", base + XGMAC_MMC_TXFRAME_G_LO);
 	storage->tx_packets = count;
-	storage->tx_fifo_errors = readl(base + XGMAC_MMC_TXUNDERFLOW);
+	storage->tx_fifo_errors = pete_readl("drivers/net/ethernet/calxeda/xgmac.c:1467", base + XGMAC_MMC_TXUNDERFLOW);
 
-	writel(0, base + XGMAC_MMC_CTRL);
+	pete_writel("drivers/net/ethernet/calxeda/xgmac.c:1469", 0, base + XGMAC_MMC_CTRL);
 	spin_unlock_bh(&priv->stats_lock);
 }
 
@@ -1496,12 +1496,12 @@ static int xgmac_set_features(struct net_device *dev, netdev_features_t features
 	if (!(changed & NETIF_F_RXCSUM))
 		return 0;
 
-	ctrl = readl(ioaddr + XGMAC_CONTROL);
+	ctrl = pete_readl("drivers/net/ethernet/calxeda/xgmac.c:1499", ioaddr + XGMAC_CONTROL);
 	if (features & NETIF_F_RXCSUM)
 		ctrl |= XGMAC_CONTROL_IPC;
 	else
 		ctrl &= ~XGMAC_CONTROL_IPC;
-	writel(ctrl, ioaddr + XGMAC_CONTROL);
+	pete_writel("drivers/net/ethernet/calxeda/xgmac.c:1504", ctrl, ioaddr + XGMAC_CONTROL);
 
 	return 0;
 }
@@ -1596,7 +1596,7 @@ static void xgmac_get_ethtool_stats(struct net_device *dev,
 
 	for (i = 0; i < XGMAC_STATS_LEN; i++) {
 		if (xgmac_gstrings_stats[i].is_reg)
-			*data++ = readl(priv->base +
+			*data++ = pete_readl("drivers/net/ethernet/calxeda/xgmac.c:1599", priv->base +
 				xgmac_gstrings_stats[i].stat_offset);
 		else
 			*data++ = *(u32 *)(p +
@@ -1728,17 +1728,17 @@ static int xgmac_probe(struct platform_device *pdev)
 		goto err_io;
 	}
 
-	uid = readl(priv->base + XGMAC_VERSION);
+	uid = pete_readl("drivers/net/ethernet/calxeda/xgmac.c:1731", priv->base + XGMAC_VERSION);
 	netdev_info(ndev, "h/w version is 0x%x\n", uid);
 
 	/* Figure out how many valid mac address filter registers we have */
-	writel(1, priv->base + XGMAC_ADDR_HIGH(31));
-	if (readl(priv->base + XGMAC_ADDR_HIGH(31)) == 1)
+	pete_writel("drivers/net/ethernet/calxeda/xgmac.c:1735", 1, priv->base + XGMAC_ADDR_HIGH(31));
+	if (pete_readl("drivers/net/ethernet/calxeda/xgmac.c:1736", priv->base + XGMAC_ADDR_HIGH(31)) == 1)
 		priv->max_macs = 31;
 	else
 		priv->max_macs = 7;
 
-	writel(0, priv->base + XGMAC_DMA_INTR_ENA);
+	pete_writel("drivers/net/ethernet/calxeda/xgmac.c:1741", 0, priv->base + XGMAC_DMA_INTR_ENA);
 	ndev->irq = platform_get_irq(pdev, 0);
 	if (ndev->irq == -ENXIO) {
 		netdev_err(ndev, "No irq resource\n");
@@ -1774,7 +1774,7 @@ static int xgmac_probe(struct platform_device *pdev)
 		priv->wolopts = WAKE_MAGIC;	/* Magic Frame as default */
 
 	ndev->hw_features = NETIF_F_SG | NETIF_F_HIGHDMA;
-	if (readl(priv->base + XGMAC_DMA_HW_FEATURE) & DMA_HW_FEAT_TXCOESEL)
+	if (pete_readl("drivers/net/ethernet/calxeda/xgmac.c:1777", priv->base + XGMAC_DMA_HW_FEATURE) & DMA_HW_FEAT_TXCOESEL)
 		ndev->hw_features |= NETIF_F_IP_CSUM | NETIF_F_IPV6_CSUM |
 				     NETIF_F_RXCSUM;
 	ndev->features |= ndev->hw_features;
@@ -1852,7 +1852,7 @@ static void xgmac_pmt(void __iomem *ioaddr, unsigned long mode)
 	if (mode & WAKE_UCAST)
 		pmt |= XGMAC_PMT_POWERDOWN | XGMAC_PMT_GLBL_UNICAST;
 
-	writel(pmt, ioaddr + XGMAC_PMT);
+	pete_writel("drivers/net/ethernet/calxeda/xgmac.c:1855", pmt, ioaddr + XGMAC_PMT);
 }
 
 static int xgmac_suspend(struct device *dev)
@@ -1866,13 +1866,13 @@ static int xgmac_suspend(struct device *dev)
 
 	netif_device_detach(ndev);
 	napi_disable(&priv->napi);
-	writel(0, priv->base + XGMAC_DMA_INTR_ENA);
+	pete_writel("drivers/net/ethernet/calxeda/xgmac.c:1869", 0, priv->base + XGMAC_DMA_INTR_ENA);
 
 	if (device_may_wakeup(priv->device)) {
 		/* Stop TX/RX DMA Only */
-		value = readl(priv->base + XGMAC_DMA_CONTROL);
+		value = pete_readl("drivers/net/ethernet/calxeda/xgmac.c:1873", priv->base + XGMAC_DMA_CONTROL);
 		value &= ~(DMA_CONTROL_ST | DMA_CONTROL_SR);
-		writel(value, priv->base + XGMAC_DMA_CONTROL);
+		pete_writel("drivers/net/ethernet/calxeda/xgmac.c:1875", value, priv->base + XGMAC_DMA_CONTROL);
 
 		xgmac_pmt(priv->base, priv->wolopts);
 	} else
@@ -1894,8 +1894,8 @@ static int xgmac_resume(struct device *dev)
 
 	/* Enable the MAC and DMA */
 	xgmac_mac_enable(ioaddr);
-	writel(DMA_INTR_DEFAULT_MASK, ioaddr + XGMAC_DMA_STATUS);
-	writel(DMA_INTR_DEFAULT_MASK, ioaddr + XGMAC_DMA_INTR_ENA);
+	pete_writel("drivers/net/ethernet/calxeda/xgmac.c:1897", DMA_INTR_DEFAULT_MASK, ioaddr + XGMAC_DMA_STATUS);
+	pete_writel("drivers/net/ethernet/calxeda/xgmac.c:1898", DMA_INTR_DEFAULT_MASK, ioaddr + XGMAC_DMA_INTR_ENA);
 
 	netif_device_attach(ndev);
 	napi_enable(&priv->napi);

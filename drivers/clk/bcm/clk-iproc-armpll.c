@@ -78,7 +78,7 @@ static unsigned int __get_fid(struct iproc_arm_pll *pll)
 	u32 val;
 	unsigned int policy, fid, active_fid;
 
-	val = readl(pll->base + IPROC_CLK_ARM_DIV_OFFSET);
+	val = pete_readl("drivers/clk/bcm/clk-iproc-armpll.c:81", pll->base + IPROC_CLK_ARM_DIV_OFFSET);
 	if (val & (1 << IPROC_CLK_ARM_DIV_PLL_SELECT_OVERRIDE_SHIFT))
 		policy = val & IPROC_CLK_ARM_DIV_ARM_PLL_SELECT_MASK;
 	else
@@ -87,11 +87,11 @@ static unsigned int __get_fid(struct iproc_arm_pll *pll)
 	/* something is seriously wrong */
 	BUG_ON(policy > IPROC_CLK_MAX_FREQ_POLICY);
 
-	val = readl(pll->base + IPROC_CLK_POLICY_FREQ_OFFSET);
+	val = pete_readl("drivers/clk/bcm/clk-iproc-armpll.c:90", pll->base + IPROC_CLK_POLICY_FREQ_OFFSET);
 	fid = (val >> (IPROC_CLK_POLICY_FREQ_POLICY_FREQ_SHIFT * policy)) &
 		IPROC_CLK_POLICY_FREQ_POLICY_FREQ_MASK;
 
-	val = readl(pll->base + IPROC_CLK_POLICY_DBG_OFFSET);
+	val = pete_readl("drivers/clk/bcm/clk-iproc-armpll.c:94", pll->base + IPROC_CLK_POLICY_DBG_OFFSET);
 	active_fid = IPROC_CLK_POLICY_DBG_ACT_FREQ_MASK &
 		(val >> IPROC_CLK_POLICY_DBG_ACT_FREQ_SHIFT);
 	if (fid != active_fid) {
@@ -128,14 +128,14 @@ static int __get_mdiv(struct iproc_arm_pll *pll)
 		break;
 
 	case ARM_PLL_FID_CH0_SLOW_CLK:
-		val = readl(pll->base + IPROC_CLK_PLLARMC_OFFSET);
+		val = pete_readl("drivers/clk/bcm/clk-iproc-armpll.c:131", pll->base + IPROC_CLK_PLLARMC_OFFSET);
 		mdiv = val & IPROC_CLK_PLLARMC_MDIV_MASK;
 		if (mdiv == 0)
 			mdiv = 256;
 		break;
 
 	case ARM_PLL_FID_CH1_FAST_CLK:
-		val = readl(pll->base +	IPROC_CLK_PLLARMCTL5_OFFSET);
+		val = pete_readl("drivers/clk/bcm/clk-iproc-armpll.c:138", pll->base +	IPROC_CLK_PLLARMCTL5_OFFSET);
 		mdiv = val & IPROC_CLK_PLLARMCTL5_H_MDIV_MASK;
 		if (mdiv == 0)
 			mdiv = 256;
@@ -153,7 +153,7 @@ static unsigned int __get_ndiv(struct iproc_arm_pll *pll)
 	u32 val;
 	unsigned int ndiv_int, ndiv_frac, ndiv;
 
-	val = readl(pll->base + IPROC_CLK_PLLARM_OFFSET_OFFSET);
+	val = pete_readl("drivers/clk/bcm/clk-iproc-armpll.c:156", pll->base + IPROC_CLK_PLLARM_OFFSET_OFFSET);
 	if (val & (1 << IPROC_CLK_PLLARM_SW_CTL_SHIFT)) {
 		/*
 		 * offset mode is active. Read the ndiv from the PLLARM OFFSET
@@ -167,13 +167,13 @@ static unsigned int __get_ndiv(struct iproc_arm_pll *pll)
 		ndiv_frac = val & IPROC_CLK_PLLARM_NDIV_FRAC_OFFSET_MASK;
 	} else {
 		/* offset mode not active */
-		val = readl(pll->base + IPROC_CLK_PLLARMA_OFFSET);
+		val = pete_readl("drivers/clk/bcm/clk-iproc-armpll.c:170", pll->base + IPROC_CLK_PLLARMA_OFFSET);
 		ndiv_int = (val >> IPROC_CLK_PLLARMA_NDIV_INT_SHIFT) &
 			IPROC_CLK_PLLARMA_NDIV_INT_MASK;
 		if (ndiv_int == 0)
 			ndiv_int = 1024;
 
-		val = readl(pll->base + IPROC_CLK_PLLARMB_OFFSET);
+		val = pete_readl("drivers/clk/bcm/clk-iproc-armpll.c:176", pll->base + IPROC_CLK_PLLARMB_OFFSET);
 		ndiv_frac = val & IPROC_CLK_PLLARMB_NDIV_FRAC_MASK;
 	}
 
@@ -202,14 +202,14 @@ static unsigned long iproc_arm_pll_recalc_rate(struct clk_hw *hw,
 	unsigned int pdiv;
 
 	/* in bypass mode, use parent rate */
-	val = readl(pll->base + IPROC_CLK_PLLARMC_OFFSET);
+	val = pete_readl("drivers/clk/bcm/clk-iproc-armpll.c:205", pll->base + IPROC_CLK_PLLARMC_OFFSET);
 	if (val & (1 << IPROC_CLK_PLLARMC_BYPCLK_EN_SHIFT)) {
 		pll->rate = parent_rate;
 		return pll->rate;
 	}
 
 	/* PLL needs to be locked */
-	val = readl(pll->base + IPROC_CLK_PLLARMA_OFFSET);
+	val = pete_readl("drivers/clk/bcm/clk-iproc-armpll.c:212", pll->base + IPROC_CLK_PLLARMA_OFFSET);
 	if (!(val & (1 << IPROC_CLK_PLLARMA_LOCK_SHIFT))) {
 		pll->rate = 0;
 		return 0;

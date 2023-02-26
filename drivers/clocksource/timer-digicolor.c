@@ -72,20 +72,20 @@ static struct digicolor_timer *dc_timer(struct clock_event_device *ce)
 static inline void dc_timer_disable(struct clock_event_device *ce)
 {
 	struct digicolor_timer *dt = dc_timer(ce);
-	writeb(CONTROL_DISABLE, dt->base + CONTROL(dt->timer_id));
+	pete_writeb("drivers/clocksource/timer-digicolor.c:75", CONTROL_DISABLE, dt->base + CONTROL(dt->timer_id));
 }
 
 static inline void dc_timer_enable(struct clock_event_device *ce, u32 mode)
 {
 	struct digicolor_timer *dt = dc_timer(ce);
-	writeb(CONTROL_ENABLE | mode, dt->base + CONTROL(dt->timer_id));
+	pete_writeb("drivers/clocksource/timer-digicolor.c:81", CONTROL_ENABLE | mode, dt->base + CONTROL(dt->timer_id));
 }
 
 static inline void dc_timer_set_count(struct clock_event_device *ce,
 				      unsigned long count)
 {
 	struct digicolor_timer *dt = dc_timer(ce);
-	writel(count, dt->base + COUNT(dt->timer_id));
+	pete_writel("drivers/clocksource/timer-digicolor.c:88", count, dt->base + COUNT(dt->timer_id));
 }
 
 static int digicolor_clkevt_shutdown(struct clock_event_device *ce)
@@ -146,7 +146,7 @@ static irqreturn_t digicolor_timer_interrupt(int irq, void *dev_id)
 
 static u64 notrace digicolor_timer_sched_read(void)
 {
-	return ~readl(dc_timer_dev.base + COUNT(TIMER_B));
+	return ~pete_readl("drivers/clocksource/timer-digicolor.c:149", dc_timer_dev.base + COUNT(TIMER_B));
 }
 
 static int __init digicolor_timer_init(struct device_node *node)
@@ -180,9 +180,9 @@ static int __init digicolor_timer_init(struct device_node *node)
 	rate = clk_get_rate(clk);
 	dc_timer_dev.ticks_per_jiffy = DIV_ROUND_UP(rate, HZ);
 
-	writeb(CONTROL_DISABLE, dc_timer_dev.base + CONTROL(TIMER_B));
-	writel(UINT_MAX, dc_timer_dev.base + COUNT(TIMER_B));
-	writeb(CONTROL_ENABLE, dc_timer_dev.base + CONTROL(TIMER_B));
+	pete_writeb("drivers/clocksource/timer-digicolor.c:183", CONTROL_DISABLE, dc_timer_dev.base + CONTROL(TIMER_B));
+	pete_writel("drivers/clocksource/timer-digicolor.c:184", UINT_MAX, dc_timer_dev.base + COUNT(TIMER_B));
+	pete_writeb("drivers/clocksource/timer-digicolor.c:185", CONTROL_ENABLE, dc_timer_dev.base + CONTROL(TIMER_B));
 
 	sched_clock_register(digicolor_timer_sched_read, 32, rate);
 	clocksource_mmio_init(dc_timer_dev.base + COUNT(TIMER_B), node->name,

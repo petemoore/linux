@@ -232,12 +232,12 @@ static struct sahara_dev *dev_ptr;
 
 static inline void sahara_write(struct sahara_dev *dev, u32 data, u32 reg)
 {
-	writel(data, dev->regs_base + reg);
+	pete_writel("drivers/crypto/sahara.c:235", data, dev->regs_base + reg);
 }
 
 static inline unsigned int sahara_read(struct sahara_dev *dev, u32 reg)
 {
-	return readl(dev->regs_base + reg);
+	return pete_readl("drivers/crypto/sahara.c:240", dev->regs_base + reg);
 }
 
 static u32 sahara_aes_key_hdr(struct sahara_dev *dev)

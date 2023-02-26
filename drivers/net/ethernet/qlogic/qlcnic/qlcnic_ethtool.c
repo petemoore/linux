@@ -563,10 +563,10 @@ qlcnic_get_regs(struct net_device *dev, struct ethtool_regs *regs, void *p)
 		tx_ring = &adapter->tx_ring[ring];
 		regs_buff[i++] = le32_to_cpu(*(tx_ring->hw_consumer));
 		regs_buff[i++] = tx_ring->sw_consumer;
-		regs_buff[i++] = readl(tx_ring->crb_cmd_producer);
+		regs_buff[i++] = pete_readl("drivers/net/ethernet/qlogic/qlcnic/qlcnic_ethtool.c:566", tx_ring->crb_cmd_producer);
 		regs_buff[i++] = tx_ring->producer;
 		if (tx_ring->crb_intr_mask)
-			regs_buff[i++] = readl(tx_ring->crb_intr_mask);
+			regs_buff[i++] = pete_readl("drivers/net/ethernet/qlogic/qlcnic/qlcnic_ethtool.c:569", tx_ring->crb_intr_mask);
 		else
 			regs_buff[i++] = QLCNIC_TX_INTR_NOT_CONFIGURED;
 	}
@@ -574,16 +574,16 @@ qlcnic_get_regs(struct net_device *dev, struct ethtool_regs *regs, void *p)
 	regs_buff[i++] = adapter->max_rds_rings; /* No. of RX ring */
 	for (ring = 0; ring < adapter->max_rds_rings; ring++) {
 		rds_rings = &recv_ctx->rds_rings[ring];
-		regs_buff[i++] = readl(rds_rings->crb_rcv_producer);
+		regs_buff[i++] = pete_readl("drivers/net/ethernet/qlogic/qlcnic/qlcnic_ethtool.c:577", rds_rings->crb_rcv_producer);
 		regs_buff[i++] = rds_rings->producer;
 	}
 
 	regs_buff[i++] = adapter->drv_sds_rings; /* No. of SDS ring */
 	for (ring = 0; ring < adapter->drv_sds_rings; ring++) {
 		sds_ring = &(recv_ctx->sds_rings[ring]);
-		regs_buff[i++] = readl(sds_ring->crb_sts_consumer);
+		regs_buff[i++] = pete_readl("drivers/net/ethernet/qlogic/qlcnic/qlcnic_ethtool.c:584", sds_ring->crb_sts_consumer);
 		regs_buff[i++] = sds_ring->consumer;
-		regs_buff[i++] = readl(sds_ring->crb_intr_mask);
+		regs_buff[i++] = pete_readl("drivers/net/ethernet/qlogic/qlcnic/qlcnic_ethtool.c:586", sds_ring->crb_intr_mask);
 	}
 }
 

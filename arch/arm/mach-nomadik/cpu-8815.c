@@ -91,7 +91,7 @@ static void cpu8815_restart(enum reboot_mode mode, const char *cmd)
 	/* FIXME: use egpio when implemented */
 
 	/* Write anything to Reset status register */
-	writel(1, srcbase + 0x18);
+	pete_writel("arch/arm/mach-nomadik/cpu-8815.c:94", 1, srcbase + 0x18);
 }
 
 static const char * cpu8815_board_compat[] = {

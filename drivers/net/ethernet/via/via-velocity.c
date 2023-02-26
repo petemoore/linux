@@ -90,7 +90,7 @@ static void velocity_set_power_state(struct velocity_info *vptr, char state)
 	if (vptr->pdev)
 		pci_set_power_state(vptr->pdev, state);
 	else
-		writeb(state, addr + 0x154);
+		pete_writeb("drivers/net/ethernet/via/via-velocity.c:93", state, addr + 0x154);
 }
 
 /**
@@ -108,14 +108,14 @@ static void mac_get_cam_mask(struct mac_regs __iomem *regs, u8 *mask)
 	/* Select CAM mask */
 	BYTE_REG_BITS_SET(CAMCR_PS_CAM_MASK, CAMCR_PS1 | CAMCR_PS0, &regs->CAMCR);
 
-	writeb(0, &regs->CAMADDR);
+	pete_writeb("drivers/net/ethernet/via/via-velocity.c:111", 0, &regs->CAMADDR);
 
 	/* read mask */
 	for (i = 0; i < 8; i++)
-		*mask++ = readb(&(regs->MARCAM[i]));
+		*mask++ = pete_readb("drivers/net/ethernet/via/via-velocity.c:115", &(regs->MARCAM[i]));
 
 	/* disable CAMEN */
-	writeb(0, &regs->CAMADDR);
+	pete_writeb("drivers/net/ethernet/via/via-velocity.c:118", 0, &regs->CAMADDR);
 
 	/* Select mar */
 	BYTE_REG_BITS_SET(CAMCR_PS_MAR, CAMCR_PS1 | CAMCR_PS0, &regs->CAMCR);
@@ -134,13 +134,13 @@ static void mac_set_cam_mask(struct mac_regs __iomem *regs, u8 *mask)
 	/* Select CAM mask */
 	BYTE_REG_BITS_SET(CAMCR_PS_CAM_MASK, CAMCR_PS1 | CAMCR_PS0, &regs->CAMCR);
 
-	writeb(CAMADDR_CAMEN, &regs->CAMADDR);
+	pete_writeb("drivers/net/ethernet/via/via-velocity.c:137", CAMADDR_CAMEN, &regs->CAMADDR);
 
 	for (i = 0; i < 8; i++)
-		writeb(*mask++, &(regs->MARCAM[i]));
+		pete_writeb("drivers/net/ethernet/via/via-velocity.c:140", *mask++, &(regs->MARCAM[i]));
 
 	/* disable CAMEN */
-	writeb(0, &regs->CAMADDR);
+	pete_writeb("drivers/net/ethernet/via/via-velocity.c:143", 0, &regs->CAMADDR);
 
 	/* Select mar */
 	BYTE_REG_BITS_SET(CAMCR_PS_MAR, CAMCR_PS1 | CAMCR_PS0, &regs->CAMCR);
@@ -152,13 +152,13 @@ static void mac_set_vlan_cam_mask(struct mac_regs __iomem *regs, u8 *mask)
 	/* Select CAM mask */
 	BYTE_REG_BITS_SET(CAMCR_PS_CAM_MASK, CAMCR_PS1 | CAMCR_PS0, &regs->CAMCR);
 
-	writeb(CAMADDR_CAMEN | CAMADDR_VCAMSL, &regs->CAMADDR);
+	pete_writeb("drivers/net/ethernet/via/via-velocity.c:155", CAMADDR_CAMEN | CAMADDR_VCAMSL, &regs->CAMADDR);
 
 	for (i = 0; i < 8; i++)
-		writeb(*mask++, &(regs->MARCAM[i]));
+		pete_writeb("drivers/net/ethernet/via/via-velocity.c:158", *mask++, &(regs->MARCAM[i]));
 
 	/* disable CAMEN */
-	writeb(0, &regs->CAMADDR);
+	pete_writeb("drivers/net/ethernet/via/via-velocity.c:161", 0, &regs->CAMADDR);
 
 	/* Select mar */
 	BYTE_REG_BITS_SET(CAMCR_PS_MAR, CAMCR_PS1 | CAMCR_PS0, &regs->CAMCR);
@@ -181,16 +181,16 @@ static void mac_set_cam(struct mac_regs __iomem *regs, int idx, const u8 *addr)
 
 	idx &= (64 - 1);
 
-	writeb(CAMADDR_CAMEN | idx, &regs->CAMADDR);
+	pete_writeb("drivers/net/ethernet/via/via-velocity.c:184", CAMADDR_CAMEN | idx, &regs->CAMADDR);
 
 	for (i = 0; i < 6; i++)
-		writeb(*addr++, &(regs->MARCAM[i]));
+		pete_writeb("drivers/net/ethernet/via/via-velocity.c:187", *addr++, &(regs->MARCAM[i]));
 
 	BYTE_REG_BITS_ON(CAMCR_CAMWR, &regs->CAMCR);
 
 	udelay(10);
 
-	writeb(0, &regs->CAMADDR);
+	pete_writeb("drivers/net/ethernet/via/via-velocity.c:193", 0, &regs->CAMADDR);
 
 	/* Select mar */
 	BYTE_REG_BITS_SET(CAMCR_PS_MAR, CAMCR_PS1 | CAMCR_PS0, &regs->CAMCR);
@@ -205,14 +205,14 @@ static void mac_set_vlan_cam(struct mac_regs __iomem *regs, int idx,
 
 	idx &= (64 - 1);
 
-	writeb(CAMADDR_CAMEN | CAMADDR_VCAMSL | idx, &regs->CAMADDR);
-	writew(*((u16 *) addr), &regs->MARCAM[0]);
+	pete_writeb("drivers/net/ethernet/via/via-velocity.c:208", CAMADDR_CAMEN | CAMADDR_VCAMSL | idx, &regs->CAMADDR);
+	pete_writew("drivers/net/ethernet/via/via-velocity.c:209", *((u16 *) addr), &regs->MARCAM[0]);
 
 	BYTE_REG_BITS_ON(CAMCR_CAMWR, &regs->CAMCR);
 
 	udelay(10);
 
-	writeb(0, &regs->CAMADDR);
+	pete_writeb("drivers/net/ethernet/via/via-velocity.c:215", 0, &regs->CAMADDR);
 
 	/* Select mar */
 	BYTE_REG_BITS_SET(CAMCR_PS_MAR, CAMCR_PS1 | CAMCR_PS0, &regs->CAMCR);
@@ -238,11 +238,11 @@ static void mac_wol_reset(struct mac_regs __iomem *regs)
 	BYTE_REG_BITS_OFF(CHIPGCR_FCGMII, &regs->CHIPGCR);
 	BYTE_REG_BITS_OFF(CHIPGCR_FCMODE, &regs->CHIPGCR);
 	/* disable force PME-enable */
-	writeb(WOLCFG_PMEOVR, &regs->WOLCFGClr);
+	pete_writeb("drivers/net/ethernet/via/via-velocity.c:241", WOLCFG_PMEOVR, &regs->WOLCFGClr);
 	/* disable power-event config bit */
-	writew(0xFFFF, &regs->WOLCRClr);
+	pete_writew("drivers/net/ethernet/via/via-velocity.c:243", 0xFFFF, &regs->WOLCRClr);
 	/* clear power status */
-	writew(0xFFFF, &regs->WOLSRClr);
+	pete_writew("drivers/net/ethernet/via/via-velocity.c:245", 0xFFFF, &regs->WOLSRClr);
 }
 
 static const struct ethtool_ops velocity_ethtool_ops;
@@ -576,10 +576,10 @@ static void velocity_rx_reset(struct velocity_info *vptr)
 	for (i = 0; i < vptr->options.numrx; ++i)
 		vptr->rx.ring[i].rdesc0.len |= OWNED_BY_NIC;
 
-	writew(vptr->options.numrx, &regs->RBRDU);
-	writel(vptr->rx.pool_dma, &regs->RDBaseLo);
-	writew(0, &regs->RDIdx);
-	writew(vptr->options.numrx - 1, &regs->RDCSize);
+	pete_writew("drivers/net/ethernet/via/via-velocity.c:579", vptr->options.numrx, &regs->RBRDU);
+	pete_writel("drivers/net/ethernet/via/via-velocity.c:580", vptr->rx.pool_dma, &regs->RDBaseLo);
+	pete_writew("drivers/net/ethernet/via/via-velocity.c:581", 0, &regs->RDIdx);
+	pete_writew("drivers/net/ethernet/via/via-velocity.c:582", vptr->options.numrx - 1, &regs->RDCSize);
 }
 
 /**
@@ -629,7 +629,7 @@ static void safe_disable_mii_autopoll(struct mac_regs __iomem *regs)
 	u16 ww;
 
 	/*  turn off MAUTO */
-	writeb(0, &regs->MIICR);
+	pete_writeb("drivers/net/ethernet/via/via-velocity.c:632", 0, &regs->MIICR);
 	for (ww = 0; ww < W_MAX_TIMEOUT; ww++) {
 		udelay(1);
 		if (BYTE_REG_BITS_IS_ON(MIISR_MIDLE, &regs->MIISR))
@@ -648,8 +648,8 @@ static void enable_mii_autopoll(struct mac_regs __iomem *regs)
 {
 	int ii;
 
-	writeb(0, &(regs->MIICR));
-	writeb(MIIADR_SWMPL, &regs->MIIADR);
+	pete_writeb("drivers/net/ethernet/via/via-velocity.c:651", 0, &(regs->MIICR));
+	pete_writeb("drivers/net/ethernet/via/via-velocity.c:652", MIIADR_SWMPL, &regs->MIIADR);
 
 	for (ii = 0; ii < W_MAX_TIMEOUT; ii++) {
 		udelay(1);
@@ -657,7 +657,7 @@ static void enable_mii_autopoll(struct mac_regs __iomem *regs)
 			break;
 	}
 
-	writeb(MIICR_MAUTO, &regs->MIICR);
+	pete_writeb("drivers/net/ethernet/via/via-velocity.c:660", MIICR_MAUTO, &regs->MIICR);
 
 	for (ii = 0; ii < W_MAX_TIMEOUT; ii++) {
 		udelay(1);
@@ -685,16 +685,16 @@ static int velocity_mii_read(struct mac_regs __iomem *regs, u8 index, u16 *data)
 	 */
 	safe_disable_mii_autopoll(regs);
 
-	writeb(index, &regs->MIIADR);
+	pete_writeb("drivers/net/ethernet/via/via-velocity.c:688", index, &regs->MIIADR);
 
 	BYTE_REG_BITS_ON(MIICR_RCMD, &regs->MIICR);
 
 	for (ww = 0; ww < W_MAX_TIMEOUT; ww++) {
-		if (!(readb(&regs->MIICR) & MIICR_RCMD))
+		if (!(pete_readb("drivers/net/ethernet/via/via-velocity.c:693", &regs->MIICR) & MIICR_RCMD))
 			break;
 	}
 
-	*data = readw(&regs->MIIDATA);
+	*data = pete_readw("drivers/net/ethernet/via/via-velocity.c:697", &regs->MIIDATA);
 
 	enable_mii_autopoll(regs);
 	if (ww == W_MAX_TIMEOUT)
@@ -764,9 +764,9 @@ static int velocity_mii_write(struct mac_regs __iomem *regs, u8 mii_addr, u16 da
 	safe_disable_mii_autopoll(regs);
 
 	/* MII reg offset */
-	writeb(mii_addr, &regs->MIIADR);
+	pete_writeb("drivers/net/ethernet/via/via-velocity.c:767", mii_addr, &regs->MIIADR);
 	/* set MII data */
-	writew(data, &regs->MIIDATA);
+	pete_writew("drivers/net/ethernet/via/via-velocity.c:769", data, &regs->MIIDATA);
 
 	/* turn on MIICR_WCMD */
 	BYTE_REG_BITS_ON(MIICR_WCMD, &regs->MIICR);
@@ -774,7 +774,7 @@ static int velocity_mii_write(struct mac_regs __iomem *regs, u8 mii_addr, u16 da
 	/* W_MAX_TIMEOUT is the timeout period */
 	for (ww = 0; ww < W_MAX_TIMEOUT; ww++) {
 		udelay(5);
-		if (!(readb(&regs->MIICR) & MIICR_WCMD))
+		if (!(pete_readb("drivers/net/ethernet/via/via-velocity.c:777", &regs->MIICR) & MIICR_WCMD))
 			break;
 	}
 	enable_mii_autopoll(regs);
@@ -838,7 +838,7 @@ static u32 check_connection_type(struct mac_regs __iomem *regs)
 	u32 status = 0;
 	u8 PHYSR0;
 	u16 ANAR;
-	PHYSR0 = readb(&regs->PHYSR0);
+	PHYSR0 = pete_readb("drivers/net/ethernet/via/via-velocity.c:841", &regs->PHYSR0);
 
 	/*
 	   if (!(PHYSR0 & PHYSR0_LINKGD))
@@ -917,7 +917,7 @@ static int velocity_set_media_mode(struct velocity_info *vptr, u32 mii_status)
 		/* set force MAC mode bit */
 		BYTE_REG_BITS_ON(CHIPGCR_FCMODE, &regs->CHIPGCR);
 
-		CHIPGCR = readb(&regs->CHIPGCR);
+		CHIPGCR = pete_readb("drivers/net/ethernet/via/via-velocity.c:920", &regs->CHIPGCR);
 
 		if (mii_status & VELOCITY_SPEED_1000)
 			CHIPGCR |= CHIPGCR_FCGMII;
@@ -926,7 +926,7 @@ static int velocity_set_media_mode(struct velocity_info *vptr, u32 mii_status)
 
 		if (mii_status & VELOCITY_DUPLEX_FULL) {
 			CHIPGCR |= CHIPGCR_FCFDX;
-			writeb(CHIPGCR, &regs->CHIPGCR);
+			pete_writeb("drivers/net/ethernet/via/via-velocity.c:929", CHIPGCR, &regs->CHIPGCR);
 			netdev_info(vptr->netdev,
 				    "set Velocity to forced full mode\n");
 			if (vptr->rev_id < REV_ID_VT3216_A0)
@@ -935,7 +935,7 @@ static int velocity_set_media_mode(struct velocity_info *vptr, u32 mii_status)
 			CHIPGCR &= ~CHIPGCR_FCFDX;
 			netdev_info(vptr->netdev,
 				    "set Velocity to forced half mode\n");
-			writeb(CHIPGCR, &regs->CHIPGCR);
+			pete_writeb("drivers/net/ethernet/via/via-velocity.c:938", CHIPGCR, &regs->CHIPGCR);
 			if (vptr->rev_id < REV_ID_VT3216_A0)
 				BYTE_REG_BITS_ON(TCR_TB2BDIS, &regs->TCR);
 		}
@@ -1060,34 +1060,34 @@ static void enable_flow_control_ability(struct velocity_info *vptr)
 
 	case FLOW_CNTL_DEFAULT:
 		if (BYTE_REG_BITS_IS_ON(PHYSR0_RXFLC, &regs->PHYSR0))
-			writel(CR0_FDXRFCEN, &regs->CR0Set);
+			pete_writel("drivers/net/ethernet/via/via-velocity.c:1063", CR0_FDXRFCEN, &regs->CR0Set);
 		else
-			writel(CR0_FDXRFCEN, &regs->CR0Clr);
+			pete_writel("drivers/net/ethernet/via/via-velocity.c:1065", CR0_FDXRFCEN, &regs->CR0Clr);
 
 		if (BYTE_REG_BITS_IS_ON(PHYSR0_TXFLC, &regs->PHYSR0))
-			writel(CR0_FDXTFCEN, &regs->CR0Set);
+			pete_writel("drivers/net/ethernet/via/via-velocity.c:1068", CR0_FDXTFCEN, &regs->CR0Set);
 		else
-			writel(CR0_FDXTFCEN, &regs->CR0Clr);
+			pete_writel("drivers/net/ethernet/via/via-velocity.c:1070", CR0_FDXTFCEN, &regs->CR0Clr);
 		break;
 
 	case FLOW_CNTL_TX:
-		writel(CR0_FDXTFCEN, &regs->CR0Set);
-		writel(CR0_FDXRFCEN, &regs->CR0Clr);
+		pete_writel("drivers/net/ethernet/via/via-velocity.c:1074", CR0_FDXTFCEN, &regs->CR0Set);
+		pete_writel("drivers/net/ethernet/via/via-velocity.c:1075", CR0_FDXRFCEN, &regs->CR0Clr);
 		break;
 
 	case FLOW_CNTL_RX:
-		writel(CR0_FDXRFCEN, &regs->CR0Set);
-		writel(CR0_FDXTFCEN, &regs->CR0Clr);
+		pete_writel("drivers/net/ethernet/via/via-velocity.c:1079", CR0_FDXRFCEN, &regs->CR0Set);
+		pete_writel("drivers/net/ethernet/via/via-velocity.c:1080", CR0_FDXTFCEN, &regs->CR0Clr);
 		break;
 
 	case FLOW_CNTL_TX_RX:
-		writel(CR0_FDXTFCEN, &regs->CR0Set);
-		writel(CR0_FDXRFCEN, &regs->CR0Set);
+		pete_writel("drivers/net/ethernet/via/via-velocity.c:1084", CR0_FDXTFCEN, &regs->CR0Set);
+		pete_writel("drivers/net/ethernet/via/via-velocity.c:1085", CR0_FDXRFCEN, &regs->CR0Set);
 		break;
 
 	case FLOW_CNTL_DISABLE:
-		writel(CR0_FDXRFCEN, &regs->CR0Clr);
-		writel(CR0_FDXTFCEN, &regs->CR0Clr);
+		pete_writel("drivers/net/ethernet/via/via-velocity.c:1089", CR0_FDXRFCEN, &regs->CR0Clr);
+		pete_writel("drivers/net/ethernet/via/via-velocity.c:1090", CR0_FDXTFCEN, &regs->CR0Clr);
 		break;
 
 	default:
@@ -1108,7 +1108,7 @@ static int velocity_soft_reset(struct velocity_info *vptr)
 	struct mac_regs __iomem *regs = vptr->mac_regs;
 	int i = 0;
 
-	writel(CR0_SFRST, &regs->CR0Set);
+	pete_writel("drivers/net/ethernet/via/via-velocity.c:1111", CR0_SFRST, &regs->CR0Set);
 
 	for (i = 0; i < W_MAX_TIMEOUT; i++) {
 		udelay(5);
@@ -1117,7 +1117,7 @@ static int velocity_soft_reset(struct velocity_info *vptr)
 	}
 
 	if (i == W_MAX_TIMEOUT) {
-		writel(CR0_FORSRST, &regs->CR0Set);
+		pete_writel("drivers/net/ethernet/via/via-velocity.c:1120", CR0_FORSRST, &regs->CR0Set);
 		/* FIXME: PCI POSTING */
 		/* delay 2ms */
 		mdelay(2);
@@ -1142,13 +1142,13 @@ static void velocity_set_multi(struct net_device *dev)
 	struct netdev_hw_addr *ha;
 
 	if (dev->flags & IFF_PROMISC) {	/* Set promiscuous. */
-		writel(0xffffffff, &regs->MARCAM[0]);
-		writel(0xffffffff, &regs->MARCAM[4]);
+		pete_writel("drivers/net/ethernet/via/via-velocity.c:1145", 0xffffffff, &regs->MARCAM[0]);
+		pete_writel("drivers/net/ethernet/via/via-velocity.c:1146", 0xffffffff, &regs->MARCAM[4]);
 		rx_mode = (RCR_AM | RCR_AB | RCR_PROM);
 	} else if ((netdev_mc_count(dev) > vptr->multicast_limit) ||
 		   (dev->flags & IFF_ALLMULTI)) {
-		writel(0xffffffff, &regs->MARCAM[0]);
-		writel(0xffffffff, &regs->MARCAM[4]);
+		pete_writel("drivers/net/ethernet/via/via-velocity.c:1150", 0xffffffff, &regs->MARCAM[0]);
+		pete_writel("drivers/net/ethernet/via/via-velocity.c:1151", 0xffffffff, &regs->MARCAM[4]);
 		rx_mode = (RCR_AM | RCR_AB);
 	} else {
 		int offset = MCAM_SIZE - vptr->multicast_limit;
@@ -1275,8 +1275,8 @@ static void setup_queue_timers(struct velocity_info *vptr)
 			rxqueue_timer = vptr->options.rxqueue_timer;
 		}
 
-		writeb(txqueue_timer, &vptr->mac_regs->TQETMR);
-		writeb(rxqueue_timer, &vptr->mac_regs->RQETMR);
+		pete_writeb("drivers/net/ethernet/via/via-velocity.c:1278", txqueue_timer, &vptr->mac_regs->TQETMR);
+		pete_writeb("drivers/net/ethernet/via/via-velocity.c:1279", rxqueue_timer, &vptr->mac_regs->RQETMR);
 	}
 }
 
@@ -1297,24 +1297,24 @@ static void setup_adaptive_interrupts(struct velocity_info *vptr)
 	vptr->int_mask = INT_MASK_DEF;
 
 	/* Set Tx Interrupt Suppression Threshold */
-	writeb(CAMCR_PS0, &regs->CAMCR);
+	pete_writeb("drivers/net/ethernet/via/via-velocity.c:1300", CAMCR_PS0, &regs->CAMCR);
 	if (tx_intsup != 0) {
 		vptr->int_mask &= ~(ISR_PTXI | ISR_PTX0I | ISR_PTX1I |
 				ISR_PTX2I | ISR_PTX3I);
-		writew(tx_intsup, &regs->ISRCTL);
+		pete_writew("drivers/net/ethernet/via/via-velocity.c:1304", tx_intsup, &regs->ISRCTL);
 	} else
-		writew(ISRCTL_TSUPDIS, &regs->ISRCTL);
+		pete_writew("drivers/net/ethernet/via/via-velocity.c:1306", ISRCTL_TSUPDIS, &regs->ISRCTL);
 
 	/* Set Rx Interrupt Suppression Threshold */
-	writeb(CAMCR_PS1, &regs->CAMCR);
+	pete_writeb("drivers/net/ethernet/via/via-velocity.c:1309", CAMCR_PS1, &regs->CAMCR);
 	if (rx_intsup != 0) {
 		vptr->int_mask &= ~ISR_PRXI;
-		writew(rx_intsup, &regs->ISRCTL);
+		pete_writew("drivers/net/ethernet/via/via-velocity.c:1312", rx_intsup, &regs->ISRCTL);
 	} else
-		writew(ISRCTL_RSUPDIS, &regs->ISRCTL);
+		pete_writew("drivers/net/ethernet/via/via-velocity.c:1314", ISRCTL_RSUPDIS, &regs->ISRCTL);
 
 	/* Select page to interrupt hold timer */
-	writeb(0, &regs->CAMCR);
+	pete_writeb("drivers/net/ethernet/via/via-velocity.c:1317", 0, &regs->CAMCR);
 }
 
 /**
@@ -1357,8 +1357,8 @@ static void velocity_init_registers(struct velocity_info *vptr,
 		enable_flow_control_ability(vptr);
 
 		mac_clear_isr(regs);
-		writel(CR0_STOP, &regs->CR0Clr);
-		writel((CR0_DPOLL | CR0_TXON | CR0_RXON | CR0_STRT),
+		pete_writel("drivers/net/ethernet/via/via-velocity.c:1360", CR0_STOP, &regs->CR0Clr);
+		pete_writel("drivers/net/ethernet/via/via-velocity.c:1361", (CR0_DPOLL | CR0_TXON | CR0_RXON | CR0_STRT),
 							&regs->CR0Set);
 
 		break;
@@ -1374,7 +1374,7 @@ static void velocity_init_registers(struct velocity_info *vptr,
 		if (!vptr->no_eeprom) {
 			mac_eeprom_reload(regs);
 			for (i = 0; i < 6; i++)
-				writeb(netdev->dev_addr[i], regs->PAR + i);
+				pete_writeb("drivers/net/ethernet/via/via-velocity.c:1377", netdev->dev_addr[i], regs->PAR + i);
 		}
 
 		/*
@@ -1384,7 +1384,7 @@ static void velocity_init_registers(struct velocity_info *vptr,
 		mac_set_rx_thresh(regs, vptr->options.rx_thresh);
 		mac_set_dma_length(regs, vptr->options.DMA_length);
 
-		writeb(WOLCFG_SAM | WOLCFG_SAB, &regs->WOLCFGSet);
+		pete_writeb("drivers/net/ethernet/via/via-velocity.c:1387", WOLCFG_SAM | WOLCFG_SAB, &regs->WOLCFGSet);
 		/*
 		 *	Back off algorithm use original IEEE standard
 		 */
@@ -1407,22 +1407,22 @@ static void velocity_init_registers(struct velocity_info *vptr,
 
 		setup_adaptive_interrupts(vptr);
 
-		writel(vptr->rx.pool_dma, &regs->RDBaseLo);
-		writew(vptr->options.numrx - 1, &regs->RDCSize);
+		pete_writel("drivers/net/ethernet/via/via-velocity.c:1410", vptr->rx.pool_dma, &regs->RDBaseLo);
+		pete_writew("drivers/net/ethernet/via/via-velocity.c:1411", vptr->options.numrx - 1, &regs->RDCSize);
 		mac_rx_queue_run(regs);
 		mac_rx_queue_wake(regs);
 
-		writew(vptr->options.numtx - 1, &regs->TDCSize);
+		pete_writew("drivers/net/ethernet/via/via-velocity.c:1415", vptr->options.numtx - 1, &regs->TDCSize);
 
 		for (i = 0; i < vptr->tx.numq; i++) {
-			writel(vptr->tx.pool_dma[i], &regs->TDBaseLo[i]);
+			pete_writel("drivers/net/ethernet/via/via-velocity.c:1418", vptr->tx.pool_dma[i], &regs->TDBaseLo[i]);
 			mac_tx_queue_run(regs, i);
 		}
 
 		init_flow_control_register(vptr);
 
-		writel(CR0_STOP, &regs->CR0Clr);
-		writel((CR0_DPOLL | CR0_TXON | CR0_RXON | CR0_STRT), &regs->CR0Set);
+		pete_writel("drivers/net/ethernet/via/via-velocity.c:1424", CR0_STOP, &regs->CR0Clr);
+		pete_writel("drivers/net/ethernet/via/via-velocity.c:1425", (CR0_DPOLL | CR0_TXON | CR0_RXON | CR0_STRT), &regs->CR0Set);
 
 		mii_status = velocity_get_opt_media_mode(vptr);
 		netif_stop_queue(netdev);
@@ -1464,7 +1464,7 @@ static void velocity_give_many_rx_descs(struct velocity_info *vptr)
 		vptr->rx.ring[dirty].rdesc0.len |= OWNED_BY_NIC;
 	}
 
-	writew(vptr->rx.filled & 0xfffc, &regs->RBRDU);
+	pete_writew("drivers/net/ethernet/via/via-velocity.c:1467", vptr->rx.filled & 0xfffc, &regs->RBRDU);
 	vptr->rx.filled = unusable;
 }
 
@@ -1824,9 +1824,9 @@ static void velocity_error(struct velocity_info *vptr, int status)
 		struct mac_regs __iomem *regs = vptr->mac_regs;
 
 		netdev_err(vptr->netdev, "TD structure error TDindex=%hx\n",
-			   readw(&regs->TDIdx[0]));
+			   pete_readw("drivers/net/ethernet/via/via-velocity.c:1827", &regs->TDIdx[0]));
 		BYTE_REG_BITS_ON(TXESR_TDSTR, &regs->TXESR);
-		writew(TRDCSR_RUN, &regs->TDCSRClr);
+		pete_writew("drivers/net/ethernet/via/via-velocity.c:1829", TRDCSR_RUN, &regs->TDCSRClr);
 		netif_stop_queue(vptr->netdev);
 
 		/* FIXME: port over the pci_device_failed code and use it
@@ -1864,7 +1864,7 @@ static void velocity_error(struct velocity_info *vptr, int status)
 		/*
 		 *	Get link status from PHYSR0
 		 */
-		linked = readb(&regs->PHYSR0) & PHYSR0_LINKGD;
+		linked = pete_readb("drivers/net/ethernet/via/via-velocity.c:1867", &regs->PHYSR0) & PHYSR0_LINKGD;
 
 		if (linked) {
 			vptr->mii_status &= ~VELOCITY_LINK_FAIL;
@@ -2272,9 +2272,9 @@ static void velocity_shutdown(struct velocity_info *vptr)
 {
 	struct mac_regs __iomem *regs = vptr->mac_regs;
 	mac_disable_int(regs);
-	writel(CR0_STOP, &regs->CR0Set);
-	writew(0xFFFF, &regs->TDCSRClr);
-	writeb(0xFF, &regs->RDCSRClr);
+	pete_writel("drivers/net/ethernet/via/via-velocity.c:2275", CR0_STOP, &regs->CR0Set);
+	pete_writew("drivers/net/ethernet/via/via-velocity.c:2276", 0xFFFF, &regs->TDCSRClr);
+	pete_writeb("drivers/net/ethernet/via/via-velocity.c:2277", 0xFF, &regs->RDCSRClr);
 	safe_disable_mii_autopoll(regs);
 	mac_clear_isr(regs);
 }
@@ -2395,7 +2395,7 @@ static int velocity_mii_ioctl(struct net_device *dev, struct ifreq *ifr, int cmd
 
 	switch (cmd) {
 	case SIOCGMIIPHY:
-		miidata->phy_id = readb(&regs->MIIADR) & 0x1f;
+		miidata->phy_id = pete_readb("drivers/net/ethernet/via/via-velocity.c:2398", &regs->MIIADR) & 0x1f;
 		break;
 	case SIOCGMIIREG:
 		if (velocity_mii_read(vptr->mac_regs, miidata->reg_num & 0x1f, &(miidata->val_out)) < 0)
@@ -2815,12 +2815,12 @@ static int velocity_probe(struct device *dev, int irq,
 	}
 
 	vptr->mac_regs = regs;
-	vptr->rev_id = readb(&regs->rev_id);
+	vptr->rev_id = pete_readb("drivers/net/ethernet/via/via-velocity.c:2818", &regs->rev_id);
 
 	mac_wol_reset(regs);
 
 	for (i = 0; i < 6; i++)
-		netdev->dev_addr[i] = readb(&regs->PAR[i]);
+		netdev->dev_addr[i] = pete_readb("drivers/net/ethernet/via/via-velocity.c:2823", &regs->PAR[i]);
 
 
 	velocity_get_options(&vptr->options, velocity_nics);
@@ -3022,17 +3022,17 @@ static int velocity_set_wol(struct velocity_info *vptr)
 		{0xfffff000, 0xffffffff, 0xffffffff, 0x000ffff}	 /* Magic Packet */
 	};
 
-	writew(0xFFFF, &regs->WOLCRClr);
-	writeb(WOLCFG_SAB | WOLCFG_SAM, &regs->WOLCFGSet);
-	writew(WOLCR_MAGIC_EN, &regs->WOLCRSet);
+	pete_writew("drivers/net/ethernet/via/via-velocity.c:3025", 0xFFFF, &regs->WOLCRClr);
+	pete_writeb("drivers/net/ethernet/via/via-velocity.c:3026", WOLCFG_SAB | WOLCFG_SAM, &regs->WOLCFGSet);
+	pete_writew("drivers/net/ethernet/via/via-velocity.c:3027", WOLCR_MAGIC_EN, &regs->WOLCRSet);
 
 	/*
 	   if (vptr->wol_opts & VELOCITY_WOL_PHY)
-	   writew((WOLCR_LINKON_EN|WOLCR_LINKOFF_EN), &regs->WOLCRSet);
+	   pete_writew("drivers/net/ethernet/via/via-velocity.c:3031", (WOLCR_LINKON_EN|WOLCR_LINKOFF_EN), &regs->WOLCRSet);
 	 */
 
 	if (vptr->wol_opts & VELOCITY_WOL_UCAST)
-		writew(WOLCR_UNICAST_EN, &regs->WOLCRSet);
+		pete_writew("drivers/net/ethernet/via/via-velocity.c:3035", WOLCR_UNICAST_EN, &regs->WOLCRSet);
 
 	if (vptr->wol_opts & VELOCITY_WOL_ARP) {
 		struct arp_packet *arp = (struct arp_packet *) buf;
@@ -3040,7 +3040,7 @@ static int velocity_set_wol(struct velocity_info *vptr)
 		memset(buf, 0, sizeof(struct arp_packet) + 7);
 
 		for (i = 0; i < 4; i++)
-			writel(mask_pattern[0][i], &regs->ByteMask[0][i]);
+			pete_writel("drivers/net/ethernet/via/via-velocity.c:3043", mask_pattern[0][i], &regs->ByteMask[0][i]);
 
 		arp->type = htons(ETH_P_ARP);
 		arp->ar_op = htons(1);
@@ -3050,14 +3050,14 @@ static int velocity_set_wol(struct velocity_info *vptr)
 		crc = wol_calc_crc((sizeof(struct arp_packet) + 7) / 8, buf,
 				(u8 *) & mask_pattern[0][0]);
 
-		writew(crc, &regs->PatternCRC[0]);
-		writew(WOLCR_ARP_EN, &regs->WOLCRSet);
+		pete_writew("drivers/net/ethernet/via/via-velocity.c:3053", crc, &regs->PatternCRC[0]);
+		pete_writew("drivers/net/ethernet/via/via-velocity.c:3054", WOLCR_ARP_EN, &regs->WOLCRSet);
 	}
 
 	BYTE_REG_BITS_ON(PWCFG_WOLTYPE, &regs->PWCFGSet);
 	BYTE_REG_BITS_ON(PWCFG_LEGACY_WOLEN, &regs->PWCFGSet);
 
-	writew(0x0FFF, &regs->WOLSRClr);
+	pete_writew("drivers/net/ethernet/via/via-velocity.c:3060", 0x0FFF, &regs->WOLSRClr);
 
 	if (spd_dpx == SPD_DPX_1000_FULL)
 		goto mac_done;
@@ -3080,9 +3080,9 @@ advertise_done:
 
 	{
 		u8 GCR;
-		GCR = readb(&regs->CHIPGCR);
+		GCR = pete_readb("drivers/net/ethernet/via/via-velocity.c:3083", &regs->CHIPGCR);
 		GCR = (GCR & ~CHIPGCR_FCGMII) | CHIPGCR_FCFDX;
-		writeb(GCR, &regs->CHIPGCR);
+		pete_writeb("drivers/net/ethernet/via/via-velocity.c:3085", GCR, &regs->CHIPGCR);
 	}
 
 mac_done:
@@ -3112,13 +3112,13 @@ static void velocity_save_context(struct velocity_info *vptr, struct velocity_co
 	u8 __iomem *ptr = (u8 __iomem *)regs;
 
 	for (i = MAC_REG_PAR; i < MAC_REG_CR0_CLR; i += 4)
-		*((u32 *) (context->mac_reg + i)) = readl(ptr + i);
+		*((u32 *) (context->mac_reg + i)) = pete_readl("drivers/net/ethernet/via/via-velocity.c:3115", ptr + i);
 
 	for (i = MAC_REG_MAR; i < MAC_REG_TDCSR_CLR; i += 4)
-		*((u32 *) (context->mac_reg + i)) = readl(ptr + i);
+		*((u32 *) (context->mac_reg + i)) = pete_readl("drivers/net/ethernet/via/via-velocity.c:3118", ptr + i);
 
 	for (i = MAC_REG_RDBASE_LO; i < MAC_REG_FIFO_TEST0; i += 4)
-		*((u32 *) (context->mac_reg + i)) = readl(ptr + i);
+		*((u32 *) (context->mac_reg + i)) = pete_readl("drivers/net/ethernet/via/via-velocity.c:3121", ptr + i);
 
 }
 
@@ -3172,24 +3172,24 @@ static void velocity_restore_context(struct velocity_info *vptr, struct velocity
 	u8 __iomem *ptr = (u8 __iomem *)regs;
 
 	for (i = MAC_REG_PAR; i < MAC_REG_CR0_SET; i += 4)
-		writel(*((u32 *) (context->mac_reg + i)), ptr + i);
+		pete_writel("drivers/net/ethernet/via/via-velocity.c:3175", *((u32 *) (context->mac_reg + i)), ptr + i);
 
 	/* Just skip cr0 */
 	for (i = MAC_REG_CR1_SET; i < MAC_REG_CR0_CLR; i++) {
 		/* Clear */
-		writeb(~(*((u8 *) (context->mac_reg + i))), ptr + i + 4);
+		pete_writeb("drivers/net/ethernet/via/via-velocity.c:3180", ~(*((u8 *) (context->mac_reg + i))), ptr + i + 4);
 		/* Set */
-		writeb(*((u8 *) (context->mac_reg + i)), ptr + i);
+		pete_writeb("drivers/net/ethernet/via/via-velocity.c:3182", *((u8 *) (context->mac_reg + i)), ptr + i);
 	}
 
 	for (i = MAC_REG_MAR; i < MAC_REG_IMR; i += 4)
-		writel(*((u32 *) (context->mac_reg + i)), ptr + i);
+		pete_writel("drivers/net/ethernet/via/via-velocity.c:3186", *((u32 *) (context->mac_reg + i)), ptr + i);
 
 	for (i = MAC_REG_RDBASE_LO; i < MAC_REG_FIFO_TEST0; i += 4)
-		writel(*((u32 *) (context->mac_reg + i)), ptr + i);
+		pete_writel("drivers/net/ethernet/via/via-velocity.c:3189", *((u32 *) (context->mac_reg + i)), ptr + i);
 
 	for (i = MAC_REG_TDCSR_SET; i <= MAC_REG_RDCSR_SET; i++)
-		writeb(*((u8 *) (context->mac_reg + i)), ptr + i);
+		pete_writeb("drivers/net/ethernet/via/via-velocity.c:3192", *((u8 *) (context->mac_reg + i)), ptr + i);
 }
 
 static int velocity_resume(struct device *dev)
@@ -3352,7 +3352,7 @@ static int velocity_get_link_ksettings(struct net_device *dev,
 	cmd->base.autoneg = (status & VELOCITY_AUTONEG_ENABLE) ?
 		AUTONEG_ENABLE : AUTONEG_DISABLE;
 	cmd->base.port = PORT_TP;
-	cmd->base.phy_address = readb(&regs->MIIADR) & 0x1F;
+	cmd->base.phy_address = pete_readb("drivers/net/ethernet/via/via-velocity.c:3355", &regs->MIIADR) & 0x1F;
 
 	if (status & VELOCITY_DUPLEX_FULL)
 		cmd->base.duplex = DUPLEX_FULL;

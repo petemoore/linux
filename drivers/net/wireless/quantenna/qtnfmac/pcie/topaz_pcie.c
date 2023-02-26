@@ -105,7 +105,7 @@ static void qtnf_deassert_intx(struct qtnf_pcie_topaz_state *ts)
 	void __iomem *reg = ts->base.sysctl_bar + TOPAZ_PCIE_CFG0_OFFSET;
 	u32 cfg;
 
-	cfg = readl(reg);
+	cfg = pete_readl("drivers/net/wireless/quantenna/qtnfmac/pcie/topaz_pcie.c:108", reg);
 	cfg &= ~TOPAZ_ASSERT_INTX;
 	qtnf_non_posted_write(cfg, reg);
 }
@@ -113,14 +113,14 @@ static void qtnf_deassert_intx(struct qtnf_pcie_topaz_state *ts)
 static inline int qtnf_topaz_intx_asserted(struct qtnf_pcie_topaz_state *ts)
 {
 	void __iomem *reg = ts->base.sysctl_bar + TOPAZ_PCIE_CFG0_OFFSET;
-	u32 cfg = readl(reg);
+	u32 cfg = pete_readl("drivers/net/wireless/quantenna/qtnfmac/pcie/topaz_pcie.c:116", reg);
 
 	return !!(cfg & TOPAZ_ASSERT_INTX);
 }
 
 static void qtnf_topaz_reset_ep(struct qtnf_pcie_topaz_state *ts)
 {
-	writel(TOPAZ_IPC_IRQ_WORD(TOPAZ_RC_RST_EP_IRQ),
+	pete_writel("drivers/net/wireless/quantenna/qtnfmac/pcie/topaz_pcie.c:123", TOPAZ_IPC_IRQ_WORD(TOPAZ_RC_RST_EP_IRQ),
 	       TOPAZ_LH_IPC4_INT(ts->base.sysctl_bar));
 	msleep(QTN_EP_RESET_WAIT_MS);
 	pci_restore_state(ts->base.pdev);
@@ -130,7 +130,7 @@ static void setup_rx_irqs(struct qtnf_pcie_topaz_state *ts)
 {
 	void __iomem *reg = PCIE_DMA_WR_DONE_IMWR_ADDR_LOW(ts->base.dmareg_bar);
 
-	ts->dma_msi_imwr = readl(reg);
+	ts->dma_msi_imwr = pete_readl("drivers/net/wireless/quantenna/qtnfmac/pcie/topaz_pcie.c:133", reg);
 }
 
 static void enable_rx_irqs(struct qtnf_pcie_topaz_state *ts)
@@ -151,13 +151,13 @@ static void qtnf_topaz_ipc_gen_ep_int(void *arg)
 {
 	struct qtnf_pcie_topaz_state *ts = arg;
 
-	writel(TOPAZ_IPC_IRQ_WORD(TOPAZ_RC_CTRL_IRQ),
+	pete_writel("drivers/net/wireless/quantenna/qtnfmac/pcie/topaz_pcie.c:154", TOPAZ_IPC_IRQ_WORD(TOPAZ_RC_CTRL_IRQ),
 	       TOPAZ_CTL_M2L_INT(ts->base.sysctl_bar));
 }
 
 static int qtnf_is_state(__le32 __iomem *reg, u32 state)
 {
-	u32 s = readl(reg);
+	u32 s = pete_readl("drivers/net/wireless/quantenna/qtnfmac/pcie/topaz_pcie.c:160", reg);
 
 	return (s == state);
 }
@@ -401,11 +401,11 @@ static void qtnf_topaz_data_tx_reclaim(struct qtnf_pcie_topaz_state *ts)
 
 	spin_lock_irqsave(&priv->tx_reclaim_lock, flags);
 
-	tx_done_index = readl(ts->ep_next_rx_pkt);
+	tx_done_index = pete_readl("drivers/net/wireless/quantenna/qtnfmac/pcie/topaz_pcie.c:404", ts->ep_next_rx_pkt);
 	i = priv->tx_bd_r_index;
 
 	if (CIRC_CNT(priv->tx_bd_w_index, tx_done_index, priv->tx_bd_num))
-		writel(TOPAZ_IPC_IRQ_WORD(TOPAZ_RC_TX_DONE_IRQ),
+		pete_writel("drivers/net/wireless/quantenna/qtnfmac/pcie/topaz_pcie.c:408", TOPAZ_IPC_IRQ_WORD(TOPAZ_RC_TX_DONE_IRQ),
 		       TOPAZ_LH_IPC4_INT(priv->sysctl_bar));
 
 	while (CIRC_CNT(tx_done_index, i, priv->tx_bd_num)) {
@@ -451,13 +451,13 @@ static void qtnf_try_stop_xmit(struct qtnf_bus *bus, struct net_device *ndev)
 		ts->base.tx_stopped = 1;
 	}
 
-	writel(0x0, ts->txqueue_wake);
+	pete_writel("drivers/net/wireless/quantenna/qtnfmac/pcie/topaz_pcie.c:454", 0x0, ts->txqueue_wake);
 
 	/* sync up tx queue status before generating interrupt */
 	dma_wmb();
 
 	/* send irq to card: tx stopped */
-	writel(TOPAZ_IPC_IRQ_WORD(TOPAZ_RC_TX_STOP_IRQ),
+	pete_writel("drivers/net/wireless/quantenna/qtnfmac/pcie/topaz_pcie.c:460", TOPAZ_IPC_IRQ_WORD(TOPAZ_RC_TX_STOP_IRQ),
 	       TOPAZ_LH_IPC4_INT(ts->base.sysctl_bar));
 
 	/* schedule reclaim attempt */
@@ -469,12 +469,12 @@ static void qtnf_try_wake_xmit(struct qtnf_bus *bus, struct net_device *ndev)
 	struct qtnf_pcie_topaz_state *ts = get_bus_priv(bus);
 	int ready;
 
-	ready = readl(ts->txqueue_wake);
+	ready = pete_readl("drivers/net/wireless/quantenna/qtnfmac/pcie/topaz_pcie.c:472", ts->txqueue_wake);
 	if (ready) {
 		netif_wake_queue(ndev);
 	} else {
 		/* re-send irq to card: tx stopped */
-		writel(TOPAZ_IPC_IRQ_WORD(TOPAZ_RC_TX_STOP_IRQ),
+		pete_writel("drivers/net/wireless/quantenna/qtnfmac/pcie/topaz_pcie.c:477", TOPAZ_IPC_IRQ_WORD(TOPAZ_RC_TX_STOP_IRQ),
 		       TOPAZ_LH_IPC4_INT(ts->base.sysctl_bar));
 	}
 }
@@ -532,14 +532,14 @@ static int qtnf_pcie_data_tx(struct qtnf_bus *bus, struct sk_buff *skb,
 	txbd = &ts->tx_bd_vbase[i];
 	txbd->addr = cpu_to_le32(QTN_HOST_LO32(skb_paddr));
 
-	writel(QTN_HOST_LO32(skb_paddr), &bda->request[i].addr);
-	writel(len | QTN_PCIE_TX_VALID_PKT, &bda->request[i].info);
+	pete_writel("drivers/net/wireless/quantenna/qtnfmac/pcie/topaz_pcie.c:535", QTN_HOST_LO32(skb_paddr), &bda->request[i].addr);
+	pete_writel("drivers/net/wireless/quantenna/qtnfmac/pcie/topaz_pcie.c:536", len | QTN_PCIE_TX_VALID_PKT, &bda->request[i].info);
 
 	/* sync up descriptor updates before generating interrupt */
 	dma_wmb();
 
 	/* generate irq to card: tx done */
-	writel(TOPAZ_IPC_IRQ_WORD(TOPAZ_RC_TX_DONE_IRQ),
+	pete_writel("drivers/net/wireless/quantenna/qtnfmac/pcie/topaz_pcie.c:542", TOPAZ_IPC_IRQ_WORD(TOPAZ_RC_TX_DONE_IRQ),
 	       TOPAZ_LH_IPC4_INT(priv->sysctl_bar));
 
 	if (++i >= priv->tx_bd_num)
@@ -679,7 +679,7 @@ static int qtnf_topaz_rx_poll(struct napi_struct *napi, int budget)
 
 		/* notify card about recv packets once per several packets */
 		if (((++ts->rx_pkt_count) & RX_DONE_INTR_MSK) == 0)
-			writel(TOPAZ_IPC_IRQ_WORD(TOPAZ_RC_RX_DONE_IRQ),
+			pete_writel("drivers/net/wireless/quantenna/qtnfmac/pcie/topaz_pcie.c:682", TOPAZ_IPC_IRQ_WORD(TOPAZ_RC_RX_DONE_IRQ),
 			       TOPAZ_LH_IPC4_INT(priv->sysctl_bar));
 
 		priv->rx_skb[r_idx] = NULL;
@@ -767,7 +767,7 @@ static int qtnf_dbg_pkt_stats(struct seq_file *s, void *data)
 	struct qtnf_bus *bus = dev_get_drvdata(s->private);
 	struct qtnf_pcie_topaz_state *ts = get_bus_priv(bus);
 	struct qtnf_pcie_bus_priv *priv = &ts->base;
-	u32 tx_done_index = readl(ts->ep_next_rx_pkt);
+	u32 tx_done_index = pete_readl("drivers/net/wireless/quantenna/qtnfmac/pcie/topaz_pcie.c:770", ts->ep_next_rx_pkt);
 
 	seq_printf(s, "tx_full_count(%u)\n", priv->tx_full_count);
 	seq_printf(s, "tx_done_count(%u)\n", priv->tx_done_count);
@@ -800,12 +800,12 @@ static int qtnf_dbg_pkt_stats(struct seq_file *s, void *data)
 static void qtnf_reset_dma_offset(struct qtnf_pcie_topaz_state *ts)
 {
 	struct qtnf_topaz_bda __iomem *bda = ts->bda;
-	u32 offset = readl(&bda->bda_dma_offset);
+	u32 offset = pete_readl("drivers/net/wireless/quantenna/qtnfmac/pcie/topaz_pcie.c:803", &bda->bda_dma_offset);
 
 	if ((offset & PCIE_DMA_OFFSET_ERROR_MASK) != PCIE_DMA_OFFSET_ERROR)
 		return;
 
-	writel(0x0, &bda->bda_dma_offset);
+	pete_writel("drivers/net/wireless/quantenna/qtnfmac/pcie/topaz_pcie.c:808", 0x0, &bda->bda_dma_offset);
 }
 
 static int qtnf_pcie_endian_detect(struct qtnf_pcie_topaz_state *ts)
@@ -815,14 +815,14 @@ static int qtnf_pcie_endian_detect(struct qtnf_pcie_topaz_state *ts)
 	u32 endian;
 	int ret = 0;
 
-	writel(QTN_PCI_ENDIAN_DETECT_DATA, &bda->bda_pci_endian);
+	pete_writel("drivers/net/wireless/quantenna/qtnfmac/pcie/topaz_pcie.c:818", QTN_PCI_ENDIAN_DETECT_DATA, &bda->bda_pci_endian);
 
 	/* flush endian modifications before status update */
 	dma_wmb();
 
-	writel(QTN_PCI_ENDIAN_VALID_STATUS, &bda->bda_pci_pre_status);
+	pete_writel("drivers/net/wireless/quantenna/qtnfmac/pcie/topaz_pcie.c:823", QTN_PCI_ENDIAN_VALID_STATUS, &bda->bda_pci_pre_status);
 
-	while (readl(&bda->bda_pci_post_status) !=
+	while (pete_readl("drivers/net/wireless/quantenna/qtnfmac/pcie/topaz_pcie.c:825", &bda->bda_pci_post_status) !=
 	       QTN_PCI_ENDIAN_VALID_STATUS) {
 		usleep_range(1000, 1200);
 		if (++timeout > QTN_FW_DL_TIMEOUT_MS) {
@@ -835,14 +835,14 @@ static int qtnf_pcie_endian_detect(struct qtnf_pcie_topaz_state *ts)
 	/* do not read before status is updated */
 	dma_rmb();
 
-	endian = readl(&bda->bda_pci_endian);
+	endian = pete_readl("drivers/net/wireless/quantenna/qtnfmac/pcie/topaz_pcie.c:838", &bda->bda_pci_endian);
 	WARN(endian != QTN_PCI_LITTLE_ENDIAN,
 	     "%s: unexpected card endianness", __func__);
 
 endian_out:
-	writel(0, &bda->bda_pci_pre_status);
-	writel(0, &bda->bda_pci_post_status);
-	writel(0, &bda->bda_pci_endian);
+	pete_writel("drivers/net/wireless/quantenna/qtnfmac/pcie/topaz_pcie.c:843", 0, &bda->bda_pci_pre_status);
+	pete_writel("drivers/net/wireless/quantenna/qtnfmac/pcie/topaz_pcie.c:844", 0, &bda->bda_pci_post_status);
+	pete_writel("drivers/net/wireless/quantenna/qtnfmac/pcie/topaz_pcie.c:845", 0, &bda->bda_pci_endian);
 
 	return ret;
 }
@@ -860,18 +860,18 @@ static int qtnf_pre_init_ep(struct qtnf_bus *bus)
 		return ret;
 	}
 
-	writeb(ts->base.msi_enabled, &ts->bda->bda_rc_msi_enabled);
+	pete_writeb("drivers/net/wireless/quantenna/qtnfmac/pcie/topaz_pcie.c:863", ts->base.msi_enabled, &ts->bda->bda_rc_msi_enabled);
 	qtnf_reset_dma_offset(ts);
 
 	/* notify card about driver type and boot mode */
-	flags = readl(&bda->bda_flags) | QTN_BDA_HOST_QLINK_DRV;
+	flags = pete_readl("drivers/net/wireless/quantenna/qtnfmac/pcie/topaz_pcie.c:867", &bda->bda_flags) | QTN_BDA_HOST_QLINK_DRV;
 
 	if (ts->base.flashboot)
 		flags |= QTN_BDA_FLASH_BOOT;
 	else
 		flags &= ~QTN_BDA_FLASH_BOOT;
 
-	writel(flags, &bda->bda_flags);
+	pete_writel("drivers/net/wireless/quantenna/qtnfmac/pcie/topaz_pcie.c:874", flags, &bda->bda_flags);
 
 	qtnf_set_state(&ts->bda->bda_bootstate, QTN_BDA_FW_HOST_RDY);
 	if (qtnf_poll_state(&ts->bda->bda_bootstate, QTN_BDA_FW_TARGET_RDY,
@@ -937,7 +937,7 @@ qtnf_ep_fw_load(struct qtnf_pcie_topaz_state *ts, const u8 *fw, u32 fw_size)
 	}
 
 	nblocks = NBLOCKS(fw_size, blksize);
-	offset = readl(&bda->bda_dma_offset);
+	offset = pete_readl("drivers/net/wireless/quantenna/qtnfmac/pcie/topaz_pcie.c:940", &bda->bda_dma_offset);
 
 	qtnf_set_state(&ts->bda->bda_bootstate, QTN_BDA_FW_HOST_LOAD);
 	if (qtnf_poll_state(&ts->bda->bda_bootstate, QTN_BDA_FW_EP_RDY,
@@ -1035,7 +1035,7 @@ static void qtnf_topaz_fw_work_handler(struct work_struct *work)
 {
 	struct qtnf_bus *bus = container_of(work, struct qtnf_bus, fw_work);
 	struct qtnf_pcie_topaz_state *ts = (void *)get_bus_priv(bus);
-	int bootloader_needed = readl(&ts->bda->bda_flags) & QTN_BDA_XMIT_UBOOT;
+	int bootloader_needed = pete_readl("drivers/net/wireless/quantenna/qtnfmac/pcie/topaz_pcie.c:1038", &ts->bda->bda_flags) & QTN_BDA_XMIT_UBOOT;
 	struct pci_dev *pdev = ts->base.pdev;
 	int ret;
 
@@ -1184,9 +1184,9 @@ static int qtnf_pcie_topaz_suspend(struct qtnf_bus *bus)
 	struct qtnf_pcie_topaz_state *ts = get_bus_priv(bus);
 	struct pci_dev *pdev = ts->base.pdev;
 
-	writel((u32 __force)PCI_D3hot, ts->ep_pmstate);
+	pete_writel("drivers/net/wireless/quantenna/qtnfmac/pcie/topaz_pcie.c:1187", (u32 __force)PCI_D3hot, ts->ep_pmstate);
 	dma_wmb();
-	writel(TOPAZ_IPC_IRQ_WORD(TOPAZ_RC_PM_EP_IRQ),
+	pete_writel("drivers/net/wireless/quantenna/qtnfmac/pcie/topaz_pcie.c:1189", TOPAZ_IPC_IRQ_WORD(TOPAZ_RC_PM_EP_IRQ),
 	       TOPAZ_LH_IPC4_INT(ts->base.sysctl_bar));
 
 	pci_save_state(pdev);
@@ -1205,9 +1205,9 @@ static int qtnf_pcie_topaz_resume(struct qtnf_bus *bus)
 	pci_restore_state(pdev);
 	pci_enable_wake(pdev, PCI_D0, 0);
 
-	writel((u32 __force)PCI_D0, ts->ep_pmstate);
+	pete_writel("drivers/net/wireless/quantenna/qtnfmac/pcie/topaz_pcie.c:1208", (u32 __force)PCI_D0, ts->ep_pmstate);
 	dma_wmb();
-	writel(TOPAZ_IPC_IRQ_WORD(TOPAZ_RC_PM_EP_IRQ),
+	pete_writel("drivers/net/wireless/quantenna/qtnfmac/pcie/topaz_pcie.c:1210", TOPAZ_IPC_IRQ_WORD(TOPAZ_RC_PM_EP_IRQ),
 	       TOPAZ_LH_IPC4_INT(ts->base.sysctl_bar));
 
 	return 0;

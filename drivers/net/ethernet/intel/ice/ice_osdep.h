@@ -10,10 +10,10 @@
 #include <linux/io-64-nonatomic-lo-hi.h>
 #endif
 
-#define wr32(a, reg, value)	writel((value), ((a)->hw_addr + (reg)))
-#define rd32(a, reg)		readl((a)->hw_addr + (reg))
-#define wr64(a, reg, value)	writeq((value), ((a)->hw_addr + (reg)))
-#define rd64(a, reg)		readq((a)->hw_addr + (reg))
+#define wr32(a, reg, value)	pete_writel("drivers/net/ethernet/intel/ice/ice_osdep.h:13", (value), ((a)->hw_addr + (reg)))
+#define rd32(a, reg)		pete_readl("drivers/net/ethernet/intel/ice/ice_osdep.h:14", (a)->hw_addr + (reg))
+#define wr64(a, reg, value)	pete_writeq("drivers/net/ethernet/intel/ice/ice_osdep.h:15", (value), ((a)->hw_addr + (reg)))
+#define rd64(a, reg)		pete_readq("drivers/net/ethernet/intel/ice/ice_osdep.h:16", (a)->hw_addr + (reg))
 
 #define ice_flush(a)		rd32((a), GLGEN_STAT)
 #define ICE_M(m, s)		((m) << (s))

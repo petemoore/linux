@@ -326,7 +326,7 @@ static ssize_t inject_error_store(struct device *dev,
 	 * or manually set the IRQ status.
 	 */
 	if (sysfs_streq(data, "nodev"))
-		readl(apb->res);
+		pete_readl("drivers/bus/bt1-apb.c:329", apb->res);
 	else if (sysfs_streq(data, "irq"))
 		regmap_update_bits(apb->regs, APB_EHB_ISR, APB_EHB_ISR_PENDING,
 				   APB_EHB_ISR_PENDING);

@@ -117,26 +117,26 @@ static int phy_berlin_usb_power_on(struct phy *phy)
 
 	reset_control_reset(priv->rst_ctrl);
 
-	writel(priv->pll_divider,
+	pete_writel("drivers/phy/marvell/phy-berlin-usb.c:120", priv->pll_divider,
 	       priv->base + USB_PHY_PLL);
-	writel(CLK_STABLE | PLL_CTRL_REG | PHASE_OFF_TOL_250 | KVC0_REG_CTRL |
+	pete_writel("drivers/phy/marvell/phy-berlin-usb.c:122", CLK_STABLE | PLL_CTRL_REG | PHASE_OFF_TOL_250 | KVC0_REG_CTRL |
 	       CLK_BLK_EN, priv->base + USB_PHY_PLL_CONTROL);
-	writel(V2I_VCO_RATIO(0x5) | R_ROTATE_0 | ANA_TEST_DC_CTRL(0x5),
+	pete_writel("drivers/phy/marvell/phy-berlin-usb.c:124", V2I_VCO_RATIO(0x5) | R_ROTATE_0 | ANA_TEST_DC_CTRL(0x5),
 	       priv->base + USB_PHY_ANALOG);
-	writel(PHASE_FREEZE_DLY_4_CL | ACK_LENGTH_16_CL | SQ_LENGTH_12 |
+	pete_writel("drivers/phy/marvell/phy-berlin-usb.c:126", PHASE_FREEZE_DLY_4_CL | ACK_LENGTH_16_CL | SQ_LENGTH_12 |
 	       DISCON_THRESHOLD_270 | SQ_THRESHOLD(0xa) | LPF_COEF(0x2) |
 	       INTPL_CUR_30, priv->base + USB_PHY_RX_CTRL);
 
-	writel(TX_VDD12_13 | TX_OUT_AMP(0x3), priv->base + USB_PHY_TX_CTRL1);
-	writel(EXT_HS_RCAL_EN | IMPCAL_VTH_DIV(0x3) | EXT_RS_RCAL_DIV(0x4),
+	pete_writel("drivers/phy/marvell/phy-berlin-usb.c:130", TX_VDD12_13 | TX_OUT_AMP(0x3), priv->base + USB_PHY_TX_CTRL1);
+	pete_writel("drivers/phy/marvell/phy-berlin-usb.c:131", EXT_HS_RCAL_EN | IMPCAL_VTH_DIV(0x3) | EXT_RS_RCAL_DIV(0x4),
 	       priv->base + USB_PHY_TX_CTRL0);
 
-	writel(EXT_HS_RCAL_EN | IMPCAL_VTH_DIV(0x3) | EXT_RS_RCAL_DIV(0x4) |
+	pete_writel("drivers/phy/marvell/phy-berlin-usb.c:134", EXT_HS_RCAL_EN | IMPCAL_VTH_DIV(0x3) | EXT_RS_RCAL_DIV(0x4) |
 	       EXT_FS_RCAL_DIV(0x2), priv->base + USB_PHY_TX_CTRL0);
 
-	writel(EXT_HS_RCAL_EN | IMPCAL_VTH_DIV(0x3) | EXT_RS_RCAL_DIV(0x4),
+	pete_writel("drivers/phy/marvell/phy-berlin-usb.c:137", EXT_HS_RCAL_EN | IMPCAL_VTH_DIV(0x3) | EXT_RS_RCAL_DIV(0x4),
 	       priv->base + USB_PHY_TX_CTRL0);
-	writel(TX_CHAN_CTRL_REG(0xf) | DRV_SLEWRATE(0x3) | IMP_CAL_FS_HS_DLY_3 |
+	pete_writel("drivers/phy/marvell/phy-berlin-usb.c:139", TX_CHAN_CTRL_REG(0xf) | DRV_SLEWRATE(0x3) | IMP_CAL_FS_HS_DLY_3 |
 	       FS_DRV_EN_MASK(0xd), priv->base + USB_PHY_TX_CTRL2);
 
 	return 0;

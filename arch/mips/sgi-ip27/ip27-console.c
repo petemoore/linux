@@ -36,7 +36,7 @@ void prom_putchar(char c)
 {
 	struct ioc3_uartregs *uart = console_uart();
 
-	while ((readb(&uart->iu_lsr) & 0x20) == 0)
+	while ((pete_readb("arch/mips/sgi-ip27/ip27-console.c:39", &uart->iu_lsr) & 0x20) == 0)
 		;
-	writeb(c, &uart->iu_thr);
+	pete_writeb("arch/mips/sgi-ip27/ip27-console.c:41", c, &uart->iu_thr);
 }

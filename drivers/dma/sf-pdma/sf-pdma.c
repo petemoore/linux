@@ -25,17 +25,17 @@
 #include "sf-pdma.h"
 
 #ifndef readq
-static inline unsigned long long readq(void __iomem *addr)
+static inline unsigned long long pete_readq("drivers/dma/sf-pdma/sf-pdma.c:28", void __iomem *addr)
 {
-	return readl(addr) | (((unsigned long long)readl(addr + 4)) << 32LL);
+	return pete_readl("drivers/dma/sf-pdma/sf-pdma.c:30", addr) | (((unsigned long long)pete_readl("drivers/dma/sf-pdma/sf-pdma.c:30", addr + 4)) << 32LL);
 }
 #endif
 
 #ifndef writeq
-static inline void writeq(unsigned long long v, void __iomem *addr)
+static inline void pete_writeq("drivers/dma/sf-pdma/sf-pdma.c:35", unsigned long long v, void __iomem *addr)
 {
-	writel(lower_32_bits(v), addr);
-	writel(upper_32_bits(v), addr + 4);
+	pete_writel("drivers/dma/sf-pdma/sf-pdma.c:37", lower_32_bits(v), addr);
+	pete_writel("drivers/dma/sf-pdma/sf-pdma.c:38", upper_32_bits(v), addr + 4);
 }
 #endif
 
@@ -75,7 +75,7 @@ static void sf_pdma_disclaim_chan(struct sf_pdma_chan *chan)
 {
 	struct pdma_regs *regs = &chan->regs;
 
-	writel(PDMA_CLEAR_CTRL, regs->ctrl);
+	pete_writel("drivers/dma/sf-pdma/sf-pdma.c:78", PDMA_CLEAR_CTRL, regs->ctrl);
 }
 
 static struct dma_async_tx_descriptor *
@@ -123,7 +123,7 @@ static int sf_pdma_alloc_chan_resources(struct dma_chan *dchan)
 	struct pdma_regs *regs = &chan->regs;
 
 	dma_cookie_init(dchan);
-	writel(PDMA_CLAIM_MASK, regs->ctrl);
+	pete_writel("drivers/dma/sf-pdma/sf-pdma.c:126", PDMA_CLAIM_MASK, regs->ctrl);
 
 	return 0;
 }
@@ -132,7 +132,7 @@ static void sf_pdma_disable_request(struct sf_pdma_chan *chan)
 {
 	struct pdma_regs *regs = &chan->regs;
 
-	writel(readl(regs->ctrl) & ~PDMA_RUN_MASK, regs->ctrl);
+	pete_writel("drivers/dma/sf-pdma/sf-pdma.c:135", pete_readl("drivers/dma/sf-pdma/sf-pdma.c:135", regs->ctrl) & ~PDMA_RUN_MASK, regs->ctrl);
 }
 
 static void sf_pdma_free_chan_resources(struct dma_chan *dchan)
@@ -174,7 +174,7 @@ static size_t sf_pdma_desc_residue(struct sf_pdma_chan *chan,
 		goto out;
 
 	if (cookie == tx->cookie) {
-		residue = readq(regs->residue);
+		residue = pete_readq("drivers/dma/sf-pdma/sf-pdma.c:177", regs->residue);
 	} else {
 		vd = vchan_find_desc(&chan->vchan, cookie);
 		if (!vd)
@@ -233,7 +233,7 @@ static void sf_pdma_enable_request(struct sf_pdma_chan *chan)
 		PDMA_ENABLE_ERR_INT_MASK |
 		PDMA_RUN_MASK;
 
-	writel(v, regs->ctrl);
+	pete_writel("drivers/dma/sf-pdma/sf-pdma.c:236", v, regs->ctrl);
 }
 
 static struct sf_pdma_desc *sf_pdma_get_first_pending_desc(struct sf_pdma_chan *chan)
@@ -259,10 +259,10 @@ static void sf_pdma_xfer_desc(struct sf_pdma_chan *chan)
 		return;
 	}
 
-	writel(desc->xfer_type, regs->xfer_type);
-	writeq(desc->xfer_size, regs->xfer_size);
-	writeq(desc->dst_addr, regs->dst_addr);
-	writeq(desc->src_addr, regs->src_addr);
+	pete_writel("drivers/dma/sf-pdma/sf-pdma.c:262", desc->xfer_type, regs->xfer_type);
+	pete_writeq("drivers/dma/sf-pdma/sf-pdma.c:263", desc->xfer_size, regs->xfer_size);
+	pete_writeq("drivers/dma/sf-pdma/sf-pdma.c:264", desc->dst_addr, regs->dst_addr);
+	pete_writeq("drivers/dma/sf-pdma/sf-pdma.c:265", desc->src_addr, regs->src_addr);
 
 	chan->desc = desc;
 	chan->status = DMA_IN_PROGRESS;
@@ -346,8 +346,8 @@ static irqreturn_t sf_pdma_done_isr(int irq, void *dev_id)
 	u64 residue;
 
 	spin_lock(&chan->vchan.lock);
-	writel((readl(regs->ctrl)) & ~PDMA_DONE_STATUS_MASK, regs->ctrl);
-	residue = readq(regs->residue);
+	pete_writel("drivers/dma/sf-pdma/sf-pdma.c:349", (pete_readl("drivers/dma/sf-pdma/sf-pdma.c:349", regs->ctrl)) & ~PDMA_DONE_STATUS_MASK, regs->ctrl);
+	residue = pete_readq("drivers/dma/sf-pdma/sf-pdma.c:350", regs->residue);
 
 	if (!residue) {
 		tasklet_hi_schedule(&chan->done_tasklet);
@@ -373,7 +373,7 @@ static irqreturn_t sf_pdma_err_isr(int irq, void *dev_id)
 	struct pdma_regs *regs = &chan->regs;
 
 	spin_lock(&chan->lock);
-	writel((readl(regs->ctrl)) & ~PDMA_ERR_STATUS_MASK, regs->ctrl);
+	pete_writel("drivers/dma/sf-pdma/sf-pdma.c:376", (pete_readl("drivers/dma/sf-pdma/sf-pdma.c:376", regs->ctrl)) & ~PDMA_ERR_STATUS_MASK, regs->ctrl);
 	spin_unlock(&chan->lock);
 
 	tasklet_schedule(&chan->err_tasklet);
@@ -488,7 +488,7 @@ static void sf_pdma_setup_chans(struct sf_pdma *pdma)
 		chan->vchan.desc_free = sf_pdma_free_desc;
 		vchan_init(&chan->vchan, &pdma->dma_dev);
 
-		writel(PDMA_CLEAR_CTRL, chan->regs.ctrl);
+		pete_writel("drivers/dma/sf-pdma/sf-pdma.c:491", PDMA_CLEAR_CTRL, chan->regs.ctrl);
 
 		tasklet_setup(&chan->done_tasklet, sf_pdma_donebh_tasklet);
 		tasklet_setup(&chan->err_tasklet, sf_pdma_errbh_tasklet);

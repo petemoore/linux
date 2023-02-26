@@ -348,10 +348,10 @@ static int s3c2410_nand_setrate(struct s3c2410_nand_info *info)
 
 	local_irq_save(flags);
 
-	cfg = readl(info->regs + S3C2410_NFCONF);
+	cfg = pete_readl("drivers/mtd/nand/raw/s3c2410.c:351", info->regs + S3C2410_NFCONF);
 	cfg &= ~mask;
 	cfg |= set;
-	writel(cfg, info->regs + S3C2410_NFCONF);
+	pete_writel("drivers/mtd/nand/raw/s3c2410.c:354", cfg, info->regs + S3C2410_NFCONF);
 
 	local_irq_restore(flags);
 
@@ -384,7 +384,7 @@ static int s3c2410_nand_inithw(struct s3c2410_nand_info *info)
 	case TYPE_S3C2412:
 		/* enable the controller and de-assert nFCE */
 
-		writel(S3C2440_NFCONT_ENABLE, info->regs + S3C2440_NFCONT);
+		pete_writel("drivers/mtd/nand/raw/s3c2410.c:387", S3C2440_NFCONT_ENABLE, info->regs + S3C2440_NFCONT);
 	}
 
 	return 0;
@@ -415,7 +415,7 @@ static void s3c2410_nand_select_chip(struct nand_chip *this, int chip)
 	if (chip != -1)
 		s3c2410_nand_clk_set_state(info, CLOCK_ENABLE);
 
-	cur = readl(info->sel_reg);
+	cur = pete_readl("drivers/mtd/nand/raw/s3c2410.c:418", info->sel_reg);
 
 	if (chip == -1) {
 		cur |= info->sel_bit;
@@ -433,7 +433,7 @@ static void s3c2410_nand_select_chip(struct nand_chip *this, int chip)
 		cur &= ~info->sel_bit;
 	}
 
-	writel(cur, info->sel_reg);
+	pete_writel("drivers/mtd/nand/raw/s3c2410.c:436", cur, info->sel_reg);
 
 	if (chip == -1)
 		s3c2410_nand_clk_set_state(info, CLOCK_SUSPEND);
@@ -454,9 +454,9 @@ static void s3c2410_nand_hwcontrol(struct nand_chip *chip, int cmd,
 		return;
 
 	if (ctrl & NAND_CLE)
-		writeb(cmd, info->regs + S3C2410_NFCMD);
+		pete_writeb("drivers/mtd/nand/raw/s3c2410.c:457", cmd, info->regs + S3C2410_NFCMD);
 	else
-		writeb(cmd, info->regs + S3C2410_NFADDR);
+		pete_writeb("drivers/mtd/nand/raw/s3c2410.c:459", cmd, info->regs + S3C2410_NFADDR);
 }
 
 /* command and control functions */
@@ -471,9 +471,9 @@ static void s3c2440_nand_hwcontrol(struct nand_chip *chip, int cmd,
 		return;
 
 	if (ctrl & NAND_CLE)
-		writeb(cmd, info->regs + S3C2440_NFCMD);
+		pete_writeb("drivers/mtd/nand/raw/s3c2410.c:474", cmd, info->regs + S3C2440_NFCMD);
 	else
-		writeb(cmd, info->regs + S3C2440_NFADDR);
+		pete_writeb("drivers/mtd/nand/raw/s3c2410.c:476", cmd, info->regs + S3C2440_NFADDR);
 }
 
 /* s3c2410_nand_devready()
@@ -485,21 +485,21 @@ static int s3c2410_nand_devready(struct nand_chip *chip)
 {
 	struct mtd_info *mtd = nand_to_mtd(chip);
 	struct s3c2410_nand_info *info = s3c2410_nand_mtd_toinfo(mtd);
-	return readb(info->regs + S3C2410_NFSTAT) & S3C2410_NFSTAT_BUSY;
+	return pete_readb("drivers/mtd/nand/raw/s3c2410.c:488", info->regs + S3C2410_NFSTAT) & S3C2410_NFSTAT_BUSY;
 }
 
 static int s3c2440_nand_devready(struct nand_chip *chip)
 {
 	struct mtd_info *mtd = nand_to_mtd(chip);
 	struct s3c2410_nand_info *info = s3c2410_nand_mtd_toinfo(mtd);
-	return readb(info->regs + S3C2440_NFSTAT) & S3C2440_NFSTAT_READY;
+	return pete_readb("drivers/mtd/nand/raw/s3c2410.c:495", info->regs + S3C2440_NFSTAT) & S3C2440_NFSTAT_READY;
 }
 
 static int s3c2412_nand_devready(struct nand_chip *chip)
 {
 	struct mtd_info *mtd = nand_to_mtd(chip);
 	struct s3c2410_nand_info *info = s3c2410_nand_mtd_toinfo(mtd);
-	return readb(info->regs + S3C2412_NFSTAT) & S3C2412_NFSTAT_READY;
+	return pete_readb("drivers/mtd/nand/raw/s3c2410.c:502", info->regs + S3C2412_NFSTAT) & S3C2412_NFSTAT_READY;
 }
 
 /* ECC handling functions */
@@ -590,9 +590,9 @@ static void s3c2410_nand_enable_hwecc(struct nand_chip *chip, int mode)
 	unsigned long ctrl;
 
 	info = s3c2410_nand_mtd_toinfo(nand_to_mtd(chip));
-	ctrl = readl(info->regs + S3C2410_NFCONF);
+	ctrl = pete_readl("drivers/mtd/nand/raw/s3c2410.c:593", info->regs + S3C2410_NFCONF);
 	ctrl |= S3C2410_NFCONF_INITECC;
-	writel(ctrl, info->regs + S3C2410_NFCONF);
+	pete_writel("drivers/mtd/nand/raw/s3c2410.c:595", ctrl, info->regs + S3C2410_NFCONF);
 }
 
 static void s3c2412_nand_enable_hwecc(struct nand_chip *chip, int mode)
@@ -601,8 +601,8 @@ static void s3c2412_nand_enable_hwecc(struct nand_chip *chip, int mode)
 	unsigned long ctrl;
 
 	info = s3c2410_nand_mtd_toinfo(nand_to_mtd(chip));
-	ctrl = readl(info->regs + S3C2440_NFCONT);
-	writel(ctrl | S3C2412_NFCONT_INIT_MAIN_ECC,
+	ctrl = pete_readl("drivers/mtd/nand/raw/s3c2410.c:604", info->regs + S3C2440_NFCONT);
+	pete_writel("drivers/mtd/nand/raw/s3c2410.c:605", ctrl | S3C2412_NFCONT_INIT_MAIN_ECC,
 	       info->regs + S3C2440_NFCONT);
 }
 
@@ -612,8 +612,8 @@ static void s3c2440_nand_enable_hwecc(struct nand_chip *chip, int mode)
 	unsigned long ctrl;
 
 	info = s3c2410_nand_mtd_toinfo(nand_to_mtd(chip));
-	ctrl = readl(info->regs + S3C2440_NFCONT);
-	writel(ctrl | S3C2440_NFCONT_INITECC, info->regs + S3C2440_NFCONT);
+	ctrl = pete_readl("drivers/mtd/nand/raw/s3c2410.c:615", info->regs + S3C2440_NFCONT);
+	pete_writel("drivers/mtd/nand/raw/s3c2410.c:616", ctrl | S3C2440_NFCONT_INITECC, info->regs + S3C2440_NFCONT);
 }
 
 static int s3c2410_nand_calculate_ecc(struct nand_chip *chip,
@@ -622,9 +622,9 @@ static int s3c2410_nand_calculate_ecc(struct nand_chip *chip,
 	struct mtd_info *mtd = nand_to_mtd(chip);
 	struct s3c2410_nand_info *info = s3c2410_nand_mtd_toinfo(mtd);
 
-	ecc_code[0] = readb(info->regs + S3C2410_NFECC + 0);
-	ecc_code[1] = readb(info->regs + S3C2410_NFECC + 1);
-	ecc_code[2] = readb(info->regs + S3C2410_NFECC + 2);
+	ecc_code[0] = pete_readb("drivers/mtd/nand/raw/s3c2410.c:625", info->regs + S3C2410_NFECC + 0);
+	ecc_code[1] = pete_readb("drivers/mtd/nand/raw/s3c2410.c:626", info->regs + S3C2410_NFECC + 1);
+	ecc_code[2] = pete_readb("drivers/mtd/nand/raw/s3c2410.c:627", info->regs + S3C2410_NFECC + 2);
 
 	pr_debug("%s: returning ecc %*phN\n", __func__, 3, ecc_code);
 
@@ -636,7 +636,7 @@ static int s3c2412_nand_calculate_ecc(struct nand_chip *chip,
 {
 	struct mtd_info *mtd = nand_to_mtd(chip);
 	struct s3c2410_nand_info *info = s3c2410_nand_mtd_toinfo(mtd);
-	unsigned long ecc = readl(info->regs + S3C2412_NFMECC0);
+	unsigned long ecc = pete_readl("drivers/mtd/nand/raw/s3c2410.c:639", info->regs + S3C2412_NFMECC0);
 
 	ecc_code[0] = ecc;
 	ecc_code[1] = ecc >> 8;
@@ -652,7 +652,7 @@ static int s3c2440_nand_calculate_ecc(struct nand_chip *chip,
 {
 	struct mtd_info *mtd = nand_to_mtd(chip);
 	struct s3c2410_nand_info *info = s3c2410_nand_mtd_toinfo(mtd);
-	unsigned long ecc = readl(info->regs + S3C2440_NFMECC0);
+	unsigned long ecc = pete_readl("drivers/mtd/nand/raw/s3c2410.c:655", info->regs + S3C2440_NFMECC0);
 
 	ecc_code[0] = ecc;
 	ecc_code[1] = ecc >> 8;
@@ -684,7 +684,7 @@ static void s3c2440_nand_read_buf(struct nand_chip *this, u_char *buf, int len)
 		buf += len & ~3;
 
 		for (; len & 3; len--)
-			*buf++ = readb(info->regs + S3C2440_NFDATA);
+			*buf++ = pete_readb("drivers/mtd/nand/raw/s3c2410.c:687", info->regs + S3C2440_NFDATA);
 	}
 }
 
@@ -707,7 +707,7 @@ static void s3c2440_nand_write_buf(struct nand_chip *this, const u_char *buf,
 		buf += len & ~3;
 
 		for (; len & 3; len--, buf++)
-			writeb(*buf, info->regs + S3C2440_NFDATA);
+			pete_writeb("drivers/mtd/nand/raw/s3c2410.c:710", *buf, info->regs + S3C2440_NFDATA);
 	}
 }
 
@@ -894,7 +894,7 @@ static void s3c2410_nand_init_chip(struct s3c2410_nand_info *info,
 		chip->legacy.cmd_ctrl  = s3c2440_nand_hwcontrol;
 		chip->legacy.dev_ready = s3c2412_nand_devready;
 
-		if (readl(regs + S3C2410_NFCONF) & S3C2412_NFCONF_NANDBOOT)
+		if (pete_readl("drivers/mtd/nand/raw/s3c2410.c:897", regs + S3C2410_NFCONF) & S3C2412_NFCONF_NANDBOOT)
 			dev_info(info->device, "System booted from NAND\n");
 
 		break;
@@ -1213,14 +1213,14 @@ static int s3c24xx_nand_suspend(struct platform_device *dev, pm_message_t pm)
 	struct s3c2410_nand_info *info = platform_get_drvdata(dev);
 
 	if (info) {
-		info->save_sel = readl(info->sel_reg);
+		info->save_sel = pete_readl("drivers/mtd/nand/raw/s3c2410.c:1216", info->sel_reg);
 
 		/* For the moment, we must ensure nFCE is high during
 		 * the time we are suspended. This really should be
 		 * handled by suspending the MTDs we are using, but
 		 * that is currently not the case. */
 
-		writel(info->save_sel | info->sel_bit, info->sel_reg);
+		pete_writel("drivers/mtd/nand/raw/s3c2410.c:1223", info->save_sel | info->sel_bit, info->sel_reg);
 
 		s3c2410_nand_clk_set_state(info, CLOCK_DISABLE);
 	}
@@ -1239,10 +1239,10 @@ static int s3c24xx_nand_resume(struct platform_device *dev)
 
 		/* Restore the state of the nFCE line. */
 
-		sel = readl(info->sel_reg);
+		sel = pete_readl("drivers/mtd/nand/raw/s3c2410.c:1242", info->sel_reg);
 		sel &= ~info->sel_bit;
 		sel |= info->save_sel & info->sel_bit;
-		writel(sel, info->sel_reg);
+		pete_writel("drivers/mtd/nand/raw/s3c2410.c:1245", sel, info->sel_reg);
 
 		s3c2410_nand_clk_set_state(info, CLOCK_SUSPEND);
 	}

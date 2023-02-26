@@ -144,13 +144,13 @@ static void free_dbr(int offs, int size)
 
 static void dim2_transfer_madr(u32 val)
 {
-	writel(val, &g.dim2->MADR);
+	pete_writel("drivers/staging/most/dim2/hal.c:147", val, &g.dim2->MADR);
 
 	/* wait for transfer completion */
-	while ((readl(&g.dim2->MCTL) & 1) != 1)
+	while ((pete_readl("drivers/staging/most/dim2/hal.c:150", &g.dim2->MCTL) & 1) != 1)
 		continue;
 
-	writel(0, &g.dim2->MCTL);   /* clear transfer complete */
+	pete_writel("drivers/staging/most/dim2/hal.c:153", 0, &g.dim2->MCTL);   /* clear transfer complete */
 }
 
 static void dim2_clear_dbr(u16 addr, u16 size)
@@ -160,8 +160,8 @@ static void dim2_clear_dbr(u16 addr, u16 size)
 	u16 const end_addr = addr + size;
 	u32 const cmd = bit_mask(MADR_WNR_BIT) | bit_mask(MADR_TB_BIT);
 
-	writel(0, &g.dim2->MCTL);   /* clear transfer complete */
-	writel(0, &g.dim2->MDAT0);
+	pete_writel("drivers/staging/most/dim2/hal.c:163", 0, &g.dim2->MCTL);   /* clear transfer complete */
+	pete_writel("drivers/staging/most/dim2/hal.c:164", 0, &g.dim2->MDAT0);
 
 	for (; addr < end_addr; addr++)
 		dim2_transfer_madr(cmd | addr);
@@ -171,28 +171,28 @@ static u32 dim2_read_ctr(u32 ctr_addr, u16 mdat_idx)
 {
 	dim2_transfer_madr(ctr_addr);
 
-	return readl((&g.dim2->MDAT0) + mdat_idx);
+	return pete_readl("drivers/staging/most/dim2/hal.c:174", (&g.dim2->MDAT0) + mdat_idx);
 }
 
 static void dim2_write_ctr_mask(u32 ctr_addr, const u32 *mask, const u32 *value)
 {
 	enum { MADR_WNR_BIT = 31 };
 
-	writel(0, &g.dim2->MCTL);   /* clear transfer complete */
+	pete_writel("drivers/staging/most/dim2/hal.c:181", 0, &g.dim2->MCTL);   /* clear transfer complete */
 
 	if (mask[0] != 0)
-		writel(value[0], &g.dim2->MDAT0);
+		pete_writel("drivers/staging/most/dim2/hal.c:184", value[0], &g.dim2->MDAT0);
 	if (mask[1] != 0)
-		writel(value[1], &g.dim2->MDAT1);
+		pete_writel("drivers/staging/most/dim2/hal.c:186", value[1], &g.dim2->MDAT1);
 	if (mask[2] != 0)
-		writel(value[2], &g.dim2->MDAT2);
+		pete_writel("drivers/staging/most/dim2/hal.c:188", value[2], &g.dim2->MDAT2);
 	if (mask[3] != 0)
-		writel(value[3], &g.dim2->MDAT3);
+		pete_writel("drivers/staging/most/dim2/hal.c:190", value[3], &g.dim2->MDAT3);
 
-	writel(mask[0], &g.dim2->MDWE0);
-	writel(mask[1], &g.dim2->MDWE1);
-	writel(mask[2], &g.dim2->MDWE2);
-	writel(mask[3], &g.dim2->MDWE3);
+	pete_writel("drivers/staging/most/dim2/hal.c:192", mask[0], &g.dim2->MDWE0);
+	pete_writel("drivers/staging/most/dim2/hal.c:193", mask[1], &g.dim2->MDWE1);
+	pete_writel("drivers/staging/most/dim2/hal.c:194", mask[2], &g.dim2->MDWE2);
+	pete_writel("drivers/staging/most/dim2/hal.c:195", mask[3], &g.dim2->MDWE3);
 
 	dim2_transfer_madr(bit_mask(MADR_WNR_BIT) | ctr_addr);
 }
@@ -357,13 +357,13 @@ static void dim2_configure_channel(
 	dim2_configure_cat(AHB_CAT, ch_addr, type, is_tx ? 0 : 1);
 
 	/* unmask interrupt for used channel, enable mlb_sys_int[0] interrupt */
-	writel(readl(&g.dim2->ACMR0) | bit_mask(ch_addr), &g.dim2->ACMR0);
+	pete_writel("drivers/staging/most/dim2/hal.c:360", pete_readl("drivers/staging/most/dim2/hal.c:360", &g.dim2->ACMR0) | bit_mask(ch_addr), &g.dim2->ACMR0);
 }
 
 static void dim2_clear_channel(u8 ch_addr)
 {
 	/* mask interrupt for used channel, disable mlb_sys_int[0] interrupt */
-	writel(readl(&g.dim2->ACMR0) & ~bit_mask(ch_addr), &g.dim2->ACMR0);
+	pete_writel("drivers/staging/most/dim2/hal.c:366", pete_readl("drivers/staging/most/dim2/hal.c:366", &g.dim2->ACMR0) & ~bit_mask(ch_addr), &g.dim2->ACMR0);
 
 	dim2_clear_cat(AHB_CAT, ch_addr);
 	dim2_clear_adt(ch_addr);
@@ -372,7 +372,7 @@ static void dim2_clear_channel(u8 ch_addr)
 	dim2_clear_cdt(ch_addr);
 
 	/* clear channel status bit */
-	writel(bit_mask(ch_addr), &g.dim2->ACSR0);
+	pete_writel("drivers/staging/most/dim2/hal.c:375", bit_mask(ch_addr), &g.dim2->ACSR0);
 }
 
 /* -------------------------------------------------------------------------- */
@@ -516,20 +516,20 @@ static inline u16 norm_sync_buffer_size(u16 buf_size, u16 bytes_per_frame)
 static void dim2_cleanup(void)
 {
 	/* disable MediaLB */
-	writel(false << MLBC0_MLBEN_BIT, &g.dim2->MLBC0);
+	pete_writel("drivers/staging/most/dim2/hal.c:519", false << MLBC0_MLBEN_BIT, &g.dim2->MLBC0);
 
 	dim2_clear_ctram();
 
 	/* disable mlb_int interrupt */
-	writel(0, &g.dim2->MIEN);
+	pete_writel("drivers/staging/most/dim2/hal.c:524", 0, &g.dim2->MIEN);
 
 	/* clear status for all dma channels */
-	writel(0xFFFFFFFF, &g.dim2->ACSR0);
-	writel(0xFFFFFFFF, &g.dim2->ACSR1);
+	pete_writel("drivers/staging/most/dim2/hal.c:527", 0xFFFFFFFF, &g.dim2->ACSR0);
+	pete_writel("drivers/staging/most/dim2/hal.c:528", 0xFFFFFFFF, &g.dim2->ACSR1);
 
 	/* mask interrupts for all channels */
-	writel(0, &g.dim2->ACMR0);
-	writel(0, &g.dim2->ACMR1);
+	pete_writel("drivers/staging/most/dim2/hal.c:531", 0, &g.dim2->ACMR0);
+	pete_writel("drivers/staging/most/dim2/hal.c:532", 0, &g.dim2->ACMR1);
 }
 
 static void dim2_initialize(bool enable_6pin, u8 mlb_clock)
@@ -537,21 +537,21 @@ static void dim2_initialize(bool enable_6pin, u8 mlb_clock)
 	dim2_cleanup();
 
 	/* configure and enable MediaLB */
-	writel(enable_6pin << MLBC0_MLBPEN_BIT |
+	pete_writel("drivers/staging/most/dim2/hal.c:540", enable_6pin << MLBC0_MLBPEN_BIT |
 	       mlb_clock << MLBC0_MLBCLK_SHIFT |
 	       g.fcnt << MLBC0_FCNT_SHIFT |
 	       true << MLBC0_MLBEN_BIT,
 	       &g.dim2->MLBC0);
 
 	/* activate all HBI channels */
-	writel(0xFFFFFFFF, &g.dim2->HCMR0);
-	writel(0xFFFFFFFF, &g.dim2->HCMR1);
+	pete_writel("drivers/staging/most/dim2/hal.c:547", 0xFFFFFFFF, &g.dim2->HCMR0);
+	pete_writel("drivers/staging/most/dim2/hal.c:548", 0xFFFFFFFF, &g.dim2->HCMR1);
 
 	/* enable HBI */
-	writel(bit_mask(HCTL_EN_BIT), &g.dim2->HCTL);
+	pete_writel("drivers/staging/most/dim2/hal.c:551", bit_mask(HCTL_EN_BIT), &g.dim2->HCTL);
 
 	/* configure DMA */
-	writel(ACTL_DMA_MODE_VAL_DMA_MODE_1 << ACTL_DMA_MODE_BIT |
+	pete_writel("drivers/staging/most/dim2/hal.c:554", ACTL_DMA_MODE_VAL_DMA_MODE_1 << ACTL_DMA_MODE_BIT |
 	       true << ACTL_SCE_BIT, &g.dim2->ACTL);
 }
 
@@ -560,12 +560,12 @@ static bool dim2_is_mlb_locked(void)
 	u32 const mask0 = bit_mask(MLBC0_MLBLK_BIT);
 	u32 const mask1 = bit_mask(MLBC1_CLKMERR_BIT) |
 			  bit_mask(MLBC1_LOCKERR_BIT);
-	u32 const c1 = readl(&g.dim2->MLBC1);
+	u32 const c1 = pete_readl("drivers/staging/most/dim2/hal.c:563", &g.dim2->MLBC1);
 	u32 const nda_mask = (u32)MLBC1_NDA_MASK << MLBC1_NDA_SHIFT;
 
-	writel(c1 & nda_mask, &g.dim2->MLBC1);
-	return (readl(&g.dim2->MLBC1) & mask1) == 0 &&
-	       (readl(&g.dim2->MLBC0) & mask0) != 0;
+	pete_writel("drivers/staging/most/dim2/hal.c:566", c1 & nda_mask, &g.dim2->MLBC1);
+	return (pete_readl("drivers/staging/most/dim2/hal.c:567", &g.dim2->MLBC1) & mask1) == 0 &&
+	       (pete_readl("drivers/staging/most/dim2/hal.c:568", &g.dim2->MLBC0) & mask0) != 0;
 }
 
 /* -------------------------------------------------------------------------- */
@@ -588,7 +588,7 @@ static inline bool service_channel(u8 ch_addr, u8 idx)
 	dim2_write_ctr_mask(ADT + ch_addr, mask, adt_w);
 
 	/* clear channel status bit */
-	writel(bit_mask(ch_addr), &g.dim2->ACSR0);
+	pete_writel("drivers/staging/most/dim2/hal.c:591", bit_mask(ch_addr), &g.dim2->ACSR0);
 
 	return true;
 }
@@ -774,8 +774,8 @@ static u8 init_ctrl_async(struct dim_channel *ch, u8 type, u8 is_tx,
 
 void dim_service_mlb_int_irq(void)
 {
-	writel(0, &g.dim2->MS0);
-	writel(0, &g.dim2->MS1);
+	pete_writel("drivers/staging/most/dim2/hal.c:777", 0, &g.dim2->MS0);
+	pete_writel("drivers/staging/most/dim2/hal.c:778", 0, &g.dim2->MS1);
 }
 
 /*
@@ -822,7 +822,7 @@ u8 dim_init_async(struct dim_channel *ch, u8 is_tx, u16 ch_address,
 	if (is_tx && !g.atx_dbr.ch_addr) {
 		g.atx_dbr.ch_addr = ch->addr;
 		dbrcnt_init(ch->addr, ch->dbr_size);
-		writel(bit_mask(20), &g.dim2->MIEN);
+		pete_writel("drivers/staging/most/dim2/hal.c:825", bit_mask(20), &g.dim2->MIEN);
 	}
 
 	return ret;
@@ -889,7 +889,7 @@ u8 dim_destroy_channel(struct dim_channel *ch)
 		return DIM_ERR_DRIVER_NOT_INITIALIZED;
 
 	if (ch->addr == g.atx_dbr.ch_addr) {
-		writel(0, &g.dim2->MIEN);
+		pete_writel("drivers/staging/most/dim2/hal.c:892", 0, &g.dim2->MIEN);
 		g.atx_dbr.ch_addr = 0;
 	}
 

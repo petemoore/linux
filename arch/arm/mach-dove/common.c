@@ -442,12 +442,12 @@ void dove_restart(enum reboot_mode mode, const char *cmd)
 	/*
 	 * Enable soft reset to assert RSTOUTn.
 	 */
-	writel(SOFT_RESET_OUT_EN, RSTOUTn_MASK);
+	pete_writel("arch/arm/mach-dove/common.c:445", SOFT_RESET_OUT_EN, RSTOUTn_MASK);
 
 	/*
 	 * Assert soft reset.
 	 */
-	writel(SOFT_RESET, SYSTEM_SOFT_RESET);
+	pete_writel("arch/arm/mach-dove/common.c:450", SOFT_RESET, SYSTEM_SOFT_RESET);
 
 	while (1)
 		;

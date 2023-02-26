@@ -118,30 +118,30 @@ static int slim_rproc_start(struct rproc *rproc)
 
 	/* disable CPU pipeline clock & reset CPU pipeline */
 	val = SLIM_CLK_GATE_DIS | SLIM_CLK_GATE_RESET;
-	writel(val, slim_rproc->slimcore + SLIM_CLK_GATE_OFST);
+	pete_writel("drivers/remoteproc/st_slim_rproc.c:121", val, slim_rproc->slimcore + SLIM_CLK_GATE_OFST);
 
 	/* disable SLIM core STBus sync */
-	writel(SLIM_STBUS_SYNC_DIS, slim_rproc->peri + SLIM_STBUS_SYNC_OFST);
+	pete_writel("drivers/remoteproc/st_slim_rproc.c:124", SLIM_STBUS_SYNC_DIS, slim_rproc->peri + SLIM_STBUS_SYNC_OFST);
 
 	/* enable cpu pipeline clock */
-	writel(!SLIM_CLK_GATE_DIS,
+	pete_writel("drivers/remoteproc/st_slim_rproc.c:127", !SLIM_CLK_GATE_DIS,
 		slim_rproc->slimcore + SLIM_CLK_GATE_OFST);
 
 	/* clear int & cmd mailbox */
-	writel(~0U, slim_rproc->peri + SLIM_INT_CLR_OFST);
-	writel(~0U, slim_rproc->peri + SLIM_CMD_CLR_OFST);
+	pete_writel("drivers/remoteproc/st_slim_rproc.c:131", ~0U, slim_rproc->peri + SLIM_INT_CLR_OFST);
+	pete_writel("drivers/remoteproc/st_slim_rproc.c:132", ~0U, slim_rproc->peri + SLIM_CMD_CLR_OFST);
 
 	/* enable all channels cmd & int */
-	writel(~0U, slim_rproc->peri + SLIM_INT_MASK_OFST);
-	writel(~0U, slim_rproc->peri + SLIM_CMD_MASK_OFST);
+	pete_writel("drivers/remoteproc/st_slim_rproc.c:135", ~0U, slim_rproc->peri + SLIM_INT_MASK_OFST);
+	pete_writel("drivers/remoteproc/st_slim_rproc.c:136", ~0U, slim_rproc->peri + SLIM_CMD_MASK_OFST);
 
 	/* enable cpu */
-	writel(SLIM_EN_RUN, slim_rproc->slimcore + SLIM_EN_OFST);
+	pete_writel("drivers/remoteproc/st_slim_rproc.c:139", SLIM_EN_RUN, slim_rproc->slimcore + SLIM_EN_OFST);
 
 	hw_id = readl_relaxed(slim_rproc->slimcore + SLIM_ID_OFST);
 	hw_ver = readl_relaxed(slim_rproc->slimcore + SLIM_VER_OFST);
 
-	fw_rev = readl(slim_rproc->mem[ST_SLIM_DMEM].cpu_addr +
+	fw_rev = pete_readl("drivers/remoteproc/st_slim_rproc.c:144", slim_rproc->mem[ST_SLIM_DMEM].cpu_addr +
 			SLIM_REV_ID_OFST);
 
 	dev_info(dev, "fw rev:%ld.%ld on SLIM %ld.%ld\n",
@@ -157,15 +157,15 @@ static int slim_rproc_stop(struct rproc *rproc)
 	u32 val;
 
 	/* mask all (cmd & int) channels */
-	writel(0UL, slim_rproc->peri + SLIM_INT_MASK_OFST);
-	writel(0UL, slim_rproc->peri + SLIM_CMD_MASK_OFST);
+	pete_writel("drivers/remoteproc/st_slim_rproc.c:160", 0UL, slim_rproc->peri + SLIM_INT_MASK_OFST);
+	pete_writel("drivers/remoteproc/st_slim_rproc.c:161", 0UL, slim_rproc->peri + SLIM_CMD_MASK_OFST);
 
 	/* disable cpu pipeline clock */
-	writel(SLIM_CLK_GATE_DIS, slim_rproc->slimcore + SLIM_CLK_GATE_OFST);
+	pete_writel("drivers/remoteproc/st_slim_rproc.c:164", SLIM_CLK_GATE_DIS, slim_rproc->slimcore + SLIM_CLK_GATE_OFST);
 
-	writel(!SLIM_EN_RUN, slim_rproc->slimcore + SLIM_EN_OFST);
+	pete_writel("drivers/remoteproc/st_slim_rproc.c:166", !SLIM_EN_RUN, slim_rproc->slimcore + SLIM_EN_OFST);
 
-	val = readl(slim_rproc->slimcore + SLIM_EN_OFST);
+	val = pete_readl("drivers/remoteproc/st_slim_rproc.c:168", slim_rproc->slimcore + SLIM_EN_OFST);
 	if (val & SLIM_EN_RUN)
 		dev_warn(&rproc->dev, "Failed to disable SLIM");
 

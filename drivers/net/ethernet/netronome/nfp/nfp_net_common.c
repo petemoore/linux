@@ -59,7 +59,7 @@ void nfp_net_get_fw_version(struct nfp_net_fw_version *fw_ver,
 {
 	u32 reg;
 
-	reg = readl(ctrl_bar + NFP_NET_CFG_VERSION);
+	reg = pete_readl("drivers/net/ethernet/netronome/nfp/nfp_net_common.c:62", ctrl_bar + NFP_NET_CFG_VERSION);
 	put_unaligned_le32(reg, fw_ver);
 }
 

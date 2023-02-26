@@ -174,7 +174,7 @@ static void dmafetch_onoff(struct mmp_overlay *overlay, int on)
 	tmp = readl_relaxed(ctrl_regs(path) + dma_ctrl(0, path->id));
 	tmp &= ~mask;
 	tmp |= (on ? enable : 0);
-	writel(tmp, ctrl_regs(path) + dma_ctrl(0, path->id));
+	pete_writel("drivers/video/fbdev/mmp/hw/mmp_ctrl.c:177", tmp, ctrl_regs(path) + dma_ctrl(0, path->id));
 	mutex_unlock(&overlay->access_ok);
 }
 

@@ -43,14 +43,14 @@ static irqreturn_t kirkwood_dma_irq(int irq, void *dev_id)
 	struct kirkwood_dma_data *priv = dev_id;
 	unsigned long mask, status, cause;
 
-	mask = readl(priv->io + KIRKWOOD_INT_MASK);
-	status = readl(priv->io + KIRKWOOD_INT_CAUSE) & mask;
+	mask = pete_readl("sound/soc/kirkwood/kirkwood-dma.c:46", priv->io + KIRKWOOD_INT_MASK);
+	status = pete_readl("sound/soc/kirkwood/kirkwood-dma.c:47", priv->io + KIRKWOOD_INT_CAUSE) & mask;
 
-	cause = readl(priv->io + KIRKWOOD_ERR_CAUSE);
+	cause = pete_readl("sound/soc/kirkwood/kirkwood-dma.c:49", priv->io + KIRKWOOD_ERR_CAUSE);
 	if (unlikely(cause)) {
 		printk(KERN_WARNING "%s: got err interrupt 0x%lx\n",
 				__func__, cause);
-		writel(cause, priv->io + KIRKWOOD_ERR_CAUSE);
+		pete_writel("sound/soc/kirkwood/kirkwood-dma.c:53", cause, priv->io + KIRKWOOD_ERR_CAUSE);
 	}
 
 	/* we've enabled only bytes interrupts ... */
@@ -62,7 +62,7 @@ static irqreturn_t kirkwood_dma_irq(int irq, void *dev_id)
 	}
 
 	/* ack int */
-	writel(status, priv->io + KIRKWOOD_INT_CAUSE);
+	pete_writel("sound/soc/kirkwood/kirkwood-dma.c:65", status, priv->io + KIRKWOOD_INT_CAUSE);
 
 	if (status & KIRKWOOD_INT_CAUSE_PLAY_BYTES)
 		snd_pcm_period_elapsed(priv->substream_play);
@@ -81,16 +81,16 @@ kirkwood_dma_conf_mbus_windows(void __iomem *base, int win,
 	int i;
 
 	/* First disable and clear windows */
-	writel(0, base + KIRKWOOD_AUDIO_WIN_CTRL_REG(win));
-	writel(0, base + KIRKWOOD_AUDIO_WIN_BASE_REG(win));
+	pete_writel("sound/soc/kirkwood/kirkwood-dma.c:84", 0, base + KIRKWOOD_AUDIO_WIN_CTRL_REG(win));
+	pete_writel("sound/soc/kirkwood/kirkwood-dma.c:85", 0, base + KIRKWOOD_AUDIO_WIN_BASE_REG(win));
 
 	/* try to find matching cs for current dma address */
 	for (i = 0; i < dram->num_cs; i++) {
 		const struct mbus_dram_window *cs = dram->cs + i;
 		if ((cs->base & 0xffff0000) < (dma & 0xffff0000)) {
-			writel(cs->base & 0xffff0000,
+			pete_writel("sound/soc/kirkwood/kirkwood-dma.c:91", cs->base & 0xffff0000,
 				base + KIRKWOOD_AUDIO_WIN_BASE_REG(win));
-			writel(((cs->size - 1) & 0xffff0000) |
+			pete_writel("sound/soc/kirkwood/kirkwood-dma.c:93", ((cs->size - 1) & 0xffff0000) |
 				(cs->mbus_attr << 8) |
 				(dram->mbus_dram_target_id << 4) | 1,
 				base + KIRKWOOD_AUDIO_WIN_CTRL_REG(win));
@@ -137,7 +137,7 @@ static int kirkwood_dma_open(struct snd_soc_component *component,
 		 * Enable Error interrupts. We're only ack'ing them but
 		 * it's useful for diagnostics
 		 */
-		writel((unsigned int)-1, priv->io + KIRKWOOD_ERR_MASK);
+		pete_writel("sound/soc/kirkwood/kirkwood-dma.c:140", (unsigned int)-1, priv->io + KIRKWOOD_ERR_MASK);
 	}
 
 	if (substream->stream == SNDRV_PCM_STREAM_PLAYBACK) {
@@ -167,7 +167,7 @@ static int kirkwood_dma_close(struct snd_soc_component *component,
 		priv->substream_rec = NULL;
 
 	if (!priv->substream_play && !priv->substream_rec) {
-		writel(0, priv->io + KIRKWOOD_ERR_MASK);
+		pete_writel("sound/soc/kirkwood/kirkwood-dma.c:170", 0, priv->io + KIRKWOOD_ERR_MASK);
 		free_irq(priv->irq, priv);
 	}
 
@@ -204,13 +204,13 @@ static int kirkwood_dma_prepare(struct snd_soc_component *component,
 	count = snd_pcm_lib_period_bytes(substream);
 
 	if (substream->stream == SNDRV_PCM_STREAM_PLAYBACK) {
-		writel(count, priv->io + KIRKWOOD_PLAY_BYTE_INT_COUNT);
-		writel(runtime->dma_addr, priv->io + KIRKWOOD_PLAY_BUF_ADDR);
-		writel(size, priv->io + KIRKWOOD_PLAY_BUF_SIZE);
+		pete_writel("sound/soc/kirkwood/kirkwood-dma.c:207", count, priv->io + KIRKWOOD_PLAY_BYTE_INT_COUNT);
+		pete_writel("sound/soc/kirkwood/kirkwood-dma.c:208", runtime->dma_addr, priv->io + KIRKWOOD_PLAY_BUF_ADDR);
+		pete_writel("sound/soc/kirkwood/kirkwood-dma.c:209", size, priv->io + KIRKWOOD_PLAY_BUF_SIZE);
 	} else {
-		writel(count, priv->io + KIRKWOOD_REC_BYTE_INT_COUNT);
-		writel(runtime->dma_addr, priv->io + KIRKWOOD_REC_BUF_ADDR);
-		writel(size, priv->io + KIRKWOOD_REC_BUF_SIZE);
+		pete_writel("sound/soc/kirkwood/kirkwood-dma.c:211", count, priv->io + KIRKWOOD_REC_BYTE_INT_COUNT);
+		pete_writel("sound/soc/kirkwood/kirkwood-dma.c:212", runtime->dma_addr, priv->io + KIRKWOOD_REC_BUF_ADDR);
+		pete_writel("sound/soc/kirkwood/kirkwood-dma.c:213", size, priv->io + KIRKWOOD_REC_BUF_SIZE);
 	}
 
 
@@ -226,10 +226,10 @@ static snd_pcm_uframes_t kirkwood_dma_pointer(
 
 	if (substream->stream == SNDRV_PCM_STREAM_PLAYBACK)
 		count = bytes_to_frames(substream->runtime,
-			readl(priv->io + KIRKWOOD_PLAY_BYTE_COUNT));
+			pete_readl("sound/soc/kirkwood/kirkwood-dma.c:229", priv->io + KIRKWOOD_PLAY_BYTE_COUNT));
 	else
 		count = bytes_to_frames(substream->runtime,
-			readl(priv->io + KIRKWOOD_REC_BYTE_COUNT));
+			pete_readl("sound/soc/kirkwood/kirkwood-dma.c:232", priv->io + KIRKWOOD_REC_BYTE_COUNT));
 
 	return count;
 }

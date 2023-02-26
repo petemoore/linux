@@ -15,15 +15,15 @@
 #define CLR			0x08
 #define TGL			0x0C
 
-#define dcss_writel(v, c)	writel((v), (c))
-#define dcss_readl(c)		readl(c)
-#define dcss_set(v, c)		writel((v), (c) + SET)
-#define dcss_clr(v, c)		writel((v), (c) + CLR)
-#define dcss_toggle(v, c)	writel((v), (c) + TGL)
+#define dcss_writel(v, c)	pete_writel("drivers/gpu/drm/imx/dcss/dcss-dev.h:18", (v), (c))
+#define dcss_readl(c)		pete_readl("drivers/gpu/drm/imx/dcss/dcss-dev.h:19", c)
+#define dcss_set(v, c)		pete_writel("drivers/gpu/drm/imx/dcss/dcss-dev.h:20", (v), (c) + SET)
+#define dcss_clr(v, c)		pete_writel("drivers/gpu/drm/imx/dcss/dcss-dev.h:21", (v), (c) + CLR)
+#define dcss_toggle(v, c)	pete_writel("drivers/gpu/drm/imx/dcss/dcss-dev.h:22", (v), (c) + TGL)
 
 static inline void dcss_update(u32 v, u32 m, void __iomem *c)
 {
-	writel((readl(c) & ~(m)) | (v), (c));
+	pete_writel("drivers/gpu/drm/imx/dcss/dcss-dev.h:26", (pete_readl("drivers/gpu/drm/imx/dcss/dcss-dev.h:26", c) & ~(m)) | (v), (c));
 }
 
 #define DCSS_DBG_REG(reg)	{.name = #reg, .ofs = reg}

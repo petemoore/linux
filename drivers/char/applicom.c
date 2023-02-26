@@ -130,14 +130,14 @@ static int ac_register_board(unsigned long physloc, void __iomem *loc,
 {
 	volatile unsigned char byte_reset_it;
 
-	if((readb(loc + CONF_END_TEST)     != 0x00) ||
-	   (readb(loc + CONF_END_TEST + 1) != 0x55) ||
-	   (readb(loc + CONF_END_TEST + 2) != 0xAA) ||
-	   (readb(loc + CONF_END_TEST + 3) != 0xFF))
+	if((pete_readb("drivers/char/applicom.c:133", loc + CONF_END_TEST)     != 0x00) ||
+	   (pete_readb("drivers/char/applicom.c:134", loc + CONF_END_TEST + 1) != 0x55) ||
+	   (pete_readb("drivers/char/applicom.c:135", loc + CONF_END_TEST + 2) != 0xAA) ||
+	   (pete_readb("drivers/char/applicom.c:136", loc + CONF_END_TEST + 3) != 0xFF))
 		return 0;
 
 	if (!boardno)
-		boardno = readb(loc + NUMCARD_OWNER_TO_PC);
+		boardno = pete_readb("drivers/char/applicom.c:140", loc + NUMCARD_OWNER_TO_PC);
 
 	if (!boardno || boardno > MAX_BOARD) {
 		printk(KERN_WARNING "Board #%d (at 0x%lx) is out of range (1 <= x <= %d).\n",
@@ -157,7 +157,7 @@ static int ac_register_board(unsigned long physloc, void __iomem *loc,
 	apbs[boardno].RamIO = loc;
 	init_waitqueue_head(&apbs[boardno].FlagSleepSend);
 	spin_lock_init(&apbs[boardno].mutex);
-	byte_reset_it = readb(loc + RAM_IT_TO_PC);
+	byte_reset_it = pete_readb("drivers/char/applicom.c:160", loc + RAM_IT_TO_PC);
 
 	numboards++;
 	return boardno + 1;
@@ -234,7 +234,7 @@ static int __init applicom_init(void)
 
 		/* Enable interrupts. */
 
-		writeb(0x40, apbs[boardno - 1].RamIO + RAM_IT_FROM_PC);
+		pete_writeb("drivers/char/applicom.c:237", 0x40, apbs[boardno - 1].RamIO + RAM_IT_FROM_PC);
 
 		apbs[boardno - 1].irq = dev->irq;
 	}
@@ -310,19 +310,19 @@ static int __init applicom_init(void)
 				continue;
 
 			for (serial = 0; serial < SERIAL_NUMBER - TYPE_CARD; serial++)
-				boardname[serial] = readb(apbs[i].RamIO + TYPE_CARD + serial);
+				boardname[serial] = pete_readb("drivers/char/applicom.c:313", apbs[i].RamIO + TYPE_CARD + serial);
 
 			boardname[serial] = 0;
 
 
 			printk(KERN_INFO "Applicom board %d: %s, PROM V%d.%d",
 			       i+1, boardname,
-			       (int)(readb(apbs[i].RamIO + VERS) >> 4),
-			       (int)(readb(apbs[i].RamIO + VERS) & 0xF));
+			       (int)(pete_readb("drivers/char/applicom.c:320", apbs[i].RamIO + VERS) >> 4),
+			       (int)(pete_readb("drivers/char/applicom.c:321", apbs[i].RamIO + VERS) & 0xF));
 			
-			serial = (readb(apbs[i].RamIO + SERIAL_NUMBER) << 16) + 
-				(readb(apbs[i].RamIO + SERIAL_NUMBER + 1) << 8) + 
-				(readb(apbs[i].RamIO + SERIAL_NUMBER + 2) );
+			serial = (pete_readb("drivers/char/applicom.c:323", apbs[i].RamIO + SERIAL_NUMBER) << 16) + 
+				(pete_readb("drivers/char/applicom.c:324", apbs[i].RamIO + SERIAL_NUMBER + 1) << 8) + 
+				(pete_readb("drivers/char/applicom.c:325", apbs[i].RamIO + SERIAL_NUMBER + 2) );
 
 			if (serial != 0)
 				printk(" S/N %d\n", serial);
@@ -420,11 +420,11 @@ static ssize_t ac_write(struct file *file, const char __user *buf, size_t count,
 	spin_lock_irqsave(&apbs[IndexCard].mutex, flags);
 
 	/* Test octet ready correct */
-	if(readb(apbs[IndexCard].RamIO + DATA_FROM_PC_READY) > 2) { 
-		Dummy = readb(apbs[IndexCard].RamIO + VERS);
+	if(pete_readb("drivers/char/applicom.c:423", apbs[IndexCard].RamIO + DATA_FROM_PC_READY) > 2) { 
+		Dummy = pete_readb("drivers/char/applicom.c:424", apbs[IndexCard].RamIO + VERS);
 		spin_unlock_irqrestore(&apbs[IndexCard].mutex, flags);
 		printk(KERN_WARNING "APPLICOM driver write error board %d, DataFromPcReady = %d\n",
-		       IndexCard,(int)readb(apbs[IndexCard].RamIO + DATA_FROM_PC_READY));
+		       IndexCard,(int)pete_readb("drivers/char/applicom.c:427", apbs[IndexCard].RamIO + DATA_FROM_PC_READY));
 		DeviceErrorCount++;
 		return -EIO;
 	}
@@ -434,8 +434,8 @@ static ssize_t ac_write(struct file *file, const char __user *buf, size_t count,
 	add_wait_queue(&apbs[IndexCard].FlagSleepSend, &wait);
 
 	/* Check whether the card is ready for us */
-	while (readb(apbs[IndexCard].RamIO + DATA_FROM_PC_READY) != 0) {
-		Dummy = readb(apbs[IndexCard].RamIO + VERS);
+	while (pete_readb("drivers/char/applicom.c:437", apbs[IndexCard].RamIO + DATA_FROM_PC_READY) != 0) {
+		Dummy = pete_readb("drivers/char/applicom.c:438", apbs[IndexCard].RamIO + VERS);
 		/* It's busy. Sleep. */
 
 		spin_unlock_irqrestore(&apbs[IndexCard].mutex, flags);
@@ -453,7 +453,7 @@ static ssize_t ac_write(struct file *file, const char __user *buf, size_t count,
 	set_current_state(TASK_RUNNING);
 	remove_wait_queue(&apbs[IndexCard].FlagSleepSend, &wait);
 
-	writeb(1, apbs[IndexCard].RamIO + DATA_FROM_PC_READY);
+	pete_writeb("drivers/char/applicom.c:456", 1, apbs[IndexCard].RamIO + DATA_FROM_PC_READY);
 
 	/* Which is best - lock down the pages with rawio and then
 	   copy directly, or use bounce buffers? For now we do the latter 
@@ -464,16 +464,16 @@ static ssize_t ac_write(struct file *file, const char __user *buf, size_t count,
 		int c;
 
 		for (c = 0; c < sizeof(struct mailbox); c++)
-			writeb(*(from++), to++);
+			pete_writeb("drivers/char/applicom.c:467", *(from++), to++);
 	}
 
-	writeb(0x20, apbs[IndexCard].RamIO + TIC_OWNER_FROM_PC);
-	writeb(0xff, apbs[IndexCard].RamIO + NUMCARD_OWNER_FROM_PC);
-	writeb(TicCard, apbs[IndexCard].RamIO + TIC_DES_FROM_PC);
-	writeb(NumCard, apbs[IndexCard].RamIO + NUMCARD_DES_FROM_PC);
-	writeb(2, apbs[IndexCard].RamIO + DATA_FROM_PC_READY);
-	writeb(1, apbs[IndexCard].RamIO + RAM_IT_FROM_PC);
-	Dummy = readb(apbs[IndexCard].RamIO + VERS);
+	pete_writeb("drivers/char/applicom.c:470", 0x20, apbs[IndexCard].RamIO + TIC_OWNER_FROM_PC);
+	pete_writeb("drivers/char/applicom.c:471", 0xff, apbs[IndexCard].RamIO + NUMCARD_OWNER_FROM_PC);
+	pete_writeb("drivers/char/applicom.c:472", TicCard, apbs[IndexCard].RamIO + TIC_DES_FROM_PC);
+	pete_writeb("drivers/char/applicom.c:473", NumCard, apbs[IndexCard].RamIO + NUMCARD_DES_FROM_PC);
+	pete_writeb("drivers/char/applicom.c:474", 2, apbs[IndexCard].RamIO + DATA_FROM_PC_READY);
+	pete_writeb("drivers/char/applicom.c:475", 1, apbs[IndexCard].RamIO + RAM_IT_FROM_PC);
+	Dummy = pete_readb("drivers/char/applicom.c:476", apbs[IndexCard].RamIO + VERS);
 	spin_unlock_irqrestore(&apbs[IndexCard].mutex, flags);
 	return 0;
 }
@@ -487,25 +487,25 @@ static int do_ac_read(int IndexCard, char __user *buf,
 	int c;
 #endif
 
-	st_loc->tic_owner_to_pc = readb(apbs[IndexCard].RamIO + TIC_OWNER_TO_PC);
-	st_loc->numcard_owner_to_pc = readb(apbs[IndexCard].RamIO + NUMCARD_OWNER_TO_PC);
+	st_loc->tic_owner_to_pc = pete_readb("drivers/char/applicom.c:490", apbs[IndexCard].RamIO + TIC_OWNER_TO_PC);
+	st_loc->numcard_owner_to_pc = pete_readb("drivers/char/applicom.c:491", apbs[IndexCard].RamIO + NUMCARD_OWNER_TO_PC);
 
 
 	{
 		int c;
 
 		for (c = 0; c < sizeof(struct mailbox); c++)
-			*(to++) = readb(from++);
+			*(to++) = pete_readb("drivers/char/applicom.c:498", from++);
 	}
-	writeb(1, apbs[IndexCard].RamIO + ACK_FROM_PC_READY);
-	writeb(1, apbs[IndexCard].RamIO + TYP_ACK_FROM_PC);
-	writeb(IndexCard+1, apbs[IndexCard].RamIO + NUMCARD_ACK_FROM_PC);
-	writeb(readb(apbs[IndexCard].RamIO + TIC_OWNER_TO_PC), 
+	pete_writeb("drivers/char/applicom.c:500", 1, apbs[IndexCard].RamIO + ACK_FROM_PC_READY);
+	pete_writeb("drivers/char/applicom.c:501", 1, apbs[IndexCard].RamIO + TYP_ACK_FROM_PC);
+	pete_writeb("drivers/char/applicom.c:502", IndexCard+1, apbs[IndexCard].RamIO + NUMCARD_ACK_FROM_PC);
+	pete_writeb("drivers/char/applicom.c:503", pete_readb("drivers/char/applicom.c:503", apbs[IndexCard].RamIO + TIC_OWNER_TO_PC), 
 	       apbs[IndexCard].RamIO + TIC_ACK_FROM_PC);
-	writeb(2, apbs[IndexCard].RamIO + ACK_FROM_PC_READY);
-	writeb(0, apbs[IndexCard].RamIO + DATA_TO_PC_READY);
-	writeb(2, apbs[IndexCard].RamIO + RAM_IT_FROM_PC);
-	Dummy = readb(apbs[IndexCard].RamIO + VERS);
+	pete_writeb("drivers/char/applicom.c:505", 2, apbs[IndexCard].RamIO + ACK_FROM_PC_READY);
+	pete_writeb("drivers/char/applicom.c:506", 0, apbs[IndexCard].RamIO + DATA_TO_PC_READY);
+	pete_writeb("drivers/char/applicom.c:507", 2, apbs[IndexCard].RamIO + RAM_IT_FROM_PC);
+	Dummy = pete_readb("drivers/char/applicom.c:508", apbs[IndexCard].RamIO + VERS);
 
 #ifdef DEBUG
 		printk("Read from applicom card #%d. struct st_ram_io follows:", NumCard);
@@ -560,7 +560,7 @@ static ssize_t ac_read (struct file *filp, char __user *buf, size_t count, loff_
 				continue;
 			spin_lock_irqsave(&apbs[i].mutex, flags);
 			
-			tmp = readb(apbs[i].RamIO + DATA_TO_PC_READY);
+			tmp = pete_readb("drivers/char/applicom.c:563", apbs[i].RamIO + DATA_TO_PC_READY);
 			
 			if (tmp == 2) {
 				struct st_ram_io st_loc;
@@ -582,20 +582,20 @@ static ssize_t ac_read (struct file *filp, char __user *buf, size_t count, loff_
 			
 			if (tmp > 2) {
 				/* Got an error */
-				Dummy = readb(apbs[i].RamIO + VERS);
+				Dummy = pete_readb("drivers/char/applicom.c:585", apbs[i].RamIO + VERS);
 				
 				spin_unlock_irqrestore(&apbs[i].mutex, flags);
 				set_current_state(TASK_RUNNING);
 				remove_wait_queue(&FlagSleepRec, &wait);
 				
 				printk(KERN_WARNING "APPLICOM driver read error board %d, DataToPcReady = %d\n",
-				       i,(int)readb(apbs[i].RamIO + DATA_TO_PC_READY));
+				       i,(int)pete_readb("drivers/char/applicom.c:592", apbs[i].RamIO + DATA_TO_PC_READY));
 				DeviceErrorCount++;
 				return -EIO;
 			}
 			
 			/* Nothing for us. Try the next board */
-			Dummy = readb(apbs[i].RamIO + VERS);
+			Dummy = pete_readb("drivers/char/applicom.c:598", apbs[i].RamIO + VERS);
 			spin_unlock_irqrestore(&apbs[i].mutex, flags);
 			
 		} /* per board */
@@ -638,43 +638,43 @@ static irqreturn_t ac_interrupt(int vec, void *dev_instance)
 			spin_lock(&apbs[i].mutex);
 
 			/* Skip if this board doesn't want attention */
-			if(readb(apbs[i].RamIO + RAM_IT_TO_PC) == 0) {
+			if(pete_readb("drivers/char/applicom.c:641", apbs[i].RamIO + RAM_IT_TO_PC) == 0) {
 				spin_unlock(&apbs[i].mutex);
 				continue;
 			}
 
 			handled = 1;
 			FlagInt = 1;
-			writeb(0, apbs[i].RamIO + RAM_IT_TO_PC);
+			pete_writeb("drivers/char/applicom.c:648", 0, apbs[i].RamIO + RAM_IT_TO_PC);
 
-			if (readb(apbs[i].RamIO + DATA_TO_PC_READY) > 2) {
+			if (pete_readb("drivers/char/applicom.c:650", apbs[i].RamIO + DATA_TO_PC_READY) > 2) {
 				printk(KERN_WARNING "APPLICOM driver interrupt err board %d, DataToPcReady = %d\n",
-				       i+1,(int)readb(apbs[i].RamIO + DATA_TO_PC_READY));
+				       i+1,(int)pete_readb("drivers/char/applicom.c:652", apbs[i].RamIO + DATA_TO_PC_READY));
 				DeviceErrorCount++;
 			}
 
-			if((readb(apbs[i].RamIO + DATA_FROM_PC_READY) > 2) && 
-			   (readb(apbs[i].RamIO + DATA_FROM_PC_READY) != 6)) {
+			if((pete_readb("drivers/char/applicom.c:656", apbs[i].RamIO + DATA_FROM_PC_READY) > 2) && 
+			   (pete_readb("drivers/char/applicom.c:657", apbs[i].RamIO + DATA_FROM_PC_READY) != 6)) {
 				
 				printk(KERN_WARNING "APPLICOM driver interrupt err board %d, DataFromPcReady = %d\n",
-				       i+1,(int)readb(apbs[i].RamIO + DATA_FROM_PC_READY));
+				       i+1,(int)pete_readb("drivers/char/applicom.c:660", apbs[i].RamIO + DATA_FROM_PC_READY));
 				DeviceErrorCount++;
 			}
 
-			if (readb(apbs[i].RamIO + DATA_TO_PC_READY) == 2) {	/* mailbox sent by the card ?   */
+			if (pete_readb("drivers/char/applicom.c:664", apbs[i].RamIO + DATA_TO_PC_READY) == 2) {	/* mailbox sent by the card ?   */
 				if (waitqueue_active(&FlagSleepRec)) {
 				wake_up_interruptible(&FlagSleepRec);
 			}
 			}
 
-			if (readb(apbs[i].RamIO + DATA_FROM_PC_READY) == 0) {	/* ram i/o free for write by pc ? */
+			if (pete_readb("drivers/char/applicom.c:670", apbs[i].RamIO + DATA_FROM_PC_READY) == 0) {	/* ram i/o free for write by pc ? */
 				if (waitqueue_active(&apbs[i].FlagSleepSend)) {	/* process sleep during read ?    */
 					wake_up_interruptible(&apbs[i].FlagSleepSend);
 				}
 			}
-			Dummy = readb(apbs[i].RamIO + VERS);
+			Dummy = pete_readb("drivers/char/applicom.c:675", apbs[i].RamIO + VERS);
 
-			if(readb(apbs[i].RamIO + RAM_IT_TO_PC)) {
+			if(pete_readb("drivers/char/applicom.c:677", apbs[i].RamIO + RAM_IT_TO_PC)) {
 				/* There's another int waiting on this card */
 				spin_unlock(&apbs[i].mutex);
 				i--;
@@ -726,27 +726,27 @@ static long ac_ioctl(struct file *file, unsigned int cmd, unsigned long arg)
 	case 0:
 		pmem = apbs[IndexCard].RamIO;
 		for (i = 0; i < sizeof(struct st_ram_io); i++)
-			((unsigned char *)adgl)[i]=readb(pmem++);
+			((unsigned char *)adgl)[i]=pete_readb("drivers/char/applicom.c:729", pmem++);
 		if (copy_to_user(argp, adgl, sizeof(struct st_ram_io)))
 			ret = -EFAULT;
 		break;
 	case 1:
 		pmem = apbs[IndexCard].RamIO + CONF_END_TEST;
 		for (i = 0; i < 4; i++)
-			adgl->conf_end_test[i] = readb(pmem++);
+			adgl->conf_end_test[i] = pete_readb("drivers/char/applicom.c:736", pmem++);
 		for (i = 0; i < 2; i++)
-			adgl->error_code[i] = readb(pmem++);
+			adgl->error_code[i] = pete_readb("drivers/char/applicom.c:738", pmem++);
 		for (i = 0; i < 4; i++)
-			adgl->parameter_error[i] = readb(pmem++);
+			adgl->parameter_error[i] = pete_readb("drivers/char/applicom.c:740", pmem++);
 		pmem = apbs[IndexCard].RamIO + VERS;
-		adgl->vers = readb(pmem);
+		adgl->vers = pete_readb("drivers/char/applicom.c:742", pmem);
 		pmem = apbs[IndexCard].RamIO + TYPE_CARD;
 		for (i = 0; i < 20; i++)
-			adgl->reserv1[i] = readb(pmem++);
+			adgl->reserv1[i] = pete_readb("drivers/char/applicom.c:745", pmem++);
 		*(int *)&adgl->reserv1[20] =  
-			(readb(apbs[IndexCard].RamIO + SERIAL_NUMBER) << 16) + 
-			(readb(apbs[IndexCard].RamIO + SERIAL_NUMBER + 1) << 8) + 
-			(readb(apbs[IndexCard].RamIO + SERIAL_NUMBER + 2) );
+			(pete_readb("drivers/char/applicom.c:747", apbs[IndexCard].RamIO + SERIAL_NUMBER) << 16) + 
+			(pete_readb("drivers/char/applicom.c:748", apbs[IndexCard].RamIO + SERIAL_NUMBER + 1) << 8) + 
+			(pete_readb("drivers/char/applicom.c:749", apbs[IndexCard].RamIO + SERIAL_NUMBER + 2) );
 
 		if (copy_to_user(argp, adgl, sizeof(struct st_ram_io)))
 			ret = -EFAULT;
@@ -754,35 +754,35 @@ static long ac_ioctl(struct file *file, unsigned int cmd, unsigned long arg)
 	case 2:
 		pmem = apbs[IndexCard].RamIO + CONF_END_TEST;
 		for (i = 0; i < 10; i++)
-			writeb(0xff, pmem++);
-		writeb(adgl->data_from_pc_ready, 
+			pete_writeb("drivers/char/applicom.c:757", 0xff, pmem++);
+		pete_writeb("drivers/char/applicom.c:758", adgl->data_from_pc_ready, 
 		       apbs[IndexCard].RamIO + DATA_FROM_PC_READY);
 
-		writeb(1, apbs[IndexCard].RamIO + RAM_IT_FROM_PC);
+		pete_writeb("drivers/char/applicom.c:761", 1, apbs[IndexCard].RamIO + RAM_IT_FROM_PC);
 		
 		for (i = 0; i < MAX_BOARD; i++) {
 			if (apbs[i].RamIO) {
-				byte_reset_it = readb(apbs[i].RamIO + RAM_IT_TO_PC);
+				byte_reset_it = pete_readb("drivers/char/applicom.c:765", apbs[i].RamIO + RAM_IT_TO_PC);
 			}
 		}
 		break;
 	case 3:
 		pmem = apbs[IndexCard].RamIO + TIC_DES_FROM_PC;
-		writeb(adgl->tic_des_from_pc, pmem);
+		pete_writeb("drivers/char/applicom.c:771", adgl->tic_des_from_pc, pmem);
 		break;
 	case 4:
 		pmem = apbs[IndexCard].RamIO + TIC_OWNER_TO_PC;
-		adgl->tic_owner_to_pc     = readb(pmem++);
-		adgl->numcard_owner_to_pc = readb(pmem);
+		adgl->tic_owner_to_pc     = pete_readb("drivers/char/applicom.c:775", pmem++);
+		adgl->numcard_owner_to_pc = pete_readb("drivers/char/applicom.c:776", pmem);
 		if (copy_to_user(argp, adgl,sizeof(struct st_ram_io)))
 			ret = -EFAULT;
 		break;
 	case 5:
-		writeb(adgl->num_card, apbs[IndexCard].RamIO + NUMCARD_OWNER_TO_PC);
-		writeb(adgl->num_card, apbs[IndexCard].RamIO + NUMCARD_DES_FROM_PC);
-		writeb(adgl->num_card, apbs[IndexCard].RamIO + NUMCARD_ACK_FROM_PC);
-		writeb(4, apbs[IndexCard].RamIO + DATA_FROM_PC_READY);
-		writeb(1, apbs[IndexCard].RamIO + RAM_IT_FROM_PC);
+		pete_writeb("drivers/char/applicom.c:781", adgl->num_card, apbs[IndexCard].RamIO + NUMCARD_OWNER_TO_PC);
+		pete_writeb("drivers/char/applicom.c:782", adgl->num_card, apbs[IndexCard].RamIO + NUMCARD_DES_FROM_PC);
+		pete_writeb("drivers/char/applicom.c:783", adgl->num_card, apbs[IndexCard].RamIO + NUMCARD_ACK_FROM_PC);
+		pete_writeb("drivers/char/applicom.c:784", 4, apbs[IndexCard].RamIO + DATA_FROM_PC_READY);
+		pete_writeb("drivers/char/applicom.c:785", 1, apbs[IndexCard].RamIO + RAM_IT_FROM_PC);
 		break;
 	case 6:
 		printk(KERN_INFO "APPLICOM driver release .... V2.8.0 ($Revision: 1.30 $)\n");
@@ -797,19 +797,19 @@ static long ac_ioctl(struct file *file, unsigned int cmd, unsigned long arg)
 				continue;
 
 			for (serial = 0; serial < SERIAL_NUMBER - TYPE_CARD; serial++)
-				boardname[serial] = readb(apbs[i].RamIO + TYPE_CARD + serial);
+				boardname[serial] = pete_readb("drivers/char/applicom.c:800", apbs[i].RamIO + TYPE_CARD + serial);
 			boardname[serial] = 0;
 
 			printk(KERN_INFO "Prom version board %d ....... V%d.%d %s",
 			       i+1,
-			       (int)(readb(apbs[i].RamIO + VERS) >> 4),
-			       (int)(readb(apbs[i].RamIO + VERS) & 0xF),
+			       (int)(pete_readb("drivers/char/applicom.c:805", apbs[i].RamIO + VERS) >> 4),
+			       (int)(pete_readb("drivers/char/applicom.c:806", apbs[i].RamIO + VERS) & 0xF),
 			       boardname);
 
 
-			serial = (readb(apbs[i].RamIO + SERIAL_NUMBER) << 16) + 
-				(readb(apbs[i].RamIO + SERIAL_NUMBER + 1) << 8) + 
-				(readb(apbs[i].RamIO + SERIAL_NUMBER + 2) );
+			serial = (pete_readb("drivers/char/applicom.c:810", apbs[i].RamIO + SERIAL_NUMBER) << 16) + 
+				(pete_readb("drivers/char/applicom.c:811", apbs[i].RamIO + SERIAL_NUMBER + 1) << 8) + 
+				(pete_readb("drivers/char/applicom.c:812", apbs[i].RamIO + SERIAL_NUMBER + 2) );
 
 			if (serial != 0)
 				printk(" S/N %d\n", serial);
@@ -833,7 +833,7 @@ static long ac_ioctl(struct file *file, unsigned int cmd, unsigned long arg)
 		ret = -ENOTTY;
 		break;
 	}
-	Dummy = readb(apbs[IndexCard].RamIO + VERS);
+	Dummy = pete_readb("drivers/char/applicom.c:836", apbs[IndexCard].RamIO + VERS);
 	kfree(adgl);
 	mutex_unlock(&ac_mutex);
 	return ret;

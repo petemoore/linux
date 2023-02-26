@@ -194,7 +194,7 @@ bool ixgbe_alloc_rx_buffers_zc(struct ixgbe_ring *rx_ring, u16 count)
 		 * such as IA-64).
 		 */
 		wmb();
-		writel(i, rx_ring->tail);
+		pete_writel("drivers/net/ethernet/intel/ixgbe/ixgbe_xsk.c:197", i, rx_ring->tail);
 	}
 
 	return ok;
@@ -345,7 +345,7 @@ int ixgbe_clean_rx_irq_zc(struct ixgbe_q_vector *q_vector,
 		 * know there are new descriptors to fetch.
 		 */
 		wmb();
-		writel(ring->next_to_use, ring->tail);
+		pete_writel("drivers/net/ethernet/intel/ixgbe/ixgbe_xsk.c:348", ring->next_to_use, ring->tail);
 	}
 
 	u64_stats_update_begin(&rx_ring->syncp);

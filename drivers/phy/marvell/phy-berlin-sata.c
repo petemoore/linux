@@ -68,13 +68,13 @@ static inline void phy_berlin_sata_reg_setbits(void __iomem *ctrl_reg,
 	u32 regval;
 
 	/* select register */
-	writel(phy_base + reg, ctrl_reg + PORT_VSR_ADDR);
+	pete_writel("drivers/phy/marvell/phy-berlin-sata.c:71", phy_base + reg, ctrl_reg + PORT_VSR_ADDR);
 
 	/* set bits */
-	regval = readl(ctrl_reg + PORT_VSR_DATA);
+	regval = pete_readl("drivers/phy/marvell/phy-berlin-sata.c:74", ctrl_reg + PORT_VSR_DATA);
 	regval &= ~mask;
 	regval |= val;
-	writel(regval, ctrl_reg + PORT_VSR_DATA);
+	pete_writel("drivers/phy/marvell/phy-berlin-sata.c:77", regval, ctrl_reg + PORT_VSR_DATA);
 }
 
 static int phy_berlin_sata_power_on(struct phy *phy)
@@ -89,16 +89,16 @@ static int phy_berlin_sata_power_on(struct phy *phy)
 	spin_lock(&priv->lock);
 
 	/* Power on PHY */
-	writel(CONTROL_REGISTER, priv->base + HOST_VSA_ADDR);
-	regval = readl(priv->base + HOST_VSA_DATA);
+	pete_writel("drivers/phy/marvell/phy-berlin-sata.c:92", CONTROL_REGISTER, priv->base + HOST_VSA_ADDR);
+	regval = pete_readl("drivers/phy/marvell/phy-berlin-sata.c:93", priv->base + HOST_VSA_DATA);
 	regval &= ~desc->power_bit;
-	writel(regval, priv->base + HOST_VSA_DATA);
+	pete_writel("drivers/phy/marvell/phy-berlin-sata.c:95", regval, priv->base + HOST_VSA_DATA);
 
 	/* Configure MBus */
-	writel(MBUS_SIZE_CONTROL, priv->base + HOST_VSA_ADDR);
-	regval = readl(priv->base + HOST_VSA_DATA);
+	pete_writel("drivers/phy/marvell/phy-berlin-sata.c:98", MBUS_SIZE_CONTROL, priv->base + HOST_VSA_ADDR);
+	regval = pete_readl("drivers/phy/marvell/phy-berlin-sata.c:99", priv->base + HOST_VSA_DATA);
 	regval |= MBUS_WRITE_REQUEST_SIZE_128 | MBUS_READ_REQUEST_SIZE_128;
-	writel(regval, priv->base + HOST_VSA_DATA);
+	pete_writel("drivers/phy/marvell/phy-berlin-sata.c:101", regval, priv->base + HOST_VSA_DATA);
 
 	/* set PHY mode and ref freq to 25 MHz */
 	phy_berlin_sata_reg_setbits(ctrl_reg, priv->phy_base, 0x01,
@@ -118,10 +118,10 @@ static int phy_berlin_sata_power_on(struct phy *phy)
 				    0x0000, USE_MAX_PLL_RATE);
 
 	/* set Gen3 controller speed */
-	regval = readl(ctrl_reg + PORT_SCR_CTL);
+	regval = pete_readl("drivers/phy/marvell/phy-berlin-sata.c:121", ctrl_reg + PORT_SCR_CTL);
 	regval &= ~GENMASK(7, 4);
 	regval |= 0x30;
-	writel(regval, ctrl_reg + PORT_SCR_CTL);
+	pete_writel("drivers/phy/marvell/phy-berlin-sata.c:124", regval, ctrl_reg + PORT_SCR_CTL);
 
 	spin_unlock(&priv->lock);
 
@@ -141,10 +141,10 @@ static int phy_berlin_sata_power_off(struct phy *phy)
 	spin_lock(&priv->lock);
 
 	/* Power down PHY */
-	writel(CONTROL_REGISTER, priv->base + HOST_VSA_ADDR);
-	regval = readl(priv->base + HOST_VSA_DATA);
+	pete_writel("drivers/phy/marvell/phy-berlin-sata.c:144", CONTROL_REGISTER, priv->base + HOST_VSA_ADDR);
+	regval = pete_readl("drivers/phy/marvell/phy-berlin-sata.c:145", priv->base + HOST_VSA_DATA);
 	regval |= desc->power_bit;
-	writel(regval, priv->base + HOST_VSA_DATA);
+	pete_writel("drivers/phy/marvell/phy-berlin-sata.c:147", regval, priv->base + HOST_VSA_DATA);
 
 	spin_unlock(&priv->lock);
 

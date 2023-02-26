@@ -422,7 +422,7 @@ static inline void snd_hdac_reg_writeb(struct hdac_bus *bus, void __iomem *addr,
 	if (snd_hdac_aligned_mmio(bus))
 		snd_hdac_aligned_write(val, addr, 0xff);
 	else
-		writeb(val, addr);
+		pete_writeb("include/sound/hdaudio.h:425", val, addr);
 }
 
 static inline void snd_hdac_reg_writew(struct hdac_bus *bus, void __iomem *addr,
@@ -431,23 +431,23 @@ static inline void snd_hdac_reg_writew(struct hdac_bus *bus, void __iomem *addr,
 	if (snd_hdac_aligned_mmio(bus))
 		snd_hdac_aligned_write(val, addr, 0xffff);
 	else
-		writew(val, addr);
+		pete_writew("include/sound/hdaudio.h:434", val, addr);
 }
 
 static inline u8 snd_hdac_reg_readb(struct hdac_bus *bus, void __iomem *addr)
 {
 	return snd_hdac_aligned_mmio(bus) ?
-		snd_hdac_aligned_read(addr, 0xff) : readb(addr);
+		snd_hdac_aligned_read(addr, 0xff) : pete_readb("include/sound/hdaudio.h:440", addr);
 }
 
 static inline u16 snd_hdac_reg_readw(struct hdac_bus *bus, void __iomem *addr)
 {
 	return snd_hdac_aligned_mmio(bus) ?
-		snd_hdac_aligned_read(addr, 0xffff) : readw(addr);
+		snd_hdac_aligned_read(addr, 0xffff) : pete_readw("include/sound/hdaudio.h:446", addr);
 }
 
-#define snd_hdac_reg_writel(bus, addr, val)	writel(val, addr)
-#define snd_hdac_reg_readl(bus, addr)	readl(addr)
+#define snd_hdac_reg_writel(bus, addr, val)	pete_writel("include/sound/hdaudio.h:449", val, addr)
+#define snd_hdac_reg_readl(bus, addr)	pete_readl("include/sound/hdaudio.h:450", addr)
 
 /*
  * macros for easy use

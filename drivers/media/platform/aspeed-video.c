@@ -427,19 +427,19 @@ static void aspeed_video_init_jpeg_table(u32 *table, bool yuv420)
 static void aspeed_video_update(struct aspeed_video *video, u32 reg, u32 clear,
 				u32 bits)
 {
-	u32 t = readl(video->base + reg);
+	u32 t = pete_readl("drivers/media/platform/aspeed-video.c:430", video->base + reg);
 	u32 before = t;
 
 	t &= ~clear;
 	t |= bits;
-	writel(t, video->base + reg);
+	pete_writel("drivers/media/platform/aspeed-video.c:435", t, video->base + reg);
 	dev_dbg(video->dev, "update %03x[%08x -> %08x]\n", reg, before,
-		readl(video->base + reg));
+		pete_readl("drivers/media/platform/aspeed-video.c:437", video->base + reg));
 }
 
 static u32 aspeed_video_read(struct aspeed_video *video, u32 reg)
 {
-	u32 t = readl(video->base + reg);
+	u32 t = pete_readl("drivers/media/platform/aspeed-video.c:442", video->base + reg);
 
 	dev_dbg(video->dev, "read %03x[%08x]\n", reg, t);
 	return t;
@@ -447,9 +447,9 @@ static u32 aspeed_video_read(struct aspeed_video *video, u32 reg)
 
 static void aspeed_video_write(struct aspeed_video *video, u32 reg, u32 val)
 {
-	writel(val, video->base + reg);
+	pete_writel("drivers/media/platform/aspeed-video.c:450", val, video->base + reg);
 	dev_dbg(video->dev, "write %03x[%08x]\n", reg,
-		readl(video->base + reg));
+		pete_readl("drivers/media/platform/aspeed-video.c:452", video->base + reg));
 }
 
 static int aspeed_video_start_frame(struct aspeed_video *video)

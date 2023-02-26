@@ -522,7 +522,7 @@ static void armada_37xx_irq_ack(struct irq_data *d)
 
 	armada_37xx_irq_update_reg(&reg, d);
 	spin_lock_irqsave(&info->irq_lock, flags);
-	writel(d->mask, info->base + reg);
+	pete_writel("drivers/pinctrl/mvebu/pinctrl-armada-37xx.c:525", d->mask, info->base + reg);
 	spin_unlock_irqrestore(&info->irq_lock, flags);
 }
 
@@ -535,8 +535,8 @@ static void armada_37xx_irq_mask(struct irq_data *d)
 
 	armada_37xx_irq_update_reg(&reg, d);
 	spin_lock_irqsave(&info->irq_lock, flags);
-	val = readl(info->base + reg);
-	writel(val & ~d->mask, info->base + reg);
+	val = pete_readl("drivers/pinctrl/mvebu/pinctrl-armada-37xx.c:538", info->base + reg);
+	pete_writel("drivers/pinctrl/mvebu/pinctrl-armada-37xx.c:539", val & ~d->mask, info->base + reg);
 	spin_unlock_irqrestore(&info->irq_lock, flags);
 }
 
@@ -549,8 +549,8 @@ static void armada_37xx_irq_unmask(struct irq_data *d)
 
 	armada_37xx_irq_update_reg(&reg, d);
 	spin_lock_irqsave(&info->irq_lock, flags);
-	val = readl(info->base + reg);
-	writel(val | d->mask, info->base + reg);
+	val = pete_readl("drivers/pinctrl/mvebu/pinctrl-armada-37xx.c:552", info->base + reg);
+	pete_writel("drivers/pinctrl/mvebu/pinctrl-armada-37xx.c:553", val | d->mask, info->base + reg);
 	spin_unlock_irqrestore(&info->irq_lock, flags);
 }
 
@@ -563,12 +563,12 @@ static int armada_37xx_irq_set_wake(struct irq_data *d, unsigned int on)
 
 	armada_37xx_irq_update_reg(&reg, d);
 	spin_lock_irqsave(&info->irq_lock, flags);
-	val = readl(info->base + reg);
+	val = pete_readl("drivers/pinctrl/mvebu/pinctrl-armada-37xx.c:566", info->base + reg);
 	if (on)
 		val |= (BIT(d->hwirq % GPIO_PER_REG));
 	else
 		val &= ~(BIT(d->hwirq % GPIO_PER_REG));
-	writel(val, info->base + reg);
+	pete_writel("drivers/pinctrl/mvebu/pinctrl-armada-37xx.c:571", val, info->base + reg);
 	spin_unlock_irqrestore(&info->irq_lock, flags);
 
 	return 0;
@@ -583,7 +583,7 @@ static int armada_37xx_irq_set_type(struct irq_data *d, unsigned int type)
 
 	spin_lock_irqsave(&info->irq_lock, flags);
 	armada_37xx_irq_update_reg(&reg, d);
-	val = readl(info->base + reg);
+	val = pete_readl("drivers/pinctrl/mvebu/pinctrl-armada-37xx.c:586", info->base + reg);
 	switch (type) {
 	case IRQ_TYPE_EDGE_RISING:
 		val &= ~(BIT(d->hwirq % GPIO_PER_REG));
@@ -608,7 +608,7 @@ static int armada_37xx_irq_set_type(struct irq_data *d, unsigned int type)
 		spin_unlock_irqrestore(&info->irq_lock, flags);
 		return -EINVAL;
 	}
-	writel(val, info->base + reg);
+	pete_writel("drivers/pinctrl/mvebu/pinctrl-armada-37xx.c:611", val, info->base + reg);
 	spin_unlock_irqrestore(&info->irq_lock, flags);
 
 	return 0;
@@ -625,7 +625,7 @@ static int armada_37xx_edge_both_irq_swap_pol(struct armada_37xx_pinctrl *info,
 	regmap_read(info->regmap, INPUT_VAL + 4*reg_idx, &l);
 
 	spin_lock_irqsave(&info->irq_lock, flags);
-	p = readl(info->base + IRQ_POL + 4 * reg_idx);
+	p = pete_readl("drivers/pinctrl/mvebu/pinctrl-armada-37xx.c:628", info->base + IRQ_POL + 4 * reg_idx);
 	if ((p ^ l) & (1 << bit_num)) {
 		/*
 		 * For the gpios which are used for both-edge irqs, when their
@@ -638,7 +638,7 @@ static int armada_37xx_edge_both_irq_swap_pol(struct armada_37xx_pinctrl *info,
 		 * polarity control to "Detect falling edge" correspondingly.
 		 */
 		p ^= 1 << bit_num;
-		writel(p, info->base + IRQ_POL + 4 * reg_idx);
+		pete_writel("drivers/pinctrl/mvebu/pinctrl-armada-37xx.c:641", p, info->base + IRQ_POL + 4 * reg_idx);
 		ret = 0;
 	} else {
 		/* Spurious irq */
@@ -682,7 +682,7 @@ static void armada_37xx_irq_handler(struct irq_desc *desc)
 					 * is not as expected after incoming
 					 * edge, just ack the gpio irq.
 					 */
-					writel(1 << hwirq,
+					pete_writel("drivers/pinctrl/mvebu/pinctrl-armada-37xx.c:685", 1 << hwirq,
 					       info->base +
 					       IRQ_STATUS + 4 * i);
 					goto update_status;
@@ -1012,10 +1012,10 @@ static int armada_3700_pinctrl_suspend(struct device *dev)
 	regmap_read(info->regmap, OUTPUT_VAL + sizeof(u32),
 		    &info->pm.out_val_h);
 
-	info->pm.irq_en_l = readl(info->base + IRQ_EN);
-	info->pm.irq_en_h = readl(info->base + IRQ_EN + sizeof(u32));
-	info->pm.irq_pol_l = readl(info->base + IRQ_POL);
-	info->pm.irq_pol_h = readl(info->base + IRQ_POL + sizeof(u32));
+	info->pm.irq_en_l = pete_readl("drivers/pinctrl/mvebu/pinctrl-armada-37xx.c:1015", info->base + IRQ_EN);
+	info->pm.irq_en_h = pete_readl("drivers/pinctrl/mvebu/pinctrl-armada-37xx.c:1016", info->base + IRQ_EN + sizeof(u32));
+	info->pm.irq_pol_l = pete_readl("drivers/pinctrl/mvebu/pinctrl-armada-37xx.c:1017", info->base + IRQ_POL);
+	info->pm.irq_pol_h = pete_readl("drivers/pinctrl/mvebu/pinctrl-armada-37xx.c:1018", info->base + IRQ_POL + sizeof(u32));
 
 	/* Save pinctrl state */
 	regmap_read(info->regmap, SELECTION, &info->pm.selection);
@@ -1079,10 +1079,10 @@ static int armada_3700_pinctrl_resume(struct device *dev)
 		}
 	}
 
-	writel(info->pm.irq_en_l, info->base + IRQ_EN);
-	writel(info->pm.irq_en_h, info->base + IRQ_EN + sizeof(u32));
-	writel(info->pm.irq_pol_l, info->base + IRQ_POL);
-	writel(info->pm.irq_pol_h, info->base + IRQ_POL + sizeof(u32));
+	pete_writel("drivers/pinctrl/mvebu/pinctrl-armada-37xx.c:1082", info->pm.irq_en_l, info->base + IRQ_EN);
+	pete_writel("drivers/pinctrl/mvebu/pinctrl-armada-37xx.c:1083", info->pm.irq_en_h, info->base + IRQ_EN + sizeof(u32));
+	pete_writel("drivers/pinctrl/mvebu/pinctrl-armada-37xx.c:1084", info->pm.irq_pol_l, info->base + IRQ_POL);
+	pete_writel("drivers/pinctrl/mvebu/pinctrl-armada-37xx.c:1085", info->pm.irq_pol_h, info->base + IRQ_POL + sizeof(u32));
 
 	/* Restore pinctrl state */
 	regmap_write(info->regmap, SELECTION, info->pm.selection);

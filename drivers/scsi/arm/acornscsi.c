@@ -184,29 +184,29 @@ static void acornscsi_abortcmd(AS_Host *host);
 
 static inline void sbic_arm_write(AS_Host *host, unsigned int reg, unsigned int value)
 {
-    writeb(reg, host->base + SBIC_REGIDX);
-    writeb(value, host->base + SBIC_REGVAL);
+    pete_writeb("drivers/scsi/arm/acornscsi.c:187", reg, host->base + SBIC_REGIDX);
+    pete_writeb("drivers/scsi/arm/acornscsi.c:188", value, host->base + SBIC_REGVAL);
 }
 
 static inline int sbic_arm_read(AS_Host *host, unsigned int reg)
 {
     if(reg == SBIC_ASR)
-	   return readl(host->base + SBIC_REGIDX) & 255;
-    writeb(reg, host->base + SBIC_REGIDX);
-    return readl(host->base + SBIC_REGVAL) & 255;
+	   return pete_readl("drivers/scsi/arm/acornscsi.c:194", host->base + SBIC_REGIDX) & 255;
+    pete_writeb("drivers/scsi/arm/acornscsi.c:195", reg, host->base + SBIC_REGIDX);
+    return pete_readl("drivers/scsi/arm/acornscsi.c:196", host->base + SBIC_REGVAL) & 255;
 }
 
-#define sbic_arm_writenext(host, val)	writeb((val), (host)->base + SBIC_REGVAL)
-#define sbic_arm_readnext(host) 	readb((host)->base + SBIC_REGVAL)
+#define sbic_arm_writenext(host, val)	pete_writeb("drivers/scsi/arm/acornscsi.c:199", (val), (host)->base + SBIC_REGVAL)
+#define sbic_arm_readnext(host) 	pete_readb("drivers/scsi/arm/acornscsi.c:200", (host)->base + SBIC_REGVAL)
 
 #ifdef USE_DMAC
 #define dmac_read(host,reg) \
-	readb((host)->base + DMAC_OFFSET + ((reg) << 2))
+	pete_readb("drivers/scsi/arm/acornscsi.c:204", (host)->base + DMAC_OFFSET + ((reg) << 2))
 
 #define dmac_write(host,reg,value) \
-	({ writeb((value), (host)->base + DMAC_OFFSET + ((reg) << 2)); })
+	({ pete_writeb("drivers/scsi/arm/acornscsi.c:207", (value), (host)->base + DMAC_OFFSET + ((reg) << 2)); })
 
-#define dmac_clearintr(host) 	writeb(0, (host)->fast + INT_REG)
+#define dmac_clearintr(host) 	pete_writeb("drivers/scsi/arm/acornscsi.c:209", 0, (host)->fast + INT_REG)
 
 static inline unsigned int dmac_address(AS_Host *host)
 {
@@ -303,20 +303,20 @@ void acornscsi_resetcard(AS_Host *host)
 
     /* assert reset line */
     host->card.page_reg = 0x80;
-    writeb(host->card.page_reg, host->fast + PAGE_REG);
+    pete_writeb("drivers/scsi/arm/acornscsi.c:306", host->card.page_reg, host->fast + PAGE_REG);
 
     /* wait 3 cs.  SCSI standard says 25ms. */
     acornscsi_csdelay(3);
 
     host->card.page_reg = 0;
-    writeb(host->card.page_reg, host->fast + PAGE_REG);
+    pete_writeb("drivers/scsi/arm/acornscsi.c:312", host->card.page_reg, host->fast + PAGE_REG);
 
     /*
      * Should get a reset from the card
      */
     timeout = 1000;
     do {
-	if (readb(host->fast + INT_REG) & 8)
+	if (pete_readb("drivers/scsi/arm/acornscsi.c:319", host->fast + INT_REG) & 8)
 	    break;
 	udelay(1);
     } while (--timeout);
@@ -337,7 +337,7 @@ void acornscsi_resetcard(AS_Host *host)
      */
     timeout = 1000;
     do {
-	if (readb(host->fast + INT_REG) & 8)
+	if (pete_readb("drivers/scsi/arm/acornscsi.c:340", host->fast + INT_REG) & 8)
 	    break;
 	udelay(1);
     } while (--timeout);
@@ -357,7 +357,7 @@ void acornscsi_resetcard(AS_Host *host)
     sbic_arm_write(host, SBIC_SOURCEID, SOURCEID_ER | SOURCEID_DSP);
 
     host->card.page_reg = 0x40;
-    writeb(host->card.page_reg, host->fast + PAGE_REG);
+    pete_writeb("drivers/scsi/arm/acornscsi.c:360", host->card.page_reg, host->fast + PAGE_REG);
 
     /* setup dmac - uPC71071 */
     dmac_write(host, DMAC_INIT, 0);
@@ -891,7 +891,7 @@ void acornscsi_data_read(AS_Host *host, char *ptr,
     page = (start_addr >> 12);
     offset = start_addr & ((1 << 12) - 1);
 
-    writeb((page & 0x3f) | host->card.page_reg, host->fast + PAGE_REG);
+    pete_writeb("drivers/scsi/arm/acornscsi.c:894", (page & 0x3f) | host->card.page_reg, host->fast + PAGE_REG);
 
     while (len > 0) {
 	unsigned int this_len;
@@ -910,10 +910,10 @@ void acornscsi_data_read(AS_Host *host, char *ptr,
 	if (offset == (1 << 12)) {
 	    offset = 0;
 	    page ++;
-	    writeb((page & 0x3f) | host->card.page_reg, host->fast + PAGE_REG);
+	    pete_writeb("drivers/scsi/arm/acornscsi.c:913", (page & 0x3f) | host->card.page_reg, host->fast + PAGE_REG);
 	}
     }
-    writeb(host->card.page_reg, host->fast + PAGE_REG);
+    pete_writeb("drivers/scsi/arm/acornscsi.c:916", host->card.page_reg, host->fast + PAGE_REG);
 }
 
 /*
@@ -936,7 +936,7 @@ void acornscsi_data_write(AS_Host *host, char *ptr,
     page = (start_addr >> 12);
     offset = start_addr & ((1 << 12) - 1);
 
-    writeb((page & 0x3f) | host->card.page_reg, host->fast + PAGE_REG);
+    pete_writeb("drivers/scsi/arm/acornscsi.c:939", (page & 0x3f) | host->card.page_reg, host->fast + PAGE_REG);
 
     while (len > 0) {
 	unsigned int this_len;
@@ -955,10 +955,10 @@ void acornscsi_data_write(AS_Host *host, char *ptr,
 	if (offset == (1 << 12)) {
 	    offset = 0;
 	    page ++;
-	    writeb((page & 0x3f) | host->card.page_reg, host->fast + PAGE_REG);
+	    pete_writeb("drivers/scsi/arm/acornscsi.c:958", (page & 0x3f) | host->card.page_reg, host->fast + PAGE_REG);
 	}
     }
-    writeb(host->card.page_reg, host->fast + PAGE_REG);
+    pete_writeb("drivers/scsi/arm/acornscsi.c:961", host->card.page_reg, host->fast + PAGE_REG);
 }
 
 /* =========================================================================================
@@ -2368,11 +2368,11 @@ acornscsi_intr(int irq, void *dev_id)
     do {
 	ret = INTR_IDLE;
 
-	iostatus = readb(host->fast + INT_REG);
+	iostatus = pete_readb("drivers/scsi/arm/acornscsi.c:2371", host->fast + INT_REG);
 
 	if (iostatus & 2) {
 	    acornscsi_dma_intr(host);
-	    iostatus = readb(host->fast + INT_REG);
+	    iostatus = pete_readb("drivers/scsi/arm/acornscsi.c:2375", host->fast + INT_REG);
 	}
 
 	if (iostatus & 8)
@@ -2880,7 +2880,7 @@ static void acornscsi_remove(struct expansion_card *ec)
 	/*
 	 * Put card into RESET state
 	 */
-	writeb(0x80, ashost->fast + PAGE_REG);
+	pete_writeb("drivers/scsi/arm/acornscsi.c:2883", 0x80, ashost->fast + PAGE_REG);
 
 	free_irq(host->irq, ashost);
 

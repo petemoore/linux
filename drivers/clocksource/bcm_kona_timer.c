@@ -55,14 +55,14 @@ static void kona_timer_disable_and_clear(void __iomem *base)
 	 * clear and disable interrupts
 	 * We are using compare/match register 0 for our system interrupts
 	 */
-	reg = readl(base + KONA_GPTIMER_STCS_OFFSET);
+	reg = pete_readl("drivers/clocksource/bcm_kona_timer.c:58", base + KONA_GPTIMER_STCS_OFFSET);
 
 	/* Clear compare (0) interrupt */
 	reg |= 1 << KONA_GPTIMER_STCS_TIMER_MATCH_SHIFT;
 	/* disable compare */
 	reg &= ~(1 << KONA_GPTIMER_STCS_COMPARE_ENABLE_SHIFT);
 
-	writel(reg, base + KONA_GPTIMER_STCS_OFFSET);
+	pete_writel("drivers/clocksource/bcm_kona_timer.c:65", reg, base + KONA_GPTIMER_STCS_OFFSET);
 
 }
 
@@ -84,9 +84,9 @@ kona_timer_get_counter(void __iomem *timer_base, uint32_t *msw, uint32_t *lsw)
 	 */
 
 	do {
-		*msw = readl(timer_base + KONA_GPTIMER_STCHI_OFFSET);
-		*lsw = readl(timer_base + KONA_GPTIMER_STCLO_OFFSET);
-		if (*msw == readl(timer_base + KONA_GPTIMER_STCHI_OFFSET))
+		*msw = pete_readl("drivers/clocksource/bcm_kona_timer.c:87", timer_base + KONA_GPTIMER_STCHI_OFFSET);
+		*lsw = pete_readl("drivers/clocksource/bcm_kona_timer.c:88", timer_base + KONA_GPTIMER_STCLO_OFFSET);
+		if (*msw == pete_readl("drivers/clocksource/bcm_kona_timer.c:89", timer_base + KONA_GPTIMER_STCHI_OFFSET))
 			break;
 	} while (--loop_limit);
 	if (!loop_limit) {
@@ -120,12 +120,12 @@ static int kona_timer_set_next_event(unsigned long clc,
 		return ret;
 
 	/* Load the "next" event tick value */
-	writel(lsw + clc, timers.tmr_regs + KONA_GPTIMER_STCM0_OFFSET);
+	pete_writel("drivers/clocksource/bcm_kona_timer.c:123", lsw + clc, timers.tmr_regs + KONA_GPTIMER_STCM0_OFFSET);
 
 	/* Enable compare */
-	reg = readl(timers.tmr_regs + KONA_GPTIMER_STCS_OFFSET);
+	reg = pete_readl("drivers/clocksource/bcm_kona_timer.c:126", timers.tmr_regs + KONA_GPTIMER_STCS_OFFSET);
 	reg |= (1 << KONA_GPTIMER_STCS_COMPARE_ENABLE_SHIFT);
-	writel(reg, timers.tmr_regs + KONA_GPTIMER_STCS_OFFSET);
+	pete_writel("drivers/clocksource/bcm_kona_timer.c:128", reg, timers.tmr_regs + KONA_GPTIMER_STCS_OFFSET);
 
 	return 0;
 }

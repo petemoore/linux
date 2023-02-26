@@ -9,7 +9,7 @@
 static __inline__ void __ide_mm_insw(void __iomem *port, void *addr, u32 count)
 {
 	while (count--) {
-		*(u16 *)addr = readw(port);
+		*(u16 *)addr = pete_readw("include/asm-generic/ide_iops.h:12", port);
 		addr += 2;
 	}
 }
@@ -17,7 +17,7 @@ static __inline__ void __ide_mm_insw(void __iomem *port, void *addr, u32 count)
 static __inline__ void __ide_mm_insl(void __iomem *port, void *addr, u32 count)
 {
 	while (count--) {
-		*(u32 *)addr = readl(port);
+		*(u32 *)addr = pete_readl("include/asm-generic/ide_iops.h:20", port);
 		addr += 4;
 	}
 }
@@ -25,7 +25,7 @@ static __inline__ void __ide_mm_insl(void __iomem *port, void *addr, u32 count)
 static __inline__ void __ide_mm_outsw(void __iomem *port, void *addr, u32 count)
 {
 	while (count--) {
-		writew(*(u16 *)addr, port);
+		pete_writew("include/asm-generic/ide_iops.h:28", *(u16 *)addr, port);
 		addr += 2;
 	}
 }
@@ -33,7 +33,7 @@ static __inline__ void __ide_mm_outsw(void __iomem *port, void *addr, u32 count)
 static __inline__ void __ide_mm_outsl(void __iomem * port, void *addr, u32 count)
 {
 	while (count--) {
-		writel(*(u32 *)addr, port);
+		pete_writel("include/asm-generic/ide_iops.h:36", *(u32 *)addr, port);
 		addr += 4;
 	}
 }

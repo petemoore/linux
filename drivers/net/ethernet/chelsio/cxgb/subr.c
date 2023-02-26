@@ -62,7 +62,7 @@ static int t1_wait_op_done(adapter_t *adapter, int reg, u32 mask, int polarity,
 			   int attempts, int delay)
 {
 	while (1) {
-		u32 val = readl(adapter->regs + reg) & mask;
+		u32 val = pete_readl("drivers/net/ethernet/chelsio/cxgb/subr.c:65", adapter->regs + reg) & mask;
 
 		if (!!val == polarity)
 			return 0;
@@ -82,9 +82,9 @@ int __t1_tpi_write(adapter_t *adapter, u32 addr, u32 value)
 {
 	int tpi_busy;
 
-	writel(addr, adapter->regs + A_TPI_ADDR);
-	writel(value, adapter->regs + A_TPI_WR_DATA);
-	writel(F_TPIWR, adapter->regs + A_TPI_CSR);
+	pete_writel("drivers/net/ethernet/chelsio/cxgb/subr.c:85", addr, adapter->regs + A_TPI_ADDR);
+	pete_writel("drivers/net/ethernet/chelsio/cxgb/subr.c:86", value, adapter->regs + A_TPI_WR_DATA);
+	pete_writel("drivers/net/ethernet/chelsio/cxgb/subr.c:87", F_TPIWR, adapter->regs + A_TPI_CSR);
 
 	tpi_busy = t1_wait_op_done(adapter, A_TPI_CSR, F_TPIRDY, 1,
 				   TPI_ATTEMPTS, 3);
@@ -111,8 +111,8 @@ int __t1_tpi_read(adapter_t *adapter, u32 addr, u32 *valp)
 {
 	int tpi_busy;
 
-	writel(addr, adapter->regs + A_TPI_ADDR);
-	writel(0, adapter->regs + A_TPI_CSR);
+	pete_writel("drivers/net/ethernet/chelsio/cxgb/subr.c:114", addr, adapter->regs + A_TPI_ADDR);
+	pete_writel("drivers/net/ethernet/chelsio/cxgb/subr.c:115", 0, adapter->regs + A_TPI_CSR);
 
 	tpi_busy = t1_wait_op_done(adapter, A_TPI_CSR, F_TPIRDY, 1,
 				   TPI_ATTEMPTS, 3);
@@ -120,7 +120,7 @@ int __t1_tpi_read(adapter_t *adapter, u32 addr, u32 *valp)
 		pr_alert("%s: TPI read from 0x%x failed\n",
 			 adapter->name, addr);
 	else
-		*valp = readl(adapter->regs + A_TPI_RD_DATA);
+		*valp = pete_readl("drivers/net/ethernet/chelsio/cxgb/subr.c:123", adapter->regs + A_TPI_RD_DATA);
 	return tpi_busy;
 }
 
@@ -139,7 +139,7 @@ int t1_tpi_read(adapter_t *adapter, u32 addr, u32 *valp)
  */
 static void t1_tpi_par(adapter_t *adapter, u32 value)
 {
-	writel(V_TPIPAR(value), adapter->regs + A_TPI_PAR);
+	pete_writel("drivers/net/ethernet/chelsio/cxgb/subr.c:142", V_TPIPAR(value), adapter->regs + A_TPI_PAR);
 }
 
 /*
@@ -197,7 +197,7 @@ static bool t1_pci_intr_handler(adapter_t *adapter)
 static int fpga_phy_intr_handler(adapter_t *adapter)
 {
 	int p;
-	u32 cause = readl(adapter->regs + FPGA_GMAC_ADDR_INTERRUPT_CAUSE);
+	u32 cause = pete_readl("drivers/net/ethernet/chelsio/cxgb/subr.c:200", adapter->regs + FPGA_GMAC_ADDR_INTERRUPT_CAUSE);
 
 	for_each_port(adapter, p)
 		if (cause & (1 << p)) {
@@ -207,7 +207,7 @@ static int fpga_phy_intr_handler(adapter_t *adapter)
 			if (phy_cause & cphy_cause_link_change)
 				t1_link_changed(adapter, p);
 		}
-	writel(cause, adapter->regs + FPGA_GMAC_ADDR_INTERRUPT_CAUSE);
+	pete_writel("drivers/net/ethernet/chelsio/cxgb/subr.c:210", cause, adapter->regs + FPGA_GMAC_ADDR_INTERRUPT_CAUSE);
 	return 0;
 }
 
@@ -216,7 +216,7 @@ static int fpga_phy_intr_handler(adapter_t *adapter)
  */
 static irqreturn_t fpga_slow_intr(adapter_t *adapter)
 {
-	u32 cause = readl(adapter->regs + A_PL_CAUSE);
+	u32 cause = pete_readl("drivers/net/ethernet/chelsio/cxgb/subr.c:219", adapter->regs + A_PL_CAUSE);
 	irqreturn_t ret = IRQ_NONE;
 
 	cause &= ~F_PL_INTR_SGE_DATA;
@@ -233,10 +233,10 @@ static irqreturn_t fpga_slow_intr(adapter_t *adapter)
 		 * FPGA doesn't support MC4 interrupts and it requires
 		 * this odd layer of indirection for MC5.
 		 */
-		u32 tp_cause = readl(adapter->regs + FPGA_TP_ADDR_INTERRUPT_CAUSE);
+		u32 tp_cause = pete_readl("drivers/net/ethernet/chelsio/cxgb/subr.c:236", adapter->regs + FPGA_TP_ADDR_INTERRUPT_CAUSE);
 
 		/* Clear TP interrupt */
-		writel(tp_cause, adapter->regs + FPGA_TP_ADDR_INTERRUPT_CAUSE);
+		pete_writel("drivers/net/ethernet/chelsio/cxgb/subr.c:239", tp_cause, adapter->regs + FPGA_TP_ADDR_INTERRUPT_CAUSE);
 	}
 	if (cause & FPGA_PCIX_INTERRUPT_PCIX) {
 		if (t1_pci_intr_handler(adapter))
@@ -245,7 +245,7 @@ static irqreturn_t fpga_slow_intr(adapter_t *adapter)
 
 	/* Clear the interrupts just processed. */
 	if (cause)
-		writel(cause, adapter->regs + A_PL_CAUSE);
+		pete_writel("drivers/net/ethernet/chelsio/cxgb/subr.c:248", cause, adapter->regs + A_PL_CAUSE);
 
 	if (ret != IRQ_NONE)
 		return ret;
@@ -785,7 +785,7 @@ void t1_interrupts_enable(adapter_t *adapter)
 
 	/* Enable PCIX & external chip interrupts on ASIC boards. */
 	if (t1_is_asic(adapter)) {
-		u32 pl_intr = readl(adapter->regs + A_PL_ENABLE);
+		u32 pl_intr = pete_readl("drivers/net/ethernet/chelsio/cxgb/subr.c:788", adapter->regs + A_PL_ENABLE);
 
 		/* PCI-X interrupts */
 		pci_write_config_dword(adapter->pdev, A_PCICFG_INTR_ENABLE,
@@ -793,7 +793,7 @@ void t1_interrupts_enable(adapter_t *adapter)
 
 		adapter->slow_intr_mask |= F_PL_INTR_EXT | F_PL_INTR_PCIX;
 		pl_intr |= F_PL_INTR_EXT | F_PL_INTR_PCIX;
-		writel(pl_intr, adapter->regs + A_PL_ENABLE);
+		pete_writel("drivers/net/ethernet/chelsio/cxgb/subr.c:796", pl_intr, adapter->regs + A_PL_ENABLE);
 	}
 }
 
@@ -815,7 +815,7 @@ void t1_interrupts_disable(adapter_t* adapter)
 
 	/* Disable PCIX & external chip interrupts. */
 	if (t1_is_asic(adapter))
-		writel(0, adapter->regs + A_PL_ENABLE);
+		pete_writel("drivers/net/ethernet/chelsio/cxgb/subr.c:818", 0, adapter->regs + A_PL_ENABLE);
 
 	/* PCI-X interrupts */
 	pci_write_config_dword(adapter->pdev, A_PCICFG_INTR_ENABLE, 0);
@@ -841,9 +841,9 @@ void t1_interrupts_clear(adapter_t* adapter)
 
 	/* Enable interrupts for external devices. */
 	if (t1_is_asic(adapter)) {
-		u32 pl_intr = readl(adapter->regs + A_PL_CAUSE);
+		u32 pl_intr = pete_readl("drivers/net/ethernet/chelsio/cxgb/subr.c:844", adapter->regs + A_PL_CAUSE);
 
-		writel(pl_intr | F_PL_INTR_EXT | F_PL_INTR_PCIX,
+		pete_writel("drivers/net/ethernet/chelsio/cxgb/subr.c:846", pl_intr | F_PL_INTR_EXT | F_PL_INTR_PCIX,
 		       adapter->regs + A_PL_CAUSE);
 	}
 
@@ -856,7 +856,7 @@ void t1_interrupts_clear(adapter_t* adapter)
  */
 static irqreturn_t asic_slow_intr(adapter_t *adapter)
 {
-	u32 cause = readl(adapter->regs + A_PL_CAUSE);
+	u32 cause = pete_readl("drivers/net/ethernet/chelsio/cxgb/subr.c:859", adapter->regs + A_PL_CAUSE);
 	irqreturn_t ret = IRQ_HANDLED;
 
 	cause &= adapter->slow_intr_mask;
@@ -881,14 +881,14 @@ static irqreturn_t asic_slow_intr(adapter_t *adapter)
 		 */
 		adapter->pending_thread_intr |= F_PL_INTR_EXT;
 		adapter->slow_intr_mask &= ~F_PL_INTR_EXT;
-		writel(adapter->slow_intr_mask | F_PL_INTR_SGE_DATA,
+		pete_writel("drivers/net/ethernet/chelsio/cxgb/subr.c:884", adapter->slow_intr_mask | F_PL_INTR_SGE_DATA,
 		       adapter->regs + A_PL_ENABLE);
 		ret = IRQ_WAKE_THREAD;
 	}
 
 	/* Clear the interrupts just processed. */
-	writel(cause, adapter->regs + A_PL_CAUSE);
-	readl(adapter->regs + A_PL_CAUSE); /* flush writes */
+	pete_writel("drivers/net/ethernet/chelsio/cxgb/subr.c:890", cause, adapter->regs + A_PL_CAUSE);
+	pete_readl("drivers/net/ethernet/chelsio/cxgb/subr.c:891", adapter->regs + A_PL_CAUSE); /* flush writes */
 	return ret;
 }
 
@@ -925,7 +925,7 @@ int t1_get_board_rev(adapter_t *adapter, const struct board_info *bi,
 	if (p->chip_version == CHBT_TERM_T1 ||
 	    p->chip_version == CHBT_TERM_T2 ||
 	    p->chip_version == CHBT_TERM_FPGA) {
-		u32 val = readl(adapter->regs + A_TP_PC_CONFIG);
+		u32 val = pete_readl("drivers/net/ethernet/chelsio/cxgb/subr.c:928", adapter->regs + A_TP_PC_CONFIG);
 
 		val = G_TP_PC_REV(val);
 		if (val == 2)
@@ -991,10 +991,10 @@ int t1_init_hw_modules(adapter_t *adapter)
 	const struct board_info *bi = board_info(adapter);
 
 	if (!bi->clock_mc4) {
-		u32 val = readl(adapter->regs + A_MC4_CFG);
+		u32 val = pete_readl("drivers/net/ethernet/chelsio/cxgb/subr.c:994", adapter->regs + A_MC4_CFG);
 
-		writel(val | F_READY | F_MC4_SLOW, adapter->regs + A_MC4_CFG);
-		writel(F_M_BUS_ENABLE | F_TCAM_RESET,
+		pete_writel("drivers/net/ethernet/chelsio/cxgb/subr.c:996", val | F_READY | F_MC4_SLOW, adapter->regs + A_MC4_CFG);
+		pete_writel("drivers/net/ethernet/chelsio/cxgb/subr.c:997", F_M_BUS_ENABLE | F_TCAM_RESET,
 		       adapter->regs + A_MC5_CONFIG);
 	}
 

@@ -173,9 +173,9 @@ static int scpsys_domain_is_on(struct scp_domain *scpd)
 {
 	struct scp *scp = scpd->scp;
 
-	u32 status = readl(scp->base + scp->ctrl_reg.pwr_sta_offs) &
+	u32 status = pete_readl("drivers/soc/mediatek/mtk-scpsys.c:176", scp->base + scp->ctrl_reg.pwr_sta_offs) &
 						scpd->data->sta_mask;
-	u32 status2 = readl(scp->base + scp->ctrl_reg.pwr_sta2nd_offs) &
+	u32 status2 = pete_readl("drivers/soc/mediatek/mtk-scpsys.c:178", scp->base + scp->ctrl_reg.pwr_sta2nd_offs) &
 						scpd->data->sta_mask;
 
 	/*
@@ -236,9 +236,9 @@ static int scpsys_sram_enable(struct scp_domain *scpd, void __iomem *ctl_addr)
 	u32 pdn_ack = scpd->data->sram_pdn_ack_bits;
 	int tmp;
 
-	val = readl(ctl_addr);
+	val = pete_readl("drivers/soc/mediatek/mtk-scpsys.c:239", ctl_addr);
 	val &= ~scpd->data->sram_pdn_bits;
-	writel(val, ctl_addr);
+	pete_writel("drivers/soc/mediatek/mtk-scpsys.c:241", val, ctl_addr);
 
 	/* Either wait until SRAM_PDN_ACK all 0 or have a force wait */
 	if (MTK_SCPD_CAPS(scpd, MTK_SCPD_FWAIT_SRAM)) {
@@ -266,9 +266,9 @@ static int scpsys_sram_disable(struct scp_domain *scpd, void __iomem *ctl_addr)
 	u32 pdn_ack = scpd->data->sram_pdn_ack_bits;
 	int tmp;
 
-	val = readl(ctl_addr);
+	val = pete_readl("drivers/soc/mediatek/mtk-scpsys.c:269", ctl_addr);
 	val |= scpd->data->sram_pdn_bits;
-	writel(val, ctl_addr);
+	pete_writel("drivers/soc/mediatek/mtk-scpsys.c:271", val, ctl_addr);
 
 	/* Either wait until SRAM_PDN_ACK all 1 or 0 */
 	return readl_poll_timeout(ctl_addr, tmp,
@@ -317,11 +317,11 @@ static int scpsys_power_on(struct generic_pm_domain *genpd)
 		goto err_clk;
 
 	/* subsys power on */
-	val = readl(ctl_addr);
+	val = pete_readl("drivers/soc/mediatek/mtk-scpsys.c:320", ctl_addr);
 	val |= PWR_ON_BIT;
-	writel(val, ctl_addr);
+	pete_writel("drivers/soc/mediatek/mtk-scpsys.c:322", val, ctl_addr);
 	val |= PWR_ON_2ND_BIT;
-	writel(val, ctl_addr);
+	pete_writel("drivers/soc/mediatek/mtk-scpsys.c:324", val, ctl_addr);
 
 	/* wait until PWR_ACK = 1 */
 	ret = readx_poll_timeout(scpsys_domain_is_on, scpd, tmp, tmp > 0,
@@ -330,13 +330,13 @@ static int scpsys_power_on(struct generic_pm_domain *genpd)
 		goto err_pwr_ack;
 
 	val &= ~PWR_CLK_DIS_BIT;
-	writel(val, ctl_addr);
+	pete_writel("drivers/soc/mediatek/mtk-scpsys.c:333", val, ctl_addr);
 
 	val &= ~PWR_ISO_BIT;
-	writel(val, ctl_addr);
+	pete_writel("drivers/soc/mediatek/mtk-scpsys.c:336", val, ctl_addr);
 
 	val |= PWR_RST_B_BIT;
-	writel(val, ctl_addr);
+	pete_writel("drivers/soc/mediatek/mtk-scpsys.c:339", val, ctl_addr);
 
 	ret = scpsys_sram_enable(scpd, ctl_addr);
 	if (ret < 0)
@@ -375,21 +375,21 @@ static int scpsys_power_off(struct generic_pm_domain *genpd)
 		goto out;
 
 	/* subsys power off */
-	val = readl(ctl_addr);
+	val = pete_readl("drivers/soc/mediatek/mtk-scpsys.c:378", ctl_addr);
 	val |= PWR_ISO_BIT;
-	writel(val, ctl_addr);
+	pete_writel("drivers/soc/mediatek/mtk-scpsys.c:380", val, ctl_addr);
 
 	val &= ~PWR_RST_B_BIT;
-	writel(val, ctl_addr);
+	pete_writel("drivers/soc/mediatek/mtk-scpsys.c:383", val, ctl_addr);
 
 	val |= PWR_CLK_DIS_BIT;
-	writel(val, ctl_addr);
+	pete_writel("drivers/soc/mediatek/mtk-scpsys.c:386", val, ctl_addr);
 
 	val &= ~PWR_ON_BIT;
-	writel(val, ctl_addr);
+	pete_writel("drivers/soc/mediatek/mtk-scpsys.c:389", val, ctl_addr);
 
 	val &= ~PWR_ON_2ND_BIT;
-	writel(val, ctl_addr);
+	pete_writel("drivers/soc/mediatek/mtk-scpsys.c:392", val, ctl_addr);
 
 	/* wait until PWR_ACK = 0 */
 	ret = readx_poll_timeout(scpsys_domain_is_on, scpd, tmp, tmp == 0,

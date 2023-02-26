@@ -26,7 +26,7 @@ static u16 sdhci_dove_readw(struct sdhci_host *host, int reg)
 		/* those registers don't exist */
 		return 0;
 	default:
-		ret = readw(host->ioaddr + reg);
+		ret = pete_readw("drivers/mmc/host/sdhci-dove.c:29", host->ioaddr + reg);
 	}
 	return ret;
 }
@@ -35,7 +35,7 @@ static u32 sdhci_dove_readl(struct sdhci_host *host, int reg)
 {
 	u32 ret;
 
-	ret = readl(host->ioaddr + reg);
+	ret = pete_readl("drivers/mmc/host/sdhci-dove.c:38", host->ioaddr + reg);
 
 	switch (reg) {
 	case SDHCI_CAPABILITIES:

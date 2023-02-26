@@ -694,7 +694,7 @@ static void tegra210_vic_mbist_war(struct tegra210_domain_mbist_war *mbist)
 	fence_udelay(1, vic_base + NV_PVIC_THI_SLCG_OVERRIDE_LOW);
 
 	writel_relaxed(val, vic_base + NV_PVIC_THI_SLCG_OVERRIDE_LOW);
-	readl(vic_base + NV_PVIC_THI_SLCG_OVERRIDE_LOW);
+	pete_readl("drivers/clk/tegra/clk-tegra210.c:697", vic_base + NV_PVIC_THI_SLCG_OVERRIDE_LOW);
 
 	writel_relaxed(ovre, clk_base + LVL2_CLK_GATE_OVRE);
 	fence_udelay(1, clk_base);
@@ -722,10 +722,10 @@ static void tegra210_ape_mbist_war(struct tegra210_domain_mbist_war *mbist)
 		writel_relaxed(i2s_ctrl | BIT(10),
 				i2s_base + TEGRA210_I2S_CTRL);
 		writel_relaxed(0, i2s_base + TEGRA210_I2S_CG);
-		readl(i2s_base + TEGRA210_I2S_CG);
+		pete_readl("drivers/clk/tegra/clk-tegra210.c:725", i2s_base + TEGRA210_I2S_CG);
 		writel_relaxed(1, i2s_base + TEGRA210_I2S_CG);
 		writel_relaxed(i2s_ctrl, i2s_base + TEGRA210_I2S_CTRL);
-		readl(i2s_base + TEGRA210_I2S_CTRL);
+		pete_readl("drivers/clk/tegra/clk-tegra210.c:728", i2s_base + TEGRA210_I2S_CTRL);
 
 		i2s_base += TEGRA210_I2S_SIZE;
 	}
@@ -2918,10 +2918,10 @@ static int tegra210_enable_pllu(void)
 	reg |= fentry->m;
 	reg |= fentry->n << 8;
 	reg |= fentry->p << 16;
-	writel(reg, clk_base + PLLU_BASE);
+	pete_writel("drivers/clk/tegra/clk-tegra210.c:2921", reg, clk_base + PLLU_BASE);
 	fence_udelay(1, clk_base);
 	reg |= PLL_ENABLE;
-	writel(reg, clk_base + PLLU_BASE);
+	pete_writel("drivers/clk/tegra/clk-tegra210.c:2924", reg, clk_base + PLLU_BASE);
 
 	/*
 	 * During clocks resume, same PLLU init and enable sequence get
@@ -2957,7 +2957,7 @@ static int tegra210_init_pllu(void)
 		/* enable hw controlled mode */
 		reg = readl_relaxed(clk_base + PLLU_BASE);
 		reg &= ~PLLU_BASE_OVERRIDE;
-		writel(reg, clk_base + PLLU_BASE);
+		pete_writel("drivers/clk/tegra/clk-tegra210.c:2960", reg, clk_base + PLLU_BASE);
 
 		reg = readl_relaxed(clk_base + PLLU_HW_PWRDN_CFG0);
 		reg |= PLLU_HW_PWRDN_CFG0_IDDQ_PD_INCLUDE |
@@ -3426,7 +3426,7 @@ static void tegra210_wait_cpu_in_reset(u32 cpu)
 	unsigned int reg;
 
 	do {
-		reg = readl(clk_base + CLK_RST_CONTROLLER_CPU_CMPLX_STATUS);
+		reg = pete_readl("drivers/clk/tegra/clk-tegra210.c:3429", clk_base + CLK_RST_CONTROLLER_CPU_CMPLX_STATUS);
 		cpu_relax();
 	} while (!(reg & (1 << cpu)));  /* check CPU been reset or not */
 }
@@ -3512,13 +3512,13 @@ static void tegra210_cpu_clock_suspend(void)
 {
 	/* switch coresite to clk_m, save off original source */
 	tegra210_cpu_clk_sctx.clk_csite_src =
-				readl(clk_base + CLK_SOURCE_CSITE);
-	writel(3 << 30, clk_base + CLK_SOURCE_CSITE);
+				pete_readl("drivers/clk/tegra/clk-tegra210.c:3515", clk_base + CLK_SOURCE_CSITE);
+	pete_writel("drivers/clk/tegra/clk-tegra210.c:3516", 3 << 30, clk_base + CLK_SOURCE_CSITE);
 }
 
 static void tegra210_cpu_clock_resume(void)
 {
-	writel(tegra210_cpu_clk_sctx.clk_csite_src,
+	pete_writel("drivers/clk/tegra/clk-tegra210.c:3521", tegra210_cpu_clk_sctx.clk_csite_src,
 				clk_base + CLK_SOURCE_CSITE);
 }
 #endif
@@ -3661,7 +3661,7 @@ static int tegra210_reset_assert(unsigned long id)
 	if (id == TEGRA210_RST_DFLL_DVCO)
 		tegra210_clock_assert_dfll_dvco_reset();
 	else if (id == TEGRA210_RST_ADSP)
-		writel(GENMASK(26, 21) | BIT(7),
+		pete_writel("drivers/clk/tegra/clk-tegra210.c:3664", GENMASK(26, 21) | BIT(7),
 			clk_base + CLK_RST_CONTROLLER_RST_DEV_Y_SET);
 	else
 		return -EINVAL;
@@ -3674,14 +3674,14 @@ static int tegra210_reset_deassert(unsigned long id)
 	if (id == TEGRA210_RST_DFLL_DVCO)
 		tegra210_clock_deassert_dfll_dvco_reset();
 	else if (id == TEGRA210_RST_ADSP) {
-		writel(BIT(21), clk_base + CLK_RST_CONTROLLER_RST_DEV_Y_CLR);
+		pete_writel("drivers/clk/tegra/clk-tegra210.c:3677", BIT(21), clk_base + CLK_RST_CONTROLLER_RST_DEV_Y_CLR);
 		/*
 		 * Considering adsp cpu clock (min: 12.5MHZ, max: 1GHz)
 		 * a delay of 5us ensures that it's at least
 		 * 6 * adsp_cpu_cycle_period long.
 		 */
 		udelay(5);
-		writel(GENMASK(26, 22) | BIT(7),
+		pete_writel("drivers/clk/tegra/clk-tegra210.c:3684", GENMASK(26, 22) | BIT(7),
 			clk_base + CLK_RST_CONTROLLER_RST_DEV_Y_CLR);
 	} else
 		return -EINVAL;
@@ -3778,7 +3778,7 @@ static void __init tegra210_clock_init(struct device_node *np)
 	if (!clks)
 		return;
 
-	value = readl(clk_base + SPARE_REG0) >> CLK_M_DIVISOR_SHIFT;
+	value = pete_readl("drivers/clk/tegra/clk-tegra210.c:3781", clk_base + SPARE_REG0) >> CLK_M_DIVISOR_SHIFT;
 	clk_m_div = (value & CLK_M_DIVISOR_MASK) + 1;
 
 	if (tegra_osc_clk_init(clk_base, tegra210_clks, tegra210_input_freq,
@@ -3794,9 +3794,9 @@ static void __init tegra210_clock_init(struct device_node *np)
 			     ARRAY_SIZE(tegra210_audio_plls), 24576000);
 
 	/* For Tegra210, PLLD is the only source for DSIA & DSIB */
-	value = readl(clk_base + PLLD_BASE);
+	value = pete_readl("drivers/clk/tegra/clk-tegra210.c:3797", clk_base + PLLD_BASE);
 	value &= ~BIT(25);
-	writel(value, clk_base + PLLD_BASE);
+	pete_writel("drivers/clk/tegra/clk-tegra210.c:3799", value, clk_base + PLLD_BASE);
 
 	tegra_clk_apply_init_table = tegra210_clock_apply_init_table;
 

@@ -117,7 +117,7 @@ MODULE_DEVICE_TABLE(pci, qlcnic_pci_tbl);
 
 inline void qlcnic_update_cmd_producer(struct qlcnic_host_tx_ring *tx_ring)
 {
-	writel(tx_ring->producer, tx_ring->crb_cmd_producer);
+	pete_writel("drivers/net/ethernet/qlogic/qlcnic/qlcnic_main.c:120", tx_ring->producer, tx_ring->crb_cmd_producer);
 }
 
 static const u32 msi_tgt_status[8] = {
@@ -2988,7 +2988,7 @@ static void qlcnic_dump_rings(struct qlcnic_adapter *adapter)
 			continue;
 		netdev_info(netdev,
 			    "rds_ring=%d crb_rcv_producer=%d producer=%u num_desc=%u\n",
-			     ring, readl(rds_ring->crb_rcv_producer),
+			     ring, pete_readl("drivers/net/ethernet/qlogic/qlcnic/qlcnic_main.c:2991", rds_ring->crb_rcv_producer),
 			     rds_ring->producer, rds_ring->num_desc);
 	}
 
@@ -2998,8 +2998,8 @@ static void qlcnic_dump_rings(struct qlcnic_adapter *adapter)
 			continue;
 		netdev_info(netdev,
 			    "sds_ring=%d crb_sts_consumer=%d consumer=%u crb_intr_mask=%d num_desc=%u\n",
-			    ring, readl(sds_ring->crb_sts_consumer),
-			    sds_ring->consumer, readl(sds_ring->crb_intr_mask),
+			    ring, pete_readl("drivers/net/ethernet/qlogic/qlcnic/qlcnic_main.c:3001", sds_ring->crb_sts_consumer),
+			    sds_ring->consumer, pete_readl("drivers/net/ethernet/qlogic/qlcnic/qlcnic_main.c:3002", sds_ring->crb_intr_mask),
 			    sds_ring->num_desc);
 	}
 
@@ -3018,11 +3018,11 @@ static void qlcnic_dump_rings(struct qlcnic_adapter *adapter)
 
 		if (tx_ring->crb_intr_mask)
 			netdev_info(netdev, "crb_intr_mask=%d\n",
-				    readl(tx_ring->crb_intr_mask));
+				    pete_readl("drivers/net/ethernet/qlogic/qlcnic/qlcnic_main.c:3021", tx_ring->crb_intr_mask));
 
 		netdev_info(netdev,
 			    "hw_producer=%d, sw_producer=%d sw_consumer=%d, hw_consumer=%d\n",
-			    readl(tx_ring->crb_cmd_producer),
+			    pete_readl("drivers/net/ethernet/qlogic/qlcnic/qlcnic_main.c:3025", tx_ring->crb_cmd_producer),
 			    tx_ring->producer, tx_ring->sw_consumer,
 			    le32_to_cpu(*(tx_ring->hw_consumer)));
 
@@ -3080,20 +3080,20 @@ static irqreturn_t qlcnic_82xx_clear_legacy_intr(struct qlcnic_adapter *adapter)
 {
 	u32 status;
 
-	status = readl(adapter->isr_int_vec);
+	status = pete_readl("drivers/net/ethernet/qlogic/qlcnic/qlcnic_main.c:3083", adapter->isr_int_vec);
 
 	if (!(status & adapter->ahw->int_vec_bit))
 		return IRQ_NONE;
 
 	/* check interrupt state machine, to be sure */
-	status = readl(adapter->crb_int_state_reg);
+	status = pete_readl("drivers/net/ethernet/qlogic/qlcnic/qlcnic_main.c:3089", adapter->crb_int_state_reg);
 	if (!ISR_LEGACY_INT_TRIGGERED(status))
 		return IRQ_NONE;
 
-	writel(0xffffffff, adapter->tgt_status_reg);
+	pete_writel("drivers/net/ethernet/qlogic/qlcnic/qlcnic_main.c:3093", 0xffffffff, adapter->tgt_status_reg);
 	/* read twice to ensure write is flushed */
-	readl(adapter->isr_int_vec);
-	readl(adapter->isr_int_vec);
+	pete_readl("drivers/net/ethernet/qlogic/qlcnic/qlcnic_main.c:3095", adapter->isr_int_vec);
+	pete_readl("drivers/net/ethernet/qlogic/qlcnic/qlcnic_main.c:3096", adapter->isr_int_vec);
 
 	return IRQ_HANDLED;
 }
@@ -3106,7 +3106,7 @@ static irqreturn_t qlcnic_tmp_intr(int irq, void *data)
 	if (adapter->flags & QLCNIC_MSIX_ENABLED)
 		goto done;
 	else if (adapter->flags & QLCNIC_MSI_ENABLED) {
-		writel(0xffffffff, adapter->tgt_status_reg);
+		pete_writel("drivers/net/ethernet/qlogic/qlcnic/qlcnic_main.c:3109", 0xffffffff, adapter->tgt_status_reg);
 		goto done;
 	}
 
@@ -3138,7 +3138,7 @@ static irqreturn_t qlcnic_msi_intr(int irq, void *data)
 	struct qlcnic_adapter *adapter = sds_ring->adapter;
 
 	/* clear interrupt */
-	writel(0xffffffff, adapter->tgt_status_reg);
+	pete_writel("drivers/net/ethernet/qlogic/qlcnic/qlcnic_main.c:3141", 0xffffffff, adapter->tgt_status_reg);
 
 	napi_schedule(&sds_ring->napi);
 	return IRQ_HANDLED;

@@ -743,14 +743,14 @@ int ivtv_start_v4l2_decode_stream(struct ivtv_stream *s, int gop_offset)
 	clear_bit(IVTV_F_S_STREAMOFF, &s->s_flags);
 
 	/* Zero out decoder counters */
-	writel(0, &itv->dec_mbox.mbox[IVTV_MBOX_DMA_END].data[0]);
-	writel(0, &itv->dec_mbox.mbox[IVTV_MBOX_DMA_END].data[1]);
-	writel(0, &itv->dec_mbox.mbox[IVTV_MBOX_DMA_END].data[2]);
-	writel(0, &itv->dec_mbox.mbox[IVTV_MBOX_DMA_END].data[3]);
-	writel(0, &itv->dec_mbox.mbox[IVTV_MBOX_DMA].data[0]);
-	writel(0, &itv->dec_mbox.mbox[IVTV_MBOX_DMA].data[1]);
-	writel(0, &itv->dec_mbox.mbox[IVTV_MBOX_DMA].data[2]);
-	writel(0, &itv->dec_mbox.mbox[IVTV_MBOX_DMA].data[3]);
+	pete_writel("drivers/media/pci/ivtv/ivtv-streams.c:746", 0, &itv->dec_mbox.mbox[IVTV_MBOX_DMA_END].data[0]);
+	pete_writel("drivers/media/pci/ivtv/ivtv-streams.c:747", 0, &itv->dec_mbox.mbox[IVTV_MBOX_DMA_END].data[1]);
+	pete_writel("drivers/media/pci/ivtv/ivtv-streams.c:748", 0, &itv->dec_mbox.mbox[IVTV_MBOX_DMA_END].data[2]);
+	pete_writel("drivers/media/pci/ivtv/ivtv-streams.c:749", 0, &itv->dec_mbox.mbox[IVTV_MBOX_DMA_END].data[3]);
+	pete_writel("drivers/media/pci/ivtv/ivtv-streams.c:750", 0, &itv->dec_mbox.mbox[IVTV_MBOX_DMA].data[0]);
+	pete_writel("drivers/media/pci/ivtv/ivtv-streams.c:751", 0, &itv->dec_mbox.mbox[IVTV_MBOX_DMA].data[1]);
+	pete_writel("drivers/media/pci/ivtv/ivtv-streams.c:752", 0, &itv->dec_mbox.mbox[IVTV_MBOX_DMA].data[2]);
+	pete_writel("drivers/media/pci/ivtv/ivtv-streams.c:753", 0, &itv->dec_mbox.mbox[IVTV_MBOX_DMA].data[3]);
 
 	/* turn on notification of dual/stereo mode change */
 	ivtv_vapi(itv, CX2341X_DEC_SET_EVENT_NOTIFICATION, 4, 0, 1, IVTV_IRQ_DEC_AUD_MODE_CHG, -1);

@@ -138,8 +138,8 @@ static void wdt_timer_ping(struct timer_list *unused)
 	if (time_before(jiffies, next_heartbeat)) {
 		/* Ping the WDT */
 		spin_lock(&wdt_spinlock);
-		writew(0xAAAA, wdtmrctl);
-		writew(0x5555, wdtmrctl);
+		pete_writew("drivers/watchdog/sc520_wdt.c:141", 0xAAAA, wdtmrctl);
+		pete_writew("drivers/watchdog/sc520_wdt.c:142", 0x5555, wdtmrctl);
 		spin_unlock(&wdt_spinlock);
 
 		/* Re-set the timer interval */
@@ -158,14 +158,14 @@ static void wdt_config(int writeval)
 
 	/* buy some time (ping) */
 	spin_lock_irqsave(&wdt_spinlock, flags);
-	readw(wdtmrctl);	/* ensure write synchronization */
-	writew(0xAAAA, wdtmrctl);
-	writew(0x5555, wdtmrctl);
+	pete_readw("drivers/watchdog/sc520_wdt.c:161", wdtmrctl);	/* ensure write synchronization */
+	pete_writew("drivers/watchdog/sc520_wdt.c:162", 0xAAAA, wdtmrctl);
+	pete_writew("drivers/watchdog/sc520_wdt.c:163", 0x5555, wdtmrctl);
 	/* unlock WDT = make WDT configuration register writable one time */
-	writew(0x3333, wdtmrctl);
-	writew(0xCCCC, wdtmrctl);
+	pete_writew("drivers/watchdog/sc520_wdt.c:165", 0x3333, wdtmrctl);
+	pete_writew("drivers/watchdog/sc520_wdt.c:166", 0xCCCC, wdtmrctl);
 	/* write WDT configuration register */
-	writew(writeval, wdtmrctl);
+	pete_writew("drivers/watchdog/sc520_wdt.c:168", writeval, wdtmrctl);
 	spin_unlock_irqrestore(&wdt_spinlock, flags);
 }
 

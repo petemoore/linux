@@ -27,7 +27,7 @@
 
 static inline u32 pmx_readl(struct tegra_pmx *pmx, u32 bank, u32 reg)
 {
-	return readl(pmx->regs[bank] + reg);
+	return pete_readl("drivers/pinctrl/tegra/pinctrl-tegra.c:30", pmx->regs[bank] + reg);
 }
 
 static inline void pmx_writel(struct tegra_pmx *pmx, u32 val, u32 bank, u32 reg)

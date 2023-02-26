@@ -457,12 +457,12 @@ struct bdc {
 
 static inline u32 bdc_readl(void __iomem *base, u32 offset)
 {
-	return readl(base + offset);
+	return pete_readl("drivers/usb/gadget/udc/bdc/bdc.h:460", base + offset);
 }
 
 static inline void bdc_writel(void __iomem *base, u32 offset, u32 value)
 {
-	writel(value, base + offset);
+	pete_writel("drivers/usb/gadget/udc/bdc/bdc.h:465", value, base + offset);
 }
 
 /* Buffer descriptor list operations */

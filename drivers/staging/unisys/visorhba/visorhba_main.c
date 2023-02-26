@@ -619,7 +619,7 @@ static int info_debugfs_show(struct seq_file *seq, void *v)
 		seq_printf(seq, "phys_flags_addr = 0x%016llx\n",
 			   phys_flags_addr);
 		seq_printf(seq, "FeatureFlags = %llu\n",
-			   (u64)readq(devdata->flags_addr));
+			   (u64)pete_readq("drivers/staging/unisys/visorhba/visorhba_main.c:622", devdata->flags_addr));
 	}
 	seq_printf(seq, "acquire_failed_cnt = %llu\n",
 		   devdata->acquire_failed_cnt);

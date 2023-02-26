@@ -2600,7 +2600,7 @@ static void process_db_drop(struct work_struct *work)
 			dev_err(adap->pdev_dev, "doorbell drop recovery: "
 				"qid=%d, pidx_inc=%d\n", qid, pidx_inc);
 		else
-			writel(PIDX_T5_V(pidx_inc) | QID_V(bar2_qid),
+			pete_writel("drivers/net/ethernet/chelsio/cxgb4/cxgb4_main.c:2603", PIDX_T5_V(pidx_inc) | QID_V(bar2_qid),
 			       adap->bar2 + bar2_qoffset + SGE_UDB_KDOORBELL);
 
 		/* Re-enable BAR2 WC */
@@ -6256,7 +6256,7 @@ static int cxgb4_iov_configure(struct pci_dev *pdev, int num_vfs)
 	int current_vfs = pci_num_vf(pdev);
 	u32 pcie_fw;
 
-	pcie_fw = readl(adap->regs + PCIE_FW_A);
+	pcie_fw = pete_readl("drivers/net/ethernet/chelsio/cxgb4/cxgb4_main.c:6259", adap->regs + PCIE_FW_A);
 	/* Check if fw is initialized */
 	if (!(pcie_fw & PCIE_FW_INIT_F)) {
 		dev_warn(&pdev->dev, "Device not initialized\n");

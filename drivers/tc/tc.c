@@ -100,11 +100,11 @@ static void __init tc_bus_add_devices(struct tc_bus *tbus)
 
 		for (i = 0; i < 8; i++) {
 			tdev->firmware[i] =
-				readb(module + offset + TC_FIRM_VER + 4 * i);
+				pete_readb("drivers/tc/tc.c:103", module + offset + TC_FIRM_VER + 4 * i);
 			tdev->vendor[i] =
-				readb(module + offset + TC_VENDOR + 4 * i);
+				pete_readb("drivers/tc/tc.c:105", module + offset + TC_VENDOR + 4 * i);
 			tdev->name[i] =
-				readb(module + offset + TC_MODULE + 4 * i);
+				pete_readb("drivers/tc/tc.c:107", module + offset + TC_MODULE + 4 * i);
 		}
 		tdev->firmware[8] = 0;
 		tdev->vendor[8] = 0;
@@ -113,7 +113,7 @@ static void __init tc_bus_add_devices(struct tc_bus *tbus)
 		pr_info("%s: %s %s %s\n", dev_name(&tdev->dev), tdev->vendor,
 			tdev->name, tdev->firmware);
 
-		devsize = readb(module + offset + TC_SLOT_SIZE);
+		devsize = pete_readb("drivers/tc/tc.c:116", module + offset + TC_SLOT_SIZE);
 		devsize <<= 22;
 		if (devsize <= slotsize) {
 			tdev->resource.start = slotaddr;

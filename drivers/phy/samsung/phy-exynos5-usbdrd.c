@@ -281,7 +281,7 @@ exynos5_usbdrd_pipe3_set_refclk(struct phy_usb_instance *inst)
 	struct exynos5_usbdrd_phy *phy_drd = to_usbdrd_phy(inst);
 
 	/* restore any previous reference clock settings */
-	reg = readl(phy_drd->reg_phy + EXYNOS5_DRD_PHYCLKRST);
+	reg = pete_readl("drivers/phy/samsung/phy-exynos5-usbdrd.c:284", phy_drd->reg_phy + EXYNOS5_DRD_PHYCLKRST);
 
 	/* Use EXTREFCLK as ref clock */
 	reg &= ~PHYCLKRST_REFCLKSEL_MASK;
@@ -327,7 +327,7 @@ exynos5_usbdrd_utmi_set_refclk(struct phy_usb_instance *inst)
 	struct exynos5_usbdrd_phy *phy_drd = to_usbdrd_phy(inst);
 
 	/* restore any previous reference clock settings */
-	reg = readl(phy_drd->reg_phy + EXYNOS5_DRD_PHYCLKRST);
+	reg = pete_readl("drivers/phy/samsung/phy-exynos5-usbdrd.c:330", phy_drd->reg_phy + EXYNOS5_DRD_PHYCLKRST);
 
 	reg &= ~PHYCLKRST_REFCLKSEL_MASK;
 	reg |=	PHYCLKRST_REFCLKSEL_EXT_REFCLK;
@@ -344,39 +344,39 @@ static void exynos5_usbdrd_pipe3_init(struct exynos5_usbdrd_phy *phy_drd)
 {
 	u32 reg;
 
-	reg = readl(phy_drd->reg_phy + EXYNOS5_DRD_PHYPARAM1);
+	reg = pete_readl("drivers/phy/samsung/phy-exynos5-usbdrd.c:347", phy_drd->reg_phy + EXYNOS5_DRD_PHYPARAM1);
 	/* Set Tx De-Emphasis level */
 	reg &= ~PHYPARAM1_PCS_TXDEEMPH_MASK;
 	reg |=	PHYPARAM1_PCS_TXDEEMPH;
-	writel(reg, phy_drd->reg_phy + EXYNOS5_DRD_PHYPARAM1);
+	pete_writel("drivers/phy/samsung/phy-exynos5-usbdrd.c:351", reg, phy_drd->reg_phy + EXYNOS5_DRD_PHYPARAM1);
 
-	reg = readl(phy_drd->reg_phy + EXYNOS5_DRD_PHYTEST);
+	reg = pete_readl("drivers/phy/samsung/phy-exynos5-usbdrd.c:353", phy_drd->reg_phy + EXYNOS5_DRD_PHYTEST);
 	reg &= ~PHYTEST_POWERDOWN_SSP;
-	writel(reg, phy_drd->reg_phy + EXYNOS5_DRD_PHYTEST);
+	pete_writel("drivers/phy/samsung/phy-exynos5-usbdrd.c:355", reg, phy_drd->reg_phy + EXYNOS5_DRD_PHYTEST);
 }
 
 static void exynos5_usbdrd_utmi_init(struct exynos5_usbdrd_phy *phy_drd)
 {
 	u32 reg;
 
-	reg = readl(phy_drd->reg_phy + EXYNOS5_DRD_PHYPARAM0);
+	reg = pete_readl("drivers/phy/samsung/phy-exynos5-usbdrd.c:362", phy_drd->reg_phy + EXYNOS5_DRD_PHYPARAM0);
 	/* Set Loss-of-Signal Detector sensitivity */
 	reg &= ~PHYPARAM0_REF_LOSLEVEL_MASK;
 	reg |=	PHYPARAM0_REF_LOSLEVEL;
-	writel(reg, phy_drd->reg_phy + EXYNOS5_DRD_PHYPARAM0);
+	pete_writel("drivers/phy/samsung/phy-exynos5-usbdrd.c:366", reg, phy_drd->reg_phy + EXYNOS5_DRD_PHYPARAM0);
 
-	reg = readl(phy_drd->reg_phy + EXYNOS5_DRD_PHYPARAM1);
+	reg = pete_readl("drivers/phy/samsung/phy-exynos5-usbdrd.c:368", phy_drd->reg_phy + EXYNOS5_DRD_PHYPARAM1);
 	/* Set Tx De-Emphasis level */
 	reg &= ~PHYPARAM1_PCS_TXDEEMPH_MASK;
 	reg |=	PHYPARAM1_PCS_TXDEEMPH;
-	writel(reg, phy_drd->reg_phy + EXYNOS5_DRD_PHYPARAM1);
+	pete_writel("drivers/phy/samsung/phy-exynos5-usbdrd.c:372", reg, phy_drd->reg_phy + EXYNOS5_DRD_PHYPARAM1);
 
 	/* UTMI Power Control */
-	writel(PHYUTMI_OTGDISABLE, phy_drd->reg_phy + EXYNOS5_DRD_PHYUTMI);
+	pete_writel("drivers/phy/samsung/phy-exynos5-usbdrd.c:375", PHYUTMI_OTGDISABLE, phy_drd->reg_phy + EXYNOS5_DRD_PHYUTMI);
 
-	reg = readl(phy_drd->reg_phy + EXYNOS5_DRD_PHYTEST);
+	reg = pete_readl("drivers/phy/samsung/phy-exynos5-usbdrd.c:377", phy_drd->reg_phy + EXYNOS5_DRD_PHYTEST);
 	reg &= ~PHYTEST_POWERDOWN_HSP;
-	writel(reg, phy_drd->reg_phy + EXYNOS5_DRD_PHYTEST);
+	pete_writel("drivers/phy/samsung/phy-exynos5-usbdrd.c:379", reg, phy_drd->reg_phy + EXYNOS5_DRD_PHYTEST);
 }
 
 static int exynos5_usbdrd_phy_init(struct phy *phy)
@@ -391,8 +391,8 @@ static int exynos5_usbdrd_phy_init(struct phy *phy)
 		return ret;
 
 	/* Reset USB 3.0 PHY */
-	writel(0x0, phy_drd->reg_phy + EXYNOS5_DRD_PHYREG0);
-	writel(0x0, phy_drd->reg_phy + EXYNOS5_DRD_PHYRESUME);
+	pete_writel("drivers/phy/samsung/phy-exynos5-usbdrd.c:394", 0x0, phy_drd->reg_phy + EXYNOS5_DRD_PHYREG0);
+	pete_writel("drivers/phy/samsung/phy-exynos5-usbdrd.c:395", 0x0, phy_drd->reg_phy + EXYNOS5_DRD_PHYRESUME);
 
 	/*
 	 * Setting the Frame length Adj value[6:1] to default 0x20
@@ -400,17 +400,17 @@ static int exynos5_usbdrd_phy_init(struct phy *phy)
 	 */
 	reg =	LINKSYSTEM_XHCI_VERSION_CONTROL |
 		LINKSYSTEM_FLADJ(0x20);
-	writel(reg, phy_drd->reg_phy + EXYNOS5_DRD_LINKSYSTEM);
+	pete_writel("drivers/phy/samsung/phy-exynos5-usbdrd.c:403", reg, phy_drd->reg_phy + EXYNOS5_DRD_LINKSYSTEM);
 
-	reg = readl(phy_drd->reg_phy + EXYNOS5_DRD_PHYPARAM0);
+	reg = pete_readl("drivers/phy/samsung/phy-exynos5-usbdrd.c:405", phy_drd->reg_phy + EXYNOS5_DRD_PHYPARAM0);
 	/* Select PHY CLK source */
 	reg &= ~PHYPARAM0_REF_USE_PAD;
-	writel(reg, phy_drd->reg_phy + EXYNOS5_DRD_PHYPARAM0);
+	pete_writel("drivers/phy/samsung/phy-exynos5-usbdrd.c:408", reg, phy_drd->reg_phy + EXYNOS5_DRD_PHYPARAM0);
 
 	/* This bit must be set for both HS and SS operations */
-	reg = readl(phy_drd->reg_phy + EXYNOS5_DRD_PHYUTMICLKSEL);
+	reg = pete_readl("drivers/phy/samsung/phy-exynos5-usbdrd.c:411", phy_drd->reg_phy + EXYNOS5_DRD_PHYUTMICLKSEL);
 	reg |= PHYUTMICLKSEL_UTMI_CLKSEL;
-	writel(reg, phy_drd->reg_phy + EXYNOS5_DRD_PHYUTMICLKSEL);
+	pete_writel("drivers/phy/samsung/phy-exynos5-usbdrd.c:413", reg, phy_drd->reg_phy + EXYNOS5_DRD_PHYUTMICLKSEL);
 
 	/* UTMI or PIPE3 specific init */
 	inst->phy_cfg->phy_init(phy_drd);
@@ -429,12 +429,12 @@ static int exynos5_usbdrd_phy_init(struct phy *phy)
 		/* Reset the port */
 		PHYCLKRST_PORTRESET;
 
-	writel(reg, phy_drd->reg_phy + EXYNOS5_DRD_PHYCLKRST);
+	pete_writel("drivers/phy/samsung/phy-exynos5-usbdrd.c:432", reg, phy_drd->reg_phy + EXYNOS5_DRD_PHYCLKRST);
 
 	udelay(10);
 
 	reg &= ~PHYCLKRST_PORTRESET;
-	writel(reg, phy_drd->reg_phy + EXYNOS5_DRD_PHYCLKRST);
+	pete_writel("drivers/phy/samsung/phy-exynos5-usbdrd.c:437", reg, phy_drd->reg_phy + EXYNOS5_DRD_PHYCLKRST);
 
 	clk_disable_unprepare(phy_drd->clk);
 
@@ -455,20 +455,20 @@ static int exynos5_usbdrd_phy_exit(struct phy *phy)
 	reg =	PHYUTMI_OTGDISABLE |
 		PHYUTMI_FORCESUSPEND |
 		PHYUTMI_FORCESLEEP;
-	writel(reg, phy_drd->reg_phy + EXYNOS5_DRD_PHYUTMI);
+	pete_writel("drivers/phy/samsung/phy-exynos5-usbdrd.c:458", reg, phy_drd->reg_phy + EXYNOS5_DRD_PHYUTMI);
 
 	/* Resetting the PHYCLKRST enable bits to reduce leakage current */
-	reg = readl(phy_drd->reg_phy + EXYNOS5_DRD_PHYCLKRST);
+	reg = pete_readl("drivers/phy/samsung/phy-exynos5-usbdrd.c:461", phy_drd->reg_phy + EXYNOS5_DRD_PHYCLKRST);
 	reg &= ~(PHYCLKRST_REF_SSP_EN |
 		 PHYCLKRST_SSC_EN |
 		 PHYCLKRST_COMMONONN);
-	writel(reg, phy_drd->reg_phy + EXYNOS5_DRD_PHYCLKRST);
+	pete_writel("drivers/phy/samsung/phy-exynos5-usbdrd.c:465", reg, phy_drd->reg_phy + EXYNOS5_DRD_PHYCLKRST);
 
 	/* Control PHYTEST to remove leakage current */
-	reg = readl(phy_drd->reg_phy + EXYNOS5_DRD_PHYTEST);
+	reg = pete_readl("drivers/phy/samsung/phy-exynos5-usbdrd.c:468", phy_drd->reg_phy + EXYNOS5_DRD_PHYTEST);
 	reg |=	PHYTEST_POWERDOWN_SSP |
 		PHYTEST_POWERDOWN_HSP;
-	writel(reg, phy_drd->reg_phy + EXYNOS5_DRD_PHYTEST);
+	pete_writel("drivers/phy/samsung/phy-exynos5-usbdrd.c:471", reg, phy_drd->reg_phy + EXYNOS5_DRD_PHYTEST);
 
 	clk_disable_unprepare(phy_drd->clk);
 
@@ -560,7 +560,7 @@ static int crport_handshake(struct exynos5_usbdrd_phy *phy_drd,
 	unsigned int result;
 	int err;
 
-	writel(val | cmd, phy_drd->reg_phy + EXYNOS5_DRD_PHYREG0);
+	pete_writel("drivers/phy/samsung/phy-exynos5-usbdrd.c:563", val | cmd, phy_drd->reg_phy + EXYNOS5_DRD_PHYREG0);
 
 	err = readl_poll_timeout(phy_drd->reg_phy + EXYNOS5_DRD_PHYREG1,
 				 result, (result & PHYREG1_CR_ACK), 1, 100);
@@ -569,7 +569,7 @@ static int crport_handshake(struct exynos5_usbdrd_phy *phy_drd,
 		return err;
 	}
 
-	writel(val, phy_drd->reg_phy + EXYNOS5_DRD_PHYREG0);
+	pete_writel("drivers/phy/samsung/phy-exynos5-usbdrd.c:572", val, phy_drd->reg_phy + EXYNOS5_DRD_PHYREG0);
 
 	err = readl_poll_timeout(phy_drd->reg_phy + EXYNOS5_DRD_PHYREG1,
 				 result, !(result & PHYREG1_CR_ACK), 1, 100);
@@ -587,7 +587,7 @@ static int crport_ctrl_write(struct exynos5_usbdrd_phy *phy_drd,
 	int ret;
 
 	/* Write Address */
-	writel(PHYREG0_CR_DATA_IN(addr),
+	pete_writel("drivers/phy/samsung/phy-exynos5-usbdrd.c:590", PHYREG0_CR_DATA_IN(addr),
 	       phy_drd->reg_phy + EXYNOS5_DRD_PHYREG0);
 	ret = crport_handshake(phy_drd, PHYREG0_CR_DATA_IN(addr),
 			       PHYREG0_CR_CAP_ADDR);
@@ -595,7 +595,7 @@ static int crport_ctrl_write(struct exynos5_usbdrd_phy *phy_drd,
 		return ret;
 
 	/* Write Data */
-	writel(PHYREG0_CR_DATA_IN(data),
+	pete_writel("drivers/phy/samsung/phy-exynos5-usbdrd.c:598", PHYREG0_CR_DATA_IN(data),
 	       phy_drd->reg_phy + EXYNOS5_DRD_PHYREG0);
 	ret = crport_handshake(phy_drd, PHYREG0_CR_DATA_IN(data),
 			       PHYREG0_CR_CAP_DATA);

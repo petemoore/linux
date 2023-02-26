@@ -32,8 +32,8 @@ static void __init set_vsmp_ctl(void)
 	/* set vSMP magic bits to indicate vSMP capable kernel */
 	cfg = read_pci_config(0, 0x1f, 0, PCI_BASE_ADDRESS_0);
 	address = early_ioremap(cfg, 8);
-	cap = readl(address);
-	ctl = readl(address + 4);
+	cap = pete_readl("arch/x86/kernel/vsmp_64.c:35", address);
+	ctl = pete_readl("arch/x86/kernel/vsmp_64.c:36", address + 4);
 	printk(KERN_INFO "vSMP CTL: capabilities:0x%08x  control:0x%08x\n",
 	       cap, ctl);
 
@@ -49,8 +49,8 @@ static void __init set_vsmp_ctl(void)
 	}
 #endif
 
-	writel(ctl, address + 4);
-	ctl = readl(address + 4);
+	pete_writel("arch/x86/kernel/vsmp_64.c:52", ctl, address + 4);
+	ctl = pete_readl("arch/x86/kernel/vsmp_64.c:53", address + 4);
 	pr_info("vSMP CTL: control set to:0x%08x\n", ctl);
 
 	early_iounmap(address, 8);
@@ -113,7 +113,7 @@ static void __init vsmp_cap_cpus(void)
 	if (WARN_ON(!address))
 		return;
 
-	topology = readl(address);
+	topology = pete_readl("arch/x86/kernel/vsmp_64.c:116", address);
 	node_shift = (topology >> 16) & 0x7;
 	if (!node_shift)
 		/* The value 0 should be decoded as 8 */

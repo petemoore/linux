@@ -301,9 +301,9 @@ __dwc_regs(struct dw_dma_chan *dwc)
 }
 
 #define channel_readl(dwc, name) \
-	readl(&(__dwc_regs(dwc)->name))
+	pete_readl("drivers/dma/dw/regs.h:304", &(__dwc_regs(dwc)->name))
 #define channel_writel(dwc, name, val) \
-	writel((val), &(__dwc_regs(dwc)->name))
+	pete_writel("drivers/dma/dw/regs.h:306", (val), &(__dwc_regs(dwc)->name))
 
 static inline struct dw_dma_chan *to_dw_dma_chan(struct dma_chan *chan)
 {
@@ -347,9 +347,9 @@ static inline struct dw_dma_regs __iomem *__dw_regs(struct dw_dma *dw)
 }
 
 #define dma_readl(dw, name) \
-	readl(&(__dw_regs(dw)->name))
+	pete_readl("drivers/dma/dw/regs.h:350", &(__dw_regs(dw)->name))
 #define dma_writel(dw, name, val) \
-	writel((val), &(__dw_regs(dw)->name))
+	pete_writel("drivers/dma/dw/regs.h:352", (val), &(__dw_regs(dw)->name))
 
 #define idma32_readq(dw, name)				\
 	hi_lo_readq(&(__dw_regs(dw)->name))

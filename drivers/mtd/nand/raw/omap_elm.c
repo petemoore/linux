@@ -84,12 +84,12 @@ static LIST_HEAD(elm_devices);
 
 static void elm_write_reg(struct elm_info *info, int offset, u32 val)
 {
-	writel(val, info->elm_base + offset);
+	pete_writel("drivers/mtd/nand/raw/omap_elm.c:87", val, info->elm_base + offset);
 }
 
 static u32 elm_read_reg(struct elm_info *info, int offset)
 {
-	return readl(info->elm_base + offset);
+	return pete_readl("drivers/mtd/nand/raw/omap_elm.c:92", info->elm_base + offset);
 }
 
 /**

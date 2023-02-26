@@ -143,11 +143,11 @@ struct cpt_mbox {
 static inline void cpt_write_csr64(u8 __iomem *hw_addr, u64 offset,
 				   u64 val)
 {
-	writeq(val, hw_addr + offset);
+	pete_writeq("drivers/crypto/cavium/cpt/cpt_common.h:146", val, hw_addr + offset);
 }
 
 static inline u64 cpt_read_csr64(u8 __iomem *hw_addr, u64 offset)
 {
-	return readq(hw_addr + offset);
+	return pete_readq("drivers/crypto/cavium/cpt/cpt_common.h:151", hw_addr + offset);
 }
 #endif /* __CPT_COMMON_H */

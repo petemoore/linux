@@ -1108,10 +1108,10 @@ static irqreturn_t mtk_jpeg_enc_irq(int irq, void *priv)
 
 	cancel_delayed_work(&jpeg->job_timeout_work);
 
-	irq_status = readl(jpeg->reg_base + JPEG_ENC_INT_STS) &
+	irq_status = pete_readl("drivers/media/platform/mtk-jpeg/mtk_jpeg_core.c:1111", jpeg->reg_base + JPEG_ENC_INT_STS) &
 		     JPEG_ENC_INT_STATUS_MASK_ALLIRQ;
 	if (irq_status)
-		writel(0, jpeg->reg_base + JPEG_ENC_INT_STS);
+		pete_writel("drivers/media/platform/mtk-jpeg/mtk_jpeg_core.c:1114", 0, jpeg->reg_base + JPEG_ENC_INT_STS);
 
 	if (!(irq_status & JPEG_ENC_INT_STATUS_DONE))
 		return ret;

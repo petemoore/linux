@@ -913,9 +913,9 @@ static void qlcnic_sriov_pull_bc_msg(struct qlcnic_adapter *adapter,
 	max = (size / sizeof(u32)) + hdr_size;
 
 	for (i = 2, j = 0; j < hdr_size; i++, j++)
-		*(hdr++) = readl(QLCNIC_MBX_FW(ahw, i));
+		*(hdr++) = pete_readl("drivers/net/ethernet/qlogic/qlcnic/qlcnic_sriov_common.c:916", QLCNIC_MBX_FW(ahw, i));
 	for (; j < max; i++, j++)
-		*(pay++) = readl(QLCNIC_MBX_FW(ahw, i));
+		*(pay++) = pete_readl("drivers/net/ethernet/qlogic/qlcnic/qlcnic_sriov_common.c:918", QLCNIC_MBX_FW(ahw, i));
 }
 
 static int __qlcnic_sriov_issue_bc_post(struct qlcnic_vf_info *vf)
@@ -1270,7 +1270,7 @@ static void qlcnic_sriov_handle_msg_event(struct qlcnic_sriov *sriov,
 	u8 msg_type, i;
 
 	for (i = 2; i < 6; i++)
-		ptr[i - 2] = readl(QLCNIC_MBX_FW(vf->adapter->ahw, i));
+		ptr[i - 2] = pete_readl("drivers/net/ethernet/qlogic/qlcnic/qlcnic_sriov_common.c:1273", QLCNIC_MBX_FW(vf->adapter->ahw, i));
 	msg_type = hdr.msg_type;
 
 	switch (msg_type) {

@@ -124,7 +124,7 @@ typedef enum {
 #define BCI_BUFFER_OFFSET            0x10000
 #define BCI_SIZE                     0x4000
 
-#define BCI_SEND(dw)                 writel(dw, par->bci_base + par->bci_ptr++)
+#define BCI_SEND(dw)                 pete_writel("drivers/video/fbdev/savage/savagefb.h:127", dw, par->bci_base + par->bci_ptr++)
 
 #define BCI_CMD_GET_ROP(cmd)         (((cmd) >> 16) & 0xFF)
 #define BCI_CMD_SET_ROP(cmd, rop)    ((cmd) |= ((rop & 0xFF) << 16))
@@ -253,32 +253,32 @@ struct savagefb_par {
 /* IO functions */
 static inline u8 savage_in8(u32 addr, struct savagefb_par *par)
 {
-	return readb(par->mmio.vbase + addr);
+	return pete_readb("drivers/video/fbdev/savage/savagefb.h:256", par->mmio.vbase + addr);
 }
 
 static inline u16 savage_in16(u32 addr, struct savagefb_par *par)
 {
-	return readw(par->mmio.vbase + addr);
+	return pete_readw("drivers/video/fbdev/savage/savagefb.h:261", par->mmio.vbase + addr);
 }
 
 static inline u32 savage_in32(u32 addr, struct savagefb_par *par)
 {
-	return readl(par->mmio.vbase + addr);
+	return pete_readl("drivers/video/fbdev/savage/savagefb.h:266", par->mmio.vbase + addr);
 }
 
 static inline void savage_out8(u32 addr, u8 val, struct savagefb_par *par)
 {
-	writeb(val, par->mmio.vbase + addr);
+	pete_writeb("drivers/video/fbdev/savage/savagefb.h:271", val, par->mmio.vbase + addr);
 }
 
 static inline void savage_out16(u32 addr, u16 val, struct savagefb_par *par)
 {
-	writew(val, par->mmio.vbase + addr);
+	pete_writew("drivers/video/fbdev/savage/savagefb.h:276", val, par->mmio.vbase + addr);
 }
 
 static inline void savage_out32(u32 addr, u32 val, struct savagefb_par *par)
 {
-	writel(val, par->mmio.vbase + addr);
+	pete_writel("drivers/video/fbdev/savage/savagefb.h:281", val, par->mmio.vbase + addr);
 }
 
 static inline u8 vga_in8(int addr, struct savagefb_par *par)

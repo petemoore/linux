@@ -66,7 +66,7 @@ static unsigned long ic_irq_enable;
 
 static int irq_suspend(void)
 {
-	ic_irq_enable = readl(VA_IC_BASE + IRQ_ENABLE);
+	ic_irq_enable = pete_readl("arch/arm/mach-integrator/integrator_ap.c:69", VA_IC_BASE + IRQ_ENABLE);
 	return 0;
 }
 
@@ -74,10 +74,10 @@ static void irq_resume(void)
 {
 	/* disable all irq sources */
 	cm_clear_irqs();
-	writel(-1, VA_IC_BASE + IRQ_ENABLE_CLEAR);
-	writel(-1, VA_IC_BASE + FIQ_ENABLE_CLEAR);
+	pete_writel("arch/arm/mach-integrator/integrator_ap.c:77", -1, VA_IC_BASE + IRQ_ENABLE_CLEAR);
+	pete_writel("arch/arm/mach-integrator/integrator_ap.c:78", -1, VA_IC_BASE + FIQ_ENABLE_CLEAR);
 
-	writel(ic_irq_enable, VA_IC_BASE + IRQ_ENABLE_SET);
+	pete_writel("arch/arm/mach-integrator/integrator_ap.c:80", ic_irq_enable, VA_IC_BASE + IRQ_ENABLE_SET);
 }
 #else
 #define irq_suspend NULL

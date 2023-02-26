@@ -49,8 +49,8 @@
 
 #if MEMORY_MAPPED_IO
 #define RD_REG_WORD(addr)		readw_relaxed(addr)
-#define RD_REG_WORD_dmasync(addr)	readw(addr)
-#define WRT_REG_WORD(addr, data)	writew(data, addr)
+#define RD_REG_WORD_dmasync(addr)	pete_readw("drivers/scsi/qla1280.h:52", addr)
+#define WRT_REG_WORD(addr, data)	pete_writew("drivers/scsi/qla1280.h:53", data, addr)
 #else				/* MEMORY_MAPPED_IO */
 #define RD_REG_WORD(addr)		inw((unsigned long)addr)
 #define RD_REG_WORD_dmasync(addr)	RD_REG_WORD(addr)

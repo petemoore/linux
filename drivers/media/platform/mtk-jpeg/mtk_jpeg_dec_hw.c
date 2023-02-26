@@ -193,9 +193,9 @@ u32 mtk_jpeg_dec_get_int_status(void __iomem *base)
 {
 	u32 ret;
 
-	ret = readl(base + JPGDEC_REG_INTERRUPT_STATUS) & BIT_INQST_MASK_ALLIRQ;
+	ret = pete_readl("drivers/media/platform/mtk-jpeg/mtk_jpeg_dec_hw.c:196", base + JPGDEC_REG_INTERRUPT_STATUS) & BIT_INQST_MASK_ALLIRQ;
 	if (ret)
-		writel(ret, base + JPGDEC_REG_INTERRUPT_STATUS);
+		pete_writel("drivers/media/platform/mtk-jpeg/mtk_jpeg_dec_hw.c:198", ret, base + JPGDEC_REG_INTERRUPT_STATUS);
 
 	return ret;
 }
@@ -218,20 +218,20 @@ u32 mtk_jpeg_dec_enum_result(u32 irq_result)
 
 void mtk_jpeg_dec_start(void __iomem *base)
 {
-	writel(0, base + JPGDEC_REG_TRIG);
+	pete_writel("drivers/media/platform/mtk-jpeg/mtk_jpeg_dec_hw.c:221", 0, base + JPGDEC_REG_TRIG);
 }
 
 static void mtk_jpeg_dec_soft_reset(void __iomem *base)
 {
-	writel(0x0000FFFF, base + JPGDEC_REG_INTERRUPT_STATUS);
-	writel(0x00, base + JPGDEC_REG_RESET);
-	writel(0x01, base + JPGDEC_REG_RESET);
+	pete_writel("drivers/media/platform/mtk-jpeg/mtk_jpeg_dec_hw.c:226", 0x0000FFFF, base + JPGDEC_REG_INTERRUPT_STATUS);
+	pete_writel("drivers/media/platform/mtk-jpeg/mtk_jpeg_dec_hw.c:227", 0x00, base + JPGDEC_REG_RESET);
+	pete_writel("drivers/media/platform/mtk-jpeg/mtk_jpeg_dec_hw.c:228", 0x01, base + JPGDEC_REG_RESET);
 }
 
 static void mtk_jpeg_dec_hard_reset(void __iomem *base)
 {
-	writel(0x00, base + JPGDEC_REG_RESET);
-	writel(0x10, base + JPGDEC_REG_RESET);
+	pete_writel("drivers/media/platform/mtk-jpeg/mtk_jpeg_dec_hw.c:233", 0x00, base + JPGDEC_REG_RESET);
+	pete_writel("drivers/media/platform/mtk-jpeg/mtk_jpeg_dec_hw.c:234", 0x10, base + JPGDEC_REG_RESET);
 }
 
 void mtk_jpeg_dec_reset(void __iomem *base)
@@ -247,64 +247,64 @@ static void mtk_jpeg_dec_set_brz_factor(void __iomem *base, u8 yscale_w,
 
 	val = (uvscale_h << 12) | (uvscale_w << 8) |
 	      (yscale_h << 4) | yscale_w;
-	writel(val, base + JPGDEC_REG_BRZ_FACTOR);
+	pete_writel("drivers/media/platform/mtk-jpeg/mtk_jpeg_dec_hw.c:250", val, base + JPGDEC_REG_BRZ_FACTOR);
 }
 
 static void mtk_jpeg_dec_set_dst_bank0(void __iomem *base, u32 addr_y,
 				       u32 addr_u, u32 addr_v)
 {
 	mtk_jpeg_verify_align(addr_y, 16, JPGDEC_REG_DEST_ADDR0_Y);
-	writel(addr_y, base + JPGDEC_REG_DEST_ADDR0_Y);
+	pete_writel("drivers/media/platform/mtk-jpeg/mtk_jpeg_dec_hw.c:257", addr_y, base + JPGDEC_REG_DEST_ADDR0_Y);
 	mtk_jpeg_verify_align(addr_u, 16, JPGDEC_REG_DEST_ADDR0_U);
-	writel(addr_u, base + JPGDEC_REG_DEST_ADDR0_U);
+	pete_writel("drivers/media/platform/mtk-jpeg/mtk_jpeg_dec_hw.c:259", addr_u, base + JPGDEC_REG_DEST_ADDR0_U);
 	mtk_jpeg_verify_align(addr_v, 16, JPGDEC_REG_DEST_ADDR0_V);
-	writel(addr_v, base + JPGDEC_REG_DEST_ADDR0_V);
+	pete_writel("drivers/media/platform/mtk-jpeg/mtk_jpeg_dec_hw.c:261", addr_v, base + JPGDEC_REG_DEST_ADDR0_V);
 }
 
 static void mtk_jpeg_dec_set_dst_bank1(void __iomem *base, u32 addr_y,
 				       u32 addr_u, u32 addr_v)
 {
-	writel(addr_y, base + JPGDEC_REG_DEST_ADDR1_Y);
-	writel(addr_u, base + JPGDEC_REG_DEST_ADDR1_U);
-	writel(addr_v, base + JPGDEC_REG_DEST_ADDR1_V);
+	pete_writel("drivers/media/platform/mtk-jpeg/mtk_jpeg_dec_hw.c:267", addr_y, base + JPGDEC_REG_DEST_ADDR1_Y);
+	pete_writel("drivers/media/platform/mtk-jpeg/mtk_jpeg_dec_hw.c:268", addr_u, base + JPGDEC_REG_DEST_ADDR1_U);
+	pete_writel("drivers/media/platform/mtk-jpeg/mtk_jpeg_dec_hw.c:269", addr_v, base + JPGDEC_REG_DEST_ADDR1_V);
 }
 
 static void mtk_jpeg_dec_set_mem_stride(void __iomem *base, u32 stride_y,
 					u32 stride_uv)
 {
-	writel((stride_y & 0xFFFF), base + JPGDEC_REG_STRIDE_Y);
-	writel((stride_uv & 0xFFFF), base + JPGDEC_REG_STRIDE_UV);
+	pete_writel("drivers/media/platform/mtk-jpeg/mtk_jpeg_dec_hw.c:275", (stride_y & 0xFFFF), base + JPGDEC_REG_STRIDE_Y);
+	pete_writel("drivers/media/platform/mtk-jpeg/mtk_jpeg_dec_hw.c:276", (stride_uv & 0xFFFF), base + JPGDEC_REG_STRIDE_UV);
 }
 
 static void mtk_jpeg_dec_set_img_stride(void __iomem *base, u32 stride_y,
 					u32 stride_uv)
 {
-	writel((stride_y & 0xFFFF), base + JPGDEC_REG_IMG_STRIDE_Y);
-	writel((stride_uv & 0xFFFF), base + JPGDEC_REG_IMG_STRIDE_UV);
+	pete_writel("drivers/media/platform/mtk-jpeg/mtk_jpeg_dec_hw.c:282", (stride_y & 0xFFFF), base + JPGDEC_REG_IMG_STRIDE_Y);
+	pete_writel("drivers/media/platform/mtk-jpeg/mtk_jpeg_dec_hw.c:283", (stride_uv & 0xFFFF), base + JPGDEC_REG_IMG_STRIDE_UV);
 }
 
 static void mtk_jpeg_dec_set_pause_mcu_idx(void __iomem *base, u32 idx)
 {
-	writel(idx & 0x0003FFFFFF, base + JPGDEC_REG_PAUSE_MCU_NUM);
+	pete_writel("drivers/media/platform/mtk-jpeg/mtk_jpeg_dec_hw.c:288", idx & 0x0003FFFFFF, base + JPGDEC_REG_PAUSE_MCU_NUM);
 }
 
 static void mtk_jpeg_dec_set_dec_mode(void __iomem *base, u32 mode)
 {
-	writel(mode & 0x03, base + JPGDEC_REG_OPERATION_MODE);
+	pete_writel("drivers/media/platform/mtk-jpeg/mtk_jpeg_dec_hw.c:293", mode & 0x03, base + JPGDEC_REG_OPERATION_MODE);
 }
 
 static void mtk_jpeg_dec_set_bs_write_ptr(void __iomem *base, u32 ptr)
 {
 	mtk_jpeg_verify_align(ptr, 16, JPGDEC_REG_FILE_BRP);
-	writel(ptr, base + JPGDEC_REG_FILE_BRP);
+	pete_writel("drivers/media/platform/mtk-jpeg/mtk_jpeg_dec_hw.c:299", ptr, base + JPGDEC_REG_FILE_BRP);
 }
 
 static void mtk_jpeg_dec_set_bs_info(void __iomem *base, u32 addr, u32 size)
 {
 	mtk_jpeg_verify_align(addr, 16, JPGDEC_REG_FILE_ADDR);
 	mtk_jpeg_verify_align(size, 128, JPGDEC_REG_FILE_TOTAL_SIZE);
-	writel(addr, base + JPGDEC_REG_FILE_ADDR);
-	writel(size, base + JPGDEC_REG_FILE_TOTAL_SIZE);
+	pete_writel("drivers/media/platform/mtk-jpeg/mtk_jpeg_dec_hw.c:306", addr, base + JPGDEC_REG_FILE_ADDR);
+	pete_writel("drivers/media/platform/mtk-jpeg/mtk_jpeg_dec_hw.c:307", size, base + JPGDEC_REG_FILE_TOTAL_SIZE);
 }
 
 static void mtk_jpeg_dec_set_comp_id(void __iomem *base, u32 id_y, u32 id_u,
@@ -314,17 +314,17 @@ static void mtk_jpeg_dec_set_comp_id(void __iomem *base, u32 id_y, u32 id_u,
 
 	val = ((id_y & 0x00FF) << 24) | ((id_u & 0x00FF) << 16) |
 	      ((id_v & 0x00FF) << 8);
-	writel(val, base + JPGDEC_REG_COMP_ID);
+	pete_writel("drivers/media/platform/mtk-jpeg/mtk_jpeg_dec_hw.c:317", val, base + JPGDEC_REG_COMP_ID);
 }
 
 static void mtk_jpeg_dec_set_total_mcu(void __iomem *base, u32 num)
 {
-	writel(num - 1, base + JPGDEC_REG_TOTAL_MCU_NUM);
+	pete_writel("drivers/media/platform/mtk-jpeg/mtk_jpeg_dec_hw.c:322", num - 1, base + JPGDEC_REG_TOTAL_MCU_NUM);
 }
 
 static void mtk_jpeg_dec_set_comp0_du(void __iomem *base, u32 num)
 {
-	writel(num - 1, base + JPGDEC_REG_COMP0_DATA_UNIT_NUM);
+	pete_writel("drivers/media/platform/mtk-jpeg/mtk_jpeg_dec_hw.c:327", num - 1, base + JPGDEC_REG_COMP0_DATA_UNIT_NUM);
 }
 
 static void mtk_jpeg_dec_set_du_membership(void __iomem *base, u32 member,
@@ -333,7 +333,7 @@ static void mtk_jpeg_dec_set_du_membership(void __iomem *base, u32 member,
 	if (isgray)
 		member = 0x3FFFFFFC;
 	member |= (isgray << 31) | (gmc << 30);
-	writel(member, base + JPGDEC_REG_DU_CTRL);
+	pete_writel("drivers/media/platform/mtk-jpeg/mtk_jpeg_dec_hw.c:336", member, base + JPGDEC_REG_DU_CTRL);
 }
 
 static void mtk_jpeg_dec_set_q_table(void __iomem *base, u32 id0, u32 id1,
@@ -342,7 +342,7 @@ static void mtk_jpeg_dec_set_q_table(void __iomem *base, u32 id0, u32 id1,
 	u32 val;
 
 	val = ((id0 & 0x0f) << 8) | ((id1 & 0x0f) << 4) | ((id2 & 0x0f) << 0);
-	writel(val, base + JPGDEC_REG_QT_ID);
+	pete_writel("drivers/media/platform/mtk-jpeg/mtk_jpeg_dec_hw.c:345", val, base + JPGDEC_REG_QT_ID);
 }
 
 static void mtk_jpeg_dec_set_dma_group(void __iomem *base, u32 mcu_group,
@@ -353,7 +353,7 @@ static void mtk_jpeg_dec_set_dma_group(void __iomem *base, u32 mcu_group,
 	val = (((mcu_group - 1) & 0x00FF) << 16) |
 	      (((group_num - 1) & 0x007F) << 8) |
 	      ((last_mcu - 1) & 0x00FF);
-	writel(val, base + JPGDEC_REG_WDMA_CTRL);
+	pete_writel("drivers/media/platform/mtk-jpeg/mtk_jpeg_dec_hw.c:356", val, base + JPGDEC_REG_WDMA_CTRL);
 }
 
 static void mtk_jpeg_dec_set_sampling_factor(void __iomem *base, u32 comp_num,
@@ -369,7 +369,7 @@ static void mtk_jpeg_dec_set_sampling_factor(void __iomem *base, u32 comp_num,
 		val = 0;
 	else
 		val = (y_wh << 8) | (u_wh << 4) | v_wh;
-	writel(val, base + JPGDEC_REG_DU_NUM);
+	pete_writel("drivers/media/platform/mtk-jpeg/mtk_jpeg_dec_hw.c:372", val, base + JPGDEC_REG_DU_NUM);
 }
 
 void mtk_jpeg_dec_set_config(void __iomem *base,

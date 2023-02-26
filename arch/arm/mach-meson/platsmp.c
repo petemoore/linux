@@ -44,7 +44,7 @@ static struct reset_control *meson_smp_get_core_reset(int cpu)
 
 static void meson_smp_set_cpu_ctrl(int cpu, bool on_off)
 {
-	u32 val = readl(sram_base + MESON_SMP_SRAM_CPU_CTRL_REG);
+	u32 val = pete_readl("arch/arm/mach-meson/platsmp.c:47", sram_base + MESON_SMP_SRAM_CPU_CTRL_REG);
 
 	if (on_off)
 		val |= BIT(cpu);
@@ -54,7 +54,7 @@ static void meson_smp_set_cpu_ctrl(int cpu, bool on_off)
 	/* keep bit 0 always enabled */
 	val |= BIT(0);
 
-	writel(val, sram_base + MESON_SMP_SRAM_CPU_CTRL_REG);
+	pete_writel("arch/arm/mach-meson/platsmp.c:57", val, sram_base + MESON_SMP_SRAM_CPU_CTRL_REG);
 }
 
 static void __init meson_smp_prepare_cpus(const char *scu_compatible,
@@ -121,7 +121,7 @@ static void meson_smp_begin_secondary_boot(unsigned int cpu)
 	 * system without power-cycling, or when taking the CPU offline and
 	 * then taking it online again.
 	 */
-	writel(__pa_symbol(secondary_startup),
+	pete_writel("arch/arm/mach-meson/platsmp.c:124", __pa_symbol(secondary_startup),
 	       sram_base + MESON_SMP_SRAM_CPU_CTRL_ADDR_REG(cpu));
 
 	/*
@@ -136,7 +136,7 @@ static int meson_smp_finalize_secondary_boot(unsigned int cpu)
 	unsigned long timeout;
 
 	timeout = jiffies + (10 * HZ);
-	while (readl(sram_base + MESON_SMP_SRAM_CPU_CTRL_ADDR_REG(cpu))) {
+	while (pete_readl("arch/arm/mach-meson/platsmp.c:139", sram_base + MESON_SMP_SRAM_CPU_CTRL_ADDR_REG(cpu))) {
 		if (!time_before(jiffies, timeout)) {
 			pr_err("Timeout while waiting for CPU%d status\n",
 			       cpu);
@@ -144,7 +144,7 @@ static int meson_smp_finalize_secondary_boot(unsigned int cpu)
 		}
 	}
 
-	writel(__pa_symbol(secondary_startup),
+	pete_writel("arch/arm/mach-meson/platsmp.c:147", __pa_symbol(secondary_startup),
 	       sram_base + MESON_SMP_SRAM_CPU_CTRL_ADDR_REG(cpu));
 
 	meson_smp_set_cpu_ctrl(cpu, true);

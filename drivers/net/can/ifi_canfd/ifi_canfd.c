@@ -238,7 +238,7 @@ static void ifi_canfd_irq_enable(struct net_device *ndev, bool enable)
 			enirq |= IFI_CANFD_INTERRUPT_ERROR_COUNTER;
 	}
 
-	writel(IFI_CANFD_IRQMASK_SET_ERR |
+	pete_writel("drivers/net/can/ifi_canfd/ifi_canfd.c:241", IFI_CANFD_IRQMASK_SET_ERR |
 	       IFI_CANFD_IRQMASK_SET_TS |
 	       IFI_CANFD_IRQMASK_SET_TX |
 	       IFI_CANFD_IRQMASK_SET_RX | enirq,
@@ -257,7 +257,7 @@ static void ifi_canfd_read_fifo(struct net_device *ndev)
 	u32 dlc, id;
 	int i;
 
-	rxdlc = readl(priv->base + IFI_CANFD_RXFIFO_DLC);
+	rxdlc = pete_readl("drivers/net/can/ifi_canfd/ifi_canfd.c:260", priv->base + IFI_CANFD_RXFIFO_DLC);
 	if (rxdlc & IFI_CANFD_RXFIFO_DLC_EDL)
 		skb = alloc_canfd_skb(ndev, &cf);
 	else
@@ -275,7 +275,7 @@ static void ifi_canfd_read_fifo(struct net_device *ndev)
 	else
 		cf->len = can_cc_dlc2len(dlc);
 
-	rxid = readl(priv->base + IFI_CANFD_RXFIFO_ID);
+	rxid = pete_readl("drivers/net/can/ifi_canfd/ifi_canfd.c:278", priv->base + IFI_CANFD_RXFIFO_ID);
 	id = (rxid >> IFI_CANFD_RXFIFO_ID_ID_OFFSET);
 	if (id & IFI_CANFD_RXFIFO_ID_IDE) {
 		id &= IFI_CANFD_RXFIFO_ID_ID_XTD_MASK;
@@ -307,13 +307,13 @@ static void ifi_canfd_read_fifo(struct net_device *ndev)
 
 		for (i = 0; i < cf->len; i += 4) {
 			*(u32 *)(cf->data + i) =
-				readl(priv->base + IFI_CANFD_RXFIFO_DATA + i);
+				pete_readl("drivers/net/can/ifi_canfd/ifi_canfd.c:310", priv->base + IFI_CANFD_RXFIFO_DATA + i);
 		}
 	}
 
 	/* Remove the packet from FIFO */
-	writel(IFI_CANFD_RXSTCMD_REMOVE_MSG, priv->base + IFI_CANFD_RXSTCMD);
-	writel(rx_irq_mask, priv->base + IFI_CANFD_INTERRUPT);
+	pete_writel("drivers/net/can/ifi_canfd/ifi_canfd.c:315", IFI_CANFD_RXSTCMD_REMOVE_MSG, priv->base + IFI_CANFD_RXSTCMD);
+	pete_writel("drivers/net/can/ifi_canfd/ifi_canfd.c:316", rx_irq_mask, priv->base + IFI_CANFD_INTERRUPT);
 
 	stats->rx_packets++;
 	stats->rx_bytes += cf->len;
@@ -327,7 +327,7 @@ static int ifi_canfd_do_rx_poll(struct net_device *ndev, int quota)
 	u32 pkts = 0;
 	u32 rxst;
 
-	rxst = readl(priv->base + IFI_CANFD_RXSTCMD);
+	rxst = pete_readl("drivers/net/can/ifi_canfd/ifi_canfd.c:330", priv->base + IFI_CANFD_RXSTCMD);
 	if (rxst & IFI_CANFD_RXSTCMD_EMPTY) {
 		netdev_dbg(ndev, "No messages in RX FIFO\n");
 		return 0;
@@ -342,7 +342,7 @@ static int ifi_canfd_do_rx_poll(struct net_device *ndev, int quota)
 		ifi_canfd_read_fifo(ndev);
 		quota--;
 		pkts++;
-		rxst = readl(priv->base + IFI_CANFD_RXSTCMD);
+		rxst = pete_readl("drivers/net/can/ifi_canfd/ifi_canfd.c:345", priv->base + IFI_CANFD_RXSTCMD);
 	}
 
 	if (pkts)
@@ -380,7 +380,7 @@ static int ifi_canfd_handle_lec_err(struct net_device *ndev)
 	struct net_device_stats *stats = &ndev->stats;
 	struct can_frame *cf;
 	struct sk_buff *skb;
-	u32 errctr = readl(priv->base + IFI_CANFD_ERROR_CTR);
+	u32 errctr = pete_readl("drivers/net/can/ifi_canfd/ifi_canfd.c:383", priv->base + IFI_CANFD_ERROR_CTR);
 	const u32 errmask = IFI_CANFD_ERROR_CTR_OVERLOAD_FIRST |
 			    IFI_CANFD_ERROR_CTR_ACK_ERROR_FIRST |
 			    IFI_CANFD_ERROR_CTR_BIT0_ERROR_FIRST |
@@ -425,10 +425,10 @@ static int ifi_canfd_handle_lec_err(struct net_device *ndev)
 		cf->data[2] |= CAN_ERR_PROT_FORM;
 
 	/* Reset the error counter, ack the IRQ and re-enable the counter. */
-	writel(IFI_CANFD_ERROR_CTR_ER_RESET, priv->base + IFI_CANFD_ERROR_CTR);
-	writel(IFI_CANFD_INTERRUPT_ERROR_COUNTER,
+	pete_writel("drivers/net/can/ifi_canfd/ifi_canfd.c:428", IFI_CANFD_ERROR_CTR_ER_RESET, priv->base + IFI_CANFD_ERROR_CTR);
+	pete_writel("drivers/net/can/ifi_canfd/ifi_canfd.c:429", IFI_CANFD_INTERRUPT_ERROR_COUNTER,
 	       priv->base + IFI_CANFD_INTERRUPT);
-	writel(IFI_CANFD_ERROR_CTR_ER_ENABLE, priv->base + IFI_CANFD_ERROR_CTR);
+	pete_writel("drivers/net/can/ifi_canfd/ifi_canfd.c:431", IFI_CANFD_ERROR_CTR_ER_ENABLE, priv->base + IFI_CANFD_ERROR_CTR);
 
 	stats->rx_packets++;
 	stats->rx_bytes += cf->len;
@@ -443,7 +443,7 @@ static int ifi_canfd_get_berr_counter(const struct net_device *ndev,
 	struct ifi_canfd_priv *priv = netdev_priv(ndev);
 	u32 err;
 
-	err = readl(priv->base + IFI_CANFD_ERROR);
+	err = pete_readl("drivers/net/can/ifi_canfd/ifi_canfd.c:446", priv->base + IFI_CANFD_ERROR);
 	bec->rxerr = (err >> IFI_CANFD_ERROR_RX_OFFSET) &
 		     IFI_CANFD_ERROR_RX_MASK;
 	bec->txerr = (err >> IFI_CANFD_ERROR_TX_OFFSET) &
@@ -532,7 +532,7 @@ static int ifi_canfd_handle_state_change(struct net_device *ndev,
 static int ifi_canfd_handle_state_errors(struct net_device *ndev)
 {
 	struct ifi_canfd_priv *priv = netdev_priv(ndev);
-	u32 stcmd = readl(priv->base + IFI_CANFD_STCMD);
+	u32 stcmd = pete_readl("drivers/net/can/ifi_canfd/ifi_canfd.c:535", priv->base + IFI_CANFD_STCMD);
 	int work_done = 0;
 
 	if ((stcmd & IFI_CANFD_STCMD_ERROR_ACTIVE) &&
@@ -570,7 +570,7 @@ static int ifi_canfd_poll(struct napi_struct *napi, int quota)
 {
 	struct net_device *ndev = napi->dev;
 	struct ifi_canfd_priv *priv = netdev_priv(ndev);
-	u32 rxstcmd = readl(priv->base + IFI_CANFD_RXSTCMD);
+	u32 rxstcmd = pete_readl("drivers/net/can/ifi_canfd/ifi_canfd.c:573", priv->base + IFI_CANFD_RXSTCMD);
 	int work_done = 0;
 
 	/* Handle bus state changes */
@@ -612,14 +612,14 @@ static irqreturn_t ifi_canfd_isr(int irq, void *dev_id)
 	const u32 clr_irq_mask = ~((u32)IFI_CANFD_INTERRUPT_SET_IRQ);
 	u32 isr;
 
-	isr = readl(priv->base + IFI_CANFD_INTERRUPT);
+	isr = pete_readl("drivers/net/can/ifi_canfd/ifi_canfd.c:615", priv->base + IFI_CANFD_INTERRUPT);
 
 	/* No interrupt */
 	if (isr == 0)
 		return IRQ_NONE;
 
 	/* Clear all pending interrupts but ErrWarn */
-	writel(clr_irq_mask, priv->base + IFI_CANFD_INTERRUPT);
+	pete_writel("drivers/net/can/ifi_canfd/ifi_canfd.c:622", clr_irq_mask, priv->base + IFI_CANFD_INTERRUPT);
 
 	/* RX IRQ or bus warning, start NAPI */
 	if (isr & rx_irq_mask) {
@@ -664,7 +664,7 @@ static void ifi_canfd_set_bittiming(struct net_device *ndev)
 	sjw = bt->sjw - 1;
 	tseg1 = bt->prop_seg + bt->phase_seg1 - 1;
 	tseg2 = bt->phase_seg2 - 2;
-	writel((tseg2 << IFI_CANFD_TIME_TIMEB_OFF) |
+	pete_writel("drivers/net/can/ifi_canfd/ifi_canfd.c:667", (tseg2 << IFI_CANFD_TIME_TIMEB_OFF) |
 	       (tseg1 << IFI_CANFD_TIME_TIMEA_OFF) |
 	       (brp << IFI_CANFD_TIME_PRESCALE_OFF) |
 	       (sjw << IFI_CANFD_TIME_SJW_OFF_7_9_8_8),
@@ -675,7 +675,7 @@ static void ifi_canfd_set_bittiming(struct net_device *ndev)
 	sjw = dbt->sjw - 1;
 	tseg1 = dbt->prop_seg + dbt->phase_seg1 - 1;
 	tseg2 = dbt->phase_seg2 - 2;
-	writel((tseg2 << IFI_CANFD_TIME_TIMEB_OFF) |
+	pete_writel("drivers/net/can/ifi_canfd/ifi_canfd.c:678", (tseg2 << IFI_CANFD_TIME_TIMEB_OFF) |
 	       (tseg1 << IFI_CANFD_TIME_TIMEA_OFF) |
 	       (brp << IFI_CANFD_TIME_PRESCALE_OFF) |
 	       (sjw << IFI_CANFD_TIME_SJW_OFF_7_9_8_8),
@@ -684,7 +684,7 @@ static void ifi_canfd_set_bittiming(struct net_device *ndev)
 	/* Configure transmitter delay */
 	tdc = dbt->brp * (dbt->prop_seg + dbt->phase_seg1);
 	tdc &= IFI_CANFD_TDELAY_MASK;
-	writel(IFI_CANFD_TDELAY_EN | tdc, priv->base + IFI_CANFD_TDELAY);
+	pete_writel("drivers/net/can/ifi_canfd/ifi_canfd.c:687", IFI_CANFD_TDELAY_EN | tdc, priv->base + IFI_CANFD_TDELAY);
 }
 
 static void ifi_canfd_set_filter(struct net_device *ndev, const u32 id,
@@ -692,8 +692,8 @@ static void ifi_canfd_set_filter(struct net_device *ndev, const u32 id,
 {
 	struct ifi_canfd_priv *priv = netdev_priv(ndev);
 
-	writel(mask, priv->base + IFI_CANFD_FILTER_MASK(id));
-	writel(ident, priv->base + IFI_CANFD_FILTER_IDENT(id));
+	pete_writel("drivers/net/can/ifi_canfd/ifi_canfd.c:695", mask, priv->base + IFI_CANFD_FILTER_MASK(id));
+	pete_writel("drivers/net/can/ifi_canfd/ifi_canfd.c:696", ident, priv->base + IFI_CANFD_FILTER_IDENT(id));
 }
 
 static void ifi_canfd_set_filters(struct net_device *ndev)
@@ -727,25 +727,25 @@ static void ifi_canfd_start(struct net_device *ndev)
 	u32 stcmd;
 
 	/* Reset the IP */
-	writel(IFI_CANFD_STCMD_HARDRESET, priv->base + IFI_CANFD_STCMD);
-	writel(IFI_CANFD_STCMD_ENABLE_7_9_8_8_TIMING,
+	pete_writel("drivers/net/can/ifi_canfd/ifi_canfd.c:730", IFI_CANFD_STCMD_HARDRESET, priv->base + IFI_CANFD_STCMD);
+	pete_writel("drivers/net/can/ifi_canfd/ifi_canfd.c:731", IFI_CANFD_STCMD_ENABLE_7_9_8_8_TIMING,
 	       priv->base + IFI_CANFD_STCMD);
 
 	ifi_canfd_set_bittiming(ndev);
 	ifi_canfd_set_filters(ndev);
 
 	/* Reset FIFOs */
-	writel(IFI_CANFD_RXSTCMD_RESET, priv->base + IFI_CANFD_RXSTCMD);
-	writel(0, priv->base + IFI_CANFD_RXSTCMD);
-	writel(IFI_CANFD_TXSTCMD_RESET, priv->base + IFI_CANFD_TXSTCMD);
-	writel(0, priv->base + IFI_CANFD_TXSTCMD);
+	pete_writel("drivers/net/can/ifi_canfd/ifi_canfd.c:738", IFI_CANFD_RXSTCMD_RESET, priv->base + IFI_CANFD_RXSTCMD);
+	pete_writel("drivers/net/can/ifi_canfd/ifi_canfd.c:739", 0, priv->base + IFI_CANFD_RXSTCMD);
+	pete_writel("drivers/net/can/ifi_canfd/ifi_canfd.c:740", IFI_CANFD_TXSTCMD_RESET, priv->base + IFI_CANFD_TXSTCMD);
+	pete_writel("drivers/net/can/ifi_canfd/ifi_canfd.c:741", 0, priv->base + IFI_CANFD_TXSTCMD);
 
 	/* Repeat transmission until successful */
-	writel(0, priv->base + IFI_CANFD_REPEAT);
-	writel(0, priv->base + IFI_CANFD_SUSPEND);
+	pete_writel("drivers/net/can/ifi_canfd/ifi_canfd.c:744", 0, priv->base + IFI_CANFD_REPEAT);
+	pete_writel("drivers/net/can/ifi_canfd/ifi_canfd.c:745", 0, priv->base + IFI_CANFD_SUSPEND);
 
 	/* Clear all pending interrupts */
-	writel((u32)(~IFI_CANFD_INTERRUPT_SET_IRQ),
+	pete_writel("drivers/net/can/ifi_canfd/ifi_canfd.c:748", (u32)(~IFI_CANFD_INTERRUPT_SET_IRQ),
 	       priv->base + IFI_CANFD_INTERRUPT);
 
 	stcmd = IFI_CANFD_STCMD_ENABLE | IFI_CANFD_STCMD_NORMAL_MODE |
@@ -769,13 +769,13 @@ static void ifi_canfd_start(struct net_device *ndev)
 	ifi_canfd_irq_enable(ndev, 1);
 
 	/* Unlock, reset and enable the error counter. */
-	writel(IFI_CANFD_ERROR_CTR_UNLOCK_MAGIC,
+	pete_writel("drivers/net/can/ifi_canfd/ifi_canfd.c:772", IFI_CANFD_ERROR_CTR_UNLOCK_MAGIC,
 	       priv->base + IFI_CANFD_ERROR_CTR);
-	writel(IFI_CANFD_ERROR_CTR_ER_RESET, priv->base + IFI_CANFD_ERROR_CTR);
-	writel(IFI_CANFD_ERROR_CTR_ER_ENABLE, priv->base + IFI_CANFD_ERROR_CTR);
+	pete_writel("drivers/net/can/ifi_canfd/ifi_canfd.c:774", IFI_CANFD_ERROR_CTR_ER_RESET, priv->base + IFI_CANFD_ERROR_CTR);
+	pete_writel("drivers/net/can/ifi_canfd/ifi_canfd.c:775", IFI_CANFD_ERROR_CTR_ER_ENABLE, priv->base + IFI_CANFD_ERROR_CTR);
 
 	/* Enable controller */
-	writel(stcmd, priv->base + IFI_CANFD_STCMD);
+	pete_writel("drivers/net/can/ifi_canfd/ifi_canfd.c:778", stcmd, priv->base + IFI_CANFD_STCMD);
 }
 
 static void ifi_canfd_stop(struct net_device *ndev)
@@ -783,17 +783,17 @@ static void ifi_canfd_stop(struct net_device *ndev)
 	struct ifi_canfd_priv *priv = netdev_priv(ndev);
 
 	/* Reset and disable the error counter. */
-	writel(IFI_CANFD_ERROR_CTR_ER_RESET, priv->base + IFI_CANFD_ERROR_CTR);
-	writel(0, priv->base + IFI_CANFD_ERROR_CTR);
+	pete_writel("drivers/net/can/ifi_canfd/ifi_canfd.c:786", IFI_CANFD_ERROR_CTR_ER_RESET, priv->base + IFI_CANFD_ERROR_CTR);
+	pete_writel("drivers/net/can/ifi_canfd/ifi_canfd.c:787", 0, priv->base + IFI_CANFD_ERROR_CTR);
 
 	/* Reset the IP */
-	writel(IFI_CANFD_STCMD_HARDRESET, priv->base + IFI_CANFD_STCMD);
+	pete_writel("drivers/net/can/ifi_canfd/ifi_canfd.c:790", IFI_CANFD_STCMD_HARDRESET, priv->base + IFI_CANFD_STCMD);
 
 	/* Mask all interrupts */
-	writel(~0, priv->base + IFI_CANFD_IRQMASK);
+	pete_writel("drivers/net/can/ifi_canfd/ifi_canfd.c:793", ~0, priv->base + IFI_CANFD_IRQMASK);
 
 	/* Clear all pending interrupts */
-	writel((u32)(~IFI_CANFD_INTERRUPT_SET_IRQ),
+	pete_writel("drivers/net/can/ifi_canfd/ifi_canfd.c:796", (u32)(~IFI_CANFD_INTERRUPT_SET_IRQ),
 	       priv->base + IFI_CANFD_INTERRUPT);
 
 	/* Set the state as STOPPED */
@@ -875,7 +875,7 @@ static netdev_tx_t ifi_canfd_start_xmit(struct sk_buff *skb,
 		return NETDEV_TX_OK;
 
 	/* Check if the TX buffer is full */
-	txst = readl(priv->base + IFI_CANFD_TXSTCMD);
+	txst = pete_readl("drivers/net/can/ifi_canfd/ifi_canfd.c:878", priv->base + IFI_CANFD_TXSTCMD);
 	if (txst & IFI_CANFD_TXSTCMD_FULL) {
 		netif_stop_queue(ndev);
 		netdev_err(ndev, "BUG! TX FIFO full when queue awake!\n");
@@ -911,21 +911,21 @@ static netdev_tx_t ifi_canfd_start_xmit(struct sk_buff *skb,
 		txdlc |= IFI_CANFD_TXFIFO_DLC_RTR;
 
 	/* message ram configuration */
-	writel(txid, priv->base + IFI_CANFD_TXFIFO_ID);
-	writel(txdlc, priv->base + IFI_CANFD_TXFIFO_DLC);
+	pete_writel("drivers/net/can/ifi_canfd/ifi_canfd.c:914", txid, priv->base + IFI_CANFD_TXFIFO_ID);
+	pete_writel("drivers/net/can/ifi_canfd/ifi_canfd.c:915", txdlc, priv->base + IFI_CANFD_TXFIFO_DLC);
 
 	for (i = 0; i < cf->len; i += 4) {
-		writel(*(u32 *)(cf->data + i),
+		pete_writel("drivers/net/can/ifi_canfd/ifi_canfd.c:918", *(u32 *)(cf->data + i),
 		       priv->base + IFI_CANFD_TXFIFO_DATA + i);
 	}
 
-	writel(0, priv->base + IFI_CANFD_TXFIFO_REPEATCOUNT);
-	writel(0, priv->base + IFI_CANFD_TXFIFO_SUSPEND_US);
+	pete_writel("drivers/net/can/ifi_canfd/ifi_canfd.c:922", 0, priv->base + IFI_CANFD_TXFIFO_REPEATCOUNT);
+	pete_writel("drivers/net/can/ifi_canfd/ifi_canfd.c:923", 0, priv->base + IFI_CANFD_TXFIFO_SUSPEND_US);
 
 	can_put_echo_skb(skb, ndev, 0, 0);
 
 	/* Start the transmission */
-	writel(IFI_CANFD_TXSTCMD_ADD_MSG, priv->base + IFI_CANFD_TXSTCMD);
+	pete_writel("drivers/net/can/ifi_canfd/ifi_canfd.c:928", IFI_CANFD_TXSTCMD_ADD_MSG, priv->base + IFI_CANFD_TXSTCMD);
 
 	return NETDEV_TX_OK;
 }
@@ -954,13 +954,13 @@ static int ifi_canfd_plat_probe(struct platform_device *pdev)
 	if (irq < 0)
 		return -EINVAL;
 
-	id = readl(addr + IFI_CANFD_IP_ID);
+	id = pete_readl("drivers/net/can/ifi_canfd/ifi_canfd.c:957", addr + IFI_CANFD_IP_ID);
 	if (id != IFI_CANFD_IP_ID_VALUE) {
 		dev_err(dev, "This block is not IFI CANFD, id=%08x\n", id);
 		return -EINVAL;
 	}
 
-	rev = readl(addr + IFI_CANFD_VER) & IFI_CANFD_VER_REV_MASK;
+	rev = pete_readl("drivers/net/can/ifi_canfd/ifi_canfd.c:963", addr + IFI_CANFD_VER) & IFI_CANFD_VER_REV_MASK;
 	if (rev < IFI_CANFD_VER_REV_MIN_SUPPORTED) {
 		dev_err(dev, "This block is too old (rev %i), minimum supported is rev %i\n",
 			rev, IFI_CANFD_VER_REV_MIN_SUPPORTED);
@@ -983,7 +983,7 @@ static int ifi_canfd_plat_probe(struct platform_device *pdev)
 
 	priv->can.state = CAN_STATE_STOPPED;
 
-	priv->can.clock.freq = readl(addr + IFI_CANFD_CANCLOCK);
+	priv->can.clock.freq = pete_readl("drivers/net/can/ifi_canfd/ifi_canfd.c:986", addr + IFI_CANFD_CANCLOCK);
 
 	priv->can.bittiming_const	= &ifi_canfd_bittiming_const;
 	priv->can.data_bittiming_const	= &ifi_canfd_bittiming_const;

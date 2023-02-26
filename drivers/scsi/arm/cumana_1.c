@@ -50,58 +50,58 @@ static inline int cumanascsi_pwrite(struct NCR5380_hostdata *hostdata,
 
   if(!len) return 0;
 
-  writeb(0x02, base + CTRL);
+  pete_writeb("drivers/scsi/arm/cumana_1.c:53", 0x02, base + CTRL);
   laddr = (unsigned long *)addr;
   while(len >= 32)
   {
     unsigned int status;
     unsigned long v;
-    status = readb(base + STAT);
+    status = pete_readb("drivers/scsi/arm/cumana_1.c:59", base + STAT);
     if(status & 0x80)
       goto end;
     if(!(status & 0x40))
       continue;
-    v=*laddr++; writew(L(v), dma); writew(H(v), dma);
-    v=*laddr++; writew(L(v), dma); writew(H(v), dma);
-    v=*laddr++; writew(L(v), dma); writew(H(v), dma);
-    v=*laddr++; writew(L(v), dma); writew(H(v), dma);
-    v=*laddr++; writew(L(v), dma); writew(H(v), dma);
-    v=*laddr++; writew(L(v), dma); writew(H(v), dma);
-    v=*laddr++; writew(L(v), dma); writew(H(v), dma);
-    v=*laddr++; writew(L(v), dma); writew(H(v), dma);
+    v=*laddr++; pete_writew("drivers/scsi/arm/cumana_1.c:64", L(v), dma); pete_writew("drivers/scsi/arm/cumana_1.c:64", H(v), dma);
+    v=*laddr++; pete_writew("drivers/scsi/arm/cumana_1.c:65", L(v), dma); pete_writew("drivers/scsi/arm/cumana_1.c:65", H(v), dma);
+    v=*laddr++; pete_writew("drivers/scsi/arm/cumana_1.c:66", L(v), dma); pete_writew("drivers/scsi/arm/cumana_1.c:66", H(v), dma);
+    v=*laddr++; pete_writew("drivers/scsi/arm/cumana_1.c:67", L(v), dma); pete_writew("drivers/scsi/arm/cumana_1.c:67", H(v), dma);
+    v=*laddr++; pete_writew("drivers/scsi/arm/cumana_1.c:68", L(v), dma); pete_writew("drivers/scsi/arm/cumana_1.c:68", H(v), dma);
+    v=*laddr++; pete_writew("drivers/scsi/arm/cumana_1.c:69", L(v), dma); pete_writew("drivers/scsi/arm/cumana_1.c:69", H(v), dma);
+    v=*laddr++; pete_writew("drivers/scsi/arm/cumana_1.c:70", L(v), dma); pete_writew("drivers/scsi/arm/cumana_1.c:70", H(v), dma);
+    v=*laddr++; pete_writew("drivers/scsi/arm/cumana_1.c:71", L(v), dma); pete_writew("drivers/scsi/arm/cumana_1.c:71", H(v), dma);
     len -= 32;
     if(len == 0)
       break;
   }
 
   addr = (unsigned char *)laddr;
-  writeb(0x12, base + CTRL);
+  pete_writeb("drivers/scsi/arm/cumana_1.c:78", 0x12, base + CTRL);
 
   while(len > 0)
   {
     unsigned int status;
-    status = readb(base + STAT);
+    status = pete_readb("drivers/scsi/arm/cumana_1.c:83", base + STAT);
     if(status & 0x80)
       goto end;
     if(status & 0x40)
     {
-      writeb(*addr++, dma);
+      pete_writeb("drivers/scsi/arm/cumana_1.c:88", *addr++, dma);
       if(--len == 0)
         break;
     }
 
-    status = readb(base + STAT);
+    status = pete_readb("drivers/scsi/arm/cumana_1.c:93", base + STAT);
     if(status & 0x80)
       goto end;
     if(status & 0x40)
     {
-      writeb(*addr++, dma);
+      pete_writeb("drivers/scsi/arm/cumana_1.c:98", *addr++, dma);
       if(--len == 0)
         break;
     }
   }
 end:
-  writeb(hostdata->ctrl | 0x40, base + CTRL);
+  pete_writeb("drivers/scsi/arm/cumana_1.c:104", hostdata->ctrl | 0x40, base + CTRL);
 
 	if (len)
 		return -1;
@@ -117,57 +117,57 @@ static inline int cumanascsi_pread(struct NCR5380_hostdata *hostdata,
 
   if(!len) return 0;
 
-  writeb(0x00, base + CTRL);
+  pete_writeb("drivers/scsi/arm/cumana_1.c:120", 0x00, base + CTRL);
   laddr = (unsigned long *)addr;
   while(len >= 32)
   {
     unsigned int status;
-    status = readb(base + STAT);
+    status = pete_readb("drivers/scsi/arm/cumana_1.c:125", base + STAT);
     if(status & 0x80)
       goto end;
     if(!(status & 0x40))
       continue;
-    *laddr++ = readw(dma) | (readw(dma) << 16);
-    *laddr++ = readw(dma) | (readw(dma) << 16);
-    *laddr++ = readw(dma) | (readw(dma) << 16);
-    *laddr++ = readw(dma) | (readw(dma) << 16);
-    *laddr++ = readw(dma) | (readw(dma) << 16);
-    *laddr++ = readw(dma) | (readw(dma) << 16);
-    *laddr++ = readw(dma) | (readw(dma) << 16);
-    *laddr++ = readw(dma) | (readw(dma) << 16);
+    *laddr++ = pete_readw("drivers/scsi/arm/cumana_1.c:130", dma) | (pete_readw("drivers/scsi/arm/cumana_1.c:130", dma) << 16);
+    *laddr++ = pete_readw("drivers/scsi/arm/cumana_1.c:131", dma) | (pete_readw("drivers/scsi/arm/cumana_1.c:131", dma) << 16);
+    *laddr++ = pete_readw("drivers/scsi/arm/cumana_1.c:132", dma) | (pete_readw("drivers/scsi/arm/cumana_1.c:132", dma) << 16);
+    *laddr++ = pete_readw("drivers/scsi/arm/cumana_1.c:133", dma) | (pete_readw("drivers/scsi/arm/cumana_1.c:133", dma) << 16);
+    *laddr++ = pete_readw("drivers/scsi/arm/cumana_1.c:134", dma) | (pete_readw("drivers/scsi/arm/cumana_1.c:134", dma) << 16);
+    *laddr++ = pete_readw("drivers/scsi/arm/cumana_1.c:135", dma) | (pete_readw("drivers/scsi/arm/cumana_1.c:135", dma) << 16);
+    *laddr++ = pete_readw("drivers/scsi/arm/cumana_1.c:136", dma) | (pete_readw("drivers/scsi/arm/cumana_1.c:136", dma) << 16);
+    *laddr++ = pete_readw("drivers/scsi/arm/cumana_1.c:137", dma) | (pete_readw("drivers/scsi/arm/cumana_1.c:137", dma) << 16);
     len -= 32;
     if(len == 0)
       break;
   }
 
   addr = (unsigned char *)laddr;
-  writeb(0x10, base + CTRL);
+  pete_writeb("drivers/scsi/arm/cumana_1.c:144", 0x10, base + CTRL);
 
   while(len > 0)
   {
     unsigned int status;
-    status = readb(base + STAT);
+    status = pete_readb("drivers/scsi/arm/cumana_1.c:149", base + STAT);
     if(status & 0x80)
       goto end;
     if(status & 0x40)
     {
-      *addr++ = readb(dma);
+      *addr++ = pete_readb("drivers/scsi/arm/cumana_1.c:154", dma);
       if(--len == 0)
         break;
     }
 
-    status = readb(base + STAT);
+    status = pete_readb("drivers/scsi/arm/cumana_1.c:159", base + STAT);
     if(status & 0x80)
       goto end;
     if(status & 0x40)
     {
-      *addr++ = readb(dma);
+      *addr++ = pete_readb("drivers/scsi/arm/cumana_1.c:164", dma);
       if(--len == 0)
         break;
     }
   }
 end:
-  writeb(hostdata->ctrl | 0x40, base + CTRL);
+  pete_writeb("drivers/scsi/arm/cumana_1.c:170", hostdata->ctrl | 0x40, base + CTRL);
 
 	if (len)
 		return -1;
@@ -186,12 +186,12 @@ static u8 cumanascsi_read(struct NCR5380_hostdata *hostdata,
 	u8 __iomem *base = hostdata->io;
 	u8 val;
 
-	writeb(0, base + CTRL);
+	pete_writeb("drivers/scsi/arm/cumana_1.c:189", 0, base + CTRL);
 
-	val = readb(base + 0x2100 + (reg << 2));
+	val = pete_readb("drivers/scsi/arm/cumana_1.c:191", base + 0x2100 + (reg << 2));
 
 	hostdata->ctrl = 0x40;
-	writeb(0x40, base + CTRL);
+	pete_writeb("drivers/scsi/arm/cumana_1.c:194", 0x40, base + CTRL);
 
 	return val;
 }
@@ -201,12 +201,12 @@ static void cumanascsi_write(struct NCR5380_hostdata *hostdata,
 {
 	u8 __iomem *base = hostdata->io;
 
-	writeb(0, base + CTRL);
+	pete_writeb("drivers/scsi/arm/cumana_1.c:204", 0, base + CTRL);
 
-	writeb(value, base + 0x2100 + (reg << 2));
+	pete_writeb("drivers/scsi/arm/cumana_1.c:206", value, base + 0x2100 + (reg << 2));
 
 	hostdata->ctrl = 0x40;
-	writeb(0x40, base + CTRL);
+	pete_writeb("drivers/scsi/arm/cumana_1.c:209", 0x40, base + CTRL);
 }
 
 #include "../NCR5380.c"
@@ -262,7 +262,7 @@ static int cumanascsi1_probe(struct expansion_card *ec,
 	NCR5380_maybe_reset_bus(host);
 
         priv(host)->ctrl = 0;
-        writeb(0, priv(host)->io + CTRL);
+        pete_writeb("drivers/scsi/arm/cumana_1.c:265", 0, priv(host)->io + CTRL);
 
 	ret = request_irq(host->irq, cumanascsi_intr, 0,
 			  "CumanaSCSI-1", host);

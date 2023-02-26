@@ -621,10 +621,10 @@ to_vc4_crtc_state(struct drm_crtc_state *crtc_state)
 	return container_of(crtc_state, struct vc4_crtc_state, base);
 }
 
-#define V3D_READ(offset) readl(vc4->v3d->regs + offset)
-#define V3D_WRITE(offset, val) writel(val, vc4->v3d->regs + offset)
-#define HVS_READ(offset) readl(hvs->regs + offset)
-#define HVS_WRITE(offset, val) writel(val, hvs->regs + offset)
+#define V3D_READ(offset) pete_readl("drivers/gpu/drm/vc4/vc4_drv.h:624", vc4->v3d->regs + offset)
+#define V3D_WRITE(offset, val) pete_writel("drivers/gpu/drm/vc4/vc4_drv.h:625", val, vc4->v3d->regs + offset)
+#define HVS_READ(offset) pete_readl("drivers/gpu/drm/vc4/vc4_drv.h:626", hvs->regs + offset)
+#define HVS_WRITE(offset, val) pete_writel("drivers/gpu/drm/vc4/vc4_drv.h:627", val, hvs->regs + offset)
 
 #define VC4_REG32(reg) { .name = #reg, .offset = reg }
 

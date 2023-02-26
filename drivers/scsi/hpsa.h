@@ -420,20 +420,20 @@ struct offline_device_entry {
 static void SA5_submit_command(struct ctlr_info *h,
 	struct CommandList *c)
 {
-	writel(c->busaddr, h->vaddr + SA5_REQUEST_PORT_OFFSET);
-	(void) readl(h->vaddr + SA5_SCRATCHPAD_OFFSET);
+	pete_writel("drivers/scsi/hpsa.h:423", c->busaddr, h->vaddr + SA5_REQUEST_PORT_OFFSET);
+	(void) pete_readl("drivers/scsi/hpsa.h:424", h->vaddr + SA5_SCRATCHPAD_OFFSET);
 }
 
 static void SA5_submit_command_no_read(struct ctlr_info *h,
 	struct CommandList *c)
 {
-	writel(c->busaddr, h->vaddr + SA5_REQUEST_PORT_OFFSET);
+	pete_writel("drivers/scsi/hpsa.h:430", c->busaddr, h->vaddr + SA5_REQUEST_PORT_OFFSET);
 }
 
 static void SA5_submit_command_ioaccel2(struct ctlr_info *h,
 	struct CommandList *c)
 {
-	writel(c->busaddr, h->vaddr + SA5_REQUEST_PORT_OFFSET);
+	pete_writel("drivers/scsi/hpsa.h:436", c->busaddr, h->vaddr + SA5_REQUEST_PORT_OFFSET);
 }
 
 /*
@@ -445,13 +445,13 @@ static void SA5_intr_mask(struct ctlr_info *h, unsigned long val)
 {
 	if (val) { /* Turn interrupts on */
 		h->interrupts_enabled = 1;
-		writel(0, h->vaddr + SA5_REPLY_INTR_MASK_OFFSET);
-		(void) readl(h->vaddr + SA5_REPLY_INTR_MASK_OFFSET);
+		pete_writel("drivers/scsi/hpsa.h:448", 0, h->vaddr + SA5_REPLY_INTR_MASK_OFFSET);
+		(void) pete_readl("drivers/scsi/hpsa.h:449", h->vaddr + SA5_REPLY_INTR_MASK_OFFSET);
 	} else { /* Turn them off */
 		h->interrupts_enabled = 0;
-		writel(SA5_INTR_OFF,
+		pete_writel("drivers/scsi/hpsa.h:452", SA5_INTR_OFF,
 			h->vaddr + SA5_REPLY_INTR_MASK_OFFSET);
-		(void) readl(h->vaddr + SA5_REPLY_INTR_MASK_OFFSET);
+		(void) pete_readl("drivers/scsi/hpsa.h:454", h->vaddr + SA5_REPLY_INTR_MASK_OFFSET);
 	}
 }
 
@@ -462,13 +462,13 @@ static void SA5B_intr_mask(struct ctlr_info *h, unsigned long val)
 {
 	if (val) { /* Turn interrupts on */
 		h->interrupts_enabled = 1;
-		writel(0, h->vaddr + SA5_REPLY_INTR_MASK_OFFSET);
-		(void) readl(h->vaddr + SA5_REPLY_INTR_MASK_OFFSET);
+		pete_writel("drivers/scsi/hpsa.h:465", 0, h->vaddr + SA5_REPLY_INTR_MASK_OFFSET);
+		(void) pete_readl("drivers/scsi/hpsa.h:466", h->vaddr + SA5_REPLY_INTR_MASK_OFFSET);
 	} else { /* Turn them off */
 		h->interrupts_enabled = 0;
-		writel(SA5B_INTR_OFF,
+		pete_writel("drivers/scsi/hpsa.h:469", SA5B_INTR_OFF,
 		       h->vaddr + SA5_REPLY_INTR_MASK_OFFSET);
-		(void) readl(h->vaddr + SA5_REPLY_INTR_MASK_OFFSET);
+		(void) pete_readl("drivers/scsi/hpsa.h:471", h->vaddr + SA5_REPLY_INTR_MASK_OFFSET);
 	}
 }
 
@@ -476,13 +476,13 @@ static void SA5_performant_intr_mask(struct ctlr_info *h, unsigned long val)
 {
 	if (val) { /* turn on interrupts */
 		h->interrupts_enabled = 1;
-		writel(0, h->vaddr + SA5_REPLY_INTR_MASK_OFFSET);
-		(void) readl(h->vaddr + SA5_REPLY_INTR_MASK_OFFSET);
+		pete_writel("drivers/scsi/hpsa.h:479", 0, h->vaddr + SA5_REPLY_INTR_MASK_OFFSET);
+		(void) pete_readl("drivers/scsi/hpsa.h:480", h->vaddr + SA5_REPLY_INTR_MASK_OFFSET);
 	} else {
 		h->interrupts_enabled = 0;
-		writel(SA5_PERF_INTR_OFF,
+		pete_writel("drivers/scsi/hpsa.h:483", SA5_PERF_INTR_OFF,
 			h->vaddr + SA5_REPLY_INTR_MASK_OFFSET);
-		(void) readl(h->vaddr + SA5_REPLY_INTR_MASK_OFFSET);
+		(void) pete_readl("drivers/scsi/hpsa.h:485", h->vaddr + SA5_REPLY_INTR_MASK_OFFSET);
 	}
 }
 
@@ -496,12 +496,12 @@ static unsigned long SA5_performant_completed(struct ctlr_info *h, u8 q)
 		/* flush the controller write of the reply queue by reading
 		 * outbound doorbell status register.
 		 */
-		(void) readl(h->vaddr + SA5_OUTDB_STATUS);
-		writel(SA5_OUTDB_CLEAR_PERF_BIT, h->vaddr + SA5_OUTDB_CLEAR);
+		(void) pete_readl("drivers/scsi/hpsa.h:499", h->vaddr + SA5_OUTDB_STATUS);
+		pete_writel("drivers/scsi/hpsa.h:500", SA5_OUTDB_CLEAR_PERF_BIT, h->vaddr + SA5_OUTDB_CLEAR);
 		/* Do a read in order to flush the write to the controller
 		 * (as per spec.)
 		 */
-		(void) readl(h->vaddr + SA5_OUTDB_STATUS);
+		(void) pete_readl("drivers/scsi/hpsa.h:504", h->vaddr + SA5_OUTDB_STATUS);
 	}
 
 	if ((((u32) rq->head[rq->current_entry]) & 1) == rq->wraparound) {
@@ -527,7 +527,7 @@ static unsigned long SA5_completed(struct ctlr_info *h,
 	__attribute__((unused)) u8 q)
 {
 	unsigned long register_value
-		= readl(h->vaddr + SA5_REPLY_PORT_OFFSET);
+		= pete_readl("drivers/scsi/hpsa.h:530", h->vaddr + SA5_REPLY_PORT_OFFSET);
 
 	if (register_value != FIFO_EMPTY)
 		atomic_dec(&h->commands_outstanding);
@@ -548,19 +548,19 @@ static unsigned long SA5_completed(struct ctlr_info *h,
 static bool SA5_intr_pending(struct ctlr_info *h)
 {
 	unsigned long register_value  =
-		readl(h->vaddr + SA5_INTR_STATUS);
+		pete_readl("drivers/scsi/hpsa.h:551", h->vaddr + SA5_INTR_STATUS);
 	return register_value & SA5_INTR_PENDING;
 }
 
 static bool SA5_performant_intr_pending(struct ctlr_info *h)
 {
-	unsigned long register_value = readl(h->vaddr + SA5_INTR_STATUS);
+	unsigned long register_value = pete_readl("drivers/scsi/hpsa.h:557", h->vaddr + SA5_INTR_STATUS);
 
 	if (!register_value)
 		return false;
 
 	/* Read outbound doorbell to flush */
-	register_value = readl(h->vaddr + SA5_OUTDB_STATUS);
+	register_value = pete_readl("drivers/scsi/hpsa.h:563", h->vaddr + SA5_OUTDB_STATUS);
 	return register_value & SA5_OUTDB_STATUS_PERF_BIT;
 }
 
@@ -568,7 +568,7 @@ static bool SA5_performant_intr_pending(struct ctlr_info *h)
 
 static bool SA5_ioaccel_mode1_intr_pending(struct ctlr_info *h)
 {
-	unsigned long register_value = readl(h->vaddr + SA5_INTR_STATUS);
+	unsigned long register_value = pete_readl("drivers/scsi/hpsa.h:571", h->vaddr + SA5_INTR_STATUS);
 
 	return (register_value & SA5_IOACCEL_MODE1_INTR_STATUS_CMP_BIT) ?
 		true : false;
@@ -579,7 +579,7 @@ static bool SA5_ioaccel_mode1_intr_pending(struct ctlr_info *h)
  */
 static bool SA5B_intr_pending(struct ctlr_info *h)
 {
-	return readl(h->vaddr + SA5_INTR_STATUS) & SA5B_INTR_PENDING;
+	return pete_readl("drivers/scsi/hpsa.h:582", h->vaddr + SA5_INTR_STATUS) & SA5B_INTR_PENDING;
 }
 
 #define IOACCEL_MODE1_REPLY_QUEUE_INDEX  0x1A0
@@ -606,7 +606,7 @@ static unsigned long SA5_ioaccel_mode1_completed(struct ctlr_info *h, u8 q)
 		 * but with current driver design this is easiest.
 		 */
 		wmb();
-		writel((q << 24) | rq->current_entry, h->vaddr +
+		pete_writel("drivers/scsi/hpsa.h:609", (q << 24) | rq->current_entry, h->vaddr +
 				IOACCEL_MODE1_CONSUMER_INDEX);
 		atomic_dec(&h->commands_outstanding);
 	}

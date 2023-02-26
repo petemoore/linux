@@ -146,10 +146,10 @@ static void pc300_set_iface(port_t *port)
 
 	if (port->card->type == PC300_RSV) {
 		if (port->iface == IF_IFACE_V35)
-			writel(card->init_ctrl_value |
+			pete_writel("drivers/net/wan/pc300too.c:149", card->init_ctrl_value |
 			       PC300_CHMEDIA_MASK(port->chan), init_ctrl);
 		else
-			writel(card->init_ctrl_value &
+			pete_writel("drivers/net/wan/pc300too.c:152", card->init_ctrl_value &
 			       ~PC300_CHMEDIA_MASK(port->chan), init_ctrl);
 	}
 }
@@ -333,7 +333,7 @@ static int pc300_pci_init_one(struct pci_dev *pdev,
 
 	/* PLX PCI 9050 workaround for local configuration register read bug */
 	pci_write_config_dword(pdev, PCI_BASE_ADDRESS_0, scaphys);
-	card->init_ctrl_value = readl(&((plx9050 __iomem *)card->scabase)->init_ctrl);
+	card->init_ctrl_value = pete_readl("drivers/net/wan/pc300too.c:336", &((plx9050 __iomem *)card->scabase)->init_ctrl);
 	pci_write_config_dword(pdev, PCI_BASE_ADDRESS_0, plxphys);
 
 	if (pdev->device == PCI_DEVICE_ID_PC300_TE_1 ||
@@ -361,21 +361,21 @@ static int pc300_pci_init_one(struct pci_dev *pdev,
 
 	/* Reset PLX */
 	p = &card->plxbase->init_ctrl;
-	writel(card->init_ctrl_value | 0x40000000, p);
-	readl(p);		/* Flush the write - do not use sca_flush */
+	pete_writel("drivers/net/wan/pc300too.c:364", card->init_ctrl_value | 0x40000000, p);
+	pete_readl("drivers/net/wan/pc300too.c:365", p);		/* Flush the write - do not use sca_flush */
 	udelay(1);
 
-	writel(card->init_ctrl_value, p);
-	readl(p);		/* Flush the write - do not use sca_flush */
+	pete_writel("drivers/net/wan/pc300too.c:368", card->init_ctrl_value, p);
+	pete_readl("drivers/net/wan/pc300too.c:369", p);		/* Flush the write - do not use sca_flush */
 	udelay(1);
 
 	/* Reload Config. Registers from EEPROM */
-	writel(card->init_ctrl_value | 0x20000000, p);
-	readl(p);		/* Flush the write - do not use sca_flush */
+	pete_writel("drivers/net/wan/pc300too.c:373", card->init_ctrl_value | 0x20000000, p);
+	pete_readl("drivers/net/wan/pc300too.c:374", p);		/* Flush the write - do not use sca_flush */
 	udelay(1);
 
-	writel(card->init_ctrl_value, p);
-	readl(p);		/* Flush the write - do not use sca_flush */
+	pete_writel("drivers/net/wan/pc300too.c:377", card->init_ctrl_value, p);
+	pete_readl("drivers/net/wan/pc300too.c:378", p);		/* Flush the write - do not use sca_flush */
 	udelay(1);
 
 	ramsize = sca_detect_ram(card, card->rambase,
@@ -386,7 +386,7 @@ static int pc300_pci_init_one(struct pci_dev *pdev,
 	else
 		card->init_ctrl_value |= PC300_CLKSEL_MASK;
 
-	writel(card->init_ctrl_value, &card->plxbase->init_ctrl);
+	pete_writel("drivers/net/wan/pc300too.c:389", card->init_ctrl_value, &card->plxbase->init_ctrl);
 	/* number of TX + RX buffers for one port */
 	i = ramsize / (card->n_ports * (sizeof(pkt_desc) + HDLC_MAX_MRU));
 	card->tx_ring_buffers = min(i / 2, MAX_TX_BUFFERS);
@@ -408,7 +408,7 @@ static int pc300_pci_init_one(struct pci_dev *pdev,
 	}
 
 	/* Enable interrupts on the PCI bridge, LINTi1 active low */
-	writew(0x0041, &card->plxbase->intr_ctrl_stat);
+	pete_writew("drivers/net/wan/pc300too.c:411", 0x0041, &card->plxbase->intr_ctrl_stat);
 
 	/* Allocate IRQ */
 	if (request_irq(pdev->irq, sca_intr, IRQF_SHARED, "pc300", card)) {

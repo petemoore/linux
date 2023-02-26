@@ -193,14 +193,14 @@ static void qla4xxx_build_scsi_iocbs(struct srb *srb,
 
 void qla4_83xx_queue_iocb(struct scsi_qla_host *ha)
 {
-	writel(ha->request_in, &ha->qla4_83xx_reg->req_q_in);
-	readl(&ha->qla4_83xx_reg->req_q_in);
+	pete_writel("drivers/scsi/qla4xxx/ql4_iocb.c:196", ha->request_in, &ha->qla4_83xx_reg->req_q_in);
+	pete_readl("drivers/scsi/qla4xxx/ql4_iocb.c:197", &ha->qla4_83xx_reg->req_q_in);
 }
 
 void qla4_83xx_complete_iocb(struct scsi_qla_host *ha)
 {
-	writel(ha->response_out, &ha->qla4_83xx_reg->rsp_q_out);
-	readl(&ha->qla4_83xx_reg->rsp_q_out);
+	pete_writel("drivers/scsi/qla4xxx/ql4_iocb.c:202", ha->response_out, &ha->qla4_83xx_reg->rsp_q_out);
+	pete_readl("drivers/scsi/qla4xxx/ql4_iocb.c:203", &ha->qla4_83xx_reg->rsp_q_out);
 }
 
 /**
@@ -230,8 +230,8 @@ void qla4_82xx_queue_iocb(struct scsi_qla_host *ha)
  **/
 void qla4_82xx_complete_iocb(struct scsi_qla_host *ha)
 {
-	writel(ha->response_out, &ha->qla4_82xx_reg->rsp_q_out);
-	readl(&ha->qla4_82xx_reg->rsp_q_out);
+	pete_writel("drivers/scsi/qla4xxx/ql4_iocb.c:233", ha->response_out, &ha->qla4_82xx_reg->rsp_q_out);
+	pete_readl("drivers/scsi/qla4xxx/ql4_iocb.c:234", &ha->qla4_82xx_reg->rsp_q_out);
 }
 
 /**
@@ -243,8 +243,8 @@ void qla4_82xx_complete_iocb(struct scsi_qla_host *ha)
  **/
 void qla4xxx_queue_iocb(struct scsi_qla_host *ha)
 {
-	writel(ha->request_in, &ha->reg->req_q_in);
-	readl(&ha->reg->req_q_in);
+	pete_writel("drivers/scsi/qla4xxx/ql4_iocb.c:246", ha->request_in, &ha->reg->req_q_in);
+	pete_readl("drivers/scsi/qla4xxx/ql4_iocb.c:247", &ha->reg->req_q_in);
 }
 
 /**
@@ -257,8 +257,8 @@ void qla4xxx_queue_iocb(struct scsi_qla_host *ha)
  **/
 void qla4xxx_complete_iocb(struct scsi_qla_host *ha)
 {
-	writel(ha->response_out, &ha->reg->rsp_q_out);
-	readl(&ha->reg->rsp_q_out);
+	pete_writel("drivers/scsi/qla4xxx/ql4_iocb.c:260", ha->response_out, &ha->reg->rsp_q_out);
+	pete_readl("drivers/scsi/qla4xxx/ql4_iocb.c:261", &ha->reg->rsp_q_out);
 }
 
 /**

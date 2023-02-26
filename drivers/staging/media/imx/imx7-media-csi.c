@@ -203,13 +203,13 @@ imx7_csi_notifier_to_dev(struct v4l2_async_notifier *n)
 
 static u32 imx7_csi_reg_read(struct imx7_csi *csi, unsigned int offset)
 {
-	return readl(csi->regbase + offset);
+	return pete_readl("drivers/staging/media/imx/imx7-media-csi.c:206", csi->regbase + offset);
 }
 
 static void imx7_csi_reg_write(struct imx7_csi *csi, unsigned int value,
 			       unsigned int offset)
 {
-	writel(value, csi->regbase + offset);
+	pete_writel("drivers/staging/media/imx/imx7-media-csi.c:212", value, csi->regbase + offset);
 }
 
 static u32 imx7_csi_irq_clear(struct imx7_csi *csi)

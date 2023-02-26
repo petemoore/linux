@@ -77,12 +77,12 @@ struct pistachio_clk_pll {
 
 static inline u32 pll_readl(struct pistachio_clk_pll *pll, u32 reg)
 {
-	return readl(pll->base + reg);
+	return pete_readl("drivers/clk/pistachio/clk-pll.c:80", pll->base + reg);
 }
 
 static inline void pll_writel(struct pistachio_clk_pll *pll, u32 val, u32 reg)
 {
-	writel(val, pll->base + reg);
+	pete_writel("drivers/clk/pistachio/clk-pll.c:85", val, pll->base + reg);
 }
 
 static inline void pll_lock(struct pistachio_clk_pll *pll)

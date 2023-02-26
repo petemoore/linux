@@ -379,11 +379,11 @@ static inline void mpic_ht_end_irq(struct mpic *mpic, unsigned int source)
 	if (fixup->applebase) {
 		unsigned int soff = (fixup->index >> 3) & ~3;
 		unsigned int mask = 1U << (fixup->index & 0x1f);
-		writel(mask, fixup->applebase + soff);
+		pete_writel("arch/powerpc/sysdev/mpic.c:382", mask, fixup->applebase + soff);
 	} else {
 		raw_spin_lock(&mpic->fixup_lock);
-		writeb(0x11 + 2 * fixup->index, fixup->base + 2);
-		writel(fixup->data, fixup->base + 4);
+		pete_writeb("arch/powerpc/sysdev/mpic.c:385", 0x11 + 2 * fixup->index, fixup->base + 2);
+		pete_writel("arch/powerpc/sysdev/mpic.c:386", fixup->data, fixup->base + 4);
 		raw_spin_unlock(&mpic->fixup_lock);
 	}
 }
@@ -402,12 +402,12 @@ static void mpic_startup_ht_interrupt(struct mpic *mpic, unsigned int source,
 	    source, fixup->index);
 	raw_spin_lock_irqsave(&mpic->fixup_lock, flags);
 	/* Enable and configure */
-	writeb(0x10 + 2 * fixup->index, fixup->base + 2);
-	tmp = readl(fixup->base + 4);
+	pete_writeb("arch/powerpc/sysdev/mpic.c:405", 0x10 + 2 * fixup->index, fixup->base + 2);
+	tmp = pete_readl("arch/powerpc/sysdev/mpic.c:406", fixup->base + 4);
 	tmp &= ~(0x23U);
 	if (level)
 		tmp |= 0x22;
-	writel(tmp, fixup->base + 4);
+	pete_writel("arch/powerpc/sysdev/mpic.c:410", tmp, fixup->base + 4);
 	raw_spin_unlock_irqrestore(&mpic->fixup_lock, flags);
 
 #ifdef CONFIG_PM
@@ -430,10 +430,10 @@ static void mpic_shutdown_ht_interrupt(struct mpic *mpic, unsigned int source)
 
 	/* Disable */
 	raw_spin_lock_irqsave(&mpic->fixup_lock, flags);
-	writeb(0x10 + 2 * fixup->index, fixup->base + 2);
-	tmp = readl(fixup->base + 4);
+	pete_writeb("arch/powerpc/sysdev/mpic.c:433", 0x10 + 2 * fixup->index, fixup->base + 2);
+	tmp = pete_readl("arch/powerpc/sysdev/mpic.c:434", fixup->base + 4);
 	tmp |= 1;
-	writel(tmp, fixup->base + 4);
+	pete_writel("arch/powerpc/sysdev/mpic.c:436", tmp, fixup->base + 4);
 	raw_spin_unlock_irqrestore(&mpic->fixup_lock, flags);
 
 #ifdef CONFIG_PM
@@ -451,11 +451,11 @@ static void __init mpic_scan_ht_msi(struct mpic *mpic, u8 __iomem *devbase,
 	u8 pos, flags;
 	u64 addr = 0;
 
-	for (pos = readb(devbase + PCI_CAPABILITY_LIST); pos != 0;
-	     pos = readb(devbase + pos + PCI_CAP_LIST_NEXT)) {
-		u8 id = readb(devbase + pos + PCI_CAP_LIST_ID);
+	for (pos = pete_readb("arch/powerpc/sysdev/mpic.c:454", devbase + PCI_CAPABILITY_LIST); pos != 0;
+	     pos = pete_readb("arch/powerpc/sysdev/mpic.c:455", devbase + pos + PCI_CAP_LIST_NEXT)) {
+		u8 id = pete_readb("arch/powerpc/sysdev/mpic.c:456", devbase + pos + PCI_CAP_LIST_ID);
 		if (id == PCI_CAP_ID_HT) {
-			id = readb(devbase + pos + 3);
+			id = pete_readb("arch/powerpc/sysdev/mpic.c:458", devbase + pos + 3);
 			if ((id & HT_5BIT_CAP_MASK) == HT_CAPTYPE_MSI_MAPPING)
 				break;
 		}
@@ -466,10 +466,10 @@ static void __init mpic_scan_ht_msi(struct mpic *mpic, u8 __iomem *devbase,
 
 	base = devbase + pos;
 
-	flags = readb(base + HT_MSI_FLAGS);
+	flags = pete_readb("arch/powerpc/sysdev/mpic.c:469", base + HT_MSI_FLAGS);
 	if (!(flags & HT_MSI_FLAGS_FIXED)) {
-		addr = readl(base + HT_MSI_ADDR_LO) & HT_MSI_ADDR_LO_MASK;
-		addr = addr | ((u64)readl(base + HT_MSI_ADDR_HI) << 32);
+		addr = pete_readl("arch/powerpc/sysdev/mpic.c:471", base + HT_MSI_ADDR_LO) & HT_MSI_ADDR_LO_MASK;
+		addr = addr | ((u64)pete_readl("arch/powerpc/sysdev/mpic.c:472", base + HT_MSI_ADDR_HI) << 32);
 	}
 
 	printk(KERN_DEBUG "mpic:   - HT:%02x.%x %s MSI mapping found @ 0x%llx\n",
@@ -477,7 +477,7 @@ static void __init mpic_scan_ht_msi(struct mpic *mpic, u8 __iomem *devbase,
 		flags & HT_MSI_FLAGS_ENABLE ? "enabled" : "disabled", addr);
 
 	if (!(flags & HT_MSI_FLAGS_ENABLE))
-		writeb(flags | HT_MSI_FLAGS_ENABLE, base + HT_MSI_FLAGS);
+		pete_writeb("arch/powerpc/sysdev/mpic.c:480", flags | HT_MSI_FLAGS_ENABLE, base + HT_MSI_FLAGS);
 }
 #else
 static void __init mpic_scan_ht_msi(struct mpic *mpic, u8 __iomem *devbase,
@@ -495,11 +495,11 @@ static void __init mpic_scan_ht_pic(struct mpic *mpic, u8 __iomem *devbase,
 	u32 tmp;
 	u8 pos;
 
-	for (pos = readb(devbase + PCI_CAPABILITY_LIST); pos != 0;
-	     pos = readb(devbase + pos + PCI_CAP_LIST_NEXT)) {
-		u8 id = readb(devbase + pos + PCI_CAP_LIST_ID);
+	for (pos = pete_readb("arch/powerpc/sysdev/mpic.c:498", devbase + PCI_CAPABILITY_LIST); pos != 0;
+	     pos = pete_readb("arch/powerpc/sysdev/mpic.c:499", devbase + pos + PCI_CAP_LIST_NEXT)) {
+		u8 id = pete_readb("arch/powerpc/sysdev/mpic.c:500", devbase + pos + PCI_CAP_LIST_ID);
 		if (id == PCI_CAP_ID_HT) {
-			id = readb(devbase + pos + 3);
+			id = pete_readb("arch/powerpc/sysdev/mpic.c:502", devbase + pos + 3);
 			if ((id & HT_5BIT_CAP_MASK) == HT_CAPTYPE_IRQ)
 				break;
 		}
@@ -508,21 +508,21 @@ static void __init mpic_scan_ht_pic(struct mpic *mpic, u8 __iomem *devbase,
 		return;
 
 	base = devbase + pos;
-	writeb(0x01, base + 2);
-	n = (readl(base + 4) >> 16) & 0xff;
+	pete_writeb("arch/powerpc/sysdev/mpic.c:511", 0x01, base + 2);
+	n = (pete_readl("arch/powerpc/sysdev/mpic.c:512", base + 4) >> 16) & 0xff;
 
 	printk(KERN_INFO "mpic:   - HT:%02x.%x [0x%02x] vendor %04x device %04x"
 	       " has %d irqs\n",
 	       devfn >> 3, devfn & 0x7, pos, vdid & 0xffff, vdid >> 16, n + 1);
 
 	for (i = 0; i <= n; i++) {
-		writeb(0x10 + 2 * i, base + 2);
-		tmp = readl(base + 4);
+		pete_writeb("arch/powerpc/sysdev/mpic.c:519", 0x10 + 2 * i, base + 2);
+		tmp = pete_readl("arch/powerpc/sysdev/mpic.c:520", base + 4);
 		irq = (tmp >> 16) & 0xff;
 		DBG("HT PIC index 0x%x, irq 0x%x, tmp: %08x\n", i, irq, tmp);
 		/* mask it , will be unmasked later */
 		tmp |= 0x1;
-		writel(tmp, base + 4);
+		pete_writel("arch/powerpc/sysdev/mpic.c:525", tmp, base + 4);
 		mpic->fixups[irq].index = i;
 		mpic->fixups[irq].base = base;
 		/* Apple HT PIC has a non-standard way of doing EOIs */
@@ -530,8 +530,8 @@ static void __init mpic_scan_ht_pic(struct mpic *mpic, u8 __iomem *devbase,
 			mpic->fixups[irq].applebase = devbase + 0x60;
 		else
 			mpic->fixups[irq].applebase = NULL;
-		writeb(0x11 + 2 * i, base + 2);
-		mpic->fixups[irq].data = readl(base + 4) | 0x80000000;
+		pete_writeb("arch/powerpc/sysdev/mpic.c:533", 0x11 + 2 * i, base + 2);
+		mpic->fixups[irq].data = pete_readl("arch/powerpc/sysdev/mpic.c:534", base + 4) | 0x80000000;
 	}
 }
 
@@ -561,8 +561,8 @@ static void __init mpic_scan_ht_pics(struct mpic *mpic)
 	 */
 	for (devfn = 0; devfn < 0x100; devfn++) {
 		u8 __iomem *devbase = cfgspace + (devfn << 8);
-		u8 hdr_type = readb(devbase + PCI_HEADER_TYPE);
-		u32 l = readl(devbase + PCI_VENDOR_ID);
+		u8 hdr_type = pete_readb("arch/powerpc/sysdev/mpic.c:564", devbase + PCI_HEADER_TYPE);
+		u32 l = pete_readl("arch/powerpc/sysdev/mpic.c:565", devbase + PCI_VENDOR_ID);
 		u16 s;
 
 		DBG("devfn %x, l: %x\n", devfn, l);
@@ -572,7 +572,7 @@ static void __init mpic_scan_ht_pics(struct mpic *mpic)
 		    l == 0x0000ffff || l == 0xffff0000)
 			goto next;
 		/* Check if is supports capability lists */
-		s = readw(devbase + PCI_STATUS);
+		s = pete_readw("arch/powerpc/sysdev/mpic.c:575", devbase + PCI_STATUS);
 		if (!(s & PCI_STATUS_CAP_LIST))
 			goto next;
 
@@ -1976,9 +1976,9 @@ static void mpic_resume_one(struct mpic *mpic)
 				continue;
 
 			/* Enable and configure */
-			writeb(0x10 + 2 * fixup->index, fixup->base + 2);
+			pete_writeb("arch/powerpc/sysdev/mpic.c:1979", 0x10 + 2 * fixup->index, fixup->base + 2);
 
-			writel(mpic->save_data[i].fixup_data & ~1,
+			pete_writel("arch/powerpc/sysdev/mpic.c:1981", mpic->save_data[i].fixup_data & ~1,
 			       fixup->base + 4);
 		}
 	}

@@ -97,8 +97,8 @@ static void (*_fsl_writel)(u32 v, unsigned __iomem *p);
 #define fsl_writel(v, p)	(*_fsl_writel)((v), (p))
 
 #else
-#define fsl_readl(addr)		readl(addr)
-#define fsl_writel(val, addr)	writel(val, addr)
+#define fsl_readl(addr)		pete_readl("drivers/usb/phy/phy-fsl-usb.c:100", addr)
+#define fsl_writel(val, addr)	pete_writel("drivers/usb/phy/phy-fsl-usb.c:101", val, addr)
 #endif /* CONFIG_PPC32 */
 
 int write_ulpi(u8 addr, u8 data)

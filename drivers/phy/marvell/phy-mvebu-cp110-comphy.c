@@ -340,7 +340,7 @@ static int mvebu_comphy_ethernet_init_reset(struct mvebu_comphy_lane *lane)
 	regmap_write(priv->regmap, MVEBU_COMPHY_CONF1(lane->id), val);
 
 	/* Select baud rates and PLLs */
-	val = readl(priv->base + MVEBU_COMPHY_SERDES_CFG0(lane->id));
+	val = pete_readl("drivers/phy/marvell/phy-mvebu-cp110-comphy.c:343", priv->base + MVEBU_COMPHY_SERDES_CFG0(lane->id));
 	val &= ~(MVEBU_COMPHY_SERDES_CFG0_PU_PLL |
 		 MVEBU_COMPHY_SERDES_CFG0_PU_RX |
 		 MVEBU_COMPHY_SERDES_CFG0_PU_TX |
@@ -377,7 +377,7 @@ static int mvebu_comphy_ethernet_init_reset(struct mvebu_comphy_lane *lane)
 		return -ENOTSUPP;
 	}
 
-	writel(val, priv->base + MVEBU_COMPHY_SERDES_CFG0(lane->id));
+	pete_writel("drivers/phy/marvell/phy-mvebu-cp110-comphy.c:380", val, priv->base + MVEBU_COMPHY_SERDES_CFG0(lane->id));
 
 	if (lane->submode == PHY_INTERFACE_MODE_RXAUI) {
 		regmap_read(priv->regmap, MVEBU_COMPHY_SD1_CTRL1, &val);
@@ -402,17 +402,17 @@ static int mvebu_comphy_ethernet_init_reset(struct mvebu_comphy_lane *lane)
 	}
 
 	/* reset */
-	val = readl(priv->base + MVEBU_COMPHY_SERDES_CFG1(lane->id));
+	val = pete_readl("drivers/phy/marvell/phy-mvebu-cp110-comphy.c:405", priv->base + MVEBU_COMPHY_SERDES_CFG1(lane->id));
 	val &= ~(MVEBU_COMPHY_SERDES_CFG1_RESET |
 		 MVEBU_COMPHY_SERDES_CFG1_CORE_RESET |
 		 MVEBU_COMPHY_SERDES_CFG1_RF_RESET);
-	writel(val, priv->base + MVEBU_COMPHY_SERDES_CFG1(lane->id));
+	pete_writel("drivers/phy/marvell/phy-mvebu-cp110-comphy.c:409", val, priv->base + MVEBU_COMPHY_SERDES_CFG1(lane->id));
 
 	/* de-assert reset */
-	val = readl(priv->base + MVEBU_COMPHY_SERDES_CFG1(lane->id));
+	val = pete_readl("drivers/phy/marvell/phy-mvebu-cp110-comphy.c:412", priv->base + MVEBU_COMPHY_SERDES_CFG1(lane->id));
 	val |= MVEBU_COMPHY_SERDES_CFG1_RESET |
 	       MVEBU_COMPHY_SERDES_CFG1_CORE_RESET;
-	writel(val, priv->base + MVEBU_COMPHY_SERDES_CFG1(lane->id));
+	pete_writel("drivers/phy/marvell/phy-mvebu-cp110-comphy.c:415", val, priv->base + MVEBU_COMPHY_SERDES_CFG1(lane->id));
 
 	/* wait until clocks are ready */
 	mdelay(1);
@@ -423,24 +423,24 @@ static int mvebu_comphy_ethernet_init_reset(struct mvebu_comphy_lane *lane)
 	regmap_write(priv->regmap, MVEBU_COMPHY_CONF6(lane->id), val);
 
 	/* refclk selection */
-	val = readl(priv->base + MVEBU_COMPHY_MISC_CTRL0(lane->id));
+	val = pete_readl("drivers/phy/marvell/phy-mvebu-cp110-comphy.c:426", priv->base + MVEBU_COMPHY_MISC_CTRL0(lane->id));
 	val &= ~MVEBU_COMPHY_MISC_CTRL0_REFCLK_SEL;
 	if (lane->submode == PHY_INTERFACE_MODE_10GBASER)
 		val |= MVEBU_COMPHY_MISC_CTRL0_ICP_FORCE;
-	writel(val, priv->base + MVEBU_COMPHY_MISC_CTRL0(lane->id));
+	pete_writel("drivers/phy/marvell/phy-mvebu-cp110-comphy.c:430", val, priv->base + MVEBU_COMPHY_MISC_CTRL0(lane->id));
 
 	/* power and pll selection */
-	val = readl(priv->base + MVEBU_COMPHY_PWRPLL_CTRL(lane->id));
+	val = pete_readl("drivers/phy/marvell/phy-mvebu-cp110-comphy.c:433", priv->base + MVEBU_COMPHY_PWRPLL_CTRL(lane->id));
 	val &= ~(MVEBU_COMPHY_PWRPLL_CTRL_RFREQ(0x1f) |
 		 MVEBU_COMPHY_PWRPLL_PHY_MODE(0x7));
 	val |= MVEBU_COMPHY_PWRPLL_CTRL_RFREQ(0x1) |
 	       MVEBU_COMPHY_PWRPLL_PHY_MODE(0x4);
-	writel(val, priv->base + MVEBU_COMPHY_PWRPLL_CTRL(lane->id));
+	pete_writel("drivers/phy/marvell/phy-mvebu-cp110-comphy.c:438", val, priv->base + MVEBU_COMPHY_PWRPLL_CTRL(lane->id));
 
-	val = readl(priv->base + MVEBU_COMPHY_LOOPBACK(lane->id));
+	val = pete_readl("drivers/phy/marvell/phy-mvebu-cp110-comphy.c:440", priv->base + MVEBU_COMPHY_LOOPBACK(lane->id));
 	val &= ~MVEBU_COMPHY_LOOPBACK_DBUS_WIDTH(0x7);
 	val |= MVEBU_COMPHY_LOOPBACK_DBUS_WIDTH(0x1);
-	writel(val, priv->base + MVEBU_COMPHY_LOOPBACK(lane->id));
+	pete_writel("drivers/phy/marvell/phy-mvebu-cp110-comphy.c:443", val, priv->base + MVEBU_COMPHY_LOOPBACK(lane->id));
 
 	return 0;
 }
@@ -451,11 +451,11 @@ static int mvebu_comphy_init_plls(struct mvebu_comphy_lane *lane)
 	u32 val;
 
 	/* SERDES external config */
-	val = readl(priv->base + MVEBU_COMPHY_SERDES_CFG0(lane->id));
+	val = pete_readl("drivers/phy/marvell/phy-mvebu-cp110-comphy.c:454", priv->base + MVEBU_COMPHY_SERDES_CFG0(lane->id));
 	val |= MVEBU_COMPHY_SERDES_CFG0_PU_PLL |
 	       MVEBU_COMPHY_SERDES_CFG0_PU_RX |
 	       MVEBU_COMPHY_SERDES_CFG0_PU_TX;
-	writel(val, priv->base + MVEBU_COMPHY_SERDES_CFG0(lane->id));
+	pete_writel("drivers/phy/marvell/phy-mvebu-cp110-comphy.c:458", val, priv->base + MVEBU_COMPHY_SERDES_CFG0(lane->id));
 
 	/* check rx/tx pll */
 	readl_poll_timeout(priv->base + MVEBU_COMPHY_SERDES_STATUS0(lane->id),
@@ -468,9 +468,9 @@ static int mvebu_comphy_init_plls(struct mvebu_comphy_lane *lane)
 		return -ETIMEDOUT;
 
 	/* rx init */
-	val = readl(priv->base + MVEBU_COMPHY_SERDES_CFG1(lane->id));
+	val = pete_readl("drivers/phy/marvell/phy-mvebu-cp110-comphy.c:471", priv->base + MVEBU_COMPHY_SERDES_CFG1(lane->id));
 	val |= MVEBU_COMPHY_SERDES_CFG1_RX_INIT;
-	writel(val, priv->base + MVEBU_COMPHY_SERDES_CFG1(lane->id));
+	pete_writel("drivers/phy/marvell/phy-mvebu-cp110-comphy.c:473", val, priv->base + MVEBU_COMPHY_SERDES_CFG1(lane->id));
 
 	/* check rx */
 	readl_poll_timeout(priv->base + MVEBU_COMPHY_SERDES_STATUS0(lane->id),
@@ -479,9 +479,9 @@ static int mvebu_comphy_init_plls(struct mvebu_comphy_lane *lane)
 	if (!(val & MVEBU_COMPHY_SERDES_STATUS0_RX_INIT))
 		return -ETIMEDOUT;
 
-	val = readl(priv->base + MVEBU_COMPHY_SERDES_CFG1(lane->id));
+	val = pete_readl("drivers/phy/marvell/phy-mvebu-cp110-comphy.c:482", priv->base + MVEBU_COMPHY_SERDES_CFG1(lane->id));
 	val &= ~MVEBU_COMPHY_SERDES_CFG1_RX_INIT;
-	writel(val, priv->base + MVEBU_COMPHY_SERDES_CFG1(lane->id));
+	pete_writel("drivers/phy/marvell/phy-mvebu-cp110-comphy.c:484", val, priv->base + MVEBU_COMPHY_SERDES_CFG1(lane->id));
 
 	return 0;
 }
@@ -497,24 +497,24 @@ static int mvebu_comphy_set_mode_sgmii(struct phy *phy)
 	if (err)
 		return err;
 
-	val = readl(priv->base + MVEBU_COMPHY_RX_CTRL1(lane->id));
+	val = pete_readl("drivers/phy/marvell/phy-mvebu-cp110-comphy.c:500", priv->base + MVEBU_COMPHY_RX_CTRL1(lane->id));
 	val &= ~MVEBU_COMPHY_RX_CTRL1_CLK8T_EN;
 	val |= MVEBU_COMPHY_RX_CTRL1_RXCLK2X_SEL;
-	writel(val, priv->base + MVEBU_COMPHY_RX_CTRL1(lane->id));
+	pete_writel("drivers/phy/marvell/phy-mvebu-cp110-comphy.c:503", val, priv->base + MVEBU_COMPHY_RX_CTRL1(lane->id));
 
-	val = readl(priv->base + MVEBU_COMPHY_DTL_CTRL(lane->id));
+	val = pete_readl("drivers/phy/marvell/phy-mvebu-cp110-comphy.c:505", priv->base + MVEBU_COMPHY_DTL_CTRL(lane->id));
 	val &= ~MVEBU_COMPHY_DTL_CTRL_DTL_FLOOP_EN;
-	writel(val, priv->base + MVEBU_COMPHY_DTL_CTRL(lane->id));
+	pete_writel("drivers/phy/marvell/phy-mvebu-cp110-comphy.c:507", val, priv->base + MVEBU_COMPHY_DTL_CTRL(lane->id));
 
 	regmap_read(priv->regmap, MVEBU_COMPHY_CONF1(lane->id), &val);
 	val &= ~MVEBU_COMPHY_CONF1_USB_PCIE;
 	val |= MVEBU_COMPHY_CONF1_PWRUP;
 	regmap_write(priv->regmap, MVEBU_COMPHY_CONF1(lane->id), val);
 
-	val = readl(priv->base + MVEBU_COMPHY_GEN1_S0(lane->id));
+	val = pete_readl("drivers/phy/marvell/phy-mvebu-cp110-comphy.c:514", priv->base + MVEBU_COMPHY_GEN1_S0(lane->id));
 	val &= ~MVEBU_COMPHY_GEN1_S0_TX_EMPH(0xf);
 	val |= MVEBU_COMPHY_GEN1_S0_TX_EMPH(0x1);
-	writel(val, priv->base + MVEBU_COMPHY_GEN1_S0(lane->id));
+	pete_writel("drivers/phy/marvell/phy-mvebu-cp110-comphy.c:517", val, priv->base + MVEBU_COMPHY_GEN1_S0(lane->id));
 
 	return mvebu_comphy_init_plls(lane);
 }
@@ -530,44 +530,44 @@ static int mvebu_comphy_set_mode_rxaui(struct phy *phy)
 	if (err)
 		return err;
 
-	val = readl(priv->base + MVEBU_COMPHY_RX_CTRL1(lane->id));
+	val = pete_readl("drivers/phy/marvell/phy-mvebu-cp110-comphy.c:533", priv->base + MVEBU_COMPHY_RX_CTRL1(lane->id));
 	val |= MVEBU_COMPHY_RX_CTRL1_RXCLK2X_SEL |
 	       MVEBU_COMPHY_RX_CTRL1_CLK8T_EN;
-	writel(val, priv->base + MVEBU_COMPHY_RX_CTRL1(lane->id));
+	pete_writel("drivers/phy/marvell/phy-mvebu-cp110-comphy.c:536", val, priv->base + MVEBU_COMPHY_RX_CTRL1(lane->id));
 
-	val = readl(priv->base + MVEBU_COMPHY_DTL_CTRL(lane->id));
+	val = pete_readl("drivers/phy/marvell/phy-mvebu-cp110-comphy.c:538", priv->base + MVEBU_COMPHY_DTL_CTRL(lane->id));
 	val |= MVEBU_COMPHY_DTL_CTRL_DTL_FLOOP_EN;
-	writel(val, priv->base + MVEBU_COMPHY_DTL_CTRL(lane->id));
+	pete_writel("drivers/phy/marvell/phy-mvebu-cp110-comphy.c:540", val, priv->base + MVEBU_COMPHY_DTL_CTRL(lane->id));
 
-	val = readl(priv->base + MVEBU_COMPHY_SERDES_CFG2(lane->id));
+	val = pete_readl("drivers/phy/marvell/phy-mvebu-cp110-comphy.c:542", priv->base + MVEBU_COMPHY_SERDES_CFG2(lane->id));
 	val |= MVEBU_COMPHY_SERDES_CFG2_DFE_EN;
-	writel(val, priv->base + MVEBU_COMPHY_SERDES_CFG2(lane->id));
+	pete_writel("drivers/phy/marvell/phy-mvebu-cp110-comphy.c:544", val, priv->base + MVEBU_COMPHY_SERDES_CFG2(lane->id));
 
-	val = readl(priv->base + MVEBU_COMPHY_DFE_RES(lane->id));
+	val = pete_readl("drivers/phy/marvell/phy-mvebu-cp110-comphy.c:546", priv->base + MVEBU_COMPHY_DFE_RES(lane->id));
 	val |= MVEBU_COMPHY_DFE_RES_FORCE_GEN_TBL;
-	writel(val, priv->base + MVEBU_COMPHY_DFE_RES(lane->id));
+	pete_writel("drivers/phy/marvell/phy-mvebu-cp110-comphy.c:548", val, priv->base + MVEBU_COMPHY_DFE_RES(lane->id));
 
-	val = readl(priv->base + MVEBU_COMPHY_GEN1_S0(lane->id));
+	val = pete_readl("drivers/phy/marvell/phy-mvebu-cp110-comphy.c:550", priv->base + MVEBU_COMPHY_GEN1_S0(lane->id));
 	val &= ~MVEBU_COMPHY_GEN1_S0_TX_EMPH(0xf);
 	val |= MVEBU_COMPHY_GEN1_S0_TX_EMPH(0xd);
-	writel(val, priv->base + MVEBU_COMPHY_GEN1_S0(lane->id));
+	pete_writel("drivers/phy/marvell/phy-mvebu-cp110-comphy.c:553", val, priv->base + MVEBU_COMPHY_GEN1_S0(lane->id));
 
-	val = readl(priv->base + MVEBU_COMPHY_GEN1_S1(lane->id));
+	val = pete_readl("drivers/phy/marvell/phy-mvebu-cp110-comphy.c:555", priv->base + MVEBU_COMPHY_GEN1_S1(lane->id));
 	val &= ~(MVEBU_COMPHY_GEN1_S1_RX_MUL_PI(0x7) |
 		 MVEBU_COMPHY_GEN1_S1_RX_MUL_PF(0x7));
 	val |= MVEBU_COMPHY_GEN1_S1_RX_MUL_PI(0x1) |
 	       MVEBU_COMPHY_GEN1_S1_RX_MUL_PF(0x1) |
 	       MVEBU_COMPHY_GEN1_S1_RX_DFE_EN;
-	writel(val, priv->base + MVEBU_COMPHY_GEN1_S1(lane->id));
+	pete_writel("drivers/phy/marvell/phy-mvebu-cp110-comphy.c:561", val, priv->base + MVEBU_COMPHY_GEN1_S1(lane->id));
 
-	val = readl(priv->base + MVEBU_COMPHY_COEF(lane->id));
+	val = pete_readl("drivers/phy/marvell/phy-mvebu-cp110-comphy.c:563", priv->base + MVEBU_COMPHY_COEF(lane->id));
 	val &= ~(MVEBU_COMPHY_COEF_DFE_EN | MVEBU_COMPHY_COEF_DFE_CTRL);
-	writel(val, priv->base + MVEBU_COMPHY_COEF(lane->id));
+	pete_writel("drivers/phy/marvell/phy-mvebu-cp110-comphy.c:565", val, priv->base + MVEBU_COMPHY_COEF(lane->id));
 
-	val = readl(priv->base + MVEBU_COMPHY_GEN1_S4(lane->id));
+	val = pete_readl("drivers/phy/marvell/phy-mvebu-cp110-comphy.c:567", priv->base + MVEBU_COMPHY_GEN1_S4(lane->id));
 	val &= ~MVEBU_COMPHY_GEN1_S4_DFE_RES(0x3);
 	val |= MVEBU_COMPHY_GEN1_S4_DFE_RES(0x1);
-	writel(val, priv->base + MVEBU_COMPHY_GEN1_S4(lane->id));
+	pete_writel("drivers/phy/marvell/phy-mvebu-cp110-comphy.c:570", val, priv->base + MVEBU_COMPHY_GEN1_S4(lane->id));
 
 	return mvebu_comphy_init_plls(lane);
 }
@@ -583,58 +583,58 @@ static int mvebu_comphy_set_mode_10gbaser(struct phy *phy)
 	if (err)
 		return err;
 
-	val = readl(priv->base + MVEBU_COMPHY_RX_CTRL1(lane->id));
+	val = pete_readl("drivers/phy/marvell/phy-mvebu-cp110-comphy.c:586", priv->base + MVEBU_COMPHY_RX_CTRL1(lane->id));
 	val |= MVEBU_COMPHY_RX_CTRL1_RXCLK2X_SEL |
 	       MVEBU_COMPHY_RX_CTRL1_CLK8T_EN;
-	writel(val, priv->base + MVEBU_COMPHY_RX_CTRL1(lane->id));
+	pete_writel("drivers/phy/marvell/phy-mvebu-cp110-comphy.c:589", val, priv->base + MVEBU_COMPHY_RX_CTRL1(lane->id));
 
-	val = readl(priv->base + MVEBU_COMPHY_DTL_CTRL(lane->id));
+	val = pete_readl("drivers/phy/marvell/phy-mvebu-cp110-comphy.c:591", priv->base + MVEBU_COMPHY_DTL_CTRL(lane->id));
 	val |= MVEBU_COMPHY_DTL_CTRL_DTL_FLOOP_EN;
-	writel(val, priv->base + MVEBU_COMPHY_DTL_CTRL(lane->id));
+	pete_writel("drivers/phy/marvell/phy-mvebu-cp110-comphy.c:593", val, priv->base + MVEBU_COMPHY_DTL_CTRL(lane->id));
 
 	/* Speed divider */
-	val = readl(priv->base + MVEBU_COMPHY_SPEED_DIV(lane->id));
+	val = pete_readl("drivers/phy/marvell/phy-mvebu-cp110-comphy.c:596", priv->base + MVEBU_COMPHY_SPEED_DIV(lane->id));
 	val |= MVEBU_COMPHY_SPEED_DIV_TX_FORCE;
-	writel(val, priv->base + MVEBU_COMPHY_SPEED_DIV(lane->id));
+	pete_writel("drivers/phy/marvell/phy-mvebu-cp110-comphy.c:598", val, priv->base + MVEBU_COMPHY_SPEED_DIV(lane->id));
 
-	val = readl(priv->base + MVEBU_COMPHY_SERDES_CFG2(lane->id));
+	val = pete_readl("drivers/phy/marvell/phy-mvebu-cp110-comphy.c:600", priv->base + MVEBU_COMPHY_SERDES_CFG2(lane->id));
 	val |= MVEBU_COMPHY_SERDES_CFG2_DFE_EN;
-	writel(val, priv->base + MVEBU_COMPHY_SERDES_CFG2(lane->id));
+	pete_writel("drivers/phy/marvell/phy-mvebu-cp110-comphy.c:602", val, priv->base + MVEBU_COMPHY_SERDES_CFG2(lane->id));
 
 	/* DFE resolution */
-	val = readl(priv->base + MVEBU_COMPHY_DFE_RES(lane->id));
+	val = pete_readl("drivers/phy/marvell/phy-mvebu-cp110-comphy.c:605", priv->base + MVEBU_COMPHY_DFE_RES(lane->id));
 	val |= MVEBU_COMPHY_DFE_RES_FORCE_GEN_TBL;
-	writel(val, priv->base + MVEBU_COMPHY_DFE_RES(lane->id));
+	pete_writel("drivers/phy/marvell/phy-mvebu-cp110-comphy.c:607", val, priv->base + MVEBU_COMPHY_DFE_RES(lane->id));
 
-	val = readl(priv->base + MVEBU_COMPHY_GEN1_S0(lane->id));
+	val = pete_readl("drivers/phy/marvell/phy-mvebu-cp110-comphy.c:609", priv->base + MVEBU_COMPHY_GEN1_S0(lane->id));
 	val &= ~(MVEBU_COMPHY_GEN1_S0_TX_AMP(0x1f) |
 		 MVEBU_COMPHY_GEN1_S0_TX_EMPH(0xf));
 	val |= MVEBU_COMPHY_GEN1_S0_TX_AMP(0x1c) |
 	       MVEBU_COMPHY_GEN1_S0_TX_EMPH(0xe);
-	writel(val, priv->base + MVEBU_COMPHY_GEN1_S0(lane->id));
+	pete_writel("drivers/phy/marvell/phy-mvebu-cp110-comphy.c:614", val, priv->base + MVEBU_COMPHY_GEN1_S0(lane->id));
 
-	val = readl(priv->base + MVEBU_COMPHY_GEN1_S2(lane->id));
+	val = pete_readl("drivers/phy/marvell/phy-mvebu-cp110-comphy.c:616", priv->base + MVEBU_COMPHY_GEN1_S2(lane->id));
 	val &= ~MVEBU_COMPHY_GEN1_S2_TX_EMPH(0xf);
 	val |= MVEBU_COMPHY_GEN1_S2_TX_EMPH_EN;
-	writel(val, priv->base + MVEBU_COMPHY_GEN1_S2(lane->id));
+	pete_writel("drivers/phy/marvell/phy-mvebu-cp110-comphy.c:619", val, priv->base + MVEBU_COMPHY_GEN1_S2(lane->id));
 
-	val = readl(priv->base + MVEBU_COMPHY_TX_SLEW_RATE(lane->id));
+	val = pete_readl("drivers/phy/marvell/phy-mvebu-cp110-comphy.c:621", priv->base + MVEBU_COMPHY_TX_SLEW_RATE(lane->id));
 	val |= MVEBU_COMPHY_TX_SLEW_RATE_EMPH(0x3) |
 	       MVEBU_COMPHY_TX_SLEW_RATE_SLC(0x3f);
-	writel(val, priv->base + MVEBU_COMPHY_TX_SLEW_RATE(lane->id));
+	pete_writel("drivers/phy/marvell/phy-mvebu-cp110-comphy.c:624", val, priv->base + MVEBU_COMPHY_TX_SLEW_RATE(lane->id));
 
 	/* Impedance calibration */
-	val = readl(priv->base + MVEBU_COMPHY_IMP_CAL(lane->id));
+	val = pete_readl("drivers/phy/marvell/phy-mvebu-cp110-comphy.c:627", priv->base + MVEBU_COMPHY_IMP_CAL(lane->id));
 	val &= ~MVEBU_COMPHY_IMP_CAL_TX_EXT(0x1f);
 	val |= MVEBU_COMPHY_IMP_CAL_TX_EXT(0xe) |
 	       MVEBU_COMPHY_IMP_CAL_TX_EXT_EN;
-	writel(val, priv->base + MVEBU_COMPHY_IMP_CAL(lane->id));
+	pete_writel("drivers/phy/marvell/phy-mvebu-cp110-comphy.c:631", val, priv->base + MVEBU_COMPHY_IMP_CAL(lane->id));
 
-	val = readl(priv->base + MVEBU_COMPHY_GEN1_S5(lane->id));
+	val = pete_readl("drivers/phy/marvell/phy-mvebu-cp110-comphy.c:633", priv->base + MVEBU_COMPHY_GEN1_S5(lane->id));
 	val &= ~MVEBU_COMPHY_GEN1_S5_ICP(0xf);
-	writel(val, priv->base + MVEBU_COMPHY_GEN1_S5(lane->id));
+	pete_writel("drivers/phy/marvell/phy-mvebu-cp110-comphy.c:635", val, priv->base + MVEBU_COMPHY_GEN1_S5(lane->id));
 
-	val = readl(priv->base + MVEBU_COMPHY_GEN1_S1(lane->id));
+	val = pete_readl("drivers/phy/marvell/phy-mvebu-cp110-comphy.c:637", priv->base + MVEBU_COMPHY_GEN1_S1(lane->id));
 	val &= ~(MVEBU_COMPHY_GEN1_S1_RX_MUL_PI(0x7) |
 		 MVEBU_COMPHY_GEN1_S1_RX_MUL_PF(0x7) |
 		 MVEBU_COMPHY_GEN1_S1_RX_MUL_FI(0x3) |
@@ -644,72 +644,72 @@ static int mvebu_comphy_set_mode_10gbaser(struct phy *phy)
 	       MVEBU_COMPHY_GEN1_S1_RX_MUL_PF(0x2) |
 	       MVEBU_COMPHY_GEN1_S1_RX_MUL_FF(0x1) |
 	       MVEBU_COMPHY_GEN1_S1_RX_DIV(0x3);
-	writel(val, priv->base + MVEBU_COMPHY_GEN1_S1(lane->id));
+	pete_writel("drivers/phy/marvell/phy-mvebu-cp110-comphy.c:647", val, priv->base + MVEBU_COMPHY_GEN1_S1(lane->id));
 
-	val = readl(priv->base + MVEBU_COMPHY_COEF(lane->id));
+	val = pete_readl("drivers/phy/marvell/phy-mvebu-cp110-comphy.c:649", priv->base + MVEBU_COMPHY_COEF(lane->id));
 	val &= ~(MVEBU_COMPHY_COEF_DFE_EN | MVEBU_COMPHY_COEF_DFE_CTRL);
-	writel(val, priv->base + MVEBU_COMPHY_COEF(lane->id));
+	pete_writel("drivers/phy/marvell/phy-mvebu-cp110-comphy.c:651", val, priv->base + MVEBU_COMPHY_COEF(lane->id));
 
-	val = readl(priv->base + MVEBU_COMPHY_GEN1_S4(lane->id));
+	val = pete_readl("drivers/phy/marvell/phy-mvebu-cp110-comphy.c:653", priv->base + MVEBU_COMPHY_GEN1_S4(lane->id));
 	val &= ~MVEBU_COMPHY_GEN1_S4_DFE_RES(0x3);
 	val |= MVEBU_COMPHY_GEN1_S4_DFE_RES(0x1);
-	writel(val, priv->base + MVEBU_COMPHY_GEN1_S4(lane->id));
+	pete_writel("drivers/phy/marvell/phy-mvebu-cp110-comphy.c:656", val, priv->base + MVEBU_COMPHY_GEN1_S4(lane->id));
 
-	val = readl(priv->base + MVEBU_COMPHY_GEN1_S3(lane->id));
+	val = pete_readl("drivers/phy/marvell/phy-mvebu-cp110-comphy.c:658", priv->base + MVEBU_COMPHY_GEN1_S3(lane->id));
 	val |= MVEBU_COMPHY_GEN1_S3_FBCK_SEL;
-	writel(val, priv->base + MVEBU_COMPHY_GEN1_S3(lane->id));
+	pete_writel("drivers/phy/marvell/phy-mvebu-cp110-comphy.c:660", val, priv->base + MVEBU_COMPHY_GEN1_S3(lane->id));
 
 	/* rx training timer */
-	val = readl(priv->base + MVEBU_COMPHY_TRAINING5(lane->id));
+	val = pete_readl("drivers/phy/marvell/phy-mvebu-cp110-comphy.c:663", priv->base + MVEBU_COMPHY_TRAINING5(lane->id));
 	val &= ~MVEBU_COMPHY_TRAINING5_RX_TIMER(0x3ff);
 	val |= MVEBU_COMPHY_TRAINING5_RX_TIMER(0x13);
-	writel(val, priv->base + MVEBU_COMPHY_TRAINING5(lane->id));
+	pete_writel("drivers/phy/marvell/phy-mvebu-cp110-comphy.c:666", val, priv->base + MVEBU_COMPHY_TRAINING5(lane->id));
 
 	/* tx train peak to peak hold */
-	val = readl(priv->base + MVEBU_COMPHY_TRAINING0(lane->id));
+	val = pete_readl("drivers/phy/marvell/phy-mvebu-cp110-comphy.c:669", priv->base + MVEBU_COMPHY_TRAINING0(lane->id));
 	val |= MVEBU_COMPHY_TRAINING0_P2P_HOLD;
-	writel(val, priv->base + MVEBU_COMPHY_TRAINING0(lane->id));
+	pete_writel("drivers/phy/marvell/phy-mvebu-cp110-comphy.c:671", val, priv->base + MVEBU_COMPHY_TRAINING0(lane->id));
 
-	val = readl(priv->base + MVEBU_COMPHY_TX_PRESET(lane->id));
+	val = pete_readl("drivers/phy/marvell/phy-mvebu-cp110-comphy.c:673", priv->base + MVEBU_COMPHY_TX_PRESET(lane->id));
 	val &= ~MVEBU_COMPHY_TX_PRESET_INDEX(0xf);
 	val |= MVEBU_COMPHY_TX_PRESET_INDEX(0x2);	/* preset coeff */
-	writel(val, priv->base + MVEBU_COMPHY_TX_PRESET(lane->id));
+	pete_writel("drivers/phy/marvell/phy-mvebu-cp110-comphy.c:676", val, priv->base + MVEBU_COMPHY_TX_PRESET(lane->id));
 
-	val = readl(priv->base + MVEBU_COMPHY_FRAME_DETECT3(lane->id));
+	val = pete_readl("drivers/phy/marvell/phy-mvebu-cp110-comphy.c:678", priv->base + MVEBU_COMPHY_FRAME_DETECT3(lane->id));
 	val &= ~MVEBU_COMPHY_FRAME_DETECT3_LOST_TIMEOUT_EN;
-	writel(val, priv->base + MVEBU_COMPHY_FRAME_DETECT3(lane->id));
+	pete_writel("drivers/phy/marvell/phy-mvebu-cp110-comphy.c:680", val, priv->base + MVEBU_COMPHY_FRAME_DETECT3(lane->id));
 
-	val = readl(priv->base + MVEBU_COMPHY_TX_TRAIN_PRESET(lane->id));
+	val = pete_readl("drivers/phy/marvell/phy-mvebu-cp110-comphy.c:682", priv->base + MVEBU_COMPHY_TX_TRAIN_PRESET(lane->id));
 	val |= MVEBU_COMPHY_TX_TRAIN_PRESET_16B_AUTO_EN |
 	       MVEBU_COMPHY_TX_TRAIN_PRESET_PRBS11;
-	writel(val, priv->base + MVEBU_COMPHY_TX_TRAIN_PRESET(lane->id));
+	pete_writel("drivers/phy/marvell/phy-mvebu-cp110-comphy.c:685", val, priv->base + MVEBU_COMPHY_TX_TRAIN_PRESET(lane->id));
 
-	val = readl(priv->base + MVEBU_COMPHY_FRAME_DETECT0(lane->id));
+	val = pete_readl("drivers/phy/marvell/phy-mvebu-cp110-comphy.c:687", priv->base + MVEBU_COMPHY_FRAME_DETECT0(lane->id));
 	val &= ~MVEBU_COMPHY_FRAME_DETECT0_PATN(0x1ff);
 	val |= MVEBU_COMPHY_FRAME_DETECT0_PATN(0x88);
-	writel(val, priv->base + MVEBU_COMPHY_FRAME_DETECT0(lane->id));
+	pete_writel("drivers/phy/marvell/phy-mvebu-cp110-comphy.c:690", val, priv->base + MVEBU_COMPHY_FRAME_DETECT0(lane->id));
 
-	val = readl(priv->base + MVEBU_COMPHY_DME(lane->id));
+	val = pete_readl("drivers/phy/marvell/phy-mvebu-cp110-comphy.c:692", priv->base + MVEBU_COMPHY_DME(lane->id));
 	val |= MVEBU_COMPHY_DME_ETH_MODE;
-	writel(val, priv->base + MVEBU_COMPHY_DME(lane->id));
+	pete_writel("drivers/phy/marvell/phy-mvebu-cp110-comphy.c:694", val, priv->base + MVEBU_COMPHY_DME(lane->id));
 
-	val = readl(priv->base + MVEBU_COMPHY_VDD_CAL0(lane->id));
+	val = pete_readl("drivers/phy/marvell/phy-mvebu-cp110-comphy.c:696", priv->base + MVEBU_COMPHY_VDD_CAL0(lane->id));
 	val |= MVEBU_COMPHY_VDD_CAL0_CONT_MODE;
-	writel(val, priv->base + MVEBU_COMPHY_VDD_CAL0(lane->id));
+	pete_writel("drivers/phy/marvell/phy-mvebu-cp110-comphy.c:698", val, priv->base + MVEBU_COMPHY_VDD_CAL0(lane->id));
 
-	val = readl(priv->base + MVEBU_SP_CALIB(lane->id));
+	val = pete_readl("drivers/phy/marvell/phy-mvebu-cp110-comphy.c:700", priv->base + MVEBU_SP_CALIB(lane->id));
 	val &= ~MVEBU_SP_CALIB_SAMPLER(0x3);
 	val |= MVEBU_SP_CALIB_SAMPLER(0x3) |
 	       MVEBU_SP_CALIB_SAMPLER_EN;
-	writel(val, priv->base + MVEBU_SP_CALIB(lane->id));
+	pete_writel("drivers/phy/marvell/phy-mvebu-cp110-comphy.c:704", val, priv->base + MVEBU_SP_CALIB(lane->id));
 	val &= ~MVEBU_SP_CALIB_SAMPLER_EN;
-	writel(val, priv->base + MVEBU_SP_CALIB(lane->id));
+	pete_writel("drivers/phy/marvell/phy-mvebu-cp110-comphy.c:706", val, priv->base + MVEBU_SP_CALIB(lane->id));
 
 	/* External rx regulator */
-	val = readl(priv->base + MVEBU_COMPHY_EXT_SELV(lane->id));
+	val = pete_readl("drivers/phy/marvell/phy-mvebu-cp110-comphy.c:709", priv->base + MVEBU_COMPHY_EXT_SELV(lane->id));
 	val &= ~MVEBU_COMPHY_EXT_SELV_RX_SAMPL(0x1f);
 	val |= MVEBU_COMPHY_EXT_SELV_RX_SAMPL(0x1a);
-	writel(val, priv->base + MVEBU_COMPHY_EXT_SELV(lane->id));
+	pete_writel("drivers/phy/marvell/phy-mvebu-cp110-comphy.c:712", val, priv->base + MVEBU_COMPHY_EXT_SELV(lane->id));
 
 	return mvebu_comphy_init_plls(lane);
 }
@@ -751,9 +751,9 @@ static int mvebu_comphy_power_on_legacy(struct phy *phy)
 	}
 
 	/* digital reset */
-	val = readl(priv->base + MVEBU_COMPHY_SERDES_CFG1(lane->id));
+	val = pete_readl("drivers/phy/marvell/phy-mvebu-cp110-comphy.c:754", priv->base + MVEBU_COMPHY_SERDES_CFG1(lane->id));
 	val |= MVEBU_COMPHY_SERDES_CFG1_RF_RESET;
-	writel(val, priv->base + MVEBU_COMPHY_SERDES_CFG1(lane->id));
+	pete_writel("drivers/phy/marvell/phy-mvebu-cp110-comphy.c:756", val, priv->base + MVEBU_COMPHY_SERDES_CFG1(lane->id));
 
 	return ret;
 }
@@ -867,11 +867,11 @@ static int mvebu_comphy_power_off_legacy(struct phy *phy)
 	struct mvebu_comphy_priv *priv = lane->priv;
 	u32 val;
 
-	val = readl(priv->base + MVEBU_COMPHY_SERDES_CFG1(lane->id));
+	val = pete_readl("drivers/phy/marvell/phy-mvebu-cp110-comphy.c:870", priv->base + MVEBU_COMPHY_SERDES_CFG1(lane->id));
 	val &= ~(MVEBU_COMPHY_SERDES_CFG1_RESET |
 		 MVEBU_COMPHY_SERDES_CFG1_CORE_RESET |
 		 MVEBU_COMPHY_SERDES_CFG1_RF_RESET);
-	writel(val, priv->base + MVEBU_COMPHY_SERDES_CFG1(lane->id));
+	pete_writel("drivers/phy/marvell/phy-mvebu-cp110-comphy.c:874", val, priv->base + MVEBU_COMPHY_SERDES_CFG1(lane->id));
 
 	regmap_read(priv->regmap, MVEBU_COMPHY_SELECTOR, &val);
 	val &= ~(0xf << MVEBU_COMPHY_SELECTOR_PHY(lane->id));

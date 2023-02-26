@@ -106,8 +106,8 @@
 #define PM_RSTC_WRCFG_FULL_RESET	0x00000020
 #define PM_RSTC_RESET			0x00000102
 
-#define PM_READ(reg) readl(power->base + (reg))
-#define PM_WRITE(reg, val) writel(PM_PASSWORD | (val), power->base + (reg))
+#define PM_READ(reg) pete_readl("drivers/soc/bcm/bcm2835-power.c:109", power->base + (reg))
+#define PM_WRITE(reg, val) pete_writel("drivers/soc/bcm/bcm2835-power.c:110", PM_PASSWORD | (val), power->base + (reg))
 
 #define ASB_BRDG_VERSION                0x00
 #define ASB_CPR_CTRL                    0x04
@@ -126,8 +126,8 @@
 
 #define ASB_AXI_BRDG_ID			0x20
 
-#define ASB_READ(reg) readl(power->asb + (reg))
-#define ASB_WRITE(reg, val) writel(PM_PASSWORD | (val), power->asb + (reg))
+#define ASB_READ(reg) pete_readl("drivers/soc/bcm/bcm2835-power.c:129", power->asb + (reg))
+#define ASB_WRITE(reg, val) pete_writel("drivers/soc/bcm/bcm2835-power.c:130", PM_PASSWORD | (val), power->asb + (reg))
 
 struct bcm2835_power_domain {
 	struct generic_pm_domain base;

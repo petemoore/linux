@@ -28,7 +28,7 @@ int mlxbf_gige_tx_init(struct mlxbf_gige *priv)
 	priv->tx_wqe_next = priv->tx_wqe_base;
 
 	/* Write TX WQE base address into MMIO reg */
-	writeq(priv->tx_wqe_base_dma, priv->base + MLXBF_GIGE_TX_WQ_BASE);
+	pete_writeq("drivers/net/ethernet/mellanox/mlxbf_gige/mlxbf_gige_tx.c:31", priv->tx_wqe_base_dma, priv->base + MLXBF_GIGE_TX_WQ_BASE);
 
 	/* Allocate address for TX completion count */
 	priv->tx_cc = dma_alloc_coherent(priv->dev, MLXBF_GIGE_TX_CC_SZ,
@@ -40,9 +40,9 @@ int mlxbf_gige_tx_init(struct mlxbf_gige *priv)
 	}
 
 	/* Write TX CC base address into MMIO reg */
-	writeq(priv->tx_cc_dma, priv->base + MLXBF_GIGE_TX_CI_UPDATE_ADDRESS);
+	pete_writeq("drivers/net/ethernet/mellanox/mlxbf_gige/mlxbf_gige_tx.c:43", priv->tx_cc_dma, priv->base + MLXBF_GIGE_TX_CI_UPDATE_ADDRESS);
 
-	writeq(ilog2(priv->tx_q_entries),
+	pete_writeq("drivers/net/ethernet/mellanox/mlxbf_gige/mlxbf_gige_tx.c:45", ilog2(priv->tx_q_entries),
 	       priv->base + MLXBF_GIGE_TX_WQ_SIZE_LOG2);
 
 	priv->prev_tx_ci = 0;
@@ -85,8 +85,8 @@ void mlxbf_gige_tx_deinit(struct mlxbf_gige *priv)
 	priv->tx_cc = NULL;
 	priv->tx_cc_dma = 0;
 	priv->tx_wqe_next = NULL;
-	writeq(0, priv->base + MLXBF_GIGE_TX_WQ_BASE);
-	writeq(0, priv->base + MLXBF_GIGE_TX_CI_UPDATE_ADDRESS);
+	pete_writeq("drivers/net/ethernet/mellanox/mlxbf_gige/mlxbf_gige_tx.c:88", 0, priv->base + MLXBF_GIGE_TX_WQ_BASE);
+	pete_writeq("drivers/net/ethernet/mellanox/mlxbf_gige/mlxbf_gige_tx.c:89", 0, priv->base + MLXBF_GIGE_TX_CI_UPDATE_ADDRESS);
 }
 
 /* Function that returns status of TX ring:
@@ -131,10 +131,10 @@ bool mlxbf_gige_handle_tx_complete(struct mlxbf_gige *priv)
 	u64 tx_status;
 	u16 tx_ci;
 
-	tx_status = readq(priv->base + MLXBF_GIGE_TX_STATUS);
+	tx_status = pete_readq("drivers/net/ethernet/mellanox/mlxbf_gige/mlxbf_gige_tx.c:134", priv->base + MLXBF_GIGE_TX_STATUS);
 	if (tx_status & MLXBF_GIGE_TX_STATUS_DATA_FIFO_FULL)
 		priv->stats.tx_fifo_full++;
-	tx_ci = readq(priv->base + MLXBF_GIGE_TX_CONSUMER_INDEX);
+	tx_ci = pete_readq("drivers/net/ethernet/mellanox/mlxbf_gige/mlxbf_gige_tx.c:137", priv->base + MLXBF_GIGE_TX_CONSUMER_INDEX);
 	stats = &priv->netdev->stats;
 
 	/* Transmit completion logic needs to loop until the completion
@@ -264,7 +264,7 @@ netdev_tx_t mlxbf_gige_start_xmit(struct sk_buff *skb,
 	if (!netdev_xmit_more()) {
 		/* Create memory barrier before write to TX PI */
 		wmb();
-		writeq(priv->tx_pi, priv->base + MLXBF_GIGE_TX_PRODUCER_INDEX);
+		pete_writeq("drivers/net/ethernet/mellanox/mlxbf_gige/mlxbf_gige_tx.c:267", priv->tx_pi, priv->base + MLXBF_GIGE_TX_PRODUCER_INDEX);
 	}
 
 	/* Check if the last TX entry was just used */

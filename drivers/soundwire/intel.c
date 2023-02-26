@@ -54,22 +54,22 @@ enum intel_pdi_type {
  */
 static inline int intel_readl(void __iomem *base, int offset)
 {
-	return readl(base + offset);
+	return pete_readl("drivers/soundwire/intel.c:57", base + offset);
 }
 
 static inline void intel_writel(void __iomem *base, int offset, int value)
 {
-	writel(value, base + offset);
+	pete_writel("drivers/soundwire/intel.c:62", value, base + offset);
 }
 
 static inline u16 intel_readw(void __iomem *base, int offset)
 {
-	return readw(base + offset);
+	return pete_readw("drivers/soundwire/intel.c:67", base + offset);
 }
 
 static inline void intel_writew(void __iomem *base, int offset, u16 value)
 {
-	writew(value, base + offset);
+	pete_writew("drivers/soundwire/intel.c:72", value, base + offset);
 }
 
 static int intel_wait_bit(void __iomem *base, int offset, u32 mask, u32 target)
@@ -78,7 +78,7 @@ static int intel_wait_bit(void __iomem *base, int offset, u32 mask, u32 target)
 	u32 reg_read;
 
 	do {
-		reg_read = readl(base + offset);
+		reg_read = pete_readl("drivers/soundwire/intel.c:81", base + offset);
 		if ((reg_read & mask) == target)
 			return 0;
 
@@ -91,13 +91,13 @@ static int intel_wait_bit(void __iomem *base, int offset, u32 mask, u32 target)
 
 static int intel_clear_bit(void __iomem *base, int offset, u32 value, u32 mask)
 {
-	writel(value, base + offset);
+	pete_writel("drivers/soundwire/intel.c:94", value, base + offset);
 	return intel_wait_bit(base, offset, mask, 0);
 }
 
 static int intel_set_bit(void __iomem *base, int offset, u32 value, u32 mask)
 {
-	writel(value, base + offset);
+	pete_writel("drivers/soundwire/intel.c:100", value, base + offset);
 	return intel_wait_bit(base, offset, mask, mask);
 }
 

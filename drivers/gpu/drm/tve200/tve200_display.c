@@ -30,7 +30,7 @@ irqreturn_t tve200_irq(int irq, void *data)
 	u32 stat;
 	u32 val;
 
-	stat = readl(priv->regs + TVE200_INT_STAT);
+	stat = pete_readl("drivers/gpu/drm/tve200/tve200_display.c:33", priv->regs + TVE200_INT_STAT);
 
 	if (!stat)
 		return IRQ_NONE;
@@ -47,7 +47,7 @@ irqreturn_t tve200_irq(int irq, void *data)
 	 * another one at the start of the image (that we discard).
 	 */
 	if (stat & TVE200_INT_V_STATUS) {
-		val = readl(priv->regs + TVE200_CTRL);
+		val = pete_readl("drivers/gpu/drm/tve200/tve200_display.c:50", priv->regs + TVE200_CTRL);
 		/* We have an actual start of vsync */
 		if (!(val & TVE200_VSTSTYPE_BITS)) {
 			drm_crtc_handle_vblank(&priv->pipe.crtc);
@@ -57,12 +57,12 @@ irqreturn_t tve200_irq(int irq, void *data)
 			/* Toggle trigger back to start of vsync */
 			val &= ~TVE200_VSTSTYPE_BITS;
 		}
-		writel(val, priv->regs + TVE200_CTRL);
+		pete_writel("drivers/gpu/drm/tve200/tve200_display.c:60", val, priv->regs + TVE200_CTRL);
 	} else
 		dev_err(priv->drm->dev, "stray IRQ %08x\n", stat);
 
 	/* Clear the interrupt once done */
-	writel(stat, priv->regs + TVE200_INT_CLR);
+	pete_writel("drivers/gpu/drm/tve200/tve200_display.c:65", stat, priv->regs + TVE200_INT_CLR);
 
 	return IRQ_HANDLED;
 }
@@ -135,16 +135,16 @@ static void tve200_display_enable(struct drm_simple_display_pipe *pipe,
 	clk_prepare_enable(priv->clk);
 
 	/* Reset the TVE200 and wait for it to come back online */
-	writel(TVE200_CTRL_4_RESET, priv->regs + TVE200_CTRL_4);
+	pete_writel("drivers/gpu/drm/tve200/tve200_display.c:138", TVE200_CTRL_4_RESET, priv->regs + TVE200_CTRL_4);
 	for (retries = 0; retries < 5; retries++) {
 		usleep_range(30000, 50000);
-		if (readl(priv->regs + TVE200_CTRL_4) & TVE200_CTRL_4_RESET)
+		if (pete_readl("drivers/gpu/drm/tve200/tve200_display.c:141", priv->regs + TVE200_CTRL_4) & TVE200_CTRL_4_RESET)
 			continue;
 		else
 			break;
 	}
 	if (retries == 5 &&
-	    readl(priv->regs + TVE200_CTRL_4) & TVE200_CTRL_4_RESET) {
+	    pete_readl("drivers/gpu/drm/tve200/tve200_display.c:147", priv->regs + TVE200_CTRL_4) & TVE200_CTRL_4_RESET) {
 		dev_err(drm->dev, "can't get hardware out of reset\n");
 		return;
 	}
@@ -233,7 +233,7 @@ static void tve200_display_enable(struct drm_simple_display_pipe *pipe,
 	ctrl1 |= TVE200_TVEEN;
 
 	/* Turn it on */
-	writel(ctrl1, priv->regs + TVE200_CTRL);
+	pete_writel("drivers/gpu/drm/tve200/tve200_display.c:236", ctrl1, priv->regs + TVE200_CTRL);
 
 	drm_crtc_vblank_on(crtc);
 }
@@ -247,8 +247,8 @@ static void tve200_display_disable(struct drm_simple_display_pipe *pipe)
 	drm_crtc_vblank_off(crtc);
 
 	/* Disable put into reset and Power Down */
-	writel(0, priv->regs + TVE200_CTRL);
-	writel(TVE200_CTRL_4_RESET, priv->regs + TVE200_CTRL_4);
+	pete_writel("drivers/gpu/drm/tve200/tve200_display.c:250", 0, priv->regs + TVE200_CTRL);
+	pete_writel("drivers/gpu/drm/tve200/tve200_display.c:251", TVE200_CTRL_4_RESET, priv->regs + TVE200_CTRL_4);
 
 	clk_disable_unprepare(priv->clk);
 }
@@ -266,14 +266,14 @@ static void tve200_display_update(struct drm_simple_display_pipe *pipe,
 
 	if (fb) {
 		/* For RGB, the Y component is used as base address */
-		writel(drm_fb_cma_get_gem_addr(fb, pstate, 0),
+		pete_writel("drivers/gpu/drm/tve200/tve200_display.c:269", drm_fb_cma_get_gem_addr(fb, pstate, 0),
 		       priv->regs + TVE200_Y_FRAME_BASE_ADDR);
 
 		/* For three plane YUV we need two more addresses */
 		if (fb->format->format == DRM_FORMAT_YUV420) {
-			writel(drm_fb_cma_get_gem_addr(fb, pstate, 1),
+			pete_writel("drivers/gpu/drm/tve200/tve200_display.c:274", drm_fb_cma_get_gem_addr(fb, pstate, 1),
 			       priv->regs + TVE200_U_FRAME_BASE_ADDR);
-			writel(drm_fb_cma_get_gem_addr(fb, pstate, 2),
+			pete_writel("drivers/gpu/drm/tve200/tve200_display.c:276", drm_fb_cma_get_gem_addr(fb, pstate, 2),
 			       priv->regs + TVE200_V_FRAME_BASE_ADDR);
 		}
 	}
@@ -297,8 +297,8 @@ static int tve200_display_enable_vblank(struct drm_simple_display_pipe *pipe)
 	struct tve200_drm_dev_private *priv = drm->dev_private;
 
 	/* Clear any IRQs and enable */
-	writel(0xFF, priv->regs + TVE200_INT_CLR);
-	writel(TVE200_INT_V_STATUS, priv->regs + TVE200_INT_EN);
+	pete_writel("drivers/gpu/drm/tve200/tve200_display.c:300", 0xFF, priv->regs + TVE200_INT_CLR);
+	pete_writel("drivers/gpu/drm/tve200/tve200_display.c:301", TVE200_INT_V_STATUS, priv->regs + TVE200_INT_EN);
 	return 0;
 }
 
@@ -308,7 +308,7 @@ static void tve200_display_disable_vblank(struct drm_simple_display_pipe *pipe)
 	struct drm_device *drm = crtc->dev;
 	struct tve200_drm_dev_private *priv = drm->dev_private;
 
-	writel(0, priv->regs + TVE200_INT_EN);
+	pete_writel("drivers/gpu/drm/tve200/tve200_display.c:311", 0, priv->regs + TVE200_INT_EN);
 }
 
 static const struct drm_simple_display_pipe_funcs tve200_display_funcs = {

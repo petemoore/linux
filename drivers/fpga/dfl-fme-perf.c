@@ -278,8 +278,8 @@ static u64 fme_read_perf_cntr_reg(void __iomem *addr)
 	 * support 64bit read - readq is split into 2 readl.
 	 */
 	do {
-		v = readq(addr);
-		low = readl(addr);
+		v = pete_readq("drivers/fpga/dfl-fme-perf.c:281", addr);
+		low = pete_readl("drivers/fpga/dfl-fme-perf.c:282", addr);
 	} while (((u32)v) > low);
 
 	return v;
@@ -325,11 +325,11 @@ static u64 cache_read_event_counter(struct fme_perf_priv *priv,
 		channel = CACHE_CHANNEL_RD;
 
 	/* set channel access type and cache event code. */
-	v = readq(base + CACHE_CTRL);
+	v = pete_readq("drivers/fpga/dfl-fme-perf.c:328", base + CACHE_CTRL);
 	v &= ~(CACHE_CHANNEL_SEL | CACHE_CTRL_EVNT);
 	v |= FIELD_PREP(CACHE_CHANNEL_SEL, channel);
 	v |= FIELD_PREP(CACHE_CTRL_EVNT, event);
-	writeq(v, base + CACHE_CTRL);
+	pete_writeq("drivers/fpga/dfl-fme-perf.c:332", v, base + CACHE_CTRL);
 
 	if (readq_poll_timeout_atomic(base + CACHE_CNTR0, v,
 				      FIELD_GET(CACHE_CNTR_EVNT, v) == event,
@@ -395,7 +395,7 @@ static int fabric_event_init(struct fme_perf_priv *priv, u32 event, u32 portid)
 
 	priv->fab_port_id = portid;
 
-	v = readq(base + FAB_CTRL);
+	v = pete_readq("drivers/fpga/dfl-fme-perf.c:398", base + FAB_CTRL);
 	v &= ~(FAB_PORT_FILTER | FAB_PORT_ID);
 
 	if (is_portid_root(portid)) {
@@ -404,7 +404,7 @@ static int fabric_event_init(struct fme_perf_priv *priv, u32 event, u32 portid)
 		v |= FIELD_PREP(FAB_PORT_FILTER, FAB_PORT_FILTER_ENABLE);
 		v |= FIELD_PREP(FAB_PORT_ID, portid);
 	}
-	writeq(v, base + FAB_CTRL);
+	pete_writeq("drivers/fpga/dfl-fme-perf.c:407", v, base + FAB_CTRL);
 
 exit:
 	spin_unlock(&priv->fab_lock);
@@ -425,10 +425,10 @@ static u64 fabric_read_event_counter(struct fme_perf_priv *priv, u32 event,
 	void __iomem *base = priv->ioaddr;
 	u64 v;
 
-	v = readq(base + FAB_CTRL);
+	v = pete_readq("drivers/fpga/dfl-fme-perf.c:428", base + FAB_CTRL);
 	v &= ~FAB_CTRL_EVNT;
 	v |= FIELD_PREP(FAB_CTRL_EVNT, event);
-	writeq(v, base + FAB_CTRL);
+	pete_writeq("drivers/fpga/dfl-fme-perf.c:431", v, base + FAB_CTRL);
 
 	if (readq_poll_timeout_atomic(base + FAB_CNTR, v,
 				      FIELD_GET(FAB_CNTR_EVNT, v) == event,
@@ -458,10 +458,10 @@ static u64 vtd_read_event_counter(struct fme_perf_priv *priv, u32 event,
 
 	event += (portid * (VTD_EVNT_MAX + 1));
 
-	v = readq(base + VTD_CTRL);
+	v = pete_readq("drivers/fpga/dfl-fme-perf.c:461", base + VTD_CTRL);
 	v &= ~VTD_CTRL_EVNT;
 	v |= FIELD_PREP(VTD_CTRL_EVNT, event);
-	writeq(v, base + VTD_CTRL);
+	pete_writeq("drivers/fpga/dfl-fme-perf.c:464", v, base + VTD_CTRL);
 
 	if (readq_poll_timeout_atomic(base + VTD_CNTR, v,
 				      FIELD_GET(VTD_CNTR_EVNT, v) == event,
@@ -489,10 +489,10 @@ static u64 vtd_sip_read_event_counter(struct fme_perf_priv *priv, u32 event,
 	void __iomem *base = priv->ioaddr;
 	u64 v;
 
-	v = readq(base + VTD_SIP_CTRL);
+	v = pete_readq("drivers/fpga/dfl-fme-perf.c:492", base + VTD_SIP_CTRL);
 	v &= ~VTD_SIP_CTRL_EVNT;
 	v |= FIELD_PREP(VTD_SIP_CTRL_EVNT, event);
-	writeq(v, base + VTD_SIP_CTRL);
+	pete_writeq("drivers/fpga/dfl-fme-perf.c:495", v, base + VTD_SIP_CTRL);
 
 	if (readq_poll_timeout_atomic(base + VTD_SIP_CNTR, v,
 				      FIELD_GET(VTD_SIP_CNTR_EVNT, v) == event,
@@ -893,7 +893,7 @@ static void fme_perf_setup_hardware(struct fme_perf_priv *priv)
 	u64 v;
 
 	/* read and save current working mode for fabric counters */
-	v = readq(base + FAB_CTRL);
+	v = pete_readq("drivers/fpga/dfl-fme-perf.c:896", base + FAB_CTRL);
 
 	if (FIELD_GET(FAB_PORT_FILTER, v) == FAB_PORT_FILTER_DISABLE)
 		priv->fab_port_id = FME_PORTID_ROOT;

@@ -56,13 +56,13 @@ static unsigned char mpu401_read_port(struct snd_mpu401 *mpu,
 static void mpu401_write_mmio(struct snd_mpu401 *mpu, unsigned char data,
 			      unsigned long addr)
 {
-	writeb(data, (void __iomem *)addr);
+	pete_writeb("sound/drivers/mpu401/mpu401_uart.c:59", data, (void __iomem *)addr);
 }
 
 static unsigned char mpu401_read_mmio(struct snd_mpu401 *mpu,
 				      unsigned long addr)
 {
-	return readb((void __iomem *)addr);
+	return pete_readb("sound/drivers/mpu401/mpu401_uart.c:65", (void __iomem *)addr);
 }
 /*  */
 

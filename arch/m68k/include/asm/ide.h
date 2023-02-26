@@ -49,8 +49,8 @@
 #define readw				in_be16
 #define __ide_mm_insw(port, addr, n)	raw_insw((u16 *)port, addr, n)
 #define __ide_mm_insl(port, addr, n)	raw_insl((u32 *)port, addr, n)
-#define writeb(val, port)		out_8(port, val)
-#define writew(val, port)		out_be16(port, val)
+#define pete_writeb("arch/m68k/include/asm/ide.h:52", val, port)		out_8(port, val)
+#define pete_writew("arch/m68k/include/asm/ide.h:53", val, port)		out_be16(port, val)
 #define __ide_mm_outsw(port, addr, n)	raw_outsw((u16 *)port, addr, n)
 #define __ide_mm_outsl(port, addr, n)	raw_outsl((u32 *)port, addr, n)
 

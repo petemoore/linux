@@ -229,7 +229,7 @@ static void armada_drm_crtc_disable_irq(struct armada_crtc *dcrtc, u32 mask)
 {
 	if (dcrtc->irq_ena & mask) {
 		dcrtc->irq_ena &= ~mask;
-		writel(dcrtc->irq_ena, dcrtc->base + LCD_SPU_IRQ_ENA);
+		pete_writel("drivers/gpu/drm/armada/armada_crtc.c:232", dcrtc->irq_ena, dcrtc->base + LCD_SPU_IRQ_ENA);
 	}
 }
 
@@ -237,9 +237,9 @@ static void armada_drm_crtc_enable_irq(struct armada_crtc *dcrtc, u32 mask)
 {
 	if ((dcrtc->irq_ena & mask) != mask) {
 		dcrtc->irq_ena |= mask;
-		writel(dcrtc->irq_ena, dcrtc->base + LCD_SPU_IRQ_ENA);
+		pete_writel("drivers/gpu/drm/armada/armada_crtc.c:240", dcrtc->irq_ena, dcrtc->base + LCD_SPU_IRQ_ENA);
 		if (readl_relaxed(dcrtc->base + LCD_SPU_IRQ_ISR) & mask)
-			writel(0, dcrtc->base + LCD_SPU_IRQ_ISR);
+			pete_writel("drivers/gpu/drm/armada/armada_crtc.c:242", 0, dcrtc->base + LCD_SPU_IRQ_ISR);
 	}
 }
 

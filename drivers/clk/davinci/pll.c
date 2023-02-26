@@ -119,7 +119,7 @@ static unsigned long davinci_pll_recalc_rate(struct clk_hw *hw,
 	unsigned long rate = parent_rate;
 	u32 mult;
 
-	mult = readl(pll->base + PLLM) & pll->pllm_mask;
+	mult = pete_readl("drivers/clk/davinci/pll.c:122", pll->base + PLLM) & pll->pllm_mask;
 	rate *= mult + 1;
 
 	return rate;
@@ -185,7 +185,7 @@ static int davinci_pll_set_rate(struct clk_hw *hw, unsigned long rate,
 	u32 mult;
 
 	mult = rate / parent_rate;
-	writel(mult - 1, pll->base + PLLM);
+	pete_writel("drivers/clk/davinci/pll.c:188", mult - 1, pll->base + PLLM);
 
 	return 0;
 }
@@ -211,7 +211,7 @@ static unsigned long dm365_pll_recalc_rate(struct clk_hw *hw,
 	unsigned long rate = parent_rate;
 	u32 mult;
 
-	mult = readl(pll->base + PLLM) & pll->pllm_mask;
+	mult = pete_readl("drivers/clk/davinci/pll.c:214", pll->base + PLLM) & pll->pllm_mask;
 	rate *= mult * 2;
 
 	return rate;
@@ -311,30 +311,30 @@ static int davinci_pllen_rate_change(struct notifier_block *nb,
 	struct davinci_pllen_clk *pll = to_davinci_pllen_clk(hw);
 	u32 ctrl;
 
-	ctrl = readl(pll->base + PLLCTL);
+	ctrl = pete_readl("drivers/clk/davinci/pll.c:314", pll->base + PLLCTL);
 
 	if (flags == PRE_RATE_CHANGE) {
 		/* Switch the PLL to bypass mode */
 		ctrl &= ~(PLLCTL_PLLENSRC | PLLCTL_PLLEN);
-		writel(ctrl, pll->base + PLLCTL);
+		pete_writel("drivers/clk/davinci/pll.c:319", ctrl, pll->base + PLLCTL);
 
 		udelay(PLL_BYPASS_TIME);
 
 		/* Reset and enable PLL */
 		ctrl &= ~(PLLCTL_PLLRST | PLLCTL_PLLDIS);
-		writel(ctrl, pll->base + PLLCTL);
+		pete_writel("drivers/clk/davinci/pll.c:325", ctrl, pll->base + PLLCTL);
 	} else {
 		udelay(PLL_RESET_TIME);
 
 		/* Bring PLL out of reset */
 		ctrl |= PLLCTL_PLLRST;
-		writel(ctrl, pll->base + PLLCTL);
+		pete_writel("drivers/clk/davinci/pll.c:331", ctrl, pll->base + PLLCTL);
 
 		udelay(PLL_LOCK_TIME);
 
 		/* Remove PLL from bypass mode */
 		ctrl |= PLLCTL_PLLEN;
-		writel(ctrl, pll->base + PLLCTL);
+		pete_writel("drivers/clk/davinci/pll.c:337", ctrl, pll->base + PLLCTL);
 	}
 
 	return NOTIFY_OK;
@@ -609,9 +609,9 @@ davinci_pll_obsclk_register(struct device *dev,
 	divider->width = DIV_RATIO_WIDTH;
 
 	/* make sure divider is enabled just in case bootloader disabled it */
-	oscdiv = readl(base + OSCDIV);
+	oscdiv = pete_readl("drivers/clk/davinci/pll.c:612", base + OSCDIV);
 	oscdiv |= BIT(DIV_ENABLE_SHIFT);
-	writel(oscdiv, base + OSCDIV);
+	pete_writel("drivers/clk/davinci/pll.c:614", oscdiv, base + OSCDIV);
 
 	clk = clk_register_composite(dev, info->name, info->parent_names,
 				     info->num_parents,
@@ -648,14 +648,14 @@ static int davinci_pll_sysclk_rate_change(struct notifier_block *nb,
 	switch (flags) {
 	case POST_RATE_CHANGE:
 		/* apply the changes */
-		pllcmd = readl(pll->base + PLLCMD);
+		pllcmd = pete_readl("drivers/clk/davinci/pll.c:651", pll->base + PLLCMD);
 		pllcmd |= PLLCMD_GOSET;
-		writel(pllcmd, pll->base + PLLCMD);
+		pete_writel("drivers/clk/davinci/pll.c:653", pllcmd, pll->base + PLLCMD);
 		fallthrough;
 	case PRE_RATE_CHANGE:
 		/* Wait until for outstanding changes to take effect */
 		do {
-			pllstat = readl(pll->base + PLLSTAT);
+			pllstat = pete_readl("drivers/clk/davinci/pll.c:658", pll->base + PLLSTAT);
 		} while (pllstat & PLLSTAT_GOSTAT);
 		break;
 	}

@@ -2501,7 +2501,7 @@ static inline uint32_t r100_mm_rreg(struct radeon_device *rdev, uint32_t reg,
 {
 	/* The mmio size is 64kb at minimum. Allows the if to be optimized out. */
 	if ((reg < rdev->rmmio_size || reg < RADEON_MIN_MMIO_SIZE) && !always_indirect)
-		return readl(((void __iomem *)rdev->rmmio) + reg);
+		return pete_readl("drivers/gpu/drm/radeon/radeon.h:2504", ((void __iomem *)rdev->rmmio) + reg);
 	else
 		return r100_mm_rreg_slow(rdev, reg);
 }
@@ -2509,7 +2509,7 @@ static inline void r100_mm_wreg(struct radeon_device *rdev, uint32_t reg, uint32
 				bool always_indirect)
 {
 	if ((reg < rdev->rmmio_size || reg < RADEON_MIN_MMIO_SIZE) && !always_indirect)
-		writel(v, ((void __iomem *)rdev->rmmio) + reg);
+		pete_writel("drivers/gpu/drm/radeon/radeon.h:2512", v, ((void __iomem *)rdev->rmmio) + reg);
 	else
 		r100_mm_wreg_slow(rdev, reg, v);
 }
@@ -2538,10 +2538,10 @@ static inline struct radeon_fence *to_radeon_fence(struct dma_fence *f)
 /*
  * Registers read & write functions.
  */
-#define RREG8(reg) readb((rdev->rmmio) + (reg))
-#define WREG8(reg, v) writeb(v, (rdev->rmmio) + (reg))
-#define RREG16(reg) readw((rdev->rmmio) + (reg))
-#define WREG16(reg, v) writew(v, (rdev->rmmio) + (reg))
+#define RREG8(reg) pete_readb("drivers/gpu/drm/radeon/radeon.h:2541", (rdev->rmmio) + (reg))
+#define WREG8(reg, v) pete_writeb("drivers/gpu/drm/radeon/radeon.h:2542", v, (rdev->rmmio) + (reg))
+#define RREG16(reg) pete_readw("drivers/gpu/drm/radeon/radeon.h:2543", (rdev->rmmio) + (reg))
+#define WREG16(reg, v) pete_writew("drivers/gpu/drm/radeon/radeon.h:2544", v, (rdev->rmmio) + (reg))
 #define RREG32(reg) r100_mm_rreg(rdev, (reg), false)
 #define RREG32_IDX(reg) r100_mm_rreg(rdev, (reg), true)
 #define DREG32(reg) pr_info("REGISTER: " #reg " : 0x%08X\n",	\

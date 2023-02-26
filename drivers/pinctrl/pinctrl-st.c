@@ -665,9 +665,9 @@ static inline void __st_gpio_set(struct st_gpio_bank *bank,
 	unsigned offset, int value)
 {
 	if (value)
-		writel(BIT(offset), bank->base + REG_PIO_SET_POUT);
+		pete_writel("drivers/pinctrl/pinctrl-st.c:668", BIT(offset), bank->base + REG_PIO_SET_POUT);
 	else
-		writel(BIT(offset), bank->base + REG_PIO_CLR_POUT);
+		pete_writel("drivers/pinctrl/pinctrl-st.c:670", BIT(offset), bank->base + REG_PIO_CLR_POUT);
 }
 
 static void st_gpio_direction(struct st_gpio_bank *bank,
@@ -694,9 +694,9 @@ static void st_gpio_direction(struct st_gpio_bank *bank,
 	 */
 	for (i = 0; i <= 2; i++) {
 		if (direction & BIT(i))
-			writel(BIT(offset), bank->base + REG_PIO_SET_PC(i));
+			pete_writel("drivers/pinctrl/pinctrl-st.c:697", BIT(offset), bank->base + REG_PIO_SET_PC(i));
 		else
-			writel(BIT(offset), bank->base + REG_PIO_CLR_PC(i));
+			pete_writel("drivers/pinctrl/pinctrl-st.c:699", BIT(offset), bank->base + REG_PIO_CLR_PC(i));
 	}
 }
 
@@ -704,7 +704,7 @@ static int st_gpio_get(struct gpio_chip *chip, unsigned offset)
 {
 	struct st_gpio_bank *bank = gpiochip_get_data(chip);
 
-	return !!(readl(bank->base + REG_PIO_PIN) & BIT(offset));
+	return !!(pete_readl("drivers/pinctrl/pinctrl-st.c:707", bank->base + REG_PIO_PIN) & BIT(offset));
 }
 
 static void st_gpio_set(struct gpio_chip *chip, unsigned offset, int value)
@@ -756,7 +756,7 @@ static int st_gpio_get_direction(struct gpio_chip *chip, unsigned offset)
 	 * - See st_gpio_direction() above for an explanation
 	 */
 	for (i = 0; i <= 2; i++) {
-		value = readl(bank->base + REG_PIO_PC(i));
+		value = pete_readl("drivers/pinctrl/pinctrl-st.c:759", bank->base + REG_PIO_PC(i));
 		direction |= ((value >> offset) & 0x1) << i;
 	}
 
@@ -1286,7 +1286,7 @@ static void st_gpio_irq_mask(struct irq_data *d)
 	struct gpio_chip *gc = irq_data_get_irq_chip_data(d);
 	struct st_gpio_bank *bank = gpiochip_get_data(gc);
 
-	writel(BIT(d->hwirq), bank->base + REG_PIO_CLR_PMASK);
+	pete_writel("drivers/pinctrl/pinctrl-st.c:1289", BIT(d->hwirq), bank->base + REG_PIO_CLR_PMASK);
 }
 
 static void st_gpio_irq_unmask(struct irq_data *d)
@@ -1294,7 +1294,7 @@ static void st_gpio_irq_unmask(struct irq_data *d)
 	struct gpio_chip *gc = irq_data_get_irq_chip_data(d);
 	struct st_gpio_bank *bank = gpiochip_get_data(gc);
 
-	writel(BIT(d->hwirq), bank->base + REG_PIO_SET_PMASK);
+	pete_writel("drivers/pinctrl/pinctrl-st.c:1297", BIT(d->hwirq), bank->base + REG_PIO_SET_PMASK);
 }
 
 static int st_gpio_irq_request_resources(struct irq_data *d)
@@ -1351,10 +1351,10 @@ static int st_gpio_irq_set_type(struct irq_data *d, unsigned type)
 	bank->irq_edge_conf |= pin_edge_conf;
 	spin_unlock_irqrestore(&bank->lock, flags);
 
-	val = readl(bank->base + REG_PIO_PCOMP);
+	val = pete_readl("drivers/pinctrl/pinctrl-st.c:1354", bank->base + REG_PIO_PCOMP);
 	val &= ~BIT(pin);
 	val |= (comp << pin);
-	writel(val, bank->base + REG_PIO_PCOMP);
+	pete_writel("drivers/pinctrl/pinctrl-st.c:1357", val, bank->base + REG_PIO_PCOMP);
 
 	return 0;
 }
@@ -1394,9 +1394,9 @@ static void __gpio_irq_handler(struct st_gpio_bank *bank)
 	spin_unlock_irqrestore(&bank->lock, flags);
 
 	for (;;) {
-		port_in = readl(bank->base + REG_PIO_PIN);
-		port_comp = readl(bank->base + REG_PIO_PCOMP);
-		port_mask = readl(bank->base + REG_PIO_PMASK);
+		port_in = pete_readl("drivers/pinctrl/pinctrl-st.c:1397", bank->base + REG_PIO_PIN);
+		port_comp = pete_readl("drivers/pinctrl/pinctrl-st.c:1398", bank->base + REG_PIO_PCOMP);
+		port_mask = pete_readl("drivers/pinctrl/pinctrl-st.c:1399", bank->base + REG_PIO_PMASK);
 
 		active_irqs = (port_in ^ port_comp) & port_mask;
 
@@ -1411,7 +1411,7 @@ static void __gpio_irq_handler(struct st_gpio_bank *bank)
 				/* edge detection. */
 				val = st_gpio_get(&bank->gpio_chip, n);
 
-				writel(BIT(n),
+				pete_writel("drivers/pinctrl/pinctrl-st.c:1414", BIT(n),
 					val ? bank->base + REG_PIO_SET_PCOMP :
 					bank->base + REG_PIO_CLR_PCOMP);
 
@@ -1446,7 +1446,7 @@ static void st_gpio_irqmux_handler(struct irq_desc *desc)
 
 	chained_irq_enter(chip, desc);
 
-	status = readl(info->irqmux_base);
+	status = pete_readl("drivers/pinctrl/pinctrl-st.c:1449", info->irqmux_base);
 
 	for_each_set_bit(n, &status, info->nbanks)
 		__gpio_irq_handler(&info->banks[n]);

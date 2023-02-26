@@ -2166,7 +2166,7 @@ qlcnic_82xx_enable_tx_intr(struct qlcnic_adapter *adapter,
 {
 	if (qlcnic_check_multi_tx(adapter) &&
 	    !adapter->ahw->diag_test)
-		writel(0x0, tx_ring->crb_intr_mask);
+		pete_writel("drivers/net/ethernet/qlogic/qlcnic/qlcnic.h:2169", 0x0, tx_ring->crb_intr_mask);
 }
 
 static inline void
@@ -2175,21 +2175,21 @@ qlcnic_82xx_disable_tx_intr(struct qlcnic_adapter *adapter,
 {
 	if (qlcnic_check_multi_tx(adapter) &&
 	    !adapter->ahw->diag_test)
-		writel(1, tx_ring->crb_intr_mask);
+		pete_writel("drivers/net/ethernet/qlogic/qlcnic/qlcnic.h:2178", 1, tx_ring->crb_intr_mask);
 }
 
 static inline void
 qlcnic_83xx_enable_tx_intr(struct qlcnic_adapter *adapter,
 			   struct qlcnic_host_tx_ring *tx_ring)
 {
-	writel(0, tx_ring->crb_intr_mask);
+	pete_writel("drivers/net/ethernet/qlogic/qlcnic/qlcnic.h:2185", 0, tx_ring->crb_intr_mask);
 }
 
 static inline void
 qlcnic_83xx_disable_tx_intr(struct qlcnic_adapter *adapter,
 			    struct qlcnic_host_tx_ring *tx_ring)
 {
-	writel(1, tx_ring->crb_intr_mask);
+	pete_writel("drivers/net/ethernet/qlogic/qlcnic/qlcnic.h:2192", 1, tx_ring->crb_intr_mask);
 }
 
 /* Enable MSI-x and INT-x interrupts */
@@ -2197,7 +2197,7 @@ static inline void
 qlcnic_83xx_enable_sds_intr(struct qlcnic_adapter *adapter,
 			    struct qlcnic_host_sds_ring *sds_ring)
 {
-	writel(0, sds_ring->crb_intr_mask);
+	pete_writel("drivers/net/ethernet/qlogic/qlcnic/qlcnic.h:2200", 0, sds_ring->crb_intr_mask);
 }
 
 /* Disable MSI-x and INT-x interrupts */
@@ -2205,7 +2205,7 @@ static inline void
 qlcnic_83xx_disable_sds_intr(struct qlcnic_adapter *adapter,
 			     struct qlcnic_host_sds_ring *sds_ring)
 {
-	writel(1, sds_ring->crb_intr_mask);
+	pete_writel("drivers/net/ethernet/qlogic/qlcnic/qlcnic.h:2208", 1, sds_ring->crb_intr_mask);
 }
 
 static inline void qlcnic_disable_multi_tx(struct qlcnic_adapter *adapter)
@@ -2224,9 +2224,9 @@ qlcnic_82xx_disable_sds_intr(struct qlcnic_adapter *adapter,
 	if (qlcnic_check_multi_tx(adapter) &&
 	    !adapter->ahw->diag_test &&
 	    (adapter->flags & QLCNIC_MSIX_ENABLED))
-		writel(0x1, sds_ring->crb_intr_mask);
+		pete_writel("drivers/net/ethernet/qlogic/qlcnic/qlcnic.h:2227", 0x1, sds_ring->crb_intr_mask);
 	else
-		writel(0, sds_ring->crb_intr_mask);
+		pete_writel("drivers/net/ethernet/qlogic/qlcnic/qlcnic.h:2229", 0, sds_ring->crb_intr_mask);
 }
 
 static inline void qlcnic_enable_sds_intr(struct qlcnic_adapter *adapter,
@@ -2268,12 +2268,12 @@ qlcnic_82xx_enable_sds_intr(struct qlcnic_adapter *adapter,
 	if (qlcnic_check_multi_tx(adapter) &&
 	    !adapter->ahw->diag_test &&
 	    (adapter->flags & QLCNIC_MSIX_ENABLED))
-		writel(0, sds_ring->crb_intr_mask);
+		pete_writel("drivers/net/ethernet/qlogic/qlcnic/qlcnic.h:2271", 0, sds_ring->crb_intr_mask);
 	else
-		writel(0x1, sds_ring->crb_intr_mask);
+		pete_writel("drivers/net/ethernet/qlogic/qlcnic/qlcnic.h:2273", 0x1, sds_ring->crb_intr_mask);
 
 	if (!QLCNIC_IS_MSI_FAMILY(adapter))
-		writel(0xfbff, adapter->tgt_mask_reg);
+		pete_writel("drivers/net/ethernet/qlogic/qlcnic/qlcnic.h:2276", 0xfbff, adapter->tgt_mask_reg);
 }
 
 static inline int qlcnic_get_diag_lock(struct qlcnic_adapter *adapter)

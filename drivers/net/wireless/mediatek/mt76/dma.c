@@ -82,9 +82,9 @@ mt76_free_pending_txwi(struct mt76_dev *dev)
 static void
 mt76_dma_sync_idx(struct mt76_dev *dev, struct mt76_queue *q)
 {
-	writel(q->desc_dma, &q->regs->desc_base);
-	writel(q->ndesc, &q->regs->ring_size);
-	q->head = readl(&q->regs->dma_idx);
+	pete_writel("drivers/net/wireless/mediatek/mt76/dma.c:85", q->desc_dma, &q->regs->desc_base);
+	pete_writel("drivers/net/wireless/mediatek/mt76/dma.c:86", q->ndesc, &q->regs->ring_size);
+	q->head = pete_readl("drivers/net/wireless/mediatek/mt76/dma.c:87", &q->regs->dma_idx);
 	q->tail = q->head;
 }
 
@@ -100,8 +100,8 @@ mt76_dma_queue_reset(struct mt76_dev *dev, struct mt76_queue *q)
 	for (i = 0; i < q->ndesc; i++)
 		q->desc[i].ctrl = cpu_to_le32(MT_DMA_CTL_DMA_DONE);
 
-	writel(0, &q->regs->cpu_idx);
-	writel(0, &q->regs->dma_idx);
+	pete_writel("drivers/net/wireless/mediatek/mt76/dma.c:103", 0, &q->regs->cpu_idx);
+	pete_writel("drivers/net/wireless/mediatek/mt76/dma.c:104", 0, &q->regs->dma_idx);
 	mt76_dma_sync_idx(dev, q);
 }
 
@@ -224,7 +224,7 @@ static void
 mt76_dma_kick_queue(struct mt76_dev *dev, struct mt76_queue *q)
 {
 	wmb();
-	writel(q->head, &q->regs->cpu_idx);
+	pete_writel("drivers/net/wireless/mediatek/mt76/dma.c:227", q->head, &q->regs->cpu_idx);
 }
 
 static void
@@ -240,7 +240,7 @@ mt76_dma_tx_cleanup(struct mt76_dev *dev, struct mt76_queue *q, bool flush)
 	if (flush)
 		last = -1;
 	else
-		last = readl(&q->regs->dma_idx);
+		last = pete_readl("drivers/net/wireless/mediatek/mt76/dma.c:243", &q->regs->dma_idx);
 
 	while (q->queued > 0 && q->tail != last) {
 		mt76_dma_tx_cleanup_idx(dev, q, q->tail, &entry);
@@ -252,7 +252,7 @@ mt76_dma_tx_cleanup(struct mt76_dev *dev, struct mt76_queue *q, bool flush)
 		}
 
 		if (!flush && q->tail == last)
-			last = readl(&q->regs->dma_idx);
+			last = pete_readl("drivers/net/wireless/mediatek/mt76/dma.c:255", &q->regs->dma_idx);
 
 	}
 	spin_unlock_bh(&q->cleanup_lock);

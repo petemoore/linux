@@ -86,8 +86,8 @@ static int ls1x_rtc_read_time(struct device *dev, struct rtc_time *rtm)
 	unsigned long v;
 	time64_t t;
 
-	v = readl(SYS_TOYREAD0);
-	t = readl(SYS_TOYREAD1);
+	v = pete_readl("drivers/rtc/rtc-ls1x.c:89", SYS_TOYREAD0);
+	t = pete_readl("drivers/rtc/rtc-ls1x.c:90", SYS_TOYREAD1);
 
 	memset(rtm, 0, sizeof(struct rtc_time));
 	t  = mktime64((t & LS1X_YEAR_MASK), ls1x_get_month(v),
@@ -109,10 +109,10 @@ static int ls1x_rtc_set_time(struct device *dev, struct  rtc_time *rtm)
 		| (rtm->tm_min  << LS1X_MIN_OFFSET)
 		| (rtm->tm_sec  << LS1X_SEC_OFFSET);
 
-	writel(v, SYS_TOYWRITE0);
+	pete_writel("drivers/rtc/rtc-ls1x.c:112", v, SYS_TOYWRITE0);
 	c = 0x10000;
 	/* add timeout check counter, for more safe */
-	while ((readl(SYS_COUNTER_CNTRL) & SYS_CNTRL_TS) && --c)
+	while ((pete_readl("drivers/rtc/rtc-ls1x.c:115", SYS_COUNTER_CNTRL) & SYS_CNTRL_TS) && --c)
 		usleep_range(1000, 3000);
 
 	if (!c) {
@@ -121,9 +121,9 @@ static int ls1x_rtc_set_time(struct device *dev, struct  rtc_time *rtm)
 	}
 
 	t = rtm->tm_year + 1900;
-	writel(t, SYS_TOYWRITE1);
+	pete_writel("drivers/rtc/rtc-ls1x.c:124", t, SYS_TOYWRITE1);
 	c = 0x10000;
-	while ((readl(SYS_COUNTER_CNTRL) & SYS_CNTRL_TS) && --c)
+	while ((pete_readl("drivers/rtc/rtc-ls1x.c:126", SYS_COUNTER_CNTRL) & SYS_CNTRL_TS) && --c)
 		usleep_range(1000, 3000);
 
 	if (!c) {
@@ -145,26 +145,26 @@ static int ls1x_rtc_probe(struct platform_device *pdev)
 	struct rtc_device *rtcdev;
 	unsigned long v;
 
-	v = readl(SYS_COUNTER_CNTRL);
+	v = pete_readl("drivers/rtc/rtc-ls1x.c:148", SYS_COUNTER_CNTRL);
 	if (!(v & RTC_CNTR_OK)) {
 		dev_err(&pdev->dev, "rtc counters not working\n");
 		return -ENODEV;
 	}
 
 	/* set to 1 HZ if needed */
-	if (readl(SYS_TOYTRIM) != 32767) {
+	if (pete_readl("drivers/rtc/rtc-ls1x.c:155", SYS_TOYTRIM) != 32767) {
 		v = 0x100000;
-		while ((readl(SYS_COUNTER_CNTRL) & SYS_CNTRL_TTS) && --v)
+		while ((pete_readl("drivers/rtc/rtc-ls1x.c:157", SYS_COUNTER_CNTRL) & SYS_CNTRL_TTS) && --v)
 			usleep_range(1000, 3000);
 
 		if (!v) {
 			dev_err(&pdev->dev, "time out\n");
 			return -ETIMEDOUT;
 		}
-		writel(32767, SYS_TOYTRIM);
+		pete_writel("drivers/rtc/rtc-ls1x.c:164", 32767, SYS_TOYTRIM);
 	}
 	/* this loop coundn't be endless */
-	while (readl(SYS_COUNTER_CNTRL) & SYS_CNTRL_TTS)
+	while (pete_readl("drivers/rtc/rtc-ls1x.c:167", SYS_COUNTER_CNTRL) & SYS_CNTRL_TTS)
 		usleep_range(1000, 3000);
 
 	rtcdev = devm_rtc_allocate_device(&pdev->dev);

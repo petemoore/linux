@@ -40,9 +40,9 @@ static inline void tpm_timer_disable(void)
 	unsigned int val;
 
 	/* channel disable */
-	val = readl(timer_base + TPM_C0SC);
+	val = pete_readl("drivers/clocksource/timer-imx-tpm.c:43", timer_base + TPM_C0SC);
 	val &= ~(TPM_C0SC_MODE_MASK | TPM_C0SC_CHIE);
-	writel(val, timer_base + TPM_C0SC);
+	pete_writel("drivers/clocksource/timer-imx-tpm.c:45", val, timer_base + TPM_C0SC);
 }
 
 static inline void tpm_timer_enable(void)
@@ -50,20 +50,20 @@ static inline void tpm_timer_enable(void)
 	unsigned int val;
 
 	/* channel enabled in sw compare mode */
-	val = readl(timer_base + TPM_C0SC);
+	val = pete_readl("drivers/clocksource/timer-imx-tpm.c:53", timer_base + TPM_C0SC);
 	val |= (TPM_C0SC_MODE_SW_COMPARE << TPM_C0SC_MODE_SHIFT) |
 	       TPM_C0SC_CHIE;
-	writel(val, timer_base + TPM_C0SC);
+	pete_writel("drivers/clocksource/timer-imx-tpm.c:56", val, timer_base + TPM_C0SC);
 }
 
 static inline void tpm_irq_acknowledge(void)
 {
-	writel(TPM_STATUS_CH0F, timer_base + TPM_STATUS);
+	pete_writel("drivers/clocksource/timer-imx-tpm.c:61", TPM_STATUS_CH0F, timer_base + TPM_STATUS);
 }
 
 static inline unsigned long tpm_read_counter(void)
 {
-	return readl(timer_base + TPM_CNT);
+	return pete_readl("drivers/clocksource/timer-imx-tpm.c:66", timer_base + TPM_CNT);
 }
 
 #if defined(CONFIG_ARM)
@@ -87,7 +87,7 @@ static int tpm_set_next_event(unsigned long delta,
 
 	next = tpm_read_counter();
 	next += delta;
-	writel(next, timer_base + TPM_C0V);
+	pete_writel("drivers/clocksource/timer-imx-tpm.c:90", next, timer_base + TPM_C0V);
 	now = tpm_read_counter();
 
 	/*
@@ -196,7 +196,7 @@ static int __init tpm_timer_init(struct device_node *np)
 
 	timer_base = timer_of_base(&to_tpm);
 
-	counter_width = (readl(timer_base + TPM_PARAM)
+	counter_width = (pete_readl("drivers/clocksource/timer-imx-tpm.c:199", timer_base + TPM_PARAM)
 		& TPM_PARAM_WIDTH_MASK) >> TPM_PARAM_WIDTH_SHIFT;
 	/* use rating 200 for 32-bit counter and 150 for 16-bit counter */
 	to_tpm.clkevt.rating = counter_width == 0x20 ? 200 : 150;
@@ -210,24 +210,24 @@ static int __init tpm_timer_init(struct device_node *np)
 	 * 5) DMA transfers disabled
 	 */
 	/* make sure counter is disabled */
-	writel(0, timer_base + TPM_SC);
+	pete_writel("drivers/clocksource/timer-imx-tpm.c:213", 0, timer_base + TPM_SC);
 	/* TOF is W1C */
-	writel(TPM_SC_TOF_MASK, timer_base + TPM_SC);
-	writel(0, timer_base + TPM_CNT);
+	pete_writel("drivers/clocksource/timer-imx-tpm.c:215", TPM_SC_TOF_MASK, timer_base + TPM_SC);
+	pete_writel("drivers/clocksource/timer-imx-tpm.c:216", 0, timer_base + TPM_CNT);
 	/* CHF is W1C */
-	writel(TPM_C0SC_CHF_MASK, timer_base + TPM_C0SC);
+	pete_writel("drivers/clocksource/timer-imx-tpm.c:218", TPM_C0SC_CHF_MASK, timer_base + TPM_C0SC);
 
 	/*
 	 * increase per cnt,
 	 * div 8 for 32-bit counter and div 128 for 16-bit counter
 	 */
-	writel(TPM_SC_CMOD_INC_PER_CNT |
+	pete_writel("drivers/clocksource/timer-imx-tpm.c:224", TPM_SC_CMOD_INC_PER_CNT |
 		(counter_width == 0x20 ?
 		TPM_SC_CMOD_DIV_DEFAULT : TPM_SC_CMOD_DIV_MAX),
 		timer_base + TPM_SC);
 
 	/* set MOD register to maximum for free running mode */
-	writel(GENMASK(counter_width - 1, 0), timer_base + TPM_MOD);
+	pete_writel("drivers/clocksource/timer-imx-tpm.c:230", GENMASK(counter_width - 1, 0), timer_base + TPM_MOD);
 
 	tpm_clockevent_init();
 

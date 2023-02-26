@@ -114,7 +114,7 @@ void snd_hdac_ext_stream_decouple_locked(struct hdac_bus *bus,
 	u32 val;
 	int mask = AZX_PPCTL_PROCEN(hstream->index);
 
-	val = readw(bus->ppcap + AZX_REG_PP_PPCTL) & mask;
+	val = pete_readw("sound/hda/ext/hdac_ext_stream.c:117", bus->ppcap + AZX_REG_PP_PPCTL) & mask;
 
 	if (decouple && !val)
 		snd_hdac_updatel(bus->ppcap, AZX_REG_PP_PPCTL, mask, mask);
@@ -177,20 +177,20 @@ void snd_hdac_ext_link_stream_reset(struct hdac_ext_stream *stream)
 	udelay(3);
 	timeout = 50;
 	do {
-		val = readl(stream->pplc_addr + AZX_REG_PPLCCTL) &
+		val = pete_readl("sound/hda/ext/hdac_ext_stream.c:180", stream->pplc_addr + AZX_REG_PPLCCTL) &
 				AZX_PPLCCTL_STRST;
 		if (val)
 			break;
 		udelay(3);
 	} while (--timeout);
 	val &= ~AZX_PPLCCTL_STRST;
-	writel(val, stream->pplc_addr + AZX_REG_PPLCCTL);
+	pete_writel("sound/hda/ext/hdac_ext_stream.c:187", val, stream->pplc_addr + AZX_REG_PPLCCTL);
 	udelay(3);
 
 	timeout = 50;
 	/* waiting for hardware to report that the stream is out of reset */
 	do {
-		val = readl(stream->pplc_addr + AZX_REG_PPLCCTL) & AZX_PPLCCTL_STRST;
+		val = pete_readl("sound/hda/ext/hdac_ext_stream.c:193", stream->pplc_addr + AZX_REG_PPLCCTL) & AZX_PPLCCTL_STRST;
 		if (!val)
 			break;
 		udelay(3);
@@ -212,13 +212,13 @@ int snd_hdac_ext_link_stream_setup(struct hdac_ext_stream *stream, int fmt)
 	/* make sure the run bit is zero for SD */
 	snd_hdac_ext_link_stream_clear(stream);
 	/* program the stream_tag */
-	val = readl(stream->pplc_addr + AZX_REG_PPLCCTL);
+	val = pete_readl("sound/hda/ext/hdac_ext_stream.c:215", stream->pplc_addr + AZX_REG_PPLCCTL);
 	val = (val & ~AZX_PPLCCTL_STRM_MASK) |
 		(hstream->stream_tag << AZX_PPLCCTL_STRM_SHIFT);
-	writel(val, stream->pplc_addr + AZX_REG_PPLCCTL);
+	pete_writel("sound/hda/ext/hdac_ext_stream.c:218", val, stream->pplc_addr + AZX_REG_PPLCCTL);
 
 	/* program the stream format */
-	writew(fmt, stream->pplc_addr + AZX_REG_PPLCFMT);
+	pete_writew("sound/hda/ext/hdac_ext_stream.c:221", fmt, stream->pplc_addr + AZX_REG_PPLCFMT);
 
 	return 0;
 }
@@ -449,7 +449,7 @@ int snd_hdac_ext_stream_set_spib(struct hdac_bus *bus,
 		return -EINVAL;
 	}
 
-	writel(value, stream->spib_addr);
+	pete_writel("sound/hda/ext/hdac_ext_stream.c:452", value, stream->spib_addr);
 
 	return 0;
 }
@@ -471,7 +471,7 @@ int snd_hdac_ext_stream_get_spbmaxfifo(struct hdac_bus *bus,
 		return -EINVAL;
 	}
 
-	return readl(stream->fifo_addr);
+	return pete_readl("sound/hda/ext/hdac_ext_stream.c:474", stream->fifo_addr);
 }
 EXPORT_SYMBOL_GPL(snd_hdac_ext_stream_get_spbmaxfifo);
 
@@ -515,7 +515,7 @@ int snd_hdac_ext_stream_set_dpibr(struct hdac_bus *bus,
 		return -EINVAL;
 	}
 
-	writel(value, stream->dpibr_addr);
+	pete_writel("sound/hda/ext/hdac_ext_stream.c:518", value, stream->dpibr_addr);
 
 	return 0;
 }

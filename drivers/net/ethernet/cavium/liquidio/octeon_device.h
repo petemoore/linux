@@ -738,16 +738,16 @@ void lio_pci_writeq(struct octeon_device *oct, u64 val, u64 addr);
 
 /* Routines for reading and writing CSRs */
 #define   octeon_write_csr(oct_dev, reg_off, value) \
-		writel(value, (oct_dev)->mmio[0].hw_addr + (reg_off))
+		pete_writel("drivers/net/ethernet/cavium/liquidio/octeon_device.h:741", value, (oct_dev)->mmio[0].hw_addr + (reg_off))
 
 #define   octeon_write_csr64(oct_dev, reg_off, val64) \
-		writeq(val64, (oct_dev)->mmio[0].hw_addr + (reg_off))
+		pete_writeq("drivers/net/ethernet/cavium/liquidio/octeon_device.h:744", val64, (oct_dev)->mmio[0].hw_addr + (reg_off))
 
 #define   octeon_read_csr(oct_dev, reg_off)         \
-		readl((oct_dev)->mmio[0].hw_addr + (reg_off))
+		pete_readl("drivers/net/ethernet/cavium/liquidio/octeon_device.h:747", (oct_dev)->mmio[0].hw_addr + (reg_off))
 
 #define   octeon_read_csr64(oct_dev, reg_off)         \
-		readq((oct_dev)->mmio[0].hw_addr + (reg_off))
+		pete_readq("drivers/net/ethernet/cavium/liquidio/octeon_device.h:750", (oct_dev)->mmio[0].hw_addr + (reg_off))
 
 /**
  * Checks if memory access is okay

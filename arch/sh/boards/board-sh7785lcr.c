@@ -347,7 +347,7 @@ static void __init sh7785lcr_setup(char **cmdline_p)
 		return;
 	}
 
-	writel(0x000307c2, sm501_reg + SM501_DRAM_CONTROL);
+	pete_writel("arch/sh/boards/board-sh7785lcr.c:350", 0x000307c2, sm501_reg + SM501_DRAM_CONTROL);
 	iounmap(sm501_reg);
 }
 

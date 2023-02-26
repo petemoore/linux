@@ -26,11 +26,11 @@ static unsigned long clk_periclk_recalc_rate(struct clk_hw *hwclk,
 	if (socfpgaclk->fixed_div) {
 		div = socfpgaclk->fixed_div;
 	} else if (socfpgaclk->div_reg) {
-		div = readl(socfpgaclk->div_reg) >> socfpgaclk->shift;
+		div = pete_readl("drivers/clk/socfpga/clk-periph-a10.c:29", socfpgaclk->div_reg) >> socfpgaclk->shift;
 		div &= GENMASK(socfpgaclk->width - 1, 0);
 		div += 1;
 	} else {
-		div = ((readl(socfpgaclk->hw.reg) & 0x7ff) + 1);
+		div = ((pete_readl("drivers/clk/socfpga/clk-periph-a10.c:33", socfpgaclk->hw.reg) & 0x7ff) + 1);
 	}
 
 	return parent_rate / div;
@@ -42,7 +42,7 @@ static u8 clk_periclk_get_parent(struct clk_hw *hwclk)
 	u32 clk_src;
 	const char *name = clk_hw_get_name(hwclk);
 
-	clk_src = readl(socfpgaclk->hw.reg);
+	clk_src = pete_readl("drivers/clk/socfpga/clk-periph-a10.c:45", socfpgaclk->hw.reg);
 	if (streq(name, SOCFPGA_MPU_FREE_CLK) ||
 	    streq(name, SOCFPGA_NOC_FREE_CLK) ||
 	    streq(name, SOCFPGA_SDMMC_FREE_CLK))

@@ -219,9 +219,9 @@ struct bfa_ioc_regs_s {
 	u32	smem_pg0;
 };
 
-#define bfa_mem_read(_raddr, _off)	swab32(readl(((_raddr) + (_off))))
+#define bfa_mem_read(_raddr, _off)	swab32(pete_readl("drivers/scsi/bfa/bfa_ioc.h:222", ((_raddr) + (_off))))
 #define bfa_mem_write(_raddr, _off, _val)	\
-			writel(swab32((_val)), ((_raddr) + (_off)))
+			pete_writel("drivers/scsi/bfa/bfa_ioc.h:224", swab32((_val)), ((_raddr) + (_off)))
 /*
  * IOC Mailbox structures
  */

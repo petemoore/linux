@@ -75,7 +75,7 @@ static inline void cbc_writel(u32 val, int reg)
 	    (IS_ENABLED(CONFIG_CACHE_B15_RAC) && reg >= RAC_CONFIG0_REG))
 		return;
 
-	writel(val, cpubiuctrl_base + offset);
+	pete_writel("drivers/soc/bcm/brcmstb/biuctrl.c:78", val, cpubiuctrl_base + offset);
 }
 
 static const int b15_cpubiuctrl_regs[] = {

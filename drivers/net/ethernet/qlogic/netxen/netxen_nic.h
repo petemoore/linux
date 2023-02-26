@@ -1200,19 +1200,19 @@ typedef struct {
 
 /* Mini Coredump register read/write routine */
 #define NX_RD_DUMP_REG(addr, bar0, data) do {                   \
-	writel((addr & 0xFFFF0000), (void __iomem *) (bar0 +            \
+	pete_writel("drivers/net/ethernet/qlogic/netxen/netxen_nic.h:1203", (addr & 0xFFFF0000), (void __iomem *) (bar0 +            \
 		NX_FW_DUMP_REG1));                                      \
-	readl((void __iomem *) (bar0 + NX_FW_DUMP_REG1));               \
-	*data = readl((void __iomem *) (bar0 + NX_FW_DUMP_REG2 +        \
+	pete_readl("drivers/net/ethernet/qlogic/netxen/netxen_nic.h:1205", (void __iomem *) (bar0 + NX_FW_DUMP_REG1));               \
+	*data = pete_readl("drivers/net/ethernet/qlogic/netxen/netxen_nic.h:1206", (void __iomem *) (bar0 + NX_FW_DUMP_REG2 +        \
 		LSW(addr)));                                            \
 } while (0)
 
 #define NX_WR_DUMP_REG(addr, bar0, data) do {                   \
-	writel((addr & 0xFFFF0000), (void __iomem *) (bar0 +            \
+	pete_writel("drivers/net/ethernet/qlogic/netxen/netxen_nic.h:1211", (addr & 0xFFFF0000), (void __iomem *) (bar0 +            \
 		NX_FW_DUMP_REG1));                                      \
-	readl((void __iomem *) (bar0 + NX_FW_DUMP_REG1));                \
-	writel(data, (void __iomem *) (bar0 + NX_FW_DUMP_REG2 + LSW(addr)));\
-	readl((void __iomem *) (bar0 + NX_FW_DUMP_REG2 + LSW(addr)));  \
+	pete_readl("drivers/net/ethernet/qlogic/netxen/netxen_nic.h:1213", (void __iomem *) (bar0 + NX_FW_DUMP_REG1));                \
+	pete_writel("drivers/net/ethernet/qlogic/netxen/netxen_nic.h:1214", data, (void __iomem *) (bar0 + NX_FW_DUMP_REG2 + LSW(addr)));\
+	pete_readl("drivers/net/ethernet/qlogic/netxen/netxen_nic.h:1215", (void __iomem *) (bar0 + NX_FW_DUMP_REG2 + LSW(addr)));  \
 } while (0)
 
 
@@ -1276,8 +1276,8 @@ Entry Type Defines
 #define NX_DUMP_SKIP		0x80	/*  driver skipped this entry  */
 #define NX_DUMP_SIZE_ERR 0x40	/*entry size vs capture size mismatch*/
 
-#define NX_PCI_READ_32(ADDR)			readl((ADDR))
-#define NX_PCI_WRITE_32(DATA, ADDR)	writel(DATA, (ADDR))
+#define NX_PCI_READ_32(ADDR)			pete_readl("drivers/net/ethernet/qlogic/netxen/netxen_nic.h:1279", (ADDR))
+#define NX_PCI_WRITE_32(DATA, ADDR)	pete_writel("drivers/net/ethernet/qlogic/netxen/netxen_nic.h:1280", DATA, (ADDR))
 
 
 

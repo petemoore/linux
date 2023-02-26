@@ -58,7 +58,7 @@ static int idma_irq;
 static void idma_getpos(dma_addr_t *src)
 {
 	*src = idma.lp_tx_addr +
-		(readl(idma.regs + I2STRNCNT) & 0xffffff) * 4;
+		(pete_readl("sound/soc/samsung/idma.c:61", idma.regs + I2STRNCNT) & 0xffffff) * 4;
 }
 
 static int idma_enqueue(struct snd_pcm_substream *substream)
@@ -73,25 +73,25 @@ static int idma_enqueue(struct snd_pcm_substream *substream)
 
 	/* Internal DMA Level0 Interrupt Address */
 	val = idma.lp_tx_addr + prtd->periodsz;
-	writel(val, idma.regs + I2SLVL0ADDR);
+	pete_writel("sound/soc/samsung/idma.c:76", val, idma.regs + I2SLVL0ADDR);
 
 	/* Start address0 of I2S internal DMA operation. */
 	val = idma.lp_tx_addr;
-	writel(val, idma.regs + I2SSTR0);
+	pete_writel("sound/soc/samsung/idma.c:80", val, idma.regs + I2SSTR0);
 
 	/*
 	 * Transfer block size for I2S internal DMA.
 	 * Should decide transfer size before start dma operation
 	 */
-	val = readl(idma.regs + I2SSIZE);
+	val = pete_readl("sound/soc/samsung/idma.c:86", idma.regs + I2SSIZE);
 	val &= ~(I2SSIZE_TRNMSK << I2SSIZE_SHIFT);
 	val |= (((runtime->dma_bytes >> 2) &
 			I2SSIZE_TRNMSK) << I2SSIZE_SHIFT);
-	writel(val, idma.regs + I2SSIZE);
+	pete_writel("sound/soc/samsung/idma.c:90", val, idma.regs + I2SSIZE);
 
-	val = readl(idma.regs + I2SAHB);
+	val = pete_readl("sound/soc/samsung/idma.c:92", idma.regs + I2SAHB);
 	val |= AHB_INTENLVL0;
-	writel(val, idma.regs + I2SAHB);
+	pete_writel("sound/soc/samsung/idma.c:94", val, idma.regs + I2SAHB);
 
 	return 0;
 }
@@ -108,7 +108,7 @@ static void idma_setcallbk(struct snd_pcm_substream *substream,
 
 static void idma_control(int op)
 {
-	u32 val = readl(idma.regs + I2SAHB);
+	u32 val = pete_readl("sound/soc/samsung/idma.c:111", idma.regs + I2SAHB);
 
 	spin_lock(&idma.lock);
 
@@ -124,7 +124,7 @@ static void idma_control(int op)
 		return;
 	}
 
-	writel(val, idma.regs + I2SAHB);
+	pete_writel("sound/soc/samsung/idma.c:127", val, idma.regs + I2SAHB);
 	spin_unlock(&idma.lock);
 }
 
@@ -143,13 +143,13 @@ static int idma_hw_params(struct snd_soc_component *component,
 {
 	struct snd_pcm_runtime *runtime = substream->runtime;
 	struct idma_ctrl *prtd = substream->runtime->private_data;
-	u32 mod = readl(idma.regs + I2SMOD);
-	u32 ahb = readl(idma.regs + I2SAHB);
+	u32 mod = pete_readl("sound/soc/samsung/idma.c:146", idma.regs + I2SMOD);
+	u32 ahb = pete_readl("sound/soc/samsung/idma.c:147", idma.regs + I2SAHB);
 
 	ahb |= (AHB_DMARLD | AHB_INTMASK);
 	mod |= MOD_TXS_IDMA;
-	writel(ahb, idma.regs + I2SAHB);
-	writel(mod, idma.regs + I2SMOD);
+	pete_writel("sound/soc/samsung/idma.c:151", ahb, idma.regs + I2SAHB);
+	pete_writel("sound/soc/samsung/idma.c:152", mod, idma.regs + I2SMOD);
 
 	snd_pcm_set_runtime_buffer(substream, &substream->dma_buffer);
 	runtime->dma_bytes = params_buffer_bytes(params);
@@ -262,20 +262,20 @@ static irqreturn_t iis_irq(int irqno, void *dev_id)
 	struct idma_ctrl *prtd = (struct idma_ctrl *)dev_id;
 	u32 iisahb, val, addr;
 
-	iisahb  = readl(idma.regs + I2SAHB);
+	iisahb  = pete_readl("sound/soc/samsung/idma.c:265", idma.regs + I2SAHB);
 
 	val = (iisahb & AHB_LVL0INT) ? AHB_CLRLVL0INT : 0;
 
 	if (val) {
 		iisahb |= val;
-		writel(iisahb, idma.regs + I2SAHB);
+		pete_writel("sound/soc/samsung/idma.c:271", iisahb, idma.regs + I2SAHB);
 
-		addr = readl(idma.regs + I2SLVL0ADDR) - idma.lp_tx_addr;
+		addr = pete_readl("sound/soc/samsung/idma.c:273", idma.regs + I2SLVL0ADDR) - idma.lp_tx_addr;
 		addr += prtd->periodsz;
 		addr %= (u32)(prtd->end - prtd->start);
 		addr += idma.lp_tx_addr;
 
-		writel(addr, idma.regs + I2SLVL0ADDR);
+		pete_writel("sound/soc/samsung/idma.c:278", addr, idma.regs + I2SLVL0ADDR);
 
 		if (prtd->cb)
 			prtd->cb(prtd->token, prtd->period);

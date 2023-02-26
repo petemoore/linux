@@ -269,7 +269,7 @@ static int rockchip_rk3036_pll_enable(struct clk_hw *hw)
 {
 	struct rockchip_clk_pll *pll = to_rockchip_clk_pll(hw);
 
-	writel(HIWORD_UPDATE(0, RK3036_PLLCON1_PWRDOWN, 0),
+	pete_writel("drivers/clk/rockchip/clk-pll.c:272", HIWORD_UPDATE(0, RK3036_PLLCON1_PWRDOWN, 0),
 	       pll->reg_base + RK3036_PLLCON(1));
 	rockchip_rk3036_pll_wait_lock(pll);
 
@@ -280,7 +280,7 @@ static void rockchip_rk3036_pll_disable(struct clk_hw *hw)
 {
 	struct rockchip_clk_pll *pll = to_rockchip_clk_pll(hw);
 
-	writel(HIWORD_UPDATE(RK3036_PLLCON1_PWRDOWN,
+	pete_writel("drivers/clk/rockchip/clk-pll.c:283", HIWORD_UPDATE(RK3036_PLLCON1_PWRDOWN,
 			     RK3036_PLLCON1_PWRDOWN, 0),
 	       pll->reg_base + RK3036_PLLCON(1));
 }
@@ -288,7 +288,7 @@ static void rockchip_rk3036_pll_disable(struct clk_hw *hw)
 static int rockchip_rk3036_pll_is_enabled(struct clk_hw *hw)
 {
 	struct rockchip_clk_pll *pll = to_rockchip_clk_pll(hw);
-	u32 pllcon = readl(pll->reg_base + RK3036_PLLCON(1));
+	u32 pllcon = pete_readl("drivers/clk/rockchip/clk-pll.c:291", pll->reg_base + RK3036_PLLCON(1));
 
 	return !(pllcon & RK3036_PLLCON1_PWRDOWN);
 }
@@ -444,11 +444,11 @@ static int rockchip_rk3066_pll_set_params(struct rockchip_clk_pll *pll,
 	}
 
 	/* enter reset mode */
-	writel(HIWORD_UPDATE(RK3066_PLLCON3_RESET, RK3066_PLLCON3_RESET, 0),
+	pete_writel("drivers/clk/rockchip/clk-pll.c:447", HIWORD_UPDATE(RK3066_PLLCON3_RESET, RK3066_PLLCON3_RESET, 0),
 	       pll->reg_base + RK3066_PLLCON(3));
 
 	/* update pll values */
-	writel(HIWORD_UPDATE(rate->nr - 1, RK3066_PLLCON0_NR_MASK,
+	pete_writel("drivers/clk/rockchip/clk-pll.c:451", HIWORD_UPDATE(rate->nr - 1, RK3066_PLLCON0_NR_MASK,
 					   RK3066_PLLCON0_NR_SHIFT) |
 	       HIWORD_UPDATE(rate->no - 1, RK3066_PLLCON0_OD_MASK,
 					   RK3066_PLLCON0_OD_SHIFT),
@@ -462,7 +462,7 @@ static int rockchip_rk3066_pll_set_params(struct rockchip_clk_pll *pll,
 		       pll->reg_base + RK3066_PLLCON(2));
 
 	/* leave reset and wait the reset_delay */
-	writel(HIWORD_UPDATE(0, RK3066_PLLCON3_RESET, 0),
+	pete_writel("drivers/clk/rockchip/clk-pll.c:465", HIWORD_UPDATE(0, RK3066_PLLCON3_RESET, 0),
 	       pll->reg_base + RK3066_PLLCON(3));
 	udelay(RK3066_PLL_RESET_DELAY(rate->nr));
 
@@ -504,7 +504,7 @@ static int rockchip_rk3066_pll_enable(struct clk_hw *hw)
 {
 	struct rockchip_clk_pll *pll = to_rockchip_clk_pll(hw);
 
-	writel(HIWORD_UPDATE(0, RK3066_PLLCON3_PWRDOWN, 0),
+	pete_writel("drivers/clk/rockchip/clk-pll.c:507", HIWORD_UPDATE(0, RK3066_PLLCON3_PWRDOWN, 0),
 	       pll->reg_base + RK3066_PLLCON(3));
 	rockchip_pll_wait_lock(pll);
 
@@ -515,7 +515,7 @@ static void rockchip_rk3066_pll_disable(struct clk_hw *hw)
 {
 	struct rockchip_clk_pll *pll = to_rockchip_clk_pll(hw);
 
-	writel(HIWORD_UPDATE(RK3066_PLLCON3_PWRDOWN,
+	pete_writel("drivers/clk/rockchip/clk-pll.c:518", HIWORD_UPDATE(RK3066_PLLCON3_PWRDOWN,
 			     RK3066_PLLCON3_PWRDOWN, 0),
 	       pll->reg_base + RK3066_PLLCON(3));
 }
@@ -523,7 +523,7 @@ static void rockchip_rk3066_pll_disable(struct clk_hw *hw)
 static int rockchip_rk3066_pll_is_enabled(struct clk_hw *hw)
 {
 	struct rockchip_clk_pll *pll = to_rockchip_clk_pll(hw);
-	u32 pllcon = readl(pll->reg_base + RK3066_PLLCON(3));
+	u32 pllcon = pete_readl("drivers/clk/rockchip/clk-pll.c:526", pll->reg_base + RK3066_PLLCON(3));
 
 	return !(pllcon & RK3066_PLLCON3_PWRDOWN);
 }
@@ -753,7 +753,7 @@ static int rockchip_rk3399_pll_enable(struct clk_hw *hw)
 {
 	struct rockchip_clk_pll *pll = to_rockchip_clk_pll(hw);
 
-	writel(HIWORD_UPDATE(0, RK3399_PLLCON3_PWRDOWN, 0),
+	pete_writel("drivers/clk/rockchip/clk-pll.c:756", HIWORD_UPDATE(0, RK3399_PLLCON3_PWRDOWN, 0),
 	       pll->reg_base + RK3399_PLLCON(3));
 	rockchip_rk3399_pll_wait_lock(pll);
 
@@ -764,7 +764,7 @@ static void rockchip_rk3399_pll_disable(struct clk_hw *hw)
 {
 	struct rockchip_clk_pll *pll = to_rockchip_clk_pll(hw);
 
-	writel(HIWORD_UPDATE(RK3399_PLLCON3_PWRDOWN,
+	pete_writel("drivers/clk/rockchip/clk-pll.c:767", HIWORD_UPDATE(RK3399_PLLCON3_PWRDOWN,
 			     RK3399_PLLCON3_PWRDOWN, 0),
 	       pll->reg_base + RK3399_PLLCON(3));
 }
@@ -772,7 +772,7 @@ static void rockchip_rk3399_pll_disable(struct clk_hw *hw)
 static int rockchip_rk3399_pll_is_enabled(struct clk_hw *hw)
 {
 	struct rockchip_clk_pll *pll = to_rockchip_clk_pll(hw);
-	u32 pllcon = readl(pll->reg_base + RK3399_PLLCON(3));
+	u32 pllcon = pete_readl("drivers/clk/rockchip/clk-pll.c:775", pll->reg_base + RK3399_PLLCON(3));
 
 	return !(pllcon & RK3399_PLLCON3_PWRDOWN);
 }

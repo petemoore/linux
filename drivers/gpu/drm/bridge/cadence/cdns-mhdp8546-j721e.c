@@ -55,14 +55,14 @@ static void cdns_mhdp_j721e_enable(struct cdns_mhdp_device *mhdp)
 	 * to eDP DPI2. This is the only supported SST configuration on
 	 * J721E.
 	 */
-	writel(DPTX_SRC_VIF_0_EN | DPTX_SRC_VIF_0_SEL_DPI2,
+	pete_writel("drivers/gpu/drm/bridge/cadence/cdns-mhdp8546-j721e.c:58", DPTX_SRC_VIF_0_EN | DPTX_SRC_VIF_0_SEL_DPI2,
 	       mhdp->j721e_regs + DPTX_SRC_CFG);
 }
 
 static void cdns_mhdp_j721e_disable(struct cdns_mhdp_device *mhdp)
 {
 	/* Put everything to defaults  */
-	writel(0, mhdp->j721e_regs + DPTX_DSC_CFG);
+	pete_writel("drivers/gpu/drm/bridge/cadence/cdns-mhdp8546-j721e.c:65", 0, mhdp->j721e_regs + DPTX_DSC_CFG);
 }
 
 const struct mhdp_platform_ops mhdp_ti_j721e_ops = {

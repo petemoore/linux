@@ -321,12 +321,12 @@ static inline void exynos_dsi_write(struct exynos_dsi *dsi, enum reg_idx idx,
 				    u32 val)
 {
 
-	writel(val, dsi->reg_base + dsi->driver_data->reg_ofs[idx]);
+	pete_writel("drivers/gpu/drm/exynos/exynos_drm_dsi.c:324", val, dsi->reg_base + dsi->driver_data->reg_ofs[idx]);
 }
 
 static inline u32 exynos_dsi_read(struct exynos_dsi *dsi, enum reg_idx idx)
 {
-	return readl(dsi->reg_base + dsi->driver_data->reg_ofs[idx]);
+	return pete_readl("drivers/gpu/drm/exynos/exynos_drm_dsi.c:329", dsi->reg_base + dsi->driver_data->reg_ofs[idx]);
 }
 
 static const unsigned int exynos_reg_ofs[] = {
@@ -612,7 +612,7 @@ static unsigned long exynos_dsi_set_pll(struct exynos_dsi *dsi,
 	}
 	dev_dbg(dsi->dev, "PLL freq %lu, (p %d, m %d, s %d)\n", fout, p, m, s);
 
-	writel(driver_data->reg_values[PLL_TIMER],
+	pete_writel("drivers/gpu/drm/exynos/exynos_drm_dsi.c:615", driver_data->reg_values[PLL_TIMER],
 			dsi->reg_base + driver_data->plltmr_reg);
 
 	reg = DSIM_PLL_EN | DSIM_PLL_P(p) | DSIM_PLL_M(m) | DSIM_PLL_S(s);

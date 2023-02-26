@@ -80,7 +80,7 @@ static int intel_xhci_usb_set_role(struct usb_role_switch *sw,
 	 * SW_SWITCH_EN bits to be zero for role switch,
 	 * do not set these bits for those devices.
 	 */
-	val = readl(data->base + DUAL_ROLE_CFG0);
+	val = pete_readl("drivers/usb/roles/intel-xhci-usb-role-switch.c:83", data->base + DUAL_ROLE_CFG0);
 	switch (role) {
 	case USB_ROLE_NONE:
 		val |= SW_IDPIN;
@@ -103,7 +103,7 @@ static int intel_xhci_usb_set_role(struct usb_role_switch *sw,
 		val &= ~DRD_CONFIG_MASK;
 		val |= SW_SWITCH_EN | drd_config;
 	}
-	writel(val, data->base + DUAL_ROLE_CFG0);
+	pete_writel("drivers/usb/roles/intel-xhci-usb-role-switch.c:106", val, data->base + DUAL_ROLE_CFG0);
 
 	acpi_release_global_lock(glk);
 
@@ -112,7 +112,7 @@ static int intel_xhci_usb_set_role(struct usb_role_switch *sw,
 
 	/* Polling on CFG1 register to confirm mode switch.*/
 	do {
-		val = readl(data->base + DUAL_ROLE_CFG1);
+		val = pete_readl("drivers/usb/roles/intel-xhci-usb-role-switch.c:115", data->base + DUAL_ROLE_CFG1);
 		if (!!(val & HOST_MODE) == (role == USB_ROLE_HOST)) {
 			pm_runtime_put(data->dev);
 			return 0;
@@ -135,7 +135,7 @@ static enum usb_role intel_xhci_usb_get_role(struct usb_role_switch *sw)
 	u32 val;
 
 	pm_runtime_get_sync(data->dev);
-	val = readl(data->base + DUAL_ROLE_CFG0);
+	val = pete_readl("drivers/usb/roles/intel-xhci-usb-role-switch.c:138", data->base + DUAL_ROLE_CFG0);
 	pm_runtime_put(data->dev);
 
 	if (!(val & SW_IDPIN))

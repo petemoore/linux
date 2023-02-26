@@ -40,7 +40,7 @@ r9a06g032_smp_boot_secondary(unsigned int cpu,
 
 	spin_lock(&cpu_lock);
 
-	writel(__pa_symbol(secondary_startup), cpu_bootaddr);
+	pete_writel("drivers/soc/renesas/r9a06g032-smp.c:43", __pa_symbol(secondary_startup), cpu_bootaddr);
 	arch_send_wakeup_ipi_mask(cpumask_of(cpu));
 
 	spin_unlock(&cpu_lock);

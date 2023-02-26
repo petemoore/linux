@@ -1182,7 +1182,7 @@ int do_dma_probe(struct dw_dma_chip *chip)
 		if (autocfg) {
 			unsigned int r = DW_DMA_MAX_NR_CHANNELS - i - 1;
 			void __iomem *addr = &__dw_regs(dw)->DWC_PARAMS[r];
-			unsigned int dwc_params = readl(addr);
+			unsigned int dwc_params = pete_readl("drivers/dma/dw/core.c:1185", addr);
 
 			dev_dbg(chip->dev, "DWC_PARAMS[%d]: 0x%08x\n", i,
 					   dwc_params);

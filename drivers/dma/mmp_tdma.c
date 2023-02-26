@@ -142,23 +142,23 @@ static int mmp_tdma_config_write(struct dma_chan *chan,
 
 static void mmp_tdma_chan_set_desc(struct mmp_tdma_chan *tdmac, dma_addr_t phys)
 {
-	writel(phys, tdmac->reg_base + TDNDPR);
-	writel(readl(tdmac->reg_base + TDCR) | TDCR_FETCHND,
+	pete_writel("drivers/dma/mmp_tdma.c:145", phys, tdmac->reg_base + TDNDPR);
+	pete_writel("drivers/dma/mmp_tdma.c:146", pete_readl("drivers/dma/mmp_tdma.c:146", tdmac->reg_base + TDCR) | TDCR_FETCHND,
 					tdmac->reg_base + TDCR);
 }
 
 static void mmp_tdma_enable_irq(struct mmp_tdma_chan *tdmac, bool enable)
 {
 	if (enable)
-		writel(TDIMR_COMP, tdmac->reg_base + TDIMR);
+		pete_writel("drivers/dma/mmp_tdma.c:153", TDIMR_COMP, tdmac->reg_base + TDIMR);
 	else
-		writel(0, tdmac->reg_base + TDIMR);
+		pete_writel("drivers/dma/mmp_tdma.c:155", 0, tdmac->reg_base + TDIMR);
 }
 
 static void mmp_tdma_enable_chan(struct mmp_tdma_chan *tdmac)
 {
 	/* enable dma chan */
-	writel(readl(tdmac->reg_base + TDCR) | TDCR_CHANEN,
+	pete_writel("drivers/dma/mmp_tdma.c:161", pete_readl("drivers/dma/mmp_tdma.c:161", tdmac->reg_base + TDCR) | TDCR_CHANEN,
 					tdmac->reg_base + TDCR);
 	tdmac->status = DMA_IN_PROGRESS;
 }
@@ -168,10 +168,10 @@ static int mmp_tdma_disable_chan(struct dma_chan *chan)
 	struct mmp_tdma_chan *tdmac = to_mmp_tdma_chan(chan);
 	u32 tdcr;
 
-	tdcr = readl(tdmac->reg_base + TDCR);
+	tdcr = pete_readl("drivers/dma/mmp_tdma.c:171", tdmac->reg_base + TDCR);
 	tdcr |= TDCR_ABR;
 	tdcr &= ~TDCR_CHANEN;
-	writel(tdcr, tdmac->reg_base + TDCR);
+	pete_writel("drivers/dma/mmp_tdma.c:174", tdcr, tdmac->reg_base + TDCR);
 
 	tdmac->status = DMA_COMPLETE;
 
@@ -182,7 +182,7 @@ static int mmp_tdma_resume_chan(struct dma_chan *chan)
 {
 	struct mmp_tdma_chan *tdmac = to_mmp_tdma_chan(chan);
 
-	writel(readl(tdmac->reg_base + TDCR) | TDCR_CHANEN,
+	pete_writel("drivers/dma/mmp_tdma.c:185", pete_readl("drivers/dma/mmp_tdma.c:185", tdmac->reg_base + TDCR) | TDCR_CHANEN,
 					tdmac->reg_base + TDCR);
 	tdmac->status = DMA_IN_PROGRESS;
 
@@ -193,7 +193,7 @@ static int mmp_tdma_pause_chan(struct dma_chan *chan)
 {
 	struct mmp_tdma_chan *tdmac = to_mmp_tdma_chan(chan);
 
-	writel(readl(tdmac->reg_base + TDCR) & ~TDCR_CHANEN,
+	pete_writel("drivers/dma/mmp_tdma.c:196", pete_readl("drivers/dma/mmp_tdma.c:196", tdmac->reg_base + TDCR) & ~TDCR_CHANEN,
 					tdmac->reg_base + TDCR);
 	tdmac->status = DMA_PAUSED;
 
@@ -281,18 +281,18 @@ static int mmp_tdma_config_chan(struct dma_chan *chan)
 		}
 	}
 
-	writel(tdcr, tdmac->reg_base + TDCR);
+	pete_writel("drivers/dma/mmp_tdma.c:284", tdcr, tdmac->reg_base + TDCR);
 	return 0;
 }
 
 static int mmp_tdma_clear_chan_irq(struct mmp_tdma_chan *tdmac)
 {
-	u32 reg = readl(tdmac->reg_base + TDISR);
+	u32 reg = pete_readl("drivers/dma/mmp_tdma.c:290", tdmac->reg_base + TDISR);
 
 	if (reg & TDISR_COMP) {
 		/* clear irq */
 		reg &= ~TDISR_COMP;
-		writel(reg, tdmac->reg_base + TDISR);
+		pete_writel("drivers/dma/mmp_tdma.c:295", reg, tdmac->reg_base + TDISR);
 
 		return 0;
 	}

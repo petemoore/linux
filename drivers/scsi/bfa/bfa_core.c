@@ -765,7 +765,7 @@ bfa_msix_all(struct bfa_s *bfa, int vec)
 	u32	intr, qintr;
 	int	queue;
 
-	intr = readl(bfa->iocfc.bfa_regs.intr_status);
+	intr = pete_readl("drivers/scsi/bfa/bfa_core.c:768", bfa->iocfc.bfa_regs.intr_status);
 	if (!intr)
 		return;
 
@@ -804,11 +804,11 @@ bfa_intx(struct bfa_s *bfa)
 	int queue;
 	bfa_boolean_t rspq_comp = BFA_FALSE;
 
-	intr = readl(bfa->iocfc.bfa_regs.intr_status);
+	intr = pete_readl("drivers/scsi/bfa/bfa_core.c:807", bfa->iocfc.bfa_regs.intr_status);
 
 	qintr = intr & (__HFN_INT_RME_MASK | __HFN_INT_CPE_MASK);
 	if (qintr)
-		writel(qintr, bfa->iocfc.bfa_regs.intr_status);
+		pete_writel("drivers/scsi/bfa/bfa_core.c:811", qintr, bfa->iocfc.bfa_regs.intr_status);
 
 	/*
 	 * Unconditional RME completion queue interrupt
@@ -860,8 +860,8 @@ bfa_isr_enable(struct bfa_s *bfa)
 		umsk |= port_id == 0 ? __HFN_INT_FN0_MASK : __HFN_INT_FN1_MASK;
 	}
 
-	writel(umsk, bfa->iocfc.bfa_regs.intr_status);
-	writel(~umsk, bfa->iocfc.bfa_regs.intr_mask);
+	pete_writel("drivers/scsi/bfa/bfa_core.c:863", umsk, bfa->iocfc.bfa_regs.intr_status);
+	pete_writel("drivers/scsi/bfa/bfa_core.c:864", ~umsk, bfa->iocfc.bfa_regs.intr_mask);
 	bfa->iocfc.intr_mask = ~umsk;
 	bfa_isr_mode_set(bfa, bfa->msix.nvecs != 0);
 
@@ -876,7 +876,7 @@ bfa_isr_disable(struct bfa_s *bfa)
 {
 	bfa->intr_enabled = BFA_FALSE;
 	bfa_isr_mode_set(bfa, BFA_FALSE);
-	writel(-1L, bfa->iocfc.bfa_regs.intr_mask);
+	pete_writel("drivers/scsi/bfa/bfa_core.c:879", -1L, bfa->iocfc.bfa_regs.intr_mask);
 	bfa_msix_uninstall(bfa);
 }
 
@@ -908,7 +908,7 @@ bfa_msix_lpu_err(struct bfa_s *bfa, int vec)
 	u32 intr, curr_value;
 	bfa_boolean_t lpu_isr, halt_isr, pss_isr;
 
-	intr = readl(bfa->iocfc.bfa_regs.intr_status);
+	intr = pete_readl("drivers/scsi/bfa/bfa_core.c:911", bfa->iocfc.bfa_regs.intr_status);
 
 	if (bfa_asic_id_ct2(bfa->ioc.pcidev.device_id)) {
 		halt_isr = intr & __HFN_INT_CPQ_HALT_CT2;
@@ -934,9 +934,9 @@ bfa_msix_lpu_err(struct bfa_s *bfa, int vec)
 			 * Register needs to be cleared as well so Interrupt
 			 * Status Register will be cleared.
 			 */
-			curr_value = readl(bfa->ioc.ioc_regs.ll_halt);
+			curr_value = pete_readl("drivers/scsi/bfa/bfa_core.c:937", bfa->ioc.ioc_regs.ll_halt);
 			curr_value &= ~__FW_INIT_HALT_P;
-			writel(curr_value, bfa->ioc.ioc_regs.ll_halt);
+			pete_writel("drivers/scsi/bfa/bfa_core.c:939", curr_value, bfa->ioc.ioc_regs.ll_halt);
 		}
 
 		if (pss_isr) {
@@ -945,13 +945,13 @@ bfa_msix_lpu_err(struct bfa_s *bfa, int vec)
 			 * interrups are shared so driver's interrupt handler is
 			 * still called even though it is already masked out.
 			 */
-			curr_value = readl(
+			curr_value = pete_readl("drivers/scsi/bfa/bfa_core.c:948", 
 					bfa->ioc.ioc_regs.pss_err_status_reg);
-			writel(curr_value,
+			pete_writel("drivers/scsi/bfa/bfa_core.c:950", curr_value,
 				bfa->ioc.ioc_regs.pss_err_status_reg);
 		}
 
-		writel(intr, bfa->iocfc.bfa_regs.intr_status);
+		pete_writel("drivers/scsi/bfa/bfa_core.c:954", intr, bfa->iocfc.bfa_regs.intr_status);
 		bfa_ioc_error_isr(&bfa->ioc);
 	}
 }

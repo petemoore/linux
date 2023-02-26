@@ -592,15 +592,15 @@ static void iommu_poll_events(struct amd_iommu *iommu)
 {
 	u32 head, tail;
 
-	head = readl(iommu->mmio_base + MMIO_EVT_HEAD_OFFSET);
-	tail = readl(iommu->mmio_base + MMIO_EVT_TAIL_OFFSET);
+	head = pete_readl("drivers/iommu/amd/iommu.c:595", iommu->mmio_base + MMIO_EVT_HEAD_OFFSET);
+	tail = pete_readl("drivers/iommu/amd/iommu.c:596", iommu->mmio_base + MMIO_EVT_TAIL_OFFSET);
 
 	while (head != tail) {
 		iommu_print_event(iommu, iommu->evt_buf + head);
 		head = (head + EVENT_ENTRY_SIZE) % EVT_BUFFER_SIZE;
 	}
 
-	writel(head, iommu->mmio_base + MMIO_EVT_HEAD_OFFSET);
+	pete_writel("drivers/iommu/amd/iommu.c:603", head, iommu->mmio_base + MMIO_EVT_HEAD_OFFSET);
 }
 
 static void iommu_handle_ppr_entry(struct amd_iommu *iommu, u64 *raw)
@@ -628,8 +628,8 @@ static void iommu_poll_ppr_log(struct amd_iommu *iommu)
 	if (iommu->ppr_log == NULL)
 		return;
 
-	head = readl(iommu->mmio_base + MMIO_PPR_HEAD_OFFSET);
-	tail = readl(iommu->mmio_base + MMIO_PPR_TAIL_OFFSET);
+	head = pete_readl("drivers/iommu/amd/iommu.c:631", iommu->mmio_base + MMIO_PPR_HEAD_OFFSET);
+	tail = pete_readl("drivers/iommu/amd/iommu.c:632", iommu->mmio_base + MMIO_PPR_TAIL_OFFSET);
 
 	while (head != tail) {
 		volatile u64 *raw;
@@ -661,14 +661,14 @@ static void iommu_poll_ppr_log(struct amd_iommu *iommu)
 
 		/* Update head pointer of hardware ring-buffer */
 		head = (head + PPR_ENTRY_SIZE) % PPR_LOG_SIZE;
-		writel(head, iommu->mmio_base + MMIO_PPR_HEAD_OFFSET);
+		pete_writel("drivers/iommu/amd/iommu.c:664", head, iommu->mmio_base + MMIO_PPR_HEAD_OFFSET);
 
 		/* Handle PPR entry */
 		iommu_handle_ppr_entry(iommu, entry);
 
 		/* Refresh ring-buffer information */
-		head = readl(iommu->mmio_base + MMIO_PPR_HEAD_OFFSET);
-		tail = readl(iommu->mmio_base + MMIO_PPR_TAIL_OFFSET);
+		head = pete_readl("drivers/iommu/amd/iommu.c:670", iommu->mmio_base + MMIO_PPR_HEAD_OFFSET);
+		tail = pete_readl("drivers/iommu/amd/iommu.c:671", iommu->mmio_base + MMIO_PPR_TAIL_OFFSET);
 	}
 }
 
@@ -690,8 +690,8 @@ static void iommu_poll_ga_log(struct amd_iommu *iommu)
 	if (iommu->ga_log == NULL)
 		return;
 
-	head = readl(iommu->mmio_base + MMIO_GA_HEAD_OFFSET);
-	tail = readl(iommu->mmio_base + MMIO_GA_TAIL_OFFSET);
+	head = pete_readl("drivers/iommu/amd/iommu.c:693", iommu->mmio_base + MMIO_GA_HEAD_OFFSET);
+	tail = pete_readl("drivers/iommu/amd/iommu.c:694", iommu->mmio_base + MMIO_GA_TAIL_OFFSET);
 
 	while (head != tail) {
 		volatile u64 *raw;
@@ -705,7 +705,7 @@ static void iommu_poll_ga_log(struct amd_iommu *iommu)
 
 		/* Update head pointer of hardware ring-buffer */
 		head = (head + GA_ENTRY_SIZE) % GA_LOG_SIZE;
-		writel(head, iommu->mmio_base + MMIO_GA_HEAD_OFFSET);
+		pete_writel("drivers/iommu/amd/iommu.c:708", head, iommu->mmio_base + MMIO_GA_HEAD_OFFSET);
 
 		/* Handle GA entry */
 		switch (GA_REQ_TYPE(log_entry)) {
@@ -750,11 +750,11 @@ amd_iommu_set_pci_msi_domain(struct device *dev, struct amd_iommu *iommu) { }
 irqreturn_t amd_iommu_int_thread(int irq, void *data)
 {
 	struct amd_iommu *iommu = (struct amd_iommu *) data;
-	u32 status = readl(iommu->mmio_base + MMIO_STATUS_OFFSET);
+	u32 status = pete_readl("drivers/iommu/amd/iommu.c:753", iommu->mmio_base + MMIO_STATUS_OFFSET);
 
 	while (status & AMD_IOMMU_INT_MASK) {
 		/* Enable interrupt sources again */
-		writel(AMD_IOMMU_INT_MASK,
+		pete_writel("drivers/iommu/amd/iommu.c:757", AMD_IOMMU_INT_MASK,
 			iommu->mmio_base + MMIO_STATUS_OFFSET);
 
 		if (status & MMIO_STATUS_EVT_INT_MASK) {
@@ -792,7 +792,7 @@ irqreturn_t amd_iommu_int_thread(int irq, void *data)
 		 * If not, driver will need to go through the interrupt handler
 		 * again and re-clear the bits
 		 */
-		status = readl(iommu->mmio_base + MMIO_STATUS_OFFSET);
+		status = pete_readl("drivers/iommu/amd/iommu.c:795", iommu->mmio_base + MMIO_STATUS_OFFSET);
 	}
 	return IRQ_HANDLED;
 }
@@ -840,7 +840,7 @@ static void copy_cmd_to_buffer(struct amd_iommu *iommu,
 	iommu->cmd_buf_tail = tail;
 
 	/* Tell the IOMMU about it */
-	writel(tail, iommu->mmio_base + MMIO_CMD_TAIL_OFFSET);
+	pete_writel("drivers/iommu/amd/iommu.c:843", tail, iommu->mmio_base + MMIO_CMD_TAIL_OFFSET);
 }
 
 static void build_completion_wait(struct iommu_cmd *cmd,
@@ -1028,7 +1028,7 @@ again:
 		}
 
 		/* Update head and recheck remaining space */
-		iommu->cmd_buf_head = readl(iommu->mmio_base +
+		iommu->cmd_buf_head = pete_readl("drivers/iommu/amd/iommu.c:1031", iommu->mmio_base +
 					    MMIO_CMD_HEAD_OFFSET);
 
 		goto again;

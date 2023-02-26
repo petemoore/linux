@@ -164,24 +164,24 @@ struct tw68_dev {
 
 /* ----------------------------------------------------------- */
 
-#define tw_readl(reg)		readl(dev->lmmio + ((reg) >> 2))
-#define	tw_readb(reg)		readb(dev->bmmio + (reg))
-#define tw_writel(reg, value)	writel((value), dev->lmmio + ((reg) >> 2))
-#define	tw_writeb(reg, value)	writeb((value), dev->bmmio + (reg))
+#define tw_readl(reg)		pete_readl("drivers/media/pci/tw68/tw68.h:167", dev->lmmio + ((reg) >> 2))
+#define	tw_readb(reg)		pete_readb("drivers/media/pci/tw68/tw68.h:168", dev->bmmio + (reg))
+#define tw_writel(reg, value)	pete_writel("drivers/media/pci/tw68/tw68.h:169", (value), dev->lmmio + ((reg) >> 2))
+#define	tw_writeb(reg, value)	pete_writeb("drivers/media/pci/tw68/tw68.h:170", (value), dev->bmmio + (reg))
 
 #define tw_andorl(reg, mask, value) \
-		writel((readl(dev->lmmio+((reg)>>2)) & ~(mask)) |\
+		pete_writel("drivers/media/pci/tw68/tw68.h:173", (pete_readl("drivers/media/pci/tw68/tw68.h:173", dev->lmmio+((reg)>>2)) & ~(mask)) |\
 		((value) & (mask)), dev->lmmio+((reg)>>2))
 #define	tw_andorb(reg, mask, value) \
-		writeb((readb(dev->bmmio + (reg)) & ~(mask)) |\
+		pete_writeb("drivers/media/pci/tw68/tw68.h:176", (pete_readb("drivers/media/pci/tw68/tw68.h:176", dev->bmmio + (reg)) & ~(mask)) |\
 		((value) & (mask)), dev->bmmio+(reg))
 #define tw_setl(reg, bit)	tw_andorl((reg), (bit), (bit))
 #define	tw_setb(reg, bit)	tw_andorb((reg), (bit), (bit))
 #define	tw_clearl(reg, bit)	\
-		writel((readl(dev->lmmio + ((reg) >> 2)) & ~(bit)), \
+		pete_writel("drivers/media/pci/tw68/tw68.h:181", (pete_readl("drivers/media/pci/tw68/tw68.h:181", dev->lmmio + ((reg) >> 2)) & ~(bit)), \
 		dev->lmmio + ((reg) >> 2))
 #define	tw_clearb(reg, bit)	\
-		writeb((readb(dev->bmmio+(reg)) & ~(bit)), \
+		pete_writeb("drivers/media/pci/tw68/tw68.h:184", (pete_readb("drivers/media/pci/tw68/tw68.h:184", dev->bmmio+(reg)) & ~(bit)), \
 		dev->bmmio + (reg))
 
 #define tw_wait(us) { udelay(us); }

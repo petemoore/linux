@@ -50,8 +50,8 @@ struct mvsd_host {
 	struct clk *clk;
 };
 
-#define mvsd_write(offs, val)	writel(val, iobase + (offs))
-#define mvsd_read(offs)		readl(iobase + (offs))
+#define mvsd_write(offs, val)	pete_writel("drivers/mmc/host/mvsdio.c:53", val, iobase + (offs))
+#define mvsd_read(offs)		pete_readl("drivers/mmc/host/mvsdio.c:54", iobase + (offs))
 
 static int mvsd_setup_data(struct mvsd_host *host, struct mmc_data *data)
 {
@@ -676,17 +676,17 @@ mv_conf_mbus_windows(struct mvsd_host *host,
 	int i;
 
 	for (i = 0; i < 4; i++) {
-		writel(0, iobase + MVSD_WINDOW_CTRL(i));
-		writel(0, iobase + MVSD_WINDOW_BASE(i));
+		pete_writel("drivers/mmc/host/mvsdio.c:679", 0, iobase + MVSD_WINDOW_CTRL(i));
+		pete_writel("drivers/mmc/host/mvsdio.c:680", 0, iobase + MVSD_WINDOW_BASE(i));
 	}
 
 	for (i = 0; i < dram->num_cs; i++) {
 		const struct mbus_dram_window *cs = dram->cs + i;
-		writel(((cs->size - 1) & 0xffff0000) |
+		pete_writel("drivers/mmc/host/mvsdio.c:685", ((cs->size - 1) & 0xffff0000) |
 		       (cs->mbus_attr << 8) |
 		       (dram->mbus_dram_target_id << 4) | 1,
 		       iobase + MVSD_WINDOW_CTRL(i));
-		writel(cs->base, iobase + MVSD_WINDOW_BASE(i));
+		pete_writel("drivers/mmc/host/mvsdio.c:689", cs->base, iobase + MVSD_WINDOW_BASE(i));
 	}
 }
 

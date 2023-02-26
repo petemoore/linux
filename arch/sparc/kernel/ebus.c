@@ -52,14 +52,14 @@ static void __ebus_dma_reset(struct ebus_dma_info *p, int no_drain)
 	int i;
 	u32 val = 0;
 
-	writel(EBDMA_CSR_RESET, p->regs + EBDMA_CSR);
+	pete_writel("arch/sparc/kernel/ebus.c:55", EBDMA_CSR_RESET, p->regs + EBDMA_CSR);
 	udelay(1);
 
 	if (no_drain)
 		return;
 
 	for (i = EBUS_DMA_RESET_TIMEOUT; i > 0; i--) {
-		val = readl(p->regs + EBDMA_CSR);
+		val = pete_readl("arch/sparc/kernel/ebus.c:62", p->regs + EBDMA_CSR);
 
 		if (!(val & (EBDMA_CSR_DRAIN | EBDMA_CSR_CYC_PEND)))
 			break;
@@ -74,8 +74,8 @@ static irqreturn_t ebus_dma_irq(int irq, void *dev_id)
 	u32 csr = 0;
 
 	spin_lock_irqsave(&p->lock, flags);
-	csr = readl(p->regs + EBDMA_CSR);
-	writel(csr, p->regs + EBDMA_CSR);
+	csr = pete_readl("arch/sparc/kernel/ebus.c:77", p->regs + EBDMA_CSR);
+	pete_writel("arch/sparc/kernel/ebus.c:78", csr, p->regs + EBDMA_CSR);
 	spin_unlock_irqrestore(&p->lock, flags);
 
 	if (csr & EBDMA_CSR_ERR_PEND) {
@@ -115,7 +115,7 @@ int ebus_dma_register(struct ebus_dma_info *p)
 	if (p->flags & EBUS_DMA_FLAG_TCI_DISABLE)
 		csr |= EBDMA_CSR_TCI_DIS;
 
-	writel(csr, p->regs + EBDMA_CSR);
+	pete_writel("arch/sparc/kernel/ebus.c:118", csr, p->regs + EBDMA_CSR);
 
 	return 0;
 }
@@ -133,15 +133,15 @@ int ebus_dma_irq_enable(struct ebus_dma_info *p, int on)
 		}
 
 		spin_lock_irqsave(&p->lock, flags);
-		csr = readl(p->regs + EBDMA_CSR);
+		csr = pete_readl("arch/sparc/kernel/ebus.c:136", p->regs + EBDMA_CSR);
 		csr |= EBDMA_CSR_INT_EN;
-		writel(csr, p->regs + EBDMA_CSR);
+		pete_writel("arch/sparc/kernel/ebus.c:138", csr, p->regs + EBDMA_CSR);
 		spin_unlock_irqrestore(&p->lock, flags);
 	} else {
 		spin_lock_irqsave(&p->lock, flags);
-		csr = readl(p->regs + EBDMA_CSR);
+		csr = pete_readl("arch/sparc/kernel/ebus.c:142", p->regs + EBDMA_CSR);
 		csr &= ~EBDMA_CSR_INT_EN;
-		writel(csr, p->regs + EBDMA_CSR);
+		pete_writel("arch/sparc/kernel/ebus.c:144", csr, p->regs + EBDMA_CSR);
 		spin_unlock_irqrestore(&p->lock, flags);
 
 		if (p->flags & EBUS_DMA_FLAG_USE_EBDMA_HANDLER) {
@@ -160,10 +160,10 @@ void ebus_dma_unregister(struct ebus_dma_info *p)
 	int irq_on = 0;
 
 	spin_lock_irqsave(&p->lock, flags);
-	csr = readl(p->regs + EBDMA_CSR);
+	csr = pete_readl("arch/sparc/kernel/ebus.c:163", p->regs + EBDMA_CSR);
 	if (csr & EBDMA_CSR_INT_EN) {
 		csr &= ~EBDMA_CSR_INT_EN;
-		writel(csr, p->regs + EBDMA_CSR);
+		pete_writel("arch/sparc/kernel/ebus.c:166", csr, p->regs + EBDMA_CSR);
 		irq_on = 1;
 	}
 	spin_unlock_irqrestore(&p->lock, flags);
@@ -183,7 +183,7 @@ int ebus_dma_request(struct ebus_dma_info *p, dma_addr_t bus_addr, size_t len)
 		return -EINVAL;
 
 	spin_lock_irqsave(&p->lock, flags);
-	csr = readl(p->regs + EBDMA_CSR);
+	csr = pete_readl("arch/sparc/kernel/ebus.c:186", p->regs + EBDMA_CSR);
 	err = -EINVAL;
 	if (!(csr & EBDMA_CSR_EN_DMA))
 		goto out;
@@ -191,8 +191,8 @@ int ebus_dma_request(struct ebus_dma_info *p, dma_addr_t bus_addr, size_t len)
 	if (csr & EBDMA_CSR_NA_LOADED)
 		goto out;
 
-	writel(len,      p->regs + EBDMA_COUNT);
-	writel(bus_addr, p->regs + EBDMA_ADDR);
+	pete_writel("arch/sparc/kernel/ebus.c:194", len,      p->regs + EBDMA_COUNT);
+	pete_writel("arch/sparc/kernel/ebus.c:195", bus_addr, p->regs + EBDMA_ADDR);
 	err = 0;
 
 out:
@@ -220,7 +220,7 @@ void ebus_dma_prepare(struct ebus_dma_info *p, int write)
 	if (p->flags & EBUS_DMA_FLAG_TCI_DISABLE)
 		csr |= EBDMA_CSR_TCI_DIS;
 
-	writel(csr, p->regs + EBDMA_CSR);
+	pete_writel("arch/sparc/kernel/ebus.c:223", csr, p->regs + EBDMA_CSR);
 
 	spin_unlock_irqrestore(&p->lock, flags);
 }
@@ -228,13 +228,13 @@ EXPORT_SYMBOL(ebus_dma_prepare);
 
 unsigned int ebus_dma_residue(struct ebus_dma_info *p)
 {
-	return readl(p->regs + EBDMA_COUNT);
+	return pete_readl("arch/sparc/kernel/ebus.c:231", p->regs + EBDMA_COUNT);
 }
 EXPORT_SYMBOL(ebus_dma_residue);
 
 unsigned int ebus_dma_addr(struct ebus_dma_info *p)
 {
-	return readl(p->regs + EBDMA_ADDR);
+	return pete_readl("arch/sparc/kernel/ebus.c:237", p->regs + EBDMA_ADDR);
 }
 EXPORT_SYMBOL(ebus_dma_addr);
 
@@ -244,14 +244,14 @@ void ebus_dma_enable(struct ebus_dma_info *p, int on)
 	u32 orig_csr, csr;
 
 	spin_lock_irqsave(&p->lock, flags);
-	orig_csr = csr = readl(p->regs + EBDMA_CSR);
+	orig_csr = csr = pete_readl("arch/sparc/kernel/ebus.c:247", p->regs + EBDMA_CSR);
 	if (on)
 		csr |= EBDMA_CSR_EN_DMA;
 	else
 		csr &= ~EBDMA_CSR_EN_DMA;
 	if ((orig_csr & EBDMA_CSR_EN_DMA) !=
 	    (csr & EBDMA_CSR_EN_DMA))
-		writel(csr, p->regs + EBDMA_CSR);
+		pete_writel("arch/sparc/kernel/ebus.c:254", csr, p->regs + EBDMA_CSR);
 	spin_unlock_irqrestore(&p->lock, flags);
 }
 EXPORT_SYMBOL(ebus_dma_enable);

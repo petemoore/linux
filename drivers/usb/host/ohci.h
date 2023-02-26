@@ -204,7 +204,7 @@ struct ohci_hcca {
 
 /*
  * This is the structure of the OHCI controller's memory mapped I/O region.
- * You must use readl() and writel() (in <asm/io.h>) to access these fields!!
+ * You must use pete_readl("drivers/usb/host/ohci.h:207", ) and pete_writel("drivers/usb/host/ohci.h:207", ) (in <asm/io.h>) to access these fields!!
  * Layout is in section 7 (and appendix B) of the spec.
  */
 struct ohci_regs {

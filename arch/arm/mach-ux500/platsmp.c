@@ -74,9 +74,9 @@ static int ux500_boot_secondary(unsigned int cpu, struct task_struct *idle)
 	 * backup ram register at offset 0x1FF0, which is what boot rom code
 	 * is waiting for. This will wake up the secondary core from WFE.
 	 */
-	writel(__pa_symbol(secondary_startup),
+	pete_writel("arch/arm/mach-ux500/platsmp.c:77", __pa_symbol(secondary_startup),
 	       backupram + UX500_CPU1_JUMPADDR_OFFSET);
-	writel(0xA1FEED01,
+	pete_writel("arch/arm/mach-ux500/platsmp.c:79", 0xA1FEED01,
 	       backupram + UX500_CPU1_WAKEMAGIC_OFFSET);
 
 	/* make sure write buffer is drained */

@@ -49,9 +49,9 @@ int __afu_port_enable(struct platform_device *pdev)
 	base = dfl_get_feature_ioaddr_by_id(&pdev->dev, PORT_FEATURE_ID_HEADER);
 
 	/* Clear port soft reset */
-	v = readq(base + PORT_HDR_CTRL);
+	v = pete_readq("drivers/fpga/dfl-afu-main.c:52", base + PORT_HDR_CTRL);
 	v &= ~PORT_CTRL_SFTRST;
-	writeq(v, base + PORT_HDR_CTRL);
+	pete_writeq("drivers/fpga/dfl-afu-main.c:54", v, base + PORT_HDR_CTRL);
 
 	/*
 	 * HW clears the ack bit to indicate that the port is fully out
@@ -87,9 +87,9 @@ int __afu_port_disable(struct platform_device *pdev)
 	base = dfl_get_feature_ioaddr_by_id(&pdev->dev, PORT_FEATURE_ID_HEADER);
 
 	/* Set port soft reset */
-	v = readq(base + PORT_HDR_CTRL);
+	v = pete_readq("drivers/fpga/dfl-afu-main.c:90", base + PORT_HDR_CTRL);
 	v |= PORT_CTRL_SFTRST;
-	writeq(v, base + PORT_HDR_CTRL);
+	pete_writeq("drivers/fpga/dfl-afu-main.c:92", v, base + PORT_HDR_CTRL);
 
 	/*
 	 * HW sets ack bit to 1 when all outstanding requests have been drained
@@ -147,7 +147,7 @@ static int port_get_id(struct platform_device *pdev)
 
 	base = dfl_get_feature_ioaddr_by_id(&pdev->dev, PORT_FEATURE_ID_HEADER);
 
-	return FIELD_GET(PORT_CAP_PORT_NUM, readq(base + PORT_HDR_CAP));
+	return FIELD_GET(PORT_CAP_PORT_NUM, pete_readq("drivers/fpga/dfl-afu-main.c:150", base + PORT_HDR_CAP));
 }
 
 static ssize_t
@@ -169,7 +169,7 @@ ltr_show(struct device *dev, struct device_attribute *attr, char *buf)
 	base = dfl_get_feature_ioaddr_by_id(dev, PORT_FEATURE_ID_HEADER);
 
 	mutex_lock(&pdata->lock);
-	v = readq(base + PORT_HDR_CTRL);
+	v = pete_readq("drivers/fpga/dfl-afu-main.c:172", base + PORT_HDR_CTRL);
 	mutex_unlock(&pdata->lock);
 
 	return sprintf(buf, "%x\n", (u8)FIELD_GET(PORT_CTRL_LATENCY, v));
@@ -190,10 +190,10 @@ ltr_store(struct device *dev, struct device_attribute *attr,
 	base = dfl_get_feature_ioaddr_by_id(dev, PORT_FEATURE_ID_HEADER);
 
 	mutex_lock(&pdata->lock);
-	v = readq(base + PORT_HDR_CTRL);
+	v = pete_readq("drivers/fpga/dfl-afu-main.c:193", base + PORT_HDR_CTRL);
 	v &= ~PORT_CTRL_LATENCY;
 	v |= FIELD_PREP(PORT_CTRL_LATENCY, ltr ? 1 : 0);
-	writeq(v, base + PORT_HDR_CTRL);
+	pete_writeq("drivers/fpga/dfl-afu-main.c:196", v, base + PORT_HDR_CTRL);
 	mutex_unlock(&pdata->lock);
 
 	return count;
@@ -210,7 +210,7 @@ ap1_event_show(struct device *dev, struct device_attribute *attr, char *buf)
 	base = dfl_get_feature_ioaddr_by_id(dev, PORT_FEATURE_ID_HEADER);
 
 	mutex_lock(&pdata->lock);
-	v = readq(base + PORT_HDR_STS);
+	v = pete_readq("drivers/fpga/dfl-afu-main.c:213", base + PORT_HDR_STS);
 	mutex_unlock(&pdata->lock);
 
 	return sprintf(buf, "%x\n", (u8)FIELD_GET(PORT_STS_AP1_EVT, v));
@@ -230,7 +230,7 @@ ap1_event_store(struct device *dev, struct device_attribute *attr,
 	base = dfl_get_feature_ioaddr_by_id(dev, PORT_FEATURE_ID_HEADER);
 
 	mutex_lock(&pdata->lock);
-	writeq(PORT_STS_AP1_EVT, base + PORT_HDR_STS);
+	pete_writeq("drivers/fpga/dfl-afu-main.c:233", PORT_STS_AP1_EVT, base + PORT_HDR_STS);
 	mutex_unlock(&pdata->lock);
 
 	return count;
@@ -248,7 +248,7 @@ ap2_event_show(struct device *dev, struct device_attribute *attr,
 	base = dfl_get_feature_ioaddr_by_id(dev, PORT_FEATURE_ID_HEADER);
 
 	mutex_lock(&pdata->lock);
-	v = readq(base + PORT_HDR_STS);
+	v = pete_readq("drivers/fpga/dfl-afu-main.c:251", base + PORT_HDR_STS);
 	mutex_unlock(&pdata->lock);
 
 	return sprintf(buf, "%x\n", (u8)FIELD_GET(PORT_STS_AP2_EVT, v));
@@ -268,7 +268,7 @@ ap2_event_store(struct device *dev, struct device_attribute *attr,
 	base = dfl_get_feature_ioaddr_by_id(dev, PORT_FEATURE_ID_HEADER);
 
 	mutex_lock(&pdata->lock);
-	writeq(PORT_STS_AP2_EVT, base + PORT_HDR_STS);
+	pete_writeq("drivers/fpga/dfl-afu-main.c:271", PORT_STS_AP2_EVT, base + PORT_HDR_STS);
 	mutex_unlock(&pdata->lock);
 
 	return count;
@@ -285,7 +285,7 @@ power_state_show(struct device *dev, struct device_attribute *attr, char *buf)
 	base = dfl_get_feature_ioaddr_by_id(dev, PORT_FEATURE_ID_HEADER);
 
 	mutex_lock(&pdata->lock);
-	v = readq(base + PORT_HDR_STS);
+	v = pete_readq("drivers/fpga/dfl-afu-main.c:288", base + PORT_HDR_STS);
 	mutex_unlock(&pdata->lock);
 
 	return sprintf(buf, "0x%x\n", (u8)FIELD_GET(PORT_STS_PWR_STATE, v));
@@ -306,7 +306,7 @@ userclk_freqcmd_store(struct device *dev, struct device_attribute *attr,
 	base = dfl_get_feature_ioaddr_by_id(dev, PORT_FEATURE_ID_HEADER);
 
 	mutex_lock(&pdata->lock);
-	writeq(userclk_freq_cmd, base + PORT_HDR_USRCLK_CMD0);
+	pete_writeq("drivers/fpga/dfl-afu-main.c:309", userclk_freq_cmd, base + PORT_HDR_USRCLK_CMD0);
 	mutex_unlock(&pdata->lock);
 
 	return count;
@@ -327,7 +327,7 @@ userclk_freqcntrcmd_store(struct device *dev, struct device_attribute *attr,
 	base = dfl_get_feature_ioaddr_by_id(dev, PORT_FEATURE_ID_HEADER);
 
 	mutex_lock(&pdata->lock);
-	writeq(userclk_freqcntr_cmd, base + PORT_HDR_USRCLK_CMD1);
+	pete_writeq("drivers/fpga/dfl-afu-main.c:330", userclk_freqcntr_cmd, base + PORT_HDR_USRCLK_CMD1);
 	mutex_unlock(&pdata->lock);
 
 	return count;
@@ -345,7 +345,7 @@ userclk_freqsts_show(struct device *dev, struct device_attribute *attr,
 	base = dfl_get_feature_ioaddr_by_id(dev, PORT_FEATURE_ID_HEADER);
 
 	mutex_lock(&pdata->lock);
-	userclk_freqsts = readq(base + PORT_HDR_USRCLK_STS0);
+	userclk_freqsts = pete_readq("drivers/fpga/dfl-afu-main.c:348", base + PORT_HDR_USRCLK_STS0);
 	mutex_unlock(&pdata->lock);
 
 	return sprintf(buf, "0x%llx\n", (unsigned long long)userclk_freqsts);
@@ -363,7 +363,7 @@ userclk_freqcntrsts_show(struct device *dev, struct device_attribute *attr,
 	base = dfl_get_feature_ioaddr_by_id(dev, PORT_FEATURE_ID_HEADER);
 
 	mutex_lock(&pdata->lock);
-	userclk_freqcntrsts = readq(base + PORT_HDR_USRCLK_STS1);
+	userclk_freqcntrsts = pete_readq("drivers/fpga/dfl-afu-main.c:366", base + PORT_HDR_USRCLK_STS1);
 	mutex_unlock(&pdata->lock);
 
 	return sprintf(buf, "0x%llx\n",
@@ -468,8 +468,8 @@ afu_id_show(struct device *dev, struct device_attribute *attr, char *buf)
 		return -EBUSY;
 	}
 
-	guidl = readq(base + GUID_L);
-	guidh = readq(base + GUID_H);
+	guidl = pete_readq("drivers/fpga/dfl-afu-main.c:471", base + GUID_L);
+	guidh = pete_readq("drivers/fpga/dfl-afu-main.c:472", base + GUID_H);
 	mutex_unlock(&pdata->lock);
 
 	return scnprintf(buf, PAGE_SIZE, "%016llx%016llx\n", guidh, guidl);

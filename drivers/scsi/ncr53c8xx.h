@@ -399,7 +399,7 @@
 
 #ifdef CONFIG_SCSI_NCR53C8XX_NO_WORD_TRANSFERS
 /* Only 8 or 32 bit transfers allowed */
-#define INW_OFF(o)		(readb((char __iomem *)np->reg + ncr_offw(o)) << 8 | readb((char __iomem *)np->reg + ncr_offw(o) + 1))
+#define INW_OFF(o)		(pete_readb("drivers/scsi/ncr53c8xx.h:402", (char __iomem *)np->reg + ncr_offw(o)) << 8 | pete_readb("drivers/scsi/ncr53c8xx.h:402", (char __iomem *)np->reg + ncr_offw(o) + 1))
 #else
 #define INW_OFF(o)		readw_raw((char __iomem *)np->reg + ncr_offw(o))
 #endif
@@ -407,7 +407,7 @@
 
 #ifdef CONFIG_SCSI_NCR53C8XX_NO_WORD_TRANSFERS
 /* Only 8 or 32 bit transfers allowed */
-#define OUTW_OFF(o, val)	do { writeb((char)((val) >> 8), (char __iomem *)np->reg + ncr_offw(o)); writeb((char)(val), (char __iomem *)np->reg + ncr_offw(o) + 1); } while (0)
+#define OUTW_OFF(o, val)	do { pete_writeb("drivers/scsi/ncr53c8xx.h:410", (char)((val) >> 8), (char __iomem *)np->reg + ncr_offw(o)); pete_writeb("drivers/scsi/ncr53c8xx.h:410", (char)(val), (char __iomem *)np->reg + ncr_offw(o) + 1); } while (0)
 #else
 #define OUTW_OFF(o, val)	writew_raw((val), (char __iomem *)np->reg + ncr_offw(o))
 #endif

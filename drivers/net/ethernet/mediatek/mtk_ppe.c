@@ -11,12 +11,12 @@
 
 static void ppe_w32(struct mtk_ppe *ppe, u32 reg, u32 val)
 {
-	writel(val, ppe->base + reg);
+	pete_writel("drivers/net/ethernet/mediatek/mtk_ppe.c:14", val, ppe->base + reg);
 }
 
 static u32 ppe_r32(struct mtk_ppe *ppe, u32 reg)
 {
-	return readl(ppe->base + reg);
+	return pete_readl("drivers/net/ethernet/mediatek/mtk_ppe.c:19", ppe->base + reg);
 }
 
 static u32 ppe_m32(struct mtk_ppe *ppe, u32 reg, u32 mask, u32 set)

@@ -1101,7 +1101,7 @@ void meson_venc_hdmi_mode_set(struct meson_drm *priv, int vic,
 			       ENCI_VIDEO_MODE_ADV_YBW_HIGH,
 			       priv->io_base + _REG(ENCI_VIDEO_MODE_ADV));
 
-		writel(vmode->enci.sch_adjust,
+		pete_writel("drivers/gpu/drm/meson/meson_venc.c:1104", vmode->enci.sch_adjust,
 				priv->io_base + _REG(ENCI_VIDEO_SCH));
 
 		/* Sync mode : MASTER Master mode, free run, send HSO/VSO out */
@@ -1616,7 +1616,7 @@ void meson_venci_cvbs_mode_set(struct meson_drm *priv,
 		       ENCI_VIDEO_MODE_ADV_YBW_HIGH,
 		       priv->io_base + _REG(ENCI_VIDEO_MODE_ADV));
 
-	writel(mode->sch_adjust, priv->io_base + _REG(ENCI_VIDEO_SCH));
+	pete_writel("drivers/gpu/drm/meson/meson_venc.c:1619", mode->sch_adjust, priv->io_base + _REG(ENCI_VIDEO_SCH));
 
 	/* Sync mode : MASTER Master mode, free run, send HSO/VSO out */
 	writel_relaxed(0x07, priv->io_base + _REG(ENCI_SYNC_MODE));

@@ -99,14 +99,14 @@ static void imx1_write_2bit(struct imx1_pinctrl *ipctl, unsigned int pin_id,
 			reg, offset, value);
 
 	/* Get current state of pins */
-	old_val = readl(reg);
+	old_val = pete_readl("drivers/pinctrl/freescale/pinctrl-imx1-core.c:102", reg);
 	old_val &= mask;
 
 	new_val = value & 0x3; /* Make sure value is really 2 bit */
 	new_val <<= offset;
 	new_val |= old_val;/* Set new state for pin_id */
 
-	writel(new_val, reg);
+	pete_writel("drivers/pinctrl/freescale/pinctrl-imx1-core.c:109", new_val, reg);
 }
 
 static void imx1_write_bit(struct imx1_pinctrl *ipctl, unsigned int pin_id,
@@ -119,14 +119,14 @@ static void imx1_write_bit(struct imx1_pinctrl *ipctl, unsigned int pin_id,
 	u32 new_val;
 
 	/* Get current state of pins */
-	old_val = readl(reg);
+	old_val = pete_readl("drivers/pinctrl/freescale/pinctrl-imx1-core.c:122", reg);
 	old_val &= mask;
 
 	new_val = value & 0x1; /* Make sure value is really 1 bit */
 	new_val <<= offset;
 	new_val |= old_val;/* Set new state for pin_id */
 
-	writel(new_val, reg);
+	pete_writel("drivers/pinctrl/freescale/pinctrl-imx1-core.c:129", new_val, reg);
 }
 
 static int imx1_read_2bit(struct imx1_pinctrl *ipctl, unsigned int pin_id,
@@ -139,7 +139,7 @@ static int imx1_read_2bit(struct imx1_pinctrl *ipctl, unsigned int pin_id,
 	if (pin_id % 32 >= 16)
 		reg += 0x04;
 
-	return (readl(reg) & (BIT(offset) | BIT(offset+1))) >> offset;
+	return (pete_readl("drivers/pinctrl/freescale/pinctrl-imx1-core.c:142", reg) & (BIT(offset) | BIT(offset+1))) >> offset;
 }
 
 static int imx1_read_bit(struct imx1_pinctrl *ipctl, unsigned int pin_id,
@@ -148,7 +148,7 @@ static int imx1_read_bit(struct imx1_pinctrl *ipctl, unsigned int pin_id,
 	void __iomem *reg = imx1_mem(ipctl, pin_id) + reg_offset;
 	int offset = pin_id % 32;
 
-	return !!(readl(reg) & BIT(offset));
+	return !!(pete_readl("drivers/pinctrl/freescale/pinctrl-imx1-core.c:151", reg) & BIT(offset));
 }
 
 static inline const struct imx1_pin_group *imx1_pinctrl_find_group_by_name(

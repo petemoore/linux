@@ -45,7 +45,7 @@ void cxl_probe_component_regs(struct device *dev, void __iomem *base,
 	 */
 	base += CXL_CM_OFFSET;
 
-	cap_array = readl(base + CXL_CM_CAP_HDR_OFFSET);
+	cap_array = pete_readl("drivers/cxl/core/regs.c:48", base + CXL_CM_CAP_HDR_OFFSET);
 
 	if (FIELD_GET(CXL_CM_CAP_HDR_ID_MASK, cap_array) != CM_CAP_HDR_CAP_ID) {
 		dev_err(dev,
@@ -63,7 +63,7 @@ void cxl_probe_component_regs(struct device *dev, void __iomem *base,
 		u16 cap_id, offset;
 		u32 length;
 
-		hdr = readl(base + cap * 0x4);
+		hdr = pete_readl("drivers/cxl/core/regs.c:66", base + cap * 0x4);
 
 		cap_id = FIELD_GET(CXL_CM_CAP_HDR_ID_MASK, hdr);
 		offset = FIELD_GET(CXL_CM_CAP_PTR_MASK, hdr);
@@ -74,7 +74,7 @@ void cxl_probe_component_regs(struct device *dev, void __iomem *base,
 			dev_dbg(dev, "found HDM decoder capability (0x%x)\n",
 				offset);
 
-			hdr = readl(register_block);
+			hdr = pete_readl("drivers/cxl/core/regs.c:77", register_block);
 
 			decoder_cnt = cxl_hdm_decoder_count(hdr);
 			length = 0x20 * decoder_cnt + 0x10;
@@ -108,7 +108,7 @@ void cxl_probe_device_regs(struct device *dev, void __iomem *base,
 
 	*map = (struct cxl_device_reg_map){ 0 };
 
-	cap_array = readq(base + CXLDEV_CAP_ARRAY_OFFSET);
+	cap_array = pete_readq("drivers/cxl/core/regs.c:111", base + CXLDEV_CAP_ARRAY_OFFSET);
 	if (FIELD_GET(CXLDEV_CAP_ARRAY_ID_MASK, cap_array) !=
 	    CXLDEV_CAP_ARRAY_CAP_ID)
 		return;
@@ -120,9 +120,9 @@ void cxl_probe_device_regs(struct device *dev, void __iomem *base,
 		u16 cap_id;
 
 		cap_id = FIELD_GET(CXLDEV_CAP_HDR_CAP_ID_MASK,
-				   readl(base + cap * 0x10));
-		offset = readl(base + cap * 0x10 + 0x4);
-		length = readl(base + cap * 0x10 + 0x8);
+				   pete_readl("drivers/cxl/core/regs.c:123", base + cap * 0x10));
+		offset = pete_readl("drivers/cxl/core/regs.c:124", base + cap * 0x10 + 0x4);
+		length = pete_readl("drivers/cxl/core/regs.c:125", base + cap * 0x10 + 0x8);
 
 		switch (cap_id) {
 		case CXLDEV_CAP_CAP_ID_DEVICE_STATUS:

@@ -2177,7 +2177,7 @@ static void xhci_add_in_port(struct xhci_hcd *xhci, unsigned int num_ports,
 	struct device *dev = xhci_to_hcd(xhci)->self.sysdev;
 	struct xhci_port_cap *port_cap;
 
-	temp = readl(addr);
+	temp = pete_readl("drivers/usb/host/xhci-mem.c:2180", addr);
 	major_revision = XHCI_EXT_PORT_MAJOR(temp);
 	minor_revision = XHCI_EXT_PORT_MINOR(temp);
 
@@ -2207,7 +2207,7 @@ static void xhci_add_in_port(struct xhci_hcd *xhci, unsigned int num_ports,
 		rhub->min_rev = minor_revision;
 
 	/* Port offset and count in the third dword, see section 7.2 */
-	temp = readl(addr + 2);
+	temp = pete_readl("drivers/usb/host/xhci-mem.c:2210", addr + 2);
 	port_offset = XHCI_EXT_PORT_OFF(temp);
 	port_count = XHCI_EXT_PORT_COUNT(temp);
 	xhci_dbg_trace(xhci, trace_xhci_dbg_init,
@@ -2236,7 +2236,7 @@ static void xhci_add_in_port(struct xhci_hcd *xhci, unsigned int num_ports,
 
 		port_cap->psi_uid_count++;
 		for (i = 0; i < port_cap->psi_count; i++) {
-			port_cap->psi[i] = readl(addr + 4 + i);
+			port_cap->psi[i] = pete_readl("drivers/usb/host/xhci-mem.c:2239", addr + 4 + i);
 
 			/* count unique ID values, two consecutive entries can
 			 * have the same ID if link is assymetric
@@ -2445,7 +2445,7 @@ int xhci_mem_init(struct xhci_hcd *xhci, gfp_t flags)
 	INIT_DELAYED_WORK(&xhci->cmd_timer, xhci_handle_command_timeout);
 	init_completion(&xhci->cmd_ring_stop_completion);
 
-	page_size = readl(&xhci->op_regs->page_size);
+	page_size = pete_readl("drivers/usb/host/xhci-mem.c:2448", &xhci->op_regs->page_size);
 	xhci_dbg_trace(xhci, trace_xhci_dbg_init,
 			"Supported page size register = 0x%x", page_size);
 	for (i = 0; i < 16; i++) {
@@ -2468,14 +2468,14 @@ int xhci_mem_init(struct xhci_hcd *xhci, gfp_t flags)
 	 * Program the Number of Device Slots Enabled field in the CONFIG
 	 * register with the max value of slots the HC can handle.
 	 */
-	val = HCS_MAX_SLOTS(readl(&xhci->cap_regs->hcs_params1));
+	val = HCS_MAX_SLOTS(pete_readl("drivers/usb/host/xhci-mem.c:2471", &xhci->cap_regs->hcs_params1));
 	xhci_dbg_trace(xhci, trace_xhci_dbg_init,
 			"// xHC can handle at most %d device slots.", val);
-	val2 = readl(&xhci->op_regs->config_reg);
+	val2 = pete_readl("drivers/usb/host/xhci-mem.c:2474", &xhci->op_regs->config_reg);
 	val |= (val2 & ~HCS_SLOTS_MASK);
 	xhci_dbg_trace(xhci, trace_xhci_dbg_init,
 			"// Setting Max device slots reg = 0x%x.", val);
-	writel(val, &xhci->op_regs->config_reg);
+	pete_writel("drivers/usb/host/xhci-mem.c:2478", val, &xhci->op_regs->config_reg);
 
 	/*
 	 * xHCI section 5.4.6 - doorbell array must be
@@ -2551,7 +2551,7 @@ int xhci_mem_init(struct xhci_hcd *xhci, gfp_t flags)
 	 */
 	xhci->cmd_ring_reserved_trbs++;
 
-	val = readl(&xhci->cap_regs->db_off);
+	val = pete_readl("drivers/usb/host/xhci-mem.c:2554", &xhci->cap_regs->db_off);
 	val &= DBOFF_MASK;
 	xhci_dbg_trace(xhci, trace_xhci_dbg_init,
 			"// Doorbell array is located at offset 0x%x"
@@ -2579,13 +2579,13 @@ int xhci_mem_init(struct xhci_hcd *xhci, gfp_t flags)
 		goto fail;
 
 	/* set ERST count with the number of entries in the segment table */
-	val = readl(&xhci->ir_set->erst_size);
+	val = pete_readl("drivers/usb/host/xhci-mem.c:2582", &xhci->ir_set->erst_size);
 	val &= ERST_SIZE_MASK;
 	val |= val2;
 	xhci_dbg_trace(xhci, trace_xhci_dbg_init,
 			"// Write ERST size = %i to ir_set 0 (some bits preserved)",
 			val);
-	writel(val, &xhci->ir_set->erst_size);
+	pete_writel("drivers/usb/host/xhci-mem.c:2588", val, &xhci->ir_set->erst_size);
 
 	xhci_dbg_trace(xhci, trace_xhci_dbg_init,
 			"// Set ERST entries to point to event ring.");
@@ -2629,10 +2629,10 @@ int xhci_mem_init(struct xhci_hcd *xhci, gfp_t flags)
 	 * is necessary for allowing USB 3.0 devices to do remote wakeup from
 	 * U3 (device suspend).
 	 */
-	temp = readl(&xhci->op_regs->dev_notification);
+	temp = pete_readl("drivers/usb/host/xhci-mem.c:2632", &xhci->op_regs->dev_notification);
 	temp &= ~DEV_NOTE_MASK;
 	temp |= DEV_NOTE_FWAKE;
-	writel(temp, &xhci->op_regs->dev_notification);
+	pete_writel("drivers/usb/host/xhci-mem.c:2635", temp, &xhci->op_regs->dev_notification);
 
 	return 0;
 

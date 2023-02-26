@@ -435,19 +435,19 @@ static inline int is_tiled(const struct gsc_fmt *fmt)
 
 static inline void gsc_hw_enable_control(struct gsc_dev *dev, bool on)
 {
-	u32 cfg = readl(dev->regs + GSC_ENABLE);
+	u32 cfg = pete_readl("drivers/media/platform/exynos-gsc/gsc-core.h:438", dev->regs + GSC_ENABLE);
 
 	if (on)
 		cfg |= GSC_ENABLE_ON;
 	else
 		cfg &= ~GSC_ENABLE_ON;
 
-	writel(cfg, dev->regs + GSC_ENABLE);
+	pete_writel("drivers/media/platform/exynos-gsc/gsc-core.h:445", cfg, dev->regs + GSC_ENABLE);
 }
 
 static inline int gsc_hw_get_irq_status(struct gsc_dev *dev)
 {
-	u32 cfg = readl(dev->regs + GSC_IRQ);
+	u32 cfg = pete_readl("drivers/media/platform/exynos-gsc/gsc-core.h:450", dev->regs + GSC_IRQ);
 	if (cfg & GSC_IRQ_STATUS_OR_IRQ)
 		return GSC_IRQ_OVERRUN;
 	else
@@ -457,12 +457,12 @@ static inline int gsc_hw_get_irq_status(struct gsc_dev *dev)
 
 static inline void gsc_hw_clear_irq(struct gsc_dev *dev, int irq)
 {
-	u32 cfg = readl(dev->regs + GSC_IRQ);
+	u32 cfg = pete_readl("drivers/media/platform/exynos-gsc/gsc-core.h:460", dev->regs + GSC_IRQ);
 	if (irq == GSC_IRQ_OVERRUN)
 		cfg |= GSC_IRQ_STATUS_OR_IRQ;
 	else if (irq == GSC_IRQ_DONE)
 		cfg |= GSC_IRQ_STATUS_FRM_DONE_IRQ;
-	writel(cfg, dev->regs + GSC_IRQ);
+	pete_writel("drivers/media/platform/exynos-gsc/gsc-core.h:465", cfg, dev->regs + GSC_IRQ);
 }
 
 static inline bool gsc_ctx_state_is_set(u32 mask, struct gsc_ctx *ctx)

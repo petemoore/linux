@@ -61,13 +61,13 @@ nfp_repr_phy_port_get_stats64(struct nfp_port *port,
 {
 	u8 __iomem *mem = port->eth_stats;
 
-	stats->tx_packets = readq(mem + NFP_MAC_STATS_TX_FRAMES_TRANSMITTED_OK);
-	stats->tx_bytes = readq(mem + NFP_MAC_STATS_TX_OUT_OCTETS);
-	stats->tx_dropped = readq(mem + NFP_MAC_STATS_TX_OUT_ERRORS);
+	stats->tx_packets = pete_readq("drivers/net/ethernet/netronome/nfp/nfp_net_repr.c:64", mem + NFP_MAC_STATS_TX_FRAMES_TRANSMITTED_OK);
+	stats->tx_bytes = pete_readq("drivers/net/ethernet/netronome/nfp/nfp_net_repr.c:65", mem + NFP_MAC_STATS_TX_OUT_OCTETS);
+	stats->tx_dropped = pete_readq("drivers/net/ethernet/netronome/nfp/nfp_net_repr.c:66", mem + NFP_MAC_STATS_TX_OUT_ERRORS);
 
-	stats->rx_packets = readq(mem + NFP_MAC_STATS_RX_FRAMES_RECEIVED_OK);
-	stats->rx_bytes = readq(mem + NFP_MAC_STATS_RX_IN_OCTETS);
-	stats->rx_dropped = readq(mem + NFP_MAC_STATS_RX_IN_ERRORS);
+	stats->rx_packets = pete_readq("drivers/net/ethernet/netronome/nfp/nfp_net_repr.c:68", mem + NFP_MAC_STATS_RX_FRAMES_RECEIVED_OK);
+	stats->rx_bytes = pete_readq("drivers/net/ethernet/netronome/nfp/nfp_net_repr.c:69", mem + NFP_MAC_STATS_RX_IN_OCTETS);
+	stats->rx_dropped = pete_readq("drivers/net/ethernet/netronome/nfp/nfp_net_repr.c:70", mem + NFP_MAC_STATS_RX_IN_ERRORS);
 }
 
 static void
@@ -77,13 +77,13 @@ nfp_repr_vnic_get_stats64(struct nfp_port *port,
 	/* TX and RX stats are flipped as we are returning the stats as seen
 	 * at the switch port corresponding to the VF.
 	 */
-	stats->tx_packets = readq(port->vnic + NFP_NET_CFG_STATS_RX_FRAMES);
-	stats->tx_bytes = readq(port->vnic + NFP_NET_CFG_STATS_RX_OCTETS);
-	stats->tx_dropped = readq(port->vnic + NFP_NET_CFG_STATS_RX_DISCARDS);
+	stats->tx_packets = pete_readq("drivers/net/ethernet/netronome/nfp/nfp_net_repr.c:80", port->vnic + NFP_NET_CFG_STATS_RX_FRAMES);
+	stats->tx_bytes = pete_readq("drivers/net/ethernet/netronome/nfp/nfp_net_repr.c:81", port->vnic + NFP_NET_CFG_STATS_RX_OCTETS);
+	stats->tx_dropped = pete_readq("drivers/net/ethernet/netronome/nfp/nfp_net_repr.c:82", port->vnic + NFP_NET_CFG_STATS_RX_DISCARDS);
 
-	stats->rx_packets = readq(port->vnic + NFP_NET_CFG_STATS_TX_FRAMES);
-	stats->rx_bytes = readq(port->vnic + NFP_NET_CFG_STATS_TX_OCTETS);
-	stats->rx_dropped = readq(port->vnic + NFP_NET_CFG_STATS_TX_DISCARDS);
+	stats->rx_packets = pete_readq("drivers/net/ethernet/netronome/nfp/nfp_net_repr.c:84", port->vnic + NFP_NET_CFG_STATS_TX_FRAMES);
+	stats->rx_bytes = pete_readq("drivers/net/ethernet/netronome/nfp/nfp_net_repr.c:85", port->vnic + NFP_NET_CFG_STATS_TX_OCTETS);
+	stats->rx_dropped = pete_readq("drivers/net/ethernet/netronome/nfp/nfp_net_repr.c:86", port->vnic + NFP_NET_CFG_STATS_TX_DISCARDS);
 }
 
 static void

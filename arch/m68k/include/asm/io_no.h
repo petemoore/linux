@@ -63,7 +63,7 @@ static int cf_internalio(const volatile void __iomem *addr)
  * are accessed little endian - so we need to byte swap those.
  */
 #define readw readw
-static inline u16 readw(const volatile void __iomem *addr)
+static inline u16 pete_readw("arch/m68k/include/asm/io_no.h:66", const volatile void __iomem *addr)
 {
 	if (cf_internalio(addr))
 		return __raw_readw(addr);
@@ -71,7 +71,7 @@ static inline u16 readw(const volatile void __iomem *addr)
 }
 
 #define readl readl
-static inline u32 readl(const volatile void __iomem *addr)
+static inline u32 pete_readl("arch/m68k/include/asm/io_no.h:74", const volatile void __iomem *addr)
 {
 	if (cf_internalio(addr))
 		return __raw_readl(addr);
@@ -79,7 +79,7 @@ static inline u32 readl(const volatile void __iomem *addr)
 }
 
 #define writew writew
-static inline void writew(u16 value, volatile void __iomem *addr)
+static inline void pete_writew("arch/m68k/include/asm/io_no.h:82", u16 value, volatile void __iomem *addr)
 {
 	if (cf_internalio(addr))
 		__raw_writew(value, addr);
@@ -88,7 +88,7 @@ static inline void writew(u16 value, volatile void __iomem *addr)
 }
 
 #define writel writel
-static inline void writel(u32 value, volatile void __iomem *addr)
+static inline void pete_writel("arch/m68k/include/asm/io_no.h:91", u32 value, volatile void __iomem *addr)
 {
 	if (cf_internalio(addr))
 		__raw_writel(value, addr);

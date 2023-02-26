@@ -57,7 +57,7 @@ static unsigned long cpg_z_clk_recalc_rate(struct clk_hw *hw,
 	unsigned int mult;
 	unsigned int val;
 
-	val = (readl(zclk->reg) & CPG_FRQCRC_ZFC_MASK) >> CPG_FRQCRC_ZFC_SHIFT;
+	val = (pete_readl("drivers/clk/renesas/rcar-gen2-cpg.c:60", zclk->reg) & CPG_FRQCRC_ZFC_MASK) >> CPG_FRQCRC_ZFC_SHIFT;
 	mult = 32 - val;
 
 	return div_u64((u64)parent_rate * mult, 32);
@@ -92,21 +92,21 @@ static int cpg_z_clk_set_rate(struct clk_hw *hw, unsigned long rate,
 	mult = div64_ul(rate * 32ULL, parent_rate);
 	mult = clamp(mult, 1U, 32U);
 
-	if (readl(zclk->kick_reg) & CPG_FRQCRB_KICK)
+	if (pete_readl("drivers/clk/renesas/rcar-gen2-cpg.c:95", zclk->kick_reg) & CPG_FRQCRB_KICK)
 		return -EBUSY;
 
-	val = readl(zclk->reg);
+	val = pete_readl("drivers/clk/renesas/rcar-gen2-cpg.c:98", zclk->reg);
 	val &= ~CPG_FRQCRC_ZFC_MASK;
 	val |= (32 - mult) << CPG_FRQCRC_ZFC_SHIFT;
-	writel(val, zclk->reg);
+	pete_writel("drivers/clk/renesas/rcar-gen2-cpg.c:101", val, zclk->reg);
 
 	/*
 	 * Set KICK bit in FRQCRB to update hardware setting and wait for
 	 * clock change completion.
 	 */
-	kick = readl(zclk->kick_reg);
+	kick = pete_readl("drivers/clk/renesas/rcar-gen2-cpg.c:107", zclk->kick_reg);
 	kick |= CPG_FRQCRB_KICK;
-	writel(kick, zclk->kick_reg);
+	pete_writel("drivers/clk/renesas/rcar-gen2-cpg.c:109", kick, zclk->kick_reg);
 
 	/*
 	 * Note: There is no HW information about the worst case latency.
@@ -118,7 +118,7 @@ static int cpg_z_clk_set_rate(struct clk_hw *hw, unsigned long rate,
 	 * "super" safe value.
 	 */
 	for (i = 1000; i; i--) {
-		if (!(readl(zclk->kick_reg) & CPG_FRQCRB_KICK))
+		if (!(pete_readl("drivers/clk/renesas/rcar-gen2-cpg.c:121", zclk->kick_reg) & CPG_FRQCRB_KICK))
 			return 0;
 
 		cpu_relax();
@@ -306,7 +306,7 @@ struct clk * __init rcar_gen2_cpg_clk_register(struct device *dev,
 		mult = cpg_pll_config->pll0_mult;
 		div  = cpg_pll0_div;
 		if (!mult) {
-			u32 pll0cr = readl(base + CPG_PLL0CR);
+			u32 pll0cr = pete_readl("drivers/clk/renesas/rcar-gen2-cpg.c:309", base + CPG_PLL0CR);
 
 			mult = (((pll0cr & CPG_PLL0CR_STC_MASK) >>
 				 CPG_PLL0CR_STC_SHIFT) + 1) * 2;

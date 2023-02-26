@@ -37,9 +37,9 @@ static int moxart_wdt_restart(struct watchdog_device *wdt_dev,
 {
 	struct moxart_wdt_dev *moxart_wdt = watchdog_get_drvdata(wdt_dev);
 
-	writel(1, moxart_wdt->base + REG_COUNT);
-	writel(0x5ab9, moxart_wdt->base + REG_MODE);
-	writel(0x03, moxart_wdt->base + REG_ENABLE);
+	pete_writel("drivers/watchdog/moxart_wdt.c:40", 1, moxart_wdt->base + REG_COUNT);
+	pete_writel("drivers/watchdog/moxart_wdt.c:41", 0x5ab9, moxart_wdt->base + REG_MODE);
+	pete_writel("drivers/watchdog/moxart_wdt.c:42", 0x03, moxart_wdt->base + REG_ENABLE);
 
 	return 0;
 }
@@ -48,7 +48,7 @@ static int moxart_wdt_stop(struct watchdog_device *wdt_dev)
 {
 	struct moxart_wdt_dev *moxart_wdt = watchdog_get_drvdata(wdt_dev);
 
-	writel(0, moxart_wdt->base + REG_ENABLE);
+	pete_writel("drivers/watchdog/moxart_wdt.c:51", 0, moxart_wdt->base + REG_ENABLE);
 
 	return 0;
 }
@@ -57,10 +57,10 @@ static int moxart_wdt_start(struct watchdog_device *wdt_dev)
 {
 	struct moxart_wdt_dev *moxart_wdt = watchdog_get_drvdata(wdt_dev);
 
-	writel(moxart_wdt->clock_frequency * wdt_dev->timeout,
+	pete_writel("drivers/watchdog/moxart_wdt.c:60", moxart_wdt->clock_frequency * wdt_dev->timeout,
 	       moxart_wdt->base + REG_COUNT);
-	writel(0x5ab9, moxart_wdt->base + REG_MODE);
-	writel(0x03, moxart_wdt->base + REG_ENABLE);
+	pete_writel("drivers/watchdog/moxart_wdt.c:62", 0x5ab9, moxart_wdt->base + REG_MODE);
+	pete_writel("drivers/watchdog/moxart_wdt.c:63", 0x03, moxart_wdt->base + REG_ENABLE);
 
 	return 0;
 }

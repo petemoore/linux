@@ -66,12 +66,12 @@ struct histb_pcie {
 
 static u32 histb_pcie_readl(struct histb_pcie *histb_pcie, u32 reg)
 {
-	return readl(histb_pcie->ctrl + reg);
+	return pete_readl("drivers/pci/controller/dwc/pcie-histb.c:69", histb_pcie->ctrl + reg);
 }
 
 static void histb_pcie_writel(struct histb_pcie *histb_pcie, u32 reg, u32 val)
 {
-	writel(val, histb_pcie->ctrl + reg);
+	pete_writel("drivers/pci/controller/dwc/pcie-histb.c:74", val, histb_pcie->ctrl + reg);
 }
 
 static void histb_pcie_dbi_w_mode(struct pcie_port *pp, bool enable)

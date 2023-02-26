@@ -560,7 +560,7 @@ static void cs46xx_dsp_proc_task_tree_read (struct snd_info_entry *entry,
 				snd_iprintf(buffer,"\n");
 				col = 0;
 			}
-			val = readl(dst + (ins->tasks[i].address + j) * sizeof(u32));
+			val = pete_readl("sound/pci/cs46xx/dsp_spos.c:563", dst + (ins->tasks[i].address + j) * sizeof(u32));
 			snd_iprintf(buffer,"%08x ",val);
 		}
 	}
@@ -627,7 +627,7 @@ static void cs46xx_dsp_proc_parameter_dump_read (struct snd_info_entry *entry,
 			snd_iprintf(buffer, "%04X ", i / (unsigned int)sizeof(u32));
 		}
 
-		snd_iprintf(buffer,"%08X ",readl(dst + i));
+		snd_iprintf(buffer,"%08X ",pete_readl("sound/pci/cs46xx/dsp_spos.c:630", dst + i));
 	}
 }
 
@@ -649,7 +649,7 @@ static void cs46xx_dsp_proc_sample_dump_read (struct snd_info_entry *entry,
 			snd_iprintf(buffer, "%04X ",i);
 		}
 
-		snd_iprintf(buffer,"%08X ",readl(dst + i));
+		snd_iprintf(buffer,"%08X ",pete_readl("sound/pci/cs46xx/dsp_spos.c:652", dst + i));
 	}
 
 	snd_iprintf(buffer,"\nMIX_SAMPLE_BUF1:\n");
@@ -665,7 +665,7 @@ static void cs46xx_dsp_proc_sample_dump_read (struct snd_info_entry *entry,
 			snd_iprintf(buffer, "%04X ",i);
 		}
 
-		snd_iprintf(buffer,"%08X ",readl(dst + i));
+		snd_iprintf(buffer,"%08X ",pete_readl("sound/pci/cs46xx/dsp_spos.c:668", dst + i));
 	}
 
 	snd_iprintf(buffer,"\nSRC_TASK_SCB1:\n");
@@ -680,7 +680,7 @@ static void cs46xx_dsp_proc_sample_dump_read (struct snd_info_entry *entry,
 			snd_iprintf(buffer, "%04X ",i);
 		}
 
-		snd_iprintf(buffer,"%08X ",readl(dst + i));
+		snd_iprintf(buffer,"%08X ",pete_readl("sound/pci/cs46xx/dsp_spos.c:683", dst + i));
 	}
 
 
@@ -696,7 +696,7 @@ static void cs46xx_dsp_proc_sample_dump_read (struct snd_info_entry *entry,
 			snd_iprintf(buffer, "%04X ",i);
 		}
 
-		snd_iprintf(buffer,"%08X ",readl(dst + i));
+		snd_iprintf(buffer,"%08X ",pete_readl("sound/pci/cs46xx/dsp_spos.c:699", dst + i));
 	}
 
 	snd_iprintf(buffer,"\n...\n");
@@ -712,7 +712,7 @@ static void cs46xx_dsp_proc_sample_dump_read (struct snd_info_entry *entry,
 			snd_iprintf(buffer, "%04X ",i);
 		}
 
-		snd_iprintf(buffer,"%08X ",readl(dst + i));
+		snd_iprintf(buffer,"%08X ",pete_readl("sound/pci/cs46xx/dsp_spos.c:715", dst + i));
 	}
 
 
@@ -728,7 +728,7 @@ static void cs46xx_dsp_proc_sample_dump_read (struct snd_info_entry *entry,
 			snd_iprintf(buffer, "%04X ",i);
 		}
 
-		snd_iprintf(buffer,"%08X ",readl(dst + i));
+		snd_iprintf(buffer,"%08X ",pete_readl("sound/pci/cs46xx/dsp_spos.c:731", dst + i));
 	}
 
 	snd_iprintf(buffer,"\nCODEC_INPUT_BUF1: \n");
@@ -743,7 +743,7 @@ static void cs46xx_dsp_proc_sample_dump_read (struct snd_info_entry *entry,
 			snd_iprintf(buffer, "%04X ",i);
 		}
 
-		snd_iprintf(buffer,"%08X ",readl(dst + i));
+		snd_iprintf(buffer,"%08X ",pete_readl("sound/pci/cs46xx/dsp_spos.c:746", dst + i));
 	}
 #if 0
 	snd_iprintf(buffer,"\nWRITE_BACK_BUF1: \n");
@@ -758,7 +758,7 @@ static void cs46xx_dsp_proc_sample_dump_read (struct snd_info_entry *entry,
 			snd_iprintf(buffer, "%04X ",i);
 		}
 
-		snd_iprintf(buffer,"%08X ",readl(dst + i));
+		snd_iprintf(buffer,"%08X ",pete_readl("sound/pci/cs46xx/dsp_spos.c:761", dst + i));
 	}
 #endif
 
@@ -774,7 +774,7 @@ static void cs46xx_dsp_proc_sample_dump_read (struct snd_info_entry *entry,
 			snd_iprintf(buffer, "%04X ",i);
 		}
 		
-		snd_iprintf(buffer,"%08X ",readl(dst + i));
+		snd_iprintf(buffer,"%08X ",pete_readl("sound/pci/cs46xx/dsp_spos.c:777", dst + i));
 	}
 	snd_iprintf(buffer,"\n");
 }
@@ -875,7 +875,7 @@ static void _dsp_create_task_tree (struct snd_cs46xx *chip, u32 * task_data,
 	for (i = 0; i < size; ++i) {
 		dev_dbg(chip->card->dev, "addr %p, val %08x\n",
 			spdst, task_data[i]);
-		writel(task_data[i],spdst);
+		pete_writel("sound/pci/cs46xx/dsp_spos.c:878", task_data[i],spdst);
 		spdst += sizeof(u32);
 	}
 }
@@ -889,7 +889,7 @@ static void _dsp_create_scb (struct snd_cs46xx *chip, u32 * scb_data, u32 dest)
 	for (i = 0; i < 0x10; ++i) {
 		dev_dbg(chip->card->dev, "addr %p, val %08x\n",
 			spdst, scb_data[i]);
-		writel(scb_data[i],spdst);
+		pete_writel("sound/pci/cs46xx/dsp_spos.c:892", scb_data[i],spdst);
 		spdst += sizeof(u32);
 	}
 }

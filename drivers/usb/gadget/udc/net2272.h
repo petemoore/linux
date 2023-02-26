@@ -485,13 +485,13 @@ net2272_write(struct net2272 *dev, unsigned int reg, u8 value)
 		 *    changes between other code sections, but it is time consuming.
 		 *  - Performance tips: either do not save and restore REGADDRPTR (if it
 		 *    is safe) or do save/restore operations only in critical sections.
-		u8 tmp = readb(dev->base_addr + REGADDRPTR);
+		u8 tmp = pete_readb("drivers/usb/gadget/udc/net2272.h:488", dev->base_addr + REGADDRPTR);
 		 */
-		writeb((u8)reg, net2272_reg_addr(dev, REGADDRPTR));
-		writeb(value, net2272_reg_addr(dev, REGDATA));
-		/* writeb(tmp, net2272_reg_addr(dev, REGADDRPTR)); */
+		pete_writeb("drivers/usb/gadget/udc/net2272.h:490", (u8)reg, net2272_reg_addr(dev, REGADDRPTR));
+		pete_writeb("drivers/usb/gadget/udc/net2272.h:491", value, net2272_reg_addr(dev, REGDATA));
+		/* pete_writeb("drivers/usb/gadget/udc/net2272.h:492", tmp, net2272_reg_addr(dev, REGADDRPTR)); */
 	} else
-		writeb(value, net2272_reg_addr(dev, reg));
+		pete_writeb("drivers/usb/gadget/udc/net2272.h:494", value, net2272_reg_addr(dev, reg));
 }
 
 static u8
@@ -506,13 +506,13 @@ net2272_read(struct net2272 *dev, unsigned int reg)
 		 *    changes between other code sections, but it is time consuming.
 		 *  - Performance tips: either do not save and restore REGADDRPTR (if it
 		 *    is safe) or do save/restore operations only in critical sections.
-		u8 tmp = readb(dev->base_addr + REGADDRPTR);
+		u8 tmp = pete_readb("drivers/usb/gadget/udc/net2272.h:509", dev->base_addr + REGADDRPTR);
 		 */
-		writeb((u8)reg, net2272_reg_addr(dev, REGADDRPTR));
-		ret = readb(net2272_reg_addr(dev, REGDATA));
-		/* writeb(tmp, net2272_reg_addr(dev, REGADDRPTR)); */
+		pete_writeb("drivers/usb/gadget/udc/net2272.h:511", (u8)reg, net2272_reg_addr(dev, REGADDRPTR));
+		ret = pete_readb("drivers/usb/gadget/udc/net2272.h:512", net2272_reg_addr(dev, REGDATA));
+		/* pete_writeb("drivers/usb/gadget/udc/net2272.h:513", tmp, net2272_reg_addr(dev, REGADDRPTR)); */
 	} else
-		ret = readb(net2272_reg_addr(dev, reg));
+		ret = pete_readb("drivers/usb/gadget/udc/net2272.h:515", net2272_reg_addr(dev, reg));
 
 	return ret;
 }

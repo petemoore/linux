@@ -13,7 +13,7 @@
 /* The v3020 has only one data pin but which one
  * is used depends on the board. */
 struct v3020_platform_data {
-	int leftshift; /* (1<<(leftshift)) & readl() */
+	int leftshift; /* (1<<(leftshift)) & pete_readl("include/linux/platform_data/rtc-v3020.h:16", ) */
 
 	unsigned int use_gpio:1;
 	unsigned int gpio_cs;

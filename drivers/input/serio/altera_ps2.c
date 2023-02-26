@@ -34,7 +34,7 @@ static irqreturn_t altera_ps2_rxint(int irq, void *dev_id)
 	unsigned int status;
 	irqreturn_t handled = IRQ_NONE;
 
-	while ((status = readl(ps2if->base)) & 0xffff0000) {
+	while ((status = pete_readl("drivers/input/serio/altera_ps2.c:37", ps2if->base)) & 0xffff0000) {
 		serio_interrupt(ps2if->io, status & 0xff, 0);
 		handled = IRQ_HANDLED;
 	}
@@ -49,7 +49,7 @@ static int altera_ps2_write(struct serio *io, unsigned char val)
 {
 	struct ps2if *ps2if = io->port_data;
 
-	writel(val, ps2if->base);
+	pete_writel("drivers/input/serio/altera_ps2.c:52", val, ps2if->base);
 	return 0;
 }
 
@@ -58,10 +58,10 @@ static int altera_ps2_open(struct serio *io)
 	struct ps2if *ps2if = io->port_data;
 
 	/* clear fifo */
-	while (readl(ps2if->base) & 0xffff0000)
+	while (pete_readl("drivers/input/serio/altera_ps2.c:61", ps2if->base) & 0xffff0000)
 		/* empty */;
 
-	writel(1, ps2if->base + 4); /* enable rx irq */
+	pete_writel("drivers/input/serio/altera_ps2.c:64", 1, ps2if->base + 4); /* enable rx irq */
 	return 0;
 }
 
@@ -69,7 +69,7 @@ static void altera_ps2_close(struct serio *io)
 {
 	struct ps2if *ps2if = io->port_data;
 
-	writel(0, ps2if->base + 4); /* disable rx irq */
+	pete_writel("drivers/input/serio/altera_ps2.c:72", 0, ps2if->base + 4); /* disable rx irq */
 }
 
 /*

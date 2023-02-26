@@ -136,11 +136,11 @@ void snd_hdac_ext_bus_link_power(struct hdac_device *codec, bool enable);
 
 /* update register macro */
 #define snd_hdac_updatel(addr, reg, mask, val)		\
-	writel(((readl(addr + reg) & ~(mask)) | (val)), \
+	pete_writel("include/sound/hdaudio_ext.h:139", ((pete_readl("include/sound/hdaudio_ext.h:139", addr + reg) & ~(mask)) | (val)), \
 		addr + reg)
 
 #define snd_hdac_updatew(addr, reg, mask, val)		\
-	writew(((readw(addr + reg) & ~(mask)) | (val)), \
+	pete_writew("include/sound/hdaudio_ext.h:143", ((pete_readw("include/sound/hdaudio_ext.h:143", addr + reg) & ~(mask)) | (val)), \
 		addr + reg)
 
 

@@ -954,12 +954,12 @@ bool qed_edpm_enabled(struct qed_hwfn *p_hwfn);
 						(cdev->regview) + \
 							 (offset))
 
-#define REG_RD(cdev, offset)            readl(REG_ADDR(cdev, offset))
-#define REG_WR(cdev, offset, val)       writel((u32)val, REG_ADDR(cdev, offset))
-#define REG_WR16(cdev, offset, val)     writew((u16)val, REG_ADDR(cdev, offset))
+#define REG_RD(cdev, offset)            pete_readl("drivers/net/ethernet/qlogic/qed/qed.h:957", REG_ADDR(cdev, offset))
+#define REG_WR(cdev, offset, val)       pete_writel("drivers/net/ethernet/qlogic/qed/qed.h:958", (u32)val, REG_ADDR(cdev, offset))
+#define REG_WR16(cdev, offset, val)     pete_writew("drivers/net/ethernet/qlogic/qed/qed.h:959", (u16)val, REG_ADDR(cdev, offset))
 
 #define DOORBELL(cdev, db_addr, val)			 \
-	writel((u32)val, (void __iomem *)((u8 __iomem *)\
+	pete_writel("drivers/net/ethernet/qlogic/qed/qed.h:962", (u32)val, (void __iomem *)((u8 __iomem *)\
 					  (cdev->doorbells) + (db_addr)))
 
 #define MFW_PORT(_p_hwfn)       ((_p_hwfn)->abs_pf_id %			  \

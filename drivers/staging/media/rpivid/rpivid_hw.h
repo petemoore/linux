@@ -87,25 +87,25 @@ static inline void apb_write(const struct rpivid_dev * const dev,
 static inline void apb_write_final(const struct rpivid_dev * const dev,
 				   const unsigned int offset, const u32 val)
 {
-	writel(val, dev->base_h265 + offset);
+	pete_writel("drivers/staging/media/rpivid/rpivid_hw.h:90", val, dev->base_h265 + offset);
 }
 
 static inline u32 apb_read(const struct rpivid_dev * const dev,
 			   const unsigned int offset)
 {
-	return readl(dev->base_h265 + offset);
+	return pete_readl("drivers/staging/media/rpivid/rpivid_hw.h:96", dev->base_h265 + offset);
 }
 
 static inline void irq_write(const struct rpivid_dev * const dev,
 			     const unsigned int offset, const u32 val)
 {
-	writel(val, dev->base_irq + offset);
+	pete_writel("drivers/staging/media/rpivid/rpivid_hw.h:102", val, dev->base_irq + offset);
 }
 
 static inline u32 irq_read(const struct rpivid_dev * const dev,
 			   const unsigned int offset)
 {
-	return readl(dev->base_irq + offset);
+	return pete_readl("drivers/staging/media/rpivid/rpivid_hw.h:108", dev->base_irq + offset);
 }
 
 static inline void apb_write_vc_addr(const struct rpivid_dev * const dev,

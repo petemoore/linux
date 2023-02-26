@@ -391,12 +391,12 @@ struct rkisp1_isp_mbus_info {
 static inline void
 rkisp1_write(struct rkisp1_device *rkisp1, u32 val, unsigned int addr)
 {
-	writel(val, rkisp1->base_addr + addr);
+	pete_writel("drivers/media/platform/rockchip/rkisp1/rkisp1-common.h:394", val, rkisp1->base_addr + addr);
 }
 
 static inline u32 rkisp1_read(struct rkisp1_device *rkisp1, unsigned int addr)
 {
-	return readl(rkisp1->base_addr + addr);
+	return pete_readl("drivers/media/platform/rockchip/rkisp1/rkisp1-common.h:399", rkisp1->base_addr + addr);
 }
 
 /*

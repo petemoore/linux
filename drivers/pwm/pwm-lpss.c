@@ -38,14 +38,14 @@ static inline u32 pwm_lpss_read(const struct pwm_device *pwm)
 {
 	struct pwm_lpss_chip *lpwm = to_lpwm(pwm->chip);
 
-	return readl(lpwm->regs + pwm->hwpwm * PWM_SIZE + PWM);
+	return pete_readl("drivers/pwm/pwm-lpss.c:41", lpwm->regs + pwm->hwpwm * PWM_SIZE + PWM);
 }
 
 static inline void pwm_lpss_write(const struct pwm_device *pwm, u32 value)
 {
 	struct pwm_lpss_chip *lpwm = to_lpwm(pwm->chip);
 
-	writel(value, lpwm->regs + pwm->hwpwm * PWM_SIZE + PWM);
+	pete_writel("drivers/pwm/pwm-lpss.c:48", value, lpwm->regs + pwm->hwpwm * PWM_SIZE + PWM);
 }
 
 static int pwm_lpss_wait_for_update(struct pwm_device *pwm)

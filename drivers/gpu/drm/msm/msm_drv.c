@@ -182,12 +182,12 @@ void msm_writel(u32 data, void __iomem *addr)
 {
 	if (reglog)
 		printk(KERN_DEBUG "IO:W %p %08x\n", addr, data);
-	writel(data, addr);
+	pete_writel("drivers/gpu/drm/msm/msm_drv.c:185", data, addr);
 }
 
 u32 msm_readl(const void __iomem *addr)
 {
-	u32 val = readl(addr);
+	u32 val = pete_readl("drivers/gpu/drm/msm/msm_drv.c:190", addr);
 	if (reglog)
 		pr_err("IO:R %p %08x\n", addr, val);
 	return val;

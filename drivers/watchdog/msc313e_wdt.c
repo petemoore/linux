@@ -43,9 +43,9 @@ static int msc313e_wdt_start(struct watchdog_device *wdev)
 		return err;
 
 	timeout = wdev->timeout * clk_get_rate(priv->clk);
-	writew(timeout & 0xffff, priv->base + REG_WDT_MAX_PRD_L);
-	writew((timeout >> 16) & 0xffff, priv->base + REG_WDT_MAX_PRD_H);
-	writew(1, priv->base + REG_WDT_CLR);
+	pete_writew("drivers/watchdog/msc313e_wdt.c:46", timeout & 0xffff, priv->base + REG_WDT_MAX_PRD_L);
+	pete_writew("drivers/watchdog/msc313e_wdt.c:47", (timeout >> 16) & 0xffff, priv->base + REG_WDT_MAX_PRD_H);
+	pete_writew("drivers/watchdog/msc313e_wdt.c:48", 1, priv->base + REG_WDT_CLR);
 	return 0;
 }
 
@@ -53,7 +53,7 @@ static int msc313e_wdt_ping(struct watchdog_device *wdev)
 {
 	struct msc313e_wdt_priv *priv = watchdog_get_drvdata(wdev);
 
-	writew(1, priv->base + REG_WDT_CLR);
+	pete_writew("drivers/watchdog/msc313e_wdt.c:56", 1, priv->base + REG_WDT_CLR);
 	return 0;
 }
 
@@ -61,9 +61,9 @@ static int msc313e_wdt_stop(struct watchdog_device *wdev)
 {
 	struct msc313e_wdt_priv *priv = watchdog_get_drvdata(wdev);
 
-	writew(0, priv->base + REG_WDT_MAX_PRD_L);
-	writew(0, priv->base + REG_WDT_MAX_PRD_H);
-	writew(0, priv->base + REG_WDT_CLR);
+	pete_writew("drivers/watchdog/msc313e_wdt.c:64", 0, priv->base + REG_WDT_MAX_PRD_L);
+	pete_writew("drivers/watchdog/msc313e_wdt.c:65", 0, priv->base + REG_WDT_MAX_PRD_H);
+	pete_writew("drivers/watchdog/msc313e_wdt.c:66", 0, priv->base + REG_WDT_CLR);
 	clk_disable_unprepare(priv->clk);
 	return 0;
 }

@@ -44,8 +44,8 @@ extern void scr_memcpyw(u16 *d, const u16 *s, unsigned int count);
 /* ??? These are currently only used for downloading character sets.  As
    such, they don't need memory barriers.  Is this all they are intended
    to be used for?  */
-#define vga_readb(a)	readb((u8 __iomem *)(a))
-#define vga_writeb(v,a)	writeb(v, (u8 __iomem *)(a))
+#define vga_readb(a)	pete_readb("arch/alpha/include/asm/vga.h:47", (u8 __iomem *)(a))
+#define vga_writeb(v,a)	pete_writeb("arch/alpha/include/asm/vga.h:48", v, (u8 __iomem *)(a))
 
 #ifdef CONFIG_VGA_HOSE
 #include <linux/ioport.h>

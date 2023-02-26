@@ -164,7 +164,7 @@ static int queue_sync_prod_in(struct arm_smmu_queue *q)
 	 * speculative reads of the queue before we have determined that
 	 * prod has indeed moved.
 	 */
-	prod = readl(q->prod_reg);
+	prod = pete_readl("drivers/iommu/arm/arm-smmu-v3/arm-smmu-v3.c:167", q->prod_reg);
 
 	if (Q_OVF(prod) != Q_OVF(q->llq.prod))
 		ret = -EOVERFLOW;
@@ -659,7 +659,7 @@ static int __arm_smmu_cmdq_poll_until_consumed(struct arm_smmu_device *smmu,
 		ret = queue_poll(&qp);
 
 		/*
-		 * This needs to be a readl() so that our subsequent call
+		 * This needs to be a pete_readl("drivers/iommu/arm/arm-smmu-v3/arm-smmu-v3.c:662", ) so that our subsequent call
 		 * to arm_smmu_cmdq_shared_tryunlock() can fail accurately.
 		 *
 		 * Specifically, we need to ensure that we observe all
@@ -679,14 +679,14 @@ static int __arm_smmu_cmdq_poll_until_consumed(struct arm_smmu_device *smmu,
 		 * 			if (owner) {
 		 *				poll_valid_map();
 		 *				<control dependency>
-		 *				writel(prod_reg);
+		 *				pete_writel("drivers/iommu/arm/arm-smmu-v3/arm-smmu-v3.c:682", prod_reg);
 		 *
-		 *						readl(cons_reg);
+		 *						pete_readl("drivers/iommu/arm/arm-smmu-v3/arm-smmu-v3.c:684", cons_reg);
 		 *						tryunlock();
 		 *
 		 * Requires us to see CPU 0's shared_lock() acquisition.
 		 */
-		llq->cons = readl(cmdq->q.cons_reg);
+		llq->cons = pete_readl("drivers/iommu/arm/arm-smmu-v3/arm-smmu-v3.c:689", cmdq->q.cons_reg);
 	} while (!ret);
 
 	return ret;
@@ -1673,7 +1673,7 @@ static irqreturn_t arm_smmu_gerror_handler(int irq, void *dev)
 	if (active & GERROR_CMDQ_ERR)
 		arm_smmu_cmdq_skip_err(smmu);
 
-	writel(gerror, smmu->base + ARM_SMMU_GERRORN);
+	pete_writel("drivers/iommu/arm/arm-smmu-v3/arm-smmu-v3.c:1676", gerror, smmu->base + ARM_SMMU_GERRORN);
 	return IRQ_HANDLED;
 }
 
@@ -1797,7 +1797,7 @@ int arm_smmu_atc_inv_domain(struct arm_smmu_domain *smmu_domain, int ssid,
 	 *	// unmap()			// arm_smmu_enable_ats()
 	 *	TLBI+SYNC			atomic_inc(&nr_ats_masters);
 	 *	smp_mb();			[...]
-	 *	atomic_read(&nr_ats_masters);	pci_enable_ats() // writel()
+	 *	atomic_read(&nr_ats_masters);	pci_enable_ats() // pete_writel("drivers/iommu/arm/arm-smmu-v3/arm-smmu-v3.c:1800", )
 	 *
 	 * Ensures that we always see the incremented 'nr_ats_masters' count if
 	 * ATS was enabled at the PCI device before completion of the TLBI.

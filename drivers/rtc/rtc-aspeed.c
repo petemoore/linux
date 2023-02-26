@@ -25,15 +25,15 @@ static int aspeed_rtc_read_time(struct device *dev, struct rtc_time *tm)
 	unsigned int cent, year;
 	u32 reg1, reg2;
 
-	if (!(readl(rtc->base + RTC_CTRL) & RTC_ENABLE)) {
+	if (!(pete_readl("drivers/rtc/rtc-aspeed.c:28", rtc->base + RTC_CTRL) & RTC_ENABLE)) {
 		dev_dbg(dev, "%s failing as rtc disabled\n", __func__);
 		return -EINVAL;
 	}
 
 	do {
-		reg2 = readl(rtc->base + RTC_YEAR);
-		reg1 = readl(rtc->base + RTC_TIME);
-	} while (reg2 != readl(rtc->base + RTC_YEAR));
+		reg2 = pete_readl("drivers/rtc/rtc-aspeed.c:34", rtc->base + RTC_YEAR);
+		reg1 = pete_readl("drivers/rtc/rtc-aspeed.c:35", rtc->base + RTC_TIME);
+	} while (reg2 != pete_readl("drivers/rtc/rtc-aspeed.c:36", rtc->base + RTC_YEAR));
 
 	tm->tm_mday = (reg1 >> 24) & 0x1f;
 	tm->tm_hour = (reg1 >> 16) & 0x1f;
@@ -65,14 +65,14 @@ static int aspeed_rtc_set_time(struct device *dev, struct rtc_time *tm)
 	reg2 = ((cent & 0x1f) << 16) | ((year & 0x7f) << 8) |
 		((tm->tm_mon + 1) & 0xf);
 
-	ctrl = readl(rtc->base + RTC_CTRL);
-	writel(ctrl | RTC_UNLOCK, rtc->base + RTC_CTRL);
+	ctrl = pete_readl("drivers/rtc/rtc-aspeed.c:68", rtc->base + RTC_CTRL);
+	pete_writel("drivers/rtc/rtc-aspeed.c:69", ctrl | RTC_UNLOCK, rtc->base + RTC_CTRL);
 
-	writel(reg1, rtc->base + RTC_TIME);
-	writel(reg2, rtc->base + RTC_YEAR);
+	pete_writel("drivers/rtc/rtc-aspeed.c:71", reg1, rtc->base + RTC_TIME);
+	pete_writel("drivers/rtc/rtc-aspeed.c:72", reg2, rtc->base + RTC_YEAR);
 
 	/* Re-lock and ensure enable is set now that a time is programmed */
-	writel(ctrl | RTC_ENABLE, rtc->base + RTC_CTRL);
+	pete_writel("drivers/rtc/rtc-aspeed.c:75", ctrl | RTC_ENABLE, rtc->base + RTC_CTRL);
 
 	return 0;
 }

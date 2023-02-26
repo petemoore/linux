@@ -470,7 +470,7 @@ static int hns3_nic_init_irq(struct hns3_nic_priv *priv)
 static void hns3_mask_vector_irq(struct hns3_enet_tqp_vector *tqp_vector,
 				 u32 mask_en)
 {
-	writel(mask_en, tqp_vector->mask_addr);
+	pete_writel("drivers/net/ethernet/hisilicon/hns3/hns3_enet.c:473", mask_en, tqp_vector->mask_addr);
 }
 
 static void hns3_vector_enable(struct hns3_enet_tqp_vector *tqp_vector)
@@ -509,7 +509,7 @@ void hns3_set_vector_coalesce_rl(struct hns3_enet_tqp_vector *tqp_vector,
 		 */
 		rl_reg |=  HNS3_INT_RL_ENABLE_MASK;
 
-	writel(rl_reg, tqp_vector->mask_addr + HNS3_VECTOR_RL_OFFSET);
+	pete_writel("drivers/net/ethernet/hisilicon/hns3/hns3_enet.c:512", rl_reg, tqp_vector->mask_addr + HNS3_VECTOR_RL_OFFSET);
 }
 
 void hns3_set_vector_coalesce_rx_gl(struct hns3_enet_tqp_vector *tqp_vector,
@@ -522,7 +522,7 @@ void hns3_set_vector_coalesce_rx_gl(struct hns3_enet_tqp_vector *tqp_vector,
 	else
 		new_val = hns3_gl_usec_to_reg(gl_value);
 
-	writel(new_val, tqp_vector->mask_addr + HNS3_VECTOR_GL0_OFFSET);
+	pete_writel("drivers/net/ethernet/hisilicon/hns3/hns3_enet.c:525", new_val, tqp_vector->mask_addr + HNS3_VECTOR_GL0_OFFSET);
 }
 
 void hns3_set_vector_coalesce_tx_gl(struct hns3_enet_tqp_vector *tqp_vector,
@@ -535,19 +535,19 @@ void hns3_set_vector_coalesce_tx_gl(struct hns3_enet_tqp_vector *tqp_vector,
 	else
 		new_val = hns3_gl_usec_to_reg(gl_value);
 
-	writel(new_val, tqp_vector->mask_addr + HNS3_VECTOR_GL1_OFFSET);
+	pete_writel("drivers/net/ethernet/hisilicon/hns3/hns3_enet.c:538", new_val, tqp_vector->mask_addr + HNS3_VECTOR_GL1_OFFSET);
 }
 
 void hns3_set_vector_coalesce_tx_ql(struct hns3_enet_tqp_vector *tqp_vector,
 				    u32 ql_value)
 {
-	writel(ql_value, tqp_vector->mask_addr + HNS3_VECTOR_TX_QL_OFFSET);
+	pete_writel("drivers/net/ethernet/hisilicon/hns3/hns3_enet.c:544", ql_value, tqp_vector->mask_addr + HNS3_VECTOR_TX_QL_OFFSET);
 }
 
 void hns3_set_vector_coalesce_rx_ql(struct hns3_enet_tqp_vector *tqp_vector,
 				    u32 ql_value)
 {
-	writel(ql_value, tqp_vector->mask_addr + HNS3_VECTOR_RX_QL_OFFSET);
+	pete_writel("drivers/net/ethernet/hisilicon/hns3/hns3_enet.c:550", ql_value, tqp_vector->mask_addr + HNS3_VECTOR_RX_QL_OFFSET);
 }
 
 static void hns3_vector_coalesce_init(struct hns3_enet_tqp_vector *tqp_vector,
@@ -1995,7 +1995,7 @@ static void hns3_tx_doorbell(struct hns3_enet_ring *ring, int num,
 	if (!ring->pending_buf)
 		return;
 
-	writel(ring->pending_buf,
+	pete_writel("drivers/net/ethernet/hisilicon/hns3/hns3_enet.c:1998", ring->pending_buf,
 	       ring->tqp->io_base + HNS3_RING_TX_RING_TAIL_REG);
 	ring->pending_buf = 0;
 	WRITE_ONCE(ring->last_to_use, ring->next_to_use);
@@ -2717,7 +2717,7 @@ static bool hns3_get_tx_timeo_queue_info(struct net_device *ndev)
 	netdev_info(ndev,
 		    "BD_NUM: 0x%x HW_HEAD: 0x%x, HW_TAIL: 0x%x, BD_ERR: 0x%x, INT: 0x%x\n",
 		    bd_num, hw_head, hw_tail, bd_err,
-		    readl(tx_ring->tqp_vector->mask_addr));
+		    pete_readl("drivers/net/ethernet/hisilicon/hns3/hns3_enet.c:2720", tx_ring->tqp_vector->mask_addr));
 	netdev_info(ndev,
 		    "RING_EN: 0x%x, TC: 0x%x, FBD_NUM: 0x%x FBD_OFT: 0x%x, EBD_NUM: 0x%x, EBD_OFT: 0x%x\n",
 		    ring_en, tc, fbd_num, fbd_oft, ebd_num, ebd_oft);
@@ -3496,7 +3496,7 @@ static bool hns3_nic_alloc_rx_buffers(struct hns3_enet_ring *ring,
 					    "alloc rx buffer failed: %d\n",
 					    ret);
 
-				writel(i, ring->tqp->io_base +
+				pete_writel("drivers/net/ethernet/hisilicon/hns3/hns3_enet.c:3499", i, ring->tqp->io_base +
 				       HNS3_RING_RX_RING_HEAD_REG);
 				return true;
 			}
@@ -3508,7 +3508,7 @@ static bool hns3_nic_alloc_rx_buffers(struct hns3_enet_ring *ring,
 		ring_ptr_move_fw(ring, next_to_use);
 	}
 
-	writel(i, ring->tqp->io_base + HNS3_RING_RX_RING_HEAD_REG);
+	pete_writel("drivers/net/ethernet/hisilicon/hns3/hns3_enet.c:3511", i, ring->tqp->io_base + HNS3_RING_RX_RING_HEAD_REG);
 	return false;
 }
 
@@ -5016,7 +5016,7 @@ static void hns3_set_cq_period_mode(struct hns3_nic_priv *priv,
 			HNS3_CQ_MODE_CQE : HNS3_CQ_MODE_EQE;
 		reg = is_tx ? HNS3_GL1_CQ_MODE_REG : HNS3_GL0_CQ_MODE_REG;
 
-		writel(new_mode, handle->kinfo.io_base + reg);
+		pete_writel("drivers/net/ethernet/hisilicon/hns3/hns3_enet.c:5019", new_mode, handle->kinfo.io_base + reg);
 	}
 }
 

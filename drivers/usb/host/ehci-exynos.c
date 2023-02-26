@@ -226,7 +226,7 @@ static int exynos_ehci_probe(struct platform_device *pdev)
 		pdev->dev.of_node = NULL;
 
 	/* DMA burst Enable */
-	writel(EHCI_INSNREG00_ENABLE_DMA_BURST, EHCI_INSNREG00(hcd->regs));
+	pete_writel("drivers/usb/host/ehci-exynos.c:229", EHCI_INSNREG00_ENABLE_DMA_BURST, EHCI_INSNREG00(hcd->regs));
 
 	err = usb_add_hcd(hcd, irq, IRQF_SHARED);
 	if (err) {
@@ -305,7 +305,7 @@ static int exynos_ehci_resume(struct device *dev)
 	}
 
 	/* DMA burst Enable */
-	writel(EHCI_INSNREG00_ENABLE_DMA_BURST, EHCI_INSNREG00(hcd->regs));
+	pete_writel("drivers/usb/host/ehci-exynos.c:308", EHCI_INSNREG00_ENABLE_DMA_BURST, EHCI_INSNREG00(hcd->regs));
 
 	ehci_resume(hcd, false);
 	return 0;

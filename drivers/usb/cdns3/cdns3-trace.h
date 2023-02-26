@@ -128,8 +128,8 @@ DECLARE_EVENT_CLASS(cdns3_log_epx_irq,
 	),
 	TP_fast_assign(
 		__assign_str(ep_name, priv_ep->name);
-		__entry->ep_sts = readl(&priv_dev->regs->ep_sts);
-		__entry->ep_traddr = readl(&priv_dev->regs->ep_traddr);
+		__entry->ep_sts = pete_readl("drivers/usb/cdns3/cdns3-trace.h:131", &priv_dev->regs->ep_sts);
+		__entry->ep_traddr = pete_readl("drivers/usb/cdns3/cdns3-trace.h:132", &priv_dev->regs->ep_traddr);
 		__entry->ep_last_sid = priv_ep->last_stream_id;
 		__entry->use_streams = priv_ep->use_streams;
 	),

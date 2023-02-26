@@ -109,13 +109,13 @@ struct mac_ops *get_mac_ops(void *cgxd)
 
 void cgx_write(struct cgx *cgx, u64 lmac, u64 offset, u64 val)
 {
-	writeq(val, cgx->reg_base + (lmac << cgx->mac_ops->lmac_offset) +
+	pete_writeq("drivers/net/ethernet/marvell/octeontx2/af/cgx.c:112", val, cgx->reg_base + (lmac << cgx->mac_ops->lmac_offset) +
 	       offset);
 }
 
 u64 cgx_read(struct cgx *cgx, u64 lmac, u64 offset)
 {
-	return readq(cgx->reg_base + (lmac << cgx->mac_ops->lmac_offset) +
+	return pete_readq("drivers/net/ethernet/marvell/octeontx2/af/cgx.c:118", cgx->reg_base + (lmac << cgx->mac_ops->lmac_offset) +
 		     offset);
 }
 

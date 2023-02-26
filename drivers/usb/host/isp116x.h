@@ -356,13 +356,13 @@ struct isp116x_ep {
 
 static inline void isp116x_write_addr(struct isp116x *isp116x, unsigned reg)
 {
-	writew(reg & 0xff, isp116x->addr_reg);
+	pete_writew("drivers/usb/host/isp116x.h:359", reg & 0xff, isp116x->addr_reg);
 	isp116x_delay(isp116x, 300);
 }
 
 static inline void isp116x_write_data16(struct isp116x *isp116x, u16 val)
 {
-	writew(val, isp116x->data_reg);
+	pete_writew("drivers/usb/host/isp116x.h:365", val, isp116x->data_reg);
 	isp116x_delay(isp116x, 150);
 }
 
@@ -376,7 +376,7 @@ static inline u16 isp116x_read_data16(struct isp116x *isp116x)
 {
 	u16 val;
 
-	val = readw(isp116x->data_reg);
+	val = pete_readw("drivers/usb/host/isp116x.h:379", isp116x->data_reg);
 	isp116x_delay(isp116x, 150);
 	return val;
 }
@@ -392,9 +392,9 @@ static inline u16 isp116x_raw_read_data16(struct isp116x *isp116x)
 
 static inline void isp116x_write_data32(struct isp116x *isp116x, u32 val)
 {
-	writew(val & 0xffff, isp116x->data_reg);
+	pete_writew("drivers/usb/host/isp116x.h:395", val & 0xffff, isp116x->data_reg);
 	isp116x_delay(isp116x, 150);
-	writew(val >> 16, isp116x->data_reg);
+	pete_writew("drivers/usb/host/isp116x.h:397", val >> 16, isp116x->data_reg);
 	isp116x_delay(isp116x, 150);
 }
 
@@ -402,9 +402,9 @@ static inline u32 isp116x_read_data32(struct isp116x *isp116x)
 {
 	u32 val;
 
-	val = (u32) readw(isp116x->data_reg);
+	val = (u32) pete_readw("drivers/usb/host/isp116x.h:405", isp116x->data_reg);
 	isp116x_delay(isp116x, 150);
-	val |= ((u32) readw(isp116x->data_reg)) << 16;
+	val |= ((u32) pete_readw("drivers/usb/host/isp116x.h:407", isp116x->data_reg)) << 16;
 	isp116x_delay(isp116x, 150);
 	return val;
 }

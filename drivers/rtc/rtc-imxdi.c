@@ -172,7 +172,7 @@ static void di_write_busy_wait(const struct imxdi_dev *imxdi, u32 val,
 			       unsigned reg)
 {
 	/* do the register write */
-	writel(val, imxdi->ioaddr + reg);
+	pete_writel("drivers/rtc/rtc-imxdi.c:175", val, imxdi->ioaddr + reg);
 
 	/*
 	 * now it takes four 32,768 kHz clock cycles to take
@@ -185,7 +185,7 @@ static void di_report_tamper_info(struct imxdi_dev *imxdi,  u32 dsr)
 {
 	u32 dtcr;
 
-	dtcr = readl(imxdi->ioaddr + DTCR);
+	dtcr = pete_readl("drivers/rtc/rtc-imxdi.c:188", imxdi->ioaddr + DTCR);
 
 	dev_emerg(&imxdi->pdev->dev, "DryIce tamper event detected\n");
 	/* the following flags force a transition into the "FAILURE STATE" */
@@ -248,7 +248,7 @@ static int di_handle_failure_state(struct imxdi_dev *imxdi, u32 dsr)
 	/* report the cause */
 	di_report_tamper_info(imxdi, dsr);
 
-	dcr = readl(imxdi->ioaddr + DCR);
+	dcr = pete_readl("drivers/rtc/rtc-imxdi.c:251", imxdi->ioaddr + DCR);
 
 	if (dcr & DCR_FSHL) {
 		/* we are out of luck */
@@ -289,7 +289,7 @@ static int di_handle_invalid_state(struct imxdi_dev *imxdi, u32 dsr)
 	/* and lets protect them at runtime from any change */
 	di_write_busy_wait(imxdi, DCR_TDCSL, DCR);
 
-	sec = readl(imxdi->ioaddr + DTCMR);
+	sec = pete_readl("drivers/rtc/rtc-imxdi.c:292", imxdi->ioaddr + DTCMR);
 	if (sec != 0)
 		dev_warn(&imxdi->pdev->dev,
 			 "The security violation has happened at %u seconds\n",
@@ -298,7 +298,7 @@ static int di_handle_invalid_state(struct imxdi_dev *imxdi, u32 dsr)
 	 * the timer cannot be set/modified if
 	 * - the TCHL or TCSL bit is set in DCR
 	 */
-	dcr = readl(imxdi->ioaddr + DCR);
+	dcr = pete_readl("drivers/rtc/rtc-imxdi.c:301", imxdi->ioaddr + DCR);
 	if (!(dcr & DCR_TCE)) {
 		if (dcr & DCR_TCHL) {
 			/* we are out of luck */
@@ -376,7 +376,7 @@ static int di_handle_invalid_and_failure_state(struct imxdi_dev *imxdi, u32 dsr)
 			DSR_EBD | DSR_SAD | DSR_TTD | DSR_CTD | DSR_VTD |
 			DSR_MCO | DSR_TCO), DSR);
 
-	dsr = readl(imxdi->ioaddr + DSR);
+	dsr = pete_readl("drivers/rtc/rtc-imxdi.c:379", imxdi->ioaddr + DSR);
 	if ((dsr & ~(DSR_NVF | DSR_SVF | DSR_WBF | DSR_WNF |
 			DSR_WCF | DSR_WEF)) != 0)
 		dev_warn(&imxdi->pdev->dev,
@@ -391,7 +391,7 @@ static int di_handle_invalid_and_failure_state(struct imxdi_dev *imxdi, u32 dsr)
 	di_write_busy_wait(imxdi, DSR_SVF, DSR);
 
 	/* success? */
-	dsr = readl(imxdi->ioaddr + DSR);
+	dsr = pete_readl("drivers/rtc/rtc-imxdi.c:394", imxdi->ioaddr + DSR);
 	if (dsr & DSR_SVF) {
 		dev_crit(&imxdi->pdev->dev,
 			 "Cannot clear the security violation flag. We are ending up in an endless loop!\n");
@@ -412,7 +412,7 @@ static int di_handle_state(struct imxdi_dev *imxdi)
 	int rc;
 	u32 dsr;
 
-	dsr = readl(imxdi->ioaddr + DSR);
+	dsr = pete_readl("drivers/rtc/rtc-imxdi.c:415", imxdi->ioaddr + DSR);
 
 	switch (dsr & (DSR_NVF | DSR_SVF)) {
 	case DSR_NVF:
@@ -444,7 +444,7 @@ static void di_int_enable(struct imxdi_dev *imxdi, u32 intr)
 	unsigned long flags;
 
 	spin_lock_irqsave(&imxdi->irq_lock, flags);
-	writel(readl(imxdi->ioaddr + DIER) | intr,
+	pete_writel("drivers/rtc/rtc-imxdi.c:447", pete_readl("drivers/rtc/rtc-imxdi.c:447", imxdi->ioaddr + DIER) | intr,
 	       imxdi->ioaddr + DIER);
 	spin_unlock_irqrestore(&imxdi->irq_lock, flags);
 }
@@ -457,7 +457,7 @@ static void di_int_disable(struct imxdi_dev *imxdi, u32 intr)
 	unsigned long flags;
 
 	spin_lock_irqsave(&imxdi->irq_lock, flags);
-	writel(readl(imxdi->ioaddr + DIER) & ~intr,
+	pete_writel("drivers/rtc/rtc-imxdi.c:460", pete_readl("drivers/rtc/rtc-imxdi.c:460", imxdi->ioaddr + DIER) & ~intr,
 	       imxdi->ioaddr + DIER);
 	spin_unlock_irqrestore(&imxdi->irq_lock, flags);
 }
@@ -476,11 +476,11 @@ static void clear_write_error(struct imxdi_dev *imxdi)
 	dev_warn(&imxdi->pdev->dev, "WARNING: Register write error!\n");
 
 	/* clear the write error flag */
-	writel(DSR_WEF, imxdi->ioaddr + DSR);
+	pete_writel("drivers/rtc/rtc-imxdi.c:479", DSR_WEF, imxdi->ioaddr + DSR);
 
 	/* wait for it to take effect */
 	for (cnt = 0; cnt < 1000; cnt++) {
-		if ((readl(imxdi->ioaddr + DSR) & DSR_WEF) == 0)
+		if ((pete_readl("drivers/rtc/rtc-imxdi.c:483", imxdi->ioaddr + DSR) & DSR_WEF) == 0)
 			return;
 		udelay(10);
 	}
@@ -508,7 +508,7 @@ static int di_write_wait(struct imxdi_dev *imxdi, u32 val, int reg)
 	imxdi->dsr = 0;
 
 	/* do the register write */
-	writel(val, imxdi->ioaddr + reg);
+	pete_writel("drivers/rtc/rtc-imxdi.c:511", val, imxdi->ioaddr + reg);
 
 	/* wait for the write to finish */
 	ret = wait_event_interruptible_timeout(imxdi->write_wait,
@@ -542,7 +542,7 @@ static int dryice_rtc_read_time(struct device *dev, struct rtc_time *tm)
 	struct imxdi_dev *imxdi = dev_get_drvdata(dev);
 	unsigned long now;
 
-	now = readl(imxdi->ioaddr + DTCMR);
+	now = pete_readl("drivers/rtc/rtc-imxdi.c:545", imxdi->ioaddr + DTCMR);
 	rtc_time64_to_tm(now, tm);
 
 	return 0;
@@ -558,8 +558,8 @@ static int dryice_rtc_set_time(struct device *dev, struct rtc_time *tm)
 	u32 dcr, dsr;
 	int rc;
 
-	dcr = readl(imxdi->ioaddr + DCR);
-	dsr = readl(imxdi->ioaddr + DSR);
+	dcr = pete_readl("drivers/rtc/rtc-imxdi.c:561", imxdi->ioaddr + DCR);
+	dsr = pete_readl("drivers/rtc/rtc-imxdi.c:562", imxdi->ioaddr + DSR);
 
 	if (!(dcr & DCR_TCE) || (dsr & DSR_SVF)) {
 		if (dcr & DCR_TCHL) {
@@ -583,7 +583,7 @@ static int dryice_rtc_set_time(struct device *dev, struct rtc_time *tm)
 	if (rc != 0)
 		return rc;
 
-	return di_write_wait(imxdi, readl(imxdi->ioaddr + DCR) | DCR_TCE, DCR);
+	return di_write_wait(imxdi, pete_readl("drivers/rtc/rtc-imxdi.c:586", imxdi->ioaddr + DCR) | DCR_TCE, DCR);
 }
 
 static int dryice_rtc_alarm_irq_enable(struct device *dev,
@@ -608,17 +608,17 @@ static int dryice_rtc_read_alarm(struct device *dev, struct rtc_wkalrm *alarm)
 	struct imxdi_dev *imxdi = dev_get_drvdata(dev);
 	u32 dcamr;
 
-	dcamr = readl(imxdi->ioaddr + DCAMR);
+	dcamr = pete_readl("drivers/rtc/rtc-imxdi.c:611", imxdi->ioaddr + DCAMR);
 	rtc_time64_to_tm(dcamr, &alarm->time);
 
 	/* alarm is enabled if the interrupt is enabled */
-	alarm->enabled = (readl(imxdi->ioaddr + DIER) & DIER_CAIE) != 0;
+	alarm->enabled = (pete_readl("drivers/rtc/rtc-imxdi.c:615", imxdi->ioaddr + DIER) & DIER_CAIE) != 0;
 
 	/* don't allow the DSR read to mess up DSR_WCF */
 	mutex_lock(&imxdi->write_mutex);
 
 	/* alarm is pending if the alarm flag is set */
-	alarm->pending = (readl(imxdi->ioaddr + DSR) & DSR_CAF) != 0;
+	alarm->pending = (pete_readl("drivers/rtc/rtc-imxdi.c:621", imxdi->ioaddr + DSR) & DSR_CAF) != 0;
 
 	mutex_unlock(&imxdi->write_mutex);
 
@@ -663,8 +663,8 @@ static irqreturn_t dryice_irq(int irq, void *dev_id)
 	u32 dsr, dier;
 	irqreturn_t rc = IRQ_NONE;
 
-	dier = readl(imxdi->ioaddr + DIER);
-	dsr = readl(imxdi->ioaddr + DSR);
+	dier = pete_readl("drivers/rtc/rtc-imxdi.c:666", imxdi->ioaddr + DIER);
+	dsr = pete_readl("drivers/rtc/rtc-imxdi.c:667", imxdi->ioaddr + DSR);
 
 	/* handle the security violation event */
 	if (dier & DIER_SVIE) {
@@ -790,7 +790,7 @@ static int __init dryice_rtc_probe(struct platform_device *pdev)
 	 */
 
 	/* mask all interrupts */
-	writel(0, imxdi->ioaddr + DIER);
+	pete_writel("drivers/rtc/rtc-imxdi.c:793", 0, imxdi->ioaddr + DIER);
 
 	rc = di_handle_state(imxdi);
 	if (rc != 0)
@@ -837,7 +837,7 @@ static int __exit dryice_rtc_remove(struct platform_device *pdev)
 	flush_work(&imxdi->work);
 
 	/* mask all interrupts */
-	writel(0, imxdi->ioaddr + DIER);
+	pete_writel("drivers/rtc/rtc-imxdi.c:840", 0, imxdi->ioaddr + DIER);
 
 	clk_disable_unprepare(imxdi->clk);
 

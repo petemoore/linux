@@ -386,28 +386,28 @@ static inline struct mtu3_request *next_request(struct mtu3_ep *mep)
 
 static inline void mtu3_writel(void __iomem *base, u32 offset, u32 data)
 {
-	writel(data, base + offset);
+	pete_writel("drivers/usb/mtu3/mtu3.h:389", data, base + offset);
 }
 
 static inline u32 mtu3_readl(void __iomem *base, u32 offset)
 {
-	return readl(base + offset);
+	return pete_readl("drivers/usb/mtu3/mtu3.h:394", base + offset);
 }
 
 static inline void mtu3_setbits(void __iomem *base, u32 offset, u32 bits)
 {
 	void __iomem *addr = base + offset;
-	u32 tmp = readl(addr);
+	u32 tmp = pete_readl("drivers/usb/mtu3/mtu3.h:400", addr);
 
-	writel((tmp | (bits)), addr);
+	pete_writel("drivers/usb/mtu3/mtu3.h:402", (tmp | (bits)), addr);
 }
 
 static inline void mtu3_clrbits(void __iomem *base, u32 offset, u32 bits)
 {
 	void __iomem *addr = base + offset;
-	u32 tmp = readl(addr);
+	u32 tmp = pete_readl("drivers/usb/mtu3/mtu3.h:408", addr);
 
-	writel((tmp & ~(bits)), addr);
+	pete_writel("drivers/usb/mtu3/mtu3.h:410", (tmp & ~(bits)), addr);
 }
 
 int ssusb_check_clocks(struct ssusb_mtk *ssusb, u32 ex_clks);

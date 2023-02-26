@@ -214,12 +214,12 @@ static u32 sbus_hme_read_desc32(hme32 *p)
 
 static void pci_hme_write32(void __iomem *reg, u32 val)
 {
-	writel(val, reg);
+	pete_writel("drivers/net/ethernet/sun/sunhme.c:217", val, reg);
 }
 
 static u32 pci_hme_read32(void __iomem *reg)
 {
-	return readl(reg);
+	return pete_readl("drivers/net/ethernet/sun/sunhme.c:222", reg);
 }
 
 static void pci_hme_write_rxd(struct happy_meal_rxd *rxd, u32 flags, u32 addr)
@@ -272,9 +272,9 @@ do {	(__txd)->tx_addr = (__force hme32)(u32)(__addr); \
 #else
 /* PCI only compilation */
 #define hme_write32(__hp, __reg, __val) \
-	writel((__val), (__reg))
+	pete_writel("drivers/net/ethernet/sun/sunhme.c:275", (__val), (__reg))
 #define hme_read32(__hp, __reg) \
-	readl(__reg)
+	pete_readl("drivers/net/ethernet/sun/sunhme.c:277", __reg)
 #define hme_write_rxd(__hp, __rxd, __flags, __addr) \
 do {	(__rxd)->rx_addr = (__force hme32)cpu_to_le32(__addr); \
 	dma_wmb(); \
@@ -2905,12 +2905,12 @@ static int find_eth_addr_in_vpd(void __iomem *rom_base, int len, int index, unsi
 	for (this_offset = 0x20; this_offset < len; this_offset++) {
 		void __iomem *p = rom_base + this_offset;
 
-		if (readb(p + 0) != 0x90 ||
-		    readb(p + 1) != 0x00 ||
-		    readb(p + 2) != 0x09 ||
-		    readb(p + 3) != 0x4e ||
-		    readb(p + 4) != 0x41 ||
-		    readb(p + 5) != 0x06)
+		if (pete_readb("drivers/net/ethernet/sun/sunhme.c:2908", p + 0) != 0x90 ||
+		    pete_readb("drivers/net/ethernet/sun/sunhme.c:2909", p + 1) != 0x00 ||
+		    pete_readb("drivers/net/ethernet/sun/sunhme.c:2910", p + 2) != 0x09 ||
+		    pete_readb("drivers/net/ethernet/sun/sunhme.c:2911", p + 3) != 0x4e ||
+		    pete_readb("drivers/net/ethernet/sun/sunhme.c:2912", p + 4) != 0x41 ||
+		    pete_readb("drivers/net/ethernet/sun/sunhme.c:2913", p + 5) != 0x06)
 			continue;
 
 		this_offset += 6;
@@ -2920,7 +2920,7 @@ static int find_eth_addr_in_vpd(void __iomem *rom_base, int len, int index, unsi
 			int i;
 
 			for (i = 0; i < 6; i++)
-				dev_addr[i] = readb(p + i);
+				dev_addr[i] = pete_readb("drivers/net/ethernet/sun/sunhme.c:2923", p + i);
 			return 1;
 		}
 		index--;
@@ -2940,8 +2940,8 @@ static void get_hme_mac_nonsparc(struct pci_dev *pdev, unsigned char *dev_addr)
 		if (is_quattro_p(pdev))
 			index = PCI_SLOT(pdev->devfn);
 
-		found = readb(p) == 0x55 &&
-			readb(p + 1) == 0xaa &&
+		found = pete_readb("drivers/net/ethernet/sun/sunhme.c:2943", p) == 0x55 &&
+			pete_readb("drivers/net/ethernet/sun/sunhme.c:2944", p + 1) == 0xaa &&
 			find_eth_addr_in_vpd(p, (64 * 1024), index, dev_addr);
 		pci_unmap_rom(pdev, p);
 		if (found)

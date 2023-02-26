@@ -10,8 +10,8 @@
 #include <linux/delay.h>
 #include "camif-regs.h"
 
-#define camif_write(_camif, _off, _val)	writel(_val, (_camif)->io_base + (_off))
-#define camif_read(_camif, _off)	readl((_camif)->io_base + (_off))
+#define camif_write(_camif, _off, _val)	pete_writel("drivers/media/platform/s3c-camif/camif-regs.c:13", _val, (_camif)->io_base + (_off))
+#define camif_read(_camif, _off)	pete_readl("drivers/media/platform/s3c-camif/camif-regs.c:14", (_camif)->io_base + (_off))
 
 void camif_hw_reset(struct camif_dev *camif)
 {
@@ -597,7 +597,7 @@ void camif_hw_dump_regs(struct camif_dev *camif, const char *label)
 
 	pr_info("--- %s ---\n", label);
 	for (i = 0; i < ARRAY_SIZE(registers); i++) {
-		u32 cfg = readl(camif->io_base + registers[i].offset);
+		u32 cfg = pete_readl("drivers/media/platform/s3c-camif/camif-regs.c:600", camif->io_base + registers[i].offset);
 		dev_info(camif->dev, "%s:\t0x%08x\n", registers[i].name, cfg);
 	}
 }

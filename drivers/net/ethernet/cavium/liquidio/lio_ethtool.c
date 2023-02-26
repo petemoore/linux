@@ -1211,7 +1211,7 @@ static int lio_reset_queues(struct net_device *netdev, uint32_t num_qs)
 		}
 
 		for (i = 0; i < oct->num_oqs; i++)
-			writel(oct->droq[i]->max_count,
+			pete_writel("drivers/net/ethernet/cavium/liquidio/lio_ethtool.c:1214", oct->droq[i]->max_count,
 			       oct->droq[i]->pkts_credit_reg);
 
 		/* Informing firmware about the new queue count. It is required
@@ -2395,12 +2395,12 @@ oct_cfg_tx_intrcnt(struct lio *lio,
 				      CN23XX_PKT_IN_DONE_WMARK_MASK;
 		for (q_no = 0; q_no < oct->num_iqs; q_no++) {
 			inst_cnt_reg = (oct->instr_queue[q_no])->inst_cnt_reg;
-			val = readq(inst_cnt_reg);
+			val = pete_readq("drivers/net/ethernet/cavium/liquidio/lio_ethtool.c:2398", inst_cnt_reg);
 			/*clear wmark and count.dont want to write count back*/
 			val = (val & 0xFFFF000000000000ULL) |
 			      ((u64)(iq_intr_pkt - 1)
 			       << CN23XX_PKT_IN_DONE_WMARK_BIT_POS);
-			writeq(val, inst_cnt_reg);
+			pete_writeq("drivers/net/ethernet/cavium/liquidio/lio_ethtool.c:2403", val, inst_cnt_reg);
 			/*consider setting resend bit*/
 		}
 		intrmod->tx_frames = iq_intr_pkt;

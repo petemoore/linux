@@ -51,12 +51,12 @@ struct tegra_cec {
 
 static inline u32 cec_read(struct tegra_cec *cec, u32 reg)
 {
-	return readl(cec->cec_base + reg);
+	return pete_readl("drivers/media/cec/platform/tegra/tegra_cec.c:54", cec->cec_base + reg);
 }
 
 static inline void cec_write(struct tegra_cec *cec, u32 reg, u32 val)
 {
-	writel(val, cec->cec_base + reg);
+	pete_writel("drivers/media/cec/platform/tegra/tegra_cec.c:59", val, cec->cec_base + reg);
 }
 
 static void tegra_cec_error_recovery(struct tegra_cec *cec)

@@ -119,7 +119,7 @@ static int sunxi_cpu_power_switch_set(unsigned int cpu, unsigned int cluster,
 	u32 reg;
 
 	/* control sequence from Allwinner A80 user manual v1.2 PRCM section */
-	reg = readl(prcm_base + PRCM_PWR_SWITCH_REG(cluster, cpu));
+	reg = pete_readl("arch/arm/mach-sunxi/mc_smp.c:122", prcm_base + PRCM_PWR_SWITCH_REG(cluster, cpu));
 	if (enable) {
 		if (reg == 0x00) {
 			pr_debug("power clamp for cluster %u cpu %u already open\n",
@@ -127,18 +127,18 @@ static int sunxi_cpu_power_switch_set(unsigned int cpu, unsigned int cluster,
 			return 0;
 		}
 
-		writel(0xff, prcm_base + PRCM_PWR_SWITCH_REG(cluster, cpu));
+		pete_writel("arch/arm/mach-sunxi/mc_smp.c:130", 0xff, prcm_base + PRCM_PWR_SWITCH_REG(cluster, cpu));
 		udelay(10);
-		writel(0xfe, prcm_base + PRCM_PWR_SWITCH_REG(cluster, cpu));
+		pete_writel("arch/arm/mach-sunxi/mc_smp.c:132", 0xfe, prcm_base + PRCM_PWR_SWITCH_REG(cluster, cpu));
 		udelay(10);
-		writel(0xf8, prcm_base + PRCM_PWR_SWITCH_REG(cluster, cpu));
+		pete_writel("arch/arm/mach-sunxi/mc_smp.c:134", 0xf8, prcm_base + PRCM_PWR_SWITCH_REG(cluster, cpu));
 		udelay(10);
-		writel(0xf0, prcm_base + PRCM_PWR_SWITCH_REG(cluster, cpu));
+		pete_writel("arch/arm/mach-sunxi/mc_smp.c:136", 0xf0, prcm_base + PRCM_PWR_SWITCH_REG(cluster, cpu));
 		udelay(10);
-		writel(0x00, prcm_base + PRCM_PWR_SWITCH_REG(cluster, cpu));
+		pete_writel("arch/arm/mach-sunxi/mc_smp.c:138", 0x00, prcm_base + PRCM_PWR_SWITCH_REG(cluster, cpu));
 		udelay(10);
 	} else {
-		writel(0xff, prcm_base + PRCM_PWR_SWITCH_REG(cluster, cpu));
+		pete_writel("arch/arm/mach-sunxi/mc_smp.c:141", 0xff, prcm_base + PRCM_PWR_SWITCH_REG(cluster, cpu));
 		udelay(10);
 	}
 
@@ -148,11 +148,11 @@ static int sunxi_cpu_power_switch_set(unsigned int cpu, unsigned int cluster,
 static void sunxi_cpu0_hotplug_support_set(bool enable)
 {
 	if (enable) {
-		writel(CPU0_SUPPORT_HOTPLUG_MAGIC0, sram_b_smp_base);
-		writel(CPU0_SUPPORT_HOTPLUG_MAGIC1, sram_b_smp_base + 0x4);
+		pete_writel("arch/arm/mach-sunxi/mc_smp.c:151", CPU0_SUPPORT_HOTPLUG_MAGIC0, sram_b_smp_base);
+		pete_writel("arch/arm/mach-sunxi/mc_smp.c:152", CPU0_SUPPORT_HOTPLUG_MAGIC1, sram_b_smp_base + 0x4);
 	} else {
-		writel(0x0, sram_b_smp_base);
-		writel(0x0, sram_b_smp_base + 0x4);
+		pete_writel("arch/arm/mach-sunxi/mc_smp.c:154", 0x0, sram_b_smp_base);
+		pete_writel("arch/arm/mach-sunxi/mc_smp.c:155", 0x0, sram_b_smp_base + 0x4);
 	}
 }
 
@@ -169,29 +169,29 @@ static int sunxi_cpu_powerup(unsigned int cpu, unsigned int cluster)
 		sunxi_cpu0_hotplug_support_set(true);
 
 	/* assert processor power-on reset */
-	reg = readl(prcm_base + PRCM_CPU_PO_RST_CTRL(cluster));
+	reg = pete_readl("arch/arm/mach-sunxi/mc_smp.c:172", prcm_base + PRCM_CPU_PO_RST_CTRL(cluster));
 	reg &= ~PRCM_CPU_PO_RST_CTRL_CORE(cpu);
-	writel(reg, prcm_base + PRCM_CPU_PO_RST_CTRL(cluster));
+	pete_writel("arch/arm/mach-sunxi/mc_smp.c:174", reg, prcm_base + PRCM_CPU_PO_RST_CTRL(cluster));
 
 	if (is_a83t) {
 		/* assert cpu power-on reset */
-		reg  = readl(r_cpucfg_base +
+		reg  = pete_readl("arch/arm/mach-sunxi/mc_smp.c:178", r_cpucfg_base +
 			     R_CPUCFG_CLUSTER_PO_RST_CTRL(cluster));
 		reg &= ~(R_CPUCFG_CLUSTER_PO_RST_CTRL_CORE(cpu));
-		writel(reg, r_cpucfg_base +
+		pete_writel("arch/arm/mach-sunxi/mc_smp.c:181", reg, r_cpucfg_base +
 		       R_CPUCFG_CLUSTER_PO_RST_CTRL(cluster));
 		udelay(10);
 	}
 
 	/* Cortex-A7: hold L1 reset disable signal low */
 	if (!sunxi_core_is_cortex_a15(cpu, cluster)) {
-		reg = readl(cpucfg_base + CPUCFG_CX_CTRL_REG0(cluster));
+		reg = pete_readl("arch/arm/mach-sunxi/mc_smp.c:188", cpucfg_base + CPUCFG_CX_CTRL_REG0(cluster));
 		reg &= ~CPUCFG_CX_CTRL_REG0_L1_RST_DISABLE(cpu);
-		writel(reg, cpucfg_base + CPUCFG_CX_CTRL_REG0(cluster));
+		pete_writel("arch/arm/mach-sunxi/mc_smp.c:190", reg, cpucfg_base + CPUCFG_CX_CTRL_REG0(cluster));
 	}
 
 	/* assert processor related resets */
-	reg = readl(cpucfg_base + CPUCFG_CX_RST_CTRL(cluster));
+	reg = pete_readl("arch/arm/mach-sunxi/mc_smp.c:194", cpucfg_base + CPUCFG_CX_RST_CTRL(cluster));
 	reg &= ~CPUCFG_CX_RST_CTRL_DBG_RST(cpu);
 
 	/*
@@ -201,7 +201,7 @@ static int sunxi_cpu_powerup(unsigned int cpu, unsigned int cluster)
 	if (!sunxi_core_is_cortex_a15(cpu, cluster))
 		reg &= ~CPUCFG_CX_RST_CTRL_ETM_RST(cpu);
 
-	writel(reg, cpucfg_base + CPUCFG_CX_RST_CTRL(cluster));
+	pete_writel("arch/arm/mach-sunxi/mc_smp.c:204", reg, cpucfg_base + CPUCFG_CX_RST_CTRL(cluster));
 
 	/* open power switch */
 	sunxi_cpu_power_switch_set(cpu, cluster, true);
@@ -213,9 +213,9 @@ static int sunxi_cpu_powerup(unsigned int cpu, unsigned int cluster)
 	}
 
 	/* clear processor power gate */
-	reg = readl(prcm_base + PRCM_PWROFF_GATING_REG(cluster));
+	reg = pete_readl("arch/arm/mach-sunxi/mc_smp.c:216", prcm_base + PRCM_PWROFF_GATING_REG(cluster));
 	reg &= ~PRCM_PWROFF_GATING_REG_CORE(cpu);
-	writel(reg, prcm_base + PRCM_PWROFF_GATING_REG(cluster));
+	pete_writel("arch/arm/mach-sunxi/mc_smp.c:218", reg, prcm_base + PRCM_PWROFF_GATING_REG(cluster));
 	udelay(20);
 
 	/* Handle A83T bit swap */
@@ -225,28 +225,28 @@ static int sunxi_cpu_powerup(unsigned int cpu, unsigned int cluster)
 	}
 
 	/* de-assert processor power-on reset */
-	reg = readl(prcm_base + PRCM_CPU_PO_RST_CTRL(cluster));
+	reg = pete_readl("arch/arm/mach-sunxi/mc_smp.c:228", prcm_base + PRCM_CPU_PO_RST_CTRL(cluster));
 	reg |= PRCM_CPU_PO_RST_CTRL_CORE(cpu);
-	writel(reg, prcm_base + PRCM_CPU_PO_RST_CTRL(cluster));
+	pete_writel("arch/arm/mach-sunxi/mc_smp.c:230", reg, prcm_base + PRCM_CPU_PO_RST_CTRL(cluster));
 
 	if (is_a83t) {
-		reg  = readl(r_cpucfg_base +
+		reg  = pete_readl("arch/arm/mach-sunxi/mc_smp.c:233", r_cpucfg_base +
 			     R_CPUCFG_CLUSTER_PO_RST_CTRL(cluster));
 		reg |= R_CPUCFG_CLUSTER_PO_RST_CTRL_CORE(cpu);
-		writel(reg, r_cpucfg_base +
+		pete_writel("arch/arm/mach-sunxi/mc_smp.c:236", reg, r_cpucfg_base +
 		       R_CPUCFG_CLUSTER_PO_RST_CTRL(cluster));
 		udelay(10);
 	}
 
 	/* de-assert all processor resets */
-	reg = readl(cpucfg_base + CPUCFG_CX_RST_CTRL(cluster));
+	reg = pete_readl("arch/arm/mach-sunxi/mc_smp.c:242", cpucfg_base + CPUCFG_CX_RST_CTRL(cluster));
 	reg |= CPUCFG_CX_RST_CTRL_DBG_RST(cpu);
 	reg |= CPUCFG_CX_RST_CTRL_CORE_RST(cpu);
 	if (!sunxi_core_is_cortex_a15(cpu, cluster))
 		reg |= CPUCFG_CX_RST_CTRL_ETM_RST(cpu);
 	else
 		reg |= CPUCFG_CX_RST_CTRL_CX_RST(cpu); /* NEON */
-	writel(reg, cpucfg_base + CPUCFG_CX_RST_CTRL(cluster));
+	pete_writel("arch/arm/mach-sunxi/mc_smp.c:249", reg, cpucfg_base + CPUCFG_CX_RST_CTRL(cluster));
 
 	return 0;
 }
@@ -261,34 +261,34 @@ static int sunxi_cluster_powerup(unsigned int cluster)
 
 	/* For A83T, assert cluster cores resets */
 	if (is_a83t) {
-		reg = readl(cpucfg_base + CPUCFG_CX_RST_CTRL(cluster));
+		reg = pete_readl("arch/arm/mach-sunxi/mc_smp.c:264", cpucfg_base + CPUCFG_CX_RST_CTRL(cluster));
 		reg &= ~CPUCFG_CX_RST_CTRL_CORE_RST_ALL;   /* Core Reset    */
-		writel(reg, cpucfg_base + CPUCFG_CX_RST_CTRL(cluster));
+		pete_writel("arch/arm/mach-sunxi/mc_smp.c:266", reg, cpucfg_base + CPUCFG_CX_RST_CTRL(cluster));
 		udelay(10);
 	}
 
 	/* assert ACINACTM */
-	reg = readl(cpucfg_base + CPUCFG_CX_CTRL_REG1(cluster));
+	reg = pete_readl("arch/arm/mach-sunxi/mc_smp.c:271", cpucfg_base + CPUCFG_CX_CTRL_REG1(cluster));
 	reg |= CPUCFG_CX_CTRL_REG1_ACINACTM;
-	writel(reg, cpucfg_base + CPUCFG_CX_CTRL_REG1(cluster));
+	pete_writel("arch/arm/mach-sunxi/mc_smp.c:273", reg, cpucfg_base + CPUCFG_CX_CTRL_REG1(cluster));
 
 	/* assert cluster processor power-on resets */
-	reg = readl(prcm_base + PRCM_CPU_PO_RST_CTRL(cluster));
+	reg = pete_readl("arch/arm/mach-sunxi/mc_smp.c:276", prcm_base + PRCM_CPU_PO_RST_CTRL(cluster));
 	reg &= ~PRCM_CPU_PO_RST_CTRL_CORE_ALL;
-	writel(reg, prcm_base + PRCM_CPU_PO_RST_CTRL(cluster));
+	pete_writel("arch/arm/mach-sunxi/mc_smp.c:278", reg, prcm_base + PRCM_CPU_PO_RST_CTRL(cluster));
 
 	/* assert cluster cores resets */
 	if (is_a83t) {
-		reg  = readl(r_cpucfg_base +
+		reg  = pete_readl("arch/arm/mach-sunxi/mc_smp.c:282", r_cpucfg_base +
 			     R_CPUCFG_CLUSTER_PO_RST_CTRL(cluster));
 		reg &= ~CPUCFG_CX_RST_CTRL_CORE_RST_ALL;
-		writel(reg, r_cpucfg_base +
+		pete_writel("arch/arm/mach-sunxi/mc_smp.c:285", reg, r_cpucfg_base +
 		       R_CPUCFG_CLUSTER_PO_RST_CTRL(cluster));
 		udelay(10);
 	}
 
 	/* assert cluster resets */
-	reg = readl(cpucfg_base + CPUCFG_CX_RST_CTRL(cluster));
+	reg = pete_readl("arch/arm/mach-sunxi/mc_smp.c:291", cpucfg_base + CPUCFG_CX_RST_CTRL(cluster));
 	reg &= ~CPUCFG_CX_RST_CTRL_DBG_SOC_RST;
 	reg &= ~CPUCFG_CX_RST_CTRL_DBG_RST_ALL;
 	reg &= ~CPUCFG_CX_RST_CTRL_H_RST;
@@ -301,10 +301,10 @@ static int sunxi_cluster_powerup(unsigned int cluster)
 	if (!sunxi_core_is_cortex_a15(0, cluster))
 		reg &= ~CPUCFG_CX_RST_CTRL_ETM_RST_ALL;
 
-	writel(reg, cpucfg_base + CPUCFG_CX_RST_CTRL(cluster));
+	pete_writel("arch/arm/mach-sunxi/mc_smp.c:304", reg, cpucfg_base + CPUCFG_CX_RST_CTRL(cluster));
 
 	/* hold L1/L2 reset disable signals low */
-	reg = readl(cpucfg_base + CPUCFG_CX_CTRL_REG0(cluster));
+	reg = pete_readl("arch/arm/mach-sunxi/mc_smp.c:307", cpucfg_base + CPUCFG_CX_CTRL_REG0(cluster));
 	if (sunxi_core_is_cortex_a15(0, cluster)) {
 		/* Cortex-A15: hold L2RSTDISABLE low */
 		reg &= ~CPUCFG_CX_CTRL_REG0_L2_RST_DISABLE_A15;
@@ -313,28 +313,28 @@ static int sunxi_cluster_powerup(unsigned int cluster)
 		reg &= ~CPUCFG_CX_CTRL_REG0_L1_RST_DISABLE_ALL;
 		reg &= ~CPUCFG_CX_CTRL_REG0_L2_RST_DISABLE_A7;
 	}
-	writel(reg, cpucfg_base + CPUCFG_CX_CTRL_REG0(cluster));
+	pete_writel("arch/arm/mach-sunxi/mc_smp.c:316", reg, cpucfg_base + CPUCFG_CX_CTRL_REG0(cluster));
 
 	/* clear cluster power gate */
-	reg = readl(prcm_base + PRCM_PWROFF_GATING_REG(cluster));
+	reg = pete_readl("arch/arm/mach-sunxi/mc_smp.c:319", prcm_base + PRCM_PWROFF_GATING_REG(cluster));
 	if (is_a83t)
 		reg &= ~PRCM_PWROFF_GATING_REG_CLUSTER_SUN8I;
 	else
 		reg &= ~PRCM_PWROFF_GATING_REG_CLUSTER_SUN9I;
-	writel(reg, prcm_base + PRCM_PWROFF_GATING_REG(cluster));
+	pete_writel("arch/arm/mach-sunxi/mc_smp.c:324", reg, prcm_base + PRCM_PWROFF_GATING_REG(cluster));
 	udelay(20);
 
 	/* de-assert cluster resets */
-	reg = readl(cpucfg_base + CPUCFG_CX_RST_CTRL(cluster));
+	reg = pete_readl("arch/arm/mach-sunxi/mc_smp.c:328", cpucfg_base + CPUCFG_CX_RST_CTRL(cluster));
 	reg |= CPUCFG_CX_RST_CTRL_DBG_SOC_RST;
 	reg |= CPUCFG_CX_RST_CTRL_H_RST;
 	reg |= CPUCFG_CX_RST_CTRL_L2_RST;
-	writel(reg, cpucfg_base + CPUCFG_CX_RST_CTRL(cluster));
+	pete_writel("arch/arm/mach-sunxi/mc_smp.c:332", reg, cpucfg_base + CPUCFG_CX_RST_CTRL(cluster));
 
 	/* de-assert ACINACTM */
-	reg = readl(cpucfg_base + CPUCFG_CX_CTRL_REG1(cluster));
+	reg = pete_readl("arch/arm/mach-sunxi/mc_smp.c:335", cpucfg_base + CPUCFG_CX_CTRL_REG1(cluster));
 	reg &= ~CPUCFG_CX_CTRL_REG1_ACINACTM;
-	writel(reg, cpucfg_base + CPUCFG_CX_CTRL_REG1(cluster));
+	pete_writel("arch/arm/mach-sunxi/mc_smp.c:337", reg, cpucfg_base + CPUCFG_CX_CTRL_REG1(cluster));
 
 	return 0;
 }
@@ -436,9 +436,9 @@ static void sunxi_cluster_cache_disable(void)
 	sunxi_cluster_cache_disable_without_axi();
 
 	/* last man standing, assert ACINACTM */
-	reg = readl(cpucfg_base + CPUCFG_CX_CTRL_REG1(cluster));
+	reg = pete_readl("arch/arm/mach-sunxi/mc_smp.c:439", cpucfg_base + CPUCFG_CX_CTRL_REG1(cluster));
 	reg |= CPUCFG_CX_CTRL_REG1_ACINACTM;
-	writel(reg, cpucfg_base + CPUCFG_CX_CTRL_REG1(cluster));
+	pete_writel("arch/arm/mach-sunxi/mc_smp.c:441", reg, cpucfg_base + CPUCFG_CX_CTRL_REG1(cluster));
 }
 
 static void sunxi_mc_smp_cpu_die(unsigned int l_cpu)
@@ -491,9 +491,9 @@ static int sunxi_cpu_powerdown(unsigned int cpu, unsigned int cluster)
 		gating_bit = 4;
 
 	/* gate processor power */
-	reg = readl(prcm_base + PRCM_PWROFF_GATING_REG(cluster));
+	reg = pete_readl("arch/arm/mach-sunxi/mc_smp.c:494", prcm_base + PRCM_PWROFF_GATING_REG(cluster));
 	reg |= PRCM_PWROFF_GATING_REG_CORE(gating_bit);
-	writel(reg, prcm_base + PRCM_PWROFF_GATING_REG(cluster));
+	pete_writel("arch/arm/mach-sunxi/mc_smp.c:496", reg, prcm_base + PRCM_PWROFF_GATING_REG(cluster));
 	udelay(20);
 
 	/* close power switch */
@@ -512,20 +512,20 @@ static int sunxi_cluster_powerdown(unsigned int cluster)
 
 	/* assert cluster resets or system will hang */
 	pr_debug("%s: assert cluster reset\n", __func__);
-	reg = readl(cpucfg_base + CPUCFG_CX_RST_CTRL(cluster));
+	reg = pete_readl("arch/arm/mach-sunxi/mc_smp.c:515", cpucfg_base + CPUCFG_CX_RST_CTRL(cluster));
 	reg &= ~CPUCFG_CX_RST_CTRL_DBG_SOC_RST;
 	reg &= ~CPUCFG_CX_RST_CTRL_H_RST;
 	reg &= ~CPUCFG_CX_RST_CTRL_L2_RST;
-	writel(reg, cpucfg_base + CPUCFG_CX_RST_CTRL(cluster));
+	pete_writel("arch/arm/mach-sunxi/mc_smp.c:519", reg, cpucfg_base + CPUCFG_CX_RST_CTRL(cluster));
 
 	/* gate cluster power */
 	pr_debug("%s: gate cluster power\n", __func__);
-	reg = readl(prcm_base + PRCM_PWROFF_GATING_REG(cluster));
+	reg = pete_readl("arch/arm/mach-sunxi/mc_smp.c:523", prcm_base + PRCM_PWROFF_GATING_REG(cluster));
 	if (is_a83t)
 		reg |= PRCM_PWROFF_GATING_REG_CLUSTER_SUN8I;
 	else
 		reg |= PRCM_PWROFF_GATING_REG_CLUSTER_SUN9I;
-	writel(reg, prcm_base + PRCM_PWROFF_GATING_REG(cluster));
+	pete_writel("arch/arm/mach-sunxi/mc_smp.c:528", reg, prcm_base + PRCM_PWROFF_GATING_REG(cluster));
 	udelay(20);
 
 	return 0;
@@ -565,7 +565,7 @@ static int sunxi_mc_smp_cpu_kill(unsigned int l_cpu)
 		if (sunxi_mc_smp_cpu_table[cluster][cpu])
 			continue;
 
-		reg = readl(cpucfg_base + CPUCFG_CX_STATUS(cluster));
+		reg = pete_readl("arch/arm/mach-sunxi/mc_smp.c:568", cpucfg_base + CPUCFG_CX_STATUS(cluster));
 		if (reg & CPUCFG_CX_STATUS_STANDBYWFI(cpu))
 			break;
 	}
@@ -882,7 +882,7 @@ static int __init sunxi_mc_smp_init(void)
 		addr = r_cpucfg_base + R_CPUCFG_CPU_SOFT_ENTRY_REG;
 	else
 		addr = prcm_base + PRCM_CPU_SOFT_ENTRY_REG;
-	writel(__pa_symbol(sunxi_mc_smp_secondary_startup), addr);
+	pete_writel("arch/arm/mach-sunxi/mc_smp.c:885", __pa_symbol(sunxi_mc_smp_secondary_startup), addr);
 
 	/* Actually enable multi cluster SMP */
 	smp_set_ops(&sunxi_mc_smp_smp_ops);

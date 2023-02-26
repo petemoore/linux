@@ -113,12 +113,12 @@ struct i2s_stream_instance {
 
 static inline u32 rv_readl(void __iomem *base_addr)
 {
-	return readl(base_addr - ACP3x_PHY_BASE_ADDRESS);
+	return pete_readl("sound/soc/amd/raven/acp3x.h:116", base_addr - ACP3x_PHY_BASE_ADDRESS);
 }
 
 static inline void rv_writel(u32 val, void __iomem *base_addr)
 {
-	writel(val, base_addr - ACP3x_PHY_BASE_ADDRESS);
+	pete_writel("sound/soc/amd/raven/acp3x.h:121", val, base_addr - ACP3x_PHY_BASE_ADDRESS);
 }
 
 static inline u64 acp_get_byte_count(struct i2s_stream_instance *rtd,

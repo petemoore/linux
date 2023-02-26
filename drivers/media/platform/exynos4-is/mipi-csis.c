@@ -268,8 +268,8 @@ static const struct csis_pix_format s5pcsis_formats[] = {
 	}
 };
 
-#define s5pcsis_write(__csis, __r, __v) writel(__v, __csis->regs + __r)
-#define s5pcsis_read(__csis, __r) readl(__csis->regs + __r)
+#define s5pcsis_write(__csis, __r, __v) pete_writel("drivers/media/platform/exynos4-is/mipi-csis.c:271", __v, __csis->regs + __r)
+#define s5pcsis_read(__csis, __r) pete_readl("drivers/media/platform/exynos4-is/mipi-csis.c:272", __csis->regs + __r)
 
 static struct csis_state *sd_to_csis_state(struct v4l2_subdev *sdev)
 {

@@ -68,7 +68,7 @@ static int uniphier_i2c_xfer_byte(struct i2c_adapter *adap, u32 txdata,
 	reinit_completion(&priv->comp);
 
 	txdata |= UNIPHIER_I2C_DTRM_IRQEN;
-	writel(txdata, priv->membase + UNIPHIER_I2C_DTRM);
+	pete_writel("drivers/i2c/busses/i2c-uniphier.c:71", txdata, priv->membase + UNIPHIER_I2C_DTRM);
 
 	time_left = wait_for_completion_timeout(&priv->comp, adap->timeout);
 	if (unlikely(!time_left)) {
@@ -76,7 +76,7 @@ static int uniphier_i2c_xfer_byte(struct i2c_adapter *adap, u32 txdata,
 		return -ETIMEDOUT;
 	}
 
-	rxdata = readl(priv->membase + UNIPHIER_I2C_DREC);
+	rxdata = pete_readl("drivers/i2c/busses/i2c-uniphier.c:79", priv->membase + UNIPHIER_I2C_DREC);
 	if (rxdatap)
 		*rxdatap = rxdata;
 
@@ -195,7 +195,7 @@ static int uniphier_i2c_check_bus_busy(struct i2c_adapter *adap)
 {
 	struct uniphier_i2c_priv *priv = i2c_get_adapdata(adap);
 
-	if (!(readl(priv->membase + UNIPHIER_I2C_DREC) &
+	if (!(pete_readl("drivers/i2c/busses/i2c-uniphier.c:198", priv->membase + UNIPHIER_I2C_DREC) &
 						UNIPHIER_I2C_DREC_BBN)) {
 		if (priv->busy_cnt++ > 3) {
 			/*
@@ -250,14 +250,14 @@ static void uniphier_i2c_reset(struct uniphier_i2c_priv *priv, bool reset_on)
 	u32 val = UNIPHIER_I2C_BRST_RSCL;
 
 	val |= reset_on ? 0 : UNIPHIER_I2C_BRST_FOEN;
-	writel(val, priv->membase + UNIPHIER_I2C_BRST);
+	pete_writel("drivers/i2c/busses/i2c-uniphier.c:253", val, priv->membase + UNIPHIER_I2C_BRST);
 }
 
 static int uniphier_i2c_get_scl(struct i2c_adapter *adap)
 {
 	struct uniphier_i2c_priv *priv = i2c_get_adapdata(adap);
 
-	return !!(readl(priv->membase + UNIPHIER_I2C_BSTS) &
+	return !!(pete_readl("drivers/i2c/busses/i2c-uniphier.c:260", priv->membase + UNIPHIER_I2C_BSTS) &
 							UNIPHIER_I2C_BSTS_SCL);
 }
 
@@ -265,7 +265,7 @@ static void uniphier_i2c_set_scl(struct i2c_adapter *adap, int val)
 {
 	struct uniphier_i2c_priv *priv = i2c_get_adapdata(adap);
 
-	writel(val ? UNIPHIER_I2C_BRST_RSCL : 0,
+	pete_writel("drivers/i2c/busses/i2c-uniphier.c:268", val ? UNIPHIER_I2C_BRST_RSCL : 0,
 	       priv->membase + UNIPHIER_I2C_BRST);
 }
 
@@ -273,7 +273,7 @@ static int uniphier_i2c_get_sda(struct i2c_adapter *adap)
 {
 	struct uniphier_i2c_priv *priv = i2c_get_adapdata(adap);
 
-	return !!(readl(priv->membase + UNIPHIER_I2C_BSTS) &
+	return !!(pete_readl("drivers/i2c/busses/i2c-uniphier.c:276", priv->membase + UNIPHIER_I2C_BSTS) &
 							UNIPHIER_I2C_BSTS_SDA);
 }
 
@@ -302,7 +302,7 @@ static void uniphier_i2c_hw_init(struct uniphier_i2c_priv *priv)
 	 *  Fast-mode:     tLOW = 1.3 us, tHIGH = 0.6 us
 	 * "tLow/tHIGH = 5/4" meets both.
 	 */
-	writel((cyc * 5 / 9 << 16) | cyc, priv->membase + UNIPHIER_I2C_CLK);
+	pete_writel("drivers/i2c/busses/i2c-uniphier.c:305", (cyc * 5 / 9 << 16) | cyc, priv->membase + UNIPHIER_I2C_CLK);
 
 	uniphier_i2c_reset(priv, false);
 }

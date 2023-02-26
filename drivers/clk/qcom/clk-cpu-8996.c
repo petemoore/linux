@@ -441,13 +441,13 @@ static void qcom_cpu_clk_msm8996_acd_init(void __iomem *base)
 	kryo_l2_set_indirect_reg(L2ACDSSCR_REG, 0x00000601);
 
 	if (PWRCL_CPU_REG_MASK == (hwid | PWRCL_CPU_REG_MASK)) {
-		writel(0xf, base + PWRCL_REG_OFFSET + SSSCTL_OFFSET);
+		pete_writel("drivers/clk/qcom/clk-cpu-8996.c:444", 0xf, base + PWRCL_REG_OFFSET + SSSCTL_OFFSET);
 		kryo_l2_set_indirect_reg(L2ACDCR_REG, 0x002c5ffd);
 	}
 
 	if (PERFCL_CPU_REG_MASK == (hwid | PERFCL_CPU_REG_MASK)) {
 		kryo_l2_set_indirect_reg(L2ACDCR_REG, 0x002c5ffd);
-		writel(0xf, base + PERFCL_REG_OFFSET + SSSCTL_OFFSET);
+		pete_writel("drivers/clk/qcom/clk-cpu-8996.c:450", 0xf, base + PERFCL_REG_OFFSET + SSSCTL_OFFSET);
 	}
 
 	spin_unlock_irqrestore(&qcom_clk_acd_lock, flags);

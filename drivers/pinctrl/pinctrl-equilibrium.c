@@ -29,7 +29,7 @@ static void eqbr_gpio_disable_irq(struct irq_data *d)
 	unsigned long flags;
 
 	raw_spin_lock_irqsave(&gctrl->lock, flags);
-	writel(BIT(offset), gctrl->membase + GPIO_IRNENCLR);
+	pete_writel("drivers/pinctrl/pinctrl-equilibrium.c:32", BIT(offset), gctrl->membase + GPIO_IRNENCLR);
 	raw_spin_unlock_irqrestore(&gctrl->lock, flags);
 }
 
@@ -42,7 +42,7 @@ static void eqbr_gpio_enable_irq(struct irq_data *d)
 
 	gc->direction_input(gc, offset);
 	raw_spin_lock_irqsave(&gctrl->lock, flags);
-	writel(BIT(offset), gctrl->membase + GPIO_IRNRNSET);
+	pete_writel("drivers/pinctrl/pinctrl-equilibrium.c:45", BIT(offset), gctrl->membase + GPIO_IRNRNSET);
 	raw_spin_unlock_irqrestore(&gctrl->lock, flags);
 }
 
@@ -54,7 +54,7 @@ static void eqbr_gpio_ack_irq(struct irq_data *d)
 	unsigned long flags;
 
 	raw_spin_lock_irqsave(&gctrl->lock, flags);
-	writel(BIT(offset), gctrl->membase + GPIO_IRNCR);
+	pete_writel("drivers/pinctrl/pinctrl-equilibrium.c:57", BIT(offset), gctrl->membase + GPIO_IRNCR);
 	raw_spin_unlock_irqrestore(&gctrl->lock, flags);
 }
 
@@ -68,9 +68,9 @@ static inline void eqbr_cfg_bit(void __iomem *addr,
 				unsigned int offset, unsigned int set)
 {
 	if (set)
-		writel(readl(addr) | BIT(offset), addr);
+		pete_writel("drivers/pinctrl/pinctrl-equilibrium.c:71", pete_readl("drivers/pinctrl/pinctrl-equilibrium.c:71", addr) | BIT(offset), addr);
 	else
-		writel(readl(addr) & ~BIT(offset), addr);
+		pete_writel("drivers/pinctrl/pinctrl-equilibrium.c:73", pete_readl("drivers/pinctrl/pinctrl-equilibrium.c:73", addr) & ~BIT(offset), addr);
 }
 
 static int eqbr_irq_type_cfg(struct gpio_irq_type *type,
@@ -152,7 +152,7 @@ static void eqbr_irq_handler(struct irq_desc *desc)
 	unsigned long pins, offset;
 
 	chained_irq_enter(ic, desc);
-	pins = readl(gctrl->membase + GPIO_IRNCR);
+	pins = pete_readl("drivers/pinctrl/pinctrl-equilibrium.c:155", gctrl->membase + GPIO_IRNCR);
 
 	for_each_set_bit(offset, &pins, gc->ngpio)
 		generic_handle_domain_irq(gc->irq.domain, offset);
@@ -303,7 +303,7 @@ static int eqbr_set_pin_mux(struct eqbr_pinctrl_drv_data *pctl,
 	}
 
 	raw_spin_lock_irqsave(&pctl->lock, flags);
-	writel(pmx, mem + (offset * 4));
+	pete_writel("drivers/pinctrl/pinctrl-equilibrium.c:306", pmx, mem + (offset * 4));
 	raw_spin_unlock_irqrestore(&pctl->lock, flags);
 	return 0;
 }
@@ -355,7 +355,7 @@ static int get_drv_cur(void __iomem *mem, unsigned int offset)
 	unsigned int idx = offset / DRV_CUR_PINS; /* 0-15, 16-31 per register*/
 	unsigned int pin_offset = offset % DRV_CUR_PINS;
 
-	return PARSE_DRV_CURRENT(readl(mem + REG_DRCC(idx)), pin_offset);
+	return PARSE_DRV_CURRENT(pete_readl("drivers/pinctrl/pinctrl-equilibrium.c:358", mem + REG_DRCC(idx)), pin_offset);
 }
 
 static struct eqbr_gpio_ctrl
@@ -402,19 +402,19 @@ static int eqbr_pinconf_get(struct pinctrl_dev *pctldev, unsigned int pin,
 	raw_spin_lock_irqsave(&pctl->lock, flags);
 	switch (param) {
 	case PIN_CONFIG_BIAS_PULL_UP:
-		val = !!(readl(mem + REG_PUEN) & BIT(offset));
+		val = !!(pete_readl("drivers/pinctrl/pinctrl-equilibrium.c:405", mem + REG_PUEN) & BIT(offset));
 		break;
 	case PIN_CONFIG_BIAS_PULL_DOWN:
-		val = !!(readl(mem + REG_PDEN) & BIT(offset));
+		val = !!(pete_readl("drivers/pinctrl/pinctrl-equilibrium.c:408", mem + REG_PDEN) & BIT(offset));
 		break;
 	case PIN_CONFIG_DRIVE_OPEN_DRAIN:
-		val = !!(readl(mem + REG_OD) & BIT(offset));
+		val = !!(pete_readl("drivers/pinctrl/pinctrl-equilibrium.c:411", mem + REG_OD) & BIT(offset));
 		break;
 	case PIN_CONFIG_DRIVE_STRENGTH:
 		val = get_drv_cur(mem, offset);
 		break;
 	case PIN_CONFIG_SLEW_RATE:
-		val = !!(readl(mem + REG_SRC) & BIT(offset));
+		val = !!(pete_readl("drivers/pinctrl/pinctrl-equilibrium.c:417", mem + REG_SRC) & BIT(offset));
 		break;
 	case PIN_CONFIG_OUTPUT_ENABLE:
 		gctrl = get_gpio_ctrls_via_bank(pctl, bank);
@@ -424,7 +424,7 @@ static int eqbr_pinconf_get(struct pinctrl_dev *pctldev, unsigned int pin,
 			raw_spin_unlock_irqrestore(&pctl->lock, flags);
 			return -ENODEV;
 		}
-		val = !!(readl(gctrl->membase + GPIO_DIR) & BIT(offset));
+		val = !!(pete_readl("drivers/pinctrl/pinctrl-equilibrium.c:427", gctrl->membase + GPIO_DIR) & BIT(offset));
 		break;
 	default:
 		raw_spin_unlock_irqrestore(&pctl->lock, flags);
@@ -500,9 +500,9 @@ static int eqbr_pinconf_set(struct pinctrl_dev *pctldev, unsigned int pin,
 		}
 
 		raw_spin_lock_irqsave(&pctl->lock, flags);
-		regval = readl(mem);
+		regval = pete_readl("drivers/pinctrl/pinctrl-equilibrium.c:503", mem);
 		regval = (regval & ~mask) | ((val << offset) & mask);
-		writel(regval, mem);
+		pete_writel("drivers/pinctrl/pinctrl-equilibrium.c:505", regval, mem);
 		raw_spin_unlock_irqrestore(&pctl->lock, flags);
 	}
 
@@ -846,7 +846,7 @@ static int pinbank_init(struct device_node *np,
 	bank->pin_base = spec.args[1];
 	bank->nr_pins = spec.args[2];
 
-	bank->aval_pinmap = readl(bank->membase + REG_AVAIL);
+	bank->aval_pinmap = pete_readl("drivers/pinctrl/pinctrl-equilibrium.c:849", bank->membase + REG_AVAIL);
 	bank->id = id;
 
 	dev_dbg(dev, "pinbank id: %d, reg: %px, pinbase: %u, pin number: %u, pinmap: 0x%x\n",

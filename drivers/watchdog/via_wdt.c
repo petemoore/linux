@@ -74,9 +74,9 @@ static unsigned long next_heartbeat;	/* the next_heartbeat for the timer */
 
 static inline void wdt_reset(void)
 {
-	unsigned int ctl = readl(wdt_mem);
+	unsigned int ctl = pete_readl("drivers/watchdog/via_wdt.c:77", wdt_mem);
 
-	writel(ctl | VIA_WDT_TRIGGER, wdt_mem);
+	pete_writel("drivers/watchdog/via_wdt.c:79", ctl | VIA_WDT_TRIGGER, wdt_mem);
 }
 
 /*
@@ -107,10 +107,10 @@ static int wdt_ping(struct watchdog_device *wdd)
 
 static int wdt_start(struct watchdog_device *wdd)
 {
-	unsigned int ctl = readl(wdt_mem);
+	unsigned int ctl = pete_readl("drivers/watchdog/via_wdt.c:110", wdt_mem);
 
-	writel(wdd->timeout, wdt_mem + VIA_WDT_COUNT);
-	writel(ctl | VIA_WDT_RUNNING | VIA_WDT_TRIGGER, wdt_mem);
+	pete_writel("drivers/watchdog/via_wdt.c:112", wdd->timeout, wdt_mem + VIA_WDT_COUNT);
+	pete_writel("drivers/watchdog/via_wdt.c:113", ctl | VIA_WDT_RUNNING | VIA_WDT_TRIGGER, wdt_mem);
 	wdt_ping(wdd);
 	mod_timer(&timer, jiffies + WDT_HEARTBEAT);
 	return 0;
@@ -118,16 +118,16 @@ static int wdt_start(struct watchdog_device *wdd)
 
 static int wdt_stop(struct watchdog_device *wdd)
 {
-	unsigned int ctl = readl(wdt_mem);
+	unsigned int ctl = pete_readl("drivers/watchdog/via_wdt.c:121", wdt_mem);
 
-	writel(ctl & ~VIA_WDT_RUNNING, wdt_mem);
+	pete_writel("drivers/watchdog/via_wdt.c:123", ctl & ~VIA_WDT_RUNNING, wdt_mem);
 	return 0;
 }
 
 static int wdt_set_timeout(struct watchdog_device *wdd,
 			   unsigned int new_timeout)
 {
-	writel(new_timeout, wdt_mem + VIA_WDT_COUNT);
+	pete_writel("drivers/watchdog/via_wdt.c:130", new_timeout, wdt_mem + VIA_WDT_COUNT);
 	wdd->timeout = new_timeout;
 	return 0;
 }
@@ -208,7 +208,7 @@ static int wdt_probe(struct pci_dev *pdev,
 	wdt_dev.timeout = timeout;
 	wdt_dev.parent = &pdev->dev;
 	watchdog_set_nowayout(&wdt_dev, nowayout);
-	if (readl(wdt_mem) & VIA_WDT_FIRED)
+	if (pete_readl("drivers/watchdog/via_wdt.c:211", wdt_mem) & VIA_WDT_FIRED)
 		wdt_dev.bootstatus |= WDIOF_CARDRESET;
 
 	ret = watchdog_register_device(&wdt_dev);

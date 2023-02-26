@@ -109,7 +109,7 @@ static inline void irdma_invalidate_pf_hmc_pd(struct irdma_sc_dev *dev, u32 sd_i
 		  FIELD_PREP(IRDMA_PFHMC_PDINV_PMSDPARTSEL, 1) |
 		  FIELD_PREP(IRDMA_PFHMC_PDINV_PMPDIDX, pd_idx);
 
-	writel(val, dev->hw_regs[IRDMA_PFHMC_PDINV]);
+	pete_writel("drivers/infiniband/hw/irdma/hmc.c:112", val, dev->hw_regs[IRDMA_PFHMC_PDINV]);
 }
 
 /**

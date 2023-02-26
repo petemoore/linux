@@ -214,12 +214,12 @@ static void isp1760_hcd_portsc1_set_clear(struct isp1760_hcd *priv, u32 field,
 	u32 bit = isp176x_hc_portsc1_fields[field];
 	u16 portsc1_reg = priv->is_isp1763 ? ISP1763_HC_PORTSC1 :
 		ISP176x_HC_PORTSC1;
-	u32 port_status = readl(priv->base + portsc1_reg);
+	u32 port_status = pete_readl("drivers/usb/isp1760/isp1760-hcd.c:217", priv->base + portsc1_reg);
 
 	if (val)
-		writel(port_status | bit, priv->base + portsc1_reg);
+		pete_writel("drivers/usb/isp1760/isp1760-hcd.c:220", port_status | bit, priv->base + portsc1_reg);
 	else
-		writel(port_status & ~bit, priv->base + portsc1_reg);
+		pete_writel("drivers/usb/isp1760/isp1760-hcd.c:222", port_status & ~bit, priv->base + portsc1_reg);
 }
 
 static void isp1760_hcd_write(struct usb_hcd *hcd, u32 field, u32 val)
@@ -399,7 +399,7 @@ static void isp1763_mem_read(struct usb_hcd *hcd, u16 srcaddr,
 	if (bytes <= 0)
 		return;
 
-	*((u8 *)dstptr) = (u8)(readw(priv->base + ISP1763_HC_DATA) & 0xFF);
+	*((u8 *)dstptr) = (u8)(pete_readw("drivers/usb/isp1760/isp1760-hcd.c:402", priv->base + ISP1763_HC_DATA) & 0xFF);
 }
 
 static void mem_read(struct usb_hcd *hcd, u32 src_offset, __u32 *dst,
@@ -472,7 +472,7 @@ static void isp1763_mem_write(struct usb_hcd *hcd, u16 dstaddr, u16 *src,
 	 * The only way to get here is if there is a single byte left,
 	 * get it and write it to the data reg;
 	 */
-	writew(*((u8 *)src), priv->base + ISP1763_HC_DATA);
+	pete_writew("drivers/usb/isp1760/isp1760-hcd.c:475", *((u8 *)src), priv->base + ISP1763_HC_DATA);
 }
 
 static void mem_write(struct usb_hcd *hcd, u32 dst_offset, __u32 *src,

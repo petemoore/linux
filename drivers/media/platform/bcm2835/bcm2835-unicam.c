@@ -554,17 +554,17 @@ to_unicam_device(struct v4l2_device *v4l2_dev)
 /* Hardware access */
 static inline void clk_write(struct unicam_device *dev, u32 val)
 {
-	writel(val | 0x5a000000, dev->clk_gate_base);
+	pete_writel("drivers/media/platform/bcm2835/bcm2835-unicam.c:557", val | 0x5a000000, dev->clk_gate_base);
 }
 
 static inline u32 reg_read(struct unicam_device *dev, u32 offset)
 {
-	return readl(dev->base + offset);
+	return pete_readl("drivers/media/platform/bcm2835/bcm2835-unicam.c:562", dev->base + offset);
 }
 
 static inline void reg_write(struct unicam_device *dev, u32 offset, u32 val)
 {
-	writel(val, dev->base + offset);
+	pete_writel("drivers/media/platform/bcm2835/bcm2835-unicam.c:567", val, dev->base + offset);
 }
 
 static inline int get_field(u32 value, u32 mask)

@@ -58,7 +58,7 @@ static irqreturn_t nspire_keypad_irq(int irq, void *dev_id)
 	u16 state[8];
 	u16 bits, changed;
 
-	int_sts = readl(keypad->reg_base + KEYPAD_INT) & keypad->int_mask;
+	int_sts = pete_readl("drivers/input/keyboard/nspire-keypad.c:61", keypad->reg_base + KEYPAD_INT) & keypad->int_mask;
 	if (!int_sts)
 		return IRQ_NONE;
 
@@ -88,7 +88,7 @@ static irqreturn_t nspire_keypad_irq(int irq, void *dev_id)
 
 	input_sync(input);
 
-	writel(0x3, keypad->reg_base + KEYPAD_INT);
+	pete_writel("drivers/input/keyboard/nspire-keypad.c:91", 0x3, keypad->reg_base + KEYPAD_INT);
 
 	return IRQ_HANDLED;
 }
@@ -118,14 +118,14 @@ static int nspire_keypad_open(struct input_dev *input)
 	val |= 3 << 0; /* Set scan mode to 3 (continuous scan) */
 	val |= row_delay_cycles << 2; /* Delay between scanning each row */
 	val |= delay_cycles << 16; /* Delay between scans */
-	writel(val, keypad->reg_base + KEYPAD_SCAN_MODE);
+	pete_writel("drivers/input/keyboard/nspire-keypad.c:121", val, keypad->reg_base + KEYPAD_SCAN_MODE);
 
 	val = (KEYPAD_BITMASK_ROWS & 0xff) | (KEYPAD_BITMASK_COLS & 0xff)<<8;
-	writel(val, keypad->reg_base + KEYPAD_CNTL);
+	pete_writel("drivers/input/keyboard/nspire-keypad.c:124", val, keypad->reg_base + KEYPAD_CNTL);
 
 	/* Enable interrupts */
 	keypad->int_mask = 1 << 1;
-	writel(keypad->int_mask, keypad->reg_base + KEYPAD_INTMSK);
+	pete_writel("drivers/input/keyboard/nspire-keypad.c:128", keypad->int_mask, keypad->reg_base + KEYPAD_INTMSK);
 
 	return 0;
 }
@@ -135,9 +135,9 @@ static void nspire_keypad_close(struct input_dev *input)
 	struct nspire_keypad *keypad = input_get_drvdata(input);
 
 	/* Disable interrupts */
-	writel(0, keypad->reg_base + KEYPAD_INTMSK);
+	pete_writel("drivers/input/keyboard/nspire-keypad.c:138", 0, keypad->reg_base + KEYPAD_INTMSK);
 	/* Acknowledge existing interrupts */
-	writel(~0, keypad->reg_base + KEYPAD_INT);
+	pete_writel("drivers/input/keyboard/nspire-keypad.c:140", ~0, keypad->reg_base + KEYPAD_INT);
 
 	clk_disable_unprepare(keypad->clk);
 }
@@ -204,15 +204,15 @@ static int nspire_keypad_probe(struct platform_device *pdev)
 	}
 
 	/* Disable interrupts */
-	writel(0, keypad->reg_base + KEYPAD_INTMSK);
+	pete_writel("drivers/input/keyboard/nspire-keypad.c:207", 0, keypad->reg_base + KEYPAD_INTMSK);
 	/* Acknowledge existing interrupts */
-	writel(~0, keypad->reg_base + KEYPAD_INT);
+	pete_writel("drivers/input/keyboard/nspire-keypad.c:209", ~0, keypad->reg_base + KEYPAD_INT);
 
 	/* Disable GPIO interrupts to prevent hanging on touchpad */
 	/* Possibly used to detect touchpad events */
-	writel(0, keypad->reg_base + KEYPAD_UNKNOWN_INT);
+	pete_writel("drivers/input/keyboard/nspire-keypad.c:213", 0, keypad->reg_base + KEYPAD_UNKNOWN_INT);
 	/* Acknowledge existing GPIO interrupts */
-	writel(~0, keypad->reg_base + KEYPAD_UNKNOWN_INT_STS);
+	pete_writel("drivers/input/keyboard/nspire-keypad.c:215", ~0, keypad->reg_base + KEYPAD_UNKNOWN_INT_STS);
 
 	clk_disable_unprepare(keypad->clk);
 

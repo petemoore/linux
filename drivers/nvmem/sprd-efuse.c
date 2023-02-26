@@ -105,14 +105,14 @@ static void sprd_efuse_unlock(struct sprd_efuse *efuse)
 
 static void sprd_efuse_set_prog_power(struct sprd_efuse *efuse, bool en)
 {
-	u32 val = readl(efuse->base + SPRD_EFUSE_PW_SWT);
+	u32 val = pete_readl("drivers/nvmem/sprd-efuse.c:108", efuse->base + SPRD_EFUSE_PW_SWT);
 
 	if (en)
 		val &= ~SPRD_EFUSE_ENK2_ON;
 	else
 		val &= ~SPRD_EFUSE_ENK1_ON;
 
-	writel(val, efuse->base + SPRD_EFUSE_PW_SWT);
+	pete_writel("drivers/nvmem/sprd-efuse.c:115", val, efuse->base + SPRD_EFUSE_PW_SWT);
 
 	/* Open or close efuse power need wait 1000us to make power stable. */
 	usleep_range(1000, 1200);
@@ -122,7 +122,7 @@ static void sprd_efuse_set_prog_power(struct sprd_efuse *efuse, bool en)
 	else
 		val |= SPRD_EFUSE_ENK2_ON;
 
-	writel(val, efuse->base + SPRD_EFUSE_PW_SWT);
+	pete_writel("drivers/nvmem/sprd-efuse.c:125", val, efuse->base + SPRD_EFUSE_PW_SWT);
 
 	/* Open or close efuse power need wait 1000us to make power stable. */
 	usleep_range(1000, 1200);
@@ -130,14 +130,14 @@ static void sprd_efuse_set_prog_power(struct sprd_efuse *efuse, bool en)
 
 static void sprd_efuse_set_read_power(struct sprd_efuse *efuse, bool en)
 {
-	u32 val = readl(efuse->base + SPRD_EFUSE_ENABLE);
+	u32 val = pete_readl("drivers/nvmem/sprd-efuse.c:133", efuse->base + SPRD_EFUSE_ENABLE);
 
 	if (en)
 		val |= SPRD_EFUSE_VDD_EN;
 	else
 		val &= ~SPRD_EFUSE_VDD_EN;
 
-	writel(val, efuse->base + SPRD_EFUSE_ENABLE);
+	pete_writel("drivers/nvmem/sprd-efuse.c:140", val, efuse->base + SPRD_EFUSE_ENABLE);
 
 	/* Open or close efuse power need wait 1000us to make power stable. */
 	usleep_range(1000, 1200);
@@ -145,50 +145,50 @@ static void sprd_efuse_set_read_power(struct sprd_efuse *efuse, bool en)
 
 static void sprd_efuse_set_prog_lock(struct sprd_efuse *efuse, bool en)
 {
-	u32 val = readl(efuse->base + SPRD_EFUSE_ENABLE);
+	u32 val = pete_readl("drivers/nvmem/sprd-efuse.c:148", efuse->base + SPRD_EFUSE_ENABLE);
 
 	if (en)
 		val |= SPRD_EFUSE_LOCK_WR_EN;
 	else
 		val &= ~SPRD_EFUSE_LOCK_WR_EN;
 
-	writel(val, efuse->base + SPRD_EFUSE_ENABLE);
+	pete_writel("drivers/nvmem/sprd-efuse.c:155", val, efuse->base + SPRD_EFUSE_ENABLE);
 }
 
 static void sprd_efuse_set_auto_check(struct sprd_efuse *efuse, bool en)
 {
-	u32 val = readl(efuse->base + SPRD_EFUSE_ENABLE);
+	u32 val = pete_readl("drivers/nvmem/sprd-efuse.c:160", efuse->base + SPRD_EFUSE_ENABLE);
 
 	if (en)
 		val |= SPRD_EFUSE_AUTO_CHECK_EN;
 	else
 		val &= ~SPRD_EFUSE_AUTO_CHECK_EN;
 
-	writel(val, efuse->base + SPRD_EFUSE_ENABLE);
+	pete_writel("drivers/nvmem/sprd-efuse.c:167", val, efuse->base + SPRD_EFUSE_ENABLE);
 }
 
 static void sprd_efuse_set_data_double(struct sprd_efuse *efuse, bool en)
 {
-	u32 val = readl(efuse->base + SPRD_EFUSE_ENABLE);
+	u32 val = pete_readl("drivers/nvmem/sprd-efuse.c:172", efuse->base + SPRD_EFUSE_ENABLE);
 
 	if (en)
 		val |= SPRD_EFUSE_DOUBLE_EN;
 	else
 		val &= ~SPRD_EFUSE_DOUBLE_EN;
 
-	writel(val, efuse->base + SPRD_EFUSE_ENABLE);
+	pete_writel("drivers/nvmem/sprd-efuse.c:179", val, efuse->base + SPRD_EFUSE_ENABLE);
 }
 
 static void sprd_efuse_set_prog_en(struct sprd_efuse *efuse, bool en)
 {
-	u32 val = readl(efuse->base + SPRD_EFUSE_PW_SWT);
+	u32 val = pete_readl("drivers/nvmem/sprd-efuse.c:184", efuse->base + SPRD_EFUSE_PW_SWT);
 
 	if (en)
 		val |= SPRD_EFUSE_PROG_EN;
 	else
 		val &= ~SPRD_EFUSE_PROG_EN;
 
-	writel(val, efuse->base + SPRD_EFUSE_PW_SWT);
+	pete_writel("drivers/nvmem/sprd-efuse.c:191", val, efuse->base + SPRD_EFUSE_PW_SWT);
 }
 
 static int sprd_efuse_raw_prog(struct sprd_efuse *efuse, u32 blk, bool doub,
@@ -202,7 +202,7 @@ static int sprd_efuse_raw_prog(struct sprd_efuse *efuse, u32 blk, bool doub,
 	 * allow programming, and block other programming until we clear the
 	 * magic number.
 	 */
-	writel(SPRD_EFUSE_MAGIC_NUMBER,
+	pete_writel("drivers/nvmem/sprd-efuse.c:205", SPRD_EFUSE_MAGIC_NUMBER,
 	       efuse->base + SPRD_EFUSE_MAGIC_NUM);
 
 	/*
@@ -220,7 +220,7 @@ static int sprd_efuse_raw_prog(struct sprd_efuse *efuse, u32 blk, bool doub,
 	if (lock)
 		sprd_efuse_set_auto_check(efuse, true);
 
-	writel(*data, efuse->base + SPRD_EFUSE_MEM(blk));
+	pete_writel("drivers/nvmem/sprd-efuse.c:223", *data, efuse->base + SPRD_EFUSE_MEM(blk));
 
 	/* Disable auto-check and data double after programming */
 	if (lock)
@@ -231,22 +231,22 @@ static int sprd_efuse_raw_prog(struct sprd_efuse *efuse, u32 blk, bool doub,
 	 * Check the efuse error status, if the programming is successful,
 	 * we should lock this efuse block to avoid programming again.
 	 */
-	status = readl(efuse->base + SPRD_EFUSE_ERR_FLAG);
+	status = pete_readl("drivers/nvmem/sprd-efuse.c:234", efuse->base + SPRD_EFUSE_ERR_FLAG);
 	if (status) {
 		dev_err(efuse->dev,
 			"write error status %u of block %d\n", status, blk);
 
-		writel(SPRD_EFUSE_ERR_CLR_MASK,
+		pete_writel("drivers/nvmem/sprd-efuse.c:239", SPRD_EFUSE_ERR_CLR_MASK,
 		       efuse->base + SPRD_EFUSE_ERR_CLR);
 		ret = -EBUSY;
 	} else if (lock) {
 		sprd_efuse_set_prog_lock(efuse, lock);
-		writel(0, efuse->base + SPRD_EFUSE_MEM(blk));
+		pete_writel("drivers/nvmem/sprd-efuse.c:244", 0, efuse->base + SPRD_EFUSE_MEM(blk));
 		sprd_efuse_set_prog_lock(efuse, false);
 	}
 
 	sprd_efuse_set_prog_power(efuse, false);
-	writel(0, efuse->base + SPRD_EFUSE_MAGIC_NUM);
+	pete_writel("drivers/nvmem/sprd-efuse.c:249", 0, efuse->base + SPRD_EFUSE_MAGIC_NUM);
 
 	return ret;
 }
@@ -266,7 +266,7 @@ static int sprd_efuse_raw_read(struct sprd_efuse *efuse, int blk, u32 *val,
 	sprd_efuse_set_data_double(efuse, doub);
 
 	/* Start to read data from efuse block */
-	*val = readl(efuse->base + SPRD_EFUSE_MEM(blk));
+	*val = pete_readl("drivers/nvmem/sprd-efuse.c:269", efuse->base + SPRD_EFUSE_MEM(blk));
 
 	/* Disable double data */
 	sprd_efuse_set_data_double(efuse, false);
@@ -278,12 +278,12 @@ static int sprd_efuse_raw_read(struct sprd_efuse *efuse, int blk, u32 *val,
 	 * Check the efuse error status and clear them if there are some
 	 * errors occurred.
 	 */
-	status = readl(efuse->base + SPRD_EFUSE_ERR_FLAG);
+	status = pete_readl("drivers/nvmem/sprd-efuse.c:281", efuse->base + SPRD_EFUSE_ERR_FLAG);
 	if (status) {
 		dev_err(efuse->dev,
 			"read error status %d of block %d\n", status, blk);
 
-		writel(SPRD_EFUSE_ERR_CLR_MASK,
+		pete_writel("drivers/nvmem/sprd-efuse.c:286", SPRD_EFUSE_ERR_CLR_MASK,
 		       efuse->base + SPRD_EFUSE_ERR_CLR);
 		return -EBUSY;
 	}

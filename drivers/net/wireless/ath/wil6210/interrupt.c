@@ -59,13 +59,13 @@ static inline void wil_icr_clear(u32 x, void __iomem *addr)
 
 static inline void wil_icr_clear(u32 x, void __iomem *addr)
 {
-	writel(x, addr);
+	pete_writel("drivers/net/wireless/ath/wil6210/interrupt.c:62", x, addr);
 }
 #endif /* defined(CONFIG_WIL6210_ISR_COR) */
 
 static inline u32 wil_ioread32_and_clear(void __iomem *addr)
 {
-	u32 x = readl(addr);
+	u32 x = pete_readl("drivers/net/wireless/ath/wil6210/interrupt.c:68", addr);
 
 	wil_icr_clear(x, addr);
 
@@ -834,9 +834,9 @@ free0:
 /* can't use wil_ioread32_and_clear because ICC value is not set yet */
 static inline void wil_clear32(void __iomem *addr)
 {
-	u32 x = readl(addr);
+	u32 x = pete_readl("drivers/net/wireless/ath/wil6210/interrupt.c:837", addr);
 
-	writel(x, addr);
+	pete_writel("drivers/net/wireless/ath/wil6210/interrupt.c:839", x, addr);
 }
 
 void wil6210_clear_irq(struct wil6210_priv *wil)

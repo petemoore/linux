@@ -61,13 +61,13 @@ static void __init clps711x_clk_init_dt(struct device_node *np)
 	spin_lock_init(&clps711x_clk->lock);
 
 	/* Read PLL multiplier value and sanity check */
-	tmp = readl(base + CLPS711X_PLLR) >> 24;
+	tmp = pete_readl("drivers/clk/clk-clps711x.c:64", base + CLPS711X_PLLR) >> 24;
 	if (((tmp >= 10) && (tmp <= 50)) || !fref)
 		f_pll = DIV_ROUND_UP(CLPS711X_OSC_FREQ * tmp, 2);
 	else
 		f_pll = fref;
 
-	tmp = readl(base + CLPS711X_SYSFLG2);
+	tmp = pete_readl("drivers/clk/clk-clps711x.c:70", base + CLPS711X_SYSFLG2);
 	if (tmp & SYSFLG2_CKMODE) {
 		f_cpu = CLPS711X_EXT_FREQ;
 		f_bus = CLPS711X_EXT_FREQ;
@@ -85,14 +85,14 @@ static void __init clps711x_clk_init_dt(struct device_node *np)
 	}
 
 	if (tmp & SYSFLG2_CKMODE) {
-		if (readl(base + CLPS711X_SYSCON2) & SYSCON2_OSTB)
+		if (pete_readl("drivers/clk/clk-clps711x.c:88", base + CLPS711X_SYSCON2) & SYSCON2_OSTB)
 			f_tim = DIV_ROUND_CLOSEST(CLPS711X_EXT_FREQ, 26);
 		else
 			f_tim = DIV_ROUND_CLOSEST(CLPS711X_EXT_FREQ, 24);
 	} else
 		f_tim = DIV_ROUND_CLOSEST(f_cpu, 144);
 
-	tmp = readl(base + CLPS711X_SYSCON1);
+	tmp = pete_readl("drivers/clk/clk-clps711x.c:95", base + CLPS711X_SYSCON1);
 	/* Timer1 in free running mode.
 	 * Counter will wrap around to 0xffff when it underflows
 	 * and will continue to count down.
@@ -103,7 +103,7 @@ static void __init clps711x_clk_init_dt(struct device_node *np)
 	 * the counter underflows.
 	 */
 	tmp |= SYSCON1_TC2M | SYSCON1_TC2S;
-	writel(tmp, base + CLPS711X_SYSCON1);
+	pete_writel("drivers/clk/clk-clps711x.c:106", tmp, base + CLPS711X_SYSCON1);
 
 	clps711x_clk->clk_data.hws[CLPS711X_CLK_DUMMY] =
 		clk_hw_register_fixed_rate(NULL, "dummy", NULL, 0, 0);

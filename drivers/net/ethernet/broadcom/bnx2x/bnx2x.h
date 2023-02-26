@@ -168,9 +168,9 @@ do {						\
 
 #define REG_ADDR(bp, offset)		((bp->regview) + (offset))
 
-#define REG_RD(bp, offset)		readl(REG_ADDR(bp, offset))
-#define REG_RD8(bp, offset)		readb(REG_ADDR(bp, offset))
-#define REG_RD16(bp, offset)		readw(REG_ADDR(bp, offset))
+#define REG_RD(bp, offset)		pete_readl("drivers/net/ethernet/broadcom/bnx2x/bnx2x.h:171", REG_ADDR(bp, offset))
+#define REG_RD8(bp, offset)		pete_readb("drivers/net/ethernet/broadcom/bnx2x/bnx2x.h:172", REG_ADDR(bp, offset))
+#define REG_RD16(bp, offset)		pete_readw("drivers/net/ethernet/broadcom/bnx2x/bnx2x.h:173", REG_ADDR(bp, offset))
 
 #define REG_WR_RELAXED(bp, offset, val)	\
 	writel_relaxed((u32)val, REG_ADDR(bp, offset))
@@ -178,9 +178,9 @@ do {						\
 #define REG_WR16_RELAXED(bp, offset, val) \
 	writew_relaxed((u16)val, REG_ADDR(bp, offset))
 
-#define REG_WR(bp, offset, val)		writel((u32)val, REG_ADDR(bp, offset))
-#define REG_WR8(bp, offset, val)	writeb((u8)val, REG_ADDR(bp, offset))
-#define REG_WR16(bp, offset, val)	writew((u16)val, REG_ADDR(bp, offset))
+#define REG_WR(bp, offset, val)		pete_writel("drivers/net/ethernet/broadcom/bnx2x/bnx2x.h:181", (u32)val, REG_ADDR(bp, offset))
+#define REG_WR8(bp, offset, val)	pete_writeb("drivers/net/ethernet/broadcom/bnx2x/bnx2x.h:182", (u8)val, REG_ADDR(bp, offset))
+#define REG_WR16(bp, offset, val)	pete_writew("drivers/net/ethernet/broadcom/bnx2x/bnx2x.h:183", (u16)val, REG_ADDR(bp, offset))
 
 #define REG_RD_IND(bp, offset)		bnx2x_reg_rd_ind(bp, offset)
 #define REG_WR_IND(bp, offset, val)	bnx2x_reg_wr_ind(bp, offset, val)

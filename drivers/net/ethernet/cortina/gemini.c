@@ -231,9 +231,9 @@ static void gmac_update_config0_reg(struct net_device *netdev,
 
 	spin_lock_irqsave(&port->config_lock, flags);
 
-	reg = readl(port->gmac_base + GMAC_CONFIG0);
+	reg = pete_readl("drivers/net/ethernet/cortina/gemini.c:234", port->gmac_base + GMAC_CONFIG0);
 	reg = (reg & ~vmask) | val;
-	writel(reg, port->gmac_base + GMAC_CONFIG0);
+	pete_writel("drivers/net/ethernet/cortina/gemini.c:236", reg, port->gmac_base + GMAC_CONFIG0);
 
 	spin_unlock_irqrestore(&port->config_lock, flags);
 }
@@ -246,9 +246,9 @@ static void gmac_enable_tx_rx(struct net_device *netdev)
 
 	spin_lock_irqsave(&port->config_lock, flags);
 
-	reg = readl(port->gmac_base + GMAC_CONFIG0);
+	reg = pete_readl("drivers/net/ethernet/cortina/gemini.c:249", port->gmac_base + GMAC_CONFIG0);
 	reg &= ~CONFIG0_TX_RX_DISABLE;
-	writel(reg, port->gmac_base + GMAC_CONFIG0);
+	pete_writel("drivers/net/ethernet/cortina/gemini.c:251", reg, port->gmac_base + GMAC_CONFIG0);
 
 	spin_unlock_irqrestore(&port->config_lock, flags);
 }
@@ -261,9 +261,9 @@ static void gmac_disable_tx_rx(struct net_device *netdev)
 
 	spin_lock_irqsave(&port->config_lock, flags);
 
-	val = readl(port->gmac_base + GMAC_CONFIG0);
+	val = pete_readl("drivers/net/ethernet/cortina/gemini.c:264", port->gmac_base + GMAC_CONFIG0);
 	val |= CONFIG0_TX_RX_DISABLE;
-	writel(val, port->gmac_base + GMAC_CONFIG0);
+	pete_writel("drivers/net/ethernet/cortina/gemini.c:266", val, port->gmac_base + GMAC_CONFIG0);
 
 	spin_unlock_irqrestore(&port->config_lock, flags);
 
@@ -278,13 +278,13 @@ static void gmac_set_flow_control(struct net_device *netdev, bool tx, bool rx)
 
 	spin_lock_irqsave(&port->config_lock, flags);
 
-	val = readl(port->gmac_base + GMAC_CONFIG0);
+	val = pete_readl("drivers/net/ethernet/cortina/gemini.c:281", port->gmac_base + GMAC_CONFIG0);
 	val &= ~CONFIG0_FLOW_CTL;
 	if (tx)
 		val |= CONFIG0_FLOW_TX;
 	if (rx)
 		val |= CONFIG0_FLOW_RX;
-	writel(val, port->gmac_base + GMAC_CONFIG0);
+	pete_writel("drivers/net/ethernet/cortina/gemini.c:287", val, port->gmac_base + GMAC_CONFIG0);
 
 	spin_unlock_irqrestore(&port->config_lock, flags);
 }
@@ -297,7 +297,7 @@ static void gmac_speed_set(struct net_device *netdev)
 	int pause_tx = 0;
 	int pause_rx = 0;
 
-	status.bits32 = readl(port->gmac_base + GMAC_STATUS);
+	status.bits32 = pete_readl("drivers/net/ethernet/cortina/gemini.c:300", port->gmac_base + GMAC_STATUS);
 	old_status.bits32 = status.bits32;
 	status.bits.link = phydev->link;
 	status.bits.duplex = phydev->duplex;
@@ -355,7 +355,7 @@ static void gmac_speed_set(struct net_device *netdev)
 	}
 
 	gmac_disable_tx_rx(netdev);
-	writel(status.bits32, port->gmac_base + GMAC_STATUS);
+	pete_writel("drivers/net/ethernet/cortina/gemini.c:358", status.bits32, port->gmac_base + GMAC_STATUS);
 	gmac_enable_tx_rx(netdev);
 }
 
@@ -402,7 +402,7 @@ static int gmac_setup_phy(struct net_device *netdev)
 		netdev->phydev = NULL;
 		return -EINVAL;
 	}
-	writel(status.bits32, port->gmac_base + GMAC_STATUS);
+	pete_writel("drivers/net/ethernet/cortina/gemini.c:405", status.bits32, port->gmac_base + GMAC_STATUS);
 
 	if (netif_msg_link(port))
 		phy_attached_info(phy);
@@ -516,19 +516,19 @@ static int gmac_init(struct net_device *netdev)
 	union gmac_config0 tmp;
 
 	config0.bits.max_len = gmac_pick_rx_max_len(netdev->mtu);
-	tmp.bits32 = readl(port->gmac_base + GMAC_CONFIG0);
+	tmp.bits32 = pete_readl("drivers/net/ethernet/cortina/gemini.c:519", port->gmac_base + GMAC_CONFIG0);
 	config0.bits.reserved = tmp.bits.reserved;
-	writel(config0.bits32, port->gmac_base + GMAC_CONFIG0);
-	writel(config1.bits32, port->gmac_base + GMAC_CONFIG1);
-	writel(config2.bits32, port->gmac_base + GMAC_CONFIG2);
-	writel(config3.bits32, port->gmac_base + GMAC_CONFIG3);
+	pete_writel("drivers/net/ethernet/cortina/gemini.c:521", config0.bits32, port->gmac_base + GMAC_CONFIG0);
+	pete_writel("drivers/net/ethernet/cortina/gemini.c:522", config1.bits32, port->gmac_base + GMAC_CONFIG1);
+	pete_writel("drivers/net/ethernet/cortina/gemini.c:523", config2.bits32, port->gmac_base + GMAC_CONFIG2);
+	pete_writel("drivers/net/ethernet/cortina/gemini.c:524", config3.bits32, port->gmac_base + GMAC_CONFIG3);
 
-	readl(port->dma_base + GMAC_AHB_WEIGHT_REG);
-	writel(ahb_weight.bits32, port->dma_base + GMAC_AHB_WEIGHT_REG);
+	pete_readl("drivers/net/ethernet/cortina/gemini.c:526", port->dma_base + GMAC_AHB_WEIGHT_REG);
+	pete_writel("drivers/net/ethernet/cortina/gemini.c:527", ahb_weight.bits32, port->dma_base + GMAC_AHB_WEIGHT_REG);
 
-	writel(hw_weigh.bits32,
+	pete_writel("drivers/net/ethernet/cortina/gemini.c:529", hw_weigh.bits32,
 	       port->dma_base + GMAC_TX_WEIGHTING_CTRL_0_REG);
-	writel(sw_weigh.bits32,
+	pete_writel("drivers/net/ethernet/cortina/gemini.c:531", sw_weigh.bits32,
 	       port->dma_base + GMAC_TX_WEIGHTING_CTRL_1_REG);
 
 	port->rxq_order = DEFAULT_GMAC_RXQ_ORDER;
@@ -579,7 +579,7 @@ static int gmac_setup_txqs(struct net_device *netdev)
 		return -ENOMEM;
 	}
 
-	writel(port->txq_dma_base | port->txq_order,
+	pete_writel("drivers/net/ethernet/cortina/gemini.c:582", port->txq_dma_base | port->txq_order,
 	       port->dma_base + GMAC_SW_TX_QUEUE_BASE_REG);
 
 	for (i = 0; i < n_txq; i++) {
@@ -587,9 +587,9 @@ static int gmac_setup_txqs(struct net_device *netdev)
 		txq->skb = skb_tab;
 		txq->noirq_packets = 0;
 
-		r = readw(rwptr_reg);
+		r = pete_readw("drivers/net/ethernet/cortina/gemini.c:590", rwptr_reg);
 		rwptr_reg += 2;
-		writew(r, rwptr_reg);
+		pete_writew("drivers/net/ethernet/cortina/gemini.c:592", r, rwptr_reg);
 		rwptr_reg += 2;
 		txq->cptr = r;
 
@@ -684,14 +684,14 @@ static void gmac_cleanup_txqs(struct net_device *netdev)
 	rwptr_reg = port->dma_base + GMAC_SW_TX_QUEUE0_PTR_REG;
 
 	for (i = 0; i < n_txq; i++) {
-		r = readw(rwptr_reg);
+		r = pete_readw("drivers/net/ethernet/cortina/gemini.c:687", rwptr_reg);
 		rwptr_reg += 2;
-		writew(r, rwptr_reg);
+		pete_writew("drivers/net/ethernet/cortina/gemini.c:689", r, rwptr_reg);
 		rwptr_reg += 2;
 
 		gmac_clean_txq(netdev, port->txq + i, r);
 	}
-	writel(0, port->dma_base + GMAC_SW_TX_QUEUE_BASE_REG);
+	pete_writel("drivers/net/ethernet/cortina/gemini.c:694", 0, port->dma_base + GMAC_SW_TX_QUEUE_BASE_REG);
 
 	kfree(port->txq->skb);
 	dma_free_coherent(geth->dev,
@@ -719,8 +719,8 @@ static int gmac_setup_rxq(struct net_device *netdev)
 		return -ENOMEM;
 	}
 
-	writel(port->rxq_dma_base | port->rxq_order, &qhdr->word0);
-	writel(0, port->rxq_rwptr);
+	pete_writel("drivers/net/ethernet/cortina/gemini.c:722", port->rxq_dma_base | port->rxq_order, &qhdr->word0);
+	pete_writel("drivers/net/ethernet/cortina/gemini.c:723", 0, port->rxq_rwptr);
 	return 0;
 }
 
@@ -769,12 +769,12 @@ static void gmac_cleanup_rxq(struct net_device *netdev)
 	dma_reg = &qhdr->word0;
 	ptr_reg = &qhdr->word1;
 
-	rw.bits32 = readl(ptr_reg);
+	rw.bits32 = pete_readl("drivers/net/ethernet/cortina/gemini.c:772", ptr_reg);
 	r = rw.bits.rptr;
 	w = rw.bits.wptr;
-	writew(r, ptr_reg + 2);
+	pete_writew("drivers/net/ethernet/cortina/gemini.c:775", r, ptr_reg + 2);
 
-	writel(0, dma_reg);
+	pete_writel("drivers/net/ethernet/cortina/gemini.c:777", 0, dma_reg);
 
 	/* Loop from read pointer to write pointer of the RX queue
 	 * and free up all pages by the queue.
@@ -882,7 +882,7 @@ static unsigned int geth_fill_freeq(struct gemini_ethernet *geth, bool refill)
 
 	spin_lock_irqsave(&geth->freeq_lock, flags);
 
-	rw.bits32 = readl(geth->base + GLOBAL_SWFQ_RWPTR_REG);
+	rw.bits32 = pete_readl("drivers/net/ethernet/cortina/gemini.c:885", geth->base + GLOBAL_SWFQ_RWPTR_REG);
 	pn = (refill ? rw.bits.wptr : rw.bits.rptr) >> fpp_order;
 	epn = (rw.bits.rptr >> fpp_order) - 1;
 	epn &= m_pn;
@@ -916,7 +916,7 @@ static unsigned int geth_fill_freeq(struct gemini_ethernet *geth, bool refill)
 		pn &= m_pn;
 	}
 
-	writew(pn << fpp_order, geth->base + GLOBAL_SWFQ_RWPTR_REG + 2);
+	pete_writew("drivers/net/ethernet/cortina/gemini.c:919", pn << fpp_order, geth->base + GLOBAL_SWFQ_RWPTR_REG + 2);
 
 	spin_unlock_irqrestore(&geth->freeq_lock, flags);
 
@@ -960,13 +960,13 @@ static int geth_setup_freeq(struct gemini_ethernet *geth)
 	if (!filled)
 		goto err_freeq_alloc;
 
-	qt.bits32 = readl(geth->base + GLOBAL_QUEUE_THRESHOLD_REG);
+	qt.bits32 = pete_readl("drivers/net/ethernet/cortina/gemini.c:963", geth->base + GLOBAL_QUEUE_THRESHOLD_REG);
 	qt.bits.swfq_empty = 32;
-	writel(qt.bits32, geth->base + GLOBAL_QUEUE_THRESHOLD_REG);
+	pete_writel("drivers/net/ethernet/cortina/gemini.c:965", qt.bits32, geth->base + GLOBAL_QUEUE_THRESHOLD_REG);
 
 	skbsz.bits.sw_skb_size = 1 << geth->freeq_frag_order;
-	writel(skbsz.bits32, geth->base + GLOBAL_DMA_SKB_SIZE_REG);
-	writel(geth->freeq_dma_base | geth->freeq_order,
+	pete_writel("drivers/net/ethernet/cortina/gemini.c:968", skbsz.bits32, geth->base + GLOBAL_DMA_SKB_SIZE_REG);
+	pete_writel("drivers/net/ethernet/cortina/gemini.c:969", geth->freeq_dma_base | geth->freeq_order,
 	       geth->base + GLOBAL_SW_FREEQ_BASE_SIZE_REG);
 
 	return 0;
@@ -1004,9 +1004,9 @@ static void geth_cleanup_freeq(struct gemini_ethernet *geth)
 	unsigned int pages = len >> fpp_order;
 	unsigned int pn;
 
-	writew(readw(geth->base + GLOBAL_SWFQ_RWPTR_REG),
+	pete_writew("drivers/net/ethernet/cortina/gemini.c:1007", pete_readw("drivers/net/ethernet/cortina/gemini.c:1007", geth->base + GLOBAL_SWFQ_RWPTR_REG),
 	       geth->base + GLOBAL_SWFQ_RWPTR_REG + 2);
-	writel(0, geth->base + GLOBAL_SW_FREEQ_BASE_SIZE_REG);
+	pete_writel("drivers/net/ethernet/cortina/gemini.c:1009", 0, geth->base + GLOBAL_SW_FREEQ_BASE_SIZE_REG);
 
 	for (pn = 0; pn < pages; pn++) {
 		struct gmac_queue_page *gpage;
@@ -1079,9 +1079,9 @@ static int geth_resize_freeq(struct gemini_ethernet_port *port)
 	spin_lock_irqsave(&geth->irq_lock, flags);
 
 	/* Disable the software queue IRQs */
-	en = readl(geth->base + GLOBAL_INTERRUPT_ENABLE_4_REG);
+	en = pete_readl("drivers/net/ethernet/cortina/gemini.c:1082", geth->base + GLOBAL_INTERRUPT_ENABLE_4_REG);
 	en &= ~SWFQ_EMPTY_INT_BIT;
-	writel(en, geth->base + GLOBAL_INTERRUPT_ENABLE_4_REG);
+	pete_writel("drivers/net/ethernet/cortina/gemini.c:1084", en, geth->base + GLOBAL_INTERRUPT_ENABLE_4_REG);
 	spin_unlock_irqrestore(&geth->irq_lock, flags);
 
 	/* Drop the old queue */
@@ -1098,7 +1098,7 @@ static int geth_resize_freeq(struct gemini_ethernet_port *port)
 	 */
 	spin_lock_irqsave(&geth->irq_lock, flags);
 	en |= SWFQ_EMPTY_INT_BIT;
-	writel(en, geth->base + GLOBAL_INTERRUPT_ENABLE_4_REG);
+	pete_writel("drivers/net/ethernet/cortina/gemini.c:1101", en, geth->base + GLOBAL_INTERRUPT_ENABLE_4_REG);
 	spin_unlock_irqrestore(&geth->irq_lock, flags);
 
 	return ret;
@@ -1116,11 +1116,11 @@ static void gmac_tx_irq_enable(struct net_device *netdev,
 	mask = GMAC0_IRQ0_TXQ0_INTS << (6 * netdev->dev_id + txq);
 
 	if (en)
-		writel(mask, geth->base + GLOBAL_INTERRUPT_STATUS_0_REG);
+		pete_writel("drivers/net/ethernet/cortina/gemini.c:1119", mask, geth->base + GLOBAL_INTERRUPT_STATUS_0_REG);
 
-	val = readl(geth->base + GLOBAL_INTERRUPT_ENABLE_0_REG);
+	val = pete_readl("drivers/net/ethernet/cortina/gemini.c:1121", geth->base + GLOBAL_INTERRUPT_ENABLE_0_REG);
 	val = en ? val | mask : val & ~mask;
-	writel(val, geth->base + GLOBAL_INTERRUPT_ENABLE_0_REG);
+	pete_writel("drivers/net/ethernet/cortina/gemini.c:1123", val, geth->base + GLOBAL_INTERRUPT_ENABLE_0_REG);
 }
 
 static void gmac_tx_irq(struct net_device *netdev, unsigned int txq_num)
@@ -1243,7 +1243,7 @@ static netdev_tx_t gmac_start_xmit(struct sk_buff *skb,
 	ntxq = netdev_get_tx_queue(netdev, txq_num);
 	nfrags = skb_shinfo(skb)->nr_frags;
 
-	rw.bits32 = readl(ptr_reg);
+	rw.bits32 = pete_readl("drivers/net/ethernet/cortina/gemini.c:1246", ptr_reg);
 	r = rw.bits.rptr;
 	w = rw.bits.wptr;
 
@@ -1282,7 +1282,7 @@ static netdev_tx_t gmac_start_xmit(struct sk_buff *skb,
 			goto out_drop_free;
 	}
 
-	writew(w, ptr_reg + 2);
+	pete_writew("drivers/net/ethernet/cortina/gemini.c:1285", w, ptr_reg + 2);
 
 	gmac_clean_txq(netdev, txq, r);
 	return NETDEV_TX_OK;
@@ -1314,19 +1314,19 @@ static void gmac_enable_irq(struct net_device *netdev, int enable)
 	spin_lock_irqsave(&geth->irq_lock, flags);
 
 	mask = GMAC0_IRQ0_2 << (netdev->dev_id * 2);
-	val = readl(geth->base + GLOBAL_INTERRUPT_ENABLE_0_REG);
+	val = pete_readl("drivers/net/ethernet/cortina/gemini.c:1317", geth->base + GLOBAL_INTERRUPT_ENABLE_0_REG);
 	val = enable ? (val | mask) : (val & ~mask);
-	writel(val, geth->base + GLOBAL_INTERRUPT_ENABLE_0_REG);
+	pete_writel("drivers/net/ethernet/cortina/gemini.c:1319", val, geth->base + GLOBAL_INTERRUPT_ENABLE_0_REG);
 
 	mask = DEFAULT_Q0_INT_BIT << netdev->dev_id;
-	val = readl(geth->base + GLOBAL_INTERRUPT_ENABLE_1_REG);
+	val = pete_readl("drivers/net/ethernet/cortina/gemini.c:1322", geth->base + GLOBAL_INTERRUPT_ENABLE_1_REG);
 	val = enable ? (val | mask) : (val & ~mask);
-	writel(val, geth->base + GLOBAL_INTERRUPT_ENABLE_1_REG);
+	pete_writel("drivers/net/ethernet/cortina/gemini.c:1324", val, geth->base + GLOBAL_INTERRUPT_ENABLE_1_REG);
 
 	mask = GMAC0_IRQ4_8 << (netdev->dev_id * 8);
-	val = readl(geth->base + GLOBAL_INTERRUPT_ENABLE_4_REG);
+	val = pete_readl("drivers/net/ethernet/cortina/gemini.c:1327", geth->base + GLOBAL_INTERRUPT_ENABLE_4_REG);
 	val = enable ? (val | mask) : (val & ~mask);
-	writel(val, geth->base + GLOBAL_INTERRUPT_ENABLE_4_REG);
+	pete_writel("drivers/net/ethernet/cortina/gemini.c:1329", val, geth->base + GLOBAL_INTERRUPT_ENABLE_4_REG);
 
 	spin_unlock_irqrestore(&geth->irq_lock, flags);
 }
@@ -1343,9 +1343,9 @@ static void gmac_enable_rx_irq(struct net_device *netdev, int enable)
 	spin_lock_irqsave(&geth->irq_lock, flags);
 	mask = DEFAULT_Q0_INT_BIT << netdev->dev_id;
 
-	val = readl(geth->base + GLOBAL_INTERRUPT_ENABLE_1_REG);
+	val = pete_readl("drivers/net/ethernet/cortina/gemini.c:1346", geth->base + GLOBAL_INTERRUPT_ENABLE_1_REG);
 	val = enable ? (val | mask) : (val & ~mask);
-	writel(val, geth->base + GLOBAL_INTERRUPT_ENABLE_1_REG);
+	pete_writel("drivers/net/ethernet/cortina/gemini.c:1348", val, geth->base + GLOBAL_INTERRUPT_ENABLE_1_REG);
 
 	spin_unlock_irqrestore(&geth->irq_lock, flags);
 }
@@ -1410,9 +1410,9 @@ static unsigned int gmac_rx(struct net_device *netdev, unsigned int budget)
 	dma_addr_t mapping;
 	int frag_nr = 0;
 
-	rw.bits32 = readl(ptr_reg);
+	rw.bits32 = pete_readl("drivers/net/ethernet/cortina/gemini.c:1413", ptr_reg);
 	/* Reset interrupt as all packages until here are taken into account */
-	writel(DEFAULT_Q0_INT_BIT << netdev->dev_id,
+	pete_writel("drivers/net/ethernet/cortina/gemini.c:1415", DEFAULT_Q0_INT_BIT << netdev->dev_id,
 	       geth->base + GLOBAL_INTERRUPT_STATUS_1_REG);
 	r = rw.bits.rptr;
 	w = rw.bits.wptr;
@@ -1499,7 +1499,7 @@ err_drop:
 		port->stats.rx_dropped++;
 	}
 
-	writew(r, ptr_reg);
+	pete_writew("drivers/net/ethernet/cortina/gemini.c:1502", r, ptr_reg);
 	return budget;
 }
 
@@ -1539,52 +1539,52 @@ static void gmac_dump_dma_state(struct net_device *netdev)
 	u32 reg[5];
 
 	/* Interrupt status */
-	reg[0] = readl(geth->base + GLOBAL_INTERRUPT_STATUS_0_REG);
-	reg[1] = readl(geth->base + GLOBAL_INTERRUPT_STATUS_1_REG);
-	reg[2] = readl(geth->base + GLOBAL_INTERRUPT_STATUS_2_REG);
-	reg[3] = readl(geth->base + GLOBAL_INTERRUPT_STATUS_3_REG);
-	reg[4] = readl(geth->base + GLOBAL_INTERRUPT_STATUS_4_REG);
+	reg[0] = pete_readl("drivers/net/ethernet/cortina/gemini.c:1542", geth->base + GLOBAL_INTERRUPT_STATUS_0_REG);
+	reg[1] = pete_readl("drivers/net/ethernet/cortina/gemini.c:1543", geth->base + GLOBAL_INTERRUPT_STATUS_1_REG);
+	reg[2] = pete_readl("drivers/net/ethernet/cortina/gemini.c:1544", geth->base + GLOBAL_INTERRUPT_STATUS_2_REG);
+	reg[3] = pete_readl("drivers/net/ethernet/cortina/gemini.c:1545", geth->base + GLOBAL_INTERRUPT_STATUS_3_REG);
+	reg[4] = pete_readl("drivers/net/ethernet/cortina/gemini.c:1546", geth->base + GLOBAL_INTERRUPT_STATUS_4_REG);
 	netdev_err(netdev, "IRQ status: 0x%08x 0x%08x 0x%08x 0x%08x 0x%08x\n",
 		   reg[0], reg[1], reg[2], reg[3], reg[4]);
 
 	/* Interrupt enable */
-	reg[0] = readl(geth->base + GLOBAL_INTERRUPT_ENABLE_0_REG);
-	reg[1] = readl(geth->base + GLOBAL_INTERRUPT_ENABLE_1_REG);
-	reg[2] = readl(geth->base + GLOBAL_INTERRUPT_ENABLE_2_REG);
-	reg[3] = readl(geth->base + GLOBAL_INTERRUPT_ENABLE_3_REG);
-	reg[4] = readl(geth->base + GLOBAL_INTERRUPT_ENABLE_4_REG);
+	reg[0] = pete_readl("drivers/net/ethernet/cortina/gemini.c:1551", geth->base + GLOBAL_INTERRUPT_ENABLE_0_REG);
+	reg[1] = pete_readl("drivers/net/ethernet/cortina/gemini.c:1552", geth->base + GLOBAL_INTERRUPT_ENABLE_1_REG);
+	reg[2] = pete_readl("drivers/net/ethernet/cortina/gemini.c:1553", geth->base + GLOBAL_INTERRUPT_ENABLE_2_REG);
+	reg[3] = pete_readl("drivers/net/ethernet/cortina/gemini.c:1554", geth->base + GLOBAL_INTERRUPT_ENABLE_3_REG);
+	reg[4] = pete_readl("drivers/net/ethernet/cortina/gemini.c:1555", geth->base + GLOBAL_INTERRUPT_ENABLE_4_REG);
 	netdev_err(netdev, "IRQ enable: 0x%08x 0x%08x 0x%08x 0x%08x 0x%08x\n",
 		   reg[0], reg[1], reg[2], reg[3], reg[4]);
 
 	/* RX DMA status */
-	reg[0] = readl(port->dma_base + GMAC_DMA_RX_FIRST_DESC_REG);
-	reg[1] = readl(port->dma_base + GMAC_DMA_RX_CURR_DESC_REG);
+	reg[0] = pete_readl("drivers/net/ethernet/cortina/gemini.c:1560", port->dma_base + GMAC_DMA_RX_FIRST_DESC_REG);
+	reg[1] = pete_readl("drivers/net/ethernet/cortina/gemini.c:1561", port->dma_base + GMAC_DMA_RX_CURR_DESC_REG);
 	reg[2] = GET_RPTR(port->rxq_rwptr);
 	reg[3] = GET_WPTR(port->rxq_rwptr);
 	netdev_err(netdev, "RX DMA regs: 0x%08x 0x%08x, ptr: %u %u\n",
 		   reg[0], reg[1], reg[2], reg[3]);
 
-	reg[0] = readl(port->dma_base + GMAC_DMA_RX_DESC_WORD0_REG);
-	reg[1] = readl(port->dma_base + GMAC_DMA_RX_DESC_WORD1_REG);
-	reg[2] = readl(port->dma_base + GMAC_DMA_RX_DESC_WORD2_REG);
-	reg[3] = readl(port->dma_base + GMAC_DMA_RX_DESC_WORD3_REG);
+	reg[0] = pete_readl("drivers/net/ethernet/cortina/gemini.c:1567", port->dma_base + GMAC_DMA_RX_DESC_WORD0_REG);
+	reg[1] = pete_readl("drivers/net/ethernet/cortina/gemini.c:1568", port->dma_base + GMAC_DMA_RX_DESC_WORD1_REG);
+	reg[2] = pete_readl("drivers/net/ethernet/cortina/gemini.c:1569", port->dma_base + GMAC_DMA_RX_DESC_WORD2_REG);
+	reg[3] = pete_readl("drivers/net/ethernet/cortina/gemini.c:1570", port->dma_base + GMAC_DMA_RX_DESC_WORD3_REG);
 	netdev_err(netdev, "RX DMA descriptor: 0x%08x 0x%08x 0x%08x 0x%08x\n",
 		   reg[0], reg[1], reg[2], reg[3]);
 
 	/* TX DMA status */
 	ptr_reg = port->dma_base + GMAC_SW_TX_QUEUE0_PTR_REG;
 
-	reg[0] = readl(port->dma_base + GMAC_DMA_TX_FIRST_DESC_REG);
-	reg[1] = readl(port->dma_base + GMAC_DMA_TX_CURR_DESC_REG);
+	reg[0] = pete_readl("drivers/net/ethernet/cortina/gemini.c:1577", port->dma_base + GMAC_DMA_TX_FIRST_DESC_REG);
+	reg[1] = pete_readl("drivers/net/ethernet/cortina/gemini.c:1578", port->dma_base + GMAC_DMA_TX_CURR_DESC_REG);
 	reg[2] = GET_RPTR(ptr_reg);
 	reg[3] = GET_WPTR(ptr_reg);
 	netdev_err(netdev, "TX DMA regs: 0x%08x 0x%08x, ptr: %u %u\n",
 		   reg[0], reg[1], reg[2], reg[3]);
 
-	reg[0] = readl(port->dma_base + GMAC_DMA_TX_DESC_WORD0_REG);
-	reg[1] = readl(port->dma_base + GMAC_DMA_TX_DESC_WORD1_REG);
-	reg[2] = readl(port->dma_base + GMAC_DMA_TX_DESC_WORD2_REG);
-	reg[3] = readl(port->dma_base + GMAC_DMA_TX_DESC_WORD3_REG);
+	reg[0] = pete_readl("drivers/net/ethernet/cortina/gemini.c:1584", port->dma_base + GMAC_DMA_TX_DESC_WORD0_REG);
+	reg[1] = pete_readl("drivers/net/ethernet/cortina/gemini.c:1585", port->dma_base + GMAC_DMA_TX_DESC_WORD1_REG);
+	reg[2] = pete_readl("drivers/net/ethernet/cortina/gemini.c:1586", port->dma_base + GMAC_DMA_TX_DESC_WORD2_REG);
+	reg[3] = pete_readl("drivers/net/ethernet/cortina/gemini.c:1587", port->dma_base + GMAC_DMA_TX_DESC_WORD3_REG);
 	netdev_err(netdev, "TX DMA descriptor: 0x%08x 0x%08x 0x%08x 0x%08x\n",
 		   reg[0], reg[1], reg[2], reg[3]);
 
@@ -1612,21 +1612,21 @@ static void gmac_update_hw_stats(struct net_device *netdev)
 	spin_lock_irqsave(&geth->irq_lock, flags);
 	u64_stats_update_begin(&port->ir_stats_syncp);
 
-	rx_discards = readl(port->gmac_base + GMAC_IN_DISCARDS);
+	rx_discards = pete_readl("drivers/net/ethernet/cortina/gemini.c:1615", port->gmac_base + GMAC_IN_DISCARDS);
 	port->hw_stats[0] += rx_discards;
-	port->hw_stats[1] += readl(port->gmac_base + GMAC_IN_ERRORS);
-	rx_mcast = readl(port->gmac_base + GMAC_IN_MCAST);
+	port->hw_stats[1] += pete_readl("drivers/net/ethernet/cortina/gemini.c:1617", port->gmac_base + GMAC_IN_ERRORS);
+	rx_mcast = pete_readl("drivers/net/ethernet/cortina/gemini.c:1618", port->gmac_base + GMAC_IN_MCAST);
 	port->hw_stats[2] += rx_mcast;
-	rx_bcast = readl(port->gmac_base + GMAC_IN_BCAST);
+	rx_bcast = pete_readl("drivers/net/ethernet/cortina/gemini.c:1620", port->gmac_base + GMAC_IN_BCAST);
 	port->hw_stats[3] += rx_bcast;
-	port->hw_stats[4] += readl(port->gmac_base + GMAC_IN_MAC1);
-	port->hw_stats[5] += readl(port->gmac_base + GMAC_IN_MAC2);
+	port->hw_stats[4] += pete_readl("drivers/net/ethernet/cortina/gemini.c:1622", port->gmac_base + GMAC_IN_MAC1);
+	port->hw_stats[5] += pete_readl("drivers/net/ethernet/cortina/gemini.c:1623", port->gmac_base + GMAC_IN_MAC2);
 
 	port->stats.rx_missed_errors += rx_discards;
 	port->stats.multicast += rx_mcast;
 	port->stats.multicast += rx_bcast;
 
-	writel(GMAC0_MIB_INT_BIT << (netdev->dev_id * 8),
+	pete_writel("drivers/net/ethernet/cortina/gemini.c:1629", GMAC0_MIB_INT_BIT << (netdev->dev_id * 8),
 	       geth->base + GLOBAL_INTERRUPT_STATUS_4_REG);
 
 	u64_stats_update_end(&port->ir_stats_syncp);
@@ -1652,7 +1652,7 @@ static u32 gmac_get_intr_flags(struct net_device *netdev, int i)
 	irqif_reg = geth->base + GLOBAL_INTERRUPT_STATUS_0_REG + offs;
 	irqen_reg = geth->base + GLOBAL_INTERRUPT_ENABLE_0_REG + offs;
 
-	val = readl(irqif_reg) & readl(irqen_reg);
+	val = pete_readl("drivers/net/ethernet/cortina/gemini.c:1655", irqif_reg) & pete_readl("drivers/net/ethernet/cortina/gemini.c:1655", irqen_reg);
 	return val;
 }
 
@@ -1716,7 +1716,7 @@ static irqreturn_t gmac_irq(int irq, void *data)
 		gmac_update_hw_stats(netdev);
 
 	if (val & (GMAC0_RX_OVERRUN_INT_BIT << (netdev->dev_id * 8))) {
-		writel(GMAC0_RXDERR_INT_BIT << (netdev->dev_id * 8),
+		pete_writel("drivers/net/ethernet/cortina/gemini.c:1719", GMAC0_RXDERR_INT_BIT << (netdev->dev_id * 8),
 		       geth->base + GLOBAL_INTERRUPT_STATUS_4_REG);
 
 		spin_lock(&geth->irq_lock);
@@ -1734,7 +1734,7 @@ static void gmac_start_dma(struct gemini_ethernet_port *port)
 	void __iomem *dma_ctrl_reg = port->dma_base + GMAC_DMA_CTRL_REG;
 	union gmac_dma_ctrl dma_ctrl;
 
-	dma_ctrl.bits32 = readl(dma_ctrl_reg);
+	dma_ctrl.bits32 = pete_readl("drivers/net/ethernet/cortina/gemini.c:1737", dma_ctrl_reg);
 	dma_ctrl.bits.rd_enable = 1;
 	dma_ctrl.bits.td_enable = 1;
 	dma_ctrl.bits.loopback = 0;
@@ -1747,7 +1747,7 @@ static void gmac_start_dma(struct gemini_ethernet_port *port)
 	dma_ctrl.bits.td_burst_size = HBURST_INCR8;
 	dma_ctrl.bits.td_bus = HSIZE_8;
 
-	writel(dma_ctrl.bits32, dma_ctrl_reg);
+	pete_writel("drivers/net/ethernet/cortina/gemini.c:1750", dma_ctrl.bits32, dma_ctrl_reg);
 }
 
 static void gmac_stop_dma(struct gemini_ethernet_port *port)
@@ -1755,10 +1755,10 @@ static void gmac_stop_dma(struct gemini_ethernet_port *port)
 	void __iomem *dma_ctrl_reg = port->dma_base + GMAC_DMA_CTRL_REG;
 	union gmac_dma_ctrl dma_ctrl;
 
-	dma_ctrl.bits32 = readl(dma_ctrl_reg);
+	dma_ctrl.bits32 = pete_readl("drivers/net/ethernet/cortina/gemini.c:1758", dma_ctrl_reg);
 	dma_ctrl.bits.rd_enable = 0;
 	dma_ctrl.bits.td_enable = 0;
-	writel(dma_ctrl.bits32, dma_ctrl_reg);
+	pete_writel("drivers/net/ethernet/cortina/gemini.c:1761", dma_ctrl.bits32, dma_ctrl_reg);
 }
 
 static int gmac_open(struct net_device *netdev)
@@ -1870,9 +1870,9 @@ static void gmac_set_rx_mode(struct net_device *netdev)
 		}
 	}
 
-	writel(mc_filter[0], port->gmac_base + GMAC_MCAST_FIL0);
-	writel(mc_filter[1], port->gmac_base + GMAC_MCAST_FIL1);
-	writel(filter.bits32, port->gmac_base + GMAC_RX_FLTR);
+	pete_writel("drivers/net/ethernet/cortina/gemini.c:1873", mc_filter[0], port->gmac_base + GMAC_MCAST_FIL0);
+	pete_writel("drivers/net/ethernet/cortina/gemini.c:1874", mc_filter[1], port->gmac_base + GMAC_MCAST_FIL1);
+	pete_writel("drivers/net/ethernet/cortina/gemini.c:1875", filter.bits32, port->gmac_base + GMAC_RX_FLTR);
 }
 
 static void gmac_write_mac_address(struct net_device *netdev)
@@ -1883,9 +1883,9 @@ static void gmac_write_mac_address(struct net_device *netdev)
 	memset(addr, 0, sizeof(addr));
 	memcpy(addr, netdev->dev_addr, ETH_ALEN);
 
-	writel(le32_to_cpu(addr[0]), port->gmac_base + GMAC_STA_ADD0);
-	writel(le32_to_cpu(addr[1]), port->gmac_base + GMAC_STA_ADD1);
-	writel(le32_to_cpu(addr[2]), port->gmac_base + GMAC_STA_ADD2);
+	pete_writel("drivers/net/ethernet/cortina/gemini.c:1886", le32_to_cpu(addr[0]), port->gmac_base + GMAC_STA_ADD0);
+	pete_writel("drivers/net/ethernet/cortina/gemini.c:1887", le32_to_cpu(addr[1]), port->gmac_base + GMAC_STA_ADD1);
+	pete_writel("drivers/net/ethernet/cortina/gemini.c:1888", le32_to_cpu(addr[2]), port->gmac_base + GMAC_STA_ADD2);
 }
 
 static int gmac_set_mac_address(struct net_device *netdev, void *addr)
@@ -1902,12 +1902,12 @@ static void gmac_clear_hw_stats(struct net_device *netdev)
 {
 	struct gemini_ethernet_port *port = netdev_priv(netdev);
 
-	readl(port->gmac_base + GMAC_IN_DISCARDS);
-	readl(port->gmac_base + GMAC_IN_ERRORS);
-	readl(port->gmac_base + GMAC_IN_MCAST);
-	readl(port->gmac_base + GMAC_IN_BCAST);
-	readl(port->gmac_base + GMAC_IN_MAC1);
-	readl(port->gmac_base + GMAC_IN_MAC2);
+	pete_readl("drivers/net/ethernet/cortina/gemini.c:1905", port->gmac_base + GMAC_IN_DISCARDS);
+	pete_readl("drivers/net/ethernet/cortina/gemini.c:1906", port->gmac_base + GMAC_IN_ERRORS);
+	pete_readl("drivers/net/ethernet/cortina/gemini.c:1907", port->gmac_base + GMAC_IN_MCAST);
+	pete_readl("drivers/net/ethernet/cortina/gemini.c:1908", port->gmac_base + GMAC_IN_BCAST);
+	pete_readl("drivers/net/ethernet/cortina/gemini.c:1909", port->gmac_base + GMAC_IN_MAC1);
+	pete_readl("drivers/net/ethernet/cortina/gemini.c:1910", port->gmac_base + GMAC_IN_MAC2);
 }
 
 static void gmac_get_stats64(struct net_device *netdev,
@@ -1998,9 +1998,9 @@ static int gmac_set_features(struct net_device *netdev,
 
 	spin_lock_irqsave(&port->config_lock, flags);
 
-	reg = readl(port->gmac_base + GMAC_CONFIG0);
+	reg = pete_readl("drivers/net/ethernet/cortina/gemini.c:2001", port->gmac_base + GMAC_CONFIG0);
 	reg = enable ? reg | CONFIG0_RX_CHKSUM : reg & ~CONFIG0_RX_CHKSUM;
-	writel(reg, port->gmac_base + GMAC_CONFIG0);
+	pete_writel("drivers/net/ethernet/cortina/gemini.c:2003", reg, port->gmac_base + GMAC_CONFIG0);
 
 	spin_unlock_irqrestore(&port->config_lock, flags);
 	return 0;
@@ -2100,7 +2100,7 @@ static void gmac_get_pauseparam(struct net_device *netdev,
 	struct gemini_ethernet_port *port = netdev_priv(netdev);
 	union gmac_config0 config0;
 
-	config0.bits32 = readl(port->gmac_base + GMAC_CONFIG0);
+	config0.bits32 = pete_readl("drivers/net/ethernet/cortina/gemini.c:2103", port->gmac_base + GMAC_CONFIG0);
 
 	pparam->rx_pause = config0.bits.rx_fc_en;
 	pparam->tx_pause = config0.bits.tx_fc_en;
@@ -2112,7 +2112,7 @@ static void gmac_get_ringparam(struct net_device *netdev,
 {
 	struct gemini_ethernet_port *port = netdev_priv(netdev);
 
-	readl(port->gmac_base + GMAC_CONFIG0);
+	pete_readl("drivers/net/ethernet/cortina/gemini.c:2115", port->gmac_base + GMAC_CONFIG0);
 
 	rp->rx_max_pending = 1 << 15;
 	rp->rx_mini_max_pending = 0;
@@ -2246,10 +2246,10 @@ static irqreturn_t gemini_port_irq_thread(int irq, void *data)
 
 	spin_lock_irqsave(&geth->irq_lock, flags);
 	/* ACK queue interrupt */
-	writel(irqmask, geth->base + GLOBAL_INTERRUPT_STATUS_4_REG);
+	pete_writel("drivers/net/ethernet/cortina/gemini.c:2249", irqmask, geth->base + GLOBAL_INTERRUPT_STATUS_4_REG);
 	/* Enable queue interrupt again */
-	irqmask |= readl(geth->base + GLOBAL_INTERRUPT_ENABLE_4_REG);
-	writel(irqmask, geth->base + GLOBAL_INTERRUPT_ENABLE_4_REG);
+	irqmask |= pete_readl("drivers/net/ethernet/cortina/gemini.c:2251", geth->base + GLOBAL_INTERRUPT_ENABLE_4_REG);
+	pete_writel("drivers/net/ethernet/cortina/gemini.c:2252", irqmask, geth->base + GLOBAL_INTERRUPT_ENABLE_4_REG);
 	spin_unlock_irqrestore(&geth->irq_lock, flags);
 
 	return IRQ_HANDLED;
@@ -2265,8 +2265,8 @@ static irqreturn_t gemini_port_irq(int irq, void *data)
 	geth = port->geth;
 	spin_lock(&geth->irq_lock);
 
-	val = readl(geth->base + GLOBAL_INTERRUPT_STATUS_4_REG);
-	en = readl(geth->base + GLOBAL_INTERRUPT_ENABLE_4_REG);
+	val = pete_readl("drivers/net/ethernet/cortina/gemini.c:2268", geth->base + GLOBAL_INTERRUPT_STATUS_4_REG);
+	en = pete_readl("drivers/net/ethernet/cortina/gemini.c:2269", geth->base + GLOBAL_INTERRUPT_ENABLE_4_REG);
 
 	if (val & en & SWFQ_EMPTY_INT_BIT) {
 		/* Disable the queue empty interrupt while we work on
@@ -2275,7 +2275,7 @@ static irqreturn_t gemini_port_irq(int irq, void *data)
 		 */
 		en &= ~(SWFQ_EMPTY_INT_BIT | GMAC0_RX_OVERRUN_INT_BIT
 					   | GMAC1_RX_OVERRUN_INT_BIT);
-		writel(en, geth->base + GLOBAL_INTERRUPT_ENABLE_4_REG);
+		pete_writel("drivers/net/ethernet/cortina/gemini.c:2278", en, geth->base + GLOBAL_INTERRUPT_ENABLE_4_REG);
 		ret = IRQ_WAKE_THREAD;
 	}
 
@@ -2304,11 +2304,11 @@ static void gemini_ethernet_init(struct gemini_ethernet *geth)
 	else
 		return;
 
-	writel(0, geth->base + GLOBAL_INTERRUPT_ENABLE_0_REG);
-	writel(0, geth->base + GLOBAL_INTERRUPT_ENABLE_1_REG);
-	writel(0, geth->base + GLOBAL_INTERRUPT_ENABLE_2_REG);
-	writel(0, geth->base + GLOBAL_INTERRUPT_ENABLE_3_REG);
-	writel(0, geth->base + GLOBAL_INTERRUPT_ENABLE_4_REG);
+	pete_writel("drivers/net/ethernet/cortina/gemini.c:2307", 0, geth->base + GLOBAL_INTERRUPT_ENABLE_0_REG);
+	pete_writel("drivers/net/ethernet/cortina/gemini.c:2308", 0, geth->base + GLOBAL_INTERRUPT_ENABLE_1_REG);
+	pete_writel("drivers/net/ethernet/cortina/gemini.c:2309", 0, geth->base + GLOBAL_INTERRUPT_ENABLE_2_REG);
+	pete_writel("drivers/net/ethernet/cortina/gemini.c:2310", 0, geth->base + GLOBAL_INTERRUPT_ENABLE_3_REG);
+	pete_writel("drivers/net/ethernet/cortina/gemini.c:2311", 0, geth->base + GLOBAL_INTERRUPT_ENABLE_4_REG);
 
 	/* Interrupt config:
 	 *
@@ -2320,24 +2320,24 @@ static void gemini_ethernet_init(struct gemini_ethernet *geth)
 	 *	Default Q1 -----------> int1 ----> eth1
 	 *	FreeQ intr -----------> int1 ----> eth1
 	 */
-	writel(0xCCFC0FC0, geth->base + GLOBAL_INTERRUPT_SELECT_0_REG);
-	writel(0x00F00002, geth->base + GLOBAL_INTERRUPT_SELECT_1_REG);
-	writel(0xFFFFFFFF, geth->base + GLOBAL_INTERRUPT_SELECT_2_REG);
-	writel(0xFFFFFFFF, geth->base + GLOBAL_INTERRUPT_SELECT_3_REG);
-	writel(0xFF000003, geth->base + GLOBAL_INTERRUPT_SELECT_4_REG);
+	pete_writel("drivers/net/ethernet/cortina/gemini.c:2323", 0xCCFC0FC0, geth->base + GLOBAL_INTERRUPT_SELECT_0_REG);
+	pete_writel("drivers/net/ethernet/cortina/gemini.c:2324", 0x00F00002, geth->base + GLOBAL_INTERRUPT_SELECT_1_REG);
+	pete_writel("drivers/net/ethernet/cortina/gemini.c:2325", 0xFFFFFFFF, geth->base + GLOBAL_INTERRUPT_SELECT_2_REG);
+	pete_writel("drivers/net/ethernet/cortina/gemini.c:2326", 0xFFFFFFFF, geth->base + GLOBAL_INTERRUPT_SELECT_3_REG);
+	pete_writel("drivers/net/ethernet/cortina/gemini.c:2327", 0xFF000003, geth->base + GLOBAL_INTERRUPT_SELECT_4_REG);
 
 	/* edge-triggered interrupts packed to level-triggered one... */
-	writel(~0, geth->base + GLOBAL_INTERRUPT_STATUS_0_REG);
-	writel(~0, geth->base + GLOBAL_INTERRUPT_STATUS_1_REG);
-	writel(~0, geth->base + GLOBAL_INTERRUPT_STATUS_2_REG);
-	writel(~0, geth->base + GLOBAL_INTERRUPT_STATUS_3_REG);
-	writel(~0, geth->base + GLOBAL_INTERRUPT_STATUS_4_REG);
+	pete_writel("drivers/net/ethernet/cortina/gemini.c:2330", ~0, geth->base + GLOBAL_INTERRUPT_STATUS_0_REG);
+	pete_writel("drivers/net/ethernet/cortina/gemini.c:2331", ~0, geth->base + GLOBAL_INTERRUPT_STATUS_1_REG);
+	pete_writel("drivers/net/ethernet/cortina/gemini.c:2332", ~0, geth->base + GLOBAL_INTERRUPT_STATUS_2_REG);
+	pete_writel("drivers/net/ethernet/cortina/gemini.c:2333", ~0, geth->base + GLOBAL_INTERRUPT_STATUS_3_REG);
+	pete_writel("drivers/net/ethernet/cortina/gemini.c:2334", ~0, geth->base + GLOBAL_INTERRUPT_STATUS_4_REG);
 
 	/* Set up queue */
-	writel(0, geth->base + GLOBAL_SW_FREEQ_BASE_SIZE_REG);
-	writel(0, geth->base + GLOBAL_HW_FREEQ_BASE_SIZE_REG);
-	writel(0, geth->base + GLOBAL_SWFQ_RWPTR_REG);
-	writel(0, geth->base + GLOBAL_HWFQ_RWPTR_REG);
+	pete_writel("drivers/net/ethernet/cortina/gemini.c:2337", 0, geth->base + GLOBAL_SW_FREEQ_BASE_SIZE_REG);
+	pete_writel("drivers/net/ethernet/cortina/gemini.c:2338", 0, geth->base + GLOBAL_HW_FREEQ_BASE_SIZE_REG);
+	pete_writel("drivers/net/ethernet/cortina/gemini.c:2339", 0, geth->base + GLOBAL_SWFQ_RWPTR_REG);
+	pete_writel("drivers/net/ethernet/cortina/gemini.c:2340", 0, geth->base + GLOBAL_HWFQ_RWPTR_REG);
 
 	geth->freeq_frag_order = DEFAULT_RX_BUF_ORDER;
 	/* This makes the queue resize on probe() so that we
@@ -2349,11 +2349,11 @@ static void gemini_ethernet_init(struct gemini_ethernet *geth)
 static void gemini_port_save_mac_addr(struct gemini_ethernet_port *port)
 {
 	port->mac_addr[0] =
-		cpu_to_le32(readl(port->gmac_base + GMAC_STA_ADD0));
+		cpu_to_le32(pete_readl("drivers/net/ethernet/cortina/gemini.c:2352", port->gmac_base + GMAC_STA_ADD0));
 	port->mac_addr[1] =
-		cpu_to_le32(readl(port->gmac_base + GMAC_STA_ADD1));
+		cpu_to_le32(pete_readl("drivers/net/ethernet/cortina/gemini.c:2354", port->gmac_base + GMAC_STA_ADD1));
 	port->mac_addr[2] =
-		cpu_to_le32(readl(port->gmac_base + GMAC_STA_ADD2));
+		cpu_to_le32(pete_readl("drivers/net/ethernet/cortina/gemini.c:2356", port->gmac_base + GMAC_STA_ADD2));
 }
 
 static int gemini_ethernet_port_probe(struct platform_device *pdev)
@@ -2553,7 +2553,7 @@ static int gemini_ethernet_probe(struct platform_device *pdev)
 	/* Wait for ports to stabilize */
 	do {
 		udelay(2);
-		val = readl(geth->base + GLOBAL_TOE_VERSION_REG);
+		val = pete_readl("drivers/net/ethernet/cortina/gemini.c:2556", geth->base + GLOBAL_TOE_VERSION_REG);
 		barrier();
 	} while (!val && --retry);
 	if (!retry) {

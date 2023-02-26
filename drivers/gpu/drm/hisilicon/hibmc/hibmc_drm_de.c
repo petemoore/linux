@@ -118,21 +118,21 @@ static void hibmc_plane_atomic_update(struct drm_plane *plane,
 	if (WARN_ON_ONCE(gpu_addr < 0))
 		return; /* Bug: we didn't pin the BO to VRAM in prepare_fb. */
 
-	writel(gpu_addr, priv->mmio + HIBMC_CRT_FB_ADDRESS);
+	pete_writel("drivers/gpu/drm/hisilicon/hibmc/hibmc_drm_de.c:121", gpu_addr, priv->mmio + HIBMC_CRT_FB_ADDRESS);
 
 	reg = new_state->fb->width * (new_state->fb->format->cpp[0]);
 
 	line_l = new_state->fb->pitches[0];
-	writel(HIBMC_FIELD(HIBMC_CRT_FB_WIDTH_WIDTH, reg) |
+	pete_writel("drivers/gpu/drm/hisilicon/hibmc/hibmc_drm_de.c:126", HIBMC_FIELD(HIBMC_CRT_FB_WIDTH_WIDTH, reg) |
 	       HIBMC_FIELD(HIBMC_CRT_FB_WIDTH_OFFS, line_l),
 	       priv->mmio + HIBMC_CRT_FB_WIDTH);
 
 	/* SET PIXEL FORMAT */
-	reg = readl(priv->mmio + HIBMC_CRT_DISP_CTL);
+	reg = pete_readl("drivers/gpu/drm/hisilicon/hibmc/hibmc_drm_de.c:131", priv->mmio + HIBMC_CRT_DISP_CTL);
 	reg &= ~HIBMC_CRT_DISP_CTL_FORMAT_MASK;
 	reg |= HIBMC_FIELD(HIBMC_CRT_DISP_CTL_FORMAT,
 			   new_state->fb->format->cpp[0] * 8 / 16);
-	writel(reg, priv->mmio + HIBMC_CRT_DISP_CTL);
+	pete_writel("drivers/gpu/drm/hisilicon/hibmc/hibmc_drm_de.c:135", reg, priv->mmio + HIBMC_CRT_DISP_CTL);
 }
 
 static const u32 channel_formats1[] = {
@@ -162,13 +162,13 @@ static void hibmc_crtc_dpms(struct drm_crtc *crtc, u32 dpms)
 	struct hibmc_drm_private *priv = to_hibmc_drm_private(crtc->dev);
 	u32 reg;
 
-	reg = readl(priv->mmio + HIBMC_CRT_DISP_CTL);
+	reg = pete_readl("drivers/gpu/drm/hisilicon/hibmc/hibmc_drm_de.c:165", priv->mmio + HIBMC_CRT_DISP_CTL);
 	reg &= ~HIBMC_CRT_DISP_CTL_DPMS_MASK;
 	reg |= HIBMC_FIELD(HIBMC_CRT_DISP_CTL_DPMS, dpms);
 	reg &= ~HIBMC_CRT_DISP_CTL_TIMING_MASK;
 	if (dpms == HIBMC_CRT_DPMS_ON)
 		reg |= HIBMC_CRT_DISP_CTL_TIMING(1);
-	writel(reg, priv->mmio + HIBMC_CRT_DISP_CTL);
+	pete_writel("drivers/gpu/drm/hisilicon/hibmc/hibmc_drm_de.c:171", reg, priv->mmio + HIBMC_CRT_DISP_CTL);
 }
 
 static void hibmc_crtc_atomic_enable(struct drm_crtc *crtc,
@@ -180,7 +180,7 @@ static void hibmc_crtc_atomic_enable(struct drm_crtc *crtc,
 	hibmc_set_power_mode(priv, HIBMC_PW_MODE_CTL_MODE_MODE0);
 
 	/* Enable display power gate & LOCALMEM power gate*/
-	reg = readl(priv->mmio + HIBMC_CURRENT_GATE);
+	reg = pete_readl("drivers/gpu/drm/hisilicon/hibmc/hibmc_drm_de.c:183", priv->mmio + HIBMC_CURRENT_GATE);
 	reg &= ~HIBMC_CURR_GATE_LOCALMEM_MASK;
 	reg &= ~HIBMC_CURR_GATE_DISPLAY_MASK;
 	reg |= HIBMC_CURR_GATE_LOCALMEM(1);
@@ -202,7 +202,7 @@ static void hibmc_crtc_atomic_disable(struct drm_crtc *crtc,
 	hibmc_set_power_mode(priv, HIBMC_PW_MODE_CTL_MODE_SLEEP);
 
 	/* Enable display power gate & LOCALMEM power gate*/
-	reg = readl(priv->mmio + HIBMC_CURRENT_GATE);
+	reg = pete_readl("drivers/gpu/drm/hisilicon/hibmc/hibmc_drm_de.c:205", priv->mmio + HIBMC_CURRENT_GATE);
 	reg &= ~HIBMC_CURR_GATE_LOCALMEM_MASK;
 	reg &= ~HIBMC_CURR_GATE_DISPLAY_MASK;
 	reg |= HIBMC_CURR_GATE_LOCALMEM(0);
@@ -256,29 +256,29 @@ static void set_vclock_hisilicon(struct drm_device *dev, u64 pll)
 	u32 val;
 	struct hibmc_drm_private *priv = to_hibmc_drm_private(dev);
 
-	val = readl(priv->mmio + CRT_PLL1_HS);
+	val = pete_readl("drivers/gpu/drm/hisilicon/hibmc/hibmc_drm_de.c:259", priv->mmio + CRT_PLL1_HS);
 	val &= ~(CRT_PLL1_HS_OUTER_BYPASS(1));
-	writel(val, priv->mmio + CRT_PLL1_HS);
+	pete_writel("drivers/gpu/drm/hisilicon/hibmc/hibmc_drm_de.c:261", val, priv->mmio + CRT_PLL1_HS);
 
 	val = CRT_PLL1_HS_INTER_BYPASS(1) | CRT_PLL1_HS_POWERON(1);
-	writel(val, priv->mmio + CRT_PLL1_HS);
+	pete_writel("drivers/gpu/drm/hisilicon/hibmc/hibmc_drm_de.c:264", val, priv->mmio + CRT_PLL1_HS);
 
-	writel(pll, priv->mmio + CRT_PLL1_HS);
+	pete_writel("drivers/gpu/drm/hisilicon/hibmc/hibmc_drm_de.c:266", pll, priv->mmio + CRT_PLL1_HS);
 
 	usleep_range(1000, 2000);
 
 	val = pll & ~(CRT_PLL1_HS_POWERON(1));
-	writel(val, priv->mmio + CRT_PLL1_HS);
+	pete_writel("drivers/gpu/drm/hisilicon/hibmc/hibmc_drm_de.c:271", val, priv->mmio + CRT_PLL1_HS);
 
 	usleep_range(1000, 2000);
 
 	val &= ~(CRT_PLL1_HS_INTER_BYPASS(1));
-	writel(val, priv->mmio + CRT_PLL1_HS);
+	pete_writel("drivers/gpu/drm/hisilicon/hibmc/hibmc_drm_de.c:276", val, priv->mmio + CRT_PLL1_HS);
 
 	usleep_range(1000, 2000);
 
 	val |= CRT_PLL1_HS_OUTER_BYPASS(1);
-	writel(val, priv->mmio + CRT_PLL1_HS);
+	pete_writel("drivers/gpu/drm/hisilicon/hibmc/hibmc_drm_de.c:281", val, priv->mmio + CRT_PLL1_HS);
 }
 
 static void get_pll_config(u64 x, u64 y, u32 *pll1, u32 *pll2)
@@ -320,7 +320,7 @@ static u32 display_ctrl_adjust(struct drm_device *dev,
 	y = mode->vdisplay;
 
 	get_pll_config(x, y, &pll1, &pll2);
-	writel(pll2, priv->mmio + CRT_PLL2_HS);
+	pete_writel("drivers/gpu/drm/hisilicon/hibmc/hibmc_drm_de.c:323", pll2, priv->mmio + CRT_PLL2_HS);
 	set_vclock_hisilicon(dev, pll1);
 
 	/*
@@ -329,11 +329,11 @@ static u32 display_ctrl_adjust(struct drm_device *dev,
 	 * Note that normal chip only use those two register for
 	 * auto-centering mode.
 	 */
-	writel(HIBMC_FIELD(HIBMC_CRT_AUTO_CENTERING_TL_TOP, 0) |
+	pete_writel("drivers/gpu/drm/hisilicon/hibmc/hibmc_drm_de.c:332", HIBMC_FIELD(HIBMC_CRT_AUTO_CENTERING_TL_TOP, 0) |
 	       HIBMC_FIELD(HIBMC_CRT_AUTO_CENTERING_TL_LEFT, 0),
 	       priv->mmio + HIBMC_CRT_AUTO_CENTERING_TL);
 
-	writel(HIBMC_FIELD(HIBMC_CRT_AUTO_CENTERING_BR_BOTTOM, y - 1) |
+	pete_writel("drivers/gpu/drm/hisilicon/hibmc/hibmc_drm_de.c:336", HIBMC_FIELD(HIBMC_CRT_AUTO_CENTERING_BR_BOTTOM, y - 1) |
 	       HIBMC_FIELD(HIBMC_CRT_AUTO_CENTERING_BR_RIGHT, x - 1),
 	       priv->mmio + HIBMC_CRT_AUTO_CENTERING_BR);
 
@@ -352,7 +352,7 @@ static u32 display_ctrl_adjust(struct drm_device *dev,
 	/* clock_phase_polarity is 0 */
 	ctrl |= HIBMC_CRT_DISP_CTL_CLOCK_PHASE(0);
 
-	writel(ctrl, priv->mmio + HIBMC_CRT_DISP_CTL);
+	pete_writel("drivers/gpu/drm/hisilicon/hibmc/hibmc_drm_de.c:355", ctrl, priv->mmio + HIBMC_CRT_DISP_CTL);
 
 	return ctrl;
 }
@@ -366,20 +366,20 @@ static void hibmc_crtc_mode_set_nofb(struct drm_crtc *crtc)
 	u32 width = mode->hsync_end - mode->hsync_start;
 	u32 height = mode->vsync_end - mode->vsync_start;
 
-	writel(format_pll_reg(), priv->mmio + HIBMC_CRT_PLL_CTRL);
-	writel(HIBMC_FIELD(HIBMC_CRT_HORZ_TOTAL_TOTAL, mode->htotal - 1) |
+	pete_writel("drivers/gpu/drm/hisilicon/hibmc/hibmc_drm_de.c:369", format_pll_reg(), priv->mmio + HIBMC_CRT_PLL_CTRL);
+	pete_writel("drivers/gpu/drm/hisilicon/hibmc/hibmc_drm_de.c:370", HIBMC_FIELD(HIBMC_CRT_HORZ_TOTAL_TOTAL, mode->htotal - 1) |
 	       HIBMC_FIELD(HIBMC_CRT_HORZ_TOTAL_DISP_END, mode->hdisplay - 1),
 	       priv->mmio + HIBMC_CRT_HORZ_TOTAL);
 
-	writel(HIBMC_FIELD(HIBMC_CRT_HORZ_SYNC_WIDTH, width) |
+	pete_writel("drivers/gpu/drm/hisilicon/hibmc/hibmc_drm_de.c:374", HIBMC_FIELD(HIBMC_CRT_HORZ_SYNC_WIDTH, width) |
 	       HIBMC_FIELD(HIBMC_CRT_HORZ_SYNC_START, mode->hsync_start - 1),
 	       priv->mmio + HIBMC_CRT_HORZ_SYNC);
 
-	writel(HIBMC_FIELD(HIBMC_CRT_VERT_TOTAL_TOTAL, mode->vtotal - 1) |
+	pete_writel("drivers/gpu/drm/hisilicon/hibmc/hibmc_drm_de.c:378", HIBMC_FIELD(HIBMC_CRT_VERT_TOTAL_TOTAL, mode->vtotal - 1) |
 	       HIBMC_FIELD(HIBMC_CRT_VERT_TOTAL_DISP_END, mode->vdisplay - 1),
 	       priv->mmio + HIBMC_CRT_VERT_TOTAL);
 
-	writel(HIBMC_FIELD(HIBMC_CRT_VERT_SYNC_HEIGHT, height) |
+	pete_writel("drivers/gpu/drm/hisilicon/hibmc/hibmc_drm_de.c:382", HIBMC_FIELD(HIBMC_CRT_VERT_SYNC_HEIGHT, height) |
 	       HIBMC_FIELD(HIBMC_CRT_VERT_SYNC_START, mode->vsync_start - 1),
 	       priv->mmio + HIBMC_CRT_VERT_SYNC);
 
@@ -401,7 +401,7 @@ static void hibmc_crtc_atomic_begin(struct drm_crtc *crtc,
 	hibmc_set_power_mode(priv, HIBMC_PW_MODE_CTL_MODE_MODE0);
 
 	/* Enable display power gate & LOCALMEM power gate*/
-	reg = readl(priv->mmio + HIBMC_CURRENT_GATE);
+	reg = pete_readl("drivers/gpu/drm/hisilicon/hibmc/hibmc_drm_de.c:404", priv->mmio + HIBMC_CURRENT_GATE);
 	reg &= ~HIBMC_CURR_GATE_DISPLAY_MASK;
 	reg &= ~HIBMC_CURR_GATE_LOCALMEM_MASK;
 	reg |= HIBMC_CURR_GATE_DISPLAY(1);
@@ -428,7 +428,7 @@ static int hibmc_crtc_enable_vblank(struct drm_crtc *crtc)
 {
 	struct hibmc_drm_private *priv = to_hibmc_drm_private(crtc->dev);
 
-	writel(HIBMC_RAW_INTERRUPT_EN_VBLANK(1),
+	pete_writel("drivers/gpu/drm/hisilicon/hibmc/hibmc_drm_de.c:431", HIBMC_RAW_INTERRUPT_EN_VBLANK(1),
 	       priv->mmio + HIBMC_RAW_INTERRUPT_EN);
 
 	return 0;
@@ -438,7 +438,7 @@ static void hibmc_crtc_disable_vblank(struct drm_crtc *crtc)
 {
 	struct hibmc_drm_private *priv = to_hibmc_drm_private(crtc->dev);
 
-	writel(HIBMC_RAW_INTERRUPT_EN_VBLANK(0),
+	pete_writel("drivers/gpu/drm/hisilicon/hibmc/hibmc_drm_de.c:441", HIBMC_RAW_INTERRUPT_EN_VBLANK(0),
 	       priv->mmio + HIBMC_RAW_INTERRUPT_EN);
 }
 
@@ -461,12 +461,12 @@ static void hibmc_crtc_load_lut(struct drm_crtc *crtc)
 		u8 blue = *b++ >> 8;
 		u32 rgb = (red << 16) | (green << 8) | blue;
 
-		writel(rgb, mmio + HIBMC_CRT_PALETTE + offset);
+		pete_writel("drivers/gpu/drm/hisilicon/hibmc/hibmc_drm_de.c:464", rgb, mmio + HIBMC_CRT_PALETTE + offset);
 	}
 
-	reg = readl(priv->mmio + HIBMC_CRT_DISP_CTL);
+	reg = pete_readl("drivers/gpu/drm/hisilicon/hibmc/hibmc_drm_de.c:467", priv->mmio + HIBMC_CRT_DISP_CTL);
 	reg |= HIBMC_FIELD(HIBMC_CTL_DISP_CTL_GAMMA, 1);
-	writel(reg, priv->mmio + HIBMC_CRT_DISP_CTL);
+	pete_writel("drivers/gpu/drm/hisilicon/hibmc/hibmc_drm_de.c:469", reg, priv->mmio + HIBMC_CRT_DISP_CTL);
 }
 
 static int hibmc_crtc_gamma_set(struct drm_crtc *crtc, u16 *red, u16 *green,

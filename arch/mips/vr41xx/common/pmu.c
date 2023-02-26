@@ -31,8 +31,8 @@
 
 static void __iomem *pmu_base;
 
-#define pmu_read(offset)		readw(pmu_base + (offset))
-#define pmu_write(offset, value)	writew((value), pmu_base + (offset))
+#define pmu_read(offset)		pete_readw("arch/mips/vr41xx/common/pmu.c:34", pmu_base + (offset))
+#define pmu_write(offset, value)	pete_writew("arch/mips/vr41xx/common/pmu.c:35", (value), pmu_base + (offset))
 
 static void __cpuidle vr41xx_cpu_wait(void)
 {

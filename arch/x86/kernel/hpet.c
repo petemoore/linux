@@ -76,12 +76,12 @@ struct hpet_channel *clockevent_to_channel(struct clock_event_device *evt)
 
 inline unsigned int hpet_readl(unsigned int a)
 {
-	return readl(hpet_virt_address + a);
+	return pete_readl("arch/x86/kernel/hpet.c:79", hpet_virt_address + a);
 }
 
 static inline void hpet_writel(unsigned int d, unsigned int a)
 {
-	writel(d, hpet_virt_address + a);
+	pete_writel("arch/x86/kernel/hpet.c:84", d, hpet_virt_address + a);
 }
 
 static inline void hpet_set_mapping(void)

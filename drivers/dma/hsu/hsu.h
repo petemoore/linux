@@ -98,13 +98,13 @@ static inline struct hsu_dma_chan *to_hsu_dma_chan(struct dma_chan *chan)
 
 static inline u32 hsu_chan_readl(struct hsu_dma_chan *hsuc, int offset)
 {
-	return readl(hsuc->reg + offset);
+	return pete_readl("drivers/dma/hsu/hsu.h:101", hsuc->reg + offset);
 }
 
 static inline void hsu_chan_writel(struct hsu_dma_chan *hsuc, int offset,
 				   u32 value)
 {
-	writel(value, hsuc->reg + offset);
+	pete_writel("drivers/dma/hsu/hsu.h:107", value, hsuc->reg + offset);
 }
 
 struct hsu_dma {

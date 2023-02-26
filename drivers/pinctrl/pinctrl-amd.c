@@ -43,7 +43,7 @@ static int amd_gpio_get_direction(struct gpio_chip *gc, unsigned offset)
 	struct amd_gpio *gpio_dev = gpiochip_get_data(gc);
 
 	raw_spin_lock_irqsave(&gpio_dev->lock, flags);
-	pin_reg = readl(gpio_dev->base + offset * 4);
+	pin_reg = pete_readl("drivers/pinctrl/pinctrl-amd.c:46", gpio_dev->base + offset * 4);
 	raw_spin_unlock_irqrestore(&gpio_dev->lock, flags);
 
 	if (pin_reg & BIT(OUTPUT_ENABLE_OFF))
@@ -59,9 +59,9 @@ static int amd_gpio_direction_input(struct gpio_chip *gc, unsigned offset)
 	struct amd_gpio *gpio_dev = gpiochip_get_data(gc);
 
 	raw_spin_lock_irqsave(&gpio_dev->lock, flags);
-	pin_reg = readl(gpio_dev->base + offset * 4);
+	pin_reg = pete_readl("drivers/pinctrl/pinctrl-amd.c:62", gpio_dev->base + offset * 4);
 	pin_reg &= ~BIT(OUTPUT_ENABLE_OFF);
-	writel(pin_reg, gpio_dev->base + offset * 4);
+	pete_writel("drivers/pinctrl/pinctrl-amd.c:64", pin_reg, gpio_dev->base + offset * 4);
 	raw_spin_unlock_irqrestore(&gpio_dev->lock, flags);
 
 	return 0;
@@ -75,13 +75,13 @@ static int amd_gpio_direction_output(struct gpio_chip *gc, unsigned offset,
 	struct amd_gpio *gpio_dev = gpiochip_get_data(gc);
 
 	raw_spin_lock_irqsave(&gpio_dev->lock, flags);
-	pin_reg = readl(gpio_dev->base + offset * 4);
+	pin_reg = pete_readl("drivers/pinctrl/pinctrl-amd.c:78", gpio_dev->base + offset * 4);
 	pin_reg |= BIT(OUTPUT_ENABLE_OFF);
 	if (value)
 		pin_reg |= BIT(OUTPUT_VALUE_OFF);
 	else
 		pin_reg &= ~BIT(OUTPUT_VALUE_OFF);
-	writel(pin_reg, gpio_dev->base + offset * 4);
+	pete_writel("drivers/pinctrl/pinctrl-amd.c:84", pin_reg, gpio_dev->base + offset * 4);
 	raw_spin_unlock_irqrestore(&gpio_dev->lock, flags);
 
 	return 0;
@@ -94,7 +94,7 @@ static int amd_gpio_get_value(struct gpio_chip *gc, unsigned offset)
 	struct amd_gpio *gpio_dev = gpiochip_get_data(gc);
 
 	raw_spin_lock_irqsave(&gpio_dev->lock, flags);
-	pin_reg = readl(gpio_dev->base + offset * 4);
+	pin_reg = pete_readl("drivers/pinctrl/pinctrl-amd.c:97", gpio_dev->base + offset * 4);
 	raw_spin_unlock_irqrestore(&gpio_dev->lock, flags);
 
 	return !!(pin_reg & BIT(PIN_STS_OFF));
@@ -107,12 +107,12 @@ static void amd_gpio_set_value(struct gpio_chip *gc, unsigned offset, int value)
 	struct amd_gpio *gpio_dev = gpiochip_get_data(gc);
 
 	raw_spin_lock_irqsave(&gpio_dev->lock, flags);
-	pin_reg = readl(gpio_dev->base + offset * 4);
+	pin_reg = pete_readl("drivers/pinctrl/pinctrl-amd.c:110", gpio_dev->base + offset * 4);
 	if (value)
 		pin_reg |= BIT(OUTPUT_VALUE_OFF);
 	else
 		pin_reg &= ~BIT(OUTPUT_VALUE_OFF);
-	writel(pin_reg, gpio_dev->base + offset * 4);
+	pete_writel("drivers/pinctrl/pinctrl-amd.c:115", pin_reg, gpio_dev->base + offset * 4);
 	raw_spin_unlock_irqrestore(&gpio_dev->lock, flags);
 }
 
@@ -126,7 +126,7 @@ static int amd_gpio_set_debounce(struct gpio_chip *gc, unsigned offset,
 	struct amd_gpio *gpio_dev = gpiochip_get_data(gc);
 
 	raw_spin_lock_irqsave(&gpio_dev->lock, flags);
-	pin_reg = readl(gpio_dev->base + offset * 4);
+	pin_reg = pete_readl("drivers/pinctrl/pinctrl-amd.c:129", gpio_dev->base + offset * 4);
 
 	if (debounce) {
 		pin_reg |= DB_TYPE_REMOVE_GLITCH << DB_CNTRL_OFF;
@@ -175,7 +175,7 @@ static int amd_gpio_set_debounce(struct gpio_chip *gc, unsigned offset,
 		pin_reg &= ~DB_TMR_OUT_MASK;
 		pin_reg &= ~(DB_CNTRl_MASK << DB_CNTRL_OFF);
 	}
-	writel(pin_reg, gpio_dev->base + offset * 4);
+	pete_writel("drivers/pinctrl/pinctrl-amd.c:178", pin_reg, gpio_dev->base + offset * 4);
 	raw_spin_unlock_irqrestore(&gpio_dev->lock, flags);
 
 	return ret;
@@ -250,7 +250,7 @@ static void amd_gpio_dbg_show(struct seq_file *s, struct gpio_chip *gc)
 		for (; i < pin_num; i++) {
 			seq_printf(s, "pin%d\t", i);
 			raw_spin_lock_irqsave(&gpio_dev->lock, flags);
-			pin_reg = readl(gpio_dev->base + i * 4);
+			pin_reg = pete_readl("drivers/pinctrl/pinctrl-amd.c:253", gpio_dev->base + i * 4);
 			raw_spin_unlock_irqrestore(&gpio_dev->lock, flags);
 
 			if (pin_reg & BIT(INTERRUPT_ENABLE_OFF)) {
@@ -388,10 +388,10 @@ static void amd_gpio_irq_enable(struct irq_data *d)
 	struct amd_gpio *gpio_dev = gpiochip_get_data(gc);
 
 	raw_spin_lock_irqsave(&gpio_dev->lock, flags);
-	pin_reg = readl(gpio_dev->base + (d->hwirq)*4);
+	pin_reg = pete_readl("drivers/pinctrl/pinctrl-amd.c:391", gpio_dev->base + (d->hwirq)*4);
 	pin_reg |= BIT(INTERRUPT_ENABLE_OFF);
 	pin_reg |= BIT(INTERRUPT_MASK_OFF);
-	writel(pin_reg, gpio_dev->base + (d->hwirq)*4);
+	pete_writel("drivers/pinctrl/pinctrl-amd.c:394", pin_reg, gpio_dev->base + (d->hwirq)*4);
 	raw_spin_unlock_irqrestore(&gpio_dev->lock, flags);
 }
 
@@ -403,10 +403,10 @@ static void amd_gpio_irq_disable(struct irq_data *d)
 	struct amd_gpio *gpio_dev = gpiochip_get_data(gc);
 
 	raw_spin_lock_irqsave(&gpio_dev->lock, flags);
-	pin_reg = readl(gpio_dev->base + (d->hwirq)*4);
+	pin_reg = pete_readl("drivers/pinctrl/pinctrl-amd.c:406", gpio_dev->base + (d->hwirq)*4);
 	pin_reg &= ~BIT(INTERRUPT_ENABLE_OFF);
 	pin_reg &= ~BIT(INTERRUPT_MASK_OFF);
-	writel(pin_reg, gpio_dev->base + (d->hwirq)*4);
+	pete_writel("drivers/pinctrl/pinctrl-amd.c:409", pin_reg, gpio_dev->base + (d->hwirq)*4);
 	raw_spin_unlock_irqrestore(&gpio_dev->lock, flags);
 }
 
@@ -418,9 +418,9 @@ static void amd_gpio_irq_mask(struct irq_data *d)
 	struct amd_gpio *gpio_dev = gpiochip_get_data(gc);
 
 	raw_spin_lock_irqsave(&gpio_dev->lock, flags);
-	pin_reg = readl(gpio_dev->base + (d->hwirq)*4);
+	pin_reg = pete_readl("drivers/pinctrl/pinctrl-amd.c:421", gpio_dev->base + (d->hwirq)*4);
 	pin_reg &= ~BIT(INTERRUPT_MASK_OFF);
-	writel(pin_reg, gpio_dev->base + (d->hwirq)*4);
+	pete_writel("drivers/pinctrl/pinctrl-amd.c:423", pin_reg, gpio_dev->base + (d->hwirq)*4);
 	raw_spin_unlock_irqrestore(&gpio_dev->lock, flags);
 }
 
@@ -432,9 +432,9 @@ static void amd_gpio_irq_unmask(struct irq_data *d)
 	struct amd_gpio *gpio_dev = gpiochip_get_data(gc);
 
 	raw_spin_lock_irqsave(&gpio_dev->lock, flags);
-	pin_reg = readl(gpio_dev->base + (d->hwirq)*4);
+	pin_reg = pete_readl("drivers/pinctrl/pinctrl-amd.c:435", gpio_dev->base + (d->hwirq)*4);
 	pin_reg |= BIT(INTERRUPT_MASK_OFF);
-	writel(pin_reg, gpio_dev->base + (d->hwirq)*4);
+	pete_writel("drivers/pinctrl/pinctrl-amd.c:437", pin_reg, gpio_dev->base + (d->hwirq)*4);
 	raw_spin_unlock_irqrestore(&gpio_dev->lock, flags);
 }
 
@@ -448,14 +448,14 @@ static int amd_gpio_irq_set_wake(struct irq_data *d, unsigned int on)
 	int err;
 
 	raw_spin_lock_irqsave(&gpio_dev->lock, flags);
-	pin_reg = readl(gpio_dev->base + (d->hwirq)*4);
+	pin_reg = pete_readl("drivers/pinctrl/pinctrl-amd.c:451", gpio_dev->base + (d->hwirq)*4);
 
 	if (on)
 		pin_reg |= wake_mask;
 	else
 		pin_reg &= ~wake_mask;
 
-	writel(pin_reg, gpio_dev->base + (d->hwirq)*4);
+	pete_writel("drivers/pinctrl/pinctrl-amd.c:458", pin_reg, gpio_dev->base + (d->hwirq)*4);
 	raw_spin_unlock_irqrestore(&gpio_dev->lock, flags);
 
 	if (on)
@@ -478,9 +478,9 @@ static void amd_gpio_irq_eoi(struct irq_data *d)
 	struct amd_gpio *gpio_dev = gpiochip_get_data(gc);
 
 	raw_spin_lock_irqsave(&gpio_dev->lock, flags);
-	reg = readl(gpio_dev->base + WAKE_INT_MASTER_REG);
+	reg = pete_readl("drivers/pinctrl/pinctrl-amd.c:481", gpio_dev->base + WAKE_INT_MASTER_REG);
 	reg |= EOI_MASK;
-	writel(reg, gpio_dev->base + WAKE_INT_MASTER_REG);
+	pete_writel("drivers/pinctrl/pinctrl-amd.c:483", reg, gpio_dev->base + WAKE_INT_MASTER_REG);
 	raw_spin_unlock_irqrestore(&gpio_dev->lock, flags);
 }
 
@@ -493,7 +493,7 @@ static int amd_gpio_irq_set_type(struct irq_data *d, unsigned int type)
 	struct amd_gpio *gpio_dev = gpiochip_get_data(gc);
 
 	raw_spin_lock_irqsave(&gpio_dev->lock, flags);
-	pin_reg = readl(gpio_dev->base + (d->hwirq)*4);
+	pin_reg = pete_readl("drivers/pinctrl/pinctrl-amd.c:496", gpio_dev->base + (d->hwirq)*4);
 
 	switch (type & IRQ_TYPE_SENSE_MASK) {
 	case IRQ_TYPE_EDGE_RISING:
@@ -559,10 +559,10 @@ static int amd_gpio_irq_set_type(struct irq_data *d, unsigned int type)
 	pin_reg_irq_en = pin_reg;
 	pin_reg_irq_en |= mask;
 	pin_reg_irq_en &= ~BIT(INTERRUPT_MASK_OFF);
-	writel(pin_reg_irq_en, gpio_dev->base + (d->hwirq)*4);
-	while ((readl(gpio_dev->base + (d->hwirq)*4) & mask) != mask)
+	pete_writel("drivers/pinctrl/pinctrl-amd.c:562", pin_reg_irq_en, gpio_dev->base + (d->hwirq)*4);
+	while ((pete_readl("drivers/pinctrl/pinctrl-amd.c:563", gpio_dev->base + (d->hwirq)*4) & mask) != mask)
 		continue;
-	writel(pin_reg, gpio_dev->base + (d->hwirq)*4);
+	pete_writel("drivers/pinctrl/pinctrl-amd.c:565", pin_reg, gpio_dev->base + (d->hwirq)*4);
 	raw_spin_unlock_irqrestore(&gpio_dev->lock, flags);
 
 	return ret;
@@ -611,9 +611,9 @@ static bool do_amd_gpio_irq_handler(int irq, void *dev_id)
 
 	/* Read the wake status */
 	raw_spin_lock_irqsave(&gpio_dev->lock, flags);
-	status = readl(gpio_dev->base + WAKE_INT_STATUS_REG1);
+	status = pete_readl("drivers/pinctrl/pinctrl-amd.c:614", gpio_dev->base + WAKE_INT_STATUS_REG1);
 	status <<= 32;
-	status |= readl(gpio_dev->base + WAKE_INT_STATUS_REG0);
+	status |= pete_readl("drivers/pinctrl/pinctrl-amd.c:616", gpio_dev->base + WAKE_INT_STATUS_REG0);
 	raw_spin_unlock_irqrestore(&gpio_dev->lock, flags);
 
 	/* Bit 0-45 contain the relevant status bits */
@@ -626,7 +626,7 @@ static bool do_amd_gpio_irq_handler(int irq, void *dev_id)
 
 		/* Each status bit covers four pins */
 		for (i = 0; i < 4; i++) {
-			regval = readl(regs + i);
+			regval = pete_readl("drivers/pinctrl/pinctrl-amd.c:629", regs + i);
 
 			if (regval & PIN_IRQ_PENDING)
 				dev_dbg(&gpio_dev->pdev->dev,
@@ -651,14 +651,14 @@ static bool do_amd_gpio_irq_handler(int irq, void *dev_id)
 			 * by an interrupt storm.
 			 */
 			raw_spin_lock_irqsave(&gpio_dev->lock, flags);
-			regval = readl(regs + i);
+			regval = pete_readl("drivers/pinctrl/pinctrl-amd.c:654", regs + i);
 			if (irq == 0) {
 				regval &= ~BIT(INTERRUPT_ENABLE_OFF);
 				dev_dbg(&gpio_dev->pdev->dev,
 					"Disabling spurious GPIO IRQ %d\n",
 					irqnr + i);
 			}
-			writel(regval, regs + i);
+			pete_writel("drivers/pinctrl/pinctrl-amd.c:661", regval, regs + i);
 			raw_spin_unlock_irqrestore(&gpio_dev->lock, flags);
 			ret = true;
 		}
@@ -669,9 +669,9 @@ static bool do_amd_gpio_irq_handler(int irq, void *dev_id)
 
 	/* Signal EOI to the GPIO unit */
 	raw_spin_lock_irqsave(&gpio_dev->lock, flags);
-	regval = readl(gpio_dev->base + WAKE_INT_MASTER_REG);
+	regval = pete_readl("drivers/pinctrl/pinctrl-amd.c:672", gpio_dev->base + WAKE_INT_MASTER_REG);
 	regval |= EOI_MASK;
-	writel(regval, gpio_dev->base + WAKE_INT_MASTER_REG);
+	pete_writel("drivers/pinctrl/pinctrl-amd.c:674", regval, gpio_dev->base + WAKE_INT_MASTER_REG);
 	raw_spin_unlock_irqrestore(&gpio_dev->lock, flags);
 
 	return ret;
@@ -735,7 +735,7 @@ static int amd_pinconf_get(struct pinctrl_dev *pctldev,
 	enum pin_config_param param = pinconf_to_config_param(*config);
 
 	raw_spin_lock_irqsave(&gpio_dev->lock, flags);
-	pin_reg = readl(gpio_dev->base + pin*4);
+	pin_reg = pete_readl("drivers/pinctrl/pinctrl-amd.c:738", gpio_dev->base + pin*4);
 	raw_spin_unlock_irqrestore(&gpio_dev->lock, flags);
 	switch (param) {
 	case PIN_CONFIG_INPUT_DEBOUNCE:
@@ -780,7 +780,7 @@ static int amd_pinconf_set(struct pinctrl_dev *pctldev, unsigned int pin,
 	for (i = 0; i < num_configs; i++) {
 		param = pinconf_to_config_param(configs[i]);
 		arg = pinconf_to_config_argument(configs[i]);
-		pin_reg = readl(gpio_dev->base + pin*4);
+		pin_reg = pete_readl("drivers/pinctrl/pinctrl-amd.c:783", gpio_dev->base + pin*4);
 
 		switch (param) {
 		case PIN_CONFIG_INPUT_DEBOUNCE:
@@ -813,7 +813,7 @@ static int amd_pinconf_set(struct pinctrl_dev *pctldev, unsigned int pin,
 			ret = -ENOTSUPP;
 		}
 
-		writel(pin_reg, gpio_dev->base + pin*4);
+		pete_writel("drivers/pinctrl/pinctrl-amd.c:816", pin_reg, gpio_dev->base + pin*4);
 	}
 	raw_spin_unlock_irqrestore(&gpio_dev->lock, flags);
 
@@ -883,9 +883,9 @@ static void amd_gpio_irq_init(struct amd_gpio *gpio_dev)
 
 		raw_spin_lock_irqsave(&gpio_dev->lock, flags);
 
-		pin_reg = readl(gpio_dev->base + i * 4);
+		pin_reg = pete_readl("drivers/pinctrl/pinctrl-amd.c:886", gpio_dev->base + i * 4);
 		pin_reg &= ~mask;
-		writel(pin_reg, gpio_dev->base + i * 4);
+		pete_writel("drivers/pinctrl/pinctrl-amd.c:888", pin_reg, gpio_dev->base + i * 4);
 
 		raw_spin_unlock_irqrestore(&gpio_dev->lock, flags);
 	}
@@ -924,7 +924,7 @@ static int amd_gpio_suspend(struct device *dev)
 			continue;
 
 		raw_spin_lock_irqsave(&gpio_dev->lock, flags);
-		gpio_dev->saved_regs[i] = readl(gpio_dev->base + pin * 4) & ~PIN_IRQ_PENDING;
+		gpio_dev->saved_regs[i] = pete_readl("drivers/pinctrl/pinctrl-amd.c:927", gpio_dev->base + pin * 4) & ~PIN_IRQ_PENDING;
 		raw_spin_unlock_irqrestore(&gpio_dev->lock, flags);
 	}
 
@@ -945,8 +945,8 @@ static int amd_gpio_resume(struct device *dev)
 			continue;
 
 		raw_spin_lock_irqsave(&gpio_dev->lock, flags);
-		gpio_dev->saved_regs[i] |= readl(gpio_dev->base + pin * 4) & PIN_IRQ_PENDING;
-		writel(gpio_dev->saved_regs[i], gpio_dev->base + pin * 4);
+		gpio_dev->saved_regs[i] |= pete_readl("drivers/pinctrl/pinctrl-amd.c:948", gpio_dev->base + pin * 4) & PIN_IRQ_PENDING;
+		pete_writel("drivers/pinctrl/pinctrl-amd.c:949", gpio_dev->saved_regs[i], gpio_dev->base + pin * 4);
 		raw_spin_unlock_irqrestore(&gpio_dev->lock, flags);
 	}
 

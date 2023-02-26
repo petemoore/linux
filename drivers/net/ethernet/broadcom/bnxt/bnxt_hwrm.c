@@ -485,10 +485,10 @@ static int __hwrm_send(struct bnxt *bp, struct bnxt_hwrm_ctx *ctx)
 	__iowrite32_copy(bp->bar0 + bar_offset, data, msg_len / 4);
 
 	for (i = msg_len; i < max_req_len; i += 4)
-		writel(0, bp->bar0 + bar_offset + i);
+		pete_writel("drivers/net/ethernet/broadcom/bnxt/bnxt_hwrm.c:488", 0, bp->bar0 + bar_offset + i);
 
 	/* Ring channel doorbell */
-	writel(1, bp->bar0 + doorbell_offset);
+	pete_writel("drivers/net/ethernet/broadcom/bnxt/bnxt_hwrm.c:491", 1, bp->bar0 + doorbell_offset);
 
 	if (!pci_is_enabled(bp->pdev)) {
 		rc = -ENODEV;

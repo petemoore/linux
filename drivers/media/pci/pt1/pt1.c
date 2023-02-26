@@ -287,12 +287,12 @@ static int pt1_demod_block_init(struct pt1 *pt1)
 
 static void pt1_write_reg(struct pt1 *pt1, int reg, u32 data)
 {
-	writel(data, pt1->regs + reg * 4);
+	pete_writel("drivers/media/pci/pt1/pt1.c:290", data, pt1->regs + reg * 4);
 }
 
 static u32 pt1_read_reg(struct pt1 *pt1, int reg)
 {
-	return readl(pt1->regs + reg * 4);
+	return pete_readl("drivers/media/pci/pt1/pt1.c:295", pt1->regs + reg * 4);
 }
 
 static unsigned int pt1_nr_tables = 8;

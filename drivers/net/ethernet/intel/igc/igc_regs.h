@@ -307,7 +307,7 @@ u32 igc_rd32(struct igc_hw *hw, u32 reg);
 do { \
 	u8 __iomem *hw_addr = READ_ONCE((hw)->hw_addr); \
 	if (!IGC_REMOVED(hw_addr)) \
-		writel((val), &hw_addr[(reg)]); \
+		pete_writel("drivers/net/ethernet/intel/igc/igc_regs.h:310", (val), &hw_addr[(reg)]); \
 } while (0)
 
 #define rd32(reg) (igc_rd32(hw, reg))

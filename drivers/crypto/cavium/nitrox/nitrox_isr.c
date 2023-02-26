@@ -31,7 +31,7 @@ static irqreturn_t nps_pkt_slc_isr(int irq, void *data)
 	union nps_pkt_slc_cnts slc_cnts;
 	struct nitrox_cmdq *cmdq = qvec->cmdq;
 
-	slc_cnts.value = readq(cmdq->compl_cnt_csr_addr);
+	slc_cnts.value = pete_readq("drivers/crypto/cavium/nitrox/nitrox_isr.c:34", cmdq->compl_cnt_csr_addr);
 	/* New packet on SLC output port */
 	if (slc_cnts.s.slc_int)
 		tasklet_hi_schedule(&qvec->resp_tasklet);

@@ -33,14 +33,14 @@ static void __iomem *owl_clkevt_base;
 
 static inline void owl_timer_reset(void __iomem *base)
 {
-	writel(0, base + OWL_Tx_CTL);
-	writel(0, base + OWL_Tx_VAL);
-	writel(0, base + OWL_Tx_CMP);
+	pete_writel("drivers/clocksource/timer-owl.c:36", 0, base + OWL_Tx_CTL);
+	pete_writel("drivers/clocksource/timer-owl.c:37", 0, base + OWL_Tx_VAL);
+	pete_writel("drivers/clocksource/timer-owl.c:38", 0, base + OWL_Tx_CMP);
 }
 
 static inline void owl_timer_set_enabled(void __iomem *base, bool enabled)
 {
-	u32 ctl = readl(base + OWL_Tx_CTL);
+	u32 ctl = pete_readl("drivers/clocksource/timer-owl.c:43", base + OWL_Tx_CTL);
 
 	/* PD bit is cleared when set */
 	ctl &= ~OWL_Tx_CTL_PD;
@@ -50,12 +50,12 @@ static inline void owl_timer_set_enabled(void __iomem *base, bool enabled)
 	else
 		ctl &= ~OWL_Tx_CTL_EN;
 
-	writel(ctl, base + OWL_Tx_CTL);
+	pete_writel("drivers/clocksource/timer-owl.c:53", ctl, base + OWL_Tx_CTL);
 }
 
 static u64 notrace owl_timer_sched_read(void)
 {
-	return (u64)readl(owl_clksrc_base + OWL_Tx_VAL);
+	return (u64)pete_readl("drivers/clocksource/timer-owl.c:58", owl_clksrc_base + OWL_Tx_VAL);
 }
 
 static int owl_timer_set_state_shutdown(struct clock_event_device *evt)
@@ -83,9 +83,9 @@ static int owl_timer_set_next_event(unsigned long evt,
 	void __iomem *base = owl_clkevt_base;
 
 	owl_timer_set_enabled(base, false);
-	writel(OWL_Tx_CTL_INTEN, base + OWL_Tx_CTL);
-	writel(0, base + OWL_Tx_VAL);
-	writel(evt, base + OWL_Tx_CMP);
+	pete_writel("drivers/clocksource/timer-owl.c:86", OWL_Tx_CTL_INTEN, base + OWL_Tx_CTL);
+	pete_writel("drivers/clocksource/timer-owl.c:87", 0, base + OWL_Tx_VAL);
+	pete_writel("drivers/clocksource/timer-owl.c:88", evt, base + OWL_Tx_CMP);
 	owl_timer_set_enabled(base, true);
 
 	return 0;
@@ -106,7 +106,7 @@ static irqreturn_t owl_timer1_interrupt(int irq, void *dev_id)
 {
 	struct clock_event_device *evt = (struct clock_event_device *)dev_id;
 
-	writel(OWL_Tx_CTL_PD, owl_clkevt_base + OWL_Tx_CTL);
+	pete_writel("drivers/clocksource/timer-owl.c:109", OWL_Tx_CTL_PD, owl_clkevt_base + OWL_Tx_CTL);
 
 	evt->event_handler(evt);
 

@@ -93,13 +93,13 @@ struct tegra_xusb_padctl {
 static inline void padctl_writel(struct tegra_xusb_padctl *padctl, u32 value,
 				 unsigned long offset)
 {
-	writel(value, padctl->regs + offset);
+	pete_writel("drivers/pinctrl/tegra/pinctrl-tegra-xusb.c:96", value, padctl->regs + offset);
 }
 
 static inline u32 padctl_readl(struct tegra_xusb_padctl *padctl,
 			       unsigned long offset)
 {
-	return readl(padctl->regs + offset);
+	return pete_readl("drivers/pinctrl/tegra/pinctrl-tegra-xusb.c:102", padctl->regs + offset);
 }
 
 static int tegra_xusb_padctl_get_groups_count(struct pinctrl_dev *pinctrl)

@@ -266,17 +266,17 @@ struct zilog_layout {
 /* Read Register 15 (value of WR 15) */
 
 /* Misc macros */
-#define ZS_CLEARERR(channel)    do { writeb(ERR_RES, &channel->control); \
+#define ZS_CLEARERR(channel)    do { pete_writeb("drivers/tty/serial/ip22zilog.h:269", ERR_RES, &channel->control); \
 				     udelay(5); } while(0)
 
-#define ZS_CLEARSTAT(channel)   do { writeb(RES_EXT_INT, &channel->control); \
+#define ZS_CLEARSTAT(channel)   do { pete_writeb("drivers/tty/serial/ip22zilog.h:272", RES_EXT_INT, &channel->control); \
 				     udelay(5); } while(0)
 
-#define ZS_CLEARFIFO(channel)   do { readb(&channel->data); \
+#define ZS_CLEARFIFO(channel)   do { pete_readb("drivers/tty/serial/ip22zilog.h:275", &channel->data); \
 				     udelay(2); \
-				     readb(&channel->data); \
+				     pete_readb("drivers/tty/serial/ip22zilog.h:277", &channel->data); \
 				     udelay(2); \
-				     readb(&channel->data); \
+				     pete_readb("drivers/tty/serial/ip22zilog.h:279", &channel->data); \
 				     udelay(2); } while(0)
 
 #endif /* _IP22_ZILOG_H */

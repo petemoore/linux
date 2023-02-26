@@ -20,19 +20,19 @@ void fimc_hw_reset(struct fimc_dev *dev)
 {
 	u32 cfg;
 
-	cfg = readl(dev->regs + FIMC_REG_CISRCFMT);
+	cfg = pete_readl("drivers/media/platform/exynos4-is/fimc-reg.c:23", dev->regs + FIMC_REG_CISRCFMT);
 	cfg |= FIMC_REG_CISRCFMT_ITU601_8BIT;
-	writel(cfg, dev->regs + FIMC_REG_CISRCFMT);
+	pete_writel("drivers/media/platform/exynos4-is/fimc-reg.c:25", cfg, dev->regs + FIMC_REG_CISRCFMT);
 
 	/* Software reset. */
-	cfg = readl(dev->regs + FIMC_REG_CIGCTRL);
+	cfg = pete_readl("drivers/media/platform/exynos4-is/fimc-reg.c:28", dev->regs + FIMC_REG_CIGCTRL);
 	cfg |= (FIMC_REG_CIGCTRL_SWRST | FIMC_REG_CIGCTRL_IRQ_LEVEL);
-	writel(cfg, dev->regs + FIMC_REG_CIGCTRL);
+	pete_writel("drivers/media/platform/exynos4-is/fimc-reg.c:30", cfg, dev->regs + FIMC_REG_CIGCTRL);
 	udelay(10);
 
-	cfg = readl(dev->regs + FIMC_REG_CIGCTRL);
+	cfg = pete_readl("drivers/media/platform/exynos4-is/fimc-reg.c:33", dev->regs + FIMC_REG_CIGCTRL);
 	cfg &= ~FIMC_REG_CIGCTRL_SWRST;
-	writel(cfg, dev->regs + FIMC_REG_CIGCTRL);
+	pete_writel("drivers/media/platform/exynos4-is/fimc-reg.c:35", cfg, dev->regs + FIMC_REG_CIGCTRL);
 
 	if (dev->drv_data->out_buf_count > 4)
 		fimc_hw_set_dma_seq(dev, 0xF);
@@ -73,7 +73,7 @@ void fimc_hw_set_rotation(struct fimc_ctx *ctx)
 	u32 cfg, flip;
 	struct fimc_dev *dev = ctx->fimc_dev;
 
-	cfg = readl(dev->regs + FIMC_REG_CITRGFMT);
+	cfg = pete_readl("drivers/media/platform/exynos4-is/fimc-reg.c:76", dev->regs + FIMC_REG_CITRGFMT);
 	cfg &= ~(FIMC_REG_CITRGFMT_INROT90 | FIMC_REG_CITRGFMT_OUTROT90 |
 		 FIMC_REG_CITRGFMT_FLIP_180);
 
@@ -91,13 +91,13 @@ void fimc_hw_set_rotation(struct fimc_ctx *ctx)
 
 	if (ctx->out_path == FIMC_IO_DMA) {
 		cfg |= fimc_hw_get_target_flip(ctx);
-		writel(cfg, dev->regs + FIMC_REG_CITRGFMT);
+		pete_writel("drivers/media/platform/exynos4-is/fimc-reg.c:94", cfg, dev->regs + FIMC_REG_CITRGFMT);
 	} else {
 		/* LCD FIFO path */
-		flip = readl(dev->regs + FIMC_REG_MSCTRL);
+		flip = pete_readl("drivers/media/platform/exynos4-is/fimc-reg.c:97", dev->regs + FIMC_REG_MSCTRL);
 		flip &= ~FIMC_REG_MSCTRL_FLIP_MASK;
 		flip |= fimc_hw_get_in_flip(ctx);
-		writel(flip, dev->regs + FIMC_REG_MSCTRL);
+		pete_writel("drivers/media/platform/exynos4-is/fimc-reg.c:100", flip, dev->regs + FIMC_REG_MSCTRL);
 	}
 }
 
@@ -110,7 +110,7 @@ void fimc_hw_set_target_format(struct fimc_ctx *ctx)
 	dbg("w= %d, h= %d color: %d", frame->width,
 	    frame->height, frame->fmt->color);
 
-	cfg = readl(dev->regs + FIMC_REG_CITRGFMT);
+	cfg = pete_readl("drivers/media/platform/exynos4-is/fimc-reg.c:113", dev->regs + FIMC_REG_CITRGFMT);
 	cfg &= ~(FIMC_REG_CITRGFMT_FMT_MASK | FIMC_REG_CITRGFMT_HSIZE_MASK |
 		 FIMC_REG_CITRGFMT_VSIZE_MASK);
 
@@ -136,12 +136,12 @@ void fimc_hw_set_target_format(struct fimc_ctx *ctx)
 	else
 		cfg |= (frame->width << 16) | frame->height;
 
-	writel(cfg, dev->regs + FIMC_REG_CITRGFMT);
+	pete_writel("drivers/media/platform/exynos4-is/fimc-reg.c:139", cfg, dev->regs + FIMC_REG_CITRGFMT);
 
-	cfg = readl(dev->regs + FIMC_REG_CITAREA);
+	cfg = pete_readl("drivers/media/platform/exynos4-is/fimc-reg.c:141", dev->regs + FIMC_REG_CITAREA);
 	cfg &= ~FIMC_REG_CITAREA_MASK;
 	cfg |= (frame->width * frame->height);
-	writel(cfg, dev->regs + FIMC_REG_CITAREA);
+	pete_writel("drivers/media/platform/exynos4-is/fimc-reg.c:144", cfg, dev->regs + FIMC_REG_CITAREA);
 }
 
 static void fimc_hw_set_out_dma_size(struct fimc_ctx *ctx)
@@ -151,15 +151,15 @@ static void fimc_hw_set_out_dma_size(struct fimc_ctx *ctx)
 	u32 cfg;
 
 	cfg = (frame->f_height << 16) | frame->f_width;
-	writel(cfg, dev->regs + FIMC_REG_ORGOSIZE);
+	pete_writel("drivers/media/platform/exynos4-is/fimc-reg.c:154", cfg, dev->regs + FIMC_REG_ORGOSIZE);
 
 	/* Select color space conversion equation (HD/SD size).*/
-	cfg = readl(dev->regs + FIMC_REG_CIGCTRL);
+	cfg = pete_readl("drivers/media/platform/exynos4-is/fimc-reg.c:157", dev->regs + FIMC_REG_CIGCTRL);
 	if (frame->f_width >= 1280) /* HD */
 		cfg |= FIMC_REG_CIGCTRL_CSC_ITU601_709;
 	else	/* SD */
 		cfg &= ~FIMC_REG_CIGCTRL_CSC_ITU601_709;
-	writel(cfg, dev->regs + FIMC_REG_CIGCTRL);
+	pete_writel("drivers/media/platform/exynos4-is/fimc-reg.c:162", cfg, dev->regs + FIMC_REG_CIGCTRL);
 
 }
 
@@ -173,18 +173,18 @@ void fimc_hw_set_out_dma(struct fimc_ctx *ctx)
 
 	/* Set the input dma offsets. */
 	cfg = (offset->y_v << 16) | offset->y_h;
-	writel(cfg, dev->regs + FIMC_REG_CIOYOFF);
+	pete_writel("drivers/media/platform/exynos4-is/fimc-reg.c:176", cfg, dev->regs + FIMC_REG_CIOYOFF);
 
 	cfg = (offset->cb_v << 16) | offset->cb_h;
-	writel(cfg, dev->regs + FIMC_REG_CIOCBOFF);
+	pete_writel("drivers/media/platform/exynos4-is/fimc-reg.c:179", cfg, dev->regs + FIMC_REG_CIOCBOFF);
 
 	cfg = (offset->cr_v << 16) | offset->cr_h;
-	writel(cfg, dev->regs + FIMC_REG_CIOCROFF);
+	pete_writel("drivers/media/platform/exynos4-is/fimc-reg.c:182", cfg, dev->regs + FIMC_REG_CIOCROFF);
 
 	fimc_hw_set_out_dma_size(ctx);
 
 	/* Configure chroma components order. */
-	cfg = readl(dev->regs + FIMC_REG_CIOCTRL);
+	cfg = pete_readl("drivers/media/platform/exynos4-is/fimc-reg.c:187", dev->regs + FIMC_REG_CIOCTRL);
 
 	cfg &= ~(FIMC_REG_CIOCTRL_ORDER2P_MASK |
 		 FIMC_REG_CIOCTRL_ORDER422_MASK |
@@ -205,27 +205,27 @@ void fimc_hw_set_out_dma(struct fimc_ctx *ctx)
 	else if (fmt->color == FIMC_FMT_RGB444)
 		cfg |= FIMC_REG_CIOCTRL_ARGB4444;
 
-	writel(cfg, dev->regs + FIMC_REG_CIOCTRL);
+	pete_writel("drivers/media/platform/exynos4-is/fimc-reg.c:208", cfg, dev->regs + FIMC_REG_CIOCTRL);
 }
 
 static void fimc_hw_en_autoload(struct fimc_dev *dev, int enable)
 {
-	u32 cfg = readl(dev->regs + FIMC_REG_ORGISIZE);
+	u32 cfg = pete_readl("drivers/media/platform/exynos4-is/fimc-reg.c:213", dev->regs + FIMC_REG_ORGISIZE);
 	if (enable)
 		cfg |= FIMC_REG_CIREAL_ISIZE_AUTOLOAD_EN;
 	else
 		cfg &= ~FIMC_REG_CIREAL_ISIZE_AUTOLOAD_EN;
-	writel(cfg, dev->regs + FIMC_REG_ORGISIZE);
+	pete_writel("drivers/media/platform/exynos4-is/fimc-reg.c:218", cfg, dev->regs + FIMC_REG_ORGISIZE);
 }
 
 void fimc_hw_en_lastirq(struct fimc_dev *dev, int enable)
 {
-	u32 cfg = readl(dev->regs + FIMC_REG_CIOCTRL);
+	u32 cfg = pete_readl("drivers/media/platform/exynos4-is/fimc-reg.c:223", dev->regs + FIMC_REG_CIOCTRL);
 	if (enable)
 		cfg |= FIMC_REG_CIOCTRL_LASTIRQ_ENABLE;
 	else
 		cfg &= ~FIMC_REG_CIOCTRL_LASTIRQ_ENABLE;
-	writel(cfg, dev->regs + FIMC_REG_CIOCTRL);
+	pete_writel("drivers/media/platform/exynos4-is/fimc-reg.c:228", cfg, dev->regs + FIMC_REG_CIOCTRL);
 }
 
 void fimc_hw_set_prescaler(struct fimc_ctx *ctx)
@@ -238,10 +238,10 @@ void fimc_hw_set_prescaler(struct fimc_ctx *ctx)
 	cfg = shfactor << 28;
 
 	cfg |= (sc->pre_hratio << 16) | sc->pre_vratio;
-	writel(cfg, dev->regs + FIMC_REG_CISCPRERATIO);
+	pete_writel("drivers/media/platform/exynos4-is/fimc-reg.c:241", cfg, dev->regs + FIMC_REG_CISCPRERATIO);
 
 	cfg = (sc->pre_dst_width << 16) | sc->pre_dst_height;
-	writel(cfg, dev->regs + FIMC_REG_CISCPREDST);
+	pete_writel("drivers/media/platform/exynos4-is/fimc-reg.c:244", cfg, dev->regs + FIMC_REG_CISCPREDST);
 }
 
 static void fimc_hw_set_scaler(struct fimc_ctx *ctx)
@@ -251,7 +251,7 @@ static void fimc_hw_set_scaler(struct fimc_ctx *ctx)
 	struct fimc_frame *src_frame = &ctx->s_frame;
 	struct fimc_frame *dst_frame = &ctx->d_frame;
 
-	u32 cfg = readl(dev->regs + FIMC_REG_CISCCTRL);
+	u32 cfg = pete_readl("drivers/media/platform/exynos4-is/fimc-reg.c:254", dev->regs + FIMC_REG_CISCCTRL);
 
 	cfg &= ~(FIMC_REG_CISCCTRL_CSCR2Y_WIDE | FIMC_REG_CISCCTRL_CSCY2R_WIDE |
 		 FIMC_REG_CISCCTRL_SCALEUP_H | FIMC_REG_CISCCTRL_SCALEUP_V |
@@ -305,7 +305,7 @@ static void fimc_hw_set_scaler(struct fimc_ctx *ctx)
 			cfg |= FIMC_REG_CISCCTRL_INTERLACE;
 	}
 
-	writel(cfg, dev->regs + FIMC_REG_CISCCTRL);
+	pete_writel("drivers/media/platform/exynos4-is/fimc-reg.c:308", cfg, dev->regs + FIMC_REG_CISCCTRL);
 }
 
 void fimc_hw_set_mainscaler(struct fimc_ctx *ctx)
@@ -320,26 +320,26 @@ void fimc_hw_set_mainscaler(struct fimc_ctx *ctx)
 
 	fimc_hw_set_scaler(ctx);
 
-	cfg = readl(dev->regs + FIMC_REG_CISCCTRL);
+	cfg = pete_readl("drivers/media/platform/exynos4-is/fimc-reg.c:323", dev->regs + FIMC_REG_CISCCTRL);
 	cfg &= ~(FIMC_REG_CISCCTRL_MHRATIO_MASK |
 		 FIMC_REG_CISCCTRL_MVRATIO_MASK);
 
 	if (variant->has_mainscaler_ext) {
 		cfg |= FIMC_REG_CISCCTRL_MHRATIO_EXT(sc->main_hratio);
 		cfg |= FIMC_REG_CISCCTRL_MVRATIO_EXT(sc->main_vratio);
-		writel(cfg, dev->regs + FIMC_REG_CISCCTRL);
+		pete_writel("drivers/media/platform/exynos4-is/fimc-reg.c:330", cfg, dev->regs + FIMC_REG_CISCCTRL);
 
-		cfg = readl(dev->regs + FIMC_REG_CIEXTEN);
+		cfg = pete_readl("drivers/media/platform/exynos4-is/fimc-reg.c:332", dev->regs + FIMC_REG_CIEXTEN);
 
 		cfg &= ~(FIMC_REG_CIEXTEN_MVRATIO_EXT_MASK |
 			 FIMC_REG_CIEXTEN_MHRATIO_EXT_MASK);
 		cfg |= FIMC_REG_CIEXTEN_MHRATIO_EXT(sc->main_hratio);
 		cfg |= FIMC_REG_CIEXTEN_MVRATIO_EXT(sc->main_vratio);
-		writel(cfg, dev->regs + FIMC_REG_CIEXTEN);
+		pete_writel("drivers/media/platform/exynos4-is/fimc-reg.c:338", cfg, dev->regs + FIMC_REG_CIEXTEN);
 	} else {
 		cfg |= FIMC_REG_CISCCTRL_MHRATIO(sc->main_hratio);
 		cfg |= FIMC_REG_CISCCTRL_MVRATIO(sc->main_vratio);
-		writel(cfg, dev->regs + FIMC_REG_CISCCTRL);
+		pete_writel("drivers/media/platform/exynos4-is/fimc-reg.c:342", cfg, dev->regs + FIMC_REG_CISCCTRL);
 	}
 }
 
@@ -348,7 +348,7 @@ void fimc_hw_enable_capture(struct fimc_ctx *ctx)
 	struct fimc_dev *dev = ctx->fimc_dev;
 	u32 cfg;
 
-	cfg = readl(dev->regs + FIMC_REG_CIIMGCPT);
+	cfg = pete_readl("drivers/media/platform/exynos4-is/fimc-reg.c:351", dev->regs + FIMC_REG_CIIMGCPT);
 	cfg |= FIMC_REG_CIIMGCPT_CPT_FREN_ENABLE;
 
 	if (ctx->scaler.enabled)
@@ -357,15 +357,15 @@ void fimc_hw_enable_capture(struct fimc_ctx *ctx)
 		cfg &= FIMC_REG_CIIMGCPT_IMGCPTEN_SC;
 
 	cfg |= FIMC_REG_CIIMGCPT_IMGCPTEN;
-	writel(cfg, dev->regs + FIMC_REG_CIIMGCPT);
+	pete_writel("drivers/media/platform/exynos4-is/fimc-reg.c:360", cfg, dev->regs + FIMC_REG_CIIMGCPT);
 }
 
 void fimc_hw_disable_capture(struct fimc_dev *dev)
 {
-	u32 cfg = readl(dev->regs + FIMC_REG_CIIMGCPT);
+	u32 cfg = pete_readl("drivers/media/platform/exynos4-is/fimc-reg.c:365", dev->regs + FIMC_REG_CIIMGCPT);
 	cfg &= ~(FIMC_REG_CIIMGCPT_IMGCPTEN |
 		 FIMC_REG_CIIMGCPT_IMGCPTEN_SC);
-	writel(cfg, dev->regs + FIMC_REG_CIIMGCPT);
+	pete_writel("drivers/media/platform/exynos4-is/fimc-reg.c:368", cfg, dev->regs + FIMC_REG_CIIMGCPT);
 }
 
 void fimc_hw_set_effect(struct fimc_ctx *ctx)
@@ -382,7 +382,7 @@ void fimc_hw_set_effect(struct fimc_ctx *ctx)
 			cfg |= (effect->pat_cb << 13) | effect->pat_cr;
 	}
 
-	writel(cfg, dev->regs + FIMC_REG_CIIMGEFF);
+	pete_writel("drivers/media/platform/exynos4-is/fimc-reg.c:385", cfg, dev->regs + FIMC_REG_CIIMGEFF);
 }
 
 void fimc_hw_set_rgb_alpha(struct fimc_ctx *ctx)
@@ -394,10 +394,10 @@ void fimc_hw_set_rgb_alpha(struct fimc_ctx *ctx)
 	if (!(frame->fmt->flags & FMT_HAS_ALPHA))
 		return;
 
-	cfg = readl(dev->regs + FIMC_REG_CIOCTRL);
+	cfg = pete_readl("drivers/media/platform/exynos4-is/fimc-reg.c:397", dev->regs + FIMC_REG_CIOCTRL);
 	cfg &= ~FIMC_REG_CIOCTRL_ALPHA_OUT_MASK;
 	cfg |= (frame->alpha << 4);
-	writel(cfg, dev->regs + FIMC_REG_CIOCTRL);
+	pete_writel("drivers/media/platform/exynos4-is/fimc-reg.c:400", cfg, dev->regs + FIMC_REG_CIOCTRL);
 }
 
 static void fimc_hw_set_in_dma_size(struct fimc_ctx *ctx)
@@ -413,8 +413,8 @@ static void fimc_hw_set_in_dma_size(struct fimc_ctx *ctx)
 	cfg_o |= (frame->f_height << 16) | frame->f_width;
 	cfg_r |= (frame->height << 16) | frame->width;
 
-	writel(cfg_o, dev->regs + FIMC_REG_ORGISIZE);
-	writel(cfg_r, dev->regs + FIMC_REG_CIREAL_ISIZE);
+	pete_writel("drivers/media/platform/exynos4-is/fimc-reg.c:416", cfg_o, dev->regs + FIMC_REG_ORGISIZE);
+	pete_writel("drivers/media/platform/exynos4-is/fimc-reg.c:417", cfg_r, dev->regs + FIMC_REG_CIREAL_ISIZE);
 }
 
 void fimc_hw_set_in_dma(struct fimc_ctx *ctx)
@@ -426,13 +426,13 @@ void fimc_hw_set_in_dma(struct fimc_ctx *ctx)
 
 	/* Set the pixel offsets. */
 	cfg = (offset->y_v << 16) | offset->y_h;
-	writel(cfg, dev->regs + FIMC_REG_CIIYOFF);
+	pete_writel("drivers/media/platform/exynos4-is/fimc-reg.c:429", cfg, dev->regs + FIMC_REG_CIIYOFF);
 
 	cfg = (offset->cb_v << 16) | offset->cb_h;
-	writel(cfg, dev->regs + FIMC_REG_CIICBOFF);
+	pete_writel("drivers/media/platform/exynos4-is/fimc-reg.c:432", cfg, dev->regs + FIMC_REG_CIICBOFF);
 
 	cfg = (offset->cr_v << 16) | offset->cr_h;
-	writel(cfg, dev->regs + FIMC_REG_CIICROFF);
+	pete_writel("drivers/media/platform/exynos4-is/fimc-reg.c:435", cfg, dev->regs + FIMC_REG_CIICROFF);
 
 	/* Input original and real size. */
 	fimc_hw_set_in_dma_size(ctx);
@@ -441,7 +441,7 @@ void fimc_hw_set_in_dma(struct fimc_ctx *ctx)
 	fimc_hw_en_autoload(dev, ctx->out_path == FIMC_IO_LCDFIFO);
 
 	/* Set the input DMA to process single frame only. */
-	cfg = readl(dev->regs + FIMC_REG_MSCTRL);
+	cfg = pete_readl("drivers/media/platform/exynos4-is/fimc-reg.c:444", dev->regs + FIMC_REG_MSCTRL);
 	cfg &= ~(FIMC_REG_MSCTRL_INFORMAT_MASK
 		 | FIMC_REG_MSCTRL_IN_BURST_COUNT_MASK
 		 | FIMC_REG_MSCTRL_INPUT_MASK
@@ -484,10 +484,10 @@ void fimc_hw_set_in_dma(struct fimc_ctx *ctx)
 		break;
 	}
 
-	writel(cfg, dev->regs + FIMC_REG_MSCTRL);
+	pete_writel("drivers/media/platform/exynos4-is/fimc-reg.c:487", cfg, dev->regs + FIMC_REG_MSCTRL);
 
 	/* Input/output DMA linear/tiled mode. */
-	cfg = readl(dev->regs + FIMC_REG_CIDMAPARAM);
+	cfg = pete_readl("drivers/media/platform/exynos4-is/fimc-reg.c:490", dev->regs + FIMC_REG_CIDMAPARAM);
 	cfg &= ~FIMC_REG_CIDMAPARAM_TILE_MASK;
 
 	if (tiled_fmt(ctx->s_frame.fmt))
@@ -496,7 +496,7 @@ void fimc_hw_set_in_dma(struct fimc_ctx *ctx)
 	if (tiled_fmt(ctx->d_frame.fmt))
 		cfg |= FIMC_REG_CIDMAPARAM_W_64X32;
 
-	writel(cfg, dev->regs + FIMC_REG_CIDMAPARAM);
+	pete_writel("drivers/media/platform/exynos4-is/fimc-reg.c:499", cfg, dev->regs + FIMC_REG_CIDMAPARAM);
 }
 
 
@@ -504,7 +504,7 @@ void fimc_hw_set_input_path(struct fimc_ctx *ctx)
 {
 	struct fimc_dev *dev = ctx->fimc_dev;
 
-	u32 cfg = readl(dev->regs + FIMC_REG_MSCTRL);
+	u32 cfg = pete_readl("drivers/media/platform/exynos4-is/fimc-reg.c:507", dev->regs + FIMC_REG_MSCTRL);
 	cfg &= ~FIMC_REG_MSCTRL_INPUT_MASK;
 
 	if (ctx->in_path == FIMC_IO_DMA)
@@ -512,32 +512,32 @@ void fimc_hw_set_input_path(struct fimc_ctx *ctx)
 	else
 		cfg |= FIMC_REG_MSCTRL_INPUT_EXTCAM;
 
-	writel(cfg, dev->regs + FIMC_REG_MSCTRL);
+	pete_writel("drivers/media/platform/exynos4-is/fimc-reg.c:515", cfg, dev->regs + FIMC_REG_MSCTRL);
 }
 
 void fimc_hw_set_output_path(struct fimc_ctx *ctx)
 {
 	struct fimc_dev *dev = ctx->fimc_dev;
 
-	u32 cfg = readl(dev->regs + FIMC_REG_CISCCTRL);
+	u32 cfg = pete_readl("drivers/media/platform/exynos4-is/fimc-reg.c:522", dev->regs + FIMC_REG_CISCCTRL);
 	cfg &= ~FIMC_REG_CISCCTRL_LCDPATHEN_FIFO;
 	if (ctx->out_path == FIMC_IO_LCDFIFO)
 		cfg |= FIMC_REG_CISCCTRL_LCDPATHEN_FIFO;
-	writel(cfg, dev->regs + FIMC_REG_CISCCTRL);
+	pete_writel("drivers/media/platform/exynos4-is/fimc-reg.c:526", cfg, dev->regs + FIMC_REG_CISCCTRL);
 }
 
 void fimc_hw_set_input_addr(struct fimc_dev *dev, struct fimc_addr *addr)
 {
-	u32 cfg = readl(dev->regs + FIMC_REG_CIREAL_ISIZE);
+	u32 cfg = pete_readl("drivers/media/platform/exynos4-is/fimc-reg.c:531", dev->regs + FIMC_REG_CIREAL_ISIZE);
 	cfg |= FIMC_REG_CIREAL_ISIZE_ADDR_CH_DIS;
-	writel(cfg, dev->regs + FIMC_REG_CIREAL_ISIZE);
+	pete_writel("drivers/media/platform/exynos4-is/fimc-reg.c:533", cfg, dev->regs + FIMC_REG_CIREAL_ISIZE);
 
-	writel(addr->y, dev->regs + FIMC_REG_CIIYSA(0));
-	writel(addr->cb, dev->regs + FIMC_REG_CIICBSA(0));
-	writel(addr->cr, dev->regs + FIMC_REG_CIICRSA(0));
+	pete_writel("drivers/media/platform/exynos4-is/fimc-reg.c:535", addr->y, dev->regs + FIMC_REG_CIIYSA(0));
+	pete_writel("drivers/media/platform/exynos4-is/fimc-reg.c:536", addr->cb, dev->regs + FIMC_REG_CIICBSA(0));
+	pete_writel("drivers/media/platform/exynos4-is/fimc-reg.c:537", addr->cr, dev->regs + FIMC_REG_CIICRSA(0));
 
 	cfg &= ~FIMC_REG_CIREAL_ISIZE_ADDR_CH_DIS;
-	writel(cfg, dev->regs + FIMC_REG_CIREAL_ISIZE);
+	pete_writel("drivers/media/platform/exynos4-is/fimc-reg.c:540", cfg, dev->regs + FIMC_REG_CIREAL_ISIZE);
 }
 
 void fimc_hw_set_output_addr(struct fimc_dev *dev,
@@ -545,9 +545,9 @@ void fimc_hw_set_output_addr(struct fimc_dev *dev,
 {
 	int i = (index == -1) ? 0 : index;
 	do {
-		writel(addr->y, dev->regs + FIMC_REG_CIOYSA(i));
-		writel(addr->cb, dev->regs + FIMC_REG_CIOCBSA(i));
-		writel(addr->cr, dev->regs + FIMC_REG_CIOCRSA(i));
+		pete_writel("drivers/media/platform/exynos4-is/fimc-reg.c:548", addr->y, dev->regs + FIMC_REG_CIOYSA(i));
+		pete_writel("drivers/media/platform/exynos4-is/fimc-reg.c:549", addr->cb, dev->regs + FIMC_REG_CIOCBSA(i));
+		pete_writel("drivers/media/platform/exynos4-is/fimc-reg.c:550", addr->cr, dev->regs + FIMC_REG_CIOCRSA(i));
 		dbg("dst_buf[%d]: 0x%X, cb: 0x%X, cr: 0x%X",
 		    i, addr->y, addr->cb, addr->cr);
 	} while (index == -1 && ++i < FIMC_MAX_OUT_BUFS);
@@ -556,7 +556,7 @@ void fimc_hw_set_output_addr(struct fimc_dev *dev,
 int fimc_hw_set_camera_polarity(struct fimc_dev *fimc,
 				struct fimc_source_info *cam)
 {
-	u32 cfg = readl(fimc->regs + FIMC_REG_CIGCTRL);
+	u32 cfg = pete_readl("drivers/media/platform/exynos4-is/fimc-reg.c:559", fimc->regs + FIMC_REG_CIGCTRL);
 
 	cfg &= ~(FIMC_REG_CIGCTRL_INVPOLPCLK | FIMC_REG_CIGCTRL_INVPOLVSYNC |
 		 FIMC_REG_CIGCTRL_INVPOLHREF | FIMC_REG_CIGCTRL_INVPOLHSYNC |
@@ -577,7 +577,7 @@ int fimc_hw_set_camera_polarity(struct fimc_dev *fimc,
 	if (cam->flags & V4L2_MBUS_FIELD_EVEN_LOW)
 		cfg |= FIMC_REG_CIGCTRL_INVPOLFIELD;
 
-	writel(cfg, fimc->regs + FIMC_REG_CIGCTRL);
+	pete_writel("drivers/media/platform/exynos4-is/fimc-reg.c:580", cfg, fimc->regs + FIMC_REG_CIGCTRL);
 
 	return 0;
 }
@@ -644,7 +644,7 @@ int fimc_hw_set_camera_source(struct fimc_dev *fimc,
 	}
 
 	cfg |= (f->o_width << 16) | f->o_height;
-	writel(cfg, fimc->regs + FIMC_REG_CISRCFMT);
+	pete_writel("drivers/media/platform/exynos4-is/fimc-reg.c:647", cfg, fimc->regs + FIMC_REG_CISRCFMT);
 	return 0;
 }
 
@@ -652,19 +652,19 @@ void fimc_hw_set_camera_offset(struct fimc_dev *fimc, struct fimc_frame *f)
 {
 	u32 hoff2, voff2;
 
-	u32 cfg = readl(fimc->regs + FIMC_REG_CIWDOFST);
+	u32 cfg = pete_readl("drivers/media/platform/exynos4-is/fimc-reg.c:655", fimc->regs + FIMC_REG_CIWDOFST);
 
 	cfg &= ~(FIMC_REG_CIWDOFST_HOROFF_MASK | FIMC_REG_CIWDOFST_VEROFF_MASK);
 	cfg |=  FIMC_REG_CIWDOFST_OFF_EN |
 		(f->offs_h << 16) | f->offs_v;
 
-	writel(cfg, fimc->regs + FIMC_REG_CIWDOFST);
+	pete_writel("drivers/media/platform/exynos4-is/fimc-reg.c:661", cfg, fimc->regs + FIMC_REG_CIWDOFST);
 
 	/* See CIWDOFSTn register description in the datasheet for details. */
 	hoff2 = f->o_width - f->width - f->offs_h;
 	voff2 = f->o_height - f->height - f->offs_v;
 	cfg = (hoff2 << 16) | voff2;
-	writel(cfg, fimc->regs + FIMC_REG_CIWDOFST2);
+	pete_writel("drivers/media/platform/exynos4-is/fimc-reg.c:667", cfg, fimc->regs + FIMC_REG_CIWDOFST2);
 }
 
 int fimc_hw_set_camera_type(struct fimc_dev *fimc,
@@ -674,7 +674,7 @@ int fimc_hw_set_camera_type(struct fimc_dev *fimc,
 	u32 csis_data_alignment = 32;
 	u32 cfg, tmp;
 
-	cfg = readl(fimc->regs + FIMC_REG_CIGCTRL);
+	cfg = pete_readl("drivers/media/platform/exynos4-is/fimc-reg.c:677", fimc->regs + FIMC_REG_CIGCTRL);
 
 	/* Select ITU B interface, disable Writeback path and test pattern. */
 	cfg &= ~(FIMC_REG_CIGCTRL_TESTPAT_MASK | FIMC_REG_CIGCTRL_SELCAM_ITU_A |
@@ -707,7 +707,7 @@ int fimc_hw_set_camera_type(struct fimc_dev *fimc,
 		}
 		tmp |= (csis_data_alignment == 32) << 8;
 
-		writel(tmp, fimc->regs + FIMC_REG_CSIIMGFMT);
+		pete_writel("drivers/media/platform/exynos4-is/fimc-reg.c:710", tmp, fimc->regs + FIMC_REG_CSIIMGFMT);
 		break;
 	case FIMC_BUS_TYPE_ITU_601...FIMC_BUS_TYPE_ITU_656:
 		if (source->mux_id == 0) /* ITU-A, ITU-B: 0, 1 */
@@ -730,36 +730,36 @@ int fimc_hw_set_camera_type(struct fimc_dev *fimc,
 			 source->fimc_bus_type);
 		return -EINVAL;
 	}
-	writel(cfg, fimc->regs + FIMC_REG_CIGCTRL);
+	pete_writel("drivers/media/platform/exynos4-is/fimc-reg.c:733", cfg, fimc->regs + FIMC_REG_CIGCTRL);
 
 	return 0;
 }
 
 void fimc_hw_clear_irq(struct fimc_dev *dev)
 {
-	u32 cfg = readl(dev->regs + FIMC_REG_CIGCTRL);
+	u32 cfg = pete_readl("drivers/media/platform/exynos4-is/fimc-reg.c:740", dev->regs + FIMC_REG_CIGCTRL);
 	cfg |= FIMC_REG_CIGCTRL_IRQ_CLR;
-	writel(cfg, dev->regs + FIMC_REG_CIGCTRL);
+	pete_writel("drivers/media/platform/exynos4-is/fimc-reg.c:742", cfg, dev->regs + FIMC_REG_CIGCTRL);
 }
 
 void fimc_hw_enable_scaler(struct fimc_dev *dev, bool on)
 {
-	u32 cfg = readl(dev->regs + FIMC_REG_CISCCTRL);
+	u32 cfg = pete_readl("drivers/media/platform/exynos4-is/fimc-reg.c:747", dev->regs + FIMC_REG_CISCCTRL);
 	if (on)
 		cfg |= FIMC_REG_CISCCTRL_SCALERSTART;
 	else
 		cfg &= ~FIMC_REG_CISCCTRL_SCALERSTART;
-	writel(cfg, dev->regs + FIMC_REG_CISCCTRL);
+	pete_writel("drivers/media/platform/exynos4-is/fimc-reg.c:752", cfg, dev->regs + FIMC_REG_CISCCTRL);
 }
 
 void fimc_hw_activate_input_dma(struct fimc_dev *dev, bool on)
 {
-	u32 cfg = readl(dev->regs + FIMC_REG_MSCTRL);
+	u32 cfg = pete_readl("drivers/media/platform/exynos4-is/fimc-reg.c:757", dev->regs + FIMC_REG_MSCTRL);
 	if (on)
 		cfg |= FIMC_REG_MSCTRL_ENVID;
 	else
 		cfg &= ~FIMC_REG_MSCTRL_ENVID;
-	writel(cfg, dev->regs + FIMC_REG_MSCTRL);
+	pete_writel("drivers/media/platform/exynos4-is/fimc-reg.c:762", cfg, dev->regs + FIMC_REG_MSCTRL);
 }
 
 /* Return an index to the buffer actually being written. */
@@ -768,11 +768,11 @@ s32 fimc_hw_get_frame_index(struct fimc_dev *dev)
 	s32 reg;
 
 	if (dev->drv_data->cistatus2) {
-		reg = readl(dev->regs + FIMC_REG_CISTATUS2) & 0x3f;
+		reg = pete_readl("drivers/media/platform/exynos4-is/fimc-reg.c:771", dev->regs + FIMC_REG_CISTATUS2) & 0x3f;
 		return reg - 1;
 	}
 
-	reg = readl(dev->regs + FIMC_REG_CISTATUS);
+	reg = pete_readl("drivers/media/platform/exynos4-is/fimc-reg.c:775", dev->regs + FIMC_REG_CISTATUS);
 
 	return (reg & FIMC_REG_CISTATUS_FRAMECNT_MASK) >>
 		FIMC_REG_CISTATUS_FRAMECNT_SHIFT;
@@ -786,7 +786,7 @@ s32 fimc_hw_get_prev_frame_index(struct fimc_dev *dev)
 	if (!dev->drv_data->cistatus2)
 		return -1;
 
-	reg = readl(dev->regs + FIMC_REG_CISTATUS2);
+	reg = pete_readl("drivers/media/platform/exynos4-is/fimc-reg.c:789", dev->regs + FIMC_REG_CISTATUS2);
 	return ((reg >> 7) & 0x3f) - 1;
 }
 

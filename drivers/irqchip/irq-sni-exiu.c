@@ -41,7 +41,7 @@ static void exiu_irq_ack(struct irq_data *d)
 {
 	struct exiu_irq_data *data = irq_data_get_irq_chip_data(d);
 
-	writel(BIT(d->hwirq), data->base + EIREQCLR);
+	pete_writel("drivers/irqchip/irq-sni-exiu.c:44", BIT(d->hwirq), data->base + EIREQCLR);
 }
 
 static void exiu_irq_eoi(struct irq_data *d)
@@ -55,7 +55,7 @@ static void exiu_irq_eoi(struct irq_data *d)
 	 * the interrupt.
 	 */
 	if (irqd_is_level_type(d))
-		writel(BIT(d->hwirq), data->base + EIREQCLR);
+		pete_writel("drivers/irqchip/irq-sni-exiu.c:58", BIT(d->hwirq), data->base + EIREQCLR);
 
 	irq_chip_eoi_parent(d);
 }

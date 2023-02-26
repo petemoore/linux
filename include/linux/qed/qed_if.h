@@ -435,12 +435,12 @@ enum qed_db_rec_space {
 	DB_REC_USER,
 };
 
-#define DIRECT_REG_WR(reg_addr, val) writel((u32)val, \
+#define DIRECT_REG_WR(reg_addr, val) pete_writel("include/linux/qed/qed_if.h:438", (u32)val, \
 					    (void __iomem *)(reg_addr))
 
-#define DIRECT_REG_RD(reg_addr) readl((void __iomem *)(reg_addr))
+#define DIRECT_REG_RD(reg_addr) pete_readl("include/linux/qed/qed_if.h:441", (void __iomem *)(reg_addr))
 
-#define DIRECT_REG_WR64(reg_addr, val) writeq((u64)val,	\
+#define DIRECT_REG_WR64(reg_addr, val) pete_writeq("include/linux/qed/qed_if.h:443", (u64)val,	\
 					      (void __iomem *)(reg_addr))
 
 #define QED_COALESCE_MAX 0x1FF

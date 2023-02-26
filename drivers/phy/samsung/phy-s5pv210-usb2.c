@@ -127,26 +127,26 @@ static void s5pv210_phy_pwr(struct samsung_usb2_phy_instance *inst, bool on)
 	}
 
 	if (on) {
-		writel(drv->ref_reg_val, drv->reg_phy + S5PV210_UPHYCLK);
+		pete_writel("drivers/phy/samsung/phy-s5pv210-usb2.c:130", drv->ref_reg_val, drv->reg_phy + S5PV210_UPHYCLK);
 
-		pwr = readl(drv->reg_phy + S5PV210_UPHYPWR);
+		pwr = pete_readl("drivers/phy/samsung/phy-s5pv210-usb2.c:132", drv->reg_phy + S5PV210_UPHYPWR);
 		pwr &= ~phypwr;
-		writel(pwr, drv->reg_phy + S5PV210_UPHYPWR);
+		pete_writel("drivers/phy/samsung/phy-s5pv210-usb2.c:134", pwr, drv->reg_phy + S5PV210_UPHYPWR);
 
-		rst = readl(drv->reg_phy + S5PV210_UPHYRST);
+		rst = pete_readl("drivers/phy/samsung/phy-s5pv210-usb2.c:136", drv->reg_phy + S5PV210_UPHYRST);
 		rst |= rstbits;
-		writel(rst, drv->reg_phy + S5PV210_UPHYRST);
+		pete_writel("drivers/phy/samsung/phy-s5pv210-usb2.c:138", rst, drv->reg_phy + S5PV210_UPHYRST);
 		udelay(10);
 		rst &= ~rstbits;
-		writel(rst, drv->reg_phy + S5PV210_UPHYRST);
+		pete_writel("drivers/phy/samsung/phy-s5pv210-usb2.c:141", rst, drv->reg_phy + S5PV210_UPHYRST);
 		/* The following delay is necessary for the reset sequence to be
 		 * completed
 		 */
 		udelay(80);
 	} else {
-		pwr = readl(drv->reg_phy + S5PV210_UPHYPWR);
+		pwr = pete_readl("drivers/phy/samsung/phy-s5pv210-usb2.c:147", drv->reg_phy + S5PV210_UPHYPWR);
 		pwr |= phypwr;
-		writel(pwr, drv->reg_phy + S5PV210_UPHYPWR);
+		pete_writel("drivers/phy/samsung/phy-s5pv210-usb2.c:149", pwr, drv->reg_phy + S5PV210_UPHYPWR);
 	}
 }
 

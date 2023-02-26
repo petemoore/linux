@@ -122,7 +122,7 @@ static irqreturn_t mv_cesa_int(int irq, void *priv)
 		int res;
 
 		mask = mv_cesa_get_int_mask(engine);
-		status = readl(engine->regs + CESA_SA_INT_STATUS);
+		status = pete_readl("drivers/crypto/marvell/cesa/cesa.c:125", engine->regs + CESA_SA_INT_STATUS);
 
 		if (!(status & mask))
 			break;
@@ -131,8 +131,8 @@ static irqreturn_t mv_cesa_int(int irq, void *priv)
 		 * TODO: avoid clearing the FPGA_INT_STATUS if this not
 		 * relevant on some platforms.
 		 */
-		writel(~status, engine->regs + CESA_SA_FPGA_INT_STATUS);
-		writel(~status, engine->regs + CESA_SA_INT_STATUS);
+		pete_writel("drivers/crypto/marvell/cesa/cesa.c:134", ~status, engine->regs + CESA_SA_FPGA_INT_STATUS);
+		pete_writel("drivers/crypto/marvell/cesa/cesa.c:135", ~status, engine->regs + CESA_SA_INT_STATUS);
 
 		/* Process fetched requests */
 		res = mv_cesa_int_process(engine, status & mask);
@@ -319,18 +319,18 @@ mv_cesa_conf_mbus_windows(struct mv_cesa_engine *engine,
 	int i;
 
 	for (i = 0; i < 4; i++) {
-		writel(0, iobase + CESA_TDMA_WINDOW_CTRL(i));
-		writel(0, iobase + CESA_TDMA_WINDOW_BASE(i));
+		pete_writel("drivers/crypto/marvell/cesa/cesa.c:322", 0, iobase + CESA_TDMA_WINDOW_CTRL(i));
+		pete_writel("drivers/crypto/marvell/cesa/cesa.c:323", 0, iobase + CESA_TDMA_WINDOW_BASE(i));
 	}
 
 	for (i = 0; i < dram->num_cs; i++) {
 		const struct mbus_dram_window *cs = dram->cs + i;
 
-		writel(((cs->size - 1) & 0xffff0000) |
+		pete_writel("drivers/crypto/marvell/cesa/cesa.c:329", ((cs->size - 1) & 0xffff0000) |
 		       (cs->mbus_attr << 8) |
 		       (dram->mbus_dram_target_id << 4) | 1,
 		       iobase + CESA_TDMA_WINDOW_CTRL(i));
-		writel(cs->base, iobase + CESA_TDMA_WINDOW_BASE(i));
+		pete_writel("drivers/crypto/marvell/cesa/cesa.c:333", cs->base, iobase + CESA_TDMA_WINDOW_BASE(i));
 	}
 }
 
@@ -535,10 +535,10 @@ static int mv_cesa_probe(struct platform_device *pdev)
 		if (dram && cesa->caps->has_tdma)
 			mv_cesa_conf_mbus_windows(engine, dram);
 
-		writel(0, engine->regs + CESA_SA_INT_STATUS);
-		writel(CESA_SA_CFG_STOP_DIG_ERR,
+		pete_writel("drivers/crypto/marvell/cesa/cesa.c:538", 0, engine->regs + CESA_SA_INT_STATUS);
+		pete_writel("drivers/crypto/marvell/cesa/cesa.c:539", CESA_SA_CFG_STOP_DIG_ERR,
 		       engine->regs + CESA_SA_CFG);
-		writel(engine->sram_dma & CESA_SA_SRAM_MSK,
+		pete_writel("drivers/crypto/marvell/cesa/cesa.c:541", engine->sram_dma & CESA_SA_SRAM_MSK,
 		       engine->regs + CESA_SA_DESC_P0);
 
 		ret = devm_request_threaded_irq(dev, irq, NULL, mv_cesa_int,

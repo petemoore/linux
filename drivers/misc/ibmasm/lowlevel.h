@@ -40,24 +40,24 @@
 
 static inline int sp_interrupt_pending(void __iomem *base_address)
 {
-	return SP_INTR_MASK & readl(base_address + INTR_STATUS_REGISTER);
+	return SP_INTR_MASK & pete_readl("drivers/misc/ibmasm/lowlevel.h:43", base_address + INTR_STATUS_REGISTER);
 }
 
 static inline int uart_interrupt_pending(void __iomem *base_address)
 {
-	return UART_INTR_MASK & readl(base_address + INTR_STATUS_REGISTER);
+	return UART_INTR_MASK & pete_readl("drivers/misc/ibmasm/lowlevel.h:48", base_address + INTR_STATUS_REGISTER);
 }
 
 static inline void ibmasm_enable_interrupts(void __iomem *base_address, int mask)
 {
 	void __iomem *ctrl_reg = base_address + INTR_CONTROL_REGISTER;
-	writel( readl(ctrl_reg) & ~mask, ctrl_reg);
+	pete_writel("drivers/misc/ibmasm/lowlevel.h:54",  pete_readl("drivers/misc/ibmasm/lowlevel.h:54", ctrl_reg) & ~mask, ctrl_reg);
 }
 
 static inline void ibmasm_disable_interrupts(void __iomem *base_address, int mask)
 {
 	void __iomem *ctrl_reg = base_address + INTR_CONTROL_REGISTER;
-	writel( readl(ctrl_reg) | mask, ctrl_reg);
+	pete_writel("drivers/misc/ibmasm/lowlevel.h:60",  pete_readl("drivers/misc/ibmasm/lowlevel.h:60", ctrl_reg) | mask, ctrl_reg);
 }
 
 static inline void enable_sp_interrupts(void __iomem *base_address)
@@ -88,7 +88,7 @@ static inline u32 get_mfa_outbound(void __iomem *base_address)
 	u32 mfa;
 
 	for (retry=0; retry<=10; retry++) {
-		mfa = readl(base_address + OUTBOUND_QUEUE_PORT);
+		mfa = pete_readl("drivers/misc/ibmasm/lowlevel.h:91", base_address + OUTBOUND_QUEUE_PORT);
 		if (valid_mfa(mfa))
 			break;
 	}
@@ -97,12 +97,12 @@ static inline u32 get_mfa_outbound(void __iomem *base_address)
 
 static inline void set_mfa_outbound(void __iomem *base_address, u32 mfa)
 {
-	writel(mfa, base_address + OUTBOUND_QUEUE_PORT);
+	pete_writel("drivers/misc/ibmasm/lowlevel.h:100", mfa, base_address + OUTBOUND_QUEUE_PORT);
 }
 
 static inline u32 get_mfa_inbound(void __iomem *base_address)
 {
-	u32 mfa = readl(base_address + INBOUND_QUEUE_PORT);
+	u32 mfa = pete_readl("drivers/misc/ibmasm/lowlevel.h:105", base_address + INBOUND_QUEUE_PORT);
 
 	if (MAILBOX_FULL(mfa))
 		return 0;
@@ -112,7 +112,7 @@ static inline u32 get_mfa_inbound(void __iomem *base_address)
 
 static inline void set_mfa_inbound(void __iomem *base_address, u32 mfa)
 {
-	writel(mfa, base_address + INBOUND_QUEUE_PORT);
+	pete_writel("drivers/misc/ibmasm/lowlevel.h:115", mfa, base_address + INBOUND_QUEUE_PORT);
 }
 
 static inline struct i2o_message *get_i2o_message(void __iomem *base_address, u32 mfa)

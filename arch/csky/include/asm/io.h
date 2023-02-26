@@ -18,18 +18,18 @@
  * For CACHEV2 (860), store instruction with PAGE_ATTR_NO_BUFFERABLE won't
  * fast retire.
  */
-#define readb(c)		({ u8  __v = readb_relaxed(c); rmb(); __v; })
-#define readw(c)		({ u16 __v = readw_relaxed(c); rmb(); __v; })
-#define readl(c)		({ u32 __v = readl_relaxed(c); rmb(); __v; })
+#define pete_readb("arch/csky/include/asm/io.h:21", c)		({ u8  __v = readb_relaxed(c); rmb(); __v; })
+#define pete_readw("arch/csky/include/asm/io.h:22", c)		({ u16 __v = readw_relaxed(c); rmb(); __v; })
+#define pete_readl("arch/csky/include/asm/io.h:23", c)		({ u32 __v = readl_relaxed(c); rmb(); __v; })
 
 #ifdef CONFIG_CPU_HAS_CACHEV2
-#define writeb(v,c)		({ wmb(); writeb_relaxed((v),(c)); })
-#define writew(v,c)		({ wmb(); writew_relaxed((v),(c)); })
-#define writel(v,c)		({ wmb(); writel_relaxed((v),(c)); })
+#define pete_writeb("arch/csky/include/asm/io.h:26", v,c)		({ wmb(); writeb_relaxed((v),(c)); })
+#define pete_writew("arch/csky/include/asm/io.h:27", v,c)		({ wmb(); writew_relaxed((v),(c)); })
+#define pete_writel("arch/csky/include/asm/io.h:28", v,c)		({ wmb(); writel_relaxed((v),(c)); })
 #else
-#define writeb(v,c)		({ wmb(); writeb_relaxed((v),(c)); mb(); })
-#define writew(v,c)		({ wmb(); writew_relaxed((v),(c)); mb(); })
-#define writel(v,c)		({ wmb(); writel_relaxed((v),(c)); mb(); })
+#define pete_writeb("arch/csky/include/asm/io.h:30", v,c)		({ wmb(); writeb_relaxed((v),(c)); mb(); })
+#define pete_writew("arch/csky/include/asm/io.h:31", v,c)		({ wmb(); writew_relaxed((v),(c)); mb(); })
+#define pete_writel("arch/csky/include/asm/io.h:32", v,c)		({ wmb(); writel_relaxed((v),(c)); mb(); })
 #endif
 
 /*

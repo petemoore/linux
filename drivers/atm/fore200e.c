@@ -434,7 +434,7 @@ static u32 fore200e_pca_read(volatile u32 __iomem *addr)
 {
     /* on big-endian hosts, the board is configured to convert
        the endianess of slave RAM accesses  */
-    return le32_to_cpu(readl(addr));
+    return le32_to_cpu(pete_readl("drivers/atm/fore200e.c:437", addr));
 }
 
 
@@ -442,17 +442,17 @@ static void fore200e_pca_write(u32 val, volatile u32 __iomem *addr)
 {
     /* on big-endian hosts, the board is configured to convert
        the endianess of slave RAM accesses  */
-    writel(cpu_to_le32(val), addr);
+    pete_writel("drivers/atm/fore200e.c:445", cpu_to_le32(val), addr);
 }
 
 static int
 fore200e_pca_irq_check(struct fore200e* fore200e)
 {
     /* this is a 1 bit register */
-    int irq_posted = readl(fore200e->regs.pca.psr);
+    int irq_posted = pete_readl("drivers/atm/fore200e.c:452", fore200e->regs.pca.psr);
 
 #if defined(CONFIG_ATM_FORE200E_DEBUG) && (CONFIG_ATM_FORE200E_DEBUG == 2)
-    if (irq_posted && (readl(fore200e->regs.pca.hcr) & PCA200E_HCR_OUTFULL)) {
+    if (irq_posted && (pete_readl("drivers/atm/fore200e.c:455", fore200e->regs.pca.hcr) & PCA200E_HCR_OUTFULL)) {
 	DPRINTK(2,"FIFO OUT full, device %d\n", fore200e->atm_dev->number);
     }
 #endif
@@ -464,16 +464,16 @@ fore200e_pca_irq_check(struct fore200e* fore200e)
 static void
 fore200e_pca_irq_ack(struct fore200e* fore200e)
 {
-    writel(PCA200E_HCR_CLRINTR, fore200e->regs.pca.hcr);
+    pete_writel("drivers/atm/fore200e.c:467", PCA200E_HCR_CLRINTR, fore200e->regs.pca.hcr);
 }
 
 
 static void
 fore200e_pca_reset(struct fore200e* fore200e)
 {
-    writel(PCA200E_HCR_RESET, fore200e->regs.pca.hcr);
+    pete_writel("drivers/atm/fore200e.c:474", PCA200E_HCR_RESET, fore200e->regs.pca.hcr);
     fore200e_spin(10);
-    writel(0, fore200e->regs.pca.hcr);
+    pete_writel("drivers/atm/fore200e.c:476", 0, fore200e->regs.pca.hcr);
 }
 
 

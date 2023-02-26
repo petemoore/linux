@@ -48,7 +48,7 @@ static void ds1216_read(u8 __iomem *ioaddr, u8 *buf)
 	for (i = 0; i < 8; i++) {
 		c = 0;
 		for (j = 0; j < 8; j++)
-			c |= (readb(ioaddr) & 0x1) << j;
+			c |= (pete_readb("drivers/rtc/rtc-ds1216.c:51", ioaddr) & 0x1) << j;
 		buf[i] = c;
 	}
 }
@@ -61,7 +61,7 @@ static void ds1216_write(u8 __iomem *ioaddr, const u8 *buf)
 	for (i = 0; i < 8; i++) {
 		c = buf[i];
 		for (j = 0; j < 8; j++) {
-			writeb(c, ioaddr);
+			pete_writeb("drivers/rtc/rtc-ds1216.c:64", c, ioaddr);
 			c = c >> 1;
 		}
 	}
@@ -70,7 +70,7 @@ static void ds1216_write(u8 __iomem *ioaddr, const u8 *buf)
 static void ds1216_switch_ds_to_clock(u8 __iomem *ioaddr)
 {
 	/* Reset magic pointer */
-	readb(ioaddr);
+	pete_readb("drivers/rtc/rtc-ds1216.c:73", ioaddr);
 	/* Write 64 bit magic to DS1216 */
 	ds1216_write(ioaddr, magic);
 }

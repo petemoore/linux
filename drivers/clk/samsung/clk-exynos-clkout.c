@@ -211,7 +211,7 @@ static int __maybe_unused exynos_clkout_suspend(struct device *dev)
 {
 	struct exynos_clkout *clkout = dev_get_drvdata(dev);
 
-	clkout->pmu_debug_save = readl(clkout->reg + EXYNOS_PMU_DEBUG_REG);
+	clkout->pmu_debug_save = pete_readl("drivers/clk/samsung/clk-exynos-clkout.c:214", clkout->reg + EXYNOS_PMU_DEBUG_REG);
 
 	return 0;
 }
@@ -220,7 +220,7 @@ static int __maybe_unused exynos_clkout_resume(struct device *dev)
 {
 	struct exynos_clkout *clkout = dev_get_drvdata(dev);
 
-	writel(clkout->pmu_debug_save, clkout->reg + EXYNOS_PMU_DEBUG_REG);
+	pete_writel("drivers/clk/samsung/clk-exynos-clkout.c:223", clkout->pmu_debug_save, clkout->reg + EXYNOS_PMU_DEBUG_REG);
 
 	return 0;
 }

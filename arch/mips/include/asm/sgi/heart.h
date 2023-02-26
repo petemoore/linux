@@ -83,8 +83,8 @@ struct ip30_heart_regs {		/* 0x0ff00000 */
 	u64 mem_refresh;		/* +  0x00010 */
 	u64 mem_req_arb;		/* +  0x00018 */
 	union {
-		u64 q[HEART_MEMORY_BANKS];	/* readq() */
-		u32 l[HEART_MEMORY_BANKS * 2];	/* readl() */
+		u64 q[HEART_MEMORY_BANKS];	/* pete_readq("arch/mips/include/asm/sgi/heart.h:86", ) */
+		u32 l[HEART_MEMORY_BANKS * 2];	/* pete_readl("arch/mips/include/asm/sgi/heart.h:87", ) */
 	} mem_cfg;			/* +  0x00020 */
 	/* Flow control (gfx?) */
 	u64 fc_mode;			/* +  0x00040 */

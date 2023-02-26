@@ -210,10 +210,10 @@ static bool svc_i3c_master_error(struct svc_i3c_master *master)
 {
 	u32 mstatus, merrwarn;
 
-	mstatus = readl(master->regs + SVC_I3C_MSTATUS);
+	mstatus = pete_readl("drivers/i3c/master/svc-i3c-master.c:213", master->regs + SVC_I3C_MSTATUS);
 	if (SVC_I3C_MSTATUS_ERRWARN(mstatus)) {
-		merrwarn = readl(master->regs + SVC_I3C_MERRWARN);
-		writel(merrwarn, master->regs + SVC_I3C_MERRWARN);
+		merrwarn = pete_readl("drivers/i3c/master/svc-i3c-master.c:215", master->regs + SVC_I3C_MERRWARN);
+		pete_writel("drivers/i3c/master/svc-i3c-master.c:216", merrwarn, master->regs + SVC_I3C_MERRWARN);
 		dev_err(master->dev,
 			"Error condition: MSTATUS 0x%08x, MERRWARN 0x%08x\n",
 			mstatus, merrwarn);
@@ -226,14 +226,14 @@ static bool svc_i3c_master_error(struct svc_i3c_master *master)
 
 static void svc_i3c_master_enable_interrupts(struct svc_i3c_master *master, u32 mask)
 {
-	writel(mask, master->regs + SVC_I3C_MINTSET);
+	pete_writel("drivers/i3c/master/svc-i3c-master.c:229", mask, master->regs + SVC_I3C_MINTSET);
 }
 
 static void svc_i3c_master_disable_interrupts(struct svc_i3c_master *master)
 {
-	u32 mask = readl(master->regs + SVC_I3C_MINTSET);
+	u32 mask = pete_readl("drivers/i3c/master/svc-i3c-master.c:234", master->regs + SVC_I3C_MINTSET);
 
-	writel(mask, master->regs + SVC_I3C_MINTCLR);
+	pete_writel("drivers/i3c/master/svc-i3c-master.c:236", mask, master->regs + SVC_I3C_MINTCLR);
 }
 
 static inline struct svc_i3c_master *
@@ -268,7 +268,7 @@ svc_i3c_master_dev_from_addr(struct svc_i3c_master *master,
 
 static void svc_i3c_master_emit_stop(struct svc_i3c_master *master)
 {
-	writel(SVC_I3C_MCTRL_REQUEST_STOP, master->regs + SVC_I3C_MCTRL);
+	pete_writel("drivers/i3c/master/svc-i3c-master.c:271", SVC_I3C_MCTRL_REQUEST_STOP, master->regs + SVC_I3C_MCTRL);
 
 	/*
 	 * This delay is necessary after the emission of a stop, otherwise eg.
@@ -281,7 +281,7 @@ static void svc_i3c_master_emit_stop(struct svc_i3c_master *master)
 
 static void svc_i3c_master_clear_merrwarn(struct svc_i3c_master *master)
 {
-	writel(readl(master->regs + SVC_I3C_MERRWARN),
+	pete_writel("drivers/i3c/master/svc-i3c-master.c:284", pete_readl("drivers/i3c/master/svc-i3c-master.c:284", master->regs + SVC_I3C_MERRWARN),
 	       master->regs + SVC_I3C_MERRWARN);
 }
 
@@ -301,9 +301,9 @@ static int svc_i3c_master_handle_ibi(struct svc_i3c_master *master,
 	slot->len = 0;
 	buf = slot->data;
 
-	while (SVC_I3C_MSTATUS_RXPEND(readl(master->regs + SVC_I3C_MSTATUS))  &&
+	while (SVC_I3C_MSTATUS_RXPEND(pete_readl("drivers/i3c/master/svc-i3c-master.c:304", master->regs + SVC_I3C_MSTATUS))  &&
 	       slot->len < SVC_I3C_FIFO_SIZE) {
-		mdatactrl = readl(master->regs + SVC_I3C_MDATACTRL);
+		mdatactrl = pete_readl("drivers/i3c/master/svc-i3c-master.c:306", master->regs + SVC_I3C_MDATACTRL);
 		count = SVC_I3C_MDATACTRL_RXCOUNT(mdatactrl);
 		readsl(master->regs + SVC_I3C_MRDATAB, buf, count);
 		slot->len += count;
@@ -326,12 +326,12 @@ static void svc_i3c_master_ack_ibi(struct svc_i3c_master *master,
 	else
 		ibi_ack_nack |= SVC_I3C_MCTRL_IBIRESP_ACK_WITHOUT_BYTE;
 
-	writel(ibi_ack_nack, master->regs + SVC_I3C_MCTRL);
+	pete_writel("drivers/i3c/master/svc-i3c-master.c:329", ibi_ack_nack, master->regs + SVC_I3C_MCTRL);
 }
 
 static void svc_i3c_master_nack_ibi(struct svc_i3c_master *master)
 {
-	writel(SVC_I3C_MCTRL_REQUEST_IBI_ACKNACK |
+	pete_writel("drivers/i3c/master/svc-i3c-master.c:334", SVC_I3C_MCTRL_REQUEST_IBI_ACKNACK |
 	       SVC_I3C_MCTRL_IBIRESP_NACK,
 	       master->regs + SVC_I3C_MCTRL);
 }
@@ -346,7 +346,7 @@ static void svc_i3c_master_ibi_work(struct work_struct *work)
 	int ret;
 
 	/* Acknowledge the incoming interrupt with the AUTOIBI mechanism */
-	writel(SVC_I3C_MCTRL_REQUEST_AUTO_IBI |
+	pete_writel("drivers/i3c/master/svc-i3c-master.c:349", SVC_I3C_MCTRL_REQUEST_AUTO_IBI |
 	       SVC_I3C_MCTRL_IBIRESP_AUTO,
 	       master->regs + SVC_I3C_MCTRL);
 
@@ -359,9 +359,9 @@ static void svc_i3c_master_ibi_work(struct work_struct *work)
 	}
 
 	/* Clear the interrupt status */
-	writel(SVC_I3C_MINT_IBIWON, master->regs + SVC_I3C_MSTATUS);
+	pete_writel("drivers/i3c/master/svc-i3c-master.c:362", SVC_I3C_MINT_IBIWON, master->regs + SVC_I3C_MSTATUS);
 
-	status = readl(master->regs + SVC_I3C_MSTATUS);
+	status = pete_readl("drivers/i3c/master/svc-i3c-master.c:364", master->regs + SVC_I3C_MSTATUS);
 	ibitype = SVC_I3C_MSTATUS_IBITYPE(status);
 	ibiaddr = SVC_I3C_MSTATUS_IBIADDR(status);
 
@@ -426,13 +426,13 @@ reenable_ibis:
 static irqreturn_t svc_i3c_master_irq_handler(int irq, void *dev_id)
 {
 	struct svc_i3c_master *master = (struct svc_i3c_master *)dev_id;
-	u32 active = readl(master->regs + SVC_I3C_MINTMASKED);
+	u32 active = pete_readl("drivers/i3c/master/svc-i3c-master.c:429", master->regs + SVC_I3C_MINTMASKED);
 
 	if (!SVC_I3C_MSTATUS_SLVSTART(active))
 		return IRQ_NONE;
 
 	/* Clear the interrupt status */
-	writel(SVC_I3C_MINT_SLVSTART, master->regs + SVC_I3C_MSTATUS);
+	pete_writel("drivers/i3c/master/svc-i3c-master.c:435", SVC_I3C_MINT_SLVSTART, master->regs + SVC_I3C_MSTATUS);
 
 	svc_i3c_master_disable_interrupts(master);
 
@@ -509,7 +509,7 @@ static int svc_i3c_master_bus_init(struct i3c_master_controller *m)
 	      SVC_I3C_MCONFIG_ODHPP(odhpp) |
 	      SVC_I3C_MCONFIG_SKEW(0) |
 	      SVC_I3C_MCONFIG_I2CBAUD(i2cbaud);
-	writel(reg, master->regs + SVC_I3C_MCONFIG);
+	pete_writel("drivers/i3c/master/svc-i3c-master.c:512", reg, master->regs + SVC_I3C_MCONFIG);
 
 	/* Master core's registration */
 	ret = i3c_master_get_free_addr(m, 0);
@@ -518,7 +518,7 @@ static int svc_i3c_master_bus_init(struct i3c_master_controller *m)
 
 	info.dyn_addr = ret;
 
-	writel(SVC_MDYNADDR_VALID | SVC_MDYNADDR_ADDR(info.dyn_addr),
+	pete_writel("drivers/i3c/master/svc-i3c-master.c:521", SVC_MDYNADDR_VALID | SVC_MDYNADDR_ADDR(info.dyn_addr),
 	       master->regs + SVC_I3C_MDYNADDR);
 
 	ret = i3c_master_set_info(&master->base, &info);
@@ -537,7 +537,7 @@ static void svc_i3c_master_bus_cleanup(struct i3c_master_controller *m)
 	svc_i3c_master_disable_interrupts(master);
 
 	/* Disable master */
-	writel(0, master->regs + SVC_I3C_MCONFIG);
+	pete_writel("drivers/i3c/master/svc-i3c-master.c:540", 0, master->regs + SVC_I3C_MCONFIG);
 }
 
 static int svc_i3c_master_reserve_slot(struct svc_i3c_master *master)
@@ -661,7 +661,7 @@ static int svc_i3c_master_readb(struct svc_i3c_master *master, u8 *dst,
 		if (ret)
 			return ret;
 
-		dst[i] = readl(master->regs + SVC_I3C_MRDATAB);
+		dst[i] = pete_readl("drivers/i3c/master/svc-i3c-master.c:664", master->regs + SVC_I3C_MRDATAB);
 	}
 
 	return 0;
@@ -677,7 +677,7 @@ static int svc_i3c_master_do_daa_locked(struct svc_i3c_master *master,
 
 	while (true) {
 		/* Enter/proceed with DAA */
-		writel(SVC_I3C_MCTRL_REQUEST_PROC_DAA |
+		pete_writel("drivers/i3c/master/svc-i3c-master.c:680", SVC_I3C_MCTRL_REQUEST_PROC_DAA |
 		       SVC_I3C_MCTRL_TYPE_I3C |
 		       SVC_I3C_MCTRL_IBIRESP_NACK |
 		       SVC_I3C_MCTRL_DIR(SVC_I3C_MCTRL_DIR_WRITE),
@@ -761,7 +761,7 @@ static int svc_i3c_master_do_daa_locked(struct svc_i3c_master *master,
 		dev_dbg(master->dev, "DAA: device %d assigned to 0x%02x\n",
 			dev_nb, addrs[dev_nb]);
 
-		writel(addrs[dev_nb], master->regs + SVC_I3C_MWDATAB);
+		pete_writel("drivers/i3c/master/svc-i3c-master.c:764", addrs[dev_nb], master->regs + SVC_I3C_MWDATAB);
 		last_addr = addrs[dev_nb++];
 	}
 
@@ -817,9 +817,9 @@ static int svc_i3c_update_ibirules(struct svc_i3c_master *master)
 
 	/* Pick the first list that can be handled by hardware, randomly */
 	if (list_mbyte)
-		writel(reg_mbyte, master->regs + SVC_I3C_IBIRULES);
+		pete_writel("drivers/i3c/master/svc-i3c-master.c:820", reg_mbyte, master->regs + SVC_I3C_IBIRULES);
 	else
-		writel(reg_nobyte, master->regs + SVC_I3C_IBIRULES);
+		pete_writel("drivers/i3c/master/svc-i3c-master.c:822", reg_nobyte, master->regs + SVC_I3C_IBIRULES);
 
 	return 0;
 }
@@ -879,7 +879,7 @@ static int svc_i3c_master_read(struct svc_i3c_master *master,
 
 		count = SVC_I3C_MDATACTRL_RXCOUNT(mdctrl);
 		for (i = 0; i < count; i++)
-			in[offset + i] = readl(master->regs + SVC_I3C_MRDATAB);
+			in[offset + i] = pete_readl("drivers/i3c/master/svc-i3c-master.c:882", master->regs + SVC_I3C_MRDATAB);
 
 		offset += count;
 	}
@@ -906,9 +906,9 @@ static int svc_i3c_master_write(struct svc_i3c_master *master,
 		 * "end" bit set or be written in MWDATABE.
 		 */
 		if (likely(offset < (len - 1)))
-			writel(out[offset++], master->regs + SVC_I3C_MWDATAB);
+			pete_writel("drivers/i3c/master/svc-i3c-master.c:909", out[offset++], master->regs + SVC_I3C_MWDATAB);
 		else
-			writel(out[offset++], master->regs + SVC_I3C_MWDATABE);
+			pete_writel("drivers/i3c/master/svc-i3c-master.c:911", out[offset++], master->regs + SVC_I3C_MWDATABE);
 	}
 
 	return 0;
@@ -922,7 +922,7 @@ static int svc_i3c_master_xfer(struct svc_i3c_master *master,
 	u32 reg;
 	int ret;
 
-	writel(SVC_I3C_MCTRL_REQUEST_START_ADDR |
+	pete_writel("drivers/i3c/master/svc-i3c-master.c:925", SVC_I3C_MCTRL_REQUEST_START_ADDR |
 	       xfer_type |
 	       SVC_I3C_MCTRL_IBIRESP_NACK |
 	       SVC_I3C_MCTRL_DIR(rnw) |
@@ -1335,7 +1335,7 @@ static void svc_i3c_master_reset(struct svc_i3c_master *master)
 	u32 reg;
 
 	/* Clear pending warnings */
-	writel(readl(master->regs + SVC_I3C_MERRWARN),
+	pete_writel("drivers/i3c/master/svc-i3c-master.c:1338", pete_readl("drivers/i3c/master/svc-i3c-master.c:1338", master->regs + SVC_I3C_MERRWARN),
 	       master->regs + SVC_I3C_MERRWARN);
 
 	/* Set RX and TX tigger levels, flush FIFOs */
@@ -1344,7 +1344,7 @@ static void svc_i3c_master_reset(struct svc_i3c_master *master)
 	      SVC_I3C_MDATACTRL_UNLOCK_TRIG |
 	      SVC_I3C_MDATACTRL_TXTRIG_FIFO_NOT_FULL |
 	      SVC_I3C_MDATACTRL_RXTRIG_FIFO_NOT_EMPTY;
-	writel(reg, master->regs + SVC_I3C_MDATACTRL);
+	pete_writel("drivers/i3c/master/svc-i3c-master.c:1347", reg, master->regs + SVC_I3C_MDATACTRL);
 
 	svc_i3c_master_disable_interrupts(master);
 }

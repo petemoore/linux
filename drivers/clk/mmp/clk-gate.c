@@ -34,10 +34,10 @@ static int mmp_clk_gate_enable(struct clk_hw *hw)
 	if (gate->lock)
 		spin_lock_irqsave(gate->lock, flags);
 
-	tmp = readl(gate->reg);
+	tmp = pete_readl("drivers/clk/mmp/clk-gate.c:37", gate->reg);
 	tmp &= ~gate->mask;
 	tmp |= gate->val_enable;
-	writel(tmp, gate->reg);
+	pete_writel("drivers/clk/mmp/clk-gate.c:40", tmp, gate->reg);
 
 	if (gate->lock)
 		spin_unlock_irqrestore(gate->lock, flags);
@@ -60,10 +60,10 @@ static void mmp_clk_gate_disable(struct clk_hw *hw)
 	if (gate->lock)
 		spin_lock_irqsave(gate->lock, flags);
 
-	tmp = readl(gate->reg);
+	tmp = pete_readl("drivers/clk/mmp/clk-gate.c:63", gate->reg);
 	tmp &= ~gate->mask;
 	tmp |= gate->val_disable;
-	writel(tmp, gate->reg);
+	pete_writel("drivers/clk/mmp/clk-gate.c:66", tmp, gate->reg);
 
 	if (gate->lock)
 		spin_unlock_irqrestore(gate->lock, flags);
@@ -78,7 +78,7 @@ static int mmp_clk_gate_is_enabled(struct clk_hw *hw)
 	if (gate->lock)
 		spin_lock_irqsave(gate->lock, flags);
 
-	tmp = readl(gate->reg);
+	tmp = pete_readl("drivers/clk/mmp/clk-gate.c:81", gate->reg);
 
 	if (gate->lock)
 		spin_unlock_irqrestore(gate->lock, flags);

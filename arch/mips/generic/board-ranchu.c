@@ -25,8 +25,8 @@ static __init u64 read_rtc_time(void __iomem *base)
 	 * as well so there is no fear that we may read
 	 * inaccurate high value.
 	 */
-	time_low = readl(base + GOLDFISH_TIMER_LOW);
-	time_high = readl(base + GOLDFISH_TIMER_HIGH);
+	time_low = pete_readl("arch/mips/generic/board-ranchu.c:28", base + GOLDFISH_TIMER_LOW);
+	time_high = pete_readl("arch/mips/generic/board-ranchu.c:29", base + GOLDFISH_TIMER_HIGH);
 
 	return ((u64)time_high << 32) | time_low;
 }

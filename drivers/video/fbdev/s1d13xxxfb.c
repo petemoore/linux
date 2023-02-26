@@ -96,13 +96,13 @@ static const struct fb_fix_screeninfo s1d13xxxfb_fix = {
 static inline u8
 s1d13xxxfb_readreg(struct s1d13xxxfb_par *par, u16 regno)
 {
-	return readb(par->regs + regno);
+	return pete_readb("drivers/video/fbdev/s1d13xxxfb.c:99", par->regs + regno);
 }
 
 static inline void
 s1d13xxxfb_writereg(struct s1d13xxxfb_par *par, u16 regno, u8 value)
 {
-	writeb(value, par->regs + regno);
+	pete_writeb("drivers/video/fbdev/s1d13xxxfb.c:105", value, par->regs + regno);
 }
 
 static inline void

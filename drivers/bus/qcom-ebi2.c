@@ -236,9 +236,9 @@ static void qcom_ebi2_setup_chipselect(struct device_node *np,
 	int i;
 
 	csd = &cs_info[csindex];
-	val = readl(ebi2_base);
+	val = pete_readl("drivers/bus/qcom-ebi2.c:239", ebi2_base);
 	val |= csd->enable_mask;
-	writel(val, ebi2_base);
+	pete_writel("drivers/bus/qcom-ebi2.c:241", val, ebi2_base);
 	dev_dbg(dev, "enabled CS%u\n", csindex);
 
 	/* Next set up the XMEMC */
@@ -284,9 +284,9 @@ static void qcom_ebi2_setup_chipselect(struct device_node *np,
 		 csindex, slowcfg, fastcfg);
 
 	if (slowcfg)
-		writel(slowcfg, ebi2_xmem + csd->slow_cfg);
+		pete_writel("drivers/bus/qcom-ebi2.c:287", slowcfg, ebi2_xmem + csd->slow_cfg);
 	if (fastcfg)
-		writel(fastcfg, ebi2_xmem + csd->fast_cfg);
+		pete_writel("drivers/bus/qcom-ebi2.c:289", fastcfg, ebi2_xmem + csd->fast_cfg);
 }
 
 static int qcom_ebi2_probe(struct platform_device *pdev)
@@ -340,12 +340,12 @@ static int qcom_ebi2_probe(struct platform_device *pdev)
 	}
 
 	/* Allegedly this turns the power save mode off */
-	writel(0UL, ebi2_xmem + EBI2_XMEM_CFG);
+	pete_writel("drivers/bus/qcom-ebi2.c:343", 0UL, ebi2_xmem + EBI2_XMEM_CFG);
 
 	/* Disable all chipselects */
-	val = readl(ebi2_base);
+	val = pete_readl("drivers/bus/qcom-ebi2.c:346", ebi2_base);
 	val &= ~EBI2_CSN_MASK;
-	writel(val, ebi2_base);
+	pete_writel("drivers/bus/qcom-ebi2.c:348", val, ebi2_base);
 
 	/* Walk over the child nodes and see what chipselects we use */
 	for_each_available_child_of_node(np, child) {

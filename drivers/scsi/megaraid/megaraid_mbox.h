@@ -224,9 +224,9 @@ typedef struct {
 #define IS_RAID_CH(rdev, ch)	(((rdev)->channel_class >> (ch)) & 0x01)
 
 
-#define RDINDOOR(rdev)		readl((rdev)->baseaddr + 0x20)
-#define RDOUTDOOR(rdev)		readl((rdev)->baseaddr + 0x2C)
-#define WRINDOOR(rdev, value)	writel(value, (rdev)->baseaddr + 0x20)
-#define WROUTDOOR(rdev, value)	writel(value, (rdev)->baseaddr + 0x2C)
+#define RDINDOOR(rdev)		pete_readl("drivers/scsi/megaraid/megaraid_mbox.h:227", (rdev)->baseaddr + 0x20)
+#define RDOUTDOOR(rdev)		pete_readl("drivers/scsi/megaraid/megaraid_mbox.h:228", (rdev)->baseaddr + 0x2C)
+#define WRINDOOR(rdev, value)	pete_writel("drivers/scsi/megaraid/megaraid_mbox.h:229", value, (rdev)->baseaddr + 0x20)
+#define WROUTDOOR(rdev, value)	pete_writel("drivers/scsi/megaraid/megaraid_mbox.h:230", value, (rdev)->baseaddr + 0x2C)
 
 #endif // _MEGARAID_H_

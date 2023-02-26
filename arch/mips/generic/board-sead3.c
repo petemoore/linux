@@ -186,9 +186,9 @@ static __init unsigned int sead3_measure_hpt_freq(void)
 
 	local_irq_save(flags);
 
-	orig = readl(status_reg) & 0x2;		      /* get original sample */
+	orig = pete_readl("arch/mips/generic/board-sead3.c:189", status_reg) & 0x2;		      /* get original sample */
 	/* wait for transition */
-	while ((readl(status_reg) & 0x2) == orig)
+	while ((pete_readl("arch/mips/generic/board-sead3.c:191", status_reg) & 0x2) == orig)
 		;
 	orig = orig ^ 0x2;			      /* flip the bit */
 
@@ -197,7 +197,7 @@ static __init unsigned int sead3_measure_hpt_freq(void)
 	/* wait 1 second (the sampling clock transitions every 10ms) */
 	while (tick < 100) {
 		/* wait for transition */
-		while ((readl(status_reg) & 0x2) == orig)
+		while ((pete_readl("arch/mips/generic/board-sead3.c:200", status_reg) & 0x2) == orig)
 			;
 		orig = orig ^ 0x2;			      /* flip the bit */
 		tick++;

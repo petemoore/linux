@@ -1131,7 +1131,7 @@ static int fsl_mc_bus_probe(struct platform_device *pdev)
 
 	if (mc->fsl_mc_regs) {
 		if (IS_ENABLED(CONFIG_ACPI) && !dev_of_node(&pdev->dev)) {
-			mc_stream_id = readl(mc->fsl_mc_regs + FSL_MC_FAPR);
+			mc_stream_id = pete_readl("drivers/bus/fsl-mc/fsl-mc-bus.c:1134", mc->fsl_mc_regs + FSL_MC_FAPR);
 			/*
 			 * HW ORs the PL and BMT bit, places the result in bit
 			 * 14 of the StreamID and ORs in the ICID. Calculate it
@@ -1159,7 +1159,7 @@ static int fsl_mc_bus_probe(struct platform_device *pdev)
 		 * At this point MC should have all its SMMU setup done so make
 		 * sure it is resumed.
 		 */
-		writel(readl(mc->fsl_mc_regs + FSL_MC_GCR1) &
+		pete_writel("drivers/bus/fsl-mc/fsl-mc-bus.c:1162", pete_readl("drivers/bus/fsl-mc/fsl-mc-bus.c:1162", mc->fsl_mc_regs + FSL_MC_GCR1) &
 			     (~(GCR1_P1_STOP | GCR1_P2_STOP)),
 		       mc->fsl_mc_regs + FSL_MC_GCR1);
 	}
@@ -1252,7 +1252,7 @@ static int fsl_mc_bus_remove(struct platform_device *pdev)
 		 * Pause the MC firmware so that it doesn't crash in certain
 		 * scenarios, such as kexec.
 		 */
-		writel(readl(mc->fsl_mc_regs + FSL_MC_GCR1) |
+		pete_writel("drivers/bus/fsl-mc/fsl-mc-bus.c:1255", pete_readl("drivers/bus/fsl-mc/fsl-mc-bus.c:1255", mc->fsl_mc_regs + FSL_MC_GCR1) |
 		       (GCR1_P1_STOP | GCR1_P2_STOP),
 		       mc->fsl_mc_regs + FSL_MC_GCR1);
 	}
@@ -1317,7 +1317,7 @@ static int fsl_mc_bus_notifier(struct notifier_block *nb,
 	 * it is done or otherwise the firmware will crash right after the SMMU
 	 * gets probed and enabled.
 	 */
-	writel(readl(fsl_mc_regs + FSL_MC_GCR1) | (GCR1_P1_STOP | GCR1_P2_STOP),
+	pete_writel("drivers/bus/fsl-mc/fsl-mc-bus.c:1320", pete_readl("drivers/bus/fsl-mc/fsl-mc-bus.c:1320", fsl_mc_regs + FSL_MC_GCR1) | (GCR1_P1_STOP | GCR1_P2_STOP),
 	       fsl_mc_regs + FSL_MC_GCR1);
 	iounmap(fsl_mc_regs);
 

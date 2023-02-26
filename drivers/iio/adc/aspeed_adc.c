@@ -97,7 +97,7 @@ static int aspeed_adc_read_raw(struct iio_dev *indio_dev,
 
 	switch (mask) {
 	case IIO_CHAN_INFO_RAW:
-		*val = readw(data->base + chan->address);
+		*val = pete_readw("drivers/iio/adc/aspeed_adc.c:100", data->base + chan->address);
 		return IIO_VAL_INT;
 
 	case IIO_CHAN_INFO_SCALE:
@@ -157,7 +157,7 @@ static int aspeed_adc_reg_access(struct iio_dev *indio_dev,
 	if (!readval || reg % 4 || reg > ASPEED_REG_MAX)
 		return -EINVAL;
 
-	*readval = readl(data->base + reg);
+	*readval = pete_readl("drivers/iio/adc/aspeed_adc.c:160", data->base + reg);
 
 	return 0;
 }
@@ -227,7 +227,7 @@ static int aspeed_adc_probe(struct platform_device *pdev)
 
 	if (model_data->wait_init_sequence) {
 		/* Enable engine in normal mode. */
-		writel(ASPEED_OPERATION_MODE_NORMAL | ASPEED_ENGINE_ENABLE,
+		pete_writel("drivers/iio/adc/aspeed_adc.c:230", ASPEED_OPERATION_MODE_NORMAL | ASPEED_ENGINE_ENABLE,
 		       data->base + ASPEED_REG_ENGINE_CONTROL);
 
 		/* Wait for initial sequence complete. */
@@ -248,7 +248,7 @@ static int aspeed_adc_probe(struct platform_device *pdev)
 
 	adc_engine_control_reg_val = GENMASK(31, 16) |
 		ASPEED_OPERATION_MODE_NORMAL | ASPEED_ENGINE_ENABLE;
-	writel(adc_engine_control_reg_val,
+	pete_writel("drivers/iio/adc/aspeed_adc.c:251", adc_engine_control_reg_val,
 		data->base + ASPEED_REG_ENGINE_CONTROL);
 
 	model_data = of_device_get_match_data(&pdev->dev);
@@ -265,7 +265,7 @@ static int aspeed_adc_probe(struct platform_device *pdev)
 	return 0;
 
 iio_register_error:
-	writel(ASPEED_OPERATION_MODE_POWER_DOWN,
+	pete_writel("drivers/iio/adc/aspeed_adc.c:268", ASPEED_OPERATION_MODE_POWER_DOWN,
 		data->base + ASPEED_REG_ENGINE_CONTROL);
 	clk_disable_unprepare(data->clk_scaler->clk);
 clk_enable_error:
@@ -284,7 +284,7 @@ static int aspeed_adc_remove(struct platform_device *pdev)
 	struct aspeed_adc_data *data = iio_priv(indio_dev);
 
 	iio_device_unregister(indio_dev);
-	writel(ASPEED_OPERATION_MODE_POWER_DOWN,
+	pete_writel("drivers/iio/adc/aspeed_adc.c:287", ASPEED_OPERATION_MODE_POWER_DOWN,
 		data->base + ASPEED_REG_ENGINE_CONTROL);
 	clk_disable_unprepare(data->clk_scaler->clk);
 	reset_control_assert(data->rst);

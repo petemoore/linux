@@ -2475,32 +2475,32 @@ struct skge_port {
 /* Register accessor for memory mapped device */
 static inline u32 skge_read32(const struct skge_hw *hw, int reg)
 {
-	return readl(hw->regs + reg);
+	return pete_readl("drivers/net/ethernet/marvell/skge.h:2478", hw->regs + reg);
 }
 
 static inline u16 skge_read16(const struct skge_hw *hw, int reg)
 {
-	return readw(hw->regs + reg);
+	return pete_readw("drivers/net/ethernet/marvell/skge.h:2483", hw->regs + reg);
 }
 
 static inline u8 skge_read8(const struct skge_hw *hw, int reg)
 {
-	return readb(hw->regs + reg);
+	return pete_readb("drivers/net/ethernet/marvell/skge.h:2488", hw->regs + reg);
 }
 
 static inline void skge_write32(const struct skge_hw *hw, int reg, u32 val)
 {
-	writel(val, hw->regs + reg);
+	pete_writel("drivers/net/ethernet/marvell/skge.h:2493", val, hw->regs + reg);
 }
 
 static inline void skge_write16(const struct skge_hw *hw, int reg, u16 val)
 {
-	writew(val, hw->regs + reg);
+	pete_writew("drivers/net/ethernet/marvell/skge.h:2498", val, hw->regs + reg);
 }
 
 static inline void skge_write8(const struct skge_hw *hw, int reg, u8 val)
 {
-	writeb(val, hw->regs + reg);
+	pete_writeb("drivers/net/ethernet/marvell/skge.h:2503", val, hw->regs + reg);
 }
 
 /* MAC Related Registers inside the device. */

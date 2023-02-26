@@ -120,18 +120,18 @@ int sun8i_ss_prng_generate(struct crypto_rng *tfm, const u8 *src,
 	err = 0;
 
 	mutex_lock(&ss->mlock);
-	writel(dma_iv, ss->base + SS_IV_ADR_REG);
+	pete_writel("drivers/crypto/allwinner/sun8i-ss/sun8i-ss-prng.c:123", dma_iv, ss->base + SS_IV_ADR_REG);
 	/* the PRNG act badly (failing rngtest) without SS_KEY_ADR_REG set */
-	writel(dma_iv, ss->base + SS_KEY_ADR_REG);
-	writel(dma_dst, ss->base + SS_DST_ADR_REG);
-	writel(todo / 4, ss->base + SS_LEN_ADR_REG);
+	pete_writel("drivers/crypto/allwinner/sun8i-ss/sun8i-ss-prng.c:125", dma_iv, ss->base + SS_KEY_ADR_REG);
+	pete_writel("drivers/crypto/allwinner/sun8i-ss/sun8i-ss-prng.c:126", dma_dst, ss->base + SS_DST_ADR_REG);
+	pete_writel("drivers/crypto/allwinner/sun8i-ss/sun8i-ss-prng.c:127", todo / 4, ss->base + SS_LEN_ADR_REG);
 
 	reinit_completion(&ss->flows[flow].complete);
 	ss->flows[flow].status = 0;
 	/* Be sure all data is written before enabling the task */
 	wmb();
 
-	writel(v, ss->base + SS_CTL_REG);
+	pete_writel("drivers/crypto/allwinner/sun8i-ss/sun8i-ss-prng.c:134", v, ss->base + SS_CTL_REG);
 
 	wait_for_completion_interruptible_timeout(&ss->flows[flow].complete,
 						  msecs_to_jiffies(todo));

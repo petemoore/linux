@@ -31,7 +31,7 @@ static void raq_web_led_set(struct led_classdev *led_cdev,
 		led_value |= LED_WEB;
 	else
 		led_value &= ~LED_WEB;
-	writeb(led_value, led_port);
+	pete_writeb("drivers/leds/leds-cobalt-raq.c:34", led_value, led_port);
 
 	spin_unlock_irqrestore(&led_value_lock, flags);
 }
@@ -52,7 +52,7 @@ static void raq_power_off_led_set(struct led_classdev *led_cdev,
 		led_value |= LED_POWER_OFF;
 	else
 		led_value &= ~LED_POWER_OFF;
-	writeb(led_value, led_port);
+	pete_writeb("drivers/leds/leds-cobalt-raq.c:55", led_value, led_port);
 
 	spin_unlock_irqrestore(&led_value_lock, flags);
 }

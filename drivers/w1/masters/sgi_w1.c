@@ -30,7 +30,7 @@ static u8 sgi_w1_wait(u32 __iomem *mcr)
 	u32 mcr_val;
 
 	do {
-		mcr_val = readl(mcr);
+		mcr_val = pete_readl("drivers/w1/masters/sgi_w1.c:33", mcr);
 	} while (!(mcr_val & MCR_DONE));
 
 	return (mcr_val & MCR_RD_DATA) ? 1 : 0;
@@ -46,7 +46,7 @@ static u8 sgi_w1_reset_bus(void *data)
 	struct sgi_w1_device *dev = data;
 	u8 ret;
 
-	writel(MCR_PACK(520, 65), dev->mcr);
+	pete_writel("drivers/w1/masters/sgi_w1.c:49", MCR_PACK(520, 65), dev->mcr);
 	ret = sgi_w1_wait(dev->mcr);
 	udelay(500); /* recovery time */
 	return ret;
@@ -63,9 +63,9 @@ static u8 sgi_w1_touch_bit(void *data, u8 bit)
 	u8 ret;
 
 	if (bit)
-		writel(MCR_PACK(6, 13), dev->mcr);
+		pete_writel("drivers/w1/masters/sgi_w1.c:66", MCR_PACK(6, 13), dev->mcr);
 	else
-		writel(MCR_PACK(80, 30), dev->mcr);
+		pete_writel("drivers/w1/masters/sgi_w1.c:68", MCR_PACK(80, 30), dev->mcr);
 
 	ret = sgi_w1_wait(dev->mcr);
 	if (bit)

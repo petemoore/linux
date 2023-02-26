@@ -52,24 +52,24 @@ static inline void snd_cs46xx_poke(struct snd_cs46xx *chip, unsigned long reg, u
 		printk(KERN_DEBUG "snd_cs46xx_poke: %04X - %08X\n",
 		       reg >> 2,val);
 	*/
-	writel(val, chip->region.idx[bank+1].remap_addr + offset);
+	pete_writel("sound/pci/cs46xx/cs46xx_lib.h:55", val, chip->region.idx[bank+1].remap_addr + offset);
 }
 
 static inline unsigned int snd_cs46xx_peek(struct snd_cs46xx *chip, unsigned long reg)
 {
 	unsigned int bank = reg >> 16;
 	unsigned int offset = reg & 0xffff;
-	return readl(chip->region.idx[bank+1].remap_addr + offset);
+	return pete_readl("sound/pci/cs46xx/cs46xx_lib.h:62", chip->region.idx[bank+1].remap_addr + offset);
 }
 
 static inline void snd_cs46xx_pokeBA0(struct snd_cs46xx *chip, unsigned long offset, unsigned int val)
 {
-	writel(val, chip->region.name.ba0.remap_addr + offset);
+	pete_writel("sound/pci/cs46xx/cs46xx_lib.h:67", val, chip->region.name.ba0.remap_addr + offset);
 }
 
 static inline unsigned int snd_cs46xx_peekBA0(struct snd_cs46xx *chip, unsigned long offset)
 {
-	return readl(chip->region.name.ba0.remap_addr + offset);
+	return pete_readl("sound/pci/cs46xx/cs46xx_lib.h:72", chip->region.name.ba0.remap_addr + offset);
 }
 
 struct dsp_spos_instance *cs46xx_dsp_spos_create (struct snd_cs46xx * chip);

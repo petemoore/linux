@@ -19,12 +19,12 @@
 
 static inline u32 qce_read(struct qce_device *qce, u32 offset)
 {
-	return readl(qce->base + offset);
+	return pete_readl("drivers/crypto/qce/common.c:22", qce->base + offset);
 }
 
 static inline void qce_write(struct qce_device *qce, u32 offset, u32 val)
 {
-	writel(val, qce->base + offset);
+	pete_writel("drivers/crypto/qce/common.c:27", val, qce->base + offset);
 }
 
 static inline void qce_write_array(struct qce_device *qce, u32 offset,

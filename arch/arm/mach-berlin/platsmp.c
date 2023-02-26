@@ -34,11 +34,11 @@ static inline void berlin_perform_reset_cpu(unsigned int cpu)
 {
 	u32 val;
 
-	val = readl(cpu_ctrl + CPU_RESET_NON_SC);
+	val = pete_readl("arch/arm/mach-berlin/platsmp.c:37", cpu_ctrl + CPU_RESET_NON_SC);
 	val &= ~BIT(cpu_logical_map(cpu));
-	writel(val, cpu_ctrl + CPU_RESET_NON_SC);
+	pete_writel("arch/arm/mach-berlin/platsmp.c:39", val, cpu_ctrl + CPU_RESET_NON_SC);
 	val |= BIT(cpu_logical_map(cpu));
-	writel(val, cpu_ctrl + CPU_RESET_NON_SC);
+	pete_writel("arch/arm/mach-berlin/platsmp.c:41", val, cpu_ctrl + CPU_RESET_NON_SC);
 }
 
 static int berlin_boot_secondary(unsigned int cpu, struct task_struct *idle)
@@ -83,13 +83,13 @@ static void __init berlin_smp_prepare_cpus(unsigned int max_cpus)
 	 * Write the first instruction the CPU will execute after being reset
 	 * in the reset exception vector.
 	 */
-	writel(boot_inst, vectors_base + RESET_VECT);
+	pete_writel("arch/arm/mach-berlin/platsmp.c:86", boot_inst, vectors_base + RESET_VECT);
 
 	/*
 	 * Write the secondary startup address into the SW reset address
 	 * vector. This is used by boot_inst.
 	 */
-	writel(__pa_symbol(secondary_startup), vectors_base + SW_RESET_ADDR);
+	pete_writel("arch/arm/mach-berlin/platsmp.c:92", __pa_symbol(secondary_startup), vectors_base + SW_RESET_ADDR);
 
 	iounmap(vectors_base);
 unmap_scu:
@@ -108,9 +108,9 @@ static int berlin_cpu_kill(unsigned int cpu)
 {
 	u32 val;
 
-	val = readl(cpu_ctrl + CPU_RESET_NON_SC);
+	val = pete_readl("arch/arm/mach-berlin/platsmp.c:111", cpu_ctrl + CPU_RESET_NON_SC);
 	val &= ~BIT(cpu_logical_map(cpu));
-	writel(val, cpu_ctrl + CPU_RESET_NON_SC);
+	pete_writel("arch/arm/mach-berlin/platsmp.c:113", val, cpu_ctrl + CPU_RESET_NON_SC);
 
 	return 1;
 }

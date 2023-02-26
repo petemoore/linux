@@ -55,7 +55,7 @@ MODULE_PARM_DESC(external_clk, "External clock when internal_clk disabled");
 
 static u8 f81601_pci_read_reg(const struct sja1000_priv *priv, int port)
 {
-	return readb(priv->reg_base + port);
+	return pete_readb("drivers/net/can/sja1000/f81601.c:58", priv->reg_base + port);
 }
 
 static void f81601_pci_write_reg(const struct sja1000_priv *priv, int port,
@@ -65,8 +65,8 @@ static void f81601_pci_write_reg(const struct sja1000_priv *priv, int port,
 	unsigned long flags;
 
 	spin_lock_irqsave(&card->lock, flags);
-	writeb(val, priv->reg_base + port);
-	readb(priv->reg_base);
+	pete_writeb("drivers/net/can/sja1000/f81601.c:68", val, priv->reg_base + port);
+	pete_readb("drivers/net/can/sja1000/f81601.c:69", priv->reg_base);
 	spin_unlock_irqrestore(&card->lock, flags);
 }
 

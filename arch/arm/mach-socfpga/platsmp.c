@@ -24,12 +24,12 @@ static int socfpga_boot_secondary(unsigned int cpu, struct task_struct *idle)
 
 	if (socfpga_cpu1start_addr) {
 		/* This will put CPU #1 into reset. */
-		writel(RSTMGR_MPUMODRST_CPU1,
+		pete_writel("arch/arm/mach-socfpga/platsmp.c:27", RSTMGR_MPUMODRST_CPU1,
 		       rst_manager_base_addr + SOCFPGA_RSTMGR_MODMPURST);
 
 		memcpy(phys_to_virt(0), secondary_trampoline, trampoline_size);
 
-		writel(__pa_symbol(secondary_startup),
+		pete_writel("arch/arm/mach-socfpga/platsmp.c:32", __pa_symbol(secondary_startup),
 		       sys_manager_base_addr + (socfpga_cpu1start_addr & 0x000000ff));
 
 		flush_cache_all();
@@ -37,7 +37,7 @@ static int socfpga_boot_secondary(unsigned int cpu, struct task_struct *idle)
 		outer_clean_range(0, trampoline_size);
 
 		/* This will release CPU #1 out of reset. */
-		writel(0, rst_manager_base_addr + SOCFPGA_RSTMGR_MODMPURST);
+		pete_writel("arch/arm/mach-socfpga/platsmp.c:40", 0, rst_manager_base_addr + SOCFPGA_RSTMGR_MODMPURST);
 	}
 
 	return 0;
@@ -48,11 +48,11 @@ static int socfpga_a10_boot_secondary(unsigned int cpu, struct task_struct *idle
 	int trampoline_size = secondary_trampoline_end - secondary_trampoline;
 
 	if (socfpga_cpu1start_addr) {
-		writel(RSTMGR_MPUMODRST_CPU1, rst_manager_base_addr +
+		pete_writel("arch/arm/mach-socfpga/platsmp.c:51", RSTMGR_MPUMODRST_CPU1, rst_manager_base_addr +
 		       SOCFPGA_A10_RSTMGR_MODMPURST);
 		memcpy(phys_to_virt(0), secondary_trampoline, trampoline_size);
 
-		writel(__pa_symbol(secondary_startup),
+		pete_writel("arch/arm/mach-socfpga/platsmp.c:55", __pa_symbol(secondary_startup),
 		       sys_manager_base_addr + (socfpga_cpu1start_addr & 0x00000fff));
 
 		flush_cache_all();
@@ -60,7 +60,7 @@ static int socfpga_a10_boot_secondary(unsigned int cpu, struct task_struct *idle
 		outer_clean_range(0, trampoline_size);
 
 		/* This will release CPU #1 out of reset. */
-		writel(0, rst_manager_base_addr + SOCFPGA_A10_RSTMGR_MODMPURST);
+		pete_writel("arch/arm/mach-socfpga/platsmp.c:63", 0, rst_manager_base_addr + SOCFPGA_A10_RSTMGR_MODMPURST);
 	}
 
 	return 0;

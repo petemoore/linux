@@ -54,21 +54,21 @@ static inline void pm8001_write_32(void *addr, u32 offset, __le32 val)
 static inline u32 pm8001_cr32(struct pm8001_hba_info *pm8001_ha, u32 bar,
 		u32 offset)
 {
-	return readl(pm8001_ha->io_mem[bar].memvirtaddr + offset);
+	return pete_readl("drivers/scsi/pm8001/pm8001_chips.h:57", pm8001_ha->io_mem[bar].memvirtaddr + offset);
 }
 
 static inline void pm8001_cw32(struct pm8001_hba_info *pm8001_ha, u32 bar,
 		u32 addr, u32 val)
 {
-	writel(val, pm8001_ha->io_mem[bar].memvirtaddr + addr);
+	pete_writel("drivers/scsi/pm8001/pm8001_chips.h:63", val, pm8001_ha->io_mem[bar].memvirtaddr + addr);
 }
 static inline u32 pm8001_mr32(void __iomem *addr, u32 offset)
 {
-	return readl(addr + offset);
+	return pete_readl("drivers/scsi/pm8001/pm8001_chips.h:67", addr + offset);
 }
 static inline void pm8001_mw32(void __iomem *addr, u32 offset, u32 val)
 {
-	writel(val, addr + offset);
+	pete_writel("drivers/scsi/pm8001/pm8001_chips.h:71", val, addr + offset);
 }
 static inline u32 get_pci_bar_index(u32 pcibar)
 {

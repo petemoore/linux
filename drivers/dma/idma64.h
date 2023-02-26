@@ -150,13 +150,13 @@ static inline struct idma64_chan *to_idma64_chan(struct dma_chan *chan)
 
 static inline u32 idma64c_readl(struct idma64_chan *idma64c, int offset)
 {
-	return readl(idma64c->regs + offset);
+	return pete_readl("drivers/dma/idma64.h:153", idma64c->regs + offset);
 }
 
 static inline void idma64c_writel(struct idma64_chan *idma64c, int offset,
 				  u32 value)
 {
-	writel(value, idma64c->regs + offset);
+	pete_writel("drivers/dma/idma64.h:159", value, idma64c->regs + offset);
 }
 
 #define channel_readl(idma64c, reg)		\
@@ -197,12 +197,12 @@ static inline struct idma64 *to_idma64(struct dma_device *ddev)
 
 static inline u32 idma64_readl(struct idma64 *idma64, int offset)
 {
-	return readl(idma64->regs + offset);
+	return pete_readl("drivers/dma/idma64.h:200", idma64->regs + offset);
 }
 
 static inline void idma64_writel(struct idma64 *idma64, int offset, u32 value)
 {
-	writel(value, idma64->regs + offset);
+	pete_writel("drivers/dma/idma64.h:205", value, idma64->regs + offset);
 }
 
 #define dma_readl(idma64, reg)			\

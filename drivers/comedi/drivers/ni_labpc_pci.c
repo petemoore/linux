@@ -57,7 +57,7 @@ static int labpc_pci_mite_init(struct pci_dev *pcidev)
 
 	/* set data window to main registers (BAR 1) */
 	main_phys_addr = pci_resource_start(pcidev, 1);
-	writel(main_phys_addr | WENAB, mite_base + MITE_IODWBSR);
+	pete_writel("drivers/comedi/drivers/ni_labpc_pci.c:60", main_phys_addr | WENAB, mite_base + MITE_IODWBSR);
 
 	/* finished with MITE registers */
 	iounmap(mite_base);

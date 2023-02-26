@@ -498,12 +498,12 @@ MODULE_DEVICE_TABLE(pci, snd_cs4281_ids);
 static inline void snd_cs4281_pokeBA0(struct cs4281 *chip, unsigned long offset,
 				      unsigned int val)
 {
-        writel(val, chip->ba0 + offset);
+        pete_writel("sound/pci/cs4281.c:501", val, chip->ba0 + offset);
 }
 
 static inline unsigned int snd_cs4281_peekBA0(struct cs4281 *chip, unsigned long offset)
 {
-        return readl(chip->ba0 + offset);
+        return pete_readl("sound/pci/cs4281.c:506", chip->ba0 + offset);
 }
 
 static void snd_cs4281_ac97_write(struct snd_ac97 *ac97,
@@ -1818,10 +1818,10 @@ static void snd_cs4281_opl3_command(struct snd_opl3 *opl3, unsigned short cmd,
 
 	spin_lock_irqsave(&opl3->reg_lock, flags);
 
-	writel((unsigned int)cmd, port);
+	pete_writel("sound/pci/cs4281.c:1821", (unsigned int)cmd, port);
 	udelay(10);
 
-	writel((unsigned int)val, port + 4);
+	pete_writel("sound/pci/cs4281.c:1824", (unsigned int)val, port + 4);
 	udelay(30);
 
 	spin_unlock_irqrestore(&opl3->reg_lock, flags);

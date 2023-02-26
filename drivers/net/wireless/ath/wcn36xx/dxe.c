@@ -33,7 +33,7 @@ static void wcn36xx_ccu_write_register(struct wcn36xx *wcn, int addr, int data)
 		    "wcn36xx_ccu_write_register: addr=%x, data=%x\n",
 		    addr, data);
 
-	writel(data, wcn->ccu_base + addr);
+	pete_writel("drivers/net/wireless/ath/wcn36xx/dxe.c:36", data, wcn->ccu_base + addr);
 }
 
 static void wcn36xx_dxe_write_register(struct wcn36xx *wcn, int addr, int data)
@@ -42,12 +42,12 @@ static void wcn36xx_dxe_write_register(struct wcn36xx *wcn, int addr, int data)
 		    "wcn36xx_dxe_write_register: addr=%x, data=%x\n",
 		    addr, data);
 
-	writel(data, wcn->dxe_base + addr);
+	pete_writel("drivers/net/wireless/ath/wcn36xx/dxe.c:45", data, wcn->dxe_base + addr);
 }
 
 static void wcn36xx_dxe_read_register(struct wcn36xx *wcn, int addr, int *data)
 {
-	*data = readl(wcn->dxe_base + addr);
+	*data = pete_readl("drivers/net/wireless/ath/wcn36xx/dxe.c:50", wcn->dxe_base + addr);
 
 	wcn36xx_dbg(WCN36XX_DBG_DXE,
 		    "wcn36xx_dxe_read_register: addr=%x, data=%x\n",

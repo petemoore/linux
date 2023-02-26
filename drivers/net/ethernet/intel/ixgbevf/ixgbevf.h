@@ -293,7 +293,7 @@ static inline u16 ixgbevf_desc_unused(struct ixgbevf_ring *ring)
 
 static inline void ixgbevf_write_tail(struct ixgbevf_ring *ring, u32 value)
 {
-	writel(value, ring->tail);
+	pete_writel("drivers/net/ethernet/intel/ixgbevf/ixgbevf.h:296", value, ring->tail);
 }
 
 #define IXGBEVF_RX_DESC(R, i)	\

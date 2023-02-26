@@ -179,29 +179,29 @@ static int ocs_hcu_wait_busy(struct ocs_hcu_dev *hcu_dev)
 static void ocs_hcu_done_irq_en(struct ocs_hcu_dev *hcu_dev)
 {
 	/* Clear any pending interrupts. */
-	writel(0xFFFFFFFF, hcu_dev->io_base + OCS_HCU_ISR);
+	pete_writel("drivers/crypto/keembay/ocs-hcu.c:182", 0xFFFFFFFF, hcu_dev->io_base + OCS_HCU_ISR);
 	hcu_dev->irq_err = false;
 	/* Enable error and HCU done interrupts. */
-	writel(HCU_IRQ_HASH_DONE | HCU_IRQ_HASH_ERR_MASK,
+	pete_writel("drivers/crypto/keembay/ocs-hcu.c:185", HCU_IRQ_HASH_DONE | HCU_IRQ_HASH_ERR_MASK,
 	       hcu_dev->io_base + OCS_HCU_IER);
 }
 
 static void ocs_hcu_dma_irq_en(struct ocs_hcu_dev *hcu_dev)
 {
 	/* Clear any pending interrupts. */
-	writel(0xFFFFFFFF, hcu_dev->io_base + OCS_HCU_DMA_MSI_ISR);
+	pete_writel("drivers/crypto/keembay/ocs-hcu.c:192", 0xFFFFFFFF, hcu_dev->io_base + OCS_HCU_DMA_MSI_ISR);
 	hcu_dev->irq_err = false;
 	/* Only operating on DMA source completion and error interrupts. */
-	writel(HCU_DMA_IRQ_ERR_MASK | HCU_DMA_IRQ_SRC_DONE,
+	pete_writel("drivers/crypto/keembay/ocs-hcu.c:195", HCU_DMA_IRQ_ERR_MASK | HCU_DMA_IRQ_SRC_DONE,
 	       hcu_dev->io_base + OCS_HCU_DMA_MSI_IER);
 	/* Unmask */
-	writel(HCU_DMA_MSI_UNMASK, hcu_dev->io_base + OCS_HCU_DMA_MSI_MASK);
+	pete_writel("drivers/crypto/keembay/ocs-hcu.c:198", HCU_DMA_MSI_UNMASK, hcu_dev->io_base + OCS_HCU_DMA_MSI_MASK);
 }
 
 static void ocs_hcu_irq_dis(struct ocs_hcu_dev *hcu_dev)
 {
-	writel(HCU_IRQ_DISABLE, hcu_dev->io_base + OCS_HCU_IER);
-	writel(HCU_DMA_MSI_DISABLE, hcu_dev->io_base + OCS_HCU_DMA_MSI_IER);
+	pete_writel("drivers/crypto/keembay/ocs-hcu.c:203", HCU_IRQ_DISABLE, hcu_dev->io_base + OCS_HCU_IER);
+	pete_writel("drivers/crypto/keembay/ocs-hcu.c:204", HCU_DMA_MSI_DISABLE, hcu_dev->io_base + OCS_HCU_DMA_MSI_IER);
 }
 
 static int ocs_hcu_wait_and_disable_irq(struct ocs_hcu_dev *hcu_dev)
@@ -267,10 +267,10 @@ static int ocs_hcu_get_intermediate_data(struct ocs_hcu_dev *hcu_dev,
 	 * to SHA512_DIGEST_SIZE / sizeof(u32).
 	 */
 	for (i = 0; i < n; i++)
-		chain[i] = readl(hcu_dev->io_base + OCS_HCU_CHAIN);
+		chain[i] = pete_readl("drivers/crypto/keembay/ocs-hcu.c:270", hcu_dev->io_base + OCS_HCU_CHAIN);
 
-	data->msg_len_lo = readl(hcu_dev->io_base + OCS_HCU_MSG_LEN_LO);
-	data->msg_len_hi = readl(hcu_dev->io_base + OCS_HCU_MSG_LEN_HI);
+	data->msg_len_lo = pete_readl("drivers/crypto/keembay/ocs-hcu.c:272", hcu_dev->io_base + OCS_HCU_MSG_LEN_LO);
+	data->msg_len_hi = pete_readl("drivers/crypto/keembay/ocs-hcu.c:273", hcu_dev->io_base + OCS_HCU_MSG_LEN_HI);
 
 	return 0;
 }
@@ -298,10 +298,10 @@ static void ocs_hcu_set_intermediate_data(struct ocs_hcu_dev *hcu_dev,
 	 * to SHA512_DIGEST_SIZE / sizeof(u32).
 	 */
 	for (i = 0; i < n; i++)
-		writel(chain[i], hcu_dev->io_base + OCS_HCU_CHAIN);
+		pete_writel("drivers/crypto/keembay/ocs-hcu.c:301", chain[i], hcu_dev->io_base + OCS_HCU_CHAIN);
 
-	writel(data->msg_len_lo, hcu_dev->io_base + OCS_HCU_MSG_LEN_LO);
-	writel(data->msg_len_hi, hcu_dev->io_base + OCS_HCU_MSG_LEN_HI);
+	pete_writel("drivers/crypto/keembay/ocs-hcu.c:303", data->msg_len_lo, hcu_dev->io_base + OCS_HCU_MSG_LEN_LO);
+	pete_writel("drivers/crypto/keembay/ocs-hcu.c:304", data->msg_len_hi, hcu_dev->io_base + OCS_HCU_MSG_LEN_HI);
 }
 
 static int ocs_hcu_get_digest(struct ocs_hcu_dev *hcu_dev,
@@ -325,7 +325,7 @@ static int ocs_hcu_get_digest(struct ocs_hcu_dev *hcu_dev,
 
 	chain = (u32 *)dgst;
 	for (i = 0; i < dgst_len / sizeof(u32); i++)
-		chain[i] = readl(hcu_dev->io_base + OCS_HCU_CHAIN);
+		chain[i] = pete_readl("drivers/crypto/keembay/ocs-hcu.c:328", hcu_dev->io_base + OCS_HCU_CHAIN);
 
 	return 0;
 }
@@ -362,7 +362,7 @@ static int ocs_hcu_hw_cfg(struct ocs_hcu_dev *hcu_dev, enum ocs_hcu_algo algo,
 	if (use_hmac)
 		cfg |= BIT(HCU_MODE_HMAC_SHIFT);
 
-	writel(cfg, hcu_dev->io_base + OCS_HCU_MODE);
+	pete_writel("drivers/crypto/keembay/ocs-hcu.c:365", cfg, hcu_dev->io_base + OCS_HCU_MODE);
 
 	return 0;
 }
@@ -377,7 +377,7 @@ static void ocs_hcu_clear_key(struct ocs_hcu_dev *hcu_dev)
 
 	/* Clear OCS_HCU_KEY_[0..15] */
 	for (reg_off = 0; reg_off < OCS_HCU_HW_KEY_LEN; reg_off += sizeof(u32))
-		writel(0, hcu_dev->io_base + OCS_HCU_KEY_0 + reg_off);
+		pete_writel("drivers/crypto/keembay/ocs-hcu.c:380", 0, hcu_dev->io_base + OCS_HCU_KEY_0 + reg_off);
 }
 
 /**
@@ -415,14 +415,14 @@ static int ocs_hcu_write_key(struct ocs_hcu_dev *hcu_dev, const u8 *key, size_t 
 	 * swapped:
 	 * 3 <---> 0, 2 <---> 1.
 	 */
-	writel(HCU_BYTE_ORDER_SWAP,
+	pete_writel("drivers/crypto/keembay/ocs-hcu.c:418", HCU_BYTE_ORDER_SWAP,
 	       hcu_dev->io_base + OCS_HCU_KEY_BYTE_ORDER_CFG);
 	/*
 	 * And then we write the 32-bit words composing the key starting from
 	 * the end of the key.
 	 */
 	for (i = 0; i < OCS_HCU_HW_KEY_LEN_U32; i++)
-		writel(key_u32[OCS_HCU_HW_KEY_LEN_U32 - 1 - i],
+		pete_writel("drivers/crypto/keembay/ocs-hcu.c:425", key_u32[OCS_HCU_HW_KEY_LEN_U32 - 1 - i],
 		       hcu_dev->io_base + OCS_HCU_KEY_0 + (sizeof(u32) * i));
 
 	memzero_explicit(key_u32, OCS_HCU_HW_KEY_LEN);
@@ -468,16 +468,16 @@ static int ocs_hcu_ll_dma_start(struct ocs_hcu_dev *hcu_dev,
 		ocs_hcu_dma_irq_en(hcu_dev);
 
 	reinit_completion(&hcu_dev->irq_done);
-	writel(dma_list->dma_addr, hcu_dev->io_base + OCS_HCU_DMA_NEXT_SRC_DESCR);
-	writel(0, hcu_dev->io_base + OCS_HCU_DMA_SRC_SIZE);
-	writel(0, hcu_dev->io_base + OCS_HCU_DMA_DST_SIZE);
+	pete_writel("drivers/crypto/keembay/ocs-hcu.c:471", dma_list->dma_addr, hcu_dev->io_base + OCS_HCU_DMA_NEXT_SRC_DESCR);
+	pete_writel("drivers/crypto/keembay/ocs-hcu.c:472", 0, hcu_dev->io_base + OCS_HCU_DMA_SRC_SIZE);
+	pete_writel("drivers/crypto/keembay/ocs-hcu.c:473", 0, hcu_dev->io_base + OCS_HCU_DMA_DST_SIZE);
 
-	writel(OCS_HCU_START, hcu_dev->io_base + OCS_HCU_OPERATION);
+	pete_writel("drivers/crypto/keembay/ocs-hcu.c:475", OCS_HCU_START, hcu_dev->io_base + OCS_HCU_OPERATION);
 
-	writel(cfg, hcu_dev->io_base + OCS_HCU_DMA_DMA_MODE);
+	pete_writel("drivers/crypto/keembay/ocs-hcu.c:477", cfg, hcu_dev->io_base + OCS_HCU_DMA_DMA_MODE);
 
 	if (finalize)
-		writel(OCS_HCU_TERMINATE, hcu_dev->io_base + OCS_HCU_OPERATION);
+		pete_writel("drivers/crypto/keembay/ocs-hcu.c:480", OCS_HCU_TERMINATE, hcu_dev->io_base + OCS_HCU_OPERATION);
 
 	rc = ocs_hcu_wait_and_disable_irq(hcu_dev);
 	if (rc)
@@ -702,7 +702,7 @@ int ocs_hcu_hash_final(struct ocs_hcu_dev *hcu_dev,
 	 */
 	ocs_hcu_done_irq_en(hcu_dev);
 	reinit_completion(&hcu_dev->irq_done);
-	writel(OCS_HCU_TERMINATE, hcu_dev->io_base + OCS_HCU_OPERATION);
+	pete_writel("drivers/crypto/keembay/ocs-hcu.c:705", OCS_HCU_TERMINATE, hcu_dev->io_base + OCS_HCU_OPERATION);
 
 	rc = ocs_hcu_wait_and_disable_irq(hcu_dev);
 	if (rc)
@@ -746,12 +746,12 @@ int ocs_hcu_digest(struct ocs_hcu_dev *hcu_dev, enum ocs_hcu_algo algo,
 
 	reinit_completion(&hcu_dev->irq_done);
 
-	writel(dma_handle, hcu_dev->io_base + OCS_HCU_DMA_SRC_ADDR);
-	writel(data_len, hcu_dev->io_base + OCS_HCU_DMA_SRC_SIZE);
-	writel(OCS_HCU_START, hcu_dev->io_base + OCS_HCU_OPERATION);
-	writel(reg, hcu_dev->io_base + OCS_HCU_DMA_DMA_MODE);
+	pete_writel("drivers/crypto/keembay/ocs-hcu.c:749", dma_handle, hcu_dev->io_base + OCS_HCU_DMA_SRC_ADDR);
+	pete_writel("drivers/crypto/keembay/ocs-hcu.c:750", data_len, hcu_dev->io_base + OCS_HCU_DMA_SRC_SIZE);
+	pete_writel("drivers/crypto/keembay/ocs-hcu.c:751", OCS_HCU_START, hcu_dev->io_base + OCS_HCU_OPERATION);
+	pete_writel("drivers/crypto/keembay/ocs-hcu.c:752", reg, hcu_dev->io_base + OCS_HCU_DMA_DMA_MODE);
 
-	writel(OCS_HCU_TERMINATE, hcu_dev->io_base + OCS_HCU_OPERATION);
+	pete_writel("drivers/crypto/keembay/ocs-hcu.c:754", OCS_HCU_TERMINATE, hcu_dev->io_base + OCS_HCU_OPERATION);
 
 	rc = ocs_hcu_wait_and_disable_irq(hcu_dev);
 	if (rc)
@@ -812,12 +812,12 @@ irqreturn_t ocs_hcu_irq_handler(int irq, void *dev_id)
 	u32 dma_irq;
 
 	/* Read and clear the HCU interrupt. */
-	hcu_irq = readl(hcu_dev->io_base + OCS_HCU_ISR);
-	writel(hcu_irq, hcu_dev->io_base + OCS_HCU_ISR);
+	hcu_irq = pete_readl("drivers/crypto/keembay/ocs-hcu.c:815", hcu_dev->io_base + OCS_HCU_ISR);
+	pete_writel("drivers/crypto/keembay/ocs-hcu.c:816", hcu_irq, hcu_dev->io_base + OCS_HCU_ISR);
 
 	/* Read and clear the HCU DMA interrupt. */
-	dma_irq = readl(hcu_dev->io_base + OCS_HCU_DMA_MSI_ISR);
-	writel(dma_irq, hcu_dev->io_base + OCS_HCU_DMA_MSI_ISR);
+	dma_irq = pete_readl("drivers/crypto/keembay/ocs-hcu.c:819", hcu_dev->io_base + OCS_HCU_DMA_MSI_ISR);
+	pete_writel("drivers/crypto/keembay/ocs-hcu.c:820", dma_irq, hcu_dev->io_base + OCS_HCU_DMA_MSI_ISR);
 
 	/* Check for errors. */
 	if (hcu_irq & HCU_IRQ_HASH_ERR_MASK || dma_irq & HCU_DMA_IRQ_ERR_MASK) {

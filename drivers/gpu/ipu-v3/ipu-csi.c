@@ -176,13 +176,13 @@ enum ipu_csi_clk_mode {
 
 static inline u32 ipu_csi_read(struct ipu_csi *csi, unsigned offset)
 {
-	return readl(csi->base + offset);
+	return pete_readl("drivers/gpu/ipu-v3/ipu-csi.c:179", csi->base + offset);
 }
 
 static inline void ipu_csi_write(struct ipu_csi *csi, u32 value,
 				 unsigned offset)
 {
-	writel(value, csi->base + offset);
+	pete_writel("drivers/gpu/ipu-v3/ipu-csi.c:185", value, csi->base + offset);
 }
 
 /*

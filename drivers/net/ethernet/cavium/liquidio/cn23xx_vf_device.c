@@ -139,7 +139,7 @@ static int cn23xx_vf_setup_global_input_regs(struct octeon_device *oct)
 		intr_threshold = CFG_GET_IQ_INTR_PKT(cn23xx->conf) &
 				 CN23XX_PKT_IN_DONE_WMARK_MASK;
 
-		writeq((readq(inst_cnt_reg) &
+		pete_writeq("drivers/net/ethernet/cavium/liquidio/cn23xx_vf_device.c:142", (pete_readq("drivers/net/ethernet/cavium/liquidio/cn23xx_vf_device.c:142", inst_cnt_reg) &
 			~(CN23XX_PKT_IN_DONE_WMARK_MASK <<
 			  CN23XX_PKT_IN_DONE_WMARK_BIT_POS)) |
 		       (intr_threshold << CN23XX_PKT_IN_DONE_WMARK_BIT_POS),
@@ -232,11 +232,11 @@ static void cn23xx_setup_vf_iq_regs(struct octeon_device *oct, u32 iq_no)
 	/* Store the current instruction counter (used in flush_iq
 	 * calculation)
 	 */
-	pkt_in_done = readq(iq->inst_cnt_reg);
+	pkt_in_done = pete_readq("drivers/net/ethernet/cavium/liquidio/cn23xx_vf_device.c:235", iq->inst_cnt_reg);
 
 	if (oct->msix_on) {
 		/* Set CINT_ENB to enable IQ interrupt */
-		writeq((pkt_in_done | CN23XX_INTR_CINT_ENB),
+		pete_writeq("drivers/net/ethernet/cavium/liquidio/cn23xx_vf_device.c:239", (pkt_in_done | CN23XX_INTR_CINT_ENB),
 		       iq->inst_cnt_reg);
 	}
 	iq->reset_instr_cnt = 0;
@@ -310,7 +310,7 @@ static int cn23xx_setup_vf_mbox(struct octeon_device *oct)
 
 	oct->mbox[0] = mbox;
 
-	writeq(OCTEON_PFVFSIG, mbox->mbox_read_reg);
+	pete_writeq("drivers/net/ethernet/cavium/liquidio/cn23xx_vf_device.c:313", OCTEON_PFVFSIG, mbox->mbox_read_reg);
 
 	return 0;
 }
@@ -476,8 +476,8 @@ static void cn23xx_handle_vf_mbox_intr(struct octeon_ioq_vector *ioq_vector)
 
 	if (!ioq_vector->droq_index) {
 		/* read and clear by writing 1 */
-		mbox_int_val = readq(oct->mbox[0]->mbox_int_reg);
-		writeq(mbox_int_val, oct->mbox[0]->mbox_int_reg);
+		mbox_int_val = pete_readq("drivers/net/ethernet/cavium/liquidio/cn23xx_vf_device.c:479", oct->mbox[0]->mbox_int_reg);
+		pete_writeq("drivers/net/ethernet/cavium/liquidio/cn23xx_vf_device.c:480", mbox_int_val, oct->mbox[0]->mbox_int_reg);
 		if (octeon_mbox_read(oct->mbox[0]))
 			schedule_delayed_work(&oct->mbox[0]->mbox_poll_wk.work,
 					      msecs_to_jiffies(0));
@@ -493,7 +493,7 @@ static u64 cn23xx_vf_msix_interrupt_handler(void *dev)
 	u64 ret = 0;
 
 	dev_dbg(&oct->pci_dev->dev, "In %s octeon_dev @ %p\n", __func__, oct);
-	pkts_sent = readq(droq->pkts_sent_reg);
+	pkts_sent = pete_readq("drivers/net/ethernet/cavium/liquidio/cn23xx_vf_device.c:496", droq->pkts_sent_reg);
 
 	/* If our device has interrupted, then proceed. Also check
 	 * for all f's if interrupt was triggered on an error
@@ -523,7 +523,7 @@ static u64 cn23xx_vf_msix_interrupt_handler(void *dev)
 
 static u32 cn23xx_update_read_index(struct octeon_instr_queue *iq)
 {
-	u32 pkt_in_done = readl(iq->inst_cnt_reg);
+	u32 pkt_in_done = pete_readl("drivers/net/ethernet/cavium/liquidio/cn23xx_vf_device.c:526", iq->inst_cnt_reg);
 	u32 last_done;
 	u32 new_idx;
 

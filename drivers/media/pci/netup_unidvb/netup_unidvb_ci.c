@@ -45,7 +45,7 @@
 
 irqreturn_t netup_ci_interrupt(struct netup_unidvb_dev *ndev)
 {
-	writew(0x101, ndev->bmmio0 + CAM_CTRLSTAT_CLR);
+	pete_writew("drivers/media/pci/netup_unidvb/netup_unidvb_ci.c:48", 0x101, ndev->bmmio0 + CAM_CTRLSTAT_CLR);
 	return IRQ_HANDLED;
 }
 
@@ -57,13 +57,13 @@ static int netup_unidvb_ci_slot_ts_ctl(struct dvb_ca_en50221 *en50221,
 	u16 shift = (state->nr == 1) ? CAM1_SHIFT : 0;
 
 	dev_dbg(&dev->pci_dev->dev, "%s(): CAM_CTRLSTAT=0x%x\n",
-		__func__, readw(dev->bmmio0 + CAM_CTRLSTAT_READ_SET));
+		__func__, pete_readw("drivers/media/pci/netup_unidvb/netup_unidvb_ci.c:60", dev->bmmio0 + CAM_CTRLSTAT_READ_SET));
 	if (slot != 0)
 		return -EINVAL;
 	/* pass data to CAM module */
-	writew(BIT_CAM_BYPASS << shift, dev->bmmio0 + CAM_CTRLSTAT_CLR);
+	pete_writew("drivers/media/pci/netup_unidvb/netup_unidvb_ci.c:64", BIT_CAM_BYPASS << shift, dev->bmmio0 + CAM_CTRLSTAT_CLR);
 	dev_dbg(&dev->pci_dev->dev, "%s(): CAM_CTRLSTAT=0x%x done\n",
-		__func__, readw(dev->bmmio0 + CAM_CTRLSTAT_READ_SET));
+		__func__, pete_readw("drivers/media/pci/netup_unidvb/netup_unidvb_ci.c:66", dev->bmmio0 + CAM_CTRLSTAT_READ_SET));
 	return 0;
 }
 
@@ -88,15 +88,15 @@ static int netup_unidvb_ci_slot_reset(struct dvb_ca_en50221 *en50221,
 	int reset_counter = 3;
 
 	dev_dbg(&dev->pci_dev->dev, "%s(): CAM_CTRLSTAT_READ_SET=0x%x\n",
-		__func__, readw(dev->bmmio0 + CAM_CTRLSTAT_READ_SET));
+		__func__, pete_readw("drivers/media/pci/netup_unidvb/netup_unidvb_ci.c:91", dev->bmmio0 + CAM_CTRLSTAT_READ_SET));
 reset:
 	timeout = jiffies + msecs_to_jiffies(5000);
 	/* start reset */
-	writew(BIT_CAM_RESET << shift, dev->bmmio0 + CAM_CTRLSTAT_READ_SET);
+	pete_writew("drivers/media/pci/netup_unidvb/netup_unidvb_ci.c:95", BIT_CAM_RESET << shift, dev->bmmio0 + CAM_CTRLSTAT_READ_SET);
 	dev_dbg(&dev->pci_dev->dev, "%s(): waiting for reset\n", __func__);
 	/* wait until reset done */
 	while (time_before(jiffies, timeout)) {
-		ci_stat = readw(dev->bmmio0 + CAM_CTRLSTAT_READ_SET);
+		ci_stat = pete_readw("drivers/media/pci/netup_unidvb/netup_unidvb_ci.c:99", dev->bmmio0 + CAM_CTRLSTAT_READ_SET);
 		if (ci_stat & (BIT_CAM_READY << shift))
 			break;
 		udelay(1000);
@@ -120,8 +120,8 @@ static int netup_unidvb_poll_ci_slot_status(struct dvb_ca_en50221 *en50221,
 	u16 ci_stat = 0;
 
 	dev_dbg(&dev->pci_dev->dev, "%s(): CAM_CTRLSTAT_READ_SET=0x%x\n",
-		__func__, readw(dev->bmmio0 + CAM_CTRLSTAT_READ_SET));
-	ci_stat = readw(dev->bmmio0 + CAM_CTRLSTAT_READ_SET);
+		__func__, pete_readw("drivers/media/pci/netup_unidvb/netup_unidvb_ci.c:123", dev->bmmio0 + CAM_CTRLSTAT_READ_SET));
+	ci_stat = pete_readw("drivers/media/pci/netup_unidvb/netup_unidvb_ci.c:124", dev->bmmio0 + CAM_CTRLSTAT_READ_SET);
 	if (ci_stat & (BIT_CAM_READY << shift)) {
 		state->status = DVB_CA_EN50221_POLL_CAM_PRESENT |
 			DVB_CA_EN50221_POLL_CAM_READY;
@@ -217,7 +217,7 @@ int netup_unidvb_ci_register(struct netup_unidvb_dev *dev,
 			__func__, result);
 		return result;
 	}
-	writew(NETUP_UNIDVB_IRQ_CI, dev->bmmio0 + REG_IMASK_SET);
+	pete_writew("drivers/media/pci/netup_unidvb/netup_unidvb_ci.c:220", NETUP_UNIDVB_IRQ_CI, dev->bmmio0 + REG_IMASK_SET);
 	dev_info(&pci_dev->dev,
 		"%s(): CI adapter %d init done\n", __func__, num);
 	return 0;

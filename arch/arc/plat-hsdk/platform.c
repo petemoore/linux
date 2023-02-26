@@ -206,17 +206,17 @@ static void __init hsdk_init_memory_bridge_axi_dmac(void)
 		axi_m_oft1 = 0x76543210;
 	}
 
-	writel(0x77777777, CREG_AXI_M_SLV0(M_DMAC_0));
-	writel(0xFEDCBA98, CREG_AXI_M_OFT0(M_DMAC_0));
-	writel(axi_m_slv1, CREG_AXI_M_SLV1(M_DMAC_0));
-	writel(axi_m_oft1, CREG_AXI_M_OFT1(M_DMAC_0));
-	writel(UPDATE_VAL, CREG_AXI_M_UPDT(M_DMAC_0));
+	pete_writel("arch/arc/plat-hsdk/platform.c:209", 0x77777777, CREG_AXI_M_SLV0(M_DMAC_0));
+	pete_writel("arch/arc/plat-hsdk/platform.c:210", 0xFEDCBA98, CREG_AXI_M_OFT0(M_DMAC_0));
+	pete_writel("arch/arc/plat-hsdk/platform.c:211", axi_m_slv1, CREG_AXI_M_SLV1(M_DMAC_0));
+	pete_writel("arch/arc/plat-hsdk/platform.c:212", axi_m_oft1, CREG_AXI_M_OFT1(M_DMAC_0));
+	pete_writel("arch/arc/plat-hsdk/platform.c:213", UPDATE_VAL, CREG_AXI_M_UPDT(M_DMAC_0));
 
-	writel(0x77777777, CREG_AXI_M_SLV0(M_DMAC_1));
-	writel(0xFEDCBA98, CREG_AXI_M_OFT0(M_DMAC_1));
-	writel(axi_m_slv1, CREG_AXI_M_SLV1(M_DMAC_1));
-	writel(axi_m_oft1, CREG_AXI_M_OFT1(M_DMAC_1));
-	writel(UPDATE_VAL, CREG_AXI_M_UPDT(M_DMAC_1));
+	pete_writel("arch/arc/plat-hsdk/platform.c:215", 0x77777777, CREG_AXI_M_SLV0(M_DMAC_1));
+	pete_writel("arch/arc/plat-hsdk/platform.c:216", 0xFEDCBA98, CREG_AXI_M_OFT0(M_DMAC_1));
+	pete_writel("arch/arc/plat-hsdk/platform.c:217", axi_m_slv1, CREG_AXI_M_SLV1(M_DMAC_1));
+	pete_writel("arch/arc/plat-hsdk/platform.c:218", axi_m_oft1, CREG_AXI_M_OFT1(M_DMAC_1));
+	pete_writel("arch/arc/plat-hsdk/platform.c:219", UPDATE_VAL, CREG_AXI_M_UPDT(M_DMAC_1));
 }
 
 static void __init hsdk_init_memory_bridge(void)
@@ -228,67 +228,67 @@ static void __init hsdk_init_memory_bridge(void)
 	 * We need to clean boot mirror (BOOT[1:0]) bits in them to avoid first
 	 * aperture to be masked by 'boot mirror'.
 	 */
-	reg = readl(CREG_AXI_M_HS_CORE_BOOT) & (~0x3);
-	writel(reg, CREG_AXI_M_HS_CORE_BOOT);
-	writel(0x11111111, CREG_AXI_M_SLV0(M_HS_CORE));
-	writel(0x63111111, CREG_AXI_M_SLV1(M_HS_CORE));
-	writel(0xFEDCBA98, CREG_AXI_M_OFT0(M_HS_CORE));
-	writel(0x0E543210, CREG_AXI_M_OFT1(M_HS_CORE));
-	writel(UPDATE_VAL, CREG_AXI_M_UPDT(M_HS_CORE));
+	reg = pete_readl("arch/arc/plat-hsdk/platform.c:231", CREG_AXI_M_HS_CORE_BOOT) & (~0x3);
+	pete_writel("arch/arc/plat-hsdk/platform.c:232", reg, CREG_AXI_M_HS_CORE_BOOT);
+	pete_writel("arch/arc/plat-hsdk/platform.c:233", 0x11111111, CREG_AXI_M_SLV0(M_HS_CORE));
+	pete_writel("arch/arc/plat-hsdk/platform.c:234", 0x63111111, CREG_AXI_M_SLV1(M_HS_CORE));
+	pete_writel("arch/arc/plat-hsdk/platform.c:235", 0xFEDCBA98, CREG_AXI_M_OFT0(M_HS_CORE));
+	pete_writel("arch/arc/plat-hsdk/platform.c:236", 0x0E543210, CREG_AXI_M_OFT1(M_HS_CORE));
+	pete_writel("arch/arc/plat-hsdk/platform.c:237", UPDATE_VAL, CREG_AXI_M_UPDT(M_HS_CORE));
 
-	writel(0x77777777, CREG_AXI_M_SLV0(M_HS_RTT));
-	writel(0x77777777, CREG_AXI_M_SLV1(M_HS_RTT));
-	writel(0xFEDCBA98, CREG_AXI_M_OFT0(M_HS_RTT));
-	writel(0x76543210, CREG_AXI_M_OFT1(M_HS_RTT));
-	writel(UPDATE_VAL, CREG_AXI_M_UPDT(M_HS_RTT));
+	pete_writel("arch/arc/plat-hsdk/platform.c:239", 0x77777777, CREG_AXI_M_SLV0(M_HS_RTT));
+	pete_writel("arch/arc/plat-hsdk/platform.c:240", 0x77777777, CREG_AXI_M_SLV1(M_HS_RTT));
+	pete_writel("arch/arc/plat-hsdk/platform.c:241", 0xFEDCBA98, CREG_AXI_M_OFT0(M_HS_RTT));
+	pete_writel("arch/arc/plat-hsdk/platform.c:242", 0x76543210, CREG_AXI_M_OFT1(M_HS_RTT));
+	pete_writel("arch/arc/plat-hsdk/platform.c:243", UPDATE_VAL, CREG_AXI_M_UPDT(M_HS_RTT));
 
-	writel(0x88888888, CREG_AXI_M_SLV0(M_AXI_TUN));
-	writel(0x88888888, CREG_AXI_M_SLV1(M_AXI_TUN));
-	writel(0xFEDCBA98, CREG_AXI_M_OFT0(M_AXI_TUN));
-	writel(0x76543210, CREG_AXI_M_OFT1(M_AXI_TUN));
-	writel(UPDATE_VAL, CREG_AXI_M_UPDT(M_AXI_TUN));
+	pete_writel("arch/arc/plat-hsdk/platform.c:245", 0x88888888, CREG_AXI_M_SLV0(M_AXI_TUN));
+	pete_writel("arch/arc/plat-hsdk/platform.c:246", 0x88888888, CREG_AXI_M_SLV1(M_AXI_TUN));
+	pete_writel("arch/arc/plat-hsdk/platform.c:247", 0xFEDCBA98, CREG_AXI_M_OFT0(M_AXI_TUN));
+	pete_writel("arch/arc/plat-hsdk/platform.c:248", 0x76543210, CREG_AXI_M_OFT1(M_AXI_TUN));
+	pete_writel("arch/arc/plat-hsdk/platform.c:249", UPDATE_VAL, CREG_AXI_M_UPDT(M_AXI_TUN));
 
-	writel(0x77777777, CREG_AXI_M_SLV0(M_HDMI_VIDEO));
-	writel(0x77777777, CREG_AXI_M_SLV1(M_HDMI_VIDEO));
-	writel(0xFEDCBA98, CREG_AXI_M_OFT0(M_HDMI_VIDEO));
-	writel(0x76543210, CREG_AXI_M_OFT1(M_HDMI_VIDEO));
-	writel(UPDATE_VAL, CREG_AXI_M_UPDT(M_HDMI_VIDEO));
+	pete_writel("arch/arc/plat-hsdk/platform.c:251", 0x77777777, CREG_AXI_M_SLV0(M_HDMI_VIDEO));
+	pete_writel("arch/arc/plat-hsdk/platform.c:252", 0x77777777, CREG_AXI_M_SLV1(M_HDMI_VIDEO));
+	pete_writel("arch/arc/plat-hsdk/platform.c:253", 0xFEDCBA98, CREG_AXI_M_OFT0(M_HDMI_VIDEO));
+	pete_writel("arch/arc/plat-hsdk/platform.c:254", 0x76543210, CREG_AXI_M_OFT1(M_HDMI_VIDEO));
+	pete_writel("arch/arc/plat-hsdk/platform.c:255", UPDATE_VAL, CREG_AXI_M_UPDT(M_HDMI_VIDEO));
 
-	writel(0x77777777, CREG_AXI_M_SLV0(M_HDMI_AUDIO));
-	writel(0x77777777, CREG_AXI_M_SLV1(M_HDMI_AUDIO));
-	writel(0xFEDCBA98, CREG_AXI_M_OFT0(M_HDMI_AUDIO));
-	writel(0x76543210, CREG_AXI_M_OFT1(M_HDMI_AUDIO));
-	writel(UPDATE_VAL, CREG_AXI_M_UPDT(M_HDMI_AUDIO));
+	pete_writel("arch/arc/plat-hsdk/platform.c:257", 0x77777777, CREG_AXI_M_SLV0(M_HDMI_AUDIO));
+	pete_writel("arch/arc/plat-hsdk/platform.c:258", 0x77777777, CREG_AXI_M_SLV1(M_HDMI_AUDIO));
+	pete_writel("arch/arc/plat-hsdk/platform.c:259", 0xFEDCBA98, CREG_AXI_M_OFT0(M_HDMI_AUDIO));
+	pete_writel("arch/arc/plat-hsdk/platform.c:260", 0x76543210, CREG_AXI_M_OFT1(M_HDMI_AUDIO));
+	pete_writel("arch/arc/plat-hsdk/platform.c:261", UPDATE_VAL, CREG_AXI_M_UPDT(M_HDMI_AUDIO));
 
-	writel(0x77777777, CREG_AXI_M_SLV0(M_USB_HOST));
-	writel(0x77999999, CREG_AXI_M_SLV1(M_USB_HOST));
-	writel(0xFEDCBA98, CREG_AXI_M_OFT0(M_USB_HOST));
-	writel(0x76DCBA98, CREG_AXI_M_OFT1(M_USB_HOST));
-	writel(UPDATE_VAL, CREG_AXI_M_UPDT(M_USB_HOST));
+	pete_writel("arch/arc/plat-hsdk/platform.c:263", 0x77777777, CREG_AXI_M_SLV0(M_USB_HOST));
+	pete_writel("arch/arc/plat-hsdk/platform.c:264", 0x77999999, CREG_AXI_M_SLV1(M_USB_HOST));
+	pete_writel("arch/arc/plat-hsdk/platform.c:265", 0xFEDCBA98, CREG_AXI_M_OFT0(M_USB_HOST));
+	pete_writel("arch/arc/plat-hsdk/platform.c:266", 0x76DCBA98, CREG_AXI_M_OFT1(M_USB_HOST));
+	pete_writel("arch/arc/plat-hsdk/platform.c:267", UPDATE_VAL, CREG_AXI_M_UPDT(M_USB_HOST));
 
-	writel(0x77777777, CREG_AXI_M_SLV0(M_ETHERNET));
-	writel(0x77999999, CREG_AXI_M_SLV1(M_ETHERNET));
-	writel(0xFEDCBA98, CREG_AXI_M_OFT0(M_ETHERNET));
-	writel(0x76DCBA98, CREG_AXI_M_OFT1(M_ETHERNET));
-	writel(UPDATE_VAL, CREG_AXI_M_UPDT(M_ETHERNET));
+	pete_writel("arch/arc/plat-hsdk/platform.c:269", 0x77777777, CREG_AXI_M_SLV0(M_ETHERNET));
+	pete_writel("arch/arc/plat-hsdk/platform.c:270", 0x77999999, CREG_AXI_M_SLV1(M_ETHERNET));
+	pete_writel("arch/arc/plat-hsdk/platform.c:271", 0xFEDCBA98, CREG_AXI_M_OFT0(M_ETHERNET));
+	pete_writel("arch/arc/plat-hsdk/platform.c:272", 0x76DCBA98, CREG_AXI_M_OFT1(M_ETHERNET));
+	pete_writel("arch/arc/plat-hsdk/platform.c:273", UPDATE_VAL, CREG_AXI_M_UPDT(M_ETHERNET));
 
-	writel(0x77777777, CREG_AXI_M_SLV0(M_SDIO));
-	writel(0x77999999, CREG_AXI_M_SLV1(M_SDIO));
-	writel(0xFEDCBA98, CREG_AXI_M_OFT0(M_SDIO));
-	writel(0x76DCBA98, CREG_AXI_M_OFT1(M_SDIO));
-	writel(UPDATE_VAL, CREG_AXI_M_UPDT(M_SDIO));
+	pete_writel("arch/arc/plat-hsdk/platform.c:275", 0x77777777, CREG_AXI_M_SLV0(M_SDIO));
+	pete_writel("arch/arc/plat-hsdk/platform.c:276", 0x77999999, CREG_AXI_M_SLV1(M_SDIO));
+	pete_writel("arch/arc/plat-hsdk/platform.c:277", 0xFEDCBA98, CREG_AXI_M_OFT0(M_SDIO));
+	pete_writel("arch/arc/plat-hsdk/platform.c:278", 0x76DCBA98, CREG_AXI_M_OFT1(M_SDIO));
+	pete_writel("arch/arc/plat-hsdk/platform.c:279", UPDATE_VAL, CREG_AXI_M_UPDT(M_SDIO));
 
-	writel(0x77777777, CREG_AXI_M_SLV0(M_GPU));
-	writel(0x77777777, CREG_AXI_M_SLV1(M_GPU));
-	writel(0xFEDCBA98, CREG_AXI_M_OFT0(M_GPU));
-	writel(0x76543210, CREG_AXI_M_OFT1(M_GPU));
-	writel(UPDATE_VAL, CREG_AXI_M_UPDT(M_GPU));
+	pete_writel("arch/arc/plat-hsdk/platform.c:281", 0x77777777, CREG_AXI_M_SLV0(M_GPU));
+	pete_writel("arch/arc/plat-hsdk/platform.c:282", 0x77777777, CREG_AXI_M_SLV1(M_GPU));
+	pete_writel("arch/arc/plat-hsdk/platform.c:283", 0xFEDCBA98, CREG_AXI_M_OFT0(M_GPU));
+	pete_writel("arch/arc/plat-hsdk/platform.c:284", 0x76543210, CREG_AXI_M_OFT1(M_GPU));
+	pete_writel("arch/arc/plat-hsdk/platform.c:285", UPDATE_VAL, CREG_AXI_M_UPDT(M_GPU));
 
-	writel(0x00000000, CREG_AXI_M_SLV0(M_DVFS));
-	writel(0x60000000, CREG_AXI_M_SLV1(M_DVFS));
-	writel(0x00000000, CREG_AXI_M_OFT0(M_DVFS));
-	writel(0x00000000, CREG_AXI_M_OFT1(M_DVFS));
-	writel(UPDATE_VAL, CREG_AXI_M_UPDT(M_DVFS));
+	pete_writel("arch/arc/plat-hsdk/platform.c:287", 0x00000000, CREG_AXI_M_SLV0(M_DVFS));
+	pete_writel("arch/arc/plat-hsdk/platform.c:288", 0x60000000, CREG_AXI_M_SLV1(M_DVFS));
+	pete_writel("arch/arc/plat-hsdk/platform.c:289", 0x00000000, CREG_AXI_M_OFT0(M_DVFS));
+	pete_writel("arch/arc/plat-hsdk/platform.c:290", 0x00000000, CREG_AXI_M_OFT1(M_DVFS));
+	pete_writel("arch/arc/plat-hsdk/platform.c:291", UPDATE_VAL, CREG_AXI_M_UPDT(M_DVFS));
 
 	hsdk_init_memory_bridge_axi_dmac();
 
@@ -298,8 +298,8 @@ static void __init hsdk_init_memory_bridge(void)
 	 * will cause problems with DMA to/from peripherals even if PAE40 is
 	 * not used.
 	 */
-	writel(0x00000000, CREG_PAE);
-	writel(UPDATE_VAL, CREG_PAE_UPDT);
+	pete_writel("arch/arc/plat-hsdk/platform.c:301", 0x00000000, CREG_PAE);
+	pete_writel("arch/arc/plat-hsdk/platform.c:302", UPDATE_VAL, CREG_PAE_UPDT);
 }
 
 static void __init hsdk_init_early(void)

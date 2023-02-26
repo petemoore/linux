@@ -210,12 +210,12 @@ struct exynos_ufs {
 #define EXYNOS_UFS_MMIO_FUNC(name)					  \
 static inline void name##_writel(struct exynos_ufs *ufs, u32 val, u32 reg)\
 {									  \
-	writel(val, ufs->reg_##name + reg);				  \
+	pete_writel("drivers/scsi/ufs/ufs-exynos.h:213", val, ufs->reg_##name + reg);				  \
 }									  \
 									  \
 static inline u32 name##_readl(struct exynos_ufs *ufs, u32 reg)		  \
 {									  \
-	return readl(ufs->reg_##name + reg);				  \
+	return pete_readl("drivers/scsi/ufs/ufs-exynos.h:218", ufs->reg_##name + reg);				  \
 }
 
 EXYNOS_UFS_MMIO_FUNC(hci);

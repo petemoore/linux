@@ -287,7 +287,7 @@ static irqreturn_t spi_st_irq(int irq, void *dev_id)
 		 * read SSC_IEN to ensure that this bit is set
 		 * before re-enabling interrupt
 		 */
-		readl(spi_st->base + SSC_IEN);
+		pete_readl("drivers/spi/spi-st-ssc4.c:290", spi_st->base + SSC_IEN);
 		complete(&spi_st->done);
 	}
 

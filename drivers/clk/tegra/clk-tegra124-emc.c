@@ -102,7 +102,7 @@ static unsigned long emc_recalc_rate(struct clk_hw *hw,
 	 */
 	parent_rate = clk_hw_get_rate(clk_hw_get_parent(hw));
 
-	val = readl(tegra->clk_regs + CLK_SOURCE_EMC);
+	val = pete_readl("drivers/clk/tegra/clk-tegra124-emc.c:105", tegra->clk_regs + CLK_SOURCE_EMC);
 	div = val & CLK_SOURCE_EMC_EMC_2X_CLK_DIVISOR_MASK;
 
 	return parent_rate / (div + 2) * 2;
@@ -167,7 +167,7 @@ static u8 emc_get_parent(struct clk_hw *hw)
 
 	tegra = container_of(hw, struct tegra_clk_emc, hw);
 
-	val = readl(tegra->clk_regs + CLK_SOURCE_EMC);
+	val = pete_readl("drivers/clk/tegra/clk-tegra124-emc.c:170", tegra->clk_regs + CLK_SOURCE_EMC);
 
 	return (val >> CLK_SOURCE_EMC_EMC_2X_CLK_SRC_SHIFT)
 		& CLK_SOURCE_EMC_EMC_2X_CLK_SRC_MASK;
@@ -257,7 +257,7 @@ static int emc_set_timing(struct tegra_clk_emc *tegra,
 
 	spin_lock_irqsave(tegra->lock, flags);
 
-	car_value = readl(tegra->clk_regs + CLK_SOURCE_EMC);
+	car_value = pete_readl("drivers/clk/tegra/clk-tegra124-emc.c:260", tegra->clk_regs + CLK_SOURCE_EMC);
 
 	car_value &= ~CLK_SOURCE_EMC_EMC_2X_CLK_SRC(~0);
 	car_value |= CLK_SOURCE_EMC_EMC_2X_CLK_SRC(timing->parent_index);
@@ -265,7 +265,7 @@ static int emc_set_timing(struct tegra_clk_emc *tegra,
 	car_value &= ~CLK_SOURCE_EMC_EMC_2X_CLK_DIVISOR(~0);
 	car_value |= CLK_SOURCE_EMC_EMC_2X_CLK_DIVISOR(div);
 
-	writel(car_value, tegra->clk_regs + CLK_SOURCE_EMC);
+	pete_writel("drivers/clk/tegra/clk-tegra124-emc.c:268", car_value, tegra->clk_regs + CLK_SOURCE_EMC);
 
 	spin_unlock_irqrestore(tegra->lock, flags);
 

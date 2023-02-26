@@ -426,10 +426,10 @@ static int amba_device_try_add(struct amba_device *dev, struct resource *parent)
 		 * they are located at end of region
 		 */
 		for (pid = 0, i = 0; i < 4; i++)
-			pid |= (readl(tmp + size - 0x20 + 4 * i) & 255) <<
+			pid |= (pete_readl("drivers/amba/bus.c:429", tmp + size - 0x20 + 4 * i) & 255) <<
 				(i * 8);
 		for (cid = 0, i = 0; i < 4; i++)
-			cid |= (readl(tmp + size - 0x10 + 4 * i) & 255) <<
+			cid |= (pete_readl("drivers/amba/bus.c:432", tmp + size - 0x10 + 4 * i) & 255) <<
 				(i * 8);
 
 		if (cid == CORESIGHT_CID) {
@@ -437,9 +437,9 @@ static int amba_device_try_add(struct amba_device *dev, struct resource *parent)
 			void __iomem *csbase = tmp + size - 4096;
 
 			dev->uci.devarch =
-				readl(csbase + UCI_REG_DEVARCH_OFFSET);
+				pete_readl("drivers/amba/bus.c:440", csbase + UCI_REG_DEVARCH_OFFSET);
 			dev->uci.devtype =
-				readl(csbase + UCI_REG_DEVTYPE_OFFSET) & 0xff;
+				pete_readl("drivers/amba/bus.c:442", csbase + UCI_REG_DEVTYPE_OFFSET) & 0xff;
 		}
 
 		amba_put_disable_pclk(dev);

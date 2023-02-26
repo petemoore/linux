@@ -23,8 +23,8 @@
 #include "panfrost_features.h"
 #include "panfrost_regs.h"
 
-#define mmu_write(dev, reg, data) writel(data, dev->iomem + reg)
-#define mmu_read(dev, reg) readl(dev->iomem + reg)
+#define mmu_write(dev, reg, data) pete_writel("drivers/gpu/drm/panfrost/panfrost_mmu.c:26", data, dev->iomem + reg)
+#define mmu_read(dev, reg) pete_readl("drivers/gpu/drm/panfrost/panfrost_mmu.c:27", dev->iomem + reg)
 
 static int wait_ready(struct panfrost_device *pfdev, u32 as_nr)
 {

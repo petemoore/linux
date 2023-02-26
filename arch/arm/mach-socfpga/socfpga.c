@@ -71,26 +71,26 @@ static void socfpga_cyclone5_restart(enum reboot_mode mode, const char *cmd)
 {
 	u32 temp;
 
-	temp = readl(rst_manager_base_addr + SOCFPGA_RSTMGR_CTRL);
+	temp = pete_readl("arch/arm/mach-socfpga/socfpga.c:74", rst_manager_base_addr + SOCFPGA_RSTMGR_CTRL);
 
 	if (mode == REBOOT_WARM)
 		temp |= RSTMGR_CTRL_SWWARMRSTREQ;
 	else
 		temp |= RSTMGR_CTRL_SWCOLDRSTREQ;
-	writel(temp, rst_manager_base_addr + SOCFPGA_RSTMGR_CTRL);
+	pete_writel("arch/arm/mach-socfpga/socfpga.c:80", temp, rst_manager_base_addr + SOCFPGA_RSTMGR_CTRL);
 }
 
 static void socfpga_arria10_restart(enum reboot_mode mode, const char *cmd)
 {
 	u32 temp;
 
-	temp = readl(rst_manager_base_addr + SOCFPGA_A10_RSTMGR_CTRL);
+	temp = pete_readl("arch/arm/mach-socfpga/socfpga.c:87", rst_manager_base_addr + SOCFPGA_A10_RSTMGR_CTRL);
 
 	if (mode == REBOOT_WARM)
 		temp |= RSTMGR_CTRL_SWWARMRSTREQ;
 	else
 		temp |= RSTMGR_CTRL_SWCOLDRSTREQ;
-	writel(temp, rst_manager_base_addr + SOCFPGA_A10_RSTMGR_CTRL);
+	pete_writel("arch/arm/mach-socfpga/socfpga.c:93", temp, rst_manager_base_addr + SOCFPGA_A10_RSTMGR_CTRL);
 }
 
 static const char *altera_dt_match[] = {

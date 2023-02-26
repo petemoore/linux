@@ -60,7 +60,7 @@ static int geode_rng_data_read(struct hwrng *rng, u32 *data)
 {
 	void __iomem *mem = (void __iomem *)rng->priv;
 
-	*data = readl(mem + GEODE_RNG_DATA_REG);
+	*data = pete_readl("drivers/char/hw_random/geode-rng.c:63", mem + GEODE_RNG_DATA_REG);
 
 	return 4;
 }
@@ -71,7 +71,7 @@ static int geode_rng_data_present(struct hwrng *rng, int wait)
 	int data, i;
 
 	for (i = 0; i < 20; i++) {
-		data = !!(readl(mem + GEODE_RNG_STATUS_REG));
+		data = !!(pete_readl("drivers/char/hw_random/geode-rng.c:74", mem + GEODE_RNG_STATUS_REG));
 		if (data || !wait)
 			break;
 		udelay(10);

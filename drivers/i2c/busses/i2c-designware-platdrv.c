@@ -125,7 +125,7 @@ static int bt1_i2c_request_regs(struct dw_i2c_dev *dev)
 
 static int mscc_twi_set_sda_hold_time(struct dw_i2c_dev *dev)
 {
-	writel((dev->sda_hold_time << 1) | MSCC_ICPU_CFG_TWI_DELAY_ENABLE,
+	pete_writel("drivers/i2c/busses/i2c-designware-platdrv.c:128", (dev->sda_hold_time << 1) | MSCC_ICPU_CFG_TWI_DELAY_ENABLE,
 	       dev->ext + MSCC_ICPU_CFG_TWI_DELAY);
 
 	return 0;

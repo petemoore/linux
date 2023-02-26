@@ -43,9 +43,9 @@ static int mmp_clk_reset_assert(struct reset_controller_dev *rcdev,
 	if (cell->lock)
 		spin_lock_irqsave(cell->lock, flags);
 
-	val = readl(cell->reg);
+	val = pete_readl("drivers/clk/mmp/reset.c:46", cell->reg);
 	val |= cell->bits;
-	writel(val, cell->reg);
+	pete_writel("drivers/clk/mmp/reset.c:48", val, cell->reg);
 
 	if (cell->lock)
 		spin_unlock_irqrestore(cell->lock, flags);
@@ -65,9 +65,9 @@ static int mmp_clk_reset_deassert(struct reset_controller_dev *rcdev,
 	if (cell->lock)
 		spin_lock_irqsave(cell->lock, flags);
 
-	val = readl(cell->reg);
+	val = pete_readl("drivers/clk/mmp/reset.c:68", cell->reg);
 	val &= ~cell->bits;
-	writel(val, cell->reg);
+	pete_writel("drivers/clk/mmp/reset.c:70", val, cell->reg);
 
 	if (cell->lock)
 		spin_unlock_irqrestore(cell->lock, flags);

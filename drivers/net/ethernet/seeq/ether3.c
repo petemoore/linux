@@ -99,17 +99,17 @@ typedef enum {
  */
 static inline void ether3_outb(int v, void __iomem *r)
 {
-	writeb(v, r);
+	pete_writeb("drivers/net/ethernet/seeq/ether3.c:102", v, r);
 	udelay(1);
 }
 
 static inline void ether3_outw(int v, void __iomem *r)
 {
-	writew(v, r);
+	pete_writew("drivers/net/ethernet/seeq/ether3.c:108", v, r);
 	udelay(1);
 }
-#define ether3_inb(r)		({ unsigned int __v = readb((r)); udelay(1); __v; })
-#define ether3_inw(r)		({ unsigned int __v = readw((r)); udelay(1); __v; })
+#define ether3_inb(r)		({ unsigned int __v = pete_readb("drivers/net/ethernet/seeq/ether3.c:111", (r)); udelay(1); __v; })
+#define ether3_inw(r)		({ unsigned int __v = pete_readw("drivers/net/ethernet/seeq/ether3.c:112", (r)); udelay(1); __v; })
 
 static int
 ether3_setbuffer(struct net_device *dev, buffer_rw_t read, int start)
@@ -145,12 +145,12 @@ ether3_setbuffer(struct net_device *dev, buffer_rw_t read, int start)
 	writesw(REG_BUFWIN, (data), (length) >> 1)
 
 #define ether3_writeword(dev,data)				\
-	writew((data), REG_BUFWIN)
+	pete_writew("drivers/net/ethernet/seeq/ether3.c:148", (data), REG_BUFWIN)
 
 #define ether3_writelong(dev,data)	{			\
 	void __iomem *reg_bufwin = REG_BUFWIN;			\
-	writew((data), reg_bufwin);				\
-	writew((data) >> 16, reg_bufwin);			\
+	pete_writew("drivers/net/ethernet/seeq/ether3.c:152", (data), reg_bufwin);				\
+	pete_writew("drivers/net/ethernet/seeq/ether3.c:153", (data) >> 16, reg_bufwin);			\
 }
 
 /*
@@ -160,10 +160,10 @@ ether3_setbuffer(struct net_device *dev, buffer_rw_t read, int start)
 	readsw(REG_BUFWIN, (data), (length) >> 1)
 
 #define ether3_readword(dev)					\
-	readw(REG_BUFWIN)
+	pete_readw("drivers/net/ethernet/seeq/ether3.c:163", REG_BUFWIN)
 
 #define ether3_readlong(dev)	 				\
-	readw(REG_BUFWIN) | (readw(REG_BUFWIN) << 16)
+	pete_readw("drivers/net/ethernet/seeq/ether3.c:166", REG_BUFWIN) | (pete_readw("drivers/net/ethernet/seeq/ether3.c:166", REG_BUFWIN) << 16)
 
 /*
  * Switch LED off...

@@ -117,9 +117,9 @@ orion_spi_setbits(struct orion_spi *orion_spi, u32 reg, u32 mask)
 	void __iomem *reg_addr = spi_reg(orion_spi, reg);
 	u32 val;
 
-	val = readl(reg_addr);
+	val = pete_readl("drivers/spi/spi-orion.c:120", reg_addr);
 	val |= mask;
-	writel(val, reg_addr);
+	pete_writel("drivers/spi/spi-orion.c:122", val, reg_addr);
 }
 
 static inline void
@@ -128,9 +128,9 @@ orion_spi_clrbits(struct orion_spi *orion_spi, u32 reg, u32 mask)
 	void __iomem *reg_addr = spi_reg(orion_spi, reg);
 	u32 val;
 
-	val = readl(reg_addr);
+	val = pete_readl("drivers/spi/spi-orion.c:131", reg_addr);
 	val &= ~mask;
-	writel(val, reg_addr);
+	pete_writel("drivers/spi/spi-orion.c:133", val, reg_addr);
 }
 
 static int orion_spi_baudrate_set(struct spi_device *spi, unsigned int speed)
@@ -223,9 +223,9 @@ static int orion_spi_baudrate_set(struct spi_device *spi, unsigned int speed)
 		prescale = 0x10 + rate/2;
 	}
 
-	reg = readl(spi_reg(orion_spi, ORION_SPI_IF_CONFIG_REG));
+	reg = pete_readl("drivers/spi/spi-orion.c:226", spi_reg(orion_spi, ORION_SPI_IF_CONFIG_REG));
 	reg = ((reg & ~devdata->prescale_mask) | prescale);
-	writel(reg, spi_reg(orion_spi, ORION_SPI_IF_CONFIG_REG));
+	pete_writel("drivers/spi/spi-orion.c:228", reg, spi_reg(orion_spi, ORION_SPI_IF_CONFIG_REG));
 
 	return 0;
 }
@@ -238,7 +238,7 @@ orion_spi_mode_set(struct spi_device *spi)
 
 	orion_spi = spi_master_get_devdata(spi->master);
 
-	reg = readl(spi_reg(orion_spi, ORION_SPI_IF_CONFIG_REG));
+	reg = pete_readl("drivers/spi/spi-orion.c:241", spi_reg(orion_spi, ORION_SPI_IF_CONFIG_REG));
 	reg &= ~ORION_SPI_MODE_MASK;
 	if (spi->mode & SPI_CPOL)
 		reg |= ORION_SPI_MODE_CPOL;
@@ -249,7 +249,7 @@ orion_spi_mode_set(struct spi_device *spi)
 	else
 		reg &= ~(ORION_SPI_IF_RXLSBF | ORION_SPI_IF_TXLSBF);
 
-	writel(reg, spi_reg(orion_spi, ORION_SPI_IF_CONFIG_REG));
+	pete_writel("drivers/spi/spi-orion.c:252", reg, spi_reg(orion_spi, ORION_SPI_IF_CONFIG_REG));
 }
 
 static void
@@ -274,7 +274,7 @@ orion_spi_50mhz_ac_timing_erratum(struct spi_device *spi, unsigned int speed)
 	 * 2. Set TMISO_SAMPLE value to 0x2 in "SPI Timing Parameters 1
 	 * Register" before setting the interface.
 	 */
-	reg = readl(spi_reg(orion_spi, ORION_SPI_TIMING_PARAMS_REG));
+	reg = pete_readl("drivers/spi/spi-orion.c:277", spi_reg(orion_spi, ORION_SPI_TIMING_PARAMS_REG));
 	reg &= ~ORION_SPI_TMISO_SAMPLE_MASK;
 
 	if (clk_get_rate(orion_spi->clk) == 250000000 &&
@@ -284,7 +284,7 @@ orion_spi_50mhz_ac_timing_erratum(struct spi_device *spi, unsigned int speed)
 	else
 		reg |= ORION_SPI_TMISO_SAMPLE_1; /* This is the default value */
 
-	writel(reg, spi_reg(orion_spi, ORION_SPI_TIMING_PARAMS_REG));
+	pete_writel("drivers/spi/spi-orion.c:287", reg, spi_reg(orion_spi, ORION_SPI_TIMING_PARAMS_REG));
 }
 
 /*
@@ -334,7 +334,7 @@ static void orion_spi_set_cs(struct spi_device *spi, bool enable)
 	orion_spi = spi_master_get_devdata(spi->master);
 	ctrl_reg = spi_reg(orion_spi, ORION_SPI_IF_CTRL_REG);
 
-	val = readl(ctrl_reg);
+	val = pete_readl("drivers/spi/spi-orion.c:337", ctrl_reg);
 
 	/* Clear existing chip-select and assertion state */
 	val &= ~(ORION_SPI_CS_MASK | 0x1);
@@ -362,7 +362,7 @@ static void orion_spi_set_cs(struct spi_device *spi, bool enable)
 	 * To avoid toggling unwanted chip selects update the register
 	 * with a single write.
 	 */
-	writel(val, ctrl_reg);
+	pete_writel("drivers/spi/spi-orion.c:365", val, ctrl_reg);
 }
 
 static inline int orion_spi_wait_till_ready(struct orion_spi *orion_spi)
@@ -370,7 +370,7 @@ static inline int orion_spi_wait_till_ready(struct orion_spi *orion_spi)
 	int i;
 
 	for (i = 0; i < ORION_SPI_WAIT_RDY_MAX_LOOP; i++) {
-		if (readl(spi_reg(orion_spi, ORION_SPI_INT_CAUSE_REG)))
+		if (pete_readl("drivers/spi/spi-orion.c:373", spi_reg(orion_spi, ORION_SPI_INT_CAUSE_REG)))
 			return 1;
 
 		udelay(1);
@@ -399,12 +399,12 @@ orion_spi_write_read_8bit(struct spi_device *spi,
 	int_reg = spi_reg(orion_spi, ORION_SPI_INT_CAUSE_REG);
 
 	/* clear the interrupt cause register */
-	writel(0x0, int_reg);
+	pete_writel("drivers/spi/spi-orion.c:402", 0x0, int_reg);
 
 	if (tx_buf && *tx_buf)
-		writel(*(*tx_buf)++, tx_reg);
+		pete_writel("drivers/spi/spi-orion.c:405", *(*tx_buf)++, tx_reg);
 	else
-		writel(0, tx_reg);
+		pete_writel("drivers/spi/spi-orion.c:407", 0, tx_reg);
 
 	if (orion_spi_wait_till_ready(orion_spi) < 0) {
 		if (cs_single_byte) {
@@ -417,7 +417,7 @@ orion_spi_write_read_8bit(struct spi_device *spi,
 	}
 
 	if (rx_buf && *rx_buf)
-		*(*rx_buf)++ = readl(rx_reg);
+		*(*rx_buf)++ = pete_readl("drivers/spi/spi-orion.c:420", rx_reg);
 
 	if (cs_single_byte) {
 		orion_spi_set_cs(spi, 1);
@@ -446,12 +446,12 @@ orion_spi_write_read_16bit(struct spi_device *spi,
 	int_reg = spi_reg(orion_spi, ORION_SPI_INT_CAUSE_REG);
 
 	/* clear the interrupt cause register */
-	writel(0x0, int_reg);
+	pete_writel("drivers/spi/spi-orion.c:449", 0x0, int_reg);
 
 	if (tx_buf && *tx_buf)
-		writel(__cpu_to_le16(get_unaligned((*tx_buf)++)), tx_reg);
+		pete_writel("drivers/spi/spi-orion.c:452", __cpu_to_le16(get_unaligned((*tx_buf)++)), tx_reg);
 	else
-		writel(0, tx_reg);
+		pete_writel("drivers/spi/spi-orion.c:454", 0, tx_reg);
 
 	if (orion_spi_wait_till_ready(orion_spi) < 0) {
 		dev_err(&spi->dev, "TXS timed out\n");
@@ -459,7 +459,7 @@ orion_spi_write_read_16bit(struct spi_device *spi,
 	}
 
 	if (rx_buf && *rx_buf)
-		put_unaligned(__le16_to_cpu(readl(rx_reg)), (*rx_buf)++);
+		put_unaligned(__le16_to_cpu(pete_readl("drivers/spi/spi-orion.c:462", rx_reg)), (*rx_buf)++);
 
 	return 1;
 }
@@ -570,7 +570,7 @@ static int orion_spi_reset(struct orion_spi *orion_spi)
 	orion_spi_clrbits(orion_spi, ORION_SPI_IF_CTRL_REG, 0x1);
 
 	/* Don't deassert CS between the direct mapped SPI transfers */
-	writel(0, spi_reg(orion_spi, SPI_DIRECT_WRITE_CONFIG_REG));
+	pete_writel("drivers/spi/spi-orion.c:573", 0, spi_reg(orion_spi, SPI_DIRECT_WRITE_CONFIG_REG));
 
 	return 0;
 }

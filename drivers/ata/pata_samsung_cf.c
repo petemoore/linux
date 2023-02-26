@@ -75,15 +75,15 @@ struct s3c_ide_info {
 
 static void pata_s3c_set_endian(void __iomem *s3c_ide_regbase, u8 mode)
 {
-	u32 reg = readl(s3c_ide_regbase + S3C_ATA_CFG);
+	u32 reg = pete_readl("drivers/ata/pata_samsung_cf.c:78", s3c_ide_regbase + S3C_ATA_CFG);
 	reg = mode ? (reg & ~S3C_ATA_CFG_SWAP) : (reg | S3C_ATA_CFG_SWAP);
-	writel(reg, s3c_ide_regbase + S3C_ATA_CFG);
+	pete_writel("drivers/ata/pata_samsung_cf.c:80", reg, s3c_ide_regbase + S3C_ATA_CFG);
 }
 
 static void pata_s3c_cfg_mode(void __iomem *s3c_ide_sfrbase)
 {
 	/* Select true-ide as the internal operating mode */
-	writel(readl(s3c_ide_sfrbase + S3C_CFATA_MUX) | S3C_CFATA_MUX_TRUEIDE,
+	pete_writel("drivers/ata/pata_samsung_cf.c:86", pete_readl("drivers/ata/pata_samsung_cf.c:86", s3c_ide_sfrbase + S3C_CFATA_MUX) | S3C_CFATA_MUX_TRUEIDE,
 		s3c_ide_sfrbase + S3C_CFATA_MUX);
 }
 
@@ -105,7 +105,7 @@ static void pata_s3c_set_piomode(struct ata_port *ap, struct ata_device *adev)
 	struct s3c_ide_info *info = ap->host->private_data;
 	struct ata_timing timing;
 	int cycle_time;
-	ulong ata_cfg = readl(info->ide_addr + S3C_ATA_CFG);
+	ulong ata_cfg = pete_readl("drivers/ata/pata_samsung_cf.c:108", info->ide_addr + S3C_ATA_CFG);
 	ulong piotime;
 
 	/* Enables IORDY if mode requires it */
@@ -121,8 +121,8 @@ static void pata_s3c_set_piomode(struct ata_port *ap, struct ata_device *adev)
 
 	piotime = pata_s3c_setup_timing(info, &timing);
 
-	writel(ata_cfg, info->ide_addr + S3C_ATA_CFG);
-	writel(piotime, info->ide_addr + S3C_ATA_PIO_TIME);
+	pete_writel("drivers/ata/pata_samsung_cf.c:124", ata_cfg, info->ide_addr + S3C_ATA_CFG);
+	pete_writel("drivers/ata/pata_samsung_cf.c:125", piotime, info->ide_addr + S3C_ATA_PIO_TIME);
 }
 
 /*
@@ -137,7 +137,7 @@ static int wait_for_host_ready(struct s3c_ide_info *info)
 	/* wait for maximum of 20 msec */
 	timeout = jiffies + msecs_to_jiffies(20);
 	while (time_before(jiffies, timeout)) {
-		if ((readl(fifo_reg) >> 28) == 0)
+		if ((pete_readl("drivers/ata/pata_samsung_cf.c:140", fifo_reg) >> 28) == 0)
 			return 0;
 	}
 	return -EBUSY;
@@ -151,7 +151,7 @@ static void ata_outb(struct ata_host *host, u8 addr, void __iomem *reg)
 	struct s3c_ide_info *info = host->private_data;
 
 	wait_for_host_ready(info);
-	writeb(addr, reg);
+	pete_writeb("drivers/ata/pata_samsung_cf.c:154", addr, reg);
 }
 
 /*
@@ -163,9 +163,9 @@ static u8 ata_inb(struct ata_host *host, void __iomem *reg)
 	u8 temp;
 
 	wait_for_host_ready(info);
-	(void) readb(reg);
+	(void) pete_readb("drivers/ata/pata_samsung_cf.c:166", reg);
 	wait_for_host_ready(info);
-	temp = readb(info->ide_addr + S3C_ATA_PIO_RDATA);
+	temp = pete_readb("drivers/ata/pata_samsung_cf.c:168", info->ide_addr + S3C_ATA_PIO_RDATA);
 	return temp;
 }
 
@@ -274,15 +274,15 @@ static unsigned int pata_s3c_data_xfer(struct ata_queued_cmd *qc,
 	if (rw == READ)
 		for (i = 0; i < words; i++, data_ptr++) {
 			wait_for_host_ready(info);
-			(void) readw(data_addr);
+			(void) pete_readw("drivers/ata/pata_samsung_cf.c:277", data_addr);
 			wait_for_host_ready(info);
-			*data_ptr = readw(info->ide_addr
+			*data_ptr = pete_readw("drivers/ata/pata_samsung_cf.c:279", info->ide_addr
 					+ S3C_ATA_PIO_RDATA);
 		}
 	else
 		for (i = 0; i < words; i++, data_ptr++) {
 			wait_for_host_ready(info);
-			writew(*data_ptr, data_addr);
+			pete_writew("drivers/ata/pata_samsung_cf.c:285", *data_ptr, data_addr);
 		}
 
 	if (buflen & 0x01)
@@ -440,9 +440,9 @@ static struct ata_port_operations pata_s5p_port_ops = {
 
 static void pata_s3c_enable(void __iomem *s3c_ide_regbase, bool state)
 {
-	u32 temp = readl(s3c_ide_regbase + S3C_ATA_CTRL);
+	u32 temp = pete_readl("drivers/ata/pata_samsung_cf.c:443", s3c_ide_regbase + S3C_ATA_CTRL);
 	temp = state ? (temp | 1) : (temp & ~1);
-	writel(temp, s3c_ide_regbase + S3C_ATA_CTRL);
+	pete_writel("drivers/ata/pata_samsung_cf.c:445", temp, s3c_ide_regbase + S3C_ATA_CTRL);
 }
 
 static irqreturn_t pata_s3c_irq(int irq, void *dev_instance)
@@ -451,8 +451,8 @@ static irqreturn_t pata_s3c_irq(int irq, void *dev_instance)
 	struct s3c_ide_info *info = host->private_data;
 	u32 reg;
 
-	reg = readl(info->ide_addr + S3C_ATA_IRQ);
-	writel(reg, info->ide_addr + S3C_ATA_IRQ);
+	reg = pete_readl("drivers/ata/pata_samsung_cf.c:454", info->ide_addr + S3C_ATA_IRQ);
+	pete_writel("drivers/ata/pata_samsung_cf.c:455", reg, info->ide_addr + S3C_ATA_IRQ);
 
 	return ata_sff_interrupt(irq, dev_instance);
 }
@@ -469,8 +469,8 @@ static void pata_s3c_hwinit(struct s3c_ide_info *info,
 		msleep(100);
 
 		/* Remove IRQ Status */
-		writel(0x1f, info->ide_addr + S3C_ATA_IRQ);
-		writel(0x1b, info->ide_addr + S3C_ATA_IRQ_MSK);
+		pete_writel("drivers/ata/pata_samsung_cf.c:472", 0x1f, info->ide_addr + S3C_ATA_IRQ);
+		pete_writel("drivers/ata/pata_samsung_cf.c:473", 0x1b, info->ide_addr + S3C_ATA_IRQ_MSK);
 		break;
 
 	case TYPE_S5PV210:
@@ -480,8 +480,8 @@ static void pata_s3c_hwinit(struct s3c_ide_info *info,
 		msleep(100);
 
 		/* Remove IRQ Status */
-		writel(0x3f, info->ide_addr + S3C_ATA_IRQ);
-		writel(0x3f, info->ide_addr + S3C_ATA_IRQ_MSK);
+		pete_writel("drivers/ata/pata_samsung_cf.c:483", 0x3f, info->ide_addr + S3C_ATA_IRQ);
+		pete_writel("drivers/ata/pata_samsung_cf.c:484", 0x3f, info->ide_addr + S3C_ATA_IRQ_MSK);
 		break;
 
 	default:

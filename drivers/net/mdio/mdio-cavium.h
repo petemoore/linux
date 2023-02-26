@@ -110,8 +110,8 @@ static inline u64 oct_mdio_readq(void __iomem *addr)
 #else
 #include <linux/io-64-nonatomic-lo-hi.h>
 
-#define oct_mdio_writeq(val, addr)	writeq(val, addr)
-#define oct_mdio_readq(addr)		readq(addr)
+#define oct_mdio_writeq(val, addr)	pete_writeq("drivers/net/mdio/mdio-cavium.h:113", val, addr)
+#define oct_mdio_readq(addr)		pete_readq("drivers/net/mdio/mdio-cavium.h:114", addr)
 #endif
 
 int cavium_mdiobus_read(struct mii_bus *bus, int phy_id, int regnum);

@@ -263,7 +263,7 @@ struct g2d_data {
 
 static inline void g2d_hw_reset(struct g2d_data *g2d)
 {
-	writel(G2D_R | G2D_SFRCLEAR, g2d->regs + G2D_SOFT_RESET);
+	pete_writel("drivers/gpu/drm/exynos/exynos_drm_g2d.c:266", G2D_R | G2D_SFRCLEAR, g2d->regs + G2D_SOFT_RESET);
 	clear_bit(G2D_BIT_ENGINE_BUSY, &g2d->flags);
 }
 

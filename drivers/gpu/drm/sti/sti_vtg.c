@@ -153,7 +153,7 @@ struct sti_vtg *of_vtg_find(struct device_node *np)
 
 static void vtg_reset(struct sti_vtg *vtg)
 {
-	writel(1, vtg->regs + VTG_DRST_AUTOC);
+	pete_writel("drivers/gpu/drm/sti/sti_vtg.c:156", 1, vtg->regs + VTG_DRST_AUTOC);
 }
 
 static void vtg_set_output_window(void __iomem *regs,
@@ -176,10 +176,10 @@ static void vtg_set_output_window(void __iomem *regs,
 	video_bottom_field_start = video_top_field_start;
 	video_bottom_field_stop = video_top_field_stop;
 
-	writel(video_top_field_start, regs + VTG_VID_TFO);
-	writel(video_top_field_stop, regs + VTG_VID_TFS);
-	writel(video_bottom_field_start, regs + VTG_VID_BFO);
-	writel(video_bottom_field_stop, regs + VTG_VID_BFS);
+	pete_writel("drivers/gpu/drm/sti/sti_vtg.c:179", video_top_field_start, regs + VTG_VID_TFO);
+	pete_writel("drivers/gpu/drm/sti/sti_vtg.c:180", video_top_field_stop, regs + VTG_VID_TFS);
+	pete_writel("drivers/gpu/drm/sti/sti_vtg.c:181", video_bottom_field_start, regs + VTG_VID_BFO);
+	pete_writel("drivers/gpu/drm/sti/sti_vtg.c:182", video_bottom_field_stop, regs + VTG_VID_BFS);
 }
 
 static void vtg_set_hsync_vsync_pos(struct sti_vtg_sync_params *sync,
@@ -243,10 +243,10 @@ static void vtg_set_mode(struct sti_vtg *vtg,
 	unsigned int i;
 
 	/* Set the number of clock cycles per line */
-	writel(mode->htotal, vtg->regs + VTG_CLKLN);
+	pete_writel("drivers/gpu/drm/sti/sti_vtg.c:246", mode->htotal, vtg->regs + VTG_CLKLN);
 
 	/* Set Half Line Per Field (only progressive supported for now) */
-	writel(mode->vtotal * 2, vtg->regs + VTG_HLFLN);
+	pete_writel("drivers/gpu/drm/sti/sti_vtg.c:249", mode->vtotal * 2, vtg->regs + VTG_HLFLN);
 
 	/* Program output window */
 	vtg_set_output_window(vtg->regs, mode);
@@ -265,28 +265,28 @@ static void vtg_set_mode(struct sti_vtg *vtg,
 
 	/* Progam the syncs outputs */
 	for (i = 0; i < VTG_MAX_SYNC_OUTPUT ; i++) {
-		writel(sync[i].hsync,
+		pete_writel("drivers/gpu/drm/sti/sti_vtg.c:268", sync[i].hsync,
 		       vtg->regs + vtg_regs_offs[i].h_hd);
-		writel(sync[i].vsync_line_top,
+		pete_writel("drivers/gpu/drm/sti/sti_vtg.c:270", sync[i].vsync_line_top,
 		       vtg->regs + vtg_regs_offs[i].top_v_vd);
-		writel(sync[i].vsync_line_bot,
+		pete_writel("drivers/gpu/drm/sti/sti_vtg.c:272", sync[i].vsync_line_bot,
 		       vtg->regs + vtg_regs_offs[i].bot_v_vd);
-		writel(sync[i].vsync_off_top,
+		pete_writel("drivers/gpu/drm/sti/sti_vtg.c:274", sync[i].vsync_off_top,
 		       vtg->regs + vtg_regs_offs[i].top_v_hd);
-		writel(sync[i].vsync_off_bot,
+		pete_writel("drivers/gpu/drm/sti/sti_vtg.c:276", sync[i].vsync_off_bot,
 		       vtg->regs + vtg_regs_offs[i].bot_v_hd);
 	}
 
 	/* mode */
-	writel(type, vtg->regs + VTG_MODE);
+	pete_writel("drivers/gpu/drm/sti/sti_vtg.c:281", type, vtg->regs + VTG_MODE);
 }
 
 static void vtg_enable_irq(struct sti_vtg *vtg)
 {
 	/* clear interrupt status and mask */
-	writel(0xFFFF, vtg->regs + VTG_HOST_ITS_BCLR);
-	writel(0xFFFF, vtg->regs + VTG_HOST_ITM_BCLR);
-	writel(VTG_IRQ_MASK, vtg->regs + VTG_HOST_ITM_BSET);
+	pete_writel("drivers/gpu/drm/sti/sti_vtg.c:287", 0xFFFF, vtg->regs + VTG_HOST_ITS_BCLR);
+	pete_writel("drivers/gpu/drm/sti/sti_vtg.c:288", 0xFFFF, vtg->regs + VTG_HOST_ITM_BCLR);
+	pete_writel("drivers/gpu/drm/sti/sti_vtg.c:289", VTG_IRQ_MASK, vtg->regs + VTG_HOST_ITM_BSET);
 }
 
 void sti_vtg_set_config(struct sti_vtg *vtg,
@@ -366,12 +366,12 @@ static irqreturn_t vtg_irq(int irq, void *arg)
 {
 	struct sti_vtg *vtg = arg;
 
-	vtg->irq_status = readl(vtg->regs + VTG_HOST_ITS);
+	vtg->irq_status = pete_readl("drivers/gpu/drm/sti/sti_vtg.c:369", vtg->regs + VTG_HOST_ITS);
 
-	writel(vtg->irq_status, vtg->regs + VTG_HOST_ITS_BCLR);
+	pete_writel("drivers/gpu/drm/sti/sti_vtg.c:371", vtg->irq_status, vtg->regs + VTG_HOST_ITS_BCLR);
 
 	/* force sync bus write */
-	readl(vtg->regs + VTG_HOST_ITS);
+	pete_readl("drivers/gpu/drm/sti/sti_vtg.c:374", vtg->regs + VTG_HOST_ITS);
 
 	return IRQ_WAKE_THREAD;
 }

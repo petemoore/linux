@@ -47,7 +47,7 @@ static unsigned long clk_factors_recalc_rate(struct clk_hw *hw,
 	const struct clk_factors_config *config = factors->config;
 
 	/* Fetch the register value */
-	reg = readl(factors->reg);
+	reg = pete_readl("drivers/clk/sunxi/clk-factors.c:50", factors->reg);
 
 	/* Get each individual factor if applicable */
 	if (config->nwidth != SUNXI_FACTORS_NOT_APPLICABLE)
@@ -147,7 +147,7 @@ static int clk_factors_set_rate(struct clk_hw *hw, unsigned long rate,
 		spin_lock_irqsave(factors->lock, flags);
 
 	/* Fetch the register value */
-	reg = readl(factors->reg);
+	reg = pete_readl("drivers/clk/sunxi/clk-factors.c:150", factors->reg);
 
 	/* Set up the new factors - macros do not do anything if width is 0 */
 	reg = FACTOR_SET(config->nshift, config->nwidth, reg, req.n);
@@ -156,7 +156,7 @@ static int clk_factors_set_rate(struct clk_hw *hw, unsigned long rate,
 	reg = FACTOR_SET(config->pshift, config->pwidth, reg, req.p);
 
 	/* Apply them now */
-	writel(reg, factors->reg);
+	pete_writel("drivers/clk/sunxi/clk-factors.c:159", reg, factors->reg);
 
 	/* delay 500us so pll stabilizes */
 	__delay((rate >> 20) * 500 / 2);

@@ -183,24 +183,24 @@ static void nlm_xlpii_usb_hw_reset(int node, int port)
 	if (!corebase)
 		return;
 
-	writel(0x240002, corebase + 0xc2c0);
+	pete_writel("arch/mips/netlogic/xlp/usb-init-xlp2.c:186", 0x240002, corebase + 0xc2c0);
 	/* GCTL 0xc110 */
-	val = readl(corebase + 0xc110);
+	val = pete_readl("arch/mips/netlogic/xlp/usb-init-xlp2.c:188", corebase + 0xc110);
 	val &= ~(0x3 << 12);
 	val |= (1 << 12);
-	writel(val, corebase + 0xc110);
+	pete_writel("arch/mips/netlogic/xlp/usb-init-xlp2.c:191", val, corebase + 0xc110);
 	udelay(100);
 
 	/* PHYCFG 0xc200 */
-	val = readl(corebase + 0xc200);
+	val = pete_readl("arch/mips/netlogic/xlp/usb-init-xlp2.c:195", corebase + 0xc200);
 	val &= ~(1 << 6);
-	writel(val, corebase + 0xc200);
+	pete_writel("arch/mips/netlogic/xlp/usb-init-xlp2.c:197", val, corebase + 0xc200);
 	udelay(100);
 
 	/* PIPECTL 0xc2c0 */
-	val = readl(corebase + 0xc2c0);
+	val = pete_readl("arch/mips/netlogic/xlp/usb-init-xlp2.c:201", corebase + 0xc2c0);
 	val &= ~(1 << 17);
-	writel(val, corebase + 0xc2c0);
+	pete_writel("arch/mips/netlogic/xlp/usb-init-xlp2.c:203", val, corebase + 0xc2c0);
 
 	iounmap(corebase);
 }

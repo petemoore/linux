@@ -222,12 +222,12 @@ const static char *monitor_name[] = {
 
 static inline void write_reg(int monitor, int reg, u32 value)
 {
-	writel(value, state->monitor[monitor].base_address + reg);
+	pete_writel("drivers/perf/raspberrypi_axi_monitor.c:225", value, state->monitor[monitor].base_address + reg);
 }
 
 static inline u32 read_reg(int monitor, u32 reg)
 {
-	return readl(state->monitor[monitor].base_address + reg);
+	return pete_readl("drivers/perf/raspberrypi_axi_monitor.c:230", state->monitor[monitor].base_address + reg);
 }
 
 static void read_bus_watcher(int monitor, int watcher, u32 *results)
@@ -258,7 +258,7 @@ static void read_bus_watcher(int monitor, int watcher, u32 *results)
 		void __iomem *addr = state->monitor[monitor].base_address
 				+ watcher + BW_ATRANS_OFFSET;
 		for (i = 0; i < NUM_BUS_WATCHER_RESULTS; i++, addr += 4)
-			*results++ = readl(addr);
+			*results++ = pete_readl("drivers/perf/raspberrypi_axi_monitor.c:261", addr);
 	}
 }
 

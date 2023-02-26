@@ -35,7 +35,7 @@ unsigned int i8259_irq(void)
 
 	/* Either int-ack or poll for the IRQ */
 	if (pci_intack)
-		irq = readb(pci_intack);
+		irq = pete_readb("arch/powerpc/sysdev/i8259.c:38", pci_intack);
 	else {
 		raw_spin_lock(&i8259_lock);
 		lock = 1;

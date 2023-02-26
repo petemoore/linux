@@ -72,7 +72,7 @@ static void __init tx4927_pci_setup(void)
 			TXX9_PCI_OPT_CLK_66; /* already configured */
 
 	/* Reset PCI Bus */
-	writeb(1, rbtx4927_pcireset_addr);
+	pete_writeb("arch/mips/txx9/rbtx4927/setup.c:75", 1, rbtx4927_pcireset_addr);
 	/* Reset PCIC */
 	txx9_set64(&tx4927_ccfgptr->clkctr, TX4927_CLKCTR_PCIRST);
 	if ((txx9_pci_option & TXX9_PCI_OPT_CLK_MASK) ==
@@ -81,7 +81,7 @@ static void __init tx4927_pci_setup(void)
 	mdelay(10);
 	/* clear PCIC reset */
 	txx9_clear64(&tx4927_ccfgptr->clkctr, TX4927_CLKCTR_PCIRST);
-	writeb(0, rbtx4927_pcireset_addr);
+	pete_writeb("arch/mips/txx9/rbtx4927/setup.c:84", 0, rbtx4927_pcireset_addr);
 	iob();
 
 	tx4927_report_pciclk();
@@ -90,14 +90,14 @@ static void __init tx4927_pci_setup(void)
 	    TXX9_PCI_OPT_CLK_AUTO &&
 	    txx9_pci66_check(c, 0, 0)) {
 		/* Reset PCI Bus */
-		writeb(1, rbtx4927_pcireset_addr);
+		pete_writeb("arch/mips/txx9/rbtx4927/setup.c:93", 1, rbtx4927_pcireset_addr);
 		/* Reset PCIC */
 		txx9_set64(&tx4927_ccfgptr->clkctr, TX4927_CLKCTR_PCIRST);
 		tx4927_pciclk66_setup();
 		mdelay(10);
 		/* clear PCIC reset */
 		txx9_clear64(&tx4927_ccfgptr->clkctr, TX4927_CLKCTR_PCIRST);
-		writeb(0, rbtx4927_pcireset_addr);
+		pete_writeb("arch/mips/txx9/rbtx4927/setup.c:100", 0, rbtx4927_pcireset_addr);
 		iob();
 		/* Reinitialize PCIC */
 		tx4927_report_pciclk();
@@ -119,7 +119,7 @@ static void __init tx4937_pci_setup(void)
 			TXX9_PCI_OPT_CLK_66; /* already configured */
 
 	/* Reset PCI Bus */
-	writeb(1, rbtx4927_pcireset_addr);
+	pete_writeb("arch/mips/txx9/rbtx4927/setup.c:122", 1, rbtx4927_pcireset_addr);
 	/* Reset PCIC */
 	txx9_set64(&tx4938_ccfgptr->clkctr, TX4938_CLKCTR_PCIRST);
 	if ((txx9_pci_option & TXX9_PCI_OPT_CLK_MASK) ==
@@ -128,7 +128,7 @@ static void __init tx4937_pci_setup(void)
 	mdelay(10);
 	/* clear PCIC reset */
 	txx9_clear64(&tx4938_ccfgptr->clkctr, TX4938_CLKCTR_PCIRST);
-	writeb(0, rbtx4927_pcireset_addr);
+	pete_writeb("arch/mips/txx9/rbtx4927/setup.c:131", 0, rbtx4927_pcireset_addr);
 	iob();
 
 	tx4938_report_pciclk();
@@ -137,14 +137,14 @@ static void __init tx4937_pci_setup(void)
 	    TXX9_PCI_OPT_CLK_AUTO &&
 	    txx9_pci66_check(c, 0, 0)) {
 		/* Reset PCI Bus */
-		writeb(1, rbtx4927_pcireset_addr);
+		pete_writeb("arch/mips/txx9/rbtx4927/setup.c:140", 1, rbtx4927_pcireset_addr);
 		/* Reset PCIC */
 		txx9_set64(&tx4938_ccfgptr->clkctr, TX4938_CLKCTR_PCIRST);
 		tx4938_pciclk66_setup();
 		mdelay(10);
 		/* clear PCIC reset */
 		txx9_clear64(&tx4938_ccfgptr->clkctr, TX4938_CLKCTR_PCIRST);
-		writeb(0, rbtx4927_pcireset_addr);
+		pete_writeb("arch/mips/txx9/rbtx4927/setup.c:147", 0, rbtx4927_pcireset_addr);
 		iob();
 		/* Reinitialize PCIC */
 		tx4938_report_pciclk();
@@ -187,14 +187,14 @@ static void __init rbtx4937_arch_init(void)
 static void toshiba_rbtx4927_restart(char *command)
 {
 	/* enable the s/w reset register */
-	writeb(1, rbtx4927_softresetlock_addr);
+	pete_writeb("arch/mips/txx9/rbtx4927/setup.c:190", 1, rbtx4927_softresetlock_addr);
 
 	/* wait for enable to be seen */
-	while (!(readb(rbtx4927_softresetlock_addr) & 1))
+	while (!(pete_readb("arch/mips/txx9/rbtx4927/setup.c:193", rbtx4927_softresetlock_addr) & 1))
 		;
 
 	/* do a s/w reset */
-	writeb(1, rbtx4927_softreset_addr);
+	pete_writeb("arch/mips/txx9/rbtx4927/setup.c:197", 1, rbtx4927_softreset_addr);
 
 	/* fallback */
 	(*_machine_halt)();

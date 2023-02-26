@@ -42,9 +42,9 @@ int loongson2_cpu_set_rate(unsigned long rate_khz)
 	if (rate_khz != pos->frequency)
 		return -ENOTSUPP;
 
-	regval = readl(LOONGSON_CHIPCFG);
+	regval = pete_readl("arch/mips/loongson2ef/lemote-2f/clock.c:45", LOONGSON_CHIPCFG);
 	regval = (regval & ~0x7) | (pos->driver_data - 1);
-	writel(regval, LOONGSON_CHIPCFG);
+	pete_writel("arch/mips/loongson2ef/lemote-2f/clock.c:47", regval, LOONGSON_CHIPCFG);
 
 	return 0;
 }

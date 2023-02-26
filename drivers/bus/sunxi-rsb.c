@@ -274,7 +274,7 @@ static int _sunxi_rsb_run_xfer(struct sunxi_rsb *rsb)
 	u32 int_mask, status;
 	bool timeout;
 
-	if (readl(rsb->regs + RSB_CTRL) & RSB_CTRL_START_TRANS) {
+	if (pete_readl("drivers/bus/sunxi-rsb.c:277", rsb->regs + RSB_CTRL) & RSB_CTRL_START_TRANS) {
 		dev_dbg(rsb->dev, "RSB transfer still in progress\n");
 		return -EBUSY;
 	}
@@ -282,15 +282,15 @@ static int _sunxi_rsb_run_xfer(struct sunxi_rsb *rsb)
 	reinit_completion(&rsb->complete);
 
 	int_mask = RSB_INTS_LOAD_BSY | RSB_INTS_TRANS_ERR | RSB_INTS_TRANS_OVER;
-	writel(int_mask, rsb->regs + RSB_INTE);
-	writel(RSB_CTRL_START_TRANS | RSB_CTRL_GLOBAL_INT_ENB,
+	pete_writel("drivers/bus/sunxi-rsb.c:285", int_mask, rsb->regs + RSB_INTE);
+	pete_writel("drivers/bus/sunxi-rsb.c:286", RSB_CTRL_START_TRANS | RSB_CTRL_GLOBAL_INT_ENB,
 	       rsb->regs + RSB_CTRL);
 
 	if (irqs_disabled()) {
 		timeout = readl_poll_timeout_atomic(rsb->regs + RSB_INTS,
 						    status, (status & int_mask),
 						    10, 100000);
-		writel(status, rsb->regs + RSB_INTS);
+		pete_writel("drivers/bus/sunxi-rsb.c:293", status, rsb->regs + RSB_INTS);
 	} else {
 		timeout = !wait_for_completion_io_timeout(&rsb->complete,
 							  msecs_to_jiffies(100));
@@ -301,10 +301,10 @@ static int _sunxi_rsb_run_xfer(struct sunxi_rsb *rsb)
 		dev_dbg(rsb->dev, "RSB timeout\n");
 
 		/* abort the transfer */
-		writel(RSB_CTRL_ABORT_TRANS, rsb->regs + RSB_CTRL);
+		pete_writel("drivers/bus/sunxi-rsb.c:304", RSB_CTRL_ABORT_TRANS, rsb->regs + RSB_CTRL);
 
 		/* clear any interrupt flags */
-		writel(readl(rsb->regs + RSB_INTS), rsb->regs + RSB_INTS);
+		pete_writel("drivers/bus/sunxi-rsb.c:307", pete_readl("drivers/bus/sunxi-rsb.c:307", rsb->regs + RSB_INTS), rsb->regs + RSB_INTS);
 
 		return -ETIMEDOUT;
 	}
@@ -359,15 +359,15 @@ static int sunxi_rsb_read(struct sunxi_rsb *rsb, u8 rtaddr, u8 addr,
 
 	mutex_lock(&rsb->lock);
 
-	writel(addr, rsb->regs + RSB_ADDR);
-	writel(RSB_DAR_RTA(rtaddr), rsb->regs + RSB_DAR);
-	writel(cmd, rsb->regs + RSB_CMD);
+	pete_writel("drivers/bus/sunxi-rsb.c:362", addr, rsb->regs + RSB_ADDR);
+	pete_writel("drivers/bus/sunxi-rsb.c:363", RSB_DAR_RTA(rtaddr), rsb->regs + RSB_DAR);
+	pete_writel("drivers/bus/sunxi-rsb.c:364", cmd, rsb->regs + RSB_CMD);
 
 	ret = _sunxi_rsb_run_xfer(rsb);
 	if (ret)
 		goto unlock;
 
-	*buf = readl(rsb->regs + RSB_DATA) & GENMASK(len * 8 - 1, 0);
+	*buf = pete_readl("drivers/bus/sunxi-rsb.c:370", rsb->regs + RSB_DATA) & GENMASK(len * 8 - 1, 0);
 
 unlock:
 	mutex_unlock(&rsb->lock);
@@ -408,10 +408,10 @@ static int sunxi_rsb_write(struct sunxi_rsb *rsb, u8 rtaddr, u8 addr,
 
 	mutex_lock(&rsb->lock);
 
-	writel(addr, rsb->regs + RSB_ADDR);
-	writel(RSB_DAR_RTA(rtaddr), rsb->regs + RSB_DAR);
-	writel(*buf, rsb->regs + RSB_DATA);
-	writel(cmd, rsb->regs + RSB_CMD);
+	pete_writel("drivers/bus/sunxi-rsb.c:411", addr, rsb->regs + RSB_ADDR);
+	pete_writel("drivers/bus/sunxi-rsb.c:412", RSB_DAR_RTA(rtaddr), rsb->regs + RSB_DAR);
+	pete_writel("drivers/bus/sunxi-rsb.c:413", *buf, rsb->regs + RSB_DATA);
+	pete_writel("drivers/bus/sunxi-rsb.c:414", cmd, rsb->regs + RSB_CMD);
 	ret = _sunxi_rsb_run_xfer(rsb);
 
 	mutex_unlock(&rsb->lock);
@@ -509,13 +509,13 @@ static irqreturn_t sunxi_rsb_irq(int irq, void *dev_id)
 	struct sunxi_rsb *rsb = dev_id;
 	u32 status;
 
-	status = readl(rsb->regs + RSB_INTS);
+	status = pete_readl("drivers/bus/sunxi-rsb.c:512", rsb->regs + RSB_INTS);
 	rsb->status = status;
 
 	/* Clear interrupts */
 	status &= (RSB_INTS_LOAD_BSY | RSB_INTS_TRANS_ERR |
 		   RSB_INTS_TRANS_OVER);
-	writel(status, rsb->regs + RSB_INTS);
+	pete_writel("drivers/bus/sunxi-rsb.c:518", status, rsb->regs + RSB_INTS);
 
 	complete(&rsb->complete);
 
@@ -528,7 +528,7 @@ static int sunxi_rsb_init_device_mode(struct sunxi_rsb *rsb)
 	u32 reg;
 
 	/* send init sequence */
-	writel(RSB_DMCR_DEVICE_START | RSB_DMCR_MODE_DATA |
+	pete_writel("drivers/bus/sunxi-rsb.c:531", RSB_DMCR_DEVICE_START | RSB_DMCR_MODE_DATA |
 	       RSB_DMCR_MODE_REG | RSB_DMCR_DEV_ADDR, rsb->regs + RSB_DMCR);
 
 	readl_poll_timeout(rsb->regs + RSB_DMCR, reg,
@@ -537,7 +537,7 @@ static int sunxi_rsb_init_device_mode(struct sunxi_rsb *rsb)
 		ret = -ETIMEDOUT;
 
 	/* clear interrupt status bits */
-	writel(readl(rsb->regs + RSB_INTS), rsb->regs + RSB_INTS);
+	pete_writel("drivers/bus/sunxi-rsb.c:540", pete_readl("drivers/bus/sunxi-rsb.c:540", rsb->regs + RSB_INTS), rsb->regs + RSB_INTS);
 
 	return ret;
 }
@@ -612,8 +612,8 @@ static int of_rsb_register_devices(struct sunxi_rsb *rsb)
 		 */
 
 		/* setup command parameters */
-		writel(RSB_CMD_STRA, rsb->regs + RSB_CMD);
-		writel(RSB_DAR_RTA(rtaddr) | RSB_DAR_DA(hwaddr),
+		pete_writel("drivers/bus/sunxi-rsb.c:615", RSB_CMD_STRA, rsb->regs + RSB_CMD);
+		pete_writel("drivers/bus/sunxi-rsb.c:616", RSB_DAR_RTA(rtaddr) | RSB_DAR_DA(hwaddr),
 		       rsb->regs + RSB_DAR);
 
 		/* send command */
@@ -666,7 +666,7 @@ static int sunxi_rsb_hw_init(struct sunxi_rsb *rsb)
 	}
 
 	/* reset the controller */
-	writel(RSB_CTRL_SOFT_RST, rsb->regs + RSB_CTRL);
+	pete_writel("drivers/bus/sunxi-rsb.c:669", RSB_CTRL_SOFT_RST, rsb->regs + RSB_CTRL);
 	readl_poll_timeout(rsb->regs + RSB_CTRL, reg,
 			   !(reg & RSB_CTRL_SOFT_RST), 1000, 100000);
 
@@ -689,7 +689,7 @@ static int sunxi_rsb_hw_init(struct sunxi_rsb *rsb)
 		clk_delay = 1;
 
 	dev_info(dev, "RSB running at %lu Hz\n", p_clk_freq / clk_div / 2);
-	writel(RSB_CCR_SDA_OUT_DELAY(clk_delay) | RSB_CCR_CLK_DIV(clk_div - 1),
+	pete_writel("drivers/bus/sunxi-rsb.c:692", RSB_CCR_SDA_OUT_DELAY(clk_delay) | RSB_CCR_CLK_DIV(clk_div - 1),
 	       rsb->regs + RSB_CCR);
 
 	return 0;

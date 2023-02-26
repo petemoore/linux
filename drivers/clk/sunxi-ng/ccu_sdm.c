@@ -15,10 +15,10 @@ bool ccu_sdm_helper_is_enabled(struct ccu_common *common,
 	if (!(common->features & CCU_FEATURE_SIGMA_DELTA_MOD))
 		return false;
 
-	if (sdm->enable && !(readl(common->base + common->reg) & sdm->enable))
+	if (sdm->enable && !(pete_readl("drivers/clk/sunxi-ng/ccu_sdm.c:18", common->base + common->reg) & sdm->enable))
 		return false;
 
-	return !!(readl(common->base + sdm->tuning_reg) & sdm->tuning_enable);
+	return !!(pete_readl("drivers/clk/sunxi-ng/ccu_sdm.c:21", common->base + sdm->tuning_reg) & sdm->tuning_enable);
 }
 
 void ccu_sdm_helper_enable(struct ccu_common *common,
@@ -35,18 +35,18 @@ void ccu_sdm_helper_enable(struct ccu_common *common,
 	/* Set the pattern */
 	for (i = 0; i < sdm->table_size; i++)
 		if (sdm->table[i].rate == rate)
-			writel(sdm->table[i].pattern,
+			pete_writel("drivers/clk/sunxi-ng/ccu_sdm.c:38", sdm->table[i].pattern,
 			       common->base + sdm->tuning_reg);
 
 	/* Make sure SDM is enabled */
 	spin_lock_irqsave(common->lock, flags);
-	reg = readl(common->base + sdm->tuning_reg);
-	writel(reg | sdm->tuning_enable, common->base + sdm->tuning_reg);
+	reg = pete_readl("drivers/clk/sunxi-ng/ccu_sdm.c:43", common->base + sdm->tuning_reg);
+	pete_writel("drivers/clk/sunxi-ng/ccu_sdm.c:44", reg | sdm->tuning_enable, common->base + sdm->tuning_reg);
 	spin_unlock_irqrestore(common->lock, flags);
 
 	spin_lock_irqsave(common->lock, flags);
-	reg = readl(common->base + common->reg);
-	writel(reg | sdm->enable, common->base + common->reg);
+	reg = pete_readl("drivers/clk/sunxi-ng/ccu_sdm.c:48", common->base + common->reg);
+	pete_writel("drivers/clk/sunxi-ng/ccu_sdm.c:49", reg | sdm->enable, common->base + common->reg);
 	spin_unlock_irqrestore(common->lock, flags);
 }
 
@@ -60,13 +60,13 @@ void ccu_sdm_helper_disable(struct ccu_common *common,
 		return;
 
 	spin_lock_irqsave(common->lock, flags);
-	reg = readl(common->base + common->reg);
-	writel(reg & ~sdm->enable, common->base + common->reg);
+	reg = pete_readl("drivers/clk/sunxi-ng/ccu_sdm.c:63", common->base + common->reg);
+	pete_writel("drivers/clk/sunxi-ng/ccu_sdm.c:64", reg & ~sdm->enable, common->base + common->reg);
 	spin_unlock_irqrestore(common->lock, flags);
 
 	spin_lock_irqsave(common->lock, flags);
-	reg = readl(common->base + sdm->tuning_reg);
-	writel(reg & ~sdm->tuning_enable, common->base + sdm->tuning_reg);
+	reg = pete_readl("drivers/clk/sunxi-ng/ccu_sdm.c:68", common->base + sdm->tuning_reg);
+	pete_writel("drivers/clk/sunxi-ng/ccu_sdm.c:69", reg & ~sdm->tuning_enable, common->base + sdm->tuning_reg);
 	spin_unlock_irqrestore(common->lock, flags);
 }
 
@@ -119,7 +119,7 @@ unsigned long ccu_sdm_helper_read_rate(struct ccu_common *common,
 	pr_debug("%s: clock is sigma-delta modulated\n",
 		 clk_hw_get_name(&common->hw));
 
-	reg = readl(common->base + sdm->tuning_reg);
+	reg = pete_readl("drivers/clk/sunxi-ng/ccu_sdm.c:122", common->base + sdm->tuning_reg);
 
 	pr_debug("%s: pattern reg is 0x%x",
 		 clk_hw_get_name(&common->hw), reg);

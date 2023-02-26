@@ -765,22 +765,22 @@ static void gfx_v9_0_rlcg_w(struct amdgpu_device *adev, u32 offset, u32 v, u32 f
 
 	if (offset == grbm_cntl || offset == grbm_idx) {
 		if (offset  == grbm_cntl)
-			writel(v, scratch_reg2);
+			pete_writel("drivers/gpu/drm/amd/amdgpu/gfx_v9_0.c:768", v, scratch_reg2);
 		else if (offset == grbm_idx)
-			writel(v, scratch_reg3);
+			pete_writel("drivers/gpu/drm/amd/amdgpu/gfx_v9_0.c:770", v, scratch_reg3);
 
-		writel(v, ((void __iomem *)adev->rmmio) + (offset * 4));
+		pete_writel("drivers/gpu/drm/amd/amdgpu/gfx_v9_0.c:772", v, ((void __iomem *)adev->rmmio) + (offset * 4));
 	} else {
 		uint32_t i = 0;
 		uint32_t retries = 50000;
 
-		writel(v, scratch_reg0);
-		writel(offset | 0x80000000, scratch_reg1);
-		writel(1, spare_int);
+		pete_writel("drivers/gpu/drm/amd/amdgpu/gfx_v9_0.c:777", v, scratch_reg0);
+		pete_writel("drivers/gpu/drm/amd/amdgpu/gfx_v9_0.c:778", offset | 0x80000000, scratch_reg1);
+		pete_writel("drivers/gpu/drm/amd/amdgpu/gfx_v9_0.c:779", 1, spare_int);
 		for (i = 0; i < retries; i++) {
 			u32 tmp;
 
-			tmp = readl(scratch_reg1);
+			tmp = pete_readl("drivers/gpu/drm/amd/amdgpu/gfx_v9_0.c:783", scratch_reg1);
 			if (!(tmp & 0x80000000))
 				break;
 

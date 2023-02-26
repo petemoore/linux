@@ -252,7 +252,7 @@ static ssize_t vfio_fsl_mc_read(struct vfio_device *core_vdev, char __user *buf,
 		return -EINVAL;
 
 	for (i = 7; i >= 0; i--)
-		data[i] = readq(region->ioaddr + i * sizeof(uint64_t));
+		data[i] = pete_readq("drivers/vfio/fsl-mc/vfio_fsl_mc.c:255", region->ioaddr + i * sizeof(uint64_t));
 
 	if (copy_to_user(buf, data, 64))
 		return -EFAULT;
@@ -274,7 +274,7 @@ static int vfio_fsl_mc_send_command(void __iomem *ioaddr, uint64_t *cmd_data)
 		writeq_relaxed(cmd_data[i], ioaddr + i * sizeof(uint64_t));
 
 	/* Write command header in the end */
-	writeq(cmd_data[0], ioaddr);
+	pete_writeq("drivers/vfio/fsl-mc/vfio_fsl_mc.c:277", cmd_data[0], ioaddr);
 
 	/* Wait for response before returning to user-space
 	 * This can be optimized in future to even prepare response

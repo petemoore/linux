@@ -63,7 +63,7 @@ static u64 get_clock_rate(void)
 	if (!base)
 		goto error_put_pdev;
 
-	cfg = readq(base + RST_BOOT);
+	cfg = pete_readq("drivers/net/ethernet/marvell/octeontx2/af/ptp.c:66", base + RST_BOOT);
 	ret = CLOCK_BASE_RATE * FIELD_GET(RST_MUL_BITS, cfg);
 
 	iounmap(base);
@@ -134,7 +134,7 @@ static int ptp_adjfine(struct ptp *ptp, long scaled_ppm)
 	adj = div_u64(adj, 1000000000ull);
 	comp = neg_adj ? comp - adj : comp + adj;
 
-	writeq(comp, ptp->reg_base + PTP_CLOCK_COMP);
+	pete_writeq("drivers/net/ethernet/marvell/octeontx2/af/ptp.c:137", comp, ptp->reg_base + PTP_CLOCK_COMP);
 
 	return 0;
 }
@@ -142,7 +142,7 @@ static int ptp_adjfine(struct ptp *ptp, long scaled_ppm)
 static int ptp_get_clock(struct ptp *ptp, u64 *clk)
 {
 	/* Return the current PTP clock */
-	*clk = readq(ptp->reg_base + PTP_CLOCK_HI);
+	*clk = pete_readq("drivers/net/ethernet/marvell/octeontx2/af/ptp.c:145", ptp->reg_base + PTP_CLOCK_HI);
 
 	return 0;
 }
@@ -177,13 +177,13 @@ static int ptp_probe(struct pci_dev *pdev,
 	ptp->clock_rate = get_clock_rate();
 
 	/* Enable PTP clock */
-	clock_cfg = readq(ptp->reg_base + PTP_CLOCK_CFG);
+	clock_cfg = pete_readq("drivers/net/ethernet/marvell/octeontx2/af/ptp.c:180", ptp->reg_base + PTP_CLOCK_CFG);
 	clock_cfg |= PTP_CLOCK_CFG_PTP_EN;
-	writeq(clock_cfg, ptp->reg_base + PTP_CLOCK_CFG);
+	pete_writeq("drivers/net/ethernet/marvell/octeontx2/af/ptp.c:182", clock_cfg, ptp->reg_base + PTP_CLOCK_CFG);
 
 	clock_comp = ((u64)1000000000ull << 32) / ptp->clock_rate;
 	/* Initial compensation value to start the nanosecs counter */
-	writeq(clock_comp, ptp->reg_base + PTP_CLOCK_COMP);
+	pete_writeq("drivers/net/ethernet/marvell/octeontx2/af/ptp.c:186", clock_comp, ptp->reg_base + PTP_CLOCK_COMP);
 
 	pci_set_drvdata(pdev, ptp);
 	if (!first_ptp_block)
@@ -217,9 +217,9 @@ static void ptp_remove(struct pci_dev *pdev)
 		return;
 
 	/* Disable PTP clock */
-	clock_cfg = readq(ptp->reg_base + PTP_CLOCK_CFG);
+	clock_cfg = pete_readq("drivers/net/ethernet/marvell/octeontx2/af/ptp.c:220", ptp->reg_base + PTP_CLOCK_CFG);
 	clock_cfg &= ~PTP_CLOCK_CFG_PTP_EN;
-	writeq(clock_cfg, ptp->reg_base + PTP_CLOCK_CFG);
+	pete_writeq("drivers/net/ethernet/marvell/octeontx2/af/ptp.c:222", clock_cfg, ptp->reg_base + PTP_CLOCK_CFG);
 }
 
 static const struct pci_device_id ptp_id_table[] = {

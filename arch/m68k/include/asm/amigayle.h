@@ -60,11 +60,11 @@ struct GAYLE {
 #define gayle_attribute ((volatile u_char *)(GAYLE_ATTRIBUTE))
 
 #if 0
-#define gayle_inb(a) readb( GAYLE_IO+(a)+(((a)&1)*GAYLE_ODD) )
-#define gayle_outb(v,a) writeb( v, GAYLE_IO+(a)+(((a)&1)*GAYLE_ODD) )
+#define gayle_inb(a) pete_readb("arch/m68k/include/asm/amigayle.h:63",  GAYLE_IO+(a)+(((a)&1)*GAYLE_ODD) )
+#define gayle_outb(v,a) pete_writeb("arch/m68k/include/asm/amigayle.h:64",  v, GAYLE_IO+(a)+(((a)&1)*GAYLE_ODD) )
 
-#define gayle_inw(a) readw( GAYLE_IO+(a) )
-#define gayle_outw(v,a) writew( v, GAYLE_IO+(a) )
+#define gayle_inw(a) pete_readw("arch/m68k/include/asm/amigayle.h:66",  GAYLE_IO+(a) )
+#define gayle_outw(v,a) pete_writew("arch/m68k/include/asm/amigayle.h:67",  v, GAYLE_IO+(a) )
 #endif
 
 /* GAYLE_CARDSTATUS bit def */

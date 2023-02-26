@@ -471,9 +471,9 @@ static inline void set_SOGO(struct controller *ctrl)
 {
 	u16 misc;
 
-	misc = readw(ctrl->hpc_reg + MISC);
+	misc = pete_readw("drivers/pci/hotplug/cpqphp.h:474", ctrl->hpc_reg + MISC);
 	misc = (misc | 0x0001) & 0xFFFB;
-	writew(misc, ctrl->hpc_reg + MISC);
+	pete_writew("drivers/pci/hotplug/cpqphp.h:476", misc, ctrl->hpc_reg + MISC);
 }
 
 
@@ -481,9 +481,9 @@ static inline void amber_LED_on(struct controller *ctrl, u8 slot)
 {
 	u32 led_control;
 
-	led_control = readl(ctrl->hpc_reg + LED_CONTROL);
+	led_control = pete_readl("drivers/pci/hotplug/cpqphp.h:484", ctrl->hpc_reg + LED_CONTROL);
 	led_control |= (0x01010000L << slot);
-	writel(led_control, ctrl->hpc_reg + LED_CONTROL);
+	pete_writel("drivers/pci/hotplug/cpqphp.h:486", led_control, ctrl->hpc_reg + LED_CONTROL);
 }
 
 
@@ -491,9 +491,9 @@ static inline void amber_LED_off(struct controller *ctrl, u8 slot)
 {
 	u32 led_control;
 
-	led_control = readl(ctrl->hpc_reg + LED_CONTROL);
+	led_control = pete_readl("drivers/pci/hotplug/cpqphp.h:494", ctrl->hpc_reg + LED_CONTROL);
 	led_control &= ~(0x01010000L << slot);
-	writel(led_control, ctrl->hpc_reg + LED_CONTROL);
+	pete_writel("drivers/pci/hotplug/cpqphp.h:496", led_control, ctrl->hpc_reg + LED_CONTROL);
 }
 
 
@@ -501,7 +501,7 @@ static inline int read_amber_LED(struct controller *ctrl, u8 slot)
 {
 	u32 led_control;
 
-	led_control = readl(ctrl->hpc_reg + LED_CONTROL);
+	led_control = pete_readl("drivers/pci/hotplug/cpqphp.h:504", ctrl->hpc_reg + LED_CONTROL);
 	led_control &= (0x01010000L << slot);
 
 	return led_control ? 1 : 0;
@@ -512,18 +512,18 @@ static inline void green_LED_on(struct controller *ctrl, u8 slot)
 {
 	u32 led_control;
 
-	led_control = readl(ctrl->hpc_reg + LED_CONTROL);
+	led_control = pete_readl("drivers/pci/hotplug/cpqphp.h:515", ctrl->hpc_reg + LED_CONTROL);
 	led_control |= 0x0101L << slot;
-	writel(led_control, ctrl->hpc_reg + LED_CONTROL);
+	pete_writel("drivers/pci/hotplug/cpqphp.h:517", led_control, ctrl->hpc_reg + LED_CONTROL);
 }
 
 static inline void green_LED_off(struct controller *ctrl, u8 slot)
 {
 	u32 led_control;
 
-	led_control = readl(ctrl->hpc_reg + LED_CONTROL);
+	led_control = pete_readl("drivers/pci/hotplug/cpqphp.h:524", ctrl->hpc_reg + LED_CONTROL);
 	led_control &= ~(0x0101L << slot);
-	writel(led_control, ctrl->hpc_reg + LED_CONTROL);
+	pete_writel("drivers/pci/hotplug/cpqphp.h:526", led_control, ctrl->hpc_reg + LED_CONTROL);
 }
 
 
@@ -531,10 +531,10 @@ static inline void green_LED_blink(struct controller *ctrl, u8 slot)
 {
 	u32 led_control;
 
-	led_control = readl(ctrl->hpc_reg + LED_CONTROL);
+	led_control = pete_readl("drivers/pci/hotplug/cpqphp.h:534", ctrl->hpc_reg + LED_CONTROL);
 	led_control &= ~(0x0101L << slot);
 	led_control |= (0x0001L << slot);
-	writel(led_control, ctrl->hpc_reg + LED_CONTROL);
+	pete_writel("drivers/pci/hotplug/cpqphp.h:537", led_control, ctrl->hpc_reg + LED_CONTROL);
 }
 
 
@@ -542,9 +542,9 @@ static inline void slot_disable(struct controller *ctrl, u8 slot)
 {
 	u8 slot_enable;
 
-	slot_enable = readb(ctrl->hpc_reg + SLOT_ENABLE);
+	slot_enable = pete_readb("drivers/pci/hotplug/cpqphp.h:545", ctrl->hpc_reg + SLOT_ENABLE);
 	slot_enable &= ~(0x01 << slot);
-	writeb(slot_enable, ctrl->hpc_reg + SLOT_ENABLE);
+	pete_writeb("drivers/pci/hotplug/cpqphp.h:547", slot_enable, ctrl->hpc_reg + SLOT_ENABLE);
 }
 
 
@@ -552,9 +552,9 @@ static inline void slot_enable(struct controller *ctrl, u8 slot)
 {
 	u8 slot_enable;
 
-	slot_enable = readb(ctrl->hpc_reg + SLOT_ENABLE);
+	slot_enable = pete_readb("drivers/pci/hotplug/cpqphp.h:555", ctrl->hpc_reg + SLOT_ENABLE);
 	slot_enable |= (0x01 << slot);
-	writeb(slot_enable, ctrl->hpc_reg + SLOT_ENABLE);
+	pete_writeb("drivers/pci/hotplug/cpqphp.h:557", slot_enable, ctrl->hpc_reg + SLOT_ENABLE);
 }
 
 
@@ -562,7 +562,7 @@ static inline u8 is_slot_enabled(struct controller *ctrl, u8 slot)
 {
 	u8 slot_enable;
 
-	slot_enable = readb(ctrl->hpc_reg + SLOT_ENABLE);
+	slot_enable = pete_readb("drivers/pci/hotplug/cpqphp.h:565", ctrl->hpc_reg + SLOT_ENABLE);
 	slot_enable &= (0x01 << slot);
 	return slot_enable ? 1 : 0;
 }
@@ -570,7 +570,7 @@ static inline u8 is_slot_enabled(struct controller *ctrl, u8 slot)
 
 static inline u8 read_slot_enable(struct controller *ctrl)
 {
-	return readb(ctrl->hpc_reg + SLOT_ENABLE);
+	return pete_readb("drivers/pci/hotplug/cpqphp.h:573", ctrl->hpc_reg + SLOT_ENABLE);
 }
 
 
@@ -587,7 +587,7 @@ static inline u8 get_controller_speed(struct controller *ctrl)
 	u16 misc;
 
 	if (ctrl->pcix_support) {
-		curr_freq = readb(ctrl->hpc_reg + NEXT_CURR_FREQ);
+		curr_freq = pete_readb("drivers/pci/hotplug/cpqphp.h:590", ctrl->hpc_reg + NEXT_CURR_FREQ);
 		if ((curr_freq & 0xB0) == 0xB0)
 			return PCI_SPEED_133MHz_PCIX;
 		if ((curr_freq & 0xA0) == 0xA0)
@@ -600,7 +600,7 @@ static inline u8 get_controller_speed(struct controller *ctrl)
 		return PCI_SPEED_33MHz;
 	}
 
-	misc = readw(ctrl->hpc_reg + MISC);
+	misc = pete_readw("drivers/pci/hotplug/cpqphp.h:603", ctrl->hpc_reg + MISC);
 	return (misc & 0x0800) ? PCI_SPEED_66MHz : PCI_SPEED_33MHz;
 }
 
@@ -615,7 +615,7 @@ static inline u8 get_controller_speed(struct controller *ctrl)
  */
 static inline u8 get_adapter_speed(struct controller *ctrl, u8 hp_slot)
 {
-	u32 temp_dword = readl(ctrl->hpc_reg + NON_INT_INPUT);
+	u32 temp_dword = pete_readl("drivers/pci/hotplug/cpqphp.h:618", ctrl->hpc_reg + NON_INT_INPUT);
 	dbg("slot: %d, PCIXCAP: %8x\n", hp_slot, temp_dword);
 	if (ctrl->pcix_support) {
 		if (temp_dword & (0x10000 << hp_slot))
@@ -634,18 +634,18 @@ static inline void enable_slot_power(struct controller *ctrl, u8 slot)
 {
 	u8 slot_power;
 
-	slot_power = readb(ctrl->hpc_reg + SLOT_POWER);
+	slot_power = pete_readb("drivers/pci/hotplug/cpqphp.h:637", ctrl->hpc_reg + SLOT_POWER);
 	slot_power |= (0x01 << slot);
-	writeb(slot_power, ctrl->hpc_reg + SLOT_POWER);
+	pete_writeb("drivers/pci/hotplug/cpqphp.h:639", slot_power, ctrl->hpc_reg + SLOT_POWER);
 }
 
 static inline void disable_slot_power(struct controller *ctrl, u8 slot)
 {
 	u8 slot_power;
 
-	slot_power = readb(ctrl->hpc_reg + SLOT_POWER);
+	slot_power = pete_readb("drivers/pci/hotplug/cpqphp.h:646", ctrl->hpc_reg + SLOT_POWER);
 	slot_power &= ~(0x01 << slot);
-	writeb(slot_power, ctrl->hpc_reg + SLOT_POWER);
+	pete_writeb("drivers/pci/hotplug/cpqphp.h:648", slot_power, ctrl->hpc_reg + SLOT_POWER);
 }
 
 
@@ -679,7 +679,7 @@ static inline int cpq_get_latch_status(struct controller *ctrl,
 	dbg("%s: slot->device = %d, ctrl->slot_device_offset = %d\n",
 	    __func__, slot->device, ctrl->slot_device_offset);
 
-	status = (readl(ctrl->hpc_reg + INT_INPUT_CLEAR) & (0x01L << hp_slot));
+	status = (pete_readl("drivers/pci/hotplug/cpqphp.h:682", ctrl->hpc_reg + INT_INPUT_CLEAR) & (0x01L << hp_slot));
 
 	return (status == 0) ? 1 : 0;
 }
@@ -694,7 +694,7 @@ static inline int get_presence_status(struct controller *ctrl,
 
 	hp_slot = slot->device - ctrl->slot_device_offset;
 
-	tempdword = readl(ctrl->hpc_reg + INT_INPUT_CLEAR);
+	tempdword = pete_readl("drivers/pci/hotplug/cpqphp.h:697", ctrl->hpc_reg + INT_INPUT_CLEAR);
 	presence_save = (int) ((((~tempdword) >> 23) | ((~tempdword) >> 15))
 				>> hp_slot) & 0x02;
 

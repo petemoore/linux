@@ -42,7 +42,7 @@
 
 #ifdef CONFIG_FB_S3C_DEBUG_REGWRITE
 #undef writel
-#define writel(v, r) do { \
+#define pete_writel("drivers/video/fbdev/s3c-fb.c:45", v, r) do { \
 	pr_debug("%s: %08x => %p\n", __func__, (unsigned int)v, r); \
 	__raw_writel(v, r); \
 } while (0)
@@ -396,7 +396,7 @@ static void vidosd_set_size(struct s3c_fb_win *win, u32 size)
 
 	/* OSD can be set up if osd_size_off != 0 for this window */
 	if (win->variant.osd_size_off)
-		writel(size, sfb->regs + OSD_BASE(win->index, sfb->variant)
+		pete_writel("drivers/video/fbdev/s3c-fb.c:399", size, sfb->regs + OSD_BASE(win->index, sfb->variant)
 				+ win->variant.osd_size_off);
 }
 
@@ -411,7 +411,7 @@ static void vidosd_set_alpha(struct s3c_fb_win *win, u32 alpha)
 	struct s3c_fb *sfb = win->parent;
 
 	if (win->variant.has_osd_alpha)
-		writel(alpha, sfb->regs + VIDOSD_C(win->index, sfb->variant));
+		pete_writel("drivers/video/fbdev/s3c-fb.c:414", alpha, sfb->regs + VIDOSD_C(win->index, sfb->variant));
 }
 
 /**
@@ -427,18 +427,18 @@ static void shadow_protect_win(struct s3c_fb_win *win, bool protect)
 
 	if (protect) {
 		if (sfb->variant.has_prtcon) {
-			writel(PRTCON_PROTECT, sfb->regs + PRTCON);
+			pete_writel("drivers/video/fbdev/s3c-fb.c:430", PRTCON_PROTECT, sfb->regs + PRTCON);
 		} else if (sfb->variant.has_shadowcon) {
-			reg = readl(sfb->regs + SHADOWCON);
-			writel(reg | SHADOWCON_WINx_PROTECT(win->index),
+			reg = pete_readl("drivers/video/fbdev/s3c-fb.c:432", sfb->regs + SHADOWCON);
+			pete_writel("drivers/video/fbdev/s3c-fb.c:433", reg | SHADOWCON_WINx_PROTECT(win->index),
 				sfb->regs + SHADOWCON);
 		}
 	} else {
 		if (sfb->variant.has_prtcon) {
-			writel(0, sfb->regs + PRTCON);
+			pete_writel("drivers/video/fbdev/s3c-fb.c:438", 0, sfb->regs + PRTCON);
 		} else if (sfb->variant.has_shadowcon) {
-			reg = readl(sfb->regs + SHADOWCON);
-			writel(reg & ~SHADOWCON_WINx_PROTECT(win->index),
+			reg = pete_readl("drivers/video/fbdev/s3c-fb.c:440", sfb->regs + SHADOWCON);
+			pete_writel("drivers/video/fbdev/s3c-fb.c:441", reg & ~SHADOWCON_WINx_PROTECT(win->index),
 				sfb->regs + SHADOWCON);
 		}
 	}
@@ -451,7 +451,7 @@ static void shadow_protect_win(struct s3c_fb_win *win, bool protect)
  */
 static void s3c_fb_enable(struct s3c_fb *sfb, int enable)
 {
-	u32 vidcon0 = readl(sfb->regs + VIDCON0);
+	u32 vidcon0 = pete_readl("drivers/video/fbdev/s3c-fb.c:454", sfb->regs + VIDCON0);
 
 	if (enable && !sfb->output_on)
 		pm_runtime_get_sync(sfb->dev);
@@ -469,7 +469,7 @@ static void s3c_fb_enable(struct s3c_fb *sfb, int enable)
 		}
 	}
 
-	writel(vidcon0, sfb->regs + VIDCON0);
+	pete_writel("drivers/video/fbdev/s3c-fb.c:472", vidcon0, sfb->regs + VIDCON0);
 
 	if (!enable && sfb->output_on)
 		pm_runtime_put_sync(sfb->dev);
@@ -528,7 +528,7 @@ static int s3c_fb_set_par(struct fb_info *info)
 	info->fix.ypanstep = info->var.yres_virtual > info->var.yres ? 1 : 0;
 
 	/* disable the window whilst we update it */
-	writel(0, regs + WINCON(win_no));
+	pete_writel("drivers/video/fbdev/s3c-fb.c:531", 0, regs + WINCON(win_no));
 
 	if (!sfb->output_on)
 		s3c_fb_enable(sfb, 1);
@@ -538,23 +538,23 @@ static int s3c_fb_set_par(struct fb_info *info)
 	/* start and end registers stride is 8 */
 	buf = regs + win_no * 8;
 
-	writel(info->fix.smem_start, buf + sfb->variant.buf_start);
+	pete_writel("drivers/video/fbdev/s3c-fb.c:541", info->fix.smem_start, buf + sfb->variant.buf_start);
 
 	data = info->fix.smem_start + info->fix.line_length * var->yres;
-	writel(data, buf + sfb->variant.buf_end);
+	pete_writel("drivers/video/fbdev/s3c-fb.c:544", data, buf + sfb->variant.buf_end);
 
 	pagewidth = (var->xres * var->bits_per_pixel) >> 3;
 	data = VIDW_BUF_SIZE_OFFSET(info->fix.line_length - pagewidth) |
 	       VIDW_BUF_SIZE_PAGEWIDTH(pagewidth) |
 	       VIDW_BUF_SIZE_OFFSET_E(info->fix.line_length - pagewidth) |
 	       VIDW_BUF_SIZE_PAGEWIDTH_E(pagewidth);
-	writel(data, regs + sfb->variant.buf_size + (win_no * 4));
+	pete_writel("drivers/video/fbdev/s3c-fb.c:551", data, regs + sfb->variant.buf_size + (win_no * 4));
 
 	/* write 'OSD' registers to control position of framebuffer */
 
 	data = VIDOSDxA_TOPLEFT_X(0) | VIDOSDxA_TOPLEFT_Y(0) |
 	       VIDOSDxA_TOPLEFT_X_E(0) | VIDOSDxA_TOPLEFT_Y_E(0);
-	writel(data, regs + VIDOSD_A(win_no, sfb->variant));
+	pete_writel("drivers/video/fbdev/s3c-fb.c:557", data, regs + VIDOSD_A(win_no, sfb->variant));
 
 	data = VIDOSDxB_BOTRIGHT_X(s3c_fb_align_word(var->bits_per_pixel,
 						     var->xres - 1)) |
@@ -563,7 +563,7 @@ static int s3c_fb_set_par(struct fb_info *info)
 						     var->xres - 1)) |
 	       VIDOSDxB_BOTRIGHT_Y_E(var->yres - 1);
 
-	writel(data, regs + VIDOSD_B(win_no, sfb->variant));
+	pete_writel("drivers/video/fbdev/s3c-fb.c:566", data, regs + VIDOSD_B(win_no, sfb->variant));
 
 	data = var->xres * var->yres;
 
@@ -576,9 +576,9 @@ static int s3c_fb_set_par(struct fb_info *info)
 
 	/* Enable DMA channel for this window */
 	if (sfb->variant.has_shadowcon) {
-		data = readl(sfb->regs + SHADOWCON);
+		data = pete_readl("drivers/video/fbdev/s3c-fb.c:579", sfb->regs + SHADOWCON);
 		data |= SHADOWCON_CHx_ENABLE(win_no);
-		writel(data, sfb->regs + SHADOWCON);
+		pete_writel("drivers/video/fbdev/s3c-fb.c:581", data, sfb->regs + SHADOWCON);
 	}
 
 	data = WINCONx_ENWIN;
@@ -655,22 +655,22 @@ static int s3c_fb_set_par(struct fb_info *info)
 
 		keycon += (win_no - 1) * 8;
 
-		writel(keycon0_data, keycon + WKEYCON0);
-		writel(keycon1_data, keycon + WKEYCON1);
+		pete_writel("drivers/video/fbdev/s3c-fb.c:658", keycon0_data, keycon + WKEYCON0);
+		pete_writel("drivers/video/fbdev/s3c-fb.c:659", keycon1_data, keycon + WKEYCON1);
 	}
 
-	writel(data, regs + sfb->variant.wincon + (win_no * 4));
-	writel(0x0, regs + sfb->variant.winmap + (win_no * 4));
+	pete_writel("drivers/video/fbdev/s3c-fb.c:662", data, regs + sfb->variant.wincon + (win_no * 4));
+	pete_writel("drivers/video/fbdev/s3c-fb.c:663", 0x0, regs + sfb->variant.winmap + (win_no * 4));
 
 	/* Set alpha value width */
 	if (sfb->variant.has_blendcon) {
-		data = readl(sfb->regs + BLENDCON);
+		data = pete_readl("drivers/video/fbdev/s3c-fb.c:667", sfb->regs + BLENDCON);
 		data &= ~BLENDCON_NEW_MASK;
 		if (var->transp.length > 4)
 			data |= BLENDCON_NEW_8BIT_ALPHA_VALUE;
 		else
 			data |= BLENDCON_NEW_4BIT_ALPHA_VALUE;
-		writel(data, sfb->regs + BLENDCON);
+		pete_writel("drivers/video/fbdev/s3c-fb.c:673", data, sfb->regs + BLENDCON);
 	}
 
 	shadow_protect_win(win, 0);
@@ -709,15 +709,15 @@ static void s3c_fb_update_palette(struct s3c_fb *sfb,
 
 	win->palette_buffer[reg] = value;
 
-	palcon = readl(sfb->regs + WPALCON);
-	writel(palcon | WPALCON_PAL_UPDATE, sfb->regs + WPALCON);
+	palcon = pete_readl("drivers/video/fbdev/s3c-fb.c:712", sfb->regs + WPALCON);
+	pete_writel("drivers/video/fbdev/s3c-fb.c:713", palcon | WPALCON_PAL_UPDATE, sfb->regs + WPALCON);
 
 	if (win->variant.palette_16bpp)
-		writew(value, palreg + (reg * 2));
+		pete_writew("drivers/video/fbdev/s3c-fb.c:716", value, palreg + (reg * 2));
 	else
-		writel(value, palreg + (reg * 4));
+		pete_writel("drivers/video/fbdev/s3c-fb.c:718", value, palreg + (reg * 4));
 
-	writel(palcon, sfb->regs + WPALCON);
+	pete_writel("drivers/video/fbdev/s3c-fb.c:720", palcon, sfb->regs + WPALCON);
 }
 
 static inline unsigned int chan_to_field(unsigned int chan,
@@ -804,7 +804,7 @@ static int s3c_fb_blank(int blank_mode, struct fb_info *info)
 
 	pm_runtime_get_sync(sfb->dev);
 
-	wincon = readl(sfb->regs + sfb->variant.wincon + (index * 4));
+	wincon = pete_readl("drivers/video/fbdev/s3c-fb.c:807", sfb->regs + sfb->variant.wincon + (index * 4));
 
 	switch (blank_mode) {
 	case FB_BLANK_POWERDOWN:
@@ -815,14 +815,14 @@ static int s3c_fb_blank(int blank_mode, struct fb_info *info)
 	case FB_BLANK_NORMAL:
 		/* disable the DMA and display 0x0 (black) */
 		shadow_protect_win(win, 1);
-		writel(WINxMAP_MAP | WINxMAP_MAP_COLOUR(0x0),
+		pete_writel("drivers/video/fbdev/s3c-fb.c:818", WINxMAP_MAP | WINxMAP_MAP_COLOUR(0x0),
 		       sfb->regs + sfb->variant.winmap + (index * 4));
 		shadow_protect_win(win, 0);
 		break;
 
 	case FB_BLANK_UNBLANK:
 		shadow_protect_win(win, 1);
-		writel(0x0, sfb->regs + sfb->variant.winmap + (index * 4));
+		pete_writel("drivers/video/fbdev/s3c-fb.c:825", 0x0, sfb->regs + sfb->variant.winmap + (index * 4));
 		shadow_protect_win(win, 0);
 		wincon |= WINCONx_ENWIN;
 		sfb->enabled |= (1 << index);
@@ -836,7 +836,7 @@ static int s3c_fb_blank(int blank_mode, struct fb_info *info)
 	}
 
 	shadow_protect_win(win, 1);
-	writel(wincon, sfb->regs + sfb->variant.wincon + (index * 4));
+	pete_writel("drivers/video/fbdev/s3c-fb.c:839", wincon, sfb->regs + sfb->variant.wincon + (index * 4));
 
 	/* Check the enabled state to see if we need to be running the
 	 * main LCD interface, as if there are no active windows then
@@ -901,8 +901,8 @@ static int s3c_fb_pan_display(struct fb_var_screeninfo *var,
 	 * both start and end addresses are updated to prevent corruption */
 	shadow_protect_win(win, 1);
 
-	writel(info->fix.smem_start + start_boff, buf + sfb->variant.buf_start);
-	writel(info->fix.smem_start + end_boff, buf + sfb->variant.buf_end);
+	pete_writel("drivers/video/fbdev/s3c-fb.c:904", info->fix.smem_start + start_boff, buf + sfb->variant.buf_start);
+	pete_writel("drivers/video/fbdev/s3c-fb.c:905", info->fix.smem_start + end_boff, buf + sfb->variant.buf_end);
 
 	shadow_protect_win(win, 0);
 
@@ -921,7 +921,7 @@ static void s3c_fb_enable_irq(struct s3c_fb *sfb)
 
 	if (!test_and_set_bit(S3C_FB_VSYNC_IRQ_EN, &sfb->irq_flags)) {
 		/* IRQ disabled, enable it */
-		irq_ctrl_reg = readl(regs + VIDINTCON0);
+		irq_ctrl_reg = pete_readl("drivers/video/fbdev/s3c-fb.c:924", regs + VIDINTCON0);
 
 		irq_ctrl_reg |= VIDINTCON0_INT_ENABLE;
 		irq_ctrl_reg |= VIDINTCON0_INT_FRAME;
@@ -931,7 +931,7 @@ static void s3c_fb_enable_irq(struct s3c_fb *sfb)
 		irq_ctrl_reg &= ~VIDINTCON0_FRAMESEL1_MASK;
 		irq_ctrl_reg |= VIDINTCON0_FRAMESEL1_NONE;
 
-		writel(irq_ctrl_reg, regs + VIDINTCON0);
+		pete_writel("drivers/video/fbdev/s3c-fb.c:934", irq_ctrl_reg, regs + VIDINTCON0);
 	}
 }
 
@@ -946,12 +946,12 @@ static void s3c_fb_disable_irq(struct s3c_fb *sfb)
 
 	if (test_and_clear_bit(S3C_FB_VSYNC_IRQ_EN, &sfb->irq_flags)) {
 		/* IRQ enabled, disable it */
-		irq_ctrl_reg = readl(regs + VIDINTCON0);
+		irq_ctrl_reg = pete_readl("drivers/video/fbdev/s3c-fb.c:949", regs + VIDINTCON0);
 
 		irq_ctrl_reg &= ~VIDINTCON0_INT_FRAME;
 		irq_ctrl_reg &= ~VIDINTCON0_INT_ENABLE;
 
-		writel(irq_ctrl_reg, regs + VIDINTCON0);
+		pete_writel("drivers/video/fbdev/s3c-fb.c:954", irq_ctrl_reg, regs + VIDINTCON0);
 	}
 }
 
@@ -963,12 +963,12 @@ static irqreturn_t s3c_fb_irq(int irq, void *dev_id)
 
 	spin_lock(&sfb->slock);
 
-	irq_sts_reg = readl(regs + VIDINTCON1);
+	irq_sts_reg = pete_readl("drivers/video/fbdev/s3c-fb.c:966", regs + VIDINTCON1);
 
 	if (irq_sts_reg & VIDINTCON1_INT_FRAME) {
 
 		/* VSYNC interrupt, accept it */
-		writel(VIDINTCON1_INT_FRAME, regs + VIDINTCON1);
+		pete_writel("drivers/video/fbdev/s3c-fb.c:971", VIDINTCON1_INT_FRAME, regs + VIDINTCON1);
 
 		sfb->vsync_info.count++;
 		wake_up_interruptible(&sfb->vsync_info.wait);
@@ -1146,10 +1146,10 @@ static void s3c_fb_release_win(struct s3c_fb *sfb, struct s3c_fb_win *win)
 
 	if (win->fbinfo) {
 		if (sfb->variant.has_shadowcon) {
-			data = readl(sfb->regs + SHADOWCON);
+			data = pete_readl("drivers/video/fbdev/s3c-fb.c:1149", sfb->regs + SHADOWCON);
 			data &= ~SHADOWCON_CHx_ENABLE(win->index);
 			data &= ~SHADOWCON_CHx_LOCAL_ENABLE(win->index);
-			writel(data, sfb->regs + SHADOWCON);
+			pete_writel("drivers/video/fbdev/s3c-fb.c:1152", data, sfb->regs + SHADOWCON);
 		}
 		unregister_framebuffer(win->fbinfo);
 		if (win->fbinfo->cmap.len)
@@ -1308,23 +1308,23 @@ static void s3c_fb_set_rgb_timing(struct s3c_fb *sfb)
 
 	if (sfb->variant.is_2443)
 		data |= (1 << 5);
-	writel(data, regs + VIDCON0);
+	pete_writel("drivers/video/fbdev/s3c-fb.c:1311", data, regs + VIDCON0);
 
 	data = VIDTCON0_VBPD(vmode->upper_margin - 1) |
 	       VIDTCON0_VFPD(vmode->lower_margin - 1) |
 	       VIDTCON0_VSPW(vmode->vsync_len - 1);
-	writel(data, regs + sfb->variant.vidtcon);
+	pete_writel("drivers/video/fbdev/s3c-fb.c:1316", data, regs + sfb->variant.vidtcon);
 
 	data = VIDTCON1_HBPD(vmode->left_margin - 1) |
 	       VIDTCON1_HFPD(vmode->right_margin - 1) |
 	       VIDTCON1_HSPW(vmode->hsync_len - 1);
-	writel(data, regs + sfb->variant.vidtcon + 4);
+	pete_writel("drivers/video/fbdev/s3c-fb.c:1321", data, regs + sfb->variant.vidtcon + 4);
 
 	data = VIDTCON2_LINEVAL(vmode->yres - 1) |
 	       VIDTCON2_HOZVAL(vmode->xres - 1) |
 	       VIDTCON2_LINEVAL_E(vmode->yres - 1) |
 	       VIDTCON2_HOZVAL_E(vmode->xres - 1);
-	writel(data, regs + sfb->variant.vidtcon + 8);
+	pete_writel("drivers/video/fbdev/s3c-fb.c:1327", data, regs + sfb->variant.vidtcon + 8);
 }
 
 /**
@@ -1339,17 +1339,17 @@ static void s3c_fb_clear_win(struct s3c_fb *sfb, int win)
 	void __iomem *regs = sfb->regs;
 	u32 reg;
 
-	writel(0, regs + sfb->variant.wincon + (win * 4));
-	writel(0, regs + VIDOSD_A(win, sfb->variant));
-	writel(0, regs + VIDOSD_B(win, sfb->variant));
-	writel(0, regs + VIDOSD_C(win, sfb->variant));
+	pete_writel("drivers/video/fbdev/s3c-fb.c:1342", 0, regs + sfb->variant.wincon + (win * 4));
+	pete_writel("drivers/video/fbdev/s3c-fb.c:1343", 0, regs + VIDOSD_A(win, sfb->variant));
+	pete_writel("drivers/video/fbdev/s3c-fb.c:1344", 0, regs + VIDOSD_B(win, sfb->variant));
+	pete_writel("drivers/video/fbdev/s3c-fb.c:1345", 0, regs + VIDOSD_C(win, sfb->variant));
 
 	if (sfb->variant.has_shadowcon) {
-		reg = readl(sfb->regs + SHADOWCON);
+		reg = pete_readl("drivers/video/fbdev/s3c-fb.c:1348", sfb->regs + SHADOWCON);
 		reg &= ~(SHADOWCON_WINx_PROTECT(win) |
 			SHADOWCON_CHx_ENABLE(win) |
 			SHADOWCON_CHx_LOCAL_ENABLE(win));
-		writel(reg, sfb->regs + SHADOWCON);
+		pete_writel("drivers/video/fbdev/s3c-fb.c:1352", reg, sfb->regs + SHADOWCON);
 	}
 }
 
@@ -1441,14 +1441,14 @@ static int s3c_fb_probe(struct platform_device *pdev)
 
 	pd->setup_gpio();
 
-	writel(pd->vidcon1, sfb->regs + VIDCON1);
+	pete_writel("drivers/video/fbdev/s3c-fb.c:1444", pd->vidcon1, sfb->regs + VIDCON1);
 
 	/* set video clock running at under-run */
 	if (sfb->variant.has_fixvclk) {
-		reg = readl(sfb->regs + VIDCON1);
+		reg = pete_readl("drivers/video/fbdev/s3c-fb.c:1448", sfb->regs + VIDCON1);
 		reg &= ~VIDCON1_VCLK_MASK;
 		reg |= VIDCON1_VCLK_RUN;
-		writel(reg, sfb->regs + VIDCON1);
+		pete_writel("drivers/video/fbdev/s3c-fb.c:1451", reg, sfb->regs + VIDCON1);
 	}
 
 	/* zero all windows before we do anything */
@@ -1461,8 +1461,8 @@ static int s3c_fb_probe(struct platform_device *pdev)
 		void __iomem *regs = sfb->regs + sfb->variant.keycon;
 
 		regs += (win * 8);
-		writel(0xffffff, regs + WKEYCON0);
-		writel(0xffffff, regs + WKEYCON1);
+		pete_writel("drivers/video/fbdev/s3c-fb.c:1464", 0xffffff, regs + WKEYCON0);
+		pete_writel("drivers/video/fbdev/s3c-fb.c:1465", 0xffffff, regs + WKEYCON1);
 	}
 
 	s3c_fb_set_rgb_timing(sfb);
@@ -1577,14 +1577,14 @@ static int s3c_fb_resume(struct device *dev)
 
 	/* setup gpio and output polarity controls */
 	pd->setup_gpio();
-	writel(pd->vidcon1, sfb->regs + VIDCON1);
+	pete_writel("drivers/video/fbdev/s3c-fb.c:1580", pd->vidcon1, sfb->regs + VIDCON1);
 
 	/* set video clock running at under-run */
 	if (sfb->variant.has_fixvclk) {
-		reg = readl(sfb->regs + VIDCON1);
+		reg = pete_readl("drivers/video/fbdev/s3c-fb.c:1584", sfb->regs + VIDCON1);
 		reg &= ~VIDCON1_VCLK_MASK;
 		reg |= VIDCON1_VCLK_RUN;
-		writel(reg, sfb->regs + VIDCON1);
+		pete_writel("drivers/video/fbdev/s3c-fb.c:1587", reg, sfb->regs + VIDCON1);
 	}
 
 	/* zero all windows before we do anything */
@@ -1599,8 +1599,8 @@ static int s3c_fb_resume(struct device *dev)
 
 		shadow_protect_win(win, 1);
 		regs += (win_no * 8);
-		writel(0xffffff, regs + WKEYCON0);
-		writel(0xffffff, regs + WKEYCON1);
+		pete_writel("drivers/video/fbdev/s3c-fb.c:1602", 0xffffff, regs + WKEYCON0);
+		pete_writel("drivers/video/fbdev/s3c-fb.c:1603", 0xffffff, regs + WKEYCON1);
 		shadow_protect_win(win, 0);
 	}
 
@@ -1647,7 +1647,7 @@ static int s3c_fb_runtime_resume(struct device *dev)
 
 	/* setup gpio and output polarity controls */
 	pd->setup_gpio();
-	writel(pd->vidcon1, sfb->regs + VIDCON1);
+	pete_writel("drivers/video/fbdev/s3c-fb.c:1650", pd->vidcon1, sfb->regs + VIDCON1);
 
 	return 0;
 }

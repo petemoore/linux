@@ -80,17 +80,17 @@ struct remote_input {
 #define vnc_status(sp)		(mouse_addr(sp) + CONDOR_OUTPUT_VNC_STATUS)
 #define isr_control(sp)		(mouse_addr(sp) + CONDOR_MOUSE_ISR_CONTROL)
 
-#define mouse_interrupt_pending(sp)	readl(mouse_addr(sp) + CONDOR_MOUSE_ISR_STATUS)
-#define clear_mouse_interrupt(sp)	writel(0, mouse_addr(sp) + CONDOR_MOUSE_ISR_STATUS)
-#define enable_mouse_interrupts(sp)	writel(1, mouse_addr(sp) + CONDOR_MOUSE_ISR_CONTROL)
-#define disable_mouse_interrupts(sp)	writel(0, mouse_addr(sp) + CONDOR_MOUSE_ISR_CONTROL)
+#define mouse_interrupt_pending(sp)	pete_readl("drivers/misc/ibmasm/remote.h:83", mouse_addr(sp) + CONDOR_MOUSE_ISR_STATUS)
+#define clear_mouse_interrupt(sp)	pete_writel("drivers/misc/ibmasm/remote.h:84", 0, mouse_addr(sp) + CONDOR_MOUSE_ISR_STATUS)
+#define enable_mouse_interrupts(sp)	pete_writel("drivers/misc/ibmasm/remote.h:85", 1, mouse_addr(sp) + CONDOR_MOUSE_ISR_CONTROL)
+#define disable_mouse_interrupts(sp)	pete_writel("drivers/misc/ibmasm/remote.h:86", 0, mouse_addr(sp) + CONDOR_MOUSE_ISR_CONTROL)
 
 /* remote input queue operations */
 #define REMOTE_QUEUE_SIZE	60
 
-#define get_queue_writer(sp)	readl(mouse_addr(sp) + CONDOR_MOUSE_Q_WRITER)
-#define get_queue_reader(sp)	readl(mouse_addr(sp) + CONDOR_MOUSE_Q_READER)
-#define set_queue_reader(sp, reader)	writel(reader, mouse_addr(sp) + CONDOR_MOUSE_Q_READER)
+#define get_queue_writer(sp)	pete_readl("drivers/misc/ibmasm/remote.h:91", mouse_addr(sp) + CONDOR_MOUSE_Q_WRITER)
+#define get_queue_reader(sp)	pete_readl("drivers/misc/ibmasm/remote.h:92", mouse_addr(sp) + CONDOR_MOUSE_Q_READER)
+#define set_queue_reader(sp, reader)	pete_writel("drivers/misc/ibmasm/remote.h:93", reader, mouse_addr(sp) + CONDOR_MOUSE_Q_READER)
 
 #define queue_begin	(mouse_addr(sp) + CONDOR_MOUSE_Q_BEGIN)
 

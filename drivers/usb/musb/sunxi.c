@@ -102,7 +102,7 @@ static void sunxi_musb_work(struct work_struct *work)
 
 		spin_lock_irqsave(&musb->lock, flags);
 
-		devctl = readb(musb->mregs + SUNXI_MUSB_DEVCTL);
+		devctl = pete_readb("drivers/usb/musb/sunxi.c:105", musb->mregs + SUNXI_MUSB_DEVCTL);
 		if (test_bit(SUNXI_MUSB_FL_HOSTMODE, &glue->flags)) {
 			set_bit(SUNXI_MUSB_FL_VBUS_ON, &glue->flags);
 			musb->xceiv->otg->state = OTG_STATE_A_WAIT_VRISE;
@@ -114,7 +114,7 @@ static void sunxi_musb_work(struct work_struct *work)
 			MUSB_DEV_MODE(musb);
 			devctl &= ~MUSB_DEVCTL_SESSION;
 		}
-		writeb(devctl, musb->mregs + SUNXI_MUSB_DEVCTL);
+		pete_writeb("drivers/usb/musb/sunxi.c:117", devctl, musb->mregs + SUNXI_MUSB_DEVCTL);
 
 		spin_unlock_irqrestore(&musb->lock, flags);
 	}
@@ -171,9 +171,9 @@ static irqreturn_t sunxi_musb_interrupt(int irq, void *__hci)
 
 	spin_lock_irqsave(&musb->lock, flags);
 
-	musb->int_usb = readb(musb->mregs + SUNXI_MUSB_INTRUSB);
+	musb->int_usb = pete_readb("drivers/usb/musb/sunxi.c:174", musb->mregs + SUNXI_MUSB_INTRUSB);
 	if (musb->int_usb)
-		writeb(musb->int_usb, musb->mregs + SUNXI_MUSB_INTRUSB);
+		pete_writeb("drivers/usb/musb/sunxi.c:176", musb->int_usb, musb->mregs + SUNXI_MUSB_INTRUSB);
 
 	if ((musb->int_usb & MUSB_INTR_RESET) && !is_host_active(musb)) {
 		/* ep0 FADDR must be 0 when (re)entering peripheral mode */
@@ -181,13 +181,13 @@ static irqreturn_t sunxi_musb_interrupt(int irq, void *__hci)
 		musb_writeb(musb->mregs, MUSB_FADDR, 0);
 	}
 
-	musb->int_tx = readw(musb->mregs + SUNXI_MUSB_INTRTX);
+	musb->int_tx = pete_readw("drivers/usb/musb/sunxi.c:184", musb->mregs + SUNXI_MUSB_INTRTX);
 	if (musb->int_tx)
-		writew(musb->int_tx, musb->mregs + SUNXI_MUSB_INTRTX);
+		pete_writew("drivers/usb/musb/sunxi.c:186", musb->int_tx, musb->mregs + SUNXI_MUSB_INTRTX);
 
-	musb->int_rx = readw(musb->mregs + SUNXI_MUSB_INTRRX);
+	musb->int_rx = pete_readw("drivers/usb/musb/sunxi.c:188", musb->mregs + SUNXI_MUSB_INTRRX);
 	if (musb->int_rx)
-		writew(musb->int_rx, musb->mregs + SUNXI_MUSB_INTRRX);
+		pete_writew("drivers/usb/musb/sunxi.c:190", musb->int_rx, musb->mregs + SUNXI_MUSB_INTRRX);
 
 	musb_interrupt(musb);
 
@@ -237,7 +237,7 @@ static int sunxi_musb_init(struct musb *musb)
 			goto error_clk_disable;
 	}
 
-	writeb(SUNXI_MUSB_VEND0_PIO_MODE, musb->mregs + SUNXI_MUSB_VEND0);
+	pete_writeb("drivers/usb/musb/sunxi.c:240", SUNXI_MUSB_VEND0_PIO_MODE, musb->mregs + SUNXI_MUSB_VEND0);
 
 	/* Register notifier before calling phy_init() */
 	ret = devm_extcon_register_notifier(glue->dev, glue->extcon,
@@ -415,23 +415,23 @@ static u8 sunxi_musb_readb(void __iomem *addr, u32 offset)
 		/* generic control or fifo control reg access */
 		switch (offset) {
 		case MUSB_FADDR:
-			return readb(addr + SUNXI_MUSB_FADDR);
+			return pete_readb("drivers/usb/musb/sunxi.c:418", addr + SUNXI_MUSB_FADDR);
 		case MUSB_POWER:
-			return readb(addr + SUNXI_MUSB_POWER);
+			return pete_readb("drivers/usb/musb/sunxi.c:420", addr + SUNXI_MUSB_POWER);
 		case MUSB_INTRUSB:
-			return readb(addr + SUNXI_MUSB_INTRUSB);
+			return pete_readb("drivers/usb/musb/sunxi.c:422", addr + SUNXI_MUSB_INTRUSB);
 		case MUSB_INTRUSBE:
-			return readb(addr + SUNXI_MUSB_INTRUSBE);
+			return pete_readb("drivers/usb/musb/sunxi.c:424", addr + SUNXI_MUSB_INTRUSBE);
 		case MUSB_INDEX:
-			return readb(addr + SUNXI_MUSB_INDEX);
+			return pete_readb("drivers/usb/musb/sunxi.c:426", addr + SUNXI_MUSB_INDEX);
 		case MUSB_TESTMODE:
 			return 0; /* No testmode on sunxi */
 		case MUSB_DEVCTL:
-			return readb(addr + SUNXI_MUSB_DEVCTL);
+			return pete_readb("drivers/usb/musb/sunxi.c:430", addr + SUNXI_MUSB_DEVCTL);
 		case MUSB_TXFIFOSZ:
-			return readb(addr + SUNXI_MUSB_TXFIFOSZ);
+			return pete_readb("drivers/usb/musb/sunxi.c:432", addr + SUNXI_MUSB_TXFIFOSZ);
 		case MUSB_RXFIFOSZ:
-			return readb(addr + SUNXI_MUSB_RXFIFOSZ);
+			return pete_readb("drivers/usb/musb/sunxi.c:434", addr + SUNXI_MUSB_RXFIFOSZ);
 		case MUSB_CONFIGDATA + 0x10: /* See musb_read_configdata() */
 			glue = dev_get_drvdata(sunxi_musb->controller->parent);
 			/* A33 saves a reg, and we get to hardcode this */
@@ -439,7 +439,7 @@ static u8 sunxi_musb_readb(void __iomem *addr, u32 offset)
 				     &glue->flags))
 				return 0xde;
 
-			return readb(addr + SUNXI_MUSB_CONFIGDATA);
+			return pete_readb("drivers/usb/musb/sunxi.c:442", addr + SUNXI_MUSB_CONFIGDATA);
 		/* Offset for these is fixed by sunxi_musb_busctl_offset() */
 		case SUNXI_MUSB_TXFUNCADDR:
 		case SUNXI_MUSB_TXHUBADDR:
@@ -448,7 +448,7 @@ static u8 sunxi_musb_readb(void __iomem *addr, u32 offset)
 		case SUNXI_MUSB_RXHUBADDR:
 		case SUNXI_MUSB_RXHUBPORT:
 			/* multipoint / busctl reg access */
-			return readb(addr + offset);
+			return pete_readb("drivers/usb/musb/sunxi.c:451", addr + offset);
 		default:
 			dev_err(sunxi_musb->controller->parent,
 				"Error unknown readb offset %u\n", offset);
@@ -459,7 +459,7 @@ static u8 sunxi_musb_readb(void __iomem *addr, u32 offset)
 		/* sunxi has a 2 byte hole before the txtype register */
 		if (offset >= MUSB_TXTYPE)
 			offset += 2;
-		return readb(addr + offset);
+		return pete_readb("drivers/usb/musb/sunxi.c:462", addr + offset);
 	}
 
 	dev_err(sunxi_musb->controller->parent,
@@ -474,26 +474,26 @@ static void sunxi_musb_writeb(void __iomem *addr, unsigned offset, u8 data)
 		/* generic control or fifo control reg access */
 		switch (offset) {
 		case MUSB_FADDR:
-			return writeb(data, addr + SUNXI_MUSB_FADDR);
+			return pete_writeb("drivers/usb/musb/sunxi.c:477", data, addr + SUNXI_MUSB_FADDR);
 		case MUSB_POWER:
-			return writeb(data, addr + SUNXI_MUSB_POWER);
+			return pete_writeb("drivers/usb/musb/sunxi.c:479", data, addr + SUNXI_MUSB_POWER);
 		case MUSB_INTRUSB:
-			return writeb(data, addr + SUNXI_MUSB_INTRUSB);
+			return pete_writeb("drivers/usb/musb/sunxi.c:481", data, addr + SUNXI_MUSB_INTRUSB);
 		case MUSB_INTRUSBE:
-			return writeb(data, addr + SUNXI_MUSB_INTRUSBE);
+			return pete_writeb("drivers/usb/musb/sunxi.c:483", data, addr + SUNXI_MUSB_INTRUSBE);
 		case MUSB_INDEX:
-			return writeb(data, addr + SUNXI_MUSB_INDEX);
+			return pete_writeb("drivers/usb/musb/sunxi.c:485", data, addr + SUNXI_MUSB_INDEX);
 		case MUSB_TESTMODE:
 			if (data)
 				dev_warn(sunxi_musb->controller->parent,
 					"sunxi-musb does not have testmode\n");
 			return;
 		case MUSB_DEVCTL:
-			return writeb(data, addr + SUNXI_MUSB_DEVCTL);
+			return pete_writeb("drivers/usb/musb/sunxi.c:492", data, addr + SUNXI_MUSB_DEVCTL);
 		case MUSB_TXFIFOSZ:
-			return writeb(data, addr + SUNXI_MUSB_TXFIFOSZ);
+			return pete_writeb("drivers/usb/musb/sunxi.c:494", data, addr + SUNXI_MUSB_TXFIFOSZ);
 		case MUSB_RXFIFOSZ:
-			return writeb(data, addr + SUNXI_MUSB_RXFIFOSZ);
+			return pete_writeb("drivers/usb/musb/sunxi.c:496", data, addr + SUNXI_MUSB_RXFIFOSZ);
 		/* Offset for these is fixed by sunxi_musb_busctl_offset() */
 		case SUNXI_MUSB_TXFUNCADDR:
 		case SUNXI_MUSB_TXHUBADDR:
@@ -502,7 +502,7 @@ static void sunxi_musb_writeb(void __iomem *addr, unsigned offset, u8 data)
 		case SUNXI_MUSB_RXHUBADDR:
 		case SUNXI_MUSB_RXHUBPORT:
 			/* multipoint / busctl reg access */
-			return writeb(data, addr + offset);
+			return pete_writeb("drivers/usb/musb/sunxi.c:505", data, addr + offset);
 		default:
 			dev_err(sunxi_musb->controller->parent,
 				"Error unknown writeb offset %u\n", offset);
@@ -512,7 +512,7 @@ static void sunxi_musb_writeb(void __iomem *addr, unsigned offset, u8 data)
 		/* ep control reg access */
 		if (offset >= MUSB_TXTYPE)
 			offset += 2;
-		return writeb(data, addr + offset);
+		return pete_writeb("drivers/usb/musb/sunxi.c:515", data, addr + offset);
 	}
 
 	dev_err(sunxi_musb->controller->parent,
@@ -526,19 +526,19 @@ static u16 sunxi_musb_readw(void __iomem *addr, u32 offset)
 		/* generic control or fifo control reg access */
 		switch (offset) {
 		case MUSB_INTRTX:
-			return readw(addr + SUNXI_MUSB_INTRTX);
+			return pete_readw("drivers/usb/musb/sunxi.c:529", addr + SUNXI_MUSB_INTRTX);
 		case MUSB_INTRRX:
-			return readw(addr + SUNXI_MUSB_INTRRX);
+			return pete_readw("drivers/usb/musb/sunxi.c:531", addr + SUNXI_MUSB_INTRRX);
 		case MUSB_INTRTXE:
-			return readw(addr + SUNXI_MUSB_INTRTXE);
+			return pete_readw("drivers/usb/musb/sunxi.c:533", addr + SUNXI_MUSB_INTRTXE);
 		case MUSB_INTRRXE:
-			return readw(addr + SUNXI_MUSB_INTRRXE);
+			return pete_readw("drivers/usb/musb/sunxi.c:535", addr + SUNXI_MUSB_INTRRXE);
 		case MUSB_FRAME:
-			return readw(addr + SUNXI_MUSB_FRAME);
+			return pete_readw("drivers/usb/musb/sunxi.c:537", addr + SUNXI_MUSB_FRAME);
 		case MUSB_TXFIFOADD:
-			return readw(addr + SUNXI_MUSB_TXFIFOADD);
+			return pete_readw("drivers/usb/musb/sunxi.c:539", addr + SUNXI_MUSB_TXFIFOADD);
 		case MUSB_RXFIFOADD:
-			return readw(addr + SUNXI_MUSB_RXFIFOADD);
+			return pete_readw("drivers/usb/musb/sunxi.c:541", addr + SUNXI_MUSB_RXFIFOADD);
 		case MUSB_HWVERS:
 			return 0; /* sunxi musb version is not known */
 		default:
@@ -548,7 +548,7 @@ static u16 sunxi_musb_readw(void __iomem *addr, u32 offset)
 		}
 	} else if (addr == (sunxi_musb->mregs + 0x80)) {
 		/* ep control reg access */
-		return readw(addr + offset);
+		return pete_readw("drivers/usb/musb/sunxi.c:551", addr + offset);
 	}
 
 	dev_err(sunxi_musb->controller->parent,
@@ -563,19 +563,19 @@ static void sunxi_musb_writew(void __iomem *addr, unsigned offset, u16 data)
 		/* generic control or fifo control reg access */
 		switch (offset) {
 		case MUSB_INTRTX:
-			return writew(data, addr + SUNXI_MUSB_INTRTX);
+			return pete_writew("drivers/usb/musb/sunxi.c:566", data, addr + SUNXI_MUSB_INTRTX);
 		case MUSB_INTRRX:
-			return writew(data, addr + SUNXI_MUSB_INTRRX);
+			return pete_writew("drivers/usb/musb/sunxi.c:568", data, addr + SUNXI_MUSB_INTRRX);
 		case MUSB_INTRTXE:
-			return writew(data, addr + SUNXI_MUSB_INTRTXE);
+			return pete_writew("drivers/usb/musb/sunxi.c:570", data, addr + SUNXI_MUSB_INTRTXE);
 		case MUSB_INTRRXE:
-			return writew(data, addr + SUNXI_MUSB_INTRRXE);
+			return pete_writew("drivers/usb/musb/sunxi.c:572", data, addr + SUNXI_MUSB_INTRRXE);
 		case MUSB_FRAME:
-			return writew(data, addr + SUNXI_MUSB_FRAME);
+			return pete_writew("drivers/usb/musb/sunxi.c:574", data, addr + SUNXI_MUSB_FRAME);
 		case MUSB_TXFIFOADD:
-			return writew(data, addr + SUNXI_MUSB_TXFIFOADD);
+			return pete_writew("drivers/usb/musb/sunxi.c:576", data, addr + SUNXI_MUSB_TXFIFOADD);
 		case MUSB_RXFIFOADD:
-			return writew(data, addr + SUNXI_MUSB_RXFIFOADD);
+			return pete_writew("drivers/usb/musb/sunxi.c:578", data, addr + SUNXI_MUSB_RXFIFOADD);
 		default:
 			dev_err(sunxi_musb->controller->parent,
 				"Error unknown writew offset %u\n", offset);
@@ -583,7 +583,7 @@ static void sunxi_musb_writew(void __iomem *addr, unsigned offset, u16 data)
 		}
 	} else if (addr == (sunxi_musb->mregs + 0x80)) {
 		/* ep control reg access */
-		return writew(data, addr + offset);
+		return pete_writew("drivers/usb/musb/sunxi.c:586", data, addr + offset);
 	}
 
 	dev_err(sunxi_musb->controller->parent,

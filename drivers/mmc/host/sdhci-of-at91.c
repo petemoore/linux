@@ -54,9 +54,9 @@ static void sdhci_at91_set_force_card_detect(struct sdhci_host *host)
 {
 	u8 mc1r;
 
-	mc1r = readb(host->ioaddr + SDMMC_MC1R);
+	mc1r = pete_readb("drivers/mmc/host/sdhci-of-at91.c:57", host->ioaddr + SDMMC_MC1R);
 	mc1r |= SDMMC_MC1R_FCD;
-	writeb(mc1r, host->ioaddr + SDMMC_MC1R);
+	pete_writeb("drivers/mmc/host/sdhci-of-at91.c:59", mc1r, host->ioaddr + SDMMC_MC1R);
 }
 
 static void sdhci_at91_set_clock(struct sdhci_host *host, unsigned int clock)
@@ -175,8 +175,8 @@ static int sdhci_at91_set_clks_presets(struct device *dev)
 	unsigned int			preset_div;
 
 	clk_prepare_enable(priv->hclock);
-	caps0 = readl(host->ioaddr + SDHCI_CAPABILITIES);
-	caps1 = readl(host->ioaddr + SDHCI_CAPABILITIES_1);
+	caps0 = pete_readl("drivers/mmc/host/sdhci-of-at91.c:178", host->ioaddr + SDHCI_CAPABILITIES);
+	caps1 = pete_readl("drivers/mmc/host/sdhci-of-at91.c:179", host->ioaddr + SDHCI_CAPABILITIES_1);
 
 	gck_rate = clk_get_rate(priv->gck);
 	if (priv->soc_data->baseclk_is_generated_internally)
@@ -192,11 +192,11 @@ static int sdhci_at91_set_clks_presets(struct device *dev)
 	caps1 &= ~SDHCI_CLOCK_MUL_MASK;
 	caps1 |= FIELD_PREP(SDHCI_CLOCK_MUL_MASK, clk_mul);
 	/* Set capabilities in r/w mode. */
-	writel(SDMMC_CACR_KEY | SDMMC_CACR_CAPWREN, host->ioaddr + SDMMC_CACR);
-	writel(caps0, host->ioaddr + SDHCI_CAPABILITIES);
-	writel(caps1, host->ioaddr + SDHCI_CAPABILITIES_1);
+	pete_writel("drivers/mmc/host/sdhci-of-at91.c:195", SDMMC_CACR_KEY | SDMMC_CACR_CAPWREN, host->ioaddr + SDMMC_CACR);
+	pete_writel("drivers/mmc/host/sdhci-of-at91.c:196", caps0, host->ioaddr + SDHCI_CAPABILITIES);
+	pete_writel("drivers/mmc/host/sdhci-of-at91.c:197", caps1, host->ioaddr + SDHCI_CAPABILITIES_1);
 	/* Set capabilities in ro mode. */
-	writel(0, host->ioaddr + SDMMC_CACR);
+	pete_writel("drivers/mmc/host/sdhci-of-at91.c:199", 0, host->ioaddr + SDMMC_CACR);
 
 	dev_dbg(dev, "update clk mul to %u as gck rate is %u Hz and clk base is %u Hz\n",
 		clk_mul, gck_rate, clk_base_rate);
@@ -208,19 +208,19 @@ static int sdhci_at91_set_clks_presets(struct device *dev)
 	 * reason, we need to use presets to support SDR104.
 	 */
 	preset_div = DIV_ROUND_UP(gck_rate, 24000000) - 1;
-	writew(SDHCI_AT91_PRESET_COMMON_CONF | preset_div,
+	pete_writew("drivers/mmc/host/sdhci-of-at91.c:211", SDHCI_AT91_PRESET_COMMON_CONF | preset_div,
 	       host->ioaddr + SDHCI_PRESET_FOR_SDR12);
 	preset_div = DIV_ROUND_UP(gck_rate, 50000000) - 1;
-	writew(SDHCI_AT91_PRESET_COMMON_CONF | preset_div,
+	pete_writew("drivers/mmc/host/sdhci-of-at91.c:214", SDHCI_AT91_PRESET_COMMON_CONF | preset_div,
 	       host->ioaddr + SDHCI_PRESET_FOR_SDR25);
 	preset_div = DIV_ROUND_UP(gck_rate, 100000000) - 1;
-	writew(SDHCI_AT91_PRESET_COMMON_CONF | preset_div,
+	pete_writew("drivers/mmc/host/sdhci-of-at91.c:217", SDHCI_AT91_PRESET_COMMON_CONF | preset_div,
 	       host->ioaddr + SDHCI_PRESET_FOR_SDR50);
 	preset_div = DIV_ROUND_UP(gck_rate, 120000000) - 1;
-	writew(SDHCI_AT91_PRESET_COMMON_CONF | preset_div,
+	pete_writew("drivers/mmc/host/sdhci-of-at91.c:220", SDHCI_AT91_PRESET_COMMON_CONF | preset_div,
 	       host->ioaddr + SDHCI_PRESET_FOR_SDR104);
 	preset_div = DIV_ROUND_UP(gck_rate, 50000000) - 1;
-	writew(SDHCI_AT91_PRESET_COMMON_CONF | preset_div,
+	pete_writew("drivers/mmc/host/sdhci-of-at91.c:223", SDHCI_AT91_PRESET_COMMON_CONF | preset_div,
 	       host->ioaddr + SDHCI_PRESET_FOR_DDR50);
 
 	clk_prepare_enable(priv->mainck);

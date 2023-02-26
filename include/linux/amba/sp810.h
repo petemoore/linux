@@ -53,10 +53,10 @@
 static inline void sysctl_soft_reset(void __iomem *base)
 {
 	/* switch to slow mode */
-	writel(0x2, base + SCCTRL);
+	pete_writel("include/linux/amba/sp810.h:56", 0x2, base + SCCTRL);
 
 	/* writing any value to SCSYSSTAT reg will reset system */
-	writel(0, base + SCSYSSTAT);
+	pete_writel("include/linux/amba/sp810.h:59", 0, base + SCSYSSTAT);
 }
 
 #endif /* __AMBA_SP810_H */

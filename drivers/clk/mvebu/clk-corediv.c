@@ -83,7 +83,7 @@ static int clk_corediv_is_enabled(struct clk_hw *hwclk)
 	const struct clk_corediv_desc *desc = corediv->desc;
 	u32 enable_mask = BIT(desc->fieldbit) << soc_desc->enable_bit_offset;
 
-	return !!(readl(corediv->reg) & enable_mask);
+	return !!(pete_readl("drivers/clk/mvebu/clk-corediv.c:86", corediv->reg) & enable_mask);
 }
 
 static int clk_corediv_enable(struct clk_hw *hwclk)
@@ -96,9 +96,9 @@ static int clk_corediv_enable(struct clk_hw *hwclk)
 
 	spin_lock_irqsave(&corediv->lock, flags);
 
-	reg = readl(corediv->reg);
+	reg = pete_readl("drivers/clk/mvebu/clk-corediv.c:99", corediv->reg);
 	reg |= (BIT(desc->fieldbit) << soc_desc->enable_bit_offset);
-	writel(reg, corediv->reg);
+	pete_writel("drivers/clk/mvebu/clk-corediv.c:101", reg, corediv->reg);
 
 	spin_unlock_irqrestore(&corediv->lock, flags);
 
@@ -115,9 +115,9 @@ static void clk_corediv_disable(struct clk_hw *hwclk)
 
 	spin_lock_irqsave(&corediv->lock, flags);
 
-	reg = readl(corediv->reg);
+	reg = pete_readl("drivers/clk/mvebu/clk-corediv.c:118", corediv->reg);
 	reg &= ~(BIT(desc->fieldbit) << soc_desc->enable_bit_offset);
-	writel(reg, corediv->reg);
+	pete_writel("drivers/clk/mvebu/clk-corediv.c:120", reg, corediv->reg);
 
 	spin_unlock_irqrestore(&corediv->lock, flags);
 }
@@ -130,7 +130,7 @@ static unsigned long clk_corediv_recalc_rate(struct clk_hw *hwclk,
 	const struct clk_corediv_desc *desc = corediv->desc;
 	u32 reg, div;
 
-	reg = readl(corediv->reg + soc_desc->ratio_offset);
+	reg = pete_readl("drivers/clk/mvebu/clk-corediv.c:133", corediv->reg + soc_desc->ratio_offset);
 	div = (reg >> desc->offset) & desc->mask;
 	return parent_rate / div;
 }
@@ -164,18 +164,18 @@ static int clk_corediv_set_rate(struct clk_hw *hwclk, unsigned long rate,
 	spin_lock_irqsave(&corediv->lock, flags);
 
 	/* Write new divider to the divider ratio register */
-	reg = readl(corediv->reg + soc_desc->ratio_offset);
+	reg = pete_readl("drivers/clk/mvebu/clk-corediv.c:167", corediv->reg + soc_desc->ratio_offset);
 	reg &= ~(desc->mask << desc->offset);
 	reg |= (div & desc->mask) << desc->offset;
-	writel(reg, corediv->reg + soc_desc->ratio_offset);
+	pete_writel("drivers/clk/mvebu/clk-corediv.c:170", reg, corediv->reg + soc_desc->ratio_offset);
 
 	/* Set reload-force for this clock */
-	reg = readl(corediv->reg) | BIT(desc->fieldbit);
-	writel(reg, corediv->reg);
+	reg = pete_readl("drivers/clk/mvebu/clk-corediv.c:173", corediv->reg) | BIT(desc->fieldbit);
+	pete_writel("drivers/clk/mvebu/clk-corediv.c:174", reg, corediv->reg);
 
 	/* Now trigger the clock update */
-	reg = readl(corediv->reg) | soc_desc->ratio_reload;
-	writel(reg, corediv->reg);
+	reg = pete_readl("drivers/clk/mvebu/clk-corediv.c:177", corediv->reg) | soc_desc->ratio_reload;
+	pete_writel("drivers/clk/mvebu/clk-corediv.c:178", reg, corediv->reg);
 
 	/*
 	 * Wait for clocks to settle down, and then clear all the
@@ -183,7 +183,7 @@ static int clk_corediv_set_rate(struct clk_hw *hwclk, unsigned long rate,
 	 */
 	udelay(1000);
 	reg &= ~(CORE_CLK_DIV_RATIO_MASK | soc_desc->ratio_reload);
-	writel(reg, corediv->reg);
+	pete_writel("drivers/clk/mvebu/clk-corediv.c:186", reg, corediv->reg);
 	udelay(1000);
 
 	spin_unlock_irqrestore(&corediv->lock, flags);

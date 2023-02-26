@@ -21,7 +21,7 @@ static void asd_write_byte(struct asd_ha_struct *asd_ha,
 		outb(val,
 		     (unsigned long)asd_ha->io_handle[0].addr + (offs & 0xFF));
 	else
-		writeb(val, asd_ha->io_handle[0].addr + offs);
+		pete_writeb("drivers/scsi/aic94xx/aic94xx_reg.c:24", val, asd_ha->io_handle[0].addr + offs);
 	wmb();
 }
 
@@ -32,7 +32,7 @@ static void asd_write_word(struct asd_ha_struct *asd_ha,
 		outw(val,
 		     (unsigned long)asd_ha->io_handle[0].addr + (offs & 0xFF));
 	else
-		writew(val, asd_ha->io_handle[0].addr + offs);
+		pete_writew("drivers/scsi/aic94xx/aic94xx_reg.c:35", val, asd_ha->io_handle[0].addr + offs);
 	wmb();
 }
 
@@ -43,7 +43,7 @@ static void asd_write_dword(struct asd_ha_struct *asd_ha,
 		outl(val,
 		     (unsigned long)asd_ha->io_handle[0].addr + (offs & 0xFF));
 	else
-		writel(val, asd_ha->io_handle[0].addr + offs);
+		pete_writel("drivers/scsi/aic94xx/aic94xx_reg.c:46", val, asd_ha->io_handle[0].addr + offs);
 	wmb();
 }
 
@@ -56,7 +56,7 @@ static u8 asd_read_byte(struct asd_ha_struct *asd_ha, unsigned long offs)
 		val = inb((unsigned long) asd_ha->io_handle[0].addr
 			  + (offs & 0xFF));
 	else
-		val = readb(asd_ha->io_handle[0].addr + offs);
+		val = pete_readb("drivers/scsi/aic94xx/aic94xx_reg.c:59", asd_ha->io_handle[0].addr + offs);
 	rmb();
 	return val;
 }
@@ -69,7 +69,7 @@ static u16 asd_read_word(struct asd_ha_struct *asd_ha,
 		val = inw((unsigned long)asd_ha->io_handle[0].addr
 			  + (offs & 0xFF));
 	else
-		val = readw(asd_ha->io_handle[0].addr + offs);
+		val = pete_readw("drivers/scsi/aic94xx/aic94xx_reg.c:72", asd_ha->io_handle[0].addr + offs);
 	rmb();
 	return val;
 }
@@ -82,7 +82,7 @@ static u32 asd_read_dword(struct asd_ha_struct *asd_ha,
 		val = inl((unsigned long) asd_ha->io_handle[0].addr
 			  + (offs & 0xFF));
 	else
-		val = readl(asd_ha->io_handle[0].addr + offs);
+		val = pete_readl("drivers/scsi/aic94xx/aic94xx_reg.c:85", asd_ha->io_handle[0].addr + offs);
 	rmb();
 	return val;
 }

@@ -90,10 +90,10 @@ static inline void dw_update_bits(void __iomem *addr, u32 bit_start,
 {
 	u32 tmp, orig;
 
-	orig = readl(addr);
+	orig = pete_readl("drivers/gpu/drm/hisilicon/kirin/dw_dsi_reg.h:93", addr);
 	tmp = orig & ~(mask << bit_start);
 	tmp |= (val & mask) << bit_start;
-	writel(tmp, addr);
+	pete_writel("drivers/gpu/drm/hisilicon/kirin/dw_dsi_reg.h:96", tmp, addr);
 }
 
 #endif /* __DW_DRM_DSI_H__ */

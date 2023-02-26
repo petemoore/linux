@@ -171,27 +171,27 @@ static int hpc_check_cmd_status(struct controller *ctrl);
 
 static inline u8 shpc_readb(struct controller *ctrl, int reg)
 {
-	return readb(ctrl->creg + reg);
+	return pete_readb("drivers/pci/hotplug/shpchp_hpc.c:174", ctrl->creg + reg);
 }
 
 static inline u16 shpc_readw(struct controller *ctrl, int reg)
 {
-	return readw(ctrl->creg + reg);
+	return pete_readw("drivers/pci/hotplug/shpchp_hpc.c:179", ctrl->creg + reg);
 }
 
 static inline void shpc_writew(struct controller *ctrl, int reg, u16 val)
 {
-	writew(val, ctrl->creg + reg);
+	pete_writew("drivers/pci/hotplug/shpchp_hpc.c:184", val, ctrl->creg + reg);
 }
 
 static inline u32 shpc_readl(struct controller *ctrl, int reg)
 {
-	return readl(ctrl->creg + reg);
+	return pete_readl("drivers/pci/hotplug/shpchp_hpc.c:189", ctrl->creg + reg);
 }
 
 static inline void shpc_writel(struct controller *ctrl, int reg, u32 val)
 {
-	writel(val, ctrl->creg + reg);
+	pete_writel("drivers/pci/hotplug/shpchp_hpc.c:194", val, ctrl->creg + reg);
 }
 
 static inline int shpc_indirect_read(struct controller *ctrl, int index,

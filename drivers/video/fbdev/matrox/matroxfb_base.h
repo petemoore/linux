@@ -126,23 +126,23 @@ typedef struct {
 } vaddr_t;
 
 static inline unsigned int mga_readb(vaddr_t va, unsigned int offs) {
-	return readb(va.vaddr + offs);
+	return pete_readb("drivers/video/fbdev/matrox/matroxfb_base.h:129", va.vaddr + offs);
 }
 
 static inline void mga_writeb(vaddr_t va, unsigned int offs, u_int8_t value) {
-	writeb(value, va.vaddr + offs);
+	pete_writeb("drivers/video/fbdev/matrox/matroxfb_base.h:133", value, va.vaddr + offs);
 }
 
 static inline void mga_writew(vaddr_t va, unsigned int offs, u_int16_t value) {
-	writew(value, va.vaddr + offs);
+	pete_writew("drivers/video/fbdev/matrox/matroxfb_base.h:137", value, va.vaddr + offs);
 }
 
 static inline u_int32_t mga_readl(vaddr_t va, unsigned int offs) {
-	return readl(va.vaddr + offs);
+	return pete_readl("drivers/video/fbdev/matrox/matroxfb_base.h:141", va.vaddr + offs);
 }
 
 static inline void mga_writel(vaddr_t va, unsigned int offs, u_int32_t value) {
-	writel(value, va.vaddr + offs);
+	pete_writel("drivers/video/fbdev/matrox/matroxfb_base.h:145", value, va.vaddr + offs);
 }
 
 static inline void mga_memcpy_toio(vaddr_t va, const void* src, int len) {

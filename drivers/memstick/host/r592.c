@@ -54,7 +54,7 @@ EXPORT_SYMBOL(memstick_debug_get_tpc_name);
 /* Read a register*/
 static inline u32 r592_read_reg(struct r592_device *dev, int address)
 {
-	u32 value = readl(dev->mmio + address);
+	u32 value = pete_readl("drivers/memstick/host/r592.c:57", dev->mmio + address);
 	dbg_reg("reg #%02d == 0x%08x", address, value);
 	return value;
 }
@@ -64,7 +64,7 @@ static inline void r592_write_reg(struct r592_device *dev,
 							int address, u32 value)
 {
 	dbg_reg("reg #%02d <- 0x%08x", address, value);
-	writel(value, dev->mmio + address);
+	pete_writel("drivers/memstick/host/r592.c:67", value, dev->mmio + address);
 }
 
 /* Reads a big endian DWORD register */
@@ -87,19 +87,19 @@ static inline void r592_write_reg_raw_be(struct r592_device *dev,
 static inline void r592_set_reg_mask(struct r592_device *dev,
 							int address, u32 mask)
 {
-	u32 reg = readl(dev->mmio + address);
+	u32 reg = pete_readl("drivers/memstick/host/r592.c:90", dev->mmio + address);
 	dbg_reg("reg #%02d |= 0x%08x (old =0x%08x)", address, mask, reg);
-	writel(reg | mask , dev->mmio + address);
+	pete_writel("drivers/memstick/host/r592.c:92", reg | mask , dev->mmio + address);
 }
 
 /* Clear specific bits in a register (little endian) */
 static inline void r592_clear_reg_mask(struct r592_device *dev,
 						int address, u32 mask)
 {
-	u32 reg = readl(dev->mmio + address);
+	u32 reg = pete_readl("drivers/memstick/host/r592.c:99", dev->mmio + address);
 	dbg_reg("reg #%02d &= 0x%08x (old = 0x%08x, mask = 0x%08x)",
 						address, ~mask, reg, mask);
-	writel(reg & ~mask, dev->mmio + address);
+	pete_writel("drivers/memstick/host/r592.c:102", reg & ~mask, dev->mmio + address);
 }
 
 

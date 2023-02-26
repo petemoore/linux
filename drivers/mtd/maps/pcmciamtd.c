@@ -114,7 +114,7 @@ static map_word pcmcia_read8_remap(struct map_info *map, unsigned long ofs)
 	if(!addr)
 		return d;
 
-	d.x[0] = readb(addr);
+	d.x[0] = pete_readb("drivers/mtd/maps/pcmciamtd.c:117", addr);
 	pr_debug("ofs = 0x%08lx (%p) data = 0x%02lx\n", ofs, addr, d.x[0]);
 	return d;
 }
@@ -129,7 +129,7 @@ static map_word pcmcia_read16_remap(struct map_info *map, unsigned long ofs)
 	if(!addr)
 		return d;
 
-	d.x[0] = readw(addr);
+	d.x[0] = pete_readw("drivers/mtd/maps/pcmciamtd.c:132", addr);
 	pr_debug("ofs = 0x%08lx (%p) data = 0x%04lx\n", ofs, addr, d.x[0]);
 	return d;
 }
@@ -169,7 +169,7 @@ static void pcmcia_write8_remap(struct map_info *map, map_word d, unsigned long 
 		return;
 
 	pr_debug("adr = 0x%08lx (%p)  data = 0x%02lx\n", adr, addr, d.x[0]);
-	writeb(d.x[0], addr);
+	pete_writeb("drivers/mtd/maps/pcmciamtd.c:172", d.x[0], addr);
 }
 
 
@@ -180,7 +180,7 @@ static void pcmcia_write16_remap(struct map_info *map, map_word d, unsigned long
 		return;
 
 	pr_debug("adr = 0x%08lx (%p)  data = 0x%04lx\n", adr, addr, d.x[0]);
-	writew(d.x[0], addr);
+	pete_writew("drivers/mtd/maps/pcmciamtd.c:183", d.x[0], addr);
 }
 
 
@@ -222,7 +222,7 @@ static map_word pcmcia_read8(struct map_info *map, unsigned long ofs)
 	if(DEV_REMOVED(map))
 		return d;
 
-	d.x[0] = readb(win_base + ofs);
+	d.x[0] = pete_readb("drivers/mtd/maps/pcmciamtd.c:225", win_base + ofs);
 	pr_debug("ofs = 0x%08lx (%p) data = 0x%02lx\n",
 	      ofs, win_base + ofs, d.x[0]);
 	return d;
@@ -237,7 +237,7 @@ static map_word pcmcia_read16(struct map_info *map, unsigned long ofs)
 	if(DEV_REMOVED(map))
 		return d;
 
-	d.x[0] = readw(win_base + ofs);
+	d.x[0] = pete_readw("drivers/mtd/maps/pcmciamtd.c:240", win_base + ofs);
 	pr_debug("ofs = 0x%08lx (%p) data = 0x%04lx\n",
 	      ofs, win_base + ofs, d.x[0]);
 	return d;
@@ -265,7 +265,7 @@ static void pcmcia_write8(struct map_info *map, map_word d, unsigned long adr)
 
 	pr_debug("adr = 0x%08lx (%p)  data = 0x%02lx\n",
 	      adr, win_base + adr, d.x[0]);
-	writeb(d.x[0], win_base + adr);
+	pete_writeb("drivers/mtd/maps/pcmciamtd.c:268", d.x[0], win_base + adr);
 }
 
 
@@ -278,7 +278,7 @@ static void pcmcia_write16(struct map_info *map, map_word d, unsigned long adr)
 
 	pr_debug("adr = 0x%08lx (%p)  data = 0x%04lx\n",
 	      adr, win_base + adr, d.x[0]);
-	writew(d.x[0], win_base + adr);
+	pete_writew("drivers/mtd/maps/pcmciamtd.c:281", d.x[0], win_base + adr);
 }
 
 

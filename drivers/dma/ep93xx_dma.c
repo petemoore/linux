@@ -308,12 +308,12 @@ static bool ep93xx_dma_advance_active(struct ep93xx_dma_chan *edmac)
 
 static void m2p_set_control(struct ep93xx_dma_chan *edmac, u32 control)
 {
-	writel(control, edmac->regs + M2P_CONTROL);
+	pete_writel("drivers/dma/ep93xx_dma.c:311", control, edmac->regs + M2P_CONTROL);
 	/*
 	 * EP93xx User's Guide states that we must perform a dummy read after
 	 * write to the control register.
 	 */
-	readl(edmac->regs + M2P_CONTROL);
+	pete_readl("drivers/dma/ep93xx_dma.c:316", edmac->regs + M2P_CONTROL);
 }
 
 static int m2p_hw_setup(struct ep93xx_dma_chan *edmac)
@@ -321,7 +321,7 @@ static int m2p_hw_setup(struct ep93xx_dma_chan *edmac)
 	struct ep93xx_dma_data *data = edmac->chan.private;
 	u32 control;
 
-	writel(data->port & 0xf, edmac->regs + M2P_PPALLOC);
+	pete_writel("drivers/dma/ep93xx_dma.c:324", data->port & 0xf, edmac->regs + M2P_PPALLOC);
 
 	control = M2P_CONTROL_CH_ERROR_INT | M2P_CONTROL_ICE
 		| M2P_CONTROL_ENABLE;
@@ -334,7 +334,7 @@ static int m2p_hw_setup(struct ep93xx_dma_chan *edmac)
 
 static inline u32 m2p_channel_state(struct ep93xx_dma_chan *edmac)
 {
-	return (readl(edmac->regs + M2P_STATUS) >> 4) & 0x3;
+	return (pete_readl("drivers/dma/ep93xx_dma.c:337", edmac->regs + M2P_STATUS) >> 4) & 0x3;
 }
 
 static void m2p_hw_synchronize(struct ep93xx_dma_chan *edmac)
@@ -343,7 +343,7 @@ static void m2p_hw_synchronize(struct ep93xx_dma_chan *edmac)
 	u32 control;
 
 	spin_lock_irqsave(&edmac->lock, flags);
-	control = readl(edmac->regs + M2P_CONTROL);
+	control = pete_readl("drivers/dma/ep93xx_dma.c:346", edmac->regs + M2P_CONTROL);
 	control &= ~(M2P_CONTROL_STALLINT | M2P_CONTROL_NFBINT);
 	m2p_set_control(edmac, control);
 	spin_unlock_irqrestore(&edmac->lock, flags);
@@ -377,11 +377,11 @@ static void m2p_fill_desc(struct ep93xx_dma_chan *edmac)
 		bus_addr = desc->dst_addr;
 
 	if (edmac->buffer == 0) {
-		writel(desc->size, edmac->regs + M2P_MAXCNT0);
-		writel(bus_addr, edmac->regs + M2P_BASE0);
+		pete_writel("drivers/dma/ep93xx_dma.c:380", desc->size, edmac->regs + M2P_MAXCNT0);
+		pete_writel("drivers/dma/ep93xx_dma.c:381", bus_addr, edmac->regs + M2P_BASE0);
 	} else {
-		writel(desc->size, edmac->regs + M2P_MAXCNT1);
-		writel(bus_addr, edmac->regs + M2P_BASE1);
+		pete_writel("drivers/dma/ep93xx_dma.c:383", desc->size, edmac->regs + M2P_MAXCNT1);
+		pete_writel("drivers/dma/ep93xx_dma.c:384", bus_addr, edmac->regs + M2P_BASE1);
 	}
 
 	edmac->buffer ^= 1;
@@ -389,7 +389,7 @@ static void m2p_fill_desc(struct ep93xx_dma_chan *edmac)
 
 static void m2p_hw_submit(struct ep93xx_dma_chan *edmac)
 {
-	u32 control = readl(edmac->regs + M2P_CONTROL);
+	u32 control = pete_readl("drivers/dma/ep93xx_dma.c:392", edmac->regs + M2P_CONTROL);
 
 	m2p_fill_desc(edmac);
 	control |= M2P_CONTROL_STALLINT;
@@ -404,14 +404,14 @@ static void m2p_hw_submit(struct ep93xx_dma_chan *edmac)
 
 static int m2p_hw_interrupt(struct ep93xx_dma_chan *edmac)
 {
-	u32 irq_status = readl(edmac->regs + M2P_INTERRUPT);
+	u32 irq_status = pete_readl("drivers/dma/ep93xx_dma.c:407", edmac->regs + M2P_INTERRUPT);
 	u32 control;
 
 	if (irq_status & M2P_INTERRUPT_ERROR) {
 		struct ep93xx_dma_desc *desc = ep93xx_dma_get_active(edmac);
 
 		/* Clear the error interrupt */
-		writel(1, edmac->regs + M2P_INTERRUPT);
+		pete_writel("drivers/dma/ep93xx_dma.c:414", 1, edmac->regs + M2P_INTERRUPT);
 
 		/*
 		 * It seems that there is no easy way of reporting errors back
@@ -445,7 +445,7 @@ static int m2p_hw_interrupt(struct ep93xx_dma_chan *edmac)
 	}
 
 	/* Disable interrupts */
-	control = readl(edmac->regs + M2P_CONTROL);
+	control = pete_readl("drivers/dma/ep93xx_dma.c:448", edmac->regs + M2P_CONTROL);
 	control &= ~(M2P_CONTROL_STALLINT | M2P_CONTROL_NFBINT);
 	m2p_set_control(edmac, control);
 
@@ -463,7 +463,7 @@ static int m2m_hw_setup(struct ep93xx_dma_chan *edmac)
 
 	if (!data) {
 		/* This is memcpy channel, nothing to configure */
-		writel(control, edmac->regs + M2M_CONTROL);
+		pete_writel("drivers/dma/ep93xx_dma.c:466", control, edmac->regs + M2M_CONTROL);
 		return 0;
 	}
 
@@ -513,14 +513,14 @@ static int m2m_hw_setup(struct ep93xx_dma_chan *edmac)
 		return -EINVAL;
 	}
 
-	writel(control, edmac->regs + M2M_CONTROL);
+	pete_writel("drivers/dma/ep93xx_dma.c:516", control, edmac->regs + M2M_CONTROL);
 	return 0;
 }
 
 static void m2m_hw_shutdown(struct ep93xx_dma_chan *edmac)
 {
 	/* Just disable the channel */
-	writel(0, edmac->regs + M2M_CONTROL);
+	pete_writel("drivers/dma/ep93xx_dma.c:523", 0, edmac->regs + M2M_CONTROL);
 }
 
 static void m2m_fill_desc(struct ep93xx_dma_chan *edmac)
@@ -534,13 +534,13 @@ static void m2m_fill_desc(struct ep93xx_dma_chan *edmac)
 	}
 
 	if (edmac->buffer == 0) {
-		writel(desc->src_addr, edmac->regs + M2M_SAR_BASE0);
-		writel(desc->dst_addr, edmac->regs + M2M_DAR_BASE0);
-		writel(desc->size, edmac->regs + M2M_BCR0);
+		pete_writel("drivers/dma/ep93xx_dma.c:537", desc->src_addr, edmac->regs + M2M_SAR_BASE0);
+		pete_writel("drivers/dma/ep93xx_dma.c:538", desc->dst_addr, edmac->regs + M2M_DAR_BASE0);
+		pete_writel("drivers/dma/ep93xx_dma.c:539", desc->size, edmac->regs + M2M_BCR0);
 	} else {
-		writel(desc->src_addr, edmac->regs + M2M_SAR_BASE1);
-		writel(desc->dst_addr, edmac->regs + M2M_DAR_BASE1);
-		writel(desc->size, edmac->regs + M2M_BCR1);
+		pete_writel("drivers/dma/ep93xx_dma.c:541", desc->src_addr, edmac->regs + M2M_SAR_BASE1);
+		pete_writel("drivers/dma/ep93xx_dma.c:542", desc->dst_addr, edmac->regs + M2M_DAR_BASE1);
+		pete_writel("drivers/dma/ep93xx_dma.c:543", desc->size, edmac->regs + M2M_BCR1);
 	}
 
 	edmac->buffer ^= 1;
@@ -549,7 +549,7 @@ static void m2m_fill_desc(struct ep93xx_dma_chan *edmac)
 static void m2m_hw_submit(struct ep93xx_dma_chan *edmac)
 {
 	struct ep93xx_dma_data *data = edmac->chan.private;
-	u32 control = readl(edmac->regs + M2M_CONTROL);
+	u32 control = pete_readl("drivers/dma/ep93xx_dma.c:552", edmac->regs + M2M_CONTROL);
 
 	/*
 	 * Since we allow clients to configure PW (peripheral width) we always
@@ -572,7 +572,7 @@ static void m2m_hw_submit(struct ep93xx_dma_chan *edmac)
 	 * done _after_ the BCRx registers are programmed.
 	 */
 	control |= M2M_CONTROL_ENABLE;
-	writel(control, edmac->regs + M2M_CONTROL);
+	pete_writel("drivers/dma/ep93xx_dma.c:575", control, edmac->regs + M2M_CONTROL);
 
 	if (!data) {
 		/*
@@ -580,7 +580,7 @@ static void m2m_hw_submit(struct ep93xx_dma_chan *edmac)
 		 * in order to start the memcpy operation.
 		 */
 		control |= M2M_CONTROL_START;
-		writel(control, edmac->regs + M2M_CONTROL);
+		pete_writel("drivers/dma/ep93xx_dma.c:583", control, edmac->regs + M2M_CONTROL);
 	}
 }
 
@@ -596,7 +596,7 @@ static void m2m_hw_submit(struct ep93xx_dma_chan *edmac)
  */
 static int m2m_hw_interrupt(struct ep93xx_dma_chan *edmac)
 {
-	u32 status = readl(edmac->regs + M2M_STATUS);
+	u32 status = pete_readl("drivers/dma/ep93xx_dma.c:599", edmac->regs + M2M_STATUS);
 	u32 ctl_fsm = status & M2M_STATUS_CTL_MASK;
 	u32 buf_fsm = status & M2M_STATUS_BUF_MASK;
 	bool done = status & M2M_STATUS_DONE;
@@ -605,12 +605,12 @@ static int m2m_hw_interrupt(struct ep93xx_dma_chan *edmac)
 	struct ep93xx_dma_desc *desc;
 
 	/* Accept only DONE and NFB interrupts */
-	if (!(readl(edmac->regs + M2M_INTERRUPT) & M2M_INTERRUPT_MASK))
+	if (!(pete_readl("drivers/dma/ep93xx_dma.c:608", edmac->regs + M2M_INTERRUPT) & M2M_INTERRUPT_MASK))
 		return INTERRUPT_UNKNOWN;
 
 	if (done) {
 		/* Clear the DONE bit */
-		writel(0, edmac->regs + M2M_INTERRUPT);
+		pete_writel("drivers/dma/ep93xx_dma.c:613", 0, edmac->regs + M2M_INTERRUPT);
 	}
 
 	/*
@@ -638,9 +638,9 @@ static int m2m_hw_interrupt(struct ep93xx_dma_chan *edmac)
 			m2m_fill_desc(edmac);
 			if (done && !edmac->chan.private) {
 				/* Software trigger for memcpy channel */
-				control = readl(edmac->regs + M2M_CONTROL);
+				control = pete_readl("drivers/dma/ep93xx_dma.c:641", edmac->regs + M2M_CONTROL);
 				control |= M2M_CONTROL_START;
-				writel(control, edmac->regs + M2M_CONTROL);
+				pete_writel("drivers/dma/ep93xx_dma.c:643", control, edmac->regs + M2M_CONTROL);
 			}
 			return INTERRUPT_NEXT_BUFFER;
 		} else {
@@ -656,10 +656,10 @@ static int m2m_hw_interrupt(struct ep93xx_dma_chan *edmac)
 	    buf_fsm == M2M_STATUS_BUF_NO &&
 	    ctl_fsm == M2M_STATUS_CTL_STALL) {
 		/* Disable interrupts and the channel */
-		control = readl(edmac->regs + M2M_CONTROL);
+		control = pete_readl("drivers/dma/ep93xx_dma.c:659", edmac->regs + M2M_CONTROL);
 		control &= ~(M2M_CONTROL_DONEINT | M2M_CONTROL_NFBINT
 			    | M2M_CONTROL_ENABLE);
-		writel(control, edmac->regs + M2M_CONTROL);
+		pete_writel("drivers/dma/ep93xx_dma.c:662", control, edmac->regs + M2M_CONTROL);
 		return INTERRUPT_DONE;
 	}
 

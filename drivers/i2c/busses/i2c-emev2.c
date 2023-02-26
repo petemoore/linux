@@ -74,7 +74,7 @@ struct em_i2c_device {
 
 static inline void em_clear_set_bit(struct em_i2c_device *priv, u8 clear, u8 set, u8 reg)
 {
-	writeb((readb(priv->base + reg) & ~clear) | set, priv->base + reg);
+	pete_writeb("drivers/i2c/busses/i2c-emev2.c:77", (pete_readb("drivers/i2c/busses/i2c-emev2.c:77", priv->base + reg) & ~clear) | set, priv->base + reg);
 }
 
 static int em_i2c_wait_for_event(struct em_i2c_device *priv)
@@ -89,7 +89,7 @@ static int em_i2c_wait_for_event(struct em_i2c_device *priv)
 	if (!time_left)
 		return -ETIMEDOUT;
 
-	status = readb(priv->base + I2C_OFS_IICSE0);
+	status = pete_readb("drivers/i2c/busses/i2c-emev2.c:92", priv->base + I2C_OFS_IICSE0);
 	return status & I2C_BIT_ALD0 ? -EAGAIN : status;
 }
 
@@ -108,30 +108,30 @@ static void em_i2c_reset(struct i2c_adapter *adap)
 	int retr;
 
 	/* If I2C active */
-	if (readb(priv->base + I2C_OFS_IICACT0) & I2C_BIT_IICE0) {
+	if (pete_readb("drivers/i2c/busses/i2c-emev2.c:111", priv->base + I2C_OFS_IICACT0) & I2C_BIT_IICE0) {
 		/* Disable I2C operation */
-		writeb(0, priv->base + I2C_OFS_IICACT0);
+		pete_writeb("drivers/i2c/busses/i2c-emev2.c:113", 0, priv->base + I2C_OFS_IICACT0);
 
 		retr = 1000;
-		while (readb(priv->base + I2C_OFS_IICACT0) == 1 && retr)
+		while (pete_readb("drivers/i2c/busses/i2c-emev2.c:116", priv->base + I2C_OFS_IICACT0) == 1 && retr)
 			retr--;
 		WARN_ON(retr == 0);
 	}
 
 	/* Transfer mode set */
-	writeb(I2C_BIT_DFC0, priv->base + I2C_OFS_IICCL0);
+	pete_writeb("drivers/i2c/busses/i2c-emev2.c:122", I2C_BIT_DFC0, priv->base + I2C_OFS_IICCL0);
 
 	/* Can Issue start without detecting a stop, Reservation disabled. */
-	writeb(I2C_BIT_STCEN | I2C_BIT_IICRSV, priv->base + I2C_OFS_IICF0);
+	pete_writeb("drivers/i2c/busses/i2c-emev2.c:125", I2C_BIT_STCEN | I2C_BIT_IICRSV, priv->base + I2C_OFS_IICF0);
 
 	/* I2C enable, 9 bit interrupt mode */
-	writeb(I2C_BIT_WTIM0, priv->base + I2C_OFS_IICC0);
+	pete_writeb("drivers/i2c/busses/i2c-emev2.c:128", I2C_BIT_WTIM0, priv->base + I2C_OFS_IICC0);
 
 	/* Enable I2C operation */
-	writeb(I2C_BIT_IICE0, priv->base + I2C_OFS_IICACT0);
+	pete_writeb("drivers/i2c/busses/i2c-emev2.c:131", I2C_BIT_IICE0, priv->base + I2C_OFS_IICACT0);
 
 	retr = 1000;
-	while (readb(priv->base + I2C_OFS_IICACT0) == 0 && retr)
+	while (pete_readb("drivers/i2c/busses/i2c-emev2.c:134", priv->base + I2C_OFS_IICACT0) == 0 && retr)
 		retr--;
 	WARN_ON(retr == 0);
 }
@@ -147,7 +147,7 @@ static int __em_i2c_xfer(struct i2c_adapter *adap, struct i2c_msg *msg,
 	em_clear_set_bit(priv, 0, I2C_BIT_STT0, I2C_OFS_IICC0);
 
 	/* Send slave address and R/W type */
-	writeb(i2c_8bit_addr_from_msg(msg), priv->base + I2C_OFS_IIC0);
+	pete_writeb("drivers/i2c/busses/i2c-emev2.c:150", i2c_8bit_addr_from_msg(msg), priv->base + I2C_OFS_IIC0);
 
 	/* Wait for transaction */
 	status = em_i2c_wait_for_event(priv);
@@ -175,7 +175,7 @@ static int __em_i2c_xfer(struct i2c_adapter *adap, struct i2c_msg *msg,
 	/* Send / receive data */
 	for (count = 0; count < msg->len; count++) {
 		if (read) { /* Read transaction */
-			msg->buf[count] = readb(priv->base + I2C_OFS_IIC0);
+			msg->buf[count] = pete_readb("drivers/i2c/busses/i2c-emev2.c:178", priv->base + I2C_OFS_IIC0);
 			em_clear_set_bit(priv, 0, I2C_BIT_WREL0, I2C_OFS_IICC0);
 
 		} else { /* Write transaction */
@@ -186,7 +186,7 @@ static int __em_i2c_xfer(struct i2c_adapter *adap, struct i2c_msg *msg,
 			}
 
 			/* Write data */
-			writeb(msg->buf[count], priv->base + I2C_OFS_IIC0);
+			pete_writeb("drivers/i2c/busses/i2c-emev2.c:189", msg->buf[count], priv->base + I2C_OFS_IIC0);
 		}
 
 		/* Wait for R/W transaction */
@@ -212,7 +212,7 @@ static int em_i2c_xfer(struct i2c_adapter *adap, struct i2c_msg *msgs,
 	struct em_i2c_device *priv = i2c_get_adapdata(adap);
 	int ret, i;
 
-	if (readb(priv->base + I2C_OFS_IICF0) & I2C_BIT_IICBSY)
+	if (pete_readb("drivers/i2c/busses/i2c-emev2.c:215", priv->base + I2C_OFS_IICF0) & I2C_BIT_IICBSY)
 		return -EAGAIN;
 
 	for (i = 0; i < num; i++) {
@@ -234,7 +234,7 @@ static bool em_i2c_slave_irq(struct em_i2c_device *priv)
 	if (!priv->slave)
 		return false;
 
-	status = readb(priv->base + I2C_OFS_IICSE0);
+	status = pete_readb("drivers/i2c/busses/i2c-emev2.c:237", priv->base + I2C_OFS_IICSE0);
 
 	/* Extension code, do not participate */
 	if (status & I2C_BIT_EXC0) {
@@ -268,7 +268,7 @@ static bool em_i2c_slave_irq(struct em_i2c_device *priv)
 				I2C_SLAVE_READ_REQUESTED :
 				I2C_SLAVE_READ_PROCESSED;
 			i2c_slave_event(priv->slave, event, &value);
-			writeb(value, priv->base + I2C_OFS_IIC0);
+			pete_writeb("drivers/i2c/busses/i2c-emev2.c:271", value, priv->base + I2C_OFS_IIC0);
 		} else {
 			/* NACK, stop transmitting */
 			em_clear_set_bit(priv, 0, I2C_BIT_LREL0, I2C_OFS_IICC0);
@@ -285,7 +285,7 @@ static bool em_i2c_slave_irq(struct em_i2c_device *priv)
 					&value);
 		} else {
 			/* Recv data */
-			value = readb(priv->base + I2C_OFS_IIC0);
+			value = pete_readb("drivers/i2c/busses/i2c-emev2.c:288", priv->base + I2C_OFS_IIC0);
 			ret = i2c_slave_event(priv->slave,
 					I2C_SLAVE_WRITE_RECEIVED, &value);
 			if (ret < 0)
@@ -327,7 +327,7 @@ static int em_i2c_reg_slave(struct i2c_client *slave)
 	priv->slave = slave;
 
 	/* Set slave address */
-	writeb(slave->addr << 1, priv->base + I2C_OFS_SVA0);
+	pete_writeb("drivers/i2c/busses/i2c-emev2.c:330", slave->addr << 1, priv->base + I2C_OFS_SVA0);
 
 	return 0;
 }
@@ -338,7 +338,7 @@ static int em_i2c_unreg_slave(struct i2c_client *slave)
 
 	WARN_ON(!priv->slave);
 
-	writeb(0, priv->base + I2C_OFS_SVA0);
+	pete_writeb("drivers/i2c/busses/i2c-emev2.c:341", 0, priv->base + I2C_OFS_SVA0);
 
 	/*
 	 * Wait for interrupt to finish. New slave irqs cannot happen because we

@@ -9,8 +9,8 @@
 #include "lima_vm.h"
 #include "lima_regs.h"
 
-#define dlbu_write(reg, data) writel(data, ip->iomem + reg)
-#define dlbu_read(reg) readl(ip->iomem + reg)
+#define dlbu_write(reg, data) pete_writel("drivers/gpu/drm/lima/lima_dlbu.c:12", data, ip->iomem + reg)
+#define dlbu_read(reg) pete_readl("drivers/gpu/drm/lima/lima_dlbu.c:13", ip->iomem + reg)
 
 void lima_dlbu_enable(struct lima_device *dev, int num_pp)
 {

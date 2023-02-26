@@ -109,14 +109,14 @@ static void bluefield_gather_report_ecc(struct mem_ctl_info *mci,
 	 * registers with information about the last ECC error occurrence.
 	 */
 	ecc_latch_select = MLXBF_ECC_LATCH_SEL__START;
-	writel(ecc_latch_select, priv->emi_base + MLXBF_ECC_LATCH_SEL);
+	pete_writel("drivers/edac/bluefield_edac.c:112", ecc_latch_select, priv->emi_base + MLXBF_ECC_LATCH_SEL);
 
 	/*
 	 * Verify that the ECC reported info in the registers is of the
 	 * same type as the one asked to report. If not, just report the
 	 * error without the detailed information.
 	 */
-	dram_syndrom = readl(priv->emi_base + MLXBF_SYNDROM);
+	dram_syndrom = pete_readl("drivers/edac/bluefield_edac.c:119", priv->emi_base + MLXBF_SYNDROM);
 	serr = FIELD_GET(MLXBF_SYNDROM__SERR, dram_syndrom);
 	derr = FIELD_GET(MLXBF_SYNDROM__DERR, dram_syndrom);
 	syndrom = FIELD_GET(MLXBF_SYNDROM__SYN, dram_syndrom);
@@ -127,13 +127,13 @@ static void bluefield_gather_report_ecc(struct mem_ctl_info *mci,
 		return;
 	}
 
-	dram_additional_info = readl(priv->emi_base + MLXBF_ADD_INFO);
+	dram_additional_info = pete_readl("drivers/edac/bluefield_edac.c:130", priv->emi_base + MLXBF_ADD_INFO);
 	err_prank = FIELD_GET(MLXBF_ADD_INFO__ERR_PRANK, dram_additional_info);
 
 	ecc_dimm = (err_prank >= 2 && priv->dimm_ranks[0] <= 2) ? 1 : 0;
 
-	edea0 = readl(priv->emi_base + MLXBF_ERR_ADDR_0);
-	edea1 = readl(priv->emi_base + MLXBF_ERR_ADDR_1);
+	edea0 = pete_readl("drivers/edac/bluefield_edac.c:135", priv->emi_base + MLXBF_ERR_ADDR_0);
+	edea1 = pete_readl("drivers/edac/bluefield_edac.c:136", priv->emi_base + MLXBF_ERR_ADDR_1);
 
 	ecc_dimm_addr = ((u64)edea1 << 32) | edea0;
 
@@ -155,7 +155,7 @@ static void bluefield_edac_check(struct mem_ctl_info *mci)
 	if (mci->edac_cap == EDAC_FLAG_NONE)
 		return;
 
-	ecc_count = readl(priv->emi_base + MLXBF_ECC_CNT);
+	ecc_count = pete_readl("drivers/edac/bluefield_edac.c:158", priv->emi_base + MLXBF_ECC_CNT);
 	single_error_count = FIELD_GET(MLXBF_ECC_CNT__SERR_CNT, ecc_count);
 	double_error_count = FIELD_GET(MLXBF_ECC_CNT__DERR_CNT, ecc_count);
 
@@ -173,7 +173,7 @@ static void bluefield_edac_check(struct mem_ctl_info *mci)
 
 	/* Write to clear reported errors. */
 	if (ecc_count)
-		writel(ecc_error, priv->emi_base + MLXBF_ECC_ERR);
+		pete_writel("drivers/edac/bluefield_edac.c:176", ecc_error, priv->emi_base + MLXBF_ECC_ERR);
 }
 
 /* Initialize the DIMMs information for the given memory controller. */

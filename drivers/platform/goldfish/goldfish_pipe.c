@@ -221,7 +221,7 @@ static int goldfish_pipe_cmd_locked(struct goldfish_pipe *pipe,
 	pipe->command_buffer->cmd = cmd;
 	/* failure by default */
 	pipe->command_buffer->status = PIPE_ERROR_INVAL;
-	writel(pipe->id, pipe->dev->base + PIPE_REG_CMD);
+	pete_writel("drivers/platform/goldfish/goldfish_pipe.c:224", pipe->id, pipe->dev->base + PIPE_REG_CMD);
 	return pipe->command_buffer->status;
 }
 
@@ -628,7 +628,7 @@ static irqreturn_t goldfish_pipe_interrupt(int irq, void *dev_id)
 	/* Request the signalled pipes from the device */
 	spin_lock_irqsave(&dev->lock, flags);
 
-	count = readl(dev->base + PIPE_REG_GET_SIGNALLED);
+	count = pete_readl("drivers/platform/goldfish/goldfish_pipe.c:631", dev->base + PIPE_REG_GET_SIGNALLED);
 	if (count == 0) {
 		spin_unlock_irqrestore(&dev->lock, flags);
 		return IRQ_NONE;
@@ -799,8 +799,8 @@ static void write_pa_addr(void *addr, void __iomem *portl, void __iomem *porth)
 {
 	const unsigned long paddr = __pa(addr);
 
-	writel(upper_32_bits(paddr), porth);
-	writel(lower_32_bits(paddr), portl);
+	pete_writel("drivers/platform/goldfish/goldfish_pipe.c:802", upper_32_bits(paddr), porth);
+	pete_writel("drivers/platform/goldfish/goldfish_pipe.c:803", lower_32_bits(paddr), portl);
 }
 
 static int goldfish_pipe_device_init(struct platform_device *pdev,
@@ -854,7 +854,7 @@ static int goldfish_pipe_device_init(struct platform_device *pdev,
 		      dev->base + PIPE_REG_SIGNAL_BUFFER,
 		      dev->base + PIPE_REG_SIGNAL_BUFFER_HIGH);
 
-	writel(MAX_SIGNALLED_PIPES,
+	pete_writel("drivers/platform/goldfish/goldfish_pipe.c:857", MAX_SIGNALLED_PIPES,
 	       dev->base + PIPE_REG_SIGNAL_BUFFER_COUNT);
 
 	write_pa_addr(&dev->buffers->open_command_params,
@@ -909,8 +909,8 @@ static int goldfish_pipe_probe(struct platform_device *pdev)
 	 *  reading device version back: this allows the host implementation to
 	 *  detect the old driver (if there was no version write before read).
 	 */
-	writel(PIPE_DRIVER_VERSION, dev->base + PIPE_REG_VERSION);
-	dev->version = readl(dev->base + PIPE_REG_VERSION);
+	pete_writel("drivers/platform/goldfish/goldfish_pipe.c:912", PIPE_DRIVER_VERSION, dev->base + PIPE_REG_VERSION);
+	dev->version = pete_readl("drivers/platform/goldfish/goldfish_pipe.c:913", dev->base + PIPE_REG_VERSION);
 	if (WARN_ON(dev->version < PIPE_CURRENT_DEVICE_VERSION))
 		return -EINVAL;
 

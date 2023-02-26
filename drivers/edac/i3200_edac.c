@@ -195,9 +195,9 @@ static void i3200_get_and_clear_error_info(struct mem_ctl_info *mci,
 	if (!(info->errsts & I3200_ERRSTS_BITS))
 		return;
 
-	info->eccerrlog[0] = readq(window + I3200_C0ECCERRLOG);
+	info->eccerrlog[0] = pete_readq("drivers/edac/i3200_edac.c:198", window + I3200_C0ECCERRLOG);
 	if (nr_channels == 2)
-		info->eccerrlog[1] = readq(window + I3200_C1ECCERRLOG);
+		info->eccerrlog[1] = pete_readq("drivers/edac/i3200_edac.c:200", window + I3200_C1ECCERRLOG);
 
 	pci_read_config_word(pdev, I3200_ERRSTS, &info->errsts2);
 
@@ -208,9 +208,9 @@ static void i3200_get_and_clear_error_info(struct mem_ctl_info *mci,
 	 * should be UE info.
 	 */
 	if ((info->errsts ^ info->errsts2) & I3200_ERRSTS_BITS) {
-		info->eccerrlog[0] = readq(window + I3200_C0ECCERRLOG);
+		info->eccerrlog[0] = pete_readq("drivers/edac/i3200_edac.c:211", window + I3200_C0ECCERRLOG);
 		if (nr_channels == 2)
-			info->eccerrlog[1] = readq(window + I3200_C1ECCERRLOG);
+			info->eccerrlog[1] = pete_readq("drivers/edac/i3200_edac.c:213", window + I3200_C1ECCERRLOG);
 	}
 
 	i3200_clear_error_info(mci);
@@ -294,8 +294,8 @@ static void i3200_get_drbs(void __iomem *window,
 	int i;
 
 	for (i = 0; i < I3200_RANKS_PER_CHANNEL; i++) {
-		drbs[0][i] = readw(window + I3200_C0DRB + 2*i) & I3200_DRB_MASK;
-		drbs[1][i] = readw(window + I3200_C1DRB + 2*i) & I3200_DRB_MASK;
+		drbs[0][i] = pete_readw("drivers/edac/i3200_edac.c:297", window + I3200_C0DRB + 2*i) & I3200_DRB_MASK;
+		drbs[1][i] = pete_readw("drivers/edac/i3200_edac.c:298", window + I3200_C1DRB + 2*i) & I3200_DRB_MASK;
 
 		edac_dbg(0, "drb[0][%d] = %d, drb[1][%d] = %d\n", i, drbs[0][i], i, drbs[1][i]);
 	}

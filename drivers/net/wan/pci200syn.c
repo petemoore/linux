@@ -98,7 +98,7 @@ static inline void new_memcpy_toio(char __iomem *dest, char *src, int length)
 		dest += len;
 		src += len;
 		length -= len;
-		readb(dest);
+		pete_readb("drivers/net/wan/pci200syn.c:101", dest);
 	} while (len);
 }
 
@@ -321,12 +321,12 @@ static int pci200_pci_init_one(struct pci_dev *pdev,
 
 	/* Reset PLX */
 	p = &card->plxbase->init_ctrl;
-	writel(readl(p) | 0x40000000, p);
-	readl(p);		/* Flush the write - do not use sca_flush */
+	pete_writel("drivers/net/wan/pci200syn.c:324", pete_readl("drivers/net/wan/pci200syn.c:324", p) | 0x40000000, p);
+	pete_readl("drivers/net/wan/pci200syn.c:325", p);		/* Flush the write - do not use sca_flush */
 	udelay(1);
 
-	writel(readl(p) & ~0x40000000, p);
-	readl(p);		/* Flush the write - do not use sca_flush */
+	pete_writel("drivers/net/wan/pci200syn.c:328", pete_readl("drivers/net/wan/pci200syn.c:328", p) & ~0x40000000, p);
+	pete_readl("drivers/net/wan/pci200syn.c:329", p);		/* Flush the write - do not use sca_flush */
 	udelay(1);
 
 	ramsize = sca_detect_ram(card, card->rambase,
@@ -352,7 +352,7 @@ static int pci200_pci_init_one(struct pci_dev *pdev,
 
 	/* Enable interrupts on the PCI bridge */
 	p = &card->plxbase->intr_ctrl_stat;
-	writew(readw(p) | 0x0040, p);
+	pete_writew("drivers/net/wan/pci200syn.c:355", pete_readw("drivers/net/wan/pci200syn.c:355", p) | 0x0040, p);
 
 	/* Allocate IRQ */
 	if (request_irq(pdev->irq, sca_intr, IRQF_SHARED, "pci200syn", card)) {

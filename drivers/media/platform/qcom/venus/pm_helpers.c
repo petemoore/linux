@@ -340,9 +340,9 @@ vcodec_control_v3(struct venus_core *core, u32 session_type, bool enable)
 		ctrl = core->wrapper_base + WRAPPER_VENC_VCODEC_POWER_CONTROL;
 
 	if (enable)
-		writel(0, ctrl);
+		pete_writel("drivers/media/platform/qcom/venus/pm_helpers.c:343", 0, ctrl);
 	else
-		writel(1, ctrl);
+		pete_writel("drivers/media/platform/qcom/venus/pm_helpers.c:345", 1, ctrl);
 }
 
 static int vdec_get_v3(struct device *dev)
@@ -424,13 +424,13 @@ static int vcodec_control_v4(struct venus_core *core, u32 coreid, bool enable)
 	}
 
 	if (enable) {
-		writel(0, ctrl);
+		pete_writel("drivers/media/platform/qcom/venus/pm_helpers.c:427", 0, ctrl);
 
 		ret = readl_poll_timeout(stat, val, val & BIT(1), 1, 100);
 		if (ret)
 			return ret;
 	} else {
-		writel(1, ctrl);
+		pete_writel("drivers/media/platform/qcom/venus/pm_helpers.c:433", 1, ctrl);
 
 		ret = readl_poll_timeout(stat, val, !(val & BIT(1)), 1, 100);
 		if (ret)

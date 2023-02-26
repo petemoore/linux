@@ -116,7 +116,7 @@ static int exynos_cpu_suspend(unsigned long arg)
 	exynos_smc(SMC_CMD_SLEEP, 0, 0, 0);
 
 	pr_info("Failed to suspend the system\n");
-	writel(0, sysram_ns_base_addr + EXYNOS_BOOT_FLAG);
+	pete_writel("arch/arm/mach-exynos/firmware.c:119", 0, sysram_ns_base_addr + EXYNOS_BOOT_FLAG);
 	return 1;
 }
 
@@ -125,8 +125,8 @@ static int exynos_suspend(void)
 	if (read_cpuid_part() == ARM_CPU_PART_CORTEX_A9)
 		exynos_save_cp15();
 
-	writel(EXYNOS_SLEEP_MAGIC, sysram_ns_base_addr + EXYNOS_BOOT_FLAG);
-	writel(__pa_symbol(exynos_cpu_resume_ns),
+	pete_writel("arch/arm/mach-exynos/firmware.c:128", EXYNOS_SLEEP_MAGIC, sysram_ns_base_addr + EXYNOS_BOOT_FLAG);
+	pete_writel("arch/arm/mach-exynos/firmware.c:129", __pa_symbol(exynos_cpu_resume_ns),
 		sysram_ns_base_addr + EXYNOS_BOOT_ADDR);
 
 	return cpu_suspend(0, exynos_cpu_suspend);
@@ -134,7 +134,7 @@ static int exynos_suspend(void)
 
 static int exynos_resume(void)
 {
-	writel(0, sysram_ns_base_addr + EXYNOS_BOOT_FLAG);
+	pete_writel("arch/arm/mach-exynos/firmware.c:137", 0, sysram_ns_base_addr + EXYNOS_BOOT_FLAG);
 
 	return 0;
 }

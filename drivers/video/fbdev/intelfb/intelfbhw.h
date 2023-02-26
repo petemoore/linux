@@ -520,19 +520,19 @@
 /*** Macros ***/
 
 /* I/O macros */
-#define INREG8(addr)	      readb((u8 __iomem *)(dinfo->mmio_base + (addr)))
-#define INREG16(addr)	      readw((u16 __iomem *)(dinfo->mmio_base + (addr)))
-#define INREG(addr)	      readl((u32 __iomem *)(dinfo->mmio_base + (addr)))
-#define OUTREG8(addr, val)    writeb((val),(u8 __iomem *)(dinfo->mmio_base + \
+#define INREG8(addr)	      pete_readb("drivers/video/fbdev/intelfb/intelfbhw.h:523", (u8 __iomem *)(dinfo->mmio_base + (addr)))
+#define INREG16(addr)	      pete_readw("drivers/video/fbdev/intelfb/intelfbhw.h:524", (u16 __iomem *)(dinfo->mmio_base + (addr)))
+#define INREG(addr)	      pete_readl("drivers/video/fbdev/intelfb/intelfbhw.h:525", (u32 __iomem *)(dinfo->mmio_base + (addr)))
+#define OUTREG8(addr, val)    pete_writeb("drivers/video/fbdev/intelfb/intelfbhw.h:526", (val),(u8 __iomem *)(dinfo->mmio_base + \
 							   (addr)))
-#define OUTREG16(addr, val)    writew((val),(u16 __iomem *)(dinfo->mmio_base + \
+#define OUTREG16(addr, val)    pete_writew("drivers/video/fbdev/intelfb/intelfbhw.h:528", (val),(u16 __iomem *)(dinfo->mmio_base + \
 							   (addr)))
-#define OUTREG(addr, val)     writel((val),(u32 __iomem *)(dinfo->mmio_base + \
+#define OUTREG(addr, val)     pete_writel("drivers/video/fbdev/intelfb/intelfbhw.h:530", (val),(u32 __iomem *)(dinfo->mmio_base + \
                                      (addr)))
 
 /* Ring buffer macros */
 #define OUT_RING(n)	do {						\
-	writel((n), (u32 __iomem *)(dinfo->ring.virtual + dinfo->ring_tail));\
+	pete_writel("drivers/video/fbdev/intelfb/intelfbhw.h:535", (n), (u32 __iomem *)(dinfo->ring.virtual + dinfo->ring_tail));\
 	dinfo->ring_tail += 4;						\
 	dinfo->ring_tail &= dinfo->ring_tail_mask;			\
 } while (0)

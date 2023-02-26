@@ -57,12 +57,12 @@ static const struct pci_device_id zip_id_table[] = {
 
 void zip_reg_write(u64 val, u64 __iomem *addr)
 {
-	writeq(val, addr);
+	pete_writeq("drivers/crypto/cavium/zip/zip_main.c:60", val, addr);
 }
 
 u64 zip_reg_read(u64 __iomem *addr)
 {
-	return readq(addr);
+	return pete_readq("drivers/crypto/cavium/zip/zip_main.c:65", addr);
 }
 
 /*

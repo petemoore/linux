@@ -196,14 +196,14 @@ struct sl811h_ep {
 
 static inline u8 sl811_read(struct sl811 *sl811, int reg)
 {
-	writeb(reg, sl811->addr_reg);
-	return readb(sl811->data_reg);
+	pete_writeb("drivers/usb/host/sl811.h:199", reg, sl811->addr_reg);
+	return pete_readb("drivers/usb/host/sl811.h:200", sl811->data_reg);
 }
 
 static inline void sl811_write(struct sl811 *sl811, int reg, u8 val)
 {
-	writeb(reg, sl811->addr_reg);
-	writeb(val, sl811->data_reg);
+	pete_writeb("drivers/usb/host/sl811.h:205", reg, sl811->addr_reg);
+	pete_writeb("drivers/usb/host/sl811.h:206", val, sl811->data_reg);
 }
 
 static inline void
@@ -214,12 +214,12 @@ sl811_write_buf(struct sl811 *sl811, int addr, const void *buf, size_t count)
 
 	if (!count)
 		return;
-	writeb(addr, sl811->addr_reg);
+	pete_writeb("drivers/usb/host/sl811.h:217", addr, sl811->addr_reg);
 
 	data = buf;
 	data_reg = sl811->data_reg;
 	do {
-		writeb(*data++, data_reg);
+		pete_writeb("drivers/usb/host/sl811.h:222", *data++, data_reg);
 	} while (--count);
 }
 
@@ -231,12 +231,12 @@ sl811_read_buf(struct sl811 *sl811, int addr, void *buf, size_t count)
 
 	if (!count)
 		return;
-	writeb(addr, sl811->addr_reg);
+	pete_writeb("drivers/usb/host/sl811.h:234", addr, sl811->addr_reg);
 
 	data = buf;
 	data_reg = sl811->data_reg;
 	do {
-		*data++ = readb(data_reg);
+		*data++ = pete_readb("drivers/usb/host/sl811.h:239", data_reg);
 	} while (--count);
 }
 

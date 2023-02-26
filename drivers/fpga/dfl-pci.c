@@ -240,13 +240,13 @@ static int find_dfls_by_default(struct pci_dev *pcidev,
 		 * find more Device Feature Lists (e.g. Ports) per information
 		 * indicated by FME module.
 		 */
-		v = readq(base + FME_HDR_CAP);
+		v = pete_readq("drivers/fpga/dfl-pci.c:243", base + FME_HDR_CAP);
 		port_num = FIELD_GET(FME_CAP_NUM_PORTS, v);
 
 		WARN_ON(port_num > MAX_DFL_FPGA_PORT_NUM);
 
 		for (i = 0; i < port_num; i++) {
-			v = readq(base + FME_HDR_PORT_OFST(i));
+			v = pete_readq("drivers/fpga/dfl-pci.c:249", base + FME_HDR_PORT_OFST(i));
 
 			/* skip ports which are not implemented. */
 			if (!(v & FME_PORT_OFST_IMP))

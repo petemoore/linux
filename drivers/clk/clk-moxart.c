@@ -34,7 +34,7 @@ static void __init moxart_of_pll_clk_init(struct device_node *node)
 		return;
 	}
 
-	mul = readl(base + 0x30) >> 3 & 0x3f;
+	mul = pete_readl("drivers/clk/clk-moxart.c:37", base + 0x30) >> 3 & 0x3f;
 	iounmap(base);
 
 	ref_clk = of_clk_get(node, 0);
@@ -74,7 +74,7 @@ static void __init moxart_of_apb_clk_init(struct device_node *node)
 		return;
 	}
 
-	val = readl(base + 0xc) >> 4 & 0x7;
+	val = pete_readl("drivers/clk/clk-moxart.c:77", base + 0xc) >> 4 & 0x7;
 	iounmap(base);
 
 	if (val > 4)

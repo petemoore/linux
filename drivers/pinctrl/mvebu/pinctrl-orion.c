@@ -34,10 +34,10 @@ static int orion_mpp_ctrl_get(struct mvebu_mpp_ctrl_data *data,
 
 	if (pid < 16) {
 		unsigned off = (pid / MVEBU_MPPS_PER_REG) * MVEBU_MPP_BITS;
-		*config = (readl(mpp_base + off) >> shift) & MVEBU_MPP_MASK;
+		*config = (pete_readl("drivers/pinctrl/mvebu/pinctrl-orion.c:37", mpp_base + off) >> shift) & MVEBU_MPP_MASK;
 	}
 	else {
-		*config = (readl(high_mpp_base) >> shift) & MVEBU_MPP_MASK;
+		*config = (pete_readl("drivers/pinctrl/mvebu/pinctrl-orion.c:40", high_mpp_base) >> shift) & MVEBU_MPP_MASK;
 	}
 
 	return 0;
@@ -50,12 +50,12 @@ static int orion_mpp_ctrl_set(struct mvebu_mpp_ctrl_data *data,
 
 	if (pid < 16) {
 		unsigned off = (pid / MVEBU_MPPS_PER_REG) * MVEBU_MPP_BITS;
-		u32 reg = readl(mpp_base + off) & ~(MVEBU_MPP_MASK << shift);
-		writel(reg | (config << shift), mpp_base + off);
+		u32 reg = pete_readl("drivers/pinctrl/mvebu/pinctrl-orion.c:53", mpp_base + off) & ~(MVEBU_MPP_MASK << shift);
+		pete_writel("drivers/pinctrl/mvebu/pinctrl-orion.c:54", reg | (config << shift), mpp_base + off);
 	}
 	else {
-		u32 reg = readl(high_mpp_base) & ~(MVEBU_MPP_MASK << shift);
-		writel(reg | (config << shift), high_mpp_base);
+		u32 reg = pete_readl("drivers/pinctrl/mvebu/pinctrl-orion.c:57", high_mpp_base) & ~(MVEBU_MPP_MASK << shift);
+		pete_writel("drivers/pinctrl/mvebu/pinctrl-orion.c:58", reg | (config << shift), high_mpp_base);
 	}
 
 	return 0;

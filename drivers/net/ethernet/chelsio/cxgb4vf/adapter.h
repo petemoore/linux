@@ -428,7 +428,7 @@ enum { /* adapter flags */
  */
 static inline u32 t4_read_reg(struct adapter *adapter, u32 reg_addr)
 {
-	return readl(adapter->regs + reg_addr);
+	return pete_readl("drivers/net/ethernet/chelsio/cxgb4vf/adapter.h:431", adapter->regs + reg_addr);
 }
 
 /**
@@ -441,19 +441,19 @@ static inline u32 t4_read_reg(struct adapter *adapter, u32 reg_addr)
  */
 static inline void t4_write_reg(struct adapter *adapter, u32 reg_addr, u32 val)
 {
-	writel(val, adapter->regs + reg_addr);
+	pete_writel("drivers/net/ethernet/chelsio/cxgb4vf/adapter.h:444", val, adapter->regs + reg_addr);
 }
 
 #ifndef readq
-static inline u64 readq(const volatile void __iomem *addr)
+static inline u64 pete_readq("drivers/net/ethernet/chelsio/cxgb4vf/adapter.h:448", const volatile void __iomem *addr)
 {
-	return readl(addr) + ((u64)readl(addr + 4) << 32);
+	return pete_readl("drivers/net/ethernet/chelsio/cxgb4vf/adapter.h:450", addr) + ((u64)pete_readl("drivers/net/ethernet/chelsio/cxgb4vf/adapter.h:450", addr + 4) << 32);
 }
 
-static inline void writeq(u64 val, volatile void __iomem *addr)
+static inline void pete_writeq("drivers/net/ethernet/chelsio/cxgb4vf/adapter.h:453", u64 val, volatile void __iomem *addr)
 {
-	writel(val, addr);
-	writel(val >> 32, addr + 4);
+	pete_writel("drivers/net/ethernet/chelsio/cxgb4vf/adapter.h:455", val, addr);
+	pete_writel("drivers/net/ethernet/chelsio/cxgb4vf/adapter.h:456", val >> 32, addr + 4);
 }
 #endif
 
@@ -466,7 +466,7 @@ static inline void writeq(u64 val, volatile void __iomem *addr)
  */
 static inline u64 t4_read_reg64(struct adapter *adapter, u32 reg_addr)
 {
-	return readq(adapter->regs + reg_addr);
+	return pete_readq("drivers/net/ethernet/chelsio/cxgb4vf/adapter.h:469", adapter->regs + reg_addr);
 }
 
 /**
@@ -480,7 +480,7 @@ static inline u64 t4_read_reg64(struct adapter *adapter, u32 reg_addr)
 static inline void t4_write_reg64(struct adapter *adapter, u32 reg_addr,
 				  u64 val)
 {
-	writeq(val, adapter->regs + reg_addr);
+	pete_writeq("drivers/net/ethernet/chelsio/cxgb4vf/adapter.h:483", val, adapter->regs + reg_addr);
 }
 
 /**

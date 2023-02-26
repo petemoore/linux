@@ -68,8 +68,8 @@ static int lpc18xx_wdt_feed(struct watchdog_device *wdt_dev)
 	 * sequence.
 	 */
 	spin_lock_irqsave(&lpc18xx_wdt->lock, flags);
-	writel(LPC18XX_WDT_FEED_MAGIC1, lpc18xx_wdt->base + LPC18XX_WDT_FEED);
-	writel(LPC18XX_WDT_FEED_MAGIC2, lpc18xx_wdt->base + LPC18XX_WDT_FEED);
+	pete_writel("drivers/watchdog/lpc18xx_wdt.c:71", LPC18XX_WDT_FEED_MAGIC1, lpc18xx_wdt->base + LPC18XX_WDT_FEED);
+	pete_writel("drivers/watchdog/lpc18xx_wdt.c:72", LPC18XX_WDT_FEED_MAGIC2, lpc18xx_wdt->base + LPC18XX_WDT_FEED);
 	spin_unlock_irqrestore(&lpc18xx_wdt->lock, flags);
 
 	return 0;
@@ -106,7 +106,7 @@ static void __lpc18xx_wdt_set_timeout(struct lpc18xx_wdt_dev *lpc18xx_wdt)
 
 	val = DIV_ROUND_UP(lpc18xx_wdt->wdt_dev.timeout * lpc18xx_wdt->clk_rate,
 			   LPC18XX_WDT_CLK_DIV);
-	writel(val, lpc18xx_wdt->base + LPC18XX_WDT_TC);
+	pete_writel("drivers/watchdog/lpc18xx_wdt.c:109", val, lpc18xx_wdt->base + LPC18XX_WDT_TC);
 }
 
 static int lpc18xx_wdt_set_timeout(struct watchdog_device *wdt_dev,
@@ -125,7 +125,7 @@ static unsigned int lpc18xx_wdt_get_timeleft(struct watchdog_device *wdt_dev)
 	struct lpc18xx_wdt_dev *lpc18xx_wdt = watchdog_get_drvdata(wdt_dev);
 	unsigned int val;
 
-	val = readl(lpc18xx_wdt->base + LPC18XX_WDT_TV);
+	val = pete_readl("drivers/watchdog/lpc18xx_wdt.c:128", lpc18xx_wdt->base + LPC18XX_WDT_TV);
 	return (val * LPC18XX_WDT_CLK_DIV) / lpc18xx_wdt->clk_rate;
 }
 
@@ -137,10 +137,10 @@ static int lpc18xx_wdt_start(struct watchdog_device *wdt_dev)
 	if (timer_pending(&lpc18xx_wdt->timer))
 		del_timer(&lpc18xx_wdt->timer);
 
-	val = readl(lpc18xx_wdt->base + LPC18XX_WDT_MOD);
+	val = pete_readl("drivers/watchdog/lpc18xx_wdt.c:140", lpc18xx_wdt->base + LPC18XX_WDT_MOD);
 	val |= LPC18XX_WDT_MOD_WDEN;
 	val |= LPC18XX_WDT_MOD_WDRESET;
-	writel(val, lpc18xx_wdt->base + LPC18XX_WDT_MOD);
+	pete_writel("drivers/watchdog/lpc18xx_wdt.c:143", val, lpc18xx_wdt->base + LPC18XX_WDT_MOD);
 
 	/*
 	 * Setting the WDEN bit in the WDMOD register is not sufficient to
@@ -164,16 +164,16 @@ static int lpc18xx_wdt_restart(struct watchdog_device *wdt_dev,
 	 */
 	spin_lock_irqsave(&lpc18xx_wdt->lock, flags);
 
-	val = readl(lpc18xx_wdt->base + LPC18XX_WDT_MOD);
+	val = pete_readl("drivers/watchdog/lpc18xx_wdt.c:167", lpc18xx_wdt->base + LPC18XX_WDT_MOD);
 	val |= LPC18XX_WDT_MOD_WDEN;
 	val |= LPC18XX_WDT_MOD_WDRESET;
-	writel(val, lpc18xx_wdt->base + LPC18XX_WDT_MOD);
+	pete_writel("drivers/watchdog/lpc18xx_wdt.c:170", val, lpc18xx_wdt->base + LPC18XX_WDT_MOD);
 
-	writel(LPC18XX_WDT_FEED_MAGIC1, lpc18xx_wdt->base + LPC18XX_WDT_FEED);
-	writel(LPC18XX_WDT_FEED_MAGIC2, lpc18xx_wdt->base + LPC18XX_WDT_FEED);
+	pete_writel("drivers/watchdog/lpc18xx_wdt.c:172", LPC18XX_WDT_FEED_MAGIC1, lpc18xx_wdt->base + LPC18XX_WDT_FEED);
+	pete_writel("drivers/watchdog/lpc18xx_wdt.c:173", LPC18XX_WDT_FEED_MAGIC2, lpc18xx_wdt->base + LPC18XX_WDT_FEED);
 
-	writel(LPC18XX_WDT_FEED_MAGIC1, lpc18xx_wdt->base + LPC18XX_WDT_FEED);
-	writel(LPC18XX_WDT_FEED_MAGIC1, lpc18xx_wdt->base + LPC18XX_WDT_FEED);
+	pete_writel("drivers/watchdog/lpc18xx_wdt.c:175", LPC18XX_WDT_FEED_MAGIC1, lpc18xx_wdt->base + LPC18XX_WDT_FEED);
+	pete_writel("drivers/watchdog/lpc18xx_wdt.c:176", LPC18XX_WDT_FEED_MAGIC1, lpc18xx_wdt->base + LPC18XX_WDT_FEED);
 
 	spin_unlock_irqrestore(&lpc18xx_wdt->lock, flags);
 

@@ -24,7 +24,7 @@ static void __iomem *tcd;
 
 static u64 notrace clps711x_sched_clock_read(void)
 {
-	return ~readw(tcd);
+	return ~pete_readw("drivers/clocksource/clps711x-timer.c:27", tcd);
 }
 
 static void __init clps711x_clksrc_init(struct clk *clock, void __iomem *base)
@@ -61,7 +61,7 @@ static int __init _clps711x_clkevt_init(struct clk *clock, void __iomem *base,
 	rate = clk_get_rate(clock);
 
 	/* Set Timer prescaler */
-	writew(DIV_ROUND_CLOSEST(rate, HZ), base);
+	pete_writew("drivers/clocksource/clps711x-timer.c:64", DIV_ROUND_CLOSEST(rate, HZ), base);
 
 	clkevt->name = "clps711x-clockevent";
 	clkevt->rating = 300;

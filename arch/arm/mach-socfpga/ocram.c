@@ -34,8 +34,8 @@ void socfpga_init_ocram_ecc(void)
 	}
 
 	/* Clear any pending OCRAM ECC interrupts, then enable ECC */
-	writel(ALTR_OCRAM_CLEAR_ECC, mapped_ocr_edac_addr);
-	writel(ALTR_OCRAM_ECC_EN, mapped_ocr_edac_addr);
+	pete_writel("arch/arm/mach-socfpga/ocram.c:37", ALTR_OCRAM_CLEAR_ECC, mapped_ocr_edac_addr);
+	pete_writel("arch/arm/mach-socfpga/ocram.c:38", ALTR_OCRAM_ECC_EN, mapped_ocr_edac_addr);
 
 	iounmap(mapped_ocr_edac_addr);
 }
@@ -66,23 +66,23 @@ void socfpga_init_ocram_ecc(void)
 
 static inline void ecc_set_bits(u32 bit_mask, void __iomem *ioaddr)
 {
-	u32 value = readl(ioaddr);
+	u32 value = pete_readl("arch/arm/mach-socfpga/ocram.c:69", ioaddr);
 
 	value |= bit_mask;
-	writel(value, ioaddr);
+	pete_writel("arch/arm/mach-socfpga/ocram.c:72", value, ioaddr);
 }
 
 static inline void ecc_clear_bits(u32 bit_mask, void __iomem *ioaddr)
 {
-	u32 value = readl(ioaddr);
+	u32 value = pete_readl("arch/arm/mach-socfpga/ocram.c:77", ioaddr);
 
 	value &= ~bit_mask;
-	writel(value, ioaddr);
+	pete_writel("arch/arm/mach-socfpga/ocram.c:80", value, ioaddr);
 }
 
 static inline int ecc_test_bits(u32 bit_mask, void __iomem *ioaddr)
 {
-	u32 value = readl(ioaddr);
+	u32 value = pete_readl("arch/arm/mach-socfpga/ocram.c:85", ioaddr);
 
 	return (value & bit_mask) ? 1 : 0;
 }
@@ -106,7 +106,7 @@ static int altr_init_memory_port(void __iomem *ioaddr)
 		return -EBUSY;
 
 	/* Clear any pending ECC interrupts */
-	writel(ALTR_A10_ECC_ERRPENA_MASK,
+	pete_writel("arch/arm/mach-socfpga/ocram.c:109", ALTR_A10_ECC_ERRPENA_MASK,
 	       (ioaddr + ALTR_A10_ECC_INTSTAT_OFST));
 
 	return 0;
@@ -139,7 +139,7 @@ void socfpga_init_arria10_ocram_ecc(void)
 	}
 
 	/* Disable ECC */
-	writel(ALTR_A10_OCRAM_ECC_EN_CTL,
+	pete_writel("arch/arm/mach-socfpga/ocram.c:142", ALTR_A10_OCRAM_ECC_EN_CTL,
 	       sys_manager_base_addr + A10_SYSMGR_ECC_INTMASK_SET_OFST);
 	ecc_clear_bits(ALTR_A10_ECC_SERRINTEN,
 		       (ecc_block_base + ALTR_A10_ECC_ERRINTEN_OFST));
@@ -161,7 +161,7 @@ void socfpga_init_arria10_ocram_ecc(void)
 		     (ecc_block_base + ALTR_A10_ECC_CTRL_OFST));
 	ecc_set_bits(ALTR_A10_ECC_SERRINTEN,
 		     (ecc_block_base + ALTR_A10_ECC_ERRINTEN_OFST));
-	writel(ALTR_A10_OCRAM_ECC_EN_CTL,
+	pete_writel("arch/arm/mach-socfpga/ocram.c:164", ALTR_A10_OCRAM_ECC_EN_CTL,
 	       sys_manager_base_addr + A10_SYSMGR_ECC_INTMASK_CLR_OFST);
 
 	/* Ensure all writes complete */

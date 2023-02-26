@@ -59,7 +59,7 @@ static int wait_for_reg_status(void __iomem *base, u32 reg, u32 checkbit,
 	unsigned long timeout = jiffies + PHY_PLL_TIMEOUT;
 
 	while (time_before(jiffies, timeout)) {
-		if ((readl(base + reg) & checkbit) == status)
+		if ((pete_readl("drivers/phy/samsung/phy-exynos5250-sata.c:62", base + reg) & checkbit) == status)
 			return 0;
 	}
 
@@ -96,51 +96,51 @@ static int exynos_sata_phy_init(struct phy *phy)
 	if (ret != 0)
 		dev_err(&sata_phy->phy->dev, "phy init failed\n");
 
-	writel(val, sata_phy->regs + EXYNOS5_SATA_RESET);
+	pete_writel("drivers/phy/samsung/phy-exynos5250-sata.c:99", val, sata_phy->regs + EXYNOS5_SATA_RESET);
 
-	val = readl(sata_phy->regs + EXYNOS5_SATA_RESET);
+	val = pete_readl("drivers/phy/samsung/phy-exynos5250-sata.c:101", sata_phy->regs + EXYNOS5_SATA_RESET);
 	val |= RESET_GLOBAL_RST_N | RESET_CMN_RST_N | RESET_CMN_BLOCK_RST_N
 		| RESET_CMN_I2C_RST_N | RESET_TX_RX_PIPE_RST_N
 		| RESET_TX_RX_BLOCK_RST_N | RESET_TX_RX_I2C_RST_N;
-	writel(val, sata_phy->regs + EXYNOS5_SATA_RESET);
+	pete_writel("drivers/phy/samsung/phy-exynos5250-sata.c:105", val, sata_phy->regs + EXYNOS5_SATA_RESET);
 
-	val = readl(sata_phy->regs + EXYNOS5_SATA_RESET);
+	val = pete_readl("drivers/phy/samsung/phy-exynos5250-sata.c:107", sata_phy->regs + EXYNOS5_SATA_RESET);
 	val |= LINK_RESET;
-	writel(val, sata_phy->regs + EXYNOS5_SATA_RESET);
+	pete_writel("drivers/phy/samsung/phy-exynos5250-sata.c:109", val, sata_phy->regs + EXYNOS5_SATA_RESET);
 
-	val = readl(sata_phy->regs + EXYNOS5_SATA_RESET);
+	val = pete_readl("drivers/phy/samsung/phy-exynos5250-sata.c:111", sata_phy->regs + EXYNOS5_SATA_RESET);
 	val |= RESET_CMN_RST_N;
-	writel(val, sata_phy->regs + EXYNOS5_SATA_RESET);
+	pete_writel("drivers/phy/samsung/phy-exynos5250-sata.c:113", val, sata_phy->regs + EXYNOS5_SATA_RESET);
 
-	val = readl(sata_phy->regs + EXYNOS5_SATA_PHSATA_CTRLM);
+	val = pete_readl("drivers/phy/samsung/phy-exynos5250-sata.c:115", sata_phy->regs + EXYNOS5_SATA_PHSATA_CTRLM);
 	val &= ~PHCTRLM_REF_RATE;
-	writel(val, sata_phy->regs + EXYNOS5_SATA_PHSATA_CTRLM);
+	pete_writel("drivers/phy/samsung/phy-exynos5250-sata.c:117", val, sata_phy->regs + EXYNOS5_SATA_PHSATA_CTRLM);
 
 	/* High speed enable for Gen3 */
-	val = readl(sata_phy->regs + EXYNOS5_SATA_PHSATA_CTRLM);
+	val = pete_readl("drivers/phy/samsung/phy-exynos5250-sata.c:120", sata_phy->regs + EXYNOS5_SATA_PHSATA_CTRLM);
 	val |= PHCTRLM_HIGH_SPEED;
-	writel(val, sata_phy->regs + EXYNOS5_SATA_PHSATA_CTRLM);
+	pete_writel("drivers/phy/samsung/phy-exynos5250-sata.c:122", val, sata_phy->regs + EXYNOS5_SATA_PHSATA_CTRLM);
 
-	val = readl(sata_phy->regs + EXYNOS5_SATA_CTRL0);
+	val = pete_readl("drivers/phy/samsung/phy-exynos5250-sata.c:124", sata_phy->regs + EXYNOS5_SATA_CTRL0);
 	val |= CTRL0_P0_PHY_CALIBRATED_SEL | CTRL0_P0_PHY_CALIBRATED;
-	writel(val, sata_phy->regs + EXYNOS5_SATA_CTRL0);
+	pete_writel("drivers/phy/samsung/phy-exynos5250-sata.c:126", val, sata_phy->regs + EXYNOS5_SATA_CTRL0);
 
-	val = readl(sata_phy->regs + EXYNOS5_SATA_MODE0);
+	val = pete_readl("drivers/phy/samsung/phy-exynos5250-sata.c:128", sata_phy->regs + EXYNOS5_SATA_MODE0);
 	val |= SATA_SPD_GEN3;
-	writel(val, sata_phy->regs + EXYNOS5_SATA_MODE0);
+	pete_writel("drivers/phy/samsung/phy-exynos5250-sata.c:130", val, sata_phy->regs + EXYNOS5_SATA_MODE0);
 
 	ret = i2c_master_send(sata_phy->client, buf, sizeof(buf));
 	if (ret < 0)
 		return ret;
 
 	/* release cmu reset */
-	val = readl(sata_phy->regs + EXYNOS5_SATA_RESET);
+	val = pete_readl("drivers/phy/samsung/phy-exynos5250-sata.c:137", sata_phy->regs + EXYNOS5_SATA_RESET);
 	val &= ~RESET_CMN_RST_N;
-	writel(val, sata_phy->regs + EXYNOS5_SATA_RESET);
+	pete_writel("drivers/phy/samsung/phy-exynos5250-sata.c:139", val, sata_phy->regs + EXYNOS5_SATA_RESET);
 
-	val = readl(sata_phy->regs + EXYNOS5_SATA_RESET);
+	val = pete_readl("drivers/phy/samsung/phy-exynos5250-sata.c:141", sata_phy->regs + EXYNOS5_SATA_RESET);
 	val |= RESET_CMN_RST_N;
-	writel(val, sata_phy->regs + EXYNOS5_SATA_RESET);
+	pete_writel("drivers/phy/samsung/phy-exynos5250-sata.c:143", val, sata_phy->regs + EXYNOS5_SATA_RESET);
 
 	ret = wait_for_reg_status(sata_phy->regs,
 				EXYNOS5_SATA_PHSATA_STATM,

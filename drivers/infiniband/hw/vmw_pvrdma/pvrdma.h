@@ -298,22 +298,22 @@ static inline struct pvrdma_ah *to_vah(struct ib_ah *ibah)
 
 static inline void pvrdma_write_reg(struct pvrdma_dev *dev, u32 reg, u32 val)
 {
-	writel(cpu_to_le32(val), dev->regs + reg);
+	pete_writel("drivers/infiniband/hw/vmw_pvrdma/pvrdma.h:301", cpu_to_le32(val), dev->regs + reg);
 }
 
 static inline u32 pvrdma_read_reg(struct pvrdma_dev *dev, u32 reg)
 {
-	return le32_to_cpu(readl(dev->regs + reg));
+	return le32_to_cpu(pete_readl("drivers/infiniband/hw/vmw_pvrdma/pvrdma.h:306", dev->regs + reg));
 }
 
 static inline void pvrdma_write_uar_cq(struct pvrdma_dev *dev, u32 val)
 {
-	writel(cpu_to_le32(val), dev->driver_uar.map + PVRDMA_UAR_CQ_OFFSET);
+	pete_writel("drivers/infiniband/hw/vmw_pvrdma/pvrdma.h:311", cpu_to_le32(val), dev->driver_uar.map + PVRDMA_UAR_CQ_OFFSET);
 }
 
 static inline void pvrdma_write_uar_qp(struct pvrdma_dev *dev, u32 val)
 {
-	writel(cpu_to_le32(val), dev->driver_uar.map + PVRDMA_UAR_QP_OFFSET);
+	pete_writel("drivers/infiniband/hw/vmw_pvrdma/pvrdma.h:316", cpu_to_le32(val), dev->driver_uar.map + PVRDMA_UAR_QP_OFFSET);
 }
 
 static inline void *pvrdma_page_dir_get_ptr(struct pvrdma_page_dir *pdir,

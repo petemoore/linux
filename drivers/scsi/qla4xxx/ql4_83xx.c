@@ -14,12 +14,12 @@
 
 uint32_t qla4_83xx_rd_reg(struct scsi_qla_host *ha, ulong addr)
 {
-	return readl((void __iomem *)(ha->nx_pcibase + addr));
+	return pete_readl("drivers/scsi/qla4xxx/ql4_83xx.c:17", (void __iomem *)(ha->nx_pcibase + addr));
 }
 
 void qla4_83xx_wr_reg(struct scsi_qla_host *ha, ulong addr, uint32_t val)
 {
-	writel(val, (void __iomem *)(ha->nx_pcibase + addr));
+	pete_writel("drivers/scsi/qla4xxx/ql4_83xx.c:22", val, (void __iomem *)(ha->nx_pcibase + addr));
 }
 
 static int qla4_83xx_set_win_base(struct scsi_qla_host *ha, uint32_t addr)
@@ -1270,10 +1270,10 @@ static void qla4_83xx_disable_mbox_intrs(struct scsi_qla_host *ha)
 	uint32_t mb_int, ret;
 
 	if (test_and_clear_bit(AF_83XX_MBOX_INTR_ON, &ha->flags)) {
-		ret = readl(&ha->qla4_83xx_reg->mbox_int);
+		ret = pete_readl("drivers/scsi/qla4xxx/ql4_83xx.c:1273", &ha->qla4_83xx_reg->mbox_int);
 		mb_int = ret & ~INT_ENABLE_FW_MB;
-		writel(mb_int, &ha->qla4_83xx_reg->mbox_int);
-		writel(1, &ha->qla4_83xx_reg->leg_int_mask);
+		pete_writel("drivers/scsi/qla4xxx/ql4_83xx.c:1275", mb_int, &ha->qla4_83xx_reg->mbox_int);
+		pete_writel("drivers/scsi/qla4xxx/ql4_83xx.c:1276", 1, &ha->qla4_83xx_reg->leg_int_mask);
 	}
 }
 
@@ -1297,8 +1297,8 @@ void qla4_83xx_enable_mbox_intrs(struct scsi_qla_host *ha)
 
 	if (!test_bit(AF_83XX_MBOX_INTR_ON, &ha->flags)) {
 		mb_int = INT_ENABLE_FW_MB;
-		writel(mb_int, &ha->qla4_83xx_reg->mbox_int);
-		writel(0, &ha->qla4_83xx_reg->leg_int_mask);
+		pete_writel("drivers/scsi/qla4xxx/ql4_83xx.c:1300", mb_int, &ha->qla4_83xx_reg->mbox_int);
+		pete_writel("drivers/scsi/qla4xxx/ql4_83xx.c:1301", 0, &ha->qla4_83xx_reg->leg_int_mask);
 		set_bit(AF_83XX_MBOX_INTR_ON, &ha->flags);
 	}
 }
@@ -1318,21 +1318,21 @@ void qla4_83xx_queue_mbox_cmd(struct scsi_qla_host *ha, uint32_t *mbx_cmd,
 
 	/* Load all mailbox registers, except mailbox 0. */
 	for (i = 1; i < incount; i++)
-		writel(mbx_cmd[i], &ha->qla4_83xx_reg->mailbox_in[i]);
+		pete_writel("drivers/scsi/qla4xxx/ql4_83xx.c:1321", mbx_cmd[i], &ha->qla4_83xx_reg->mailbox_in[i]);
 
-	writel(mbx_cmd[0], &ha->qla4_83xx_reg->mailbox_in[0]);
+	pete_writel("drivers/scsi/qla4xxx/ql4_83xx.c:1323", mbx_cmd[0], &ha->qla4_83xx_reg->mailbox_in[0]);
 
 	/* Set Host Interrupt register to 1, to tell the firmware that
 	 * a mailbox command is pending. Firmware after reading the
 	 * mailbox command, clears the host interrupt register */
-	writel(HINT_MBX_INT_PENDING, &ha->qla4_83xx_reg->host_intr);
+	pete_writel("drivers/scsi/qla4xxx/ql4_83xx.c:1328", HINT_MBX_INT_PENDING, &ha->qla4_83xx_reg->host_intr);
 }
 
 void qla4_83xx_process_mbox_intr(struct scsi_qla_host *ha, int outcount)
 {
 	int intr_status;
 
-	intr_status = readl(&ha->qla4_83xx_reg->risc_intr);
+	intr_status = pete_readl("drivers/scsi/qla4xxx/ql4_83xx.c:1335", &ha->qla4_83xx_reg->risc_intr);
 	if (intr_status) {
 		ha->mbox_status_count = outcount;
 		ha->isp_ops->interrupt_service_routine(ha, intr_status);

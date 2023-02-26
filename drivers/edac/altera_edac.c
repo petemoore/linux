@@ -561,12 +561,12 @@ static irqreturn_t altr_edac_device_handler(int irq, void *dev_id)
 
 	if (irq == drvdata->sb_irq) {
 		if (priv->ce_clear_mask)
-			writel(priv->ce_clear_mask, drvdata->base);
+			pete_writel("drivers/edac/altera_edac.c:564", priv->ce_clear_mask, drvdata->base);
 		edac_device_handle_ce(dci, 0, 0, drvdata->edac_dev_name);
 		ret_value = IRQ_HANDLED;
 	} else if (irq == drvdata->db_irq) {
 		if (priv->ue_clear_mask)
-			writel(priv->ue_clear_mask, drvdata->base);
+			pete_writel("drivers/edac/altera_edac.c:569", priv->ue_clear_mask, drvdata->base);
 		edac_device_handle_ue(dci, 0, 0, drvdata->edac_dev_name);
 		panic("\nEDAC:ECC_DEVICE[Uncorrectable errors]\n");
 		ret_value = IRQ_HANDLED;
@@ -624,8 +624,8 @@ altr_edac_device_trig(struct file *file, const char __user *user_buf,
 		if (READ_ONCE(ptemp[i]))
 			result = -1;
 		/* Toggle Error bit (it is latched), leave ECC enabled */
-		writel(error_mask, (drvdata->base + priv->set_err_ofst));
-		writel(priv->ecc_enable_mask, (drvdata->base +
+		pete_writel("drivers/edac/altera_edac.c:627", error_mask, (drvdata->base + priv->set_err_ofst));
+		pete_writel("drivers/edac/altera_edac.c:628", priv->ecc_enable_mask, (drvdata->base +
 					       priv->set_err_ofst));
 		ptemp[i] = i;
 	}
@@ -848,7 +848,7 @@ altr_check_ecc_deps(struct altr_edac_device_dev *device)
 	void __iomem  *base = device->base;
 	const struct edac_device_prv_data *prv = device->data;
 
-	if (readl(base + prv->ecc_en_ofst) & prv->ecc_enable_mask)
+	if (pete_readl("drivers/edac/altera_edac.c:851", base + prv->ecc_en_ofst) & prv->ecc_enable_mask)
 		return 0;
 
 	edac_printk(KERN_ERR, EDAC_DEVICE,
@@ -863,13 +863,13 @@ static irqreturn_t __maybe_unused altr_edac_a10_ecc_irq(int irq, void *dev_id)
 	void __iomem  *base = dci->base;
 
 	if (irq == dci->sb_irq) {
-		writel(ALTR_A10_ECC_SERRPENA,
+		pete_writel("drivers/edac/altera_edac.c:866", ALTR_A10_ECC_SERRPENA,
 		       base + ALTR_A10_ECC_INTSTAT_OFST);
 		edac_device_handle_ce(dci->edac_dev, 0, 0, dci->edac_dev_name);
 
 		return IRQ_HANDLED;
 	} else if (irq == dci->db_irq) {
-		writel(ALTR_A10_ECC_DERRPENA,
+		pete_writel("drivers/edac/altera_edac.c:872", ALTR_A10_ECC_DERRPENA,
 		       base + ALTR_A10_ECC_INTSTAT_OFST);
 		edac_device_handle_ue(dci->edac_dev, 0, 0, dci->edac_dev_name);
 		if (dci->data->panic)
@@ -898,23 +898,23 @@ static inline int a10_get_irq_mask(struct device_node *np)
 
 static inline void ecc_set_bits(u32 bit_mask, void __iomem *ioaddr)
 {
-	u32 value = readl(ioaddr);
+	u32 value = pete_readl("drivers/edac/altera_edac.c:901", ioaddr);
 
 	value |= bit_mask;
-	writel(value, ioaddr);
+	pete_writel("drivers/edac/altera_edac.c:904", value, ioaddr);
 }
 
 static inline void ecc_clear_bits(u32 bit_mask, void __iomem *ioaddr)
 {
-	u32 value = readl(ioaddr);
+	u32 value = pete_readl("drivers/edac/altera_edac.c:909", ioaddr);
 
 	value &= ~bit_mask;
-	writel(value, ioaddr);
+	pete_writel("drivers/edac/altera_edac.c:912", value, ioaddr);
 }
 
 static inline int ecc_test_bits(u32 bit_mask, void __iomem *ioaddr)
 {
-	u32 value = readl(ioaddr);
+	u32 value = pete_readl("drivers/edac/altera_edac.c:917", ioaddr);
 
 	return (value & bit_mask) ? 1 : 0;
 }
@@ -950,7 +950,7 @@ static int __maybe_unused altr_init_memory_port(void __iomem *ioaddr, int port)
 		ret = -EBUSY;
 
 	/* Clear any pending ECC interrupts */
-	writel(clear_mask, (ioaddr + ALTR_A10_ECC_INTSTAT_OFST));
+	pete_writel("drivers/edac/altera_edac.c:953", clear_mask, (ioaddr + ALTR_A10_ECC_INTSTAT_OFST));
 
 	return ret;
 }
@@ -991,7 +991,7 @@ altr_init_a10_ecc_block(struct device_node *np, u32 irq_mask,
 
 	/* Disable ECC */
 	regmap_write(ecc_mgr_map, A10_SYSMGR_ECC_INTMASK_SET_OFST, irq_mask);
-	writel(ALTR_A10_ECC_SERRINTEN,
+	pete_writel("drivers/edac/altera_edac.c:994", ALTR_A10_ECC_SERRINTEN,
 	       (ecc_block_base + ALTR_A10_ECC_ERRINTENR_OFST));
 	ecc_clear_bits(ecc_ctrl_en_mask,
 		       (ecc_block_base + ALTR_A10_ECC_CTRL_OFST));
@@ -1021,7 +1021,7 @@ altr_init_a10_ecc_block(struct device_node *np, u32 irq_mask,
 	/* Enable ECC */
 	ecc_set_bits(ecc_ctrl_en_mask, (ecc_block_base +
 					ALTR_A10_ECC_CTRL_OFST));
-	writel(ALTR_A10_ECC_SERRINTEN,
+	pete_writel("drivers/edac/altera_edac.c:1024", ALTR_A10_ECC_SERRINTEN,
 	       (ecc_block_base + ALTR_A10_ECC_ERRINTENS_OFST));
 	regmap_write(ecc_mgr_map, A10_SYSMGR_ECC_INTMASK_CLR_OFST, irq_mask);
 	/* Ensure all writes complete */
@@ -1166,7 +1166,7 @@ altr_check_ocram_deps_init(struct altr_edac_device_dev *device)
 		return -ENODEV;
 
 	/* Enable IRQ on Single Bit Error */
-	writel(ALTR_A10_ECC_SERRINTEN, (base + ALTR_A10_ECC_ERRINTENS_OFST));
+	pete_writel("drivers/edac/altera_edac.c:1169", ALTR_A10_ECC_SERRINTEN, (base + ALTR_A10_ECC_ERRINTENS_OFST));
 	/* Ensure all writes complete */
 	wmb();
 
@@ -1241,7 +1241,7 @@ static int altr_l2_check_deps(struct altr_edac_device_dev *device)
 	void __iomem *base = device->base;
 	const struct edac_device_prv_data *prv = device->data;
 
-	if ((readl(base) & prv->ecc_enable_mask) ==
+	if ((pete_readl("drivers/edac/altera_edac.c:1244", base) & prv->ecc_enable_mask) ==
 	     prv->ecc_enable_mask)
 		return 0;
 
@@ -1619,12 +1619,12 @@ static irqreturn_t altr_edac_a10_ecc_irq_portb(int irq, void *dev_id)
 	const struct edac_device_prv_data *priv = ad->data;
 
 	if (irq == ad->sb_irq) {
-		writel(priv->ce_clear_mask,
+		pete_writel("drivers/edac/altera_edac.c:1622", priv->ce_clear_mask,
 		       base + ALTR_A10_ECC_INTSTAT_OFST);
 		edac_device_handle_ce(ad->edac_dev, 0, 0, ad->edac_dev_name);
 		return IRQ_HANDLED;
 	} else if (irq == ad->db_irq) {
-		writel(priv->ue_clear_mask,
+		pete_writel("drivers/edac/altera_edac.c:1627", priv->ue_clear_mask,
 		       base + ALTR_A10_ECC_INTSTAT_OFST);
 		edac_device_handle_ue(ad->edac_dev, 0, 0, ad->edac_dev_name);
 		return IRQ_HANDLED;
@@ -1721,9 +1721,9 @@ altr_edac_a10_device_trig(struct file *file, const char __user *user_buf,
 
 	local_irq_save(flags);
 	if (trig_type == ALTR_UE_TRIGGER_CHAR)
-		writel(priv->ue_set_mask, set_addr);
+		pete_writel("drivers/edac/altera_edac.c:1724", priv->ue_set_mask, set_addr);
 	else
-		writel(priv->ce_set_mask, set_addr);
+		pete_writel("drivers/edac/altera_edac.c:1726", priv->ce_set_mask, set_addr);
 
 	/* Ensure the interrupt test bits are set */
 	wmb();
@@ -1753,39 +1753,39 @@ altr_edac_a10_device_trig2(struct file *file, const char __user *user_buf,
 
 	local_irq_save(flags);
 	if (trig_type == ALTR_UE_TRIGGER_CHAR) {
-		writel(priv->ue_set_mask, set_addr);
+		pete_writel("drivers/edac/altera_edac.c:1756", priv->ue_set_mask, set_addr);
 	} else {
 		/* Setup read/write of 4 bytes */
-		writel(ECC_WORD_WRITE, drvdata->base + ECC_BLK_DBYTECTRL_OFST);
+		pete_writel("drivers/edac/altera_edac.c:1759", ECC_WORD_WRITE, drvdata->base + ECC_BLK_DBYTECTRL_OFST);
 		/* Setup Address to 0 */
-		writel(0, drvdata->base + ECC_BLK_ADDRESS_OFST);
+		pete_writel("drivers/edac/altera_edac.c:1761", 0, drvdata->base + ECC_BLK_ADDRESS_OFST);
 		/* Setup accctrl to read & ecc & data override */
-		writel(ECC_READ_EDOVR, drvdata->base + ECC_BLK_ACCCTRL_OFST);
+		pete_writel("drivers/edac/altera_edac.c:1763", ECC_READ_EDOVR, drvdata->base + ECC_BLK_ACCCTRL_OFST);
 		/* Kick it. */
-		writel(ECC_XACT_KICK, drvdata->base + ECC_BLK_STARTACC_OFST);
+		pete_writel("drivers/edac/altera_edac.c:1765", ECC_XACT_KICK, drvdata->base + ECC_BLK_STARTACC_OFST);
 		/* Setup write for single bit change */
-		writel(readl(drvdata->base + ECC_BLK_RDATA0_OFST) ^ 0x1,
+		pete_writel("drivers/edac/altera_edac.c:1767", pete_readl("drivers/edac/altera_edac.c:1767", drvdata->base + ECC_BLK_RDATA0_OFST) ^ 0x1,
 		       drvdata->base + ECC_BLK_WDATA0_OFST);
-		writel(readl(drvdata->base + ECC_BLK_RDATA1_OFST),
+		pete_writel("drivers/edac/altera_edac.c:1769", pete_readl("drivers/edac/altera_edac.c:1769", drvdata->base + ECC_BLK_RDATA1_OFST),
 		       drvdata->base + ECC_BLK_WDATA1_OFST);
-		writel(readl(drvdata->base + ECC_BLK_RDATA2_OFST),
+		pete_writel("drivers/edac/altera_edac.c:1771", pete_readl("drivers/edac/altera_edac.c:1771", drvdata->base + ECC_BLK_RDATA2_OFST),
 		       drvdata->base + ECC_BLK_WDATA2_OFST);
-		writel(readl(drvdata->base + ECC_BLK_RDATA3_OFST),
+		pete_writel("drivers/edac/altera_edac.c:1773", pete_readl("drivers/edac/altera_edac.c:1773", drvdata->base + ECC_BLK_RDATA3_OFST),
 		       drvdata->base + ECC_BLK_WDATA3_OFST);
 
 		/* Copy Read ECC to Write ECC */
-		writel(readl(drvdata->base + ECC_BLK_RECC0_OFST),
+		pete_writel("drivers/edac/altera_edac.c:1777", pete_readl("drivers/edac/altera_edac.c:1777", drvdata->base + ECC_BLK_RECC0_OFST),
 		       drvdata->base + ECC_BLK_WECC0_OFST);
-		writel(readl(drvdata->base + ECC_BLK_RECC1_OFST),
+		pete_writel("drivers/edac/altera_edac.c:1779", pete_readl("drivers/edac/altera_edac.c:1779", drvdata->base + ECC_BLK_RECC1_OFST),
 		       drvdata->base + ECC_BLK_WECC1_OFST);
 		/* Setup accctrl to write & ecc override & data override */
-		writel(ECC_WRITE_EDOVR, drvdata->base + ECC_BLK_ACCCTRL_OFST);
+		pete_writel("drivers/edac/altera_edac.c:1782", ECC_WRITE_EDOVR, drvdata->base + ECC_BLK_ACCCTRL_OFST);
 		/* Kick it. */
-		writel(ECC_XACT_KICK, drvdata->base + ECC_BLK_STARTACC_OFST);
+		pete_writel("drivers/edac/altera_edac.c:1784", ECC_XACT_KICK, drvdata->base + ECC_BLK_STARTACC_OFST);
 		/* Setup accctrl to read & ecc overwrite & data overwrite */
-		writel(ECC_READ_EDOVR, drvdata->base + ECC_BLK_ACCCTRL_OFST);
+		pete_writel("drivers/edac/altera_edac.c:1786", ECC_READ_EDOVR, drvdata->base + ECC_BLK_ACCCTRL_OFST);
 		/* Kick it. */
-		writel(ECC_XACT_KICK, drvdata->base + ECC_BLK_STARTACC_OFST);
+		pete_writel("drivers/edac/altera_edac.c:1788", ECC_XACT_KICK, drvdata->base + ECC_BLK_STARTACC_OFST);
 	}
 
 	/* Ensure the interrupt test bits are set */
@@ -2056,9 +2056,9 @@ static int s10_edac_dberr_handler(struct notifier_block *this,
 			if (!(BIT(ed->db_irq) & dberror))
 				continue;
 
-			writel(ALTR_A10_ECC_DERRPENA,
+			pete_writel("drivers/edac/altera_edac.c:2059", ALTR_A10_ECC_DERRPENA,
 			       ed->base + ALTR_A10_ECC_INTSTAT_OFST);
-			err_addr = readl(ed->base + ALTR_S10_DERR_ADDRA_OFST);
+			err_addr = pete_readl("drivers/edac/altera_edac.c:2061", ed->base + ALTR_S10_DERR_ADDRA_OFST);
 			regmap_write(edac->ecc_mgr_map,
 				     S10_SYSMGR_UE_ADDR_OFST, err_addr);
 			edac_printk(KERN_ERR, EDAC_DEVICE,

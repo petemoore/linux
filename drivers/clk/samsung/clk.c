@@ -25,7 +25,7 @@ void samsung_clk_save(void __iomem *base,
 				    unsigned int num_regs)
 {
 	for (; num_regs > 0; --num_regs, ++rd)
-		rd->value = readl(base + rd->offset);
+		rd->value = pete_readl("drivers/clk/samsung/clk.c:28", base + rd->offset);
 }
 
 void samsung_clk_restore(void __iomem *base,
@@ -33,7 +33,7 @@ void samsung_clk_restore(void __iomem *base,
 				      unsigned int num_regs)
 {
 	for (; num_regs > 0; --num_regs, ++rd)
-		writel(rd->value, base + rd->offset);
+		pete_writel("drivers/clk/samsung/clk.c:36", rd->value, base + rd->offset);
 }
 
 struct samsung_clk_reg_dump *samsung_clk_alloc_reg_dump(

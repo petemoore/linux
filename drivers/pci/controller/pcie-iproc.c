@@ -421,7 +421,7 @@ static inline u32 iproc_pcie_read_reg(struct iproc_pcie *pcie,
 	if (iproc_pcie_reg_is_invalid(offset))
 		return 0;
 
-	return readl(pcie->base + offset);
+	return pete_readl("drivers/pci/controller/pcie-iproc.c:424", pcie->base + offset);
 }
 
 static inline void iproc_pcie_write_reg(struct iproc_pcie *pcie,
@@ -432,7 +432,7 @@ static inline void iproc_pcie_write_reg(struct iproc_pcie *pcie,
 	if (iproc_pcie_reg_is_invalid(offset))
 		return;
 
-	writel(val, pcie->base + offset);
+	pete_writel("drivers/pci/controller/pcie-iproc.c:435", val, pcie->base + offset);
 }
 
 /*
@@ -502,7 +502,7 @@ static unsigned int iproc_pcie_cfg_retry(struct iproc_pcie *pcie,
 	 * a CRS completion, so we will incorrectly retry the read and
 	 * eventually return the wrong data (0xffffffff).
 	 */
-	data = readl(cfg_data_p);
+	data = pete_readl("drivers/pci/controller/pcie-iproc.c:505", cfg_data_p);
 	while (data == CFG_RETRY_STATUS && timeout--) {
 		/*
 		 * CRS state is set in CFG_RD status register
@@ -514,7 +514,7 @@ static unsigned int iproc_pcie_cfg_retry(struct iproc_pcie *pcie,
 			return data;
 
 		udelay(1);
-		data = readl(cfg_data_p);
+		data = pete_readl("drivers/pci/controller/pcie-iproc.c:517", cfg_data_p);
 	}
 
 	if (data == CFG_RETRY_STATUS)
@@ -664,7 +664,7 @@ static int iproc_pci_raw_config_read32(struct iproc_pcie *pcie,
 		return PCIBIOS_DEVICE_NOT_FOUND;
 	}
 
-	*val = readl(addr);
+	*val = pete_readl("drivers/pci/controller/pcie-iproc.c:667", addr);
 
 	if (size <= 2)
 		*val = (*val >> (8 * (where & 3))) & ((1 << (size * 8)) - 1);
@@ -684,14 +684,14 @@ static int iproc_pci_raw_config_write32(struct iproc_pcie *pcie,
 		return PCIBIOS_DEVICE_NOT_FOUND;
 
 	if (size == 4) {
-		writel(val, addr);
+		pete_writel("drivers/pci/controller/pcie-iproc.c:687", val, addr);
 		return PCIBIOS_SUCCESSFUL;
 	}
 
 	mask = ~(((1 << (size * 8)) - 1) << ((where & 0x3) * 8));
-	tmp = readl(addr) & mask;
+	tmp = pete_readl("drivers/pci/controller/pcie-iproc.c:692", addr) & mask;
 	tmp |= val << ((where & 0x3) * 8);
-	writel(tmp, addr);
+	pete_writel("drivers/pci/controller/pcie-iproc.c:694", tmp, addr);
 
 	return PCIBIOS_SUCCESSFUL;
 }
@@ -875,22 +875,22 @@ static inline int iproc_pcie_ob_write(struct iproc_pcie *pcie, int window_idx,
 	 * Program the OARR registers.  The upper 32-bit OARR register is
 	 * always right after the lower 32-bit OARR register.
 	 */
-	writel(lower_32_bits(axi_addr) | (size_idx << OARR_SIZE_CFG_SHIFT) |
+	pete_writel("drivers/pci/controller/pcie-iproc.c:878", lower_32_bits(axi_addr) | (size_idx << OARR_SIZE_CFG_SHIFT) |
 	       OARR_VALID, pcie->base + oarr_offset);
-	writel(upper_32_bits(axi_addr), pcie->base + oarr_offset + 4);
+	pete_writel("drivers/pci/controller/pcie-iproc.c:880", upper_32_bits(axi_addr), pcie->base + oarr_offset + 4);
 
 	/* now program the OMAP registers */
-	writel(lower_32_bits(pci_addr), pcie->base + omap_offset);
-	writel(upper_32_bits(pci_addr), pcie->base + omap_offset + 4);
+	pete_writel("drivers/pci/controller/pcie-iproc.c:883", lower_32_bits(pci_addr), pcie->base + omap_offset);
+	pete_writel("drivers/pci/controller/pcie-iproc.c:884", upper_32_bits(pci_addr), pcie->base + omap_offset + 4);
 
 	dev_dbg(dev, "ob window [%d]: offset 0x%x axi %pap pci %pap\n",
 		window_idx, oarr_offset, &axi_addr, &pci_addr);
 	dev_dbg(dev, "oarr lo 0x%x oarr hi 0x%x\n",
-		readl(pcie->base + oarr_offset),
-		readl(pcie->base + oarr_offset + 4));
+		pete_readl("drivers/pci/controller/pcie-iproc.c:889", pcie->base + oarr_offset),
+		pete_readl("drivers/pci/controller/pcie-iproc.c:890", pcie->base + oarr_offset + 4));
 	dev_dbg(dev, "omap lo 0x%x omap hi 0x%x\n",
-		readl(pcie->base + omap_offset),
-		readl(pcie->base + omap_offset + 4));
+		pete_readl("drivers/pci/controller/pcie-iproc.c:892", pcie->base + omap_offset),
+		pete_readl("drivers/pci/controller/pcie-iproc.c:893", pcie->base + omap_offset + 4));
 
 	return 0;
 }
@@ -1081,13 +1081,13 @@ static int iproc_pcie_ib_write(struct iproc_pcie *pcie, int region_idx,
 	 * Program the IARR registers.  The upper 32-bit IARR register is
 	 * always right after the lower 32-bit IARR register.
 	 */
-	writel(lower_32_bits(pci_addr) | BIT(size_idx),
+	pete_writel("drivers/pci/controller/pcie-iproc.c:1084", lower_32_bits(pci_addr) | BIT(size_idx),
 	       pcie->base + iarr_offset);
-	writel(upper_32_bits(pci_addr), pcie->base + iarr_offset + 4);
+	pete_writel("drivers/pci/controller/pcie-iproc.c:1086", upper_32_bits(pci_addr), pcie->base + iarr_offset + 4);
 
 	dev_dbg(dev, "iarr lo 0x%x iarr hi 0x%x\n",
-		readl(pcie->base + iarr_offset),
-		readl(pcie->base + iarr_offset + 4));
+		pete_readl("drivers/pci/controller/pcie-iproc.c:1089", pcie->base + iarr_offset),
+		pete_readl("drivers/pci/controller/pcie-iproc.c:1090", pcie->base + iarr_offset + 4));
 
 	/*
 	 * Now program the IMAP registers.  Each IARR region may have one or
@@ -1095,15 +1095,15 @@ static int iproc_pcie_ib_write(struct iproc_pcie *pcie, int region_idx,
 	 */
 	size >>= ilog2(nr_windows);
 	for (window_idx = 0; window_idx < nr_windows; window_idx++) {
-		val = readl(pcie->base + imap_offset);
+		val = pete_readl("drivers/pci/controller/pcie-iproc.c:1098", pcie->base + imap_offset);
 		val |= lower_32_bits(axi_addr) | IMAP_VALID;
-		writel(val, pcie->base + imap_offset);
-		writel(upper_32_bits(axi_addr),
+		pete_writel("drivers/pci/controller/pcie-iproc.c:1100", val, pcie->base + imap_offset);
+		pete_writel("drivers/pci/controller/pcie-iproc.c:1101", upper_32_bits(axi_addr),
 		       pcie->base + imap_offset + ib_map->imap_addr_offset);
 
 		dev_dbg(dev, "imap window [%d] lo 0x%x hi 0x%x\n",
-			window_idx, readl(pcie->base + imap_offset),
-			readl(pcie->base + imap_offset +
+			window_idx, pete_readl("drivers/pci/controller/pcie-iproc.c:1105", pcie->base + imap_offset),
+			pete_readl("drivers/pci/controller/pcie-iproc.c:1106", pcie->base + imap_offset +
 			      ib_map->imap_addr_offset));
 
 		imap_offset += ib_map->imap_window_offset;

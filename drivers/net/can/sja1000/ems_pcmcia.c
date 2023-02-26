@@ -69,13 +69,13 @@ MODULE_DEVICE_TABLE(pcmcia, ems_pcmcia_tbl);
 
 static u8 ems_pcmcia_read_reg(const struct sja1000_priv *priv, int port)
 {
-	return readb(priv->reg_base + port);
+	return pete_readb("drivers/net/can/sja1000/ems_pcmcia.c:72", priv->reg_base + port);
 }
 
 static void ems_pcmcia_write_reg(const struct sja1000_priv *priv, int port,
 				 u8 val)
 {
-	writeb(val, priv->reg_base + port);
+	pete_writeb("drivers/net/can/sja1000/ems_pcmcia.c:78", val, priv->reg_base + port);
 }
 
 static irqreturn_t ems_pcmcia_interrupt(int irq, void *dev_id)
@@ -86,7 +86,7 @@ static irqreturn_t ems_pcmcia_interrupt(int irq, void *dev_id)
 	int i, again;
 
 	/* Card not present */
-	if (readw(card->base_addr) != 0xAA55)
+	if (pete_readw("drivers/net/can/sja1000/ems_pcmcia.c:89", card->base_addr) != 0xAA55)
 		return IRQ_HANDLED;
 
 	do {
@@ -146,7 +146,7 @@ static void ems_pcmcia_del_card(struct pcmcia_device *pdev)
 		free_sja1000dev(dev);
 	}
 
-	writeb(EMS_CMD_UMAP, card->base_addr);
+	pete_writeb("drivers/net/can/sja1000/ems_pcmcia.c:149", EMS_CMD_UMAP, card->base_addr);
 	iounmap(card->base_addr);
 	kfree(card);
 
@@ -179,16 +179,16 @@ static int ems_pcmcia_add_card(struct pcmcia_device *pdev, unsigned long base)
 	}
 
 	/* Check for unique EMS CAN signature */
-	if (readw(card->base_addr) != 0xAA55) {
+	if (pete_readw("drivers/net/can/sja1000/ems_pcmcia.c:182", card->base_addr) != 0xAA55) {
 		err = -ENODEV;
 		goto failure_cleanup;
 	}
 
 	/* Request board reset */
-	writeb(EMS_CMD_RESET, card->base_addr);
+	pete_writeb("drivers/net/can/sja1000/ems_pcmcia.c:188", EMS_CMD_RESET, card->base_addr);
 
 	/* Make sure CAN controllers are mapped into card's memory space */
-	writeb(EMS_CMD_MAP, card->base_addr);
+	pete_writeb("drivers/net/can/sja1000/ems_pcmcia.c:191", EMS_CMD_MAP, card->base_addr);
 
 	/* Detect available channels */
 	for (i = 0; i < EMS_PCMCIA_MAX_CHAN; i++) {

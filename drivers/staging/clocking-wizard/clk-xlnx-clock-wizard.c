@@ -126,7 +126,7 @@ static unsigned long clk_wzrd_recalc_rate(struct clk_hw *hw,
 	void __iomem *div_addr = divider->base + divider->offset;
 	unsigned int val;
 
-	val = readl(div_addr) >> divider->shift;
+	val = pete_readl("drivers/staging/clocking-wizard/clk-xlnx-clock-wizard.c:129", div_addr) >> divider->shift;
 	val &= div_mask(divider->width);
 
 	return divider_recalc_rate(hw, parent_rate, val, divider->table,
@@ -153,8 +153,8 @@ static int clk_wzrd_dynamic_reconfig(struct clk_hw *hw, unsigned long rate,
 	min_t(u32, value, WZRD_DR_MAX_INT_DIV_VALUE);
 
 	/* Set divisor and clear phase offset */
-	writel(value, div_addr);
-	writel(0x00, div_addr + WZRD_DR_DIV_TO_PHASE_OFFSET);
+	pete_writel("drivers/staging/clocking-wizard/clk-xlnx-clock-wizard.c:156", value, div_addr);
+	pete_writel("drivers/staging/clocking-wizard/clk-xlnx-clock-wizard.c:157", 0x00, div_addr + WZRD_DR_DIV_TO_PHASE_OFFSET);
 
 	/* Check status register */
 	err = readl_poll_timeout(divider->base + WZRD_DR_STATUS_REG_OFFSET,
@@ -164,7 +164,7 @@ static int clk_wzrd_dynamic_reconfig(struct clk_hw *hw, unsigned long rate,
 		goto err_reconfig;
 
 	/* Initiate reconfiguration */
-	writel(WZRD_DR_BEGIN_DYNA_RECONF,
+	pete_writel("drivers/staging/clocking-wizard/clk-xlnx-clock-wizard.c:167", WZRD_DR_BEGIN_DYNA_RECONF,
 	       divider->base + WZRD_DR_INIT_REG_OFFSET);
 
 	/* Check status register */
@@ -207,7 +207,7 @@ static unsigned long clk_wzrd_recalc_ratef(struct clk_hw *hw,
 	struct clk_wzrd_divider *divider = to_clk_wzrd_divider(hw);
 	void __iomem *div_addr = divider->base + divider->offset;
 
-	val = readl(div_addr);
+	val = pete_readl("drivers/staging/clocking-wizard/clk-xlnx-clock-wizard.c:210", div_addr);
 	div = val & div_mask(divider->width);
 	frac = (val >> WZRD_CLKOUT_FRAC_SHIFT) & WZRD_CLKOUT_FRAC_MASK;
 
@@ -234,8 +234,8 @@ static int clk_wzrd_dynamic_reconfig_f(struct clk_hw *hw, unsigned long rate,
 	value = (f  | (clockout0_div & WZRD_CLKOUT_DIVIDE_MASK));
 
 	/* Set divisor and clear phase offset */
-	writel(value, div_addr);
-	writel(0x0, div_addr + WZRD_DR_DIV_TO_PHASE_OFFSET);
+	pete_writel("drivers/staging/clocking-wizard/clk-xlnx-clock-wizard.c:237", value, div_addr);
+	pete_writel("drivers/staging/clocking-wizard/clk-xlnx-clock-wizard.c:238", 0x0, div_addr + WZRD_DR_DIV_TO_PHASE_OFFSET);
 
 	/* Check status register */
 	err = readl_poll_timeout(divider->base + WZRD_DR_STATUS_REG_OFFSET, value,
@@ -245,7 +245,7 @@ static int clk_wzrd_dynamic_reconfig_f(struct clk_hw *hw, unsigned long rate,
 		return err;
 
 	/* Initiate reconfiguration */
-	writel(WZRD_DR_BEGIN_DYNA_RECONF,
+	pete_writel("drivers/staging/clocking-wizard/clk-xlnx-clock-wizard.c:248", WZRD_DR_BEGIN_DYNA_RECONF,
 	       divider->base + WZRD_DR_INIT_REG_OFFSET);
 
 	/* Check status register */
@@ -466,7 +466,7 @@ static int clk_wzrd_probe(struct platform_device *pdev)
 		goto err_disable_clk;
 	}
 
-	reg = readl(clk_wzrd->base + WZRD_CLK_CFG_REG(0));
+	reg = pete_readl("drivers/staging/clocking-wizard/clk-xlnx-clock-wizard.c:469", clk_wzrd->base + WZRD_CLK_CFG_REG(0));
 	reg_f = reg & WZRD_CLKFBOUT_FRAC_MASK;
 	reg_f =  reg_f >> WZRD_CLKFBOUT_FRAC_SHIFT;
 

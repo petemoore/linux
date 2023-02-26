@@ -110,13 +110,13 @@ static int __opb_write(struct fsi_master_aspeed *aspeed, u32 addr,
 	writel_relaxed(addr, base + OPB0_FSI_ADDR);
 	writel_relaxed(val, base + OPB0_FSI_DATA_W);
 	writel_relaxed(0x1, base + OPB_IRQ_CLEAR);
-	writel(0x1, base + OPB_TRIGGER);
+	pete_writel("drivers/fsi/fsi-master-aspeed.c:113", 0x1, base + OPB_TRIGGER);
 
 	ret = readl_poll_timeout(base + OPB_IRQ_STATUS, reg,
 				(reg & OPB0_XFER_ACK_EN) != 0,
 				0, OPB_POLL_TIMEOUT);
 
-	status = readl(base + OPB0_STATUS);
+	status = pete_readl("drivers/fsi/fsi-master-aspeed.c:119", base + OPB0_STATUS);
 
 	trace_fsi_master_aspeed_opb_write(addr, val, transfer_size, status, reg);
 
@@ -161,18 +161,18 @@ static int __opb_read(struct fsi_master_aspeed *aspeed, uint32_t addr,
 	writel_relaxed(transfer_size, base + OPB0_XFER_SIZE);
 	writel_relaxed(addr, base + OPB0_FSI_ADDR);
 	writel_relaxed(0x1, base + OPB_IRQ_CLEAR);
-	writel(0x1, base + OPB_TRIGGER);
+	pete_writel("drivers/fsi/fsi-master-aspeed.c:164", 0x1, base + OPB_TRIGGER);
 
 	ret = readl_poll_timeout(base + OPB_IRQ_STATUS, reg,
 			   (reg & OPB0_XFER_ACK_EN) != 0,
 			   0, OPB_POLL_TIMEOUT);
 
-	status = readl(base + OPB0_STATUS);
+	status = pete_readl("drivers/fsi/fsi-master-aspeed.c:170", base + OPB0_STATUS);
 
-	result = readl(base + OPB0_FSI_DATA_R);
+	result = pete_readl("drivers/fsi/fsi-master-aspeed.c:172", base + OPB0_FSI_DATA_R);
 
 	trace_fsi_master_aspeed_opb_read(addr, transfer_size, result,
-			readl(base + OPB0_STATUS),
+			pete_readl("drivers/fsi/fsi-master-aspeed.c:175", base + OPB0_STATUS),
 			reg);
 
 	/* Return error when poll timed out */
@@ -571,29 +571,29 @@ static int fsi_master_aspeed_probe(struct platform_device *pdev)
 		dev_err(&pdev->dev, "CFAM reset GPIO setup failed\n");
 	}
 
-	writel(0x1, aspeed->base + OPB_CLK_SYNC);
-	writel(OPB1_XFER_ACK_EN | OPB0_XFER_ACK_EN,
+	pete_writel("drivers/fsi/fsi-master-aspeed.c:574", 0x1, aspeed->base + OPB_CLK_SYNC);
+	pete_writel("drivers/fsi/fsi-master-aspeed.c:575", OPB1_XFER_ACK_EN | OPB0_XFER_ACK_EN,
 			aspeed->base + OPB_IRQ_MASK);
 
 	/* TODO: determine an appropriate value */
-	writel(0x10, aspeed->base + OPB_RETRY_COUNTER);
+	pete_writel("drivers/fsi/fsi-master-aspeed.c:579", 0x10, aspeed->base + OPB_RETRY_COUNTER);
 
-	writel(ctrl_base, aspeed->base + OPB_CTRL_BASE);
-	writel(fsi_base, aspeed->base + OPB_FSI_BASE);
+	pete_writel("drivers/fsi/fsi-master-aspeed.c:581", ctrl_base, aspeed->base + OPB_CTRL_BASE);
+	pete_writel("drivers/fsi/fsi-master-aspeed.c:582", fsi_base, aspeed->base + OPB_FSI_BASE);
 
 	/* Set read data order */
-	writel(0x00030b1b, aspeed->base + OPB0_READ_ORDER1);
+	pete_writel("drivers/fsi/fsi-master-aspeed.c:585", 0x00030b1b, aspeed->base + OPB0_READ_ORDER1);
 
 	/* Set write data order */
-	writel(0x0011101b, aspeed->base + OPB0_WRITE_ORDER1);
-	writel(0x0c330f3f, aspeed->base + OPB0_WRITE_ORDER2);
+	pete_writel("drivers/fsi/fsi-master-aspeed.c:588", 0x0011101b, aspeed->base + OPB0_WRITE_ORDER1);
+	pete_writel("drivers/fsi/fsi-master-aspeed.c:589", 0x0c330f3f, aspeed->base + OPB0_WRITE_ORDER2);
 
 	/*
 	 * Select OPB0 for all operations.
 	 * Will need to be reworked when enabling DMA or anything that uses
 	 * OPB1.
 	 */
-	writel(0x1, aspeed->base + OPB0_SELECT);
+	pete_writel("drivers/fsi/fsi-master-aspeed.c:596", 0x1, aspeed->base + OPB0_SELECT);
 
 	rc = opb_readl(aspeed, ctrl_base + FSI_MVER, &raw);
 	if (rc) {

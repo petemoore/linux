@@ -13,7 +13,7 @@
 
 void gsc_hw_set_sw_reset(struct gsc_dev *dev)
 {
-	writel(GSC_SW_RESET_SRESET, dev->regs + GSC_SW_RESET);
+	pete_writel("drivers/media/platform/exynos-gsc/gsc-regs.c:16", GSC_SW_RESET_SRESET, dev->regs + GSC_SW_RESET);
 }
 
 int gsc_wait_reset(struct gsc_dev *dev)
@@ -22,7 +22,7 @@ int gsc_wait_reset(struct gsc_dev *dev)
 	u32 cfg;
 
 	while (time_before(jiffies, end)) {
-		cfg = readl(dev->regs + GSC_SW_RESET);
+		cfg = pete_readl("drivers/media/platform/exynos-gsc/gsc-regs.c:25", dev->regs + GSC_SW_RESET);
 		if (!cfg)
 			return 0;
 		usleep_range(10, 20);
@@ -35,52 +35,52 @@ void gsc_hw_set_frm_done_irq_mask(struct gsc_dev *dev, bool mask)
 {
 	u32 cfg;
 
-	cfg = readl(dev->regs + GSC_IRQ);
+	cfg = pete_readl("drivers/media/platform/exynos-gsc/gsc-regs.c:38", dev->regs + GSC_IRQ);
 	if (mask)
 		cfg |= GSC_IRQ_FRMDONE_MASK;
 	else
 		cfg &= ~GSC_IRQ_FRMDONE_MASK;
-	writel(cfg, dev->regs + GSC_IRQ);
+	pete_writel("drivers/media/platform/exynos-gsc/gsc-regs.c:43", cfg, dev->regs + GSC_IRQ);
 }
 
 void gsc_hw_set_gsc_irq_enable(struct gsc_dev *dev, bool mask)
 {
 	u32 cfg;
 
-	cfg = readl(dev->regs + GSC_IRQ);
+	cfg = pete_readl("drivers/media/platform/exynos-gsc/gsc-regs.c:50", dev->regs + GSC_IRQ);
 	if (mask)
 		cfg |= GSC_IRQ_ENABLE;
 	else
 		cfg &= ~GSC_IRQ_ENABLE;
-	writel(cfg, dev->regs + GSC_IRQ);
+	pete_writel("drivers/media/platform/exynos-gsc/gsc-regs.c:55", cfg, dev->regs + GSC_IRQ);
 }
 
 void gsc_hw_set_input_buf_masking(struct gsc_dev *dev, u32 shift,
 				bool enable)
 {
-	u32 cfg = readl(dev->regs + GSC_IN_BASE_ADDR_Y_MASK);
+	u32 cfg = pete_readl("drivers/media/platform/exynos-gsc/gsc-regs.c:61", dev->regs + GSC_IN_BASE_ADDR_Y_MASK);
 	u32 mask = 1 << shift;
 
 	cfg &= ~mask;
 	cfg |= enable << shift;
 
-	writel(cfg, dev->regs + GSC_IN_BASE_ADDR_Y_MASK);
-	writel(cfg, dev->regs + GSC_IN_BASE_ADDR_CB_MASK);
-	writel(cfg, dev->regs + GSC_IN_BASE_ADDR_CR_MASK);
+	pete_writel("drivers/media/platform/exynos-gsc/gsc-regs.c:67", cfg, dev->regs + GSC_IN_BASE_ADDR_Y_MASK);
+	pete_writel("drivers/media/platform/exynos-gsc/gsc-regs.c:68", cfg, dev->regs + GSC_IN_BASE_ADDR_CB_MASK);
+	pete_writel("drivers/media/platform/exynos-gsc/gsc-regs.c:69", cfg, dev->regs + GSC_IN_BASE_ADDR_CR_MASK);
 }
 
 void gsc_hw_set_output_buf_masking(struct gsc_dev *dev, u32 shift,
 				bool enable)
 {
-	u32 cfg = readl(dev->regs + GSC_OUT_BASE_ADDR_Y_MASK);
+	u32 cfg = pete_readl("drivers/media/platform/exynos-gsc/gsc-regs.c:75", dev->regs + GSC_OUT_BASE_ADDR_Y_MASK);
 	u32 mask = 1 << shift;
 
 	cfg &= ~mask;
 	cfg |= enable << shift;
 
-	writel(cfg, dev->regs + GSC_OUT_BASE_ADDR_Y_MASK);
-	writel(cfg, dev->regs + GSC_OUT_BASE_ADDR_CB_MASK);
-	writel(cfg, dev->regs + GSC_OUT_BASE_ADDR_CR_MASK);
+	pete_writel("drivers/media/platform/exynos-gsc/gsc-regs.c:81", cfg, dev->regs + GSC_OUT_BASE_ADDR_Y_MASK);
+	pete_writel("drivers/media/platform/exynos-gsc/gsc-regs.c:82", cfg, dev->regs + GSC_OUT_BASE_ADDR_CB_MASK);
+	pete_writel("drivers/media/platform/exynos-gsc/gsc-regs.c:83", cfg, dev->regs + GSC_OUT_BASE_ADDR_CR_MASK);
 }
 
 void gsc_hw_set_input_addr(struct gsc_dev *dev, struct gsc_addr *addr,
@@ -88,9 +88,9 @@ void gsc_hw_set_input_addr(struct gsc_dev *dev, struct gsc_addr *addr,
 {
 	pr_debug("src_buf[%d]: %pad, cb: %pad, cr: %pad", index,
 			&addr->y, &addr->cb, &addr->cr);
-	writel(addr->y, dev->regs + GSC_IN_BASE_ADDR_Y(index));
-	writel(addr->cb, dev->regs + GSC_IN_BASE_ADDR_CB(index));
-	writel(addr->cr, dev->regs + GSC_IN_BASE_ADDR_CR(index));
+	pete_writel("drivers/media/platform/exynos-gsc/gsc-regs.c:91", addr->y, dev->regs + GSC_IN_BASE_ADDR_Y(index));
+	pete_writel("drivers/media/platform/exynos-gsc/gsc-regs.c:92", addr->cb, dev->regs + GSC_IN_BASE_ADDR_CB(index));
+	pete_writel("drivers/media/platform/exynos-gsc/gsc-regs.c:93", addr->cr, dev->regs + GSC_IN_BASE_ADDR_CR(index));
 
 }
 
@@ -99,22 +99,22 @@ void gsc_hw_set_output_addr(struct gsc_dev *dev,
 {
 	pr_debug("dst_buf[%d]: %pad, cb: %pad, cr: %pad",
 			index, &addr->y, &addr->cb, &addr->cr);
-	writel(addr->y, dev->regs + GSC_OUT_BASE_ADDR_Y(index));
-	writel(addr->cb, dev->regs + GSC_OUT_BASE_ADDR_CB(index));
-	writel(addr->cr, dev->regs + GSC_OUT_BASE_ADDR_CR(index));
+	pete_writel("drivers/media/platform/exynos-gsc/gsc-regs.c:102", addr->y, dev->regs + GSC_OUT_BASE_ADDR_Y(index));
+	pete_writel("drivers/media/platform/exynos-gsc/gsc-regs.c:103", addr->cb, dev->regs + GSC_OUT_BASE_ADDR_CB(index));
+	pete_writel("drivers/media/platform/exynos-gsc/gsc-regs.c:104", addr->cr, dev->regs + GSC_OUT_BASE_ADDR_CR(index));
 }
 
 void gsc_hw_set_input_path(struct gsc_ctx *ctx)
 {
 	struct gsc_dev *dev = ctx->gsc_dev;
 
-	u32 cfg = readl(dev->regs + GSC_IN_CON);
+	u32 cfg = pete_readl("drivers/media/platform/exynos-gsc/gsc-regs.c:111", dev->regs + GSC_IN_CON);
 	cfg &= ~(GSC_IN_PATH_MASK | GSC_IN_LOCAL_SEL_MASK);
 
 	if (ctx->in_path == GSC_DMA)
 		cfg |= GSC_IN_PATH_MEMORY;
 
-	writel(cfg, dev->regs + GSC_IN_CON);
+	pete_writel("drivers/media/platform/exynos-gsc/gsc-regs.c:117", cfg, dev->regs + GSC_IN_CON);
 }
 
 void gsc_hw_set_in_size(struct gsc_ctx *ctx)
@@ -126,17 +126,17 @@ void gsc_hw_set_in_size(struct gsc_ctx *ctx)
 	/* Set input pixel offset */
 	cfg = GSC_SRCIMG_OFFSET_X(frame->crop.left);
 	cfg |= GSC_SRCIMG_OFFSET_Y(frame->crop.top);
-	writel(cfg, dev->regs + GSC_SRCIMG_OFFSET);
+	pete_writel("drivers/media/platform/exynos-gsc/gsc-regs.c:129", cfg, dev->regs + GSC_SRCIMG_OFFSET);
 
 	/* Set input original size */
 	cfg = GSC_SRCIMG_WIDTH(frame->f_width);
 	cfg |= GSC_SRCIMG_HEIGHT(frame->f_height);
-	writel(cfg, dev->regs + GSC_SRCIMG_SIZE);
+	pete_writel("drivers/media/platform/exynos-gsc/gsc-regs.c:134", cfg, dev->regs + GSC_SRCIMG_SIZE);
 
 	/* Set input cropped size */
 	cfg = GSC_CROPPED_WIDTH(frame->crop.width);
 	cfg |= GSC_CROPPED_HEIGHT(frame->crop.height);
-	writel(cfg, dev->regs + GSC_CROPPED_SIZE);
+	pete_writel("drivers/media/platform/exynos-gsc/gsc-regs.c:139", cfg, dev->regs + GSC_CROPPED_SIZE);
 }
 
 void gsc_hw_set_in_image_rgb(struct gsc_ctx *ctx)
@@ -145,7 +145,7 @@ void gsc_hw_set_in_image_rgb(struct gsc_ctx *ctx)
 	struct gsc_frame *frame = &ctx->s_frame;
 	u32 cfg;
 
-	cfg = readl(dev->regs + GSC_IN_CON);
+	cfg = pete_readl("drivers/media/platform/exynos-gsc/gsc-regs.c:148", dev->regs + GSC_IN_CON);
 	if (frame->colorspace == V4L2_COLORSPACE_REC709)
 		cfg |= GSC_IN_RGB_HD_WIDE;
 	else
@@ -156,7 +156,7 @@ void gsc_hw_set_in_image_rgb(struct gsc_ctx *ctx)
 	else if (frame->fmt->pixelformat == V4L2_PIX_FMT_RGB32)
 		cfg |= GSC_IN_XRGB8888;
 
-	writel(cfg, dev->regs + GSC_IN_CON);
+	pete_writel("drivers/media/platform/exynos-gsc/gsc-regs.c:159", cfg, dev->regs + GSC_IN_CON);
 }
 
 void gsc_hw_set_in_image_format(struct gsc_ctx *ctx)
@@ -166,11 +166,11 @@ void gsc_hw_set_in_image_format(struct gsc_ctx *ctx)
 	u32 i, depth = 0;
 	u32 cfg;
 
-	cfg = readl(dev->regs + GSC_IN_CON);
+	cfg = pete_readl("drivers/media/platform/exynos-gsc/gsc-regs.c:169", dev->regs + GSC_IN_CON);
 	cfg &= ~(GSC_IN_RGB_TYPE_MASK | GSC_IN_YUV422_1P_ORDER_MASK |
 		 GSC_IN_CHROMA_ORDER_MASK | GSC_IN_FORMAT_MASK |
 		 GSC_IN_TILE_TYPE_MASK | GSC_IN_TILE_MODE);
-	writel(cfg, dev->regs + GSC_IN_CON);
+	pete_writel("drivers/media/platform/exynos-gsc/gsc-regs.c:173", cfg, dev->regs + GSC_IN_CON);
 
 	if (is_rgb(frame->fmt->color)) {
 		gsc_hw_set_in_image_rgb(ctx);
@@ -212,14 +212,14 @@ void gsc_hw_set_in_image_format(struct gsc_ctx *ctx)
 	if (is_tiled(frame->fmt))
 		cfg |= GSC_IN_TILE_C_16x8 | GSC_IN_TILE_MODE;
 
-	writel(cfg, dev->regs + GSC_IN_CON);
+	pete_writel("drivers/media/platform/exynos-gsc/gsc-regs.c:215", cfg, dev->regs + GSC_IN_CON);
 }
 
 void gsc_hw_set_output_path(struct gsc_ctx *ctx)
 {
 	struct gsc_dev *dev = ctx->gsc_dev;
 
-	u32 cfg = readl(dev->regs + GSC_OUT_CON);
+	u32 cfg = pete_readl("drivers/media/platform/exynos-gsc/gsc-regs.c:222", dev->regs + GSC_OUT_CON);
 	cfg &= ~GSC_OUT_PATH_MASK;
 
 	if (ctx->out_path == GSC_DMA)
@@ -227,7 +227,7 @@ void gsc_hw_set_output_path(struct gsc_ctx *ctx)
 	else
 		cfg |= GSC_OUT_PATH_LOCAL;
 
-	writel(cfg, dev->regs + GSC_OUT_CON);
+	pete_writel("drivers/media/platform/exynos-gsc/gsc-regs.c:230", cfg, dev->regs + GSC_OUT_CON);
 }
 
 void gsc_hw_set_out_size(struct gsc_ctx *ctx)
@@ -240,11 +240,11 @@ void gsc_hw_set_out_size(struct gsc_ctx *ctx)
 	if (ctx->out_path == GSC_DMA) {
 		cfg = GSC_DSTIMG_OFFSET_X(frame->crop.left);
 		cfg |= GSC_DSTIMG_OFFSET_Y(frame->crop.top);
-		writel(cfg, dev->regs + GSC_DSTIMG_OFFSET);
+		pete_writel("drivers/media/platform/exynos-gsc/gsc-regs.c:243", cfg, dev->regs + GSC_DSTIMG_OFFSET);
 
 		cfg = GSC_DSTIMG_WIDTH(frame->f_width);
 		cfg |= GSC_DSTIMG_HEIGHT(frame->f_height);
-		writel(cfg, dev->regs + GSC_DSTIMG_SIZE);
+		pete_writel("drivers/media/platform/exynos-gsc/gsc-regs.c:247", cfg, dev->regs + GSC_DSTIMG_SIZE);
 	}
 
 	/* Set output scaled size */
@@ -256,7 +256,7 @@ void gsc_hw_set_out_size(struct gsc_ctx *ctx)
 		cfg = GSC_SCALED_WIDTH(frame->crop.width);
 		cfg |= GSC_SCALED_HEIGHT(frame->crop.height);
 	}
-	writel(cfg, dev->regs + GSC_SCALED_SIZE);
+	pete_writel("drivers/media/platform/exynos-gsc/gsc-regs.c:259", cfg, dev->regs + GSC_SCALED_SIZE);
 }
 
 void gsc_hw_set_out_image_rgb(struct gsc_ctx *ctx)
@@ -265,7 +265,7 @@ void gsc_hw_set_out_image_rgb(struct gsc_ctx *ctx)
 	struct gsc_frame *frame = &ctx->d_frame;
 	u32 cfg;
 
-	cfg = readl(dev->regs + GSC_OUT_CON);
+	cfg = pete_readl("drivers/media/platform/exynos-gsc/gsc-regs.c:268", dev->regs + GSC_OUT_CON);
 	if (frame->colorspace == V4L2_COLORSPACE_REC709)
 		cfg |= GSC_OUT_RGB_HD_WIDE;
 	else
@@ -276,7 +276,7 @@ void gsc_hw_set_out_image_rgb(struct gsc_ctx *ctx)
 	else if (frame->fmt->pixelformat == V4L2_PIX_FMT_RGB32)
 		cfg |= GSC_OUT_XRGB8888;
 
-	writel(cfg, dev->regs + GSC_OUT_CON);
+	pete_writel("drivers/media/platform/exynos-gsc/gsc-regs.c:279", cfg, dev->regs + GSC_OUT_CON);
 }
 
 void gsc_hw_set_out_image_format(struct gsc_ctx *ctx)
@@ -286,11 +286,11 @@ void gsc_hw_set_out_image_format(struct gsc_ctx *ctx)
 	u32 i, depth = 0;
 	u32 cfg;
 
-	cfg = readl(dev->regs + GSC_OUT_CON);
+	cfg = pete_readl("drivers/media/platform/exynos-gsc/gsc-regs.c:289", dev->regs + GSC_OUT_CON);
 	cfg &= ~(GSC_OUT_RGB_TYPE_MASK | GSC_OUT_YUV422_1P_ORDER_MASK |
 		 GSC_OUT_CHROMA_ORDER_MASK | GSC_OUT_FORMAT_MASK |
 		 GSC_OUT_TILE_TYPE_MASK | GSC_OUT_TILE_MODE);
-	writel(cfg, dev->regs + GSC_OUT_CON);
+	pete_writel("drivers/media/platform/exynos-gsc/gsc-regs.c:293", cfg, dev->regs + GSC_OUT_CON);
 
 	if (is_rgb(frame->fmt->color)) {
 		gsc_hw_set_out_image_rgb(ctx);
@@ -336,7 +336,7 @@ void gsc_hw_set_out_image_format(struct gsc_ctx *ctx)
 		cfg |= GSC_OUT_TILE_C_16x8 | GSC_OUT_TILE_MODE;
 
 end_set:
-	writel(cfg, dev->regs + GSC_OUT_CON);
+	pete_writel("drivers/media/platform/exynos-gsc/gsc-regs.c:339", cfg, dev->regs + GSC_OUT_CON);
 }
 
 void gsc_hw_set_prescaler(struct gsc_ctx *ctx)
@@ -348,7 +348,7 @@ void gsc_hw_set_prescaler(struct gsc_ctx *ctx)
 	cfg = GSC_PRESC_SHFACTOR(sc->pre_shfactor);
 	cfg |= GSC_PRESC_H_RATIO(sc->pre_hratio);
 	cfg |= GSC_PRESC_V_RATIO(sc->pre_vratio);
-	writel(cfg, dev->regs + GSC_PRE_SCALE_RATIO);
+	pete_writel("drivers/media/platform/exynos-gsc/gsc-regs.c:351", cfg, dev->regs + GSC_PRE_SCALE_RATIO);
 }
 
 void gsc_hw_set_mainscaler(struct gsc_ctx *ctx)
@@ -358,10 +358,10 @@ void gsc_hw_set_mainscaler(struct gsc_ctx *ctx)
 	u32 cfg;
 
 	cfg = GSC_MAIN_H_RATIO_VALUE(sc->main_hratio);
-	writel(cfg, dev->regs + GSC_MAIN_H_RATIO);
+	pete_writel("drivers/media/platform/exynos-gsc/gsc-regs.c:361", cfg, dev->regs + GSC_MAIN_H_RATIO);
 
 	cfg = GSC_MAIN_V_RATIO_VALUE(sc->main_vratio);
-	writel(cfg, dev->regs + GSC_MAIN_V_RATIO);
+	pete_writel("drivers/media/platform/exynos-gsc/gsc-regs.c:364", cfg, dev->regs + GSC_MAIN_V_RATIO);
 }
 
 void gsc_hw_set_rotation(struct gsc_ctx *ctx)
@@ -369,7 +369,7 @@ void gsc_hw_set_rotation(struct gsc_ctx *ctx)
 	struct gsc_dev *dev = ctx->gsc_dev;
 	u32 cfg;
 
-	cfg = readl(dev->regs + GSC_IN_CON);
+	cfg = pete_readl("drivers/media/platform/exynos-gsc/gsc-regs.c:372", dev->regs + GSC_IN_CON);
 	cfg &= ~GSC_IN_ROT_MASK;
 
 	switch (ctx->gsc_ctrls.rotate->val) {
@@ -394,7 +394,7 @@ void gsc_hw_set_rotation(struct gsc_ctx *ctx)
 			cfg |= GSC_IN_ROT_YFLIP;
 	}
 
-	writel(cfg, dev->regs + GSC_IN_CON);
+	pete_writel("drivers/media/platform/exynos-gsc/gsc-regs.c:397", cfg, dev->regs + GSC_IN_CON);
 }
 
 void gsc_hw_set_global_alpha(struct gsc_ctx *ctx)
@@ -408,11 +408,11 @@ void gsc_hw_set_global_alpha(struct gsc_ctx *ctx)
 		return;
 	}
 
-	cfg = readl(dev->regs + GSC_OUT_CON);
+	cfg = pete_readl("drivers/media/platform/exynos-gsc/gsc-regs.c:411", dev->regs + GSC_OUT_CON);
 	cfg &= ~GSC_OUT_GLOBAL_ALPHA_MASK;
 
 	cfg |= GSC_OUT_GLOBAL_ALPHA(ctx->gsc_ctrls.global_alpha->val);
-	writel(cfg, dev->regs + GSC_OUT_CON);
+	pete_writel("drivers/media/platform/exynos-gsc/gsc-regs.c:415", cfg, dev->regs + GSC_OUT_CON);
 }
 
 void gsc_hw_set_sfr_update(struct gsc_ctx *ctx)
@@ -420,7 +420,7 @@ void gsc_hw_set_sfr_update(struct gsc_ctx *ctx)
 	struct gsc_dev *dev = ctx->gsc_dev;
 	u32 cfg;
 
-	cfg = readl(dev->regs + GSC_ENABLE);
+	cfg = pete_readl("drivers/media/platform/exynos-gsc/gsc-regs.c:423", dev->regs + GSC_ENABLE);
 	cfg |= GSC_ENABLE_SFR_UPDATE;
-	writel(cfg, dev->regs + GSC_ENABLE);
+	pete_writel("drivers/media/platform/exynos-gsc/gsc-regs.c:425", cfg, dev->regs + GSC_ENABLE);
 }

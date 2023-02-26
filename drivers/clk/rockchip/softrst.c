@@ -29,7 +29,7 @@ static int rockchip_softrst_assert(struct reset_controller_dev *rcdev,
 	int offset = id % softrst->num_per_reg;
 
 	if (softrst->flags & ROCKCHIP_SOFTRST_HIWORD_MASK) {
-		writel(BIT(offset) | (BIT(offset) << 16),
+		pete_writel("drivers/clk/rockchip/softrst.c:32", BIT(offset) | (BIT(offset) << 16),
 		       softrst->reg_base + (bank * 4));
 	} else {
 		unsigned long flags;
@@ -37,8 +37,8 @@ static int rockchip_softrst_assert(struct reset_controller_dev *rcdev,
 
 		spin_lock_irqsave(&softrst->lock, flags);
 
-		reg = readl(softrst->reg_base + (bank * 4));
-		writel(reg | BIT(offset), softrst->reg_base + (bank * 4));
+		reg = pete_readl("drivers/clk/rockchip/softrst.c:40", softrst->reg_base + (bank * 4));
+		pete_writel("drivers/clk/rockchip/softrst.c:41", reg | BIT(offset), softrst->reg_base + (bank * 4));
 
 		spin_unlock_irqrestore(&softrst->lock, flags);
 	}
@@ -56,15 +56,15 @@ static int rockchip_softrst_deassert(struct reset_controller_dev *rcdev,
 	int offset = id % softrst->num_per_reg;
 
 	if (softrst->flags & ROCKCHIP_SOFTRST_HIWORD_MASK) {
-		writel((BIT(offset) << 16), softrst->reg_base + (bank * 4));
+		pete_writel("drivers/clk/rockchip/softrst.c:59", (BIT(offset) << 16), softrst->reg_base + (bank * 4));
 	} else {
 		unsigned long flags;
 		u32 reg;
 
 		spin_lock_irqsave(&softrst->lock, flags);
 
-		reg = readl(softrst->reg_base + (bank * 4));
-		writel(reg & ~BIT(offset), softrst->reg_base + (bank * 4));
+		reg = pete_readl("drivers/clk/rockchip/softrst.c:66", softrst->reg_base + (bank * 4));
+		pete_writel("drivers/clk/rockchip/softrst.c:67", reg & ~BIT(offset), softrst->reg_base + (bank * 4));
 
 		spin_unlock_irqrestore(&softrst->lock, flags);
 	}

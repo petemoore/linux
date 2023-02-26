@@ -31,7 +31,7 @@ static u32 imx5_read_srev_reg(const char *compat)
 	of_node_put(np);
 	WARN_ON(!iim_base);
 
-	srev = readl(iim_base + IIM_SREV) & 0xff;
+	srev = pete_readl("arch/arm/mach-imx/cpu-imx5.c:34", iim_base + IIM_SREV) & 0xff;
 
 	iounmap(iim_base);
 

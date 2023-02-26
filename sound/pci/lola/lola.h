@@ -375,23 +375,23 @@ struct lola {
 
 /* Helper macros */
 #define lola_readl(chip, idx, name) \
-	readl((chip)->bar[idx].remap_addr + LOLA_##idx##_##name)
+	pete_readl("sound/pci/lola/lola.h:378", (chip)->bar[idx].remap_addr + LOLA_##idx##_##name)
 #define lola_readw(chip, idx, name) \
-	readw((chip)->bar[idx].remap_addr + LOLA_##idx##_##name)
+	pete_readw("sound/pci/lola/lola.h:380", (chip)->bar[idx].remap_addr + LOLA_##idx##_##name)
 #define lola_readb(chip, idx, name) \
-	readb((chip)->bar[idx].remap_addr + LOLA_##idx##_##name)
+	pete_readb("sound/pci/lola/lola.h:382", (chip)->bar[idx].remap_addr + LOLA_##idx##_##name)
 #define lola_writel(chip, idx, name, val) \
-	writel((val), (chip)->bar[idx].remap_addr + LOLA_##idx##_##name)
+	pete_writel("sound/pci/lola/lola.h:384", (val), (chip)->bar[idx].remap_addr + LOLA_##idx##_##name)
 #define lola_writew(chip, idx, name, val) \
-	writew((val), (chip)->bar[idx].remap_addr + LOLA_##idx##_##name)
+	pete_writew("sound/pci/lola/lola.h:386", (val), (chip)->bar[idx].remap_addr + LOLA_##idx##_##name)
 #define lola_writeb(chip, idx, name, val) \
-	writeb((val), (chip)->bar[idx].remap_addr + LOLA_##idx##_##name)
+	pete_writeb("sound/pci/lola/lola.h:388", (val), (chip)->bar[idx].remap_addr + LOLA_##idx##_##name)
 
 #define lola_dsd_read(chip, dsd, name) \
-	readl((chip)->bar[BAR1].remap_addr + LOLA_BAR1_DSD0_OFFSET + \
+	pete_readl("sound/pci/lola/lola.h:391", (chip)->bar[BAR1].remap_addr + LOLA_BAR1_DSD0_OFFSET + \
 	      (LOLA_BAR1_DSD_SIZE * (dsd)) + LOLA_BAR1_DSDn##name)
 #define lola_dsd_write(chip, dsd, name, val) \
-	writel((val), (chip)->bar[BAR1].remap_addr + LOLA_BAR1_DSD0_OFFSET + \
+	pete_writel("sound/pci/lola/lola.h:394", (val), (chip)->bar[BAR1].remap_addr + LOLA_BAR1_DSD0_OFFSET + \
 	       (LOLA_BAR1_DSD_SIZE * (dsd)) + LOLA_BAR1_DSDn##name)
 
 /* GET verbs HDAudio */

@@ -46,13 +46,13 @@ static int clk_pll_prepare(struct clk_hw *hwclk)
 	struct hb_clk *hbclk = to_hb_clk(hwclk);
 	u32 reg;
 
-	reg = readl(hbclk->reg);
+	reg = pete_readl("drivers/clk/clk-highbank.c:49", hbclk->reg);
 	reg &= ~HB_PLL_RESET;
-	writel(reg, hbclk->reg);
+	pete_writel("drivers/clk/clk-highbank.c:51", reg, hbclk->reg);
 
-	while ((readl(hbclk->reg) & HB_PLL_LOCK) == 0)
+	while ((pete_readl("drivers/clk/clk-highbank.c:53", hbclk->reg) & HB_PLL_LOCK) == 0)
 		;
-	while ((readl(hbclk->reg) & HB_PLL_LOCK_500) == 0)
+	while ((pete_readl("drivers/clk/clk-highbank.c:55", hbclk->reg) & HB_PLL_LOCK_500) == 0)
 		;
 
 	return 0;
@@ -63,9 +63,9 @@ static void clk_pll_unprepare(struct clk_hw *hwclk)
 	struct hb_clk *hbclk = to_hb_clk(hwclk);
 	u32 reg;
 
-	reg = readl(hbclk->reg);
+	reg = pete_readl("drivers/clk/clk-highbank.c:66", hbclk->reg);
 	reg |= HB_PLL_RESET;
-	writel(reg, hbclk->reg);
+	pete_writel("drivers/clk/clk-highbank.c:68", reg, hbclk->reg);
 }
 
 static int clk_pll_enable(struct clk_hw *hwclk)
@@ -73,9 +73,9 @@ static int clk_pll_enable(struct clk_hw *hwclk)
 	struct hb_clk *hbclk = to_hb_clk(hwclk);
 	u32 reg;
 
-	reg = readl(hbclk->reg);
+	reg = pete_readl("drivers/clk/clk-highbank.c:76", hbclk->reg);
 	reg |= HB_PLL_EXT_ENA;
-	writel(reg, hbclk->reg);
+	pete_writel("drivers/clk/clk-highbank.c:78", reg, hbclk->reg);
 
 	return 0;
 }
@@ -85,9 +85,9 @@ static void clk_pll_disable(struct clk_hw *hwclk)
 	struct hb_clk *hbclk = to_hb_clk(hwclk);
 	u32 reg;
 
-	reg = readl(hbclk->reg);
+	reg = pete_readl("drivers/clk/clk-highbank.c:88", hbclk->reg);
 	reg &= ~HB_PLL_EXT_ENA;
-	writel(reg, hbclk->reg);
+	pete_writel("drivers/clk/clk-highbank.c:90", reg, hbclk->reg);
 }
 
 static unsigned long clk_pll_recalc_rate(struct clk_hw *hwclk,
@@ -96,7 +96,7 @@ static unsigned long clk_pll_recalc_rate(struct clk_hw *hwclk,
 	struct hb_clk *hbclk = to_hb_clk(hwclk);
 	unsigned long divf, divq, vco_freq, reg;
 
-	reg = readl(hbclk->reg);
+	reg = pete_readl("drivers/clk/clk-highbank.c:99", hbclk->reg);
 	if (reg & HB_PLL_EXT_BYPASS)
 		return parent_rate;
 
@@ -151,31 +151,31 @@ static int clk_pll_set_rate(struct clk_hw *hwclk, unsigned long rate,
 
 	clk_pll_calc(rate, parent_rate, &divq, &divf);
 
-	reg = readl(hbclk->reg);
+	reg = pete_readl("drivers/clk/clk-highbank.c:154", hbclk->reg);
 	if (divf != ((reg & HB_PLL_DIVF_MASK) >> HB_PLL_DIVF_SHIFT)) {
 		/* Need to re-lock PLL, so put it into bypass mode */
 		reg |= HB_PLL_EXT_BYPASS;
-		writel(reg | HB_PLL_EXT_BYPASS, hbclk->reg);
+		pete_writel("drivers/clk/clk-highbank.c:158", reg | HB_PLL_EXT_BYPASS, hbclk->reg);
 
-		writel(reg | HB_PLL_RESET, hbclk->reg);
+		pete_writel("drivers/clk/clk-highbank.c:160", reg | HB_PLL_RESET, hbclk->reg);
 		reg &= ~(HB_PLL_DIVF_MASK | HB_PLL_DIVQ_MASK);
 		reg |= (divf << HB_PLL_DIVF_SHIFT) | (divq << HB_PLL_DIVQ_SHIFT);
-		writel(reg | HB_PLL_RESET, hbclk->reg);
-		writel(reg, hbclk->reg);
+		pete_writel("drivers/clk/clk-highbank.c:163", reg | HB_PLL_RESET, hbclk->reg);
+		pete_writel("drivers/clk/clk-highbank.c:164", reg, hbclk->reg);
 
-		while ((readl(hbclk->reg) & HB_PLL_LOCK) == 0)
+		while ((pete_readl("drivers/clk/clk-highbank.c:166", hbclk->reg) & HB_PLL_LOCK) == 0)
 			;
-		while ((readl(hbclk->reg) & HB_PLL_LOCK_500) == 0)
+		while ((pete_readl("drivers/clk/clk-highbank.c:168", hbclk->reg) & HB_PLL_LOCK_500) == 0)
 			;
 		reg |= HB_PLL_EXT_ENA;
 		reg &= ~HB_PLL_EXT_BYPASS;
 	} else {
-		writel(reg | HB_PLL_EXT_BYPASS, hbclk->reg);
+		pete_writel("drivers/clk/clk-highbank.c:173", reg | HB_PLL_EXT_BYPASS, hbclk->reg);
 		reg &= ~HB_PLL_DIVQ_MASK;
 		reg |= divq << HB_PLL_DIVQ_SHIFT;
-		writel(reg | HB_PLL_EXT_BYPASS, hbclk->reg);
+		pete_writel("drivers/clk/clk-highbank.c:176", reg | HB_PLL_EXT_BYPASS, hbclk->reg);
 	}
-	writel(reg, hbclk->reg);
+	pete_writel("drivers/clk/clk-highbank.c:178", reg, hbclk->reg);
 
 	return 0;
 }
@@ -194,7 +194,7 @@ static unsigned long clk_cpu_periphclk_recalc_rate(struct clk_hw *hwclk,
 						   unsigned long parent_rate)
 {
 	struct hb_clk *hbclk = to_hb_clk(hwclk);
-	u32 div = (readl(hbclk->reg) & HB_A9_PCLK_DIV) ? 8 : 4;
+	u32 div = (pete_readl("drivers/clk/clk-highbank.c:197", hbclk->reg) & HB_A9_PCLK_DIV) ? 8 : 4;
 	return parent_rate / div;
 }
 
@@ -206,7 +206,7 @@ static unsigned long clk_cpu_a9bclk_recalc_rate(struct clk_hw *hwclk,
 						unsigned long parent_rate)
 {
 	struct hb_clk *hbclk = to_hb_clk(hwclk);
-	u32 div = (readl(hbclk->reg) & HB_A9_BCLK_DIV_MASK) >> HB_A9_BCLK_DIV_SHIFT;
+	u32 div = (pete_readl("drivers/clk/clk-highbank.c:209", hbclk->reg) & HB_A9_BCLK_DIV_MASK) >> HB_A9_BCLK_DIV_SHIFT;
 
 	return parent_rate / (div + 2);
 }
@@ -221,7 +221,7 @@ static unsigned long clk_periclk_recalc_rate(struct clk_hw *hwclk,
 	struct hb_clk *hbclk = to_hb_clk(hwclk);
 	u32 div;
 
-	div = readl(hbclk->reg) & 0x1f;
+	div = pete_readl("drivers/clk/clk-highbank.c:224", hbclk->reg) & 0x1f;
 	div++;
 	div *= 2;
 
@@ -250,7 +250,7 @@ static int clk_periclk_set_rate(struct clk_hw *hwclk, unsigned long rate,
 	if (div & 0x1)
 		return -EINVAL;
 
-	writel(div >> 1, hbclk->reg);
+	pete_writel("drivers/clk/clk-highbank.c:253", div >> 1, hbclk->reg);
 	return 0;
 }
 

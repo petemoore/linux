@@ -386,11 +386,11 @@ static void qedi_put_rq_bdq_buf(struct qedi_ctx *qedi,
 	/* Increment producer to let f/w know we've handled the frame */
 	qedi->bdq_prod_idx += count;
 
-	writew(qedi->bdq_prod_idx, qedi->bdq_primary_prod);
-	readw(qedi->bdq_primary_prod);
+	pete_writew("drivers/scsi/qedi/qedi_fw.c:389", qedi->bdq_prod_idx, qedi->bdq_primary_prod);
+	pete_readw("drivers/scsi/qedi/qedi_fw.c:390", qedi->bdq_primary_prod);
 
-	writew(qedi->bdq_prod_idx, qedi->bdq_secondary_prod);
-	readw(qedi->bdq_secondary_prod);
+	pete_writew("drivers/scsi/qedi/qedi_fw.c:392", qedi->bdq_prod_idx, qedi->bdq_secondary_prod);
+	pete_readw("drivers/scsi/qedi/qedi_fw.c:393", qedi->bdq_secondary_prod);
 }
 
 static void qedi_unsol_pdu_adjust_bdq(struct qedi_ctx *qedi,
@@ -931,7 +931,7 @@ static void qedi_ring_doorbell(struct qedi_conn *qedi_conn)
 
 	/* wmb - Make sure fw idx is coherent */
 	wmb();
-	writel(*(u32 *)&qedi_conn->ep->db_data, qedi_conn->ep->p_doorbell);
+	pete_writel("drivers/scsi/qedi/qedi_fw.c:934", *(u32 *)&qedi_conn->ep->db_data, qedi_conn->ep->p_doorbell);
 
 	/* Make sure fw write idx is coherent, and include both memory barriers
 	 * as a failsafe as for some architectures the call is the same but on

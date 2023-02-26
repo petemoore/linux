@@ -60,7 +60,7 @@ static int ocelot_restart_handle(struct notifier_block *this,
 
 	pr_emerg("Resetting SoC\n");
 
-	writel(SOFT_CHIP_RST, ctx->base);
+	pete_writel("drivers/power/reset/ocelot-reset.c:63", SOFT_CHIP_RST, ctx->base);
 
 	pr_emerg("Unable to restart system\n");
 	return NOTIFY_DONE;

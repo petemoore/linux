@@ -225,14 +225,14 @@
 #define   ITV_MCH_TEMP_SHIFT (8)
 #define   ITV_PCH_TEMP_MASK 0x000000ff
 
-#define thm_readb(off) readb(ips->regmap + (off))
-#define thm_readw(off) readw(ips->regmap + (off))
-#define thm_readl(off) readl(ips->regmap + (off))
-#define thm_readq(off) readq(ips->regmap + (off))
+#define thm_readb(off) pete_readb("drivers/platform/x86/intel_ips.c:228", ips->regmap + (off))
+#define thm_readw(off) pete_readw("drivers/platform/x86/intel_ips.c:229", ips->regmap + (off))
+#define thm_readl(off) pete_readl("drivers/platform/x86/intel_ips.c:230", ips->regmap + (off))
+#define thm_readq(off) pete_readq("drivers/platform/x86/intel_ips.c:231", ips->regmap + (off))
 
-#define thm_writeb(off, val) writeb((val), ips->regmap + (off))
-#define thm_writew(off, val) writew((val), ips->regmap + (off))
-#define thm_writel(off, val) writel((val), ips->regmap + (off))
+#define thm_writeb(off, val) pete_writeb("drivers/platform/x86/intel_ips.c:233", (val), ips->regmap + (off))
+#define thm_writew(off, val) pete_writew("drivers/platform/x86/intel_ips.c:234", (val), ips->regmap + (off))
+#define thm_writel(off, val) pete_writel("drivers/platform/x86/intel_ips.c:235", (val), ips->regmap + (off))
 
 static const int IPS_ADJUST_PERIOD = 5000; /* ms */
 static bool late_i915_load = false;

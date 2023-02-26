@@ -211,13 +211,13 @@ extern long mga_compat_ioctl(struct file *filp, unsigned int cmd,
 #define mga_flush_write_combine()	wmb()
 
 #define MGA_READ8(reg) \
-	readb(((void __iomem *)dev_priv->mmio->handle) + (reg))
+	pete_readb("drivers/gpu/drm/mga/mga_drv.h:214", ((void __iomem *)dev_priv->mmio->handle) + (reg))
 #define MGA_READ(reg) \
-	readl(((void __iomem *)dev_priv->mmio->handle) + (reg))
+	pete_readl("drivers/gpu/drm/mga/mga_drv.h:216", ((void __iomem *)dev_priv->mmio->handle) + (reg))
 #define MGA_WRITE8(reg, val) \
-	writeb(val, ((void __iomem *)dev_priv->mmio->handle) + (reg))
+	pete_writeb("drivers/gpu/drm/mga/mga_drv.h:218", val, ((void __iomem *)dev_priv->mmio->handle) + (reg))
 #define MGA_WRITE(reg, val) \
-	writel(val, ((void __iomem *)dev_priv->mmio->handle) + (reg))
+	pete_writel("drivers/gpu/drm/mga/mga_drv.h:220", val, ((void __iomem *)dev_priv->mmio->handle) + (reg))
 
 #define DWGREG0		0x1c00
 #define DWGREG0_END	0x1dff

@@ -23,8 +23,8 @@
 
 #define JOB_TIMEOUT_MS 500
 
-#define job_write(dev, reg, data) writel(data, dev->iomem + (reg))
-#define job_read(dev, reg) readl(dev->iomem + (reg))
+#define job_write(dev, reg, data) pete_writel("drivers/gpu/drm/panfrost/panfrost_job.c:26", data, dev->iomem + (reg))
+#define job_read(dev, reg) pete_readl("drivers/gpu/drm/panfrost/panfrost_job.c:27", dev->iomem + (reg))
 
 struct panfrost_queue_state {
 	struct drm_gpu_scheduler sched;

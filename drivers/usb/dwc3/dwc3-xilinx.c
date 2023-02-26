@@ -57,14 +57,14 @@ static void dwc3_xlnx_mask_phy_rst(struct dwc3_xlnx *priv_data, bool mask)
 	 * This does not actually reset the phy, but just controls
 	 * whether USB controller can or cannot reset ULPI PHY.
 	 */
-	reg = readl(priv_data->regs + XLNX_USB_PHY_RST_EN);
+	reg = pete_readl("drivers/usb/dwc3/dwc3-xilinx.c:60", priv_data->regs + XLNX_USB_PHY_RST_EN);
 
 	if (mask)
 		reg &= ~XLNX_PHY_RST_MASK;
 	else
 		reg |= XLNX_PHY_RST_MASK;
 
-	writel(reg, priv_data->regs + XLNX_USB_PHY_RST_EN);
+	pete_writel("drivers/usb/dwc3/dwc3-xilinx.c:67", reg, priv_data->regs + XLNX_USB_PHY_RST_EN);
 }
 
 static int dwc3_xlnx_init_versal(struct dwc3_xlnx *priv_data)
@@ -177,10 +177,10 @@ static int dwc3_xlnx_init_zynqmp(struct dwc3_xlnx *priv_data)
 	}
 
 	/* Set PIPE Power Present signal in FPD Power Present Register*/
-	writel(FPD_POWER_PRSNT_OPTION, priv_data->regs + XLNX_USB_FPD_POWER_PRSNT);
+	pete_writel("drivers/usb/dwc3/dwc3-xilinx.c:180", FPD_POWER_PRSNT_OPTION, priv_data->regs + XLNX_USB_FPD_POWER_PRSNT);
 
 	/* Set the PIPE Clock Select bit in FPD PIPE Clock register */
-	writel(PIPE_CLK_SELECT, priv_data->regs + XLNX_USB_FPD_PIPE_CLK);
+	pete_writel("drivers/usb/dwc3/dwc3-xilinx.c:183", PIPE_CLK_SELECT, priv_data->regs + XLNX_USB_FPD_PIPE_CLK);
 
 	ret = reset_control_deassert(crst);
 	if (ret < 0) {
@@ -207,9 +207,9 @@ skip_usb3_phy:
 	 * make SMMU and CCI work with USB DMA.
 	 */
 	if (of_dma_is_coherent(dev->of_node) || device_iommu_mapped(dev)) {
-		reg = readl(priv_data->regs + XLNX_USB_TRAFFIC_ROUTE_CONFIG);
+		reg = pete_readl("drivers/usb/dwc3/dwc3-xilinx.c:210", priv_data->regs + XLNX_USB_TRAFFIC_ROUTE_CONFIG);
 		reg |= XLNX_USB_TRAFFIC_ROUTE_FPD;
-		writel(reg, priv_data->regs + XLNX_USB_TRAFFIC_ROUTE_CONFIG);
+		pete_writel("drivers/usb/dwc3/dwc3-xilinx.c:212", reg, priv_data->regs + XLNX_USB_TRAFFIC_ROUTE_CONFIG);
 	}
 
 err:

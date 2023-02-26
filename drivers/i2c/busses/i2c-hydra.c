@@ -32,13 +32,13 @@
 static inline void pdregw(void *data, u32 val)
 {
 	struct Hydra *hydra = (struct Hydra *)data;
-	writel(val, &hydra->CachePD);
+	pete_writel("drivers/i2c/busses/i2c-hydra.c:35", val, &hydra->CachePD);
 }
 
 static inline u32 pdregr(void *data)
 {
 	struct Hydra *hydra = (struct Hydra *)data;
-	return readl(&hydra->CachePD);
+	return pete_readl("drivers/i2c/busses/i2c-hydra.c:41", &hydra->CachePD);
 }
 
 static void hydra_bit_setscl(void *data, int state)

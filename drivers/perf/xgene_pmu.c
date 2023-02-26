@@ -709,29 +709,29 @@ static void clear_avail_cntr(struct xgene_pmu_dev *pmu_dev, int cntr)
 
 static inline void xgene_pmu_mask_int(struct xgene_pmu *xgene_pmu)
 {
-	writel(PCPPMU_INTENMASK, xgene_pmu->pcppmu_csr + PCPPMU_INTMASK_REG);
+	pete_writel("drivers/perf/xgene_pmu.c:712", PCPPMU_INTENMASK, xgene_pmu->pcppmu_csr + PCPPMU_INTMASK_REG);
 }
 
 static inline void xgene_pmu_v3_mask_int(struct xgene_pmu *xgene_pmu)
 {
-	writel(PCPPMU_V3_INTENMASK, xgene_pmu->pcppmu_csr + PCPPMU_INTMASK_REG);
+	pete_writel("drivers/perf/xgene_pmu.c:717", PCPPMU_V3_INTENMASK, xgene_pmu->pcppmu_csr + PCPPMU_INTMASK_REG);
 }
 
 static inline void xgene_pmu_unmask_int(struct xgene_pmu *xgene_pmu)
 {
-	writel(PCPPMU_INTCLRMASK, xgene_pmu->pcppmu_csr + PCPPMU_INTMASK_REG);
+	pete_writel("drivers/perf/xgene_pmu.c:722", PCPPMU_INTCLRMASK, xgene_pmu->pcppmu_csr + PCPPMU_INTMASK_REG);
 }
 
 static inline void xgene_pmu_v3_unmask_int(struct xgene_pmu *xgene_pmu)
 {
-	writel(PCPPMU_V3_INTCLRMASK,
+	pete_writel("drivers/perf/xgene_pmu.c:727", PCPPMU_V3_INTCLRMASK,
 	       xgene_pmu->pcppmu_csr + PCPPMU_INTMASK_REG);
 }
 
 static inline u64 xgene_pmu_read_counter32(struct xgene_pmu_dev *pmu_dev,
 					   int idx)
 {
-	return readl(pmu_dev->inf->csr + PMU_PMEVCNTR0 + (4 * idx));
+	return pete_readl("drivers/perf/xgene_pmu.c:734", pmu_dev->inf->csr + PMU_PMEVCNTR0 + (4 * idx));
 }
 
 static inline u64 xgene_pmu_read_counter64(struct xgene_pmu_dev *pmu_dev,
@@ -756,7 +756,7 @@ static inline u64 xgene_pmu_read_counter64(struct xgene_pmu_dev *pmu_dev,
 static inline void
 xgene_pmu_write_counter32(struct xgene_pmu_dev *pmu_dev, int idx, u64 val)
 {
-	writel(val, pmu_dev->inf->csr + PMU_PMEVCNTR0 + (4 * idx));
+	pete_writel("drivers/perf/xgene_pmu.c:759", val, pmu_dev->inf->csr + PMU_PMEVCNTR0 + (4 * idx));
 }
 
 static inline void
@@ -775,13 +775,13 @@ xgene_pmu_write_counter64(struct xgene_pmu_dev *pmu_dev, int idx, u64 val)
 static inline void
 xgene_pmu_write_evttype(struct xgene_pmu_dev *pmu_dev, int idx, u32 val)
 {
-	writel(val, pmu_dev->inf->csr + PMU_PMEVTYPER0 + (4 * idx));
+	pete_writel("drivers/perf/xgene_pmu.c:778", val, pmu_dev->inf->csr + PMU_PMEVTYPER0 + (4 * idx));
 }
 
 static inline void
 xgene_pmu_write_agentmsk(struct xgene_pmu_dev *pmu_dev, u32 val)
 {
-	writel(val, pmu_dev->inf->csr + PMU_PMAMR0);
+	pete_writel("drivers/perf/xgene_pmu.c:784", val, pmu_dev->inf->csr + PMU_PMAMR0);
 }
 
 static inline void
@@ -790,7 +790,7 @@ xgene_pmu_v3_write_agentmsk(struct xgene_pmu_dev *pmu_dev, u32 val) { }
 static inline void
 xgene_pmu_write_agent1msk(struct xgene_pmu_dev *pmu_dev, u32 val)
 {
-	writel(val, pmu_dev->inf->csr + PMU_PMAMR1);
+	pete_writel("drivers/perf/xgene_pmu.c:793", val, pmu_dev->inf->csr + PMU_PMAMR1);
 }
 
 static inline void
@@ -801,9 +801,9 @@ xgene_pmu_enable_counter(struct xgene_pmu_dev *pmu_dev, int idx)
 {
 	u32 val;
 
-	val = readl(pmu_dev->inf->csr + PMU_PMCNTENSET);
+	val = pete_readl("drivers/perf/xgene_pmu.c:804", pmu_dev->inf->csr + PMU_PMCNTENSET);
 	val |= 1 << idx;
-	writel(val, pmu_dev->inf->csr + PMU_PMCNTENSET);
+	pete_writel("drivers/perf/xgene_pmu.c:806", val, pmu_dev->inf->csr + PMU_PMCNTENSET);
 }
 
 static inline void
@@ -811,9 +811,9 @@ xgene_pmu_disable_counter(struct xgene_pmu_dev *pmu_dev, int idx)
 {
 	u32 val;
 
-	val = readl(pmu_dev->inf->csr + PMU_PMCNTENCLR);
+	val = pete_readl("drivers/perf/xgene_pmu.c:814", pmu_dev->inf->csr + PMU_PMCNTENCLR);
 	val |= 1 << idx;
-	writel(val, pmu_dev->inf->csr + PMU_PMCNTENCLR);
+	pete_writel("drivers/perf/xgene_pmu.c:816", val, pmu_dev->inf->csr + PMU_PMCNTENCLR);
 }
 
 static inline void
@@ -821,9 +821,9 @@ xgene_pmu_enable_counter_int(struct xgene_pmu_dev *pmu_dev, int idx)
 {
 	u32 val;
 
-	val = readl(pmu_dev->inf->csr + PMU_PMINTENSET);
+	val = pete_readl("drivers/perf/xgene_pmu.c:824", pmu_dev->inf->csr + PMU_PMINTENSET);
 	val |= 1 << idx;
-	writel(val, pmu_dev->inf->csr + PMU_PMINTENSET);
+	pete_writel("drivers/perf/xgene_pmu.c:826", val, pmu_dev->inf->csr + PMU_PMINTENSET);
 }
 
 static inline void
@@ -831,36 +831,36 @@ xgene_pmu_disable_counter_int(struct xgene_pmu_dev *pmu_dev, int idx)
 {
 	u32 val;
 
-	val = readl(pmu_dev->inf->csr + PMU_PMINTENCLR);
+	val = pete_readl("drivers/perf/xgene_pmu.c:834", pmu_dev->inf->csr + PMU_PMINTENCLR);
 	val |= 1 << idx;
-	writel(val, pmu_dev->inf->csr + PMU_PMINTENCLR);
+	pete_writel("drivers/perf/xgene_pmu.c:836", val, pmu_dev->inf->csr + PMU_PMINTENCLR);
 }
 
 static inline void xgene_pmu_reset_counters(struct xgene_pmu_dev *pmu_dev)
 {
 	u32 val;
 
-	val = readl(pmu_dev->inf->csr + PMU_PMCR);
+	val = pete_readl("drivers/perf/xgene_pmu.c:843", pmu_dev->inf->csr + PMU_PMCR);
 	val |= PMU_PMCR_P;
-	writel(val, pmu_dev->inf->csr + PMU_PMCR);
+	pete_writel("drivers/perf/xgene_pmu.c:845", val, pmu_dev->inf->csr + PMU_PMCR);
 }
 
 static inline void xgene_pmu_start_counters(struct xgene_pmu_dev *pmu_dev)
 {
 	u32 val;
 
-	val = readl(pmu_dev->inf->csr + PMU_PMCR);
+	val = pete_readl("drivers/perf/xgene_pmu.c:852", pmu_dev->inf->csr + PMU_PMCR);
 	val |= PMU_PMCR_E;
-	writel(val, pmu_dev->inf->csr + PMU_PMCR);
+	pete_writel("drivers/perf/xgene_pmu.c:854", val, pmu_dev->inf->csr + PMU_PMCR);
 }
 
 static inline void xgene_pmu_stop_counters(struct xgene_pmu_dev *pmu_dev)
 {
 	u32 val;
 
-	val = readl(pmu_dev->inf->csr + PMU_PMCR);
+	val = pete_readl("drivers/perf/xgene_pmu.c:861", pmu_dev->inf->csr + PMU_PMCR);
 	val &= ~PMU_PMCR_E;
-	writel(val, pmu_dev->inf->csr + PMU_PMCR);
+	pete_writel("drivers/perf/xgene_pmu.c:863", val, pmu_dev->inf->csr + PMU_PMCR);
 }
 
 static void xgene_perf_pmu_enable(struct pmu *pmu)
@@ -1196,20 +1196,20 @@ static void _xgene_pmu_isr(int irq, struct xgene_pmu_dev *pmu_dev)
 	xgene_pmu->ops->stop_counters(pmu_dev);
 
 	if (xgene_pmu->version == PCP_PMU_V3)
-		pmovsr = readl(csr + PMU_PMOVSSET) & PMU_OVERFLOW_MASK;
+		pmovsr = pete_readl("drivers/perf/xgene_pmu.c:1199", csr + PMU_PMOVSSET) & PMU_OVERFLOW_MASK;
 	else
-		pmovsr = readl(csr + PMU_PMOVSR) & PMU_OVERFLOW_MASK;
+		pmovsr = pete_readl("drivers/perf/xgene_pmu.c:1201", csr + PMU_PMOVSR) & PMU_OVERFLOW_MASK;
 
 	if (!pmovsr)
 		goto out;
 
 	/* Clear interrupt flag */
 	if (xgene_pmu->version == PCP_PMU_V1)
-		writel(0x0, csr + PMU_PMOVSR);
+		pete_writel("drivers/perf/xgene_pmu.c:1208", 0x0, csr + PMU_PMOVSR);
 	else if (xgene_pmu->version == PCP_PMU_V2)
-		writel(pmovsr, csr + PMU_PMOVSR);
+		pete_writel("drivers/perf/xgene_pmu.c:1210", pmovsr, csr + PMU_PMOVSR);
 	else
-		writel(pmovsr, csr + PMU_PMOVSCLR);
+		pete_writel("drivers/perf/xgene_pmu.c:1212", pmovsr, csr + PMU_PMOVSCLR);
 
 	for (idx = 0; idx < PMU_MAX_COUNTERS; idx++) {
 		struct perf_event *event = pmu_dev->pmu_counter_event[idx];
@@ -1236,7 +1236,7 @@ static irqreturn_t xgene_pmu_isr(int irq, void *dev_id)
 	raw_spin_lock(&xgene_pmu->lock);
 
 	/* Get Interrupt PMU source */
-	val = readl(xgene_pmu->pcppmu_csr + PCPPMU_INTSTATUS_REG);
+	val = pete_readl("drivers/perf/xgene_pmu.c:1239", xgene_pmu->pcppmu_csr + PCPPMU_INTSTATUS_REG);
 	if (xgene_pmu->version == PCP_PMU_V3) {
 		intr_mcu = PCPPMU_V3_INT_MCU;
 		intr_mcb = PCPPMU_V3_INT_MCB;
@@ -1300,19 +1300,19 @@ static int acpi_pmu_probe_active_mcb_mcu_l3c(struct xgene_pmu *xgene_pmu,
 
 	xgene_pmu->l3c_active_mask = 0x1;
 
-	reg = readl(csw_csr + CSW_CSWCR);
+	reg = pete_readl("drivers/perf/xgene_pmu.c:1303", csw_csr + CSW_CSWCR);
 	if (reg & CSW_CSWCR_DUALMCB_MASK) {
 		/* Dual MCB active */
 		xgene_pmu->mcb_active_mask = 0x3;
 		/* Probe all active MC(s) */
-		reg = readl(mcbb_csr + CSW_CSWCR);
+		reg = pete_readl("drivers/perf/xgene_pmu.c:1308", mcbb_csr + CSW_CSWCR);
 		xgene_pmu->mc_active_mask =
 			(reg & MCBADDRMR_DUALMCU_MODE_MASK) ? 0xF : 0x5;
 	} else {
 		/* Single MCB active */
 		xgene_pmu->mcb_active_mask = 0x1;
 		/* Probe all active MC(s) */
-		reg = readl(mcba_csr + CSW_CSWCR);
+		reg = pete_readl("drivers/perf/xgene_pmu.c:1315", mcba_csr + CSW_CSWCR);
 		xgene_pmu->mc_active_mask =
 			(reg & MCBADDRMR_DUALMCU_MODE_MASK) ? 0x3 : 0x1;
 	}
@@ -1334,7 +1334,7 @@ static int acpi_pmu_v3_probe_active_mcb_mcu_l3c(struct xgene_pmu *xgene_pmu,
 		return PTR_ERR(csw_csr);
 	}
 
-	reg = readl(csw_csr + CSW_CSWCR);
+	reg = pete_readl("drivers/perf/xgene_pmu.c:1337", csw_csr + CSW_CSWCR);
 	mcb0routing = CSW_CSWCR_MCB0_ROUTING(reg);
 	mcb1routing = CSW_CSWCR_MCB1_ROUTING(reg);
 	if (reg & CSW_CSWCR_DUALMCB_MASK) {

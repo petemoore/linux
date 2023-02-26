@@ -105,7 +105,7 @@ static void aspeed_sdc_set_slot_capability(struct sdhci_host *host, struct aspee
 	else
 		cap_val &= ~BIT(capability % 32);
 	mirror_reg_offset = ((slot + 1) * 0x10) + (cap_reg * 4);
-	writel(cap_val, sdc->regs + mirror_reg_offset);
+	pete_writel("drivers/mmc/host/sdhci-of-aspeed.c:108", cap_val, sdc->regs + mirror_reg_offset);
 }
 
 static void aspeed_sdc_configure_8bit_mode(struct aspeed_sdc *sdc,
@@ -116,12 +116,12 @@ static void aspeed_sdc_configure_8bit_mode(struct aspeed_sdc *sdc,
 
 	/* Set/clear 8 bit mode */
 	spin_lock(&sdc->lock);
-	info = readl(sdc->regs + ASPEED_SDC_INFO);
+	info = pete_readl("drivers/mmc/host/sdhci-of-aspeed.c:119", sdc->regs + ASPEED_SDC_INFO);
 	if (bus8)
 		info |= sdhci->width_mask;
 	else
 		info &= ~sdhci->width_mask;
-	writel(info, sdc->regs + ASPEED_SDC_INFO);
+	pete_writel("drivers/mmc/host/sdhci-of-aspeed.c:124", info, sdc->regs + ASPEED_SDC_INFO);
 	spin_unlock(&sdc->lock);
 }
 
@@ -146,12 +146,12 @@ aspeed_sdc_set_phase_taps(struct aspeed_sdc *sdc,
 	u32 reg;
 
 	spin_lock(&sdc->lock);
-	reg = readl(sdc->regs + ASPEED_SDC_PHASE);
+	reg = pete_readl("drivers/mmc/host/sdhci-of-aspeed.c:149", sdc->regs + ASPEED_SDC_PHASE);
 
 	reg = aspeed_sdc_set_phase_tap(&desc->in, taps->in, taps->valid, reg);
 	reg = aspeed_sdc_set_phase_tap(&desc->out, taps->out, taps->valid, reg);
 
-	writel(reg, sdc->regs + ASPEED_SDC_PHASE);
+	pete_writel("drivers/mmc/host/sdhci-of-aspeed.c:154", reg, sdc->regs + ASPEED_SDC_PHASE);
 	spin_unlock(&sdc->lock);
 }
 
@@ -319,7 +319,7 @@ static void aspeed_sdhci_set_bus_width(struct sdhci_host *host, int width)
 
 static u32 aspeed_sdhci_readl(struct sdhci_host *host, int reg)
 {
-	u32 val = readl(host->ioaddr + reg);
+	u32 val = pete_readl("drivers/mmc/host/sdhci-of-aspeed.c:322", host->ioaddr + reg);
 
 	if (unlikely(reg == SDHCI_PRESENT_STATE) &&
 	    (host->mmc->caps2 & MMC_CAP2_CD_ACTIVE_HIGH))

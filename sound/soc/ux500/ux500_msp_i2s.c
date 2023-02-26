@@ -138,7 +138,7 @@ static void set_prot_desc_tx(struct ux500_msp *msp,
 	temp_reg |= MSP_SET_COMPANDING_MODE(protdesc->compression_mode);
 	temp_reg |= MSP_SET_FSYNC_IGNORE(protdesc->frame_sync_ignore);
 
-	writel(temp_reg, msp->registers + MSP_TCF);
+	pete_writel("sound/soc/ux500/ux500_msp_i2s.c:141", temp_reg, msp->registers + MSP_TCF);
 }
 
 static void set_prot_desc_rx(struct ux500_msp *msp,
@@ -166,7 +166,7 @@ static void set_prot_desc_rx(struct ux500_msp *msp,
 	temp_reg |= MSP_SET_COMPANDING_MODE(protdesc->expansion_mode);
 	temp_reg |= MSP_SET_FSYNC_IGNORE(protdesc->frame_sync_ignore);
 
-	writel(temp_reg, msp->registers + MSP_RCF);
+	pete_writel("sound/soc/ux500/ux500_msp_i2s.c:169", temp_reg, msp->registers + MSP_RCF);
 }
 
 static int configure_protocol(struct ux500_msp *msp,
@@ -203,12 +203,12 @@ static int configure_protocol(struct ux500_msp *msp,
 		set_prot_desc_rx(msp, protdesc, data_size);
 
 	/* The code below should not be separated. */
-	temp_reg = readl(msp->registers + MSP_GCR) & ~TX_CLK_POL_RISING;
+	temp_reg = pete_readl("sound/soc/ux500/ux500_msp_i2s.c:206", msp->registers + MSP_GCR) & ~TX_CLK_POL_RISING;
 	temp_reg |= MSP_TX_CLKPOL_BIT(~protdesc->tx_clk_pol);
-	writel(temp_reg, msp->registers + MSP_GCR);
-	temp_reg = readl(msp->registers + MSP_GCR) & ~RX_CLK_POL_RISING;
+	pete_writel("sound/soc/ux500/ux500_msp_i2s.c:208", temp_reg, msp->registers + MSP_GCR);
+	temp_reg = pete_readl("sound/soc/ux500/ux500_msp_i2s.c:209", msp->registers + MSP_GCR) & ~RX_CLK_POL_RISING;
 	temp_reg |= MSP_RX_CLKPOL_BIT(protdesc->rx_clk_pol);
-	writel(temp_reg, msp->registers + MSP_GCR);
+	pete_writel("sound/soc/ux500/ux500_msp_i2s.c:211", temp_reg, msp->registers + MSP_GCR);
 
 	return 0;
 }
@@ -222,8 +222,8 @@ static int setup_bitclk(struct ux500_msp *msp, struct ux500_msp_config *config)
 	u32 temp_reg = 0;
 	struct msp_protdesc *protdesc = NULL;
 
-	reg_val_GCR = readl(msp->registers + MSP_GCR);
-	writel(reg_val_GCR & ~SRG_ENABLE, msp->registers + MSP_GCR);
+	reg_val_GCR = pete_readl("sound/soc/ux500/ux500_msp_i2s.c:225", msp->registers + MSP_GCR);
+	pete_writel("sound/soc/ux500/ux500_msp_i2s.c:226", reg_val_GCR & ~SRG_ENABLE, msp->registers + MSP_GCR);
 
 	if (config->default_protdesc)
 		protdesc =
@@ -255,14 +255,14 @@ static int setup_bitclk(struct ux500_msp *msp, struct ux500_msp_config *config)
 	temp_reg = (sck_div - 1) & SCK_DIV_MASK;
 	temp_reg |= FRAME_WIDTH_BITS(frame_width);
 	temp_reg |= FRAME_PERIOD_BITS(frame_per);
-	writel(temp_reg, msp->registers + MSP_SRG);
+	pete_writel("sound/soc/ux500/ux500_msp_i2s.c:258", temp_reg, msp->registers + MSP_SRG);
 
 	msp->f_bitclk = (config->f_inputclk)/(sck_div + 1);
 
 	/* Enable bit-clock */
 	udelay(100);
-	reg_val_GCR = readl(msp->registers + MSP_GCR);
-	writel(reg_val_GCR | SRG_ENABLE, msp->registers + MSP_GCR);
+	reg_val_GCR = pete_readl("sound/soc/ux500/ux500_msp_i2s.c:264", msp->registers + MSP_GCR);
+	pete_writel("sound/soc/ux500/ux500_msp_i2s.c:265", reg_val_GCR | SRG_ENABLE, msp->registers + MSP_GCR);
 	udelay(100);
 
 	return 0;
@@ -291,17 +291,17 @@ static int configure_multichannel(struct ux500_msp *msp,
 	mcfg = &config->multichannel_config;
 	if (mcfg->tx_multichannel_enable) {
 		if (protdesc->tx_phase_mode == MSP_SINGLE_PHASE) {
-			reg_val_MCR = readl(msp->registers + MSP_MCR);
-			writel(reg_val_MCR | (mcfg->tx_multichannel_enable ?
+			reg_val_MCR = pete_readl("sound/soc/ux500/ux500_msp_i2s.c:294", msp->registers + MSP_MCR);
+			pete_writel("sound/soc/ux500/ux500_msp_i2s.c:295", reg_val_MCR | (mcfg->tx_multichannel_enable ?
 						1 << TMCEN_BIT : 0),
 				msp->registers + MSP_MCR);
-			writel(mcfg->tx_channel_0_enable,
+			pete_writel("sound/soc/ux500/ux500_msp_i2s.c:298", mcfg->tx_channel_0_enable,
 				msp->registers + MSP_TCE0);
-			writel(mcfg->tx_channel_1_enable,
+			pete_writel("sound/soc/ux500/ux500_msp_i2s.c:300", mcfg->tx_channel_1_enable,
 				msp->registers + MSP_TCE1);
-			writel(mcfg->tx_channel_2_enable,
+			pete_writel("sound/soc/ux500/ux500_msp_i2s.c:302", mcfg->tx_channel_2_enable,
 				msp->registers + MSP_TCE2);
-			writel(mcfg->tx_channel_3_enable,
+			pete_writel("sound/soc/ux500/ux500_msp_i2s.c:304", mcfg->tx_channel_3_enable,
 				msp->registers + MSP_TCE3);
 		} else {
 			dev_err(msp->dev,
@@ -312,17 +312,17 @@ static int configure_multichannel(struct ux500_msp *msp,
 	}
 	if (mcfg->rx_multichannel_enable) {
 		if (protdesc->rx_phase_mode == MSP_SINGLE_PHASE) {
-			reg_val_MCR = readl(msp->registers + MSP_MCR);
-			writel(reg_val_MCR | (mcfg->rx_multichannel_enable ?
+			reg_val_MCR = pete_readl("sound/soc/ux500/ux500_msp_i2s.c:315", msp->registers + MSP_MCR);
+			pete_writel("sound/soc/ux500/ux500_msp_i2s.c:316", reg_val_MCR | (mcfg->rx_multichannel_enable ?
 						1 << RMCEN_BIT : 0),
 				msp->registers + MSP_MCR);
-			writel(mcfg->rx_channel_0_enable,
+			pete_writel("sound/soc/ux500/ux500_msp_i2s.c:319", mcfg->rx_channel_0_enable,
 					msp->registers + MSP_RCE0);
-			writel(mcfg->rx_channel_1_enable,
+			pete_writel("sound/soc/ux500/ux500_msp_i2s.c:321", mcfg->rx_channel_1_enable,
 					msp->registers + MSP_RCE1);
-			writel(mcfg->rx_channel_2_enable,
+			pete_writel("sound/soc/ux500/ux500_msp_i2s.c:323", mcfg->rx_channel_2_enable,
 					msp->registers + MSP_RCE2);
-			writel(mcfg->rx_channel_3_enable,
+			pete_writel("sound/soc/ux500/ux500_msp_i2s.c:325", mcfg->rx_channel_3_enable,
 					msp->registers + MSP_RCE3);
 		} else {
 			dev_err(msp->dev,
@@ -331,14 +331,14 @@ static int configure_multichannel(struct ux500_msp *msp,
 			return -EINVAL;
 		}
 		if (mcfg->rx_comparison_enable_mode) {
-			reg_val_MCR = readl(msp->registers + MSP_MCR);
-			writel(reg_val_MCR |
+			reg_val_MCR = pete_readl("sound/soc/ux500/ux500_msp_i2s.c:334", msp->registers + MSP_MCR);
+			pete_writel("sound/soc/ux500/ux500_msp_i2s.c:335", reg_val_MCR |
 				(mcfg->rx_comparison_enable_mode << RCMPM_BIT),
 				msp->registers + MSP_MCR);
 
-			writel(mcfg->comparison_mask,
+			pete_writel("sound/soc/ux500/ux500_msp_i2s.c:339", mcfg->comparison_mask,
 					msp->registers + MSP_RCM);
-			writel(mcfg->comparison_value,
+			pete_writel("sound/soc/ux500/ux500_msp_i2s.c:341", mcfg->comparison_value,
 					msp->registers + MSP_RCV);
 
 		}
@@ -377,18 +377,18 @@ static int enable_msp(struct ux500_msp *msp, struct ux500_msp_config *config)
 		return -EINVAL;
 	}
 
-	reg_val_DMACR = readl(msp->registers + MSP_DMACR);
+	reg_val_DMACR = pete_readl("sound/soc/ux500/ux500_msp_i2s.c:380", msp->registers + MSP_DMACR);
 	if (config->direction & MSP_DIR_RX)
 		reg_val_DMACR |= RX_DMA_ENABLE;
 	if (config->direction & MSP_DIR_TX)
 		reg_val_DMACR |= TX_DMA_ENABLE;
-	writel(reg_val_DMACR, msp->registers + MSP_DMACR);
+	pete_writel("sound/soc/ux500/ux500_msp_i2s.c:385", reg_val_DMACR, msp->registers + MSP_DMACR);
 
-	writel(config->iodelay, msp->registers + MSP_IODLY);
+	pete_writel("sound/soc/ux500/ux500_msp_i2s.c:387", config->iodelay, msp->registers + MSP_IODLY);
 
 	/* Enable frame generation logic */
-	reg_val_GCR = readl(msp->registers + MSP_GCR);
-	writel(reg_val_GCR | FRAME_GEN_ENABLE, msp->registers + MSP_GCR);
+	reg_val_GCR = pete_readl("sound/soc/ux500/ux500_msp_i2s.c:390", msp->registers + MSP_GCR);
+	pete_writel("sound/soc/ux500/ux500_msp_i2s.c:391", reg_val_GCR | FRAME_GEN_ENABLE, msp->registers + MSP_GCR);
 
 	return status;
 }
@@ -398,16 +398,16 @@ static void flush_fifo_rx(struct ux500_msp *msp)
 	u32 reg_val_GCR, reg_val_FLR;
 	u32 limit = 32;
 
-	reg_val_GCR = readl(msp->registers + MSP_GCR);
-	writel(reg_val_GCR | RX_ENABLE, msp->registers + MSP_GCR);
+	reg_val_GCR = pete_readl("sound/soc/ux500/ux500_msp_i2s.c:401", msp->registers + MSP_GCR);
+	pete_writel("sound/soc/ux500/ux500_msp_i2s.c:402", reg_val_GCR | RX_ENABLE, msp->registers + MSP_GCR);
 
-	reg_val_FLR = readl(msp->registers + MSP_FLR);
+	reg_val_FLR = pete_readl("sound/soc/ux500/ux500_msp_i2s.c:404", msp->registers + MSP_FLR);
 	while (!(reg_val_FLR & RX_FIFO_EMPTY) && limit--) {
-		readl(msp->registers + MSP_DR);
-		reg_val_FLR = readl(msp->registers + MSP_FLR);
+		pete_readl("sound/soc/ux500/ux500_msp_i2s.c:406", msp->registers + MSP_DR);
+		reg_val_FLR = pete_readl("sound/soc/ux500/ux500_msp_i2s.c:407", msp->registers + MSP_FLR);
 	}
 
-	writel(reg_val_GCR, msp->registers + MSP_GCR);
+	pete_writel("sound/soc/ux500/ux500_msp_i2s.c:410", reg_val_GCR, msp->registers + MSP_GCR);
 }
 
 static void flush_fifo_tx(struct ux500_msp *msp)
@@ -415,17 +415,17 @@ static void flush_fifo_tx(struct ux500_msp *msp)
 	u32 reg_val_GCR, reg_val_FLR;
 	u32 limit = 32;
 
-	reg_val_GCR = readl(msp->registers + MSP_GCR);
-	writel(reg_val_GCR | TX_ENABLE, msp->registers + MSP_GCR);
-	writel(MSP_ITCR_ITEN | MSP_ITCR_TESTFIFO, msp->registers + MSP_ITCR);
+	reg_val_GCR = pete_readl("sound/soc/ux500/ux500_msp_i2s.c:418", msp->registers + MSP_GCR);
+	pete_writel("sound/soc/ux500/ux500_msp_i2s.c:419", reg_val_GCR | TX_ENABLE, msp->registers + MSP_GCR);
+	pete_writel("sound/soc/ux500/ux500_msp_i2s.c:420", MSP_ITCR_ITEN | MSP_ITCR_TESTFIFO, msp->registers + MSP_ITCR);
 
-	reg_val_FLR = readl(msp->registers + MSP_FLR);
+	reg_val_FLR = pete_readl("sound/soc/ux500/ux500_msp_i2s.c:422", msp->registers + MSP_FLR);
 	while (!(reg_val_FLR & TX_FIFO_EMPTY) && limit--) {
-		readl(msp->registers + MSP_TSTDR);
-		reg_val_FLR = readl(msp->registers + MSP_FLR);
+		pete_readl("sound/soc/ux500/ux500_msp_i2s.c:424", msp->registers + MSP_TSTDR);
+		reg_val_FLR = pete_readl("sound/soc/ux500/ux500_msp_i2s.c:425", msp->registers + MSP_FLR);
 	}
-	writel(0x0, msp->registers + MSP_ITCR);
-	writel(reg_val_GCR, msp->registers + MSP_GCR);
+	pete_writel("sound/soc/ux500/ux500_msp_i2s.c:427", 0x0, msp->registers + MSP_ITCR);
+	pete_writel("sound/soc/ux500/ux500_msp_i2s.c:428", reg_val_GCR, msp->registers + MSP_GCR);
 }
 
 int ux500_msp_i2s_open(struct ux500_msp *msp,
@@ -476,10 +476,10 @@ int ux500_msp_i2s_open(struct ux500_msp *msp,
 		config->srg_clk_sel | config->loopback_enable |
 		config->tx_data_enable);
 
-	old_reg = readl(msp->registers + MSP_GCR);
+	old_reg = pete_readl("sound/soc/ux500/ux500_msp_i2s.c:479", msp->registers + MSP_GCR);
 	old_reg &= ~mask;
 	new_reg |= old_reg;
-	writel(new_reg, msp->registers + MSP_GCR);
+	pete_writel("sound/soc/ux500/ux500_msp_i2s.c:482", new_reg, msp->registers + MSP_GCR);
 
 	res = enable_msp(msp, config);
 	if (res < 0) {
@@ -502,12 +502,12 @@ static void disable_msp_rx(struct ux500_msp *msp)
 {
 	u32 reg_val_GCR, reg_val_DMACR, reg_val_IMSC;
 
-	reg_val_GCR = readl(msp->registers + MSP_GCR);
-	writel(reg_val_GCR & ~RX_ENABLE, msp->registers + MSP_GCR);
-	reg_val_DMACR = readl(msp->registers + MSP_DMACR);
-	writel(reg_val_DMACR & ~RX_DMA_ENABLE, msp->registers + MSP_DMACR);
-	reg_val_IMSC = readl(msp->registers + MSP_IMSC);
-	writel(reg_val_IMSC &
+	reg_val_GCR = pete_readl("sound/soc/ux500/ux500_msp_i2s.c:505", msp->registers + MSP_GCR);
+	pete_writel("sound/soc/ux500/ux500_msp_i2s.c:506", reg_val_GCR & ~RX_ENABLE, msp->registers + MSP_GCR);
+	reg_val_DMACR = pete_readl("sound/soc/ux500/ux500_msp_i2s.c:507", msp->registers + MSP_DMACR);
+	pete_writel("sound/soc/ux500/ux500_msp_i2s.c:508", reg_val_DMACR & ~RX_DMA_ENABLE, msp->registers + MSP_DMACR);
+	reg_val_IMSC = pete_readl("sound/soc/ux500/ux500_msp_i2s.c:509", msp->registers + MSP_IMSC);
+	pete_writel("sound/soc/ux500/ux500_msp_i2s.c:510", reg_val_IMSC &
 			~(RX_SERVICE_INT | RX_OVERRUN_ERROR_INT),
 			msp->registers + MSP_IMSC);
 
@@ -518,12 +518,12 @@ static void disable_msp_tx(struct ux500_msp *msp)
 {
 	u32 reg_val_GCR, reg_val_DMACR, reg_val_IMSC;
 
-	reg_val_GCR = readl(msp->registers + MSP_GCR);
-	writel(reg_val_GCR & ~TX_ENABLE, msp->registers + MSP_GCR);
-	reg_val_DMACR = readl(msp->registers + MSP_DMACR);
-	writel(reg_val_DMACR & ~TX_DMA_ENABLE, msp->registers + MSP_DMACR);
-	reg_val_IMSC = readl(msp->registers + MSP_IMSC);
-	writel(reg_val_IMSC &
+	reg_val_GCR = pete_readl("sound/soc/ux500/ux500_msp_i2s.c:521", msp->registers + MSP_GCR);
+	pete_writel("sound/soc/ux500/ux500_msp_i2s.c:522", reg_val_GCR & ~TX_ENABLE, msp->registers + MSP_GCR);
+	reg_val_DMACR = pete_readl("sound/soc/ux500/ux500_msp_i2s.c:523", msp->registers + MSP_DMACR);
+	pete_writel("sound/soc/ux500/ux500_msp_i2s.c:524", reg_val_DMACR & ~TX_DMA_ENABLE, msp->registers + MSP_DMACR);
+	reg_val_IMSC = pete_readl("sound/soc/ux500/ux500_msp_i2s.c:525", msp->registers + MSP_IMSC);
+	pete_writel("sound/soc/ux500/ux500_msp_i2s.c:526", reg_val_IMSC &
 			~(TX_SERVICE_INT | TX_UNDERRUN_ERR_INT),
 			msp->registers + MSP_IMSC);
 
@@ -535,26 +535,26 @@ static int disable_msp(struct ux500_msp *msp, unsigned int dir)
 	u32 reg_val_GCR;
 	unsigned int disable_tx, disable_rx;
 
-	reg_val_GCR = readl(msp->registers + MSP_GCR);
+	reg_val_GCR = pete_readl("sound/soc/ux500/ux500_msp_i2s.c:538", msp->registers + MSP_GCR);
 	disable_tx = dir & MSP_DIR_TX;
 	disable_rx = dir & MSP_DIR_TX;
 	if (disable_tx && disable_rx) {
-		reg_val_GCR = readl(msp->registers + MSP_GCR);
-		writel(reg_val_GCR | LOOPBACK_MASK,
+		reg_val_GCR = pete_readl("sound/soc/ux500/ux500_msp_i2s.c:542", msp->registers + MSP_GCR);
+		pete_writel("sound/soc/ux500/ux500_msp_i2s.c:543", reg_val_GCR | LOOPBACK_MASK,
 				msp->registers + MSP_GCR);
 
 		/* Flush TX-FIFO */
 		flush_fifo_tx(msp);
 
 		/* Disable TX-channel */
-		writel((readl(msp->registers + MSP_GCR) &
+		pete_writel("sound/soc/ux500/ux500_msp_i2s.c:550", (pete_readl("sound/soc/ux500/ux500_msp_i2s.c:550", msp->registers + MSP_GCR) &
 			       (~TX_ENABLE)), msp->registers + MSP_GCR);
 
 		/* Flush RX-FIFO */
 		flush_fifo_rx(msp);
 
 		/* Disable Loopback and Receive channel */
-		writel((readl(msp->registers + MSP_GCR) &
+		pete_writel("sound/soc/ux500/ux500_msp_i2s.c:557", (pete_readl("sound/soc/ux500/ux500_msp_i2s.c:557", msp->registers + MSP_GCR) &
 				(~(RX_ENABLE | LOOPBACK_MASK))),
 				msp->registers + MSP_GCR);
 
@@ -586,8 +586,8 @@ int ux500_msp_i2s_trigger(struct ux500_msp *msp, int cmd, int direction)
 			enable_bit = TX_ENABLE;
 		else
 			enable_bit = RX_ENABLE;
-		reg_val_GCR = readl(msp->registers + MSP_GCR);
-		writel(reg_val_GCR | enable_bit, msp->registers + MSP_GCR);
+		reg_val_GCR = pete_readl("sound/soc/ux500/ux500_msp_i2s.c:589", msp->registers + MSP_GCR);
+		pete_writel("sound/soc/ux500/ux500_msp_i2s.c:590", reg_val_GCR | enable_bit, msp->registers + MSP_GCR);
 		break;
 
 	case SNDRV_PCM_TRIGGER_STOP:
@@ -615,26 +615,26 @@ int ux500_msp_i2s_close(struct ux500_msp *msp, unsigned int dir)
 	if (msp->dir_busy == 0) {
 		/* disable sample rate and frame generators */
 		msp->msp_state = MSP_STATE_IDLE;
-		writel((readl(msp->registers + MSP_GCR) &
+		pete_writel("sound/soc/ux500/ux500_msp_i2s.c:618", (pete_readl("sound/soc/ux500/ux500_msp_i2s.c:618", msp->registers + MSP_GCR) &
 			       (~(FRAME_GEN_ENABLE | SRG_ENABLE))),
 			      msp->registers + MSP_GCR);
 
-		writel(0, msp->registers + MSP_GCR);
-		writel(0, msp->registers + MSP_TCF);
-		writel(0, msp->registers + MSP_RCF);
-		writel(0, msp->registers + MSP_DMACR);
-		writel(0, msp->registers + MSP_SRG);
-		writel(0, msp->registers + MSP_MCR);
-		writel(0, msp->registers + MSP_RCM);
-		writel(0, msp->registers + MSP_RCV);
-		writel(0, msp->registers + MSP_TCE0);
-		writel(0, msp->registers + MSP_TCE1);
-		writel(0, msp->registers + MSP_TCE2);
-		writel(0, msp->registers + MSP_TCE3);
-		writel(0, msp->registers + MSP_RCE0);
-		writel(0, msp->registers + MSP_RCE1);
-		writel(0, msp->registers + MSP_RCE2);
-		writel(0, msp->registers + MSP_RCE3);
+		pete_writel("sound/soc/ux500/ux500_msp_i2s.c:622", 0, msp->registers + MSP_GCR);
+		pete_writel("sound/soc/ux500/ux500_msp_i2s.c:623", 0, msp->registers + MSP_TCF);
+		pete_writel("sound/soc/ux500/ux500_msp_i2s.c:624", 0, msp->registers + MSP_RCF);
+		pete_writel("sound/soc/ux500/ux500_msp_i2s.c:625", 0, msp->registers + MSP_DMACR);
+		pete_writel("sound/soc/ux500/ux500_msp_i2s.c:626", 0, msp->registers + MSP_SRG);
+		pete_writel("sound/soc/ux500/ux500_msp_i2s.c:627", 0, msp->registers + MSP_MCR);
+		pete_writel("sound/soc/ux500/ux500_msp_i2s.c:628", 0, msp->registers + MSP_RCM);
+		pete_writel("sound/soc/ux500/ux500_msp_i2s.c:629", 0, msp->registers + MSP_RCV);
+		pete_writel("sound/soc/ux500/ux500_msp_i2s.c:630", 0, msp->registers + MSP_TCE0);
+		pete_writel("sound/soc/ux500/ux500_msp_i2s.c:631", 0, msp->registers + MSP_TCE1);
+		pete_writel("sound/soc/ux500/ux500_msp_i2s.c:632", 0, msp->registers + MSP_TCE2);
+		pete_writel("sound/soc/ux500/ux500_msp_i2s.c:633", 0, msp->registers + MSP_TCE3);
+		pete_writel("sound/soc/ux500/ux500_msp_i2s.c:634", 0, msp->registers + MSP_RCE0);
+		pete_writel("sound/soc/ux500/ux500_msp_i2s.c:635", 0, msp->registers + MSP_RCE1);
+		pete_writel("sound/soc/ux500/ux500_msp_i2s.c:636", 0, msp->registers + MSP_RCE2);
+		pete_writel("sound/soc/ux500/ux500_msp_i2s.c:637", 0, msp->registers + MSP_RCE3);
 	}
 
 	return status;

@@ -76,8 +76,8 @@ static void cptvf_send_msg_to_pf(struct otx_cptvf *cptvf,
 				     struct otx_cpt_mbox *mbx)
 {
 	/* Writing mbox(1) causes interrupt */
-	writeq(mbx->msg, cptvf->reg_base + OTX_CPT_VFX_PF_MBOXX(0, 0));
-	writeq(mbx->data, cptvf->reg_base + OTX_CPT_VFX_PF_MBOXX(0, 1));
+	pete_writeq("drivers/crypto/marvell/octeontx/otx_cptvf_mbox.c:79", mbx->msg, cptvf->reg_base + OTX_CPT_VFX_PF_MBOXX(0, 0));
+	pete_writeq("drivers/crypto/marvell/octeontx/otx_cptvf_mbox.c:80", mbx->data, cptvf->reg_base + OTX_CPT_VFX_PF_MBOXX(0, 1));
 }
 
 /* Interrupt handler to handle mailbox messages from VFs */
@@ -89,8 +89,8 @@ void otx_cptvf_handle_mbox_intr(struct otx_cptvf *cptvf)
 	 * MBOX[0] contains msg
 	 * MBOX[1] contains data
 	 */
-	mbx.msg  = readq(cptvf->reg_base + OTX_CPT_VFX_PF_MBOXX(0, 0));
-	mbx.data = readq(cptvf->reg_base + OTX_CPT_VFX_PF_MBOXX(0, 1));
+	mbx.msg  = pete_readq("drivers/crypto/marvell/octeontx/otx_cptvf_mbox.c:92", cptvf->reg_base + OTX_CPT_VFX_PF_MBOXX(0, 0));
+	mbx.data = pete_readq("drivers/crypto/marvell/octeontx/otx_cptvf_mbox.c:93", cptvf->reg_base + OTX_CPT_VFX_PF_MBOXX(0, 1));
 
 	dump_mbox_msg(&mbx, -1);
 

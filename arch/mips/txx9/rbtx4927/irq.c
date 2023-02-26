@@ -121,7 +121,7 @@ static int toshiba_rbtx4927_irq_nested(int sw_irq)
 {
 	u8 level3;
 
-	level3 = readb(rbtx4927_imstat_addr) & 0x1f;
+	level3 = pete_readb("arch/mips/txx9/rbtx4927/irq.c:124", rbtx4927_imstat_addr) & 0x1f;
 	if (unlikely(!level3))
 		return -1;
 	return RBTX4927_IRQ_IOC + __fls8(level3);
@@ -131,18 +131,18 @@ static void toshiba_rbtx4927_irq_ioc_enable(struct irq_data *d)
 {
 	unsigned char v;
 
-	v = readb(rbtx4927_imask_addr);
+	v = pete_readb("arch/mips/txx9/rbtx4927/irq.c:134", rbtx4927_imask_addr);
 	v |= (1 << (d->irq - RBTX4927_IRQ_IOC));
-	writeb(v, rbtx4927_imask_addr);
+	pete_writeb("arch/mips/txx9/rbtx4927/irq.c:136", v, rbtx4927_imask_addr);
 }
 
 static void toshiba_rbtx4927_irq_ioc_disable(struct irq_data *d)
 {
 	unsigned char v;
 
-	v = readb(rbtx4927_imask_addr);
+	v = pete_readb("arch/mips/txx9/rbtx4927/irq.c:143", rbtx4927_imask_addr);
 	v &= ~(1 << (d->irq - RBTX4927_IRQ_IOC));
-	writeb(v, rbtx4927_imask_addr);
+	pete_writeb("arch/mips/txx9/rbtx4927/irq.c:145", v, rbtx4927_imask_addr);
 	mmiowb();
 }
 
@@ -158,9 +158,9 @@ static void __init toshiba_rbtx4927_irq_ioc_init(void)
 	int i;
 
 	/* mask all IOC interrupts */
-	writeb(0, rbtx4927_imask_addr);
+	pete_writeb("arch/mips/txx9/rbtx4927/irq.c:161", 0, rbtx4927_imask_addr);
 	/* clear SoftInt interrupts */
-	writeb(0, rbtx4927_softint_addr);
+	pete_writeb("arch/mips/txx9/rbtx4927/irq.c:163", 0, rbtx4927_softint_addr);
 
 	for (i = RBTX4927_IRQ_IOC;
 	     i < RBTX4927_IRQ_IOC + RBTX4927_NR_IRQ_IOC; i++)

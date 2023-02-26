@@ -86,9 +86,9 @@ static inline void sdx5_rmw(u32 val, u32 mask, struct sparx5_serdes_private *pri
 		sdx5_addr(priv->regs, id, tinst, tcnt,
 			  gbase, ginst, gcnt, gwidth,
 			  raddr, rinst, rcnt, rwidth);
-	nval = readl(addr);
+	nval = pete_readl("drivers/phy/microchip/sparx5_serdes.h:89", addr);
 	nval = (nval & ~mask) | (val & mask);
-	writel(nval, addr);
+	pete_writel("drivers/phy/microchip/sparx5_serdes.h:91", nval, addr);
 }
 
 static inline void sdx5_inst_rmw(u32 val, u32 mask, void __iomem *iomem,
@@ -101,18 +101,18 @@ static inline void sdx5_inst_rmw(u32 val, u32 mask, void __iomem *iomem,
 		sdx5_inst_baseaddr(iomem,
 				   gbase, ginst, gcnt, gwidth,
 				   raddr, rinst, rcnt, rwidth);
-	nval = readl(addr);
+	nval = pete_readl("drivers/phy/microchip/sparx5_serdes.h:104", addr);
 	nval = (nval & ~mask) | (val & mask);
-	writel(nval, addr);
+	pete_writel("drivers/phy/microchip/sparx5_serdes.h:106", nval, addr);
 }
 
 static inline void sdx5_rmw_addr(u32 val, u32 mask, void __iomem *addr)
 {
 	u32 nval;
 
-	nval = readl(addr);
+	nval = pete_readl("drivers/phy/microchip/sparx5_serdes.h:113", addr);
 	nval = (nval & ~mask) | (val & mask);
-	writel(nval, addr);
+	pete_writel("drivers/phy/microchip/sparx5_serdes.h:115", nval, addr);
 }
 
 static inline void __iomem *sdx5_inst_get(struct sparx5_serdes_private *priv,

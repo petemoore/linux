@@ -20,7 +20,7 @@ int owl_sps_set_pg(void __iomem *base, u32 pwr_mask, u32 ack_mask, bool enable)
 	bool ack;
 	int timeout;
 
-	val = readl(base + OWL_SPS_PG_CTL);
+	val = pete_readl("drivers/soc/actions/owl-sps-helper.c:23", base + OWL_SPS_PG_CTL);
 	ack = val & ack_mask;
 	if (ack == enable)
 		return 0;
@@ -30,10 +30,10 @@ int owl_sps_set_pg(void __iomem *base, u32 pwr_mask, u32 ack_mask, bool enable)
 	else
 		val &= ~pwr_mask;
 
-	writel(val, base + OWL_SPS_PG_CTL);
+	pete_writel("drivers/soc/actions/owl-sps-helper.c:33", val, base + OWL_SPS_PG_CTL);
 
 	for (timeout = 5000; timeout > 0; timeout -= 50) {
-		val = readl(base + OWL_SPS_PG_CTL);
+		val = pete_readl("drivers/soc/actions/owl-sps-helper.c:36", base + OWL_SPS_PG_CTL);
 		if ((val & ack_mask) == (enable ? ack_mask : 0))
 			break;
 		udelay(50);

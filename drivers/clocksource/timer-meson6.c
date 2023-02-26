@@ -69,32 +69,32 @@ static struct delay_timer meson6_delay_timer = {
 
 static u64 notrace meson6_timer_sched_read(void)
 {
-	return (u64)readl(timer_base + MESON_ISA_TIMERE);
+	return (u64)pete_readl("drivers/clocksource/timer-meson6.c:72", timer_base + MESON_ISA_TIMERE);
 }
 
 static void meson6_clkevt_time_stop(void)
 {
-	u32 val = readl(timer_base + MESON_ISA_TIMER_MUX);
+	u32 val = pete_readl("drivers/clocksource/timer-meson6.c:77", timer_base + MESON_ISA_TIMER_MUX);
 
-	writel(val & ~MESON_ISA_TIMER_MUX_TIMERA_EN,
+	pete_writel("drivers/clocksource/timer-meson6.c:79", val & ~MESON_ISA_TIMER_MUX_TIMERA_EN,
 	       timer_base + MESON_ISA_TIMER_MUX);
 }
 
 static void meson6_clkevt_time_setup(unsigned long delay)
 {
-	writel(delay, timer_base + MESON_ISA_TIMERA);
+	pete_writel("drivers/clocksource/timer-meson6.c:85", delay, timer_base + MESON_ISA_TIMERA);
 }
 
 static void meson6_clkevt_time_start(bool periodic)
 {
-	u32 val = readl(timer_base + MESON_ISA_TIMER_MUX);
+	u32 val = pete_readl("drivers/clocksource/timer-meson6.c:90", timer_base + MESON_ISA_TIMER_MUX);
 
 	if (periodic)
 		val |= MESON_ISA_TIMER_MUX_TIMERA_MODE;
 	else
 		val &= ~MESON_ISA_TIMER_MUX_TIMERA_MODE;
 
-	writel(val | MESON_ISA_TIMER_MUX_TIMERA_EN,
+	pete_writel("drivers/clocksource/timer-meson6.c:97", val | MESON_ISA_TIMER_MUX_TIMERA_EN,
 	       timer_base + MESON_ISA_TIMER_MUX);
 }
 
@@ -168,11 +168,11 @@ static int __init meson6_timer_init(struct device_node *node)
 	}
 
 	/* Set 1us for timer E */
-	val = readl(timer_base + MESON_ISA_TIMER_MUX);
+	val = pete_readl("drivers/clocksource/timer-meson6.c:171", timer_base + MESON_ISA_TIMER_MUX);
 	val &= ~MESON_ISA_TIMER_MUX_TIMERE_INPUT_CLOCK_MASK;
 	val |= FIELD_PREP(MESON_ISA_TIMER_MUX_TIMERE_INPUT_CLOCK_MASK,
 			  MESON_ISA_TIMER_MUX_TIMERE_INPUT_CLOCK_1US);
-	writel(val, timer_base + MESON_ISA_TIMER_MUX);
+	pete_writel("drivers/clocksource/timer-meson6.c:175", val, timer_base + MESON_ISA_TIMER_MUX);
 
 	sched_clock_register(meson6_timer_sched_read, 32, USEC_PER_SEC);
 	clocksource_mmio_init(timer_base + MESON_ISA_TIMERE, node->name,
@@ -182,7 +182,7 @@ static int __init meson6_timer_init(struct device_node *node)
 	val &= ~MESON_ISA_TIMER_MUX_TIMERA_INPUT_CLOCK_MASK;
 	val |= FIELD_PREP(MESON_ISA_TIMER_MUX_TIMERA_INPUT_CLOCK_MASK,
 			  MESON_ISA_TIMER_MUX_TIMERABCD_INPUT_CLOCK_1US);
-	writel(val, timer_base + MESON_ISA_TIMER_MUX);
+	pete_writel("drivers/clocksource/timer-meson6.c:185", val, timer_base + MESON_ISA_TIMER_MUX);
 
 	/* Stop the timer A */
 	meson6_clkevt_time_stop();

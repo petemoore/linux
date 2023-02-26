@@ -142,7 +142,7 @@ static void emac_reg_write_all(void __iomem *base,
 	size_t i;
 
 	for (i = 0; i < size; ++itr, ++i)
-		writel(itr->val, base + itr->offset);
+		pete_writel("drivers/net/ethernet/qualcomm/emac/emac-sgmii-fsm9900.c:145", itr->val, base + itr->offset);
 }
 
 static const struct emac_reg_write physical_coding_sublayer_programming[] = {
@@ -218,10 +218,10 @@ int emac_sgmii_init_fsm9900(struct emac_adapter *adpt)
 	emac_reg_write_all(phy->base, tx_rx_setting, ARRAY_SIZE(tx_rx_setting));
 
 	/* Power up the Ser/Des engine */
-	writel(SERDES_START, phy->base + EMAC_SGMII_PHY_SERDES_START);
+	pete_writel("drivers/net/ethernet/qualcomm/emac/emac-sgmii-fsm9900.c:221", SERDES_START, phy->base + EMAC_SGMII_PHY_SERDES_START);
 
 	for (i = 0; i < SERDES_START_WAIT_TIMES; i++) {
-		if (readl(phy->base + EMAC_QSERDES_COM_RESET_SM) & READY)
+		if (pete_readl("drivers/net/ethernet/qualcomm/emac/emac-sgmii-fsm9900.c:224", phy->base + EMAC_QSERDES_COM_RESET_SM) & READY)
 			break;
 		usleep_range(100, 200);
 	}
@@ -231,7 +231,7 @@ int emac_sgmii_init_fsm9900(struct emac_adapter *adpt)
 		return -EIO;
 	}
 	/* Mask out all the SGMII Interrupt */
-	writel(0, phy->base + EMAC_SGMII_PHY_INTERRUPT_MASK);
+	pete_writel("drivers/net/ethernet/qualcomm/emac/emac-sgmii-fsm9900.c:234", 0, phy->base + EMAC_SGMII_PHY_INTERRUPT_MASK);
 
 	return 0;
 }

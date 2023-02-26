@@ -32,9 +32,9 @@ static int lmtst_map_table_ops(struct rvu *rvu, u32 index, u64 *val,
 	}
 
 	if (lmt_tbl_op == LMT_TBL_OP_READ) {
-		*val = readq(lmt_map_base + index);
+		*val = pete_readq("drivers/net/ethernet/marvell/octeontx2/af/rvu_cn10k.c:35", lmt_map_base + index);
 	} else {
-		writeq((*val), (lmt_map_base + index));
+		pete_writeq("drivers/net/ethernet/marvell/octeontx2/af/rvu_cn10k.c:37", (*val), (lmt_map_base + index));
 		/* Flushing the AP interceptor cache to make APR_LMT_MAP_ENTRY_S
 		 * changes effective. Write 1 for flush and read is being used as a
 		 * barrier and sets up a data dependency. Write to 0 after a write
@@ -353,14 +353,14 @@ static void __rvu_lbk_set_chans(struct rvu *rvu, void __iomem *base,
 	struct rvu_hwinfo *hw = rvu->hw;
 	u64 cfg;
 
-	cfg = readq(base + offset);
+	cfg = pete_readq("drivers/net/ethernet/marvell/octeontx2/af/rvu_cn10k.c:356", base + offset);
 	cfg &= ~(LBK_LINK_CFG_RANGE_MASK |
 		 LBK_LINK_CFG_ID_MASK | LBK_LINK_CFG_BASE_MASK);
 	cfg |=	FIELD_PREP(LBK_LINK_CFG_RANGE_MASK, ilog2(chans));
 	cfg |=	FIELD_PREP(LBK_LINK_CFG_ID_MASK, lbkid);
 	cfg |=	FIELD_PREP(LBK_LINK_CFG_BASE_MASK, hw->lbk_chan_base);
 
-	writeq(cfg, base + offset);
+	pete_writeq("drivers/net/ethernet/marvell/octeontx2/af/rvu_cn10k.c:363", cfg, base + offset);
 }
 
 static void rvu_lbk_set_channels(struct rvu *rvu)
@@ -395,7 +395,7 @@ static void rvu_lbk_set_channels(struct rvu *rvu)
 		if (!base)
 			goto err_put;
 
-		lbk_const = readq(base + LBK_CONST);
+		lbk_const = pete_readq("drivers/net/ethernet/marvell/octeontx2/af/rvu_cn10k.c:398", base + LBK_CONST);
 		chans = FIELD_GET(LBK_CONST_CHANS, lbk_const);
 		dst = FIELD_GET(LBK_CONST_DST, lbk_const);
 		src = FIELD_GET(LBK_CONST_SRC, lbk_const);

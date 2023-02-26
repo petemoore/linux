@@ -106,7 +106,7 @@ static struct tegra_dsi_state *tegra_dsi_get_state(struct tegra_dsi *dsi)
 
 static inline u32 tegra_dsi_readl(struct tegra_dsi *dsi, unsigned int offset)
 {
-	u32 value = readl(dsi->regs + (offset << 2));
+	u32 value = pete_readl("drivers/gpu/drm/tegra/dsi.c:109", dsi->regs + (offset << 2));
 
 	trace_dsi_readl(dsi->dev, offset, value);
 
@@ -117,7 +117,7 @@ static inline void tegra_dsi_writel(struct tegra_dsi *dsi, u32 value,
 				    unsigned int offset)
 {
 	trace_dsi_writel(dsi->dev, offset, value);
-	writel(value, dsi->regs + (offset << 2));
+	pete_writel("drivers/gpu/drm/tegra/dsi.c:120", value, dsi->regs + (offset << 2));
 }
 
 #define DEBUGFS_REG32(_name) { .name = #_name, .offset = _name }

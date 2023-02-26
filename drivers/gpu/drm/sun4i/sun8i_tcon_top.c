@@ -43,10 +43,10 @@ int sun8i_tcon_top_set_hdmi_src(struct device *dev, int tcon)
 
 	spin_lock_irqsave(&tcon_top->reg_lock, flags);
 
-	val = readl(tcon_top->regs + TCON_TOP_GATE_SRC_REG);
+	val = pete_readl("drivers/gpu/drm/sun4i/sun8i_tcon_top.c:46", tcon_top->regs + TCON_TOP_GATE_SRC_REG);
 	val &= ~TCON_TOP_HDMI_SRC_MSK;
 	val |= FIELD_PREP(TCON_TOP_HDMI_SRC_MSK, tcon - 1);
-	writel(val, tcon_top->regs + TCON_TOP_GATE_SRC_REG);
+	pete_writel("drivers/gpu/drm/sun4i/sun8i_tcon_top.c:49", val, tcon_top->regs + TCON_TOP_GATE_SRC_REG);
 
 	spin_unlock_irqrestore(&tcon_top->reg_lock, flags);
 
@@ -77,7 +77,7 @@ int sun8i_tcon_top_de_config(struct device *dev, int mixer, int tcon)
 
 	spin_lock_irqsave(&tcon_top->reg_lock, flags);
 
-	reg = readl(tcon_top->regs + TCON_TOP_PORT_SEL_REG);
+	reg = pete_readl("drivers/gpu/drm/sun4i/sun8i_tcon_top.c:80", tcon_top->regs + TCON_TOP_PORT_SEL_REG);
 	if (mixer == 0) {
 		reg &= ~TCON_TOP_PORT_DE0_MSK;
 		reg |= FIELD_PREP(TCON_TOP_PORT_DE0_MSK, tcon);
@@ -85,7 +85,7 @@ int sun8i_tcon_top_de_config(struct device *dev, int mixer, int tcon)
 		reg &= ~TCON_TOP_PORT_DE1_MSK;
 		reg |= FIELD_PREP(TCON_TOP_PORT_DE1_MSK, tcon);
 	}
-	writel(reg, tcon_top->regs + TCON_TOP_PORT_SEL_REG);
+	pete_writel("drivers/gpu/drm/sun4i/sun8i_tcon_top.c:88", reg, tcon_top->regs + TCON_TOP_PORT_SEL_REG);
 
 	spin_unlock_irqrestore(&tcon_top->reg_lock, flags);
 
@@ -180,8 +180,8 @@ static int sun8i_tcon_top_bind(struct device *dev, struct device *master,
 	 * At least on H6, some registers have some bits set by default
 	 * which may cause issues. Clear them here.
 	 */
-	writel(0, regs + TCON_TOP_PORT_SEL_REG);
-	writel(0, regs + TCON_TOP_GATE_SRC_REG);
+	pete_writel("drivers/gpu/drm/sun4i/sun8i_tcon_top.c:183", 0, regs + TCON_TOP_PORT_SEL_REG);
+	pete_writel("drivers/gpu/drm/sun4i/sun8i_tcon_top.c:184", 0, regs + TCON_TOP_GATE_SRC_REG);
 
 	/*
 	 * TCON TOP has two muxes, which select parent clock for each TCON TV

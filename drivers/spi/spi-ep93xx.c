@@ -170,8 +170,8 @@ static int ep93xx_spi_chip_setup(struct spi_master *master,
 		spi->mode, div_cpsr, div_scr, dss);
 	dev_dbg(&master->dev, "setup: cr0 %#x\n", cr0);
 
-	writel(div_cpsr, espi->mmio + SSPCPSR);
-	writel(cr0, espi->mmio + SSPCR0);
+	pete_writel("drivers/spi/spi-ep93xx.c:173", div_cpsr, espi->mmio + SSPCPSR);
+	pete_writel("drivers/spi/spi-ep93xx.c:174", cr0, espi->mmio + SSPCR0);
 
 	return 0;
 }
@@ -191,7 +191,7 @@ static void ep93xx_do_write(struct spi_master *master)
 			val = ((u8 *)xfer->tx_buf)[espi->tx];
 		espi->tx += 1;
 	}
-	writel(val, espi->mmio + SSPDR);
+	pete_writel("drivers/spi/spi-ep93xx.c:194", val, espi->mmio + SSPDR);
 }
 
 static void ep93xx_do_read(struct spi_master *master)
@@ -200,7 +200,7 @@ static void ep93xx_do_read(struct spi_master *master)
 	struct spi_transfer *xfer = master->cur_msg->state;
 	u32 val;
 
-	val = readl(espi->mmio + SSPDR);
+	val = pete_readl("drivers/spi/spi-ep93xx.c:203", espi->mmio + SSPDR);
 	if (xfer->bits_per_word > 8) {
 		if (xfer->rx_buf)
 			((u16 *)xfer->rx_buf)[espi->rx] = val;
@@ -229,7 +229,7 @@ static int ep93xx_spi_read_write(struct spi_master *master)
 	struct spi_transfer *xfer = master->cur_msg->state;
 
 	/* read as long as RX FIFO has frames in it */
-	while ((readl(espi->mmio + SSPSR) & SSPSR_RNE)) {
+	while ((pete_readl("drivers/spi/spi-ep93xx.c:232", espi->mmio + SSPSR) & SSPSR_RNE)) {
 		ep93xx_do_read(master);
 		espi->fifo_level--;
 	}
@@ -444,9 +444,9 @@ static irqreturn_t ep93xx_spi_interrupt(int irq, void *dev_id)
 	 * If we got ROR (receive overrun) interrupt we know that something is
 	 * wrong. Just abort the message.
 	 */
-	if (readl(espi->mmio + SSPIIR) & SSPIIR_RORIS) {
+	if (pete_readl("drivers/spi/spi-ep93xx.c:447", espi->mmio + SSPIIR) & SSPIIR_RORIS) {
 		/* clear the overrun interrupt */
-		writel(0, espi->mmio + SSPICR);
+		pete_writel("drivers/spi/spi-ep93xx.c:449", 0, espi->mmio + SSPICR);
 		dev_warn(&master->dev,
 			 "receive overrun, aborting the message\n");
 		master->cur_msg->status = -EIO;
@@ -470,9 +470,9 @@ static irqreturn_t ep93xx_spi_interrupt(int irq, void *dev_id)
 	 * any case we disable interrupts and notify the worker to handle
 	 * any post-processing of the message.
 	 */
-	val = readl(espi->mmio + SSPCR1);
+	val = pete_readl("drivers/spi/spi-ep93xx.c:473", espi->mmio + SSPCR1);
 	val &= ~(SSPCR1_RORIE | SSPCR1_TIE | SSPCR1_RIE);
-	writel(val, espi->mmio + SSPCR1);
+	pete_writel("drivers/spi/spi-ep93xx.c:475", val, espi->mmio + SSPCR1);
 
 	spi_finalize_current_transfer(master);
 
@@ -508,9 +508,9 @@ static int ep93xx_spi_transfer_one(struct spi_master *master,
 	/* Using PIO so prime the TX FIFO and enable interrupts */
 	ep93xx_spi_read_write(master);
 
-	val = readl(espi->mmio + SSPCR1);
+	val = pete_readl("drivers/spi/spi-ep93xx.c:511", espi->mmio + SSPCR1);
 	val |= (SSPCR1_RORIE | SSPCR1_TIE | SSPCR1_RIE);
-	writel(val, espi->mmio + SSPCR1);
+	pete_writel("drivers/spi/spi-ep93xx.c:513", val, espi->mmio + SSPCR1);
 
 	/* signal that we need to wait for completion */
 	return 1;
@@ -526,13 +526,13 @@ static int ep93xx_spi_prepare_message(struct spi_master *master,
 	 * Just to be sure: flush any data from RX FIFO.
 	 */
 	timeout = jiffies + msecs_to_jiffies(SPI_TIMEOUT);
-	while (readl(espi->mmio + SSPSR) & SSPSR_RNE) {
+	while (pete_readl("drivers/spi/spi-ep93xx.c:529", espi->mmio + SSPSR) & SSPSR_RNE) {
 		if (time_after(jiffies, timeout)) {
 			dev_warn(&master->dev,
 				 "timeout while flushing RX FIFO\n");
 			return -ETIMEDOUT;
 		}
-		readl(espi->mmio + SSPDR);
+		pete_readl("drivers/spi/spi-ep93xx.c:535", espi->mmio + SSPDR);
 	}
 
 	/*
@@ -554,9 +554,9 @@ static int ep93xx_spi_prepare_hardware(struct spi_master *master)
 	if (ret)
 		return ret;
 
-	val = readl(espi->mmio + SSPCR1);
+	val = pete_readl("drivers/spi/spi-ep93xx.c:557", espi->mmio + SSPCR1);
 	val |= SSPCR1_SSE;
-	writel(val, espi->mmio + SSPCR1);
+	pete_writel("drivers/spi/spi-ep93xx.c:559", val, espi->mmio + SSPCR1);
 
 	return 0;
 }
@@ -566,9 +566,9 @@ static int ep93xx_spi_unprepare_hardware(struct spi_master *master)
 	struct ep93xx_spi *espi = spi_master_get_devdata(master);
 	u32 val;
 
-	val = readl(espi->mmio + SSPCR1);
+	val = pete_readl("drivers/spi/spi-ep93xx.c:569", espi->mmio + SSPCR1);
 	val &= ~SSPCR1_SSE;
-	writel(val, espi->mmio + SSPCR1);
+	pete_writel("drivers/spi/spi-ep93xx.c:571", val, espi->mmio + SSPCR1);
 
 	clk_disable_unprepare(espi->clk);
 
@@ -724,7 +724,7 @@ static int ep93xx_spi_probe(struct platform_device *pdev)
 		dev_warn(&pdev->dev, "DMA setup failed. Falling back to PIO\n");
 
 	/* make sure that the hardware is disabled */
-	writel(0, espi->mmio + SSPCR1);
+	pete_writel("drivers/spi/spi-ep93xx.c:727", 0, espi->mmio + SSPCR1);
 
 	error = devm_spi_register_master(&pdev->dev, master);
 	if (error) {

@@ -64,17 +64,17 @@
 
 #define SMC_IO_SHIFT		(lp->io_shift)
 
-#define SMC_inb(a, r)		readb((a) + (r))
+#define SMC_inb(a, r)		pete_readb("drivers/net/ethernet/smsc/smc91x.h:67", (a) + (r))
 #define SMC_inw(a, r)							\
 	({								\
 		unsigned int __smc_r = r;				\
-		SMC_16BIT(lp) ? readw((a) + __smc_r) :			\
+		SMC_16BIT(lp) ? pete_readw("drivers/net/ethernet/smsc/smc91x.h:71", (a) + __smc_r) :			\
 		SMC_8BIT(lp) ? SMC_inw_b(a, __smc_r) :			\
 		({ BUG(); 0; });					\
 	})
 
-#define SMC_inl(a, r)		readl((a) + (r))
-#define SMC_outb(v, a, r)	writeb(v, (a) + (r))
+#define SMC_inl(a, r)		pete_readl("drivers/net/ethernet/smsc/smc91x.h:76", (a) + (r))
+#define SMC_outb(v, a, r)	pete_writeb("drivers/net/ethernet/smsc/smc91x.h:77", v, (a) + (r))
 #define SMC_outw(lp, v, a, r)						\
 	do {								\
 		unsigned int __v = v, __smc_r = r;			\
@@ -86,7 +86,7 @@
 			BUG();						\
 	} while (0)
 
-#define SMC_outl(v, a, r)	writel(v, (a) + (r))
+#define SMC_outl(v, a, r)	pete_writel("drivers/net/ethernet/smsc/smc91x.h:89", v, (a) + (r))
 #define SMC_insb(a, r, p, l)	readsb((a) + (r), p, l)
 #define SMC_outsb(a, r, p, l)	writesb((a) + (r), p, l)
 #define SMC_insw(a, r, p, l)	readsw((a) + (r), p, l)
@@ -101,10 +101,10 @@ static inline void _SMC_outw_align4(u16 val, void __iomem *ioaddr, int reg,
 {
 	if (use_align4_workaround) {
 		unsigned int v = val << 16;
-		v |= readl(ioaddr + (reg & ~2)) & 0xffff;
-		writel(v, ioaddr + (reg & ~2));
+		v |= pete_readl("drivers/net/ethernet/smsc/smc91x.h:104", ioaddr + (reg & ~2)) & 0xffff;
+		pete_writel("drivers/net/ethernet/smsc/smc91x.h:105", v, ioaddr + (reg & ~2));
 	} else {
-		writew(val, ioaddr + reg);
+		pete_writew("drivers/net/ethernet/smsc/smc91x.h:107", val, ioaddr + reg);
 	}
 }
 
@@ -140,12 +140,12 @@ static inline void _SMC_outw_align4(u16 val, void __iomem *ioaddr, int reg,
 #define SMC_CAN_USE_32BIT       1
 #define SMC_NOWAIT              1
 
-#define SMC_inb(a, r)           readb((a) + (r))
-#define SMC_inw(a, r)           readw((a) + (r))
-#define SMC_inl(a, r)           readl((a) + (r))
-#define SMC_outb(v, a, r)       writeb(v, (a) + (r))
-#define SMC_outw(lp, v, a, r)   writew(v, (a) + (r))
-#define SMC_outl(v, a, r)       writel(v, (a) + (r))
+#define SMC_inb(a, r)           pete_readb("drivers/net/ethernet/smsc/smc91x.h:143", (a) + (r))
+#define SMC_inw(a, r)           pete_readw("drivers/net/ethernet/smsc/smc91x.h:144", (a) + (r))
+#define SMC_inl(a, r)           pete_readl("drivers/net/ethernet/smsc/smc91x.h:145", (a) + (r))
+#define SMC_outb(v, a, r)       pete_writeb("drivers/net/ethernet/smsc/smc91x.h:146", v, (a) + (r))
+#define SMC_outw(lp, v, a, r)   pete_writew("drivers/net/ethernet/smsc/smc91x.h:147", v, (a) + (r))
+#define SMC_outl(v, a, r)       pete_writel("drivers/net/ethernet/smsc/smc91x.h:148", v, (a) + (r))
 #define SMC_insw(a, r, p, l)    readsw((a) + (r), p, l)
 #define SMC_outsw(a, r, p, l)   writesw((a) + (r), p, l)
 #define SMC_insl(a, r, p, l)    readsl((a) + (r), p, l)
@@ -165,18 +165,18 @@ static inline void mcf_insw(void *a, unsigned char *p, int l)
 {
 	u16 *wp = (u16 *) p;
 	while (l-- > 0)
-		*wp++ = readw(a);
+		*wp++ = pete_readw("drivers/net/ethernet/smsc/smc91x.h:168", a);
 }
 
 static inline void mcf_outsw(void *a, unsigned char *p, int l)
 {
 	u16 *wp = (u16 *) p;
 	while (l-- > 0)
-		writew(*wp++, a);
+		pete_writew("drivers/net/ethernet/smsc/smc91x.h:175", *wp++, a);
 }
 
-#define SMC_inw(a, r)		_swapw(readw((a) + (r)))
-#define SMC_outw(lp, v, a, r)	writew(_swapw(v), (a) + (r))
+#define SMC_inw(a, r)		_swapw(pete_readw("drivers/net/ethernet/smsc/smc91x.h:178", (a) + (r)))
+#define SMC_outw(lp, v, a, r)	pete_writew("drivers/net/ethernet/smsc/smc91x.h:179", _swapw(v), (a) + (r))
 #define SMC_insw(a, r, p, l)	mcf_insw(a + r, p, l)
 #define SMC_outsw(a, r, p, l)	mcf_outsw(a + r, p, l)
 

@@ -28,12 +28,12 @@
 
 static inline void i2s_write_reg(void __iomem *io_base, int reg, u32 val)
 {
-	writel(val, io_base + reg);
+	pete_writel("sound/soc/dwc/dwc-i2s.c:31", val, io_base + reg);
 }
 
 static inline u32 i2s_read_reg(void __iomem *io_base, int reg)
 {
-	return readl(io_base + reg);
+	return pete_readl("sound/soc/dwc/dwc-i2s.c:36", io_base + reg);
 }
 
 static inline void i2s_disable_channels(struct dw_i2s_dev *dev, u32 stream)

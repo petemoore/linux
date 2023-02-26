@@ -234,7 +234,7 @@ static int s3c2410wdt_keepalive(struct watchdog_device *wdd)
 	struct s3c2410_wdt *wdt = watchdog_get_drvdata(wdd);
 
 	spin_lock(&wdt->lock);
-	writel(wdt->count, wdt->reg_base + S3C2410_WTCNT);
+	pete_writel("drivers/watchdog/s3c2410_wdt.c:237", wdt->count, wdt->reg_base + S3C2410_WTCNT);
 	spin_unlock(&wdt->lock);
 
 	return 0;
@@ -244,9 +244,9 @@ static void __s3c2410wdt_stop(struct s3c2410_wdt *wdt)
 {
 	unsigned long wtcon;
 
-	wtcon = readl(wdt->reg_base + S3C2410_WTCON);
+	wtcon = pete_readl("drivers/watchdog/s3c2410_wdt.c:247", wdt->reg_base + S3C2410_WTCON);
 	wtcon &= ~(S3C2410_WTCON_ENABLE | S3C2410_WTCON_RSTEN);
-	writel(wtcon, wdt->reg_base + S3C2410_WTCON);
+	pete_writel("drivers/watchdog/s3c2410_wdt.c:249", wtcon, wdt->reg_base + S3C2410_WTCON);
 }
 
 static int s3c2410wdt_stop(struct watchdog_device *wdd)
@@ -269,7 +269,7 @@ static int s3c2410wdt_start(struct watchdog_device *wdd)
 
 	__s3c2410wdt_stop(wdt);
 
-	wtcon = readl(wdt->reg_base + S3C2410_WTCON);
+	wtcon = pete_readl("drivers/watchdog/s3c2410_wdt.c:272", wdt->reg_base + S3C2410_WTCON);
 	wtcon |= S3C2410_WTCON_ENABLE | S3C2410_WTCON_DIV128;
 
 	if (soft_noboot) {
@@ -283,9 +283,9 @@ static int s3c2410wdt_start(struct watchdog_device *wdd)
 	dev_dbg(wdt->dev, "Starting watchdog: count=0x%08x, wtcon=%08lx\n",
 		wdt->count, wtcon);
 
-	writel(wdt->count, wdt->reg_base + S3C2410_WTDAT);
-	writel(wdt->count, wdt->reg_base + S3C2410_WTCNT);
-	writel(wtcon, wdt->reg_base + S3C2410_WTCON);
+	pete_writel("drivers/watchdog/s3c2410_wdt.c:286", wdt->count, wdt->reg_base + S3C2410_WTDAT);
+	pete_writel("drivers/watchdog/s3c2410_wdt.c:287", wdt->count, wdt->reg_base + S3C2410_WTCNT);
+	pete_writel("drivers/watchdog/s3c2410_wdt.c:288", wtcon, wdt->reg_base + S3C2410_WTCON);
 	spin_unlock(&wdt->lock);
 
 	return 0;
@@ -293,7 +293,7 @@ static int s3c2410wdt_start(struct watchdog_device *wdd)
 
 static inline int s3c2410wdt_is_running(struct s3c2410_wdt *wdt)
 {
-	return readl(wdt->reg_base + S3C2410_WTCON) & S3C2410_WTCON_ENABLE;
+	return pete_readl("drivers/watchdog/s3c2410_wdt.c:296", wdt->reg_base + S3C2410_WTCON) & S3C2410_WTCON_ENABLE;
 }
 
 static int s3c2410wdt_set_heartbeat(struct watchdog_device *wdd,
@@ -335,12 +335,12 @@ static int s3c2410wdt_set_heartbeat(struct watchdog_device *wdd,
 	wdt->count = count;
 
 	/* update the pre-scaler */
-	wtcon = readl(wdt->reg_base + S3C2410_WTCON);
+	wtcon = pete_readl("drivers/watchdog/s3c2410_wdt.c:338", wdt->reg_base + S3C2410_WTCON);
 	wtcon &= ~S3C2410_WTCON_PRESCALE_MASK;
 	wtcon |= S3C2410_WTCON_PRESCALE(divisor-1);
 
-	writel(count, wdt->reg_base + S3C2410_WTDAT);
-	writel(wtcon, wdt->reg_base + S3C2410_WTCON);
+	pete_writel("drivers/watchdog/s3c2410_wdt.c:342", count, wdt->reg_base + S3C2410_WTDAT);
+	pete_writel("drivers/watchdog/s3c2410_wdt.c:343", wtcon, wdt->reg_base + S3C2410_WTCON);
 
 	wdd->timeout = (count * divisor) / freq;
 
@@ -354,14 +354,14 @@ static int s3c2410wdt_restart(struct watchdog_device *wdd, unsigned long action,
 	void __iomem *wdt_base = wdt->reg_base;
 
 	/* disable watchdog, to be safe  */
-	writel(0, wdt_base + S3C2410_WTCON);
+	pete_writel("drivers/watchdog/s3c2410_wdt.c:357", 0, wdt_base + S3C2410_WTCON);
 
 	/* put initial values into count and data */
-	writel(0x80, wdt_base + S3C2410_WTCNT);
-	writel(0x80, wdt_base + S3C2410_WTDAT);
+	pete_writel("drivers/watchdog/s3c2410_wdt.c:360", 0x80, wdt_base + S3C2410_WTCNT);
+	pete_writel("drivers/watchdog/s3c2410_wdt.c:361", 0x80, wdt_base + S3C2410_WTDAT);
 
 	/* set the watchdog to go and reset... */
-	writel(S3C2410_WTCON_ENABLE | S3C2410_WTCON_DIV16 |
+	pete_writel("drivers/watchdog/s3c2410_wdt.c:364", S3C2410_WTCON_ENABLE | S3C2410_WTCON_DIV16 |
 		S3C2410_WTCON_RSTEN | S3C2410_WTCON_PRESCALE(0x20),
 		wdt_base + S3C2410_WTCON);
 
@@ -405,7 +405,7 @@ static irqreturn_t s3c2410wdt_irq(int irqno, void *param)
 	s3c2410wdt_keepalive(&wdt->wdt_device);
 
 	if (wdt->drv_data->quirks & QUIRK_HAS_WTCLRINT_REG)
-		writel(0x1, wdt->reg_base + S3C2410_WTCLRINT);
+		pete_writel("drivers/watchdog/s3c2410_wdt.c:408", 0x1, wdt->reg_base + S3C2410_WTCLRINT);
 
 	return IRQ_HANDLED;
 }
@@ -628,7 +628,7 @@ static int s3c2410wdt_probe(struct platform_device *pdev)
 
 	/* print out a statement of readiness */
 
-	wtcon = readl(wdt->reg_base + S3C2410_WTCON);
+	wtcon = pete_readl("drivers/watchdog/s3c2410_wdt.c:631", wdt->reg_base + S3C2410_WTCON);
 
 	dev_info(dev, "watchdog %sactive, reset %sabled, irq %sabled\n",
 		 (wtcon & S3C2410_WTCON_ENABLE) ?  "" : "in",
@@ -685,8 +685,8 @@ static int s3c2410wdt_suspend(struct device *dev)
 	struct s3c2410_wdt *wdt = dev_get_drvdata(dev);
 
 	/* Save watchdog state, and turn it off. */
-	wdt->wtcon_save = readl(wdt->reg_base + S3C2410_WTCON);
-	wdt->wtdat_save = readl(wdt->reg_base + S3C2410_WTDAT);
+	wdt->wtcon_save = pete_readl("drivers/watchdog/s3c2410_wdt.c:688", wdt->reg_base + S3C2410_WTCON);
+	wdt->wtdat_save = pete_readl("drivers/watchdog/s3c2410_wdt.c:689", wdt->reg_base + S3C2410_WTDAT);
 
 	ret = s3c2410wdt_mask_and_disable_reset(wdt, true);
 	if (ret < 0)
@@ -704,9 +704,9 @@ static int s3c2410wdt_resume(struct device *dev)
 	struct s3c2410_wdt *wdt = dev_get_drvdata(dev);
 
 	/* Restore watchdog state. */
-	writel(wdt->wtdat_save, wdt->reg_base + S3C2410_WTDAT);
-	writel(wdt->wtdat_save, wdt->reg_base + S3C2410_WTCNT);/* Reset count */
-	writel(wdt->wtcon_save, wdt->reg_base + S3C2410_WTCON);
+	pete_writel("drivers/watchdog/s3c2410_wdt.c:707", wdt->wtdat_save, wdt->reg_base + S3C2410_WTDAT);
+	pete_writel("drivers/watchdog/s3c2410_wdt.c:708", wdt->wtdat_save, wdt->reg_base + S3C2410_WTCNT);/* Reset count */
+	pete_writel("drivers/watchdog/s3c2410_wdt.c:709", wdt->wtcon_save, wdt->reg_base + S3C2410_WTCON);
 
 	ret = s3c2410wdt_mask_and_disable_reset(wdt, false);
 	if (ret < 0)

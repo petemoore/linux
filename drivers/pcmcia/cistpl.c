@@ -156,13 +156,13 @@ int pcmcia_read_cis_mem(struct pcmcia_socket *s, int attr, u_int addr,
 			return -1;
 		}
 
-		writeb(flags, sys+CISREG_ICTRL0);
-		writeb(addr & 0xff, sys+CISREG_IADDR0);
-		writeb((addr>>8) & 0xff, sys+CISREG_IADDR1);
-		writeb((addr>>16) & 0xff, sys+CISREG_IADDR2);
-		writeb((addr>>24) & 0xff, sys+CISREG_IADDR3);
+		pete_writeb("drivers/pcmcia/cistpl.c:159", flags, sys+CISREG_ICTRL0);
+		pete_writeb("drivers/pcmcia/cistpl.c:160", addr & 0xff, sys+CISREG_IADDR0);
+		pete_writeb("drivers/pcmcia/cistpl.c:161", (addr>>8) & 0xff, sys+CISREG_IADDR1);
+		pete_writeb("drivers/pcmcia/cistpl.c:162", (addr>>16) & 0xff, sys+CISREG_IADDR2);
+		pete_writeb("drivers/pcmcia/cistpl.c:163", (addr>>24) & 0xff, sys+CISREG_IADDR3);
 		for ( ; len > 0; len--, buf++)
-			*buf = readb(sys+CISREG_IDATA0);
+			*buf = pete_readb("drivers/pcmcia/cistpl.c:165", sys+CISREG_IDATA0);
 	} else {
 		u_int inc = 1, card_offset, flags;
 
@@ -193,7 +193,7 @@ int pcmcia_read_cis_mem(struct pcmcia_socket *s, int attr, u_int addr,
 			for ( ; len > 0; len--, buf++, sys += inc) {
 				if (sys == end)
 					break;
-				*buf = readb(sys);
+				*buf = pete_readb("drivers/pcmcia/cistpl.c:196", sys);
 			}
 			card_offset += s->map_size;
 			addr = 0;
@@ -237,13 +237,13 @@ int pcmcia_write_cis_mem(struct pcmcia_socket *s, int attr, u_int addr,
 			return -EINVAL;
 		}
 
-		writeb(flags, sys+CISREG_ICTRL0);
-		writeb(addr & 0xff, sys+CISREG_IADDR0);
-		writeb((addr>>8) & 0xff, sys+CISREG_IADDR1);
-		writeb((addr>>16) & 0xff, sys+CISREG_IADDR2);
-		writeb((addr>>24) & 0xff, sys+CISREG_IADDR3);
+		pete_writeb("drivers/pcmcia/cistpl.c:240", flags, sys+CISREG_ICTRL0);
+		pete_writeb("drivers/pcmcia/cistpl.c:241", addr & 0xff, sys+CISREG_IADDR0);
+		pete_writeb("drivers/pcmcia/cistpl.c:242", (addr>>8) & 0xff, sys+CISREG_IADDR1);
+		pete_writeb("drivers/pcmcia/cistpl.c:243", (addr>>16) & 0xff, sys+CISREG_IADDR2);
+		pete_writeb("drivers/pcmcia/cistpl.c:244", (addr>>24) & 0xff, sys+CISREG_IADDR3);
 		for ( ; len > 0; len--, buf++)
-			writeb(*buf, sys+CISREG_IDATA0);
+			pete_writeb("drivers/pcmcia/cistpl.c:246", *buf, sys+CISREG_IDATA0);
 	} else {
 		u_int inc = 1, card_offset, flags;
 
@@ -267,7 +267,7 @@ int pcmcia_write_cis_mem(struct pcmcia_socket *s, int attr, u_int addr,
 			for ( ; len > 0; len--, buf++, sys += inc) {
 				if (sys == end)
 					break;
-				writeb(*buf, sys);
+				pete_writeb("drivers/pcmcia/cistpl.c:270", *buf, sys);
 			}
 			card_offset += s->map_size;
 			addr = 0;

@@ -201,12 +201,12 @@ extern struct cedrus_dec_ops cedrus_dec_ops_vp8;
 
 static inline void cedrus_write(struct cedrus_dev *dev, u32 reg, u32 val)
 {
-	writel(val, dev->base + reg);
+	pete_writel("drivers/staging/media/sunxi/cedrus/cedrus.h:204", val, dev->base + reg);
 }
 
 static inline u32 cedrus_read(struct cedrus_dev *dev, u32 reg)
 {
-	return readl(dev->base + reg);
+	return pete_readl("drivers/staging/media/sunxi/cedrus/cedrus.h:209", dev->base + reg);
 }
 
 static inline u32 cedrus_wait_for(struct cedrus_dev *dev, u32 reg, u32 flag)

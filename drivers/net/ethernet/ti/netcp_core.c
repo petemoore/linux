@@ -195,13 +195,13 @@ static int emac_arch_get_mac_addr(char *x, void __iomem *efuse_mac, u32 swap)
 {
 	unsigned int addr0, addr1;
 
-	addr1 = readl(efuse_mac + 4);
-	addr0 = readl(efuse_mac);
+	addr1 = pete_readl("drivers/net/ethernet/ti/netcp_core.c:198", efuse_mac + 4);
+	addr0 = pete_readl("drivers/net/ethernet/ti/netcp_core.c:199", efuse_mac);
 
 	switch (swap) {
 	case NETCP_EFUSE_ADDR_SWAP:
 		addr0 = addr1;
-		addr1 = readl(efuse_mac);
+		addr1 = pete_readl("drivers/net/ethernet/ti/netcp_core.c:204", efuse_mac);
 		break;
 	default:
 		break;

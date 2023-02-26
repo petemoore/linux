@@ -108,26 +108,26 @@ extern int ar7_cpu_clock, ar7_bus_clock, ar7_dsp_clock;
 
 static inline int ar7_is_titan(void)
 {
-	return (readl((void *)KSEG1ADDR(AR7_REGS_GPIO + 0x24)) & 0xffff) ==
+	return (pete_readl("arch/mips/include/asm/mach-ar7/ar7.h:111", (void *)KSEG1ADDR(AR7_REGS_GPIO + 0x24)) & 0xffff) ==
 		AR7_CHIP_TITAN;
 }
 
 static inline u16 ar7_chip_id(void)
 {
-	return ar7_is_titan() ? AR7_CHIP_TITAN : (readl((void *)
+	return ar7_is_titan() ? AR7_CHIP_TITAN : (pete_readl("arch/mips/include/asm/mach-ar7/ar7.h:117", (void *)
 		KSEG1ADDR(AR7_REGS_GPIO + 0x14)) & 0xffff);
 }
 
 static inline u16 titan_chip_id(void)
 {
-	unsigned int val = readl((void *)KSEG1ADDR(AR7_REGS_GPIO +
+	unsigned int val = pete_readl("arch/mips/include/asm/mach-ar7/ar7.h:123", (void *)KSEG1ADDR(AR7_REGS_GPIO +
 						TITAN_GPIO_INPUT_1));
 	return ((val >> 12) & 0x0f);
 }
 
 static inline u8 ar7_chip_rev(void)
 {
-	return (readl((void *)KSEG1ADDR(AR7_REGS_GPIO + (ar7_is_titan() ? 0x24 :
+	return (pete_readl("arch/mips/include/asm/mach-ar7/ar7.h:130", (void *)KSEG1ADDR(AR7_REGS_GPIO + (ar7_is_titan() ? 0x24 :
 		0x14))) >> 16) & 0xff;
 }
 
@@ -151,7 +151,7 @@ static inline void ar7_device_enable(u32 bit)
 {
 	void *reset_reg =
 		(void *)KSEG1ADDR(AR7_REGS_RESET + AR7_RESET_PERIPHERAL);
-	writel(readl(reset_reg) | (1 << bit), reset_reg);
+	pete_writel("arch/mips/include/asm/mach-ar7/ar7.h:154", pete_readl("arch/mips/include/asm/mach-ar7/ar7.h:154", reset_reg) | (1 << bit), reset_reg);
 	msleep(20);
 }
 
@@ -159,7 +159,7 @@ static inline void ar7_device_disable(u32 bit)
 {
 	void *reset_reg =
 		(void *)KSEG1ADDR(AR7_REGS_RESET + AR7_RESET_PERIPHERAL);
-	writel(readl(reset_reg) & ~(1 << bit), reset_reg);
+	pete_writel("arch/mips/include/asm/mach-ar7/ar7.h:162", pete_readl("arch/mips/include/asm/mach-ar7/ar7.h:162", reset_reg) & ~(1 << bit), reset_reg);
 	msleep(20);
 }
 
@@ -172,14 +172,14 @@ static inline void ar7_device_reset(u32 bit)
 static inline void ar7_device_on(u32 bit)
 {
 	void *power_reg = (void *)KSEG1ADDR(AR7_REGS_POWER);
-	writel(readl(power_reg) | (1 << bit), power_reg);
+	pete_writel("arch/mips/include/asm/mach-ar7/ar7.h:175", pete_readl("arch/mips/include/asm/mach-ar7/ar7.h:175", power_reg) | (1 << bit), power_reg);
 	msleep(20);
 }
 
 static inline void ar7_device_off(u32 bit)
 {
 	void *power_reg = (void *)KSEG1ADDR(AR7_REGS_POWER);
-	writel(readl(power_reg) & ~(1 << bit), power_reg);
+	pete_writel("arch/mips/include/asm/mach-ar7/ar7.h:182", pete_readl("arch/mips/include/asm/mach-ar7/ar7.h:182", power_reg) & ~(1 << bit), power_reg);
 	msleep(20);
 }
 

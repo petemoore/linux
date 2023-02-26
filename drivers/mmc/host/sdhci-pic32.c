@@ -106,7 +106,7 @@ static const struct sdhci_pltfm_data sdhci_pic32_pdata = {
 static void pic32_sdhci_shared_bus(struct platform_device *pdev)
 {
 	struct sdhci_host *host = platform_get_drvdata(pdev);
-	u32 bus = readl(host->ioaddr + SDH_SHARED_BUS_CTRL);
+	u32 bus = pete_readl("drivers/mmc/host/sdhci-pic32.c:109", host->ioaddr + SDH_SHARED_BUS_CTRL);
 	u32 clk_pins = (bus & SDH_SHARED_BUS_NR_CLK_PINS_MASK) >> 0;
 	u32 irq_pins = (bus & SDH_SHARED_BUS_NR_IRQ_PINS_MASK) >> 4;
 
@@ -118,7 +118,7 @@ static void pic32_sdhci_shared_bus(struct platform_device *pdev)
 	if (irq_pins & 1)
 		bus |= (1 << SDH_SHARED_BUS_IRQ_PINS);
 
-	writel(bus, host->ioaddr + SDH_SHARED_BUS_CTRL);
+	pete_writel("drivers/mmc/host/sdhci-pic32.c:121", bus, host->ioaddr + SDH_SHARED_BUS_CTRL);
 }
 
 static void pic32_sdhci_probe_platform(struct platform_device *pdev,
@@ -128,7 +128,7 @@ static void pic32_sdhci_probe_platform(struct platform_device *pdev,
 	struct sdhci_host *host = platform_get_drvdata(pdev);
 
 	/* Check card slot connected on shared bus. */
-	host->caps = readl(host->ioaddr + SDHCI_CAPABILITIES);
+	host->caps = pete_readl("drivers/mmc/host/sdhci-pic32.c:131", host->ioaddr + SDHCI_CAPABILITIES);
 	caps_slot_type = (host->caps & SDH_CAPS_SDH_SLOT_TYPE_MASK) >> 30;
 	if (caps_slot_type == SDH_SLOT_TYPE_SHARED_BUS)
 		pic32_sdhci_shared_bus(pdev);
@@ -216,7 +216,7 @@ static int pic32_sdhci_remove(struct platform_device *pdev)
 	struct pic32_sdhci_priv *sdhci_pdata = sdhci_priv(host);
 	u32 scratch;
 
-	scratch = readl(host->ioaddr + SDHCI_INT_STATUS);
+	scratch = pete_readl("drivers/mmc/host/sdhci-pic32.c:219", host->ioaddr + SDHCI_INT_STATUS);
 	sdhci_remove_host(host, scratch == (u32)~0);
 	clk_disable_unprepare(sdhci_pdata->base_clk);
 	clk_disable_unprepare(sdhci_pdata->sys_clk);

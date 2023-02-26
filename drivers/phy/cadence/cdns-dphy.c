@@ -181,21 +181,21 @@ static void cdns_dphy_ref_set_pll_cfg(struct cdns_dphy *dphy,
 	fbdiv_low = (cfg->pll_fbdiv / 4) - 2;
 	fbdiv_high = cfg->pll_fbdiv - fbdiv_low - 2;
 
-	writel(DPHY_CMN_IPDIV_FROM_REG | DPHY_CMN_OPDIV_FROM_REG |
+	pete_writel("drivers/phy/cadence/cdns-dphy.c:184", DPHY_CMN_IPDIV_FROM_REG | DPHY_CMN_OPDIV_FROM_REG |
 	       DPHY_CMN_IPDIV(cfg->pll_ipdiv) |
 	       DPHY_CMN_OPDIV(cfg->pll_opdiv),
 	       dphy->regs + DPHY_CMN_OPIPDIV);
-	writel(DPHY_CMN_FBDIV_FROM_REG |
+	pete_writel("drivers/phy/cadence/cdns-dphy.c:188", DPHY_CMN_FBDIV_FROM_REG |
 	       DPHY_CMN_FBDIV_VAL(fbdiv_low, fbdiv_high),
 	       dphy->regs + DPHY_CMN_FBDIV);
-	writel(DPHY_CMN_PWM_HIGH(6) | DPHY_CMN_PWM_LOW(0x101) |
+	pete_writel("drivers/phy/cadence/cdns-dphy.c:191", DPHY_CMN_PWM_HIGH(6) | DPHY_CMN_PWM_LOW(0x101) |
 	       DPHY_CMN_PWM_DIV(0x8),
 	       dphy->regs + DPHY_CMN_PWM);
 }
 
 static void cdns_dphy_ref_set_psm_div(struct cdns_dphy *dphy, u8 div)
 {
-	writel(DPHY_PSM_CFG_FROM_REG | DPHY_PSM_CLK_DIV(div),
+	pete_writel("drivers/phy/cadence/cdns-dphy.c:198", DPHY_PSM_CFG_FROM_REG | DPHY_PSM_CLK_DIV(div),
 	       dphy->regs + DPHY_PSM_CFG);
 }
 
@@ -287,7 +287,7 @@ static int cdns_dphy_power_on(struct phy *phy)
 	clk_prepare_enable(dphy->pll_ref_clk);
 
 	/* Start TX state machine. */
-	writel(DPHY_CMN_SSM_EN | DPHY_CMN_TX_MODE_EN,
+	pete_writel("drivers/phy/cadence/cdns-dphy.c:290", DPHY_CMN_SSM_EN | DPHY_CMN_TX_MODE_EN,
 	       dphy->regs + DPHY_CMN_SSM);
 
 	return 0;

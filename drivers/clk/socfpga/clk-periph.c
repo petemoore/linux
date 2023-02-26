@@ -24,11 +24,11 @@ static unsigned long clk_periclk_recalc_rate(struct clk_hw *hwclk,
 		div = socfpgaclk->fixed_div;
 	} else {
 		if (socfpgaclk->div_reg) {
-			val = readl(socfpgaclk->div_reg) >> socfpgaclk->shift;
+			val = pete_readl("drivers/clk/socfpga/clk-periph.c:27", socfpgaclk->div_reg) >> socfpgaclk->shift;
 			val &= GENMASK(socfpgaclk->width - 1, 0);
 			parent_rate /= (val + 1);
 		}
-		div = ((readl(socfpgaclk->hw.reg) & 0x1ff) + 1);
+		div = ((pete_readl("drivers/clk/socfpga/clk-periph.c:31", socfpgaclk->hw.reg) & 0x1ff) + 1);
 	}
 
 	return parent_rate / div;
@@ -38,7 +38,7 @@ static u8 clk_periclk_get_parent(struct clk_hw *hwclk)
 {
 	u32 clk_src;
 
-	clk_src = readl(clk_mgr_base_addr + CLKMGR_DBCTRL);
+	clk_src = pete_readl("drivers/clk/socfpga/clk-periph.c:41", clk_mgr_base_addr + CLKMGR_DBCTRL);
 	return clk_src & 0x1;
 }
 

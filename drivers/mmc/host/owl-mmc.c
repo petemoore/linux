@@ -121,14 +121,14 @@ static void owl_mmc_update_reg(void __iomem *reg, unsigned int val, bool state)
 {
 	unsigned int regval;
 
-	regval = readl(reg);
+	regval = pete_readl("drivers/mmc/host/owl-mmc.c:124", reg);
 
 	if (state)
 		regval |= val;
 	else
 		regval &= ~val;
 
-	writel(regval, reg);
+	pete_writel("drivers/mmc/host/owl-mmc.c:131", regval, reg);
 }
 
 static irqreturn_t owl_irq_handler(int irq, void *devid)
@@ -138,11 +138,11 @@ static irqreturn_t owl_irq_handler(int irq, void *devid)
 
 	spin_lock(&owl_host->lock);
 
-	state = readl(owl_host->base + OWL_REG_SD_STATE);
+	state = pete_readl("drivers/mmc/host/owl-mmc.c:141", owl_host->base + OWL_REG_SD_STATE);
 	if (state & OWL_SD_STATE_TEI) {
-		state = readl(owl_host->base + OWL_REG_SD_STATE);
+		state = pete_readl("drivers/mmc/host/owl-mmc.c:143", owl_host->base + OWL_REG_SD_STATE);
 		state |= OWL_SD_STATE_TEI;
-		writel(state, owl_host->base + OWL_REG_SD_STATE);
+		pete_writel("drivers/mmc/host/owl-mmc.c:145", state, owl_host->base + OWL_REG_SD_STATE);
 		complete(&owl_host->sdc_complete);
 	}
 
@@ -219,11 +219,11 @@ static void owl_mmc_send_cmd(struct owl_mmc_host *owl_host,
 	}
 
 	/* Keep current WDELAY and RDELAY */
-	mode |= (readl(owl_host->base + OWL_REG_SD_CTL) & (0xff << 16));
+	mode |= (pete_readl("drivers/mmc/host/owl-mmc.c:222", owl_host->base + OWL_REG_SD_CTL) & (0xff << 16));
 
 	/* Start to send corresponding command type */
-	writel(cmd->arg, owl_host->base + OWL_REG_SD_ARG);
-	writel(cmd->opcode, owl_host->base + OWL_REG_SD_CMD);
+	pete_writel("drivers/mmc/host/owl-mmc.c:225", cmd->arg, owl_host->base + OWL_REG_SD_ARG);
+	pete_writel("drivers/mmc/host/owl-mmc.c:226", cmd->opcode, owl_host->base + OWL_REG_SD_CMD);
 
 	/* Set LBE to send clk at the end of last read block */
 	if (data) {
@@ -236,7 +236,7 @@ static void owl_mmc_send_cmd(struct owl_mmc_host *owl_host,
 	owl_host->cmd = cmd;
 
 	/* Start transfer */
-	writel(mode, owl_host->base + OWL_REG_SD_CTL);
+	pete_writel("drivers/mmc/host/owl-mmc.c:239", mode, owl_host->base + OWL_REG_SD_CTL);
 
 	if (data)
 		return;
@@ -250,7 +250,7 @@ static void owl_mmc_send_cmd(struct owl_mmc_host *owl_host,
 		return;
 	}
 
-	state = readl(owl_host->base + OWL_REG_SD_STATE);
+	state = pete_readl("drivers/mmc/host/owl-mmc.c:253", owl_host->base + OWL_REG_SD_STATE);
 	if (mmc_resp_type(cmd) & MMC_RSP_PRESENT) {
 		if (cmd_rsp_mask & state) {
 			if (state & OWL_SD_STATE_CLNR) {
@@ -267,13 +267,13 @@ static void owl_mmc_send_cmd(struct owl_mmc_host *owl_host,
 		}
 
 		if (mmc_resp_type(cmd) & MMC_RSP_136) {
-			cmd->resp[3] = readl(owl_host->base + OWL_REG_SD_RSPBUF0);
-			cmd->resp[2] = readl(owl_host->base + OWL_REG_SD_RSPBUF1);
-			cmd->resp[1] = readl(owl_host->base + OWL_REG_SD_RSPBUF2);
-			cmd->resp[0] = readl(owl_host->base + OWL_REG_SD_RSPBUF3);
+			cmd->resp[3] = pete_readl("drivers/mmc/host/owl-mmc.c:270", owl_host->base + OWL_REG_SD_RSPBUF0);
+			cmd->resp[2] = pete_readl("drivers/mmc/host/owl-mmc.c:271", owl_host->base + OWL_REG_SD_RSPBUF1);
+			cmd->resp[1] = pete_readl("drivers/mmc/host/owl-mmc.c:272", owl_host->base + OWL_REG_SD_RSPBUF2);
+			cmd->resp[0] = pete_readl("drivers/mmc/host/owl-mmc.c:273", owl_host->base + OWL_REG_SD_RSPBUF3);
 		} else {
-			resp[0] = readl(owl_host->base + OWL_REG_SD_RSPBUF0);
-			resp[1] = readl(owl_host->base + OWL_REG_SD_RSPBUF1);
+			resp[0] = pete_readl("drivers/mmc/host/owl-mmc.c:275", owl_host->base + OWL_REG_SD_RSPBUF0);
+			resp[1] = pete_readl("drivers/mmc/host/owl-mmc.c:276", owl_host->base + OWL_REG_SD_RSPBUF1);
 			cmd->resp[0] = resp[1] << 24 | resp[0] >> 8;
 			cmd->resp[1] = resp[1] >> 8;
 		}
@@ -296,14 +296,14 @@ static int owl_mmc_prepare_data(struct owl_mmc_host *owl_host,
 
 	owl_mmc_update_reg(owl_host->base + OWL_REG_SD_EN, OWL_SD_EN_BSEL,
 			   true);
-	writel(data->blocks, owl_host->base + OWL_REG_SD_BLK_NUM);
-	writel(data->blksz, owl_host->base + OWL_REG_SD_BLK_SIZE);
+	pete_writel("drivers/mmc/host/owl-mmc.c:299", data->blocks, owl_host->base + OWL_REG_SD_BLK_NUM);
+	pete_writel("drivers/mmc/host/owl-mmc.c:300", data->blksz, owl_host->base + OWL_REG_SD_BLK_SIZE);
 	total = data->blksz * data->blocks;
 
 	if (total < 512)
-		writel(total, owl_host->base + OWL_REG_SD_BUF_SIZE);
+		pete_writel("drivers/mmc/host/owl-mmc.c:304", total, owl_host->base + OWL_REG_SD_BUF_SIZE);
 	else
-		writel(512, owl_host->base + OWL_REG_SD_BUF_SIZE);
+		pete_writel("drivers/mmc/host/owl-mmc.c:306", 512, owl_host->base + OWL_REG_SD_BUF_SIZE);
 
 	if (data->flags & MMC_DATA_WRITE) {
 		owl_host->dma_dir = DMA_TO_DEVICE;
@@ -391,25 +391,25 @@ static int owl_mmc_set_clk_rate(struct owl_mmc_host *owl_host,
 	int ret;
 	u32 reg;
 
-	reg = readl(owl_host->base + OWL_REG_SD_CTL);
+	reg = pete_readl("drivers/mmc/host/owl-mmc.c:394", owl_host->base + OWL_REG_SD_CTL);
 	reg &= ~OWL_SD_CTL_DELAY_MSK;
 
 	/* Set RDELAY and WDELAY based on the clock */
 	if (rate <= 1000000) {
-		writel(reg | OWL_SD_CTL_RDELAY(OWL_SD_DELAY_LOW_CLK) |
+		pete_writel("drivers/mmc/host/owl-mmc.c:399", reg | OWL_SD_CTL_RDELAY(OWL_SD_DELAY_LOW_CLK) |
 		       OWL_SD_CTL_WDELAY(OWL_SD_DELAY_LOW_CLK),
 		       owl_host->base + OWL_REG_SD_CTL);
 	} else if ((rate > 1000000) && (rate <= 26000000)) {
-		writel(reg | OWL_SD_CTL_RDELAY(OWL_SD_DELAY_MID_CLK) |
+		pete_writel("drivers/mmc/host/owl-mmc.c:403", reg | OWL_SD_CTL_RDELAY(OWL_SD_DELAY_MID_CLK) |
 		       OWL_SD_CTL_WDELAY(OWL_SD_DELAY_MID_CLK),
 		       owl_host->base + OWL_REG_SD_CTL);
 	} else if ((rate > 26000000) && (rate <= 52000000) && !owl_host->ddr_50) {
-		writel(reg | OWL_SD_CTL_RDELAY(OWL_SD_DELAY_HIGH_CLK) |
+		pete_writel("drivers/mmc/host/owl-mmc.c:407", reg | OWL_SD_CTL_RDELAY(OWL_SD_DELAY_HIGH_CLK) |
 		       OWL_SD_CTL_WDELAY(OWL_SD_DELAY_HIGH_CLK),
 		       owl_host->base + OWL_REG_SD_CTL);
 	/* DDR50 mode has special delay chain */
 	} else if ((rate > 26000000) && (rate <= 52000000) && owl_host->ddr_50) {
-		writel(reg | OWL_SD_CTL_RDELAY(OWL_SD_RDELAY_DDR50) |
+		pete_writel("drivers/mmc/host/owl-mmc.c:412", reg | OWL_SD_CTL_RDELAY(OWL_SD_RDELAY_DDR50) |
 		       OWL_SD_CTL_WDELAY(OWL_SD_WDELAY_DDR50),
 		       owl_host->base + OWL_REG_SD_CTL);
 	} else {
@@ -437,7 +437,7 @@ static void owl_mmc_set_bus_width(struct owl_mmc_host *owl_host,
 {
 	u32 reg;
 
-	reg = readl(owl_host->base + OWL_REG_SD_EN);
+	reg = pete_readl("drivers/mmc/host/owl-mmc.c:440", owl_host->base + OWL_REG_SD_EN);
 	reg &= ~0x03;
 	switch (ios->bus_width) {
 	case MMC_BUS_WIDTH_1:
@@ -450,7 +450,7 @@ static void owl_mmc_set_bus_width(struct owl_mmc_host *owl_host,
 		break;
 	}
 
-	writel(reg, owl_host->base + OWL_REG_SD_EN);
+	pete_writel("drivers/mmc/host/owl-mmc.c:453", reg, owl_host->base + OWL_REG_SD_EN);
 }
 
 static void owl_mmc_ctr_reset(struct owl_mmc_host *owl_host)
@@ -471,9 +471,9 @@ static void owl_mmc_power_on(struct owl_mmc_host *owl_host)
 		       OWL_SD_STATE_TEIE, true);
 
 	/* Send init clk */
-	mode = (readl(owl_host->base + OWL_REG_SD_CTL) & (0xff << 16));
+	mode = (pete_readl("drivers/mmc/host/owl-mmc.c:474", owl_host->base + OWL_REG_SD_CTL) & (0xff << 16));
 	mode |= OWL_SD_CTL_TS | OWL_SD_CTL_TCN(5) | OWL_SD_CTL_TM(8);
-	writel(mode, owl_host->base + OWL_REG_SD_CTL);
+	pete_writel("drivers/mmc/host/owl-mmc.c:476", mode, owl_host->base + OWL_REG_SD_CTL);
 
 	if (!wait_for_completion_timeout(&owl_host->sdc_complete, HZ)) {
 		dev_err(owl_host->dev, "CMD interrupt timeout\n");
@@ -492,7 +492,7 @@ static void owl_mmc_set_ios(struct mmc_host *mmc, struct mmc_ios *ios)
 		/* Reset the SDC controller to clear all previous states */
 		owl_mmc_ctr_reset(owl_host);
 		clk_prepare_enable(owl_host->clk);
-		writel(OWL_SD_ENABLE | OWL_SD_EN_RESE,
+		pete_writel("drivers/mmc/host/owl-mmc.c:495", OWL_SD_ENABLE | OWL_SD_EN_RESE,
 		       owl_host->base + OWL_REG_SD_EN);
 
 		break;

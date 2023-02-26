@@ -73,12 +73,12 @@
 #define E1000_VMBMEM(_n)	(0x00800 + (64 * (_n)))
 
 /* Define macros for handling registers */
-#define er32(reg)	readl(hw->hw_addr + E1000_##reg)
-#define ew32(reg, val)	writel((val), hw->hw_addr +  E1000_##reg)
+#define er32(reg)	pete_readl("drivers/net/ethernet/intel/igbvf/regs.h:76", hw->hw_addr + E1000_##reg)
+#define ew32(reg, val)	pete_writel("drivers/net/ethernet/intel/igbvf/regs.h:77", (val), hw->hw_addr +  E1000_##reg)
 #define array_er32(reg, offset) \
-	readl(hw->hw_addr + E1000_##reg + (offset << 2))
+	pete_readl("drivers/net/ethernet/intel/igbvf/regs.h:79", hw->hw_addr + E1000_##reg + (offset << 2))
 #define array_ew32(reg, offset, val) \
-	writel((val), hw->hw_addr +  E1000_##reg + (offset << 2))
+	pete_writel("drivers/net/ethernet/intel/igbvf/regs.h:81", (val), hw->hw_addr +  E1000_##reg + (offset << 2))
 #define e1e_flush()	er32(STATUS)
 
 #endif

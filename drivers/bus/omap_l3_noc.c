@@ -341,7 +341,7 @@ static int l3_resume_noirq(struct device *dev)
 
 	/* Dummy read to force OCP barrier */
 	if (mask_regx)
-		(void)readl(mask_regx);
+		(void)pete_readl("drivers/bus/omap_l3_noc.c:344", mask_regx);
 
 	return 0;
 }

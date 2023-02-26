@@ -103,7 +103,7 @@ static inline int xhci_find_next_ext_cap(void __iomem *base, u32 start, int id)
 
 	offset = start;
 	if (!start || start == XHCI_HCC_PARAMS_OFFSET) {
-		val = readl(base + XHCI_HCC_PARAMS_OFFSET);
+		val = pete_readl("drivers/usb/host/xhci-ext-caps.h:106", base + XHCI_HCC_PARAMS_OFFSET);
 		if (val == ~0)
 			return 0;
 		offset = XHCI_HCC_EXT_CAPS(val) << 2;
@@ -111,7 +111,7 @@ static inline int xhci_find_next_ext_cap(void __iomem *base, u32 start, int id)
 			return 0;
 	}
 	do {
-		val = readl(base + offset);
+		val = pete_readl("drivers/usb/host/xhci-ext-caps.h:114", base + offset);
 		if (val == ~0)
 			return 0;
 		if (offset != start && (id == 0 || XHCI_EXT_CAPS_ID(val) == id))

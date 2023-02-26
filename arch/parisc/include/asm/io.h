@@ -167,36 +167,36 @@ static inline void __raw_writeq(unsigned long long b, volatile void __iomem *add
 	*(volatile unsigned long long __force *) addr = b;
 }
 
-static inline unsigned char readb(const volatile void __iomem *addr)
+static inline unsigned char pete_readb("arch/parisc/include/asm/io.h:170", const volatile void __iomem *addr)
 {
 	return __raw_readb(addr);
 }
-static inline unsigned short readw(const volatile void __iomem *addr)
+static inline unsigned short pete_readw("arch/parisc/include/asm/io.h:174", const volatile void __iomem *addr)
 {
 	return le16_to_cpu((__le16 __force) __raw_readw(addr));
 }
-static inline unsigned int readl(const volatile void __iomem *addr)
+static inline unsigned int pete_readl("arch/parisc/include/asm/io.h:178", const volatile void __iomem *addr)
 {
 	return le32_to_cpu((__le32 __force) __raw_readl(addr));
 }
-static inline unsigned long long readq(const volatile void __iomem *addr)
+static inline unsigned long long pete_readq("arch/parisc/include/asm/io.h:182", const volatile void __iomem *addr)
 {
 	return le64_to_cpu((__le64 __force) __raw_readq(addr));
 }
 
-static inline void writeb(unsigned char b, volatile void __iomem *addr)
+static inline void pete_writeb("arch/parisc/include/asm/io.h:187", unsigned char b, volatile void __iomem *addr)
 {
 	__raw_writeb(b, addr);
 }
-static inline void writew(unsigned short w, volatile void __iomem *addr)
+static inline void pete_writew("arch/parisc/include/asm/io.h:191", unsigned short w, volatile void __iomem *addr)
 {
 	__raw_writew((__u16 __force) cpu_to_le16(w), addr);
 }
-static inline void writel(unsigned int l, volatile void __iomem *addr)
+static inline void pete_writel("arch/parisc/include/asm/io.h:195", unsigned int l, volatile void __iomem *addr)
 {
 	__raw_writel((__u32 __force) cpu_to_le32(l), addr);
 }
-static inline void writeq(unsigned long long q, volatile void __iomem *addr)
+static inline void pete_writeq("arch/parisc/include/asm/io.h:199", unsigned long long q, volatile void __iomem *addr)
 {
 	__raw_writeq((__u64 __force) cpu_to_le64(q), addr);
 }
@@ -210,14 +210,14 @@ static inline void writeq(unsigned long long q, volatile void __iomem *addr)
 #define writel	writel
 #define writeq	writeq
 
-#define readb_relaxed(addr)	readb(addr)
-#define readw_relaxed(addr)	readw(addr)
-#define readl_relaxed(addr)	readl(addr)
-#define readq_relaxed(addr)	readq(addr)
-#define writeb_relaxed(b, addr)	writeb(b, addr)
-#define writew_relaxed(w, addr)	writew(w, addr)
-#define writel_relaxed(l, addr)	writel(l, addr)
-#define writeq_relaxed(q, addr)	writeq(q, addr)
+#define readb_relaxed(addr)	pete_readb("arch/parisc/include/asm/io.h:213", addr)
+#define readw_relaxed(addr)	pete_readw("arch/parisc/include/asm/io.h:214", addr)
+#define readl_relaxed(addr)	pete_readl("arch/parisc/include/asm/io.h:215", addr)
+#define readq_relaxed(addr)	pete_readq("arch/parisc/include/asm/io.h:216", addr)
+#define writeb_relaxed(b, addr)	pete_writeb("arch/parisc/include/asm/io.h:217", b, addr)
+#define writew_relaxed(w, addr)	pete_writew("arch/parisc/include/asm/io.h:218", w, addr)
+#define writel_relaxed(l, addr)	pete_writel("arch/parisc/include/asm/io.h:219", l, addr)
+#define writeq_relaxed(q, addr)	pete_writeq("arch/parisc/include/asm/io.h:220", q, addr)
 
 void memset_io(volatile void __iomem *addr, unsigned char val, int count);
 void memcpy_fromio(void *dst, const volatile void __iomem *src, int count);

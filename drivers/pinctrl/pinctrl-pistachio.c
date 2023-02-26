@@ -830,12 +830,12 @@ static const struct pistachio_pin_group pistachio_groups[] = {
 
 static inline u32 pctl_readl(struct pistachio_pinctrl *pctl, u32 reg)
 {
-	return readl(pctl->base + reg);
+	return pete_readl("drivers/pinctrl/pinctrl-pistachio.c:833", pctl->base + reg);
 }
 
 static inline void pctl_writel(struct pistachio_pinctrl *pctl, u32 val, u32 reg)
 {
-	writel(val, pctl->base + reg);
+	pete_writel("drivers/pinctrl/pinctrl-pistachio.c:838", val, pctl->base + reg);
 }
 
 static inline struct pistachio_gpio_bank *irqd_to_bank(struct irq_data *d)
@@ -845,13 +845,13 @@ static inline struct pistachio_gpio_bank *irqd_to_bank(struct irq_data *d)
 
 static inline u32 gpio_readl(struct pistachio_gpio_bank *bank, u32 reg)
 {
-	return readl(bank->base + reg);
+	return pete_readl("drivers/pinctrl/pinctrl-pistachio.c:848", bank->base + reg);
 }
 
 static inline void gpio_writel(struct pistachio_gpio_bank *bank, u32 val,
 			       u32 reg)
 {
-	writel(val, bank->base + reg);
+	pete_writel("drivers/pinctrl/pinctrl-pistachio.c:854", val, bank->base + reg);
 }
 
 static inline void gpio_mask_writel(struct pistachio_gpio_bank *bank,

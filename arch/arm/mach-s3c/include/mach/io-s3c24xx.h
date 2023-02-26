@@ -25,13 +25,13 @@
 
 #ifdef CONFIG_ISA
 
-#define inb(p)		readb(S3C24XX_VA_ISA_BYTE + (p))
-#define inw(p)		readw(S3C24XX_VA_ISA_WORD + (p))
-#define inl(p)		readl(S3C24XX_VA_ISA_WORD + (p))
+#define inb(p)		pete_readb("arch/arm/mach-s3c/include/mach/io-s3c24xx.h:28", S3C24XX_VA_ISA_BYTE + (p))
+#define inw(p)		pete_readw("arch/arm/mach-s3c/include/mach/io-s3c24xx.h:29", S3C24XX_VA_ISA_WORD + (p))
+#define inl(p)		pete_readl("arch/arm/mach-s3c/include/mach/io-s3c24xx.h:30", S3C24XX_VA_ISA_WORD + (p))
 
-#define outb(v,p)	writeb((v), S3C24XX_VA_ISA_BYTE + (p))
-#define outw(v,p)	writew((v), S3C24XX_VA_ISA_WORD + (p))
-#define outl(v,p)	writel((v), S3C24XX_VA_ISA_WORD + (p))
+#define outb(v,p)	pete_writeb("arch/arm/mach-s3c/include/mach/io-s3c24xx.h:32", (v), S3C24XX_VA_ISA_BYTE + (p))
+#define outw(v,p)	pete_writew("arch/arm/mach-s3c/include/mach/io-s3c24xx.h:33", (v), S3C24XX_VA_ISA_WORD + (p))
+#define outl(v,p)	pete_writel("arch/arm/mach-s3c/include/mach/io-s3c24xx.h:34", (v), S3C24XX_VA_ISA_WORD + (p))
 
 #define insb(p,d,l)	readsb(S3C24XX_VA_ISA_BYTE + (p),d,l)
 #define insw(p,d,l)	readsw(S3C24XX_VA_ISA_WORD + (p),d,l)

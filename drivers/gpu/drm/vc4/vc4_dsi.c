@@ -619,7 +619,7 @@ dsi_dma_workaround_write(struct vc4_dsi *dsi, u32 offset, u32 val)
 
 	/* DSI0 should be able to write normally. */
 	if (!chan) {
-		writel(val, dsi->regs + offset);
+		pete_writel("drivers/gpu/drm/vc4/vc4_dsi.c:622", val, dsi->regs + offset);
 		return;
 	}
 
@@ -645,7 +645,7 @@ dsi_dma_workaround_write(struct vc4_dsi *dsi, u32 offset, u32 val)
 		DRM_ERROR("Failed to wait for DMA: %d\n", ret);
 }
 
-#define DSI_READ(offset) readl(dsi->regs + (offset))
+#define DSI_READ(offset) pete_readl("drivers/gpu/drm/vc4/vc4_dsi.c:648", dsi->regs + (offset))
 #define DSI_WRITE(offset, val) dsi_dma_workaround_write(dsi, offset, val)
 #define DSI_PORT_READ(offset) \
 	DSI_READ(dsi->variant->port ? DSI1_##offset : DSI0_##offset)

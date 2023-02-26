@@ -149,7 +149,7 @@ static void gsc_hpdi_drain_dma(struct comedi_device *dev, unsigned int channel)
 	unsigned int size;
 	unsigned int next;
 
-	next = readl(devpriv->plx9080_mmio + PLX_REG_DMAPADR(channel));
+	next = pete_readl("drivers/comedi/drivers/gsc_hpdi.c:152", devpriv->plx9080_mmio + PLX_REG_DMAPADR(channel));
 
 	idx = devpriv->dma_desc_index;
 	start = le32_to_cpu(devpriv->dma_desc[idx].pci_start_addr);
@@ -189,23 +189,23 @@ static irqreturn_t gsc_hpdi_interrupt(int irq, void *d)
 	if (!dev->attached)
 		return IRQ_NONE;
 
-	plx_status = readl(devpriv->plx9080_mmio + PLX_REG_INTCSR);
+	plx_status = pete_readl("drivers/comedi/drivers/gsc_hpdi.c:192", devpriv->plx9080_mmio + PLX_REG_INTCSR);
 	if ((plx_status &
 	     (PLX_INTCSR_DMA0IA | PLX_INTCSR_DMA1IA | PLX_INTCSR_PLIA)) == 0)
 		return IRQ_NONE;
 
-	hpdi_intr_status = readl(dev->mmio + INTERRUPT_STATUS_REG);
-	hpdi_board_status = readl(dev->mmio + BOARD_STATUS_REG);
+	hpdi_intr_status = pete_readl("drivers/comedi/drivers/gsc_hpdi.c:197", dev->mmio + INTERRUPT_STATUS_REG);
+	hpdi_board_status = pete_readl("drivers/comedi/drivers/gsc_hpdi.c:198", dev->mmio + BOARD_STATUS_REG);
 
 	if (hpdi_intr_status)
-		writel(hpdi_intr_status, dev->mmio + INTERRUPT_STATUS_REG);
+		pete_writel("drivers/comedi/drivers/gsc_hpdi.c:201", hpdi_intr_status, dev->mmio + INTERRUPT_STATUS_REG);
 
 	/* spin lock makes sure no one else changes plx dma control reg */
 	spin_lock_irqsave(&dev->spinlock, flags);
-	dma0_status = readb(devpriv->plx9080_mmio + PLX_REG_DMACSR0);
+	dma0_status = pete_readb("drivers/comedi/drivers/gsc_hpdi.c:205", devpriv->plx9080_mmio + PLX_REG_DMACSR0);
 	if (plx_status & PLX_INTCSR_DMA0IA) {
 		/* dma chan 0 interrupt */
-		writeb((dma0_status & PLX_DMACSR_ENABLE) | PLX_DMACSR_CLEARINTR,
+		pete_writeb("drivers/comedi/drivers/gsc_hpdi.c:208", (dma0_status & PLX_DMACSR_ENABLE) | PLX_DMACSR_CLEARINTR,
 		       devpriv->plx9080_mmio + PLX_REG_DMACSR0);
 
 		if (dma0_status & PLX_DMACSR_ENABLE)
@@ -215,10 +215,10 @@ static irqreturn_t gsc_hpdi_interrupt(int irq, void *d)
 
 	/* spin lock makes sure no one else changes plx dma control reg */
 	spin_lock_irqsave(&dev->spinlock, flags);
-	dma1_status = readb(devpriv->plx9080_mmio + PLX_REG_DMACSR1);
+	dma1_status = pete_readb("drivers/comedi/drivers/gsc_hpdi.c:218", devpriv->plx9080_mmio + PLX_REG_DMACSR1);
 	if (plx_status & PLX_INTCSR_DMA1IA) {
 		/* XXX */ /* dma chan 1 interrupt */
-		writeb((dma1_status & PLX_DMACSR_ENABLE) | PLX_DMACSR_CLEARINTR,
+		pete_writeb("drivers/comedi/drivers/gsc_hpdi.c:221", (dma1_status & PLX_DMACSR_ENABLE) | PLX_DMACSR_CLEARINTR,
 		       devpriv->plx9080_mmio + PLX_REG_DMACSR1);
 	}
 	spin_unlock_irqrestore(&dev->spinlock, flags);
@@ -226,8 +226,8 @@ static irqreturn_t gsc_hpdi_interrupt(int irq, void *d)
 	/* clear possible plx9080 interrupt sources */
 	if (plx_status & PLX_INTCSR_LDBIA) {
 		/* clear local doorbell interrupt */
-		plx_bits = readl(devpriv->plx9080_mmio + PLX_REG_L2PDBELL);
-		writel(plx_bits, devpriv->plx9080_mmio + PLX_REG_L2PDBELL);
+		plx_bits = pete_readl("drivers/comedi/drivers/gsc_hpdi.c:229", devpriv->plx9080_mmio + PLX_REG_L2PDBELL);
+		pete_writel("drivers/comedi/drivers/gsc_hpdi.c:230", plx_bits, devpriv->plx9080_mmio + PLX_REG_L2PDBELL);
 	}
 
 	if (hpdi_board_status & RX_OVERRUN_BIT) {
@@ -264,8 +264,8 @@ static void gsc_hpdi_abort_dma(struct comedi_device *dev, unsigned int channel)
 static int gsc_hpdi_cancel(struct comedi_device *dev,
 			   struct comedi_subdevice *s)
 {
-	writel(0, dev->mmio + BOARD_CONTROL_REG);
-	writel(0, dev->mmio + INTERRUPT_CONTROL_REG);
+	pete_writel("drivers/comedi/drivers/gsc_hpdi.c:267", 0, dev->mmio + BOARD_CONTROL_REG);
+	pete_writel("drivers/comedi/drivers/gsc_hpdi.c:268", 0, dev->mmio + INTERRUPT_CONTROL_REG);
 
 	gsc_hpdi_abort_dma(dev, 0);
 
@@ -284,7 +284,7 @@ static int gsc_hpdi_cmd(struct comedi_device *dev,
 	if (s->io_bits)
 		return -EINVAL;
 
-	writel(RX_FIFO_RESET_BIT, dev->mmio + BOARD_CONTROL_REG);
+	pete_writel("drivers/comedi/drivers/gsc_hpdi.c:287", RX_FIFO_RESET_BIT, dev->mmio + BOARD_CONTROL_REG);
 
 	gsc_hpdi_abort_dma(dev, 0);
 
@@ -296,18 +296,18 @@ static int gsc_hpdi_cmd(struct comedi_device *dev,
 	 * occasionally cause problems with transfer of first dma
 	 * block.  Initializing them to zero seems to fix the problem.
 	 */
-	writel(0, devpriv->plx9080_mmio + PLX_REG_DMASIZ0);
-	writel(0, devpriv->plx9080_mmio + PLX_REG_DMAPADR0);
-	writel(0, devpriv->plx9080_mmio + PLX_REG_DMALADR0);
+	pete_writel("drivers/comedi/drivers/gsc_hpdi.c:299", 0, devpriv->plx9080_mmio + PLX_REG_DMASIZ0);
+	pete_writel("drivers/comedi/drivers/gsc_hpdi.c:300", 0, devpriv->plx9080_mmio + PLX_REG_DMAPADR0);
+	pete_writel("drivers/comedi/drivers/gsc_hpdi.c:301", 0, devpriv->plx9080_mmio + PLX_REG_DMALADR0);
 
 	/* give location of first dma descriptor */
 	bits = devpriv->dma_desc_phys_addr | PLX_DMADPR_DESCPCI |
 	       PLX_DMADPR_TCINTR | PLX_DMADPR_XFERL2P;
-	writel(bits, devpriv->plx9080_mmio + PLX_REG_DMADPR0);
+	pete_writel("drivers/comedi/drivers/gsc_hpdi.c:306", bits, devpriv->plx9080_mmio + PLX_REG_DMADPR0);
 
 	/* enable dma transfer */
 	spin_lock_irqsave(&dev->spinlock, flags);
-	writeb(PLX_DMACSR_ENABLE | PLX_DMACSR_START | PLX_DMACSR_CLEARINTR,
+	pete_writeb("drivers/comedi/drivers/gsc_hpdi.c:310", PLX_DMACSR_ENABLE | PLX_DMACSR_START | PLX_DMACSR_CLEARINTR,
 	       devpriv->plx9080_mmio + PLX_REG_DMACSR0);
 	spin_unlock_irqrestore(&dev->spinlock, flags);
 
@@ -317,12 +317,12 @@ static int gsc_hpdi_cmd(struct comedi_device *dev,
 		devpriv->dio_count = 1;
 
 	/* clear over/under run status flags */
-	writel(RX_UNDERRUN_BIT | RX_OVERRUN_BIT, dev->mmio + BOARD_STATUS_REG);
+	pete_writel("drivers/comedi/drivers/gsc_hpdi.c:320", RX_UNDERRUN_BIT | RX_OVERRUN_BIT, dev->mmio + BOARD_STATUS_REG);
 
 	/* enable interrupts */
-	writel(RX_FULL_INTR, dev->mmio + INTERRUPT_CONTROL_REG);
+	pete_writel("drivers/comedi/drivers/gsc_hpdi.c:323", RX_FULL_INTR, dev->mmio + INTERRUPT_CONTROL_REG);
 
-	writel(RX_ENABLE_BIT, dev->mmio + BOARD_CONTROL_REG);
+	pete_writel("drivers/comedi/drivers/gsc_hpdi.c:325", RX_ENABLE_BIT, dev->mmio + BOARD_CONTROL_REG);
 
 	return 0;
 }
@@ -508,27 +508,27 @@ static int gsc_hpdi_init(struct comedi_device *dev)
 	u32 plx_intcsr_bits;
 
 	/* wait 10usec after reset before accessing fifos */
-	writel(BOARD_RESET_BIT, dev->mmio + BOARD_CONTROL_REG);
+	pete_writel("drivers/comedi/drivers/gsc_hpdi.c:511", BOARD_RESET_BIT, dev->mmio + BOARD_CONTROL_REG);
 	usleep_range(10, 1000);
 
-	writel(ALMOST_EMPTY_BITS(32) | ALMOST_FULL_BITS(32),
+	pete_writel("drivers/comedi/drivers/gsc_hpdi.c:514", ALMOST_EMPTY_BITS(32) | ALMOST_FULL_BITS(32),
 	       dev->mmio + RX_PROG_ALMOST_REG);
-	writel(ALMOST_EMPTY_BITS(32) | ALMOST_FULL_BITS(32),
+	pete_writel("drivers/comedi/drivers/gsc_hpdi.c:516", ALMOST_EMPTY_BITS(32) | ALMOST_FULL_BITS(32),
 	       dev->mmio + TX_PROG_ALMOST_REG);
 
-	devpriv->tx_fifo_size = readl(dev->mmio + TX_FIFO_SIZE_REG) &
+	devpriv->tx_fifo_size = pete_readl("drivers/comedi/drivers/gsc_hpdi.c:519", dev->mmio + TX_FIFO_SIZE_REG) &
 				FIFO_SIZE_MASK;
-	devpriv->rx_fifo_size = readl(dev->mmio + RX_FIFO_SIZE_REG) &
+	devpriv->rx_fifo_size = pete_readl("drivers/comedi/drivers/gsc_hpdi.c:521", dev->mmio + RX_FIFO_SIZE_REG) &
 				FIFO_SIZE_MASK;
 
-	writel(0, dev->mmio + INTERRUPT_CONTROL_REG);
+	pete_writel("drivers/comedi/drivers/gsc_hpdi.c:524", 0, dev->mmio + INTERRUPT_CONTROL_REG);
 
 	/* enable interrupts */
 	plx_intcsr_bits =
 	    PLX_INTCSR_LSEABORTEN | PLX_INTCSR_LSEPARITYEN | PLX_INTCSR_PIEN |
 	    PLX_INTCSR_PLIEN | PLX_INTCSR_PABORTIEN | PLX_INTCSR_LIOEN |
 	    PLX_INTCSR_DMA0IEN;
-	writel(plx_intcsr_bits, devpriv->plx9080_mmio + PLX_REG_INTCSR);
+	pete_writel("drivers/comedi/drivers/gsc_hpdi.c:531", plx_intcsr_bits, devpriv->plx9080_mmio + PLX_REG_INTCSR);
 
 	return 0;
 }
@@ -544,9 +544,9 @@ static void gsc_hpdi_init_plx9080(struct comedi_device *dev)
 #else
 	bits = 0;
 #endif
-	writel(bits, devpriv->plx9080_mmio + PLX_REG_BIGEND);
+	pete_writel("drivers/comedi/drivers/gsc_hpdi.c:547", bits, devpriv->plx9080_mmio + PLX_REG_BIGEND);
 
-	writel(0, devpriv->plx9080_mmio + PLX_REG_INTCSR);
+	pete_writel("drivers/comedi/drivers/gsc_hpdi.c:549", 0, devpriv->plx9080_mmio + PLX_REG_INTCSR);
 
 	gsc_hpdi_abort_dma(dev, 0);
 	gsc_hpdi_abort_dma(dev, 1);
@@ -574,7 +574,7 @@ static void gsc_hpdi_init_plx9080(struct comedi_device *dev)
 	/* enable local burst mode */
 	bits |= PLX_DMAMODE_BURSTEN;
 	bits |= PLX_DMAMODE_WIDTH_32;
-	writel(bits, plx_iobase + PLX_REG_DMAMODE0);
+	pete_writel("drivers/comedi/drivers/gsc_hpdi.c:577", bits, plx_iobase + PLX_REG_DMAMODE0);
 }
 
 static int gsc_hpdi_auto_attach(struct comedi_device *dev,
@@ -680,7 +680,7 @@ static void gsc_hpdi_detach(struct comedi_device *dev)
 		free_irq(dev->irq, dev);
 	if (devpriv) {
 		if (devpriv->plx9080_mmio) {
-			writel(0, devpriv->plx9080_mmio + PLX_REG_INTCSR);
+			pete_writel("drivers/comedi/drivers/gsc_hpdi.c:683", 0, devpriv->plx9080_mmio + PLX_REG_INTCSR);
 			iounmap(devpriv->plx9080_mmio);
 		}
 		if (dev->mmio)

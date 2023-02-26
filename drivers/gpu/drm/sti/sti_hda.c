@@ -263,12 +263,12 @@ struct sti_hda_connector {
 
 static u32 hda_read(struct sti_hda *hda, int offset)
 {
-	return readl(hda->regs + offset);
+	return pete_readl("drivers/gpu/drm/sti/sti_hda.c:266", hda->regs + offset);
 }
 
 static void hda_write(struct sti_hda *hda, u32 val, int offset)
 {
-	writel(val, hda->regs + offset);
+	pete_writel("drivers/gpu/drm/sti/sti_hda.c:271", val, hda->regs + offset);
 }
 
 /**
@@ -302,18 +302,18 @@ static void hda_enable_hd_dacs(struct sti_hda *hda, bool enable)
 	if (hda->video_dacs_ctrl) {
 		u32 val;
 
-		val = readl(hda->video_dacs_ctrl);
+		val = pete_readl("drivers/gpu/drm/sti/sti_hda.c:305", hda->video_dacs_ctrl);
 		if (enable)
 			val &= ~DAC_CFG_HD_HZUVW_OFF_MASK;
 		else
 			val |= DAC_CFG_HD_HZUVW_OFF_MASK;
 
-		writel(val, hda->video_dacs_ctrl);
+		pete_writel("drivers/gpu/drm/sti/sti_hda.c:311", val, hda->video_dacs_ctrl);
 	}
 }
 
 #define DBGFS_DUMP(reg) seq_printf(s, "\n  %-25s 0x%08X", #reg, \
-				   readl(hda->regs + reg))
+				   pete_readl("drivers/gpu/drm/sti/sti_hda.c:316", hda->regs + reg))
 
 static void hda_dbg_cfg(struct seq_file *s, int val)
 {
@@ -329,13 +329,13 @@ static void hda_dbg_awg_microcode(struct seq_file *s, void __iomem *reg)
 	for (i = 0; i < AWG_MAX_INST; i++) {
 		if (i % 8 == 0)
 			seq_printf(s, "\n  %04X:", i);
-		seq_printf(s, " %04X", readl(reg + i * 4));
+		seq_printf(s, " %04X", pete_readl("drivers/gpu/drm/sti/sti_hda.c:332", reg + i * 4));
 	}
 }
 
 static void hda_dbg_video_dacs_ctrl(struct seq_file *s, void __iomem *reg)
 {
-	u32 val = readl(reg);
+	u32 val = pete_readl("drivers/gpu/drm/sti/sti_hda.c:338", reg);
 
 	seq_printf(s, "\n\n  %-25s 0x%08X", "VIDEO_DACS_CONTROL", val);
 	seq_puts(s, "\tHD DACs ");
@@ -349,7 +349,7 @@ static int hda_dbg_show(struct seq_file *s, void *data)
 
 	seq_printf(s, "HD Analog: (vaddr = 0x%p)", hda->regs);
 	DBGFS_DUMP(HDA_ANA_CFG);
-	hda_dbg_cfg(s, readl(hda->regs + HDA_ANA_CFG));
+	hda_dbg_cfg(s, pete_readl("drivers/gpu/drm/sti/sti_hda.c:352", hda->regs + HDA_ANA_CFG));
 	DBGFS_DUMP(HDA_ANA_SCALE_CTRL_Y);
 	DBGFS_DUMP(HDA_ANA_SCALE_CTRL_CB);
 	DBGFS_DUMP(HDA_ANA_SCALE_CTRL_CR);

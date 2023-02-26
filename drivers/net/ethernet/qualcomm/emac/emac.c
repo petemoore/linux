@@ -72,9 +72,9 @@ static const char * const emac_clk_name[] = {
 
 void emac_reg_update32(void __iomem *addr, u32 mask, u32 val)
 {
-	u32 data = readl(addr);
+	u32 data = pete_readl("drivers/net/ethernet/qualcomm/emac/emac.c:75", addr);
 
-	writel(((data & ~mask) | val), addr);
+	pete_writel("drivers/net/ethernet/qualcomm/emac/emac.c:77", ((data & ~mask) | val), addr);
 }
 
 /* reinitialize */
@@ -108,7 +108,7 @@ static int emac_napi_rtx(struct napi_struct *napi, int budget)
 		napi_complete_done(napi, work_done);
 
 		irq->mask |= rx_q->intr;
-		writel(irq->mask, adpt->base + EMAC_INT_MASK);
+		pete_writel("drivers/net/ethernet/qualcomm/emac/emac.c:111", irq->mask, adpt->base + EMAC_INT_MASK);
 	}
 
 	return work_done;
@@ -132,7 +132,7 @@ static irqreturn_t emac_isr(int _irq, void *data)
 	u32 isr, status;
 
 	/* disable the interrupt */
-	writel(0, adpt->base + EMAC_INT_MASK);
+	pete_writel("drivers/net/ethernet/qualcomm/emac/emac.c:135", 0, adpt->base + EMAC_INT_MASK);
 
 	isr = readl_relaxed(adpt->base + EMAC_INT_STATUS);
 
@@ -166,7 +166,7 @@ static irqreturn_t emac_isr(int _irq, void *data)
 
 exit:
 	/* enable the interrupt */
-	writel(irq->mask, adpt->base + EMAC_INT_MASK);
+	pete_writel("drivers/net/ethernet/qualcomm/emac/emac.c:169", irq->mask, adpt->base + EMAC_INT_MASK);
 
 	return IRQ_HANDLED;
 }

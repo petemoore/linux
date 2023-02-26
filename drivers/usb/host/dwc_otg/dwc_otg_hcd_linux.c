@@ -497,9 +497,9 @@ static void hcd_init_fiq(void *cookie)
 			 dwc_otg_hcd->fiq_state->mphi_regs.base);
 
 		//Enable mphi peripheral
-		writel((1<<31),dwc_otg_hcd->fiq_state->mphi_regs.ctrl);
+		pete_writel("drivers/usb/host/dwc_otg/dwc_otg_hcd_linux.c:500", (1<<31),dwc_otg_hcd->fiq_state->mphi_regs.ctrl);
 #ifdef DEBUG
-		if (readl(dwc_otg_hcd->fiq_state->mphi_regs.ctrl) & 0x80000000)
+		if (pete_readl("drivers/usb/host/dwc_otg/dwc_otg_hcd_linux.c:502", dwc_otg_hcd->fiq_state->mphi_regs.ctrl) & 0x80000000)
 			DWC_WARN("MPHI periph has been enabled");
 		else
 			DWC_WARN("MPHI periph has NOT been enabled");

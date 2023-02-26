@@ -45,12 +45,12 @@ static void bcm281xx_restart(enum reboot_mode mode, const char *cmd)
 	}
 
 	/* Enable watchdog with short timeout (244us). */
-	val = readl(base + SECWDOG_OFFSET);
+	val = pete_readl("arch/arm/mach-bcm/board_bcm281xx.c:48", base + SECWDOG_OFFSET);
 	val &= SECWDOG_RESERVED_MASK | SECWDOG_WD_LOAD_FLAG_MASK;
 	val |= SECWDOG_EN_MASK | SECWDOG_SRSTEN_MASK |
 		(0x15 << SECWDOG_CLKS_SHIFT) |
 		(0x8 << SECWDOG_COUNT_SHIFT);
-	writel(val, base + SECWDOG_OFFSET);
+	pete_writel("arch/arm/mach-bcm/board_bcm281xx.c:53", val, base + SECWDOG_OFFSET);
 
 	/* Wait for reset */
 	while (1);

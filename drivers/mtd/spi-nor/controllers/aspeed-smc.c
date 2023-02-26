@@ -263,7 +263,7 @@ static void aspeed_smc_chip_check_config(struct aspeed_smc_chip *chip)
 	struct aspeed_smc_controller *controller = chip->controller;
 	u32 reg;
 
-	reg = readl(controller->regs + CONFIG_REG);
+	reg = pete_readl("drivers/mtd/spi-nor/controllers/aspeed-smc.c:266", controller->regs + CONFIG_REG);
 
 	if (reg & aspeed_smc_chip_write_bit(chip))
 		return;
@@ -271,7 +271,7 @@ static void aspeed_smc_chip_check_config(struct aspeed_smc_chip *chip)
 	dev_dbg(controller->dev, "config write is not set ! @%p: 0x%08x\n",
 		controller->regs + CONFIG_REG, reg);
 	reg |= aspeed_smc_chip_write_bit(chip);
-	writel(reg, controller->regs + CONFIG_REG);
+	pete_writel("drivers/mtd/spi-nor/controllers/aspeed-smc.c:274", reg, controller->regs + CONFIG_REG);
 }
 
 static void aspeed_smc_start_user(struct spi_nor *nor)
@@ -287,10 +287,10 @@ static void aspeed_smc_start_user(struct spi_nor *nor)
 
 	ctl |= CONTROL_COMMAND_MODE_USER |
 		CONTROL_CE_STOP_ACTIVE_CONTROL;
-	writel(ctl, chip->ctl);
+	pete_writel("drivers/mtd/spi-nor/controllers/aspeed-smc.c:290", ctl, chip->ctl);
 
 	ctl &= ~CONTROL_CE_STOP_ACTIVE_CONTROL;
-	writel(ctl, chip->ctl);
+	pete_writel("drivers/mtd/spi-nor/controllers/aspeed-smc.c:293", ctl, chip->ctl);
 }
 
 static void aspeed_smc_stop_user(struct spi_nor *nor)
@@ -301,8 +301,8 @@ static void aspeed_smc_stop_user(struct spi_nor *nor)
 	u32 ctl2 = ctl | CONTROL_COMMAND_MODE_USER |
 		CONTROL_CE_STOP_ACTIVE_CONTROL;
 
-	writel(ctl2, chip->ctl);	/* stop user CE control */
-	writel(ctl, chip->ctl);		/* default to fread or read mode */
+	pete_writel("drivers/mtd/spi-nor/controllers/aspeed-smc.c:304", ctl2, chip->ctl);	/* stop user CE control */
+	pete_writel("drivers/mtd/spi-nor/controllers/aspeed-smc.c:305", ctl, chip->ctl);		/* default to fread or read mode */
 }
 
 static int aspeed_smc_prep(struct spi_nor *nor)
@@ -442,7 +442,7 @@ static void __iomem *aspeed_smc_chip_base(struct aspeed_smc_chip *chip,
 	u32 reg;
 
 	if (controller->info->nce > 1) {
-		reg = readl(SEGMENT_ADDR_REG(controller, chip->cs));
+		reg = pete_readl("drivers/mtd/spi-nor/controllers/aspeed-smc.c:445", SEGMENT_ADDR_REG(controller, chip->cs));
 
 		if (SEGMENT_ADDR_START(reg) >= SEGMENT_ADDR_END(reg))
 			return NULL;
@@ -455,7 +455,7 @@ static void __iomem *aspeed_smc_chip_base(struct aspeed_smc_chip *chip,
 
 static u32 aspeed_smc_ahb_base_phy(struct aspeed_smc_controller *controller)
 {
-	u32 seg0_val = readl(SEGMENT_ADDR_REG(controller, 0));
+	u32 seg0_val = pete_readl("drivers/mtd/spi-nor/controllers/aspeed-smc.c:458", SEGMENT_ADDR_REG(controller, 0));
 
 	return SEGMENT_ADDR_START(seg0_val);
 }
@@ -470,7 +470,7 @@ static u32 chip_set_segment(struct aspeed_smc_chip *chip, u32 cs, u32 start,
 	ahb_base_phy = aspeed_smc_ahb_base_phy(controller);
 
 	seg_reg = SEGMENT_ADDR_REG(controller, cs);
-	seg_oldval = readl(seg_reg);
+	seg_oldval = pete_readl("drivers/mtd/spi-nor/controllers/aspeed-smc.c:473", seg_reg);
 
 	/*
 	 * If the chip size is not specified, use the default segment
@@ -492,16 +492,16 @@ static u32 chip_set_segment(struct aspeed_smc_chip *chip, u32 cs, u32 start,
 
 	end = start + size;
 	seg_newval = SEGMENT_ADDR_VALUE(start, end);
-	writel(seg_newval, seg_reg);
+	pete_writel("drivers/mtd/spi-nor/controllers/aspeed-smc.c:495", seg_newval, seg_reg);
 
 	/*
 	 * Restore default value if something goes wrong. The chip
 	 * might have set some bogus value and we would loose access
 	 * to the chip.
 	 */
-	if (seg_newval != readl(seg_reg)) {
+	if (seg_newval != pete_readl("drivers/mtd/spi-nor/controllers/aspeed-smc.c:502", seg_reg)) {
 		dev_err(chip->nor.dev, "CE%d window invalid", cs);
-		writel(seg_oldval, seg_reg);
+		pete_writel("drivers/mtd/spi-nor/controllers/aspeed-smc.c:504", seg_oldval, seg_reg);
 		start = SEGMENT_ADDR_START(seg_oldval);
 		end = SEGMENT_ADDR_END(seg_oldval);
 		size = end - start;
@@ -564,7 +564,7 @@ static u32 aspeed_smc_chip_set_segment(struct aspeed_smc_chip *chip)
 	 * segment ending address
 	 */
 	if (chip->cs) {
-		u32 prev = readl(SEGMENT_ADDR_REG(controller, chip->cs - 1));
+		u32 prev = pete_readl("drivers/mtd/spi-nor/controllers/aspeed-smc.c:567", SEGMENT_ADDR_REG(controller, chip->cs - 1));
 
 		start = SEGMENT_ADDR_END(prev);
 	} else {
@@ -598,10 +598,10 @@ static void aspeed_smc_chip_enable_write(struct aspeed_smc_chip *chip)
 	struct aspeed_smc_controller *controller = chip->controller;
 	u32 reg;
 
-	reg = readl(controller->regs + CONFIG_REG);
+	reg = pete_readl("drivers/mtd/spi-nor/controllers/aspeed-smc.c:601", controller->regs + CONFIG_REG);
 
 	reg |= aspeed_smc_chip_write_bit(chip);
-	writel(reg, controller->regs + CONFIG_REG);
+	pete_writel("drivers/mtd/spi-nor/controllers/aspeed-smc.c:604", reg, controller->regs + CONFIG_REG);
 }
 
 static void aspeed_smc_chip_set_type(struct aspeed_smc_chip *chip, int type)
@@ -611,10 +611,10 @@ static void aspeed_smc_chip_set_type(struct aspeed_smc_chip *chip, int type)
 
 	chip->type = type;
 
-	reg = readl(controller->regs + CONFIG_REG);
+	reg = pete_readl("drivers/mtd/spi-nor/controllers/aspeed-smc.c:614", controller->regs + CONFIG_REG);
 	reg &= ~(3 << (chip->cs * 2));
 	reg |= chip->type << (chip->cs * 2);
-	writel(reg, controller->regs + CONFIG_REG);
+	pete_writel("drivers/mtd/spi-nor/controllers/aspeed-smc.c:617", reg, controller->regs + CONFIG_REG);
 }
 
 /*
@@ -627,9 +627,9 @@ static void aspeed_smc_chip_set_4b(struct aspeed_smc_chip *chip)
 	struct aspeed_smc_controller *controller = chip->controller;
 	u32 reg;
 
-	reg = readl(controller->regs + CE_CONTROL_REG);
+	reg = pete_readl("drivers/mtd/spi-nor/controllers/aspeed-smc.c:630", controller->regs + CE_CONTROL_REG);
 	reg |= 1 << chip->cs;
-	writel(reg, controller->regs + CE_CONTROL_REG);
+	pete_writel("drivers/mtd/spi-nor/controllers/aspeed-smc.c:632", reg, controller->regs + CE_CONTROL_REG);
 }
 
 /*
@@ -675,7 +675,7 @@ static int aspeed_smc_chip_setup_init(struct aspeed_smc_chip *chip,
 	 * to keep them. In the future, we should handle calibration
 	 * from Linux.
 	 */
-	reg = readl(chip->ctl);
+	reg = pete_readl("drivers/mtd/spi-nor/controllers/aspeed-smc.c:678", chip->ctl);
 	dev_dbg(controller->dev, "control register: %08x\n", reg);
 
 	base_reg = reg & CONTROL_KEEP_MASK;

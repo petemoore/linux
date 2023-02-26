@@ -514,14 +514,14 @@ static inline void set_rxaddr(struct rr_regs __iomem *regs, volatile dma_addr_t 
 {
 	unsigned long baddr = addr;
 #if (BITS_PER_LONG == 64) && defined(__LITTLE_ENDIAN)
-	writel(baddr & 0xffffffff, &regs->RxRingHi);
-	writel(baddr >> 32, &regs->RxRingLo);
+	pete_writel("drivers/net/hippi/rrunner.h:517", baddr & 0xffffffff, &regs->RxRingHi);
+	pete_writel("drivers/net/hippi/rrunner.h:518", baddr >> 32, &regs->RxRingLo);
 #elif (BITS_PER_LONG == 64)
-	writel(baddr >> 32, &regs->RxRingHi);
-	writel(baddr & 0xffffffff, &regs->RxRingLo);
+	pete_writel("drivers/net/hippi/rrunner.h:520", baddr >> 32, &regs->RxRingHi);
+	pete_writel("drivers/net/hippi/rrunner.h:521", baddr & 0xffffffff, &regs->RxRingLo);
 #else
-	writel(0, &regs->RxRingHi);
-	writel(baddr, &regs->RxRingLo);
+	pete_writel("drivers/net/hippi/rrunner.h:523", 0, &regs->RxRingHi);
+	pete_writel("drivers/net/hippi/rrunner.h:524", baddr, &regs->RxRingLo);
 #endif
 	mb();
 }
@@ -531,14 +531,14 @@ static inline void set_infoaddr(struct rr_regs __iomem *regs, volatile dma_addr_
 {
 	unsigned long baddr = addr;
 #if (BITS_PER_LONG == 64) && defined(__LITTLE_ENDIAN)
-	writel(baddr & 0xffffffff, &regs->InfoPtrHi);
-	writel(baddr >> 32, &regs->InfoPtrLo);
+	pete_writel("drivers/net/hippi/rrunner.h:534", baddr & 0xffffffff, &regs->InfoPtrHi);
+	pete_writel("drivers/net/hippi/rrunner.h:535", baddr >> 32, &regs->InfoPtrLo);
 #elif (BITS_PER_LONG == 64)
-	writel(baddr >> 32, &regs->InfoPtrHi);
-	writel(baddr & 0xffffffff, &regs->InfoPtrLo);
+	pete_writel("drivers/net/hippi/rrunner.h:537", baddr >> 32, &regs->InfoPtrHi);
+	pete_writel("drivers/net/hippi/rrunner.h:538", baddr & 0xffffffff, &regs->InfoPtrLo);
 #else
-	writel(0, &regs->InfoPtrHi);
-	writel(baddr, &regs->InfoPtrLo);
+	pete_writel("drivers/net/hippi/rrunner.h:540", 0, &regs->InfoPtrHi);
+	pete_writel("drivers/net/hippi/rrunner.h:541", baddr, &regs->InfoPtrLo);
 #endif
 	mb();
 }

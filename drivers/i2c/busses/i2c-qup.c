@@ -285,13 +285,13 @@ static irqreturn_t qup_i2c_interrupt(int irq, void *dev)
 	u32 qup_err;
 	u32 opflags;
 
-	bus_err = readl(qup->base + QUP_I2C_STATUS);
-	qup_err = readl(qup->base + QUP_ERROR_FLAGS);
-	opflags = readl(qup->base + QUP_OPERATIONAL);
+	bus_err = pete_readl("drivers/i2c/busses/i2c-qup.c:288", qup->base + QUP_I2C_STATUS);
+	qup_err = pete_readl("drivers/i2c/busses/i2c-qup.c:289", qup->base + QUP_ERROR_FLAGS);
+	opflags = pete_readl("drivers/i2c/busses/i2c-qup.c:290", qup->base + QUP_OPERATIONAL);
 
 	if (!qup->msg) {
 		/* Clear Error interrupt */
-		writel(QUP_RESET_STATE, qup->base + QUP_STATE);
+		pete_writel("drivers/i2c/busses/i2c-qup.c:294", QUP_RESET_STATE, qup->base + QUP_STATE);
 		return IRQ_HANDLED;
 	}
 
@@ -300,11 +300,11 @@ static irqreturn_t qup_i2c_interrupt(int irq, void *dev)
 
 	/* Clear the error bits in QUP_ERROR_FLAGS */
 	if (qup_err)
-		writel(qup_err, qup->base + QUP_ERROR_FLAGS);
+		pete_writel("drivers/i2c/busses/i2c-qup.c:303", qup_err, qup->base + QUP_ERROR_FLAGS);
 
 	/* Clear the error bits in QUP_I2C_STATUS */
 	if (bus_err)
-		writel(bus_err, qup->base + QUP_I2C_STATUS);
+		pete_writel("drivers/i2c/busses/i2c-qup.c:307", bus_err, qup->base + QUP_I2C_STATUS);
 
 	/*
 	 * Check for BAM mode and returns if already error has come for current
@@ -323,12 +323,12 @@ static irqreturn_t qup_i2c_interrupt(int irq, void *dev)
 		 * HW FIFO and generates the BAM interrupt.
 		 */
 		if (!qup->use_dma)
-			writel(QUP_RESET_STATE, qup->base + QUP_STATE);
+			pete_writel("drivers/i2c/busses/i2c-qup.c:326", QUP_RESET_STATE, qup->base + QUP_STATE);
 		goto done;
 	}
 
 	if (opflags & QUP_OUT_SVC_FLAG) {
-		writel(QUP_OUT_SVC_FLAG, qup->base + QUP_OPERATIONAL);
+		pete_writel("drivers/i2c/busses/i2c-qup.c:331", QUP_OUT_SVC_FLAG, qup->base + QUP_OPERATIONAL);
 
 		if (opflags & OUT_BLOCK_WRITE_REQ) {
 			blk->tx_fifo_free += qup->out_blk_sz;
@@ -340,7 +340,7 @@ static irqreturn_t qup_i2c_interrupt(int irq, void *dev)
 	}
 
 	if (opflags & QUP_IN_SVC_FLAG) {
-		writel(QUP_IN_SVC_FLAG, qup->base + QUP_OPERATIONAL);
+		pete_writel("drivers/i2c/busses/i2c-qup.c:343", QUP_IN_SVC_FLAG, qup->base + QUP_OPERATIONAL);
 
 		if (!blk->is_rx_blk_mode) {
 			blk->fifo_available += qup->in_fifo_sz;
@@ -384,7 +384,7 @@ static int qup_i2c_poll_state_mask(struct qup_i2c_dev *qup,
 	 * cycles. So retry once after a 1uS delay.
 	 */
 	do {
-		state = readl(qup->base + QUP_STATE);
+		state = pete_readl("drivers/i2c/busses/i2c-qup.c:387", qup->base + QUP_STATE);
 
 		if (state & QUP_STATE_VALID &&
 		    (state & req_mask) == req_state)
@@ -403,10 +403,10 @@ static int qup_i2c_poll_state(struct qup_i2c_dev *qup, u32 req_state)
 
 static void qup_i2c_flush(struct qup_i2c_dev *qup)
 {
-	u32 val = readl(qup->base + QUP_STATE);
+	u32 val = pete_readl("drivers/i2c/busses/i2c-qup.c:406", qup->base + QUP_STATE);
 
 	val |= QUP_I2C_FLUSH;
-	writel(val, qup->base + QUP_STATE);
+	pete_writel("drivers/i2c/busses/i2c-qup.c:409", val, qup->base + QUP_STATE);
 }
 
 static int qup_i2c_poll_state_valid(struct qup_i2c_dev *qup)
@@ -424,7 +424,7 @@ static int qup_i2c_change_state(struct qup_i2c_dev *qup, u32 state)
 	if (qup_i2c_poll_state_valid(qup) != 0)
 		return -EIO;
 
-	writel(state, qup->base + QUP_STATE);
+	pete_writel("drivers/i2c/busses/i2c-qup.c:427", state, qup->base + QUP_STATE);
 
 	if (qup_i2c_poll_state(qup, state) != 0)
 		return -EIO;
@@ -440,7 +440,7 @@ static int qup_i2c_bus_active(struct qup_i2c_dev *qup, int len)
 
 	timeout = jiffies + len * 4;
 	for (;;) {
-		status = readl(qup->base + QUP_I2C_STATUS);
+		status = pete_readl("drivers/i2c/busses/i2c-qup.c:443", qup->base + QUP_I2C_STATUS);
 		if (!(status & I2C_STATUS_BUS_ACTIVE))
 			break;
 
@@ -484,7 +484,7 @@ static void qup_i2c_write_tx_fifo_v1(struct qup_i2c_dev *qup)
 
 		/* Write out the pair and the last odd value */
 		if (idx & 1 || qup->pos == msg->len - 1)
-			writel(val, qup->base + QUP_OUT_FIFO_BASE);
+			pete_writel("drivers/i2c/busses/i2c-qup.c:487", val, qup->base + QUP_OUT_FIFO_BASE);
 
 		qup->pos++;
 		idx++;
@@ -846,21 +846,21 @@ static int qup_i2c_bam_xfer(struct i2c_adapter *adap, struct i2c_msg *msg,
 	if (ret)
 		goto out;
 
-	writel(0, qup->base + QUP_MX_INPUT_CNT);
-	writel(0, qup->base + QUP_MX_OUTPUT_CNT);
+	pete_writel("drivers/i2c/busses/i2c-qup.c:849", 0, qup->base + QUP_MX_INPUT_CNT);
+	pete_writel("drivers/i2c/busses/i2c-qup.c:850", 0, qup->base + QUP_MX_OUTPUT_CNT);
 
 	/* set BAM mode */
-	writel(QUP_REPACK_EN | QUP_BAM_MODE, qup->base + QUP_IO_MODE);
+	pete_writel("drivers/i2c/busses/i2c-qup.c:853", QUP_REPACK_EN | QUP_BAM_MODE, qup->base + QUP_IO_MODE);
 
 	/* mask fifo irqs */
-	writel((0x3 << 8), qup->base + QUP_OPERATIONAL_MASK);
+	pete_writel("drivers/i2c/busses/i2c-qup.c:856", (0x3 << 8), qup->base + QUP_OPERATIONAL_MASK);
 
 	/* set RUN STATE */
 	ret = qup_i2c_change_state(qup, QUP_RUN_STATE);
 	if (ret)
 		goto out;
 
-	writel(qup->clk_ctl, qup->base + QUP_I2C_CLK_CTL);
+	pete_writel("drivers/i2c/busses/i2c-qup.c:863", qup->clk_ctl, qup->base + QUP_I2C_CLK_CTL);
 	qup_i2c_bam_clear_tag_buffers(qup);
 
 	for (idx = 0; idx < num; idx++) {
@@ -904,7 +904,7 @@ static int qup_i2c_wait_for_complete(struct qup_i2c_dev *qup,
 
 	left = wait_for_completion_timeout(&qup->xfer, qup->xfer_timeout);
 	if (!left) {
-		writel(1, qup->base + QUP_SW_RESET);
+		pete_writel("drivers/i2c/busses/i2c-qup.c:907", 1, qup->base + QUP_SW_RESET);
 		ret = -ETIMEDOUT;
 	}
 
@@ -924,7 +924,7 @@ static void qup_i2c_read_rx_fifo_v1(struct qup_i2c_dev *qup)
 	while (blk->fifo_available && qup->pos < msg->len) {
 		if ((idx & 1) == 0) {
 			/* Reading 2 words at time */
-			val = readl(qup->base + QUP_IN_FIFO_BASE);
+			val = pete_readl("drivers/i2c/busses/i2c-qup.c:927", qup->base + QUP_IN_FIFO_BASE);
 			msg->buf[qup->pos++] = val & 0xFF;
 		} else {
 			msg->buf[qup->pos++] = val >> QUP_MSW_SHIFT;
@@ -948,7 +948,7 @@ static void qup_i2c_write_rx_tags_v1(struct qup_i2c_dev *qup)
 	len = (msg->len == QUP_READ_LIMIT) ? 0 : msg->len;
 
 	val = ((QUP_TAG_REC | len) << QUP_MSW_SHIFT) | QUP_TAG_START | addr;
-	writel(val, qup->base + QUP_OUT_FIFO_BASE);
+	pete_writel("drivers/i2c/busses/i2c-qup.c:951", val, qup->base + QUP_OUT_FIFO_BASE);
 }
 
 static void qup_i2c_conf_v1(struct qup_i2c_dev *qup)
@@ -962,28 +962,28 @@ static void qup_i2c_conf_v1(struct qup_i2c_dev *qup)
 
 	if (blk->is_tx_blk_mode) {
 		io_mode |= QUP_OUTPUT_BLK_MODE;
-		writel(0, qup->base + QUP_MX_WRITE_CNT);
-		writel(blk->total_tx_len, qup->base + QUP_MX_OUTPUT_CNT);
+		pete_writel("drivers/i2c/busses/i2c-qup.c:965", 0, qup->base + QUP_MX_WRITE_CNT);
+		pete_writel("drivers/i2c/busses/i2c-qup.c:966", blk->total_tx_len, qup->base + QUP_MX_OUTPUT_CNT);
 	} else {
-		writel(0, qup->base + QUP_MX_OUTPUT_CNT);
-		writel(blk->total_tx_len, qup->base + QUP_MX_WRITE_CNT);
+		pete_writel("drivers/i2c/busses/i2c-qup.c:968", 0, qup->base + QUP_MX_OUTPUT_CNT);
+		pete_writel("drivers/i2c/busses/i2c-qup.c:969", blk->total_tx_len, qup->base + QUP_MX_WRITE_CNT);
 	}
 
 	if (blk->total_rx_len) {
 		if (blk->is_rx_blk_mode) {
 			io_mode |= QUP_INPUT_BLK_MODE;
-			writel(0, qup->base + QUP_MX_READ_CNT);
-			writel(blk->total_rx_len, qup->base + QUP_MX_INPUT_CNT);
+			pete_writel("drivers/i2c/busses/i2c-qup.c:975", 0, qup->base + QUP_MX_READ_CNT);
+			pete_writel("drivers/i2c/busses/i2c-qup.c:976", blk->total_rx_len, qup->base + QUP_MX_INPUT_CNT);
 		} else {
-			writel(0, qup->base + QUP_MX_INPUT_CNT);
-			writel(blk->total_rx_len, qup->base + QUP_MX_READ_CNT);
+			pete_writel("drivers/i2c/busses/i2c-qup.c:978", 0, qup->base + QUP_MX_INPUT_CNT);
+			pete_writel("drivers/i2c/busses/i2c-qup.c:979", blk->total_rx_len, qup->base + QUP_MX_READ_CNT);
 		}
 	} else {
 		qup_config |= QUP_NO_INPUT;
 	}
 
-	writel(qup_config, qup->base + QUP_CONFIG);
-	writel(io_mode, qup->base + QUP_IO_MODE);
+	pete_writel("drivers/i2c/busses/i2c-qup.c:985", qup_config, qup->base + QUP_CONFIG);
+	pete_writel("drivers/i2c/busses/i2c-qup.c:986", io_mode, qup->base + QUP_IO_MODE);
 }
 
 static void qup_i2c_clear_blk_v1(struct qup_i2c_block *blk)
@@ -1004,7 +1004,7 @@ static int qup_i2c_conf_xfer_v1(struct qup_i2c_dev *qup, bool is_rx)
 	if (ret)
 		return ret;
 
-	writel(qup->clk_ctl, qup->base + QUP_I2C_CLK_CTL);
+	pete_writel("drivers/i2c/busses/i2c-qup.c:1007", qup->clk_ctl, qup->base + QUP_I2C_CLK_CTL);
 
 	ret = qup_i2c_change_state(qup, QUP_PAUSE_STATE);
 	if (ret)
@@ -1073,13 +1073,13 @@ static int qup_i2c_xfer(struct i2c_adapter *adap,
 	qup->bus_err = 0;
 	qup->qup_err = 0;
 
-	writel(1, qup->base + QUP_SW_RESET);
+	pete_writel("drivers/i2c/busses/i2c-qup.c:1076", 1, qup->base + QUP_SW_RESET);
 	ret = qup_i2c_poll_state(qup, QUP_RESET_STATE);
 	if (ret)
 		goto out;
 
 	/* Configure QUP as I2C mini core */
-	writel(I2C_MINI_CORE | I2C_N_VAL, qup->base + QUP_CONFIG);
+	pete_writel("drivers/i2c/busses/i2c-qup.c:1082", I2C_MINI_CORE | I2C_N_VAL, qup->base + QUP_CONFIG);
 
 	for (idx = 0; idx < num; idx++) {
 		if (qup_i2c_poll_state_i2c_master(qup)) {
@@ -1126,24 +1126,24 @@ static void qup_i2c_conf_count_v2(struct qup_i2c_dev *qup)
 	u32 qup_config = I2C_MINI_CORE | I2C_N_VAL_V2;
 
 	if (blk->is_tx_blk_mode)
-		writel(qup->config_run | blk->total_tx_len,
+		pete_writel("drivers/i2c/busses/i2c-qup.c:1129", qup->config_run | blk->total_tx_len,
 		       qup->base + QUP_MX_OUTPUT_CNT);
 	else
-		writel(qup->config_run | blk->total_tx_len,
+		pete_writel("drivers/i2c/busses/i2c-qup.c:1132", qup->config_run | blk->total_tx_len,
 		       qup->base + QUP_MX_WRITE_CNT);
 
 	if (blk->total_rx_len) {
 		if (blk->is_rx_blk_mode)
-			writel(qup->config_run | blk->total_rx_len,
+			pete_writel("drivers/i2c/busses/i2c-qup.c:1137", qup->config_run | blk->total_rx_len,
 			       qup->base + QUP_MX_INPUT_CNT);
 		else
-			writel(qup->config_run | blk->total_rx_len,
+			pete_writel("drivers/i2c/busses/i2c-qup.c:1140", qup->config_run | blk->total_rx_len,
 			       qup->base + QUP_MX_READ_CNT);
 	} else {
 		qup_config |= QUP_NO_INPUT;
 	}
 
-	writel(qup_config, qup->base + QUP_CONFIG);
+	pete_writel("drivers/i2c/busses/i2c-qup.c:1146", qup_config, qup->base + QUP_CONFIG);
 }
 
 /*
@@ -1158,19 +1158,19 @@ static void qup_i2c_conf_mode_v2(struct qup_i2c_dev *qup)
 
 	if (blk->is_tx_blk_mode) {
 		io_mode |= QUP_OUTPUT_BLK_MODE;
-		writel(0, qup->base + QUP_MX_WRITE_CNT);
+		pete_writel("drivers/i2c/busses/i2c-qup.c:1161", 0, qup->base + QUP_MX_WRITE_CNT);
 	} else {
-		writel(0, qup->base + QUP_MX_OUTPUT_CNT);
+		pete_writel("drivers/i2c/busses/i2c-qup.c:1163", 0, qup->base + QUP_MX_OUTPUT_CNT);
 	}
 
 	if (blk->is_rx_blk_mode) {
 		io_mode |= QUP_INPUT_BLK_MODE;
-		writel(0, qup->base + QUP_MX_READ_CNT);
+		pete_writel("drivers/i2c/busses/i2c-qup.c:1168", 0, qup->base + QUP_MX_READ_CNT);
 	} else {
-		writel(0, qup->base + QUP_MX_INPUT_CNT);
+		pete_writel("drivers/i2c/busses/i2c-qup.c:1170", 0, qup->base + QUP_MX_INPUT_CNT);
 	}
 
-	writel(io_mode, qup->base + QUP_IO_MODE);
+	pete_writel("drivers/i2c/busses/i2c-qup.c:1173", io_mode, qup->base + QUP_IO_MODE);
 }
 
 /* Clear required variables before starting of any QUP v2 sub transfer. */
@@ -1199,7 +1199,7 @@ static void qup_i2c_recv_data(struct qup_i2c_dev *qup)
 	     blk->cur_blk_len && blk->fifo_available;
 	     blk->cur_blk_len--, blk->fifo_available--) {
 		if (j == 0)
-			blk->rx_fifo_data = readl(qup->base + QUP_IN_FIFO_BASE);
+			blk->rx_fifo_data = pete_readl("drivers/i2c/busses/i2c-qup.c:1202", qup->base + QUP_IN_FIFO_BASE);
 
 		*(blk->cur_data++) = blk->rx_fifo_data;
 		blk->rx_fifo_data >>= 8;
@@ -1218,7 +1218,7 @@ static void qup_i2c_recv_tags(struct qup_i2c_dev *qup)
 {
 	struct qup_i2c_block *blk = &qup->blk;
 
-	blk->rx_fifo_data = readl(qup->base + QUP_IN_FIFO_BASE);
+	blk->rx_fifo_data = pete_readl("drivers/i2c/busses/i2c-qup.c:1221", qup->base + QUP_IN_FIFO_BASE);
 	blk->rx_fifo_data >>= blk->rx_tag_len  * 8;
 	blk->rx_fifo_data_pos = blk->rx_tag_len;
 	blk->fifo_available -= blk->rx_tag_len;
@@ -1261,7 +1261,7 @@ qup_i2c_write_blk_data(struct qup_i2c_dev *qup, u8 **data, unsigned int *len)
 	     (*len)--, blk->tx_fifo_free--) {
 		blk->tx_fifo_data |= *(*data)++ << (j * 8);
 		if (j == 3) {
-			writel(blk->tx_fifo_data,
+			pete_writel("drivers/i2c/busses/i2c-qup.c:1264", blk->tx_fifo_data,
 			       qup->base + QUP_OUT_FIFO_BASE);
 			blk->tx_fifo_data = 0x0;
 			j = 0;
@@ -1280,7 +1280,7 @@ static void qup_i2c_write_rx_tags_v2(struct qup_i2c_dev *qup)
 
 	qup_i2c_write_blk_data(qup, &blk->cur_tx_tags, &blk->tx_tag_len);
 	if (blk->tx_fifo_data_pos)
-		writel(blk->tx_fifo_data, qup->base + QUP_OUT_FIFO_BASE);
+		pete_writel("drivers/i2c/busses/i2c-qup.c:1283", blk->tx_fifo_data, qup->base + QUP_OUT_FIFO_BASE);
 }
 
 /*
@@ -1332,7 +1332,7 @@ static void qup_i2c_write_tx_fifo_v2(struct qup_i2c_dev *qup)
 	return;
 
 send_last_word:
-	writel(blk->tx_fifo_data, qup->base + QUP_OUT_FIFO_BASE);
+	pete_writel("drivers/i2c/busses/i2c-qup.c:1335", blk->tx_fifo_data, qup->base + QUP_OUT_FIFO_BASE);
 }
 
 /*
@@ -1378,7 +1378,7 @@ qup_i2c_conf_xfer_v2(struct qup_i2c_dev *qup, bool is_rx, bool is_first,
 		if (ret)
 			return ret;
 
-		writel(qup->clk_ctl, qup->base + QUP_I2C_CLK_CTL);
+		pete_writel("drivers/i2c/busses/i2c-qup.c:1381", qup->clk_ctl, qup->base + QUP_I2C_CLK_CTL);
 
 		ret = qup_i2c_change_state(qup, QUP_PAUSE_STATE);
 		if (ret)
@@ -1553,14 +1553,14 @@ static int qup_i2c_xfer_v2(struct i2c_adapter *adap,
 	if (ret)
 		goto out;
 
-	writel(1, qup->base + QUP_SW_RESET);
+	pete_writel("drivers/i2c/busses/i2c-qup.c:1556", 1, qup->base + QUP_SW_RESET);
 	ret = qup_i2c_poll_state(qup, QUP_RESET_STATE);
 	if (ret)
 		goto out;
 
 	/* Configure QUP as I2C mini core */
-	writel(I2C_MINI_CORE | I2C_N_VAL_V2, qup->base + QUP_CONFIG);
-	writel(QUP_V2_TAGS_EN, qup->base + QUP_I2C_MASTER_GEN);
+	pete_writel("drivers/i2c/busses/i2c-qup.c:1562", I2C_MINI_CORE | I2C_N_VAL_V2, qup->base + QUP_CONFIG);
+	pete_writel("drivers/i2c/busses/i2c-qup.c:1563", QUP_V2_TAGS_EN, qup->base + QUP_I2C_MASTER_GEN);
 
 	if (qup_i2c_poll_state_i2c_master(qup)) {
 		ret = -EIO;
@@ -1642,9 +1642,9 @@ static void qup_i2c_disable_clocks(struct qup_i2c_dev *qup)
 
 	qup_i2c_change_state(qup, QUP_RESET_STATE);
 	clk_disable_unprepare(qup->clk);
-	config = readl(qup->base + QUP_CONFIG);
+	config = pete_readl("drivers/i2c/busses/i2c-qup.c:1645", qup->base + QUP_CONFIG);
 	config |= QUP_CLOCK_AUTO_GATE;
-	writel(config, qup->base + QUP_CONFIG);
+	pete_writel("drivers/i2c/busses/i2c-qup.c:1647", config, qup->base + QUP_CONFIG);
 	clk_disable_unprepare(qup->pclk);
 }
 
@@ -1791,7 +1791,7 @@ nodma:
 	 * Bootloaders might leave a pending interrupt on certain QUP's,
 	 * so we reset the core before registering for interrupts.
 	 */
-	writel(1, qup->base + QUP_SW_RESET);
+	pete_writel("drivers/i2c/busses/i2c-qup.c:1794", 1, qup->base + QUP_SW_RESET);
 	ret = qup_i2c_poll_state_valid(qup);
 	if (ret)
 		goto fail;
@@ -1804,10 +1804,10 @@ nodma:
 	}
 	disable_irq(qup->irq);
 
-	hw_ver = readl(qup->base + QUP_HW_VERSION);
+	hw_ver = pete_readl("drivers/i2c/busses/i2c-qup.c:1807", qup->base + QUP_HW_VERSION);
 	dev_dbg(qup->dev, "Revision %x\n", hw_ver);
 
-	io_mode = readl(qup->base + QUP_IO_MODE);
+	io_mode = pete_readl("drivers/i2c/busses/i2c-qup.c:1810", qup->base + QUP_IO_MODE);
 
 	/*
 	 * The block/fifo size w.r.t. 'actual data' is 1/2 due to 'tag'

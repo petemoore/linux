@@ -982,15 +982,15 @@ struct s2io_nic {
 static inline void SPECIAL_REG_WRITE(u64 val, void __iomem *addr, int order)
 {
 	if (order == LF) {
-		writel((u32) (val), addr);
-		(void) readl(addr);
-		writel((u32) (val >> 32), (addr + 4));
-		(void) readl(addr + 4);
+		pete_writel("drivers/net/ethernet/neterion/s2io.h:985", (u32) (val), addr);
+		(void) pete_readl("drivers/net/ethernet/neterion/s2io.h:986", addr);
+		pete_writel("drivers/net/ethernet/neterion/s2io.h:987", (u32) (val >> 32), (addr + 4));
+		(void) pete_readl("drivers/net/ethernet/neterion/s2io.h:988", addr + 4);
 	} else {
-		writel((u32) (val >> 32), (addr + 4));
-		(void) readl(addr + 4);
-		writel((u32) (val), addr);
-		(void) readl(addr);
+		pete_writel("drivers/net/ethernet/neterion/s2io.h:990", (u32) (val >> 32), (addr + 4));
+		(void) pete_readl("drivers/net/ethernet/neterion/s2io.h:991", addr + 4);
+		pete_writel("drivers/net/ethernet/neterion/s2io.h:992", (u32) (val), addr);
+		(void) pete_readl("drivers/net/ethernet/neterion/s2io.h:993", addr);
 	}
 }
 

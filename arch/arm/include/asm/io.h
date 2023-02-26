@@ -212,7 +212,7 @@ void __iomem *pci_remap_cfgspace(resource_size_t res_cookie, size_t size);
  * Only set this larger if you really need inb() et.al. to operate over
  * a larger address space.  Note that SOC_COMMON ioremaps each sockets
  * IO space area, and so inb() et.al. must be defined to operate as per
- * readb() et.al. on such platforms.
+ * pete_readb("arch/arm/include/asm/io.h:215", ) et.al. on such platforms.
  */
 #ifndef IO_SPACE_LIMIT
 #if defined(CONFIG_PCMCIA_SOC_COMMON) || defined(CONFIG_PCMCIA_SOC_COMMON_MODULE)
@@ -298,13 +298,13 @@ extern void _memset_io(volatile void __iomem *, int, size_t);
 #define writew_relaxed(v,c)	__raw_writew((__force u16) cpu_to_le16(v),c)
 #define writel_relaxed(v,c)	__raw_writel((__force u32) cpu_to_le32(v),c)
 
-#define readb(c)		({ u8  __v = readb_relaxed(c); __iormb(); __v; })
-#define readw(c)		({ u16 __v = readw_relaxed(c); __iormb(); __v; })
-#define readl(c)		({ u32 __v = readl_relaxed(c); __iormb(); __v; })
+#define pete_readb("arch/arm/include/asm/io.h:301", c)		({ u8  __v = readb_relaxed(c); __iormb(); __v; })
+#define pete_readw("arch/arm/include/asm/io.h:302", c)		({ u16 __v = readw_relaxed(c); __iormb(); __v; })
+#define pete_readl("arch/arm/include/asm/io.h:303", c)		({ u32 __v = readl_relaxed(c); __iormb(); __v; })
 
-#define writeb(v,c)		({ __iowmb(); writeb_relaxed(v,c); })
-#define writew(v,c)		({ __iowmb(); writew_relaxed(v,c); })
-#define writel(v,c)		({ __iowmb(); writel_relaxed(v,c); })
+#define pete_writeb("arch/arm/include/asm/io.h:305", v,c)		({ __iowmb(); writeb_relaxed(v,c); })
+#define pete_writew("arch/arm/include/asm/io.h:306", v,c)		({ __iowmb(); writew_relaxed(v,c); })
+#define pete_writel("arch/arm/include/asm/io.h:307", v,c)		({ __iowmb(); writel_relaxed(v,c); })
 
 #define readsb(p,d,l)		__raw_readsb(p,d,l)
 #define readsw(p,d,l)		__raw_readsw(p,d,l)

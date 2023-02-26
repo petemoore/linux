@@ -1069,7 +1069,7 @@ static int rcar_pcie_aarch32_abort_handler(unsigned long addr,
 		goto unlock_exit;
 	}
 
-	pmsr = readl(pcie_base + PMSR);
+	pmsr = pete_readl("drivers/pci/controller/pcie-rcar-host.c:1072", pcie_base + PMSR);
 
 	/*
 	 * Test if the PCIe controller received PM_ENTER_L1 DLLP and
@@ -1078,11 +1078,11 @@ static int rcar_pcie_aarch32_abort_handler(unsigned long addr,
 	 * which it can return to L0s/L0 on its own.
 	 */
 	if ((pmsr & PMEL1RX) && ((pmsr & PMSTATE) != PMSTATE_L1)) {
-		writel(L1IATN, pcie_base + PMCTLR);
+		pete_writel("drivers/pci/controller/pcie-rcar-host.c:1081", L1IATN, pcie_base + PMCTLR);
 		ret = readl_poll_timeout_atomic(pcie_base + PMSR, val,
 						val & L1FAEG, 10, 1000);
 		WARN(ret, "Timeout waiting for L1 link state, ret=%d\n", ret);
-		writel(L1FAEG | PMEL1RX, pcie_base + PMSR);
+		pete_writel("drivers/pci/controller/pcie-rcar-host.c:1085", L1FAEG | PMEL1RX, pcie_base + PMSR);
 	}
 
 unlock_exit:

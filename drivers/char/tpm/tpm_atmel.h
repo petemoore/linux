@@ -28,8 +28,8 @@ struct tpm_atmel_priv {
 
 #include <asm/prom.h>
 
-#define atmel_getb(priv, offset) readb(priv->iobase + offset)
-#define atmel_putb(val, priv, offset) writeb(val, priv->iobase + offset)
+#define atmel_getb(priv, offset) pete_readb("drivers/char/tpm/tpm_atmel.h:31", priv->iobase + offset)
+#define atmel_putb(val, priv, offset) pete_writeb("drivers/char/tpm/tpm_atmel.h:32", val, priv->iobase + offset)
 #define atmel_request_region request_mem_region
 #define atmel_release_region release_mem_region
 

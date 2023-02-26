@@ -48,7 +48,7 @@ static void bcm6358_led_write(void __iomem *reg, unsigned long data)
 #ifdef CONFIG_CPU_BIG_ENDIAN
 	iowrite32be(data, reg);
 #else
-	writel(data, reg);
+	pete_writel("drivers/leds/leds-bcm6358.c:51", data, reg);
 #endif
 }
 
@@ -57,7 +57,7 @@ static unsigned long bcm6358_led_read(void __iomem *reg)
 #ifdef CONFIG_CPU_BIG_ENDIAN
 	return ioread32be(reg);
 #else
-	return readl(reg);
+	return pete_readl("drivers/leds/leds-bcm6358.c:60", reg);
 #endif
 }
 

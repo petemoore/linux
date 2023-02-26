@@ -120,7 +120,7 @@ static void vnic_rq_init_start(struct vnic_rq *rq, unsigned int cq_index,
 	unsigned int count = rq->ring.desc_count;
 
 	paddr = (u64)rq->ring.base_addr | VNIC_PADDR_TARGET;
-	writeq(paddr, &rq->ctrl->ring_base);
+	pete_writeq("drivers/net/ethernet/cisco/enic/vnic_rq.c:123", paddr, &rq->ctrl->ring_base);
 	iowrite32(count, &rq->ctrl->ring_size);
 	iowrite32(cq_index, &rq->ctrl->cq_index);
 	iowrite32(error_interrupt_enable, &rq->ctrl->error_interrupt_enable);

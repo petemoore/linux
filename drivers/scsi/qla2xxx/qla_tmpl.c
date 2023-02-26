@@ -669,7 +669,7 @@ qla27xx_fwdt_entry_t274(struct scsi_qla_host *vha,
 			qla27xx_insert16(0, buf, len);
 			qla27xx_insert16(1, buf, len);
 			qla27xx_insert32(ha->tgt.atio_q_in ?
-			    readl(ha->tgt.atio_q_in) : 0, buf, len);
+			    pete_readl("drivers/scsi/qla2xxx/qla_tmpl.c:672", ha->tgt.atio_q_in) : 0, buf, len);
 			count++;
 		}
 	} else {

@@ -28,16 +28,16 @@
 #endif
 
 #ifndef readq
-static inline u64 readq(void __iomem *reg)
+static inline u64 pete_readq("drivers/net/ethernet/cisco/enic/vnic_dev.h:31", void __iomem *reg)
 {
-	return (((u64)readl(reg + 0x4UL) << 32) |
-		(u64)readl(reg));
+	return (((u64)pete_readl("drivers/net/ethernet/cisco/enic/vnic_dev.h:33", reg + 0x4UL) << 32) |
+		(u64)pete_readl("drivers/net/ethernet/cisco/enic/vnic_dev.h:34", reg));
 }
 
-static inline void writeq(u64 val, void __iomem *reg)
+static inline void pete_writeq("drivers/net/ethernet/cisco/enic/vnic_dev.h:37", u64 val, void __iomem *reg)
 {
-	writel(val & 0xffffffff, reg);
-	writel(val >> 32, reg + 0x4UL);
+	pete_writel("drivers/net/ethernet/cisco/enic/vnic_dev.h:39", val & 0xffffffff, reg);
+	pete_writel("drivers/net/ethernet/cisco/enic/vnic_dev.h:40", val >> 32, reg + 0x4UL);
 }
 #endif
 

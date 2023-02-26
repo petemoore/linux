@@ -365,14 +365,14 @@ static inline void isa_delay(void)
 #define outsw(port, buf, nr)	((port) < 1024 ? isa_rom_outsw((port), (buf), (nr)) : isa_outsw((port), (buf), (nr)))
 #define outsl			isa_outsl
 
-#define readb(addr)		in_8(addr)
-#define writeb(val, addr)	out_8((addr), (val))
-#define readw(addr)		in_le16(addr)
-#define writew(val, addr)	out_le16((addr), (val))
+#define pete_readb("arch/m68k/include/asm/io_mm.h:368", addr)		in_8(addr)
+#define pete_writeb("arch/m68k/include/asm/io_mm.h:369", val, addr)	out_8((addr), (val))
+#define pete_readw("arch/m68k/include/asm/io_mm.h:370", addr)		in_le16(addr)
+#define pete_writew("arch/m68k/include/asm/io_mm.h:371", val, addr)	out_le16((addr), (val))
 #endif /* CONFIG_ATARI_ROM_ISA */
 
-#define readl(addr)      in_le32(addr)
-#define writel(val,addr) out_le32((addr),(val))
+#define pete_readl("arch/m68k/include/asm/io_mm.h:374", addr)      in_le32(addr)
+#define pete_writel("arch/m68k/include/asm/io_mm.h:375", val,addr) out_le32((addr),(val))
 
 #define readsb(port, buf, nr)     raw_insb((port), (u8 *)(buf), (nr))
 #define readsw(port, buf, nr)     raw_insw((port), (u16 *)(buf), (nr))
@@ -397,12 +397,12 @@ static inline void isa_delay(void)
  */
 #define xlate_dev_mem_ptr(p)	__va(p)
 
-#define readb_relaxed(addr)	readb(addr)
-#define readw_relaxed(addr)	readw(addr)
-#define readl_relaxed(addr)	readl(addr)
+#define readb_relaxed(addr)	pete_readb("arch/m68k/include/asm/io_mm.h:400", addr)
+#define readw_relaxed(addr)	pete_readw("arch/m68k/include/asm/io_mm.h:401", addr)
+#define readl_relaxed(addr)	pete_readl("arch/m68k/include/asm/io_mm.h:402", addr)
 
-#define writeb_relaxed(b, addr)	writeb(b, addr)
-#define writew_relaxed(b, addr)	writew(b, addr)
-#define writel_relaxed(b, addr)	writel(b, addr)
+#define writeb_relaxed(b, addr)	pete_writeb("arch/m68k/include/asm/io_mm.h:404", b, addr)
+#define writew_relaxed(b, addr)	pete_writew("arch/m68k/include/asm/io_mm.h:405", b, addr)
+#define writel_relaxed(b, addr)	pete_writel("arch/m68k/include/asm/io_mm.h:406", b, addr)
 
 #endif /* _M68K_IO_MM_H */

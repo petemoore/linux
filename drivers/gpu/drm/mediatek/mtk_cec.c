@@ -63,9 +63,9 @@ static void mtk_cec_clear_bits(struct mtk_cec *cec, unsigned int offset,
 	void __iomem *reg = cec->regs + offset;
 	u32 tmp;
 
-	tmp = readl(reg);
+	tmp = pete_readl("drivers/gpu/drm/mediatek/mtk_cec.c:66", reg);
 	tmp &= ~bits;
-	writel(tmp, reg);
+	pete_writel("drivers/gpu/drm/mediatek/mtk_cec.c:68", tmp, reg);
 }
 
 static void mtk_cec_set_bits(struct mtk_cec *cec, unsigned int offset,
@@ -74,18 +74,18 @@ static void mtk_cec_set_bits(struct mtk_cec *cec, unsigned int offset,
 	void __iomem *reg = cec->regs + offset;
 	u32 tmp;
 
-	tmp = readl(reg);
+	tmp = pete_readl("drivers/gpu/drm/mediatek/mtk_cec.c:77", reg);
 	tmp |= bits;
-	writel(tmp, reg);
+	pete_writel("drivers/gpu/drm/mediatek/mtk_cec.c:79", tmp, reg);
 }
 
 static void mtk_cec_mask(struct mtk_cec *cec, unsigned int offset,
 			 unsigned int val, unsigned int mask)
 {
-	u32 tmp = readl(cec->regs + offset) & ~mask;
+	u32 tmp = pete_readl("drivers/gpu/drm/mediatek/mtk_cec.c:85", cec->regs + offset) & ~mask;
 
 	tmp |= val & mask;
-	writel(tmp, cec->regs + offset);
+	pete_writel("drivers/gpu/drm/mediatek/mtk_cec.c:88", tmp, cec->regs + offset);
 }
 
 void mtk_cec_set_hpd_event(struct device *dev,
@@ -106,7 +106,7 @@ bool mtk_cec_hpd_high(struct device *dev)
 	struct mtk_cec *cec = dev_get_drvdata(dev);
 	unsigned int status;
 
-	status = readl(cec->regs + RX_EVENT);
+	status = pete_readl("drivers/gpu/drm/mediatek/mtk_cec.c:109", cec->regs + RX_EVENT);
 
 	return (status & (HDMI_PORD | HDMI_HTPLG)) == (HDMI_PORD | HDMI_HTPLG);
 }

@@ -1016,7 +1016,7 @@
 
 static inline void dsaf_write_reg(u8 __iomem *base, u32 reg, u32 value)
 {
-	writel(value, base + reg);
+	pete_writel("drivers/net/ethernet/hisilicon/hns/hns_dsaf_reg.h:1019", value, base + reg);
 }
 
 #define dsaf_write_dev(a, reg, value) \
@@ -1024,7 +1024,7 @@ static inline void dsaf_write_reg(u8 __iomem *base, u32 reg, u32 value)
 
 static inline u32 dsaf_read_reg(u8 __iomem *base, u32 reg)
 {
-	return readl(base + reg);
+	return pete_readl("drivers/net/ethernet/hisilicon/hns/hns_dsaf_reg.h:1027", base + reg);
 }
 
 static inline void dsaf_write_syscon(struct regmap *base, u32 reg, u32 value)
@@ -1085,11 +1085,11 @@ static inline u32 dsaf_get_reg_field(u8 __iomem *base, u32 reg, u32 mask,
 	dsaf_get_reg_field((dev)->io_base, (reg), (1ull << (bit)), (bit))
 
 #define dsaf_write_b(addr, data)\
-	writeb((data), (__iomem u8 *)(addr))
+	pete_writeb("drivers/net/ethernet/hisilicon/hns/hns_dsaf_reg.h:1088", (data), (__iomem u8 *)(addr))
 #define dsaf_read_b(addr)\
-	readb((__iomem u8 *)(addr))
+	pete_readb("drivers/net/ethernet/hisilicon/hns/hns_dsaf_reg.h:1090", (__iomem u8 *)(addr))
 
 #define hns_mac_reg_read64(drv, offset) \
-	readq((__iomem void *)(((drv)->io_base + 0xc00 + (offset))))
+	pete_readq("drivers/net/ethernet/hisilicon/hns/hns_dsaf_reg.h:1093", (__iomem void *)(((drv)->io_base + 0xc00 + (offset))))
 
 #endif	/* _DSAF_REG_H */

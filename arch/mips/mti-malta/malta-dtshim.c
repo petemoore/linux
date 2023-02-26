@@ -191,7 +191,7 @@ static void __init append_memory(void *fdt, int root_off)
 	/* detect the memory map in use */
 	if (malta_scon() == MIPS_REVISION_SCON_ROCIT) {
 		/* ROCit has a register indicating the memory map in use */
-		config = readl((void __iomem *)CKSEG1ADDR(ROCIT_CONFIG_GEN1));
+		config = pete_readl("arch/mips/mti-malta/malta-dtshim.c:194", (void __iomem *)CKSEG1ADDR(ROCIT_CONFIG_GEN1));
 		mem_map = config & ROCIT_CONFIG_GEN1_MEMMAP_MASK;
 		mem_map >>= ROCIT_CONFIG_GEN1_MEMMAP_SHIFT;
 	} else {

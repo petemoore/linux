@@ -25,7 +25,7 @@ static inline u32 dwc3_readl(void __iomem *base, u32 offset)
 	 * space, see dwc3_probe in core.c.
 	 * However, the offsets are given starting from xHCI address space.
 	 */
-	value = readl(base + offset - DWC3_GLOBALS_REGS_START);
+	value = pete_readl("drivers/usb/dwc3/io.h:28", base + offset - DWC3_GLOBALS_REGS_START);
 
 	/*
 	 * When tracing we want to make it easy to find the correct address on
@@ -44,7 +44,7 @@ static inline void dwc3_writel(void __iomem *base, u32 offset, u32 value)
 	 * space, see dwc3_probe in core.c.
 	 * However, the offsets are given starting from xHCI address space.
 	 */
-	writel(value, base + offset - DWC3_GLOBALS_REGS_START);
+	pete_writel("drivers/usb/dwc3/io.h:47", value, base + offset - DWC3_GLOBALS_REGS_START);
 
 	/*
 	 * When tracing we want to make it easy to find the correct address on

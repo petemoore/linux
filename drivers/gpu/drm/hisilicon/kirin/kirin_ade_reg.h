@@ -217,10 +217,10 @@ static inline void ade_update_bits(void __iomem *addr, u32 bit_start,
 {
 	u32 tmp, orig;
 
-	orig = readl(addr);
+	orig = pete_readl("drivers/gpu/drm/hisilicon/kirin/kirin_ade_reg.h:220", addr);
 	tmp = orig & ~(mask << bit_start);
 	tmp |= (val & mask) << bit_start;
-	writel(tmp, addr);
+	pete_writel("drivers/gpu/drm/hisilicon/kirin/kirin_ade_reg.h:223", tmp, addr);
 }
 
 #endif

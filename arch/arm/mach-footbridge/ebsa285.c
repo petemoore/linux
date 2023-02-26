@@ -55,7 +55,7 @@ static void ebsa285_led_set(struct led_classdev *cdev,
 		hw_led_state |= led->mask;
 	else
 		hw_led_state &= ~led->mask;
-	writeb(hw_led_state, xbus);
+	pete_writeb("arch/arm/mach-footbridge/ebsa285.c:58", hw_led_state, xbus);
 }
 
 static enum led_brightness ebsa285_led_get(struct led_classdev *cdev)
@@ -79,7 +79,7 @@ static int __init ebsa285_leds_init(void)
 
 	/* 3 LEDS all off */
 	hw_led_state = XBUS_AMBER_L | XBUS_GREEN_L | XBUS_RED_L;
-	writeb(hw_led_state, xbus);
+	pete_writeb("arch/arm/mach-footbridge/ebsa285.c:82", hw_led_state, xbus);
 
 	for (i = 0; i < ARRAY_SIZE(ebsa285_leds); i++) {
 		struct ebsa285_led *led;

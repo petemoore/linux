@@ -103,7 +103,7 @@ static inline void __raw_writeq(u64 q, const volatile void __iomem *addr)
  */
 #define readb readb
 #define readb_relaxed readb
-static inline u8 readb(const volatile void __iomem *addr)
+static inline u8 pete_readb("arch/sparc/include/asm/io_64.h:106", const volatile void __iomem *addr)
 {	u8 ret;
 
 	__asm__ __volatile__("lduba\t[%1] %2, %0\t/* pci_readb */"
@@ -115,7 +115,7 @@ static inline u8 readb(const volatile void __iomem *addr)
 
 #define readw readw
 #define readw_relaxed readw
-static inline u16 readw(const volatile void __iomem *addr)
+static inline u16 pete_readw("arch/sparc/include/asm/io_64.h:118", const volatile void __iomem *addr)
 {	u16 ret;
 
 	__asm__ __volatile__("lduha\t[%1] %2, %0\t/* pci_readw */"
@@ -128,7 +128,7 @@ static inline u16 readw(const volatile void __iomem *addr)
 
 #define readl readl
 #define readl_relaxed readl
-static inline u32 readl(const volatile void __iomem *addr)
+static inline u32 pete_readl("arch/sparc/include/asm/io_64.h:131", const volatile void __iomem *addr)
 {	u32 ret;
 
 	__asm__ __volatile__("lduwa\t[%1] %2, %0\t/* pci_readl */"
@@ -141,7 +141,7 @@ static inline u32 readl(const volatile void __iomem *addr)
 
 #define readq readq
 #define readq_relaxed readq
-static inline u64 readq(const volatile void __iomem *addr)
+static inline u64 pete_readq("arch/sparc/include/asm/io_64.h:144", const volatile void __iomem *addr)
 {	u64 ret;
 
 	__asm__ __volatile__("ldxa\t[%1] %2, %0\t/* pci_readq */"
@@ -154,7 +154,7 @@ static inline u64 readq(const volatile void __iomem *addr)
 
 #define writeb writeb
 #define writeb_relaxed writeb
-static inline void writeb(u8 b, volatile void __iomem *addr)
+static inline void pete_writeb("arch/sparc/include/asm/io_64.h:157", u8 b, volatile void __iomem *addr)
 {
 	__asm__ __volatile__("stba\t%r0, [%1] %2\t/* pci_writeb */"
 			     : /* no outputs */
@@ -164,7 +164,7 @@ static inline void writeb(u8 b, volatile void __iomem *addr)
 
 #define writew writew
 #define writew_relaxed writew
-static inline void writew(u16 w, volatile void __iomem *addr)
+static inline void pete_writew("arch/sparc/include/asm/io_64.h:167", u16 w, volatile void __iomem *addr)
 {
 	__asm__ __volatile__("stha\t%r0, [%1] %2\t/* pci_writew */"
 			     : /* no outputs */
@@ -174,7 +174,7 @@ static inline void writew(u16 w, volatile void __iomem *addr)
 
 #define writel writel
 #define writel_relaxed writel
-static inline void writel(u32 l, volatile void __iomem *addr)
+static inline void pete_writel("arch/sparc/include/asm/io_64.h:177", u32 l, volatile void __iomem *addr)
 {
 	__asm__ __volatile__("stwa\t%r0, [%1] %2\t/* pci_writel */"
 			     : /* no outputs */
@@ -184,7 +184,7 @@ static inline void writel(u32 l, volatile void __iomem *addr)
 
 #define writeq writeq
 #define writeq_relaxed writeq
-static inline void writeq(u64 q, volatile void __iomem *addr)
+static inline void pete_writeq("arch/sparc/include/asm/io_64.h:187", u64 q, volatile void __iomem *addr)
 {
 	__asm__ __volatile__("stxa\t%r0, [%1] %2\t/* pci_writeq */"
 			     : /* no outputs */
@@ -195,37 +195,37 @@ static inline void writeq(u64 q, volatile void __iomem *addr)
 #define inb inb
 static inline u8 inb(unsigned long addr)
 {
-	return readb((volatile void __iomem *)addr);
+	return pete_readb("arch/sparc/include/asm/io_64.h:198", (volatile void __iomem *)addr);
 }
 
 #define inw inw
 static inline u16 inw(unsigned long addr)
 {
-	return readw((volatile void __iomem *)addr);
+	return pete_readw("arch/sparc/include/asm/io_64.h:204", (volatile void __iomem *)addr);
 }
 
 #define inl inl
 static inline u32 inl(unsigned long addr)
 {
-	return readl((volatile void __iomem *)addr);
+	return pete_readl("arch/sparc/include/asm/io_64.h:210", (volatile void __iomem *)addr);
 }
 
 #define outb outb
 static inline void outb(u8 b, unsigned long addr)
 {
-	writeb(b, (volatile void __iomem *)addr);
+	pete_writeb("arch/sparc/include/asm/io_64.h:216", b, (volatile void __iomem *)addr);
 }
 
 #define outw outw
 static inline void outw(u16 w, unsigned long addr)
 {
-	writew(w, (volatile void __iomem *)addr);
+	pete_writew("arch/sparc/include/asm/io_64.h:222", w, (volatile void __iomem *)addr);
 }
 
 #define outl outl
 static inline void outl(u32 l, unsigned long addr)
 {
-	writel(l, (volatile void __iomem *)addr);
+	pete_writel("arch/sparc/include/asm/io_64.h:228", l, (volatile void __iomem *)addr);
 }
 
 
@@ -340,7 +340,7 @@ static inline void memset_io(volatile void __iomem *dst, int c, __kernel_size_t 
 	volatile void __iomem *d = dst;
 
 	while (n--) {
-		writeb(c, d);
+		pete_writeb("arch/sparc/include/asm/io_64.h:343", c, d);
 		d++;
 	}
 }
@@ -364,7 +364,7 @@ static inline void memcpy_fromio(void *dst, const volatile void __iomem *src,
 	char *d = dst;
 
 	while (n--) {
-		char tmp = readb(src);
+		char tmp = pete_readb("arch/sparc/include/asm/io_64.h:367", src);
 		*d++ = tmp;
 		src++;
 	}
@@ -391,7 +391,7 @@ static inline void memcpy_toio(volatile void __iomem *dst, const void *src,
 
 	while (n--) {
 		char tmp = *s++;
-		writeb(tmp, d);
+		pete_writeb("arch/sparc/include/asm/io_64.h:394", tmp, d);
 		d++;
 	}
 }

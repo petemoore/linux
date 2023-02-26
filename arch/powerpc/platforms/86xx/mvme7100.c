@@ -61,10 +61,10 @@ static void __init mvme7100_setup_arch(void)
 
 	if (mvme7100_regs) {
 		/* Disable ds1375, max6649, and abort interrupts */
-		reg = readb(mvme7100_regs + MVME7100_INTERRUPT_REG_2_OFFSET);
+		reg = pete_readb("arch/powerpc/platforms/86xx/mvme7100.c:64", mvme7100_regs + MVME7100_INTERRUPT_REG_2_OFFSET);
 		reg |= MVME7100_DS1375_MASK | MVME7100_MAX6649_MASK
 			| MVME7100_ABORT_MASK;
-		writeb(reg, mvme7100_regs + MVME7100_INTERRUPT_REG_2_OFFSET);
+		pete_writeb("arch/powerpc/platforms/86xx/mvme7100.c:67", reg, mvme7100_regs + MVME7100_INTERRUPT_REG_2_OFFSET);
 	} else
 		pr_warn("Unable to map board registers\n");
 

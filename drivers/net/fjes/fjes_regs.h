@@ -119,7 +119,7 @@ u32 fjes_hw_rd32(struct fjes_hw *hw, u32 reg);
 #define wr32(reg, val) \
 do { \
 	u8 *base = hw->base; \
-	writel((val), &base[(reg)]); \
+	pete_writel("drivers/net/fjes/fjes_regs.h:122", (val), &base[(reg)]); \
 } while (0)
 
 #define rd32(reg) (fjes_hw_rd32(hw, reg))

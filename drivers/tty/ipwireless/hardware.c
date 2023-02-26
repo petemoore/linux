@@ -448,7 +448,7 @@ static void do_send_fragment(struct ipw_hardware *hw, unsigned char *data,
 			outw((unsigned short) 0xDEAD, hw->base_port);
 			i += 2;
 		}
-		writew(MEMRX_RX, &hw->memory_info_regs->memreg_rx);
+		pete_writew("drivers/tty/ipwireless/hardware.c:451", MEMRX_RX, &hw->memory_info_regs->memreg_rx);
 	}
 
 	spin_unlock_irqrestore(&hw->lock, flags);
@@ -536,10 +536,10 @@ static void ipw_setup_hardware(struct ipw_hardware *hw)
 		 * Set INTRACK bit (bit 0), which means we must explicitly
 		 * acknowledge interrupts by clearing bit 2 of reg_config_and_status.
 		 */
-		unsigned short csr = readw(&hw->memregs_CCR->reg_config_and_status);
+		unsigned short csr = pete_readw("drivers/tty/ipwireless/hardware.c:539", &hw->memregs_CCR->reg_config_and_status);
 
 		csr |= 1;
-		writew(csr, &hw->memregs_CCR->reg_config_and_status);
+		pete_writew("drivers/tty/ipwireless/hardware.c:542", csr, &hw->memregs_CCR->reg_config_and_status);
 	}
 	spin_unlock_irqrestore(&hw->lock, flags);
 }
@@ -844,7 +844,7 @@ static void acknowledge_data_read(struct ipw_hardware *hw)
 	if (hw->hw_version == HW_VERSION_1)
 		outw(DCR_RXDONE, hw->base_port + IODCR);
 	else
-		writew(MEMRX_PCINTACKK,
+		pete_writew("drivers/tty/ipwireless/hardware.c:847", MEMRX_PCINTACKK,
 				&hw->memory_info_regs->memreg_pc_interrupt_ack);
 }
 
@@ -880,7 +880,7 @@ static void do_receive_packet(struct ipw_hardware *hw)
 		if (len > hw->ll_mtu) {
 			printk(KERN_INFO IPWIRELESS_PCCARD_NAME
 			       ": received a packet of %u bytes - longer than the MTU!\n", len);
-			writew(MEMRX_PCINTACKK,
+			pete_writew("drivers/tty/ipwireless/hardware.c:883", MEMRX_PCINTACKK,
 				&hw->memory_info_regs->memreg_pc_interrupt_ack);
 			return;
 		}
@@ -1050,7 +1050,7 @@ static int is_card_present(struct ipw_hardware *hw)
 	if (hw->hw_version == HW_VERSION_1)
 		return inw(hw->base_port + IOIR) != 0xFFFF;
 	else
-		return readl(&hw->memory_info_regs->memreg_card_present) ==
+		return pete_readl("drivers/tty/ipwireless/hardware.c:1053", &hw->memory_info_regs->memreg_card_present) ==
 		    CARD_PRESENT_VALUE;
 }
 
@@ -1093,10 +1093,10 @@ static irqreturn_t ipwireless_handle_v1_interrupt(int irq,
 
 static void acknowledge_pcmcia_interrupt(struct ipw_hardware *hw)
 {
-	unsigned short csr = readw(&hw->memregs_CCR->reg_config_and_status);
+	unsigned short csr = pete_readw("drivers/tty/ipwireless/hardware.c:1096", &hw->memregs_CCR->reg_config_and_status);
 
 	csr &= 0xfffd;
-	writew(csr, &hw->memregs_CCR->reg_config_and_status);
+	pete_writew("drivers/tty/ipwireless/hardware.c:1099", csr, &hw->memregs_CCR->reg_config_and_status);
 }
 
 static irqreturn_t ipwireless_handle_v2_v3_interrupt(int irq,
@@ -1110,10 +1110,10 @@ static irqreturn_t ipwireless_handle_v2_v3_interrupt(int irq,
 
 	do {
 
-	unsigned short memtx = readw(hw->memreg_tx);
+	unsigned short memtx = pete_readw("drivers/tty/ipwireless/hardware.c:1113", hw->memreg_tx);
 	unsigned short memtx_serial;
 	unsigned short memrxdone =
-		readw(&hw->memory_info_regs->memreg_rx_done);
+		pete_readw("drivers/tty/ipwireless/hardware.c:1116", &hw->memory_info_regs->memreg_rx_done);
 
 	try_mem_tx_old = 0;
 
@@ -1122,7 +1122,7 @@ static irqreturn_t ipwireless_handle_v2_v3_interrupt(int irq,
 
 		/* check if the card uses memreg_tx_old register */
 		if (hw->memreg_tx == &hw->memory_info_regs->memreg_tx_new) {
-			memtx = readw(&hw->memory_info_regs->memreg_tx_old);
+			memtx = pete_readw("drivers/tty/ipwireless/hardware.c:1125", &hw->memory_info_regs->memreg_tx_old);
 			if (memtx & MEMTX_TX) {
 				printk(KERN_INFO IPWIRELESS_PCCARD_NAME
 					": Using memreg_tx_old\n");
@@ -1146,7 +1146,7 @@ static irqreturn_t ipwireless_handle_v2_v3_interrupt(int irq,
 
 	memtx_serial = memtx & (unsigned short) 0xff00;
 	if (memtx & MEMTX_TX) {
-		writew(memtx_serial, hw->memreg_tx);
+		pete_writew("drivers/tty/ipwireless/hardware.c:1149", memtx_serial, hw->memreg_tx);
 
 		if (hw->serial_number_detected) {
 			if (memtx_serial != hw->last_memtx_serial) {
@@ -1176,14 +1176,14 @@ static irqreturn_t ipwireless_handle_v2_v3_interrupt(int irq,
 		}
 	}
 	if (memrxdone & MEMRX_RX_DONE) {
-		writew(0, &hw->memory_info_regs->memreg_rx_done);
+		pete_writew("drivers/tty/ipwireless/hardware.c:1179", 0, &hw->memory_info_regs->memreg_rx_done);
 		spin_lock_irqsave(&hw->lock, flags);
 		hw->tx_ready = 1;
 		spin_unlock_irqrestore(&hw->lock, flags);
 		tx = 1;
 	}
 	if (tx)
-		writew(MEMRX_PCINTACKK,
+		pete_writew("drivers/tty/ipwireless/hardware.c:1186", MEMRX_PCINTACKK,
 				&hw->memory_info_regs->memreg_pc_interrupt_ack);
 
 	acknowledge_pcmcia_interrupt(hw);

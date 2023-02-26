@@ -575,7 +575,7 @@ static inline s32 e1000_get_phy_info(struct e1000_hw *hw)
 
 static inline u32 __er32(struct e1000_hw *hw, unsigned long reg)
 {
-	return readl(hw->hw_addr + reg);
+	return pete_readl("drivers/net/ethernet/intel/e1000e/e1000.h:578", hw->hw_addr + reg);
 }
 
 #define er32(reg)	__er32(hw, E1000_##reg)
@@ -590,6 +590,6 @@ void __ew32(struct e1000_hw *hw, unsigned long reg, u32 val);
 	(__ew32((a), (reg + ((offset) << 2)), (value)))
 
 #define E1000_READ_REG_ARRAY(a, reg, offset) \
-	(readl((a)->hw_addr + reg + ((offset) << 2)))
+	(pete_readl("drivers/net/ethernet/intel/e1000e/e1000.h:593", (a)->hw_addr + reg + ((offset) << 2)))
 
 #endif /* _E1000_H_ */

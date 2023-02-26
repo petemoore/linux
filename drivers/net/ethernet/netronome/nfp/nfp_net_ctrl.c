@@ -34,7 +34,7 @@ nfp_net_tls_parse_crypto_ops(struct device *dev, struct nfp_net_tlv_caps *caps,
 		return false;
 	}
 
-	caps->crypto_ops = readl(data);
+	caps->crypto_ops = pete_readl("drivers/net/ethernet/netronome/nfp/nfp_net_ctrl.c:37", data);
 	caps->crypto_enable_off = data - ctrl_mem + 16;
 	caps->tls_resync_ss = rx_stream_scan;
 
@@ -50,13 +50,13 @@ int nfp_net_tlv_caps_parse(struct device *dev, u8 __iomem *ctrl_mem,
 
 	nfp_net_tlv_caps_reset(caps);
 
-	hdr = readl(data);
+	hdr = pete_readl("drivers/net/ethernet/netronome/nfp/nfp_net_ctrl.c:53", data);
 	if (!hdr)
 		return 0;
 
 	while (true) {
 		unsigned int length, offset;
-		u32 hdr = readl(data);
+		u32 hdr = pete_readl("drivers/net/ethernet/netronome/nfp/nfp_net_ctrl.c:59", data);
 
 		length = FIELD_GET(NFP_NET_CFG_TLV_HEADER_LENGTH, hdr);
 		offset = data - ctrl_mem;
@@ -96,7 +96,7 @@ int nfp_net_tlv_caps_parse(struct device *dev, u8 __iomem *ctrl_mem,
 				return -EINVAL;
 			}
 
-			caps->me_freq_mhz = readl(data);
+			caps->me_freq_mhz = pete_readl("drivers/net/ethernet/netronome/nfp/nfp_net_ctrl.c:99", data);
 			break;
 		case NFP_NET_CFG_TLV_TYPE_MBOX:
 			if (!length) {
@@ -121,11 +121,11 @@ int nfp_net_tlv_caps_parse(struct device *dev, u8 __iomem *ctrl_mem,
 				return -EINVAL;
 			}
 
-			caps->repr_cap = readl(data);
+			caps->repr_cap = pete_readl("drivers/net/ethernet/netronome/nfp/nfp_net_ctrl.c:124", data);
 			break;
 		case NFP_NET_CFG_TLV_TYPE_MBOX_CMSG_TYPES:
 			if (length >= 4)
-				caps->mbox_cmsg_types = readl(data);
+				caps->mbox_cmsg_types = pete_readl("drivers/net/ethernet/netronome/nfp/nfp_net_ctrl.c:128", data);
 			break;
 		case NFP_NET_CFG_TLV_TYPE_CRYPTO_OPS:
 			if (!nfp_net_tls_parse_crypto_ops(dev, caps, ctrl_mem,

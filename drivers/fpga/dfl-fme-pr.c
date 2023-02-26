@@ -91,7 +91,7 @@ static int fme_pr(struct platform_device *pdev, unsigned long arg)
 					       FME_FEATURE_ID_HEADER);
 
 	/* check port id */
-	v = readq(fme_hdr + FME_HDR_CAP);
+	v = pete_readq("drivers/fpga/dfl-fme-pr.c:94", fme_hdr + FME_HDR_CAP);
 	if (port_pr.port_id >= FIELD_GET(FME_CAP_NUM_PORTS, v)) {
 		dev_dbg(&pdev->dev, "port number more than maximum\n");
 		return -EINVAL;
@@ -398,9 +398,9 @@ static int pr_mgmt_init(struct platform_device *pdev,
 	priv->mgr = mgr;
 
 	/* Read capability register to check number of regions and bridges */
-	fme_cap = readq(fme_hdr + FME_HDR_CAP);
+	fme_cap = pete_readq("drivers/fpga/dfl-fme-pr.c:401", fme_hdr + FME_HDR_CAP);
 	for (; i < FIELD_GET(FME_CAP_NUM_PORTS, fme_cap); i++) {
-		port_offset = readq(fme_hdr + FME_HDR_PORT_OFST(i));
+		port_offset = pete_readq("drivers/fpga/dfl-fme-pr.c:403", fme_hdr + FME_HDR_PORT_OFST(i));
 		if (!(port_offset & FME_PORT_OFST_IMP))
 			continue;
 

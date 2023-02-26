@@ -130,7 +130,7 @@ void bt878_start(struct bt878 *bt, u32 controlreg, u32 op_sync_orin,
 		u32 irq_err_ignore);
 void bt878_stop(struct bt878 *bt);
 
-#define bmtwrite(dat,adr)  writel((dat), (adr))
-#define bmtread(adr)       readl(adr)
+#define bmtwrite(dat,adr)  pete_writel("drivers/media/pci/bt8xx/bt878.h:133", (dat), (adr))
+#define bmtread(adr)       pete_readl("drivers/media/pci/bt8xx/bt878.h:134", adr)
 
 #endif

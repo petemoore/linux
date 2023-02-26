@@ -21,9 +21,9 @@ void mtk_hdmi_phy_clear_bits(struct mtk_hdmi_phy *hdmi_phy, u32 offset,
 	void __iomem *reg = hdmi_phy->regs + offset;
 	u32 tmp;
 
-	tmp = readl(reg);
+	tmp = pete_readl("drivers/phy/mediatek/phy-mtk-hdmi.c:24", reg);
 	tmp &= ~bits;
-	writel(tmp, reg);
+	pete_writel("drivers/phy/mediatek/phy-mtk-hdmi.c:26", tmp, reg);
 }
 
 void mtk_hdmi_phy_set_bits(struct mtk_hdmi_phy *hdmi_phy, u32 offset,
@@ -32,9 +32,9 @@ void mtk_hdmi_phy_set_bits(struct mtk_hdmi_phy *hdmi_phy, u32 offset,
 	void __iomem *reg = hdmi_phy->regs + offset;
 	u32 tmp;
 
-	tmp = readl(reg);
+	tmp = pete_readl("drivers/phy/mediatek/phy-mtk-hdmi.c:35", reg);
 	tmp |= bits;
-	writel(tmp, reg);
+	pete_writel("drivers/phy/mediatek/phy-mtk-hdmi.c:37", tmp, reg);
 }
 
 void mtk_hdmi_phy_mask(struct mtk_hdmi_phy *hdmi_phy, u32 offset,
@@ -43,9 +43,9 @@ void mtk_hdmi_phy_mask(struct mtk_hdmi_phy *hdmi_phy, u32 offset,
 	void __iomem *reg = hdmi_phy->regs + offset;
 	u32 tmp;
 
-	tmp = readl(reg);
+	tmp = pete_readl("drivers/phy/mediatek/phy-mtk-hdmi.c:46", reg);
 	tmp = (tmp & ~mask) | (val & mask);
-	writel(tmp, reg);
+	pete_writel("drivers/phy/mediatek/phy-mtk-hdmi.c:48", tmp, reg);
 }
 
 inline struct mtk_hdmi_phy *to_mtk_hdmi_phy(struct clk_hw *hw)

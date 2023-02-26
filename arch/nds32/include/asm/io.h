@@ -71,13 +71,13 @@ static inline u32 __raw_readl(const volatile void __iomem *addr)
  * {read,write}{b,w,l,q}() access little endian memory and return result in
  * native endianness.
  */
-#define readb(c)	({ u8  __v = readb_relaxed(c); __iormb(); __v; })
-#define readw(c)	({ u16 __v = readw_relaxed(c); __iormb(); __v; })
-#define readl(c)	({ u32 __v = readl_relaxed(c); __iormb(); __v; })
+#define pete_readb("arch/nds32/include/asm/io.h:74", c)	({ u8  __v = readb_relaxed(c); __iormb(); __v; })
+#define pete_readw("arch/nds32/include/asm/io.h:75", c)	({ u16 __v = readw_relaxed(c); __iormb(); __v; })
+#define pete_readl("arch/nds32/include/asm/io.h:76", c)	({ u32 __v = readl_relaxed(c); __iormb(); __v; })
 
-#define writeb(v,c)	({ __iowmb(); writeb_relaxed((v),(c)); })
-#define writew(v,c)	({ __iowmb(); writew_relaxed((v),(c)); })
-#define writel(v,c)	({ __iowmb(); writel_relaxed((v),(c)); })
+#define pete_writeb("arch/nds32/include/asm/io.h:78", v,c)	({ __iowmb(); writeb_relaxed((v),(c)); })
+#define pete_writew("arch/nds32/include/asm/io.h:79", v,c)	({ __iowmb(); writew_relaxed((v),(c)); })
+#define pete_writel("arch/nds32/include/asm/io.h:80", v,c)	({ __iowmb(); writel_relaxed((v),(c)); })
 
 #include <asm-generic/io.h>
 

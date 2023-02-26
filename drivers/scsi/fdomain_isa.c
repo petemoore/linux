@@ -108,8 +108,8 @@ static int fdomain_isa_match(struct device *dev, unsigned int ndev)
 		bios_base = addresses[ndev];
 		/* read I/O base from BIOS area */
 		if (sig->base_offset)
-			base = readb(p + sig->base_offset) +
-			      (readb(p + sig->base_offset + 1) << 8);
+			base = pete_readb("drivers/scsi/fdomain_isa.c:111", p + sig->base_offset) +
+			      (pete_readb("drivers/scsi/fdomain_isa.c:112", p + sig->base_offset + 1) << 8);
 		iounmap(p);
 		if (base) {
 			dev_info(dev, "BIOS at 0x%lx specifies I/O base 0x%x\n",

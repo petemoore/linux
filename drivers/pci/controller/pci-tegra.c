@@ -375,23 +375,23 @@ struct tegra_pcie_port {
 static inline void afi_writel(struct tegra_pcie *pcie, u32 value,
 			      unsigned long offset)
 {
-	writel(value, pcie->afi + offset);
+	pete_writel("drivers/pci/controller/pci-tegra.c:378", value, pcie->afi + offset);
 }
 
 static inline u32 afi_readl(struct tegra_pcie *pcie, unsigned long offset)
 {
-	return readl(pcie->afi + offset);
+	return pete_readl("drivers/pci/controller/pci-tegra.c:383", pcie->afi + offset);
 }
 
 static inline void pads_writel(struct tegra_pcie *pcie, u32 value,
 			       unsigned long offset)
 {
-	writel(value, pcie->pads + offset);
+	pete_writel("drivers/pci/controller/pci-tegra.c:389", value, pcie->pads + offset);
 }
 
 static inline u32 pads_readl(struct tegra_pcie *pcie, unsigned long offset)
 {
-	return readl(pcie->pads + offset);
+	return pete_readl("drivers/pci/controller/pci-tegra.c:394", pcie->pads + offset);
 }
 
 /*
@@ -535,25 +535,25 @@ static void tegra_pcie_enable_rp_features(struct tegra_pcie_port *port)
 	u32 value;
 
 	/* Enable AER capability */
-	value = readl(port->base + RP_VEND_CTL1);
+	value = pete_readl("drivers/pci/controller/pci-tegra.c:538", port->base + RP_VEND_CTL1);
 	value |= RP_VEND_CTL1_ERPT;
-	writel(value, port->base + RP_VEND_CTL1);
+	pete_writel("drivers/pci/controller/pci-tegra.c:540", value, port->base + RP_VEND_CTL1);
 
 	/* Optimal settings to enhance bandwidth */
-	value = readl(port->base + RP_VEND_XP);
+	value = pete_readl("drivers/pci/controller/pci-tegra.c:543", port->base + RP_VEND_XP);
 	value |= RP_VEND_XP_OPPORTUNISTIC_ACK;
 	value |= RP_VEND_XP_OPPORTUNISTIC_UPDATEFC;
-	writel(value, port->base + RP_VEND_XP);
+	pete_writel("drivers/pci/controller/pci-tegra.c:546", value, port->base + RP_VEND_XP);
 
 	/*
 	 * LTSSM will wait for DLLP to finish before entering L1 or L2,
 	 * to avoid truncation of PM messages which results in receiver errors
 	 */
-	value = readl(port->base + RP_VEND_XP_BIST);
+	value = pete_readl("drivers/pci/controller/pci-tegra.c:552", port->base + RP_VEND_XP_BIST);
 	value |= RP_VEND_XP_BIST_GOTO_L1_L2_AFTER_DLLP_DONE;
-	writel(value, port->base + RP_VEND_XP_BIST);
+	pete_writel("drivers/pci/controller/pci-tegra.c:554", value, port->base + RP_VEND_XP_BIST);
 
-	value = readl(port->base + RP_PRIV_MISC);
+	value = pete_readl("drivers/pci/controller/pci-tegra.c:556", port->base + RP_PRIV_MISC);
 	value |= RP_PRIV_MISC_CTLR_CLK_CLAMP_ENABLE;
 	value |= RP_PRIV_MISC_TMS_CLK_CLAMP_ENABLE;
 
@@ -564,7 +564,7 @@ static void tegra_pcie_enable_rp_features(struct tegra_pcie_port *port)
 			RP_PRIV_MISC_TMS_CLK_CLAMP_THRESHOLD;
 	}
 
-	writel(value, port->base + RP_PRIV_MISC);
+	pete_writel("drivers/pci/controller/pci-tegra.c:567", value, port->base + RP_PRIV_MISC);
 }
 
 static void tegra_pcie_program_ectl_settings(struct tegra_pcie_port *port)
@@ -572,47 +572,47 @@ static void tegra_pcie_program_ectl_settings(struct tegra_pcie_port *port)
 	const struct tegra_pcie_soc *soc = port->pcie->soc;
 	u32 value;
 
-	value = readl(port->base + RP_ECTL_2_R1);
+	value = pete_readl("drivers/pci/controller/pci-tegra.c:575", port->base + RP_ECTL_2_R1);
 	value &= ~RP_ECTL_2_R1_RX_CTLE_1C_MASK;
 	value |= soc->ectl.regs.rp_ectl_2_r1;
-	writel(value, port->base + RP_ECTL_2_R1);
+	pete_writel("drivers/pci/controller/pci-tegra.c:578", value, port->base + RP_ECTL_2_R1);
 
-	value = readl(port->base + RP_ECTL_4_R1);
+	value = pete_readl("drivers/pci/controller/pci-tegra.c:580", port->base + RP_ECTL_4_R1);
 	value &= ~RP_ECTL_4_R1_RX_CDR_CTRL_1C_MASK;
 	value |= soc->ectl.regs.rp_ectl_4_r1 <<
 				RP_ECTL_4_R1_RX_CDR_CTRL_1C_SHIFT;
-	writel(value, port->base + RP_ECTL_4_R1);
+	pete_writel("drivers/pci/controller/pci-tegra.c:584", value, port->base + RP_ECTL_4_R1);
 
-	value = readl(port->base + RP_ECTL_5_R1);
+	value = pete_readl("drivers/pci/controller/pci-tegra.c:586", port->base + RP_ECTL_5_R1);
 	value &= ~RP_ECTL_5_R1_RX_EQ_CTRL_L_1C_MASK;
 	value |= soc->ectl.regs.rp_ectl_5_r1;
-	writel(value, port->base + RP_ECTL_5_R1);
+	pete_writel("drivers/pci/controller/pci-tegra.c:589", value, port->base + RP_ECTL_5_R1);
 
-	value = readl(port->base + RP_ECTL_6_R1);
+	value = pete_readl("drivers/pci/controller/pci-tegra.c:591", port->base + RP_ECTL_6_R1);
 	value &= ~RP_ECTL_6_R1_RX_EQ_CTRL_H_1C_MASK;
 	value |= soc->ectl.regs.rp_ectl_6_r1;
-	writel(value, port->base + RP_ECTL_6_R1);
+	pete_writel("drivers/pci/controller/pci-tegra.c:594", value, port->base + RP_ECTL_6_R1);
 
-	value = readl(port->base + RP_ECTL_2_R2);
+	value = pete_readl("drivers/pci/controller/pci-tegra.c:596", port->base + RP_ECTL_2_R2);
 	value &= ~RP_ECTL_2_R2_RX_CTLE_1C_MASK;
 	value |= soc->ectl.regs.rp_ectl_2_r2;
-	writel(value, port->base + RP_ECTL_2_R2);
+	pete_writel("drivers/pci/controller/pci-tegra.c:599", value, port->base + RP_ECTL_2_R2);
 
-	value = readl(port->base + RP_ECTL_4_R2);
+	value = pete_readl("drivers/pci/controller/pci-tegra.c:601", port->base + RP_ECTL_4_R2);
 	value &= ~RP_ECTL_4_R2_RX_CDR_CTRL_1C_MASK;
 	value |= soc->ectl.regs.rp_ectl_4_r2 <<
 				RP_ECTL_4_R2_RX_CDR_CTRL_1C_SHIFT;
-	writel(value, port->base + RP_ECTL_4_R2);
+	pete_writel("drivers/pci/controller/pci-tegra.c:605", value, port->base + RP_ECTL_4_R2);
 
-	value = readl(port->base + RP_ECTL_5_R2);
+	value = pete_readl("drivers/pci/controller/pci-tegra.c:607", port->base + RP_ECTL_5_R2);
 	value &= ~RP_ECTL_5_R2_RX_EQ_CTRL_L_1C_MASK;
 	value |= soc->ectl.regs.rp_ectl_5_r2;
-	writel(value, port->base + RP_ECTL_5_R2);
+	pete_writel("drivers/pci/controller/pci-tegra.c:610", value, port->base + RP_ECTL_5_R2);
 
-	value = readl(port->base + RP_ECTL_6_R2);
+	value = pete_readl("drivers/pci/controller/pci-tegra.c:612", port->base + RP_ECTL_6_R2);
 	value &= ~RP_ECTL_6_R2_RX_EQ_CTRL_H_1C_MASK;
 	value |= soc->ectl.regs.rp_ectl_6_r2;
-	writel(value, port->base + RP_ECTL_6_R2);
+	pete_writel("drivers/pci/controller/pci-tegra.c:615", value, port->base + RP_ECTL_6_R2);
 }
 
 static void tegra_pcie_apply_sw_fixup(struct tegra_pcie_port *port)
@@ -626,17 +626,17 @@ static void tegra_pcie_apply_sw_fixup(struct tegra_pcie_port *port)
 	 * retry time to resolve this issue.
 	 */
 	if (soc->program_deskew_time) {
-		value = readl(port->base + RP_VEND_CTL0);
+		value = pete_readl("drivers/pci/controller/pci-tegra.c:629", port->base + RP_VEND_CTL0);
 		value &= ~RP_VEND_CTL0_DSK_RST_PULSE_WIDTH_MASK;
 		value |= RP_VEND_CTL0_DSK_RST_PULSE_WIDTH;
-		writel(value, port->base + RP_VEND_CTL0);
+		pete_writel("drivers/pci/controller/pci-tegra.c:632", value, port->base + RP_VEND_CTL0);
 	}
 
 	if (soc->update_fc_timer) {
-		value = readl(port->base + RP_VEND_XP);
+		value = pete_readl("drivers/pci/controller/pci-tegra.c:636", port->base + RP_VEND_XP);
 		value &= ~RP_VEND_XP_UPDATE_FC_THRESHOLD_MASK;
 		value |= soc->update_fc_threshold;
-		writel(value, port->base + RP_VEND_XP);
+		pete_writel("drivers/pci/controller/pci-tegra.c:639", value, port->base + RP_VEND_XP);
 	}
 
 	/*
@@ -645,10 +645,10 @@ static void tegra_pcie_apply_sw_fixup(struct tegra_pcie_port *port)
 	 * Hence, the strategy followed here is to initially advertise
 	 * only Gen-1 and after link is up, retrain link to Gen-2 speed
 	 */
-	value = readl(port->base + RP_LINK_CONTROL_STATUS_2);
+	value = pete_readl("drivers/pci/controller/pci-tegra.c:648", port->base + RP_LINK_CONTROL_STATUS_2);
 	value &= ~PCI_EXP_LNKSTA_CLS;
 	value |= PCI_EXP_LNKSTA_CLS_2_5GB;
-	writel(value, port->base + RP_LINK_CONTROL_STATUS_2);
+	pete_writel("drivers/pci/controller/pci-tegra.c:651", value, port->base + RP_LINK_CONTROL_STATUS_2);
 }
 
 static void tegra_pcie_port_enable(struct tegra_pcie_port *port)
@@ -671,9 +671,9 @@ static void tegra_pcie_port_enable(struct tegra_pcie_port *port)
 	tegra_pcie_port_reset(port);
 
 	if (soc->force_pca_enable) {
-		value = readl(port->base + RP_VEND_CTL2);
+		value = pete_readl("drivers/pci/controller/pci-tegra.c:674", port->base + RP_VEND_CTL2);
 		value |= RP_VEND_CTL2_PCA_ENABLE;
-		writel(value, port->base + RP_VEND_CTL2);
+		pete_writel("drivers/pci/controller/pci-tegra.c:676", value, port->base + RP_VEND_CTL2);
 	}
 
 	tegra_pcie_enable_rp_features(port);
@@ -2250,16 +2250,16 @@ static bool tegra_pcie_port_check_link(struct tegra_pcie_port *port)
 	unsigned long value;
 
 	/* override presence detection */
-	value = readl(port->base + RP_PRIV_MISC);
+	value = pete_readl("drivers/pci/controller/pci-tegra.c:2253", port->base + RP_PRIV_MISC);
 	value &= ~RP_PRIV_MISC_PRSNT_MAP_EP_ABSNT;
 	value |= RP_PRIV_MISC_PRSNT_MAP_EP_PRSNT;
-	writel(value, port->base + RP_PRIV_MISC);
+	pete_writel("drivers/pci/controller/pci-tegra.c:2256", value, port->base + RP_PRIV_MISC);
 
 	do {
 		unsigned int timeout = TEGRA_PCIE_LINKUP_TIMEOUT;
 
 		do {
-			value = readl(port->base + RP_VEND_XP);
+			value = pete_readl("drivers/pci/controller/pci-tegra.c:2262", port->base + RP_VEND_XP);
 
 			if (value & RP_VEND_XP_DL_UP)
 				break;
@@ -2275,7 +2275,7 @@ static bool tegra_pcie_port_check_link(struct tegra_pcie_port *port)
 		timeout = TEGRA_PCIE_LINKUP_TIMEOUT;
 
 		do {
-			value = readl(port->base + RP_LINK_CONTROL_STATUS);
+			value = pete_readl("drivers/pci/controller/pci-tegra.c:2278", port->base + RP_LINK_CONTROL_STATUS);
 
 			if (value & RP_LINK_CONTROL_STATUS_DL_LINK_ACTIVE)
 				return true;
@@ -2304,10 +2304,10 @@ static void tegra_pcie_change_link_speed(struct tegra_pcie *pcie)
 		 * is called only for Tegra chips which support Gen2.
 		 * So there no harm if supported link speed is not verified.
 		 */
-		value = readl(port->base + RP_LINK_CONTROL_STATUS_2);
+		value = pete_readl("drivers/pci/controller/pci-tegra.c:2307", port->base + RP_LINK_CONTROL_STATUS_2);
 		value &= ~PCI_EXP_LNKSTA_CLS;
 		value |= PCI_EXP_LNKSTA_CLS_5_0GB;
-		writel(value, port->base + RP_LINK_CONTROL_STATUS_2);
+		pete_writel("drivers/pci/controller/pci-tegra.c:2310", value, port->base + RP_LINK_CONTROL_STATUS_2);
 
 		/*
 		 * Poll until link comes back from recovery to avoid race
@@ -2316,7 +2316,7 @@ static void tegra_pcie_change_link_speed(struct tegra_pcie *pcie)
 		deadline = ktime_add_us(ktime_get(), LINK_RETRAIN_TIMEOUT);
 
 		while (ktime_before(ktime_get(), deadline)) {
-			value = readl(port->base + RP_LINK_CONTROL_STATUS);
+			value = pete_readl("drivers/pci/controller/pci-tegra.c:2319", port->base + RP_LINK_CONTROL_STATUS);
 			if ((value & PCI_EXP_LNKSTA_LT) == 0)
 				break;
 
@@ -2328,14 +2328,14 @@ static void tegra_pcie_change_link_speed(struct tegra_pcie *pcie)
 				 port->index);
 
 		/* Retrain the link */
-		value = readl(port->base + RP_LINK_CONTROL_STATUS);
+		value = pete_readl("drivers/pci/controller/pci-tegra.c:2331", port->base + RP_LINK_CONTROL_STATUS);
 		value |= PCI_EXP_LNKCTL_RL;
-		writel(value, port->base + RP_LINK_CONTROL_STATUS);
+		pete_writel("drivers/pci/controller/pci-tegra.c:2333", value, port->base + RP_LINK_CONTROL_STATUS);
 
 		deadline = ktime_add_us(ktime_get(), LINK_RETRAIN_TIMEOUT);
 
 		while (ktime_before(ktime_get(), deadline)) {
-			value = readl(port->base + RP_LINK_CONTROL_STATUS);
+			value = pete_readl("drivers/pci/controller/pci-tegra.c:2338", port->base + RP_LINK_CONTROL_STATUS);
 			if ((value & PCI_EXP_LNKSTA_LT) == 0)
 				break;
 
@@ -2568,12 +2568,12 @@ static int tegra_pcie_ports_seq_show(struct seq_file *s, void *v)
 
 	port = list_entry(v, struct tegra_pcie_port, list);
 
-	value = readl(port->base + RP_VEND_XP);
+	value = pete_readl("drivers/pci/controller/pci-tegra.c:2571", port->base + RP_VEND_XP);
 
 	if (value & RP_VEND_XP_DL_UP)
 		up = true;
 
-	value = readl(port->base + RP_LINK_CONTROL_STATUS);
+	value = pete_readl("drivers/pci/controller/pci-tegra.c:2576", port->base + RP_LINK_CONTROL_STATUS);
 
 	if (value & RP_LINK_CONTROL_STATUS_DL_LINK_ACTIVE)
 		active = true;

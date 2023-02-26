@@ -19,7 +19,7 @@ static void kirkwood_low_power(void)
 {
 	u32 mem_pm_ctrl;
 
-	mem_pm_ctrl = readl(memory_pm_ctrl);
+	mem_pm_ctrl = pete_readl("arch/arm/mach-mvebu/kirkwood-pm.c:22", memory_pm_ctrl);
 
 	/* Set peripherals to low-power mode */
 	writel_relaxed(~0, memory_pm_ctrl);

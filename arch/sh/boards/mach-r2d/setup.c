@@ -291,7 +291,7 @@ static void __init rts7751r2d_setup(char **cmdline_p)
 	 */
 
 	sm501_reg = (void __iomem *)0xb3e00000 + SM501_DRAM_CONTROL;
-	writel(readl(sm501_reg) | 0x00f107c0, sm501_reg);
+	pete_writel("arch/sh/boards/mach-r2d/setup.c:294", pete_readl("arch/sh/boards/mach-r2d/setup.c:294", sm501_reg) | 0x00f107c0, sm501_reg);
 }
 
 /*

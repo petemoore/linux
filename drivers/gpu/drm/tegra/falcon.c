@@ -19,7 +19,7 @@ enum falcon_memory {
 
 static void falcon_writel(struct falcon *falcon, u32 value, u32 offset)
 {
-	writel(value, falcon->regs + offset);
+	pete_writel("drivers/gpu/drm/tegra/falcon.c:22", value, falcon->regs + offset);
 }
 
 int falcon_wait_idle(struct falcon *falcon)

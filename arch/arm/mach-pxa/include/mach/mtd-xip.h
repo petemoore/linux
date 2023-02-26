@@ -18,11 +18,11 @@
 
 #define ICIP			io_p2v(0x40d00000)
 #define ICMR			io_p2v(0x40d00004)
-#define xip_irqpending()	(readl(ICIP) & readl(ICMR))
+#define xip_irqpending()	(pete_readl("arch/arm/mach-pxa/include/mach/mtd-xip.h:21", ICIP) & pete_readl("arch/arm/mach-pxa/include/mach/mtd-xip.h:21", ICMR))
 
 /* we sample OSCR and convert desired delta to usec (1/4 ~= 1000000/3686400) */
-#define xip_currtime()		readl(OSCR)
-#define xip_elapsed_since(x)	(signed)((readl(OSCR) - (x)) / 4)
+#define xip_currtime()		pete_readl("arch/arm/mach-pxa/include/mach/mtd-xip.h:24", OSCR)
+#define xip_elapsed_since(x)	(signed)((pete_readl("arch/arm/mach-pxa/include/mach/mtd-xip.h:25", OSCR) - (x)) / 4)
 
 /*
  * xip_cpu_idle() is used when waiting for a delay equal or larger than

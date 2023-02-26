@@ -519,9 +519,9 @@ stex_send_cmd(struct st_hba *hba, struct req_msg *req, u16 tag)
 	hba->ccb[tag].req = req;
 	hba->out_req_cnt++;
 
-	writel(hba->req_head, hba->mmio_base + IMR0);
-	writel(MU_INBOUND_DOORBELL_REQHEADCHANGED, hba->mmio_base + IDBL);
-	readl(hba->mmio_base + IDBL); /* flush */
+	pete_writel("drivers/scsi/stex.c:522", hba->req_head, hba->mmio_base + IMR0);
+	pete_writel("drivers/scsi/stex.c:523", MU_INBOUND_DOORBELL_REQHEADCHANGED, hba->mmio_base + IDBL);
+	pete_readl("drivers/scsi/stex.c:524", hba->mmio_base + IDBL); /* flush */
 }
 
 static void
@@ -549,13 +549,13 @@ stex_ss_send_cmd(struct st_hba *hba, struct req_msg *req, u16 tag)
 	++hba->req_head;
 	hba->req_head %= hba->rq_count+1;
 	if (hba->cardtype == st_P3) {
-		writel((addr >> 16) >> 16, hba->mmio_base + YH2I_REQ_HI);
-		writel(addr, hba->mmio_base + YH2I_REQ);
+		pete_writel("drivers/scsi/stex.c:552", (addr >> 16) >> 16, hba->mmio_base + YH2I_REQ_HI);
+		pete_writel("drivers/scsi/stex.c:553", addr, hba->mmio_base + YH2I_REQ);
 	} else {
-		writel((addr >> 16) >> 16, hba->mmio_base + YH2I_REQ_HI);
-		readl(hba->mmio_base + YH2I_REQ_HI); /* flush */
-		writel(addr, hba->mmio_base + YH2I_REQ);
-		readl(hba->mmio_base + YH2I_REQ); /* flush */
+		pete_writel("drivers/scsi/stex.c:555", (addr >> 16) >> 16, hba->mmio_base + YH2I_REQ_HI);
+		pete_readl("drivers/scsi/stex.c:556", hba->mmio_base + YH2I_REQ_HI); /* flush */
+		pete_writel("drivers/scsi/stex.c:557", addr, hba->mmio_base + YH2I_REQ);
+		pete_readl("drivers/scsi/stex.c:558", hba->mmio_base + YH2I_REQ); /* flush */
 	}
 }
 
@@ -804,7 +804,7 @@ static void stex_mu_intr(struct st_hba *hba, u32 doorbell)
 		return;
 
 	/* status payloads */
-	hba->status_head = readl(base + OMR1);
+	hba->status_head = pete_readl("drivers/scsi/stex.c:807", base + OMR1);
 	if (unlikely(hba->status_head > hba->sts_count)) {
 		printk(KERN_WARNING DRV_NAME "(%s): invalid status head\n",
 			pci_name(hba->pdev));
@@ -875,8 +875,8 @@ static void stex_mu_intr(struct st_hba *hba, u32 doorbell)
 	}
 
 update_status:
-	writel(hba->status_head, base + IMR1);
-	readl(base + IMR1); /* flush */
+	pete_writel("drivers/scsi/stex.c:878", hba->status_head, base + IMR1);
+	pete_readl("drivers/scsi/stex.c:879", base + IMR1); /* flush */
 }
 
 static irqreturn_t stex_intr(int irq, void *__hba)
@@ -888,12 +888,12 @@ static irqreturn_t stex_intr(int irq, void *__hba)
 
 	spin_lock_irqsave(hba->host->host_lock, flags);
 
-	data = readl(base + ODBL);
+	data = pete_readl("drivers/scsi/stex.c:891", base + ODBL);
 
 	if (data && data != 0xffffffff) {
 		/* clear the interrupt */
-		writel(data, base + ODBL);
-		readl(base + ODBL); /* flush */
+		pete_writel("drivers/scsi/stex.c:895", data, base + ODBL);
+		pete_readl("drivers/scsi/stex.c:896", base + ODBL); /* flush */
 		stex_mu_intr(hba, data);
 		spin_unlock_irqrestore(hba->host->host_lock, flags);
 		if (unlikely(data & MU_OUTBOUND_DOORBELL_REQUEST_RESET &&
@@ -990,10 +990,10 @@ static irqreturn_t stex_ss_intr(int irq, void *__hba)
 	spin_lock_irqsave(hba->host->host_lock, flags);
 
 	if (hba->cardtype == st_yel) {
-		data = readl(base + YI2H_INT);
+		data = pete_readl("drivers/scsi/stex.c:993", base + YI2H_INT);
 		if (data && data != 0xffffffff) {
 			/* clear the interrupt */
-			writel(data, base + YI2H_INT_C);
+			pete_writel("drivers/scsi/stex.c:996", data, base + YI2H_INT_C);
 			stex_ss_mu_intr(hba);
 			spin_unlock_irqrestore(hba->host->host_lock, flags);
 			if (unlikely(data & SS_I2H_REQUEST_RESET))
@@ -1001,12 +1001,12 @@ static irqreturn_t stex_ss_intr(int irq, void *__hba)
 			return IRQ_HANDLED;
 		}
 	} else {
-		data = readl(base + PSCRATCH4);
+		data = pete_readl("drivers/scsi/stex.c:1004", base + PSCRATCH4);
 		if (data != 0xffffffff) {
 			if (data != 0) {
 				/* clear the interrupt */
-				writel(data, base + PSCRATCH1);
-				writel((1 << 22), base + YH2I_INT);
+				pete_writel("drivers/scsi/stex.c:1008", data, base + PSCRATCH1);
+				pete_writel("drivers/scsi/stex.c:1009", (1 << 22), base + YH2I_INT);
 			}
 			stex_ss_mu_intr(hba);
 			spin_unlock_irqrestore(hba->host->host_lock, flags);
@@ -1029,11 +1029,11 @@ static int stex_common_handshake(struct st_hba *hba)
 	u32 data;
 	unsigned long before;
 
-	if (readl(base + OMR0) != MU_HANDSHAKE_SIGNATURE) {
-		writel(MU_INBOUND_DOORBELL_HANDSHAKE, base + IDBL);
-		readl(base + IDBL);
+	if (pete_readl("drivers/scsi/stex.c:1032", base + OMR0) != MU_HANDSHAKE_SIGNATURE) {
+		pete_writel("drivers/scsi/stex.c:1033", MU_INBOUND_DOORBELL_HANDSHAKE, base + IDBL);
+		pete_readl("drivers/scsi/stex.c:1034", base + IDBL);
 		before = jiffies;
-		while (readl(base + OMR0) != MU_HANDSHAKE_SIGNATURE) {
+		while (pete_readl("drivers/scsi/stex.c:1036", base + OMR0) != MU_HANDSHAKE_SIGNATURE) {
 			if (time_after(jiffies, before + MU_MAX_DELAY * HZ)) {
 				printk(KERN_ERR DRV_NAME
 					"(%s): no handshake signature\n",
@@ -1047,7 +1047,7 @@ static int stex_common_handshake(struct st_hba *hba)
 
 	udelay(10);
 
-	data = readl(base + OMR1);
+	data = pete_readl("drivers/scsi/stex.c:1050", base + OMR1);
 	if ((data & 0xffff0000) == MU_HANDSHAKE_SIGNATURE_HALF) {
 		data &= 0x0000ffff;
 		if (hba->host->can_queue > data) {
@@ -1071,19 +1071,19 @@ static int stex_common_handshake(struct st_hba *hba)
 		h->extra_offset = h->extra_size = 0;
 
 	status_phys = hba->dma_handle + (hba->rq_count+1) * hba->rq_size;
-	writel(status_phys, base + IMR0);
-	readl(base + IMR0);
-	writel((status_phys >> 16) >> 16, base + IMR1);
-	readl(base + IMR1);
+	pete_writel("drivers/scsi/stex.c:1074", status_phys, base + IMR0);
+	pete_readl("drivers/scsi/stex.c:1075", base + IMR0);
+	pete_writel("drivers/scsi/stex.c:1076", (status_phys >> 16) >> 16, base + IMR1);
+	pete_readl("drivers/scsi/stex.c:1077", base + IMR1);
 
-	writel((status_phys >> 16) >> 16, base + OMR0); /* old fw compatible */
-	readl(base + OMR0);
-	writel(MU_INBOUND_DOORBELL_HANDSHAKE, base + IDBL);
-	readl(base + IDBL); /* flush */
+	pete_writel("drivers/scsi/stex.c:1079", (status_phys >> 16) >> 16, base + OMR0); /* old fw compatible */
+	pete_readl("drivers/scsi/stex.c:1080", base + OMR0);
+	pete_writel("drivers/scsi/stex.c:1081", MU_INBOUND_DOORBELL_HANDSHAKE, base + IDBL);
+	pete_readl("drivers/scsi/stex.c:1082", base + IDBL); /* flush */
 
 	udelay(10);
 	before = jiffies;
-	while (readl(base + OMR0) != MU_HANDSHAKE_SIGNATURE) {
+	while (pete_readl("drivers/scsi/stex.c:1086", base + OMR0) != MU_HANDSHAKE_SIGNATURE) {
 		if (time_after(jiffies, before + MU_MAX_DELAY * HZ)) {
 			printk(KERN_ERR DRV_NAME
 				"(%s): no signature after handshake frame\n",
@@ -1094,14 +1094,14 @@ static int stex_common_handshake(struct st_hba *hba)
 		msleep(1);
 	}
 
-	writel(0, base + IMR0);
-	readl(base + IMR0);
-	writel(0, base + OMR0);
-	readl(base + OMR0);
-	writel(0, base + IMR1);
-	readl(base + IMR1);
-	writel(0, base + OMR1);
-	readl(base + OMR1); /* flush */
+	pete_writel("drivers/scsi/stex.c:1097", 0, base + IMR0);
+	pete_readl("drivers/scsi/stex.c:1098", base + IMR0);
+	pete_writel("drivers/scsi/stex.c:1099", 0, base + OMR0);
+	pete_readl("drivers/scsi/stex.c:1100", base + OMR0);
+	pete_writel("drivers/scsi/stex.c:1101", 0, base + IMR1);
+	pete_readl("drivers/scsi/stex.c:1102", base + IMR1);
+	pete_writel("drivers/scsi/stex.c:1103", 0, base + OMR1);
+	pete_readl("drivers/scsi/stex.c:1104", base + OMR1); /* flush */
 	return 0;
 }
 
@@ -1118,7 +1118,7 @@ static int stex_ss_handshake(struct st_hba *hba)
 	before = jiffies;
 
 	if (hba->cardtype == st_yel) {
-		operationaldata = readl(base + YIOA_STATUS);
+		operationaldata = pete_readl("drivers/scsi/stex.c:1121", base + YIOA_STATUS);
 		while (operationaldata != SS_MU_OPERATIONAL) {
 			if (time_after(jiffies, before + MU_MAX_DELAY * HZ)) {
 				printk(KERN_ERR DRV_NAME
@@ -1127,10 +1127,10 @@ static int stex_ss_handshake(struct st_hba *hba)
 				return -1;
 			}
 			msleep(1);
-			operationaldata = readl(base + YIOA_STATUS);
+			operationaldata = pete_readl("drivers/scsi/stex.c:1130", base + YIOA_STATUS);
 		}
 	} else {
-		operationaldata = readl(base + PSCRATCH3);
+		operationaldata = pete_readl("drivers/scsi/stex.c:1133", base + PSCRATCH3);
 		while (operationaldata != SS_MU_OPERATIONAL) {
 			if (time_after(jiffies, before + MU_MAX_DELAY * HZ)) {
 				printk(KERN_ERR DRV_NAME
@@ -1139,7 +1139,7 @@ static int stex_ss_handshake(struct st_hba *hba)
 				return -1;
 			}
 			msleep(1);
-			operationaldata = readl(base + PSCRATCH3);
+			operationaldata = pete_readl("drivers/scsi/stex.c:1142", base + PSCRATCH3);
 		}
 	}
 
@@ -1160,25 +1160,25 @@ static int stex_ss_handshake(struct st_hba *hba)
 	h->scratch_size = cpu_to_le32(scratch_size);
 
 	if (hba->cardtype == st_yel) {
-		data = readl(base + YINT_EN);
+		data = pete_readl("drivers/scsi/stex.c:1163", base + YINT_EN);
 		data &= ~4;
-		writel(data, base + YINT_EN);
-		writel((hba->dma_handle >> 16) >> 16, base + YH2I_REQ_HI);
-		readl(base + YH2I_REQ_HI);
-		writel(hba->dma_handle, base + YH2I_REQ);
-		readl(base + YH2I_REQ); /* flush */
+		pete_writel("drivers/scsi/stex.c:1165", data, base + YINT_EN);
+		pete_writel("drivers/scsi/stex.c:1166", (hba->dma_handle >> 16) >> 16, base + YH2I_REQ_HI);
+		pete_readl("drivers/scsi/stex.c:1167", base + YH2I_REQ_HI);
+		pete_writel("drivers/scsi/stex.c:1168", hba->dma_handle, base + YH2I_REQ);
+		pete_readl("drivers/scsi/stex.c:1169", base + YH2I_REQ); /* flush */
 	} else {
-		data = readl(base + YINT_EN);
+		data = pete_readl("drivers/scsi/stex.c:1171", base + YINT_EN);
 		data &= ~(1 << 0);
 		data &= ~(1 << 2);
-		writel(data, base + YINT_EN);
+		pete_writel("drivers/scsi/stex.c:1174", data, base + YINT_EN);
 		if (hba->msi_lock == 0) {
 			/* P3 MSI Register cannot access twice */
-			writel((1 << 6), base + YH2I_INT);
+			pete_writel("drivers/scsi/stex.c:1177", (1 << 6), base + YH2I_INT);
 			hba->msi_lock  = 1;
 		}
-		writel((hba->dma_handle >> 16) >> 16, base + YH2I_REQ_HI);
-		writel(hba->dma_handle, base + YH2I_REQ);
+		pete_writel("drivers/scsi/stex.c:1180", (hba->dma_handle >> 16) >> 16, base + YH2I_REQ_HI);
+		pete_writel("drivers/scsi/stex.c:1181", hba->dma_handle, base + YH2I_REQ);
 	}
 
 	before = jiffies;
@@ -1196,7 +1196,7 @@ static int stex_ss_handshake(struct st_hba *hba)
 			msleep(1);
 		}
 	} else {
-		mailboxdata = readl(base + MAILBOX_BASE + MAILBOX_HNDSHK_STS);
+		mailboxdata = pete_readl("drivers/scsi/stex.c:1199", base + MAILBOX_BASE + MAILBOX_HNDSHK_STS);
 		while (mailboxdata != SS_STS_HANDSHAKE) {
 			if (time_after(jiffies, before + MU_MAX_DELAY * HZ)) {
 				printk(KERN_ERR DRV_NAME
@@ -1207,7 +1207,7 @@ static int stex_ss_handshake(struct st_hba *hba)
 			}
 			rmb();
 			msleep(1);
-			mailboxdata = readl(base + MAILBOX_BASE + MAILBOX_HNDSHK_STS);
+			mailboxdata = pete_readl("drivers/scsi/stex.c:1210", base + MAILBOX_BASE + MAILBOX_HNDSHK_STS);
 		}
 	}
 	memset(scratch, 0, scratch_size);
@@ -1264,28 +1264,28 @@ static int stex_abort(struct scsi_cmnd *cmd)
 		goto out;
 
 	if (hba->cardtype == st_yel) {
-		data = readl(base + YI2H_INT);
+		data = pete_readl("drivers/scsi/stex.c:1267", base + YI2H_INT);
 		if (data == 0 || data == 0xffffffff)
 			goto fail_out;
 
-		writel(data, base + YI2H_INT_C);
+		pete_writel("drivers/scsi/stex.c:1271", data, base + YI2H_INT_C);
 		stex_ss_mu_intr(hba);
 	} else if (hba->cardtype == st_P3) {
-		data = readl(base + PSCRATCH4);
+		data = pete_readl("drivers/scsi/stex.c:1274", base + PSCRATCH4);
 		if (data == 0xffffffff)
 			goto fail_out;
 		if (data != 0) {
-			writel(data, base + PSCRATCH1);
-			writel((1 << 22), base + YH2I_INT);
+			pete_writel("drivers/scsi/stex.c:1278", data, base + PSCRATCH1);
+			pete_writel("drivers/scsi/stex.c:1279", (1 << 22), base + YH2I_INT);
 		}
 		stex_ss_mu_intr(hba);
 	} else {
-		data = readl(base + ODBL);
+		data = pete_readl("drivers/scsi/stex.c:1283", base + ODBL);
 		if (data == 0 || data == 0xffffffff)
 			goto fail_out;
 
-		writel(data, base + ODBL);
-		readl(base + ODBL); /* flush */
+		pete_writel("drivers/scsi/stex.c:1287", data, base + ODBL);
+		pete_readl("drivers/scsi/stex.c:1288", base + ODBL); /* flush */
 		stex_mu_intr(hba, data);
 	}
 	if (hba->wait_ccb == NULL) {
@@ -1350,8 +1350,8 @@ static int stex_yos_reset(struct st_hba *hba)
 	int ret = 0;
 
 	base = hba->mmio_base;
-	writel(MU_INBOUND_DOORBELL_RESET, base + IDBL);
-	readl(base + IDBL); /* flush */
+	pete_writel("drivers/scsi/stex.c:1353", MU_INBOUND_DOORBELL_RESET, base + IDBL);
+	pete_readl("drivers/scsi/stex.c:1354", base + IDBL); /* flush */
 	before = jiffies;
 	while (hba->out_req_cnt > 0) {
 		if (time_after(jiffies, before + ST_INTERNAL_TIMEOUT * HZ)) {
@@ -1376,14 +1376,14 @@ static int stex_yos_reset(struct st_hba *hba)
 
 static void stex_ss_reset(struct st_hba *hba)
 {
-	writel(SS_H2I_INT_RESET, hba->mmio_base + YH2I_INT);
-	readl(hba->mmio_base + YH2I_INT);
+	pete_writel("drivers/scsi/stex.c:1379", SS_H2I_INT_RESET, hba->mmio_base + YH2I_INT);
+	pete_readl("drivers/scsi/stex.c:1380", hba->mmio_base + YH2I_INT);
 	ssleep(5);
 }
 
 static void stex_p3_reset(struct st_hba *hba)
 {
-	writel(SS_H2I_INT_RESET, hba->mmio_base + YH2I_INT);
+	pete_writel("drivers/scsi/stex.c:1386", SS_H2I_INT_RESET, hba->mmio_base + YH2I_INT);
 	ssleep(5);
 }
 

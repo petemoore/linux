@@ -681,10 +681,10 @@ static void artpec6_pmx_select_func(struct pinctrl_dev *pctldev,
 
 		reg = artpec6_pmx_reg_offset(artpec6_pin_groups[group].pins[i]);
 
-		regval = readl(pmx->base + reg);
+		regval = pete_readl("drivers/pinctrl/pinctrl-artpec6.c:684", pmx->base + reg);
 		regval &= ~ARTPEC6_PINMUX_SEL_MASK;
 		regval |= val;
-		writel(regval, pmx->base + reg);
+		pete_writel("drivers/pinctrl/pinctrl-artpec6.c:687", regval, pmx->base + reg);
 	}
 }
 
@@ -748,7 +748,7 @@ static int artpec6_pconf_get(struct pinctrl_dev *pctldev, unsigned int pin,
 		pmx->pins[pin].name);
 
 	/* Read pin register values */
-	regval = readl(pmx->base + artpec6_pmx_reg_offset(pin));
+	regval = pete_readl("drivers/pinctrl/pinctrl-artpec6.c:751", pmx->base + artpec6_pmx_reg_offset(pin));
 
 	/* If valid, get configuration for parameter */
 	switch (param) {
@@ -822,9 +822,9 @@ static int artpec6_pconf_set(struct pinctrl_dev *pctldev, unsigned int pin,
 
 		switch (param) {
 		case PIN_CONFIG_BIAS_DISABLE:
-			regval = readl(reg);
+			regval = pete_readl("drivers/pinctrl/pinctrl-artpec6.c:825", reg);
 			regval |= (1 << ARTPEC6_PINMUX_UDC1_SHIFT);
-			writel(regval, reg);
+			pete_writel("drivers/pinctrl/pinctrl-artpec6.c:827", regval, reg);
 			break;
 
 		case PIN_CONFIG_BIAS_PULL_UP:
@@ -834,10 +834,10 @@ static int artpec6_pconf_set(struct pinctrl_dev *pctldev, unsigned int pin,
 				return -EINVAL;
 			}
 
-			regval = readl(reg);
+			regval = pete_readl("drivers/pinctrl/pinctrl-artpec6.c:837", reg);
 			regval |= (arg << ARTPEC6_PINMUX_UDC0_SHIFT);
 			regval &= ~ARTPEC6_PINMUX_UDC1_MASK; /* Enable */
-			writel(regval, reg);
+			pete_writel("drivers/pinctrl/pinctrl-artpec6.c:840", regval, reg);
 			break;
 
 		case PIN_CONFIG_BIAS_PULL_DOWN:
@@ -847,10 +847,10 @@ static int artpec6_pconf_set(struct pinctrl_dev *pctldev, unsigned int pin,
 				return -EINVAL;
 			}
 
-			regval = readl(reg);
+			regval = pete_readl("drivers/pinctrl/pinctrl-artpec6.c:850", reg);
 			regval &= ~(arg << ARTPEC6_PINMUX_UDC0_SHIFT);
 			regval &= ~ARTPEC6_PINMUX_UDC1_MASK; /* Enable */
-			writel(regval, reg);
+			pete_writel("drivers/pinctrl/pinctrl-artpec6.c:853", regval, reg);
 			break;
 
 		case PIN_CONFIG_DRIVE_STRENGTH:
@@ -861,10 +861,10 @@ static int artpec6_pconf_set(struct pinctrl_dev *pctldev, unsigned int pin,
 				return -EINVAL;
 			}
 
-			regval = readl(reg);
+			regval = pete_readl("drivers/pinctrl/pinctrl-artpec6.c:864", reg);
 			regval &= ~ARTPEC6_PINMUX_DRV_MASK;
 			regval |= (drive << ARTPEC6_PINMUX_DRV_SHIFT);
-			writel(regval, reg);
+			pete_writel("drivers/pinctrl/pinctrl-artpec6.c:867", regval, reg);
 			break;
 
 		default:

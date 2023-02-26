@@ -83,7 +83,7 @@ static int mscc_miim_read(struct mii_bus *bus, int mii_id, int regnum)
 	if (ret)
 		goto out;
 
-	writel(MSCC_MIIM_CMD_VLD | (mii_id << MSCC_MIIM_CMD_PHYAD_SHIFT) |
+	pete_writel("drivers/net/mdio/mdio-mscc-miim.c:86", MSCC_MIIM_CMD_VLD | (mii_id << MSCC_MIIM_CMD_PHYAD_SHIFT) |
 	       (regnum << MSCC_MIIM_CMD_REGAD_SHIFT) | MSCC_MIIM_CMD_OPR_READ,
 	       miim->regs + MSCC_MIIM_REG_CMD);
 
@@ -91,7 +91,7 @@ static int mscc_miim_read(struct mii_bus *bus, int mii_id, int regnum)
 	if (ret)
 		goto out;
 
-	val = readl(miim->regs + MSCC_MIIM_REG_DATA);
+	val = pete_readl("drivers/net/mdio/mdio-mscc-miim.c:94", miim->regs + MSCC_MIIM_REG_DATA);
 	if (val & MSCC_MIIM_DATA_ERROR) {
 		ret = -EIO;
 		goto out;
@@ -115,7 +115,7 @@ static int mscc_miim_write(struct mii_bus *bus, int mii_id,
 	if (ret < 0)
 		goto out;
 
-	writel(MSCC_MIIM_CMD_VLD | (mii_id << MSCC_MIIM_CMD_PHYAD_SHIFT) |
+	pete_writel("drivers/net/mdio/mdio-mscc-miim.c:118", MSCC_MIIM_CMD_VLD | (mii_id << MSCC_MIIM_CMD_PHYAD_SHIFT) |
 	       (regnum << MSCC_MIIM_CMD_REGAD_SHIFT) |
 	       (value << MSCC_MIIM_CMD_WRDATA_SHIFT) |
 	       MSCC_MIIM_CMD_OPR_WRITE,
@@ -130,8 +130,8 @@ static int mscc_miim_reset(struct mii_bus *bus)
 	struct mscc_miim_dev *miim = bus->priv;
 
 	if (miim->phy_regs) {
-		writel(0, miim->phy_regs + MSCC_PHY_REG_PHY_CFG);
-		writel(0x1ff, miim->phy_regs + MSCC_PHY_REG_PHY_CFG);
+		pete_writel("drivers/net/mdio/mdio-mscc-miim.c:133", 0, miim->phy_regs + MSCC_PHY_REG_PHY_CFG);
+		pete_writel("drivers/net/mdio/mdio-mscc-miim.c:134", 0x1ff, miim->phy_regs + MSCC_PHY_REG_PHY_CFG);
 		mdelay(500);
 	}
 

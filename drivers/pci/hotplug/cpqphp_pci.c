@@ -46,10 +46,10 @@ static void __iomem *detect_HRT_floating_pointer(void __iomem *begin, void __iom
 	endp = (end - sizeof(struct hrt) + 1);
 
 	for (fp = begin; fp <= endp; fp += 16) {
-		temp1 = readb(fp + SIG0);
-		temp2 = readb(fp + SIG1);
-		temp3 = readb(fp + SIG2);
-		temp4 = readb(fp + SIG3);
+		temp1 = pete_readb("drivers/pci/hotplug/cpqphp_pci.c:49", fp + SIG0);
+		temp2 = pete_readb("drivers/pci/hotplug/cpqphp_pci.c:50", fp + SIG1);
+		temp3 = pete_readb("drivers/pci/hotplug/cpqphp_pci.c:51", fp + SIG2);
+		temp4 = pete_readb("drivers/pci/hotplug/cpqphp_pci.c:52", fp + SIG3);
 		if (temp1 == '$' &&
 		    temp2 == 'H' &&
 		    temp3 == 'R' &&
@@ -1187,7 +1187,7 @@ int cpqhp_find_available_resources(struct controller *ctrl, void __iomem *rom_st
 		return -ENODEV;
 
 	/* Sum all resources and setup resource maps */
-	unused_IRQ = readl(rom_resource_table + UNUSED_IRQ);
+	unused_IRQ = pete_readl("drivers/pci/hotplug/cpqphp_pci.c:1190", rom_resource_table + UNUSED_IRQ);
 	dbg("unused_IRQ = %x\n", unused_IRQ);
 
 	temp = 0;
@@ -1214,7 +1214,7 @@ int cpqhp_find_available_resources(struct controller *ctrl, void __iomem *rom_st
 	}
 
 	dbg("cpqhp_nic_irq= %d\n", cpqhp_nic_irq);
-	unused_IRQ = readl(rom_resource_table + PCIIRQ);
+	unused_IRQ = pete_readl("drivers/pci/hotplug/cpqphp_pci.c:1217", rom_resource_table + PCIIRQ);
 
 	temp = 0;
 
@@ -1232,25 +1232,25 @@ int cpqhp_find_available_resources(struct controller *ctrl, void __iomem *rom_st
 
 	one_slot = rom_resource_table + sizeof(struct hrt);
 
-	i = readb(rom_resource_table + NUMBER_OF_ENTRIES);
+	i = pete_readb("drivers/pci/hotplug/cpqphp_pci.c:1235", rom_resource_table + NUMBER_OF_ENTRIES);
 	dbg("number_of_entries = %d\n", i);
 
-	if (!readb(one_slot + SECONDARY_BUS))
+	if (!pete_readb("drivers/pci/hotplug/cpqphp_pci.c:1238", one_slot + SECONDARY_BUS))
 		return 1;
 
 	dbg("dev|IO base|length|Mem base|length|Pre base|length|PB SB MB\n");
 
-	while (i && readb(one_slot + SECONDARY_BUS)) {
-		u8 dev_func = readb(one_slot + DEV_FUNC);
-		u8 primary_bus = readb(one_slot + PRIMARY_BUS);
-		u8 secondary_bus = readb(one_slot + SECONDARY_BUS);
-		u8 max_bus = readb(one_slot + MAX_BUS);
-		u16 io_base = readw(one_slot + IO_BASE);
-		u16 io_length = readw(one_slot + IO_LENGTH);
-		u16 mem_base = readw(one_slot + MEM_BASE);
-		u16 mem_length = readw(one_slot + MEM_LENGTH);
-		u16 pre_mem_base = readw(one_slot + PRE_MEM_BASE);
-		u16 pre_mem_length = readw(one_slot + PRE_MEM_LENGTH);
+	while (i && pete_readb("drivers/pci/hotplug/cpqphp_pci.c:1243", one_slot + SECONDARY_BUS)) {
+		u8 dev_func = pete_readb("drivers/pci/hotplug/cpqphp_pci.c:1244", one_slot + DEV_FUNC);
+		u8 primary_bus = pete_readb("drivers/pci/hotplug/cpqphp_pci.c:1245", one_slot + PRIMARY_BUS);
+		u8 secondary_bus = pete_readb("drivers/pci/hotplug/cpqphp_pci.c:1246", one_slot + SECONDARY_BUS);
+		u8 max_bus = pete_readb("drivers/pci/hotplug/cpqphp_pci.c:1247", one_slot + MAX_BUS);
+		u16 io_base = pete_readw("drivers/pci/hotplug/cpqphp_pci.c:1248", one_slot + IO_BASE);
+		u16 io_length = pete_readw("drivers/pci/hotplug/cpqphp_pci.c:1249", one_slot + IO_LENGTH);
+		u16 mem_base = pete_readw("drivers/pci/hotplug/cpqphp_pci.c:1250", one_slot + MEM_BASE);
+		u16 mem_length = pete_readw("drivers/pci/hotplug/cpqphp_pci.c:1251", one_slot + MEM_LENGTH);
+		u16 pre_mem_base = pete_readw("drivers/pci/hotplug/cpqphp_pci.c:1252", one_slot + PRE_MEM_BASE);
+		u16 pre_mem_length = pete_readw("drivers/pci/hotplug/cpqphp_pci.c:1253", one_slot + PRE_MEM_LENGTH);
 
 		dbg("%2.2x | %4.4x  | %4.4x | %4.4x   | %4.4x | %4.4x   | %4.4x |%2.2x %2.2x %2.2x\n",
 		    dev_func, io_base, io_length, mem_base, mem_length, pre_mem_base, pre_mem_length,

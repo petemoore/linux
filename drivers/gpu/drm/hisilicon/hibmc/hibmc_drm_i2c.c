@@ -27,19 +27,19 @@ static void hibmc_set_i2c_signal(void *data, u32 mask, int value)
 {
 	struct hibmc_connector *hibmc_connector = data;
 	struct hibmc_drm_private *priv = to_hibmc_drm_private(hibmc_connector->base.dev);
-	u32 tmp_dir = readl(priv->mmio + GPIO_DATA_DIRECTION);
+	u32 tmp_dir = pete_readl("drivers/gpu/drm/hisilicon/hibmc/hibmc_drm_i2c.c:30", priv->mmio + GPIO_DATA_DIRECTION);
 
 	if (value) {
 		tmp_dir &= ~mask;
-		writel(tmp_dir, priv->mmio + GPIO_DATA_DIRECTION);
+		pete_writel("drivers/gpu/drm/hisilicon/hibmc/hibmc_drm_i2c.c:34", tmp_dir, priv->mmio + GPIO_DATA_DIRECTION);
 	} else {
-		u32 tmp_data = readl(priv->mmio + GPIO_DATA);
+		u32 tmp_data = pete_readl("drivers/gpu/drm/hisilicon/hibmc/hibmc_drm_i2c.c:36", priv->mmio + GPIO_DATA);
 
 		tmp_data &= ~mask;
-		writel(tmp_data, priv->mmio + GPIO_DATA);
+		pete_writel("drivers/gpu/drm/hisilicon/hibmc/hibmc_drm_i2c.c:39", tmp_data, priv->mmio + GPIO_DATA);
 
 		tmp_dir |= mask;
-		writel(tmp_dir, priv->mmio + GPIO_DATA_DIRECTION);
+		pete_writel("drivers/gpu/drm/hisilicon/hibmc/hibmc_drm_i2c.c:42", tmp_dir, priv->mmio + GPIO_DATA_DIRECTION);
 	}
 }
 
@@ -47,14 +47,14 @@ static int hibmc_get_i2c_signal(void *data, u32 mask)
 {
 	struct hibmc_connector *hibmc_connector = data;
 	struct hibmc_drm_private *priv = to_hibmc_drm_private(hibmc_connector->base.dev);
-	u32 tmp_dir = readl(priv->mmio + GPIO_DATA_DIRECTION);
+	u32 tmp_dir = pete_readl("drivers/gpu/drm/hisilicon/hibmc/hibmc_drm_i2c.c:50", priv->mmio + GPIO_DATA_DIRECTION);
 
 	if ((tmp_dir & mask) != mask) {
 		tmp_dir &= ~mask;
-		writel(tmp_dir, priv->mmio + GPIO_DATA_DIRECTION);
+		pete_writel("drivers/gpu/drm/hisilicon/hibmc/hibmc_drm_i2c.c:54", tmp_dir, priv->mmio + GPIO_DATA_DIRECTION);
 	}
 
-	return (readl(priv->mmio + GPIO_DATA) & mask) ? 1 : 0;
+	return (pete_readl("drivers/gpu/drm/hisilicon/hibmc/hibmc_drm_i2c.c:57", priv->mmio + GPIO_DATA) & mask) ? 1 : 0;
 }
 
 static void hibmc_ddc_setsda(void *data, int state)

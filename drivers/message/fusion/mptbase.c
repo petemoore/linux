@@ -217,8 +217,8 @@ static int  __init    fusion_init  (void);
 static void __exit    fusion_exit  (void);
 
 #define CHIPREG_READ32(addr) 		readl_relaxed(addr)
-#define CHIPREG_READ32_dmasync(addr)	readl(addr)
-#define CHIPREG_WRITE32(addr,val) 	writel(val, addr)
+#define CHIPREG_READ32_dmasync(addr)	pete_readl("drivers/message/fusion/mptbase.c:220", addr)
+#define CHIPREG_WRITE32(addr,val) 	pete_writel("drivers/message/fusion/mptbase.c:221", val, addr)
 #define CHIPREG_PIO_WRITE32(addr,val)	outl(val, (unsigned long)addr)
 #define CHIPREG_PIO_READ32(addr) 	inl((unsigned long)addr)
 

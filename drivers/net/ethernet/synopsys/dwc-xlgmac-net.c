@@ -262,7 +262,7 @@ static irqreturn_t xlgmac_isr(int irq, void *data)
 	 * interrupts. So for polling mode, we just need to check for
 	 * this register to be non-zero
 	 */
-	dma_isr = readl(pdata->mac_regs + DMA_ISR);
+	dma_isr = pete_readl("drivers/net/ethernet/synopsys/dwc-xlgmac-net.c:265", pdata->mac_regs + DMA_ISR);
 	if (!dma_isr)
 		return IRQ_HANDLED;
 
@@ -274,7 +274,7 @@ static irqreturn_t xlgmac_isr(int irq, void *data)
 
 		channel = pdata->channel_head + i;
 
-		dma_ch_isr = readl(XLGMAC_DMA_REG(channel, DMA_CH_SR));
+		dma_ch_isr = pete_readl("drivers/net/ethernet/synopsys/dwc-xlgmac-net.c:277", XLGMAC_DMA_REG(channel, DMA_CH_SR));
 		netif_dbg(pdata, intr, pdata->netdev, "DMA_CH%u_ISR=%#010x\n",
 			  i, dma_ch_isr);
 
@@ -321,12 +321,12 @@ static irqreturn_t xlgmac_isr(int irq, void *data)
 		}
 
 		/* Clear all interrupt signals */
-		writel(dma_ch_isr, XLGMAC_DMA_REG(channel, DMA_CH_SR));
+		pete_writel("drivers/net/ethernet/synopsys/dwc-xlgmac-net.c:324", dma_ch_isr, XLGMAC_DMA_REG(channel, DMA_CH_SR));
 	}
 
 	if (XLGMAC_GET_REG_BITS(dma_isr, DMA_ISR_MACIS_POS,
 				DMA_ISR_MACIS_LEN)) {
-		mac_isr = readl(pdata->mac_regs + MAC_ISR);
+		mac_isr = pete_readl("drivers/net/ethernet/synopsys/dwc-xlgmac-net.c:329", pdata->mac_regs + MAC_ISR);
 
 		if (XLGMAC_GET_REG_BITS(mac_isr, MAC_ISR_MMCTXIS_POS,
 					MAC_ISR_MMCTXIS_LEN))
@@ -980,7 +980,7 @@ static void xlgmac_rx_refresh(struct xlgmac_channel *channel)
 	 * the last cleaned entry
 	 */
 	desc_data = XLGMAC_GET_DESC_DATA(ring, ring->dirty - 1);
-	writel(lower_32_bits(desc_data->dma_desc_addr),
+	pete_writel("drivers/net/ethernet/synopsys/dwc-xlgmac-net.c:983", lower_32_bits(desc_data->dma_desc_addr),
 	       XLGMAC_DMA_REG(channel, DMA_CH_RDTR_LO));
 }
 

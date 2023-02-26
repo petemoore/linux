@@ -112,10 +112,10 @@ static void __init sun4i_pll2_setup(struct device_node *node,
 	 * to use it, we just need to initialise it to 4, and use a
 	 * fixed divider.
 	 */
-	val = readl(reg);
+	val = pete_readl("drivers/clk/sunxi/clk-a10-pll2.c:115", reg);
 	val &= ~(SUN4I_PLL2_POST_DIV_MASK << SUN4I_PLL2_POST_DIV_SHIFT);
 	val |= (SUN4I_PLL2_POST_DIV_VALUE - post_div_offset) << SUN4I_PLL2_POST_DIV_SHIFT;
-	writel(val, reg);
+	pete_writel("drivers/clk/sunxi/clk-a10-pll2.c:118", val, reg);
 
 	of_property_read_string_index(node, "clock-output-names",
 				      SUN4I_A10_PLL2_1X, &clk_name);

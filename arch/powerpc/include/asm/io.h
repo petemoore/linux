@@ -556,12 +556,12 @@ __do_out_asm(_rec_outl, "stwbrx")
 #define __do_inw(port)		_rec_inw(port)
 #define __do_inl(port)		_rec_inl(port)
 #else /* CONFIG_PPC32 */
-#define __do_outb(val, port)	writeb(val,(PCI_IO_ADDR)_IO_BASE+port);
-#define __do_outw(val, port)	writew(val,(PCI_IO_ADDR)_IO_BASE+port);
-#define __do_outl(val, port)	writel(val,(PCI_IO_ADDR)_IO_BASE+port);
-#define __do_inb(port)		readb((PCI_IO_ADDR)_IO_BASE + port);
-#define __do_inw(port)		readw((PCI_IO_ADDR)_IO_BASE + port);
-#define __do_inl(port)		readl((PCI_IO_ADDR)_IO_BASE + port);
+#define __do_outb(val, port)	pete_writeb("arch/powerpc/include/asm/io.h:559", val,(PCI_IO_ADDR)_IO_BASE+port);
+#define __do_outw(val, port)	pete_writew("arch/powerpc/include/asm/io.h:560", val,(PCI_IO_ADDR)_IO_BASE+port);
+#define __do_outl(val, port)	pete_writel("arch/powerpc/include/asm/io.h:561", val,(PCI_IO_ADDR)_IO_BASE+port);
+#define __do_inb(port)		pete_readb("arch/powerpc/include/asm/io.h:562", (PCI_IO_ADDR)_IO_BASE + port);
+#define __do_inw(port)		pete_readw("arch/powerpc/include/asm/io.h:563", (PCI_IO_ADDR)_IO_BASE + port);
+#define __do_inl(port)		pete_readl("arch/powerpc/include/asm/io.h:564", (PCI_IO_ADDR)_IO_BASE + port);
 #endif /* !CONFIG_PPC32 */
 
 #ifdef CONFIG_EEH
@@ -689,14 +689,14 @@ static inline void name at					\
 /*
  * We don't do relaxed operations yet, at least not with this semantic
  */
-#define readb_relaxed(addr)	readb(addr)
-#define readw_relaxed(addr)	readw(addr)
-#define readl_relaxed(addr)	readl(addr)
-#define readq_relaxed(addr)	readq(addr)
-#define writeb_relaxed(v, addr)	writeb(v, addr)
-#define writew_relaxed(v, addr)	writew(v, addr)
-#define writel_relaxed(v, addr)	writel(v, addr)
-#define writeq_relaxed(v, addr)	writeq(v, addr)
+#define readb_relaxed(addr)	pete_readb("arch/powerpc/include/asm/io.h:692", addr)
+#define readw_relaxed(addr)	pete_readw("arch/powerpc/include/asm/io.h:693", addr)
+#define readl_relaxed(addr)	pete_readl("arch/powerpc/include/asm/io.h:694", addr)
+#define readq_relaxed(addr)	pete_readq("arch/powerpc/include/asm/io.h:695", addr)
+#define writeb_relaxed(v, addr)	pete_writeb("arch/powerpc/include/asm/io.h:696", v, addr)
+#define writew_relaxed(v, addr)	pete_writew("arch/powerpc/include/asm/io.h:697", v, addr)
+#define writel_relaxed(v, addr)	pete_writel("arch/powerpc/include/asm/io.h:698", v, addr)
+#define writeq_relaxed(v, addr)	pete_writeq("arch/powerpc/include/asm/io.h:699", v, addr)
 
 #ifdef CONFIG_GENERIC_IOMAP
 #include <asm-generic/iomap.h>
@@ -719,13 +719,13 @@ static inline unsigned int ioread32be(const void __iomem *addr)
 #ifdef __powerpc64__
 static inline u64 ioread64_lo_hi(const void __iomem *addr)
 {
-	return readq(addr);
+	return pete_readq("arch/powerpc/include/asm/io.h:722", addr);
 }
 #define ioread64_lo_hi ioread64_lo_hi
 
 static inline u64 ioread64_hi_lo(const void __iomem *addr)
 {
-	return readq(addr);
+	return pete_readq("arch/powerpc/include/asm/io.h:728", addr);
 }
 #define ioread64_hi_lo ioread64_hi_lo
 
@@ -763,13 +763,13 @@ static inline void iowrite32be(u32 val, void __iomem *addr)
 #ifdef __powerpc64__
 static inline void iowrite64_lo_hi(u64 val, void __iomem *addr)
 {
-	writeq(val, addr);
+	pete_writeq("arch/powerpc/include/asm/io.h:766", val, addr);
 }
 #define iowrite64_lo_hi iowrite64_lo_hi
 
 static inline void iowrite64_hi_lo(u64 val, void __iomem *addr)
 {
-	writeq(val, addr);
+	pete_writeq("arch/powerpc/include/asm/io.h:772", val, addr);
 }
 #define iowrite64_hi_lo iowrite64_hi_lo
 

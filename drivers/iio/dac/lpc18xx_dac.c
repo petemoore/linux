@@ -55,7 +55,7 @@ static int lpc18xx_dac_read_raw(struct iio_dev *indio_dev,
 
 	switch (mask) {
 	case IIO_CHAN_INFO_RAW:
-		reg = readl(dac->base + LPC18XX_DAC_CR);
+		reg = pete_readl("drivers/iio/dac/lpc18xx_dac.c:58", dac->base + LPC18XX_DAC_CR);
 		*val = reg >> LPC18XX_DAC_CR_VALUE_SHIFT;
 		*val &= LPC18XX_DAC_CR_VALUE_MASK;
 
@@ -87,8 +87,8 @@ static int lpc18xx_dac_write_raw(struct iio_dev *indio_dev,
 		reg |= val << LPC18XX_DAC_CR_VALUE_SHIFT;
 
 		mutex_lock(&dac->lock);
-		writel(reg, dac->base + LPC18XX_DAC_CR);
-		writel(LPC18XX_DAC_CTRL_DMA_ENA, dac->base + LPC18XX_DAC_CTRL);
+		pete_writel("drivers/iio/dac/lpc18xx_dac.c:90", reg, dac->base + LPC18XX_DAC_CR);
+		pete_writel("drivers/iio/dac/lpc18xx_dac.c:91", LPC18XX_DAC_CTRL_DMA_ENA, dac->base + LPC18XX_DAC_CTRL);
 		mutex_unlock(&dac->lock);
 
 		return 0;
@@ -150,8 +150,8 @@ static int lpc18xx_dac_probe(struct platform_device *pdev)
 		goto dis_reg;
 	}
 
-	writel(0, dac->base + LPC18XX_DAC_CTRL);
-	writel(0, dac->base + LPC18XX_DAC_CR);
+	pete_writel("drivers/iio/dac/lpc18xx_dac.c:153", 0, dac->base + LPC18XX_DAC_CTRL);
+	pete_writel("drivers/iio/dac/lpc18xx_dac.c:154", 0, dac->base + LPC18XX_DAC_CR);
 
 	ret = iio_device_register(indio_dev);
 	if (ret) {
@@ -175,7 +175,7 @@ static int lpc18xx_dac_remove(struct platform_device *pdev)
 
 	iio_device_unregister(indio_dev);
 
-	writel(0, dac->base + LPC18XX_DAC_CTRL);
+	pete_writel("drivers/iio/dac/lpc18xx_dac.c:178", 0, dac->base + LPC18XX_DAC_CTRL);
 	clk_disable_unprepare(dac->clk);
 	regulator_disable(dac->vref);
 

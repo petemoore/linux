@@ -82,16 +82,16 @@ static LIST_HEAD(adc_pending);	/* protected by adc_device.lock */
 
 static inline void s3c_adc_convert(struct adc_device *adc)
 {
-	unsigned con = readl(adc->regs + S3C2410_ADCCON);
+	unsigned con = pete_readl("arch/arm/mach-s3c/adc.c:85", adc->regs + S3C2410_ADCCON);
 
 	con |= S3C2410_ADCCON_ENABLE_START;
-	writel(con, adc->regs + S3C2410_ADCCON);
+	pete_writel("arch/arm/mach-s3c/adc.c:88", con, adc->regs + S3C2410_ADCCON);
 }
 
 static inline void s3c_adc_select(struct adc_device *adc,
 				  struct s3c_adc_client *client)
 {
-	unsigned con = readl(adc->regs + S3C2410_ADCCON);
+	unsigned con = pete_readl("arch/arm/mach-s3c/adc.c:94", adc->regs + S3C2410_ADCCON);
 	enum s3c_cpu_type cpu = platform_get_device_id(adc->pdev)->driver_data;
 
 	client->select_cb(client, 1);
@@ -103,23 +103,23 @@ static inline void s3c_adc_select(struct adc_device *adc,
 
 	if (!client->is_ts) {
 		if (cpu == TYPE_ADCV3)
-			writel(client->channel & 0xf, adc->regs + S5P_ADCMUX);
+			pete_writel("arch/arm/mach-s3c/adc.c:106", client->channel & 0xf, adc->regs + S5P_ADCMUX);
 		else if (cpu == TYPE_ADCV11 || cpu == TYPE_ADCV12)
-			writel(client->channel & 0xf,
+			pete_writel("arch/arm/mach-s3c/adc.c:108", client->channel & 0xf,
 						adc->regs + S3C2443_ADCMUX);
 		else
 			con |= S3C2410_ADCCON_SELMUX(client->channel);
 	}
 
-	writel(con, adc->regs + S3C2410_ADCCON);
+	pete_writel("arch/arm/mach-s3c/adc.c:114", con, adc->regs + S3C2410_ADCCON);
 }
 
 static void s3c_adc_dbgshow(struct adc_device *adc)
 {
 	adc_dbg(adc, "CON=%08x, TSC=%08x, DLY=%08x\n",
-		readl(adc->regs + S3C2410_ADCCON),
-		readl(adc->regs + S3C2410_ADCTSC),
-		readl(adc->regs + S3C2410_ADCDLY));
+		pete_readl("arch/arm/mach-s3c/adc.c:120", adc->regs + S3C2410_ADCCON),
+		pete_readl("arch/arm/mach-s3c/adc.c:121", adc->regs + S3C2410_ADCTSC),
+		pete_readl("arch/arm/mach-s3c/adc.c:122", adc->regs + S3C2410_ADCDLY));
 }
 
 static void s3c_adc_try(struct adc_device *adc)
@@ -289,8 +289,8 @@ static irqreturn_t s3c_adc_irq(int irq, void *pw)
 		goto exit;
 	}
 
-	data0 = readl(adc->regs + S3C2410_ADCDAT0);
-	data1 = readl(adc->regs + S3C2410_ADCDAT1);
+	data0 = pete_readl("arch/arm/mach-s3c/adc.c:292", adc->regs + S3C2410_ADCDAT0);
+	data1 = pete_readl("arch/arm/mach-s3c/adc.c:293", adc->regs + S3C2410_ADCDAT1);
 	adc_dbg(adc, "read %d: 0x%04x, 0x%04x\n", client->nr_samples, data0, data1);
 
 	client->nr_samples--;
@@ -324,7 +324,7 @@ static irqreturn_t s3c_adc_irq(int irq, void *pw)
 exit:
 	if (cpu == TYPE_ADCV2 || cpu == TYPE_ADCV3) {
 		/* Clear ADC interrupt */
-		writel(0, adc->regs + S3C64XX_ADCCLRINT);
+		pete_writel("arch/arm/mach-s3c/adc.c:327", 0, adc->regs + S3C64XX_ADCCLRINT);
 	}
 	return IRQ_HANDLED;
 }
@@ -387,7 +387,7 @@ static int s3c_adc_probe(struct platform_device *pdev)
 	if (cpu == TYPE_ADCV2 || cpu == TYPE_ADCV3)
 		tmp |= S3C64XX_ADCCON_RESSEL;
 
-	writel(tmp, adc->regs + S3C2410_ADCCON);
+	pete_writel("arch/arm/mach-s3c/adc.c:390", tmp, adc->regs + S3C2410_ADCCON);
 
 	dev_info(dev, "attached adc driver\n");
 
@@ -416,9 +416,9 @@ static int s3c_adc_suspend(struct device *dev)
 
 	spin_lock_irqsave(&adc->lock, flags);
 
-	con = readl(adc->regs + S3C2410_ADCCON);
+	con = pete_readl("arch/arm/mach-s3c/adc.c:419", adc->regs + S3C2410_ADCCON);
 	con |= S3C2410_ADCCON_STDBM;
-	writel(con, adc->regs + S3C2410_ADCCON);
+	pete_writel("arch/arm/mach-s3c/adc.c:421", con, adc->regs + S3C2410_ADCCON);
 
 	disable_irq(adc->irq);
 	spin_unlock_irqrestore(&adc->lock, flags);
@@ -450,7 +450,7 @@ static int s3c_adc_resume(struct device *dev)
 	if (cpu == TYPE_ADCV2 || cpu == TYPE_ADCV3)
 		tmp |= S3C64XX_ADCCON_RESSEL;
 
-	writel(tmp, adc->regs + S3C2410_ADCCON);
+	pete_writel("arch/arm/mach-s3c/adc.c:453", tmp, adc->regs + S3C2410_ADCCON);
 
 	return 0;
 }

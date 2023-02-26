@@ -21,7 +21,7 @@ int ocxl_global_mmio_read32(struct ocxl_afu *afu, size_t offset,
 		break;
 
 	default:
-		*val = readl((char *)afu->global_mmio_ptr + offset);
+		*val = pete_readl("drivers/misc/ocxl/mmio.c:24", (char *)afu->global_mmio_ptr + offset);
 		break;
 	}
 
@@ -46,7 +46,7 @@ int ocxl_global_mmio_read64(struct ocxl_afu *afu, size_t offset,
 		break;
 
 	default:
-		*val = readq((char *)afu->global_mmio_ptr + offset);
+		*val = pete_readq("drivers/misc/ocxl/mmio.c:49", (char *)afu->global_mmio_ptr + offset);
 		break;
 	}
 
@@ -71,7 +71,7 @@ int ocxl_global_mmio_write32(struct ocxl_afu *afu, size_t offset,
 		break;
 
 	default:
-		writel(val, (char *)afu->global_mmio_ptr + offset);
+		pete_writel("drivers/misc/ocxl/mmio.c:74", val, (char *)afu->global_mmio_ptr + offset);
 		break;
 	}
 
@@ -97,7 +97,7 @@ int ocxl_global_mmio_write64(struct ocxl_afu *afu, size_t offset,
 		break;
 
 	default:
-		writeq(val, (char *)afu->global_mmio_ptr + offset);
+		pete_writeq("drivers/misc/ocxl/mmio.c:100", val, (char *)afu->global_mmio_ptr + offset);
 		break;
 	}
 
@@ -127,9 +127,9 @@ int ocxl_global_mmio_set32(struct ocxl_afu *afu, size_t offset,
 		break;
 
 	default:
-		tmp = readl((char *)afu->global_mmio_ptr + offset);
+		tmp = pete_readl("drivers/misc/ocxl/mmio.c:130", (char *)afu->global_mmio_ptr + offset);
 		tmp |= mask;
-		writel(tmp, (char *)afu->global_mmio_ptr + offset);
+		pete_writel("drivers/misc/ocxl/mmio.c:132", tmp, (char *)afu->global_mmio_ptr + offset);
 		break;
 	}
 
@@ -158,9 +158,9 @@ int ocxl_global_mmio_set64(struct ocxl_afu *afu, size_t offset,
 		break;
 
 	default:
-		tmp = readq((char *)afu->global_mmio_ptr + offset);
+		tmp = pete_readq("drivers/misc/ocxl/mmio.c:161", (char *)afu->global_mmio_ptr + offset);
 		tmp |= mask;
-		writeq(tmp, (char *)afu->global_mmio_ptr + offset);
+		pete_writeq("drivers/misc/ocxl/mmio.c:163", tmp, (char *)afu->global_mmio_ptr + offset);
 		break;
 	}
 
@@ -189,9 +189,9 @@ int ocxl_global_mmio_clear32(struct ocxl_afu *afu, size_t offset,
 		break;
 
 	default:
-		tmp = readl((char *)afu->global_mmio_ptr + offset);
+		tmp = pete_readl("drivers/misc/ocxl/mmio.c:192", (char *)afu->global_mmio_ptr + offset);
 		tmp &= ~mask;
-		writel(tmp, (char *)afu->global_mmio_ptr + offset);
+		pete_writel("drivers/misc/ocxl/mmio.c:194", tmp, (char *)afu->global_mmio_ptr + offset);
 		break;
 	}
 
@@ -221,13 +221,13 @@ int ocxl_global_mmio_clear64(struct ocxl_afu *afu, size_t offset,
 		break;
 
 	default:
-		tmp = readq((char *)afu->global_mmio_ptr + offset);
+		tmp = pete_readq("drivers/misc/ocxl/mmio.c:224", (char *)afu->global_mmio_ptr + offset);
 		tmp &= ~mask;
-		writeq(tmp, (char *)afu->global_mmio_ptr + offset);
+		pete_writeq("drivers/misc/ocxl/mmio.c:226", tmp, (char *)afu->global_mmio_ptr + offset);
 		break;
 	}
 
-	writeq(tmp, (char *)afu->global_mmio_ptr + offset);
+	pete_writeq("drivers/misc/ocxl/mmio.c:230", tmp, (char *)afu->global_mmio_ptr + offset);
 
 	return 0;
 }

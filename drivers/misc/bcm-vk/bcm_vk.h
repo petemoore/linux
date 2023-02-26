@@ -449,7 +449,7 @@ extern struct bcm_vk_entry const bcm_vk_host_err[BCM_VK_HOST_ERR_NUM];
 
 static inline u32 vkread32(struct bcm_vk *vk, enum pci_barno bar, u64 offset)
 {
-	return readl(vk->bar[bar] + offset);
+	return pete_readl("drivers/misc/bcm-vk/bcm_vk.h:452", vk->bar[bar] + offset);
 }
 
 static inline void vkwrite32(struct bcm_vk *vk,
@@ -457,12 +457,12 @@ static inline void vkwrite32(struct bcm_vk *vk,
 			     enum pci_barno bar,
 			     u64 offset)
 {
-	writel(value, vk->bar[bar] + offset);
+	pete_writel("drivers/misc/bcm-vk/bcm_vk.h:460", value, vk->bar[bar] + offset);
 }
 
 static inline u8 vkread8(struct bcm_vk *vk, enum pci_barno bar, u64 offset)
 {
-	return readb(vk->bar[bar] + offset);
+	return pete_readb("drivers/misc/bcm-vk/bcm_vk.h:465", vk->bar[bar] + offset);
 }
 
 static inline void vkwrite8(struct bcm_vk *vk,
@@ -470,7 +470,7 @@ static inline void vkwrite8(struct bcm_vk *vk,
 			    enum pci_barno bar,
 			    u64 offset)
 {
-	writeb(value, vk->bar[bar] + offset);
+	pete_writeb("drivers/misc/bcm-vk/bcm_vk.h:473", value, vk->bar[bar] + offset);
 }
 
 static inline bool bcm_vk_msgq_marker_valid(struct bcm_vk *vk)

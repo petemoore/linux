@@ -40,7 +40,7 @@ static int ingenic_rng_init(struct hwrng *rng)
 {
 	struct ingenic_rng *priv = container_of(rng, struct ingenic_rng, rng);
 
-	writel(ERNG_ENABLE, priv->base + RNG_REG_ERNG_OFFSET);
+	pete_writel("drivers/char/hw_random/ingenic-rng.c:43", ERNG_ENABLE, priv->base + RNG_REG_ERNG_OFFSET);
 
 	return 0;
 }
@@ -49,7 +49,7 @@ static void ingenic_rng_cleanup(struct hwrng *rng)
 {
 	struct ingenic_rng *priv = container_of(rng, struct ingenic_rng, rng);
 
-	writel(0, priv->base + RNG_REG_ERNG_OFFSET);
+	pete_writel("drivers/char/hw_random/ingenic-rng.c:52", 0, priv->base + RNG_REG_ERNG_OFFSET);
 }
 
 static int ingenic_rng_read(struct hwrng *rng, void *buf, size_t max, bool wait)
@@ -75,7 +75,7 @@ static int ingenic_rng_read(struct hwrng *rng, void *buf, size_t max, bool wait)
 		udelay(20);
 	}
 
-	*data = readl(priv->base + RNG_REG_RNG_OFFSET);
+	*data = pete_readl("drivers/char/hw_random/ingenic-rng.c:78", priv->base + RNG_REG_RNG_OFFSET);
 
 	return 4;
 }
@@ -120,7 +120,7 @@ static int ingenic_rng_remove(struct platform_device *pdev)
 
 	hwrng_unregister(&priv->rng);
 
-	writel(0, priv->base + RNG_REG_ERNG_OFFSET);
+	pete_writel("drivers/char/hw_random/ingenic-rng.c:123", 0, priv->base + RNG_REG_ERNG_OFFSET);
 
 	return 0;
 }

@@ -1448,7 +1448,7 @@ static int tgafb_register(struct device *dev)
 	}
 
 	/* Grab info about the card.  */
-	tga_type = (readl(mem_base) >> 12) & 0x0f;
+	tga_type = (pete_readl("drivers/video/fbdev/tgafb.c:1451", mem_base) >> 12) & 0x0f;
 	par->dev = dev;
 	par->tga_mem_base = mem_base;
 	par->tga_fb_base = mem_base + fb_offset_presets[tga_type];

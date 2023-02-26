@@ -46,15 +46,15 @@
 #define writel_relaxed(v,c)	((void)__raw_writel((__force u32)ioswabl(v),c))
 #define writeq_relaxed(v,c)	((void)__raw_writeq((__force u64)ioswabq(v),c))
 
-#define readb(a)		({ u8  r_ = readb_relaxed(a); rmb(); r_; })
-#define readw(a)		({ u16 r_ = readw_relaxed(a); rmb(); r_; })
-#define readl(a)		({ u32 r_ = readl_relaxed(a); rmb(); r_; })
-#define readq(a)		({ u64 r_ = readq_relaxed(a); rmb(); r_; })
+#define pete_readb("arch/sh/include/asm/io.h:49", a)		({ u8  r_ = readb_relaxed(a); rmb(); r_; })
+#define pete_readw("arch/sh/include/asm/io.h:50", a)		({ u16 r_ = readw_relaxed(a); rmb(); r_; })
+#define pete_readl("arch/sh/include/asm/io.h:51", a)		({ u32 r_ = readl_relaxed(a); rmb(); r_; })
+#define pete_readq("arch/sh/include/asm/io.h:52", a)		({ u64 r_ = readq_relaxed(a); rmb(); r_; })
 
-#define writeb(v,a)		({ wmb(); writeb_relaxed((v),(a)); })
-#define writew(v,a)		({ wmb(); writew_relaxed((v),(a)); })
-#define writel(v,a)		({ wmb(); writel_relaxed((v),(a)); })
-#define writeq(v,a)		({ wmb(); writeq_relaxed((v),(a)); })
+#define pete_writeb("arch/sh/include/asm/io.h:54", v,a)		({ wmb(); writeb_relaxed((v),(a)); })
+#define pete_writew("arch/sh/include/asm/io.h:55", v,a)		({ wmb(); writew_relaxed((v),(a)); })
+#define pete_writel("arch/sh/include/asm/io.h:56", v,a)		({ wmb(); writel_relaxed((v),(a)); })
+#define pete_writeq("arch/sh/include/asm/io.h:57", v,a)		({ wmb(); writeq_relaxed((v),(a)); })
 
 #define readsb(p,d,l)		__raw_readsb(p,d,l)
 #define readsw(p,d,l)		__raw_readsw(p,d,l)

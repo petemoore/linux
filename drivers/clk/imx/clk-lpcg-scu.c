@@ -57,7 +57,7 @@ static int clk_lpcg_scu_enable(struct clk_hw *hw)
 		val |= CLK_GATE_SCU_LPCG_HW_SEL;
 
 	reg |= val << clk->bit_idx;
-	writel(reg, clk->reg);
+	pete_writel("drivers/clk/imx/clk-lpcg-scu.c:60", reg, clk->reg);
 
 	spin_unlock_irqrestore(&imx_lpcg_scu_lock, flags);
 
@@ -74,7 +74,7 @@ static void clk_lpcg_scu_disable(struct clk_hw *hw)
 
 	reg = readl_relaxed(clk->reg);
 	reg &= ~(CLK_GATE_SCU_LPCG_MASK << clk->bit_idx);
-	writel(reg, clk->reg);
+	pete_writel("drivers/clk/imx/clk-lpcg-scu.c:77", reg, clk->reg);
 
 	spin_unlock_irqrestore(&imx_lpcg_scu_lock, flags);
 }
@@ -150,8 +150,8 @@ static int __maybe_unused imx_clk_lpcg_scu_resume(struct device *dev)
 	 * them twice
 	 */
 
-	writel(clk->state, clk->reg);
-	writel(clk->state, clk->reg);
+	pete_writel("drivers/clk/imx/clk-lpcg-scu.c:153", clk->state, clk->reg);
+	pete_writel("drivers/clk/imx/clk-lpcg-scu.c:154", clk->state, clk->reg);
 	dev_dbg(dev, "restore lpcg state 0x%x\n", clk->state);
 
 	return 0;

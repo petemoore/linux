@@ -164,9 +164,9 @@ static void sni_rm200_disable_8259A_irq(struct irq_data *d)
 	raw_spin_lock_irqsave(&sni_rm200_i8259A_lock, flags);
 	rm200_cached_irq_mask |= mask;
 	if (irq & 8)
-		writeb(cached_slave_mask, rm200_pic_slave + PIC_IMR);
+		pete_writeb("arch/mips/sni/rm200.c:167", cached_slave_mask, rm200_pic_slave + PIC_IMR);
 	else
-		writeb(cached_master_mask, rm200_pic_master + PIC_IMR);
+		pete_writeb("arch/mips/sni/rm200.c:169", cached_master_mask, rm200_pic_master + PIC_IMR);
 	raw_spin_unlock_irqrestore(&sni_rm200_i8259A_lock, flags);
 }
 
@@ -179,9 +179,9 @@ static void sni_rm200_enable_8259A_irq(struct irq_data *d)
 	raw_spin_lock_irqsave(&sni_rm200_i8259A_lock, flags);
 	rm200_cached_irq_mask &= mask;
 	if (irq & 8)
-		writeb(cached_slave_mask, rm200_pic_slave + PIC_IMR);
+		pete_writeb("arch/mips/sni/rm200.c:182", cached_slave_mask, rm200_pic_slave + PIC_IMR);
 	else
-		writeb(cached_master_mask, rm200_pic_master + PIC_IMR);
+		pete_writeb("arch/mips/sni/rm200.c:184", cached_master_mask, rm200_pic_master + PIC_IMR);
 	raw_spin_unlock_irqrestore(&sni_rm200_i8259A_lock, flags);
 }
 
@@ -191,14 +191,14 @@ static inline int sni_rm200_i8259A_irq_real(unsigned int irq)
 	int irqmask = 1 << irq;
 
 	if (irq < 8) {
-		writeb(0x0B, rm200_pic_master + PIC_CMD);
-		value = readb(rm200_pic_master + PIC_CMD) & irqmask;
-		writeb(0x0A, rm200_pic_master + PIC_CMD);
+		pete_writeb("arch/mips/sni/rm200.c:194", 0x0B, rm200_pic_master + PIC_CMD);
+		value = pete_readb("arch/mips/sni/rm200.c:195", rm200_pic_master + PIC_CMD) & irqmask;
+		pete_writeb("arch/mips/sni/rm200.c:196", 0x0A, rm200_pic_master + PIC_CMD);
 		return value;
 	}
-	writeb(0x0B, rm200_pic_slave + PIC_CMD); /* ISR register */
-	value = readb(rm200_pic_slave + PIC_CMD) & (irqmask >> 8);
-	writeb(0x0A, rm200_pic_slave + PIC_CMD);
+	pete_writeb("arch/mips/sni/rm200.c:199", 0x0B, rm200_pic_slave + PIC_CMD); /* ISR register */
+	value = pete_readb("arch/mips/sni/rm200.c:200", rm200_pic_slave + PIC_CMD) & (irqmask >> 8);
+	pete_writeb("arch/mips/sni/rm200.c:201", 0x0A, rm200_pic_slave + PIC_CMD);
 	return value;
 }
 
@@ -236,14 +236,14 @@ void sni_rm200_mask_and_ack_8259A(struct irq_data *d)
 
 handle_real_irq:
 	if (irq & 8) {
-		readb(rm200_pic_slave + PIC_IMR);
-		writeb(cached_slave_mask, rm200_pic_slave + PIC_IMR);
-		writeb(0x60+(irq & 7), rm200_pic_slave + PIC_CMD);
-		writeb(0x60+PIC_CASCADE_IR, rm200_pic_master + PIC_CMD);
+		pete_readb("arch/mips/sni/rm200.c:239", rm200_pic_slave + PIC_IMR);
+		pete_writeb("arch/mips/sni/rm200.c:240", cached_slave_mask, rm200_pic_slave + PIC_IMR);
+		pete_writeb("arch/mips/sni/rm200.c:241", 0x60+(irq & 7), rm200_pic_slave + PIC_CMD);
+		pete_writeb("arch/mips/sni/rm200.c:242", 0x60+PIC_CASCADE_IR, rm200_pic_master + PIC_CMD);
 	} else {
-		readb(rm200_pic_master + PIC_IMR);
-		writeb(cached_master_mask, rm200_pic_master + PIC_IMR);
-		writeb(0x60+irq, rm200_pic_master + PIC_CMD);
+		pete_readb("arch/mips/sni/rm200.c:244", rm200_pic_master + PIC_IMR);
+		pete_writeb("arch/mips/sni/rm200.c:245", cached_master_mask, rm200_pic_master + PIC_IMR);
+		pete_writeb("arch/mips/sni/rm200.c:246", 0x60+irq, rm200_pic_master + PIC_CMD);
 	}
 	raw_spin_unlock_irqrestore(&sni_rm200_i8259A_lock, flags);
 	return;
@@ -299,15 +299,15 @@ static inline int sni_rm200_i8259_irq(void)
 	raw_spin_lock(&sni_rm200_i8259A_lock);
 
 	/* Perform an interrupt acknowledge cycle on controller 1. */
-	writeb(0x0C, rm200_pic_master + PIC_CMD);	/* prepare for poll */
-	irq = readb(rm200_pic_master + PIC_CMD) & 7;
+	pete_writeb("arch/mips/sni/rm200.c:302", 0x0C, rm200_pic_master + PIC_CMD);	/* prepare for poll */
+	irq = pete_readb("arch/mips/sni/rm200.c:303", rm200_pic_master + PIC_CMD) & 7;
 	if (irq == PIC_CASCADE_IR) {
 		/*
 		 * Interrupt is cascaded so perform interrupt
 		 * acknowledge on controller 2.
 		 */
-		writeb(0x0C, rm200_pic_slave + PIC_CMD); /* prepare for poll */
-		irq = (readb(rm200_pic_slave + PIC_CMD) & 7) + 8;
+		pete_writeb("arch/mips/sni/rm200.c:309", 0x0C, rm200_pic_slave + PIC_CMD); /* prepare for poll */
+		irq = (pete_readb("arch/mips/sni/rm200.c:310", rm200_pic_slave + PIC_CMD) & 7) + 8;
 	}
 
 	if (unlikely(irq == 7)) {
@@ -318,8 +318,8 @@ static inline int sni_rm200_i8259_irq(void)
 		 * significant bit is not set then there is no valid
 		 * interrupt.
 		 */
-		writeb(0x0B, rm200_pic_master + PIC_ISR); /* ISR register */
-		if (~readb(rm200_pic_master + PIC_ISR) & 0x80)
+		pete_writeb("arch/mips/sni/rm200.c:321", 0x0B, rm200_pic_master + PIC_ISR); /* ISR register */
+		if (~pete_readb("arch/mips/sni/rm200.c:322", rm200_pic_master + PIC_ISR) & 0x80)
 			irq = -1;
 	}
 
@@ -334,21 +334,21 @@ void sni_rm200_init_8259A(void)
 
 	raw_spin_lock_irqsave(&sni_rm200_i8259A_lock, flags);
 
-	writeb(0xff, rm200_pic_master + PIC_IMR);
-	writeb(0xff, rm200_pic_slave + PIC_IMR);
+	pete_writeb("arch/mips/sni/rm200.c:337", 0xff, rm200_pic_master + PIC_IMR);
+	pete_writeb("arch/mips/sni/rm200.c:338", 0xff, rm200_pic_slave + PIC_IMR);
 
-	writeb(0x11, rm200_pic_master + PIC_CMD);
-	writeb(0, rm200_pic_master + PIC_IMR);
-	writeb(1U << PIC_CASCADE_IR, rm200_pic_master + PIC_IMR);
-	writeb(MASTER_ICW4_DEFAULT, rm200_pic_master + PIC_IMR);
-	writeb(0x11, rm200_pic_slave + PIC_CMD);
-	writeb(8, rm200_pic_slave + PIC_IMR);
-	writeb(PIC_CASCADE_IR, rm200_pic_slave + PIC_IMR);
-	writeb(SLAVE_ICW4_DEFAULT, rm200_pic_slave + PIC_IMR);
+	pete_writeb("arch/mips/sni/rm200.c:340", 0x11, rm200_pic_master + PIC_CMD);
+	pete_writeb("arch/mips/sni/rm200.c:341", 0, rm200_pic_master + PIC_IMR);
+	pete_writeb("arch/mips/sni/rm200.c:342", 1U << PIC_CASCADE_IR, rm200_pic_master + PIC_IMR);
+	pete_writeb("arch/mips/sni/rm200.c:343", MASTER_ICW4_DEFAULT, rm200_pic_master + PIC_IMR);
+	pete_writeb("arch/mips/sni/rm200.c:344", 0x11, rm200_pic_slave + PIC_CMD);
+	pete_writeb("arch/mips/sni/rm200.c:345", 8, rm200_pic_slave + PIC_IMR);
+	pete_writeb("arch/mips/sni/rm200.c:346", PIC_CASCADE_IR, rm200_pic_slave + PIC_IMR);
+	pete_writeb("arch/mips/sni/rm200.c:347", SLAVE_ICW4_DEFAULT, rm200_pic_slave + PIC_IMR);
 	udelay(100);		/* wait for 8259A to initialize */
 
-	writeb(cached_master_mask, rm200_pic_master + PIC_IMR);
-	writeb(cached_slave_mask, rm200_pic_slave + PIC_IMR);
+	pete_writeb("arch/mips/sni/rm200.c:350", cached_master_mask, rm200_pic_master + PIC_IMR);
+	pete_writeb("arch/mips/sni/rm200.c:351", cached_slave_mask, rm200_pic_slave + PIC_IMR);
 
 	raw_spin_unlock_irqrestore(&sni_rm200_i8259A_lock, flags);
 }

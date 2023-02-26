@@ -572,7 +572,7 @@ static inline void pio_copy(u64 __iomem *dst, u64 *src)
 	int count = 8;
 
 	while (count) {
-		writeq(*src, dst);
+		pete_writeq("drivers/infiniband/hw/cxgb4/t4.h:575", *src, dst);
 		src++;
 		dst++;
 		count--;
@@ -591,7 +591,7 @@ static inline void t4_ring_srq_db(struct t4_srq *srq, u16 inc, u8 len16,
 	} else {
 		pr_debug("%s: DB srq->pidx = %d; len16=%d\n",
 			 __func__, srq->pidx, len16);
-		writel(PIDX_T5_V(inc) | QID_V(srq->bar2_qid),
+		pete_writel("drivers/infiniband/hw/cxgb4/t4.h:594", PIDX_T5_V(inc) | QID_V(srq->bar2_qid),
 		       srq->bar2_va + SGE_UDB_KDOORBELL);
 	}
 	/* Flush user doorbell area writes. */
@@ -611,7 +611,7 @@ static inline void t4_ring_sq_db(struct t4_wq *wq, u16 inc, union t4_wr *wqe)
 				 (u64 *)wqe);
 		} else {
 			pr_debug("DB wq->sq.pidx = %d\n", wq->sq.pidx);
-			writel(PIDX_T5_V(inc) | QID_V(wq->sq.bar2_qid),
+			pete_writel("drivers/infiniband/hw/cxgb4/t4.h:614", PIDX_T5_V(inc) | QID_V(wq->sq.bar2_qid),
 			       wq->sq.bar2_va + SGE_UDB_KDOORBELL);
 		}
 
@@ -619,7 +619,7 @@ static inline void t4_ring_sq_db(struct t4_wq *wq, u16 inc, union t4_wr *wqe)
 		wmb();
 		return;
 	}
-	writel(QID_V(wq->sq.qid) | PIDX_V(inc), wq->db);
+	pete_writel("drivers/infiniband/hw/cxgb4/t4.h:622", QID_V(wq->sq.qid) | PIDX_V(inc), wq->db);
 }
 
 static inline void t4_ring_rq_db(struct t4_wq *wq, u16 inc,
@@ -636,7 +636,7 @@ static inline void t4_ring_rq_db(struct t4_wq *wq, u16 inc,
 				 (void *)wqe);
 		} else {
 			pr_debug("DB wq->rq.pidx = %d\n", wq->rq.pidx);
-			writel(PIDX_T5_V(inc) | QID_V(wq->rq.bar2_qid),
+			pete_writel("drivers/infiniband/hw/cxgb4/t4.h:639", PIDX_T5_V(inc) | QID_V(wq->rq.bar2_qid),
 			       wq->rq.bar2_va + SGE_UDB_KDOORBELL);
 		}
 
@@ -644,7 +644,7 @@ static inline void t4_ring_rq_db(struct t4_wq *wq, u16 inc,
 		wmb();
 		return;
 	}
-	writel(QID_V(wq->rq.qid) | PIDX_V(inc), wq->db);
+	pete_writel("drivers/infiniband/hw/cxgb4/t4.h:647", QID_V(wq->rq.qid) | PIDX_V(inc), wq->db);
 }
 
 static inline int t4_wq_in_error(struct t4_wq *wq)
@@ -703,10 +703,10 @@ struct t4_cq {
 static inline void write_gts(struct t4_cq *cq, u32 val)
 {
 	if (cq->bar2_va)
-		writel(val | INGRESSQID_V(cq->bar2_qid),
+		pete_writel("drivers/infiniband/hw/cxgb4/t4.h:706", val | INGRESSQID_V(cq->bar2_qid),
 		       cq->bar2_va + SGE_UDB_GTS);
 	else
-		writel(val | INGRESSQID_V(cq->cqid), cq->gts);
+		pete_writel("drivers/infiniband/hw/cxgb4/t4.h:709", val | INGRESSQID_V(cq->cqid), cq->gts);
 }
 
 static inline int t4_clear_cq_armed(struct t4_cq *cq)

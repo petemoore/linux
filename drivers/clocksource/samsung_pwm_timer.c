@@ -89,10 +89,10 @@ static void samsung_timer_set_prescale(unsigned int channel, u16 prescale)
 
 	spin_lock_irqsave(&samsung_pwm_lock, flags);
 
-	reg = readl(pwm.base + REG_TCFG0);
+	reg = pete_readl("drivers/clocksource/samsung_pwm_timer.c:92", pwm.base + REG_TCFG0);
 	reg &= ~(TCFG0_PRESCALER_MASK << shift);
 	reg |= (prescale - 1) << shift;
-	writel(reg, pwm.base + REG_TCFG0);
+	pete_writel("drivers/clocksource/samsung_pwm_timer.c:95", reg, pwm.base + REG_TCFG0);
 
 	spin_unlock_irqrestore(&samsung_pwm_lock, flags);
 }
@@ -108,10 +108,10 @@ static void samsung_timer_set_divisor(unsigned int channel, u8 divisor)
 
 	spin_lock_irqsave(&samsung_pwm_lock, flags);
 
-	reg = readl(pwm.base + REG_TCFG1);
+	reg = pete_readl("drivers/clocksource/samsung_pwm_timer.c:111", pwm.base + REG_TCFG1);
 	reg &= ~(TCFG1_MUX_MASK << shift);
 	reg |= bits << shift;
-	writel(reg, pwm.base + REG_TCFG1);
+	pete_writel("drivers/clocksource/samsung_pwm_timer.c:114", reg, pwm.base + REG_TCFG1);
 
 	spin_unlock_irqrestore(&samsung_pwm_lock, flags);
 }
@@ -225,7 +225,7 @@ static void samsung_clockevent_resume(struct clock_event_device *cev)
 	if (pwm.variant.has_tint_cstat) {
 		u32 mask = (1 << pwm.event_id);
 
-		writel(mask | (mask << 5), pwm.base + REG_TINT_CSTAT);
+		pete_writel("drivers/clocksource/samsung_pwm_timer.c:228", mask | (mask << 5), pwm.base + REG_TINT_CSTAT);
 	}
 }
 
@@ -249,7 +249,7 @@ static irqreturn_t samsung_clock_event_isr(int irq, void *dev_id)
 	if (pwm.variant.has_tint_cstat) {
 		u32 mask = (1 << pwm.event_id);
 
-		writel(mask | (mask << 5), pwm.base + REG_TINT_CSTAT);
+		pete_writel("drivers/clocksource/samsung_pwm_timer.c:252", mask | (mask << 5), pwm.base + REG_TINT_CSTAT);
 	}
 
 	evt->event_handler(evt);
@@ -284,7 +284,7 @@ static void __init samsung_clockevent_init(void)
 	if (pwm.variant.has_tint_cstat) {
 		u32 mask = (1 << pwm.event_id);
 
-		writel(mask | (mask << 5), pwm.base + REG_TINT_CSTAT);
+		pete_writel("drivers/clocksource/samsung_pwm_timer.c:287", mask | (mask << 5), pwm.base + REG_TINT_CSTAT);
 	}
 }
 

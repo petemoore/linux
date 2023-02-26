@@ -82,24 +82,24 @@ static void meson_viu_set_g12a_osd1_matrix(struct meson_drm *priv,
 					   int *m, bool csc_on)
 {
 	/* VPP WRAP OSD1 matrix */
-	writel(((m[0] & 0xfff) << 16) | (m[1] & 0xfff),
+	pete_writel("drivers/gpu/drm/meson/meson_viu.c:85", ((m[0] & 0xfff) << 16) | (m[1] & 0xfff),
 		priv->io_base + _REG(VPP_WRAP_OSD1_MATRIX_PRE_OFFSET0_1));
-	writel(m[2] & 0xfff,
+	pete_writel("drivers/gpu/drm/meson/meson_viu.c:87", m[2] & 0xfff,
 		priv->io_base + _REG(VPP_WRAP_OSD1_MATRIX_PRE_OFFSET2));
-	writel(((m[3] & 0x1fff) << 16) | (m[4] & 0x1fff),
+	pete_writel("drivers/gpu/drm/meson/meson_viu.c:89", ((m[3] & 0x1fff) << 16) | (m[4] & 0x1fff),
 		priv->io_base + _REG(VPP_WRAP_OSD1_MATRIX_COEF00_01));
-	writel(((m[5] & 0x1fff) << 16) | (m[6] & 0x1fff),
+	pete_writel("drivers/gpu/drm/meson/meson_viu.c:91", ((m[5] & 0x1fff) << 16) | (m[6] & 0x1fff),
 		priv->io_base + _REG(VPP_WRAP_OSD1_MATRIX_COEF02_10));
-	writel(((m[7] & 0x1fff) << 16) | (m[8] & 0x1fff),
+	pete_writel("drivers/gpu/drm/meson/meson_viu.c:93", ((m[7] & 0x1fff) << 16) | (m[8] & 0x1fff),
 		priv->io_base + _REG(VPP_WRAP_OSD1_MATRIX_COEF11_12));
-	writel(((m[9] & 0x1fff) << 16) | (m[10] & 0x1fff),
+	pete_writel("drivers/gpu/drm/meson/meson_viu.c:95", ((m[9] & 0x1fff) << 16) | (m[10] & 0x1fff),
 		priv->io_base + _REG(VPP_WRAP_OSD1_MATRIX_COEF20_21));
-	writel((m[11] & 0x1fff),
+	pete_writel("drivers/gpu/drm/meson/meson_viu.c:97", (m[11] & 0x1fff),
 		priv->io_base +	_REG(VPP_WRAP_OSD1_MATRIX_COEF22));
 
-	writel(((m[18] & 0xfff) << 16) | (m[19] & 0xfff),
+	pete_writel("drivers/gpu/drm/meson/meson_viu.c:100", ((m[18] & 0xfff) << 16) | (m[19] & 0xfff),
 		priv->io_base + _REG(VPP_WRAP_OSD1_MATRIX_OFFSET0_1));
-	writel(m[20] & 0xfff,
+	pete_writel("drivers/gpu/drm/meson/meson_viu.c:102", m[20] & 0xfff,
 		priv->io_base + _REG(VPP_WRAP_OSD1_MATRIX_OFFSET2));
 
 	writel_bits_relaxed(BIT(0), csc_on ? BIT(0) : 0,
@@ -112,38 +112,38 @@ static void meson_viu_set_osd_matrix(struct meson_drm *priv,
 {
 	if (m_select == VIU_MATRIX_OSD) {
 		/* osd matrix, VIU_MATRIX_0 */
-		writel(((m[0] & 0xfff) << 16) | (m[1] & 0xfff),
+		pete_writel("drivers/gpu/drm/meson/meson_viu.c:115", ((m[0] & 0xfff) << 16) | (m[1] & 0xfff),
 			priv->io_base + _REG(VIU_OSD1_MATRIX_PRE_OFFSET0_1));
-		writel(m[2] & 0xfff,
+		pete_writel("drivers/gpu/drm/meson/meson_viu.c:117", m[2] & 0xfff,
 			priv->io_base + _REG(VIU_OSD1_MATRIX_PRE_OFFSET2));
-		writel(((m[3] & 0x1fff) << 16) | (m[4] & 0x1fff),
+		pete_writel("drivers/gpu/drm/meson/meson_viu.c:119", ((m[3] & 0x1fff) << 16) | (m[4] & 0x1fff),
 			priv->io_base + _REG(VIU_OSD1_MATRIX_COEF00_01));
-		writel(((m[5] & 0x1fff) << 16) | (m[6] & 0x1fff),
+		pete_writel("drivers/gpu/drm/meson/meson_viu.c:121", ((m[5] & 0x1fff) << 16) | (m[6] & 0x1fff),
 			priv->io_base + _REG(VIU_OSD1_MATRIX_COEF02_10));
-		writel(((m[7] & 0x1fff) << 16) | (m[8] & 0x1fff),
+		pete_writel("drivers/gpu/drm/meson/meson_viu.c:123", ((m[7] & 0x1fff) << 16) | (m[8] & 0x1fff),
 			priv->io_base + _REG(VIU_OSD1_MATRIX_COEF11_12));
-		writel(((m[9] & 0x1fff) << 16) | (m[10] & 0x1fff),
+		pete_writel("drivers/gpu/drm/meson/meson_viu.c:125", ((m[9] & 0x1fff) << 16) | (m[10] & 0x1fff),
 			priv->io_base + _REG(VIU_OSD1_MATRIX_COEF20_21));
 
 		if (m[21]) {
-			writel(((m[11] & 0x1fff) << 16) | (m[12] & 0x1fff),
+			pete_writel("drivers/gpu/drm/meson/meson_viu.c:129", ((m[11] & 0x1fff) << 16) | (m[12] & 0x1fff),
 				priv->io_base +
 					_REG(VIU_OSD1_MATRIX_COEF22_30));
-			writel(((m[13] & 0x1fff) << 16) | (m[14] & 0x1fff),
+			pete_writel("drivers/gpu/drm/meson/meson_viu.c:132", ((m[13] & 0x1fff) << 16) | (m[14] & 0x1fff),
 				priv->io_base +
 					_REG(VIU_OSD1_MATRIX_COEF31_32));
-			writel(((m[15] & 0x1fff) << 16) | (m[16] & 0x1fff),
+			pete_writel("drivers/gpu/drm/meson/meson_viu.c:135", ((m[15] & 0x1fff) << 16) | (m[16] & 0x1fff),
 				priv->io_base +
 					_REG(VIU_OSD1_MATRIX_COEF40_41));
-			writel(m[17] & 0x1fff, priv->io_base +
+			pete_writel("drivers/gpu/drm/meson/meson_viu.c:138", m[17] & 0x1fff, priv->io_base +
 				_REG(VIU_OSD1_MATRIX_COLMOD_COEF42));
 		} else
-			writel((m[11] & 0x1fff) << 16, priv->io_base +
+			pete_writel("drivers/gpu/drm/meson/meson_viu.c:141", (m[11] & 0x1fff) << 16, priv->io_base +
 				_REG(VIU_OSD1_MATRIX_COEF22_30));
 
-		writel(((m[18] & 0xfff) << 16) | (m[19] & 0xfff),
+		pete_writel("drivers/gpu/drm/meson/meson_viu.c:144", ((m[18] & 0xfff) << 16) | (m[19] & 0xfff),
 			priv->io_base + _REG(VIU_OSD1_MATRIX_OFFSET0_1));
-		writel(m[20] & 0xfff,
+		pete_writel("drivers/gpu/drm/meson/meson_viu.c:146", m[20] & 0xfff,
 			priv->io_base + _REG(VIU_OSD1_MATRIX_OFFSET2));
 
 		writel_bits_relaxed(3 << 30, m[21] << 30,
@@ -161,7 +161,7 @@ static void meson_viu_set_osd_matrix(struct meson_drm *priv,
 
 		/* osd eotf matrix, VIU_MATRIX_OSD_EOTF */
 		for (i = 0; i < 5; i++)
-			writel(((m[i * 2] & 0x1fff) << 16) |
+			pete_writel("drivers/gpu/drm/meson/meson_viu.c:164", ((m[i * 2] & 0x1fff) << 16) |
 				(m[i * 2 + 1] & 0x1fff), priv->io_base +
 				_REG(VIU_OSD1_EOTF_CTL + i + 1));
 
@@ -197,24 +197,24 @@ meson_viu_set_osd_lut(struct meson_drm *priv, enum viu_lut_sel_e lut_sel,
 		return;
 
 	if (lut_sel == VIU_LUT_OSD_OETF) {
-		writel(0, priv->io_base + _REG(addr_port));
+		pete_writel("drivers/gpu/drm/meson/meson_viu.c:200", 0, priv->io_base + _REG(addr_port));
 
 		for (i = 0; i < (OSD_OETF_LUT_SIZE / 2); i++)
-			writel(r_map[i * 2] | (r_map[i * 2 + 1] << 16),
+			pete_writel("drivers/gpu/drm/meson/meson_viu.c:203", r_map[i * 2] | (r_map[i * 2 + 1] << 16),
 				priv->io_base + _REG(data_port));
 
-		writel(r_map[OSD_OETF_LUT_SIZE - 1] | (g_map[0] << 16),
+		pete_writel("drivers/gpu/drm/meson/meson_viu.c:206", r_map[OSD_OETF_LUT_SIZE - 1] | (g_map[0] << 16),
 			priv->io_base + _REG(data_port));
 
 		for (i = 0; i < (OSD_OETF_LUT_SIZE / 2); i++)
-			writel(g_map[i * 2 + 1] | (g_map[i * 2 + 2] << 16),
+			pete_writel("drivers/gpu/drm/meson/meson_viu.c:210", g_map[i * 2 + 1] | (g_map[i * 2 + 2] << 16),
 				priv->io_base + _REG(data_port));
 
 		for (i = 0; i < (OSD_OETF_LUT_SIZE / 2); i++)
-			writel(b_map[i * 2] | (b_map[i * 2 + 1] << 16),
+			pete_writel("drivers/gpu/drm/meson/meson_viu.c:214", b_map[i * 2] | (b_map[i * 2 + 1] << 16),
 				priv->io_base + _REG(data_port));
 
-		writel(b_map[OSD_OETF_LUT_SIZE - 1],
+		pete_writel("drivers/gpu/drm/meson/meson_viu.c:217", b_map[OSD_OETF_LUT_SIZE - 1],
 			priv->io_base + _REG(data_port));
 
 		if (csc_on)
@@ -224,24 +224,24 @@ meson_viu_set_osd_lut(struct meson_drm *priv, enum viu_lut_sel_e lut_sel,
 			writel_bits_relaxed(0x7 << 29, 0,
 					    priv->io_base + _REG(ctrl_port));
 	} else if (lut_sel == VIU_LUT_OSD_EOTF) {
-		writel(0, priv->io_base + _REG(addr_port));
+		pete_writel("drivers/gpu/drm/meson/meson_viu.c:227", 0, priv->io_base + _REG(addr_port));
 
 		for (i = 0; i < (OSD_EOTF_LUT_SIZE / 2); i++)
-			writel(r_map[i * 2] | (r_map[i * 2 + 1] << 16),
+			pete_writel("drivers/gpu/drm/meson/meson_viu.c:230", r_map[i * 2] | (r_map[i * 2 + 1] << 16),
 				priv->io_base + _REG(data_port));
 
-		writel(r_map[OSD_EOTF_LUT_SIZE - 1] | (g_map[0] << 16),
+		pete_writel("drivers/gpu/drm/meson/meson_viu.c:233", r_map[OSD_EOTF_LUT_SIZE - 1] | (g_map[0] << 16),
 			priv->io_base + _REG(data_port));
 
 		for (i = 0; i < (OSD_EOTF_LUT_SIZE / 2); i++)
-			writel(g_map[i * 2 + 1] | (g_map[i * 2 + 2] << 16),
+			pete_writel("drivers/gpu/drm/meson/meson_viu.c:237", g_map[i * 2 + 1] | (g_map[i * 2 + 2] << 16),
 				priv->io_base + _REG(data_port));
 
 		for (i = 0; i < (OSD_EOTF_LUT_SIZE / 2); i++)
-			writel(b_map[i * 2] | (b_map[i * 2 + 1] << 16),
+			pete_writel("drivers/gpu/drm/meson/meson_viu.c:241", b_map[i * 2] | (b_map[i * 2 + 1] << 16),
 				priv->io_base + _REG(data_port));
 
-		writel(b_map[OSD_EOTF_LUT_SIZE - 1],
+		pete_writel("drivers/gpu/drm/meson/meson_viu.c:244", b_map[OSD_EOTF_LUT_SIZE - 1],
 			priv->io_base + _REG(data_port));
 
 		if (csc_on)

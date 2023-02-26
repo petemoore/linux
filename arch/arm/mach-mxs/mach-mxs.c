@@ -290,7 +290,7 @@ static const char __init *mxs_get_soc_id(void)
 	digctl_base = of_iomap(np, 0);
 	WARN_ON(!digctl_base);
 
-	chipid = readl(digctl_base + HW_DIGCTL_CHIPID);
+	chipid = pete_readl("arch/arm/mach-mxs/mach-mxs.c:293", digctl_base + HW_DIGCTL_CHIPID);
 	socid = chipid & HW_DIGCTL_CHIPID_MASK;
 
 	iounmap(digctl_base);

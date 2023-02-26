@@ -407,7 +407,7 @@ static int cryp_setup_context(struct cryp_ctx *ctx,
 	} else
 		control_register = ctx->dev_ctx.cr;
 
-	writel(control_register |
+	pete_writel("drivers/crypto/ux500/cryp/cryp_core.c:410", control_register |
 	       (CRYP_CRYPEN_ENABLE << CRYP_CR_CRYPEN_POS),
 	       &device_data->base->cr);
 

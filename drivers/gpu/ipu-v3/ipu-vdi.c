@@ -44,13 +44,13 @@ struct ipu_vdi {
 
 static inline u32 ipu_vdi_read(struct ipu_vdi *vdi, unsigned int offset)
 {
-	return readl(vdi->base + offset);
+	return pete_readl("drivers/gpu/ipu-v3/ipu-vdi.c:47", vdi->base + offset);
 }
 
 static inline void ipu_vdi_write(struct ipu_vdi *vdi, u32 value,
 				 unsigned int offset)
 {
-	writel(value, vdi->base + offset);
+	pete_writel("drivers/gpu/ipu-v3/ipu-vdi.c:53", value, vdi->base + offset);
 }
 
 void ipu_vdi_set_field_order(struct ipu_vdi *vdi, v4l2_std_id std, u32 field)

@@ -94,11 +94,11 @@ static void mlxbf_gige_cache_stats(struct mlxbf_gige *priv)
 
 	/* Cache stats that will be cleared by clean port operation */
 	p = &priv->stats;
-	p->rx_din_dropped_pkts += readq(priv->base +
+	p->rx_din_dropped_pkts += pete_readq("drivers/net/ethernet/mellanox/mlxbf_gige/mlxbf_gige_main.c:97", priv->base +
 					MLXBF_GIGE_RX_DIN_DROP_COUNTER);
-	p->rx_filter_passed_pkts += readq(priv->base +
+	p->rx_filter_passed_pkts += pete_readq("drivers/net/ethernet/mellanox/mlxbf_gige/mlxbf_gige_main.c:99", priv->base +
 					  MLXBF_GIGE_RX_PASS_COUNTER_ALL);
-	p->rx_filter_discard_pkts += readq(priv->base +
+	p->rx_filter_discard_pkts += pete_readq("drivers/net/ethernet/mellanox/mlxbf_gige/mlxbf_gige_main.c:101", priv->base +
 					   MLXBF_GIGE_RX_DISC_COUNTER_ALL);
 }
 
@@ -109,9 +109,9 @@ static int mlxbf_gige_clean_port(struct mlxbf_gige *priv)
 	int err;
 
 	/* Set the CLEAN_PORT_EN bit to trigger SW reset */
-	control = readq(priv->base + MLXBF_GIGE_CONTROL);
+	control = pete_readq("drivers/net/ethernet/mellanox/mlxbf_gige/mlxbf_gige_main.c:112", priv->base + MLXBF_GIGE_CONTROL);
 	control |= MLXBF_GIGE_CONTROL_CLEAN_PORT_EN;
-	writeq(control, priv->base + MLXBF_GIGE_CONTROL);
+	pete_writeq("drivers/net/ethernet/mellanox/mlxbf_gige/mlxbf_gige_main.c:114", control, priv->base + MLXBF_GIGE_CONTROL);
 
 	/* Ensure completion of "clean port" write before polling status */
 	mb();
@@ -121,9 +121,9 @@ static int mlxbf_gige_clean_port(struct mlxbf_gige *priv)
 					100, 100000);
 
 	/* Clear the CLEAN_PORT_EN bit at end of this loop */
-	control = readq(priv->base + MLXBF_GIGE_CONTROL);
+	control = pete_readq("drivers/net/ethernet/mellanox/mlxbf_gige/mlxbf_gige_main.c:124", priv->base + MLXBF_GIGE_CONTROL);
 	control &= ~MLXBF_GIGE_CONTROL_CLEAN_PORT_EN;
-	writeq(control, priv->base + MLXBF_GIGE_CONTROL);
+	pete_writeq("drivers/net/ethernet/mellanox/mlxbf_gige/mlxbf_gige_main.c:126", control, priv->base + MLXBF_GIGE_CONTROL);
 
 	return err;
 }
@@ -174,7 +174,7 @@ static int mlxbf_gige_open(struct net_device *netdev)
 	/* Ensure completion of all initialization before enabling interrupts */
 	mb();
 
-	writeq(int_en, priv->base + MLXBF_GIGE_INT_EN);
+	pete_writeq("drivers/net/ethernet/mellanox/mlxbf_gige/mlxbf_gige_main.c:177", int_en, priv->base + MLXBF_GIGE_INT_EN);
 
 	return 0;
 
@@ -190,7 +190,7 @@ static int mlxbf_gige_stop(struct net_device *netdev)
 {
 	struct mlxbf_gige *priv = netdev_priv(netdev);
 
-	writeq(0, priv->base + MLXBF_GIGE_INT_EN);
+	pete_writeq("drivers/net/ethernet/mellanox/mlxbf_gige/mlxbf_gige_main.c:193", 0, priv->base + MLXBF_GIGE_INT_EN);
 	netif_stop_queue(netdev);
 	napi_disable(&priv->napi);
 	netif_napi_del(&priv->napi);
@@ -244,7 +244,7 @@ static void mlxbf_gige_get_stats64(struct net_device *netdev,
 
 	stats->rx_length_errors = priv->stats.rx_truncate_errors;
 	stats->rx_fifo_errors = priv->stats.rx_din_dropped_pkts +
-				readq(priv->base + MLXBF_GIGE_RX_DIN_DROP_COUNTER);
+				pete_readq("drivers/net/ethernet/mellanox/mlxbf_gige/mlxbf_gige_main.c:247", priv->base + MLXBF_GIGE_RX_DIN_DROP_COUNTER);
 	stats->rx_crc_errors = priv->stats.rx_mac_errors;
 	stats->rx_errors = stats->rx_length_errors +
 			   stats->rx_fifo_errors +
@@ -297,9 +297,9 @@ static int mlxbf_gige_probe(struct platform_device *pdev)
 		return PTR_ERR(plu_base);
 
 	/* Perform general init of GigE block */
-	control = readq(base + MLXBF_GIGE_CONTROL);
+	control = pete_readq("drivers/net/ethernet/mellanox/mlxbf_gige/mlxbf_gige_main.c:300", base + MLXBF_GIGE_CONTROL);
 	control |= MLXBF_GIGE_CONTROL_PORT_EN;
-	writeq(control, base + MLXBF_GIGE_CONTROL);
+	pete_writeq("drivers/net/ethernet/mellanox/mlxbf_gige/mlxbf_gige_main.c:302", control, base + MLXBF_GIGE_CONTROL);
 
 	netdev = devm_alloc_etherdev(&pdev->dev, sizeof(*priv));
 	if (!netdev)
@@ -416,7 +416,7 @@ static void mlxbf_gige_shutdown(struct platform_device *pdev)
 {
 	struct mlxbf_gige *priv = platform_get_drvdata(pdev);
 
-	writeq(0, priv->base + MLXBF_GIGE_INT_EN);
+	pete_writeq("drivers/net/ethernet/mellanox/mlxbf_gige/mlxbf_gige_main.c:419", 0, priv->base + MLXBF_GIGE_INT_EN);
 	mlxbf_gige_clean_port(priv);
 }
 

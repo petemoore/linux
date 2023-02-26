@@ -32,21 +32,21 @@
 
 #define REV_ID_VT6110       (0)
 
-#define BYTE_REG_BITS_ON(x,p)       do { writeb(readb((p))|(x),(p));} while (0)
-#define WORD_REG_BITS_ON(x,p)       do { writew(readw((p))|(x),(p));} while (0)
-#define DWORD_REG_BITS_ON(x,p)      do { writel(readl((p))|(x),(p));} while (0)
+#define BYTE_REG_BITS_ON(x,p)       do { pete_writeb("drivers/net/ethernet/via/via-velocity.h:35", pete_readb("drivers/net/ethernet/via/via-velocity.h:35", (p))|(x),(p));} while (0)
+#define WORD_REG_BITS_ON(x,p)       do { pete_writew("drivers/net/ethernet/via/via-velocity.h:36", pete_readw("drivers/net/ethernet/via/via-velocity.h:36", (p))|(x),(p));} while (0)
+#define DWORD_REG_BITS_ON(x,p)      do { pete_writel("drivers/net/ethernet/via/via-velocity.h:37", pete_readl("drivers/net/ethernet/via/via-velocity.h:37", (p))|(x),(p));} while (0)
 
-#define BYTE_REG_BITS_IS_ON(x,p)    (readb((p)) & (x))
-#define WORD_REG_BITS_IS_ON(x,p)    (readw((p)) & (x))
-#define DWORD_REG_BITS_IS_ON(x,p)   (readl((p)) & (x))
+#define BYTE_REG_BITS_IS_ON(x,p)    (pete_readb("drivers/net/ethernet/via/via-velocity.h:39", (p)) & (x))
+#define WORD_REG_BITS_IS_ON(x,p)    (pete_readw("drivers/net/ethernet/via/via-velocity.h:40", (p)) & (x))
+#define DWORD_REG_BITS_IS_ON(x,p)   (pete_readl("drivers/net/ethernet/via/via-velocity.h:41", (p)) & (x))
 
-#define BYTE_REG_BITS_OFF(x,p)      do { writeb(readb((p)) & (~(x)),(p));} while (0)
-#define WORD_REG_BITS_OFF(x,p)      do { writew(readw((p)) & (~(x)),(p));} while (0)
-#define DWORD_REG_BITS_OFF(x,p)     do { writel(readl((p)) & (~(x)),(p));} while (0)
+#define BYTE_REG_BITS_OFF(x,p)      do { pete_writeb("drivers/net/ethernet/via/via-velocity.h:43", pete_readb("drivers/net/ethernet/via/via-velocity.h:43", (p)) & (~(x)),(p));} while (0)
+#define WORD_REG_BITS_OFF(x,p)      do { pete_writew("drivers/net/ethernet/via/via-velocity.h:44", pete_readw("drivers/net/ethernet/via/via-velocity.h:44", (p)) & (~(x)),(p));} while (0)
+#define DWORD_REG_BITS_OFF(x,p)     do { pete_writel("drivers/net/ethernet/via/via-velocity.h:45", pete_readl("drivers/net/ethernet/via/via-velocity.h:45", (p)) & (~(x)),(p));} while (0)
 
-#define BYTE_REG_BITS_SET(x,m,p)    do { writeb( (readb((p)) & (~(m))) |(x),(p));} while (0)
-#define WORD_REG_BITS_SET(x,m,p)    do { writew( (readw((p)) & (~(m))) |(x),(p));} while (0)
-#define DWORD_REG_BITS_SET(x,m,p)   do { writel( (readl((p)) & (~(m)))|(x),(p));}  while (0)
+#define BYTE_REG_BITS_SET(x,m,p)    do { pete_writeb("drivers/net/ethernet/via/via-velocity.h:47",  (pete_readb("drivers/net/ethernet/via/via-velocity.h:47", (p)) & (~(m))) |(x),(p));} while (0)
+#define WORD_REG_BITS_SET(x,m,p)    do { pete_writew("drivers/net/ethernet/via/via-velocity.h:48",  (pete_readw("drivers/net/ethernet/via/via-velocity.h:48", (p)) & (~(m))) |(x),(p));} while (0)
+#define DWORD_REG_BITS_SET(x,m,p)   do { pete_writel("drivers/net/ethernet/via/via-velocity.h:49",  (pete_readl("drivers/net/ethernet/via/via-velocity.h:49", (p)) & (~(m)))|(x),(p));}  while (0)
 
 #define VAR_USED(p)     do {(p)=(p);} while (0)
 
@@ -962,7 +962,7 @@ enum  velocity_owner {
 
 /*
  *	MAC registers as a structure. Cannot be directly accessed this
- *	way but generates offsets for readl/writel() calls
+ *	way but generates offsets for readl/pete_writel("drivers/net/ethernet/via/via-velocity.h:965", ) calls
  */
 
 struct mac_regs {
@@ -1145,13 +1145,13 @@ struct velocity_info_tbl {
 	BYTE_REG_BITS_OFF(MIBCR_MIBFRZ,&((regs)->MIBCR));\
 }
 
-#define mac_read_isr(regs)  		readl(&((regs)->ISR))
-#define mac_write_isr(regs, x)  	writel((x),&((regs)->ISR))
-#define mac_clear_isr(regs) 		writel(0xffffffffL,&((regs)->ISR))
+#define mac_read_isr(regs)  		pete_readl("drivers/net/ethernet/via/via-velocity.h:1148", &((regs)->ISR))
+#define mac_write_isr(regs, x)  	pete_writel("drivers/net/ethernet/via/via-velocity.h:1149", (x),&((regs)->ISR))
+#define mac_clear_isr(regs) 		pete_writel("drivers/net/ethernet/via/via-velocity.h:1150", 0xffffffffL,&((regs)->ISR))
 
-#define mac_write_int_mask(mask, regs) 	writel((mask),&((regs)->IMR));
-#define mac_disable_int(regs)       	writel(CR0_GINTMSK1,&((regs)->CR0Clr))
-#define mac_enable_int(regs)    	writel(CR0_GINTMSK1,&((regs)->CR0Set))
+#define mac_write_int_mask(mask, regs) 	pete_writel("drivers/net/ethernet/via/via-velocity.h:1152", (mask),&((regs)->IMR));
+#define mac_disable_int(regs)       	pete_writel("drivers/net/ethernet/via/via-velocity.h:1153", CR0_GINTMSK1,&((regs)->CR0Clr))
+#define mac_enable_int(regs)    	pete_writel("drivers/net/ethernet/via/via-velocity.h:1154", CR0_GINTMSK1,&((regs)->CR0Set))
 
 #define mac_set_dma_length(regs, n) {\
 	BYTE_REG_BITS_SET((n),0x07,&((regs)->DCFG));\
@@ -1162,19 +1162,19 @@ struct velocity_info_tbl {
 }
 
 #define mac_rx_queue_run(regs) {\
-	writeb(TRDCSR_RUN, &((regs)->RDCSRSet));\
+	pete_writeb("drivers/net/ethernet/via/via-velocity.h:1165", TRDCSR_RUN, &((regs)->RDCSRSet));\
 }
 
 #define mac_rx_queue_wake(regs) {\
-	writeb(TRDCSR_WAK, &((regs)->RDCSRSet));\
+	pete_writeb("drivers/net/ethernet/via/via-velocity.h:1169", TRDCSR_WAK, &((regs)->RDCSRSet));\
 }
 
 #define mac_tx_queue_run(regs, n) {\
-	writew(TRDCSR_RUN<<((n)*4),&((regs)->TDCSRSet));\
+	pete_writew("drivers/net/ethernet/via/via-velocity.h:1173", TRDCSR_RUN<<((n)*4),&((regs)->TDCSRSet));\
 }
 
 #define mac_tx_queue_wake(regs, n) {\
-	writew(TRDCSR_WAK<<(n*4),&((regs)->TDCSRSet));\
+	pete_writew("drivers/net/ethernet/via/via-velocity.h:1177", TRDCSR_WAK<<(n*4),&((regs)->TDCSRSet));\
 }
 
 static inline void mac_eeprom_reload(struct mac_regs __iomem * regs) {
@@ -1497,7 +1497,7 @@ static inline void velocity_update_hw_mibs(struct velocity_info *vptr)
 
 	BYTE_REG_BITS_ON(MIBCR_MPTRINI, &(vptr->mac_regs->MIBCR));
 	for (i = 0; i < HW_MIB_SIZE; i++) {
-		tmp = readl(&(vptr->mac_regs->MIBData)) & 0x00FFFFFFUL;
+		tmp = pete_readl("drivers/net/ethernet/via/via-velocity.h:1500", &(vptr->mac_regs->MIBData)) & 0x00FFFFFFUL;
 		vptr->mib_counter[i] += tmp;
 	}
 }
@@ -1515,14 +1515,14 @@ static inline void init_flow_control_register(struct velocity_info *vptr)
 
 	/* Set {XHITH1, XHITH0, XLTH1, XLTH0} in FlowCR1 to {1, 0, 1, 1}
 	   depend on RD=64, and Turn on XNOEN in FlowCR1 */
-	writel((CR0_XONEN | CR0_XHITH1 | CR0_XLTH1 | CR0_XLTH0), &regs->CR0Set);
-	writel((CR0_FDXTFCEN | CR0_FDXRFCEN | CR0_HDXFCEN | CR0_XHITH0), &regs->CR0Clr);
+	pete_writel("drivers/net/ethernet/via/via-velocity.h:1518", (CR0_XONEN | CR0_XHITH1 | CR0_XLTH1 | CR0_XLTH0), &regs->CR0Set);
+	pete_writel("drivers/net/ethernet/via/via-velocity.h:1519", (CR0_FDXTFCEN | CR0_FDXRFCEN | CR0_HDXFCEN | CR0_XHITH0), &regs->CR0Clr);
 
 	/* Set TxPauseTimer to 0xFFFF */
-	writew(0xFFFF, &regs->tx_pause_timer);
+	pete_writew("drivers/net/ethernet/via/via-velocity.h:1522", 0xFFFF, &regs->tx_pause_timer);
 
 	/* Initialize RBRDU to Rx buffer count. */
-	writew(vptr->options.numrx, &regs->RBRDU);
+	pete_writew("drivers/net/ethernet/via/via-velocity.h:1525", vptr->options.numrx, &regs->RBRDU);
 }
 
 

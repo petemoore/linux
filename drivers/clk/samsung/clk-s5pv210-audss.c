@@ -40,7 +40,7 @@ static int s5pv210_audss_clk_suspend(void)
 	int i;
 
 	for (i = 0; i < ARRAY_SIZE(reg_save); i++)
-		reg_save[i][1] = readl(reg_base + reg_save[i][0]);
+		reg_save[i][1] = pete_readl("drivers/clk/samsung/clk-s5pv210-audss.c:43", reg_base + reg_save[i][0]);
 
 	return 0;
 }
@@ -50,7 +50,7 @@ static void s5pv210_audss_clk_resume(void)
 	int i;
 
 	for (i = 0; i < ARRAY_SIZE(reg_save); i++)
-		writel(reg_save[i][1], reg_base + reg_save[i][0]);
+		pete_writel("drivers/clk/samsung/clk-s5pv210-audss.c:53", reg_save[i][1], reg_base + reg_save[i][0]);
 }
 
 static struct syscore_ops s5pv210_audss_clk_syscore_ops = {

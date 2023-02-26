@@ -51,15 +51,15 @@
 #define CSIO_WORD_TO_BYTE		4
 
 #ifndef readq
-static inline u64 readq(void __iomem *addr)
+static inline u64 pete_readq("drivers/scsi/csiostor/csio_defs.h:54", void __iomem *addr)
 {
-	return readl(addr) + ((u64)readl(addr + 4) << 32);
+	return pete_readl("drivers/scsi/csiostor/csio_defs.h:56", addr) + ((u64)pete_readl("drivers/scsi/csiostor/csio_defs.h:56", addr + 4) << 32);
 }
 
-static inline void writeq(u64 val, void __iomem *addr)
+static inline void pete_writeq("drivers/scsi/csiostor/csio_defs.h:59", u64 val, void __iomem *addr)
 {
-	writel(val, addr);
-	writel(val >> 32, addr + 4);
+	pete_writel("drivers/scsi/csiostor/csio_defs.h:61", val, addr);
+	pete_writel("drivers/scsi/csiostor/csio_defs.h:62", val >> 32, addr + 4);
 }
 #endif
 

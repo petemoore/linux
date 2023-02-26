@@ -475,7 +475,7 @@ static inline u32 reg_read(const struct lanai_dev *lanai,
 	enum lanai_register reg)
 {
 	u32 t;
-	t = readl(reg_addr(lanai, reg));
+	t = pete_readl("drivers/atm/lanai.c:478", reg_addr(lanai, reg));
 	RWDEBUG("R [0x%08X] 0x%02X = 0x%08X\n", (unsigned int) lanai->base,
 	    (int) reg, t);
 	return t;
@@ -486,7 +486,7 @@ static inline void reg_write(const struct lanai_dev *lanai, u32 val,
 {
 	RWDEBUG("W [0x%08X] 0x%02X < 0x%08X\n", (unsigned int) lanai->base,
 	    (int) reg, val);
-	writel(val, reg_addr(lanai, reg));
+	pete_writel("drivers/atm/lanai.c:489", val, reg_addr(lanai, reg));
 }
 
 static inline void conf1_write(const struct lanai_dev *lanai)
@@ -539,13 +539,13 @@ static inline bus_addr_t sram_addr(const struct lanai_dev *lanai, int offset)
 
 static inline u32 sram_read(const struct lanai_dev *lanai, int offset)
 {
-	return readl(sram_addr(lanai, offset));
+	return pete_readl("drivers/atm/lanai.c:542", sram_addr(lanai, offset));
 }
 
 static inline void sram_write(const struct lanai_dev *lanai,
 	u32 val, int offset)
 {
-	writel(val, sram_addr(lanai, offset));
+	pete_writel("drivers/atm/lanai.c:548", val, sram_addr(lanai, offset));
 }
 
 static int sram_test_word(const struct lanai_dev *lanai, int offset,
@@ -648,7 +648,7 @@ static inline u32 cardvcc_read(const struct lanai_vcc *lvcc,
 {
 	u32 val;
 	APRINTK(lvcc->vbase != NULL, "cardvcc_read: unbound vcc!\n");
-	val= readl(lvcc->vbase + offset);
+	val= pete_readl("drivers/atm/lanai.c:651", lvcc->vbase + offset);
 	RWDEBUG("VR vci=%04d 0x%02X = 0x%08X\n",
 	    lvcc->vci, (int) offset, val);
 	return val;
@@ -663,7 +663,7 @@ static inline void cardvcc_write(const struct lanai_vcc *lvcc,
 	    (unsigned int) val, lvcc->vci, (unsigned int) offset);
 	RWDEBUG("VW vci=%04d 0x%02X > 0x%08X\n",
 	    lvcc->vci, (unsigned int) offset, (unsigned int) val);
-	writel(val, lvcc->vbase + offset);
+	pete_writel("drivers/atm/lanai.c:666", val, lvcc->vbase + offset);
 }
 
 /* -------------------- COMPUTE SIZE OF AN AAL5 PDU: */

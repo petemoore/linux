@@ -109,9 +109,9 @@ static int ql_sem_spinlock(struct ql3_adapter *qdev,
 	unsigned int seconds = 3;
 
 	do {
-		writel((sem_mask | sem_bits),
+		pete_writel("drivers/net/ethernet/qlogic/qla3xxx.c:112", (sem_mask | sem_bits),
 		       &port_regs->CommonRegs.semaphoreReg);
-		value = readl(&port_regs->CommonRegs.semaphoreReg);
+		value = pete_readl("drivers/net/ethernet/qlogic/qla3xxx.c:114", &port_regs->CommonRegs.semaphoreReg);
 		if ((value & (sem_mask >> 16)) == sem_bits)
 			return 0;
 		mdelay(1000);
@@ -123,8 +123,8 @@ static void ql_sem_unlock(struct ql3_adapter *qdev, u32 sem_mask)
 {
 	struct ql3xxx_port_registers __iomem *port_regs =
 		qdev->mem_map_registers;
-	writel(sem_mask, &port_regs->CommonRegs.semaphoreReg);
-	readl(&port_regs->CommonRegs.semaphoreReg);
+	pete_writel("drivers/net/ethernet/qlogic/qla3xxx.c:126", sem_mask, &port_regs->CommonRegs.semaphoreReg);
+	pete_readl("drivers/net/ethernet/qlogic/qla3xxx.c:127", &port_regs->CommonRegs.semaphoreReg);
 }
 
 static int ql_sem_lock(struct ql3_adapter *qdev, u32 sem_mask, u32 sem_bits)
@@ -133,8 +133,8 @@ static int ql_sem_lock(struct ql3_adapter *qdev, u32 sem_mask, u32 sem_bits)
 		qdev->mem_map_registers;
 	u32 value;
 
-	writel((sem_mask | sem_bits), &port_regs->CommonRegs.semaphoreReg);
-	value = readl(&port_regs->CommonRegs.semaphoreReg);
+	pete_writel("drivers/net/ethernet/qlogic/qla3xxx.c:136", (sem_mask | sem_bits), &port_regs->CommonRegs.semaphoreReg);
+	value = pete_readl("drivers/net/ethernet/qlogic/qla3xxx.c:137", &port_regs->CommonRegs.semaphoreReg);
 	return ((value & (sem_mask >> 16)) == sem_bits);
 }
 
@@ -166,9 +166,9 @@ static void ql_set_register_page(struct ql3_adapter *qdev, u32 page)
 	struct ql3xxx_port_registers __iomem *port_regs =
 		qdev->mem_map_registers;
 
-	writel(((ISP_CONTROL_NP_MASK << 16) | page),
+	pete_writel("drivers/net/ethernet/qlogic/qla3xxx.c:169", ((ISP_CONTROL_NP_MASK << 16) | page),
 			&port_regs->CommonRegs.ispControlStatus);
-	readl(&port_regs->CommonRegs.ispControlStatus);
+	pete_readl("drivers/net/ethernet/qlogic/qla3xxx.c:171", &port_regs->CommonRegs.ispControlStatus);
 	qdev->current_page = page;
 }
 
@@ -178,7 +178,7 @@ static u32 ql_read_common_reg_l(struct ql3_adapter *qdev, u32 __iomem *reg)
 	unsigned long hw_flags;
 
 	spin_lock_irqsave(&qdev->hw_lock, hw_flags);
-	value = readl(reg);
+	value = pete_readl("drivers/net/ethernet/qlogic/qla3xxx.c:181", reg);
 	spin_unlock_irqrestore(&qdev->hw_lock, hw_flags);
 
 	return value;
@@ -186,7 +186,7 @@ static u32 ql_read_common_reg_l(struct ql3_adapter *qdev, u32 __iomem *reg)
 
 static u32 ql_read_common_reg(struct ql3_adapter *qdev, u32 __iomem *reg)
 {
-	return readl(reg);
+	return pete_readl("drivers/net/ethernet/qlogic/qla3xxx.c:189", reg);
 }
 
 static u32 ql_read_page0_reg_l(struct ql3_adapter *qdev, u32 __iomem *reg)
@@ -198,7 +198,7 @@ static u32 ql_read_page0_reg_l(struct ql3_adapter *qdev, u32 __iomem *reg)
 
 	if (qdev->current_page != 0)
 		ql_set_register_page(qdev, 0);
-	value = readl(reg);
+	value = pete_readl("drivers/net/ethernet/qlogic/qla3xxx.c:201", reg);
 
 	spin_unlock_irqrestore(&qdev->hw_lock, hw_flags);
 	return value;
@@ -208,7 +208,7 @@ static u32 ql_read_page0_reg(struct ql3_adapter *qdev, u32 __iomem *reg)
 {
 	if (qdev->current_page != 0)
 		ql_set_register_page(qdev, 0);
-	return readl(reg);
+	return pete_readl("drivers/net/ethernet/qlogic/qla3xxx.c:211", reg);
 }
 
 static void ql_write_common_reg_l(struct ql3_adapter *qdev,
@@ -217,23 +217,23 @@ static void ql_write_common_reg_l(struct ql3_adapter *qdev,
 	unsigned long hw_flags;
 
 	spin_lock_irqsave(&qdev->hw_lock, hw_flags);
-	writel(value, reg);
-	readl(reg);
+	pete_writel("drivers/net/ethernet/qlogic/qla3xxx.c:220", value, reg);
+	pete_readl("drivers/net/ethernet/qlogic/qla3xxx.c:221", reg);
 	spin_unlock_irqrestore(&qdev->hw_lock, hw_flags);
 }
 
 static void ql_write_common_reg(struct ql3_adapter *qdev,
 				u32 __iomem *reg, u32 value)
 {
-	writel(value, reg);
-	readl(reg);
+	pete_writel("drivers/net/ethernet/qlogic/qla3xxx.c:228", value, reg);
+	pete_readl("drivers/net/ethernet/qlogic/qla3xxx.c:229", reg);
 }
 
 static void ql_write_nvram_reg(struct ql3_adapter *qdev,
 				u32 __iomem *reg, u32 value)
 {
-	writel(value, reg);
-	readl(reg);
+	pete_writel("drivers/net/ethernet/qlogic/qla3xxx.c:235", value, reg);
+	pete_readl("drivers/net/ethernet/qlogic/qla3xxx.c:236", reg);
 	udelay(1);
 }
 
@@ -242,8 +242,8 @@ static void ql_write_page0_reg(struct ql3_adapter *qdev,
 {
 	if (qdev->current_page != 0)
 		ql_set_register_page(qdev, 0);
-	writel(value, reg);
-	readl(reg);
+	pete_writel("drivers/net/ethernet/qlogic/qla3xxx.c:245", value, reg);
+	pete_readl("drivers/net/ethernet/qlogic/qla3xxx.c:246", reg);
 }
 
 /*
@@ -254,8 +254,8 @@ static void ql_write_page1_reg(struct ql3_adapter *qdev,
 {
 	if (qdev->current_page != 1)
 		ql_set_register_page(qdev, 1);
-	writel(value, reg);
-	readl(reg);
+	pete_writel("drivers/net/ethernet/qlogic/qla3xxx.c:257", value, reg);
+	pete_readl("drivers/net/ethernet/qlogic/qla3xxx.c:258", reg);
 }
 
 /*
@@ -266,8 +266,8 @@ static void ql_write_page2_reg(struct ql3_adapter *qdev,
 {
 	if (qdev->current_page != 2)
 		ql_set_register_page(qdev, 2);
-	writel(value, reg);
-	readl(reg);
+	pete_writel("drivers/net/ethernet/qlogic/qla3xxx.c:269", value, reg);
+	pete_readl("drivers/net/ethernet/qlogic/qla3xxx.c:270", reg);
 }
 
 static void ql_disable_interrupts(struct ql3_adapter *qdev)
@@ -1906,7 +1906,7 @@ static void ql_update_lrg_bufq_prod_index(struct ql3_adapter *qdev)
 		}
 		wmb();
 		qdev->lrg_buf_next_free = lrg_buf_q_ele;
-		writel(qdev->lrg_buf_q_producer_index,
+		pete_writel("drivers/net/ethernet/qlogic/qla3xxx.c:1909", qdev->lrg_buf_q_producer_index,
 			&port_regs->CommonRegs.rxLargeQProducerIndex);
 	}
 }
@@ -2185,7 +2185,7 @@ static int ql_poll(struct napi_struct *napi, int budget)
 		spin_lock_irqsave(&qdev->hw_lock, flags);
 		ql_update_small_bufq_prod_index(qdev);
 		ql_update_lrg_bufq_prod_index(qdev);
-		writel(qdev->rsp_consumer_index,
+		pete_writel("drivers/net/ethernet/qlogic/qla3xxx.c:2188", qdev->rsp_consumer_index,
 			    &port_regs->CommonRegs.rspQConsumerIndex);
 		spin_unlock_irqrestore(&qdev->hw_lock, flags);
 

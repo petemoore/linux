@@ -85,8 +85,8 @@ static irqreturn_t vt8500_rtc_irq(int irq, void *dev_id)
 	spin_lock(&vt8500_rtc->lock);
 
 	/* clear interrupt sources */
-	isr = readl(vt8500_rtc->regbase + VT8500_RTC_IS);
-	writel(isr, vt8500_rtc->regbase + VT8500_RTC_IS);
+	isr = pete_readl("drivers/rtc/rtc-vt8500.c:88", vt8500_rtc->regbase + VT8500_RTC_IS);
+	pete_writel("drivers/rtc/rtc-vt8500.c:89", isr, vt8500_rtc->regbase + VT8500_RTC_IS);
 
 	spin_unlock(&vt8500_rtc->lock);
 
@@ -103,8 +103,8 @@ static int vt8500_rtc_read_time(struct device *dev, struct rtc_time *tm)
 	struct vt8500_rtc *vt8500_rtc = dev_get_drvdata(dev);
 	u32 date, time;
 
-	date = readl(vt8500_rtc->regbase + VT8500_RTC_DR);
-	time = readl(vt8500_rtc->regbase + VT8500_RTC_TR);
+	date = pete_readl("drivers/rtc/rtc-vt8500.c:106", vt8500_rtc->regbase + VT8500_RTC_DR);
+	time = pete_readl("drivers/rtc/rtc-vt8500.c:107", vt8500_rtc->regbase + VT8500_RTC_TR);
 
 	tm->tm_sec = bcd2bin(time & TIME_SEC_MASK);
 	tm->tm_min = bcd2bin((time & TIME_MIN_MASK) >> TIME_MIN_S);
@@ -122,12 +122,12 @@ static int vt8500_rtc_set_time(struct device *dev, struct rtc_time *tm)
 {
 	struct vt8500_rtc *vt8500_rtc = dev_get_drvdata(dev);
 
-	writel((bin2bcd(tm->tm_year % 100) << DATE_YEAR_S)
+	pete_writel("drivers/rtc/rtc-vt8500.c:125", (bin2bcd(tm->tm_year % 100) << DATE_YEAR_S)
 		| (bin2bcd(tm->tm_mon + 1) << DATE_MONTH_S)
 		| (bin2bcd(tm->tm_mday))
 		| ((tm->tm_year >= 200) << DATE_CENTURY_S),
 		vt8500_rtc->regbase + VT8500_RTC_DS);
-	writel((bin2bcd(tm->tm_wday) << TIME_DOW_S)
+	pete_writel("drivers/rtc/rtc-vt8500.c:130", (bin2bcd(tm->tm_wday) << TIME_DOW_S)
 		| (bin2bcd(tm->tm_hour) << TIME_HOUR_S)
 		| (bin2bcd(tm->tm_min) << TIME_MIN_S)
 		| (bin2bcd(tm->tm_sec)),
@@ -141,8 +141,8 @@ static int vt8500_rtc_read_alarm(struct device *dev, struct rtc_wkalrm *alrm)
 	struct vt8500_rtc *vt8500_rtc = dev_get_drvdata(dev);
 	u32 isr, alarm;
 
-	alarm = readl(vt8500_rtc->regbase + VT8500_RTC_AS);
-	isr = readl(vt8500_rtc->regbase + VT8500_RTC_IS);
+	alarm = pete_readl("drivers/rtc/rtc-vt8500.c:144", vt8500_rtc->regbase + VT8500_RTC_AS);
+	isr = pete_readl("drivers/rtc/rtc-vt8500.c:145", vt8500_rtc->regbase + VT8500_RTC_IS);
 
 	alrm->time.tm_mday = bcd2bin((alarm & ALARM_DAY_MASK) >> ALARM_DAY_S);
 	alrm->time.tm_hour = bcd2bin((alarm & TIME_HOUR_MASK) >> TIME_HOUR_S);
@@ -159,7 +159,7 @@ static int vt8500_rtc_set_alarm(struct device *dev, struct rtc_wkalrm *alrm)
 {
 	struct vt8500_rtc *vt8500_rtc = dev_get_drvdata(dev);
 
-	writel((alrm->enabled ? ALARM_ENABLE_MASK : 0)
+	pete_writel("drivers/rtc/rtc-vt8500.c:162", (alrm->enabled ? ALARM_ENABLE_MASK : 0)
 		| (bin2bcd(alrm->time.tm_mday) << ALARM_DAY_S)
 		| (bin2bcd(alrm->time.tm_hour) << TIME_HOUR_S)
 		| (bin2bcd(alrm->time.tm_min) << TIME_MIN_S)
@@ -172,14 +172,14 @@ static int vt8500_rtc_set_alarm(struct device *dev, struct rtc_wkalrm *alrm)
 static int vt8500_alarm_irq_enable(struct device *dev, unsigned int enabled)
 {
 	struct vt8500_rtc *vt8500_rtc = dev_get_drvdata(dev);
-	unsigned long tmp = readl(vt8500_rtc->regbase + VT8500_RTC_AS);
+	unsigned long tmp = pete_readl("drivers/rtc/rtc-vt8500.c:175", vt8500_rtc->regbase + VT8500_RTC_AS);
 
 	if (enabled)
 		tmp |= ALARM_ENABLE_MASK;
 	else
 		tmp &= ~ALARM_ENABLE_MASK;
 
-	writel(tmp, vt8500_rtc->regbase + VT8500_RTC_AS);
+	pete_writel("drivers/rtc/rtc-vt8500.c:182", tmp, vt8500_rtc->regbase + VT8500_RTC_AS);
 	return 0;
 }
 
@@ -213,7 +213,7 @@ static int vt8500_rtc_probe(struct platform_device *pdev)
 		return PTR_ERR(vt8500_rtc->regbase);
 
 	/* Enable RTC and set it to 24-hour mode */
-	writel(VT8500_RTC_CR_ENABLE,
+	pete_writel("drivers/rtc/rtc-vt8500.c:216", VT8500_RTC_CR_ENABLE,
 	       vt8500_rtc->regbase + VT8500_RTC_CR);
 
 	vt8500_rtc->rtc = devm_rtc_allocate_device(&pdev->dev);
@@ -240,7 +240,7 @@ static int vt8500_rtc_remove(struct platform_device *pdev)
 	struct vt8500_rtc *vt8500_rtc = platform_get_drvdata(pdev);
 
 	/* Disable alarm matching */
-	writel(0, vt8500_rtc->regbase + VT8500_RTC_IS);
+	pete_writel("drivers/rtc/rtc-vt8500.c:243", 0, vt8500_rtc->regbase + VT8500_RTC_IS);
 
 	return 0;
 }

@@ -49,23 +49,23 @@ static irqreturn_t mtk_vcodec_dec_irq_handler(int irq, void *priv)
 	ctx = mtk_vcodec_get_curr_ctx(dev);
 
 	/* check if HW active or not */
-	cg_status = readl(dev->reg_base[0]);
+	cg_status = pete_readl("drivers/media/platform/mtk-vcodec/mtk_vcodec_dec_drv.c:52", dev->reg_base[0]);
 	if ((cg_status & VDEC_HW_ACTIVE) != 0) {
 		mtk_v4l2_err("DEC ISR, VDEC active is not 0x0 (0x%08x)",
 			     cg_status);
 		return IRQ_HANDLED;
 	}
 
-	dec_done_status = readl(vdec_misc_addr);
+	dec_done_status = pete_readl("drivers/media/platform/mtk-vcodec/mtk_vcodec_dec_drv.c:59", vdec_misc_addr);
 	ctx->irq_status = dec_done_status;
 	if ((dec_done_status & MTK_VDEC_IRQ_STATUS_DEC_SUCCESS) !=
 		MTK_VDEC_IRQ_STATUS_DEC_SUCCESS)
 		return IRQ_HANDLED;
 
 	/* clear interrupt */
-	writel((readl(vdec_misc_addr) | VDEC_IRQ_CFG),
+	pete_writel("drivers/media/platform/mtk-vcodec/mtk_vcodec_dec_drv.c:66", (pete_readl("drivers/media/platform/mtk-vcodec/mtk_vcodec_dec_drv.c:66", vdec_misc_addr) | VDEC_IRQ_CFG),
 		dev->reg_base[VDEC_MISC] + VDEC_IRQ_CFG_REG);
-	writel((readl(vdec_misc_addr) & ~VDEC_IRQ_CLR),
+	pete_writel("drivers/media/platform/mtk-vcodec/mtk_vcodec_dec_drv.c:68", (pete_readl("drivers/media/platform/mtk-vcodec/mtk_vcodec_dec_drv.c:68", vdec_misc_addr) & ~VDEC_IRQ_CLR),
 		dev->reg_base[VDEC_MISC] + VDEC_IRQ_CFG_REG);
 
 	wake_up_ctx(ctx);

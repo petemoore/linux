@@ -153,17 +153,17 @@ static inline uint32_t make_handle(uint16_t x, uint16_t y)
 
 static inline u8 rd_reg_byte(const volatile u8 __iomem *addr)
 {
-	return readb(addr);
+	return pete_readb("drivers/scsi/qla2xxx/qla_def.h:156", addr);
 }
 
 static inline u16 rd_reg_word(const volatile __le16 __iomem *addr)
 {
-	return readw(addr);
+	return pete_readw("drivers/scsi/qla2xxx/qla_def.h:161", addr);
 }
 
 static inline u32 rd_reg_dword(const volatile __le32 __iomem *addr)
 {
-	return readl(addr);
+	return pete_readl("drivers/scsi/qla2xxx/qla_def.h:166", addr);
 }
 
 static inline u8 rd_reg_byte_relaxed(const volatile u8 __iomem *addr)
@@ -183,17 +183,17 @@ static inline u32 rd_reg_dword_relaxed(const volatile __le32 __iomem *addr)
 
 static inline void wrt_reg_byte(volatile u8 __iomem *addr, u8 data)
 {
-	return writeb(data, addr);
+	return pete_writeb("drivers/scsi/qla2xxx/qla_def.h:186", data, addr);
 }
 
 static inline void wrt_reg_word(volatile __le16 __iomem *addr, u16 data)
 {
-	return writew(data, addr);
+	return pete_writew("drivers/scsi/qla2xxx/qla_def.h:191", data, addr);
 }
 
 static inline void wrt_reg_dword(volatile __le32 __iomem *addr, u32 data)
 {
-	return writel(data, addr);
+	return pete_writel("drivers/scsi/qla2xxx/qla_def.h:196", data, addr);
 }
 
 /*

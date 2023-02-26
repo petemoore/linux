@@ -114,7 +114,7 @@ static void __init at91_wakeup_status(struct platform_device *pdev)
 	u32 reg;
 	char *reason = "unknown";
 
-	reg = readl(shdw->shdwc_base + AT91_SHDW_SR);
+	reg = pete_readl("drivers/power/reset/at91-sama5d2_shdwc.c:117", shdw->shdwc_base + AT91_SHDW_SR);
 
 	dev_dbg(&pdev->dev, "%s: status = %#x\n", __func__, reg);
 
@@ -251,10 +251,10 @@ static void at91_shdwc_dt_configure(struct platform_device *pdev)
 		mode |= SHDW_RTTWKEN(&rcfg->shdwc);
 
 	dev_dbg(&pdev->dev, "%s: mode = %#x\n", __func__, mode);
-	writel(mode, shdw->shdwc_base + AT91_SHDW_MR);
+	pete_writel("drivers/power/reset/at91-sama5d2_shdwc.c:254", mode, shdw->shdwc_base + AT91_SHDW_MR);
 
 	input = at91_shdwc_get_wakeup_input(pdev, np);
-	writel(input, shdw->shdwc_base + AT91_SHDW_WUIR);
+	pete_writel("drivers/power/reset/at91-sama5d2_shdwc.c:257", input, shdw->shdwc_base + AT91_SHDW_WUIR);
 }
 
 static const struct reg_config sama5d2_reg_config = {
@@ -401,7 +401,7 @@ static int __init at91_shdwc_probe(struct platform_device *pdev)
 			goto unmap;
 		}
 
-		ddr_type = readl(at91_shdwc->mpddrc_base +
+		ddr_type = pete_readl("drivers/power/reset/at91-sama5d2_shdwc.c:404", at91_shdwc->mpddrc_base +
 				 at91_shdwc->rcfg->ddrc.type_offset) &
 				 at91_shdwc->rcfg->ddrc.type_mask;
 		if (ddr_type != AT91_DDRSDRC_MD_LPDDR2 &&
@@ -431,8 +431,8 @@ static int __exit at91_shdwc_remove(struct platform_device *pdev)
 		pm_power_off = NULL;
 
 	/* Reset values to disable wake-up features  */
-	writel(0, shdw->shdwc_base + AT91_SHDW_MR);
-	writel(0, shdw->shdwc_base + AT91_SHDW_WUIR);
+	pete_writel("drivers/power/reset/at91-sama5d2_shdwc.c:434", 0, shdw->shdwc_base + AT91_SHDW_MR);
+	pete_writel("drivers/power/reset/at91-sama5d2_shdwc.c:435", 0, shdw->shdwc_base + AT91_SHDW_WUIR);
 
 	if (shdw->mpddrc_base)
 		iounmap(shdw->mpddrc_base);

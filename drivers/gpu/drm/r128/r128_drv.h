@@ -404,10 +404,10 @@ extern long r128_compat_ioctl(struct file *filp, unsigned int cmd,
 
 #define R128_PCIGART_TABLE_SIZE         32768
 
-#define R128_READ(reg)		readl(((void __iomem *)dev_priv->mmio->handle) + (reg))
-#define R128_WRITE(reg, val)	writel(val, ((void __iomem *)dev_priv->mmio->handle) + (reg))
-#define R128_READ8(reg)		readb(((void __iomem *)dev_priv->mmio->handle) + (reg))
-#define R128_WRITE8(reg, val)	writeb(val, ((void __iomem *)dev_priv->mmio->handle) + (reg))
+#define R128_READ(reg)		pete_readl("drivers/gpu/drm/r128/r128_drv.h:407", ((void __iomem *)dev_priv->mmio->handle) + (reg))
+#define R128_WRITE(reg, val)	pete_writel("drivers/gpu/drm/r128/r128_drv.h:408", val, ((void __iomem *)dev_priv->mmio->handle) + (reg))
+#define R128_READ8(reg)		pete_readb("drivers/gpu/drm/r128/r128_drv.h:409", ((void __iomem *)dev_priv->mmio->handle) + (reg))
+#define R128_WRITE8(reg, val)	pete_writeb("drivers/gpu/drm/r128/r128_drv.h:410", val, ((void __iomem *)dev_priv->mmio->handle) + (reg))
 
 #define R128_WRITE_PLL(addr, val)					\
 do {									\

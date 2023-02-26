@@ -3005,7 +3005,7 @@ void ata_bmdma_start(struct ata_queued_cmd *qc)
 	 * we don't care when the mmio write flushes.
 	 * Further, a read of the DMA status register _immediately_
 	 * following the write may not be what certain flaky hardware
-	 * is expected, so I think it is best to not add a readb()
+	 * is expected, so I think it is best to not add a pete_readb("drivers/ata/libata-sff.c:3008", )
 	 * without first all the MMIO ATA cards/mobos.
 	 * Or maybe I'm just being paranoid.
 	 *

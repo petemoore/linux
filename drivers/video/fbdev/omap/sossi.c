@@ -69,32 +69,32 @@ static struct {
 
 static inline u32 sossi_read_reg(int reg)
 {
-	return readl(sossi.base + reg);
+	return pete_readl("drivers/video/fbdev/omap/sossi.c:72", sossi.base + reg);
 }
 
 static inline u16 sossi_read_reg16(int reg)
 {
-	return readw(sossi.base + reg);
+	return pete_readw("drivers/video/fbdev/omap/sossi.c:77", sossi.base + reg);
 }
 
 static inline u8 sossi_read_reg8(int reg)
 {
-	return readb(sossi.base + reg);
+	return pete_readb("drivers/video/fbdev/omap/sossi.c:82", sossi.base + reg);
 }
 
 static inline void sossi_write_reg(int reg, u32 value)
 {
-	writel(value, sossi.base + reg);
+	pete_writel("drivers/video/fbdev/omap/sossi.c:87", value, sossi.base + reg);
 }
 
 static inline void sossi_write_reg16(int reg, u16 value)
 {
-	writew(value, sossi.base + reg);
+	pete_writew("drivers/video/fbdev/omap/sossi.c:92", value, sossi.base + reg);
 }
 
 static inline void sossi_write_reg8(int reg, u8 value)
 {
-	writeb(value, sossi.base + reg);
+	pete_writeb("drivers/video/fbdev/omap/sossi.c:97", value, sossi.base + reg);
 }
 
 static void sossi_set_bits(int reg, u32 bits)

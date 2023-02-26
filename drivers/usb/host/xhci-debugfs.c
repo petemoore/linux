@@ -149,7 +149,7 @@ static void xhci_debugfs_extcap_regset(struct xhci_hcd *xhci, int cap_id,
 	offset = xhci_find_next_ext_cap(base, 0, cap_id);
 	while (offset) {
 		if (cap_id == XHCI_EXT_CAPS_PROTOCOL) {
-			psic = XHCI_EXT_PORT_PSIC(readl(base + offset + 8));
+			psic = XHCI_EXT_PORT_PSIC(pete_readl("drivers/usb/host/xhci-debugfs.c:152", base + offset + 8));
 			nregs = min(4 + psic, n);
 		}
 
@@ -348,7 +348,7 @@ static int xhci_portsc_show(struct seq_file *s, void *unused)
 	u32			portsc;
 	char			str[XHCI_MSG_MAX];
 
-	portsc = readl(port->addr);
+	portsc = pete_readl("drivers/usb/host/xhci-debugfs.c:351", port->addr);
 	seq_printf(s, "%s\n", xhci_decode_portsc(str, portsc));
 
 	return 0;
@@ -378,7 +378,7 @@ static ssize_t xhci_port_write(struct file *file,  const char __user *ubuf,
 			return count;
 		spin_lock_irqsave(&xhci->lock, flags);
 		/* compliance mode can only be enabled on ports in RxDetect */
-		portsc = readl(port->addr);
+		portsc = pete_readl("drivers/usb/host/xhci-debugfs.c:381", port->addr);
 		if ((portsc & PORT_PLS_MASK) != XDEV_RXDETECT) {
 			spin_unlock_irqrestore(&xhci->lock, flags);
 			return -EPERM;
@@ -386,7 +386,7 @@ static ssize_t xhci_port_write(struct file *file,  const char __user *ubuf,
 		portsc = xhci_port_state_to_neutral(portsc);
 		portsc &= ~PORT_PLS_MASK;
 		portsc |= PORT_LINK_STROBE | XDEV_COMP_MODE;
-		writel(portsc, port->addr);
+		pete_writel("drivers/usb/host/xhci-debugfs.c:389", portsc, port->addr);
 		spin_unlock_irqrestore(&xhci->lock, flags);
 	} else {
 		return -EINVAL;
@@ -664,12 +664,12 @@ void xhci_debugfs_init(struct xhci_hcd *xhci)
 			    xhci->debugfs_root, "reg-cap");
 
 	xhci_debugfs_regset(xhci,
-			    HC_LENGTH(readl(&xhci->cap_regs->hc_capbase)),
+			    HC_LENGTH(pete_readl("drivers/usb/host/xhci-debugfs.c:667", &xhci->cap_regs->hc_capbase)),
 			    xhci_op_regs, ARRAY_SIZE(xhci_op_regs),
 			    xhci->debugfs_root, "reg-op");
 
 	xhci_debugfs_regset(xhci,
-			    readl(&xhci->cap_regs->run_regs_off) & RTSOFF_MASK,
+			    pete_readl("drivers/usb/host/xhci-debugfs.c:672", &xhci->cap_regs->run_regs_off) & RTSOFF_MASK,
 			    xhci_runtime_regs, ARRAY_SIZE(xhci_runtime_regs),
 			    xhci->debugfs_root, "reg-runtime");
 

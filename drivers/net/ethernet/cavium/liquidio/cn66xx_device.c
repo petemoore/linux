@@ -284,7 +284,7 @@ void lio_cn6xxx_setup_iq_regs(struct octeon_device *oct, u32 iq_no)
 	/* Store the current instruction counter
 	 * (used in flush_iq calculation)
 	 */
-	iq->reset_instr_cnt = readl(iq->inst_cnt_reg);
+	iq->reset_instr_cnt = pete_readl("drivers/net/ethernet/cavium/liquidio/cn66xx_device.c:287", iq->inst_cnt_reg);
 }
 
 static void lio_cn66xx_setup_iq_regs(struct octeon_device *oct, u32 iq_no)
@@ -448,7 +448,7 @@ u32 lio_cn6xxx_bar1_idx_read(struct octeon_device *oct, u32 idx)
 u32
 lio_cn6xxx_update_read_index(struct octeon_instr_queue *iq)
 {
-	u32 new_idx = readl(iq->inst_cnt_reg);
+	u32 new_idx = pete_readl("drivers/net/ethernet/cavium/liquidio/cn66xx_device.c:451", iq->inst_cnt_reg);
 
 	/* The new instr cnt reg is a 32-bit counter that can roll over. We have
 	 * noted the counter's initial value at init time into
@@ -474,7 +474,7 @@ void lio_cn6xxx_enable_interrupt(struct octeon_device *oct,
 	u64 mask = cn6xxx->intr_mask64 | CN6XXX_INTR_DMA0_FORCE;
 
 	/* Enable Interrupt */
-	writeq(mask, cn6xxx->intr_enb_reg64);
+	pete_writeq("drivers/net/ethernet/cavium/liquidio/cn66xx_device.c:477", mask, cn6xxx->intr_enb_reg64);
 }
 
 void lio_cn6xxx_disable_interrupt(struct octeon_device *oct,
@@ -483,7 +483,7 @@ void lio_cn6xxx_disable_interrupt(struct octeon_device *oct,
 	struct octeon_cn6xxx *cn6xxx = (struct octeon_cn6xxx *)oct->chip;
 
 	/* Disable Interrupts */
-	writeq(0, cn6xxx->intr_enb_reg64);
+	pete_writeq("drivers/net/ethernet/cavium/liquidio/cn66xx_device.c:486", 0, cn6xxx->intr_enb_reg64);
 }
 
 static void lio_cn6xxx_get_pcie_qlmport(struct octeon_device *oct)
@@ -573,7 +573,7 @@ irqreturn_t lio_cn6xxx_process_interrupt_regs(void *dev)
 	struct octeon_cn6xxx *cn6xxx = (struct octeon_cn6xxx *)oct->chip;
 	u64 intr64;
 
-	intr64 = readq(cn6xxx->intr_sum_reg64);
+	intr64 = pete_readq("drivers/net/ethernet/cavium/liquidio/cn66xx_device.c:576", cn6xxx->intr_sum_reg64);
 
 	/* If our device has interrupted, then proceed.
 	 * Also check for all f's if interrupt was triggered on an error
@@ -599,7 +599,7 @@ irqreturn_t lio_cn6xxx_process_interrupt_regs(void *dev)
 		oct->int_status |= OCT_DEV_INTR_DMA1_FORCE;
 
 	/* Clear the current interrupts */
-	writeq(intr64, cn6xxx->intr_sum_reg64);
+	pete_writeq("drivers/net/ethernet/cavium/liquidio/cn66xx_device.c:602", intr64, cn6xxx->intr_sum_reg64);
 
 	return IRQ_HANDLED;
 }

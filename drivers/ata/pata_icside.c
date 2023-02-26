@@ -87,7 +87,7 @@ static void pata_icside_irqenable_arcin_v5 (struct expansion_card *ec, int irqnr
 {
 	struct pata_icside_state *state = ec->irq_data;
 
-	writeb(0, state->irq_port + ICS_ARCIN_V5_INTROFFSET);
+	pete_writeb("drivers/ata/pata_icside.c:90", 0, state->irq_port + ICS_ARCIN_V5_INTROFFSET);
 }
 
 /* Prototype: pata_icside_irqdisable_arcin_v5 (struct expansion_card *ec, int irqnr)
@@ -97,7 +97,7 @@ static void pata_icside_irqdisable_arcin_v5 (struct expansion_card *ec, int irqn
 {
 	struct pata_icside_state *state = ec->irq_data;
 
-	readb(state->irq_port + ICS_ARCIN_V5_INTROFFSET);
+	pete_readb("drivers/ata/pata_icside.c:100", state->irq_port + ICS_ARCIN_V5_INTROFFSET);
 }
 
 static const expansioncard_ops_t pata_icside_ops_arcin_v5 = {
@@ -116,9 +116,9 @@ static void pata_icside_irqenable_arcin_v6 (struct expansion_card *ec, int irqnr
 	void __iomem *base = state->irq_port;
 
 	if (!state->port[0].disabled)
-		writeb(0, base + ICS_ARCIN_V6_INTROFFSET_1);
+		pete_writeb("drivers/ata/pata_icside.c:119", 0, base + ICS_ARCIN_V6_INTROFFSET_1);
 	if (!state->port[1].disabled)
-		writeb(0, base + ICS_ARCIN_V6_INTROFFSET_2);
+		pete_writeb("drivers/ata/pata_icside.c:121", 0, base + ICS_ARCIN_V6_INTROFFSET_2);
 }
 
 /* Prototype: pata_icside_irqdisable_arcin_v6 (struct expansion_card *ec, int irqnr)
@@ -128,8 +128,8 @@ static void pata_icside_irqdisable_arcin_v6 (struct expansion_card *ec, int irqn
 {
 	struct pata_icside_state *state = ec->irq_data;
 
-	readb(state->irq_port + ICS_ARCIN_V6_INTROFFSET_1);
-	readb(state->irq_port + ICS_ARCIN_V6_INTROFFSET_2);
+	pete_readb("drivers/ata/pata_icside.c:131", state->irq_port + ICS_ARCIN_V6_INTROFFSET_1);
+	pete_readb("drivers/ata/pata_icside.c:132", state->irq_port + ICS_ARCIN_V6_INTROFFSET_2);
 }
 
 /* Prototype: pata_icside_irqprobe(struct expansion_card *ec)
@@ -139,8 +139,8 @@ static int pata_icside_irqpending_arcin_v6(struct expansion_card *ec)
 {
 	struct pata_icside_state *state = ec->irq_data;
 
-	return readb(state->irq_port + ICS_ARCIN_V6_INTRSTAT_1) & 1 ||
-	       readb(state->irq_port + ICS_ARCIN_V6_INTRSTAT_2) & 1;
+	return pete_readb("drivers/ata/pata_icside.c:142", state->irq_port + ICS_ARCIN_V6_INTRSTAT_1) & 1 ||
+	       pete_readb("drivers/ata/pata_icside.c:143", state->irq_port + ICS_ARCIN_V6_INTRSTAT_2) & 1;
 }
 
 static const expansioncard_ops_t pata_icside_ops_arcin_v6 = {
@@ -237,7 +237,7 @@ static void pata_icside_bmdma_setup(struct ata_queued_cmd *qc)
 	/*
 	 * Route the DMA signals to the correct interface
 	 */
-	writeb(state->port[ap->port_no].port_sel, state->ioc_base);
+	pete_writeb("drivers/ata/pata_icside.c:240", state->port[ap->port_no].port_sel, state->ioc_base);
 
 	set_dma_speed(state->dma, state->port[ap->port_no].speed[qc->dev->devno]);
 	set_dma_sg(state->dma, qc->sg, qc->n_elem);
@@ -275,7 +275,7 @@ static u8 pata_icside_bmdma_status(struct ata_port *ap)
 	irq_port = state->irq_port + (ap->port_no ? ICS_ARCIN_V6_INTRSTAT_2 :
 						    ICS_ARCIN_V6_INTRSTAT_1);
 
-	return readb(irq_port) & 1 ? ATA_DMA_INTR : 0;
+	return pete_readb("drivers/ata/pata_icside.c:278", irq_port) & 1 ? ATA_DMA_INTR : 0;
 }
 
 static int icside_dma_init(struct pata_icside_info *info)
@@ -322,7 +322,7 @@ static void pata_icside_postreset(struct ata_link *link, unsigned int *classes)
 		 */
 		void __iomem *irq_port = state->irq_port +
 				(ap->port_no ? ICS_ARCIN_V6_INTROFFSET_2 : ICS_ARCIN_V6_INTROFFSET_1);
-		readb(irq_port);
+		pete_readb("drivers/ata/pata_icside.c:325", irq_port);
 	}
 }
 
@@ -420,7 +420,7 @@ static int pata_icside_register_v6(struct pata_icside_info *info)
 		sel = 1 << 5;
 	}
 
-	writeb(sel, ioc_base);
+	pete_writeb("drivers/ata/pata_icside.c:423", sel, ioc_base);
 
 	state->irq_port = easi_base;
 	state->ioc_base = ioc_base;
@@ -504,10 +504,10 @@ static int pata_icside_probe(struct expansion_card *ec,
 	if (idmem) {
 		unsigned int type;
 
-		type = readb(idmem + ICS_IDENT_OFFSET) & 1;
-		type |= (readb(idmem + ICS_IDENT_OFFSET + 4) & 1) << 1;
-		type |= (readb(idmem + ICS_IDENT_OFFSET + 8) & 1) << 2;
-		type |= (readb(idmem + ICS_IDENT_OFFSET + 12) & 1) << 3;
+		type = pete_readb("drivers/ata/pata_icside.c:507", idmem + ICS_IDENT_OFFSET) & 1;
+		type |= (pete_readb("drivers/ata/pata_icside.c:508", idmem + ICS_IDENT_OFFSET + 4) & 1) << 1;
+		type |= (pete_readb("drivers/ata/pata_icside.c:509", idmem + ICS_IDENT_OFFSET + 8) & 1) << 2;
+		type |= (pete_readb("drivers/ata/pata_icside.c:510", idmem + ICS_IDENT_OFFSET + 12) & 1) << 3;
 		ecardm_iounmap(ec, idmem);
 
 		state->type = type;
@@ -576,7 +576,7 @@ static void pata_icside_shutdown(struct expansion_card *ec)
 	if (host) {
 		struct pata_icside_state *state = host->private_data;
 		if (state->ioc_base)
-			writeb(0, state->ioc_base);
+			pete_writeb("drivers/ata/pata_icside.c:579", 0, state->ioc_base);
 	}
 }
 

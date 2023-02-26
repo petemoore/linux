@@ -61,7 +61,7 @@ int zynq_cpun_start(u32 address, int cpu)
 			*/
 			memcpy_toio(zero, &zynq_secondary_trampoline,
 							trampoline_size);
-			writel(address, zero + trampoline_size);
+			pete_writel("arch/arm/mach-zynq/platsmp.c:64", address, zero + trampoline_size);
 
 			flush_cache_all();
 			outer_flush_range(0, trampoline_code_size);

@@ -25,7 +25,7 @@ static int mx25_read_cpu_rev(void)
 	iim_base = of_iomap(np, 0);
 	of_node_put(np);
 	BUG_ON(!iim_base);
-	rev = readl(iim_base + MXC_IIMSREV);
+	rev = pete_readl("arch/arm/mach-imx/cpu-imx25.c:28", iim_base + MXC_IIMSREV);
 	iounmap(iim_base);
 
 	switch (rev) {

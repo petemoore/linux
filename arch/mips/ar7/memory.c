@@ -37,7 +37,7 @@ static int __init memsize(void)
 		size <<= 1;
 	} while (size < (64 << 20));
 
-	writel((u32)tmpaddr, &addr);
+	pete_writel("arch/mips/ar7/memory.c:40", (u32)tmpaddr, &addr);
 
 	return size;
 }

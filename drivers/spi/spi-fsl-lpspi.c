@@ -131,7 +131,7 @@ MODULE_DEVICE_TABLE(of, fsl_lpspi_dt_ids);
 #define LPSPI_BUF_RX(type)						\
 static void fsl_lpspi_buf_rx_##type(struct fsl_lpspi_data *fsl_lpspi)	\
 {									\
-	unsigned int val = readl(fsl_lpspi->base + IMX7ULP_RDR);	\
+	unsigned int val = pete_readl("drivers/spi/spi-fsl-lpspi.c:134", fsl_lpspi->base + IMX7ULP_RDR);	\
 									\
 	if (fsl_lpspi->rx_buf) {					\
 		*(type *)fsl_lpspi->rx_buf = val;			\
@@ -150,7 +150,7 @@ static void fsl_lpspi_buf_tx_##type(struct fsl_lpspi_data *fsl_lpspi)	\
 	}								\
 									\
 	fsl_lpspi->remain -= sizeof(type);				\
-	writel(val, fsl_lpspi->base + IMX7ULP_TDR);			\
+	pete_writel("drivers/spi/spi-fsl-lpspi.c:153", val, fsl_lpspi->base + IMX7ULP_TDR);			\
 }
 
 LPSPI_BUF_RX(u8)
@@ -163,7 +163,7 @@ LPSPI_BUF_TX(u32)
 static void fsl_lpspi_intctrl(struct fsl_lpspi_data *fsl_lpspi,
 			      unsigned int enable)
 {
-	writel(enable, fsl_lpspi->base + IMX7ULP_IER);
+	pete_writel("drivers/spi/spi-fsl-lpspi.c:166", enable, fsl_lpspi->base + IMX7ULP_IER);
 }
 
 static int fsl_lpspi_bytes_per_word(const int bpw)
@@ -225,7 +225,7 @@ static void fsl_lpspi_write_tx_fifo(struct fsl_lpspi_data *fsl_lpspi)
 	u8 txfifo_cnt;
 	u32 temp;
 
-	txfifo_cnt = readl(fsl_lpspi->base + IMX7ULP_FSR) & 0xff;
+	txfifo_cnt = pete_readl("drivers/spi/spi-fsl-lpspi.c:228", fsl_lpspi->base + IMX7ULP_FSR) & 0xff;
 
 	while (txfifo_cnt < fsl_lpspi->txfifosize) {
 		if (!fsl_lpspi->remain)
@@ -236,9 +236,9 @@ static void fsl_lpspi_write_tx_fifo(struct fsl_lpspi_data *fsl_lpspi)
 
 	if (txfifo_cnt < fsl_lpspi->txfifosize) {
 		if (!fsl_lpspi->is_slave) {
-			temp = readl(fsl_lpspi->base + IMX7ULP_TCR);
+			temp = pete_readl("drivers/spi/spi-fsl-lpspi.c:239", fsl_lpspi->base + IMX7ULP_TCR);
 			temp &= ~TCR_CONTC;
-			writel(temp, fsl_lpspi->base + IMX7ULP_TCR);
+			pete_writel("drivers/spi/spi-fsl-lpspi.c:241", temp, fsl_lpspi->base + IMX7ULP_TCR);
 		}
 
 		fsl_lpspi_intctrl(fsl_lpspi, IER_FCIE);
@@ -248,7 +248,7 @@ static void fsl_lpspi_write_tx_fifo(struct fsl_lpspi_data *fsl_lpspi)
 
 static void fsl_lpspi_read_rx_fifo(struct fsl_lpspi_data *fsl_lpspi)
 {
-	while (!(readl(fsl_lpspi->base + IMX7ULP_RSR) & RSR_RXEMPTY))
+	while (!(pete_readl("drivers/spi/spi-fsl-lpspi.c:251", fsl_lpspi->base + IMX7ULP_RSR) & RSR_RXEMPTY))
 		fsl_lpspi->rx(fsl_lpspi);
 }
 
@@ -274,7 +274,7 @@ static void fsl_lpspi_set_cmd(struct fsl_lpspi_data *fsl_lpspi)
 				temp |= TCR_CONTC;
 		}
 	}
-	writel(temp, fsl_lpspi->base + IMX7ULP_TCR);
+	pete_writel("drivers/spi/spi-fsl-lpspi.c:277", temp, fsl_lpspi->base + IMX7ULP_TCR);
 
 	dev_dbg(fsl_lpspi->dev, "TCR=0x%x\n", temp);
 }
@@ -289,7 +289,7 @@ static void fsl_lpspi_set_watermark(struct fsl_lpspi_data *fsl_lpspi)
 	else
 		temp = fsl_lpspi->watermark >> 1;
 
-	writel(temp, fsl_lpspi->base + IMX7ULP_FCR);
+	pete_writel("drivers/spi/spi-fsl-lpspi.c:292", temp, fsl_lpspi->base + IMX7ULP_FCR);
 
 	dev_dbg(fsl_lpspi->dev, "FCR=0x%x\n", temp);
 }
@@ -319,7 +319,7 @@ static int fsl_lpspi_set_bitrate(struct fsl_lpspi_data *fsl_lpspi)
 	if (scldiv >= 256)
 		return -EINVAL;
 
-	writel(scldiv | (scldiv << 8) | ((scldiv >> 1) << 16),
+	pete_writel("drivers/spi/spi-fsl-lpspi.c:322", scldiv | (scldiv << 8) | ((scldiv >> 1) << 16),
 					fsl_lpspi->base + IMX7ULP_CCR);
 
 	dev_dbg(fsl_lpspi->dev, "perclk=%d, speed=%d, prescale=%d, scldiv=%d\n",
@@ -394,16 +394,16 @@ static int fsl_lpspi_config(struct fsl_lpspi_data *fsl_lpspi)
 		temp = CFGR1_PINCFG;
 	if (fsl_lpspi->config.mode & SPI_CS_HIGH)
 		temp |= CFGR1_PCSPOL;
-	writel(temp, fsl_lpspi->base + IMX7ULP_CFGR1);
+	pete_writel("drivers/spi/spi-fsl-lpspi.c:397", temp, fsl_lpspi->base + IMX7ULP_CFGR1);
 
-	temp = readl(fsl_lpspi->base + IMX7ULP_CR);
+	temp = pete_readl("drivers/spi/spi-fsl-lpspi.c:399", fsl_lpspi->base + IMX7ULP_CR);
 	temp |= CR_RRF | CR_RTF | CR_MEN;
-	writel(temp, fsl_lpspi->base + IMX7ULP_CR);
+	pete_writel("drivers/spi/spi-fsl-lpspi.c:401", temp, fsl_lpspi->base + IMX7ULP_CR);
 
 	temp = 0;
 	if (fsl_lpspi->usedma)
 		temp = DER_TDDE | DER_RDDE;
-	writel(temp, fsl_lpspi->base + IMX7ULP_DER);
+	pete_writel("drivers/spi/spi-fsl-lpspi.c:406", temp, fsl_lpspi->base + IMX7ULP_DER);
 
 	return 0;
 }
@@ -504,11 +504,11 @@ static int fsl_lpspi_reset(struct fsl_lpspi_data *fsl_lpspi)
 
 	/* W1C for all flags in SR */
 	temp = 0x3F << 8;
-	writel(temp, fsl_lpspi->base + IMX7ULP_SR);
+	pete_writel("drivers/spi/spi-fsl-lpspi.c:507", temp, fsl_lpspi->base + IMX7ULP_SR);
 
 	/* Clear FIFO and disable module */
 	temp = CR_RRF | CR_RTF;
-	writel(temp, fsl_lpspi->base + IMX7ULP_CR);
+	pete_writel("drivers/spi/spi-fsl-lpspi.c:511", temp, fsl_lpspi->base + IMX7ULP_CR);
 
 	return 0;
 }
@@ -739,9 +739,9 @@ static irqreturn_t fsl_lpspi_isr(int irq, void *dev_id)
 	u32 temp_SR, temp_IER;
 	struct fsl_lpspi_data *fsl_lpspi = dev_id;
 
-	temp_IER = readl(fsl_lpspi->base + IMX7ULP_IER);
+	temp_IER = pete_readl("drivers/spi/spi-fsl-lpspi.c:742", fsl_lpspi->base + IMX7ULP_IER);
 	fsl_lpspi_intctrl(fsl_lpspi, 0);
-	temp_SR = readl(fsl_lpspi->base + IMX7ULP_SR);
+	temp_SR = pete_readl("drivers/spi/spi-fsl-lpspi.c:744", fsl_lpspi->base + IMX7ULP_SR);
 
 	fsl_lpspi_read_rx_fifo(fsl_lpspi);
 
@@ -751,14 +751,14 @@ static irqreturn_t fsl_lpspi_isr(int irq, void *dev_id)
 	}
 
 	if (temp_SR & SR_MBF ||
-	    readl(fsl_lpspi->base + IMX7ULP_FSR) & FSR_TXCOUNT) {
-		writel(SR_FCF, fsl_lpspi->base + IMX7ULP_SR);
+	    pete_readl("drivers/spi/spi-fsl-lpspi.c:754", fsl_lpspi->base + IMX7ULP_FSR) & FSR_TXCOUNT) {
+		pete_writel("drivers/spi/spi-fsl-lpspi.c:755", SR_FCF, fsl_lpspi->base + IMX7ULP_SR);
 		fsl_lpspi_intctrl(fsl_lpspi, IER_FCIE);
 		return IRQ_HANDLED;
 	}
 
 	if (temp_SR & SR_FCF && (temp_IER & IER_FCIE)) {
-		writel(SR_FCF, fsl_lpspi->base + IMX7ULP_SR);
+		pete_writel("drivers/spi/spi-fsl-lpspi.c:761", SR_FCF, fsl_lpspi->base + IMX7ULP_SR);
 		complete(&fsl_lpspi->xfer_done);
 		return IRQ_HANDLED;
 	}
@@ -899,7 +899,7 @@ static int fsl_lpspi_probe(struct platform_device *pdev)
 		goto out_pm_get;
 	}
 
-	temp = readl(fsl_lpspi->base + IMX7ULP_PARAM);
+	temp = pete_readl("drivers/spi/spi-fsl-lpspi.c:902", fsl_lpspi->base + IMX7ULP_PARAM);
 	fsl_lpspi->txfifosize = 1 << (temp & 0x0f);
 	fsl_lpspi->rxfifosize = 1 << ((temp >> 8) & 0x0f);
 

@@ -338,12 +338,12 @@ struct mipi_ctrl_cfg {
 static inline void kmb_write_mipi(struct kmb_dsi *kmb_dsi,
 				  unsigned int reg, u32 value)
 {
-	writel(value, (kmb_dsi->mipi_mmio + reg));
+	pete_writel("drivers/gpu/drm/kmb/kmb_dsi.h:341", value, (kmb_dsi->mipi_mmio + reg));
 }
 
 static inline u32 kmb_read_mipi(struct kmb_dsi *kmb_dsi, unsigned int reg)
 {
-	return readl(kmb_dsi->mipi_mmio + reg);
+	return pete_readl("drivers/gpu/drm/kmb/kmb_dsi.h:346", kmb_dsi->mipi_mmio + reg);
 }
 
 static inline void kmb_write_bits_mipi(struct kmb_dsi *kmb_dsi,

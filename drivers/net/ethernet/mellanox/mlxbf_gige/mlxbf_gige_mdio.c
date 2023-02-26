@@ -88,8 +88,8 @@ static u64 calculate_i1clk(struct mlxbf_gige *priv)
 	u32 reg1, reg2;
 	u32 core_f;
 
-	reg1 = readl(priv->clk_io + MLXBF_GIGE_MDIO_PLL_I1CLK_REG1);
-	reg2 = readl(priv->clk_io + MLXBF_GIGE_MDIO_PLL_I1CLK_REG2);
+	reg1 = pete_readl("drivers/net/ethernet/mellanox/mlxbf_gige/mlxbf_gige_mdio.c:91", priv->clk_io + MLXBF_GIGE_MDIO_PLL_I1CLK_REG1);
+	reg2 = pete_readl("drivers/net/ethernet/mellanox/mlxbf_gige/mlxbf_gige_mdio.c:92", priv->clk_io + MLXBF_GIGE_MDIO_PLL_I1CLK_REG2);
 
 	core_f = (reg1 & MLXBF_GIGE_MDIO_CORE_F_MASK) >>
 		MLXBF_GIGE_MDIO_CORE_F_SHIFT;
@@ -164,22 +164,22 @@ static int mlxbf_gige_mdio_read(struct mii_bus *bus, int phy_add, int phy_reg)
 	/* Send mdio read request */
 	cmd = mlxbf_gige_mdio_create_cmd(0, phy_add, phy_reg, MLXBF_GIGE_MDIO_CL22_READ);
 
-	writel(cmd, priv->mdio_io + MLXBF_GIGE_MDIO_GW_OFFSET);
+	pete_writel("drivers/net/ethernet/mellanox/mlxbf_gige/mlxbf_gige_mdio.c:167", cmd, priv->mdio_io + MLXBF_GIGE_MDIO_GW_OFFSET);
 
 	ret = readl_poll_timeout_atomic(priv->mdio_io + MLXBF_GIGE_MDIO_GW_OFFSET,
 					val, !(val & MLXBF_GIGE_MDIO_GW_BUSY_MASK), 100, 1000000);
 
 	if (ret) {
-		writel(0, priv->mdio_io + MLXBF_GIGE_MDIO_GW_OFFSET);
+		pete_writel("drivers/net/ethernet/mellanox/mlxbf_gige/mlxbf_gige_mdio.c:173", 0, priv->mdio_io + MLXBF_GIGE_MDIO_GW_OFFSET);
 		return ret;
 	}
 
-	ret = readl(priv->mdio_io + MLXBF_GIGE_MDIO_GW_OFFSET);
+	ret = pete_readl("drivers/net/ethernet/mellanox/mlxbf_gige/mlxbf_gige_mdio.c:177", priv->mdio_io + MLXBF_GIGE_MDIO_GW_OFFSET);
 	/* Only return ad bits of the gw register */
 	ret &= MLXBF_GIGE_MDIO_GW_AD_MASK;
 
 	/* The MDIO lock is set on read. To release it, clear gw register */
-	writel(0, priv->mdio_io + MLXBF_GIGE_MDIO_GW_OFFSET);
+	pete_writel("drivers/net/ethernet/mellanox/mlxbf_gige/mlxbf_gige_mdio.c:182", 0, priv->mdio_io + MLXBF_GIGE_MDIO_GW_OFFSET);
 
 	return ret;
 }
@@ -198,14 +198,14 @@ static int mlxbf_gige_mdio_write(struct mii_bus *bus, int phy_add,
 	/* Send mdio write request */
 	cmd = mlxbf_gige_mdio_create_cmd(val, phy_add, phy_reg,
 					 MLXBF_GIGE_MDIO_CL22_WRITE);
-	writel(cmd, priv->mdio_io + MLXBF_GIGE_MDIO_GW_OFFSET);
+	pete_writel("drivers/net/ethernet/mellanox/mlxbf_gige/mlxbf_gige_mdio.c:201", cmd, priv->mdio_io + MLXBF_GIGE_MDIO_GW_OFFSET);
 
 	/* If the poll timed out, drop the request */
 	ret = readl_poll_timeout_atomic(priv->mdio_io + MLXBF_GIGE_MDIO_GW_OFFSET,
 					temp, !(temp & MLXBF_GIGE_MDIO_GW_BUSY_MASK), 100, 1000000);
 
 	/* The MDIO lock is set on read. To release it, clear gw register */
-	writel(0, priv->mdio_io + MLXBF_GIGE_MDIO_GW_OFFSET);
+	pete_writel("drivers/net/ethernet/mellanox/mlxbf_gige/mlxbf_gige_mdio.c:208", 0, priv->mdio_io + MLXBF_GIGE_MDIO_GW_OFFSET);
 
 	return ret;
 }
@@ -219,7 +219,7 @@ static void mlxbf_gige_mdio_cfg(struct mlxbf_gige *priv)
 
 	val = MLXBF_GIGE_MDIO_CFG_VAL;
 	val |= FIELD_PREP(MLXBF_GIGE_MDIO_CFG_MDC_PERIOD_MASK, mdio_period);
-	writel(val, priv->mdio_io + MLXBF_GIGE_MDIO_CFG_OFFSET);
+	pete_writel("drivers/net/ethernet/mellanox/mlxbf_gige/mlxbf_gige_mdio.c:222", val, priv->mdio_io + MLXBF_GIGE_MDIO_CFG_OFFSET);
 }
 
 int mlxbf_gige_mdio_probe(struct platform_device *pdev, struct mlxbf_gige *priv)

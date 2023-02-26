@@ -191,47 +191,47 @@ static inline void s3c_hsudc_init_phy(void)
 {
 	u32 cfg;
 
-	cfg = readl(S3C2443_PWRCFG) | S3C2443_PWRCFG_USBPHY;
-	writel(cfg, S3C2443_PWRCFG);
+	cfg = pete_readl("arch/arm/mach-s3c/regs-s3c2443-clock.h:194", S3C2443_PWRCFG) | S3C2443_PWRCFG_USBPHY;
+	pete_writel("arch/arm/mach-s3c/regs-s3c2443-clock.h:195", cfg, S3C2443_PWRCFG);
 
-	cfg = readl(S3C2443_URSTCON);
+	cfg = pete_readl("arch/arm/mach-s3c/regs-s3c2443-clock.h:197", S3C2443_URSTCON);
 	cfg |= (S3C2443_URSTCON_FUNCRST | S3C2443_URSTCON_PHYRST);
-	writel(cfg, S3C2443_URSTCON);
+	pete_writel("arch/arm/mach-s3c/regs-s3c2443-clock.h:199", cfg, S3C2443_URSTCON);
 	mdelay(1);
 
-	cfg = readl(S3C2443_URSTCON);
+	cfg = pete_readl("arch/arm/mach-s3c/regs-s3c2443-clock.h:202", S3C2443_URSTCON);
 	cfg &= ~(S3C2443_URSTCON_FUNCRST | S3C2443_URSTCON_PHYRST);
-	writel(cfg, S3C2443_URSTCON);
+	pete_writel("arch/arm/mach-s3c/regs-s3c2443-clock.h:204", cfg, S3C2443_URSTCON);
 
-	cfg = readl(S3C2443_PHYCTRL);
+	cfg = pete_readl("arch/arm/mach-s3c/regs-s3c2443-clock.h:206", S3C2443_PHYCTRL);
 	cfg &= ~(S3C2443_PHYCTRL_CLKSEL | S3C2443_PHYCTRL_DSPORT);
 	cfg |= (S3C2443_PHYCTRL_EXTCLK | S3C2443_PHYCTRL_PLLSEL);
-	writel(cfg, S3C2443_PHYCTRL);
+	pete_writel("arch/arm/mach-s3c/regs-s3c2443-clock.h:209", cfg, S3C2443_PHYCTRL);
 
-	cfg = readl(S3C2443_PHYPWR);
+	cfg = pete_readl("arch/arm/mach-s3c/regs-s3c2443-clock.h:211", S3C2443_PHYPWR);
 	cfg &= ~(S3C2443_PHYPWR_FSUSPEND | S3C2443_PHYPWR_PLL_PWRDN |
 		S3C2443_PHYPWR_XO_ON | S3C2443_PHYPWR_PLL_REFCLK |
 		S3C2443_PHYPWR_ANALOG_PD);
 	cfg |= S3C2443_PHYPWR_COMMON_ON;
-	writel(cfg, S3C2443_PHYPWR);
+	pete_writel("arch/arm/mach-s3c/regs-s3c2443-clock.h:216", cfg, S3C2443_PHYPWR);
 
-	cfg = readl(S3C2443_UCLKCON);
+	cfg = pete_readl("arch/arm/mach-s3c/regs-s3c2443-clock.h:218", S3C2443_UCLKCON);
 	cfg |= (S3C2443_UCLKCON_DETECT_VBUS | S3C2443_UCLKCON_FUNC_CLKEN |
 		S3C2443_UCLKCON_TCLKEN);
-	writel(cfg, S3C2443_UCLKCON);
+	pete_writel("arch/arm/mach-s3c/regs-s3c2443-clock.h:221", cfg, S3C2443_UCLKCON);
 }
 
 static inline void s3c_hsudc_uninit_phy(void)
 {
 	u32 cfg;
 
-	cfg = readl(S3C2443_PWRCFG) & ~S3C2443_PWRCFG_USBPHY;
-	writel(cfg, S3C2443_PWRCFG);
+	cfg = pete_readl("arch/arm/mach-s3c/regs-s3c2443-clock.h:228", S3C2443_PWRCFG) & ~S3C2443_PWRCFG_USBPHY;
+	pete_writel("arch/arm/mach-s3c/regs-s3c2443-clock.h:229", cfg, S3C2443_PWRCFG);
 
-	writel(S3C2443_PHYPWR_FSUSPEND, S3C2443_PHYPWR);
+	pete_writel("arch/arm/mach-s3c/regs-s3c2443-clock.h:231", S3C2443_PHYPWR_FSUSPEND, S3C2443_PHYPWR);
 
-	cfg = readl(S3C2443_UCLKCON) & ~S3C2443_UCLKCON_FUNC_CLKEN;
-	writel(cfg, S3C2443_UCLKCON);
+	cfg = pete_readl("arch/arm/mach-s3c/regs-s3c2443-clock.h:233", S3C2443_UCLKCON) & ~S3C2443_UCLKCON_FUNC_CLKEN;
+	pete_writel("arch/arm/mach-s3c/regs-s3c2443-clock.h:234", cfg, S3C2443_UCLKCON);
 }
 
 #endif /*  __ASM_ARM_REGS_S3C2443_CLOCK */

@@ -417,7 +417,7 @@ static unsigned long clk_apb_mul_recalc_rate(struct clk_hw *hw,
 {
 	struct clk_apb_mul *am = to_clk_apb_mul(hw);
 
-	if (readl(base + STM32F4_RCC_CFGR) & BIT(am->bit_idx))
+	if (pete_readl("drivers/clk/clk-stm32f4.c:420", base + STM32F4_RCC_CFGR) & BIT(am->bit_idx))
 		return parent_rate * 2;
 
 	return parent_rate;
@@ -429,7 +429,7 @@ static long clk_apb_mul_round_rate(struct clk_hw *hw, unsigned long rate,
 	struct clk_apb_mul *am = to_clk_apb_mul(hw);
 	unsigned long mult = 1;
 
-	if (readl(base + STM32F4_RCC_CFGR) & BIT(am->bit_idx))
+	if (pete_readl("drivers/clk/clk-stm32f4.c:432", base + STM32F4_RCC_CFGR) & BIT(am->bit_idx))
 		mult = 2;
 
 	if (clk_hw_get_flags(hw) & CLK_SET_RATE_PARENT) {
@@ -615,7 +615,7 @@ static int stm32f4_pll_enable(struct clk_hw *hw)
 	clk_gate_ops.enable(hw);
 
 	do {
-		bit_status = !(readl(gate->reg) & BIT(pll->bit_rdy_idx));
+		bit_status = !(pete_readl("drivers/clk/clk-stm32f4.c:618", gate->reg) & BIT(pll->bit_rdy_idx));
 
 	} while (bit_status && --timeout);
 
@@ -634,7 +634,7 @@ static unsigned long stm32f4_pll_recalc(struct clk_hw *hw,
 	struct stm32f4_pll *pll = to_stm32f4_pll(gate);
 	unsigned long n;
 
-	n = (readl(base + pll->offset) >> 6) & 0x1ff;
+	n = (pete_readl("drivers/clk/clk-stm32f4.c:637", base + pll->offset) >> 6) & 0x1ff;
 
 	return parent_rate * n;
 }
@@ -673,9 +673,9 @@ static int stm32f4_pll_set_rate(struct clk_hw *hw, unsigned long rate,
 
 	n = rate  / parent_rate;
 
-	val = readl(base + pll->offset) & ~(0x1ff << 6);
+	val = pete_readl("drivers/clk/clk-stm32f4.c:676", base + pll->offset) & ~(0x1ff << 6);
 
-	writel(val | ((n & 0x1ff) <<  6), base + pll->offset);
+	pete_writel("drivers/clk/clk-stm32f4.c:678", val | ((n & 0x1ff) <<  6), base + pll->offset);
 
 	if (pll_state)
 		stm32f4_pll_enable(hw);
@@ -814,7 +814,7 @@ static struct clk_hw *stm32f4_rcc_register_pll(const char *pllsrc,
 	pll->offset = vco->offset;
 	pll->n_start = data->n_start;
 	pll->bit_rdy_idx = vco->bit_rdy_idx;
-	pll->status = (readl(base + STM32F4_RCC_CR) >> vco->bit_idx) & 0x1;
+	pll->status = (pete_readl("drivers/clk/clk-stm32f4.c:817", base + STM32F4_RCC_CR) >> vco->bit_idx) & 0x1;
 
 	reg = base + pll->offset;
 
@@ -900,9 +900,9 @@ static inline void sofware_reset_backup_domain(void)
 {
 	unsigned long val;
 
-	val = readl(base + STM32F4_RCC_BDCR);
-	writel(val | BIT(16), base + STM32F4_RCC_BDCR);
-	writel(val & ~BIT(16), base + STM32F4_RCC_BDCR);
+	val = pete_readl("drivers/clk/clk-stm32f4.c:903", base + STM32F4_RCC_BDCR);
+	pete_writel("drivers/clk/clk-stm32f4.c:904", val | BIT(16), base + STM32F4_RCC_BDCR);
+	pete_writel("drivers/clk/clk-stm32f4.c:905", val & ~BIT(16), base + STM32F4_RCC_BDCR);
 }
 
 struct stm32_rgate {
@@ -927,7 +927,7 @@ static int rgclk_enable(struct clk_hw *hw)
 	clk_gate_ops.enable(hw);
 
 	do {
-		bit_status = !(readl(gate->reg) & BIT(rgate->bit_rdy_idx));
+		bit_status = !(pete_readl("drivers/clk/clk-stm32f4.c:930", gate->reg) & BIT(rgate->bit_rdy_idx));
 		if (bit_status)
 			udelay(100);
 
@@ -1742,7 +1742,7 @@ static void __init stm32f4_rcc_init(struct device_node *np)
 					 base + STM32F4_RCC_PLLCFGR, 22, 1, 0,
 					 &stm32f4_clk_lock);
 
-	pllm = readl(base + STM32F4_RCC_PLLCFGR) & 0x3f;
+	pllm = pete_readl("drivers/clk/clk-stm32f4.c:1745", base + STM32F4_RCC_PLLCFGR) & 0x3f;
 
 	clk_hw_register_fixed_factor(NULL, "vco_in", pll_src,
 				     0, 1, pllm);

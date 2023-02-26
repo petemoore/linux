@@ -72,12 +72,12 @@ static void hibmc_encoder_mode_set(struct drm_encoder *encoder,
 	struct drm_device *dev = encoder->dev;
 	struct hibmc_drm_private *priv = to_hibmc_drm_private(dev);
 
-	reg = readl(priv->mmio + HIBMC_DISPLAY_CONTROL_HISILE);
+	reg = pete_readl("drivers/gpu/drm/hisilicon/hibmc/hibmc_drm_vdac.c:75", priv->mmio + HIBMC_DISPLAY_CONTROL_HISILE);
 	reg |= HIBMC_DISPLAY_CONTROL_FPVDDEN(1);
 	reg |= HIBMC_DISPLAY_CONTROL_PANELDATE(1);
 	reg |= HIBMC_DISPLAY_CONTROL_FPEN(1);
 	reg |= HIBMC_DISPLAY_CONTROL_VBIASEN(1);
-	writel(reg, priv->mmio + HIBMC_DISPLAY_CONTROL_HISILE);
+	pete_writel("drivers/gpu/drm/hisilicon/hibmc/hibmc_drm_vdac.c:80", reg, priv->mmio + HIBMC_DISPLAY_CONTROL_HISILE);
 }
 
 static const struct drm_encoder_helper_funcs hibmc_encoder_helper_funcs = {

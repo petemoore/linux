@@ -210,20 +210,20 @@ static void
 mv64xxx_i2c_hw_init(struct mv64xxx_i2c_data *drv_data)
 {
 	if (drv_data->offload_enabled) {
-		writel(0, drv_data->reg_base + MV64XXX_I2C_REG_BRIDGE_CONTROL);
-		writel(0, drv_data->reg_base + MV64XXX_I2C_REG_BRIDGE_TIMING);
-		writel(0, drv_data->reg_base +
+		pete_writel("drivers/i2c/busses/i2c-mv64xxx.c:213", 0, drv_data->reg_base + MV64XXX_I2C_REG_BRIDGE_CONTROL);
+		pete_writel("drivers/i2c/busses/i2c-mv64xxx.c:214", 0, drv_data->reg_base + MV64XXX_I2C_REG_BRIDGE_TIMING);
+		pete_writel("drivers/i2c/busses/i2c-mv64xxx.c:215", 0, drv_data->reg_base +
 			MV64XXX_I2C_REG_BRIDGE_INTR_CAUSE);
-		writel(0, drv_data->reg_base +
+		pete_writel("drivers/i2c/busses/i2c-mv64xxx.c:217", 0, drv_data->reg_base +
 			MV64XXX_I2C_REG_BRIDGE_INTR_MASK);
 	}
 
-	writel(0, drv_data->reg_base + drv_data->reg_offsets.soft_reset);
-	writel(MV64XXX_I2C_BAUD_DIV_M(drv_data->freq_m) | MV64XXX_I2C_BAUD_DIV_N(drv_data->freq_n),
+	pete_writel("drivers/i2c/busses/i2c-mv64xxx.c:221", 0, drv_data->reg_base + drv_data->reg_offsets.soft_reset);
+	pete_writel("drivers/i2c/busses/i2c-mv64xxx.c:222", MV64XXX_I2C_BAUD_DIV_M(drv_data->freq_m) | MV64XXX_I2C_BAUD_DIV_N(drv_data->freq_n),
 		drv_data->reg_base + drv_data->reg_offsets.clock);
-	writel(0, drv_data->reg_base + drv_data->reg_offsets.addr);
-	writel(0, drv_data->reg_base + drv_data->reg_offsets.ext_addr);
-	writel(MV64XXX_I2C_REG_CONTROL_TWSIEN | MV64XXX_I2C_REG_CONTROL_STOP,
+	pete_writel("drivers/i2c/busses/i2c-mv64xxx.c:224", 0, drv_data->reg_base + drv_data->reg_offsets.addr);
+	pete_writel("drivers/i2c/busses/i2c-mv64xxx.c:225", 0, drv_data->reg_base + drv_data->reg_offsets.ext_addr);
+	pete_writel("drivers/i2c/busses/i2c-mv64xxx.c:226", MV64XXX_I2C_REG_CONTROL_TWSIEN | MV64XXX_I2C_REG_CONTROL_STOP,
 		drv_data->reg_base + drv_data->reg_offsets.control);
 
 	if (drv_data->errata_delay)
@@ -350,7 +350,7 @@ static void mv64xxx_i2c_send_start(struct mv64xxx_i2c_data *drv_data)
 	drv_data->rc = 0;
 
 	mv64xxx_i2c_prepare_for_io(drv_data, drv_data->msgs);
-	writel(drv_data->cntl_bits | MV64XXX_I2C_REG_CONTROL_START,
+	pete_writel("drivers/i2c/busses/i2c-mv64xxx.c:353", drv_data->cntl_bits | MV64XXX_I2C_REG_CONTROL_START,
 	       drv_data->reg_base + drv_data->reg_offsets.control);
 }
 
@@ -378,44 +378,44 @@ mv64xxx_i2c_do_action(struct mv64xxx_i2c_data *drv_data)
 		break;
 
 	case MV64XXX_I2C_ACTION_CONTINUE:
-		writel(drv_data->cntl_bits,
+		pete_writel("drivers/i2c/busses/i2c-mv64xxx.c:381", drv_data->cntl_bits,
 			drv_data->reg_base + drv_data->reg_offsets.control);
 		break;
 
 	case MV64XXX_I2C_ACTION_SEND_ADDR_1:
-		writel(drv_data->addr1,
+		pete_writel("drivers/i2c/busses/i2c-mv64xxx.c:386", drv_data->addr1,
 			drv_data->reg_base + drv_data->reg_offsets.data);
-		writel(drv_data->cntl_bits,
+		pete_writel("drivers/i2c/busses/i2c-mv64xxx.c:388", drv_data->cntl_bits,
 			drv_data->reg_base + drv_data->reg_offsets.control);
 		break;
 
 	case MV64XXX_I2C_ACTION_SEND_ADDR_2:
-		writel(drv_data->addr2,
+		pete_writel("drivers/i2c/busses/i2c-mv64xxx.c:393", drv_data->addr2,
 			drv_data->reg_base + drv_data->reg_offsets.data);
-		writel(drv_data->cntl_bits,
+		pete_writel("drivers/i2c/busses/i2c-mv64xxx.c:395", drv_data->cntl_bits,
 			drv_data->reg_base + drv_data->reg_offsets.control);
 		break;
 
 	case MV64XXX_I2C_ACTION_SEND_DATA:
-		writel(drv_data->msg->buf[drv_data->byte_posn++],
+		pete_writel("drivers/i2c/busses/i2c-mv64xxx.c:400", drv_data->msg->buf[drv_data->byte_posn++],
 			drv_data->reg_base + drv_data->reg_offsets.data);
-		writel(drv_data->cntl_bits,
+		pete_writel("drivers/i2c/busses/i2c-mv64xxx.c:402", drv_data->cntl_bits,
 			drv_data->reg_base + drv_data->reg_offsets.control);
 		break;
 
 	case MV64XXX_I2C_ACTION_RCV_DATA:
 		drv_data->msg->buf[drv_data->byte_posn++] =
-			readl(drv_data->reg_base + drv_data->reg_offsets.data);
-		writel(drv_data->cntl_bits,
+			pete_readl("drivers/i2c/busses/i2c-mv64xxx.c:408", drv_data->reg_base + drv_data->reg_offsets.data);
+		pete_writel("drivers/i2c/busses/i2c-mv64xxx.c:409", drv_data->cntl_bits,
 			drv_data->reg_base + drv_data->reg_offsets.control);
 		break;
 
 	case MV64XXX_I2C_ACTION_RCV_DATA_STOP:
 		drv_data->msg->buf[drv_data->byte_posn++] =
-			readl(drv_data->reg_base + drv_data->reg_offsets.data);
+			pete_readl("drivers/i2c/busses/i2c-mv64xxx.c:415", drv_data->reg_base + drv_data->reg_offsets.data);
 		if (!drv_data->atomic)
 			drv_data->cntl_bits &= ~MV64XXX_I2C_REG_CONTROL_INTEN;
-		writel(drv_data->cntl_bits | MV64XXX_I2C_REG_CONTROL_STOP,
+		pete_writel("drivers/i2c/busses/i2c-mv64xxx.c:418", drv_data->cntl_bits | MV64XXX_I2C_REG_CONTROL_STOP,
 			drv_data->reg_base + drv_data->reg_offsets.control);
 		drv_data->block = 0;
 		if (drv_data->errata_delay)
@@ -434,7 +434,7 @@ mv64xxx_i2c_do_action(struct mv64xxx_i2c_data *drv_data)
 	case MV64XXX_I2C_ACTION_SEND_STOP:
 		if (!drv_data->atomic)
 			drv_data->cntl_bits &= ~MV64XXX_I2C_REG_CONTROL_INTEN;
-		writel(drv_data->cntl_bits | MV64XXX_I2C_REG_CONTROL_STOP,
+		pete_writel("drivers/i2c/busses/i2c-mv64xxx.c:437", drv_data->cntl_bits | MV64XXX_I2C_REG_CONTROL_STOP,
 			drv_data->reg_base + drv_data->reg_offsets.control);
 		drv_data->block = 0;
 		wake_up(&drv_data->waitq);
@@ -448,8 +448,8 @@ mv64xxx_i2c_read_offload_rx_data(struct mv64xxx_i2c_data *drv_data,
 {
 	u32 buf[2];
 
-	buf[0] = readl(drv_data->reg_base + MV64XXX_I2C_REG_RX_DATA_LO);
-	buf[1] = readl(drv_data->reg_base + MV64XXX_I2C_REG_RX_DATA_HI);
+	buf[0] = pete_readl("drivers/i2c/busses/i2c-mv64xxx.c:451", drv_data->reg_base + MV64XXX_I2C_REG_RX_DATA_LO);
+	buf[1] = pete_readl("drivers/i2c/busses/i2c-mv64xxx.c:452", drv_data->reg_base + MV64XXX_I2C_REG_RX_DATA_HI);
 
 	memcpy(msg->buf, buf, msg->len);
 }
@@ -459,12 +459,12 @@ mv64xxx_i2c_intr_offload(struct mv64xxx_i2c_data *drv_data)
 {
 	u32 cause, status;
 
-	cause = readl(drv_data->reg_base +
+	cause = pete_readl("drivers/i2c/busses/i2c-mv64xxx.c:462", drv_data->reg_base +
 		      MV64XXX_I2C_REG_BRIDGE_INTR_CAUSE);
 	if (!cause)
 		return IRQ_NONE;
 
-	status = readl(drv_data->reg_base +
+	status = pete_readl("drivers/i2c/busses/i2c-mv64xxx.c:467", drv_data->reg_base +
 		       MV64XXX_I2C_REG_BRIDGE_STATUS);
 
 	if (status & MV64XXX_I2C_BRIDGE_STATUS_ERROR) {
@@ -496,8 +496,8 @@ mv64xxx_i2c_intr_offload(struct mv64xxx_i2c_data *drv_data)
 	}
 
 out:
-	writel(0, drv_data->reg_base +	MV64XXX_I2C_REG_BRIDGE_CONTROL);
-	writel(0, drv_data->reg_base +
+	pete_writel("drivers/i2c/busses/i2c-mv64xxx.c:499", 0, drv_data->reg_base +	MV64XXX_I2C_REG_BRIDGE_CONTROL);
+	pete_writel("drivers/i2c/busses/i2c-mv64xxx.c:500", 0, drv_data->reg_base +
 	       MV64XXX_I2C_REG_BRIDGE_INTR_CAUSE);
 	drv_data->block = 0;
 
@@ -518,14 +518,14 @@ mv64xxx_i2c_intr(int irq, void *dev_id)
 	if (drv_data->offload_enabled)
 		rc = mv64xxx_i2c_intr_offload(drv_data);
 
-	while (readl(drv_data->reg_base + drv_data->reg_offsets.control) &
+	while (pete_readl("drivers/i2c/busses/i2c-mv64xxx.c:521", drv_data->reg_base + drv_data->reg_offsets.control) &
 						MV64XXX_I2C_REG_CONTROL_IFLG) {
-		status = readl(drv_data->reg_base + drv_data->reg_offsets.status);
+		status = pete_readl("drivers/i2c/busses/i2c-mv64xxx.c:523", drv_data->reg_base + drv_data->reg_offsets.status);
 		mv64xxx_i2c_fsm(drv_data, status);
 		mv64xxx_i2c_do_action(drv_data);
 
 		if (drv_data->irq_clear_inverted)
-			writel(drv_data->cntl_bits | MV64XXX_I2C_REG_CONTROL_IFLG,
+			pete_writel("drivers/i2c/busses/i2c-mv64xxx.c:528", drv_data->cntl_bits | MV64XXX_I2C_REG_CONTROL_IFLG,
 			       drv_data->reg_base + drv_data->reg_offsets.control);
 
 		rc = IRQ_HANDLED;
@@ -623,8 +623,8 @@ mv64xxx_i2c_prepare_tx(struct mv64xxx_i2c_data *drv_data)
 
 	memcpy(buf, msg->buf, msg->len);
 
-	writel(buf[0], drv_data->reg_base + MV64XXX_I2C_REG_TX_DATA_LO);
-	writel(buf[1], drv_data->reg_base + MV64XXX_I2C_REG_TX_DATA_HI);
+	pete_writel("drivers/i2c/busses/i2c-mv64xxx.c:626", buf[0], drv_data->reg_base + MV64XXX_I2C_REG_TX_DATA_LO);
+	pete_writel("drivers/i2c/busses/i2c-mv64xxx.c:627", buf[1], drv_data->reg_base + MV64XXX_I2C_REG_TX_DATA_HI);
 }
 
 static int
@@ -678,7 +678,7 @@ mv64xxx_i2c_offload_xfer(struct mv64xxx_i2c_data *drv_data)
 
 	/* Execute transaction */
 	drv_data->block = 1;
-	writel(ctrl_reg, drv_data->reg_base + MV64XXX_I2C_REG_BRIDGE_CONTROL);
+	pete_writel("drivers/i2c/busses/i2c-mv64xxx.c:681", ctrl_reg, drv_data->reg_base + MV64XXX_I2C_REG_BRIDGE_CONTROL);
 	spin_unlock_irqrestore(&drv_data->lock, flags);
 
 	mv64xxx_i2c_wait_for_completion(drv_data);

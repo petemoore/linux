@@ -71,7 +71,7 @@ static int timeriomem_rng_read(struct hwrng *hwrng, void *data,
 			usleep_range(period_us,
 					period_us + max(1, period_us / 100));
 
-		*(u32 *)data = readl(priv->io_base);
+		*(u32 *)data = pete_readl("drivers/char/hw_random/timeriomem-rng.c:74", priv->io_base);
 		retval += sizeof(u32);
 		data += sizeof(u32);
 		max -= sizeof(u32);

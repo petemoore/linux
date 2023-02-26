@@ -14,8 +14,8 @@
 #include "lima_gem.h"
 #include "lima_vm.h"
 
-#define gp_write(reg, data) writel(data, ip->iomem + reg)
-#define gp_read(reg) readl(ip->iomem + reg)
+#define gp_write(reg, data) pete_writel("drivers/gpu/drm/lima/lima_gp.c:17", data, ip->iomem + reg)
+#define gp_read(reg) pete_readl("drivers/gpu/drm/lima/lima_gp.c:18", ip->iomem + reg)
 
 static irqreturn_t lima_gp_irq_handler(int irq, void *data)
 {
@@ -160,7 +160,7 @@ static void lima_gp_task_run(struct lima_sched_pipe *pipe,
 	lima_gp_soft_reset_async_wait(ip);
 
 	for (i = 0; i < LIMA_GP_FRAME_REG_NUM; i++)
-		writel(f[i], ip->iomem + LIMA_GP_VSCL_START_ADDR + i * 4);
+		pete_writel("drivers/gpu/drm/lima/lima_gp.c:163", f[i], ip->iomem + LIMA_GP_VSCL_START_ADDR + i * 4);
 
 	gp_write(LIMA_GP_CMD, LIMA_GP_CMD_UPDATE_PLBU_ALLOC);
 	gp_write(LIMA_GP_CMD, cmd);

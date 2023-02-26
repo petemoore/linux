@@ -134,7 +134,7 @@ static int bdw_set_dsp_D0(struct snd_sof_dev *sdev)
 
 	/* check that ADSP shim is enabled */
 	while (tries--) {
-		reg = readl(sdev->bar[BDW_PCI_BAR] + PCI_PMCS)
+		reg = pete_readl("sound/soc/sof/intel/bdw.c:137", sdev->bar[BDW_PCI_BAR] + PCI_PMCS)
 			& PCI_PMCS_PS_MASK;
 		if (reg == 0)
 			goto finish;

@@ -190,23 +190,23 @@ static int gpio_set_irq_type(struct irq_data *d, u32 type)
 	raw_spin_lock_irqsave(&port->gc.bgpio_lock, flags);
 
 	if (GPIO_EDGE_SEL >= 0) {
-		val = readl(port->base + GPIO_EDGE_SEL);
+		val = pete_readl("drivers/gpio/gpio-mxc.c:193", port->base + GPIO_EDGE_SEL);
 		if (edge == GPIO_INT_BOTH_EDGES)
-			writel(val | (1 << gpio_idx),
+			pete_writel("drivers/gpio/gpio-mxc.c:195", val | (1 << gpio_idx),
 				port->base + GPIO_EDGE_SEL);
 		else
-			writel(val & ~(1 << gpio_idx),
+			pete_writel("drivers/gpio/gpio-mxc.c:198", val & ~(1 << gpio_idx),
 				port->base + GPIO_EDGE_SEL);
 	}
 
 	if (edge != GPIO_INT_BOTH_EDGES) {
 		reg += GPIO_ICR1 + ((gpio_idx & 0x10) >> 2); /* lower or upper register */
 		bit = gpio_idx & 0xf;
-		val = readl(reg) & ~(0x3 << (bit << 1));
-		writel(val | (edge << (bit << 1)), reg);
+		val = pete_readl("drivers/gpio/gpio-mxc.c:205", reg) & ~(0x3 << (bit << 1));
+		pete_writel("drivers/gpio/gpio-mxc.c:206", val | (edge << (bit << 1)), reg);
 	}
 
-	writel(1 << gpio_idx, port->base + GPIO_ISR);
+	pete_writel("drivers/gpio/gpio-mxc.c:209", 1 << gpio_idx, port->base + GPIO_ISR);
 
 	raw_spin_unlock_irqrestore(&port->gc.bgpio_lock, flags);
 
@@ -224,7 +224,7 @@ static void mxc_flip_edge(struct mxc_gpio_port *port, u32 gpio)
 
 	reg += GPIO_ICR1 + ((gpio & 0x10) >> 2); /* lower or upper register */
 	bit = gpio & 0xf;
-	val = readl(reg);
+	val = pete_readl("drivers/gpio/gpio-mxc.c:227", reg);
 	edge = (val >> (bit << 1)) & 3;
 	val &= ~(0x3 << (bit << 1));
 	if (edge == GPIO_INT_HIGH_LEV) {
@@ -238,7 +238,7 @@ static void mxc_flip_edge(struct mxc_gpio_port *port, u32 gpio)
 		       gpio, edge);
 		goto unlock;
 	}
-	writel(val | (edge << (bit << 1)), reg);
+	pete_writel("drivers/gpio/gpio-mxc.c:241", val | (edge << (bit << 1)), reg);
 
 unlock:
 	raw_spin_unlock_irqrestore(&port->gc.bgpio_lock, flags);
@@ -268,7 +268,7 @@ static void mx3_gpio_irq_handler(struct irq_desc *desc)
 
 	chained_irq_enter(chip, desc);
 
-	irq_stat = readl(port->base + GPIO_ISR) & readl(port->base + GPIO_IMR);
+	irq_stat = pete_readl("drivers/gpio/gpio-mxc.c:271", port->base + GPIO_ISR) & pete_readl("drivers/gpio/gpio-mxc.c:271", port->base + GPIO_IMR);
 
 	mxc_gpio_irq_handler(port, irq_stat);
 
@@ -286,11 +286,11 @@ static void mx2_gpio_irq_handler(struct irq_desc *desc)
 
 	/* walk through all interrupt status registers */
 	list_for_each_entry(port, &mxc_gpio_ports, node) {
-		irq_msk = readl(port->base + GPIO_IMR);
+		irq_msk = pete_readl("drivers/gpio/gpio-mxc.c:289", port->base + GPIO_IMR);
 		if (!irq_msk)
 			continue;
 
-		irq_stat = readl(port->base + GPIO_ISR) & irq_msk;
+		irq_stat = pete_readl("drivers/gpio/gpio-mxc.c:293", port->base + GPIO_ISR) & irq_msk;
 		if (irq_stat)
 			mxc_gpio_irq_handler(port, irq_stat);
 	}
@@ -413,8 +413,8 @@ static int mxc_gpio_probe(struct platform_device *pdev)
 		port->power_off = true;
 
 	/* disable the interrupt and clear the status */
-	writel(0, port->base + GPIO_IMR);
-	writel(~0, port->base + GPIO_ISR);
+	pete_writel("drivers/gpio/gpio-mxc.c:416", 0, port->base + GPIO_IMR);
+	pete_writel("drivers/gpio/gpio-mxc.c:417", ~0, port->base + GPIO_ISR);
 
 	if (of_device_is_compatible(np, "fsl,imx21-gpio")) {
 		/*
@@ -489,12 +489,12 @@ static void mxc_gpio_save_regs(struct mxc_gpio_port *port)
 	if (!port->power_off)
 		return;
 
-	port->gpio_saved_reg.icr1 = readl(port->base + GPIO_ICR1);
-	port->gpio_saved_reg.icr2 = readl(port->base + GPIO_ICR2);
-	port->gpio_saved_reg.imr = readl(port->base + GPIO_IMR);
-	port->gpio_saved_reg.gdir = readl(port->base + GPIO_GDIR);
-	port->gpio_saved_reg.edge_sel = readl(port->base + GPIO_EDGE_SEL);
-	port->gpio_saved_reg.dr = readl(port->base + GPIO_DR);
+	port->gpio_saved_reg.icr1 = pete_readl("drivers/gpio/gpio-mxc.c:492", port->base + GPIO_ICR1);
+	port->gpio_saved_reg.icr2 = pete_readl("drivers/gpio/gpio-mxc.c:493", port->base + GPIO_ICR2);
+	port->gpio_saved_reg.imr = pete_readl("drivers/gpio/gpio-mxc.c:494", port->base + GPIO_IMR);
+	port->gpio_saved_reg.gdir = pete_readl("drivers/gpio/gpio-mxc.c:495", port->base + GPIO_GDIR);
+	port->gpio_saved_reg.edge_sel = pete_readl("drivers/gpio/gpio-mxc.c:496", port->base + GPIO_EDGE_SEL);
+	port->gpio_saved_reg.dr = pete_readl("drivers/gpio/gpio-mxc.c:497", port->base + GPIO_DR);
 }
 
 static void mxc_gpio_restore_regs(struct mxc_gpio_port *port)
@@ -502,12 +502,12 @@ static void mxc_gpio_restore_regs(struct mxc_gpio_port *port)
 	if (!port->power_off)
 		return;
 
-	writel(port->gpio_saved_reg.icr1, port->base + GPIO_ICR1);
-	writel(port->gpio_saved_reg.icr2, port->base + GPIO_ICR2);
-	writel(port->gpio_saved_reg.imr, port->base + GPIO_IMR);
-	writel(port->gpio_saved_reg.gdir, port->base + GPIO_GDIR);
-	writel(port->gpio_saved_reg.edge_sel, port->base + GPIO_EDGE_SEL);
-	writel(port->gpio_saved_reg.dr, port->base + GPIO_DR);
+	pete_writel("drivers/gpio/gpio-mxc.c:505", port->gpio_saved_reg.icr1, port->base + GPIO_ICR1);
+	pete_writel("drivers/gpio/gpio-mxc.c:506", port->gpio_saved_reg.icr2, port->base + GPIO_ICR2);
+	pete_writel("drivers/gpio/gpio-mxc.c:507", port->gpio_saved_reg.imr, port->base + GPIO_IMR);
+	pete_writel("drivers/gpio/gpio-mxc.c:508", port->gpio_saved_reg.gdir, port->base + GPIO_GDIR);
+	pete_writel("drivers/gpio/gpio-mxc.c:509", port->gpio_saved_reg.edge_sel, port->base + GPIO_EDGE_SEL);
+	pete_writel("drivers/gpio/gpio-mxc.c:510", port->gpio_saved_reg.dr, port->base + GPIO_DR);
 }
 
 static int mxc_gpio_syscore_suspend(void)

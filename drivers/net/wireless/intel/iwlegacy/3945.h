@@ -454,7 +454,7 @@ struct il3945_shared {
 /************************************/
 
 /**
- * This I/O area is directly read/writable by driver (e.g. Linux uses writel())
+ * This I/O area is directly read/writable by driver (e.g. Linux uses pete_writel("drivers/net/wireless/intel/iwlegacy/3945.h:457", ))
  * Addresses are offsets from device's PCI hardware base address.
  */
 #define FH39_MEM_LOWER_BOUND                   (0x0800)

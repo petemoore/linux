@@ -64,9 +64,9 @@ static void __init m528x_i2c_init(void)
 
 	/* setup Port AS Pin Assignment Register for I2C */
 	/*  set PASPA0 to SCL and PASPA1 to SDA */
-	paspar = readw(MCFGPIO_PASPAR);
+	paspar = pete_readw("arch/m68k/coldfire/m528x.c:67", MCFGPIO_PASPAR);
 	paspar |= 0xF;
-	writew(paspar, MCFGPIO_PASPAR);
+	pete_writew("arch/m68k/coldfire/m528x.c:69", paspar, MCFGPIO_PASPAR);
 #endif /* IS_ENABLED(CONFIG_I2C_IMX) */
 }
 
@@ -77,9 +77,9 @@ static void __init m528x_uarts_init(void)
 	u8 port;
 
 	/* make sure PUAPAR is set for UART0 and UART1 */
-	port = readb(MCFGPIO_PUAPAR);
+	port = pete_readb("arch/m68k/coldfire/m528x.c:80", MCFGPIO_PUAPAR);
 	port |= 0x03 | (0x03 << 2);
-	writeb(port, MCFGPIO_PUAPAR);
+	pete_writeb("arch/m68k/coldfire/m528x.c:82", port, MCFGPIO_PUAPAR);
 }
 
 /***************************************************************************/
@@ -89,9 +89,9 @@ static void __init m528x_fec_init(void)
 	u16 v16;
 
 	/* Set multi-function pins to ethernet mode for fec0 */
-	v16 = readw(MCFGPIO_PASPAR);
-	writew(v16 | 0xf00, MCFGPIO_PASPAR);
-	writeb(0xc0, MCFGPIO_PEHLPAR);
+	v16 = pete_readw("arch/m68k/coldfire/m528x.c:92", MCFGPIO_PASPAR);
+	pete_writew("arch/m68k/coldfire/m528x.c:93", v16 | 0xf00, MCFGPIO_PASPAR);
+	pete_writeb("arch/m68k/coldfire/m528x.c:94", 0xc0, MCFGPIO_PEHLPAR);
 }
 
 /***************************************************************************/
@@ -99,8 +99,8 @@ static void __init m528x_fec_init(void)
 #ifdef CONFIG_WILDFIRE
 void wildfire_halt(void)
 {
-	writeb(0, 0x30000007);
-	writeb(0x2, 0x30000007);
+	pete_writeb("arch/m68k/coldfire/m528x.c:102", 0, 0x30000007);
+	pete_writeb("arch/m68k/coldfire/m528x.c:103", 0x2, 0x30000007);
 }
 #endif
 
@@ -110,14 +110,14 @@ void wildfiremod_halt(void)
 	printk(KERN_INFO "WildFireMod hibernating...\n");
 
 	/* Set portE.5 to Digital IO */
-	writew(readw(MCFGPIO_PEPAR) & ~(1 << (5 * 2)), MCFGPIO_PEPAR);
+	pete_writew("arch/m68k/coldfire/m528x.c:113", pete_readw("arch/m68k/coldfire/m528x.c:113", MCFGPIO_PEPAR) & ~(1 << (5 * 2)), MCFGPIO_PEPAR);
 
 	/* Make portE.5 an output */
-	writeb(readb(MCFGPIO_PDDR_E) | (1 << 5), MCFGPIO_PDDR_E);
+	pete_writeb("arch/m68k/coldfire/m528x.c:116", pete_readb("arch/m68k/coldfire/m528x.c:116", MCFGPIO_PDDR_E) | (1 << 5), MCFGPIO_PDDR_E);
 
 	/* Now toggle portE.5 from low to high */
-	writeb(readb(MCFGPIO_PODR_E) & ~(1 << 5), MCFGPIO_PODR_E);
-	writeb(readb(MCFGPIO_PODR_E) | (1 << 5), MCFGPIO_PODR_E);
+	pete_writeb("arch/m68k/coldfire/m528x.c:119", pete_readb("arch/m68k/coldfire/m528x.c:119", MCFGPIO_PODR_E) & ~(1 << 5), MCFGPIO_PODR_E);
+	pete_writeb("arch/m68k/coldfire/m528x.c:120", pete_readb("arch/m68k/coldfire/m528x.c:120", MCFGPIO_PODR_E) | (1 << 5), MCFGPIO_PODR_E);
 
 	printk(KERN_EMERG "Failed to hibernate. Halting!\n");
 }

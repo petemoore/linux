@@ -1970,7 +1970,7 @@ static inline void sdma_update_tail(struct sdma_engine *sde, u16 tail)
 {
 	/* Commit writes to memory and advance the tail on the chip */
 	smp_wmb(); /* see get_txhead() */
-	writeq(tail, sde->tail_csr);
+	pete_writeq("drivers/infiniband/hw/hfi1/sdma.c:1973", tail, sde->tail_csr);
 }
 
 /*

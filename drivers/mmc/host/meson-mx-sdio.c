@@ -128,16 +128,16 @@ static void meson_mx_mmc_mask_bits(struct mmc_host *mmc, char reg, u32 mask,
 	struct meson_mx_mmc_host *host = mmc_priv(mmc);
 	u32 regval;
 
-	regval = readl(host->base + reg);
+	regval = pete_readl("drivers/mmc/host/meson-mx-sdio.c:131", host->base + reg);
 	regval &= ~mask;
 	regval |= (val & mask);
 
-	writel(regval, host->base + reg);
+	pete_writel("drivers/mmc/host/meson-mx-sdio.c:135", regval, host->base + reg);
 }
 
 static void meson_mx_mmc_soft_reset(struct meson_mx_mmc_host *host)
 {
-	writel(MESON_MX_SDIO_IRQC_SOFT_RESET, host->base + MESON_MX_SDIO_IRQC);
+	pete_writel("drivers/mmc/host/meson-mx-sdio.c:140", MESON_MX_SDIO_IRQC_SOFT_RESET, host->base + MESON_MX_SDIO_IRQC);
 	udelay(2);
 }
 
@@ -215,11 +215,11 @@ static void meson_mx_mmc_start_cmd(struct mmc_host *mmc,
 
 	spin_lock_irqsave(&host->irq_lock, irqflags);
 
-	mult = readl(host->base + MESON_MX_SDIO_MULT);
+	mult = pete_readl("drivers/mmc/host/meson-mx-sdio.c:218", host->base + MESON_MX_SDIO_MULT);
 	mult &= ~MESON_MX_SDIO_MULT_PORT_SEL_MASK;
 	mult |= FIELD_PREP(MESON_MX_SDIO_MULT_PORT_SEL_MASK, host->slot_id);
 	mult |= BIT(31);
-	writel(mult, host->base + MESON_MX_SDIO_MULT);
+	pete_writel("drivers/mmc/host/meson-mx-sdio.c:222", mult, host->base + MESON_MX_SDIO_MULT);
 
 	/* enable the CMD done interrupt */
 	meson_mx_mmc_mask_bits(mmc, MESON_MX_SDIO_IRQC,
@@ -231,9 +231,9 @@ static void meson_mx_mmc_start_cmd(struct mmc_host *mmc,
 			       MESON_MX_SDIO_IRQS_CMD_INT,
 			       MESON_MX_SDIO_IRQS_CMD_INT);
 
-	writel(cmd->arg, host->base + MESON_MX_SDIO_ARGU);
-	writel(ext, host->base + MESON_MX_SDIO_EXT);
-	writel(send, host->base + MESON_MX_SDIO_SEND);
+	pete_writel("drivers/mmc/host/meson-mx-sdio.c:234", cmd->arg, host->base + MESON_MX_SDIO_ARGU);
+	pete_writel("drivers/mmc/host/meson-mx-sdio.c:235", ext, host->base + MESON_MX_SDIO_EXT);
+	pete_writel("drivers/mmc/host/meson-mx-sdio.c:236", send, host->base + MESON_MX_SDIO_SEND);
 
 	spin_unlock_irqrestore(&host->irq_lock, irqflags);
 
@@ -351,7 +351,7 @@ static void meson_mx_mmc_request(struct mmc_host *mmc, struct mmc_request *mrq)
 	host->mrq = mrq;
 
 	if (mrq->data)
-		writel(sg_dma_address(mrq->data->sg),
+		pete_writel("drivers/mmc/host/meson-mx-sdio.c:354", sg_dma_address(mrq->data->sg),
 		       host->base + MESON_MX_SDIO_ADDR);
 
 	if (mrq->sbc)
@@ -367,21 +367,21 @@ static void meson_mx_mmc_read_response(struct mmc_host *mmc,
 	u32 mult;
 	int i, resp[4];
 
-	mult = readl(host->base + MESON_MX_SDIO_MULT);
+	mult = pete_readl("drivers/mmc/host/meson-mx-sdio.c:370", host->base + MESON_MX_SDIO_MULT);
 	mult |= MESON_MX_SDIO_MULT_WR_RD_OUT_INDEX;
 	mult &= ~MESON_MX_SDIO_MULT_RESP_READ_INDEX_MASK;
 	mult |= FIELD_PREP(MESON_MX_SDIO_MULT_RESP_READ_INDEX_MASK, 0);
-	writel(mult, host->base + MESON_MX_SDIO_MULT);
+	pete_writel("drivers/mmc/host/meson-mx-sdio.c:374", mult, host->base + MESON_MX_SDIO_MULT);
 
 	if (cmd->flags & MMC_RSP_136) {
 		for (i = 0; i <= 3; i++)
-			resp[3 - i] = readl(host->base + MESON_MX_SDIO_ARGU);
+			resp[3 - i] = pete_readl("drivers/mmc/host/meson-mx-sdio.c:378", host->base + MESON_MX_SDIO_ARGU);
 		cmd->resp[0] = (resp[0] << 8) | ((resp[1] >> 24) & 0xff);
 		cmd->resp[1] = (resp[1] << 8) | ((resp[2] >> 24) & 0xff);
 		cmd->resp[2] = (resp[2] << 8) | ((resp[3] >> 24) & 0xff);
 		cmd->resp[3] = (resp[3] << 8);
 	} else if (cmd->flags & MMC_RSP_PRESENT) {
-		cmd->resp[0] = readl(host->base + MESON_MX_SDIO_ARGU);
+		cmd->resp[0] = pete_readl("drivers/mmc/host/meson-mx-sdio.c:384", host->base + MESON_MX_SDIO_ARGU);
 	}
 }
 
@@ -422,8 +422,8 @@ static irqreturn_t meson_mx_mmc_irq(int irq, void *data)
 
 	spin_lock(&host->irq_lock);
 
-	irqs = readl(host->base + MESON_MX_SDIO_IRQS);
-	send = readl(host->base + MESON_MX_SDIO_SEND);
+	irqs = pete_readl("drivers/mmc/host/meson-mx-sdio.c:425", host->base + MESON_MX_SDIO_IRQS);
+	send = pete_readl("drivers/mmc/host/meson-mx-sdio.c:426", host->base + MESON_MX_SDIO_SEND);
 
 	if (irqs & MESON_MX_SDIO_IRQS_CMD_INT)
 		ret = meson_mx_mmc_process_cmd_irq(host, irqs, send);
@@ -431,7 +431,7 @@ static irqreturn_t meson_mx_mmc_irq(int irq, void *data)
 		ret = IRQ_HANDLED;
 
 	/* finally ACK all pending interrupts */
-	writel(irqs, host->base + MESON_MX_SDIO_IRQS);
+	pete_writel("drivers/mmc/host/meson-mx-sdio.c:434", irqs, host->base + MESON_MX_SDIO_IRQS);
 
 	spin_unlock(&host->irq_lock);
 
@@ -474,9 +474,9 @@ static void meson_mx_mmc_timeout(struct timer_list *t)
 	spin_lock_irqsave(&host->irq_lock, irqflags);
 
 	/* disable the CMD interrupt */
-	irqc = readl(host->base + MESON_MX_SDIO_IRQC);
+	irqc = pete_readl("drivers/mmc/host/meson-mx-sdio.c:477", host->base + MESON_MX_SDIO_IRQC);
 	irqc &= ~MESON_MX_SDIO_IRQC_ARC_CMD_INT_EN;
-	writel(irqc, host->base + MESON_MX_SDIO_IRQC);
+	pete_writel("drivers/mmc/host/meson-mx-sdio.c:479", irqc, host->base + MESON_MX_SDIO_IRQC);
 
 	spin_unlock_irqrestore(&host->irq_lock, irqflags);
 
@@ -489,8 +489,8 @@ static void meson_mx_mmc_timeout(struct timer_list *t)
 
 	dev_dbg(mmc_dev(host->mmc),
 		"Timeout on CMD%u (IRQS = 0x%08x, ARGU = 0x%08x)\n",
-		host->cmd->opcode, readl(host->base + MESON_MX_SDIO_IRQS),
-		readl(host->base + MESON_MX_SDIO_ARGU));
+		host->cmd->opcode, pete_readl("drivers/mmc/host/meson-mx-sdio.c:492", host->base + MESON_MX_SDIO_IRQS),
+		pete_readl("drivers/mmc/host/meson-mx-sdio.c:493", host->base + MESON_MX_SDIO_ARGU));
 
 	host->cmd->error = -ETIMEDOUT;
 
@@ -707,7 +707,7 @@ static int meson_mx_mmc_probe(struct platform_device *pdev)
 	conf |= FIELD_PREP(MESON_MX_SDIO_CONF_M_ENDIAN_MASK, 0x3);
 	conf |= FIELD_PREP(MESON_MX_SDIO_CONF_WRITE_NWR_MASK, 0x2);
 	conf |= FIELD_PREP(MESON_MX_SDIO_CONF_WRITE_CRC_OK_STATUS_MASK, 0x2);
-	writel(conf, host->base + MESON_MX_SDIO_CONF);
+	pete_writel("drivers/mmc/host/meson-mx-sdio.c:710", conf, host->base + MESON_MX_SDIO_CONF);
 
 	meson_mx_mmc_soft_reset(host);
 

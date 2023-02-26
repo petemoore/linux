@@ -85,7 +85,7 @@ static const struct coreclk_ratio kirkwood_coreclk_ratios[] __initconst = {
 
 static u32 __init kirkwood_get_tclk_freq(void __iomem *sar)
 {
-	u32 opt = (readl(sar) >> SAR_KIRKWOOD_TCLK_FREQ) &
+	u32 opt = (pete_readl("drivers/clk/mvebu/kirkwood.c:88", sar) >> SAR_KIRKWOOD_TCLK_FREQ) &
 		SAR_KIRKWOOD_TCLK_FREQ_MASK;
 	return (opt) ? 166666667 : 200000000;
 }
@@ -107,7 +107,7 @@ static const u32 kirkwood_cpu_freqs[] __initconst = {
 
 static u32 __init kirkwood_get_cpu_freq(void __iomem *sar)
 {
-	u32 opt = SAR_KIRKWOOD_CPU_FREQ(readl(sar));
+	u32 opt = SAR_KIRKWOOD_CPU_FREQ(pete_readl("drivers/clk/mvebu/kirkwood.c:110", sar));
 	return kirkwood_cpu_freqs[opt];
 }
 
@@ -129,14 +129,14 @@ static void __init kirkwood_get_clk_ratio(
 	switch (id) {
 	case KIRKWOOD_CPU_TO_L2:
 	{
-		u32 opt = SAR_KIRKWOOD_L2_RATIO(readl(sar));
+		u32 opt = SAR_KIRKWOOD_L2_RATIO(pete_readl("drivers/clk/mvebu/kirkwood.c:132", sar));
 		*mult = kirkwood_cpu_l2_ratios[opt][0];
 		*div = kirkwood_cpu_l2_ratios[opt][1];
 		break;
 	}
 	case KIRKWOOD_CPU_TO_DDR:
 	{
-		u32 opt = (readl(sar) >> SAR_KIRKWOOD_DDR_RATIO) &
+		u32 opt = (pete_readl("drivers/clk/mvebu/kirkwood.c:139", sar) >> SAR_KIRKWOOD_DDR_RATIO) &
 			SAR_KIRKWOOD_DDR_RATIO_MASK;
 		*mult = kirkwood_cpu_ddr_ratios[opt][0];
 		*div = kirkwood_cpu_ddr_ratios[opt][1];
@@ -154,7 +154,7 @@ static const u32 mv88f6180_cpu_freqs[] __initconst = {
 
 static u32 __init mv88f6180_get_cpu_freq(void __iomem *sar)
 {
-	u32 opt = (readl(sar) >> SAR_MV88F6180_CLK) & SAR_MV88F6180_CLK_MASK;
+	u32 opt = (pete_readl("drivers/clk/mvebu/kirkwood.c:157", sar) >> SAR_MV88F6180_CLK) & SAR_MV88F6180_CLK_MASK;
 	return mv88f6180_cpu_freqs[opt];
 }
 
@@ -176,7 +176,7 @@ static void __init mv88f6180_get_clk_ratio(
 	}
 	case KIRKWOOD_CPU_TO_DDR:
 	{
-		u32 opt = (readl(sar) >> SAR_MV88F6180_CLK) &
+		u32 opt = (pete_readl("drivers/clk/mvebu/kirkwood.c:179", sar) >> SAR_MV88F6180_CLK) &
 			SAR_MV88F6180_CLK_MASK;
 		*mult = mv88f6180_cpu_ddr_ratios[opt][0];
 		*div = mv88f6180_cpu_ddr_ratios[opt][1];

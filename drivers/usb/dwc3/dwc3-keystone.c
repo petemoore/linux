@@ -40,12 +40,12 @@ struct dwc3_keystone {
 
 static inline u32 kdwc3_readl(void __iomem *base, u32 offset)
 {
-	return readl(base + offset);
+	return pete_readl("drivers/usb/dwc3/dwc3-keystone.c:43", base + offset);
 }
 
 static inline void kdwc3_writel(void __iomem *base, u32 offset, u32 value)
 {
-	writel(value, base + offset);
+	pete_writel("drivers/usb/dwc3/dwc3-keystone.c:48", value, base + offset);
 }
 
 static void kdwc3_enable_irqs(struct dwc3_keystone *kdwc)

@@ -355,7 +355,7 @@ static int qib_read_umem64(struct qib_devdata *dd, void __user *uaddr,
 
 	/* not very efficient, but it works for now */
 	while (reg_addr < reg_end) {
-		u64 data = readq(reg_addr);
+		u64 data = pete_readq("drivers/infiniband/hw/qib/qib_diag.c:358", reg_addr);
 
 		if (copy_to_user(uaddr, &data, sizeof(u64))) {
 			ret = -EFAULT;
@@ -405,7 +405,7 @@ static int qib_write_umem64(struct qib_devdata *dd, u32 regoffs,
 			ret = -EFAULT;
 			goto bail;
 		}
-		writeq(data, reg_addr);
+		pete_writeq("drivers/infiniband/hw/qib/qib_diag.c:408", data, reg_addr);
 
 		reg_addr++;
 		uaddr += sizeof(u64);
@@ -444,7 +444,7 @@ static int qib_read_umem32(struct qib_devdata *dd, void __user *uaddr,
 
 	/* not very efficient, but it works for now */
 	while (reg_addr < reg_end) {
-		u32 data = readl(reg_addr);
+		u32 data = pete_readl("drivers/infiniband/hw/qib/qib_diag.c:447", reg_addr);
 
 		if (copy_to_user(uaddr, &data, sizeof(data))) {
 			ret = -EFAULT;
@@ -495,7 +495,7 @@ static int qib_write_umem32(struct qib_devdata *dd, u32 regoffs,
 			ret = -EFAULT;
 			goto bail;
 		}
-		writel(data, reg_addr);
+		pete_writel("drivers/infiniband/hw/qib/qib_diag.c:498", data, reg_addr);
 
 		reg_addr++;
 		uaddr += sizeof(u32);
@@ -636,7 +636,7 @@ static ssize_t qib_diagpkt_write(struct file *fp,
 	/* disable header check on pbufn for this packet */
 	dd->f_txchk_change(dd, pbufn, 1, TXCHK_CHG_TYPE_DIS1, NULL);
 
-	writeq(dp.pbc_wd, piobuf);
+	pete_writeq("drivers/infiniband/hw/qib/qib_diag.c:639", dp.pbc_wd, piobuf);
 	/*
 	 * Copy all but the trigger word, then flush, so it's written
 	 * to chip before trigger word, then write trigger word, then

@@ -44,7 +44,7 @@ static int __maybe_unused exynos_audss_clk_suspend(struct device *dev)
 	int i;
 
 	for (i = 0; i < ARRAY_SIZE(reg_save); i++)
-		reg_save[i][1] = readl(reg_base + reg_save[i][0]);
+		reg_save[i][1] = pete_readl("drivers/clk/samsung/clk-exynos-audss.c:47", reg_base + reg_save[i][0]);
 
 	return 0;
 }
@@ -54,7 +54,7 @@ static int __maybe_unused exynos_audss_clk_resume(struct device *dev)
 	int i;
 
 	for (i = 0; i < ARRAY_SIZE(reg_save); i++)
-		writel(reg_save[i][1], reg_base + reg_save[i][0]);
+		pete_writel("drivers/clk/samsung/clk-exynos-audss.c:57", reg_save[i][1], reg_base + reg_save[i][0]);
 
 	return 0;
 }

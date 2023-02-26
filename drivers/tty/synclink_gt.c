@@ -3758,37 +3758,37 @@ module_exit(slgt_exit);
 static __u8 rd_reg8(struct slgt_info *info, unsigned int addr)
 {
 	CALC_REGADDR();
-	return readb((void __iomem *)reg_addr);
+	return pete_readb("drivers/tty/synclink_gt.c:3761", (void __iomem *)reg_addr);
 }
 
 static void wr_reg8(struct slgt_info *info, unsigned int addr, __u8 value)
 {
 	CALC_REGADDR();
-	writeb(value, (void __iomem *)reg_addr);
+	pete_writeb("drivers/tty/synclink_gt.c:3767", value, (void __iomem *)reg_addr);
 }
 
 static __u16 rd_reg16(struct slgt_info *info, unsigned int addr)
 {
 	CALC_REGADDR();
-	return readw((void __iomem *)reg_addr);
+	return pete_readw("drivers/tty/synclink_gt.c:3773", (void __iomem *)reg_addr);
 }
 
 static void wr_reg16(struct slgt_info *info, unsigned int addr, __u16 value)
 {
 	CALC_REGADDR();
-	writew(value, (void __iomem *)reg_addr);
+	pete_writew("drivers/tty/synclink_gt.c:3779", value, (void __iomem *)reg_addr);
 }
 
 static __u32 rd_reg32(struct slgt_info *info, unsigned int addr)
 {
 	CALC_REGADDR();
-	return readl((void __iomem *)reg_addr);
+	return pete_readl("drivers/tty/synclink_gt.c:3785", (void __iomem *)reg_addr);
 }
 
 static void wr_reg32(struct slgt_info *info, unsigned int addr, __u32 value)
 {
 	CALC_REGADDR();
-	writel(value, (void __iomem *)reg_addr);
+	pete_writel("drivers/tty/synclink_gt.c:3791", value, (void __iomem *)reg_addr);
 }
 
 static void rdma_reset(struct slgt_info *info)

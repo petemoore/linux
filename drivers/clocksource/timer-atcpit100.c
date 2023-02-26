@@ -70,43 +70,43 @@
 
 static void atcpit100_ch1_tmr0_en(void __iomem *base)
 {
-	writel(~0, base + CH1_REL);
-	writel(APB_CLK|TMR_32, base + CH1_CTL);
+	pete_writel("drivers/clocksource/timer-atcpit100.c:73", ~0, base + CH1_REL);
+	pete_writel("drivers/clocksource/timer-atcpit100.c:74", APB_CLK|TMR_32, base + CH1_CTL);
 }
 
 static void atcpit100_ch0_tmr0_en(void __iomem *base)
 {
-	writel(APB_CLK|TMR_32, base + CH0_CTL);
+	pete_writel("drivers/clocksource/timer-atcpit100.c:79", APB_CLK|TMR_32, base + CH0_CTL);
 }
 
 static void atcpit100_clkevt_time_setup(void __iomem *base, unsigned long delay)
 {
-	writel(delay, base + CH0_CNT);
-	writel(delay, base + CH0_REL);
+	pete_writel("drivers/clocksource/timer-atcpit100.c:84", delay, base + CH0_CNT);
+	pete_writel("drivers/clocksource/timer-atcpit100.c:85", delay, base + CH0_REL);
 }
 
 static void atcpit100_timer_clear_interrupt(void __iomem *base)
 {
 	u32 val;
 
-	val = readl(base + INT_STA);
-	writel(val | CH0INT0, base + INT_STA);
+	val = pete_readl("drivers/clocksource/timer-atcpit100.c:92", base + INT_STA);
+	pete_writel("drivers/clocksource/timer-atcpit100.c:93", val | CH0INT0, base + INT_STA);
 }
 
 static void atcpit100_clocksource_start(void __iomem *base)
 {
 	u32 val;
 
-	val = readl(base + CH_EN);
-	writel(val | CH1TMR0EN, base + CH_EN);
+	val = pete_readl("drivers/clocksource/timer-atcpit100.c:100", base + CH_EN);
+	pete_writel("drivers/clocksource/timer-atcpit100.c:101", val | CH1TMR0EN, base + CH_EN);
 }
 
 static void atcpit100_clkevt_time_start(void __iomem *base)
 {
 	u32 val;
 
-	val = readl(base + CH_EN);
-	writel(val | CH0TMR0EN, base + CH_EN);
+	val = pete_readl("drivers/clocksource/timer-atcpit100.c:108", base + CH_EN);
+	pete_writel("drivers/clocksource/timer-atcpit100.c:109", val | CH0TMR0EN, base + CH_EN);
 }
 
 static void atcpit100_clkevt_time_stop(void __iomem *base)
@@ -114,8 +114,8 @@ static void atcpit100_clkevt_time_stop(void __iomem *base)
 	u32 val;
 
 	atcpit100_timer_clear_interrupt(base);
-	val = readl(base + CH_EN);
-	writel(val & ~CH0TMR0EN, base + CH_EN);
+	val = pete_readl("drivers/clocksource/timer-atcpit100.c:117", base + CH_EN);
+	pete_writel("drivers/clocksource/timer-atcpit100.c:118", val & ~CH0TMR0EN, base + CH_EN);
 }
 
 static int atcpit100_clkevt_next_event(unsigned long evt,
@@ -124,10 +124,10 @@ static int atcpit100_clkevt_next_event(unsigned long evt,
 	u32 val;
 	struct timer_of *to = to_timer_of(clkevt);
 
-	val = readl(timer_of_base(to) + CH_EN);
-	writel(val & ~CH0TMR0EN, timer_of_base(to) + CH_EN);
-	writel(evt, timer_of_base(to) + CH0_REL);
-	writel(val | CH0TMR0EN, timer_of_base(to) + CH_EN);
+	val = pete_readl("drivers/clocksource/timer-atcpit100.c:127", timer_of_base(to) + CH_EN);
+	pete_writel("drivers/clocksource/timer-atcpit100.c:128", val & ~CH0TMR0EN, timer_of_base(to) + CH_EN);
+	pete_writel("drivers/clocksource/timer-atcpit100.c:129", evt, timer_of_base(to) + CH0_REL);
+	pete_writel("drivers/clocksource/timer-atcpit100.c:130", val | CH0TMR0EN, timer_of_base(to) + CH_EN);
 
 	return 0;
 }
@@ -154,9 +154,9 @@ static int atcpit100_clkevt_set_oneshot(struct clock_event_device *evt)
 	struct timer_of *to = to_timer_of(evt);
 	u32 val;
 
-	writel(~0x0, timer_of_base(to) + CH0_REL);
-	val = readl(timer_of_base(to) + CH_EN);
-	writel(val | CH0TMR0EN, timer_of_base(to) + CH_EN);
+	pete_writel("drivers/clocksource/timer-atcpit100.c:157", ~0x0, timer_of_base(to) + CH0_REL);
+	val = pete_readl("drivers/clocksource/timer-atcpit100.c:158", timer_of_base(to) + CH_EN);
+	pete_writel("drivers/clocksource/timer-atcpit100.c:159", val | CH0TMR0EN, timer_of_base(to) + CH_EN);
 
 	return 0;
 }
@@ -204,7 +204,7 @@ static struct timer_of to = {
 
 static u64 notrace atcpit100_timer_sched_read(void)
 {
-	return ~readl(timer_of_base(&to) + CH1_CNT);
+	return ~pete_readl("drivers/clocksource/timer-atcpit100.c:207", timer_of_base(&to) + CH1_CNT);
 }
 
 #ifdef CONFIG_NDS32
@@ -253,8 +253,8 @@ static int __init atcpit100_timer_init(struct device_node *node)
 	atcpit100_clkevt_time_start(base);
 
 	/* Enable channel 0 timer0 interrupt */
-	val = readl(base + INT_EN);
-	writel(val | CH0INT0EN, base + INT_EN);
+	val = pete_readl("drivers/clocksource/timer-atcpit100.c:256", base + INT_EN);
+	pete_writel("drivers/clocksource/timer-atcpit100.c:257", val | CH0INT0EN, base + INT_EN);
 
 #ifdef CONFIG_NDS32
 	fill_vdso_need_info(node);

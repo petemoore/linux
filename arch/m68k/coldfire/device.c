@@ -669,13 +669,13 @@ static void __init mcf_uart_set_irq(void)
 {
 #ifdef MCFUART_UIVR
 	/* UART0 interrupt setup */
-	writeb(MCFSIM_ICR_LEVEL6 | MCFSIM_ICR_PRI1, MCFSIM_UART1ICR);
-	writeb(MCF_IRQ_UART0, MCFUART_BASE0 + MCFUART_UIVR);
+	pete_writeb("arch/m68k/coldfire/device.c:672", MCFSIM_ICR_LEVEL6 | MCFSIM_ICR_PRI1, MCFSIM_UART1ICR);
+	pete_writeb("arch/m68k/coldfire/device.c:673", MCF_IRQ_UART0, MCFUART_BASE0 + MCFUART_UIVR);
 	mcf_mapirq2imr(MCF_IRQ_UART0, MCFINTC_UART0);
 
 	/* UART1 interrupt setup */
-	writeb(MCFSIM_ICR_LEVEL6 | MCFSIM_ICR_PRI2, MCFSIM_UART2ICR);
-	writeb(MCF_IRQ_UART1, MCFUART_BASE1 + MCFUART_UIVR);
+	pete_writeb("arch/m68k/coldfire/device.c:677", MCFSIM_ICR_LEVEL6 | MCFSIM_ICR_PRI2, MCFSIM_UART2ICR);
+	pete_writeb("arch/m68k/coldfire/device.c:678", MCF_IRQ_UART1, MCFUART_BASE1 + MCFUART_UIVR);
 	mcf_mapirq2imr(MCF_IRQ_UART1, MCFINTC_UART1);
 #endif
 }

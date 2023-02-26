@@ -23,8 +23,8 @@
 #include "au88x0_wt.h"
 #endif
 
-#define	hwread(x,y) readl((x)+(y))
-#define	hwwrite(x,y,z) writel((z),(x)+(y))
+#define	hwread(x,y) pete_readl("sound/pci/au88x0/au88x0.h:26", (x)+(y))
+#define	hwwrite(x,y,z) pete_writel("sound/pci/au88x0/au88x0.h:27", (z),(x)+(y))
 
 /* Vortex MPU401 defines. */
 #define	MIDI_CLOCK_DIV		0x61

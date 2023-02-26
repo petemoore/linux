@@ -105,27 +105,27 @@ static struct mid_pwr *midpwr;
 
 static u32 mid_pwr_get_state(struct mid_pwr *pwr, int reg)
 {
-	return readl(pwr->regs + PM_SSS(reg));
+	return pete_readl("arch/x86/platform/intel-mid/pwr.c:108", pwr->regs + PM_SSS(reg));
 }
 
 static void mid_pwr_set_state(struct mid_pwr *pwr, int reg, u32 value)
 {
-	writel(value, pwr->regs + PM_SSC(reg));
+	pete_writel("arch/x86/platform/intel-mid/pwr.c:113", value, pwr->regs + PM_SSC(reg));
 }
 
 static void mid_pwr_set_wake(struct mid_pwr *pwr, int reg, u32 value)
 {
-	writel(value, pwr->regs + PM_WKC(reg));
+	pete_writel("arch/x86/platform/intel-mid/pwr.c:118", value, pwr->regs + PM_WKC(reg));
 }
 
 static void mid_pwr_interrupt_disable(struct mid_pwr *pwr)
 {
-	writel(~PM_ICS_IE, pwr->regs + PM_ICS);
+	pete_writel("arch/x86/platform/intel-mid/pwr.c:123", ~PM_ICS_IE, pwr->regs + PM_ICS);
 }
 
 static bool mid_pwr_is_busy(struct mid_pwr *pwr)
 {
-	return !!(readl(pwr->regs + PM_STS) & PM_STS_BUSY);
+	return !!(pete_readl("arch/x86/platform/intel-mid/pwr.c:128", pwr->regs + PM_STS) & PM_STS_BUSY);
 }
 
 /* Wait 500ms that the latest PWRMU command finished */
@@ -146,7 +146,7 @@ static int mid_pwr_wait(struct mid_pwr *pwr)
 
 static int mid_pwr_wait_for_cmd(struct mid_pwr *pwr, u8 cmd)
 {
-	writel(PM_CMD_CMD(cmd) | PM_CMD_CM_IMMEDIATE, pwr->regs + PM_CMD);
+	pete_writel("arch/x86/platform/intel-mid/pwr.c:149", PM_CMD_CMD(cmd) | PM_CMD_CM_IMMEDIATE, pwr->regs + PM_CMD);
 	return mid_pwr_wait(pwr);
 }
 
@@ -297,7 +297,7 @@ void intel_mid_pwr_power_off(void)
 		  TRIGGER_NC_MSG_2;
 
 	/* Send command to SCU */
-	writel(cmd, pwr->regs + PM_CMD);
+	pete_writel("arch/x86/platform/intel-mid/pwr.c:300", cmd, pwr->regs + PM_CMD);
 	mid_pwr_wait(pwr);
 }
 
@@ -331,11 +331,11 @@ static irqreturn_t mid_pwr_irq_handler(int irq, void *dev_id)
 	struct mid_pwr *pwr = dev_id;
 	u32 ics;
 
-	ics = readl(pwr->regs + PM_ICS);
+	ics = pete_readl("arch/x86/platform/intel-mid/pwr.c:334", pwr->regs + PM_ICS);
 	if (!(ics & PM_ICS_IP))
 		return IRQ_NONE;
 
-	writel(ics | PM_ICS_IP, pwr->regs + PM_ICS);
+	pete_writel("arch/x86/platform/intel-mid/pwr.c:338", ics | PM_ICS_IP, pwr->regs + PM_ICS);
 
 	dev_warn(pwr->dev, "Unexpected IRQ: %#x\n", PM_ICS_INT_STATUS(ics));
 	return IRQ_HANDLED;

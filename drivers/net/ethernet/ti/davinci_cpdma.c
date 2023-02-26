@@ -170,12 +170,12 @@ static struct cpdma_control_info controls[] = {
 #define num_chan	params.num_chan
 
 /* various accessors */
-#define dma_reg_read(ctlr, ofs)		readl((ctlr)->dmaregs + (ofs))
-#define chan_read(chan, fld)		readl((chan)->fld)
-#define desc_read(desc, fld)		readl(&(desc)->fld)
-#define dma_reg_write(ctlr, ofs, v)	writel(v, (ctlr)->dmaregs + (ofs))
-#define chan_write(chan, fld, v)	writel(v, (chan)->fld)
-#define desc_write(desc, fld, v)	writel((u32)(v), &(desc)->fld)
+#define dma_reg_read(ctlr, ofs)		pete_readl("drivers/net/ethernet/ti/davinci_cpdma.c:173", (ctlr)->dmaregs + (ofs))
+#define chan_read(chan, fld)		pete_readl("drivers/net/ethernet/ti/davinci_cpdma.c:174", (chan)->fld)
+#define desc_read(desc, fld)		pete_readl("drivers/net/ethernet/ti/davinci_cpdma.c:175", &(desc)->fld)
+#define dma_reg_write(ctlr, ofs, v)	pete_writel("drivers/net/ethernet/ti/davinci_cpdma.c:176", v, (ctlr)->dmaregs + (ofs))
+#define chan_write(chan, fld, v)	pete_writel("drivers/net/ethernet/ti/davinci_cpdma.c:177", v, (chan)->fld)
+#define desc_write(desc, fld, v)	pete_writel("drivers/net/ethernet/ti/davinci_cpdma.c:178", (u32)(v), &(desc)->fld)
 
 #define cpdma_desc_to_port(chan, mode, directed)			\
 	do {								\
@@ -558,10 +558,10 @@ int cpdma_ctlr_start(struct cpdma_ctlr *ctlr)
 	}
 
 	for (i = 0; i < ctlr->num_chan; i++) {
-		writel(0, ctlr->params.txhdp + 4 * i);
-		writel(0, ctlr->params.rxhdp + 4 * i);
-		writel(0, ctlr->params.txcp + 4 * i);
-		writel(0, ctlr->params.rxcp + 4 * i);
+		pete_writel("drivers/net/ethernet/ti/davinci_cpdma.c:561", 0, ctlr->params.txhdp + 4 * i);
+		pete_writel("drivers/net/ethernet/ti/davinci_cpdma.c:562", 0, ctlr->params.rxhdp + 4 * i);
+		pete_writel("drivers/net/ethernet/ti/davinci_cpdma.c:563", 0, ctlr->params.txcp + 4 * i);
+		pete_writel("drivers/net/ethernet/ti/davinci_cpdma.c:564", 0, ctlr->params.rxcp + 4 * i);
 	}
 
 	dma_reg_write(ctlr, CPDMA_RXINTMASKCLEAR, 0xffffffff);

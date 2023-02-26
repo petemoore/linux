@@ -61,11 +61,11 @@ MODULE_LICENSE("GPL v2");
 static void __iomem *rtc1_base;
 static void __iomem *rtc2_base;
 
-#define rtc1_read(offset)		readw(rtc1_base + (offset))
-#define rtc1_write(offset, value)	writew((value), rtc1_base + (offset))
+#define rtc1_read(offset)		pete_readw("drivers/rtc/rtc-vr41xx.c:64", rtc1_base + (offset))
+#define rtc1_write(offset, value)	pete_writew("drivers/rtc/rtc-vr41xx.c:65", (value), rtc1_base + (offset))
 
-#define rtc2_read(offset)		readw(rtc2_base + (offset))
-#define rtc2_write(offset, value)	writew((value), rtc2_base + (offset))
+#define rtc2_read(offset)		pete_readw("drivers/rtc/rtc-vr41xx.c:67", rtc2_base + (offset))
+#define rtc2_write(offset, value)	pete_writew("drivers/rtc/rtc-vr41xx.c:68", (value), rtc2_base + (offset))
 
 /* 32-bit compat for ioctls that nobody else uses */
 #define RTC_EPOCH_READ32	_IOR('p', 0x0d, __u32)

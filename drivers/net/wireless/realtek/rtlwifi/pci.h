@@ -267,34 +267,34 @@ int rtl_pci_resume(struct device *dev);
 #endif /* CONFIG_PM_SLEEP */
 static inline u8 pci_read8_sync(struct rtl_priv *rtlpriv, u32 addr)
 {
-	return readb((u8 __iomem *)rtlpriv->io.pci_mem_start + addr);
+	return pete_readb("drivers/net/wireless/realtek/rtlwifi/pci.h:270", (u8 __iomem *)rtlpriv->io.pci_mem_start + addr);
 }
 
 static inline u16 pci_read16_sync(struct rtl_priv *rtlpriv, u32 addr)
 {
-	return readw((u8 __iomem *)rtlpriv->io.pci_mem_start + addr);
+	return pete_readw("drivers/net/wireless/realtek/rtlwifi/pci.h:275", (u8 __iomem *)rtlpriv->io.pci_mem_start + addr);
 }
 
 static inline u32 pci_read32_sync(struct rtl_priv *rtlpriv, u32 addr)
 {
-	return readl((u8 __iomem *)rtlpriv->io.pci_mem_start + addr);
+	return pete_readl("drivers/net/wireless/realtek/rtlwifi/pci.h:280", (u8 __iomem *)rtlpriv->io.pci_mem_start + addr);
 }
 
 static inline void pci_write8_async(struct rtl_priv *rtlpriv, u32 addr, u8 val)
 {
-	writeb(val, (u8 __iomem *)rtlpriv->io.pci_mem_start + addr);
+	pete_writeb("drivers/net/wireless/realtek/rtlwifi/pci.h:285", val, (u8 __iomem *)rtlpriv->io.pci_mem_start + addr);
 }
 
 static inline void pci_write16_async(struct rtl_priv *rtlpriv,
 				     u32 addr, u16 val)
 {
-	writew(val, (u8 __iomem *)rtlpriv->io.pci_mem_start + addr);
+	pete_writew("drivers/net/wireless/realtek/rtlwifi/pci.h:291", val, (u8 __iomem *)rtlpriv->io.pci_mem_start + addr);
 }
 
 static inline void pci_write32_async(struct rtl_priv *rtlpriv,
 				     u32 addr, u32 val)
 {
-	writel(val, (u8 __iomem *)rtlpriv->io.pci_mem_start + addr);
+	pete_writel("drivers/net/wireless/realtek/rtlwifi/pci.h:297", val, (u8 __iomem *)rtlpriv->io.pci_mem_start + addr);
 }
 
 static inline u16 calc_fifo_space(u16 rp, u16 wp, u16 size)

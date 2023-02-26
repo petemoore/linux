@@ -34,15 +34,15 @@ static void __init r8a7779_init_irq_dt(void)
 	irqchip_init();
 
 	/* route all interrupts to ARM */
-	writel(0xffffffff, base + INT2NTSR0);
-	writel(0x3fffffff, base + INT2NTSR1);
+	pete_writel("arch/arm/mach-shmobile/setup-r8a7779.c:37", 0xffffffff, base + INT2NTSR0);
+	pete_writel("arch/arm/mach-shmobile/setup-r8a7779.c:38", 0x3fffffff, base + INT2NTSR1);
 
 	/* unmask all known interrupts in INTCS2 */
-	writel(0xfffffff0, base + INT2SMSKCR0);
-	writel(0xfff7ffff, base + INT2SMSKCR1);
-	writel(0xfffbffdf, base + INT2SMSKCR2);
-	writel(0xbffffffc, base + INT2SMSKCR3);
-	writel(0x003fee3f, base + INT2SMSKCR4);
+	pete_writel("arch/arm/mach-shmobile/setup-r8a7779.c:41", 0xfffffff0, base + INT2SMSKCR0);
+	pete_writel("arch/arm/mach-shmobile/setup-r8a7779.c:42", 0xfff7ffff, base + INT2SMSKCR1);
+	pete_writel("arch/arm/mach-shmobile/setup-r8a7779.c:43", 0xfffbffdf, base + INT2SMSKCR2);
+	pete_writel("arch/arm/mach-shmobile/setup-r8a7779.c:44", 0xbffffffc, base + INT2SMSKCR3);
+	pete_writel("arch/arm/mach-shmobile/setup-r8a7779.c:45", 0x003fee3f, base + INT2SMSKCR4);
 
 	iounmap(base);
 }

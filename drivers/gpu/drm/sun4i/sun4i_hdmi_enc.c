@@ -64,7 +64,7 @@ static int sun4i_hdmi_setup_avi_infoframes(struct sun4i_hdmi *hdmi,
 	}
 
 	for (i = 0; i < sizeof(buffer); i++)
-		writeb(buffer[i], hdmi->base + SUN4I_HDMI_AVI_INFOFRAME_REG(i));
+		pete_writeb("drivers/gpu/drm/sun4i/sun4i_hdmi_enc.c:67", buffer[i], hdmi->base + SUN4I_HDMI_AVI_INFOFRAME_REG(i));
 
 	return 0;
 }
@@ -88,9 +88,9 @@ static void sun4i_hdmi_disable(struct drm_encoder *encoder)
 
 	DRM_DEBUG_DRIVER("Disabling the HDMI Output\n");
 
-	val = readl(hdmi->base + SUN4I_HDMI_VID_CTRL_REG);
+	val = pete_readl("drivers/gpu/drm/sun4i/sun4i_hdmi_enc.c:91", hdmi->base + SUN4I_HDMI_VID_CTRL_REG);
 	val &= ~SUN4I_HDMI_VID_CTRL_ENABLE;
-	writel(val, hdmi->base + SUN4I_HDMI_VID_CTRL_REG);
+	pete_writel("drivers/gpu/drm/sun4i/sun4i_hdmi_enc.c:93", val, hdmi->base + SUN4I_HDMI_VID_CTRL_REG);
 
 	clk_disable_unprepare(hdmi->tmds_clk);
 }
@@ -108,13 +108,13 @@ static void sun4i_hdmi_enable(struct drm_encoder *encoder)
 	sun4i_hdmi_setup_avi_infoframes(hdmi, mode);
 	val |= SUN4I_HDMI_PKT_CTRL_TYPE(0, SUN4I_HDMI_PKT_AVI);
 	val |= SUN4I_HDMI_PKT_CTRL_TYPE(1, SUN4I_HDMI_PKT_END);
-	writel(val, hdmi->base + SUN4I_HDMI_PKT_CTRL_REG(0));
+	pete_writel("drivers/gpu/drm/sun4i/sun4i_hdmi_enc.c:111", val, hdmi->base + SUN4I_HDMI_PKT_CTRL_REG(0));
 
 	val = SUN4I_HDMI_VID_CTRL_ENABLE;
 	if (hdmi->hdmi_monitor)
 		val |= SUN4I_HDMI_VID_CTRL_HDMI_MODE;
 
-	writel(val, hdmi->base + SUN4I_HDMI_VID_CTRL_REG);
+	pete_writel("drivers/gpu/drm/sun4i/sun4i_hdmi_enc.c:117", val, hdmi->base + SUN4I_HDMI_VID_CTRL_REG);
 }
 
 static void sun4i_hdmi_mode_set(struct drm_encoder *encoder,
@@ -129,7 +129,7 @@ static void sun4i_hdmi_mode_set(struct drm_encoder *encoder,
 	clk_set_rate(hdmi->tmds_clk, mode->crtc_clock * 1000);
 
 	/* Set input sync enable */
-	writel(SUN4I_HDMI_UNKNOWN_INPUT_SYNC,
+	pete_writel("drivers/gpu/drm/sun4i/sun4i_hdmi_enc.c:132", SUN4I_HDMI_UNKNOWN_INPUT_SYNC,
 	       hdmi->base + SUN4I_HDMI_UNKNOWN_REG);
 
 	/*
@@ -142,30 +142,30 @@ static void sun4i_hdmi_mode_set(struct drm_encoder *encoder,
 	 * protect the clock bits that have already been read out and
 	 * cached by the clock framework.
 	 */
-	val = readl(hdmi->base + SUN4I_HDMI_PAD_CTRL1_REG);
+	val = pete_readl("drivers/gpu/drm/sun4i/sun4i_hdmi_enc.c:145", hdmi->base + SUN4I_HDMI_PAD_CTRL1_REG);
 	val &= SUN4I_HDMI_PAD_CTRL1_HALVE_CLK;
 	val |= hdmi->variant->pad_ctrl1_init_val;
-	writel(val, hdmi->base + SUN4I_HDMI_PAD_CTRL1_REG);
-	val = readl(hdmi->base + SUN4I_HDMI_PAD_CTRL1_REG);
+	pete_writel("drivers/gpu/drm/sun4i/sun4i_hdmi_enc.c:148", val, hdmi->base + SUN4I_HDMI_PAD_CTRL1_REG);
+	val = pete_readl("drivers/gpu/drm/sun4i/sun4i_hdmi_enc.c:149", hdmi->base + SUN4I_HDMI_PAD_CTRL1_REG);
 
 	/* Setup timing registers */
-	writel(SUN4I_HDMI_VID_TIMING_X(mode->hdisplay) |
+	pete_writel("drivers/gpu/drm/sun4i/sun4i_hdmi_enc.c:152", SUN4I_HDMI_VID_TIMING_X(mode->hdisplay) |
 	       SUN4I_HDMI_VID_TIMING_Y(mode->vdisplay),
 	       hdmi->base + SUN4I_HDMI_VID_TIMING_ACT_REG);
 
 	x = mode->htotal - mode->hsync_start;
 	y = mode->vtotal - mode->vsync_start;
-	writel(SUN4I_HDMI_VID_TIMING_X(x) | SUN4I_HDMI_VID_TIMING_Y(y),
+	pete_writel("drivers/gpu/drm/sun4i/sun4i_hdmi_enc.c:158", SUN4I_HDMI_VID_TIMING_X(x) | SUN4I_HDMI_VID_TIMING_Y(y),
 	       hdmi->base + SUN4I_HDMI_VID_TIMING_BP_REG);
 
 	x = mode->hsync_start - mode->hdisplay;
 	y = mode->vsync_start - mode->vdisplay;
-	writel(SUN4I_HDMI_VID_TIMING_X(x) | SUN4I_HDMI_VID_TIMING_Y(y),
+	pete_writel("drivers/gpu/drm/sun4i/sun4i_hdmi_enc.c:163", SUN4I_HDMI_VID_TIMING_X(x) | SUN4I_HDMI_VID_TIMING_Y(y),
 	       hdmi->base + SUN4I_HDMI_VID_TIMING_FP_REG);
 
 	x = mode->hsync_end - mode->hsync_start;
 	y = mode->vsync_end - mode->vsync_start;
-	writel(SUN4I_HDMI_VID_TIMING_X(x) | SUN4I_HDMI_VID_TIMING_Y(y),
+	pete_writel("drivers/gpu/drm/sun4i/sun4i_hdmi_enc.c:168", SUN4I_HDMI_VID_TIMING_X(x) | SUN4I_HDMI_VID_TIMING_Y(y),
 	       hdmi->base + SUN4I_HDMI_VID_TIMING_SPW_REG);
 
 	val = SUN4I_HDMI_VID_TIMING_POL_TX_CLK;
@@ -175,7 +175,7 @@ static void sun4i_hdmi_mode_set(struct drm_encoder *encoder,
 	if (mode->flags & DRM_MODE_FLAG_PVSYNC)
 		val |= SUN4I_HDMI_VID_TIMING_POL_VSYNC;
 
-	writel(val, hdmi->base + SUN4I_HDMI_VID_TIMING_POL_REG);
+	pete_writel("drivers/gpu/drm/sun4i/sun4i_hdmi_enc.c:178", val, hdmi->base + SUN4I_HDMI_VID_TIMING_POL_REG);
 }
 
 static enum drm_mode_status sun4i_hdmi_mode_valid(struct drm_encoder *encoder,
@@ -259,7 +259,7 @@ sun4i_hdmi_connector_detect(struct drm_connector *connector, bool force)
 	struct sun4i_hdmi *hdmi = drm_connector_to_sun4i_hdmi(connector);
 	unsigned long reg;
 
-	reg = readl(hdmi->base + SUN4I_HDMI_HPD_REG);
+	reg = pete_readl("drivers/gpu/drm/sun4i/sun4i_hdmi_enc.c:262", hdmi->base + SUN4I_HDMI_HPD_REG);
 	if (!(reg & SUN4I_HDMI_HPD_HIGH)) {
 		cec_phys_addr_invalidate(hdmi->cec_adap);
 		return connector_status_disconnected;
@@ -282,7 +282,7 @@ static int sun4i_hdmi_cec_pin_read(struct cec_adapter *adap)
 {
 	struct sun4i_hdmi *hdmi = cec_get_drvdata(adap);
 
-	return readl(hdmi->base + SUN4I_HDMI_CEC) & SUN4I_HDMI_CEC_RX;
+	return pete_readl("drivers/gpu/drm/sun4i/sun4i_hdmi_enc.c:285", hdmi->base + SUN4I_HDMI_CEC) & SUN4I_HDMI_CEC_RX;
 }
 
 static void sun4i_hdmi_cec_pin_low(struct cec_adapter *adap)
@@ -290,7 +290,7 @@ static void sun4i_hdmi_cec_pin_low(struct cec_adapter *adap)
 	struct sun4i_hdmi *hdmi = cec_get_drvdata(adap);
 
 	/* Start driving the CEC pin low */
-	writel(SUN4I_HDMI_CEC_ENABLE, hdmi->base + SUN4I_HDMI_CEC);
+	pete_writel("drivers/gpu/drm/sun4i/sun4i_hdmi_enc.c:293", SUN4I_HDMI_CEC_ENABLE, hdmi->base + SUN4I_HDMI_CEC);
 }
 
 static void sun4i_hdmi_cec_pin_high(struct cec_adapter *adap)
@@ -301,7 +301,7 @@ static void sun4i_hdmi_cec_pin_high(struct cec_adapter *adap)
 	 * Stop driving the CEC pin, the pull up will take over
 	 * unless another CEC device is driving the pin low.
 	 */
-	writel(0, hdmi->base + SUN4I_HDMI_CEC);
+	pete_writel("drivers/gpu/drm/sun4i/sun4i_hdmi_enc.c:304", 0, hdmi->base + SUN4I_HDMI_CEC);
 }
 
 static const struct cec_pin_ops sun4i_hdmi_cec_pin_ops = {
@@ -580,15 +580,15 @@ static int sun4i_hdmi_bind(struct device *dev, struct device *master,
 		hdmi->ddc_parent_clk = hdmi->tmds_clk;
 	}
 
-	writel(SUN4I_HDMI_CTRL_ENABLE, hdmi->base + SUN4I_HDMI_CTRL_REG);
+	pete_writel("drivers/gpu/drm/sun4i/sun4i_hdmi_enc.c:583", SUN4I_HDMI_CTRL_ENABLE, hdmi->base + SUN4I_HDMI_CTRL_REG);
 
-	writel(hdmi->variant->pad_ctrl0_init_val,
+	pete_writel("drivers/gpu/drm/sun4i/sun4i_hdmi_enc.c:585", hdmi->variant->pad_ctrl0_init_val,
 	       hdmi->base + SUN4I_HDMI_PAD_CTRL0_REG);
 
-	reg = readl(hdmi->base + SUN4I_HDMI_PLL_CTRL_REG);
+	reg = pete_readl("drivers/gpu/drm/sun4i/sun4i_hdmi_enc.c:588", hdmi->base + SUN4I_HDMI_PLL_CTRL_REG);
 	reg &= SUN4I_HDMI_PLL_CTRL_DIV_MASK;
 	reg |= hdmi->variant->pll_ctrl_init_val;
-	writel(reg, hdmi->base + SUN4I_HDMI_PLL_CTRL_REG);
+	pete_writel("drivers/gpu/drm/sun4i/sun4i_hdmi_enc.c:591", reg, hdmi->base + SUN4I_HDMI_PLL_CTRL_REG);
 
 	ret = sun4i_hdmi_i2c_create(dev, hdmi);
 	if (ret) {
@@ -627,7 +627,7 @@ static int sun4i_hdmi_bind(struct device *dev, struct device *master,
 	ret = PTR_ERR_OR_ZERO(hdmi->cec_adap);
 	if (ret < 0)
 		goto err_cleanup_connector;
-	writel(readl(hdmi->base + SUN4I_HDMI_CEC) & ~SUN4I_HDMI_CEC_TX,
+	pete_writel("drivers/gpu/drm/sun4i/sun4i_hdmi_enc.c:630", pete_readl("drivers/gpu/drm/sun4i/sun4i_hdmi_enc.c:630", hdmi->base + SUN4I_HDMI_CEC) & ~SUN4I_HDMI_CEC_TX,
 	       hdmi->base + SUN4I_HDMI_CEC);
 #endif
 

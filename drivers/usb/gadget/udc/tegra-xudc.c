@@ -560,35 +560,35 @@ struct tegra_xudc_soc {
 
 static inline u32 fpci_readl(struct tegra_xudc *xudc, unsigned int offset)
 {
-	return readl(xudc->fpci + offset);
+	return pete_readl("drivers/usb/gadget/udc/tegra-xudc.c:563", xudc->fpci + offset);
 }
 
 static inline void fpci_writel(struct tegra_xudc *xudc, u32 val,
 			       unsigned int offset)
 {
-	writel(val, xudc->fpci + offset);
+	pete_writel("drivers/usb/gadget/udc/tegra-xudc.c:569", val, xudc->fpci + offset);
 }
 
 static inline u32 ipfs_readl(struct tegra_xudc *xudc, unsigned int offset)
 {
-	return readl(xudc->ipfs + offset);
+	return pete_readl("drivers/usb/gadget/udc/tegra-xudc.c:574", xudc->ipfs + offset);
 }
 
 static inline void ipfs_writel(struct tegra_xudc *xudc, u32 val,
 			       unsigned int offset)
 {
-	writel(val, xudc->ipfs + offset);
+	pete_writel("drivers/usb/gadget/udc/tegra-xudc.c:580", val, xudc->ipfs + offset);
 }
 
 static inline u32 xudc_readl(struct tegra_xudc *xudc, unsigned int offset)
 {
-	return readl(xudc->base + offset);
+	return pete_readl("drivers/usb/gadget/udc/tegra-xudc.c:585", xudc->base + offset);
 }
 
 static inline void xudc_writel(struct tegra_xudc *xudc, u32 val,
 			       unsigned int offset)
 {
-	writel(val, xudc->base + offset);
+	pete_writel("drivers/usb/gadget/udc/tegra-xudc.c:591", val, xudc->base + offset);
 }
 
 static inline int xudc_readl_poll(struct tegra_xudc *xudc,

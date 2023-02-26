@@ -518,7 +518,7 @@ static int skl_pcm_trigger(struct snd_pcm_substream *substream, int cmd,
 		ret = skl_decoupled_trigger(substream, cmd);
 		if ((cmd == SNDRV_PCM_TRIGGER_SUSPEND) && !w->ignore_suspend) {
 			/* save the dpib and lpib positions */
-			stream->dpib = readl(bus->remap_addr +
+			stream->dpib = pete_readl("sound/soc/intel/skylake/skl-pcm.c:521", bus->remap_addr +
 					AZX_REG_VS_SDXDPIB_XBASE +
 					(AZX_REG_VS_SDXDPIB_XINTERVAL *
 					hdac_stream(stream)->index));
@@ -1193,12 +1193,12 @@ static snd_pcm_uframes_t skl_platform_soc_pointer(
 	 */
 
 	if (substream->stream == SNDRV_PCM_STREAM_PLAYBACK) {
-		pos = readl(bus->remap_addr + AZX_REG_VS_SDXDPIB_XBASE +
+		pos = pete_readl("sound/soc/intel/skylake/skl-pcm.c:1196", bus->remap_addr + AZX_REG_VS_SDXDPIB_XBASE +
 				(AZX_REG_VS_SDXDPIB_XINTERVAL *
 				hdac_stream(hstream)->index));
 	} else {
 		udelay(20);
-		readl(bus->remap_addr +
+		pete_readl("sound/soc/intel/skylake/skl-pcm.c:1201", bus->remap_addr +
 				AZX_REG_VS_SDXDPIB_XBASE +
 				(AZX_REG_VS_SDXDPIB_XINTERVAL *
 				 hdac_stream(hstream)->index));

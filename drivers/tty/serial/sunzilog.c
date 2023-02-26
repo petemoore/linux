@@ -58,7 +58,7 @@
 #define ZSDELAY()
 #define ZSDELAY_LONG()
 #define ZS_WSYNC(__channel) \
-	readb(&((__channel)->control))
+	pete_readb("drivers/tty/serial/sunzilog.c:61", &((__channel)->control))
 #endif
 
 #define ZS_CLOCK		4915200 /* Zilog input clock rate. */
@@ -128,9 +128,9 @@ static unsigned char read_zsreg(struct zilog_channel __iomem *channel,
 {
 	unsigned char retval;
 
-	writeb(reg, &channel->control);
+	pete_writeb("drivers/tty/serial/sunzilog.c:131", reg, &channel->control);
 	ZSDELAY();
-	retval = readb(&channel->control);
+	retval = pete_readb("drivers/tty/serial/sunzilog.c:133", &channel->control);
 	ZSDELAY();
 
 	return retval;
@@ -139,9 +139,9 @@ static unsigned char read_zsreg(struct zilog_channel __iomem *channel,
 static void write_zsreg(struct zilog_channel __iomem *channel,
 			unsigned char reg, unsigned char value)
 {
-	writeb(reg, &channel->control);
+	pete_writeb("drivers/tty/serial/sunzilog.c:142", reg, &channel->control);
 	ZSDELAY();
-	writeb(value, &channel->control);
+	pete_writeb("drivers/tty/serial/sunzilog.c:144", value, &channel->control);
 	ZSDELAY();
 }
 
@@ -152,17 +152,17 @@ static void sunzilog_clear_fifo(struct zilog_channel __iomem *channel)
 	for (i = 0; i < 32; i++) {
 		unsigned char regval;
 
-		regval = readb(&channel->control);
+		regval = pete_readb("drivers/tty/serial/sunzilog.c:155", &channel->control);
 		ZSDELAY();
 		if (regval & Rx_CH_AV)
 			break;
 
 		regval = read_zsreg(channel, R1);
-		readb(&channel->data);
+		pete_readb("drivers/tty/serial/sunzilog.c:161", &channel->data);
 		ZSDELAY();
 
 		if (regval & (PAR_ERR | Rx_OVR | CRC_ERR)) {
-			writeb(ERR_RES, &channel->control);
+			pete_writeb("drivers/tty/serial/sunzilog.c:165", ERR_RES, &channel->control);
 			ZSDELAY();
 			ZS_WSYNC(channel);
 		}
@@ -186,7 +186,7 @@ static int __load_zsregs(struct zilog_channel __iomem *channel, unsigned char *r
 		udelay(100);
 	}
 
-	writeb(ERR_RES, &channel->control);
+	pete_writeb("drivers/tty/serial/sunzilog.c:189", ERR_RES, &channel->control);
 	ZSDELAY();
 	ZS_WSYNC(channel);
 
@@ -334,12 +334,12 @@ sunzilog_receive_chars(struct uart_sunzilog_port *up,
 
 		r1 = read_zsreg(channel, R1);
 		if (r1 & (PAR_ERR | Rx_OVR | CRC_ERR)) {
-			writeb(ERR_RES, &channel->control);
+			pete_writeb("drivers/tty/serial/sunzilog.c:337", ERR_RES, &channel->control);
 			ZSDELAY();
 			ZS_WSYNC(channel);
 		}
 
-		ch = readb(&channel->control);
+		ch = pete_readb("drivers/tty/serial/sunzilog.c:342", &channel->control);
 		ZSDELAY();
 
 		/* This funny hack depends upon BRK_ABRT not interfering
@@ -351,7 +351,7 @@ sunzilog_receive_chars(struct uart_sunzilog_port *up,
 		if (!(ch & Rx_CH_AV))
 			break;
 
-		ch = readb(&channel->data);
+		ch = pete_readb("drivers/tty/serial/sunzilog.c:354", &channel->data);
 		ZSDELAY();
 
 		ch &= up->parity_mask;
@@ -404,10 +404,10 @@ static void sunzilog_status_handle(struct uart_sunzilog_port *up,
 {
 	unsigned char status;
 
-	status = readb(&channel->control);
+	status = pete_readb("drivers/tty/serial/sunzilog.c:407", &channel->control);
 	ZSDELAY();
 
-	writeb(RES_EXT_INT, &channel->control);
+	pete_writeb("drivers/tty/serial/sunzilog.c:410", RES_EXT_INT, &channel->control);
 	ZSDELAY();
 	ZS_WSYNC(channel);
 
@@ -419,7 +419,7 @@ static void sunzilog_status_handle(struct uart_sunzilog_port *up,
 			 * confusing the PROM.
 			 */
 			while (1) {
-				status = readb(&channel->control);
+				status = pete_readb("drivers/tty/serial/sunzilog.c:422", &channel->control);
 				ZSDELAY();
 				if (!(status & BRK_ABRT))
 					break;
@@ -456,7 +456,7 @@ static void sunzilog_transmit_chars(struct uart_sunzilog_port *up,
 	struct circ_buf *xmit;
 
 	if (ZS_IS_CONS(up)) {
-		unsigned char status = readb(&channel->control);
+		unsigned char status = pete_readb("drivers/tty/serial/sunzilog.c:459", &channel->control);
 		ZSDELAY();
 
 		/* TX still busy?  Just wait for the next TX done interrupt.
@@ -485,7 +485,7 @@ static void sunzilog_transmit_chars(struct uart_sunzilog_port *up,
 
 	if (up->port.x_char) {
 		up->flags |= SUNZILOG_FLAG_TX_ACTIVE;
-		writeb(up->port.x_char, &channel->data);
+		pete_writeb("drivers/tty/serial/sunzilog.c:488", up->port.x_char, &channel->data);
 		ZSDELAY();
 		ZS_WSYNC(channel);
 
@@ -504,7 +504,7 @@ static void sunzilog_transmit_chars(struct uart_sunzilog_port *up,
 		goto ack_tx_int;
 
 	up->flags |= SUNZILOG_FLAG_TX_ACTIVE;
-	writeb(xmit->buf[xmit->tail], &channel->data);
+	pete_writeb("drivers/tty/serial/sunzilog.c:507", xmit->buf[xmit->tail], &channel->data);
 	ZSDELAY();
 	ZS_WSYNC(channel);
 
@@ -517,7 +517,7 @@ static void sunzilog_transmit_chars(struct uart_sunzilog_port *up,
 	return;
 
 ack_tx_int:
-	writeb(RES_Tx_P, &channel->control);
+	pete_writeb("drivers/tty/serial/sunzilog.c:520", RES_Tx_P, &channel->control);
 	ZSDELAY();
 	ZS_WSYNC(channel);
 }
@@ -538,7 +538,7 @@ static irqreturn_t sunzilog_interrupt(int irq, void *dev_id)
 		/* Channel A */
 		port = NULL;
 		if (r3 & (CHAEXT | CHATxIP | CHARxIP)) {
-			writeb(RES_H_IUS, &channel->control);
+			pete_writeb("drivers/tty/serial/sunzilog.c:541", RES_H_IUS, &channel->control);
 			ZSDELAY();
 			ZS_WSYNC(channel);
 
@@ -561,7 +561,7 @@ static irqreturn_t sunzilog_interrupt(int irq, void *dev_id)
 		spin_lock(&up->port.lock);
 		port = NULL;
 		if (r3 & (CHBEXT | CHBTxIP | CHBRxIP)) {
-			writeb(RES_H_IUS, &channel->control);
+			pete_writeb("drivers/tty/serial/sunzilog.c:564", RES_H_IUS, &channel->control);
 			ZSDELAY();
 			ZS_WSYNC(channel);
 
@@ -592,7 +592,7 @@ static __inline__ unsigned char sunzilog_read_channel_status(struct uart_port *p
 	unsigned char status;
 
 	channel = ZILOG_CHANNEL_FROM_PORT(port);
-	status = readb(&channel->control);
+	status = pete_readb("drivers/tty/serial/sunzilog.c:595", &channel->control);
 	ZSDELAY();
 
 	return status;
@@ -683,7 +683,7 @@ static void sunzilog_start_tx(struct uart_port *port)
 	up->flags |= SUNZILOG_FLAG_TX_ACTIVE;
 	up->flags &= ~SUNZILOG_FLAG_TX_STOPPED;
 
-	status = readb(&channel->control);
+	status = pete_readb("drivers/tty/serial/sunzilog.c:686", &channel->control);
 	ZSDELAY();
 
 	/* TX busy?  Just wait for the TX done interrupt.  */
@@ -694,7 +694,7 @@ static void sunzilog_start_tx(struct uart_port *port)
 	 * IRQ sending engine.
 	 */
 	if (port->x_char) {
-		writeb(port->x_char, &channel->data);
+		pete_writeb("drivers/tty/serial/sunzilog.c:697", port->x_char, &channel->data);
 		ZSDELAY();
 		ZS_WSYNC(channel);
 
@@ -705,7 +705,7 @@ static void sunzilog_start_tx(struct uart_port *port)
 
 		if (uart_circ_empty(xmit))
 			return;
-		writeb(xmit->buf[xmit->tail], &channel->data);
+		pete_writeb("drivers/tty/serial/sunzilog.c:708", xmit->buf[xmit->tail], &channel->data);
 		ZSDELAY();
 		ZS_WSYNC(channel);
 
@@ -784,7 +784,7 @@ static void __sunzilog_startup(struct uart_sunzilog_port *up)
 	struct zilog_channel __iomem *channel;
 
 	channel = ZILOG_CHANNEL_FROM_PORT(&up->port);
-	up->prev_status = readb(&channel->control);
+	up->prev_status = pete_readb("drivers/tty/serial/sunzilog.c:787", &channel->control);
 
 	/* Enable receiver and transmitter.  */
 	up->curregs[R3] |= RxENAB;
@@ -1009,12 +1009,12 @@ static int sunzilog_get_poll_char(struct uart_port *port)
 
 	r1 = read_zsreg(channel, R1);
 	if (r1 & (PAR_ERR | Rx_OVR | CRC_ERR)) {
-		writeb(ERR_RES, &channel->control);
+		pete_writeb("drivers/tty/serial/sunzilog.c:1012", ERR_RES, &channel->control);
 		ZSDELAY();
 		ZS_WSYNC(channel);
 	}
 
-	ch = readb(&channel->control);
+	ch = pete_readb("drivers/tty/serial/sunzilog.c:1017", &channel->control);
 	ZSDELAY();
 
 	/* This funny hack depends upon BRK_ABRT not interfering
@@ -1026,7 +1026,7 @@ static int sunzilog_get_poll_char(struct uart_port *port)
 	if (!(ch & Rx_CH_AV))
 		return NO_POLL_CHAR;
 
-	ch = readb(&channel->data);
+	ch = pete_readb("drivers/tty/serial/sunzilog.c:1029", &channel->data);
 	ZSDELAY();
 
 	ch &= up->parity_mask;
@@ -1134,7 +1134,7 @@ static void sunzilog_putchar(struct uart_port *port, int ch)
 	 * udelay with ZSDELAY as that is a NOP on some platforms.  -DaveM
 	 */
 	do {
-		unsigned char val = readb(&channel->control);
+		unsigned char val = pete_readb("drivers/tty/serial/sunzilog.c:1137", &channel->control);
 		if (val & Tx_BUF_EMP) {
 			ZSDELAY();
 			break;
@@ -1142,7 +1142,7 @@ static void sunzilog_putchar(struct uart_port *port, int ch)
 		udelay(5);
 	} while (--loops);
 
-	writeb(ch, &channel->data);
+	pete_writeb("drivers/tty/serial/sunzilog.c:1145", ch, &channel->data);
 	ZSDELAY();
 	ZS_WSYNC(channel);
 }

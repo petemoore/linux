@@ -75,9 +75,9 @@
 #define SDXC_REG_DS_DL_REG	0x148 /* SMC data strobe delay control */
 
 #define mmc_readl(host, reg) \
-	readl((host)->reg_base + SDXC_##reg)
+	pete_readl("drivers/mmc/host/sunxi-mmc.c:78", (host)->reg_base + SDXC_##reg)
 #define mmc_writel(host, reg, value) \
-	writel((value), (host)->reg_base + SDXC_##reg)
+	pete_writel("drivers/mmc/host/sunxi-mmc.c:80", (value), (host)->reg_base + SDXC_##reg)
 
 /* global control register bits */
 #define SDXC_SOFT_RESET			BIT(0)
@@ -714,7 +714,7 @@ static int sunxi_mmc_calibrate(struct sunxi_mmc_host *host, int reg_off)
 	 * The only mode that doesn't have such a delay is HS400, that
 	 * is in itself a TODO.
 	 */
-	writel(SDXC_CAL_DL_SW_EN, host->reg_base + reg_off);
+	pete_writel("drivers/mmc/host/sunxi-mmc.c:717", SDXC_CAL_DL_SW_EN, host->reg_base + reg_off);
 
 	return 0;
 }

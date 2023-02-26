@@ -788,7 +788,7 @@ void qedf_ring_doorbell(struct qedf_rport *fcport)
 	 */
 	wmb();
 	barrier();
-	writel(*(u32 *)&dbell, fcport->p_doorbell);
+	pete_writel("drivers/scsi/qedf/qedf_io.c:791", *(u32 *)&dbell, fcport->p_doorbell);
 	/*
 	 * Fence required to flush the write combined buffer, since another
 	 * CPU may write to the same doorbell address and data may be lost
@@ -2624,10 +2624,10 @@ increment_prod:
 	if (qedf->bdq_prod_idx == 0xffff)
 		qedf->bdq_prod_idx = 0;
 
-	writew(qedf->bdq_prod_idx, qedf->bdq_primary_prod);
-	readw(qedf->bdq_primary_prod);
-	writew(qedf->bdq_prod_idx, qedf->bdq_secondary_prod);
-	readw(qedf->bdq_secondary_prod);
+	pete_writew("drivers/scsi/qedf/qedf_io.c:2627", qedf->bdq_prod_idx, qedf->bdq_primary_prod);
+	pete_readw("drivers/scsi/qedf/qedf_io.c:2628", qedf->bdq_primary_prod);
+	pete_writew("drivers/scsi/qedf/qedf_io.c:2629", qedf->bdq_prod_idx, qedf->bdq_secondary_prod);
+	pete_readw("drivers/scsi/qedf/qedf_io.c:2630", qedf->bdq_secondary_prod);
 
 	spin_unlock_irqrestore(&qedf->hba_lock, flags);
 }

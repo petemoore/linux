@@ -489,9 +489,9 @@ extern void savage_emit_clip_rect_s4(drm_savage_private_t * dev_priv,
  * access to MMIO
  */
 #define SAVAGE_READ(reg) \
-       readl(((void __iomem *)dev_priv->mmio->handle) + (reg))
+       pete_readl("drivers/gpu/drm/savage/savage_drv.h:492", ((void __iomem *)dev_priv->mmio->handle) + (reg))
 #define SAVAGE_WRITE(reg) \
-	writel(val, ((void __iomem *)dev_priv->mmio->handle) + (reg))
+	pete_writel("drivers/gpu/drm/savage/savage_drv.h:494", val, ((void __iomem *)dev_priv->mmio->handle) + (reg))
 
 /*
  * access to the burst command interface (BCI)

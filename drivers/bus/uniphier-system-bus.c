@@ -118,7 +118,7 @@ static void uniphier_system_bus_check_boot_swap(
 	void __iomem *base_reg = priv->membase + UNIPHIER_SBC_BASE;
 	int is_swapped;
 
-	is_swapped = !(readl(base_reg) & UNIPHIER_SBC_BASE_BE);
+	is_swapped = !(pete_readl("drivers/bus/uniphier-system-bus.c:121", base_reg) & UNIPHIER_SBC_BASE_BE);
 
 	dev_dbg(priv->dev, "Boot Swap: %s\n", is_swapped ? "on" : "off");
 
@@ -168,7 +168,7 @@ static void uniphier_system_bus_set_reg(
 		}
 		dev_dbg(priv->dev, "SBC_BASE[%d] = 0x%08x\n", i, val);
 
-		writel(val, base_reg + UNIPHIER_SBC_STRIDE * i);
+		pete_writel("drivers/bus/uniphier-system-bus.c:171", val, base_reg + UNIPHIER_SBC_STRIDE * i);
 	}
 }
 

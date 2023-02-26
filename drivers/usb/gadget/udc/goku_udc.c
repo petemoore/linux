@@ -83,7 +83,7 @@ static void nuke(struct goku_ep *, int status);
 static inline void
 command(struct goku_udc_regs __iomem *regs, int command, unsigned epnum)
 {
-	writel(COMMAND_EP(epnum) | command, &regs->Command);
+	pete_writel("drivers/usb/gadget/udc/goku_udc.c:86", COMMAND_EP(epnum) | command, &regs->Command);
 	udelay(300);
 }
 
@@ -116,7 +116,7 @@ goku_ep_enable(struct usb_ep *_ep, const struct usb_endpoint_descriptor *desc)
 		return -EINVAL;
 	}
 
-	if ((readl(ep->reg_status) & EPxSTATUS_EP_MASK)
+	if ((pete_readl("drivers/usb/gadget/udc/goku_udc.c:119", ep->reg_status) & EPxSTATUS_EP_MASK)
 			!= EPxSTATUS_EP_INVALID)
 		return -EBUSY;
 
@@ -167,14 +167,14 @@ goku_ep_enable(struct usb_ep *_ep, const struct usb_endpoint_descriptor *desc)
 				? 0x10	/* double buffered */
 				: 0x11	/* single buffer */
 			) << ep->num;
-		tmp |= readl(&regs->EPxSingle);
-		writel(tmp, &regs->EPxSingle);
+		tmp |= pete_readl("drivers/usb/gadget/udc/goku_udc.c:170", &regs->EPxSingle);
+		pete_writel("drivers/usb/gadget/udc/goku_udc.c:171", tmp, &regs->EPxSingle);
 
 		tmp = (ep->dma ? 0x10/*dma*/ : 0x11/*pio*/) << ep->num;
-		tmp |= readl(&regs->EPxBCS);
-		writel(tmp, &regs->EPxBCS);
+		tmp |= pete_readl("drivers/usb/gadget/udc/goku_udc.c:174", &regs->EPxBCS);
+		pete_writel("drivers/usb/gadget/udc/goku_udc.c:175", tmp, &regs->EPxBCS);
 	}
-	writel(mode, ep->reg_mode);
+	pete_writel("drivers/usb/gadget/udc/goku_udc.c:177", mode, ep->reg_mode);
 	command(ep->dev->regs, COMMAND_RESET, ep->num);
 	ep->ep.maxpacket = max;
 	ep->stopped = 0;
@@ -204,25 +204,25 @@ static void ep_reset(struct goku_udc_regs __iomem *regs, struct goku_ep *ep)
 			dev->int_enable &= ~INT_EPxDATASET (ep->num);
 		} else
 			dev->int_enable &= ~INT_EP0;
-		writel(dev->int_enable, &regs->int_enable);
-		readl(&regs->int_enable);
+		pete_writel("drivers/usb/gadget/udc/goku_udc.c:207", dev->int_enable, &regs->int_enable);
+		pete_readl("drivers/usb/gadget/udc/goku_udc.c:208", &regs->int_enable);
 		if (ep->num < 3) {
 			struct goku_udc_regs __iomem	*r = ep->dev->regs;
 			u32				tmp;
 
-			tmp = readl(&r->EPxSingle);
+			tmp = pete_readl("drivers/usb/gadget/udc/goku_udc.c:213", &r->EPxSingle);
 			tmp &= ~(0x11 << ep->num);
-			writel(tmp, &r->EPxSingle);
+			pete_writel("drivers/usb/gadget/udc/goku_udc.c:215", tmp, &r->EPxSingle);
 
-			tmp = readl(&r->EPxBCS);
+			tmp = pete_readl("drivers/usb/gadget/udc/goku_udc.c:217", &r->EPxBCS);
 			tmp &= ~(0x11 << ep->num);
-			writel(tmp, &r->EPxBCS);
+			pete_writel("drivers/usb/gadget/udc/goku_udc.c:219", tmp, &r->EPxBCS);
 		}
 		/* reset dma in case we're still using it */
 		if (ep->dma) {
 			u32	master;
 
-			master = readl(&regs->dma_master) & MST_RW_BITS;
+			master = pete_readl("drivers/usb/gadget/udc/goku_udc.c:225", &regs->dma_master) & MST_RW_BITS;
 			if (ep->num == UDC_MSTWR_ENDPOINT) {
 				master &= ~MST_W_BITS;
 				master |= MST_WR_RESET;
@@ -230,7 +230,7 @@ static void ep_reset(struct goku_udc_regs __iomem *regs, struct goku_ep *ep)
 				master &= ~MST_R_BITS;
 				master |= MST_RD_RESET;
 			}
-			writel(master, &regs->dma_master);
+			pete_writel("drivers/usb/gadget/udc/goku_udc.c:233", master, &regs->dma_master);
 		}
 	}
 
@@ -341,7 +341,7 @@ write_packet(u32 __iomem *fifo, u8 *buf, struct goku_request *req, unsigned max)
 
 	count = length;
 	while (likely(count--))
-		writel(*buf++, fifo);
+		pete_writel("drivers/usb/gadget/udc/goku_udc.c:344", *buf++, fifo);
 	return length;
 }
 
@@ -354,7 +354,7 @@ static int write_fifo(struct goku_ep *ep, struct goku_request *req)
 	unsigned	count;
 	int		is_last;
 
-	tmp = readl(&dev->regs->DataSet);
+	tmp = pete_readl("drivers/usb/gadget/udc/goku_udc.c:357", &dev->regs->DataSet);
 	buf = req->req.buf + req->req.actual;
 	prefetch(buf);
 
@@ -368,13 +368,13 @@ static int write_fifo(struct goku_ep *ep, struct goku_request *req)
 
 	/* clear our "packet available" irq */
 	if (ep->num != 0)
-		writel(~INT_EPxDATASET(ep->num), &dev->regs->int_status);
+		pete_writel("drivers/usb/gadget/udc/goku_udc.c:371", ~INT_EPxDATASET(ep->num), &dev->regs->int_status);
 
 	count = write_packet(ep->reg_fifo, buf, req, ep->ep.maxpacket);
 
 	/* last packet often short (sometimes a zlp, especially on ep0) */
 	if (unlikely(count != ep->ep.maxpacket)) {
-		writel(~(1<<ep->num), &dev->regs->EOP);
+		pete_writel("drivers/usb/gadget/udc/goku_udc.c:377", ~(1<<ep->num), &dev->regs->EOP);
 		if (ep->num == 0) {
 			dev->ep[0].stopped = 1;
 			dev->ep0state = EP0_STATUS;
@@ -424,10 +424,10 @@ top:
 	do {
 		/* ack dataset irq matching the status we'll handle */
 		if (ep->num != 0)
-			writel(~INT_EPxDATASET(ep->num), &regs->int_status);
+			pete_writel("drivers/usb/gadget/udc/goku_udc.c:427", ~INT_EPxDATASET(ep->num), &regs->int_status);
 
-		set = readl(&regs->DataSet) & DATASET_AB(ep->num);
-		size = readl(&regs->EPxSizeLA[ep->num]);
+		set = pete_readl("drivers/usb/gadget/udc/goku_udc.c:429", &regs->DataSet) & DATASET_AB(ep->num);
+		size = pete_readl("drivers/usb/gadget/udc/goku_udc.c:430", &regs->EPxSizeLA[ep->num]);
 		bufferspace = req->req.length - req->req.actual;
 
 		/* usually do nothing without an OUT packet */
@@ -436,7 +436,7 @@ top:
 				break;
 			/* use ep1/ep2 double-buffering for OUT */
 			if (!(size & PACKET_ACTIVE))
-				size = readl(&regs->EPxSizeLB[ep->num]);
+				size = pete_readl("drivers/usb/gadget/udc/goku_udc.c:439", &regs->EPxSizeLB[ep->num]);
 			if (!(size & PACKET_ACTIVE))	/* "can't happen" */
 				break;
 			size &= DATASIZE;	/* EPxSizeH == 0 */
@@ -454,7 +454,7 @@ top:
 			req, req->req.actual, req->req.length);
 #endif
 		while (likely(size-- != 0)) {
-			u8	byte = (u8) readl(ep->reg_fifo);
+			u8	byte = (u8) pete_readl("drivers/usb/gadget/udc/goku_udc.c:457", ep->reg_fifo);
 
 			if (unlikely(bufferspace == 0)) {
 				/* this happens when the driver's buffer
@@ -476,12 +476,12 @@ top:
 			if (unlikely(ep->num == 0)) {
 				/* non-control endpoints now usable? */
 				if (ep->dev->req_config)
-					writel(ep->dev->configured
+					pete_writel("drivers/usb/gadget/udc/goku_udc.c:479", ep->dev->configured
 							? USBSTATE_CONFIGURED
 							: 0,
 						&regs->UsbState);
 				/* ep0out status stage */
-				writel(~(1<<0), &regs->EOP);
+				pete_writel("drivers/usb/gadget/udc/goku_udc.c:484", ~(1<<0), &regs->EOP);
 				ep->stopped = 1;
 				ep->dev->ep0state = EP0_STATUS;
 			}
@@ -504,7 +504,7 @@ pio_irq_enable(struct goku_udc *dev,
 		struct goku_udc_regs __iomem *regs, int epnum)
 {
 	dev->int_enable |= INT_EPxDATASET (epnum);
-	writel(dev->int_enable, &regs->int_enable);
+	pete_writel("drivers/usb/gadget/udc/goku_udc.c:507", dev->int_enable, &regs->int_enable);
 	/* write may still be posted */
 }
 
@@ -513,7 +513,7 @@ pio_irq_disable(struct goku_udc *dev,
 		struct goku_udc_regs __iomem *regs, int epnum)
 {
 	dev->int_enable &= ~INT_EPxDATASET (epnum);
-	writel(dev->int_enable, &regs->int_enable);
+	pete_writel("drivers/usb/gadget/udc/goku_udc.c:516", dev->int_enable, &regs->int_enable);
 	/* write may still be posted */
 }
 
@@ -539,7 +539,7 @@ static int start_dma(struct goku_ep *ep, struct goku_request *req)
 	u32				start = req->req.dma;
 	u32				end = start + req->req.length - 1;
 
-	master = readl(&regs->dma_master) & MST_RW_BITS;
+	master = pete_readl("drivers/usb/gadget/udc/goku_udc.c:542", &regs->dma_master) & MST_RW_BITS;
 
 	/* re-init the bits affecting IN dma; careful with zlps */
 	if (likely(ep->is_in)) {
@@ -548,8 +548,8 @@ static int start_dma(struct goku_ep *ep, struct goku_request *req)
 				master);
 //			return -EL2HLT;
 		}
-		writel(end, &regs->in_dma_end);
-		writel(start, &regs->in_dma_start);
+		pete_writel("drivers/usb/gadget/udc/goku_udc.c:551", end, &regs->in_dma_end);
+		pete_writel("drivers/usb/gadget/udc/goku_udc.c:552", start, &regs->in_dma_start);
 
 		master &= ~MST_R_BITS;
 		if (unlikely(req->req.length == 0))
@@ -573,8 +573,8 @@ static int start_dma(struct goku_ep *ep, struct goku_request *req)
 				master);
 //			return -EL2HLT;
 		}
-		writel(end, &regs->out_dma_end);
-		writel(start, &regs->out_dma_start);
+		pete_writel("drivers/usb/gadget/udc/goku_udc.c:576", end, &regs->out_dma_end);
+		pete_writel("drivers/usb/gadget/udc/goku_udc.c:577", start, &regs->out_dma_start);
 
 		master &= ~MST_W_BITS;
 		master |= MST_WR_ENA | MST_TIMEOUT_DIS;
@@ -582,8 +582,8 @@ static int start_dma(struct goku_ep *ep, struct goku_request *req)
 		ep->dev->int_enable |= INT_MSTWREND|INT_MSTWRTMOUT;
 	}
 
-	writel(master, &regs->dma_master);
-	writel(ep->dev->int_enable, &regs->int_enable);
+	pete_writel("drivers/usb/gadget/udc/goku_udc.c:585", master, &regs->dma_master);
+	pete_writel("drivers/usb/gadget/udc/goku_udc.c:586", ep->dev->int_enable, &regs->int_enable);
 	return 0;
 }
 
@@ -593,7 +593,7 @@ static void dma_advance(struct goku_udc *dev, struct goku_ep *ep)
 	struct goku_udc_regs __iomem	*regs = ep->dev->regs;
 	u32				master;
 
-	master = readl(&regs->dma_master);
+	master = pete_readl("drivers/usb/gadget/udc/goku_udc.c:596", &regs->dma_master);
 
 	if (unlikely(list_empty(&ep->queue))) {
 stop:
@@ -601,7 +601,7 @@ stop:
 			dev->int_enable &= ~INT_MSTRDEND;
 		else
 			dev->int_enable &= ~(INT_MSTWREND|INT_MSTWRTMOUT);
-		writel(dev->int_enable, &regs->int_enable);
+		pete_writel("drivers/usb/gadget/udc/goku_udc.c:604", dev->int_enable, &regs->int_enable);
 		return;
 	}
 	req = list_entry(ep->queue.next, struct goku_request, queue);
@@ -610,7 +610,7 @@ stop:
 	if (likely(ep->is_in)) {
 		if (unlikely(master & MST_RD_ENA))
 			return;
-		req->req.actual = readl(&regs->in_dma_current);
+		req->req.actual = pete_readl("drivers/usb/gadget/udc/goku_udc.c:613", &regs->in_dma_current);
 	} else {
 		if (unlikely(master & MST_WR_ENA))
 			return;
@@ -618,7 +618,7 @@ stop:
 		/* hardware merges short packets, and also hides packet
 		 * overruns.  a partial packet MAY be in the fifo here.
 		 */
-		req->req.actual = readl(&regs->out_dma_current);
+		req->req.actual = pete_readl("drivers/usb/gadget/udc/goku_udc.c:621", &regs->out_dma_current);
 	}
 	req->req.actual -= req->req.dma;
 	req->req.actual++;
@@ -650,7 +650,7 @@ static void abort_dma(struct goku_ep *ep, int status)
 	 */
 	command(regs, COMMAND_FIFO_DISABLE, ep->num);
 	req = list_entry(ep->queue.next, struct goku_request, queue);
-	master = readl(&regs->dma_master) & MST_RW_BITS;
+	master = pete_readl("drivers/usb/gadget/udc/goku_udc.c:653", &regs->dma_master) & MST_RW_BITS;
 
 	/* FIXME using these resets isn't usably documented. this may
 	 * not work unless it's followed by disabling the endpoint.
@@ -658,33 +658,33 @@ static void abort_dma(struct goku_ep *ep, int status)
 	 * FIXME the OUT reset path doesn't even behave consistently.
 	 */
 	if (ep->is_in) {
-		if (unlikely((readl(&regs->dma_master) & MST_RD_ENA) == 0))
+		if (unlikely((pete_readl("drivers/usb/gadget/udc/goku_udc.c:661", &regs->dma_master) & MST_RD_ENA) == 0))
 			goto finished;
-		curr = readl(&regs->in_dma_current);
+		curr = pete_readl("drivers/usb/gadget/udc/goku_udc.c:663", &regs->in_dma_current);
 
-		writel(curr, &regs->in_dma_end);
-		writel(curr, &regs->in_dma_start);
+		pete_writel("drivers/usb/gadget/udc/goku_udc.c:665", curr, &regs->in_dma_end);
+		pete_writel("drivers/usb/gadget/udc/goku_udc.c:666", curr, &regs->in_dma_start);
 
 		master &= ~MST_R_BITS;
 		master |= MST_RD_RESET;
-		writel(master, &regs->dma_master);
+		pete_writel("drivers/usb/gadget/udc/goku_udc.c:670", master, &regs->dma_master);
 
-		if (readl(&regs->dma_master) & MST_RD_ENA)
+		if (pete_readl("drivers/usb/gadget/udc/goku_udc.c:672", &regs->dma_master) & MST_RD_ENA)
 			DBG(ep->dev, "IN dma active after reset!\n");
 
 	} else {
-		if (unlikely((readl(&regs->dma_master) & MST_WR_ENA) == 0))
+		if (unlikely((pete_readl("drivers/usb/gadget/udc/goku_udc.c:676", &regs->dma_master) & MST_WR_ENA) == 0))
 			goto finished;
-		curr = readl(&regs->out_dma_current);
+		curr = pete_readl("drivers/usb/gadget/udc/goku_udc.c:678", &regs->out_dma_current);
 
-		writel(curr, &regs->out_dma_end);
-		writel(curr, &regs->out_dma_start);
+		pete_writel("drivers/usb/gadget/udc/goku_udc.c:680", curr, &regs->out_dma_end);
+		pete_writel("drivers/usb/gadget/udc/goku_udc.c:681", curr, &regs->out_dma_start);
 
 		master &= ~MST_W_BITS;
 		master |= MST_WR_RESET;
-		writel(master, &regs->dma_master);
+		pete_writel("drivers/usb/gadget/udc/goku_udc.c:685", master, &regs->dma_master);
 
-		if (readl(&regs->dma_master) & MST_WR_ENA)
+		if (pete_readl("drivers/usb/gadget/udc/goku_udc.c:687", &regs->dma_master) & MST_WR_ENA)
 			DBG(ep->dev, "OUT dma active after reset!\n");
 	}
 	req->req.actual = (curr - req->req.dma) + 1;
@@ -906,7 +906,7 @@ static int goku_set_halt(struct usb_ep *_ep, int value)
 		retval = -EAGAIN;
 	else if (ep->is_in && value
 			/* data in (either) packet buffer? */
-			&& (readl(&ep->dev->regs->DataSet)
+			&& (pete_readl("drivers/usb/gadget/udc/goku_udc.c:909", &ep->dev->regs->DataSet)
 					& DATASET_AB(ep->num)))
 		retval = -EAGAIN;
 	else if (!value)
@@ -915,7 +915,7 @@ static int goku_set_halt(struct usb_ep *_ep, int value)
 		ep->stopped = 1;
 		VDBG(ep->dev, "%s set halt\n", ep->ep.name);
 		command(ep->dev->regs, COMMAND_STALL, ep->num);
-		readl(ep->reg_status);
+		pete_readl("drivers/usb/gadget/udc/goku_udc.c:918", ep->reg_status);
 	}
 	spin_unlock_irqrestore(&ep->dev->lock, flags);
 	return retval;
@@ -937,8 +937,8 @@ static int goku_fifo_status(struct usb_ep *_ep)
 
 	/* ignores 16-byte dma buffer; SizeH == 0 */
 	regs = ep->dev->regs;
-	size = readl(&regs->EPxSizeLA[ep->num]) & DATASIZE;
-	size += readl(&regs->EPxSizeLB[ep->num]) & DATASIZE;
+	size = pete_readl("drivers/usb/gadget/udc/goku_udc.c:940", &regs->EPxSizeLA[ep->num]) & DATASIZE;
+	size += pete_readl("drivers/usb/gadget/udc/goku_udc.c:941", &regs->EPxSizeLB[ep->num]) & DATASIZE;
 	VDBG(ep->dev, "%s %s %u\n", __func__, ep->ep.name, size);
 	return size;
 }
@@ -961,7 +961,7 @@ static void goku_fifo_flush(struct usb_ep *_ep)
 	}
 
 	regs = ep->dev->regs;
-	size = readl(&regs->EPxSizeLA[ep->num]);
+	size = pete_readl("drivers/usb/gadget/udc/goku_udc.c:964", &regs->EPxSizeLA[ep->num]);
 	size &= DATASIZE;
 
 	/* Non-desirable behavior:  FIFO_CLEAR also clears the
@@ -1143,7 +1143,7 @@ static int udc_proc_read(struct seq_file *m, void *v)
 	local_irq_save(flags);
 
 	/* basic device status */
-	tmp = readl(&regs->power_detect);
+	tmp = pete_readl("drivers/usb/gadget/udc/goku_udc.c:1146", &regs->power_detect);
 	is_usb_connected = tmp & PW_DETECT;
 	seq_printf(m,
 		   "%s - %s\n"
@@ -1159,22 +1159,22 @@ static int udc_proc_read(struct seq_file *m, void *v)
 			   : "disconnected",
 		   udc_ep_state(dev->ep0state));
 
-	dump_intmask(m, "int_status", readl(&regs->int_status));
-	dump_intmask(m, "int_enable", readl(&regs->int_enable));
+	dump_intmask(m, "int_status", pete_readl("drivers/usb/gadget/udc/goku_udc.c:1162", &regs->int_status));
+	dump_intmask(m, "int_enable", pete_readl("drivers/usb/gadget/udc/goku_udc.c:1163", &regs->int_enable));
 
 	if (!is_usb_connected || !dev->driver || (tmp & PW_PULLUP) == 0)
 		goto done;
 
 	/* registers for (active) device and ep0 */
 	seq_printf(m, "\nirqs %lu\ndataset %02x single.bcs %02x.%02x state %x addr %u\n",
-		   dev->irqs, readl(&regs->DataSet),
-		   readl(&regs->EPxSingle), readl(&regs->EPxBCS),
-		   readl(&regs->UsbState),
-		   readl(&regs->address));
+		   dev->irqs, pete_readl("drivers/usb/gadget/udc/goku_udc.c:1170", &regs->DataSet),
+		   pete_readl("drivers/usb/gadget/udc/goku_udc.c:1171", &regs->EPxSingle), pete_readl("drivers/usb/gadget/udc/goku_udc.c:1171", &regs->EPxBCS),
+		   pete_readl("drivers/usb/gadget/udc/goku_udc.c:1172", &regs->UsbState),
+		   pete_readl("drivers/usb/gadget/udc/goku_udc.c:1173", &regs->address));
 	if (seq_has_overflowed(m))
 		goto done;
 
-	tmp = readl(&regs->dma_master);
+	tmp = pete_readl("drivers/usb/gadget/udc/goku_udc.c:1177", &regs->dma_master);
 	seq_printf(m, "dma %03X =" EIGHTBITS "%s %s\n",
 		   tmp,
 		   (tmp & MST_EOPB_DIS) ? " eopb-" : "",
@@ -1200,7 +1200,7 @@ static int udc_proc_read(struct seq_file *m, void *v)
 		if (i && !ep->ep.desc)
 			continue;
 
-		tmp = readl(ep->reg_status);
+		tmp = pete_readl("drivers/usb/gadget/udc/goku_udc.c:1203", ep->reg_status);
 		seq_printf(m, "%s %s max %u %s, irqs %lu, status %02x (%s) " FOURBITS "\n",
 			   ep->ep.name,
 			   ep->is_in ? "in" : "out",
@@ -1224,9 +1224,9 @@ static int udc_proc_read(struct seq_file *m, void *v)
 		list_for_each_entry(req, &ep->queue, queue) {
 			if (ep->dma && req->queue.prev == &ep->queue) {
 				if (i == UDC_MSTRD_ENDPOINT)
-					tmp = readl(&regs->in_dma_current);
+					tmp = pete_readl("drivers/usb/gadget/udc/goku_udc.c:1227", &regs->in_dma_current);
 				else
-					tmp = readl(&regs->out_dma_current);
+					tmp = pete_readl("drivers/usb/gadget/udc/goku_udc.c:1229", &regs->out_dma_current);
 				tmp -= req->req.dma;
 				tmp++;
 			} else
@@ -1294,17 +1294,17 @@ static void udc_reset(struct goku_udc *dev)
 {
 	struct goku_udc_regs __iomem	*regs = dev->regs;
 
-	writel(0, &regs->power_detect);
-	writel(0, &regs->int_enable);
-	readl(&regs->int_enable);
+	pete_writel("drivers/usb/gadget/udc/goku_udc.c:1297", 0, &regs->power_detect);
+	pete_writel("drivers/usb/gadget/udc/goku_udc.c:1298", 0, &regs->int_enable);
+	pete_readl("drivers/usb/gadget/udc/goku_udc.c:1299", &regs->int_enable);
 	dev->int_enable = 0;
 
 	/* deassert reset, leave USB D+ at hi-Z (no pullup)
 	 * don't let INT_PWRDETECT sequence begin
 	 */
 	udelay(250);
-	writel(PW_RESETB, &regs->power_detect);
-	readl(&regs->int_enable);
+	pete_writel("drivers/usb/gadget/udc/goku_udc.c:1306", PW_RESETB, &regs->power_detect);
+	pete_readl("drivers/usb/gadget/udc/goku_udc.c:1307", &regs->int_enable);
 }
 
 static void ep0_start(struct goku_udc *dev)
@@ -1316,10 +1316,10 @@ static void ep0_start(struct goku_udc *dev)
 
 	udc_reset(dev);
 	udc_reinit (dev);
-	//writel(MST_EOPB_ENA | MST_TIMEOUT_ENA, &regs->dma_master);
+	//pete_writel("drivers/usb/gadget/udc/goku_udc.c:1319", MST_EOPB_ENA | MST_TIMEOUT_ENA, &regs->dma_master);
 
 	/* hw handles set_address, set_feature, get_status; maybe more */
-	writel(   G_REQMODE_SET_INTF | G_REQMODE_GET_INTF
+	pete_writel("drivers/usb/gadget/udc/goku_udc.c:1322",    G_REQMODE_SET_INTF | G_REQMODE_GET_INTF
 		| G_REQMODE_SET_CONF | G_REQMODE_GET_CONF
 		| G_REQMODE_GET_DESC
 		| G_REQMODE_CLEAR_FEAT
@@ -1330,14 +1330,14 @@ static void ep0_start(struct goku_udc *dev)
 
 	/* can't modify descriptors after writing UsbReady */
 	for (i = 0; i < DESC_LEN; i++)
-		writel(0, &regs->descriptors[i]);
-	writel(0, &regs->UsbReady);
+		pete_writel("drivers/usb/gadget/udc/goku_udc.c:1333", 0, &regs->descriptors[i]);
+	pete_writel("drivers/usb/gadget/udc/goku_udc.c:1334", 0, &regs->UsbReady);
 
 	/* expect ep0 requests when the host drops reset */
-	writel(PW_RESETB | PW_PULLUP, &regs->power_detect);
+	pete_writel("drivers/usb/gadget/udc/goku_udc.c:1337", PW_RESETB | PW_PULLUP, &regs->power_detect);
 	dev->int_enable = INT_DEVWIDE | INT_EP0;
-	writel(dev->int_enable, &dev->regs->int_enable);
-	readl(&regs->int_enable);
+	pete_writel("drivers/usb/gadget/udc/goku_udc.c:1339", dev->int_enable, &dev->regs->int_enable);
+	pete_readl("drivers/usb/gadget/udc/goku_udc.c:1340", &regs->int_enable);
 	dev->gadget.speed = USB_SPEED_FULL;
 	dev->ep0state = EP0_IDLE;
 }
@@ -1345,12 +1345,12 @@ static void ep0_start(struct goku_udc *dev)
 static void udc_enable(struct goku_udc *dev)
 {
 	/* start enumeration now, or after power detect irq */
-	if (readl(&dev->regs->power_detect) & PW_DETECT)
+	if (pete_readl("drivers/usb/gadget/udc/goku_udc.c:1348", &dev->regs->power_detect) & PW_DETECT)
 		ep0_start(dev);
 	else {
 		DBG(dev, "%s\n", __func__);
 		dev->int_enable = INT_PWRDETECT;
-		writel(dev->int_enable, &dev->regs->int_enable);
+		pete_writel("drivers/usb/gadget/udc/goku_udc.c:1353", dev->int_enable, &dev->regs->int_enable);
 	}
 }
 
@@ -1422,15 +1422,15 @@ static void ep0_setup(struct goku_udc *dev)
 	int				tmp;
 
 	/* read SETUP packet and enter DATA stage */
-	ctrl.bRequestType = readl(&regs->bRequestType);
-	ctrl.bRequest = readl(&regs->bRequest);
-	ctrl.wValue  = cpu_to_le16((readl(&regs->wValueH)  << 8)
-					| readl(&regs->wValueL));
-	ctrl.wIndex  = cpu_to_le16((readl(&regs->wIndexH)  << 8)
-					| readl(&regs->wIndexL));
-	ctrl.wLength = cpu_to_le16((readl(&regs->wLengthH) << 8)
-					| readl(&regs->wLengthL));
-	writel(0, &regs->SetupRecv);
+	ctrl.bRequestType = pete_readl("drivers/usb/gadget/udc/goku_udc.c:1425", &regs->bRequestType);
+	ctrl.bRequest = pete_readl("drivers/usb/gadget/udc/goku_udc.c:1426", &regs->bRequest);
+	ctrl.wValue  = cpu_to_le16((pete_readl("drivers/usb/gadget/udc/goku_udc.c:1427", &regs->wValueH)  << 8)
+					| pete_readl("drivers/usb/gadget/udc/goku_udc.c:1428", &regs->wValueL));
+	ctrl.wIndex  = cpu_to_le16((pete_readl("drivers/usb/gadget/udc/goku_udc.c:1429", &regs->wIndexH)  << 8)
+					| pete_readl("drivers/usb/gadget/udc/goku_udc.c:1430", &regs->wIndexL));
+	ctrl.wLength = cpu_to_le16((pete_readl("drivers/usb/gadget/udc/goku_udc.c:1431", &regs->wLengthH) << 8)
+					| pete_readl("drivers/usb/gadget/udc/goku_udc.c:1432", &regs->wLengthL));
+	pete_writel("drivers/usb/gadget/udc/goku_udc.c:1433", 0, &regs->SetupRecv);
 
 	nuke(&dev->ep[0], 0);
 	dev->ep[0].stopped = 0;
@@ -1438,7 +1438,7 @@ static void ep0_setup(struct goku_udc *dev)
 		dev->ep[0].is_in = 1;
 		dev->ep0state = EP0_IN;
 		/* detect early status stages */
-		writel(ICONTROL_STATUSNAK, &dev->regs->IntControl);
+		pete_writel("drivers/usb/gadget/udc/goku_udc.c:1441", ICONTROL_STATUSNAK, &dev->regs->IntControl);
 	} else {
 		dev->ep[0].is_in = 0;
 		dev->ep0state = EP0_OUT;
@@ -1471,7 +1471,7 @@ static void ep0_setup(struct goku_udc *dev)
 					goku_clear_halt(&dev->ep[tmp]);
 succeed:
 				/* start ep0out status stage */
-				writel(~(1<<0), &regs->EOP);
+				pete_writel("drivers/usb/gadget/udc/goku_udc.c:1474", ~(1<<0), &regs->EOP);
 				dev->ep[0].stopped = 1;
 				dev->ep0state = EP0_STATUS;
 				return;
@@ -1527,7 +1527,7 @@ stall:
 
 #define ACK(irqbit) { \
 		stat &= ~irqbit; \
-		writel(~irqbit, &regs->int_status); \
+		pete_writel("drivers/usb/gadget/udc/goku_udc.c:1530", ~irqbit, &regs->int_status); \
 		handled = 1; \
 		}
 
@@ -1542,7 +1542,7 @@ static irqreturn_t goku_irq(int irq, void *_dev)
 	spin_lock(&dev->lock);
 
 rescan:
-	stat = readl(&regs->int_status) & dev->int_enable;
+	stat = pete_readl("drivers/usb/gadget/udc/goku_udc.c:1545", &regs->int_status) & dev->int_enable;
         if (!stat)
 		goto done;
 	dev->irqs++;
@@ -1559,8 +1559,8 @@ rescan:
 			goto done;
 		}
 		if (stat & INT_PWRDETECT) {
-			writel(~stat, &regs->int_status);
-			if (readl(&dev->regs->power_detect) & PW_DETECT) {
+			pete_writel("drivers/usb/gadget/udc/goku_udc.c:1562", ~stat, &regs->int_status);
+			if (pete_readl("drivers/usb/gadget/udc/goku_udc.c:1563", &dev->regs->power_detect) & PW_DETECT) {
 				VDBG(dev, "connect\n");
 				ep0_start(dev);
 			} else {
@@ -1569,7 +1569,7 @@ rescan:
 					stop_activity(dev);
 				dev->ep0state = EP0_DISCONNECT;
 				dev->int_enable = INT_DEVWIDE;
-				writel(dev->int_enable, &dev->regs->int_enable);
+				pete_writel("drivers/usb/gadget/udc/goku_udc.c:1572", dev->int_enable, &dev->regs->int_enable);
 			}
 			stat = 0;
 			handled = 1;
@@ -1577,7 +1577,7 @@ rescan:
 		}
 		if (stat & INT_SUSPEND) {
 			ACK(INT_SUSPEND);
-			if (readl(&regs->ep_status[0]) & EPxSTATUS_SUSPEND) {
+			if (pete_readl("drivers/usb/gadget/udc/goku_udc.c:1580", &regs->ep_status[0]) & EPxSTATUS_SUSPEND) {
 				switch (dev->ep0state) {
 				case EP0_DISCONNECT:
 				case EP0_SUSPEND:
@@ -1634,7 +1634,7 @@ pm_next:
 			ep = &dev->ep[0];
 			ep->irqs++;
 			nuke(ep, 0);
-			writel(~(1<<0), &regs->EOP);
+			pete_writel("drivers/usb/gadget/udc/goku_udc.c:1637", ~(1<<0), &regs->EOP);
 			dev->ep0state = EP0_STATUS;
 		}
 	}
@@ -1685,11 +1685,11 @@ pm_next:
 		goto rescan;
 
 done:
-	(void)readl(&regs->int_enable);
+	(void)pete_readl("drivers/usb/gadget/udc/goku_udc.c:1688", &regs->int_enable);
 	spin_unlock(&dev->lock);
 	if (stat)
 		DBG(dev, "unhandled irq status: %05x (%05x, %05x)\n", stat,
-				readl(&regs->int_status), dev->int_enable);
+				pete_readl("drivers/usb/gadget/udc/goku_udc.c:1692", &regs->int_status), dev->int_enable);
 	return IRQ_RETVAL(handled);
 }
 

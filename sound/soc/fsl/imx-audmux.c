@@ -68,8 +68,8 @@ static ssize_t audmux_read_file(struct file *file, char __user *user_buf,
 			return ret;
 	}
 
-	ptcr = readl(audmux_base + IMX_AUDMUX_V2_PTCR(port));
-	pdcr = readl(audmux_base + IMX_AUDMUX_V2_PDCR(port));
+	ptcr = pete_readl("sound/soc/fsl/imx-audmux.c:71", audmux_base + IMX_AUDMUX_V2_PTCR(port));
+	pdcr = pete_readl("sound/soc/fsl/imx-audmux.c:72", audmux_base + IMX_AUDMUX_V2_PDCR(port));
 
 	if (audmux_clk)
 		clk_disable_unprepare(audmux_clk);
@@ -192,7 +192,7 @@ int imx_audmux_v1_configure_port(unsigned int port, unsigned int pcr)
 	if (port >= ARRAY_SIZE(port_mapping))
 		return -EINVAL;
 
-	writel(pcr, audmux_base + port_mapping[port]);
+	pete_writel("sound/soc/fsl/imx-audmux.c:195", pcr, audmux_base + port_mapping[port]);
 
 	return 0;
 }
@@ -215,8 +215,8 @@ int imx_audmux_v2_configure_port(unsigned int port, unsigned int ptcr,
 			return ret;
 	}
 
-	writel(ptcr, audmux_base + IMX_AUDMUX_V2_PTCR(port));
-	writel(pdcr, audmux_base + IMX_AUDMUX_V2_PDCR(port));
+	pete_writel("sound/soc/fsl/imx-audmux.c:218", ptcr, audmux_base + IMX_AUDMUX_V2_PTCR(port));
+	pete_writel("sound/soc/fsl/imx-audmux.c:219", pdcr, audmux_base + IMX_AUDMUX_V2_PDCR(port));
 
 	if (audmux_clk)
 		clk_disable_unprepare(audmux_clk);
@@ -338,7 +338,7 @@ static int imx_audmux_suspend(struct device *dev)
 	clk_prepare_enable(audmux_clk);
 
 	for (i = 0; i < reg_max; i++)
-		regcache[i] = readl(audmux_base + i * 4);
+		regcache[i] = pete_readl("sound/soc/fsl/imx-audmux.c:341", audmux_base + i * 4);
 
 	clk_disable_unprepare(audmux_clk);
 
@@ -352,7 +352,7 @@ static int imx_audmux_resume(struct device *dev)
 	clk_prepare_enable(audmux_clk);
 
 	for (i = 0; i < reg_max; i++)
-		writel(regcache[i], audmux_base + i * 4);
+		pete_writel("sound/soc/fsl/imx-audmux.c:355", regcache[i], audmux_base + i * 4);
 
 	clk_disable_unprepare(audmux_clk);
 

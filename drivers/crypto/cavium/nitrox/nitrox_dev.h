@@ -274,7 +274,7 @@ struct nitrox_device {
  */
 static inline u64 nitrox_read_csr(struct nitrox_device *ndev, u64 offset)
 {
-	return readq(ndev->bar_addr + offset);
+	return pete_readq("drivers/crypto/cavium/nitrox/nitrox_dev.h:277", ndev->bar_addr + offset);
 }
 
 /**
@@ -286,7 +286,7 @@ static inline u64 nitrox_read_csr(struct nitrox_device *ndev, u64 offset)
 static inline void nitrox_write_csr(struct nitrox_device *ndev, u64 offset,
 				    u64 value)
 {
-	writeq(value, (ndev->bar_addr + offset));
+	pete_writeq("drivers/crypto/cavium/nitrox/nitrox_dev.h:289", value, (ndev->bar_addr + offset));
 }
 
 static inline bool nitrox_ready(struct nitrox_device *ndev)

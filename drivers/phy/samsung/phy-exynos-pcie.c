@@ -43,7 +43,7 @@ struct exynos_pcie_phy {
 
 static void exynos_pcie_phy_writel(void __iomem *base, u32 val, u32 offset)
 {
-	writel(val, base + offset);
+	pete_writel("drivers/phy/samsung/phy-exynos-pcie.c:46", val, base + offset);
 }
 
 /* Exynos5433 specific functions */

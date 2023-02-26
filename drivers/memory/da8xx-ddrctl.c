@@ -137,13 +137,13 @@ static int da8xx_ddrctl_probe(struct platform_device *pdev)
 			continue;
 		}
 
-		reg = readl(ddrctl + knob->reg);
+		reg = pete_readl("drivers/memory/da8xx-ddrctl.c:140", ddrctl + knob->reg);
 		reg &= knob->mask;
 		reg |= setting->val << knob->shift;
 
 		dev_dbg(dev, "writing 0x%08x to %s\n", reg, setting->name);
 
-		writel(reg, ddrctl + knob->reg);
+		pete_writel("drivers/memory/da8xx-ddrctl.c:146", reg, ddrctl + knob->reg);
 	}
 
 	return 0;

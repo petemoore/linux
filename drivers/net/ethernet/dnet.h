@@ -12,8 +12,8 @@
 
 /* Register access macros */
 #define dnet_writel(port, value, reg)	\
-	writel((value), (port)->regs + DNET_##reg)
-#define dnet_readl(port, reg)	readl((port)->regs + DNET_##reg)
+	pete_writel("drivers/net/ethernet/dnet.h:15", (value), (port)->regs + DNET_##reg)
+#define dnet_readl(port, reg)	pete_readl("drivers/net/ethernet/dnet.h:16", (port)->regs + DNET_##reg)
 
 /* ALL DNET FIFO REGISTERS */
 #define DNET_RX_LEN_FIFO		0x000	/* RX_LEN_FIFO */

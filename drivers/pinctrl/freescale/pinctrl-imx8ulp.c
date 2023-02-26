@@ -229,12 +229,12 @@ static int imx8ulp_pmx_gpio_set_direction(struct pinctrl_dev *pctldev,
 	if (pin_reg->mux_reg == -1)
 		return -EINVAL;
 
-	reg = readl(ipctl->base + pin_reg->mux_reg);
+	reg = pete_readl("drivers/pinctrl/freescale/pinctrl-imx8ulp.c:232", ipctl->base + pin_reg->mux_reg);
 	if (input)
 		reg = (reg & ~BM_OBE_ENABLED) | BM_IBE_ENABLED;
 	else
 		reg = (reg & ~BM_IBE_ENABLED) | BM_OBE_ENABLED;
-	writel(reg, ipctl->base + pin_reg->mux_reg);
+	pete_writel("drivers/pinctrl/freescale/pinctrl-imx8ulp.c:237", reg, ipctl->base + pin_reg->mux_reg);
 
 	return 0;
 }

@@ -34,8 +34,8 @@
 
 /* Read/Write access to the GPIO registers */
 #if defined(CONFIG_ARCH_ZYNQ) || defined(CONFIG_X86)
-# define xgpio_readreg(offset)		readl(offset)
-# define xgpio_writereg(offset, val)	writel(val, offset)
+# define xgpio_readreg(offset)		pete_readl("drivers/gpio/gpio-xilinx.c:37", offset)
+# define xgpio_writereg(offset, val)	pete_writel("drivers/gpio/gpio-xilinx.c:38", val, offset)
 #else
 # define xgpio_readreg(offset)		__raw_readl(offset)
 # define xgpio_writereg(offset, val)	__raw_writel(val, offset)

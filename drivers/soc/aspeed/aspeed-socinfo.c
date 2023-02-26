@@ -96,15 +96,15 @@ static int __init aspeed_socinfo_init(void)
 		of_node_put(np);
 		return -ENODEV;
 	}
-	siliconid = readl(reg);
+	siliconid = pete_readl("drivers/soc/aspeed/aspeed-socinfo.c:99", reg);
 	iounmap(reg);
 
 	/* This is optional, the ast2400 does not have it */
 	reg = of_iomap(np, 1);
 	if (reg) {
 		has_chipid = true;
-		chipid[0] = readl(reg);
-		chipid[1] = readl(reg + 4);
+		chipid[0] = pete_readl("drivers/soc/aspeed/aspeed-socinfo.c:106", reg);
+		chipid[1] = pete_readl("drivers/soc/aspeed/aspeed-socinfo.c:107", reg + 4);
 		iounmap(reg);
 	}
 	of_node_put(np);

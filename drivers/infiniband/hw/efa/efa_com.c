@@ -80,7 +80,7 @@ static u32 efa_com_reg_read32(struct efa_com_dev *edev, u16 offset)
 	EFA_SET(&mmio_read_reg, EFA_REGS_MMIO_REG_READ_REQ_ID,
 		mmio_read->seq_num);
 
-	writel(mmio_read_reg, edev->reg_bar + EFA_REGS_MMIO_REG_READ_OFF);
+	pete_writel("drivers/infiniband/hw/efa/efa_com.c:83", mmio_read_reg, edev->reg_bar + EFA_REGS_MMIO_REG_READ_OFF);
 
 	exp_time = jiffies + usecs_to_jiffies(mmio_read->mmio_read_timeout);
 	do {
@@ -138,14 +138,14 @@ static int efa_com_admin_init_sq(struct efa_com_dev *edev)
 	addr_high = upper_32_bits(sq->dma_addr);
 	addr_low = lower_32_bits(sq->dma_addr);
 
-	writel(addr_low, edev->reg_bar + EFA_REGS_AQ_BASE_LO_OFF);
-	writel(addr_high, edev->reg_bar + EFA_REGS_AQ_BASE_HI_OFF);
+	pete_writel("drivers/infiniband/hw/efa/efa_com.c:141", addr_low, edev->reg_bar + EFA_REGS_AQ_BASE_LO_OFF);
+	pete_writel("drivers/infiniband/hw/efa/efa_com.c:142", addr_high, edev->reg_bar + EFA_REGS_AQ_BASE_HI_OFF);
 
 	EFA_SET(&aq_caps, EFA_REGS_AQ_CAPS_AQ_DEPTH, aq->depth);
 	EFA_SET(&aq_caps, EFA_REGS_AQ_CAPS_AQ_ENTRY_SIZE,
 		sizeof(struct efa_admin_aq_entry));
 
-	writel(aq_caps, edev->reg_bar + EFA_REGS_AQ_CAPS_OFF);
+	pete_writel("drivers/infiniband/hw/efa/efa_com.c:148", aq_caps, edev->reg_bar + EFA_REGS_AQ_CAPS_OFF);
 
 	return 0;
 }
@@ -172,8 +172,8 @@ static int efa_com_admin_init_cq(struct efa_com_dev *edev)
 	addr_high = upper_32_bits(cq->dma_addr);
 	addr_low = lower_32_bits(cq->dma_addr);
 
-	writel(addr_low, edev->reg_bar + EFA_REGS_ACQ_BASE_LO_OFF);
-	writel(addr_high, edev->reg_bar + EFA_REGS_ACQ_BASE_HI_OFF);
+	pete_writel("drivers/infiniband/hw/efa/efa_com.c:175", addr_low, edev->reg_bar + EFA_REGS_ACQ_BASE_LO_OFF);
+	pete_writel("drivers/infiniband/hw/efa/efa_com.c:176", addr_high, edev->reg_bar + EFA_REGS_ACQ_BASE_HI_OFF);
 
 	EFA_SET(&acq_caps, EFA_REGS_ACQ_CAPS_ACQ_DEPTH, aq->depth);
 	EFA_SET(&acq_caps, EFA_REGS_ACQ_CAPS_ACQ_ENTRY_SIZE,
@@ -181,7 +181,7 @@ static int efa_com_admin_init_cq(struct efa_com_dev *edev)
 	EFA_SET(&acq_caps, EFA_REGS_ACQ_CAPS_ACQ_MSIX_VECTOR,
 		aq->msix_vector_idx);
 
-	writel(acq_caps, edev->reg_bar + EFA_REGS_ACQ_CAPS_OFF);
+	pete_writel("drivers/infiniband/hw/efa/efa_com.c:184", acq_caps, edev->reg_bar + EFA_REGS_ACQ_CAPS_OFF);
 
 	return 0;
 }
@@ -213,21 +213,21 @@ static int efa_com_admin_init_aenq(struct efa_com_dev *edev,
 	addr_low = lower_32_bits(aenq->dma_addr);
 	addr_high = upper_32_bits(aenq->dma_addr);
 
-	writel(addr_low, edev->reg_bar + EFA_REGS_AENQ_BASE_LO_OFF);
-	writel(addr_high, edev->reg_bar + EFA_REGS_AENQ_BASE_HI_OFF);
+	pete_writel("drivers/infiniband/hw/efa/efa_com.c:216", addr_low, edev->reg_bar + EFA_REGS_AENQ_BASE_LO_OFF);
+	pete_writel("drivers/infiniband/hw/efa/efa_com.c:217", addr_high, edev->reg_bar + EFA_REGS_AENQ_BASE_HI_OFF);
 
 	EFA_SET(&aenq_caps, EFA_REGS_AENQ_CAPS_AENQ_DEPTH, aenq->depth);
 	EFA_SET(&aenq_caps, EFA_REGS_AENQ_CAPS_AENQ_ENTRY_SIZE,
 		sizeof(struct efa_admin_aenq_entry));
 	EFA_SET(&aenq_caps, EFA_REGS_AENQ_CAPS_AENQ_MSIX_VECTOR,
 		aenq->msix_vector_idx);
-	writel(aenq_caps, edev->reg_bar + EFA_REGS_AENQ_CAPS_OFF);
+	pete_writel("drivers/infiniband/hw/efa/efa_com.c:224", aenq_caps, edev->reg_bar + EFA_REGS_AENQ_CAPS_OFF);
 
 	/*
 	 * Init cons_db to mark that all entries in the queue
 	 * are initially available
 	 */
-	writel(edev->aenq.cc, edev->reg_bar + EFA_REGS_AENQ_CONS_DB_OFF);
+	pete_writel("drivers/infiniband/hw/efa/efa_com.c:230", edev->aenq.cc, edev->reg_bar + EFA_REGS_AENQ_CONS_DB_OFF);
 
 	return 0;
 }
@@ -339,7 +339,7 @@ static struct efa_comp_ctx *__efa_com_submit_admin_cmd(struct efa_com_admin_queu
 		aq->sq.phase = !aq->sq.phase;
 
 	/* barrier not needed in case of writel */
-	writel(aq->sq.pc, aq->sq.db_addr);
+	pete_writel("drivers/infiniband/hw/efa/efa_com.c:342", aq->sq.pc, aq->sq.db_addr);
 
 	return comp_ctx;
 }
@@ -685,7 +685,7 @@ void efa_com_set_admin_polling_mode(struct efa_com_dev *edev, bool polling)
 	if (polling)
 		EFA_SET(&mask_value, EFA_REGS_INTR_MASK_EN, 1);
 
-	writel(mask_value, edev->reg_bar + EFA_REGS_INTR_MASK_OFF);
+	pete_writel("drivers/infiniband/hw/efa/efa_com.c:688", mask_value, edev->reg_bar + EFA_REGS_INTR_MASK_OFF);
 	if (polling)
 		set_bit(EFA_AQ_STATE_POLLING_BIT, &edev->aq.state);
 	else
@@ -870,7 +870,7 @@ void efa_com_aenq_intr_handler(struct efa_com_dev *edev, void *data)
 		return;
 
 	/* barrier not needed in case of writel */
-	writel(aenq->cc, edev->reg_bar + EFA_REGS_AENQ_CONS_DB_OFF);
+	pete_writel("drivers/infiniband/hw/efa/efa_com.c:873", aenq->cc, edev->reg_bar + EFA_REGS_AENQ_CONS_DB_OFF);
 }
 
 static void efa_com_mmio_reg_read_resp_addr_init(struct efa_com_dev *edev)
@@ -883,8 +883,8 @@ static void efa_com_mmio_reg_read_resp_addr_init(struct efa_com_dev *edev)
 	addr_high = (mmio_read->read_resp_dma_addr >> 32) & GENMASK(31, 0);
 	addr_low = mmio_read->read_resp_dma_addr & GENMASK(31, 0);
 
-	writel(addr_high, edev->reg_bar + EFA_REGS_MMIO_RESP_HI_OFF);
-	writel(addr_low, edev->reg_bar + EFA_REGS_MMIO_RESP_LO_OFF);
+	pete_writel("drivers/infiniband/hw/efa/efa_com.c:886", addr_high, edev->reg_bar + EFA_REGS_MMIO_RESP_HI_OFF);
+	pete_writel("drivers/infiniband/hw/efa/efa_com.c:887", addr_low, edev->reg_bar + EFA_REGS_MMIO_RESP_LO_OFF);
 }
 
 int efa_com_mmio_reg_read_init(struct efa_com_dev *edev)
@@ -1053,7 +1053,7 @@ int efa_com_dev_reset(struct efa_com_dev *edev,
 	/* start reset */
 	EFA_SET(&reset_val, EFA_REGS_DEV_CTL_DEV_RESET, 1);
 	EFA_SET(&reset_val, EFA_REGS_DEV_CTL_RESET_REASON, reset_reason);
-	writel(reset_val, edev->reg_bar + EFA_REGS_DEV_CTL_OFF);
+	pete_writel("drivers/infiniband/hw/efa/efa_com.c:1056", reset_val, edev->reg_bar + EFA_REGS_DEV_CTL_OFF);
 
 	/* reset clears the mmio readless address, restore it */
 	efa_com_mmio_reg_read_resp_addr_init(edev);
@@ -1065,7 +1065,7 @@ int efa_com_dev_reset(struct efa_com_dev *edev,
 	}
 
 	/* reset done */
-	writel(0, edev->reg_bar + EFA_REGS_DEV_CTL_OFF);
+	pete_writel("drivers/infiniband/hw/efa/efa_com.c:1068", 0, edev->reg_bar + EFA_REGS_DEV_CTL_OFF);
 	err = wait_for_reset_state(edev, timeout, 0);
 	if (err) {
 		ibdev_err(edev->efa_dev, "Reset indication didn't turn off\n");

@@ -109,11 +109,11 @@ static void meson8b_dwmac_mask_bits(struct meson8b_dwmac *dwmac, u32 reg,
 {
 	u32 data;
 
-	data = readl(dwmac->regs + reg);
+	data = pete_readl("drivers/net/ethernet/stmicro/stmmac/dwmac-meson8b.c:112", dwmac->regs + reg);
 	data &= ~mask;
 	data |= (value & mask);
 
-	writel(data, dwmac->regs + reg);
+	pete_writel("drivers/net/ethernet/stmicro/stmmac/dwmac-meson8b.c:116", data, dwmac->regs + reg);
 }
 
 static struct clk *meson8b_dwmac_register_clk(struct meson8b_dwmac *dwmac,

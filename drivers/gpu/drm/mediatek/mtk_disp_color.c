@@ -71,9 +71,9 @@ void mtk_color_start(struct device *dev)
 {
 	struct mtk_disp_color *color = dev_get_drvdata(dev);
 
-	writel(COLOR_BYPASS_ALL | COLOR_SEQ_SEL,
+	pete_writel("drivers/gpu/drm/mediatek/mtk_disp_color.c:74", COLOR_BYPASS_ALL | COLOR_SEQ_SEL,
 	       color->regs + DISP_COLOR_CFG_MAIN);
-	writel(0x1, color->regs + DISP_COLOR_START(color));
+	pete_writel("drivers/gpu/drm/mediatek/mtk_disp_color.c:76", 0x1, color->regs + DISP_COLOR_START(color));
 }
 
 static int mtk_disp_color_bind(struct device *dev, struct device *master,

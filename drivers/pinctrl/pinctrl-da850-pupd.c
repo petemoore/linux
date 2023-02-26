@@ -70,7 +70,7 @@ static int da850_pupd_pin_config_group_get(struct pinctrl_dev *pctldev,
 	u32 val;
 	u16 arg;
 
-	val = readl(data->base + DA850_PUPD_ENA);
+	val = pete_readl("drivers/pinctrl/pinctrl-da850-pupd.c:73", data->base + DA850_PUPD_ENA);
 	arg = !!(~val & BIT(selector));
 
 	switch (param) {
@@ -83,7 +83,7 @@ static int da850_pupd_pin_config_group_get(struct pinctrl_dev *pctldev,
 			arg = 0;
 			break;
 		}
-		val = readl(data->base + DA850_PUPD_SEL);
+		val = pete_readl("drivers/pinctrl/pinctrl-da850-pupd.c:86", data->base + DA850_PUPD_SEL);
 		if (param == PIN_CONFIG_BIAS_PULL_DOWN)
 			val = ~val;
 		arg = !!(val & BIT(selector));
@@ -107,8 +107,8 @@ static int da850_pupd_pin_config_group_set(struct pinctrl_dev *pctldev,
 	enum pin_config_param param;
 	int i;
 
-	ena = readl(data->base + DA850_PUPD_ENA);
-	sel = readl(data->base + DA850_PUPD_SEL);
+	ena = pete_readl("drivers/pinctrl/pinctrl-da850-pupd.c:110", data->base + DA850_PUPD_ENA);
+	sel = pete_readl("drivers/pinctrl/pinctrl-da850-pupd.c:111", data->base + DA850_PUPD_SEL);
 
 	for (i = 0; i < num_configs; i++) {
 		param = pinconf_to_config_param(configs[i]);
@@ -130,8 +130,8 @@ static int da850_pupd_pin_config_group_set(struct pinctrl_dev *pctldev,
 		}
 	}
 
-	writel(sel, data->base + DA850_PUPD_SEL);
-	writel(ena, data->base + DA850_PUPD_ENA);
+	pete_writel("drivers/pinctrl/pinctrl-da850-pupd.c:133", sel, data->base + DA850_PUPD_SEL);
+	pete_writel("drivers/pinctrl/pinctrl-da850-pupd.c:134", ena, data->base + DA850_PUPD_ENA);
 
 	return 0;
 }

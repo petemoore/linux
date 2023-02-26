@@ -508,7 +508,7 @@ static void rivafb_load_cursor_image(struct riva_par *par, u8 *data8,
 			tmp |= (b & 1) ? fg << 16 : bg << 16;
 			b >>= 1;
 #endif
-			writel(tmp, &par->riva.CURSOR[k++]);
+			pete_writel("drivers/video/fbdev/riva/fbdev.c:511", tmp, &par->riva.CURSOR[k++]);
 		}
 		k += (MAX_CURS - w)/2;
 	}

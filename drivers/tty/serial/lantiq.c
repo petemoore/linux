@@ -169,7 +169,7 @@ lqasc_rx_chars(struct uart_port *port)
 		  ASCFSTAT_RXFFLMASK;
 	while (fifocnt--) {
 		u8 flag = TTY_NORMAL;
-		ch = readb(port->membase + LTQ_ASC_RBUF);
+		ch = pete_readb("drivers/tty/serial/lantiq.c:172", port->membase + LTQ_ASC_RBUF);
 		rsr = (__raw_readl(port->membase + LTQ_ASC_STATE)
 			& ASCSTATE_ANY) | UART_DUMMY_UER_RX;
 		tty_flip_buffer_push(tport);
@@ -233,7 +233,7 @@ lqasc_tx_chars(struct uart_port *port)
 	while (((__raw_readl(port->membase + LTQ_ASC_FSTAT) &
 		ASCFSTAT_TXFREEMASK) >> ASCFSTAT_TXFREEOFF) != 0) {
 		if (port->x_char) {
-			writeb(port->x_char, port->membase + LTQ_ASC_TBUF);
+			pete_writeb("drivers/tty/serial/lantiq.c:236", port->x_char, port->membase + LTQ_ASC_TBUF);
 			port->icount.tx++;
 			port->x_char = 0;
 			continue;
@@ -242,7 +242,7 @@ lqasc_tx_chars(struct uart_port *port)
 		if (uart_circ_empty(xmit))
 			break;
 
-		writeb(port->state->xmit.buf[port->state->xmit.tail],
+		pete_writeb("drivers/tty/serial/lantiq.c:245", port->state->xmit.buf[port->state->xmit.tail],
 			port->membase + LTQ_ASC_TBUF);
 		xmit->tail = (xmit->tail + 1) & (UART_XMIT_SIZE - 1);
 		port->icount.tx++;
@@ -303,7 +303,7 @@ static irqreturn_t lqasc_irq(int irq, void *p)
 	struct ltq_uart_port *ltq_port = to_ltq_uart_port(port);
 
 	spin_lock_irqsave(&ltq_port->lock, flags);
-	stat = readl(port->membase + LTQ_ASC_IRNCR);
+	stat = pete_readl("drivers/tty/serial/lantiq.c:306", port->membase + LTQ_ASC_IRNCR);
 	spin_unlock_irqrestore(&ltq_port->lock, flags);
 	if (!(stat & ASC_IRNCR_MASK))
 		return IRQ_NONE;
@@ -611,7 +611,7 @@ lqasc_console_putchar(struct uart_port *port, int ch)
 		fifofree = (__raw_readl(port->membase + LTQ_ASC_FSTAT)
 			& ASCFSTAT_TXFREEMASK) >> ASCFSTAT_TXFREEOFF;
 	} while (fifofree == 0);
-	writeb(ch, port->membase + LTQ_ASC_TBUF);
+	pete_writeb("drivers/tty/serial/lantiq.c:614", ch, port->membase + LTQ_ASC_TBUF);
 }
 
 static void lqasc_serial_port_write(struct uart_port *port, const char *s,

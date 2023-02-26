@@ -113,7 +113,7 @@ struct mpc_i2c_data {
 
 static inline void writeccr(struct mpc_i2c *i2c, u32 x)
 {
-	writeb(x, i2c->base + MPC_I2C_CR);
+	pete_writeb("drivers/i2c/busses/i2c-mpc.c:116", x, i2c->base + MPC_I2C_CR);
 }
 
 /* Sometimes 9th clock pulse isn't generated, and slave doesn't release
@@ -128,19 +128,19 @@ static void mpc_i2c_fixup(struct mpc_i2c *i2c)
 
 	for (k = 9; k; k--) {
 		writeccr(i2c, 0);
-		writeb(0, i2c->base + MPC_I2C_SR); /* clear any status bits */
+		pete_writeb("drivers/i2c/busses/i2c-mpc.c:131", 0, i2c->base + MPC_I2C_SR); /* clear any status bits */
 		writeccr(i2c, CCR_MEN | CCR_MSTA); /* START */
-		readb(i2c->base + MPC_I2C_DR); /* init xfer */
+		pete_readb("drivers/i2c/busses/i2c-mpc.c:133", i2c->base + MPC_I2C_DR); /* init xfer */
 		udelay(15); /* let it hit the bus */
 		local_irq_save(flags); /* should not be delayed further */
 		writeccr(i2c, CCR_MEN | CCR_MSTA | CCR_RSTA); /* delay SDA */
-		readb(i2c->base + MPC_I2C_DR);
+		pete_readb("drivers/i2c/busses/i2c-mpc.c:137", i2c->base + MPC_I2C_DR);
 		if (k != 1)
 			udelay(5);
 		local_irq_restore(flags);
 	}
 	writeccr(i2c, CCR_MEN); /* Initiate STOP */
-	readb(i2c->base + MPC_I2C_DR);
+	pete_readb("drivers/i2c/busses/i2c-mpc.c:143", i2c->base + MPC_I2C_DR);
 	udelay(15); /* Let STOP propagate */
 	writeccr(i2c, 0);
 }
@@ -185,7 +185,7 @@ static void mpc_i2c_fixup_A004447(struct mpc_i2c *i2c)
 		return;
 	}
 
-	val = readb(i2c->base + MPC_I2C_SR);
+	val = pete_readb("drivers/i2c/busses/i2c-mpc.c:188", i2c->base + MPC_I2C_SR);
 
 	if (val & CSR_MAL) {
 		writeccr(i2c, 0x00);
@@ -196,7 +196,7 @@ static void mpc_i2c_fixup_A004447(struct mpc_i2c *i2c)
 			dev_err(i2c->dev, "timeout waiting for CSR_MBB\n");
 			return;
 		}
-		val = readb(i2c->base + MPC_I2C_DR);
+		val = pete_readb("drivers/i2c/busses/i2c-mpc.c:199", i2c->base + MPC_I2C_DR);
 		ret = i2c_mpc_wait_sr(i2c, CSR_MIF);
 		if (ret) {
 			dev_err(i2c->dev, "timeout waiting for CSR_MIF\n");
@@ -204,7 +204,7 @@ static void mpc_i2c_fixup_A004447(struct mpc_i2c *i2c)
 		}
 		writeccr(i2c, CCR_MEN | CCR_RSVD);
 	} else {
-		val = readb(i2c->base + MPC_I2C_DR);
+		val = pete_readb("drivers/i2c/busses/i2c-mpc.c:207", i2c->base + MPC_I2C_DR);
 		ret = i2c_mpc_wait_sr(i2c, CSR_MIF);
 		if (ret) {
 			dev_err(i2c->dev, "timeout waiting for CSR_MIF\n");
@@ -278,14 +278,14 @@ static void mpc_i2c_setup_52xx(struct device_node *node,
 
 	if (clock == MPC_I2C_CLOCK_PRESERVE) {
 		dev_dbg(i2c->dev, "using fdr %d\n",
-			readb(i2c->base + MPC_I2C_FDR));
+			pete_readb("drivers/i2c/busses/i2c-mpc.c:281", i2c->base + MPC_I2C_FDR));
 		return;
 	}
 
 	ret = mpc_i2c_get_fdr_52xx(node, clock, &i2c->real_clk);
 	fdr = (ret >= 0) ? ret : 0x3f; /* backward compatibility */
 
-	writeb(fdr & 0xff, i2c->base + MPC_I2C_FDR);
+	pete_writeb("drivers/i2c/busses/i2c-mpc.c:288", fdr & 0xff, i2c->base + MPC_I2C_FDR);
 
 	if (ret >= 0)
 		dev_info(i2c->dev, "clock %u Hz (fdr=%d)\n", i2c->real_clk,
@@ -464,16 +464,16 @@ static void mpc_i2c_setup_8xxx(struct device_node *node,
 
 	if (clock == MPC_I2C_CLOCK_PRESERVE) {
 		dev_dbg(i2c->dev, "using dfsrr %d, fdr %d\n",
-			readb(i2c->base + MPC_I2C_DFSRR),
-			readb(i2c->base + MPC_I2C_FDR));
+			pete_readb("drivers/i2c/busses/i2c-mpc.c:467", i2c->base + MPC_I2C_DFSRR),
+			pete_readb("drivers/i2c/busses/i2c-mpc.c:468", i2c->base + MPC_I2C_FDR));
 		return;
 	}
 
 	ret = mpc_i2c_get_fdr_8xxx(node, clock, &i2c->real_clk);
 	fdr = (ret >= 0) ? ret : 0x1031; /* backward compatibility */
 
-	writeb(fdr & 0xff, i2c->base + MPC_I2C_FDR);
-	writeb((fdr >> 8) & 0xff, i2c->base + MPC_I2C_DFSRR);
+	pete_writeb("drivers/i2c/busses/i2c-mpc.c:475", fdr & 0xff, i2c->base + MPC_I2C_FDR);
+	pete_writeb("drivers/i2c/busses/i2c-mpc.c:476", (fdr >> 8) & 0xff, i2c->base + MPC_I2C_DFSRR);
 
 	if (ret >= 0)
 		dev_info(i2c->dev, "clock %d Hz (dfsrr=%d fdr=%d)\n",
@@ -524,7 +524,7 @@ static void mpc_i2c_do_action(struct mpc_i2c *i2c)
 	case MPC_I2C_ACTION_START:
 		i2c->cntl_bits |= CCR_MSTA | CCR_MTX;
 		writeccr(i2c, i2c->cntl_bits);
-		writeb((msg->addr << 1) | dir, i2c->base + MPC_I2C_DR);
+		pete_writeb("drivers/i2c/busses/i2c-mpc.c:527", (msg->addr << 1) | dir, i2c->base + MPC_I2C_DR);
 		i2c->expect_rxack = 1;
 		i2c->action = dir ? MPC_I2C_ACTION_READ_BEGIN : MPC_I2C_ACTION_WRITE;
 		break;
@@ -536,7 +536,7 @@ static void mpc_i2c_do_action(struct mpc_i2c *i2c)
 
 			writeccr(i2c, i2c->cntl_bits);
 			/* Dummy read */
-			readb(i2c->base + MPC_I2C_DR);
+			pete_readb("drivers/i2c/busses/i2c-mpc.c:539", i2c->base + MPC_I2C_DR);
 		}
 		i2c->action = MPC_I2C_ACTION_READ_BYTE;
 		break;
@@ -553,7 +553,7 @@ static void mpc_i2c_do_action(struct mpc_i2c *i2c)
 			writeccr(i2c, i2c->cntl_bits);
 		}
 
-		byte = readb(i2c->base + MPC_I2C_DR);
+		byte = pete_readb("drivers/i2c/busses/i2c-mpc.c:556", i2c->base + MPC_I2C_DR);
 
 		if (i2c->byte_posn == 0 && recv_len) {
 			if (byte == 0 || byte > I2C_SMBUS_BLOCK_MAX) {
@@ -578,7 +578,7 @@ static void mpc_i2c_do_action(struct mpc_i2c *i2c)
 	case MPC_I2C_ACTION_WRITE:
 		dev_dbg(i2c->dev, "%s %02x\n", action_str[i2c->action],
 			msg->buf[i2c->byte_posn]);
-		writeb(msg->buf[i2c->byte_posn++], i2c->base + MPC_I2C_DR);
+		pete_writeb("drivers/i2c/busses/i2c-mpc.c:581", msg->buf[i2c->byte_posn++], i2c->base + MPC_I2C_DR);
 		i2c->expect_rxack = 1;
 		break;
 
@@ -643,11 +643,11 @@ static irqreturn_t mpc_i2c_isr(int irq, void *dev_id)
 	struct mpc_i2c *i2c = dev_id;
 	u8 status;
 
-	status = readb(i2c->base + MPC_I2C_SR);
+	status = pete_readb("drivers/i2c/busses/i2c-mpc.c:646", i2c->base + MPC_I2C_SR);
 	if (status & CSR_MIF) {
 		/* Wait up to 100us for transfer to properly complete */
 		readb_poll_timeout_atomic(i2c->base + MPC_I2C_SR, status, status & CSR_MCF, 0, 100);
-		writeb(0, i2c->base + MPC_I2C_SR);
+		pete_writeb("drivers/i2c/busses/i2c-mpc.c:650", 0, i2c->base + MPC_I2C_SR);
 		mpc_i2c_do_intr(i2c, status);
 		return IRQ_HANDLED;
 	}
@@ -682,7 +682,7 @@ static int mpc_i2c_execute_msg(struct mpc_i2c *i2c)
 	i2c->action = MPC_I2C_ACTION_START;
 
 	i2c->cntl_bits = CCR_MEN | CCR_MIEN;
-	writeb(0, i2c->base + MPC_I2C_SR);
+	pete_writeb("drivers/i2c/busses/i2c-mpc.c:685", 0, i2c->base + MPC_I2C_SR);
 	writeccr(i2c, i2c->cntl_bits);
 
 	mpc_i2c_do_action(i2c);
@@ -698,13 +698,13 @@ static int mpc_i2c_execute_msg(struct mpc_i2c *i2c)
 
 	orig_jiffies = jiffies;
 	/* Wait until STOP is seen, allow up to 1 s */
-	while (readb(i2c->base + MPC_I2C_SR) & CSR_MBB) {
+	while (pete_readb("drivers/i2c/busses/i2c-mpc.c:701", i2c->base + MPC_I2C_SR) & CSR_MBB) {
 		if (time_after(jiffies, orig_jiffies + HZ)) {
-			u8 status = readb(i2c->base + MPC_I2C_SR);
+			u8 status = pete_readb("drivers/i2c/busses/i2c-mpc.c:703", i2c->base + MPC_I2C_SR);
 
 			dev_dbg(i2c->dev, "timeout\n");
 			if ((status & (CSR_MCF | CSR_MBB | CSR_RXAK)) != 0) {
-				writeb(status & ~CSR_MAL,
+				pete_writeb("drivers/i2c/busses/i2c-mpc.c:707", status & ~CSR_MAL,
 				       i2c->base + MPC_I2C_SR);
 				i2c_recover_bus(&i2c->adap);
 			}
@@ -893,8 +893,8 @@ static int __maybe_unused mpc_i2c_suspend(struct device *dev)
 {
 	struct mpc_i2c *i2c = dev_get_drvdata(dev);
 
-	i2c->fdr = readb(i2c->base + MPC_I2C_FDR);
-	i2c->dfsrr = readb(i2c->base + MPC_I2C_DFSRR);
+	i2c->fdr = pete_readb("drivers/i2c/busses/i2c-mpc.c:896", i2c->base + MPC_I2C_FDR);
+	i2c->dfsrr = pete_readb("drivers/i2c/busses/i2c-mpc.c:897", i2c->base + MPC_I2C_DFSRR);
 
 	return 0;
 }
@@ -903,8 +903,8 @@ static int __maybe_unused mpc_i2c_resume(struct device *dev)
 {
 	struct mpc_i2c *i2c = dev_get_drvdata(dev);
 
-	writeb(i2c->fdr, i2c->base + MPC_I2C_FDR);
-	writeb(i2c->dfsrr, i2c->base + MPC_I2C_DFSRR);
+	pete_writeb("drivers/i2c/busses/i2c-mpc.c:906", i2c->fdr, i2c->base + MPC_I2C_FDR);
+	pete_writeb("drivers/i2c/busses/i2c-mpc.c:907", i2c->dfsrr, i2c->base + MPC_I2C_DFSRR);
 
 	return 0;
 }

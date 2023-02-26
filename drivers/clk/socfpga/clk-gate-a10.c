@@ -27,7 +27,7 @@ static unsigned long socfpga_gate_clk_recalc_rate(struct clk_hw *hwclk,
 	if (socfpgaclk->fixed_div)
 		div = socfpgaclk->fixed_div;
 	else if (socfpgaclk->div_reg) {
-		val = readl(socfpgaclk->div_reg) >> socfpgaclk->shift;
+		val = pete_readl("drivers/clk/socfpga/clk-gate-a10.c:30", socfpgaclk->div_reg) >> socfpgaclk->shift;
 		val &= GENMASK(socfpgaclk->width - 1, 0);
 		div = (1 << val);
 	}

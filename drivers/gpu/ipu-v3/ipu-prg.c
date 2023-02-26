@@ -255,12 +255,12 @@ void ipu_prg_channel_disable(struct ipuv3_channel *ipu_chan)
 
 	pm_runtime_get_sync(prg->dev);
 
-	val = readl(prg->regs + IPU_PRG_CTL);
+	val = pete_readl("drivers/gpu/ipu-v3/ipu-prg.c:258", prg->regs + IPU_PRG_CTL);
 	val |= IPU_PRG_CTL_BYPASS(prg_chan);
-	writel(val, prg->regs + IPU_PRG_CTL);
+	pete_writel("drivers/gpu/ipu-v3/ipu-prg.c:260", val, prg->regs + IPU_PRG_CTL);
 
 	val = IPU_PRG_REG_UPDATE_REG_UPDATE;
-	writel(val, prg->regs + IPU_PRG_REG_UPDATE);
+	pete_writel("drivers/gpu/ipu-v3/ipu-prg.c:263", val, prg->regs + IPU_PRG_REG_UPDATE);
 
 	pm_runtime_put(prg->dev);
 
@@ -302,29 +302,29 @@ int ipu_prg_channel_configure(struct ipuv3_channel *ipu_chan,
 	pm_runtime_get_sync(prg->dev);
 
 	val = (stride - 1) & IPU_PRG_STRIDE_STRIDE_MASK;
-	writel(val, prg->regs + IPU_PRG_STRIDE(prg_chan));
+	pete_writel("drivers/gpu/ipu-v3/ipu-prg.c:305", val, prg->regs + IPU_PRG_STRIDE(prg_chan));
 
 	val = ((height & IPU_PRG_HEIGHT_PRE_HEIGHT_MASK) <<
 	       IPU_PRG_HEIGHT_PRE_HEIGHT_SHIFT) |
 	      ((height & IPU_PRG_HEIGHT_IPU_HEIGHT_MASK) <<
 	       IPU_PRG_HEIGHT_IPU_HEIGHT_SHIFT);
-	writel(val, prg->regs + IPU_PRG_HEIGHT(prg_chan));
+	pete_writel("drivers/gpu/ipu-v3/ipu-prg.c:311", val, prg->regs + IPU_PRG_HEIGHT(prg_chan));
 
 	val = ipu_pre_get_baddr(prg->pres[chan->used_pre]);
 	*eba = val;
-	writel(val, prg->regs + IPU_PRG_BADDR(prg_chan));
+	pete_writel("drivers/gpu/ipu-v3/ipu-prg.c:315", val, prg->regs + IPU_PRG_BADDR(prg_chan));
 
-	val = readl(prg->regs + IPU_PRG_CTL);
+	val = pete_readl("drivers/gpu/ipu-v3/ipu-prg.c:317", prg->regs + IPU_PRG_CTL);
 	/* config AXI ID */
 	val &= ~(IPU_PRG_CTL_SOFT_ARID_MASK <<
 		 IPU_PRG_CTL_SOFT_ARID_SHIFT(prg_chan));
 	val |= IPU_PRG_CTL_SOFT_ARID(prg_chan, axi_id);
 	/* enable channel */
 	val &= ~IPU_PRG_CTL_BYPASS(prg_chan);
-	writel(val, prg->regs + IPU_PRG_CTL);
+	pete_writel("drivers/gpu/ipu-v3/ipu-prg.c:324", val, prg->regs + IPU_PRG_CTL);
 
 	val = IPU_PRG_REG_UPDATE_REG_UPDATE;
-	writel(val, prg->regs + IPU_PRG_REG_UPDATE);
+	pete_writel("drivers/gpu/ipu-v3/ipu-prg.c:327", val, prg->regs + IPU_PRG_REG_UPDATE);
 
 	/* wait for both double buffers to be filled */
 	readl_poll_timeout(prg->regs + IPU_PRG_STATUS, val,
@@ -403,12 +403,12 @@ static int ipu_prg_probe(struct platform_device *pdev)
 	}
 
 	/* init to free running mode */
-	val = readl(prg->regs + IPU_PRG_CTL);
+	val = pete_readl("drivers/gpu/ipu-v3/ipu-prg.c:406", prg->regs + IPU_PRG_CTL);
 	val |= IPU_PRG_CTL_SHADOW_EN;
-	writel(val, prg->regs + IPU_PRG_CTL);
+	pete_writel("drivers/gpu/ipu-v3/ipu-prg.c:408", val, prg->regs + IPU_PRG_CTL);
 
 	/* disable address threshold */
-	writel(0xffffffff, prg->regs + IPU_PRG_THD);
+	pete_writel("drivers/gpu/ipu-v3/ipu-prg.c:411", 0xffffffff, prg->regs + IPU_PRG_THD);
 
 	pm_runtime_set_active(dev);
 	pm_runtime_enable(dev);

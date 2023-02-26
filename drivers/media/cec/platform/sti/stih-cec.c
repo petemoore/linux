@@ -138,48 +138,48 @@ static int stih_cec_adap_enable(struct cec_adapter *adap, bool enable)
 		unsigned long clk_freq = clk_get_rate(cec->clk);
 		u32 cec_clk_div = clk_freq / 10000;
 
-		writel(cec_clk_div, cec->regs + CEC_CLK_DIV);
+		pete_writel("drivers/media/cec/platform/sti/stih-cec.c:141", cec_clk_div, cec->regs + CEC_CLK_DIV);
 
 		/* Configuration of the durations activating a timeout */
-		writel(CEC_SBIT_TOUT_47MS | (CEC_DBIT_TOUT_28MS << 4),
+		pete_writel("drivers/media/cec/platform/sti/stih-cec.c:144", CEC_SBIT_TOUT_47MS | (CEC_DBIT_TOUT_28MS << 4),
 		       cec->regs + CEC_BIT_TOUT_THRESH);
 
 		/* Configuration of the smallest allowed duration for pulses */
-		writel(CEC_BIT_LPULSE_03MS | CEC_BIT_HPULSE_03MS,
+		pete_writel("drivers/media/cec/platform/sti/stih-cec.c:148", CEC_BIT_LPULSE_03MS | CEC_BIT_HPULSE_03MS,
 		       cec->regs + CEC_BIT_PULSE_THRESH);
 
 		/* Minimum received bit period threshold */
-		writel(BIT(5) | BIT(7), cec->regs + CEC_TX_CTRL);
+		pete_writel("drivers/media/cec/platform/sti/stih-cec.c:152", BIT(5) | BIT(7), cec->regs + CEC_TX_CTRL);
 
 		/* Configuration of transceiver data arrays */
-		writel(CEC_TX_ARRAY_EN | CEC_RX_ARRAY_EN | CEC_TX_STOP_ON_NACK,
+		pete_writel("drivers/media/cec/platform/sti/stih-cec.c:155", CEC_TX_ARRAY_EN | CEC_RX_ARRAY_EN | CEC_TX_STOP_ON_NACK,
 		       cec->regs + CEC_DATA_ARRAY_CTRL);
 
 		/* Configuration of the control bits for CEC Transceiver */
-		writel(CEC_IN_FILTER_EN | CEC_EN | CEC_RX_RESET_EN,
+		pete_writel("drivers/media/cec/platform/sti/stih-cec.c:159", CEC_IN_FILTER_EN | CEC_EN | CEC_RX_RESET_EN,
 		       cec->regs + CEC_CTRL);
 
 		/* Clear logical addresses */
-		writel(0, cec->regs + CEC_ADDR_TABLE);
+		pete_writel("drivers/media/cec/platform/sti/stih-cec.c:163", 0, cec->regs + CEC_ADDR_TABLE);
 
 		/* Clear the status register */
-		writel(0x0, cec->regs + CEC_STATUS);
+		pete_writel("drivers/media/cec/platform/sti/stih-cec.c:166", 0x0, cec->regs + CEC_STATUS);
 
 		/* Enable the interrupts */
-		writel(CEC_TX_DONE_IRQ_EN | CEC_RX_DONE_IRQ_EN |
+		pete_writel("drivers/media/cec/platform/sti/stih-cec.c:169", CEC_TX_DONE_IRQ_EN | CEC_RX_DONE_IRQ_EN |
 		       CEC_RX_SOM_IRQ_EN | CEC_RX_EOM_IRQ_EN |
 		       CEC_ERROR_IRQ_EN,
 		       cec->regs + CEC_IRQ_CTRL);
 
 	} else {
 		/* Clear logical addresses */
-		writel(0, cec->regs + CEC_ADDR_TABLE);
+		pete_writel("drivers/media/cec/platform/sti/stih-cec.c:176", 0, cec->regs + CEC_ADDR_TABLE);
 
 		/* Clear the status register */
-		writel(0x0, cec->regs + CEC_STATUS);
+		pete_writel("drivers/media/cec/platform/sti/stih-cec.c:179", 0x0, cec->regs + CEC_STATUS);
 
 		/* Disable the interrupts */
-		writel(0, cec->regs + CEC_IRQ_CTRL);
+		pete_writel("drivers/media/cec/platform/sti/stih-cec.c:182", 0, cec->regs + CEC_IRQ_CTRL);
 	}
 
 	return 0;
@@ -188,14 +188,14 @@ static int stih_cec_adap_enable(struct cec_adapter *adap, bool enable)
 static int stih_cec_adap_log_addr(struct cec_adapter *adap, u8 logical_addr)
 {
 	struct stih_cec *cec = cec_get_drvdata(adap);
-	u32 reg = readl(cec->regs + CEC_ADDR_TABLE);
+	u32 reg = pete_readl("drivers/media/cec/platform/sti/stih-cec.c:191", cec->regs + CEC_ADDR_TABLE);
 
 	reg |= 1 << logical_addr;
 
 	if (logical_addr == CEC_LOG_ADDR_INVALID)
 		reg = 0;
 
-	writel(reg, cec->regs + CEC_ADDR_TABLE);
+	pete_writel("drivers/media/cec/platform/sti/stih-cec.c:198", reg, cec->regs + CEC_ADDR_TABLE);
 
 	return 0;
 }
@@ -208,13 +208,13 @@ static int stih_cec_adap_transmit(struct cec_adapter *adap, u8 attempts,
 
 	/* Copy message into registers */
 	for (i = 0; i < msg->len; i++)
-		writeb(msg->msg[i], cec->regs + CEC_TX_DATA_BASE + i);
+		pete_writeb("drivers/media/cec/platform/sti/stih-cec.c:211", msg->msg[i], cec->regs + CEC_TX_DATA_BASE + i);
 
 	/*
 	 * Start transmission, configure hardware to add start and stop bits
 	 * Signal free time is handled by the hardware
 	 */
-	writel(CEC_TX_AUTO_SOM_EN | CEC_TX_AUTO_EOM_EN | CEC_TX_START |
+	pete_writel("drivers/media/cec/platform/sti/stih-cec.c:217", CEC_TX_AUTO_SOM_EN | CEC_TX_AUTO_EOM_EN | CEC_TX_START |
 	       msg->len, cec->regs + CEC_TX_ARRAY_CTRL);
 
 	return 0;
@@ -251,7 +251,7 @@ static void stih_rx_done(struct stih_cec *cec, u32 status)
 	if (status & CEC_RX_ERROR_MAX)
 		return;
 
-	msg.len = readl(cec->regs + CEC_DATA_ARRAY_STATUS) & 0x1f;
+	msg.len = pete_readl("drivers/media/cec/platform/sti/stih-cec.c:254", cec->regs + CEC_DATA_ARRAY_STATUS) & 0x1f;
 
 	if (!msg.len)
 		return;
@@ -260,7 +260,7 @@ static void stih_rx_done(struct stih_cec *cec, u32 status)
 		msg.len = 16;
 
 	for (i = 0; i < msg.len; i++)
-		msg.msg[i] = readl(cec->regs + CEC_RX_DATA_BASE + i);
+		msg.msg[i] = pete_readl("drivers/media/cec/platform/sti/stih-cec.c:263", cec->regs + CEC_RX_DATA_BASE + i);
 
 	cec_received_msg(cec->adap, &msg);
 }
@@ -284,8 +284,8 @@ static irqreturn_t stih_cec_irq_handler(int irq, void *priv)
 {
 	struct stih_cec *cec = priv;
 
-	cec->irq_status = readl(cec->regs + CEC_STATUS);
-	writel(cec->irq_status, cec->regs + CEC_STATUS);
+	cec->irq_status = pete_readl("drivers/media/cec/platform/sti/stih-cec.c:287", cec->regs + CEC_STATUS);
+	pete_writel("drivers/media/cec/platform/sti/stih-cec.c:288", cec->irq_status, cec->regs + CEC_STATUS);
 
 	return IRQ_WAKE_THREAD;
 }

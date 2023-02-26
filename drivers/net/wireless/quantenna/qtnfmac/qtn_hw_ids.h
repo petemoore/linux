@@ -27,7 +27,7 @@
 
 static inline unsigned int qtnf_chip_id_get(const void __iomem *regs_base)
 {
-	u32 board_rev = readl(regs_base + QTN_REG_SYS_CTRL_CSR);
+	u32 board_rev = pete_readl("drivers/net/wireless/quantenna/qtnfmac/qtn_hw_ids.h:30", regs_base + QTN_REG_SYS_CTRL_CSR);
 
 	return board_rev & QTN_CHIP_ID_MASK;
 }

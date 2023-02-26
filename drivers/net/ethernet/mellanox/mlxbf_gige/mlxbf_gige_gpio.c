@@ -34,22 +34,22 @@ static void mlxbf_gige_gpio_enable(struct mlxbf_gige *priv)
 	u32 val;
 
 	spin_lock_irqsave(&priv->gpio_lock, flags);
-	val = readl(priv->gpio_io + MLXBF_GIGE_GPIO_CAUSE_OR_CLRCAUSE);
+	val = pete_readl("drivers/net/ethernet/mellanox/mlxbf_gige/mlxbf_gige_gpio.c:37", priv->gpio_io + MLXBF_GIGE_GPIO_CAUSE_OR_CLRCAUSE);
 	val |= priv->phy_int_gpio_mask;
-	writel(val, priv->gpio_io + MLXBF_GIGE_GPIO_CAUSE_OR_CLRCAUSE);
+	pete_writel("drivers/net/ethernet/mellanox/mlxbf_gige/mlxbf_gige_gpio.c:39", val, priv->gpio_io + MLXBF_GIGE_GPIO_CAUSE_OR_CLRCAUSE);
 
 	/* The INT_N interrupt level is active low.
 	 * So enable cause fall bit to detect when GPIO
 	 * state goes low.
 	 */
-	val = readl(priv->gpio_io + MLXBF_GIGE_GPIO_CAUSE_FALL_EN);
+	val = pete_readl("drivers/net/ethernet/mellanox/mlxbf_gige/mlxbf_gige_gpio.c:45", priv->gpio_io + MLXBF_GIGE_GPIO_CAUSE_FALL_EN);
 	val |= priv->phy_int_gpio_mask;
-	writel(val, priv->gpio_io + MLXBF_GIGE_GPIO_CAUSE_FALL_EN);
+	pete_writel("drivers/net/ethernet/mellanox/mlxbf_gige/mlxbf_gige_gpio.c:47", val, priv->gpio_io + MLXBF_GIGE_GPIO_CAUSE_FALL_EN);
 
 	/* Enable PHY interrupt by setting the priority level */
-	val = readl(priv->gpio_io + MLXBF_GIGE_GPIO_CAUSE_OR_EVTEN0);
+	val = pete_readl("drivers/net/ethernet/mellanox/mlxbf_gige/mlxbf_gige_gpio.c:50", priv->gpio_io + MLXBF_GIGE_GPIO_CAUSE_OR_EVTEN0);
 	val |= priv->phy_int_gpio_mask;
-	writel(val, priv->gpio_io + MLXBF_GIGE_GPIO_CAUSE_OR_EVTEN0);
+	pete_writel("drivers/net/ethernet/mellanox/mlxbf_gige/mlxbf_gige_gpio.c:52", val, priv->gpio_io + MLXBF_GIGE_GPIO_CAUSE_OR_EVTEN0);
 	spin_unlock_irqrestore(&priv->gpio_lock, flags);
 }
 
@@ -59,9 +59,9 @@ static void mlxbf_gige_gpio_disable(struct mlxbf_gige *priv)
 	u32 val;
 
 	spin_lock_irqsave(&priv->gpio_lock, flags);
-	val = readl(priv->gpio_io + MLXBF_GIGE_GPIO_CAUSE_OR_EVTEN0);
+	val = pete_readl("drivers/net/ethernet/mellanox/mlxbf_gige/mlxbf_gige_gpio.c:62", priv->gpio_io + MLXBF_GIGE_GPIO_CAUSE_OR_EVTEN0);
 	val &= ~priv->phy_int_gpio_mask;
-	writel(val, priv->gpio_io + MLXBF_GIGE_GPIO_CAUSE_OR_EVTEN0);
+	pete_writel("drivers/net/ethernet/mellanox/mlxbf_gige/mlxbf_gige_gpio.c:64", val, priv->gpio_io + MLXBF_GIGE_GPIO_CAUSE_OR_EVTEN0);
 	spin_unlock_irqrestore(&priv->gpio_lock, flags);
 }
 
@@ -75,16 +75,16 @@ static irqreturn_t mlxbf_gige_gpio_handler(int irq, void *ptr)
 	/* Check if this interrupt is from PHY device.
 	 * Return if it is not.
 	 */
-	val = readl(priv->gpio_io + MLXBF_GIGE_GPIO_CAUSE_OR_CAUSE_EVTEN0);
+	val = pete_readl("drivers/net/ethernet/mellanox/mlxbf_gige/mlxbf_gige_gpio.c:78", priv->gpio_io + MLXBF_GIGE_GPIO_CAUSE_OR_CAUSE_EVTEN0);
 	if (!(val & priv->phy_int_gpio_mask))
 		return IRQ_NONE;
 
 	/* Clear interrupt when done, otherwise, no further interrupt
 	 * will be triggered.
 	 */
-	val = readl(priv->gpio_io + MLXBF_GIGE_GPIO_CAUSE_OR_CLRCAUSE);
+	val = pete_readl("drivers/net/ethernet/mellanox/mlxbf_gige/mlxbf_gige_gpio.c:85", priv->gpio_io + MLXBF_GIGE_GPIO_CAUSE_OR_CLRCAUSE);
 	val |= priv->phy_int_gpio_mask;
-	writel(val, priv->gpio_io + MLXBF_GIGE_GPIO_CAUSE_OR_CLRCAUSE);
+	pete_writel("drivers/net/ethernet/mellanox/mlxbf_gige/mlxbf_gige_gpio.c:87", val, priv->gpio_io + MLXBF_GIGE_GPIO_CAUSE_OR_CLRCAUSE);
 
 	generic_handle_irq(priv->phy_irq);
 

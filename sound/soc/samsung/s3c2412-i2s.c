@@ -92,7 +92,7 @@ static int s3c2412_i2s_hw_params(struct snd_pcm_substream *substream,
 
 	pr_debug("Entered %s\n", __func__);
 
-	iismod = readl(i2s->regs + S3C2412_IISMOD);
+	iismod = pete_readl("sound/soc/samsung/s3c2412-i2s.c:95", i2s->regs + S3C2412_IISMOD);
 	pr_debug("%s: r: IISMOD: %x\n", __func__, iismod);
 
 	switch (params_width(params)) {
@@ -104,7 +104,7 @@ static int s3c2412_i2s_hw_params(struct snd_pcm_substream *substream,
 		break;
 	}
 
-	writel(iismod, i2s->regs + S3C2412_IISMOD);
+	pete_writel("sound/soc/samsung/s3c2412-i2s.c:107", iismod, i2s->regs + S3C2412_IISMOD);
 	pr_debug("%s: w: IISMOD: %x\n", __func__, iismod);
 
 	return 0;
@@ -117,13 +117,13 @@ static int s3c2412_i2s_suspend(struct snd_soc_component *component)
 	u32 iismod;
 
 	if (component->active) {
-		i2s->suspend_iismod = readl(i2s->regs + S3C2412_IISMOD);
-		i2s->suspend_iiscon = readl(i2s->regs + S3C2412_IISCON);
-		i2s->suspend_iispsr = readl(i2s->regs + S3C2412_IISPSR);
+		i2s->suspend_iismod = pete_readl("sound/soc/samsung/s3c2412-i2s.c:120", i2s->regs + S3C2412_IISMOD);
+		i2s->suspend_iiscon = pete_readl("sound/soc/samsung/s3c2412-i2s.c:121", i2s->regs + S3C2412_IISCON);
+		i2s->suspend_iispsr = pete_readl("sound/soc/samsung/s3c2412-i2s.c:122", i2s->regs + S3C2412_IISPSR);
 
 		/* some basic suspend checks */
 
-		iismod = readl(i2s->regs + S3C2412_IISMOD);
+		iismod = pete_readl("sound/soc/samsung/s3c2412-i2s.c:126", i2s->regs + S3C2412_IISMOD);
 
 		if (iismod & S3C2412_IISCON_RXDMA_ACTIVE)
 			pr_warn("%s: RXDMA active?\n", __func__);
@@ -146,15 +146,15 @@ static int s3c2412_i2s_resume(struct snd_soc_component *component)
 		component->active, i2s->suspend_iismod, i2s->suspend_iiscon);
 
 	if (component->active) {
-		writel(i2s->suspend_iiscon, i2s->regs + S3C2412_IISCON);
-		writel(i2s->suspend_iismod, i2s->regs + S3C2412_IISMOD);
-		writel(i2s->suspend_iispsr, i2s->regs + S3C2412_IISPSR);
+		pete_writel("sound/soc/samsung/s3c2412-i2s.c:149", i2s->suspend_iiscon, i2s->regs + S3C2412_IISCON);
+		pete_writel("sound/soc/samsung/s3c2412-i2s.c:150", i2s->suspend_iismod, i2s->regs + S3C2412_IISMOD);
+		pete_writel("sound/soc/samsung/s3c2412-i2s.c:151", i2s->suspend_iispsr, i2s->regs + S3C2412_IISPSR);
 
-		writel(S3C2412_IISFIC_RXFLUSH | S3C2412_IISFIC_TXFLUSH,
+		pete_writel("sound/soc/samsung/s3c2412-i2s.c:153", S3C2412_IISFIC_RXFLUSH | S3C2412_IISFIC_TXFLUSH,
 		       i2s->regs + S3C2412_IISFIC);
 
 		ndelay(250);
-		writel(0x0, i2s->regs + S3C2412_IISFIC);
+		pete_writel("sound/soc/samsung/s3c2412-i2s.c:157", 0x0, i2s->regs + S3C2412_IISFIC);
 	}
 
 	return 0;

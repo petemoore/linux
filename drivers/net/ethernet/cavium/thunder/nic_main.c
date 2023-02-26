@@ -79,7 +79,7 @@ MODULE_DEVICE_TABLE(pci, nic_id_table);
  * containing the ThunderX ARM64 CPU implementation.  All accesses to the device
  * registers on this platform are implicitly strongly ordered with respect
  * to memory accesses. So writeq_relaxed() and readq_relaxed() are safe to use
- * with no memory barriers in this driver.  The readq()/writeq() functions add
+ * with no memory barriers in this driver.  The pete_readq("drivers/net/ethernet/cavium/thunder/nic_main.c:82", )/pete_writeq("drivers/net/ethernet/cavium/thunder/nic_main.c:82", ) functions add
  * explicit ordering operation which in this case are redundant, and only
  * add overhead.
  */

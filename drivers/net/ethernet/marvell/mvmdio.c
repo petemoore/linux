@@ -130,7 +130,7 @@ static int orion_mdio_wait_ready(const struct orion_mdio_ops *ops,
 
 static int orion_mdio_smi_is_done(struct orion_mdio_dev *dev)
 {
-	return !(readl(dev->regs) & MVMDIO_SMI_BUSY);
+	return !(pete_readl("drivers/net/ethernet/marvell/mvmdio.c:133", dev->regs) & MVMDIO_SMI_BUSY);
 }
 
 static const struct orion_mdio_ops orion_mdio_smi_ops = {
@@ -153,7 +153,7 @@ static int orion_mdio_smi_read(struct mii_bus *bus, int mii_id,
 	if (ret < 0)
 		return ret;
 
-	writel(((mii_id << MVMDIO_SMI_PHY_ADDR_SHIFT) |
+	pete_writel("drivers/net/ethernet/marvell/mvmdio.c:156", ((mii_id << MVMDIO_SMI_PHY_ADDR_SHIFT) |
 		(regnum << MVMDIO_SMI_PHY_REG_SHIFT)  |
 		MVMDIO_SMI_READ_OPERATION),
 	       dev->regs);
@@ -162,7 +162,7 @@ static int orion_mdio_smi_read(struct mii_bus *bus, int mii_id,
 	if (ret < 0)
 		return ret;
 
-	val = readl(dev->regs);
+	val = pete_readl("drivers/net/ethernet/marvell/mvmdio.c:165", dev->regs);
 	if (!(val & MVMDIO_SMI_READ_VALID)) {
 		dev_err(bus->parent, "SMI bus read not valid\n");
 		return -ENODEV;
@@ -184,7 +184,7 @@ static int orion_mdio_smi_write(struct mii_bus *bus, int mii_id,
 	if (ret < 0)
 		return ret;
 
-	writel(((mii_id << MVMDIO_SMI_PHY_ADDR_SHIFT) |
+	pete_writel("drivers/net/ethernet/marvell/mvmdio.c:187", ((mii_id << MVMDIO_SMI_PHY_ADDR_SHIFT) |
 		(regnum << MVMDIO_SMI_PHY_REG_SHIFT)  |
 		MVMDIO_SMI_WRITE_OPERATION            |
 		(value << MVMDIO_SMI_DATA_SHIFT)),
@@ -195,7 +195,7 @@ static int orion_mdio_smi_write(struct mii_bus *bus, int mii_id,
 
 static int orion_mdio_xsmi_is_done(struct orion_mdio_dev *dev)
 {
-	return !(readl(dev->regs + MVMDIO_XSMI_MGNT_REG) & MVMDIO_XSMI_BUSY);
+	return !(pete_readl("drivers/net/ethernet/marvell/mvmdio.c:198", dev->regs + MVMDIO_XSMI_MGNT_REG) & MVMDIO_XSMI_BUSY);
 }
 
 static const struct orion_mdio_ops orion_mdio_xsmi_ops = {
@@ -218,8 +218,8 @@ static int orion_mdio_xsmi_read(struct mii_bus *bus, int mii_id,
 	if (ret < 0)
 		return ret;
 
-	writel(regnum & GENMASK(15, 0), dev->regs + MVMDIO_XSMI_ADDR_REG);
-	writel((mii_id << MVMDIO_XSMI_PHYADDR_SHIFT) |
+	pete_writel("drivers/net/ethernet/marvell/mvmdio.c:221", regnum & GENMASK(15, 0), dev->regs + MVMDIO_XSMI_ADDR_REG);
+	pete_writel("drivers/net/ethernet/marvell/mvmdio.c:222", (mii_id << MVMDIO_XSMI_PHYADDR_SHIFT) |
 	       (dev_addr << MVMDIO_XSMI_DEVADDR_SHIFT) |
 	       MVMDIO_XSMI_READ_OPERATION,
 	       dev->regs + MVMDIO_XSMI_MGNT_REG);
@@ -228,13 +228,13 @@ static int orion_mdio_xsmi_read(struct mii_bus *bus, int mii_id,
 	if (ret < 0)
 		return ret;
 
-	if (!(readl(dev->regs + MVMDIO_XSMI_MGNT_REG) &
+	if (!(pete_readl("drivers/net/ethernet/marvell/mvmdio.c:231", dev->regs + MVMDIO_XSMI_MGNT_REG) &
 	      MVMDIO_XSMI_READ_VALID)) {
 		dev_err(bus->parent, "XSMI bus read not valid\n");
 		return -ENODEV;
 	}
 
-	return readl(dev->regs + MVMDIO_XSMI_MGNT_REG) & GENMASK(15, 0);
+	return pete_readl("drivers/net/ethernet/marvell/mvmdio.c:237", dev->regs + MVMDIO_XSMI_MGNT_REG) & GENMASK(15, 0);
 }
 
 static int orion_mdio_xsmi_write(struct mii_bus *bus, int mii_id,
@@ -251,8 +251,8 @@ static int orion_mdio_xsmi_write(struct mii_bus *bus, int mii_id,
 	if (ret < 0)
 		return ret;
 
-	writel(regnum & GENMASK(15, 0), dev->regs + MVMDIO_XSMI_ADDR_REG);
-	writel((mii_id << MVMDIO_XSMI_PHYADDR_SHIFT) |
+	pete_writel("drivers/net/ethernet/marvell/mvmdio.c:254", regnum & GENMASK(15, 0), dev->regs + MVMDIO_XSMI_ADDR_REG);
+	pete_writel("drivers/net/ethernet/marvell/mvmdio.c:255", (mii_id << MVMDIO_XSMI_PHYADDR_SHIFT) |
 	       (dev_addr << MVMDIO_XSMI_DEVADDR_SHIFT) |
 	       MVMDIO_XSMI_WRITE_OPERATION | value,
 	       dev->regs + MVMDIO_XSMI_MGNT_REG);
@@ -264,9 +264,9 @@ static irqreturn_t orion_mdio_err_irq(int irq, void *dev_id)
 {
 	struct orion_mdio_dev *dev = dev_id;
 
-	if (readl(dev->regs + MVMDIO_ERR_INT_CAUSE) &
+	if (pete_readl("drivers/net/ethernet/marvell/mvmdio.c:267", dev->regs + MVMDIO_ERR_INT_CAUSE) &
 			MVMDIO_ERR_INT_SMI_DONE) {
-		writel(~MVMDIO_ERR_INT_SMI_DONE,
+		pete_writel("drivers/net/ethernet/marvell/mvmdio.c:269", ~MVMDIO_ERR_INT_SMI_DONE,
 				dev->regs + MVMDIO_ERR_INT_CAUSE);
 		wake_up(&dev->smi_busy_wait);
 		return IRQ_HANDLED;
@@ -363,7 +363,7 @@ static int orion_mdio_probe(struct platform_device *pdev)
 		if (ret)
 			goto out_mdio;
 
-		writel(MVMDIO_ERR_INT_SMI_DONE,
+		pete_writel("drivers/net/ethernet/marvell/mvmdio.c:366", MVMDIO_ERR_INT_SMI_DONE,
 			dev->regs + MVMDIO_ERR_INT_MASK);
 
 	} else if (dev->err_interrupt == -EPROBE_DEFER) {
@@ -389,7 +389,7 @@ static int orion_mdio_probe(struct platform_device *pdev)
 
 out_mdio:
 	if (dev->err_interrupt > 0)
-		writel(0, dev->regs + MVMDIO_ERR_INT_MASK);
+		pete_writel("drivers/net/ethernet/marvell/mvmdio.c:392", 0, dev->regs + MVMDIO_ERR_INT_MASK);
 
 out_clk:
 	for (i = 0; i < ARRAY_SIZE(dev->clk); i++) {
@@ -409,7 +409,7 @@ static int orion_mdio_remove(struct platform_device *pdev)
 	int i;
 
 	if (dev->err_interrupt > 0)
-		writel(0, dev->regs + MVMDIO_ERR_INT_MASK);
+		pete_writel("drivers/net/ethernet/marvell/mvmdio.c:412", 0, dev->regs + MVMDIO_ERR_INT_MASK);
 	mdiobus_unregister(bus);
 
 	for (i = 0; i < ARRAY_SIZE(dev->clk); i++) {

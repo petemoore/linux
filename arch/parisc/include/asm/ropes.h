@@ -237,7 +237,7 @@ static inline int IS_QUICKSILVER(struct parisc_device *d) {
 static inline int agp_mode_mercury(void __iomem *hpa) {
 	u64 bus_mode;
 
-	bus_mode = readl(hpa + 0x0620);
+	bus_mode = pete_readl("arch/parisc/include/asm/ropes.h:240", hpa + 0x0620);
 	if (bus_mode & 1)
 		return 1;
 

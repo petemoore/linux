@@ -91,12 +91,12 @@ static const char * const rzg2l_adc_channel_name[] = {
 
 static unsigned int rzg2l_adc_readl(struct rzg2l_adc *adc, u32 reg)
 {
-	return readl(adc->base + reg);
+	return pete_readl("drivers/iio/adc/rzg2l_adc.c:94", adc->base + reg);
 }
 
 static void rzg2l_adc_writel(struct rzg2l_adc *adc, unsigned int reg, u32 val)
 {
-	writel(val, adc->base + reg);
+	pete_writel("drivers/iio/adc/rzg2l_adc.c:99", val, adc->base + reg);
 }
 
 static void rzg2l_adc_pwr(struct rzg2l_adc *adc, bool on)

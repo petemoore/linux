@@ -702,9 +702,9 @@ static int ivtv_itvc(struct ivtv *itv, bool get, u64 reg, u64 *val)
 		return -EINVAL;
 
 	if (get)
-		*val = readl(reg + reg_start);
+		*val = pete_readl("drivers/media/pci/ivtv/ivtv-ioctl.c:705", reg + reg_start);
 	else
-		writel(*val, reg + reg_start);
+		pete_writel("drivers/media/pci/ivtv/ivtv-ioctl.c:707", *val, reg + reg_start);
 	return 0;
 }
 

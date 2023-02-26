@@ -496,7 +496,7 @@ static unsigned long bm1880_pll_recalc_rate(struct clk_hw *hw,
 	unsigned long rate;
 	u32 regval;
 
-	regval = readl(pll_hw->base + pll_hw->pll.reg);
+	regval = pete_readl("drivers/clk/clk-bm1880.c:499", pll_hw->base + pll_hw->pll.reg);
 	rate = bm1880_pll_rate_calc(regval, parent_rate);
 
 	return rate;
@@ -595,10 +595,10 @@ static unsigned long bm1880_clk_div_recalc_rate(struct clk_hw *hw,
 	unsigned int val;
 	unsigned long rate;
 
-	if (!(readl(reg_addr) & BIT(3))) {
+	if (!(pete_readl("drivers/clk/clk-bm1880.c:598", reg_addr) & BIT(3))) {
 		val = div->initval;
 	} else {
-		val = readl(reg_addr) >> div->shift;
+		val = pete_readl("drivers/clk/clk-bm1880.c:601", reg_addr) >> div->shift;
 		val &= clk_div_mask(div->width);
 	}
 
@@ -618,7 +618,7 @@ static long bm1880_clk_div_round_rate(struct clk_hw *hw, unsigned long rate,
 	if (div->flags & CLK_DIVIDER_READ_ONLY) {
 		u32 val;
 
-		val = readl(reg_addr) >> div->shift;
+		val = pete_readl("drivers/clk/clk-bm1880.c:621", reg_addr) >> div->shift;
 		val &= clk_div_mask(div->width);
 
 		return divider_ro_round_rate(hw, rate, prate, div->table,
@@ -650,10 +650,10 @@ static int bm1880_clk_div_set_rate(struct clk_hw *hw, unsigned long rate,
 	else
 		__acquire(div_hw->lock);
 
-	val = readl(reg_addr);
+	val = pete_readl("drivers/clk/clk-bm1880.c:653", reg_addr);
 	val &= ~(clk_div_mask(div->width) << div_hw->div.shift);
 	val |= (u32)value << div->shift;
-	writel(val, reg_addr);
+	pete_writel("drivers/clk/clk-bm1880.c:656", val, reg_addr);
 
 	if (div_hw->lock)
 		spin_unlock_irqrestore(div_hw->lock, flags);

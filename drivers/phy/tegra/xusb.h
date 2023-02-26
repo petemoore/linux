@@ -462,13 +462,13 @@ static inline void padctl_writel(struct tegra_xusb_padctl *padctl, u32 value,
 				 unsigned long offset)
 {
 	dev_dbg(padctl->dev, "%08lx < %08x\n", offset, value);
-	writel(value, padctl->regs + offset);
+	pete_writel("drivers/phy/tegra/xusb.h:465", value, padctl->regs + offset);
 }
 
 static inline u32 padctl_readl(struct tegra_xusb_padctl *padctl,
 			       unsigned long offset)
 {
-	u32 value = readl(padctl->regs + offset);
+	u32 value = pete_readl("drivers/phy/tegra/xusb.h:471", padctl->regs + offset);
 	dev_dbg(padctl->dev, "%08lx > %08x\n", offset, value);
 	return value;
 }

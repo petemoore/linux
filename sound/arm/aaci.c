@@ -41,15 +41,15 @@ static void aaci_ac97_select_codec(struct aaci *aaci, struct snd_ac97 *ac97)
 	/*
 	 * Ensure that the slot 1/2 RX registers are empty.
 	 */
-	v = readl(aaci->base + AACI_SLFR);
+	v = pete_readl("sound/arm/aaci.c:44", aaci->base + AACI_SLFR);
 	if (v & SLFR_2RXV)
-		readl(aaci->base + AACI_SL2RX);
+		pete_readl("sound/arm/aaci.c:46", aaci->base + AACI_SL2RX);
 	if (v & SLFR_1RXV)
-		readl(aaci->base + AACI_SL1RX);
+		pete_readl("sound/arm/aaci.c:48", aaci->base + AACI_SL1RX);
 
-	if (maincr != readl(aaci->base + AACI_MAINCR)) {
-		writel(maincr, aaci->base + AACI_MAINCR);
-		readl(aaci->base + AACI_MAINCR);
+	if (maincr != pete_readl("sound/arm/aaci.c:50", aaci->base + AACI_MAINCR)) {
+		pete_writel("sound/arm/aaci.c:51", maincr, aaci->base + AACI_MAINCR);
+		pete_readl("sound/arm/aaci.c:52", aaci->base + AACI_MAINCR);
 		udelay(1);
 	}
 }
@@ -81,8 +81,8 @@ static void aaci_ac97_write(struct snd_ac97 *ac97, unsigned short reg,
 	 * P54: You must ensure that AACI_SL2TX is always written
 	 * to, if required, before data is written to AACI_SL1TX.
 	 */
-	writel(val << 4, aaci->base + AACI_SL2TX);
-	writel(reg << 12, aaci->base + AACI_SL1TX);
+	pete_writel("sound/arm/aaci.c:84", val << 4, aaci->base + AACI_SL2TX);
+	pete_writel("sound/arm/aaci.c:85", reg << 12, aaci->base + AACI_SL1TX);
 
 	/* Initially, wait one frame period */
 	udelay(FRAME_PERIOD_US);
@@ -91,7 +91,7 @@ static void aaci_ac97_write(struct snd_ac97 *ac97, unsigned short reg,
 	timeout = FRAME_PERIOD_US * 8;
 	do {
 		udelay(1);
-		v = readl(aaci->base + AACI_SLFR);
+		v = pete_readl("sound/arm/aaci.c:94", aaci->base + AACI_SLFR);
 	} while ((v & (SLFR_1TXB|SLFR_2TXB)) && --timeout);
 
 	if (v & (SLFR_1TXB|SLFR_2TXB))
@@ -120,7 +120,7 @@ static unsigned short aaci_ac97_read(struct snd_ac97 *ac97, unsigned short reg)
 	/*
 	 * Write the register address to slot 1.
 	 */
-	writel((reg << 12) | (1 << 19), aaci->base + AACI_SL1TX);
+	pete_writel("sound/arm/aaci.c:123", (reg << 12) | (1 << 19), aaci->base + AACI_SL1TX);
 
 	/* Initially, wait one frame period */
 	udelay(FRAME_PERIOD_US);
@@ -129,7 +129,7 @@ static unsigned short aaci_ac97_read(struct snd_ac97 *ac97, unsigned short reg)
 	timeout = FRAME_PERIOD_US * 8;
 	do {
 		udelay(1);
-		v = readl(aaci->base + AACI_SLFR);
+		v = pete_readl("sound/arm/aaci.c:132", aaci->base + AACI_SLFR);
 	} while ((v & SLFR_1TXB) && --timeout);
 
 	if (v & SLFR_1TXB) {
@@ -146,7 +146,7 @@ static unsigned short aaci_ac97_read(struct snd_ac97 *ac97, unsigned short reg)
 	do {
 		udelay(1);
 		cond_resched();
-		v = readl(aaci->base + AACI_SLFR) & (SLFR_1RXV|SLFR_2RXV);
+		v = pete_readl("sound/arm/aaci.c:149", aaci->base + AACI_SLFR) & (SLFR_1RXV|SLFR_2RXV);
 	} while ((v != (SLFR_1RXV|SLFR_2RXV)) && --timeout);
 
 	if (v != (SLFR_1RXV|SLFR_2RXV)) {
@@ -156,9 +156,9 @@ static unsigned short aaci_ac97_read(struct snd_ac97 *ac97, unsigned short reg)
 	}
 
 	do {
-		v = readl(aaci->base + AACI_SL1RX) >> 12;
+		v = pete_readl("sound/arm/aaci.c:159", aaci->base + AACI_SL1RX) >> 12;
 		if (v == reg) {
-			v = readl(aaci->base + AACI_SL2RX) >> 4;
+			v = pete_readl("sound/arm/aaci.c:161", aaci->base + AACI_SL2RX) >> 4;
 			break;
 		} else if (--retries) {
 			dev_warn(&aaci->dev->dev,
@@ -184,7 +184,7 @@ aaci_chan_wait_ready(struct aaci_runtime *aacirun, unsigned long mask)
 
 	do {
 		udelay(1);
-		val = readl(aacirun->base + AACI_SR);
+		val = pete_readl("sound/arm/aaci.c:187", aacirun->base + AACI_SR);
 	} while (val & mask && timeout--);
 }
 
@@ -197,12 +197,12 @@ static void aaci_fifo_irq(struct aaci *aaci, int channel, u32 mask)
 {
 	if (mask & ISR_ORINTR) {
 		dev_warn(&aaci->dev->dev, "RX overrun on chan %d\n", channel);
-		writel(ICLR_RXOEC1 << channel, aaci->base + AACI_INTCLR);
+		pete_writel("sound/arm/aaci.c:200", ICLR_RXOEC1 << channel, aaci->base + AACI_INTCLR);
 	}
 
 	if (mask & ISR_RXTOINTR) {
 		dev_warn(&aaci->dev->dev, "RX timeout on chan %d\n", channel);
-		writel(ICLR_RXTOFEC1 << channel, aaci->base + AACI_INTCLR);
+		pete_writel("sound/arm/aaci.c:205", ICLR_RXTOFEC1 << channel, aaci->base + AACI_INTCLR);
 	}
 
 	if (mask & ISR_RXINTR) {
@@ -212,7 +212,7 @@ static void aaci_fifo_irq(struct aaci *aaci, int channel, u32 mask)
 
 		if (!aacirun->substream || !aacirun->start) {
 			dev_warn(&aaci->dev->dev, "RX interrupt???\n");
-			writel(0, aacirun->base + AACI_IE);
+			pete_writel("sound/arm/aaci.c:215", 0, aacirun->base + AACI_IE);
 			return;
 		}
 
@@ -230,7 +230,7 @@ static void aaci_fifo_irq(struct aaci *aaci, int channel, u32 mask)
 			if (!(aacirun->cr & CR_EN))
 				break;
 
-			val = readl(aacirun->base + AACI_SR);
+			val = pete_readl("sound/arm/aaci.c:233", aacirun->base + AACI_SR);
 			if (!(val & SR_RXHF))
 				break;
 			if (!(val & SR_RXFF))
@@ -262,7 +262,7 @@ static void aaci_fifo_irq(struct aaci *aaci, int channel, u32 mask)
 
 	if (mask & ISR_URINTR) {
 		dev_dbg(&aaci->dev->dev, "TX underrun on chan %d\n", channel);
-		writel(ICLR_TXUEC1 << channel, aaci->base + AACI_INTCLR);
+		pete_writel("sound/arm/aaci.c:265", ICLR_TXUEC1 << channel, aaci->base + AACI_INTCLR);
 	}
 
 	if (mask & ISR_TXINTR) {
@@ -272,7 +272,7 @@ static void aaci_fifo_irq(struct aaci *aaci, int channel, u32 mask)
 
 		if (!aacirun->substream || !aacirun->start) {
 			dev_warn(&aaci->dev->dev, "TX interrupt???\n");
-			writel(0, aacirun->base + AACI_IE);
+			pete_writel("sound/arm/aaci.c:275", 0, aacirun->base + AACI_IE);
 			return;
 		}
 
@@ -290,7 +290,7 @@ static void aaci_fifo_irq(struct aaci *aaci, int channel, u32 mask)
 			if (!(aacirun->cr & CR_EN))
 				break;
 
-			val = readl(aacirun->base + AACI_SR);
+			val = pete_readl("sound/arm/aaci.c:293", aacirun->base + AACI_SR);
 			if (!(val & SR_TXHE))
 				break;
 			if (!(val & SR_TXFE))
@@ -327,7 +327,7 @@ static irqreturn_t aaci_irq(int irq, void *devid)
 	u32 mask;
 	int i;
 
-	mask = readl(aaci->base + AACI_ALLINTS);
+	mask = pete_readl("sound/arm/aaci.c:330", aaci->base + AACI_ALLINTS);
 	if (mask) {
 		u32 m = mask;
 		for (i = 0; i < 4; i++, m >>= 7) {
@@ -561,12 +561,12 @@ static void aaci_pcm_playback_stop(struct aaci_runtime *aacirun)
 {
 	u32 ie;
 
-	ie = readl(aacirun->base + AACI_IE);
+	ie = pete_readl("sound/arm/aaci.c:564", aacirun->base + AACI_IE);
 	ie &= ~(IE_URIE|IE_TXIE);
-	writel(ie, aacirun->base + AACI_IE);
+	pete_writel("sound/arm/aaci.c:566", ie, aacirun->base + AACI_IE);
 	aacirun->cr &= ~CR_EN;
 	aaci_chan_wait_ready(aacirun, SR_TXB);
-	writel(aacirun->cr, aacirun->base + AACI_TXCR);
+	pete_writel("sound/arm/aaci.c:569", aacirun->cr, aacirun->base + AACI_TXCR);
 }
 
 static void aaci_pcm_playback_start(struct aaci_runtime *aacirun)
@@ -576,10 +576,10 @@ static void aaci_pcm_playback_start(struct aaci_runtime *aacirun)
 	aaci_chan_wait_ready(aacirun, SR_TXB);
 	aacirun->cr |= CR_EN;
 
-	ie = readl(aacirun->base + AACI_IE);
+	ie = pete_readl("sound/arm/aaci.c:579", aacirun->base + AACI_IE);
 	ie |= IE_URIE | IE_TXIE;
-	writel(ie, aacirun->base + AACI_IE);
-	writel(aacirun->cr, aacirun->base + AACI_TXCR);
+	pete_writel("sound/arm/aaci.c:581", ie, aacirun->base + AACI_IE);
+	pete_writel("sound/arm/aaci.c:582", aacirun->cr, aacirun->base + AACI_TXCR);
 }
 
 static int aaci_pcm_playback_trigger(struct snd_pcm_substream *substream, int cmd)
@@ -638,13 +638,13 @@ static void aaci_pcm_capture_stop(struct aaci_runtime *aacirun)
 
 	aaci_chan_wait_ready(aacirun, SR_RXB);
 
-	ie = readl(aacirun->base + AACI_IE);
+	ie = pete_readl("sound/arm/aaci.c:641", aacirun->base + AACI_IE);
 	ie &= ~(IE_ORIE | IE_RXIE);
-	writel(ie, aacirun->base+AACI_IE);
+	pete_writel("sound/arm/aaci.c:643", ie, aacirun->base+AACI_IE);
 
 	aacirun->cr &= ~CR_EN;
 
-	writel(aacirun->cr, aacirun->base + AACI_RXCR);
+	pete_writel("sound/arm/aaci.c:647", aacirun->cr, aacirun->base + AACI_RXCR);
 }
 
 static void aaci_pcm_capture_start(struct aaci_runtime *aacirun)
@@ -659,11 +659,11 @@ static void aaci_pcm_capture_start(struct aaci_runtime *aacirun)
 #endif
 
 	aacirun->cr |= CR_EN;
-	writel(aacirun->cr, aacirun->base + AACI_RXCR);
+	pete_writel("sound/arm/aaci.c:662", aacirun->cr, aacirun->base + AACI_RXCR);
 
-	ie = readl(aacirun->base + AACI_IE);
+	ie = pete_readl("sound/arm/aaci.c:664", aacirun->base + AACI_IE);
 	ie |= IE_ORIE |IE_RXIE; // overrun and rx interrupt -- half full
-	writel(ie, aacirun->base + AACI_IE);
+	pete_writel("sound/arm/aaci.c:666", ie, aacirun->base + AACI_IE);
 }
 
 static int aaci_pcm_capture_trigger(struct snd_pcm_substream *substream, int cmd)
@@ -826,9 +826,9 @@ static int aaci_probe_ac97(struct aaci *aaci)
 	/*
 	 * Assert AACIRESET for 2us
 	 */
-	writel(0, aaci->base + AACI_RESET);
+	pete_writel("sound/arm/aaci.c:829", 0, aaci->base + AACI_RESET);
 	udelay(2);
-	writel(RESET_NRST, aaci->base + AACI_RESET);
+	pete_writel("sound/arm/aaci.c:831", RESET_NRST, aaci->base + AACI_RESET);
 
 	/*
 	 * Give the AC'97 codec more than enough time
@@ -942,22 +942,22 @@ static unsigned int aaci_size_fifo(struct aaci *aaci)
 	 * Enable the channel, but don't assign it to any slots, so
 	 * it won't empty onto the AC'97 link.
 	 */
-	writel(CR_FEN | CR_SZ16 | CR_EN, aacirun->base + AACI_TXCR);
+	pete_writel("sound/arm/aaci.c:945", CR_FEN | CR_SZ16 | CR_EN, aacirun->base + AACI_TXCR);
 
-	for (i = 0; !(readl(aacirun->base + AACI_SR) & SR_TXFF) && i < 4096; i++)
-		writel(0, aacirun->fifo);
+	for (i = 0; !(pete_readl("sound/arm/aaci.c:947", aacirun->base + AACI_SR) & SR_TXFF) && i < 4096; i++)
+		pete_writel("sound/arm/aaci.c:948", 0, aacirun->fifo);
 
-	writel(0, aacirun->base + AACI_TXCR);
+	pete_writel("sound/arm/aaci.c:950", 0, aacirun->base + AACI_TXCR);
 
 	/*
 	 * Re-initialise the AACI after the FIFO depth test, to
 	 * ensure that the FIFOs are empty.  Unfortunately, merely
 	 * disabling the channel doesn't clear the FIFO.
 	 */
-	writel(aaci->maincr & ~MAINCR_IE, aaci->base + AACI_MAINCR);
-	readl(aaci->base + AACI_MAINCR);
+	pete_writel("sound/arm/aaci.c:957", aaci->maincr & ~MAINCR_IE, aaci->base + AACI_MAINCR);
+	pete_readl("sound/arm/aaci.c:958", aaci->base + AACI_MAINCR);
 	udelay(1);
-	writel(aaci->maincr, aaci->base + AACI_MAINCR);
+	pete_writel("sound/arm/aaci.c:960", aaci->maincr, aaci->base + AACI_MAINCR);
 
 	/*
 	 * If we hit 4096 entries, we failed.  Go back to the specified
@@ -1008,18 +1008,18 @@ static int aaci_probe(struct amba_device *dev,
 	for (i = 0; i < 4; i++) {
 		void __iomem *base = aaci->base + i * 0x14;
 
-		writel(0, base + AACI_IE);
-		writel(0, base + AACI_TXCR);
-		writel(0, base + AACI_RXCR);
+		pete_writel("sound/arm/aaci.c:1011", 0, base + AACI_IE);
+		pete_writel("sound/arm/aaci.c:1012", 0, base + AACI_TXCR);
+		pete_writel("sound/arm/aaci.c:1013", 0, base + AACI_RXCR);
 	}
 
-	writel(0x1fff, aaci->base + AACI_INTCLR);
-	writel(aaci->maincr, aaci->base + AACI_MAINCR);
+	pete_writel("sound/arm/aaci.c:1016", 0x1fff, aaci->base + AACI_INTCLR);
+	pete_writel("sound/arm/aaci.c:1017", aaci->maincr, aaci->base + AACI_MAINCR);
 	/*
 	 * Fix: ac97 read back fail errors by reading
 	 * from any arbitrary aaci register.
 	 */
-	readl(aaci->base + AACI_CSCH1);
+	pete_readl("sound/arm/aaci.c:1022", aaci->base + AACI_CSCH1);
 	ret = aaci_probe_ac97(aaci);
 	if (ret)
 		goto out;
@@ -1061,7 +1061,7 @@ static void aaci_remove(struct amba_device *dev)
 
 	if (card) {
 		struct aaci *aaci = card->private_data;
-		writel(0, aaci->base + AACI_MAINCR);
+		pete_writel("sound/arm/aaci.c:1064", 0, aaci->base + AACI_MAINCR);
 
 		snd_card_free(card);
 		amba_release_regions(dev);

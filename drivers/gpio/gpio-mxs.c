@@ -79,7 +79,7 @@ static int mxs_gpio_set_irq_type(struct irq_data *d, unsigned int type)
 	port->both_edges &= ~pin_mask;
 	switch (type) {
 	case IRQ_TYPE_EDGE_BOTH:
-		val = readl(port->base + PINCTRL_DIN(port)) & pin_mask;
+		val = pete_readl("drivers/gpio/gpio-mxs.c:82", port->base + PINCTRL_DIN(port)) & pin_mask;
 		if (val)
 			edge = GPIO_INT_FALL_EDGE;
 		else
@@ -105,21 +105,21 @@ static int mxs_gpio_set_irq_type(struct irq_data *d, unsigned int type)
 	/* set level or edge */
 	pin_addr = port->base + PINCTRL_IRQLEV(port);
 	if (edge & GPIO_INT_LEV_MASK) {
-		writel(pin_mask, pin_addr + MXS_SET);
-		writel(pin_mask, port->base + PINCTRL_IRQEN(port) + MXS_SET);
+		pete_writel("drivers/gpio/gpio-mxs.c:108", pin_mask, pin_addr + MXS_SET);
+		pete_writel("drivers/gpio/gpio-mxs.c:109", pin_mask, port->base + PINCTRL_IRQEN(port) + MXS_SET);
 	} else {
-		writel(pin_mask, pin_addr + MXS_CLR);
-		writel(pin_mask, port->base + PINCTRL_PIN2IRQ(port) + MXS_SET);
+		pete_writel("drivers/gpio/gpio-mxs.c:111", pin_mask, pin_addr + MXS_CLR);
+		pete_writel("drivers/gpio/gpio-mxs.c:112", pin_mask, port->base + PINCTRL_PIN2IRQ(port) + MXS_SET);
 	}
 
 	/* set polarity */
 	pin_addr = port->base + PINCTRL_IRQPOL(port);
 	if (edge & GPIO_INT_POL_MASK)
-		writel(pin_mask, pin_addr + MXS_SET);
+		pete_writel("drivers/gpio/gpio-mxs.c:118", pin_mask, pin_addr + MXS_SET);
 	else
-		writel(pin_mask, pin_addr + MXS_CLR);
+		pete_writel("drivers/gpio/gpio-mxs.c:120", pin_mask, pin_addr + MXS_CLR);
 
-	writel(pin_mask, port->base + PINCTRL_IRQSTAT(port) + MXS_CLR);
+	pete_writel("drivers/gpio/gpio-mxs.c:122", pin_mask, port->base + PINCTRL_IRQSTAT(port) + MXS_CLR);
 
 	return 0;
 }
@@ -132,13 +132,13 @@ static void mxs_flip_edge(struct mxs_gpio_port *port, u32 gpio)
 	bit = 1 << gpio;
 
 	pin_addr = port->base + PINCTRL_IRQPOL(port);
-	val = readl(pin_addr);
+	val = pete_readl("drivers/gpio/gpio-mxs.c:135", pin_addr);
 	edge = val & bit;
 
 	if (edge)
-		writel(bit, pin_addr + MXS_CLR);
+		pete_writel("drivers/gpio/gpio-mxs.c:139", bit, pin_addr + MXS_CLR);
 	else
-		writel(bit, pin_addr + MXS_SET);
+		pete_writel("drivers/gpio/gpio-mxs.c:141", bit, pin_addr + MXS_SET);
 }
 
 /* MXS has one interrupt *per* gpio port */
@@ -149,8 +149,8 @@ static void mxs_gpio_irq_handler(struct irq_desc *desc)
 
 	desc->irq_data.chip->irq_ack(&desc->irq_data);
 
-	irq_stat = readl(port->base + PINCTRL_IRQSTAT(port)) &
-			readl(port->base + PINCTRL_IRQEN(port));
+	irq_stat = pete_readl("drivers/gpio/gpio-mxs.c:152", port->base + PINCTRL_IRQSTAT(port)) &
+			pete_readl("drivers/gpio/gpio-mxs.c:153", port->base + PINCTRL_IRQEN(port));
 
 	while (irq_stat != 0) {
 		int irqoffset = fls(irq_stat) - 1;
@@ -242,7 +242,7 @@ static int mxs_gpio_get_direction(struct gpio_chip *gc, unsigned int offset)
 	u32 mask = 1 << offset;
 	u32 dir;
 
-	dir = readl(port->base + PINCTRL_DOE(port));
+	dir = pete_readl("drivers/gpio/gpio-mxs.c:245", port->base + PINCTRL_DOE(port));
 	if (dir & mask)
 		return GPIO_LINE_DIRECTION_OUT;
 
@@ -292,11 +292,11 @@ static int mxs_gpio_probe(struct platform_device *pdev)
 	port->base = base;
 
 	/* initially disable the interrupts */
-	writel(0, port->base + PINCTRL_PIN2IRQ(port));
-	writel(0, port->base + PINCTRL_IRQEN(port));
+	pete_writel("drivers/gpio/gpio-mxs.c:295", 0, port->base + PINCTRL_PIN2IRQ(port));
+	pete_writel("drivers/gpio/gpio-mxs.c:296", 0, port->base + PINCTRL_IRQEN(port));
 
 	/* clear address has to be used to clear IRQSTAT bits */
-	writel(~0U, port->base + PINCTRL_IRQSTAT(port) + MXS_CLR);
+	pete_writel("drivers/gpio/gpio-mxs.c:299", ~0U, port->base + PINCTRL_IRQSTAT(port) + MXS_CLR);
 
 	irq_base = devm_irq_alloc_descs(&pdev->dev, -1, 0, 32, numa_node_id());
 	if (irq_base < 0) {

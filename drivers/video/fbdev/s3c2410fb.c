@@ -80,9 +80,9 @@ static void s3c2410fb_set_lcdaddr(struct fb_info *info)
 	dprintk("LCDSADDR2 = 0x%08lx\n", saddr2);
 	dprintk("LCDSADDR3 = 0x%08lx\n", saddr3);
 
-	writel(saddr1, regs + S3C2410_LCDSADDR1);
-	writel(saddr2, regs + S3C2410_LCDSADDR2);
-	writel(saddr3, regs + S3C2410_LCDSADDR3);
+	pete_writel("drivers/video/fbdev/s3c2410fb.c:83", saddr1, regs + S3C2410_LCDSADDR1);
+	pete_writel("drivers/video/fbdev/s3c2410fb.c:84", saddr2, regs + S3C2410_LCDSADDR2);
+	pete_writel("drivers/video/fbdev/s3c2410fb.c:85", saddr3, regs + S3C2410_LCDSADDR3);
 }
 
 /* s3c2410fb_calc_pixclk()
@@ -401,18 +401,18 @@ static void s3c2410fb_activate_var(struct fb_info *info)
 	dprintk("lcdcon[4] = 0x%08lx\n", fbi->regs.lcdcon4);
 	dprintk("lcdcon[5] = 0x%08lx\n", fbi->regs.lcdcon5);
 
-	writel(fbi->regs.lcdcon1 & ~S3C2410_LCDCON1_ENVID,
+	pete_writel("drivers/video/fbdev/s3c2410fb.c:404", fbi->regs.lcdcon1 & ~S3C2410_LCDCON1_ENVID,
 		regs + S3C2410_LCDCON1);
-	writel(fbi->regs.lcdcon2, regs + S3C2410_LCDCON2);
-	writel(fbi->regs.lcdcon3, regs + S3C2410_LCDCON3);
-	writel(fbi->regs.lcdcon4, regs + S3C2410_LCDCON4);
-	writel(fbi->regs.lcdcon5, regs + S3C2410_LCDCON5);
+	pete_writel("drivers/video/fbdev/s3c2410fb.c:406", fbi->regs.lcdcon2, regs + S3C2410_LCDCON2);
+	pete_writel("drivers/video/fbdev/s3c2410fb.c:407", fbi->regs.lcdcon3, regs + S3C2410_LCDCON3);
+	pete_writel("drivers/video/fbdev/s3c2410fb.c:408", fbi->regs.lcdcon4, regs + S3C2410_LCDCON4);
+	pete_writel("drivers/video/fbdev/s3c2410fb.c:409", fbi->regs.lcdcon5, regs + S3C2410_LCDCON5);
 
 	/* set lcd address pointers */
 	s3c2410fb_set_lcdaddr(info);
 
 	fbi->regs.lcdcon1 |= S3C2410_LCDCON1_ENVID,
-	writel(fbi->regs.lcdcon1, regs + S3C2410_LCDCON1);
+	pete_writel("drivers/video/fbdev/s3c2410fb.c:415", fbi->regs.lcdcon1, regs + S3C2410_LCDCON1);
 }
 
 /*
@@ -461,9 +461,9 @@ static void schedule_palette_update(struct s3c2410fb_info *fbi,
 		fbi->palette_ready = 1;
 
 		/* enable IRQ */
-		irqen = readl(irq_base + S3C24XX_LCDINTMSK);
+		irqen = pete_readl("drivers/video/fbdev/s3c2410fb.c:464", irq_base + S3C24XX_LCDINTMSK);
 		irqen &= ~S3C2410_LCDINT_FRSYNC;
-		writel(irqen, irq_base + S3C24XX_LCDINTMSK);
+		pete_writel("drivers/video/fbdev/s3c2410fb.c:466", irqen, irq_base + S3C24XX_LCDINTMSK);
 	}
 
 	local_irq_restore(flags);
@@ -512,7 +512,7 @@ static int s3c2410fb_setcolreg(unsigned regno,
 			val |= (green >>  5) & 0x07e0;
 			val |= (blue  >> 11) & 0x001f;
 
-			writel(val, regs + S3C2410_TFTPAL(regno));
+			pete_writel("drivers/video/fbdev/s3c2410fb.c:515", val, regs + S3C2410_TFTPAL(regno));
 			schedule_palette_update(fbi, regno, val);
 		}
 
@@ -540,7 +540,7 @@ static void s3c2410fb_lcd_enable(struct s3c2410fb_info *fbi, int enable)
 	else
 		fbi->regs.lcdcon1 &= ~S3C2410_LCDCON1_ENVID;
 
-	writel(fbi->regs.lcdcon1, fbi->io + S3C2410_LCDCON1);
+	pete_writel("drivers/video/fbdev/s3c2410fb.c:543", fbi->regs.lcdcon1, fbi->io + S3C2410_LCDCON1);
 
 	local_irq_restore(flags);
 }
@@ -574,10 +574,10 @@ static int s3c2410fb_blank(int blank_mode, struct fb_info *info)
 		s3c2410fb_lcd_enable(fbi, 1);
 
 	if (blank_mode == FB_BLANK_UNBLANK)
-		writel(0x0, tpal_reg);
+		pete_writel("drivers/video/fbdev/s3c2410fb.c:577", 0x0, tpal_reg);
 	else {
 		dprintk("setting TPAL to output 0x000000\n");
-		writel(S3C2410_TPAL_EN, tpal_reg);
+		pete_writel("drivers/video/fbdev/s3c2410fb.c:580", S3C2410_TPAL_EN, tpal_reg);
 	}
 
 	return 0;
@@ -674,8 +674,8 @@ static inline void modify_gpio(void __iomem *reg,
 	if (!reg)
 		return;
 
-	tmp = readl(reg) & ~mask;
-	writel(tmp | set, reg);
+	tmp = pete_readl("drivers/video/fbdev/s3c2410fb.c:677", reg) & ~mask;
+	pete_writel("drivers/video/fbdev/s3c2410fb.c:678", tmp | set, reg);
 }
 
 /*
@@ -712,12 +712,12 @@ static int s3c2410fb_init_registers(struct fb_info *info)
 	local_irq_restore(flags);
 
 	dprintk("LPCSEL    = 0x%08lx\n", mach_info->lpcsel);
-	writel(mach_info->lpcsel, lpcsel);
+	pete_writel("drivers/video/fbdev/s3c2410fb.c:715", mach_info->lpcsel, lpcsel);
 
-	dprintk("replacing TPAL %08x\n", readl(tpal));
+	dprintk("replacing TPAL %08x\n", pete_readl("drivers/video/fbdev/s3c2410fb.c:717", tpal));
 
 	/* ensure temporary palette disabled */
-	writel(0x00, tpal);
+	pete_writel("drivers/video/fbdev/s3c2410fb.c:720", 0x00, tpal);
 
 	return 0;
 }
@@ -734,14 +734,14 @@ static void s3c2410fb_write_palette(struct s3c2410fb_info *fbi)
 		if (ent == PALETTE_BUFF_CLEAR)
 			continue;
 
-		writel(ent, regs + S3C2410_TFTPAL(i));
+		pete_writel("drivers/video/fbdev/s3c2410fb.c:737", ent, regs + S3C2410_TFTPAL(i));
 
 		/* it seems the only way to know exactly
 		 * if the palette wrote ok, is to check
 		 * to see if the value verifies ok
 		 */
 
-		if (readw(regs + S3C2410_TFTPAL(i)) == ent)
+		if (pete_readw("drivers/video/fbdev/s3c2410fb.c:744", regs + S3C2410_TFTPAL(i)) == ent)
 			fbi->palette_buffer[i] = PALETTE_BUFF_CLEAR;
 		else
 			fbi->palette_ready = 1;   /* retry */
@@ -752,14 +752,14 @@ static irqreturn_t s3c2410fb_irq(int irq, void *dev_id)
 {
 	struct s3c2410fb_info *fbi = dev_id;
 	void __iomem *irq_base = fbi->irq_base;
-	unsigned long lcdirq = readl(irq_base + S3C24XX_LCDINTPND);
+	unsigned long lcdirq = pete_readl("drivers/video/fbdev/s3c2410fb.c:755", irq_base + S3C24XX_LCDINTPND);
 
 	if (lcdirq & S3C2410_LCDINT_FRSYNC) {
 		if (fbi->palette_ready)
 			s3c2410fb_write_palette(fbi);
 
-		writel(S3C2410_LCDINT_FRSYNC, irq_base + S3C24XX_LCDINTPND);
-		writel(S3C2410_LCDINT_FRSYNC, irq_base + S3C24XX_LCDSRCPND);
+		pete_writel("drivers/video/fbdev/s3c2410fb.c:761", S3C2410_LCDINT_FRSYNC, irq_base + S3C24XX_LCDINTPND);
+		pete_writel("drivers/video/fbdev/s3c2410fb.c:762", S3C2410_LCDINT_FRSYNC, irq_base + S3C24XX_LCDSRCPND);
 	}
 
 	return IRQ_HANDLED;
@@ -894,8 +894,8 @@ static int s3c24xxfb_probe(struct platform_device *pdev,
 	strcpy(fbinfo->fix.id, driver_name);
 
 	/* Stop the video */
-	lcdcon1 = readl(info->io + S3C2410_LCDCON1);
-	writel(lcdcon1 & ~S3C2410_LCDCON1_ENVID, info->io + S3C2410_LCDCON1);
+	lcdcon1 = pete_readl("drivers/video/fbdev/s3c2410fb.c:897", info->io + S3C2410_LCDCON1);
+	pete_writel("drivers/video/fbdev/s3c2410fb.c:898", lcdcon1 & ~S3C2410_LCDCON1_ENVID, info->io + S3C2410_LCDCON1);
 
 	fbinfo->fix.type	    = FB_TYPE_PACKED_PIXELS;
 	fbinfo->fix.type_aux	    = 0;

@@ -304,14 +304,14 @@ struct hclgevf_caps_bit_map {
 
 static inline void hclgevf_write_reg(void __iomem *base, u32 reg, u32 value)
 {
-	writel(value, base + reg);
+	pete_writel("drivers/net/ethernet/hisilicon/hns3/hns3vf/hclgevf_cmd.h:307", value, base + reg);
 }
 
 static inline u32 hclgevf_read_reg(u8 __iomem *base, u32 reg)
 {
 	u8 __iomem *reg_addr = READ_ONCE(base);
 
-	return readl(reg_addr + reg);
+	return pete_readl("drivers/net/ethernet/hisilicon/hns3/hns3vf/hclgevf_cmd.h:314", reg_addr + reg);
 }
 
 #define hclgevf_write_dev(a, reg, value) \

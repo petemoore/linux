@@ -489,13 +489,13 @@ struct fst_card_info {
  */
 #define WIN_OFFSET(X)   ((long)&(((struct fst_shared *)SMC_BASE)->X))
 
-#define FST_RDB(C, E)    (readb((C)->mem + WIN_OFFSET(E)))
-#define FST_RDW(C, E)    (readw((C)->mem + WIN_OFFSET(E)))
-#define FST_RDL(C, E)    (readl((C)->mem + WIN_OFFSET(E)))
+#define FST_RDB(C, E)    (pete_readb("drivers/net/wan/farsync.c:492", (C)->mem + WIN_OFFSET(E)))
+#define FST_RDW(C, E)    (pete_readw("drivers/net/wan/farsync.c:493", (C)->mem + WIN_OFFSET(E)))
+#define FST_RDL(C, E)    (pete_readl("drivers/net/wan/farsync.c:494", (C)->mem + WIN_OFFSET(E)))
 
-#define FST_WRB(C, E, B)  (writeb((B), (C)->mem + WIN_OFFSET(E)))
-#define FST_WRW(C, E, W)  (writew((W), (C)->mem + WIN_OFFSET(E)))
-#define FST_WRL(C, E, L)  (writel((L), (C)->mem + WIN_OFFSET(E)))
+#define FST_WRB(C, E, B)  (pete_writeb("drivers/net/wan/farsync.c:496", (B), (C)->mem + WIN_OFFSET(E)))
+#define FST_WRW(C, E, W)  (pete_writew("drivers/net/wan/farsync.c:497", (W), (C)->mem + WIN_OFFSET(E)))
+#define FST_WRL(C, E, L)  (pete_writel("drivers/net/wan/farsync.c:498", (L), (C)->mem + WIN_OFFSET(E)))
 
 /*      Debug support
  */
@@ -708,7 +708,7 @@ fst_cpurelease(struct fst_card_info *card)
 	if (card->family == FST_FAMILY_TXU) {
 		/* Force posted writes to complete
 		 */
-		(void)readb(card->mem);
+		(void)pete_readb("drivers/net/wan/farsync.c:711", card->mem);
 
 		/* Release LRESET DO = 1
 		 * Then release Local Hold, DO = 1
@@ -716,7 +716,7 @@ fst_cpurelease(struct fst_card_info *card)
 		outw(0x040e, card->pci_conf + CNTRL_9054 + 2);
 		outw(0x040f, card->pci_conf + CNTRL_9054 + 2);
 	} else {
-		(void)readb(card->ctlmem);
+		(void)pete_readb("drivers/net/wan/farsync.c:719", card->ctlmem);
 	}
 }
 
@@ -726,7 +726,7 @@ static inline void
 fst_clear_intr(struct fst_card_info *card)
 {
 	if (card->family == FST_FAMILY_TXU) {
-		(void)readb(card->ctlmem);
+		(void)pete_readb("drivers/net/wan/farsync.c:729", card->ctlmem);
 	} else {
 		/* Poke the appropriate PLX chip register (same as enabling interrupts)
 		 */

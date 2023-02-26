@@ -1126,13 +1126,13 @@ void wil_dbg_ratelimited(const struct wil6210_priv *wil, const char *fmt, ...);
 /* register read */
 static inline u32 wil_r(struct wil6210_priv *wil, u32 reg)
 {
-	return readl(wil->csr + HOSTADDR(reg));
+	return pete_readl("drivers/net/wireless/ath/wil6210/wil6210.h:1129", wil->csr + HOSTADDR(reg));
 }
 
 /* register write. wmb() to make sure it is completed */
 static inline void wil_w(struct wil6210_priv *wil, u32 reg, u32 val)
 {
-	writel(val, wil->csr + HOSTADDR(reg));
+	pete_writel("drivers/net/wireless/ath/wil6210/wil6210.h:1135", val, wil->csr + HOSTADDR(reg));
 	wmb(); /* wait for write to propagate to the HW */
 }
 

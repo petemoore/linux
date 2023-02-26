@@ -318,7 +318,7 @@
 
 #define AS_LOCK_REGION_MIN_SIZE                 (1ULL << 15)
 
-#define gpu_write(dev, reg, data) writel(data, dev->iomem + reg)
-#define gpu_read(dev, reg) readl(dev->iomem + reg)
+#define gpu_write(dev, reg, data) pete_writel("drivers/gpu/drm/panfrost/panfrost_regs.h:321", data, dev->iomem + reg)
+#define gpu_read(dev, reg) pete_readl("drivers/gpu/drm/panfrost/panfrost_regs.h:322", dev->iomem + reg)
 
 #endif

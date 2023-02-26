@@ -4248,7 +4248,7 @@ static int octeon_device_init(struct octeon_device *octeon_dev)
 	 * (and the f/w appear to never have started).
 	 */
 	for (j = 0; j < octeon_dev->num_oqs; j++)
-		writel(octeon_dev->droq[j]->max_count,
+		pete_writel("drivers/net/ethernet/cavium/liquidio/lio_main.c:4251", octeon_dev->droq[j]->max_count,
 		       octeon_dev->droq[j]->pkts_credit_reg);
 
 	/* Enable the input and output queues for this Octeon device */

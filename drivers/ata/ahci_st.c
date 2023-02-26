@@ -45,10 +45,10 @@ static void st_ahci_configure_oob(void __iomem *mmio)
 		  (0x08 << ST_AHCI_OOBR_CIMIN_SHIFT) |
 		  (0x0C << ST_AHCI_OOBR_CIMAX_SHIFT);
 
-	old_val = readl(mmio + ST_AHCI_OOBR);
-	writel(old_val | ST_AHCI_OOBR_WE, mmio + ST_AHCI_OOBR);
-	writel(new_val | ST_AHCI_OOBR_WE, mmio + ST_AHCI_OOBR);
-	writel(new_val, mmio + ST_AHCI_OOBR);
+	old_val = pete_readl("drivers/ata/ahci_st.c:48", mmio + ST_AHCI_OOBR);
+	pete_writel("drivers/ata/ahci_st.c:49", old_val | ST_AHCI_OOBR_WE, mmio + ST_AHCI_OOBR);
+	pete_writel("drivers/ata/ahci_st.c:50", new_val | ST_AHCI_OOBR_WE, mmio + ST_AHCI_OOBR);
+	pete_writel("drivers/ata/ahci_st.c:51", new_val, mmio + ST_AHCI_OOBR);
 }
 
 static int st_ahci_deassert_resets(struct ahci_host_priv *hpriv,

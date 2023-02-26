@@ -134,11 +134,11 @@ struct atmel_isi {
 
 static void isi_writel(struct atmel_isi *isi, u32 reg, u32 val)
 {
-	writel(val, isi->regs + reg);
+	pete_writel("drivers/media/platform/atmel/atmel-isi.c:137", val, isi->regs + reg);
 }
 static u32 isi_readl(struct atmel_isi *isi, u32 reg)
 {
-	return readl(isi->regs + reg);
+	return pete_readl("drivers/media/platform/atmel/atmel-isi.c:141", isi->regs + reg);
 }
 
 static void configure_geometry(struct atmel_isi *isi)

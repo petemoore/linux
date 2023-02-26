@@ -14,7 +14,7 @@
 
 /*
  * FIXME
- * Ugh, we don't have PCI space, so map readb() and friends to use raw I/O
+ * Ugh, we don't have PCI space, so map pete_readb("arch/m68k/include/asm/vga.h:17", ) and friends to use raw I/O
  * accessors, which are identical to the z_*() Zorro bus accessors.
  * This should make cirrusfb work again on Amiga
  */

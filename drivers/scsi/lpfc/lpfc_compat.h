@@ -30,7 +30,7 @@ Note: HBA's SLI memory contains little-endian LW.
 Thus to access it from a little-endian host,
 memcpy_toio() and memcpy_fromio() can be used.
 However on a big-endian host, copy 4 bytes at a time,
-using writel() and readl().
+using pete_writel("drivers/scsi/lpfc/lpfc_compat.h:33", ) and pete_readl("drivers/scsi/lpfc/lpfc_compat.h:33", ).
  *******************************************************************/
 #include <asm/byteorder.h>
 
@@ -49,8 +49,8 @@ lpfc_memcpy_to_slim(void __iomem *dest, void *src, unsigned int bytes)
 
 	/* write input bytes, 4 bytes at a time */
 	for (four_bytes = bytes /4; four_bytes > 0; four_bytes--) {
-		writel( *src32, dest32);
-		readl(dest32); /* flush */
+		pete_writel("drivers/scsi/lpfc/lpfc_compat.h:52",  *src32, dest32);
+		pete_readl("drivers/scsi/lpfc/lpfc_compat.h:53", dest32); /* flush */
 		dest32++;
 		src32++;
 	}
@@ -71,7 +71,7 @@ lpfc_memcpy_from_slim( void *dest, void __iomem *src, unsigned int bytes)
 
 	/* read input bytes, 4 bytes at a time */
 	for (four_bytes = bytes /4; four_bytes > 0; four_bytes--) {
-		*dest32 = readl( src32);
+		*dest32 = pete_readl("drivers/scsi/lpfc/lpfc_compat.h:74",  src32);
 		dest32++;
 		src32++;
 	}

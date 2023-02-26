@@ -55,17 +55,17 @@
 do {							\
 	int gpioreg;                                    \
 							\
-	gpioreg = readl(__io_address(0x20200000+0x8));	\
+	gpioreg = pete_readl("drivers/usb/host/dwc_otg/dwc_otg_fiq_fsm.h:58", __io_address(0x20200000+0x8));	\
 	gpioreg &= ~(7 << (x-20)*3);			\
 	gpioreg |= 0x1 << (x-20)*3;			\
-	writel(gpioreg, __io_address(0x20200000+0x8));	\
+	pete_writel("drivers/usb/host/dwc_otg/dwc_otg_fiq_fsm.h:61", gpioreg, __io_address(0x20200000+0x8));	\
 							\
-	writel(1<<x, __io_address(0x20200000+(0x1C)));	\
+	pete_writel("drivers/usb/host/dwc_otg/dwc_otg_fiq_fsm.h:63", 1<<x, __io_address(0x20200000+(0x1C)));	\
 } while (0)
 
 #define FLAME_OFF(x)					\
 do {							\
-	writel(1<<x, __io_address(0x20200000+(0x28)));	\
+	pete_writel("drivers/usb/host/dwc_otg/dwc_otg_fiq_fsm.h:68", 1<<x, __io_address(0x20200000+(0x28)));	\
 } while (0)
 #else
 #define FLAME_ON(x) do { } while (0)

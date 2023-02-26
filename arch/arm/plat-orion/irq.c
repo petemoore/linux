@@ -27,7 +27,7 @@ void __init orion_irq_init(unsigned int irq_start, void __iomem *maskaddr)
 	/*
 	 * Mask all interrupts initially.
 	 */
-	writel(0, maskaddr);
+	pete_writel("arch/arm/plat-orion/irq.c:30", 0, maskaddr);
 
 	gc = irq_alloc_generic_chip("orion_irq", 1, irq_start, maskaddr,
 				    handle_level_irq);

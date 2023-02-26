@@ -1912,9 +1912,9 @@ u64 mlx4_read_clock(struct mlx4_dev *dev)
 	struct mlx4_priv *priv = mlx4_priv(dev);
 
 	for (i = 0; i < 10; i++) {
-		clockhi = swab32(readl(priv->clock_mapping));
-		clocklo = swab32(readl(priv->clock_mapping + 4));
-		clockhi1 = swab32(readl(priv->clock_mapping));
+		clockhi = swab32(pete_readl("drivers/net/ethernet/mellanox/mlx4/main.c:1915", priv->clock_mapping));
+		clocklo = swab32(pete_readl("drivers/net/ethernet/mellanox/mlx4/main.c:1916", priv->clock_mapping + 4));
+		clockhi1 = swab32(pete_readl("drivers/net/ethernet/mellanox/mlx4/main.c:1917", priv->clock_mapping));
 		if (clockhi == clockhi1)
 			break;
 	}
@@ -2004,7 +2004,7 @@ static int mlx4_comm_check_offline(struct mlx4_dev *dev)
 
 	end = msecs_to_jiffies(MLX4_COMM_OFFLINE_TIME_OUT) + jiffies;
 	while (time_before(jiffies, end)) {
-		comm_flags = swab32(readl((__iomem char *)priv->mfunc.comm +
+		comm_flags = swab32(pete_readl("drivers/net/ethernet/mellanox/mlx4/main.c:2007", (__iomem char *)priv->mfunc.comm +
 					  MLX4_COMM_CHAN_FLAGS));
 		offline_bit = (comm_flags &
 			       (u32)(1 << COMM_CHAN_OFFLINE_OFFSET));
@@ -2037,7 +2037,7 @@ static void mlx4_reset_vf_support(struct mlx4_dev *dev)
 	u32 comm_rst;
 	u32 comm_caps;
 
-	comm_caps = swab32(readl((__iomem char *)priv->mfunc.comm +
+	comm_caps = swab32(pete_readl("drivers/net/ethernet/mellanox/mlx4/main.c:2040", (__iomem char *)priv->mfunc.comm +
 				 MLX4_COMM_CHAN_CAPS));
 	comm_rst = (comm_caps & (u32)(1 << COMM_CHAN_RST_OFFSET));
 
@@ -2082,7 +2082,7 @@ static int mlx4_init_slave(struct mlx4_dev *dev)
 
 	/* check the driver version - the slave I/F revision
 	 * must match the master's */
-	slave_read = swab32(readl(&priv->mfunc.comm->slave_read));
+	slave_read = swab32(pete_readl("drivers/net/ethernet/mellanox/mlx4/main.c:2085", &priv->mfunc.comm->slave_read));
 	cmd_channel_ver = mlx4_comm_get_version();
 
 	if (MLX4_COMM_GET_IF_REV(cmd_channel_ver) !=
@@ -3193,7 +3193,7 @@ static int mlx4_get_ownership(struct mlx4_dev *dev)
 		return -ENOMEM;
 	}
 
-	ret = readl(owner);
+	ret = pete_readl("drivers/net/ethernet/mellanox/mlx4/main.c:3196", owner);
 	iounmap(owner);
 	return (int) !!ret;
 }
@@ -3212,7 +3212,7 @@ static void mlx4_free_ownership(struct mlx4_dev *dev)
 		mlx4_err(dev, "Failed to obtain ownership bit\n");
 		return;
 	}
-	writel(0, owner);
+	pete_writel("drivers/net/ethernet/mellanox/mlx4/main.c:3215", 0, owner);
 	msleep(1000);
 	iounmap(owner);
 }

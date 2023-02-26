@@ -87,24 +87,24 @@ static int img_i2s_in_runtime_resume(struct device *dev)
 
 static inline void img_i2s_in_writel(struct img_i2s_in *i2s, u32 val, u32 reg)
 {
-	writel(val, i2s->base + reg);
+	pete_writel("sound/soc/img/img-i2s-in.c:90", val, i2s->base + reg);
 }
 
 static inline u32 img_i2s_in_readl(struct img_i2s_in *i2s, u32 reg)
 {
-	return readl(i2s->base + reg);
+	return pete_readl("sound/soc/img/img-i2s-in.c:95", i2s->base + reg);
 }
 
 static inline void img_i2s_in_ch_writel(struct img_i2s_in *i2s, u32 chan,
 					u32 val, u32 reg)
 {
-	writel(val, i2s->channel_base + (chan * IMG_I2S_IN_CH_STRIDE) + reg);
+	pete_writel("sound/soc/img/img-i2s-in.c:101", val, i2s->channel_base + (chan * IMG_I2S_IN_CH_STRIDE) + reg);
 }
 
 static inline u32 img_i2s_in_ch_readl(struct img_i2s_in *i2s, u32 chan,
 					u32 reg)
 {
-	return readl(i2s->channel_base + (chan * IMG_I2S_IN_CH_STRIDE) + reg);
+	return pete_readl("sound/soc/img/img-i2s-in.c:107", i2s->channel_base + (chan * IMG_I2S_IN_CH_STRIDE) + reg);
 }
 
 static inline void img_i2s_in_ch_disable(struct img_i2s_in *i2s, u32 chan)

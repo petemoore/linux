@@ -494,7 +494,7 @@ struct cdnsp_3xport_cap {
 #define CDNSP_VER_2 0x10000000
 
 #define CDNSP_IF_EP_EXIST(pdev, ep_num, dir) \
-			 (readl(&(pdev)->rev_cap->ep_supported) & \
+			 (pete_readl("drivers/usb/cdns3/cdnsp-gadget.h:497", &(pdev)->rev_cap->ep_supported) & \
 			 (BIT(ep_num) << ((dir) ? 0 : 16)))
 
 /**

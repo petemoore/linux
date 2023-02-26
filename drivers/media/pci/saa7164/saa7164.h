@@ -615,9 +615,9 @@ extern unsigned int saa_debug;
 		printk(KERN_WARNING "%s: " fmt, dev->name, ## arg);\
 	} while (0)
 
-#define saa7164_readl(reg) readl(dev->lmmio + ((reg) >> 2))
-#define saa7164_writel(reg, value) writel((value), dev->lmmio + ((reg) >> 2))
+#define saa7164_readl(reg) pete_readl("drivers/media/pci/saa7164/saa7164.h:618", dev->lmmio + ((reg) >> 2))
+#define saa7164_writel(reg, value) pete_writel("drivers/media/pci/saa7164/saa7164.h:619", (value), dev->lmmio + ((reg) >> 2))
 
-#define saa7164_readb(reg)             readl(dev->bmmio + (reg))
-#define saa7164_writeb(reg, value)     writel((value), dev->bmmio + (reg))
+#define saa7164_readb(reg)             pete_readl("drivers/media/pci/saa7164/saa7164.h:621", dev->bmmio + (reg))
+#define saa7164_writeb(reg, value)     pete_writel("drivers/media/pci/saa7164/saa7164.h:622", (value), dev->bmmio + (reg))
 

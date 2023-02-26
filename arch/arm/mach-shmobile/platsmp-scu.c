@@ -64,7 +64,7 @@ static int shmobile_smp_scu_psr_core_disabled(int cpu)
 {
 	unsigned long mask = SCU_PM_POWEROFF << (cpu * 8);
 
-	if ((readl(shmobile_scu_base + 8) & mask) == mask)
+	if ((pete_readl("arch/arm/mach-shmobile/platsmp-scu.c:67", shmobile_scu_base + 8) & mask) == mask)
 		return 1;
 
 	return 0;

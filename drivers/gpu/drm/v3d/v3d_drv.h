@@ -215,17 +215,17 @@ to_v3d_fence(struct dma_fence *fence)
 	return (struct v3d_fence *)fence;
 }
 
-#define V3D_READ(offset) readl(v3d->hub_regs + offset)
-#define V3D_WRITE(offset, val) writel(val, v3d->hub_regs + offset)
+#define V3D_READ(offset) pete_readl("drivers/gpu/drm/v3d/v3d_drv.h:218", v3d->hub_regs + offset)
+#define V3D_WRITE(offset, val) pete_writel("drivers/gpu/drm/v3d/v3d_drv.h:219", val, v3d->hub_regs + offset)
 
-#define V3D_BRIDGE_READ(offset) readl(v3d->bridge_regs + offset)
-#define V3D_BRIDGE_WRITE(offset, val) writel(val, v3d->bridge_regs + offset)
+#define V3D_BRIDGE_READ(offset) pete_readl("drivers/gpu/drm/v3d/v3d_drv.h:221", v3d->bridge_regs + offset)
+#define V3D_BRIDGE_WRITE(offset, val) pete_writel("drivers/gpu/drm/v3d/v3d_drv.h:222", val, v3d->bridge_regs + offset)
 
-#define V3D_GCA_READ(offset) readl(v3d->gca_regs + offset)
-#define V3D_GCA_WRITE(offset, val) writel(val, v3d->gca_regs + offset)
+#define V3D_GCA_READ(offset) pete_readl("drivers/gpu/drm/v3d/v3d_drv.h:224", v3d->gca_regs + offset)
+#define V3D_GCA_WRITE(offset, val) pete_writel("drivers/gpu/drm/v3d/v3d_drv.h:225", val, v3d->gca_regs + offset)
 
-#define V3D_CORE_READ(core, offset) readl(v3d->core_regs[core] + offset)
-#define V3D_CORE_WRITE(core, offset, val) writel(val, v3d->core_regs[core] + offset)
+#define V3D_CORE_READ(core, offset) pete_readl("drivers/gpu/drm/v3d/v3d_drv.h:227", v3d->core_regs[core] + offset)
+#define V3D_CORE_WRITE(core, offset, val) pete_writel("drivers/gpu/drm/v3d/v3d_drv.h:228", val, v3d->core_regs[core] + offset)
 
 struct v3d_job {
 	struct drm_sched_job base;

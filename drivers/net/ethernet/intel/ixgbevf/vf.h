@@ -160,7 +160,7 @@ static inline void ixgbe_write_reg(struct ixgbe_hw *hw, u32 reg, u32 value)
 
 	if (IXGBE_REMOVED(reg_addr))
 		return;
-	writel(value, reg_addr + reg);
+	pete_writel("drivers/net/ethernet/intel/ixgbevf/vf.h:163", value, reg_addr + reg);
 }
 
 #define IXGBE_WRITE_REG(h, r, v) ixgbe_write_reg(h, r, v)

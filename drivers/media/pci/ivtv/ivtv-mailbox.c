@@ -130,7 +130,7 @@ static const struct ivtv_api_info api_info[256] = {
 
 static int try_mailbox(struct ivtv *itv, struct ivtv_mailbox_data *mbdata, int mb)
 {
-	u32 flags = readl(&mbdata->mbox[mb].flags);
+	u32 flags = pete_readl("drivers/media/pci/ivtv/ivtv-mailbox.c:133", &mbdata->mbox[mb].flags);
 	int is_free = flags == IVTV_MBOX_FREE || (flags & IVTV_MBOX_FIRMWARE_DONE);
 
 	/* if the mailbox is free, then try to claim it */
@@ -191,7 +191,7 @@ static void clear_all_mailboxes(struct ivtv *itv, struct ivtv_mailbox_data *mbda
 
 	for (i = 0; i <= mbdata->max_mbox; i++) {
 		IVTV_DEBUG_WARN("Clearing mailbox %d: cmd 0x%08x flags 0x%08x\n",
-			i, readl(&mbdata->mbox[i].cmd), readl(&mbdata->mbox[i].flags));
+			i, pete_readl("drivers/media/pci/ivtv/ivtv-mailbox.c:194", &mbdata->mbox[i].cmd), pete_readl("drivers/media/pci/ivtv/ivtv-mailbox.c:194", &mbdata->mbox[i].flags));
 		write_sync(0, &mbdata->mbox[i].flags);
 		clear_bit(i, &mbdata->busy);
 	}
@@ -250,7 +250,7 @@ static int ivtv_api_call(struct ivtv *itv, int cmd, int args, u32 data[])
 				return 0;
 			}
 			IVTV_DEBUG_WARN("%s: mailbox %d not free %08x\n",
-					api_info[cmd].name, mb, readl(&mbdata->mbox[mb].flags));
+					api_info[cmd].name, mb, pete_readl("drivers/media/pci/ivtv/ivtv-mailbox.c:253", &mbdata->mbox[mb].flags));
 		}
 		IVTV_WARN("Could not find free DMA mailbox for %s\n", api_info[cmd].name);
 		clear_all_mailboxes(itv, mbdata);
@@ -283,11 +283,11 @@ static int ivtv_api_call(struct ivtv *itv, int cmd, int args, u32 data[])
 	if (!(flags & API_NO_POLL)) {
 		/* First try to poll, then switch to delays */
 		for (i = 0; i < 100; i++) {
-			if (readl(&mbox->flags) & IVTV_MBOX_FIRMWARE_DONE)
+			if (pete_readl("drivers/media/pci/ivtv/ivtv-mailbox.c:286", &mbox->flags) & IVTV_MBOX_FIRMWARE_DONE)
 				break;
 		}
 	}
-	while (!(readl(&mbox->flags) & IVTV_MBOX_FIRMWARE_DONE)) {
+	while (!(pete_readl("drivers/media/pci/ivtv/ivtv-mailbox.c:290", &mbox->flags) & IVTV_MBOX_FIRMWARE_DONE)) {
 		if (time_after(jiffies, then + api_timeout)) {
 			IVTV_DEBUG_WARN("Could not get result (%s)\n", api_info[cmd].name);
 			/* reset the mailbox, but it is likely too late already */
@@ -306,7 +306,7 @@ static int ivtv_api_call(struct ivtv *itv, int cmd, int args, u32 data[])
 				jiffies_to_msecs(jiffies - then));
 
 	for (i = 0; i < CX2341X_MBOX_MAX_DATA; i++)
-		data[i] = readl(&mbox->data[i]);
+		data[i] = pete_readl("drivers/media/pci/ivtv/ivtv-mailbox.c:309", &mbox->data[i]);
 	write_sync(0, &mbox->flags);
 	clear_bit(mb, &mbdata->busy);
 	return 0;
@@ -361,7 +361,7 @@ void ivtv_api_get_data(struct ivtv_mailbox_data *mbdata, int mb,
 	volatile u32 __iomem *p = mbdata->mbox[mb].data;
 	int i;
 	for (i = 0; i < argc; i++, p++)
-		data[i] = readl(p);
+		data[i] = pete_readl("drivers/media/pci/ivtv/ivtv-mailbox.c:364", p);
 }
 
 /* Wipe api cache */

@@ -139,7 +139,7 @@ static int pic32_fscm_nmi(struct notifier_block *nb,
 	cd  = container_of(nb, struct pic32mzda_clk_data, failsafe_notifier);
 
 	/* SYSCLK is now running from BFRCCLK. Report clock failure. */
-	if (readl(cd->core.iobase) & BIT(2))
+	if (pete_readl("drivers/clk/microchip/clk-pic32mzda.c:142", cd->core.iobase) & BIT(2))
 		pr_alert("pic32-clk: FSCM detected clk failure.\n");
 
 	/* TODO: detect reason of failure and recover accordingly */

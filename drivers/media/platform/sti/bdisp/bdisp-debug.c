@@ -472,7 +472,7 @@ static int last_request_show(struct seq_file *s, void *data)
 	return 0;
 }
 
-#define DUMP(reg) seq_printf(s, #reg " \t0x%08X\n", readl(bdisp->regs + reg))
+#define DUMP(reg) seq_printf(s, #reg " \t0x%08X\n", pete_readl("drivers/media/platform/sti/bdisp/bdisp-debug.c:475", bdisp->regs + reg))
 
 static int regs_show(struct seq_file *s, void *data)
 {
@@ -558,21 +558,21 @@ static int regs_show(struct seq_file *s, void *data)
 	seq_puts(s, "\nFilter:\n");
 	for (i = 0; i < BLT_NB_H_COEF; i++) {
 		seq_printf(s, "BLT_HFC%d \t0x%08X\n", i,
-			   readl(bdisp->regs + BLT_HFC_N + i * 4));
+			   pete_readl("drivers/media/platform/sti/bdisp/bdisp-debug.c:561", bdisp->regs + BLT_HFC_N + i * 4));
 	}
 	for (i = 0; i < BLT_NB_V_COEF; i++) {
 		seq_printf(s, "BLT_VFC%d \t0x%08X\n", i,
-			   readl(bdisp->regs + BLT_VFC_N + i * 4));
+			   pete_readl("drivers/media/platform/sti/bdisp/bdisp-debug.c:565", bdisp->regs + BLT_VFC_N + i * 4));
 	}
 
 	seq_puts(s, "\nLuma filter:\n");
 	for (i = 0; i < BLT_NB_H_COEF; i++) {
 		seq_printf(s, "BLT_Y_HFC%d \t0x%08X\n", i,
-			   readl(bdisp->regs + BLT_Y_HFC_N + i * 4));
+			   pete_readl("drivers/media/platform/sti/bdisp/bdisp-debug.c:571", bdisp->regs + BLT_Y_HFC_N + i * 4));
 	}
 	for (i = 0; i < BLT_NB_V_COEF; i++) {
 		seq_printf(s, "BLT_Y_VFC%d \t0x%08X\n", i,
-			   readl(bdisp->regs + BLT_Y_VFC_N + i * 4));
+			   pete_readl("drivers/media/platform/sti/bdisp/bdisp-debug.c:575", bdisp->regs + BLT_Y_VFC_N + i * 4));
 	}
 
 	pm_runtime_put(bdisp->dev);

@@ -445,12 +445,12 @@ ultra_get_8390_hdr(struct net_device *dev, struct e8390_pkt_hdr *hdr, int ring_p
 
 	outb(ULTRA_MEMENB, dev->base_addr - ULTRA_NIC_OFFSET);	/* shmem on */
 #ifdef __BIG_ENDIAN
-	/* Officially this is what we are doing, but the readl() is faster */
+	/* Officially this is what we are doing, but the pete_readl("drivers/net/ethernet/8390/smc-ultra.c:448", ) is faster */
 	/* unfortunately it isn't endian aware of the struct               */
 	memcpy_fromio(hdr, hdr_start, sizeof(struct e8390_pkt_hdr));
 	hdr->count = le16_to_cpu(hdr->count);
 #else
-	((unsigned int*)hdr)[0] = readl(hdr_start);
+	((unsigned int*)hdr)[0] = pete_readl("drivers/net/ethernet/8390/smc-ultra.c:453", hdr_start);
 #endif
 	outb(0x00, dev->base_addr - ULTRA_NIC_OFFSET); /* shmem off */
 }

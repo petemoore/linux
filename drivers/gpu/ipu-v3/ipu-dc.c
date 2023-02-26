@@ -110,10 +110,10 @@ static void dc_link_event(struct ipu_dc *dc, int event, int addr, int priority)
 {
 	u32 reg;
 
-	reg = readl(dc->base + DC_RL_CH(event));
+	reg = pete_readl("drivers/gpu/ipu-v3/ipu-dc.c:113", dc->base + DC_RL_CH(event));
 	reg &= ~(0xffff << (16 * (event & 0x1)));
 	reg |= ((addr << 8) | priority) << (16 * (event & 0x1));
-	writel(reg, dc->base + DC_RL_CH(event));
+	pete_writel("drivers/gpu/ipu-v3/ipu-dc.c:116", reg, dc->base + DC_RL_CH(event));
 }
 
 static void dc_write_tmpl(struct ipu_dc *dc, int word, u32 opcode, u32 operand,
@@ -132,8 +132,8 @@ static void dc_write_tmpl(struct ipu_dc *dc, int word, u32 opcode, u32 operand,
 		reg1 = sync | glue << 4 | ++wave << 11 | ++map << 15 | ((operand << 20) & 0xfff00000);
 		reg2 = operand >> 12 | opcode << 4 | stop << 9;
 	}
-	writel(reg1, priv->dc_tmpl_reg + word * 8);
-	writel(reg2, priv->dc_tmpl_reg + word * 8 + 4);
+	pete_writel("drivers/gpu/ipu-v3/ipu-dc.c:135", reg1, priv->dc_tmpl_reg + word * 8);
+	pete_writel("drivers/gpu/ipu-v3/ipu-dc.c:136", reg2, priv->dc_tmpl_reg + word * 8 + 4);
 }
 
 static int ipu_bus_format_to_map(u32 fmt)
@@ -214,15 +214,15 @@ int ipu_dc_init_sync(struct ipu_dc *dc, struct ipu_di *di, bool interlaced,
 	dc_link_event(dc, DC_EVT_NEW_CHAN, 0, 0);
 	dc_link_event(dc, DC_EVT_NEW_ADDR, 0, 0);
 
-	reg = readl(dc->base + DC_WR_CH_CONF);
+	reg = pete_readl("drivers/gpu/ipu-v3/ipu-dc.c:217", dc->base + DC_WR_CH_CONF);
 	if (interlaced)
 		reg |= DC_WR_CH_CONF_FIELD_MODE;
 	else
 		reg &= ~DC_WR_CH_CONF_FIELD_MODE;
-	writel(reg, dc->base + DC_WR_CH_CONF);
+	pete_writel("drivers/gpu/ipu-v3/ipu-dc.c:222", reg, dc->base + DC_WR_CH_CONF);
 
-	writel(0x0, dc->base + DC_WR_CH_ADDR);
-	writel(width, priv->dc_reg + DC_DISP_CONF2(dc->di));
+	pete_writel("drivers/gpu/ipu-v3/ipu-dc.c:224", 0x0, dc->base + DC_WR_CH_ADDR);
+	pete_writel("drivers/gpu/ipu-v3/ipu-dc.c:225", width, priv->dc_reg + DC_DISP_CONF2(dc->di));
 
 	return 0;
 }
@@ -247,9 +247,9 @@ void ipu_dc_enable_channel(struct ipu_dc *dc)
 {
 	u32 reg;
 
-	reg = readl(dc->base + DC_WR_CH_CONF);
+	reg = pete_readl("drivers/gpu/ipu-v3/ipu-dc.c:250", dc->base + DC_WR_CH_CONF);
 	reg |= DC_WR_CH_CONF_PROG_TYPE_NORMAL;
-	writel(reg, dc->base + DC_WR_CH_CONF);
+	pete_writel("drivers/gpu/ipu-v3/ipu-dc.c:252", reg, dc->base + DC_WR_CH_CONF);
 }
 EXPORT_SYMBOL_GPL(ipu_dc_enable_channel);
 
@@ -257,9 +257,9 @@ void ipu_dc_disable_channel(struct ipu_dc *dc)
 {
 	u32 val;
 
-	val = readl(dc->base + DC_WR_CH_CONF);
+	val = pete_readl("drivers/gpu/ipu-v3/ipu-dc.c:260", dc->base + DC_WR_CH_CONF);
 	val &= ~DC_WR_CH_CONF_PROG_TYPE_MASK;
-	writel(val, dc->base + DC_WR_CH_CONF);
+	pete_writel("drivers/gpu/ipu-v3/ipu-dc.c:262", val, dc->base + DC_WR_CH_CONF);
 }
 EXPORT_SYMBOL_GPL(ipu_dc_disable_channel);
 
@@ -286,22 +286,22 @@ static void ipu_dc_map_config(struct ipu_dc_priv *priv, enum ipu_dc_map map,
 	int ptr = map * 3 + byte_num;
 	u32 reg;
 
-	reg = readl(priv->dc_reg + DC_MAP_CONF_VAL(ptr));
+	reg = pete_readl("drivers/gpu/ipu-v3/ipu-dc.c:289", priv->dc_reg + DC_MAP_CONF_VAL(ptr));
 	reg &= ~(0xffff << (16 * (ptr & 0x1)));
 	reg |= ((offset << 8) | mask) << (16 * (ptr & 0x1));
-	writel(reg, priv->dc_reg + DC_MAP_CONF_VAL(ptr));
+	pete_writel("drivers/gpu/ipu-v3/ipu-dc.c:292", reg, priv->dc_reg + DC_MAP_CONF_VAL(ptr));
 
-	reg = readl(priv->dc_reg + DC_MAP_CONF_PTR(map));
+	reg = pete_readl("drivers/gpu/ipu-v3/ipu-dc.c:294", priv->dc_reg + DC_MAP_CONF_PTR(map));
 	reg &= ~(0x1f << ((16 * (map & 0x1)) + (5 * byte_num)));
 	reg |= ptr << ((16 * (map & 0x1)) + (5 * byte_num));
-	writel(reg, priv->dc_reg + DC_MAP_CONF_PTR(map));
+	pete_writel("drivers/gpu/ipu-v3/ipu-dc.c:297", reg, priv->dc_reg + DC_MAP_CONF_PTR(map));
 }
 
 static void ipu_dc_map_clear(struct ipu_dc_priv *priv, int map)
 {
-	u32 reg = readl(priv->dc_reg + DC_MAP_CONF_PTR(map));
+	u32 reg = pete_readl("drivers/gpu/ipu-v3/ipu-dc.c:302", priv->dc_reg + DC_MAP_CONF_PTR(map));
 
-	writel(reg & ~(0xffff << (16 * (map & 0x1))),
+	pete_writel("drivers/gpu/ipu-v3/ipu-dc.c:304", reg & ~(0xffff << (16 * (map & 0x1))),
 		     priv->dc_reg + DC_MAP_CONF_PTR(map));
 }
 
@@ -367,13 +367,13 @@ int ipu_dc_init(struct ipu_soc *ipu, struct device *dev,
 		priv->channels[i].base = priv->dc_reg + channel_offsets[i];
 	}
 
-	writel(DC_WR_CH_CONF_WORD_SIZE_24 | DC_WR_CH_CONF_DISP_ID_PARALLEL(1) |
+	pete_writel("drivers/gpu/ipu-v3/ipu-dc.c:370", DC_WR_CH_CONF_WORD_SIZE_24 | DC_WR_CH_CONF_DISP_ID_PARALLEL(1) |
 			DC_WR_CH_CONF_PROG_DI_ID,
 			priv->channels[1].base + DC_WR_CH_CONF);
-	writel(DC_WR_CH_CONF_WORD_SIZE_24 | DC_WR_CH_CONF_DISP_ID_PARALLEL(0),
+	pete_writel("drivers/gpu/ipu-v3/ipu-dc.c:373", DC_WR_CH_CONF_WORD_SIZE_24 | DC_WR_CH_CONF_DISP_ID_PARALLEL(0),
 			priv->channels[5].base + DC_WR_CH_CONF);
 
-	writel(DC_GEN_SYNC_1_6_SYNC | DC_GEN_SYNC_PRIORITY_1,
+	pete_writel("drivers/gpu/ipu-v3/ipu-dc.c:376", DC_GEN_SYNC_1_6_SYNC | DC_GEN_SYNC_PRIORITY_1,
 		priv->dc_reg + DC_GEN);
 
 	ipu->dc_priv = priv;

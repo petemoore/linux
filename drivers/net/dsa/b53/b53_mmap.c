@@ -34,7 +34,7 @@ static int b53_mmap_read8(struct b53_device *dev, u8 page, u8 reg, u8 *val)
 	struct b53_mmap_priv *priv = dev->priv;
 	void __iomem *regs = priv->regs;
 
-	*val = readb(regs + (page << 8) + reg);
+	*val = pete_readb("drivers/net/dsa/b53/b53_mmap.c:37", regs + (page << 8) + reg);
 
 	return 0;
 }
@@ -50,7 +50,7 @@ static int b53_mmap_read16(struct b53_device *dev, u8 page, u8 reg, u16 *val)
 	if (dev->pdata && dev->pdata->big_endian)
 		*val = ioread16be(regs + (page << 8) + reg);
 	else
-		*val = readw(regs + (page << 8) + reg);
+		*val = pete_readw("drivers/net/dsa/b53/b53_mmap.c:53", regs + (page << 8) + reg);
 
 	return 0;
 }
@@ -66,7 +66,7 @@ static int b53_mmap_read32(struct b53_device *dev, u8 page, u8 reg, u32 *val)
 	if (dev->pdata && dev->pdata->big_endian)
 		*val = ioread32be(regs + (page << 8) + reg);
 	else
-		*val = readl(regs + (page << 8) + reg);
+		*val = pete_readl("drivers/net/dsa/b53/b53_mmap.c:69", regs + (page << 8) + reg);
 
 	return 0;
 }
@@ -87,8 +87,8 @@ static int b53_mmap_read48(struct b53_device *dev, u8 page, u8 reg, u64 *val)
 			lo = ioread16be(regs + (page << 8) + reg);
 			hi = ioread32be(regs + (page << 8) + reg + 2);
 		} else {
-			lo = readw(regs + (page << 8) + reg);
-			hi = readl(regs + (page << 8) + reg + 2);
+			lo = pete_readw("drivers/net/dsa/b53/b53_mmap.c:90", regs + (page << 8) + reg);
+			hi = pete_readl("drivers/net/dsa/b53/b53_mmap.c:91", regs + (page << 8) + reg + 2);
 		}
 
 		*val = ((u64)hi << 16) | lo;
@@ -100,8 +100,8 @@ static int b53_mmap_read48(struct b53_device *dev, u8 page, u8 reg, u64 *val)
 			lo = ioread32be(regs + (page << 8) + reg);
 			hi = ioread16be(regs + (page << 8) + reg + 4);
 		} else {
-			lo = readl(regs + (page << 8) + reg);
-			hi = readw(regs + (page << 8) + reg + 4);
+			lo = pete_readl("drivers/net/dsa/b53/b53_mmap.c:103", regs + (page << 8) + reg);
+			hi = pete_readw("drivers/net/dsa/b53/b53_mmap.c:104", regs + (page << 8) + reg + 4);
 		}
 
 		*val = ((u64)hi << 32) | lo;
@@ -123,8 +123,8 @@ static int b53_mmap_read64(struct b53_device *dev, u8 page, u8 reg, u64 *val)
 		lo = ioread32be(regs + (page << 8) + reg);
 		hi = ioread32be(regs + (page << 8) + reg + 4);
 	} else {
-		lo = readl(regs + (page << 8) + reg);
-		hi = readl(regs + (page << 8) + reg + 4);
+		lo = pete_readl("drivers/net/dsa/b53/b53_mmap.c:126", regs + (page << 8) + reg);
+		hi = pete_readl("drivers/net/dsa/b53/b53_mmap.c:127", regs + (page << 8) + reg + 4);
 	}
 
 	*val = ((u64)hi << 32) | lo;
@@ -137,7 +137,7 @@ static int b53_mmap_write8(struct b53_device *dev, u8 page, u8 reg, u8 value)
 	struct b53_mmap_priv *priv = dev->priv;
 	void __iomem *regs = priv->regs;
 
-	writeb(value, regs + (page << 8) + reg);
+	pete_writeb("drivers/net/dsa/b53/b53_mmap.c:140", value, regs + (page << 8) + reg);
 
 	return 0;
 }
@@ -154,7 +154,7 @@ static int b53_mmap_write16(struct b53_device *dev, u8 page, u8 reg,
 	if (dev->pdata && dev->pdata->big_endian)
 		iowrite16be(value, regs + (page << 8) + reg);
 	else
-		writew(value, regs + (page << 8) + reg);
+		pete_writew("drivers/net/dsa/b53/b53_mmap.c:157", value, regs + (page << 8) + reg);
 
 	return 0;
 }
@@ -171,7 +171,7 @@ static int b53_mmap_write32(struct b53_device *dev, u8 page, u8 reg,
 	if (dev->pdata && dev->pdata->big_endian)
 		iowrite32be(value, regs + (page << 8) + reg);
 	else
-		writel(value, regs + (page << 8) + reg);
+		pete_writel("drivers/net/dsa/b53/b53_mmap.c:174", value, regs + (page << 8) + reg);
 
 	return 0;
 }

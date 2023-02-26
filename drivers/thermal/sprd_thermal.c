@@ -112,10 +112,10 @@ static inline void sprd_thm_update_bits(void __iomem *reg, u32 mask, u32 val)
 {
 	u32 tmp, orig;
 
-	orig = readl(reg);
+	orig = pete_readl("drivers/thermal/sprd_thermal.c:115", reg);
 	tmp = orig & ~mask;
 	tmp |= val & mask;
-	writel(tmp, reg);
+	pete_writel("drivers/thermal/sprd_thermal.c:118", tmp, reg);
 }
 
 static int sprd_thm_cal_read(struct device_node *np, const char *cell_id,
@@ -209,7 +209,7 @@ static int sprd_thm_read_temp(void *devdata, int *temp)
 	struct sprd_thermal_sensor *sen = devdata;
 	u32 data;
 
-	data = readl(sen->data->base + SPRD_THM_TEMP(sen->id)) &
+	data = pete_readl("drivers/thermal/sprd_thermal.c:212", sen->data->base + SPRD_THM_TEMP(sen->id)) &
 		SPRD_THM_RAW_READ_MSK;
 
 	*temp = sprd_thm_rawdata_to_temp(sen, data);
@@ -271,7 +271,7 @@ static int sprd_thm_set_ready(struct sprd_thermal_data *thm)
 	 * system. So here we should enable the interrupt bits, though we have
 	 * not registered an irq handler.
 	 */
-	writel(SPRD_THM_INT_CLR_MASK, thm->base + SPRD_THM_INT_CLR);
+	pete_writel("drivers/thermal/sprd_thermal.c:274", SPRD_THM_INT_CLR_MASK, thm->base + SPRD_THM_INT_CLR);
 	sprd_thm_update_bits(thm->base + SPRD_THM_INT_EN,
 			     SPRD_THM_BIT_INT_EN, SPRD_THM_BIT_INT_EN);
 	sprd_thm_update_bits(thm->base + SPRD_THM_CTL,
@@ -486,7 +486,7 @@ static int sprd_thm_hw_resume(struct sprd_thermal_data *thm)
 	if (ret)
 		return ret;
 
-	writel(SPRD_THM_INT_CLR_MASK, thm->base + SPRD_THM_INT_CLR);
+	pete_writel("drivers/thermal/sprd_thermal.c:489", SPRD_THM_INT_CLR_MASK, thm->base + SPRD_THM_INT_CLR);
 	sprd_thm_update_bits(thm->base + SPRD_THM_CTL,
 			     SPRD_THM_EN, SPRD_THM_EN);
 	return sprd_thm_wait_temp_ready(thm);

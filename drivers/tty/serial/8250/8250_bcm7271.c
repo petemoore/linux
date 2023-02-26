@@ -248,13 +248,13 @@ static struct dentry *brcmuart_debugfs_root;
 static u32 udma_readl(struct brcmuart_priv *priv,
 		int reg_type, int offset)
 {
-	return readl(priv->regs[reg_type] + offset);
+	return pete_readl("drivers/tty/serial/8250/8250_bcm7271.c:251", priv->regs[reg_type] + offset);
 }
 
 static void udma_writel(struct brcmuart_priv *priv,
 			int reg_type, int offset, u32 value)
 {
-	writel(value, priv->regs[reg_type] + offset);
+	pete_writel("drivers/tty/serial/8250/8250_bcm7271.c:257", value, priv->regs[reg_type] + offset);
 }
 
 static void udma_set(struct brcmuart_priv *priv,
@@ -263,9 +263,9 @@ static void udma_set(struct brcmuart_priv *priv,
 	void __iomem *reg = priv->regs[reg_type] + offset;
 	u32 value;
 
-	value = readl(reg);
+	value = pete_readl("drivers/tty/serial/8250/8250_bcm7271.c:266", reg);
 	value |= bits;
-	writel(value, reg);
+	pete_writel("drivers/tty/serial/8250/8250_bcm7271.c:268", value, reg);
 }
 
 static void udma_unset(struct brcmuart_priv *priv,
@@ -274,9 +274,9 @@ static void udma_unset(struct brcmuart_priv *priv,
 	void __iomem *reg = priv->regs[reg_type] + offset;
 	u32 value;
 
-	value = readl(reg);
+	value = pete_readl("drivers/tty/serial/8250/8250_bcm7271.c:277", reg);
 	value &= ~bits;
-	writel(value, reg);
+	pete_writel("drivers/tty/serial/8250/8250_bcm7271.c:279", value, reg);
 }
 
 /*

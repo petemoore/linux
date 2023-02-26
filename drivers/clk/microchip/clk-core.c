@@ -98,14 +98,14 @@ static int pbclk_is_enabled(struct clk_hw *hw)
 {
 	struct pic32_periph_clk *pb = clkhw_to_pbclk(hw);
 
-	return readl(pb->ctrl_reg) & PB_DIV_ENABLE;
+	return pete_readl("drivers/clk/microchip/clk-core.c:101", pb->ctrl_reg) & PB_DIV_ENABLE;
 }
 
 static int pbclk_enable(struct clk_hw *hw)
 {
 	struct pic32_periph_clk *pb = clkhw_to_pbclk(hw);
 
-	writel(PB_DIV_ENABLE, PIC32_SET(pb->ctrl_reg));
+	pete_writel("drivers/clk/microchip/clk-core.c:108", PB_DIV_ENABLE, PIC32_SET(pb->ctrl_reg));
 	return 0;
 }
 
@@ -113,7 +113,7 @@ static void pbclk_disable(struct clk_hw *hw)
 {
 	struct pic32_periph_clk *pb = clkhw_to_pbclk(hw);
 
-	writel(PB_DIV_ENABLE, PIC32_CLR(pb->ctrl_reg));
+	pete_writel("drivers/clk/microchip/clk-core.c:116", PB_DIV_ENABLE, PIC32_CLR(pb->ctrl_reg));
 }
 
 static unsigned long calc_best_divided_rate(unsigned long rate,
@@ -144,7 +144,7 @@ static unsigned long calc_best_divided_rate(unsigned long rate,
 
 static inline u32 pbclk_read_pbdiv(struct pic32_periph_clk *pb)
 {
-	return ((readl(pb->ctrl_reg) >> PB_DIV_SHIFT) & PB_DIV_MASK) + 1;
+	return ((pete_readl("drivers/clk/microchip/clk-core.c:147", pb->ctrl_reg) >> PB_DIV_SHIFT) & PB_DIV_MASK) + 1;
 }
 
 static unsigned long pbclk_recalc_rate(struct clk_hw *hw,
@@ -182,13 +182,13 @@ static int pbclk_set_rate(struct clk_hw *hw, unsigned long rate,
 	spin_lock_irqsave(&pb->core->reg_lock, flags);
 
 	/* apply new div */
-	v = readl(pb->ctrl_reg);
+	v = pete_readl("drivers/clk/microchip/clk-core.c:185", pb->ctrl_reg);
 	v &= ~PB_DIV_MASK;
 	v |= (div - 1);
 
 	pic32_syskey_unlock();
 
-	writel(v, pb->ctrl_reg);
+	pete_writel("drivers/clk/microchip/clk-core.c:191", v, pb->ctrl_reg);
 
 	spin_unlock_irqrestore(&pb->core->reg_lock, flags);
 
@@ -248,14 +248,14 @@ static int roclk_is_enabled(struct clk_hw *hw)
 {
 	struct pic32_ref_osc *refo = clkhw_to_refosc(hw);
 
-	return readl(refo->ctrl_reg) & REFO_ON;
+	return pete_readl("drivers/clk/microchip/clk-core.c:251", refo->ctrl_reg) & REFO_ON;
 }
 
 static int roclk_enable(struct clk_hw *hw)
 {
 	struct pic32_ref_osc *refo = clkhw_to_refosc(hw);
 
-	writel(REFO_ON | REFO_OE, PIC32_SET(refo->ctrl_reg));
+	pete_writel("drivers/clk/microchip/clk-core.c:258", REFO_ON | REFO_OE, PIC32_SET(refo->ctrl_reg));
 	return 0;
 }
 
@@ -263,7 +263,7 @@ static void roclk_disable(struct clk_hw *hw)
 {
 	struct pic32_ref_osc *refo = clkhw_to_refosc(hw);
 
-	writel(REFO_ON | REFO_OE, PIC32_CLR(refo->ctrl_reg));
+	pete_writel("drivers/clk/microchip/clk-core.c:266", REFO_ON | REFO_OE, PIC32_CLR(refo->ctrl_reg));
 }
 
 static int roclk_init(struct clk_hw *hw)
@@ -279,7 +279,7 @@ static u8 roclk_get_parent(struct clk_hw *hw)
 	struct pic32_ref_osc *refo = clkhw_to_refosc(hw);
 	u32 v, i;
 
-	v = (readl(refo->ctrl_reg) >> REFO_SEL_SHIFT) & REFO_SEL_MASK;
+	v = (pete_readl("drivers/clk/microchip/clk-core.c:282", refo->ctrl_reg) >> REFO_SEL_SHIFT) & REFO_SEL_MASK;
 
 	if (!refo->parent_map)
 		return v;
@@ -362,11 +362,11 @@ static unsigned long roclk_recalc_rate(struct clk_hw *hw,
 	u32 v, rodiv, rotrim;
 
 	/* get rodiv */
-	v = readl(refo->ctrl_reg);
+	v = pete_readl("drivers/clk/microchip/clk-core.c:365", refo->ctrl_reg);
 	rodiv = (v >> REFO_DIV_SHIFT) & REFO_DIV_MASK;
 
 	/* get trim */
-	v = readl(refo->ctrl_reg + REFO_TRIM_REG);
+	v = pete_readl("drivers/clk/microchip/clk-core.c:369", refo->ctrl_reg + REFO_TRIM_REG);
 	rotrim = (v >> REFO_TRIM_SHIFT) & REFO_TRIM_MASK;
 
 	return roclk_calc_rate(parent_rate, rodiv, rotrim);
@@ -461,11 +461,11 @@ static int roclk_set_parent(struct clk_hw *hw, u8 index)
 	pic32_syskey_unlock();
 
 	/* calculate & apply new */
-	v = readl(refo->ctrl_reg);
+	v = pete_readl("drivers/clk/microchip/clk-core.c:464", refo->ctrl_reg);
 	v &= ~(REFO_SEL_MASK << REFO_SEL_SHIFT);
 	v |= index << REFO_SEL_SHIFT;
 
-	writel(v, refo->ctrl_reg);
+	pete_writel("drivers/clk/microchip/clk-core.c:468", v, refo->ctrl_reg);
 
 	spin_unlock_irqrestore(&refo->core->reg_lock, flags);
 
@@ -498,7 +498,7 @@ static int roclk_set_rate_and_parent(struct clk_hw *hw,
 	}
 
 	spin_lock_irqsave(&refo->core->reg_lock, flags);
-	v = readl(refo->ctrl_reg);
+	v = pete_readl("drivers/clk/microchip/clk-core.c:501", refo->ctrl_reg);
 
 	pic32_syskey_unlock();
 
@@ -512,22 +512,22 @@ static int roclk_set_rate_and_parent(struct clk_hw *hw,
 	/* apply RODIV */
 	v &= ~(REFO_DIV_MASK << REFO_DIV_SHIFT);
 	v |= rodiv << REFO_DIV_SHIFT;
-	writel(v, refo->ctrl_reg);
+	pete_writel("drivers/clk/microchip/clk-core.c:515", v, refo->ctrl_reg);
 
 	/* apply ROTRIM */
-	v = readl(refo->ctrl_reg + REFO_TRIM_REG);
+	v = pete_readl("drivers/clk/microchip/clk-core.c:518", refo->ctrl_reg + REFO_TRIM_REG);
 	v &= ~(REFO_TRIM_MASK << REFO_TRIM_SHIFT);
 	v |= trim << REFO_TRIM_SHIFT;
-	writel(v, refo->ctrl_reg + REFO_TRIM_REG);
+	pete_writel("drivers/clk/microchip/clk-core.c:521", v, refo->ctrl_reg + REFO_TRIM_REG);
 
 	/* enable & activate divider switching */
-	writel(REFO_ON | REFO_DIVSW_EN, PIC32_SET(refo->ctrl_reg));
+	pete_writel("drivers/clk/microchip/clk-core.c:524", REFO_ON | REFO_DIVSW_EN, PIC32_SET(refo->ctrl_reg));
 
 	/* wait till divswen is in-progress */
 	err = readl_poll_timeout_atomic(refo->ctrl_reg, v, !(v & REFO_DIVSW_EN),
 					1, LOCK_TIMEOUT_US);
 	/* leave the clk gated as it was */
-	writel(REFO_ON, PIC32_CLR(refo->ctrl_reg));
+	pete_writel("drivers/clk/microchip/clk-core.c:530", REFO_ON, PIC32_CLR(refo->ctrl_reg));
 
 	spin_unlock_irqrestore(&refo->core->reg_lock, flags);
 
@@ -649,7 +649,7 @@ static unsigned long spll_clk_recalc_rate(struct clk_hw *hw,
 	u32 mult, odiv, div, v;
 	u64 rate64;
 
-	v = readl(pll->ctrl_reg);
+	v = pete_readl("drivers/clk/microchip/clk-core.c:652", pll->ctrl_reg);
 	odiv = ((v >> PLL_ODIV_SHIFT) & PLL_ODIV_MASK);
 	mult = ((v >> PLL_MULT_SHIFT) & PLL_MULT_MASK) + 1;
 	div = spll_odiv_to_divider(odiv);
@@ -699,7 +699,7 @@ static int spll_clk_set_rate(struct clk_hw *hw, unsigned long rate,
 	spin_lock_irqsave(&pll->core->reg_lock, flags);
 
 	/* apply new multiplier & divisor */
-	v = readl(pll->ctrl_reg);
+	v = pete_readl("drivers/clk/microchip/clk-core.c:702", pll->ctrl_reg);
 	v &= ~(PLL_MULT_MASK << PLL_MULT_SHIFT);
 	v &= ~(PLL_ODIV_MASK << PLL_ODIV_SHIFT);
 	v |= (mult << PLL_MULT_SHIFT) | (odiv << PLL_ODIV_SHIFT);
@@ -707,7 +707,7 @@ static int spll_clk_set_rate(struct clk_hw *hw, unsigned long rate,
 	/* sys unlock before write */
 	pic32_syskey_unlock();
 
-	writel(v, pll->ctrl_reg);
+	pete_writel("drivers/clk/microchip/clk-core.c:710", v, pll->ctrl_reg);
 	cpu_relax();
 
 	/* insert few nops (5-stage) to ensure CPU does not hang */
@@ -746,7 +746,7 @@ struct clk *pic32_spll_clk_register(const struct pic32_sys_pll_data *data,
 	spll->lock_mask = data->lock_mask;
 
 	/* cache PLL idiv; PLL driver uses it as constant.*/
-	spll->idiv = (readl(spll->ctrl_reg) >> PLL_IDIV_SHIFT) & PLL_IDIV_MASK;
+	spll->idiv = (pete_readl("drivers/clk/microchip/clk-core.c:749", spll->ctrl_reg) >> PLL_IDIV_SHIFT) & PLL_IDIV_MASK;
 	spll->idiv += 1;
 
 	clk = devm_clk_register(core->dev, &spll->hw);
@@ -774,7 +774,7 @@ static unsigned long sclk_get_rate(struct clk_hw *hw, unsigned long parent_rate)
 	struct pic32_sys_clk *sclk = clkhw_to_sys_clk(hw);
 	u32 div;
 
-	div = (readl(sclk->slew_reg) >> SLEW_SYSDIV_SHIFT) & SLEW_SYSDIV;
+	div = (pete_readl("drivers/clk/microchip/clk-core.c:777", sclk->slew_reg) >> SLEW_SYSDIV_SHIFT) & SLEW_SYSDIV;
 	div += 1; /* sys-div to divider */
 
 	return parent_rate / div;
@@ -799,13 +799,13 @@ static int sclk_set_rate(struct clk_hw *hw,
 	spin_lock_irqsave(&sclk->core->reg_lock, flags);
 
 	/* apply new div */
-	v = readl(sclk->slew_reg);
+	v = pete_readl("drivers/clk/microchip/clk-core.c:802", sclk->slew_reg);
 	v &= ~(SLEW_SYSDIV << SLEW_SYSDIV_SHIFT);
 	v |= (div - 1) << SLEW_SYSDIV_SHIFT;
 
 	pic32_syskey_unlock();
 
-	writel(v, sclk->slew_reg);
+	pete_writel("drivers/clk/microchip/clk-core.c:808", v, sclk->slew_reg);
 
 	/* wait until BUSY is cleared */
 	err = readl_poll_timeout_atomic(sclk->slew_reg, v,
@@ -821,7 +821,7 @@ static u8 sclk_get_parent(struct clk_hw *hw)
 	struct pic32_sys_clk *sclk = clkhw_to_sys_clk(hw);
 	u32 i, v;
 
-	v = (readl(sclk->mux_reg) >> OSC_CUR_SHIFT) & OSC_CUR_MASK;
+	v = (pete_readl("drivers/clk/microchip/clk-core.c:824", sclk->mux_reg) >> OSC_CUR_SHIFT) & OSC_CUR_MASK;
 
 	if (!sclk->parent_map)
 		return v;
@@ -845,16 +845,16 @@ static int sclk_set_parent(struct clk_hw *hw, u8 index)
 	nosc = sclk->parent_map ? sclk->parent_map[index] : index;
 
 	/* set new parent */
-	v = readl(sclk->mux_reg);
+	v = pete_readl("drivers/clk/microchip/clk-core.c:848", sclk->mux_reg);
 	v &= ~(OSC_NEW_MASK << OSC_NEW_SHIFT);
 	v |= nosc << OSC_NEW_SHIFT;
 
 	pic32_syskey_unlock();
 
-	writel(v, sclk->mux_reg);
+	pete_writel("drivers/clk/microchip/clk-core.c:854", v, sclk->mux_reg);
 
 	/* initate switch */
-	writel(OSC_SWEN, PIC32_SET(sclk->mux_reg));
+	pete_writel("drivers/clk/microchip/clk-core.c:857", OSC_SWEN, PIC32_SET(sclk->mux_reg));
 	cpu_relax();
 
 	/* add nop to flush pipeline (as cpu_clk is in-flux) */
@@ -872,7 +872,7 @@ static int sclk_set_parent(struct clk_hw *hw, u8 index)
 	 * not met.
 	 * So confirm before claiming success.
 	 */
-	cosc = (readl(sclk->mux_reg) >> OSC_CUR_SHIFT) & OSC_CUR_MASK;
+	cosc = (pete_readl("drivers/clk/microchip/clk-core.c:875", sclk->mux_reg) >> OSC_CUR_SHIFT) & OSC_CUR_MASK;
 	if (cosc != nosc) {
 		pr_err("%s: err, failed to set_parent() to %d, current %d\n",
 		       clk_hw_get_name(hw), nosc, cosc);
@@ -894,11 +894,11 @@ static int sclk_init(struct clk_hw *hw)
 	/* apply slew divider on both up and down scaling */
 	if (sclk->slew_div) {
 		spin_lock_irqsave(&sclk->core->reg_lock, flags);
-		v = readl(sclk->slew_reg);
+		v = pete_readl("drivers/clk/microchip/clk-core.c:897", sclk->slew_reg);
 		v &= ~(SLEW_DIV << SLEW_DIV_SHIFT);
 		v |= sclk->slew_div << SLEW_DIV_SHIFT;
 		v |= SLEW_DOWNEN | SLEW_UPEN;
-		writel(v, sclk->slew_reg);
+		pete_writel("drivers/clk/microchip/clk-core.c:901", v, sclk->slew_reg);
 		spin_unlock_irqrestore(&sclk->core->reg_lock, flags);
 	}
 
@@ -967,7 +967,7 @@ static int sosc_clk_enable(struct clk_hw *hw)
 
 	/* enable SOSC */
 	pic32_syskey_unlock();
-	writel(sosc->enable_mask, PIC32_SET(sosc->enable_reg));
+	pete_writel("drivers/clk/microchip/clk-core.c:970", sosc->enable_mask, PIC32_SET(sosc->enable_reg));
 
 	/* wait till warm-up period expires or ready-status is updated */
 	return readl_poll_timeout_atomic(sosc->status_reg, v,
@@ -979,7 +979,7 @@ static void sosc_clk_disable(struct clk_hw *hw)
 	struct pic32_sec_osc *sosc = clkhw_to_sosc(hw);
 
 	pic32_syskey_unlock();
-	writel(sosc->enable_mask, PIC32_CLR(sosc->enable_reg));
+	pete_writel("drivers/clk/microchip/clk-core.c:982", sosc->enable_mask, PIC32_CLR(sosc->enable_reg));
 }
 
 static int sosc_clk_is_enabled(struct clk_hw *hw)
@@ -988,8 +988,8 @@ static int sosc_clk_is_enabled(struct clk_hw *hw)
 	u32 enabled, ready;
 
 	/* check enabled and ready status */
-	enabled = readl(sosc->enable_reg) & sosc->enable_mask;
-	ready = readl(sosc->status_reg) & sosc->status_mask;
+	enabled = pete_readl("drivers/clk/microchip/clk-core.c:991", sosc->enable_reg) & sosc->enable_mask;
+	ready = pete_readl("drivers/clk/microchip/clk-core.c:992", sosc->status_reg) & sosc->status_mask;
 
 	return enabled && ready;
 }

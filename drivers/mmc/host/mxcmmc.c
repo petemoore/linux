@@ -188,7 +188,7 @@ static inline u32 mxcmci_readl(struct mxcmci_host *host, int reg)
 	if (IS_ENABLED(CONFIG_PPC_MPC512x))
 		return ioread32be(host->base + reg);
 	else
-		return readl(host->base + reg);
+		return pete_readl("drivers/mmc/host/mxcmmc.c:191", host->base + reg);
 }
 
 static inline void mxcmci_writel(struct mxcmci_host *host, u32 val, int reg)
@@ -196,7 +196,7 @@ static inline void mxcmci_writel(struct mxcmci_host *host, u32 val, int reg)
 	if (IS_ENABLED(CONFIG_PPC_MPC512x))
 		iowrite32be(val, host->base + reg);
 	else
-		writel(val, host->base + reg);
+		pete_writel("drivers/mmc/host/mxcmmc.c:199", val, host->base + reg);
 }
 
 static inline u16 mxcmci_readw(struct mxcmci_host *host, int reg)
@@ -204,7 +204,7 @@ static inline u16 mxcmci_readw(struct mxcmci_host *host, int reg)
 	if (IS_ENABLED(CONFIG_PPC_MPC512x))
 		return ioread32be(host->base + reg);
 	else
-		return readw(host->base + reg);
+		return pete_readw("drivers/mmc/host/mxcmmc.c:207", host->base + reg);
 }
 
 static inline void mxcmci_writew(struct mxcmci_host *host, u16 val, int reg)
@@ -212,7 +212,7 @@ static inline void mxcmci_writew(struct mxcmci_host *host, u16 val, int reg)
 	if (IS_ENABLED(CONFIG_PPC_MPC512x))
 		iowrite32be(val, host->base + reg);
 	else
-		writew(val, host->base + reg);
+		pete_writew("drivers/mmc/host/mxcmmc.c:215", val, host->base + reg);
 }
 
 static void mxcmci_set_clk_rate(struct mxcmci_host *host, unsigned int clk_ios);

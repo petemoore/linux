@@ -59,7 +59,7 @@ static int clps711x_fb_setcolreg(u_int regno, u_int red, u_int green,
 
 	regno = (regno < 8) ? CLPS711X_PALLSW : CLPS711X_PALMSW;
 
-	writel((readl(cfb->base + regno) & ~mask) | level, cfb->base + regno);
+	pete_writel("drivers/video/fbdev/clps711x-fb.c:62", (pete_readl("drivers/video/fbdev/clps711x-fb.c:62", cfb->base + regno) & ~mask) | level, cfb->base + regno);
 
 	return 0;
 }
@@ -140,7 +140,7 @@ static int clps711x_fb_set_par(struct fb_info *info)
 
 	/* LCDCON must only be changed while the LCD is disabled */
 	regmap_update_bits(cfb->syscon, SYSCON_OFFSET, SYSCON1_LCDEN, 0);
-	writel(lcdcon, cfb->base + CLPS711X_LCDCON);
+	pete_writel("drivers/video/fbdev/clps711x-fb.c:143", lcdcon, cfb->base + CLPS711X_LCDCON);
 	regmap_update_bits(cfb->syscon, SYSCON_OFFSET,
 			   SYSCON1_LCDEN, SYSCON1_LCDEN);
 
@@ -298,7 +298,7 @@ static int clps711x_fb_probe(struct platform_device *pdev)
 		goto out_fb_release;
 
 	/* Force disable LCD on any mismatch */
-	if (info->fix.smem_start != (readb(cfb->base + CLPS711X_FBADDR) << 28))
+	if (info->fix.smem_start != (pete_readb("drivers/video/fbdev/clps711x-fb.c:301", cfb->base + CLPS711X_FBADDR) << 28))
 		regmap_update_bits(cfb->syscon, SYSCON_OFFSET,
 				   SYSCON1_LCDEN, 0);
 
@@ -308,7 +308,7 @@ static int clps711x_fb_probe(struct platform_device *pdev)
 
 	if (!(val & SYSCON1_LCDEN)) {
 		/* Setup start FB address */
-		writeb(info->fix.smem_start >> 28, cfb->base + CLPS711X_FBADDR);
+		pete_writeb("drivers/video/fbdev/clps711x-fb.c:311", info->fix.smem_start >> 28, cfb->base + CLPS711X_FBADDR);
 		/* Clean FB memory */
 		memset_io(info->screen_base, 0, cfb->buffsize);
 	}

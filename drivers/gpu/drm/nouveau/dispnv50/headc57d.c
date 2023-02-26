@@ -135,18 +135,18 @@ headc57d_olut_load_8(struct drm_color_lut *in, int size, void __iomem *mem)
 		}
 
 		for (i = 0; i < 4; i++, mem += 8) {
-			writew(r + ri * i, mem + 0);
-			writew(g + gi * i, mem + 2);
-			writew(b + bi * i, mem + 4);
+			pete_writew("drivers/gpu/drm/nouveau/dispnv50/headc57d.c:138", r + ri * i, mem + 0);
+			pete_writew("drivers/gpu/drm/nouveau/dispnv50/headc57d.c:139", g + gi * i, mem + 2);
+			pete_writew("drivers/gpu/drm/nouveau/dispnv50/headc57d.c:140", b + bi * i, mem + 4);
 		}
 	}
 
 	/* INTERPOLATE modes require a "next" entry to interpolate with,
 	 * so we replicate the last entry to deal with this for now.
 	 */
-	writew(readw(mem - 8), mem + 0);
-	writew(readw(mem - 6), mem + 2);
-	writew(readw(mem - 4), mem + 4);
+	pete_writew("drivers/gpu/drm/nouveau/dispnv50/headc57d.c:147", pete_readw("drivers/gpu/drm/nouveau/dispnv50/headc57d.c:147", mem - 8), mem + 0);
+	pete_writew("drivers/gpu/drm/nouveau/dispnv50/headc57d.c:148", pete_readw("drivers/gpu/drm/nouveau/dispnv50/headc57d.c:148", mem - 6), mem + 2);
+	pete_writew("drivers/gpu/drm/nouveau/dispnv50/headc57d.c:149", pete_readw("drivers/gpu/drm/nouveau/dispnv50/headc57d.c:149", mem - 4), mem + 4);
 }
 
 static void
@@ -156,17 +156,17 @@ headc57d_olut_load(struct drm_color_lut *in, int size, void __iomem *mem)
 	mem += 0x20;
 
 	for (; size--; in++, mem += 0x08) {
-		writew(drm_color_lut_extract(in->  red, 16), mem + 0);
-		writew(drm_color_lut_extract(in->green, 16), mem + 2);
-		writew(drm_color_lut_extract(in-> blue, 16), mem + 4);
+		pete_writew("drivers/gpu/drm/nouveau/dispnv50/headc57d.c:159", drm_color_lut_extract(in->  red, 16), mem + 0);
+		pete_writew("drivers/gpu/drm/nouveau/dispnv50/headc57d.c:160", drm_color_lut_extract(in->green, 16), mem + 2);
+		pete_writew("drivers/gpu/drm/nouveau/dispnv50/headc57d.c:161", drm_color_lut_extract(in-> blue, 16), mem + 4);
 	}
 
 	/* INTERPOLATE modes require a "next" entry to interpolate with,
 	 * so we replicate the last entry to deal with this for now.
 	 */
-	writew(readw(mem - 8), mem + 0);
-	writew(readw(mem - 6), mem + 2);
-	writew(readw(mem - 4), mem + 4);
+	pete_writew("drivers/gpu/drm/nouveau/dispnv50/headc57d.c:167", pete_readw("drivers/gpu/drm/nouveau/dispnv50/headc57d.c:167", mem - 8), mem + 0);
+	pete_writew("drivers/gpu/drm/nouveau/dispnv50/headc57d.c:168", pete_readw("drivers/gpu/drm/nouveau/dispnv50/headc57d.c:168", mem - 6), mem + 2);
+	pete_writew("drivers/gpu/drm/nouveau/dispnv50/headc57d.c:169", pete_readw("drivers/gpu/drm/nouveau/dispnv50/headc57d.c:169", mem - 4), mem + 4);
 }
 
 bool

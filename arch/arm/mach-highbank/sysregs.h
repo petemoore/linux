@@ -44,31 +44,31 @@ static inline void highbank_clear_core_pwr(void)
 
 static inline void highbank_set_pwr_suspend(void)
 {
-	writel(HB_PWR_SUSPEND, sregs_base + HB_SREG_A9_PWR_REQ);
+	pete_writel("arch/arm/mach-highbank/sysregs.h:47", HB_PWR_SUSPEND, sregs_base + HB_SREG_A9_PWR_REQ);
 	highbank_set_core_pwr();
 }
 
 static inline void highbank_set_pwr_shutdown(void)
 {
-	writel(HB_PWR_SHUTDOWN, sregs_base + HB_SREG_A9_PWR_REQ);
+	pete_writel("arch/arm/mach-highbank/sysregs.h:53", HB_PWR_SHUTDOWN, sregs_base + HB_SREG_A9_PWR_REQ);
 	highbank_set_core_pwr();
 }
 
 static inline void highbank_set_pwr_soft_reset(void)
 {
-	writel(HB_PWR_SOFT_RESET, sregs_base + HB_SREG_A9_PWR_REQ);
+	pete_writel("arch/arm/mach-highbank/sysregs.h:59", HB_PWR_SOFT_RESET, sregs_base + HB_SREG_A9_PWR_REQ);
 	highbank_set_core_pwr();
 }
 
 static inline void highbank_set_pwr_hard_reset(void)
 {
-	writel(HB_PWR_HARD_RESET, sregs_base + HB_SREG_A9_PWR_REQ);
+	pete_writel("arch/arm/mach-highbank/sysregs.h:65", HB_PWR_HARD_RESET, sregs_base + HB_SREG_A9_PWR_REQ);
 	highbank_set_core_pwr();
 }
 
 static inline void highbank_clear_pwr_request(void)
 {
-	writel(~0UL, sregs_base + HB_SREG_A9_PWR_REQ);
+	pete_writel("arch/arm/mach-highbank/sysregs.h:71", ~0UL, sregs_base + HB_SREG_A9_PWR_REQ);
 	highbank_clear_core_pwr();
 }
 

@@ -144,13 +144,13 @@ struct tw686x_dev {
 
 static inline uint32_t reg_read(struct tw686x_dev *dev, unsigned int reg)
 {
-	return readl(dev->mmio + reg);
+	return pete_readl("drivers/media/pci/tw686x/tw686x.h:147", dev->mmio + reg);
 }
 
 static inline void reg_write(struct tw686x_dev *dev, unsigned int reg,
 			     uint32_t value)
 {
-	writel(value, dev->mmio + reg);
+	pete_writel("drivers/media/pci/tw686x/tw686x.h:153", value, dev->mmio + reg);
 }
 
 static inline unsigned int max_channels(struct tw686x_dev *dev)

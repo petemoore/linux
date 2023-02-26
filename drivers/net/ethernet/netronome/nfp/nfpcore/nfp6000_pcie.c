@@ -277,9 +277,9 @@ nfp6000_bar_write(struct nfp6000_pcie *nfp, struct nfp_bar *bar, u32 newcfg)
 
 	if (nfp->iomem.csr) {
 		xbar = NFP_PCIE_CPP_BAR_PCIETOCPPEXPANSIONBAR(base, slot);
-		writel(newcfg, nfp->iomem.csr + xbar);
+		pete_writel("drivers/net/ethernet/netronome/nfp/nfpcore/nfp6000_pcie.c:280", newcfg, nfp->iomem.csr + xbar);
 		/* Readback to ensure BAR is flushed */
-		readl(nfp->iomem.csr + xbar);
+		pete_readl("drivers/net/ethernet/netronome/nfp/nfpcore/nfp6000_pcie.c:282", nfp->iomem.csr + xbar);
 	} else {
 		xbar = NFP_PCIE_CFG_BAR_PCIETOCPPEXPANSIONBAR(base, slot);
 		pci_write_config_dword(nfp->pdev, xbar, newcfg);
@@ -1115,7 +1115,7 @@ static int nfp6000_explicit_put(struct nfp_cpp_explicit *expl,
 	size_t i;
 
 	for (i = 0; i < len; i += sizeof(u32))
-		writel(*(src++), priv->data + i);
+		pete_writel("drivers/net/ethernet/netronome/nfp/nfpcore/nfp6000_pcie.c:1118", *(src++), priv->data + i);
 
 	return i;
 }
@@ -1172,23 +1172,23 @@ nfp6000_explicit_do(struct nfp_cpp_explicit *expl,
 		NFP_PCIE_BAR_EXPLICIT_BAR2_SignalMaster(signal_master);
 
 	if (nfp->iomem.csr) {
-		writel(csr[0], nfp->iomem.csr +
+		pete_writel("drivers/net/ethernet/netronome/nfp/nfpcore/nfp6000_pcie.c:1175", csr[0], nfp->iomem.csr +
 		       NFP_PCIE_BAR_EXPLICIT_BAR0(priv->bar.group,
 						  priv->bar.area));
-		writel(csr[1], nfp->iomem.csr +
+		pete_writel("drivers/net/ethernet/netronome/nfp/nfpcore/nfp6000_pcie.c:1178", csr[1], nfp->iomem.csr +
 		       NFP_PCIE_BAR_EXPLICIT_BAR1(priv->bar.group,
 						  priv->bar.area));
-		writel(csr[2], nfp->iomem.csr +
+		pete_writel("drivers/net/ethernet/netronome/nfp/nfpcore/nfp6000_pcie.c:1181", csr[2], nfp->iomem.csr +
 		       NFP_PCIE_BAR_EXPLICIT_BAR2(priv->bar.group,
 						  priv->bar.area));
 		/* Readback to ensure BAR is flushed */
-		readl(nfp->iomem.csr +
+		pete_readl("drivers/net/ethernet/netronome/nfp/nfpcore/nfp6000_pcie.c:1185", nfp->iomem.csr +
 		      NFP_PCIE_BAR_EXPLICIT_BAR0(priv->bar.group,
 						 priv->bar.area));
-		readl(nfp->iomem.csr +
+		pete_readl("drivers/net/ethernet/netronome/nfp/nfpcore/nfp6000_pcie.c:1188", nfp->iomem.csr +
 		      NFP_PCIE_BAR_EXPLICIT_BAR1(priv->bar.group,
 						 priv->bar.area));
-		readl(nfp->iomem.csr +
+		pete_readl("drivers/net/ethernet/netronome/nfp/nfpcore/nfp6000_pcie.c:1191", nfp->iomem.csr +
 		      NFP_PCIE_BAR_EXPLICIT_BAR2(priv->bar.group,
 						 priv->bar.area));
 	} else {
@@ -1209,7 +1209,7 @@ nfp6000_explicit_do(struct nfp_cpp_explicit *expl,
 	}
 
 	/* Issue the 'kickoff' transaction */
-	readb(priv->addr + (address & ((1 << priv->bitsize) - 1)));
+	pete_readb("drivers/net/ethernet/netronome/nfp/nfpcore/nfp6000_pcie.c:1212", priv->addr + (address & ((1 << priv->bitsize) - 1)));
 
 	return sigmask;
 }
@@ -1222,7 +1222,7 @@ static int nfp6000_explicit_get(struct nfp_cpp_explicit *expl,
 	size_t i;
 
 	for (i = 0; i < len; i += sizeof(u32))
-		*(dst++) = readl(priv->data + i);
+		*(dst++) = pete_readl("drivers/net/ethernet/netronome/nfp/nfpcore/nfp6000_pcie.c:1225", priv->data + i);
 
 	return i;
 }

@@ -1100,12 +1100,12 @@ bfa_nw_ioc_sem_get(void __iomem *sem_reg)
 	int cnt = 0;
 #define BFA_SEM_SPINCNT	3000
 
-	r32 = readl(sem_reg);
+	r32 = pete_readl("drivers/net/ethernet/brocade/bna/bfa_ioc.c:1103", sem_reg);
 
 	while ((r32 & 1) && (cnt < BFA_SEM_SPINCNT)) {
 		cnt++;
 		udelay(2);
-		r32 = readl(sem_reg);
+		r32 = pete_readl("drivers/net/ethernet/brocade/bna/bfa_ioc.c:1108", sem_reg);
 	}
 
 	if (!(r32 & 1))
@@ -1117,8 +1117,8 @@ bfa_nw_ioc_sem_get(void __iomem *sem_reg)
 void
 bfa_nw_ioc_sem_release(void __iomem *sem_reg)
 {
-	readl(sem_reg);
-	writel(1, sem_reg);
+	pete_readl("drivers/net/ethernet/brocade/bna/bfa_ioc.c:1120", sem_reg);
+	pete_writel("drivers/net/ethernet/brocade/bna/bfa_ioc.c:1121", 1, sem_reg);
 }
 
 /* Clear fwver hdr */
@@ -1129,10 +1129,10 @@ bfa_ioc_fwver_clear(struct bfa_ioc *ioc)
 	int i;
 
 	pgnum = PSS_SMEM_PGNUM(ioc->ioc_regs.smem_pg0, loff);
-	writel(pgnum, ioc->ioc_regs.host_page_num_fn);
+	pete_writel("drivers/net/ethernet/brocade/bna/bfa_ioc.c:1132", pgnum, ioc->ioc_regs.host_page_num_fn);
 
 	for (i = 0; i < (sizeof(struct bfi_ioc_image_hdr) / sizeof(u32)); i++) {
-		writel(0, ioc->ioc_regs.smem_page_start + loff);
+		pete_writel("drivers/net/ethernet/brocade/bna/bfa_ioc.c:1135", 0, ioc->ioc_regs.smem_page_start + loff);
 		loff += sizeof(u32);
 	}
 }
@@ -1145,22 +1145,22 @@ bfa_ioc_hw_sem_init(struct bfa_ioc *ioc)
 	u32 fwstate, r32;
 
 	/* Spin on init semaphore to serialize. */
-	r32 = readl(ioc->ioc_regs.ioc_init_sem_reg);
+	r32 = pete_readl("drivers/net/ethernet/brocade/bna/bfa_ioc.c:1148", ioc->ioc_regs.ioc_init_sem_reg);
 	while (r32 & 0x1) {
 		udelay(20);
-		r32 = readl(ioc->ioc_regs.ioc_init_sem_reg);
+		r32 = pete_readl("drivers/net/ethernet/brocade/bna/bfa_ioc.c:1151", ioc->ioc_regs.ioc_init_sem_reg);
 	}
 
 	fwstate = bfa_ioc_get_cur_ioc_fwstate(ioc);
 	if (fwstate == BFI_IOC_UNINIT) {
-		writel(1, ioc->ioc_regs.ioc_init_sem_reg);
+		pete_writel("drivers/net/ethernet/brocade/bna/bfa_ioc.c:1156", 1, ioc->ioc_regs.ioc_init_sem_reg);
 		return;
 	}
 
 	bfa_nw_ioc_fwver_get(ioc, &fwhdr);
 
 	if (swab32(fwhdr.exec) == BFI_FWBOOT_TYPE_NORMAL) {
-		writel(1, ioc->ioc_regs.ioc_init_sem_reg);
+		pete_writel("drivers/net/ethernet/brocade/bna/bfa_ioc.c:1163", 1, ioc->ioc_regs.ioc_init_sem_reg);
 		return;
 	}
 
@@ -1171,11 +1171,11 @@ bfa_ioc_hw_sem_init(struct bfa_ioc *ioc)
 	/*
 	 * Try to lock and then unlock the semaphore.
 	 */
-	readl(ioc->ioc_regs.ioc_sem_reg);
-	writel(1, ioc->ioc_regs.ioc_sem_reg);
+	pete_readl("drivers/net/ethernet/brocade/bna/bfa_ioc.c:1174", ioc->ioc_regs.ioc_sem_reg);
+	pete_writel("drivers/net/ethernet/brocade/bna/bfa_ioc.c:1175", 1, ioc->ioc_regs.ioc_sem_reg);
 
 	/* Unlock init semaphore */
-	writel(1, ioc->ioc_regs.ioc_init_sem_reg);
+	pete_writel("drivers/net/ethernet/brocade/bna/bfa_ioc.c:1178", 1, ioc->ioc_regs.ioc_init_sem_reg);
 }
 
 static void
@@ -1187,7 +1187,7 @@ bfa_ioc_hw_sem_get(struct bfa_ioc *ioc)
 	 * First read to the semaphore register will return 0, subsequent reads
 	 * will return 1. Semaphore is released by writing 1 to the register
 	 */
-	r32 = readl(ioc->ioc_regs.ioc_sem_reg);
+	r32 = pete_readl("drivers/net/ethernet/brocade/bna/bfa_ioc.c:1190", ioc->ioc_regs.ioc_sem_reg);
 	if (r32 == ~0) {
 		bfa_fsm_send_event(&ioc->iocpf, IOCPF_E_SEM_ERROR);
 		return;
@@ -1204,7 +1204,7 @@ bfa_ioc_hw_sem_get(struct bfa_ioc *ioc)
 void
 bfa_nw_ioc_hw_sem_release(struct bfa_ioc *ioc)
 {
-	writel(1, ioc->ioc_regs.ioc_sem_reg);
+	pete_writel("drivers/net/ethernet/brocade/bna/bfa_ioc.c:1207", 1, ioc->ioc_regs.ioc_sem_reg);
 }
 
 static void
@@ -1221,7 +1221,7 @@ bfa_ioc_lmem_init(struct bfa_ioc *ioc)
 	int		i;
 #define PSS_LMEM_INIT_TIME  10000
 
-	pss_ctl = readl(ioc->ioc_regs.pss_ctl_reg);
+	pss_ctl = pete_readl("drivers/net/ethernet/brocade/bna/bfa_ioc.c:1224", ioc->ioc_regs.pss_ctl_reg);
 	pss_ctl &= ~__PSS_LMEM_RESET;
 	pss_ctl |= __PSS_LMEM_INIT_EN;
 
@@ -1229,14 +1229,14 @@ bfa_ioc_lmem_init(struct bfa_ioc *ioc)
 	 * i2c workaround 12.5khz clock
 	 */
 	pss_ctl |= __PSS_I2C_CLK_DIV(3UL);
-	writel(pss_ctl, ioc->ioc_regs.pss_ctl_reg);
+	pete_writel("drivers/net/ethernet/brocade/bna/bfa_ioc.c:1232", pss_ctl, ioc->ioc_regs.pss_ctl_reg);
 
 	/**
 	 * wait for memory initialization to be complete
 	 */
 	i = 0;
 	do {
-		pss_ctl = readl(ioc->ioc_regs.pss_ctl_reg);
+		pss_ctl = pete_readl("drivers/net/ethernet/brocade/bna/bfa_ioc.c:1239", ioc->ioc_regs.pss_ctl_reg);
 		i++;
 	} while (!(pss_ctl & __PSS_LMEM_INIT_DONE) && (i < PSS_LMEM_INIT_TIME));
 
@@ -1247,7 +1247,7 @@ bfa_ioc_lmem_init(struct bfa_ioc *ioc)
 	BUG_ON(!(pss_ctl & __PSS_LMEM_INIT_DONE));
 
 	pss_ctl &= ~(__PSS_LMEM_INIT_DONE | __PSS_LMEM_INIT_EN);
-	writel(pss_ctl, ioc->ioc_regs.pss_ctl_reg);
+	pete_writel("drivers/net/ethernet/brocade/bna/bfa_ioc.c:1250", pss_ctl, ioc->ioc_regs.pss_ctl_reg);
 }
 
 static void
@@ -1258,10 +1258,10 @@ bfa_ioc_lpu_start(struct bfa_ioc *ioc)
 	/**
 	 * Take processor out of reset.
 	 */
-	pss_ctl = readl(ioc->ioc_regs.pss_ctl_reg);
+	pss_ctl = pete_readl("drivers/net/ethernet/brocade/bna/bfa_ioc.c:1261", ioc->ioc_regs.pss_ctl_reg);
 	pss_ctl &= ~__PSS_LPU0_RESET;
 
-	writel(pss_ctl, ioc->ioc_regs.pss_ctl_reg);
+	pete_writel("drivers/net/ethernet/brocade/bna/bfa_ioc.c:1264", pss_ctl, ioc->ioc_regs.pss_ctl_reg);
 }
 
 static void
@@ -1272,10 +1272,10 @@ bfa_ioc_lpu_stop(struct bfa_ioc *ioc)
 	/**
 	 * Put processors in reset.
 	 */
-	pss_ctl = readl(ioc->ioc_regs.pss_ctl_reg);
+	pss_ctl = pete_readl("drivers/net/ethernet/brocade/bna/bfa_ioc.c:1275", ioc->ioc_regs.pss_ctl_reg);
 	pss_ctl |= (__PSS_LPU0_RESET | __PSS_LPU1_RESET);
 
-	writel(pss_ctl, ioc->ioc_regs.pss_ctl_reg);
+	pete_writel("drivers/net/ethernet/brocade/bna/bfa_ioc.c:1278", pss_ctl, ioc->ioc_regs.pss_ctl_reg);
 }
 
 /* Get driver and firmware versions. */
@@ -1288,12 +1288,12 @@ bfa_nw_ioc_fwver_get(struct bfa_ioc *ioc, struct bfi_ioc_image_hdr *fwhdr)
 	u32	*fwsig = (u32 *) fwhdr;
 
 	pgnum = bfa_ioc_smem_pgnum(ioc, loff);
-	writel(pgnum, ioc->ioc_regs.host_page_num_fn);
+	pete_writel("drivers/net/ethernet/brocade/bna/bfa_ioc.c:1291", pgnum, ioc->ioc_regs.host_page_num_fn);
 
 	for (i = 0; i < (sizeof(struct bfi_ioc_image_hdr) / sizeof(u32));
 	     i++) {
 		fwsig[i] =
-			swab32(readl(loff + ioc->ioc_regs.smem_page_start));
+			swab32(pete_readl("drivers/net/ethernet/brocade/bna/bfa_ioc.c:1296", loff + ioc->ioc_regs.smem_page_start));
 		loff += sizeof(u32);
 	}
 }
@@ -1505,7 +1505,7 @@ bfa_flash_set_cmd(void __iomem *pci_bar, u8 wr_cnt,
 	cmd.r.read_cnt = rd_cnt;
 	cmd.r.addr_cnt = ad_cnt;
 	cmd.r.cmd = op;
-	writel(cmd.i, (pci_bar + FLI_CMD_REG));
+	pete_writel("drivers/net/ethernet/brocade/bna/bfa_ioc.c:1508", cmd.i, (pci_bar + FLI_CMD_REG));
 }
 
 static void
@@ -1515,7 +1515,7 @@ bfa_flash_set_addr(void __iomem *pci_bar, u32 address)
 
 	addr.r.addr = address & 0x00ffffff;
 	addr.r.dummy = 0;
-	writel(addr.i, (pci_bar + FLI_ADDR_REG));
+	pete_writel("drivers/net/ethernet/brocade/bna/bfa_ioc.c:1518", addr.i, (pci_bar + FLI_ADDR_REG));
 }
 
 static int
@@ -1523,7 +1523,7 @@ bfa_flash_cmd_act_check(void __iomem *pci_bar)
 {
 	union bfa_flash_cmd_reg cmd;
 
-	cmd.i = readl(pci_bar + FLI_CMD_REG);
+	cmd.i = pete_readl("drivers/net/ethernet/brocade/bna/bfa_ioc.c:1526", pci_bar + FLI_CMD_REG);
 
 	if (cmd.r.act)
 		return BFA_FLASH_ERR_CMD_ACT;
@@ -1538,18 +1538,18 @@ bfa_flash_fifo_flush(void __iomem *pci_bar)
 	u32 i;
 	union bfa_flash_dev_status_reg dev_status;
 
-	dev_status.i = readl(pci_bar + FLI_DEV_STATUS_REG);
+	dev_status.i = pete_readl("drivers/net/ethernet/brocade/bna/bfa_ioc.c:1541", pci_bar + FLI_DEV_STATUS_REG);
 
 	if (!dev_status.r.fifo_cnt)
 		return 0;
 
 	/* fifo counter in terms of words */
 	for (i = 0; i < dev_status.r.fifo_cnt; i++)
-		readl(pci_bar + FLI_RDDATA_REG);
+		pete_readl("drivers/net/ethernet/brocade/bna/bfa_ioc.c:1548", pci_bar + FLI_RDDATA_REG);
 
 	/* Check the device status. It may take some time. */
 	for (i = 0; i < BFA_FLASH_CHECK_MAX; i++) {
-		dev_status.i = readl(pci_bar + FLI_DEV_STATUS_REG);
+		dev_status.i = pete_readl("drivers/net/ethernet/brocade/bna/bfa_ioc.c:1552", pci_bar + FLI_DEV_STATUS_REG);
 		if (!dev_status.r.fifo_cnt)
 			break;
 	}
@@ -1584,11 +1584,11 @@ bfa_flash_status_read(void __iomem *pci_bar)
 	if (status)
 		return status;
 
-	dev_status.i = readl(pci_bar + FLI_DEV_STATUS_REG);
+	dev_status.i = pete_readl("drivers/net/ethernet/brocade/bna/bfa_ioc.c:1587", pci_bar + FLI_DEV_STATUS_REG);
 	if (!dev_status.r.fifo_cnt)
 		return BFA_FLASH_BUSY;
 
-	ret_status = readl(pci_bar + FLI_RDDATA_REG);
+	ret_status = pete_readl("drivers/net/ethernet/brocade/bna/bfa_ioc.c:1591", pci_bar + FLI_RDDATA_REG);
 	ret_status >>= 24;
 
 	status = bfa_flash_fifo_flush(pci_bar);
@@ -1646,7 +1646,7 @@ bfa_flash_read_end(void __iomem *pci_bar, u32 len, char *buf)
 
 	/* read data fifo up to 32 words */
 	for (i = 0; i < len; i += 4) {
-		u32 w = readl(pci_bar + FLI_RDDATA_REG);
+		u32 w = pete_readl("drivers/net/ethernet/brocade/bna/bfa_ioc.c:1649", pci_bar + FLI_RDDATA_REG);
 		*((u32 *)(buf + i)) = swab32(w);
 	}
 
@@ -1663,7 +1663,7 @@ bfa_raw_sem_get(void __iomem *bar)
 {
 	int	locked;
 
-	locked = readl(bar + FLASH_SEM_LOCK_REG);
+	locked = pete_readl("drivers/net/ethernet/brocade/bna/bfa_ioc.c:1666", bar + FLASH_SEM_LOCK_REG);
 
 	return !locked;
 }
@@ -1684,7 +1684,7 @@ bfa_flash_sem_get(void __iomem *bar)
 static void
 bfa_flash_sem_put(void __iomem *bar)
 {
-	writel(0, (bar + FLASH_SEM_LOCK_REG));
+	pete_writel("drivers/net/ethernet/brocade/bna/bfa_ioc.c:1687", 0, (bar + FLASH_SEM_LOCK_REG));
 }
 
 static enum bfa_status
@@ -1819,9 +1819,9 @@ bfa_ioc_msgflush(struct bfa_ioc *ioc)
 {
 	u32	r32;
 
-	r32 = readl(ioc->ioc_regs.lpu_mbox_cmd);
+	r32 = pete_readl("drivers/net/ethernet/brocade/bna/bfa_ioc.c:1822", ioc->ioc_regs.lpu_mbox_cmd);
 	if (r32)
-		writel(1, ioc->ioc_regs.lpu_mbox_cmd);
+		pete_writel("drivers/net/ethernet/brocade/bna/bfa_ioc.c:1824", 1, ioc->ioc_regs.lpu_mbox_cmd);
 }
 
 static void
@@ -1901,17 +1901,17 @@ bfa_ioc_mbox_send(struct bfa_ioc *ioc, void *ioc_msg, int len)
 	 * first write msg to mailbox registers
 	 */
 	for (i = 0; i < len / sizeof(u32); i++)
-		writel(cpu_to_le32(msgp[i]),
+		pete_writel("drivers/net/ethernet/brocade/bna/bfa_ioc.c:1904", cpu_to_le32(msgp[i]),
 			      ioc->ioc_regs.hfn_mbox + i * sizeof(u32));
 
 	for (; i < BFI_IOC_MSGLEN_MAX / sizeof(u32); i++)
-		writel(0, ioc->ioc_regs.hfn_mbox + i * sizeof(u32));
+		pete_writel("drivers/net/ethernet/brocade/bna/bfa_ioc.c:1908", 0, ioc->ioc_regs.hfn_mbox + i * sizeof(u32));
 
 	/*
 	 * write 1 to mailbox CMD to trigger LPU event
 	 */
-	writel(1, ioc->ioc_regs.hfn_mbox_cmd);
-	(void) readl(ioc->ioc_regs.hfn_mbox_cmd);
+	pete_writel("drivers/net/ethernet/brocade/bna/bfa_ioc.c:1913", 1, ioc->ioc_regs.hfn_mbox_cmd);
+	(void) pete_readl("drivers/net/ethernet/brocade/bna/bfa_ioc.c:1914", ioc->ioc_regs.hfn_mbox_cmd);
 }
 
 static void
@@ -1958,7 +1958,7 @@ bfa_nw_ioc_hb_check(struct bfa_ioc *ioc)
 {
 	u32 hb_count;
 
-	hb_count = readl(ioc->ioc_regs.heartbeat);
+	hb_count = pete_readl("drivers/net/ethernet/brocade/bna/bfa_ioc.c:1961", ioc->ioc_regs.heartbeat);
 	if (ioc->hb_count == hb_count) {
 		bfa_ioc_recover(ioc);
 		return;
@@ -1974,7 +1974,7 @@ bfa_nw_ioc_hb_check(struct bfa_ioc *ioc)
 static void
 bfa_ioc_hb_monitor(struct bfa_ioc *ioc)
 {
-	ioc->hb_count = readl(ioc->ioc_regs.heartbeat);
+	ioc->hb_count = pete_readl("drivers/net/ethernet/brocade/bna/bfa_ioc.c:1977", ioc->ioc_regs.heartbeat);
 	mod_timer(&ioc->hb_timer, jiffies +
 		msecs_to_jiffies(BFA_IOC_HB_TOV));
 }
@@ -2018,7 +2018,7 @@ bfa_ioc_download_fw(struct bfa_ioc *ioc, u32 boot_type,
 
 	pgnum = bfa_ioc_smem_pgnum(ioc, loff);
 
-	writel(pgnum, ioc->ioc_regs.host_page_num_fn);
+	pete_writel("drivers/net/ethernet/brocade/bna/bfa_ioc.c:2021", pgnum, ioc->ioc_regs.host_page_num_fn);
 
 	for (i = 0; i < fwimg_size; i++) {
 		if (BFA_IOC_FLASH_CHUNK_NO(i) != chunkno) {
@@ -2042,7 +2042,7 @@ bfa_ioc_download_fw(struct bfa_ioc *ioc, u32 boot_type,
 		/**
 		 * write smem
 		 */
-		writel(swab32(fwimg[BFA_IOC_FLASH_OFFSET_IN_CHUNK(i)]),
+		pete_writel("drivers/net/ethernet/brocade/bna/bfa_ioc.c:2045", swab32(fwimg[BFA_IOC_FLASH_OFFSET_IN_CHUNK(i)]),
 		       ioc->ioc_regs.smem_page_start + loff);
 
 		loff += sizeof(u32);
@@ -2053,12 +2053,12 @@ bfa_ioc_download_fw(struct bfa_ioc *ioc, u32 boot_type,
 		loff = PSS_SMEM_PGOFF(loff);
 		if (loff == 0) {
 			pgnum++;
-			writel(pgnum,
+			pete_writel("drivers/net/ethernet/brocade/bna/bfa_ioc.c:2056", pgnum,
 				      ioc->ioc_regs.host_page_num_fn);
 		}
 	}
 
-	writel(bfa_ioc_smem_pgnum(ioc, 0),
+	pete_writel("drivers/net/ethernet/brocade/bna/bfa_ioc.c:2061", bfa_ioc_smem_pgnum(ioc, 0),
 		      ioc->ioc_regs.host_page_num_fn);
 
 	/*
@@ -2070,11 +2070,11 @@ bfa_ioc_download_fw(struct bfa_ioc *ioc, u32 boot_type,
 	}
 	asicmode = BFI_FWBOOT_DEVMODE(ioc->asic_gen, ioc->asic_mode,
 					ioc->port0_mode, ioc->port1_mode);
-	writel(asicmode, ((ioc->ioc_regs.smem_page_start)
+	pete_writel("drivers/net/ethernet/brocade/bna/bfa_ioc.c:2073", asicmode, ((ioc->ioc_regs.smem_page_start)
 			+ BFI_FWBOOT_DEVMODE_OFF));
-	writel(boot_type, ((ioc->ioc_regs.smem_page_start)
+	pete_writel("drivers/net/ethernet/brocade/bna/bfa_ioc.c:2075", boot_type, ((ioc->ioc_regs.smem_page_start)
 			+ (BFI_FWBOOT_TYPE_OFF)));
-	writel(boot_env, ((ioc->ioc_regs.smem_page_start)
+	pete_writel("drivers/net/ethernet/brocade/bna/bfa_ioc.c:2077", boot_env, ((ioc->ioc_regs.smem_page_start)
 			+ (BFI_FWBOOT_ENV_OFF)));
 	return BFA_STATUS_OK;
 }
@@ -2143,7 +2143,7 @@ bfa_ioc_mbox_poll(struct bfa_ioc *ioc)
 	/**
 	 * If previous command is not yet fetched by firmware, do nothing
 	 */
-	stat = readl(ioc->ioc_regs.hfn_mbox_cmd);
+	stat = pete_readl("drivers/net/ethernet/brocade/bna/bfa_ioc.c:2146", ioc->ioc_regs.hfn_mbox_cmd);
 	if (stat)
 		return;
 
@@ -2202,11 +2202,11 @@ bfa_nw_ioc_smem_read(struct bfa_ioc *ioc, void *tbuf, u32 soff, u32 sz)
 	if (!bfa_nw_ioc_sem_get(ioc->ioc_regs.ioc_init_sem_reg))
 		return 1;
 
-	writel(pgnum, ioc->ioc_regs.host_page_num_fn);
+	pete_writel("drivers/net/ethernet/brocade/bna/bfa_ioc.c:2205", pgnum, ioc->ioc_regs.host_page_num_fn);
 
 	len = sz/sizeof(u32);
 	for (i = 0; i < len; i++) {
-		r32 = swab32(readl(loff + ioc->ioc_regs.smem_page_start));
+		r32 = swab32(pete_readl("drivers/net/ethernet/brocade/bna/bfa_ioc.c:2209", loff + ioc->ioc_regs.smem_page_start));
 		buf[i] = be32_to_cpu(r32);
 		loff += sizeof(u32);
 
@@ -2216,18 +2216,18 @@ bfa_nw_ioc_smem_read(struct bfa_ioc *ioc, void *tbuf, u32 soff, u32 sz)
 		loff = PSS_SMEM_PGOFF(loff);
 		if (loff == 0) {
 			pgnum++;
-			writel(pgnum, ioc->ioc_regs.host_page_num_fn);
+			pete_writel("drivers/net/ethernet/brocade/bna/bfa_ioc.c:2219", pgnum, ioc->ioc_regs.host_page_num_fn);
 		}
 	}
 
-	writel(PSS_SMEM_PGNUM(ioc->ioc_regs.smem_pg0, 0),
+	pete_writel("drivers/net/ethernet/brocade/bna/bfa_ioc.c:2223", PSS_SMEM_PGNUM(ioc->ioc_regs.smem_pg0, 0),
 	       ioc->ioc_regs.host_page_num_fn);
 
 	/*
 	 * release semaphore
 	 */
-	readl(ioc->ioc_regs.ioc_init_sem_reg);
-	writel(1, ioc->ioc_regs.ioc_init_sem_reg);
+	pete_readl("drivers/net/ethernet/brocade/bna/bfa_ioc.c:2229", ioc->ioc_regs.ioc_init_sem_reg);
+	pete_writel("drivers/net/ethernet/brocade/bna/bfa_ioc.c:2230", 1, ioc->ioc_regs.ioc_init_sem_reg);
 	return 0;
 }
 
@@ -2409,7 +2409,7 @@ bfa_ioc_msgget(struct bfa_ioc *ioc, void *mbmsg)
 	u32	r32;
 	int		i;
 
-	r32 = readl(ioc->ioc_regs.lpu_mbox_cmd);
+	r32 = pete_readl("drivers/net/ethernet/brocade/bna/bfa_ioc.c:2412", ioc->ioc_regs.lpu_mbox_cmd);
 	if ((r32 & 1) == 0)
 		return false;
 
@@ -2418,7 +2418,7 @@ bfa_ioc_msgget(struct bfa_ioc *ioc, void *mbmsg)
 	 */
 	for (i = 0; i < (sizeof(union bfi_ioc_i2h_msg_u) / sizeof(u32));
 	     i++) {
-		r32 = readl(ioc->ioc_regs.lpu_mbox +
+		r32 = pete_readl("drivers/net/ethernet/brocade/bna/bfa_ioc.c:2421", ioc->ioc_regs.lpu_mbox +
 				   i * sizeof(u32));
 		msgp[i] = htonl(r32);
 	}
@@ -2426,8 +2426,8 @@ bfa_ioc_msgget(struct bfa_ioc *ioc, void *mbmsg)
 	/**
 	 * turn off mailbox interrupt by clearing mailbox status
 	 */
-	writel(1, ioc->ioc_regs.lpu_mbox_cmd);
-	readl(ioc->ioc_regs.lpu_mbox_cmd);
+	pete_writel("drivers/net/ethernet/brocade/bna/bfa_ioc.c:2429", 1, ioc->ioc_regs.lpu_mbox_cmd);
+	pete_readl("drivers/net/ethernet/brocade/bna/bfa_ioc.c:2430", ioc->ioc_regs.lpu_mbox_cmd);
 
 	return true;
 }
@@ -2667,7 +2667,7 @@ bfa_nw_ioc_mbox_queue(struct bfa_ioc *ioc, struct bfa_mbox_cmd *cmd,
 	/**
 	 * If mailbox is busy, queue command for poll timer
 	 */
-	stat = readl(ioc->ioc_regs.hfn_mbox_cmd);
+	stat = pete_readl("drivers/net/ethernet/brocade/bna/bfa_ioc.c:2670", ioc->ioc_regs.hfn_mbox_cmd);
 	if (stat) {
 		list_add_tail(&cmd->qe, &mod->cmd_q);
 		return true;

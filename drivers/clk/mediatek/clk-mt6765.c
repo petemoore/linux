@@ -798,9 +798,9 @@ static int clk_mt6765_apmixed_probe(struct platform_device *pdev)
 
 	apmixed_base = base;
 	/* MPLL, CCIPLL, MAINPLL set HW mode, TDCLKSQ, CLKSQ1 */
-	writel(readl(AP_PLL_CON3) & 0xFFFFFFE1, AP_PLL_CON3);
-	writel(readl(PLLON_CON0) & 0x01041041, PLLON_CON0);
-	writel(readl(PLLON_CON1) & 0x01041041, PLLON_CON1);
+	pete_writel("drivers/clk/mediatek/clk-mt6765.c:801", pete_readl("drivers/clk/mediatek/clk-mt6765.c:801", AP_PLL_CON3) & 0xFFFFFFE1, AP_PLL_CON3);
+	pete_writel("drivers/clk/mediatek/clk-mt6765.c:802", pete_readl("drivers/clk/mediatek/clk-mt6765.c:802", PLLON_CON0) & 0x01041041, PLLON_CON0);
+	pete_writel("drivers/clk/mediatek/clk-mt6765.c:803", pete_readl("drivers/clk/mediatek/clk-mt6765.c:803", PLLON_CON1) & 0x01041041, PLLON_CON1);
 
 	return r;
 }
@@ -838,9 +838,9 @@ static int clk_mt6765_top_probe(struct platform_device *pdev)
 
 	cksys_base = base;
 	/* [4]:no need */
-	writel(readl(CLK_SCP_CFG_0) | 0x3EF, CLK_SCP_CFG_0);
+	pete_writel("drivers/clk/mediatek/clk-mt6765.c:841", pete_readl("drivers/clk/mediatek/clk-mt6765.c:841", CLK_SCP_CFG_0) | 0x3EF, CLK_SCP_CFG_0);
 	/*[1,2,3,8]: no need*/
-	writel(readl(CLK_SCP_CFG_1) | 0x1, CLK_SCP_CFG_1);
+	pete_writel("drivers/clk/mediatek/clk-mt6765.c:843", pete_readl("drivers/clk/mediatek/clk-mt6765.c:843", CLK_SCP_CFG_1) | 0x1, CLK_SCP_CFG_1);
 
 	return r;
 }

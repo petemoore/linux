@@ -45,13 +45,13 @@ static inline void cx18_raw_writel(struct cx18 *cx, u32 val, void __iomem *addr)
 /* Normal memory mapped IO */
 static inline u32 cx18_readl(struct cx18 *cx, const void __iomem *addr)
 {
-	return readl(addr);
+	return pete_readl("drivers/media/pci/cx18/cx18-io.h:48", addr);
 }
 
 static inline
 void cx18_writel_noretry(struct cx18 *cx, u32 val, void __iomem *addr)
 {
-	writel(val, addr);
+	pete_writel("drivers/media/pci/cx18/cx18-io.h:54", val, addr);
 }
 
 static inline void cx18_writel(struct cx18 *cx, u32 val, void __iomem *addr)
@@ -83,13 +83,13 @@ void cx18_writel_expect(struct cx18 *cx, u32 val, void __iomem *addr,
 
 static inline u16 cx18_readw(struct cx18 *cx, const void __iomem *addr)
 {
-	return readw(addr);
+	return pete_readw("drivers/media/pci/cx18/cx18-io.h:86", addr);
 }
 
 static inline
 void cx18_writew_noretry(struct cx18 *cx, u16 val, void __iomem *addr)
 {
-	writew(val, addr);
+	pete_writew("drivers/media/pci/cx18/cx18-io.h:92", val, addr);
 }
 
 static inline void cx18_writew(struct cx18 *cx, u16 val, void __iomem *addr)
@@ -104,13 +104,13 @@ static inline void cx18_writew(struct cx18 *cx, u16 val, void __iomem *addr)
 
 static inline u8 cx18_readb(struct cx18 *cx, const void __iomem *addr)
 {
-	return readb(addr);
+	return pete_readb("drivers/media/pci/cx18/cx18-io.h:107", addr);
 }
 
 static inline
 void cx18_writeb_noretry(struct cx18 *cx, u8 val, void __iomem *addr)
 {
-	writeb(val, addr);
+	pete_writeb("drivers/media/pci/cx18/cx18-io.h:113", val, addr);
 }
 
 static inline void cx18_writeb(struct cx18 *cx, u8 val, void __iomem *addr)

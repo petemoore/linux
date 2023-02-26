@@ -852,7 +852,7 @@ static irqreturn_t mlx4_interrupt(int irq, void *dev_ptr)
 	int work = 0;
 	int i;
 
-	writel(priv->eq_table.clr_mask, priv->eq_table.clr_int);
+	pete_writel("drivers/net/ethernet/mellanox/mlx4/eq.c:855", priv->eq_table.clr_mask, priv->eq_table.clr_int);
 
 	for (i = 0; i < dev->caps.num_comp_vectors + 1; ++i)
 		work |= mlx4_eq_int(dev, &priv->eq_table.eq[i]);

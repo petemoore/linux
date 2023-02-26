@@ -129,10 +129,10 @@ static void pwm_samsung_set_divisor(struct samsung_pwm_chip *pwm,
 
 	spin_lock_irqsave(&samsung_pwm_lock, flags);
 
-	reg = readl(pwm->base + REG_TCFG1);
+	reg = pete_readl("drivers/pwm/pwm-samsung.c:132", pwm->base + REG_TCFG1);
 	reg &= ~(TCFG1_MUX_MASK << shift);
 	reg |= bits << shift;
-	writel(reg, pwm->base + REG_TCFG1);
+	pete_writel("drivers/pwm/pwm-samsung.c:135", reg, pwm->base + REG_TCFG1);
 
 	spin_unlock_irqrestore(&samsung_pwm_lock, flags);
 }
@@ -142,7 +142,7 @@ static int pwm_samsung_is_tdiv(struct samsung_pwm_chip *chip, unsigned int chan)
 	struct samsung_pwm_variant *variant = &chip->variant;
 	u32 reg;
 
-	reg = readl(chip->base + REG_TCFG1);
+	reg = pete_readl("drivers/pwm/pwm-samsung.c:145", chip->base + REG_TCFG1);
 	reg >>= TCFG1_SHIFT(chan);
 	reg &= TCFG1_MUX_MASK;
 
@@ -157,7 +157,7 @@ static unsigned long pwm_samsung_get_tin_rate(struct samsung_pwm_chip *chip,
 
 	rate = clk_get_rate(chip->base_clk);
 
-	reg = readl(chip->base + REG_TCFG0);
+	reg = pete_readl("drivers/pwm/pwm-samsung.c:160", chip->base + REG_TCFG0);
 	if (chan >= 2)
 		reg >>= TCFG0_PRESCALER1_SHIFT;
 	reg &= TCFG0_PRESCALER_MASK;
@@ -246,15 +246,15 @@ static int pwm_samsung_enable(struct pwm_chip *chip, struct pwm_device *pwm)
 
 	spin_lock_irqsave(&samsung_pwm_lock, flags);
 
-	tcon = readl(our_chip->base + REG_TCON);
+	tcon = pete_readl("drivers/pwm/pwm-samsung.c:249", our_chip->base + REG_TCON);
 
 	tcon &= ~TCON_START(tcon_chan);
 	tcon |= TCON_MANUALUPDATE(tcon_chan);
-	writel(tcon, our_chip->base + REG_TCON);
+	pete_writel("drivers/pwm/pwm-samsung.c:253", tcon, our_chip->base + REG_TCON);
 
 	tcon &= ~TCON_MANUALUPDATE(tcon_chan);
 	tcon |= TCON_START(tcon_chan) | TCON_AUTORELOAD(tcon_chan);
-	writel(tcon, our_chip->base + REG_TCON);
+	pete_writel("drivers/pwm/pwm-samsung.c:257", tcon, our_chip->base + REG_TCON);
 
 	our_chip->disabled_mask &= ~BIT(pwm->hwpwm);
 
@@ -272,9 +272,9 @@ static void pwm_samsung_disable(struct pwm_chip *chip, struct pwm_device *pwm)
 
 	spin_lock_irqsave(&samsung_pwm_lock, flags);
 
-	tcon = readl(our_chip->base + REG_TCON);
+	tcon = pete_readl("drivers/pwm/pwm-samsung.c:275", our_chip->base + REG_TCON);
 	tcon &= ~TCON_AUTORELOAD(tcon_chan);
-	writel(tcon, our_chip->base + REG_TCON);
+	pete_writel("drivers/pwm/pwm-samsung.c:277", tcon, our_chip->base + REG_TCON);
 
 	our_chip->disabled_mask |= BIT(pwm->hwpwm);
 
@@ -290,12 +290,12 @@ static void pwm_samsung_manual_update(struct samsung_pwm_chip *chip,
 
 	spin_lock_irqsave(&samsung_pwm_lock, flags);
 
-	tcon = readl(chip->base + REG_TCON);
+	tcon = pete_readl("drivers/pwm/pwm-samsung.c:293", chip->base + REG_TCON);
 	tcon |= TCON_MANUALUPDATE(tcon_chan);
-	writel(tcon, chip->base + REG_TCON);
+	pete_writel("drivers/pwm/pwm-samsung.c:295", tcon, chip->base + REG_TCON);
 
 	tcon &= ~TCON_MANUALUPDATE(tcon_chan);
-	writel(tcon, chip->base + REG_TCON);
+	pete_writel("drivers/pwm/pwm-samsung.c:298", tcon, chip->base + REG_TCON);
 
 	spin_unlock_irqrestore(&samsung_pwm_lock, flags);
 }
@@ -315,8 +315,8 @@ static int __pwm_samsung_config(struct pwm_chip *chip, struct pwm_device *pwm,
 	if (period_ns > NSEC_PER_SEC)
 		return -ERANGE;
 
-	tcnt = readl(our_chip->base + REG_TCNTB(pwm->hwpwm));
-	oldtcmp = readl(our_chip->base + REG_TCMPB(pwm->hwpwm));
+	tcnt = pete_readl("drivers/pwm/pwm-samsung.c:318", our_chip->base + REG_TCNTB(pwm->hwpwm));
+	oldtcmp = pete_readl("drivers/pwm/pwm-samsung.c:319", our_chip->base + REG_TCMPB(pwm->hwpwm));
 
 	/* We need tick count for calculation, not last tick. */
 	++tcnt;
@@ -361,8 +361,8 @@ static int __pwm_samsung_config(struct pwm_chip *chip, struct pwm_device *pwm,
 				"tin_ns=%u, tcmp=%u/%u\n", tin_ns, tcmp, tcnt);
 
 	/* Update PWM registers. */
-	writel(tcnt, our_chip->base + REG_TCNTB(pwm->hwpwm));
-	writel(tcmp, our_chip->base + REG_TCMPB(pwm->hwpwm));
+	pete_writel("drivers/pwm/pwm-samsung.c:364", tcnt, our_chip->base + REG_TCNTB(pwm->hwpwm));
+	pete_writel("drivers/pwm/pwm-samsung.c:365", tcmp, our_chip->base + REG_TCMPB(pwm->hwpwm));
 
 	/*
 	 * In case the PWM is currently at 100% duty cycle, force a manual
@@ -396,7 +396,7 @@ static void pwm_samsung_set_invert(struct samsung_pwm_chip *chip,
 
 	spin_lock_irqsave(&samsung_pwm_lock, flags);
 
-	tcon = readl(chip->base + REG_TCON);
+	tcon = pete_readl("drivers/pwm/pwm-samsung.c:399", chip->base + REG_TCON);
 
 	if (invert) {
 		chip->inverter_mask |= BIT(channel);
@@ -406,7 +406,7 @@ static void pwm_samsung_set_invert(struct samsung_pwm_chip *chip,
 		tcon &= ~TCON_INVERT(tcon_chan);
 	}
 
-	writel(tcon, chip->base + REG_TCON);
+	pete_writel("drivers/pwm/pwm-samsung.c:409", tcon, chip->base + REG_TCON);
 
 	spin_unlock_irqrestore(&samsung_pwm_lock, flags);
 }

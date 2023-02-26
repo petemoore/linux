@@ -33,7 +33,7 @@ static void __init mips_nmi_setup(void)
 
 void ls7a_early_config(void)
 {
-	node_id_offset = ((readl(NODE_ID_OFFSET_ADDR) >> 8) & 0x1f) + 36;
+	node_id_offset = ((pete_readl("arch/mips/loongson64/init.c:36", NODE_ID_OFFSET_ADDR) >> 8) & 0x1f) + 36;
 }
 
 void rs780e_early_config(void)

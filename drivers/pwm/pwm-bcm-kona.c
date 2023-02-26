@@ -82,11 +82,11 @@ static inline struct kona_pwmc *to_kona_pwmc(struct pwm_chip *_chip)
 static void kona_pwmc_prepare_for_settings(struct kona_pwmc *kp,
 	unsigned int chan)
 {
-	unsigned int value = readl(kp->base + PWM_CONTROL_OFFSET);
+	unsigned int value = pete_readl("drivers/pwm/pwm-bcm-kona.c:85", kp->base + PWM_CONTROL_OFFSET);
 
 	value |= 1 << PWM_CONTROL_SMOOTH_SHIFT(chan);
 	value &= ~(1 << PWM_CONTROL_TRIGGER_SHIFT(chan));
-	writel(value, kp->base + PWM_CONTROL_OFFSET);
+	pete_writel("drivers/pwm/pwm-bcm-kona.c:89", value, kp->base + PWM_CONTROL_OFFSET);
 
 	/*
 	 * There must be a min 400ns delay between clearing trigger and setting
@@ -97,12 +97,12 @@ static void kona_pwmc_prepare_for_settings(struct kona_pwmc *kp,
 
 static void kona_pwmc_apply_settings(struct kona_pwmc *kp, unsigned int chan)
 {
-	unsigned int value = readl(kp->base + PWM_CONTROL_OFFSET);
+	unsigned int value = pete_readl("drivers/pwm/pwm-bcm-kona.c:100", kp->base + PWM_CONTROL_OFFSET);
 
 	/* Set trigger bit and clear smooth bit to apply new settings */
 	value &= ~(1 << PWM_CONTROL_SMOOTH_SHIFT(chan));
 	value |= 1 << PWM_CONTROL_TRIGGER_SHIFT(chan);
-	writel(value, kp->base + PWM_CONTROL_OFFSET);
+	pete_writel("drivers/pwm/pwm-bcm-kona.c:105", value, kp->base + PWM_CONTROL_OFFSET);
 
 	/* Trigger bit must be held high for at least 400 ns. */
 	ndelay(400);
@@ -158,14 +158,14 @@ static int kona_pwmc_config(struct pwm_chip *chip, struct pwm_device *pwm,
 	if (pwm_is_enabled(pwm)) {
 		kona_pwmc_prepare_for_settings(kp, chan);
 
-		value = readl(kp->base + PRESCALE_OFFSET);
+		value = pete_readl("drivers/pwm/pwm-bcm-kona.c:161", kp->base + PRESCALE_OFFSET);
 		value &= ~PRESCALE_MASK(chan);
 		value |= prescale << PRESCALE_SHIFT(chan);
-		writel(value, kp->base + PRESCALE_OFFSET);
+		pete_writel("drivers/pwm/pwm-bcm-kona.c:164", value, kp->base + PRESCALE_OFFSET);
 
-		writel(pc, kp->base + PERIOD_COUNT_OFFSET(chan));
+		pete_writel("drivers/pwm/pwm-bcm-kona.c:166", pc, kp->base + PERIOD_COUNT_OFFSET(chan));
 
-		writel(dc, kp->base + DUTY_CYCLE_HIGH_OFFSET(chan));
+		pete_writel("drivers/pwm/pwm-bcm-kona.c:168", dc, kp->base + DUTY_CYCLE_HIGH_OFFSET(chan));
 
 		kona_pwmc_apply_settings(kp, chan);
 	}
@@ -189,14 +189,14 @@ static int kona_pwmc_set_polarity(struct pwm_chip *chip, struct pwm_device *pwm,
 
 	kona_pwmc_prepare_for_settings(kp, chan);
 
-	value = readl(kp->base + PWM_CONTROL_OFFSET);
+	value = pete_readl("drivers/pwm/pwm-bcm-kona.c:192", kp->base + PWM_CONTROL_OFFSET);
 
 	if (polarity == PWM_POLARITY_NORMAL)
 		value |= 1 << PWM_CONTROL_POLARITY_SHIFT(chan);
 	else
 		value &= ~(1 << PWM_CONTROL_POLARITY_SHIFT(chan));
 
-	writel(value, kp->base + PWM_CONTROL_OFFSET);
+	pete_writel("drivers/pwm/pwm-bcm-kona.c:199", value, kp->base + PWM_CONTROL_OFFSET);
 
 	kona_pwmc_apply_settings(kp, chan);
 
@@ -235,13 +235,13 @@ static void kona_pwmc_disable(struct pwm_chip *chip, struct pwm_device *pwm)
 	kona_pwmc_prepare_for_settings(kp, chan);
 
 	/* Simulate a disable by configuring for zero duty */
-	writel(0, kp->base + DUTY_CYCLE_HIGH_OFFSET(chan));
-	writel(0, kp->base + PERIOD_COUNT_OFFSET(chan));
+	pete_writel("drivers/pwm/pwm-bcm-kona.c:238", 0, kp->base + DUTY_CYCLE_HIGH_OFFSET(chan));
+	pete_writel("drivers/pwm/pwm-bcm-kona.c:239", 0, kp->base + PERIOD_COUNT_OFFSET(chan));
 
 	/* Set prescale to 0 for this channel */
-	value = readl(kp->base + PRESCALE_OFFSET);
+	value = pete_readl("drivers/pwm/pwm-bcm-kona.c:242", kp->base + PRESCALE_OFFSET);
 	value &= ~PRESCALE_MASK(chan);
-	writel(value, kp->base + PRESCALE_OFFSET);
+	pete_writel("drivers/pwm/pwm-bcm-kona.c:244", value, kp->base + PRESCALE_OFFSET);
 
 	kona_pwmc_apply_settings(kp, chan);
 
@@ -292,7 +292,7 @@ static int kona_pwmc_probe(struct platform_device *pdev)
 	for (chan = 0; chan < kp->chip.npwm; chan++)
 		value |= (1 << PWM_CONTROL_TYPE_SHIFT(chan));
 
-	writel(value, kp->base + PWM_CONTROL_OFFSET);
+	pete_writel("drivers/pwm/pwm-bcm-kona.c:295", value, kp->base + PWM_CONTROL_OFFSET);
 
 	clk_disable_unprepare(kp->clk);
 

@@ -76,8 +76,8 @@ static void ts4800_ts_close(struct input_dev *input_dev)
 static void ts4800_ts_poll(struct input_dev *input_dev)
 {
 	struct ts4800_ts *ts = input_get_drvdata(input_dev);
-	u16 last_x = readw(ts->base + X_OFFSET);
-	u16 last_y = readw(ts->base + Y_OFFSET);
+	u16 last_x = pete_readw("drivers/input/touchscreen/ts4800-ts.c:79", ts->base + X_OFFSET);
+	u16 last_y = pete_readw("drivers/input/touchscreen/ts4800-ts.c:80", ts->base + Y_OFFSET);
 	bool pendown = last_x & PENDOWN_MASK;
 
 	if (pendown) {

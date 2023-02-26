@@ -130,7 +130,7 @@ enum ionic_dbell_bits {
 
 static inline void ionic_dbell_ring(u64 __iomem *db_page, int qtype, u64 val)
 {
-	writeq(val, &db_page[qtype]);
+	pete_writeq("drivers/net/ethernet/pensando/ionic/ionic_regs.h:133", val, &db_page[qtype]);
 }
 
 #endif /* IONIC_REGS_H */

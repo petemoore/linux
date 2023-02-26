@@ -366,7 +366,7 @@ static inline u32 spx5_rd(struct sparx5 *sparx5, int id, int tinst, int tcnt,
 			  int gbase, int ginst, int gcnt, int gwidth,
 			  int raddr, int rinst, int rcnt, int rwidth)
 {
-	return readl(spx5_addr(sparx5->regs, id, tinst, tcnt, gbase, ginst,
+	return pete_readl("drivers/net/ethernet/microchip/sparx5/sparx5_main.h:369", spx5_addr(sparx5->regs, id, tinst, tcnt, gbase, ginst,
 			       gcnt, gwidth, raddr, rinst, rcnt, rwidth));
 }
 
@@ -374,7 +374,7 @@ static inline u32 spx5_inst_rd(void __iomem *iomem, int id, int tinst, int tcnt,
 			       int gbase, int ginst, int gcnt, int gwidth,
 			       int raddr, int rinst, int rcnt, int rwidth)
 {
-	return readl(spx5_inst_addr(iomem, gbase, ginst,
+	return pete_readl("drivers/net/ethernet/microchip/sparx5/sparx5_main.h:377", spx5_inst_addr(iomem, gbase, ginst,
 				     gcnt, gwidth, raddr, rinst, rcnt, rwidth));
 }
 
@@ -383,7 +383,7 @@ static inline void spx5_wr(u32 val, struct sparx5 *sparx5,
 			   int gbase, int ginst, int gcnt, int gwidth,
 			   int raddr, int rinst, int rcnt, int rwidth)
 {
-	writel(val, spx5_addr(sparx5->regs, id, tinst, tcnt,
+	pete_writel("drivers/net/ethernet/microchip/sparx5/sparx5_main.h:386", val, spx5_addr(sparx5->regs, id, tinst, tcnt,
 			      gbase, ginst, gcnt, gwidth,
 			      raddr, rinst, rcnt, rwidth));
 }
@@ -393,7 +393,7 @@ static inline void spx5_inst_wr(u32 val, void __iomem *iomem,
 				int gbase, int ginst, int gcnt, int gwidth,
 				int raddr, int rinst, int rcnt, int rwidth)
 {
-	writel(val, spx5_inst_addr(iomem,
+	pete_writel("drivers/net/ethernet/microchip/sparx5/sparx5_main.h:396", val, spx5_inst_addr(iomem,
 				   gbase, ginst, gcnt, gwidth,
 				   raddr, rinst, rcnt, rwidth));
 }
@@ -405,10 +405,10 @@ static inline void spx5_rmw(u32 val, u32 mask, struct sparx5 *sparx5,
 {
 	u32 nval;
 
-	nval = readl(spx5_addr(sparx5->regs, id, tinst, tcnt, gbase, ginst,
+	nval = pete_readl("drivers/net/ethernet/microchip/sparx5/sparx5_main.h:408", spx5_addr(sparx5->regs, id, tinst, tcnt, gbase, ginst,
 			       gcnt, gwidth, raddr, rinst, rcnt, rwidth));
 	nval = (nval & ~mask) | (val & mask);
-	writel(nval, spx5_addr(sparx5->regs, id, tinst, tcnt, gbase, ginst,
+	pete_writel("drivers/net/ethernet/microchip/sparx5/sparx5_main.h:411", nval, spx5_addr(sparx5->regs, id, tinst, tcnt, gbase, ginst,
 			       gcnt, gwidth, raddr, rinst, rcnt, rwidth));
 }
 
@@ -419,10 +419,10 @@ static inline void spx5_inst_rmw(u32 val, u32 mask, void __iomem *iomem,
 {
 	u32 nval;
 
-	nval = readl(spx5_inst_addr(iomem, gbase, ginst, gcnt, gwidth, raddr,
+	nval = pete_readl("drivers/net/ethernet/microchip/sparx5/sparx5_main.h:422", spx5_inst_addr(iomem, gbase, ginst, gcnt, gwidth, raddr,
 				    rinst, rcnt, rwidth));
 	nval = (nval & ~mask) | (val & mask);
-	writel(nval, spx5_inst_addr(iomem, gbase, ginst, gcnt, gwidth, raddr,
+	pete_writel("drivers/net/ethernet/microchip/sparx5/sparx5_main.h:425", nval, spx5_inst_addr(iomem, gbase, ginst, gcnt, gwidth, raddr,
 				    rinst, rcnt, rwidth));
 }
 

@@ -459,7 +459,7 @@ static void gic_cpu_if_up(struct gic_chip_data *gic)
 	/*
 	* Preserve bypass disable bits to be written back later
 	*/
-	bypass = readl(cpu_base + GIC_CPU_CTRL);
+	bypass = pete_readl("drivers/irqchip/irq-gic.c:462", cpu_base + GIC_CPU_CTRL);
 	bypass &= GICC_DIS_BYPASS_MASK;
 
 	writel_relaxed(bypass | mode | GICC_ENABLE, cpu_base + GIC_CPU_CTRL);
@@ -538,7 +538,7 @@ int gic_cpu_if_down(unsigned int gic_nr)
 		return -EINVAL;
 
 	cpu_base = gic_data_cpu_base(&gic_data[gic_nr]);
-	val = readl(cpu_base + GIC_CPU_CTRL);
+	val = pete_readl("drivers/irqchip/irq-gic.c:541", cpu_base + GIC_CPU_CTRL);
 	val &= ~GICC_ENABLE;
 	writel_relaxed(val, cpu_base + GIC_CPU_CTRL);
 

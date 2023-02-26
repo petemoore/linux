@@ -74,12 +74,12 @@ static int xfer_msg(struct sun4i_hdmi *hdmi, struct i2c_msg *msg)
 
 	/* Set FIFO direction */
 	if (hdmi->variant->ddc_fifo_has_dir) {
-		reg = readl(hdmi->base + SUN4I_HDMI_DDC_CTRL_REG);
+		reg = pete_readl("drivers/gpu/drm/sun4i/sun4i_hdmi_i2c.c:77", hdmi->base + SUN4I_HDMI_DDC_CTRL_REG);
 		reg &= ~SUN4I_HDMI_DDC_CTRL_FIFO_DIR_MASK;
 		reg |= (msg->flags & I2C_M_RD) ?
 		       SUN4I_HDMI_DDC_CTRL_FIFO_DIR_READ :
 		       SUN4I_HDMI_DDC_CTRL_FIFO_DIR_WRITE;
-		writel(reg, hdmi->base + SUN4I_HDMI_DDC_CTRL_REG);
+		pete_writel("drivers/gpu/drm/sun4i/sun4i_hdmi_i2c.c:82", reg, hdmi->base + SUN4I_HDMI_DDC_CTRL_REG);
 	}
 
 	/* Clear address register (not cleared by soft reset) */

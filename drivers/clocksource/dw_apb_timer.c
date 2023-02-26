@@ -48,13 +48,13 @@ clocksource_to_dw_apb_clocksource(struct clocksource *cs)
 
 static inline u32 apbt_readl(struct dw_apb_timer *timer, unsigned long offs)
 {
-	return readl(timer->base + offs);
+	return pete_readl("drivers/clocksource/dw_apb_timer.c:51", timer->base + offs);
 }
 
 static inline void apbt_writel(struct dw_apb_timer *timer, u32 val,
 			unsigned long offs)
 {
-	writel(val, timer->base + offs);
+	pete_writel("drivers/clocksource/dw_apb_timer.c:57", val, timer->base + offs);
 }
 
 static inline u32 apbt_readl_relaxed(struct dw_apb_timer *timer, unsigned long offs)

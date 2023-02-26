@@ -18,7 +18,7 @@ static u8 ssb_host_soc_read8(struct ssb_device *dev, u16 offset)
 	struct ssb_bus *bus = dev->bus;
 
 	offset += dev->core_index * SSB_CORE_SIZE;
-	return readb(bus->mmio + offset);
+	return pete_readb("drivers/ssb/host_soc.c:21", bus->mmio + offset);
 }
 
 static u16 ssb_host_soc_read16(struct ssb_device *dev, u16 offset)
@@ -26,7 +26,7 @@ static u16 ssb_host_soc_read16(struct ssb_device *dev, u16 offset)
 	struct ssb_bus *bus = dev->bus;
 
 	offset += dev->core_index * SSB_CORE_SIZE;
-	return readw(bus->mmio + offset);
+	return pete_readw("drivers/ssb/host_soc.c:29", bus->mmio + offset);
 }
 
 static u32 ssb_host_soc_read32(struct ssb_device *dev, u16 offset)
@@ -34,7 +34,7 @@ static u32 ssb_host_soc_read32(struct ssb_device *dev, u16 offset)
 	struct ssb_bus *bus = dev->bus;
 
 	offset += dev->core_index * SSB_CORE_SIZE;
-	return readl(bus->mmio + offset);
+	return pete_readl("drivers/ssb/host_soc.c:37", bus->mmio + offset);
 }
 
 #ifdef CONFIG_SSB_BLOCKIO
@@ -91,7 +91,7 @@ static void ssb_host_soc_write8(struct ssb_device *dev, u16 offset, u8 value)
 	struct ssb_bus *bus = dev->bus;
 
 	offset += dev->core_index * SSB_CORE_SIZE;
-	writeb(value, bus->mmio + offset);
+	pete_writeb("drivers/ssb/host_soc.c:94", value, bus->mmio + offset);
 }
 
 static void ssb_host_soc_write16(struct ssb_device *dev, u16 offset, u16 value)
@@ -99,7 +99,7 @@ static void ssb_host_soc_write16(struct ssb_device *dev, u16 offset, u16 value)
 	struct ssb_bus *bus = dev->bus;
 
 	offset += dev->core_index * SSB_CORE_SIZE;
-	writew(value, bus->mmio + offset);
+	pete_writew("drivers/ssb/host_soc.c:102", value, bus->mmio + offset);
 }
 
 static void ssb_host_soc_write32(struct ssb_device *dev, u16 offset, u32 value)
@@ -107,7 +107,7 @@ static void ssb_host_soc_write32(struct ssb_device *dev, u16 offset, u32 value)
 	struct ssb_bus *bus = dev->bus;
 
 	offset += dev->core_index * SSB_CORE_SIZE;
-	writel(value, bus->mmio + offset);
+	pete_writel("drivers/ssb/host_soc.c:110", value, bus->mmio + offset);
 }
 
 #ifdef CONFIG_SSB_BLOCKIO

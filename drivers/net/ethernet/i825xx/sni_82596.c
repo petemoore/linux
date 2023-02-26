@@ -45,7 +45,7 @@ static inline void ca(struct net_device *dev)
 {
 	struct i596_private *lp = netdev_priv(dev);
 
-	writel(0, lp->ca);
+	pete_writel("drivers/net/ethernet/i825xx/sni_82596.c:48", 0, lp->ca);
 }
 
 
@@ -56,15 +56,15 @@ static void mpu_port(struct net_device *dev, int c, dma_addr_t x)
 	u32 v = (u32) (c) | (u32) (x);
 
 	if (lp->options & OPT_MPU_16BIT) {
-		writew(v & 0xffff, lp->mpu_port);
+		pete_writew("drivers/net/ethernet/i825xx/sni_82596.c:59", v & 0xffff, lp->mpu_port);
 		wmb();  /* order writes to MPU port */
 		udelay(1);
-		writew(v >> 16, lp->mpu_port);
+		pete_writew("drivers/net/ethernet/i825xx/sni_82596.c:62", v >> 16, lp->mpu_port);
 	} else {
-		writel(v, lp->mpu_port);
+		pete_writel("drivers/net/ethernet/i825xx/sni_82596.c:64", v, lp->mpu_port);
 		wmb();  /* order writes to MPU port */
 		udelay(1);
-		writel(v, lp->mpu_port);
+		pete_writel("drivers/net/ethernet/i825xx/sni_82596.c:67", v, lp->mpu_port);
 	}
 }
 
@@ -109,12 +109,12 @@ static int sni_82596_probe(struct platform_device *dev)
 		goto probe_failed;
 
 	/* someone seems to like messed up stuff */
-	netdevice->dev_addr[0] = readb(eth_addr + 0x0b);
-	netdevice->dev_addr[1] = readb(eth_addr + 0x0a);
-	netdevice->dev_addr[2] = readb(eth_addr + 0x09);
-	netdevice->dev_addr[3] = readb(eth_addr + 0x08);
-	netdevice->dev_addr[4] = readb(eth_addr + 0x07);
-	netdevice->dev_addr[5] = readb(eth_addr + 0x06);
+	netdevice->dev_addr[0] = pete_readb("drivers/net/ethernet/i825xx/sni_82596.c:112", eth_addr + 0x0b);
+	netdevice->dev_addr[1] = pete_readb("drivers/net/ethernet/i825xx/sni_82596.c:113", eth_addr + 0x0a);
+	netdevice->dev_addr[2] = pete_readb("drivers/net/ethernet/i825xx/sni_82596.c:114", eth_addr + 0x09);
+	netdevice->dev_addr[3] = pete_readb("drivers/net/ethernet/i825xx/sni_82596.c:115", eth_addr + 0x08);
+	netdevice->dev_addr[4] = pete_readb("drivers/net/ethernet/i825xx/sni_82596.c:116", eth_addr + 0x07);
+	netdevice->dev_addr[5] = pete_readb("drivers/net/ethernet/i825xx/sni_82596.c:117", eth_addr + 0x06);
 	iounmap(eth_addr);
 
 	if (netdevice->irq < 0) {

@@ -274,7 +274,7 @@ struct solo_dev {
 
 static inline u32 solo_reg_read(struct solo_dev *solo_dev, int reg)
 {
-	return readl(solo_dev->reg_base + reg);
+	return pete_readl("drivers/media/pci/solo6x10/solo6x10.h:277", solo_dev->reg_base + reg);
 }
 
 static inline void solo_reg_write(struct solo_dev *solo_dev, int reg,
@@ -282,7 +282,7 @@ static inline void solo_reg_write(struct solo_dev *solo_dev, int reg,
 {
 	u16 val;
 
-	writel(data, solo_dev->reg_base + reg);
+	pete_writel("drivers/media/pci/solo6x10/solo6x10.h:285", data, solo_dev->reg_base + reg);
 	pci_read_config_word(solo_dev->pdev, PCI_STATUS, &val);
 }
 

@@ -47,7 +47,7 @@ static int lpc18xx_rgu_restart(struct notifier_block *nb, unsigned long mode,
 	struct lpc18xx_rgu_data *rc = container_of(nb, struct lpc18xx_rgu_data,
 						   restart_nb);
 
-	writel(BIT(LPC18XX_RGU_CORE_RST), rc->base + LPC18XX_RGU_CTRL0);
+	pete_writel("drivers/reset/reset-lpc18xx.c:50", BIT(LPC18XX_RGU_CORE_RST), rc->base + LPC18XX_RGU_CTRL0);
 	mdelay(2000);
 
 	pr_emerg("%s: unable to restart system\n", __func__);
@@ -77,11 +77,11 @@ static int lpc18xx_rgu_setclear_reset(struct reset_controller_dev *rcdev,
 	rst_bit = 1 << (id % LPC18XX_RGU_RESETS_PER_REG);
 
 	spin_lock_irqsave(&rc->lock, flags);
-	stat = ~readl(rc->base + stat_offset);
+	stat = ~pete_readl("drivers/reset/reset-lpc18xx.c:80", rc->base + stat_offset);
 	if (set)
-		writel(stat | rst_bit, rc->base + ctrl_offset);
+		pete_writel("drivers/reset/reset-lpc18xx.c:82", stat | rst_bit, rc->base + ctrl_offset);
 	else
-		writel(stat & ~rst_bit, rc->base + ctrl_offset);
+		pete_writel("drivers/reset/reset-lpc18xx.c:84", stat & ~rst_bit, rc->base + ctrl_offset);
 	spin_unlock_irqrestore(&rc->lock, flags);
 
 	return 0;
@@ -126,7 +126,7 @@ static int lpc18xx_rgu_status(struct reset_controller_dev *rcdev,
 	offset += (id / LPC18XX_RGU_RESETS_PER_REG) * sizeof(u32);
 	bit = 1 << (id % LPC18XX_RGU_RESETS_PER_REG);
 
-	return !(readl(rc->base + offset) & bit);
+	return !(pete_readl("drivers/reset/reset-lpc18xx.c:129", rc->base + offset) & bit);
 }
 
 static const struct reset_control_ops lpc18xx_rgu_ops = {

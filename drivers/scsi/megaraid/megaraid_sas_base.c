@@ -267,12 +267,12 @@ u32 megasas_readl(struct megasas_instance *instance,
 	 */
 	if (instance->adapter_type == AERO_SERIES) {
 		do {
-			ret_val = readl(addr);
+			ret_val = pete_readl("drivers/scsi/megaraid/megaraid_sas_base.c:270", addr);
 			i++;
 		} while (ret_val == 0 && i < 3);
 		return ret_val;
 	} else {
-		return readl(addr);
+		return pete_readl("drivers/scsi/megaraid/megaraid_sas_base.c:275", addr);
 	}
 }
 
@@ -461,10 +461,10 @@ megasas_enable_intr_xscale(struct megasas_instance *instance)
 	struct megasas_register_set __iomem *regs;
 
 	regs = instance->reg_set;
-	writel(0, &(regs)->outbound_intr_mask);
+	pete_writel("drivers/scsi/megaraid/megaraid_sas_base.c:464", 0, &(regs)->outbound_intr_mask);
 
 	/* Dummy readl to force pci flush */
-	readl(&regs->outbound_intr_mask);
+	pete_readl("drivers/scsi/megaraid/megaraid_sas_base.c:467", &regs->outbound_intr_mask);
 }
 
 /**
@@ -478,9 +478,9 @@ megasas_disable_intr_xscale(struct megasas_instance *instance)
 	u32 mask = 0x1f;
 
 	regs = instance->reg_set;
-	writel(mask, &regs->outbound_intr_mask);
+	pete_writel("drivers/scsi/megaraid/megaraid_sas_base.c:481", mask, &regs->outbound_intr_mask);
 	/* Dummy readl to force pci flush */
-	readl(&regs->outbound_intr_mask);
+	pete_readl("drivers/scsi/megaraid/megaraid_sas_base.c:483", &regs->outbound_intr_mask);
 }
 
 /**
@@ -490,7 +490,7 @@ megasas_disable_intr_xscale(struct megasas_instance *instance)
 static u32
 megasas_read_fw_status_reg_xscale(struct megasas_instance *instance)
 {
-	return readl(&instance->reg_set->outbound_msg_0);
+	return pete_readl("drivers/scsi/megaraid/megaraid_sas_base.c:493", &instance->reg_set->outbound_msg_0);
 }
 /**
  * megasas_clear_intr_xscale -	Check & clear interrupt
@@ -507,7 +507,7 @@ megasas_clear_intr_xscale(struct megasas_instance *instance)
 	/*
 	 * Check if it is our interrupt
 	 */
-	status = readl(&regs->outbound_intr_status);
+	status = pete_readl("drivers/scsi/megaraid/megaraid_sas_base.c:510", &regs->outbound_intr_status);
 
 	if (status & MFI_OB_INTR_STATUS_MASK)
 		mfiStatus = MFI_INTR_FLAG_REPLY_MESSAGE;
@@ -518,10 +518,10 @@ megasas_clear_intr_xscale(struct megasas_instance *instance)
 	 * Clear the interrupt by writing back the same value
 	 */
 	if (mfiStatus)
-		writel(status, &regs->outbound_intr_status);
+		pete_writel("drivers/scsi/megaraid/megaraid_sas_base.c:521", status, &regs->outbound_intr_status);
 
 	/* Dummy readl to force pci flush */
-	readl(&regs->outbound_intr_status);
+	pete_readl("drivers/scsi/megaraid/megaraid_sas_base.c:524", &regs->outbound_intr_status);
 
 	return mfiStatus;
 }
@@ -542,7 +542,7 @@ megasas_fire_cmd_xscale(struct megasas_instance *instance,
 	unsigned long flags;
 
 	spin_lock_irqsave(&instance->hba_lock, flags);
-	writel((frame_phys_addr >> 3)|(frame_count),
+	pete_writel("drivers/scsi/megaraid/megaraid_sas_base.c:545", (frame_phys_addr >> 3)|(frame_count),
 	       &(regs)->inbound_queue_port);
 	spin_unlock_irqrestore(&instance->hba_lock, flags);
 }
@@ -559,7 +559,7 @@ megasas_adp_reset_xscale(struct megasas_instance *instance,
 	u32 i;
 	u32 pcidata;
 
-	writel(MFI_ADP_RESET, &regs->inbound_doorbell);
+	pete_writel("drivers/scsi/megaraid/megaraid_sas_base.c:562", MFI_ADP_RESET, &regs->inbound_doorbell);
 
 	for (i = 0; i < 3; i++)
 		msleep(1000); /* sleep for 3 secs */
@@ -641,12 +641,12 @@ megasas_enable_intr_ppc(struct megasas_instance *instance)
 	struct megasas_register_set __iomem *regs;
 
 	regs = instance->reg_set;
-	writel(0xFFFFFFFF, &(regs)->outbound_doorbell_clear);
+	pete_writel("drivers/scsi/megaraid/megaraid_sas_base.c:644", 0xFFFFFFFF, &(regs)->outbound_doorbell_clear);
 
-	writel(~0x80000000, &(regs)->outbound_intr_mask);
+	pete_writel("drivers/scsi/megaraid/megaraid_sas_base.c:646", ~0x80000000, &(regs)->outbound_intr_mask);
 
 	/* Dummy readl to force pci flush */
-	readl(&regs->outbound_intr_mask);
+	pete_readl("drivers/scsi/megaraid/megaraid_sas_base.c:649", &regs->outbound_intr_mask);
 }
 
 /**
@@ -660,9 +660,9 @@ megasas_disable_intr_ppc(struct megasas_instance *instance)
 	u32 mask = 0xFFFFFFFF;
 
 	regs = instance->reg_set;
-	writel(mask, &regs->outbound_intr_mask);
+	pete_writel("drivers/scsi/megaraid/megaraid_sas_base.c:663", mask, &regs->outbound_intr_mask);
 	/* Dummy readl to force pci flush */
-	readl(&regs->outbound_intr_mask);
+	pete_readl("drivers/scsi/megaraid/megaraid_sas_base.c:665", &regs->outbound_intr_mask);
 }
 
 /**
@@ -672,7 +672,7 @@ megasas_disable_intr_ppc(struct megasas_instance *instance)
 static u32
 megasas_read_fw_status_reg_ppc(struct megasas_instance *instance)
 {
-	return readl(&instance->reg_set->outbound_scratch_pad_0);
+	return pete_readl("drivers/scsi/megaraid/megaraid_sas_base.c:675", &instance->reg_set->outbound_scratch_pad_0);
 }
 
 /**
@@ -689,7 +689,7 @@ megasas_clear_intr_ppc(struct megasas_instance *instance)
 	/*
 	 * Check if it is our interrupt
 	 */
-	status = readl(&regs->outbound_intr_status);
+	status = pete_readl("drivers/scsi/megaraid/megaraid_sas_base.c:692", &regs->outbound_intr_status);
 
 	if (status & MFI_REPLY_1078_MESSAGE_INTERRUPT)
 		mfiStatus = MFI_INTR_FLAG_REPLY_MESSAGE;
@@ -700,10 +700,10 @@ megasas_clear_intr_ppc(struct megasas_instance *instance)
 	/*
 	 * Clear the interrupt by writing back the same value
 	 */
-	writel(status, &regs->outbound_doorbell_clear);
+	pete_writel("drivers/scsi/megaraid/megaraid_sas_base.c:703", status, &regs->outbound_doorbell_clear);
 
 	/* Dummy readl to force pci flush */
-	readl(&regs->outbound_doorbell_clear);
+	pete_readl("drivers/scsi/megaraid/megaraid_sas_base.c:706", &regs->outbound_doorbell_clear);
 
 	return mfiStatus;
 }
@@ -724,7 +724,7 @@ megasas_fire_cmd_ppc(struct megasas_instance *instance,
 	unsigned long flags;
 
 	spin_lock_irqsave(&instance->hba_lock, flags);
-	writel((frame_phys_addr | (frame_count<<1))|1,
+	pete_writel("drivers/scsi/megaraid/megaraid_sas_base.c:727", (frame_phys_addr | (frame_count<<1))|1,
 			&(regs)->inbound_queue_port);
 	spin_unlock_irqrestore(&instance->hba_lock, flags);
 }
@@ -770,12 +770,12 @@ megasas_enable_intr_skinny(struct megasas_instance *instance)
 	struct megasas_register_set __iomem *regs;
 
 	regs = instance->reg_set;
-	writel(0xFFFFFFFF, &(regs)->outbound_intr_mask);
+	pete_writel("drivers/scsi/megaraid/megaraid_sas_base.c:773", 0xFFFFFFFF, &(regs)->outbound_intr_mask);
 
-	writel(~MFI_SKINNY_ENABLE_INTERRUPT_MASK, &(regs)->outbound_intr_mask);
+	pete_writel("drivers/scsi/megaraid/megaraid_sas_base.c:775", ~MFI_SKINNY_ENABLE_INTERRUPT_MASK, &(regs)->outbound_intr_mask);
 
 	/* Dummy readl to force pci flush */
-	readl(&regs->outbound_intr_mask);
+	pete_readl("drivers/scsi/megaraid/megaraid_sas_base.c:778", &regs->outbound_intr_mask);
 }
 
 /**
@@ -789,9 +789,9 @@ megasas_disable_intr_skinny(struct megasas_instance *instance)
 	u32 mask = 0xFFFFFFFF;
 
 	regs = instance->reg_set;
-	writel(mask, &regs->outbound_intr_mask);
+	pete_writel("drivers/scsi/megaraid/megaraid_sas_base.c:792", mask, &regs->outbound_intr_mask);
 	/* Dummy readl to force pci flush */
-	readl(&regs->outbound_intr_mask);
+	pete_readl("drivers/scsi/megaraid/megaraid_sas_base.c:794", &regs->outbound_intr_mask);
 }
 
 /**
@@ -801,7 +801,7 @@ megasas_disable_intr_skinny(struct megasas_instance *instance)
 static u32
 megasas_read_fw_status_reg_skinny(struct megasas_instance *instance)
 {
-	return readl(&instance->reg_set->outbound_scratch_pad_0);
+	return pete_readl("drivers/scsi/megaraid/megaraid_sas_base.c:804", &instance->reg_set->outbound_scratch_pad_0);
 }
 
 /**
@@ -819,7 +819,7 @@ megasas_clear_intr_skinny(struct megasas_instance *instance)
 	/*
 	 * Check if it is our interrupt
 	 */
-	status = readl(&regs->outbound_intr_status);
+	status = pete_readl("drivers/scsi/megaraid/megaraid_sas_base.c:822", &regs->outbound_intr_status);
 
 	if (!(status & MFI_SKINNY_ENABLE_INTERRUPT_MASK)) {
 		return 0;
@@ -837,12 +837,12 @@ megasas_clear_intr_skinny(struct megasas_instance *instance)
 	/*
 	 * Clear the interrupt by writing back the same value
 	 */
-	writel(status, &regs->outbound_intr_status);
+	pete_writel("drivers/scsi/megaraid/megaraid_sas_base.c:840", status, &regs->outbound_intr_status);
 
 	/*
 	 * dummy read to flush PCI
 	 */
-	readl(&regs->outbound_intr_status);
+	pete_readl("drivers/scsi/megaraid/megaraid_sas_base.c:845", &regs->outbound_intr_status);
 
 	return mfiStatus;
 }
@@ -863,9 +863,9 @@ megasas_fire_cmd_skinny(struct megasas_instance *instance,
 	unsigned long flags;
 
 	spin_lock_irqsave(&instance->hba_lock, flags);
-	writel(upper_32_bits(frame_phys_addr),
+	pete_writel("drivers/scsi/megaraid/megaraid_sas_base.c:866", upper_32_bits(frame_phys_addr),
 	       &(regs)->inbound_high_queue_port);
-	writel((lower_32_bits(frame_phys_addr) | (frame_count<<1))|1,
+	pete_writel("drivers/scsi/megaraid/megaraid_sas_base.c:868", (lower_32_bits(frame_phys_addr) | (frame_count<<1))|1,
 	       &(regs)->inbound_low_queue_port);
 	spin_unlock_irqrestore(&instance->hba_lock, flags);
 }
@@ -917,13 +917,13 @@ megasas_enable_intr_gen2(struct megasas_instance *instance)
 	struct megasas_register_set __iomem *regs;
 
 	regs = instance->reg_set;
-	writel(0xFFFFFFFF, &(regs)->outbound_doorbell_clear);
+	pete_writel("drivers/scsi/megaraid/megaraid_sas_base.c:920", 0xFFFFFFFF, &(regs)->outbound_doorbell_clear);
 
 	/* write ~0x00000005 (4 & 1) to the intr mask*/
-	writel(~MFI_GEN2_ENABLE_INTERRUPT_MASK, &(regs)->outbound_intr_mask);
+	pete_writel("drivers/scsi/megaraid/megaraid_sas_base.c:923", ~MFI_GEN2_ENABLE_INTERRUPT_MASK, &(regs)->outbound_intr_mask);
 
 	/* Dummy readl to force pci flush */
-	readl(&regs->outbound_intr_mask);
+	pete_readl("drivers/scsi/megaraid/megaraid_sas_base.c:926", &regs->outbound_intr_mask);
 }
 
 /**
@@ -937,9 +937,9 @@ megasas_disable_intr_gen2(struct megasas_instance *instance)
 	u32 mask = 0xFFFFFFFF;
 
 	regs = instance->reg_set;
-	writel(mask, &regs->outbound_intr_mask);
+	pete_writel("drivers/scsi/megaraid/megaraid_sas_base.c:940", mask, &regs->outbound_intr_mask);
 	/* Dummy readl to force pci flush */
-	readl(&regs->outbound_intr_mask);
+	pete_readl("drivers/scsi/megaraid/megaraid_sas_base.c:942", &regs->outbound_intr_mask);
 }
 
 /**
@@ -949,7 +949,7 @@ megasas_disable_intr_gen2(struct megasas_instance *instance)
 static u32
 megasas_read_fw_status_reg_gen2(struct megasas_instance *instance)
 {
-	return readl(&instance->reg_set->outbound_scratch_pad_0);
+	return pete_readl("drivers/scsi/megaraid/megaraid_sas_base.c:952", &instance->reg_set->outbound_scratch_pad_0);
 }
 
 /**
@@ -967,7 +967,7 @@ megasas_clear_intr_gen2(struct megasas_instance *instance)
 	/*
 	 * Check if it is our interrupt
 	 */
-	status = readl(&regs->outbound_intr_status);
+	status = pete_readl("drivers/scsi/megaraid/megaraid_sas_base.c:970", &regs->outbound_intr_status);
 
 	if (status & MFI_INTR_FLAG_REPLY_MESSAGE) {
 		mfiStatus = MFI_INTR_FLAG_REPLY_MESSAGE;
@@ -980,10 +980,10 @@ megasas_clear_intr_gen2(struct megasas_instance *instance)
 	 * Clear the interrupt by writing back the same value
 	 */
 	if (mfiStatus)
-		writel(status, &regs->outbound_doorbell_clear);
+		pete_writel("drivers/scsi/megaraid/megaraid_sas_base.c:983", status, &regs->outbound_doorbell_clear);
 
 	/* Dummy readl to force pci flush */
-	readl(&regs->outbound_intr_status);
+	pete_readl("drivers/scsi/megaraid/megaraid_sas_base.c:986", &regs->outbound_intr_status);
 
 	return mfiStatus;
 }
@@ -1004,7 +1004,7 @@ megasas_fire_cmd_gen2(struct megasas_instance *instance,
 	unsigned long flags;
 
 	spin_lock_irqsave(&instance->hba_lock, flags);
-	writel((frame_phys_addr | (frame_count<<1))|1,
+	pete_writel("drivers/scsi/megaraid/megaraid_sas_base.c:1007", (frame_phys_addr | (frame_count<<1))|1,
 			&(regs)->inbound_queue_port);
 	spin_unlock_irqrestore(&instance->hba_lock, flags);
 }
@@ -1028,20 +1028,20 @@ megasas_adp_reset_gen2(struct megasas_instance *instance,
 		hostdiag_offset = &reg_set->fusion_host_diag;
 	}
 
-	writel(0, seq_offset);
-	writel(4, seq_offset);
-	writel(0xb, seq_offset);
-	writel(2, seq_offset);
-	writel(7, seq_offset);
-	writel(0xd, seq_offset);
+	pete_writel("drivers/scsi/megaraid/megaraid_sas_base.c:1031", 0, seq_offset);
+	pete_writel("drivers/scsi/megaraid/megaraid_sas_base.c:1032", 4, seq_offset);
+	pete_writel("drivers/scsi/megaraid/megaraid_sas_base.c:1033", 0xb, seq_offset);
+	pete_writel("drivers/scsi/megaraid/megaraid_sas_base.c:1034", 2, seq_offset);
+	pete_writel("drivers/scsi/megaraid/megaraid_sas_base.c:1035", 7, seq_offset);
+	pete_writel("drivers/scsi/megaraid/megaraid_sas_base.c:1036", 0xd, seq_offset);
 
 	msleep(1000);
 
-	HostDiag = (u32)readl(hostdiag_offset);
+	HostDiag = (u32)pete_readl("drivers/scsi/megaraid/megaraid_sas_base.c:1040", hostdiag_offset);
 
 	while (!(HostDiag & DIAG_WRITE_ENABLE)) {
 		msleep(100);
-		HostDiag = (u32)readl(hostdiag_offset);
+		HostDiag = (u32)pete_readl("drivers/scsi/megaraid/megaraid_sas_base.c:1044", hostdiag_offset);
 		dev_notice(&instance->pdev->dev, "RESETGEN2: retry=%x, hostdiag=%x\n",
 					retry, HostDiag);
 
@@ -1052,14 +1052,14 @@ megasas_adp_reset_gen2(struct megasas_instance *instance,
 
 	dev_notice(&instance->pdev->dev, "ADP_RESET_GEN2: HostDiag=%x\n", HostDiag);
 
-	writel((HostDiag | DIAG_RESET_ADAPTER), hostdiag_offset);
+	pete_writel("drivers/scsi/megaraid/megaraid_sas_base.c:1055", (HostDiag | DIAG_RESET_ADAPTER), hostdiag_offset);
 
 	ssleep(10);
 
-	HostDiag = (u32)readl(hostdiag_offset);
+	HostDiag = (u32)pete_readl("drivers/scsi/megaraid/megaraid_sas_base.c:1059", hostdiag_offset);
 	while (HostDiag & DIAG_RESET_ADAPTER) {
 		msleep(100);
-		HostDiag = (u32)readl(hostdiag_offset);
+		HostDiag = (u32)pete_readl("drivers/scsi/megaraid/megaraid_sas_base.c:1062", hostdiag_offset);
 		dev_notice(&instance->pdev->dev, "RESET_GEN2: retry=%x, hostdiag=%x\n",
 				retry, HostDiag);
 
@@ -2229,14 +2229,14 @@ void megaraid_sas_kill_hba(struct megasas_instance *instance)
 		(instance->pdev->device == PCI_DEVICE_ID_LSI_SAS0071SKINNY) ||
 		(instance->adapter_type != MFI_SERIES)) {
 		if (!instance->requestorId) {
-			writel(MFI_STOP_ADP, &instance->reg_set->doorbell);
+			pete_writel("drivers/scsi/megaraid/megaraid_sas_base.c:2232", MFI_STOP_ADP, &instance->reg_set->doorbell);
 			/* Flush */
-			readl(&instance->reg_set->doorbell);
+			pete_readl("drivers/scsi/megaraid/megaraid_sas_base.c:2234", &instance->reg_set->doorbell);
 		}
 		if (instance->requestorId && instance->peerIsPresent)
 			memset(instance->ld_ids, 0xff, MEGASAS_MAX_LD_IDS);
 	} else {
-		writel(MFI_STOP_ADP,
+		pete_writel("drivers/scsi/megaraid/megaraid_sas_base.c:2239", MFI_STOP_ADP,
 			&instance->reg_set->inbound_doorbell);
 	}
 	/* Complete outstanding ioctls when adapter is killed */
@@ -2988,7 +2988,7 @@ megasas_dump_reg_set(void __iomem *reg_set)
 	u32 __iomem *reg = (u32 __iomem *)reg_set;
 
 	for (i = 0; i < (sz / sizeof(u32)); i++)
-		printk("%08x: %08x\n", (i * 4), readl(&reg[i]));
+		printk("%08x: %08x\n", (i * 4), pete_readl("drivers/scsi/megaraid/megaraid_sas_base.c:2991", &reg[i]));
 }
 
 /**
@@ -3049,7 +3049,7 @@ megasas_dump_sys_regs(void __iomem *reg_set, char *buf)
 		bytes_wrote += scnprintf(loc + bytes_wrote,
 					 PAGE_SIZE - bytes_wrote,
 					 "%08x: %08x\n", (i * 4),
-					 readl(&reg[i]));
+					 pete_readl("drivers/scsi/megaraid/megaraid_sas_base.c:3052", &reg[i]));
 	}
 	return bytes_wrote;
 }
@@ -4157,11 +4157,11 @@ megasas_transition_to_ready(struct megasas_instance *instance, int ocr)
 				(instance->pdev->device ==
 				 PCI_DEVICE_ID_LSI_SAS0071SKINNY) ||
 				(instance->adapter_type != MFI_SERIES))
-				writel(
+				pete_writel("drivers/scsi/megaraid/megaraid_sas_base.c:4160", 
 				  MFI_INIT_CLEAR_HANDSHAKE|MFI_INIT_HOTPLUG,
 				  &instance->reg_set->doorbell);
 			else
-				writel(
+				pete_writel("drivers/scsi/megaraid/megaraid_sas_base.c:4164", 
 				    MFI_INIT_CLEAR_HANDSHAKE|MFI_INIT_HOTPLUG,
 					&instance->reg_set->inbound_doorbell);
 
@@ -4174,10 +4174,10 @@ megasas_transition_to_ready(struct megasas_instance *instance, int ocr)
 				(instance->pdev->device ==
 				 PCI_DEVICE_ID_LSI_SAS0071SKINNY) ||
 				(instance->adapter_type != MFI_SERIES))
-				writel(MFI_INIT_HOTPLUG,
+				pete_writel("drivers/scsi/megaraid/megaraid_sas_base.c:4177", MFI_INIT_HOTPLUG,
 				       &instance->reg_set->doorbell);
 			else
-				writel(MFI_INIT_HOTPLUG,
+				pete_writel("drivers/scsi/megaraid/megaraid_sas_base.c:4180", MFI_INIT_HOTPLUG,
 					&instance->reg_set->inbound_doorbell);
 
 			max_wait = MEGASAS_RESET_WAIT_TIME;
@@ -4193,7 +4193,7 @@ megasas_transition_to_ready(struct megasas_instance *instance, int ocr)
 				(instance->pdev->device ==
 				PCI_DEVICE_ID_LSI_SAS0071SKINNY)  ||
 				(instance->adapter_type != MFI_SERIES)) {
-				writel(MFI_RESET_FLAGS,
+				pete_writel("drivers/scsi/megaraid/megaraid_sas_base.c:4196", MFI_RESET_FLAGS,
 					&instance->reg_set->doorbell);
 
 				if (instance->adapter_type != MFI_SERIES) {
@@ -4209,7 +4209,7 @@ megasas_transition_to_ready(struct megasas_instance *instance, int ocr)
 					}
 				}
 			} else
-				writel(MFI_RESET_FLAGS,
+				pete_writel("drivers/scsi/megaraid/megaraid_sas_base.c:4212", MFI_RESET_FLAGS,
 					&instance->reg_set->inbound_doorbell);
 
 			max_wait = MEGASAS_RESET_WAIT_TIME;

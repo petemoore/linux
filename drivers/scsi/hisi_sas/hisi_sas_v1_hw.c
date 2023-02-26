@@ -413,7 +413,7 @@ static u32 hisi_sas_read32(struct hisi_hba *hisi_hba, u32 off)
 {
 	void __iomem *regs = hisi_hba->regs + off;
 
-	return readl(regs);
+	return pete_readl("drivers/scsi/hisi_sas/hisi_sas_v1_hw.c:416", regs);
 }
 
 static void hisi_sas_write32(struct hisi_hba *hisi_hba,
@@ -421,7 +421,7 @@ static void hisi_sas_write32(struct hisi_hba *hisi_hba,
 {
 	void __iomem *regs = hisi_hba->regs + off;
 
-	writel(val, regs);
+	pete_writel("drivers/scsi/hisi_sas/hisi_sas_v1_hw.c:424", val, regs);
 }
 
 static void hisi_sas_phy_write32(struct hisi_hba *hisi_hba,
@@ -429,7 +429,7 @@ static void hisi_sas_phy_write32(struct hisi_hba *hisi_hba,
 {
 	void __iomem *regs = hisi_hba->regs + (0x400 * phy_no) + off;
 
-	writel(val, regs);
+	pete_writel("drivers/scsi/hisi_sas/hisi_sas_v1_hw.c:432", val, regs);
 }
 
 static u32 hisi_sas_phy_read32(struct hisi_hba *hisi_hba,
@@ -437,7 +437,7 @@ static u32 hisi_sas_phy_read32(struct hisi_hba *hisi_hba,
 {
 	void __iomem *regs = hisi_hba->regs + (0x400 * phy_no) + off;
 
-	return readl(regs);
+	return pete_readl("drivers/scsi/hisi_sas/hisi_sas_v1_hw.c:440", regs);
 }
 
 static void config_phy_opt_mode_v1_hw(struct hisi_hba *hisi_hba, int phy_no)

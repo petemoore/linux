@@ -96,7 +96,7 @@ u32 octeon_droq_check_hw_for_pkts(struct octeon_droq *droq)
 	u32 pkt_count = 0;
 	u32 last_count;
 
-	pkt_count = readl(droq->pkts_sent_reg);
+	pkt_count = pete_readl("drivers/net/ethernet/cavium/liquidio/octeon_droq.c:99", droq->pkts_sent_reg);
 
 	last_count = pkt_count - droq->pkt_count;
 	droq->pkt_count = pkt_count;
@@ -501,7 +501,7 @@ int octeon_retry_droq_refill(struct octeon_droq *droq)
 	int desc_refilled, reschedule = 1;
 	u32 pkts_credit;
 
-	pkts_credit = readl(droq->pkts_credit_reg);
+	pkts_credit = pete_readl("drivers/net/ethernet/cavium/liquidio/octeon_droq.c:504", droq->pkts_credit_reg);
 	desc_refilled = octeon_droq_refill(oct, droq);
 	if (desc_refilled) {
 		/* Flush the droq descriptor data to memory to be sure
@@ -509,7 +509,7 @@ int octeon_retry_droq_refill(struct octeon_droq *droq)
 		 * is accurate.
 		 */
 		wmb();
-		writel(desc_refilled, droq->pkts_credit_reg);
+		pete_writel("drivers/net/ethernet/cavium/liquidio/octeon_droq.c:512", desc_refilled, droq->pkts_credit_reg);
 
 		if (pkts_credit + desc_refilled >= CN23XX_SLI_DEF_BP)
 			reschedule = 0;
@@ -706,7 +706,7 @@ octeon_droq_fast_process_packets(struct octeon_device *oct,
 				 * data in memory is accurate.
 				 */
 				wmb();
-				writel(desc_refilled, droq->pkts_credit_reg);
+				pete_writel("drivers/net/ethernet/cavium/liquidio/octeon_droq.c:709", desc_refilled, droq->pkts_credit_reg);
 			}
 		}
 	}                       /* for (each packet)... */
@@ -726,7 +726,7 @@ octeon_droq_fast_process_packets(struct octeon_device *oct,
 	atomic_sub(retval, &droq->pkts_pending);
 
 	if (droq->refill_count >= droq->refill_threshold &&
-	    readl(droq->pkts_credit_reg) < CN23XX_SLI_DEF_BP) {
+	    pete_readl("drivers/net/ethernet/cavium/liquidio/octeon_droq.c:729", droq->pkts_credit_reg) < CN23XX_SLI_DEF_BP) {
 		octeon_droq_check_hw_for_pkts(droq);
 
 		/* Make sure there are no pkts_pending */

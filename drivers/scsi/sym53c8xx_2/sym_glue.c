@@ -1443,7 +1443,7 @@ static int sym_check_raid(struct sym_device *device)
 	else
 		ram_size = 4096;
 
-	ram_val = readl(device->s.ramaddr + ram_size - 16);
+	ram_val = pete_readl("drivers/scsi/sym53c8xx_2/sym_glue.c:1446", device->s.ramaddr + ram_size - 16);
 	if (ram_val != 0x52414944)
 		return 0;
 

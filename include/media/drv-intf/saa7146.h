@@ -19,8 +19,8 @@
 #include <linux/vmalloc.h>	/* for vmalloc() */
 #include <linux/mm.h>		/* for vmalloc_to_page() */
 
-#define saa7146_write(sxy,adr,dat)    writel((dat),(sxy->mem+(adr)))
-#define saa7146_read(sxy,adr)         readl(sxy->mem+(adr))
+#define saa7146_write(sxy,adr,dat)    pete_writel("include/media/drv-intf/saa7146.h:22", (dat),(sxy->mem+(adr)))
+#define saa7146_read(sxy,adr)         pete_readl("include/media/drv-intf/saa7146.h:23", sxy->mem+(adr))
 
 extern unsigned int saa7146_debug;
 

@@ -125,7 +125,7 @@ static void mcp_sa11x0_enable(struct mcp *mcp)
 {
 	struct mcp_sa11x0 *m = priv(mcp);
 
-	writel(-1, MCSR(m));
+	pete_writel("drivers/mfd/mcp-sa11x0.c:128", -1, MCSR(m));
 	m->mccr0 |= MCCR0_MCE;
 	writel_relaxed(m->mccr0, MCCR0(m));
 }
@@ -263,7 +263,7 @@ static int mcp_sa11x0_suspend(struct device *dev)
 	if (m->mccr0 & MCCR0_MCE)
 		dev_warn(dev, "device left active (missing disable call?)\n");
 
-	writel(m->mccr0 & ~MCCR0_MCE, MCCR0(m));
+	pete_writel("drivers/mfd/mcp-sa11x0.c:266", m->mccr0 & ~MCCR0_MCE, MCCR0(m));
 
 	return 0;
 }

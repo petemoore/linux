@@ -27,11 +27,11 @@ static irqreturn_t highbank_l2_err_handler(int irq, void *dev_id)
 	struct hb_l2_drvdata *drvdata = dci->pvt_info;
 
 	if (irq == drvdata->sb_irq) {
-		writel(1, drvdata->base + SR_CLR_SB_ECC_INTR);
+		pete_writel("drivers/edac/highbank_l2_edac.c:30", 1, drvdata->base + SR_CLR_SB_ECC_INTR);
 		edac_device_handle_ce(dci, 0, 0, dci->ctl_name);
 	}
 	if (irq == drvdata->db_irq) {
-		writel(1, drvdata->base + SR_CLR_DB_ECC_INTR);
+		pete_writel("drivers/edac/highbank_l2_edac.c:34", 1, drvdata->base + SR_CLR_DB_ECC_INTR);
 		edac_device_handle_ue(dci, 0, 0, dci->ctl_name);
 	}
 

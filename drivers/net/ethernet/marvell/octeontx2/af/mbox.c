@@ -254,7 +254,7 @@ void otx2_mbox_msg_send(struct otx2_mbox *mbox, int devid)
 	/* The interrupt should be fired after num_msgs is written
 	 * to the shared memory
 	 */
-	writeq(1, (void __iomem *)mbox->reg_base +
+	pete_writeq("drivers/net/ethernet/marvell/octeontx2/af/mbox.c:257", 1, (void __iomem *)mbox->reg_base +
 	       (mbox->trigger | (devid << mbox->tr_shift)));
 }
 EXPORT_SYMBOL(otx2_mbox_msg_send);

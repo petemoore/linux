@@ -260,15 +260,15 @@ void emac_mac_multicast_addr_set(struct emac_adapter *adpt, u8 *addr)
 	reg = (crc32 >> 31) & 0x1;
 	bit = (crc32 >> 26) & 0x1F;
 
-	mta = readl(adpt->base + EMAC_HASH_TAB_REG0 + (reg << 2));
+	mta = pete_readl("drivers/net/ethernet/qualcomm/emac/emac-mac.c:263", adpt->base + EMAC_HASH_TAB_REG0 + (reg << 2));
 	mta |= BIT(bit);
-	writel(mta, adpt->base + EMAC_HASH_TAB_REG0 + (reg << 2));
+	pete_writel("drivers/net/ethernet/qualcomm/emac/emac-mac.c:265", mta, adpt->base + EMAC_HASH_TAB_REG0 + (reg << 2));
 }
 
 void emac_mac_multicast_addr_clear(struct emac_adapter *adpt)
 {
-	writel(0, adpt->base + EMAC_HASH_TAB_REG0);
-	writel(0, adpt->base + EMAC_HASH_TAB_REG1);
+	pete_writel("drivers/net/ethernet/qualcomm/emac/emac-mac.c:270", 0, adpt->base + EMAC_HASH_TAB_REG0);
+	pete_writel("drivers/net/ethernet/qualcomm/emac/emac-mac.c:271", 0, adpt->base + EMAC_HASH_TAB_REG1);
 }
 
 /* definitions for RSS */
@@ -283,7 +283,7 @@ void emac_mac_mode_config(struct emac_adapter *adpt)
 	struct net_device *netdev = adpt->netdev;
 	u32 mac;
 
-	mac = readl(adpt->base + EMAC_MAC_CTRL);
+	mac = pete_readl("drivers/net/ethernet/qualcomm/emac/emac-mac.c:286", adpt->base + EMAC_MAC_CTRL);
 	mac &= ~(VLAN_STRIP | PROM_MODE | MULTI_ALL | MAC_LP_EN);
 
 	if (netdev->features & NETIF_F_HW_VLAN_CTAG_RX)
@@ -295,45 +295,45 @@ void emac_mac_mode_config(struct emac_adapter *adpt)
 	if (netdev->flags & IFF_ALLMULTI)
 		mac |= MULTI_ALL;
 
-	writel(mac, adpt->base + EMAC_MAC_CTRL);
+	pete_writel("drivers/net/ethernet/qualcomm/emac/emac-mac.c:298", mac, adpt->base + EMAC_MAC_CTRL);
 }
 
 /* Config descriptor rings */
 static void emac_mac_dma_rings_config(struct emac_adapter *adpt)
 {
 	/* TPD (Transmit Packet Descriptor) */
-	writel(upper_32_bits(adpt->tx_q.tpd.dma_addr),
+	pete_writel("drivers/net/ethernet/qualcomm/emac/emac-mac.c:305", upper_32_bits(adpt->tx_q.tpd.dma_addr),
 	       adpt->base + EMAC_DESC_CTRL_1);
 
-	writel(lower_32_bits(adpt->tx_q.tpd.dma_addr),
+	pete_writel("drivers/net/ethernet/qualcomm/emac/emac-mac.c:308", lower_32_bits(adpt->tx_q.tpd.dma_addr),
 	       adpt->base + EMAC_DESC_CTRL_8);
 
-	writel(adpt->tx_q.tpd.count & TPD_RING_SIZE_BMSK,
+	pete_writel("drivers/net/ethernet/qualcomm/emac/emac-mac.c:311", adpt->tx_q.tpd.count & TPD_RING_SIZE_BMSK,
 	       adpt->base + EMAC_DESC_CTRL_9);
 
 	/* RFD (Receive Free Descriptor) & RRD (Receive Return Descriptor) */
-	writel(upper_32_bits(adpt->rx_q.rfd.dma_addr),
+	pete_writel("drivers/net/ethernet/qualcomm/emac/emac-mac.c:315", upper_32_bits(adpt->rx_q.rfd.dma_addr),
 	       adpt->base + EMAC_DESC_CTRL_0);
 
-	writel(lower_32_bits(adpt->rx_q.rfd.dma_addr),
+	pete_writel("drivers/net/ethernet/qualcomm/emac/emac-mac.c:318", lower_32_bits(adpt->rx_q.rfd.dma_addr),
 	       adpt->base + EMAC_DESC_CTRL_2);
-	writel(lower_32_bits(adpt->rx_q.rrd.dma_addr),
+	pete_writel("drivers/net/ethernet/qualcomm/emac/emac-mac.c:320", lower_32_bits(adpt->rx_q.rrd.dma_addr),
 	       adpt->base + EMAC_DESC_CTRL_5);
 
-	writel(adpt->rx_q.rfd.count & RFD_RING_SIZE_BMSK,
+	pete_writel("drivers/net/ethernet/qualcomm/emac/emac-mac.c:323", adpt->rx_q.rfd.count & RFD_RING_SIZE_BMSK,
 	       adpt->base + EMAC_DESC_CTRL_3);
-	writel(adpt->rx_q.rrd.count & RRD_RING_SIZE_BMSK,
+	pete_writel("drivers/net/ethernet/qualcomm/emac/emac-mac.c:325", adpt->rx_q.rrd.count & RRD_RING_SIZE_BMSK,
 	       adpt->base + EMAC_DESC_CTRL_6);
 
-	writel(adpt->rxbuf_size & RX_BUFFER_SIZE_BMSK,
+	pete_writel("drivers/net/ethernet/qualcomm/emac/emac-mac.c:328", adpt->rxbuf_size & RX_BUFFER_SIZE_BMSK,
 	       adpt->base + EMAC_DESC_CTRL_4);
 
-	writel(0, adpt->base + EMAC_DESC_CTRL_11);
+	pete_writel("drivers/net/ethernet/qualcomm/emac/emac-mac.c:331", 0, adpt->base + EMAC_DESC_CTRL_11);
 
 	/* Load all of the base addresses above and ensure that triggering HW to
 	 * read ring pointers is flushed
 	 */
-	writel(1, adpt->base + EMAC_INTER_SRAM_PART9);
+	pete_writel("drivers/net/ethernet/qualcomm/emac/emac-mac.c:336", 1, adpt->base + EMAC_INTER_SRAM_PART9);
 }
 
 /* Config transmit parameters */
@@ -341,7 +341,7 @@ static void emac_mac_tx_config(struct emac_adapter *adpt)
 {
 	u32 val;
 
-	writel((EMAC_MAX_TX_OFFLOAD_THRESH >> 3) &
+	pete_writel("drivers/net/ethernet/qualcomm/emac/emac-mac.c:344", (EMAC_MAX_TX_OFFLOAD_THRESH >> 3) &
 	       JUMBO_TASK_OFFLOAD_THRESHOLD_BMSK, adpt->base + EMAC_TXQ_CTRL_1);
 
 	val = (adpt->tpd_burst << NUM_TPD_BURST_PREF_SHFT) &
@@ -351,7 +351,7 @@ static void emac_mac_tx_config(struct emac_adapter *adpt)
 	val |= (0x0100 << NUM_TXF_BURST_PREF_SHFT) &
 		NUM_TXF_BURST_PREF_BMSK;
 
-	writel(val, adpt->base + EMAC_TXQ_CTRL_0);
+	pete_writel("drivers/net/ethernet/qualcomm/emac/emac-mac.c:354", val, adpt->base + EMAC_TXQ_CTRL_0);
 	emac_reg_update32(adpt->base + EMAC_TXQ_CTRL_2,
 			  (TXF_HWM_BMSK | TXF_LWM_BMSK), 0);
 }
@@ -365,26 +365,26 @@ static void emac_mac_rx_config(struct emac_adapter *adpt)
 	       NUM_RFD_BURST_PREF_BMSK;
 	val |= (SP_IPV6 | CUT_THRU_EN);
 
-	writel(val, adpt->base + EMAC_RXQ_CTRL_0);
+	pete_writel("drivers/net/ethernet/qualcomm/emac/emac-mac.c:368", val, adpt->base + EMAC_RXQ_CTRL_0);
 
-	val = readl(adpt->base + EMAC_RXQ_CTRL_1);
+	val = pete_readl("drivers/net/ethernet/qualcomm/emac/emac-mac.c:370", adpt->base + EMAC_RXQ_CTRL_1);
 	val &= ~(JUMBO_1KAH_BMSK | RFD_PREF_LOW_THRESHOLD_BMSK |
 		 RFD_PREF_UP_THRESHOLD_BMSK);
 	val |= (JUMBO_1KAH << JUMBO_1KAH_SHFT) |
 		(RFD_PREF_LOW_TH << RFD_PREF_LOW_THRESHOLD_SHFT) |
 		(RFD_PREF_UP_TH  << RFD_PREF_UP_THRESHOLD_SHFT);
-	writel(val, adpt->base + EMAC_RXQ_CTRL_1);
+	pete_writel("drivers/net/ethernet/qualcomm/emac/emac-mac.c:376", val, adpt->base + EMAC_RXQ_CTRL_1);
 
-	val = readl(adpt->base + EMAC_RXQ_CTRL_2);
+	val = pete_readl("drivers/net/ethernet/qualcomm/emac/emac-mac.c:378", adpt->base + EMAC_RXQ_CTRL_2);
 	val &= ~(RXF_DOF_THRESHOLD_BMSK | RXF_UOF_THRESHOLD_BMSK);
 	val |= (RXF_DOF_THRESFHOLD  << RXF_DOF_THRESHOLD_SHFT) |
 		(RXF_UOF_THRESFHOLD << RXF_UOF_THRESHOLD_SHFT);
-	writel(val, adpt->base + EMAC_RXQ_CTRL_2);
+	pete_writel("drivers/net/ethernet/qualcomm/emac/emac-mac.c:382", val, adpt->base + EMAC_RXQ_CTRL_2);
 
-	val = readl(adpt->base + EMAC_RXQ_CTRL_3);
+	val = pete_readl("drivers/net/ethernet/qualcomm/emac/emac-mac.c:384", adpt->base + EMAC_RXQ_CTRL_3);
 	val &= ~(RXD_TIMER_BMSK | RXD_THRESHOLD_BMSK);
 	val |= RXD_TH << RXD_THRESHOLD_SHFT;
-	writel(val, adpt->base + EMAC_RXQ_CTRL_3);
+	pete_writel("drivers/net/ethernet/qualcomm/emac/emac-mac.c:387", val, adpt->base + EMAC_RXQ_CTRL_3);
 }
 
 /* Config dma */
@@ -416,7 +416,7 @@ static void emac_mac_dma_config(struct emac_adapter *adpt)
 						DMAW_DLY_CNT_BMSK;
 
 	/* config DMA and ensure that configuration is flushed to HW */
-	writel(dma_ctrl, adpt->base + EMAC_DMA_CTRL);
+	pete_writel("drivers/net/ethernet/qualcomm/emac/emac-mac.c:419", dma_ctrl, adpt->base + EMAC_DMA_CTRL);
 }
 
 /* set MAC address */
@@ -431,11 +431,11 @@ static void emac_set_mac_address(struct emac_adapter *adpt, u8 *addr)
 	/* low 32bit word */
 	sta = (((u32)addr[2]) << 24) | (((u32)addr[3]) << 16) |
 	      (((u32)addr[4]) << 8)  | (((u32)addr[5]));
-	writel(sta, adpt->base + EMAC_MAC_STA_ADDR0);
+	pete_writel("drivers/net/ethernet/qualcomm/emac/emac-mac.c:434", sta, adpt->base + EMAC_MAC_STA_ADDR0);
 
 	/* hight 32bit word */
 	sta = (((u32)addr[0]) << 8) | (u32)addr[1];
-	writel(sta, adpt->base + EMAC_MAC_STA_ADDR1);
+	pete_writel("drivers/net/ethernet/qualcomm/emac/emac-mac.c:438", sta, adpt->base + EMAC_MAC_STA_ADDR1);
 }
 
 static void emac_mac_config(struct emac_adapter *adpt)
@@ -452,19 +452,19 @@ static void emac_mac_config(struct emac_adapter *adpt)
 
 	emac_mac_dma_rings_config(adpt);
 
-	writel(netdev->mtu + ETH_HLEN + VLAN_HLEN + ETH_FCS_LEN,
+	pete_writel("drivers/net/ethernet/qualcomm/emac/emac-mac.c:455", netdev->mtu + ETH_HLEN + VLAN_HLEN + ETH_FCS_LEN,
 	       adpt->base + EMAC_MAX_FRAM_LEN_CTRL);
 
 	emac_mac_tx_config(adpt);
 	emac_mac_rx_config(adpt);
 	emac_mac_dma_config(adpt);
 
-	val = readl(adpt->base + EMAC_AXI_MAST_CTRL);
+	val = pete_readl("drivers/net/ethernet/qualcomm/emac/emac-mac.c:462", adpt->base + EMAC_AXI_MAST_CTRL);
 	val &= ~(DATA_BYTE_SWAP | MAX_BOUND);
 	val |= MAX_BTYPE;
-	writel(val, adpt->base + EMAC_AXI_MAST_CTRL);
-	writel(0, adpt->base + EMAC_CLK_GATE_CTRL);
-	writel(RX_UNCPL_INT_EN, adpt->base + EMAC_MISC_CTRL);
+	pete_writel("drivers/net/ethernet/qualcomm/emac/emac-mac.c:465", val, adpt->base + EMAC_AXI_MAST_CTRL);
+	pete_writel("drivers/net/ethernet/qualcomm/emac/emac-mac.c:466", 0, adpt->base + EMAC_CLK_GATE_CTRL);
+	pete_writel("drivers/net/ethernet/qualcomm/emac/emac-mac.c:467", RX_UNCPL_INT_EN, adpt->base + EMAC_MISC_CTRL);
 }
 
 void emac_mac_reset(struct emac_adapter *adpt)
@@ -490,8 +490,8 @@ static void emac_mac_start(struct emac_adapter *adpt)
 	emac_reg_update32(adpt->base + EMAC_RXQ_CTRL_0, 0, RXQ_EN);
 
 	/* enable mac control */
-	mac = readl(adpt->base + EMAC_MAC_CTRL);
-	csr1 = readl(adpt->csr + EMAC_EMAC_WRAPPER_CSR1);
+	mac = pete_readl("drivers/net/ethernet/qualcomm/emac/emac-mac.c:493", adpt->base + EMAC_MAC_CTRL);
+	csr1 = pete_readl("drivers/net/ethernet/qualcomm/emac/emac-mac.c:494", adpt->csr + EMAC_EMAC_WRAPPER_CSR1);
 
 	mac |= TXEN | RXEN;     /* enable RX/TX */
 
@@ -948,8 +948,8 @@ int emac_mac_up(struct emac_adapter *adpt)
 	phy_attached_print(adpt->phydev, NULL);
 
 	/* enable mac irq */
-	writel((u32)~DIS_INT, adpt->base + EMAC_INT_STATUS);
-	writel(adpt->irq.mask, adpt->base + EMAC_INT_MASK);
+	pete_writel("drivers/net/ethernet/qualcomm/emac/emac-mac.c:951", (u32)~DIS_INT, adpt->base + EMAC_INT_STATUS);
+	pete_writel("drivers/net/ethernet/qualcomm/emac/emac-mac.c:952", adpt->irq.mask, adpt->base + EMAC_INT_MASK);
 
 	phy_start(adpt->phydev);
 
@@ -973,8 +973,8 @@ void emac_mac_down(struct emac_adapter *adpt)
 	 * avoid a race condition where adjust_link is null when we get
 	 * an interrupt.
 	 */
-	writel(DIS_INT, adpt->base + EMAC_INT_STATUS);
-	writel(0, adpt->base + EMAC_INT_MASK);
+	pete_writel("drivers/net/ethernet/qualcomm/emac/emac-mac.c:976", DIS_INT, adpt->base + EMAC_INT_STATUS);
+	pete_writel("drivers/net/ethernet/qualcomm/emac/emac-mac.c:977", 0, adpt->base + EMAC_INT_MASK);
 	synchronize_irq(adpt->irq.irq);
 
 	phy_disconnect(adpt->phydev);

@@ -42,9 +42,9 @@ static int ssi_regs_show(struct seq_file *m, void *p __maybe_unused)
 	void __iomem *sys = omap_ssi->sys;
 
 	pm_runtime_get_sync(ssi->device.parent);
-	seq_printf(m, "REVISION\t: 0x%08x\n",  readl(sys + SSI_REVISION_REG));
-	seq_printf(m, "SYSCONFIG\t: 0x%08x\n", readl(sys + SSI_SYSCONFIG_REG));
-	seq_printf(m, "SYSSTATUS\t: 0x%08x\n", readl(sys + SSI_SYSSTATUS_REG));
+	seq_printf(m, "REVISION\t: 0x%08x\n",  pete_readl("drivers/hsi/controllers/omap_ssi_core.c:45", sys + SSI_REVISION_REG));
+	seq_printf(m, "SYSCONFIG\t: 0x%08x\n", pete_readl("drivers/hsi/controllers/omap_ssi_core.c:46", sys + SSI_SYSCONFIG_REG));
+	seq_printf(m, "SYSSTATUS\t: 0x%08x\n", pete_readl("drivers/hsi/controllers/omap_ssi_core.c:47", sys + SSI_SYSSTATUS_REG));
 	pm_runtime_put(ssi->device.parent);
 
 	return 0;
@@ -61,42 +61,42 @@ static int ssi_gdd_regs_show(struct seq_file *m, void *p __maybe_unused)
 	pm_runtime_get_sync(ssi->device.parent);
 
 	seq_printf(m, "GDD_MPU_STATUS\t: 0x%08x\n",
-		readl(sys + SSI_GDD_MPU_IRQ_STATUS_REG));
+		pete_readl("drivers/hsi/controllers/omap_ssi_core.c:64", sys + SSI_GDD_MPU_IRQ_STATUS_REG));
 	seq_printf(m, "GDD_MPU_ENABLE\t: 0x%08x\n\n",
-		readl(sys + SSI_GDD_MPU_IRQ_ENABLE_REG));
+		pete_readl("drivers/hsi/controllers/omap_ssi_core.c:66", sys + SSI_GDD_MPU_IRQ_ENABLE_REG));
 	seq_printf(m, "HW_ID\t\t: 0x%08x\n",
-				readl(gdd + SSI_GDD_HW_ID_REG));
+				pete_readl("drivers/hsi/controllers/omap_ssi_core.c:68", gdd + SSI_GDD_HW_ID_REG));
 	seq_printf(m, "PPORT_ID\t: 0x%08x\n",
-				readl(gdd + SSI_GDD_PPORT_ID_REG));
+				pete_readl("drivers/hsi/controllers/omap_ssi_core.c:70", gdd + SSI_GDD_PPORT_ID_REG));
 	seq_printf(m, "MPORT_ID\t: 0x%08x\n",
-				readl(gdd + SSI_GDD_MPORT_ID_REG));
+				pete_readl("drivers/hsi/controllers/omap_ssi_core.c:72", gdd + SSI_GDD_MPORT_ID_REG));
 	seq_printf(m, "TEST\t\t: 0x%08x\n",
-				readl(gdd + SSI_GDD_TEST_REG));
+				pete_readl("drivers/hsi/controllers/omap_ssi_core.c:74", gdd + SSI_GDD_TEST_REG));
 	seq_printf(m, "GCR\t\t: 0x%08x\n",
-				readl(gdd + SSI_GDD_GCR_REG));
+				pete_readl("drivers/hsi/controllers/omap_ssi_core.c:76", gdd + SSI_GDD_GCR_REG));
 
 	for (lch = 0; lch < SSI_MAX_GDD_LCH; lch++) {
 		seq_printf(m, "\nGDD LCH %d\n=========\n", lch);
 		seq_printf(m, "CSDP\t\t: 0x%04x\n",
-				readw(gdd + SSI_GDD_CSDP_REG(lch)));
+				pete_readw("drivers/hsi/controllers/omap_ssi_core.c:81", gdd + SSI_GDD_CSDP_REG(lch)));
 		seq_printf(m, "CCR\t\t: 0x%04x\n",
-				readw(gdd + SSI_GDD_CCR_REG(lch)));
+				pete_readw("drivers/hsi/controllers/omap_ssi_core.c:83", gdd + SSI_GDD_CCR_REG(lch)));
 		seq_printf(m, "CICR\t\t: 0x%04x\n",
-				readw(gdd + SSI_GDD_CICR_REG(lch)));
+				pete_readw("drivers/hsi/controllers/omap_ssi_core.c:85", gdd + SSI_GDD_CICR_REG(lch)));
 		seq_printf(m, "CSR\t\t: 0x%04x\n",
-				readw(gdd + SSI_GDD_CSR_REG(lch)));
+				pete_readw("drivers/hsi/controllers/omap_ssi_core.c:87", gdd + SSI_GDD_CSR_REG(lch)));
 		seq_printf(m, "CSSA\t\t: 0x%08x\n",
-				readl(gdd + SSI_GDD_CSSA_REG(lch)));
+				pete_readl("drivers/hsi/controllers/omap_ssi_core.c:89", gdd + SSI_GDD_CSSA_REG(lch)));
 		seq_printf(m, "CDSA\t\t: 0x%08x\n",
-				readl(gdd + SSI_GDD_CDSA_REG(lch)));
+				pete_readl("drivers/hsi/controllers/omap_ssi_core.c:91", gdd + SSI_GDD_CDSA_REG(lch)));
 		seq_printf(m, "CEN\t\t: 0x%04x\n",
-				readw(gdd + SSI_GDD_CEN_REG(lch)));
+				pete_readw("drivers/hsi/controllers/omap_ssi_core.c:93", gdd + SSI_GDD_CEN_REG(lch)));
 		seq_printf(m, "CSAC\t\t: 0x%04x\n",
-				readw(gdd + SSI_GDD_CSAC_REG(lch)));
+				pete_readw("drivers/hsi/controllers/omap_ssi_core.c:95", gdd + SSI_GDD_CSAC_REG(lch)));
 		seq_printf(m, "CDAC\t\t: 0x%04x\n",
-				readw(gdd + SSI_GDD_CDAC_REG(lch)));
+				pete_readw("drivers/hsi/controllers/omap_ssi_core.c:97", gdd + SSI_GDD_CDAC_REG(lch)));
 		seq_printf(m, "CLNK_CTRL\t: 0x%04x\n",
-				readw(gdd + SSI_GDD_CLNK_CTRL_REG(lch)));
+				pete_readw("drivers/hsi/controllers/omap_ssi_core.c:99", gdd + SSI_GDD_CLNK_CTRL_REG(lch)));
 	}
 
 	pm_runtime_put(ssi->device.parent);
@@ -176,7 +176,7 @@ static void ssi_gdd_complete(struct hsi_controller *ssi, unsigned int lch)
 
 	spin_lock(&omap_ssi->lock);
 
-	val = readl(omap_ssi->sys + SSI_GDD_MPU_IRQ_ENABLE_REG);
+	val = pete_readl("drivers/hsi/controllers/omap_ssi_core.c:179", omap_ssi->sys + SSI_GDD_MPU_IRQ_ENABLE_REG);
 	val &= ~SSI_GDD_LCH(lch);
 	writel_relaxed(val, omap_ssi->sys + SSI_GDD_MPU_IRQ_ENABLE_REG);
 
@@ -190,7 +190,7 @@ static void ssi_gdd_complete(struct hsi_controller *ssi, unsigned int lch)
 		/* Keep clocks reference for write pio event */
 	}
 	dma_unmap_sg(&ssi->device, msg->sgt.sgl, msg->sgt.nents, dir);
-	csr = readw(omap_ssi->gdd + SSI_GDD_CSR_REG(lch));
+	csr = pete_readw("drivers/hsi/controllers/omap_ssi_core.c:193", omap_ssi->gdd + SSI_GDD_CSR_REG(lch));
 	omap_ssi->gdd_trn[lch].msg = NULL; /* release GDD lch */
 	dev_dbg(&port->device, "DMA completed ch %d ttype %d\n",
 				msg->channel, msg->ttype);
@@ -207,7 +207,7 @@ static void ssi_gdd_complete(struct hsi_controller *ssi, unsigned int lch)
 		return;
 	}
 	spin_lock(&omap_port->lock);
-	val |= readl(omap_ssi->sys + SSI_MPU_ENABLE_REG(port->num, 0));
+	val |= pete_readl("drivers/hsi/controllers/omap_ssi_core.c:210", omap_ssi->sys + SSI_MPU_ENABLE_REG(port->num, 0));
 	writel_relaxed(val, omap_ssi->sys + SSI_MPU_ENABLE_REG(port->num, 0));
 	spin_unlock(&omap_port->lock);
 
@@ -231,13 +231,13 @@ static void ssi_gdd_tasklet(unsigned long dev)
 		return;
 	}
 
-	status_reg = readl(sys + SSI_GDD_MPU_IRQ_STATUS_REG);
+	status_reg = pete_readl("drivers/hsi/controllers/omap_ssi_core.c:234", sys + SSI_GDD_MPU_IRQ_STATUS_REG);
 	for (lch = 0; lch < SSI_MAX_GDD_LCH; lch++) {
 		if (status_reg & SSI_GDD_LCH(lch))
 			ssi_gdd_complete(ssi, lch);
 	}
 	writel_relaxed(status_reg, sys + SSI_GDD_MPU_IRQ_STATUS_REG);
-	status_reg = readl(sys + SSI_GDD_MPU_IRQ_STATUS_REG);
+	status_reg = pete_readl("drivers/hsi/controllers/omap_ssi_core.c:240", sys + SSI_GDD_MPU_IRQ_STATUS_REG);
 
 	pm_runtime_put(ssi->device.parent);
 

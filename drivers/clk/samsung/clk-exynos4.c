@@ -1024,7 +1024,7 @@ static unsigned long __init exynos4_get_xom(void)
 		chipid_base = of_iomap(np, 0);
 
 		if (chipid_base)
-			xom = readl(chipid_base + 8);
+			xom = pete_readl("drivers/clk/samsung/clk-exynos4.c:1027", chipid_base + 8);
 
 		iounmap(chipid_base);
 		of_node_put(np);

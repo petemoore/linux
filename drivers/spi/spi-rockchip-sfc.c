@@ -207,7 +207,7 @@ static int rockchip_sfc_reset(struct rockchip_sfc *sfc)
 
 static u16 rockchip_sfc_get_version(struct rockchip_sfc *sfc)
 {
-	return  (u16)(readl(sfc->regbase + SFC_VER) & 0xffff);
+	return  (u16)(pete_readl("drivers/spi/spi-rockchip-sfc.c:210", sfc->regbase + SFC_VER) & 0xffff);
 }
 
 static u32 rockchip_sfc_get_max_iosize(struct rockchip_sfc *sfc)
@@ -220,9 +220,9 @@ static void rockchip_sfc_irq_unmask(struct rockchip_sfc *sfc, u32 mask)
 	u32 reg;
 
 	/* Enable transfer complete interrupt */
-	reg = readl(sfc->regbase + SFC_IMR);
+	reg = pete_readl("drivers/spi/spi-rockchip-sfc.c:223", sfc->regbase + SFC_IMR);
 	reg &= ~mask;
-	writel(reg, sfc->regbase + SFC_IMR);
+	pete_writel("drivers/spi/spi-rockchip-sfc.c:225", reg, sfc->regbase + SFC_IMR);
 }
 
 static void rockchip_sfc_irq_mask(struct rockchip_sfc *sfc, u32 mask)
@@ -230,18 +230,18 @@ static void rockchip_sfc_irq_mask(struct rockchip_sfc *sfc, u32 mask)
 	u32 reg;
 
 	/* Disable transfer finish interrupt */
-	reg = readl(sfc->regbase + SFC_IMR);
+	reg = pete_readl("drivers/spi/spi-rockchip-sfc.c:233", sfc->regbase + SFC_IMR);
 	reg |= mask;
-	writel(reg, sfc->regbase + SFC_IMR);
+	pete_writel("drivers/spi/spi-rockchip-sfc.c:235", reg, sfc->regbase + SFC_IMR);
 }
 
 static int rockchip_sfc_init(struct rockchip_sfc *sfc)
 {
-	writel(0, sfc->regbase + SFC_CTRL);
-	writel(0xFFFFFFFF, sfc->regbase + SFC_ICLR);
+	pete_writel("drivers/spi/spi-rockchip-sfc.c:240", 0, sfc->regbase + SFC_CTRL);
+	pete_writel("drivers/spi/spi-rockchip-sfc.c:241", 0xFFFFFFFF, sfc->regbase + SFC_ICLR);
 	rockchip_sfc_irq_mask(sfc, 0xFFFFFFFF);
 	if (rockchip_sfc_get_version(sfc) >= SFC_VER_4)
-		writel(SFC_LEN_CTRL_TRB_SEL, sfc->regbase + SFC_LEN_CTRL);
+		pete_writel("drivers/spi/spi-rockchip-sfc.c:244", SFC_LEN_CTRL_TRB_SEL, sfc->regbase + SFC_LEN_CTRL);
 
 	return 0;
 }
@@ -314,7 +314,7 @@ static int rockchip_sfc_xfer_setup(struct rockchip_sfc *sfc,
 			cmd |= SFC_CMD_ADDR_24BITS << SFC_CMD_ADDR_SHIFT;
 		} else {
 			cmd |= SFC_CMD_ADDR_XBITS << SFC_CMD_ADDR_SHIFT;
-			writel(op->addr.nbytes * 8 - 1, sfc->regbase + SFC_ABIT);
+			pete_writel("drivers/spi/spi-rockchip-sfc.c:317", op->addr.nbytes * 8 - 1, sfc->regbase + SFC_ABIT);
 		}
 
 		ctrl |= ((op->addr.buswidth >> 1) << SFC_CTRL_ADDR_BITS_SHIFT);
@@ -332,7 +332,7 @@ static int rockchip_sfc_xfer_setup(struct rockchip_sfc *sfc,
 
 	/* set DATA */
 	if (sfc->version >= SFC_VER_4) /* Clear it if no data to transfer */
-		writel(len, sfc->regbase + SFC_LEN_EXT);
+		pete_writel("drivers/spi/spi-rockchip-sfc.c:335", len, sfc->regbase + SFC_LEN_EXT);
 	else
 		cmd |= len << SFC_CMD_TRAN_BYTES_SHIFT;
 	if (len) {
@@ -354,10 +354,10 @@ static int rockchip_sfc_xfer_setup(struct rockchip_sfc *sfc,
 	dev_dbg(sfc->dev, "sfc ctrl=%x cmd=%x addr=%llx len=%x\n",
 		ctrl, cmd, op->addr.val, len);
 
-	writel(ctrl, sfc->regbase + SFC_CTRL);
-	writel(cmd, sfc->regbase + SFC_CMD);
+	pete_writel("drivers/spi/spi-rockchip-sfc.c:357", ctrl, sfc->regbase + SFC_CTRL);
+	pete_writel("drivers/spi/spi-rockchip-sfc.c:358", cmd, sfc->regbase + SFC_CMD);
 	if (op->addr.nbytes)
-		writel(op->addr.val, sfc->regbase + SFC_ADDR);
+		pete_writel("drivers/spi/spi-rockchip-sfc.c:360", op->addr.val, sfc->regbase + SFC_ADDR);
 
 	return 0;
 }
@@ -387,7 +387,7 @@ static int rockchip_sfc_write_fifo(struct rockchip_sfc *sfc, const u8 *buf, int 
 		if (tx_level < 0)
 			return tx_level;
 		memcpy(&tmp, buf, bytes);
-		writel(tmp, sfc->regbase + SFC_DATA);
+		pete_writel("drivers/spi/spi-rockchip-sfc.c:390", tmp, sfc->regbase + SFC_DATA);
 	}
 
 	return len;
@@ -418,7 +418,7 @@ static int rockchip_sfc_read_fifo(struct rockchip_sfc *sfc, u8 *buf, int len)
 		rx_level = rockchip_sfc_wait_rxfifo_ready(sfc, 1000);
 		if (rx_level < 0)
 			return rx_level;
-		tmp = readl(sfc->regbase + SFC_DATA);
+		tmp = pete_readl("drivers/spi/spi-rockchip-sfc.c:421", sfc->regbase + SFC_DATA);
 		memcpy(buf, &tmp, bytes);
 	}
 
@@ -427,9 +427,9 @@ static int rockchip_sfc_read_fifo(struct rockchip_sfc *sfc, u8 *buf, int len)
 
 static int rockchip_sfc_fifo_transfer_dma(struct rockchip_sfc *sfc, dma_addr_t dma_buf, size_t len)
 {
-	writel(0xFFFFFFFF, sfc->regbase + SFC_ICLR);
-	writel((u32)dma_buf, sfc->regbase + SFC_DMA_ADDR);
-	writel(SFC_DMA_TRIGGER_START, sfc->regbase + SFC_DMA_TRIGGER);
+	pete_writel("drivers/spi/spi-rockchip-sfc.c:430", 0xFFFFFFFF, sfc->regbase + SFC_ICLR);
+	pete_writel("drivers/spi/spi-rockchip-sfc.c:431", (u32)dma_buf, sfc->regbase + SFC_DMA_ADDR);
+	pete_writel("drivers/spi/spi-rockchip-sfc.c:432", SFC_DMA_TRIGGER_START, sfc->regbase + SFC_DMA_TRIGGER);
 
 	return len;
 }
@@ -540,7 +540,7 @@ static irqreturn_t rockchip_sfc_irq_handler(int irq, void *dev_id)
 	struct rockchip_sfc *sfc = dev_id;
 	u32 reg;
 
-	reg = readl(sfc->regbase + SFC_RISR);
+	reg = pete_readl("drivers/spi/spi-rockchip-sfc.c:543", sfc->regbase + SFC_RISR);
 
 	/* Clear interrupt */
 	writel_relaxed(reg, sfc->regbase + SFC_ICLR);

@@ -469,14 +469,14 @@ static int aspeed_sgpio_reset_tolerance(struct gpio_chip *chip,
 
 	raw_spin_lock_irqsave(&gpio->lock, flags);
 
-	val = readl(reg);
+	val = pete_readl("drivers/gpio/gpio-aspeed-sgpio.c:472", reg);
 
 	if (enable)
 		val |= GPIO_BIT(offset);
 	else
 		val &= ~GPIO_BIT(offset);
 
-	writel(val, reg);
+	pete_writel("drivers/gpio/gpio-aspeed-sgpio.c:479", val, reg);
 
 	raw_spin_unlock_irqrestore(&gpio->lock, flags);
 

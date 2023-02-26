@@ -32,19 +32,19 @@ static int adda_reg_read(void *context, unsigned int reg, unsigned int *val)
 	u32 tmp;
 
 	/* De-assert reset */
-	writel(readl(base) | ADDA_PR_RESET, base);
+	pete_writel("sound/soc/sunxi/sun8i-adda-pr-regmap.c:35", pete_readl("sound/soc/sunxi/sun8i-adda-pr-regmap.c:35", base) | ADDA_PR_RESET, base);
 
 	/* Clear write bit */
-	writel(readl(base) & ~ADDA_PR_WRITE, base);
+	pete_writel("sound/soc/sunxi/sun8i-adda-pr-regmap.c:38", pete_readl("sound/soc/sunxi/sun8i-adda-pr-regmap.c:38", base) & ~ADDA_PR_WRITE, base);
 
 	/* Set register address */
-	tmp = readl(base);
+	tmp = pete_readl("sound/soc/sunxi/sun8i-adda-pr-regmap.c:41", base);
 	tmp &= ~(ADDA_PR_ADDR_MASK << ADDA_PR_ADDR_SHIFT);
 	tmp |= (reg & ADDA_PR_ADDR_MASK) << ADDA_PR_ADDR_SHIFT;
-	writel(tmp, base);
+	pete_writel("sound/soc/sunxi/sun8i-adda-pr-regmap.c:44", tmp, base);
 
 	/* Read back value */
-	*val = readl(base) & ADDA_PR_DATA_OUT_MASK;
+	*val = pete_readl("sound/soc/sunxi/sun8i-adda-pr-regmap.c:47", base) & ADDA_PR_DATA_OUT_MASK;
 
 	return 0;
 }
@@ -55,25 +55,25 @@ static int adda_reg_write(void *context, unsigned int reg, unsigned int val)
 	u32 tmp;
 
 	/* De-assert reset */
-	writel(readl(base) | ADDA_PR_RESET, base);
+	pete_writel("sound/soc/sunxi/sun8i-adda-pr-regmap.c:58", pete_readl("sound/soc/sunxi/sun8i-adda-pr-regmap.c:58", base) | ADDA_PR_RESET, base);
 
 	/* Set register address */
-	tmp = readl(base);
+	tmp = pete_readl("sound/soc/sunxi/sun8i-adda-pr-regmap.c:61", base);
 	tmp &= ~(ADDA_PR_ADDR_MASK << ADDA_PR_ADDR_SHIFT);
 	tmp |= (reg & ADDA_PR_ADDR_MASK) << ADDA_PR_ADDR_SHIFT;
-	writel(tmp, base);
+	pete_writel("sound/soc/sunxi/sun8i-adda-pr-regmap.c:64", tmp, base);
 
 	/* Set data to write */
-	tmp = readl(base);
+	tmp = pete_readl("sound/soc/sunxi/sun8i-adda-pr-regmap.c:67", base);
 	tmp &= ~(ADDA_PR_DATA_IN_MASK << ADDA_PR_DATA_IN_SHIFT);
 	tmp |= (val & ADDA_PR_DATA_IN_MASK) << ADDA_PR_DATA_IN_SHIFT;
-	writel(tmp, base);
+	pete_writel("sound/soc/sunxi/sun8i-adda-pr-regmap.c:70", tmp, base);
 
 	/* Set write bit to signal a write */
-	writel(readl(base) | ADDA_PR_WRITE, base);
+	pete_writel("sound/soc/sunxi/sun8i-adda-pr-regmap.c:73", pete_readl("sound/soc/sunxi/sun8i-adda-pr-regmap.c:73", base) | ADDA_PR_WRITE, base);
 
 	/* Clear write bit */
-	writel(readl(base) & ~ADDA_PR_WRITE, base);
+	pete_writel("sound/soc/sunxi/sun8i-adda-pr-regmap.c:76", pete_readl("sound/soc/sunxi/sun8i-adda-pr-regmap.c:76", base) & ~ADDA_PR_WRITE, base);
 
 	return 0;
 }

@@ -181,7 +181,7 @@ static inline void nsp_mmio_write(unsigned long base,
 {
 	unsigned char *ptr = (unsigned char *)(base + NSP_MMIO_OFFSET + index);
 
-	writeb(val, ptr);
+	pete_writeb("drivers/scsi/pcmcia/nsp_io.h:184", val, ptr);
 }
 
 static inline unsigned char nsp_mmio_read(unsigned long base,
@@ -189,7 +189,7 @@ static inline unsigned char nsp_mmio_read(unsigned long base,
 {
 	unsigned char *ptr = (unsigned char *)(base + NSP_MMIO_OFFSET + index);
 
-	return readb(ptr);
+	return pete_readb("drivers/scsi/pcmcia/nsp_io.h:192", ptr);
 }
 
 /*-----------*/
@@ -200,8 +200,8 @@ static inline unsigned char nsp_mmio_index_read(unsigned long base,
 	unsigned char *index_ptr = (unsigned char *)(base + NSP_MMIO_OFFSET + INDEXREG);
 	unsigned char *data_ptr  = (unsigned char *)(base + NSP_MMIO_OFFSET + DATAREG);
 
-	writeb((unsigned char)reg, index_ptr);
-	return readb(data_ptr);
+	pete_writeb("drivers/scsi/pcmcia/nsp_io.h:203", (unsigned char)reg, index_ptr);
+	return pete_readb("drivers/scsi/pcmcia/nsp_io.h:204", data_ptr);
 }
 
 static inline void nsp_mmio_index_write(unsigned long base,
@@ -211,8 +211,8 @@ static inline void nsp_mmio_index_write(unsigned long base,
 	unsigned char *index_ptr = (unsigned char *)(base + NSP_MMIO_OFFSET + INDEXREG);
 	unsigned char *data_ptr  = (unsigned char *)(base + NSP_MMIO_OFFSET + DATAREG);
 
-	writeb((unsigned char)reg, index_ptr);
-	writeb(val,                data_ptr);
+	pete_writeb("drivers/scsi/pcmcia/nsp_io.h:214", (unsigned char)reg, index_ptr);
+	pete_writeb("drivers/scsi/pcmcia/nsp_io.h:215", val,                data_ptr);
 }
 
 /* read 32bit FIFO */
@@ -228,7 +228,7 @@ static inline void nsp_mmio_multi_read_4(unsigned long  base,
 	//nsp_dbg(NSP_DEBUG_DATA_IO, "base 0x%0lx ptr 0x%p",base,ptr);
 
 	for (i = 0; i < count; i++) {
-		*tmp = readl(ptr);
+		*tmp = pete_readl("drivers/scsi/pcmcia/nsp_io.h:231", ptr);
 		//nsp_dbg(NSP_DEBUG_DATA_IO, "<%d,%p,%p,%lx>", i, ptr, tmp, *tmp);
 		tmp++;
 	}
@@ -254,7 +254,7 @@ static inline void nsp_mmio_multi_write_4(unsigned long  base,
 	//nsp_dbg(NSP_DEBUG_DATA_IO, "base 0x%0lx ptr 0x%p",base,ptr);
 
 	for (i = 0; i < count; i++) {
-		writel(*tmp, ptr);
+		pete_writel("drivers/scsi/pcmcia/nsp_io.h:257", *tmp, ptr);
 		//nsp_dbg(NSP_DEBUG_DATA_IO, "<%d,%p,%p,%lx>", i, ptr, tmp, *tmp);
 		tmp++;
 	}

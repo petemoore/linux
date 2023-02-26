@@ -805,20 +805,20 @@ static inline int ivtv_raw_vbi(const struct ivtv *itv)
    to kill the firmware and get into the broken state until computer is
    rebooted. */
 #define write_sync(val, reg) \
-	do { writel(val, reg); readl(reg); } while (0)
+	do { pete_writel("drivers/media/pci/ivtv/ivtv-driver.h:808", val, reg); pete_readl("drivers/media/pci/ivtv/ivtv-driver.h:808", reg); } while (0)
 
-#define read_reg(reg) readl(itv->reg_mem + (reg))
-#define write_reg(val, reg) writel(val, itv->reg_mem + (reg))
+#define read_reg(reg) pete_readl("drivers/media/pci/ivtv/ivtv-driver.h:810", itv->reg_mem + (reg))
+#define write_reg(val, reg) pete_writel("drivers/media/pci/ivtv/ivtv-driver.h:811", val, itv->reg_mem + (reg))
 #define write_reg_sync(val, reg) \
 	do { write_reg(val, reg); read_reg(reg); } while (0)
 
-#define read_enc(addr) readl(itv->enc_mem + (u32)(addr))
-#define write_enc(val, addr) writel(val, itv->enc_mem + (u32)(addr))
+#define read_enc(addr) pete_readl("drivers/media/pci/ivtv/ivtv-driver.h:815", itv->enc_mem + (u32)(addr))
+#define write_enc(val, addr) pete_writel("drivers/media/pci/ivtv/ivtv-driver.h:816", val, itv->enc_mem + (u32)(addr))
 #define write_enc_sync(val, addr) \
 	do { write_enc(val, addr); read_enc(addr); } while (0)
 
-#define read_dec(addr) readl(itv->dec_mem + (u32)(addr))
-#define write_dec(val, addr) writel(val, itv->dec_mem + (u32)(addr))
+#define read_dec(addr) pete_readl("drivers/media/pci/ivtv/ivtv-driver.h:820", itv->dec_mem + (u32)(addr))
+#define write_dec(val, addr) pete_writel("drivers/media/pci/ivtv/ivtv-driver.h:821", val, itv->dec_mem + (u32)(addr))
 #define write_dec_sync(val, addr) \
 	do { write_dec(val, addr); read_dec(addr); } while (0)
 

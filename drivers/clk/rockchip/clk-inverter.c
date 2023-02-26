@@ -27,7 +27,7 @@ static int rockchip_inv_get_phase(struct clk_hw *hw)
 	struct rockchip_inv_clock *inv_clock = to_inv_clock(hw);
 	u32 val;
 
-	val = readl(inv_clock->reg) >> inv_clock->shift;
+	val = pete_readl("drivers/clk/rockchip/clk-inverter.c:30", inv_clock->reg) >> inv_clock->shift;
 	val &= INVERTER_MASK;
 	return val ? 180 : 0;
 }
@@ -46,7 +46,7 @@ static int rockchip_inv_set_phase(struct clk_hw *hw, int degrees)
 	}
 
 	if (inv_clock->flags & ROCKCHIP_INVERTER_HIWORD_MASK) {
-		writel(HIWORD_UPDATE(val, INVERTER_MASK, inv_clock->shift),
+		pete_writel("drivers/clk/rockchip/clk-inverter.c:49", HIWORD_UPDATE(val, INVERTER_MASK, inv_clock->shift),
 		       inv_clock->reg);
 	} else {
 		unsigned long flags;
@@ -54,10 +54,10 @@ static int rockchip_inv_set_phase(struct clk_hw *hw, int degrees)
 
 		spin_lock_irqsave(inv_clock->lock, flags);
 
-		reg = readl(inv_clock->reg);
+		reg = pete_readl("drivers/clk/rockchip/clk-inverter.c:57", inv_clock->reg);
 		reg &= ~BIT(inv_clock->shift);
 		reg |= val;
-		writel(reg, inv_clock->reg);
+		pete_writel("drivers/clk/rockchip/clk-inverter.c:60", reg, inv_clock->reg);
 
 		spin_unlock_irqrestore(inv_clock->lock, flags);
 	}

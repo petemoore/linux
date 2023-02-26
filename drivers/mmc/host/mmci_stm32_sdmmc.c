@@ -292,7 +292,7 @@ static void mmci_sdmmc_set_pwrreg(struct mmci_host *host, unsigned int pwr)
 		 * functionis lost
 		 * ault irq mask (probe) must be activated
 		 */
-		writel(MCI_IRQENABLE | host->variant->start_err,
+		pete_writel("drivers/mmc/host/mmci_stm32_sdmmc.c:295", MCI_IRQENABLE | host->variant->start_err,
 		       host->base + MMCIMASK0);
 
 		/* preserves voltage switch bits */

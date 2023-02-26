@@ -51,7 +51,7 @@ static unsigned long clk_cpu_recalc_rate(struct clk_hw *hwclk,
 	struct cpu_clk *cpuclk = to_cpu_clk(hwclk);
 	u32 reg, div;
 
-	reg = readl(cpuclk->reg_base + SYS_CTRL_CLK_DIVIDER_VALUE_OFFSET);
+	reg = pete_readl("drivers/clk/mvebu/clk-cpu.c:54", cpuclk->reg_base + SYS_CTRL_CLK_DIVIDER_VALUE_OFFSET);
 	div = (reg >> (cpuclk->cpu * 8)) & SYS_CTRL_CLK_DIVIDER_MASK;
 	return parent_rate / div;
 }
@@ -80,26 +80,26 @@ static int clk_cpu_off_set_rate(struct clk_hw *hwclk, unsigned long rate,
 	u32 reload_mask;
 
 	div = parent_rate / rate;
-	reg = (readl(cpuclk->reg_base + SYS_CTRL_CLK_DIVIDER_VALUE_OFFSET)
+	reg = (pete_readl("drivers/clk/mvebu/clk-cpu.c:83", cpuclk->reg_base + SYS_CTRL_CLK_DIVIDER_VALUE_OFFSET)
 		& (~(SYS_CTRL_CLK_DIVIDER_MASK << (cpuclk->cpu * 8))))
 		| (div << (cpuclk->cpu * 8));
-	writel(reg, cpuclk->reg_base + SYS_CTRL_CLK_DIVIDER_VALUE_OFFSET);
+	pete_writel("drivers/clk/mvebu/clk-cpu.c:86", reg, cpuclk->reg_base + SYS_CTRL_CLK_DIVIDER_VALUE_OFFSET);
 	/* Set clock divider reload smooth bit mask */
 	reload_mask = 1 << (20 + cpuclk->cpu);
 
-	reg = readl(cpuclk->reg_base + SYS_CTRL_CLK_DIVIDER_CTRL_OFFSET)
+	reg = pete_readl("drivers/clk/mvebu/clk-cpu.c:90", cpuclk->reg_base + SYS_CTRL_CLK_DIVIDER_CTRL_OFFSET)
 	    | reload_mask;
-	writel(reg, cpuclk->reg_base + SYS_CTRL_CLK_DIVIDER_CTRL_OFFSET);
+	pete_writel("drivers/clk/mvebu/clk-cpu.c:92", reg, cpuclk->reg_base + SYS_CTRL_CLK_DIVIDER_CTRL_OFFSET);
 
 	/* Now trigger the clock update */
-	reg = readl(cpuclk->reg_base + SYS_CTRL_CLK_DIVIDER_CTRL_OFFSET)
+	reg = pete_readl("drivers/clk/mvebu/clk-cpu.c:95", cpuclk->reg_base + SYS_CTRL_CLK_DIVIDER_CTRL_OFFSET)
 	    | 1 << 24;
-	writel(reg, cpuclk->reg_base + SYS_CTRL_CLK_DIVIDER_CTRL_OFFSET);
+	pete_writel("drivers/clk/mvebu/clk-cpu.c:97", reg, cpuclk->reg_base + SYS_CTRL_CLK_DIVIDER_CTRL_OFFSET);
 
 	/* Wait for clocks to settle down then clear reload request */
 	udelay(1000);
 	reg &= ~(reload_mask | 1 << 24);
-	writel(reg, cpuclk->reg_base + SYS_CTRL_CLK_DIVIDER_CTRL_OFFSET);
+	pete_writel("drivers/clk/mvebu/clk-cpu.c:102", reg, cpuclk->reg_base + SYS_CTRL_CLK_DIVIDER_CTRL_OFFSET);
 	udelay(1000);
 
 	return 0;
@@ -121,7 +121,7 @@ static int clk_cpu_on_set_rate(struct clk_hw *hwclk, unsigned long rate,
 
 	cur_rate = clk_hw_get_rate(hwclk);
 
-	reg = readl(cpuclk->reg_base + SYS_CTRL_CLK_DIVIDER_CTRL2_OFFSET);
+	reg = pete_readl("drivers/clk/mvebu/clk-cpu.c:124", cpuclk->reg_base + SYS_CTRL_CLK_DIVIDER_CTRL2_OFFSET);
 	fabric_div = (reg >> SYS_CTRL_CLK_DIVIDER_CTRL2_NBCLK_RATIO_SHIFT) &
 		SYS_CTRL_CLK_DIVIDER_MASK;
 
@@ -135,15 +135,15 @@ static int clk_cpu_on_set_rate(struct clk_hw *hwclk, unsigned long rate,
 	if (target_div == 0)
 		target_div = 1;
 
-	reg = readl(cpuclk->pmu_dfs);
+	reg = pete_readl("drivers/clk/mvebu/clk-cpu.c:138", cpuclk->pmu_dfs);
 	reg &= ~(PMU_DFS_RATIO_MASK << PMU_DFS_RATIO_SHIFT);
 	reg |= (target_div << PMU_DFS_RATIO_SHIFT);
-	writel(reg, cpuclk->pmu_dfs);
+	pete_writel("drivers/clk/mvebu/clk-cpu.c:141", reg, cpuclk->pmu_dfs);
 
-	reg = readl(cpuclk->reg_base + SYS_CTRL_CLK_DIVIDER_CTRL_OFFSET);
+	reg = pete_readl("drivers/clk/mvebu/clk-cpu.c:143", cpuclk->reg_base + SYS_CTRL_CLK_DIVIDER_CTRL_OFFSET);
 	reg |= (SYS_CTRL_CLK_DIVIDER_CTRL_RESET_ALL <<
 		SYS_CTRL_CLK_DIVIDER_CTRL_RESET_SHIFT);
-	writel(reg, cpuclk->reg_base + SYS_CTRL_CLK_DIVIDER_CTRL_OFFSET);
+	pete_writel("drivers/clk/mvebu/clk-cpu.c:146", reg, cpuclk->reg_base + SYS_CTRL_CLK_DIVIDER_CTRL_OFFSET);
 
 	return mvebu_pmsu_dfs_request(cpuclk->cpu);
 }

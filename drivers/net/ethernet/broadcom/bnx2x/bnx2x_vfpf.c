@@ -161,9 +161,9 @@ static int bnx2x_send_msg2pf(struct bnx2x *bp, u8 *done, dma_addr_t msg_mapping)
 	}
 
 	/* Write message address */
-	writel(U64_LO(msg_mapping),
+	pete_writel("drivers/net/ethernet/broadcom/bnx2x/bnx2x_vfpf.c:164", U64_LO(msg_mapping),
 	       &zone_data->non_trigger.vf_pf_channel.msg_addr_lo);
-	writel(U64_HI(msg_mapping),
+	pete_writel("drivers/net/ethernet/broadcom/bnx2x/bnx2x_vfpf.c:166", U64_HI(msg_mapping),
 	       &zone_data->non_trigger.vf_pf_channel.msg_addr_hi);
 
 	/* make sure the address is written before FW accesses it */
@@ -198,7 +198,7 @@ static int bnx2x_get_vf_id(struct bnx2x *bp, u32 *vf_id)
 
 	do {
 		/* pxp traps vf read of doorbells and returns me reg value */
-		me_reg = readl(bp->doorbells);
+		me_reg = pete_readl("drivers/net/ethernet/broadcom/bnx2x/bnx2x_vfpf.c:201", bp->doorbells);
 		if (GOOD_ME_REG(me_reg))
 			break;
 

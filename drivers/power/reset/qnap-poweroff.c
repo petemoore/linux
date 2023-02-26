@@ -57,16 +57,16 @@ static void qnap_power_off(void)
 	pr_err("%s: triggering power-off...\n", __func__);
 
 	/* hijack UART1 and reset into sane state */
-	writel(0x83, UART1_REG(LCR));
-	writel(divisor & 0xff, UART1_REG(DLL));
-	writel((divisor >> 8) & 0xff, UART1_REG(DLM));
-	writel(0x03, UART1_REG(LCR));
-	writel(0x00, UART1_REG(IER));
-	writel(0x00, UART1_REG(FCR));
-	writel(0x00, UART1_REG(MCR));
+	pete_writel("drivers/power/reset/qnap-poweroff.c:60", 0x83, UART1_REG(LCR));
+	pete_writel("drivers/power/reset/qnap-poweroff.c:61", divisor & 0xff, UART1_REG(DLL));
+	pete_writel("drivers/power/reset/qnap-poweroff.c:62", (divisor >> 8) & 0xff, UART1_REG(DLM));
+	pete_writel("drivers/power/reset/qnap-poweroff.c:63", 0x03, UART1_REG(LCR));
+	pete_writel("drivers/power/reset/qnap-poweroff.c:64", 0x00, UART1_REG(IER));
+	pete_writel("drivers/power/reset/qnap-poweroff.c:65", 0x00, UART1_REG(FCR));
+	pete_writel("drivers/power/reset/qnap-poweroff.c:66", 0x00, UART1_REG(MCR));
 
 	/* send the power-off command to PIC */
-	writel(cfg->cmd, UART1_REG(TX));
+	pete_writel("drivers/power/reset/qnap-poweroff.c:69", cfg->cmd, UART1_REG(TX));
 }
 
 static int qnap_power_off_probe(struct platform_device *pdev)

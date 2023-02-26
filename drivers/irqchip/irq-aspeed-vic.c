@@ -60,29 +60,29 @@ static void vic_init_hw(struct aspeed_vic *vic)
 	u32 sense;
 
 	/* Disable all interrupts */
-	writel(0xffffffff, vic->base + AVIC_INT_ENABLE_CLR);
-	writel(0xffffffff, vic->base + AVIC_INT_ENABLE_CLR + 4);
+	pete_writel("drivers/irqchip/irq-aspeed-vic.c:63", 0xffffffff, vic->base + AVIC_INT_ENABLE_CLR);
+	pete_writel("drivers/irqchip/irq-aspeed-vic.c:64", 0xffffffff, vic->base + AVIC_INT_ENABLE_CLR + 4);
 
 	/* Make sure no soft trigger is on */
-	writel(0xffffffff, vic->base + AVIC_INT_TRIGGER_CLR);
-	writel(0xffffffff, vic->base + AVIC_INT_TRIGGER_CLR + 4);
+	pete_writel("drivers/irqchip/irq-aspeed-vic.c:67", 0xffffffff, vic->base + AVIC_INT_TRIGGER_CLR);
+	pete_writel("drivers/irqchip/irq-aspeed-vic.c:68", 0xffffffff, vic->base + AVIC_INT_TRIGGER_CLR + 4);
 
 	/* Set everything to be IRQ */
-	writel(0, vic->base + AVIC_INT_SELECT);
-	writel(0, vic->base + AVIC_INT_SELECT + 4);
+	pete_writel("drivers/irqchip/irq-aspeed-vic.c:71", 0, vic->base + AVIC_INT_SELECT);
+	pete_writel("drivers/irqchip/irq-aspeed-vic.c:72", 0, vic->base + AVIC_INT_SELECT + 4);
 
 	/* Some interrupts have a programmable high/low level trigger
 	 * (4 GPIO direct inputs), for now we assume this was configured
 	 * by firmware. We read which ones are edge now.
 	 */
-	sense = readl(vic->base + AVIC_INT_SENSE);
+	sense = pete_readl("drivers/irqchip/irq-aspeed-vic.c:78", vic->base + AVIC_INT_SENSE);
 	vic->edge_sources[0] = ~sense;
-	sense = readl(vic->base + AVIC_INT_SENSE + 4);
+	sense = pete_readl("drivers/irqchip/irq-aspeed-vic.c:80", vic->base + AVIC_INT_SENSE + 4);
 	vic->edge_sources[1] = ~sense;
 
 	/* Clear edge detection latches */
-	writel(0xffffffff, vic->base + AVIC_EDGE_CLR);
-	writel(0xffffffff, vic->base + AVIC_EDGE_CLR + 4);
+	pete_writel("drivers/irqchip/irq-aspeed-vic.c:84", 0xffffffff, vic->base + AVIC_EDGE_CLR);
+	pete_writel("drivers/irqchip/irq-aspeed-vic.c:85", 0xffffffff, vic->base + AVIC_EDGE_CLR + 4);
 }
 
 static void __exception_irq_entry avic_handle_irq(struct pt_regs *regs)
@@ -112,7 +112,7 @@ static void avic_ack_irq(struct irq_data *d)
 
 	/* Clear edge latch for edge interrupts, nop for level */
 	if (vic->edge_sources[sidx] & sbit)
-		writel(sbit, vic->base + AVIC_EDGE_CLR + sidx * 4);
+		pete_writel("drivers/irqchip/irq-aspeed-vic.c:115", sbit, vic->base + AVIC_EDGE_CLR + sidx * 4);
 }
 
 static void avic_mask_irq(struct irq_data *d)
@@ -121,7 +121,7 @@ static void avic_mask_irq(struct irq_data *d)
 	unsigned int sidx = d->hwirq >> 5;
 	unsigned int sbit = 1u << (d->hwirq & 0x1f);
 
-	writel(sbit, vic->base + AVIC_INT_ENABLE_CLR + sidx * 4);
+	pete_writel("drivers/irqchip/irq-aspeed-vic.c:124", sbit, vic->base + AVIC_INT_ENABLE_CLR + sidx * 4);
 }
 
 static void avic_unmask_irq(struct irq_data *d)
@@ -130,7 +130,7 @@ static void avic_unmask_irq(struct irq_data *d)
 	unsigned int sidx = d->hwirq >> 5;
 	unsigned int sbit = 1u << (d->hwirq & 0x1f);
 
-	writel(sbit, vic->base + AVIC_INT_ENABLE + sidx * 4);
+	pete_writel("drivers/irqchip/irq-aspeed-vic.c:133", sbit, vic->base + AVIC_INT_ENABLE + sidx * 4);
 }
 
 /* For level irq, faster than going through a nop "ack" and mask */
@@ -141,11 +141,11 @@ static void avic_mask_ack_irq(struct irq_data *d)
 	unsigned int sbit = 1u << (d->hwirq & 0x1f);
 
 	/* First mask */
-	writel(sbit, vic->base + AVIC_INT_ENABLE_CLR + sidx * 4);
+	pete_writel("drivers/irqchip/irq-aspeed-vic.c:144", sbit, vic->base + AVIC_INT_ENABLE_CLR + sidx * 4);
 
 	/* Then clear edge latch for edge interrupts */
 	if (vic->edge_sources[sidx] & sbit)
-		writel(sbit, vic->base + AVIC_EDGE_CLR + sidx * 4);
+		pete_writel("drivers/irqchip/irq-aspeed-vic.c:148", sbit, vic->base + AVIC_EDGE_CLR + sidx * 4);
 }
 
 static struct irq_chip avic_chip = {

@@ -227,16 +227,16 @@ static void cf_dumpregs(struct arasan_cf_dev *acdev)
 	struct device *dev = acdev->host->dev;
 
 	dev_dbg(dev, ": =========== REGISTER DUMP ===========");
-	dev_dbg(dev, ": CFI_STS: %x", readl(acdev->vbase + CFI_STS));
-	dev_dbg(dev, ": IRQ_STS: %x", readl(acdev->vbase + IRQ_STS));
-	dev_dbg(dev, ": IRQ_EN: %x", readl(acdev->vbase + IRQ_EN));
-	dev_dbg(dev, ": OP_MODE: %x", readl(acdev->vbase + OP_MODE));
-	dev_dbg(dev, ": CLK_CFG: %x", readl(acdev->vbase + CLK_CFG));
-	dev_dbg(dev, ": TM_CFG: %x", readl(acdev->vbase + TM_CFG));
-	dev_dbg(dev, ": XFER_CTR: %x", readl(acdev->vbase + XFER_CTR));
-	dev_dbg(dev, ": GIRQ_STS: %x", readl(acdev->vbase + GIRQ_STS));
-	dev_dbg(dev, ": GIRQ_STS_EN: %x", readl(acdev->vbase + GIRQ_STS_EN));
-	dev_dbg(dev, ": GIRQ_SGN_EN: %x", readl(acdev->vbase + GIRQ_SGN_EN));
+	dev_dbg(dev, ": CFI_STS: %x", pete_readl("drivers/ata/pata_arasan_cf.c:230", acdev->vbase + CFI_STS));
+	dev_dbg(dev, ": IRQ_STS: %x", pete_readl("drivers/ata/pata_arasan_cf.c:231", acdev->vbase + IRQ_STS));
+	dev_dbg(dev, ": IRQ_EN: %x", pete_readl("drivers/ata/pata_arasan_cf.c:232", acdev->vbase + IRQ_EN));
+	dev_dbg(dev, ": OP_MODE: %x", pete_readl("drivers/ata/pata_arasan_cf.c:233", acdev->vbase + OP_MODE));
+	dev_dbg(dev, ": CLK_CFG: %x", pete_readl("drivers/ata/pata_arasan_cf.c:234", acdev->vbase + CLK_CFG));
+	dev_dbg(dev, ": TM_CFG: %x", pete_readl("drivers/ata/pata_arasan_cf.c:235", acdev->vbase + TM_CFG));
+	dev_dbg(dev, ": XFER_CTR: %x", pete_readl("drivers/ata/pata_arasan_cf.c:236", acdev->vbase + XFER_CTR));
+	dev_dbg(dev, ": GIRQ_STS: %x", pete_readl("drivers/ata/pata_arasan_cf.c:237", acdev->vbase + GIRQ_STS));
+	dev_dbg(dev, ": GIRQ_STS_EN: %x", pete_readl("drivers/ata/pata_arasan_cf.c:238", acdev->vbase + GIRQ_STS_EN));
+	dev_dbg(dev, ": GIRQ_SGN_EN: %x", pete_readl("drivers/ata/pata_arasan_cf.c:239", acdev->vbase + GIRQ_SGN_EN));
 	dev_dbg(dev, ": =====================================");
 }
 
@@ -244,37 +244,37 @@ static void cf_dumpregs(struct arasan_cf_dev *acdev)
 static void cf_ginterrupt_enable(struct arasan_cf_dev *acdev, bool enable)
 {
 	/* enable should be 0 or 1 */
-	writel(enable, acdev->vbase + GIRQ_STS_EN);
-	writel(enable, acdev->vbase + GIRQ_SGN_EN);
+	pete_writel("drivers/ata/pata_arasan_cf.c:247", enable, acdev->vbase + GIRQ_STS_EN);
+	pete_writel("drivers/ata/pata_arasan_cf.c:248", enable, acdev->vbase + GIRQ_SGN_EN);
 }
 
 /* Enable/Disable CF interrupts */
 static inline void
 cf_interrupt_enable(struct arasan_cf_dev *acdev, u32 mask, bool enable)
 {
-	u32 val = readl(acdev->vbase + IRQ_EN);
+	u32 val = pete_readl("drivers/ata/pata_arasan_cf.c:255", acdev->vbase + IRQ_EN);
 	/* clear & enable/disable irqs */
 	if (enable) {
-		writel(mask, acdev->vbase + IRQ_STS);
-		writel(val | mask, acdev->vbase + IRQ_EN);
+		pete_writel("drivers/ata/pata_arasan_cf.c:258", mask, acdev->vbase + IRQ_STS);
+		pete_writel("drivers/ata/pata_arasan_cf.c:259", val | mask, acdev->vbase + IRQ_EN);
 	} else
-		writel(val & ~mask, acdev->vbase + IRQ_EN);
+		pete_writel("drivers/ata/pata_arasan_cf.c:261", val & ~mask, acdev->vbase + IRQ_EN);
 }
 
 static inline void cf_card_reset(struct arasan_cf_dev *acdev)
 {
-	u32 val = readl(acdev->vbase + OP_MODE);
+	u32 val = pete_readl("drivers/ata/pata_arasan_cf.c:266", acdev->vbase + OP_MODE);
 
-	writel(val | CARD_RESET, acdev->vbase + OP_MODE);
+	pete_writel("drivers/ata/pata_arasan_cf.c:268", val | CARD_RESET, acdev->vbase + OP_MODE);
 	udelay(200);
-	writel(val & ~CARD_RESET, acdev->vbase + OP_MODE);
+	pete_writel("drivers/ata/pata_arasan_cf.c:270", val & ~CARD_RESET, acdev->vbase + OP_MODE);
 }
 
 static inline void cf_ctrl_reset(struct arasan_cf_dev *acdev)
 {
-	writel(readl(acdev->vbase + OP_MODE) & ~CFHOST_ENB,
+	pete_writel("drivers/ata/pata_arasan_cf.c:275", pete_readl("drivers/ata/pata_arasan_cf.c:275", acdev->vbase + OP_MODE) & ~CFHOST_ENB,
 			acdev->vbase + OP_MODE);
-	writel(readl(acdev->vbase + OP_MODE) | CFHOST_ENB,
+	pete_writel("drivers/ata/pata_arasan_cf.c:277", pete_readl("drivers/ata/pata_arasan_cf.c:277", acdev->vbase + OP_MODE) | CFHOST_ENB,
 			acdev->vbase + OP_MODE);
 }
 
@@ -282,7 +282,7 @@ static void cf_card_detect(struct arasan_cf_dev *acdev, bool hotplugged)
 {
 	struct ata_port *ap = acdev->host->ports[0];
 	struct ata_eh_info *ehi = &ap->link.eh_info;
-	u32 val = readl(acdev->vbase + CFI_STS);
+	u32 val = pete_readl("drivers/ata/pata_arasan_cf.c:285", acdev->vbase + CFI_STS);
 
 	/* Both CD1 & CD2 should be low if card inserted completely */
 	if (!(val & (CARD_DETECT1 | CARD_DETECT2))) {
@@ -329,9 +329,9 @@ static int cf_init(struct arasan_cf_dev *acdev)
 	if (pdata && pdata->cf_if_clk <= CF_IF_CLK_200M)
 		if_clk = pdata->cf_if_clk;
 
-	writel(if_clk, acdev->vbase + CLK_CFG);
+	pete_writel("drivers/ata/pata_arasan_cf.c:332", if_clk, acdev->vbase + CLK_CFG);
 
-	writel(TRUE_IDE_MODE | CFHOST_ENB, acdev->vbase + OP_MODE);
+	pete_writel("drivers/ata/pata_arasan_cf.c:334", TRUE_IDE_MODE | CFHOST_ENB, acdev->vbase + OP_MODE);
 	cf_interrupt_enable(acdev, CARD_DETECT_IRQ, 1);
 	cf_ginterrupt_enable(acdev, 1);
 	spin_unlock_irqrestore(&acdev->host->lock, flags);
@@ -347,7 +347,7 @@ static void cf_exit(struct arasan_cf_dev *acdev)
 	cf_ginterrupt_enable(acdev, 0);
 	cf_interrupt_enable(acdev, TRUE_IDE_IRQS, 0);
 	cf_card_reset(acdev);
-	writel(readl(acdev->vbase + OP_MODE) & ~CFHOST_ENB,
+	pete_writel("drivers/ata/pata_arasan_cf.c:350", pete_readl("drivers/ata/pata_arasan_cf.c:350", acdev->vbase + OP_MODE) & ~CFHOST_ENB,
 			acdev->vbase + OP_MODE);
 	spin_unlock_irqrestore(&acdev->host->lock, flags);
 	clk_disable_unprepare(acdev->clk);
@@ -454,9 +454,9 @@ static int sg_xfer(struct arasan_cf_dev *acdev, struct scatterlist *sg)
 	while (sglen) {
 		xfer_cnt = min(sglen, MAX_XFER_COUNT);
 		spin_lock_irqsave(&acdev->host->lock, flags);
-		xfer_ctr = readl(acdev->vbase + XFER_CTR) &
+		xfer_ctr = pete_readl("drivers/ata/pata_arasan_cf.c:457", acdev->vbase + XFER_CTR) &
 			~XFER_COUNT_MASK;
-		writel(xfer_ctr | xfer_cnt | XFER_START,
+		pete_writel("drivers/ata/pata_arasan_cf.c:459", xfer_ctr | xfer_cnt | XFER_START,
 				acdev->vbase + XFER_CTR);
 		spin_unlock_irqrestore(&acdev->host->lock, flags);
 
@@ -496,7 +496,7 @@ static int sg_xfer(struct arasan_cf_dev *acdev, struct scatterlist *sg)
 
 fail:
 	spin_lock_irqsave(&acdev->host->lock, flags);
-	writel(readl(acdev->vbase + XFER_CTR) & ~XFER_START,
+	pete_writel("drivers/ata/pata_arasan_cf.c:499", pete_readl("drivers/ata/pata_arasan_cf.c:499", acdev->vbase + XFER_CTR) & ~XFER_START,
 			acdev->vbase + XFER_CTR);
 	spin_unlock_irqrestore(&acdev->host->lock, flags);
 
@@ -595,14 +595,14 @@ static irqreturn_t arasan_cf_interrupt(int irq, void *dev)
 	unsigned long flags;
 	u32 irqsts;
 
-	irqsts = readl(acdev->vbase + GIRQ_STS);
+	irqsts = pete_readl("drivers/ata/pata_arasan_cf.c:598", acdev->vbase + GIRQ_STS);
 	if (!(irqsts & GIRQ_CF))
 		return IRQ_NONE;
 
 	spin_lock_irqsave(&acdev->host->lock, flags);
-	irqsts = readl(acdev->vbase + IRQ_STS);
-	writel(irqsts, acdev->vbase + IRQ_STS);		/* clear irqs */
-	writel(GIRQ_CF, acdev->vbase + GIRQ_STS);	/* clear girqs */
+	irqsts = pete_readl("drivers/ata/pata_arasan_cf.c:603", acdev->vbase + IRQ_STS);
+	pete_writel("drivers/ata/pata_arasan_cf.c:604", irqsts, acdev->vbase + IRQ_STS);		/* clear irqs */
+	pete_writel("drivers/ata/pata_arasan_cf.c:605", GIRQ_CF, acdev->vbase + GIRQ_STS);	/* clear girqs */
 
 	/* handle only relevant interrupts */
 	irqsts &= ~IGNORED_IRQS;
@@ -615,7 +615,7 @@ static irqreturn_t arasan_cf_interrupt(int irq, void *dev)
 
 	if (irqsts & PIO_XFER_ERR_IRQ) {
 		acdev->dma_status = ATA_DMA_ERR;
-		writel(readl(acdev->vbase + XFER_CTR) & ~XFER_START,
+		pete_writel("drivers/ata/pata_arasan_cf.c:618", pete_readl("drivers/ata/pata_arasan_cf.c:618", acdev->vbase + XFER_CTR) & ~XFER_START,
 				acdev->vbase + XFER_CTR);
 		spin_unlock_irqrestore(&acdev->host->lock, flags);
 		complete(&acdev->cf_completion);
@@ -646,7 +646,7 @@ static void arasan_cf_freeze(struct ata_port *ap)
 	struct arasan_cf_dev *acdev = ap->host->private_data;
 
 	/* stop transfer and reset controller */
-	writel(readl(acdev->vbase + XFER_CTR) & ~XFER_START,
+	pete_writel("drivers/ata/pata_arasan_cf.c:649", pete_readl("drivers/ata/pata_arasan_cf.c:649", acdev->vbase + XFER_CTR) & ~XFER_START,
 			acdev->vbase + XFER_CTR);
 	cf_ctrl_reset(acdev);
 	acdev->dma_status = ATA_DMA_ERR;
@@ -674,11 +674,11 @@ static void arasan_cf_dma_start(struct arasan_cf_dev *acdev)
 	struct ata_queued_cmd *qc = acdev->qc;
 	struct ata_port *ap = qc->ap;
 	struct ata_taskfile *tf = &qc->tf;
-	u32 xfer_ctr = readl(acdev->vbase + XFER_CTR) & ~XFER_DIR_MASK;
+	u32 xfer_ctr = pete_readl("drivers/ata/pata_arasan_cf.c:677", acdev->vbase + XFER_CTR) & ~XFER_DIR_MASK;
 	u32 write = tf->flags & ATA_TFLAG_WRITE;
 
 	xfer_ctr |= write ? XFER_WRITE : XFER_READ;
-	writel(xfer_ctr, acdev->vbase + XFER_CTR);
+	pete_writel("drivers/ata/pata_arasan_cf.c:681", xfer_ctr, acdev->vbase + XFER_CTR);
 
 	ap->ops->sff_exec_command(ap, tf);
 	ata_sff_queue_work(&acdev->work);
@@ -732,12 +732,12 @@ static void arasan_cf_set_piomode(struct ata_port *ap, struct ata_device *adev)
 	}
 
 	spin_lock_irqsave(&acdev->host->lock, flags);
-	val = readl(acdev->vbase + OP_MODE) &
+	val = pete_readl("drivers/ata/pata_arasan_cf.c:735", acdev->vbase + OP_MODE) &
 		~(ULTRA_DMA_ENB | MULTI_WORD_DMA_ENB | DRQ_BLOCK_SIZE_MASK);
-	writel(val, acdev->vbase + OP_MODE);
-	val = readl(acdev->vbase + TM_CFG) & ~TRUEIDE_PIO_TIMING_MASK;
+	pete_writel("drivers/ata/pata_arasan_cf.c:737", val, acdev->vbase + OP_MODE);
+	val = pete_readl("drivers/ata/pata_arasan_cf.c:738", acdev->vbase + TM_CFG) & ~TRUEIDE_PIO_TIMING_MASK;
 	val |= pio << TRUEIDE_PIO_TIMING_SHIFT;
-	writel(val, acdev->vbase + TM_CFG);
+	pete_writel("drivers/ata/pata_arasan_cf.c:740", val, acdev->vbase + TM_CFG);
 
 	cf_interrupt_enable(acdev, BUF_AVAIL_IRQ | XFER_DONE_IRQ, 0);
 	cf_interrupt_enable(acdev, PIO_XFER_ERR_IRQ, 1);
@@ -751,9 +751,9 @@ static void arasan_cf_set_dmamode(struct ata_port *ap, struct ata_device *adev)
 	unsigned long flags;
 
 	spin_lock_irqsave(&acdev->host->lock, flags);
-	opmode = readl(acdev->vbase + OP_MODE) &
+	opmode = pete_readl("drivers/ata/pata_arasan_cf.c:754", acdev->vbase + OP_MODE) &
 		~(MULTI_WORD_DMA_ENB | ULTRA_DMA_ENB);
-	tmcfg = readl(acdev->vbase + TM_CFG);
+	tmcfg = pete_readl("drivers/ata/pata_arasan_cf.c:756", acdev->vbase + TM_CFG);
 
 	if ((dma_mode >= XFER_UDMA_0) && (dma_mode <= XFER_UDMA_6)) {
 		opmode |= ULTRA_DMA_ENB;
@@ -770,9 +770,9 @@ static void arasan_cf_set_dmamode(struct ata_port *ap, struct ata_device *adev)
 		return;
 	}
 
-	writel(opmode, acdev->vbase + OP_MODE);
-	writel(tmcfg, acdev->vbase + TM_CFG);
-	writel(DMA_XFER_MODE, acdev->vbase + XFER_CTR);
+	pete_writel("drivers/ata/pata_arasan_cf.c:773", opmode, acdev->vbase + OP_MODE);
+	pete_writel("drivers/ata/pata_arasan_cf.c:774", tmcfg, acdev->vbase + TM_CFG);
+	pete_writel("drivers/ata/pata_arasan_cf.c:775", DMA_XFER_MODE, acdev->vbase + XFER_CTR);
 
 	cf_interrupt_enable(acdev, PIO_XFER_ERR_IRQ, 0);
 	cf_interrupt_enable(acdev, BUF_AVAIL_IRQ | XFER_DONE_IRQ, 1);

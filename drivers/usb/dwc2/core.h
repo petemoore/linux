@@ -1228,7 +1228,7 @@ static inline u32 dwc2_readl(struct dwc2_hsotg *hsotg, u32 offset)
 {
 	u32 val;
 
-	val = readl(hsotg->regs + offset);
+	val = pete_readl("drivers/usb/dwc2/core.h:1231", hsotg->regs + offset);
 	if (hsotg->needs_byte_swap)
 		return swab32(val);
 	else
@@ -1238,9 +1238,9 @@ static inline u32 dwc2_readl(struct dwc2_hsotg *hsotg, u32 offset)
 static inline void dwc2_writel(struct dwc2_hsotg *hsotg, u32 value, u32 offset)
 {
 	if (hsotg->needs_byte_swap)
-		writel(swab32(value), hsotg->regs + offset);
+		pete_writel("drivers/usb/dwc2/core.h:1241", swab32(value), hsotg->regs + offset);
 	else
-		writel(value, hsotg->regs + offset);
+		pete_writel("drivers/usb/dwc2/core.h:1243", value, hsotg->regs + offset);
 
 #ifdef DWC2_LOG_WRITES
 	pr_info("info:: wrote %08x to %p\n", value, hsotg->regs + offset);

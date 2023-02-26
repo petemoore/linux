@@ -98,11 +98,11 @@ static int vf610_ocotp_wait_busy(void __iomem *base)
 {
 	int timeout = VF610_OCOTP_TIMEOUT;
 
-	while ((readl(base) & OCOTP_CTRL_BUSY) && --timeout)
+	while ((pete_readl("drivers/nvmem/vf610-ocotp.c:101", base) & OCOTP_CTRL_BUSY) && --timeout)
 		udelay(10);
 
 	if (!timeout) {
-		writel(OCOTP_CTRL_ERR, base + OCOTP_CTRL_CLR);
+		pete_writel("drivers/nvmem/vf610-ocotp.c:105", OCOTP_CTRL_ERR, base + OCOTP_CTRL_CLR);
 		return -ETIMEDOUT;
 	}
 
@@ -155,27 +155,27 @@ static int vf610_ocotp_read(void *context, unsigned int offset,
 	while (bytes > 0) {
 		fuse_addr = vf610_get_fuse_address(offset);
 		if (fuse_addr > 0) {
-			writel(ocotp->timing, base + OCOTP_TIMING);
+			pete_writel("drivers/nvmem/vf610-ocotp.c:158", ocotp->timing, base + OCOTP_TIMING);
 			ret = vf610_ocotp_wait_busy(base + OCOTP_CTRL_REG);
 			if (ret)
 				return ret;
 
-			reg = readl(base + OCOTP_CTRL_REG);
+			reg = pete_readl("drivers/nvmem/vf610-ocotp.c:163", base + OCOTP_CTRL_REG);
 			reg &= ~OCOTP_CTRL_ADDR_MASK;
 			reg &= ~OCOTP_CTRL_WR_UNLOCK_MASK;
 			reg |= BF(fuse_addr, OCOTP_CTRL_ADDR);
-			writel(reg, base + OCOTP_CTRL_REG);
+			pete_writel("drivers/nvmem/vf610-ocotp.c:167", reg, base + OCOTP_CTRL_REG);
 
-			writel(OCOTP_READ_CTRL_READ_FUSE,
+			pete_writel("drivers/nvmem/vf610-ocotp.c:169", OCOTP_READ_CTRL_READ_FUSE,
 				base + OCOTP_READ_CTRL_REG);
 			ret = vf610_ocotp_wait_busy(base + OCOTP_CTRL_REG);
 			if (ret)
 				return ret;
 
-			if (readl(base) & OCOTP_CTRL_ERR) {
+			if (pete_readl("drivers/nvmem/vf610-ocotp.c:175", base) & OCOTP_CTRL_ERR) {
 				dev_dbg(ocotp->dev, "Error reading from fuse address %x\n",
 					fuse_addr);
-				writel(OCOTP_CTRL_ERR, base + OCOTP_CTRL_CLR);
+				pete_writel("drivers/nvmem/vf610-ocotp.c:178", OCOTP_CTRL_ERR, base + OCOTP_CTRL_CLR);
 			}
 
 			/*
@@ -183,7 +183,7 @@ static int vf610_ocotp_read(void *context, unsigned int offset,
 			 * 0xBADABADA as mentioned by the TRM. We just read this
 			 * value and return.
 			 */
-			*buf = readl(base + OCOTP_READ_FUSE_DATA);
+			*buf = pete_readl("drivers/nvmem/vf610-ocotp.c:186", base + OCOTP_READ_FUSE_DATA);
 		} else {
 			*buf = 0;
 		}

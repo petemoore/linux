@@ -66,7 +66,7 @@ static void a38x_set_conf(struct a38x_comphy_lane *lane, bool enable)
 			conf |= BIT(lane->port);
 		else
 			conf &= ~BIT(lane->port);
-		writel(conf, priv->conf);
+		pete_writel("drivers/phy/marvell/phy-armada38x-comphy.c:69", conf, priv->conf);
 	}
 }
 
@@ -76,7 +76,7 @@ static void a38x_comphy_set_reg(struct a38x_comphy_lane *lane,
 	u32 val;
 
 	val = readl_relaxed(lane->base + offset) & ~mask;
-	writel(val | value, lane->base + offset);
+	pete_writel("drivers/phy/marvell/phy-armada38x-comphy.c:79", val | value, lane->base + offset);
 }
 
 static void a38x_comphy_set_speed(struct a38x_comphy_lane *lane,

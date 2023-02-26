@@ -90,16 +90,16 @@ static struct state_info info[] = {
 
 static bool mxs_lradc_check_touch_event(struct mxs_lradc_ts *ts)
 {
-	return !!(readl(ts->base + LRADC_STATUS) &
+	return !!(pete_readl("drivers/input/touchscreen/mxs-lradc-ts.c:93", ts->base + LRADC_STATUS) &
 					LRADC_STATUS_TOUCH_DETECT_RAW);
 }
 
 static void mxs_lradc_map_ts_channel(struct mxs_lradc_ts *ts, unsigned int vch,
 				     unsigned int ch)
 {
-	writel(LRADC_CTRL4_LRADCSELECT_MASK(vch),
+	pete_writel("drivers/input/touchscreen/mxs-lradc-ts.c:100", LRADC_CTRL4_LRADCSELECT_MASK(vch),
 	       ts->base + LRADC_CTRL4 + STMP_OFFSET_REG_CLR);
-	writel(LRADC_CTRL4_LRADCSELECT(vch, ch),
+	pete_writel("drivers/input/touchscreen/mxs-lradc-ts.c:102", LRADC_CTRL4_LRADCSELECT(vch, ch),
 	       ts->base + LRADC_CTRL4 + STMP_OFFSET_REG_SET);
 }
 
@@ -113,7 +113,7 @@ static void mxs_lradc_setup_ts_channel(struct mxs_lradc_ts *ts, unsigned int ch)
 	 * HW_LRADC_CHn must be set to 1 if NUM_SAMPLES is greater then 0;
 	 * otherwise, the IRQs will not fire."
 	 */
-	writel(LRADC_CH_ACCUMULATE |
+	pete_writel("drivers/input/touchscreen/mxs-lradc-ts.c:116", LRADC_CH_ACCUMULATE |
 	       LRADC_CH_NUM_SAMPLES(ts->over_sample_cnt - 1),
 	       ts->base + LRADC_CH(ch));
 
@@ -121,7 +121,7 @@ static void mxs_lradc_setup_ts_channel(struct mxs_lradc_ts *ts, unsigned int ch)
 	 * "Software must clear this register in preparation for a
 	 * multi-cycle accumulation.
 	 */
-	writel(LRADC_CH_VALUE_MASK,
+	pete_writel("drivers/input/touchscreen/mxs-lradc-ts.c:124", LRADC_CH_VALUE_MASK,
 	       ts->base + LRADC_CH(ch) + STMP_OFFSET_REG_CLR);
 
 	/*
@@ -132,12 +132,12 @@ static void mxs_lradc_setup_ts_channel(struct mxs_lradc_ts *ts, unsigned int ch)
 	 * HW_LRADC_DELAY2, and HW_LRADC_DELAY3 must be non-zero; otherwise,
 	 * the LRADC will not trigger the delay group."
 	 */
-	writel(LRADC_DELAY_TRIGGER(1 << ch) | LRADC_DELAY_TRIGGER_DELAYS(0) |
+	pete_writel("drivers/input/touchscreen/mxs-lradc-ts.c:135", LRADC_DELAY_TRIGGER(1 << ch) | LRADC_DELAY_TRIGGER_DELAYS(0) |
 	       LRADC_DELAY_LOOP(ts->over_sample_cnt - 1) |
 	       LRADC_DELAY_DELAY(ts->over_sample_delay - 1),
 	       ts->base + LRADC_DELAY(3));
 
-	writel(LRADC_CTRL1_LRADC_IRQ(ch),
+	pete_writel("drivers/input/touchscreen/mxs-lradc-ts.c:140", LRADC_CTRL1_LRADC_IRQ(ch),
 	       ts->base + LRADC_CTRL1 + STMP_OFFSET_REG_CLR);
 
 	/*
@@ -146,7 +146,7 @@ static void mxs_lradc_setup_ts_channel(struct mxs_lradc_ts *ts, unsigned int ch)
 	 * SoC's delay unit and start the conversion later
 	 * and automatically.
 	 */
-	writel(LRADC_DELAY_TRIGGER(0) | LRADC_DELAY_TRIGGER_DELAYS(BIT(3)) |
+	pete_writel("drivers/input/touchscreen/mxs-lradc-ts.c:149", LRADC_DELAY_TRIGGER(0) | LRADC_DELAY_TRIGGER_DELAYS(BIT(3)) |
 	       LRADC_DELAY_KICK | LRADC_DELAY_DELAY(ts->settling_delay),
 	       ts->base + LRADC_DELAY(2));
 }
@@ -172,26 +172,26 @@ static void mxs_lradc_setup_ts_pressure(struct mxs_lradc_ts *ts,
 	 */
 	reg = LRADC_CH_ACCUMULATE |
 		LRADC_CH_NUM_SAMPLES(ts->over_sample_cnt - 1);
-	writel(reg, ts->base + LRADC_CH(ch1));
-	writel(reg, ts->base + LRADC_CH(ch2));
+	pete_writel("drivers/input/touchscreen/mxs-lradc-ts.c:175", reg, ts->base + LRADC_CH(ch1));
+	pete_writel("drivers/input/touchscreen/mxs-lradc-ts.c:176", reg, ts->base + LRADC_CH(ch2));
 
 	/* from the datasheet:
 	 * "Software must clear this register in preparation for a
 	 * multi-cycle accumulation.
 	 */
-	writel(LRADC_CH_VALUE_MASK,
+	pete_writel("drivers/input/touchscreen/mxs-lradc-ts.c:182", LRADC_CH_VALUE_MASK,
 	       ts->base + LRADC_CH(ch1) + STMP_OFFSET_REG_CLR);
-	writel(LRADC_CH_VALUE_MASK,
+	pete_writel("drivers/input/touchscreen/mxs-lradc-ts.c:184", LRADC_CH_VALUE_MASK,
 	       ts->base + LRADC_CH(ch2) + STMP_OFFSET_REG_CLR);
 
 	/* prepare the delay/loop unit according to the oversampling count */
-	writel(LRADC_DELAY_TRIGGER(1 << ch1) | LRADC_DELAY_TRIGGER(1 << ch2) |
+	pete_writel("drivers/input/touchscreen/mxs-lradc-ts.c:188", LRADC_DELAY_TRIGGER(1 << ch1) | LRADC_DELAY_TRIGGER(1 << ch2) |
 	       LRADC_DELAY_TRIGGER_DELAYS(0) |
 	       LRADC_DELAY_LOOP(ts->over_sample_cnt - 1) |
 	       LRADC_DELAY_DELAY(ts->over_sample_delay - 1),
 	       ts->base + LRADC_DELAY(3));
 
-	writel(LRADC_CTRL1_LRADC_IRQ(ch2),
+	pete_writel("drivers/input/touchscreen/mxs-lradc-ts.c:194", LRADC_CTRL1_LRADC_IRQ(ch2),
 	       ts->base + LRADC_CTRL1 + STMP_OFFSET_REG_CLR);
 
 	/*
@@ -200,7 +200,7 @@ static void mxs_lradc_setup_ts_pressure(struct mxs_lradc_ts *ts,
 	 * SoC's delay unit and start the conversion later
 	 * and automatically.
 	 */
-	writel(LRADC_DELAY_TRIGGER(0) | LRADC_DELAY_TRIGGER_DELAYS(BIT(3)) |
+	pete_writel("drivers/input/touchscreen/mxs-lradc-ts.c:203", LRADC_DELAY_TRIGGER(0) | LRADC_DELAY_TRIGGER_DELAYS(BIT(3)) |
 	       LRADC_DELAY_KICK | LRADC_DELAY_DELAY(ts->settling_delay),
 	       ts->base + LRADC_DELAY(2));
 }
@@ -211,7 +211,7 @@ static unsigned int mxs_lradc_ts_read_raw_channel(struct mxs_lradc_ts *ts,
 	u32 reg;
 	unsigned int num_samples, val;
 
-	reg = readl(ts->base + LRADC_CH(channel));
+	reg = pete_readl("drivers/input/touchscreen/mxs-lradc-ts.c:214", ts->base + LRADC_CH(channel));
 	if (reg & LRADC_CH_ACCUMULATE)
 		num_samples = ts->over_sample_cnt;
 	else
@@ -228,10 +228,10 @@ static unsigned int mxs_lradc_read_ts_pressure(struct mxs_lradc_ts *ts,
 	unsigned int pressure, m1, m2;
 
 	mask = LRADC_CTRL1_LRADC_IRQ(ch1) | LRADC_CTRL1_LRADC_IRQ(ch2);
-	reg = readl(ts->base + LRADC_CTRL1) & mask;
+	reg = pete_readl("drivers/input/touchscreen/mxs-lradc-ts.c:231", ts->base + LRADC_CTRL1) & mask;
 
 	while (reg != mask) {
-		reg = readl(ts->base + LRADC_CTRL1) & mask;
+		reg = pete_readl("drivers/input/touchscreen/mxs-lradc-ts.c:234", ts->base + LRADC_CTRL1) & mask;
 		dev_dbg(ts->dev, "One channel is still busy: %X\n", reg);
 	}
 
@@ -279,9 +279,9 @@ static void mxs_lradc_setup_touch_detection(struct mxs_lradc_ts *ts)
 	 *  - a weak pullup to the X+ connector
 	 *  - a strong ground at the Y- connector
 	 */
-	writel(info[lradc->soc].mask,
+	pete_writel("drivers/input/touchscreen/mxs-lradc-ts.c:282", info[lradc->soc].mask,
 	       ts->base + LRADC_CTRL0 + STMP_OFFSET_REG_CLR);
-	writel(info[lradc->soc].bit,
+	pete_writel("drivers/input/touchscreen/mxs-lradc-ts.c:284", info[lradc->soc].bit,
 	       ts->base + LRADC_CTRL0 + STMP_OFFSET_REG_SET);
 }
 
@@ -301,9 +301,9 @@ static void mxs_lradc_prepare_x_pos(struct mxs_lradc_ts *ts)
 {
 	struct mxs_lradc *lradc = ts->lradc;
 
-	writel(info[lradc->soc].mask,
+	pete_writel("drivers/input/touchscreen/mxs-lradc-ts.c:304", info[lradc->soc].mask,
 	       ts->base + LRADC_CTRL0 + STMP_OFFSET_REG_CLR);
-	writel(info[lradc->soc].x_plate,
+	pete_writel("drivers/input/touchscreen/mxs-lradc-ts.c:306", info[lradc->soc].x_plate,
 	       ts->base + LRADC_CTRL0 + STMP_OFFSET_REG_SET);
 
 	ts->cur_plate = LRADC_SAMPLE_X;
@@ -327,9 +327,9 @@ static void mxs_lradc_prepare_y_pos(struct mxs_lradc_ts *ts)
 {
 	struct mxs_lradc *lradc = ts->lradc;
 
-	writel(info[lradc->soc].mask,
+	pete_writel("drivers/input/touchscreen/mxs-lradc-ts.c:330", info[lradc->soc].mask,
 	       ts->base + LRADC_CTRL0 + STMP_OFFSET_REG_CLR);
-	writel(info[lradc->soc].y_plate,
+	pete_writel("drivers/input/touchscreen/mxs-lradc-ts.c:332", info[lradc->soc].y_plate,
 	       ts->base + LRADC_CTRL0 + STMP_OFFSET_REG_SET);
 
 	ts->cur_plate = LRADC_SAMPLE_Y;
@@ -353,9 +353,9 @@ static void mxs_lradc_prepare_pressure(struct mxs_lradc_ts *ts)
 {
 	struct mxs_lradc *lradc = ts->lradc;
 
-	writel(info[lradc->soc].mask,
+	pete_writel("drivers/input/touchscreen/mxs-lradc-ts.c:356", info[lradc->soc].mask,
 	       ts->base + LRADC_CTRL0 + STMP_OFFSET_REG_CLR);
-	writel(info[lradc->soc].pressure,
+	pete_writel("drivers/input/touchscreen/mxs-lradc-ts.c:358", info[lradc->soc].pressure,
 	       ts->base + LRADC_CTRL0 + STMP_OFFSET_REG_SET);
 
 	ts->cur_plate = LRADC_SAMPLE_PRESSURE;
@@ -370,17 +370,17 @@ static void mxs_lradc_enable_touch_detection(struct mxs_lradc_ts *ts)
 	mxs_lradc_setup_touch_detection(ts);
 
 	ts->cur_plate = LRADC_TOUCH;
-	writel(LRADC_CTRL1_TOUCH_DETECT_IRQ | LRADC_CTRL1_TOUCH_DETECT_IRQ_EN,
+	pete_writel("drivers/input/touchscreen/mxs-lradc-ts.c:373", LRADC_CTRL1_TOUCH_DETECT_IRQ | LRADC_CTRL1_TOUCH_DETECT_IRQ_EN,
 	       ts->base + LRADC_CTRL1 + STMP_OFFSET_REG_CLR);
-	writel(LRADC_CTRL1_TOUCH_DETECT_IRQ_EN,
+	pete_writel("drivers/input/touchscreen/mxs-lradc-ts.c:375", LRADC_CTRL1_TOUCH_DETECT_IRQ_EN,
 	       ts->base + LRADC_CTRL1 + STMP_OFFSET_REG_SET);
 }
 
 static void mxs_lradc_start_touch_event(struct mxs_lradc_ts *ts)
 {
-	writel(LRADC_CTRL1_TOUCH_DETECT_IRQ_EN,
+	pete_writel("drivers/input/touchscreen/mxs-lradc-ts.c:381", LRADC_CTRL1_TOUCH_DETECT_IRQ_EN,
 	       ts->base + LRADC_CTRL1 + STMP_OFFSET_REG_CLR);
-	writel(LRADC_CTRL1_LRADC_IRQ_EN(TOUCHSCREEN_VCHANNEL1),
+	pete_writel("drivers/input/touchscreen/mxs-lradc-ts.c:383", LRADC_CTRL1_LRADC_IRQ_EN(TOUCHSCREEN_VCHANNEL1),
 	       ts->base + LRADC_CTRL1 + STMP_OFFSET_REG_SET);
 	/*
 	 * start with the Y-pos, because it uses nearly the same plate
@@ -406,11 +406,11 @@ static void mxs_lradc_complete_touch_event(struct mxs_lradc_ts *ts)
 	 * start a dummy conversion to burn time to settle the signals
 	 * note: we are not interested in the conversion's value
 	 */
-	writel(0, ts->base + LRADC_CH(TOUCHSCREEN_VCHANNEL1));
-	writel(LRADC_CTRL1_LRADC_IRQ(TOUCHSCREEN_VCHANNEL1) |
+	pete_writel("drivers/input/touchscreen/mxs-lradc-ts.c:409", 0, ts->base + LRADC_CH(TOUCHSCREEN_VCHANNEL1));
+	pete_writel("drivers/input/touchscreen/mxs-lradc-ts.c:410", LRADC_CTRL1_LRADC_IRQ(TOUCHSCREEN_VCHANNEL1) |
 	       LRADC_CTRL1_LRADC_IRQ(TOUCHSCREEN_VCHANNEL2),
 	       ts->base + LRADC_CTRL1 + STMP_OFFSET_REG_CLR);
-	writel(LRADC_DELAY_TRIGGER(1 << TOUCHSCREEN_VCHANNEL1) |
+	pete_writel("drivers/input/touchscreen/mxs-lradc-ts.c:413", LRADC_DELAY_TRIGGER(1 << TOUCHSCREEN_VCHANNEL1) |
 	       LRADC_DELAY_KICK | LRADC_DELAY_DELAY(10),
 	       ts->base + LRADC_DELAY(2));
 }
@@ -442,13 +442,13 @@ static void mxs_lradc_finish_touch_event(struct mxs_lradc_ts *ts, bool valid)
 
 	/* if it is released, wait for the next touch via IRQ */
 	ts->cur_plate = LRADC_TOUCH;
-	writel(0, ts->base + LRADC_DELAY(2));
-	writel(0, ts->base + LRADC_DELAY(3));
-	writel(LRADC_CTRL1_TOUCH_DETECT_IRQ |
+	pete_writel("drivers/input/touchscreen/mxs-lradc-ts.c:445", 0, ts->base + LRADC_DELAY(2));
+	pete_writel("drivers/input/touchscreen/mxs-lradc-ts.c:446", 0, ts->base + LRADC_DELAY(3));
+	pete_writel("drivers/input/touchscreen/mxs-lradc-ts.c:447", LRADC_CTRL1_TOUCH_DETECT_IRQ |
 	       LRADC_CTRL1_LRADC_IRQ_EN(TOUCHSCREEN_VCHANNEL1) |
 	       LRADC_CTRL1_LRADC_IRQ(TOUCHSCREEN_VCHANNEL1),
 	       ts->base + LRADC_CTRL1 + STMP_OFFSET_REG_CLR);
-	writel(LRADC_CTRL1_TOUCH_DETECT_IRQ_EN,
+	pete_writel("drivers/input/touchscreen/mxs-lradc-ts.c:451", LRADC_CTRL1_TOUCH_DETECT_IRQ_EN,
 	       ts->base + LRADC_CTRL1 + STMP_OFFSET_REG_SET);
 }
 
@@ -459,7 +459,7 @@ static void mxs_lradc_handle_touch(struct mxs_lradc_ts *ts)
 	case LRADC_TOUCH:
 		if (mxs_lradc_check_touch_event(ts))
 			mxs_lradc_start_touch_event(ts);
-		writel(LRADC_CTRL1_TOUCH_DETECT_IRQ,
+		pete_writel("drivers/input/touchscreen/mxs-lradc-ts.c:462", LRADC_CTRL1_TOUCH_DETECT_IRQ,
 		       ts->base + LRADC_CTRL1 + STMP_OFFSET_REG_CLR);
 		return;
 
@@ -494,7 +494,7 @@ static irqreturn_t mxs_lradc_ts_handle_irq(int irq, void *data)
 {
 	struct mxs_lradc_ts *ts = data;
 	struct mxs_lradc *lradc = ts->lradc;
-	unsigned long reg = readl(ts->base + LRADC_CTRL1);
+	unsigned long reg = pete_readl("drivers/input/touchscreen/mxs-lradc-ts.c:497", ts->base + LRADC_CTRL1);
 	u32 clr_irq = mxs_lradc_irq_mask(lradc);
 	const u32 ts_irq_mask =
 		LRADC_CTRL1_TOUCH_DETECT_IRQ |
@@ -512,7 +512,7 @@ static irqreturn_t mxs_lradc_ts_handle_irq(int irq, void *data)
 		/* Make sure we don't clear the next conversion's interrupt. */
 		clr_irq &= ~(LRADC_CTRL1_LRADC_IRQ(TOUCHSCREEN_VCHANNEL1) |
 				LRADC_CTRL1_LRADC_IRQ(TOUCHSCREEN_VCHANNEL2));
-		writel(reg & clr_irq,
+		pete_writel("drivers/input/touchscreen/mxs-lradc-ts.c:515", reg & clr_irq,
 		       ts->base + LRADC_CTRL1 + STMP_OFFSET_REG_CLR);
 	}
 
@@ -535,20 +535,20 @@ static void mxs_lradc_ts_stop(struct mxs_lradc_ts *ts)
 	struct mxs_lradc *lradc = ts->lradc;
 
 	/* stop all interrupts from firing */
-	writel(LRADC_CTRL1_TOUCH_DETECT_IRQ_EN |
+	pete_writel("drivers/input/touchscreen/mxs-lradc-ts.c:538", LRADC_CTRL1_TOUCH_DETECT_IRQ_EN |
 	       LRADC_CTRL1_LRADC_IRQ_EN(TOUCHSCREEN_VCHANNEL1) |
 	       LRADC_CTRL1_LRADC_IRQ_EN(TOUCHSCREEN_VCHANNEL2),
 	       ts->base + LRADC_CTRL1 + STMP_OFFSET_REG_CLR);
 
 	/* Power-down touchscreen touch-detect circuitry. */
-	writel(info[lradc->soc].mask,
+	pete_writel("drivers/input/touchscreen/mxs-lradc-ts.c:544", info[lradc->soc].mask,
 	       ts->base + LRADC_CTRL0 + STMP_OFFSET_REG_CLR);
 
-	writel(lradc->buffer_vchans << LRADC_CTRL1_LRADC_IRQ_EN_OFFSET,
+	pete_writel("drivers/input/touchscreen/mxs-lradc-ts.c:547", lradc->buffer_vchans << LRADC_CTRL1_LRADC_IRQ_EN_OFFSET,
 	       ts->base + LRADC_CTRL1 + STMP_OFFSET_REG_CLR);
 
 	for (i = 1; i < LRADC_MAX_DELAY_CHANS; i++)
-		writel(0, ts->base + LRADC_DELAY(i));
+		pete_writel("drivers/input/touchscreen/mxs-lradc-ts.c:551", 0, ts->base + LRADC_DELAY(i));
 }
 
 static void mxs_lradc_ts_close(struct input_dev *dev)
@@ -564,11 +564,11 @@ static void mxs_lradc_ts_hw_init(struct mxs_lradc_ts *ts)
 
 	/* Configure the touchscreen type */
 	if (lradc->soc == IMX28_LRADC) {
-		writel(LRADC_CTRL0_MX28_TOUCH_SCREEN_TYPE,
+		pete_writel("drivers/input/touchscreen/mxs-lradc-ts.c:567", LRADC_CTRL0_MX28_TOUCH_SCREEN_TYPE,
 		       ts->base + LRADC_CTRL0 + STMP_OFFSET_REG_CLR);
 
 		if (lradc->touchscreen_wire == MXS_LRADC_TOUCHSCREEN_5WIRE)
-			writel(LRADC_CTRL0_MX28_TOUCH_SCREEN_TYPE,
+			pete_writel("drivers/input/touchscreen/mxs-lradc-ts.c:571", LRADC_CTRL0_MX28_TOUCH_SCREEN_TYPE,
 			       ts->base + LRADC_CTRL0 + STMP_OFFSET_REG_SET);
 	}
 }

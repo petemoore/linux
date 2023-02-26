@@ -51,9 +51,9 @@ static inline int is_pci_memory(u32 addr)
 	return (addr >= pcibios_min_mem) && (addr <= 0x4FFFFFFF);
 }
 
-#define writeb(v, p)			__indirect_writeb(v, p)
-#define writew(v, p)			__indirect_writew(v, p)
-#define writel(v, p)			__indirect_writel(v, p)
+#define pete_writeb("arch/arm/mach-ixp4xx/include/mach/io.h:54", v, p)			__indirect_writeb(v, p)
+#define pete_writew("arch/arm/mach-ixp4xx/include/mach/io.h:55", v, p)			__indirect_writew(v, p)
+#define pete_writel("arch/arm/mach-ixp4xx/include/mach/io.h:56", v, p)			__indirect_writel(v, p)
 
 #define writeb_relaxed(v, p)		__indirect_writeb(v, p)
 #define writew_relaxed(v, p)		__indirect_writew(v, p)
@@ -63,9 +63,9 @@ static inline int is_pci_memory(u32 addr)
 #define writesw(p, v, l)		__indirect_writesw(p, v, l)
 #define writesl(p, v, l)		__indirect_writesl(p, v, l)
 
-#define readb(p)			__indirect_readb(p)
-#define readw(p)			__indirect_readw(p)
-#define readl(p)			__indirect_readl(p)
+#define pete_readb("arch/arm/mach-ixp4xx/include/mach/io.h:66", p)			__indirect_readb(p)
+#define pete_readw("arch/arm/mach-ixp4xx/include/mach/io.h:67", p)			__indirect_readw(p)
+#define pete_readl("arch/arm/mach-ixp4xx/include/mach/io.h:68", p)			__indirect_readl(p)
 
 #define readb_relaxed(p)		__indirect_readb(p)
 #define readw_relaxed(p)		__indirect_readw(p)
@@ -97,7 +97,7 @@ static inline void __indirect_writesb(volatile void __iomem *bus_addr,
 	const u8 *vaddr = p;
 
 	while (count--)
-		writeb(*vaddr++, bus_addr);
+		pete_writeb("arch/arm/mach-ixp4xx/include/mach/io.h:100", *vaddr++, bus_addr);
 }
 
 static inline void __indirect_writew(u16 value, volatile void __iomem *p)
@@ -122,7 +122,7 @@ static inline void __indirect_writesw(volatile void __iomem *bus_addr,
 	const u16 *vaddr = p;
 
 	while (count--)
-		writew(*vaddr++, bus_addr);
+		pete_writew("arch/arm/mach-ixp4xx/include/mach/io.h:125", *vaddr++, bus_addr);
 }
 
 static inline void __indirect_writel(u32 value, volatile void __iomem *p)
@@ -142,7 +142,7 @@ static inline void __indirect_writesl(volatile void __iomem *bus_addr,
 {
 	const u32 *vaddr = p;
 	while (count--)
-		writel(*vaddr++, bus_addr);
+		pete_writel("arch/arm/mach-ixp4xx/include/mach/io.h:145", *vaddr++, bus_addr);
 }
 
 static inline u8 __indirect_readb(const volatile void __iomem *p)
@@ -167,7 +167,7 @@ static inline void __indirect_readsb(const volatile void __iomem *bus_addr,
 	u8 *vaddr = p;
 
 	while (count--)
-		*vaddr++ = readb(bus_addr);
+		*vaddr++ = pete_readb("arch/arm/mach-ixp4xx/include/mach/io.h:170", bus_addr);
 }
 
 static inline u16 __indirect_readw(const volatile void __iomem *p)
@@ -192,7 +192,7 @@ static inline void __indirect_readsw(const volatile void __iomem *bus_addr,
 	u16 *vaddr = p;
 
 	while (count--)
-		*vaddr++ = readw(bus_addr);
+		*vaddr++ = pete_readw("arch/arm/mach-ixp4xx/include/mach/io.h:195", bus_addr);
 }
 
 static inline u32 __indirect_readl(const volatile void __iomem *p)
@@ -215,7 +215,7 @@ static inline void __indirect_readsl(const volatile void __iomem *bus_addr,
 	u32 *vaddr = p;
 
 	while (count--)
-		*vaddr++ = readl(bus_addr);
+		*vaddr++ = pete_readl("arch/arm/mach-ixp4xx/include/mach/io.h:218", bus_addr);
 }
 
 

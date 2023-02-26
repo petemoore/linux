@@ -123,19 +123,19 @@ enum via_family {
 /* VIA MMIO register access */
 static inline u32 via_read(struct drm_via_private *dev_priv, u32 reg)
 {
-	return readl((void __iomem *)(dev_priv->mmio->handle + reg));
+	return pete_readl("drivers/gpu/drm/via/via_drv.h:126", (void __iomem *)(dev_priv->mmio->handle + reg));
 }
 
 static inline void via_write(struct drm_via_private *dev_priv, u32 reg,
 			     u32 val)
 {
-	writel(val, (void __iomem *)(dev_priv->mmio->handle + reg));
+	pete_writel("drivers/gpu/drm/via/via_drv.h:132", val, (void __iomem *)(dev_priv->mmio->handle + reg));
 }
 
 static inline void via_write8(struct drm_via_private *dev_priv, u32 reg,
 			      u32 val)
 {
-	writeb(val, (void __iomem *)(dev_priv->mmio->handle + reg));
+	pete_writeb("drivers/gpu/drm/via/via_drv.h:138", val, (void __iomem *)(dev_priv->mmio->handle + reg));
 }
 
 static inline void via_write8_mask(struct drm_via_private *dev_priv,
@@ -143,9 +143,9 @@ static inline void via_write8_mask(struct drm_via_private *dev_priv,
 {
 	u32 tmp;
 
-	tmp = readb((void __iomem *)(dev_priv->mmio->handle + reg));
+	tmp = pete_readb("drivers/gpu/drm/via/via_drv.h:146", (void __iomem *)(dev_priv->mmio->handle + reg));
 	tmp = (tmp & ~mask) | (val & mask);
-	writeb(tmp, (void __iomem *)(dev_priv->mmio->handle + reg));
+	pete_writeb("drivers/gpu/drm/via/via_drv.h:148", tmp, (void __iomem *)(dev_priv->mmio->handle + reg));
 }
 
 /*

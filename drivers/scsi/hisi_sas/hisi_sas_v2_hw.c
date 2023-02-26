@@ -730,7 +730,7 @@ static u32 hisi_sas_read32(struct hisi_hba *hisi_hba, u32 off)
 {
 	void __iomem *regs = hisi_hba->regs + off;
 
-	return readl(regs);
+	return pete_readl("drivers/scsi/hisi_sas/hisi_sas_v2_hw.c:733", regs);
 }
 
 static u32 hisi_sas_read32_relaxed(struct hisi_hba *hisi_hba, u32 off)
@@ -744,7 +744,7 @@ static void hisi_sas_write32(struct hisi_hba *hisi_hba, u32 off, u32 val)
 {
 	void __iomem *regs = hisi_hba->regs + off;
 
-	writel(val, regs);
+	pete_writel("drivers/scsi/hisi_sas/hisi_sas_v2_hw.c:747", val, regs);
 }
 
 static void hisi_sas_phy_write32(struct hisi_hba *hisi_hba, int phy_no,
@@ -752,7 +752,7 @@ static void hisi_sas_phy_write32(struct hisi_hba *hisi_hba, int phy_no,
 {
 	void __iomem *regs = hisi_hba->regs + (0x400 * phy_no) + off;
 
-	writel(val, regs);
+	pete_writel("drivers/scsi/hisi_sas/hisi_sas_v2_hw.c:755", val, regs);
 }
 
 static u32 hisi_sas_phy_read32(struct hisi_hba *hisi_hba,
@@ -760,7 +760,7 @@ static u32 hisi_sas_phy_read32(struct hisi_hba *hisi_hba,
 {
 	void __iomem *regs = hisi_hba->regs + (0x400 * phy_no) + off;
 
-	return readl(regs);
+	return pete_readl("drivers/scsi/hisi_sas/hisi_sas_v2_hw.c:763", regs);
 }
 
 /* This function needs to be protected from pre-emption. */
@@ -3505,7 +3505,7 @@ static int write_gpio_v2_hw(struct hisi_hba *hisi_hba, u8 reg_type,
 					reg_index * 4 + phy_no;
 			int data_idx = phy_no + 3 - (phy_no % 4) * 2;
 
-			writeb(write_data[data_idx], reg_addr);
+			pete_writeb("drivers/scsi/hisi_sas/hisi_sas_v2_hw.c:3508", write_data[data_idx], reg_addr);
 		}
 
 		break;

@@ -130,8 +130,8 @@ static void rockchip_pwm_config(struct pwm_chip *chip, struct pwm_device *pwm,
 		writel_relaxed(ctrl, pc->base + pc->data->regs.ctrl);
 	}
 
-	writel(period, pc->base + pc->data->regs.period);
-	writel(duty, pc->base + pc->data->regs.duty);
+	pete_writel("drivers/pwm/pwm-rockchip.c:133", period, pc->base + pc->data->regs.period);
+	pete_writel("drivers/pwm/pwm-rockchip.c:134", duty, pc->base + pc->data->regs.duty);
 
 	if (pc->data->supports_polarity) {
 		ctrl &= ~PWM_POLARITY_MASK;
@@ -149,7 +149,7 @@ static void rockchip_pwm_config(struct pwm_chip *chip, struct pwm_device *pwm,
 	if (pc->data->supports_lock)
 		ctrl &= ~PWM_LOCK_EN;
 
-	writel(ctrl, pc->base + pc->data->regs.ctrl);
+	pete_writel("drivers/pwm/pwm-rockchip.c:152", ctrl, pc->base + pc->data->regs.ctrl);
 }
 
 static int rockchip_pwm_enable(struct pwm_chip *chip,

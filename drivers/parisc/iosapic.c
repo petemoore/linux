@@ -172,14 +172,14 @@
 
 static inline unsigned int iosapic_read(void __iomem *iosapic, unsigned int reg)
 {
-	writel(reg, iosapic + IOSAPIC_REG_SELECT);
-	return readl(iosapic + IOSAPIC_REG_WINDOW);
+	pete_writel("drivers/parisc/iosapic.c:175", reg, iosapic + IOSAPIC_REG_SELECT);
+	return pete_readl("drivers/parisc/iosapic.c:176", iosapic + IOSAPIC_REG_WINDOW);
 }
 
 static inline void iosapic_write(void __iomem *iosapic, unsigned int reg, u32 val)
 {
-	writel(reg, iosapic + IOSAPIC_REG_SELECT);
-	writel(val, iosapic + IOSAPIC_REG_WINDOW);
+	pete_writel("drivers/parisc/iosapic.c:181", reg, iosapic + IOSAPIC_REG_SELECT);
+	pete_writel("drivers/parisc/iosapic.c:182", val, iosapic + IOSAPIC_REG_WINDOW);
 }
 
 #define IOSAPIC_VERSION_MASK	0x000000ff
@@ -543,12 +543,12 @@ static void iosapic_wr_irt_entry(struct vector_info *vi, u32 dp0, u32 dp1)
 	iosapic_write(isp->addr, IOSAPIC_IRDT_ENTRY(vi->irqline), dp0);
 
 	/* Read the window register to flush the writes down to HW  */
-	dp0 = readl(isp->addr+IOSAPIC_REG_WINDOW);
+	dp0 = pete_readl("drivers/parisc/iosapic.c:546", isp->addr+IOSAPIC_REG_WINDOW);
 
 	iosapic_write(isp->addr, IOSAPIC_IRDT_ENTRY_HI(vi->irqline), dp1);
 
 	/* Read the window register to flush the writes down to HW  */
-	dp1 = readl(isp->addr+IOSAPIC_REG_WINDOW);
+	dp1 = pete_readl("drivers/parisc/iosapic.c:551", isp->addr+IOSAPIC_REG_WINDOW);
 }
 
 /*
@@ -629,7 +629,7 @@ static void iosapic_unmask_irq(struct irq_data *d)
 	u32 *t = (u32 *) ((ulong) vi->eoi_addr & ~0xffUL);
 	printk("iosapic_enable_irq(): regs %p", vi->eoi_addr);
 	for ( ; t < vi->eoi_addr; t++)
-		printk(" %x", readl(t));
+		printk(" %x", pete_readl("drivers/parisc/iosapic.c:632", t));
 	printk("\n");
 }
 

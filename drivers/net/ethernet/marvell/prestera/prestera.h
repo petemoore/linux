@@ -208,13 +208,13 @@ struct prestera_rxtx_params {
 static inline void prestera_write(const struct prestera_switch *sw,
 				  unsigned int reg, u32 val)
 {
-	writel(val, sw->dev->pp_regs + reg);
+	pete_writel("drivers/net/ethernet/marvell/prestera/prestera.h:211", val, sw->dev->pp_regs + reg);
 }
 
 static inline u32 prestera_read(const struct prestera_switch *sw,
 				unsigned int reg)
 {
-	return readl(sw->dev->pp_regs + reg);
+	return pete_readl("drivers/net/ethernet/marvell/prestera/prestera.h:217", sw->dev->pp_regs + reg);
 }
 
 int prestera_device_register(struct prestera_device *dev);

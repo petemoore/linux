@@ -29,16 +29,16 @@ void qnap_tsx09_power_off(void)
 	pr_info("%s: triggering power-off...\n", __func__);
 
 	/* hijack uart1 and reset into sane state (19200,8n1) */
-	writel(0x83, UART1_REG(LCR));
-	writel(divisor & 0xff, UART1_REG(DLL));
-	writel((divisor >> 8) & 0xff, UART1_REG(DLM));
-	writel(0x03, UART1_REG(LCR));
-	writel(0x00, UART1_REG(IER));
-	writel(0x00, UART1_REG(FCR));
-	writel(0x00, UART1_REG(MCR));
+	pete_writel("arch/arm/mach-orion5x/tsx09-common.c:32", 0x83, UART1_REG(LCR));
+	pete_writel("arch/arm/mach-orion5x/tsx09-common.c:33", divisor & 0xff, UART1_REG(DLL));
+	pete_writel("arch/arm/mach-orion5x/tsx09-common.c:34", (divisor >> 8) & 0xff, UART1_REG(DLM));
+	pete_writel("arch/arm/mach-orion5x/tsx09-common.c:35", 0x03, UART1_REG(LCR));
+	pete_writel("arch/arm/mach-orion5x/tsx09-common.c:36", 0x00, UART1_REG(IER));
+	pete_writel("arch/arm/mach-orion5x/tsx09-common.c:37", 0x00, UART1_REG(FCR));
+	pete_writel("arch/arm/mach-orion5x/tsx09-common.c:38", 0x00, UART1_REG(MCR));
 
 	/* send the power-off command 'A' to PIC */
-	writel('A', UART1_REG(TX));
+	pete_writel("arch/arm/mach-orion5x/tsx09-common.c:41", 'A', UART1_REG(TX));
 }
 
 /*****************************************************************************

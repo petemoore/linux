@@ -23,12 +23,12 @@ void setup_8250_early_printk_port(unsigned long base, unsigned int reg_shift,
 
 static inline u8 serial_in(int offset)
 {
-	return readb(serial8250_base + (offset << serial8250_reg_shift));
+	return pete_readb("arch/mips/kernel/early_printk_8250.c:26", serial8250_base + (offset << serial8250_reg_shift));
 }
 
 static inline void serial_out(int offset, char value)
 {
-	writeb(value, serial8250_base + (offset << serial8250_reg_shift));
+	pete_writeb("arch/mips/kernel/early_printk_8250.c:31", value, serial8250_base + (offset << serial8250_reg_shift));
 }
 
 void prom_putchar(char c)

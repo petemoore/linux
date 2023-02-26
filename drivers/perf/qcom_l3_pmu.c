@@ -357,7 +357,7 @@ static inline void qcom_l3_cache__init(struct l3cache_pmu *l3pmu)
 	 * Use writel for the first programming command to ensure the basic
 	 * counter unit is stopped before proceeding
 	 */
-	writel(BC_SATROLL_CR_RESET, l3pmu->regs + L3_M_BC_SATROLL_CR);
+	pete_writel("drivers/perf/qcom_l3_pmu.c:360", BC_SATROLL_CR_RESET, l3pmu->regs + L3_M_BC_SATROLL_CR);
 
 	writel_relaxed(BC_CNTENCLR_RESET, l3pmu->regs + L3_M_BC_CNTENCLR);
 	writel_relaxed(BC_INTENCLR_RESET, l3pmu->regs + L3_M_BC_INTENCLR);
@@ -382,7 +382,7 @@ static inline void qcom_l3_cache__init(struct l3cache_pmu *l3pmu)
 	 * Use writel here to ensure all programming commands are done
 	 *  before proceeding
 	 */
-	writel(BC_ENABLE, l3pmu->regs + L3_M_BC_CR);
+	pete_writel("drivers/perf/qcom_l3_pmu.c:385", BC_ENABLE, l3pmu->regs + L3_M_BC_CR);
 }
 
 static irqreturn_t qcom_l3_cache__handle_irq(int irq_num, void *data)

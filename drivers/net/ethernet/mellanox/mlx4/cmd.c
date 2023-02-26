@@ -255,7 +255,7 @@ static int mlx4_cmd_reset_flow(struct mlx4_dev *dev, u16 op, u8 op_modifier,
 static int comm_pending(struct mlx4_dev *dev)
 {
 	struct mlx4_priv *priv = mlx4_priv(dev);
-	u32 status = readl(&priv->mfunc.comm->slave_read);
+	u32 status = pete_readl("drivers/net/ethernet/mellanox/mlx4/cmd.c:258", &priv->mfunc.comm->slave_read);
 
 	return (swab32(status) >> 31) != priv->cmd.comm_toggle;
 }
@@ -422,7 +422,7 @@ static int cmd_pending(struct mlx4_dev *dev)
 	if (pci_channel_offline(dev->persist->pdev))
 		return -EIO;
 
-	status = readl(mlx4_priv(dev)->cmd.hcr + HCR_STATUS_OFFSET);
+	status = pete_readl("drivers/net/ethernet/mellanox/mlx4/cmd.c:425", mlx4_priv(dev)->cmd.hcr + HCR_STATUS_OFFSET);
 
 	return (status & swab32(1 << HCR_GO_BIT)) ||
 		(mlx4_priv(dev)->cmd.toggle ==
@@ -2269,8 +2269,8 @@ void mlx4_master_comm_channel(struct work_struct *work)
 			continue;
 		}
 		++reported;
-		comm_cmd = swab32(readl(&mfunc->comm[slave].slave_write));
-		slt = swab32(readl(&mfunc->comm[slave].slave_read)) >> 31;
+		comm_cmd = swab32(pete_readl("drivers/net/ethernet/mellanox/mlx4/cmd.c:2272", &mfunc->comm[slave].slave_write));
+		slt = swab32(pete_readl("drivers/net/ethernet/mellanox/mlx4/cmd.c:2273", &mfunc->comm[slave].slave_read)) >> 31;
 		toggle = comm_cmd >> 31;
 		if (toggle != slt) {
 			if (master->slave_state[slave].comm_toggle
@@ -2304,14 +2304,14 @@ static int sync_toggles(struct mlx4_dev *dev)
 	u32 rd_toggle;
 	unsigned long end;
 
-	wr_toggle = swab32(readl(&priv->mfunc.comm->slave_write));
+	wr_toggle = swab32(pete_readl("drivers/net/ethernet/mellanox/mlx4/cmd.c:2307", &priv->mfunc.comm->slave_write));
 	if (wr_toggle == 0xffffffff)
 		end = jiffies + msecs_to_jiffies(30000);
 	else
 		end = jiffies + msecs_to_jiffies(5000);
 
 	while (time_before(jiffies, end)) {
-		rd_toggle = swab32(readl(&priv->mfunc.comm->slave_read));
+		rd_toggle = swab32(pete_readl("drivers/net/ethernet/mellanox/mlx4/cmd.c:2314", &priv->mfunc.comm->slave_read));
 		if (wr_toggle == 0xffffffff || rd_toggle == 0xffffffff) {
 			/* PCI might be offline */
 
@@ -2326,7 +2326,7 @@ static int sync_toggles(struct mlx4_dev *dev)
 			}
 
 			msleep(100);
-			wr_toggle = swab32(readl(&priv->mfunc.comm->
+			wr_toggle = swab32(pete_readl("drivers/net/ethernet/mellanox/mlx4/cmd.c:2329", &priv->mfunc.comm->
 					   slave_write));
 			continue;
 		}
@@ -2574,7 +2574,7 @@ void mlx4_report_internal_err_comm_event(struct mlx4_dev *dev)
 	 * communication channels.
 	 */
 	for (slave = 0; slave < dev->num_slaves; slave++) {
-		slave_read = swab32(readl(&priv->mfunc.comm[slave].slave_read));
+		slave_read = swab32(pete_readl("drivers/net/ethernet/mellanox/mlx4/cmd.c:2577", &priv->mfunc.comm[slave].slave_read));
 		slave_read |= (u32)COMM_CHAN_EVENT_INTERNAL_ERR;
 		__raw_writel((__force u32)cpu_to_be32(slave_read),
 			     &priv->mfunc.comm[slave].slave_read);

@@ -474,14 +474,14 @@ static int mvs_94xx_init(struct mvs_info *mvi)
 
 	if (mvi->flags & MVF_FLAG_SOC) {
 		/* set select registers */
-		writel(0x0E008000, regs + 0x000);
-		writel(0x59000008, regs + 0x004);
-		writel(0x20, regs + 0x008);
-		writel(0x20, regs + 0x00c);
-		writel(0x20, regs + 0x010);
-		writel(0x20, regs + 0x014);
-		writel(0x20, regs + 0x018);
-		writel(0x20, regs + 0x01c);
+		pete_writel("drivers/scsi/mvsas/mv_94xx.c:477", 0x0E008000, regs + 0x000);
+		pete_writel("drivers/scsi/mvsas/mv_94xx.c:478", 0x59000008, regs + 0x004);
+		pete_writel("drivers/scsi/mvsas/mv_94xx.c:479", 0x20, regs + 0x008);
+		pete_writel("drivers/scsi/mvsas/mv_94xx.c:480", 0x20, regs + 0x00c);
+		pete_writel("drivers/scsi/mvsas/mv_94xx.c:481", 0x20, regs + 0x010);
+		pete_writel("drivers/scsi/mvsas/mv_94xx.c:482", 0x20, regs + 0x014);
+		pete_writel("drivers/scsi/mvsas/mv_94xx.c:483", 0x20, regs + 0x018);
+		pete_writel("drivers/scsi/mvsas/mv_94xx.c:484", 0x20, regs + 0x01c);
 	}
 	for (i = 0; i < mvi->chip->n_phy; i++) {
 		/* clear phy int status */
@@ -597,10 +597,10 @@ static void mvs_94xx_interrupt_enable(struct mvs_info *mvi)
 	tmp = mr32(MVS_GBL_CTL);
 	tmp |= (MVS_IRQ_SAS_A | MVS_IRQ_SAS_B);
 	mw32(MVS_GBL_INT_STAT, tmp);
-	writel(tmp, regs + 0x0C);
-	writel(tmp, regs + 0x10);
-	writel(tmp, regs + 0x14);
-	writel(tmp, regs + 0x18);
+	pete_writel("drivers/scsi/mvsas/mv_94xx.c:600", tmp, regs + 0x0C);
+	pete_writel("drivers/scsi/mvsas/mv_94xx.c:601", tmp, regs + 0x10);
+	pete_writel("drivers/scsi/mvsas/mv_94xx.c:602", tmp, regs + 0x14);
+	pete_writel("drivers/scsi/mvsas/mv_94xx.c:603", tmp, regs + 0x18);
 	mw32(MVS_GBL_CTL, tmp);
 }
 
@@ -613,10 +613,10 @@ static void mvs_94xx_interrupt_disable(struct mvs_info *mvi)
 
 	tmp &= ~(MVS_IRQ_SAS_A | MVS_IRQ_SAS_B);
 	mw32(MVS_GBL_INT_STAT, tmp);
-	writel(tmp, regs + 0x0C);
-	writel(tmp, regs + 0x10);
-	writel(tmp, regs + 0x14);
-	writel(tmp, regs + 0x18);
+	pete_writel("drivers/scsi/mvsas/mv_94xx.c:616", tmp, regs + 0x0C);
+	pete_writel("drivers/scsi/mvsas/mv_94xx.c:617", tmp, regs + 0x10);
+	pete_writel("drivers/scsi/mvsas/mv_94xx.c:618", tmp, regs + 0x14);
+	pete_writel("drivers/scsi/mvsas/mv_94xx.c:619", tmp, regs + 0x18);
 	mw32(MVS_GBL_CTL, tmp);
 }
 

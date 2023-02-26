@@ -31,7 +31,7 @@ static int sl3516_ce_rng_read(struct hwrng *rng, void *buf, size_t max, bool wai
 	}
 
 	while (read < max) {
-		*data = readl(ce->base + IPSEC_RAND_NUM_REG);
+		*data = pete_readl("drivers/crypto/gemini/sl3516-ce-rng.c:34", ce->base + IPSEC_RAND_NUM_REG);
 		data++;
 		read += 4;
 	}

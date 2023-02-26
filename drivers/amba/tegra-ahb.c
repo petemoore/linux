@@ -125,12 +125,12 @@ struct tegra_ahb {
 
 static inline u32 gizmo_readl(struct tegra_ahb *ahb, u32 offset)
 {
-	return readl(ahb->regs + offset);
+	return pete_readl("drivers/amba/tegra-ahb.c:128", ahb->regs + offset);
 }
 
 static inline void gizmo_writel(struct tegra_ahb *ahb, u32 value, u32 offset)
 {
-	writel(value, ahb->regs + offset);
+	pete_writel("drivers/amba/tegra-ahb.c:133", value, ahb->regs + offset);
 }
 
 #ifdef CONFIG_TEGRA_IOMMU_SMMU

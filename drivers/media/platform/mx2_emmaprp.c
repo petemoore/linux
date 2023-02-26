@@ -254,13 +254,13 @@ static inline void emmaprp_dump_regs(struct emmaprp_dev *pcdev)
 		"  DEST_CB_PTR = 0x%08X\n"
 		"  CH2_OUT_IMAGE_SIZE = 0x%08X\n"
 		"  CNTL = 0x%08X\n",
-		readl(pcdev->base_emma + PRP_SOURCE_Y_PTR),
-		readl(pcdev->base_emma + PRP_SRC_FRAME_SIZE),
-		readl(pcdev->base_emma + PRP_DEST_Y_PTR),
-		readl(pcdev->base_emma + PRP_DEST_CR_PTR),
-		readl(pcdev->base_emma + PRP_DEST_CB_PTR),
-		readl(pcdev->base_emma + PRP_CH2_OUT_IMAGE_SIZE),
-		readl(pcdev->base_emma + PRP_CNTL));
+		pete_readl("drivers/media/platform/mx2_emmaprp.c:257", pcdev->base_emma + PRP_SOURCE_Y_PTR),
+		pete_readl("drivers/media/platform/mx2_emmaprp.c:258", pcdev->base_emma + PRP_SRC_FRAME_SIZE),
+		pete_readl("drivers/media/platform/mx2_emmaprp.c:259", pcdev->base_emma + PRP_DEST_Y_PTR),
+		pete_readl("drivers/media/platform/mx2_emmaprp.c:260", pcdev->base_emma + PRP_DEST_CR_PTR),
+		pete_readl("drivers/media/platform/mx2_emmaprp.c:261", pcdev->base_emma + PRP_DEST_CB_PTR),
+		pete_readl("drivers/media/platform/mx2_emmaprp.c:262", pcdev->base_emma + PRP_CH2_OUT_IMAGE_SIZE),
+		pete_readl("drivers/media/platform/mx2_emmaprp.c:263", pcdev->base_emma + PRP_CNTL));
 }
 
 static void emmaprp_device_run(void *priv)
@@ -296,21 +296,21 @@ static void emmaprp_device_run(void *priv)
 	}
 
 	/* Input frame parameters */
-	writel(p_in, pcdev->base_emma + PRP_SOURCE_Y_PTR);
-	writel(PRP_SIZE_WIDTH(s_width) | PRP_SIZE_HEIGHT(s_height),
+	pete_writel("drivers/media/platform/mx2_emmaprp.c:299", p_in, pcdev->base_emma + PRP_SOURCE_Y_PTR);
+	pete_writel("drivers/media/platform/mx2_emmaprp.c:300", PRP_SIZE_WIDTH(s_width) | PRP_SIZE_HEIGHT(s_height),
 	       pcdev->base_emma + PRP_SRC_FRAME_SIZE);
 
 	/* Output frame parameters */
-	writel(p_out, pcdev->base_emma + PRP_DEST_Y_PTR);
-	writel(p_out + d_size, pcdev->base_emma + PRP_DEST_CB_PTR);
-	writel(p_out + d_size + (d_size >> 2),
+	pete_writel("drivers/media/platform/mx2_emmaprp.c:304", p_out, pcdev->base_emma + PRP_DEST_Y_PTR);
+	pete_writel("drivers/media/platform/mx2_emmaprp.c:305", p_out + d_size, pcdev->base_emma + PRP_DEST_CB_PTR);
+	pete_writel("drivers/media/platform/mx2_emmaprp.c:306", p_out + d_size + (d_size >> 2),
 	       pcdev->base_emma + PRP_DEST_CR_PTR);
-	writel(PRP_SIZE_WIDTH(d_width) | PRP_SIZE_HEIGHT(d_height),
+	pete_writel("drivers/media/platform/mx2_emmaprp.c:308", PRP_SIZE_WIDTH(d_width) | PRP_SIZE_HEIGHT(d_height),
 	       pcdev->base_emma + PRP_CH2_OUT_IMAGE_SIZE);
 
 	/* IRQ configuration */
-	tmp = readl(pcdev->base_emma + PRP_INTR_CNTL);
-	writel(tmp | PRP_INTR_RDERR |
+	tmp = pete_readl("drivers/media/platform/mx2_emmaprp.c:312", pcdev->base_emma + PRP_INTR_CNTL);
+	pete_writel("drivers/media/platform/mx2_emmaprp.c:313", tmp | PRP_INTR_RDERR |
 		PRP_INTR_CH2WERR |
 		PRP_INTR_CH2FC,
 		pcdev->base_emma + PRP_INTR_CNTL);
@@ -318,8 +318,8 @@ static void emmaprp_device_run(void *priv)
 	emmaprp_dump_regs(pcdev);
 
 	/* Enable transfer */
-	tmp = readl(pcdev->base_emma + PRP_CNTL);
-	writel(tmp | PRP_CNTL_CH2_OUT_YUV420 |
+	tmp = pete_readl("drivers/media/platform/mx2_emmaprp.c:321", pcdev->base_emma + PRP_CNTL);
+	pete_writel("drivers/media/platform/mx2_emmaprp.c:322", tmp | PRP_CNTL_CH2_OUT_YUV420 |
 		PRP_CNTL_DATA_IN_YUV422 |
 		PRP_CNTL_CH2EN,
 		pcdev->base_emma + PRP_CNTL);
@@ -334,8 +334,8 @@ static irqreturn_t emmaprp_irq(int irq_emma, void *data)
 	u32 irqst;
 
 	/* Check irq flags and clear irq */
-	irqst = readl(pcdev->base_emma + PRP_INTRSTATUS);
-	writel(irqst, pcdev->base_emma + PRP_INTRSTATUS);
+	irqst = pete_readl("drivers/media/platform/mx2_emmaprp.c:337", pcdev->base_emma + PRP_INTRSTATUS);
+	pete_writel("drivers/media/platform/mx2_emmaprp.c:338", irqst, pcdev->base_emma + PRP_INTRSTATUS);
 	dprintk(pcdev, "irqst = 0x%08x\n", irqst);
 
 	curr_ctx = v4l2_m2m_get_curr_priv(pcdev->m2m_dev);
@@ -348,7 +348,7 @@ static irqreturn_t emmaprp_irq(int irq_emma, void *data)
 		if ((irqst & PRP_INTR_ST_RDERR) ||
 		(irqst & PRP_INTR_ST_CH2WERR)) {
 			pr_err("PrP bus error occurred, this transfer is probably corrupted\n");
-			writel(PRP_CNTL_SWRST, pcdev->base_emma + PRP_CNTL);
+			pete_writel("drivers/media/platform/mx2_emmaprp.c:351", PRP_CNTL_SWRST, pcdev->base_emma + PRP_CNTL);
 		} else if (irqst & PRP_INTR_ST_CH2B1CI) { /* buffer ready */
 			src_vb = v4l2_m2m_src_buf_remove(curr_ctx->fh.m2m_ctx);
 			dst_vb = v4l2_m2m_dst_buf_remove(curr_ctx->fh.m2m_ctx);

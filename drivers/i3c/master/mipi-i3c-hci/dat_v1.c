@@ -35,10 +35,10 @@
 /*	DAT_0_IBI_PAYLOAD		W0_BIT_(12) */
 #define DAT_0_STATIC_ADDRESS		W0_MASK(6, 0)
 
-#define dat_w0_read(i)		readl(hci->DAT_regs + (i) * 8)
-#define dat_w1_read(i)		readl(hci->DAT_regs + (i) * 8 + 4)
-#define dat_w0_write(i, v)	writel(v, hci->DAT_regs + (i) * 8)
-#define dat_w1_write(i, v)	writel(v, hci->DAT_regs + (i) * 8 + 4)
+#define dat_w0_read(i)		pete_readl("drivers/i3c/master/mipi-i3c-hci/dat_v1.c:38", hci->DAT_regs + (i) * 8)
+#define dat_w1_read(i)		pete_readl("drivers/i3c/master/mipi-i3c-hci/dat_v1.c:39", hci->DAT_regs + (i) * 8 + 4)
+#define dat_w0_write(i, v)	pete_writel("drivers/i3c/master/mipi-i3c-hci/dat_v1.c:40", v, hci->DAT_regs + (i) * 8)
+#define dat_w1_write(i, v)	pete_writel("drivers/i3c/master/mipi-i3c-hci/dat_v1.c:41", v, hci->DAT_regs + (i) * 8 + 4)
 
 static inline bool dynaddr_parity(unsigned int addr)
 {

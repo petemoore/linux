@@ -53,11 +53,11 @@ static void meson_mx_efuse_mask_bits(struct meson_mx_efuse *efuse, u32 reg,
 {
 	u32 data;
 
-	data = readl(efuse->base + reg);
+	data = pete_readl("drivers/nvmem/meson-mx-efuse.c:56", efuse->base + reg);
 	data &= ~mask;
 	data |= (set & mask);
 
-	writel(data, efuse->base + reg);
+	pete_writel("drivers/nvmem/meson-mx-efuse.c:60", data, efuse->base + reg);
 }
 
 static int meson_mx_efuse_hw_enable(struct meson_mx_efuse *efuse)
@@ -116,7 +116,7 @@ static int meson_mx_efuse_read_addr(struct meson_mx_efuse *efuse,
 	 * perform a dummy read to ensure that the HW has the RD_BUSY bit set
 	 * when polling for the status below.
 	 */
-	readl(efuse->base + MESON_MX_EFUSE_CNTL1);
+	pete_readl("drivers/nvmem/meson-mx-efuse.c:119", efuse->base + MESON_MX_EFUSE_CNTL1);
 
 	err = readl_poll_timeout_atomic(efuse->base + MESON_MX_EFUSE_CNTL1,
 			regval,
@@ -128,7 +128,7 @@ static int meson_mx_efuse_read_addr(struct meson_mx_efuse *efuse,
 		return err;
 	}
 
-	*value = readl(efuse->base + MESON_MX_EFUSE_CNTL2);
+	*value = pete_readl("drivers/nvmem/meson-mx-efuse.c:131", efuse->base + MESON_MX_EFUSE_CNTL2);
 
 	return 0;
 }

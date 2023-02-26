@@ -125,11 +125,11 @@ static void __init m520x_qspi_init(void)
 #if IS_ENABLED(CONFIG_SPI_COLDFIRE_QSPI)
 	u16 par;
 	/* setup Port QS for QSPI with gpio CS control */
-	writeb(0x3f, MCF_GPIO_PAR_QSPI);
+	pete_writeb("arch/m68k/coldfire/m520x.c:128", 0x3f, MCF_GPIO_PAR_QSPI);
 	/* make U1CTS and U2RTS gpio for cs_control */
-	par = readw(MCF_GPIO_PAR_UART);
+	par = pete_readw("arch/m68k/coldfire/m520x.c:130", MCF_GPIO_PAR_UART);
 	par &= 0x00ff;
-	writew(par, MCF_GPIO_PAR_UART);
+	pete_writew("arch/m68k/coldfire/m520x.c:132", par, MCF_GPIO_PAR_UART);
 #endif /* IS_ENABLED(CONFIG_SPI_COLDFIRE_QSPI) */
 }
 
@@ -142,9 +142,9 @@ static void __init m520x_i2c_init(void)
 
 	/* setup Port FECI2C Pin Assignment Register for I2C */
 	/*  set PAR_SCL to SCL and PAR_SDA to SDA */
-	par = readb(MCF_GPIO_PAR_FECI2C);
+	par = pete_readb("arch/m68k/coldfire/m520x.c:145", MCF_GPIO_PAR_FECI2C);
 	par |= 0x0f;
-	writeb(par, MCF_GPIO_PAR_FECI2C);
+	pete_writeb("arch/m68k/coldfire/m520x.c:147", par, MCF_GPIO_PAR_FECI2C);
 #endif /* IS_ENABLED(CONFIG_I2C_IMX) */
 }
 
@@ -156,17 +156,17 @@ static void __init m520x_uarts_init(void)
 	u8 par2;
 
 	/* UART0 and UART1 GPIO pin setup */
-	par = readw(MCF_GPIO_PAR_UART);
+	par = pete_readw("arch/m68k/coldfire/m520x.c:159", MCF_GPIO_PAR_UART);
 	par |= MCF_GPIO_PAR_UART_PAR_UTXD0 | MCF_GPIO_PAR_UART_PAR_URXD0;
 	par |= MCF_GPIO_PAR_UART_PAR_UTXD1 | MCF_GPIO_PAR_UART_PAR_URXD1;
-	writew(par, MCF_GPIO_PAR_UART);
+	pete_writew("arch/m68k/coldfire/m520x.c:162", par, MCF_GPIO_PAR_UART);
 
 	/* UART1 GPIO pin setup */
-	par2 = readb(MCF_GPIO_PAR_FECI2C);
+	par2 = pete_readb("arch/m68k/coldfire/m520x.c:165", MCF_GPIO_PAR_FECI2C);
 	par2 &= ~0x0F;
 	par2 |= MCF_GPIO_PAR_FECI2C_PAR_SCL_UTXD2 |
 		MCF_GPIO_PAR_FECI2C_PAR_SDA_URXD2;
-	writeb(par2, MCF_GPIO_PAR_FECI2C);
+	pete_writeb("arch/m68k/coldfire/m520x.c:169", par2, MCF_GPIO_PAR_FECI2C);
 }
 
 /***************************************************************************/
@@ -176,11 +176,11 @@ static void __init m520x_fec_init(void)
 	u8 v;
 
 	/* Set multi-function pins to ethernet mode */
-	v = readb(MCF_GPIO_PAR_FEC);
-	writeb(v | 0xf0, MCF_GPIO_PAR_FEC);
+	v = pete_readb("arch/m68k/coldfire/m520x.c:179", MCF_GPIO_PAR_FEC);
+	pete_writeb("arch/m68k/coldfire/m520x.c:180", v | 0xf0, MCF_GPIO_PAR_FEC);
 
-	v = readb(MCF_GPIO_PAR_FECI2C);
-	writeb(v | 0x0f, MCF_GPIO_PAR_FECI2C);
+	v = pete_readb("arch/m68k/coldfire/m520x.c:182", MCF_GPIO_PAR_FECI2C);
+	pete_writeb("arch/m68k/coldfire/m520x.c:183", v | 0x0f, MCF_GPIO_PAR_FECI2C);
 }
 
 /***************************************************************************/

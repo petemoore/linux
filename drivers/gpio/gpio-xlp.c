@@ -100,7 +100,7 @@ static int xlp_gpio_get_reg(void __iomem *addr, unsigned gpio)
 
 	pos = gpio % XLP_GPIO_REGSZ;
 	regset = (gpio / XLP_GPIO_REGSZ) * 4;
-	return !!(readl(addr + regset) & BIT(pos));
+	return !!(pete_readl("drivers/gpio/gpio-xlp.c:103", addr + regset) & BIT(pos));
 }
 
 static void xlp_gpio_set_reg(void __iomem *addr, unsigned gpio, int state)
@@ -109,14 +109,14 @@ static void xlp_gpio_set_reg(void __iomem *addr, unsigned gpio, int state)
 
 	pos = gpio % XLP_GPIO_REGSZ;
 	regset = (gpio / XLP_GPIO_REGSZ) * 4;
-	value = readl(addr + regset);
+	value = pete_readl("drivers/gpio/gpio-xlp.c:112", addr + regset);
 
 	if (state)
 		value |= BIT(pos);
 	else
 		value &= ~BIT(pos);
 
-	writel(value, addr + regset);
+	pete_writel("drivers/gpio/gpio-xlp.c:119", value, addr + regset);
 }
 
 static void xlp_gpio_irq_disable(struct irq_data *d)
@@ -212,7 +212,7 @@ static void xlp_gpio_generic_handler(struct irq_desc *desc)
 	for_each_set_bit(gpio, priv->gpio_enabled_mask, XLP_MAX_NR_GPIO) {
 		if (regoff != gpio / XLP_GPIO_REGSZ) {
 			regoff = gpio / XLP_GPIO_REGSZ;
-			gpio_stat = readl(priv->gpio_intr_stat + regoff * 4);
+			gpio_stat = pete_readl("drivers/gpio/gpio-xlp.c:215", priv->gpio_intr_stat + regoff * 4);
 		}
 
 		if (gpio_stat & BIT(gpio % XLP_GPIO_REGSZ))

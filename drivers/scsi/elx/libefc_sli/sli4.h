@@ -3805,7 +3805,7 @@ sli_convert_mask_to_count(u32 method, u32 mask)
 static inline u32
 sli_reg_read_status(struct sli4 *sli)
 {
-	return readl(sli->reg[0] + SLI4_PORT_STATUS_REGOFF);
+	return pete_readl("drivers/scsi/elx/libefc_sli/sli4.h:3808", sli->reg[0] + SLI4_PORT_STATUS_REGOFF);
 }
 
 static inline int
@@ -3817,13 +3817,13 @@ sli_fw_error_status(struct sli4 *sli4)
 static inline u32
 sli_reg_read_err1(struct sli4 *sli)
 {
-	return readl(sli->reg[0] + SLI4_PORT_ERROR1);
+	return pete_readl("drivers/scsi/elx/libefc_sli/sli4.h:3820", sli->reg[0] + SLI4_PORT_ERROR1);
 }
 
 static inline u32
 sli_reg_read_err2(struct sli4 *sli)
 {
-	return readl(sli->reg[0] + SLI4_PORT_ERROR2);
+	return pete_readl("drivers/scsi/elx/libefc_sli/sli4.h:3826", sli->reg[0] + SLI4_PORT_ERROR2);
 }
 
 static inline int

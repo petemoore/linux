@@ -70,7 +70,7 @@ static void spu_write_wait(void)
 	int time_count;
 	time_count = 0;
 	while (1) {
-		if (!(readl(G2_FIFO) & 0x11))
+		if (!(pete_readl("sound/sh/aica.c:73", G2_FIFO) & 0x11))
 			break;
 		/* To ensure hardware failure doesn't wedge kernel */
 		time_count++;
@@ -93,7 +93,7 @@ static void spu_memset(u32 toi, u32 what, int length)
 		if (!(i % 8))
 			spu_write_wait();
 		local_irq_save(flags);
-		writel(what, toi + SPU_MEMORY_BASE);
+		pete_writel("sound/sh/aica.c:96", what, toi + SPU_MEMORY_BASE);
 		local_irq_restore(flags);
 		toi++;
 	}
@@ -114,7 +114,7 @@ static void spu_memload(u32 toi, const void *from, int length)
 			spu_write_wait();
 		val = *froml;
 		local_irq_save(flags);
-		writel(val, to);
+		pete_writel("sound/sh/aica.c:117", val, to);
 		local_irq_restore(flags);
 		froml++;
 		to++;
@@ -128,19 +128,19 @@ static void spu_disable(void)
 	unsigned long flags;
 	u32 regval;
 	spu_write_wait();
-	regval = readl(ARM_RESET_REGISTER);
+	regval = pete_readl("sound/sh/aica.c:131", ARM_RESET_REGISTER);
 	regval |= 1;
 	spu_write_wait();
 	local_irq_save(flags);
-	writel(regval, ARM_RESET_REGISTER);
+	pete_writel("sound/sh/aica.c:135", regval, ARM_RESET_REGISTER);
 	local_irq_restore(flags);
 	for (i = 0; i < 64; i++) {
 		spu_write_wait();
-		regval = readl(SPU_REGISTER_BASE + (i * 0x80));
+		regval = pete_readl("sound/sh/aica.c:139", SPU_REGISTER_BASE + (i * 0x80));
 		regval = (regval & ~0x4000) | 0x8000;
 		spu_write_wait();
 		local_irq_save(flags);
-		writel(regval, SPU_REGISTER_BASE + (i * 0x80));
+		pete_writel("sound/sh/aica.c:143", regval, SPU_REGISTER_BASE + (i * 0x80));
 		local_irq_restore(flags);
 	}
 }
@@ -149,11 +149,11 @@ static void spu_disable(void)
 static void spu_enable(void)
 {
 	unsigned long flags;
-	u32 regval = readl(ARM_RESET_REGISTER);
+	u32 regval = pete_readl("sound/sh/aica.c:152", ARM_RESET_REGISTER);
 	regval &= ~1;
 	spu_write_wait();
 	local_irq_save(flags);
-	writel(regval, ARM_RESET_REGISTER);
+	pete_writel("sound/sh/aica.c:156", regval, ARM_RESET_REGISTER);
 	local_irq_restore(flags);
 }
 
@@ -179,7 +179,7 @@ static void aica_chn_start(void)
 	unsigned long flags;
 	spu_write_wait();
 	local_irq_save(flags);
-	writel(AICA_CMD_KICK | AICA_CMD_START, (u32 *) AICA_CONTROL_POINT);
+	pete_writel("sound/sh/aica.c:182", AICA_CMD_KICK | AICA_CMD_START, (u32 *) AICA_CONTROL_POINT);
 	local_irq_restore(flags);
 }
 
@@ -189,7 +189,7 @@ static void aica_chn_halt(void)
 	unsigned long flags;
 	spu_write_wait();
 	local_irq_save(flags);
-	writel(AICA_CMD_KICK | AICA_CMD_STOP, (u32 *) AICA_CONTROL_POINT);
+	pete_writel("sound/sh/aica.c:192", AICA_CMD_KICK | AICA_CMD_STOP, (u32 *) AICA_CONTROL_POINT);
 	local_irq_restore(flags);
 }
 
@@ -392,7 +392,7 @@ static int snd_aicapcm_pcm_trigger(struct snd_pcm_substream
 static unsigned long snd_aicapcm_pcm_pointer(struct snd_pcm_substream
 					     *substream)
 {
-	return readl(AICA_CONTROL_CHANNEL_SAMPLE_NUMBER);
+	return pete_readl("sound/sh/aica.c:395", AICA_CONTROL_CHANNEL_SAMPLE_NUMBER);
 }
 
 static const struct snd_pcm_ops snd_aicapcm_playback_ops = {

@@ -97,14 +97,14 @@ static int pl031_alarm_irq_enable(struct device *dev,
 	unsigned long imsc;
 
 	/* Clear any pending alarm interrupts. */
-	writel(RTC_BIT_AI, ldata->base + RTC_ICR);
+	pete_writel("drivers/rtc/rtc-pl031.c:100", RTC_BIT_AI, ldata->base + RTC_ICR);
 
-	imsc = readl(ldata->base + RTC_IMSC);
+	imsc = pete_readl("drivers/rtc/rtc-pl031.c:102", ldata->base + RTC_IMSC);
 
 	if (enabled == 1)
-		writel(imsc | RTC_BIT_AI, ldata->base + RTC_IMSC);
+		pete_writel("drivers/rtc/rtc-pl031.c:105", imsc | RTC_BIT_AI, ldata->base + RTC_IMSC);
 	else
-		writel(imsc & ~RTC_BIT_AI, ldata->base + RTC_IMSC);
+		pete_writel("drivers/rtc/rtc-pl031.c:107", imsc & ~RTC_BIT_AI, ldata->base + RTC_IMSC);
 
 	return 0;
 }
@@ -167,8 +167,8 @@ static int pl031_stv2_read_time(struct device *dev, struct rtc_time *tm)
 {
 	struct pl031_local *ldata = dev_get_drvdata(dev);
 
-	pl031_stv2_time_to_tm(readl(ldata->base + RTC_DR),
-			readl(ldata->base + RTC_YDR), tm);
+	pl031_stv2_time_to_tm(pete_readl("drivers/rtc/rtc-pl031.c:170", ldata->base + RTC_DR),
+			pete_readl("drivers/rtc/rtc-pl031.c:171", ldata->base + RTC_YDR), tm);
 
 	return 0;
 }
@@ -182,8 +182,8 @@ static int pl031_stv2_set_time(struct device *dev, struct rtc_time *tm)
 
 	ret = pl031_stv2_tm_to_time(dev, tm, &time, &bcd_year);
 	if (ret == 0) {
-		writel(bcd_year, ldata->base + RTC_YLR);
-		writel(time, ldata->base + RTC_LR);
+		pete_writel("drivers/rtc/rtc-pl031.c:185", bcd_year, ldata->base + RTC_YLR);
+		pete_writel("drivers/rtc/rtc-pl031.c:186", time, ldata->base + RTC_LR);
 	}
 
 	return ret;
@@ -194,11 +194,11 @@ static int pl031_stv2_read_alarm(struct device *dev, struct rtc_wkalrm *alarm)
 	struct pl031_local *ldata = dev_get_drvdata(dev);
 	int ret;
 
-	ret = pl031_stv2_time_to_tm(readl(ldata->base + RTC_MR),
-			readl(ldata->base + RTC_YMR), &alarm->time);
+	ret = pl031_stv2_time_to_tm(pete_readl("drivers/rtc/rtc-pl031.c:197", ldata->base + RTC_MR),
+			pete_readl("drivers/rtc/rtc-pl031.c:198", ldata->base + RTC_YMR), &alarm->time);
 
-	alarm->pending = readl(ldata->base + RTC_RIS) & RTC_BIT_AI;
-	alarm->enabled = readl(ldata->base + RTC_IMSC) & RTC_BIT_AI;
+	alarm->pending = pete_readl("drivers/rtc/rtc-pl031.c:200", ldata->base + RTC_RIS) & RTC_BIT_AI;
+	alarm->enabled = pete_readl("drivers/rtc/rtc-pl031.c:201", ldata->base + RTC_IMSC) & RTC_BIT_AI;
 
 	return ret;
 }
@@ -213,8 +213,8 @@ static int pl031_stv2_set_alarm(struct device *dev, struct rtc_wkalrm *alarm)
 	ret = pl031_stv2_tm_to_time(dev, &alarm->time,
 				    &time, &bcd_year);
 	if (ret == 0) {
-		writel(bcd_year, ldata->base + RTC_YMR);
-		writel(time, ldata->base + RTC_MR);
+		pete_writel("drivers/rtc/rtc-pl031.c:216", bcd_year, ldata->base + RTC_YMR);
+		pete_writel("drivers/rtc/rtc-pl031.c:217", time, ldata->base + RTC_MR);
 
 		pl031_alarm_irq_enable(dev, alarm->enabled);
 	}
@@ -228,9 +228,9 @@ static irqreturn_t pl031_interrupt(int irq, void *dev_id)
 	unsigned long rtcmis;
 	unsigned long events = 0;
 
-	rtcmis = readl(ldata->base + RTC_MIS);
+	rtcmis = pete_readl("drivers/rtc/rtc-pl031.c:231", ldata->base + RTC_MIS);
 	if (rtcmis & RTC_BIT_AI) {
-		writel(RTC_BIT_AI, ldata->base + RTC_ICR);
+		pete_writel("drivers/rtc/rtc-pl031.c:233", RTC_BIT_AI, ldata->base + RTC_ICR);
 		events |= (RTC_AF | RTC_IRQF);
 		rtc_update_irq(ldata->rtc, 1, events);
 
@@ -244,7 +244,7 @@ static int pl031_read_time(struct device *dev, struct rtc_time *tm)
 {
 	struct pl031_local *ldata = dev_get_drvdata(dev);
 
-	rtc_time64_to_tm(readl(ldata->base + RTC_DR), tm);
+	rtc_time64_to_tm(pete_readl("drivers/rtc/rtc-pl031.c:247", ldata->base + RTC_DR), tm);
 
 	return 0;
 }
@@ -253,7 +253,7 @@ static int pl031_set_time(struct device *dev, struct rtc_time *tm)
 {
 	struct pl031_local *ldata = dev_get_drvdata(dev);
 
-	writel(rtc_tm_to_time64(tm), ldata->base + RTC_LR);
+	pete_writel("drivers/rtc/rtc-pl031.c:256", rtc_tm_to_time64(tm), ldata->base + RTC_LR);
 
 	return 0;
 }
@@ -262,10 +262,10 @@ static int pl031_read_alarm(struct device *dev, struct rtc_wkalrm *alarm)
 {
 	struct pl031_local *ldata = dev_get_drvdata(dev);
 
-	rtc_time64_to_tm(readl(ldata->base + RTC_MR), &alarm->time);
+	rtc_time64_to_tm(pete_readl("drivers/rtc/rtc-pl031.c:265", ldata->base + RTC_MR), &alarm->time);
 
-	alarm->pending = readl(ldata->base + RTC_RIS) & RTC_BIT_AI;
-	alarm->enabled = readl(ldata->base + RTC_IMSC) & RTC_BIT_AI;
+	alarm->pending = pete_readl("drivers/rtc/rtc-pl031.c:267", ldata->base + RTC_RIS) & RTC_BIT_AI;
+	alarm->enabled = pete_readl("drivers/rtc/rtc-pl031.c:268", ldata->base + RTC_IMSC) & RTC_BIT_AI;
 
 	return 0;
 }
@@ -274,7 +274,7 @@ static int pl031_set_alarm(struct device *dev, struct rtc_wkalrm *alarm)
 {
 	struct pl031_local *ldata = dev_get_drvdata(dev);
 
-	writel(rtc_tm_to_time64(&alarm->time), ldata->base + RTC_MR);
+	pete_writel("drivers/rtc/rtc-pl031.c:277", rtc_tm_to_time64(&alarm->time), ldata->base + RTC_MR);
 	pl031_alarm_irq_enable(dev, alarm->enabled);
 
 	return 0;
@@ -325,27 +325,27 @@ static int pl031_probe(struct amba_device *adev, const struct amba_id *id)
 	dev_dbg(&adev->dev, "designer ID = 0x%02x\n", amba_manf(adev));
 	dev_dbg(&adev->dev, "revision = 0x%01x\n", amba_rev(adev));
 
-	data = readl(ldata->base + RTC_CR);
+	data = pete_readl("drivers/rtc/rtc-pl031.c:328", ldata->base + RTC_CR);
 	/* Enable the clockwatch on ST Variants */
 	if (vendor->clockwatch)
 		data |= RTC_CR_CWEN;
 	else
 		data |= RTC_CR_EN;
-	writel(data, ldata->base + RTC_CR);
+	pete_writel("drivers/rtc/rtc-pl031.c:334", data, ldata->base + RTC_CR);
 
 	/*
 	 * On ST PL031 variants, the RTC reset value does not provide correct
 	 * weekday for 2000-01-01. Correct the erroneous sunday to saturday.
 	 */
 	if (vendor->st_weekday) {
-		if (readl(ldata->base + RTC_YDR) == 0x2000) {
-			time = readl(ldata->base + RTC_DR);
+		if (pete_readl("drivers/rtc/rtc-pl031.c:341", ldata->base + RTC_YDR) == 0x2000) {
+			time = pete_readl("drivers/rtc/rtc-pl031.c:342", ldata->base + RTC_DR);
 			if ((time &
 			     (RTC_MON_MASK | RTC_MDAY_MASK | RTC_WDAY_MASK))
 			    == 0x02120000) {
 				time = time | (0x7 << RTC_WDAY_SHIFT);
-				writel(0x2000, ldata->base + RTC_YLR);
-				writel(time, ldata->base + RTC_LR);
+				pete_writel("drivers/rtc/rtc-pl031.c:347", 0x2000, ldata->base + RTC_YLR);
+				pete_writel("drivers/rtc/rtc-pl031.c:348", time, ldata->base + RTC_LR);
 			}
 		}
 	}

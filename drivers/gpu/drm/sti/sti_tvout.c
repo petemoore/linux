@@ -144,12 +144,12 @@ static const u32 rgb_to_ycbcr_709[8] = {
 
 static u32 tvout_read(struct sti_tvout *tvout, int offset)
 {
-	return readl(tvout->regs + offset);
+	return pete_readl("drivers/gpu/drm/sti/sti_tvout.c:147", tvout->regs + offset);
 }
 
 static void tvout_write(struct sti_tvout *tvout, u32 val, int offset)
 {
-	writel(val, tvout->regs + offset);
+	pete_writel("drivers/gpu/drm/sti/sti_tvout.c:152", val, tvout->regs + offset);
 }
 
 /**
@@ -447,7 +447,7 @@ static void tvout_hda_start(struct sti_tvout *tvout, bool main_path)
 }
 
 #define DBGFS_DUMP(reg) seq_printf(s, "\n  %-25s 0x%08X", #reg, \
-				   readl(tvout->regs + reg))
+				   pete_readl("drivers/gpu/drm/sti/sti_tvout.c:450", tvout->regs + reg))
 
 static void tvout_dbg_vip(struct seq_file *s, int val)
 {
@@ -509,7 +509,7 @@ static int tvout_dbg_show(struct seq_file *s, void *data)
 			   sti_crtc_is_main(crtc) ? "main" : "aux");
 		DBGFS_DUMP(TVO_HDMI_SYNC_SEL);
 		DBGFS_DUMP(TVO_VIP_HDMI);
-		tvout_dbg_vip(s, readl(tvout->regs + TVO_VIP_HDMI));
+		tvout_dbg_vip(s, pete_readl("drivers/gpu/drm/sti/sti_tvout.c:512", tvout->regs + TVO_VIP_HDMI));
 	} else {
 		seq_puts(s, "disabled");
 	}
@@ -522,7 +522,7 @@ static int tvout_dbg_show(struct seq_file *s, void *data)
 		DBGFS_DUMP(TVO_DVO_SYNC_SEL);
 		DBGFS_DUMP(TVO_DVO_CONFIG);
 		DBGFS_DUMP(TVO_VIP_DVO);
-		tvout_dbg_vip(s, readl(tvout->regs + TVO_VIP_DVO));
+		tvout_dbg_vip(s, pete_readl("drivers/gpu/drm/sti/sti_tvout.c:525", tvout->regs + TVO_VIP_DVO));
 	} else {
 		seq_puts(s, "disabled");
 	}
@@ -535,9 +535,9 @@ static int tvout_dbg_show(struct seq_file *s, void *data)
 		DBGFS_DUMP(TVO_HD_SYNC_SEL);
 		DBGFS_DUMP(TVO_HD_DAC_CFG_OFF);
 		tvout_dbg_hd_dac_cfg(s,
-				     readl(tvout->regs + TVO_HD_DAC_CFG_OFF));
+				     pete_readl("drivers/gpu/drm/sti/sti_tvout.c:538", tvout->regs + TVO_HD_DAC_CFG_OFF));
 		DBGFS_DUMP(TVO_VIP_HDF);
-		tvout_dbg_vip(s, readl(tvout->regs + TVO_VIP_HDF));
+		tvout_dbg_vip(s, pete_readl("drivers/gpu/drm/sti/sti_tvout.c:540", tvout->regs + TVO_VIP_HDF));
 	} else {
 		seq_puts(s, "disabled");
 	}

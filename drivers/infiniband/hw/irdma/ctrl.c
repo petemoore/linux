@@ -2490,7 +2490,7 @@ static enum irdma_status_code irdma_sc_resume_qp(struct irdma_sc_cqp *cqp,
  */
 static inline void irdma_sc_cq_ack(struct irdma_sc_cq *cq)
 {
-	writel(cq->cq_uk.cq_id, cq->cq_uk.cq_ack_db);
+	pete_writel("drivers/infiniband/hw/irdma/ctrl.c:2493", cq->cq_uk.cq_id, cq->cq_uk.cq_ack_db);
 }
 
 /**
@@ -2761,7 +2761,7 @@ void irdma_check_cqp_progress(struct irdma_cqp_timeout *timeout, struct irdma_sc
 static inline void irdma_get_cqp_reg_info(struct irdma_sc_cqp *cqp, u32 *val,
 					  u32 *tail, u32 *error)
 {
-	*val = readl(cqp->dev->hw_regs[IRDMA_CQPTAIL]);
+	*val = pete_readl("drivers/infiniband/hw/irdma/ctrl.c:2764", cqp->dev->hw_regs[IRDMA_CQPTAIL]);
 	*tail = FIELD_GET(IRDMA_CQPTAIL_WQTAIL, *val);
 	*error = FIELD_GET(IRDMA_CQPTAIL_CQP_OP_ERR, *val);
 }
@@ -2781,7 +2781,7 @@ static enum irdma_status_code irdma_cqp_poll_registers(struct irdma_sc_cqp *cqp,
 	while (i++ < count) {
 		irdma_get_cqp_reg_info(cqp, &val, &newtail, &error);
 		if (error) {
-			error = readl(cqp->dev->hw_regs[IRDMA_CQPERRCODES]);
+			error = pete_readl("drivers/infiniband/hw/irdma/ctrl.c:2784", cqp->dev->hw_regs[IRDMA_CQPERRCODES]);
 			ibdev_dbg(to_ibdev(cqp->dev),
 				  "CQP: CQPERRCODES error_code[x%08X]\n",
 				  error);
@@ -3157,9 +3157,9 @@ enum irdma_status_code irdma_sc_cqp_init(struct irdma_sc_cqp *cqp,
 	/* for the cqp commands backlog. */
 	INIT_LIST_HEAD(&cqp->dev->cqp_cmd_head);
 
-	writel(0, cqp->dev->hw_regs[IRDMA_CQPTAIL]);
-	writel(0, cqp->dev->hw_regs[IRDMA_CQPDB]);
-	writel(0, cqp->dev->hw_regs[IRDMA_CCQPSTATUS]);
+	pete_writel("drivers/infiniband/hw/irdma/ctrl.c:3160", 0, cqp->dev->hw_regs[IRDMA_CQPTAIL]);
+	pete_writel("drivers/infiniband/hw/irdma/ctrl.c:3161", 0, cqp->dev->hw_regs[IRDMA_CQPDB]);
+	pete_writel("drivers/infiniband/hw/irdma/ctrl.c:3162", 0, cqp->dev->hw_regs[IRDMA_CCQPSTATUS]);
 
 	ibdev_dbg(to_ibdev(cqp->dev),
 		  "WQE: sq_size[%04d] hw_sq_size[%04d] sq_base[%p] sq_pa[%pK] cqp[%p] polarity[x%04x]\n",
@@ -3239,8 +3239,8 @@ enum irdma_status_code irdma_sc_cqp_create(struct irdma_sc_cqp *cqp, u16 *maj_er
 	p1 = cqp->host_ctx_pa >> 32;
 	p2 = (u32)cqp->host_ctx_pa;
 
-	writel(p1, cqp->dev->hw_regs[IRDMA_CCQPHIGH]);
-	writel(p2, cqp->dev->hw_regs[IRDMA_CCQPLOW]);
+	pete_writel("drivers/infiniband/hw/irdma/ctrl.c:3242", p1, cqp->dev->hw_regs[IRDMA_CCQPHIGH]);
+	pete_writel("drivers/infiniband/hw/irdma/ctrl.c:3243", p2, cqp->dev->hw_regs[IRDMA_CCQPLOW]);
 
 	do {
 		if (cnt++ > cqp->dev->hw_attrs.max_done_count) {
@@ -3248,7 +3248,7 @@ enum irdma_status_code irdma_sc_cqp_create(struct irdma_sc_cqp *cqp, u16 *maj_er
 			goto err;
 		}
 		udelay(cqp->dev->hw_attrs.max_sleep_count);
-		val = readl(cqp->dev->hw_regs[IRDMA_CCQPSTATUS]);
+		val = pete_readl("drivers/infiniband/hw/irdma/ctrl.c:3251", cqp->dev->hw_regs[IRDMA_CCQPSTATUS]);
 	} while (!val);
 
 	if (FLD_RS_32(cqp->dev, val, IRDMA_CCQPSTATUS_CCQP_ERR)) {
@@ -3263,7 +3263,7 @@ err:
 	dma_free_coherent(cqp->dev->hw->device, cqp->sdbuf.size,
 			  cqp->sdbuf.va, cqp->sdbuf.pa);
 	cqp->sdbuf.va = NULL;
-	err_code = readl(cqp->dev->hw_regs[IRDMA_CQPERRCODES]);
+	err_code = pete_readl("drivers/infiniband/hw/irdma/ctrl.c:3266", cqp->dev->hw_regs[IRDMA_CQPERRCODES]);
 	*min_err = FIELD_GET(IRDMA_CQPERRCODES_CQP_MINOR_CODE, err_code);
 	*maj_err = FIELD_GET(IRDMA_CQPERRCODES_CQP_MAJOR_CODE, err_code);
 	return ret_code;
@@ -3275,7 +3275,7 @@ err:
  */
 void irdma_sc_cqp_post_sq(struct irdma_sc_cqp *cqp)
 {
-	writel(IRDMA_RING_CURRENT_HEAD(cqp->sq_ring), cqp->dev->cqp_db);
+	pete_writel("drivers/infiniband/hw/irdma/ctrl.c:3278", IRDMA_RING_CURRENT_HEAD(cqp->sq_ring), cqp->dev->cqp_db);
 
 	ibdev_dbg(to_ibdev(cqp->dev),
 		  "WQE: CQP SQ head 0x%x tail 0x%x size 0x%x\n",
@@ -3325,15 +3325,15 @@ enum irdma_status_code irdma_sc_cqp_destroy(struct irdma_sc_cqp *cqp)
 	u32 cnt = 0, val;
 	enum irdma_status_code ret_code = 0;
 
-	writel(0, cqp->dev->hw_regs[IRDMA_CCQPHIGH]);
-	writel(0, cqp->dev->hw_regs[IRDMA_CCQPLOW]);
+	pete_writel("drivers/infiniband/hw/irdma/ctrl.c:3328", 0, cqp->dev->hw_regs[IRDMA_CCQPHIGH]);
+	pete_writel("drivers/infiniband/hw/irdma/ctrl.c:3329", 0, cqp->dev->hw_regs[IRDMA_CCQPLOW]);
 	do {
 		if (cnt++ > cqp->dev->hw_attrs.max_done_count) {
 			ret_code = IRDMA_ERR_TIMEOUT;
 			break;
 		}
 		udelay(cqp->dev->hw_attrs.max_sleep_count);
-		val = readl(cqp->dev->hw_regs[IRDMA_CCQPSTATUS]);
+		val = pete_readl("drivers/infiniband/hw/irdma/ctrl.c:3336", cqp->dev->hw_regs[IRDMA_CCQPSTATUS]);
 	} while (FLD_RS_32(cqp->dev, val, IRDMA_CCQPSTATUS_CCQP_DONE));
 
 	dma_free_coherent(cqp->dev->hw->device, cqp->sdbuf.size,
@@ -3366,7 +3366,7 @@ void irdma_sc_ccq_arm(struct irdma_sc_cq *ccq)
 
 	dma_wmb(); /* make sure shadow area is updated before arming */
 
-	writel(ccq->cq_uk.cq_id, ccq->dev->cq_arm_db);
+	pete_writel("drivers/infiniband/hw/irdma/ctrl.c:3369", ccq->cq_uk.cq_id, ccq->dev->cq_arm_db);
 }
 
 /**
@@ -3402,7 +3402,7 @@ enum irdma_status_code irdma_sc_ccq_get_cqe_info(struct irdma_sc_cq *ccq,
 	info->min_err_code = (u16)FIELD_GET(IRDMA_CQ_MINERR, temp);
 	if (info->error) {
 		info->maj_err_code = (u16)FIELD_GET(IRDMA_CQ_MAJERR, temp);
-		error = readl(cqp->dev->hw_regs[IRDMA_CQPERRCODES]);
+		error = pete_readl("drivers/infiniband/hw/irdma/ctrl.c:3405", cqp->dev->hw_regs[IRDMA_CQPERRCODES]);
 		ibdev_dbg(to_ibdev(cqp->dev),
 			  "CQP: CQPERRCODES error_code[x%08X]\n", error);
 	}
@@ -4008,7 +4008,7 @@ static enum irdma_status_code irdma_sc_aeq_destroy(struct irdma_sc_aeq *aeq,
 	u64 hdr;
 
 	dev = aeq->dev;
-	writel(0, dev->hw_regs[IRDMA_PFINT_AEQCTL]);
+	pete_writel("drivers/infiniband/hw/irdma/ctrl.c:4011", 0, dev->hw_regs[IRDMA_PFINT_AEQCTL]);
 
 	cqp = dev->cqp;
 	wqe = irdma_sc_cqp_get_next_send_wqe(cqp, scratch);
@@ -4188,7 +4188,7 @@ enum irdma_status_code irdma_sc_get_next_aeqe(struct irdma_sc_aeq *aeq,
  */
 void irdma_sc_repost_aeq_entries(struct irdma_sc_dev *dev, u32 count)
 {
-	writel(count, dev->hw_regs[IRDMA_AEQALLOC]);
+	pete_writel("drivers/infiniband/hw/irdma/ctrl.c:4191", count, dev->hw_regs[IRDMA_AEQALLOC]);
 }
 
 /**
@@ -4996,7 +4996,7 @@ enum irdma_status_code irdma_cfg_fpm_val(struct irdma_sc_dev *dev, u32 qp_count)
 	if (ret_code) {
 		ibdev_dbg(to_ibdev(dev),
 			  "HMC: cfg_iw_fpm returned error_code[x%08X]\n",
-			  readl(dev->hw_regs[IRDMA_CQPERRCODES]));
+			  pete_readl("drivers/infiniband/hw/irdma/ctrl.c:4999", dev->hw_regs[IRDMA_CQPERRCODES]));
 		return ret_code;
 	}
 
@@ -5346,7 +5346,7 @@ void irdma_cfg_aeq(struct irdma_sc_dev *dev, u32 idx, bool enable)
 	reg_val = FIELD_PREP(IRDMA_PFINT_AEQCTL_CAUSE_ENA, enable) |
 		  FIELD_PREP(IRDMA_PFINT_AEQCTL_MSIX_INDX, idx) |
 		  FIELD_PREP(IRDMA_PFINT_AEQCTL_ITR_INDX, 3);
-	writel(reg_val, dev->hw_regs[IRDMA_PFINT_AEQCTL]);
+	pete_writel("drivers/infiniband/hw/irdma/ctrl.c:5349", reg_val, dev->hw_regs[IRDMA_PFINT_AEQCTL]);
 }
 
 /**
@@ -5376,9 +5376,9 @@ static int irdma_wait_pe_ready(struct irdma_sc_dev *dev)
 	u32 retrycount = 0;
 
 	do {
-		statuscpu0 = readl(dev->hw_regs[IRDMA_GLPE_CPUSTATUS0]);
-		statuscpu1 = readl(dev->hw_regs[IRDMA_GLPE_CPUSTATUS1]);
-		statuscpu2 = readl(dev->hw_regs[IRDMA_GLPE_CPUSTATUS2]);
+		statuscpu0 = pete_readl("drivers/infiniband/hw/irdma/ctrl.c:5379", dev->hw_regs[IRDMA_GLPE_CPUSTATUS0]);
+		statuscpu1 = pete_readl("drivers/infiniband/hw/irdma/ctrl.c:5380", dev->hw_regs[IRDMA_GLPE_CPUSTATUS1]);
+		statuscpu2 = pete_readl("drivers/infiniband/hw/irdma/ctrl.c:5381", dev->hw_regs[IRDMA_GLPE_CPUSTATUS2]);
 		if (statuscpu0 == 0x80 && statuscpu1 == 0x80 &&
 		    statuscpu2 == 0x80)
 			return 0;
@@ -5456,7 +5456,7 @@ enum irdma_status_code irdma_sc_dev_init(enum irdma_vers ver,
 	if (irdma_wait_pe_ready(dev))
 		return IRDMA_ERR_TIMEOUT;
 
-	val = readl(dev->hw_regs[IRDMA_GLPCI_LBARCTRL]);
+	val = pete_readl("drivers/infiniband/hw/irdma/ctrl.c:5459", dev->hw_regs[IRDMA_GLPCI_LBARCTRL]);
 	db_size = (u8)FIELD_GET(IRDMA_GLPCI_LBARCTRL_PE_DB_SIZE, val);
 	if (db_size != IRDMA_PE_DB_SIZE_4M && db_size != IRDMA_PE_DB_SIZE_8M) {
 		ibdev_dbg(to_ibdev(dev),

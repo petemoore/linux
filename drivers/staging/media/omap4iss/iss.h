@@ -162,7 +162,7 @@ static inline
 u32 iss_reg_read(struct iss_device *iss, enum iss_mem_resources res,
 		 u32 offset)
 {
-	return readl(iss->regs[res] + offset);
+	return pete_readl("drivers/staging/media/omap4iss/iss.h:165", iss->regs[res] + offset);
 }
 
 /*
@@ -176,7 +176,7 @@ static inline
 void iss_reg_write(struct iss_device *iss, enum iss_mem_resources res,
 		   u32 offset, u32 value)
 {
-	writel(value, iss->regs[res] + offset);
+	pete_writel("drivers/staging/media/omap4iss/iss.h:179", value, iss->regs[res] + offset);
 }
 
 /*

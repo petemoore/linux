@@ -45,10 +45,10 @@ static void altera_gpio_irq_unmask(struct irq_data *d)
 	mm_gc = &altera_gc->mmchip;
 
 	raw_spin_lock_irqsave(&altera_gc->gpio_lock, flags);
-	intmask = readl(mm_gc->regs + ALTERA_GPIO_IRQ_MASK);
+	intmask = pete_readl("drivers/gpio/gpio-altera.c:48", mm_gc->regs + ALTERA_GPIO_IRQ_MASK);
 	/* Set ALTERA_GPIO_IRQ_MASK bit to unmask */
 	intmask |= BIT(irqd_to_hwirq(d));
-	writel(intmask, mm_gc->regs + ALTERA_GPIO_IRQ_MASK);
+	pete_writel("drivers/gpio/gpio-altera.c:51", intmask, mm_gc->regs + ALTERA_GPIO_IRQ_MASK);
 	raw_spin_unlock_irqrestore(&altera_gc->gpio_lock, flags);
 }
 
@@ -63,10 +63,10 @@ static void altera_gpio_irq_mask(struct irq_data *d)
 	mm_gc = &altera_gc->mmchip;
 
 	raw_spin_lock_irqsave(&altera_gc->gpio_lock, flags);
-	intmask = readl(mm_gc->regs + ALTERA_GPIO_IRQ_MASK);
+	intmask = pete_readl("drivers/gpio/gpio-altera.c:66", mm_gc->regs + ALTERA_GPIO_IRQ_MASK);
 	/* Clear ALTERA_GPIO_IRQ_MASK bit to mask */
 	intmask &= ~BIT(irqd_to_hwirq(d));
-	writel(intmask, mm_gc->regs + ALTERA_GPIO_IRQ_MASK);
+	pete_writel("drivers/gpio/gpio-altera.c:69", intmask, mm_gc->regs + ALTERA_GPIO_IRQ_MASK);
 	raw_spin_unlock_irqrestore(&altera_gc->gpio_lock, flags);
 }
 
@@ -109,7 +109,7 @@ static int altera_gpio_get(struct gpio_chip *gc, unsigned offset)
 
 	mm_gc = to_of_mm_gpio_chip(gc);
 
-	return !!(readl(mm_gc->regs + ALTERA_GPIO_DATA) & BIT(offset));
+	return !!(pete_readl("drivers/gpio/gpio-altera.c:112", mm_gc->regs + ALTERA_GPIO_DATA) & BIT(offset));
 }
 
 static void altera_gpio_set(struct gpio_chip *gc, unsigned offset, int value)
@@ -123,12 +123,12 @@ static void altera_gpio_set(struct gpio_chip *gc, unsigned offset, int value)
 	chip = gpiochip_get_data(gc);
 
 	raw_spin_lock_irqsave(&chip->gpio_lock, flags);
-	data_reg = readl(mm_gc->regs + ALTERA_GPIO_DATA);
+	data_reg = pete_readl("drivers/gpio/gpio-altera.c:126", mm_gc->regs + ALTERA_GPIO_DATA);
 	if (value)
 		data_reg |= BIT(offset);
 	else
 		data_reg &= ~BIT(offset);
-	writel(data_reg, mm_gc->regs + ALTERA_GPIO_DATA);
+	pete_writel("drivers/gpio/gpio-altera.c:131", data_reg, mm_gc->regs + ALTERA_GPIO_DATA);
 	raw_spin_unlock_irqrestore(&chip->gpio_lock, flags);
 }
 
@@ -144,9 +144,9 @@ static int altera_gpio_direction_input(struct gpio_chip *gc, unsigned offset)
 
 	raw_spin_lock_irqsave(&chip->gpio_lock, flags);
 	/* Set pin as input, assumes software controlled IP */
-	gpio_ddr = readl(mm_gc->regs + ALTERA_GPIO_DIR);
+	gpio_ddr = pete_readl("drivers/gpio/gpio-altera.c:147", mm_gc->regs + ALTERA_GPIO_DIR);
 	gpio_ddr &= ~BIT(offset);
-	writel(gpio_ddr, mm_gc->regs + ALTERA_GPIO_DIR);
+	pete_writel("drivers/gpio/gpio-altera.c:149", gpio_ddr, mm_gc->regs + ALTERA_GPIO_DIR);
 	raw_spin_unlock_irqrestore(&chip->gpio_lock, flags);
 
 	return 0;
@@ -165,17 +165,17 @@ static int altera_gpio_direction_output(struct gpio_chip *gc,
 
 	raw_spin_lock_irqsave(&chip->gpio_lock, flags);
 	/* Sets the GPIO value */
-	data_reg = readl(mm_gc->regs + ALTERA_GPIO_DATA);
+	data_reg = pete_readl("drivers/gpio/gpio-altera.c:168", mm_gc->regs + ALTERA_GPIO_DATA);
 	if (value)
 		data_reg |= BIT(offset);
 	else
 		data_reg &= ~BIT(offset);
-	writel(data_reg, mm_gc->regs + ALTERA_GPIO_DATA);
+	pete_writel("drivers/gpio/gpio-altera.c:173", data_reg, mm_gc->regs + ALTERA_GPIO_DATA);
 
 	/* Set pin as output, assumes software controlled IP */
-	gpio_ddr = readl(mm_gc->regs + ALTERA_GPIO_DIR);
+	gpio_ddr = pete_readl("drivers/gpio/gpio-altera.c:176", mm_gc->regs + ALTERA_GPIO_DIR);
 	gpio_ddr |= BIT(offset);
-	writel(gpio_ddr, mm_gc->regs + ALTERA_GPIO_DIR);
+	pete_writel("drivers/gpio/gpio-altera.c:178", gpio_ddr, mm_gc->regs + ALTERA_GPIO_DIR);
 	raw_spin_unlock_irqrestore(&chip->gpio_lock, flags);
 
 	return 0;
@@ -198,9 +198,9 @@ static void altera_gpio_irq_edge_handler(struct irq_desc *desc)
 	chained_irq_enter(chip, desc);
 
 	while ((status =
-	      (readl(mm_gc->regs + ALTERA_GPIO_EDGE_CAP) &
-	      readl(mm_gc->regs + ALTERA_GPIO_IRQ_MASK)))) {
-		writel(status, mm_gc->regs + ALTERA_GPIO_EDGE_CAP);
+	      (pete_readl("drivers/gpio/gpio-altera.c:201", mm_gc->regs + ALTERA_GPIO_EDGE_CAP) &
+	      pete_readl("drivers/gpio/gpio-altera.c:202", mm_gc->regs + ALTERA_GPIO_IRQ_MASK)))) {
+		pete_writel("drivers/gpio/gpio-altera.c:203", status, mm_gc->regs + ALTERA_GPIO_EDGE_CAP);
 		for_each_set_bit(i, &status, mm_gc->gc.ngpio)
 			generic_handle_domain_irq(irqdomain, i);
 	}
@@ -224,8 +224,8 @@ static void altera_gpio_irq_leveL_high_handler(struct irq_desc *desc)
 
 	chained_irq_enter(chip, desc);
 
-	status = readl(mm_gc->regs + ALTERA_GPIO_DATA);
-	status &= readl(mm_gc->regs + ALTERA_GPIO_IRQ_MASK);
+	status = pete_readl("drivers/gpio/gpio-altera.c:227", mm_gc->regs + ALTERA_GPIO_DATA);
+	status &= pete_readl("drivers/gpio/gpio-altera.c:228", mm_gc->regs + ALTERA_GPIO_IRQ_MASK);
 
 	for_each_set_bit(i, &status, mm_gc->gc.ngpio)
 		generic_handle_domain_irq(irqdomain, i);

@@ -36,7 +36,7 @@ static u32 iomap_read_reg(struct m_can_classdev *cdev, int reg)
 {
 	struct m_can_pci_priv *priv = cdev_to_priv(cdev);
 
-	return readl(priv->base + reg);
+	return pete_readl("drivers/net/can/m_can/m_can_pci.c:39", priv->base + reg);
 }
 
 static int iomap_read_fifo(struct m_can_classdev *cdev, int offset, void *val, size_t val_count)
@@ -57,7 +57,7 @@ static int iomap_write_reg(struct m_can_classdev *cdev, int reg, int val)
 {
 	struct m_can_pci_priv *priv = cdev_to_priv(cdev);
 
-	writel(val, priv->base + reg);
+	pete_writel("drivers/net/can/m_can/m_can_pci.c:60", val, priv->base + reg);
 
 	return 0;
 }
@@ -135,7 +135,7 @@ static int m_can_pci_probe(struct pci_dev *pci, const struct pci_device_id *id)
 		goto err_free_irq;
 
 	/* Enable interrupt control at CAN wrapper IP */
-	writel(0x1, base + CTL_CSR_INT_CTL_OFFSET);
+	pete_writel("drivers/net/can/m_can/m_can_pci.c:138", 0x1, base + CTL_CSR_INT_CTL_OFFSET);
 
 	pm_runtime_set_autosuspend_delay(dev, 1000);
 	pm_runtime_use_autosuspend(dev);
@@ -160,7 +160,7 @@ static void m_can_pci_remove(struct pci_dev *pci)
 	pm_runtime_get_noresume(&pci->dev);
 
 	/* Disable interrupt control at CAN wrapper IP */
-	writel(0x0, priv->base + CTL_CSR_INT_CTL_OFFSET);
+	pete_writel("drivers/net/can/m_can/m_can_pci.c:163", 0x0, priv->base + CTL_CSR_INT_CTL_OFFSET);
 
 	m_can_class_unregister(mcan_class);
 	m_can_class_free_dev(mcan_class->net);

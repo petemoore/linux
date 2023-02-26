@@ -193,7 +193,7 @@ static inline void writes(const void *mem, ssize_t count, void __iomem *addr)
 
 		count /= 4;
 		do {
-			writel(*buf++, addr);
+			pete_writel("drivers/staging/media/ipu3/ipu3-css.c:196", *buf++, addr);
 			addr += 4;
 		} while (--count);
 	}
@@ -217,8 +217,8 @@ int imgu_css_set_powerup(struct device *dev, void __iomem *base,
 
 	dev_dbg(dev, "%s with freq %u\n", __func__, freq);
 	/* Clear the CSS busy signal */
-	readl(base + IMGU_REG_GP_BUSY);
-	writel(0, base + IMGU_REG_GP_BUSY);
+	pete_readl("drivers/staging/media/ipu3/ipu3-css.c:220", base + IMGU_REG_GP_BUSY);
+	pete_writel("drivers/staging/media/ipu3/ipu3-css.c:221", 0, base + IMGU_REG_GP_BUSY);
 
 	/* Wait for idle signal */
 	if (imgu_hw_wait(base, IMGU_REG_STATE, IMGU_STATE_IDLE_STS,
@@ -228,22 +228,22 @@ int imgu_css_set_powerup(struct device *dev, void __iomem *base,
 	}
 
 	/* Reset the css */
-	writel(readl(base + IMGU_REG_PM_CTRL) | IMGU_PM_CTRL_FORCE_RESET,
+	pete_writel("drivers/staging/media/ipu3/ipu3-css.c:231", pete_readl("drivers/staging/media/ipu3/ipu3-css.c:231", base + IMGU_REG_PM_CTRL) | IMGU_PM_CTRL_FORCE_RESET,
 	       base + IMGU_REG_PM_CTRL);
 
 	usleep_range(200, 300);
 
 	/** Prepare CSS */
 
-	pm_ctrl = readl(base + IMGU_REG_PM_CTRL);
-	state = readl(base + IMGU_REG_STATE);
+	pm_ctrl = pete_readl("drivers/staging/media/ipu3/ipu3-css.c:238", base + IMGU_REG_PM_CTRL);
+	state = pete_readl("drivers/staging/media/ipu3/ipu3-css.c:239", base + IMGU_REG_STATE);
 
 	dev_dbg(dev, "CSS pm_ctrl 0x%x state 0x%x (power %s)\n",
 		pm_ctrl, state, state & IMGU_STATE_POWER_DOWN ? "down" : "up");
 
 	/* Power up CSS using wrapper */
 	if (state & IMGU_STATE_POWER_DOWN) {
-		writel(IMGU_PM_CTRL_RACE_TO_HALT | IMGU_PM_CTRL_START,
+		pete_writel("drivers/staging/media/ipu3/ipu3-css.c:246", IMGU_PM_CTRL_RACE_TO_HALT | IMGU_PM_CTRL_START,
 		       base + IMGU_REG_PM_CTRL);
 		if (imgu_hw_wait(base, IMGU_REG_PM_CTRL,
 				 IMGU_PM_CTRL_START, 0)) {
@@ -252,26 +252,26 @@ int imgu_css_set_powerup(struct device *dev, void __iomem *base,
 		}
 		usleep_range(2000, 3000);
 	} else {
-		writel(IMGU_PM_CTRL_RACE_TO_HALT, base + IMGU_REG_PM_CTRL);
+		pete_writel("drivers/staging/media/ipu3/ipu3-css.c:255", IMGU_PM_CTRL_RACE_TO_HALT, base + IMGU_REG_PM_CTRL);
 	}
 
 	/* Set the busy bit */
-	writel(readl(base + IMGU_REG_GP_BUSY) | 1, base + IMGU_REG_GP_BUSY);
+	pete_writel("drivers/staging/media/ipu3/ipu3-css.c:259", pete_readl("drivers/staging/media/ipu3/ipu3-css.c:259", base + IMGU_REG_GP_BUSY) | 1, base + IMGU_REG_GP_BUSY);
 
 	/* Set CSS clock frequency */
-	pm_ctrl = readl(base + IMGU_REG_PM_CTRL);
+	pm_ctrl = pete_readl("drivers/staging/media/ipu3/ipu3-css.c:262", base + IMGU_REG_PM_CTRL);
 	val = pm_ctrl & ~(IMGU_PM_CTRL_CSS_PWRDN | IMGU_PM_CTRL_RST_AT_EOF);
-	writel(val, base + IMGU_REG_PM_CTRL);
-	writel(0, base + IMGU_REG_GP_BUSY);
+	pete_writel("drivers/staging/media/ipu3/ipu3-css.c:264", val, base + IMGU_REG_PM_CTRL);
+	pete_writel("drivers/staging/media/ipu3/ipu3-css.c:265", 0, base + IMGU_REG_GP_BUSY);
 	if (imgu_hw_wait(base, IMGU_REG_STATE,
 			 IMGU_STATE_PWRDNM_FSM_MASK, 0)) {
 		dev_err(dev, "failed to pwrdn CSS\n");
 		goto fail;
 	}
 	val = (freq / IMGU_SYSTEM_REQ_FREQ_DIVIDER) & IMGU_SYSTEM_REQ_FREQ_MASK;
-	writel(val, base + IMGU_REG_SYSTEM_REQ);
-	writel(1, base + IMGU_REG_GP_BUSY);
-	writel(readl(base + IMGU_REG_PM_CTRL) | IMGU_PM_CTRL_FORCE_HALT,
+	pete_writel("drivers/staging/media/ipu3/ipu3-css.c:272", val, base + IMGU_REG_SYSTEM_REQ);
+	pete_writel("drivers/staging/media/ipu3/ipu3-css.c:273", 1, base + IMGU_REG_GP_BUSY);
+	pete_writel("drivers/staging/media/ipu3/ipu3-css.c:274", pete_readl("drivers/staging/media/ipu3/ipu3-css.c:274", base + IMGU_REG_PM_CTRL) | IMGU_PM_CTRL_FORCE_HALT,
 	       base + IMGU_REG_PM_CTRL);
 	if (imgu_hw_wait(base, IMGU_REG_STATE, IMGU_STATE_HALT_STS,
 			 IMGU_STATE_HALT_STS)) {
@@ -279,19 +279,19 @@ int imgu_css_set_powerup(struct device *dev, void __iomem *base,
 		goto fail;
 	}
 
-	writel(readl(base + IMGU_REG_PM_CTRL) | IMGU_PM_CTRL_START,
+	pete_writel("drivers/staging/media/ipu3/ipu3-css.c:282", pete_readl("drivers/staging/media/ipu3/ipu3-css.c:282", base + IMGU_REG_PM_CTRL) | IMGU_PM_CTRL_START,
 	       base + IMGU_REG_PM_CTRL);
 	if (imgu_hw_wait(base, IMGU_REG_PM_CTRL, IMGU_PM_CTRL_START, 0)) {
 		dev_err(dev, "failed to start CSS\n");
 		goto fail;
 	}
-	writel(readl(base + IMGU_REG_PM_CTRL) | IMGU_PM_CTRL_FORCE_UNHALT,
+	pete_writel("drivers/staging/media/ipu3/ipu3-css.c:288", pete_readl("drivers/staging/media/ipu3/ipu3-css.c:288", base + IMGU_REG_PM_CTRL) | IMGU_PM_CTRL_FORCE_UNHALT,
 	       base + IMGU_REG_PM_CTRL);
 
-	val = readl(base + IMGU_REG_PM_CTRL);	/* get pm_ctrl */
+	val = pete_readl("drivers/staging/media/ipu3/ipu3-css.c:291", base + IMGU_REG_PM_CTRL);	/* get pm_ctrl */
 	val &= ~(IMGU_PM_CTRL_CSS_PWRDN | IMGU_PM_CTRL_RST_AT_EOF);
 	val |= pm_ctrl & (IMGU_PM_CTRL_CSS_PWRDN | IMGU_PM_CTRL_RST_AT_EOF);
-	writel(val, base + IMGU_REG_PM_CTRL);
+	pete_writel("drivers/staging/media/ipu3/ipu3-css.c:294", val, base + IMGU_REG_PM_CTRL);
 
 	return 0;
 
@@ -314,13 +314,13 @@ void imgu_css_set_powerdown(struct device *dev, void __iomem *base)
 		dev_warn(dev, "wait css idle timeout\n");
 
 	/* do halt-halted handshake with css */
-	writel(1, base + IMGU_REG_GP_HALT);
+	pete_writel("drivers/staging/media/ipu3/ipu3-css.c:317", 1, base + IMGU_REG_GP_HALT);
 	if (imgu_hw_wait(base, IMGU_REG_STATE, IMGU_STATE_HALT_STS,
 			 IMGU_STATE_HALT_STS))
 		dev_warn(dev, "failed to halt css");
 
 	/* de-assert the busy bit */
-	writel(0, base + IMGU_REG_GP_BUSY);
+	pete_writel("drivers/staging/media/ipu3/ipu3-css.c:323", 0, base + IMGU_REG_GP_BUSY);
 }
 
 static void imgu_css_hw_enable_irq(struct imgu_css *css)
@@ -334,40 +334,40 @@ static void imgu_css_hw_enable_irq(struct imgu_css *css)
 	 * Enable IRQ on the SP which signals that SP goes to idle
 	 * (aka ready state) and set trigger to pulse
 	 */
-	val = readl(base + IMGU_REG_SP_CTRL(0)) | IMGU_CTRL_IRQ_READY;
-	writel(val, base + IMGU_REG_SP_CTRL(0));
-	writel(val | IMGU_CTRL_IRQ_CLEAR, base + IMGU_REG_SP_CTRL(0));
+	val = pete_readl("drivers/staging/media/ipu3/ipu3-css.c:337", base + IMGU_REG_SP_CTRL(0)) | IMGU_CTRL_IRQ_READY;
+	pete_writel("drivers/staging/media/ipu3/ipu3-css.c:338", val, base + IMGU_REG_SP_CTRL(0));
+	pete_writel("drivers/staging/media/ipu3/ipu3-css.c:339", val | IMGU_CTRL_IRQ_CLEAR, base + IMGU_REG_SP_CTRL(0));
 
 	/* Enable IRQs from the IMGU wrapper */
-	writel(IMGU_REG_INT_CSS_IRQ, base + IMGU_REG_INT_ENABLE);
+	pete_writel("drivers/staging/media/ipu3/ipu3-css.c:342", IMGU_REG_INT_CSS_IRQ, base + IMGU_REG_INT_ENABLE);
 	/* Clear */
-	writel(IMGU_REG_INT_CSS_IRQ, base + IMGU_REG_INT_STATUS);
+	pete_writel("drivers/staging/media/ipu3/ipu3-css.c:344", IMGU_REG_INT_CSS_IRQ, base + IMGU_REG_INT_STATUS);
 
 	/* Enable IRQs from main IRQ controller */
-	writel(~0, base + IMGU_REG_IRQCTRL_EDGE_NOT_PULSE(IMGU_IRQCTRL_MAIN));
-	writel(0, base + IMGU_REG_IRQCTRL_MASK(IMGU_IRQCTRL_MAIN));
-	writel(IMGU_IRQCTRL_IRQ_MASK,
+	pete_writel("drivers/staging/media/ipu3/ipu3-css.c:347", ~0, base + IMGU_REG_IRQCTRL_EDGE_NOT_PULSE(IMGU_IRQCTRL_MAIN));
+	pete_writel("drivers/staging/media/ipu3/ipu3-css.c:348", 0, base + IMGU_REG_IRQCTRL_MASK(IMGU_IRQCTRL_MAIN));
+	pete_writel("drivers/staging/media/ipu3/ipu3-css.c:349", IMGU_IRQCTRL_IRQ_MASK,
 	       base + IMGU_REG_IRQCTRL_EDGE(IMGU_IRQCTRL_MAIN));
-	writel(IMGU_IRQCTRL_IRQ_MASK,
+	pete_writel("drivers/staging/media/ipu3/ipu3-css.c:351", IMGU_IRQCTRL_IRQ_MASK,
 	       base + IMGU_REG_IRQCTRL_ENABLE(IMGU_IRQCTRL_MAIN));
-	writel(IMGU_IRQCTRL_IRQ_MASK,
+	pete_writel("drivers/staging/media/ipu3/ipu3-css.c:353", IMGU_IRQCTRL_IRQ_MASK,
 	       base + IMGU_REG_IRQCTRL_CLEAR(IMGU_IRQCTRL_MAIN));
-	writel(IMGU_IRQCTRL_IRQ_MASK,
+	pete_writel("drivers/staging/media/ipu3/ipu3-css.c:355", IMGU_IRQCTRL_IRQ_MASK,
 	       base + IMGU_REG_IRQCTRL_MASK(IMGU_IRQCTRL_MAIN));
 	/* Wait for write complete */
-	readl(base + IMGU_REG_IRQCTRL_ENABLE(IMGU_IRQCTRL_MAIN));
+	pete_readl("drivers/staging/media/ipu3/ipu3-css.c:358", base + IMGU_REG_IRQCTRL_ENABLE(IMGU_IRQCTRL_MAIN));
 
 	/* Enable IRQs from SP0 and SP1 controllers */
 	for (i = IMGU_IRQCTRL_SP0; i <= IMGU_IRQCTRL_SP1; i++) {
-		writel(~0, base + IMGU_REG_IRQCTRL_EDGE_NOT_PULSE(i));
-		writel(0, base + IMGU_REG_IRQCTRL_MASK(i));
-		writel(IMGU_IRQCTRL_IRQ_MASK, base + IMGU_REG_IRQCTRL_EDGE(i));
-		writel(IMGU_IRQCTRL_IRQ_MASK,
+		pete_writel("drivers/staging/media/ipu3/ipu3-css.c:362", ~0, base + IMGU_REG_IRQCTRL_EDGE_NOT_PULSE(i));
+		pete_writel("drivers/staging/media/ipu3/ipu3-css.c:363", 0, base + IMGU_REG_IRQCTRL_MASK(i));
+		pete_writel("drivers/staging/media/ipu3/ipu3-css.c:364", IMGU_IRQCTRL_IRQ_MASK, base + IMGU_REG_IRQCTRL_EDGE(i));
+		pete_writel("drivers/staging/media/ipu3/ipu3-css.c:365", IMGU_IRQCTRL_IRQ_MASK,
 		       base + IMGU_REG_IRQCTRL_ENABLE(i));
-		writel(IMGU_IRQCTRL_IRQ_MASK, base + IMGU_REG_IRQCTRL_CLEAR(i));
-		writel(IMGU_IRQCTRL_IRQ_MASK, base + IMGU_REG_IRQCTRL_MASK(i));
+		pete_writel("drivers/staging/media/ipu3/ipu3-css.c:367", IMGU_IRQCTRL_IRQ_MASK, base + IMGU_REG_IRQCTRL_CLEAR(i));
+		pete_writel("drivers/staging/media/ipu3/ipu3-css.c:368", IMGU_IRQCTRL_IRQ_MASK, base + IMGU_REG_IRQCTRL_MASK(i));
 		/* Wait for write complete */
-		readl(base + IMGU_REG_IRQCTRL_ENABLE(i));
+		pete_readl("drivers/staging/media/ipu3/ipu3-css.c:370", base + IMGU_REG_IRQCTRL_ENABLE(i));
 	}
 }
 
@@ -431,29 +431,29 @@ static int imgu_css_hw_init(struct imgu_css *css)
 		struct imgu_fw_info *bi =
 					&css->fwp->binary_header[css->fw_sp[i]];
 
-		writel(css->binary[css->fw_sp[i]].daddr,
+		pete_writel("drivers/staging/media/ipu3/ipu3-css.c:434", css->binary[css->fw_sp[i]].daddr,
 		       base + IMGU_REG_SP_ICACHE_ADDR(bi->type));
-		writel(readl(base + IMGU_REG_SP_CTRL(bi->type)) |
+		pete_writel("drivers/staging/media/ipu3/ipu3-css.c:436", pete_readl("drivers/staging/media/ipu3/ipu3-css.c:436", base + IMGU_REG_SP_CTRL(bi->type)) |
 		       IMGU_CTRL_ICACHE_INV,
 		       base + IMGU_REG_SP_CTRL(bi->type));
 	}
-	writel(css->binary[css->fw_bl].daddr, base + IMGU_REG_ISP_ICACHE_ADDR);
-	writel(readl(base + IMGU_REG_ISP_CTRL) | IMGU_CTRL_ICACHE_INV,
+	pete_writel("drivers/staging/media/ipu3/ipu3-css.c:440", css->binary[css->fw_bl].daddr, base + IMGU_REG_ISP_ICACHE_ADDR);
+	pete_writel("drivers/staging/media/ipu3/ipu3-css.c:441", pete_readl("drivers/staging/media/ipu3/ipu3-css.c:441", base + IMGU_REG_ISP_CTRL) | IMGU_CTRL_ICACHE_INV,
 	       base + IMGU_REG_ISP_CTRL);
 
 	/* Check that IMGU hardware is ready */
 
-	if (!(readl(base + IMGU_REG_SP_CTRL(0)) & IMGU_CTRL_IDLE)) {
+	if (!(pete_readl("drivers/staging/media/ipu3/ipu3-css.c:446", base + IMGU_REG_SP_CTRL(0)) & IMGU_CTRL_IDLE)) {
 		dev_err(dev, "SP is not idle\n");
 		return -EIO;
 	}
-	if (!(readl(base + IMGU_REG_ISP_CTRL) & IMGU_CTRL_IDLE)) {
+	if (!(pete_readl("drivers/staging/media/ipu3/ipu3-css.c:450", base + IMGU_REG_ISP_CTRL) & IMGU_CTRL_IDLE)) {
 		dev_err(dev, "ISP is not idle\n");
 		return -EIO;
 	}
 
 	for (i = 0; i < ARRAY_SIZE(stream_monitors); i++) {
-		val = readl(base + stream_monitors[i].reg);
+		val = pete_readl("drivers/staging/media/ipu3/ipu3-css.c:456", base + stream_monitors[i].reg);
 		if (val & stream_monitors[i].mask) {
 			dev_err(dev, "error: Stream monitor %s is valid\n",
 				stream_monitors[i].name);
@@ -469,9 +469,9 @@ static int imgu_css_hw_init(struct imgu_css *css)
 		u32 val2 = imgu_css_gdc_lut[2][i] & IMGU_GDC_LUT_MASK;
 		u32 val3 = imgu_css_gdc_lut[3][i] & IMGU_GDC_LUT_MASK;
 
-		writel(val0 | (val1 << 16),
+		pete_writel("drivers/staging/media/ipu3/ipu3-css.c:472", val0 | (val1 << 16),
 		       base + IMGU_REG_GDC_LUT_BASE + i * 8);
-		writel(val2 | (val3 << 16),
+		pete_writel("drivers/staging/media/ipu3/ipu3-css.c:474", val2 | (val3 << 16),
 		       base + IMGU_REG_GDC_LUT_BASE + i * 8 + 4);
 	}
 
@@ -496,9 +496,9 @@ static int imgu_css_hw_start_sp(struct imgu_css *css, int sp)
 	writes(&dmem_cfg, sizeof(dmem_cfg), base +
 	       IMGU_REG_SP_DMEM_BASE(sp) + bi->info.sp.init_dmem_data);
 
-	writel(bi->info.sp.sp_entry, base + IMGU_REG_SP_START_ADDR(sp));
+	pete_writel("drivers/staging/media/ipu3/ipu3-css.c:499", bi->info.sp.sp_entry, base + IMGU_REG_SP_START_ADDR(sp));
 
-	writel(readl(base + IMGU_REG_SP_CTRL(sp))
+	pete_writel("drivers/staging/media/ipu3/ipu3-css.c:501", pete_readl("drivers/staging/media/ipu3/ipu3-css.c:501", base + IMGU_REG_SP_CTRL(sp))
 		| IMGU_CTRL_START | IMGU_CTRL_RUN, base + IMGU_REG_SP_CTRL(sp));
 
 	if (imgu_hw_wait(css->base, IMGU_REG_SP_DMEM_BASE(sp)
@@ -530,13 +530,13 @@ static int imgu_css_hw_start(struct imgu_css *css)
 	struct imgu_fw_info *bi, *bl = &css->fwp->binary_header[css->fw_bl];
 	unsigned int i;
 
-	writel(IMGU_TLB_INVALIDATE, base + IMGU_REG_TLB_INVALIDATE);
+	pete_writel("drivers/staging/media/ipu3/ipu3-css.c:533", IMGU_TLB_INVALIDATE, base + IMGU_REG_TLB_INVALIDATE);
 
 	/* Start bootloader */
 
-	writel(IMGU_ABI_BL_SWSTATE_BUSY,
+	pete_writel("drivers/staging/media/ipu3/ipu3-css.c:537", IMGU_ABI_BL_SWSTATE_BUSY,
 	       base + IMGU_REG_ISP_DMEM_BASE + bl->info.bl.sw_state);
-	writel(IMGU_NUM_SP,
+	pete_writel("drivers/staging/media/ipu3/ipu3-css.c:539", IMGU_NUM_SP,
 	       base + IMGU_REG_ISP_DMEM_BASE + bl->info.bl.num_dma_cmds);
 
 	for (i = 0; i < IMGU_NUM_SP; i++) {
@@ -556,9 +556,9 @@ static int imgu_css_hw_start(struct imgu_css *css)
 		       bl->info.bl.dma_cmd_list);
 	}
 
-	writel(bl->info.bl.bl_entry, base + IMGU_REG_ISP_START_ADDR);
+	pete_writel("drivers/staging/media/ipu3/ipu3-css.c:559", bl->info.bl.bl_entry, base + IMGU_REG_ISP_START_ADDR);
 
-	writel(readl(base + IMGU_REG_ISP_CTRL)
+	pete_writel("drivers/staging/media/ipu3/ipu3-css.c:561", pete_readl("drivers/staging/media/ipu3/ipu3-css.c:561", base + IMGU_REG_ISP_CTRL)
 		| IMGU_CTRL_START | IMGU_CTRL_RUN, base + IMGU_REG_ISP_CTRL);
 	if (imgu_hw_wait(css->base, IMGU_REG_ISP_DMEM_BASE
 			 + bl->info.bl.sw_state, ~0,
@@ -574,44 +574,44 @@ static int imgu_css_hw_start(struct imgu_css *css)
 
 	bi = &css->fwp->binary_header[css->fw_sp[0]];
 
-	writel(css->xmem_sp_group_ptrs.daddr,
+	pete_writel("drivers/staging/media/ipu3/ipu3-css.c:577", css->xmem_sp_group_ptrs.daddr,
 	       base + IMGU_REG_SP_DMEM_BASE(0) + bi->info.sp.per_frame_data);
 
-	writel(IMGU_ABI_SP_SWSTATE_TERMINATED,
+	pete_writel("drivers/staging/media/ipu3/ipu3-css.c:580", IMGU_ABI_SP_SWSTATE_TERMINATED,
 	       base + IMGU_REG_SP_DMEM_BASE(0) + bi->info.sp.sw_state);
-	writel(1, base + IMGU_REG_SP_DMEM_BASE(0) + bi->info.sp.invalidate_tlb);
+	pete_writel("drivers/staging/media/ipu3/ipu3-css.c:582", 1, base + IMGU_REG_SP_DMEM_BASE(0) + bi->info.sp.invalidate_tlb);
 
 	if (imgu_css_hw_start_sp(css, 0))
 		return -EIO;
 
-	writel(0, base + IMGU_REG_SP_DMEM_BASE(0) + bi->info.sp.isp_started);
-	writel(0, base + IMGU_REG_SP_DMEM_BASE(0) +
+	pete_writel("drivers/staging/media/ipu3/ipu3-css.c:587", 0, base + IMGU_REG_SP_DMEM_BASE(0) + bi->info.sp.isp_started);
+	pete_writel("drivers/staging/media/ipu3/ipu3-css.c:588", 0, base + IMGU_REG_SP_DMEM_BASE(0) +
 		bi->info.sp.host_sp_queues_initialized);
-	writel(0, base + IMGU_REG_SP_DMEM_BASE(0) + bi->info.sp.sleep_mode);
-	writel(0, base + IMGU_REG_SP_DMEM_BASE(0) + bi->info.sp.invalidate_tlb);
-	writel(IMGU_ABI_SP_COMM_COMMAND_READY, base + IMGU_REG_SP_DMEM_BASE(0)
+	pete_writel("drivers/staging/media/ipu3/ipu3-css.c:590", 0, base + IMGU_REG_SP_DMEM_BASE(0) + bi->info.sp.sleep_mode);
+	pete_writel("drivers/staging/media/ipu3/ipu3-css.c:591", 0, base + IMGU_REG_SP_DMEM_BASE(0) + bi->info.sp.invalidate_tlb);
+	pete_writel("drivers/staging/media/ipu3/ipu3-css.c:592", IMGU_ABI_SP_COMM_COMMAND_READY, base + IMGU_REG_SP_DMEM_BASE(0)
 		+ bi->info.sp.host_sp_com + IMGU_ABI_SP_COMM_COMMAND);
 
 	/* Enable all events for all queues */
 
 	for (i = 0; i < IPU3_CSS_PIPE_ID_NUM; i++)
-		writel(event_mask, base + IMGU_REG_SP_DMEM_BASE(0)
+		pete_writel("drivers/staging/media/ipu3/ipu3-css.c:598", event_mask, base + IMGU_REG_SP_DMEM_BASE(0)
 			+ bi->info.sp.host_sp_com
 			+ IMGU_ABI_SP_COMM_EVENT_IRQ_MASK(i));
-	writel(1, base + IMGU_REG_SP_DMEM_BASE(0) +
+	pete_writel("drivers/staging/media/ipu3/ipu3-css.c:601", 1, base + IMGU_REG_SP_DMEM_BASE(0) +
 		bi->info.sp.host_sp_queues_initialized);
 
 	/* Start SP1 */
 
 	bi = &css->fwp->binary_header[css->fw_sp[1]];
 
-	writel(IMGU_ABI_SP_SWSTATE_TERMINATED,
+	pete_writel("drivers/staging/media/ipu3/ipu3-css.c:608", IMGU_ABI_SP_SWSTATE_TERMINATED,
 	       base + IMGU_REG_SP_DMEM_BASE(1) + bi->info.sp.sw_state);
 
 	if (imgu_css_hw_start_sp(css, 1))
 		return -EIO;
 
-	writel(IMGU_ABI_SP_COMM_COMMAND_READY, base + IMGU_REG_SP_DMEM_BASE(1)
+	pete_writel("drivers/staging/media/ipu3/ipu3-css.c:614", IMGU_ABI_SP_COMM_COMMAND_READY, base + IMGU_REG_SP_DMEM_BASE(1)
 		+ bi->info.sp.host_sp_com + IMGU_ABI_SP_COMM_COMMAND);
 
 	return 0;
@@ -623,13 +623,13 @@ static void imgu_css_hw_stop(struct imgu_css *css)
 	struct imgu_fw_info *bi = &css->fwp->binary_header[css->fw_sp[0]];
 
 	/* Stop fw */
-	writel(IMGU_ABI_SP_COMM_COMMAND_TERMINATE,
+	pete_writel("drivers/staging/media/ipu3/ipu3-css.c:626", IMGU_ABI_SP_COMM_COMMAND_TERMINATE,
 	       base + IMGU_REG_SP_DMEM_BASE(0) +
 	       bi->info.sp.host_sp_com + IMGU_ABI_SP_COMM_COMMAND);
 	if (imgu_hw_wait(css->base, IMGU_REG_SP_CTRL(0),
 			 IMGU_CTRL_IDLE, IMGU_CTRL_IDLE))
 		dev_err(css->dev, "wait sp0 idle timeout.\n");
-	if (readl(base + IMGU_REG_SP_DMEM_BASE(0) + bi->info.sp.sw_state) !=
+	if (pete_readl("drivers/staging/media/ipu3/ipu3-css.c:632", base + IMGU_REG_SP_DMEM_BASE(0) + bi->info.sp.sw_state) !=
 		  IMGU_ABI_SP_SWSTATE_TERMINATED)
 		dev_err(css->dev, "sp0 is not terminated.\n");
 	if (imgu_hw_wait(css->base, IMGU_REG_ISP_CTRL,
@@ -644,8 +644,8 @@ static void imgu_css_hw_cleanup(struct imgu_css *css)
 	/** Reset CSS **/
 
 	/* Clear the CSS busy signal */
-	readl(base + IMGU_REG_GP_BUSY);
-	writel(0, base + IMGU_REG_GP_BUSY);
+	pete_readl("drivers/staging/media/ipu3/ipu3-css.c:647", base + IMGU_REG_GP_BUSY);
+	pete_writel("drivers/staging/media/ipu3/ipu3-css.c:648", 0, base + IMGU_REG_GP_BUSY);
 
 	/* Wait for idle signal */
 	if (imgu_hw_wait(css->base, IMGU_REG_STATE, IMGU_STATE_IDLE_STS,
@@ -653,7 +653,7 @@ static void imgu_css_hw_cleanup(struct imgu_css *css)
 		dev_err(css->dev, "failed to shut down hw cleanly\n");
 
 	/* Reset the css */
-	writel(readl(base + IMGU_REG_PM_CTRL) | IMGU_PM_CTRL_FORCE_RESET,
+	pete_writel("drivers/staging/media/ipu3/ipu3-css.c:656", pete_readl("drivers/staging/media/ipu3/ipu3-css.c:656", base + IMGU_REG_PM_CTRL) | IMGU_PM_CTRL_FORCE_RESET,
 	       base + IMGU_REG_PM_CTRL);
 
 	usleep_range(200, 300);
@@ -1075,8 +1075,8 @@ static u8 imgu_css_queue_pos(struct imgu_css *css, int queue, int thread)
 	struct imgu_abi_queues __iomem *q = base + IMGU_REG_SP_DMEM_BASE(sp) +
 						bi->info.sp.host_sp_queue;
 
-	return queue >= 0 ? readb(&q->host2sp_bufq_info[thread][queue].end) :
-			    readb(&q->host2sp_evtq_info.end);
+	return queue >= 0 ? pete_readb("drivers/staging/media/ipu3/ipu3-css.c:1078", &q->host2sp_bufq_info[thread][queue].end) :
+			    pete_readb("drivers/staging/media/ipu3/ipu3-css.c:1079", &q->host2sp_evtq_info.end);
 }
 
 /* Sent data to sp using given buffer queue, or if queue < 0, event queue. */
@@ -1091,13 +1091,13 @@ static int imgu_css_queue_data(struct imgu_css *css,
 	u8 size, start, end, end2;
 
 	if (queue >= 0) {
-		size = readb(&q->host2sp_bufq_info[thread][queue].size);
-		start = readb(&q->host2sp_bufq_info[thread][queue].start);
-		end = readb(&q->host2sp_bufq_info[thread][queue].end);
+		size = pete_readb("drivers/staging/media/ipu3/ipu3-css.c:1094", &q->host2sp_bufq_info[thread][queue].size);
+		start = pete_readb("drivers/staging/media/ipu3/ipu3-css.c:1095", &q->host2sp_bufq_info[thread][queue].start);
+		end = pete_readb("drivers/staging/media/ipu3/ipu3-css.c:1096", &q->host2sp_bufq_info[thread][queue].end);
 	} else {
-		size = readb(&q->host2sp_evtq_info.size);
-		start = readb(&q->host2sp_evtq_info.start);
-		end = readb(&q->host2sp_evtq_info.end);
+		size = pete_readb("drivers/staging/media/ipu3/ipu3-css.c:1098", &q->host2sp_evtq_info.size);
+		start = pete_readb("drivers/staging/media/ipu3/ipu3-css.c:1099", &q->host2sp_evtq_info.start);
+		end = pete_readb("drivers/staging/media/ipu3/ipu3-css.c:1100", &q->host2sp_evtq_info.end);
 	}
 
 	if (size == 0)
@@ -1108,11 +1108,11 @@ static int imgu_css_queue_data(struct imgu_css *css,
 		return -EBUSY;	/* Queue full */
 
 	if (queue >= 0) {
-		writel(data, &q->host2sp_bufq[thread][queue][end]);
-		writeb(end2, &q->host2sp_bufq_info[thread][queue].end);
+		pete_writel("drivers/staging/media/ipu3/ipu3-css.c:1111", data, &q->host2sp_bufq[thread][queue][end]);
+		pete_writeb("drivers/staging/media/ipu3/ipu3-css.c:1112", end2, &q->host2sp_bufq_info[thread][queue].end);
 	} else {
-		writel(data, &q->host2sp_evtq[end]);
-		writeb(end2, &q->host2sp_evtq_info.end);
+		pete_writel("drivers/staging/media/ipu3/ipu3-css.c:1114", data, &q->host2sp_evtq[end]);
+		pete_writeb("drivers/staging/media/ipu3/ipu3-css.c:1115", end2, &q->host2sp_evtq_info.end);
 	}
 
 	return 0;
@@ -1129,13 +1129,13 @@ static int imgu_css_dequeue_data(struct imgu_css *css, int queue, u32 *data)
 	u8 size, start, end, start2;
 
 	if (queue >= 0) {
-		size = readb(&q->sp2host_bufq_info[queue].size);
-		start = readb(&q->sp2host_bufq_info[queue].start);
-		end = readb(&q->sp2host_bufq_info[queue].end);
+		size = pete_readb("drivers/staging/media/ipu3/ipu3-css.c:1132", &q->sp2host_bufq_info[queue].size);
+		start = pete_readb("drivers/staging/media/ipu3/ipu3-css.c:1133", &q->sp2host_bufq_info[queue].start);
+		end = pete_readb("drivers/staging/media/ipu3/ipu3-css.c:1134", &q->sp2host_bufq_info[queue].end);
 	} else {
-		size = readb(&q->sp2host_evtq_info.size);
-		start = readb(&q->sp2host_evtq_info.start);
-		end = readb(&q->sp2host_evtq_info.end);
+		size = pete_readb("drivers/staging/media/ipu3/ipu3-css.c:1136", &q->sp2host_evtq_info.size);
+		start = pete_readb("drivers/staging/media/ipu3/ipu3-css.c:1137", &q->sp2host_evtq_info.start);
+		end = pete_readb("drivers/staging/media/ipu3/ipu3-css.c:1138", &q->sp2host_evtq_info.end);
 	}
 
 	if (size == 0)
@@ -1147,13 +1147,13 @@ static int imgu_css_dequeue_data(struct imgu_css *css, int queue, u32 *data)
 	start2 = (start + 1) % size;
 
 	if (queue >= 0) {
-		*data = readl(&q->sp2host_bufq[queue][start]);
-		writeb(start2, &q->sp2host_bufq_info[queue].start);
+		*data = pete_readl("drivers/staging/media/ipu3/ipu3-css.c:1150", &q->sp2host_bufq[queue][start]);
+		pete_writeb("drivers/staging/media/ipu3/ipu3-css.c:1151", start2, &q->sp2host_bufq_info[queue].start);
 	} else {
 		int r;
 
-		*data = readl(&q->sp2host_evtq[start]);
-		writeb(start2, &q->sp2host_evtq_info.start);
+		*data = pete_readl("drivers/staging/media/ipu3/ipu3-css.c:1155", &q->sp2host_evtq[start]);
+		pete_writeb("drivers/staging/media/ipu3/ipu3-css.c:1156", start2, &q->sp2host_evtq_info.start);
 
 		/* Acknowledge events dequeued from event queue */
 		r = imgu_css_queue_data(css, queue, 0,
@@ -2333,18 +2333,18 @@ int imgu_css_irq_ack(struct imgu_css *css)
 	u32 irq_status[IMGU_IRQCTRL_NUM];
 	int i;
 
-	u32 imgu_status = readl(base + IMGU_REG_INT_STATUS);
+	u32 imgu_status = pete_readl("drivers/staging/media/ipu3/ipu3-css.c:2336", base + IMGU_REG_INT_STATUS);
 
-	writel(imgu_status, base + IMGU_REG_INT_STATUS);
+	pete_writel("drivers/staging/media/ipu3/ipu3-css.c:2338", imgu_status, base + IMGU_REG_INT_STATUS);
 	for (i = 0; i < IMGU_IRQCTRL_NUM; i++)
-		irq_status[i] = readl(base + IMGU_REG_IRQCTRL_STATUS(i));
+		irq_status[i] = pete_readl("drivers/staging/media/ipu3/ipu3-css.c:2340", base + IMGU_REG_IRQCTRL_STATUS(i));
 
 	for (i = 0; i < NUM_SWIRQS; i++) {
 		if (irq_status[IMGU_IRQCTRL_SP0] & IMGU_IRQCTRL_IRQ_SW_PIN(i)) {
 			/* SP SW interrupt */
-			u32 cnt = readl(base + IMGU_REG_SP_DMEM_BASE(0) +
+			u32 cnt = pete_readl("drivers/staging/media/ipu3/ipu3-css.c:2345", base + IMGU_REG_SP_DMEM_BASE(0) +
 					bi->info.sp.output);
-			u32 val = readl(base + IMGU_REG_SP_DMEM_BASE(0) +
+			u32 val = pete_readl("drivers/staging/media/ipu3/ipu3-css.c:2347", base + IMGU_REG_SP_DMEM_BASE(0) +
 					bi->info.sp.output + 4 + 4 * i);
 
 			dev_dbg(css->dev, "%s: swirq %i cnt %i val 0x%x\n",
@@ -2354,9 +2354,9 @@ int imgu_css_irq_ack(struct imgu_css *css)
 
 	for (i = IMGU_IRQCTRL_NUM - 1; i >= 0; i--)
 		if (irq_status[i]) {
-			writel(irq_status[i], base + IMGU_REG_IRQCTRL_CLEAR(i));
+			pete_writel("drivers/staging/media/ipu3/ipu3-css.c:2357", irq_status[i], base + IMGU_REG_IRQCTRL_CLEAR(i));
 			/* Wait for write to complete */
-			readl(base + IMGU_REG_IRQCTRL_ENABLE(i));
+			pete_readl("drivers/staging/media/ipu3/ipu3-css.c:2359", base + IMGU_REG_IRQCTRL_ENABLE(i));
 		}
 
 	dev_dbg(css->dev, "%s: imgu 0x%x main 0x%x sp0 0x%x sp1 0x%x\n",

@@ -649,7 +649,7 @@ static int atmel_pmecc_err_location(struct atmel_pmecc_user *user)
 	s16 *smu = user->smu;
 	u32 val;
 
-	writel(PMERRLOC_DISABLE, pmecc->regs.errloc + ATMEL_PMERRLOC_ELDIS);
+	pete_writel("drivers/mtd/nand/raw/atmel/pmecc.c:652", PMERRLOC_DISABLE, pmecc->regs.errloc + ATMEL_PMERRLOC_ELDIS);
 
 	for (i = 0; i <= user->lmu[strength + 1] >> 1; i++) {
 		writel_relaxed(smu[(strength + 1) * num + i],
@@ -661,8 +661,8 @@ static int atmel_pmecc_err_location(struct atmel_pmecc_user *user)
 	if (sector_size == 1024)
 		val |= 1;
 
-	writel(val, pmecc->regs.errloc + ATMEL_PMERRLOC_ELCFG);
-	writel((sector_size * 8) + (degree * strength),
+	pete_writel("drivers/mtd/nand/raw/atmel/pmecc.c:664", val, pmecc->regs.errloc + ATMEL_PMERRLOC_ELCFG);
+	pete_writel("drivers/mtd/nand/raw/atmel/pmecc.c:665", (sector_size * 8) + (degree * strength),
 	       pmecc->regs.errloc + ATMEL_PMERRLOC_ELEN);
 
 	ret = readl_relaxed_poll_timeout(pmecc->regs.errloc +
@@ -764,8 +764,8 @@ EXPORT_SYMBOL_GPL(atmel_pmecc_get_generated_eccbytes);
 
 void atmel_pmecc_reset(struct atmel_pmecc *pmecc)
 {
-	writel(PMECC_CTRL_RST, pmecc->regs.base + ATMEL_PMECC_CTRL);
-	writel(PMECC_CTRL_DISABLE, pmecc->regs.base + ATMEL_PMECC_CTRL);
+	pete_writel("drivers/mtd/nand/raw/atmel/pmecc.c:767", PMECC_CTRL_RST, pmecc->regs.base + ATMEL_PMECC_CTRL);
+	pete_writel("drivers/mtd/nand/raw/atmel/pmecc.c:768", PMECC_CTRL_DISABLE, pmecc->regs.base + ATMEL_PMECC_CTRL);
 }
 EXPORT_SYMBOL_GPL(atmel_pmecc_reset);
 
@@ -787,13 +787,13 @@ int atmel_pmecc_enable(struct atmel_pmecc_user *user, int op)
 	else
 		cfg |= PMECC_CFG_AUTO_ENABLE;
 
-	writel(cfg, pmecc->regs.base + ATMEL_PMECC_CFG);
-	writel(user->cache.sarea, pmecc->regs.base + ATMEL_PMECC_SAREA);
-	writel(user->cache.saddr, pmecc->regs.base + ATMEL_PMECC_SADDR);
-	writel(user->cache.eaddr, pmecc->regs.base + ATMEL_PMECC_EADDR);
+	pete_writel("drivers/mtd/nand/raw/atmel/pmecc.c:790", cfg, pmecc->regs.base + ATMEL_PMECC_CFG);
+	pete_writel("drivers/mtd/nand/raw/atmel/pmecc.c:791", user->cache.sarea, pmecc->regs.base + ATMEL_PMECC_SAREA);
+	pete_writel("drivers/mtd/nand/raw/atmel/pmecc.c:792", user->cache.saddr, pmecc->regs.base + ATMEL_PMECC_SADDR);
+	pete_writel("drivers/mtd/nand/raw/atmel/pmecc.c:793", user->cache.eaddr, pmecc->regs.base + ATMEL_PMECC_EADDR);
 
-	writel(PMECC_CTRL_ENABLE, pmecc->regs.base + ATMEL_PMECC_CTRL);
-	writel(PMECC_CTRL_DATA, pmecc->regs.base + ATMEL_PMECC_CTRL);
+	pete_writel("drivers/mtd/nand/raw/atmel/pmecc.c:795", PMECC_CTRL_ENABLE, pmecc->regs.base + ATMEL_PMECC_CTRL);
+	pete_writel("drivers/mtd/nand/raw/atmel/pmecc.c:796", PMECC_CTRL_DATA, pmecc->regs.base + ATMEL_PMECC_CTRL);
 
 	return 0;
 }
@@ -855,7 +855,7 @@ static struct atmel_pmecc *atmel_pmecc_create(struct platform_device *pdev,
 		return ERR_CAST(pmecc->regs.errloc);
 
 	/* Disable all interrupts before registering the PMECC handler. */
-	writel(0xffffffff, pmecc->regs.base + ATMEL_PMECC_IDR);
+	pete_writel("drivers/mtd/nand/raw/atmel/pmecc.c:858", 0xffffffff, pmecc->regs.base + ATMEL_PMECC_IDR);
 	atmel_pmecc_reset(pmecc);
 
 	return pmecc;

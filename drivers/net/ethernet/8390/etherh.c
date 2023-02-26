@@ -48,10 +48,10 @@
 
 #define EI_SHIFT(x)	(ei_local->reg_offset[x])
 
-#define ei_inb(_p)	 readb((void __iomem *)_p)
-#define ei_outb(_v,_p)	 writeb(_v,(void __iomem *)_p)
-#define ei_inb_p(_p)	 readb((void __iomem *)_p)
-#define ei_outb_p(_v,_p) writeb(_v,(void __iomem *)_p)
+#define ei_inb(_p)	 pete_readb("drivers/net/ethernet/8390/etherh.c:51", (void __iomem *)_p)
+#define ei_outb(_v,_p)	 pete_writeb("drivers/net/ethernet/8390/etherh.c:52", _v,(void __iomem *)_p)
+#define ei_inb_p(_p)	 pete_readb("drivers/net/ethernet/8390/etherh.c:53", (void __iomem *)_p)
+#define ei_outb_p(_v,_p) pete_writeb("drivers/net/ethernet/8390/etherh.c:54", _v,(void __iomem *)_p)
 
 #define DRV_NAME	"etherh"
 #define DRV_VERSION	"1.11"
@@ -120,19 +120,19 @@ static inline void etherh_set_ctrl(struct etherh_priv *eh, unsigned char mask)
 {
 	unsigned char ctrl = eh->ctrl | mask;
 	eh->ctrl = ctrl;
-	writeb(ctrl, eh->ctrl_port);
+	pete_writeb("drivers/net/ethernet/8390/etherh.c:123", ctrl, eh->ctrl_port);
 }
 
 static inline void etherh_clr_ctrl(struct etherh_priv *eh, unsigned char mask)
 {
 	unsigned char ctrl = eh->ctrl & ~mask;
 	eh->ctrl = ctrl;
-	writeb(ctrl, eh->ctrl_port);
+	pete_writeb("drivers/net/ethernet/8390/etherh.c:130", ctrl, eh->ctrl_port);
 }
 
 static inline unsigned int etherh_get_stat(struct etherh_priv *eh)
 {
-	return readb(eh->ctrl_port);
+	return pete_readb("drivers/net/ethernet/8390/etherh.c:135", eh->ctrl_port);
 }
 
 
@@ -177,10 +177,10 @@ etherh_setif(struct net_device *dev)
 
 		switch (dev->if_port) {
 		case IF_PORT_10BASE2:
-			writeb((readb(addr) & 0xf8) | 1, addr);
+			pete_writeb("drivers/net/ethernet/8390/etherh.c:180", (pete_readb("drivers/net/ethernet/8390/etherh.c:180", addr) & 0xf8) | 1, addr);
 			break;
 		case IF_PORT_10BASET:
-			writeb((readb(addr) & 0xf8), addr);
+			pete_writeb("drivers/net/ethernet/8390/etherh.c:183", (pete_readb("drivers/net/ethernet/8390/etherh.c:183", addr) & 0xf8), addr);
 			break;
 		}
 		break;
@@ -220,7 +220,7 @@ etherh_getifstat(struct net_device *dev)
 			stat = 1;
 			break;
 		case IF_PORT_10BASET:
-			stat = readb(addr) & 4;
+			stat = pete_readb("drivers/net/ethernet/8390/etherh.c:223", addr) & 4;
 			break;
 		}
 		break;
@@ -279,7 +279,7 @@ etherh_reset(struct net_device *dev)
 	struct ei_device *ei_local = netdev_priv(dev);
 	void __iomem *addr = (void __iomem *)dev->base_addr;
 
-	writeb(E8390_NODMA+E8390_PAGE0+E8390_STOP, addr);
+	pete_writeb("drivers/net/ethernet/8390/etherh.c:282", E8390_NODMA+E8390_PAGE0+E8390_STOP, addr);
 
 	/*
 	 * See if we need to change the interface type.

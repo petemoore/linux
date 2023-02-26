@@ -647,14 +647,14 @@ static void bcm2835_dma_abort(struct bcm2835_chan *c)
 	 * A zero control block address means the channel is idle.
 	 * (The ACTIVE flag in the CS register is not a reliable indicator.)
 	 */
-	if (!readl(chan_base + BCM2835_DMA_ADDR))
+	if (!pete_readl("drivers/dma/bcm2835-dma.c:650", chan_base + BCM2835_DMA_ADDR))
 		return;
 
 	/* Write 0 to the active bit - Pause the DMA */
-	writel(0, chan_base + BCM2835_DMA_CS);
+	pete_writel("drivers/dma/bcm2835-dma.c:654", 0, chan_base + BCM2835_DMA_CS);
 
 	/* Wait for any current AXI transfer to complete */
-	while ((readl(chan_base + BCM2835_DMA_CS) & wait_mask) && --timeout)
+	while ((pete_readl("drivers/dma/bcm2835-dma.c:657", chan_base + BCM2835_DMA_CS) & wait_mask) && --timeout)
 		cpu_relax();
 
 	/* Peripheral might be stuck and fail to signal AXI write responses */
@@ -662,7 +662,7 @@ static void bcm2835_dma_abort(struct bcm2835_chan *c)
 		dev_err(c->vc.chan.device->dev,
 			"failed to complete outstanding writes\n");
 
-	writel(BCM2835_DMA_RESET, chan_base + BCM2835_DMA_CS);
+	pete_writel("drivers/dma/bcm2835-dma.c:665", BCM2835_DMA_RESET, chan_base + BCM2835_DMA_CS);
 }
 
 static void bcm2835_dma_start_desc(struct bcm2835_chan *c)
@@ -680,13 +680,13 @@ static void bcm2835_dma_start_desc(struct bcm2835_chan *c)
 	c->desc = d = to_bcm2835_dma_desc(&vd->tx);
 
 	if (c->is_40bit_channel) {
-		writel(to_bcm2711_cbaddr(d->cb_list[0].paddr),
+		pete_writel("drivers/dma/bcm2835-dma.c:683", to_bcm2711_cbaddr(d->cb_list[0].paddr),
 		       c->chan_base + BCM2711_DMA40_CB);
-		writel(BCM2711_DMA40_ACTIVE | BCM2711_DMA40_CS_FLAGS(c->dreq),
+		pete_writel("drivers/dma/bcm2835-dma.c:685", BCM2711_DMA40_ACTIVE | BCM2711_DMA40_CS_FLAGS(c->dreq),
 		       c->chan_base + BCM2711_DMA40_CS);
 	} else {
-		writel(d->cb_list[0].paddr, c->chan_base + BCM2835_DMA_ADDR);
-		writel(BCM2835_DMA_ACTIVE | BCM2835_DMA_CS_FLAGS(c->dreq),
+		pete_writel("drivers/dma/bcm2835-dma.c:688", d->cb_list[0].paddr, c->chan_base + BCM2835_DMA_ADDR);
+		pete_writel("drivers/dma/bcm2835-dma.c:689", BCM2835_DMA_ACTIVE | BCM2835_DMA_CS_FLAGS(c->dreq),
 		       c->chan_base + BCM2835_DMA_CS);
 	}
 }
@@ -700,7 +700,7 @@ static irqreturn_t bcm2835_dma_callback(int irq, void *data)
 	/* check the shared interrupt */
 	if (c->irq_flags & IRQF_SHARED) {
 		/* check if the interrupt is enabled */
-		flags = readl(c->chan_base + BCM2835_DMA_CS);
+		flags = pete_readl("drivers/dma/bcm2835-dma.c:703", c->chan_base + BCM2835_DMA_CS);
 		/* if not set then we are not the reason for the irq */
 		if (!(flags & BCM2835_DMA_INT))
 			return IRQ_NONE;
@@ -715,7 +715,7 @@ static irqreturn_t bcm2835_dma_callback(int irq, void *data)
 	 * if this IRQ handler is threaded.) If the channel is finished, it
 	 * will remain idle despite the ACTIVE flag being set.
 	 */
-	writel(BCM2835_DMA_INT | BCM2835_DMA_ACTIVE | BCM2835_DMA_CS_FLAGS(c->dreq),
+	pete_writel("drivers/dma/bcm2835-dma.c:718", BCM2835_DMA_INT | BCM2835_DMA_ACTIVE | BCM2835_DMA_CS_FLAGS(c->dreq),
 	       c->chan_base + BCM2835_DMA_CS);
 
 	d = c->desc;
@@ -724,7 +724,7 @@ static irqreturn_t bcm2835_dma_callback(int irq, void *data)
 		if (d->cyclic) {
 			/* call the cyclic callback */
 			vchan_cyclic_callback(&d->vd);
-		} else if (!readl(c->chan_base + BCM2835_DMA_ADDR)) {
+		} else if (!pete_readl("drivers/dma/bcm2835-dma.c:727", c->chan_base + BCM2835_DMA_ADDR)) {
 			vchan_cookie_complete(&c->desc->vd);
 			bcm2835_dma_start_desc(c);
 		}
@@ -819,17 +819,17 @@ static enum dma_status bcm2835_dma_tx_status(struct dma_chan *chan,
 		dma_addr_t pos;
 
 		if (d->dir == DMA_MEM_TO_DEV && c->is_40bit_channel)
-			pos = readl(c->chan_base + BCM2711_DMA40_SRC) +
-				((readl(c->chan_base + BCM2711_DMA40_SRCI) &
+			pos = pete_readl("drivers/dma/bcm2835-dma.c:822", c->chan_base + BCM2711_DMA40_SRC) +
+				((pete_readl("drivers/dma/bcm2835-dma.c:823", c->chan_base + BCM2711_DMA40_SRCI) &
 				  0xff) << 8);
 		else if (d->dir == DMA_MEM_TO_DEV && !c->is_40bit_channel)
-			pos = readl(c->chan_base + BCM2835_DMA_SOURCE_AD);
+			pos = pete_readl("drivers/dma/bcm2835-dma.c:826", c->chan_base + BCM2835_DMA_SOURCE_AD);
 		else if (d->dir == DMA_DEV_TO_MEM && c->is_40bit_channel)
-			pos = readl(c->chan_base + BCM2711_DMA40_DEST) +
-				((readl(c->chan_base + BCM2711_DMA40_DESTI) &
+			pos = pete_readl("drivers/dma/bcm2835-dma.c:828", c->chan_base + BCM2711_DMA40_DEST) +
+				((pete_readl("drivers/dma/bcm2835-dma.c:829", c->chan_base + BCM2711_DMA40_DESTI) &
 				  0xff) << 8);
 		else if (d->dir == DMA_DEV_TO_MEM && !c->is_40bit_channel)
-			pos = readl(c->chan_base + BCM2835_DMA_DEST_AD);
+			pos = pete_readl("drivers/dma/bcm2835-dma.c:832", c->chan_base + BCM2835_DMA_DEST_AD);
 		else
 			pos = 0;
 
@@ -1101,7 +1101,7 @@ static int bcm2835_dma_chan_init(struct bcm2835_dmadev *d, int chan_id,
 	/* check for 40bit and lite channels */
 	if (d->cfg_data->chan_40bit_mask & BIT(chan_id))
 		c->is_40bit_channel = true;
-	else if (readl(c->chan_base + BCM2835_DMA_DEBUG) &
+	else if (pete_readl("drivers/dma/bcm2835-dma.c:1104", c->chan_base + BCM2835_DMA_DEBUG) &
 		 BCM2835_DMA_DEBUG_LITE)
 		c->is_lite_channel = true;
 
@@ -1157,15 +1157,15 @@ void bcm2711_dma40_memcpy(dma_addr_t dst, dma_addr_t src, size_t size)
 	scb->len = size;
 	scb->next_cb = 0;
 
-	writel((u32)(memcpy_scb_dma >> 5), memcpy_chan + BCM2711_DMA40_CB);
-	writel(BCM2711_DMA40_MEMCPY_FLAGS + BCM2711_DMA40_ACTIVE,
+	pete_writel("drivers/dma/bcm2835-dma.c:1160", (u32)(memcpy_scb_dma >> 5), memcpy_chan + BCM2711_DMA40_CB);
+	pete_writel("drivers/dma/bcm2835-dma.c:1161", BCM2711_DMA40_MEMCPY_FLAGS + BCM2711_DMA40_ACTIVE,
 	       memcpy_chan + BCM2711_DMA40_CS);
 
 	/* Poll for completion */
-	while (!(readl(memcpy_chan + BCM2711_DMA40_CS) & BCM2711_DMA40_END))
+	while (!(pete_readl("drivers/dma/bcm2835-dma.c:1165", memcpy_chan + BCM2711_DMA40_CS) & BCM2711_DMA40_END))
 		cpu_relax();
 
-	writel(BCM2711_DMA40_END, memcpy_chan + BCM2711_DMA40_CS);
+	pete_writel("drivers/dma/bcm2835-dma.c:1168", BCM2711_DMA40_END, memcpy_chan + BCM2711_DMA40_CS);
 
 	spin_unlock_irqrestore(&memcpy_lock, flags);
 }

@@ -47,8 +47,8 @@ static int visconti_gpio_irq_set_type(struct irq_data *d, unsigned int type)
 
 	spin_lock_irqsave(&priv->lock, flags);
 
-	odata = readl(priv->base + GPIO_ODATA);
-	intmode = readl(priv->base + GPIO_INTMODE);
+	odata = pete_readl("drivers/gpio/gpio-visconti.c:50", priv->base + GPIO_ODATA);
+	intmode = pete_readl("drivers/gpio/gpio-visconti.c:51", priv->base + GPIO_INTMODE);
 
 	switch (type) {
 	case IRQ_TYPE_EDGE_RISING:
@@ -77,8 +77,8 @@ static int visconti_gpio_irq_set_type(struct irq_data *d, unsigned int type)
 		goto err;
 	}
 
-	writel(odata, priv->base + GPIO_ODATA);
-	writel(intmode, priv->base + GPIO_INTMODE);
+	pete_writel("drivers/gpio/gpio-visconti.c:80", odata, priv->base + GPIO_ODATA);
+	pete_writel("drivers/gpio/gpio-visconti.c:81", intmode, priv->base + GPIO_INTMODE);
 	irq_set_irq_type(offset, intc_type);
 
 	ret = irq_chip_set_type_parent(d, type);

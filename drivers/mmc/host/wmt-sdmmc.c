@@ -210,14 +210,14 @@ struct wmt_mci_priv {
 
 static void wmt_set_sd_power(struct wmt_mci_priv *priv, int enable)
 {
-	u32 reg_tmp = readb(priv->sdmmc_base + SDMMC_BUSMODE);
+	u32 reg_tmp = pete_readb("drivers/mmc/host/wmt-sdmmc.c:213", priv->sdmmc_base + SDMMC_BUSMODE);
 
 	if (enable ^ priv->power_inverted)
 		reg_tmp &= ~BM_SD_OFF;
 	else
 		reg_tmp |= BM_SD_OFF;
 
-	writeb(reg_tmp, priv->sdmmc_base + SDMMC_BUSMODE);
+	pete_writeb("drivers/mmc/host/wmt-sdmmc.c:220", reg_tmp, priv->sdmmc_base + SDMMC_BUSMODE);
 }
 
 static void wmt_mci_read_response(struct mmc_host *mmc)
@@ -233,9 +233,9 @@ static void wmt_mci_read_response(struct mmc_host *mmc)
 		response = 0;
 		for (idx2 = 0; idx2 < 4; idx2++) {
 			if ((idx1 == 3) && (idx2 == 3))
-				tmp_resp = readb(priv->sdmmc_base + SDMMC_RSP);
+				tmp_resp = pete_readb("drivers/mmc/host/wmt-sdmmc.c:236", priv->sdmmc_base + SDMMC_RSP);
 			else
-				tmp_resp = readb(priv->sdmmc_base + SDMMC_RSP +
+				tmp_resp = pete_readb("drivers/mmc/host/wmt-sdmmc.c:238", priv->sdmmc_base + SDMMC_RSP +
 						 (idx1*4) + idx2 + 1);
 			response |= (tmp_resp << (idx2 * 8));
 		}
@@ -247,8 +247,8 @@ static void wmt_mci_start_command(struct wmt_mci_priv *priv)
 {
 	u32 reg_tmp;
 
-	reg_tmp = readb(priv->sdmmc_base + SDMMC_CTLR);
-	writeb(reg_tmp | CTLR_CMD_START, priv->sdmmc_base + SDMMC_CTLR);
+	reg_tmp = pete_readb("drivers/mmc/host/wmt-sdmmc.c:250", priv->sdmmc_base + SDMMC_CTLR);
+	pete_writeb("drivers/mmc/host/wmt-sdmmc.c:251", reg_tmp | CTLR_CMD_START, priv->sdmmc_base + SDMMC_CTLR);
 }
 
 static int wmt_mci_send_command(struct mmc_host *mmc, u8 command, u8 cmdtype,
@@ -260,26 +260,26 @@ static int wmt_mci_send_command(struct mmc_host *mmc, u8 command, u8 cmdtype,
 	priv = mmc_priv(mmc);
 
 	/* write command, arg, resptype registers */
-	writeb(command, priv->sdmmc_base + SDMMC_CMD);
-	writel(arg, priv->sdmmc_base + SDMMC_ARG);
-	writeb(rsptype, priv->sdmmc_base + SDMMC_RSPTYPE);
+	pete_writeb("drivers/mmc/host/wmt-sdmmc.c:263", command, priv->sdmmc_base + SDMMC_CMD);
+	pete_writel("drivers/mmc/host/wmt-sdmmc.c:264", arg, priv->sdmmc_base + SDMMC_ARG);
+	pete_writeb("drivers/mmc/host/wmt-sdmmc.c:265", rsptype, priv->sdmmc_base + SDMMC_RSPTYPE);
 
 	/* reset response FIFO */
-	reg_tmp = readb(priv->sdmmc_base + SDMMC_CTLR);
-	writeb(reg_tmp | CTLR_FIFO_RESET, priv->sdmmc_base + SDMMC_CTLR);
+	reg_tmp = pete_readb("drivers/mmc/host/wmt-sdmmc.c:268", priv->sdmmc_base + SDMMC_CTLR);
+	pete_writeb("drivers/mmc/host/wmt-sdmmc.c:269", reg_tmp | CTLR_FIFO_RESET, priv->sdmmc_base + SDMMC_CTLR);
 
 	/* ensure clock enabled - VT3465 */
 	wmt_set_sd_power(priv, WMT_SD_POWER_ON);
 
 	/* clear status bits */
-	writeb(0xFF, priv->sdmmc_base + SDMMC_STS0);
-	writeb(0xFF, priv->sdmmc_base + SDMMC_STS1);
-	writeb(0xFF, priv->sdmmc_base + SDMMC_STS2);
-	writeb(0xFF, priv->sdmmc_base + SDMMC_STS3);
+	pete_writeb("drivers/mmc/host/wmt-sdmmc.c:275", 0xFF, priv->sdmmc_base + SDMMC_STS0);
+	pete_writeb("drivers/mmc/host/wmt-sdmmc.c:276", 0xFF, priv->sdmmc_base + SDMMC_STS1);
+	pete_writeb("drivers/mmc/host/wmt-sdmmc.c:277", 0xFF, priv->sdmmc_base + SDMMC_STS2);
+	pete_writeb("drivers/mmc/host/wmt-sdmmc.c:278", 0xFF, priv->sdmmc_base + SDMMC_STS3);
 
 	/* set command type */
-	reg_tmp = readb(priv->sdmmc_base + SDMMC_CTLR);
-	writeb((reg_tmp & 0x0F) | (cmdtype << 4),
+	reg_tmp = pete_readb("drivers/mmc/host/wmt-sdmmc.c:281", priv->sdmmc_base + SDMMC_CTLR);
+	pete_writeb("drivers/mmc/host/wmt-sdmmc.c:282", (reg_tmp & 0x0F) | (cmdtype << 4),
 	       priv->sdmmc_base + SDMMC_CTLR);
 
 	return 0;
@@ -287,8 +287,8 @@ static int wmt_mci_send_command(struct mmc_host *mmc, u8 command, u8 cmdtype,
 
 static void wmt_mci_disable_dma(struct wmt_mci_priv *priv)
 {
-	writel(DMA_ISR_INT_STS, priv->sdmmc_base + SDDMA_ISR);
-	writel(0, priv->sdmmc_base + SDDMA_IER);
+	pete_writel("drivers/mmc/host/wmt-sdmmc.c:290", DMA_ISR_INT_STS, priv->sdmmc_base + SDDMA_ISR);
+	pete_writel("drivers/mmc/host/wmt-sdmmc.c:291", 0, priv->sdmmc_base + SDDMA_IER);
 }
 
 static void wmt_complete_data_request(struct wmt_mci_priv *priv)
@@ -338,7 +338,7 @@ static irqreturn_t wmt_mci_dma_isr(int irq_num, void *data)
 
 	priv = (struct wmt_mci_priv *)data;
 
-	status = readl(priv->sdmmc_base + SDDMA_CCR) & 0x0F;
+	status = pete_readl("drivers/mmc/host/wmt-sdmmc.c:341", priv->sdmmc_base + SDDMA_CCR) & 0x0F;
 
 	if (status != DMA_CCR_EVT_SUCCESS) {
 		dev_err(priv->dev, "DMA Error: Status = %d\n", status);
@@ -378,12 +378,12 @@ static irqreturn_t wmt_mci_regular_isr(int irq_num, void *data)
 
 	priv = (struct wmt_mci_priv *)data;
 	cmd_done = 0;
-	status0 = readb(priv->sdmmc_base + SDMMC_STS0);
-	status1 = readb(priv->sdmmc_base + SDMMC_STS1);
-	status2 = readb(priv->sdmmc_base + SDMMC_STS2);
+	status0 = pete_readb("drivers/mmc/host/wmt-sdmmc.c:381", priv->sdmmc_base + SDMMC_STS0);
+	status1 = pete_readb("drivers/mmc/host/wmt-sdmmc.c:382", priv->sdmmc_base + SDMMC_STS1);
+	status2 = pete_readb("drivers/mmc/host/wmt-sdmmc.c:383", priv->sdmmc_base + SDMMC_STS2);
 
 	/* Check for card insertion */
-	reg_tmp = readb(priv->sdmmc_base + SDMMC_INTMASK0);
+	reg_tmp = pete_readb("drivers/mmc/host/wmt-sdmmc.c:386", priv->sdmmc_base + SDMMC_INTMASK0);
 	if ((reg_tmp & INT0_DI_INT_EN) && (status0 & STS0_DEVICE_INS)) {
 		mmc_detect_change(priv->mmc, 0);
 		if (priv->cmd)
@@ -394,7 +394,7 @@ static irqreturn_t wmt_mci_regular_isr(int irq_num, void *data)
 			wmt_mci_disable_dma(priv);
 			complete(priv->comp_dma);
 		}
-		writeb(STS0_DEVICE_INS, priv->sdmmc_base + SDMMC_STS0);
+		pete_writeb("drivers/mmc/host/wmt-sdmmc.c:397", STS0_DEVICE_INS, priv->sdmmc_base + SDMMC_STS0);
 		return IRQ_HANDLED;
 	}
 
@@ -452,9 +452,9 @@ static irqreturn_t wmt_mci_regular_isr(int irq_num, void *data)
 		}
 	}
 
-	writeb(status0, priv->sdmmc_base + SDMMC_STS0);
-	writeb(status1, priv->sdmmc_base + SDMMC_STS1);
-	writeb(status2, priv->sdmmc_base + SDMMC_STS2);
+	pete_writeb("drivers/mmc/host/wmt-sdmmc.c:455", status0, priv->sdmmc_base + SDMMC_STS0);
+	pete_writeb("drivers/mmc/host/wmt-sdmmc.c:456", status1, priv->sdmmc_base + SDMMC_STS1);
+	pete_writeb("drivers/mmc/host/wmt-sdmmc.c:457", status2, priv->sdmmc_base + SDMMC_STS2);
 
 	return IRQ_HANDLED;
 }
@@ -467,32 +467,32 @@ static void wmt_reset_hardware(struct mmc_host *mmc)
 	priv = mmc_priv(mmc);
 
 	/* reset controller */
-	reg_tmp = readb(priv->sdmmc_base + SDMMC_BUSMODE);
-	writeb(reg_tmp | BM_SOFT_RESET, priv->sdmmc_base + SDMMC_BUSMODE);
+	reg_tmp = pete_readb("drivers/mmc/host/wmt-sdmmc.c:470", priv->sdmmc_base + SDMMC_BUSMODE);
+	pete_writeb("drivers/mmc/host/wmt-sdmmc.c:471", reg_tmp | BM_SOFT_RESET, priv->sdmmc_base + SDMMC_BUSMODE);
 
 	/* reset response FIFO */
-	reg_tmp = readb(priv->sdmmc_base + SDMMC_CTLR);
-	writeb(reg_tmp | CTLR_FIFO_RESET, priv->sdmmc_base + SDMMC_CTLR);
+	reg_tmp = pete_readb("drivers/mmc/host/wmt-sdmmc.c:474", priv->sdmmc_base + SDMMC_CTLR);
+	pete_writeb("drivers/mmc/host/wmt-sdmmc.c:475", reg_tmp | CTLR_FIFO_RESET, priv->sdmmc_base + SDMMC_CTLR);
 
 	/* enable GPI pin to detect card */
-	writew(BLKL_INT_ENABLE | BLKL_GPI_CD, priv->sdmmc_base + SDMMC_BLKLEN);
+	pete_writew("drivers/mmc/host/wmt-sdmmc.c:478", BLKL_INT_ENABLE | BLKL_GPI_CD, priv->sdmmc_base + SDMMC_BLKLEN);
 
 	/* clear interrupt status */
-	writeb(0xFF, priv->sdmmc_base + SDMMC_STS0);
-	writeb(0xFF, priv->sdmmc_base + SDMMC_STS1);
+	pete_writeb("drivers/mmc/host/wmt-sdmmc.c:481", 0xFF, priv->sdmmc_base + SDMMC_STS0);
+	pete_writeb("drivers/mmc/host/wmt-sdmmc.c:482", 0xFF, priv->sdmmc_base + SDMMC_STS1);
 
 	/* setup interrupts */
-	writeb(INT0_CD_INT_EN | INT0_DI_INT_EN, priv->sdmmc_base +
+	pete_writeb("drivers/mmc/host/wmt-sdmmc.c:485", INT0_CD_INT_EN | INT0_DI_INT_EN, priv->sdmmc_base +
 	       SDMMC_INTMASK0);
-	writeb(INT1_DATA_TOUT_INT_EN | INT1_CMD_RES_TRAN_DONE_INT_EN |
+	pete_writeb("drivers/mmc/host/wmt-sdmmc.c:487", INT1_DATA_TOUT_INT_EN | INT1_CMD_RES_TRAN_DONE_INT_EN |
 	       INT1_CMD_RES_TOUT_INT_EN, priv->sdmmc_base + SDMMC_INTMASK1);
 
 	/* set the DMA timeout */
-	writew(8191, priv->sdmmc_base + SDMMC_DMATIMEOUT);
+	pete_writew("drivers/mmc/host/wmt-sdmmc.c:491", 8191, priv->sdmmc_base + SDMMC_DMATIMEOUT);
 
 	/* auto clock freezing enable */
-	reg_tmp = readb(priv->sdmmc_base + SDMMC_STS2);
-	writeb(reg_tmp | STS2_DIS_FORCECLK, priv->sdmmc_base + SDMMC_STS2);
+	reg_tmp = pete_readb("drivers/mmc/host/wmt-sdmmc.c:494", priv->sdmmc_base + SDMMC_STS2);
+	pete_writeb("drivers/mmc/host/wmt-sdmmc.c:495", reg_tmp | STS2_DIS_FORCECLK, priv->sdmmc_base + SDMMC_STS2);
 
 	/* set a default clock speed of 400Khz */
 	clk_set_rate(priv->clk_sdmmc, 400000);
@@ -504,9 +504,9 @@ static int wmt_dma_init(struct mmc_host *mmc)
 
 	priv = mmc_priv(mmc);
 
-	writel(DMA_GCR_SOFT_RESET, priv->sdmmc_base + SDDMA_GCR);
-	writel(DMA_GCR_DMA_EN, priv->sdmmc_base + SDDMA_GCR);
-	if ((readl(priv->sdmmc_base + SDDMA_GCR) & DMA_GCR_DMA_EN) != 0)
+	pete_writel("drivers/mmc/host/wmt-sdmmc.c:507", DMA_GCR_SOFT_RESET, priv->sdmmc_base + SDDMA_GCR);
+	pete_writel("drivers/mmc/host/wmt-sdmmc.c:508", DMA_GCR_DMA_EN, priv->sdmmc_base + SDDMA_GCR);
+	if ((pete_readl("drivers/mmc/host/wmt-sdmmc.c:509", priv->sdmmc_base + SDDMA_GCR) & DMA_GCR_DMA_EN) != 0)
 		return 0;
 	else
 		return 1;
@@ -530,20 +530,20 @@ static void wmt_dma_config(struct mmc_host *mmc, u32 descaddr, u8 dir)
 	priv = mmc_priv(mmc);
 
 	/* Enable DMA Interrupts */
-	writel(DMA_IER_INT_EN, priv->sdmmc_base + SDDMA_IER);
+	pete_writel("drivers/mmc/host/wmt-sdmmc.c:533", DMA_IER_INT_EN, priv->sdmmc_base + SDDMA_IER);
 
 	/* Write DMA Descriptor Pointer Register */
-	writel(descaddr, priv->sdmmc_base + SDDMA_DESPR);
+	pete_writel("drivers/mmc/host/wmt-sdmmc.c:536", descaddr, priv->sdmmc_base + SDDMA_DESPR);
 
-	writel(0x00, priv->sdmmc_base + SDDMA_CCR);
+	pete_writel("drivers/mmc/host/wmt-sdmmc.c:538", 0x00, priv->sdmmc_base + SDDMA_CCR);
 
 	if (dir == PDMA_WRITE) {
-		reg_tmp = readl(priv->sdmmc_base + SDDMA_CCR);
-		writel(reg_tmp & DMA_CCR_IF_TO_PERIPHERAL, priv->sdmmc_base +
+		reg_tmp = pete_readl("drivers/mmc/host/wmt-sdmmc.c:541", priv->sdmmc_base + SDDMA_CCR);
+		pete_writel("drivers/mmc/host/wmt-sdmmc.c:542", reg_tmp & DMA_CCR_IF_TO_PERIPHERAL, priv->sdmmc_base +
 		       SDDMA_CCR);
 	} else {
-		reg_tmp = readl(priv->sdmmc_base + SDDMA_CCR);
-		writel(reg_tmp | DMA_CCR_PERIPHERAL_TO_IF, priv->sdmmc_base +
+		reg_tmp = pete_readl("drivers/mmc/host/wmt-sdmmc.c:545", priv->sdmmc_base + SDDMA_CCR);
+		pete_writel("drivers/mmc/host/wmt-sdmmc.c:546", reg_tmp | DMA_CCR_PERIPHERAL_TO_IF, priv->sdmmc_base +
 		       SDDMA_CCR);
 	}
 }
@@ -552,8 +552,8 @@ static void wmt_dma_start(struct wmt_mci_priv *priv)
 {
 	u32 reg_tmp;
 
-	reg_tmp = readl(priv->sdmmc_base + SDDMA_CCR);
-	writel(reg_tmp | DMA_CCR_RUN, priv->sdmmc_base + SDDMA_CCR);
+	reg_tmp = pete_readl("drivers/mmc/host/wmt-sdmmc.c:555", priv->sdmmc_base + SDDMA_CCR);
+	pete_writel("drivers/mmc/host/wmt-sdmmc.c:556", reg_tmp | DMA_CCR_RUN, priv->sdmmc_base + SDDMA_CCR);
 }
 
 static void wmt_mci_request(struct mmc_host *mmc, struct mmc_request *req)
@@ -607,12 +607,12 @@ static void wmt_mci_request(struct mmc_host *mmc, struct mmc_request *req)
 		wmt_dma_init(mmc);
 
 		/* set controller data length */
-		reg_tmp = readw(priv->sdmmc_base + SDMMC_BLKLEN);
-		writew((reg_tmp & 0xF800) | (req->data->blksz - 1),
+		reg_tmp = pete_readw("drivers/mmc/host/wmt-sdmmc.c:610", priv->sdmmc_base + SDMMC_BLKLEN);
+		pete_writew("drivers/mmc/host/wmt-sdmmc.c:611", (reg_tmp & 0xF800) | (req->data->blksz - 1),
 		       priv->sdmmc_base + SDMMC_BLKLEN);
 
 		/* set controller block count */
-		writew(req->data->blocks, priv->sdmmc_base + SDMMC_BLKCNT);
+		pete_writew("drivers/mmc/host/wmt-sdmmc.c:615", req->data->blocks, priv->sdmmc_base + SDMMC_BLKCNT);
 
 		desc = (struct wmt_dma_descriptor *)priv->dma_desc_buffer;
 
@@ -685,8 +685,8 @@ static void wmt_mci_set_ios(struct mmc_host *mmc, struct mmc_ios *ios)
 	if (ios->clock != 0)
 		clk_set_rate(priv->clk_sdmmc, ios->clock);
 
-	busmode = readb(priv->sdmmc_base + SDMMC_BUSMODE);
-	extctrl = readb(priv->sdmmc_base + SDMMC_EXTCTRL);
+	busmode = pete_readb("drivers/mmc/host/wmt-sdmmc.c:688", priv->sdmmc_base + SDMMC_BUSMODE);
+	extctrl = pete_readb("drivers/mmc/host/wmt-sdmmc.c:689", priv->sdmmc_base + SDMMC_EXTCTRL);
 
 	busmode &= ~(BM_EIGHTBIT_MODE | BM_FOURBIT_MODE);
 	extctrl &= ~EXT_EIGHTBIT;
@@ -703,21 +703,21 @@ static void wmt_mci_set_ios(struct mmc_host *mmc, struct mmc_ios *ios)
 		break;
 	}
 
-	writeb(busmode, priv->sdmmc_base + SDMMC_BUSMODE);
-	writeb(extctrl, priv->sdmmc_base + SDMMC_EXTCTRL);
+	pete_writeb("drivers/mmc/host/wmt-sdmmc.c:706", busmode, priv->sdmmc_base + SDMMC_BUSMODE);
+	pete_writeb("drivers/mmc/host/wmt-sdmmc.c:707", extctrl, priv->sdmmc_base + SDMMC_EXTCTRL);
 }
 
 static int wmt_mci_get_ro(struct mmc_host *mmc)
 {
 	struct wmt_mci_priv *priv = mmc_priv(mmc);
 
-	return !(readb(priv->sdmmc_base + SDMMC_STS0) & STS0_WRITE_PROTECT);
+	return !(pete_readb("drivers/mmc/host/wmt-sdmmc.c:714", priv->sdmmc_base + SDMMC_STS0) & STS0_WRITE_PROTECT);
 }
 
 static int wmt_mci_get_cd(struct mmc_host *mmc)
 {
 	struct wmt_mci_priv *priv = mmc_priv(mmc);
-	u32 cd = (readb(priv->sdmmc_base + SDMMC_STS0) & STS0_CD_GPI) >> 3;
+	u32 cd = (pete_readb("drivers/mmc/host/wmt-sdmmc.c:720", priv->sdmmc_base + SDMMC_STS0) & STS0_CD_GPI) >> 3;
 
 	return !(cd ^ priv->cd_inverted);
 }
@@ -896,12 +896,12 @@ static int wmt_mci_remove(struct platform_device *pdev)
 	priv = mmc_priv(mmc);
 
 	/* reset SD controller */
-	reg_tmp = readb(priv->sdmmc_base + SDMMC_BUSMODE);
-	writel(reg_tmp | BM_SOFT_RESET, priv->sdmmc_base + SDMMC_BUSMODE);
-	reg_tmp = readw(priv->sdmmc_base + SDMMC_BLKLEN);
-	writew(reg_tmp & ~(0xA000), priv->sdmmc_base + SDMMC_BLKLEN);
-	writeb(0xFF, priv->sdmmc_base + SDMMC_STS0);
-	writeb(0xFF, priv->sdmmc_base + SDMMC_STS1);
+	reg_tmp = pete_readb("drivers/mmc/host/wmt-sdmmc.c:899", priv->sdmmc_base + SDMMC_BUSMODE);
+	pete_writel("drivers/mmc/host/wmt-sdmmc.c:900", reg_tmp | BM_SOFT_RESET, priv->sdmmc_base + SDMMC_BUSMODE);
+	reg_tmp = pete_readw("drivers/mmc/host/wmt-sdmmc.c:901", priv->sdmmc_base + SDMMC_BLKLEN);
+	pete_writew("drivers/mmc/host/wmt-sdmmc.c:902", reg_tmp & ~(0xA000), priv->sdmmc_base + SDMMC_BLKLEN);
+	pete_writeb("drivers/mmc/host/wmt-sdmmc.c:903", 0xFF, priv->sdmmc_base + SDMMC_STS0);
+	pete_writeb("drivers/mmc/host/wmt-sdmmc.c:904", 0xFF, priv->sdmmc_base + SDMMC_STS1);
 
 	/* release the dma buffers */
 	dma_free_coherent(&pdev->dev, priv->mmc->max_blk_count * 16,
@@ -938,15 +938,15 @@ static int wmt_mci_suspend(struct device *dev)
 		return 0;
 
 	priv = mmc_priv(mmc);
-	reg_tmp = readb(priv->sdmmc_base + SDMMC_BUSMODE);
-	writeb(reg_tmp | BM_SOFT_RESET, priv->sdmmc_base +
+	reg_tmp = pete_readb("drivers/mmc/host/wmt-sdmmc.c:941", priv->sdmmc_base + SDMMC_BUSMODE);
+	pete_writeb("drivers/mmc/host/wmt-sdmmc.c:942", reg_tmp | BM_SOFT_RESET, priv->sdmmc_base +
 	       SDMMC_BUSMODE);
 
-	reg_tmp = readw(priv->sdmmc_base + SDMMC_BLKLEN);
-	writew(reg_tmp & 0x5FFF, priv->sdmmc_base + SDMMC_BLKLEN);
+	reg_tmp = pete_readw("drivers/mmc/host/wmt-sdmmc.c:945", priv->sdmmc_base + SDMMC_BLKLEN);
+	pete_writew("drivers/mmc/host/wmt-sdmmc.c:946", reg_tmp & 0x5FFF, priv->sdmmc_base + SDMMC_BLKLEN);
 
-	writeb(0xFF, priv->sdmmc_base + SDMMC_STS0);
-	writeb(0xFF, priv->sdmmc_base + SDMMC_STS1);
+	pete_writeb("drivers/mmc/host/wmt-sdmmc.c:948", 0xFF, priv->sdmmc_base + SDMMC_STS0);
+	pete_writeb("drivers/mmc/host/wmt-sdmmc.c:949", 0xFF, priv->sdmmc_base + SDMMC_STS1);
 
 	clk_disable(priv->clk_sdmmc);
 	return 0;
@@ -962,16 +962,16 @@ static int wmt_mci_resume(struct device *dev)
 		priv = mmc_priv(mmc);
 		clk_enable(priv->clk_sdmmc);
 
-		reg_tmp = readb(priv->sdmmc_base + SDMMC_BUSMODE);
-		writeb(reg_tmp | BM_SOFT_RESET, priv->sdmmc_base +
+		reg_tmp = pete_readb("drivers/mmc/host/wmt-sdmmc.c:965", priv->sdmmc_base + SDMMC_BUSMODE);
+		pete_writeb("drivers/mmc/host/wmt-sdmmc.c:966", reg_tmp | BM_SOFT_RESET, priv->sdmmc_base +
 		       SDMMC_BUSMODE);
 
-		reg_tmp = readw(priv->sdmmc_base + SDMMC_BLKLEN);
-		writew(reg_tmp | (BLKL_GPI_CD | BLKL_INT_ENABLE),
+		reg_tmp = pete_readw("drivers/mmc/host/wmt-sdmmc.c:969", priv->sdmmc_base + SDMMC_BLKLEN);
+		pete_writew("drivers/mmc/host/wmt-sdmmc.c:970", reg_tmp | (BLKL_GPI_CD | BLKL_INT_ENABLE),
 		       priv->sdmmc_base + SDMMC_BLKLEN);
 
-		reg_tmp = readb(priv->sdmmc_base + SDMMC_INTMASK0);
-		writeb(reg_tmp | INT0_DI_INT_EN, priv->sdmmc_base +
+		reg_tmp = pete_readb("drivers/mmc/host/wmt-sdmmc.c:973", priv->sdmmc_base + SDMMC_INTMASK0);
+		pete_writeb("drivers/mmc/host/wmt-sdmmc.c:974", reg_tmp | INT0_DI_INT_EN, priv->sdmmc_base +
 		       SDMMC_INTMASK0);
 
 	}

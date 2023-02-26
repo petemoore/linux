@@ -166,7 +166,7 @@ static unsigned int jmb38x_ms_read_data(struct jmb38x_ms_host *host,
 	if (!length)
 		return off;
 
-	while (!(STATUS_FIFO_EMPTY & readl(host->addr + STATUS))) {
+	while (!(STATUS_FIFO_EMPTY & pete_readl("drivers/memstick/host/jmb38x_ms.c:169", host->addr + STATUS))) {
 		if (length < 4)
 			break;
 		*(unsigned int *)(buf + off) = __raw_readl(host->addr + DATA);
@@ -175,8 +175,8 @@ static unsigned int jmb38x_ms_read_data(struct jmb38x_ms_host *host,
 	}
 
 	if (length
-	    && !(STATUS_FIFO_EMPTY & readl(host->addr + STATUS))) {
-		host->io_word[0] = readl(host->addr + DATA);
+	    && !(STATUS_FIFO_EMPTY & pete_readl("drivers/memstick/host/jmb38x_ms.c:178", host->addr + STATUS))) {
+		host->io_word[0] = pete_readl("drivers/memstick/host/jmb38x_ms.c:179", host->addr + DATA);
 		for (host->io_pos = 4; host->io_pos; --host->io_pos) {
 			buf[off++] = host->io_word[0] & 0xff;
 			host->io_word[0] >>= 8;
@@ -230,8 +230,8 @@ static unsigned int jmb38x_ms_write_data(struct jmb38x_ms_host *host,
 	}
 
 	if (host->io_pos == 4
-	    && !(STATUS_FIFO_FULL & readl(host->addr + STATUS))) {
-		writel(host->io_word[0], host->addr + DATA);
+	    && !(STATUS_FIFO_FULL & pete_readl("drivers/memstick/host/jmb38x_ms.c:233", host->addr + STATUS))) {
+		pete_writel("drivers/memstick/host/jmb38x_ms.c:234", host->io_word[0], host->addr + DATA);
 		host->io_pos = 0;
 		host->io_word[0] = 0;
 	} else if (host->io_pos) {
@@ -241,7 +241,7 @@ static unsigned int jmb38x_ms_write_data(struct jmb38x_ms_host *host,
 	if (!length)
 		return off;
 
-	while (!(STATUS_FIFO_FULL & readl(host->addr + STATUS))) {
+	while (!(STATUS_FIFO_FULL & pete_readl("drivers/memstick/host/jmb38x_ms.c:244", host->addr + STATUS))) {
 		if (length < 4)
 			break;
 
@@ -353,10 +353,10 @@ static int jmb38x_ms_transfer_data(struct jmb38x_ms_host *host)
 
 	if (!length && host->req->data_dir == WRITE) {
 		if (host->cmd_flags & REG_DATA) {
-			writel(host->io_word[0], host->addr + TPC_P0);
-			writel(host->io_word[1], host->addr + TPC_P1);
+			pete_writel("drivers/memstick/host/jmb38x_ms.c:356", host->io_word[0], host->addr + TPC_P0);
+			pete_writel("drivers/memstick/host/jmb38x_ms.c:357", host->io_word[1], host->addr + TPC_P1);
 		} else if (host->io_pos) {
-			writel(host->io_word[0], host->addr + DATA);
+			pete_writel("drivers/memstick/host/jmb38x_ms.c:359", host->io_word[0], host->addr + DATA);
 		}
 	}
 
@@ -368,15 +368,15 @@ static int jmb38x_ms_issue_cmd(struct memstick_host *msh)
 	struct jmb38x_ms_host *host = memstick_priv(msh);
 	unsigned int data_len, cmd, t_val;
 
-	if (!(STATUS_HAS_MEDIA & readl(host->addr + STATUS))) {
+	if (!(STATUS_HAS_MEDIA & pete_readl("drivers/memstick/host/jmb38x_ms.c:371", host->addr + STATUS))) {
 		dev_dbg(&msh->dev, "no media status\n");
 		host->req->error = -ETIME;
 		return host->req->error;
 	}
 
-	dev_dbg(&msh->dev, "control %08x\n", readl(host->addr + HOST_CONTROL));
-	dev_dbg(&msh->dev, "status %08x\n", readl(host->addr + INT_STATUS));
-	dev_dbg(&msh->dev, "hstatus %08x\n", readl(host->addr + STATUS));
+	dev_dbg(&msh->dev, "control %08x\n", pete_readl("drivers/memstick/host/jmb38x_ms.c:377", host->addr + HOST_CONTROL));
+	dev_dbg(&msh->dev, "status %08x\n", pete_readl("drivers/memstick/host/jmb38x_ms.c:378", host->addr + INT_STATUS));
+	dev_dbg(&msh->dev, "hstatus %08x\n", pete_readl("drivers/memstick/host/jmb38x_ms.c:379", host->addr + STATUS));
 
 	host->cmd_flags = 0;
 	host->block_pos = 0;
@@ -423,23 +423,23 @@ static int jmb38x_ms_issue_cmd(struct memstick_host *msh)
 			return host->req->error;
 		}
 		data_len = sg_dma_len(&host->req->sg);
-		writel(sg_dma_address(&host->req->sg),
+		pete_writel("drivers/memstick/host/jmb38x_ms.c:426", sg_dma_address(&host->req->sg),
 		       host->addr + DMA_ADDRESS);
-		writel(((1 << 16) & BLOCK_COUNT_MASK)
+		pete_writel("drivers/memstick/host/jmb38x_ms.c:428", ((1 << 16) & BLOCK_COUNT_MASK)
 		       | (data_len & BLOCK_SIZE_MASK),
 		       host->addr + BLOCK);
-		writel(DMA_CONTROL_ENABLE, host->addr + DMA_CONTROL);
+		pete_writel("drivers/memstick/host/jmb38x_ms.c:431", DMA_CONTROL_ENABLE, host->addr + DMA_CONTROL);
 	} else if (!(host->cmd_flags & REG_DATA)) {
-		writel(((1 << 16) & BLOCK_COUNT_MASK)
+		pete_writel("drivers/memstick/host/jmb38x_ms.c:433", ((1 << 16) & BLOCK_COUNT_MASK)
 		       | (data_len & BLOCK_SIZE_MASK),
 		       host->addr + BLOCK);
-		t_val = readl(host->addr + INT_STATUS_ENABLE);
+		t_val = pete_readl("drivers/memstick/host/jmb38x_ms.c:436", host->addr + INT_STATUS_ENABLE);
 		t_val |= host->req->data_dir == READ
 			 ? INT_STATUS_FIFO_RRDY
 			 : INT_STATUS_FIFO_WRDY;
 
-		writel(t_val, host->addr + INT_STATUS_ENABLE);
-		writel(t_val, host->addr + INT_SIGNAL_ENABLE);
+		pete_writel("drivers/memstick/host/jmb38x_ms.c:441", t_val, host->addr + INT_STATUS_ENABLE);
+		pete_writel("drivers/memstick/host/jmb38x_ms.c:442", t_val, host->addr + INT_SIGNAL_ENABLE);
 	} else {
 		cmd &= ~(TPC_DATA_SEL | 0xf);
 		host->cmd_flags |= REG_DATA;
@@ -447,17 +447,17 @@ static int jmb38x_ms_issue_cmd(struct memstick_host *msh)
 
 		if (host->req->data_dir == WRITE) {
 			jmb38x_ms_transfer_data(host);
-			writel(host->io_word[0], host->addr + TPC_P0);
-			writel(host->io_word[1], host->addr + TPC_P1);
+			pete_writel("drivers/memstick/host/jmb38x_ms.c:450", host->io_word[0], host->addr + TPC_P0);
+			pete_writel("drivers/memstick/host/jmb38x_ms.c:451", host->io_word[1], host->addr + TPC_P1);
 		}
 	}
 
 	mod_timer(&host->timer, jiffies + host->timeout_jiffies);
-	writel(HOST_CONTROL_LED | readl(host->addr + HOST_CONTROL),
+	pete_writel("drivers/memstick/host/jmb38x_ms.c:456", HOST_CONTROL_LED | pete_readl("drivers/memstick/host/jmb38x_ms.c:456", host->addr + HOST_CONTROL),
 	       host->addr + HOST_CONTROL);
 	host->req->error = 0;
 
-	writel(cmd, host->addr + TPC);
+	pete_writel("drivers/memstick/host/jmb38x_ms.c:460", cmd, host->addr + TPC);
 	dev_dbg(&msh->dev, "executing TPC %08x, len %x\n", cmd, data_len);
 
 	return 0;
@@ -472,32 +472,32 @@ static void jmb38x_ms_complete_cmd(struct memstick_host *msh, int last)
 	del_timer(&host->timer);
 
 	dev_dbg(&msh->dev, "c control %08x\n",
-		readl(host->addr + HOST_CONTROL));
+		pete_readl("drivers/memstick/host/jmb38x_ms.c:475", host->addr + HOST_CONTROL));
 	dev_dbg(&msh->dev, "c status %08x\n",
-		readl(host->addr + INT_STATUS));
-	dev_dbg(&msh->dev, "c hstatus %08x\n", readl(host->addr + STATUS));
+		pete_readl("drivers/memstick/host/jmb38x_ms.c:477", host->addr + INT_STATUS));
+	dev_dbg(&msh->dev, "c hstatus %08x\n", pete_readl("drivers/memstick/host/jmb38x_ms.c:478", host->addr + STATUS));
 
-	host->req->int_reg = readl(host->addr + STATUS) & 0xff;
+	host->req->int_reg = pete_readl("drivers/memstick/host/jmb38x_ms.c:480", host->addr + STATUS) & 0xff;
 
-	writel(0, host->addr + BLOCK);
-	writel(0, host->addr + DMA_CONTROL);
+	pete_writel("drivers/memstick/host/jmb38x_ms.c:482", 0, host->addr + BLOCK);
+	pete_writel("drivers/memstick/host/jmb38x_ms.c:483", 0, host->addr + DMA_CONTROL);
 
 	if (host->cmd_flags & DMA_DATA) {
 		dma_unmap_sg(&host->chip->pdev->dev, &host->req->sg, 1,
 			     host->req->data_dir == READ
 			     ? DMA_FROM_DEVICE : DMA_TO_DEVICE);
 	} else {
-		t_val = readl(host->addr + INT_STATUS_ENABLE);
+		t_val = pete_readl("drivers/memstick/host/jmb38x_ms.c:490", host->addr + INT_STATUS_ENABLE);
 		if (host->req->data_dir == READ)
 			t_val &= ~INT_STATUS_FIFO_RRDY;
 		else
 			t_val &= ~INT_STATUS_FIFO_WRDY;
 
-		writel(t_val, host->addr + INT_STATUS_ENABLE);
-		writel(t_val, host->addr + INT_SIGNAL_ENABLE);
+		pete_writel("drivers/memstick/host/jmb38x_ms.c:496", t_val, host->addr + INT_STATUS_ENABLE);
+		pete_writel("drivers/memstick/host/jmb38x_ms.c:497", t_val, host->addr + INT_SIGNAL_ENABLE);
 	}
 
-	writel((~HOST_CONTROL_LED) & readl(host->addr + HOST_CONTROL),
+	pete_writel("drivers/memstick/host/jmb38x_ms.c:500", (~HOST_CONTROL_LED) & pete_readl("drivers/memstick/host/jmb38x_ms.c:500", host->addr + HOST_CONTROL),
 	       host->addr + HOST_CONTROL);
 
 	if (!last) {
@@ -520,7 +520,7 @@ static irqreturn_t jmb38x_ms_isr(int irq, void *dev_id)
 	unsigned int irq_status;
 
 	spin_lock(&host->lock);
-	irq_status = readl(host->addr + INT_STATUS);
+	irq_status = pete_readl("drivers/memstick/host/jmb38x_ms.c:523", host->addr + INT_STATUS);
 	dev_dbg(&host->chip->pdev->dev, "irq_status = %08x\n", irq_status);
 	if (irq_status == 0 || irq_status == (~0)) {
 		spin_unlock(&host->lock);
@@ -556,10 +556,10 @@ static irqreturn_t jmb38x_ms_isr(int irq, void *dev_id)
 				if (host->cmd_flags & REG_DATA) {
 					if (host->req->data_dir == READ) {
 						host->io_word[0]
-							= readl(host->addr
+							= pete_readl("drivers/memstick/host/jmb38x_ms.c:559", host->addr
 								+ TPC_P0);
 						host->io_word[1]
-							= readl(host->addr
+							= pete_readl("drivers/memstick/host/jmb38x_ms.c:562", host->addr
 								+ TPC_P1);
 						host->io_pos = 8;
 
@@ -576,7 +576,7 @@ static irqreturn_t jmb38x_ms_isr(int irq, void *dev_id)
 		memstick_detect_change(msh);
 	}
 
-	writel(irq_status, host->addr + INT_STATUS);
+	pete_writel("drivers/memstick/host/jmb38x_ms.c:579", irq_status, host->addr + INT_STATUS);
 
 	if (host->req
 	    && (((host->cmd_flags & CMD_READY)
@@ -636,13 +636,13 @@ static int jmb38x_ms_reset(struct jmb38x_ms_host *host)
 {
 	int cnt;
 
-	writel(HOST_CONTROL_RESET_REQ | HOST_CONTROL_CLOCK_EN
-	       | readl(host->addr + HOST_CONTROL),
+	pete_writel("drivers/memstick/host/jmb38x_ms.c:639", HOST_CONTROL_RESET_REQ | HOST_CONTROL_CLOCK_EN
+	       | pete_readl("drivers/memstick/host/jmb38x_ms.c:640", host->addr + HOST_CONTROL),
 	       host->addr + HOST_CONTROL);
 
 	for (cnt = 0; cnt < 20; ++cnt) {
 		if (!(HOST_CONTROL_RESET_REQ
-		      & readl(host->addr + HOST_CONTROL)))
+		      & pete_readl("drivers/memstick/host/jmb38x_ms.c:645", host->addr + HOST_CONTROL)))
 			goto reset_next;
 
 		ndelay(20);
@@ -650,13 +650,13 @@ static int jmb38x_ms_reset(struct jmb38x_ms_host *host)
 	dev_dbg(&host->chip->pdev->dev, "reset_req timeout\n");
 
 reset_next:
-	writel(HOST_CONTROL_RESET | HOST_CONTROL_CLOCK_EN
-	       | readl(host->addr + HOST_CONTROL),
+	pete_writel("drivers/memstick/host/jmb38x_ms.c:653", HOST_CONTROL_RESET | HOST_CONTROL_CLOCK_EN
+	       | pete_readl("drivers/memstick/host/jmb38x_ms.c:654", host->addr + HOST_CONTROL),
 	       host->addr + HOST_CONTROL);
 
 	for (cnt = 0; cnt < 20; ++cnt) {
 		if (!(HOST_CONTROL_RESET
-		      & readl(host->addr + HOST_CONTROL)))
+		      & pete_readl("drivers/memstick/host/jmb38x_ms.c:659", host->addr + HOST_CONTROL)))
 			goto reset_ok;
 
 		ndelay(20);
@@ -665,8 +665,8 @@ reset_next:
 	return -EIO;
 
 reset_ok:
-	writel(INT_STATUS_ALL, host->addr + INT_SIGNAL_ENABLE);
-	writel(INT_STATUS_ALL, host->addr + INT_STATUS_ENABLE);
+	pete_writel("drivers/memstick/host/jmb38x_ms.c:668", INT_STATUS_ALL, host->addr + INT_SIGNAL_ENABLE);
+	pete_writel("drivers/memstick/host/jmb38x_ms.c:669", INT_STATUS_ALL, host->addr + INT_STATUS_ENABLE);
 	return 0;
 }
 
@@ -675,7 +675,7 @@ static int jmb38x_ms_set_param(struct memstick_host *msh,
 			       int value)
 {
 	struct jmb38x_ms_host *host = memstick_priv(msh);
-	unsigned int host_ctl = readl(host->addr + HOST_CONTROL);
+	unsigned int host_ctl = pete_readl("drivers/memstick/host/jmb38x_ms.c:678", host->addr + HOST_CONTROL);
 	unsigned int clock_ctl = CLOCK_CONTROL_BY_MMIO, clock_delay = 0;
 	int rc = 0;
 
@@ -689,13 +689,13 @@ static int jmb38x_ms_set_param(struct memstick_host *msh,
 			host_ctl = 7;
 			host_ctl |= HOST_CONTROL_POWER_EN
 				 | HOST_CONTROL_CLOCK_EN;
-			writel(host_ctl, host->addr + HOST_CONTROL);
+			pete_writel("drivers/memstick/host/jmb38x_ms.c:692", host_ctl, host->addr + HOST_CONTROL);
 
-			writel(host->id ? PAD_PU_PD_ON_MS_SOCK1
+			pete_writel("drivers/memstick/host/jmb38x_ms.c:694", host->id ? PAD_PU_PD_ON_MS_SOCK1
 					: PAD_PU_PD_ON_MS_SOCK0,
 			       host->addr + PAD_PU_PD);
 
-			writel(PAD_OUTPUT_ENABLE_MS,
+			pete_writel("drivers/memstick/host/jmb38x_ms.c:698", PAD_OUTPUT_ENABLE_MS,
 			       host->addr + PAD_OUTPUT_ENABLE);
 
 			msleep(10);
@@ -703,9 +703,9 @@ static int jmb38x_ms_set_param(struct memstick_host *msh,
 		} else if (value == MEMSTICK_POWER_OFF) {
 			host_ctl &= ~(HOST_CONTROL_POWER_EN
 				      | HOST_CONTROL_CLOCK_EN);
-			writel(host_ctl, host->addr +  HOST_CONTROL);
-			writel(0, host->addr + PAD_OUTPUT_ENABLE);
-			writel(PAD_PU_PD_OFF, host->addr + PAD_PU_PD);
+			pete_writel("drivers/memstick/host/jmb38x_ms.c:706", host_ctl, host->addr +  HOST_CONTROL);
+			pete_writel("drivers/memstick/host/jmb38x_ms.c:707", 0, host->addr + PAD_OUTPUT_ENABLE);
+			pete_writel("drivers/memstick/host/jmb38x_ms.c:708", PAD_PU_PD_OFF, host->addr + PAD_PU_PD);
 			dev_dbg(&host->chip->pdev->dev, "power off\n");
 		} else
 			return -EINVAL;
@@ -740,9 +740,9 @@ static int jmb38x_ms_set_param(struct memstick_host *msh,
 		} else
 			return -EINVAL;
 
-		writel(host_ctl, host->addr + HOST_CONTROL);
-		writel(CLOCK_CONTROL_OFF, host->addr + CLOCK_CONTROL);
-		writel(clock_ctl, host->addr + CLOCK_CONTROL);
+		pete_writel("drivers/memstick/host/jmb38x_ms.c:743", host_ctl, host->addr + HOST_CONTROL);
+		pete_writel("drivers/memstick/host/jmb38x_ms.c:744", CLOCK_CONTROL_OFF, host->addr + CLOCK_CONTROL);
+		pete_writel("drivers/memstick/host/jmb38x_ms.c:745", clock_ctl, host->addr + CLOCK_CONTROL);
 		pci_write_config_byte(host->chip->pdev,
 				      PCI_CTL_CLOCK_DLY_ADDR + 1,
 				      clock_delay);
@@ -982,8 +982,8 @@ static void jmb38x_ms_remove(struct pci_dev *dev)
 
 		jm->hosts[cnt]->request = jmb38x_ms_dummy_submit;
 		tasklet_kill(&host->notify);
-		writel(0, host->addr + INT_SIGNAL_ENABLE);
-		writel(0, host->addr + INT_STATUS_ENABLE);
+		pete_writel("drivers/memstick/host/jmb38x_ms.c:985", 0, host->addr + INT_SIGNAL_ENABLE);
+		pete_writel("drivers/memstick/host/jmb38x_ms.c:986", 0, host->addr + INT_STATUS_ENABLE);
 		dev_dbg(&jm->pdev->dev, "interrupts off\n");
 		spin_lock_irqsave(&host->lock, flags);
 		if (host->req) {

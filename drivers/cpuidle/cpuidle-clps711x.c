@@ -18,7 +18,7 @@ static void __iomem *clps711x_halt;
 static int clps711x_cpuidle_halt(struct cpuidle_device *dev,
 				 struct cpuidle_driver *drv, int index)
 {
-	writel(0xaa, clps711x_halt);
+	pete_writel("drivers/cpuidle/cpuidle-clps711x.c:21", 0xaa, clps711x_halt);
 
 	return index;
 }

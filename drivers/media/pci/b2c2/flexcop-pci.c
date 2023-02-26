@@ -78,7 +78,7 @@ static flexcop_ibi_value flexcop_pci_read_ibi_reg(struct flexcop_device *fc,
 {
 	struct flexcop_pci *fc_pci = fc->bus_specific;
 	flexcop_ibi_value v;
-	v.raw = readl(fc_pci->io_mem + r);
+	v.raw = pete_readl("drivers/media/pci/b2c2/flexcop-pci.c:81", fc_pci->io_mem + r);
 
 	if (lastrreg != r || lastrval != v.raw) {
 		lastrreg = r; lastrval = v.raw;
@@ -98,7 +98,7 @@ static int flexcop_pci_write_ibi_reg(struct flexcop_device *fc,
 		deb_reg("new wr: %3x: %08x\n", r, v.raw);
 	}
 
-	writel(v.raw, fc_pci->io_mem + r);
+	pete_writel("drivers/media/pci/b2c2/flexcop-pci.c:101", v.raw, fc_pci->io_mem + r);
 	return 0;
 }
 

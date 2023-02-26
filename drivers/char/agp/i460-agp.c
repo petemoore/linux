@@ -52,8 +52,8 @@
  * gatt_table entries are 32-bits wide on the i460; the generic code ought to declare the
  * gatt_table and gatt_table_real pointers a "void *"...
  */
-#define RD_GATT(index)		readl((u32 *) i460.gatt + (index))
-#define WR_GATT(index, val)	writel((val), (u32 *) i460.gatt + (index))
+#define RD_GATT(index)		pete_readl("drivers/char/agp/i460-agp.c:55", (u32 *) i460.gatt + (index))
+#define WR_GATT(index, val)	pete_writel("drivers/char/agp/i460-agp.c:56", (val), (u32 *) i460.gatt + (index))
 /*
  * The 460 spec says we have to read the last location written to make sure that all
  * writes have taken effect

@@ -33,15 +33,15 @@ static int phy_mvebu_sata_power_on(struct phy *phy)
 	clk_prepare_enable(priv->clk);
 
 	/* Enable PLL and IVREF */
-	reg = readl(priv->base + SATA_PHY_MODE_2);
+	reg = pete_readl("drivers/phy/marvell/phy-mvebu-sata.c:36", priv->base + SATA_PHY_MODE_2);
 	reg |= (MODE_2_FORCE_PU_TX | MODE_2_FORCE_PU_RX |
 		MODE_2_PU_PLL | MODE_2_PU_IVREF);
-	writel(reg , priv->base + SATA_PHY_MODE_2);
+	pete_writel("drivers/phy/marvell/phy-mvebu-sata.c:39", reg , priv->base + SATA_PHY_MODE_2);
 
 	/* Enable PHY */
-	reg = readl(priv->base + SATA_IF_CTRL);
+	reg = pete_readl("drivers/phy/marvell/phy-mvebu-sata.c:42", priv->base + SATA_IF_CTRL);
 	reg &= ~CTRL_PHY_SHUTDOWN;
-	writel(reg, priv->base + SATA_IF_CTRL);
+	pete_writel("drivers/phy/marvell/phy-mvebu-sata.c:44", reg, priv->base + SATA_IF_CTRL);
 
 	clk_disable_unprepare(priv->clk);
 
@@ -56,15 +56,15 @@ static int phy_mvebu_sata_power_off(struct phy *phy)
 	clk_prepare_enable(priv->clk);
 
 	/* Disable PLL and IVREF */
-	reg = readl(priv->base + SATA_PHY_MODE_2);
+	reg = pete_readl("drivers/phy/marvell/phy-mvebu-sata.c:59", priv->base + SATA_PHY_MODE_2);
 	reg &= ~(MODE_2_FORCE_PU_TX | MODE_2_FORCE_PU_RX |
 		 MODE_2_PU_PLL | MODE_2_PU_IVREF);
-	writel(reg, priv->base + SATA_PHY_MODE_2);
+	pete_writel("drivers/phy/marvell/phy-mvebu-sata.c:62", reg, priv->base + SATA_PHY_MODE_2);
 
 	/* Disable PHY */
-	reg = readl(priv->base + SATA_IF_CTRL);
+	reg = pete_readl("drivers/phy/marvell/phy-mvebu-sata.c:65", priv->base + SATA_IF_CTRL);
 	reg |= CTRL_PHY_SHUTDOWN;
-	writel(reg, priv->base + SATA_IF_CTRL);
+	pete_writel("drivers/phy/marvell/phy-mvebu-sata.c:67", reg, priv->base + SATA_IF_CTRL);
 
 	clk_disable_unprepare(priv->clk);
 
