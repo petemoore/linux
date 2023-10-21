@@ -429,6 +429,12 @@ static void brcm_pcie_set_outbound_win(struct brcm_pcie *pcie,
 	phys_addr_t cpu_addr_mb, limit_addr_mb;
 	int high_addr_shift;
 	u32 tmp;
+	struct device *dev = pcie->dev;
+
+	dev_info(dev, "pmoore: cpu_addr: %#018llx\n", cpu_addr);
+	dev_info(dev, "pmoore: pcie_addr: %#018llx\n", pcie_addr);
+	dev_info(dev, "pmoore: size: %#018llx\n", size);
+	dev_info(dev, "pmoore: win: %#010x\n", win);
 
 	/* Set the base of the pcie_addr window */
 	pete_writel("drivers/pci/controller/pcie-brcmstb.c:434", lower_32_bits(pcie_addr), pcie->base + PCIE_MEM_WIN0_LO(win));
@@ -436,7 +442,9 @@ static void brcm_pcie_set_outbound_win(struct brcm_pcie *pcie,
 
 	/* Write the addr base & limit lower bits (in MBs) */
 	cpu_addr_mb = cpu_addr / SZ_1M;
+	dev_info(dev, "pmoore: cpu_addr_mb: %#018llx\n", cpu_addr_mb);
 	limit_addr_mb = (cpu_addr + size - 1) / SZ_1M;
+	dev_info(dev, "pmoore: limit_addr_mb: %#018llx\n", limit_addr_mb);
 
 	tmp = pete_readl("drivers/pci/controller/pcie-brcmstb.c:441", pcie->base + PCIE_MEM_WIN0_BASE_LIMIT(win));
 	u32p_replace_bits(&tmp, cpu_addr_mb,
@@ -448,6 +456,7 @@ static void brcm_pcie_set_outbound_win(struct brcm_pcie *pcie,
 	/* Write the cpu & limit addr upper bits */
 	high_addr_shift =
 		HWEIGHT32(PCIE_MISC_CPU_2_PCIE_MEM_WIN0_BASE_LIMIT_BASE_MASK);
+	dev_info(dev, "pmoore: high_addr_shift: %#010x\n", high_addr_shift);
 
 	cpu_addr_mb_high = cpu_addr_mb >> high_addr_shift;
 	tmp = pete_readl("drivers/pci/controller/pcie-brcmstb.c:453", pcie->base + PCIE_MEM_WIN0_BASE_HI(win));
@@ -790,10 +799,15 @@ static inline int brcm_pcie_get_rc_bar2_size_and_offset(struct brcm_pcie *pcie,
 
 	resource_list_for_each_entry(entry, &bridge->dma_ranges) {
 		u64 pcie_beg = entry->res->start - entry->offset;
+		dev_info(dev, "pmoore: pcie_beg: %#018llx\n", pcie_beg);
+		dev_info(dev, "pmoore: entry->res->start: %#018llx\n", entry->res->start);
+		dev_info(dev, "pmoore: entry->offset: %#018llx\n", entry->offset);
 
 		size += entry->res->end - entry->res->start + 1;
+		dev_info(dev, "pmoore: size: %#018llx\n", size);
 		if (pcie_beg < lowest_pcie_addr)
 			lowest_pcie_addr = pcie_beg;
+		dev_info(dev, "pmoore: lowest_pcie_addr: %#018llx\n", lowest_pcie_addr);
 	}
 
 	if (lowest_pcie_addr == ~(u64)0) {
@@ -803,6 +817,8 @@ static inline int brcm_pcie_get_rc_bar2_size_and_offset(struct brcm_pcie *pcie,
 
 	ret = of_property_read_variable_u64_array(pcie->np, "brcm,scb-sizes", pcie->memc_size, 1,
 						  PCIE_BRCM_MAX_MEMC);
+	dev_info(dev, "pmoore: ret: %#010x\n", ret);
+
 
 	if (ret <= 0) {
 		/* Make an educated guess */
@@ -813,13 +829,17 @@ static inline int brcm_pcie_get_rc_bar2_size_and_offset(struct brcm_pcie *pcie,
 	}
 
 	/* Each memc is viewed through a "port" that is a power of 2 */
-	for (i = 0, size = 0; i < pcie->num_memc; i++)
+	for (i = 0, size = 0; i < pcie->num_memc; i++) {
 		size += pcie->memc_size[i];
+		dev_info(dev, "pmoore: size: %#018llx\n", size);
+	}
 
 	/* System memory starts at this address in PCIe-space */
 	*rc_bar2_offset = lowest_pcie_addr;
+	dev_info(dev, "pmoore: *rc_bar2_offset: %#018llx\n", *rc_bar2_offset);
 	/* The sum of all memc views must also be a power of 2 */
 	*rc_bar2_size = 1ULL << fls64(size - 1);
+	dev_info(dev, "pmoore: *rc_bar2_size: %#018llx\n", *rc_bar2_size);
 
 	/*
 	 * We validate the inbound memory view even though we should trust
@@ -1337,14 +1357,14 @@ static int brcm_pcie_probe(struct platform_device *pdev)
 	//
 	// Added by pmoore for rpi400 debugging...
 	dev = pdev->dev;
-	dev_info(&dev, "pdev->name: %s\n", pdev->name);
-	dev_info(&dev, "pdev->id: %#0x\n", pdev->id);
-	dev_info(&dev, "pdev->id_auto: %s\n", pdev->id_auto ? "true":"false");
-	dev_info(&dev, "pdev->dev.init_name: %s\n", pdev->dev.init_name);
-	dev_info(&dev, "pdev->dev.platform_data: 0x%p\n", pdev->dev.platform_data);
-	dev_info(&dev, "pdev->platform_dma_mask: %#018llx\n", pdev->platform_dma_mask);
-	dev_info(&dev, "pdev->num_resources: %#0x\n", pdev->num_resources);
-	dev_info(&dev, "pdev->driver_override: %s\n", pdev->driver_override);
+	dev_info(&dev, "pmoore: pdev->name: %s\n", pdev->name);
+	dev_info(&dev, "pmoore: pdev->id: %#0x\n", pdev->id);
+	dev_info(&dev, "pmoore: pdev->id_auto: %s\n", pdev->id_auto ? "true":"false");
+	dev_info(&dev, "pmoore: pdev->dev.init_name: %s\n", pdev->dev.init_name);
+	dev_info(&dev, "pmoore: pdev->dev.platform_data: 0x%p\n", pdev->dev.platform_data);
+	dev_info(&dev, "pmoore: pdev->platform_dma_mask: %#018llx\n", pdev->platform_dma_mask);
+	dev_info(&dev, "pmoore: pdev->num_resources: %#0x\n", pdev->num_resources);
+	dev_info(&dev, "pmoore: pdev->driver_override: %s\n", pdev->driver_override);
 	//
 	///////////////////////////////////////////////////////////////
 
