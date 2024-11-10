@@ -1397,37 +1397,39 @@ static int brcm_pcie_probe(struct platform_device *pdev)
 	///////////////////////////////////////////////////////////////
 	//
 	// Added by pmoore for rpi400 debugging...
-	dev_info(&dev, "pmoore: bridge->bus: %p\n", bridge->bus);
-	dev_info(&dev, "pmoore: bridge->sysdata: %p\n", bridge->sysdata);
-	dev_info(&dev, "pmoore: bridge->busnr: %#0x\n", bridge->busnr);
-	dev_info(&dev, "pmoore: bridge->domain_nr: %#0x\n", bridge->domain_nr);
+	dev_info(&dev, "pmoore: bridge->bus: %p\n", bridge->bus); // null
+	dev_info(&dev, "pmoore: bridge->sysdata: %p\n", bridge->sysdata); // not null
+	dev_info(&dev, "pmoore: bridge->busnr: %#0x\n", bridge->busnr); // 0
+	dev_info(&dev, "pmoore: bridge->domain_nr: %#0x\n", bridge->domain_nr); // 0xffffffff
 	resource_list_for_each_entry(window, &bridge->windows) {
-		dev_info(&dev, "pmoore: bridge->windows resource: start=%llx, end=%llx, size=%llx, flags=%lx name=%s\n",
+		dev_info(&dev, "pmoore: bridge->windows resource: start=%#018llx, end=%#018llx, size=%#018llx, flags=%lx name=%s\n",
 		   (unsigned long long)window->res->start,
 		   (unsigned long long)window->res->end,
 		   (unsigned long long)resource_size(window->res),
 		   window->res->flags,
 		   window->res->name);
+           // start=0x0000000000000000, end=0x00000000000000ff, size=0x0000000000000100, flags=0x1000 name=(null)
+           // start=0x0000000600000000, end=0x000000063fffffff, size=0x0000000040000000, flags=0x200 name=pcie@7d500000
 	}
 	// dev_info(&dev, "pmoore: bridge->dma_ranges: %s\n", bridge->dma_ranges);
 	// dev_info(&dev, "pmoore: bridge->swizzle_irq: %s\n", bridge->swizzle_irq);
 	// dev_info(&dev, "pmoore: bridge->map_irq: %s\n", bridge->map_irq);
 	// dev_info(&dev, "pmoore: bridge->release_fn: %p\n", bridge->release_fn);
-	dev_info(&dev, "pmoore: bridge->release_data: %p\n", bridge->release_data);
-	dev_info(&dev, "pmoore: bridge->ignore_reset_delay: %x\n", bridge->ignore_reset_delay);
-	dev_info(&dev, "pmoore: bridge->no_ext_tags: %x\n", bridge->no_ext_tags);
-	dev_info(&dev, "pmoore: bridge->native_aer: %x\n", bridge->native_aer);
-	dev_info(&dev, "pmoore: bridge->native_pcie_hotplug: %x\n", bridge->native_pcie_hotplug);
-	dev_info(&dev, "pmoore: bridge->native_shpc_hotplug: %x\n", bridge->native_shpc_hotplug);
-	dev_info(&dev, "pmoore: bridge->native_pme: %x\n", bridge->native_pme);
-	dev_info(&dev, "pmoore: bridge->native_ltr: %x\n", bridge->native_ltr);
-	dev_info(&dev, "pmoore: bridge->native_dpc: %x\n", bridge->native_dpc);
-	dev_info(&dev, "pmoore: bridge->preserve_config: %x\n", bridge->preserve_config);
-	dev_info(&dev, "pmoore: bridge->size_windows: %x\n", bridge->size_windows);
-	dev_info(&dev, "pmoore: bridge->msi_domain: %x\n", bridge->msi_domain);
+	dev_info(&dev, "pmoore: bridge->release_data: %p\n", bridge->release_data); // null
+	dev_info(&dev, "pmoore: bridge->ignore_reset_delay: %x\n", bridge->ignore_reset_delay); // 0
+	dev_info(&dev, "pmoore: bridge->no_ext_tags: %x\n", bridge->no_ext_tags); // 0
+	dev_info(&dev, "pmoore: bridge->native_aer: %x\n", bridge->native_aer); // 1
+	dev_info(&dev, "pmoore: bridge->native_pcie_hotplug: %x\n", bridge->native_pcie_hotplug); // 1
+	dev_info(&dev, "pmoore: bridge->native_shpc_hotplug: %x\n", bridge->native_shpc_hotplug); // 1
+	dev_info(&dev, "pmoore: bridge->native_pme: %x\n", bridge->native_pme); // 1
+	dev_info(&dev, "pmoore: bridge->native_ltr: %x\n", bridge->native_ltr); // 1
+	dev_info(&dev, "pmoore: bridge->native_dpc: %x\n", bridge->native_dpc); // 1
+	dev_info(&dev, "pmoore: bridge->preserve_config: %x\n", bridge->preserve_config); // 0
+	dev_info(&dev, "pmoore: bridge->size_windows: %x\n", bridge->size_windows); // 0
+	dev_info(&dev, "pmoore: bridge->msi_domain: %x\n", bridge->msi_domain); // 0
 	// dev_info(&dev, "pmoore: bridge->private: %#0x\n", bridge->private);
 	//
-	dev_info(&dev, "pmoore: pci_flags: %#0x\n", pci_flags);
+	dev_info(&dev, "pmoore: pci_flags: %#0x\n", pci_flags); // 0
 	//
 	///////////////////////////////////////////////////////////////
 
