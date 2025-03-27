@@ -79,7 +79,7 @@ static int wait_lpc_idle(void __iomem *mbase, unsigned int waitcnt)
 	u32 status;
 
 	do {
-		status = readl(mbase + LPC_REG_OP_STATUS);
+		status = pete_readl("drivers/bus/hisi_lpc.c:82", mbase + LPC_REG_OP_STATUS);
 		if (status & LPC_REG_OP_STATUS_IDLE)
 			return (status & LPC_REG_OP_STATUS_FINISHED) ? 0 : -EIO;
 		ndelay(LPC_NSEC_PERWAIT);
@@ -124,7 +124,7 @@ static int hisi_lpc_target_in(struct hisi_lpc_dev *lpcdev,
 	writel_relaxed(cmd_word, lpcdev->membase + LPC_REG_CMD);
 	writel_relaxed(addr, lpcdev->membase + LPC_REG_ADDR);
 
-	writel(LPC_REG_STARTUP_SIGNAL_START,
+	pete_writel("drivers/bus/hisi_lpc.c:127", LPC_REG_STARTUP_SIGNAL_START,
 	       lpcdev->membase + LPC_REG_STARTUP_SIGNAL);
 
 	/* whether the operation is finished */
@@ -179,7 +179,7 @@ static int hisi_lpc_target_out(struct hisi_lpc_dev *lpcdev,
 
 	writesb(lpcdev->membase + LPC_REG_WDATA, buf, opcnt);
 
-	writel(LPC_REG_STARTUP_SIGNAL_START,
+	pete_writel("drivers/bus/hisi_lpc.c:182", LPC_REG_STARTUP_SIGNAL_START,
 	       lpcdev->membase + LPC_REG_STARTUP_SIGNAL);
 
 	/* whether the operation is finished */

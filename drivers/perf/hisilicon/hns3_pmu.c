@@ -747,7 +747,7 @@ static u32 hns3_pmu_readl(struct hns3_pmu *hns3_pmu, u32 reg_offset, u32 idx)
 {
 	u32 offset = hns3_pmu_get_offset(reg_offset, idx);
 
-	return readl(hns3_pmu->base + offset);
+	return pete_readl("drivers/perf/hisilicon/hns3_pmu.c:750", hns3_pmu->base + offset);
 }
 
 static void hns3_pmu_writel(struct hns3_pmu *hns3_pmu, u32 reg_offset, u32 idx,
@@ -755,14 +755,14 @@ static void hns3_pmu_writel(struct hns3_pmu *hns3_pmu, u32 reg_offset, u32 idx,
 {
 	u32 offset = hns3_pmu_get_offset(reg_offset, idx);
 
-	writel(val, hns3_pmu->base + offset);
+	pete_writel("drivers/perf/hisilicon/hns3_pmu.c:758", val, hns3_pmu->base + offset);
 }
 
 static u64 hns3_pmu_readq(struct hns3_pmu *hns3_pmu, u32 reg_offset, u32 idx)
 {
 	u32 offset = hns3_pmu_get_offset(reg_offset, idx);
 
-	return readq(hns3_pmu->base + offset);
+	return pete_readq("drivers/perf/hisilicon/hns3_pmu.c:765", hns3_pmu->base + offset);
 }
 
 static void hns3_pmu_writeq(struct hns3_pmu *hns3_pmu, u32 reg_offset, u32 idx,
@@ -770,7 +770,7 @@ static void hns3_pmu_writeq(struct hns3_pmu *hns3_pmu, u32 reg_offset, u32 idx,
 {
 	u32 offset = hns3_pmu_get_offset(reg_offset, idx);
 
-	writeq(val, hns3_pmu->base + offset);
+	pete_writeq("drivers/perf/hisilicon/hns3_pmu.c:773", val, hns3_pmu->base + offset);
 }
 
 static bool hns3_pmu_cmp_event(struct perf_event *target,
@@ -1386,9 +1386,9 @@ static void hns3_pmu_enable(struct pmu *pmu)
 	struct hns3_pmu *hns3_pmu = to_hns3_pmu(pmu);
 	u32 val;
 
-	val = readl(hns3_pmu->base + HNS3_PMU_REG_GLOBAL_CTRL);
+	val = pete_readl("drivers/perf/hisilicon/hns3_pmu.c:1389", hns3_pmu->base + HNS3_PMU_REG_GLOBAL_CTRL);
 	val |= HNS3_PMU_GLOBAL_START;
-	writel(val, hns3_pmu->base + HNS3_PMU_REG_GLOBAL_CTRL);
+	pete_writel("drivers/perf/hisilicon/hns3_pmu.c:1391", val, hns3_pmu->base + HNS3_PMU_REG_GLOBAL_CTRL);
 }
 
 static void hns3_pmu_disable(struct pmu *pmu)
@@ -1396,9 +1396,9 @@ static void hns3_pmu_disable(struct pmu *pmu)
 	struct hns3_pmu *hns3_pmu = to_hns3_pmu(pmu);
 	u32 val;
 
-	val = readl(hns3_pmu->base + HNS3_PMU_REG_GLOBAL_CTRL);
+	val = pete_readl("drivers/perf/hisilicon/hns3_pmu.c:1399", hns3_pmu->base + HNS3_PMU_REG_GLOBAL_CTRL);
 	val &= ~HNS3_PMU_GLOBAL_START;
-	writel(val, hns3_pmu->base + HNS3_PMU_REG_GLOBAL_CTRL);
+	pete_writel("drivers/perf/hisilicon/hns3_pmu.c:1401", val, hns3_pmu->base + HNS3_PMU_REG_GLOBAL_CTRL);
 }
 
 static int hns3_pmu_alloc_pmu(struct pci_dev *pdev, struct hns3_pmu *hns3_pmu)
@@ -1413,13 +1413,13 @@ static int hns3_pmu_alloc_pmu(struct pci_dev *pdev, struct hns3_pmu *hns3_pmu)
 		return -ENOMEM;
 	}
 
-	hns3_pmu->hw_clk_freq = readl(hns3_pmu->base + HNS3_PMU_REG_CLOCK_FREQ);
+	hns3_pmu->hw_clk_freq = pete_readl("drivers/perf/hisilicon/hns3_pmu.c:1416", hns3_pmu->base + HNS3_PMU_REG_CLOCK_FREQ);
 
-	val = readl(hns3_pmu->base + HNS3_PMU_REG_BDF);
+	val = pete_readl("drivers/perf/hisilicon/hns3_pmu.c:1418", hns3_pmu->base + HNS3_PMU_REG_BDF);
 	hns3_pmu->bdf_min = val & 0xffff;
 	hns3_pmu->bdf_max = val >> 16;
 
-	val = readl(hns3_pmu->base + HNS3_PMU_REG_DEVICE_ID);
+	val = pete_readl("drivers/perf/hisilicon/hns3_pmu.c:1422", hns3_pmu->base + HNS3_PMU_REG_DEVICE_ID);
 	device_id = val & 0xffff;
 	name = devm_kasprintf(&pdev->dev, GFP_KERNEL, "hns3_pmu_sicl_%u", device_id);
 	if (!name)
@@ -1427,7 +1427,7 @@ static int hns3_pmu_alloc_pmu(struct pci_dev *pdev, struct hns3_pmu *hns3_pmu)
 
 	hns3_pmu->pdev = pdev;
 	hns3_pmu->on_cpu = -1;
-	hns3_pmu->identifier = readl(hns3_pmu->base + HNS3_PMU_REG_VERSION);
+	hns3_pmu->identifier = pete_readl("drivers/perf/hisilicon/hns3_pmu.c:1430", hns3_pmu->base + HNS3_PMU_REG_VERSION);
 	hns3_pmu->pmu = (struct pmu) {
 		.name		= name,
 		.module		= THIS_MODULE,

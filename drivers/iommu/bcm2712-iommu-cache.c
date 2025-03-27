@@ -24,12 +24,12 @@ void bcm2712_iommu_cache_flush(struct bcm2712_iommu_cache *cache)
 	spin_lock_irqsave(&cache->hw_lock, flags);
 	if (cache->reg_base) {
 		/* Enable and flush the TLB cache */
-		writel(MMUC_CONTROL_ENABLE | MMUC_CONTROL_FLUSH,
+		pete_writel("drivers/iommu/bcm2712-iommu-cache.c:27", MMUC_CONTROL_ENABLE | MMUC_CONTROL_FLUSH,
 		       cache->reg_base);
 
 		/* Wait for flush to complete: it should be very quick */
 		for (i = 0; i < 1024; i++) {
-			if (!(MMUC_CONTROL_FLUSHING & readl(cache->reg_base)))
+			if (!(MMUC_CONTROL_FLUSHING & pete_readl("drivers/iommu/bcm2712-iommu-cache.c:32", cache->reg_base)))
 				break;
 			cpu_relax();
 		}

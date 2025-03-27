@@ -157,8 +157,8 @@ static inline struct board_info *to_dm9000_board(struct net_device *dev)
 static u8
 ior(struct board_info *db, int reg)
 {
-	writeb(reg, db->io_addr);
-	return readb(db->io_data);
+	pete_writeb("drivers/net/ethernet/davicom/dm9000.c:160", reg, db->io_addr);
+	return pete_readb("drivers/net/ethernet/davicom/dm9000.c:161", db->io_data);
 }
 
 /*
@@ -168,8 +168,8 @@ ior(struct board_info *db, int reg)
 static void
 iow(struct board_info *db, int reg, int value)
 {
-	writeb(reg, db->io_addr);
-	writeb(value, db->io_data);
+	pete_writeb("drivers/net/ethernet/davicom/dm9000.c:171", reg, db->io_addr);
+	pete_writeb("drivers/net/ethernet/davicom/dm9000.c:172", value, db->io_data);
 }
 
 static void
@@ -235,7 +235,7 @@ static void dm9000_dumpblk_8bit(void __iomem *reg, int count)
 	int i;
 
 	for (i = 0; i < count; i++)
-		readb(reg);
+		pete_readb("drivers/net/ethernet/davicom/dm9000.c:238", reg);
 }
 
 static void dm9000_dumpblk_16bit(void __iomem *reg, int count)
@@ -245,7 +245,7 @@ static void dm9000_dumpblk_16bit(void __iomem *reg, int count)
 	count = (count + 1) >> 1;
 
 	for (i = 0; i < count; i++)
-		readw(reg);
+		pete_readw("drivers/net/ethernet/davicom/dm9000.c:248", reg);
 }
 
 static void dm9000_dumpblk_32bit(void __iomem *reg, int count)
@@ -255,7 +255,7 @@ static void dm9000_dumpblk_32bit(void __iomem *reg, int count)
 	count = (count + 3) >> 2;
 
 	for (i = 0; i < count; i++)
-		readl(reg);
+		pete_readl("drivers/net/ethernet/davicom/dm9000.c:258", reg);
 }
 
 /*
@@ -284,7 +284,7 @@ dm9000_phy_read(struct net_device *dev, int phy_reg_unused, int reg)
 	spin_lock_irqsave(&db->lock, flags);
 
 	/* Save previous register address */
-	reg_save = readb(db->io_addr);
+	reg_save = pete_readb("drivers/net/ethernet/davicom/dm9000.c:287", db->io_addr);
 
 	/* Fill the phyxcer register into REG_0C */
 	iow(db, DM9000_EPAR, DM9000_PHY | reg);
@@ -292,13 +292,13 @@ dm9000_phy_read(struct net_device *dev, int phy_reg_unused, int reg)
 	/* Issue phyxcer read command */
 	iow(db, DM9000_EPCR, EPCR_ERPRR | EPCR_EPOS);
 
-	writeb(reg_save, db->io_addr);
+	pete_writeb("drivers/net/ethernet/davicom/dm9000.c:295", reg_save, db->io_addr);
 	spin_unlock_irqrestore(&db->lock, flags);
 
 	dm9000_msleep(db, 1);		/* Wait read complete */
 
 	spin_lock_irqsave(&db->lock, flags);
-	reg_save = readb(db->io_addr);
+	reg_save = pete_readb("drivers/net/ethernet/davicom/dm9000.c:301", db->io_addr);
 
 	iow(db, DM9000_EPCR, 0x0);	/* Clear phyxcer read command */
 
@@ -306,7 +306,7 @@ dm9000_phy_read(struct net_device *dev, int phy_reg_unused, int reg)
 	ret = (ior(db, DM9000_EPDRH) << 8) | ior(db, DM9000_EPDRL);
 
 	/* restore the previous address */
-	writeb(reg_save, db->io_addr);
+	pete_writeb("drivers/net/ethernet/davicom/dm9000.c:309", reg_save, db->io_addr);
 	spin_unlock_irqrestore(&db->lock, flags);
 
 	mutex_unlock(&db->addr_lock);
@@ -331,7 +331,7 @@ dm9000_phy_write(struct net_device *dev,
 	spin_lock_irqsave(&db->lock, flags);
 
 	/* Save previous register address */
-	reg_save = readb(db->io_addr);
+	reg_save = pete_readb("drivers/net/ethernet/davicom/dm9000.c:334", db->io_addr);
 
 	/* Fill the phyxcer register into REG_0C */
 	iow(db, DM9000_EPAR, DM9000_PHY | reg);
@@ -343,18 +343,18 @@ dm9000_phy_write(struct net_device *dev,
 	/* Issue phyxcer write command */
 	iow(db, DM9000_EPCR, EPCR_EPOS | EPCR_ERPRW);
 
-	writeb(reg_save, db->io_addr);
+	pete_writeb("drivers/net/ethernet/davicom/dm9000.c:346", reg_save, db->io_addr);
 	spin_unlock_irqrestore(&db->lock, flags);
 
 	dm9000_msleep(db, 1);		/* Wait write complete */
 
 	spin_lock_irqsave(&db->lock, flags);
-	reg_save = readb(db->io_addr);
+	reg_save = pete_readb("drivers/net/ethernet/davicom/dm9000.c:352", db->io_addr);
 
 	iow(db, DM9000_EPCR, 0x0);	/* Clear phyxcer write command */
 
 	/* restore the previous address */
-	writeb(reg_save, db->io_addr);
+	pete_writeb("drivers/net/ethernet/davicom/dm9000.c:357", reg_save, db->io_addr);
 
 	spin_unlock_irqrestore(&db->lock, flags);
 	if (!db->in_timeout)
@@ -969,7 +969,7 @@ static void dm9000_timeout(struct net_device *dev, unsigned int txqueue)
 	/* Save previous register address */
 	spin_lock_irqsave(&db->lock, flags);
 	db->in_timeout = 1;
-	reg_save = readb(db->io_addr);
+	reg_save = pete_readb("drivers/net/ethernet/davicom/dm9000.c:972", db->io_addr);
 
 	netif_stop_queue(dev);
 	dm9000_init_dm9000(dev);
@@ -979,7 +979,7 @@ static void dm9000_timeout(struct net_device *dev, unsigned int txqueue)
 	netif_wake_queue(dev);
 
 	/* Restore previous register address */
-	writeb(reg_save, db->io_addr);
+	pete_writeb("drivers/net/ethernet/davicom/dm9000.c:982", reg_save, db->io_addr);
 	db->in_timeout = 0;
 	spin_unlock_irqrestore(&db->lock, flags);
 }
@@ -1025,7 +1025,7 @@ dm9000_start_xmit(struct sk_buff *skb, struct net_device *dev)
 	spin_lock_irqsave(&db->lock, flags);
 
 	/* Move data to DM9000 TX RAM */
-	writeb(DM9000_MWCMD, db->io_addr);
+	pete_writeb("drivers/net/ethernet/davicom/dm9000.c:1028", DM9000_MWCMD, db->io_addr);
 
 	(db->outblk)(db->io_data, skb->data, skb->len);
 	dev->stats.tx_bytes += skb->len;
@@ -1098,7 +1098,7 @@ dm9000_rx(struct net_device *dev)
 		ior(db, DM9000_MRCMDX);	/* Dummy read */
 
 		/* Get most updated data */
-		rxbyte = readb(db->io_data);
+		rxbyte = pete_readb("drivers/net/ethernet/davicom/dm9000.c:1101", db->io_data);
 
 		/* Status check: this byte must be 0 or 1 */
 		if (rxbyte & DM9000_PKT_ERR) {
@@ -1112,7 +1112,7 @@ dm9000_rx(struct net_device *dev)
 
 		/* A packet ready now  & Get status/length */
 		GoodPacket = true;
-		writeb(DM9000_MRCMD, db->io_addr);
+		pete_writeb("drivers/net/ethernet/davicom/dm9000.c:1115", DM9000_MRCMD, db->io_addr);
 
 		(db->inblk)(db->io_data, &rxhdr, sizeof(rxhdr));
 
@@ -1201,7 +1201,7 @@ static irqreturn_t dm9000_interrupt(int irq, void *dev_id)
 	spin_lock_irqsave(&db->lock, flags);
 
 	/* Save previous register address */
-	reg_save = readb(db->io_addr);
+	reg_save = pete_readb("drivers/net/ethernet/davicom/dm9000.c:1204", db->io_addr);
 
 	dm9000_mask_interrupts(db);
 	/* Got DM9000 interrupt status */
@@ -1228,7 +1228,7 @@ static irqreturn_t dm9000_interrupt(int irq, void *dev_id)
 
 	dm9000_unmask_interrupts(db);
 	/* Restore previous register address */
-	writeb(reg_save, db->io_addr);
+	pete_writeb("drivers/net/ethernet/davicom/dm9000.c:1231", reg_save, db->io_addr);
 
 	spin_unlock_irqrestore(&db->lock, flags);
 

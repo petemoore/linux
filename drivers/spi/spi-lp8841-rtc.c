@@ -43,7 +43,7 @@ setsck(struct spi_lp8841_rtc *data, int is_on)
 		data->state |= SPI_LP8841_RTC_CLK;
 	else
 		data->state &= ~SPI_LP8841_RTC_CLK;
-	writeb(data->state, data->iomem);
+	pete_writeb("drivers/spi/spi-lp8841-rtc.c:46", data->state, data->iomem);
 }
 
 static inline void
@@ -53,7 +53,7 @@ setmosi(struct spi_lp8841_rtc *data, int is_on)
 		data->state |= SPI_LP8841_RTC_MOSI;
 	else
 		data->state &= ~SPI_LP8841_RTC_MOSI;
-	writeb(data->state, data->iomem);
+	pete_writeb("drivers/spi/spi-lp8841-rtc.c:56", data->state, data->iomem);
 }
 
 static inline int
@@ -108,7 +108,7 @@ spi_lp8841_rtc_transfer_one(struct spi_master *master,
 
 	if (tx) {
 		data->state &= ~SPI_LP8841_RTC_nWE;
-		writeb(data->state, data->iomem);
+		pete_writeb("drivers/spi/spi-lp8841-rtc.c:111", data->state, data->iomem);
 		while (likely(count > 0)) {
 			word = *tx++;
 			bitbang_txrx_be_cpha0_lsb(data, 1, 0,
@@ -117,7 +117,7 @@ spi_lp8841_rtc_transfer_one(struct spi_master *master,
 		}
 	} else if (rx) {
 		data->state |= SPI_LP8841_RTC_nWE;
-		writeb(data->state, data->iomem);
+		pete_writeb("drivers/spi/spi-lp8841-rtc.c:120", data->state, data->iomem);
 		while (likely(count > 0)) {
 			word = bitbang_txrx_be_cpha0_lsb(data, 1, 0,
 					SPI_CONTROLLER_NO_TX, word, 8);
@@ -139,11 +139,11 @@ spi_lp8841_rtc_set_cs(struct spi_device *spi, bool enable)
 	struct spi_lp8841_rtc *data = spi_master_get_devdata(spi->master);
 
 	data->state = 0;
-	writeb(data->state, data->iomem);
+	pete_writeb("drivers/spi/spi-lp8841-rtc.c:142", data->state, data->iomem);
 	if (enable) {
 		usleep_range(4, 5);
 		data->state |= SPI_LP8841_RTC_CE;
-		writeb(data->state, data->iomem);
+		pete_writeb("drivers/spi/spi-lp8841-rtc.c:146", data->state, data->iomem);
 		usleep_range(4, 5);
 	}
 }

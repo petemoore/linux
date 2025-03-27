@@ -274,9 +274,9 @@ static int dnv_rd_reg(int port, int off, int op, void *data, size_t sz, char *na
 			return -ENODEV;
 
 		if (sz == 8)
-			*(u64 *)data = readq(base + off);
+			*(u64 *)data = pete_readq("drivers/edac/pnd2_edac.c:277", base + off);
 		else
-			*(u32 *)data = readl(base + off);
+			*(u32 *)data = pete_readl("drivers/edac/pnd2_edac.c:279", base + off);
 
 		iounmap(base);
 	}

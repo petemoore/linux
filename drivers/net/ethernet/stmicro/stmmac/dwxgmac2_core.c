@@ -18,8 +18,8 @@ static void dwxgmac2_core_init(struct mac_device_info *hw,
 	void __iomem *ioaddr = hw->pcsr;
 	u32 tx, rx;
 
-	tx = readl(ioaddr + XGMAC_TX_CONFIG);
-	rx = readl(ioaddr + XGMAC_RX_CONFIG);
+	tx = pete_readl("drivers/net/ethernet/stmicro/stmmac/dwxgmac2_core.c:21", ioaddr + XGMAC_TX_CONFIG);
+	rx = pete_readl("drivers/net/ethernet/stmicro/stmmac/dwxgmac2_core.c:22", ioaddr + XGMAC_RX_CONFIG);
 
 	tx |= XGMAC_CORE_INIT_TX;
 	rx |= XGMAC_CORE_INIT_RX;
@@ -42,15 +42,15 @@ static void dwxgmac2_core_init(struct mac_device_info *hw,
 		}
 	}
 
-	writel(tx, ioaddr + XGMAC_TX_CONFIG);
-	writel(rx, ioaddr + XGMAC_RX_CONFIG);
-	writel(XGMAC_INT_DEFAULT_EN, ioaddr + XGMAC_INT_EN);
+	pete_writel("drivers/net/ethernet/stmicro/stmmac/dwxgmac2_core.c:45", tx, ioaddr + XGMAC_TX_CONFIG);
+	pete_writel("drivers/net/ethernet/stmicro/stmmac/dwxgmac2_core.c:46", rx, ioaddr + XGMAC_RX_CONFIG);
+	pete_writel("drivers/net/ethernet/stmicro/stmmac/dwxgmac2_core.c:47", XGMAC_INT_DEFAULT_EN, ioaddr + XGMAC_INT_EN);
 }
 
 static void dwxgmac2_set_mac(void __iomem *ioaddr, bool enable)
 {
-	u32 tx = readl(ioaddr + XGMAC_TX_CONFIG);
-	u32 rx = readl(ioaddr + XGMAC_RX_CONFIG);
+	u32 tx = pete_readl("drivers/net/ethernet/stmicro/stmmac/dwxgmac2_core.c:52", ioaddr + XGMAC_TX_CONFIG);
+	u32 rx = pete_readl("drivers/net/ethernet/stmicro/stmmac/dwxgmac2_core.c:53", ioaddr + XGMAC_RX_CONFIG);
 
 	if (enable) {
 		tx |= XGMAC_CONFIG_TE;
@@ -60,8 +60,8 @@ static void dwxgmac2_set_mac(void __iomem *ioaddr, bool enable)
 		rx &= ~XGMAC_CONFIG_RE;
 	}
 
-	writel(tx, ioaddr + XGMAC_TX_CONFIG);
-	writel(rx, ioaddr + XGMAC_RX_CONFIG);
+	pete_writel("drivers/net/ethernet/stmicro/stmmac/dwxgmac2_core.c:63", tx, ioaddr + XGMAC_TX_CONFIG);
+	pete_writel("drivers/net/ethernet/stmicro/stmmac/dwxgmac2_core.c:64", rx, ioaddr + XGMAC_RX_CONFIG);
 }
 
 static int dwxgmac2_rx_ipc(struct mac_device_info *hw)
@@ -69,14 +69,14 @@ static int dwxgmac2_rx_ipc(struct mac_device_info *hw)
 	void __iomem *ioaddr = hw->pcsr;
 	u32 value;
 
-	value = readl(ioaddr + XGMAC_RX_CONFIG);
+	value = pete_readl("drivers/net/ethernet/stmicro/stmmac/dwxgmac2_core.c:72", ioaddr + XGMAC_RX_CONFIG);
 	if (hw->rx_csum)
 		value |= XGMAC_CONFIG_IPC;
 	else
 		value &= ~XGMAC_CONFIG_IPC;
-	writel(value, ioaddr + XGMAC_RX_CONFIG);
+	pete_writel("drivers/net/ethernet/stmicro/stmmac/dwxgmac2_core.c:77", value, ioaddr + XGMAC_RX_CONFIG);
 
-	return !!(readl(ioaddr + XGMAC_RX_CONFIG) & XGMAC_CONFIG_IPC);
+	return !!(pete_readl("drivers/net/ethernet/stmicro/stmmac/dwxgmac2_core.c:79", ioaddr + XGMAC_RX_CONFIG) & XGMAC_CONFIG_IPC);
 }
 
 static void dwxgmac2_rx_queue_enable(struct mac_device_info *hw, u8 mode,
@@ -85,12 +85,12 @@ static void dwxgmac2_rx_queue_enable(struct mac_device_info *hw, u8 mode,
 	void __iomem *ioaddr = hw->pcsr;
 	u32 value;
 
-	value = readl(ioaddr + XGMAC_RXQ_CTRL0) & ~XGMAC_RXQEN(queue);
+	value = pete_readl("drivers/net/ethernet/stmicro/stmmac/dwxgmac2_core.c:88", ioaddr + XGMAC_RXQ_CTRL0) & ~XGMAC_RXQEN(queue);
 	if (mode == MTL_QUEUE_AVB)
 		value |= 0x1 << XGMAC_RXQEN_SHIFT(queue);
 	else if (mode == MTL_QUEUE_DCB)
 		value |= 0x2 << XGMAC_RXQEN_SHIFT(queue);
-	writel(value, ioaddr + XGMAC_RXQ_CTRL0);
+	pete_writel("drivers/net/ethernet/stmicro/stmmac/dwxgmac2_core.c:93", value, ioaddr + XGMAC_RXQ_CTRL0);
 }
 
 static void dwxgmac2_rx_queue_prio(struct mac_device_info *hw, u32 prio,
@@ -101,8 +101,8 @@ static void dwxgmac2_rx_queue_prio(struct mac_device_info *hw, u32 prio,
 	u32 ctrl2, ctrl3;
 	int i;
 
-	ctrl2 = readl(ioaddr + XGMAC_RXQ_CTRL2);
-	ctrl3 = readl(ioaddr + XGMAC_RXQ_CTRL3);
+	ctrl2 = pete_readl("drivers/net/ethernet/stmicro/stmmac/dwxgmac2_core.c:104", ioaddr + XGMAC_RXQ_CTRL2);
+	ctrl3 = pete_readl("drivers/net/ethernet/stmicro/stmmac/dwxgmac2_core.c:105", ioaddr + XGMAC_RXQ_CTRL3);
 
 	/* The software must ensure that the same priority
 	 * is not mapped to multiple Rx queues
@@ -121,16 +121,16 @@ static void dwxgmac2_rx_queue_prio(struct mac_device_info *hw, u32 prio,
 		ctrl2 |= (prio << XGMAC_PSRQ_SHIFT(queue)) &
 						XGMAC_PSRQ(queue);
 
-		writel(ctrl2, ioaddr + XGMAC_RXQ_CTRL2);
-		writel(ctrl3, ioaddr + XGMAC_RXQ_CTRL3);
+		pete_writel("drivers/net/ethernet/stmicro/stmmac/dwxgmac2_core.c:124", ctrl2, ioaddr + XGMAC_RXQ_CTRL2);
+		pete_writel("drivers/net/ethernet/stmicro/stmmac/dwxgmac2_core.c:125", ctrl3, ioaddr + XGMAC_RXQ_CTRL3);
 	} else {
 		queue -= 4;
 
 		ctrl3 |= (prio << XGMAC_PSRQ_SHIFT(queue)) &
 						XGMAC_PSRQ(queue);
 
-		writel(ctrl3, ioaddr + XGMAC_RXQ_CTRL3);
-		writel(ctrl2, ioaddr + XGMAC_RXQ_CTRL2);
+		pete_writel("drivers/net/ethernet/stmicro/stmmac/dwxgmac2_core.c:132", ctrl3, ioaddr + XGMAC_RXQ_CTRL3);
+		pete_writel("drivers/net/ethernet/stmicro/stmmac/dwxgmac2_core.c:133", ctrl2, ioaddr + XGMAC_RXQ_CTRL2);
 	}
 }
 
@@ -144,11 +144,11 @@ static void dwxgmac2_tx_queue_prio(struct mac_device_info *hw, u32 prio,
 	if (queue >= 4)
 		queue -= 4;
 
-	value = readl(ioaddr + reg);
+	value = pete_readl("drivers/net/ethernet/stmicro/stmmac/dwxgmac2_core.c:147", ioaddr + reg);
 	value &= ~XGMAC_PSTC(queue);
 	value |= (prio << XGMAC_PSTC_SHIFT(queue)) & XGMAC_PSTC(queue);
 
-	writel(value, ioaddr + reg);
+	pete_writel("drivers/net/ethernet/stmicro/stmmac/dwxgmac2_core.c:151", value, ioaddr + reg);
 }
 
 static void dwxgmac2_rx_queue_routing(struct mac_device_info *hw,
@@ -165,7 +165,7 @@ static void dwxgmac2_rx_queue_routing(struct mac_device_info *hw,
 		{ XGMAC_MCBCQ, XGMAC_MCBCQ_SHIFT },
 	};
 
-	value = readl(ioaddr + XGMAC_RXQ_CTRL1);
+	value = pete_readl("drivers/net/ethernet/stmicro/stmmac/dwxgmac2_core.c:168", ioaddr + XGMAC_RXQ_CTRL1);
 
 	/* routing configuration */
 	value &= ~dwxgmac2_route_possibilities[packet - 1].reg_mask;
@@ -178,7 +178,7 @@ static void dwxgmac2_rx_queue_routing(struct mac_device_info *hw,
 	else if (packet == PACKET_MCBCQ)
 		value |= FIELD_PREP(XGMAC_MCBCQEN, 1);
 
-	writel(value, ioaddr + XGMAC_RXQ_CTRL1);
+	pete_writel("drivers/net/ethernet/stmicro/stmmac/dwxgmac2_core.c:181", value, ioaddr + XGMAC_RXQ_CTRL1);
 }
 
 static void dwxgmac2_prog_mtl_rx_algorithms(struct mac_device_info *hw,
@@ -187,7 +187,7 @@ static void dwxgmac2_prog_mtl_rx_algorithms(struct mac_device_info *hw,
 	void __iomem *ioaddr = hw->pcsr;
 	u32 value;
 
-	value = readl(ioaddr + XGMAC_MTL_OPMODE);
+	value = pete_readl("drivers/net/ethernet/stmicro/stmmac/dwxgmac2_core.c:190", ioaddr + XGMAC_MTL_OPMODE);
 	value &= ~XGMAC_RAA;
 
 	switch (rx_alg) {
@@ -200,7 +200,7 @@ static void dwxgmac2_prog_mtl_rx_algorithms(struct mac_device_info *hw,
 		break;
 	}
 
-	writel(value, ioaddr + XGMAC_MTL_OPMODE);
+	pete_writel("drivers/net/ethernet/stmicro/stmmac/dwxgmac2_core.c:203", value, ioaddr + XGMAC_MTL_OPMODE);
 }
 
 static void dwxgmac2_prog_mtl_tx_algorithms(struct mac_device_info *hw,
@@ -211,7 +211,7 @@ static void dwxgmac2_prog_mtl_tx_algorithms(struct mac_device_info *hw,
 	u32 value;
 	int i;
 
-	value = readl(ioaddr + XGMAC_MTL_OPMODE);
+	value = pete_readl("drivers/net/ethernet/stmicro/stmmac/dwxgmac2_core.c:214", ioaddr + XGMAC_MTL_OPMODE);
 	value &= ~XGMAC_ETSALG;
 
 	switch (tx_alg) {
@@ -229,15 +229,15 @@ static void dwxgmac2_prog_mtl_tx_algorithms(struct mac_device_info *hw,
 		break;
 	}
 
-	writel(value, ioaddr + XGMAC_MTL_OPMODE);
+	pete_writel("drivers/net/ethernet/stmicro/stmmac/dwxgmac2_core.c:232", value, ioaddr + XGMAC_MTL_OPMODE);
 
 	/* Set ETS if desired */
 	for (i = 0; i < MTL_MAX_TX_QUEUES; i++) {
-		value = readl(ioaddr + XGMAC_MTL_TCx_ETS_CONTROL(i));
+		value = pete_readl("drivers/net/ethernet/stmicro/stmmac/dwxgmac2_core.c:236", ioaddr + XGMAC_MTL_TCx_ETS_CONTROL(i));
 		value &= ~XGMAC_TSA;
 		if (ets)
 			value |= XGMAC_ETS;
-		writel(value, ioaddr + XGMAC_MTL_TCx_ETS_CONTROL(i));
+		pete_writel("drivers/net/ethernet/stmicro/stmmac/dwxgmac2_core.c:240", value, ioaddr + XGMAC_MTL_TCx_ETS_CONTROL(i));
 	}
 }
 
@@ -247,7 +247,7 @@ static void dwxgmac2_set_mtl_tx_queue_weight(struct stmmac_priv *priv,
 {
 	void __iomem *ioaddr = hw->pcsr;
 
-	writel(weight, ioaddr + XGMAC_MTL_TCx_QUANTUM_WEIGHT(queue));
+	pete_writel("drivers/net/ethernet/stmicro/stmmac/dwxgmac2_core.c:250", weight, ioaddr + XGMAC_MTL_TCx_QUANTUM_WEIGHT(queue));
 }
 
 static void dwxgmac2_map_mtl_to_dma(struct mac_device_info *hw, u32 queue,
@@ -260,11 +260,11 @@ static void dwxgmac2_map_mtl_to_dma(struct mac_device_info *hw, u32 queue,
 	if (queue >= 4)
 		queue -= 4;
 
-	value = readl(ioaddr + reg);
+	value = pete_readl("drivers/net/ethernet/stmicro/stmmac/dwxgmac2_core.c:263", ioaddr + reg);
 	value &= ~XGMAC_QxMDMACH(queue);
 	value |= (chan << XGMAC_QxMDMACH_SHIFT(queue)) & XGMAC_QxMDMACH(queue);
 
-	writel(value, ioaddr + reg);
+	pete_writel("drivers/net/ethernet/stmicro/stmmac/dwxgmac2_core.c:267", value, ioaddr + reg);
 }
 
 static void dwxgmac2_config_cbs(struct stmmac_priv *priv,
@@ -275,15 +275,15 @@ static void dwxgmac2_config_cbs(struct stmmac_priv *priv,
 	void __iomem *ioaddr = hw->pcsr;
 	u32 value;
 
-	writel(send_slope, ioaddr + XGMAC_MTL_TCx_SENDSLOPE(queue));
-	writel(idle_slope, ioaddr + XGMAC_MTL_TCx_QUANTUM_WEIGHT(queue));
-	writel(high_credit, ioaddr + XGMAC_MTL_TCx_HICREDIT(queue));
-	writel(low_credit, ioaddr + XGMAC_MTL_TCx_LOCREDIT(queue));
+	pete_writel("drivers/net/ethernet/stmicro/stmmac/dwxgmac2_core.c:278", send_slope, ioaddr + XGMAC_MTL_TCx_SENDSLOPE(queue));
+	pete_writel("drivers/net/ethernet/stmicro/stmmac/dwxgmac2_core.c:279", idle_slope, ioaddr + XGMAC_MTL_TCx_QUANTUM_WEIGHT(queue));
+	pete_writel("drivers/net/ethernet/stmicro/stmmac/dwxgmac2_core.c:280", high_credit, ioaddr + XGMAC_MTL_TCx_HICREDIT(queue));
+	pete_writel("drivers/net/ethernet/stmicro/stmmac/dwxgmac2_core.c:281", low_credit, ioaddr + XGMAC_MTL_TCx_LOCREDIT(queue));
 
-	value = readl(ioaddr + XGMAC_MTL_TCx_ETS_CONTROL(queue));
+	value = pete_readl("drivers/net/ethernet/stmicro/stmmac/dwxgmac2_core.c:283", ioaddr + XGMAC_MTL_TCx_ETS_CONTROL(queue));
 	value &= ~XGMAC_TSA;
 	value |= XGMAC_CC | XGMAC_CBS;
-	writel(value, ioaddr + XGMAC_MTL_TCx_ETS_CONTROL(queue));
+	pete_writel("drivers/net/ethernet/stmicro/stmmac/dwxgmac2_core.c:286", value, ioaddr + XGMAC_MTL_TCx_ETS_CONTROL(queue));
 }
 
 static void dwxgmac2_dump_regs(struct mac_device_info *hw, u32 *reg_space)
@@ -292,7 +292,7 @@ static void dwxgmac2_dump_regs(struct mac_device_info *hw, u32 *reg_space)
 	int i;
 
 	for (i = 0; i < XGMAC_MAC_REGSIZE; i++)
-		reg_space[i] = readl(ioaddr + i * 4);
+		reg_space[i] = pete_readl("drivers/net/ethernet/stmicro/stmmac/dwxgmac2_core.c:295", ioaddr + i * 4);
 }
 
 static int dwxgmac2_host_irq_status(struct mac_device_info *hw,
@@ -302,18 +302,18 @@ static int dwxgmac2_host_irq_status(struct mac_device_info *hw,
 	u32 stat, en;
 	int ret = 0;
 
-	en = readl(ioaddr + XGMAC_INT_EN);
-	stat = readl(ioaddr + XGMAC_INT_STATUS);
+	en = pete_readl("drivers/net/ethernet/stmicro/stmmac/dwxgmac2_core.c:305", ioaddr + XGMAC_INT_EN);
+	stat = pete_readl("drivers/net/ethernet/stmicro/stmmac/dwxgmac2_core.c:306", ioaddr + XGMAC_INT_STATUS);
 
 	stat &= en;
 
 	if (stat & XGMAC_PMTIS) {
 		x->irq_receive_pmt_irq_n++;
-		readl(ioaddr + XGMAC_PMT);
+		pete_readl("drivers/net/ethernet/stmicro/stmmac/dwxgmac2_core.c:312", ioaddr + XGMAC_PMT);
 	}
 
 	if (stat & XGMAC_LPIIS) {
-		u32 lpi = readl(ioaddr + XGMAC_LPI_CTRL);
+		u32 lpi = pete_readl("drivers/net/ethernet/stmicro/stmmac/dwxgmac2_core.c:316", ioaddr + XGMAC_LPI_CTRL);
 
 		if (lpi & XGMAC_TLPIEN) {
 			ret |= CORE_IRQ_TX_PATH_IN_LPI_MODE;
@@ -339,14 +339,14 @@ static int dwxgmac2_host_mtl_irq_status(struct stmmac_priv *priv,
 	int ret = 0;
 	u32 status;
 
-	status = readl(ioaddr + XGMAC_MTL_INT_STATUS);
+	status = pete_readl("drivers/net/ethernet/stmicro/stmmac/dwxgmac2_core.c:342", ioaddr + XGMAC_MTL_INT_STATUS);
 	if (status & BIT(chan)) {
-		u32 chan_status = readl(ioaddr + XGMAC_MTL_QINT_STATUS(chan));
+		u32 chan_status = pete_readl("drivers/net/ethernet/stmicro/stmmac/dwxgmac2_core.c:344", ioaddr + XGMAC_MTL_QINT_STATUS(chan));
 
 		if (chan_status & XGMAC_RXOVFIS)
 			ret |= CORE_IRQ_MTL_RX_OVERFLOW;
 
-		writel(~0x0, ioaddr + XGMAC_MTL_QINT_STATUS(chan));
+		pete_writel("drivers/net/ethernet/stmicro/stmmac/dwxgmac2_core.c:349", ~0x0, ioaddr + XGMAC_MTL_QINT_STATUS(chan));
 	}
 
 	return ret;
@@ -360,7 +360,7 @@ static void dwxgmac2_flow_ctrl(struct mac_device_info *hw, unsigned int duplex,
 	u32 i;
 
 	if (fc & FLOW_RX)
-		writel(XGMAC_RFE, ioaddr + XGMAC_RX_FLOW_CTRL);
+		pete_writel("drivers/net/ethernet/stmicro/stmmac/dwxgmac2_core.c:363", XGMAC_RFE, ioaddr + XGMAC_RX_FLOW_CTRL);
 	if (fc & FLOW_TX) {
 		for (i = 0; i < tx_cnt; i++) {
 			u32 value = XGMAC_TFE;
@@ -368,7 +368,7 @@ static void dwxgmac2_flow_ctrl(struct mac_device_info *hw, unsigned int duplex,
 			if (duplex)
 				value |= pause_time << XGMAC_PT_SHIFT;
 
-			writel(value, ioaddr + XGMAC_Qx_TX_FLOW_CTRL(i));
+			pete_writel("drivers/net/ethernet/stmicro/stmmac/dwxgmac2_core.c:371", value, ioaddr + XGMAC_Qx_TX_FLOW_CTRL(i));
 		}
 	}
 }
@@ -383,12 +383,12 @@ static void dwxgmac2_pmt(struct mac_device_info *hw, unsigned long mode)
 	if (mode & WAKE_UCAST)
 		val |= XGMAC_PWRDWN | XGMAC_GLBLUCAST | XGMAC_RWKPKTEN;
 	if (val) {
-		u32 cfg = readl(ioaddr + XGMAC_RX_CONFIG);
+		u32 cfg = pete_readl("drivers/net/ethernet/stmicro/stmmac/dwxgmac2_core.c:386", ioaddr + XGMAC_RX_CONFIG);
 		cfg |= XGMAC_CONFIG_RE;
-		writel(cfg, ioaddr + XGMAC_RX_CONFIG);
+		pete_writel("drivers/net/ethernet/stmicro/stmmac/dwxgmac2_core.c:388", cfg, ioaddr + XGMAC_RX_CONFIG);
 	}
 
-	writel(val, ioaddr + XGMAC_PMT);
+	pete_writel("drivers/net/ethernet/stmicro/stmmac/dwxgmac2_core.c:391", val, ioaddr + XGMAC_PMT);
 }
 
 static void dwxgmac2_set_umac_addr(struct mac_device_info *hw,
@@ -399,10 +399,10 @@ static void dwxgmac2_set_umac_addr(struct mac_device_info *hw,
 	u32 value;
 
 	value = (addr[5] << 8) | addr[4];
-	writel(value | XGMAC_AE, ioaddr + XGMAC_ADDRx_HIGH(reg_n));
+	pete_writel("drivers/net/ethernet/stmicro/stmmac/dwxgmac2_core.c:402", value | XGMAC_AE, ioaddr + XGMAC_ADDRx_HIGH(reg_n));
 
 	value = (addr[3] << 24) | (addr[2] << 16) | (addr[1] << 8) | addr[0];
-	writel(value, ioaddr + XGMAC_ADDRx_LOW(reg_n));
+	pete_writel("drivers/net/ethernet/stmicro/stmmac/dwxgmac2_core.c:405", value, ioaddr + XGMAC_ADDRx_LOW(reg_n));
 }
 
 static void dwxgmac2_get_umac_addr(struct mac_device_info *hw,
@@ -412,8 +412,8 @@ static void dwxgmac2_get_umac_addr(struct mac_device_info *hw,
 	u32 hi_addr, lo_addr;
 
 	/* Read the MAC address from the hardware */
-	hi_addr = readl(ioaddr + XGMAC_ADDRx_HIGH(reg_n));
-	lo_addr = readl(ioaddr + XGMAC_ADDRx_LOW(reg_n));
+	hi_addr = pete_readl("drivers/net/ethernet/stmicro/stmmac/dwxgmac2_core.c:415", ioaddr + XGMAC_ADDRx_HIGH(reg_n));
+	lo_addr = pete_readl("drivers/net/ethernet/stmicro/stmmac/dwxgmac2_core.c:416", ioaddr + XGMAC_ADDRx_LOW(reg_n));
 
 	/* Extract the MAC address from the high and low words */
 	addr[0] = lo_addr & 0xff;
@@ -430,13 +430,13 @@ static void dwxgmac2_set_eee_mode(struct mac_device_info *hw,
 	void __iomem *ioaddr = hw->pcsr;
 	u32 value;
 
-	value = readl(ioaddr + XGMAC_LPI_CTRL);
+	value = pete_readl("drivers/net/ethernet/stmicro/stmmac/dwxgmac2_core.c:433", ioaddr + XGMAC_LPI_CTRL);
 
 	value |= XGMAC_LPITXEN | XGMAC_LPITXA;
 	if (en_tx_lpi_clockgating)
 		value |= XGMAC_TXCGE;
 
-	writel(value, ioaddr + XGMAC_LPI_CTRL);
+	pete_writel("drivers/net/ethernet/stmicro/stmmac/dwxgmac2_core.c:439", value, ioaddr + XGMAC_LPI_CTRL);
 }
 
 static void dwxgmac2_reset_eee_mode(struct mac_device_info *hw)
@@ -444,9 +444,9 @@ static void dwxgmac2_reset_eee_mode(struct mac_device_info *hw)
 	void __iomem *ioaddr = hw->pcsr;
 	u32 value;
 
-	value = readl(ioaddr + XGMAC_LPI_CTRL);
+	value = pete_readl("drivers/net/ethernet/stmicro/stmmac/dwxgmac2_core.c:447", ioaddr + XGMAC_LPI_CTRL);
 	value &= ~(XGMAC_LPITXEN | XGMAC_LPITXA | XGMAC_TXCGE);
-	writel(value, ioaddr + XGMAC_LPI_CTRL);
+	pete_writel("drivers/net/ethernet/stmicro/stmmac/dwxgmac2_core.c:449", value, ioaddr + XGMAC_LPI_CTRL);
 }
 
 static void dwxgmac2_set_eee_pls(struct mac_device_info *hw, int link)
@@ -454,12 +454,12 @@ static void dwxgmac2_set_eee_pls(struct mac_device_info *hw, int link)
 	void __iomem *ioaddr = hw->pcsr;
 	u32 value;
 
-	value = readl(ioaddr + XGMAC_LPI_CTRL);
+	value = pete_readl("drivers/net/ethernet/stmicro/stmmac/dwxgmac2_core.c:457", ioaddr + XGMAC_LPI_CTRL);
 	if (link)
 		value |= XGMAC_PLS;
 	else
 		value &= ~XGMAC_PLS;
-	writel(value, ioaddr + XGMAC_LPI_CTRL);
+	pete_writel("drivers/net/ethernet/stmicro/stmmac/dwxgmac2_core.c:462", value, ioaddr + XGMAC_LPI_CTRL);
 }
 
 static void dwxgmac2_set_eee_timer(struct mac_device_info *hw, int ls, int tw)
@@ -468,7 +468,7 @@ static void dwxgmac2_set_eee_timer(struct mac_device_info *hw, int ls, int tw)
 	u32 value;
 
 	value = (tw & 0xffff) | ((ls & 0x3ff) << 16);
-	writel(value, ioaddr + XGMAC_LPI_TIMER_CTRL);
+	pete_writel("drivers/net/ethernet/stmicro/stmmac/dwxgmac2_core.c:471", value, ioaddr + XGMAC_LPI_TIMER_CTRL);
 }
 
 static void dwxgmac2_set_mchash(void __iomem *ioaddr, u32 *mcfilterbits,
@@ -491,14 +491,14 @@ static void dwxgmac2_set_mchash(void __iomem *ioaddr, u32 *mcfilterbits,
 	}
 
 	for (regs = 0; regs < numhashregs; regs++)
-		writel(mcfilterbits[regs], ioaddr + XGMAC_HASH_TABLE(regs));
+		pete_writel("drivers/net/ethernet/stmicro/stmmac/dwxgmac2_core.c:494", mcfilterbits[regs], ioaddr + XGMAC_HASH_TABLE(regs));
 }
 
 static void dwxgmac2_set_filter(struct mac_device_info *hw,
 				struct net_device *dev)
 {
 	void __iomem *ioaddr = (void __iomem *)dev->base_addr;
-	u32 value = readl(ioaddr + XGMAC_PACKET_FILTER);
+	u32 value = pete_readl("drivers/net/ethernet/stmicro/stmmac/dwxgmac2_core.c:501", ioaddr + XGMAC_PACKET_FILTER);
 	int mcbitslog2 = hw->mcast_bits_log2;
 	u32 mc_filter[8];
 	int i;
@@ -516,7 +516,7 @@ static void dwxgmac2_set_filter(struct mac_device_info *hw,
 		value |= XGMAC_FILTER_PM;
 
 		for (i = 0; i < XGMAC_MAX_HASH_TABLE; i++)
-			writel(~0x0, ioaddr + XGMAC_HASH_TABLE(i));
+			pete_writel("drivers/net/ethernet/stmicro/stmmac/dwxgmac2_core.c:519", ~0x0, ioaddr + XGMAC_HASH_TABLE(i));
 	} else if (!netdev_mc_empty(dev) && (dev->flags & IFF_MULTICAST)) {
 		struct netdev_hw_addr *ha;
 
@@ -544,24 +544,24 @@ static void dwxgmac2_set_filter(struct mac_device_info *hw,
 		}
 
 		for ( ; reg < XGMAC_ADDR_MAX; reg++) {
-			writel(0, ioaddr + XGMAC_ADDRx_HIGH(reg));
-			writel(0, ioaddr + XGMAC_ADDRx_LOW(reg));
+			pete_writel("drivers/net/ethernet/stmicro/stmmac/dwxgmac2_core.c:547", 0, ioaddr + XGMAC_ADDRx_HIGH(reg));
+			pete_writel("drivers/net/ethernet/stmicro/stmmac/dwxgmac2_core.c:548", 0, ioaddr + XGMAC_ADDRx_LOW(reg));
 		}
 	}
 
-	writel(value, ioaddr + XGMAC_PACKET_FILTER);
+	pete_writel("drivers/net/ethernet/stmicro/stmmac/dwxgmac2_core.c:552", value, ioaddr + XGMAC_PACKET_FILTER);
 }
 
 static void dwxgmac2_set_mac_loopback(void __iomem *ioaddr, bool enable)
 {
-	u32 value = readl(ioaddr + XGMAC_RX_CONFIG);
+	u32 value = pete_readl("drivers/net/ethernet/stmicro/stmmac/dwxgmac2_core.c:557", ioaddr + XGMAC_RX_CONFIG);
 
 	if (enable)
 		value |= XGMAC_CONFIG_LM;
 	else
 		value &= ~XGMAC_CONFIG_LM;
 
-	writel(value, ioaddr + XGMAC_RX_CONFIG);
+	pete_writel("drivers/net/ethernet/stmicro/stmmac/dwxgmac2_core.c:564", value, ioaddr + XGMAC_RX_CONFIG);
 }
 
 static int dwxgmac2_rss_write_reg(void __iomem *ioaddr, bool is_key, int idx,
@@ -569,11 +569,11 @@ static int dwxgmac2_rss_write_reg(void __iomem *ioaddr, bool is_key, int idx,
 {
 	u32 ctrl = 0;
 
-	writel(val, ioaddr + XGMAC_RSS_DATA);
+	pete_writel("drivers/net/ethernet/stmicro/stmmac/dwxgmac2_core.c:572", val, ioaddr + XGMAC_RSS_DATA);
 	ctrl |= idx << XGMAC_RSSIA_SHIFT;
 	ctrl |= is_key ? XGMAC_ADDRT : 0x0;
 	ctrl |= XGMAC_OB;
-	writel(ctrl, ioaddr + XGMAC_RSS_ADDR);
+	pete_writel("drivers/net/ethernet/stmicro/stmmac/dwxgmac2_core.c:576", ctrl, ioaddr + XGMAC_RSS_ADDR);
 
 	return readl_poll_timeout(ioaddr + XGMAC_RSS_ADDR, ctrl,
 				  !(ctrl & XGMAC_OB), 100, 10000);
@@ -586,10 +586,10 @@ static int dwxgmac2_rss_configure(struct mac_device_info *hw,
 	u32 value, *key;
 	int i, ret;
 
-	value = readl(ioaddr + XGMAC_RSS_CTRL);
+	value = pete_readl("drivers/net/ethernet/stmicro/stmmac/dwxgmac2_core.c:589", ioaddr + XGMAC_RSS_CTRL);
 	if (!cfg || !cfg->enable) {
 		value &= ~XGMAC_RSSE;
-		writel(value, ioaddr + XGMAC_RSS_CTRL);
+		pete_writel("drivers/net/ethernet/stmicro/stmmac/dwxgmac2_core.c:592", value, ioaddr + XGMAC_RSS_CTRL);
 		return 0;
 	}
 
@@ -610,7 +610,7 @@ static int dwxgmac2_rss_configure(struct mac_device_info *hw,
 		dwxgmac2_map_mtl_to_dma(hw, i, XGMAC_QDDMACH);
 
 	value |= XGMAC_UDP4TE | XGMAC_TCP4TE | XGMAC_IP2TE | XGMAC_RSSE;
-	writel(value, ioaddr + XGMAC_RSS_CTRL);
+	pete_writel("drivers/net/ethernet/stmicro/stmmac/dwxgmac2_core.c:613", value, ioaddr + XGMAC_RSS_CTRL);
 	return 0;
 }
 
@@ -619,16 +619,16 @@ static void dwxgmac2_update_vlan_hash(struct mac_device_info *hw, u32 hash,
 {
 	void __iomem *ioaddr = hw->pcsr;
 
-	writel(hash, ioaddr + XGMAC_VLAN_HASH_TABLE);
+	pete_writel("drivers/net/ethernet/stmicro/stmmac/dwxgmac2_core.c:622", hash, ioaddr + XGMAC_VLAN_HASH_TABLE);
 
 	if (hash) {
-		u32 value = readl(ioaddr + XGMAC_PACKET_FILTER);
+		u32 value = pete_readl("drivers/net/ethernet/stmicro/stmmac/dwxgmac2_core.c:625", ioaddr + XGMAC_PACKET_FILTER);
 
 		value |= XGMAC_FILTER_VTFE;
 
-		writel(value, ioaddr + XGMAC_PACKET_FILTER);
+		pete_writel("drivers/net/ethernet/stmicro/stmmac/dwxgmac2_core.c:629", value, ioaddr + XGMAC_PACKET_FILTER);
 
-		value = readl(ioaddr + XGMAC_VLAN_TAG);
+		value = pete_readl("drivers/net/ethernet/stmicro/stmmac/dwxgmac2_core.c:631", ioaddr + XGMAC_VLAN_TAG);
 
 		value |= XGMAC_VLAN_VTHM | XGMAC_VLAN_ETV;
 		if (is_double) {
@@ -642,15 +642,15 @@ static void dwxgmac2_update_vlan_hash(struct mac_device_info *hw, u32 hash,
 		}
 
 		value &= ~XGMAC_VLAN_VID;
-		writel(value, ioaddr + XGMAC_VLAN_TAG);
+		pete_writel("drivers/net/ethernet/stmicro/stmmac/dwxgmac2_core.c:645", value, ioaddr + XGMAC_VLAN_TAG);
 	} else if (perfect_match) {
-		u32 value = readl(ioaddr + XGMAC_PACKET_FILTER);
+		u32 value = pete_readl("drivers/net/ethernet/stmicro/stmmac/dwxgmac2_core.c:647", ioaddr + XGMAC_PACKET_FILTER);
 
 		value |= XGMAC_FILTER_VTFE;
 
-		writel(value, ioaddr + XGMAC_PACKET_FILTER);
+		pete_writel("drivers/net/ethernet/stmicro/stmmac/dwxgmac2_core.c:651", value, ioaddr + XGMAC_PACKET_FILTER);
 
-		value = readl(ioaddr + XGMAC_VLAN_TAG);
+		value = pete_readl("drivers/net/ethernet/stmicro/stmmac/dwxgmac2_core.c:653", ioaddr + XGMAC_VLAN_TAG);
 
 		value &= ~XGMAC_VLAN_VTHM;
 		value |= XGMAC_VLAN_ETV;
@@ -665,22 +665,22 @@ static void dwxgmac2_update_vlan_hash(struct mac_device_info *hw, u32 hash,
 		}
 
 		value &= ~XGMAC_VLAN_VID;
-		writel(value | perfect_match, ioaddr + XGMAC_VLAN_TAG);
+		pete_writel("drivers/net/ethernet/stmicro/stmmac/dwxgmac2_core.c:668", value | perfect_match, ioaddr + XGMAC_VLAN_TAG);
 	} else {
-		u32 value = readl(ioaddr + XGMAC_PACKET_FILTER);
+		u32 value = pete_readl("drivers/net/ethernet/stmicro/stmmac/dwxgmac2_core.c:670", ioaddr + XGMAC_PACKET_FILTER);
 
 		value &= ~XGMAC_FILTER_VTFE;
 
-		writel(value, ioaddr + XGMAC_PACKET_FILTER);
+		pete_writel("drivers/net/ethernet/stmicro/stmmac/dwxgmac2_core.c:674", value, ioaddr + XGMAC_PACKET_FILTER);
 
-		value = readl(ioaddr + XGMAC_VLAN_TAG);
+		value = pete_readl("drivers/net/ethernet/stmicro/stmmac/dwxgmac2_core.c:676", ioaddr + XGMAC_VLAN_TAG);
 
 		value &= ~(XGMAC_VLAN_VTHM | XGMAC_VLAN_ETV);
 		value &= ~(XGMAC_VLAN_EDVLP | XGMAC_VLAN_ESVL);
 		value &= ~XGMAC_VLAN_DOVLTC;
 		value &= ~XGMAC_VLAN_VID;
 
-		writel(value, ioaddr + XGMAC_VLAN_TAG);
+		pete_writel("drivers/net/ethernet/stmicro/stmmac/dwxgmac2_core.c:683", value, ioaddr + XGMAC_VLAN_TAG);
 	}
 }
 
@@ -756,8 +756,8 @@ static void dwxgmac3_handle_mac_err(struct net_device *ndev,
 {
 	u32 value;
 
-	value = readl(ioaddr + XGMAC_MAC_DPP_FSM_INT_STATUS);
-	writel(value, ioaddr + XGMAC_MAC_DPP_FSM_INT_STATUS);
+	value = pete_readl("drivers/net/ethernet/stmicro/stmmac/dwxgmac2_core.c:759", ioaddr + XGMAC_MAC_DPP_FSM_INT_STATUS);
+	pete_writel("drivers/net/ethernet/stmicro/stmmac/dwxgmac2_core.c:760", value, ioaddr + XGMAC_MAC_DPP_FSM_INT_STATUS);
 
 	dwxgmac3_log_error(ndev, value, correctable, "MAC",
 			   dwxgmac3_mac_errors, STAT_OFF(mac_errors), stats);
@@ -804,8 +804,8 @@ static void dwxgmac3_handle_mtl_err(struct net_device *ndev,
 {
 	u32 value;
 
-	value = readl(ioaddr + XGMAC_MTL_ECC_INT_STATUS);
-	writel(value, ioaddr + XGMAC_MTL_ECC_INT_STATUS);
+	value = pete_readl("drivers/net/ethernet/stmicro/stmmac/dwxgmac2_core.c:807", ioaddr + XGMAC_MTL_ECC_INT_STATUS);
+	pete_writel("drivers/net/ethernet/stmicro/stmmac/dwxgmac2_core.c:808", value, ioaddr + XGMAC_MTL_ECC_INT_STATUS);
 
 	dwxgmac3_log_error(ndev, value, correctable, "MTL",
 			   dwxgmac3_mtl_errors, STAT_OFF(mtl_errors), stats);
@@ -890,14 +890,14 @@ static void dwxgmac3_handle_dma_err(struct net_device *ndev,
 {
 	u32 value;
 
-	value = readl(ioaddr + XGMAC_DMA_ECC_INT_STATUS);
-	writel(value, ioaddr + XGMAC_DMA_ECC_INT_STATUS);
+	value = pete_readl("drivers/net/ethernet/stmicro/stmmac/dwxgmac2_core.c:893", ioaddr + XGMAC_DMA_ECC_INT_STATUS);
+	pete_writel("drivers/net/ethernet/stmicro/stmmac/dwxgmac2_core.c:894", value, ioaddr + XGMAC_DMA_ECC_INT_STATUS);
 
 	dwxgmac3_log_error(ndev, value, correctable, "DMA",
 			   dwxgmac3_dma_errors, STAT_OFF(dma_errors), stats);
 
-	value = readl(ioaddr + XGMAC_DMA_DPP_INT_STATUS);
-	writel(value, ioaddr + XGMAC_DMA_DPP_INT_STATUS);
+	value = pete_readl("drivers/net/ethernet/stmicro/stmmac/dwxgmac2_core.c:899", ioaddr + XGMAC_DMA_DPP_INT_STATUS);
+	pete_writel("drivers/net/ethernet/stmicro/stmmac/dwxgmac2_core.c:900", value, ioaddr + XGMAC_DMA_DPP_INT_STATUS);
 
 	dwxgmac3_log_error(ndev, value, false, "DMA_DPP",
 			   dwxgmac3_dma_dpp_errors,
@@ -914,21 +914,21 @@ dwxgmac3_safety_feat_config(void __iomem *ioaddr, unsigned int asp,
 		return -EINVAL;
 
 	/* 1. Enable Safety Features */
-	writel(0x0, ioaddr + XGMAC_MTL_ECC_CONTROL);
+	pete_writel("drivers/net/ethernet/stmicro/stmmac/dwxgmac2_core.c:917", 0x0, ioaddr + XGMAC_MTL_ECC_CONTROL);
 
 	/* 2. Enable MTL Safety Interrupts */
-	value = readl(ioaddr + XGMAC_MTL_ECC_INT_ENABLE);
+	value = pete_readl("drivers/net/ethernet/stmicro/stmmac/dwxgmac2_core.c:920", ioaddr + XGMAC_MTL_ECC_INT_ENABLE);
 	value |= XGMAC_RPCEIE; /* RX Parser Memory Correctable Error */
 	value |= XGMAC_ECEIE; /* EST Memory Correctable Error */
 	value |= XGMAC_RXCEIE; /* RX Memory Correctable Error */
 	value |= XGMAC_TXCEIE; /* TX Memory Correctable Error */
-	writel(value, ioaddr + XGMAC_MTL_ECC_INT_ENABLE);
+	pete_writel("drivers/net/ethernet/stmicro/stmmac/dwxgmac2_core.c:925", value, ioaddr + XGMAC_MTL_ECC_INT_ENABLE);
 
 	/* 3. Enable DMA Safety Interrupts */
-	value = readl(ioaddr + XGMAC_DMA_ECC_INT_ENABLE);
+	value = pete_readl("drivers/net/ethernet/stmicro/stmmac/dwxgmac2_core.c:928", ioaddr + XGMAC_DMA_ECC_INT_ENABLE);
 	value |= XGMAC_DCEIE; /* Descriptor Cache Memory Correctable Error */
 	value |= XGMAC_TCEIE; /* TSO Memory Correctable Error */
-	writel(value, ioaddr + XGMAC_DMA_ECC_INT_ENABLE);
+	pete_writel("drivers/net/ethernet/stmicro/stmmac/dwxgmac2_core.c:931", value, ioaddr + XGMAC_DMA_ECC_INT_ENABLE);
 
 	/* 0x2: Without ECC or Parity Ports on External Application Interface
 	 * 0x4: Only ECC Protection for External Memory feature is selected
@@ -937,16 +937,16 @@ dwxgmac3_safety_feat_config(void __iomem *ioaddr, unsigned int asp,
 		return 0;
 
 	/* 4. Enable Parity and Timeout for FSM */
-	value = readl(ioaddr + XGMAC_MAC_FSM_CONTROL);
+	value = pete_readl("drivers/net/ethernet/stmicro/stmmac/dwxgmac2_core.c:940", ioaddr + XGMAC_MAC_FSM_CONTROL);
 	value |= XGMAC_PRTYEN; /* FSM Parity Feature */
 	value |= XGMAC_TMOUTEN; /* FSM Timeout Feature */
-	writel(value, ioaddr + XGMAC_MAC_FSM_CONTROL);
+	pete_writel("drivers/net/ethernet/stmicro/stmmac/dwxgmac2_core.c:943", value, ioaddr + XGMAC_MAC_FSM_CONTROL);
 
 	/* 5. Enable Data Path Parity Protection */
-	value = readl(ioaddr + XGMAC_MTL_DPP_CONTROL);
+	value = pete_readl("drivers/net/ethernet/stmicro/stmmac/dwxgmac2_core.c:946", ioaddr + XGMAC_MTL_DPP_CONTROL);
 	/* already enabled by default, explicit enable it again */
 	value &= ~XGMAC_DPP_DISABLE;
-	writel(value, ioaddr + XGMAC_MTL_DPP_CONTROL);
+	pete_writel("drivers/net/ethernet/stmicro/stmmac/dwxgmac2_core.c:949", value, ioaddr + XGMAC_MTL_DPP_CONTROL);
 
 	return 0;
 }
@@ -963,8 +963,8 @@ static int dwxgmac3_safety_feat_irq_status(struct net_device *ndev,
 	if (!asp)
 		return -EINVAL;
 
-	mtl = readl(ioaddr + XGMAC_MTL_SAFETY_INT_STATUS);
-	dma = readl(ioaddr + XGMAC_DMA_SAFETY_INT_STATUS);
+	mtl = pete_readl("drivers/net/ethernet/stmicro/stmmac/dwxgmac2_core.c:966", ioaddr + XGMAC_MTL_SAFETY_INT_STATUS);
+	dma = pete_readl("drivers/net/ethernet/stmicro/stmmac/dwxgmac2_core.c:967", ioaddr + XGMAC_DMA_SAFETY_INT_STATUS);
 
 	err = (mtl & XGMAC_MCSIS) || (dma & XGMAC_MCSIS);
 	corr = false;
@@ -1024,10 +1024,10 @@ static int dwxgmac3_safety_feat_dump(struct stmmac_safety_stats *stats,
 
 static int dwxgmac3_rxp_disable(void __iomem *ioaddr)
 {
-	u32 val = readl(ioaddr + XGMAC_MTL_OPMODE);
+	u32 val = pete_readl("drivers/net/ethernet/stmicro/stmmac/dwxgmac2_core.c:1027", ioaddr + XGMAC_MTL_OPMODE);
 
 	val &= ~XGMAC_FRPE;
-	writel(val, ioaddr + XGMAC_MTL_OPMODE);
+	pete_writel("drivers/net/ethernet/stmicro/stmmac/dwxgmac2_core.c:1030", val, ioaddr + XGMAC_MTL_OPMODE);
 
 	return 0;
 }
@@ -1036,9 +1036,9 @@ static void dwxgmac3_rxp_enable(void __iomem *ioaddr)
 {
 	u32 val;
 
-	val = readl(ioaddr + XGMAC_MTL_OPMODE);
+	val = pete_readl("drivers/net/ethernet/stmicro/stmmac/dwxgmac2_core.c:1039", ioaddr + XGMAC_MTL_OPMODE);
 	val |= XGMAC_FRPE;
-	writel(val, ioaddr + XGMAC_MTL_OPMODE);
+	pete_writel("drivers/net/ethernet/stmicro/stmmac/dwxgmac2_core.c:1041", val, ioaddr + XGMAC_MTL_OPMODE);
 }
 
 static int dwxgmac3_rxp_update_single_entry(void __iomem *ioaddr,
@@ -1059,19 +1059,19 @@ static int dwxgmac3_rxp_update_single_entry(void __iomem *ioaddr,
 
 		/* Write data */
 		val = *((u32 *)&entry->val + i);
-		writel(val, ioaddr + XGMAC_MTL_RXP_IACC_DATA);
+		pete_writel("drivers/net/ethernet/stmicro/stmmac/dwxgmac2_core.c:1062", val, ioaddr + XGMAC_MTL_RXP_IACC_DATA);
 
 		/* Write pos */
 		val = real_pos & XGMAC_ADDR;
-		writel(val, ioaddr + XGMAC_MTL_RXP_IACC_CTRL_ST);
+		pete_writel("drivers/net/ethernet/stmicro/stmmac/dwxgmac2_core.c:1066", val, ioaddr + XGMAC_MTL_RXP_IACC_CTRL_ST);
 
 		/* Write OP */
 		val |= XGMAC_WRRDN;
-		writel(val, ioaddr + XGMAC_MTL_RXP_IACC_CTRL_ST);
+		pete_writel("drivers/net/ethernet/stmicro/stmmac/dwxgmac2_core.c:1070", val, ioaddr + XGMAC_MTL_RXP_IACC_CTRL_ST);
 
 		/* Start Write */
 		val |= XGMAC_STARTBUSY;
-		writel(val, ioaddr + XGMAC_MTL_RXP_IACC_CTRL_ST);
+		pete_writel("drivers/net/ethernet/stmicro/stmmac/dwxgmac2_core.c:1074", val, ioaddr + XGMAC_MTL_RXP_IACC_CTRL_ST);
 
 		/* Wait for done */
 		ret = readl_poll_timeout(ioaddr + XGMAC_MTL_RXP_IACC_CTRL_ST,
@@ -1133,9 +1133,9 @@ static int dwxgmac3_rxp_config(void __iomem *ioaddr,
 	u32 old_val, val;
 
 	/* Force disable RX */
-	old_val = readl(ioaddr + XGMAC_RX_CONFIG);
+	old_val = pete_readl("drivers/net/ethernet/stmicro/stmmac/dwxgmac2_core.c:1136", ioaddr + XGMAC_RX_CONFIG);
 	val = old_val & ~XGMAC_CONFIG_RE;
-	writel(val, ioaddr + XGMAC_RX_CONFIG);
+	pete_writel("drivers/net/ethernet/stmicro/stmmac/dwxgmac2_core.c:1138", val, ioaddr + XGMAC_RX_CONFIG);
 
 	/* Disable RX Parser */
 	ret = dwxgmac3_rxp_disable(ioaddr);
@@ -1200,14 +1200,14 @@ static int dwxgmac3_rxp_config(void __iomem *ioaddr,
 	/* Assume n. of parsable entries == n. of valid entries */
 	val = (nve << 16) & XGMAC_NPE;
 	val |= nve & XGMAC_NVE;
-	writel(val, ioaddr + XGMAC_MTL_RXP_CONTROL_STATUS);
+	pete_writel("drivers/net/ethernet/stmicro/stmmac/dwxgmac2_core.c:1203", val, ioaddr + XGMAC_MTL_RXP_CONTROL_STATUS);
 
 	/* Enable RX Parser */
 	dwxgmac3_rxp_enable(ioaddr);
 
 re_enable:
 	/* Re-enable RX */
-	writel(old_val, ioaddr + XGMAC_RX_CONFIG);
+	pete_writel("drivers/net/ethernet/stmicro/stmmac/dwxgmac2_core.c:1210", old_val, ioaddr + XGMAC_RX_CONFIG);
 	return ret;
 }
 
@@ -1220,8 +1220,8 @@ static int dwxgmac2_get_mac_tx_timestamp(struct mac_device_info *hw, u64 *ts)
 				      value, value & XGMAC_TXTSC, 100, 10000))
 		return -EBUSY;
 
-	*ts = readl(ioaddr + XGMAC_TXTIMESTAMP_NSEC) & XGMAC_TXTSSTSLO;
-	*ts += readl(ioaddr + XGMAC_TXTIMESTAMP_SEC) * 1000000000ULL;
+	*ts = pete_readl("drivers/net/ethernet/stmicro/stmmac/dwxgmac2_core.c:1223", ioaddr + XGMAC_TXTIMESTAMP_NSEC) & XGMAC_TXTSSTSLO;
+	*ts += pete_readl("drivers/net/ethernet/stmicro/stmmac/dwxgmac2_core.c:1224", ioaddr + XGMAC_TXTIMESTAMP_SEC) * 1000000000ULL;
 	return 0;
 }
 
@@ -1229,8 +1229,8 @@ static int dwxgmac2_flex_pps_config(void __iomem *ioaddr, int index,
 				    struct stmmac_pps_cfg *cfg, bool enable,
 				    u32 sub_second_inc, u32 systime_flags)
 {
-	u32 tnsec = readl(ioaddr + XGMAC_PPSx_TARGET_TIME_NSEC(index));
-	u32 val = readl(ioaddr + XGMAC_PPS_CONTROL);
+	u32 tnsec = pete_readl("drivers/net/ethernet/stmicro/stmmac/dwxgmac2_core.c:1232", ioaddr + XGMAC_PPSx_TARGET_TIME_NSEC(index));
+	u32 val = pete_readl("drivers/net/ethernet/stmicro/stmmac/dwxgmac2_core.c:1233", ioaddr + XGMAC_PPS_CONTROL);
 	u64 period;
 
 	if (!cfg->available)
@@ -1244,7 +1244,7 @@ static int dwxgmac2_flex_pps_config(void __iomem *ioaddr, int index,
 
 	if (!enable) {
 		val |= XGMAC_PPSCMDx(index, XGMAC_PPSCMD_STOP);
-		writel(val, ioaddr + XGMAC_PPS_CONTROL);
+		pete_writel("drivers/net/ethernet/stmicro/stmmac/dwxgmac2_core.c:1247", val, ioaddr + XGMAC_PPS_CONTROL);
 		return 0;
 	}
 
@@ -1264,11 +1264,11 @@ static int dwxgmac2_flex_pps_config(void __iomem *ioaddr, int index,
 	 */
 	val |= XGMAC_PPSENx(index);
 
-	writel(cfg->start.tv_sec, ioaddr + XGMAC_PPSx_TARGET_TIME_SEC(index));
+	pete_writel("drivers/net/ethernet/stmicro/stmmac/dwxgmac2_core.c:1267", cfg->start.tv_sec, ioaddr + XGMAC_PPSx_TARGET_TIME_SEC(index));
 
 	if (!(systime_flags & PTP_TCR_TSCTRLSSR))
 		cfg->start.tv_nsec = (cfg->start.tv_nsec * 1000) / 465;
-	writel(cfg->start.tv_nsec, ioaddr + XGMAC_PPSx_TARGET_TIME_NSEC(index));
+	pete_writel("drivers/net/ethernet/stmicro/stmmac/dwxgmac2_core.c:1271", cfg->start.tv_nsec, ioaddr + XGMAC_PPSx_TARGET_TIME_NSEC(index));
 
 	period = cfg->period.tv_sec * 1000000000;
 	period += cfg->period.tv_nsec;
@@ -1278,27 +1278,27 @@ static int dwxgmac2_flex_pps_config(void __iomem *ioaddr, int index,
 	if (period <= 1)
 		return -EINVAL;
 
-	writel(period - 1, ioaddr + XGMAC_PPSx_INTERVAL(index));
+	pete_writel("drivers/net/ethernet/stmicro/stmmac/dwxgmac2_core.c:1281", period - 1, ioaddr + XGMAC_PPSx_INTERVAL(index));
 
 	period >>= 1;
 	if (period <= 1)
 		return -EINVAL;
 
-	writel(period - 1, ioaddr + XGMAC_PPSx_WIDTH(index));
+	pete_writel("drivers/net/ethernet/stmicro/stmmac/dwxgmac2_core.c:1287", period - 1, ioaddr + XGMAC_PPSx_WIDTH(index));
 
 	/* Finally, activate it */
-	writel(val, ioaddr + XGMAC_PPS_CONTROL);
+	pete_writel("drivers/net/ethernet/stmicro/stmmac/dwxgmac2_core.c:1290", val, ioaddr + XGMAC_PPS_CONTROL);
 	return 0;
 }
 
 static void dwxgmac2_sarc_configure(void __iomem *ioaddr, int val)
 {
-	u32 value = readl(ioaddr + XGMAC_TX_CONFIG);
+	u32 value = pete_readl("drivers/net/ethernet/stmicro/stmmac/dwxgmac2_core.c:1296", ioaddr + XGMAC_TX_CONFIG);
 
 	value &= ~XGMAC_CONFIG_SARC;
 	value |= val << XGMAC_CONFIG_SARC_SHIFT;
 
-	writel(value, ioaddr + XGMAC_TX_CONFIG);
+	pete_writel("drivers/net/ethernet/stmicro/stmmac/dwxgmac2_core.c:1301", value, ioaddr + XGMAC_TX_CONFIG);
 }
 
 static void dwxgmac2_enable_vlan(struct mac_device_info *hw, u32 type)
@@ -1306,12 +1306,12 @@ static void dwxgmac2_enable_vlan(struct mac_device_info *hw, u32 type)
 	void __iomem *ioaddr = hw->pcsr;
 	u32 value;
 
-	value = readl(ioaddr + XGMAC_VLAN_INCL);
+	value = pete_readl("drivers/net/ethernet/stmicro/stmmac/dwxgmac2_core.c:1309", ioaddr + XGMAC_VLAN_INCL);
 	value |= XGMAC_VLAN_VLTI;
 	value |= XGMAC_VLAN_CSVL; /* Only use SVLAN */
 	value &= ~XGMAC_VLAN_VLC;
 	value |= (type << XGMAC_VLAN_VLC_SHIFT) & XGMAC_VLAN_VLC;
-	writel(value, ioaddr + XGMAC_VLAN_INCL);
+	pete_writel("drivers/net/ethernet/stmicro/stmmac/dwxgmac2_core.c:1314", value, ioaddr + XGMAC_VLAN_INCL);
 }
 
 static int dwxgmac2_filter_wait(struct mac_device_info *hw)
@@ -1338,13 +1338,13 @@ static int dwxgmac2_filter_read(struct mac_device_info *hw, u32 filter_no,
 
 	value = ((filter_no << XGMAC_IDDR_FNUM) | reg) << XGMAC_IDDR_SHIFT;
 	value |= XGMAC_TT | XGMAC_XB;
-	writel(value, ioaddr + XGMAC_L3L4_ADDR_CTRL);
+	pete_writel("drivers/net/ethernet/stmicro/stmmac/dwxgmac2_core.c:1341", value, ioaddr + XGMAC_L3L4_ADDR_CTRL);
 
 	ret = dwxgmac2_filter_wait(hw);
 	if (ret)
 		return ret;
 
-	*data = readl(ioaddr + XGMAC_L3L4_DATA);
+	*data = pete_readl("drivers/net/ethernet/stmicro/stmmac/dwxgmac2_core.c:1347", ioaddr + XGMAC_L3L4_DATA);
 	return 0;
 }
 
@@ -1359,11 +1359,11 @@ static int dwxgmac2_filter_write(struct mac_device_info *hw, u32 filter_no,
 	if (ret)
 		return ret;
 
-	writel(data, ioaddr + XGMAC_L3L4_DATA);
+	pete_writel("drivers/net/ethernet/stmicro/stmmac/dwxgmac2_core.c:1362", data, ioaddr + XGMAC_L3L4_DATA);
 
 	value = ((filter_no << XGMAC_IDDR_FNUM) | reg) << XGMAC_IDDR_SHIFT;
 	value |= XGMAC_XB;
-	writel(value, ioaddr + XGMAC_L3L4_ADDR_CTRL);
+	pete_writel("drivers/net/ethernet/stmicro/stmmac/dwxgmac2_core.c:1366", value, ioaddr + XGMAC_L3L4_ADDR_CTRL);
 
 	return dwxgmac2_filter_wait(hw);
 }
@@ -1376,9 +1376,9 @@ static int dwxgmac2_config_l3_filter(struct mac_device_info *hw, u32 filter_no,
 	u32 value;
 	int ret;
 
-	value = readl(ioaddr + XGMAC_PACKET_FILTER);
+	value = pete_readl("drivers/net/ethernet/stmicro/stmmac/dwxgmac2_core.c:1379", ioaddr + XGMAC_PACKET_FILTER);
 	value |= XGMAC_FILTER_IPFE;
-	writel(value, ioaddr + XGMAC_PACKET_FILTER);
+	pete_writel("drivers/net/ethernet/stmicro/stmmac/dwxgmac2_core.c:1381", value, ioaddr + XGMAC_PACKET_FILTER);
 
 	ret = dwxgmac2_filter_read(hw, filter_no, XGMAC_L3L4_CTRL, &value);
 	if (ret)
@@ -1439,9 +1439,9 @@ static int dwxgmac2_config_l4_filter(struct mac_device_info *hw, u32 filter_no,
 	u32 value;
 	int ret;
 
-	value = readl(ioaddr + XGMAC_PACKET_FILTER);
+	value = pete_readl("drivers/net/ethernet/stmicro/stmmac/dwxgmac2_core.c:1442", ioaddr + XGMAC_PACKET_FILTER);
 	value |= XGMAC_FILTER_IPFE;
-	writel(value, ioaddr + XGMAC_PACKET_FILTER);
+	pete_writel("drivers/net/ethernet/stmicro/stmmac/dwxgmac2_core.c:1444", value, ioaddr + XGMAC_PACKET_FILTER);
 
 	ret = dwxgmac2_filter_read(hw, filter_no, XGMAC_L3L4_CTRL, &value);
 	if (ret)
@@ -1495,29 +1495,29 @@ static void dwxgmac2_set_arp_offload(struct mac_device_info *hw, bool en,
 	void __iomem *ioaddr = hw->pcsr;
 	u32 value;
 
-	writel(addr, ioaddr + XGMAC_ARP_ADDR);
+	pete_writel("drivers/net/ethernet/stmicro/stmmac/dwxgmac2_core.c:1498", addr, ioaddr + XGMAC_ARP_ADDR);
 
-	value = readl(ioaddr + XGMAC_RX_CONFIG);
+	value = pete_readl("drivers/net/ethernet/stmicro/stmmac/dwxgmac2_core.c:1500", ioaddr + XGMAC_RX_CONFIG);
 	if (en)
 		value |= XGMAC_CONFIG_ARPEN;
 	else
 		value &= ~XGMAC_CONFIG_ARPEN;
-	writel(value, ioaddr + XGMAC_RX_CONFIG);
+	pete_writel("drivers/net/ethernet/stmicro/stmmac/dwxgmac2_core.c:1505", value, ioaddr + XGMAC_RX_CONFIG);
 }
 
 static int dwxgmac3_est_write(void __iomem *ioaddr, u32 reg, u32 val, bool gcl)
 {
 	u32 ctrl;
 
-	writel(val, ioaddr + XGMAC_MTL_EST_GCL_DATA);
+	pete_writel("drivers/net/ethernet/stmicro/stmmac/dwxgmac2_core.c:1512", val, ioaddr + XGMAC_MTL_EST_GCL_DATA);
 
 	ctrl = (reg << XGMAC_ADDR_SHIFT);
 	ctrl |= gcl ? 0 : XGMAC_GCRR;
 
-	writel(ctrl, ioaddr + XGMAC_MTL_EST_GCL_CONTROL);
+	pete_writel("drivers/net/ethernet/stmicro/stmmac/dwxgmac2_core.c:1517", ctrl, ioaddr + XGMAC_MTL_EST_GCL_CONTROL);
 
 	ctrl |= XGMAC_SRWO;
-	writel(ctrl, ioaddr + XGMAC_MTL_EST_GCL_CONTROL);
+	pete_writel("drivers/net/ethernet/stmicro/stmmac/dwxgmac2_core.c:1520", ctrl, ioaddr + XGMAC_MTL_EST_GCL_CONTROL);
 
 	return readl_poll_timeout_atomic(ioaddr + XGMAC_MTL_EST_GCL_CONTROL,
 					 ctrl, !(ctrl & XGMAC_SRWO), 100, 5000);
@@ -1544,7 +1544,7 @@ static int dwxgmac3_est_configure(void __iomem *ioaddr, struct stmmac_est *cfg,
 			return ret;
 	}
 
-	ctrl = readl(ioaddr + XGMAC_MTL_EST_CONTROL);
+	ctrl = pete_readl("drivers/net/ethernet/stmicro/stmmac/dwxgmac2_core.c:1547", ioaddr + XGMAC_MTL_EST_CONTROL);
 	ctrl &= ~XGMAC_PTOV;
 	ctrl |= ((1000000000 / ptp_rate) * 9) << XGMAC_PTOV_SHIFT;
 	if (cfg->enable)
@@ -1552,7 +1552,7 @@ static int dwxgmac3_est_configure(void __iomem *ioaddr, struct stmmac_est *cfg,
 	else
 		ctrl &= ~XGMAC_EEST;
 
-	writel(ctrl, ioaddr + XGMAC_MTL_EST_CONTROL);
+	pete_writel("drivers/net/ethernet/stmicro/stmmac/dwxgmac2_core.c:1555", ctrl, ioaddr + XGMAC_MTL_EST_CONTROL);
 	return 0;
 }
 
@@ -1563,22 +1563,22 @@ static void dwxgmac3_fpe_configure(void __iomem *ioaddr, struct stmmac_fpe_cfg *
 	u32 value;
 
 	if (!enable) {
-		value = readl(ioaddr + XGMAC_FPE_CTRL_STS);
+		value = pete_readl("drivers/net/ethernet/stmicro/stmmac/dwxgmac2_core.c:1566", ioaddr + XGMAC_FPE_CTRL_STS);
 
 		value &= ~XGMAC_EFPE;
 
-		writel(value, ioaddr + XGMAC_FPE_CTRL_STS);
+		pete_writel("drivers/net/ethernet/stmicro/stmmac/dwxgmac2_core.c:1570", value, ioaddr + XGMAC_FPE_CTRL_STS);
 		return;
 	}
 
-	value = readl(ioaddr + XGMAC_RXQ_CTRL1);
+	value = pete_readl("drivers/net/ethernet/stmicro/stmmac/dwxgmac2_core.c:1574", ioaddr + XGMAC_RXQ_CTRL1);
 	value &= ~XGMAC_RQ;
 	value |= (num_rxq - 1) << XGMAC_RQ_SHIFT;
-	writel(value, ioaddr + XGMAC_RXQ_CTRL1);
+	pete_writel("drivers/net/ethernet/stmicro/stmmac/dwxgmac2_core.c:1577", value, ioaddr + XGMAC_RXQ_CTRL1);
 
-	value = readl(ioaddr + XGMAC_FPE_CTRL_STS);
+	value = pete_readl("drivers/net/ethernet/stmicro/stmmac/dwxgmac2_core.c:1579", ioaddr + XGMAC_FPE_CTRL_STS);
 	value |= XGMAC_EFPE;
-	writel(value, ioaddr + XGMAC_FPE_CTRL_STS);
+	pete_writel("drivers/net/ethernet/stmicro/stmmac/dwxgmac2_core.c:1581", value, ioaddr + XGMAC_FPE_CTRL_STS);
 }
 
 const struct stmmac_ops dwxgmac210_ops = {
@@ -1634,12 +1634,12 @@ static void dwxlgmac2_rx_queue_enable(struct mac_device_info *hw, u8 mode,
 	void __iomem *ioaddr = hw->pcsr;
 	u32 value;
 
-	value = readl(ioaddr + XLGMAC_RXQ_ENABLE_CTRL0) & ~XGMAC_RXQEN(queue);
+	value = pete_readl("drivers/net/ethernet/stmicro/stmmac/dwxgmac2_core.c:1637", ioaddr + XLGMAC_RXQ_ENABLE_CTRL0) & ~XGMAC_RXQEN(queue);
 	if (mode == MTL_QUEUE_AVB)
 		value |= 0x1 << XGMAC_RXQEN_SHIFT(queue);
 	else if (mode == MTL_QUEUE_DCB)
 		value |= 0x2 << XGMAC_RXQEN_SHIFT(queue);
-	writel(value, ioaddr + XLGMAC_RXQ_ENABLE_CTRL0);
+	pete_writel("drivers/net/ethernet/stmicro/stmmac/dwxgmac2_core.c:1642", value, ioaddr + XLGMAC_RXQ_ENABLE_CTRL0);
 }
 
 const struct stmmac_ops dwxlgmac2_ops = {

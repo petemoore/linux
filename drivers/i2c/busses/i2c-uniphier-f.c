@@ -106,7 +106,7 @@ static void uniphier_fi2c_fill_txfifo(struct uniphier_fi2c_priv *priv,
 		if (fifo_space-- <= 0)
 			break;
 
-		writel(*priv->buf++, priv->membase + UNIPHIER_FI2C_DTTX);
+		pete_writel("drivers/i2c/busses/i2c-uniphier-f.c:109", *priv->buf++, priv->membase + UNIPHIER_FI2C_DTTX);
 		priv->len--;
 	}
 }
@@ -120,27 +120,27 @@ static void uniphier_fi2c_drain_rxfifo(struct uniphier_fi2c_priv *priv)
 		if (fifo_left-- <= 0)
 			break;
 
-		*priv->buf++ = readl(priv->membase + UNIPHIER_FI2C_DTRX);
+		*priv->buf++ = pete_readl("drivers/i2c/busses/i2c-uniphier-f.c:123", priv->membase + UNIPHIER_FI2C_DTRX);
 		priv->len--;
 	}
 }
 
 static void uniphier_fi2c_set_irqs(struct uniphier_fi2c_priv *priv)
 {
-	writel(priv->enabled_irqs, priv->membase + UNIPHIER_FI2C_IE);
+	pete_writel("drivers/i2c/busses/i2c-uniphier-f.c:130", priv->enabled_irqs, priv->membase + UNIPHIER_FI2C_IE);
 }
 
 static void uniphier_fi2c_clear_irqs(struct uniphier_fi2c_priv *priv,
 				     u32 mask)
 {
-	writel(mask, priv->membase + UNIPHIER_FI2C_IC);
+	pete_writel("drivers/i2c/busses/i2c-uniphier-f.c:136", mask, priv->membase + UNIPHIER_FI2C_IC);
 }
 
 static void uniphier_fi2c_stop(struct uniphier_fi2c_priv *priv)
 {
 	priv->enabled_irqs |= UNIPHIER_FI2C_INT_STOP;
 	uniphier_fi2c_set_irqs(priv);
-	writel(UNIPHIER_FI2C_CR_MST | UNIPHIER_FI2C_CR_STO,
+	pete_writel("drivers/i2c/busses/i2c-uniphier-f.c:143", UNIPHIER_FI2C_CR_MST | UNIPHIER_FI2C_CR_STO,
 	       priv->membase + UNIPHIER_FI2C_CR);
 }
 
@@ -151,7 +151,7 @@ static irqreturn_t uniphier_fi2c_interrupt(int irq, void *dev_id)
 
 	spin_lock(&priv->lock);
 
-	irq_status = readl(priv->membase + UNIPHIER_FI2C_INT);
+	irq_status = pete_readl("drivers/i2c/busses/i2c-uniphier-f.c:154", priv->membase + UNIPHIER_FI2C_INT);
 	irq_status &= priv->enabled_irqs;
 
 	if (irq_status & UNIPHIER_FI2C_INT_STOP)
@@ -208,7 +208,7 @@ static irqreturn_t uniphier_fi2c_interrupt(int irq, void *dev_id)
 				priv->flags |= UNIPHIER_FI2C_BYTE_WISE;
 			}
 			if (priv->len <= 1)
-				writel(UNIPHIER_FI2C_CR_MST |
+				pete_writel("drivers/i2c/busses/i2c-uniphier-f.c:211", UNIPHIER_FI2C_CR_MST |
 				       UNIPHIER_FI2C_CR_NACK,
 				       priv->membase + UNIPHIER_FI2C_CR);
 		}
@@ -251,9 +251,9 @@ static void uniphier_fi2c_tx_init(struct uniphier_fi2c_priv *priv, u16 addr,
 	uniphier_fi2c_set_irqs(priv);
 
 	/* do not use TX byte counter */
-	writel(0, priv->membase + UNIPHIER_FI2C_TBC);
+	pete_writel("drivers/i2c/busses/i2c-uniphier-f.c:254", 0, priv->membase + UNIPHIER_FI2C_TBC);
 	/* set slave address */
-	writel(UNIPHIER_FI2C_DTTX_CMD | addr << 1,
+	pete_writel("drivers/i2c/busses/i2c-uniphier-f.c:256", UNIPHIER_FI2C_DTTX_CMD | addr << 1,
 	       priv->membase + UNIPHIER_FI2C_DTTX);
 	/*
 	 * First chunk of data. For a repeated START condition, do not write
@@ -272,7 +272,7 @@ static void uniphier_fi2c_rx_init(struct uniphier_fi2c_priv *priv, u16 addr)
 		 * If possible, use RX byte counter.
 		 * It can automatically handle NACK for the last byte.
 		 */
-		writel(priv->len, priv->membase + UNIPHIER_FI2C_RBC);
+		pete_writel("drivers/i2c/busses/i2c-uniphier-f.c:275", priv->len, priv->membase + UNIPHIER_FI2C_RBC);
 		priv->enabled_irqs |= UNIPHIER_FI2C_INT_RF |
 				      UNIPHIER_FI2C_INT_RB;
 	} else {
@@ -281,7 +281,7 @@ static void uniphier_fi2c_rx_init(struct uniphier_fi2c_priv *priv, u16 addr)
 		 * do not use it at all.  Drain data when FIFO gets full,
 		 * but treat the last portion as a special case.
 		 */
-		writel(0, priv->membase + UNIPHIER_FI2C_RBC);
+		pete_writel("drivers/i2c/busses/i2c-uniphier-f.c:284", 0, priv->membase + UNIPHIER_FI2C_RBC);
 		priv->flags |= UNIPHIER_FI2C_MANUAL_NACK;
 		priv->enabled_irqs |= UNIPHIER_FI2C_INT_RF;
 	}
@@ -289,18 +289,18 @@ static void uniphier_fi2c_rx_init(struct uniphier_fi2c_priv *priv, u16 addr)
 	uniphier_fi2c_set_irqs(priv);
 
 	/* set slave address with RD bit */
-	writel(UNIPHIER_FI2C_DTTX_CMD | UNIPHIER_FI2C_DTTX_RD | addr << 1,
+	pete_writel("drivers/i2c/busses/i2c-uniphier-f.c:292", UNIPHIER_FI2C_DTTX_CMD | UNIPHIER_FI2C_DTTX_RD | addr << 1,
 	       priv->membase + UNIPHIER_FI2C_DTTX);
 }
 
 static void uniphier_fi2c_reset(struct uniphier_fi2c_priv *priv)
 {
-	writel(UNIPHIER_FI2C_RST_RST, priv->membase + UNIPHIER_FI2C_RST);
+	pete_writel("drivers/i2c/busses/i2c-uniphier-f.c:298", UNIPHIER_FI2C_RST_RST, priv->membase + UNIPHIER_FI2C_RST);
 }
 
 static void uniphier_fi2c_prepare_operation(struct uniphier_fi2c_priv *priv)
 {
-	writel(UNIPHIER_FI2C_BRST_FOEN | UNIPHIER_FI2C_BRST_RSCL,
+	pete_writel("drivers/i2c/busses/i2c-uniphier-f.c:303", UNIPHIER_FI2C_BRST_FOEN | UNIPHIER_FI2C_BRST_RSCL,
 	       priv->membase + UNIPHIER_FI2C_BRST);
 }
 
@@ -329,7 +329,7 @@ static int uniphier_fi2c_master_xfer_one(struct i2c_adapter *adap,
 
 	reinit_completion(&priv->comp);
 	uniphier_fi2c_clear_irqs(priv, U32_MAX);
-	writel(UNIPHIER_FI2C_RST_TBRST | UNIPHIER_FI2C_RST_RBRST,
+	pete_writel("drivers/i2c/busses/i2c-uniphier-f.c:332", UNIPHIER_FI2C_RST_TBRST | UNIPHIER_FI2C_RST_RBRST,
 	       priv->membase + UNIPHIER_FI2C_RST);	/* reset TX/RX FIFO */
 
 	spin_lock_irqsave(&priv->lock, flags);
@@ -345,7 +345,7 @@ static int uniphier_fi2c_master_xfer_one(struct i2c_adapter *adap,
 	 * written only for a non-repeated START condition.
 	 */
 	if (!repeat)
-		writel(UNIPHIER_FI2C_CR_MST | UNIPHIER_FI2C_CR_STA,
+		pete_writel("drivers/i2c/busses/i2c-uniphier-f.c:348", UNIPHIER_FI2C_CR_MST | UNIPHIER_FI2C_CR_STA,
 		       priv->membase + UNIPHIER_FI2C_CR);
 
 	spin_unlock_irqrestore(&priv->lock, flags);
@@ -387,7 +387,7 @@ static int uniphier_fi2c_check_bus_busy(struct i2c_adapter *adap)
 {
 	struct uniphier_fi2c_priv *priv = i2c_get_adapdata(adap);
 
-	if (readl(priv->membase + UNIPHIER_FI2C_SR) & UNIPHIER_FI2C_SR_DB) {
+	if (pete_readl("drivers/i2c/busses/i2c-uniphier-f.c:390", priv->membase + UNIPHIER_FI2C_SR) & UNIPHIER_FI2C_SR_DB) {
 		if (priv->busy_cnt++ > 3) {
 			/*
 			 * If bus busy continues too long, it is probably
@@ -443,7 +443,7 @@ static int uniphier_fi2c_get_scl(struct i2c_adapter *adap)
 {
 	struct uniphier_fi2c_priv *priv = i2c_get_adapdata(adap);
 
-	return !!(readl(priv->membase + UNIPHIER_FI2C_BM) &
+	return !!(pete_readl("drivers/i2c/busses/i2c-uniphier-f.c:446", priv->membase + UNIPHIER_FI2C_BM) &
 							UNIPHIER_FI2C_BM_SCLS);
 }
 
@@ -451,7 +451,7 @@ static void uniphier_fi2c_set_scl(struct i2c_adapter *adap, int val)
 {
 	struct uniphier_fi2c_priv *priv = i2c_get_adapdata(adap);
 
-	writel(val ? UNIPHIER_FI2C_BRST_RSCL : 0,
+	pete_writel("drivers/i2c/busses/i2c-uniphier-f.c:454", val ? UNIPHIER_FI2C_BRST_RSCL : 0,
 	       priv->membase + UNIPHIER_FI2C_BRST);
 }
 
@@ -459,7 +459,7 @@ static int uniphier_fi2c_get_sda(struct i2c_adapter *adap)
 {
 	struct uniphier_fi2c_priv *priv = i2c_get_adapdata(adap);
 
-	return !!(readl(priv->membase + UNIPHIER_FI2C_BM) &
+	return !!(pete_readl("drivers/i2c/busses/i2c-uniphier-f.c:462", priv->membase + UNIPHIER_FI2C_BM) &
 							UNIPHIER_FI2C_BM_SDAS);
 }
 
@@ -481,9 +481,9 @@ static void uniphier_fi2c_hw_init(struct uniphier_fi2c_priv *priv)
 	unsigned int cyc = priv->clk_cycle;
 	u32 tmp;
 
-	tmp = readl(priv->membase + UNIPHIER_FI2C_CR);
+	tmp = pete_readl("drivers/i2c/busses/i2c-uniphier-f.c:484", priv->membase + UNIPHIER_FI2C_CR);
 	tmp |= UNIPHIER_FI2C_CR_MST;
-	writel(tmp, priv->membase + UNIPHIER_FI2C_CR);
+	pete_writel("drivers/i2c/busses/i2c-uniphier-f.c:486", tmp, priv->membase + UNIPHIER_FI2C_CR);
 
 	uniphier_fi2c_reset(priv);
 
@@ -491,23 +491,23 @@ static void uniphier_fi2c_hw_init(struct uniphier_fi2c_priv *priv)
 	 *  Standard-mode: tLOW + tHIGH = 10 us
 	 *  Fast-mode:     tLOW + tHIGH = 2.5 us
 	 */
-	writel(cyc, priv->membase + UNIPHIER_FI2C_CYC);
+	pete_writel("drivers/i2c/busses/i2c-uniphier-f.c:494", cyc, priv->membase + UNIPHIER_FI2C_CYC);
 	/*
 	 *  Standard-mode: tLOW = 4.7 us, tHIGH = 4.0 us, tBUF = 4.7 us
 	 *  Fast-mode:     tLOW = 1.3 us, tHIGH = 0.6 us, tBUF = 1.3 us
 	 * "tLow/tHIGH = 5/4" meets both.
 	 */
-	writel(cyc * 5 / 9, priv->membase + UNIPHIER_FI2C_LCTL);
+	pete_writel("drivers/i2c/busses/i2c-uniphier-f.c:500", cyc * 5 / 9, priv->membase + UNIPHIER_FI2C_LCTL);
 	/*
 	 *  Standard-mode: tHD;STA = 4.0 us, tSU;STA = 4.7 us, tSU;STO = 4.0 us
 	 *  Fast-mode:     tHD;STA = 0.6 us, tSU;STA = 0.6 us, tSU;STO = 0.6 us
 	 */
-	writel(cyc / 2, priv->membase + UNIPHIER_FI2C_SSUT);
+	pete_writel("drivers/i2c/busses/i2c-uniphier-f.c:505", cyc / 2, priv->membase + UNIPHIER_FI2C_SSUT);
 	/*
 	 *  Standard-mode: tSU;DAT = 250 ns
 	 *  Fast-mode:     tSU;DAT = 100 ns
 	 */
-	writel(cyc / 16, priv->membase + UNIPHIER_FI2C_DSUT);
+	pete_writel("drivers/i2c/busses/i2c-uniphier-f.c:510", cyc / 16, priv->membase + UNIPHIER_FI2C_DSUT);
 
 	uniphier_fi2c_prepare_operation(priv);
 }

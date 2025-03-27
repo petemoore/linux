@@ -234,7 +234,7 @@ static inline u32 aty_ld_le32(int regindex, const struct atyfb_par *par)
 #ifdef CONFIG_ATARI
 	return in_le32(par->ati_regbase + regindex);
 #else
-	return readl(par->ati_regbase + regindex);
+	return pete_readl("drivers/video/fbdev/aty/atyfb.h:237", par->ati_regbase + regindex);
 #endif
 }
 
@@ -247,7 +247,7 @@ static inline void aty_st_le32(int regindex, u32 val, const struct atyfb_par *pa
 #ifdef CONFIG_ATARI
 	out_le32(par->ati_regbase + regindex, val);
 #else
-	writel(val, par->ati_regbase + regindex);
+	pete_writel("drivers/video/fbdev/aty/atyfb.h:250", val, par->ati_regbase + regindex);
 #endif
 }
 
@@ -260,7 +260,7 @@ static inline void aty_st_le16(int regindex, u16 val,
 #ifdef CONFIG_ATARI
 	out_le16(par->ati_regbase + regindex, val);
 #else
-	writel(val, par->ati_regbase + regindex);
+	pete_writel("drivers/video/fbdev/aty/atyfb.h:263", val, par->ati_regbase + regindex);
 #endif
 }
 
@@ -272,7 +272,7 @@ static inline u8 aty_ld_8(int regindex, const struct atyfb_par *par)
 #ifdef CONFIG_ATARI
 	return in_8(par->ati_regbase + regindex);
 #else
-	return readb(par->ati_regbase + regindex);
+	return pete_readb("drivers/video/fbdev/aty/atyfb.h:275", par->ati_regbase + regindex);
 #endif
 }
 
@@ -285,7 +285,7 @@ static inline void aty_st_8(int regindex, u8 val, const struct atyfb_par *par)
 #ifdef CONFIG_ATARI
 	out_8(par->ati_regbase + regindex, val);
 #else
-	writeb(val, par->ati_regbase + regindex);
+	pete_writeb("drivers/video/fbdev/aty/atyfb.h:288", val, par->ati_regbase + regindex);
 #endif
 }
 

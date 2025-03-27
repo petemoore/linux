@@ -37,8 +37,8 @@
 
 #define MAX_PACKAGES 16
 
-#define xconf_readl(addr) readl(addr)
-#define xconf_readq(addr) readq(addr)
+#define xconf_readl(addr) pete_readl("arch/loongarch/include/asm/loongson.h:40", addr)
+#define xconf_readq(addr) pete_readq("arch/loongarch/include/asm/loongson.h:41", addr)
 
 static inline void xconf_writel(u32 val, volatile void __iomem *addr)
 {

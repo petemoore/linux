@@ -56,7 +56,7 @@ static unsigned long cpg_pll_clk_recalc_rate(struct clk_hw *hw,
 	unsigned int mult;
 	u32 val;
 
-	val = readl(pll_clk->pllcr_reg) & CPG_PLLnCR_STC_MASK;
+	val = pete_readl("drivers/clk/renesas/rcar-gen3-cpg.c:59", pll_clk->pllcr_reg) & CPG_PLLnCR_STC_MASK;
 	mult = (val >> __ffs(CPG_PLLnCR_STC_MASK)) + 1;
 
 	return parent_rate * mult * pll_clk->fixed_mult;
@@ -92,13 +92,13 @@ static int cpg_pll_clk_set_rate(struct clk_hw *hw, unsigned long rate,
 	mult = DIV_ROUND_CLOSEST_ULL(rate, parent_rate * pll_clk->fixed_mult);
 	mult = clamp(mult, 1U, 128U);
 
-	val = readl(pll_clk->pllcr_reg);
+	val = pete_readl("drivers/clk/renesas/rcar-gen3-cpg.c:95", pll_clk->pllcr_reg);
 	val &= ~CPG_PLLnCR_STC_MASK;
 	val |= (mult - 1) << __ffs(CPG_PLLnCR_STC_MASK);
-	writel(val, pll_clk->pllcr_reg);
+	pete_writel("drivers/clk/renesas/rcar-gen3-cpg.c:98", val, pll_clk->pllcr_reg);
 
 	for (i = 1000; i; i--) {
-		if (readl(pll_clk->pllecr_reg) & pll_clk->pllecr_pllst_mask)
+		if (pete_readl("drivers/clk/renesas/rcar-gen3-cpg.c:101", pll_clk->pllecr_reg) & pll_clk->pllecr_pllst_mask)
 			return 0;
 
 		cpu_relax();
@@ -179,7 +179,7 @@ static unsigned long cpg_z_clk_recalc_rate(struct clk_hw *hw,
 	unsigned int mult;
 	u32 val;
 
-	val = readl(zclk->reg) & zclk->mask;
+	val = pete_readl("drivers/clk/renesas/rcar-gen3-cpg.c:182", zclk->reg) & zclk->mask;
 	mult = 32 - (val >> __ffs(zclk->mask));
 
 	return DIV_ROUND_CLOSEST_ULL((u64)parent_rate * mult,
@@ -228,7 +228,7 @@ static int cpg_z_clk_set_rate(struct clk_hw *hw, unsigned long rate,
 				       parent_rate);
 	mult = clamp(mult, 1U, 32U);
 
-	if (readl(zclk->kick_reg) & CPG_FRQCRB_KICK)
+	if (pete_readl("drivers/clk/renesas/rcar-gen3-cpg.c:231", zclk->kick_reg) & CPG_FRQCRB_KICK)
 		return -EBUSY;
 
 	cpg_reg_modify(zclk->reg, zclk->mask, (32 - mult) << __ffs(zclk->mask));
@@ -249,7 +249,7 @@ static int cpg_z_clk_set_rate(struct clk_hw *hw, unsigned long rate,
 	 * "super" safe value.
 	 */
 	for (i = 1000; i; i--) {
-		if (!(readl(zclk->kick_reg) & CPG_FRQCRB_KICK))
+		if (!(pete_readl("drivers/clk/renesas/rcar-gen3-cpg.c:252", zclk->kick_reg) & CPG_FRQCRB_KICK))
 			return 0;
 
 		cpu_relax();
@@ -398,7 +398,7 @@ struct clk * __init rcar_gen3_cpg_clk_register(struct device *dev,
 		 * clock implementation and we currently have no need to change
 		 * the multiplier value.
 		 */
-		value = readl(base + CPG_PLL4CR);
+		value = pete_readl("drivers/clk/renesas/rcar-gen3-cpg.c:401", base + CPG_PLL4CR);
 		mult = (((value >> 24) & 0x7f) + 1) * 2;
 		break;
 
@@ -424,14 +424,14 @@ struct clk * __init rcar_gen3_cpg_clk_register(struct device *dev,
 			 * RINT is default.
 			 * Only if EXTALR is populated, we switch to it.
 			 */
-			value = readl(csn->reg) & 0x3f;
+			value = pete_readl("drivers/clk/renesas/rcar-gen3-cpg.c:427", csn->reg) & 0x3f;
 
 			if (clk_get_rate(clks[cpg_clk_extalr])) {
 				parent = clks[cpg_clk_extalr];
 				value |= CPG_RCKCR_CKSEL;
 			}
 
-			writel(value, csn->reg);
+			pete_writel("drivers/clk/renesas/rcar-gen3-cpg.c:434", value, csn->reg);
 			cpg_simple_notifier_register(notifiers, csn);
 			break;
 		}
@@ -477,7 +477,7 @@ struct clk * __init rcar_gen3_cpg_clk_register(struct device *dev,
 		 * Clock selectable between two parents and two fixed dividers
 		 * using RCKCR.CKSEL
 		 */
-		if (readl(base + CPG_RCKCR) & CPG_RCKCR_CKSEL) {
+		if (pete_readl("drivers/clk/renesas/rcar-gen3-cpg.c:480", base + CPG_RCKCR) & CPG_RCKCR_CKSEL) {
 			div = core->div & 0xffff;
 		} else {
 			parent = clks[core->parent >> 16];
@@ -500,7 +500,7 @@ struct clk * __init rcar_gen3_cpg_clk_register(struct device *dev,
 		 * MD[4:1] pins and CPG_RPCCKCR[4:3] register value for
 		 * which has been set prior to booting the kernel.
 		 */
-		value = (readl(base + CPG_RPCCKCR) & GENMASK(4, 3)) >> 3;
+		value = (pete_readl("drivers/clk/renesas/rcar-gen3-cpg.c:503", base + CPG_RPCCKCR) & GENMASK(4, 3)) >> 3;
 
 		switch (value) {
 		case 0:

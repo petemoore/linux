@@ -278,21 +278,21 @@ static void meson_nfc_select_chip(struct nand_chip *nand, int chip)
 	}
 	if (nfc->bus_timing != meson_chip->bus_timing) {
 		value = (NFC_CLK_CYCLE - 1) | (meson_chip->bus_timing << 5);
-		writel(value, nfc->reg_base + NFC_REG_CFG);
-		writel((1 << 31), nfc->reg_base + NFC_REG_CMD);
+		pete_writel("drivers/mtd/nand/raw/meson_nand.c:281", value, nfc->reg_base + NFC_REG_CFG);
+		pete_writel("drivers/mtd/nand/raw/meson_nand.c:282", (1 << 31), nfc->reg_base + NFC_REG_CMD);
 		nfc->bus_timing =  meson_chip->bus_timing;
 	}
 }
 
 static void meson_nfc_cmd_idle(struct meson_nfc *nfc, u32 time)
 {
-	writel(nfc->param.chip_select | NFC_CMD_IDLE | (time & 0x3ff),
+	pete_writel("drivers/mtd/nand/raw/meson_nand.c:289", nfc->param.chip_select | NFC_CMD_IDLE | (time & 0x3ff),
 	       nfc->reg_base + NFC_REG_CMD);
 }
 
 static void meson_nfc_cmd_seed(struct meson_nfc *nfc, u32 seed)
 {
-	writel(NFC_CMD_SEED | (0xc2 + (seed & 0x7fff)),
+	pete_writel("drivers/mtd/nand/raw/meson_nand.c:295", NFC_CMD_SEED | (0xc2 + (seed & 0x7fff)),
 	       nfc->reg_base + NFC_REG_CMD);
 }
 
@@ -310,7 +310,7 @@ static void meson_nfc_cmd_access(struct nand_chip *nand, int raw, bool dir,
 	if (raw) {
 		len = mtd->writesize + mtd->oobsize;
 		cmd = len | scrambler | DMA_DIR(dir);
-		writel(cmd, nfc->reg_base + NFC_REG_CMD);
+		pete_writel("drivers/mtd/nand/raw/meson_nand.c:313", cmd, nfc->reg_base + NFC_REG_CMD);
 		return;
 	}
 
@@ -319,7 +319,7 @@ static void meson_nfc_cmd_access(struct nand_chip *nand, int raw, bool dir,
 	cmd = CMDRWGEN(DMA_DIR(dir), scrambler, bch,
 		       NFC_CMD_SHORTMODE_DISABLE, pagesize, pages);
 
-	writel(cmd, nfc->reg_base + NFC_REG_CMD);
+	pete_writel("drivers/mtd/nand/raw/meson_nand.c:322", cmd, nfc->reg_base + NFC_REG_CMD);
 }
 
 static void meson_nfc_drain_cmd(struct meson_nfc *nfc)
@@ -431,16 +431,16 @@ static int meson_nfc_wait_no_rb_pin(struct nand_chip *nand, int timeout_ms,
 	meson_nfc_drain_cmd(nfc);
 	meson_nfc_wait_cmd_finish(nfc, CMD_FIFO_EMPTY_TIMEOUT);
 
-	cfg = readl(nfc->reg_base + NFC_REG_CFG);
+	cfg = pete_readl("drivers/mtd/nand/raw/meson_nand.c:434", nfc->reg_base + NFC_REG_CFG);
 	cfg |= NFC_RB_IRQ_EN;
-	writel(cfg, nfc->reg_base + NFC_REG_CFG);
+	pete_writel("drivers/mtd/nand/raw/meson_nand.c:436", cfg, nfc->reg_base + NFC_REG_CFG);
 
 	reinit_completion(&nfc->completion);
 	nand_status_op(nand, NULL);
 
 	/* use the max erase time as the maximum clock for waiting R/B */
 	cmd = NFC_CMD_RB | NFC_CMD_RB_INT_NO_PIN | nfc->timing.tbers_max;
-	writel(cmd, nfc->reg_base + NFC_REG_CMD);
+	pete_writel("drivers/mtd/nand/raw/meson_nand.c:443", cmd, nfc->reg_base + NFC_REG_CMD);
 
 	if (!wait_for_completion_timeout(&nfc->completion,
 					 msecs_to_jiffies(timeout_ms)))
@@ -461,16 +461,16 @@ static int meson_nfc_wait_rb_pin(struct meson_nfc *nfc, int timeout_ms)
 	meson_nfc_drain_cmd(nfc);
 	meson_nfc_wait_cmd_finish(nfc, CMD_FIFO_EMPTY_TIMEOUT);
 
-	cfg = readl(nfc->reg_base + NFC_REG_CFG);
+	cfg = pete_readl("drivers/mtd/nand/raw/meson_nand.c:464", nfc->reg_base + NFC_REG_CFG);
 	cfg |= NFC_RB_IRQ_EN;
-	writel(cfg, nfc->reg_base + NFC_REG_CFG);
+	pete_writel("drivers/mtd/nand/raw/meson_nand.c:466", cfg, nfc->reg_base + NFC_REG_CFG);
 
 	reinit_completion(&nfc->completion);
 
 	/* use the max erase time as the maximum clock for waiting R/B */
 	cmd = NFC_CMD_RB | NFC_CMD_RB_INT
 		| nfc->param.chip_select | nfc->timing.tbers_max;
-	writel(cmd, nfc->reg_base + NFC_REG_CMD);
+	pete_writel("drivers/mtd/nand/raw/meson_nand.c:473", cmd, nfc->reg_base + NFC_REG_CMD);
 
 	ret = wait_for_completion_timeout(&nfc->completion,
 					  msecs_to_jiffies(timeout_ms));
@@ -573,10 +573,10 @@ static int meson_nfc_dma_buffer_setup(struct nand_chip *nand, void *databuf,
 		return ret;
 	}
 	cmd = GENCMDDADDRL(NFC_CMD_ADL, nfc->daddr);
-	writel(cmd, nfc->reg_base + NFC_REG_CMD);
+	pete_writel("drivers/mtd/nand/raw/meson_nand.c:576", cmd, nfc->reg_base + NFC_REG_CMD);
 
 	cmd = GENCMDDADDRH(NFC_CMD_ADH, nfc->daddr);
-	writel(cmd, nfc->reg_base + NFC_REG_CMD);
+	pete_writel("drivers/mtd/nand/raw/meson_nand.c:579", cmd, nfc->reg_base + NFC_REG_CMD);
 
 	if (infobuf) {
 		nfc->iaddr = dma_map_single(nfc->dev, infobuf, infolen, dir);
@@ -589,10 +589,10 @@ static int meson_nfc_dma_buffer_setup(struct nand_chip *nand, void *databuf,
 		}
 		nfc->info_bytes = infolen;
 		cmd = GENCMDIADDRL(NFC_CMD_AIL, nfc->iaddr);
-		writel(cmd, nfc->reg_base + NFC_REG_CMD);
+		pete_writel("drivers/mtd/nand/raw/meson_nand.c:592", cmd, nfc->reg_base + NFC_REG_CMD);
 
 		cmd = GENCMDIADDRH(NFC_CMD_AIH, nfc->iaddr);
-		writel(cmd, nfc->reg_base + NFC_REG_CMD);
+		pete_writel("drivers/mtd/nand/raw/meson_nand.c:595", cmd, nfc->reg_base + NFC_REG_CMD);
 	}
 
 	return ret;
@@ -628,7 +628,7 @@ static int meson_nfc_read_buf(struct nand_chip *nand, u8 *buf, int len)
 		goto out;
 
 	cmd = NFC_CMD_N2M | len;
-	writel(cmd, nfc->reg_base + NFC_REG_CMD);
+	pete_writel("drivers/mtd/nand/raw/meson_nand.c:631", cmd, nfc->reg_base + NFC_REG_CMD);
 
 	meson_nfc_drain_cmd(nfc);
 	meson_nfc_wait_cmd_finish(nfc, 1000);
@@ -652,7 +652,7 @@ static int meson_nfc_write_buf(struct nand_chip *nand, u8 *buf, int len)
 		return ret;
 
 	cmd = NFC_CMD_M2N | len;
-	writel(cmd, nfc->reg_base + NFC_REG_CMD);
+	pete_writel("drivers/mtd/nand/raw/meson_nand.c:655", cmd, nfc->reg_base + NFC_REG_CMD);
 
 	meson_nfc_drain_cmd(nfc);
 	meson_nfc_wait_cmd_finish(nfc, 1000);
@@ -705,7 +705,7 @@ static int meson_nfc_rw_cmd_prepare_and_execute(struct nand_chip *nand,
 
 	if (in) {
 		nfc->cmdfifo.rw.cmd1 = cs | NFC_CMD_CLE | NAND_CMD_READSTART;
-		writel(nfc->cmdfifo.rw.cmd1, nfc->reg_base + NFC_REG_CMD);
+		pete_writel("drivers/mtd/nand/raw/meson_nand.c:708", nfc->cmdfifo.rw.cmd1, nfc->reg_base + NFC_REG_CMD);
 		meson_nfc_queue_rb(nand, PSEC_TO_MSEC(sdr->tR_max), true);
 	} else {
 		meson_nfc_cmd_idle(nfc, nfc->timing.tadl);
@@ -751,7 +751,7 @@ static int meson_nfc_write_page_sub(struct nand_chip *nand,
 	}
 
 	cmd = nfc->param.chip_select | NFC_CMD_CLE | NAND_CMD_PAGEPROG;
-	writel(cmd, nfc->reg_base + NFC_REG_CMD);
+	pete_writel("drivers/mtd/nand/raw/meson_nand.c:754", cmd, nfc->reg_base + NFC_REG_CMD);
 	meson_nfc_queue_rb(nand, PSEC_TO_MSEC(sdr->tPROG_max), false);
 
 	meson_nfc_dma_buffer_release(nand, data_len, info_len, DMA_TO_DEVICE);
@@ -1038,7 +1038,7 @@ static int meson_nfc_exec_op(struct nand_chip *nand,
 		case NAND_OP_CMD_INSTR:
 			cmd = nfc->param.chip_select | NFC_CMD_CLE;
 			cmd |= instr->ctx.cmd.opcode & 0xff;
-			writel(cmd, nfc->reg_base + NFC_REG_CMD);
+			pete_writel("drivers/mtd/nand/raw/meson_nand.c:1041", cmd, nfc->reg_base + NFC_REG_CMD);
 			meson_nfc_cmd_idle(nfc, delay_idle);
 			break;
 
@@ -1046,7 +1046,7 @@ static int meson_nfc_exec_op(struct nand_chip *nand,
 			for (i = 0; i < instr->ctx.addr.naddrs; i++) {
 				cmd = nfc->param.chip_select | NFC_CMD_ALE;
 				cmd |= instr->ctx.addr.addrs[i] & 0xff;
-				writel(cmd, nfc->reg_base + NFC_REG_CMD);
+				pete_writel("drivers/mtd/nand/raw/meson_nand.c:1049", cmd, nfc->reg_base + NFC_REG_CMD);
 			}
 			meson_nfc_cmd_idle(nfc, delay_idle);
 			break;
@@ -1154,7 +1154,7 @@ static int meson_nfc_clk_init(struct meson_nfc *nfc)
 		return PTR_ERR(nfc->nand_clk);
 
 	/* init SD_EMMC_CLOCK to sane defaults w/min clock rate */
-	writel(CLK_SELECT_NAND | readl(nfc->reg_clk),
+	pete_writel("drivers/mtd/nand/raw/meson_nand.c:1157", CLK_SELECT_NAND | pete_readl("drivers/mtd/nand/raw/meson_nand.c:1157", nfc->reg_clk),
 	       nfc->reg_clk);
 
 	ret = clk_prepare_enable(nfc->core_clk);
@@ -1481,12 +1481,12 @@ static irqreturn_t meson_nfc_irq(int irq, void *id)
 	struct meson_nfc *nfc = id;
 	u32 cfg;
 
-	cfg = readl(nfc->reg_base + NFC_REG_CFG);
+	cfg = pete_readl("drivers/mtd/nand/raw/meson_nand.c:1484", nfc->reg_base + NFC_REG_CFG);
 	if (!(cfg & NFC_RB_IRQ_EN))
 		return IRQ_NONE;
 
 	cfg &= ~(NFC_RB_IRQ_EN);
-	writel(cfg, nfc->reg_base + NFC_REG_CFG);
+	pete_writel("drivers/mtd/nand/raw/meson_nand.c:1489", cfg, nfc->reg_base + NFC_REG_CFG);
 
 	complete(&nfc->completion);
 	return IRQ_HANDLED;
@@ -1550,7 +1550,7 @@ static int meson_nfc_probe(struct platform_device *pdev)
 		return ret;
 	}
 
-	writel(0, nfc->reg_base + NFC_REG_CFG);
+	pete_writel("drivers/mtd/nand/raw/meson_nand.c:1553", 0, nfc->reg_base + NFC_REG_CFG);
 	ret = devm_request_irq(dev, irq, meson_nfc_irq, 0, dev_name(dev), nfc);
 	if (ret) {
 		dev_err(dev, "failed to request NFC IRQ\n");

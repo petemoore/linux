@@ -174,16 +174,16 @@ static int amba_read_periphid(struct amba_device *dev)
 	 * they are located at end of region
 	 */
 	for (pid = 0, i = 0; i < 4; i++)
-		pid |= (readl(tmp + size - 0x20 + 4 * i) & 255) << (i * 8);
+		pid |= (pete_readl("drivers/amba/bus.c:177", tmp + size - 0x20 + 4 * i) & 255) << (i * 8);
 	for (cid = 0, i = 0; i < 4; i++)
-		cid |= (readl(tmp + size - 0x10 + 4 * i) & 255) << (i * 8);
+		cid |= (pete_readl("drivers/amba/bus.c:179", tmp + size - 0x10 + 4 * i) & 255) << (i * 8);
 
 	if (cid == CORESIGHT_CID) {
 		/* set the base to the start of the last 4k block */
 		void __iomem *csbase = tmp + size - 4096;
 
-		dev->uci.devarch = readl(csbase + UCI_REG_DEVARCH_OFFSET);
-		dev->uci.devtype = readl(csbase + UCI_REG_DEVTYPE_OFFSET) & 0xff;
+		dev->uci.devarch = pete_readl("drivers/amba/bus.c:185", csbase + UCI_REG_DEVARCH_OFFSET);
+		dev->uci.devtype = pete_readl("drivers/amba/bus.c:186", csbase + UCI_REG_DEVTYPE_OFFSET) & 0xff;
 	}
 
 	if (cid == AMBA_CID || cid == CORESIGHT_CID) {

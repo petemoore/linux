@@ -48,11 +48,11 @@ static int pci1xxxx_gpio_get_direction(struct gpio_chip *gpio, unsigned int nr)
 	u32 data;
 	int ret = -EINVAL;
 
-	data = readl(priv->reg_base + INP_EN_OFFSET(nr));
+	data = pete_readl("drivers/misc/mchp_pci1xxxx/mchp_pci1xxxx_gpio.c:51", priv->reg_base + INP_EN_OFFSET(nr));
 	if (data & BIT(nr % 32)) {
 		ret =  1;
 	} else {
-		data = readl(priv->reg_base + OUT_EN_OFFSET(nr));
+		data = pete_readl("drivers/misc/mchp_pci1xxxx/mchp_pci1xxxx_gpio.c:55", priv->reg_base + OUT_EN_OFFSET(nr));
 		if (data & BIT(nr % 32))
 			ret =  0;
 	}
@@ -65,12 +65,12 @@ static inline void pci1xxx_assign_bit(void __iomem *base_addr, unsigned int reg_
 {
 	u32 data;
 
-	data = readl(base_addr + reg_offset);
+	data = pete_readl("drivers/misc/mchp_pci1xxxx/mchp_pci1xxxx_gpio.c:68", base_addr + reg_offset);
 	if (set)
 		data |= BIT(bitpos);
 	else
 		data &= ~BIT(bitpos);
-	writel(data, base_addr + reg_offset);
+	pete_writel("drivers/misc/mchp_pci1xxxx/mchp_pci1xxxx_gpio.c:73", data, base_addr + reg_offset);
 }
 
 static int pci1xxxx_gpio_direction_input(struct gpio_chip *gpio, unsigned int nr)
@@ -90,7 +90,7 @@ static int pci1xxxx_gpio_get(struct gpio_chip *gpio, unsigned int nr)
 {
 	struct pci1xxxx_gpio *priv = gpiochip_get_data(gpio);
 
-	return (readl(priv->reg_base + INP_OFFSET(nr)) >> (nr % 32)) & 1;
+	return (pete_readl("drivers/misc/mchp_pci1xxxx/mchp_pci1xxxx_gpio.c:93", priv->reg_base + INP_OFFSET(nr)) >> (nr % 32)) & 1;
 }
 
 static int pci1xxxx_gpio_direction_output(struct gpio_chip *gpio,
@@ -103,12 +103,12 @@ static int pci1xxxx_gpio_direction_output(struct gpio_chip *gpio,
 	spin_lock_irqsave(&priv->lock, flags);
 	pci1xxx_assign_bit(priv->reg_base, INP_EN_OFFSET(nr), (nr % 32), false);
 	pci1xxx_assign_bit(priv->reg_base, OUT_EN_OFFSET(nr), (nr % 32), true);
-	data = readl(priv->reg_base + OUT_OFFSET(nr));
+	data = pete_readl("drivers/misc/mchp_pci1xxxx/mchp_pci1xxxx_gpio.c:106", priv->reg_base + OUT_OFFSET(nr));
 	if (val)
 		data |= (1 << (nr % 32));
 	else
 		data &= ~(1 << (nr % 32));
-	writel(data, priv->reg_base + OUT_OFFSET(nr));
+	pete_writel("drivers/misc/mchp_pci1xxxx/mchp_pci1xxxx_gpio.c:111", data, priv->reg_base + OUT_OFFSET(nr));
 	spin_unlock_irqrestore(&priv->lock, flags);
 
 	return 0;
@@ -264,7 +264,7 @@ static irqreturn_t pci1xxxx_gpio_irq_handler(int irq, void *dev_id)
 	spin_unlock_irqrestore(&priv->lock, flags);
 	for (gpiobank = 0; gpiobank < 3; gpiobank++) {
 		spin_lock_irqsave(&priv->lock, flags);
-		int_status = readl(priv->reg_base + INTR_STATUS_OFFSET(gpiobank));
+		int_status = pete_readl("drivers/misc/mchp_pci1xxxx/mchp_pci1xxxx_gpio.c:267", priv->reg_base + INTR_STATUS_OFFSET(gpiobank));
 		spin_unlock_irqrestore(&priv->lock, flags);
 		if (gpiobank == 2)
 			pincount = 29;
@@ -274,7 +274,7 @@ static irqreturn_t pci1xxxx_gpio_irq_handler(int irq, void *dev_id)
 			unsigned int irq;
 
 			spin_lock_irqsave(&priv->lock, flags);
-			writel(BIT(bit), priv->reg_base + INTR_STATUS_OFFSET(gpiobank));
+			pete_writel("drivers/misc/mchp_pci1xxxx/mchp_pci1xxxx_gpio.c:277", BIT(bit), priv->reg_base + INTR_STATUS_OFFSET(gpiobank));
 			spin_unlock_irqrestore(&priv->lock, flags);
 			irq = irq_find_mapping(gc->irq.domain, (bit + (gpiobank * 32)));
 			handle_nested_irq(irq);
@@ -398,7 +398,7 @@ static int pci1xxxx_gpio_probe(struct auxiliary_device *aux_dev,
 	if (!priv->reg_base)
 		return -ENOMEM;
 
-	writel(0x0264, (priv->reg_base + 0x400 + 0xF0));
+	pete_writel("drivers/misc/mchp_pci1xxxx/mchp_pci1xxxx_gpio.c:401", 0x0264, (priv->reg_base + 0x400 + 0xF0));
 
 	retval = pci1xxxx_gpio_setup(priv, pdata->irq_num);
 

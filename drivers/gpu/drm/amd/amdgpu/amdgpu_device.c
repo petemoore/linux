@@ -409,7 +409,7 @@ uint32_t amdgpu_device_rreg(struct amdgpu_device *adev,
 			ret = amdgpu_kiq_rreg(adev, reg);
 			up_read(&adev->reset_domain->sem);
 		} else {
-			ret = readl(((void __iomem *)adev->rmmio) + (reg * 4));
+			ret = pete_readl("drivers/gpu/drm/amd/amdgpu/amdgpu_device.c:412", ((void __iomem *)adev->rmmio) + (reg * 4));
 		}
 	} else {
 		ret = adev->pcie_rreg(adev, reg * 4);
@@ -439,7 +439,7 @@ uint8_t amdgpu_mm_rreg8(struct amdgpu_device *adev, uint32_t offset)
 		return 0;
 
 	if (offset < adev->rmmio_size)
-		return (readb(adev->rmmio + offset));
+		return (pete_readb("drivers/gpu/drm/amd/amdgpu/amdgpu_device.c:442", adev->rmmio + offset));
 	BUG();
 }
 
@@ -464,7 +464,7 @@ void amdgpu_mm_wreg8(struct amdgpu_device *adev, uint32_t offset, uint8_t value)
 		return;
 
 	if (offset < adev->rmmio_size)
-		writeb(value, adev->rmmio + offset);
+		pete_writeb("drivers/gpu/drm/amd/amdgpu/amdgpu_device.c:467", value, adev->rmmio + offset);
 	else
 		BUG();
 }
@@ -493,7 +493,7 @@ void amdgpu_device_wreg(struct amdgpu_device *adev,
 			amdgpu_kiq_wreg(adev, reg, v);
 			up_read(&adev->reset_domain->sem);
 		} else {
-			writel(v, ((void __iomem *)adev->rmmio) + (reg * 4));
+			pete_writel("drivers/gpu/drm/amd/amdgpu/amdgpu_device.c:496", v, ((void __iomem *)adev->rmmio) + (reg * 4));
 		}
 	} else {
 		adev->pcie_wreg(adev, reg * 4, v);
@@ -526,7 +526,7 @@ void amdgpu_mm_wreg_mmio_rlc(struct amdgpu_device *adev,
 	} else if ((reg * 4) >= adev->rmmio_size) {
 		adev->pcie_wreg(adev, reg * 4, v);
 	} else {
-		writel(v, ((void __iomem *)adev->rmmio) + (reg * 4));
+		pete_writel("drivers/gpu/drm/amd/amdgpu/amdgpu_device.c:529", v, ((void __iomem *)adev->rmmio) + (reg * 4));
 	}
 }
 
@@ -553,9 +553,9 @@ u32 amdgpu_device_indirect_rreg(struct amdgpu_device *adev,
 	pcie_index_offset = (void __iomem *)adev->rmmio + pcie_index * 4;
 	pcie_data_offset = (void __iomem *)adev->rmmio + pcie_data * 4;
 
-	writel(reg_addr, pcie_index_offset);
-	readl(pcie_index_offset);
-	r = readl(pcie_data_offset);
+	pete_writel("drivers/gpu/drm/amd/amdgpu/amdgpu_device.c:556", reg_addr, pcie_index_offset);
+	pete_readl("drivers/gpu/drm/amd/amdgpu/amdgpu_device.c:557", pcie_index_offset);
+	r = pete_readl("drivers/gpu/drm/amd/amdgpu/amdgpu_device.c:558", pcie_data_offset);
 	spin_unlock_irqrestore(&adev->pcie_idx_lock, flags);
 
 	return r;
@@ -584,18 +584,18 @@ u32 amdgpu_device_indirect_rreg_ext(struct amdgpu_device *adev,
 		pcie_index_hi_offset = (void __iomem *)adev->rmmio +
 				pcie_index_hi * 4;
 
-	writel(reg_addr, pcie_index_offset);
-	readl(pcie_index_offset);
+	pete_writel("drivers/gpu/drm/amd/amdgpu/amdgpu_device.c:587", reg_addr, pcie_index_offset);
+	pete_readl("drivers/gpu/drm/amd/amdgpu/amdgpu_device.c:588", pcie_index_offset);
 	if (pcie_index_hi != 0) {
-		writel((reg_addr >> 32) & 0xff, pcie_index_hi_offset);
-		readl(pcie_index_hi_offset);
+		pete_writel("drivers/gpu/drm/amd/amdgpu/amdgpu_device.c:590", (reg_addr >> 32) & 0xff, pcie_index_hi_offset);
+		pete_readl("drivers/gpu/drm/amd/amdgpu/amdgpu_device.c:591", pcie_index_hi_offset);
 	}
-	r = readl(pcie_data_offset);
+	r = pete_readl("drivers/gpu/drm/amd/amdgpu/amdgpu_device.c:593", pcie_data_offset);
 
 	/* clear the high bits */
 	if (pcie_index_hi != 0) {
-		writel(0, pcie_index_hi_offset);
-		readl(pcie_index_hi_offset);
+		pete_writel("drivers/gpu/drm/amd/amdgpu/amdgpu_device.c:597", 0, pcie_index_hi_offset);
+		pete_readl("drivers/gpu/drm/amd/amdgpu/amdgpu_device.c:598", pcie_index_hi_offset);
 	}
 
 	spin_unlock_irqrestore(&adev->pcie_idx_lock, flags);
@@ -627,13 +627,13 @@ u64 amdgpu_device_indirect_rreg64(struct amdgpu_device *adev,
 	pcie_data_offset = (void __iomem *)adev->rmmio + pcie_data * 4;
 
 	/* read low 32 bits */
-	writel(reg_addr, pcie_index_offset);
-	readl(pcie_index_offset);
-	r = readl(pcie_data_offset);
+	pete_writel("drivers/gpu/drm/amd/amdgpu/amdgpu_device.c:630", reg_addr, pcie_index_offset);
+	pete_readl("drivers/gpu/drm/amd/amdgpu/amdgpu_device.c:631", pcie_index_offset);
+	r = pete_readl("drivers/gpu/drm/amd/amdgpu/amdgpu_device.c:632", pcie_data_offset);
 	/* read high 32 bits */
-	writel(reg_addr + 4, pcie_index_offset);
-	readl(pcie_index_offset);
-	r |= ((u64)readl(pcie_data_offset) << 32);
+	pete_writel("drivers/gpu/drm/amd/amdgpu/amdgpu_device.c:634", reg_addr + 4, pcie_index_offset);
+	pete_readl("drivers/gpu/drm/amd/amdgpu/amdgpu_device.c:635", pcie_index_offset);
+	r |= ((u64)pete_readl("drivers/gpu/drm/amd/amdgpu/amdgpu_device.c:636", pcie_data_offset) << 32);
 	spin_unlock_irqrestore(&adev->pcie_idx_lock, flags);
 
 	return r;
@@ -661,10 +661,10 @@ void amdgpu_device_indirect_wreg(struct amdgpu_device *adev,
 	pcie_index_offset = (void __iomem *)adev->rmmio + pcie_index * 4;
 	pcie_data_offset = (void __iomem *)adev->rmmio + pcie_data * 4;
 
-	writel(reg_addr, pcie_index_offset);
-	readl(pcie_index_offset);
-	writel(reg_data, pcie_data_offset);
-	readl(pcie_data_offset);
+	pete_writel("drivers/gpu/drm/amd/amdgpu/amdgpu_device.c:664", reg_addr, pcie_index_offset);
+	pete_readl("drivers/gpu/drm/amd/amdgpu/amdgpu_device.c:665", pcie_index_offset);
+	pete_writel("drivers/gpu/drm/amd/amdgpu/amdgpu_device.c:666", reg_data, pcie_data_offset);
+	pete_readl("drivers/gpu/drm/amd/amdgpu/amdgpu_device.c:667", pcie_data_offset);
 	spin_unlock_irqrestore(&adev->pcie_idx_lock, flags);
 }
 
@@ -690,19 +690,19 @@ void amdgpu_device_indirect_wreg_ext(struct amdgpu_device *adev,
 		pcie_index_hi_offset = (void __iomem *)adev->rmmio +
 				pcie_index_hi * 4;
 
-	writel(reg_addr, pcie_index_offset);
-	readl(pcie_index_offset);
+	pete_writel("drivers/gpu/drm/amd/amdgpu/amdgpu_device.c:693", reg_addr, pcie_index_offset);
+	pete_readl("drivers/gpu/drm/amd/amdgpu/amdgpu_device.c:694", pcie_index_offset);
 	if (pcie_index_hi != 0) {
-		writel((reg_addr >> 32) & 0xff, pcie_index_hi_offset);
-		readl(pcie_index_hi_offset);
+		pete_writel("drivers/gpu/drm/amd/amdgpu/amdgpu_device.c:696", (reg_addr >> 32) & 0xff, pcie_index_hi_offset);
+		pete_readl("drivers/gpu/drm/amd/amdgpu/amdgpu_device.c:697", pcie_index_hi_offset);
 	}
-	writel(reg_data, pcie_data_offset);
-	readl(pcie_data_offset);
+	pete_writel("drivers/gpu/drm/amd/amdgpu/amdgpu_device.c:699", reg_data, pcie_data_offset);
+	pete_readl("drivers/gpu/drm/amd/amdgpu/amdgpu_device.c:700", pcie_data_offset);
 
 	/* clear the high bits */
 	if (pcie_index_hi != 0) {
-		writel(0, pcie_index_hi_offset);
-		readl(pcie_index_hi_offset);
+		pete_writel("drivers/gpu/drm/amd/amdgpu/amdgpu_device.c:704", 0, pcie_index_hi_offset);
+		pete_readl("drivers/gpu/drm/amd/amdgpu/amdgpu_device.c:705", pcie_index_hi_offset);
 	}
 
 	spin_unlock_irqrestore(&adev->pcie_idx_lock, flags);
@@ -731,15 +731,15 @@ void amdgpu_device_indirect_wreg64(struct amdgpu_device *adev,
 	pcie_data_offset = (void __iomem *)adev->rmmio + pcie_data * 4;
 
 	/* write low 32 bits */
-	writel(reg_addr, pcie_index_offset);
-	readl(pcie_index_offset);
-	writel((u32)(reg_data & 0xffffffffULL), pcie_data_offset);
-	readl(pcie_data_offset);
+	pete_writel("drivers/gpu/drm/amd/amdgpu/amdgpu_device.c:734", reg_addr, pcie_index_offset);
+	pete_readl("drivers/gpu/drm/amd/amdgpu/amdgpu_device.c:735", pcie_index_offset);
+	pete_writel("drivers/gpu/drm/amd/amdgpu/amdgpu_device.c:736", (u32)(reg_data & 0xffffffffULL), pcie_data_offset);
+	pete_readl("drivers/gpu/drm/amd/amdgpu/amdgpu_device.c:737", pcie_data_offset);
 	/* write high 32 bits */
-	writel(reg_addr + 4, pcie_index_offset);
-	readl(pcie_index_offset);
-	writel((u32)(reg_data >> 32), pcie_data_offset);
-	readl(pcie_data_offset);
+	pete_writel("drivers/gpu/drm/amd/amdgpu/amdgpu_device.c:739", reg_addr + 4, pcie_index_offset);
+	pete_readl("drivers/gpu/drm/amd/amdgpu/amdgpu_device.c:740", pcie_index_offset);
+	pete_writel("drivers/gpu/drm/amd/amdgpu/amdgpu_device.c:741", (u32)(reg_data >> 32), pcie_data_offset);
+	pete_readl("drivers/gpu/drm/amd/amdgpu/amdgpu_device.c:742", pcie_data_offset);
 	spin_unlock_irqrestore(&adev->pcie_idx_lock, flags);
 }
 

@@ -46,9 +46,9 @@ static void a37xx_mbox_receive(struct mbox_chan *chan)
 	struct armada_37xx_rwtm_rx_msg rx_msg;
 	int i;
 
-	rx_msg.retval = readl(mbox->base + RWTM_MBOX_RETURN_STATUS);
+	rx_msg.retval = pete_readl("drivers/mailbox/armada-37xx-rwtm-mailbox.c:49", mbox->base + RWTM_MBOX_RETURN_STATUS);
 	for (i = 0; i < 16; ++i)
-		rx_msg.status[i] = readl(mbox->base + RWTM_MBOX_STATUS(i));
+		rx_msg.status[i] = pete_readl("drivers/mailbox/armada-37xx-rwtm-mailbox.c:51", mbox->base + RWTM_MBOX_STATUS(i));
 
 	mbox_chan_received_data(chan, &rx_msg);
 }
@@ -59,7 +59,7 @@ static irqreturn_t a37xx_mbox_irq_handler(int irq, void *data)
 	struct a37xx_mbox *mbox = chan->con_priv;
 	u32 reg;
 
-	reg = readl(mbox->base + RWTM_HOST_INT_RESET);
+	reg = pete_readl("drivers/mailbox/armada-37xx-rwtm-mailbox.c:62", mbox->base + RWTM_HOST_INT_RESET);
 
 	if (reg & SP_CMD_COMPLETE)
 		a37xx_mbox_receive(chan);
@@ -67,7 +67,7 @@ static irqreturn_t a37xx_mbox_irq_handler(int irq, void *data)
 	if (reg & (SP_CMD_QUEUE_FULL_ACCESS | SP_CMD_QUEUE_FULL))
 		dev_err(mbox->dev, "Secure processor command queue full\n");
 
-	writel(reg, mbox->base + RWTM_HOST_INT_RESET);
+	pete_writel("drivers/mailbox/armada-37xx-rwtm-mailbox.c:70", reg, mbox->base + RWTM_HOST_INT_RESET);
 	if (reg)
 		mbox_chan_txdone(chan, 0);
 
@@ -84,7 +84,7 @@ static int a37xx_mbox_send_data(struct mbox_chan *chan, void *data)
 	if (!data)
 		return -EINVAL;
 
-	reg = readl(mbox->base + RWTM_MBOX_FIFO_STATUS);
+	reg = pete_readl("drivers/mailbox/armada-37xx-rwtm-mailbox.c:87", mbox->base + RWTM_MBOX_FIFO_STATUS);
 	if (!(reg & FIFO_STS_RDY))
 		dev_warn(mbox->dev, "Secure processor not ready\n");
 
@@ -94,8 +94,8 @@ static int a37xx_mbox_send_data(struct mbox_chan *chan, void *data)
 	}
 
 	for (i = 0; i < 16; ++i)
-		writel(msg->args[i], mbox->base + RWTM_MBOX_PARAM(i));
-	writel(msg->command, mbox->base + RWTM_MBOX_COMMAND);
+		pete_writel("drivers/mailbox/armada-37xx-rwtm-mailbox.c:97", msg->args[i], mbox->base + RWTM_MBOX_PARAM(i));
+	pete_writel("drivers/mailbox/armada-37xx-rwtm-mailbox.c:98", msg->command, mbox->base + RWTM_MBOX_COMMAND);
 
 	return 0;
 }
@@ -114,9 +114,9 @@ static int a37xx_mbox_startup(struct mbox_chan *chan)
 	}
 
 	/* enable IRQ generation */
-	reg = readl(mbox->base + RWTM_HOST_INT_MASK);
+	reg = pete_readl("drivers/mailbox/armada-37xx-rwtm-mailbox.c:117", mbox->base + RWTM_HOST_INT_MASK);
 	reg &= ~(SP_CMD_COMPLETE | SP_CMD_QUEUE_FULL_ACCESS | SP_CMD_QUEUE_FULL);
-	writel(reg, mbox->base + RWTM_HOST_INT_MASK);
+	pete_writel("drivers/mailbox/armada-37xx-rwtm-mailbox.c:119", reg, mbox->base + RWTM_HOST_INT_MASK);
 
 	return 0;
 }
@@ -127,9 +127,9 @@ static void a37xx_mbox_shutdown(struct mbox_chan *chan)
 	struct a37xx_mbox *mbox = chan->con_priv;
 
 	/* disable interrupt generation */
-	reg = readl(mbox->base + RWTM_HOST_INT_MASK);
+	reg = pete_readl("drivers/mailbox/armada-37xx-rwtm-mailbox.c:130", mbox->base + RWTM_HOST_INT_MASK);
 	reg |= SP_CMD_COMPLETE | SP_CMD_QUEUE_FULL_ACCESS | SP_CMD_QUEUE_FULL;
-	writel(reg, mbox->base + RWTM_HOST_INT_MASK);
+	pete_writel("drivers/mailbox/armada-37xx-rwtm-mailbox.c:132", reg, mbox->base + RWTM_HOST_INT_MASK);
 
 	devm_free_irq(mbox->dev, mbox->irq, chan);
 }

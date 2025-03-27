@@ -102,7 +102,7 @@ unsigned int pxa27x_get_clk_frequency_khz(int info)
 
 static bool pxa27x_is_ppll_disabled(void)
 {
-	unsigned long ccsr = readl(clk_regs + CCSR);
+	unsigned long ccsr = pete_readl("drivers/clk/pxa/clk-pxa27x.c:105", clk_regs + CCSR);
 
 	return ccsr & (1 << CCCR_PPDIS_BIT);
 }
@@ -204,7 +204,7 @@ static unsigned long clk_pxa27x_cpll_get_rate(struct clk_hw *hw,
 	unsigned long clkcfg;
 	unsigned int t, ht;
 	unsigned int l, L, n2, N;
-	unsigned long ccsr = readl(clk_regs + CCSR);
+	unsigned long ccsr = pete_readl("drivers/clk/pxa/clk-pxa27x.c:207", clk_regs + CCSR);
 
 	asm("mrc\tp14, 0, %0, c6, c0, 0" : "=r" (clkcfg));
 	t  = clkcfg & (1 << 0);
@@ -249,8 +249,8 @@ static unsigned long clk_pxa27x_lcd_base_get_rate(struct clk_hw *hw,
 						  unsigned long parent_rate)
 {
 	unsigned int l, osc_forced;
-	unsigned long ccsr = readl(clk_regs + CCSR);
-	unsigned long cccr = readl(clk_regs + CCCR);
+	unsigned long ccsr = pete_readl("drivers/clk/pxa/clk-pxa27x.c:252", clk_regs + CCSR);
+	unsigned long cccr = pete_readl("drivers/clk/pxa/clk-pxa27x.c:253", clk_regs + CCCR);
 
 	l  = ccsr & CCSR_L_MASK;
 	osc_forced = ccsr & (1 << CCCR_CPDIS_BIT);
@@ -271,7 +271,7 @@ static unsigned long clk_pxa27x_lcd_base_get_rate(struct clk_hw *hw,
 static u8 clk_pxa27x_lcd_base_get_parent(struct clk_hw *hw)
 {
 	unsigned int osc_forced;
-	unsigned long ccsr = readl(clk_regs + CCSR);
+	unsigned long ccsr = pete_readl("drivers/clk/pxa/clk-pxa27x.c:274", clk_regs + CCSR);
 
 	osc_forced = ccsr & (1 << CCCR_CPDIS_BIT);
 	if (osc_forced)
@@ -300,7 +300,7 @@ static u8 clk_pxa27x_core_get_parent(struct clk_hw *hw)
 {
 	unsigned long clkcfg;
 	unsigned int t, ht, osc_forced;
-	unsigned long ccsr = readl(clk_regs + CCSR);
+	unsigned long ccsr = pete_readl("drivers/clk/pxa/clk-pxa27x.c:303", clk_regs + CCSR);
 
 	osc_forced = ccsr & (1 << CCCR_CPDIS_BIT);
 	if (osc_forced)
@@ -337,7 +337,7 @@ MUX_OPS(clk_pxa27x_core, "core", CLK_SET_RATE_PARENT);
 static unsigned long clk_pxa27x_run_get_rate(struct clk_hw *hw,
 					     unsigned long parent_rate)
 {
-	unsigned long ccsr = readl(clk_regs + CCSR);
+	unsigned long ccsr = pete_readl("drivers/clk/pxa/clk-pxa27x.c:340", clk_regs + CCSR);
 	unsigned int n2 = (ccsr & CCSR_N2_MASK) >> CCSR_N2_SHIFT;
 
 	return (parent_rate / n2) * 2;
@@ -360,7 +360,7 @@ static unsigned long clk_pxa27x_system_bus_get_rate(struct clk_hw *hw,
 {
 	unsigned long clkcfg;
 	unsigned int b, osc_forced;
-	unsigned long ccsr = readl(clk_regs + CCSR);
+	unsigned long ccsr = pete_readl("drivers/clk/pxa/clk-pxa27x.c:363", clk_regs + CCSR);
 
 	osc_forced = ccsr & (1 << CCCR_CPDIS_BIT);
 	asm("mrc\tp14, 0, %0, c6, c0, 0" : "=r" (clkcfg));
@@ -377,7 +377,7 @@ static unsigned long clk_pxa27x_system_bus_get_rate(struct clk_hw *hw,
 static u8 clk_pxa27x_system_bus_get_parent(struct clk_hw *hw)
 {
 	unsigned int osc_forced;
-	unsigned long ccsr = readl(clk_regs + CCSR);
+	unsigned long ccsr = pete_readl("drivers/clk/pxa/clk-pxa27x.c:380", clk_regs + CCSR);
 
 	osc_forced = ccsr & (1 << CCCR_CPDIS_BIT);
 	if (osc_forced)
@@ -393,8 +393,8 @@ static unsigned long clk_pxa27x_memory_get_rate(struct clk_hw *hw,
 						unsigned long parent_rate)
 {
 	unsigned int a, l, osc_forced;
-	unsigned long cccr = readl(clk_regs + CCCR);
-	unsigned long ccsr = readl(clk_regs + CCSR);
+	unsigned long cccr = pete_readl("drivers/clk/pxa/clk-pxa27x.c:396", clk_regs + CCCR);
+	unsigned long ccsr = pete_readl("drivers/clk/pxa/clk-pxa27x.c:397", clk_regs + CCSR);
 
 	osc_forced = ccsr & (1 << CCCR_CPDIS_BIT);
 	a = cccr & (1 << CCCR_A_BIT);
@@ -412,8 +412,8 @@ static unsigned long clk_pxa27x_memory_get_rate(struct clk_hw *hw,
 static u8 clk_pxa27x_memory_get_parent(struct clk_hw *hw)
 {
 	unsigned int osc_forced, a;
-	unsigned long cccr = readl(clk_regs + CCCR);
-	unsigned long ccsr = readl(clk_regs + CCSR);
+	unsigned long cccr = pete_readl("drivers/clk/pxa/clk-pxa27x.c:415", clk_regs + CCCR);
+	unsigned long ccsr = pete_readl("drivers/clk/pxa/clk-pxa27x.c:416", clk_regs + CCSR);
 
 	osc_forced = ccsr & (1 << CCCR_CPDIS_BIT);
 	a = cccr & (1 << CCCR_A_BIT);

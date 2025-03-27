@@ -175,28 +175,28 @@ static void mxic_ecc_disable_engine(struct mxic_ecc_engine *mxic)
 {
 	u32 reg;
 
-	reg = readl(mxic->regs + DP_CONFIG);
+	reg = pete_readl("drivers/mtd/nand/ecc-mxic.c:178", mxic->regs + DP_CONFIG);
 	reg &= ~ECC_EN;
-	writel(reg, mxic->regs + DP_CONFIG);
+	pete_writel("drivers/mtd/nand/ecc-mxic.c:180", reg, mxic->regs + DP_CONFIG);
 }
 
 static void mxic_ecc_enable_engine(struct mxic_ecc_engine *mxic)
 {
 	u32 reg;
 
-	reg = readl(mxic->regs + DP_CONFIG);
+	reg = pete_readl("drivers/mtd/nand/ecc-mxic.c:187", mxic->regs + DP_CONFIG);
 	reg |= ECC_EN;
-	writel(reg, mxic->regs + DP_CONFIG);
+	pete_writel("drivers/mtd/nand/ecc-mxic.c:189", reg, mxic->regs + DP_CONFIG);
 }
 
 static void mxic_ecc_disable_int(struct mxic_ecc_engine *mxic)
 {
-	writel(0, mxic->regs + INTRPT_SIG_EN);
+	pete_writel("drivers/mtd/nand/ecc-mxic.c:194", 0, mxic->regs + INTRPT_SIG_EN);
 }
 
 static void mxic_ecc_enable_int(struct mxic_ecc_engine *mxic)
 {
-	writel(TRANS_CMPLT, mxic->regs + INTRPT_SIG_EN);
+	pete_writel("drivers/mtd/nand/ecc-mxic.c:199", TRANS_CMPLT, mxic->regs + INTRPT_SIG_EN);
 }
 
 static irqreturn_t mxic_ecc_isr(int irq, void *dev_id)
@@ -204,14 +204,14 @@ static irqreturn_t mxic_ecc_isr(int irq, void *dev_id)
 	struct mxic_ecc_engine *mxic = dev_id;
 	u32 sts;
 
-	sts = readl(mxic->regs + INTRPT_STS);
+	sts = pete_readl("drivers/mtd/nand/ecc-mxic.c:207", mxic->regs + INTRPT_STS);
 	if (!sts)
 		return IRQ_NONE;
 
 	if (sts & TRANS_CMPLT)
 		complete(&mxic->complete);
 
-	writel(sts, mxic->regs + INTRPT_STS);
+	pete_writel("drivers/mtd/nand/ecc-mxic.c:214", sts, mxic->regs + INTRPT_STS);
 
 	return IRQ_HANDLED;
 }
@@ -245,7 +245,7 @@ static int mxic_ecc_init_ctx(struct nand_device *nand, struct device *dev)
 	mtd_set_ooblayout(mtd, &mxic_ecc_ooblayout_ops);
 
 	/* Enable all status bits */
-	writel(TRANS_CMPLT | SDMA_MAIN | SDMA_SPARE | ECC_ERR |
+	pete_writel("drivers/mtd/nand/ecc-mxic.c:248", TRANS_CMPLT | SDMA_MAIN | SDMA_SPARE | ECC_ERR |
 	       TO_SPARE | TO_MAIN, mxic->regs + INTRPT_STS_EN);
 
 	/* Configure the correction depending on the NAND device topology */
@@ -295,9 +295,9 @@ static int mxic_ecc_init_ctx(struct nand_device *nand, struct device *dev)
 		return -EINVAL;
 
 	/* Configure the engine for the desired strength */
-	writel(ECC_TYP(idx), mxic->regs + DP_CONFIG);
+	pete_writel("drivers/mtd/nand/ecc-mxic.c:298", ECC_TYP(idx), mxic->regs + DP_CONFIG);
 	conf->strength = possible_strength[idx];
-	spare_reg = readl(mxic->regs + SPARE_SIZE);
+	spare_reg = pete_readl("drivers/mtd/nand/ecc-mxic.c:300", mxic->regs + SPARE_SIZE);
 
 	ctx->steps = steps;
 	ctx->data_step_sz = mtd->writesize / steps;
@@ -323,9 +323,9 @@ static int mxic_ecc_init_ctx(struct nand_device *nand, struct device *dev)
 
 	/* Configuration dump and sanity checks */
 	dev_err(dev, "DPE version number: %d\n",
-		readl(mxic->regs + DP_VER) >> DP_VER_OFFSET);
-	dev_err(dev, "Chunk size: %d\n", readl(mxic->regs + CHUNK_SIZE));
-	dev_err(dev, "Main size: %d\n", readl(mxic->regs + MAIN_SIZE));
+		pete_readl("drivers/mtd/nand/ecc-mxic.c:326", mxic->regs + DP_VER) >> DP_VER_OFFSET);
+	dev_err(dev, "Chunk size: %d\n", pete_readl("drivers/mtd/nand/ecc-mxic.c:327", mxic->regs + CHUNK_SIZE));
+	dev_err(dev, "Main size: %d\n", pete_readl("drivers/mtd/nand/ecc-mxic.c:328", mxic->regs + MAIN_SIZE));
 	dev_err(dev, "Spare size: %d\n", SPARE_SZ(spare_reg));
 	dev_err(dev, "Rsv size: %ld\n", RSV_SZ(spare_reg));
 	dev_err(dev, "Parity size: %d\n", ctx->parity_sz);
@@ -370,8 +370,8 @@ static int mxic_ecc_init_ctx_external(struct nand_device *nand)
 		return ret;
 
 	/* Trigger each step manually */
-	writel(1, mxic->regs + CHUNK_CNT);
-	writel(BURST_TYP_INCREASING | ECC_PACKED | MEM2MEM,
+	pete_writel("drivers/mtd/nand/ecc-mxic.c:373", 1, mxic->regs + CHUNK_CNT);
+	pete_writel("drivers/mtd/nand/ecc-mxic.c:374", BURST_TYP_INCREASING | ECC_PACKED | MEM2MEM,
 	       mxic->regs + HC_CONFIG);
 
 	return 0;
@@ -397,13 +397,13 @@ static int mxic_ecc_init_ctx_pipelined(struct nand_device *nand)
 	ctx = nand_to_ecc_ctx(nand);
 
 	/* All steps should be handled in one go directly by the internal DMA */
-	writel(ctx->steps, mxic->regs + CHUNK_CNT);
+	pete_writel("drivers/mtd/nand/ecc-mxic.c:400", ctx->steps, mxic->regs + CHUNK_CNT);
 
 	/*
 	 * Interleaved ECC scheme cannot be used otherwise factory bad block
 	 * markers would be lost. A packed layout is mandatory.
 	 */
-	writel(BURST_TYP_INCREASING | ECC_PACKED | MAPPING,
+	pete_writel("drivers/mtd/nand/ecc-mxic.c:406", BURST_TYP_INCREASING | ECC_PACKED | MAPPING,
 	       mxic->regs + HC_CONFIG);
 
 	return 0;
@@ -434,7 +434,7 @@ static int mxic_ecc_data_xfer_wait_for_completion(struct mxic_ecc_engine *mxic)
 	} else {
 		ret = readl_poll_timeout(mxic->regs + INTRPT_STS, val,
 					 val & TRANS_CMPLT, 10, USEC_PER_SEC);
-		writel(val, mxic->regs + INTRPT_STS);
+		pete_writel("drivers/mtd/nand/ecc-mxic.c:437", val, mxic->regs + INTRPT_STS);
 	}
 
 	if (ret) {
@@ -455,7 +455,7 @@ static int mxic_ecc_process_data(struct mxic_ecc_engine *mxic,
 	mxic_ecc_enable_engine(mxic);
 
 	/* Trigger processing */
-	writel(SDMA_STRT | dir, mxic->regs + SDMA_CTRL);
+	pete_writel("drivers/mtd/nand/ecc-mxic.c:458", SDMA_STRT | dir, mxic->regs + SDMA_CTRL);
 
 	/* Wait for completion */
 	ret = mxic_ecc_data_xfer_wait_for_completion(mxic);
@@ -471,7 +471,7 @@ int mxic_ecc_process_data_pipelined(struct nand_ecc_engine *eng,
 	struct mxic_ecc_engine *mxic = pip_ecc_eng_to_mxic(eng);
 
 	if (dirmap)
-		writel(dirmap, mxic->regs + HC_SLV_ADDR);
+		pete_writel("drivers/mtd/nand/ecc-mxic.c:474", dirmap, mxic->regs + HC_SLV_ADDR);
 
 	return mxic_ecc_process_data(mxic, direction);
 }
@@ -580,9 +580,9 @@ static int mxic_ecc_prepare_io_req_external(struct nand_device *nand,
 	mutex_lock(&mxic->lock);
 
 	for (step = 0; step < ctx->steps; step++) {
-		writel(sg_dma_address(&ctx->sg[0]) + (step * ctx->data_step_sz),
+		pete_writel("drivers/mtd/nand/ecc-mxic.c:583", sg_dma_address(&ctx->sg[0]) + (step * ctx->data_step_sz),
 		       mxic->regs + SDMA_MAIN_ADDR);
-		writel(sg_dma_address(&ctx->sg[1]) + (step * (ctx->oob_step_sz + STAT_BYTES)),
+		pete_writel("drivers/mtd/nand/ecc-mxic.c:585", sg_dma_address(&ctx->sg[1]) + (step * (ctx->oob_step_sz + STAT_BYTES)),
 		       mxic->regs + SDMA_SPARE_ADDR);
 		ret = mxic_ecc_process_data(mxic, ctx->req->type);
 		if (ret)
@@ -637,9 +637,9 @@ static int mxic_ecc_finish_io_req_external(struct nand_device *nand,
 	mutex_lock(&mxic->lock);
 
 	for (step = 0; step < ctx->steps; step++) {
-		writel(sg_dma_address(&ctx->sg[0]) + (step * ctx->data_step_sz),
+		pete_writel("drivers/mtd/nand/ecc-mxic.c:640", sg_dma_address(&ctx->sg[0]) + (step * ctx->data_step_sz),
 		       mxic->regs + SDMA_MAIN_ADDR);
-		writel(sg_dma_address(&ctx->sg[1]) + (step * (ctx->oob_step_sz + STAT_BYTES)),
+		pete_writel("drivers/mtd/nand/ecc-mxic.c:642", sg_dma_address(&ctx->sg[1]) + (step * (ctx->oob_step_sz + STAT_BYTES)),
 		       mxic->regs + SDMA_SPARE_ADDR);
 		ret = mxic_ecc_process_data(mxic, ctx->req->type);
 		if (ret)
@@ -691,8 +691,8 @@ static int mxic_ecc_prepare_io_req_pipelined(struct nand_device *nand,
 
 	mutex_lock(&mxic->lock);
 
-	writel(sg_dma_address(&ctx->sg[0]), mxic->regs + SDMA_MAIN_ADDR);
-	writel(sg_dma_address(&ctx->sg[1]), mxic->regs + SDMA_SPARE_ADDR);
+	pete_writel("drivers/mtd/nand/ecc-mxic.c:694", sg_dma_address(&ctx->sg[0]), mxic->regs + SDMA_MAIN_ADDR);
+	pete_writel("drivers/mtd/nand/ecc-mxic.c:695", sg_dma_address(&ctx->sg[1]), mxic->regs + SDMA_SPARE_ADDR);
 
 	return 0;
 }

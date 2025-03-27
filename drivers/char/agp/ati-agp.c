@@ -70,8 +70,8 @@ static int ati_create_page_map(struct ati_page_map *page_map)
 	page_map->remapped = page_map->real;
 
 	for (i = 0; i < PAGE_SIZE / sizeof(unsigned long); i++) {
-		writel(agp_bridge->scratch_page, page_map->remapped+i);
-		readl(page_map->remapped+i);	/* PCI Posting. */
+		pete_writel("drivers/char/agp/ati-agp.c:73", agp_bridge->scratch_page, page_map->remapped+i);
+		pete_readl("drivers/char/agp/ati-agp.c:74", page_map->remapped+i);	/* PCI Posting. */
 	}
 
 	return 0;
@@ -175,8 +175,8 @@ static int ati_fetch_size(void)
 
 static void ati_tlbflush(struct agp_memory * mem)
 {
-	writel(1, ati_generic_private.registers+ATI_GART_CACHE_CNTRL);
-	readl(ati_generic_private.registers+ATI_GART_CACHE_CNTRL);	/* PCI Posting. */
+	pete_writel("drivers/char/agp/ati-agp.c:178", 1, ati_generic_private.registers+ATI_GART_CACHE_CNTRL);
+	pete_readl("drivers/char/agp/ati-agp.c:179", ati_generic_private.registers+ATI_GART_CACHE_CNTRL);	/* PCI Posting. */
 }
 
 static void ati_cleanup(void)
@@ -223,16 +223,16 @@ static int ati_configure(void)
 						   AGP_APERTURE_BAR);
 	printk(KERN_INFO PFX "IGP320 gart_bus_addr: %x\n", agp_bridge.gart_bus_addr);
 	*/
-	writel(0x60000, ati_generic_private.registers+ATI_GART_FEATURE_ID);
-	readl(ati_generic_private.registers+ATI_GART_FEATURE_ID);	/* PCI Posting.*/
+	pete_writel("drivers/char/agp/ati-agp.c:226", 0x60000, ati_generic_private.registers+ATI_GART_FEATURE_ID);
+	pete_readl("drivers/char/agp/ati-agp.c:227", ati_generic_private.registers+ATI_GART_FEATURE_ID);	/* PCI Posting.*/
 
 	/* SIGNALED_SYSTEM_ERROR @ NB_STATUS */
 	pci_read_config_dword(agp_bridge->dev, PCI_COMMAND, &temp);
 	pci_write_config_dword(agp_bridge->dev, PCI_COMMAND, temp | (1<<14));
 
 	/* Write out the address of the gatt table */
-	writel(agp_bridge->gatt_bus_addr, ati_generic_private.registers+ATI_GART_BASE);
-	readl(ati_generic_private.registers+ATI_GART_BASE);	/* PCI Posting. */
+	pete_writel("drivers/char/agp/ati-agp.c:234", agp_bridge->gatt_bus_addr, ati_generic_private.registers+ATI_GART_BASE);
+	pete_readl("drivers/char/agp/ati-agp.c:235", ati_generic_private.registers+ATI_GART_BASE);	/* PCI Posting. */
 
 	return 0;
 }
@@ -280,7 +280,7 @@ static int ati_insert_memory(struct agp_memory * mem,
 	while (j < (pg_start + mem->page_count)) {
 		addr = (j * PAGE_SIZE) + agp_bridge->gart_bus_addr;
 		cur_gatt = GET_GATT(addr);
-		if (!PGE_EMPTY(agp_bridge,readl(cur_gatt+GET_GATT_OFF(addr))))
+		if (!PGE_EMPTY(agp_bridge,pete_readl("drivers/char/agp/ati-agp.c:283", cur_gatt+GET_GATT_OFF(addr))))
 			return -EBUSY;
 		j++;
 	}
@@ -294,12 +294,12 @@ static int ati_insert_memory(struct agp_memory * mem,
 	for (i = 0, j = pg_start; i < mem->page_count; i++, j++) {
 		addr = (j * PAGE_SIZE) + agp_bridge->gart_bus_addr;
 		cur_gatt = GET_GATT(addr);
-		writel(agp_bridge->driver->mask_memory(agp_bridge,
+		pete_writel("drivers/char/agp/ati-agp.c:297", agp_bridge->driver->mask_memory(agp_bridge,
 						       page_to_phys(mem->pages[i]),
 						       mem->type),
 		       cur_gatt+GET_GATT_OFF(addr));
 	}
-	readl(GET_GATT(agp_bridge->gart_bus_addr)); /* PCI posting */
+	pete_readl("drivers/char/agp/ati-agp.c:302", GET_GATT(agp_bridge->gart_bus_addr)); /* PCI posting */
 	agp_bridge->driver->tlb_flush(mem);
 	return 0;
 }
@@ -322,10 +322,10 @@ static int ati_remove_memory(struct agp_memory * mem, off_t pg_start,
 	for (i = pg_start; i < (mem->page_count + pg_start); i++) {
 		addr = (i * PAGE_SIZE) + agp_bridge->gart_bus_addr;
 		cur_gatt = GET_GATT(addr);
-		writel(agp_bridge->scratch_page, cur_gatt+GET_GATT_OFF(addr));
+		pete_writel("drivers/char/agp/ati-agp.c:325", agp_bridge->scratch_page, cur_gatt+GET_GATT_OFF(addr));
 	}
 
-	readl(GET_GATT(agp_bridge->gart_bus_addr)); /* PCI posting */
+	pete_readl("drivers/char/agp/ati-agp.c:328", GET_GATT(agp_bridge->gart_bus_addr)); /* PCI posting */
 	agp_bridge->driver->tlb_flush(mem);
 	return 0;
 }
@@ -383,15 +383,15 @@ static int ati_create_gatt_table(struct agp_bridge_data *bridge)
 
 	/* Calculate the agp offset */
 	for (i = 0; i < value->num_entries / 1024; i++, addr += 0x00400000) {
-		writel(virt_to_phys(ati_generic_private.gatt_pages[i]->real) | 1,
+		pete_writel("drivers/char/agp/ati-agp.c:386", virt_to_phys(ati_generic_private.gatt_pages[i]->real) | 1,
 			page_dir.remapped+GET_PAGE_DIR_OFF(addr));
-		readl(page_dir.remapped+GET_PAGE_DIR_OFF(addr));	/* PCI Posting. */
+		pete_readl("drivers/char/agp/ati-agp.c:388", page_dir.remapped+GET_PAGE_DIR_OFF(addr));	/* PCI Posting. */
 	}
 
 	for (i = 0; i < value->num_entries; i++) {
 		addr = (i * PAGE_SIZE) + agp_bridge->gart_bus_addr;
 		cur_gatt = GET_GATT(addr);
-		writel(agp_bridge->scratch_page, cur_gatt+GET_GATT_OFF(addr));
+		pete_writel("drivers/char/agp/ati-agp.c:394", agp_bridge->scratch_page, cur_gatt+GET_GATT_OFF(addr));
 	}
 
 	return 0;

@@ -213,7 +213,7 @@ static inline void tavor_eq_req_not(struct mthca_dev *dev, int eqn)
 
 static inline void arbel_eq_req_not(struct mthca_dev *dev, u32 eqn_mask)
 {
-	writel(eqn_mask, dev->eq_regs.arbel.eq_arm);
+	pete_writel("drivers/infiniband/hw/mthca/mthca_eq.c:216", eqn_mask, dev->eq_regs.arbel.eq_arm);
 }
 
 static inline void disarm_cq(struct mthca_dev *dev, int eqn, int cqn)
@@ -395,13 +395,13 @@ static irqreturn_t mthca_tavor_interrupt(int irq, void *dev_ptr)
 	int i;
 
 	if (dev->eq_table.clr_mask)
-		writel(dev->eq_table.clr_mask, dev->eq_table.clr_int);
+		pete_writel("drivers/infiniband/hw/mthca/mthca_eq.c:398", dev->eq_table.clr_mask, dev->eq_table.clr_int);
 
-	ecr = readl(dev->eq_regs.tavor.ecr_base + 4);
+	ecr = pete_readl("drivers/infiniband/hw/mthca/mthca_eq.c:400", dev->eq_regs.tavor.ecr_base + 4);
 	if (!ecr)
 		return IRQ_NONE;
 
-	writel(ecr, dev->eq_regs.tavor.ecr_base +
+	pete_writel("drivers/infiniband/hw/mthca/mthca_eq.c:404", ecr, dev->eq_regs.tavor.ecr_base +
 	       MTHCA_ECR_CLR_BASE - MTHCA_ECR_BASE + 4);
 
 	for (i = 0; i < MTHCA_NUM_EQ; ++i)
@@ -435,7 +435,7 @@ static irqreturn_t mthca_arbel_interrupt(int irq, void *dev_ptr)
 	int i;
 
 	if (dev->eq_table.clr_mask)
-		writel(dev->eq_table.clr_mask, dev->eq_table.clr_int);
+		pete_writel("drivers/infiniband/hw/mthca/mthca_eq.c:438", dev->eq_table.clr_mask, dev->eq_table.clr_int);
 
 	for (i = 0; i < MTHCA_NUM_EQ; ++i)
 		if (mthca_eq_int(dev, &dev->eq_table.eq[i])) {

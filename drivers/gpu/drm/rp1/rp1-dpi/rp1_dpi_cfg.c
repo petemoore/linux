@@ -474,8 +474,8 @@
 #define VIDEO_OUT_CFG_RSTSEQ_DONE_BUSADAPTER_ACCESS "RO"
 // =============================================================================
 
-#define CFG_WRITE(reg, val)  writel((val),  dpi->hw_base[RP1DPI_HW_BLOCK_CFG] + (reg ## _OFFSET))
-#define CFG_READ(reg)	     readl(dpi->hw_base[RP1DPI_HW_BLOCK_CFG] + (reg ## _OFFSET))
+#define CFG_WRITE(reg, val)  pete_writel("drivers/gpu/drm/rp1/rp1-dpi/rp1_dpi_cfg.c:477", (val),  dpi->hw_base[RP1DPI_HW_BLOCK_CFG] + (reg ## _OFFSET))
+#define CFG_READ(reg)	     pete_readl("drivers/gpu/drm/rp1/rp1-dpi/rp1_dpi_cfg.c:478", dpi->hw_base[RP1DPI_HW_BLOCK_CFG] + (reg ## _OFFSET))
 
 void rp1dpi_vidout_setup(struct rp1_dpi *dpi, bool drive_negedge)
 {

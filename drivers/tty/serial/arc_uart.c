@@ -66,8 +66,8 @@
 
 /* Uart bit fiddling helpers: lowest level */
 #define RBASE(port, reg)      (port->membase + reg)
-#define UART_REG_SET(u, r, v) writeb((v), RBASE(u, r))
-#define UART_REG_GET(u, r)    readb(RBASE(u, r))
+#define UART_REG_SET(u, r, v) pete_writeb("drivers/tty/serial/arc_uart.c:69", (v), RBASE(u, r))
+#define UART_REG_GET(u, r)    pete_readb("drivers/tty/serial/arc_uart.c:70", RBASE(u, r))
 
 #define UART_REG_OR(u, r, v)  UART_REG_SET(u, r, UART_REG_GET(u, r) | (v))
 #define UART_REG_CLR(u, r, v) UART_REG_SET(u, r, UART_REG_GET(u, r) & ~(v))

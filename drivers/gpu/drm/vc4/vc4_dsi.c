@@ -639,7 +639,7 @@ dsi_dma_workaround_write(struct vc4_dsi *dsi, u32 offset, u32 val)
 
 	/* DSI0 should be able to write normally. */
 	if (!chan) {
-		writel(val, dsi->regs + offset);
+		pete_writel("drivers/gpu/drm/vc4/vc4_dsi.c:642", val, dsi->regs + offset);
 		return;
 	}
 
@@ -668,7 +668,7 @@ dsi_dma_workaround_write(struct vc4_dsi *dsi, u32 offset, u32 val)
 #define DSI_READ(offset)								\
 	({										\
 		kunit_fail_current_test("Accessing a register in a unit test!\n");	\
-		readl(dsi->regs + (offset));						\
+		pete_readl("drivers/gpu/drm/vc4/vc4_dsi.c:671", dsi->regs + (offset));						\
 	})
 
 #define DSI_WRITE(offset, val) dsi_dma_workaround_write(dsi, offset, val)

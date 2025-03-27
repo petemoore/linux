@@ -155,9 +155,9 @@ void setleds(char *str)
 		reg = IOADDR(LEDS_PHYS) + 0x20 + ((3 - i) << 3);
 
 		if (!str[i])
-			writeb(' ', reg);
+			pete_writeb("arch/mips/sibyte/swarm/setup.c:158", ' ', reg);
 		else
-			writeb(str[i], reg);
+			pete_writeb("arch/mips/sibyte/swarm/setup.c:160", str[i], reg);
 	}
 }
 

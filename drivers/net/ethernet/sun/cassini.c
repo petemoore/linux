@@ -270,7 +270,7 @@ static void cas_disable_irq(struct cas *cp, const int ring)
 {
 	/* Make sure we won't get any more interrupts */
 	if (ring == 0) {
-		writel(0xFFFFFFFF, cp->regs + REG_INTR_MASK);
+		pete_writel("drivers/net/ethernet/sun/cassini.c:273", 0xFFFFFFFF, cp->regs + REG_INTR_MASK);
 		return;
 	}
 
@@ -287,12 +287,12 @@ static void cas_disable_irq(struct cas *cp, const int ring)
 #ifdef USE_PCI_INTD
 		case 3:
 #endif
-			writel(INTRN_MASK_CLEAR_ALL | INTRN_MASK_RX_EN,
+			pete_writel("drivers/net/ethernet/sun/cassini.c:290", INTRN_MASK_CLEAR_ALL | INTRN_MASK_RX_EN,
 			       cp->regs + REG_PLUS_INTRN_MASK(ring));
 			break;
 #endif
 		default:
-			writel(INTRN_MASK_CLEAR_ALL, cp->regs +
+			pete_writel("drivers/net/ethernet/sun/cassini.c:295", INTRN_MASK_CLEAR_ALL, cp->regs +
 			       REG_PLUS_INTRN_MASK(ring));
 			break;
 		}
@@ -310,7 +310,7 @@ static inline void cas_mask_intr(struct cas *cp)
 static void cas_enable_irq(struct cas *cp, const int ring)
 {
 	if (ring == 0) { /* all but TX_DONE */
-		writel(INTR_TX_DONE, cp->regs + REG_INTR_MASK);
+		pete_writel("drivers/net/ethernet/sun/cassini.c:313", INTR_TX_DONE, cp->regs + REG_INTR_MASK);
 		return;
 	}
 
@@ -326,7 +326,7 @@ static void cas_enable_irq(struct cas *cp, const int ring)
 #ifdef USE_PCI_INTD
 		case 3:
 #endif
-			writel(INTRN_MASK_RX_EN, cp->regs +
+			pete_writel("drivers/net/ethernet/sun/cassini.c:329", INTRN_MASK_RX_EN, cp->regs +
 			       REG_PLUS_INTRN_MASK(ring));
 			break;
 #endif
@@ -350,8 +350,8 @@ static inline void cas_entropy_gather(struct cas *cp)
 	if ((cp->cas_flags & CAS_FLAG_ENTROPY_DEV) == 0)
 		return;
 
-	batch_entropy_store(readl(cp->regs + REG_ENTROPY_IV),
-			    readl(cp->regs + REG_ENTROPY_IV),
+	batch_entropy_store(pete_readl("drivers/net/ethernet/sun/cassini.c:353", cp->regs + REG_ENTROPY_IV),
+			    pete_readl("drivers/net/ethernet/sun/cassini.c:354", cp->regs + REG_ENTROPY_IV),
 			    sizeof(uint64_t)*8);
 #endif
 }
@@ -362,13 +362,13 @@ static inline void cas_entropy_reset(struct cas *cp)
 	if ((cp->cas_flags & CAS_FLAG_ENTROPY_DEV) == 0)
 		return;
 
-	writel(BIM_LOCAL_DEV_PAD | BIM_LOCAL_DEV_PROM | BIM_LOCAL_DEV_EXT,
+	pete_writel("drivers/net/ethernet/sun/cassini.c:365", BIM_LOCAL_DEV_PAD | BIM_LOCAL_DEV_PROM | BIM_LOCAL_DEV_EXT,
 	       cp->regs + REG_BIM_LOCAL_DEV_EN);
-	writeb(ENTROPY_RESET_STC_MODE, cp->regs + REG_ENTROPY_RESET);
-	writeb(0x55, cp->regs + REG_ENTROPY_RAND_REG);
+	pete_writeb("drivers/net/ethernet/sun/cassini.c:367", ENTROPY_RESET_STC_MODE, cp->regs + REG_ENTROPY_RESET);
+	pete_writeb("drivers/net/ethernet/sun/cassini.c:368", 0x55, cp->regs + REG_ENTROPY_RAND_REG);
 
 	/* if we read back 0x0, we don't have an entropy device */
-	if (readb(cp->regs + REG_ENTROPY_RAND_REG) == 0)
+	if (pete_readb("drivers/net/ethernet/sun/cassini.c:371", cp->regs + REG_ENTROPY_RAND_REG) == 0)
 		cp->cas_flags &= ~CAS_FLAG_ENTROPY_DEV;
 #endif
 }
@@ -385,12 +385,12 @@ static u16 cas_phy_read(struct cas *cp, int reg)
 	cmd |= CAS_BASE(MIF_FRAME_PHY_ADDR, cp->phy_addr);
 	cmd |= CAS_BASE(MIF_FRAME_REG_ADDR, reg);
 	cmd |= MIF_FRAME_TURN_AROUND_MSB;
-	writel(cmd, cp->regs + REG_MIF_FRAME);
+	pete_writel("drivers/net/ethernet/sun/cassini.c:388", cmd, cp->regs + REG_MIF_FRAME);
 
 	/* poll for completion */
 	while (limit-- > 0) {
 		udelay(10);
-		cmd = readl(cp->regs + REG_MIF_FRAME);
+		cmd = pete_readl("drivers/net/ethernet/sun/cassini.c:393", cp->regs + REG_MIF_FRAME);
 		if (cmd & MIF_FRAME_TURN_AROUND_LSB)
 			return cmd & MIF_FRAME_DATA_MASK;
 	}
@@ -407,12 +407,12 @@ static int cas_phy_write(struct cas *cp, int reg, u16 val)
 	cmd |= CAS_BASE(MIF_FRAME_REG_ADDR, reg);
 	cmd |= MIF_FRAME_TURN_AROUND_MSB;
 	cmd |= val & MIF_FRAME_DATA_MASK;
-	writel(cmd, cp->regs + REG_MIF_FRAME);
+	pete_writel("drivers/net/ethernet/sun/cassini.c:410", cmd, cp->regs + REG_MIF_FRAME);
 
 	/* poll for completion */
 	while (limit-- > 0) {
 		udelay(10);
-		cmd = readl(cp->regs + REG_MIF_FRAME);
+		cmd = pete_readl("drivers/net/ethernet/sun/cassini.c:415", cp->regs + REG_MIF_FRAME);
 		if (cmd & MIF_FRAME_TURN_AROUND_LSB)
 			return 0;
 	}
@@ -648,7 +648,7 @@ static void cas_mif_poll(struct cas *cp, const int enable)
 {
 	u32 cfg;
 
-	cfg  = readl(cp->regs + REG_MIF_CFG);
+	cfg  = pete_readl("drivers/net/ethernet/sun/cassini.c:651", cp->regs + REG_MIF_CFG);
 	cfg &= (MIF_CFG_MDIO_0 | MIF_CFG_MDIO_1);
 
 	if (cp->phy_type & CAS_PHY_MII_MDIO1)
@@ -660,9 +660,9 @@ static void cas_mif_poll(struct cas *cp, const int enable)
 		cfg |= CAS_BASE(MIF_CFG_POLL_REG, MII_BMSR);
 		cfg |= CAS_BASE(MIF_CFG_POLL_PHY, cp->phy_addr);
 	}
-	writel((enable) ? ~(BMSR_LSTATUS | BMSR_ANEGCOMPLETE) : 0xFFFF,
+	pete_writel("drivers/net/ethernet/sun/cassini.c:663", (enable) ? ~(BMSR_LSTATUS | BMSR_ANEGCOMPLETE) : 0xFFFF,
 	       cp->regs + REG_MIF_MASK);
-	writel(cfg, cp->regs + REG_MIF_CFG);
+	pete_writel("drivers/net/ethernet/sun/cassini.c:665", cfg, cp->regs + REG_MIF_CFG);
 }
 
 /* Must be invoked under cp->lock */
@@ -730,7 +730,7 @@ start_aneg:
 	}
 #endif
 	if (cp->phy_type & CAS_PHY_SERDES) {
-		u32 val = readl(cp->regs + REG_PCS_MII_CTRL);
+		u32 val = pete_readl("drivers/net/ethernet/sun/cassini.c:733", cp->regs + REG_PCS_MII_CTRL);
 
 		if (cp->link_cntl & BMCR_ANENABLE) {
 			val |= (PCS_MII_RESTART_AUTONEG | PCS_MII_AUTONEG_EN);
@@ -742,7 +742,7 @@ start_aneg:
 			cp->lstate = link_force_ok;
 		}
 		cp->link_transition = LINK_TRANSITION_LINK_CONFIG;
-		writel(val, cp->regs + REG_PCS_MII_CTRL);
+		pete_writel("drivers/net/ethernet/sun/cassini.c:745", val, cp->regs + REG_PCS_MII_CTRL);
 
 	} else {
 		cas_mif_poll(cp, 0);
@@ -853,7 +853,7 @@ static void cas_phy_init(struct cas *cp)
 
 	/* if we're in MII/GMII mode, set up phy */
 	if (CAS_PHY_MII(cp->phy_type)) {
-		writel(PCS_DATAPATH_MODE_MII,
+		pete_writel("drivers/net/ethernet/sun/cassini.c:856", PCS_DATAPATH_MODE_MII,
 		       cp->regs + REG_PCS_DATAPATH_MODE);
 
 		cas_mif_poll(cp, 0);
@@ -889,7 +889,7 @@ static void cas_phy_init(struct cas *cp)
 			}
 
 		} else if (cp->cas_flags & CAS_FLAG_SATURN) {
-			writel((cp->phy_type & CAS_PHY_MII_MDIO0) ?
+			pete_writel("drivers/net/ethernet/sun/cassini.c:892", (cp->phy_type & CAS_PHY_MII_MDIO0) ?
 			       SATURN_PCFG_FSI : 0x0,
 			       cp->regs + REG_SATURN_PCFG);
 
@@ -931,46 +931,46 @@ static void cas_phy_init(struct cas *cp)
 		u32 val;
 		int limit;
 
-		writel(PCS_DATAPATH_MODE_SERDES,
+		pete_writel("drivers/net/ethernet/sun/cassini.c:934", PCS_DATAPATH_MODE_SERDES,
 		       cp->regs + REG_PCS_DATAPATH_MODE);
 
 		/* enable serdes pins on saturn */
 		if (cp->cas_flags & CAS_FLAG_SATURN)
-			writel(0, cp->regs + REG_SATURN_PCFG);
+			pete_writel("drivers/net/ethernet/sun/cassini.c:939", 0, cp->regs + REG_SATURN_PCFG);
 
 		/* Reset PCS unit. */
-		val = readl(cp->regs + REG_PCS_MII_CTRL);
+		val = pete_readl("drivers/net/ethernet/sun/cassini.c:942", cp->regs + REG_PCS_MII_CTRL);
 		val |= PCS_MII_RESET;
-		writel(val, cp->regs + REG_PCS_MII_CTRL);
+		pete_writel("drivers/net/ethernet/sun/cassini.c:944", val, cp->regs + REG_PCS_MII_CTRL);
 
 		limit = STOP_TRIES;
 		while (--limit > 0) {
 			udelay(10);
-			if ((readl(cp->regs + REG_PCS_MII_CTRL) &
+			if ((pete_readl("drivers/net/ethernet/sun/cassini.c:949", cp->regs + REG_PCS_MII_CTRL) &
 			     PCS_MII_RESET) == 0)
 				break;
 		}
 		if (limit <= 0)
 			netdev_warn(cp->dev, "PCS reset bit would not clear [%08x]\n",
-				    readl(cp->regs + REG_PCS_STATE_MACHINE));
+				    pete_readl("drivers/net/ethernet/sun/cassini.c:955", cp->regs + REG_PCS_STATE_MACHINE));
 
 		/* Make sure PCS is disabled while changing advertisement
 		 * configuration.
 		 */
-		writel(0x0, cp->regs + REG_PCS_CFG);
+		pete_writel("drivers/net/ethernet/sun/cassini.c:960", 0x0, cp->regs + REG_PCS_CFG);
 
 		/* Advertise all capabilities except half-duplex. */
-		val  = readl(cp->regs + REG_PCS_MII_ADVERT);
+		val  = pete_readl("drivers/net/ethernet/sun/cassini.c:963", cp->regs + REG_PCS_MII_ADVERT);
 		val &= ~PCS_MII_ADVERT_HD;
 		val |= (PCS_MII_ADVERT_FD | PCS_MII_ADVERT_SYM_PAUSE |
 			PCS_MII_ADVERT_ASYM_PAUSE);
-		writel(val, cp->regs + REG_PCS_MII_ADVERT);
+		pete_writel("drivers/net/ethernet/sun/cassini.c:967", val, cp->regs + REG_PCS_MII_ADVERT);
 
 		/* enable PCS */
-		writel(PCS_CFG_EN, cp->regs + REG_PCS_CFG);
+		pete_writel("drivers/net/ethernet/sun/cassini.c:970", PCS_CFG_EN, cp->regs + REG_PCS_CFG);
 
 		/* pcs workaround: enable sync detect */
-		writel(PCS_SERDES_CTRL_SYNCD_EN,
+		pete_writel("drivers/net/ethernet/sun/cassini.c:973", PCS_SERDES_CTRL_SYNCD_EN,
 		       cp->regs + REG_PCS_SERDES_CTRL);
 	}
 }
@@ -985,9 +985,9 @@ static int cas_pcs_link_check(struct cas *cp)
 	 * read it twice in such a case to see a transition
 	 * to the link being up.
 	 */
-	stat = readl(cp->regs + REG_PCS_MII_STATUS);
+	stat = pete_readl("drivers/net/ethernet/sun/cassini.c:988", cp->regs + REG_PCS_MII_STATUS);
 	if ((stat & PCS_MII_STATUS_LINK_STATUS) == 0)
-		stat = readl(cp->regs + REG_PCS_MII_STATUS);
+		stat = pete_readl("drivers/net/ethernet/sun/cassini.c:990", cp->regs + REG_PCS_MII_STATUS);
 
 	/* The remote-fault indication is only valid
 	 * when autoneg has completed.
@@ -1000,7 +1000,7 @@ static int cas_pcs_link_check(struct cas *cp)
 	/* work around link detection issue by querying the PCS state
 	 * machine directly.
 	 */
-	state_machine = readl(cp->regs + REG_PCS_STATE_MACHINE);
+	state_machine = pete_readl("drivers/net/ethernet/sun/cassini.c:1003", cp->regs + REG_PCS_STATE_MACHINE);
 	if ((state_machine & PCS_SM_LINK_STATE_MASK) != SM_LINK_STATE_UP) {
 		stat &= ~PCS_MII_STATUS_LINK_STATUS;
 	} else if (state_machine & PCS_SM_WORD_SYNC_STATE_MASK) {
@@ -1055,7 +1055,7 @@ static int cas_pcs_link_check(struct cas *cp)
 		 */
 		if ((cp->cas_flags & CAS_FLAG_REG_PLUS) == 0) {
 			/* should check to see if we're in a forced mode */
-			stat = readl(cp->regs + REG_PCS_SERDES_STATE);
+			stat = pete_readl("drivers/net/ethernet/sun/cassini.c:1058", cp->regs + REG_PCS_SERDES_STATE);
 			if (stat == 0x03)
 				return 1;
 		}
@@ -1083,7 +1083,7 @@ static int cas_pcs_link_check(struct cas *cp)
 static int cas_pcs_interrupt(struct net_device *dev,
 			     struct cas *cp, u32 status)
 {
-	u32 stat = readl(cp->regs + REG_PCS_INTR_STATUS);
+	u32 stat = pete_readl("drivers/net/ethernet/sun/cassini.c:1086", cp->regs + REG_PCS_INTR_STATUS);
 
 	if ((stat & PCS_INTR_STATUS_LINK_CHANGE) == 0)
 		return 0;
@@ -1093,7 +1093,7 @@ static int cas_pcs_interrupt(struct net_device *dev,
 static int cas_txmac_interrupt(struct net_device *dev,
 			       struct cas *cp, u32 status)
 {
-	u32 txmac_stat = readl(cp->regs + REG_MAC_TX_STATUS);
+	u32 txmac_stat = pete_readl("drivers/net/ethernet/sun/cassini.c:1096", cp->regs + REG_MAC_TX_STATUS);
 
 	if (!txmac_stat)
 		return 0;
@@ -1150,11 +1150,11 @@ static void cas_load_firmware(struct cas *cp, cas_hp_inst_t *firmware)
 
 	i = 0;
 	while ((inst = firmware) && inst->note) {
-		writel(i, cp->regs + REG_HP_INSTR_RAM_ADDR);
+		pete_writel("drivers/net/ethernet/sun/cassini.c:1153", i, cp->regs + REG_HP_INSTR_RAM_ADDR);
 
 		val = CAS_BASE(HP_INSTR_RAM_HI_VAL, inst->val);
 		val |= CAS_BASE(HP_INSTR_RAM_HI_MASK, inst->mask);
-		writel(val, cp->regs + REG_HP_INSTR_RAM_DATA_HI);
+		pete_writel("drivers/net/ethernet/sun/cassini.c:1157", val, cp->regs + REG_HP_INSTR_RAM_DATA_HI);
 
 		val = CAS_BASE(HP_INSTR_RAM_MID_OUTARG, inst->outarg >> 10);
 		val |= CAS_BASE(HP_INSTR_RAM_MID_OUTOP, inst->outop);
@@ -1163,13 +1163,13 @@ static void cas_load_firmware(struct cas *cp, cas_hp_inst_t *firmware)
 		val |= CAS_BASE(HP_INSTR_RAM_MID_SNEXT, inst->snext);
 		val |= CAS_BASE(HP_INSTR_RAM_MID_SOFF, inst->soff);
 		val |= CAS_BASE(HP_INSTR_RAM_MID_OP, inst->op);
-		writel(val, cp->regs + REG_HP_INSTR_RAM_DATA_MID);
+		pete_writel("drivers/net/ethernet/sun/cassini.c:1166", val, cp->regs + REG_HP_INSTR_RAM_DATA_MID);
 
 		val = CAS_BASE(HP_INSTR_RAM_LOW_OUTMASK, inst->outmask);
 		val |= CAS_BASE(HP_INSTR_RAM_LOW_OUTSHIFT, inst->outshift);
 		val |= CAS_BASE(HP_INSTR_RAM_LOW_OUTEN, inst->outenab);
 		val |= CAS_BASE(HP_INSTR_RAM_LOW_OUTARG, inst->outarg);
-		writel(val, cp->regs + REG_HP_INSTR_RAM_DATA_LOW);
+		pete_writel("drivers/net/ethernet/sun/cassini.c:1172", val, cp->regs + REG_HP_INSTR_RAM_DATA_LOW);
 		++firmware;
 		++i;
 	}
@@ -1188,13 +1188,13 @@ static void cas_init_rx_dma(struct cas *cp)
 	if ((N_RX_DESC_RINGS > 1) &&
 	    (cp->cas_flags & CAS_FLAG_REG_PLUS))  /* do desc 2 */
 		val |= CAS_BASE(RX_CFG_DESC_RING1, RX_DESC_RINGN_INDEX(1));
-	writel(val, cp->regs + REG_RX_CFG);
+	pete_writel("drivers/net/ethernet/sun/cassini.c:1191", val, cp->regs + REG_RX_CFG);
 
 	val = (unsigned long) cp->init_rxds[0] -
 		(unsigned long) cp->init_block;
-	writel((desc_dma + val) >> 32, cp->regs + REG_RX_DB_HI);
-	writel((desc_dma + val) & 0xffffffff, cp->regs + REG_RX_DB_LOW);
-	writel(RX_DESC_RINGN_SIZE(0) - 4, cp->regs + REG_RX_KICK);
+	pete_writel("drivers/net/ethernet/sun/cassini.c:1195", (desc_dma + val) >> 32, cp->regs + REG_RX_DB_HI);
+	pete_writel("drivers/net/ethernet/sun/cassini.c:1196", (desc_dma + val) & 0xffffffff, cp->regs + REG_RX_DB_LOW);
+	pete_writel("drivers/net/ethernet/sun/cassini.c:1197", RX_DESC_RINGN_SIZE(0) - 4, cp->regs + REG_RX_KICK);
 
 	if (cp->cas_flags & CAS_FLAG_REG_PLUS) {
 		/* rx desc 2 is for IPSEC packets. however,
@@ -1202,27 +1202,27 @@ static void cas_init_rx_dma(struct cas *cp)
 		 */
 		val = (unsigned long) cp->init_rxds[1] -
 			(unsigned long) cp->init_block;
-		writel((desc_dma + val) >> 32, cp->regs + REG_PLUS_RX_DB1_HI);
-		writel((desc_dma + val) & 0xffffffff, cp->regs +
+		pete_writel("drivers/net/ethernet/sun/cassini.c:1205", (desc_dma + val) >> 32, cp->regs + REG_PLUS_RX_DB1_HI);
+		pete_writel("drivers/net/ethernet/sun/cassini.c:1206", (desc_dma + val) & 0xffffffff, cp->regs +
 		       REG_PLUS_RX_DB1_LOW);
-		writel(RX_DESC_RINGN_SIZE(1) - 4, cp->regs +
+		pete_writel("drivers/net/ethernet/sun/cassini.c:1208", RX_DESC_RINGN_SIZE(1) - 4, cp->regs +
 		       REG_PLUS_RX_KICK1);
 	}
 
 	/* rx completion registers */
 	val = (unsigned long) cp->init_rxcs[0] -
 		(unsigned long) cp->init_block;
-	writel((desc_dma + val) >> 32, cp->regs + REG_RX_CB_HI);
-	writel((desc_dma + val) & 0xffffffff, cp->regs + REG_RX_CB_LOW);
+	pete_writel("drivers/net/ethernet/sun/cassini.c:1215", (desc_dma + val) >> 32, cp->regs + REG_RX_CB_HI);
+	pete_writel("drivers/net/ethernet/sun/cassini.c:1216", (desc_dma + val) & 0xffffffff, cp->regs + REG_RX_CB_LOW);
 
 	if (cp->cas_flags & CAS_FLAG_REG_PLUS) {
 		/* rx comp 2-4 */
 		for (i = 1; i < MAX_RX_COMP_RINGS; i++) {
 			val = (unsigned long) cp->init_rxcs[i] -
 				(unsigned long) cp->init_block;
-			writel((desc_dma + val) >> 32, cp->regs +
+			pete_writel("drivers/net/ethernet/sun/cassini.c:1223", (desc_dma + val) >> 32, cp->regs +
 			       REG_PLUS_RX_CBN_HI(i));
-			writel((desc_dma + val) & 0xffffffff, cp->regs +
+			pete_writel("drivers/net/ethernet/sun/cassini.c:1225", (desc_dma + val) & 0xffffffff, cp->regs +
 			       REG_PLUS_RX_CBN_LOW(i));
 		}
 	}
@@ -1231,35 +1231,35 @@ static void cas_init_rx_dma(struct cas *cp)
 	 * on reset because complete == kick.
 	 * selective clear set up to prevent interrupts on resets
 	 */
-	readl(cp->regs + REG_INTR_STATUS_ALIAS);
-	writel(INTR_RX_DONE | INTR_RX_BUF_UNAVAIL, cp->regs + REG_ALIAS_CLEAR);
+	pete_readl("drivers/net/ethernet/sun/cassini.c:1234", cp->regs + REG_INTR_STATUS_ALIAS);
+	pete_writel("drivers/net/ethernet/sun/cassini.c:1235", INTR_RX_DONE | INTR_RX_BUF_UNAVAIL, cp->regs + REG_ALIAS_CLEAR);
 
 	/* set up pause thresholds */
 	val  = CAS_BASE(RX_PAUSE_THRESH_OFF,
 			cp->rx_pause_off / RX_PAUSE_THRESH_QUANTUM);
 	val |= CAS_BASE(RX_PAUSE_THRESH_ON,
 			cp->rx_pause_on / RX_PAUSE_THRESH_QUANTUM);
-	writel(val, cp->regs + REG_RX_PAUSE_THRESH);
+	pete_writel("drivers/net/ethernet/sun/cassini.c:1242", val, cp->regs + REG_RX_PAUSE_THRESH);
 
 	/* zero out dma reassembly buffers */
 	for (i = 0; i < 64; i++) {
-		writel(i, cp->regs + REG_RX_TABLE_ADDR);
-		writel(0x0, cp->regs + REG_RX_TABLE_DATA_LOW);
-		writel(0x0, cp->regs + REG_RX_TABLE_DATA_MID);
-		writel(0x0, cp->regs + REG_RX_TABLE_DATA_HI);
+		pete_writel("drivers/net/ethernet/sun/cassini.c:1246", i, cp->regs + REG_RX_TABLE_ADDR);
+		pete_writel("drivers/net/ethernet/sun/cassini.c:1247", 0x0, cp->regs + REG_RX_TABLE_DATA_LOW);
+		pete_writel("drivers/net/ethernet/sun/cassini.c:1248", 0x0, cp->regs + REG_RX_TABLE_DATA_MID);
+		pete_writel("drivers/net/ethernet/sun/cassini.c:1249", 0x0, cp->regs + REG_RX_TABLE_DATA_HI);
 	}
 
 	/* make sure address register is 0 for normal operation */
-	writel(0x0, cp->regs + REG_RX_CTRL_FIFO_ADDR);
-	writel(0x0, cp->regs + REG_RX_IPP_FIFO_ADDR);
+	pete_writel("drivers/net/ethernet/sun/cassini.c:1253", 0x0, cp->regs + REG_RX_CTRL_FIFO_ADDR);
+	pete_writel("drivers/net/ethernet/sun/cassini.c:1254", 0x0, cp->regs + REG_RX_IPP_FIFO_ADDR);
 
 	/* interrupt mitigation */
 #ifdef USE_RX_BLANK
 	val = CAS_BASE(RX_BLANK_INTR_TIME, RX_BLANK_INTR_TIME_VAL);
 	val |= CAS_BASE(RX_BLANK_INTR_PKT, RX_BLANK_INTR_PKT_VAL);
-	writel(val, cp->regs + REG_RX_BLANK);
+	pete_writel("drivers/net/ethernet/sun/cassini.c:1260", val, cp->regs + REG_RX_BLANK);
 #else
-	writel(0x0, cp->regs + REG_RX_BLANK);
+	pete_writel("drivers/net/ethernet/sun/cassini.c:1262", 0x0, cp->regs + REG_RX_BLANK);
 #endif
 
 	/* interrupt generation as a function of low water marks for
@@ -1269,16 +1269,16 @@ static void cas_init_rx_dma(struct cas *cp)
 	 */
 	/* val = CAS_BASE(RX_AE_THRESH_FREE, RX_AE_FREEN_VAL(0)); */
 	val = CAS_BASE(RX_AE_THRESH_COMP, RX_AE_COMP_VAL);
-	writel(val, cp->regs + REG_RX_AE_THRESH);
+	pete_writel("drivers/net/ethernet/sun/cassini.c:1272", val, cp->regs + REG_RX_AE_THRESH);
 	if (cp->cas_flags & CAS_FLAG_REG_PLUS) {
 		val = CAS_BASE(RX_AE1_THRESH_FREE, RX_AE_FREEN_VAL(1));
-		writel(val, cp->regs + REG_PLUS_RX_AE1_THRESH);
+		pete_writel("drivers/net/ethernet/sun/cassini.c:1275", val, cp->regs + REG_PLUS_RX_AE1_THRESH);
 	}
 
 	/* Random early detect registers. useful for congestion avoidance.
 	 * this should be tunable.
 	 */
-	writel(0x0, cp->regs + REG_RX_RED);
+	pete_writel("drivers/net/ethernet/sun/cassini.c:1281", 0x0, cp->regs + REG_RX_RED);
 
 	/* receive page sizes. default == 2K (0x800) */
 	val = 0;
@@ -1308,7 +1308,7 @@ static void cas_init_rx_dma(struct cas *cp)
 	val |= CAS_BASE(RX_PAGE_SIZE_MTU_STRIDE, i);
 	val |= CAS_BASE(RX_PAGE_SIZE_MTU_COUNT, cp->page_size >> (i + 10));
 	val |= CAS_BASE(RX_PAGE_SIZE_MTU_OFF, 0x1);
-	writel(val, cp->regs + REG_RX_PAGE_SIZE);
+	pete_writel("drivers/net/ethernet/sun/cassini.c:1311", val, cp->regs + REG_RX_PAGE_SIZE);
 
 	/* enable the header parser if desired */
 	if (&CAS_HP_FIRMWARE[0] == &cas_prog_null[0])
@@ -1317,7 +1317,7 @@ static void cas_init_rx_dma(struct cas *cp)
 	val = CAS_BASE(HP_CFG_NUM_CPU, CAS_NCPUS > 63 ? 0 : CAS_NCPUS);
 	val |= HP_CFG_PARSE_EN | HP_CFG_SYN_INC_MASK;
 	val |= CAS_BASE(HP_CFG_TCP_THRESH, HP_TCP_THRESH_VAL);
-	writel(val, cp->regs + REG_HP_CFG);
+	pete_writel("drivers/net/ethernet/sun/cassini.c:1320", val, cp->regs + REG_HP_CFG);
 }
 
 static inline void cas_rxc_init(struct cas_rx_comp *rxc)
@@ -1423,9 +1423,9 @@ static int cas_rxmac_reset(struct cas *cp)
 	u32 val;
 
 	/* First, reset MAC RX. */
-	writel(cp->mac_rx_cfg & ~MAC_RX_CFG_EN, cp->regs + REG_MAC_RX_CFG);
+	pete_writel("drivers/net/ethernet/sun/cassini.c:1426", cp->mac_rx_cfg & ~MAC_RX_CFG_EN, cp->regs + REG_MAC_RX_CFG);
 	for (limit = 0; limit < STOP_TRIES; limit++) {
-		if (!(readl(cp->regs + REG_MAC_RX_CFG) & MAC_RX_CFG_EN))
+		if (!(pete_readl("drivers/net/ethernet/sun/cassini.c:1428", cp->regs + REG_MAC_RX_CFG) & MAC_RX_CFG_EN))
 			break;
 		udelay(10);
 	}
@@ -1435,9 +1435,9 @@ static int cas_rxmac_reset(struct cas *cp)
 	}
 
 	/* Second, disable RX DMA. */
-	writel(0, cp->regs + REG_RX_CFG);
+	pete_writel("drivers/net/ethernet/sun/cassini.c:1438", 0, cp->regs + REG_RX_CFG);
 	for (limit = 0; limit < STOP_TRIES; limit++) {
-		if (!(readl(cp->regs + REG_RX_CFG) & RX_CFG_DMA_EN))
+		if (!(pete_readl("drivers/net/ethernet/sun/cassini.c:1440", cp->regs + REG_RX_CFG) & RX_CFG_DMA_EN))
 			break;
 		udelay(10);
 	}
@@ -1449,9 +1449,9 @@ static int cas_rxmac_reset(struct cas *cp)
 	mdelay(5);
 
 	/* Execute RX reset command. */
-	writel(SW_RESET_RX, cp->regs + REG_SW_RESET);
+	pete_writel("drivers/net/ethernet/sun/cassini.c:1452", SW_RESET_RX, cp->regs + REG_SW_RESET);
 	for (limit = 0; limit < STOP_TRIES; limit++) {
-		if (!(readl(cp->regs + REG_SW_RESET) & SW_RESET_RX))
+		if (!(pete_readl("drivers/net/ethernet/sun/cassini.c:1454", cp->regs + REG_SW_RESET) & SW_RESET_RX))
 			break;
 		udelay(10);
 	}
@@ -1468,11 +1468,11 @@ static int cas_rxmac_reset(struct cas *cp)
 	cas_init_rx_dma(cp);
 
 	/* re-enable */
-	val = readl(cp->regs + REG_RX_CFG);
-	writel(val | RX_CFG_DMA_EN, cp->regs + REG_RX_CFG);
-	writel(MAC_RX_FRAME_RECV, cp->regs + REG_MAC_RX_MASK);
-	val = readl(cp->regs + REG_MAC_RX_CFG);
-	writel(val | MAC_RX_CFG_EN, cp->regs + REG_MAC_RX_CFG);
+	val = pete_readl("drivers/net/ethernet/sun/cassini.c:1471", cp->regs + REG_RX_CFG);
+	pete_writel("drivers/net/ethernet/sun/cassini.c:1472", val | RX_CFG_DMA_EN, cp->regs + REG_RX_CFG);
+	pete_writel("drivers/net/ethernet/sun/cassini.c:1473", MAC_RX_FRAME_RECV, cp->regs + REG_MAC_RX_MASK);
+	val = pete_readl("drivers/net/ethernet/sun/cassini.c:1474", cp->regs + REG_MAC_RX_CFG);
+	pete_writel("drivers/net/ethernet/sun/cassini.c:1475", val | MAC_RX_CFG_EN, cp->regs + REG_MAC_RX_CFG);
 	return 0;
 }
 #endif
@@ -1480,7 +1480,7 @@ static int cas_rxmac_reset(struct cas *cp)
 static int cas_rxmac_interrupt(struct net_device *dev, struct cas *cp,
 			       u32 status)
 {
-	u32 stat = readl(cp->regs + REG_MAC_RX_STATUS);
+	u32 stat = pete_readl("drivers/net/ethernet/sun/cassini.c:1483", cp->regs + REG_MAC_RX_STATUS);
 
 	if (!stat)
 		return 0;
@@ -1513,7 +1513,7 @@ static int cas_rxmac_interrupt(struct net_device *dev, struct cas *cp,
 static int cas_mac_interrupt(struct net_device *dev, struct cas *cp,
 			     u32 status)
 {
-	u32 stat = readl(cp->regs + REG_MAC_CTRL_STATUS);
+	u32 stat = pete_readl("drivers/net/ethernet/sun/cassini.c:1516", cp->regs + REG_MAC_CTRL_STATUS);
 
 	if (!stat)
 		return 0;
@@ -1653,7 +1653,7 @@ static int cas_mii_link_check(struct cas *cp, const u16 bmsr)
 static int cas_mif_interrupt(struct net_device *dev, struct cas *cp,
 			     u32 status)
 {
-	u32 stat = readl(cp->regs + REG_MIF_STATUS);
+	u32 stat = pete_readl("drivers/net/ethernet/sun/cassini.c:1656", cp->regs + REG_MIF_STATUS);
 	u16 bmsr;
 
 	/* check for a link change */
@@ -1667,13 +1667,13 @@ static int cas_mif_interrupt(struct net_device *dev, struct cas *cp,
 static int cas_pci_interrupt(struct net_device *dev, struct cas *cp,
 			     u32 status)
 {
-	u32 stat = readl(cp->regs + REG_PCI_ERR_STATUS);
+	u32 stat = pete_readl("drivers/net/ethernet/sun/cassini.c:1670", cp->regs + REG_PCI_ERR_STATUS);
 
 	if (!stat)
 		return 0;
 
 	netdev_err(dev, "PCI error [%04x:%04x]",
-		   stat, readl(cp->regs + REG_BIM_DIAG));
+		   stat, pete_readl("drivers/net/ethernet/sun/cassini.c:1676", cp->regs + REG_BIM_DIAG));
 
 	/* cassini+ has this reserved */
 	if ((stat & PCI_ERR_BADACK) &&
@@ -1897,7 +1897,7 @@ static void cas_tx(struct net_device *dev, struct cas *cp,
 			CAS_VAL(TX_COMPWB_LSB, compwb);
 		compwb = TX_COMPWB_NEXT(compwb);
 #else
-		limit = readl(cp->regs + REG_TX_COMPN(ring));
+		limit = pete_readl("drivers/net/ethernet/sun/cassini.c:1900", cp->regs + REG_TX_COMPN(ring));
 #endif
 		if (cp->tx_old[ring] != limit)
 			cas_tx_ringN(cp, ring, limit);
@@ -2153,10 +2153,10 @@ static void cas_post_page(struct cas *cp, const int ring, const int index)
 		return;
 
 	if (ring == 0)
-		writel(entry, cp->regs + REG_RX_KICK);
+		pete_writel("drivers/net/ethernet/sun/cassini.c:2156", entry, cp->regs + REG_RX_KICK);
 	else if ((N_RX_DESC_RINGS > 1) &&
 		 (cp->cas_flags & CAS_FLAG_REG_PLUS))
-		writel(entry, cp->regs + REG_PLUS_RX_KICK1);
+		pete_writel("drivers/net/ethernet/sun/cassini.c:2159", entry, cp->regs + REG_PLUS_RX_KICK1);
 }
 
 
@@ -2214,10 +2214,10 @@ static int cas_post_rxds_ringN(struct cas *cp, int ring, int num)
 		return 0;
 
 	if (ring == 0)
-		writel(cluster, cp->regs + REG_RX_KICK);
+		pete_writel("drivers/net/ethernet/sun/cassini.c:2217", cluster, cp->regs + REG_RX_KICK);
 	else if ((N_RX_DESC_RINGS > 1) &&
 		 (cp->cas_flags & CAS_FLAG_REG_PLUS))
-		writel(cluster, cp->regs + REG_PLUS_RX_KICK1);
+		pete_writel("drivers/net/ethernet/sun/cassini.c:2220", cluster, cp->regs + REG_PLUS_RX_KICK1);
 	return 0;
 }
 
@@ -2243,7 +2243,7 @@ static int cas_rx_ringN(struct cas *cp, int ring, int budget)
 	netif_printk(cp, intr, KERN_DEBUG, cp->dev,
 		     "rx[%d] interrupt, done: %d/%d\n",
 		     ring,
-		     readl(cp->regs + REG_RX_COMP_HEAD), cp->rx_new[ring]);
+		     pete_readl("drivers/net/ethernet/sun/cassini.c:2246", cp->regs + REG_RX_COMP_HEAD), cp->rx_new[ring]);
 
 	entry = cp->rx_new[ring];
 	drops = 0;
@@ -2360,7 +2360,7 @@ static void cas_post_rxcs_ringN(struct net_device *dev,
 	entry = cp->rx_new[ring];
 	netif_printk(cp, intr, KERN_DEBUG, dev,
 		     "rxc[%d] interrupt, done: %d/%d\n",
-		     ring, readl(cp->regs + REG_RX_COMP_HEAD), entry);
+		     ring, pete_readl("drivers/net/ethernet/sun/cassini.c:2363", cp->regs + REG_RX_COMP_HEAD), entry);
 
 	/* zero and re-mark descriptors */
 	while (last != entry) {
@@ -2370,9 +2370,9 @@ static void cas_post_rxcs_ringN(struct net_device *dev,
 	cp->rx_cur[ring] = last;
 
 	if (ring == 0)
-		writel(last, cp->regs + REG_RX_COMP_TAIL);
+		pete_writel("drivers/net/ethernet/sun/cassini.c:2373", last, cp->regs + REG_RX_COMP_TAIL);
 	else if (cp->cas_flags & CAS_FLAG_REG_PLUS)
-		writel(last, cp->regs + REG_PLUS_RX_COMPN_TAIL(ring));
+		pete_writel("drivers/net/ethernet/sun/cassini.c:2375", last, cp->regs + REG_PLUS_RX_COMPN_TAIL(ring));
 }
 
 
@@ -2395,7 +2395,7 @@ static irqreturn_t cas_interruptN(int irq, void *dev_id)
 	struct cas *cp = netdev_priv(dev);
 	unsigned long flags;
 	int ring = (irq == cp->pci_irq_INTC) ? 2 : 3;
-	u32 status = readl(cp->regs + REG_PLUS_INTRN_STATUS(ring));
+	u32 status = pete_readl("drivers/net/ethernet/sun/cassini.c:2398", cp->regs + REG_PLUS_INTRN_STATUS(ring));
 
 	/* check for shared irq */
 	if (status == 0)
@@ -2446,7 +2446,7 @@ static irqreturn_t cas_interrupt1(int irq, void *dev_id)
 	struct net_device *dev = dev_id;
 	struct cas *cp = netdev_priv(dev);
 	unsigned long flags;
-	u32 status = readl(cp->regs + REG_PLUS_INTRN_STATUS(1));
+	u32 status = pete_readl("drivers/net/ethernet/sun/cassini.c:2449", cp->regs + REG_PLUS_INTRN_STATUS(1));
 
 	/* check for shared interrupt */
 	if (status == 0)
@@ -2498,7 +2498,7 @@ static irqreturn_t cas_interrupt(int irq, void *dev_id)
 	struct net_device *dev = dev_id;
 	struct cas *cp = netdev_priv(dev);
 	unsigned long flags;
-	u32 status = readl(cp->regs + REG_INTR_STATUS);
+	u32 status = pete_readl("drivers/net/ethernet/sun/cassini.c:2501", cp->regs + REG_INTR_STATUS);
 
 	if (status == 0)
 		return IRQ_NONE;
@@ -2532,7 +2532,7 @@ static int cas_poll(struct napi_struct *napi, int budget)
 	struct cas *cp = container_of(napi, struct cas, napi);
 	struct net_device *dev = cp->dev;
 	int i, enable_intr, credits;
-	u32 status = readl(cp->regs + REG_INTR_STATUS);
+	u32 status = pete_readl("drivers/net/ethernet/sun/cassini.c:2535", cp->regs + REG_INTR_STATUS);
 	unsigned long flags;
 
 	spin_lock_irqsave(&cp->lock, flags);
@@ -2567,7 +2567,7 @@ rx_comp:
 
 #ifdef USE_PCI_INTB
 	if (N_RX_COMP_RINGS > 1) {
-		status = readl(cp->regs + REG_PLUS_INTRN_STATUS(1));
+		status = pete_readl("drivers/net/ethernet/sun/cassini.c:2570", cp->regs + REG_PLUS_INTRN_STATUS(1));
 		if (status)
 			cas_handle_irq1(dev, cp, status);
 	}
@@ -2575,7 +2575,7 @@ rx_comp:
 
 #ifdef USE_PCI_INTC
 	if (N_RX_COMP_RINGS > 2) {
-		status = readl(cp->regs + REG_PLUS_INTRN_STATUS(2));
+		status = pete_readl("drivers/net/ethernet/sun/cassini.c:2578", cp->regs + REG_PLUS_INTRN_STATUS(2));
 		if (status)
 			cas_handle_irqN(dev, cp, status, 2);
 	}
@@ -2583,7 +2583,7 @@ rx_comp:
 
 #ifdef USE_PCI_INTD
 	if (N_RX_COMP_RINGS > 3) {
-		status = readl(cp->regs + REG_PLUS_INTRN_STATUS(3));
+		status = pete_readl("drivers/net/ethernet/sun/cassini.c:2586", cp->regs + REG_PLUS_INTRN_STATUS(3));
 		if (status)
 			cas_handle_irqN(dev, cp, status, 3);
 	}
@@ -2635,31 +2635,31 @@ static void cas_tx_timeout(struct net_device *dev, unsigned int txqueue)
 	}
 
 	netdev_err(dev, "MIF_STATE[%08x]\n",
-		   readl(cp->regs + REG_MIF_STATE_MACHINE));
+		   pete_readl("drivers/net/ethernet/sun/cassini.c:2638", cp->regs + REG_MIF_STATE_MACHINE));
 
 	netdev_err(dev, "MAC_STATE[%08x]\n",
-		   readl(cp->regs + REG_MAC_STATE_MACHINE));
+		   pete_readl("drivers/net/ethernet/sun/cassini.c:2641", cp->regs + REG_MAC_STATE_MACHINE));
 
 	netdev_err(dev, "TX_STATE[%08x:%08x:%08x] FIFO[%08x:%08x:%08x] SM1[%08x] SM2[%08x]\n",
-		   readl(cp->regs + REG_TX_CFG),
-		   readl(cp->regs + REG_MAC_TX_STATUS),
-		   readl(cp->regs + REG_MAC_TX_CFG),
-		   readl(cp->regs + REG_TX_FIFO_PKT_CNT),
-		   readl(cp->regs + REG_TX_FIFO_WRITE_PTR),
-		   readl(cp->regs + REG_TX_FIFO_READ_PTR),
-		   readl(cp->regs + REG_TX_SM_1),
-		   readl(cp->regs + REG_TX_SM_2));
+		   pete_readl("drivers/net/ethernet/sun/cassini.c:2644", cp->regs + REG_TX_CFG),
+		   pete_readl("drivers/net/ethernet/sun/cassini.c:2645", cp->regs + REG_MAC_TX_STATUS),
+		   pete_readl("drivers/net/ethernet/sun/cassini.c:2646", cp->regs + REG_MAC_TX_CFG),
+		   pete_readl("drivers/net/ethernet/sun/cassini.c:2647", cp->regs + REG_TX_FIFO_PKT_CNT),
+		   pete_readl("drivers/net/ethernet/sun/cassini.c:2648", cp->regs + REG_TX_FIFO_WRITE_PTR),
+		   pete_readl("drivers/net/ethernet/sun/cassini.c:2649", cp->regs + REG_TX_FIFO_READ_PTR),
+		   pete_readl("drivers/net/ethernet/sun/cassini.c:2650", cp->regs + REG_TX_SM_1),
+		   pete_readl("drivers/net/ethernet/sun/cassini.c:2651", cp->regs + REG_TX_SM_2));
 
 	netdev_err(dev, "RX_STATE[%08x:%08x:%08x]\n",
-		   readl(cp->regs + REG_RX_CFG),
-		   readl(cp->regs + REG_MAC_RX_STATUS),
-		   readl(cp->regs + REG_MAC_RX_CFG));
+		   pete_readl("drivers/net/ethernet/sun/cassini.c:2654", cp->regs + REG_RX_CFG),
+		   pete_readl("drivers/net/ethernet/sun/cassini.c:2655", cp->regs + REG_MAC_RX_STATUS),
+		   pete_readl("drivers/net/ethernet/sun/cassini.c:2656", cp->regs + REG_MAC_RX_CFG));
 
 	netdev_err(dev, "HP_STATE[%08x:%08x:%08x:%08x]\n",
-		   readl(cp->regs + REG_HP_STATE_MACHINE),
-		   readl(cp->regs + REG_HP_STATUS0),
-		   readl(cp->regs + REG_HP_STATUS1),
-		   readl(cp->regs + REG_HP_STATUS2));
+		   pete_readl("drivers/net/ethernet/sun/cassini.c:2659", cp->regs + REG_HP_STATE_MACHINE),
+		   pete_readl("drivers/net/ethernet/sun/cassini.c:2660", cp->regs + REG_HP_STATUS0),
+		   pete_readl("drivers/net/ethernet/sun/cassini.c:2661", cp->regs + REG_HP_STATUS1),
+		   pete_readl("drivers/net/ethernet/sun/cassini.c:2662", cp->regs + REG_HP_STATUS2));
 
 #if 1
 	atomic_inc(&cp->reset_task_pending);
@@ -2799,7 +2799,7 @@ static inline int cas_xmit_tx_ringN(struct cas *cp, int ring,
 	netif_printk(cp, tx_queued, KERN_DEBUG, dev,
 		     "tx[%d] queued, slot %d, skblen %d, avail %d\n",
 		     ring, entry, skb->len, TX_BUFFS_AVAIL(cp, ring));
-	writel(entry, cp->regs + REG_TX_KICKN(ring));
+	pete_writel("drivers/net/ethernet/sun/cassini.c:2802", entry, cp->regs + REG_TX_KICKN(ring));
 	spin_unlock_irqrestore(&cp->tx_lock[ring], flags);
 	return 0;
 }
@@ -2834,8 +2834,8 @@ static void cas_init_tx_dma(struct cas *cp)
 	/* set up tx completion writeback registers. must be 8-byte aligned */
 #ifdef USE_TX_COMPWB
 	off = offsetof(struct cas_init_block, tx_compwb);
-	writel((desc_dma + off) >> 32, cp->regs + REG_TX_COMPWB_DB_HI);
-	writel((desc_dma + off) & 0xffffffff, cp->regs + REG_TX_COMPWB_DB_LOW);
+	pete_writel("drivers/net/ethernet/sun/cassini.c:2837", (desc_dma + off) >> 32, cp->regs + REG_TX_COMPWB_DB_HI);
+	pete_writel("drivers/net/ethernet/sun/cassini.c:2838", (desc_dma + off) & 0xffffffff, cp->regs + REG_TX_COMPWB_DB_LOW);
 #endif
 
 	/* enable completion writebacks, enable paced mode,
@@ -2852,28 +2852,28 @@ static void cas_init_tx_dma(struct cas *cp)
 			(unsigned long) cp->init_block;
 
 		val |= CAS_TX_RINGN_BASE(i);
-		writel((desc_dma + off) >> 32, cp->regs + REG_TX_DBN_HI(i));
-		writel((desc_dma + off) & 0xffffffff, cp->regs +
+		pete_writel("drivers/net/ethernet/sun/cassini.c:2855", (desc_dma + off) >> 32, cp->regs + REG_TX_DBN_HI(i));
+		pete_writel("drivers/net/ethernet/sun/cassini.c:2856", (desc_dma + off) & 0xffffffff, cp->regs +
 		       REG_TX_DBN_LOW(i));
 		/* don't zero out the kick register here as the system
 		 * will wedge
 		 */
 	}
-	writel(val, cp->regs + REG_TX_CFG);
+	pete_writel("drivers/net/ethernet/sun/cassini.c:2862", val, cp->regs + REG_TX_CFG);
 
 	/* program max burst sizes. these numbers should be different
 	 * if doing QoS.
 	 */
 #ifdef USE_QOS
-	writel(0x800, cp->regs + REG_TX_MAXBURST_0);
-	writel(0x1600, cp->regs + REG_TX_MAXBURST_1);
-	writel(0x2400, cp->regs + REG_TX_MAXBURST_2);
-	writel(0x4800, cp->regs + REG_TX_MAXBURST_3);
+	pete_writel("drivers/net/ethernet/sun/cassini.c:2868", 0x800, cp->regs + REG_TX_MAXBURST_0);
+	pete_writel("drivers/net/ethernet/sun/cassini.c:2869", 0x1600, cp->regs + REG_TX_MAXBURST_1);
+	pete_writel("drivers/net/ethernet/sun/cassini.c:2870", 0x2400, cp->regs + REG_TX_MAXBURST_2);
+	pete_writel("drivers/net/ethernet/sun/cassini.c:2871", 0x4800, cp->regs + REG_TX_MAXBURST_3);
 #else
-	writel(0x800, cp->regs + REG_TX_MAXBURST_0);
-	writel(0x800, cp->regs + REG_TX_MAXBURST_1);
-	writel(0x800, cp->regs + REG_TX_MAXBURST_2);
-	writel(0x800, cp->regs + REG_TX_MAXBURST_3);
+	pete_writel("drivers/net/ethernet/sun/cassini.c:2873", 0x800, cp->regs + REG_TX_MAXBURST_0);
+	pete_writel("drivers/net/ethernet/sun/cassini.c:2874", 0x800, cp->regs + REG_TX_MAXBURST_1);
+	pete_writel("drivers/net/ethernet/sun/cassini.c:2875", 0x800, cp->regs + REG_TX_MAXBURST_2);
+	pete_writel("drivers/net/ethernet/sun/cassini.c:2876", 0x800, cp->regs + REG_TX_MAXBURST_3);
 #endif
 }
 
@@ -2897,11 +2897,11 @@ static void cas_process_mc_list(struct cas *cp)
 			/* use the alternate mac address registers for the
 			 * first 15 multicast addresses
 			 */
-			writel((ha->addr[4] << 8) | ha->addr[5],
+			pete_writel("drivers/net/ethernet/sun/cassini.c:2900", (ha->addr[4] << 8) | ha->addr[5],
 			       cp->regs + REG_MAC_ADDRN(i*3 + 0));
-			writel((ha->addr[2] << 8) | ha->addr[3],
+			pete_writel("drivers/net/ethernet/sun/cassini.c:2902", (ha->addr[2] << 8) | ha->addr[3],
 			       cp->regs + REG_MAC_ADDRN(i*3 + 1));
-			writel((ha->addr[0] << 8) | ha->addr[1],
+			pete_writel("drivers/net/ethernet/sun/cassini.c:2904", (ha->addr[0] << 8) | ha->addr[1],
 			       cp->regs + REG_MAC_ADDRN(i*3 + 2));
 			i++;
 		}
@@ -2915,7 +2915,7 @@ static void cas_process_mc_list(struct cas *cp)
 		}
 	}
 	for (i = 0; i < 16; i++)
-		writel(hash_table[i], cp->regs + REG_MAC_HASH_TABLEN(i));
+		pete_writel("drivers/net/ethernet/sun/cassini.c:2918", hash_table[i], cp->regs + REG_MAC_HASH_TABLEN(i));
 }
 
 /* Must be invoked under cp->lock. */
@@ -2929,7 +2929,7 @@ static u32 cas_setup_multicast(struct cas *cp)
 
 	} else if (cp->dev->flags & IFF_ALLMULTI) {
 	    	for (i=0; i < 16; i++)
-			writel(0xFFFF, cp->regs + REG_MAC_HASH_TABLEN(i));
+			pete_writel("drivers/net/ethernet/sun/cassini.c:2932", 0xFFFF, cp->regs + REG_MAC_HASH_TABLEN(i));
 		rxcfg |= MAC_RX_CFG_HASH_FILTER_EN;
 
 	} else {
@@ -2943,17 +2943,17 @@ static u32 cas_setup_multicast(struct cas *cp)
 /* must be invoked under cp->stat_lock[N_TX_RINGS] */
 static void cas_clear_mac_err(struct cas *cp)
 {
-	writel(0, cp->regs + REG_MAC_COLL_NORMAL);
-	writel(0, cp->regs + REG_MAC_COLL_FIRST);
-	writel(0, cp->regs + REG_MAC_COLL_EXCESS);
-	writel(0, cp->regs + REG_MAC_COLL_LATE);
-	writel(0, cp->regs + REG_MAC_TIMER_DEFER);
-	writel(0, cp->regs + REG_MAC_ATTEMPTS_PEAK);
-	writel(0, cp->regs + REG_MAC_RECV_FRAME);
-	writel(0, cp->regs + REG_MAC_LEN_ERR);
-	writel(0, cp->regs + REG_MAC_ALIGN_ERR);
-	writel(0, cp->regs + REG_MAC_FCS_ERR);
-	writel(0, cp->regs + REG_MAC_RX_CODE_ERR);
+	pete_writel("drivers/net/ethernet/sun/cassini.c:2946", 0, cp->regs + REG_MAC_COLL_NORMAL);
+	pete_writel("drivers/net/ethernet/sun/cassini.c:2947", 0, cp->regs + REG_MAC_COLL_FIRST);
+	pete_writel("drivers/net/ethernet/sun/cassini.c:2948", 0, cp->regs + REG_MAC_COLL_EXCESS);
+	pete_writel("drivers/net/ethernet/sun/cassini.c:2949", 0, cp->regs + REG_MAC_COLL_LATE);
+	pete_writel("drivers/net/ethernet/sun/cassini.c:2950", 0, cp->regs + REG_MAC_TIMER_DEFER);
+	pete_writel("drivers/net/ethernet/sun/cassini.c:2951", 0, cp->regs + REG_MAC_ATTEMPTS_PEAK);
+	pete_writel("drivers/net/ethernet/sun/cassini.c:2952", 0, cp->regs + REG_MAC_RECV_FRAME);
+	pete_writel("drivers/net/ethernet/sun/cassini.c:2953", 0, cp->regs + REG_MAC_LEN_ERR);
+	pete_writel("drivers/net/ethernet/sun/cassini.c:2954", 0, cp->regs + REG_MAC_ALIGN_ERR);
+	pete_writel("drivers/net/ethernet/sun/cassini.c:2955", 0, cp->regs + REG_MAC_FCS_ERR);
+	pete_writel("drivers/net/ethernet/sun/cassini.c:2956", 0, cp->regs + REG_MAC_RX_CODE_ERR);
 }
 
 
@@ -2962,13 +2962,13 @@ static void cas_mac_reset(struct cas *cp)
 	int i;
 
 	/* do both TX and RX reset */
-	writel(0x1, cp->regs + REG_MAC_TX_RESET);
-	writel(0x1, cp->regs + REG_MAC_RX_RESET);
+	pete_writel("drivers/net/ethernet/sun/cassini.c:2965", 0x1, cp->regs + REG_MAC_TX_RESET);
+	pete_writel("drivers/net/ethernet/sun/cassini.c:2966", 0x1, cp->regs + REG_MAC_RX_RESET);
 
 	/* wait for TX */
 	i = STOP_TRIES;
 	while (i-- > 0) {
-		if (readl(cp->regs + REG_MAC_TX_RESET) == 0)
+		if (pete_readl("drivers/net/ethernet/sun/cassini.c:2971", cp->regs + REG_MAC_TX_RESET) == 0)
 			break;
 		udelay(10);
 	}
@@ -2976,17 +2976,17 @@ static void cas_mac_reset(struct cas *cp)
 	/* wait for RX */
 	i = STOP_TRIES;
 	while (i-- > 0) {
-		if (readl(cp->regs + REG_MAC_RX_RESET) == 0)
+		if (pete_readl("drivers/net/ethernet/sun/cassini.c:2979", cp->regs + REG_MAC_RX_RESET) == 0)
 			break;
 		udelay(10);
 	}
 
-	if (readl(cp->regs + REG_MAC_TX_RESET) |
-	    readl(cp->regs + REG_MAC_RX_RESET))
+	if (pete_readl("drivers/net/ethernet/sun/cassini.c:2984", cp->regs + REG_MAC_TX_RESET) |
+	    pete_readl("drivers/net/ethernet/sun/cassini.c:2985", cp->regs + REG_MAC_RX_RESET))
 		netdev_err(cp->dev, "mac tx[%d]/rx[%d] reset failed [%08x]\n",
-			   readl(cp->regs + REG_MAC_TX_RESET),
-			   readl(cp->regs + REG_MAC_RX_RESET),
-			   readl(cp->regs + REG_MAC_STATE_MACHINE));
+			   pete_readl("drivers/net/ethernet/sun/cassini.c:2987", cp->regs + REG_MAC_TX_RESET),
+			   pete_readl("drivers/net/ethernet/sun/cassini.c:2988", cp->regs + REG_MAC_RX_RESET),
+			   pete_readl("drivers/net/ethernet/sun/cassini.c:2989", cp->regs + REG_MAC_STATE_MACHINE));
 }
 
 
@@ -2998,33 +2998,33 @@ static void cas_init_mac(struct cas *cp)
 	cas_mac_reset(cp);
 
 	/* setup core arbitration weight register */
-	writel(CAWR_RR_DIS, cp->regs + REG_CAWR);
+	pete_writel("drivers/net/ethernet/sun/cassini.c:3001", CAWR_RR_DIS, cp->regs + REG_CAWR);
 
 #if !defined(CONFIG_SPARC64) && !defined(CONFIG_ALPHA)
 	/* set the infinite burst register for chips that don't have
 	 * pci issues.
 	 */
 	if ((cp->cas_flags & CAS_FLAG_TARGET_ABORT) == 0)
-		writel(INF_BURST_EN, cp->regs + REG_INF_BURST);
+		pete_writel("drivers/net/ethernet/sun/cassini.c:3008", INF_BURST_EN, cp->regs + REG_INF_BURST);
 #endif
 
-	writel(0x1BF0, cp->regs + REG_MAC_SEND_PAUSE);
+	pete_writel("drivers/net/ethernet/sun/cassini.c:3011", 0x1BF0, cp->regs + REG_MAC_SEND_PAUSE);
 
-	writel(0x00, cp->regs + REG_MAC_IPG0);
-	writel(0x08, cp->regs + REG_MAC_IPG1);
-	writel(0x04, cp->regs + REG_MAC_IPG2);
+	pete_writel("drivers/net/ethernet/sun/cassini.c:3013", 0x00, cp->regs + REG_MAC_IPG0);
+	pete_writel("drivers/net/ethernet/sun/cassini.c:3014", 0x08, cp->regs + REG_MAC_IPG1);
+	pete_writel("drivers/net/ethernet/sun/cassini.c:3015", 0x04, cp->regs + REG_MAC_IPG2);
 
 	/* change later for 802.3z */
-	writel(0x40, cp->regs + REG_MAC_SLOT_TIME);
+	pete_writel("drivers/net/ethernet/sun/cassini.c:3018", 0x40, cp->regs + REG_MAC_SLOT_TIME);
 
 	/* min frame + FCS */
-	writel(ETH_ZLEN + 4, cp->regs + REG_MAC_FRAMESIZE_MIN);
+	pete_writel("drivers/net/ethernet/sun/cassini.c:3021", ETH_ZLEN + 4, cp->regs + REG_MAC_FRAMESIZE_MIN);
 
 	/* Ethernet payload + header + FCS + optional VLAN tag. NOTE: we
 	 * specify the maximum frame size to prevent RX tag errors on
 	 * oversized frames.
 	 */
-	writel(CAS_BASE(MAC_FRAMESIZE_MAX_BURST, 0x2000) |
+	pete_writel("drivers/net/ethernet/sun/cassini.c:3027", CAS_BASE(MAC_FRAMESIZE_MAX_BURST, 0x2000) |
 	       CAS_BASE(MAC_FRAMESIZE_MAX_FRAME,
 			(CAS_MAX_MTU + ETH_HLEN + 4 + 4)),
 	       cp->regs + REG_MAC_FRAMESIZE_MAX);
@@ -3034,32 +3034,32 @@ static void cas_init_mac(struct cas *cp)
 	 * size to 65 bytes.
 	 */
 	if ((cp->cas_flags & CAS_FLAG_SATURN) && cp->crc_size)
-		writel(0x41, cp->regs + REG_MAC_PA_SIZE);
+		pete_writel("drivers/net/ethernet/sun/cassini.c:3037", 0x41, cp->regs + REG_MAC_PA_SIZE);
 	else
-		writel(0x07, cp->regs + REG_MAC_PA_SIZE);
-	writel(0x04, cp->regs + REG_MAC_JAM_SIZE);
-	writel(0x10, cp->regs + REG_MAC_ATTEMPT_LIMIT);
-	writel(0x8808, cp->regs + REG_MAC_CTRL_TYPE);
+		pete_writel("drivers/net/ethernet/sun/cassini.c:3039", 0x07, cp->regs + REG_MAC_PA_SIZE);
+	pete_writel("drivers/net/ethernet/sun/cassini.c:3040", 0x04, cp->regs + REG_MAC_JAM_SIZE);
+	pete_writel("drivers/net/ethernet/sun/cassini.c:3041", 0x10, cp->regs + REG_MAC_ATTEMPT_LIMIT);
+	pete_writel("drivers/net/ethernet/sun/cassini.c:3042", 0x8808, cp->regs + REG_MAC_CTRL_TYPE);
 
-	writel((e[5] | (e[4] << 8)) & 0x3ff, cp->regs + REG_MAC_RANDOM_SEED);
+	pete_writel("drivers/net/ethernet/sun/cassini.c:3044", (e[5] | (e[4] << 8)) & 0x3ff, cp->regs + REG_MAC_RANDOM_SEED);
 
-	writel(0, cp->regs + REG_MAC_ADDR_FILTER0);
-	writel(0, cp->regs + REG_MAC_ADDR_FILTER1);
-	writel(0, cp->regs + REG_MAC_ADDR_FILTER2);
-	writel(0, cp->regs + REG_MAC_ADDR_FILTER2_1_MASK);
-	writel(0, cp->regs + REG_MAC_ADDR_FILTER0_MASK);
+	pete_writel("drivers/net/ethernet/sun/cassini.c:3046", 0, cp->regs + REG_MAC_ADDR_FILTER0);
+	pete_writel("drivers/net/ethernet/sun/cassini.c:3047", 0, cp->regs + REG_MAC_ADDR_FILTER1);
+	pete_writel("drivers/net/ethernet/sun/cassini.c:3048", 0, cp->regs + REG_MAC_ADDR_FILTER2);
+	pete_writel("drivers/net/ethernet/sun/cassini.c:3049", 0, cp->regs + REG_MAC_ADDR_FILTER2_1_MASK);
+	pete_writel("drivers/net/ethernet/sun/cassini.c:3050", 0, cp->regs + REG_MAC_ADDR_FILTER0_MASK);
 
 	/* setup mac address in perfect filter array */
 	for (i = 0; i < 45; i++)
-		writel(0x0, cp->regs + REG_MAC_ADDRN(i));
+		pete_writel("drivers/net/ethernet/sun/cassini.c:3054", 0x0, cp->regs + REG_MAC_ADDRN(i));
 
-	writel((e[4] << 8) | e[5], cp->regs + REG_MAC_ADDRN(0));
-	writel((e[2] << 8) | e[3], cp->regs + REG_MAC_ADDRN(1));
-	writel((e[0] << 8) | e[1], cp->regs + REG_MAC_ADDRN(2));
+	pete_writel("drivers/net/ethernet/sun/cassini.c:3056", (e[4] << 8) | e[5], cp->regs + REG_MAC_ADDRN(0));
+	pete_writel("drivers/net/ethernet/sun/cassini.c:3057", (e[2] << 8) | e[3], cp->regs + REG_MAC_ADDRN(1));
+	pete_writel("drivers/net/ethernet/sun/cassini.c:3058", (e[0] << 8) | e[1], cp->regs + REG_MAC_ADDRN(2));
 
-	writel(0x0001, cp->regs + REG_MAC_ADDRN(42));
-	writel(0xc200, cp->regs + REG_MAC_ADDRN(43));
-	writel(0x0180, cp->regs + REG_MAC_ADDRN(44));
+	pete_writel("drivers/net/ethernet/sun/cassini.c:3060", 0x0001, cp->regs + REG_MAC_ADDRN(42));
+	pete_writel("drivers/net/ethernet/sun/cassini.c:3061", 0xc200, cp->regs + REG_MAC_ADDRN(43));
+	pete_writel("drivers/net/ethernet/sun/cassini.c:3062", 0x0180, cp->regs + REG_MAC_ADDRN(44));
 
 	cp->mac_rx_cfg = cas_setup_multicast(cp);
 
@@ -3071,13 +3071,13 @@ static void cas_init_mac(struct cas *cp)
 	 * counter expiration events, but we do not want to hear about
 	 * normal rx/tx as the DMA engine tells us that.
 	 */
-	writel(MAC_TX_FRAME_XMIT, cp->regs + REG_MAC_TX_MASK);
-	writel(MAC_RX_FRAME_RECV, cp->regs + REG_MAC_RX_MASK);
+	pete_writel("drivers/net/ethernet/sun/cassini.c:3074", MAC_TX_FRAME_XMIT, cp->regs + REG_MAC_TX_MASK);
+	pete_writel("drivers/net/ethernet/sun/cassini.c:3075", MAC_RX_FRAME_RECV, cp->regs + REG_MAC_RX_MASK);
 
 	/* Don't enable even the PAUSE interrupts for now, we
 	 * make no use of those events other than to record them.
 	 */
-	writel(0xffffffff, cp->regs + REG_MAC_CTRL_MASK);
+	pete_writel("drivers/net/ethernet/sun/cassini.c:3080", 0xffffffff, cp->regs + REG_MAC_CTRL_MASK);
 }
 
 /* Must be invoked under cp->lock. */
@@ -3108,7 +3108,7 @@ static int cas_vpd_match(const void __iomem *p, const char *str)
 	int i;
 
 	for (i = 0; i < len; i++) {
-		if (readb(p + i) != str[i])
+		if (pete_readb("drivers/net/ethernet/sun/cassini.c:3111", p + i) != str[i])
 			return 0;
 	}
 	return 1;
@@ -3144,43 +3144,43 @@ static int cas_get_vpd_info(struct cas *cp, unsigned char *dev_addr,
 #endif
 
 	/* give us access to the PROM */
-	writel(BIM_LOCAL_DEV_PROM | BIM_LOCAL_DEV_PAD,
+	pete_writel("drivers/net/ethernet/sun/cassini.c:3147", BIM_LOCAL_DEV_PROM | BIM_LOCAL_DEV_PAD,
 	       cp->regs + REG_BIM_LOCAL_DEV_EN);
 
 	/* check for an expansion rom */
-	if (readb(p) != 0x55 || readb(p + 1) != 0xaa)
+	if (pete_readb("drivers/net/ethernet/sun/cassini.c:3151", p) != 0x55 || pete_readb("drivers/net/ethernet/sun/cassini.c:3151", p + 1) != 0xaa)
 		goto use_random_mac_addr;
 
 	/* search for beginning of vpd */
 	base = NULL;
 	for (i = 2; i < EXPANSION_ROM_SIZE; i++) {
 		/* check for PCIR */
-		if ((readb(p + i + 0) == 0x50) &&
-		    (readb(p + i + 1) == 0x43) &&
-		    (readb(p + i + 2) == 0x49) &&
-		    (readb(p + i + 3) == 0x52)) {
-			base = p + (readb(p + i + 8) |
-				    (readb(p + i + 9) << 8));
+		if ((pete_readb("drivers/net/ethernet/sun/cassini.c:3158", p + i + 0) == 0x50) &&
+		    (pete_readb("drivers/net/ethernet/sun/cassini.c:3159", p + i + 1) == 0x43) &&
+		    (pete_readb("drivers/net/ethernet/sun/cassini.c:3160", p + i + 2) == 0x49) &&
+		    (pete_readb("drivers/net/ethernet/sun/cassini.c:3161", p + i + 3) == 0x52)) {
+			base = p + (pete_readb("drivers/net/ethernet/sun/cassini.c:3162", p + i + 8) |
+				    (pete_readb("drivers/net/ethernet/sun/cassini.c:3163", p + i + 9) << 8));
 			break;
 		}
 	}
 
-	if (!base || (readb(base) != 0x82))
+	if (!base || (pete_readb("drivers/net/ethernet/sun/cassini.c:3168", base) != 0x82))
 		goto use_random_mac_addr;
 
-	i = (readb(base + 1) | (readb(base + 2) << 8)) + 3;
+	i = (pete_readb("drivers/net/ethernet/sun/cassini.c:3171", base + 1) | (pete_readb("drivers/net/ethernet/sun/cassini.c:3171", base + 2) << 8)) + 3;
 	while (i < EXPANSION_ROM_SIZE) {
-		if (readb(base + i) != 0x90) /* no vpd found */
+		if (pete_readb("drivers/net/ethernet/sun/cassini.c:3173", base + i) != 0x90) /* no vpd found */
 			goto use_random_mac_addr;
 
 		/* found a vpd field */
-		len = readb(base + i + 1) | (readb(base + i + 2) << 8);
+		len = pete_readb("drivers/net/ethernet/sun/cassini.c:3177", base + i + 1) | (pete_readb("drivers/net/ethernet/sun/cassini.c:3177", base + i + 2) << 8);
 
 		/* extract keywords */
 		kstart = base + i + 3;
 		p = kstart;
 		while ((p - kstart) < len) {
-			int klen = readb(p + 2);
+			int klen = pete_readb("drivers/net/ethernet/sun/cassini.c:3183", p + 2);
 			int j;
 			char type;
 
@@ -3223,13 +3223,13 @@ static int cas_get_vpd_info(struct cas *cp, unsigned char *dev_addr,
 			 * -- VPD data length == 4
 			 * -- property string == phy-interface
 			 */
-			if (readb(p) != 'I')
+			if (pete_readb("drivers/net/ethernet/sun/cassini.c:3226", p) != 'I')
 				goto next;
 
 			/* finally, check string and length */
-			type = readb(p + 3);
+			type = pete_readb("drivers/net/ethernet/sun/cassini.c:3230", p + 3);
 			if (type == 'B') {
-				if ((klen == 29) && readb(p + 4) == 6 &&
+				if ((klen == 29) && pete_readb("drivers/net/ethernet/sun/cassini.c:3232", p + 4) == 6 &&
 				    cas_vpd_match(p + 5,
 						  "local-mac-address")) {
 					if (mac_off++ > offset)
@@ -3238,7 +3238,7 @@ static int cas_get_vpd_info(struct cas *cp, unsigned char *dev_addr,
 					/* set mac address */
 					for (j = 0; j < 6; j++)
 						dev_addr[j] =
-							readb(p + 23 + j);
+							pete_readb("drivers/net/ethernet/sun/cassini.c:3241", p + 23 + j);
 					goto found_mac;
 				}
 			}
@@ -3258,7 +3258,7 @@ static int cas_get_vpd_info(struct cas *cp, unsigned char *dev_addr,
 			if (found & VPD_FOUND_PHY)
 				goto next;
 
-			if ((klen == 18) && readb(p + 4) == 4 &&
+			if ((klen == 18) && pete_readb("drivers/net/ethernet/sun/cassini.c:3261", p + 4) == 4 &&
 			    cas_vpd_match(p + 5, "phy-type")) {
 				if (cas_vpd_match(p + 14, "pcs")) {
 					phy_type = CAS_PHY_SERDES;
@@ -3266,7 +3266,7 @@ static int cas_get_vpd_info(struct cas *cp, unsigned char *dev_addr,
 				}
 			}
 
-			if ((klen == 23) && readb(p + 4) == 4 &&
+			if ((klen == 23) && pete_readb("drivers/net/ethernet/sun/cassini.c:3269", p + 4) == 4 &&
 			    cas_vpd_match(p + 5, "phy-interface")) {
 				if (cas_vpd_match(p + 19, "pcs")) {
 					phy_type = CAS_PHY_SERDES;
@@ -3306,7 +3306,7 @@ use_random_mac_addr:
 	get_random_bytes(dev_addr + 3, 3);
 
 done:
-	writel(0, cp->regs + REG_BIM_LOCAL_DEV_EN);
+	pete_writel("drivers/net/ethernet/sun/cassini.c:3309", 0, cp->regs + REG_BIM_LOCAL_DEV_EN);
 	return phy_type;
 }
 
@@ -3368,7 +3368,7 @@ static int cas_check_invariants(struct cas *cp)
 	cp->page_size = (PAGE_SIZE << cp->page_order);
 
 	/* Fetch the FIFO configurations. */
-	cp->tx_fifo_size = readl(cp->regs + REG_TX_FIFO_SIZE) * 64;
+	cp->tx_fifo_size = pete_readl("drivers/net/ethernet/sun/cassini.c:3371", cp->regs + REG_TX_FIFO_SIZE) * 64;
 	cp->rx_fifo_size = RX_FIFO_SIZE;
 
 	/* finish phy determination. MDIO1 takes precedence over MDIO0 if
@@ -3382,7 +3382,7 @@ static int cas_check_invariants(struct cas *cp)
 	}
 
 	/* MII */
-	cfg = readl(cp->regs + REG_MIF_CFG);
+	cfg = pete_readl("drivers/net/ethernet/sun/cassini.c:3385", cp->regs + REG_MIF_CFG);
 	if (cfg & MIF_CFG_MDIO_1) {
 		cp->phy_type = CAS_PHY_MII_MDIO1;
 	} else if (cfg & MIF_CFG_MDIO_0) {
@@ -3390,7 +3390,7 @@ static int cas_check_invariants(struct cas *cp)
 	}
 
 	cas_mif_poll(cp, 0);
-	writel(PCS_DATAPATH_MODE_MII, cp->regs + REG_PCS_DATAPATH_MODE);
+	pete_writel("drivers/net/ethernet/sun/cassini.c:3393", PCS_DATAPATH_MODE_MII, cp->regs + REG_PCS_DATAPATH_MODE);
 
 	for (i = 0; i < 32; i++) {
 		u32 phy_id;
@@ -3407,7 +3407,7 @@ static int cas_check_invariants(struct cas *cp)
 		}
 	}
 	pr_err("MII phy did not respond [%08x]\n",
-	       readl(cp->regs + REG_MIF_STATE_MACHINE));
+	       pete_readl("drivers/net/ethernet/sun/cassini.c:3410", cp->regs + REG_MIF_STATE_MACHINE));
 	return -1;
 
 done:
@@ -3427,20 +3427,20 @@ static inline void cas_start_dma(struct cas *cp)
 	int txfailed = 0;
 
 	/* enable dma */
-	val = readl(cp->regs + REG_TX_CFG) | TX_CFG_DMA_EN;
-	writel(val, cp->regs + REG_TX_CFG);
-	val = readl(cp->regs + REG_RX_CFG) | RX_CFG_DMA_EN;
-	writel(val, cp->regs + REG_RX_CFG);
+	val = pete_readl("drivers/net/ethernet/sun/cassini.c:3430", cp->regs + REG_TX_CFG) | TX_CFG_DMA_EN;
+	pete_writel("drivers/net/ethernet/sun/cassini.c:3431", val, cp->regs + REG_TX_CFG);
+	val = pete_readl("drivers/net/ethernet/sun/cassini.c:3432", cp->regs + REG_RX_CFG) | RX_CFG_DMA_EN;
+	pete_writel("drivers/net/ethernet/sun/cassini.c:3433", val, cp->regs + REG_RX_CFG);
 
 	/* enable the mac */
-	val = readl(cp->regs + REG_MAC_TX_CFG) | MAC_TX_CFG_EN;
-	writel(val, cp->regs + REG_MAC_TX_CFG);
-	val = readl(cp->regs + REG_MAC_RX_CFG) | MAC_RX_CFG_EN;
-	writel(val, cp->regs + REG_MAC_RX_CFG);
+	val = pete_readl("drivers/net/ethernet/sun/cassini.c:3436", cp->regs + REG_MAC_TX_CFG) | MAC_TX_CFG_EN;
+	pete_writel("drivers/net/ethernet/sun/cassini.c:3437", val, cp->regs + REG_MAC_TX_CFG);
+	val = pete_readl("drivers/net/ethernet/sun/cassini.c:3438", cp->regs + REG_MAC_RX_CFG) | MAC_RX_CFG_EN;
+	pete_writel("drivers/net/ethernet/sun/cassini.c:3439", val, cp->regs + REG_MAC_RX_CFG);
 
 	i = STOP_TRIES;
 	while (i-- > 0) {
-		val = readl(cp->regs + REG_MAC_TX_CFG);
+		val = pete_readl("drivers/net/ethernet/sun/cassini.c:3443", cp->regs + REG_MAC_TX_CFG);
 		if ((val & MAC_TX_CFG_EN))
 			break;
 		udelay(10);
@@ -3448,13 +3448,13 @@ static inline void cas_start_dma(struct cas *cp)
 	if (i < 0) txfailed = 1;
 	i = STOP_TRIES;
 	while (i-- > 0) {
-		val = readl(cp->regs + REG_MAC_RX_CFG);
+		val = pete_readl("drivers/net/ethernet/sun/cassini.c:3451", cp->regs + REG_MAC_RX_CFG);
 		if ((val & MAC_RX_CFG_EN)) {
 			if (txfailed) {
 				netdev_err(cp->dev,
 					   "enabling mac failed [tx:%08x:%08x]\n",
-					   readl(cp->regs + REG_MIF_STATE_MACHINE),
-					   readl(cp->regs + REG_MAC_STATE_MACHINE));
+					   pete_readl("drivers/net/ethernet/sun/cassini.c:3456", cp->regs + REG_MIF_STATE_MACHINE),
+					   pete_readl("drivers/net/ethernet/sun/cassini.c:3457", cp->regs + REG_MAC_STATE_MACHINE));
 			}
 			goto enable_rx_done;
 		}
@@ -3462,17 +3462,17 @@ static inline void cas_start_dma(struct cas *cp)
 	}
 	netdev_err(cp->dev, "enabling mac failed [%s:%08x:%08x]\n",
 		   (txfailed ? "tx,rx" : "rx"),
-		   readl(cp->regs + REG_MIF_STATE_MACHINE),
-		   readl(cp->regs + REG_MAC_STATE_MACHINE));
+		   pete_readl("drivers/net/ethernet/sun/cassini.c:3465", cp->regs + REG_MIF_STATE_MACHINE),
+		   pete_readl("drivers/net/ethernet/sun/cassini.c:3466", cp->regs + REG_MAC_STATE_MACHINE));
 
 enable_rx_done:
 	cas_unmask_intr(cp); /* enable interrupts */
-	writel(RX_DESC_RINGN_SIZE(0) - 4, cp->regs + REG_RX_KICK);
-	writel(0, cp->regs + REG_RX_COMP_TAIL);
+	pete_writel("drivers/net/ethernet/sun/cassini.c:3470", RX_DESC_RINGN_SIZE(0) - 4, cp->regs + REG_RX_KICK);
+	pete_writel("drivers/net/ethernet/sun/cassini.c:3471", 0, cp->regs + REG_RX_COMP_TAIL);
 
 	if (cp->cas_flags & CAS_FLAG_REG_PLUS) {
 		if (N_RX_DESC_RINGS > 1)
-			writel(RX_DESC_RINGN_SIZE(1) - 4,
+			pete_writel("drivers/net/ethernet/sun/cassini.c:3475", RX_DESC_RINGN_SIZE(1) - 4,
 			       cp->regs + REG_PLUS_RX_KICK1);
 	}
 }
@@ -3481,7 +3481,7 @@ enable_rx_done:
 static void cas_read_pcs_link_mode(struct cas *cp, int *fd, int *spd,
 				   int *pause)
 {
-	u32 val = readl(cp->regs + REG_PCS_MII_LPA);
+	u32 val = pete_readl("drivers/net/ethernet/sun/cassini.c:3484", cp->regs + REG_PCS_MII_LPA);
 	*fd     = (val & PCS_MII_LPA_FD) ? 1 : 0;
 	*pause  = (val & PCS_MII_LPA_SYM_PAUSE) ? 0x01 : 0x00;
 	if (val & PCS_MII_LPA_ASYM_PAUSE)
@@ -3554,7 +3554,7 @@ static void cas_set_link_modes(struct cas *cp)
 		cas_mif_poll(cp, 1);
 
 	} else {
-		val = readl(cp->regs + REG_PCS_MII_CTRL);
+		val = pete_readl("drivers/net/ethernet/sun/cassini.c:3557", cp->regs + REG_PCS_MII_CTRL);
 		cas_read_pcs_link_mode(cp, &full_duplex, &speed, &pause);
 		if ((val & PCS_MII_AUTONEG_EN) == 0) {
 			if (val & PCS_MII_CTRL_DUPLEX)
@@ -3575,7 +3575,7 @@ static void cas_set_link_modes(struct cas *cp)
 		val |= MAC_XIF_FDPLX_LED;
 	if (speed == 1000)
 		val |= MAC_XIF_GMII_MODE;
-	writel(val, cp->regs + REG_MAC_XIF_CFG);
+	pete_writel("drivers/net/ethernet/sun/cassini.c:3578", val, cp->regs + REG_MAC_XIF_CFG);
 
 	/* deal with carrier and collision detect. */
 	val = MAC_TX_CFG_IPG_EN;
@@ -3596,27 +3596,27 @@ static void cas_set_link_modes(struct cas *cp)
 	 * also activate checksum bug workaround
 	 */
 	if ((speed == 1000) && !full_duplex) {
-		writel(val | MAC_TX_CFG_CARRIER_EXTEND,
+		pete_writel("drivers/net/ethernet/sun/cassini.c:3599", val | MAC_TX_CFG_CARRIER_EXTEND,
 		       cp->regs + REG_MAC_TX_CFG);
 
-		val = readl(cp->regs + REG_MAC_RX_CFG);
+		val = pete_readl("drivers/net/ethernet/sun/cassini.c:3602", cp->regs + REG_MAC_RX_CFG);
 		val &= ~MAC_RX_CFG_STRIP_FCS; /* checksum workaround */
-		writel(val | MAC_RX_CFG_CARRIER_EXTEND,
+		pete_writel("drivers/net/ethernet/sun/cassini.c:3604", val | MAC_RX_CFG_CARRIER_EXTEND,
 		       cp->regs + REG_MAC_RX_CFG);
 
-		writel(0x200, cp->regs + REG_MAC_SLOT_TIME);
+		pete_writel("drivers/net/ethernet/sun/cassini.c:3607", 0x200, cp->regs + REG_MAC_SLOT_TIME);
 
 		cp->crc_size = 4;
 		/* minimum size gigabit frame at half duplex */
 		cp->min_frame_size = CAS_1000MB_MIN_FRAME;
 
 	} else {
-		writel(val, cp->regs + REG_MAC_TX_CFG);
+		pete_writel("drivers/net/ethernet/sun/cassini.c:3614", val, cp->regs + REG_MAC_TX_CFG);
 
 		/* checksum bug workaround. don't strip FCS when in
 		 * half-duplex mode
 		 */
-		val = readl(cp->regs + REG_MAC_RX_CFG);
+		val = pete_readl("drivers/net/ethernet/sun/cassini.c:3619", cp->regs + REG_MAC_RX_CFG);
 		if (full_duplex) {
 			val |= MAC_RX_CFG_STRIP_FCS;
 			cp->crc_size = 0;
@@ -3626,9 +3626,9 @@ static void cas_set_link_modes(struct cas *cp)
 			cp->crc_size = 4;
 			cp->min_frame_size = CAS_MIN_FRAME;
 		}
-		writel(val & ~MAC_RX_CFG_CARRIER_EXTEND,
+		pete_writel("drivers/net/ethernet/sun/cassini.c:3629", val & ~MAC_RX_CFG_CARRIER_EXTEND,
 		       cp->regs + REG_MAC_RX_CFG);
-		writel(0x40, cp->regs + REG_MAC_SLOT_TIME);
+		pete_writel("drivers/net/ethernet/sun/cassini.c:3631", 0x40, cp->regs + REG_MAC_SLOT_TIME);
 	}
 
 	if (netif_msg_link(cp)) {
@@ -3644,7 +3644,7 @@ static void cas_set_link_modes(struct cas *cp)
 		}
 	}
 
-	val = readl(cp->regs + REG_MAC_CTRL_CFG);
+	val = pete_readl("drivers/net/ethernet/sun/cassini.c:3647", cp->regs + REG_MAC_CTRL_CFG);
 	val &= ~(MAC_CTRL_CFG_SEND_PAUSE_EN | MAC_CTRL_CFG_RECV_PAUSE_EN);
 	if (pause) { /* symmetric or asymmetric pause */
 		val |= MAC_CTRL_CFG_SEND_PAUSE_EN;
@@ -3652,7 +3652,7 @@ static void cas_set_link_modes(struct cas *cp)
 			val |= MAC_CTRL_CFG_RECV_PAUSE_EN;
 		}
 	}
-	writel(val, cp->regs + REG_MAC_CTRL_CFG);
+	pete_writel("drivers/net/ethernet/sun/cassini.c:3655", val, cp->regs + REG_MAC_CTRL_CFG);
 	cas_start_dma(cp);
 }
 
@@ -3682,7 +3682,7 @@ static void cas_init_hw(struct cas *cp, int restart_link)
  */
 static void cas_hard_reset(struct cas *cp)
 {
-	writel(BIM_LOCAL_DEV_SOFT_0, cp->regs + REG_BIM_LOCAL_DEV_EN);
+	pete_writel("drivers/net/ethernet/sun/cassini.c:3685", BIM_LOCAL_DEV_SOFT_0, cp->regs + REG_BIM_LOCAL_DEV_EN);
 	udelay(20);
 	pci_restore_state(cp->pdev);
 }
@@ -3700,10 +3700,10 @@ static void cas_global_reset(struct cas *cp, int blkflag)
 		 * need some special handling if the chip is set into a
 		 * loopback mode.
 		 */
-		writel((SW_RESET_TX | SW_RESET_RX | SW_RESET_BLOCK_PCS_SLINK),
+		pete_writel("drivers/net/ethernet/sun/cassini.c:3703", (SW_RESET_TX | SW_RESET_RX | SW_RESET_BLOCK_PCS_SLINK),
 		       cp->regs + REG_SW_RESET);
 	} else {
-		writel(SW_RESET_TX | SW_RESET_RX, cp->regs + REG_SW_RESET);
+		pete_writel("drivers/net/ethernet/sun/cassini.c:3706", SW_RESET_TX | SW_RESET_RX, cp->regs + REG_SW_RESET);
 	}
 
 	/* need to wait at least 3ms before polling register */
@@ -3711,7 +3711,7 @@ static void cas_global_reset(struct cas *cp, int blkflag)
 
 	limit = STOP_TRIES;
 	while (limit-- > 0) {
-		u32 val = readl(cp->regs + REG_SW_RESET);
+		u32 val = pete_readl("drivers/net/ethernet/sun/cassini.c:3714", cp->regs + REG_SW_RESET);
 		if ((val & (SW_RESET_TX | SW_RESET_RX)) == 0)
 			goto done;
 		udelay(10);
@@ -3720,14 +3720,14 @@ static void cas_global_reset(struct cas *cp, int blkflag)
 
 done:
 	/* enable various BIM interrupts */
-	writel(BIM_CFG_DPAR_INTR_ENABLE | BIM_CFG_RMA_INTR_ENABLE |
+	pete_writel("drivers/net/ethernet/sun/cassini.c:3723", BIM_CFG_DPAR_INTR_ENABLE | BIM_CFG_RMA_INTR_ENABLE |
 	       BIM_CFG_RTA_INTR_ENABLE, cp->regs + REG_BIM_CFG);
 
 	/* clear out pci error status mask for handled errors.
 	 * we don't deal with DMA counter overflows as they happen
 	 * all the time.
 	 */
-	writel(0xFFFFFFFFU & ~(PCI_ERR_BADACK | PCI_ERR_DTRTO |
+	pete_writel("drivers/net/ethernet/sun/cassini.c:3730", 0xFFFFFFFFU & ~(PCI_ERR_BADACK | PCI_ERR_DTRTO |
 			       PCI_ERR_OTHER | PCI_ERR_BIM_DMA_WRITE |
 			       PCI_ERR_BIM_DMA_READ), cp->regs +
 	       REG_PCI_ERR_STATUS_MASK);
@@ -3735,7 +3735,7 @@ done:
 	/* set up for MII by default to address mac rx reset timeout
 	 * issue
 	 */
-	writel(PCS_DATAPATH_MODE_MII, cp->regs + REG_PCS_DATAPATH_MODE);
+	pete_writel("drivers/net/ethernet/sun/cassini.c:3738", PCS_DATAPATH_MODE_MII, cp->regs + REG_PCS_DATAPATH_MODE);
 }
 
 static void cas_reset(struct cas *cp, int blkflag)
@@ -3748,13 +3748,13 @@ static void cas_reset(struct cas *cp, int blkflag)
 	cas_entropy_reset(cp);
 
 	/* disable dma engines. */
-	val = readl(cp->regs + REG_TX_CFG);
+	val = pete_readl("drivers/net/ethernet/sun/cassini.c:3751", cp->regs + REG_TX_CFG);
 	val &= ~TX_CFG_DMA_EN;
-	writel(val, cp->regs + REG_TX_CFG);
+	pete_writel("drivers/net/ethernet/sun/cassini.c:3753", val, cp->regs + REG_TX_CFG);
 
-	val = readl(cp->regs + REG_RX_CFG);
+	val = pete_readl("drivers/net/ethernet/sun/cassini.c:3755", cp->regs + REG_RX_CFG);
 	val &= ~RX_CFG_DMA_EN;
-	writel(val, cp->regs + REG_RX_CFG);
+	pete_writel("drivers/net/ethernet/sun/cassini.c:3757", val, cp->regs + REG_RX_CFG);
 
 	/* program header parser */
 	if ((cp->cas_flags & CAS_FLAG_TARGET_ABORT) ||
@@ -4084,7 +4084,7 @@ static void cas_link_timer(struct timer_list *t)
 		 */
 		bmsr = cas_phy_read(cp, MII_BMSR);
 		cas_mif_poll(cp, 1);
-		readl(cp->regs + REG_MIF_STATUS); /* avoid dups */
+		pete_readl("drivers/net/ethernet/sun/cassini.c:4087", cp->regs + REG_MIF_STATUS); /* avoid dups */
 		reset = cas_mii_link_check(cp, bmsr);
 	} else {
 		reset = cas_pcs_link_check(cp);
@@ -4094,8 +4094,8 @@ static void cas_link_timer(struct timer_list *t)
 		goto done;
 
 	/* check for tx state machine confusion */
-	if ((readl(cp->regs + REG_MAC_TX_STATUS) & MAC_TX_FRAME_XMIT) == 0) {
-		u32 val = readl(cp->regs + REG_MAC_STATE_MACHINE);
+	if ((pete_readl("drivers/net/ethernet/sun/cassini.c:4097", cp->regs + REG_MAC_TX_STATUS) & MAC_TX_FRAME_XMIT) == 0) {
+		u32 val = pete_readl("drivers/net/ethernet/sun/cassini.c:4098", cp->regs + REG_MAC_STATE_MACHINE);
 		u32 wptr, rptr;
 		int tlm  = CAS_VAL(MAC_SM_TLM, val);
 
@@ -4107,9 +4107,9 @@ static void cas_link_timer(struct timer_list *t)
 			goto done;
 		}
 
-		val  = readl(cp->regs + REG_TX_FIFO_PKT_CNT);
-		wptr = readl(cp->regs + REG_TX_FIFO_WRITE_PTR);
-		rptr = readl(cp->regs + REG_TX_FIFO_READ_PTR);
+		val  = pete_readl("drivers/net/ethernet/sun/cassini.c:4110", cp->regs + REG_TX_FIFO_PKT_CNT);
+		wptr = pete_readl("drivers/net/ethernet/sun/cassini.c:4111", cp->regs + REG_TX_FIFO_WRITE_PTR);
+		rptr = pete_readl("drivers/net/ethernet/sun/cassini.c:4112", cp->regs + REG_TX_FIFO_READ_PTR);
 		if ((val == 0) && (wptr != rptr)) {
 			netif_printk(cp, tx_err, KERN_DEBUG, cp->dev,
 				     "tx err: TX_FIFO[%08x:%08x:%08x]\n",
@@ -4342,7 +4342,7 @@ static void cas_read_regs(struct cas *cp, u8 *ptr, int len)
 				    -ethtool_register_table[i].offsets);
 			val = hval;
 		} else {
-			val= readl(cp->regs+ethtool_register_table[i].offsets);
+			val= pete_readl("drivers/net/ethernet/sun/cassini.c:4345", cp->regs+ethtool_register_table[i].offsets);
 		}
 		memcpy(p, (u8 *)&val, sizeof(u32));
 	}
@@ -4371,22 +4371,22 @@ static struct net_device_stats *cas_get_stats(struct net_device *dev)
 	 */
 	spin_lock_irqsave(&cp->stat_lock[N_TX_RINGS], flags);
 	stats[N_TX_RINGS].rx_crc_errors +=
-	  readl(cp->regs + REG_MAC_FCS_ERR) & 0xffff;
+	  pete_readl("drivers/net/ethernet/sun/cassini.c:4374", cp->regs + REG_MAC_FCS_ERR) & 0xffff;
 	stats[N_TX_RINGS].rx_frame_errors +=
-		readl(cp->regs + REG_MAC_ALIGN_ERR) &0xffff;
+		pete_readl("drivers/net/ethernet/sun/cassini.c:4376", cp->regs + REG_MAC_ALIGN_ERR) &0xffff;
 	stats[N_TX_RINGS].rx_length_errors +=
-		readl(cp->regs + REG_MAC_LEN_ERR) & 0xffff;
+		pete_readl("drivers/net/ethernet/sun/cassini.c:4378", cp->regs + REG_MAC_LEN_ERR) & 0xffff;
 #if 1
-	tmp = (readl(cp->regs + REG_MAC_COLL_EXCESS) & 0xffff) +
-		(readl(cp->regs + REG_MAC_COLL_LATE) & 0xffff);
+	tmp = (pete_readl("drivers/net/ethernet/sun/cassini.c:4380", cp->regs + REG_MAC_COLL_EXCESS) & 0xffff) +
+		(pete_readl("drivers/net/ethernet/sun/cassini.c:4381", cp->regs + REG_MAC_COLL_LATE) & 0xffff);
 	stats[N_TX_RINGS].tx_aborted_errors += tmp;
 	stats[N_TX_RINGS].collisions +=
-	  tmp + (readl(cp->regs + REG_MAC_COLL_NORMAL) & 0xffff);
+	  tmp + (pete_readl("drivers/net/ethernet/sun/cassini.c:4384", cp->regs + REG_MAC_COLL_NORMAL) & 0xffff);
 #else
 	stats[N_TX_RINGS].tx_aborted_errors +=
-		readl(cp->regs + REG_MAC_COLL_EXCESS);
-	stats[N_TX_RINGS].collisions += readl(cp->regs + REG_MAC_COLL_EXCESS) +
-		readl(cp->regs + REG_MAC_COLL_LATE);
+		pete_readl("drivers/net/ethernet/sun/cassini.c:4387", cp->regs + REG_MAC_COLL_EXCESS);
+	stats[N_TX_RINGS].collisions += pete_readl("drivers/net/ethernet/sun/cassini.c:4388", cp->regs + REG_MAC_COLL_EXCESS) +
+		pete_readl("drivers/net/ethernet/sun/cassini.c:4389", cp->regs + REG_MAC_COLL_LATE);
 #endif
 	cas_clear_mac_err(cp);
 
@@ -4432,11 +4432,11 @@ static void cas_set_multicast(struct net_device *dev)
 		return;
 
 	spin_lock_irqsave(&cp->lock, flags);
-	rxcfg = readl(cp->regs + REG_MAC_RX_CFG);
+	rxcfg = pete_readl("drivers/net/ethernet/sun/cassini.c:4435", cp->regs + REG_MAC_RX_CFG);
 
 	/* disable RX MAC and wait for completion */
-	writel(rxcfg & ~MAC_RX_CFG_EN, cp->regs + REG_MAC_RX_CFG);
-	while (readl(cp->regs + REG_MAC_RX_CFG) & MAC_RX_CFG_EN) {
+	pete_writel("drivers/net/ethernet/sun/cassini.c:4438", rxcfg & ~MAC_RX_CFG_EN, cp->regs + REG_MAC_RX_CFG);
+	while (pete_readl("drivers/net/ethernet/sun/cassini.c:4439", cp->regs + REG_MAC_RX_CFG) & MAC_RX_CFG_EN) {
 		if (!limit--)
 			break;
 		udelay(10);
@@ -4445,8 +4445,8 @@ static void cas_set_multicast(struct net_device *dev)
 	/* disable hash filter and wait for completion */
 	limit = STOP_TRIES;
 	rxcfg &= ~(MAC_RX_CFG_PROMISC_EN | MAC_RX_CFG_HASH_FILTER_EN);
-	writel(rxcfg & ~MAC_RX_CFG_EN, cp->regs + REG_MAC_RX_CFG);
-	while (readl(cp->regs + REG_MAC_RX_CFG) & MAC_RX_CFG_HASH_FILTER_EN) {
+	pete_writel("drivers/net/ethernet/sun/cassini.c:4448", rxcfg & ~MAC_RX_CFG_EN, cp->regs + REG_MAC_RX_CFG);
+	while (pete_readl("drivers/net/ethernet/sun/cassini.c:4449", cp->regs + REG_MAC_RX_CFG) & MAC_RX_CFG_HASH_FILTER_EN) {
 		if (!limit--)
 			break;
 		udelay(10);
@@ -4455,7 +4455,7 @@ static void cas_set_multicast(struct net_device *dev)
 	/* program hash filters */
 	cp->mac_rx_cfg = rxcfg_new = cas_setup_multicast(cp);
 	rxcfg |= rxcfg_new;
-	writel(rxcfg, cp->regs + REG_MAC_RX_CFG);
+	pete_writel("drivers/net/ethernet/sun/cassini.c:4458", rxcfg, cp->regs + REG_MAC_RX_CFG);
 	spin_unlock_irqrestore(&cp->lock, flags);
 }
 
@@ -4520,7 +4520,7 @@ static int cas_get_link_ksettings(struct net_device *dev,
 
 		if (cp->hw_running) {
 			/* pcs uses the same bits as mii */
-			bmcr = readl(cp->regs + REG_PCS_MII_CTRL);
+			bmcr = pete_readl("drivers/net/ethernet/sun/cassini.c:4523", cp->regs + REG_PCS_MII_CTRL);
 			cas_read_pcs_link_mode(cp, &full_duplex,
 					       &speed, &pause);
 		}
@@ -5048,7 +5048,7 @@ static int cas_init_one(struct pci_dev *pdev, const struct pci_device_id *ent)
 		goto err_out_free_consistent;
 	}
 
-	i = readl(cp->regs + REG_BIM_CFG);
+	i = pete_readl("drivers/net/ethernet/sun/cassini.c:5051", cp->regs + REG_BIM_CFG);
 	netdev_info(dev, "Sun Cassini%s (%sbit/%sMHz PCI/%s) Ethernet[%d] %pM\n",
 		    (cp->cas_flags & CAS_FLAG_REG_PLUS) ? "+" : "",
 		    (i & BIM_CFG_32BIT) ? "32" : "64",

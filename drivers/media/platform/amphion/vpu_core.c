@@ -28,12 +28,12 @@
 
 void csr_writel(struct vpu_core *core, u32 reg, u32 val)
 {
-	writel(val, core->base + reg);
+	pete_writel("drivers/media/platform/amphion/vpu_core.c:31", val, core->base + reg);
 }
 
 u32 csr_readl(struct vpu_core *core, u32 reg)
 {
-	return readl(core->base + reg);
+	return pete_readl("drivers/media/platform/amphion/vpu_core.c:36", core->base + reg);
 }
 
 static int vpu_core_load_firmware(struct vpu_core *core)

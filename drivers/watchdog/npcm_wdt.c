@@ -57,8 +57,8 @@ static int npcm_wdt_ping(struct watchdog_device *wdd)
 	struct npcm_wdt *wdt = to_npcm_wdt(wdd);
 	u32 val;
 
-	val = readl(wdt->reg);
-	writel(val | NPCM_WTR, wdt->reg);
+	val = pete_readl("drivers/watchdog/npcm_wdt.c:60", wdt->reg);
+	pete_writel("drivers/watchdog/npcm_wdt.c:61", val | NPCM_WTR, wdt->reg);
 
 	return 0;
 }
@@ -94,7 +94,7 @@ static int npcm_wdt_start(struct watchdog_device *wdd)
 
 	val |= NPCM_WTRE | NPCM_WTE | NPCM_WTR | NPCM_WTIE;
 
-	writel(val, wdt->reg);
+	pete_writel("drivers/watchdog/npcm_wdt.c:97", val, wdt->reg);
 
 	return 0;
 }
@@ -103,7 +103,7 @@ static int npcm_wdt_stop(struct watchdog_device *wdd)
 {
 	struct npcm_wdt *wdt = to_npcm_wdt(wdd);
 
-	writel(0, wdt->reg);
+	pete_writel("drivers/watchdog/npcm_wdt.c:106", 0, wdt->reg);
 
 	if (wdt->clk)
 		clk_disable_unprepare(wdt->clk);
@@ -159,7 +159,7 @@ static int npcm_wdt_restart(struct watchdog_device *wdd,
 	if (wdt->clk)
 		clk_prepare_enable(wdt->clk);
 
-	writel(NPCM_WTR | NPCM_WTRE | NPCM_WTE, wdt->reg);
+	pete_writel("drivers/watchdog/npcm_wdt.c:162", NPCM_WTR | NPCM_WTRE | NPCM_WTE, wdt->reg);
 	udelay(1000);
 
 	return 0;
@@ -169,7 +169,7 @@ static bool npcm_is_running(struct watchdog_device *wdd)
 {
 	struct npcm_wdt *wdt = to_npcm_wdt(wdd);
 
-	return readl(wdt->reg) & NPCM_WTE;
+	return pete_readl("drivers/watchdog/npcm_wdt.c:172", wdt->reg) & NPCM_WTE;
 }
 
 static const struct watchdog_info npcm_wdt_info = {

@@ -27,7 +27,7 @@ static void notify_cq(struct erdma_cq *cq, u8 solcitied)
 		FIELD_PREP(ERDMA_CQDB_CI_MASK, cq->kern_cq.ci);
 
 	*cq->kern_cq.db_record = db_data;
-	writeq(db_data, cq->kern_cq.db);
+	pete_writeq("drivers/infiniband/hw/erdma/erdma_cq.c:30", db_data, cq->kern_cq.db);
 }
 
 int erdma_req_notify_cq(struct ib_cq *ibcq, enum ib_cq_notify_flags flags)

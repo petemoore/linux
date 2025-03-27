@@ -42,7 +42,7 @@ static u8 mxc_w1_ds2_reset_bus(void *data)
 	struct mxc_w1_device *dev = data;
 	ktime_t timeout;
 
-	writeb(MXC_W1_CONTROL_RPP, dev->regs + MXC_W1_CONTROL);
+	pete_writeb("drivers/w1/masters/mxc_w1.c:45", MXC_W1_CONTROL_RPP, dev->regs + MXC_W1_CONTROL);
 
 	/* Wait for reset sequence 511+512us, use 1500us for sure */
 	timeout = ktime_add_us(ktime_get(), 1500);
@@ -50,7 +50,7 @@ static u8 mxc_w1_ds2_reset_bus(void *data)
 	udelay(511 + 512);
 
 	do {
-		u8 ctrl = readb(dev->regs + MXC_W1_CONTROL);
+		u8 ctrl = pete_readb("drivers/w1/masters/mxc_w1.c:53", dev->regs + MXC_W1_CONTROL);
 
 		/* PST bit is valid after the RPP bit is self-cleared */
 		if (!(ctrl & MXC_W1_CONTROL_RPP))
@@ -70,7 +70,7 @@ static u8 mxc_w1_ds2_touch_bit(void *data, u8 bit)
 	struct mxc_w1_device *dev = data;
 	ktime_t timeout;
 
-	writeb(MXC_W1_CONTROL_WR(bit), dev->regs + MXC_W1_CONTROL);
+	pete_writeb("drivers/w1/masters/mxc_w1.c:73", MXC_W1_CONTROL_WR(bit), dev->regs + MXC_W1_CONTROL);
 
 	/* Wait for read/write bit (60us, Max 120us), use 200us for sure */
 	timeout = ktime_add_us(ktime_get(), 200);
@@ -78,7 +78,7 @@ static u8 mxc_w1_ds2_touch_bit(void *data, u8 bit)
 	udelay(60);
 
 	do {
-		u8 ctrl = readb(dev->regs + MXC_W1_CONTROL);
+		u8 ctrl = pete_readb("drivers/w1/masters/mxc_w1.c:81", dev->regs + MXC_W1_CONTROL);
 
 		/* RDST bit is valid after the WR1/RD bit is self-cleared */
 		if (!(ctrl & MXC_W1_CONTROL_WR(bit)))
@@ -126,10 +126,10 @@ static int mxc_w1_probe(struct platform_device *pdev)
 	}
 
 	/* Software reset 1-Wire module */
-	writeb(MXC_W1_RESET_RST, mdev->regs + MXC_W1_RESET);
-	writeb(0, mdev->regs + MXC_W1_RESET);
+	pete_writeb("drivers/w1/masters/mxc_w1.c:129", MXC_W1_RESET_RST, mdev->regs + MXC_W1_RESET);
+	pete_writeb("drivers/w1/masters/mxc_w1.c:130", 0, mdev->regs + MXC_W1_RESET);
 
-	writeb(clkdiv - 1, mdev->regs + MXC_W1_TIME_DIVIDER);
+	pete_writeb("drivers/w1/masters/mxc_w1.c:132", clkdiv - 1, mdev->regs + MXC_W1_TIME_DIVIDER);
 
 	mdev->bus_master.data = mdev;
 	mdev->bus_master.reset_bus = mxc_w1_ds2_reset_bus;

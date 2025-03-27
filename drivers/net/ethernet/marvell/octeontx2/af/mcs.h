@@ -166,12 +166,12 @@ extern struct pci_driver mcs_driver;
 
 static inline void mcs_reg_write(struct mcs *mcs, u64 offset, u64 val)
 {
-	writeq(val, mcs->reg_base + offset);
+	pete_writeq("drivers/net/ethernet/marvell/octeontx2/af/mcs.h:169", val, mcs->reg_base + offset);
 }
 
 static inline u64 mcs_reg_read(struct mcs *mcs, u64 offset)
 {
-	return readq(mcs->reg_base + offset);
+	return pete_readq("drivers/net/ethernet/marvell/octeontx2/af/mcs.h:174", mcs->reg_base + offset);
 }
 
 /* MCS APIs */

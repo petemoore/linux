@@ -343,11 +343,11 @@ unsigned int fun_process_cq(struct fun_queue *funq, unsigned int max)
 		funq->rq_tail = (funq->rq_tail + funq->num_rqe_to_fill) %
 				funq->rq_depth;
 		funq->num_rqe_to_fill = 0;
-		writel(funq->rq_tail, funq->rq_db);
+		pete_writel("drivers/net/ethernet/fungible/funcore/fun_queue.c:346", funq->rq_tail, funq->rq_db);
 	}
 
 	db = funq->cq_head | FUN_DB_IRQ_ARM_F;
-	writel(db, funq->cq_db);
+	pete_writel("drivers/net/ethernet/fungible/funcore/fun_queue.c:350", db, funq->cq_db);
 	return processed;
 }
 

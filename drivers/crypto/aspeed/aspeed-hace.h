@@ -272,9 +272,9 @@ enum aspeed_version {
 };
 
 #define ast_hace_write(hace, val, offset)	\
-	writel((val), (hace)->regs + (offset))
+	pete_writel("drivers/crypto/aspeed/aspeed-hace.h:275", (val), (hace)->regs + (offset))
 #define ast_hace_read(hace, offset)		\
-	readl((hace)->regs + (offset))
+	pete_readl("drivers/crypto/aspeed/aspeed-hace.h:277", (hace)->regs + (offset))
 
 void aspeed_register_hace_hash_algs(struct aspeed_hace_dev *hace_dev);
 void aspeed_unregister_hace_hash_algs(struct aspeed_hace_dev *hace_dev);

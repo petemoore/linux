@@ -252,10 +252,10 @@ static void __pixpll_rreg(struct lsdc_pixpll *this,
 			  union lsdc_pixpll_reg_bitmap *dst)
 {
 #if defined(CONFIG_64BIT)
-	dst->d = readq(this->mmio);
+	dst->d = pete_readq("drivers/gpu/drm/loongson/lsdc_pixpll.c:255", this->mmio);
 #else
-	dst->w[0] = readl(this->mmio);
-	dst->w[1] = readl(this->mmio + 4);
+	dst->w[0] = pete_readl("drivers/gpu/drm/loongson/lsdc_pixpll.c:257", this->mmio);
+	dst->w[1] = pete_readl("drivers/gpu/drm/loongson/lsdc_pixpll.c:258", this->mmio + 4);
 #endif
 }
 
@@ -263,10 +263,10 @@ static void __pixpll_wreg(struct lsdc_pixpll *this,
 			  union lsdc_pixpll_reg_bitmap *src)
 {
 #if defined(CONFIG_64BIT)
-	writeq(src->d, this->mmio);
+	pete_writeq("drivers/gpu/drm/loongson/lsdc_pixpll.c:266", src->d, this->mmio);
 #else
-	writel(src->w[0], this->mmio);
-	writel(src->w[1], this->mmio + 4);
+	pete_writel("drivers/gpu/drm/loongson/lsdc_pixpll.c:268", src->w[0], this->mmio);
+	pete_writel("drivers/gpu/drm/loongson/lsdc_pixpll.c:269", src->w[1], this->mmio + 4);
 #endif
 }
 

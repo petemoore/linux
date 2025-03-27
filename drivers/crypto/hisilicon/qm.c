@@ -532,7 +532,7 @@ static bool qm_qp_avail_state(struct hisi_qm *qm, struct hisi_qp *qp,
 
 static u32 qm_get_hw_error_status(struct hisi_qm *qm)
 {
-	return readl(qm->io_base + QM_ABNORMAL_INT_STATUS);
+	return pete_readl("drivers/crypto/hisilicon/qm.c:535", qm->io_base + QM_ABNORMAL_INT_STATUS);
 }
 
 static u32 qm_get_dev_err_status(struct hisi_qm *qm)
@@ -663,7 +663,7 @@ static int qm_mb_nolock(struct hisi_qm *qm, struct qm_mailbox *mailbox)
 		goto mb_busy;
 	}
 
-	val = readl(qm->io_base + QM_MB_CMD_SEND_BASE);
+	val = pete_readl("drivers/crypto/hisilicon/qm.c:666", qm->io_base + QM_MB_CMD_SEND_BASE);
 	if (val & QM_MB_STATUS_MASK) {
 		dev_err(&qm->pdev->dev, "QM mailbox operation failed!\n");
 		ret = -EIO;
@@ -704,7 +704,7 @@ static void qm_db_v1(struct hisi_qm *qm, u16 qn, u8 cmd, u16 index, u8 priority)
 		   ((u64)index << QM_DB_INDEX_SHIFT_V1)  |
 		   ((u64)priority << QM_DB_PRIORITY_SHIFT_V1);
 
-	writeq(doorbell, qm->io_base + QM_DOORBELL_BASE_V1);
+	pete_writeq("drivers/crypto/hisilicon/qm.c:707", doorbell, qm->io_base + QM_DOORBELL_BASE_V1);
 }
 
 static void qm_db_v2(struct hisi_qm *qm, u16 qn, u8 cmd, u16 index, u8 priority)
@@ -724,7 +724,7 @@ static void qm_db_v2(struct hisi_qm *qm, u16 qn, u8 cmd, u16 index, u8 priority)
 		   ((u64)index << QM_DB_INDEX_SHIFT_V2) |
 		   ((u64)priority << QM_DB_PRIORITY_SHIFT_V2);
 
-	writeq(doorbell, io_base);
+	pete_writeq("drivers/crypto/hisilicon/qm.c:727", doorbell, io_base);
 }
 
 static void qm_db(struct hisi_qm *qm, u16 qn, u8 cmd, u16 index, u8 priority)
@@ -743,16 +743,16 @@ static void qm_disable_clock_gate(struct hisi_qm *qm)
 	if (qm->ver < QM_HW_V3)
 		return;
 
-	val = readl(qm->io_base + QM_PM_CTRL);
+	val = pete_readl("drivers/crypto/hisilicon/qm.c:746", qm->io_base + QM_PM_CTRL);
 	val |= QM_IDLE_DISABLE;
-	writel(val, qm->io_base +  QM_PM_CTRL);
+	pete_writel("drivers/crypto/hisilicon/qm.c:748", val, qm->io_base +  QM_PM_CTRL);
 }
 
 static int qm_dev_mem_reset(struct hisi_qm *qm)
 {
 	u32 val;
 
-	writel(0x1, qm->io_base + QM_MEM_START_INIT);
+	pete_writel("drivers/crypto/hisilicon/qm.c:755", 0x1, qm->io_base + QM_MEM_START_INIT);
 	return readl_relaxed_poll_timeout(qm->io_base + QM_MEM_INIT_DONE, val,
 					  val & BIT(0), POLL_PERIOD,
 					  POLL_TIMEOUT);
@@ -782,7 +782,7 @@ u32 hisi_qm_get_hw_info(struct hisi_qm *qm,
 		if (!is_read)
 			return info_table[index].v3_val;
 
-		val = readl(qm->io_base + info_table[index].offset);
+		val = pete_readl("drivers/crypto/hisilicon/qm.c:785", qm->io_base + info_table[index].offset);
 		return (val >> info_table[index].shift) & info_table[index].mask;
 	}
 }
@@ -980,7 +980,7 @@ static irqreturn_t qm_mb_cmd_irq(int irq, void *data)
 	struct hisi_qm *qm = data;
 	u32 val;
 
-	val = readl(qm->io_base + QM_IFC_INT_STATUS);
+	val = pete_readl("drivers/crypto/hisilicon/qm.c:983", qm->io_base + QM_IFC_INT_STATUS);
 	val &= QM_IFC_INT_STATUS_MASK;
 	if (!val)
 		return IRQ_NONE;
@@ -1126,7 +1126,7 @@ static void qm_init_prefetch(struct hisi_qm *qm)
 			PAGE_SIZE);
 	}
 
-	writel(page_type, qm->io_base + QM_PAGE_SIZE);
+	pete_writel("drivers/crypto/hisilicon/qm.c:1129", page_type, qm->io_base + QM_PAGE_SIZE);
 }
 
 /*
@@ -1238,8 +1238,8 @@ static void qm_vft_data_cfg(struct hisi_qm *qm, enum vft_type type, u32 base,
 		}
 	}
 
-	writel(lower_32_bits(tmp), qm->io_base + QM_VFT_CFG_DATA_L);
-	writel(upper_32_bits(tmp), qm->io_base + QM_VFT_CFG_DATA_H);
+	pete_writel("drivers/crypto/hisilicon/qm.c:1241", lower_32_bits(tmp), qm->io_base + QM_VFT_CFG_DATA_L);
+	pete_writel("drivers/crypto/hisilicon/qm.c:1242", upper_32_bits(tmp), qm->io_base + QM_VFT_CFG_DATA_H);
 }
 
 static int qm_set_vft_common(struct hisi_qm *qm, enum vft_type type,
@@ -1258,17 +1258,17 @@ static int qm_set_vft_common(struct hisi_qm *qm, enum vft_type type,
 	if (ret)
 		return ret;
 
-	writel(0x0, qm->io_base + QM_VFT_CFG_OP_WR);
-	writel(type, qm->io_base + QM_VFT_CFG_TYPE);
+	pete_writel("drivers/crypto/hisilicon/qm.c:1261", 0x0, qm->io_base + QM_VFT_CFG_OP_WR);
+	pete_writel("drivers/crypto/hisilicon/qm.c:1262", type, qm->io_base + QM_VFT_CFG_TYPE);
 	if (type == SHAPER_VFT)
 		fun_num |= base << QM_SHAPER_VFT_OFFSET;
 
-	writel(fun_num, qm->io_base + QM_VFT_CFG);
+	pete_writel("drivers/crypto/hisilicon/qm.c:1266", fun_num, qm->io_base + QM_VFT_CFG);
 
 	qm_vft_data_cfg(qm, type, base, number, factor);
 
-	writel(0x0, qm->io_base + QM_VFT_CFG_RDY);
-	writel(0x1, qm->io_base + QM_VFT_CFG_OP_ENABLE);
+	pete_writel("drivers/crypto/hisilicon/qm.c:1270", 0x0, qm->io_base + QM_VFT_CFG_RDY);
+	pete_writel("drivers/crypto/hisilicon/qm.c:1271", 0x1, qm->io_base + QM_VFT_CFG_OP_ENABLE);
 
 	return readl_relaxed_poll_timeout(qm->io_base + QM_VFT_CFG_RDY, val,
 					  val & BIT(0), POLL_PERIOD,
@@ -1285,7 +1285,7 @@ static int qm_shaper_init_vft(struct hisi_qm *qm, u32 fun_num)
 		dev_err(&qm->pdev->dev, "failed to calculate shaper parameter!\n");
 		return ret;
 	}
-	writel(qm->type_rate, qm->io_base + QM_SHAPER_CFG);
+	pete_writel("drivers/crypto/hisilicon/qm.c:1288", qm->type_rate, qm->io_base + QM_SHAPER_CFG);
 	for (i = ALG_TYPE_0; i <= ALG_TYPE_1; i++) {
 		/* The base number of queue reuse for different alg type */
 		ret = qm_set_vft_common(qm, SHAPER_VFT, fun_num, i, 1);
@@ -1332,8 +1332,8 @@ static int qm_get_vft_v2(struct hisi_qm *qm, u32 *base, u32 *number)
 	if (ret)
 		return ret;
 
-	sqc_vft = readl(qm->io_base + QM_MB_CMD_DATA_ADDR_L) |
-		  ((u64)readl(qm->io_base + QM_MB_CMD_DATA_ADDR_H) << 32);
+	sqc_vft = pete_readl("drivers/crypto/hisilicon/qm.c:1335", qm->io_base + QM_MB_CMD_DATA_ADDR_L) |
+		  ((u64)pete_readl("drivers/crypto/hisilicon/qm.c:1336", qm->io_base + QM_MB_CMD_DATA_ADDR_H) << 32);
 	*base = QM_SQC_VFT_BASE_MASK_V2 & (sqc_vft >> QM_SQC_VFT_BASE_SHIFT_V2);
 	*number = (QM_SQC_VFT_NUM_MASK_V2 &
 		   (sqc_vft >> QM_SQC_VFT_NUM_SHIFT_V2)) + 1;
@@ -1382,7 +1382,7 @@ static int qm_dump_cqc_raw(struct hisi_qm *qm, dma_addr_t dma_addr, u16 qp_id)
 
 static void qm_hw_error_init_v1(struct hisi_qm *qm)
 {
-	writel(QM_ABNORMAL_INT_MASK_VALUE, qm->io_base + QM_ABNORMAL_INT_MASK);
+	pete_writel("drivers/crypto/hisilicon/qm.c:1385", QM_ABNORMAL_INT_MASK_VALUE, qm->io_base + QM_ABNORMAL_INT_MASK);
 }
 
 static void qm_hw_error_cfg(struct hisi_qm *qm)
@@ -1391,13 +1391,13 @@ static void qm_hw_error_cfg(struct hisi_qm *qm)
 
 	qm->error_mask = err_info->nfe | err_info->ce | err_info->fe;
 	/* clear QM hw residual error source */
-	writel(qm->error_mask, qm->io_base + QM_ABNORMAL_INT_SOURCE);
+	pete_writel("drivers/crypto/hisilicon/qm.c:1394", qm->error_mask, qm->io_base + QM_ABNORMAL_INT_SOURCE);
 
 	/* configure error type */
-	writel(err_info->ce, qm->io_base + QM_RAS_CE_ENABLE);
-	writel(QM_RAS_CE_TIMES_PER_IRQ, qm->io_base + QM_RAS_CE_THRESHOLD);
-	writel(err_info->nfe, qm->io_base + QM_RAS_NFE_ENABLE);
-	writel(err_info->fe, qm->io_base + QM_RAS_FE_ENABLE);
+	pete_writel("drivers/crypto/hisilicon/qm.c:1397", err_info->ce, qm->io_base + QM_RAS_CE_ENABLE);
+	pete_writel("drivers/crypto/hisilicon/qm.c:1398", QM_RAS_CE_TIMES_PER_IRQ, qm->io_base + QM_RAS_CE_THRESHOLD);
+	pete_writel("drivers/crypto/hisilicon/qm.c:1399", err_info->nfe, qm->io_base + QM_RAS_NFE_ENABLE);
+	pete_writel("drivers/crypto/hisilicon/qm.c:1400", err_info->fe, qm->io_base + QM_RAS_FE_ENABLE);
 }
 
 static void qm_hw_error_init_v2(struct hisi_qm *qm)
@@ -1407,16 +1407,16 @@ static void qm_hw_error_init_v2(struct hisi_qm *qm)
 	qm_hw_error_cfg(qm);
 
 	irq_unmask = ~qm->error_mask;
-	irq_unmask &= readl(qm->io_base + QM_ABNORMAL_INT_MASK);
-	writel(irq_unmask, qm->io_base + QM_ABNORMAL_INT_MASK);
+	irq_unmask &= pete_readl("drivers/crypto/hisilicon/qm.c:1410", qm->io_base + QM_ABNORMAL_INT_MASK);
+	pete_writel("drivers/crypto/hisilicon/qm.c:1411", irq_unmask, qm->io_base + QM_ABNORMAL_INT_MASK);
 }
 
 static void qm_hw_error_uninit_v2(struct hisi_qm *qm)
 {
 	u32 irq_mask = qm->error_mask;
 
-	irq_mask |= readl(qm->io_base + QM_ABNORMAL_INT_MASK);
-	writel(irq_mask, qm->io_base + QM_ABNORMAL_INT_MASK);
+	irq_mask |= pete_readl("drivers/crypto/hisilicon/qm.c:1418", qm->io_base + QM_ABNORMAL_INT_MASK);
+	pete_writel("drivers/crypto/hisilicon/qm.c:1419", irq_mask, qm->io_base + QM_ABNORMAL_INT_MASK);
 }
 
 static void qm_hw_error_init_v3(struct hisi_qm *qm)
@@ -1426,22 +1426,22 @@ static void qm_hw_error_init_v3(struct hisi_qm *qm)
 	qm_hw_error_cfg(qm);
 
 	/* enable close master ooo when hardware error happened */
-	writel(qm->err_info.qm_shutdown_mask, qm->io_base + QM_OOO_SHUTDOWN_SEL);
+	pete_writel("drivers/crypto/hisilicon/qm.c:1429", qm->err_info.qm_shutdown_mask, qm->io_base + QM_OOO_SHUTDOWN_SEL);
 
 	irq_unmask = ~qm->error_mask;
-	irq_unmask &= readl(qm->io_base + QM_ABNORMAL_INT_MASK);
-	writel(irq_unmask, qm->io_base + QM_ABNORMAL_INT_MASK);
+	irq_unmask &= pete_readl("drivers/crypto/hisilicon/qm.c:1432", qm->io_base + QM_ABNORMAL_INT_MASK);
+	pete_writel("drivers/crypto/hisilicon/qm.c:1433", irq_unmask, qm->io_base + QM_ABNORMAL_INT_MASK);
 }
 
 static void qm_hw_error_uninit_v3(struct hisi_qm *qm)
 {
 	u32 irq_mask = qm->error_mask;
 
-	irq_mask |= readl(qm->io_base + QM_ABNORMAL_INT_MASK);
-	writel(irq_mask, qm->io_base + QM_ABNORMAL_INT_MASK);
+	irq_mask |= pete_readl("drivers/crypto/hisilicon/qm.c:1440", qm->io_base + QM_ABNORMAL_INT_MASK);
+	pete_writel("drivers/crypto/hisilicon/qm.c:1441", irq_mask, qm->io_base + QM_ABNORMAL_INT_MASK);
 
 	/* disable close master ooo when hardware error happened */
-	writel(0x0, qm->io_base + QM_OOO_SHUTDOWN_SEL);
+	pete_writel("drivers/crypto/hisilicon/qm.c:1444", 0x0, qm->io_base + QM_OOO_SHUTDOWN_SEL);
 }
 
 static void qm_log_hw_error(struct hisi_qm *qm, u32 error_status)
@@ -1460,14 +1460,14 @@ static void qm_log_hw_error(struct hisi_qm *qm, u32 error_status)
 			err->msg, err->int_msk);
 
 		if (err->int_msk & QM_DB_TIMEOUT) {
-			reg_val = readl(qm->io_base + QM_ABNORMAL_INF01);
+			reg_val = pete_readl("drivers/crypto/hisilicon/qm.c:1463", qm->io_base + QM_ABNORMAL_INF01);
 			type = (reg_val & QM_DB_TIMEOUT_TYPE) >>
 			       QM_DB_TIMEOUT_TYPE_SHIFT;
 			vf_num = reg_val & QM_DB_TIMEOUT_VF;
 			dev_err(dev, "qm %s doorbell timeout in function %u\n",
 				qm_db_timeout[type], vf_num);
 		} else if (err->int_msk & QM_OF_FIFO_OF) {
-			reg_val = readl(qm->io_base + QM_ABNORMAL_INF00);
+			reg_val = pete_readl("drivers/crypto/hisilicon/qm.c:1470", qm->io_base + QM_ABNORMAL_INF00);
 			type = (reg_val & QM_FIFO_OVERFLOW_TYPE) >>
 			       QM_FIFO_OVERFLOW_TYPE_SHIFT;
 			vf_num = reg_val & QM_FIFO_OVERFLOW_VF;
@@ -1493,15 +1493,15 @@ static enum acc_err_result qm_hw_error_handle_v2(struct hisi_qm *qm)
 		qm_log_hw_error(qm, error_status);
 		if (error_status & qm->err_info.qm_reset_mask) {
 			/* Disable the same error reporting until device is recovered. */
-			writel(qm->err_info.nfe & (~error_status),
+			pete_writel("drivers/crypto/hisilicon/qm.c:1496", qm->err_info.nfe & (~error_status),
 			       qm->io_base + QM_RAS_NFE_ENABLE);
 			return ACC_ERR_NEED_RESET;
 		}
 
 		/* Clear error source if not need reset. */
-		writel(error_status, qm->io_base + QM_ABNORMAL_INT_SOURCE);
-		writel(qm->err_info.nfe, qm->io_base + QM_RAS_NFE_ENABLE);
-		writel(qm->err_info.ce, qm->io_base + QM_RAS_CE_ENABLE);
+		pete_writel("drivers/crypto/hisilicon/qm.c:1502", error_status, qm->io_base + QM_ABNORMAL_INT_SOURCE);
+		pete_writel("drivers/crypto/hisilicon/qm.c:1503", qm->err_info.nfe, qm->io_base + QM_RAS_NFE_ENABLE);
+		pete_writel("drivers/crypto/hisilicon/qm.c:1504", qm->err_info.ce, qm->io_base + QM_RAS_CE_ENABLE);
 	}
 
 	return ACC_ERR_RECOVERED;
@@ -1518,8 +1518,8 @@ static int qm_get_mb_cmd(struct hisi_qm *qm, u64 *msg, u16 fun_num)
 	if (ret)
 		goto err_unlock;
 
-	*msg = readl(qm->io_base + QM_MB_CMD_DATA_ADDR_L) |
-		  ((u64)readl(qm->io_base + QM_MB_CMD_DATA_ADDR_H) << 32);
+	*msg = pete_readl("drivers/crypto/hisilicon/qm.c:1521", qm->io_base + QM_MB_CMD_DATA_ADDR_L) |
+		  ((u64)pete_readl("drivers/crypto/hisilicon/qm.c:1522", qm->io_base + QM_MB_CMD_DATA_ADDR_H) << 32);
 
 err_unlock:
 	mutex_unlock(&qm->mailbox_lock);
@@ -1531,11 +1531,11 @@ static void qm_clear_cmd_interrupt(struct hisi_qm *qm, u64 vf_mask)
 	u32 val;
 
 	if (qm->fun_type == QM_HW_PF)
-		writeq(vf_mask, qm->io_base + QM_IFC_INT_SOURCE_P);
+		pete_writeq("drivers/crypto/hisilicon/qm.c:1534", vf_mask, qm->io_base + QM_IFC_INT_SOURCE_P);
 
-	val = readl(qm->io_base + QM_IFC_INT_SOURCE_V);
+	val = pete_readl("drivers/crypto/hisilicon/qm.c:1536", qm->io_base + QM_IFC_INT_SOURCE_V);
 	val |= QM_IFC_INT_SOURCE_MASK;
-	writel(val, qm->io_base + QM_IFC_INT_SOURCE_V);
+	pete_writel("drivers/crypto/hisilicon/qm.c:1538", val, qm->io_base + QM_IFC_INT_SOURCE_V);
 }
 
 static void qm_handle_vf_msg(struct hisi_qm *qm, u32 vf_id)
@@ -1581,7 +1581,7 @@ static int qm_wait_vf_prepare_finish(struct hisi_qm *qm)
 		return 0;
 
 	while (true) {
-		val = readq(qm->io_base + QM_IFC_INT_SOURCE_P);
+		val = pete_readq("drivers/crypto/hisilicon/qm.c:1584", qm->io_base + QM_IFC_INT_SOURCE_P);
 		/* All VFs send command to PF, break */
 		if ((val & GENMASK(vfs_num, 1)) == GENMASK(vfs_num, 1))
 			break;
@@ -1612,23 +1612,23 @@ static void qm_trigger_vf_interrupt(struct hisi_qm *qm, u32 fun_num)
 {
 	u32 val;
 
-	val = readl(qm->io_base + QM_IFC_INT_CFG);
+	val = pete_readl("drivers/crypto/hisilicon/qm.c:1615", qm->io_base + QM_IFC_INT_CFG);
 	val &= ~QM_IFC_SEND_ALL_VFS;
 	val |= fun_num;
-	writel(val, qm->io_base + QM_IFC_INT_CFG);
+	pete_writel("drivers/crypto/hisilicon/qm.c:1618", val, qm->io_base + QM_IFC_INT_CFG);
 
-	val = readl(qm->io_base + QM_IFC_INT_SET_P);
+	val = pete_readl("drivers/crypto/hisilicon/qm.c:1620", qm->io_base + QM_IFC_INT_SET_P);
 	val |= QM_IFC_INT_SET_MASK;
-	writel(val, qm->io_base + QM_IFC_INT_SET_P);
+	pete_writel("drivers/crypto/hisilicon/qm.c:1622", val, qm->io_base + QM_IFC_INT_SET_P);
 }
 
 static void qm_trigger_pf_interrupt(struct hisi_qm *qm)
 {
 	u32 val;
 
-	val = readl(qm->io_base + QM_IFC_INT_SET_V);
+	val = pete_readl("drivers/crypto/hisilicon/qm.c:1629", qm->io_base + QM_IFC_INT_SET_V);
 	val |= QM_IFC_INT_SET_MASK;
-	writel(val, qm->io_base + QM_IFC_INT_SET_V);
+	pete_writel("drivers/crypto/hisilicon/qm.c:1631", val, qm->io_base + QM_IFC_INT_SET_V);
 }
 
 static int qm_ping_single_vf(struct hisi_qm *qm, u64 cmd, u32 fun_num)
@@ -1650,7 +1650,7 @@ static int qm_ping_single_vf(struct hisi_qm *qm, u64 cmd, u32 fun_num)
 	qm_trigger_vf_interrupt(qm, fun_num);
 	while (true) {
 		msleep(QM_WAIT_DST_ACK);
-		val = readq(qm->io_base + QM_IFC_READY_STATUS);
+		val = pete_readq("drivers/crypto/hisilicon/qm.c:1653", qm->io_base + QM_IFC_READY_STATUS);
 		/* if VF respond, PF notifies VF successfully. */
 		if (!(val & BIT(fun_num)))
 			goto err_unlock;
@@ -1690,7 +1690,7 @@ static int qm_ping_all_vfs(struct hisi_qm *qm, u64 cmd)
 	qm_trigger_vf_interrupt(qm, QM_IFC_SEND_ALL_VFS);
 	while (true) {
 		msleep(QM_WAIT_DST_ACK);
-		val = readq(qm->io_base + QM_IFC_READY_STATUS);
+		val = pete_readq("drivers/crypto/hisilicon/qm.c:1693", qm->io_base + QM_IFC_READY_STATUS);
 		/* If all VFs acked, PF notifies VFs successfully. */
 		if (!(val & GENMASK(vfs_num, 1))) {
 			mutex_unlock(&qm->mailbox_lock);
@@ -1731,7 +1731,7 @@ static int qm_ping_pf(struct hisi_qm *qm, u64 cmd)
 	/* Waiting for PF response */
 	while (true) {
 		msleep(QM_WAIT_DST_ACK);
-		val = readl(qm->io_base + QM_IFC_INT_SET_V);
+		val = pete_readl("drivers/crypto/hisilicon/qm.c:1734", qm->io_base + QM_IFC_INT_SET_V);
 		if (!(val & QM_IFC_INT_STATUS_MASK))
 			break;
 
@@ -1766,7 +1766,7 @@ static int qm_set_msi(struct hisi_qm *qm, bool set)
 			return 0;
 
 		mdelay(1);
-		if (readl(qm->io_base + QM_PEH_DFX_INFO0))
+		if (pete_readl("drivers/crypto/hisilicon/qm.c:1769", qm->io_base + QM_PEH_DFX_INFO0))
 			return -EFAULT;
 	}
 
@@ -2305,7 +2305,7 @@ static void hisi_qm_cache_wb(struct hisi_qm *qm)
 	if (qm->ver == QM_HW_V1)
 		return;
 
-	writel(0x1, qm->io_base + QM_CACHE_WB_START);
+	pete_writel("drivers/crypto/hisilicon/qm.c:2308", 0x1, qm->io_base + QM_CACHE_WB_START);
 	if (readl_relaxed_poll_timeout(qm->io_base + QM_CACHE_WB_DONE,
 				       val, val & BIT(0), POLL_PERIOD,
 				       POLL_TIMEOUT))
@@ -2860,9 +2860,9 @@ static void qm_cmd_uninit(struct hisi_qm *qm)
 	if (!test_bit(QM_SUPPORT_MB_COMMAND, &qm->caps))
 		return;
 
-	val = readl(qm->io_base + QM_IFC_INT_MASK);
+	val = pete_readl("drivers/crypto/hisilicon/qm.c:2863", qm->io_base + QM_IFC_INT_MASK);
 	val |= QM_IFC_INT_DISABLE;
-	writel(val, qm->io_base + QM_IFC_INT_MASK);
+	pete_writel("drivers/crypto/hisilicon/qm.c:2865", val, qm->io_base + QM_IFC_INT_MASK);
 }
 
 static void qm_cmd_init(struct hisi_qm *qm)
@@ -2876,9 +2876,9 @@ static void qm_cmd_init(struct hisi_qm *qm)
 	qm_clear_cmd_interrupt(qm, QM_IFC_INT_SOURCE_CLR);
 
 	/* Enable pf to vf communication reg. */
-	val = readl(qm->io_base + QM_IFC_INT_MASK);
+	val = pete_readl("drivers/crypto/hisilicon/qm.c:2879", qm->io_base + QM_IFC_INT_MASK);
 	val &= ~QM_IFC_INT_DISABLE;
-	writel(val, qm->io_base + QM_IFC_INT_MASK);
+	pete_writel("drivers/crypto/hisilicon/qm.c:2881", val, qm->io_base + QM_IFC_INT_MASK);
 }
 
 static void qm_put_pci_res(struct hisi_qm *qm)
@@ -2904,7 +2904,7 @@ static void hisi_qm_pci_uninit(struct hisi_qm *qm)
 static void hisi_qm_set_state(struct hisi_qm *qm, u8 state)
 {
 	if (qm->ver > QM_HW_V2 && qm->fun_type == QM_HW_VF)
-		writel(state, qm->io_base + QM_VF_STATE);
+		pete_writel("drivers/crypto/hisilicon/qm.c:2907", state, qm->io_base + QM_VF_STATE);
 }
 
 static void hisi_qm_unint_work(struct hisi_qm *qm)
@@ -3023,14 +3023,14 @@ static void qm_enable_eq_aeq_interrupts(struct hisi_qm *qm)
 	qm_db(qm, 0, QM_DOORBELL_CMD_AEQ, qm->status.aeq_head, 0);
 	qm_db(qm, 0, QM_DOORBELL_CMD_EQ, qm->status.eq_head, 0);
 
-	writel(0x0, qm->io_base + QM_VF_EQ_INT_MASK);
-	writel(0x0, qm->io_base + QM_VF_AEQ_INT_MASK);
+	pete_writel("drivers/crypto/hisilicon/qm.c:3026", 0x0, qm->io_base + QM_VF_EQ_INT_MASK);
+	pete_writel("drivers/crypto/hisilicon/qm.c:3027", 0x0, qm->io_base + QM_VF_AEQ_INT_MASK);
 }
 
 static void qm_disable_eq_aeq_interrupts(struct hisi_qm *qm)
 {
-	writel(0x1, qm->io_base + QM_VF_EQ_INT_MASK);
-	writel(0x1, qm->io_base + QM_VF_AEQ_INT_MASK);
+	pete_writel("drivers/crypto/hisilicon/qm.c:3032", 0x1, qm->io_base + QM_VF_EQ_INT_MASK);
+	pete_writel("drivers/crypto/hisilicon/qm.c:3033", 0x1, qm->io_base + QM_VF_AEQ_INT_MASK);
 }
 
 static int qm_eq_ctx_cfg(struct hisi_qm *qm)
@@ -3596,12 +3596,12 @@ static u32 qm_get_shaper_vft_qos(struct hisi_qm *qm, u32 fun_index)
 	if (ret)
 		return 0;
 
-	writel(0x1, qm->io_base + QM_VFT_CFG_OP_WR);
-	writel(SHAPER_VFT, qm->io_base + QM_VFT_CFG_TYPE);
-	writel(fun_index, qm->io_base + QM_VFT_CFG);
+	pete_writel("drivers/crypto/hisilicon/qm.c:3599", 0x1, qm->io_base + QM_VFT_CFG_OP_WR);
+	pete_writel("drivers/crypto/hisilicon/qm.c:3600", SHAPER_VFT, qm->io_base + QM_VFT_CFG_TYPE);
+	pete_writel("drivers/crypto/hisilicon/qm.c:3601", fun_index, qm->io_base + QM_VFT_CFG);
 
-	writel(0x0, qm->io_base + QM_VFT_CFG_RDY);
-	writel(0x1, qm->io_base + QM_VFT_CFG_OP_ENABLE);
+	pete_writel("drivers/crypto/hisilicon/qm.c:3603", 0x0, qm->io_base + QM_VFT_CFG_RDY);
+	pete_writel("drivers/crypto/hisilicon/qm.c:3604", 0x1, qm->io_base + QM_VFT_CFG_OP_ENABLE);
 
 	ret = readl_relaxed_poll_timeout(qm->io_base + QM_VFT_CFG_RDY, val,
 					 val & BIT(0), POLL_PERIOD,
@@ -3609,8 +3609,8 @@ static u32 qm_get_shaper_vft_qos(struct hisi_qm *qm, u32 fun_index)
 	if (ret)
 		return 0;
 
-	shaper_vft = readl(qm->io_base + QM_VFT_CFG_DATA_L) |
-		  ((u64)readl(qm->io_base + QM_VFT_CFG_DATA_H) << 32);
+	shaper_vft = pete_readl("drivers/crypto/hisilicon/qm.c:3612", qm->io_base + QM_VFT_CFG_DATA_L) |
+		  ((u64)pete_readl("drivers/crypto/hisilicon/qm.c:3613", qm->io_base + QM_VFT_CFG_DATA_H) << 32);
 
 	cir_b = shaper_vft & QM_SHAPER_CIR_B_MASK;
 	cir_u = shaper_vft & QM_SHAPER_CIR_U_MASK;
@@ -4015,7 +4015,7 @@ static int qm_check_req_recv(struct hisi_qm *qm)
 	if (qm->ver >= QM_HW_V3)
 		return 0;
 
-	writel(ACC_VENDOR_ID_VALUE, qm->io_base + QM_PEH_VENDOR_ID);
+	pete_writel("drivers/crypto/hisilicon/qm.c:4018", ACC_VENDOR_ID_VALUE, qm->io_base + QM_PEH_VENDOR_ID);
 	ret = readl_relaxed_poll_timeout(qm->io_base + QM_PEH_VENDOR_ID, val,
 					 (val == ACC_VENDOR_ID_VALUE),
 					 POLL_PERIOD, POLL_TIMEOUT);
@@ -4024,7 +4024,7 @@ static int qm_check_req_recv(struct hisi_qm *qm)
 		return ret;
 	}
 
-	writel(PCI_VENDOR_ID_HUAWEI, qm->io_base + QM_PEH_VENDOR_ID);
+	pete_writel("drivers/crypto/hisilicon/qm.c:4027", PCI_VENDOR_ID_HUAWEI, qm->io_base + QM_PEH_VENDOR_ID);
 	ret = readl_relaxed_poll_timeout(qm->io_base + QM_PEH_VENDOR_ID, val,
 					 (val == PCI_VENDOR_ID_HUAWEI),
 					 POLL_PERIOD, POLL_TIMEOUT);
@@ -4100,10 +4100,10 @@ static void qm_dev_ecc_mbit_handle(struct hisi_qm *qm)
 	} else if (qm->err_status.is_dev_ecc_mbit &&
 		   !qm->err_status.is_qm_ecc_mbit &&
 		   !qm->err_ini->close_axi_master_ooo) {
-		nfe_enb = readl(qm->io_base + QM_RAS_NFE_ENABLE);
-		writel(nfe_enb & QM_RAS_NFE_MBIT_DISABLE,
+		nfe_enb = pete_readl("drivers/crypto/hisilicon/qm.c:4103", qm->io_base + QM_RAS_NFE_ENABLE);
+		pete_writel("drivers/crypto/hisilicon/qm.c:4104", nfe_enb & QM_RAS_NFE_MBIT_DISABLE,
 		       qm->io_base + QM_RAS_NFE_ENABLE);
-		writel(QM_ECC_MBIT, qm->io_base + QM_ABNORMAL_INT_SET);
+		pete_writel("drivers/crypto/hisilicon/qm.c:4106", QM_ECC_MBIT, qm->io_base + QM_ABNORMAL_INT_SET);
 	}
 }
 
@@ -4209,7 +4209,7 @@ static int qm_master_ooo_check(struct hisi_qm *qm)
 	int ret;
 
 	/* Check the ooo register of the device before resetting the device. */
-	writel(ACC_MASTER_GLOBAL_CTRL_SHUTDOWN, qm->io_base + ACC_MASTER_GLOBAL_CTRL);
+	pete_writel("drivers/crypto/hisilicon/qm.c:4212", ACC_MASTER_GLOBAL_CTRL_SHUTDOWN, qm->io_base + ACC_MASTER_GLOBAL_CTRL);
 	ret = readl_relaxed_poll_timeout(qm->io_base + ACC_MASTER_TRANS_RETURN,
 					 val, (val == ACC_MASTER_TRANS_RETURN_RW),
 					 POLL_PERIOD, POLL_TIMEOUT);
@@ -4374,8 +4374,8 @@ static void qm_restart_prepare(struct hisi_qm *qm)
 		return;
 
 	/* temporarily close the OOO port used for PEH to write out MSI */
-	value = readl(qm->io_base + ACC_AM_CFG_PORT_WR_EN);
-	writel(value & ~qm->err_info.msi_wr_port,
+	value = pete_readl("drivers/crypto/hisilicon/qm.c:4377", qm->io_base + ACC_AM_CFG_PORT_WR_EN);
+	pete_writel("drivers/crypto/hisilicon/qm.c:4378", value & ~qm->err_info.msi_wr_port,
 	       qm->io_base + ACC_AM_CFG_PORT_WR_EN);
 
 	/* clear dev ecc 2bit error source if having */
@@ -4384,10 +4384,10 @@ static void qm_restart_prepare(struct hisi_qm *qm)
 		qm->err_ini->clear_dev_hw_err_status(qm, value);
 
 	/* clear QM ecc mbit error source */
-	writel(QM_ECC_MBIT, qm->io_base + QM_ABNORMAL_INT_SOURCE);
+	pete_writel("drivers/crypto/hisilicon/qm.c:4387", QM_ECC_MBIT, qm->io_base + QM_ABNORMAL_INT_SOURCE);
 
 	/* clear AM Reorder Buffer ecc mbit source */
-	writel(ACC_ROB_ECC_ERR_MULTPL, qm->io_base + ACC_AM_ROB_ECC_INT_STS);
+	pete_writel("drivers/crypto/hisilicon/qm.c:4390", ACC_ROB_ECC_ERR_MULTPL, qm->io_base + ACC_AM_ROB_ECC_INT_STS);
 }
 
 static void qm_restart_done(struct hisi_qm *qm)
@@ -4402,9 +4402,9 @@ static void qm_restart_done(struct hisi_qm *qm)
 		return;
 
 	/* open the OOO port for PEH to write out MSI */
-	value = readl(qm->io_base + ACC_AM_CFG_PORT_WR_EN);
+	value = pete_readl("drivers/crypto/hisilicon/qm.c:4405", qm->io_base + ACC_AM_CFG_PORT_WR_EN);
 	value |= qm->err_info.msi_wr_port;
-	writel(value, qm->io_base + ACC_AM_CFG_PORT_WR_EN);
+	pete_writel("drivers/crypto/hisilicon/qm.c:4407", value, qm->io_base + ACC_AM_CFG_PORT_WR_EN);
 
 clear_flags:
 	qm->err_status.is_qm_ecc_mbit = false;
@@ -4867,7 +4867,7 @@ static void qm_cmd_process(struct work_struct *cmd_process)
 	u32 i;
 
 	if (qm->fun_type == QM_HW_PF) {
-		val = readq(qm->io_base + QM_IFC_INT_SOURCE_P);
+		val = pete_readq("drivers/crypto/hisilicon/qm.c:4870", qm->io_base + QM_IFC_INT_SOURCE_P);
 		if (!val)
 			return;
 
@@ -5186,7 +5186,7 @@ static int qm_get_hw_caps(struct hisi_qm *qm)
 		set_bit(QM_SUPPORT_DB_ISOLATION, &qm->caps);
 
 	if (qm->ver >= QM_HW_V3) {
-		val = readl(qm->io_base + QM_FUNC_CAPS_REG);
+		val = pete_readl("drivers/crypto/hisilicon/qm.c:5189", qm->io_base + QM_FUNC_CAPS_REG);
 		qm->cap_ver = val & QM_CAPBILITY_VERSION;
 	}
 
@@ -5284,7 +5284,7 @@ static int qm_clear_device(struct hisi_qm *qm)
 
 	ret = qm_master_ooo_check(qm);
 	if (ret) {
-		writel(0x0, qm->io_base + ACC_MASTER_GLOBAL_CTRL);
+		pete_writel("drivers/crypto/hisilicon/qm.c:5287", 0x0, qm->io_base + ACC_MASTER_GLOBAL_CTRL);
 		return ret;
 	}
 
@@ -5478,7 +5478,7 @@ int hisi_qm_init(struct hisi_qm *qm)
 
 	if (qm->fun_type == QM_HW_PF) {
 		/* Set the doorbell timeout to QM_DB_TIMEOUT_CFG ns. */
-		writel(QM_DB_TIMEOUT_SET, qm->io_base + QM_DB_TIMEOUT_CFG);
+		pete_writel("drivers/crypto/hisilicon/qm.c:5481", QM_DB_TIMEOUT_SET, qm->io_base + QM_DB_TIMEOUT_CFG);
 		qm_disable_clock_gate(qm);
 		ret = qm_dev_mem_reset(qm);
 		if (ret) {
@@ -5637,7 +5637,7 @@ static int qm_rebuild_for_resume(struct hisi_qm *qm)
 	qm_cmd_init(qm);
 	hisi_qm_dev_err_init(qm);
 	/* Set the doorbell timeout to QM_DB_TIMEOUT_CFG ns. */
-	writel(QM_DB_TIMEOUT_SET, qm->io_base + QM_DB_TIMEOUT_CFG);
+	pete_writel("drivers/crypto/hisilicon/qm.c:5640", QM_DB_TIMEOUT_SET, qm->io_base + QM_DB_TIMEOUT_CFG);
 	qm_disable_clock_gate(qm);
 	ret = qm_dev_mem_reset(qm);
 	if (ret)

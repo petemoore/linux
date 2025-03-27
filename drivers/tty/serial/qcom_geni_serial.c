@@ -215,7 +215,7 @@ static unsigned int qcom_geni_serial_get_mctrl(struct uart_port *uport)
 	if (uart_console(uport)) {
 		mctrl |= TIOCM_CTS;
 	} else {
-		geni_ios = readl(uport->membase + SE_GENI_IOS);
+		geni_ios = pete_readl("drivers/tty/serial/qcom_geni_serial.c:218", uport->membase + SE_GENI_IOS);
 		if (!(geni_ios & IO2_DATA_IN))
 			mctrl |= TIOCM_CTS;
 	}
@@ -237,7 +237,7 @@ static void qcom_geni_serial_set_mctrl(struct uart_port *uport,
 
 	if (!(mctrl & TIOCM_RTS) && !uport->suspended)
 		uart_manual_rfr = UART_MANUAL_RFR_EN | UART_RFR_NOT_READY;
-	writel(uart_manual_rfr, uport->membase + SE_UART_MANUAL_RFR);
+	pete_writel("drivers/tty/serial/qcom_geni_serial.c:240", uart_manual_rfr, uport->membase + SE_UART_MANUAL_RFR);
 }
 
 static const char *qcom_geni_serial_get_type(struct uart_port *uport)
@@ -259,12 +259,12 @@ static struct qcom_geni_serial_port *get_port_from_line(int line, bool console)
 
 static bool qcom_geni_serial_main_active(struct uart_port *uport)
 {
-	return readl(uport->membase + SE_GENI_STATUS) & M_GENI_CMD_ACTIVE;
+	return pete_readl("drivers/tty/serial/qcom_geni_serial.c:262", uport->membase + SE_GENI_STATUS) & M_GENI_CMD_ACTIVE;
 }
 
 static bool qcom_geni_serial_secondary_active(struct uart_port *uport)
 {
-	return readl(uport->membase + SE_GENI_STATUS) & S_GENI_CMD_ACTIVE;
+	return pete_readl("drivers/tty/serial/qcom_geni_serial.c:267", uport->membase + SE_GENI_STATUS) & S_GENI_CMD_ACTIVE;
 }
 
 static bool qcom_geni_serial_poll_bit(struct uart_port *uport,
@@ -287,7 +287,7 @@ static bool qcom_geni_serial_poll_bit(struct uart_port *uport,
 	 */
 	timeout_us = DIV_ROUND_UP(timeout_us, 10) * 10;
 	while (timeout_us) {
-		reg = readl(uport->membase + offset);
+		reg = pete_readl("drivers/tty/serial/qcom_geni_serial.c:290", uport->membase + offset);
 		if ((bool)(reg & field) == set)
 			return true;
 		udelay(10);
@@ -300,9 +300,9 @@ static void qcom_geni_serial_setup_tx(struct uart_port *uport, u32 xmit_size)
 {
 	u32 m_cmd;
 
-	writel(xmit_size, uport->membase + SE_UART_TX_TRANS_LEN);
+	pete_writel("drivers/tty/serial/qcom_geni_serial.c:303", xmit_size, uport->membase + SE_UART_TX_TRANS_LEN);
 	m_cmd = UART_START_TX << M_OPCODE_SHFT;
-	writel(m_cmd, uport->membase + SE_GENI_M_CMD0);
+	pete_writel("drivers/tty/serial/qcom_geni_serial.c:305", m_cmd, uport->membase + SE_GENI_M_CMD0);
 }
 
 static void qcom_geni_serial_poll_tx_done(struct uart_port *uport)
@@ -313,24 +313,24 @@ static void qcom_geni_serial_poll_tx_done(struct uart_port *uport)
 	done = qcom_geni_serial_poll_bit(uport, SE_GENI_M_IRQ_STATUS,
 						M_CMD_DONE_EN, true);
 	if (!done) {
-		writel(M_GENI_CMD_ABORT, uport->membase +
+		pete_writel("drivers/tty/serial/qcom_geni_serial.c:316", M_GENI_CMD_ABORT, uport->membase +
 						SE_GENI_M_CMD_CTRL_REG);
 		irq_clear |= M_CMD_ABORT_EN;
 		qcom_geni_serial_poll_bit(uport, SE_GENI_M_IRQ_STATUS,
 							M_CMD_ABORT_EN, true);
 	}
-	writel(irq_clear, uport->membase + SE_GENI_M_IRQ_CLEAR);
+	pete_writel("drivers/tty/serial/qcom_geni_serial.c:322", irq_clear, uport->membase + SE_GENI_M_IRQ_CLEAR);
 }
 
 static void qcom_geni_serial_abort_rx(struct uart_port *uport)
 {
 	u32 irq_clear = S_CMD_DONE_EN | S_CMD_ABORT_EN;
 
-	writel(S_GENI_CMD_ABORT, uport->membase + SE_GENI_S_CMD_CTRL_REG);
+	pete_writel("drivers/tty/serial/qcom_geni_serial.c:329", S_GENI_CMD_ABORT, uport->membase + SE_GENI_S_CMD_CTRL_REG);
 	qcom_geni_serial_poll_bit(uport, SE_GENI_S_CMD_CTRL_REG,
 					S_GENI_CMD_ABORT, false);
-	writel(irq_clear, uport->membase + SE_GENI_S_IRQ_CLEAR);
-	writel(FORCE_DEFAULT, uport->membase + GENI_FORCE_DEFAULT_REG);
+	pete_writel("drivers/tty/serial/qcom_geni_serial.c:332", irq_clear, uport->membase + SE_GENI_S_IRQ_CLEAR);
+	pete_writel("drivers/tty/serial/qcom_geni_serial.c:333", FORCE_DEFAULT, uport->membase + GENI_FORCE_DEFAULT_REG);
 }
 
 #ifdef CONFIG_CONSOLE_POLL
@@ -342,13 +342,13 @@ static int qcom_geni_serial_get_char(struct uart_port *uport)
 	int ret;
 
 	if (!private_data->poll_cached_bytes_cnt) {
-		status = readl(uport->membase + SE_GENI_M_IRQ_STATUS);
-		writel(status, uport->membase + SE_GENI_M_IRQ_CLEAR);
+		status = pete_readl("drivers/tty/serial/qcom_geni_serial.c:345", uport->membase + SE_GENI_M_IRQ_STATUS);
+		pete_writel("drivers/tty/serial/qcom_geni_serial.c:346", status, uport->membase + SE_GENI_M_IRQ_CLEAR);
 
-		status = readl(uport->membase + SE_GENI_S_IRQ_STATUS);
-		writel(status, uport->membase + SE_GENI_S_IRQ_CLEAR);
+		status = pete_readl("drivers/tty/serial/qcom_geni_serial.c:348", uport->membase + SE_GENI_S_IRQ_STATUS);
+		pete_writel("drivers/tty/serial/qcom_geni_serial.c:349", status, uport->membase + SE_GENI_S_IRQ_CLEAR);
 
-		status = readl(uport->membase + SE_GENI_RX_FIFO_STATUS);
+		status = pete_readl("drivers/tty/serial/qcom_geni_serial.c:351", uport->membase + SE_GENI_RX_FIFO_STATUS);
 		word_cnt = status & RX_FIFO_WC_MSK;
 		if (!word_cnt)
 			return NO_POLL_CHAR;
@@ -366,7 +366,7 @@ static int qcom_geni_serial_get_char(struct uart_port *uport)
 			private_data->poll_cached_bytes_cnt = BYTES_PER_FIFO_WORD;
 
 		private_data->poll_cached_bytes =
-			readl(uport->membase + SE_GENI_RX_FIFOn);
+			pete_readl("drivers/tty/serial/qcom_geni_serial.c:369", uport->membase + SE_GENI_RX_FIFOn);
 	}
 
 	private_data->poll_cached_bytes_cnt--;
@@ -379,12 +379,12 @@ static int qcom_geni_serial_get_char(struct uart_port *uport)
 static void qcom_geni_serial_poll_put_char(struct uart_port *uport,
 							unsigned char c)
 {
-	writel(DEF_TX_WM, uport->membase + SE_GENI_TX_WATERMARK_REG);
+	pete_writel("drivers/tty/serial/qcom_geni_serial.c:382", DEF_TX_WM, uport->membase + SE_GENI_TX_WATERMARK_REG);
 	qcom_geni_serial_setup_tx(uport, 1);
 	WARN_ON(!qcom_geni_serial_poll_bit(uport, SE_GENI_M_IRQ_STATUS,
 						M_TX_FIFO_WATERMARK_EN, true));
-	writel(c, uport->membase + SE_GENI_TX_FIFOn);
-	writel(M_TX_FIFO_WATERMARK_EN, uport->membase + SE_GENI_M_IRQ_CLEAR);
+	pete_writel("drivers/tty/serial/qcom_geni_serial.c:386", c, uport->membase + SE_GENI_TX_FIFOn);
+	pete_writel("drivers/tty/serial/qcom_geni_serial.c:387", M_TX_FIFO_WATERMARK_EN, uport->membase + SE_GENI_M_IRQ_CLEAR);
 	qcom_geni_serial_poll_tx_done(uport);
 }
 
@@ -416,7 +416,7 @@ static void qcom_geni_serial_wr_char(struct uart_port *uport, unsigned char ch)
 	private_data->write_cached_bytes_cnt++;
 
 	if (private_data->write_cached_bytes_cnt == BYTES_PER_FIFO_WORD) {
-		writel(private_data->write_cached_bytes,
+		pete_writel("drivers/tty/serial/qcom_geni_serial.c:419", private_data->write_cached_bytes,
 		       uport->membase + SE_GENI_TX_FIFOn);
 		private_data->write_cached_bytes_cnt = 0;
 	}
@@ -440,7 +440,7 @@ __qcom_geni_serial_console_write(struct uart_port *uport, const char *s,
 			bytes_to_send++;
 	}
 
-	writel(DEF_TX_WM, uport->membase + SE_GENI_TX_WATERMARK_REG);
+	pete_writel("drivers/tty/serial/qcom_geni_serial.c:443", DEF_TX_WM, uport->membase + SE_GENI_TX_WATERMARK_REG);
 	qcom_geni_serial_setup_tx(uport, bytes_to_send);
 	for (i = 0; i < count; ) {
 		size_t chars_to_write = 0;
@@ -458,7 +458,7 @@ __qcom_geni_serial_console_write(struct uart_port *uport, const char *s,
 		chars_to_write = min_t(size_t, count - i, avail / 2);
 		uart_console_write(uport, s + i, chars_to_write,
 						qcom_geni_serial_wr_char);
-		writel(M_TX_FIFO_WATERMARK_EN, uport->membase +
+		pete_writel("drivers/tty/serial/qcom_geni_serial.c:461", M_TX_FIFO_WATERMARK_EN, uport->membase +
 							SE_GENI_M_IRQ_CLEAR);
 		i += chars_to_write;
 	}
@@ -466,7 +466,7 @@ __qcom_geni_serial_console_write(struct uart_port *uport, const char *s,
 	if (private_data->write_cached_bytes_cnt) {
 		private_data->write_cached_bytes >>= BITS_PER_BYTE *
 			(BYTES_PER_FIFO_WORD - private_data->write_cached_bytes_cnt);
-		writel(private_data->write_cached_bytes,
+		pete_writel("drivers/tty/serial/qcom_geni_serial.c:469", private_data->write_cached_bytes,
 		       uport->membase + SE_GENI_TX_FIFOn);
 		private_data->write_cached_bytes_cnt = 0;
 	}
@@ -496,7 +496,7 @@ static void qcom_geni_serial_console_write(struct console *co, const char *s,
 	else
 		spin_lock_irqsave(&uport->lock, flags);
 
-	geni_status = readl(uport->membase + SE_GENI_STATUS);
+	geni_status = pete_readl("drivers/tty/serial/qcom_geni_serial.c:499", uport->membase + SE_GENI_STATUS);
 
 	/* Cancel the current write to log the fault */
 	if (!locked) {
@@ -506,10 +506,10 @@ static void qcom_geni_serial_console_write(struct console *co, const char *s,
 			geni_se_abort_m_cmd(&port->se);
 			qcom_geni_serial_poll_bit(uport, SE_GENI_M_IRQ_STATUS,
 							M_CMD_ABORT_EN, true);
-			writel(M_CMD_ABORT_EN, uport->membase +
+			pete_writel("drivers/tty/serial/qcom_geni_serial.c:509", M_CMD_ABORT_EN, uport->membase +
 							SE_GENI_M_IRQ_CLEAR);
 		}
-		writel(M_CMD_CANCEL_EN, uport->membase + SE_GENI_M_IRQ_CLEAR);
+		pete_writel("drivers/tty/serial/qcom_geni_serial.c:512", M_CMD_CANCEL_EN, uport->membase + SE_GENI_M_IRQ_CLEAR);
 	} else if ((geni_status & M_GENI_CMD_ACTIVE) && !port->tx_remaining) {
 		/*
 		 * It seems we can't interrupt existing transfers if all data
@@ -518,8 +518,8 @@ static void qcom_geni_serial_console_write(struct console *co, const char *s,
 		qcom_geni_serial_poll_tx_done(uport);
 
 		if (!uart_circ_empty(&uport->state->xmit)) {
-			irq_en = readl(uport->membase + SE_GENI_M_IRQ_EN);
-			writel(irq_en | M_TX_FIFO_WATERMARK_EN,
+			irq_en = pete_readl("drivers/tty/serial/qcom_geni_serial.c:521", uport->membase + SE_GENI_M_IRQ_EN);
+			pete_writel("drivers/tty/serial/qcom_geni_serial.c:522", irq_en | M_TX_FIFO_WATERMARK_EN,
 					uport->membase + SE_GENI_M_IRQ_EN);
 		}
 	}
@@ -594,7 +594,7 @@ static void handle_rx_uart(struct uart_port *uport, u32 bytes, bool drop)
 
 static unsigned int qcom_geni_serial_tx_empty(struct uart_port *uport)
 {
-	return !readl(uport->membase + SE_GENI_TX_FIFO_STATUS);
+	return !pete_readl("drivers/tty/serial/qcom_geni_serial.c:597", uport->membase + SE_GENI_TX_FIFO_STATUS);
 }
 
 static void qcom_geni_serial_stop_tx_dma(struct uart_port *uport)
@@ -622,10 +622,10 @@ static void qcom_geni_serial_stop_tx_dma(struct uart_port *uport)
 						 M_CMD_ABORT_EN, true);
 		if (!done)
 			dev_err_ratelimited(uport->dev, "M_CMD_ABORT_EN not set");
-		writel(M_CMD_ABORT_EN, uport->membase + SE_GENI_M_IRQ_CLEAR);
+		pete_writel("drivers/tty/serial/qcom_geni_serial.c:625", M_CMD_ABORT_EN, uport->membase + SE_GENI_M_IRQ_CLEAR);
 	}
 
-	writel(M_CMD_CANCEL_EN, uport->membase + SE_GENI_M_IRQ_CLEAR);
+	pete_writel("drivers/tty/serial/qcom_geni_serial.c:628", M_CMD_CANCEL_EN, uport->membase + SE_GENI_M_IRQ_CLEAR);
 }
 
 static void qcom_geni_serial_start_tx_dma(struct uart_port *uport)
@@ -664,11 +664,11 @@ static void qcom_geni_serial_start_tx_fifo(struct uart_port *uport)
 	    !qcom_geni_serial_tx_empty(uport))
 		return;
 
-	irq_en = readl(uport->membase +	SE_GENI_M_IRQ_EN);
+	irq_en = pete_readl("drivers/tty/serial/qcom_geni_serial.c:667", uport->membase +	SE_GENI_M_IRQ_EN);
 	irq_en |= M_TX_FIFO_WATERMARK_EN | M_CMD_DONE_EN;
 
-	writel(DEF_TX_WM, uport->membase + SE_GENI_TX_WATERMARK_REG);
-	writel(irq_en, uport->membase +	SE_GENI_M_IRQ_EN);
+	pete_writel("drivers/tty/serial/qcom_geni_serial.c:670", DEF_TX_WM, uport->membase + SE_GENI_TX_WATERMARK_REG);
+	pete_writel("drivers/tty/serial/qcom_geni_serial.c:671", irq_en, uport->membase +	SE_GENI_M_IRQ_EN);
 }
 
 static void qcom_geni_serial_stop_tx_fifo(struct uart_port *uport)
@@ -676,10 +676,10 @@ static void qcom_geni_serial_stop_tx_fifo(struct uart_port *uport)
 	u32 irq_en;
 	struct qcom_geni_serial_port *port = to_dev_port(uport);
 
-	irq_en = readl(uport->membase + SE_GENI_M_IRQ_EN);
+	irq_en = pete_readl("drivers/tty/serial/qcom_geni_serial.c:679", uport->membase + SE_GENI_M_IRQ_EN);
 	irq_en &= ~(M_CMD_DONE_EN | M_TX_FIFO_WATERMARK_EN);
-	writel(0, uport->membase + SE_GENI_TX_WATERMARK_REG);
-	writel(irq_en, uport->membase + SE_GENI_M_IRQ_EN);
+	pete_writel("drivers/tty/serial/qcom_geni_serial.c:681", 0, uport->membase + SE_GENI_TX_WATERMARK_REG);
+	pete_writel("drivers/tty/serial/qcom_geni_serial.c:682", irq_en, uport->membase + SE_GENI_M_IRQ_EN);
 	/* Possible stop tx is called multiple times. */
 	if (!qcom_geni_serial_main_active(uport))
 		return;
@@ -690,9 +690,9 @@ static void qcom_geni_serial_stop_tx_fifo(struct uart_port *uport)
 		geni_se_abort_m_cmd(&port->se);
 		qcom_geni_serial_poll_bit(uport, SE_GENI_M_IRQ_STATUS,
 						M_CMD_ABORT_EN, true);
-		writel(M_CMD_ABORT_EN, uport->membase + SE_GENI_M_IRQ_CLEAR);
+		pete_writel("drivers/tty/serial/qcom_geni_serial.c:693", M_CMD_ABORT_EN, uport->membase + SE_GENI_M_IRQ_CLEAR);
 	}
-	writel(M_CMD_CANCEL_EN, uport->membase + SE_GENI_M_IRQ_CLEAR);
+	pete_writel("drivers/tty/serial/qcom_geni_serial.c:695", M_CMD_CANCEL_EN, uport->membase + SE_GENI_M_IRQ_CLEAR);
 }
 
 static void qcom_geni_serial_handle_rx_fifo(struct uart_port *uport, bool drop)
@@ -703,7 +703,7 @@ static void qcom_geni_serial_handle_rx_fifo(struct uart_port *uport, bool drop)
 	u32 last_word_partial;
 	u32 total_bytes;
 
-	status = readl(uport->membase +	SE_GENI_RX_FIFO_STATUS);
+	status = pete_readl("drivers/tty/serial/qcom_geni_serial.c:706", uport->membase +	SE_GENI_RX_FIFO_STATUS);
 	word_cnt = status & RX_FIFO_WC_MSK;
 	last_word_partial = status & RX_LAST;
 	last_word_byte_cnt = (status & RX_LAST_BYTE_VALID_MSK) >>
@@ -725,13 +725,13 @@ static void qcom_geni_serial_stop_rx_fifo(struct uart_port *uport)
 	struct qcom_geni_serial_port *port = to_dev_port(uport);
 	u32 s_irq_status;
 
-	irq_en = readl(uport->membase + SE_GENI_S_IRQ_EN);
+	irq_en = pete_readl("drivers/tty/serial/qcom_geni_serial.c:728", uport->membase + SE_GENI_S_IRQ_EN);
 	irq_en &= ~(S_RX_FIFO_WATERMARK_EN | S_RX_FIFO_LAST_EN);
-	writel(irq_en, uport->membase + SE_GENI_S_IRQ_EN);
+	pete_writel("drivers/tty/serial/qcom_geni_serial.c:730", irq_en, uport->membase + SE_GENI_S_IRQ_EN);
 
-	irq_en = readl(uport->membase + SE_GENI_M_IRQ_EN);
+	irq_en = pete_readl("drivers/tty/serial/qcom_geni_serial.c:732", uport->membase + SE_GENI_M_IRQ_EN);
 	irq_en &= ~(M_RX_FIFO_WATERMARK_EN | M_RX_FIFO_LAST_EN);
-	writel(irq_en, uport->membase + SE_GENI_M_IRQ_EN);
+	pete_writel("drivers/tty/serial/qcom_geni_serial.c:734", irq_en, uport->membase + SE_GENI_M_IRQ_EN);
 
 	if (!qcom_geni_serial_secondary_active(uport))
 		return;
@@ -743,11 +743,11 @@ static void qcom_geni_serial_stop_rx_fifo(struct uart_port *uport)
 	 * If timeout occurs secondary engine remains active
 	 * and Abort sequence is executed.
 	 */
-	s_irq_status = readl(uport->membase + SE_GENI_S_IRQ_STATUS);
+	s_irq_status = pete_readl("drivers/tty/serial/qcom_geni_serial.c:746", uport->membase + SE_GENI_S_IRQ_STATUS);
 	/* Flush the Rx buffer */
 	if (s_irq_status & S_RX_FIFO_LAST_EN)
 		qcom_geni_serial_handle_rx_fifo(uport, true);
-	writel(s_irq_status, uport->membase + SE_GENI_S_IRQ_CLEAR);
+	pete_writel("drivers/tty/serial/qcom_geni_serial.c:750", s_irq_status, uport->membase + SE_GENI_S_IRQ_CLEAR);
 
 	if (qcom_geni_serial_secondary_active(uport))
 		qcom_geni_serial_abort_rx(uport);
@@ -763,13 +763,13 @@ static void qcom_geni_serial_start_rx_fifo(struct uart_port *uport)
 
 	geni_se_setup_s_cmd(&port->se, UART_START_READ, 0);
 
-	irq_en = readl(uport->membase + SE_GENI_S_IRQ_EN);
+	irq_en = pete_readl("drivers/tty/serial/qcom_geni_serial.c:766", uport->membase + SE_GENI_S_IRQ_EN);
 	irq_en |= S_RX_FIFO_WATERMARK_EN | S_RX_FIFO_LAST_EN;
-	writel(irq_en, uport->membase + SE_GENI_S_IRQ_EN);
+	pete_writel("drivers/tty/serial/qcom_geni_serial.c:768", irq_en, uport->membase + SE_GENI_S_IRQ_EN);
 
-	irq_en = readl(uport->membase + SE_GENI_M_IRQ_EN);
+	irq_en = pete_readl("drivers/tty/serial/qcom_geni_serial.c:770", uport->membase + SE_GENI_M_IRQ_EN);
 	irq_en |= M_RX_FIFO_WATERMARK_EN | M_RX_FIFO_LAST_EN;
-	writel(irq_en, uport->membase + SE_GENI_M_IRQ_EN);
+	pete_writel("drivers/tty/serial/qcom_geni_serial.c:772", irq_en, uport->membase + SE_GENI_M_IRQ_EN);
 }
 
 static void qcom_geni_serial_stop_rx_dma(struct uart_port *uport)
@@ -784,15 +784,15 @@ static void qcom_geni_serial_stop_rx_dma(struct uart_port *uport)
 	done = qcom_geni_serial_poll_bit(uport, SE_DMA_RX_IRQ_STAT,
 			RX_EOT, true);
 	if (done) {
-		writel(RX_EOT | RX_DMA_DONE,
+		pete_writel("drivers/tty/serial/qcom_geni_serial.c:787", RX_EOT | RX_DMA_DONE,
 				uport->membase + SE_DMA_RX_IRQ_CLR);
 	} else {
 		qcom_geni_serial_abort_rx(uport);
 
-		writel(1, uport->membase + SE_DMA_RX_FSM_RST);
+		pete_writel("drivers/tty/serial/qcom_geni_serial.c:792", 1, uport->membase + SE_DMA_RX_FSM_RST);
 		qcom_geni_serial_poll_bit(uport, SE_DMA_RX_IRQ_STAT,
 				RX_RESET_DONE, true);
-		writel(RX_RESET_DONE | RX_DMA_DONE,
+		pete_writel("drivers/tty/serial/qcom_geni_serial.c:795", RX_RESET_DONE | RX_DMA_DONE,
 				uport->membase + SE_DMA_RX_IRQ_CLR);
 	}
 
@@ -837,7 +837,7 @@ static void qcom_geni_serial_handle_rx_dma(struct uart_port *uport, bool drop)
 	geni_se_rx_dma_unprep(&port->se, port->rx_dma_addr, DMA_RX_BUF_SIZE);
 	port->rx_dma_addr = 0;
 
-	rx_in = readl(uport->membase + SE_DMA_RX_LEN_IN);
+	rx_in = pete_readl("drivers/tty/serial/qcom_geni_serial.c:840", uport->membase + SE_DMA_RX_LEN_IN);
 	if (!rx_in) {
 		dev_warn(uport->dev, "serial engine reports 0 RX bytes in!\n");
 		return;
@@ -905,7 +905,7 @@ static void qcom_geni_serial_handle_tx_fifo(struct uart_port *uport,
 	u32 irq_en;
 	unsigned int chunk;
 
-	status = readl(uport->membase + SE_GENI_TX_FIFO_STATUS);
+	status = pete_readl("drivers/tty/serial/qcom_geni_serial.c:908", uport->membase + SE_GENI_TX_FIFO_STATUS);
 
 	/* Complete the current tx command before taking newly added data */
 	if (active)
@@ -930,9 +930,9 @@ static void qcom_geni_serial_handle_tx_fifo(struct uart_port *uport,
 		qcom_geni_serial_setup_tx(uport, pending);
 		port->tx_remaining = pending;
 
-		irq_en = readl(uport->membase + SE_GENI_M_IRQ_EN);
+		irq_en = pete_readl("drivers/tty/serial/qcom_geni_serial.c:933", uport->membase + SE_GENI_M_IRQ_EN);
 		if (!(irq_en & M_TX_FIFO_WATERMARK_EN))
-			writel(irq_en | M_TX_FIFO_WATERMARK_EN,
+			pete_writel("drivers/tty/serial/qcom_geni_serial.c:935", irq_en | M_TX_FIFO_WATERMARK_EN,
 					uport->membase + SE_GENI_M_IRQ_EN);
 	}
 
@@ -943,14 +943,14 @@ static void qcom_geni_serial_handle_tx_fifo(struct uart_port *uport,
 	 * cleared it in qcom_geni_serial_isr it will have already reasserted
 	 * so we must clear it again here after our writes.
 	 */
-	writel(M_TX_FIFO_WATERMARK_EN,
+	pete_writel("drivers/tty/serial/qcom_geni_serial.c:946", M_TX_FIFO_WATERMARK_EN,
 			uport->membase + SE_GENI_M_IRQ_CLEAR);
 
 out_write_wakeup:
 	if (!port->tx_remaining) {
-		irq_en = readl(uport->membase + SE_GENI_M_IRQ_EN);
+		irq_en = pete_readl("drivers/tty/serial/qcom_geni_serial.c:951", uport->membase + SE_GENI_M_IRQ_EN);
 		if (irq_en & M_TX_FIFO_WATERMARK_EN)
-			writel(irq_en & ~M_TX_FIFO_WATERMARK_EN,
+			pete_writel("drivers/tty/serial/qcom_geni_serial.c:953", irq_en & ~M_TX_FIFO_WATERMARK_EN,
 					uport->membase + SE_GENI_M_IRQ_EN);
 	}
 
@@ -994,17 +994,17 @@ static irqreturn_t qcom_geni_serial_isr(int isr, void *dev)
 
 	spin_lock(&uport->lock);
 
-	m_irq_status = readl(uport->membase + SE_GENI_M_IRQ_STATUS);
-	s_irq_status = readl(uport->membase + SE_GENI_S_IRQ_STATUS);
-	dma_tx_status = readl(uport->membase + SE_DMA_TX_IRQ_STAT);
-	dma_rx_status = readl(uport->membase + SE_DMA_RX_IRQ_STAT);
-	geni_status = readl(uport->membase + SE_GENI_STATUS);
-	dma = readl(uport->membase + SE_GENI_DMA_MODE_EN);
-	m_irq_en = readl(uport->membase + SE_GENI_M_IRQ_EN);
-	writel(m_irq_status, uport->membase + SE_GENI_M_IRQ_CLEAR);
-	writel(s_irq_status, uport->membase + SE_GENI_S_IRQ_CLEAR);
-	writel(dma_tx_status, uport->membase + SE_DMA_TX_IRQ_CLR);
-	writel(dma_rx_status, uport->membase + SE_DMA_RX_IRQ_CLR);
+	m_irq_status = pete_readl("drivers/tty/serial/qcom_geni_serial.c:997", uport->membase + SE_GENI_M_IRQ_STATUS);
+	s_irq_status = pete_readl("drivers/tty/serial/qcom_geni_serial.c:998", uport->membase + SE_GENI_S_IRQ_STATUS);
+	dma_tx_status = pete_readl("drivers/tty/serial/qcom_geni_serial.c:999", uport->membase + SE_DMA_TX_IRQ_STAT);
+	dma_rx_status = pete_readl("drivers/tty/serial/qcom_geni_serial.c:1000", uport->membase + SE_DMA_RX_IRQ_STAT);
+	geni_status = pete_readl("drivers/tty/serial/qcom_geni_serial.c:1001", uport->membase + SE_GENI_STATUS);
+	dma = pete_readl("drivers/tty/serial/qcom_geni_serial.c:1002", uport->membase + SE_GENI_DMA_MODE_EN);
+	m_irq_en = pete_readl("drivers/tty/serial/qcom_geni_serial.c:1003", uport->membase + SE_GENI_M_IRQ_EN);
+	pete_writel("drivers/tty/serial/qcom_geni_serial.c:1004", m_irq_status, uport->membase + SE_GENI_M_IRQ_CLEAR);
+	pete_writel("drivers/tty/serial/qcom_geni_serial.c:1005", s_irq_status, uport->membase + SE_GENI_S_IRQ_CLEAR);
+	pete_writel("drivers/tty/serial/qcom_geni_serial.c:1006", dma_tx_status, uport->membase + SE_DMA_TX_IRQ_CLR);
+	pete_writel("drivers/tty/serial/qcom_geni_serial.c:1007", dma_rx_status, uport->membase + SE_DMA_RX_IRQ_CLR);
 
 	if (WARN_ON(m_irq_status & M_ILLEGAL_CMD_EN))
 		goto out_unlock;
@@ -1119,9 +1119,9 @@ static int qcom_geni_serial_port_setup(struct uart_port *uport)
 	if (ret)
 		return ret;
 
-	writel(rxstale, uport->membase + SE_UART_RX_STALE_CNT);
+	pete_writel("drivers/tty/serial/qcom_geni_serial.c:1122", rxstale, uport->membase + SE_UART_RX_STALE_CNT);
 
-	pin_swap = readl(uport->membase + SE_UART_IO_MACRO_CTRL);
+	pin_swap = pete_readl("drivers/tty/serial/qcom_geni_serial.c:1124", uport->membase + SE_UART_IO_MACRO_CTRL);
 	if (port->rx_tx_swap) {
 		pin_swap &= ~DEFAULT_IO_MACRO_IO2_IO3_MASK;
 		pin_swap |= IO_MACRO_IO2_IO3_SWAP;
@@ -1132,7 +1132,7 @@ static int qcom_geni_serial_port_setup(struct uart_port *uport)
 	}
 	/* Configure this register if RX-TX, CTS-RTS pins are swapped */
 	if (port->rx_tx_swap || port->cts_rts_swap)
-		writel(pin_swap, uport->membase + SE_UART_IO_MACRO_CTRL);
+		pete_writel("drivers/tty/serial/qcom_geni_serial.c:1135", pin_swap, uport->membase + SE_UART_IO_MACRO_CTRL);
 
 	/*
 	 * Make an unconditional cancel on the main sequencer to reset
@@ -1287,10 +1287,10 @@ static void qcom_geni_serial_set_termios(struct uart_port *uport,
 	geni_icc_set_bw(&port->se);
 
 	/* parity */
-	tx_trans_cfg = readl(uport->membase + SE_UART_TX_TRANS_CFG);
-	tx_parity_cfg = readl(uport->membase + SE_UART_TX_PARITY_CFG);
-	rx_trans_cfg = readl(uport->membase + SE_UART_RX_TRANS_CFG);
-	rx_parity_cfg = readl(uport->membase + SE_UART_RX_PARITY_CFG);
+	tx_trans_cfg = pete_readl("drivers/tty/serial/qcom_geni_serial.c:1290", uport->membase + SE_UART_TX_TRANS_CFG);
+	tx_parity_cfg = pete_readl("drivers/tty/serial/qcom_geni_serial.c:1291", uport->membase + SE_UART_TX_PARITY_CFG);
+	rx_trans_cfg = pete_readl("drivers/tty/serial/qcom_geni_serial.c:1292", uport->membase + SE_UART_RX_TRANS_CFG);
+	rx_parity_cfg = pete_readl("drivers/tty/serial/qcom_geni_serial.c:1293", uport->membase + SE_UART_RX_PARITY_CFG);
 	if (termios->c_cflag & PARENB) {
 		tx_trans_cfg |= UART_TX_PAR_EN;
 		rx_trans_cfg |= UART_RX_PAR_EN;
@@ -1344,17 +1344,17 @@ static void qcom_geni_serial_set_termios(struct uart_port *uport,
 	}
 
 	if (!uart_console(uport))
-		writel(port->loopback,
+		pete_writel("drivers/tty/serial/qcom_geni_serial.c:1347", port->loopback,
 				uport->membase + SE_UART_LOOPBACK_CFG);
-	writel(tx_trans_cfg, uport->membase + SE_UART_TX_TRANS_CFG);
-	writel(tx_parity_cfg, uport->membase + SE_UART_TX_PARITY_CFG);
-	writel(rx_trans_cfg, uport->membase + SE_UART_RX_TRANS_CFG);
-	writel(rx_parity_cfg, uport->membase + SE_UART_RX_PARITY_CFG);
-	writel(bits_per_char, uport->membase + SE_UART_TX_WORD_LEN);
-	writel(bits_per_char, uport->membase + SE_UART_RX_WORD_LEN);
-	writel(stop_bit_len, uport->membase + SE_UART_TX_STOP_BIT_LEN);
-	writel(ser_clk_cfg, uport->membase + GENI_SER_M_CLK_CFG);
-	writel(ser_clk_cfg, uport->membase + GENI_SER_S_CLK_CFG);
+	pete_writel("drivers/tty/serial/qcom_geni_serial.c:1349", tx_trans_cfg, uport->membase + SE_UART_TX_TRANS_CFG);
+	pete_writel("drivers/tty/serial/qcom_geni_serial.c:1350", tx_parity_cfg, uport->membase + SE_UART_TX_PARITY_CFG);
+	pete_writel("drivers/tty/serial/qcom_geni_serial.c:1351", rx_trans_cfg, uport->membase + SE_UART_RX_TRANS_CFG);
+	pete_writel("drivers/tty/serial/qcom_geni_serial.c:1352", rx_parity_cfg, uport->membase + SE_UART_RX_PARITY_CFG);
+	pete_writel("drivers/tty/serial/qcom_geni_serial.c:1353", bits_per_char, uport->membase + SE_UART_TX_WORD_LEN);
+	pete_writel("drivers/tty/serial/qcom_geni_serial.c:1354", bits_per_char, uport->membase + SE_UART_RX_WORD_LEN);
+	pete_writel("drivers/tty/serial/qcom_geni_serial.c:1355", stop_bit_len, uport->membase + SE_UART_TX_STOP_BIT_LEN);
+	pete_writel("drivers/tty/serial/qcom_geni_serial.c:1356", ser_clk_cfg, uport->membase + GENI_SER_M_CLK_CFG);
+	pete_writel("drivers/tty/serial/qcom_geni_serial.c:1357", ser_clk_cfg, uport->membase + GENI_SER_S_CLK_CFG);
 }
 
 #ifdef CONFIG_SERIAL_QCOM_GENI_CONSOLE
@@ -1473,13 +1473,13 @@ static int __init qcom_geni_serial_earlycon_setup(struct earlycon_device *dev,
 	geni_se_init(&se, DEF_FIFO_DEPTH_WORDS / 2, DEF_FIFO_DEPTH_WORDS - 2);
 	geni_se_select_mode(&se, GENI_SE_FIFO);
 
-	writel(tx_trans_cfg, uport->membase + SE_UART_TX_TRANS_CFG);
-	writel(tx_parity_cfg, uport->membase + SE_UART_TX_PARITY_CFG);
-	writel(rx_trans_cfg, uport->membase + SE_UART_RX_TRANS_CFG);
-	writel(rx_parity_cfg, uport->membase + SE_UART_RX_PARITY_CFG);
-	writel(bits_per_char, uport->membase + SE_UART_TX_WORD_LEN);
-	writel(bits_per_char, uport->membase + SE_UART_RX_WORD_LEN);
-	writel(stop_bit_len, uport->membase + SE_UART_TX_STOP_BIT_LEN);
+	pete_writel("drivers/tty/serial/qcom_geni_serial.c:1476", tx_trans_cfg, uport->membase + SE_UART_TX_TRANS_CFG);
+	pete_writel("drivers/tty/serial/qcom_geni_serial.c:1477", tx_parity_cfg, uport->membase + SE_UART_TX_PARITY_CFG);
+	pete_writel("drivers/tty/serial/qcom_geni_serial.c:1478", rx_trans_cfg, uport->membase + SE_UART_RX_TRANS_CFG);
+	pete_writel("drivers/tty/serial/qcom_geni_serial.c:1479", rx_parity_cfg, uport->membase + SE_UART_RX_PARITY_CFG);
+	pete_writel("drivers/tty/serial/qcom_geni_serial.c:1480", bits_per_char, uport->membase + SE_UART_TX_WORD_LEN);
+	pete_writel("drivers/tty/serial/qcom_geni_serial.c:1481", bits_per_char, uport->membase + SE_UART_RX_WORD_LEN);
+	pete_writel("drivers/tty/serial/qcom_geni_serial.c:1482", stop_bit_len, uport->membase + SE_UART_TX_STOP_BIT_LEN);
 
 	dev->con->write = qcom_geni_serial_earlycon_write;
 	dev->con->setup = NULL;

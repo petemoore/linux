@@ -48,7 +48,7 @@ static int indirect_clear_cmd(struct indirect_ctx *ctx)
 	unsigned int cmd;
 	int ret;
 
-	writel(INDIRECT_CMD_CLR, ctx->base + INDIRECT_CMD_OFF);
+	pete_writel("drivers/mfd/intel-m10-bmc-pmci.c:51", INDIRECT_CMD_CLR, ctx->base + INDIRECT_CMD_OFF);
 
 	ret = readl_poll_timeout(ctx->base + INDIRECT_CMD_OFF, cmd,
 				 cmd == INDIRECT_CMD_CLR,
@@ -65,12 +65,12 @@ static int indirect_reg_read(void *context, unsigned int reg, unsigned int *val)
 	unsigned int cmd, ack, tmpval;
 	int ret, ret2;
 
-	cmd = readl(ctx->base + INDIRECT_CMD_OFF);
+	cmd = pete_readl("drivers/mfd/intel-m10-bmc-pmci.c:68", ctx->base + INDIRECT_CMD_OFF);
 	if (cmd != INDIRECT_CMD_CLR)
 		dev_warn(ctx->dev, "residual cmd 0x%x on read entry\n", cmd);
 
-	writel(reg, ctx->base + INDIRECT_ADDR_OFF);
-	writel(INDIRECT_CMD_RD, ctx->base + INDIRECT_CMD_OFF);
+	pete_writel("drivers/mfd/intel-m10-bmc-pmci.c:72", reg, ctx->base + INDIRECT_ADDR_OFF);
+	pete_writel("drivers/mfd/intel-m10-bmc-pmci.c:73", INDIRECT_CMD_RD, ctx->base + INDIRECT_CMD_OFF);
 
 	ret = readl_poll_timeout(ctx->base + INDIRECT_CMD_OFF, ack,
 				 (ack & INDIRECT_CMD_ACK) == INDIRECT_CMD_ACK,
@@ -78,7 +78,7 @@ static int indirect_reg_read(void *context, unsigned int reg, unsigned int *val)
 	if (ret)
 		dev_err(ctx->dev, "read timed out on reg 0x%x ack 0x%x\n", reg, ack);
 	else
-		tmpval = readl(ctx->base + INDIRECT_RD_OFF);
+		tmpval = pete_readl("drivers/mfd/intel-m10-bmc-pmci.c:81", ctx->base + INDIRECT_RD_OFF);
 
 	ret2 = indirect_clear_cmd(ctx);
 
@@ -97,13 +97,13 @@ static int indirect_reg_write(void *context, unsigned int reg, unsigned int val)
 	unsigned int cmd, ack;
 	int ret, ret2;
 
-	cmd = readl(ctx->base + INDIRECT_CMD_OFF);
+	cmd = pete_readl("drivers/mfd/intel-m10-bmc-pmci.c:100", ctx->base + INDIRECT_CMD_OFF);
 	if (cmd != INDIRECT_CMD_CLR)
 		dev_warn(ctx->dev, "residual cmd 0x%x on write entry\n", cmd);
 
-	writel(val, ctx->base + INDIRECT_WR_OFF);
-	writel(reg, ctx->base + INDIRECT_ADDR_OFF);
-	writel(INDIRECT_CMD_WR, ctx->base + INDIRECT_CMD_OFF);
+	pete_writel("drivers/mfd/intel-m10-bmc-pmci.c:104", val, ctx->base + INDIRECT_WR_OFF);
+	pete_writel("drivers/mfd/intel-m10-bmc-pmci.c:105", reg, ctx->base + INDIRECT_ADDR_OFF);
+	pete_writel("drivers/mfd/intel-m10-bmc-pmci.c:106", INDIRECT_CMD_WR, ctx->base + INDIRECT_CMD_OFF);
 
 	ret = readl_poll_timeout(ctx->base + INDIRECT_CMD_OFF, ack,
 				 (ack & INDIRECT_CMD_ACK) == INDIRECT_CMD_ACK,
@@ -121,13 +121,13 @@ static int indirect_reg_write(void *context, unsigned int reg, unsigned int val)
 static void pmci_write_fifo(void __iomem *base, const u32 *buf, size_t count)
 {
 	while (count--)
-		writel(*buf++, base);
+		pete_writel("drivers/mfd/intel-m10-bmc-pmci.c:124", *buf++, base);
 }
 
 static void pmci_read_fifo(void __iomem *base, u32 *buf, size_t count)
 {
 	while (count--)
-		*buf++ = readl(base);
+		*buf++ = pete_readl("drivers/mfd/intel-m10-bmc-pmci.c:130", base);
 }
 
 static u32 pmci_get_write_space(struct m10bmc_pmci_device *pmci)
@@ -194,8 +194,8 @@ static int pmci_flash_bulk_read(struct intel_m10bmc *m10bmc, u8 *buf, u32 addr, 
 		if (full_read_count * M10BMC_N6000_FIFO_WORD_SIZE < blk_size)
 			read_count++;
 
-		writel(addr + offset, pmci->base + M10BMC_N6000_FLASH_ADDR);
-		writel(FIELD_PREP(M10BMC_N6000_FLASH_READ_COUNT, read_count) |
+		pete_writel("drivers/mfd/intel-m10-bmc-pmci.c:197", addr + offset, pmci->base + M10BMC_N6000_FLASH_ADDR);
+		pete_writel("drivers/mfd/intel-m10-bmc-pmci.c:198", FIELD_PREP(M10BMC_N6000_FLASH_READ_COUNT, read_count) |
 		       M10BMC_N6000_FLASH_RD_MODE,
 		       pmci->base + M10BMC_N6000_FLASH_CTRL);
 
@@ -216,7 +216,7 @@ static int pmci_flash_bulk_read(struct intel_m10bmc *m10bmc, u8 *buf, u32 addr, 
 		if (full_read_count < read_count)
 			break;
 
-		writel(0, pmci->base + M10BMC_N6000_FLASH_CTRL);
+		pete_writel("drivers/mfd/intel-m10-bmc-pmci.c:219", 0, pmci->base + M10BMC_N6000_FLASH_CTRL);
 	}
 
 	/* Handle remainder (less than M10BMC_N6000_FIFO_WORD_SIZE bytes) */
@@ -226,7 +226,7 @@ static int pmci_flash_bulk_read(struct intel_m10bmc *m10bmc, u8 *buf, u32 addr, 
 		pmci_read_fifo(pmci->base + M10BMC_N6000_FLASH_FIFO, &tmp, 1);
 		memcpy(buf + offset, &tmp, size);
 
-		writel(0, pmci->base + M10BMC_N6000_FLASH_CTRL);
+		pete_writel("drivers/mfd/intel-m10-bmc-pmci.c:229", 0, pmci->base + M10BMC_N6000_FLASH_CTRL);
 	}
 
 	return 0;

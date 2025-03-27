@@ -28,12 +28,12 @@
 
 static inline u32 ipu_cm_read(struct ipu_soc *ipu, unsigned offset)
 {
-	return readl(ipu->cm_reg + offset);
+	return pete_readl("drivers/gpu/ipu-v3/ipu-common.c:31", ipu->cm_reg + offset);
 }
 
 static inline void ipu_cm_write(struct ipu_soc *ipu, u32 value, unsigned offset)
 {
-	writel(value, ipu->cm_reg + offset);
+	pete_writel("drivers/gpu/ipu-v3/ipu-common.c:36", value, ipu->cm_reg + offset);
 }
 
 int ipu_get_num(struct ipu_soc *ipu)

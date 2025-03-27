@@ -9,10 +9,10 @@ static int hclge_ptp_get_cycle(struct hclge_dev *hdev)
 {
 	struct hclge_ptp *ptp = hdev->ptp;
 
-	ptp->cycle.quo = readl(hdev->ptp->io_base + HCLGE_PTP_CYCLE_QUO_REG) &
+	ptp->cycle.quo = pete_readl("drivers/net/ethernet/hisilicon/hns3/hns3pf/hclge_ptp.c:12", hdev->ptp->io_base + HCLGE_PTP_CYCLE_QUO_REG) &
 			 HCLGE_PTP_CYCLE_QUO_MASK;
-	ptp->cycle.numer = readl(hdev->ptp->io_base + HCLGE_PTP_CYCLE_NUM_REG);
-	ptp->cycle.den = readl(hdev->ptp->io_base + HCLGE_PTP_CYCLE_DEN_REG);
+	ptp->cycle.numer = pete_readl("drivers/net/ethernet/hisilicon/hns3/hns3pf/hclge_ptp.c:14", hdev->ptp->io_base + HCLGE_PTP_CYCLE_NUM_REG);
+	ptp->cycle.den = pete_readl("drivers/net/ethernet/hisilicon/hns3/hns3pf/hclge_ptp.c:15", hdev->ptp->io_base + HCLGE_PTP_CYCLE_DEN_REG);
 
 	if (ptp->cycle.den == 0) {
 		dev_err(&hdev->pdev->dev, "invalid ptp cycle denominator!\n");
@@ -41,11 +41,11 @@ static int hclge_ptp_adjfine(struct ptp_clock_info *ptp, long scaled_ppm)
 	quo = div_u64_rem(adj_val, cycle->den, &numerator);
 
 	spin_lock_irqsave(&hdev->ptp->lock, flags);
-	writel(quo & HCLGE_PTP_CYCLE_QUO_MASK,
+	pete_writel("drivers/net/ethernet/hisilicon/hns3/hns3pf/hclge_ptp.c:44", quo & HCLGE_PTP_CYCLE_QUO_MASK,
 	       hdev->ptp->io_base + HCLGE_PTP_CYCLE_QUO_REG);
-	writel(numerator, hdev->ptp->io_base + HCLGE_PTP_CYCLE_NUM_REG);
-	writel(cycle->den, hdev->ptp->io_base + HCLGE_PTP_CYCLE_DEN_REG);
-	writel(HCLGE_PTP_CYCLE_ADJ_EN,
+	pete_writel("drivers/net/ethernet/hisilicon/hns3/hns3pf/hclge_ptp.c:46", numerator, hdev->ptp->io_base + HCLGE_PTP_CYCLE_NUM_REG);
+	pete_writel("drivers/net/ethernet/hisilicon/hns3/hns3pf/hclge_ptp.c:47", cycle->den, hdev->ptp->io_base + HCLGE_PTP_CYCLE_DEN_REG);
+	pete_writel("drivers/net/ethernet/hisilicon/hns3/hns3pf/hclge_ptp.c:48", HCLGE_PTP_CYCLE_ADJ_EN,
 	       hdev->ptp->io_base + HCLGE_PTP_CYCLE_CFG_REG);
 	spin_unlock_irqrestore(&hdev->ptp->lock, flags);
 
@@ -78,12 +78,12 @@ void hclge_ptp_clean_tx_hwts(struct hclge_dev *hdev)
 	u32 hi, lo;
 	u64 ns;
 
-	ns = readl(hdev->ptp->io_base + HCLGE_PTP_TX_TS_NSEC_REG) &
+	ns = pete_readl("drivers/net/ethernet/hisilicon/hns3/hns3pf/hclge_ptp.c:81", hdev->ptp->io_base + HCLGE_PTP_TX_TS_NSEC_REG) &
 	     HCLGE_PTP_TX_TS_NSEC_MASK;
-	lo = readl(hdev->ptp->io_base + HCLGE_PTP_TX_TS_SEC_L_REG);
-	hi = readl(hdev->ptp->io_base + HCLGE_PTP_TX_TS_SEC_H_REG) &
+	lo = pete_readl("drivers/net/ethernet/hisilicon/hns3/hns3pf/hclge_ptp.c:83", hdev->ptp->io_base + HCLGE_PTP_TX_TS_SEC_L_REG);
+	hi = pete_readl("drivers/net/ethernet/hisilicon/hns3/hns3pf/hclge_ptp.c:84", hdev->ptp->io_base + HCLGE_PTP_TX_TS_SEC_H_REG) &
 	     HCLGE_PTP_TX_TS_SEC_H_MASK;
-	hdev->ptp->last_tx_seqid = readl(hdev->ptp->io_base +
+	hdev->ptp->last_tx_seqid = pete_readl("drivers/net/ethernet/hisilicon/hns3/hns3pf/hclge_ptp.c:86", hdev->ptp->io_base +
 		HCLGE_PTP_TX_TS_SEQID_REG);
 
 	if (skb) {
@@ -116,7 +116,7 @@ void hclge_ptp_get_rx_hwts(struct hnae3_handle *handle, struct sk_buff *skb,
 	 * from register.
 	 */
 	spin_lock_irqsave(&hdev->ptp->lock, flags);
-	sec_h = readl(hdev->ptp->io_base + HCLGE_PTP_CUR_TIME_SEC_H_REG);
+	sec_h = pete_readl("drivers/net/ethernet/hisilicon/hns3/hns3pf/hclge_ptp.c:119", hdev->ptp->io_base + HCLGE_PTP_CUR_TIME_SEC_H_REG);
 	spin_unlock_irqrestore(&hdev->ptp->lock, flags);
 
 	ns += (((u64)sec_h) << HCLGE_PTP_SEC_H_OFFSET | sec) * NSEC_PER_SEC;
@@ -134,9 +134,9 @@ static int hclge_ptp_gettimex(struct ptp_clock_info *ptp, struct timespec64 *ts,
 	u64 ns;
 
 	spin_lock_irqsave(&hdev->ptp->lock, flags);
-	ns = readl(hdev->ptp->io_base + HCLGE_PTP_CUR_TIME_NSEC_REG);
-	hi = readl(hdev->ptp->io_base + HCLGE_PTP_CUR_TIME_SEC_H_REG);
-	lo = readl(hdev->ptp->io_base + HCLGE_PTP_CUR_TIME_SEC_L_REG);
+	ns = pete_readl("drivers/net/ethernet/hisilicon/hns3/hns3pf/hclge_ptp.c:137", hdev->ptp->io_base + HCLGE_PTP_CUR_TIME_NSEC_REG);
+	hi = pete_readl("drivers/net/ethernet/hisilicon/hns3/hns3pf/hclge_ptp.c:138", hdev->ptp->io_base + HCLGE_PTP_CUR_TIME_SEC_H_REG);
+	lo = pete_readl("drivers/net/ethernet/hisilicon/hns3/hns3pf/hclge_ptp.c:139", hdev->ptp->io_base + HCLGE_PTP_CUR_TIME_SEC_L_REG);
 	spin_unlock_irqrestore(&hdev->ptp->lock, flags);
 
 	ns += (((u64)hi) << HCLGE_PTP_SEC_H_OFFSET | lo) * NSEC_PER_SEC;
@@ -152,13 +152,13 @@ static int hclge_ptp_settime(struct ptp_clock_info *ptp,
 	unsigned long flags;
 
 	spin_lock_irqsave(&hdev->ptp->lock, flags);
-	writel(ts->tv_nsec, hdev->ptp->io_base + HCLGE_PTP_TIME_NSEC_REG);
-	writel(ts->tv_sec >> HCLGE_PTP_SEC_H_OFFSET,
+	pete_writel("drivers/net/ethernet/hisilicon/hns3/hns3pf/hclge_ptp.c:155", ts->tv_nsec, hdev->ptp->io_base + HCLGE_PTP_TIME_NSEC_REG);
+	pete_writel("drivers/net/ethernet/hisilicon/hns3/hns3pf/hclge_ptp.c:156", ts->tv_sec >> HCLGE_PTP_SEC_H_OFFSET,
 	       hdev->ptp->io_base + HCLGE_PTP_TIME_SEC_H_REG);
-	writel(ts->tv_sec & HCLGE_PTP_SEC_L_MASK,
+	pete_writel("drivers/net/ethernet/hisilicon/hns3/hns3pf/hclge_ptp.c:158", ts->tv_sec & HCLGE_PTP_SEC_L_MASK,
 	       hdev->ptp->io_base + HCLGE_PTP_TIME_SEC_L_REG);
 	/* synchronize the time of phc */
-	writel(HCLGE_PTP_TIME_SYNC_EN,
+	pete_writel("drivers/net/ethernet/hisilicon/hns3/hns3pf/hclge_ptp.c:161", HCLGE_PTP_TIME_SYNC_EN,
 	       hdev->ptp->io_base + HCLGE_PTP_TIME_SYNC_REG);
 	spin_unlock_irqrestore(&hdev->ptp->lock, flags);
 
@@ -192,8 +192,8 @@ static int hclge_ptp_adjtime(struct ptp_clock_info *ptp, s64 delta)
 	adj_val |= delta & HCLGE_PTP_TIME_NSEC_MASK;
 
 	spin_lock_irqsave(&hdev->ptp->lock, flags);
-	writel(adj_val, hdev->ptp->io_base + HCLGE_PTP_TIME_NSEC_REG);
-	writel(HCLGE_PTP_TIME_ADJ_EN,
+	pete_writel("drivers/net/ethernet/hisilicon/hns3/hns3pf/hclge_ptp.c:195", adj_val, hdev->ptp->io_base + HCLGE_PTP_TIME_NSEC_REG);
+	pete_writel("drivers/net/ethernet/hisilicon/hns3/hns3pf/hclge_ptp.c:196", HCLGE_PTP_TIME_ADJ_EN,
 	       hdev->ptp->io_base + HCLGE_PTP_TIME_ADJ_REG);
 	spin_unlock_irqrestore(&hdev->ptp->lock, flags);
 

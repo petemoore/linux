@@ -26,7 +26,7 @@ static inline void _memset_io(volatile void __iomem *dst,
 	volatile void __iomem *d = dst;
 
 	while (n--) {
-		writeb(c, d);
+		pete_writeb("arch/sparc/include/asm/io_32.h:29", c, d);
 		d++;
 	}
 }
@@ -37,7 +37,7 @@ static inline void _memcpy_fromio(void *dst, const volatile void __iomem *src,
 	char *d = dst;
 
 	while (n--) {
-		char tmp = readb(src);
+		char tmp = pete_readb("arch/sparc/include/asm/io_32.h:40", src);
 		*d++ = tmp;
 		src++;
 	}
@@ -51,7 +51,7 @@ static inline void _memcpy_toio(volatile void __iomem *dst, const void *src,
 
 	while (n--) {
 		char tmp = *s++;
-		writeb(tmp, d);
+		pete_writeb("arch/sparc/include/asm/io_32.h:54", tmp, d);
 		d++;
 	}
 }

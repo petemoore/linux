@@ -140,7 +140,7 @@ static void davinci_mdio_init_clk(struct davinci_mdio_data *data)
 static void davinci_mdio_enable(struct davinci_mdio_data *data)
 {
 	/* set enable and clock divider */
-	writel(data->clk_div | CONTROL_ENABLE, &data->regs->control);
+	pete_writel("drivers/net/ethernet/ti/davinci_mdio.c:143", data->clk_div | CONTROL_ENABLE, &data->regs->control);
 }
 
 static void davinci_mdio_disable(struct davinci_mdio_data *data)
@@ -148,22 +148,22 @@ static void davinci_mdio_disable(struct davinci_mdio_data *data)
 	u32 reg;
 
 	/* Disable MDIO state machine */
-	reg = readl(&data->regs->control);
+	reg = pete_readl("drivers/net/ethernet/ti/davinci_mdio.c:151", &data->regs->control);
 
 	reg &= ~CONTROL_CLKDIV;
 	reg |= data->clk_div;
 
 	reg &= ~CONTROL_ENABLE;
-	writel(reg, &data->regs->control);
+	pete_writel("drivers/net/ethernet/ti/davinci_mdio.c:157", reg, &data->regs->control);
 }
 
 static void davinci_mdio_enable_manual_mode(struct davinci_mdio_data *data)
 {
 	u32 reg;
 	/* set manual mode */
-	reg = readl(&data->regs->poll);
+	reg = pete_readl("drivers/net/ethernet/ti/davinci_mdio.c:164", &data->regs->poll);
 	reg |= MDIO_MANUALMODE;
-	writel(reg, &data->regs->poll);
+	pete_writel("drivers/net/ethernet/ti/davinci_mdio.c:166", reg, &data->regs->poll);
 }
 
 static void davinci_set_mdc(struct mdiobb_ctrl *ctrl, int level)
@@ -172,14 +172,14 @@ static void davinci_set_mdc(struct mdiobb_ctrl *ctrl, int level)
 	u32 reg;
 
 	data = container_of(ctrl, struct davinci_mdio_data, bb_ctrl);
-	reg = readl(&data->regs->manualif);
+	reg = pete_readl("drivers/net/ethernet/ti/davinci_mdio.c:175", &data->regs->manualif);
 
 	if (level)
 		reg |= MDIO_MAN_MDCLK_O;
 	else
 		reg &= ~MDIO_MAN_MDCLK_O;
 
-	writel(reg, &data->regs->manualif);
+	pete_writel("drivers/net/ethernet/ti/davinci_mdio.c:182", reg, &data->regs->manualif);
 }
 
 static void davinci_set_mdio_dir(struct mdiobb_ctrl *ctrl, int output)
@@ -188,14 +188,14 @@ static void davinci_set_mdio_dir(struct mdiobb_ctrl *ctrl, int output)
 	u32 reg;
 
 	data = container_of(ctrl, struct davinci_mdio_data, bb_ctrl);
-	reg = readl(&data->regs->manualif);
+	reg = pete_readl("drivers/net/ethernet/ti/davinci_mdio.c:191", &data->regs->manualif);
 
 	if (output)
 		reg |= MDIO_MAN_OE;
 	else
 		reg &= ~MDIO_MAN_OE;
 
-	writel(reg, &data->regs->manualif);
+	pete_writel("drivers/net/ethernet/ti/davinci_mdio.c:198", reg, &data->regs->manualif);
 }
 
 static void  davinci_set_mdio_data(struct mdiobb_ctrl *ctrl, int value)
@@ -204,14 +204,14 @@ static void  davinci_set_mdio_data(struct mdiobb_ctrl *ctrl, int value)
 	u32 reg;
 
 	data = container_of(ctrl, struct davinci_mdio_data, bb_ctrl);
-	reg = readl(&data->regs->manualif);
+	reg = pete_readl("drivers/net/ethernet/ti/davinci_mdio.c:207", &data->regs->manualif);
 
 	if (value)
 		reg |= MDIO_MAN_PIN;
 	else
 		reg &= ~MDIO_MAN_PIN;
 
-	writel(reg, &data->regs->manualif);
+	pete_writel("drivers/net/ethernet/ti/davinci_mdio.c:214", reg, &data->regs->manualif);
 }
 
 static int davinci_get_mdio_data(struct mdiobb_ctrl *ctrl)
@@ -220,7 +220,7 @@ static int davinci_get_mdio_data(struct mdiobb_ctrl *ctrl)
 	unsigned long reg;
 
 	data = container_of(ctrl, struct davinci_mdio_data, bb_ctrl);
-	reg = readl(&data->regs->manualif);
+	reg = pete_readl("drivers/net/ethernet/ti/davinci_mdio.c:223", &data->regs->manualif);
 	return test_bit(MDIO_PIN, &reg);
 }
 
@@ -309,7 +309,7 @@ static int davinci_mdio_common_reset(struct davinci_mdio_data *data)
 	msleep(PHY_MAX_ADDR * data->access_time);
 
 	/* dump hardware version info */
-	ver = readl(&data->regs->version);
+	ver = pete_readl("drivers/net/ethernet/ti/davinci_mdio.c:312", &data->regs->version);
 	dev_info(data->dev,
 		 "davinci mdio revision %d.%d, bus freq %ld\n",
 		 (ver >> 8) & 0xff, ver & 0xff,
@@ -319,7 +319,7 @@ static int davinci_mdio_common_reset(struct davinci_mdio_data *data)
 		goto done;
 
 	/* get phy mask from the alive register */
-	phy_mask = readl(&data->regs->alive);
+	phy_mask = pete_readl("drivers/net/ethernet/ti/davinci_mdio.c:322", &data->regs->alive);
 	if (phy_mask) {
 		/* restrict mdio bus to live phys only */
 		dev_info(data->dev, "detected phy mask %x\n", ~phy_mask);
@@ -363,11 +363,11 @@ static inline int wait_for_user_access(struct davinci_mdio_data *data)
 	u32 reg;
 
 	while (time_after(timeout, jiffies)) {
-		reg = readl(&regs->user[0].access);
+		reg = pete_readl("drivers/net/ethernet/ti/davinci_mdio.c:366", &regs->user[0].access);
 		if ((reg & USERACCESS_GO) == 0)
 			return 0;
 
-		reg = readl(&regs->control);
+		reg = pete_readl("drivers/net/ethernet/ti/davinci_mdio.c:370", &regs->control);
 		if ((reg & CONTROL_IDLE) == 0) {
 			usleep_range(100, 200);
 			continue;
@@ -383,7 +383,7 @@ static inline int wait_for_user_access(struct davinci_mdio_data *data)
 		return -EAGAIN;
 	}
 
-	reg = readl(&regs->user[0].access);
+	reg = pete_readl("drivers/net/ethernet/ti/davinci_mdio.c:386", &regs->user[0].access);
 	if ((reg & USERACCESS_GO) == 0)
 		return 0;
 
@@ -428,7 +428,7 @@ static int davinci_mdio_read(struct mii_bus *bus, int phy_id, int phy_reg)
 		if (ret < 0)
 			break;
 
-		writel(reg, &data->regs->user[0].access);
+		pete_writel("drivers/net/ethernet/ti/davinci_mdio.c:431", reg, &data->regs->user[0].access);
 
 		ret = wait_for_user_access(data);
 		if (ret == -EAGAIN)
@@ -436,7 +436,7 @@ static int davinci_mdio_read(struct mii_bus *bus, int phy_id, int phy_reg)
 		if (ret < 0)
 			break;
 
-		reg = readl(&data->regs->user[0].access);
+		reg = pete_readl("drivers/net/ethernet/ti/davinci_mdio.c:439", &data->regs->user[0].access);
 		ret = (reg & USERACCESS_ACK) ? (reg & USERACCESS_DATA) : -EIO;
 		break;
 	}
@@ -470,7 +470,7 @@ static int davinci_mdio_write(struct mii_bus *bus, int phy_id,
 		if (ret < 0)
 			break;
 
-		writel(reg, &data->regs->user[0].access);
+		pete_writel("drivers/net/ethernet/ti/davinci_mdio.c:473", reg, &data->regs->user[0].access);
 
 		ret = wait_for_user_access(data);
 		if (ret == -EAGAIN)
@@ -697,9 +697,9 @@ static int davinci_mdio_runtime_suspend(struct device *dev)
 	u32 ctrl;
 
 	/* shutdown the scan state machine */
-	ctrl = readl(&data->regs->control);
+	ctrl = pete_readl("drivers/net/ethernet/ti/davinci_mdio.c:700", &data->regs->control);
 	ctrl &= ~CONTROL_ENABLE;
-	writel(ctrl, &data->regs->control);
+	pete_writel("drivers/net/ethernet/ti/davinci_mdio.c:702", ctrl, &data->regs->control);
 
 	if (!data->manual_mode)
 		wait_for_idle(data);

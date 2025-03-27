@@ -77,7 +77,7 @@ static int mana_smc_poll_register(void __iomem *base, bool reset)
 	 * driver are temporarily busy.
 	 */
 	for (i = 0; i < 20 * 1000; i++)  {
-		last_dword = readl(ptr);
+		last_dword = pete_readl("drivers/net/ethernet/microsoft/mana/shm_channel.c:80", ptr);
 
 		/* shmem reads as 0xFFFFFFFF in the reset case */
 		if (reset && last_dword == SHMEM_VF_RESET_STATE)
@@ -105,7 +105,7 @@ static int mana_smc_read_response(struct shm_channel *sc, u32 msg_type,
 	if (err)
 		return err;
 
-	hdr.as_uint32 = readl(base + SMC_LAST_DWORD * SMC_BASIC_UNIT);
+	hdr.as_uint32 = pete_readl("drivers/net/ethernet/microsoft/mana/shm_channel.c:108", base + SMC_LAST_DWORD * SMC_BASIC_UNIT);
 
 	if (reset_vf && hdr.as_uint32 == SHMEM_VF_RESET_STATE)
 		return 0;
@@ -236,7 +236,7 @@ int mana_smc_setup_hwc(struct shm_channel *sc, bool reset_vf, u64 eq_addr,
 	 */
 	dword = (u32 *)shm_buf;
 	for (i = 0; i < SMC_APERTURE_DWORDS; i++)
-		writel(*dword++, sc->base + i * SMC_BASIC_UNIT);
+		pete_writel("drivers/net/ethernet/microsoft/mana/shm_channel.c:239", *dword++, sc->base + i * SMC_BASIC_UNIT);
 
 	/* Read shmem response (polling for VF possession) and validate.
 	 * For setup, waiting for response on shared memory is not strictly
@@ -274,7 +274,7 @@ int mana_smc_teardown_hwc(struct shm_channel *sc, bool reset_vf)
 	/* Write message in high 32 bits of 256-bit shared memory, causing HW
 	 * to set possession bit to PF.
 	 */
-	writel(hdr.as_uint32, sc->base + SMC_LAST_DWORD * SMC_BASIC_UNIT);
+	pete_writel("drivers/net/ethernet/microsoft/mana/shm_channel.c:277", hdr.as_uint32, sc->base + SMC_LAST_DWORD * SMC_BASIC_UNIT);
 
 	/* Read shmem response (polling for VF possession) and validate.
 	 * For teardown, waiting for response is required to ensure hardware

@@ -49,12 +49,12 @@ static int lan9662_otp_power(struct lan9662_otp *otp, bool up)
 	void __iomem *pwrdn = OTP_OTP_PWR_DN(otp->base);
 
 	if (up) {
-		writel(readl(pwrdn) & ~OTP_OTP_PWR_DN_OTP_PWRDN_N, pwrdn);
+		pete_writel("drivers/nvmem/lan9662-otpc.c:52", pete_readl("drivers/nvmem/lan9662-otpc.c:52", pwrdn) & ~OTP_OTP_PWR_DN_OTP_PWRDN_N, pwrdn);
 		if (lan9662_otp_wait_flag_clear(OTP_OTP_STATUS(otp->base),
 						OTP_OTP_STATUS_OTP_CPUMPEN))
 			return -ETIMEDOUT;
 	} else {
-		writel(readl(pwrdn) | OTP_OTP_PWR_DN_OTP_PWRDN_N, pwrdn);
+		pete_writel("drivers/nvmem/lan9662-otpc.c:57", pete_readl("drivers/nvmem/lan9662-otpc.c:57", pwrdn) | OTP_OTP_PWR_DN_OTP_PWRDN_N, pwrdn);
 	}
 
 	return 0;
@@ -75,8 +75,8 @@ static int lan9662_otp_execute(struct lan9662_otp *otp)
 
 static void lan9662_otp_set_address(struct lan9662_otp *otp, u32 offset)
 {
-	writel(0xff & (offset >> 8), OTP_OTP_ADDR_HI(otp->base));
-	writel(0xff & offset, OTP_OTP_ADDR_LO(otp->base));
+	pete_writel("drivers/nvmem/lan9662-otpc.c:78", 0xff & (offset >> 8), OTP_OTP_ADDR_HI(otp->base));
+	pete_writel("drivers/nvmem/lan9662-otpc.c:79", 0xff & offset, OTP_OTP_ADDR_LO(otp->base));
 }
 
 static int lan9662_otp_read_byte(struct lan9662_otp *otp, u32 offset, u8 *dst)
@@ -85,14 +85,14 @@ static int lan9662_otp_read_byte(struct lan9662_otp *otp, u32 offset, u8 *dst)
 	int rc;
 
 	lan9662_otp_set_address(otp, offset);
-	writel(OTP_OTP_FUNC_CMD_OTP_READ, OTP_OTP_FUNC_CMD(otp->base));
-	writel(OTP_OTP_CMD_GO_OTP_GO, OTP_OTP_CMD_GO(otp->base));
+	pete_writel("drivers/nvmem/lan9662-otpc.c:88", OTP_OTP_FUNC_CMD_OTP_READ, OTP_OTP_FUNC_CMD(otp->base));
+	pete_writel("drivers/nvmem/lan9662-otpc.c:89", OTP_OTP_CMD_GO_OTP_GO, OTP_OTP_CMD_GO(otp->base));
 	rc = lan9662_otp_execute(otp);
 	if (!rc) {
-		pass = readl(OTP_OTP_PASS_FAIL(otp->base));
+		pass = pete_readl("drivers/nvmem/lan9662-otpc.c:92", OTP_OTP_PASS_FAIL(otp->base));
 		if (pass & OTP_OTP_PASS_FAIL_OTP_READ_PROHIBITED)
 			return -EACCES;
-		*dst = (u8) readl(OTP_OTP_RD_DATA(otp->base));
+		*dst = (u8) pete_readl("drivers/nvmem/lan9662-otpc.c:95", OTP_OTP_RD_DATA(otp->base));
 	}
 	return rc;
 }
@@ -103,14 +103,14 @@ static int lan9662_otp_write_byte(struct lan9662_otp *otp, u32 offset, u8 data)
 	int rc;
 
 	lan9662_otp_set_address(otp, offset);
-	writel(OTP_OTP_PRGM_MODE_OTP_PGM_MODE_BYTE, OTP_OTP_PRGM_MODE(otp->base));
-	writel(data, OTP_OTP_PRGM_DATA(otp->base));
-	writel(OTP_OTP_FUNC_CMD_OTP_PROGRAM, OTP_OTP_FUNC_CMD(otp->base));
-	writel(OTP_OTP_CMD_GO_OTP_GO, OTP_OTP_CMD_GO(otp->base));
+	pete_writel("drivers/nvmem/lan9662-otpc.c:106", OTP_OTP_PRGM_MODE_OTP_PGM_MODE_BYTE, OTP_OTP_PRGM_MODE(otp->base));
+	pete_writel("drivers/nvmem/lan9662-otpc.c:107", data, OTP_OTP_PRGM_DATA(otp->base));
+	pete_writel("drivers/nvmem/lan9662-otpc.c:108", OTP_OTP_FUNC_CMD_OTP_PROGRAM, OTP_OTP_FUNC_CMD(otp->base));
+	pete_writel("drivers/nvmem/lan9662-otpc.c:109", OTP_OTP_CMD_GO_OTP_GO, OTP_OTP_CMD_GO(otp->base));
 
 	rc = lan9662_otp_execute(otp);
 	if (!rc) {
-		pass = readl(OTP_OTP_PASS_FAIL(otp->base));
+		pass = pete_readl("drivers/nvmem/lan9662-otpc.c:113", OTP_OTP_PASS_FAIL(otp->base));
 		if (pass & OTP_OTP_PASS_FAIL_OTP_WRITE_PROHIBITED)
 			return -EACCES;
 		if (pass & OTP_OTP_PASS_FAIL_OTP_FAIL)

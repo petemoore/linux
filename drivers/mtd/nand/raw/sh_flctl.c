@@ -113,13 +113,13 @@ static struct nand_bbt_descr flctl_4secc_largepage = {
 
 static void empty_fifo(struct sh_flctl *flctl)
 {
-	writel(flctl->flintdmacr_base | AC1CLR | AC0CLR, FLINTDMACR(flctl));
-	writel(flctl->flintdmacr_base, FLINTDMACR(flctl));
+	pete_writel("drivers/mtd/nand/raw/sh_flctl.c:116", flctl->flintdmacr_base | AC1CLR | AC0CLR, FLINTDMACR(flctl));
+	pete_writel("drivers/mtd/nand/raw/sh_flctl.c:117", flctl->flintdmacr_base, FLINTDMACR(flctl));
 }
 
 static void start_translation(struct sh_flctl *flctl)
 {
-	writeb(TRSTRT, FLTRCR(flctl));
+	pete_writeb("drivers/mtd/nand/raw/sh_flctl.c:122", TRSTRT, FLTRCR(flctl));
 }
 
 static void timeout_error(struct sh_flctl *flctl, const char *str)
@@ -132,15 +132,15 @@ static void wait_completion(struct sh_flctl *flctl)
 	uint32_t timeout = LOOP_TIMEOUT_MAX;
 
 	while (timeout--) {
-		if (readb(FLTRCR(flctl)) & TREND) {
-			writeb(0x0, FLTRCR(flctl));
+		if (pete_readb("drivers/mtd/nand/raw/sh_flctl.c:135", FLTRCR(flctl)) & TREND) {
+			pete_writeb("drivers/mtd/nand/raw/sh_flctl.c:136", 0x0, FLTRCR(flctl));
 			return;
 		}
 		udelay(1);
 	}
 
 	timeout_error(flctl, __func__);
-	writeb(0x0, FLTRCR(flctl));
+	pete_writeb("drivers/mtd/nand/raw/sh_flctl.c:143", 0x0, FLTRCR(flctl));
 }
 
 static void flctl_dma_complete(void *param)
@@ -238,7 +238,7 @@ static void set_addr(struct mtd_info *mtd, int column, int page_addr)
 			if (flctl->rw_ADRCNT == ADRCNT2_E) {
 				uint32_t 	addr2;
 				addr2 = (page_addr >> 16) & 0xff;
-				writel(addr2, FLADR2(flctl));
+				pete_writel("drivers/mtd/nand/raw/sh_flctl.c:241", addr2, FLADR2(flctl));
 			}
 		} else {
 			addr = column;
@@ -247,7 +247,7 @@ static void set_addr(struct mtd_info *mtd, int column, int page_addr)
 			addr |= ((page_addr >> 16) & 0xff) << 24;
 		}
 	}
-	writel(addr, FLADR(flctl));
+	pete_writel("drivers/mtd/nand/raw/sh_flctl.c:250", addr, FLADR(flctl));
 }
 
 static void wait_rfifo_ready(struct sh_flctl *flctl)
@@ -257,7 +257,7 @@ static void wait_rfifo_ready(struct sh_flctl *flctl)
 	while (timeout--) {
 		uint32_t val;
 		/* check FIFO */
-		val = readl(FLDTCNTR(flctl)) >> 16;
+		val = pete_readl("drivers/mtd/nand/raw/sh_flctl.c:260", FLDTCNTR(flctl)) >> 16;
 		if (val & 0xFF)
 			return;
 		udelay(1);
@@ -271,7 +271,7 @@ static void wait_wfifo_ready(struct sh_flctl *flctl)
 
 	while (timeout--) {
 		/* check FIFO */
-		len = (readl(FLDTCNTR(flctl)) >> 16) & 0xFF;
+		len = (pete_readl("drivers/mtd/nand/raw/sh_flctl.c:274", FLDTCNTR(flctl)) >> 16) & 0xFF;
 		if (len >= 4)
 			return;
 		udelay(1);
@@ -297,12 +297,12 @@ static enum flctl_ecc_res_t wait_recfifo_ready
 	 */
 	while (timeout--) {
 		/* check if all is ok and we can read out the OOB */
-		size = readl(FLDTCNTR(flctl)) >> 24;
+		size = pete_readl("drivers/mtd/nand/raw/sh_flctl.c:300", FLDTCNTR(flctl)) >> 24;
 		if ((size & 0xFF) == 4)
 			return state;
 
 		/* check if a correction code has been calculated */
-		if (!(readl(FL4ECCCR(flctl)) & _4ECCEND)) {
+		if (!(pete_readl("drivers/mtd/nand/raw/sh_flctl.c:305", FL4ECCCR(flctl)) & _4ECCEND)) {
 			/*
 			 * either we wait for the fifo to be filled or a
 			 * correction pattern is being generated
@@ -312,7 +312,7 @@ static enum flctl_ecc_res_t wait_recfifo_ready
 		}
 
 		/* check for an uncorrectable error */
-		if (readl(FL4ECCCR(flctl)) & _4ECCFA) {
+		if (pete_readl("drivers/mtd/nand/raw/sh_flctl.c:315", FL4ECCCR(flctl)) & _4ECCFA) {
 			/* check if we face a non-empty page */
 			for (i = 0; i < 512; i++) {
 				if (flctl->done_buff[i] != 0xff) {
@@ -326,7 +326,7 @@ static enum flctl_ecc_res_t wait_recfifo_ready
 				"reading empty sector %d, ecc error ignored\n",
 				sector_number);
 
-			writel(0, FL4ECCCR(flctl));
+			pete_writel("drivers/mtd/nand/raw/sh_flctl.c:329", 0, FL4ECCCR(flctl));
 			continue;
 		}
 
@@ -340,7 +340,7 @@ static enum flctl_ecc_res_t wait_recfifo_ready
 			uint8_t org;
 			unsigned int index;
 
-			data = readl(ecc_reg[i]);
+			data = pete_readl("drivers/mtd/nand/raw/sh_flctl.c:343", ecc_reg[i]);
 
 			if (flctl->page_size)
 				index = (512 * sector_number) +
@@ -352,7 +352,7 @@ static enum flctl_ecc_res_t wait_recfifo_ready
 			flctl->done_buff[index] = org ^ (data & 0xFF);
 		}
 		state = FL_REPAIRABLE;
-		writel(0, FL4ECCCR(flctl));
+		pete_writel("drivers/mtd/nand/raw/sh_flctl.c:355", 0, FL4ECCCR(flctl));
 	}
 
 	timeout_error(flctl, __func__);
@@ -366,7 +366,7 @@ static void wait_wecfifo_ready(struct sh_flctl *flctl)
 
 	while (timeout--) {
 		/* check FLECFIFO */
-		len = (readl(FLDTCNTR(flctl)) >> 24) & 0xFF;
+		len = (pete_readl("drivers/mtd/nand/raw/sh_flctl.c:369", FLDTCNTR(flctl)) >> 24) & 0xFF;
 		if (len >= 4)
 			return;
 		udelay(1);
@@ -401,9 +401,9 @@ static int flctl_dma_fifo0_transfer(struct sh_flctl *flctl, unsigned long *buf,
 			tr_dir, DMA_PREP_INTERRUPT | DMA_CTRL_ACK);
 
 	if (desc) {
-		reg = readl(FLINTDMACR(flctl));
+		reg = pete_readl("drivers/mtd/nand/raw/sh_flctl.c:404", FLINTDMACR(flctl));
 		reg |= DREQ0EN;
-		writel(reg, FLINTDMACR(flctl));
+		pete_writel("drivers/mtd/nand/raw/sh_flctl.c:406", reg, FLINTDMACR(flctl));
 
 		desc->callback = flctl_dma_complete;
 		desc->callback_param = flctl;
@@ -436,9 +436,9 @@ static int flctl_dma_fifo0_transfer(struct sh_flctl *flctl, unsigned long *buf,
 	}
 
 out:
-	reg = readl(FLINTDMACR(flctl));
+	reg = pete_readl("drivers/mtd/nand/raw/sh_flctl.c:439", FLINTDMACR(flctl));
 	reg &= ~DREQ0EN;
-	writel(reg, FLINTDMACR(flctl));
+	pete_writel("drivers/mtd/nand/raw/sh_flctl.c:441", reg, FLINTDMACR(flctl));
 
 	dma_unmap_single(chan->device->dev, dma_addr, len, dir);
 
@@ -453,7 +453,7 @@ static void read_datareg(struct sh_flctl *flctl, int offset)
 
 	wait_completion(flctl);
 
-	data = readl(FLDATAR(flctl));
+	data = pete_readl("drivers/mtd/nand/raw/sh_flctl.c:456", FLDATAR(flctl));
 	*buf = le32_to_cpu(data);
 }
 
@@ -472,7 +472,7 @@ static void read_fiforeg(struct sh_flctl *flctl, int rlen, int offset)
 	/* do polling transfer */
 	for (i = 0; i < len_4align; i++) {
 		wait_rfifo_ready(flctl);
-		buf[i] = readl(FLDTFIFO(flctl));
+		buf[i] = pete_readl("drivers/mtd/nand/raw/sh_flctl.c:475", FLDTFIFO(flctl));
 	}
 
 convert:
@@ -491,7 +491,7 @@ static enum flctl_ecc_res_t read_ecfiforeg
 
 	if (res != FL_ERROR) {
 		for (i = 0; i < 4; i++) {
-			ecc_buf[i] = readl(FLECFIFO(flctl));
+			ecc_buf[i] = pete_readl("drivers/mtd/nand/raw/sh_flctl.c:494", FLECFIFO(flctl));
 			ecc_buf[i] = be32_to_cpu(ecc_buf[i]);
 		}
 	}
@@ -508,7 +508,7 @@ static void write_fiforeg(struct sh_flctl *flctl, int rlen,
 	len_4align = (rlen + 3) / 4;
 	for (i = 0; i < len_4align; i++) {
 		wait_wfifo_ready(flctl);
-		writel(cpu_to_be32(buf[i]), FLDTFIFO(flctl));
+		pete_writel("drivers/mtd/nand/raw/sh_flctl.c:511", cpu_to_be32(buf[i]), FLDTFIFO(flctl));
 	}
 }
 
@@ -531,7 +531,7 @@ static void write_ec_fiforeg(struct sh_flctl *flctl, int rlen,
 	/* do polling transfer */
 	for (i = 0; i < len_4align; i++) {
 		wait_wecfifo_ready(flctl);
-		writel(buf[i], FLECFIFO(flctl));
+		pete_writel("drivers/mtd/nand/raw/sh_flctl.c:534", buf[i], FLECFIFO(flctl));
 	}
 }
 
@@ -592,9 +592,9 @@ static void set_cmd_regs(struct mtd_info *mtd, uint32_t cmd, uint32_t flcmcdr_va
 	flcmdcr_val |= addr_len_bytes;
 
 	/* Now actually write */
-	writel(flcmncr_val, FLCMNCR(flctl));
-	writel(flcmdcr_val, FLCMDCR(flctl));
-	writel(flcmcdr_val, FLCMCDR(flctl));
+	pete_writel("drivers/mtd/nand/raw/sh_flctl.c:595", flcmncr_val, FLCMNCR(flctl));
+	pete_writel("drivers/mtd/nand/raw/sh_flctl.c:596", flcmdcr_val, FLCMDCR(flctl));
+	pete_writel("drivers/mtd/nand/raw/sh_flctl.c:597", flcmcdr_val, FLCMCDR(flctl));
 }
 
 static int flctl_read_page_hwecc(struct nand_chip *chip, uint8_t *buf,
@@ -629,10 +629,10 @@ static void execmd_read_page_sector(struct mtd_info *mtd, int page_addr)
 	set_cmd_regs(mtd, NAND_CMD_READ0,
 		(NAND_CMD_READSTART << 8) | NAND_CMD_READ0);
 
-	writel(readl(FLCMNCR(flctl)) | ACM_SACCES_MODE | _4ECCCORRECT,
+	pete_writel("drivers/mtd/nand/raw/sh_flctl.c:632", pete_readl("drivers/mtd/nand/raw/sh_flctl.c:632", FLCMNCR(flctl)) | ACM_SACCES_MODE | _4ECCCORRECT,
 		 FLCMNCR(flctl));
-	writel(readl(FLCMDCR(flctl)) | page_sectors, FLCMDCR(flctl));
-	writel(page_addr << 2, FLADR(flctl));
+	pete_writel("drivers/mtd/nand/raw/sh_flctl.c:634", pete_readl("drivers/mtd/nand/raw/sh_flctl.c:634", FLCMDCR(flctl)) | page_sectors, FLCMDCR(flctl));
+	pete_writel("drivers/mtd/nand/raw/sh_flctl.c:635", page_addr << 2, FLADR(flctl));
 
 	empty_fifo(flctl);
 	start_translation(flctl);
@@ -663,7 +663,7 @@ static void execmd_read_page_sector(struct mtd_info *mtd, int page_addr)
 
 	wait_completion(flctl);
 
-	writel(readl(FLCMNCR(flctl)) & ~(ACM_SACCES_MODE | _4ECCCORRECT),
+	pete_writel("drivers/mtd/nand/raw/sh_flctl.c:666", pete_readl("drivers/mtd/nand/raw/sh_flctl.c:666", FLCMNCR(flctl)) & ~(ACM_SACCES_MODE | _4ECCCORRECT),
 			FLCMNCR(flctl));
 }
 
@@ -680,7 +680,7 @@ static void execmd_read_oob(struct mtd_info *mtd, int page_addr)
 
 	for (i = 0; i < page_sectors; i++) {
 		set_addr(mtd, (512 + 16) * i + 512 , page_addr);
-		writel(16, FLDTCNTR(flctl));
+		pete_writel("drivers/mtd/nand/raw/sh_flctl.c:683", 16, FLDTCNTR(flctl));
 
 		start_translation(flctl);
 		read_fiforeg(flctl, 16, 16 * i);
@@ -700,9 +700,9 @@ static void execmd_write_page_sector(struct mtd_info *mtd)
 			(NAND_CMD_PAGEPROG << 8) | NAND_CMD_SEQIN);
 
 	empty_fifo(flctl);
-	writel(readl(FLCMNCR(flctl)) | ACM_SACCES_MODE, FLCMNCR(flctl));
-	writel(readl(FLCMDCR(flctl)) | page_sectors, FLCMDCR(flctl));
-	writel(page_addr << 2, FLADR(flctl));
+	pete_writel("drivers/mtd/nand/raw/sh_flctl.c:703", pete_readl("drivers/mtd/nand/raw/sh_flctl.c:703", FLCMNCR(flctl)) | ACM_SACCES_MODE, FLCMNCR(flctl));
+	pete_writel("drivers/mtd/nand/raw/sh_flctl.c:704", pete_readl("drivers/mtd/nand/raw/sh_flctl.c:704", FLCMDCR(flctl)) | page_sectors, FLCMDCR(flctl));
+	pete_writel("drivers/mtd/nand/raw/sh_flctl.c:705", page_addr << 2, FLADR(flctl));
 	start_translation(flctl);
 
 	for (sector = 0; sector < page_sectors; sector++) {
@@ -711,7 +711,7 @@ static void execmd_write_page_sector(struct mtd_info *mtd)
 	}
 
 	wait_completion(flctl);
-	writel(readl(FLCMNCR(flctl)) & ~ACM_SACCES_MODE, FLCMNCR(flctl));
+	pete_writel("drivers/mtd/nand/raw/sh_flctl.c:714", pete_readl("drivers/mtd/nand/raw/sh_flctl.c:714", FLCMNCR(flctl)) & ~ACM_SACCES_MODE, FLCMNCR(flctl));
 }
 
 static void execmd_write_oob(struct mtd_info *mtd)
@@ -728,7 +728,7 @@ static void execmd_write_oob(struct mtd_info *mtd)
 	for (sector = 0; sector < page_sectors; sector++) {
 		empty_fifo(flctl);
 		set_addr(mtd, sector * 528 + 512, page_addr);
-		writel(16, FLDTCNTR(flctl));	/* set read size */
+		pete_writel("drivers/mtd/nand/raw/sh_flctl.c:731", 16, FLDTCNTR(flctl));	/* set read size */
 
 		start_translation(flctl);
 		write_fiforeg(flctl, 16, 16 * sector);
@@ -813,7 +813,7 @@ static void flctl_cmdfunc(struct nand_chip *chip, unsigned int command,
 		set_addr(mtd, column, 0);
 
 		flctl->read_bytes = 8;
-		writel(flctl->read_bytes, FLDTCNTR(flctl)); /* set read size */
+		pete_writel("drivers/mtd/nand/raw/sh_flctl.c:816", flctl->read_bytes, FLDTCNTR(flctl)); /* set read size */
 		empty_fifo(flctl);
 		start_translation(flctl);
 		read_fiforeg(flctl, flctl->read_bytes, 0);
@@ -856,7 +856,7 @@ static void flctl_cmdfunc(struct nand_chip *chip, unsigned int command,
 			set_cmd_regs(mtd, NAND_CMD_SEQIN,
 					flctl->seqin_read_cmd);
 			set_addr(mtd, -1, -1);
-			writel(0, FLDTCNTR(flctl));	/* set 0 size */
+			pete_writel("drivers/mtd/nand/raw/sh_flctl.c:859", 0, FLDTCNTR(flctl));	/* set 0 size */
 			start_translation(flctl);
 			wait_completion(flctl);
 		}
@@ -872,7 +872,7 @@ static void flctl_cmdfunc(struct nand_chip *chip, unsigned int command,
 		}
 		set_cmd_regs(mtd, command, (command << 8) | NAND_CMD_SEQIN);
 		set_addr(mtd, flctl->seqin_column, flctl->seqin_page_addr);
-		writel(flctl->index, FLDTCNTR(flctl));	/* set write size */
+		pete_writel("drivers/mtd/nand/raw/sh_flctl.c:875", flctl->index, FLDTCNTR(flctl));	/* set write size */
 		start_translation(flctl);
 		write_fiforeg(flctl, flctl->index, 0);
 		wait_completion(flctl);
@@ -883,7 +883,7 @@ static void flctl_cmdfunc(struct nand_chip *chip, unsigned int command,
 		set_addr(mtd, -1, -1);
 
 		flctl->read_bytes = 1;
-		writel(flctl->read_bytes, FLDTCNTR(flctl)); /* set read size */
+		pete_writel("drivers/mtd/nand/raw/sh_flctl.c:886", flctl->read_bytes, FLDTCNTR(flctl)); /* set read size */
 		start_translation(flctl);
 		read_datareg(flctl, 0); /* read and end */
 		break;
@@ -892,7 +892,7 @@ static void flctl_cmdfunc(struct nand_chip *chip, unsigned int command,
 		set_cmd_regs(mtd, command, command);
 		set_addr(mtd, -1, -1);
 
-		writel(0, FLDTCNTR(flctl));	/* set 0 size */
+		pete_writel("drivers/mtd/nand/raw/sh_flctl.c:895", 0, FLDTCNTR(flctl));	/* set 0 size */
 		start_translation(flctl);
 		wait_completion(flctl);
 		break;
@@ -903,7 +903,7 @@ static void flctl_cmdfunc(struct nand_chip *chip, unsigned int command,
 	goto runtime_exit;
 
 read_normal_exit:
-	writel(flctl->read_bytes, FLDTCNTR(flctl));	/* set read size */
+	pete_writel("drivers/mtd/nand/raw/sh_flctl.c:906", flctl->read_bytes, FLDTCNTR(flctl));	/* set read size */
 	empty_fifo(flctl);
 	start_translation(flctl);
 	read_fiforeg(flctl, flctl->read_bytes, 0);
@@ -923,7 +923,7 @@ static void flctl_select_chip(struct nand_chip *chip, int chipnr)
 		flctl->flcmncr_base &= ~CE0_ENABLE;
 
 		pm_runtime_get_sync(&flctl->pdev->dev);
-		writel(flctl->flcmncr_base, FLCMNCR(flctl));
+		pete_writel("drivers/mtd/nand/raw/sh_flctl.c:926", flctl->flcmncr_base, FLCMNCR(flctl));
 
 		if (flctl->qos_request) {
 			dev_pm_qos_remove_request(&flctl->pm_qos);
@@ -948,7 +948,7 @@ static void flctl_select_chip(struct nand_chip *chip, int chipnr)
 
 		if (flctl->holden) {
 			pm_runtime_get_sync(&flctl->pdev->dev);
-			writel(HOLDEN, FLHOLDCR(flctl));
+			pete_writel("drivers/mtd/nand/raw/sh_flctl.c:951", HOLDEN, FLHOLDCR(flctl));
 			pm_runtime_put_sync(&flctl->pdev->dev);
 		}
 		break;
@@ -1060,8 +1060,8 @@ static irqreturn_t flctl_handle_flste(int irq, void *dev_id)
 {
 	struct sh_flctl *flctl = dev_id;
 
-	dev_err(&flctl->pdev->dev, "flste irq: %x\n", readl(FLINTDMACR(flctl)));
-	writel(flctl->flintdmacr_base, FLINTDMACR(flctl));
+	dev_err(&flctl->pdev->dev, "flste irq: %x\n", pete_readl("drivers/mtd/nand/raw/sh_flctl.c:1063", FLINTDMACR(flctl)));
+	pete_writel("drivers/mtd/nand/raw/sh_flctl.c:1064", flctl->flintdmacr_base, FLINTDMACR(flctl));
 
 	return IRQ_HANDLED;
 }

@@ -388,13 +388,13 @@ extern unsigned int	sisfb_read_mio_pci_word(struct SiS_Private *SiS_Pr, int reg)
 
 
 /* MMIO access macros */
-#define MMIO_IN8(base, offset)  readb((base+offset))
-#define MMIO_IN16(base, offset) readw((base+offset))
-#define MMIO_IN32(base, offset) readl((base+offset))
+#define MMIO_IN8(base, offset)  pete_readb("drivers/video/fbdev/sis/sis.h:391", (base+offset))
+#define MMIO_IN16(base, offset) pete_readw("drivers/video/fbdev/sis/sis.h:392", (base+offset))
+#define MMIO_IN32(base, offset) pete_readl("drivers/video/fbdev/sis/sis.h:393", (base+offset))
 
-#define MMIO_OUT8(base, offset, val)  writeb(((u8)(val)), (base+offset))
-#define MMIO_OUT16(base, offset, val) writew(((u16)(val)), (base+offset))
-#define MMIO_OUT32(base, offset, val) writel(((u32)(val)), (base+offset))
+#define MMIO_OUT8(base, offset, val)  pete_writeb("drivers/video/fbdev/sis/sis.h:395", ((u8)(val)), (base+offset))
+#define MMIO_OUT16(base, offset, val) pete_writew("drivers/video/fbdev/sis/sis.h:396", ((u16)(val)), (base+offset))
+#define MMIO_OUT32(base, offset, val) pete_writel("drivers/video/fbdev/sis/sis.h:397", ((u32)(val)), (base+offset))
 
 /* Queue control MMIO registers */
 #define Q_BASE_ADDR		0x85C0  /* Base address of software queue */

@@ -206,7 +206,7 @@ irqreturn_t sparc_floppy_irq(int irq, void *dev_cookie)
 		u8 val;
 
 		while (size) {
-			val = readb(stat);
+			val = pete_readb("arch/sparc/include/asm/floppy_64.h:209", stat);
 			if (unlikely(!(val & 0x80))) {
 				pdma_vaddr = vaddr;
 				pdma_size = size;
@@ -220,12 +220,12 @@ irqreturn_t sparc_floppy_irq(int irq, void *dev_cookie)
 			}
 			if (val & 0x40) {
 				/* read */
-				*vaddr++ = readb(stat + 1);
+				*vaddr++ = pete_readb("arch/sparc/include/asm/floppy_64.h:223", stat + 1);
 			} else {
 				unsigned char data = *vaddr++;
 
 				/* write */
-				writeb(data, stat + 1);
+				pete_writeb("arch/sparc/include/asm/floppy_64.h:228", data, stat + 1);
 			}
 			size--;
 		}
@@ -234,11 +234,11 @@ irqreturn_t sparc_floppy_irq(int irq, void *dev_cookie)
 		pdma_size = size;
 
 		/* Send Terminal Count pulse to floppy controller. */
-		val = readb(auxio_register);
+		val = pete_readb("arch/sparc/include/asm/floppy_64.h:237", auxio_register);
 		val |= AUXIO_AUX1_FTCNT;
-		writeb(val, auxio_register);
+		pete_writeb("arch/sparc/include/asm/floppy_64.h:239", val, auxio_register);
 		val &= ~AUXIO_AUX1_FTCNT;
-		writeb(val, auxio_register);
+		pete_writeb("arch/sparc/include/asm/floppy_64.h:241", val, auxio_register);
 
 		doing_pdma = 0;
 	}
@@ -600,7 +600,7 @@ static unsigned long __init sun_floppy_init(void)
 		 * (most notably Ultra5/Ultra10) come up with it clear.
 		 */
 		auxio_reg = (void __iomem *) op->resource[2].start;
-		writel(readl(auxio_reg)|0x2, auxio_reg);
+		pete_writel("arch/sparc/include/asm/floppy_64.h:603", pete_readl("arch/sparc/include/asm/floppy_64.h:603", auxio_reg)|0x2, auxio_reg);
 
 		sun_floppy_dev = &op->dev;
 

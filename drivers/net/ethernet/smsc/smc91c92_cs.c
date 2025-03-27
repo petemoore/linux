@@ -384,17 +384,17 @@ static int mhz_3288_power(struct pcmcia_device *link)
     u_char tmp;
 
     /* Read the ISR twice... */
-    readb(smc->base+MEGAHERTZ_ISR);
+    pete_readb("drivers/net/ethernet/smsc/smc91c92_cs.c:387", smc->base+MEGAHERTZ_ISR);
     udelay(5);
-    readb(smc->base+MEGAHERTZ_ISR);
+    pete_readb("drivers/net/ethernet/smsc/smc91c92_cs.c:389", smc->base+MEGAHERTZ_ISR);
 
     /* Pause 200ms... */
     mdelay(200);
 
     /* Now read and write the COR... */
-    tmp = readb(smc->base + link->config_base + CISREG_COR);
+    tmp = pete_readb("drivers/net/ethernet/smsc/smc91c92_cs.c:395", smc->base + link->config_base + CISREG_COR);
     udelay(5);
-    writeb(tmp, smc->base + link->config_base + CISREG_COR);
+    pete_writeb("drivers/net/ethernet/smsc/smc91c92_cs.c:397", tmp, smc->base + link->config_base + CISREG_COR);
 
     return 0;
 }
@@ -523,14 +523,14 @@ static void mot_config(struct pcmcia_device *link)
     unsigned int iouart = link->resource[1]->start;
 
     /* Set UART base address and force map with COR bit 1 */
-    writeb(iouart & 0xff,        smc->base + MOT_UART + CISREG_IOBASE_0);
-    writeb((iouart >> 8) & 0xff, smc->base + MOT_UART + CISREG_IOBASE_1);
-    writeb(MOT_NORMAL,           smc->base + MOT_UART + CISREG_COR);
+    pete_writeb("drivers/net/ethernet/smsc/smc91c92_cs.c:526", iouart & 0xff,        smc->base + MOT_UART + CISREG_IOBASE_0);
+    pete_writeb("drivers/net/ethernet/smsc/smc91c92_cs.c:527", (iouart >> 8) & 0xff, smc->base + MOT_UART + CISREG_IOBASE_1);
+    pete_writeb("drivers/net/ethernet/smsc/smc91c92_cs.c:528", MOT_NORMAL,           smc->base + MOT_UART + CISREG_COR);
 
     /* Set SMC base address and force map with COR bit 1 */
-    writeb(ioaddr & 0xff,        smc->base + MOT_LAN + CISREG_IOBASE_0);
-    writeb((ioaddr >> 8) & 0xff, smc->base + MOT_LAN + CISREG_IOBASE_1);
-    writeb(MOT_NORMAL,           smc->base + MOT_LAN + CISREG_COR);
+    pete_writeb("drivers/net/ethernet/smsc/smc91c92_cs.c:531", ioaddr & 0xff,        smc->base + MOT_LAN + CISREG_IOBASE_0);
+    pete_writeb("drivers/net/ethernet/smsc/smc91c92_cs.c:532", (ioaddr >> 8) & 0xff, smc->base + MOT_LAN + CISREG_IOBASE_1);
+    pete_writeb("drivers/net/ethernet/smsc/smc91c92_cs.c:533", MOT_NORMAL,           smc->base + MOT_LAN + CISREG_COR);
 
     /* Wait for things to settle down */
     mdelay(100);
@@ -1443,12 +1443,12 @@ irq_done:
     }
     if (smc->manfid == MANFID_MOTOROLA) {
 	u_char cor;
-	cor = readb(smc->base + MOT_UART + CISREG_COR);
-	writeb(cor & ~COR_IREQ_ENA, smc->base + MOT_UART + CISREG_COR);
-	writeb(cor, smc->base + MOT_UART + CISREG_COR);
-	cor = readb(smc->base + MOT_LAN + CISREG_COR);
-	writeb(cor & ~COR_IREQ_ENA, smc->base + MOT_LAN + CISREG_COR);
-	writeb(cor, smc->base + MOT_LAN + CISREG_COR);
+	cor = pete_readb("drivers/net/ethernet/smsc/smc91c92_cs.c:1446", smc->base + MOT_UART + CISREG_COR);
+	pete_writeb("drivers/net/ethernet/smsc/smc91c92_cs.c:1447", cor & ~COR_IREQ_ENA, smc->base + MOT_UART + CISREG_COR);
+	pete_writeb("drivers/net/ethernet/smsc/smc91c92_cs.c:1448", cor, smc->base + MOT_UART + CISREG_COR);
+	cor = pete_readb("drivers/net/ethernet/smsc/smc91c92_cs.c:1449", smc->base + MOT_LAN + CISREG_COR);
+	pete_writeb("drivers/net/ethernet/smsc/smc91c92_cs.c:1450", cor & ~COR_IREQ_ENA, smc->base + MOT_LAN + CISREG_COR);
+	pete_writeb("drivers/net/ethernet/smsc/smc91c92_cs.c:1451", cor, smc->base + MOT_LAN + CISREG_COR);
     }
 
     if ((smc->base != NULL) &&  /* Megahertz MFC's */
@@ -1456,12 +1456,12 @@ irq_done:
 	(smc->cardid == PRODID_MEGAHERTZ_EM3288)) {
 
 	u_char tmp;
-	tmp = readb(smc->base+MEGAHERTZ_ISR);
-	tmp = readb(smc->base+MEGAHERTZ_ISR);
+	tmp = pete_readb("drivers/net/ethernet/smsc/smc91c92_cs.c:1459", smc->base+MEGAHERTZ_ISR);
+	tmp = pete_readb("drivers/net/ethernet/smsc/smc91c92_cs.c:1460", smc->base+MEGAHERTZ_ISR);
 
 	/* Retrigger interrupt if needed */
-	writeb(tmp, smc->base + MEGAHERTZ_ISR);
-	writeb(tmp, smc->base + MEGAHERTZ_ISR);
+	pete_writeb("drivers/net/ethernet/smsc/smc91c92_cs.c:1463", tmp, smc->base + MEGAHERTZ_ISR);
+	pete_writeb("drivers/net/ethernet/smsc/smc91c92_cs.c:1464", tmp, smc->base + MEGAHERTZ_ISR);
     }
 
     spin_unlock(&smc->lock);

@@ -35,7 +35,7 @@
 static int dc21285_get_irq(void)
 {
 	void __iomem *irqstatus = (void __iomem *)CSR_IRQ_STATUS;
-	u32 mask = readl(irqstatus);
+	u32 mask = pete_readl("arch/arm/mach-footbridge/common.c:38", irqstatus);
 
 	if (mask & IRQ_MASK_SDRAMPARITY)
 		return IRQ_SDRAMPARITY;

@@ -287,7 +287,7 @@ static int imxfb_setpalettereg(u_int regno, u_int red, u_int green, u_int blue,
 		      (CNVT_TOHW(green,4) << 4) |
 		      CNVT_TOHW(blue,  4);
 
-		writel(val, fbi->regs + 0x800 + (regno << 2));
+		pete_writel("drivers/video/fbdev/imxfb.c:290", val, fbi->regs + 0x800 + (regno << 2));
 		ret = 0;
 	}
 	return ret;
@@ -518,20 +518,20 @@ static int imxfb_enable_controller(struct imxfb_info *fbi)
 
 	pr_debug("Enabling LCD controller\n");
 
-	writel(fbi->map_dma, fbi->regs + LCDC_SSA);
+	pete_writel("drivers/video/fbdev/imxfb.c:521", fbi->map_dma, fbi->regs + LCDC_SSA);
 
 	/* panning offset 0 (0 pixel offset)        */
-	writel(0x00000000, fbi->regs + LCDC_POS);
+	pete_writel("drivers/video/fbdev/imxfb.c:524", 0x00000000, fbi->regs + LCDC_POS);
 
 	/* disable hardware cursor */
-	writel(readl(fbi->regs + LCDC_CPOS) & ~(CPOS_CC0 | CPOS_CC1),
+	pete_writel("drivers/video/fbdev/imxfb.c:527", pete_readl("drivers/video/fbdev/imxfb.c:527", fbi->regs + LCDC_CPOS) & ~(CPOS_CC0 | CPOS_CC1),
 		fbi->regs + LCDC_CPOS);
 
 	/*
 	 * RMCR_LCDC_EN_MX1 is present on i.MX1 only, but doesn't hurt
 	 * on other SoCs
 	 */
-	writel(RMCR_LCDC_EN_MX1, fbi->regs + LCDC_RMCR);
+	pete_writel("drivers/video/fbdev/imxfb.c:534", RMCR_LCDC_EN_MX1, fbi->regs + LCDC_RMCR);
 
 	ret = clk_prepare_enable(fbi->clk_ipg);
 	if (ret)
@@ -553,7 +553,7 @@ err_enable_per:
 err_enable_ahb:
 	clk_disable_unprepare(fbi->clk_ipg);
 err_enable_ipg:
-	writel(0, fbi->regs + LCDC_RMCR);
+	pete_writel("drivers/video/fbdev/imxfb.c:556", 0, fbi->regs + LCDC_RMCR);
 
 	return ret;
 }
@@ -570,7 +570,7 @@ static void imxfb_disable_controller(struct imxfb_info *fbi)
 	clk_disable_unprepare(fbi->clk_ipg);
 	fbi->enabled = false;
 
-	writel(0, fbi->regs + LCDC_RMCR);
+	pete_writel("drivers/video/fbdev/imxfb.c:573", 0, fbi->regs + LCDC_RMCR);
 }
 
 static int imxfb_blank(int blank, struct fb_info *info)
@@ -655,33 +655,33 @@ static int imxfb_activate_var(struct fb_var_screeninfo *var, struct fb_info *inf
 #endif
 
 	/* physical screen start address	    */
-	writel(VPW_VPW(var->xres * var->bits_per_pixel / 8 / 4),
+	pete_writel("drivers/video/fbdev/imxfb.c:658", VPW_VPW(var->xres * var->bits_per_pixel / 8 / 4),
 		fbi->regs + LCDC_VPW);
 
-	writel(HCR_H_WIDTH(var->hsync_len - 1) |
+	pete_writel("drivers/video/fbdev/imxfb.c:661", HCR_H_WIDTH(var->hsync_len - 1) |
 		HCR_H_WAIT_1(var->right_margin - 1) |
 		HCR_H_WAIT_2(var->left_margin - left_margin_low),
 		fbi->regs + LCDC_HCR);
 
-	writel(VCR_V_WIDTH(var->vsync_len) |
+	pete_writel("drivers/video/fbdev/imxfb.c:666", VCR_V_WIDTH(var->vsync_len) |
 		VCR_V_WAIT_1(var->lower_margin) |
 		VCR_V_WAIT_2(var->upper_margin),
 		fbi->regs + LCDC_VCR);
 
-	writel(SIZE_XMAX(var->xres) | (var->yres & ymax_mask),
+	pete_writel("drivers/video/fbdev/imxfb.c:671", SIZE_XMAX(var->xres) | (var->yres & ymax_mask),
 			fbi->regs + LCDC_SIZE);
 
-	writel(fbi->pcr, fbi->regs + LCDC_PCR);
+	pete_writel("drivers/video/fbdev/imxfb.c:674", fbi->pcr, fbi->regs + LCDC_PCR);
 	if (fbi->pwmr)
-		writel(fbi->pwmr, fbi->regs + LCDC_PWMR);
-	writel(fbi->lscr1, fbi->regs + LCDC_LSCR1);
+		pete_writel("drivers/video/fbdev/imxfb.c:676", fbi->pwmr, fbi->regs + LCDC_PWMR);
+	pete_writel("drivers/video/fbdev/imxfb.c:677", fbi->lscr1, fbi->regs + LCDC_LSCR1);
 
 	/* dmacr = 0 is no valid value, as we need DMA control marks. */
 	if (fbi->dmacr)
-		writel(fbi->dmacr, fbi->regs + LCDC_DMACR);
+		pete_writel("drivers/video/fbdev/imxfb.c:681", fbi->dmacr, fbi->regs + LCDC_DMACR);
 
 	if (fbi->lauscr)
-		writel(fbi->lauscr, fbi->regs + LCDC_LAUSCR);
+		pete_writel("drivers/video/fbdev/imxfb.c:684", fbi->lauscr, fbi->regs + LCDC_LAUSCR);
 
 	return 0;
 }
@@ -811,7 +811,7 @@ static int imxfb_lcd_set_contrast(struct lcd_device *lcddev, int contrast)
 		fbi->pwmr &= ~0xff;
 		fbi->pwmr |= contrast;
 
-		writel(fbi->pwmr, fbi->regs + LCDC_PWMR);
+		pete_writel("drivers/video/fbdev/imxfb.c:814", fbi->pwmr, fbi->regs + LCDC_PWMR);
 	}
 
 	return 0;

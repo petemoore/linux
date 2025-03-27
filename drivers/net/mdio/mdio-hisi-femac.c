@@ -42,14 +42,14 @@ static int hisi_femac_mdio_read(struct mii_bus *bus, int mii_id, int regnum)
 	if (ret)
 		return ret;
 
-	writel((mii_id << BIT_PHY_ADDR_OFFSET) | regnum,
+	pete_writel("drivers/net/mdio/mdio-hisi-femac.c:45", (mii_id << BIT_PHY_ADDR_OFFSET) | regnum,
 	       data->membase + MDIO_RWCTRL);
 
 	ret = hisi_femac_mdio_wait_ready(data);
 	if (ret)
 		return ret;
 
-	return readl(data->membase + MDIO_RO_DATA) & 0xFFFF;
+	return pete_readl("drivers/net/mdio/mdio-hisi-femac.c:52", data->membase + MDIO_RO_DATA) & 0xFFFF;
 }
 
 static int hisi_femac_mdio_write(struct mii_bus *bus, int mii_id, int regnum,
@@ -62,7 +62,7 @@ static int hisi_femac_mdio_write(struct mii_bus *bus, int mii_id, int regnum,
 	if (ret)
 		return ret;
 
-	writel(MDIO_WRITE | (value << BIT_WR_DATA_OFFSET) |
+	pete_writel("drivers/net/mdio/mdio-hisi-femac.c:65", MDIO_WRITE | (value << BIT_WR_DATA_OFFSET) |
 	       (mii_id << BIT_PHY_ADDR_OFFSET) | regnum,
 	       data->membase + MDIO_RWCTRL);
 

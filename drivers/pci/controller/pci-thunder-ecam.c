@@ -44,7 +44,7 @@ static int handle_ea_bar(u32 e0, int bar, struct pci_bus *bus,
 		if (!addr)
 			return PCIBIOS_DEVICE_NOT_FOUND;
 
-		v = readl(addr);
+		v = pete_readl("drivers/pci/controller/pci-thunder-ecam.c:47", addr);
 		v &= ~0xf;
 		v |= 2; /* EA entry-1. Base-L */
 		set_val(v, where, size, val);
@@ -58,10 +58,10 @@ static int handle_ea_bar(u32 e0, int bar, struct pci_bus *bus,
 		if (!addr)
 			return PCIBIOS_DEVICE_NOT_FOUND;
 
-		barl_orig = readl(addr + 0);
-		writel(0xffffffff, addr + 0);
-		barl_rb = readl(addr + 0);
-		writel(barl_orig, addr + 0);
+		barl_orig = pete_readl("drivers/pci/controller/pci-thunder-ecam.c:61", addr + 0);
+		pete_writel("drivers/pci/controller/pci-thunder-ecam.c:62", 0xffffffff, addr + 0);
+		barl_rb = pete_readl("drivers/pci/controller/pci-thunder-ecam.c:63", addr + 0);
+		pete_writel("drivers/pci/controller/pci-thunder-ecam.c:64", barl_orig, addr + 0);
 		/* zeros in unsettable bits */
 		v = ~barl_rb & ~3;
 		v |= 0xc; /* EA entry-2. Offset-L */
@@ -73,7 +73,7 @@ static int handle_ea_bar(u32 e0, int bar, struct pci_bus *bus,
 		if (!addr)
 			return PCIBIOS_DEVICE_NOT_FOUND;
 
-		v = readl(addr); /* EA entry-3. Base-H */
+		v = pete_readl("drivers/pci/controller/pci-thunder-ecam.c:76", addr); /* EA entry-3. Base-H */
 		set_val(v, where, size, val);
 		return PCIBIOS_SUCCESSFUL;
 	}
@@ -104,7 +104,7 @@ static int thunder_ecam_p2_config_read(struct pci_bus *bus, unsigned int devfn,
 	if (!addr)
 		return PCIBIOS_DEVICE_NOT_FOUND;
 
-	v = readl(addr);
+	v = pete_readl("drivers/pci/controller/pci-thunder-ecam.c:107", addr);
 
 	/*
 	 * Bit 44 of the 64-bit Base must match the same bit in
@@ -133,7 +133,7 @@ static int thunder_ecam_config_read(struct pci_bus *bus, unsigned int devfn,
 	if (!addr)
 		return PCIBIOS_DEVICE_NOT_FOUND;
 
-	v = readl(addr);
+	v = pete_readl("drivers/pci/controller/pci-thunder-ecam.c:136", addr);
 
 	/* Check for non type-00 header */
 	cfg_type = (v >> 16) & 0x7f;
@@ -142,7 +142,7 @@ static int thunder_ecam_config_read(struct pci_bus *bus, unsigned int devfn,
 	if (!addr)
 		return PCIBIOS_DEVICE_NOT_FOUND;
 
-	class_rev = readl(addr);
+	class_rev = pete_readl("drivers/pci/controller/pci-thunder-ecam.c:145", addr);
 	if (class_rev == 0xffffffff)
 		goto no_emulation;
 
@@ -170,7 +170,7 @@ static int thunder_ecam_config_read(struct pci_bus *bus, unsigned int devfn,
 	if (!addr)
 		return PCIBIOS_DEVICE_NOT_FOUND;
 
-	vendor_device = readl(addr);
+	vendor_device = pete_readl("drivers/pci/controller/pci-thunder-ecam.c:173", addr);
 	if (vendor_device == 0xffffffff)
 		goto no_emulation;
 
@@ -189,7 +189,7 @@ static int thunder_ecam_config_read(struct pci_bus *bus, unsigned int devfn,
 			return PCIBIOS_DEVICE_NOT_FOUND;
 
 		/* E_CAP */
-		v = readl(addr);
+		v = pete_readl("drivers/pci/controller/pci-thunder-ecam.c:192", addr);
 		has_msix = (v & 0xff00) != 0;
 
 		if (!has_msix && where_a == 0x70) {
@@ -202,7 +202,7 @@ static int thunder_ecam_config_read(struct pci_bus *bus, unsigned int devfn,
 			if (!addr)
 				return PCIBIOS_DEVICE_NOT_FOUND;
 
-			v = readl(addr);
+			v = pete_readl("drivers/pci/controller/pci-thunder-ecam.c:205", addr);
 			if (v & 0xff00)
 				pr_err("Bad MSIX cap header: %08x\n", v);
 			v |= 0xbc00; /* next capability is EA at 0xbc */
@@ -258,7 +258,7 @@ static int thunder_ecam_config_read(struct pci_bus *bus, unsigned int devfn,
 			if (!addr)
 				return PCIBIOS_DEVICE_NOT_FOUND;
 
-			v = readl(addr);
+			v = pete_readl("drivers/pci/controller/pci-thunder-ecam.c:261", addr);
 			if (v & 0xff00)
 				pr_err("Bad PCIe cap header: %08x\n", v);
 			v |= 0xbc00; /* next capability is EA at 0xbc */

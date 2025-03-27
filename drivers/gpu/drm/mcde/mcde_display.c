@@ -77,9 +77,9 @@ void mcde_display_irq(struct mcde *mcde)
 	bool vblank = false;
 
 	/* Handle display IRQs */
-	mispp = readl(mcde->regs + MCDE_MISPP);
-	misovl = readl(mcde->regs + MCDE_MISOVL);
-	mischnl = readl(mcde->regs + MCDE_MISCHNL);
+	mispp = pete_readl("drivers/gpu/drm/mcde/mcde_display.c:80", mcde->regs + MCDE_MISPP);
+	misovl = pete_readl("drivers/gpu/drm/mcde/mcde_display.c:81", mcde->regs + MCDE_MISOVL);
+	mischnl = pete_readl("drivers/gpu/drm/mcde/mcde_display.c:82", mcde->regs + MCDE_MISCHNL);
 
 	/*
 	 * Handle IRQs from the DSI link. All IRQs from the DSI links
@@ -103,9 +103,9 @@ void mcde_display_irq(struct mcde *mcde)
 			if (--mcde->flow_active == 0) {
 				dev_dbg(mcde->dev, "TE0 IRQ\n");
 				/* Disable FIFO A flow */
-				val = readl(mcde->regs + MCDE_CRA0);
+				val = pete_readl("drivers/gpu/drm/mcde/mcde_display.c:106", mcde->regs + MCDE_CRA0);
 				val &= ~MCDE_CRX0_FLOEN;
-				writel(val, mcde->regs + MCDE_CRA0);
+				pete_writel("drivers/gpu/drm/mcde/mcde_display.c:108", val, mcde->regs + MCDE_CRA0);
 			}
 			spin_unlock(&mcde->flow_lock);
 		}
@@ -128,32 +128,32 @@ void mcde_display_irq(struct mcde *mcde)
 		dev_dbg(mcde->dev, "chnl C0 TE IRQ\n");
 	if (mispp & MCDE_PP_VSCC1)
 		dev_dbg(mcde->dev, "chnl C1 TE IRQ\n");
-	writel(mispp, mcde->regs + MCDE_RISPP);
+	pete_writel("drivers/gpu/drm/mcde/mcde_display.c:131", mispp, mcde->regs + MCDE_RISPP);
 
 	if (vblank)
 		drm_crtc_handle_vblank(&mcde->pipe.crtc);
 
 	if (misovl)
 		dev_info(mcde->dev, "some stray overlay IRQ %08x\n", misovl);
-	writel(misovl, mcde->regs + MCDE_RISOVL);
+	pete_writel("drivers/gpu/drm/mcde/mcde_display.c:138", misovl, mcde->regs + MCDE_RISOVL);
 
 	if (mischnl)
 		dev_info(mcde->dev, "some stray channel error IRQ %08x\n",
 			 mischnl);
-	writel(mischnl, mcde->regs + MCDE_RISCHNL);
+	pete_writel("drivers/gpu/drm/mcde/mcde_display.c:143", mischnl, mcde->regs + MCDE_RISCHNL);
 }
 
 void mcde_display_disable_irqs(struct mcde *mcde)
 {
 	/* Disable all IRQs */
-	writel(0, mcde->regs + MCDE_IMSCPP);
-	writel(0, mcde->regs + MCDE_IMSCOVL);
-	writel(0, mcde->regs + MCDE_IMSCCHNL);
+	pete_writel("drivers/gpu/drm/mcde/mcde_display.c:149", 0, mcde->regs + MCDE_IMSCPP);
+	pete_writel("drivers/gpu/drm/mcde/mcde_display.c:150", 0, mcde->regs + MCDE_IMSCOVL);
+	pete_writel("drivers/gpu/drm/mcde/mcde_display.c:151", 0, mcde->regs + MCDE_IMSCCHNL);
 
 	/* Clear any pending IRQs */
-	writel(0xFFFFFFFF, mcde->regs + MCDE_RISPP);
-	writel(0xFFFFFFFF, mcde->regs + MCDE_RISOVL);
-	writel(0xFFFFFFFF, mcde->regs + MCDE_RISCHNL);
+	pete_writel("drivers/gpu/drm/mcde/mcde_display.c:154", 0xFFFFFFFF, mcde->regs + MCDE_RISPP);
+	pete_writel("drivers/gpu/drm/mcde/mcde_display.c:155", 0xFFFFFFFF, mcde->regs + MCDE_RISOVL);
+	pete_writel("drivers/gpu/drm/mcde/mcde_display.c:156", 0xFFFFFFFF, mcde->regs + MCDE_RISCHNL);
 }
 
 static int mcde_display_check(struct drm_simple_display_pipe *pipe,
@@ -325,12 +325,12 @@ static int mcde_configure_extsrc(struct mcde *mcde, enum mcde_extsrc src,
 			format);
 		return -EINVAL;
 	}
-	writel(val, mcde->regs + conf);
+	pete_writel("drivers/gpu/drm/mcde/mcde_display.c:328", val, mcde->regs + conf);
 
 	/* Software select, primary */
 	val = MCDE_EXTSRCXCR_SEL_MOD_SOFTWARE_SEL;
 	val |= MCDE_EXTSRCXCR_MULTIOVL_CTRL_PRIMARY;
-	writel(val, mcde->regs + cr);
+	pete_writel("drivers/gpu/drm/mcde/mcde_display.c:333", val, mcde->regs + cr);
 
 	return 0;
 }
@@ -405,7 +405,7 @@ static void mcde_configure_overlay(struct mcde *mcde, enum mcde_overlay ovl,
 	val |= mode->vdisplay << MCDE_OVLXCONF_LPF_SHIFT;
 	/* Use external source 0 that we just configured */
 	val |= src << MCDE_OVLXCONF_EXTSRC_ID_SHIFT;
-	writel(val, mcde->regs + conf1);
+	pete_writel("drivers/gpu/drm/mcde/mcde_display.c:408", val, mcde->regs + conf1);
 
 	val = MCDE_OVLXCONF2_BP_PER_PIXEL_ALPHA;
 	val |= 0xff << MCDE_OVLXCONF2_ALPHAVALUE_SHIFT;
@@ -460,12 +460,12 @@ static void mcde_configure_overlay(struct mcde *mcde, enum mcde_overlay ovl,
 	dev_dbg(mcde->dev, "pixel fetcher watermark level %d pixels\n",
 		pixel_fetcher_watermark);
 	val |= pixel_fetcher_watermark << MCDE_OVLXCONF2_PIXELFETCHERWATERMARKLEVEL_SHIFT;
-	writel(val, mcde->regs + conf2);
+	pete_writel("drivers/gpu/drm/mcde/mcde_display.c:463", val, mcde->regs + conf2);
 
 	/* Number of bytes to fetch per line */
-	writel(mcde->stride, mcde->regs + ljinc);
+	pete_writel("drivers/gpu/drm/mcde/mcde_display.c:466", mcde->stride, mcde->regs + ljinc);
 	/* No cropping */
-	writel(0, mcde->regs + crop);
+	pete_writel("drivers/gpu/drm/mcde/mcde_display.c:468", 0, mcde->regs + crop);
 
 	/* Set up overlay control register */
 	val = MCDE_OVLXCR_OVLEN;
@@ -477,14 +477,14 @@ static void mcde_configure_overlay(struct mcde *mcde, enum mcde_overlay ovl,
 	/* Not using rotation but set it up anyways */
 	val |= MCDE_OVLXCR_ROTBURSTSIZE_8W <<
 		MCDE_OVLXCR_ROTBURSTSIZE_SHIFT;
-	writel(val, mcde->regs + cr);
+	pete_writel("drivers/gpu/drm/mcde/mcde_display.c:480", val, mcde->regs + cr);
 
 	/*
 	 * Set up the overlay compositor to route the overlay out to
 	 * the desired channel
 	 */
 	val = ch << MCDE_OVLXCOMP_CH_ID_SHIFT;
-	writel(val, mcde->regs + comp);
+	pete_writel("drivers/gpu/drm/mcde/mcde_display.c:487", val, mcde->regs + comp);
 }
 
 static void mcde_configure_channel(struct mcde *mcde, enum mcde_channel ch,
@@ -573,12 +573,12 @@ static void mcde_configure_channel(struct mcde *mcde, enum mcde_channel ch,
 		return;
 	}
 
-	writel(val, mcde->regs + sync);
+	pete_writel("drivers/gpu/drm/mcde/mcde_display.c:576", val, mcde->regs + sync);
 
 	/* Set up pixels per line and lines per frame */
 	val = (mode->hdisplay - 1) << MCDE_CHNLXCONF_PPL_SHIFT;
 	val |= (mode->vdisplay - 1) << MCDE_CHNLXCONF_LPF_SHIFT;
-	writel(val, mcde->regs + conf);
+	pete_writel("drivers/gpu/drm/mcde/mcde_display.c:581", val, mcde->regs + conf);
 
 	/*
 	 * Normalize color conversion:
@@ -586,17 +586,17 @@ static void mcde_configure_channel(struct mcde *mcde, enum mcde_channel ch,
 	 */
 	val = MCDE_CHNLXSTAT_CHNLBLBCKGND_EN |
 		MCDE_CHNLXSTAT_CHNLRD;
-	writel(val, mcde->regs + stat);
-	writel(0, mcde->regs + bgcol);
+	pete_writel("drivers/gpu/drm/mcde/mcde_display.c:589", val, mcde->regs + stat);
+	pete_writel("drivers/gpu/drm/mcde/mcde_display.c:590", 0, mcde->regs + bgcol);
 
 	/* Set up muxing: connect the channel to the desired FIFO */
 	switch (fifo) {
 	case MCDE_FIFO_A:
-		writel(MCDE_CHNLXMUXING_FIFO_ID_FIFO_A,
+		pete_writel("drivers/gpu/drm/mcde/mcde_display.c:595", MCDE_CHNLXMUXING_FIFO_ID_FIFO_A,
 		       mcde->regs + mux);
 		break;
 	case MCDE_FIFO_B:
-		writel(MCDE_CHNLXMUXING_FIFO_ID_FIFO_B,
+		pete_writel("drivers/gpu/drm/mcde/mcde_display.c:599", MCDE_CHNLXMUXING_FIFO_ID_FIFO_B,
 		       mcde->regs + mux);
 		break;
 	}
@@ -618,10 +618,10 @@ static void mcde_configure_channel(struct mcde *mcde, enum mcde_channel ch,
 
 		switch (fifo) {
 		case MCDE_FIFO_A:
-			writel(val, mcde->regs + MCDE_SYNCHCONFA);
+			pete_writel("drivers/gpu/drm/mcde/mcde_display.c:621", val, mcde->regs + MCDE_SYNCHCONFA);
 			break;
 		case MCDE_FIFO_B:
-			writel(val, mcde->regs + MCDE_SYNCHCONFB);
+			pete_writel("drivers/gpu/drm/mcde/mcde_display.c:624", val, mcde->regs + MCDE_SYNCHCONFB);
 			break;
 		}
 	}
@@ -692,15 +692,15 @@ static void mcde_configure_fifo(struct mcde *mcde, enum mcde_fifo fifo,
 		val |= MCDE_CTRLX_FORMID_DPIB << MCDE_CTRLX_FORMID_SHIFT;
 		break;
 	}
-	writel(val, mcde->regs + ctrl);
+	pete_writel("drivers/gpu/drm/mcde/mcde_display.c:695", val, mcde->regs + ctrl);
 
 	/* Blend source with Alpha 0xff on FIFO */
 	val = MCDE_CRX0_BLENDEN |
 		0xff << MCDE_CRX0_ALPHABLEND_SHIFT;
-	writel(val, mcde->regs + cr0);
+	pete_writel("drivers/gpu/drm/mcde/mcde_display.c:700", val, mcde->regs + cr0);
 
 	spin_lock(&mcde->fifo_crx1_lock);
-	val = readl(mcde->regs + cr1);
+	val = pete_readl("drivers/gpu/drm/mcde/mcde_display.c:703", mcde->regs + cr1);
 	/*
 	 * Set-up from mcde_fmtr_dsi.c, fmtr_dsi_enable_video()
 	 * FIXME: a different clock needs to be selected for TV out.
@@ -741,7 +741,7 @@ static void mcde_configure_fifo(struct mcde *mcde, enum mcde_fifo fifo,
 		val &= ~MCDE_CRX1_CLKSEL_MASK;
 		val |= MCDE_CRX1_CLKSEL_MCDECLK << MCDE_CRX1_CLKSEL_SHIFT;
 	}
-	writel(val, mcde->regs + cr1);
+	pete_writel("drivers/gpu/drm/mcde/mcde_display.c:744", val, mcde->regs + cr1);
 	spin_unlock(&mcde->fifo_crx1_lock);
 };
 
@@ -821,24 +821,24 @@ static void mcde_configure_dsi_formatter(struct mcde *mcde,
 		dev_err(mcde->dev, "unknown DSI format\n");
 		return;
 	}
-	writel(val, mcde->regs + conf0);
+	pete_writel("drivers/gpu/drm/mcde/mcde_display.c:824", val, mcde->regs + conf0);
 
-	writel(formatter_frame, mcde->regs + frame);
-	writel(pkt_size, mcde->regs + pkt);
-	writel(0, mcde->regs + sync);
+	pete_writel("drivers/gpu/drm/mcde/mcde_display.c:826", formatter_frame, mcde->regs + frame);
+	pete_writel("drivers/gpu/drm/mcde/mcde_display.c:827", pkt_size, mcde->regs + pkt);
+	pete_writel("drivers/gpu/drm/mcde/mcde_display.c:828", 0, mcde->regs + sync);
 	/* Define the MIPI command: we want to write into display memory */
 	val = MIPI_DCS_WRITE_MEMORY_CONTINUE <<
 		MCDE_DSIVIDXCMDW_CMDW_CONTINUE_SHIFT;
 	val |= MIPI_DCS_WRITE_MEMORY_START <<
 		MCDE_DSIVIDXCMDW_CMDW_START_SHIFT;
-	writel(val, mcde->regs + cmdw);
+	pete_writel("drivers/gpu/drm/mcde/mcde_display.c:834", val, mcde->regs + cmdw);
 
 	/*
 	 * FIXME: the vendor driver has some hack around this value in
 	 * CMD mode with autotrig.
 	 */
-	writel(0, mcde->regs + delay0);
-	writel(0, mcde->regs + delay1);
+	pete_writel("drivers/gpu/drm/mcde/mcde_display.c:840", 0, mcde->regs + delay0);
+	pete_writel("drivers/gpu/drm/mcde/mcde_display.c:841", 0, mcde->regs + delay1);
 }
 
 static void mcde_enable_fifo(struct mcde *mcde, enum mcde_fifo fifo)
@@ -860,9 +860,9 @@ static void mcde_enable_fifo(struct mcde *mcde, enum mcde_fifo fifo)
 	}
 
 	spin_lock(&mcde->flow_lock);
-	val = readl(mcde->regs + cr);
+	val = pete_readl("drivers/gpu/drm/mcde/mcde_display.c:863", mcde->regs + cr);
 	val |= MCDE_CRX0_FLOEN;
-	writel(val, mcde->regs + cr);
+	pete_writel("drivers/gpu/drm/mcde/mcde_display.c:865", val, mcde->regs + cr);
 	mcde->flow_active++;
 	spin_unlock(&mcde->flow_lock);
 }
@@ -888,9 +888,9 @@ static void mcde_disable_fifo(struct mcde *mcde, enum mcde_fifo fifo,
 	}
 
 	spin_lock(&mcde->flow_lock);
-	val = readl(mcde->regs + cr);
+	val = pete_readl("drivers/gpu/drm/mcde/mcde_display.c:891", mcde->regs + cr);
 	val &= ~MCDE_CRX0_FLOEN;
-	writel(val, mcde->regs + cr);
+	pete_writel("drivers/gpu/drm/mcde/mcde_display.c:893", val, mcde->regs + cr);
 	mcde->flow_active = 0;
 	spin_unlock(&mcde->flow_lock);
 
@@ -898,7 +898,7 @@ static void mcde_disable_fifo(struct mcde *mcde, enum mcde_fifo fifo,
 		return;
 
 	/* Check that we really drained and stopped the flow */
-	while (readl(mcde->regs + cr) & MCDE_CRX0_FLOEN) {
+	while (pete_readl("drivers/gpu/drm/mcde/mcde_display.c:901", mcde->regs + cr) & MCDE_CRX0_FLOEN) {
 		usleep_range(1000, 1500);
 		if (!--timeout) {
 			dev_err(mcde->dev,
@@ -943,13 +943,13 @@ static void mcde_drain_pipe(struct mcde *mcde, enum mcde_fifo fifo,
 		return;
 	}
 
-	val = readl(mcde->regs + ctrl);
+	val = pete_readl("drivers/gpu/drm/mcde/mcde_display.c:946", mcde->regs + ctrl);
 	if (!(val & MCDE_CTRLX_FIFOEMPTY)) {
 		dev_err(mcde->dev, "Channel A FIFO not empty (handover)\n");
 		/* Attempt to clear the FIFO */
 		mcde_enable_fifo(mcde, fifo);
 		/* Trigger a software sync out on respective channel (0-3) */
-		writel(MCDE_CHNLXSYNCHSW_SW_TRIG, mcde->regs + synsw);
+		pete_writel("drivers/gpu/drm/mcde/mcde_display.c:952", MCDE_CHNLXSYNCHSW_SW_TRIG, mcde->regs + synsw);
 		/* Disable FIFO A flow again */
 		mcde_disable_fifo(mcde, fifo, true);
 	}
@@ -1024,35 +1024,35 @@ static void mcde_setup_dpi(struct mcde *mcde, const struct drm_display_mode *mod
 	/* 24 bits DPI: connect Ch A MSB to D[32:39] */
 	val |= 2 << MCDE_CONF0_OUTMUX4_SHIFT;
 	/* Syncmux bits zero: DPI channel A */
-	writel(val, mcde->regs + MCDE_CONF0);
+	pete_writel("drivers/gpu/drm/mcde/mcde_display.c:1027", val, mcde->regs + MCDE_CONF0);
 
 	/* This hammers us into LCD mode */
-	writel(0, mcde->regs + MCDE_TVCRA);
+	pete_writel("drivers/gpu/drm/mcde/mcde_display.c:1030", 0, mcde->regs + MCDE_TVCRA);
 
 	/* Front porch and sync width */
 	val = (vsw << MCDE_TVBL1_BEL1_SHIFT);
 	val |= (vfp << MCDE_TVBL1_BSL1_SHIFT);
-	writel(val, mcde->regs + MCDE_TVBL1A);
+	pete_writel("drivers/gpu/drm/mcde/mcde_display.c:1035", val, mcde->regs + MCDE_TVBL1A);
 	/* The vendor driver sets the same value into TVBL2A */
-	writel(val, mcde->regs + MCDE_TVBL2A);
+	pete_writel("drivers/gpu/drm/mcde/mcde_display.c:1037", val, mcde->regs + MCDE_TVBL2A);
 
 	/* Vertical back porch */
 	val = (vbp << MCDE_TVDVO_DVO1_SHIFT);
 	/* The vendor drivers sets the same value into TVDVOA */
 	val |= (vbp << MCDE_TVDVO_DVO2_SHIFT);
-	writel(val, mcde->regs + MCDE_TVDVOA);
+	pete_writel("drivers/gpu/drm/mcde/mcde_display.c:1043", val, mcde->regs + MCDE_TVDVOA);
 
 	/* Horizontal back porch, as 0 = 1 cycle we need to subtract 1 */
-	writel((hbp - 1), mcde->regs + MCDE_TVTIM1A);
+	pete_writel("drivers/gpu/drm/mcde/mcde_display.c:1046", (hbp - 1), mcde->regs + MCDE_TVTIM1A);
 
 	/* Horizongal sync width and horizonal front porch, 0 = 1 cycle */
 	val = ((hsw - 1) << MCDE_TVLBALW_LBW_SHIFT);
 	val |= ((hfp - 1) << MCDE_TVLBALW_ALW_SHIFT);
-	writel(val, mcde->regs + MCDE_TVLBALWA);
+	pete_writel("drivers/gpu/drm/mcde/mcde_display.c:1051", val, mcde->regs + MCDE_TVLBALWA);
 
 	/* Blank some TV registers we don't use */
-	writel(0, mcde->regs + MCDE_TVISLA);
-	writel(0, mcde->regs + MCDE_TVBLUA);
+	pete_writel("drivers/gpu/drm/mcde/mcde_display.c:1054", 0, mcde->regs + MCDE_TVISLA);
+	pete_writel("drivers/gpu/drm/mcde/mcde_display.c:1055", 0, mcde->regs + MCDE_TVBLUA);
 
 	/* Set up sync inversion etc */
 	val = 0;
@@ -1064,7 +1064,7 @@ static void mcde_setup_dpi(struct mcde *mcde, const struct drm_display_mode *mod
 		val |= MCDE_LCDTIM1B_IOE;
 	if (connector->display_info.bus_flags & DRM_BUS_FLAG_PIXDATA_DRIVE_NEGEDGE)
 		val |= MCDE_LCDTIM1B_IPC;
-	writel(val, mcde->regs + MCDE_LCDTIM1A);
+	pete_writel("drivers/gpu/drm/mcde/mcde_display.c:1067", val, mcde->regs + MCDE_LCDTIM1A);
 }
 
 static void mcde_setup_dsi(struct mcde *mcde, const struct drm_display_mode *mode,
@@ -1103,7 +1103,7 @@ static void mcde_setup_dsi(struct mcde *mcde, const struct drm_display_mode *mod
 	val |= 0 << MCDE_CONF0_OUTMUX2_SHIFT;
 	val |= 4 << MCDE_CONF0_OUTMUX3_SHIFT;
 	val |= 5 << MCDE_CONF0_OUTMUX4_SHIFT;
-	writel(val, mcde->regs + MCDE_CONF0);
+	pete_writel("drivers/gpu/drm/mcde/mcde_display.c:1106", val, mcde->regs + MCDE_CONF0);
 
 	/* Calculations from mcde_fmtr_dsi.c, fmtr_dsi_enable_video() */
 
@@ -1179,8 +1179,8 @@ static void mcde_display_enable(struct drm_simple_display_pipe *pipe,
 
 	/* Clear any pending interrupts */
 	mcde_display_disable_irqs(mcde);
-	writel(0, mcde->regs + MCDE_IMSCERR);
-	writel(0xFFFFFFFF, mcde->regs + MCDE_RISERR);
+	pete_writel("drivers/gpu/drm/mcde/mcde_display.c:1182", 0, mcde->regs + MCDE_IMSCERR);
+	pete_writel("drivers/gpu/drm/mcde/mcde_display.c:1183", 0xFFFFFFFF, mcde->regs + MCDE_RISERR);
 
 	if (mcde->dpi_output)
 		mcde_setup_dpi(mcde, mode, &fifo_wtrmrk);
@@ -1263,11 +1263,11 @@ static void mcde_display_enable(struct drm_simple_display_pipe *pipe,
 			val = MCDE_VSCRC_VSPOL;
 		else
 			val = 0;
-		writel(val, mcde->regs + MCDE_VSCRC0);
+		pete_writel("drivers/gpu/drm/mcde/mcde_display.c:1266", val, mcde->regs + MCDE_VSCRC0);
 		/* Enable VSYNC capture on TE0 */
-		val = readl(mcde->regs + MCDE_CRC);
+		val = pete_readl("drivers/gpu/drm/mcde/mcde_display.c:1268", mcde->regs + MCDE_CRC);
 		val |= MCDE_CRC_SYCEN0;
-		writel(val, mcde->regs + MCDE_CRC);
+		pete_writel("drivers/gpu/drm/mcde/mcde_display.c:1270", val, mcde->regs + MCDE_CRC);
 		break;
 	default:
 		/* No TE capture */
@@ -1290,9 +1290,9 @@ static void mcde_display_enable(struct drm_simple_display_pipe *pipe,
 	}
 
 	/* Enable MCDE with automatic clock gating */
-	val = readl(mcde->regs + MCDE_CR);
+	val = pete_readl("drivers/gpu/drm/mcde/mcde_display.c:1293", mcde->regs + MCDE_CR);
 	val |= MCDE_CR_MCDEEN | MCDE_CR_AUTOCLKG_EN;
-	writel(val, mcde->regs + MCDE_CR);
+	pete_writel("drivers/gpu/drm/mcde/mcde_display.c:1295", val, mcde->regs + MCDE_CR);
 
 	dev_info(drm->dev, "MCDE display is enabled\n");
 }
@@ -1353,7 +1353,7 @@ static void mcde_start_flow(struct mcde *mcde)
 
 	if (mcde->flow_mode == MCDE_COMMAND_ONESHOT_FLOW) {
 		/* Trigger a software sync out on channel 0 */
-		writel(MCDE_CHNLXSYNCHSW_SW_TRIG,
+		pete_writel("drivers/gpu/drm/mcde/mcde_display.c:1356", MCDE_CHNLXSYNCHSW_SW_TRIG,
 		       mcde->regs + MCDE_CHNL0SYNCHSW);
 
 		/*
@@ -1372,12 +1372,12 @@ static void mcde_start_flow(struct mcde *mcde)
 static void mcde_set_extsrc(struct mcde *mcde, u32 buffer_address)
 {
 	/* Write bitmap base address to register */
-	writel(buffer_address, mcde->regs + MCDE_EXTSRCXA0);
+	pete_writel("drivers/gpu/drm/mcde/mcde_display.c:1375", buffer_address, mcde->regs + MCDE_EXTSRCXA0);
 	/*
 	 * Base address for next line this is probably only used
 	 * in interlace modes.
 	 */
-	writel(buffer_address + mcde->stride, mcde->regs + MCDE_EXTSRCXA1);
+	pete_writel("drivers/gpu/drm/mcde/mcde_display.c:1380", buffer_address + mcde->stride, mcde->regs + MCDE_EXTSRCXA1);
 }
 
 static void mcde_display_update(struct drm_simple_display_pipe *pipe,
@@ -1456,7 +1456,7 @@ static int mcde_display_enable_vblank(struct drm_simple_display_pipe *pipe)
 		MCDE_PP_VSCC1 |
 		MCDE_PP_VCMPC0 |
 		MCDE_PP_VCMPC1;
-	writel(val, mcde->regs + MCDE_IMSCPP);
+	pete_writel("drivers/gpu/drm/mcde/mcde_display.c:1459", val, mcde->regs + MCDE_IMSCPP);
 
 	return 0;
 }
@@ -1468,9 +1468,9 @@ static void mcde_display_disable_vblank(struct drm_simple_display_pipe *pipe)
 	struct mcde *mcde = to_mcde(drm);
 
 	/* Disable all VBLANK IRQs */
-	writel(0, mcde->regs + MCDE_IMSCPP);
+	pete_writel("drivers/gpu/drm/mcde/mcde_display.c:1471", 0, mcde->regs + MCDE_IMSCPP);
 	/* Clear any pending IRQs */
-	writel(0xFFFFFFFF, mcde->regs + MCDE_RISPP);
+	pete_writel("drivers/gpu/drm/mcde/mcde_display.c:1473", 0xFFFFFFFF, mcde->regs + MCDE_RISPP);
 }
 
 static struct drm_simple_display_pipe_funcs mcde_display_funcs = {

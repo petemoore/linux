@@ -131,11 +131,11 @@ void irdma_uk_qp_post_wr(struct irdma_qp_uk *qp)
 			if (sw_sq_head > qp->initial_ring.head) {
 				if (hw_sq_tail >= qp->initial_ring.head &&
 				    hw_sq_tail < sw_sq_head)
-					writel(qp->qp_id, qp->wqe_alloc_db);
+					pete_writel("drivers/infiniband/hw/irdma/uk.c:134", qp->qp_id, qp->wqe_alloc_db);
 			} else {
 				if (hw_sq_tail >= qp->initial_ring.head ||
 				    hw_sq_tail < sw_sq_head)
-					writel(qp->qp_id, qp->wqe_alloc_db);
+					pete_writel("drivers/infiniband/hw/irdma/uk.c:138", qp->qp_id, qp->wqe_alloc_db);
 			}
 		}
 	}
@@ -959,7 +959,7 @@ void irdma_uk_cq_request_notification(struct irdma_cq_uk *cq,
 
 	dma_wmb(); /* make sure WQE is populated before valid bit is set */
 
-	writel(cq->cq_id, cq->cqe_alloc_db);
+	pete_writel("drivers/infiniband/hw/irdma/uk.c:962", cq->cq_id, cq->cqe_alloc_db);
 }
 
 /**

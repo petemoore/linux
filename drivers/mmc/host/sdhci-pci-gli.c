@@ -1177,7 +1177,7 @@ static u32 sdhci_gl9750_readl(struct sdhci_host *host, int reg)
 {
 	u32 value;
 
-	value = readl(host->ioaddr + reg);
+	value = pete_readl("drivers/mmc/host/sdhci-pci-gli.c:1180", host->ioaddr + reg);
 	if (unlikely(reg == SDHCI_MAX_CURRENT && !(value & 0xff)))
 		value |= 0xc8;
 
@@ -1525,7 +1525,7 @@ static int gli_probe_slot_gl9763e(struct sdhci_pci_slot *slot)
 
 static u16 sdhci_gli_readw(struct sdhci_host *host, int reg)
 {
-	u32 val = readl(host->ioaddr + (reg & ~3));
+	u32 val = pete_readl("drivers/mmc/host/sdhci-pci-gli.c:1528", host->ioaddr + (reg & ~3));
 	u16 word;
 
 	word = (val >> REG_OFFSET_IN_BITS(reg)) & 0xffff;
@@ -1534,7 +1534,7 @@ static u16 sdhci_gli_readw(struct sdhci_host *host, int reg)
 
 static u8 sdhci_gli_readb(struct sdhci_host *host, int reg)
 {
-	u32 val = readl(host->ioaddr + (reg & ~3));
+	u32 val = pete_readl("drivers/mmc/host/sdhci-pci-gli.c:1537", host->ioaddr + (reg & ~3));
 	u8 byte = (val >> REG_OFFSET_IN_BITS(reg)) & 0xff;
 
 	return byte;

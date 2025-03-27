@@ -736,7 +736,7 @@ static int lpc18xx_get_pintsel(void __iomem *addr, u32 val, int *arg)
 	u32 reg_val;
 	int i;
 
-	reg_val = readl(addr);
+	reg_val = pete_readl("drivers/pinctrl/pinctrl-lpc18xx.c:739", addr);
 	for (i = 0; i < LPC18XX_SCU_IRQ_PER_PINTSEL; i++) {
 		if ((reg_val & LPC18XX_SCU_PINTSEL_VAL_MASK) == val)
 			return 0;
@@ -884,7 +884,7 @@ static int lpc18xx_pconf_get(struct pinctrl_dev *pctldev, unsigned pin,
 	if (!pin_cap)
 		return -EINVAL;
 
-	reg = readl(scu->base + pin_cap->offset);
+	reg = pete_readl("drivers/pinctrl/pinctrl-lpc18xx.c:887", scu->base + pin_cap->offset);
 
 	if (pin_cap->type == TYPE_I2C0)
 		ret = lpc18xx_pconf_get_i2c0(param, &arg, reg, pin);
@@ -998,10 +998,10 @@ static int lpc18xx_pconf_set_gpio_pin_int(struct pinctrl_dev *pctldev,
 
 	reg_offset += (param_val / LPC18XX_SCU_IRQ_PER_PINTSEL) * sizeof(u32);
 
-	reg_val = readl(scu->base + reg_offset);
+	reg_val = pete_readl("drivers/pinctrl/pinctrl-lpc18xx.c:1001", scu->base + reg_offset);
 	reg_val &= ~LPC18XX_SCU_PINTSEL_VAL(LPC18XX_SCU_PINTSEL_VAL_MASK, param_val);
 	reg_val |= LPC18XX_SCU_PINTSEL_VAL(val, param_val);
-	writel(reg_val, scu->base + reg_offset);
+	pete_writel("drivers/pinctrl/pinctrl-lpc18xx.c:1004", reg_val, scu->base + reg_offset);
 
 	return 0;
 }
@@ -1099,7 +1099,7 @@ static int lpc18xx_pconf_set(struct pinctrl_dev *pctldev, unsigned pin,
 	if (!pin_cap)
 		return -EINVAL;
 
-	reg = readl(scu->base + pin_cap->offset);
+	reg = pete_readl("drivers/pinctrl/pinctrl-lpc18xx.c:1102", scu->base + pin_cap->offset);
 
 	for (i = 0; i < num_configs; i++) {
 		param = pinconf_to_config_param(configs[i]);
@@ -1116,7 +1116,7 @@ static int lpc18xx_pconf_set(struct pinctrl_dev *pctldev, unsigned pin,
 			return ret;
 	}
 
-	writel(reg, scu->base + pin_cap->offset);
+	pete_writel("drivers/pinctrl/pinctrl-lpc18xx.c:1119", reg, scu->base + pin_cap->offset);
 
 	return 0;
 }
@@ -1177,26 +1177,26 @@ static int lpc18xx_pmx_set(struct pinctrl_dev *pctldev, unsigned function,
 	if (function == FUNC_ADC && (pin->analog & LPC18XX_ANALOG_PIN)) {
 		u32 offset;
 
-		writel(LPC18XX_SCU_ANALOG_PIN_CFG, scu->base + pin->offset);
+		pete_writel("drivers/pinctrl/pinctrl-lpc18xx.c:1180", LPC18XX_SCU_ANALOG_PIN_CFG, scu->base + pin->offset);
 
 		if (LPC18XX_ANALOG_ADC(pin->analog) == 0)
 			offset = LPC18XX_SCU_REG_ENAIO0;
 		else
 			offset = LPC18XX_SCU_REG_ENAIO1;
 
-		reg = readl(scu->base + offset);
+		reg = pete_readl("drivers/pinctrl/pinctrl-lpc18xx.c:1187", scu->base + offset);
 		reg |= pin->analog & LPC18XX_ANALOG_BIT_MASK;
-		writel(reg, scu->base + offset);
+		pete_writel("drivers/pinctrl/pinctrl-lpc18xx.c:1189", reg, scu->base + offset);
 
 		return 0;
 	}
 
 	if (function == FUNC_DAC && (pin->analog & LPC18XX_ANALOG_PIN)) {
-		writel(LPC18XX_SCU_ANALOG_PIN_CFG, scu->base + pin->offset);
+		pete_writel("drivers/pinctrl/pinctrl-lpc18xx.c:1195", LPC18XX_SCU_ANALOG_PIN_CFG, scu->base + pin->offset);
 
-		reg = readl(scu->base + LPC18XX_SCU_REG_ENAIO2);
+		reg = pete_readl("drivers/pinctrl/pinctrl-lpc18xx.c:1197", scu->base + LPC18XX_SCU_REG_ENAIO2);
 		reg |= LPC18XX_SCU_REG_ENAIO2_DAC;
-		writel(reg, scu->base + LPC18XX_SCU_REG_ENAIO2);
+		pete_writel("drivers/pinctrl/pinctrl-lpc18xx.c:1199", reg, scu->base + LPC18XX_SCU_REG_ENAIO2);
 
 		return 0;
 	}
@@ -1209,9 +1209,9 @@ static int lpc18xx_pmx_set(struct pinctrl_dev *pctldev, unsigned function,
 	if (func >= LPC18XX_SCU_FUNC_PER_PIN)
 		goto fail;
 
-	reg = readl(scu->base + pin->offset);
+	reg = pete_readl("drivers/pinctrl/pinctrl-lpc18xx.c:1212", scu->base + pin->offset);
 	reg &= ~LPC18XX_SCU_PIN_MODE_MASK;
-	writel(reg | func, scu->base + pin->offset);
+	pete_writel("drivers/pinctrl/pinctrl-lpc18xx.c:1214", reg | func, scu->base + pin->offset);
 
 	return 0;
 fail:

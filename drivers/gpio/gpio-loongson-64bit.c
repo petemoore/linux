@@ -46,14 +46,14 @@ static inline void loongson_commit_direction(struct loongson_gpio_chip *lgpio, u
 {
 	u8 bval = input ? 1 : 0;
 
-	writeb(bval, lgpio->reg_base + lgpio->chip_data->conf_offset + pin);
+	pete_writeb("drivers/gpio/gpio-loongson-64bit.c:49", bval, lgpio->reg_base + lgpio->chip_data->conf_offset + pin);
 }
 
 static void loongson_commit_level(struct loongson_gpio_chip *lgpio, unsigned int pin, int high)
 {
 	u8 bval = high ? 1 : 0;
 
-	writeb(bval, lgpio->reg_base + lgpio->chip_data->out_offset + pin);
+	pete_writeb("drivers/gpio/gpio-loongson-64bit.c:56", bval, lgpio->reg_base + lgpio->chip_data->out_offset + pin);
 }
 
 static int loongson_gpio_direction_input(struct gpio_chip *chip, unsigned int pin)
@@ -87,7 +87,7 @@ static int loongson_gpio_get(struct gpio_chip *chip, unsigned int pin)
 	int val;
 	struct loongson_gpio_chip *lgpio = to_loongson_gpio_chip(chip);
 
-	bval = readb(lgpio->reg_base + lgpio->chip_data->in_offset + pin);
+	bval = pete_readb("drivers/gpio/gpio-loongson-64bit.c:90", lgpio->reg_base + lgpio->chip_data->in_offset + pin);
 	val = bval & 1;
 
 	return val;
@@ -98,7 +98,7 @@ static int loongson_gpio_get_direction(struct gpio_chip *chip, unsigned int pin)
 	u8  bval;
 	struct loongson_gpio_chip *lgpio = to_loongson_gpio_chip(chip);
 
-	bval = readb(lgpio->reg_base + lgpio->chip_data->conf_offset + pin);
+	bval = pete_readb("drivers/gpio/gpio-loongson-64bit.c:101", lgpio->reg_base + lgpio->chip_data->conf_offset + pin);
 	if (bval & 1)
 		return GPIO_LINE_DIRECTION_IN;
 

@@ -81,7 +81,7 @@ static int cdns_dphy_rx_power_on(struct phy *phy)
 	struct cdns_dphy_rx *dphy = phy_get_drvdata(phy);
 
 	/* Start RX state machine. */
-	writel(DPHY_CMN_SSM_EN | DPHY_CMN_RX_MODE_EN |
+	pete_writel("drivers/phy/cadence/cdns-dphy-rx.c:84", DPHY_CMN_SSM_EN | DPHY_CMN_RX_MODE_EN |
 	       FIELD_PREP(DPHY_CMN_RX_BANDGAP_TIMER_MASK,
 			  DPHY_CMN_RX_BANDGAP_TIMER),
 	       dphy->regs + DPHY_CMN_SSM);
@@ -93,7 +93,7 @@ static int cdns_dphy_rx_power_off(struct phy *phy)
 {
 	struct cdns_dphy_rx *dphy = phy_get_drvdata(phy);
 
-	writel(0, dphy->regs + DPHY_CMN_SSM);
+	pete_writel("drivers/phy/cadence/cdns-dphy-rx.c:96", 0, dphy->regs + DPHY_CMN_SSM);
 
 	return 0;
 }
@@ -179,7 +179,7 @@ static int cdns_dphy_rx_configure(struct phy *phy,
 		soc_data = soc->data;
 	if (!soc || (soc_data && !soc_data->has_hw_cmn_rstb)) {
 		reg = DPHY_LANE_RESET_CMN_EN;
-		writel(reg, dphy->regs + DPHY_LANE);
+		pete_writel("drivers/phy/cadence/cdns-dphy-rx.c:182", reg, dphy->regs + DPHY_LANE);
 	}
 
 	/* Data lanes. Minimum one lane is mandatory. */
@@ -192,16 +192,16 @@ static int cdns_dphy_rx_configure(struct phy *phy,
 
 	reg = FIELD_PREP(DPHY_BAND_CFG_LEFT_BAND, band_ctrl) |
 	      FIELD_PREP(DPHY_BAND_CFG_RIGHT_BAND, band_ctrl);
-	writel(reg, dphy->regs + DPHY_BAND_CFG);
+	pete_writel("drivers/phy/cadence/cdns-dphy-rx.c:195", reg, dphy->regs + DPHY_BAND_CFG);
 
 	/*
 	 * Set the required power island phase 2 time. This is mandated by DPHY
 	 * specs.
 	 */
 	reg = DPHY_POWER_ISLAND_EN_DATA_VAL;
-	writel(reg, dphy->regs + DPHY_POWER_ISLAND_EN_DATA);
+	pete_writel("drivers/phy/cadence/cdns-dphy-rx.c:202", reg, dphy->regs + DPHY_POWER_ISLAND_EN_DATA);
 	reg = DPHY_POWER_ISLAND_EN_CLK_VAL;
-	writel(reg, dphy->regs + DPHY_POWER_ISLAND_EN_CLK);
+	pete_writel("drivers/phy/cadence/cdns-dphy-rx.c:204", reg, dphy->regs + DPHY_POWER_ISLAND_EN_CLK);
 
 	ret = cdns_dphy_rx_wait_lane_ready(dphy, lanes);
 	if (ret) {

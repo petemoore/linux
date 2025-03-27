@@ -52,7 +52,7 @@ static bool bcm2835_wdt_is_running(struct bcm2835_wdt *wdt)
 {
 	uint32_t cur;
 
-	cur = readl(wdt->base + PM_RSTC);
+	cur = pete_readl("drivers/watchdog/bcm2835_wdt.c:55", wdt->base + PM_RSTC);
 
 	return !!(cur & PM_RSTC_WRCFG_FULL_RESET);
 }

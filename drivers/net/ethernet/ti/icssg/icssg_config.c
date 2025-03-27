@@ -229,7 +229,7 @@ static void emac_r30_cmd_init(struct prueth_emac *emac)
 	p = emac->dram.va + MGR_R30_CMD_OFFSET;
 
 	for (i = 0; i < 4; i++)
-		writel(EMAC_NONE, &p->cmd[i]);
+		pete_writel("drivers/net/ethernet/ti/icssg/icssg_config.c:232", EMAC_NONE, &p->cmd[i]);
 }
 
 static int emac_r30_is_done(struct prueth_emac *emac)
@@ -241,7 +241,7 @@ static int emac_r30_is_done(struct prueth_emac *emac)
 	p = emac->dram.va + MGR_R30_CMD_OFFSET;
 
 	for (i = 0; i < 4; i++) {
-		cmd = readl(&p->cmd[i]);
+		cmd = pete_readl("drivers/net/ethernet/ti/icssg/icssg_config.c:244", &p->cmd[i]);
 		if (cmd != EMAC_NONE)
 			return 0;
 	}
@@ -273,14 +273,14 @@ static int prueth_emac_buffer_setup(struct prueth_emac *emac)
 
 	bpool_cfg = emac->dram.va + BUFFER_POOL_0_ADDR_OFFSET;
 	/* workaround for f/w bug. bpool 0 needs to be initilalized */
-	writel(addr, &bpool_cfg[0].addr);
-	writel(0, &bpool_cfg[0].len);
+	pete_writel("drivers/net/ethernet/ti/icssg/icssg_config.c:276", addr, &bpool_cfg[0].addr);
+	pete_writel("drivers/net/ethernet/ti/icssg/icssg_config.c:277", 0, &bpool_cfg[0].len);
 
 	for (i = PRUETH_EMAC_BUF_POOL_START;
 	     i < PRUETH_EMAC_BUF_POOL_START + PRUETH_NUM_BUF_POOLS;
 	     i++) {
-		writel(addr, &bpool_cfg[i].addr);
-		writel(PRUETH_EMAC_BUF_POOL_SIZE, &bpool_cfg[i].len);
+		pete_writel("drivers/net/ethernet/ti/icssg/icssg_config.c:282", addr, &bpool_cfg[i].addr);
+		pete_writel("drivers/net/ethernet/ti/icssg/icssg_config.c:283", PRUETH_EMAC_BUF_POOL_SIZE, &bpool_cfg[i].len);
 		addr += PRUETH_EMAC_BUF_POOL_SIZE;
 	}
 
@@ -292,18 +292,18 @@ static int prueth_emac_buffer_setup(struct prueth_emac *emac)
 	/* Pre-emptible RX buffer queue */
 	rxq_ctx = emac->dram.va + HOST_RX_Q_PRE_CONTEXT_OFFSET;
 	for (i = 0; i < 3; i++)
-		writel(addr, &rxq_ctx->start[i]);
+		pete_writel("drivers/net/ethernet/ti/icssg/icssg_config.c:295", addr, &rxq_ctx->start[i]);
 
 	addr += PRUETH_EMAC_RX_CTX_BUF_SIZE;
-	writel(addr, &rxq_ctx->end);
+	pete_writel("drivers/net/ethernet/ti/icssg/icssg_config.c:298", addr, &rxq_ctx->end);
 
 	/* Express RX buffer queue */
 	rxq_ctx = emac->dram.va + HOST_RX_Q_EXP_CONTEXT_OFFSET;
 	for (i = 0; i < 3; i++)
-		writel(addr, &rxq_ctx->start[i]);
+		pete_writel("drivers/net/ethernet/ti/icssg/icssg_config.c:303", addr, &rxq_ctx->start[i]);
 
 	addr += PRUETH_EMAC_RX_CTX_BUF_SIZE;
-	writel(addr, &rxq_ctx->end);
+	pete_writel("drivers/net/ethernet/ti/icssg/icssg_config.c:306", addr, &rxq_ctx->end);
 
 	return 0;
 }
@@ -363,10 +363,10 @@ int icssg_config(struct prueth *prueth, struct prueth_emac *emac, int slice)
 	pru_rproc_set_ctable(prueth->txpru[slice], PRU_C28, 0x100 << 8);
 
 	flow_cfg = config + PSI_L_REGULAR_FLOW_ID_BASE_OFFSET;
-	writew(emac->rx_flow_id_base, &flow_cfg->rx_base_flow);
-	writew(0, &flow_cfg->mgm_base_flow);
-	writeb(0, config + SPL_PKT_DEFAULT_PRIORITY);
-	writeb(0, config + QUEUE_NUM_UNTAGGED);
+	pete_writew("drivers/net/ethernet/ti/icssg/icssg_config.c:366", emac->rx_flow_id_base, &flow_cfg->rx_base_flow);
+	pete_writew("drivers/net/ethernet/ti/icssg/icssg_config.c:367", 0, &flow_cfg->mgm_base_flow);
+	pete_writeb("drivers/net/ethernet/ti/icssg/icssg_config.c:368", 0, config + SPL_PKT_DEFAULT_PRIORITY);
+	pete_writeb("drivers/net/ethernet/ti/icssg/icssg_config.c:369", 0, config + QUEUE_NUM_UNTAGGED);
 
 	ret = prueth_emac_buffer_setup(emac);
 	if (ret)
@@ -419,7 +419,7 @@ int emac_set_port_state(struct prueth_emac *emac,
 	mutex_lock(&emac->cmd_lock);
 
 	for (i = 0; i < 4; i++)
-		writel(emac_r32_bitmask[cmd].cmd[i], &p->cmd[i]);
+		pete_writel("drivers/net/ethernet/ti/icssg/icssg_config.c:422", emac_r32_bitmask[cmd].cmd[i], &p->cmd[i]);
 
 	/* wait for done */
 	ret = read_poll_timeout(emac_r30_is_done, done, done == 1,
@@ -453,5 +453,5 @@ void icssg_config_set_speed(struct prueth_emac *emac)
 		return;
 	}
 
-	writeb(fw_speed, emac->dram.va + PORT_LINK_SPEED_OFFSET);
+	pete_writeb("drivers/net/ethernet/ti/icssg/icssg_config.c:456", fw_speed, emac->dram.va + PORT_LINK_SPEED_OFFSET);
 }

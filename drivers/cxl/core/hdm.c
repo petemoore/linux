@@ -79,7 +79,7 @@ static void parse_hdm_decoder_caps(struct cxl_hdm *cxlhdm)
 {
 	u32 hdm_cap;
 
-	hdm_cap = readl(cxlhdm->regs.hdm_decoder + CXL_HDM_DECODER_CAP_OFFSET);
+	hdm_cap = pete_readl("drivers/cxl/core/hdm.c:82", cxlhdm->regs.hdm_decoder + CXL_HDM_DECODER_CAP_OFFSET);
 	cxlhdm->decoder_count = cxl_hdm_decoder_count(hdm_cap);
 	cxlhdm->target_count =
 		FIELD_GET(CXL_HDM_DECODER_TARGET_COUNT_MASK, hdm_cap);
@@ -142,15 +142,15 @@ static bool should_emulate_decoders(struct cxl_endpoint_dvsec_info *info)
 	 * emulated DVSEC decoders.
 	 */
 	for (i = 0; i < cxlhdm->decoder_count; i++) {
-		ctrl = readl(hdm + CXL_HDM_DECODER0_CTRL_OFFSET(i));
+		ctrl = pete_readl("drivers/cxl/core/hdm.c:145", hdm + CXL_HDM_DECODER0_CTRL_OFFSET(i));
 		dev_dbg(&info->port->dev,
 			"decoder%d.%d: committed: %ld base: %#x_%.8x size: %#x_%.8x\n",
 			info->port->id, i,
 			FIELD_GET(CXL_HDM_DECODER0_CTRL_COMMITTED, ctrl),
-			readl(hdm + CXL_HDM_DECODER0_BASE_HIGH_OFFSET(i)),
-			readl(hdm + CXL_HDM_DECODER0_BASE_LOW_OFFSET(i)),
-			readl(hdm + CXL_HDM_DECODER0_SIZE_HIGH_OFFSET(i)),
-			readl(hdm + CXL_HDM_DECODER0_SIZE_LOW_OFFSET(i)));
+			pete_readl("drivers/cxl/core/hdm.c:150", hdm + CXL_HDM_DECODER0_BASE_HIGH_OFFSET(i)),
+			pete_readl("drivers/cxl/core/hdm.c:151", hdm + CXL_HDM_DECODER0_BASE_LOW_OFFSET(i)),
+			pete_readl("drivers/cxl/core/hdm.c:152", hdm + CXL_HDM_DECODER0_SIZE_HIGH_OFFSET(i)),
+			pete_readl("drivers/cxl/core/hdm.c:153", hdm + CXL_HDM_DECODER0_SIZE_LOW_OFFSET(i)));
 		if (FIELD_GET(CXL_HDM_DECODER0_CTRL_COMMITTED, ctrl))
 			return false;
 	}
@@ -621,10 +621,10 @@ static int cxld_await_commit(void __iomem *hdm, int id)
 	int i;
 
 	for (i = 0; i < COMMIT_TIMEOUT_MS; i++) {
-		ctrl = readl(hdm + CXL_HDM_DECODER0_CTRL_OFFSET(id));
+		ctrl = pete_readl("drivers/cxl/core/hdm.c:624", hdm + CXL_HDM_DECODER0_CTRL_OFFSET(id));
 		if (FIELD_GET(CXL_HDM_DECODER0_CTRL_COMMIT_ERROR, ctrl)) {
 			ctrl &= ~CXL_HDM_DECODER0_CTRL_COMMIT;
-			writel(ctrl, hdm + CXL_HDM_DECODER0_CTRL_OFFSET(id));
+			pete_writel("drivers/cxl/core/hdm.c:627", ctrl, hdm + CXL_HDM_DECODER0_CTRL_OFFSET(id));
 			return -EIO;
 		}
 		if (FIELD_GET(CXL_HDM_DECODER0_CTRL_COMMITTED, ctrl))
@@ -676,16 +676,16 @@ static int cxl_decoder_commit(struct cxl_decoder *cxld)
 
 	down_read(&cxl_dpa_rwsem);
 	/* common decoder settings */
-	ctrl = readl(hdm + CXL_HDM_DECODER0_CTRL_OFFSET(cxld->id));
+	ctrl = pete_readl("drivers/cxl/core/hdm.c:679", hdm + CXL_HDM_DECODER0_CTRL_OFFSET(cxld->id));
 	cxld_set_interleave(cxld, &ctrl);
 	cxld_set_type(cxld, &ctrl);
 	base = cxld->hpa_range.start;
 	size = range_len(&cxld->hpa_range);
 
-	writel(upper_32_bits(base), hdm + CXL_HDM_DECODER0_BASE_HIGH_OFFSET(id));
-	writel(lower_32_bits(base), hdm + CXL_HDM_DECODER0_BASE_LOW_OFFSET(id));
-	writel(upper_32_bits(size), hdm + CXL_HDM_DECODER0_SIZE_HIGH_OFFSET(id));
-	writel(lower_32_bits(size), hdm + CXL_HDM_DECODER0_SIZE_LOW_OFFSET(id));
+	pete_writel("drivers/cxl/core/hdm.c:685", upper_32_bits(base), hdm + CXL_HDM_DECODER0_BASE_HIGH_OFFSET(id));
+	pete_writel("drivers/cxl/core/hdm.c:686", lower_32_bits(base), hdm + CXL_HDM_DECODER0_BASE_LOW_OFFSET(id));
+	pete_writel("drivers/cxl/core/hdm.c:687", upper_32_bits(size), hdm + CXL_HDM_DECODER0_SIZE_HIGH_OFFSET(id));
+	pete_writel("drivers/cxl/core/hdm.c:688", lower_32_bits(size), hdm + CXL_HDM_DECODER0_SIZE_LOW_OFFSET(id));
 
 	if (is_switch_decoder(&cxld->dev)) {
 		struct cxl_switch_decoder *cxlsd =
@@ -695,19 +695,19 @@ static int cxl_decoder_commit(struct cxl_decoder *cxld)
 		u64 targets;
 
 		cxlsd_set_targets(cxlsd, &targets);
-		writel(upper_32_bits(targets), tl_hi);
-		writel(lower_32_bits(targets), tl_lo);
+		pete_writel("drivers/cxl/core/hdm.c:698", upper_32_bits(targets), tl_hi);
+		pete_writel("drivers/cxl/core/hdm.c:699", lower_32_bits(targets), tl_lo);
 	} else {
 		struct cxl_endpoint_decoder *cxled =
 			to_cxl_endpoint_decoder(&cxld->dev);
 		void __iomem *sk_hi = hdm + CXL_HDM_DECODER0_SKIP_HIGH(id);
 		void __iomem *sk_lo = hdm + CXL_HDM_DECODER0_SKIP_LOW(id);
 
-		writel(upper_32_bits(cxled->skip), sk_hi);
-		writel(lower_32_bits(cxled->skip), sk_lo);
+		pete_writel("drivers/cxl/core/hdm.c:706", upper_32_bits(cxled->skip), sk_hi);
+		pete_writel("drivers/cxl/core/hdm.c:707", lower_32_bits(cxled->skip), sk_lo);
 	}
 
-	writel(ctrl, hdm + CXL_HDM_DECODER0_CTRL_OFFSET(id));
+	pete_writel("drivers/cxl/core/hdm.c:710", ctrl, hdm + CXL_HDM_DECODER0_CTRL_OFFSET(id));
 	up_read(&cxl_dpa_rwsem);
 
 	port->commit_end++;
@@ -779,14 +779,14 @@ static void cxl_decoder_reset(struct cxl_decoder *cxld)
 			dev_name(&cxld->dev), port->id, port->commit_end);
 
 	down_read(&cxl_dpa_rwsem);
-	ctrl = readl(hdm + CXL_HDM_DECODER0_CTRL_OFFSET(id));
+	ctrl = pete_readl("drivers/cxl/core/hdm.c:782", hdm + CXL_HDM_DECODER0_CTRL_OFFSET(id));
 	ctrl &= ~CXL_HDM_DECODER0_CTRL_COMMIT;
-	writel(ctrl, hdm + CXL_HDM_DECODER0_CTRL_OFFSET(id));
+	pete_writel("drivers/cxl/core/hdm.c:784", ctrl, hdm + CXL_HDM_DECODER0_CTRL_OFFSET(id));
 
-	writel(0, hdm + CXL_HDM_DECODER0_SIZE_HIGH_OFFSET(id));
-	writel(0, hdm + CXL_HDM_DECODER0_SIZE_LOW_OFFSET(id));
-	writel(0, hdm + CXL_HDM_DECODER0_BASE_HIGH_OFFSET(id));
-	writel(0, hdm + CXL_HDM_DECODER0_BASE_LOW_OFFSET(id));
+	pete_writel("drivers/cxl/core/hdm.c:786", 0, hdm + CXL_HDM_DECODER0_SIZE_HIGH_OFFSET(id));
+	pete_writel("drivers/cxl/core/hdm.c:787", 0, hdm + CXL_HDM_DECODER0_SIZE_LOW_OFFSET(id));
+	pete_writel("drivers/cxl/core/hdm.c:788", 0, hdm + CXL_HDM_DECODER0_BASE_HIGH_OFFSET(id));
+	pete_writel("drivers/cxl/core/hdm.c:789", 0, hdm + CXL_HDM_DECODER0_BASE_LOW_OFFSET(id));
 	up_read(&cxl_dpa_rwsem);
 
 	cxld->flags &= ~CXL_DECODER_F_ENABLE;
@@ -860,12 +860,12 @@ static int init_hdm_decoder(struct cxl_port *port, struct cxl_decoder *cxld,
 		return cxl_setup_hdm_decoder_from_dvsec(port, cxld, dpa_base,
 							which, info);
 
-	ctrl = readl(hdm + CXL_HDM_DECODER0_CTRL_OFFSET(which));
-	lo = readl(hdm + CXL_HDM_DECODER0_BASE_LOW_OFFSET(which));
-	hi = readl(hdm + CXL_HDM_DECODER0_BASE_HIGH_OFFSET(which));
+	ctrl = pete_readl("drivers/cxl/core/hdm.c:863", hdm + CXL_HDM_DECODER0_CTRL_OFFSET(which));
+	lo = pete_readl("drivers/cxl/core/hdm.c:864", hdm + CXL_HDM_DECODER0_BASE_LOW_OFFSET(which));
+	hi = pete_readl("drivers/cxl/core/hdm.c:865", hdm + CXL_HDM_DECODER0_BASE_HIGH_OFFSET(which));
 	base = (hi << 32) + lo;
-	lo = readl(hdm + CXL_HDM_DECODER0_SIZE_LOW_OFFSET(which));
-	hi = readl(hdm + CXL_HDM_DECODER0_SIZE_HIGH_OFFSET(which));
+	lo = pete_readl("drivers/cxl/core/hdm.c:867", hdm + CXL_HDM_DECODER0_SIZE_LOW_OFFSET(which));
+	hi = pete_readl("drivers/cxl/core/hdm.c:868", hdm + CXL_HDM_DECODER0_SIZE_HIGH_OFFSET(which));
 	size = (hi << 32) + lo;
 	committed = !!(ctrl & CXL_HDM_DECODER0_CTRL_COMMITTED);
 	cxld->commit = cxl_decoder_commit;
@@ -932,7 +932,7 @@ static int init_hdm_decoder(struct cxl_port *port, struct cxl_decoder *cxld,
 		if (!FIELD_GET(CXL_HDM_DECODER0_CTRL_HOSTONLY, ctrl) &&
 		    cxld->target_type == CXL_DECODER_HOSTONLYMEM) {
 			ctrl |= CXL_HDM_DECODER0_CTRL_HOSTONLY;
-			writel(ctrl, hdm + CXL_HDM_DECODER0_CTRL_OFFSET(which));
+			pete_writel("drivers/cxl/core/hdm.c:935", ctrl, hdm + CXL_HDM_DECODER0_CTRL_OFFSET(which));
 		}
 	}
 	rc = eiw_to_ways(FIELD_GET(CXL_HDM_DECODER0_CTRL_IW_MASK, ctrl),
@@ -953,8 +953,8 @@ static int init_hdm_decoder(struct cxl_port *port, struct cxl_decoder *cxld,
 		cxld->interleave_ways, cxld->interleave_granularity);
 
 	if (!cxled) {
-		lo = readl(hdm + CXL_HDM_DECODER0_TL_LOW(which));
-		hi = readl(hdm + CXL_HDM_DECODER0_TL_HIGH(which));
+		lo = pete_readl("drivers/cxl/core/hdm.c:956", hdm + CXL_HDM_DECODER0_TL_LOW(which));
+		hi = pete_readl("drivers/cxl/core/hdm.c:957", hdm + CXL_HDM_DECODER0_TL_HIGH(which));
 		target_list.value = (hi << 32) + lo;
 		for (i = 0; i < cxld->interleave_ways; i++)
 			target_map[i] = target_list.target_id[i];
@@ -972,8 +972,8 @@ static int init_hdm_decoder(struct cxl_port *port, struct cxl_decoder *cxld,
 			port->id, cxld->id, size, cxld->interleave_ways);
 		return -ENXIO;
 	}
-	lo = readl(hdm + CXL_HDM_DECODER0_SKIP_LOW(which));
-	hi = readl(hdm + CXL_HDM_DECODER0_SKIP_HIGH(which));
+	lo = pete_readl("drivers/cxl/core/hdm.c:975", hdm + CXL_HDM_DECODER0_SKIP_LOW(which));
+	hi = pete_readl("drivers/cxl/core/hdm.c:976", hdm + CXL_HDM_DECODER0_SKIP_HIGH(which));
 	skip = (hi << 32) + lo;
 	rc = devm_cxl_dpa_reserve(cxled, *dpa_base + skip, dpa_size, skip);
 	if (rc) {
@@ -1007,7 +1007,7 @@ static void cxl_settle_decoders(struct cxl_hdm *cxlhdm)
 	 * host and target.
 	 */
 	for (i = 0, committed = 0; i < cxlhdm->decoder_count; i++) {
-		ctrl = readl(hdm + CXL_HDM_DECODER0_CTRL_OFFSET(i));
+		ctrl = pete_readl("drivers/cxl/core/hdm.c:1010", hdm + CXL_HDM_DECODER0_CTRL_OFFSET(i));
 		if (ctrl & CXL_HDM_DECODER0_CTRL_COMMITTED)
 			committed++;
 	}

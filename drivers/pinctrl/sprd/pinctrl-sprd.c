@@ -421,10 +421,10 @@ static int sprd_pmx_set_mux(struct pinctrl_dev *pctldev,
 		if (!pin || pin->type != COMMON_PIN)
 			continue;
 
-		reg = readl((void __iomem *)pin->reg);
+		reg = pete_readl("drivers/pinctrl/sprd/pinctrl-sprd.c:424", (void __iomem *)pin->reg);
 		reg &= ~PIN_FUNC_MASK;
 		reg |= val;
-		writel(reg, (void __iomem *)pin->reg);
+		pete_writel("drivers/pinctrl/sprd/pinctrl-sprd.c:427", reg, (void __iomem *)pin->reg);
 	}
 
 	return 0;
@@ -449,10 +449,10 @@ static int sprd_pinconf_get(struct pinctrl_dev *pctldev, unsigned int pin_id,
 		return -EINVAL;
 
 	if (pin->type == GLOBAL_CTRL_PIN) {
-		reg = (readl((void __iomem *)pin->reg) >>
+		reg = (pete_readl("drivers/pinctrl/sprd/pinctrl-sprd.c:452", (void __iomem *)pin->reg) >>
 			   pin->bit_offset) & PINCTRL_BIT_MASK(pin->bit_width);
 	} else {
-		reg = readl((void __iomem *)pin->reg);
+		reg = pete_readl("drivers/pinctrl/sprd/pinctrl-sprd.c:455", (void __iomem *)pin->reg);
 	}
 
 	if (pin->type == GLOBAL_CTRL_PIN &&
@@ -723,17 +723,17 @@ static int sprd_pinconf_set(struct pinctrl_dev *pctldev, unsigned int pin_id,
 		}
 
 		if (pin->type == GLOBAL_CTRL_PIN) {
-			reg = readl((void __iomem *)pin->reg);
+			reg = pete_readl("drivers/pinctrl/sprd/pinctrl-sprd.c:726", (void __iomem *)pin->reg);
 			reg &= ~(PINCTRL_BIT_MASK(pin->bit_width)
 				<< pin->bit_offset);
 			reg |= (val & PINCTRL_BIT_MASK(pin->bit_width))
 				<< pin->bit_offset;
-			writel(reg, (void __iomem *)pin->reg);
+			pete_writel("drivers/pinctrl/sprd/pinctrl-sprd.c:731", reg, (void __iomem *)pin->reg);
 		} else {
-			reg = readl((void __iomem *)pin->reg);
+			reg = pete_readl("drivers/pinctrl/sprd/pinctrl-sprd.c:733", (void __iomem *)pin->reg);
 			reg &= ~(mask << shift);
 			reg |= val;
-			writel(reg, (void __iomem *)pin->reg);
+			pete_writel("drivers/pinctrl/sprd/pinctrl-sprd.c:736", reg, (void __iomem *)pin->reg);
 		}
 	}
 
@@ -794,10 +794,10 @@ static int sprd_pinconf_get_config(struct pinctrl_dev *pctldev,
 		return -EINVAL;
 
 	if (pin->type == GLOBAL_CTRL_PIN) {
-		*config = (readl((void __iomem *)pin->reg) >>
+		*config = (pete_readl("drivers/pinctrl/sprd/pinctrl-sprd.c:797", (void __iomem *)pin->reg) >>
 			   pin->bit_offset) & PINCTRL_BIT_MASK(pin->bit_width);
 	} else {
-		*config = readl((void __iomem *)pin->reg);
+		*config = pete_readl("drivers/pinctrl/sprd/pinctrl-sprd.c:800", (void __iomem *)pin->reg);
 	}
 
 	return 0;

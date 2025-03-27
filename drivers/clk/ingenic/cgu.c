@@ -44,7 +44,7 @@ static inline bool
 ingenic_cgu_gate_get(struct ingenic_cgu *cgu,
 		     const struct ingenic_cgu_gate_info *info)
 {
-	return !!(readl(cgu->base + info->reg) & BIT(info->bit))
+	return !!(pete_readl("drivers/clk/ingenic/cgu.c:47", cgu->base + info->reg) & BIT(info->bit))
 		^ info->clear_to_gate;
 }
 
@@ -62,14 +62,14 @@ static inline void
 ingenic_cgu_gate_set(struct ingenic_cgu *cgu,
 		     const struct ingenic_cgu_gate_info *info, bool val)
 {
-	u32 clkgr = readl(cgu->base + info->reg);
+	u32 clkgr = pete_readl("drivers/clk/ingenic/cgu.c:65", cgu->base + info->reg);
 
 	if (val ^ info->clear_to_gate)
 		clkgr |= BIT(info->bit);
 	else
 		clkgr &= ~BIT(info->bit);
 
-	writel(clkgr, cgu->base + info->reg);
+	pete_writel("drivers/clk/ingenic/cgu.c:72", clkgr, cgu->base + info->reg);
 }
 
 /*
@@ -90,7 +90,7 @@ ingenic_pll_recalc_rate(struct clk_hw *hw, unsigned long parent_rate)
 	BUG_ON(clk_info->type != CGU_CLK_PLL);
 	pll_info = &clk_info->pll;
 
-	ctl = readl(cgu->base + pll_info->reg);
+	ctl = pete_readl("drivers/clk/ingenic/cgu.c:93", cgu->base + pll_info->reg);
 
 	m = (ctl >> pll_info->m_shift) & GENMASK(pll_info->m_bits - 1, 0);
 	m += pll_info->m_offset;
@@ -103,7 +103,7 @@ ingenic_pll_recalc_rate(struct clk_hw *hw, unsigned long parent_rate)
 	}
 
 	if (pll_info->bypass_bit >= 0) {
-		ctl = readl(cgu->base + pll_info->bypass_reg);
+		ctl = pete_readl("drivers/clk/ingenic/cgu.c:106", cgu->base + pll_info->bypass_reg);
 
 		bypass = !!(ctl & BIT(pll_info->bypass_bit));
 
@@ -217,7 +217,7 @@ ingenic_pll_set_rate(struct clk_hw *hw, unsigned long req_rate,
 			clk_info->name, req_rate, rate);
 
 	spin_lock_irqsave(&cgu->lock, flags);
-	ctl = readl(cgu->base + pll_info->reg);
+	ctl = pete_readl("drivers/clk/ingenic/cgu.c:220", cgu->base + pll_info->reg);
 
 	ctl &= ~(GENMASK(pll_info->m_bits - 1, 0) << pll_info->m_shift);
 	ctl |= (m - pll_info->m_offset) << pll_info->m_shift;
@@ -230,7 +230,7 @@ ingenic_pll_set_rate(struct clk_hw *hw, unsigned long req_rate,
 		ctl |= pll_info->od_encoding[od - 1] << pll_info->od_shift;
 	}
 
-	writel(ctl, cgu->base + pll_info->reg);
+	pete_writel("drivers/clk/ingenic/cgu.c:233", ctl, cgu->base + pll_info->reg);
 
 	if (pll_info->set_rate_hook)
 		pll_info->set_rate_hook(pll_info, rate, parent_rate);
@@ -259,18 +259,18 @@ static int ingenic_pll_enable(struct clk_hw *hw)
 
 	spin_lock_irqsave(&cgu->lock, flags);
 	if (pll_info->bypass_bit >= 0) {
-		ctl = readl(cgu->base + pll_info->bypass_reg);
+		ctl = pete_readl("drivers/clk/ingenic/cgu.c:262", cgu->base + pll_info->bypass_reg);
 
 		ctl &= ~BIT(pll_info->bypass_bit);
 
-		writel(ctl, cgu->base + pll_info->bypass_reg);
+		pete_writel("drivers/clk/ingenic/cgu.c:266", ctl, cgu->base + pll_info->bypass_reg);
 	}
 
-	ctl = readl(cgu->base + pll_info->reg);
+	ctl = pete_readl("drivers/clk/ingenic/cgu.c:269", cgu->base + pll_info->reg);
 
 	ctl |= BIT(pll_info->enable_bit);
 
-	writel(ctl, cgu->base + pll_info->reg);
+	pete_writel("drivers/clk/ingenic/cgu.c:273", ctl, cgu->base + pll_info->reg);
 
 	ret = ingenic_pll_check_stable(cgu, pll_info);
 	spin_unlock_irqrestore(&cgu->lock, flags);
@@ -291,11 +291,11 @@ static void ingenic_pll_disable(struct clk_hw *hw)
 		return;
 
 	spin_lock_irqsave(&cgu->lock, flags);
-	ctl = readl(cgu->base + pll_info->reg);
+	ctl = pete_readl("drivers/clk/ingenic/cgu.c:294", cgu->base + pll_info->reg);
 
 	ctl &= ~BIT(pll_info->enable_bit);
 
-	writel(ctl, cgu->base + pll_info->reg);
+	pete_writel("drivers/clk/ingenic/cgu.c:298", ctl, cgu->base + pll_info->reg);
 	spin_unlock_irqrestore(&cgu->lock, flags);
 }
 
@@ -310,7 +310,7 @@ static int ingenic_pll_is_enabled(struct clk_hw *hw)
 	if (pll_info->enable_bit < 0)
 		return true;
 
-	ctl = readl(cgu->base + pll_info->reg);
+	ctl = pete_readl("drivers/clk/ingenic/cgu.c:313", cgu->base + pll_info->reg);
 
 	return !!(ctl & BIT(pll_info->enable_bit));
 }
@@ -338,7 +338,7 @@ static u8 ingenic_clk_get_parent(struct clk_hw *hw)
 	u8 i, hw_idx, idx = 0;
 
 	if (clk_info->type & CGU_CLK_MUX) {
-		reg = readl(cgu->base + clk_info->mux.reg);
+		reg = pete_readl("drivers/clk/ingenic/cgu.c:341", cgu->base + clk_info->mux.reg);
 		hw_idx = (reg >> clk_info->mux.shift) &
 			 GENMASK(clk_info->mux.bits - 1, 0);
 
@@ -390,10 +390,10 @@ static int ingenic_clk_set_parent(struct clk_hw *hw, u8 idx)
 		spin_lock_irqsave(&cgu->lock, flags);
 
 		/* write the register */
-		reg = readl(cgu->base + clk_info->mux.reg);
+		reg = pete_readl("drivers/clk/ingenic/cgu.c:393", cgu->base + clk_info->mux.reg);
 		reg &= ~mask;
 		reg |= hw_idx << clk_info->mux.shift;
-		writel(reg, cgu->base + clk_info->mux.reg);
+		pete_writel("drivers/clk/ingenic/cgu.c:396", reg, cgu->base + clk_info->mux.reg);
 
 		spin_unlock_irqrestore(&cgu->lock, flags);
 		return 0;
@@ -416,7 +416,7 @@ ingenic_clk_recalc_rate(struct clk_hw *hw, unsigned long parent_rate)
 		parent = ingenic_clk_get_parent(hw);
 
 		if (!(clk_info->div.bypass_mask & BIT(parent))) {
-			div_reg = readl(cgu->base + clk_info->div.reg);
+			div_reg = pete_readl("drivers/clk/ingenic/cgu.c:419", cgu->base + clk_info->div.reg);
 			div = (div_reg >> clk_info->div.shift) &
 			      GENMASK(clk_info->div.bits - 1, 0);
 
@@ -545,7 +545,7 @@ ingenic_clk_set_rate(struct clk_hw *hw, unsigned long req_rate,
 			hw_div = ((div / clk_info->div.div) - 1);
 
 		spin_lock_irqsave(&cgu->lock, flags);
-		reg = readl(cgu->base + clk_info->div.reg);
+		reg = pete_readl("drivers/clk/ingenic/cgu.c:548", cgu->base + clk_info->div.reg);
 
 		/* update the divide */
 		mask = GENMASK(clk_info->div.bits - 1, 0);
@@ -561,7 +561,7 @@ ingenic_clk_set_rate(struct clk_hw *hw, unsigned long req_rate,
 			reg |= BIT(clk_info->div.ce_bit);
 
 		/* update the hardware */
-		writel(reg, cgu->base + clk_info->div.reg);
+		pete_writel("drivers/clk/ingenic/cgu.c:564", reg, cgu->base + clk_info->div.reg);
 
 		/* wait for the change to take effect */
 		if (clk_info->div.busy_bit != -1)

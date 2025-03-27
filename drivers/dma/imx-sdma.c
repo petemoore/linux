@@ -726,12 +726,12 @@ static int sdma_config_ownership(struct sdma_channel *sdmac,
 
 static int is_sdma_channel_enabled(struct sdma_engine *sdma, int channel)
 {
-	return !!(readl(sdma->regs + SDMA_H_STATSTOP) & BIT(channel));
+	return !!(pete_readl("drivers/dma/imx-sdma.c:729", sdma->regs + SDMA_H_STATSTOP) & BIT(channel));
 }
 
 static void sdma_enable_channel(struct sdma_engine *sdma, int channel)
 {
-	writel(BIT(channel), sdma->regs + SDMA_H_START);
+	pete_writel("drivers/dma/imx-sdma.c:734", BIT(channel), sdma->regs + SDMA_H_START);
 }
 
 /*
@@ -750,7 +750,7 @@ static int sdma_run_channel0(struct sdma_engine *sdma)
 		dev_err(sdma->dev, "Timeout waiting for CH0 ready\n");
 
 	/* Set bits of CONFIG register with dynamic context switching */
-	reg = readl(sdma->regs + SDMA_H_CONFIG);
+	reg = pete_readl("drivers/dma/imx-sdma.c:753", sdma->regs + SDMA_H_CONFIG);
 	if ((reg & SDMA_H_CONFIG_CSM) == 0) {
 		reg |= SDMA_H_CONFIG_CSM;
 		writel_relaxed(reg, sdma->regs + SDMA_H_CONFIG);

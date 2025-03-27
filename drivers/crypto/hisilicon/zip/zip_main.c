@@ -481,7 +481,7 @@ static int hisi_zip_set_high_perf(struct hisi_qm *qm)
 		val &= ~HZIP_HIGH_COMP_PERF;
 
 	/* Set perf mode */
-	writel(val, qm->io_base + HZIP_HIGH_PERF_OFFSET);
+	pete_writel("drivers/crypto/hisilicon/zip/zip_main.c:484", val, qm->io_base + HZIP_HIGH_PERF_OFFSET);
 	ret = readl_relaxed_poll_timeout(qm->io_base + HZIP_HIGH_PERF_OFFSET,
 					 val, val == perf_mode, HZIP_DELAY_1_US,
 					 HZIP_POLL_TIMEOUT_US);
@@ -502,7 +502,7 @@ static void hisi_zip_open_sva_prefetch(struct hisi_qm *qm)
 	/* Enable prefetch */
 	val = readl_relaxed(qm->io_base + HZIP_PREFETCH_CFG);
 	val &= HZIP_PREFETCH_ENABLE;
-	writel(val, qm->io_base + HZIP_PREFETCH_CFG);
+	pete_writel("drivers/crypto/hisilicon/zip/zip_main.c:505", val, qm->io_base + HZIP_PREFETCH_CFG);
 
 	ret = readl_relaxed_poll_timeout(qm->io_base + HZIP_PREFETCH_CFG,
 					 val, !(val & HZIP_SVA_PREFETCH_DISABLE),
@@ -521,7 +521,7 @@ static void hisi_zip_close_sva_prefetch(struct hisi_qm *qm)
 
 	val = readl_relaxed(qm->io_base + HZIP_PREFETCH_CFG);
 	val |= HZIP_SVA_PREFETCH_DISABLE;
-	writel(val, qm->io_base + HZIP_PREFETCH_CFG);
+	pete_writel("drivers/crypto/hisilicon/zip/zip_main.c:524", val, qm->io_base + HZIP_PREFETCH_CFG);
 
 	ret = readl_relaxed_poll_timeout(qm->io_base + HZIP_SVA_TRANS,
 					 val, !(val & HZIP_SVA_DISABLE_READY),
@@ -537,13 +537,13 @@ static void hisi_zip_enable_clock_gate(struct hisi_qm *qm)
 	if (qm->ver < QM_HW_V3)
 		return;
 
-	val = readl(qm->io_base + HZIP_CLOCK_GATE_CTRL);
+	val = pete_readl("drivers/crypto/hisilicon/zip/zip_main.c:540", qm->io_base + HZIP_CLOCK_GATE_CTRL);
 	val |= HZIP_CLOCK_GATED_EN;
-	writel(val, qm->io_base + HZIP_CLOCK_GATE_CTRL);
+	pete_writel("drivers/crypto/hisilicon/zip/zip_main.c:542", val, qm->io_base + HZIP_CLOCK_GATE_CTRL);
 
-	val = readl(qm->io_base + HZIP_PEH_CFG_AUTO_GATE);
+	val = pete_readl("drivers/crypto/hisilicon/zip/zip_main.c:544", qm->io_base + HZIP_PEH_CFG_AUTO_GATE);
 	val |= HZIP_PEH_CFG_AUTO_GATE_EN;
-	writel(val, qm->io_base + HZIP_PEH_CFG_AUTO_GATE);
+	pete_writel("drivers/crypto/hisilicon/zip/zip_main.c:546", val, qm->io_base + HZIP_PEH_CFG_AUTO_GATE);
 }
 
 static int hisi_zip_set_user_domain_and_cache(struct hisi_qm *qm)
@@ -552,47 +552,47 @@ static int hisi_zip_set_user_domain_and_cache(struct hisi_qm *qm)
 	u32 dcomp_bm, comp_bm;
 
 	/* qm user domain */
-	writel(AXUSER_BASE, base + QM_ARUSER_M_CFG_1);
-	writel(ARUSER_M_CFG_ENABLE, base + QM_ARUSER_M_CFG_ENABLE);
-	writel(AXUSER_BASE, base + QM_AWUSER_M_CFG_1);
-	writel(AWUSER_M_CFG_ENABLE, base + QM_AWUSER_M_CFG_ENABLE);
-	writel(WUSER_M_CFG_ENABLE, base + QM_WUSER_M_CFG_ENABLE);
+	pete_writel("drivers/crypto/hisilicon/zip/zip_main.c:555", AXUSER_BASE, base + QM_ARUSER_M_CFG_1);
+	pete_writel("drivers/crypto/hisilicon/zip/zip_main.c:556", ARUSER_M_CFG_ENABLE, base + QM_ARUSER_M_CFG_ENABLE);
+	pete_writel("drivers/crypto/hisilicon/zip/zip_main.c:557", AXUSER_BASE, base + QM_AWUSER_M_CFG_1);
+	pete_writel("drivers/crypto/hisilicon/zip/zip_main.c:558", AWUSER_M_CFG_ENABLE, base + QM_AWUSER_M_CFG_ENABLE);
+	pete_writel("drivers/crypto/hisilicon/zip/zip_main.c:559", WUSER_M_CFG_ENABLE, base + QM_WUSER_M_CFG_ENABLE);
 
 	/* qm cache */
-	writel(AXI_M_CFG, base + QM_AXI_M_CFG);
-	writel(AXI_M_CFG_ENABLE, base + QM_AXI_M_CFG_ENABLE);
+	pete_writel("drivers/crypto/hisilicon/zip/zip_main.c:562", AXI_M_CFG, base + QM_AXI_M_CFG);
+	pete_writel("drivers/crypto/hisilicon/zip/zip_main.c:563", AXI_M_CFG_ENABLE, base + QM_AXI_M_CFG_ENABLE);
 
 	/* disable FLR triggered by BME(bus master enable) */
-	writel(PEH_AXUSER_CFG, base + QM_PEH_AXUSER_CFG);
-	writel(PEH_AXUSER_CFG_ENABLE, base + QM_PEH_AXUSER_CFG_ENABLE);
+	pete_writel("drivers/crypto/hisilicon/zip/zip_main.c:566", PEH_AXUSER_CFG, base + QM_PEH_AXUSER_CFG);
+	pete_writel("drivers/crypto/hisilicon/zip/zip_main.c:567", PEH_AXUSER_CFG_ENABLE, base + QM_PEH_AXUSER_CFG_ENABLE);
 
 	/* cache */
-	writel(HZIP_CACHE_ALL_EN, base + HZIP_PORT_ARCA_CHE_0);
-	writel(HZIP_CACHE_ALL_EN, base + HZIP_PORT_ARCA_CHE_1);
-	writel(HZIP_CACHE_ALL_EN, base + HZIP_PORT_AWCA_CHE_0);
-	writel(HZIP_CACHE_ALL_EN, base + HZIP_PORT_AWCA_CHE_1);
+	pete_writel("drivers/crypto/hisilicon/zip/zip_main.c:570", HZIP_CACHE_ALL_EN, base + HZIP_PORT_ARCA_CHE_0);
+	pete_writel("drivers/crypto/hisilicon/zip/zip_main.c:571", HZIP_CACHE_ALL_EN, base + HZIP_PORT_ARCA_CHE_1);
+	pete_writel("drivers/crypto/hisilicon/zip/zip_main.c:572", HZIP_CACHE_ALL_EN, base + HZIP_PORT_AWCA_CHE_0);
+	pete_writel("drivers/crypto/hisilicon/zip/zip_main.c:573", HZIP_CACHE_ALL_EN, base + HZIP_PORT_AWCA_CHE_1);
 
 	/* user domain configurations */
-	writel(AXUSER_BASE, base + HZIP_BD_RUSER_32_63);
-	writel(AXUSER_BASE, base + HZIP_BD_WUSER_32_63);
+	pete_writel("drivers/crypto/hisilicon/zip/zip_main.c:576", AXUSER_BASE, base + HZIP_BD_RUSER_32_63);
+	pete_writel("drivers/crypto/hisilicon/zip/zip_main.c:577", AXUSER_BASE, base + HZIP_BD_WUSER_32_63);
 
 	if (qm->use_sva && qm->ver == QM_HW_V2) {
-		writel(AXUSER_BASE | AXUSER_SSV, base + HZIP_DATA_RUSER_32_63);
-		writel(AXUSER_BASE | AXUSER_SSV, base + HZIP_DATA_WUSER_32_63);
-		writel(AXUSER_BASE | AXUSER_SSV, base + HZIP_SGL_RUSER_32_63);
+		pete_writel("drivers/crypto/hisilicon/zip/zip_main.c:580", AXUSER_BASE | AXUSER_SSV, base + HZIP_DATA_RUSER_32_63);
+		pete_writel("drivers/crypto/hisilicon/zip/zip_main.c:581", AXUSER_BASE | AXUSER_SSV, base + HZIP_DATA_WUSER_32_63);
+		pete_writel("drivers/crypto/hisilicon/zip/zip_main.c:582", AXUSER_BASE | AXUSER_SSV, base + HZIP_SGL_RUSER_32_63);
 	} else {
-		writel(AXUSER_BASE, base + HZIP_DATA_RUSER_32_63);
-		writel(AXUSER_BASE, base + HZIP_DATA_WUSER_32_63);
-		writel(AXUSER_BASE, base + HZIP_SGL_RUSER_32_63);
+		pete_writel("drivers/crypto/hisilicon/zip/zip_main.c:584", AXUSER_BASE, base + HZIP_DATA_RUSER_32_63);
+		pete_writel("drivers/crypto/hisilicon/zip/zip_main.c:585", AXUSER_BASE, base + HZIP_DATA_WUSER_32_63);
+		pete_writel("drivers/crypto/hisilicon/zip/zip_main.c:586", AXUSER_BASE, base + HZIP_SGL_RUSER_32_63);
 	}
 
 	/* let's open all compression/decompression cores */
 	dcomp_bm = qm->cap_tables.dev_cap_table[ZIP_DECOMP_ENABLE_BITMAP_IDX].cap_val;
 	comp_bm = qm->cap_tables.dev_cap_table[ZIP_COMP_ENABLE_BITMAP_IDX].cap_val;
-	writel(HZIP_DECOMP_CHECK_ENABLE | dcomp_bm | comp_bm, base + HZIP_CLOCK_GATE_CTRL);
+	pete_writel("drivers/crypto/hisilicon/zip/zip_main.c:592", HZIP_DECOMP_CHECK_ENABLE | dcomp_bm | comp_bm, base + HZIP_CLOCK_GATE_CTRL);
 
 	/* enable sqc,cqc writeback */
-	writel(SQC_CACHE_ENABLE | CQC_CACHE_ENABLE | SQC_CACHE_WB_ENABLE |
+	pete_writel("drivers/crypto/hisilicon/zip/zip_main.c:595", SQC_CACHE_ENABLE | CQC_CACHE_ENABLE | SQC_CACHE_WB_ENABLE |
 	       CQC_CACHE_WB_ENABLE | FIELD_PREP(SQC_CACHE_WB_THRD, 1) |
 	       FIELD_PREP(CQC_CACHE_WB_THRD, 1), base + QM_CACHE_CTL);
 
@@ -605,7 +605,7 @@ static void hisi_zip_master_ooo_ctrl(struct hisi_qm *qm, bool enable)
 {
 	u32 val1, val2;
 
-	val1 = readl(qm->io_base + HZIP_SOFT_CTRL_ZIP_CONTROL);
+	val1 = pete_readl("drivers/crypto/hisilicon/zip/zip_main.c:608", qm->io_base + HZIP_SOFT_CTRL_ZIP_CONTROL);
 	if (enable) {
 		val1 |= HZIP_AXI_SHUTDOWN_ENABLE;
 		val2 = hisi_qm_get_hw_info(qm, zip_basic_cap_info,
@@ -616,9 +616,9 @@ static void hisi_zip_master_ooo_ctrl(struct hisi_qm *qm, bool enable)
 	}
 
 	if (qm->ver > QM_HW_V2)
-		writel(val2, qm->io_base + HZIP_OOO_SHUTDOWN_SEL);
+		pete_writel("drivers/crypto/hisilicon/zip/zip_main.c:619", val2, qm->io_base + HZIP_OOO_SHUTDOWN_SEL);
 
-	writel(val1, qm->io_base + HZIP_SOFT_CTRL_ZIP_CONTROL);
+	pete_writel("drivers/crypto/hisilicon/zip/zip_main.c:621", val1, qm->io_base + HZIP_SOFT_CTRL_ZIP_CONTROL);
 }
 
 static void hisi_zip_hw_error_enable(struct hisi_qm *qm)
@@ -626,7 +626,7 @@ static void hisi_zip_hw_error_enable(struct hisi_qm *qm)
 	u32 nfe, ce;
 
 	if (qm->ver == QM_HW_V1) {
-		writel(HZIP_CORE_INT_MASK_ALL,
+		pete_writel("drivers/crypto/hisilicon/zip/zip_main.c:629", HZIP_CORE_INT_MASK_ALL,
 		       qm->io_base + HZIP_CORE_INT_MASK_REG);
 		dev_info(&qm->pdev->dev, "Does not support hw error handle\n");
 		return;
@@ -636,17 +636,17 @@ static void hisi_zip_hw_error_enable(struct hisi_qm *qm)
 	ce = hisi_qm_get_hw_info(qm, zip_basic_cap_info, ZIP_CE_MASK_CAP, qm->cap_ver);
 
 	/* clear ZIP hw error source if having */
-	writel(ce | nfe | HZIP_CORE_INT_RAS_FE_ENB_MASK, qm->io_base + HZIP_CORE_INT_SOURCE);
+	pete_writel("drivers/crypto/hisilicon/zip/zip_main.c:639", ce | nfe | HZIP_CORE_INT_RAS_FE_ENB_MASK, qm->io_base + HZIP_CORE_INT_SOURCE);
 
 	/* configure error type */
-	writel(ce, qm->io_base + HZIP_CORE_INT_RAS_CE_ENB);
-	writel(HZIP_CORE_INT_RAS_FE_ENB_MASK, qm->io_base + HZIP_CORE_INT_RAS_FE_ENB);
-	writel(nfe, qm->io_base + HZIP_CORE_INT_RAS_NFE_ENB);
+	pete_writel("drivers/crypto/hisilicon/zip/zip_main.c:642", ce, qm->io_base + HZIP_CORE_INT_RAS_CE_ENB);
+	pete_writel("drivers/crypto/hisilicon/zip/zip_main.c:643", HZIP_CORE_INT_RAS_FE_ENB_MASK, qm->io_base + HZIP_CORE_INT_RAS_FE_ENB);
+	pete_writel("drivers/crypto/hisilicon/zip/zip_main.c:644", nfe, qm->io_base + HZIP_CORE_INT_RAS_NFE_ENB);
 
 	hisi_zip_master_ooo_ctrl(qm, true);
 
 	/* enable ZIP hw error interrupts */
-	writel(0, qm->io_base + HZIP_CORE_INT_MASK_REG);
+	pete_writel("drivers/crypto/hisilicon/zip/zip_main.c:649", 0, qm->io_base + HZIP_CORE_INT_MASK_REG);
 }
 
 static void hisi_zip_hw_error_disable(struct hisi_qm *qm)
@@ -656,7 +656,7 @@ static void hisi_zip_hw_error_disable(struct hisi_qm *qm)
 	/* disable ZIP hw error interrupts */
 	nfe = hisi_qm_get_hw_info(qm, zip_basic_cap_info, ZIP_NFE_MASK_CAP, qm->cap_ver);
 	ce = hisi_qm_get_hw_info(qm, zip_basic_cap_info, ZIP_CE_MASK_CAP, qm->cap_ver);
-	writel(ce | nfe | HZIP_CORE_INT_RAS_FE_ENB_MASK, qm->io_base + HZIP_CORE_INT_MASK_REG);
+	pete_writel("drivers/crypto/hisilicon/zip/zip_main.c:659", ce | nfe | HZIP_CORE_INT_RAS_FE_ENB_MASK, qm->io_base + HZIP_CORE_INT_MASK_REG);
 
 	hisi_zip_master_ooo_ctrl(qm, false);
 }
@@ -670,7 +670,7 @@ static inline struct hisi_qm *file_to_qm(struct ctrl_debug_file *file)
 
 static u32 clear_enable_read(struct hisi_qm *qm)
 {
-	return readl(qm->io_base + HZIP_SOFT_CTRL_CNT_CLR_CE) &
+	return pete_readl("drivers/crypto/hisilicon/zip/zip_main.c:673", qm->io_base + HZIP_SOFT_CTRL_CNT_CLR_CE) &
 		     HZIP_SOFT_CTRL_CNT_CLR_CE_BIT;
 }
 
@@ -681,9 +681,9 @@ static int clear_enable_write(struct hisi_qm *qm, u32 val)
 	if (val != 1 && val != 0)
 		return -EINVAL;
 
-	tmp = (readl(qm->io_base + HZIP_SOFT_CTRL_CNT_CLR_CE) &
+	tmp = (pete_readl("drivers/crypto/hisilicon/zip/zip_main.c:684", qm->io_base + HZIP_SOFT_CTRL_CNT_CLR_CE) &
 	       ~HZIP_SOFT_CTRL_CNT_CLR_CE_BIT) | val;
-	writel(tmp, qm->io_base + HZIP_SOFT_CTRL_CNT_CLR_CE);
+	pete_writel("drivers/crypto/hisilicon/zip/zip_main.c:686", tmp, qm->io_base + HZIP_SOFT_CTRL_CNT_CLR_CE);
 
 	return  0;
 }
@@ -925,14 +925,14 @@ static void hisi_zip_debug_regs_clear(struct hisi_qm *qm)
 	int i, j;
 
 	/* enable register read_clear bit */
-	writel(HZIP_RD_CNT_CLR_CE_EN, qm->io_base + HZIP_SOFT_CTRL_CNT_CLR_CE);
+	pete_writel("drivers/crypto/hisilicon/zip/zip_main.c:928", HZIP_RD_CNT_CLR_CE_EN, qm->io_base + HZIP_SOFT_CTRL_CNT_CLR_CE);
 	for (i = 0; i < ARRAY_SIZE(core_offsets); i++)
 		for (j = 0; j < ARRAY_SIZE(hzip_dfx_regs); j++)
-			readl(qm->io_base + core_offsets[i] +
+			pete_readl("drivers/crypto/hisilicon/zip/zip_main.c:931", qm->io_base + core_offsets[i] +
 			      hzip_dfx_regs[j].offset);
 
 	/* disable register read_clear bit */
-	writel(0x0, qm->io_base + HZIP_SOFT_CTRL_CNT_CLR_CE);
+	pete_writel("drivers/crypto/hisilicon/zip/zip_main.c:935", 0x0, qm->io_base + HZIP_SOFT_CTRL_CNT_CLR_CE);
 
 	hisi_qm_debug_regs_clear(qm);
 }
@@ -1050,7 +1050,7 @@ static void hisi_zip_log_hw_error(struct hisi_qm *qm, u32 err_sts)
 				err->msg, err->int_msk);
 
 			if (err->int_msk & HZIP_CORE_INT_STATUS_M_ECC) {
-				err_val = readl(qm->io_base +
+				err_val = pete_readl("drivers/crypto/hisilicon/zip/zip_main.c:1053", qm->io_base +
 						HZIP_CORE_SRAM_ECC_ERR_INFO);
 				dev_err(dev, "hisi-zip multi ecc sram num=0x%x\n",
 					((err_val >>
@@ -1063,12 +1063,12 @@ static void hisi_zip_log_hw_error(struct hisi_qm *qm, u32 err_sts)
 
 static u32 hisi_zip_get_hw_err_status(struct hisi_qm *qm)
 {
-	return readl(qm->io_base + HZIP_CORE_INT_STATUS);
+	return pete_readl("drivers/crypto/hisilicon/zip/zip_main.c:1066", qm->io_base + HZIP_CORE_INT_STATUS);
 }
 
 static void hisi_zip_clear_hw_err_status(struct hisi_qm *qm, u32 err_sts)
 {
-	writel(err_sts, qm->io_base + HZIP_CORE_INT_SOURCE);
+	pete_writel("drivers/crypto/hisilicon/zip/zip_main.c:1071", err_sts, qm->io_base + HZIP_CORE_INT_SOURCE);
 }
 
 static void hisi_zip_disable_error_report(struct hisi_qm *qm, u32 err_type)
@@ -1076,19 +1076,19 @@ static void hisi_zip_disable_error_report(struct hisi_qm *qm, u32 err_type)
 	u32 nfe_mask;
 
 	nfe_mask = hisi_qm_get_hw_info(qm, zip_basic_cap_info, ZIP_NFE_MASK_CAP, qm->cap_ver);
-	writel(nfe_mask & (~err_type), qm->io_base + HZIP_CORE_INT_RAS_NFE_ENB);
+	pete_writel("drivers/crypto/hisilicon/zip/zip_main.c:1079", nfe_mask & (~err_type), qm->io_base + HZIP_CORE_INT_RAS_NFE_ENB);
 }
 
 static void hisi_zip_open_axi_master_ooo(struct hisi_qm *qm)
 {
 	u32 val;
 
-	val = readl(qm->io_base + HZIP_SOFT_CTRL_ZIP_CONTROL);
+	val = pete_readl("drivers/crypto/hisilicon/zip/zip_main.c:1086", qm->io_base + HZIP_SOFT_CTRL_ZIP_CONTROL);
 
-	writel(val & ~HZIP_AXI_SHUTDOWN_ENABLE,
+	pete_writel("drivers/crypto/hisilicon/zip/zip_main.c:1088", val & ~HZIP_AXI_SHUTDOWN_ENABLE,
 	       qm->io_base + HZIP_SOFT_CTRL_ZIP_CONTROL);
 
-	writel(val | HZIP_AXI_SHUTDOWN_ENABLE,
+	pete_writel("drivers/crypto/hisilicon/zip/zip_main.c:1091", val | HZIP_AXI_SHUTDOWN_ENABLE,
 	       qm->io_base + HZIP_SOFT_CTRL_ZIP_CONTROL);
 }
 
@@ -1097,12 +1097,12 @@ static void hisi_zip_close_axi_master_ooo(struct hisi_qm *qm)
 	u32 nfe_enb;
 
 	/* Disable ECC Mbit error report. */
-	nfe_enb = readl(qm->io_base + HZIP_CORE_INT_RAS_NFE_ENB);
-	writel(nfe_enb & ~HZIP_CORE_INT_STATUS_M_ECC,
+	nfe_enb = pete_readl("drivers/crypto/hisilicon/zip/zip_main.c:1100", qm->io_base + HZIP_CORE_INT_RAS_NFE_ENB);
+	pete_writel("drivers/crypto/hisilicon/zip/zip_main.c:1101", nfe_enb & ~HZIP_CORE_INT_STATUS_M_ECC,
 	       qm->io_base + HZIP_CORE_INT_RAS_NFE_ENB);
 
 	/* Inject zip ECC Mbit error to block master ooo. */
-	writel(HZIP_CORE_INT_STATUS_M_ECC,
+	pete_writel("drivers/crypto/hisilicon/zip/zip_main.c:1105", HZIP_CORE_INT_STATUS_M_ECC,
 	       qm->io_base + HZIP_CORE_INT_SET);
 }
 

@@ -288,10 +288,10 @@ static void s3c64xx_irq_set_function(struct samsung_pinctrl_drv_data *d,
 
 	raw_spin_lock_irqsave(&bank->slock, flags);
 
-	val = readl(reg);
+	val = pete_readl("drivers/pinctrl/samsung/pinctrl-s3c64xx.c:291", reg);
 	val &= ~(mask << shift);
 	val |= bank->eint_func << shift;
-	writel(val, reg);
+	pete_writel("drivers/pinctrl/samsung/pinctrl-s3c64xx.c:294", val, reg);
 
 	raw_spin_unlock_irqrestore(&bank->slock, flags);
 }
@@ -308,12 +308,12 @@ static inline void s3c64xx_gpio_irq_set_mask(struct irq_data *irqd, bool mask)
 	void __iomem *reg = d->virt_base + EINTMASK_REG(bank->eint_offset);
 	u32 val;
 
-	val = readl(reg);
+	val = pete_readl("drivers/pinctrl/samsung/pinctrl-s3c64xx.c:311", reg);
 	if (mask)
 		val |= 1 << index;
 	else
 		val &= ~(1 << index);
-	writel(val, reg);
+	pete_writel("drivers/pinctrl/samsung/pinctrl-s3c64xx.c:316", val, reg);
 }
 
 static void s3c64xx_gpio_irq_unmask(struct irq_data *irqd)
@@ -333,7 +333,7 @@ static void s3c64xx_gpio_irq_ack(struct irq_data *irqd)
 	unsigned char index = EINT_OFFS(bank->eint_offset) + irqd->hwirq;
 	void __iomem *reg = d->virt_base + EINTPEND_REG(bank->eint_offset);
 
-	writel(1 << index, reg);
+	pete_writel("drivers/pinctrl/samsung/pinctrl-s3c64xx.c:336", 1 << index, reg);
 }
 
 static int s3c64xx_gpio_irq_set_type(struct irq_data *irqd, unsigned int type)
@@ -358,10 +358,10 @@ static int s3c64xx_gpio_irq_set_type(struct irq_data *irqd, unsigned int type)
 	shift = EINT_OFFS(bank->eint_offset) + irqd->hwirq;
 	shift = 4 * (shift / 4); /* 4 EINTs per trigger selector */
 
-	val = readl(reg);
+	val = pete_readl("drivers/pinctrl/samsung/pinctrl-s3c64xx.c:361", reg);
 	val &= ~(EINT_CON_MASK << shift);
 	val |= trigger << shift;
-	writel(val, reg);
+	pete_writel("drivers/pinctrl/samsung/pinctrl-s3c64xx.c:364", val, reg);
 
 	s3c64xx_irq_set_function(d, bank, irqd->hwirq);
 
@@ -416,7 +416,7 @@ static void s3c64xx_eint_gpio_irq(struct irq_desc *desc)
 		unsigned int pin;
 		int ret;
 
-		svc = readl(drvdata->virt_base + SERVICE_REG);
+		svc = pete_readl("drivers/pinctrl/samsung/pinctrl-s3c64xx.c:419", drvdata->virt_base + SERVICE_REG);
 		group = SVC_GROUP(svc);
 		pin = svc & SVC_NUM_MASK;
 
@@ -512,12 +512,12 @@ static inline void s3c64xx_eint0_irq_set_mask(struct irq_data *irqd, bool mask)
 	struct samsung_pinctrl_drv_data *d = ddata->bank->drvdata;
 	u32 val;
 
-	val = readl(d->virt_base + EINT0MASK_REG);
+	val = pete_readl("drivers/pinctrl/samsung/pinctrl-s3c64xx.c:515", d->virt_base + EINT0MASK_REG);
 	if (mask)
 		val |= 1 << ddata->eints[irqd->hwirq];
 	else
 		val &= ~(1 << ddata->eints[irqd->hwirq]);
-	writel(val, d->virt_base + EINT0MASK_REG);
+	pete_writel("drivers/pinctrl/samsung/pinctrl-s3c64xx.c:520", val, d->virt_base + EINT0MASK_REG);
 }
 
 static void s3c64xx_eint0_irq_unmask(struct irq_data *irqd)
@@ -536,7 +536,7 @@ static void s3c64xx_eint0_irq_ack(struct irq_data *irqd)
 					irq_data_get_irq_chip_data(irqd);
 	struct samsung_pinctrl_drv_data *d = ddata->bank->drvdata;
 
-	writel(1 << ddata->eints[irqd->hwirq],
+	pete_writel("drivers/pinctrl/samsung/pinctrl-s3c64xx.c:539", 1 << ddata->eints[irqd->hwirq],
 					d->virt_base + EINT0PEND_REG);
 }
 
@@ -568,10 +568,10 @@ static int s3c64xx_eint0_irq_set_type(struct irq_data *irqd, unsigned int type)
 	}
 	shift = EINT_CON_LEN * (shift / 2);
 
-	val = readl(reg);
+	val = pete_readl("drivers/pinctrl/samsung/pinctrl-s3c64xx.c:571", reg);
 	val &= ~(EINT_CON_MASK << shift);
 	val |= trigger << shift;
-	writel(val, reg);
+	pete_writel("drivers/pinctrl/samsung/pinctrl-s3c64xx.c:574", val, reg);
 
 	s3c64xx_irq_set_function(d, bank, irqd->hwirq);
 
@@ -598,8 +598,8 @@ static inline void s3c64xx_irq_demux_eint(struct irq_desc *desc, u32 range)
 
 	chained_irq_enter(chip, desc);
 
-	pend = readl(drvdata->virt_base + EINT0PEND_REG);
-	mask = readl(drvdata->virt_base + EINT0MASK_REG);
+	pend = pete_readl("drivers/pinctrl/samsung/pinctrl-s3c64xx.c:601", drvdata->virt_base + EINT0PEND_REG);
+	mask = pete_readl("drivers/pinctrl/samsung/pinctrl-s3c64xx.c:602", drvdata->virt_base + EINT0MASK_REG);
 
 	pend = pend & range & ~mask;
 	pend &= range;

@@ -86,13 +86,13 @@ static void ni6527_set_filter_interval(struct comedi_device *dev,
 	struct ni6527_private *devpriv = dev->private;
 
 	if (val != devpriv->filter_interval) {
-		writeb(val & 0xff, dev->mmio + NI6527_FILT_INTERVAL_REG(0));
-		writeb((val >> 8) & 0xff,
+		pete_writeb("drivers/comedi/drivers/ni_6527.c:89", val & 0xff, dev->mmio + NI6527_FILT_INTERVAL_REG(0));
+		pete_writeb("drivers/comedi/drivers/ni_6527.c:90", (val >> 8) & 0xff,
 		       dev->mmio + NI6527_FILT_INTERVAL_REG(1));
-		writeb((val >> 16) & 0x0f,
+		pete_writeb("drivers/comedi/drivers/ni_6527.c:92", (val >> 16) & 0x0f,
 		       dev->mmio + NI6527_FILT_INTERVAL_REG(2));
 
-		writeb(NI6527_CLR_INTERVAL, dev->mmio + NI6527_CLR_REG);
+		pete_writeb("drivers/comedi/drivers/ni_6527.c:95", NI6527_CLR_INTERVAL, dev->mmio + NI6527_CLR_REG);
 
 		devpriv->filter_interval = val;
 	}
@@ -101,9 +101,9 @@ static void ni6527_set_filter_interval(struct comedi_device *dev,
 static void ni6527_set_filter_enable(struct comedi_device *dev,
 				     unsigned int val)
 {
-	writeb(val & 0xff, dev->mmio + NI6527_FILT_ENA_REG(0));
-	writeb((val >> 8) & 0xff, dev->mmio + NI6527_FILT_ENA_REG(1));
-	writeb((val >> 16) & 0xff, dev->mmio + NI6527_FILT_ENA_REG(2));
+	pete_writeb("drivers/comedi/drivers/ni_6527.c:104", val & 0xff, dev->mmio + NI6527_FILT_ENA_REG(0));
+	pete_writeb("drivers/comedi/drivers/ni_6527.c:105", (val >> 8) & 0xff, dev->mmio + NI6527_FILT_ENA_REG(1));
+	pete_writeb("drivers/comedi/drivers/ni_6527.c:106", (val >> 16) & 0xff, dev->mmio + NI6527_FILT_ENA_REG(2));
 }
 
 static int ni6527_di_insn_config(struct comedi_device *dev,
@@ -147,9 +147,9 @@ static int ni6527_di_insn_bits(struct comedi_device *dev,
 {
 	unsigned int val;
 
-	val = readb(dev->mmio + NI6527_DI_REG(0));
-	val |= (readb(dev->mmio + NI6527_DI_REG(1)) << 8);
-	val |= (readb(dev->mmio + NI6527_DI_REG(2)) << 16);
+	val = pete_readb("drivers/comedi/drivers/ni_6527.c:150", dev->mmio + NI6527_DI_REG(0));
+	val |= (pete_readb("drivers/comedi/drivers/ni_6527.c:151", dev->mmio + NI6527_DI_REG(1)) << 8);
+	val |= (pete_readb("drivers/comedi/drivers/ni_6527.c:152", dev->mmio + NI6527_DI_REG(2)) << 16);
 
 	data[1] = val;
 
@@ -169,12 +169,12 @@ static int ni6527_do_insn_bits(struct comedi_device *dev,
 		unsigned int val = s->state ^ 0xffffff;
 
 		if (mask & 0x0000ff)
-			writeb(val & 0xff, dev->mmio + NI6527_DO_REG(0));
+			pete_writeb("drivers/comedi/drivers/ni_6527.c:172", val & 0xff, dev->mmio + NI6527_DO_REG(0));
 		if (mask & 0x00ff00)
-			writeb((val >> 8) & 0xff,
+			pete_writeb("drivers/comedi/drivers/ni_6527.c:174", (val >> 8) & 0xff,
 			       dev->mmio + NI6527_DO_REG(1));
 		if (mask & 0xff0000)
-			writeb((val >> 16) & 0xff,
+			pete_writeb("drivers/comedi/drivers/ni_6527.c:177", (val >> 16) & 0xff,
 			       dev->mmio + NI6527_DO_REG(2));
 	}
 
@@ -189,7 +189,7 @@ static irqreturn_t ni6527_interrupt(int irq, void *d)
 	struct comedi_subdevice *s = dev->read_subdev;
 	unsigned int status;
 
-	status = readb(dev->mmio + NI6527_STATUS_REG);
+	status = pete_readb("drivers/comedi/drivers/ni_6527.c:192", dev->mmio + NI6527_STATUS_REG);
 	if (!(status & NI6527_STATUS_IRQ))
 		return IRQ_NONE;
 
@@ -200,7 +200,7 @@ static irqreturn_t ni6527_interrupt(int irq, void *d)
 		comedi_handle_events(dev, s);
 	}
 
-	writeb(NI6527_CLR_IRQS, dev->mmio + NI6527_CLR_REG);
+	pete_writeb("drivers/comedi/drivers/ni_6527.c:203", NI6527_CLR_IRQS, dev->mmio + NI6527_CLR_REG);
 
 	return IRQ_HANDLED;
 }
@@ -247,8 +247,8 @@ static int ni6527_intr_cmdtest(struct comedi_device *dev,
 static int ni6527_intr_cmd(struct comedi_device *dev,
 			   struct comedi_subdevice *s)
 {
-	writeb(NI6527_CLR_IRQS, dev->mmio + NI6527_CLR_REG);
-	writeb(NI6527_CTRL_ENABLE_IRQS, dev->mmio + NI6527_CTRL_REG);
+	pete_writeb("drivers/comedi/drivers/ni_6527.c:250", NI6527_CLR_IRQS, dev->mmio + NI6527_CLR_REG);
+	pete_writeb("drivers/comedi/drivers/ni_6527.c:251", NI6527_CTRL_ENABLE_IRQS, dev->mmio + NI6527_CTRL_REG);
 
 	return 0;
 }
@@ -256,7 +256,7 @@ static int ni6527_intr_cmd(struct comedi_device *dev,
 static int ni6527_intr_cancel(struct comedi_device *dev,
 			      struct comedi_subdevice *s)
 {
-	writeb(NI6527_CTRL_DISABLE_IRQS, dev->mmio + NI6527_CTRL_REG);
+	pete_writeb("drivers/comedi/drivers/ni_6527.c:259", NI6527_CTRL_DISABLE_IRQS, dev->mmio + NI6527_CTRL_REG);
 
 	return 0;
 }
@@ -282,19 +282,19 @@ static void ni6527_set_edge_detection(struct comedi_device *dev,
 		if (mask & 0xff) {
 			if (~mask & 0xff) {
 				/* preserve rising-edge detection channels */
-				rising |= readb(dev->mmio +
+				rising |= pete_readb("drivers/comedi/drivers/ni_6527.c:285", dev->mmio +
 						NI6527_RISING_EDGE_REG(i)) &
 					  (~mask & 0xff);
 				/* preserve falling-edge detection channels */
-				falling |= readb(dev->mmio +
+				falling |= pete_readb("drivers/comedi/drivers/ni_6527.c:289", dev->mmio +
 						 NI6527_FALLING_EDGE_REG(i)) &
 					   (~mask & 0xff);
 			}
 			/* update rising-edge detection channels */
-			writeb(rising & 0xff,
+			pete_writeb("drivers/comedi/drivers/ni_6527.c:294", rising & 0xff,
 			       dev->mmio + NI6527_RISING_EDGE_REG(i));
 			/* update falling-edge detection channels */
-			writeb(falling & 0xff,
+			pete_writeb("drivers/comedi/drivers/ni_6527.c:297", falling & 0xff,
 			       dev->mmio + NI6527_FALLING_EDGE_REG(i));
 		}
 		rising >>= 8;
@@ -363,9 +363,9 @@ static void ni6527_reset(struct comedi_device *dev)
 	/* disable edge detection */
 	ni6527_set_edge_detection(dev, 0xffffffff, 0, 0);
 
-	writeb(NI6527_CLR_IRQS | NI6527_CLR_RESET_FILT,
+	pete_writeb("drivers/comedi/drivers/ni_6527.c:366", NI6527_CLR_IRQS | NI6527_CLR_RESET_FILT,
 	       dev->mmio + NI6527_CLR_REG);
-	writeb(NI6527_CTRL_DISABLE_IRQS, dev->mmio + NI6527_CTRL_REG);
+	pete_writeb("drivers/comedi/drivers/ni_6527.c:368", NI6527_CTRL_DISABLE_IRQS, dev->mmio + NI6527_CTRL_REG);
 }
 
 static int ni6527_auto_attach(struct comedi_device *dev,
@@ -397,7 +397,7 @@ static int ni6527_auto_attach(struct comedi_device *dev,
 		return -ENOMEM;
 
 	/* make sure this is actually a 6527 device */
-	if (readb(dev->mmio + NI6527_ID_REG) != 0x27)
+	if (pete_readb("drivers/comedi/drivers/ni_6527.c:400", dev->mmio + NI6527_ID_REG) != 0x27)
 		return -ENODEV;
 
 	ni6527_reset(dev);

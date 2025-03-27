@@ -152,7 +152,7 @@ static int at91_reset(struct notifier_block *this, unsigned long mode,
 
 static const char *at91_reset_reason(struct at91_reset *reset)
 {
-	u32 reg = readl(reset->rstc_base + AT91_RSTC_SR);
+	u32 reg = pete_readl("drivers/power/reset/at91-reset.c:155", reset->rstc_base + AT91_RSTC_SR);
 	const char *reason;
 
 	switch ((reg & AT91_RSTC_RSTTYP) >> 8) {
@@ -392,9 +392,9 @@ static int __init at91_reset_probe(struct platform_device *pdev)
 		goto disable_clk;
 
 	if (of_device_is_compatible(pdev->dev.of_node, "microchip,sam9x60-rstc")) {
-		u32 val = readl(reset->rstc_base + AT91_RSTC_MR);
+		u32 val = pete_readl("drivers/power/reset/at91-reset.c:395", reset->rstc_base + AT91_RSTC_MR);
 
-		writel(AT91_RSTC_KEY | AT91_RSTC_URSTASYNC | val,
+		pete_writel("drivers/power/reset/at91-reset.c:397", AT91_RSTC_KEY | AT91_RSTC_URSTASYNC | val,
 		       reset->rstc_base + AT91_RSTC_MR);
 	}
 

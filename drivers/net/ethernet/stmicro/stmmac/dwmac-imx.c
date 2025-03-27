@@ -234,35 +234,35 @@ static void imx93_dwmac_fix_speed(void *priv, unsigned int speed, unsigned int m
 	if (iface != MX93_GPR_ENET_QOS_INTF_SEL_RGMII)
 		return;
 
-	old_ctrl = readl(dwmac->base_addr + MAC_CTRL_REG);
+	old_ctrl = pete_readl("drivers/net/ethernet/stmicro/stmmac/dwmac-imx.c:237", dwmac->base_addr + MAC_CTRL_REG);
 	ctrl = old_ctrl & ~CTRL_SPEED_MASK;
 	regmap_update_bits(dwmac->intf_regmap, dwmac->intf_reg_off,
 			   MX93_GPR_ENET_QOS_INTF_MODE_MASK, 0);
-	writel(ctrl, dwmac->base_addr + MAC_CTRL_REG);
+	pete_writel("drivers/net/ethernet/stmicro/stmmac/dwmac-imx.c:241", ctrl, dwmac->base_addr + MAC_CTRL_REG);
 
 	 /* Ensure the settings for CTRL are applied. */
-	readl(dwmac->base_addr + MAC_CTRL_REG);
+	pete_readl("drivers/net/ethernet/stmicro/stmmac/dwmac-imx.c:244", dwmac->base_addr + MAC_CTRL_REG);
 
 	usleep_range(10, 20);
 	iface |= MX93_GPR_ENET_QOS_CLK_GEN_EN;
 	regmap_update_bits(dwmac->intf_regmap, dwmac->intf_reg_off,
 			   MX93_GPR_ENET_QOS_INTF_MODE_MASK, iface);
 
-	writel(old_ctrl, dwmac->base_addr + MAC_CTRL_REG);
+	pete_writel("drivers/net/ethernet/stmicro/stmmac/dwmac-imx.c:251", old_ctrl, dwmac->base_addr + MAC_CTRL_REG);
 }
 
 static int imx_dwmac_mx93_reset(void *priv, void __iomem *ioaddr)
 {
 	struct plat_stmmacenet_data *plat_dat = priv;
-	u32 value = readl(ioaddr + DMA_BUS_MODE);
+	u32 value = pete_readl("drivers/net/ethernet/stmicro/stmmac/dwmac-imx.c:257", ioaddr + DMA_BUS_MODE);
 
 	/* DMA SW reset */
 	value |= DMA_BUS_MODE_SFT_RESET;
-	writel(value, ioaddr + DMA_BUS_MODE);
+	pete_writel("drivers/net/ethernet/stmicro/stmmac/dwmac-imx.c:261", value, ioaddr + DMA_BUS_MODE);
 
 	if (plat_dat->mac_interface == PHY_INTERFACE_MODE_RMII) {
 		usleep_range(100, 200);
-		writel(RMII_RESET_SPEED, ioaddr + MAC_CTRL_REG);
+		pete_writel("drivers/net/ethernet/stmicro/stmmac/dwmac-imx.c:265", RMII_RESET_SPEED, ioaddr + MAC_CTRL_REG);
 	}
 
 	return readl_poll_timeout(ioaddr + DMA_BUS_MODE, value,

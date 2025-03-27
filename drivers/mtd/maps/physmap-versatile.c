@@ -105,15 +105,15 @@ static int ap_flash_init(struct platform_device *pdev)
 		dev_err(&pdev->dev, "error clearing Integrator VPP/WP\n");
 
 	/* Unlock the EBI */
-	writel(INTEGRATOR_EBI_LOCK_VAL, ebi_base + INTEGRATOR_EBI_LOCK_OFFSET);
+	pete_writel("drivers/mtd/maps/physmap-versatile.c:108", INTEGRATOR_EBI_LOCK_VAL, ebi_base + INTEGRATOR_EBI_LOCK_OFFSET);
 
 	/* Enable write cycles on the EBI, CSR1 (flash) */
-	val = readl(ebi_base + INTEGRATOR_EBI_CSR1_OFFSET);
+	val = pete_readl("drivers/mtd/maps/physmap-versatile.c:111", ebi_base + INTEGRATOR_EBI_CSR1_OFFSET);
 	val |= INTEGRATOR_EBI_WRITE_ENABLE;
-	writel(val, ebi_base + INTEGRATOR_EBI_CSR1_OFFSET);
+	pete_writel("drivers/mtd/maps/physmap-versatile.c:113", val, ebi_base + INTEGRATOR_EBI_CSR1_OFFSET);
 
 	/* Lock the EBI again */
-	writel(0, ebi_base + INTEGRATOR_EBI_LOCK_OFFSET);
+	pete_writel("drivers/mtd/maps/physmap-versatile.c:116", 0, ebi_base + INTEGRATOR_EBI_LOCK_OFFSET);
 	iounmap(ebi_base);
 
 	return 0;

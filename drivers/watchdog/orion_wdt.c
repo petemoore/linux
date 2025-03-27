@@ -184,10 +184,10 @@ static int orion_wdt_ping(struct watchdog_device *wdt_dev)
 {
 	struct orion_watchdog *dev = watchdog_get_drvdata(wdt_dev);
 	/* Reload watchdog duration */
-	writel(dev->clk_rate * wdt_dev->timeout,
+	pete_writel("drivers/watchdog/orion_wdt.c:187", dev->clk_rate * wdt_dev->timeout,
 	       dev->reg + dev->data->wdt_counter_offset);
 	if (dev->wdt.info->options & WDIOF_PRETIMEOUT)
-		writel(dev->clk_rate * (wdt_dev->timeout - wdt_dev->pretimeout),
+		pete_writel("drivers/watchdog/orion_wdt.c:190", dev->clk_rate * (wdt_dev->timeout - wdt_dev->pretimeout),
 		       dev->reg + TIMER1_VAL_OFF);
 
 	return 0;
@@ -199,10 +199,10 @@ static int armada375_start(struct watchdog_device *wdt_dev)
 	u32 reg;
 
 	/* Set watchdog duration */
-	writel(dev->clk_rate * wdt_dev->timeout,
+	pete_writel("drivers/watchdog/orion_wdt.c:202", dev->clk_rate * wdt_dev->timeout,
 	       dev->reg + dev->data->wdt_counter_offset);
 	if (dev->wdt.info->options & WDIOF_PRETIMEOUT)
-		writel(dev->clk_rate * (wdt_dev->timeout - wdt_dev->pretimeout),
+		pete_writel("drivers/watchdog/orion_wdt.c:205", dev->clk_rate * (wdt_dev->timeout - wdt_dev->pretimeout),
 		       dev->reg + TIMER1_VAL_OFF);
 
 	/* Clear the watchdog expiration bit */
@@ -215,9 +215,9 @@ static int armada375_start(struct watchdog_device *wdt_dev)
 	atomic_io_modify(dev->reg + TIMER_CTRL, reg, reg);
 
 	/* Enable reset on watchdog */
-	reg = readl(dev->rstout);
+	reg = pete_readl("drivers/watchdog/orion_wdt.c:218", dev->rstout);
 	reg |= dev->data->rstout_enable_bit;
-	writel(reg, dev->rstout);
+	pete_writel("drivers/watchdog/orion_wdt.c:220", reg, dev->rstout);
 
 	atomic_io_modify(dev->rstout_mask, dev->data->rstout_mask_bit, 0);
 	return 0;
@@ -229,7 +229,7 @@ static int armada370_start(struct watchdog_device *wdt_dev)
 	u32 reg;
 
 	/* Set watchdog duration */
-	writel(dev->clk_rate * wdt_dev->timeout,
+	pete_writel("drivers/watchdog/orion_wdt.c:232", dev->clk_rate * wdt_dev->timeout,
 	       dev->reg + dev->data->wdt_counter_offset);
 
 	/* Clear the watchdog expiration bit */
@@ -242,9 +242,9 @@ static int armada370_start(struct watchdog_device *wdt_dev)
 	atomic_io_modify(dev->reg + TIMER_CTRL, reg, reg);
 
 	/* Enable reset on watchdog */
-	reg = readl(dev->rstout);
+	reg = pete_readl("drivers/watchdog/orion_wdt.c:245", dev->rstout);
 	reg |= dev->data->rstout_enable_bit;
-	writel(reg, dev->rstout);
+	pete_writel("drivers/watchdog/orion_wdt.c:247", reg, dev->rstout);
 	return 0;
 }
 
@@ -253,7 +253,7 @@ static int orion_start(struct watchdog_device *wdt_dev)
 	struct orion_watchdog *dev = watchdog_get_drvdata(wdt_dev);
 
 	/* Set watchdog duration */
-	writel(dev->clk_rate * wdt_dev->timeout,
+	pete_writel("drivers/watchdog/orion_wdt.c:256", dev->clk_rate * wdt_dev->timeout,
 	       dev->reg + dev->data->wdt_counter_offset);
 
 	/* Enable watchdog timer */
@@ -296,9 +296,9 @@ static int armada375_stop(struct watchdog_device *wdt_dev)
 	/* Disable reset on watchdog */
 	atomic_io_modify(dev->rstout_mask, dev->data->rstout_mask_bit,
 					   dev->data->rstout_mask_bit);
-	reg = readl(dev->rstout);
+	reg = pete_readl("drivers/watchdog/orion_wdt.c:299", dev->rstout);
 	reg &= ~dev->data->rstout_enable_bit;
-	writel(reg, dev->rstout);
+	pete_writel("drivers/watchdog/orion_wdt.c:301", reg, dev->rstout);
 
 	/* Disable watchdog timer */
 	mask = dev->data->wdt_enable_bit;
@@ -315,9 +315,9 @@ static int armada370_stop(struct watchdog_device *wdt_dev)
 	u32 reg, mask;
 
 	/* Disable reset on watchdog */
-	reg = readl(dev->rstout);
+	reg = pete_readl("drivers/watchdog/orion_wdt.c:318", dev->rstout);
 	reg &= ~dev->data->rstout_enable_bit;
-	writel(reg, dev->rstout);
+	pete_writel("drivers/watchdog/orion_wdt.c:320", reg, dev->rstout);
 
 	/* Disable watchdog timer */
 	mask = dev->data->wdt_enable_bit;
@@ -339,8 +339,8 @@ static int orion_enabled(struct orion_watchdog *dev)
 {
 	bool enabled, running;
 
-	enabled = readl(dev->rstout) & dev->data->rstout_enable_bit;
-	running = readl(dev->reg + TIMER_CTRL) & dev->data->wdt_enable_bit;
+	enabled = pete_readl("drivers/watchdog/orion_wdt.c:342", dev->rstout) & dev->data->rstout_enable_bit;
+	running = pete_readl("drivers/watchdog/orion_wdt.c:343", dev->reg + TIMER_CTRL) & dev->data->wdt_enable_bit;
 
 	return enabled && running;
 }
@@ -349,9 +349,9 @@ static int armada375_enabled(struct orion_watchdog *dev)
 {
 	bool masked, enabled, running;
 
-	masked = readl(dev->rstout_mask) & dev->data->rstout_mask_bit;
-	enabled = readl(dev->rstout) & dev->data->rstout_enable_bit;
-	running = readl(dev->reg + TIMER_CTRL) & dev->data->wdt_enable_bit;
+	masked = pete_readl("drivers/watchdog/orion_wdt.c:352", dev->rstout_mask) & dev->data->rstout_mask_bit;
+	enabled = pete_readl("drivers/watchdog/orion_wdt.c:353", dev->rstout) & dev->data->rstout_enable_bit;
+	running = pete_readl("drivers/watchdog/orion_wdt.c:354", dev->reg + TIMER_CTRL) & dev->data->wdt_enable_bit;
 
 	return !masked && enabled && running;
 }
@@ -366,7 +366,7 @@ static int orion_wdt_enabled(struct watchdog_device *wdt_dev)
 static unsigned int orion_wdt_get_timeleft(struct watchdog_device *wdt_dev)
 {
 	struct orion_watchdog *dev = watchdog_get_drvdata(wdt_dev);
-	return readl(dev->reg + dev->data->wdt_counter_offset) / dev->clk_rate;
+	return pete_readl("drivers/watchdog/orion_wdt.c:369", dev->reg + dev->data->wdt_counter_offset) / dev->clk_rate;
 }
 
 static struct watchdog_info orion_wdt_info = {

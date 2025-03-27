@@ -68,9 +68,9 @@ u16 rz_mtu3_shared_reg_read(struct rz_mtu3_channel *ch, u16 offset)
 	struct rz_mtu3_priv *priv = mtu->priv_data;
 
 	if (rz_mtu3_is_16bit_shared_reg(offset))
-		return readw(priv->mmio + offset);
+		return pete_readw("drivers/mfd/rz-mtu3.c:71", priv->mmio + offset);
 	else
-		return readb(priv->mmio + offset);
+		return pete_readb("drivers/mfd/rz-mtu3.c:73", priv->mmio + offset);
 }
 EXPORT_SYMBOL_GPL(rz_mtu3_shared_reg_read);
 
@@ -82,7 +82,7 @@ u8 rz_mtu3_8bit_ch_read(struct rz_mtu3_channel *ch, u16 offset)
 
 	ch_offs = rz_mtu3_8bit_ch_reg_offs[ch->channel_number][offset];
 
-	return readb(priv->mmio + ch_offs);
+	return pete_readb("drivers/mfd/rz-mtu3.c:85", priv->mmio + ch_offs);
 }
 EXPORT_SYMBOL_GPL(rz_mtu3_8bit_ch_read);
 
@@ -98,7 +98,7 @@ u16 rz_mtu3_16bit_ch_read(struct rz_mtu3_channel *ch, u16 offset)
 
 	ch_offs = rz_mtu3_16bit_ch_reg_offs[ch->channel_number][offset];
 
-	return readw(priv->mmio + ch_offs);
+	return pete_readw("drivers/mfd/rz-mtu3.c:101", priv->mmio + ch_offs);
 }
 EXPORT_SYMBOL_GPL(rz_mtu3_16bit_ch_read);
 
@@ -113,7 +113,7 @@ u32 rz_mtu3_32bit_ch_read(struct rz_mtu3_channel *ch, u16 offset)
 
 	ch_offs = rz_mtu3_32bit_ch_reg_offs[ch->channel_number][offset];
 
-	return readl(priv->mmio + ch_offs);
+	return pete_readl("drivers/mfd/rz-mtu3.c:116", priv->mmio + ch_offs);
 }
 EXPORT_SYMBOL_GPL(rz_mtu3_32bit_ch_read);
 
@@ -124,7 +124,7 @@ void rz_mtu3_8bit_ch_write(struct rz_mtu3_channel *ch, u16 offset, u8 val)
 	u16 ch_offs;
 
 	ch_offs = rz_mtu3_8bit_ch_reg_offs[ch->channel_number][offset];
-	writeb(val, priv->mmio + ch_offs);
+	pete_writeb("drivers/mfd/rz-mtu3.c:127", val, priv->mmio + ch_offs);
 }
 EXPORT_SYMBOL_GPL(rz_mtu3_8bit_ch_write);
 
@@ -139,7 +139,7 @@ void rz_mtu3_16bit_ch_write(struct rz_mtu3_channel *ch, u16 offset, u16 val)
 		return;
 
 	ch_offs = rz_mtu3_16bit_ch_reg_offs[ch->channel_number][offset];
-	writew(val, priv->mmio + ch_offs);
+	pete_writew("drivers/mfd/rz-mtu3.c:142", val, priv->mmio + ch_offs);
 }
 EXPORT_SYMBOL_GPL(rz_mtu3_16bit_ch_write);
 
@@ -153,7 +153,7 @@ void rz_mtu3_32bit_ch_write(struct rz_mtu3_channel *ch, u16 offset, u32 val)
 		return;
 
 	ch_offs = rz_mtu3_32bit_ch_reg_offs[ch->channel_number][offset];
-	writel(val, priv->mmio + ch_offs);
+	pete_writel("drivers/mfd/rz-mtu3.c:156", val, priv->mmio + ch_offs);
 }
 EXPORT_SYMBOL_GPL(rz_mtu3_32bit_ch_write);
 
@@ -163,9 +163,9 @@ void rz_mtu3_shared_reg_write(struct rz_mtu3_channel *ch, u16 offset, u16 value)
 	struct rz_mtu3_priv *priv = mtu->priv_data;
 
 	if (rz_mtu3_is_16bit_shared_reg(offset))
-		writew(value, priv->mmio + offset);
+		pete_writew("drivers/mfd/rz-mtu3.c:166", value, priv->mmio + offset);
 	else
-		writeb((u8)value, priv->mmio + offset);
+		pete_writeb("drivers/mfd/rz-mtu3.c:168", (u8)value, priv->mmio + offset);
 }
 EXPORT_SYMBOL_GPL(rz_mtu3_shared_reg_write);
 

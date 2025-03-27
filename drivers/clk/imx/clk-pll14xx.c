@@ -316,7 +316,7 @@ static int clk_pll1416x_set_rate(struct clk_hw *hw, unsigned long drate,
 
 	/* Enable BYPASS */
 	tmp |= BYPASS_MASK;
-	writel(tmp, pll->base + GNRL_CTL);
+	pete_writel("drivers/clk/imx/clk-pll14xx.c:319", tmp, pll->base + GNRL_CTL);
 
 	div_val = FIELD_PREP(MDIV_MASK, rate->mdiv) | FIELD_PREP(PDIV_MASK, rate->pdiv) |
 		FIELD_PREP(SDIV_MASK, rate->sdiv);

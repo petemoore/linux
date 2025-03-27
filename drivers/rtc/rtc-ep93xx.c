@@ -36,7 +36,7 @@ static int ep93xx_rtc_get_swcomp(struct device *dev, unsigned short *preload,
 	struct ep93xx_rtc *ep93xx_rtc = dev_get_drvdata(dev);
 	unsigned long comp;
 
-	comp = readl(ep93xx_rtc->mmio_base + EP93XX_RTC_SWCOMP);
+	comp = pete_readl("drivers/rtc/rtc-ep93xx.c:39", ep93xx_rtc->mmio_base + EP93XX_RTC_SWCOMP);
 
 	if (preload)
 		*preload = (comp & EP93XX_RTC_SWCOMP_INT_MASK)
@@ -54,7 +54,7 @@ static int ep93xx_rtc_read_time(struct device *dev, struct rtc_time *tm)
 	struct ep93xx_rtc *ep93xx_rtc = dev_get_drvdata(dev);
 	unsigned long time;
 
-	time = readl(ep93xx_rtc->mmio_base + EP93XX_RTC_DATA);
+	time = pete_readl("drivers/rtc/rtc-ep93xx.c:57", ep93xx_rtc->mmio_base + EP93XX_RTC_DATA);
 
 	rtc_time64_to_tm(time, tm);
 	return 0;
@@ -65,7 +65,7 @@ static int ep93xx_rtc_set_time(struct device *dev, struct rtc_time *tm)
 	struct ep93xx_rtc *ep93xx_rtc = dev_get_drvdata(dev);
 	unsigned long secs = rtc_tm_to_time64(tm);
 
-	writel(secs + 1, ep93xx_rtc->mmio_base + EP93XX_RTC_LOAD);
+	pete_writel("drivers/rtc/rtc-ep93xx.c:68", secs + 1, ep93xx_rtc->mmio_base + EP93XX_RTC_LOAD);
 	return 0;
 }
 

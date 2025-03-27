@@ -176,12 +176,12 @@ static const struct drm_prop_enum_list colorspace_mode_names[] = {
 
 u32 hdmi_read(struct sti_hdmi *hdmi, int offset)
 {
-	return readl(hdmi->regs + offset);
+	return pete_readl("drivers/gpu/drm/sti/sti_hdmi.c:179", hdmi->regs + offset);
 }
 
 void hdmi_write(struct sti_hdmi *hdmi, u32 val, int offset)
 {
-	writel(val, hdmi->regs + offset);
+	pete_writel("drivers/gpu/drm/sti/sti_hdmi.c:184", val, hdmi->regs + offset);
 }
 
 /*
@@ -196,7 +196,7 @@ static irqreturn_t hdmi_irq_thread(int irq, void *arg)
 
 	/* Hot plug/unplug IRQ */
 	if (hdmi->irq_status & HDMI_INT_HOT_PLUG) {
-		hdmi->hpd = readl(hdmi->regs + HDMI_STA) & HDMI_STA_HOT_PLUG;
+		hdmi->hpd = pete_readl("drivers/gpu/drm/sti/sti_hdmi.c:199", hdmi->regs + HDMI_STA) & HDMI_STA_HOT_PLUG;
 		if (hdmi->drm_dev)
 			drm_helper_hpd_irq_event(hdmi->drm_dev);
 	}
@@ -402,7 +402,7 @@ static void hdmi_infoframe_write_infopack(struct sti_hdmi *hdmi,
 	val = HDMI_INFOFRAME_HEADER_TYPE(*ptr++);
 	val |= HDMI_INFOFRAME_HEADER_VERSION(*ptr++);
 	val |= HDMI_INFOFRAME_HEADER_LEN(*ptr++);
-	writel(val, hdmi->regs + head_offset);
+	pete_writel("drivers/gpu/drm/sti/sti_hdmi.c:405", val, hdmi->regs + head_offset);
 
 	/*
 	 * Each subpack contains 4 bytes
@@ -416,7 +416,7 @@ static void hdmi_infoframe_write_infopack(struct sti_hdmi *hdmi,
 		num = min_t(size_t, size - i, sizeof(u32));
 		val = hdmi_infoframe_subpack(ptr, num);
 		ptr += sizeof(u32);
-		writel(val, hdmi->regs + pack_offset + i);
+		pete_writel("drivers/gpu/drm/sti/sti_hdmi.c:419", val, hdmi->regs + pack_offset + i);
 	}
 
 	/* Enable transmission slot for updated infoframe */
@@ -1441,7 +1441,7 @@ static int sti_hdmi_probe(struct platform_device *pdev)
 		goto release_adapter;
 	}
 
-	hdmi->hpd = readl(hdmi->regs + HDMI_STA) & HDMI_STA_HOT_PLUG;
+	hdmi->hpd = pete_readl("drivers/gpu/drm/sti/sti_hdmi.c:1444", hdmi->regs + HDMI_STA) & HDMI_STA_HOT_PLUG;
 
 	init_waitqueue_head(&hdmi->wait_event);
 

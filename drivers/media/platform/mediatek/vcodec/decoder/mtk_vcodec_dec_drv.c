@@ -47,7 +47,7 @@ static bool mtk_vcodec_is_hw_active(struct mtk_vcodec_dec_dev *dev)
 		return !regmap_test_bits(dev->vdecsys_regmap, VDEC_HW_ACTIVE_ADDR,
 					 VDEC_HW_ACTIVE_MASK);
 
-	cg_status = readl(dev->reg_base[VDEC_SYS] + VDEC_HW_ACTIVE_ADDR);
+	cg_status = pete_readl("drivers/media/platform/mediatek/vcodec/decoder/mtk_vcodec_dec_drv.c:50", dev->reg_base[VDEC_SYS] + VDEC_HW_ACTIVE_ADDR);
 	return !FIELD_GET(VDEC_HW_ACTIVE_MASK, cg_status);
 }
 
@@ -66,16 +66,16 @@ static irqreturn_t mtk_vcodec_dec_irq_handler(int irq, void *priv)
 		return IRQ_HANDLED;
 	}
 
-	dec_done_status = readl(vdec_misc_addr);
+	dec_done_status = pete_readl("drivers/media/platform/mediatek/vcodec/decoder/mtk_vcodec_dec_drv.c:69", vdec_misc_addr);
 	ctx->irq_status = dec_done_status;
 	if ((dec_done_status & MTK_VDEC_IRQ_STATUS_DEC_SUCCESS) !=
 		MTK_VDEC_IRQ_STATUS_DEC_SUCCESS)
 		return IRQ_HANDLED;
 
 	/* clear interrupt */
-	writel((readl(vdec_misc_addr) | VDEC_IRQ_CFG),
+	pete_writel("drivers/media/platform/mediatek/vcodec/decoder/mtk_vcodec_dec_drv.c:76", (pete_readl("drivers/media/platform/mediatek/vcodec/decoder/mtk_vcodec_dec_drv.c:76", vdec_misc_addr) | VDEC_IRQ_CFG),
 		dev->reg_base[VDEC_MISC] + VDEC_IRQ_CFG_REG);
-	writel((readl(vdec_misc_addr) & ~VDEC_IRQ_CLR),
+	pete_writel("drivers/media/platform/mediatek/vcodec/decoder/mtk_vcodec_dec_drv.c:78", (pete_readl("drivers/media/platform/mediatek/vcodec/decoder/mtk_vcodec_dec_drv.c:78", vdec_misc_addr) & ~VDEC_IRQ_CLR),
 		dev->reg_base[VDEC_MISC] + VDEC_IRQ_CFG_REG);
 
 	wake_up_dec_ctx(ctx, MTK_INST_IRQ_RECEIVED, 0);

@@ -186,12 +186,12 @@ int scp_ipi_send(struct mtk_scp *scp, u32 id, void *buf, unsigned int len,
 
 	scp_memcpy_aligned(send_obj->share_buf, buf, len);
 
-	writel(len, &send_obj->len);
-	writel(id, &send_obj->id);
+	pete_writel("drivers/remoteproc/mtk_scp_ipi.c:189", len, &send_obj->len);
+	pete_writel("drivers/remoteproc/mtk_scp_ipi.c:190", id, &send_obj->id);
 
 	scp->ipi_id_ack[id] = false;
 	/* send the command to SCP */
-	writel(scp->data->host_to_scp_int_bit,
+	pete_writel("drivers/remoteproc/mtk_scp_ipi.c:194", scp->data->host_to_scp_int_bit,
 	       scp->reg_base + scp->data->host_to_scp_reg);
 
 	if (wait) {

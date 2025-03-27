@@ -1353,8 +1353,8 @@ static int __qaic_execute_bo_ioctl(struct drm_device *dev, void *data, struct dr
 		goto release_ch_rcu;
 	}
 
-	head = readl(dbc->dbc_base + REQHP_OFF);
-	tail = readl(dbc->dbc_base + REQTP_OFF);
+	head = pete_readl("drivers/accel/qaic/qaic_data.c:1356", dbc->dbc_base + REQHP_OFF);
+	tail = pete_readl("drivers/accel/qaic/qaic_data.c:1357", dbc->dbc_base + REQTP_OFF);
 
 	if (head == U32_MAX || tail == U32_MAX) {
 		/* PCI link error */
@@ -1371,7 +1371,7 @@ static int __qaic_execute_bo_ioctl(struct drm_device *dev, void *data, struct dr
 
 	/* Finalize commit to hardware */
 	submit_ts = ktime_get_ns();
-	writel(tail, dbc->dbc_base + REQTP_OFF);
+	pete_writel("drivers/accel/qaic/qaic_data.c:1374", tail, dbc->dbc_base + REQTP_OFF);
 
 	update_profiling_data(file_priv, exec, args->hdr.count, is_partial, received_ts,
 			      submit_ts, queue_level);
@@ -1447,13 +1447,13 @@ irqreturn_t dbc_irq_handler(int irq, void *data)
 		return IRQ_HANDLED;
 	}
 
-	head = readl(dbc->dbc_base + RSPHP_OFF);
+	head = pete_readl("drivers/accel/qaic/qaic_data.c:1450", dbc->dbc_base + RSPHP_OFF);
 	if (head == U32_MAX) { /* PCI link error */
 		srcu_read_unlock(&dbc->ch_lock, rcu_id);
 		return IRQ_NONE;
 	}
 
-	tail = readl(dbc->dbc_base + RSPTP_OFF);
+	tail = pete_readl("drivers/accel/qaic/qaic_data.c:1456", dbc->dbc_base + RSPTP_OFF);
 	if (tail == U32_MAX) { /* PCI link error */
 		srcu_read_unlock(&dbc->ch_lock, rcu_id);
 		return IRQ_NONE;
@@ -1496,13 +1496,13 @@ void irq_polling_work(struct work_struct *work)
 		}
 		spin_unlock_irqrestore(&dbc->xfer_lock, flags);
 
-		head = readl(dbc->dbc_base + RSPHP_OFF);
+		head = pete_readl("drivers/accel/qaic/qaic_data.c:1499", dbc->dbc_base + RSPHP_OFF);
 		if (head == U32_MAX) { /* PCI link error */
 			srcu_read_unlock(&dbc->ch_lock, rcu_id);
 			return;
 		}
 
-		tail = readl(dbc->dbc_base + RSPTP_OFF);
+		tail = pete_readl("drivers/accel/qaic/qaic_data.c:1505", dbc->dbc_base + RSPTP_OFF);
 		if (tail == U32_MAX) { /* PCI link error */
 			srcu_read_unlock(&dbc->ch_lock, rcu_id);
 			return;
@@ -1536,7 +1536,7 @@ irqreturn_t dbc_irq_threaded_fn(int irq, void *data)
 
 	rcu_id = srcu_read_lock(&dbc->ch_lock);
 
-	head = readl(dbc->dbc_base + RSPHP_OFF);
+	head = pete_readl("drivers/accel/qaic/qaic_data.c:1539", dbc->dbc_base + RSPHP_OFF);
 	if (head == U32_MAX) /* PCI link error */
 		goto error_out;
 
@@ -1555,7 +1555,7 @@ read_fifo:
 	if (!dbc->usr)
 		goto error_out;
 
-	tail = readl(dbc->dbc_base + RSPTP_OFF);
+	tail = pete_readl("drivers/accel/qaic/qaic_data.c:1558", dbc->dbc_base + RSPTP_OFF);
 	if (tail == U32_MAX) /* PCI link error */
 		goto error_out;
 
@@ -1615,7 +1615,7 @@ read_fifo:
 	 * Update the head pointer of response queue and let the device know
 	 * that we have consumed elements from the queue.
 	 */
-	writel(head, dbc->dbc_base + RSPHP_OFF);
+	pete_writel("drivers/accel/qaic/qaic_data.c:1618", head, dbc->dbc_base + RSPHP_OFF);
 
 	/* elements might have been put in the queue while we were processing */
 	goto read_fifo;
@@ -1626,7 +1626,7 @@ normal_out:
 	else
 		schedule_work(&dbc->poll_work);
 	/* checking the fifo and enabling irqs is a race, missed event check */
-	tail = readl(dbc->dbc_base + RSPTP_OFF);
+	tail = pete_readl("drivers/accel/qaic/qaic_data.c:1629", dbc->dbc_base + RSPTP_OFF);
 	if (tail != U32_MAX && head != tail) {
 		if (likely(!datapath_polling))
 			disable_irq_nosync(irq);

@@ -81,11 +81,11 @@ static void dw_xdata_stop(struct dw_xdata *dw)
 
 	mutex_lock(&dw->mutex);
 
-	burst = readl(&(__dw_regs(dw)->burst_cnt));
+	burst = pete_readl("drivers/misc/dw-xdata-pcie.c:84", &(__dw_regs(dw)->burst_cnt));
 
 	if (burst & BURST_REPEAT) {
 		burst &= ~(u32)BURST_REPEAT;
-		writel(burst, &(__dw_regs(dw)->burst_cnt));
+		pete_writel("drivers/misc/dw-xdata-pcie.c:88", burst, &(__dw_regs(dw)->burst_cnt));
 	}
 
 	mutex_unlock(&dw->mutex);
@@ -102,13 +102,13 @@ static void dw_xdata_start(struct dw_xdata *dw, bool write)
 	mutex_lock(&dw->mutex);
 
 	/* Clear status register */
-	writel(0x0, &(__dw_regs(dw)->status));
+	pete_writel("drivers/misc/dw-xdata-pcie.c:105", 0x0, &(__dw_regs(dw)->status));
 
 	/* Burst count register set for continuous until stopped */
-	writel(BURST_REPEAT | BURST_VALUE, &(__dw_regs(dw)->burst_cnt));
+	pete_writel("drivers/misc/dw-xdata-pcie.c:108", BURST_REPEAT | BURST_VALUE, &(__dw_regs(dw)->burst_cnt));
 
 	/* Pattern register */
-	writel(PATTERN_VALUE, &(__dw_regs(dw)->pattern));
+	pete_writel("drivers/misc/dw-xdata-pcie.c:111", PATTERN_VALUE, &(__dw_regs(dw)->pattern));
 
 	/* Control register */
 	control = CONTROL_DOORBELL | CONTROL_PATTERN_INC | CONTROL_NO_ADDR_INC;
@@ -118,7 +118,7 @@ static void dw_xdata_start(struct dw_xdata *dw, bool write)
 	} else {
 		control |= CONTROL_LENGTH(dw->max_rd_len);
 	}
-	writel(control, &(__dw_regs(dw)->control));
+	pete_writel("drivers/misc/dw-xdata-pcie.c:121", control, &(__dw_regs(dw)->control));
 
 	/*
 	 * The xData HW block needs about 100 ms to initiate the traffic
@@ -126,7 +126,7 @@ static void dw_xdata_start(struct dw_xdata *dw, bool write)
 	 */
 	usleep_range(100, 150);
 
-	status = readl(&(__dw_regs(dw)->status));
+	status = pete_readl("drivers/misc/dw-xdata-pcie.c:129", &(__dw_regs(dw)->status));
 
 	mutex_unlock(&dw->mutex);
 
@@ -138,13 +138,13 @@ static void dw_xdata_start(struct dw_xdata *dw, bool write)
 static void dw_xdata_perf_meas(struct dw_xdata *dw, u64 *data, bool write)
 {
 	if (write) {
-		*data = readl(&(__dw_regs(dw)->wr_cnt_msb));
+		*data = pete_readl("drivers/misc/dw-xdata-pcie.c:141", &(__dw_regs(dw)->wr_cnt_msb));
 		*data <<= 32;
-		*data |= readl(&(__dw_regs(dw)->wr_cnt_lsb));
+		*data |= pete_readl("drivers/misc/dw-xdata-pcie.c:143", &(__dw_regs(dw)->wr_cnt_lsb));
 	} else {
-		*data = readl(&(__dw_regs(dw)->rd_cnt_msb));
+		*data = pete_readl("drivers/misc/dw-xdata-pcie.c:145", &(__dw_regs(dw)->rd_cnt_msb));
 		*data <<= 32;
-		*data |= readl(&(__dw_regs(dw)->rd_cnt_lsb));
+		*data |= pete_readl("drivers/misc/dw-xdata-pcie.c:147", &(__dw_regs(dw)->rd_cnt_lsb));
 	}
 }
 
@@ -167,10 +167,10 @@ static void dw_xdata_perf(struct dw_xdata *dw, u64 *rate, bool write)
 	mutex_lock(&dw->mutex);
 
 	/* First acquisition of current count frames */
-	writel(0x0, &(__dw_regs(dw)->perf_control));
+	pete_writel("drivers/misc/dw-xdata-pcie.c:170", 0x0, &(__dw_regs(dw)->perf_control));
 	dw_xdata_perf_meas(dw, &data[0], write);
 	time[0] = jiffies;
-	writel((u32)XPERF_CONTROL_ENABLE, &(__dw_regs(dw)->perf_control));
+	pete_writel("drivers/misc/dw-xdata-pcie.c:173", (u32)XPERF_CONTROL_ENABLE, &(__dw_regs(dw)->perf_control));
 
 	/*
 	 * Wait 100ms between the 1st count frame acquisition and the 2nd
@@ -179,10 +179,10 @@ static void dw_xdata_perf(struct dw_xdata *dw, u64 *rate, bool write)
 	mdelay(100);
 
 	/* Second acquisition of current count frames */
-	writel(0x0, &(__dw_regs(dw)->perf_control));
+	pete_writel("drivers/misc/dw-xdata-pcie.c:182", 0x0, &(__dw_regs(dw)->perf_control));
 	dw_xdata_perf_meas(dw, &data[1], write);
 	time[1] = jiffies;
-	writel((u32)XPERF_CONTROL_ENABLE, &(__dw_regs(dw)->perf_control));
+	pete_writel("drivers/misc/dw-xdata-pcie.c:185", (u32)XPERF_CONTROL_ENABLE, &(__dw_regs(dw)->perf_control));
 
 	/*
 	 * Speed calculation
@@ -350,12 +350,12 @@ static int dw_xdata_pcie_probe(struct pci_dev *pdev,
 	dw->misc_dev.parent = dev;
 	dw->misc_dev.groups = xdata_groups;
 
-	writel(0x0, &(__dw_regs(dw)->RAM_addr));
-	writel(0x0, &(__dw_regs(dw)->RAM_port));
+	pete_writel("drivers/misc/dw-xdata-pcie.c:353", 0x0, &(__dw_regs(dw)->RAM_addr));
+	pete_writel("drivers/misc/dw-xdata-pcie.c:354", 0x0, &(__dw_regs(dw)->RAM_port));
 
 	addr = dw->rg_region.paddr + DW_XDATA_EP_MEM_OFFSET;
-	writel(lower_32_bits(addr), &(__dw_regs(dw)->addr_lsb));
-	writel(upper_32_bits(addr), &(__dw_regs(dw)->addr_msb));
+	pete_writel("drivers/misc/dw-xdata-pcie.c:357", lower_32_bits(addr), &(__dw_regs(dw)->addr_lsb));
+	pete_writel("drivers/misc/dw-xdata-pcie.c:358", upper_32_bits(addr), &(__dw_regs(dw)->addr_msb));
 	dev_dbg(dev, "xData: target address = 0x%.16llx\n", addr);
 
 	dev_dbg(dev, "xData: wr_len = %zu, rd_len = %zu\n",

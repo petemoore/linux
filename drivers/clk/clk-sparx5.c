@@ -145,10 +145,10 @@ static unsigned long s5_calc_params(unsigned long rate,
 static int s5_pll_enable(struct clk_hw *hw)
 {
 	struct s5_hw_clk *pll = to_s5_pll(hw);
-	u32 val = readl(pll->reg);
+	u32 val = pete_readl("drivers/clk/clk-sparx5.c:148", pll->reg);
 
 	val |= PLL_CLK_ENA;
-	writel(val, pll->reg);
+	pete_writel("drivers/clk/clk-sparx5.c:151", val, pll->reg);
 
 	return 0;
 }
@@ -156,10 +156,10 @@ static int s5_pll_enable(struct clk_hw *hw)
 static void s5_pll_disable(struct clk_hw *hw)
 {
 	struct s5_hw_clk *pll = to_s5_pll(hw);
-	u32 val = readl(pll->reg);
+	u32 val = pete_readl("drivers/clk/clk-sparx5.c:159", pll->reg);
 
 	val &= ~PLL_CLK_ENA;
-	writel(val, pll->reg);
+	pete_writel("drivers/clk/clk-sparx5.c:162", val, pll->reg);
 }
 
 static int s5_pll_set_rate(struct clk_hw *hw,
@@ -175,7 +175,7 @@ static int s5_pll_set_rate(struct clk_hw *hw,
 	if (eff_rate != rate)
 		return -EOPNOTSUPP;
 
-	val = readl(pll->reg) & PLL_CLK_ENA;
+	val = pete_readl("drivers/clk/clk-sparx5.c:178", pll->reg) & PLL_CLK_ENA;
 	val |= FIELD_PREP(PLL_DIV, conf.div);
 	if (conf.rot_ena) {
 		val |= PLL_ROT_ENA;
@@ -184,7 +184,7 @@ static int s5_pll_set_rate(struct clk_hw *hw,
 		if (conf.rot_dir)
 			val |= PLL_ROT_DIR;
 	}
-	writel(val, pll->reg);
+	pete_writel("drivers/clk/clk-sparx5.c:187", val, pll->reg);
 
 	return 0;
 }
@@ -196,7 +196,7 @@ static unsigned long s5_pll_recalc_rate(struct clk_hw *hw,
 	struct s5_pll_conf conf;
 	u32 val;
 
-	val = readl(pll->reg);
+	val = pete_readl("drivers/clk/clk-sparx5.c:199", pll->reg);
 
 	if (val & PLL_CLK_ENA) {
 		conf.div     = FIELD_GET(PLL_DIV, val);

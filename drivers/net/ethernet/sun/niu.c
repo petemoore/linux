@@ -67,15 +67,15 @@ MODULE_LICENSE("GPL");
 MODULE_VERSION(DRV_MODULE_VERSION);
 
 #ifndef readq
-static u64 readq(void __iomem *reg)
+static u64 pete_readq("drivers/net/ethernet/sun/niu.c:70", void __iomem *reg)
 {
-	return ((u64) readl(reg)) | (((u64) readl(reg + 4UL)) << 32);
+	return ((u64) pete_readl("drivers/net/ethernet/sun/niu.c:72", reg)) | (((u64) pete_readl("drivers/net/ethernet/sun/niu.c:72", reg + 4UL)) << 32);
 }
 
-static void writeq(u64 val, void __iomem *reg)
+static void pete_writeq("drivers/net/ethernet/sun/niu.c:75", u64 val, void __iomem *reg)
 {
-	writel(val & 0xffffffff, reg);
-	writel(val >> 32, reg + 0x4UL);
+	pete_writel("drivers/net/ethernet/sun/niu.c:77", val & 0xffffffff, reg);
+	pete_writel("drivers/net/ethernet/sun/niu.c:78", val >> 32, reg + 0x4UL);
 }
 #endif
 
@@ -88,20 +88,20 @@ MODULE_DEVICE_TABLE(pci, niu_pci_tbl);
 
 #define NIU_TX_TIMEOUT			(5 * HZ)
 
-#define nr64(reg)		readq(np->regs + (reg))
-#define nw64(reg, val)		writeq((val), np->regs + (reg))
+#define nr64(reg)		pete_readq("drivers/net/ethernet/sun/niu.c:91", np->regs + (reg))
+#define nw64(reg, val)		pete_writeq("drivers/net/ethernet/sun/niu.c:92", (val), np->regs + (reg))
 
-#define nr64_mac(reg)		readq(np->mac_regs + (reg))
-#define nw64_mac(reg, val)	writeq((val), np->mac_regs + (reg))
+#define nr64_mac(reg)		pete_readq("drivers/net/ethernet/sun/niu.c:94", np->mac_regs + (reg))
+#define nw64_mac(reg, val)	pete_writeq("drivers/net/ethernet/sun/niu.c:95", (val), np->mac_regs + (reg))
 
-#define nr64_ipp(reg)		readq(np->regs + np->ipp_off + (reg))
-#define nw64_ipp(reg, val)	writeq((val), np->regs + np->ipp_off + (reg))
+#define nr64_ipp(reg)		pete_readq("drivers/net/ethernet/sun/niu.c:97", np->regs + np->ipp_off + (reg))
+#define nw64_ipp(reg, val)	pete_writeq("drivers/net/ethernet/sun/niu.c:98", (val), np->regs + np->ipp_off + (reg))
 
-#define nr64_pcs(reg)		readq(np->regs + np->pcs_off + (reg))
-#define nw64_pcs(reg, val)	writeq((val), np->regs + np->pcs_off + (reg))
+#define nr64_pcs(reg)		pete_readq("drivers/net/ethernet/sun/niu.c:100", np->regs + np->pcs_off + (reg))
+#define nw64_pcs(reg, val)	pete_writeq("drivers/net/ethernet/sun/niu.c:101", (val), np->regs + np->pcs_off + (reg))
 
-#define nr64_xpcs(reg)		readq(np->regs + np->xpcs_off + (reg))
-#define nw64_xpcs(reg, val)	writeq((val), np->regs + np->xpcs_off + (reg))
+#define nr64_xpcs(reg)		pete_readq("drivers/net/ethernet/sun/niu.c:103", np->regs + np->xpcs_off + (reg))
+#define nw64_xpcs(reg, val)	pete_writeq("drivers/net/ethernet/sun/niu.c:104", (val), np->regs + np->xpcs_off + (reg))
 
 #define NIU_MSG_DEFAULT (NETIF_MSG_DRV | NETIF_MSG_PROBE | NETIF_MSG_LINK)
 

@@ -97,12 +97,12 @@ static int sis_wait_for_ctrl_ready_with_timeout(struct pqi_ctrl_info *ctrl_info,
 	timeout = (timeout_secs * HZ) + jiffies;
 
 	while (1) {
-		status = readl(&ctrl_info->registers->sis_firmware_status);
+		status = pete_readl("drivers/scsi/smartpqi/smartpqi_sis.c:100", &ctrl_info->registers->sis_firmware_status);
 		if (status != ~0) {
 			if (status & SIS_CTRL_KERNEL_PANIC) {
 				dev_err(&ctrl_info->pci_dev->dev,
 					"controller is offline: status code 0x%x\n",
-					readl(
+					pete_readl("drivers/scsi/smartpqi/smartpqi_sis.c:105", 
 					&ctrl_info->registers->sis_mailbox[7]));
 				return -ENODEV;
 			}
@@ -138,7 +138,7 @@ bool sis_is_firmware_running(struct pqi_ctrl_info *ctrl_info)
 	bool running;
 	u32 status;
 
-	status = readl(&ctrl_info->registers->sis_firmware_status);
+	status = pete_readl("drivers/scsi/smartpqi/smartpqi_sis.c:141", &ctrl_info->registers->sis_firmware_status);
 
 	if (status != ~0 && (status & SIS_CTRL_KERNEL_PANIC))
 		running = false;
@@ -148,20 +148,20 @@ bool sis_is_firmware_running(struct pqi_ctrl_info *ctrl_info)
 	if (!running)
 		dev_err(&ctrl_info->pci_dev->dev,
 			"controller is offline: status code 0x%x\n",
-			readl(&ctrl_info->registers->sis_mailbox[7]));
+			pete_readl("drivers/scsi/smartpqi/smartpqi_sis.c:151", &ctrl_info->registers->sis_mailbox[7]));
 
 	return running;
 }
 
 bool sis_is_kernel_up(struct pqi_ctrl_info *ctrl_info)
 {
-	return readl(&ctrl_info->registers->sis_firmware_status) &
+	return pete_readl("drivers/scsi/smartpqi/smartpqi_sis.c:158", &ctrl_info->registers->sis_firmware_status) &
 		SIS_CTRL_KERNEL_UP;
 }
 
 u32 sis_get_product_id(struct pqi_ctrl_info *ctrl_info)
 {
-	return readl(&ctrl_info->registers->sis_product_identifier);
+	return pete_readl("drivers/scsi/smartpqi/smartpqi_sis.c:164", &ctrl_info->registers->sis_product_identifier);
 }
 
 /* used for passing command parameters/results when issuing SIS commands */
@@ -181,31 +181,31 @@ static int sis_send_sync_cmd(struct pqi_ctrl_info *ctrl_info,
 	registers = ctrl_info->registers;
 
 	/* Write the command to mailbox 0. */
-	writel(cmd, &registers->sis_mailbox[0]);
+	pete_writel("drivers/scsi/smartpqi/smartpqi_sis.c:184", cmd, &registers->sis_mailbox[0]);
 
 	/*
 	 * Write the command parameters to mailboxes 1-4 (mailbox 5 is not used
 	 * when sending a command to the controller).
 	 */
 	for (i = 1; i <= 4; i++)
-		writel(params->mailbox[i], &registers->sis_mailbox[i]);
+		pete_writel("drivers/scsi/smartpqi/smartpqi_sis.c:191", params->mailbox[i], &registers->sis_mailbox[i]);
 
 	/* Clear the command doorbell. */
-	writel(SIS_CLEAR_CTRL_TO_HOST_DOORBELL,
+	pete_writel("drivers/scsi/smartpqi/smartpqi_sis.c:194", SIS_CLEAR_CTRL_TO_HOST_DOORBELL,
 		&registers->sis_ctrl_to_host_doorbell_clear);
 
 	/* Disable doorbell interrupts by masking all interrupts. */
-	writel(~0, &registers->sis_interrupt_mask);
+	pete_writel("drivers/scsi/smartpqi/smartpqi_sis.c:198", ~0, &registers->sis_interrupt_mask);
 	usleep_range(1000, 2000);
 
 	/*
 	 * Force the completion of the interrupt mask register write before
 	 * submitting the command.
 	 */
-	readl(&registers->sis_interrupt_mask);
+	pete_readl("drivers/scsi/smartpqi/smartpqi_sis.c:205", &registers->sis_interrupt_mask);
 
 	/* Submit the command to the controller. */
-	writel(SIS_CMD_READY, &registers->sis_host_to_ctrl_doorbell);
+	pete_writel("drivers/scsi/smartpqi/smartpqi_sis.c:208", SIS_CMD_READY, &registers->sis_host_to_ctrl_doorbell);
 
 	/*
 	 * Poll for command completion.  Note that the call to msleep() is at
@@ -215,7 +215,7 @@ static int sis_send_sync_cmd(struct pqi_ctrl_info *ctrl_info,
 	timeout = (SIS_CMD_COMPLETE_TIMEOUT_SECS * HZ) + jiffies;
 	while (1) {
 		msleep(SIS_CMD_COMPLETE_POLL_INTERVAL_MSECS);
-		doorbell = readl(&registers->sis_ctrl_to_host_doorbell);
+		doorbell = pete_readl("drivers/scsi/smartpqi/smartpqi_sis.c:218", &registers->sis_ctrl_to_host_doorbell);
 		if (doorbell & SIS_CMD_COMPLETE)
 			break;
 		if (time_after(jiffies, timeout))
@@ -223,7 +223,7 @@ static int sis_send_sync_cmd(struct pqi_ctrl_info *ctrl_info,
 	}
 
 	/* Read the command status from mailbox 0. */
-	cmd_status = readl(&registers->sis_mailbox[0]);
+	cmd_status = pete_readl("drivers/scsi/smartpqi/smartpqi_sis.c:226", &registers->sis_mailbox[0]);
 	if (cmd_status != SIS_CMD_STATUS_SUCCESS) {
 		dev_err(&ctrl_info->pci_dev->dev,
 			"SIS command failed for command 0x%x: status = 0x%x\n",
@@ -237,7 +237,7 @@ static int sis_send_sync_cmd(struct pqi_ctrl_info *ctrl_info,
 	 */
 	params->mailbox[0] = cmd_status;
 	for (i = 1; i < ARRAY_SIZE(params->mailbox); i++)
-		params->mailbox[i] = readl(&registers->sis_mailbox[i]);
+		params->mailbox[i] = pete_readl("drivers/scsi/smartpqi/smartpqi_sis.c:240", &registers->sis_mailbox[i]);
 
 	return 0;
 }
@@ -362,10 +362,10 @@ static int sis_wait_for_doorbell_bit_to_clear(
 
 	while (1) {
 		doorbell_register =
-			readl(&ctrl_info->registers->sis_host_to_ctrl_doorbell);
+			pete_readl("drivers/scsi/smartpqi/smartpqi_sis.c:365", &ctrl_info->registers->sis_host_to_ctrl_doorbell);
 		if ((doorbell_register & bit) == 0)
 			break;
-		if (readl(&ctrl_info->registers->sis_firmware_status) &
+		if (pete_readl("drivers/scsi/smartpqi/smartpqi_sis.c:368", &ctrl_info->registers->sis_firmware_status) &
 			SIS_CTRL_KERNEL_PANIC) {
 			rc = -ENODEV;
 			break;
@@ -385,7 +385,7 @@ static int sis_wait_for_doorbell_bit_to_clear(
 
 static inline int sis_set_doorbell_bit(struct pqi_ctrl_info *ctrl_info, u32 bit)
 {
-	writel(bit, &ctrl_info->registers->sis_host_to_ctrl_doorbell);
+	pete_writel("drivers/scsi/smartpqi/smartpqi_sis.c:388", bit, &ctrl_info->registers->sis_host_to_ctrl_doorbell);
 	usleep_range(1000, 2000);
 
 	return sis_wait_for_doorbell_bit_to_clear(ctrl_info, bit);
@@ -404,14 +404,14 @@ void sis_enable_intx(struct pqi_ctrl_info *ctrl_info)
 void sis_shutdown_ctrl(struct pqi_ctrl_info *ctrl_info,
 	enum pqi_ctrl_shutdown_reason ctrl_shutdown_reason)
 {
-	if (readl(&ctrl_info->registers->sis_firmware_status) &
+	if (pete_readl("drivers/scsi/smartpqi/smartpqi_sis.c:407", &ctrl_info->registers->sis_firmware_status) &
 		SIS_CTRL_KERNEL_PANIC)
 		return;
 
 	if (ctrl_info->firmware_triage_supported)
-		writel(ctrl_shutdown_reason, &ctrl_info->registers->sis_ctrl_shutdown_reason_code);
+		pete_writel("drivers/scsi/smartpqi/smartpqi_sis.c:412", ctrl_shutdown_reason, &ctrl_info->registers->sis_ctrl_shutdown_reason_code);
 
-	writel(SIS_TRIGGER_SHUTDOWN, &ctrl_info->registers->sis_host_to_ctrl_doorbell);
+	pete_writel("drivers/scsi/smartpqi/smartpqi_sis.c:414", SIS_TRIGGER_SHUTDOWN, &ctrl_info->registers->sis_host_to_ctrl_doorbell);
 }
 
 int sis_pqi_reset_quiesce(struct pqi_ctrl_info *ctrl_info)
@@ -426,25 +426,25 @@ int sis_reenable_sis_mode(struct pqi_ctrl_info *ctrl_info)
 
 void sis_write_driver_scratch(struct pqi_ctrl_info *ctrl_info, u32 value)
 {
-	writel(value, &ctrl_info->registers->sis_driver_scratch);
+	pete_writel("drivers/scsi/smartpqi/smartpqi_sis.c:429", value, &ctrl_info->registers->sis_driver_scratch);
 	usleep_range(1000, 2000);
 }
 
 u32 sis_read_driver_scratch(struct pqi_ctrl_info *ctrl_info)
 {
-	return readl(&ctrl_info->registers->sis_driver_scratch);
+	return pete_readl("drivers/scsi/smartpqi/smartpqi_sis.c:435", &ctrl_info->registers->sis_driver_scratch);
 }
 
 static inline enum sis_fw_triage_status
 	sis_read_firmware_triage_status(struct pqi_ctrl_info *ctrl_info)
 {
-	return ((enum sis_fw_triage_status)(readl(&ctrl_info->registers->sis_firmware_status) &
+	return ((enum sis_fw_triage_status)(pete_readl("drivers/scsi/smartpqi/smartpqi_sis.c:441", &ctrl_info->registers->sis_firmware_status) &
 		SIS_CTRL_KERNEL_FW_TRIAGE));
 }
 
 void sis_soft_reset(struct pqi_ctrl_info *ctrl_info)
 {
-	writel(SIS_SOFT_RESET,
+	pete_writel("drivers/scsi/smartpqi/smartpqi_sis.c:447", SIS_SOFT_RESET,
 		&ctrl_info->registers->sis_host_to_ctrl_doorbell);
 }
 

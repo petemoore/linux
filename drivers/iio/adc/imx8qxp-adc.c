@@ -125,16 +125,16 @@ static void imx8qxp_adc_reset(struct imx8qxp_adc *adc)
 	u32 ctrl;
 
 	/*software reset, need to clear the set bit*/
-	ctrl = readl(adc->regs + IMX8QXP_ADR_ADC_CTRL);
+	ctrl = pete_readl("drivers/iio/adc/imx8qxp-adc.c:128", adc->regs + IMX8QXP_ADR_ADC_CTRL);
 	ctrl |= FIELD_PREP(IMX8QXP_ADC_CTRL_SOFTWARE_RESET_MASK, 1);
-	writel(ctrl, adc->regs + IMX8QXP_ADR_ADC_CTRL);
+	pete_writel("drivers/iio/adc/imx8qxp-adc.c:130", ctrl, adc->regs + IMX8QXP_ADR_ADC_CTRL);
 	udelay(10);
 	ctrl &= ~FIELD_PREP(IMX8QXP_ADC_CTRL_SOFTWARE_RESET_MASK, 1);
-	writel(ctrl, adc->regs + IMX8QXP_ADR_ADC_CTRL);
+	pete_writel("drivers/iio/adc/imx8qxp-adc.c:133", ctrl, adc->regs + IMX8QXP_ADR_ADC_CTRL);
 
 	/* reset the fifo */
 	ctrl |= FIELD_PREP(IMX8QXP_ADC_CTRL_FIFO_RESET_MASK, 1);
-	writel(ctrl, adc->regs + IMX8QXP_ADR_ADC_CTRL);
+	pete_writel("drivers/iio/adc/imx8qxp-adc.c:137", ctrl, adc->regs + IMX8QXP_ADR_ADC_CTRL);
 }
 
 static void imx8qxp_adc_reg_config(struct imx8qxp_adc *adc, int channel)
@@ -147,14 +147,14 @@ static void imx8qxp_adc_reg_config(struct imx8qxp_adc *adc, int channel)
 		  FIELD_PREP(IMX8QXP_ADC_CFG_REFSEL_MASK, 0) |
 		  FIELD_PREP(IMX8QXP_ADC_CFG_PWRSEL_MASK, 3) |
 		  FIELD_PREP(IMX8QXP_ADC_CFG_TPRICTRL_MASK, 0);
-	writel(adc_cfg, adc->regs + IMX8QXP_ADR_ADC_CFG);
+	pete_writel("drivers/iio/adc/imx8qxp-adc.c:150", adc_cfg, adc->regs + IMX8QXP_ADR_ADC_CFG);
 
 	/* config the trigger control */
 	adc_tctrl = FIELD_PREP(IMX8QXP_ADC_TCTRL_TCMD_MASK, 1) |
 		    FIELD_PREP(IMX8QXP_ADC_TCTRL_TDLY_MASK, 0) |
 		    FIELD_PREP(IMX8QXP_ADC_TCTRL_TPRI_MASK, IMX8QXP_ADC_TCTRL_TPRI_PRIORITY_HIGH) |
 		    FIELD_PREP(IMX8QXP_ADC_TCTRL_HTEN_MASK, IMX8QXP_ADC_TCTRL_HTEN_HW_TIRG_DIS);
-	writel(adc_tctrl, adc->regs + IMX8QXP_ADR_ADC_TCTRL(0));
+	pete_writel("drivers/iio/adc/imx8qxp-adc.c:157", adc_tctrl, adc->regs + IMX8QXP_ADR_ADC_TCTRL(0));
 
 	/* config the cmd */
 	adc_cmdl = FIELD_PREP(IMX8QXP_ADC_CMDL_CSCALE_MASK, IMX8QXP_ADC_CMDL_CHANNEL_SCALE_FULL) |
@@ -162,7 +162,7 @@ static void imx8qxp_adc_reg_config(struct imx8qxp_adc *adc, int channel)
 		   FIELD_PREP(IMX8QXP_ADC_CMDL_DIFF_MASK, IMX8QXP_ADC_CMDL_MODE_SINGLE) |
 		   FIELD_PREP(IMX8QXP_ADC_CMDL_ABSEL_MASK, IMX8QXP_ADC_CMDL_SEL_A_A_B_CHANNEL) |
 		   FIELD_PREP(IMX8QXP_ADC_CMDL_ADCH_MASK, channel);
-	writel(adc_cmdl, adc->regs + IMX8QXP_ADR_ADC_CMDL(0));
+	pete_writel("drivers/iio/adc/imx8qxp-adc.c:165", adc_cmdl, adc->regs + IMX8QXP_ADR_ADC_CMDL(0));
 
 	adc_cmdh = FIELD_PREP(IMX8QXP_ADC_CMDH_NEXT_MASK, 0) |
 		   FIELD_PREP(IMX8QXP_ADC_CMDH_LOOP_MASK, 0) |
@@ -170,32 +170,32 @@ static void imx8qxp_adc_reg_config(struct imx8qxp_adc *adc, int channel)
 		   FIELD_PREP(IMX8QXP_ADC_CMDH_STS_MASK, 0) |
 		   FIELD_PREP(IMX8QXP_ADC_CMDH_LWI_MASK, IMX8QXP_ADC_CMDH_LWI_INCREMENT_DIS) |
 		   FIELD_PREP(IMX8QXP_ADC_CMDH_CMPEN_MASK, IMX8QXP_ADC_CMDH_CMPEN_DIS);
-	writel(adc_cmdh, adc->regs + IMX8QXP_ADR_ADC_CMDH(0));
+	pete_writel("drivers/iio/adc/imx8qxp-adc.c:173", adc_cmdh, adc->regs + IMX8QXP_ADR_ADC_CMDH(0));
 }
 
 static void imx8qxp_adc_fifo_config(struct imx8qxp_adc *adc)
 {
 	u32 fifo_ctrl, interrupt_en;
 
-	fifo_ctrl = readl(adc->regs + IMX8QXP_ADR_ADC_FCTRL);
+	fifo_ctrl = pete_readl("drivers/iio/adc/imx8qxp-adc.c:180", adc->regs + IMX8QXP_ADR_ADC_FCTRL);
 	fifo_ctrl &= ~IMX8QXP_ADC_FCTRL_FWMARK_MASK;
 	/* set the watermark level to 1 */
 	fifo_ctrl |= FIELD_PREP(IMX8QXP_ADC_FCTRL_FWMARK_MASK, 0);
-	writel(fifo_ctrl, adc->regs + IMX8QXP_ADR_ADC_FCTRL);
+	pete_writel("drivers/iio/adc/imx8qxp-adc.c:184", fifo_ctrl, adc->regs + IMX8QXP_ADR_ADC_FCTRL);
 
 	/* FIFO Watermark Interrupt Enable */
-	interrupt_en = readl(adc->regs + IMX8QXP_ADR_ADC_IE);
+	interrupt_en = pete_readl("drivers/iio/adc/imx8qxp-adc.c:187", adc->regs + IMX8QXP_ADR_ADC_IE);
 	interrupt_en |= FIELD_PREP(IMX8QXP_ADC_IE_FWMIE_MASK, 1);
-	writel(interrupt_en, adc->regs + IMX8QXP_ADR_ADC_IE);
+	pete_writel("drivers/iio/adc/imx8qxp-adc.c:189", interrupt_en, adc->regs + IMX8QXP_ADR_ADC_IE);
 }
 
 static void imx8qxp_adc_disable(struct imx8qxp_adc *adc)
 {
 	u32 ctrl;
 
-	ctrl = readl(adc->regs + IMX8QXP_ADR_ADC_CTRL);
+	ctrl = pete_readl("drivers/iio/adc/imx8qxp-adc.c:196", adc->regs + IMX8QXP_ADR_ADC_CTRL);
 	ctrl &= ~FIELD_PREP(IMX8QXP_ADC_CTRL_ADC_EN_MASK, 1);
-	writel(ctrl, adc->regs + IMX8QXP_ADR_ADC_CTRL);
+	pete_writel("drivers/iio/adc/imx8qxp-adc.c:198", ctrl, adc->regs + IMX8QXP_ADR_ADC_CTRL);
 }
 
 static int imx8qxp_adc_read_raw(struct iio_dev *indio_dev,
@@ -220,11 +220,11 @@ static int imx8qxp_adc_read_raw(struct iio_dev *indio_dev,
 		imx8qxp_adc_fifo_config(adc);
 
 		/* adc enable */
-		ctrl = readl(adc->regs + IMX8QXP_ADR_ADC_CTRL);
+		ctrl = pete_readl("drivers/iio/adc/imx8qxp-adc.c:223", adc->regs + IMX8QXP_ADR_ADC_CTRL);
 		ctrl |= FIELD_PREP(IMX8QXP_ADC_CTRL_ADC_EN_MASK, 1);
-		writel(ctrl, adc->regs + IMX8QXP_ADR_ADC_CTRL);
+		pete_writel("drivers/iio/adc/imx8qxp-adc.c:225", ctrl, adc->regs + IMX8QXP_ADR_ADC_CTRL);
 		/* adc start */
-		writel(1, adc->regs + IMX8QXP_ADR_ADC_SWTRIG);
+		pete_writel("drivers/iio/adc/imx8qxp-adc.c:227", 1, adc->regs + IMX8QXP_ADR_ADC_SWTRIG);
 
 		ret = wait_for_completion_interruptible_timeout(&adc->completion,
 								IMX8QXP_ADC_TIMEOUT);
@@ -270,7 +270,7 @@ static irqreturn_t imx8qxp_adc_isr(int irq, void *dev_id)
 	int i;
 
 	fifo_count = FIELD_GET(IMX8QXP_ADC_FCTRL_FCOUNT_MASK,
-			       readl(adc->regs + IMX8QXP_ADR_ADC_FCTRL));
+			       pete_readl("drivers/iio/adc/imx8qxp-adc.c:273", adc->regs + IMX8QXP_ADR_ADC_FCTRL));
 
 	for (i = 0; i < fifo_count; i++)
 		adc->fifo[i] = FIELD_GET(IMX8QXP_ADC_RESFIFO_VAL_MASK,
@@ -293,7 +293,7 @@ static int imx8qxp_adc_reg_access(struct iio_dev *indio_dev, unsigned int reg,
 
 	pm_runtime_get_sync(dev);
 
-	*readval = readl(adc->regs + reg);
+	*readval = pete_readl("drivers/iio/adc/imx8qxp-adc.c:296", adc->regs + reg);
 
 	pm_runtime_mark_last_busy(dev);
 	pm_runtime_put_sync_autosuspend(dev);

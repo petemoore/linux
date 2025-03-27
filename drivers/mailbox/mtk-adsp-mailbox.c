@@ -37,9 +37,9 @@ static irqreturn_t mtk_adsp_mbox_irq(int irq, void *data)
 {
 	struct mbox_chan *chan = data;
 	struct mtk_adsp_mbox_priv *priv = get_mtk_adsp_mbox_priv(chan->mbox);
-	u32 op = readl(priv->va_mboxreg + priv->cfg->set_out);
+	u32 op = pete_readl("drivers/mailbox/mtk-adsp-mailbox.c:40", priv->va_mboxreg + priv->cfg->set_out);
 
-	writel(op, priv->va_mboxreg + priv->cfg->clr_out);
+	pete_writel("drivers/mailbox/mtk-adsp-mailbox.c:42", op, priv->va_mboxreg + priv->cfg->clr_out);
 
 	return IRQ_WAKE_THREAD;
 }
@@ -64,8 +64,8 @@ static int mtk_adsp_mbox_startup(struct mbox_chan *chan)
 	struct mtk_adsp_mbox_priv *priv = get_mtk_adsp_mbox_priv(chan->mbox);
 
 	/* Clear ADSP mbox command */
-	writel(0xFFFFFFFF, priv->va_mboxreg + priv->cfg->clr_in);
-	writel(0xFFFFFFFF, priv->va_mboxreg + priv->cfg->clr_out);
+	pete_writel("drivers/mailbox/mtk-adsp-mailbox.c:67", 0xFFFFFFFF, priv->va_mboxreg + priv->cfg->clr_in);
+	pete_writel("drivers/mailbox/mtk-adsp-mailbox.c:68", 0xFFFFFFFF, priv->va_mboxreg + priv->cfg->clr_out);
 
 	return 0;
 }
@@ -75,8 +75,8 @@ static void mtk_adsp_mbox_shutdown(struct mbox_chan *chan)
 	struct mtk_adsp_mbox_priv *priv = get_mtk_adsp_mbox_priv(chan->mbox);
 
 	/* Clear ADSP mbox command */
-	writel(0xFFFFFFFF, priv->va_mboxreg + priv->cfg->clr_in);
-	writel(0xFFFFFFFF, priv->va_mboxreg + priv->cfg->clr_out);
+	pete_writel("drivers/mailbox/mtk-adsp-mailbox.c:78", 0xFFFFFFFF, priv->va_mboxreg + priv->cfg->clr_in);
+	pete_writel("drivers/mailbox/mtk-adsp-mailbox.c:79", 0xFFFFFFFF, priv->va_mboxreg + priv->cfg->clr_out);
 }
 
 static int mtk_adsp_mbox_send_data(struct mbox_chan *chan, void *data)
@@ -84,7 +84,7 @@ static int mtk_adsp_mbox_send_data(struct mbox_chan *chan, void *data)
 	struct mtk_adsp_mbox_priv *priv = get_mtk_adsp_mbox_priv(chan->mbox);
 	u32 *msg = data;
 
-	writel(*msg, priv->va_mboxreg + priv->cfg->set_in);
+	pete_writel("drivers/mailbox/mtk-adsp-mailbox.c:87", *msg, priv->va_mboxreg + priv->cfg->set_in);
 
 	return 0;
 }
@@ -93,7 +93,7 @@ static bool mtk_adsp_mbox_last_tx_done(struct mbox_chan *chan)
 {
 	struct mtk_adsp_mbox_priv *priv = get_mtk_adsp_mbox_priv(chan->mbox);
 
-	return readl(priv->va_mboxreg + priv->cfg->set_in) == 0;
+	return pete_readl("drivers/mailbox/mtk-adsp-mailbox.c:96", priv->va_mboxreg + priv->cfg->set_in) == 0;
 }
 
 static const struct mbox_chan_ops mtk_adsp_mbox_chan_ops = {

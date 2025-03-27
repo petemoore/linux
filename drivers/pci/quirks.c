@@ -1696,10 +1696,10 @@ static void asus_hides_smbus_lpc_ich6_resume_early(struct pci_dev *dev)
 		return;
 
 	/* read the Function Disable register, dword mode only */
-	val = readl(asus_rcba_base + 0x3418);
+	val = pete_readl("drivers/pci/quirks.c:1699", asus_rcba_base + 0x3418);
 
 	/* enable the SMBus device */
-	writel(val & 0xFFFFFFF7, asus_rcba_base + 0x3418);
+	pete_writel("drivers/pci/quirks.c:1702", val & 0xFFFFFFF7, asus_rcba_base + 0x3418);
 }
 
 static void asus_hides_smbus_lpc_ich6_resume(struct pci_dev *dev)
@@ -2472,10 +2472,10 @@ static void quirk_e100_interrupt(struct pci_dev *dev)
 		return;
 	}
 
-	cmd_hi = readb(csr + 3);
+	cmd_hi = pete_readb("drivers/pci/quirks.c:2475", csr + 3);
 	if (cmd_hi == 0) {
 		pci_warn(dev, "Firmware left e100 interrupts enabled; disabling\n");
-		writeb(1, csr + 3);
+		pete_writeb("drivers/pci/quirks.c:2478", 1, csr + 3);
 	}
 
 	iounmap(csr);
@@ -3548,10 +3548,10 @@ static void disable_igfx_irq(struct pci_dev *dev)
 	}
 
 	/* Check if any interrupt line is still enabled */
-	if (readl(regs + I915_DEIER_REG) != 0) {
+	if (pete_readl("drivers/pci/quirks.c:3551", regs + I915_DEIER_REG) != 0) {
 		pci_warn(dev, "BIOS left Intel GPU interrupts enabled; disabling\n");
 
-		writel(0, regs + I915_DEIER_REG);
+		pete_writel("drivers/pci/quirks.c:3554", 0, regs + I915_DEIER_REG);
 	}
 
 	pci_iounmap(dev, regs);
@@ -4072,11 +4072,11 @@ static int nvme_disable_and_flr(struct pci_dev *dev, bool probe)
 	pci_read_config_word(dev, PCI_COMMAND, &cmd);
 	pci_write_config_word(dev, PCI_COMMAND, cmd | PCI_COMMAND_MEMORY);
 
-	cfg = readl(bar + NVME_REG_CC);
+	cfg = pete_readl("drivers/pci/quirks.c:4075", bar + NVME_REG_CC);
 
 	/* Disable controller if enabled */
 	if (cfg & NVME_CC_ENABLE) {
-		u32 cap = readl(bar + NVME_REG_CAP);
+		u32 cap = pete_readl("drivers/pci/quirks.c:4079", bar + NVME_REG_CAP);
 		unsigned long timeout;
 
 		/*
@@ -4086,7 +4086,7 @@ static int nvme_disable_and_flr(struct pci_dev *dev, bool probe)
 		 */
 		cfg &= ~(NVME_CC_SHN_MASK | NVME_CC_ENABLE);
 
-		writel(cfg, bar + NVME_REG_CC);
+		pete_writel("drivers/pci/quirks.c:4089", cfg, bar + NVME_REG_CC);
 
 		/*
 		 * Some controllers require an additional delay here, see
@@ -4098,7 +4098,7 @@ static int nvme_disable_and_flr(struct pci_dev *dev, bool probe)
 		timeout = ((NVME_CAP_TIMEOUT(cap) + 1) * HZ / 2) + jiffies;
 
 		for (;;) {
-			u32 status = readl(bar + NVME_REG_CSTS);
+			u32 status = pete_readl("drivers/pci/quirks.c:4101", bar + NVME_REG_CSTS);
 
 			/* Ready status becomes zero on disable complete */
 			if (!(status & NVME_CSTS_RDY))
@@ -5249,14 +5249,14 @@ static int pci_quirk_enable_intel_lpc_acs(struct pci_dev *dev)
 	 * the UPDCR to disable peer decodes for each port.  This provides the
 	 * PCIe ACS equivalent of PCI_ACS_RR | PCI_ACS_CR | PCI_ACS_UF
 	 */
-	bspr = readl(rcba_mem + INTEL_BSPR_REG);
+	bspr = pete_readl("drivers/pci/quirks.c:5252", rcba_mem + INTEL_BSPR_REG);
 	bspr &= INTEL_BSPR_REG_BPNPD | INTEL_BSPR_REG_BPPD;
 	if (bspr != (INTEL_BSPR_REG_BPNPD | INTEL_BSPR_REG_BPPD)) {
-		updcr = readl(rcba_mem + INTEL_UPDCR_REG);
+		updcr = pete_readl("drivers/pci/quirks.c:5255", rcba_mem + INTEL_UPDCR_REG);
 		if (updcr & INTEL_UPDCR_REG_MASK) {
 			pci_info(dev, "Disabling UPDCR peer decodes\n");
 			updcr &= ~INTEL_UPDCR_REG_MASK;
-			writel(updcr, rcba_mem + INTEL_UPDCR_REG);
+			pete_writel("drivers/pci/quirks.c:5259", updcr, rcba_mem + INTEL_UPDCR_REG);
 		}
 	}
 

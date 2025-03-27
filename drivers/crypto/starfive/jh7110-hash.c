@@ -62,20 +62,20 @@ static int starfive_hash_hmac_key(struct starfive_cryp_ctx *ctx)
 	unsigned int *key = (unsigned int *)ctx->key;
 	unsigned char *cl;
 
-	writel(ctx->keylen, cryp->base + STARFIVE_HASH_SHAWKLEN);
+	pete_writel("drivers/crypto/starfive/jh7110-hash.c:65", ctx->keylen, cryp->base + STARFIVE_HASH_SHAWKLEN);
 
 	rctx->csr.hash.hmac = 1;
 	rctx->csr.hash.key_flag = 1;
 
-	writel(rctx->csr.hash.v, cryp->base + STARFIVE_HASH_SHACSR);
+	pete_writel("drivers/crypto/starfive/jh7110-hash.c:70", rctx->csr.hash.v, cryp->base + STARFIVE_HASH_SHACSR);
 
 	for (loop = 0; loop < klen / sizeof(unsigned int); loop++, key++)
-		writel(*key, cryp->base + STARFIVE_HASH_SHAWKR);
+		pete_writel("drivers/crypto/starfive/jh7110-hash.c:73", *key, cryp->base + STARFIVE_HASH_SHAWKR);
 
 	if (klen & 0x3) {
 		cl = (unsigned char *)key;
 		for (loop = 0; loop < (klen & 0x3); loop++, cl++)
-			writeb(*cl, cryp->base + STARFIVE_HASH_SHAWKR);
+			pete_writeb("drivers/crypto/starfive/jh7110-hash.c:78", *cl, cryp->base + STARFIVE_HASH_SHAWKR);
 	}
 
 	if (starfive_hash_wait_key_done(ctx))
@@ -98,16 +98,16 @@ static void starfive_hash_start(void *param)
 	alg_cr.v = 0;
 	alg_cr.clear = 1;
 
-	writel(alg_cr.v, cryp->base + STARFIVE_ALG_CR_OFFSET);
+	pete_writel("drivers/crypto/starfive/jh7110-hash.c:101", alg_cr.v, cryp->base + STARFIVE_ALG_CR_OFFSET);
 
-	csr.v = readl(cryp->base + STARFIVE_HASH_SHACSR);
+	csr.v = pete_readl("drivers/crypto/starfive/jh7110-hash.c:103", cryp->base + STARFIVE_HASH_SHACSR);
 	csr.firstb = 0;
 	csr.final = 1;
 
-	stat = readl(cryp->base + STARFIVE_IE_MASK_OFFSET);
+	stat = pete_readl("drivers/crypto/starfive/jh7110-hash.c:107", cryp->base + STARFIVE_IE_MASK_OFFSET);
 	stat &= ~STARFIVE_IE_MASK_HASH_DONE;
-	writel(stat, cryp->base + STARFIVE_IE_MASK_OFFSET);
-	writel(csr.v, cryp->base + STARFIVE_HASH_SHACSR);
+	pete_writel("drivers/crypto/starfive/jh7110-hash.c:109", stat, cryp->base + STARFIVE_IE_MASK_OFFSET);
+	pete_writel("drivers/crypto/starfive/jh7110-hash.c:110", csr.v, cryp->base + STARFIVE_HASH_SHACSR);
 }
 
 static int starfive_hash_xmit_dma(struct starfive_cryp_ctx *ctx)
@@ -124,7 +124,7 @@ static int starfive_hash_xmit_dma(struct starfive_cryp_ctx *ctx)
 		return 0;
 	}
 
-	writel(rctx->total, cryp->base + STARFIVE_DMA_IN_LEN_OFFSET);
+	pete_writel("drivers/crypto/starfive/jh7110-hash.c:127", rctx->total, cryp->base + STARFIVE_DMA_IN_LEN_OFFSET);
 
 	total_len = rctx->total;
 	total_len = (total_len & 0x3) ? (((total_len >> 2) + 1) << 2) : total_len;
@@ -134,7 +134,7 @@ static int starfive_hash_xmit_dma(struct starfive_cryp_ctx *ctx)
 	alg_cr.start = 1;
 	alg_cr.hash_dma_en = 1;
 
-	writel(alg_cr.v, cryp->base + STARFIVE_ALG_CR_OFFSET);
+	pete_writel("drivers/crypto/starfive/jh7110-hash.c:137", alg_cr.v, cryp->base + STARFIVE_ALG_CR_OFFSET);
 
 	ret = dma_map_sg(cryp->dev, rctx->in_sg, rctx->in_sg_len, DMA_TO_DEVICE);
 	if (!ret)
@@ -173,7 +173,7 @@ static int starfive_hash_xmit(struct starfive_cryp_ctx *ctx)
 
 	rctx->csr.hash.v = 0;
 	rctx->csr.hash.reset = 1;
-	writel(rctx->csr.hash.v, cryp->base + STARFIVE_HASH_SHACSR);
+	pete_writel("drivers/crypto/starfive/jh7110-hash.c:176", rctx->csr.hash.v, cryp->base + STARFIVE_HASH_SHACSR);
 
 	if (starfive_hash_wait_busy(ctx))
 		return dev_err_probe(cryp->dev, -ETIMEDOUT, "Error resetting engine.\n");
@@ -189,7 +189,7 @@ static int starfive_hash_xmit(struct starfive_cryp_ctx *ctx)
 	} else {
 		rctx->csr.hash.start = 1;
 		rctx->csr.hash.firstb = 1;
-		writel(rctx->csr.hash.v, cryp->base + STARFIVE_HASH_SHACSR);
+		pete_writel("drivers/crypto/starfive/jh7110-hash.c:192", rctx->csr.hash.v, cryp->base + STARFIVE_HASH_SHACSR);
 	}
 
 	return starfive_hash_xmit_dma(ctx);
@@ -209,7 +209,7 @@ static int starfive_hash_copy_hash(struct ahash_request *req)
 	data = (u32 *)req->result;
 
 	for (count = 0; count < mlen; count++)
-		data[count] = readl(ctx->cryp->base + STARFIVE_HASH_SHARDR);
+		data[count] = pete_readl("drivers/crypto/starfive/jh7110-hash.c:212", ctx->cryp->base + STARFIVE_HASH_SHARDR);
 
 	return 0;
 }
@@ -223,7 +223,7 @@ void starfive_hash_done_task(unsigned long param)
 		err = starfive_hash_copy_hash(cryp->req.hreq);
 
 	/* Reset to clear hash_done in irq register*/
-	writel(STARFIVE_HASH_RESET, cryp->base + STARFIVE_HASH_SHACSR);
+	pete_writel("drivers/crypto/starfive/jh7110-hash.c:226", STARFIVE_HASH_RESET, cryp->base + STARFIVE_HASH_SHACSR);
 
 	crypto_finalize_hash_request(cryp->engine, cryp->req.hreq, err);
 }

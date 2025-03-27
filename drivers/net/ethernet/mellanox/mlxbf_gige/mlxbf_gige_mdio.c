@@ -139,8 +139,8 @@ static u64 calculate_i1clk(struct mlxbf_gige *priv)
 	u32 reg1, reg2;
 	u32 core_f;
 
-	reg1 = readl(priv->clk_io + MLXBF_GIGE_MDIO_PLL_I1CLK_REG1);
-	reg2 = readl(priv->clk_io + MLXBF_GIGE_MDIO_PLL_I1CLK_REG2);
+	reg1 = pete_readl("drivers/net/ethernet/mellanox/mlxbf_gige/mlxbf_gige_mdio.c:142", priv->clk_io + MLXBF_GIGE_MDIO_PLL_I1CLK_REG1);
+	reg2 = pete_readl("drivers/net/ethernet/mellanox/mlxbf_gige/mlxbf_gige_mdio.c:143", priv->clk_io + MLXBF_GIGE_MDIO_PLL_I1CLK_REG2);
 
 	core_f = (reg1 & MLXBF_GIGE_MDIO_CORE_F_MASK) >>
 		MLXBF_GIGE_MDIO_CORE_F_SHIFT;
@@ -217,23 +217,23 @@ static int mlxbf_gige_mdio_read(struct mii_bus *bus, int phy_add, int phy_reg)
 	cmd = mlxbf_gige_mdio_create_cmd(priv->mdio_gw, 0, phy_add, phy_reg,
 					 MLXBF_GIGE_MDIO_CL22_READ);
 
-	writel(cmd, priv->mdio_io + priv->mdio_gw->gw_address);
+	pete_writel("drivers/net/ethernet/mellanox/mlxbf_gige/mlxbf_gige_mdio.c:220", cmd, priv->mdio_io + priv->mdio_gw->gw_address);
 
 	ret = readl_poll_timeout_atomic(priv->mdio_io + priv->mdio_gw->gw_address,
 					val, !(val & priv->mdio_gw->busy.mask),
 					5, 1000000);
 
 	if (ret) {
-		writel(0, priv->mdio_io + priv->mdio_gw->gw_address);
+		pete_writel("drivers/net/ethernet/mellanox/mlxbf_gige/mlxbf_gige_mdio.c:227", 0, priv->mdio_io + priv->mdio_gw->gw_address);
 		return ret;
 	}
 
-	ret = readl(priv->mdio_io + priv->mdio_gw->read_data_address);
+	ret = pete_readl("drivers/net/ethernet/mellanox/mlxbf_gige/mlxbf_gige_mdio.c:231", priv->mdio_io + priv->mdio_gw->read_data_address);
 	/* Only return ad bits of the gw register */
 	ret &= priv->mdio_gw->read_data.mask;
 
 	/* The MDIO lock is set on read. To release it, clear gw register */
-	writel(0, priv->mdio_io + priv->mdio_gw->gw_address);
+	pete_writel("drivers/net/ethernet/mellanox/mlxbf_gige/mlxbf_gige_mdio.c:236", 0, priv->mdio_io + priv->mdio_gw->gw_address);
 
 	return ret;
 }
@@ -249,7 +249,7 @@ static int mlxbf_gige_mdio_write(struct mii_bus *bus, int phy_add,
 	/* Send mdio write request */
 	cmd = mlxbf_gige_mdio_create_cmd(priv->mdio_gw, val, phy_add, phy_reg,
 					 MLXBF_GIGE_MDIO_CL22_WRITE);
-	writel(cmd, priv->mdio_io + priv->mdio_gw->gw_address);
+	pete_writel("drivers/net/ethernet/mellanox/mlxbf_gige/mlxbf_gige_mdio.c:252", cmd, priv->mdio_io + priv->mdio_gw->gw_address);
 
 	/* If the poll timed out, drop the request */
 	ret = readl_poll_timeout_atomic(priv->mdio_io + priv->mdio_gw->gw_address,
@@ -257,7 +257,7 @@ static int mlxbf_gige_mdio_write(struct mii_bus *bus, int phy_add,
 					5, 1000000);
 
 	/* The MDIO lock is set on read. To release it, clear gw register */
-	writel(0, priv->mdio_io + priv->mdio_gw->gw_address);
+	pete_writel("drivers/net/ethernet/mellanox/mlxbf_gige/mlxbf_gige_mdio.c:260", 0, priv->mdio_io + priv->mdio_gw->gw_address);
 
 	return ret;
 }
@@ -272,16 +272,16 @@ static void mlxbf_gige_mdio_cfg(struct mlxbf_gige *priv)
 	if (priv->hw_version == MLXBF_GIGE_VERSION_BF2) {
 		val = MLXBF2_GIGE_MDIO_CFG_VAL;
 		val |= FIELD_PREP(MLXBF2_GIGE_MDIO_CFG_MDC_PERIOD_MASK, mdio_period);
-		writel(val, priv->mdio_io + MLXBF2_GIGE_MDIO_CFG_OFFSET);
+		pete_writel("drivers/net/ethernet/mellanox/mlxbf_gige/mlxbf_gige_mdio.c:275", val, priv->mdio_io + MLXBF2_GIGE_MDIO_CFG_OFFSET);
 	} else {
 		val = FIELD_PREP(MLXBF3_GIGE_MDIO_CFG_MDIO_MODE_MASK, 1) |
 		      FIELD_PREP(MLXBF3_GIGE_MDIO_CFG_MDIO_FULL_DRIVE_MASK, 1);
-		writel(val, priv->mdio_io + MLXBF3_GIGE_MDIO_CFG_REG0);
+		pete_writel("drivers/net/ethernet/mellanox/mlxbf_gige/mlxbf_gige_mdio.c:279", val, priv->mdio_io + MLXBF3_GIGE_MDIO_CFG_REG0);
 		val = FIELD_PREP(MLXBF3_GIGE_MDIO_CFG_MDC_PERIOD_MASK, mdio_period);
-		writel(val, priv->mdio_io + MLXBF3_GIGE_MDIO_CFG_REG1);
+		pete_writel("drivers/net/ethernet/mellanox/mlxbf_gige/mlxbf_gige_mdio.c:281", val, priv->mdio_io + MLXBF3_GIGE_MDIO_CFG_REG1);
 		val = FIELD_PREP(MLXBF3_GIGE_MDIO_CFG_MDIO_IN_SAMP_MASK, 6) |
 		      FIELD_PREP(MLXBF3_GIGE_MDIO_CFG_MDIO_OUT_SAMP_MASK, 13);
-		writel(val, priv->mdio_io + MLXBF3_GIGE_MDIO_CFG_REG2);
+		pete_writel("drivers/net/ethernet/mellanox/mlxbf_gige/mlxbf_gige_mdio.c:284", val, priv->mdio_io + MLXBF3_GIGE_MDIO_CFG_REG2);
 	}
 }
 

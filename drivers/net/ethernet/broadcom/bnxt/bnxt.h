@@ -2270,7 +2270,7 @@ static inline void bnxt_writeq(struct bnxt *bp, u64 val,
 	lo_hi_writeq(val, addr);
 	spin_unlock(&bp->db_lock);
 #else
-	writeq(val, addr);
+	pete_writeq("drivers/net/ethernet/broadcom/bnxt/bnxt.h:2273", val, addr);
 #endif
 }
 
@@ -2310,9 +2310,9 @@ static inline void bnxt_db_write(struct bnxt *bp, struct bnxt_db_info *db,
 	} else {
 		u32 db_val = db->db_key32 | idx;
 
-		writel(db_val, db->doorbell);
+		pete_writel("drivers/net/ethernet/broadcom/bnxt/bnxt.h:2313", db_val, db->doorbell);
 		if (bp->flags & BNXT_FLAG_DOUBLE_DB)
-			writel(db_val, db->doorbell);
+			pete_writel("drivers/net/ethernet/broadcom/bnxt/bnxt.h:2315", db_val, db->doorbell);
 	}
 }
 

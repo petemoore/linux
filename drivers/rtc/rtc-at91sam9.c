@@ -79,9 +79,9 @@ struct sam9_rtc {
 };
 
 #define rtt_readl(rtc, field) \
-	readl((rtc)->rtt + AT91_RTT_ ## field)
+	pete_readl("drivers/rtc/rtc-at91sam9.c:82", (rtc)->rtt + AT91_RTT_ ## field)
 #define rtt_writel(rtc, field, val) \
-	writel((val), (rtc)->rtt + AT91_RTT_ ## field)
+	pete_writel("drivers/rtc/rtc-at91sam9.c:84", (val), (rtc)->rtt + AT91_RTT_ ## field)
 
 static inline unsigned int gpbr_readl(struct sam9_rtc *rtc)
 {

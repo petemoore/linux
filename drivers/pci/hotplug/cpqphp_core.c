@@ -65,12 +65,12 @@ MODULE_PARM_DESC(debug, "Debugging mode enabled or not");
 
 static inline int is_slot64bit(struct slot *slot)
 {
-	return (readb(slot->p_sm_slot + SMBIOS_SLOT_WIDTH) == 0x06) ? 1 : 0;
+	return (pete_readb("drivers/pci/hotplug/cpqphp_core.c:68", slot->p_sm_slot + SMBIOS_SLOT_WIDTH) == 0x06) ? 1 : 0;
 }
 
 static inline int is_slot66mhz(struct slot *slot)
 {
-	return (readb(slot->p_sm_slot + SMBIOS_SLOT_TYPE) == 0x0E) ? 1 : 0;
+	return (pete_readb("drivers/pci/hotplug/cpqphp_core.c:73", slot->p_sm_slot + SMBIOS_SLOT_TYPE) == 0x0E) ? 1 : 0;
 }
 
 /**
@@ -90,10 +90,10 @@ static void __iomem *detect_SMBIOS_pointer(void __iomem *begin, void __iomem *en
 	endp = (end - sizeof(u32) + 1);
 
 	for (fp = begin; fp <= endp; fp += 16) {
-		temp1 = readb(fp);
-		temp2 = readb(fp+1);
-		temp3 = readb(fp+2);
-		temp4 = readb(fp+3);
+		temp1 = pete_readb("drivers/pci/hotplug/cpqphp_core.c:93", fp);
+		temp2 = pete_readb("drivers/pci/hotplug/cpqphp_core.c:94", fp+1);
+		temp3 = pete_readb("drivers/pci/hotplug/cpqphp_core.c:95", fp+2);
+		temp4 = pete_readb("drivers/pci/hotplug/cpqphp_core.c:96", fp+3);
 		if (temp1 == '_' &&
 		    temp2 == 'S' &&
 		    temp3 == 'M' &&
@@ -127,10 +127,10 @@ static int init_SERR(struct controller *ctrl)
 
 	tempdword = ctrl->first_slot;
 
-	number_of_slots = readb(ctrl->hpc_reg + SLOT_MASK) & 0x0F;
+	number_of_slots = pete_readb("drivers/pci/hotplug/cpqphp_core.c:130", ctrl->hpc_reg + SLOT_MASK) & 0x0F;
 	/* Loop through slots */
 	while (number_of_slots) {
-		writeb(0, ctrl->hpc_reg + SLOT_SERR);
+		pete_writeb("drivers/pci/hotplug/cpqphp_core.c:133", 0, ctrl->hpc_reg + SLOT_SERR);
 		tempdword++;
 		number_of_slots--;
 	}
@@ -201,20 +201,20 @@ static void __iomem *get_subsequent_smbios_entry(void __iomem *smbios_start,
 		return NULL;
 
 	/* set p_max to the end of the table */
-	p_max = smbios_start + readw(smbios_table + ST_LENGTH);
+	p_max = smbios_start + pete_readw("drivers/pci/hotplug/cpqphp_core.c:204", smbios_table + ST_LENGTH);
 
 	p_temp = curr;
-	p_temp += readb(curr + SMBIOS_GENERIC_LENGTH);
+	p_temp += pete_readb("drivers/pci/hotplug/cpqphp_core.c:207", curr + SMBIOS_GENERIC_LENGTH);
 
 	while ((p_temp < p_max) && !bail) {
 		/* Look for the double NULL terminator
 		 * The first condition is the previous byte
 		 * and the second is the curr
 		 */
-		if (!previous_byte && !(readb(p_temp)))
+		if (!previous_byte && !(pete_readb("drivers/pci/hotplug/cpqphp_core.c:214", p_temp)))
 			bail = 1;
 
-		previous_byte = readb(p_temp);
+		previous_byte = pete_readb("drivers/pci/hotplug/cpqphp_core.c:217", p_temp);
 		p_temp++;
 	}
 
@@ -254,7 +254,7 @@ static void __iomem *get_SMBIOS_entry(void __iomem *smbios_start,
 					smbios_table, previous);
 
 	while (previous)
-		if (readb(previous + SMBIOS_GENERIC_TYPE) != type)
+		if (pete_readb("drivers/pci/hotplug/cpqphp_core.c:257", previous + SMBIOS_GENERIC_TYPE) != type)
 			previous = get_subsequent_smbios_entry(smbios_start,
 						smbios_table, previous);
 		else
@@ -586,10 +586,10 @@ static int ctrl_slot_setup(struct controller *ctrl,
 
 	dbg("%s\n", __func__);
 
-	tempdword = readl(ctrl->hpc_reg + INT_INPUT_CLEAR);
+	tempdword = pete_readl("drivers/pci/hotplug/cpqphp_core.c:589", ctrl->hpc_reg + INT_INPUT_CLEAR);
 
-	number_of_slots = readb(ctrl->hpc_reg + SLOT_MASK) & 0x0F;
-	slot_device = readb(ctrl->hpc_reg + SLOT_MASK) >> 4;
+	number_of_slots = pete_readb("drivers/pci/hotplug/cpqphp_core.c:591", ctrl->hpc_reg + SLOT_MASK) & 0x0F;
+	slot_device = pete_readb("drivers/pci/hotplug/cpqphp_core.c:592", ctrl->hpc_reg + SLOT_MASK) >> 4;
 	slot_number = ctrl->first_slot;
 
 	while (number_of_slots) {
@@ -608,7 +608,7 @@ static int ctrl_slot_setup(struct controller *ctrl,
 		slot_entry = get_SMBIOS_entry(smbios_start, smbios_table, 9,
 					slot_entry);
 
-		while (slot_entry && (readw(slot_entry + SMBIOS_SLOT_NUMBER) !=
+		while (slot_entry && (pete_readw("drivers/pci/hotplug/cpqphp_core.c:611", slot_entry + SMBIOS_SLOT_NUMBER) !=
 				slot->number)) {
 			slot_entry = get_SMBIOS_entry(smbios_start,
 						smbios_table, 9, slot_entry);
@@ -633,7 +633,7 @@ static int ctrl_slot_setup(struct controller *ctrl,
 			slot->capabilities |= PCISLOT_66_MHZ_OPERATION;
 
 		ctrl_slot =
-			slot_device - (readb(ctrl->hpc_reg + SLOT_MASK) >> 4);
+			slot_device - (pete_readb("drivers/pci/hotplug/cpqphp_core.c:636", ctrl->hpc_reg + SLOT_MASK) >> 4);
 
 		/* Check presence */
 		slot->capabilities |=
@@ -731,8 +731,8 @@ static int one_time_init(void)
 		goto error_rom_start;
 	}
 
-	smbios_start = ioremap(readl(smbios_table + ST_ADDRESS),
-					readw(smbios_table + ST_LENGTH));
+	smbios_start = ioremap(pete_readl("drivers/pci/hotplug/cpqphp_core.c:734", smbios_table + ST_ADDRESS),
+					pete_readw("drivers/pci/hotplug/cpqphp_core.c:735", smbios_table + ST_LENGTH));
 	if (!smbios_start) {
 		err("Could not ioremap memory region taken from SMBIOS values\n");
 		retval = -EIO;
@@ -1079,7 +1079,7 @@ static int cpqhpc_probe(struct pci_dev *pdev, const struct pci_device_id *ent)
 	 * CS: this is leveraging the PCIIRQ routing code from the kernel
 	 * (pci-pc.c: get_irq_routing_table) */
 	rc = get_slot_mapping(ctrl->pci_bus, pdev->bus->number,
-				(readb(ctrl->hpc_reg + SLOT_MASK) >> 4),
+				(pete_readb("drivers/pci/hotplug/cpqphp_core.c:1082", ctrl->hpc_reg + SLOT_MASK) >> 4),
 				&(ctrl->first_slot));
 	dbg("get_slot_mapping: first_slot = %d, returned = %d\n",
 				ctrl->first_slot, rc);
@@ -1089,7 +1089,7 @@ static int cpqhpc_probe(struct pci_dev *pdev, const struct pci_device_id *ent)
 	}
 
 	/* Store PCI Config Space for all devices on this bus */
-	rc = cpqhp_save_config(ctrl, ctrl->bus, readb(ctrl->hpc_reg + SLOT_MASK));
+	rc = cpqhp_save_config(ctrl, ctrl->bus, pete_readb("drivers/pci/hotplug/cpqphp_core.c:1092", ctrl->hpc_reg + SLOT_MASK));
 	if (rc) {
 		err("%s: unable to save PCI configuration data, error %d\n",
 				__func__, rc);
@@ -1120,7 +1120,7 @@ static int cpqhpc_probe(struct pci_dev *pdev, const struct pci_device_id *ent)
 	/*
 	 * Finish setting up the hot plug ctrl device
 	 */
-	ctrl->slot_device_offset = readb(ctrl->hpc_reg + SLOT_MASK) >> 4;
+	ctrl->slot_device_offset = pete_readb("drivers/pci/hotplug/cpqphp_core.c:1123", ctrl->hpc_reg + SLOT_MASK) >> 4;
 	dbg("NumSlots %d\n", ctrl->slot_device_offset);
 
 	ctrl->next_event = 0;
@@ -1135,7 +1135,7 @@ static int cpqhpc_probe(struct pci_dev *pdev, const struct pci_device_id *ent)
 	}
 
 	/* Mask all general input interrupts */
-	writel(0xFFFFFFFFL, ctrl->hpc_reg + INT_MASK);
+	pete_writel("drivers/pci/hotplug/cpqphp_core.c:1138", 0xFFFFFFFFL, ctrl->hpc_reg + INT_MASK);
 
 	/* set up the interrupt */
 	dbg("HPC interrupt = %d\n", ctrl->interrupt);
@@ -1150,16 +1150,16 @@ static int cpqhpc_probe(struct pci_dev *pdev, const struct pci_device_id *ent)
 	/* Enable Shift Out interrupt and clear it, also enable SERR on power
 	 * fault
 	 */
-	temp_word = readw(ctrl->hpc_reg + MISC);
+	temp_word = pete_readw("drivers/pci/hotplug/cpqphp_core.c:1153", ctrl->hpc_reg + MISC);
 	temp_word |= 0x4006;
-	writew(temp_word, ctrl->hpc_reg + MISC);
+	pete_writew("drivers/pci/hotplug/cpqphp_core.c:1155", temp_word, ctrl->hpc_reg + MISC);
 
 	/* Changed 05/05/97 to clear all interrupts at start */
-	writel(0xFFFFFFFFL, ctrl->hpc_reg + INT_INPUT_CLEAR);
+	pete_writel("drivers/pci/hotplug/cpqphp_core.c:1158", 0xFFFFFFFFL, ctrl->hpc_reg + INT_INPUT_CLEAR);
 
-	ctrl->ctrl_int_comp = readl(ctrl->hpc_reg + INT_INPUT_CLEAR);
+	ctrl->ctrl_int_comp = pete_readl("drivers/pci/hotplug/cpqphp_core.c:1160", ctrl->hpc_reg + INT_INPUT_CLEAR);
 
-	writel(0x0L, ctrl->hpc_reg + INT_MASK);
+	pete_writel("drivers/pci/hotplug/cpqphp_core.c:1162", 0x0L, ctrl->hpc_reg + INT_MASK);
 
 	if (!cpqhp_ctrl_list) {
 		cpqhp_ctrl_list = ctrl;
@@ -1174,10 +1174,10 @@ static int cpqhpc_probe(struct pci_dev *pdev, const struct pci_device_id *ent)
 	 */
 	mutex_lock(&ctrl->crit_sect);
 
-	num_of_slots = readb(ctrl->hpc_reg + SLOT_MASK) & 0x0F;
+	num_of_slots = pete_readb("drivers/pci/hotplug/cpqphp_core.c:1177", ctrl->hpc_reg + SLOT_MASK) & 0x0F;
 
 	/* find first device number for the ctrl */
-	device = readb(ctrl->hpc_reg + SLOT_MASK) >> 4;
+	device = pete_readb("drivers/pci/hotplug/cpqphp_core.c:1180", ctrl->hpc_reg + SLOT_MASK) >> 4;
 
 	while (num_of_slots) {
 		dbg("num_of_slots: %d\n", num_of_slots);
@@ -1263,12 +1263,12 @@ static void __exit unload_cpqphpd(void)
 			u16 misc;
 			rc = read_slot_enable(ctrl);
 
-			writeb(0, ctrl->hpc_reg + SLOT_SERR);
-			writel(0xFFFFFFC0L | ~rc, ctrl->hpc_reg + INT_MASK);
+			pete_writeb("drivers/pci/hotplug/cpqphp_core.c:1266", 0, ctrl->hpc_reg + SLOT_SERR);
+			pete_writel("drivers/pci/hotplug/cpqphp_core.c:1267", 0xFFFFFFC0L | ~rc, ctrl->hpc_reg + INT_MASK);
 
-			misc = readw(ctrl->hpc_reg + MISC);
+			misc = pete_readw("drivers/pci/hotplug/cpqphp_core.c:1269", ctrl->hpc_reg + MISC);
 			misc &= 0xFFFD;
-			writew(misc, ctrl->hpc_reg + MISC);
+			pete_writew("drivers/pci/hotplug/cpqphp_core.c:1271", misc, ctrl->hpc_reg + MISC);
 		}
 
 		ctrl_slot_cleanup(ctrl);

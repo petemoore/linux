@@ -42,7 +42,7 @@ static unsigned int __init ux500_read_asicid(phys_addr_t addr)
 	if (!virt)
 		return 0;
 
-	asicid = readl(virt);
+	asicid = pete_readl("drivers/soc/ux500/ux500-soc-id.c:45", virt);
 	iounmap(virt);
 
 	return asicid;

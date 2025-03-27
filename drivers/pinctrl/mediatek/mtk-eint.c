@@ -87,7 +87,7 @@ static unsigned int mtk_eint_can_en_debounce(struct mtk_eint *eint,
 	void __iomem *reg = mtk_eint_get_offset(eint, eint_num,
 						eint->regs->sens);
 
-	if (readl(reg) & bit)
+	if (pete_readl("drivers/pinctrl/mediatek/mtk-eint.c:90", reg) & bit)
 		sens = MTK_EINT_LEVEL_SENSITIVE;
 	else
 		sens = MTK_EINT_EDGE_SENSITIVE;
@@ -114,7 +114,7 @@ static int mtk_eint_flip_edge(struct mtk_eint *eint, int hwirq)
 			reg_offset = eint->regs->pol_clr;
 		else
 			reg_offset = eint->regs->pol_set;
-		writel(mask, reg + reg_offset);
+		pete_writel("drivers/pinctrl/mediatek/mtk-eint.c:117", mask, reg + reg_offset);
 
 		curr_level = eint->gpio_xlate->get_gpio_state(eint->pctl,
 							      hwirq);
@@ -132,7 +132,7 @@ static void mtk_eint_mask(struct irq_data *d)
 
 	eint->cur_mask[d->hwirq >> 5] &= ~mask;
 
-	writel(mask, reg);
+	pete_writel("drivers/pinctrl/mediatek/mtk-eint.c:135", mask, reg);
 }
 
 static void mtk_eint_unmask(struct irq_data *d)
@@ -144,7 +144,7 @@ static void mtk_eint_unmask(struct irq_data *d)
 
 	eint->cur_mask[d->hwirq >> 5] |= mask;
 
-	writel(mask, reg);
+	pete_writel("drivers/pinctrl/mediatek/mtk-eint.c:147", mask, reg);
 
 	if (eint->dual_edge[d->hwirq])
 		mtk_eint_flip_edge(eint, d->hwirq);
@@ -157,7 +157,7 @@ static unsigned int mtk_eint_get_mask(struct mtk_eint *eint,
 	void __iomem *reg = mtk_eint_get_offset(eint, eint_num,
 						eint->regs->mask);
 
-	return !!(readl(reg) & bit);
+	return !!(pete_readl("drivers/pinctrl/mediatek/mtk-eint.c:160", reg) & bit);
 }
 
 static void mtk_eint_ack(struct irq_data *d)
@@ -167,7 +167,7 @@ static void mtk_eint_ack(struct irq_data *d)
 	void __iomem *reg = mtk_eint_get_offset(eint, d->hwirq,
 						eint->regs->ack);
 
-	writel(mask, reg);
+	pete_writel("drivers/pinctrl/mediatek/mtk-eint.c:170", mask, reg);
 }
 
 static int mtk_eint_set_type(struct irq_data *d, unsigned int type)
@@ -199,18 +199,18 @@ static int mtk_eint_set_type(struct irq_data *d, unsigned int type)
 
 	if (type & (IRQ_TYPE_LEVEL_LOW | IRQ_TYPE_EDGE_FALLING)) {
 		reg = mtk_eint_get_offset(eint, d->hwirq, eint->regs->pol_clr);
-		writel(mask, reg);
+		pete_writel("drivers/pinctrl/mediatek/mtk-eint.c:202", mask, reg);
 	} else {
 		reg = mtk_eint_get_offset(eint, d->hwirq, eint->regs->pol_set);
-		writel(mask, reg);
+		pete_writel("drivers/pinctrl/mediatek/mtk-eint.c:205", mask, reg);
 	}
 
 	if (type & (IRQ_TYPE_EDGE_RISING | IRQ_TYPE_EDGE_FALLING)) {
 		reg = mtk_eint_get_offset(eint, d->hwirq, eint->regs->sens_clr);
-		writel(mask, reg);
+		pete_writel("drivers/pinctrl/mediatek/mtk-eint.c:210", mask, reg);
 	} else {
 		reg = mtk_eint_get_offset(eint, d->hwirq, eint->regs->sens_set);
-		writel(mask, reg);
+		pete_writel("drivers/pinctrl/mediatek/mtk-eint.c:213", mask, reg);
 	}
 
 	mtk_eint_ack(d);
@@ -308,8 +308,8 @@ static unsigned int mtk_eint_hw_init(struct mtk_eint *eint)
 	unsigned int i;
 
 	for (i = 0; i < eint->hw->ap_num; i += 32) {
-		writel(0xffffffff, dom_en);
-		writel(0xffffffff, mask_set);
+		pete_writel("drivers/pinctrl/mediatek/mtk-eint.c:311", 0xffffffff, dom_en);
+		pete_writel("drivers/pinctrl/mediatek/mtk-eint.c:312", 0xffffffff, mask_set);
 		dom_en += 4;
 		mask_set += 4;
 	}
@@ -324,12 +324,12 @@ mtk_eint_debounce_process(struct mtk_eint *eint, int index)
 	unsigned int bit, dbnc;
 
 	ctrl_offset = (index / 4) * 4 + eint->regs->dbnc_ctrl;
-	dbnc = readl(eint->base + ctrl_offset);
+	dbnc = pete_readl("drivers/pinctrl/mediatek/mtk-eint.c:327", eint->base + ctrl_offset);
 	bit = MTK_EINT_DBNC_SET_EN << ((index % 4) * 8);
 	if ((bit & dbnc) > 0) {
 		ctrl_offset = (index / 4) * 4 + eint->regs->dbnc_set;
 		rst = MTK_EINT_DBNC_RST_BIT << ((index % 4) * 8);
-		writel(rst, eint->base + ctrl_offset);
+		pete_writel("drivers/pinctrl/mediatek/mtk-eint.c:332", rst, eint->base + ctrl_offset);
 	}
 }
 
@@ -345,7 +345,7 @@ static void mtk_eint_irq_handler(struct irq_desc *desc)
 	chained_irq_enter(chip, desc);
 	for (eint_num = 0; eint_num < eint->hw->ap_num; eint_num += 32,
 	     reg += 4) {
-		status = readl(reg);
+		status = pete_readl("drivers/pinctrl/mediatek/mtk-eint.c:348", reg);
 		while (status) {
 			offset = __ffs(status);
 			mask_offset = eint_num >> 5;
@@ -371,7 +371,7 @@ static void mtk_eint_irq_handler(struct irq_desc *desc)
 				 * Clear soft-irq in case we raised it last
 				 * time.
 				 */
-				writel(BIT(offset), reg - eint->regs->stat +
+				pete_writel("drivers/pinctrl/mediatek/mtk-eint.c:374", BIT(offset), reg - eint->regs->stat +
 				       eint->regs->soft_clr);
 
 				start_level =
@@ -389,7 +389,7 @@ static void mtk_eint_irq_handler(struct irq_desc *desc)
 				 * interrupt, raised it through soft-irq.
 				 */
 				if (start_level != curr_level)
-					writel(BIT(offset), reg -
+					pete_writel("drivers/pinctrl/mediatek/mtk-eint.c:392", BIT(offset), reg -
 					       eint->regs->stat +
 					       eint->regs->soft_set);
 			}
@@ -454,12 +454,12 @@ int mtk_eint_set_debounce(struct mtk_eint *eint, unsigned long eint_num,
 	}
 
 	clr_bit = 0xff << eint_offset;
-	writel(clr_bit, eint->base + clr_offset);
+	pete_writel("drivers/pinctrl/mediatek/mtk-eint.c:457", clr_bit, eint->base + clr_offset);
 
 	bit = ((dbnc << MTK_EINT_DBNC_SET_DBNC_BITS) | MTK_EINT_DBNC_SET_EN) <<
 		eint_offset;
 	rst = MTK_EINT_DBNC_RST_BIT << eint_offset;
-	writel(rst | bit, eint->base + set_offset);
+	pete_writel("drivers/pinctrl/mediatek/mtk-eint.c:462", rst | bit, eint->base + set_offset);
 
 	/*
 	 * Delay a while (more than 2T) to wait for hw debounce counter reset

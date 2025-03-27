@@ -24,7 +24,7 @@ static int spl2sw_mdio_access(struct spl2sw_common *comm, u8 cmd, u8 addr, u8 re
 	/* Note that addr (of phy) should match either ext_phy0_addr
 	 * or ext_phy1_addr, or mdio commands won't be sent out.
 	 */
-	reg = readl(comm->l2sw_reg_base + L2SW_MAC_FORCE_MODE);
+	reg = pete_readl("drivers/net/ethernet/sunplus/spl2sw_mdio.c:27", comm->l2sw_reg_base + L2SW_MAC_FORCE_MODE);
 	reg &= ~MAC_EXT_PHY0_ADDR;
 	reg |= FIELD_PREP(MAC_EXT_PHY0_ADDR, addr);
 
@@ -35,8 +35,8 @@ static int spl2sw_mdio_access(struct spl2sw_common *comm, u8 cmd, u8 addr, u8 re
 	 * No interrupt is allowed in between.
 	 */
 	spin_lock_irq(&comm->mdio_lock);
-	writel(reg, comm->l2sw_reg_base + L2SW_MAC_FORCE_MODE);
-	writel(reg2, comm->l2sw_reg_base + L2SW_PHY_CNTL_REG0);
+	pete_writel("drivers/net/ethernet/sunplus/spl2sw_mdio.c:38", reg, comm->l2sw_reg_base + L2SW_MAC_FORCE_MODE);
+	pete_writel("drivers/net/ethernet/sunplus/spl2sw_mdio.c:39", reg2, comm->l2sw_reg_base + L2SW_PHY_CNTL_REG0);
 	spin_unlock_irq(&comm->mdio_lock);
 
 	ret = read_poll_timeout(readl, val, val & cmd, 1, 1000, true,
@@ -46,10 +46,10 @@ static int spl2sw_mdio_access(struct spl2sw_common *comm, u8 cmd, u8 addr, u8 re
 	 * from sending mdio command to phy by
 	 * hardware auto-mdio function.
 	 */
-	reg = readl(comm->l2sw_reg_base + L2SW_MAC_FORCE_MODE);
+	reg = pete_readl("drivers/net/ethernet/sunplus/spl2sw_mdio.c:49", comm->l2sw_reg_base + L2SW_MAC_FORCE_MODE);
 	reg &= ~MAC_EXT_PHY0_ADDR;
 	reg |= FIELD_PREP(MAC_EXT_PHY0_ADDR, 31);
-	writel(reg, comm->l2sw_reg_base + L2SW_MAC_FORCE_MODE);
+	pete_writel("drivers/net/ethernet/sunplus/spl2sw_mdio.c:52", reg, comm->l2sw_reg_base + L2SW_MAC_FORCE_MODE);
 
 	if (ret == 0)
 		return val >> 16;

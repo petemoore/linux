@@ -298,7 +298,7 @@ static irqreturn_t meson_spicc_irq(int irq, void *data)
 
 	if (!spicc->xfer_remain) {
 		/* Disable all IRQs */
-		writel(0, spicc->base + SPICC_INTREG);
+		pete_writel("drivers/spi/spi-meson-spicc.c:301", 0, spicc->base + SPICC_INTREG);
 
 		complete(&spicc->done);
 
@@ -525,7 +525,7 @@ static int meson_spicc_unprepare_transfer(struct spi_master *master)
 	u32 conf = readl_relaxed(spicc->base + SPICC_CONREG) & SPICC_DATARATE_MASK;
 
 	/* Disable all IRQs */
-	writel(0, spicc->base + SPICC_INTREG);
+	pete_writel("drivers/spi/spi-meson-spicc.c:528", 0, spicc->base + SPICC_INTREG);
 
 	device_reset_optional(&spicc->pdev->dev);
 
@@ -914,7 +914,7 @@ static void meson_spicc_remove(struct platform_device *pdev)
 	struct meson_spicc_device *spicc = platform_get_drvdata(pdev);
 
 	/* Disable SPI */
-	writel(0, spicc->base + SPICC_CONREG);
+	pete_writel("drivers/spi/spi-meson-spicc.c:917", 0, spicc->base + SPICC_CONREG);
 
 	clk_disable_unprepare(spicc->core);
 	clk_disable_unprepare(spicc->pclk);

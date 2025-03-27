@@ -785,10 +785,10 @@ static void mtk_thermal_get_bank(struct mtk_thermal_bank *bank)
 	if (mt->conf->need_switch_bank) {
 		mutex_lock(&mt->lock);
 
-		val = readl(mt->thermal_base + PTPCORESEL);
+		val = pete_readl("drivers/thermal/mediatek/auxadc_thermal.c:788", mt->thermal_base + PTPCORESEL);
 		val &= ~0xf;
 		val |= bank->id;
-		writel(val, mt->thermal_base + PTPCORESEL);
+		pete_writel("drivers/thermal/mediatek/auxadc_thermal.c:791", val, mt->thermal_base + PTPCORESEL);
 	}
 }
 
@@ -821,7 +821,7 @@ static int mtk_thermal_bank_temperature(struct mtk_thermal_bank *bank)
 	u32 raw;
 
 	for (i = 0; i < conf->bank_data[bank->id].num_sensors; i++) {
-		raw = readl(mt->thermal_base + conf->msr[i]);
+		raw = pete_readl("drivers/thermal/mediatek/auxadc_thermal.c:824", mt->thermal_base + conf->msr[i]);
 
 		temp = mt->raw_to_mcelsius(
 			mt, conf->bank_data[bank->id].sensors[i], raw);
@@ -887,29 +887,29 @@ static void mtk_thermal_init_bank(struct mtk_thermal *mt, int num,
 	mtk_thermal_get_bank(bank);
 
 	/* bus clock 66M counting unit is 12 * 15.15ns * 256 = 46.540us */
-	writel(TEMP_MONCTL1_PERIOD_UNIT(12), controller_base + TEMP_MONCTL1);
+	pete_writel("drivers/thermal/mediatek/auxadc_thermal.c:890", TEMP_MONCTL1_PERIOD_UNIT(12), controller_base + TEMP_MONCTL1);
 
 	/*
 	 * filt interval is 1 * 46.540us = 46.54us,
 	 * sen interval is 429 * 46.540us = 19.96ms
 	 */
-	writel(TEMP_MONCTL2_FILTER_INTERVAL(1) |
+	pete_writel("drivers/thermal/mediatek/auxadc_thermal.c:896", TEMP_MONCTL2_FILTER_INTERVAL(1) |
 			TEMP_MONCTL2_SENSOR_INTERVAL(429),
 			controller_base + TEMP_MONCTL2);
 
 	/* poll is set to 10u */
-	writel(TEMP_AHBPOLL_ADC_POLL_INTERVAL(768),
+	pete_writel("drivers/thermal/mediatek/auxadc_thermal.c:901", TEMP_AHBPOLL_ADC_POLL_INTERVAL(768),
 	       controller_base + TEMP_AHBPOLL);
 
 	/* temperature sampling control, 1 sample */
-	writel(0x0, controller_base + TEMP_MSRCTL0);
+	pete_writel("drivers/thermal/mediatek/auxadc_thermal.c:905", 0x0, controller_base + TEMP_MSRCTL0);
 
 	/* exceed this polling time, IRQ would be inserted */
-	writel(0xffffffff, controller_base + TEMP_AHBTO);
+	pete_writel("drivers/thermal/mediatek/auxadc_thermal.c:908", 0xffffffff, controller_base + TEMP_AHBTO);
 
 	/* number of interrupts per event, 1 is enough */
-	writel(0x0, controller_base + TEMP_MONIDET0);
-	writel(0x0, controller_base + TEMP_MONIDET1);
+	pete_writel("drivers/thermal/mediatek/auxadc_thermal.c:911", 0x0, controller_base + TEMP_MONIDET0);
+	pete_writel("drivers/thermal/mediatek/auxadc_thermal.c:912", 0x0, controller_base + TEMP_MONIDET1);
 
 	/*
 	 * The MT8173 thermal controller does not have its own ADC. Instead it
@@ -924,55 +924,55 @@ static void mtk_thermal_init_bank(struct mtk_thermal *mt, int num,
 	 * this value will be stored to TEMP_PNPMUXADDR (TEMP_SPARE0)
 	 * automatically by hw
 	 */
-	writel(BIT(conf->auxadc_channel), controller_base + TEMP_ADCMUX);
+	pete_writel("drivers/thermal/mediatek/auxadc_thermal.c:927", BIT(conf->auxadc_channel), controller_base + TEMP_ADCMUX);
 
 	/* AHB address for auxadc mux selection */
-	writel(auxadc_phys_base + AUXADC_CON1_CLR_V,
+	pete_writel("drivers/thermal/mediatek/auxadc_thermal.c:930", auxadc_phys_base + AUXADC_CON1_CLR_V,
 	       controller_base + TEMP_ADCMUXADDR);
 
 	if (mt->conf->version == MTK_THERMAL_V1) {
 		/* AHB address for pnp sensor mux selection */
-		writel(apmixed_phys_base + APMIXED_SYS_TS_CON1,
+		pete_writel("drivers/thermal/mediatek/auxadc_thermal.c:935", apmixed_phys_base + APMIXED_SYS_TS_CON1,
 		       controller_base + TEMP_PNPMUXADDR);
 	}
 
 	/* AHB value for auxadc enable */
-	writel(BIT(conf->auxadc_channel), controller_base + TEMP_ADCEN);
+	pete_writel("drivers/thermal/mediatek/auxadc_thermal.c:940", BIT(conf->auxadc_channel), controller_base + TEMP_ADCEN);
 
 	/* AHB address for auxadc enable (channel 0 immediate mode selected) */
-	writel(auxadc_phys_base + AUXADC_CON1_SET_V,
+	pete_writel("drivers/thermal/mediatek/auxadc_thermal.c:943", auxadc_phys_base + AUXADC_CON1_SET_V,
 	       controller_base + TEMP_ADCENADDR);
 
 	/* AHB address for auxadc valid bit */
-	writel(auxadc_phys_base + AUXADC_DATA(conf->auxadc_channel),
+	pete_writel("drivers/thermal/mediatek/auxadc_thermal.c:947", auxadc_phys_base + AUXADC_DATA(conf->auxadc_channel),
 	       controller_base + TEMP_ADCVALIDADDR);
 
 	/* AHB address for auxadc voltage output */
-	writel(auxadc_phys_base + AUXADC_DATA(conf->auxadc_channel),
+	pete_writel("drivers/thermal/mediatek/auxadc_thermal.c:951", auxadc_phys_base + AUXADC_DATA(conf->auxadc_channel),
 	       controller_base + TEMP_ADCVOLTADDR);
 
 	/* read valid & voltage are at the same register */
-	writel(0x0, controller_base + TEMP_RDCTRL);
+	pete_writel("drivers/thermal/mediatek/auxadc_thermal.c:955", 0x0, controller_base + TEMP_RDCTRL);
 
 	/* indicate where the valid bit is */
-	writel(TEMP_ADCVALIDMASK_VALID_HIGH | TEMP_ADCVALIDMASK_VALID_POS(12),
+	pete_writel("drivers/thermal/mediatek/auxadc_thermal.c:958", TEMP_ADCVALIDMASK_VALID_HIGH | TEMP_ADCVALIDMASK_VALID_POS(12),
 	       controller_base + TEMP_ADCVALIDMASK);
 
 	/* no shift */
-	writel(0x0, controller_base + TEMP_ADCVOLTAGESHIFT);
+	pete_writel("drivers/thermal/mediatek/auxadc_thermal.c:962", 0x0, controller_base + TEMP_ADCVOLTAGESHIFT);
 
 	/* enable auxadc mux write transaction */
-	writel(TEMP_ADCWRITECTRL_ADC_MUX_WRITE,
+	pete_writel("drivers/thermal/mediatek/auxadc_thermal.c:965", TEMP_ADCWRITECTRL_ADC_MUX_WRITE,
 		controller_base + TEMP_ADCWRITECTRL);
 
 	for (i = 0; i < conf->bank_data[num].num_sensors; i++)
-		writel(conf->sensor_mux_values[conf->bank_data[num].sensors[i]],
+		pete_writel("drivers/thermal/mediatek/auxadc_thermal.c:969", conf->sensor_mux_values[conf->bank_data[num].sensors[i]],
 		       mt->thermal_base + conf->adcpnp[i]);
 
-	writel((1 << conf->bank_data[num].num_sensors) - 1,
+	pete_writel("drivers/thermal/mediatek/auxadc_thermal.c:972", (1 << conf->bank_data[num].num_sensors) - 1,
 	       controller_base + TEMP_MONCTL0);
 
-	writel(TEMP_ADCWRITECTRL_ADC_PNP_WRITE |
+	pete_writel("drivers/thermal/mediatek/auxadc_thermal.c:975", TEMP_ADCWRITECTRL_ADC_PNP_WRITE |
 	       TEMP_ADCWRITECTRL_ADC_MUX_WRITE,
 	       controller_base + TEMP_ADCWRITECTRL);
 
@@ -1173,10 +1173,10 @@ static void mtk_thermal_turn_on_buffer(struct mtk_thermal *mt,
 	if (!mt->conf->apmixed_buffer_ctl_reg)
 		return;
 
-	tmp = readl(apmixed_base + mt->conf->apmixed_buffer_ctl_reg);
+	tmp = pete_readl("drivers/thermal/mediatek/auxadc_thermal.c:1176", apmixed_base + mt->conf->apmixed_buffer_ctl_reg);
 	tmp &= mt->conf->apmixed_buffer_ctl_mask;
 	tmp |= mt->conf->apmixed_buffer_ctl_set;
-	writel(tmp, apmixed_base + mt->conf->apmixed_buffer_ctl_reg);
+	pete_writel("drivers/thermal/mediatek/auxadc_thermal.c:1179", tmp, apmixed_base + mt->conf->apmixed_buffer_ctl_reg);
 	udelay(200);
 }
 
@@ -1185,10 +1185,10 @@ static void mtk_thermal_release_periodic_ts(struct mtk_thermal *mt,
 {
 	int tmp;
 
-	writel(0x800, auxadc_base + AUXADC_CON1_SET_V);
-	writel(0x1, mt->thermal_base + TEMP_MONCTL0);
-	tmp = readl(mt->thermal_base + TEMP_MSRCTL1);
-	writel((tmp & (~0x10e)), mt->thermal_base + TEMP_MSRCTL1);
+	pete_writel("drivers/thermal/mediatek/auxadc_thermal.c:1188", 0x800, auxadc_base + AUXADC_CON1_SET_V);
+	pete_writel("drivers/thermal/mediatek/auxadc_thermal.c:1189", 0x1, mt->thermal_base + TEMP_MONCTL0);
+	tmp = pete_readl("drivers/thermal/mediatek/auxadc_thermal.c:1190", mt->thermal_base + TEMP_MSRCTL1);
+	pete_writel("drivers/thermal/mediatek/auxadc_thermal.c:1191", (tmp & (~0x10e)), mt->thermal_base + TEMP_MSRCTL1);
 }
 
 static int mtk_thermal_probe(struct platform_device *pdev)

@@ -386,13 +386,13 @@ static int jh7110_sys_init_hw(struct gpio_chip *gc)
 			struct jh7110_pinctrl, gc);
 
 	/* mask all GPIO interrupts */
-	writel(0U, sfp->base + JH7110_SYS_GPIOIE0);
-	writel(0U, sfp->base + JH7110_SYS_GPIOIE1);
+	pete_writel("drivers/pinctrl/starfive/pinctrl-starfive-jh7110-sys.c:389", 0U, sfp->base + JH7110_SYS_GPIOIE0);
+	pete_writel("drivers/pinctrl/starfive/pinctrl-starfive-jh7110-sys.c:390", 0U, sfp->base + JH7110_SYS_GPIOIE1);
 	/* clear edge interrupt flags */
-	writel(~0U, sfp->base + JH7110_SYS_GPIOIC0);
-	writel(~0U, sfp->base + JH7110_SYS_GPIOIC1);
+	pete_writel("drivers/pinctrl/starfive/pinctrl-starfive-jh7110-sys.c:392", ~0U, sfp->base + JH7110_SYS_GPIOIC0);
+	pete_writel("drivers/pinctrl/starfive/pinctrl-starfive-jh7110-sys.c:393", ~0U, sfp->base + JH7110_SYS_GPIOIC1);
 	/* enable GPIO interrupts */
-	writel(1U, sfp->base + JH7110_SYS_GPIOEN);
+	pete_writel("drivers/pinctrl/starfive/pinctrl-starfive-jh7110-sys.c:395", 1U, sfp->base + JH7110_SYS_GPIOEN);
 	return 0;
 }
 

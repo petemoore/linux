@@ -30,8 +30,8 @@ static void thunder_mmc_release_bus(struct cvm_mmc_host *host)
 
 static void thunder_mmc_int_enable(struct cvm_mmc_host *host, u64 val)
 {
-	writeq(val, host->base + MIO_EMM_INT(host));
-	writeq(val, host->base + MIO_EMM_INT_EN_SET(host));
+	pete_writeq("drivers/mmc/host/cavium-thunderx.c:33", val, host->base + MIO_EMM_INT(host));
+	pete_writeq("drivers/mmc/host/cavium-thunderx.c:34", val, host->base + MIO_EMM_INT_EN_SET(host));
 }
 
 static int thunder_mmc_register_interrupts(struct cvm_mmc_host *host,
@@ -120,10 +120,10 @@ static int thunder_mmc_probe(struct pci_dev *pdev,
 	 * Clear out any pending interrupts that may be left over from
 	 * bootloader. Writing 1 to the bits clears them.
 	 */
-	writeq(127, host->base + MIO_EMM_INT_EN(host));
-	writeq(3, host->base + MIO_EMM_DMA_INT_ENA_W1C(host));
+	pete_writeq("drivers/mmc/host/cavium-thunderx.c:123", 127, host->base + MIO_EMM_INT_EN(host));
+	pete_writeq("drivers/mmc/host/cavium-thunderx.c:124", 3, host->base + MIO_EMM_DMA_INT_ENA_W1C(host));
 	/* Clear DMA FIFO */
-	writeq(BIT_ULL(16), host->base + MIO_EMM_DMA_FIFO_CFG(host));
+	pete_writeq("drivers/mmc/host/cavium-thunderx.c:126", BIT_ULL(16), host->base + MIO_EMM_DMA_FIFO_CFG(host));
 
 	ret = thunder_mmc_register_interrupts(host, pdev);
 	if (ret)
@@ -178,9 +178,9 @@ static void thunder_mmc_remove(struct pci_dev *pdev)
 		if (host->slot[i])
 			cvm_mmc_of_slot_remove(host->slot[i]);
 
-	dma_cfg = readq(host->dma_base + MIO_EMM_DMA_CFG(host));
+	dma_cfg = pete_readq("drivers/mmc/host/cavium-thunderx.c:181", host->dma_base + MIO_EMM_DMA_CFG(host));
 	dma_cfg &= ~MIO_EMM_DMA_CFG_EN;
-	writeq(dma_cfg, host->dma_base + MIO_EMM_DMA_CFG(host));
+	pete_writeq("drivers/mmc/host/cavium-thunderx.c:183", dma_cfg, host->dma_base + MIO_EMM_DMA_CFG(host));
 
 	clk_disable_unprepare(host->clk);
 	pci_release_regions(pdev);

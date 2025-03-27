@@ -605,10 +605,10 @@ static void byt_set_group_simple_mux(struct intel_pinctrl *vg,
 			continue;
 		}
 
-		value = readl(padcfg0);
+		value = pete_readl("drivers/pinctrl/intel/pinctrl-baytrail.c:608", padcfg0);
 		value &= ~BYT_PIN_MUX;
 		value |= func;
-		writel(value, padcfg0);
+		pete_writel("drivers/pinctrl/intel/pinctrl-baytrail.c:611", value, padcfg0);
 	}
 
 	raw_spin_unlock_irqrestore(&byt_lock, flags);
@@ -634,10 +634,10 @@ static void byt_set_group_mixed_mux(struct intel_pinctrl *vg,
 			continue;
 		}
 
-		value = readl(padcfg0);
+		value = pete_readl("drivers/pinctrl/intel/pinctrl-baytrail.c:637", padcfg0);
 		value &= ~BYT_PIN_MUX;
 		value |= func[i];
-		writel(value, padcfg0);
+		pete_writel("drivers/pinctrl/intel/pinctrl-baytrail.c:640", value, padcfg0);
 	}
 
 	raw_spin_unlock_irqrestore(&byt_lock, flags);
@@ -682,13 +682,13 @@ static void byt_gpio_clear_triggering(struct intel_pinctrl *vg, unsigned int off
 	u32 value;
 
 	raw_spin_lock_irqsave(&byt_lock, flags);
-	value = readl(reg);
+	value = pete_readl("drivers/pinctrl/intel/pinctrl-baytrail.c:685", reg);
 
 	/* Do not clear direct-irq enabled IRQs (from gpio_disable_free) */
 	if (!(value & BYT_DIRECT_IRQ_EN))
 		value &= ~(BYT_TRIG_POS | BYT_TRIG_NEG | BYT_TRIG_LVL);
 
-	writel(value, reg);
+	pete_writel("drivers/pinctrl/intel/pinctrl-baytrail.c:691", value, reg);
 	raw_spin_unlock_irqrestore(&byt_lock, flags);
 }
 
@@ -712,12 +712,12 @@ static int byt_gpio_request_enable(struct pinctrl_dev *pctl_dev,
 	 * configured correctly we allow changing the mux value from
 	 * request (but print out warning about that).
 	 */
-	value = readl(reg) & BYT_PIN_MUX;
+	value = pete_readl("drivers/pinctrl/intel/pinctrl-baytrail.c:715", reg) & BYT_PIN_MUX;
 	gpio_mux = byt_get_gpio_mux(vg, offset);
 	if (gpio_mux != value) {
-		value = readl(reg) & ~BYT_PIN_MUX;
+		value = pete_readl("drivers/pinctrl/intel/pinctrl-baytrail.c:718", reg) & ~BYT_PIN_MUX;
 		value |= gpio_mux;
-		writel(value, reg);
+		pete_writel("drivers/pinctrl/intel/pinctrl-baytrail.c:720", value, reg);
 
 		dev_warn(vg->dev, FW_BUG "Pin %i: forcibly re-configured as GPIO\n", offset);
 	}
@@ -750,7 +750,7 @@ static void byt_gpio_direct_irq_check(struct intel_pinctrl *vg,
 	 * sense, so let's at least inform the caller before they shoot
 	 * themselves in the foot.
 	 */
-	if (readl(conf_reg) & BYT_DIRECT_IRQ_EN)
+	if (pete_readl("drivers/pinctrl/intel/pinctrl-baytrail.c:753", conf_reg) & BYT_DIRECT_IRQ_EN)
 		dev_info_once(vg->dev,
 			      "Potential Error: Pin %i: forcibly set GPIO with DIRECT_IRQ_EN to output\n",
 			      offset);
@@ -768,14 +768,14 @@ static int byt_gpio_set_direction(struct pinctrl_dev *pctl_dev,
 
 	raw_spin_lock_irqsave(&byt_lock, flags);
 
-	value = readl(val_reg);
+	value = pete_readl("drivers/pinctrl/intel/pinctrl-baytrail.c:771", val_reg);
 	value &= ~BYT_DIR_MASK;
 	if (input)
 		value |= BYT_OUTPUT_EN;
 	else
 		byt_gpio_direct_irq_check(vg, offset);
 
-	writel(value, val_reg);
+	pete_writel("drivers/pinctrl/intel/pinctrl-baytrail.c:778", value, val_reg);
 
 	raw_spin_unlock_irqrestore(&byt_lock, flags);
 
@@ -847,9 +847,9 @@ static int byt_pin_config_get(struct pinctrl_dev *pctl_dev, unsigned int offset,
 	u16 arg = 0;
 
 	raw_spin_lock_irqsave(&byt_lock, flags);
-	conf = readl(conf_reg);
+	conf = pete_readl("drivers/pinctrl/intel/pinctrl-baytrail.c:850", conf_reg);
 	pull = conf & BYT_PULL_ASSIGN_MASK;
-	val = readl(val_reg);
+	val = pete_readl("drivers/pinctrl/intel/pinctrl-baytrail.c:852", val_reg);
 	raw_spin_unlock_irqrestore(&byt_lock, flags);
 
 	switch (param) {
@@ -878,7 +878,7 @@ static int byt_pin_config_get(struct pinctrl_dev *pctl_dev, unsigned int offset,
 			return -EINVAL;
 
 		raw_spin_lock_irqsave(&byt_lock, flags);
-		debounce = readl(db_reg);
+		debounce = pete_readl("drivers/pinctrl/intel/pinctrl-baytrail.c:881", db_reg);
 		raw_spin_unlock_irqrestore(&byt_lock, flags);
 
 		switch (debounce & BYT_DEBOUNCE_PULSE_MASK) {
@@ -934,8 +934,8 @@ static int byt_pin_config_set(struct pinctrl_dev *pctl_dev,
 
 	raw_spin_lock_irqsave(&byt_lock, flags);
 
-	conf = readl(conf_reg);
-	val = readl(val_reg);
+	conf = pete_readl("drivers/pinctrl/intel/pinctrl-baytrail.c:937", conf_reg);
+	val = pete_readl("drivers/pinctrl/intel/pinctrl-baytrail.c:938", val_reg);
 
 	for (i = 0; i < num_configs; i++) {
 		param = pinconf_to_config_param(configs[i]);
@@ -956,7 +956,7 @@ static int byt_pin_config_set(struct pinctrl_dev *pctl_dev,
 			 */
 			if (val & BYT_INPUT_EN) {
 				val &= ~BYT_INPUT_EN;
-				writel(val, val_reg);
+				pete_writel("drivers/pinctrl/intel/pinctrl-baytrail.c:959", val, val_reg);
 				dev_warn(vg->dev, "Pin %i: forcibly set to input mode\n", offset);
 			}
 
@@ -976,7 +976,7 @@ static int byt_pin_config_set(struct pinctrl_dev *pctl_dev,
 			 */
 			if (val & BYT_INPUT_EN) {
 				val &= ~BYT_INPUT_EN;
-				writel(val, val_reg);
+				pete_writel("drivers/pinctrl/intel/pinctrl-baytrail.c:979", val, val_reg);
 				dev_warn(vg->dev, "Pin %i: forcibly set to input mode\n", offset);
 			}
 
@@ -1029,9 +1029,9 @@ static int byt_pin_config_set(struct pinctrl_dev *pctl_dev,
 			if (ret)
 				break;
 
-			debounce = readl(db_reg);
+			debounce = pete_readl("drivers/pinctrl/intel/pinctrl-baytrail.c:1032", db_reg);
 			debounce = (debounce & ~BYT_DEBOUNCE_PULSE_MASK) | db_pulse;
-			writel(debounce, db_reg);
+			pete_writel("drivers/pinctrl/intel/pinctrl-baytrail.c:1034", debounce, db_reg);
 
 			break;
 		default:
@@ -1043,7 +1043,7 @@ static int byt_pin_config_set(struct pinctrl_dev *pctl_dev,
 	}
 
 	if (!ret)
-		writel(conf, conf_reg);
+		pete_writel("drivers/pinctrl/intel/pinctrl-baytrail.c:1046", conf, conf_reg);
 
 	raw_spin_unlock_irqrestore(&byt_lock, flags);
 
@@ -1071,7 +1071,7 @@ static int byt_gpio_get(struct gpio_chip *chip, unsigned int offset)
 	u32 val;
 
 	raw_spin_lock_irqsave(&byt_lock, flags);
-	val = readl(reg);
+	val = pete_readl("drivers/pinctrl/intel/pinctrl-baytrail.c:1074", reg);
 	raw_spin_unlock_irqrestore(&byt_lock, flags);
 
 	return !!(val & BYT_LEVEL);
@@ -1088,11 +1088,11 @@ static void byt_gpio_set(struct gpio_chip *chip, unsigned int offset, int value)
 		return;
 
 	raw_spin_lock_irqsave(&byt_lock, flags);
-	old_val = readl(reg);
+	old_val = pete_readl("drivers/pinctrl/intel/pinctrl-baytrail.c:1091", reg);
 	if (value)
-		writel(old_val | BYT_LEVEL, reg);
+		pete_writel("drivers/pinctrl/intel/pinctrl-baytrail.c:1093", old_val | BYT_LEVEL, reg);
 	else
-		writel(old_val & ~BYT_LEVEL, reg);
+		pete_writel("drivers/pinctrl/intel/pinctrl-baytrail.c:1095", old_val & ~BYT_LEVEL, reg);
 	raw_spin_unlock_irqrestore(&byt_lock, flags);
 }
 
@@ -1107,7 +1107,7 @@ static int byt_gpio_get_direction(struct gpio_chip *chip, unsigned int offset)
 		return -EINVAL;
 
 	raw_spin_lock_irqsave(&byt_lock, flags);
-	value = readl(reg);
+	value = pete_readl("drivers/pinctrl/intel/pinctrl-baytrail.c:1110", reg);
 	raw_spin_unlock_irqrestore(&byt_lock, flags);
 
 	if (!(value & BYT_OUTPUT_EN))
@@ -1127,10 +1127,10 @@ static int byt_gpio_direction_input(struct gpio_chip *chip, unsigned int offset)
 
 	raw_spin_lock_irqsave(&byt_lock, flags);
 
-	reg = readl(val_reg);
+	reg = pete_readl("drivers/pinctrl/intel/pinctrl-baytrail.c:1130", val_reg);
 	reg &= ~BYT_DIR_MASK;
 	reg |= BYT_OUTPUT_EN;
-	writel(reg, val_reg);
+	pete_writel("drivers/pinctrl/intel/pinctrl-baytrail.c:1133", reg, val_reg);
 
 	raw_spin_unlock_irqrestore(&byt_lock, flags);
 	return 0;
@@ -1154,14 +1154,14 @@ static int byt_gpio_direction_output(struct gpio_chip *chip,
 
 	byt_gpio_direct_irq_check(vg, offset);
 
-	reg = readl(val_reg);
+	reg = pete_readl("drivers/pinctrl/intel/pinctrl-baytrail.c:1157", val_reg);
 	reg &= ~BYT_DIR_MASK;
 	if (value)
 		reg |= BYT_LEVEL;
 	else
 		reg &= ~BYT_LEVEL;
 
-	writel(reg, val_reg);
+	pete_writel("drivers/pinctrl/intel/pinctrl-baytrail.c:1164", reg, val_reg);
 
 	raw_spin_unlock_irqrestore(&byt_lock, flags);
 	return 0;
@@ -1197,8 +1197,8 @@ static void byt_gpio_dbg_show(struct seq_file *s, struct gpio_chip *chip)
 		}
 
 		raw_spin_lock_irqsave(&byt_lock, flags);
-		conf0 = readl(conf_reg);
-		val = readl(val_reg);
+		conf0 = pete_readl("drivers/pinctrl/intel/pinctrl-baytrail.c:1200", conf_reg);
+		val = pete_readl("drivers/pinctrl/intel/pinctrl-baytrail.c:1201", val_reg);
 		raw_spin_unlock_irqrestore(&byt_lock, flags);
 
 		comm = intel_get_community(vg, pin);
@@ -1284,7 +1284,7 @@ static void byt_irq_ack(struct irq_data *d)
 		return;
 
 	raw_spin_lock(&byt_lock);
-	writel(BIT(hwirq % 32), reg);
+	pete_writel("drivers/pinctrl/intel/pinctrl-baytrail.c:1287", BIT(hwirq % 32), reg);
 	raw_spin_unlock(&byt_lock);
 }
 
@@ -1314,7 +1314,7 @@ static void byt_irq_unmask(struct irq_data *d)
 		return;
 
 	raw_spin_lock_irqsave(&byt_lock, flags);
-	value = readl(reg);
+	value = pete_readl("drivers/pinctrl/intel/pinctrl-baytrail.c:1317", reg);
 
 	switch (irqd_get_trigger_type(d)) {
 	case IRQ_TYPE_LEVEL_HIGH:
@@ -1334,7 +1334,7 @@ static void byt_irq_unmask(struct irq_data *d)
 		break;
 	}
 
-	writel(value, reg);
+	pete_writel("drivers/pinctrl/intel/pinctrl-baytrail.c:1337", value, reg);
 
 	raw_spin_unlock_irqrestore(&byt_lock, flags);
 }
@@ -1352,7 +1352,7 @@ static int byt_irq_type(struct irq_data *d, unsigned int type)
 		return -EINVAL;
 
 	raw_spin_lock_irqsave(&byt_lock, flags);
-	value = readl(reg);
+	value = pete_readl("drivers/pinctrl/intel/pinctrl-baytrail.c:1355", reg);
 
 	WARN(value & BYT_DIRECT_IRQ_EN,
 	     "Bad pad config for IO mode, force DIRECT_IRQ_EN bit clearing");
@@ -1366,7 +1366,7 @@ static int byt_irq_type(struct irq_data *d, unsigned int type)
 	value |= BYT_GLITCH_FILTER_EN | BYT_GLITCH_F_SLOW_CLK |
 		 BYT_GLITCH_F_FAST_CLK;
 
-	writel(value, reg);
+	pete_writel("drivers/pinctrl/intel/pinctrl-baytrail.c:1369", value, reg);
 
 	if (type & IRQ_TYPE_EDGE_BOTH)
 		irq_set_handler_locked(d, handle_edge_irq);
@@ -1407,7 +1407,7 @@ static void byt_gpio_irq_handler(struct irq_desc *desc)
 		}
 
 		raw_spin_lock(&byt_lock);
-		pending = readl(reg);
+		pending = pete_readl("drivers/pinctrl/intel/pinctrl-baytrail.c:1410", reg);
 		raw_spin_unlock(&byt_lock);
 		for_each_set_bit(pin, &pending, 32)
 			generic_handle_domain_irq(vg->chip.irq.domain, base + pin);
@@ -1484,14 +1484,14 @@ static void byt_init_irq_valid_mask(struct gpio_chip *chip,
 			continue;
 		}
 
-		value = readl(reg);
+		value = pete_readl("drivers/pinctrl/intel/pinctrl-baytrail.c:1487", reg);
 		if (value & BYT_DIRECT_IRQ_EN) {
 			if (byt_direct_irq_sanity_check(vg, i, value)) {
 				clear_bit(i, valid_mask);
 			} else {
 				value &= ~(BYT_DIRECT_IRQ_EN | BYT_TRIG_POS |
 					   BYT_TRIG_NEG | BYT_TRIG_LVL);
-				writel(value, reg);
+				pete_writel("drivers/pinctrl/intel/pinctrl-baytrail.c:1494", value, reg);
 			}
 		} else if ((value & BYT_PIN_MUX) == byt_get_gpio_mux(vg, i)) {
 			byt_gpio_clear_triggering(vg, i);
@@ -1515,10 +1515,10 @@ static int byt_gpio_irq_init_hw(struct gpio_chip *chip)
 			continue;
 		}
 
-		writel(0xffffffff, reg);
+		pete_writel("drivers/pinctrl/intel/pinctrl-baytrail.c:1518", 0xffffffff, reg);
 		/* make sure trigger bits are cleared, if not then a pin
 		   might be misconfigured in bios */
-		value = readl(reg);
+		value = pete_readl("drivers/pinctrl/intel/pinctrl-baytrail.c:1521", reg);
 		if (value)
 			dev_err(vg->dev,
 				"GPIO interrupt error, pins misconfigured. INT_STAT%u: %#08x\n",
@@ -1687,7 +1687,7 @@ static int byt_gpio_suspend(struct device *dev)
 			dev_warn(vg->dev, "Pin %i: can't retrieve CONF0\n", i);
 			continue;
 		}
-		value = readl(reg) & BYT_CONF0_RESTORE_MASK;
+		value = pete_readl("drivers/pinctrl/intel/pinctrl-baytrail.c:1690", reg) & BYT_CONF0_RESTORE_MASK;
 		vg->context.pads[i].conf0 = value;
 
 		reg = byt_gpio_reg(vg, pin, BYT_VAL_REG);
@@ -1695,7 +1695,7 @@ static int byt_gpio_suspend(struct device *dev)
 			dev_warn(vg->dev, "Pin %i: can't retrieve VAL\n", i);
 			continue;
 		}
-		value = readl(reg) & BYT_VAL_RESTORE_MASK;
+		value = pete_readl("drivers/pinctrl/intel/pinctrl-baytrail.c:1698", reg) & BYT_VAL_RESTORE_MASK;
 		vg->context.pads[i].val = value;
 	}
 
@@ -1721,12 +1721,12 @@ static int byt_gpio_resume(struct device *dev)
 			dev_warn(vg->dev, "Pin %i: can't retrieve CONF0\n", i);
 			continue;
 		}
-		value = readl(reg);
+		value = pete_readl("drivers/pinctrl/intel/pinctrl-baytrail.c:1724", reg);
 		if ((value & BYT_CONF0_RESTORE_MASK) !=
 		     vg->context.pads[i].conf0) {
 			value &= ~BYT_CONF0_RESTORE_MASK;
 			value |= vg->context.pads[i].conf0;
-			writel(value, reg);
+			pete_writel("drivers/pinctrl/intel/pinctrl-baytrail.c:1729", value, reg);
 			dev_info(dev, "restored pin %d CONF0 %#08x", i, value);
 		}
 
@@ -1735,7 +1735,7 @@ static int byt_gpio_resume(struct device *dev)
 			dev_warn(vg->dev, "Pin %i: can't retrieve VAL\n", i);
 			continue;
 		}
-		value = readl(reg);
+		value = pete_readl("drivers/pinctrl/intel/pinctrl-baytrail.c:1738", reg);
 		if ((value & BYT_VAL_RESTORE_MASK) !=
 		     vg->context.pads[i].val) {
 			u32 v;
@@ -1743,7 +1743,7 @@ static int byt_gpio_resume(struct device *dev)
 			v = value & ~BYT_VAL_RESTORE_MASK;
 			v |= vg->context.pads[i].val;
 			if (v != value) {
-				writel(v, reg);
+				pete_writel("drivers/pinctrl/intel/pinctrl-baytrail.c:1746", v, reg);
 				dev_dbg(dev, "restored pin %d VAL %#08x\n", i, v);
 			}
 		}

@@ -169,7 +169,7 @@ void fm10k_alloc_rx_buffers(struct fm10k_ring *rx_ring, u16 cleaned_count)
 		wmb();
 
 		/* notify hardware of new descriptors */
-		writel(i, rx_ring->tail);
+		pete_writel("drivers/net/ethernet/intel/fm10k/fm10k_main.c:172", i, rx_ring->tail);
 	}
 }
 
@@ -1028,7 +1028,7 @@ static void fm10k_tx_map(struct fm10k_ring *tx_ring,
 
 	/* notify HW of packet */
 	if (netif_xmit_stopped(txring_txq(tx_ring)) || !netdev_xmit_more()) {
-		writel(i, tx_ring->tail);
+		pete_writel("drivers/net/ethernet/intel/fm10k/fm10k_main.c:1031", i, tx_ring->tail);
 	}
 
 	return;
@@ -1415,7 +1415,7 @@ static void fm10k_qv_enable(struct fm10k_q_vector *q_vector)
 	itr |= (q_vector->rx.itr & FM10K_ITR_MAX) << FM10K_ITR_INTERVAL1_SHIFT;
 
 	/* Write the final value to the ITR register */
-	writel(itr, q_vector->itr);
+	pete_writel("drivers/net/ethernet/intel/fm10k/fm10k_main.c:1418", itr, q_vector->itr);
 }
 
 static int fm10k_poll(struct napi_struct *napi, int budget)

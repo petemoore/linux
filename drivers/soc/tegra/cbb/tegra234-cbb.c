@@ -151,7 +151,7 @@ tegra234_cbb_write_access_allowed(struct platform_device *pdev, struct tegra234_
 		return false;
 	}
 
-	val = readl(cbb->regs + cbb->fabric->firewall_base + cbb->fabric->firewall_ctl);
+	val = pete_readl("drivers/soc/tegra/cbb/tegra234-cbb.c:154", cbb->regs + cbb->fabric->firewall_base + cbb->fabric->firewall_ctl);
 	/*
 	 * If the firewall check feature for allowing or blocking the
 	 * write accesses through the firewall of a fabric is disabled
@@ -164,7 +164,7 @@ tegra234_cbb_write_access_allowed(struct platform_device *pdev, struct tegra234_
 	 * If the firewall check is enabled then check whether CCPLEX
 	 * has write access to the fabric's error notifier registers
 	 */
-	val = readl(cbb->regs + cbb->fabric->firewall_base + cbb->fabric->firewall_wr_ctl);
+	val = pete_readl("drivers/soc/tegra/cbb/tegra234-cbb.c:167", cbb->regs + cbb->fabric->firewall_base + cbb->fabric->firewall_wr_ctl);
 	if (val & (BIT(CCPLEX_MSTRID)))
 		return true;
 
@@ -177,7 +177,7 @@ static void tegra234_cbb_fault_enable(struct tegra_cbb *cbb)
 	void __iomem *addr;
 
 	addr = priv->regs + priv->fabric->notifier_offset;
-	writel(0x1ff, addr + FABRIC_EN_CFG_INTERRUPT_ENABLE_0_0);
+	pete_writel("drivers/soc/tegra/cbb/tegra234-cbb.c:180", 0x1ff, addr + FABRIC_EN_CFG_INTERRUPT_ENABLE_0_0);
 	dsb(sy);
 }
 
@@ -185,7 +185,7 @@ static void tegra234_cbb_error_clear(struct tegra_cbb *cbb)
 {
 	struct tegra234_cbb *priv = to_tegra234_cbb(cbb);
 
-	writel(0x3f, priv->mon + FABRIC_MN_MASTER_ERR_STATUS_0);
+	pete_writel("drivers/soc/tegra/cbb/tegra234-cbb.c:188", 0x3f, priv->mon + FABRIC_MN_MASTER_ERR_STATUS_0);
 	dsb(sy);
 }
 
@@ -196,7 +196,7 @@ static u32 tegra234_cbb_get_status(struct tegra_cbb *cbb)
 	u32 value;
 
 	addr = priv->regs + priv->fabric->notifier_offset;
-	value = readl(addr + FABRIC_EN_CFG_STATUS_0_0);
+	value = pete_readl("drivers/soc/tegra/cbb/tegra234-cbb.c:199", addr + FABRIC_EN_CFG_STATUS_0_0);
 	dsb(sy);
 
 	return value;
@@ -204,7 +204,7 @@ static u32 tegra234_cbb_get_status(struct tegra_cbb *cbb)
 
 static void tegra234_cbb_mask_serror(struct tegra234_cbb *cbb)
 {
-	writel(0x1, cbb->regs + cbb->fabric->off_mask_erd);
+	pete_writel("drivers/soc/tegra/cbb/tegra234-cbb.c:207", 0x1, cbb->regs + cbb->fabric->off_mask_erd);
 	dsb(sy);
 }
 
@@ -212,7 +212,7 @@ static u32 tegra234_cbb_get_tmo_slv(void __iomem *addr)
 {
 	u32 timeout;
 
-	timeout = readl(addr);
+	timeout = pete_readl("drivers/soc/tegra/cbb/tegra234-cbb.c:215", addr);
 	return timeout;
 }
 
@@ -449,7 +449,7 @@ static int print_errmonX_info(struct seq_file *file, struct tegra234_cbb *cbb)
 {
 	u32 overflow, status, error;
 
-	status = readl(cbb->mon + FABRIC_MN_MASTER_ERR_STATUS_0);
+	status = pete_readl("drivers/soc/tegra/cbb/tegra234-cbb.c:452", cbb->mon + FABRIC_MN_MASTER_ERR_STATUS_0);
 	if (!status) {
 		pr_err("Error Notifier received a spurious notification\n");
 		return -ENODATA;
@@ -460,11 +460,11 @@ static int print_errmonX_info(struct seq_file *file, struct tegra234_cbb *cbb)
 		return -EINVAL;
 	}
 
-	overflow = readl(cbb->mon + FABRIC_MN_MASTER_ERR_OVERFLOW_STATUS_0);
+	overflow = pete_readl("drivers/soc/tegra/cbb/tegra234-cbb.c:463", cbb->mon + FABRIC_MN_MASTER_ERR_OVERFLOW_STATUS_0);
 
 	tegra234_cbb_print_error(file, cbb, status, overflow);
 
-	error = readl(cbb->mon + FABRIC_MN_MASTER_LOG_ERR_STATUS_0);
+	error = pete_readl("drivers/soc/tegra/cbb/tegra234-cbb.c:467", cbb->mon + FABRIC_MN_MASTER_LOG_ERR_STATUS_0);
 	if (!error) {
 		pr_info("Error Monitor doesn't have Error Logger\n");
 		return -EINVAL;
@@ -476,15 +476,15 @@ static int print_errmonX_info(struct seq_file *file, struct tegra234_cbb *cbb)
 		if (error & BIT(0)) {
 			u32 hi, lo;
 
-			hi = readl(cbb->mon + FABRIC_MN_MASTER_LOG_ADDR_HIGH_0);
-			lo = readl(cbb->mon + FABRIC_MN_MASTER_LOG_ADDR_LOW_0);
+			hi = pete_readl("drivers/soc/tegra/cbb/tegra234-cbb.c:479", cbb->mon + FABRIC_MN_MASTER_LOG_ADDR_HIGH_0);
+			lo = pete_readl("drivers/soc/tegra/cbb/tegra234-cbb.c:480", cbb->mon + FABRIC_MN_MASTER_LOG_ADDR_LOW_0);
 
 			cbb->access = (u64)hi << 32 | lo;
 
-			cbb->mn_attr0 = readl(cbb->mon + FABRIC_MN_MASTER_LOG_ATTRIBUTES0_0);
-			cbb->mn_attr1 = readl(cbb->mon + FABRIC_MN_MASTER_LOG_ATTRIBUTES1_0);
-			cbb->mn_attr2 = readl(cbb->mon + FABRIC_MN_MASTER_LOG_ATTRIBUTES2_0);
-			cbb->mn_user_bits = readl(cbb->mon + FABRIC_MN_MASTER_LOG_USER_BITS0_0);
+			cbb->mn_attr0 = pete_readl("drivers/soc/tegra/cbb/tegra234-cbb.c:484", cbb->mon + FABRIC_MN_MASTER_LOG_ATTRIBUTES0_0);
+			cbb->mn_attr1 = pete_readl("drivers/soc/tegra/cbb/tegra234-cbb.c:485", cbb->mon + FABRIC_MN_MASTER_LOG_ATTRIBUTES1_0);
+			cbb->mn_attr2 = pete_readl("drivers/soc/tegra/cbb/tegra234-cbb.c:486", cbb->mon + FABRIC_MN_MASTER_LOG_ATTRIBUTES2_0);
+			cbb->mn_user_bits = pete_readl("drivers/soc/tegra/cbb/tegra234-cbb.c:487", cbb->mon + FABRIC_MN_MASTER_LOG_USER_BITS0_0);
 
 			print_errlog_err(file, cbb);
 		}
@@ -512,9 +512,9 @@ static int print_err_notifier(struct seq_file *file, struct tegra234_cbb *cbb, u
 			phys_addr_t addr;
 			u64 offset;
 
-			writel(mask, cbb->regs + notifier + FABRIC_EN_CFG_ADDR_INDEX_0_0);
-			hi = readl(cbb->regs + notifier + FABRIC_EN_CFG_ADDR_HI_0);
-			lo = readl(cbb->regs + notifier + FABRIC_EN_CFG_ADDR_LOW_0);
+			pete_writel("drivers/soc/tegra/cbb/tegra234-cbb.c:515", mask, cbb->regs + notifier + FABRIC_EN_CFG_ADDR_INDEX_0_0);
+			hi = pete_readl("drivers/soc/tegra/cbb/tegra234-cbb.c:516", cbb->regs + notifier + FABRIC_EN_CFG_ADDR_HI_0);
+			lo = pete_readl("drivers/soc/tegra/cbb/tegra234-cbb.c:517", cbb->regs + notifier + FABRIC_EN_CFG_ADDR_LOW_0);
 
 			addr = (u64)hi << 32 | lo;
 

@@ -147,7 +147,7 @@ static void imx_lcdc_update_hw_registers(struct drm_simple_display_pipe *pipe,
 
 	addr = drm_fb_dma_get_gem_addr(fb, new_state, 0);
 	/* The LSSAR register specifies the LCD screen start address (SSA). */
-	writel(addr, lcdc->base + IMX21LCDC_LSSAR);
+	pete_writel("drivers/gpu/drm/imx/lcdc/imx-lcdc.c:150", addr, lcdc->base + IMX21LCDC_LSSAR);
 
 	if (!mode_set)
 		return;
@@ -159,27 +159,27 @@ static void imx_lcdc_update_hw_registers(struct drm_simple_display_pipe *pipe,
 	/* Framesize */
 	framesize = FIELD_PREP(IMX21LCDC_LSR_XMAX, crtc->mode.hdisplay >> 4) |
 		FIELD_PREP(IMX21LCDC_LSR_YMAX, crtc->mode.vdisplay);
-	writel(framesize, lcdc->base + IMX21LCDC_LSR);
+	pete_writel("drivers/gpu/drm/imx/lcdc/imx-lcdc.c:162", framesize, lcdc->base + IMX21LCDC_LSR);
 
 	/* HSYNC */
 	lhcr = FIELD_PREP(IMX21LCDC_LHCR_HFPORCH, crtc->mode.hsync_start - crtc->mode.hdisplay - 1) |
 		FIELD_PREP(IMX21LCDC_LHCR_HWIDTH, crtc->mode.hsync_end - crtc->mode.hsync_start - 1) |
 		FIELD_PREP(IMX21LCDC_LHCR_HBPORCH, crtc->mode.htotal - crtc->mode.hsync_end - 3);
-	writel(lhcr, lcdc->base + IMX21LCDC_LHCR);
+	pete_writel("drivers/gpu/drm/imx/lcdc/imx-lcdc.c:168", lhcr, lcdc->base + IMX21LCDC_LHCR);
 
 	/* VSYNC */
 	lvcr = FIELD_PREP(IMX21LCDC_LVCR_VFPORCH, crtc->mode.vsync_start - crtc->mode.vdisplay) |
 		FIELD_PREP(IMX21LCDC_LVCR_VWIDTH, crtc->mode.vsync_end - crtc->mode.vsync_start) |
 		FIELD_PREP(IMX21LCDC_LVCR_VBPORCH, crtc->mode.vtotal - crtc->mode.vsync_end);
-	writel(lvcr, lcdc->base + IMX21LCDC_LVCR);
+	pete_writel("drivers/gpu/drm/imx/lcdc/imx-lcdc.c:174", lvcr, lcdc->base + IMX21LCDC_LVCR);
 
-	lpcr = readl(lcdc->base + IMX21LCDC_LPCR);
+	lpcr = pete_readl("drivers/gpu/drm/imx/lcdc/imx-lcdc.c:176", lcdc->base + IMX21LCDC_LPCR);
 	lpcr &= ~IMX21LCDC_LPCR_BPIX;
 	lpcr |= FIELD_PREP(IMX21LCDC_LPCR_BPIX, imx_lcdc_get_format(fb->format->format));
-	writel(lpcr, lcdc->base + IMX21LCDC_LPCR);
+	pete_writel("drivers/gpu/drm/imx/lcdc/imx-lcdc.c:179", lpcr, lcdc->base + IMX21LCDC_LPCR);
 
 	/* Virtual Page Width */
-	writel(new_state->fb->pitches[0] / 4, lcdc->base + IMX21LCDC_LVPWR);
+	pete_writel("drivers/gpu/drm/imx/lcdc/imx-lcdc.c:182", new_state->fb->pitches[0] / 4, lcdc->base + IMX21LCDC_LVPWR);
 
 	/* Enable PER clock */
 	if (new_state->crtc->enabled)
@@ -207,7 +207,7 @@ static void imx_lcdc_pipe_enable(struct drm_simple_display_pipe *pipe,
 					mode->clock * 1000);
 	bpp = imx_lcdc_get_format(plane_state->fb->format->format);
 
-	writel(FIELD_PREP(IMX21LCDC_LPCR_PCD, clk_div - 1) |
+	pete_writel("drivers/gpu/drm/imx/lcdc/imx-lcdc.c:210", FIELD_PREP(IMX21LCDC_LPCR_PCD, clk_div - 1) |
 	       FIELD_PREP(IMX21LCDC_LPCR_LPPOL, hsync_pol) |
 	       FIELD_PREP(IMX21LCDC_LPCR_FLMPOL, vsync_pol) |
 	       FIELD_PREP(IMX21LCDC_LPCR_OEPOL, data_enable_pol) |
@@ -221,10 +221,10 @@ static void imx_lcdc_pipe_enable(struct drm_simple_display_pipe *pipe,
 	       lcdc->base + IMX21LCDC_LPCR);
 
 	/* 0px panning offset */
-	writel(0x00000000, lcdc->base + IMX21LCDC_LPOR);
+	pete_writel("drivers/gpu/drm/imx/lcdc/imx-lcdc.c:224", 0x00000000, lcdc->base + IMX21LCDC_LPOR);
 
 	/* disable hardware cursor */
-	writel(readl(lcdc->base + IMX21LCDC_LCPR) & ~(IMX21LCDC_LCPR_CC0 | IMX21LCDC_LCPR_CC1),
+	pete_writel("drivers/gpu/drm/imx/lcdc/imx-lcdc.c:227", pete_readl("drivers/gpu/drm/imx/lcdc/imx-lcdc.c:227", lcdc->base + IMX21LCDC_LCPR) & ~(IMX21LCDC_LCPR_CC0 | IMX21LCDC_LCPR_CC1),
 	       lcdc->base + IMX21LCDC_LCPR);
 
 	ret = clk_prepare_enable(lcdc->clk_ipg);
@@ -244,7 +244,7 @@ static void imx_lcdc_pipe_enable(struct drm_simple_display_pipe *pipe,
 	imx_lcdc_update_hw_registers(pipe, NULL, true);
 
 	/* Enable VBLANK Interrupt */
-	writel(INTR_EOF, lcdc->base + IMX21LCDC_LIER);
+	pete_writel("drivers/gpu/drm/imx/lcdc/imx-lcdc.c:247", INTR_EOF, lcdc->base + IMX21LCDC_LIER);
 }
 
 static void imx_lcdc_pipe_disable(struct drm_simple_display_pipe *pipe)
@@ -268,7 +268,7 @@ static void imx_lcdc_pipe_disable(struct drm_simple_display_pipe *pipe)
 	spin_unlock_irq(&lcdc->drm.event_lock);
 
 	/* Disable VBLANK Interrupt */
-	writel(0, lcdc->base + IMX21LCDC_LIER);
+	pete_writel("drivers/gpu/drm/imx/lcdc/imx-lcdc.c:271", 0, lcdc->base + IMX21LCDC_LIER);
 }
 
 static int imx_lcdc_pipe_check(struct drm_simple_display_pipe *pipe,
@@ -370,7 +370,7 @@ static irqreturn_t imx_lcdc_irq_handler(int irq, void *arg)
 	struct drm_crtc *crtc = &lcdc->pipe.crtc;
 	unsigned int status;
 
-	status = readl(lcdc->base + IMX21LCDC_LISR);
+	status = pete_readl("drivers/gpu/drm/imx/lcdc/imx-lcdc.c:373", lcdc->base + IMX21LCDC_LISR);
 
 	if (status & INTR_EOF) {
 		drm_crtc_handle_vblank(crtc);

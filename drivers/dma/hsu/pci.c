@@ -33,7 +33,7 @@ static irqreturn_t hsu_pci_irq(int irq, void *dev)
 	int ret = 0;
 	int err;
 
-	dmaisr = readl(chip->regs + HSU_PCI_DMAISR);
+	dmaisr = pete_readl("drivers/dma/hsu/pci.c:36", chip->regs + HSU_PCI_DMAISR);
 	for_each_set_bit(i, &dmaisr, chip->hsu->nr_channels) {
 		err = hsu_dma_get_status(chip, i, &status);
 		if (err > 0)

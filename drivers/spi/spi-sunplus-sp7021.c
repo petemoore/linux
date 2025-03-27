@@ -101,9 +101,9 @@ static irqreturn_t sp7021_spi_slave_irq(int irq, void *dev)
 	struct sp7021_spi_ctlr *pspim = dev;
 	unsigned int data_status;
 
-	data_status = readl(pspim->s_base + SP7021_DATA_RDY_REG);
+	data_status = pete_readl("drivers/spi/spi-sunplus-sp7021.c:104", pspim->s_base + SP7021_DATA_RDY_REG);
 	data_status |= SP7021_SLAVE_CLR_INT;
-	writel(data_status , pspim->s_base + SP7021_DATA_RDY_REG);
+	pete_writel("drivers/spi/spi-sunplus-sp7021.c:106", data_status , pspim->s_base + SP7021_DATA_RDY_REG);
 	complete(&pspim->slave_isr);
 	return IRQ_HANDLED;
 }
@@ -124,12 +124,12 @@ static int sp7021_spi_slave_tx(struct spi_device *spi, struct spi_transfer *xfer
 
 	reinit_completion(&pspim->slave_isr);
 	value = SP7021_SLAVE_DMA_EN | SP7021_SLAVE_DMA_RW | FIELD_PREP(SP7021_SLAVE_DMA_CMD, 3);
-	writel(value, pspim->s_base + SP7021_SLAVE_DMA_CTRL_REG);
-	writel(xfer->len, pspim->s_base + SP7021_SLAVE_DMA_LENGTH_REG);
-	writel(xfer->tx_dma, pspim->s_base + SP7021_SLAVE_DMA_ADDR_REG);
-	value = readl(pspim->s_base + SP7021_DATA_RDY_REG);
+	pete_writel("drivers/spi/spi-sunplus-sp7021.c:127", value, pspim->s_base + SP7021_SLAVE_DMA_CTRL_REG);
+	pete_writel("drivers/spi/spi-sunplus-sp7021.c:128", xfer->len, pspim->s_base + SP7021_SLAVE_DMA_LENGTH_REG);
+	pete_writel("drivers/spi/spi-sunplus-sp7021.c:129", xfer->tx_dma, pspim->s_base + SP7021_SLAVE_DMA_ADDR_REG);
+	value = pete_readl("drivers/spi/spi-sunplus-sp7021.c:130", pspim->s_base + SP7021_DATA_RDY_REG);
 	value |= SP7021_SLAVE_DATA_RDY;
-	writel(value, pspim->s_base + SP7021_DATA_RDY_REG);
+	pete_writel("drivers/spi/spi-sunplus-sp7021.c:132", value, pspim->s_base + SP7021_DATA_RDY_REG);
 	if (wait_for_completion_interruptible(&pspim->isr_done)) {
 		dev_err(&spi->dev, "%s() wait_for_completion err\n", __func__);
 		return -EINTR;
@@ -144,14 +144,14 @@ static int sp7021_spi_slave_rx(struct spi_device *spi, struct spi_transfer *xfer
 
 	reinit_completion(&pspim->isr_done);
 	value = SP7021_SLAVE_DMA_EN | FIELD_PREP(SP7021_SLAVE_DMA_CMD, 3);
-	writel(value, pspim->s_base + SP7021_SLAVE_DMA_CTRL_REG);
-	writel(xfer->len, pspim->s_base + SP7021_SLAVE_DMA_LENGTH_REG);
-	writel(xfer->rx_dma, pspim->s_base + SP7021_SLAVE_DMA_ADDR_REG);
+	pete_writel("drivers/spi/spi-sunplus-sp7021.c:147", value, pspim->s_base + SP7021_SLAVE_DMA_CTRL_REG);
+	pete_writel("drivers/spi/spi-sunplus-sp7021.c:148", xfer->len, pspim->s_base + SP7021_SLAVE_DMA_LENGTH_REG);
+	pete_writel("drivers/spi/spi-sunplus-sp7021.c:149", xfer->rx_dma, pspim->s_base + SP7021_SLAVE_DMA_ADDR_REG);
 	if (wait_for_completion_interruptible(&pspim->isr_done)) {
 		dev_err(&spi->dev, "%s() wait_for_completion err\n", __func__);
 		return -EINTR;
 	}
-	writel(SP7021_SLAVE_SW_RST, pspim->s_base + SP7021_SLAVE_DMA_CTRL_REG);
+	pete_writel("drivers/spi/spi-sunplus-sp7021.c:154", SP7021_SLAVE_SW_RST, pspim->s_base + SP7021_SLAVE_DMA_CTRL_REG);
 	return 0;
 }
 
@@ -161,7 +161,7 @@ static void sp7021_spi_master_rb(struct sp7021_spi_ctlr *pspim, unsigned int len
 
 	for (i = 0; i < len; i++) {
 		pspim->rx_buf[pspim->rx_cur_len] =
-			readl(pspim->m_base + SP7021_FIFO_REG);
+			pete_readl("drivers/spi/spi-sunplus-sp7021.c:164", pspim->m_base + SP7021_FIFO_REG);
 		pspim->rx_cur_len++;
 	}
 }
@@ -171,7 +171,7 @@ static void sp7021_spi_master_wb(struct sp7021_spi_ctlr *pspim, unsigned int len
 	int i;
 
 	for (i = 0; i < len; i++) {
-		writel(pspim->tx_buf[pspim->tx_cur_len],
+		pete_writel("drivers/spi/spi-sunplus-sp7021.c:174", pspim->tx_buf[pspim->tx_cur_len],
 		       pspim->m_base + SP7021_FIFO_REG);
 		pspim->tx_cur_len++;
 	}
@@ -186,7 +186,7 @@ static irqreturn_t sp7021_spi_master_irq(int irq, void *dev)
 	bool isrdone = false;
 	u32 value;
 
-	fd_status = readl(pspim->m_base + SP7021_SPI_STATUS_REG);
+	fd_status = pete_readl("drivers/spi/spi-sunplus-sp7021.c:189", pspim->m_base + SP7021_SPI_STATUS_REG);
 	tx_cnt = FIELD_GET(SP7021_TX_CNT_MASK, fd_status);
 	tx_len = FIELD_GET(SP7021_TX_LEN_MASK, fd_status);
 	total_len = FIELD_GET(SP7021_GET_LEN_MASK, fd_status);
@@ -210,13 +210,13 @@ static irqreturn_t sp7021_spi_master_irq(int irq, void *dev)
 	if (tx_cnt > 0)
 		sp7021_spi_master_wb(pspim, tx_cnt);
 
-	fd_status = readl(pspim->m_base + SP7021_SPI_STATUS_REG);
+	fd_status = pete_readl("drivers/spi/spi-sunplus-sp7021.c:213", pspim->m_base + SP7021_SPI_STATUS_REG);
 	tx_len = FIELD_GET(SP7021_TX_LEN_MASK, fd_status);
 	total_len = FIELD_GET(SP7021_GET_LEN_MASK, fd_status);
 
 	if (fd_status & SP7021_FINISH_FLAG || tx_len == pspim->tx_cur_len) {
 		while (total_len != pspim->rx_cur_len) {
-			fd_status = readl(pspim->m_base + SP7021_SPI_STATUS_REG);
+			fd_status = pete_readl("drivers/spi/spi-sunplus-sp7021.c:219", pspim->m_base + SP7021_SPI_STATUS_REG);
 			total_len = FIELD_GET(SP7021_GET_LEN_MASK, fd_status);
 			if (fd_status & SP7021_RX_FULL_FLAG)
 				rx_cnt = pspim->data_unit;
@@ -226,10 +226,10 @@ static irqreturn_t sp7021_spi_master_irq(int irq, void *dev)
 			if (rx_cnt > 0)
 				sp7021_spi_master_rb(pspim, rx_cnt);
 		}
-		value = readl(pspim->m_base + SP7021_INT_BUSY_REG);
+		value = pete_readl("drivers/spi/spi-sunplus-sp7021.c:229", pspim->m_base + SP7021_INT_BUSY_REG);
 		value |= SP7021_CLR_MASTER_INT;
-		writel(value, pspim->m_base + SP7021_INT_BUSY_REG);
-		writel(SP7021_FINISH_FLAG, pspim->m_base + SP7021_SPI_STATUS_REG);
+		pete_writel("drivers/spi/spi-sunplus-sp7021.c:231", value, pspim->m_base + SP7021_INT_BUSY_REG);
+		pete_writel("drivers/spi/spi-sunplus-sp7021.c:232", SP7021_FINISH_FLAG, pspim->m_base + SP7021_SPI_STATUS_REG);
 		isrdone = true;
 	}
 
@@ -255,9 +255,9 @@ static int sp7021_spi_controller_prepare_message(struct spi_controller *ctlr,
 	struct spi_device *s = msg->spi;
 	u32 valus, rs = 0;
 
-	valus = readl(pspim->m_base + SP7021_SPI_STATUS_REG);
+	valus = pete_readl("drivers/spi/spi-sunplus-sp7021.c:258", pspim->m_base + SP7021_SPI_STATUS_REG);
 	valus |= SP7021_FD_SW_RST;
-	writel(valus, pspim->m_base + SP7021_SPI_STATUS_REG);
+	pete_writel("drivers/spi/spi-sunplus-sp7021.c:260", valus, pspim->m_base + SP7021_SPI_STATUS_REG);
 	rs |= SP7021_FD_SEL;
 	if (s->mode & SPI_CPOL)
 		rs |= SP7021_CPOL_FD;
@@ -276,7 +276,7 @@ static int sp7021_spi_controller_prepare_message(struct spi_controller *ctlr,
 	rs |=  FIELD_PREP(SP7021_TX_UNIT, 0) | FIELD_PREP(SP7021_RX_UNIT, 0);
 	pspim->xfer_conf = rs;
 	if (pspim->xfer_conf & SP7021_CPOL_FD)
-		writel(pspim->xfer_conf, pspim->m_base + SP7021_SPI_CONFIG_REG);
+		pete_writel("drivers/spi/spi-sunplus-sp7021.c:279", pspim->xfer_conf, pspim->m_base + SP7021_SPI_CONFIG_REG);
 
 	return 0;
 }
@@ -292,7 +292,7 @@ static void sp7021_spi_setup_clk(struct spi_controller *ctlr, struct spi_transfe
 	clk_sel = (div / 2) - 1;
 	pspim->xfer_conf &= ~SP7021_CLK_MASK;
 	pspim->xfer_conf |= FIELD_PREP(SP7021_CLK_MASK, clk_sel);
-	writel(pspim->xfer_conf, pspim->m_base + SP7021_SPI_CONFIG_REG);
+	pete_writel("drivers/spi/spi-sunplus-sp7021.c:295", pspim->xfer_conf, pspim->m_base + SP7021_SPI_CONFIG_REG);
 }
 
 static int sp7021_spi_master_transfer_one(struct spi_controller *ctlr, struct spi_device *spi,
@@ -325,18 +325,18 @@ static int sp7021_spi_master_transfer_one(struct spi_controller *ctlr, struct sp
 			len_temp = min(pspim->data_unit, xfer_len);
 			sp7021_spi_master_wb(pspim, len_temp);
 		}
-		reg_temp = readl(pspim->m_base + SP7021_SPI_CONFIG_REG);
+		reg_temp = pete_readl("drivers/spi/spi-sunplus-sp7021.c:328", pspim->m_base + SP7021_SPI_CONFIG_REG);
 		reg_temp &= ~SP7021_CLEAN_RW_BYTE;
 		reg_temp &= ~SP7021_CLEAN_FLUG_MASK;
 		reg_temp |= SP7021_FD_SEL | SP7021_FINISH_FLAG_MASK |
 			    SP7021_TX_EMP_FLAG_MASK | SP7021_RX_FULL_FLAG_MASK |
 			    FIELD_PREP(SP7021_TX_UNIT, 0) | FIELD_PREP(SP7021_RX_UNIT, 0);
-		writel(reg_temp, pspim->m_base + SP7021_SPI_CONFIG_REG);
+		pete_writel("drivers/spi/spi-sunplus-sp7021.c:334", reg_temp, pspim->m_base + SP7021_SPI_CONFIG_REG);
 
 		reg_temp = FIELD_PREP(SP7021_SET_TX_LEN, xfer_len) |
 				      FIELD_PREP(SP7021_SET_XFER_LEN, xfer_len) |
 				      SP7021_SPI_START_FD;
-		writel(reg_temp, pspim->m_base + SP7021_SPI_STATUS_REG);
+		pete_writel("drivers/spi/spi-sunplus-sp7021.c:339", reg_temp, pspim->m_base + SP7021_SPI_STATUS_REG);
 
 		if (!wait_for_completion_interruptible_timeout(&pspim->isr_done, timeout)) {
 			dev_err(&spi->dev, "wait_for_completion err\n");
@@ -344,15 +344,15 @@ static int sp7021_spi_master_transfer_one(struct spi_controller *ctlr, struct sp
 			return -ETIMEDOUT;
 		}
 
-		reg_temp = readl(pspim->m_base + SP7021_SPI_STATUS_REG);
+		reg_temp = pete_readl("drivers/spi/spi-sunplus-sp7021.c:347", pspim->m_base + SP7021_SPI_STATUS_REG);
 		if (reg_temp & SP7021_FINISH_FLAG) {
-			writel(SP7021_FINISH_FLAG, pspim->m_base + SP7021_SPI_STATUS_REG);
-			writel(readl(pspim->m_base + SP7021_SPI_CONFIG_REG) &
+			pete_writel("drivers/spi/spi-sunplus-sp7021.c:349", SP7021_FINISH_FLAG, pspim->m_base + SP7021_SPI_STATUS_REG);
+			pete_writel("drivers/spi/spi-sunplus-sp7021.c:350", pete_readl("drivers/spi/spi-sunplus-sp7021.c:350", pspim->m_base + SP7021_SPI_CONFIG_REG) &
 				SP7021_CLEAN_FLUG_MASK, pspim->m_base + SP7021_SPI_CONFIG_REG);
 		}
 
 		if (pspim->xfer_conf & SP7021_CPOL_FD)
-			writel(pspim->xfer_conf, pspim->m_base + SP7021_SPI_CONFIG_REG);
+			pete_writel("drivers/spi/spi-sunplus-sp7021.c:355", pspim->xfer_conf, pspim->m_base + SP7021_SPI_CONFIG_REG);
 
 		mutex_unlock(&pspim->buf_lock);
 	}

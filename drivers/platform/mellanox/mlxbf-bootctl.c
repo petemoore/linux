@@ -372,7 +372,7 @@ static int mlxbf_rsh_log_sem_lock(void)
 
 static void mlxbf_rsh_log_sem_unlock(void)
 {
-	writeq(0, mlxbf_rsh_semaphore);
+	pete_writeq("drivers/platform/mellanox/mlxbf-bootctl.c:375", 0, mlxbf_rsh_semaphore);
 }
 
 static ssize_t rsh_log_store(struct device *dev,
@@ -417,7 +417,7 @@ static ssize_t rsh_log_store(struct device *dev,
 		return rc;
 
 	/* Calculate how many words are available. */
-	idx = readq(mlxbf_rsh_scratch_buf_ctl);
+	idx = pete_readq("drivers/platform/mellanox/mlxbf-bootctl.c:420", mlxbf_rsh_scratch_buf_ctl);
 	num = min((int)DIV_ROUND_UP(size, sizeof(u64)),
 		  RSH_SCRATCH_BUF_CTL_IDX_MASK - idx - 1);
 	if (num <= 0)
@@ -427,7 +427,7 @@ static ssize_t rsh_log_store(struct device *dev,
 	data = FIELD_PREP(MLXBF_RSH_LOG_TYPE_MASK, MLXBF_RSH_LOG_TYPE_MSG);
 	data |= FIELD_PREP(MLXBF_RSH_LOG_LEN_MASK, num);
 	data |= FIELD_PREP(MLXBF_RSH_LOG_LEVEL_MASK, level);
-	writeq(data, mlxbf_rsh_scratch_buf_data);
+	pete_writeq("drivers/platform/mellanox/mlxbf-bootctl.c:430", data, mlxbf_rsh_scratch_buf_data);
 
 	/* Write message. */
 	for (idx = 0; idx < num && size > 0; idx++) {
@@ -440,7 +440,7 @@ static ssize_t rsh_log_store(struct device *dev,
 			size -= sizeof(u64);
 			buf += sizeof(u64);
 		}
-		writeq(data, mlxbf_rsh_scratch_buf_data);
+		pete_writeq("drivers/platform/mellanox/mlxbf-bootctl.c:443", data, mlxbf_rsh_scratch_buf_data);
 	}
 
 done:
@@ -951,7 +951,7 @@ static ssize_t mlxbf_bootctl_bootfifo_read(struct file *filp,
 	while (count >= sizeof(data)) {
 		/* Give up reading if no more data within 500ms. */
 		if (!cnt) {
-			cnt = readq(mlxbf_rsh_boot_cnt);
+			cnt = pete_readq("drivers/platform/mellanox/mlxbf-bootctl.c:954", mlxbf_rsh_boot_cnt);
 			if (!cnt) {
 				if (time_after(jiffies, expire))
 					break;
@@ -960,7 +960,7 @@ static ssize_t mlxbf_bootctl_bootfifo_read(struct file *filp,
 			}
 		}
 
-		data = readq(mlxbf_rsh_boot_data);
+		data = pete_readq("drivers/platform/mellanox/mlxbf-bootctl.c:963", mlxbf_rsh_boot_data);
 		memcpy(p, &data, sizeof(data));
 		count -= sizeof(data);
 		p += sizeof(data);

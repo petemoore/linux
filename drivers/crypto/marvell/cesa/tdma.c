@@ -50,9 +50,9 @@ void mv_cesa_dma_step(struct mv_cesa_req *dreq)
 		       engine->regs + CESA_SA_CFG);
 	writel_relaxed(dreq->chain.first->cur_dma,
 		       engine->regs + CESA_TDMA_NEXT_ADDR);
-	WARN_ON(readl(engine->regs + CESA_SA_CMD) &
+	WARN_ON(pete_readl("drivers/crypto/marvell/cesa/tdma.c:53", engine->regs + CESA_SA_CMD) &
 		CESA_SA_CMD_EN_CESA_SA_ACCL0);
-	writel(CESA_SA_CMD_EN_CESA_SA_ACCL0, engine->regs + CESA_SA_CMD);
+	pete_writel("drivers/crypto/marvell/cesa/tdma.c:55", CESA_SA_CMD_EN_CESA_SA_ACCL0, engine->regs + CESA_SA_CMD);
 }
 
 void mv_cesa_dma_cleanup(struct mv_cesa_req *dreq)
@@ -125,7 +125,7 @@ int mv_cesa_tdma_process(struct mv_cesa_engine *engine, u32 status)
 	dma_addr_t tdma_cur;
 	int res = 0;
 
-	tdma_cur = readl(engine->regs + CESA_TDMA_CUR);
+	tdma_cur = pete_readl("drivers/crypto/marvell/cesa/tdma.c:128", engine->regs + CESA_TDMA_CUR);
 
 	for (tdma = engine->chain.first; tdma; tdma = next) {
 		spin_lock_bh(&engine->lock);

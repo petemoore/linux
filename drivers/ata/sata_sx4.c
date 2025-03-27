@@ -463,9 +463,9 @@ static void pdc20621_dma_prep(struct ata_queued_cmd *qc)
 		    &pp->dimm_buf[PDC_DIMM_HEADER_SZ], sgt_len);
 
 	/* force host FIFO dump */
-	writel(0x00000001, mmio + PDC_20621_GENERAL_CTL);
+	pete_writel("drivers/ata/sata_sx4.c:466", 0x00000001, mmio + PDC_20621_GENERAL_CTL);
 
-	readl(dimm_mmio);	/* MMIO PCI posting flush */
+	pete_readl("drivers/ata/sata_sx4.c:468", dimm_mmio);	/* MMIO PCI posting flush */
 
 	ata_port_dbg(ap, "ata pkt buf ofs %u, prd size %u, mmio copied\n",
 		     i, sgt_len);
@@ -497,9 +497,9 @@ static void pdc20621_nodata_prep(struct ata_queued_cmd *qc)
 		    &pp->dimm_buf, PDC_DIMM_HEADER_SZ);
 
 	/* force host FIFO dump */
-	writel(0x00000001, mmio + PDC_20621_GENERAL_CTL);
+	pete_writel("drivers/ata/sata_sx4.c:500", 0x00000001, mmio + PDC_20621_GENERAL_CTL);
 
-	readl(dimm_mmio);	/* MMIO PCI posting flush */
+	pete_readl("drivers/ata/sata_sx4.c:502", dimm_mmio);	/* MMIO PCI posting flush */
 
 	ata_port_dbg(ap, "ata pkt buf ofs %u, mmio copied\n", i);
 }
@@ -531,11 +531,11 @@ static void __pdc20621_push_hdma(struct ata_queued_cmd *qc,
 	/* hard-code chip #0 */
 	mmio += PDC_CHIP0_OFS;
 
-	writel(0x00000001, mmio + PDC_20621_SEQCTL + (seq * 4));
-	readl(mmio + PDC_20621_SEQCTL + (seq * 4));	/* flush */
+	pete_writel("drivers/ata/sata_sx4.c:534", 0x00000001, mmio + PDC_20621_SEQCTL + (seq * 4));
+	pete_readl("drivers/ata/sata_sx4.c:535", mmio + PDC_20621_SEQCTL + (seq * 4));	/* flush */
 
-	writel(pkt_ofs, mmio + PDC_HDMA_PKT_SUBMIT);
-	readl(mmio + PDC_HDMA_PKT_SUBMIT);	/* flush */
+	pete_writel("drivers/ata/sata_sx4.c:537", pkt_ofs, mmio + PDC_HDMA_PKT_SUBMIT);
+	pete_readl("drivers/ata/sata_sx4.c:538", mmio + PDC_HDMA_PKT_SUBMIT);	/* flush */
 }
 
 static void pdc20621_push_hdma(struct ata_queued_cmd *qc,
@@ -585,8 +585,8 @@ static void pdc20621_dump_hdma(struct ata_queued_cmd *qc)
 	dimm_mmio += PDC_DIMM_HOST_PKT;
 
 	ata_port_dbg(ap, "HDMA 0x%08X 0x%08X 0x%08X 0x%08X\n",
-		     readl(dimm_mmio), readl(dimm_mmio + 4),
-		     readl(dimm_mmio + 8), readl(dimm_mmio + 12));
+		     pete_readl("drivers/ata/sata_sx4.c:588", dimm_mmio), pete_readl("drivers/ata/sata_sx4.c:588", dimm_mmio + 4),
+		     pete_readl("drivers/ata/sata_sx4.c:589", dimm_mmio + 8), pete_readl("drivers/ata/sata_sx4.c:589", dimm_mmio + 12));
 }
 
 static void pdc20621_packet_start(struct ata_queued_cmd *qc)
@@ -617,12 +617,12 @@ static void pdc20621_packet_start(struct ata_queued_cmd *qc)
 			port_ofs + PDC_DIMM_HOST_PKT,
 			seq);
 	} else {
-		writel(0x00000001, mmio + PDC_20621_SEQCTL + (seq * 4));
-		readl(mmio + PDC_20621_SEQCTL + (seq * 4));	/* flush */
+		pete_writel("drivers/ata/sata_sx4.c:620", 0x00000001, mmio + PDC_20621_SEQCTL + (seq * 4));
+		pete_readl("drivers/ata/sata_sx4.c:621", mmio + PDC_20621_SEQCTL + (seq * 4));	/* flush */
 
-		writel(port_ofs + PDC_DIMM_ATA_PKT,
+		pete_writel("drivers/ata/sata_sx4.c:623", port_ofs + PDC_DIMM_ATA_PKT,
 		       ap->ioaddr.cmd_addr + PDC_PKT_SUBMIT);
-		readl(ap->ioaddr.cmd_addr + PDC_PKT_SUBMIT);
+		pete_readl("drivers/ata/sata_sx4.c:625", ap->ioaddr.cmd_addr + PDC_PKT_SUBMIT);
 		ata_port_dbg(ap, "submitted ofs 0x%x (%u), seq %u\n",
 			port_ofs + PDC_DIMM_ATA_PKT,
 			port_ofs + PDC_DIMM_ATA_PKT,
@@ -669,7 +669,7 @@ static inline unsigned int pdc20621_host_intr(struct ata_port *ap,
 		/* step two - DMA from DIMM to host */
 		if (doing_hdma) {
 			ata_port_dbg(ap, "read hdma, 0x%x 0x%x\n",
-				readl(mmio + 0x104), readl(mmio + PDC_HDMA_CTLSTAT));
+				pete_readl("drivers/ata/sata_sx4.c:672", mmio + 0x104), pete_readl("drivers/ata/sata_sx4.c:672", mmio + PDC_HDMA_CTLSTAT));
 			/* get drive status; clear intr; complete txn */
 			qc->err_mask |= ac_err_mask(ata_wait_idle(ap));
 			ata_qc_complete(qc);
@@ -680,7 +680,7 @@ static inline unsigned int pdc20621_host_intr(struct ata_port *ap,
 		else {
 			u8 seq = (u8) (port_no + 1 + 4);
 			ata_port_dbg(ap, "read ata, 0x%x 0x%x\n",
-				readl(mmio + 0x104), readl(mmio + PDC_HDMA_CTLSTAT));
+				pete_readl("drivers/ata/sata_sx4.c:683", mmio + 0x104), pete_readl("drivers/ata/sata_sx4.c:683", mmio + PDC_HDMA_CTLSTAT));
 
 			/* submit hdma pkt */
 			pdc20621_dump_hdma(qc);
@@ -695,20 +695,20 @@ static inline unsigned int pdc20621_host_intr(struct ata_port *ap,
 		if (doing_hdma) {
 			u8 seq = (u8) (port_no + 1);
 			ata_port_dbg(ap, "write hdma, 0x%x 0x%x\n",
-				readl(mmio + 0x104), readl(mmio + PDC_HDMA_CTLSTAT));
+				pete_readl("drivers/ata/sata_sx4.c:698", mmio + 0x104), pete_readl("drivers/ata/sata_sx4.c:698", mmio + PDC_HDMA_CTLSTAT));
 
 			/* submit ata pkt */
-			writel(0x00000001, mmio + PDC_20621_SEQCTL + (seq * 4));
-			readl(mmio + PDC_20621_SEQCTL + (seq * 4));
-			writel(port_ofs + PDC_DIMM_ATA_PKT,
+			pete_writel("drivers/ata/sata_sx4.c:701", 0x00000001, mmio + PDC_20621_SEQCTL + (seq * 4));
+			pete_readl("drivers/ata/sata_sx4.c:702", mmio + PDC_20621_SEQCTL + (seq * 4));
+			pete_writel("drivers/ata/sata_sx4.c:703", port_ofs + PDC_DIMM_ATA_PKT,
 			       ap->ioaddr.cmd_addr + PDC_PKT_SUBMIT);
-			readl(ap->ioaddr.cmd_addr + PDC_PKT_SUBMIT);
+			pete_readl("drivers/ata/sata_sx4.c:705", ap->ioaddr.cmd_addr + PDC_PKT_SUBMIT);
 		}
 
 		/* step two - execute ATA command */
 		else {
 			ata_port_dbg(ap, "write ata, 0x%x 0x%x\n",
-				readl(mmio + 0x104), readl(mmio + PDC_HDMA_CTLSTAT));
+				pete_readl("drivers/ata/sata_sx4.c:711", mmio + 0x104), pete_readl("drivers/ata/sata_sx4.c:711", mmio + PDC_HDMA_CTLSTAT));
 			/* get drive status; clear intr; complete txn */
 			qc->err_mask |= ac_err_mask(ata_wait_idle(ap));
 			ata_qc_complete(qc);
@@ -753,7 +753,7 @@ static irqreturn_t pdc20621_interrupt(int irq, void *dev_instance)
 
 	/* reading should also clear interrupts */
 	mmio_base += PDC_CHIP0_OFS;
-	mask = readl(mmio_base + PDC_20621_SEQMASK);
+	mask = pete_readl("drivers/ata/sata_sx4.c:756", mmio_base + PDC_20621_SEQMASK);
 
 	if (mask == 0xffffffff)
 		return IRQ_NONE;
@@ -797,11 +797,11 @@ static void pdc_freeze(struct ata_port *ap)
 
 	/* FIXME: if all 4 ATA engines are stopped, also stop HDMA engine */
 
-	tmp = readl(mmio + PDC_CTLSTAT);
+	tmp = pete_readl("drivers/ata/sata_sx4.c:800", mmio + PDC_CTLSTAT);
 	tmp |= PDC_MASK_INT;
 	tmp &= ~PDC_DMA_ENABLE;
-	writel(tmp, mmio + PDC_CTLSTAT);
-	readl(mmio + PDC_CTLSTAT); /* flush */
+	pete_writel("drivers/ata/sata_sx4.c:803", tmp, mmio + PDC_CTLSTAT);
+	pete_readl("drivers/ata/sata_sx4.c:804", mmio + PDC_CTLSTAT); /* flush */
 }
 
 static void pdc_thaw(struct ata_port *ap)
@@ -815,10 +815,10 @@ static void pdc_thaw(struct ata_port *ap)
 	ioread8(ap->ioaddr.status_addr);
 
 	/* turn IRQ back on */
-	tmp = readl(mmio + PDC_CTLSTAT);
+	tmp = pete_readl("drivers/ata/sata_sx4.c:818", mmio + PDC_CTLSTAT);
 	tmp &= ~PDC_MASK_INT;
-	writel(tmp, mmio + PDC_CTLSTAT);
-	readl(mmio + PDC_CTLSTAT); /* flush */
+	pete_writel("drivers/ata/sata_sx4.c:820", tmp, mmio + PDC_CTLSTAT);
+	pete_readl("drivers/ata/sata_sx4.c:821", mmio + PDC_CTLSTAT); /* flush */
 }
 
 static void pdc_reset_port(struct ata_port *ap)
@@ -830,19 +830,19 @@ static void pdc_reset_port(struct ata_port *ap)
 	/* FIXME: handle HDMA copy engine */
 
 	for (i = 11; i > 0; i--) {
-		tmp = readl(mmio);
+		tmp = pete_readl("drivers/ata/sata_sx4.c:833", mmio);
 		if (tmp & PDC_RESET)
 			break;
 
 		udelay(100);
 
 		tmp |= PDC_RESET;
-		writel(tmp, mmio);
+		pete_writel("drivers/ata/sata_sx4.c:840", tmp, mmio);
 	}
 
 	tmp &= ~PDC_RESET;
-	writel(tmp, mmio);
-	readl(mmio);	/* flush */
+	pete_writel("drivers/ata/sata_sx4.c:844", tmp, mmio);
+	pete_readl("drivers/ata/sata_sx4.c:845", mmio);	/* flush */
 }
 
 static int pdc_softreset(struct ata_link *link, unsigned int *class,
@@ -950,10 +950,10 @@ static void pdc20621_get_from_dimm(struct ata_host *host, void *psource,
 	window_size = 0x2000 * 4; /* 32K byte uchar size */
 	idx = (u16) (offset / window_size);
 
-	writel(0x01, mmio + PDC_GENERAL_CTLR);
-	readl(mmio + PDC_GENERAL_CTLR);
-	writel(((idx) << page_mask), mmio + PDC_DIMM_WINDOW_CTLR);
-	readl(mmio + PDC_DIMM_WINDOW_CTLR);
+	pete_writel("drivers/ata/sata_sx4.c:953", 0x01, mmio + PDC_GENERAL_CTLR);
+	pete_readl("drivers/ata/sata_sx4.c:954", mmio + PDC_GENERAL_CTLR);
+	pete_writel("drivers/ata/sata_sx4.c:955", ((idx) << page_mask), mmio + PDC_DIMM_WINDOW_CTLR);
+	pete_readl("drivers/ata/sata_sx4.c:956", mmio + PDC_DIMM_WINDOW_CTLR);
 
 	offset -= (idx * window_size);
 	idx++;
@@ -963,10 +963,10 @@ static void pdc20621_get_from_dimm(struct ata_host *host, void *psource,
 	psource += dist;
 	size -= dist;
 	for (; (long) size >= (long) window_size ;) {
-		writel(0x01, mmio + PDC_GENERAL_CTLR);
-		readl(mmio + PDC_GENERAL_CTLR);
-		writel(((idx) << page_mask), mmio + PDC_DIMM_WINDOW_CTLR);
-		readl(mmio + PDC_DIMM_WINDOW_CTLR);
+		pete_writel("drivers/ata/sata_sx4.c:966", 0x01, mmio + PDC_GENERAL_CTLR);
+		pete_readl("drivers/ata/sata_sx4.c:967", mmio + PDC_GENERAL_CTLR);
+		pete_writel("drivers/ata/sata_sx4.c:968", ((idx) << page_mask), mmio + PDC_DIMM_WINDOW_CTLR);
+		pete_readl("drivers/ata/sata_sx4.c:969", mmio + PDC_DIMM_WINDOW_CTLR);
 		memcpy_fromio(psource, dimm_mmio, window_size / 4);
 		psource += window_size;
 		size -= window_size;
@@ -974,10 +974,10 @@ static void pdc20621_get_from_dimm(struct ata_host *host, void *psource,
 	}
 
 	if (size) {
-		writel(0x01, mmio + PDC_GENERAL_CTLR);
-		readl(mmio + PDC_GENERAL_CTLR);
-		writel(((idx) << page_mask), mmio + PDC_DIMM_WINDOW_CTLR);
-		readl(mmio + PDC_DIMM_WINDOW_CTLR);
+		pete_writel("drivers/ata/sata_sx4.c:977", 0x01, mmio + PDC_GENERAL_CTLR);
+		pete_readl("drivers/ata/sata_sx4.c:978", mmio + PDC_GENERAL_CTLR);
+		pete_writel("drivers/ata/sata_sx4.c:979", ((idx) << page_mask), mmio + PDC_DIMM_WINDOW_CTLR);
+		pete_readl("drivers/ata/sata_sx4.c:980", mmio + PDC_DIMM_WINDOW_CTLR);
 		memcpy_fromio(psource, dimm_mmio, size / 4);
 	}
 }
@@ -1000,34 +1000,34 @@ static void pdc20621_put_to_dimm(struct ata_host *host, void *psource,
 	window_size = 0x2000 * 4;       /* 32K byte uchar size */
 	idx = (u16) (offset / window_size);
 
-	writel(((idx) << page_mask), mmio + PDC_DIMM_WINDOW_CTLR);
-	readl(mmio + PDC_DIMM_WINDOW_CTLR);
+	pete_writel("drivers/ata/sata_sx4.c:1003", ((idx) << page_mask), mmio + PDC_DIMM_WINDOW_CTLR);
+	pete_readl("drivers/ata/sata_sx4.c:1004", mmio + PDC_DIMM_WINDOW_CTLR);
 	offset -= (idx * window_size);
 	idx++;
 	dist = min(size, window_size - offset);
 	memcpy_toio(dimm_mmio + offset / 4, psource, dist);
-	writel(0x01, mmio + PDC_GENERAL_CTLR);
-	readl(mmio + PDC_GENERAL_CTLR);
+	pete_writel("drivers/ata/sata_sx4.c:1009", 0x01, mmio + PDC_GENERAL_CTLR);
+	pete_readl("drivers/ata/sata_sx4.c:1010", mmio + PDC_GENERAL_CTLR);
 
 	psource += dist;
 	size -= dist;
 	for (; (long) size >= (long) window_size ;) {
-		writel(((idx) << page_mask), mmio + PDC_DIMM_WINDOW_CTLR);
-		readl(mmio + PDC_DIMM_WINDOW_CTLR);
+		pete_writel("drivers/ata/sata_sx4.c:1015", ((idx) << page_mask), mmio + PDC_DIMM_WINDOW_CTLR);
+		pete_readl("drivers/ata/sata_sx4.c:1016", mmio + PDC_DIMM_WINDOW_CTLR);
 		memcpy_toio(dimm_mmio, psource, window_size / 4);
-		writel(0x01, mmio + PDC_GENERAL_CTLR);
-		readl(mmio + PDC_GENERAL_CTLR);
+		pete_writel("drivers/ata/sata_sx4.c:1018", 0x01, mmio + PDC_GENERAL_CTLR);
+		pete_readl("drivers/ata/sata_sx4.c:1019", mmio + PDC_GENERAL_CTLR);
 		psource += window_size;
 		size -= window_size;
 		idx++;
 	}
 
 	if (size) {
-		writel(((idx) << page_mask), mmio + PDC_DIMM_WINDOW_CTLR);
-		readl(mmio + PDC_DIMM_WINDOW_CTLR);
+		pete_writel("drivers/ata/sata_sx4.c:1026", ((idx) << page_mask), mmio + PDC_DIMM_WINDOW_CTLR);
+		pete_readl("drivers/ata/sata_sx4.c:1027", mmio + PDC_DIMM_WINDOW_CTLR);
 		memcpy_toio(dimm_mmio, psource, size / 4);
-		writel(0x01, mmio + PDC_GENERAL_CTLR);
-		readl(mmio + PDC_GENERAL_CTLR);
+		pete_writel("drivers/ata/sata_sx4.c:1029", 0x01, mmio + PDC_GENERAL_CTLR);
+		pete_readl("drivers/ata/sata_sx4.c:1030", mmio + PDC_GENERAL_CTLR);
 	}
 }
 
@@ -1047,17 +1047,17 @@ static unsigned int pdc20621_i2c_read(struct ata_host *host, u32 device,
 	i2creg |= subaddr << 16;
 
 	/* Set the device and subaddress */
-	writel(i2creg, mmio + PDC_I2C_ADDR_DATA);
-	readl(mmio + PDC_I2C_ADDR_DATA);
+	pete_writel("drivers/ata/sata_sx4.c:1050", i2creg, mmio + PDC_I2C_ADDR_DATA);
+	pete_readl("drivers/ata/sata_sx4.c:1051", mmio + PDC_I2C_ADDR_DATA);
 
 	/* Write Control to perform read operation, mask int */
-	writel(PDC_I2C_READ | PDC_I2C_START | PDC_I2C_MASK_INT,
+	pete_writel("drivers/ata/sata_sx4.c:1054", PDC_I2C_READ | PDC_I2C_START | PDC_I2C_MASK_INT,
 	       mmio + PDC_I2C_CONTROL);
 
 	for (count = 0; count <= 1000; count ++) {
-		status = readl(mmio + PDC_I2C_CONTROL);
+		status = pete_readl("drivers/ata/sata_sx4.c:1058", mmio + PDC_I2C_CONTROL);
 		if (status & PDC_I2C_COMPLETE) {
-			status = readl(mmio + PDC_I2C_ADDR_DATA);
+			status = pete_readl("drivers/ata/sata_sx4.c:1060", mmio + PDC_I2C_ADDR_DATA);
 			break;
 		} else if (count == 1000)
 			return 0;
@@ -1147,8 +1147,8 @@ static int pdc20621_prog_dimm0(struct ata_host *host)
 	data |= (((size / 16) - 1) << 16);
 	data |= (0 << 23);
 	data |= 8;
-	writel(data, mmio + PDC_DIMM0_CONTROL);
-	readl(mmio + PDC_DIMM0_CONTROL);
+	pete_writel("drivers/ata/sata_sx4.c:1150", data, mmio + PDC_DIMM0_CONTROL);
+	pete_readl("drivers/ata/sata_sx4.c:1151", mmio + PDC_DIMM0_CONTROL);
 	return size;
 }
 
@@ -1170,8 +1170,8 @@ static unsigned int pdc20621_prog_dimm_global(struct ata_host *host)
 	*/
 
 	data = 0x022259F1;
-	writel(data, mmio + PDC_SDRAM_CONTROL);
-	readl(mmio + PDC_SDRAM_CONTROL);
+	pete_writel("drivers/ata/sata_sx4.c:1173", data, mmio + PDC_SDRAM_CONTROL);
+	pete_readl("drivers/ata/sata_sx4.c:1174", mmio + PDC_SDRAM_CONTROL);
 
 	/* Turn on for ECC */
 	if (!pdc20621_i2c_read(host, PDC_DIMM0_SPD_DEV_ADDRESS,
@@ -1183,19 +1183,19 @@ static unsigned int pdc20621_prog_dimm_global(struct ata_host *host)
 	}
 	if (spd0 == 0x02) {
 		data |= (0x01 << 16);
-		writel(data, mmio + PDC_SDRAM_CONTROL);
-		readl(mmio + PDC_SDRAM_CONTROL);
+		pete_writel("drivers/ata/sata_sx4.c:1186", data, mmio + PDC_SDRAM_CONTROL);
+		pete_readl("drivers/ata/sata_sx4.c:1187", mmio + PDC_SDRAM_CONTROL);
 		dev_err(host->dev, "Local DIMM ECC Enabled\n");
 	}
 
 	/* DIMM Initialization Select/Enable (bit 18/19) */
 	data &= (~(1<<18));
 	data |= (1<<19);
-	writel(data, mmio + PDC_SDRAM_CONTROL);
+	pete_writel("drivers/ata/sata_sx4.c:1194", data, mmio + PDC_SDRAM_CONTROL);
 
 	error = 1;
 	for (i = 1; i <= 10; i++) {   /* polling ~5 secs */
-		data = readl(mmio + PDC_SDRAM_CONTROL);
+		data = pete_readl("drivers/ata/sata_sx4.c:1198", mmio + PDC_SDRAM_CONTROL);
 		if (!(data & (1<<19))) {
 			error = 0;
 			break;
@@ -1223,13 +1223,13 @@ static unsigned int pdc20621_dimm_init(struct ata_host *host)
 	/* Initialize PLL based upon PCI Bus Frequency */
 
 	/* Initialize Time Period Register */
-	writel(0xffffffff, mmio + PDC_TIME_PERIOD);
-	time_period = readl(mmio + PDC_TIME_PERIOD);
+	pete_writel("drivers/ata/sata_sx4.c:1226", 0xffffffff, mmio + PDC_TIME_PERIOD);
+	time_period = pete_readl("drivers/ata/sata_sx4.c:1227", mmio + PDC_TIME_PERIOD);
 	dev_dbg(host->dev, "Time Period Register (0x40): 0x%x\n", time_period);
 
 	/* Enable timer */
-	writel(PDC_TIMER_DEFAULT, mmio + PDC_TIME_CONTROL);
-	readl(mmio + PDC_TIME_CONTROL);
+	pete_writel("drivers/ata/sata_sx4.c:1231", PDC_TIMER_DEFAULT, mmio + PDC_TIME_CONTROL);
+	pete_readl("drivers/ata/sata_sx4.c:1232", mmio + PDC_TIME_CONTROL);
 
 	/* Wait 3 seconds */
 	msleep(3000);
@@ -1239,7 +1239,7 @@ static unsigned int pdc20621_dimm_init(struct ata_host *host)
 	   clock cycle.
 	*/
 
-	tcount = readl(mmio + PDC_TIME_COUNTER);
+	tcount = pete_readl("drivers/ata/sata_sx4.c:1242", mmio + PDC_TIME_COUNTER);
 	dev_dbg(host->dev, "Time Counter Register (0x44): 0x%x\n", tcount);
 
 	/*
@@ -1269,8 +1269,8 @@ static unsigned int pdc20621_dimm_init(struct ata_host *host)
 
 	/* Initialize PLL. */
 	dev_dbg(host->dev, "pci_status: 0x%x\n", pci_status);
-	writel(pci_status, mmio + PDC_CTL_STATUS);
-	readl(mmio + PDC_CTL_STATUS);
+	pete_writel("drivers/ata/sata_sx4.c:1272", pci_status, mmio + PDC_CTL_STATUS);
+	pete_readl("drivers/ata/sata_sx4.c:1273", mmio + PDC_CTL_STATUS);
 
 	/*
 	   Read SPD of DIMM by I2C interface,
@@ -1362,24 +1362,24 @@ static void pdc_20621_init(struct ata_host *host)
 	/*
 	 * Select page 0x40 for our 32k DIMM window
 	 */
-	tmp = readl(mmio + PDC_20621_DIMM_WINDOW) & 0xffff0000;
+	tmp = pete_readl("drivers/ata/sata_sx4.c:1365", mmio + PDC_20621_DIMM_WINDOW) & 0xffff0000;
 	tmp |= PDC_PAGE_WINDOW;	/* page 40h; arbitrarily selected */
-	writel(tmp, mmio + PDC_20621_DIMM_WINDOW);
+	pete_writel("drivers/ata/sata_sx4.c:1367", tmp, mmio + PDC_20621_DIMM_WINDOW);
 
 	/*
 	 * Reset Host DMA
 	 */
-	tmp = readl(mmio + PDC_HDMA_CTLSTAT);
+	tmp = pete_readl("drivers/ata/sata_sx4.c:1372", mmio + PDC_HDMA_CTLSTAT);
 	tmp |= PDC_RESET;
-	writel(tmp, mmio + PDC_HDMA_CTLSTAT);
-	readl(mmio + PDC_HDMA_CTLSTAT);		/* flush */
+	pete_writel("drivers/ata/sata_sx4.c:1374", tmp, mmio + PDC_HDMA_CTLSTAT);
+	pete_readl("drivers/ata/sata_sx4.c:1375", mmio + PDC_HDMA_CTLSTAT);		/* flush */
 
 	udelay(10);
 
-	tmp = readl(mmio + PDC_HDMA_CTLSTAT);
+	tmp = pete_readl("drivers/ata/sata_sx4.c:1379", mmio + PDC_HDMA_CTLSTAT);
 	tmp &= ~PDC_RESET;
-	writel(tmp, mmio + PDC_HDMA_CTLSTAT);
-	readl(mmio + PDC_HDMA_CTLSTAT);		/* flush */
+	pete_writel("drivers/ata/sata_sx4.c:1381", tmp, mmio + PDC_HDMA_CTLSTAT);
+	pete_readl("drivers/ata/sata_sx4.c:1382", mmio + PDC_HDMA_CTLSTAT);		/* flush */
 }
 
 static int pdc_sata_init_one(struct pci_dev *pdev,

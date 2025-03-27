@@ -233,7 +233,7 @@ static const struct v4l2_subdev_pad_ops csi2tx_pad_ops = {
 /* Set Wake Up value in the D-PHY */
 static void csi2tx_dphy_set_wakeup(struct csi2tx_priv *csi2tx)
 {
-	writel(CSI2TX_DPHY_CLK_WAKEUP_ULPS_CYCLES(32),
+	pete_writel("drivers/media/platform/cadence/cdns-csi2tx.c:236", CSI2TX_DPHY_CLK_WAKEUP_ULPS_CYCLES(32),
 	       csi2tx->base + CSI2TX_DPHY_CLK_WAKEUP_REG);
 }
 
@@ -251,13 +251,13 @@ static void csi2tx_dphy_init_finish(struct csi2tx_priv *csi2tx, u32 reg)
 	reg |= CSI2TX_DPHY_CFG_CLK_ENABLE;
 	for (i = 0; i < csi2tx->num_lanes; i++)
 		reg |= CSI2TX_DPHY_CFG_LANE_ENABLE(csi2tx->lanes[i] - 1);
-	writel(reg, csi2tx->base + CSI2TX_DPHY_CFG_REG);
+	pete_writel("drivers/media/platform/cadence/cdns-csi2tx.c:254", reg, csi2tx->base + CSI2TX_DPHY_CFG_REG);
 
 	udelay(10);
 
 	/* Switch to HS mode */
 	reg &= ~CSI2TX_DPHY_CFG_MODE_MASK;
-	writel(reg | CSI2TX_DPHY_CFG_MODE_HS,
+	pete_writel("drivers/media/platform/cadence/cdns-csi2tx.c:260", reg | CSI2TX_DPHY_CFG_MODE_HS,
 	       csi2tx->base + CSI2TX_DPHY_CFG_REG);
 }
 
@@ -273,7 +273,7 @@ static void csi2tx_dphy_setup(struct csi2tx_priv *csi2tx)
 	reg = CSI2TX_DPHY_CFG_CLK_RESET | CSI2TX_DPHY_CFG_MODE_LPDT;
 	for (i = 0; i < csi2tx->num_lanes; i++)
 		reg |= CSI2TX_DPHY_CFG_LANE_RESET(csi2tx->lanes[i] - 1);
-	writel(reg, csi2tx->base + CSI2TX_DPHY_CFG_REG);
+	pete_writel("drivers/media/platform/cadence/cdns-csi2tx.c:276", reg, csi2tx->base + CSI2TX_DPHY_CFG_REG);
 
 	csi2tx_dphy_init_finish(csi2tx, reg);
 }
@@ -287,14 +287,14 @@ static void csi2tx_v2_dphy_setup(struct csi2tx_priv *csi2tx)
 
 	/* Put our lanes (clock and data) out of reset */
 	reg = CSI2TX_V2_DPHY_CFG_RESET | CSI2TX_V2_DPHY_CFG_MODE_LPDT;
-	writel(reg, csi2tx->base + CSI2TX_V2_DPHY_CFG_REG);
+	pete_writel("drivers/media/platform/cadence/cdns-csi2tx.c:290", reg, csi2tx->base + CSI2TX_V2_DPHY_CFG_REG);
 
 	csi2tx_dphy_init_finish(csi2tx, reg);
 }
 
 static void csi2tx_reset(struct csi2tx_priv *csi2tx)
 {
-	writel(CSI2TX_CONFIG_SRST_REQ, csi2tx->base + CSI2TX_CONFIG_REG);
+	pete_writel("drivers/media/platform/cadence/cdns-csi2tx.c:297", CSI2TX_CONFIG_SRST_REQ, csi2tx->base + CSI2TX_CONFIG_REG);
 
 	udelay(10);
 }
@@ -307,7 +307,7 @@ static int csi2tx_start(struct csi2tx_priv *csi2tx)
 
 	csi2tx_reset(csi2tx);
 
-	writel(CSI2TX_CONFIG_CFG_REQ, csi2tx->base + CSI2TX_CONFIG_REG);
+	pete_writel("drivers/media/platform/cadence/cdns-csi2tx.c:310", CSI2TX_CONFIG_CFG_REQ, csi2tx->base + CSI2TX_CONFIG_REG);
 
 	udelay(10);
 
@@ -361,10 +361,10 @@ static int csi2tx_start(struct csi2tx_priv *csi2tx)
 		 * not equal to its stream ID. We need to find a
 		 * proper way to address it.
 		 */
-		writel(CSI2TX_DT_CFG_DT(fmt->dt),
+		pete_writel("drivers/media/platform/cadence/cdns-csi2tx.c:364", CSI2TX_DT_CFG_DT(fmt->dt),
 		       csi2tx->base + CSI2TX_DT_CFG_REG(stream));
 
-		writel(CSI2TX_DT_FORMAT_BYTES_PER_LINE(mfmt->width * fmt->bpp) |
+		pete_writel("drivers/media/platform/cadence/cdns-csi2tx.c:367", CSI2TX_DT_FORMAT_BYTES_PER_LINE(mfmt->width * fmt->bpp) |
 		       CSI2TX_DT_FORMAT_MAX_LINE_NUM(mfmt->height + 1),
 		       csi2tx->base + CSI2TX_DT_FORMAT_REG(stream));
 
@@ -372,19 +372,19 @@ static int csi2tx_start(struct csi2tx_priv *csi2tx)
 		 * TODO: This needs to be calculated based on the
 		 * output CSI2 clock rate.
 		 */
-		writel(CSI2TX_STREAM_IF_CFG_FILL_LEVEL(4),
+		pete_writel("drivers/media/platform/cadence/cdns-csi2tx.c:375", CSI2TX_STREAM_IF_CFG_FILL_LEVEL(4),
 		       csi2tx->base + CSI2TX_STREAM_IF_CFG_REG(stream));
 	}
 
 	/* Disable the configuration mode */
-	writel(0, csi2tx->base + CSI2TX_CONFIG_REG);
+	pete_writel("drivers/media/platform/cadence/cdns-csi2tx.c:380", 0, csi2tx->base + CSI2TX_CONFIG_REG);
 
 	return 0;
 }
 
 static void csi2tx_stop(struct csi2tx_priv *csi2tx)
 {
-	writel(CSI2TX_CONFIG_CFG_REQ | CSI2TX_CONFIG_SRST_REQ,
+	pete_writel("drivers/media/platform/cadence/cdns-csi2tx.c:387", CSI2TX_CONFIG_CFG_REQ | CSI2TX_CONFIG_SRST_REQ,
 	       csi2tx->base + CSI2TX_CONFIG_REG);
 }
 
@@ -460,7 +460,7 @@ static int csi2tx_get_resources(struct csi2tx_priv *csi2tx,
 		return ret;
 	}
 
-	dev_cfg = readl(csi2tx->base + CSI2TX_DEVICE_CONFIG_REG);
+	dev_cfg = pete_readl("drivers/media/platform/cadence/cdns-csi2tx.c:463", csi2tx->base + CSI2TX_DEVICE_CONFIG_REG);
 	clk_disable_unprepare(csi2tx->p_clk);
 
 	csi2tx->max_lanes = dev_cfg & CSI2TX_DEVICE_CONFIG_LANES_MASK;

@@ -69,9 +69,9 @@ rz_cpg_register_clock(struct device_node *np, void __iomem *base,
 	 * let them run at fixed current speed and implement the details later.
 	 */
 	if (strcmp(name, "i") == 0)
-		val = (readl(base + CPG_FRQCR) >> 8) & 3;
+		val = (pete_readl("drivers/clk/renesas/clk-rz.c:72", base + CPG_FRQCR) >> 8) & 3;
 	else if (strcmp(name, "g") == 0)
-		val = readl(base + CPG_FRQCR2) & 3;
+		val = pete_readl("drivers/clk/renesas/clk-rz.c:74", base + CPG_FRQCR2) & 3;
 	else
 		return ERR_PTR(-EINVAL);
 

@@ -40,7 +40,7 @@ static int pl111_debugfs_regs(struct seq_file *m, void *unused)
 	for (i = 0; i < ARRAY_SIZE(pl111_reg_defs); i++) {
 		seq_printf(m, "%s (0x%04x): 0x%08x\n",
 			   pl111_reg_defs[i].name, pl111_reg_defs[i].reg,
-			   readl(priv->regs + pl111_reg_defs[i].reg));
+			   pete_readl("drivers/gpu/drm/pl111/pl111_debugfs.c:43", priv->regs + pl111_reg_defs[i].reg));
 	}
 
 	return 0;

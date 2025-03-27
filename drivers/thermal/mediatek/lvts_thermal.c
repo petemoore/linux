@@ -317,7 +317,7 @@ static void lvts_update_irq_mask(struct lvts_ctrl *lvts_ctrl)
 	u32 value = 0;
 	int i;
 
-	value = readl(LVTS_MONINT(lvts_ctrl->base));
+	value = pete_readl("drivers/thermal/mediatek/lvts_thermal.c:320", LVTS_MONINT(lvts_ctrl->base));
 
 	for (i = 0; i < ARRAY_SIZE(masks); i++) {
 		if (lvts_ctrl->sensors[i].high_thresh == lvts_ctrl->high_thresh
@@ -327,7 +327,7 @@ static void lvts_update_irq_mask(struct lvts_ctrl *lvts_ctrl)
 			value &= ~masks[i];
 	}
 
-	writel(value, LVTS_MONINT(lvts_ctrl->base));
+	pete_writel("drivers/thermal/mediatek/lvts_thermal.c:330", value, LVTS_MONINT(lvts_ctrl->base));
 }
 
 static bool lvts_should_update_thresh(struct lvts_ctrl *lvts_ctrl, int high)
@@ -378,7 +378,7 @@ static int lvts_set_trips(struct thermal_zone_device *tz, int low, int high)
 	 */
 	pr_debug("%s: Setting low limit temperature interrupt: %d\n",
 		 thermal_zone_device_type(tz), low);
-	writel(raw_low, LVTS_OFFSETL(base));
+	pete_writel("drivers/thermal/mediatek/lvts_thermal.c:381", raw_low, LVTS_OFFSETL(base));
 
 	/*
 	 * High offset temperature threshold
@@ -391,7 +391,7 @@ static int lvts_set_trips(struct thermal_zone_device *tz, int low, int high)
 	 */
 	pr_debug("%s: Setting high limit temperature interrupt: %d\n",
 		 thermal_zone_device_type(tz), high);
-	writel(raw_high, LVTS_OFFSETH(base));
+	pete_writel("drivers/thermal/mediatek/lvts_thermal.c:394", raw_high, LVTS_OFFSETH(base));
 
 	return 0;
 }
@@ -470,7 +470,7 @@ static irqreturn_t lvts_ctrl_irq_handler(struct lvts_ctrl *lvts_ctrl)
 	 * sensor 0 interrupt: 0000 0000 0000 1001 0000 0000 0001 1111
 	 *                  => 0x0009001F
 	 */
-	value = readl(LVTS_MONINTSTS(lvts_ctrl->base));
+	value = pete_readl("drivers/thermal/mediatek/lvts_thermal.c:473", LVTS_MONINTSTS(lvts_ctrl->base));
 
 	/*
 	 * Let's figure out which sensors raised the interrupt
@@ -492,7 +492,7 @@ static irqreturn_t lvts_ctrl_irq_handler(struct lvts_ctrl *lvts_ctrl)
 	/*
 	 * Write back to clear the interrupt status (W1C)
 	 */
-	writel(value, LVTS_MONINTSTS(lvts_ctrl->base));
+	pete_writel("drivers/thermal/mediatek/lvts_thermal.c:495", value, LVTS_MONINTSTS(lvts_ctrl->base));
 
 	return iret;
 }
@@ -795,7 +795,7 @@ static void lvts_write_config(struct lvts_ctrl *lvts_ctrl, u32 *cmds, int nr_cmd
 	 * Configuration register
 	 */
 	for (i = 0; i < nr_cmds; i++) {
-		writel(cmds[i], LVTS_CONFIG(lvts_ctrl->base));
+		pete_writel("drivers/thermal/mediatek/lvts_thermal.c:798", cmds[i], LVTS_CONFIG(lvts_ctrl->base));
 		usleep_range(2, 4);
 	}
 }
@@ -814,7 +814,7 @@ static int lvts_irq_init(struct lvts_ctrl *lvts_ctrl)
 	 *         10 : Selected sensor with bits 19-18
 	 *         11 : Reserved
 	 */
-	writel(BIT(16), LVTS_PROTCTL(lvts_ctrl->base));
+	pete_writel("drivers/thermal/mediatek/lvts_thermal.c:817", BIT(16), LVTS_PROTCTL(lvts_ctrl->base));
 
 	/*
 	 * LVTS_PROTTA : Stage 1 temperature threshold
@@ -825,10 +825,10 @@ static int lvts_irq_init(struct lvts_ctrl *lvts_ctrl)
 	 *
 	 * 14-0: Raw temperature threshold
 	 *
-	 * writel(0x0, LVTS_PROTTA(lvts_ctrl->base));
-	 * writel(0x0, LVTS_PROTTB(lvts_ctrl->base));
+	 * pete_writel("drivers/thermal/mediatek/lvts_thermal.c:828", 0x0, LVTS_PROTTA(lvts_ctrl->base));
+	 * pete_writel("drivers/thermal/mediatek/lvts_thermal.c:829", 0x0, LVTS_PROTTB(lvts_ctrl->base));
 	 */
-	writel(lvts_ctrl->hw_tshut_raw_temp, LVTS_PROTTC(lvts_ctrl->base));
+	pete_writel("drivers/thermal/mediatek/lvts_thermal.c:831", lvts_ctrl->hw_tshut_raw_temp, LVTS_PROTTC(lvts_ctrl->base));
 
 	/*
 	 * LVTS_MONINT : Interrupt configuration register
@@ -836,7 +836,7 @@ static int lvts_irq_init(struct lvts_ctrl *lvts_ctrl)
 	 * The LVTS_MONINT register layout is the same as the LVTS_MONINTSTS
 	 * register, except we set the bits to enable the interrupt.
 	 */
-	writel(LVTS_MONINT_CONF, LVTS_MONINT(lvts_ctrl->base));
+	pete_writel("drivers/thermal/mediatek/lvts_thermal.c:839", LVTS_MONINT_CONF, LVTS_MONINT(lvts_ctrl->base));
 
 	return 0;
 }
@@ -864,7 +864,7 @@ static int lvts_ctrl_set_enable(struct lvts_ctrl *lvts_ctrl, int enable)
 	 *
 	 * 0 : enable / disable clock
 	 */
-	writel(enable, LVTS_CLKEN(lvts_ctrl->base));
+	pete_writel("drivers/thermal/mediatek/lvts_thermal.c:867", enable, LVTS_CLKEN(lvts_ctrl->base));
 
 	return 0;
 }
@@ -883,7 +883,7 @@ static int lvts_ctrl_connect(struct device *dev, struct lvts_ctrl *lvts_ctrl)
 	 * 0-5	: thermal controller id
 	 *   7	: thermal controller connection is valid
 	 */
-	id = readl(LVTS_ID(lvts_ctrl->base));
+	id = pete_readl("drivers/thermal/mediatek/lvts_thermal.c:886", LVTS_ID(lvts_ctrl->base));
 	if (!(id & BIT(7)))
 		return -EIO;
 
@@ -925,7 +925,7 @@ static int lvts_ctrl_calibrate(struct device *dev, struct lvts_ctrl *lvts_ctrl)
 	 * 20-0 : Efuse value for normalization data
 	 */
 	for (i = 0; i < LVTS_SENSOR_MAX; i++)
-		writel(lvts_ctrl->calibration[i], lvts_edata[i]);
+		pete_writel("drivers/thermal/mediatek/lvts_thermal.c:928", lvts_ctrl->calibration[i], lvts_edata[i]);
 
 	return 0;
 }
@@ -945,7 +945,7 @@ static int lvts_ctrl_configure(struct device *dev, struct lvts_ctrl *lvts_ctrl)
 	 * 7-0	: ADC Sense 0
 	 */
 	value = LVTS_TSSEL_CONF;
-	writel(value, LVTS_TSSEL(lvts_ctrl->base));
+	pete_writel("drivers/thermal/mediatek/lvts_thermal.c:948", value, LVTS_TSSEL(lvts_ctrl->base));
 
 	/*
 	 * LVTS_CALSCALE : ADC voltage round
@@ -974,7 +974,7 @@ static int lvts_ctrl_configure(struct device *dev, struct lvts_ctrl *lvts_ctrl)
 	 */
 	value = LVTS_HW_FILTER << 9 |  LVTS_HW_FILTER << 6 |
 			LVTS_HW_FILTER << 3 | LVTS_HW_FILTER;
-	writel(value, LVTS_MSRCTL0(lvts_ctrl->base));
+	pete_writel("drivers/thermal/mediatek/lvts_thermal.c:977", value, LVTS_MSRCTL0(lvts_ctrl->base));
 
 	/*
 	 * LVTS_MONCTL1 : Period unit and group interval configuration
@@ -1017,7 +1017,7 @@ static int lvts_ctrl_configure(struct device *dev, struct lvts_ctrl *lvts_ctrl)
 	 *
 	 */
 	value = LVTS_GROUP_INTERVAL << 20 | LVTS_PERIOD_UNIT;
-	writel(value, LVTS_MONCTL1(lvts_ctrl->base));
+	pete_writel("drivers/thermal/mediatek/lvts_thermal.c:1020", value, LVTS_MONCTL1(lvts_ctrl->base));
 
 	/*
 	 * LVTS_MONCTL2 : Filtering and sensor interval
@@ -1030,7 +1030,7 @@ static int lvts_ctrl_configure(struct device *dev, struct lvts_ctrl *lvts_ctrl)
 	 *
 	 */
 	value = LVTS_FILTER_INTERVAL << 16 | LVTS_SENSOR_INTERVAL;
-	writel(value, LVTS_MONCTL2(lvts_ctrl->base));
+	pete_writel("drivers/thermal/mediatek/lvts_thermal.c:1033", value, LVTS_MONCTL2(lvts_ctrl->base));
 
 	return lvts_irq_init(lvts_ctrl);
 }
@@ -1110,14 +1110,14 @@ static int lvts_ctrl_start(struct device *dev, struct lvts_ctrl *lvts_ctrl)
 		 * That configuration will ignore the filtering and the delays
 		 * introduced in MONCTL1 and MONCTL2
 		 */
-		writel(sensor_map, LVTS_MSRCTL1(lvts_ctrl->base));
+		pete_writel("drivers/thermal/mediatek/lvts_thermal.c:1113", sensor_map, LVTS_MSRCTL1(lvts_ctrl->base));
 	} else {
 		/*
 		 * Bits:
 		 *      9: Single point access flow
 		 *    0-3: Enable sensing point 0-3
 		 */
-		writel(sensor_map | BIT(9), LVTS_MONCTL0(lvts_ctrl->base));
+		pete_writel("drivers/thermal/mediatek/lvts_thermal.c:1120", sensor_map | BIT(9), LVTS_MONCTL0(lvts_ctrl->base));
 	}
 
 	return 0;

@@ -142,17 +142,17 @@ static int exynos_usi_enable(const struct exynos_usi *usi)
 		return ret;
 
 	/* Enable USI block */
-	val = readl(usi->regs + USI_CON);
+	val = pete_readl("drivers/soc/samsung/exynos-usi.c:145", usi->regs + USI_CON);
 	val &= ~USI_CON_RESET;
-	writel(val, usi->regs + USI_CON);
+	pete_writel("drivers/soc/samsung/exynos-usi.c:147", val, usi->regs + USI_CON);
 	udelay(1);
 
 	/* Continuously provide the clock to USI IP w/o gating */
 	if (usi->clkreq_on) {
-		val = readl(usi->regs + USI_OPTION);
+		val = pete_readl("drivers/soc/samsung/exynos-usi.c:152", usi->regs + USI_OPTION);
 		val &= ~USI_OPTION_CLKSTOP_ON;
 		val |= USI_OPTION_CLKREQ_ON;
-		writel(val, usi->regs + USI_OPTION);
+		pete_writel("drivers/soc/samsung/exynos-usi.c:155", val, usi->regs + USI_OPTION);
 	}
 
 	clk_bulk_disable_unprepare(usi->data->num_clks, usi->clks);

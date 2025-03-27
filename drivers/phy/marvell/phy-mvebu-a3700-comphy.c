@@ -370,25 +370,25 @@ static inline void comphy_reg_set(void __iomem *addr, u32 data, u32 mask)
 {
 	u32 val;
 
-	val = readl(addr);
+	val = pete_readl("drivers/phy/marvell/phy-mvebu-a3700-comphy.c:373", addr);
 	val = (val & ~mask) | (data & mask);
-	writel(val, addr);
+	pete_writel("drivers/phy/marvell/phy-mvebu-a3700-comphy.c:375", val, addr);
 }
 
 static inline void comphy_reg_set16(void __iomem *addr, u16 data, u16 mask)
 {
 	u16 val;
 
-	val = readw(addr);
+	val = pete_readw("drivers/phy/marvell/phy-mvebu-a3700-comphy.c:382", addr);
 	val = (val & ~mask) | (data & mask);
-	writew(val, addr);
+	pete_writew("drivers/phy/marvell/phy-mvebu-a3700-comphy.c:384", val, addr);
 }
 
 /* Used for accessing lane 2 registers (SATA/USB3 PHY) */
 static void comphy_set_indirect(struct mvebu_a3700_comphy_priv *priv,
 				u32 offset, u16 data, u16 mask)
 {
-	writel(offset,
+	pete_writel("drivers/phy/marvell/phy-mvebu-a3700-comphy.c:391", offset,
 	       priv->lane2_phy_indirect + COMPHY_LANE2_INDIR_ADDR);
 	comphy_reg_set(priv->lane2_phy_indirect + COMPHY_LANE2_INDIR_DATA,
 		       data, mask);
@@ -422,7 +422,7 @@ static int comphy_lane_reg_poll(struct mvebu_a3700_comphy_lane *lane,
 		u32 data;
 
 		/* lane 2 PHY registers are accessed indirectly */
-		writel(reg + COMPHY_LANE2_REGS_BASE,
+		pete_writel("drivers/phy/marvell/phy-mvebu-a3700-comphy.c:425", reg + COMPHY_LANE2_REGS_BASE,
 		       lane->priv->lane2_phy_indirect +
 		       COMPHY_LANE2_INDIR_ADDR);
 
@@ -511,9 +511,9 @@ mvebu_a3700_comphy_set_phy_selector(struct mvebu_a3700_comphy_lane *lane)
 
 	spin_lock_irqsave(&lane->priv->lock, flags);
 
-	old = readl(lane->priv->comphy_regs + COMPHY_SELECTOR_PHY_REG);
+	old = pete_readl("drivers/phy/marvell/phy-mvebu-a3700-comphy.c:514", lane->priv->comphy_regs + COMPHY_SELECTOR_PHY_REG);
 	new = (old & ~clr) | set;
-	writel(new, lane->priv->comphy_regs + COMPHY_SELECTOR_PHY_REG);
+	pete_writel("drivers/phy/marvell/phy-mvebu-a3700-comphy.c:516", new, lane->priv->comphy_regs + COMPHY_SELECTOR_PHY_REG);
 
 	spin_unlock_irqrestore(&lane->priv->lock, flags);
 

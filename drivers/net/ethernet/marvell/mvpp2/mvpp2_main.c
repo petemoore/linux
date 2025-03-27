@@ -73,12 +73,12 @@ MODULE_PARM_DESC(queue_mode, "Set queue_mode (single=0, multi=1)");
 
 void mvpp2_write(struct mvpp2 *priv, u32 offset, u32 data)
 {
-	writel(data, priv->swth_base[0] + offset);
+	pete_writel("drivers/net/ethernet/marvell/mvpp2/mvpp2_main.c:76", data, priv->swth_base[0] + offset);
 }
 
 u32 mvpp2_read(struct mvpp2 *priv, u32 offset)
 {
-	return readl(priv->swth_base[0] + offset);
+	return pete_readl("drivers/net/ethernet/marvell/mvpp2/mvpp2_main.c:81", priv->swth_base[0] + offset);
 }
 
 static u32 mvpp2_read_relaxed(struct mvpp2 *priv, u32 offset)
@@ -93,12 +93,12 @@ static inline u32 mvpp2_cpu_to_thread(struct mvpp2 *priv, int cpu)
 
 static void mvpp2_cm3_write(struct mvpp2 *priv, u32 offset, u32 data)
 {
-	writel(data, priv->cm3_base + offset);
+	pete_writel("drivers/net/ethernet/marvell/mvpp2/mvpp2_main.c:96", data, priv->cm3_base + offset);
 }
 
 static u32 mvpp2_cm3_read(struct mvpp2 *priv, u32 offset)
 {
-	return readl(priv->cm3_base + offset);
+	return pete_readl("drivers/net/ethernet/marvell/mvpp2/mvpp2_main.c:101", priv->cm3_base + offset);
 }
 
 static struct page_pool *
@@ -158,13 +158,13 @@ mvpp2_create_page_pool(struct device *dev, int num, int len,
 static void mvpp2_thread_write(struct mvpp2 *priv, unsigned int thread,
 			       u32 offset, u32 data)
 {
-	writel(data, priv->swth_base[thread] + offset);
+	pete_writel("drivers/net/ethernet/marvell/mvpp2/mvpp2_main.c:161", data, priv->swth_base[thread] + offset);
 }
 
 static u32 mvpp2_thread_read(struct mvpp2 *priv, unsigned int thread,
 			     u32 offset)
 {
-	return readl(priv->swth_base[thread] + offset);
+	return pete_readl("drivers/net/ethernet/marvell/mvpp2/mvpp2_main.c:167", priv->swth_base[thread] + offset);
 }
 
 static void mvpp2_thread_write_relaxed(struct mvpp2 *priv, unsigned int thread,
@@ -1521,11 +1521,11 @@ static void mvpp2_modify(void __iomem *ptr, u32 mask, u32 set)
 {
 	u32 old, val;
 
-	old = val = readl(ptr);
+	old = val = pete_readl("drivers/net/ethernet/marvell/mvpp2/mvpp2_main.c:1524", ptr);
 	val &= ~mask;
 	val |= set;
 	if (old != val)
-		writel(val, ptr);
+		pete_writel("drivers/net/ethernet/marvell/mvpp2/mvpp2_main.c:1528", val, ptr);
 }
 
 static void mvpp22_gop_init_rgmii(struct mvpp2_port *port)
@@ -1572,20 +1572,20 @@ static void mvpp22_gop_init_10gkr(struct mvpp2_port *port)
 	void __iomem *xpcs = priv->iface_base + MVPP22_XPCS_BASE(port->gop_id);
 	u32 val;
 
-	val = readl(xpcs + MVPP22_XPCS_CFG0);
+	val = pete_readl("drivers/net/ethernet/marvell/mvpp2/mvpp2_main.c:1575", xpcs + MVPP22_XPCS_CFG0);
 	val &= ~(MVPP22_XPCS_CFG0_PCS_MODE(0x3) |
 		 MVPP22_XPCS_CFG0_ACTIVE_LANE(0x3));
 	val |= MVPP22_XPCS_CFG0_ACTIVE_LANE(2);
-	writel(val, xpcs + MVPP22_XPCS_CFG0);
+	pete_writel("drivers/net/ethernet/marvell/mvpp2/mvpp2_main.c:1579", val, xpcs + MVPP22_XPCS_CFG0);
 
-	val = readl(mpcs + MVPP22_MPCS_CTRL);
+	val = pete_readl("drivers/net/ethernet/marvell/mvpp2/mvpp2_main.c:1581", mpcs + MVPP22_MPCS_CTRL);
 	val &= ~MVPP22_MPCS_CTRL_FWD_ERR_CONN;
-	writel(val, mpcs + MVPP22_MPCS_CTRL);
+	pete_writel("drivers/net/ethernet/marvell/mvpp2/mvpp2_main.c:1583", val, mpcs + MVPP22_MPCS_CTRL);
 
-	val = readl(mpcs + MVPP22_MPCS_CLK_RESET);
+	val = pete_readl("drivers/net/ethernet/marvell/mvpp2/mvpp2_main.c:1585", mpcs + MVPP22_MPCS_CLK_RESET);
 	val &= ~MVPP22_MPCS_CLK_RESET_DIV_RATIO(0x7);
 	val |= MVPP22_MPCS_CLK_RESET_DIV_RATIO(1);
-	writel(val, mpcs + MVPP22_MPCS_CLK_RESET);
+	pete_writel("drivers/net/ethernet/marvell/mvpp2/mvpp2_main.c:1588", val, mpcs + MVPP22_MPCS_CLK_RESET);
 }
 
 static void mvpp22_gop_fca_enable_periodic(struct mvpp2_port *port, bool en)
@@ -1594,11 +1594,11 @@ static void mvpp22_gop_fca_enable_periodic(struct mvpp2_port *port, bool en)
 	void __iomem *fca = priv->iface_base + MVPP22_FCA_BASE(port->gop_id);
 	u32 val;
 
-	val = readl(fca + MVPP22_FCA_CONTROL_REG);
+	val = pete_readl("drivers/net/ethernet/marvell/mvpp2/mvpp2_main.c:1597", fca + MVPP22_FCA_CONTROL_REG);
 	val &= ~MVPP22_FCA_ENABLE_PERIODIC;
 	if (en)
 		val |= MVPP22_FCA_ENABLE_PERIODIC;
-	writel(val, fca + MVPP22_FCA_CONTROL_REG);
+	pete_writel("drivers/net/ethernet/marvell/mvpp2/mvpp2_main.c:1601", val, fca + MVPP22_FCA_CONTROL_REG);
 }
 
 static void mvpp22_gop_fca_set_timer(struct mvpp2_port *port, u32 timer)
@@ -1610,8 +1610,8 @@ static void mvpp22_gop_fca_set_timer(struct mvpp2_port *port, u32 timer)
 	lsb = timer & MVPP22_FCA_REG_MASK;
 	msb = timer >> MVPP22_FCA_REG_SIZE;
 
-	writel(lsb, fca + MVPP22_PERIODIC_COUNTER_LSB_REG);
-	writel(msb, fca + MVPP22_PERIODIC_COUNTER_MSB_REG);
+	pete_writel("drivers/net/ethernet/marvell/mvpp2/mvpp2_main.c:1613", lsb, fca + MVPP22_PERIODIC_COUNTER_LSB_REG);
+	pete_writel("drivers/net/ethernet/marvell/mvpp2/mvpp2_main.c:1614", msb, fca + MVPP22_PERIODIC_COUNTER_MSB_REG);
 }
 
 /* Set Flow Control timer x100 faster than pause quanta to ensure that link
@@ -1694,19 +1694,19 @@ static void mvpp22_gop_unmask_irq(struct mvpp2_port *port)
 	    phy_interface_mode_is_8023z(port->phy_interface) ||
 	    port->phy_interface == PHY_INTERFACE_MODE_SGMII) {
 		/* Enable the GMAC link status irq for this port */
-		val = readl(port->base + MVPP22_GMAC_INT_SUM_MASK);
+		val = pete_readl("drivers/net/ethernet/marvell/mvpp2/mvpp2_main.c:1697", port->base + MVPP22_GMAC_INT_SUM_MASK);
 		val |= MVPP22_GMAC_INT_SUM_MASK_LINK_STAT;
-		writel(val, port->base + MVPP22_GMAC_INT_SUM_MASK);
+		pete_writel("drivers/net/ethernet/marvell/mvpp2/mvpp2_main.c:1699", val, port->base + MVPP22_GMAC_INT_SUM_MASK);
 	}
 
 	if (mvpp2_port_supports_xlg(port)) {
 		/* Enable the XLG/GIG irqs for this port */
-		val = readl(port->base + MVPP22_XLG_EXT_INT_MASK);
+		val = pete_readl("drivers/net/ethernet/marvell/mvpp2/mvpp2_main.c:1704", port->base + MVPP22_XLG_EXT_INT_MASK);
 		if (mvpp2_is_xlg(port->phy_interface))
 			val |= MVPP22_XLG_EXT_INT_MASK_XLG;
 		else
 			val |= MVPP22_XLG_EXT_INT_MASK_GIG;
-		writel(val, port->base + MVPP22_XLG_EXT_INT_MASK);
+		pete_writel("drivers/net/ethernet/marvell/mvpp2/mvpp2_main.c:1709", val, port->base + MVPP22_XLG_EXT_INT_MASK);
 	}
 }
 
@@ -1715,18 +1715,18 @@ static void mvpp22_gop_mask_irq(struct mvpp2_port *port)
 	u32 val;
 
 	if (mvpp2_port_supports_xlg(port)) {
-		val = readl(port->base + MVPP22_XLG_EXT_INT_MASK);
+		val = pete_readl("drivers/net/ethernet/marvell/mvpp2/mvpp2_main.c:1718", port->base + MVPP22_XLG_EXT_INT_MASK);
 		val &= ~(MVPP22_XLG_EXT_INT_MASK_XLG |
 			 MVPP22_XLG_EXT_INT_MASK_GIG);
-		writel(val, port->base + MVPP22_XLG_EXT_INT_MASK);
+		pete_writel("drivers/net/ethernet/marvell/mvpp2/mvpp2_main.c:1721", val, port->base + MVPP22_XLG_EXT_INT_MASK);
 	}
 
 	if (phy_interface_mode_is_rgmii(port->phy_interface) ||
 	    phy_interface_mode_is_8023z(port->phy_interface) ||
 	    port->phy_interface == PHY_INTERFACE_MODE_SGMII) {
-		val = readl(port->base + MVPP22_GMAC_INT_SUM_MASK);
+		val = pete_readl("drivers/net/ethernet/marvell/mvpp2/mvpp2_main.c:1727", port->base + MVPP22_GMAC_INT_SUM_MASK);
 		val &= ~MVPP22_GMAC_INT_SUM_MASK_LINK_STAT;
-		writel(val, port->base + MVPP22_GMAC_INT_SUM_MASK);
+		pete_writel("drivers/net/ethernet/marvell/mvpp2/mvpp2_main.c:1729", val, port->base + MVPP22_GMAC_INT_SUM_MASK);
 	}
 }
 
@@ -1742,15 +1742,15 @@ static void mvpp22_gop_setup_irq(struct mvpp2_port *port)
 	    phy_interface_mode_is_rgmii(port->phy_interface) ||
 	    phy_interface_mode_is_8023z(port->phy_interface) ||
 	    port->phy_interface == PHY_INTERFACE_MODE_SGMII) {
-		val = readl(port->base + MVPP22_GMAC_INT_MASK);
+		val = pete_readl("drivers/net/ethernet/marvell/mvpp2/mvpp2_main.c:1745", port->base + MVPP22_GMAC_INT_MASK);
 		val |= MVPP22_GMAC_INT_MASK_LINK_STAT;
-		writel(val, port->base + MVPP22_GMAC_INT_MASK);
+		pete_writel("drivers/net/ethernet/marvell/mvpp2/mvpp2_main.c:1747", val, port->base + MVPP22_GMAC_INT_MASK);
 	}
 
 	if (mvpp2_port_supports_xlg(port)) {
-		val = readl(port->base + MVPP22_XLG_INT_MASK);
+		val = pete_readl("drivers/net/ethernet/marvell/mvpp2/mvpp2_main.c:1751", port->base + MVPP22_XLG_INT_MASK);
 		val |= MVPP22_XLG_INT_MASK_LINK;
-		writel(val, port->base + MVPP22_XLG_INT_MASK);
+		pete_writel("drivers/net/ethernet/marvell/mvpp2/mvpp2_main.c:1753", val, port->base + MVPP22_XLG_INT_MASK);
 
 		mvpp2_modify(port->base + MVPP22_XLG_EXT_INT_MASK,
 			     MVPP22_XLG_EXT_INT_MASK_PTP,
@@ -1791,15 +1791,15 @@ static void mvpp2_port_enable(struct mvpp2_port *port)
 
 	if (mvpp2_port_supports_xlg(port) &&
 	    mvpp2_is_xlg(port->phy_interface)) {
-		val = readl(port->base + MVPP22_XLG_CTRL0_REG);
+		val = pete_readl("drivers/net/ethernet/marvell/mvpp2/mvpp2_main.c:1794", port->base + MVPP22_XLG_CTRL0_REG);
 		val |= MVPP22_XLG_CTRL0_PORT_EN;
 		val &= ~MVPP22_XLG_CTRL0_MIB_CNT_DIS;
-		writel(val, port->base + MVPP22_XLG_CTRL0_REG);
+		pete_writel("drivers/net/ethernet/marvell/mvpp2/mvpp2_main.c:1797", val, port->base + MVPP22_XLG_CTRL0_REG);
 	} else {
-		val = readl(port->base + MVPP2_GMAC_CTRL_0_REG);
+		val = pete_readl("drivers/net/ethernet/marvell/mvpp2/mvpp2_main.c:1799", port->base + MVPP2_GMAC_CTRL_0_REG);
 		val |= MVPP2_GMAC_PORT_EN_MASK;
 		val |= MVPP2_GMAC_MIB_CNTR_EN_MASK;
-		writel(val, port->base + MVPP2_GMAC_CTRL_0_REG);
+		pete_writel("drivers/net/ethernet/marvell/mvpp2/mvpp2_main.c:1802", val, port->base + MVPP2_GMAC_CTRL_0_REG);
 	}
 }
 
@@ -1809,14 +1809,14 @@ static void mvpp2_port_disable(struct mvpp2_port *port)
 
 	if (mvpp2_port_supports_xlg(port) &&
 	    mvpp2_is_xlg(port->phy_interface)) {
-		val = readl(port->base + MVPP22_XLG_CTRL0_REG);
+		val = pete_readl("drivers/net/ethernet/marvell/mvpp2/mvpp2_main.c:1812", port->base + MVPP22_XLG_CTRL0_REG);
 		val &= ~MVPP22_XLG_CTRL0_PORT_EN;
-		writel(val, port->base + MVPP22_XLG_CTRL0_REG);
+		pete_writel("drivers/net/ethernet/marvell/mvpp2/mvpp2_main.c:1814", val, port->base + MVPP22_XLG_CTRL0_REG);
 	}
 
-	val = readl(port->base + MVPP2_GMAC_CTRL_0_REG);
+	val = pete_readl("drivers/net/ethernet/marvell/mvpp2/mvpp2_main.c:1817", port->base + MVPP2_GMAC_CTRL_0_REG);
 	val &= ~(MVPP2_GMAC_PORT_EN_MASK);
-	writel(val, port->base + MVPP2_GMAC_CTRL_0_REG);
+	pete_writel("drivers/net/ethernet/marvell/mvpp2/mvpp2_main.c:1819", val, port->base + MVPP2_GMAC_CTRL_0_REG);
 }
 
 /* Set IEEE 802.3x Flow Control Xon Packet Transmission Mode */
@@ -1824,9 +1824,9 @@ static void mvpp2_port_periodic_xon_disable(struct mvpp2_port *port)
 {
 	u32 val;
 
-	val = readl(port->base + MVPP2_GMAC_CTRL_1_REG) &
+	val = pete_readl("drivers/net/ethernet/marvell/mvpp2/mvpp2_main.c:1827", port->base + MVPP2_GMAC_CTRL_1_REG) &
 		    ~MVPP2_GMAC_PERIODIC_XON_EN_MASK;
-	writel(val, port->base + MVPP2_GMAC_CTRL_1_REG);
+	pete_writel("drivers/net/ethernet/marvell/mvpp2/mvpp2_main.c:1829", val, port->base + MVPP2_GMAC_CTRL_1_REG);
 }
 
 /* Configure loopback port */
@@ -1835,7 +1835,7 @@ static void mvpp2_port_loopback_set(struct mvpp2_port *port,
 {
 	u32 val;
 
-	val = readl(port->base + MVPP2_GMAC_CTRL_1_REG);
+	val = pete_readl("drivers/net/ethernet/marvell/mvpp2/mvpp2_main.c:1838", port->base + MVPP2_GMAC_CTRL_1_REG);
 
 	if (state->speed == 1000)
 		val |= MVPP2_GMAC_GMII_LB_EN_MASK;
@@ -1848,7 +1848,7 @@ static void mvpp2_port_loopback_set(struct mvpp2_port *port,
 	else
 		val &= ~MVPP2_GMAC_PCS_LB_EN_MASK;
 
-	writel(val, port->base + MVPP2_GMAC_CTRL_1_REG);
+	pete_writel("drivers/net/ethernet/marvell/mvpp2/mvpp2_main.c:1851", val, port->base + MVPP2_GMAC_CTRL_1_REG);
 }
 
 enum {
@@ -1872,9 +1872,9 @@ static u64 mvpp2_read_count(struct mvpp2_port *port,
 {
 	u64 val;
 
-	val = readl(port->stats_base + counter->offset);
+	val = pete_readl("drivers/net/ethernet/marvell/mvpp2/mvpp2_main.c:1875", port->stats_base + counter->offset);
 	if (counter->reg_is_64b)
-		val += (u64)readl(port->stats_base + counter->offset + 4) << 32;
+		val += (u64)pete_readl("drivers/net/ethernet/marvell/mvpp2/mvpp2_main.c:1877", port->stats_base + counter->offset + 4) << 32;
 
 	return val;
 }
@@ -2167,14 +2167,14 @@ static void mvpp2_mac_reset_assert(struct mvpp2_port *port)
 {
 	u32 val;
 
-	val = readl(port->base + MVPP2_GMAC_CTRL_2_REG) |
+	val = pete_readl("drivers/net/ethernet/marvell/mvpp2/mvpp2_main.c:2170", port->base + MVPP2_GMAC_CTRL_2_REG) |
 	      MVPP2_GMAC_PORT_RESET_MASK;
-	writel(val, port->base + MVPP2_GMAC_CTRL_2_REG);
+	pete_writel("drivers/net/ethernet/marvell/mvpp2/mvpp2_main.c:2172", val, port->base + MVPP2_GMAC_CTRL_2_REG);
 
 	if (port->priv->hw_version >= MVPP22 && port->gop_id == 0) {
-		val = readl(port->base + MVPP22_XLG_CTRL0_REG) &
+		val = pete_readl("drivers/net/ethernet/marvell/mvpp2/mvpp2_main.c:2175", port->base + MVPP22_XLG_CTRL0_REG) &
 		      ~MVPP22_XLG_CTRL0_MAC_RESET_DIS;
-		writel(val, port->base + MVPP22_XLG_CTRL0_REG);
+		pete_writel("drivers/net/ethernet/marvell/mvpp2/mvpp2_main.c:2177", val, port->base + MVPP22_XLG_CTRL0_REG);
 	}
 }
 
@@ -2190,13 +2190,13 @@ static void mvpp22_pcs_reset_assert(struct mvpp2_port *port)
 	mpcs = priv->iface_base + MVPP22_MPCS_BASE(port->gop_id);
 	xpcs = priv->iface_base + MVPP22_XPCS_BASE(port->gop_id);
 
-	val = readl(mpcs + MVPP22_MPCS_CLK_RESET);
+	val = pete_readl("drivers/net/ethernet/marvell/mvpp2/mvpp2_main.c:2193", mpcs + MVPP22_MPCS_CLK_RESET);
 	val &= ~(MAC_CLK_RESET_MAC | MAC_CLK_RESET_SD_RX | MAC_CLK_RESET_SD_TX);
 	val |= MVPP22_MPCS_CLK_RESET_DIV_SET;
-	writel(val, mpcs + MVPP22_MPCS_CLK_RESET);
+	pete_writel("drivers/net/ethernet/marvell/mvpp2/mvpp2_main.c:2196", val, mpcs + MVPP22_MPCS_CLK_RESET);
 
-	val = readl(xpcs + MVPP22_XPCS_CFG0);
-	writel(val & ~MVPP22_XPCS_CFG0_RESET_DIS, xpcs + MVPP22_XPCS_CFG0);
+	val = pete_readl("drivers/net/ethernet/marvell/mvpp2/mvpp2_main.c:2198", xpcs + MVPP22_XPCS_CFG0);
+	pete_writel("drivers/net/ethernet/marvell/mvpp2/mvpp2_main.c:2199", val & ~MVPP22_XPCS_CFG0_RESET_DIS, xpcs + MVPP22_XPCS_CFG0);
 }
 
 static void mvpp22_pcs_reset_deassert(struct mvpp2_port *port,
@@ -2215,16 +2215,16 @@ static void mvpp22_pcs_reset_deassert(struct mvpp2_port *port,
 	switch (interface) {
 	case PHY_INTERFACE_MODE_5GBASER:
 	case PHY_INTERFACE_MODE_10GBASER:
-		val = readl(mpcs + MVPP22_MPCS_CLK_RESET);
+		val = pete_readl("drivers/net/ethernet/marvell/mvpp2/mvpp2_main.c:2218", mpcs + MVPP22_MPCS_CLK_RESET);
 		val |= MAC_CLK_RESET_MAC | MAC_CLK_RESET_SD_RX |
 		       MAC_CLK_RESET_SD_TX;
 		val &= ~MVPP22_MPCS_CLK_RESET_DIV_SET;
-		writel(val, mpcs + MVPP22_MPCS_CLK_RESET);
+		pete_writel("drivers/net/ethernet/marvell/mvpp2/mvpp2_main.c:2222", val, mpcs + MVPP22_MPCS_CLK_RESET);
 		break;
 	case PHY_INTERFACE_MODE_XAUI:
 	case PHY_INTERFACE_MODE_RXAUI:
-		val = readl(xpcs + MVPP22_XPCS_CFG0);
-		writel(val | MVPP22_XPCS_CFG0_RESET_DIS, xpcs + MVPP22_XPCS_CFG0);
+		val = pete_readl("drivers/net/ethernet/marvell/mvpp2/mvpp2_main.c:2226", xpcs + MVPP22_XPCS_CFG0);
+		pete_writel("drivers/net/ethernet/marvell/mvpp2/mvpp2_main.c:2227", val | MVPP22_XPCS_CFG0_RESET_DIS, xpcs + MVPP22_XPCS_CFG0);
 		break;
 	default:
 		break;
@@ -2236,11 +2236,11 @@ static inline void mvpp2_gmac_max_rx_size_set(struct mvpp2_port *port)
 {
 	u32 val;
 
-	val = readl(port->base + MVPP2_GMAC_CTRL_0_REG);
+	val = pete_readl("drivers/net/ethernet/marvell/mvpp2/mvpp2_main.c:2239", port->base + MVPP2_GMAC_CTRL_0_REG);
 	val &= ~MVPP2_GMAC_MAX_RX_SIZE_MASK;
 	val |= (((port->pkt_size - MVPP2_MH_SIZE) / 2) <<
 		    MVPP2_GMAC_MAX_RX_SIZE_OFFS);
-	writel(val, port->base + MVPP2_GMAC_CTRL_0_REG);
+	pete_writel("drivers/net/ethernet/marvell/mvpp2/mvpp2_main.c:2243", val, port->base + MVPP2_GMAC_CTRL_0_REG);
 }
 
 /* Change maximum receive size of the port */
@@ -2248,11 +2248,11 @@ static inline void mvpp2_xlg_max_rx_size_set(struct mvpp2_port *port)
 {
 	u32 val;
 
-	val =  readl(port->base + MVPP22_XLG_CTRL1_REG);
+	val =  pete_readl("drivers/net/ethernet/marvell/mvpp2/mvpp2_main.c:2251", port->base + MVPP22_XLG_CTRL1_REG);
 	val &= ~MVPP22_XLG_CTRL1_FRAMESIZELIMIT_MASK;
 	val |= ((port->pkt_size - MVPP2_MH_SIZE) / 2) <<
 	       MVPP22_XLG_CTRL1_FRAMESIZELIMIT_OFFS;
-	writel(val, port->base + MVPP22_XLG_CTRL1_REG);
+	pete_writel("drivers/net/ethernet/marvell/mvpp2/mvpp2_main.c:2255", val, port->base + MVPP22_XLG_CTRL1_REG);
 }
 
 /* Set defaults to the MVPP2 port */
@@ -2262,11 +2262,11 @@ static void mvpp2_defaults_set(struct mvpp2_port *port)
 
 	if (port->priv->hw_version == MVPP21) {
 		/* Update TX FIFO MIN Threshold */
-		val = readl(port->base + MVPP2_GMAC_PORT_FIFO_CFG_1_REG);
+		val = pete_readl("drivers/net/ethernet/marvell/mvpp2/mvpp2_main.c:2265", port->base + MVPP2_GMAC_PORT_FIFO_CFG_1_REG);
 		val &= ~MVPP2_GMAC_TX_FIFO_MIN_TH_ALL_MASK;
 		/* Min. TX threshold must be less than minimal packet length */
 		val |= MVPP2_GMAC_TX_FIFO_MIN_TH_MASK(64 - 4 - 2);
-		writel(val, port->base + MVPP2_GMAC_PORT_FIFO_CFG_1_REG);
+		pete_writel("drivers/net/ethernet/marvell/mvpp2/mvpp2_main.c:2269", val, port->base + MVPP2_GMAC_PORT_FIFO_CFG_1_REG);
 	}
 
 	/* Disable Legacy WRR, Disable EJP, Release from reset */
@@ -3415,7 +3415,7 @@ static void mvpp2_isr_handle_ptp(struct mvpp2_port *port)
 	u32 val;
 
 	ptp = port->priv->iface_base + MVPP22_PTP_BASE(port->gop_id);
-	val = readl(ptp + MVPP22_PTP_INT_CAUSE);
+	val = pete_readl("drivers/net/ethernet/marvell/mvpp2/mvpp2_main.c:3418", ptp + MVPP22_PTP_INT_CAUSE);
 	if (val & MVPP22_PTP_INT_CAUSE_QUEUE0)
 		mvpp2_isr_handle_ptp_queue(port, 0);
 	if (val & MVPP22_PTP_INT_CAUSE_QUEUE1)
@@ -3456,9 +3456,9 @@ static void mvpp2_isr_handle_xlg(struct mvpp2_port *port)
 	bool link;
 	u32 val;
 
-	val = readl(port->base + MVPP22_XLG_INT_STAT);
+	val = pete_readl("drivers/net/ethernet/marvell/mvpp2/mvpp2_main.c:3459", port->base + MVPP22_XLG_INT_STAT);
 	if (val & MVPP22_XLG_INT_STAT_LINK) {
-		val = readl(port->base + MVPP22_XLG_STATUS);
+		val = pete_readl("drivers/net/ethernet/marvell/mvpp2/mvpp2_main.c:3461", port->base + MVPP22_XLG_STATUS);
 		link = (val & MVPP22_XLG_STATUS_LINK_UP);
 		mvpp2_isr_handle_link(port, link);
 	}
@@ -3472,9 +3472,9 @@ static void mvpp2_isr_handle_gmac_internal(struct mvpp2_port *port)
 	if (phy_interface_mode_is_rgmii(port->phy_interface) ||
 	    phy_interface_mode_is_8023z(port->phy_interface) ||
 	    port->phy_interface == PHY_INTERFACE_MODE_SGMII) {
-		val = readl(port->base + MVPP22_GMAC_INT_STAT);
+		val = pete_readl("drivers/net/ethernet/marvell/mvpp2/mvpp2_main.c:3475", port->base + MVPP22_GMAC_INT_STAT);
 		if (val & MVPP22_GMAC_INT_STAT_LINK) {
-			val = readl(port->base + MVPP2_GMAC_STATUS0);
+			val = pete_readl("drivers/net/ethernet/marvell/mvpp2/mvpp2_main.c:3477", port->base + MVPP2_GMAC_STATUS0);
 			link = (val & MVPP2_GMAC_STATUS0_LINK_UP);
 			mvpp2_isr_handle_link(port, link);
 		}
@@ -3492,7 +3492,7 @@ static irqreturn_t mvpp2_port_isr(int irq, void *dev_id)
 	if (mvpp2_port_supports_xlg(port) &&
 	    mvpp2_is_xlg(port->phy_interface)) {
 		/* Check the external status register */
-		val = readl(port->base + MVPP22_XLG_EXT_INT_STAT);
+		val = pete_readl("drivers/net/ethernet/marvell/mvpp2/mvpp2_main.c:3495", port->base + MVPP22_XLG_EXT_INT_STAT);
 		if (val & MVPP22_XLG_EXT_INT_STAT_XLG)
 			mvpp2_isr_handle_xlg(port);
 		if (val & MVPP22_XLG_EXT_INT_STAT_PTP)
@@ -3501,7 +3501,7 @@ static irqreturn_t mvpp2_port_isr(int irq, void *dev_id)
 		/* If it's not the XLG, we must be using the GMAC.
 		 * Check the summary status.
 		 */
-		val = readl(port->base + MVPP22_GMAC_INT_SUM_STAT);
+		val = pete_readl("drivers/net/ethernet/marvell/mvpp2/mvpp2_main.c:3504", port->base + MVPP22_GMAC_INT_SUM_STAT);
 		if (val & MVPP22_GMAC_INT_SUM_STAT_INTERNAL)
 			mvpp2_isr_handle_gmac_internal(port);
 		if (val & MVPP22_GMAC_INT_SUM_STAT_PTP)
@@ -4581,7 +4581,7 @@ static void mvpp22_mode_reconfigure(struct mvpp2_port *port,
 	mvpp22_pcs_reset_deassert(port, interface);
 
 	if (mvpp2_port_supports_xlg(port)) {
-		ctrl3 = readl(port->base + MVPP22_XLG_CTRL3_REG);
+		ctrl3 = pete_readl("drivers/net/ethernet/marvell/mvpp2/mvpp2_main.c:4584", port->base + MVPP22_XLG_CTRL3_REG);
 		ctrl3 &= ~MVPP22_XLG_CTRL3_MACMODESELECT_MASK;
 
 		if (mvpp2_is_xlg(interface))
@@ -4589,7 +4589,7 @@ static void mvpp22_mode_reconfigure(struct mvpp2_port *port,
 		else
 			ctrl3 |= MVPP22_XLG_CTRL3_MACMODESELECT_GMAC;
 
-		writel(ctrl3, port->base + MVPP22_XLG_CTRL3_REG);
+		pete_writel("drivers/net/ethernet/marvell/mvpp2/mvpp2_main.c:4592", ctrl3, port->base + MVPP22_XLG_CTRL3_REG);
 	}
 
 	if (mvpp2_port_supports_xlg(port) && mvpp2_is_xlg(interface))
@@ -4689,9 +4689,9 @@ static void mvpp21_get_mac_address(struct mvpp2_port *port, unsigned char *addr)
 {
 	u32 mac_addr_l, mac_addr_m, mac_addr_h;
 
-	mac_addr_l = readl(port->base + MVPP2_GMAC_CTRL_1_REG);
-	mac_addr_m = readl(port->priv->lms_base + MVPP2_SRC_ADDR_MIDDLE);
-	mac_addr_h = readl(port->priv->lms_base + MVPP2_SRC_ADDR_HIGH);
+	mac_addr_l = pete_readl("drivers/net/ethernet/marvell/mvpp2/mvpp2_main.c:4692", port->base + MVPP2_GMAC_CTRL_1_REG);
+	mac_addr_m = pete_readl("drivers/net/ethernet/marvell/mvpp2/mvpp2_main.c:4693", port->priv->lms_base + MVPP2_SRC_ADDR_MIDDLE);
+	mac_addr_h = pete_readl("drivers/net/ethernet/marvell/mvpp2/mvpp2_main.c:4694", port->priv->lms_base + MVPP2_SRC_ADDR_HIGH);
 	addr[0] = (mac_addr_h >> 24) & 0xFF;
 	addr[1] = (mac_addr_h >> 16) & 0xFF;
 	addr[2] = (mac_addr_h >> 8) & 0xFF;
@@ -5951,15 +5951,15 @@ static int mvpp2_port_init(struct mvpp2_port *port)
 	mvpp2_port_disable(port);
 
 	if (mvpp2_is_xlg(port->phy_interface)) {
-		val = readl(port->base + MVPP22_XLG_CTRL0_REG);
+		val = pete_readl("drivers/net/ethernet/marvell/mvpp2/mvpp2_main.c:5954", port->base + MVPP22_XLG_CTRL0_REG);
 		val &= ~MVPP22_XLG_CTRL0_FORCE_LINK_PASS;
 		val |= MVPP22_XLG_CTRL0_FORCE_LINK_DOWN;
-		writel(val, port->base + MVPP22_XLG_CTRL0_REG);
+		pete_writel("drivers/net/ethernet/marvell/mvpp2/mvpp2_main.c:5957", val, port->base + MVPP22_XLG_CTRL0_REG);
 	} else {
-		val = readl(port->base + MVPP2_GMAC_AUTONEG_CONFIG);
+		val = pete_readl("drivers/net/ethernet/marvell/mvpp2/mvpp2_main.c:5959", port->base + MVPP2_GMAC_AUTONEG_CONFIG);
 		val &= ~MVPP2_GMAC_FORCE_LINK_PASS;
 		val |= MVPP2_GMAC_FORCE_LINK_DOWN;
-		writel(val, port->base + MVPP2_GMAC_AUTONEG_CONFIG);
+		pete_writel("drivers/net/ethernet/marvell/mvpp2/mvpp2_main.c:5962", val, port->base + MVPP2_GMAC_AUTONEG_CONFIG);
 	}
 
 	port->tx_time_coal = MVPP2_TXDONE_COAL_USEC;
@@ -6190,11 +6190,11 @@ static void mvpp2_xlg_pcs_get_state(struct phylink_pcs *pcs,
 	state->duplex = 1;
 	state->an_complete = 1;
 
-	val = readl(port->base + MVPP22_XLG_STATUS);
+	val = pete_readl("drivers/net/ethernet/marvell/mvpp2/mvpp2_main.c:6193", port->base + MVPP22_XLG_STATUS);
 	state->link = !!(val & MVPP22_XLG_STATUS_LINK_UP);
 
 	state->pause = 0;
-	val = readl(port->base + MVPP22_XLG_CTRL0_REG);
+	val = pete_readl("drivers/net/ethernet/marvell/mvpp2/mvpp2_main.c:6197", port->base + MVPP22_XLG_CTRL0_REG);
 	if (val & MVPP22_XLG_CTRL0_TX_FLOW_CTRL_EN)
 		state->pause |= MLO_PAUSE_TX;
 	if (val & MVPP22_XLG_CTRL0_RX_FLOW_CTRL_EN)
@@ -6235,7 +6235,7 @@ static void mvpp2_gmac_pcs_get_state(struct phylink_pcs *pcs,
 	struct mvpp2_port *port = mvpp2_pcs_gmac_to_port(pcs);
 	u32 val;
 
-	val = readl(port->base + MVPP2_GMAC_STATUS0);
+	val = pete_readl("drivers/net/ethernet/marvell/mvpp2/mvpp2_main.c:6238", port->base + MVPP2_GMAC_STATUS0);
 
 	state->an_complete = !!(val & MVPP2_GMAC_STATUS0_AN_COMPLETE);
 	state->link = !!(val & MVPP2_GMAC_STATUS0_LINK_UP);
@@ -6311,11 +6311,11 @@ static int mvpp2_gmac_pcs_config(struct phylink_pcs *pcs, unsigned int neg_mode,
 		val = 0;
 	}
 
-	old_an = an = readl(port->base + MVPP2_GMAC_AUTONEG_CONFIG);
+	old_an = an = pete_readl("drivers/net/ethernet/marvell/mvpp2/mvpp2_main.c:6314", port->base + MVPP2_GMAC_AUTONEG_CONFIG);
 	an = (an & ~mask) | val;
 	changed = an ^ old_an;
 	if (changed)
-		writel(an, port->base + MVPP2_GMAC_AUTONEG_CONFIG);
+		pete_writel("drivers/net/ethernet/marvell/mvpp2/mvpp2_main.c:6318", an, port->base + MVPP2_GMAC_AUTONEG_CONFIG);
 
 	/* We are only interested in the advertisement bits changing */
 	return changed & (MVPP2_GMAC_FC_ADV_EN | MVPP2_GMAC_FC_ADV_ASM_EN);
@@ -6324,11 +6324,11 @@ static int mvpp2_gmac_pcs_config(struct phylink_pcs *pcs, unsigned int neg_mode,
 static void mvpp2_gmac_pcs_an_restart(struct phylink_pcs *pcs)
 {
 	struct mvpp2_port *port = mvpp2_pcs_gmac_to_port(pcs);
-	u32 val = readl(port->base + MVPP2_GMAC_AUTONEG_CONFIG);
+	u32 val = pete_readl("drivers/net/ethernet/marvell/mvpp2/mvpp2_main.c:6327", port->base + MVPP2_GMAC_AUTONEG_CONFIG);
 
-	writel(val | MVPP2_GMAC_IN_BAND_RESTART_AN,
+	pete_writel("drivers/net/ethernet/marvell/mvpp2/mvpp2_main.c:6329", val | MVPP2_GMAC_IN_BAND_RESTART_AN,
 	       port->base + MVPP2_GMAC_AUTONEG_CONFIG);
-	writel(val & ~MVPP2_GMAC_IN_BAND_RESTART_AN,
+	pete_writel("drivers/net/ethernet/marvell/mvpp2/mvpp2_main.c:6331", val & ~MVPP2_GMAC_IN_BAND_RESTART_AN,
 	       port->base + MVPP2_GMAC_AUTONEG_CONFIG);
 }
 
@@ -6355,7 +6355,7 @@ static void mvpp2_xlg_config(struct mvpp2_port *port, unsigned int mode,
 
 	/* Wait for reset to deassert */
 	do {
-		val = readl(port->base + MVPP22_XLG_CTRL0_REG);
+		val = pete_readl("drivers/net/ethernet/marvell/mvpp2/mvpp2_main.c:6358", port->base + MVPP22_XLG_CTRL0_REG);
 	} while (!(val & MVPP22_XLG_CTRL0_MAC_RESET_DIS));
 }
 
@@ -6366,9 +6366,9 @@ static void mvpp2_gmac_config(struct mvpp2_port *port, unsigned int mode,
 	u32 old_ctrl2, ctrl2;
 	u32 old_ctrl4, ctrl4;
 
-	old_ctrl0 = ctrl0 = readl(port->base + MVPP2_GMAC_CTRL_0_REG);
-	old_ctrl2 = ctrl2 = readl(port->base + MVPP2_GMAC_CTRL_2_REG);
-	old_ctrl4 = ctrl4 = readl(port->base + MVPP22_GMAC_CTRL_4_REG);
+	old_ctrl0 = ctrl0 = pete_readl("drivers/net/ethernet/marvell/mvpp2/mvpp2_main.c:6369", port->base + MVPP2_GMAC_CTRL_0_REG);
+	old_ctrl2 = ctrl2 = pete_readl("drivers/net/ethernet/marvell/mvpp2/mvpp2_main.c:6370", port->base + MVPP2_GMAC_CTRL_2_REG);
+	old_ctrl4 = ctrl4 = pete_readl("drivers/net/ethernet/marvell/mvpp2/mvpp2_main.c:6371", port->base + MVPP22_GMAC_CTRL_4_REG);
 
 	ctrl0 &= ~MVPP2_GMAC_PORT_TYPE_MASK;
 	ctrl2 &= ~(MVPP2_GMAC_INBAND_AN_MASK | MVPP2_GMAC_PCS_ENABLE_MASK | MVPP2_GMAC_FLOW_CTRL_MASK);
@@ -6411,11 +6411,11 @@ static void mvpp2_gmac_config(struct mvpp2_port *port, unsigned int mode,
 	}
 
 	if (old_ctrl0 != ctrl0)
-		writel(ctrl0, port->base + MVPP2_GMAC_CTRL_0_REG);
+		pete_writel("drivers/net/ethernet/marvell/mvpp2/mvpp2_main.c:6414", ctrl0, port->base + MVPP2_GMAC_CTRL_0_REG);
 	if (old_ctrl2 != ctrl2)
-		writel(ctrl2, port->base + MVPP2_GMAC_CTRL_2_REG);
+		pete_writel("drivers/net/ethernet/marvell/mvpp2/mvpp2_main.c:6416", ctrl2, port->base + MVPP2_GMAC_CTRL_2_REG);
 	if (old_ctrl4 != ctrl4)
-		writel(ctrl4, port->base + MVPP22_GMAC_CTRL_4_REG);
+		pete_writel("drivers/net/ethernet/marvell/mvpp2/mvpp2_main.c:6418", ctrl4, port->base + MVPP22_GMAC_CTRL_4_REG);
 }
 
 static struct phylink_pcs *mvpp2_select_pcs(struct phylink_config *config,
@@ -6521,7 +6521,7 @@ static int mvpp2_mac_finish(struct phylink_config *config, unsigned int mode,
 		mvpp2_modify(port->base + MVPP2_GMAC_CTRL_2_REG,
 			     MVPP2_GMAC_PORT_RESET_MASK, 0);
 
-		while (readl(port->base + MVPP2_GMAC_CTRL_2_REG) &
+		while (pete_readl("drivers/net/ethernet/marvell/mvpp2/mvpp2_main.c:6524", port->base + MVPP2_GMAC_CTRL_2_REG) &
 		       MVPP2_GMAC_PORT_RESET_MASK)
 			continue;
 	}
@@ -6636,15 +6636,15 @@ static void mvpp2_mac_link_down(struct phylink_config *config,
 
 	if (!phylink_autoneg_inband(mode)) {
 		if (mvpp2_is_xlg(interface)) {
-			val = readl(port->base + MVPP22_XLG_CTRL0_REG);
+			val = pete_readl("drivers/net/ethernet/marvell/mvpp2/mvpp2_main.c:6639", port->base + MVPP22_XLG_CTRL0_REG);
 			val &= ~MVPP22_XLG_CTRL0_FORCE_LINK_PASS;
 			val |= MVPP22_XLG_CTRL0_FORCE_LINK_DOWN;
-			writel(val, port->base + MVPP22_XLG_CTRL0_REG);
+			pete_writel("drivers/net/ethernet/marvell/mvpp2/mvpp2_main.c:6642", val, port->base + MVPP22_XLG_CTRL0_REG);
 		} else {
-			val = readl(port->base + MVPP2_GMAC_AUTONEG_CONFIG);
+			val = pete_readl("drivers/net/ethernet/marvell/mvpp2/mvpp2_main.c:6644", port->base + MVPP2_GMAC_AUTONEG_CONFIG);
 			val &= ~MVPP2_GMAC_FORCE_LINK_PASS;
 			val |= MVPP2_GMAC_FORCE_LINK_DOWN;
-			writel(val, port->base + MVPP2_GMAC_AUTONEG_CONFIG);
+			pete_writel("drivers/net/ethernet/marvell/mvpp2/mvpp2_main.c:6647", val, port->base + MVPP2_GMAC_AUTONEG_CONFIG);
 		}
 	}
 
@@ -7351,13 +7351,13 @@ static int mvpp2_init(struct platform_device *pdev, struct mvpp2 *priv)
 
 	/* Disable HW PHY polling */
 	if (priv->hw_version == MVPP21) {
-		val = readl(priv->lms_base + MVPP2_PHY_AN_CFG0_REG);
+		val = pete_readl("drivers/net/ethernet/marvell/mvpp2/mvpp2_main.c:7354", priv->lms_base + MVPP2_PHY_AN_CFG0_REG);
 		val |= MVPP2_PHY_AN_STOP_SMI0_MASK;
-		writel(val, priv->lms_base + MVPP2_PHY_AN_CFG0_REG);
+		pete_writel("drivers/net/ethernet/marvell/mvpp2/mvpp2_main.c:7356", val, priv->lms_base + MVPP2_PHY_AN_CFG0_REG);
 	} else {
-		val = readl(priv->iface_base + MVPP22_SMI_MISC_CFG_REG);
+		val = pete_readl("drivers/net/ethernet/marvell/mvpp2/mvpp2_main.c:7358", priv->iface_base + MVPP22_SMI_MISC_CFG_REG);
 		val &= ~MVPP22_SMI_POLLING_EN;
-		writel(val, priv->iface_base + MVPP22_SMI_MISC_CFG_REG);
+		pete_writel("drivers/net/ethernet/marvell/mvpp2/mvpp2_main.c:7360", val, priv->iface_base + MVPP22_SMI_MISC_CFG_REG);
 	}
 
 	/* Allocate and initialize aggregated TXQs */
@@ -7386,7 +7386,7 @@ static int mvpp2_init(struct platform_device *pdev, struct mvpp2 *priv)
 	}
 
 	if (priv->hw_version == MVPP21)
-		writel(MVPP2_EXT_GLOBAL_CTRL_DEFAULT,
+		pete_writel("drivers/net/ethernet/marvell/mvpp2/mvpp2_main.c:7389", MVPP2_EXT_GLOBAL_CTRL_DEFAULT,
 		       priv->lms_base + MVPP2_MNG_EXTENDED_GLOBAL_CTRL_REG);
 
 	/* Allow cache snoop when transmiting packets */

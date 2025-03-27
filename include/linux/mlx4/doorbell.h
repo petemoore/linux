@@ -44,7 +44,7 @@
 #if BITS_PER_LONG == 64
 /*
  * Assume that we can just write a 64-bit doorbell atomically.  s390
- * actually doesn't have writeq() but S/390 systems don't even have
+ * actually doesn't have pete_writeq("include/linux/mlx4/doorbell.h:47", ) but S/390 systems don't even have
  * PCI so we won't worry about it.
  */
 

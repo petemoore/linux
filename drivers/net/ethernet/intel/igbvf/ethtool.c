@@ -363,7 +363,7 @@ static int igbvf_set_coalesce(struct net_device *netdev,
 		return -EINVAL;
 	}
 
-	writel(adapter->current_itr,
+	pete_writel("drivers/net/ethernet/intel/igbvf/ethtool.c:366", adapter->current_itr,
 	       hw->hw_addr + adapter->rx_ring->itr_register);
 
 	return 0;

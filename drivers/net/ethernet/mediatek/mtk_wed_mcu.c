@@ -18,12 +18,12 @@
 
 static u32 wo_r32(struct mtk_wed_wo *wo, u32 reg)
 {
-	return readl(wo->boot.addr + reg);
+	return pete_readl("drivers/net/ethernet/mediatek/mtk_wed_mcu.c:21", wo->boot.addr + reg);
 }
 
 static void wo_w32(struct mtk_wed_wo *wo, u32 reg, u32 val)
 {
-	writel(val, wo->boot.addr + reg);
+	pete_writel("drivers/net/ethernet/mediatek/mtk_wed_mcu.c:26", val, wo->boot.addr + reg);
 }
 
 static struct sk_buff *

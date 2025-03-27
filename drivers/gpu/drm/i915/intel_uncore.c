@@ -120,9 +120,9 @@ intel_uncore_forcewake_domain_to_str(const enum forcewake_domain_id id)
 	return "unknown";
 }
 
-#define fw_ack(d) readl((d)->reg_ack)
-#define fw_set(d, val) writel(_MASKED_BIT_ENABLE((val)), (d)->reg_set)
-#define fw_clear(d, val) writel(_MASKED_BIT_DISABLE((val)), (d)->reg_set)
+#define fw_ack(d) pete_readl("drivers/gpu/drm/i915/intel_uncore.c:123", (d)->reg_ack)
+#define fw_set(d, val) pete_writel("drivers/gpu/drm/i915/intel_uncore.c:124", _MASKED_BIT_ENABLE((val)), (d)->reg_set)
+#define fw_clear(d, val) pete_writel("drivers/gpu/drm/i915/intel_uncore.c:125", _MASKED_BIT_DISABLE((val)), (d)->reg_set)
 
 static inline void
 fw_domain_reset(const struct intel_uncore_forcewake_domain *d)

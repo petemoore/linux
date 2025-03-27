@@ -65,7 +65,7 @@ static int rcar_pcie_wakeup(struct device *pcie_dev, void __iomem *pcie_base)
 		goto unlock_exit;
 	}
 
-	pmsr = readl(pcie_base + PMSR);
+	pmsr = pete_readl("drivers/pci/controller/pcie-rcar-host.c:68", pcie_base + PMSR);
 
 	/*
 	 * Test if the PCIe controller received PM_ENTER_L1 DLLP and
@@ -74,7 +74,7 @@ static int rcar_pcie_wakeup(struct device *pcie_dev, void __iomem *pcie_base)
 	 * which it can return to L0s/L0 on its own.
 	 */
 	if ((pmsr & PMEL1RX) && ((pmsr & PMSTATE) != PMSTATE_L1)) {
-		writel(L1IATN, pcie_base + PMCTLR);
+		pete_writel("drivers/pci/controller/pcie-rcar-host.c:77", L1IATN, pcie_base + PMCTLR);
 		ret = readl_poll_timeout_atomic(pcie_base + PMSR, val,
 						val & L1FAEG, 10, 1000);
 		if (ret) {
@@ -82,7 +82,7 @@ static int rcar_pcie_wakeup(struct device *pcie_dev, void __iomem *pcie_base)
 					     "Timeout waiting for L1 link state, ret=%d\n",
 					     ret);
 		}
-		writel(L1FAEG | PMEL1RX, pcie_base + PMSR);
+		pete_writel("drivers/pci/controller/pcie-rcar-host.c:85", L1FAEG | PMEL1RX, pcie_base + PMSR);
 	}
 
 unlock_exit:

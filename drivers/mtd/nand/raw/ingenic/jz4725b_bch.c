@@ -61,12 +61,12 @@
 
 static inline void jz4725b_bch_config_set(struct ingenic_ecc *bch, u32 cfg)
 {
-	writel(cfg, bch->base + BCH_BHCSR);
+	pete_writel("drivers/mtd/nand/raw/ingenic/jz4725b_bch.c:64", cfg, bch->base + BCH_BHCSR);
 }
 
 static inline void jz4725b_bch_config_clear(struct ingenic_ecc *bch, u32 cfg)
 {
-	writel(cfg, bch->base + BCH_BHCCR);
+	pete_writel("drivers/mtd/nand/raw/ingenic/jz4725b_bch.c:69", cfg, bch->base + BCH_BHCCR);
 }
 
 static int jz4725b_bch_reset(struct ingenic_ecc *bch,
@@ -75,7 +75,7 @@ static int jz4725b_bch_reset(struct ingenic_ecc *bch,
 	u32 reg, max_value;
 
 	/* Clear interrupt status. */
-	writel(readl(bch->base + BCH_BHINT), bch->base + BCH_BHINT);
+	pete_writel("drivers/mtd/nand/raw/ingenic/jz4725b_bch.c:78", pete_readl("drivers/mtd/nand/raw/ingenic/jz4725b_bch.c:78", bch->base + BCH_BHINT), bch->base + BCH_BHINT);
 
 	/* Initialise and enable BCH. */
 	jz4725b_bch_config_clear(bch, 0x1f);
@@ -104,7 +104,7 @@ static int jz4725b_bch_reset(struct ingenic_ecc *bch,
 	/* Set up BCH count register. */
 	reg = params->size << BCH_BHCNT_ENC_COUNT_SHIFT;
 	reg |= (params->size + params->bytes) << BCH_BHCNT_DEC_COUNT_SHIFT;
-	writel(reg, bch->base + BCH_BHCNT);
+	pete_writel("drivers/mtd/nand/raw/ingenic/jz4725b_bch.c:107", reg, bch->base + BCH_BHCNT);
 
 	return 0;
 }
@@ -112,7 +112,7 @@ static int jz4725b_bch_reset(struct ingenic_ecc *bch,
 static void jz4725b_bch_disable(struct ingenic_ecc *bch)
 {
 	/* Clear interrupts */
-	writel(readl(bch->base + BCH_BHINT), bch->base + BCH_BHINT);
+	pete_writel("drivers/mtd/nand/raw/ingenic/jz4725b_bch.c:115", pete_readl("drivers/mtd/nand/raw/ingenic/jz4725b_bch.c:115", bch->base + BCH_BHINT), bch->base + BCH_BHINT);
 
 	/* Disable the hardware */
 	jz4725b_bch_config_clear(bch, BCH_BHCR_BCHE);
@@ -122,7 +122,7 @@ static void jz4725b_bch_write_data(struct ingenic_ecc *bch, const u8 *buf,
 				   size_t size)
 {
 	while (size--)
-		writeb(*buf++, bch->base + BCH_BHDR);
+		pete_writeb("drivers/mtd/nand/raw/ingenic/jz4725b_bch.c:125", *buf++, bch->base + BCH_BHDR);
 }
 
 static void jz4725b_bch_read_parity(struct ingenic_ecc *bch, u8 *buf,
@@ -175,7 +175,7 @@ static int jz4725b_bch_wait_complete(struct ingenic_ecc *bch, unsigned int irq,
 	if (status)
 		*status = reg;
 
-	writel(reg, bch->base + BCH_BHINT);
+	pete_writel("drivers/mtd/nand/raw/ingenic/jz4725b_bch.c:178", reg, bch->base + BCH_BHINT);
 
 	return 0;
 }
@@ -255,7 +255,7 @@ static int jz4725b_correct(struct ingenic_ecc *bch,
 		if (i & 1) {
 			bit = (reg & BCH_BHERR_INDEX1_MASK) >> BCH_BHERR_INDEX1_SHIFT;
 		} else {
-			reg = readl(bch->base + BCH_BHERR0 + (i * 4));
+			reg = pete_readl("drivers/mtd/nand/raw/ingenic/jz4725b_bch.c:258", bch->base + BCH_BHERR0 + (i * 4));
 			bit = (reg & BCH_BHERR_INDEX0_MASK) >> BCH_BHERR_INDEX0_SHIFT;
 		}
 

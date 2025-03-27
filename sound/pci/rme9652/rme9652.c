@@ -298,12 +298,12 @@ MODULE_DEVICE_TABLE(pci, snd_rme9652_ids);
 
 static inline void rme9652_write(struct snd_rme9652 *rme9652, int reg, int val)
 {
-	writel(val, rme9652->iobase + reg);
+	pete_writel("sound/pci/rme9652/rme9652.c:301", val, rme9652->iobase + reg);
 }
 
 static inline unsigned int rme9652_read(struct snd_rme9652 *rme9652, int reg)
 {
-	return readl(rme9652->iobase + reg);
+	return pete_readl("sound/pci/rme9652/rme9652.c:306", rme9652->iobase + reg);
 }
 
 static inline int snd_rme9652_use_is_exclusive(struct snd_rme9652 *rme9652)

@@ -234,7 +234,7 @@ static int _vnic_dev_cmd(struct vnic_dev *vdev, enum vnic_devcmd_cmd cmd,
 
 	if (_CMD_DIR(cmd) & _CMD_DIR_WRITE) {
 		for (i = 0; i < VNIC_DEVCMD_NARGS; i++)
-			writeq(vdev->args[i], &devcmd->args[i]);
+			pete_writeq("drivers/net/ethernet/cisco/enic/vnic_dev.c:237", vdev->args[i], &devcmd->args[i]);
 		wmb();
 	}
 
@@ -256,7 +256,7 @@ static int _vnic_dev_cmd(struct vnic_dev *vdev, enum vnic_devcmd_cmd cmd,
 		if (!(status & STAT_BUSY)) {
 
 			if (status & STAT_ERROR) {
-				err = (int)readq(&devcmd->args[0]);
+				err = (int)pete_readq("drivers/net/ethernet/cisco/enic/vnic_dev.c:259", &devcmd->args[0]);
 				if (err == ERR_EINVAL &&
 				    cmd == CMD_CAPABILITY)
 					return -err;
@@ -270,7 +270,7 @@ static int _vnic_dev_cmd(struct vnic_dev *vdev, enum vnic_devcmd_cmd cmd,
 			if (_CMD_DIR(cmd) & _CMD_DIR_READ) {
 				rmb();
 				for (i = 0; i < VNIC_DEVCMD_NARGS; i++)
-					vdev->args[i] = readq(&devcmd->args[i]);
+					vdev->args[i] = pete_readq("drivers/net/ethernet/cisco/enic/vnic_dev.c:273", &devcmd->args[i]);
 			}
 
 			return 0;

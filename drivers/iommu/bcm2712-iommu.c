@@ -14,8 +14,8 @@
 #include <linux/platform_device.h>
 #include <linux/spinlock.h>
 
-#define MMU_WR(off, val)   writel(val, mmu->reg_base + (off))
-#define MMU_RD(off)        readl(mmu->reg_base + (off))
+#define MMU_WR(off, val)   pete_writel("drivers/iommu/bcm2712-iommu.c:17", val, mmu->reg_base + (off))
+#define MMU_RD(off)        pete_readl("drivers/iommu/bcm2712-iommu.c:18", mmu->reg_base + (off))
 
 #define domain_to_mmu(d) (container_of(d, struct bcm2712_iommu_domain, base)->mmu)
 

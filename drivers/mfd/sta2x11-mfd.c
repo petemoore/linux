@@ -108,11 +108,11 @@ u32 __sta2x11_mfd_mask(struct pci_dev *pdev, u32 reg, u32 mask, u32 val,
 		return 0;
 	}
 	spin_lock_irqsave(&mfd->lock[index], flags);
-	r = readl(regs + reg);
+	r = pete_readl("drivers/mfd/sta2x11-mfd.c:111", regs + reg);
 	r &= ~mask;
 	r |= val;
 	if (mask)
-		writel(r, regs + reg);
+		pete_writel("drivers/mfd/sta2x11-mfd.c:115", r, regs + reg);
 	spin_unlock_irqrestore(&mfd->lock[index], flags);
 	return r;
 }

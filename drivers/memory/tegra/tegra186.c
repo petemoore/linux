@@ -78,7 +78,7 @@ static void tegra186_mc_client_sid_override(struct tegra_mc *mc,
 	if (client->regs.sid.security == 0 && client->regs.sid.override == 0)
 		return;
 
-	value = readl(mc->regs + client->regs.sid.security);
+	value = pete_readl("drivers/memory/tegra/tegra186.c:81", mc->regs + client->regs.sid.security);
 	if ((value & MC_SID_STREAMID_SECURITY_OVERRIDE) == 0) {
 		/*
 		 * If the secure firmware has locked this down the override
@@ -97,16 +97,16 @@ static void tegra186_mc_client_sid_override(struct tegra_mc *mc,
 		WARN_ON((value & MC_SID_STREAMID_SECURITY_OVERRIDE) == 0);
 
 		value |= MC_SID_STREAMID_SECURITY_OVERRIDE;
-		writel(value, mc->regs + client->regs.sid.security);
+		pete_writel("drivers/memory/tegra/tegra186.c:100", value, mc->regs + client->regs.sid.security);
 	}
 
-	value = readl(mc->regs + client->regs.sid.override);
+	value = pete_readl("drivers/memory/tegra/tegra186.c:103", mc->regs + client->regs.sid.override);
 	old = value & MC_SID_STREAMID_OVERRIDE_MASK;
 
 	if (old != sid) {
 		dev_dbg(mc->dev, "overriding SID %x for %s with %x\n", old,
 			client->name, sid);
-		writel(sid, mc->regs + client->regs.sid.override);
+		pete_writel("drivers/memory/tegra/tegra186.c:109", sid, mc->regs + client->regs.sid.override);
 	}
 }
 #endif

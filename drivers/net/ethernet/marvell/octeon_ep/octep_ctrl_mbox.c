@@ -83,45 +83,45 @@ int octep_ctrl_mbox_init(struct octep_ctrl_mbox *mbox)
 		return -EINVAL;
 	}
 
-	magic_num = readq(OCTEP_CTRL_MBOX_INFO_MAGIC_NUM(mbox->barmem));
+	magic_num = pete_readq("drivers/net/ethernet/marvell/octeon_ep/octep_ctrl_mbox.c:86", OCTEP_CTRL_MBOX_INFO_MAGIC_NUM(mbox->barmem));
 	if (magic_num != OCTEP_CTRL_MBOX_MAGIC_NUMBER) {
 		pr_info("octep_ctrl_mbox : Invalid magic number %llx\n", magic_num);
 		return -EINVAL;
 	}
 
-	status = readq(OCTEP_CTRL_MBOX_INFO_FW_STATUS(mbox->barmem));
+	status = pete_readq("drivers/net/ethernet/marvell/octeon_ep/octep_ctrl_mbox.c:92", OCTEP_CTRL_MBOX_INFO_FW_STATUS(mbox->barmem));
 	if (status != OCTEP_CTRL_MBOX_STATUS_READY) {
 		pr_info("octep_ctrl_mbox : Firmware is not ready.\n");
 		return -EINVAL;
 	}
 
-	fw_versions = readq(OCTEP_CTRL_MBOX_INFO_FW_VERSION(mbox->barmem));
+	fw_versions = pete_readq("drivers/net/ethernet/marvell/octeon_ep/octep_ctrl_mbox.c:98", OCTEP_CTRL_MBOX_INFO_FW_VERSION(mbox->barmem));
 	mbox->min_fw_version = ((fw_versions & 0xffffffff00000000ull) >> 32);
 	mbox->max_fw_version = (fw_versions & 0xffffffff);
-	mbox->barmem_sz = readl(OCTEP_CTRL_MBOX_INFO_BARMEM_SZ(mbox->barmem));
+	mbox->barmem_sz = pete_readl("drivers/net/ethernet/marvell/octeon_ep/octep_ctrl_mbox.c:101", OCTEP_CTRL_MBOX_INFO_BARMEM_SZ(mbox->barmem));
 
-	writeq(OCTEP_CTRL_MBOX_STATUS_INIT,
+	pete_writeq("drivers/net/ethernet/marvell/octeon_ep/octep_ctrl_mbox.c:103", OCTEP_CTRL_MBOX_STATUS_INIT,
 	       OCTEP_CTRL_MBOX_INFO_HOST_STATUS(mbox->barmem));
 
 	mutex_init(&mbox->h2fq_lock);
 	mutex_init(&mbox->f2hq_lock);
 
-	mbox->h2fq.sz = readl(OCTEP_CTRL_MBOX_H2FQ_SZ(mbox->barmem));
+	mbox->h2fq.sz = pete_readl("drivers/net/ethernet/marvell/octeon_ep/octep_ctrl_mbox.c:109", OCTEP_CTRL_MBOX_H2FQ_SZ(mbox->barmem));
 	mbox->h2fq.hw_prod = OCTEP_CTRL_MBOX_H2FQ_PROD(mbox->barmem);
 	mbox->h2fq.hw_cons = OCTEP_CTRL_MBOX_H2FQ_CONS(mbox->barmem);
 	mbox->h2fq.hw_q = mbox->barmem + OCTEP_CTRL_MBOX_TOTAL_INFO_SZ;
 
-	mbox->f2hq.sz = readl(OCTEP_CTRL_MBOX_F2HQ_SZ(mbox->barmem));
+	mbox->f2hq.sz = pete_readl("drivers/net/ethernet/marvell/octeon_ep/octep_ctrl_mbox.c:114", OCTEP_CTRL_MBOX_F2HQ_SZ(mbox->barmem));
 	mbox->f2hq.hw_prod = OCTEP_CTRL_MBOX_F2HQ_PROD(mbox->barmem);
 	mbox->f2hq.hw_cons = OCTEP_CTRL_MBOX_F2HQ_CONS(mbox->barmem);
 	mbox->f2hq.hw_q = mbox->barmem +
 			  OCTEP_CTRL_MBOX_TOTAL_INFO_SZ +
 			  mbox->h2fq.sz;
 
-	writeq(mbox->version, OCTEP_CTRL_MBOX_INFO_HOST_VERSION(mbox->barmem));
+	pete_writeq("drivers/net/ethernet/marvell/octeon_ep/octep_ctrl_mbox.c:121", mbox->version, OCTEP_CTRL_MBOX_INFO_HOST_VERSION(mbox->barmem));
 	/* ensure ready state is seen after everything is initialized */
 	wmb();
-	writeq(OCTEP_CTRL_MBOX_STATUS_READY,
+	pete_writeq("drivers/net/ethernet/marvell/octeon_ep/octep_ctrl_mbox.c:124", OCTEP_CTRL_MBOX_STATUS_READY,
 	       OCTEP_CTRL_MBOX_INFO_HOST_STATUS(mbox->barmem));
 
 	pr_info("Octep ctrl mbox : Init successful.\n");
@@ -167,13 +167,13 @@ int octep_ctrl_mbox_send(struct octep_ctrl_mbox *mbox, struct octep_ctrl_mbox_ms
 	if (!mbox || !msg)
 		return -EINVAL;
 
-	if (readq(OCTEP_CTRL_MBOX_INFO_FW_STATUS(mbox->barmem)) != OCTEP_CTRL_MBOX_STATUS_READY)
+	if (pete_readq("drivers/net/ethernet/marvell/octeon_ep/octep_ctrl_mbox.c:170", OCTEP_CTRL_MBOX_INFO_FW_STATUS(mbox->barmem)) != OCTEP_CTRL_MBOX_STATUS_READY)
 		return -EIO;
 
 	mutex_lock(&mbox->h2fq_lock);
 	q = &mbox->h2fq;
-	pi = readl(q->hw_prod);
-	ci = readl(q->hw_cons);
+	pi = pete_readl("drivers/net/ethernet/marvell/octeon_ep/octep_ctrl_mbox.c:175", q->hw_prod);
+	ci = pete_readl("drivers/net/ethernet/marvell/octeon_ep/octep_ctrl_mbox.c:176", q->hw_cons);
 
 	if (octep_ctrl_mbox_circq_space(pi, ci, q->sz) < (msg->hdr.s.sz + mbox_hdr_sz)) {
 		mutex_unlock(&mbox->h2fq_lock);
@@ -188,7 +188,7 @@ int octep_ctrl_mbox_send(struct octep_ctrl_mbox *mbox, struct octep_ctrl_mbox_ms
 		octep_write_mbox_data(q, &pi, ci, sg->msg, w_sz);
 		buf_sz -= w_sz;
 	}
-	writel(pi, q->hw_prod);
+	pete_writel("drivers/net/ethernet/marvell/octeon_ep/octep_ctrl_mbox.c:191", pi, q->hw_prod);
 	mutex_unlock(&mbox->h2fq_lock);
 
 	return 0;
@@ -229,13 +229,13 @@ int octep_ctrl_mbox_recv(struct octep_ctrl_mbox *mbox, struct octep_ctrl_mbox_ms
 	struct octep_ctrl_mbox_q *q;
 	int s;
 
-	if (readq(OCTEP_CTRL_MBOX_INFO_FW_STATUS(mbox->barmem)) != OCTEP_CTRL_MBOX_STATUS_READY)
+	if (pete_readq("drivers/net/ethernet/marvell/octeon_ep/octep_ctrl_mbox.c:232", OCTEP_CTRL_MBOX_INFO_FW_STATUS(mbox->barmem)) != OCTEP_CTRL_MBOX_STATUS_READY)
 		return -EIO;
 
 	mutex_lock(&mbox->f2hq_lock);
 	q = &mbox->f2hq;
-	pi = readl(q->hw_prod);
-	ci = readl(q->hw_cons);
+	pi = pete_readl("drivers/net/ethernet/marvell/octeon_ep/octep_ctrl_mbox.c:237", q->hw_prod);
+	ci = pete_readl("drivers/net/ethernet/marvell/octeon_ep/octep_ctrl_mbox.c:238", q->hw_cons);
 
 	q_depth = octep_ctrl_mbox_circq_depth(pi, ci, q->sz);
 	if (q_depth < mbox_hdr_sz) {
@@ -251,7 +251,7 @@ int octep_ctrl_mbox_recv(struct octep_ctrl_mbox *mbox, struct octep_ctrl_mbox_ms
 		octep_read_mbox_data(q, pi, &ci, sg->msg, r_sz);
 		buf_sz -= r_sz;
 	}
-	writel(ci, q->hw_cons);
+	pete_writel("drivers/net/ethernet/marvell/octeon_ep/octep_ctrl_mbox.c:254", ci, q->hw_cons);
 	mutex_unlock(&mbox->f2hq_lock);
 
 	return 0;
@@ -264,8 +264,8 @@ int octep_ctrl_mbox_uninit(struct octep_ctrl_mbox *mbox)
 	if (!mbox->barmem)
 		return -EINVAL;
 
-	writeq(0, OCTEP_CTRL_MBOX_INFO_HOST_VERSION(mbox->barmem));
-	writeq(OCTEP_CTRL_MBOX_STATUS_INVALID,
+	pete_writeq("drivers/net/ethernet/marvell/octeon_ep/octep_ctrl_mbox.c:267", 0, OCTEP_CTRL_MBOX_INFO_HOST_VERSION(mbox->barmem));
+	pete_writeq("drivers/net/ethernet/marvell/octeon_ep/octep_ctrl_mbox.c:268", OCTEP_CTRL_MBOX_STATUS_INVALID,
 	       OCTEP_CTRL_MBOX_INFO_HOST_STATUS(mbox->barmem));
 	/* ensure uninit state is written before uninitialization */
 	wmb();

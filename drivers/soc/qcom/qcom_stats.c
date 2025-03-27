@@ -138,7 +138,7 @@ static void qcom_create_soc_sleep_stat_files(struct dentry *root, void __iomem *
 	 * address in devicetree. The last 16bits indicates the stats_offset.
 	 */
 	if (config->dynamic_offset) {
-		stats_offset = readl(reg + RPM_DYNAMIC_ADDR);
+		stats_offset = pete_readl("drivers/soc/qcom/qcom_stats.c:141", reg + RPM_DYNAMIC_ADDR);
 		stats_offset &= RPM_DYNAMIC_ADDR_MASK;
 	}
 
@@ -152,7 +152,7 @@ static void qcom_create_soc_sleep_stat_files(struct dentry *root, void __iomem *
 		 * For rpmh-sleep-stats: "aosd", "cxsd" and "ddr".
 		 * For rpm-sleep-stats: "vmin" and "vlow".
 		 */
-		type = readl(d[i].base);
+		type = pete_readl("drivers/soc/qcom/qcom_stats.c:155", d[i].base);
 		for (j = 0; j < sizeof(u32); j++) {
 			stat_type[j] = type & 0xff;
 			type = type >> 8;

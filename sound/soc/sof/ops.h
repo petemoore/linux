@@ -308,7 +308,7 @@ static inline void snd_sof_dsp_write8(struct snd_sof_dev *sdev, u32 bar,
 	if (sof_ops(sdev)->write8)
 		sof_ops(sdev)->write8(sdev, sdev->bar[bar] + offset, value);
 	else
-		writeb(value,  sdev->bar[bar] + offset);
+		pete_writeb("sound/soc/sof/ops.h:311", value,  sdev->bar[bar] + offset);
 }
 
 static inline void snd_sof_dsp_write(struct snd_sof_dev *sdev, u32 bar,
@@ -317,7 +317,7 @@ static inline void snd_sof_dsp_write(struct snd_sof_dev *sdev, u32 bar,
 	if (sof_ops(sdev)->write)
 		sof_ops(sdev)->write(sdev, sdev->bar[bar] + offset, value);
 	else
-		writel(value,  sdev->bar[bar] + offset);
+		pete_writel("sound/soc/sof/ops.h:320", value,  sdev->bar[bar] + offset);
 }
 
 static inline void snd_sof_dsp_write64(struct snd_sof_dev *sdev, u32 bar,
@@ -326,7 +326,7 @@ static inline void snd_sof_dsp_write64(struct snd_sof_dev *sdev, u32 bar,
 	if (sof_ops(sdev)->write64)
 		sof_ops(sdev)->write64(sdev, sdev->bar[bar] + offset, value);
 	else
-		writeq(value, sdev->bar[bar] + offset);
+		pete_writeq("sound/soc/sof/ops.h:329", value, sdev->bar[bar] + offset);
 }
 
 static inline u8 snd_sof_dsp_read8(struct snd_sof_dev *sdev, u32 bar,
@@ -335,7 +335,7 @@ static inline u8 snd_sof_dsp_read8(struct snd_sof_dev *sdev, u32 bar,
 	if (sof_ops(sdev)->read8)
 		return sof_ops(sdev)->read8(sdev, sdev->bar[bar] + offset);
 	else
-		return readb(sdev->bar[bar] + offset);
+		return pete_readb("sound/soc/sof/ops.h:338", sdev->bar[bar] + offset);
 }
 
 static inline u32 snd_sof_dsp_read(struct snd_sof_dev *sdev, u32 bar,
@@ -344,7 +344,7 @@ static inline u32 snd_sof_dsp_read(struct snd_sof_dev *sdev, u32 bar,
 	if (sof_ops(sdev)->read)
 		return sof_ops(sdev)->read(sdev, sdev->bar[bar] + offset);
 	else
-		return readl(sdev->bar[bar] + offset);
+		return pete_readl("sound/soc/sof/ops.h:347", sdev->bar[bar] + offset);
 }
 
 static inline u64 snd_sof_dsp_read64(struct snd_sof_dev *sdev, u32 bar,
@@ -353,7 +353,7 @@ static inline u64 snd_sof_dsp_read64(struct snd_sof_dev *sdev, u32 bar,
 	if (sof_ops(sdev)->read64)
 		return sof_ops(sdev)->read64(sdev, sdev->bar[bar] + offset);
 	else
-		return readq(sdev->bar[bar] + offset);
+		return pete_readq("sound/soc/sof/ops.h:356", sdev->bar[bar] + offset);
 }
 
 static inline void snd_sof_dsp_update8(struct snd_sof_dev *sdev, u32 bar,

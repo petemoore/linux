@@ -724,14 +724,14 @@ static inline void ace_set_txprd(struct ace_regs __iomem *regs,
 #ifdef INDEX_DEBUG
 	unsigned long flags;
 	spin_lock_irqsave(&ap->debug_lock, flags);
-	writel(value, &regs->TxPrd);
+	pete_writel("drivers/net/ethernet/alteon/acenic.h:727", value, &regs->TxPrd);
 	if (value == ap->last_tx)
 		printk(KERN_ERR "AceNIC RACE ALERT! writing identical value "
 		       "to tx producer (%i)\n", value);
 	ap->last_tx = value;
 	spin_unlock_irqrestore(&ap->debug_lock, flags);
 #else
-	writel(value, &regs->TxPrd);
+	pete_writel("drivers/net/ethernet/alteon/acenic.h:734", value, &regs->TxPrd);
 #endif
 	wmb();
 }
@@ -743,9 +743,9 @@ static inline void ace_mask_irq(struct net_device *dev)
 	struct ace_regs __iomem *regs = ap->regs;
 
 	if (ACE_IS_TIGON_I(ap))
-		writel(1, &regs->MaskInt);
+		pete_writel("drivers/net/ethernet/alteon/acenic.h:746", 1, &regs->MaskInt);
 	else
-		writel(readl(&regs->HostCtrl) | MASK_INTS, &regs->HostCtrl);
+		pete_writel("drivers/net/ethernet/alteon/acenic.h:748", pete_readl("drivers/net/ethernet/alteon/acenic.h:748", &regs->HostCtrl) | MASK_INTS, &regs->HostCtrl);
 
 	ace_sync_irq(dev->irq);
 }
@@ -757,9 +757,9 @@ static inline void ace_unmask_irq(struct net_device *dev)
 	struct ace_regs __iomem *regs = ap->regs;
 
 	if (ACE_IS_TIGON_I(ap))
-		writel(0, &regs->MaskInt);
+		pete_writel("drivers/net/ethernet/alteon/acenic.h:760", 0, &regs->MaskInt);
 	else
-		writel(readl(&regs->HostCtrl) & ~MASK_INTS, &regs->HostCtrl);
+		pete_writel("drivers/net/ethernet/alteon/acenic.h:762", pete_readl("drivers/net/ethernet/alteon/acenic.h:762", &regs->HostCtrl) & ~MASK_INTS, &regs->HostCtrl);
 }
 
 

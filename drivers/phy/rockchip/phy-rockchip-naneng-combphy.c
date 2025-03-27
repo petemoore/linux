@@ -153,9 +153,9 @@ static void rockchip_combphy_updatel(struct rockchip_combphy_priv *priv,
 {
 	unsigned int temp;
 
-	temp = readl(priv->mmio + reg);
+	temp = pete_readl("drivers/phy/rockchip/phy-rockchip-naneng-combphy.c:156", priv->mmio + reg);
 	temp = (temp & ~(mask)) | val;
-	writel(temp, priv->mmio + reg);
+	pete_writel("drivers/phy/rockchip/phy-rockchip-naneng-combphy.c:158", temp, priv->mmio + reg);
 }
 
 static int rockchip_combphy_param_write(struct regmap *base,
@@ -404,9 +404,9 @@ static int rk3568_combphy_cfg(struct rockchip_combphy_priv *priv)
 					 PHYREG32);
 
 		/* Enable adaptive CTLE for USB3.0 Rx. */
-		val = readl(priv->mmio + PHYREG15);
+		val = pete_readl("drivers/phy/rockchip/phy-rockchip-naneng-combphy.c:407", priv->mmio + PHYREG15);
 		val |= PHYREG15_CTLE_EN;
-		writel(val, priv->mmio + PHYREG15);
+		pete_writel("drivers/phy/rockchip/phy-rockchip-naneng-combphy.c:409", val, priv->mmio + PHYREG15);
 
 		/* Set PLL KVCO fine tuning signals. */
 		rockchip_combphy_updatel(priv, PHYREG33_PLL_KVCO_MASK,
@@ -414,15 +414,15 @@ static int rk3568_combphy_cfg(struct rockchip_combphy_priv *priv)
 					 PHYREG33);
 
 		/* Enable controlling random jitter. */
-		writel(PHYREG12_PLL_LPF_ADJ_VALUE, priv->mmio + PHYREG12);
+		pete_writel("drivers/phy/rockchip/phy-rockchip-naneng-combphy.c:417", PHYREG12_PLL_LPF_ADJ_VALUE, priv->mmio + PHYREG12);
 
 		/* Set PLL input clock divider 1/2. */
 		rockchip_combphy_updatel(priv, PHYREG6_PLL_DIV_MASK,
 					 PHYREG6_PLL_DIV_2 << PHYREG6_PLL_DIV_SHIFT,
 					 PHYREG6);
 
-		writel(PHYREG18_PLL_LOOP, priv->mmio + PHYREG18);
-		writel(PHYREG11_SU_TRIM_0_7, priv->mmio + PHYREG11);
+		pete_writel("drivers/phy/rockchip/phy-rockchip-naneng-combphy.c:424", PHYREG18_PLL_LOOP, priv->mmio + PHYREG18);
+		pete_writel("drivers/phy/rockchip/phy-rockchip-naneng-combphy.c:425", PHYREG11_SU_TRIM_0_7, priv->mmio + PHYREG11);
 
 		rockchip_combphy_param_write(priv->phy_grf, &cfg->pipe_sel_usb, true);
 		rockchip_combphy_param_write(priv->phy_grf, &cfg->pipe_txcomp_sel, false);
@@ -432,16 +432,16 @@ static int rk3568_combphy_cfg(struct rockchip_combphy_priv *priv)
 
 	case PHY_TYPE_SATA:
 		/* Enable adaptive CTLE for SATA Rx. */
-		val = readl(priv->mmio + PHYREG15);
+		val = pete_readl("drivers/phy/rockchip/phy-rockchip-naneng-combphy.c:435", priv->mmio + PHYREG15);
 		val |= PHYREG15_CTLE_EN;
-		writel(val, priv->mmio + PHYREG15);
+		pete_writel("drivers/phy/rockchip/phy-rockchip-naneng-combphy.c:437", val, priv->mmio + PHYREG15);
 		/*
 		 * Set tx_rterm=50ohm and rx_rterm=44ohm for SATA.
 		 * 0: 60ohm, 8: 50ohm 15: 44ohm (by step abort 1ohm)
 		 */
 		val = PHYREG7_TX_RTERM_50OHM << PHYREG7_TX_RTERM_SHIFT;
 		val |= PHYREG7_RX_RTERM_44OHM << PHYREG7_RX_RTERM_SHIFT;
-		writel(val, priv->mmio + PHYREG7);
+		pete_writel("drivers/phy/rockchip/phy-rockchip-naneng-combphy.c:444", val, priv->mmio + PHYREG7);
 
 		rockchip_combphy_param_write(priv->phy_grf, &cfg->con0_for_sata, true);
 		rockchip_combphy_param_write(priv->phy_grf, &cfg->con1_for_sata, true);
@@ -480,7 +480,7 @@ static int rk3568_combphy_cfg(struct rockchip_combphy_priv *priv)
 			rockchip_combphy_updatel(priv, PHYREG15_SSC_CNT_MASK,
 						 val, PHYREG15);
 
-			writel(PHYREG16_SSC_CNT_VALUE, priv->mmio + PHYREG16);
+			pete_writel("drivers/phy/rockchip/phy-rockchip-naneng-combphy.c:483", PHYREG16_SSC_CNT_VALUE, priv->mmio + PHYREG16);
 		}
 		break;
 
@@ -497,14 +497,14 @@ static int rk3568_combphy_cfg(struct rockchip_combphy_priv *priv)
 						 val, PHYREG33);
 
 			/* Enable controlling random jitter. */
-			writel(PHYREG12_PLL_LPF_ADJ_VALUE, priv->mmio + PHYREG12);
+			pete_writel("drivers/phy/rockchip/phy-rockchip-naneng-combphy.c:500", PHYREG12_PLL_LPF_ADJ_VALUE, priv->mmio + PHYREG12);
 
 			val = PHYREG6_PLL_DIV_2 << PHYREG6_PLL_DIV_SHIFT;
 			rockchip_combphy_updatel(priv, PHYREG6_PLL_DIV_MASK,
 						 val, PHYREG6);
 
-			writel(PHYREG18_PLL_LOOP, priv->mmio + PHYREG18);
-			writel(PHYREG11_SU_TRIM_0_7, priv->mmio + PHYREG11);
+			pete_writel("drivers/phy/rockchip/phy-rockchip-naneng-combphy.c:506", PHYREG18_PLL_LOOP, priv->mmio + PHYREG18);
+			pete_writel("drivers/phy/rockchip/phy-rockchip-naneng-combphy.c:507", PHYREG11_SU_TRIM_0_7, priv->mmio + PHYREG11);
 		} else if (priv->type == PHY_TYPE_SATA) {
 			/* downward spread spectrum +500ppm */
 			val = PHYREG32_SSC_DOWNWARD << PHYREG32_SSC_DIR_SHIFT;
@@ -525,16 +525,16 @@ static int rk3568_combphy_cfg(struct rockchip_combphy_priv *priv)
 			val |= PHYREG13_CKRCV_AMP0;
 			rockchip_combphy_updatel(priv, PHYREG13_RESISTER_MASK, val, PHYREG13);
 
-			val = readl(priv->mmio + PHYREG14);
+			val = pete_readl("drivers/phy/rockchip/phy-rockchip-naneng-combphy.c:528", priv->mmio + PHYREG14);
 			val |= PHYREG14_CKRCV_AMP1;
-			writel(val, priv->mmio + PHYREG14);
+			pete_writel("drivers/phy/rockchip/phy-rockchip-naneng-combphy.c:530", val, priv->mmio + PHYREG14);
 		}
 	}
 
 	if (priv->enable_ssc) {
-		val = readl(priv->mmio + PHYREG8);
+		val = pete_readl("drivers/phy/rockchip/phy-rockchip-naneng-combphy.c:535", priv->mmio + PHYREG8);
 		val |= PHYREG8_SSC_EN;
-		writel(val, priv->mmio + PHYREG8);
+		pete_writel("drivers/phy/rockchip/phy-rockchip-naneng-combphy.c:537", val, priv->mmio + PHYREG8);
 	}
 
 	return 0;
@@ -612,9 +612,9 @@ static int rk3588_combphy_cfg(struct rockchip_combphy_priv *priv)
 					 PHYREG32);
 
 		/* Enable adaptive CTLE for USB3.0 Rx. */
-		val = readl(priv->mmio + PHYREG15);
+		val = pete_readl("drivers/phy/rockchip/phy-rockchip-naneng-combphy.c:615", priv->mmio + PHYREG15);
 		val |= PHYREG15_CTLE_EN;
-		writel(val, priv->mmio + PHYREG15);
+		pete_writel("drivers/phy/rockchip/phy-rockchip-naneng-combphy.c:617", val, priv->mmio + PHYREG15);
 
 		/* Set PLL KVCO fine tuning signals. */
 		rockchip_combphy_updatel(priv, PHYREG33_PLL_KVCO_MASK,
@@ -622,15 +622,15 @@ static int rk3588_combphy_cfg(struct rockchip_combphy_priv *priv)
 					 PHYREG33);
 
 		/* Enable controlling random jitter. */
-		writel(PHYREG12_PLL_LPF_ADJ_VALUE, priv->mmio + PHYREG12);
+		pete_writel("drivers/phy/rockchip/phy-rockchip-naneng-combphy.c:625", PHYREG12_PLL_LPF_ADJ_VALUE, priv->mmio + PHYREG12);
 
 		/* Set PLL input clock divider 1/2. */
 		rockchip_combphy_updatel(priv, PHYREG6_PLL_DIV_MASK,
 					 PHYREG6_PLL_DIV_2 << PHYREG6_PLL_DIV_SHIFT,
 					 PHYREG6);
 
-		writel(PHYREG18_PLL_LOOP, priv->mmio + PHYREG18);
-		writel(PHYREG11_SU_TRIM_0_7, priv->mmio + PHYREG11);
+		pete_writel("drivers/phy/rockchip/phy-rockchip-naneng-combphy.c:632", PHYREG18_PLL_LOOP, priv->mmio + PHYREG18);
+		pete_writel("drivers/phy/rockchip/phy-rockchip-naneng-combphy.c:633", PHYREG11_SU_TRIM_0_7, priv->mmio + PHYREG11);
 
 		rockchip_combphy_param_write(priv->phy_grf, &cfg->pipe_txcomp_sel, false);
 		rockchip_combphy_param_write(priv->phy_grf, &cfg->pipe_txelec_sel, false);
@@ -638,16 +638,16 @@ static int rk3588_combphy_cfg(struct rockchip_combphy_priv *priv)
 		break;
 	case PHY_TYPE_SATA:
 		/* Enable adaptive CTLE for SATA Rx. */
-		val = readl(priv->mmio + PHYREG15);
+		val = pete_readl("drivers/phy/rockchip/phy-rockchip-naneng-combphy.c:641", priv->mmio + PHYREG15);
 		val |= PHYREG15_CTLE_EN;
-		writel(val, priv->mmio + PHYREG15);
+		pete_writel("drivers/phy/rockchip/phy-rockchip-naneng-combphy.c:643", val, priv->mmio + PHYREG15);
 		/*
 		 * Set tx_rterm=50ohm and rx_rterm=44ohm for SATA.
 		 * 0: 60ohm, 8: 50ohm 15: 44ohm (by step abort 1ohm)
 		 */
 		val = PHYREG7_TX_RTERM_50OHM << PHYREG7_TX_RTERM_SHIFT;
 		val |= PHYREG7_RX_RTERM_44OHM << PHYREG7_RX_RTERM_SHIFT;
-		writel(val, priv->mmio + PHYREG7);
+		pete_writel("drivers/phy/rockchip/phy-rockchip-naneng-combphy.c:650", val, priv->mmio + PHYREG7);
 
 		rockchip_combphy_param_write(priv->phy_grf, &cfg->con0_for_sata, true);
 		rockchip_combphy_param_write(priv->phy_grf, &cfg->con1_for_sata, true);
@@ -673,7 +673,7 @@ static int rk3588_combphy_cfg(struct rockchip_combphy_priv *priv)
 			rockchip_combphy_updatel(priv, PHYREG15_SSC_CNT_MASK,
 						 val, PHYREG15);
 
-			writel(PHYREG16_SSC_CNT_VALUE, priv->mmio + PHYREG16);
+			pete_writel("drivers/phy/rockchip/phy-rockchip-naneng-combphy.c:676", PHYREG16_SSC_CNT_VALUE, priv->mmio + PHYREG16);
 		}
 		break;
 
@@ -689,13 +689,13 @@ static int rk3588_combphy_cfg(struct rockchip_combphy_priv *priv)
 						 val, PHYREG33);
 
 			/* Enable controlling random jitter. */
-			writel(PHYREG12_PLL_LPF_ADJ_VALUE, priv->mmio + PHYREG12);
+			pete_writel("drivers/phy/rockchip/phy-rockchip-naneng-combphy.c:692", PHYREG12_PLL_LPF_ADJ_VALUE, priv->mmio + PHYREG12);
 
 			/* Set up rx_trim: PLL LPF C1 85pf R1 1.25kohm */
-			writel(PHYREG27_RX_TRIM_RK3588, priv->mmio + PHYREG27);
+			pete_writel("drivers/phy/rockchip/phy-rockchip-naneng-combphy.c:695", PHYREG27_RX_TRIM_RK3588, priv->mmio + PHYREG27);
 
 			/* Set up su_trim:  */
-			writel(PHYREG11_SU_TRIM_0_7, priv->mmio + PHYREG11);
+			pete_writel("drivers/phy/rockchip/phy-rockchip-naneng-combphy.c:698", PHYREG11_SU_TRIM_0_7, priv->mmio + PHYREG11);
 		} else if (priv->type == PHY_TYPE_SATA) {
 			/* downward spread spectrum +500ppm */
 			val = PHYREG32_SSC_DOWNWARD << PHYREG32_SSC_DIR_SHIFT;
@@ -715,16 +715,16 @@ static int rk3588_combphy_cfg(struct rockchip_combphy_priv *priv)
 			val |= PHYREG13_CKRCV_AMP0;
 			rockchip_combphy_updatel(priv, PHYREG13_RESISTER_MASK, val, PHYREG13);
 
-			val = readl(priv->mmio + PHYREG14);
+			val = pete_readl("drivers/phy/rockchip/phy-rockchip-naneng-combphy.c:718", priv->mmio + PHYREG14);
 			val |= PHYREG14_CKRCV_AMP1;
-			writel(val, priv->mmio + PHYREG14);
+			pete_writel("drivers/phy/rockchip/phy-rockchip-naneng-combphy.c:720", val, priv->mmio + PHYREG14);
 		}
 	}
 
 	if (priv->enable_ssc) {
-		val = readl(priv->mmio + PHYREG8);
+		val = pete_readl("drivers/phy/rockchip/phy-rockchip-naneng-combphy.c:725", priv->mmio + PHYREG8);
 		val |= PHYREG8_SSC_EN;
-		writel(val, priv->mmio + PHYREG8);
+		pete_writel("drivers/phy/rockchip/phy-rockchip-naneng-combphy.c:727", val, priv->mmio + PHYREG8);
 	}
 
 	return 0;

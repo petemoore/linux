@@ -229,11 +229,11 @@ static inline int k3_bgp_read_temp(struct k3_thermal_data *devdata,
 	 *
 	 * Errata workaround.
 	 */
-	s0 = readl(bgp->base + devdata->stat_offset) &
+	s0 = pete_readl("drivers/thermal/k3_j72xx_bandgap.c:232", bgp->base + devdata->stat_offset) &
 		K3_VTM_TS_STAT_DTEMP_MASK;
-	s1 = readl(bgp->base + devdata->stat_offset) &
+	s1 = pete_readl("drivers/thermal/k3_j72xx_bandgap.c:234", bgp->base + devdata->stat_offset) &
 		K3_VTM_TS_STAT_DTEMP_MASK;
-	s2 = readl(bgp->base + devdata->stat_offset) &
+	s2 = pete_readl("drivers/thermal/k3_j72xx_bandgap.c:236", bgp->base + devdata->stat_offset) &
 		K3_VTM_TS_STAT_DTEMP_MASK;
 	dtemp = vtm_get_best_value(s0, s1, s2);
 
@@ -297,16 +297,16 @@ static void get_efuse_values(int id, struct k3_thermal_data *data, int *err,
 		/* Extract the offset value using bit-mask */
 		if (ct_offsets[id][i] == -1 && i == 1) {
 			/* 25C offset Case of Sensor 2 split between 2 regs */
-			tmp = (readl(fuse_base + 0x8) & 0xE0000000) >> (29);
-			tmp |= ((readl(fuse_base + 0xC) & 0x1F) << 3);
+			tmp = (pete_readl("drivers/thermal/k3_j72xx_bandgap.c:300", fuse_base + 0x8) & 0xE0000000) >> (29);
+			tmp |= ((pete_readl("drivers/thermal/k3_j72xx_bandgap.c:301", fuse_base + 0xC) & 0x1F) << 3);
 			pow = tmp & 0x80;
 		} else if (ct_offsets[id][i] == -1 && i == 2) {
 			/* 125C Case of Sensor 3 split between 2 regs */
-			tmp = (readl(fuse_base + 0x4) & 0xF8000000) >> (27);
-			tmp |= ((readl(fuse_base + 0x8) & 0xF) << 5);
+			tmp = (pete_readl("drivers/thermal/k3_j72xx_bandgap.c:305", fuse_base + 0x4) & 0xF8000000) >> (27);
+			tmp |= ((pete_readl("drivers/thermal/k3_j72xx_bandgap.c:306", fuse_base + 0x8) & 0xF) << 5);
 			pow = tmp & 0x100;
 		} else {
-			tmp = readl(fuse_base + ct_offsets[id][i]);
+			tmp = pete_readl("drivers/thermal/k3_j72xx_bandgap.c:309", fuse_base + ct_offsets[id][i]);
 			tmp &= ct_bm[id][i];
 			tmp = tmp >> __ffs(ct_bm[id][i]);
 
@@ -405,7 +405,7 @@ static int k3_j72xx_bandgap_probe(struct platform_device *pdev)
 		if (IS_ERR(fuse_base))
 			return PTR_ERR(fuse_base);
 
-		if ((readl(fuse_base) & 0xc0000000) == 0xc0000000)
+		if ((pete_readl("drivers/thermal/k3_j72xx_bandgap.c:408", fuse_base) & 0xc0000000) == 0xc0000000)
 			workaround_needed = false;
 	}
 
@@ -421,7 +421,7 @@ static int k3_j72xx_bandgap_probe(struct platform_device *pdev)
 	}
 
 	/* Get the sensor count in the VTM */
-	val = readl(bgp->base + K3_VTM_DEVINFO_PWR0_OFFSET);
+	val = pete_readl("drivers/thermal/k3_j72xx_bandgap.c:424", bgp->base + K3_VTM_DEVINFO_PWR0_OFFSET);
 	cnt = val & K3_VTM_DEVINFO_PWR0_TEMPSENS_CT_MASK;
 	cnt >>= __ffs(K3_VTM_DEVINFO_PWR0_TEMPSENS_CT_MASK);
 
@@ -470,11 +470,11 @@ static int k3_j72xx_bandgap_probe(struct platform_device *pdev)
 		else if (id == 0 && !workaround_needed)
 			memcpy(derived_table, ref_table, TABLE_SIZE * 4);
 
-		val = readl(data[id].bgp->cfg2_base + data[id].ctrl_offset);
+		val = pete_readl("drivers/thermal/k3_j72xx_bandgap.c:473", data[id].bgp->cfg2_base + data[id].ctrl_offset);
 		val |= (K3_VTM_TMPSENS_CTRL_MAXT_OUTRG_EN |
 			K3_VTM_TMPSENS_CTRL_SOC |
 			K3_VTM_TMPSENS_CTRL_CLRZ | BIT(4));
-		writel(val, data[id].bgp->cfg2_base + data[id].ctrl_offset);
+		pete_writel("drivers/thermal/k3_j72xx_bandgap.c:477", val, data[id].bgp->cfg2_base + data[id].ctrl_offset);
 
 		bgp->ts_data[id] = &data[id];
 		ti_thermal = devm_thermal_of_zone_register(bgp->dev, id, &data[id],
@@ -496,10 +496,10 @@ static int k3_j72xx_bandgap_probe(struct platform_device *pdev)
 	high_max = k3_j72xx_bandgap_temp_to_adc_code(MAX_TEMP);
 	low_temp = k3_j72xx_bandgap_temp_to_adc_code(COOL_DOWN_TEMP);
 
-	writel((low_temp << 16) | high_max, data[0].bgp->cfg2_base +
+	pete_writel("drivers/thermal/k3_j72xx_bandgap.c:499", (low_temp << 16) | high_max, data[0].bgp->cfg2_base +
 	       K3_VTM_MISC_CTRL2_OFFSET);
 	mdelay(100);
-	writel(K3_VTM_ANYMAXT_OUTRG_ALERT_EN, data[0].bgp->cfg2_base +
+	pete_writel("drivers/thermal/k3_j72xx_bandgap.c:502", K3_VTM_ANYMAXT_OUTRG_ALERT_EN, data[0].bgp->cfg2_base +
 	       K3_VTM_MISC_CTRL_OFFSET);
 
 	print_look_up_table(dev, ref_table);

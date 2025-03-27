@@ -381,8 +381,8 @@ static int sti_hqvdp_get_free_cmd(struct sti_hqvdp *hqvdp)
 	u32 cmd = hqvdp->hqvdp_cmd_paddr;
 	int i;
 
-	curr_cmd = readl(hqvdp->regs + HQVDP_MBX_CURRENT_CMD);
-	next_cmd = readl(hqvdp->regs + HQVDP_MBX_NEXT_CMD);
+	curr_cmd = pete_readl("drivers/gpu/drm/sti/sti_hqvdp.c:384", hqvdp->regs + HQVDP_MBX_CURRENT_CMD);
+	next_cmd = pete_readl("drivers/gpu/drm/sti/sti_hqvdp.c:385", hqvdp->regs + HQVDP_MBX_NEXT_CMD);
 
 	for (i = 0; i < NB_VDP_CMD; i++) {
 		if ((cmd != curr_cmd) && (cmd != next_cmd))
@@ -409,7 +409,7 @@ static int sti_hqvdp_get_curr_cmd(struct sti_hqvdp *hqvdp)
 	u32 cmd = hqvdp->hqvdp_cmd_paddr;
 	unsigned int i;
 
-	curr_cmd = readl(hqvdp->regs + HQVDP_MBX_CURRENT_CMD);
+	curr_cmd = pete_readl("drivers/gpu/drm/sti/sti_hqvdp.c:412", hqvdp->regs + HQVDP_MBX_CURRENT_CMD);
 
 	for (i = 0; i < NB_VDP_CMD; i++) {
 		if (cmd == curr_cmd)
@@ -437,7 +437,7 @@ static int sti_hqvdp_get_next_cmd(struct sti_hqvdp *hqvdp)
 	dma_addr_t cmd = hqvdp->hqvdp_cmd_paddr;
 	unsigned int i;
 
-	next_cmd = readl(hqvdp->regs + HQVDP_MBX_NEXT_CMD);
+	next_cmd = pete_readl("drivers/gpu/drm/sti/sti_hqvdp.c:440", hqvdp->regs + HQVDP_MBX_NEXT_CMD);
 
 	for (i = 0; i < NB_VDP_CMD; i++) {
 		if (cmd == next_cmd)
@@ -450,7 +450,7 @@ static int sti_hqvdp_get_next_cmd(struct sti_hqvdp *hqvdp)
 }
 
 #define DBGFS_DUMP(reg) seq_printf(s, "\n  %-25s 0x%08X", #reg, \
-				   readl(hqvdp->regs + reg))
+				   pete_readl("drivers/gpu/drm/sti/sti_hqvdp.c:453", hqvdp->regs + reg))
 
 static const char *hqvdp_dbg_get_lut(u32 *coef)
 {
@@ -576,7 +576,7 @@ static int hqvdp_dbg_show(struct seq_file *s, void *data)
 	DBGFS_DUMP(HQVDP_MBX_INFO_HOST);
 	DBGFS_DUMP(HQVDP_MBX_IRQ_TO_HOST);
 	DBGFS_DUMP(HQVDP_MBX_INFO_XP70);
-	infoxp70 = readl(hqvdp->regs + HQVDP_MBX_INFO_XP70);
+	infoxp70 = pete_readl("drivers/gpu/drm/sti/sti_hqvdp.c:579", hqvdp->regs + HQVDP_MBX_INFO_XP70);
 	seq_puts(s, "\tFirmware state: ");
 	if (infoxp70 & INFO_XP70_FW_READY)
 		seq_puts(s, "idle and ready");
@@ -589,13 +589,13 @@ static int hqvdp_dbg_show(struct seq_file *s, void *data)
 
 	DBGFS_DUMP(HQVDP_MBX_SW_RESET_CTRL);
 	DBGFS_DUMP(HQVDP_MBX_STARTUP_CTRL1);
-	if (readl(hqvdp->regs + HQVDP_MBX_STARTUP_CTRL1)
+	if (pete_readl("drivers/gpu/drm/sti/sti_hqvdp.c:592", hqvdp->regs + HQVDP_MBX_STARTUP_CTRL1)
 					& STARTUP_CTRL1_RST_DONE)
 		seq_puts(s, "\tReset is done");
 	else
 		seq_puts(s, "\tReset is NOT done");
 	DBGFS_DUMP(HQVDP_MBX_STARTUP_CTRL2);
-	if (readl(hqvdp->regs + HQVDP_MBX_STARTUP_CTRL2)
+	if (pete_readl("drivers/gpu/drm/sti/sti_hqvdp.c:598", hqvdp->regs + HQVDP_MBX_STARTUP_CTRL2)
 					& STARTUP_CTRL2_FETCH_EN)
 		seq_puts(s, "\tFetch is enabled");
 	else
@@ -604,13 +604,13 @@ static int hqvdp_dbg_show(struct seq_file *s, void *data)
 	DBGFS_DUMP(HQVDP_MBX_NEXT_CMD);
 	DBGFS_DUMP(HQVDP_MBX_CURRENT_CMD);
 	DBGFS_DUMP(HQVDP_MBX_SOFT_VSYNC);
-	if (!(readl(hqvdp->regs + HQVDP_MBX_SOFT_VSYNC) & 3))
+	if (!(pete_readl("drivers/gpu/drm/sti/sti_hqvdp.c:607", hqvdp->regs + HQVDP_MBX_SOFT_VSYNC) & 3))
 		seq_puts(s, "\tHW Vsync");
 	else
 		seq_puts(s, "\tSW Vsync ?!?!");
 
 	/* Last command */
-	cmd = readl(hqvdp->regs + HQVDP_MBX_CURRENT_CMD);
+	cmd = pete_readl("drivers/gpu/drm/sti/sti_hqvdp.c:613", hqvdp->regs + HQVDP_MBX_CURRENT_CMD);
 	cmd_offset = sti_hqvdp_get_curr_cmd(hqvdp);
 	if (cmd_offset == -1) {
 		seq_puts(s, "\n\n  Last command: unknown");
@@ -622,7 +622,7 @@ static int hqvdp_dbg_show(struct seq_file *s, void *data)
 	}
 
 	/* Next command */
-	cmd = readl(hqvdp->regs + HQVDP_MBX_NEXT_CMD);
+	cmd = pete_readl("drivers/gpu/drm/sti/sti_hqvdp.c:625", hqvdp->regs + HQVDP_MBX_NEXT_CMD);
 	cmd_offset = sti_hqvdp_get_next_cmd(hqvdp);
 	if (cmd_offset == -1) {
 		seq_puts(s, "\n\n  Next command: unknown");
@@ -764,10 +764,10 @@ static void sti_hqvdp_disable(struct sti_hqvdp *hqvdp)
 		DRM_DEBUG_DRIVER("Warning: cannot unregister VTG notifier\n");
 
 	/* Set next cmd to NULL */
-	writel(0, hqvdp->regs + HQVDP_MBX_NEXT_CMD);
+	pete_writel("drivers/gpu/drm/sti/sti_hqvdp.c:767", 0, hqvdp->regs + HQVDP_MBX_NEXT_CMD);
 
 	for (i = 0; i < POLL_MAX_ATTEMPT; i++) {
-		if (readl(hqvdp->regs + HQVDP_MBX_INFO_XP70)
+		if (pete_readl("drivers/gpu/drm/sti/sti_hqvdp.c:770", hqvdp->regs + HQVDP_MBX_INFO_XP70)
 				& INFO_XP70_FW_READY)
 			break;
 		msleep(POLL_DELAY_MS);
@@ -834,7 +834,7 @@ static int sti_hqvdp_vtg_cb(struct notifier_block *nb, unsigned long evt, void *
 				btm_cmd->top.chroma_src_pitch / 2;
 
 		/* Post the command to mailbox */
-		writel(hqvdp->hqvdp_cmd_paddr + btm_cmd_offset,
+		pete_writel("drivers/gpu/drm/sti/sti_hqvdp.c:837", hqvdp->hqvdp_cmd_paddr + btm_cmd_offset,
 				hqvdp->regs + HQVDP_MBX_NEXT_CMD);
 
 		hqvdp->btm_field_pending = false;
@@ -872,21 +872,21 @@ static void sti_hqvdp_init(struct sti_hqvdp *hqvdp)
 static void sti_hqvdp_init_plugs(struct sti_hqvdp *hqvdp)
 {
 	/* Configure Plugs (same for RD & WR) */
-	writel(PLUG_PAGE_SIZE_256, hqvdp->regs + HQVDP_RD_PLUG_PAGE_SIZE);
-	writel(PLUG_MIN_OPC_8, hqvdp->regs + HQVDP_RD_PLUG_MIN_OPC);
-	writel(PLUG_MAX_OPC_64, hqvdp->regs + HQVDP_RD_PLUG_MAX_OPC);
-	writel(PLUG_MAX_CHK_2X, hqvdp->regs + HQVDP_RD_PLUG_MAX_CHK);
-	writel(PLUG_MAX_MSG_1X, hqvdp->regs + HQVDP_RD_PLUG_MAX_MSG);
-	writel(PLUG_MIN_SPACE_1, hqvdp->regs + HQVDP_RD_PLUG_MIN_SPACE);
-	writel(PLUG_CONTROL_ENABLE, hqvdp->regs + HQVDP_RD_PLUG_CONTROL);
+	pete_writel("drivers/gpu/drm/sti/sti_hqvdp.c:875", PLUG_PAGE_SIZE_256, hqvdp->regs + HQVDP_RD_PLUG_PAGE_SIZE);
+	pete_writel("drivers/gpu/drm/sti/sti_hqvdp.c:876", PLUG_MIN_OPC_8, hqvdp->regs + HQVDP_RD_PLUG_MIN_OPC);
+	pete_writel("drivers/gpu/drm/sti/sti_hqvdp.c:877", PLUG_MAX_OPC_64, hqvdp->regs + HQVDP_RD_PLUG_MAX_OPC);
+	pete_writel("drivers/gpu/drm/sti/sti_hqvdp.c:878", PLUG_MAX_CHK_2X, hqvdp->regs + HQVDP_RD_PLUG_MAX_CHK);
+	pete_writel("drivers/gpu/drm/sti/sti_hqvdp.c:879", PLUG_MAX_MSG_1X, hqvdp->regs + HQVDP_RD_PLUG_MAX_MSG);
+	pete_writel("drivers/gpu/drm/sti/sti_hqvdp.c:880", PLUG_MIN_SPACE_1, hqvdp->regs + HQVDP_RD_PLUG_MIN_SPACE);
+	pete_writel("drivers/gpu/drm/sti/sti_hqvdp.c:881", PLUG_CONTROL_ENABLE, hqvdp->regs + HQVDP_RD_PLUG_CONTROL);
 
-	writel(PLUG_PAGE_SIZE_256, hqvdp->regs + HQVDP_WR_PLUG_PAGE_SIZE);
-	writel(PLUG_MIN_OPC_8, hqvdp->regs + HQVDP_WR_PLUG_MIN_OPC);
-	writel(PLUG_MAX_OPC_64, hqvdp->regs + HQVDP_WR_PLUG_MAX_OPC);
-	writel(PLUG_MAX_CHK_2X, hqvdp->regs + HQVDP_WR_PLUG_MAX_CHK);
-	writel(PLUG_MAX_MSG_1X, hqvdp->regs + HQVDP_WR_PLUG_MAX_MSG);
-	writel(PLUG_MIN_SPACE_1, hqvdp->regs + HQVDP_WR_PLUG_MIN_SPACE);
-	writel(PLUG_CONTROL_ENABLE, hqvdp->regs + HQVDP_WR_PLUG_CONTROL);
+	pete_writel("drivers/gpu/drm/sti/sti_hqvdp.c:883", PLUG_PAGE_SIZE_256, hqvdp->regs + HQVDP_WR_PLUG_PAGE_SIZE);
+	pete_writel("drivers/gpu/drm/sti/sti_hqvdp.c:884", PLUG_MIN_OPC_8, hqvdp->regs + HQVDP_WR_PLUG_MIN_OPC);
+	pete_writel("drivers/gpu/drm/sti/sti_hqvdp.c:885", PLUG_MAX_OPC_64, hqvdp->regs + HQVDP_WR_PLUG_MAX_OPC);
+	pete_writel("drivers/gpu/drm/sti/sti_hqvdp.c:886", PLUG_MAX_CHK_2X, hqvdp->regs + HQVDP_WR_PLUG_MAX_CHK);
+	pete_writel("drivers/gpu/drm/sti/sti_hqvdp.c:887", PLUG_MAX_MSG_1X, hqvdp->regs + HQVDP_WR_PLUG_MAX_MSG);
+	pete_writel("drivers/gpu/drm/sti/sti_hqvdp.c:888", PLUG_MIN_SPACE_1, hqvdp->regs + HQVDP_WR_PLUG_MIN_SPACE);
+	pete_writel("drivers/gpu/drm/sti/sti_hqvdp.c:889", PLUG_CONTROL_ENABLE, hqvdp->regs + HQVDP_WR_PLUG_CONTROL);
 }
 
 /**
@@ -956,10 +956,10 @@ static void sti_hqvdp_start_xp70(struct sti_hqvdp *hqvdp)
 		DRM_ERROR("Failed to prepare/enable HQVDP clk\n");
 
 	/* Reset */
-	writel(SW_RESET_CTRL_FULL, hqvdp->regs + HQVDP_MBX_SW_RESET_CTRL);
+	pete_writel("drivers/gpu/drm/sti/sti_hqvdp.c:959", SW_RESET_CTRL_FULL, hqvdp->regs + HQVDP_MBX_SW_RESET_CTRL);
 
 	for (i = 0; i < POLL_MAX_ATTEMPT; i++) {
-		if (readl(hqvdp->regs + HQVDP_MBX_STARTUP_CTRL1)
+		if (pete_readl("drivers/gpu/drm/sti/sti_hqvdp.c:962", hqvdp->regs + HQVDP_MBX_STARTUP_CTRL1)
 				& STARTUP_CTRL1_RST_DONE)
 			break;
 		msleep(POLL_DELAY_MS);
@@ -972,31 +972,31 @@ static void sti_hqvdp_start_xp70(struct sti_hqvdp *hqvdp)
 
 	/* Init Read & Write plugs */
 	for (i = 0; i < header->rd_size / 4; i++)
-		writel(fw_rd_plug[i], hqvdp->regs + HQVDP_RD_PLUG + i * 4);
+		pete_writel("drivers/gpu/drm/sti/sti_hqvdp.c:975", fw_rd_plug[i], hqvdp->regs + HQVDP_RD_PLUG + i * 4);
 	for (i = 0; i < header->wr_size / 4; i++)
-		writel(fw_wr_plug[i], hqvdp->regs + HQVDP_WR_PLUG + i * 4);
+		pete_writel("drivers/gpu/drm/sti/sti_hqvdp.c:977", fw_wr_plug[i], hqvdp->regs + HQVDP_WR_PLUG + i * 4);
 
 	sti_hqvdp_init_plugs(hqvdp);
 
 	/* Authorize Idle Mode */
-	writel(STARTUP_CTRL1_AUTH_IDLE, hqvdp->regs + HQVDP_MBX_STARTUP_CTRL1);
+	pete_writel("drivers/gpu/drm/sti/sti_hqvdp.c:982", STARTUP_CTRL1_AUTH_IDLE, hqvdp->regs + HQVDP_MBX_STARTUP_CTRL1);
 
 	/* Prevent VTG interruption during the boot */
-	writel(SOFT_VSYNC_SW_CTRL_IRQ, hqvdp->regs + HQVDP_MBX_SOFT_VSYNC);
-	writel(0, hqvdp->regs + HQVDP_MBX_NEXT_CMD);
+	pete_writel("drivers/gpu/drm/sti/sti_hqvdp.c:985", SOFT_VSYNC_SW_CTRL_IRQ, hqvdp->regs + HQVDP_MBX_SOFT_VSYNC);
+	pete_writel("drivers/gpu/drm/sti/sti_hqvdp.c:986", 0, hqvdp->regs + HQVDP_MBX_NEXT_CMD);
 
 	/* Download PMEM & DMEM */
 	for (i = 0; i < header->pmem_size / 4; i++)
-		writel(fw_pmem[i], hqvdp->regs + HQVDP_PMEM + i * 4);
+		pete_writel("drivers/gpu/drm/sti/sti_hqvdp.c:990", fw_pmem[i], hqvdp->regs + HQVDP_PMEM + i * 4);
 	for (i = 0; i < header->dmem_size / 4; i++)
-		writel(fw_dmem[i], hqvdp->regs + HQVDP_DMEM + i * 4);
+		pete_writel("drivers/gpu/drm/sti/sti_hqvdp.c:992", fw_dmem[i], hqvdp->regs + HQVDP_DMEM + i * 4);
 
 	/* Enable fetch */
-	writel(STARTUP_CTRL2_FETCH_EN, hqvdp->regs + HQVDP_MBX_STARTUP_CTRL2);
+	pete_writel("drivers/gpu/drm/sti/sti_hqvdp.c:995", STARTUP_CTRL2_FETCH_EN, hqvdp->regs + HQVDP_MBX_STARTUP_CTRL2);
 
 	/* Wait end of boot */
 	for (i = 0; i < POLL_MAX_ATTEMPT; i++) {
-		if (readl(hqvdp->regs + HQVDP_MBX_INFO_XP70)
+		if (pete_readl("drivers/gpu/drm/sti/sti_hqvdp.c:999", hqvdp->regs + HQVDP_MBX_INFO_XP70)
 				& INFO_XP70_FW_READY)
 			break;
 		msleep(POLL_DELAY_MS);
@@ -1008,7 +1008,7 @@ static void sti_hqvdp_start_xp70(struct sti_hqvdp *hqvdp)
 	}
 
 	/* Launch Vsync */
-	writel(SOFT_VSYNC_HW, hqvdp->regs + HQVDP_MBX_SOFT_VSYNC);
+	pete_writel("drivers/gpu/drm/sti/sti_hqvdp.c:1011", SOFT_VSYNC_HW, hqvdp->regs + HQVDP_MBX_SOFT_VSYNC);
 
 	DRM_INFO("HQVDP XP70 initialized\n");
 
@@ -1232,7 +1232,7 @@ static void sti_hqvdp_atomic_update(struct drm_plane *drm_plane,
 	scale_v = SCALE_FACTOR * dst_h / src_h;
 	sti_hqvdp_update_hvsrc(HVSRC_VERT, scale_v, &cmd->hvsrc);
 
-	writel(hqvdp->hqvdp_cmd_paddr + cmd_offset,
+	pete_writel("drivers/gpu/drm/sti/sti_hqvdp.c:1235", hqvdp->hqvdp_cmd_paddr + cmd_offset,
 	       hqvdp->regs + HQVDP_MBX_NEXT_CMD);
 
 	/* Interlaced : get ready to display the bottom field at next Vsync */

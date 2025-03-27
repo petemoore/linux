@@ -497,7 +497,7 @@ static void emac_rx_timestamp(struct prueth_emac *emac,
 	struct skb_shared_hwtstamps *ssh;
 	u64 ns;
 
-	u32 hi_sw = readl(emac->prueth->shram.va +
+	u32 hi_sw = pete_readl("drivers/net/ethernet/ti/icssg/icssg_prueth.c:500", emac->prueth->shram.va +
 			  TIMESYNC_FW_WC_COUNT_HI_SW_OFFSET_OFFSET);
 	ns = icssg_ts_to_ns(hi_sw, psdata[1], psdata[0],
 			    IEP_DEFAULT_CYCLE_TIME_NS);
@@ -648,7 +648,7 @@ static void tx_ts_work(struct prueth_emac *emac)
 			break;
 		}
 
-		hi_sw = readl(emac->prueth->shram.va +
+		hi_sw = pete_readl("drivers/net/ethernet/ti/icssg/icssg_prueth.c:651", emac->prueth->shram.va +
 			      TIMESYNC_FW_WC_COUNT_HI_SW_OFFSET_OFFSET);
 		ns = icssg_ts_to_ns(hi_sw, tsr.hi_ts, tsr.lo_ts,
 				    IEP_DEFAULT_CYCLE_TIME_NS);
@@ -1181,15 +1181,15 @@ static u64 prueth_iep_gettime(void *clockops_data, struct ptp_system_timestamp *
 	local_irq_save(flags);
 	do {
 		iepcount_hi = icss_iep_get_count_hi(emac->iep);
-		iepcount_hi += readl(fw_count_hi_addr);
-		hi_rollover_count = readl(fw_hi_r_count_addr);
+		iepcount_hi += pete_readl("drivers/net/ethernet/ti/icssg/icssg_prueth.c:1184", fw_count_hi_addr);
+		hi_rollover_count = pete_readl("drivers/net/ethernet/ti/icssg/icssg_prueth.c:1185", fw_hi_r_count_addr);
 		ptp_read_system_prets(sts);
 		iepcount_lo = icss_iep_get_count_low(emac->iep);
 		ptp_read_system_postts(sts);
 
 		iepcount_hi_r = icss_iep_get_count_hi(emac->iep);
-		iepcount_hi_r += readl(fw_count_hi_addr);
-		hi_rollover_count_r = readl(fw_hi_r_count_addr);
+		iepcount_hi_r += pete_readl("drivers/net/ethernet/ti/icssg/icssg_prueth.c:1191", fw_count_hi_addr);
+		hi_rollover_count_r = pete_readl("drivers/net/ethernet/ti/icssg/icssg_prueth.c:1192", fw_hi_r_count_addr);
 	} while ((iepcount_hi_r != iepcount_hi) ||
 		 (hi_rollover_count != hi_rollover_count_r));
 	local_irq_restore(flags);
@@ -1226,11 +1226,11 @@ static void prueth_iep_settime(void *clockops_data, u64 ns)
 
 	memcpy_toio(sc_descp, &sc_desc, sizeof(sc_desc));
 
-	writeb(1, &sc_descp->request);
+	pete_writeb("drivers/net/ethernet/ti/icssg/icssg_prueth.c:1229", 1, &sc_descp->request);
 
 	timeout = 5;	/* fw should take 2-3 ms */
 	while (timeout--) {
-		if (readb(&sc_descp->acknowledgment))
+		if (pete_readb("drivers/net/ethernet/ti/icssg/icssg_prueth.c:1233", &sc_descp->acknowledgment))
 			return;
 
 		usleep_range(500, 1000);
@@ -1283,7 +1283,7 @@ static int prueth_perout_enable(void *clockops_data,
 	/* we're in shadow mode so need to set upper 32-bits */
 	*cmp = (u64)offset << 32;
 
-	writel(reduction_factor, emac->prueth->shram.va +
+	pete_writel("drivers/net/ethernet/ti/icssg/icssg_prueth.c:1286", reduction_factor, emac->prueth->shram.va +
 		TIMESYNC_FW_WC_SYNCOUT_REDUCTION_FACTOR_OFFSET);
 
 	current_cycle = icssg_read_time(emac->prueth->shram.va +

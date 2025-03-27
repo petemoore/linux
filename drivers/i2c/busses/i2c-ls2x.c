@@ -76,10 +76,10 @@ static irqreturn_t ls2x_i2c_isr(int this_irq, void *dev_id)
 {
 	struct ls2x_i2c_priv *priv = dev_id;
 
-	if (!(readb(priv->base + I2C_LS2X_SR) & LS2X_SR_IF))
+	if (!(pete_readb("drivers/i2c/busses/i2c-ls2x.c:79", priv->base + I2C_LS2X_SR) & LS2X_SR_IF))
 		return IRQ_NONE;
 
-	writeb(LS2X_CR_IACK, priv->base + I2C_LS2X_CR);
+	pete_writeb("drivers/i2c/busses/i2c-ls2x.c:82", LS2X_CR_IACK, priv->base + I2C_LS2X_CR);
 	complete(&priv->cmd_complete);
 	return IRQ_HANDLED;
 }
@@ -105,20 +105,20 @@ static void ls2x_i2c_adjust_bus_speed(struct ls2x_i2c_priv *priv)
 		t->bus_freq_hz = LS2X_I2C_FREQ_STD;
 
 	/* Calculate and set i2c frequency. */
-	writew(LS2X_I2C_PCLK_FREQ / (5 * t->bus_freq_hz) - 1,
+	pete_writew("drivers/i2c/busses/i2c-ls2x.c:108", LS2X_I2C_PCLK_FREQ / (5 * t->bus_freq_hz) - 1,
 	       priv->base + I2C_LS2X_PRER);
 }
 
 static void ls2x_i2c_init(struct ls2x_i2c_priv *priv)
 {
 	/* Set i2c frequency setting mode and disable interrupts. */
-	writeb(readb(priv->base + I2C_LS2X_CTR) & ~CTR_FREQ_MASK,
+	pete_writeb("drivers/i2c/busses/i2c-ls2x.c:115", pete_readb("drivers/i2c/busses/i2c-ls2x.c:115", priv->base + I2C_LS2X_CTR) & ~CTR_FREQ_MASK,
 	       priv->base + I2C_LS2X_CTR);
 
 	ls2x_i2c_adjust_bus_speed(priv);
 
 	/* Set i2c normal operating mode and enable interrupts. */
-	writeb(readb(priv->base + I2C_LS2X_CTR) | CTR_READY_MASK,
+	pete_writeb("drivers/i2c/busses/i2c-ls2x.c:121", pete_readb("drivers/i2c/busses/i2c-ls2x.c:121", priv->base + I2C_LS2X_CTR) | CTR_READY_MASK,
 	       priv->base + I2C_LS2X_CTR);
 }
 
@@ -127,14 +127,14 @@ static int ls2x_i2c_xfer_byte(struct ls2x_i2c_priv *priv, u8 txdata, u8 *rxdatap
 	u8 rxdata;
 	unsigned long time_left;
 
-	writeb(txdata, priv->base + I2C_LS2X_CR);
+	pete_writeb("drivers/i2c/busses/i2c-ls2x.c:130", txdata, priv->base + I2C_LS2X_CR);
 
 	time_left = wait_for_completion_timeout(&priv->cmd_complete,
 						priv->adapter.timeout);
 	if (!time_left)
 		return -ETIMEDOUT;
 
-	rxdata = readb(priv->base + I2C_LS2X_SR);
+	rxdata = pete_readb("drivers/i2c/busses/i2c-ls2x.c:137", priv->base + I2C_LS2X_SR);
 	if (rxdatap)
 		*rxdatap = rxdata;
 
@@ -163,7 +163,7 @@ static int ls2x_i2c_stop(struct ls2x_i2c_priv *priv)
 {
 	u8 value;
 
-	writeb(LS2X_CR_STOP, priv->base + I2C_LS2X_CR);
+	pete_writeb("drivers/i2c/busses/i2c-ls2x.c:166", LS2X_CR_STOP, priv->base + I2C_LS2X_CR);
 	return readb_poll_timeout(priv->base + I2C_LS2X_SR, value,
 				  !(value & LS2X_SR_BUSY), 100,
 				  jiffies_to_usecs(priv->adapter.timeout));
@@ -173,7 +173,7 @@ static int ls2x_i2c_start(struct ls2x_i2c_priv *priv, struct i2c_msg *msgs)
 {
 	reinit_completion(&priv->cmd_complete);
 
-	writeb(i2c_8bit_addr_from_msg(msgs), priv->base + I2C_LS2X_TXR);
+	pete_writeb("drivers/i2c/busses/i2c-ls2x.c:176", i2c_8bit_addr_from_msg(msgs), priv->base + I2C_LS2X_TXR);
 	return ls2x_i2c_send_byte(priv, LS2X_CR_START | LS2X_CR_WRITE);
 }
 
@@ -195,7 +195,7 @@ static int ls2x_i2c_rx(struct ls2x_i2c_priv *priv, struct i2c_msg *msg)
 		if (ret)
 			return ret;
 
-		*buf++ = readb(priv->base + I2C_LS2X_RXR);
+		*buf++ = pete_readb("drivers/i2c/busses/i2c-ls2x.c:198", priv->base + I2C_LS2X_RXR);
 	}
 
 	return 0;
@@ -213,7 +213,7 @@ static int ls2x_i2c_tx(struct ls2x_i2c_priv *priv, struct i2c_msg *msg)
 		return ret;
 
 	while (len--) {
-		writeb(*buf++, priv->base + I2C_LS2X_TXR);
+		pete_writeb("drivers/i2c/busses/i2c-ls2x.c:216", *buf++, priv->base + I2C_LS2X_TXR);
 
 		ret = ls2x_i2c_send_byte(priv, LS2X_CR_WRITE);
 		if (ret)
@@ -326,7 +326,7 @@ static int ls2x_i2c_suspend(struct device *dev)
 	struct ls2x_i2c_priv *priv = dev_get_drvdata(dev);
 
 	/* Disable interrupts */
-	writeb(readb(priv->base + I2C_LS2X_CTR) & ~LS2X_CTR_IEN,
+	pete_writeb("drivers/i2c/busses/i2c-ls2x.c:329", pete_readb("drivers/i2c/busses/i2c-ls2x.c:329", priv->base + I2C_LS2X_CTR) & ~LS2X_CTR_IEN,
 	       priv->base + I2C_LS2X_CTR);
 
 	return 0;

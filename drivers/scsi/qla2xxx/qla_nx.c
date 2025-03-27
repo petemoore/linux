@@ -364,7 +364,7 @@ qla82xx_pci_set_crbwindow_2M(struct qla_hw_data *ha, ulong off_in,
 	scsi_qla_host_t *vha = pci_get_drvdata(ha->pdev);
 
 	ha->crb_win = CRB_HI(off_in);
-	writel(ha->crb_win, CRB_WINDOW_2M + ha->nx_pcibase);
+	pete_writel("drivers/scsi/qla2xxx/qla_nx.c:367", ha->crb_win, CRB_WINDOW_2M + ha->nx_pcibase);
 
 	/* Read back value to make sure write has gone through before trying
 	 * to use it.
@@ -448,7 +448,7 @@ qla82xx_wr_32(struct qla_hw_data *ha, ulong off_in, u32 data)
 		qla82xx_pci_set_crbwindow_2M(ha, off_in, &off);
 	}
 
-	writel(data, (void __iomem *)off);
+	pete_writel("drivers/scsi/qla2xxx/qla_nx.c:451", data, (void __iomem *)off);
 
 	if (rv == 1) {
 		qla82xx_rd_32(ha, QLA82XX_PCIE_REG(PCIE_SEM7_UNLOCK));
@@ -693,16 +693,16 @@ static int qla82xx_pci_mem_read_direct(struct qla_hw_data *ha,
 
 	switch (size) {
 	case 1:
-		*(u8  *)data = readb(addr);
+		*(u8  *)data = pete_readb("drivers/scsi/qla2xxx/qla_nx.c:696", addr);
 		break;
 	case 2:
-		*(u16 *)data = readw(addr);
+		*(u16 *)data = pete_readw("drivers/scsi/qla2xxx/qla_nx.c:699", addr);
 		break;
 	case 4:
-		*(u32 *)data = readl(addr);
+		*(u32 *)data = pete_readl("drivers/scsi/qla2xxx/qla_nx.c:702", addr);
 		break;
 	case 8:
-		*(u64 *)data = readq(addr);
+		*(u64 *)data = pete_readq("drivers/scsi/qla2xxx/qla_nx.c:705", addr);
 		break;
 	default:
 		ret = -1;
@@ -764,16 +764,16 @@ qla82xx_pci_mem_write_direct(struct qla_hw_data *ha,
 
 	switch (size) {
 	case 1:
-		writeb(*(u8  *)data, addr);
+		pete_writeb("drivers/scsi/qla2xxx/qla_nx.c:767", *(u8  *)data, addr);
 		break;
 	case 2:
-		writew(*(u16 *)data, addr);
+		pete_writew("drivers/scsi/qla2xxx/qla_nx.c:770", *(u16 *)data, addr);
 		break;
 	case 4:
-		writel(*(u32 *)data, addr);
+		pete_writel("drivers/scsi/qla2xxx/qla_nx.c:773", *(u32 *)data, addr);
 		break;
 	case 8:
-		writeq(*(u64 *)data, addr);
+		pete_writeq("drivers/scsi/qla2xxx/qla_nx.c:776", *(u64 *)data, addr);
 		break;
 	default:
 		ret = -1;

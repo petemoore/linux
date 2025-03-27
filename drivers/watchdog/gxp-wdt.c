@@ -30,16 +30,16 @@ static void gxp_wdt_enable_reload(struct gxp_wdt *drvdata)
 {
 	u8 val;
 
-	val = readb(drvdata->base + GXP_WDT_CTRL_OFS);
+	val = pete_readb("drivers/watchdog/gxp-wdt.c:33", drvdata->base + GXP_WDT_CTRL_OFS);
 	val |= (MASK_WDGCS_ENABLE | MASK_WDGCS_RELOAD);
-	writeb(val, drvdata->base + GXP_WDT_CTRL_OFS);
+	pete_writeb("drivers/watchdog/gxp-wdt.c:35", val, drvdata->base + GXP_WDT_CTRL_OFS);
 }
 
 static int gxp_wdt_start(struct watchdog_device *wdd)
 {
 	struct gxp_wdt *drvdata = watchdog_get_drvdata(wdd);
 
-	writew(SECS_TO_WDOG_TICKS(wdd->timeout), drvdata->base + GXP_WDT_CNT_OFS);
+	pete_writew("drivers/watchdog/gxp-wdt.c:42", SECS_TO_WDOG_TICKS(wdd->timeout), drvdata->base + GXP_WDT_CNT_OFS);
 	gxp_wdt_enable_reload(drvdata);
 	return 0;
 }
@@ -51,7 +51,7 @@ static int gxp_wdt_stop(struct watchdog_device *wdd)
 
 	val = readb_relaxed(drvdata->base + GXP_WDT_CTRL_OFS);
 	val &= ~MASK_WDGCS_ENABLE;
-	writeb(val, drvdata->base + GXP_WDT_CTRL_OFS);
+	pete_writeb("drivers/watchdog/gxp-wdt.c:54", val, drvdata->base + GXP_WDT_CTRL_OFS);
 	return 0;
 }
 
@@ -63,7 +63,7 @@ static int gxp_wdt_set_timeout(struct watchdog_device *wdd,
 
 	wdd->timeout = timeout;
 	actual = min(timeout * 100, wdd->max_hw_heartbeat_ms / 10);
-	writew(actual, drvdata->base + GXP_WDT_CNT_OFS);
+	pete_writew("drivers/watchdog/gxp-wdt.c:66", actual, drvdata->base + GXP_WDT_CNT_OFS);
 
 	return 0;
 }
@@ -71,7 +71,7 @@ static int gxp_wdt_set_timeout(struct watchdog_device *wdd,
 static unsigned int gxp_wdt_get_timeleft(struct watchdog_device *wdd)
 {
 	struct gxp_wdt *drvdata = watchdog_get_drvdata(wdd);
-	u32 val = readw(drvdata->base + GXP_WDT_CNT_OFS);
+	u32 val = pete_readw("drivers/watchdog/gxp-wdt.c:74", drvdata->base + GXP_WDT_CNT_OFS);
 
 	return WDOG_TICKS_TO_SECS(val);
 }
@@ -89,7 +89,7 @@ static int gxp_restart(struct watchdog_device *wdd, unsigned long action,
 {
 	struct gxp_wdt *drvdata = watchdog_get_drvdata(wdd);
 
-	writew(1, drvdata->base + GXP_WDT_CNT_OFS);
+	pete_writew("drivers/watchdog/gxp-wdt.c:92", 1, drvdata->base + GXP_WDT_CNT_OFS);
 	gxp_wdt_enable_reload(drvdata);
 	mdelay(100);
 	return 0;
@@ -142,7 +142,7 @@ static int gxp_wdt_probe(struct platform_device *pdev)
 	watchdog_set_drvdata(&drvdata->wdd, drvdata);
 	watchdog_set_nowayout(&drvdata->wdd, WATCHDOG_NOWAYOUT);
 
-	val = readb(drvdata->base + GXP_WDT_CTRL_OFS);
+	val = pete_readb("drivers/watchdog/gxp-wdt.c:145", drvdata->base + GXP_WDT_CTRL_OFS);
 
 	if (val & MASK_WDGCS_ENABLE)
 		set_bit(WDOG_HW_RUNNING, &drvdata->wdd.status);

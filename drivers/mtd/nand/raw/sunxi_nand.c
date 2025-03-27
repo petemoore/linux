@@ -260,8 +260,8 @@ static inline struct sunxi_nfc *to_sunxi_nfc(struct nand_controller *ctrl)
 static irqreturn_t sunxi_nfc_interrupt(int irq, void *dev_id)
 {
 	struct sunxi_nfc *nfc = dev_id;
-	u32 st = readl(nfc->regs + NFC_REG_ST);
-	u32 ien = readl(nfc->regs + NFC_REG_INT);
+	u32 st = pete_readl("drivers/mtd/nand/raw/sunxi_nand.c:263", nfc->regs + NFC_REG_ST);
+	u32 ien = pete_readl("drivers/mtd/nand/raw/sunxi_nand.c:264", nfc->regs + NFC_REG_INT);
 
 	if (!(ien & st))
 		return IRQ_NONE;
@@ -269,8 +269,8 @@ static irqreturn_t sunxi_nfc_interrupt(int irq, void *dev_id)
 	if ((ien & st) == ien)
 		complete(&nfc->complete);
 
-	writel(st & NFC_INT_MASK, nfc->regs + NFC_REG_ST);
-	writel(~st & ien & NFC_INT_MASK, nfc->regs + NFC_REG_INT);
+	pete_writel("drivers/mtd/nand/raw/sunxi_nand.c:272", st & NFC_INT_MASK, nfc->regs + NFC_REG_ST);
+	pete_writel("drivers/mtd/nand/raw/sunxi_nand.c:273", ~st & ien & NFC_INT_MASK, nfc->regs + NFC_REG_INT);
 
 	return IRQ_HANDLED;
 }
@@ -289,7 +289,7 @@ static int sunxi_nfc_wait_events(struct sunxi_nfc *nfc, u32 events,
 	if (!use_polling) {
 		init_completion(&nfc->complete);
 
-		writel(events, nfc->regs + NFC_REG_INT);
+		pete_writel("drivers/mtd/nand/raw/sunxi_nand.c:292", events, nfc->regs + NFC_REG_INT);
 
 		ret = wait_for_completion_timeout(&nfc->complete,
 						msecs_to_jiffies(timeout_ms));
@@ -298,7 +298,7 @@ static int sunxi_nfc_wait_events(struct sunxi_nfc *nfc, u32 events,
 		else
 			ret = 0;
 
-		writel(0, nfc->regs + NFC_REG_INT);
+		pete_writel("drivers/mtd/nand/raw/sunxi_nand.c:301", 0, nfc->regs + NFC_REG_INT);
 	} else {
 		u32 status;
 
@@ -307,7 +307,7 @@ static int sunxi_nfc_wait_events(struct sunxi_nfc *nfc, u32 events,
 					 timeout_ms * 1000);
 	}
 
-	writel(events & NFC_INT_MASK, nfc->regs + NFC_REG_ST);
+	pete_writel("drivers/mtd/nand/raw/sunxi_nand.c:310", events & NFC_INT_MASK, nfc->regs + NFC_REG_ST);
 
 	if (ret)
 		dev_err(nfc->dev, "wait interrupt timedout\n");
@@ -334,8 +334,8 @@ static int sunxi_nfc_rst(struct sunxi_nfc *nfc)
 	u32 ctl;
 	int ret;
 
-	writel(0, nfc->regs + NFC_REG_ECC_CTL);
-	writel(NFC_RESET, nfc->regs + NFC_REG_CTL);
+	pete_writel("drivers/mtd/nand/raw/sunxi_nand.c:337", 0, nfc->regs + NFC_REG_ECC_CTL);
+	pete_writel("drivers/mtd/nand/raw/sunxi_nand.c:338", NFC_RESET, nfc->regs + NFC_REG_CTL);
 
 	ret = readl_poll_timeout(nfc->regs + NFC_REG_CTL, ctl,
 				 !(ctl & NFC_RESET), 1,
@@ -374,16 +374,16 @@ static int sunxi_nfc_dma_op_prepare(struct sunxi_nfc *nfc, const void *buf,
 		}
 	}
 
-	writel(readl(nfc->regs + NFC_REG_CTL) | NFC_RAM_METHOD,
+	pete_writel("drivers/mtd/nand/raw/sunxi_nand.c:377", pete_readl("drivers/mtd/nand/raw/sunxi_nand.c:377", nfc->regs + NFC_REG_CTL) | NFC_RAM_METHOD,
 	       nfc->regs + NFC_REG_CTL);
-	writel(nchunks, nfc->regs + NFC_REG_SECTOR_NUM);
-	writel(chunksize, nfc->regs + NFC_REG_CNT);
+	pete_writel("drivers/mtd/nand/raw/sunxi_nand.c:379", nchunks, nfc->regs + NFC_REG_SECTOR_NUM);
+	pete_writel("drivers/mtd/nand/raw/sunxi_nand.c:380", chunksize, nfc->regs + NFC_REG_CNT);
 
 	if (nfc->caps->has_mdma) {
-		writel(readl(nfc->regs + NFC_REG_CTL) & ~NFC_DMA_TYPE_NORMAL,
+		pete_writel("drivers/mtd/nand/raw/sunxi_nand.c:383", pete_readl("drivers/mtd/nand/raw/sunxi_nand.c:383", nfc->regs + NFC_REG_CTL) & ~NFC_DMA_TYPE_NORMAL,
 		       nfc->regs + NFC_REG_CTL);
-		writel(chunksize * nchunks, nfc->regs + NFC_REG_MDMA_CNT);
-		writel(sg_dma_address(sg), nfc->regs + NFC_REG_MDMA_ADDR);
+		pete_writel("drivers/mtd/nand/raw/sunxi_nand.c:385", chunksize * nchunks, nfc->regs + NFC_REG_MDMA_CNT);
+		pete_writel("drivers/mtd/nand/raw/sunxi_nand.c:386", sg_dma_address(sg), nfc->regs + NFC_REG_MDMA_ADDR);
 	} else {
 		dmat = dmaengine_submit(dmad);
 
@@ -395,7 +395,7 @@ static int sunxi_nfc_dma_op_prepare(struct sunxi_nfc *nfc, const void *buf,
 	return 0;
 
 err_clr_dma_flag:
-	writel(readl(nfc->regs + NFC_REG_CTL) & ~NFC_RAM_METHOD,
+	pete_writel("drivers/mtd/nand/raw/sunxi_nand.c:398", pete_readl("drivers/mtd/nand/raw/sunxi_nand.c:398", nfc->regs + NFC_REG_CTL) & ~NFC_RAM_METHOD,
 	       nfc->regs + NFC_REG_CTL);
 
 err_unmap_buf:
@@ -408,7 +408,7 @@ static void sunxi_nfc_dma_op_cleanup(struct sunxi_nfc *nfc,
 				     struct scatterlist *sg)
 {
 	dma_unmap_sg(nfc->dev, sg, 1, ddir);
-	writel(readl(nfc->regs + NFC_REG_CTL) & ~NFC_RAM_METHOD,
+	pete_writel("drivers/mtd/nand/raw/sunxi_nand.c:411", pete_readl("drivers/mtd/nand/raw/sunxi_nand.c:411", nfc->regs + NFC_REG_CTL) & ~NFC_RAM_METHOD,
 	       nfc->regs + NFC_REG_CTL);
 }
 
@@ -423,7 +423,7 @@ static void sunxi_nfc_select_chip(struct nand_chip *nand, unsigned int cs)
 	if (cs >= sunxi_nand->nsels)
 		return;
 
-	ctl = readl(nfc->regs + NFC_REG_CTL) &
+	ctl = pete_readl("drivers/mtd/nand/raw/sunxi_nand.c:426", nfc->regs + NFC_REG_CTL) &
 	      ~(NFC_PAGE_SHIFT_MSK | NFC_CE_SEL_MSK | NFC_RB_SEL_MSK | NFC_EN);
 
 	sel = &sunxi_nand->sels[cs];
@@ -431,16 +431,16 @@ static void sunxi_nfc_select_chip(struct nand_chip *nand, unsigned int cs)
 	if (sel->rb >= 0)
 		ctl |= NFC_RB_SEL(sel->rb);
 
-	writel(mtd->writesize, nfc->regs + NFC_REG_SPARE_AREA);
+	pete_writel("drivers/mtd/nand/raw/sunxi_nand.c:434", mtd->writesize, nfc->regs + NFC_REG_SPARE_AREA);
 
 	if (nfc->clk_rate != sunxi_nand->clk_rate) {
 		clk_set_rate(nfc->mod_clk, sunxi_nand->clk_rate);
 		nfc->clk_rate = sunxi_nand->clk_rate;
 	}
 
-	writel(sunxi_nand->timing_ctl, nfc->regs + NFC_REG_TIMING_CTL);
-	writel(sunxi_nand->timing_cfg, nfc->regs + NFC_REG_TIMING_CFG);
-	writel(ctl, nfc->regs + NFC_REG_CTL);
+	pete_writel("drivers/mtd/nand/raw/sunxi_nand.c:441", sunxi_nand->timing_ctl, nfc->regs + NFC_REG_TIMING_CTL);
+	pete_writel("drivers/mtd/nand/raw/sunxi_nand.c:442", sunxi_nand->timing_cfg, nfc->regs + NFC_REG_TIMING_CFG);
+	pete_writel("drivers/mtd/nand/raw/sunxi_nand.c:443", ctl, nfc->regs + NFC_REG_CTL);
 }
 
 static void sunxi_nfc_read_buf(struct nand_chip *nand, uint8_t *buf, int len)
@@ -461,9 +461,9 @@ static void sunxi_nfc_read_buf(struct nand_chip *nand, uint8_t *buf, int len)
 		if (ret)
 			break;
 
-		writel(cnt, nfc->regs + NFC_REG_CNT);
+		pete_writel("drivers/mtd/nand/raw/sunxi_nand.c:464", cnt, nfc->regs + NFC_REG_CNT);
 		tmp = NFC_DATA_TRANS | NFC_DATA_SWAP_METHOD;
-		writel(tmp, nfc->regs + NFC_REG_CMD);
+		pete_writel("drivers/mtd/nand/raw/sunxi_nand.c:466", tmp, nfc->regs + NFC_REG_CMD);
 
 		/* Arbitrary limit for polling mode */
 		if (cnt < 64)
@@ -499,11 +499,11 @@ static void sunxi_nfc_write_buf(struct nand_chip *nand, const uint8_t *buf,
 		if (ret)
 			break;
 
-		writel(cnt, nfc->regs + NFC_REG_CNT);
+		pete_writel("drivers/mtd/nand/raw/sunxi_nand.c:502", cnt, nfc->regs + NFC_REG_CNT);
 		memcpy_toio(nfc->regs + NFC_RAM0_BASE, buf + offs, cnt);
 		tmp = NFC_DATA_TRANS | NFC_DATA_SWAP_METHOD |
 		      NFC_ACCESS_DIR;
-		writel(tmp, nfc->regs + NFC_REG_CMD);
+		pete_writel("drivers/mtd/nand/raw/sunxi_nand.c:506", tmp, nfc->regs + NFC_REG_CMD);
 
 		/* Arbitrary limit for polling mode */
 		if (cnt < 64)
@@ -623,16 +623,16 @@ static void sunxi_nfc_randomizer_config(struct nand_chip *nand, int page,
 					bool ecc)
 {
 	struct sunxi_nfc *nfc = to_sunxi_nfc(nand->controller);
-	u32 ecc_ctl = readl(nfc->regs + NFC_REG_ECC_CTL);
+	u32 ecc_ctl = pete_readl("drivers/mtd/nand/raw/sunxi_nand.c:626", nfc->regs + NFC_REG_ECC_CTL);
 	u16 state;
 
 	if (!(nand->options & NAND_NEED_SCRAMBLING))
 		return;
 
-	ecc_ctl = readl(nfc->regs + NFC_REG_ECC_CTL);
+	ecc_ctl = pete_readl("drivers/mtd/nand/raw/sunxi_nand.c:632", nfc->regs + NFC_REG_ECC_CTL);
 	state = sunxi_nfc_randomizer_state(nand, page, ecc);
-	ecc_ctl = readl(nfc->regs + NFC_REG_ECC_CTL) & ~NFC_RANDOM_SEED_MSK;
-	writel(ecc_ctl | NFC_RANDOM_SEED(state), nfc->regs + NFC_REG_ECC_CTL);
+	ecc_ctl = pete_readl("drivers/mtd/nand/raw/sunxi_nand.c:634", nfc->regs + NFC_REG_ECC_CTL) & ~NFC_RANDOM_SEED_MSK;
+	pete_writel("drivers/mtd/nand/raw/sunxi_nand.c:635", ecc_ctl | NFC_RANDOM_SEED(state), nfc->regs + NFC_REG_ECC_CTL);
 }
 
 static void sunxi_nfc_randomizer_enable(struct nand_chip *nand)
@@ -642,7 +642,7 @@ static void sunxi_nfc_randomizer_enable(struct nand_chip *nand)
 	if (!(nand->options & NAND_NEED_SCRAMBLING))
 		return;
 
-	writel(readl(nfc->regs + NFC_REG_ECC_CTL) | NFC_RANDOM_EN,
+	pete_writel("drivers/mtd/nand/raw/sunxi_nand.c:645", pete_readl("drivers/mtd/nand/raw/sunxi_nand.c:645", nfc->regs + NFC_REG_ECC_CTL) | NFC_RANDOM_EN,
 	       nfc->regs + NFC_REG_ECC_CTL);
 }
 
@@ -653,7 +653,7 @@ static void sunxi_nfc_randomizer_disable(struct nand_chip *nand)
 	if (!(nand->options & NAND_NEED_SCRAMBLING))
 		return;
 
-	writel(readl(nfc->regs + NFC_REG_ECC_CTL) & ~NFC_RANDOM_EN,
+	pete_writel("drivers/mtd/nand/raw/sunxi_nand.c:656", pete_readl("drivers/mtd/nand/raw/sunxi_nand.c:656", nfc->regs + NFC_REG_ECC_CTL) & ~NFC_RANDOM_EN,
 	       nfc->regs + NFC_REG_ECC_CTL);
 }
 
@@ -689,14 +689,14 @@ static void sunxi_nfc_hw_ecc_enable(struct nand_chip *nand)
 	struct sunxi_nand_chip *sunxi_nand = to_sunxi_nand(nand);
 	struct sunxi_nfc *nfc = to_sunxi_nfc(nand->controller);
 
-	writel(sunxi_nand->ecc.ecc_ctl, nfc->regs + NFC_REG_ECC_CTL);
+	pete_writel("drivers/mtd/nand/raw/sunxi_nand.c:692", sunxi_nand->ecc.ecc_ctl, nfc->regs + NFC_REG_ECC_CTL);
 }
 
 static void sunxi_nfc_hw_ecc_disable(struct nand_chip *nand)
 {
 	struct sunxi_nfc *nfc = to_sunxi_nfc(nand->controller);
 
-	writel(0, nfc->regs + NFC_REG_ECC_CTL);
+	pete_writel("drivers/mtd/nand/raw/sunxi_nand.c:699", 0, nfc->regs + NFC_REG_ECC_CTL);
 }
 
 static inline void sunxi_nfc_user_data_to_buf(u32 user_data, u8 *buf)
@@ -717,7 +717,7 @@ static void sunxi_nfc_hw_ecc_get_prot_oob_bytes(struct nand_chip *nand, u8 *oob,
 {
 	struct sunxi_nfc *nfc = to_sunxi_nfc(nand->controller);
 
-	sunxi_nfc_user_data_to_buf(readl(nfc->regs + NFC_REG_USER_DATA(step)),
+	sunxi_nfc_user_data_to_buf(pete_readl("drivers/mtd/nand/raw/sunxi_nand.c:720", nfc->regs + NFC_REG_USER_DATA(step)),
 				   oob);
 
 	/* De-randomize the Bad Block Marker. */
@@ -739,7 +739,7 @@ static void sunxi_nfc_hw_ecc_set_prot_oob_bytes(struct nand_chip *nand,
 		oob = user_data;
 	}
 
-	writel(sunxi_nfc_buf_to_user_data(oob),
+	pete_writel("drivers/mtd/nand/raw/sunxi_nand.c:742", sunxi_nfc_buf_to_user_data(oob),
 	       nfc->regs + NFC_REG_USER_DATA(step));
 }
 
@@ -771,7 +771,7 @@ static int sunxi_nfc_hw_ecc_correct(struct nand_chip *nand, u8 *data, u8 *oob,
 	if (status & NFC_ECC_PAT_FOUND(step)) {
 		u8 pattern;
 
-		if (unlikely(!(readl(nfc->regs + NFC_REG_PAT_ID) & 0x1))) {
+		if (unlikely(!(pete_readl("drivers/mtd/nand/raw/sunxi_nand.c:774", nfc->regs + NFC_REG_PAT_ID) & 0x1))) {
 			pattern = 0x0;
 		} else {
 			pattern = 0xff;
@@ -787,7 +787,7 @@ static int sunxi_nfc_hw_ecc_correct(struct nand_chip *nand, u8 *data, u8 *oob,
 		return 0;
 	}
 
-	tmp = readl(nfc->regs + NFC_REG_ECC_ERR_CNT(step));
+	tmp = pete_readl("drivers/mtd/nand/raw/sunxi_nand.c:790", nfc->regs + NFC_REG_ECC_ERR_CNT(step));
 
 	return NFC_ECC_ERR_CNT(step, tmp);
 }
@@ -818,7 +818,7 @@ static int sunxi_nfc_hw_ecc_read_chunk(struct nand_chip *nand,
 		return ret;
 
 	sunxi_nfc_randomizer_enable(nand);
-	writel(NFC_DATA_TRANS | NFC_DATA_SWAP_METHOD | NFC_ECC_OP,
+	pete_writel("drivers/mtd/nand/raw/sunxi_nand.c:821", NFC_DATA_TRANS | NFC_DATA_SWAP_METHOD | NFC_ECC_OP,
 	       nfc->regs + NFC_REG_CMD);
 
 	ret = sunxi_nfc_wait_events(nfc, NFC_CMD_INT_FLAG, false, 0);
@@ -829,7 +829,7 @@ static int sunxi_nfc_hw_ecc_read_chunk(struct nand_chip *nand,
 	*cur_off = oob_off + ecc->bytes + 4;
 
 	ret = sunxi_nfc_hw_ecc_correct(nand, data, oob_required ? oob : NULL, 0,
-				       readl(nfc->regs + NFC_REG_ECC_ST),
+				       pete_readl("drivers/mtd/nand/raw/sunxi_nand.c:832", nfc->regs + NFC_REG_ECC_ST),
 				       &erased);
 	if (erased)
 		return 1;
@@ -925,7 +925,7 @@ static int sunxi_nfc_hw_ecc_read_chunks_dma(struct nand_chip *nand, uint8_t *buf
 	sunxi_nfc_randomizer_config(nand, page, false);
 	sunxi_nfc_randomizer_enable(nand);
 
-	writel((NAND_CMD_RNDOUTSTART << 16) | (NAND_CMD_RNDOUT << 8) |
+	pete_writel("drivers/mtd/nand/raw/sunxi_nand.c:928", (NAND_CMD_RNDOUTSTART << 16) | (NAND_CMD_RNDOUT << 8) |
 	       NAND_CMD_READSTART, nfc->regs + NFC_REG_RCMD_SET);
 
 	wait = NFC_CMD_INT_FLAG;
@@ -935,7 +935,7 @@ static int sunxi_nfc_hw_ecc_read_chunks_dma(struct nand_chip *nand, uint8_t *buf
 	else
 		dma_async_issue_pending(nfc->dmac);
 
-	writel(NFC_PAGE_OP | NFC_DATA_SWAP_METHOD | NFC_DATA_TRANS,
+	pete_writel("drivers/mtd/nand/raw/sunxi_nand.c:938", NFC_PAGE_OP | NFC_DATA_SWAP_METHOD | NFC_DATA_TRANS,
 	       nfc->regs + NFC_REG_CMD);
 
 	ret = sunxi_nfc_wait_events(nfc, wait, false, 0);
@@ -950,7 +950,7 @@ static int sunxi_nfc_hw_ecc_read_chunks_dma(struct nand_chip *nand, uint8_t *buf
 	if (ret)
 		return ret;
 
-	status = readl(nfc->regs + NFC_REG_ECC_ST);
+	status = pete_readl("drivers/mtd/nand/raw/sunxi_nand.c:953", nfc->regs + NFC_REG_ECC_ST);
 
 	for (i = 0; i < nchunks; i++) {
 		int data_off = i * ecc->size;
@@ -1052,7 +1052,7 @@ static int sunxi_nfc_hw_ecc_write_chunk(struct nand_chip *nand,
 	sunxi_nfc_randomizer_enable(nand);
 	sunxi_nfc_hw_ecc_set_prot_oob_bytes(nand, oob, 0, bbm, page);
 
-	writel(NFC_DATA_TRANS | NFC_DATA_SWAP_METHOD |
+	pete_writel("drivers/mtd/nand/raw/sunxi_nand.c:1055", NFC_DATA_TRANS | NFC_DATA_SWAP_METHOD |
 	       NFC_ACCESS_DIR | NFC_ECC_OP,
 	       nfc->regs + NFC_REG_CMD);
 
@@ -1306,7 +1306,7 @@ static int sunxi_nfc_hw_ecc_write_page_dma(struct nand_chip *nand,
 	sunxi_nfc_randomizer_config(nand, page, false);
 	sunxi_nfc_randomizer_enable(nand);
 
-	writel((NAND_CMD_RNDIN << 8) | NAND_CMD_PAGEPROG,
+	pete_writel("drivers/mtd/nand/raw/sunxi_nand.c:1309", (NAND_CMD_RNDIN << 8) | NAND_CMD_PAGEPROG,
 	       nfc->regs + NFC_REG_WCMD_SET);
 
 	wait = NFC_CMD_INT_FLAG;
@@ -1316,7 +1316,7 @@ static int sunxi_nfc_hw_ecc_write_page_dma(struct nand_chip *nand,
 	else
 		dma_async_issue_pending(nfc->dmac);
 
-	writel(NFC_PAGE_OP | NFC_DATA_SWAP_METHOD |
+	pete_writel("drivers/mtd/nand/raw/sunxi_nand.c:1319", NFC_PAGE_OP | NFC_DATA_SWAP_METHOD |
 	       NFC_DATA_TRANS | NFC_ACCESS_DIR,
 	       nfc->regs + NFC_REG_CMD);
 
@@ -1830,20 +1830,20 @@ static int sunxi_nfc_exec_subop(struct nand_chip *nand,
 		return ret;
 
 	if (cmd & NFC_SEND_ADR) {
-		writel(addrs[0], nfc->regs + NFC_REG_ADDR_LOW);
-		writel(addrs[1], nfc->regs + NFC_REG_ADDR_HIGH);
+		pete_writel("drivers/mtd/nand/raw/sunxi_nand.c:1833", addrs[0], nfc->regs + NFC_REG_ADDR_LOW);
+		pete_writel("drivers/mtd/nand/raw/sunxi_nand.c:1834", addrs[1], nfc->regs + NFC_REG_ADDR_HIGH);
 	}
 
 	if (cmd & NFC_SEND_CMD2)
-		writel(extcmd,
+		pete_writel("drivers/mtd/nand/raw/sunxi_nand.c:1838", extcmd,
 		       nfc->regs +
 		       (cmd & NFC_ACCESS_DIR ?
 			NFC_REG_WCMD_SET : NFC_REG_RCMD_SET));
 
 	if (cmd & NFC_DATA_TRANS)
-		writel(cnt, nfc->regs + NFC_REG_CNT);
+		pete_writel("drivers/mtd/nand/raw/sunxi_nand.c:1844", cnt, nfc->regs + NFC_REG_CNT);
 
-	writel(cmd, nfc->regs + NFC_REG_CMD);
+	pete_writel("drivers/mtd/nand/raw/sunxi_nand.c:1846", cmd, nfc->regs + NFC_REG_CMD);
 
 	ret = sunxi_nfc_wait_events(nfc, NFC_CMD_INT_FLAG,
 				    !(cmd & NFC_WAIT_FLAG) && cnt < 64,
@@ -2126,7 +2126,7 @@ static int sunxi_nfc_probe(struct platform_device *pdev)
 	if (ret)
 		goto out_ahb_reset_reassert;
 
-	writel(0, nfc->regs + NFC_REG_INT);
+	pete_writel("drivers/mtd/nand/raw/sunxi_nand.c:2129", 0, nfc->regs + NFC_REG_INT);
 	ret = devm_request_irq(dev, irq, sunxi_nfc_interrupt,
 			       0, "sunxi-nand", nfc);
 	if (ret)

@@ -406,13 +406,13 @@ static void sprd_dpu_init(struct sprd_dpu *dpu)
 	struct dpu_context *ctx = &dpu->ctx;
 	u32 int_mask = 0;
 
-	writel(0x00, ctx->base + REG_BG_COLOR);
-	writel(0x00, ctx->base + REG_MMU_EN);
-	writel(0x00, ctx->base + REG_MMU_PPN1);
-	writel(0xffff, ctx->base + REG_MMU_RANGE1);
-	writel(0x00, ctx->base + REG_MMU_PPN2);
-	writel(0xffff, ctx->base + REG_MMU_RANGE2);
-	writel(0x1ffff, ctx->base + REG_MMU_VPN_RANGE);
+	pete_writel("drivers/gpu/drm/sprd/sprd_dpu.c:409", 0x00, ctx->base + REG_BG_COLOR);
+	pete_writel("drivers/gpu/drm/sprd/sprd_dpu.c:410", 0x00, ctx->base + REG_MMU_EN);
+	pete_writel("drivers/gpu/drm/sprd/sprd_dpu.c:411", 0x00, ctx->base + REG_MMU_PPN1);
+	pete_writel("drivers/gpu/drm/sprd/sprd_dpu.c:412", 0xffff, ctx->base + REG_MMU_RANGE1);
+	pete_writel("drivers/gpu/drm/sprd/sprd_dpu.c:413", 0x00, ctx->base + REG_MMU_PPN2);
+	pete_writel("drivers/gpu/drm/sprd/sprd_dpu.c:414", 0xffff, ctx->base + REG_MMU_RANGE2);
+	pete_writel("drivers/gpu/drm/sprd/sprd_dpu.c:415", 0x1ffff, ctx->base + REG_MMU_VPN_RANGE);
 
 	if (ctx->if_type == SPRD_DPU_IF_DPI) {
 		/* use dpi as interface */
@@ -446,15 +446,15 @@ static void sprd_dpu_init(struct sprd_dpu *dpu)
 		int_mask |= BIT_DPU_INT_TE;
 	}
 
-	writel(int_mask, ctx->base + REG_DPU_INT_EN);
+	pete_writel("drivers/gpu/drm/sprd/sprd_dpu.c:449", int_mask, ctx->base + REG_DPU_INT_EN);
 }
 
 static void sprd_dpu_fini(struct sprd_dpu *dpu)
 {
 	struct dpu_context *ctx = &dpu->ctx;
 
-	writel(0x00, ctx->base + REG_DPU_INT_EN);
-	writel(0xff, ctx->base + REG_DPU_INT_CLR);
+	pete_writel("drivers/gpu/drm/sprd/sprd_dpu.c:456", 0x00, ctx->base + REG_DPU_INT_EN);
+	pete_writel("drivers/gpu/drm/sprd/sprd_dpu.c:457", 0xff, ctx->base + REG_DPU_INT_CLR);
 }
 
 static void sprd_dpi_init(struct sprd_dpu *dpu)
@@ -464,20 +464,20 @@ static void sprd_dpi_init(struct sprd_dpu *dpu)
 	u32 size;
 
 	size = (ctx->vm.vactive << 16) | ctx->vm.hactive;
-	writel(size, ctx->base + REG_PANEL_SIZE);
-	writel(size, ctx->base + REG_BLEND_SIZE);
+	pete_writel("drivers/gpu/drm/sprd/sprd_dpu.c:467", size, ctx->base + REG_PANEL_SIZE);
+	pete_writel("drivers/gpu/drm/sprd/sprd_dpu.c:468", size, ctx->base + REG_BLEND_SIZE);
 
 	if (ctx->if_type == SPRD_DPU_IF_DPI) {
 		/* set dpi timing */
 		reg_val = ctx->vm.hsync_len << 0 |
 			  ctx->vm.hback_porch << 8 |
 			  ctx->vm.hfront_porch << 20;
-		writel(reg_val, ctx->base + REG_DPI_H_TIMING);
+		pete_writel("drivers/gpu/drm/sprd/sprd_dpu.c:475", reg_val, ctx->base + REG_DPI_H_TIMING);
 
 		reg_val = ctx->vm.vsync_len << 0 |
 			  ctx->vm.vback_porch << 8 |
 			  ctx->vm.vfront_porch << 20;
-		writel(reg_val, ctx->base + REG_DPI_V_TIMING);
+		pete_writel("drivers/gpu/drm/sprd/sprd_dpu.c:480", reg_val, ctx->base + REG_DPI_V_TIMING);
 	}
 }
 
@@ -750,7 +750,7 @@ static irqreturn_t sprd_dpu_isr(int irq, void *data)
 	struct dpu_context *ctx = &dpu->ctx;
 	u32 reg_val, int_mask = 0;
 
-	reg_val = readl(ctx->base + REG_DPU_INT_STS);
+	reg_val = pete_readl("drivers/gpu/drm/sprd/sprd_dpu.c:753", ctx->base + REG_DPU_INT_STS);
 
 	/* disable err interrupt */
 	if (reg_val & BIT_DPU_INT_ERR) {
@@ -773,7 +773,7 @@ static irqreturn_t sprd_dpu_isr(int irq, void *data)
 	if (reg_val & BIT_DPU_INT_VSYNC)
 		drm_crtc_handle_vblank(&dpu->base);
 
-	writel(reg_val, ctx->base + REG_DPU_INT_CLR);
+	pete_writel("drivers/gpu/drm/sprd/sprd_dpu.c:776", reg_val, ctx->base + REG_DPU_INT_CLR);
 	dpu_reg_clr(ctx, REG_DPU_INT_EN, int_mask);
 
 	return IRQ_HANDLED;
@@ -804,8 +804,8 @@ static int sprd_dpu_context_init(struct sprd_dpu *dpu,
 		return ctx->irq;
 
 	/* disable and clear interrupts before register dpu IRQ. */
-	writel(0x00, ctx->base + REG_DPU_INT_EN);
-	writel(0xff, ctx->base + REG_DPU_INT_CLR);
+	pete_writel("drivers/gpu/drm/sprd/sprd_dpu.c:807", 0x00, ctx->base + REG_DPU_INT_EN);
+	pete_writel("drivers/gpu/drm/sprd/sprd_dpu.c:808", 0xff, ctx->base + REG_DPU_INT_CLR);
 
 	ret = devm_request_irq(dev, ctx->irq, sprd_dpu_isr,
 			       IRQF_TRIGGER_NONE, "DPU", dpu);

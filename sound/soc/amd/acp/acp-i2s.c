@@ -171,19 +171,19 @@ static int acp_i2s_hwparams(struct snd_pcm_substream *substream, struct snd_pcm_
 		adata->xfer_rx_resolution[dai->driver->id - 1] = xfer_resolution;
 	}
 
-	val = readl(adata->acp_base + reg_val);
+	val = pete_readl("sound/soc/amd/acp/acp-i2s.c:174", adata->acp_base + reg_val);
 	val &= ~ACP3x_ITER_IRER_SAMP_LEN_MASK;
 	val = val | (xfer_resolution  << 3);
-	writel(val, adata->acp_base + reg_val);
+	pete_writel("sound/soc/amd/acp/acp-i2s.c:177", val, adata->acp_base + reg_val);
 
 	if (adata->tdm_mode) {
-		val = readl(adata->acp_base + reg_val);
-		writel(val | BIT(1), adata->acp_base + reg_val);
+		val = pete_readl("sound/soc/amd/acp/acp-i2s.c:180", adata->acp_base + reg_val);
+		pete_writel("sound/soc/amd/acp/acp-i2s.c:181", val | BIT(1), adata->acp_base + reg_val);
 		if (substream->stream == SNDRV_PCM_STREAM_PLAYBACK)
 			tdm_fmt = adata->tdm_tx_fmt[dai->driver->id - 1];
 		else
 			tdm_fmt = adata->tdm_rx_fmt[dai->driver->id - 1];
-		writel(tdm_fmt, adata->acp_base + fmt_reg);
+		pete_writel("sound/soc/amd/acp/acp-i2s.c:186", tdm_fmt, adata->acp_base + fmt_reg);
 	}
 
 	if (rsrc->soc_mclk) {
@@ -322,12 +322,12 @@ static int acp_i2s_trigger(struct snd_pcm_substream *substream, int cmd, struct 
 				return -EINVAL;
 			}
 		}
-		writel(period_bytes, adata->acp_base + water_val);
-		writel(buf_size, adata->acp_base + buf_reg);
-		val = readl(adata->acp_base + reg_val);
+		pete_writel("sound/soc/amd/acp/acp-i2s.c:325", period_bytes, adata->acp_base + water_val);
+		pete_writel("sound/soc/amd/acp/acp-i2s.c:326", buf_size, adata->acp_base + buf_reg);
+		val = pete_readl("sound/soc/amd/acp/acp-i2s.c:327", adata->acp_base + reg_val);
 		val = val | BIT(0);
-		writel(val, adata->acp_base + reg_val);
-		writel(1, adata->acp_base + ier_val);
+		pete_writel("sound/soc/amd/acp/acp-i2s.c:329", val, adata->acp_base + reg_val);
+		pete_writel("sound/soc/amd/acp/acp-i2s.c:330", 1, adata->acp_base + ier_val);
 		if (rsrc->soc_mclk)
 			acp_set_i2s_clk(adata, dai->driver->id);
 		return 0;
@@ -366,19 +366,19 @@ static int acp_i2s_trigger(struct snd_pcm_substream *substream, int cmd, struct 
 				return -EINVAL;
 			}
 		}
-		val = readl(adata->acp_base + reg_val);
+		val = pete_readl("sound/soc/amd/acp/acp-i2s.c:369", adata->acp_base + reg_val);
 		val = val & ~BIT(0);
-		writel(val, adata->acp_base + reg_val);
+		pete_writel("sound/soc/amd/acp/acp-i2s.c:371", val, adata->acp_base + reg_val);
 
-		if (!(readl(adata->acp_base + ACP_BTTDM_ITER) & BIT(0)) &&
-		    !(readl(adata->acp_base + ACP_BTTDM_IRER) & BIT(0)))
-			writel(0, adata->acp_base + ACP_BTTDM_IER);
-		if (!(readl(adata->acp_base + ACP_I2STDM_ITER) & BIT(0)) &&
-		    !(readl(adata->acp_base + ACP_I2STDM_IRER) & BIT(0)))
-			writel(0, adata->acp_base + ACP_I2STDM_IER);
-		if (!(readl(adata->acp_base + ACP_HSTDM_ITER) & BIT(0)) &&
-		    !(readl(adata->acp_base + ACP_HSTDM_IRER) & BIT(0)))
-			writel(0, adata->acp_base + ACP_HSTDM_IER);
+		if (!(pete_readl("sound/soc/amd/acp/acp-i2s.c:373", adata->acp_base + ACP_BTTDM_ITER) & BIT(0)) &&
+		    !(pete_readl("sound/soc/amd/acp/acp-i2s.c:374", adata->acp_base + ACP_BTTDM_IRER) & BIT(0)))
+			pete_writel("sound/soc/amd/acp/acp-i2s.c:375", 0, adata->acp_base + ACP_BTTDM_IER);
+		if (!(pete_readl("sound/soc/amd/acp/acp-i2s.c:376", adata->acp_base + ACP_I2STDM_ITER) & BIT(0)) &&
+		    !(pete_readl("sound/soc/amd/acp/acp-i2s.c:377", adata->acp_base + ACP_I2STDM_IRER) & BIT(0)))
+			pete_writel("sound/soc/amd/acp/acp-i2s.c:378", 0, adata->acp_base + ACP_I2STDM_IER);
+		if (!(pete_readl("sound/soc/amd/acp/acp-i2s.c:379", adata->acp_base + ACP_HSTDM_ITER) & BIT(0)) &&
+		    !(pete_readl("sound/soc/amd/acp/acp-i2s.c:380", adata->acp_base + ACP_HSTDM_IRER) & BIT(0)))
+			pete_writel("sound/soc/amd/acp/acp-i2s.c:381", 0, adata->acp_base + ACP_HSTDM_IER);
 		return 0;
 	default:
 		return -EINVAL;
@@ -407,7 +407,7 @@ static int acp_i2s_prepare(struct snd_pcm_substream *substream, struct snd_soc_d
 			reg_fifo_size = ACP_I2S_TX_FIFOSIZE;
 
 			phy_addr = I2S_SP_TX_MEM_WINDOW_START + stream->reg_offset;
-			writel(phy_addr, adata->acp_base + ACP_I2S_TX_RINGBUFADDR);
+			pete_writel("sound/soc/amd/acp/acp-i2s.c:410", phy_addr, adata->acp_base + ACP_I2S_TX_RINGBUFADDR);
 		} else {
 			reg_dma_size = ACP_I2S_RX_DMA_SIZE;
 			acp_fifo_addr = rsrc->sram_pte_offset +
@@ -415,7 +415,7 @@ static int acp_i2s_prepare(struct snd_pcm_substream *substream, struct snd_soc_d
 			reg_fifo_addr = ACP_I2S_RX_FIFOADDR;
 			reg_fifo_size = ACP_I2S_RX_FIFOSIZE;
 			phy_addr = I2S_SP_RX_MEM_WINDOW_START + stream->reg_offset;
-			writel(phy_addr, adata->acp_base + ACP_I2S_RX_RINGBUFADDR);
+			pete_writel("sound/soc/amd/acp/acp-i2s.c:418", phy_addr, adata->acp_base + ACP_I2S_RX_RINGBUFADDR);
 		}
 		break;
 	case I2S_BT_INSTANCE:
@@ -427,7 +427,7 @@ static int acp_i2s_prepare(struct snd_pcm_substream *substream, struct snd_soc_d
 			reg_fifo_size = ACP_BT_TX_FIFOSIZE;
 
 			phy_addr = I2S_BT_TX_MEM_WINDOW_START + stream->reg_offset;
-			writel(phy_addr, adata->acp_base + ACP_BT_TX_RINGBUFADDR);
+			pete_writel("sound/soc/amd/acp/acp-i2s.c:430", phy_addr, adata->acp_base + ACP_BT_TX_RINGBUFADDR);
 		} else {
 			reg_dma_size = ACP_BT_RX_DMA_SIZE;
 			acp_fifo_addr = rsrc->sram_pte_offset +
@@ -436,7 +436,7 @@ static int acp_i2s_prepare(struct snd_pcm_substream *substream, struct snd_soc_d
 			reg_fifo_size = ACP_BT_RX_FIFOSIZE;
 
 			phy_addr = I2S_BT_TX_MEM_WINDOW_START + stream->reg_offset;
-			writel(phy_addr, adata->acp_base + ACP_BT_RX_RINGBUFADDR);
+			pete_writel("sound/soc/amd/acp/acp-i2s.c:439", phy_addr, adata->acp_base + ACP_BT_RX_RINGBUFADDR);
 		}
 		break;
 	case I2S_HS_INSTANCE:
@@ -448,7 +448,7 @@ static int acp_i2s_prepare(struct snd_pcm_substream *substream, struct snd_soc_d
 			reg_fifo_size = ACP_HS_TX_FIFOSIZE;
 
 			phy_addr = I2S_HS_TX_MEM_WINDOW_START + stream->reg_offset;
-			writel(phy_addr, adata->acp_base + ACP_HS_TX_RINGBUFADDR);
+			pete_writel("sound/soc/amd/acp/acp-i2s.c:451", phy_addr, adata->acp_base + ACP_HS_TX_RINGBUFADDR);
 		} else {
 			reg_dma_size = ACP_HS_RX_DMA_SIZE;
 			acp_fifo_addr = rsrc->sram_pte_offset +
@@ -457,7 +457,7 @@ static int acp_i2s_prepare(struct snd_pcm_substream *substream, struct snd_soc_d
 			reg_fifo_size = ACP_HS_RX_FIFOSIZE;
 
 			phy_addr = I2S_HS_RX_MEM_WINDOW_START + stream->reg_offset;
-			writel(phy_addr, adata->acp_base + ACP_HS_RX_RINGBUFADDR);
+			pete_writel("sound/soc/amd/acp/acp-i2s.c:460", phy_addr, adata->acp_base + ACP_HS_RX_RINGBUFADDR);
 		}
 		break;
 	default:
@@ -465,11 +465,11 @@ static int acp_i2s_prepare(struct snd_pcm_substream *substream, struct snd_soc_d
 		return -EINVAL;
 	}
 
-	writel(DMA_SIZE, adata->acp_base + reg_dma_size);
-	writel(acp_fifo_addr, adata->acp_base + reg_fifo_addr);
-	writel(FIFO_SIZE, adata->acp_base + reg_fifo_size);
+	pete_writel("sound/soc/amd/acp/acp-i2s.c:468", DMA_SIZE, adata->acp_base + reg_dma_size);
+	pete_writel("sound/soc/amd/acp/acp-i2s.c:469", acp_fifo_addr, adata->acp_base + reg_fifo_addr);
+	pete_writel("sound/soc/amd/acp/acp-i2s.c:470", FIFO_SIZE, adata->acp_base + reg_fifo_size);
 
-	ext_int_ctrl = readl(ACP_EXTERNAL_INTR_CNTL(adata, rsrc->irqp_used));
+	ext_int_ctrl = pete_readl("sound/soc/amd/acp/acp-i2s.c:472", ACP_EXTERNAL_INTR_CNTL(adata, rsrc->irqp_used));
 	ext_int_ctrl |= BIT(I2S_RX_THRESHOLD(rsrc->offset)) |
 			BIT(BT_RX_THRESHOLD(rsrc->offset)) |
 			BIT(I2S_TX_THRESHOLD(rsrc->offset)) |
@@ -477,7 +477,7 @@ static int acp_i2s_prepare(struct snd_pcm_substream *substream, struct snd_soc_d
 			BIT(HS_RX_THRESHOLD(rsrc->offset)) |
 			BIT(HS_TX_THRESHOLD(rsrc->offset));
 
-	writel(ext_int_ctrl, ACP_EXTERNAL_INTR_CNTL(adata, rsrc->irqp_used));
+	pete_writel("sound/soc/amd/acp/acp-i2s.c:480", ext_int_ctrl, ACP_EXTERNAL_INTR_CNTL(adata, rsrc->irqp_used));
 
 	return 0;
 }

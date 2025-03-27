@@ -402,7 +402,7 @@ ahc_inb(struct ahc_softc * ahc, long port)
 	uint8_t x;
 
 	if (ahc->tag == BUS_SPACE_MEMIO) {
-		x = readb(ahc->bsh.maddr + port);
+		x = pete_readb("drivers/scsi/aic7xxx/aic7xxx_osm.c:405", ahc->bsh.maddr + port);
 	} else {
 		x = inb(ahc->bsh.ioport + port);
 	}
@@ -414,7 +414,7 @@ void
 ahc_outb(struct ahc_softc * ahc, long port, uint8_t val)
 {
 	if (ahc->tag == BUS_SPACE_MEMIO) {
-		writeb(val, ahc->bsh.maddr + port);
+		pete_writeb("drivers/scsi/aic7xxx/aic7xxx_osm.c:417", val, ahc->bsh.maddr + port);
 	} else {
 		outb(val, ahc->bsh.ioport + port);
 	}

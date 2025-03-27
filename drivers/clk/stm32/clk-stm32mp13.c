@@ -1466,7 +1466,7 @@ static int stm32mp13_clock_is_provided_by_secure(void __iomem *base,
 
 		secf = &stm32mp13_security[sec_id];
 
-		return !!(readl(base + secf->offset) & BIT(secf->bit_idx));
+		return !!(pete_readl("drivers/clk/stm32/clk-stm32mp13.c:1469", base + secf->offset) & BIT(secf->bit_idx));
 	}
 
 	return 0;

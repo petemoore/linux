@@ -200,15 +200,15 @@ static void __plx_dma_stop(struct plx_dma_dev *plxdev)
 	unsigned long timeout = jiffies + msecs_to_jiffies(1000);
 	u32 val;
 
-	val = readl(plxdev->bar + PLX_REG_CTRL);
+	val = pete_readl("drivers/dma/plx_dma.c:203", plxdev->bar + PLX_REG_CTRL);
 	if (!(val & ~PLX_REG_CTRL_GRACEFUL_PAUSE))
 		return;
 
-	writel(PLX_REG_CTRL_RESET_VAL | PLX_REG_CTRL_GRACEFUL_PAUSE,
+	pete_writel("drivers/dma/plx_dma.c:207", PLX_REG_CTRL_RESET_VAL | PLX_REG_CTRL_GRACEFUL_PAUSE,
 	       plxdev->bar + PLX_REG_CTRL);
 
 	while (!time_after(jiffies, timeout)) {
-		val = readl(plxdev->bar + PLX_REG_CTRL);
+		val = pete_readl("drivers/dma/plx_dma.c:211", plxdev->bar + PLX_REG_CTRL);
 		if (val & PLX_REG_CTRL_GRACEFUL_PAUSE_DONE)
 			break;
 
@@ -219,13 +219,13 @@ static void __plx_dma_stop(struct plx_dma_dev *plxdev)
 		dev_err(plxdev->dma_dev.dev,
 			"Timeout waiting for graceful pause!\n");
 
-	writel(PLX_REG_CTRL_RESET_VAL | PLX_REG_CTRL_GRACEFUL_PAUSE,
+	pete_writel("drivers/dma/plx_dma.c:222", PLX_REG_CTRL_RESET_VAL | PLX_REG_CTRL_GRACEFUL_PAUSE,
 	       plxdev->bar + PLX_REG_CTRL);
 
-	writel(0, plxdev->bar + PLX_REG_DESC_RING_COUNT);
-	writel(0, plxdev->bar + PLX_REG_DESC_RING_ADDR);
-	writel(0, plxdev->bar + PLX_REG_DESC_RING_ADDR_HI);
-	writel(0, plxdev->bar + PLX_REG_DESC_RING_NEXT_ADDR);
+	pete_writel("drivers/dma/plx_dma.c:225", 0, plxdev->bar + PLX_REG_DESC_RING_COUNT);
+	pete_writel("drivers/dma/plx_dma.c:226", 0, plxdev->bar + PLX_REG_DESC_RING_ADDR);
+	pete_writel("drivers/dma/plx_dma.c:227", 0, plxdev->bar + PLX_REG_DESC_RING_ADDR_HI);
+	pete_writel("drivers/dma/plx_dma.c:228", 0, plxdev->bar + PLX_REG_DESC_RING_NEXT_ADDR);
 }
 
 static void plx_dma_stop(struct plx_dma_dev *plxdev)
@@ -350,7 +350,7 @@ static void plx_dma_issue_pending(struct dma_chan *chan)
 	 */
 	wmb();
 
-	writew(PLX_REG_CTRL_START_VAL, plxdev->bar + PLX_REG_CTRL);
+	pete_writew("drivers/dma/plx_dma.c:353", PLX_REG_CTRL_START_VAL, plxdev->bar + PLX_REG_CTRL);
 
 	rcu_read_unlock();
 }
@@ -360,7 +360,7 @@ static irqreturn_t plx_dma_isr(int irq, void *devid)
 	struct plx_dma_dev *plxdev = devid;
 	u32 status;
 
-	status = readw(plxdev->bar + PLX_REG_INTR_STATUS);
+	status = pete_readw("drivers/dma/plx_dma.c:363", plxdev->bar + PLX_REG_INTR_STATUS);
 
 	if (!status)
 		return IRQ_NONE;
@@ -368,7 +368,7 @@ static irqreturn_t plx_dma_isr(int irq, void *devid)
 	if (status & PLX_REG_INTR_STATUS_DESC_DONE && plxdev->ring_active)
 		tasklet_schedule(&plxdev->desc_task);
 
-	writew(status, plxdev->bar + PLX_REG_INTR_STATUS);
+	pete_writew("drivers/dma/plx_dma.c:371", status, plxdev->bar + PLX_REG_INTR_STATUS);
 
 	return IRQ_HANDLED;
 }
@@ -427,15 +427,15 @@ static int plx_dma_alloc_chan_resources(struct dma_chan *chan)
 		goto out_free_hw_ring;
 	}
 
-	writel(PLX_REG_CTRL_RESET_VAL, plxdev->bar + PLX_REG_CTRL);
-	writel(lower_32_bits(plxdev->hw_ring_dma),
+	pete_writel("drivers/dma/plx_dma.c:430", PLX_REG_CTRL_RESET_VAL, plxdev->bar + PLX_REG_CTRL);
+	pete_writel("drivers/dma/plx_dma.c:431", lower_32_bits(plxdev->hw_ring_dma),
 	       plxdev->bar + PLX_REG_DESC_RING_ADDR);
-	writel(upper_32_bits(plxdev->hw_ring_dma),
+	pete_writel("drivers/dma/plx_dma.c:433", upper_32_bits(plxdev->hw_ring_dma),
 	       plxdev->bar + PLX_REG_DESC_RING_ADDR_HI);
-	writel(lower_32_bits(plxdev->hw_ring_dma),
+	pete_writel("drivers/dma/plx_dma.c:435", lower_32_bits(plxdev->hw_ring_dma),
 	       plxdev->bar + PLX_REG_DESC_RING_NEXT_ADDR);
-	writel(PLX_DMA_RING_COUNT, plxdev->bar + PLX_REG_DESC_RING_COUNT);
-	writel(PLX_REG_PREF_LIMIT_PREF_FOUR, plxdev->bar + PLX_REG_PREF_LIMIT);
+	pete_writel("drivers/dma/plx_dma.c:437", PLX_DMA_RING_COUNT, plxdev->bar + PLX_REG_DESC_RING_COUNT);
+	pete_writel("drivers/dma/plx_dma.c:438", PLX_REG_PREF_LIMIT_PREF_FOUR, plxdev->bar + PLX_REG_PREF_LIMIT);
 
 	plxdev->ring_active = true;
 

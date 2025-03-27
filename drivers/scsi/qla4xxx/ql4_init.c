@@ -17,7 +17,7 @@ static void ql4xxx_set_mac_number(struct scsi_qla_host *ha)
 
 	/* Get the function number */
 	spin_lock_irqsave(&ha->hardware_lock, flags);
-	value = readw(&ha->reg->ctrl_status);
+	value = pete_readw("drivers/scsi/qla4xxx/ql4_init.c:20", &ha->reg->ctrl_status);
 	spin_unlock_irqrestore(&ha->hardware_lock, flags);
 
 	switch (value & ISP_CONTROL_FN_MASK) {
@@ -98,18 +98,18 @@ int qla4xxx_init_rings(struct scsi_qla_host *ha)
 	ha->response_ptr = &ha->response_ring[ha->response_out];
 
 	if (is_qla8022(ha)) {
-		writel(0,
+		pete_writel("drivers/scsi/qla4xxx/ql4_init.c:101", 0,
 		    (unsigned long  __iomem *)&ha->qla4_82xx_reg->req_q_out);
-		writel(0,
+		pete_writel("drivers/scsi/qla4xxx/ql4_init.c:103", 0,
 		    (unsigned long  __iomem *)&ha->qla4_82xx_reg->rsp_q_in);
-		writel(0,
+		pete_writel("drivers/scsi/qla4xxx/ql4_init.c:105", 0,
 		    (unsigned long  __iomem *)&ha->qla4_82xx_reg->rsp_q_out);
 	} else if (is_qla8032(ha) || is_qla8042(ha)) {
-		writel(0,
+		pete_writel("drivers/scsi/qla4xxx/ql4_init.c:108", 0,
 		       (unsigned long __iomem *)&ha->qla4_83xx_reg->req_q_in);
-		writel(0,
+		pete_writel("drivers/scsi/qla4xxx/ql4_init.c:110", 0,
 		       (unsigned long __iomem *)&ha->qla4_83xx_reg->rsp_q_in);
-		writel(0,
+		pete_writel("drivers/scsi/qla4xxx/ql4_init.c:112", 0,
 		       (unsigned long __iomem *)&ha->qla4_83xx_reg->rsp_q_out);
 	} else {
 		/*
@@ -123,9 +123,9 @@ int qla4xxx_init_rings(struct scsi_qla_host *ha)
 		ha->shadow_regs->rsp_q_in = cpu_to_le32(0);
 		wmb();
 
-		writel(0, &ha->reg->req_q_in);
-		writel(0, &ha->reg->rsp_q_out);
-		readl(&ha->reg->rsp_q_out);
+		pete_writel("drivers/scsi/qla4xxx/ql4_init.c:126", 0, &ha->reg->req_q_in);
+		pete_writel("drivers/scsi/qla4xxx/ql4_init.c:127", 0, &ha->reg->rsp_q_out);
+		pete_readl("drivers/scsi/qla4xxx/ql4_init.c:128", &ha->reg->rsp_q_out);
 	}
 
 	qla4xxx_init_response_q_entries(ha);
@@ -636,8 +636,8 @@ static int qla4xxx_config_nvram(struct scsi_qla_host *ha)
 		     ha->host_no, __func__, extHwConfig.Asuint32_t));
 
 	spin_lock_irqsave(&ha->hardware_lock, flags);
-	writel((0xFFFF << 16) | extHwConfig.Asuint32_t, isp_ext_hw_conf(ha));
-	readl(isp_ext_hw_conf(ha));
+	pete_writel("drivers/scsi/qla4xxx/ql4_init.c:639", (0xFFFF << 16) | extHwConfig.Asuint32_t, isp_ext_hw_conf(ha));
+	pete_readl("drivers/scsi/qla4xxx/ql4_init.c:640", isp_ext_hw_conf(ha));
 	spin_unlock_irqrestore(&ha->hardware_lock, flags);
 
 	ql4xxx_unlock_nvram(ha);
@@ -700,16 +700,16 @@ static int qla4xxx_start_firmware_from_flash(struct scsi_qla_host *ha)
 		     ha->host_no, __func__));
 
 	spin_lock_irqsave(&ha->hardware_lock, flags);
-	writel(jiffies, &ha->reg->mailbox[7]);
+	pete_writel("drivers/scsi/qla4xxx/ql4_init.c:703", jiffies, &ha->reg->mailbox[7]);
 	if (is_qla4022(ha) | is_qla4032(ha))
-		writel(set_rmask(NVR_WRITE_ENABLE),
+		pete_writel("drivers/scsi/qla4xxx/ql4_init.c:705", set_rmask(NVR_WRITE_ENABLE),
 		       &ha->reg->u1.isp4022.nvram);
 
-        writel(2, &ha->reg->mailbox[6]);
-        readl(&ha->reg->mailbox[6]);
+        pete_writel("drivers/scsi/qla4xxx/ql4_init.c:708", 2, &ha->reg->mailbox[6]);
+        pete_readl("drivers/scsi/qla4xxx/ql4_init.c:709", &ha->reg->mailbox[6]);
 
-	writel(set_rmask(CSR_BOOT_ENABLE), &ha->reg->ctrl_status);
-	readl(&ha->reg->ctrl_status);
+	pete_writel("drivers/scsi/qla4xxx/ql4_init.c:711", set_rmask(CSR_BOOT_ENABLE), &ha->reg->ctrl_status);
+	pete_readl("drivers/scsi/qla4xxx/ql4_init.c:712", &ha->reg->ctrl_status);
 	spin_unlock_irqrestore(&ha->hardware_lock, flags);
 
 	/* Wait for firmware to come UP. */
@@ -721,8 +721,8 @@ static int qla4xxx_start_firmware_from_flash(struct scsi_qla_host *ha)
 		uint32_t ctrl_status;
 
 		spin_lock_irqsave(&ha->hardware_lock, flags);
-		ctrl_status = readw(&ha->reg->ctrl_status);
-		mbox_status = readw(&ha->reg->mailbox[0]);
+		ctrl_status = pete_readw("drivers/scsi/qla4xxx/ql4_init.c:724", &ha->reg->ctrl_status);
+		mbox_status = pete_readw("drivers/scsi/qla4xxx/ql4_init.c:725", &ha->reg->mailbox[0]);
 		spin_unlock_irqrestore(&ha->hardware_lock, flags);
 
 		if (ctrl_status & set_rmask(CSR_SCSI_PROCESSOR_INTR))
@@ -742,9 +742,9 @@ static int qla4xxx_start_firmware_from_flash(struct scsi_qla_host *ha)
 			     ha->host_no, __func__));
 
 		spin_lock_irqsave(&ha->hardware_lock, flags);
-		writel(set_rmask(CSR_SCSI_PROCESSOR_INTR),
+		pete_writel("drivers/scsi/qla4xxx/ql4_init.c:745", set_rmask(CSR_SCSI_PROCESSOR_INTR),
 		       &ha->reg->ctrl_status);
-		readl(&ha->reg->ctrl_status);
+		pete_readl("drivers/scsi/qla4xxx/ql4_init.c:747", &ha->reg->ctrl_status);
 		spin_unlock_irqrestore(&ha->hardware_lock, flags);
 
 		status = QLA_SUCCESS;
@@ -804,17 +804,17 @@ int qla4xxx_start_firmware(struct scsi_qla_host *ha)
 	spin_lock_irqsave(&ha->hardware_lock, flags);
 
 	DEBUG2(printk("scsi%ld: %s: port_ctrl	= 0x%08X\n", ha->host_no,
-		      __func__, readw(isp_port_ctrl(ha))));
+		      __func__, pete_readw("drivers/scsi/qla4xxx/ql4_init.c:807", isp_port_ctrl(ha))));
 	DEBUG(printk("scsi%ld: %s: port_status = 0x%08X\n", ha->host_no,
-		     __func__, readw(isp_port_status(ha))));
+		     __func__, pete_readw("drivers/scsi/qla4xxx/ql4_init.c:809", isp_port_status(ha))));
 
 	/* Is Hardware already initialized? */
-	if ((readw(isp_port_ctrl(ha)) & 0x8000) != 0) {
+	if ((pete_readw("drivers/scsi/qla4xxx/ql4_init.c:812", isp_port_ctrl(ha)) & 0x8000) != 0) {
 		DEBUG(printk("scsi%ld: %s: Hardware has already been "
 			     "initialized\n", ha->host_no, __func__));
 
 		/* Receive firmware boot acknowledgement */
-		mbox_status = readw(&ha->reg->mailbox[0]);
+		mbox_status = pete_readw("drivers/scsi/qla4xxx/ql4_init.c:817", &ha->reg->mailbox[0]);
 
 		DEBUG2(printk("scsi%ld: %s: H/W Config complete - mbox[0]= "
 			      "0x%x\n", ha->host_no, __func__, mbox_status));
@@ -825,12 +825,12 @@ int qla4xxx_start_firmware(struct scsi_qla_host *ha)
 			config_chip = 1;
 			soft_reset = 0;
 		} else {
-			writel(set_rmask(CSR_SCSI_PROCESSOR_INTR),
+			pete_writel("drivers/scsi/qla4xxx/ql4_init.c:828", set_rmask(CSR_SCSI_PROCESSOR_INTR),
 			       &ha->reg->ctrl_status);
-			readl(&ha->reg->ctrl_status);
-			writel(set_rmask(CSR_SCSI_COMPLETION_INTR),
+			pete_readl("drivers/scsi/qla4xxx/ql4_init.c:830", &ha->reg->ctrl_status);
+			pete_writel("drivers/scsi/qla4xxx/ql4_init.c:831", set_rmask(CSR_SCSI_COMPLETION_INTR),
 			       &ha->reg->ctrl_status);
-			readl(&ha->reg->ctrl_status);
+			pete_readl("drivers/scsi/qla4xxx/ql4_init.c:833", &ha->reg->ctrl_status);
 			spin_unlock_irqrestore(&ha->hardware_lock, flags);
 			if (qla4xxx_get_firmware_state(ha) == QLA_SUCCESS) {
 				DEBUG2(printk("scsi%ld: %s: Get firmware "

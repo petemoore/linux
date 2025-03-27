@@ -76,7 +76,7 @@ static void liointc_chained_handle_irq(struct irq_desc *desc)
 
 	chained_irq_enter(chip, desc);
 
-	pending = readl(handler->priv->core_isr[core]);
+	pending = pete_readl("drivers/irqchip/irq-loongson-liointc.c:79", handler->priv->core_isr[core]);
 
 	if (!pending) {
 		/* Always blame LPC IRQ if we have that bug */
@@ -103,10 +103,10 @@ static void liointc_set_bit(struct irq_chip_generic *gc,
 				u32 mask, bool set)
 {
 	if (set)
-		writel(readl(gc->reg_base + offset) | mask,
+		pete_writel("drivers/irqchip/irq-loongson-liointc.c:106", pete_readl("drivers/irqchip/irq-loongson-liointc.c:106", gc->reg_base + offset) | mask,
 				gc->reg_base + offset);
 	else
-		writel(readl(gc->reg_base + offset) & ~mask,
+		pete_writel("drivers/irqchip/irq-loongson-liointc.c:109", pete_readl("drivers/irqchip/irq-loongson-liointc.c:109", gc->reg_base + offset) & ~mask,
 				gc->reg_base + offset);
 }
 
@@ -148,8 +148,8 @@ static void liointc_suspend(struct irq_chip_generic *gc)
 {
 	struct liointc_priv *priv = gc->private;
 
-	priv->int_pol = readl(gc->reg_base + LIOINTC_REG_INTC_POL);
-	priv->int_edge = readl(gc->reg_base + LIOINTC_REG_INTC_EDGE);
+	priv->int_pol = pete_readl("drivers/irqchip/irq-loongson-liointc.c:151", gc->reg_base + LIOINTC_REG_INTC_POL);
+	priv->int_edge = pete_readl("drivers/irqchip/irq-loongson-liointc.c:152", gc->reg_base + LIOINTC_REG_INTC_EDGE);
 }
 
 static void liointc_resume(struct irq_chip_generic *gc)
@@ -160,14 +160,14 @@ static void liointc_resume(struct irq_chip_generic *gc)
 
 	irq_gc_lock_irqsave(gc, flags);
 	/* Disable all at first */
-	writel(0xffffffff, gc->reg_base + LIOINTC_REG_INTC_DISABLE);
+	pete_writel("drivers/irqchip/irq-loongson-liointc.c:163", 0xffffffff, gc->reg_base + LIOINTC_REG_INTC_DISABLE);
 	/* Restore map cache */
 	for (i = 0; i < LIOINTC_CHIP_IRQ; i++)
-		writeb(priv->map_cache[i], gc->reg_base + i);
-	writel(priv->int_pol, gc->reg_base + LIOINTC_REG_INTC_POL);
-	writel(priv->int_edge, gc->reg_base + LIOINTC_REG_INTC_EDGE);
+		pete_writeb("drivers/irqchip/irq-loongson-liointc.c:166", priv->map_cache[i], gc->reg_base + i);
+	pete_writel("drivers/irqchip/irq-loongson-liointc.c:167", priv->int_pol, gc->reg_base + LIOINTC_REG_INTC_POL);
+	pete_writel("drivers/irqchip/irq-loongson-liointc.c:168", priv->int_edge, gc->reg_base + LIOINTC_REG_INTC_EDGE);
 	/* Restore mask cache */
-	writel(gc->mask_cache, gc->reg_base + LIOINTC_REG_INTC_ENABLE);
+	pete_writel("drivers/irqchip/irq-loongson-liointc.c:170", gc->mask_cache, gc->reg_base + LIOINTC_REG_INTC_ENABLE);
 	irq_gc_unlock_irqrestore(gc, flags);
 }
 
@@ -259,9 +259,9 @@ static int liointc_init(phys_addr_t addr, unsigned long size, int revision,
 
 
 	/* Disable all IRQs */
-	writel(0xffffffff, base + LIOINTC_REG_INTC_DISABLE);
+	pete_writel("drivers/irqchip/irq-loongson-liointc.c:262", 0xffffffff, base + LIOINTC_REG_INTC_DISABLE);
 	/* Set to level triggered */
-	writel(0x0, base + LIOINTC_REG_INTC_EDGE);
+	pete_writel("drivers/irqchip/irq-loongson-liointc.c:264", 0x0, base + LIOINTC_REG_INTC_EDGE);
 
 	/* Generate parent INT part of map cache */
 	for (i = 0; i < LIOINTC_NUM_PARENT; i++) {
@@ -278,7 +278,7 @@ static int liointc_init(phys_addr_t addr, unsigned long size, int revision,
 	for (i = 0; i < LIOINTC_CHIP_IRQ; i++) {
 		/* Generate core part of map cache */
 		priv->map_cache[i] |= BIT(loongson_sysconf.boot_cpu_id);
-		writeb(priv->map_cache[i], base + i);
+		pete_writeb("drivers/irqchip/irq-loongson-liointc.c:281", priv->map_cache[i], base + i);
 	}
 
 	gc = irq_get_domain_generic_chip(domain, 0);

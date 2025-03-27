@@ -15,12 +15,12 @@
 
 static inline u32 mxc_isi_read(struct mxc_isi_pipe *pipe, u32 reg)
 {
-	return readl(pipe->regs + reg);
+	return pete_readl("drivers/media/platform/nxp/imx8-isi/imx8-isi-hw.c:18", pipe->regs + reg);
 }
 
 static inline void mxc_isi_write(struct mxc_isi_pipe *pipe, u32 reg, u32 val)
 {
-	writel(val, pipe->regs + reg);
+	pete_writel("drivers/media/platform/nxp/imx8-isi/imx8-isi-hw.c:23", val, pipe->regs + reg);
 }
 
 /* -----------------------------------------------------------------------------

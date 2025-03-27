@@ -39,7 +39,7 @@ static int npcm_rng_init(struct hwrng *rng)
 {
 	struct npcm_rng *priv = to_npcm_rng(rng);
 
-	writel(priv->clkp | NPCM_RNG_ENABLE, priv->base + NPCM_RNGCS_REG);
+	pete_writel("drivers/char/hw_random/npcm-rng.c:42", priv->clkp | NPCM_RNG_ENABLE, priv->base + NPCM_RNGCS_REG);
 
 	return 0;
 }
@@ -48,7 +48,7 @@ static void npcm_rng_cleanup(struct hwrng *rng)
 {
 	struct npcm_rng *priv = to_npcm_rng(rng);
 
-	writel(priv->clkp, priv->base + NPCM_RNGCS_REG);
+	pete_writel("drivers/char/hw_random/npcm-rng.c:51", priv->clkp, priv->base + NPCM_RNGCS_REG);
 }
 
 static int npcm_rng_read(struct hwrng *rng, void *buf, size_t max, bool wait)
@@ -68,12 +68,12 @@ static int npcm_rng_read(struct hwrng *rng, void *buf, size_t max, bool wait)
 					       NPCM_RNG_TIMEOUT_USEC))
 				break;
 		} else {
-			if ((readb(priv->base + NPCM_RNGCS_REG) &
+			if ((pete_readb("drivers/char/hw_random/npcm-rng.c:71", priv->base + NPCM_RNGCS_REG) &
 			    NPCM_RNG_DATA_VALID) == 0)
 				break;
 		}
 
-		*(u8 *)buf = readb(priv->base + NPCM_RNGD_REG);
+		*(u8 *)buf = pete_readb("drivers/char/hw_random/npcm-rng.c:76", priv->base + NPCM_RNGD_REG);
 		retval++;
 		buf++;
 		max--;
@@ -112,7 +112,7 @@ static int npcm_rng_probe(struct platform_device *pdev)
 	priv->rng.priv = (unsigned long)&pdev->dev;
 	priv->clkp = (u32)(uintptr_t)of_device_get_match_data(&pdev->dev);
 
-	writel(NPCM_RNG_M1ROSEL, priv->base + NPCM_RNGMODE_REG);
+	pete_writel("drivers/char/hw_random/npcm-rng.c:115", NPCM_RNG_M1ROSEL, priv->base + NPCM_RNGMODE_REG);
 
 	ret = devm_hwrng_register(&pdev->dev, &priv->rng);
 	if (ret) {

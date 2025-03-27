@@ -32,8 +32,8 @@
 #include <linux/delay.h>
 #include "psb_drv.h"
 
-#define HDMI_READ(reg)		readl(hdmi_dev->regs + (reg))
-#define HDMI_WRITE(reg, val)	writel(val, hdmi_dev->regs + (reg))
+#define HDMI_READ(reg)		pete_readl("drivers/gpu/drm/gma500/oaktrail_hdmi_i2c.c:35", hdmi_dev->regs + (reg))
+#define HDMI_WRITE(reg, val)	pete_writel("drivers/gpu/drm/gma500/oaktrail_hdmi_i2c.c:36", val, hdmi_dev->regs + (reg))
 
 #define HDMI_HCR	0x1000
 #define HCR_DETECT_HDP		(1 << 6)
@@ -261,10 +261,10 @@ static void oaktrail_hdmi_i2c_gpio_fix(void)
 		return;
 	}
 
-	temp = readl(base + 0x44);
+	temp = pete_readl("drivers/gpu/drm/gma500/oaktrail_hdmi_i2c.c:264", base + 0x44);
 	DRM_DEBUG_DRIVER("old gpio val %x\n", temp);
-	writel((temp | 0x00000a00), (base +  0x44));
-	temp = readl(base + 0x44);
+	pete_writel("drivers/gpu/drm/gma500/oaktrail_hdmi_i2c.c:266", (temp | 0x00000a00), (base +  0x44));
+	temp = pete_readl("drivers/gpu/drm/gma500/oaktrail_hdmi_i2c.c:267", base + 0x44);
 	DRM_DEBUG_DRIVER("new gpio val %x\n", temp);
 
 	iounmap(base);

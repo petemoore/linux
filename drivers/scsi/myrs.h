@@ -1032,8 +1032,8 @@ void dma_addr_writeql(dma_addr_t addr, void __iomem *write_address)
 
 	u.wq = addr;
 
-	writel(u.wl[0], write_address);
-	writel(u.wl[1], write_address + 4);
+	pete_writel("drivers/scsi/myrs.h:1035", u.wl[0], write_address);
+	pete_writel("drivers/scsi/myrs.h:1036", u.wl[1], write_address + 4);
 }
 
 /*

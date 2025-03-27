@@ -45,7 +45,7 @@ static void au_write_buf(struct nand_chip *this, const void *buf,
 	int i;
 
 	for (i = 0; i < len; i++) {
-		writeb(p[i], ctx->base + MEM_STNAND_DATA);
+		pete_writeb("drivers/mtd/nand/raw/au1550nd.c:48", p[i], ctx->base + MEM_STNAND_DATA);
 		wmb(); /* drain writebuffer */
 	}
 }
@@ -66,7 +66,7 @@ static void au_read_buf(struct nand_chip *this, void *buf,
 	int i;
 
 	for (i = 0; i < len; i++) {
-		p[i] = readb(ctx->base + MEM_STNAND_DATA);
+		p[i] = pete_readb("drivers/mtd/nand/raw/au1550nd.c:69", ctx->base + MEM_STNAND_DATA);
 		wmb(); /* drain writebuffer */
 	}
 }
@@ -88,7 +88,7 @@ static void au_write_buf16(struct nand_chip *this, const void *buf,
 
 	len >>= 1;
 	for (i = 0; i < len; i++) {
-		writew(p[i], ctx->base + MEM_STNAND_DATA);
+		pete_writew("drivers/mtd/nand/raw/au1550nd.c:91", p[i], ctx->base + MEM_STNAND_DATA);
 		wmb(); /* drain writebuffer */
 	}
 }
@@ -109,7 +109,7 @@ static void au_read_buf16(struct nand_chip *this, void *buf, unsigned int len)
 
 	len >>= 1;
 	for (i = 0; i < len; i++) {
-		p[i] = readw(ctx->base + MEM_STNAND_DATA);
+		p[i] = pete_readw("drivers/mtd/nand/raw/au1550nd.c:112", ctx->base + MEM_STNAND_DATA);
 		wmb(); /* drain writebuffer */
 	}
 }
@@ -159,7 +159,7 @@ static int au1550nd_exec_instr(struct nand_chip *this,
 
 	switch (instr->type) {
 	case NAND_OP_CMD_INSTR:
-		writeb(instr->ctx.cmd.opcode,
+		pete_writeb("drivers/mtd/nand/raw/au1550nd.c:162", instr->ctx.cmd.opcode,
 		       ctx->base + MEM_STNAND_CMD);
 		/* Drain the writebuffer */
 		wmb();
@@ -167,7 +167,7 @@ static int au1550nd_exec_instr(struct nand_chip *this,
 
 	case NAND_OP_ADDR_INSTR:
 		for (i = 0; i < instr->ctx.addr.naddrs; i++) {
-			writeb(instr->ctx.addr.addrs[i],
+			pete_writeb("drivers/mtd/nand/raw/au1550nd.c:170", instr->ctx.addr.addrs[i],
 			       ctx->base + MEM_STNAND_ADDR);
 			/* Drain the writebuffer */
 			wmb();

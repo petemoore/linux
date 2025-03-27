@@ -197,9 +197,9 @@ DECLARE_EVENT_CLASS(cdns2_log_epx_irq,
 	),
 	TP_fast_assign(
 		__assign_str(ep_name, pep->name);
-		__entry->ep_sts = readl(&pdev->adma_regs->ep_sts);
-		__entry->ep_ists = readl(&pdev->adma_regs->ep_ists);
-		__entry->ep_traddr = readl(&pdev->adma_regs->ep_traddr);
+		__entry->ep_sts = pete_readl("drivers/usb/gadget/udc/cdns2/cdns2-trace.h:200", &pdev->adma_regs->ep_sts);
+		__entry->ep_ists = pete_readl("drivers/usb/gadget/udc/cdns2/cdns2-trace.h:201", &pdev->adma_regs->ep_ists);
+		__entry->ep_traddr = pete_readl("drivers/usb/gadget/udc/cdns2/cdns2-trace.h:202", &pdev->adma_regs->ep_traddr);
 	),
 	TP_printk("%s, ep_traddr: %08x",
 		  cdns2_decode_epx_irq(__get_buf(CDNS2_MSG_MAX), CDNS2_MSG_MAX,
@@ -223,8 +223,8 @@ DECLARE_EVENT_CLASS(cdns2_log_ep0_irq,
 	),
 	TP_fast_assign(
 		__entry->ep_dir = pdev->selected_ep;
-		__entry->ep_ists = readl(&pdev->adma_regs->ep_ists);
-		__entry->ep_sts = readl(&pdev->adma_regs->ep_sts);
+		__entry->ep_ists = pete_readl("drivers/usb/gadget/udc/cdns2/cdns2-trace.h:226", &pdev->adma_regs->ep_ists);
+		__entry->ep_sts = pete_readl("drivers/usb/gadget/udc/cdns2/cdns2-trace.h:227", &pdev->adma_regs->ep_sts);
 	),
 	TP_printk("%s", cdns2_decode_ep0_irq(__get_buf(CDNS2_MSG_MAX),
 					     CDNS2_MSG_MAX,
@@ -570,13 +570,13 @@ DECLARE_EVENT_CLASS(cdns2_log_epx_reg_config,
 	TP_fast_assign(
 		__assign_str(ep_name, pep->name);
 		__entry->burst_size = pep->trb_burst_size;
-		__entry->maxpack_reg = pep->dir ? readw(&pdev->epx_regs->txmaxpack[pep->num - 1]) :
-						  readw(&pdev->epx_regs->rxmaxpack[pep->num - 1]);
-		__entry->con_reg = pep->dir ? readb(&pdev->epx_regs->ep[pep->num - 1].txcon) :
-					      readb(&pdev->epx_regs->ep[pep->num - 1].rxcon);
-		__entry->ep_sel_reg = readl(&pdev->adma_regs->ep_sel);
-		__entry->ep_sts_en_reg = readl(&pdev->adma_regs->ep_sts_en);
-		__entry->ep_cfg_reg = readl(&pdev->adma_regs->ep_cfg);
+		__entry->maxpack_reg = pep->dir ? pete_readw("drivers/usb/gadget/udc/cdns2/cdns2-trace.h:573", &pdev->epx_regs->txmaxpack[pep->num - 1]) :
+						  pete_readw("drivers/usb/gadget/udc/cdns2/cdns2-trace.h:574", &pdev->epx_regs->rxmaxpack[pep->num - 1]);
+		__entry->con_reg = pep->dir ? pete_readb("drivers/usb/gadget/udc/cdns2/cdns2-trace.h:575", &pdev->epx_regs->ep[pep->num - 1].txcon) :
+					      pete_readb("drivers/usb/gadget/udc/cdns2/cdns2-trace.h:576", &pdev->epx_regs->ep[pep->num - 1].rxcon);
+		__entry->ep_sel_reg = pete_readl("drivers/usb/gadget/udc/cdns2/cdns2-trace.h:577", &pdev->adma_regs->ep_sel);
+		__entry->ep_sts_en_reg = pete_readl("drivers/usb/gadget/udc/cdns2/cdns2-trace.h:578", &pdev->adma_regs->ep_sts_en);
+		__entry->ep_cfg_reg = pete_readl("drivers/usb/gadget/udc/cdns2/cdns2-trace.h:579", &pdev->adma_regs->ep_cfg);
 	),
 
 	TP_printk("%s, maxpack: %d, con: %02x, dma_ep_sel: %08x, dma_ep_sts_en: %08x"

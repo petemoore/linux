@@ -145,30 +145,30 @@ static void xhci_mtk_set_frame_interval(struct xhci_hcd_mtk *mtk)
 	if (!of_device_is_compatible(dev->of_node, "mediatek,mt8195-xhci"))
 		return;
 
-	value = readl(hcd->regs + HFCNTR_CFG);
+	value = pete_readl("drivers/usb/host/xhci-mtk.c:148", hcd->regs + HFCNTR_CFG);
 	value &= ~(ITP_DELTA_CLK_MASK | FRMCNT_LEV1_RANG_MASK);
 	value |= (ITP_DELTA_CLK | FRMCNT_LEV1_RANG);
-	writel(value, hcd->regs + HFCNTR_CFG);
+	pete_writel("drivers/usb/host/xhci-mtk.c:151", value, hcd->regs + HFCNTR_CFG);
 
-	value = readl(hcd->regs + LS_EOF_CFG);
+	value = pete_readl("drivers/usb/host/xhci-mtk.c:153", hcd->regs + LS_EOF_CFG);
 	value &= ~XSEOF_OFFSET_MASK;
 	value |= LSEOF_OFFSET;
-	writel(value, hcd->regs + LS_EOF_CFG);
+	pete_writel("drivers/usb/host/xhci-mtk.c:156", value, hcd->regs + LS_EOF_CFG);
 
-	value = readl(hcd->regs + FS_EOF_CFG);
+	value = pete_readl("drivers/usb/host/xhci-mtk.c:158", hcd->regs + FS_EOF_CFG);
 	value &= ~XSEOF_OFFSET_MASK;
 	value |= FSEOF_OFFSET;
-	writel(value, hcd->regs + FS_EOF_CFG);
+	pete_writel("drivers/usb/host/xhci-mtk.c:161", value, hcd->regs + FS_EOF_CFG);
 
-	value = readl(hcd->regs + SS_GEN1_EOF_CFG);
+	value = pete_readl("drivers/usb/host/xhci-mtk.c:163", hcd->regs + SS_GEN1_EOF_CFG);
 	value &= ~XSEOF_OFFSET_MASK;
 	value |= SSG1EOF_OFFSET;
-	writel(value, hcd->regs + SS_GEN1_EOF_CFG);
+	pete_writel("drivers/usb/host/xhci-mtk.c:166", value, hcd->regs + SS_GEN1_EOF_CFG);
 
-	value = readl(hcd->regs + SS_GEN2_EOF_CFG);
+	value = pete_readl("drivers/usb/host/xhci-mtk.c:168", hcd->regs + SS_GEN2_EOF_CFG);
 	value &= ~XSEOF_OFFSET_MASK;
 	value |= SSG2EOF_OFFSET;
-	writel(value, hcd->regs + SS_GEN2_EOF_CFG);
+	pete_writel("drivers/usb/host/xhci-mtk.c:171", value, hcd->regs + SS_GEN2_EOF_CFG);
 }
 
 /*
@@ -184,11 +184,11 @@ static void xhci_mtk_rxfifo_depth_set(struct xhci_hcd_mtk *mtk)
 	if (!mtk->rxfifo_depth)
 		return;
 
-	value = readl(hcd->regs + HSCH_CFG1);
+	value = pete_readl("drivers/usb/host/xhci-mtk.c:187", hcd->regs + HSCH_CFG1);
 	value &= ~SCH3_RXFIFO_DEPTH_MASK;
 	value |= FIELD_PREP(SCH3_RXFIFO_DEPTH_MASK,
 			    SCH_FIFO_TO_KB(mtk->rxfifo_depth) - 1);
-	writel(value, hcd->regs + HSCH_CFG1);
+	pete_writel("drivers/usb/host/xhci-mtk.c:191", value, hcd->regs + HSCH_CFG1);
 }
 
 static void xhci_mtk_init_quirk(struct xhci_hcd_mtk *mtk)
@@ -212,9 +212,9 @@ static int xhci_mtk_host_enable(struct xhci_hcd_mtk *mtk)
 		return 0;
 
 	/* power on host ip */
-	value = readl(&ippc->ip_pw_ctr1);
+	value = pete_readl("drivers/usb/host/xhci-mtk.c:215", &ippc->ip_pw_ctr1);
 	value &= ~CTRL1_IP_HOST_PDN;
-	writel(value, &ippc->ip_pw_ctr1);
+	pete_writel("drivers/usb/host/xhci-mtk.c:217", value, &ippc->ip_pw_ctr1);
 
 	/* power on and enable u3 ports except skipped ones */
 	for (i = 0; i < mtk->num_u3_ports; i++) {
@@ -223,10 +223,10 @@ static int xhci_mtk_host_enable(struct xhci_hcd_mtk *mtk)
 			continue;
 		}
 
-		value = readl(&ippc->u3_ctrl_p[i]);
+		value = pete_readl("drivers/usb/host/xhci-mtk.c:226", &ippc->u3_ctrl_p[i]);
 		value &= ~(CTRL_U3_PORT_PDN | CTRL_U3_PORT_DIS);
 		value |= CTRL_U3_PORT_HOST_SEL;
-		writel(value, &ippc->u3_ctrl_p[i]);
+		pete_writel("drivers/usb/host/xhci-mtk.c:229", value, &ippc->u3_ctrl_p[i]);
 	}
 
 	/* power on and enable all u2 ports except skipped ones */
@@ -234,10 +234,10 @@ static int xhci_mtk_host_enable(struct xhci_hcd_mtk *mtk)
 		if (BIT(i) & mtk->u2p_dis_msk)
 			continue;
 
-		value = readl(&ippc->u2_ctrl_p[i]);
+		value = pete_readl("drivers/usb/host/xhci-mtk.c:237", &ippc->u2_ctrl_p[i]);
 		value &= ~(CTRL_U2_PORT_PDN | CTRL_U2_PORT_DIS);
 		value |= CTRL_U2_PORT_HOST_SEL;
-		writel(value, &ippc->u2_ctrl_p[i]);
+		pete_writel("drivers/usb/host/xhci-mtk.c:240", value, &ippc->u2_ctrl_p[i]);
 	}
 
 	/*
@@ -275,9 +275,9 @@ static int xhci_mtk_host_disable(struct xhci_hcd_mtk *mtk)
 		if ((0x1 << i) & mtk->u3p_dis_msk)
 			continue;
 
-		value = readl(&ippc->u3_ctrl_p[i]);
+		value = pete_readl("drivers/usb/host/xhci-mtk.c:278", &ippc->u3_ctrl_p[i]);
 		value |= CTRL_U3_PORT_PDN;
-		writel(value, &ippc->u3_ctrl_p[i]);
+		pete_writel("drivers/usb/host/xhci-mtk.c:280", value, &ippc->u3_ctrl_p[i]);
 	}
 
 	/* power down all u2 ports except skipped ones */
@@ -285,15 +285,15 @@ static int xhci_mtk_host_disable(struct xhci_hcd_mtk *mtk)
 		if (BIT(i) & mtk->u2p_dis_msk)
 			continue;
 
-		value = readl(&ippc->u2_ctrl_p[i]);
+		value = pete_readl("drivers/usb/host/xhci-mtk.c:288", &ippc->u2_ctrl_p[i]);
 		value |= CTRL_U2_PORT_PDN;
-		writel(value, &ippc->u2_ctrl_p[i]);
+		pete_writel("drivers/usb/host/xhci-mtk.c:290", value, &ippc->u2_ctrl_p[i]);
 	}
 
 	/* power down host ip */
-	value = readl(&ippc->ip_pw_ctr1);
+	value = pete_readl("drivers/usb/host/xhci-mtk.c:294", &ippc->ip_pw_ctr1);
 	value |= CTRL1_IP_HOST_PDN;
-	writel(value, &ippc->ip_pw_ctr1);
+	pete_writel("drivers/usb/host/xhci-mtk.c:296", value, &ippc->ip_pw_ctr1);
 
 	/* wait for host ip to sleep */
 	ret = readl_poll_timeout(&ippc->ip_pw_sts1, value,
@@ -315,23 +315,23 @@ static int xhci_mtk_ssusb_config(struct xhci_hcd_mtk *mtk)
 		return 0;
 
 	/* reset whole ip */
-	value = readl(&ippc->ip_pw_ctr0);
+	value = pete_readl("drivers/usb/host/xhci-mtk.c:318", &ippc->ip_pw_ctr0);
 	value |= CTRL0_IP_SW_RST;
-	writel(value, &ippc->ip_pw_ctr0);
+	pete_writel("drivers/usb/host/xhci-mtk.c:320", value, &ippc->ip_pw_ctr0);
 	udelay(1);
-	value = readl(&ippc->ip_pw_ctr0);
+	value = pete_readl("drivers/usb/host/xhci-mtk.c:322", &ippc->ip_pw_ctr0);
 	value &= ~CTRL0_IP_SW_RST;
-	writel(value, &ippc->ip_pw_ctr0);
+	pete_writel("drivers/usb/host/xhci-mtk.c:324", value, &ippc->ip_pw_ctr0);
 
 	/*
 	 * device ip is default power-on in fact
 	 * power down device ip, otherwise ip-sleep will fail
 	 */
-	value = readl(&ippc->ip_pw_ctr2);
+	value = pete_readl("drivers/usb/host/xhci-mtk.c:330", &ippc->ip_pw_ctr2);
 	value |= CTRL2_IP_DEV_PDN;
-	writel(value, &ippc->ip_pw_ctr2);
+	pete_writel("drivers/usb/host/xhci-mtk.c:332", value, &ippc->ip_pw_ctr2);
 
-	value = readl(&ippc->ip_xhci_cap);
+	value = pete_readl("drivers/usb/host/xhci-mtk.c:334", &ippc->ip_xhci_cap);
 	mtk->num_u3_ports = CAP_U3_PORT_NUM(value);
 	mtk->num_u2_ports = CAP_U2_PORT_NUM(value);
 	dev_dbg(mtk->dev, "%s u2p:%d, u3p:%d\n", __func__,

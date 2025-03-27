@@ -109,7 +109,7 @@ static const struct of_device_id of_pmsu_table[] = {
 
 void mvebu_pmsu_set_cpu_boot_addr(int hw_cpu, void *boot_addr)
 {
-	writel(__pa_symbol(boot_addr), pmsu_mp_base +
+	pete_writel("arch/arm/mach-mvebu/pmsu.c:112", __pa_symbol(boot_addr), pmsu_mp_base +
 		PMSU_BOOT_ADDR_REDIRECT_OFFSET(hw_cpu));
 }
 
@@ -209,9 +209,9 @@ static void mvebu_v7_pmsu_enable_l2_powerdown_onidle(void)
 		return;
 
 	/* Enable L2 & Fabric powerdown in Deep-Idle mode - Fabric */
-	reg = readl(pmsu_mp_base + L2C_NFABRIC_PM_CTL);
+	reg = pete_readl("arch/arm/mach-mvebu/pmsu.c:212", pmsu_mp_base + L2C_NFABRIC_PM_CTL);
 	reg |= L2C_NFABRIC_PM_CTL_PWR_DOWN;
-	writel(reg, pmsu_mp_base + L2C_NFABRIC_PM_CTL);
+	pete_writel("arch/arm/mach-mvebu/pmsu.c:214", reg, pmsu_mp_base + L2C_NFABRIC_PM_CTL);
 }
 
 enum pmsu_idle_prepare_flags {
@@ -234,29 +234,29 @@ static int mvebu_v7_pmsu_idle_prepare(unsigned long flags)
 	 * IRQ and FIQ as wakeup events, set wait for snoop queue empty
 	 * indication and mask IRQ and FIQ from CPU
 	 */
-	reg = readl(pmsu_mp_base + PMSU_STATUS_AND_MASK(hw_cpu));
+	reg = pete_readl("arch/arm/mach-mvebu/pmsu.c:237", pmsu_mp_base + PMSU_STATUS_AND_MASK(hw_cpu));
 	reg |= PMSU_STATUS_AND_MASK_CPU_IDLE_WAIT    |
 	       PMSU_STATUS_AND_MASK_IRQ_WAKEUP       |
 	       PMSU_STATUS_AND_MASK_FIQ_WAKEUP       |
 	       PMSU_STATUS_AND_MASK_SNP_Q_EMPTY_WAIT |
 	       PMSU_STATUS_AND_MASK_IRQ_MASK         |
 	       PMSU_STATUS_AND_MASK_FIQ_MASK;
-	writel(reg, pmsu_mp_base + PMSU_STATUS_AND_MASK(hw_cpu));
+	pete_writel("arch/arm/mach-mvebu/pmsu.c:244", reg, pmsu_mp_base + PMSU_STATUS_AND_MASK(hw_cpu));
 
-	reg = readl(pmsu_mp_base + PMSU_CONTROL_AND_CONFIG(hw_cpu));
+	reg = pete_readl("arch/arm/mach-mvebu/pmsu.c:246", pmsu_mp_base + PMSU_CONTROL_AND_CONFIG(hw_cpu));
 	/* ask HW to power down the L2 Cache if needed */
 	if (flags & PMSU_PREPARE_DEEP_IDLE)
 		reg |= PMSU_CONTROL_AND_CONFIG_L2_PWDDN;
 
 	/* request power down */
 	reg |= PMSU_CONTROL_AND_CONFIG_PWDDN_REQ;
-	writel(reg, pmsu_mp_base + PMSU_CONTROL_AND_CONFIG(hw_cpu));
+	pete_writel("arch/arm/mach-mvebu/pmsu.c:253", reg, pmsu_mp_base + PMSU_CONTROL_AND_CONFIG(hw_cpu));
 
 	if (flags & PMSU_PREPARE_SNOOP_DISABLE) {
 		/* Disable snoop disable by HW - SW is taking care of it */
-		reg = readl(pmsu_mp_base + PMSU_CPU_POWER_DOWN_CONTROL(hw_cpu));
+		reg = pete_readl("arch/arm/mach-mvebu/pmsu.c:257", pmsu_mp_base + PMSU_CPU_POWER_DOWN_CONTROL(hw_cpu));
 		reg |= PMSU_CPU_POWER_DOWN_DIS_SNP_Q_SKIP;
-		writel(reg, pmsu_mp_base + PMSU_CPU_POWER_DOWN_CONTROL(hw_cpu));
+		pete_writel("arch/arm/mach-mvebu/pmsu.c:259", reg, pmsu_mp_base + PMSU_CPU_POWER_DOWN_CONTROL(hw_cpu));
 	}
 
 	return 0;
@@ -344,17 +344,17 @@ void mvebu_v7_pmsu_idle_exit(void)
 	if (pmsu_mp_base == NULL)
 		return;
 	/* cancel ask HW to power down the L2 Cache if possible */
-	reg = readl(pmsu_mp_base + PMSU_CONTROL_AND_CONFIG(hw_cpu));
+	reg = pete_readl("arch/arm/mach-mvebu/pmsu.c:347", pmsu_mp_base + PMSU_CONTROL_AND_CONFIG(hw_cpu));
 	reg &= ~PMSU_CONTROL_AND_CONFIG_L2_PWDDN;
-	writel(reg, pmsu_mp_base + PMSU_CONTROL_AND_CONFIG(hw_cpu));
+	pete_writel("arch/arm/mach-mvebu/pmsu.c:349", reg, pmsu_mp_base + PMSU_CONTROL_AND_CONFIG(hw_cpu));
 
 	/* cancel Enable wakeup events and mask interrupts */
-	reg = readl(pmsu_mp_base + PMSU_STATUS_AND_MASK(hw_cpu));
+	reg = pete_readl("arch/arm/mach-mvebu/pmsu.c:352", pmsu_mp_base + PMSU_STATUS_AND_MASK(hw_cpu));
 	reg &= ~(PMSU_STATUS_AND_MASK_IRQ_WAKEUP | PMSU_STATUS_AND_MASK_FIQ_WAKEUP);
 	reg &= ~PMSU_STATUS_AND_MASK_CPU_IDLE_WAIT;
 	reg &= ~PMSU_STATUS_AND_MASK_SNP_Q_EMPTY_WAIT;
 	reg &= ~(PMSU_STATUS_AND_MASK_IRQ_MASK | PMSU_STATUS_AND_MASK_FIQ_MASK);
-	writel(reg, pmsu_mp_base + PMSU_STATUS_AND_MASK(hw_cpu));
+	pete_writel("arch/arm/mach-mvebu/pmsu.c:357", reg, pmsu_mp_base + PMSU_STATUS_AND_MASK(hw_cpu));
 }
 
 static int mvebu_v7_cpu_pm_notify(struct notifier_block *self,
@@ -447,18 +447,18 @@ static __init int armada_38x_cpuidle_init(void)
 	BUG_ON(!mpsoc_base);
 
 	/* Set up reset mask when powering down the cpus */
-	reg = readl(mpsoc_base + MPCORE_RESET_CTL);
+	reg = pete_readl("arch/arm/mach-mvebu/pmsu.c:450", mpsoc_base + MPCORE_RESET_CTL);
 	reg |= MPCORE_RESET_CTL_L2;
 	reg |= MPCORE_RESET_CTL_DEBUG;
-	writel(reg, mpsoc_base + MPCORE_RESET_CTL);
+	pete_writel("arch/arm/mach-mvebu/pmsu.c:453", reg, mpsoc_base + MPCORE_RESET_CTL);
 	iounmap(mpsoc_base);
 
 	/* Set up delay */
-	reg = readl(pmsu_mp_base + PMSU_POWERDOWN_DELAY);
+	reg = pete_readl("arch/arm/mach-mvebu/pmsu.c:457", pmsu_mp_base + PMSU_POWERDOWN_DELAY);
 	reg &= ~PMSU_POWERDOWN_DELAY_MASK;
 	reg |= PMSU_DFLT_ARMADA38X_DELAY;
 	reg |= PMSU_POWERDOWN_DELAY_PMU;
-	writel(reg, pmsu_mp_base + PMSU_POWERDOWN_DELAY);
+	pete_writel("arch/arm/mach-mvebu/pmsu.c:461", reg, pmsu_mp_base + PMSU_POWERDOWN_DELAY);
 
 	mvebu_cpu_resume = armada_38x_cpu_resume;
 	mvebu_v7_cpuidle_device.dev.platform_data = armada_38x_cpu_suspend;
@@ -541,16 +541,16 @@ static void mvebu_pmsu_dfs_request_local(void *data)
 	local_irq_save(flags);
 
 	/* Prepare to enter idle */
-	reg = readl(pmsu_mp_base + PMSU_STATUS_AND_MASK(cpu));
+	reg = pete_readl("arch/arm/mach-mvebu/pmsu.c:544", pmsu_mp_base + PMSU_STATUS_AND_MASK(cpu));
 	reg |= PMSU_STATUS_AND_MASK_CPU_IDLE_WAIT |
 	       PMSU_STATUS_AND_MASK_IRQ_MASK     |
 	       PMSU_STATUS_AND_MASK_FIQ_MASK;
-	writel(reg, pmsu_mp_base + PMSU_STATUS_AND_MASK(cpu));
+	pete_writel("arch/arm/mach-mvebu/pmsu.c:548", reg, pmsu_mp_base + PMSU_STATUS_AND_MASK(cpu));
 
 	/* Request the DFS transition */
-	reg = readl(pmsu_mp_base + PMSU_CONTROL_AND_CONFIG(cpu));
+	reg = pete_readl("arch/arm/mach-mvebu/pmsu.c:551", pmsu_mp_base + PMSU_CONTROL_AND_CONFIG(cpu));
 	reg |= PMSU_CONTROL_AND_CONFIG_DFS_REQ;
-	writel(reg, pmsu_mp_base + PMSU_CONTROL_AND_CONFIG(cpu));
+	pete_writel("arch/arm/mach-mvebu/pmsu.c:553", reg, pmsu_mp_base + PMSU_CONTROL_AND_CONFIG(cpu));
 
 	/* The fact of entering idle will trigger the DFS transition */
 	wfi();
@@ -559,9 +559,9 @@ static void mvebu_pmsu_dfs_request_local(void *data)
 	 * We're back from idle, the DFS transition has completed,
 	 * clear the idle wait indication.
 	 */
-	reg = readl(pmsu_mp_base + PMSU_STATUS_AND_MASK(cpu));
+	reg = pete_readl("arch/arm/mach-mvebu/pmsu.c:562", pmsu_mp_base + PMSU_STATUS_AND_MASK(cpu));
 	reg &= ~PMSU_STATUS_AND_MASK_CPU_IDLE_WAIT;
-	writel(reg, pmsu_mp_base + PMSU_STATUS_AND_MASK(cpu));
+	pete_writel("arch/arm/mach-mvebu/pmsu.c:564", reg, pmsu_mp_base + PMSU_STATUS_AND_MASK(cpu));
 
 	local_irq_restore(flags);
 }
@@ -573,14 +573,14 @@ int mvebu_pmsu_dfs_request(int cpu)
 	u32 reg;
 
 	/* Clear any previous DFS DONE event */
-	reg = readl(pmsu_mp_base + PMSU_EVENT_STATUS_AND_MASK(hwcpu));
+	reg = pete_readl("arch/arm/mach-mvebu/pmsu.c:576", pmsu_mp_base + PMSU_EVENT_STATUS_AND_MASK(hwcpu));
 	reg &= ~PMSU_EVENT_STATUS_AND_MASK_DFS_DONE;
-	writel(reg, pmsu_mp_base + PMSU_EVENT_STATUS_AND_MASK(hwcpu));
+	pete_writel("arch/arm/mach-mvebu/pmsu.c:578", reg, pmsu_mp_base + PMSU_EVENT_STATUS_AND_MASK(hwcpu));
 
 	/* Mask the DFS done interrupt, since we are going to poll */
-	reg = readl(pmsu_mp_base + PMSU_EVENT_STATUS_AND_MASK(hwcpu));
+	reg = pete_readl("arch/arm/mach-mvebu/pmsu.c:581", pmsu_mp_base + PMSU_EVENT_STATUS_AND_MASK(hwcpu));
 	reg |= PMSU_EVENT_STATUS_AND_MASK_DFS_DONE_MASK;
-	writel(reg, pmsu_mp_base + PMSU_EVENT_STATUS_AND_MASK(hwcpu));
+	pete_writel("arch/arm/mach-mvebu/pmsu.c:583", reg, pmsu_mp_base + PMSU_EVENT_STATUS_AND_MASK(hwcpu));
 
 	/* Trigger the DFS on the appropriate CPU */
 	smp_call_function_single(cpu, mvebu_pmsu_dfs_request_local,
@@ -589,7 +589,7 @@ int mvebu_pmsu_dfs_request(int cpu)
 	/* Poll until the DFS done event is generated */
 	timeout = jiffies + HZ;
 	while (time_before(jiffies, timeout)) {
-		reg = readl(pmsu_mp_base + PMSU_EVENT_STATUS_AND_MASK(hwcpu));
+		reg = pete_readl("arch/arm/mach-mvebu/pmsu.c:592", pmsu_mp_base + PMSU_EVENT_STATUS_AND_MASK(hwcpu));
 		if (reg & PMSU_EVENT_STATUS_AND_MASK_DFS_DONE)
 			break;
 		udelay(10);
@@ -599,9 +599,9 @@ int mvebu_pmsu_dfs_request(int cpu)
 		return -ETIME;
 
 	/* Restore the DFS mask to its original state */
-	reg = readl(pmsu_mp_base + PMSU_EVENT_STATUS_AND_MASK(hwcpu));
+	reg = pete_readl("arch/arm/mach-mvebu/pmsu.c:602", pmsu_mp_base + PMSU_EVENT_STATUS_AND_MASK(hwcpu));
 	reg &= ~PMSU_EVENT_STATUS_AND_MASK_DFS_DONE_MASK;
-	writel(reg, pmsu_mp_base + PMSU_EVENT_STATUS_AND_MASK(hwcpu));
+	pete_writel("arch/arm/mach-mvebu/pmsu.c:604", reg, pmsu_mp_base + PMSU_EVENT_STATUS_AND_MASK(hwcpu));
 
 	return 0;
 }

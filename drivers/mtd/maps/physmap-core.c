@@ -151,7 +151,7 @@ static map_word physmap_addr_gpios_read(struct map_info *map,
 	info = platform_get_drvdata(pdev);
 	physmap_set_addr_gpios(info, ofs);
 
-	word = readw(map->virt + (ofs & win_mask(info->win_order)));
+	word = pete_readw("drivers/mtd/maps/physmap-core.c:154", map->virt + (ofs & win_mask(info->win_order)));
 	mw.x[0] = word;
 	return mw;
 }
@@ -190,7 +190,7 @@ static void physmap_addr_gpios_write(struct map_info *map, map_word mw,
 	physmap_set_addr_gpios(info, ofs);
 
 	word = mw.x[0];
-	writew(word, map->virt + (ofs & win_mask(info->win_order)));
+	pete_writew("drivers/mtd/maps/physmap-core.c:193", word, map->virt + (ofs & win_mask(info->win_order)));
 }
 
 static void physmap_addr_gpios_copy_to(struct map_info *map, unsigned long ofs,

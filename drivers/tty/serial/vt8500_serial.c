@@ -111,12 +111,12 @@ static DECLARE_BITMAP(vt8500_ports_in_use, VT8500_MAX_PORTS);
 static inline void vt8500_write(struct uart_port *port, unsigned int val,
 			     unsigned int off)
 {
-	writel(val, port->membase + off);
+	pete_writel("drivers/tty/serial/vt8500_serial.c:114", val, port->membase + off);
 }
 
 static inline unsigned int vt8500_read(struct uart_port *port, unsigned int off)
 {
-	return readl(port->membase + off);
+	return pete_readl("drivers/tty/serial/vt8500_serial.c:119", port->membase + off);
 }
 
 static void vt8500_stop_tx(struct uart_port *port)
@@ -166,7 +166,7 @@ static void handle_rx(struct uart_port *port)
 		unsigned int c;
 		char flag = TTY_NORMAL;
 
-		c = readw(port->membase + VT8500_RXFIFO) & 0x3ff;
+		c = pete_readw("drivers/tty/serial/vt8500_serial.c:169", port->membase + VT8500_RXFIFO) & 0x3ff;
 
 		/* Mask conditions we're ignoring. */
 		c &= ~port->read_status_mask;
@@ -200,7 +200,7 @@ static void handle_tx(struct uart_port *port)
 
 	uart_port_tx(port, ch,
 		vt8500_tx_empty(port),
-		writeb(ch, port->membase + VT8500_TXFIFO));
+		pete_writeb("drivers/tty/serial/vt8500_serial.c:203", ch, port->membase + VT8500_TXFIFO));
 }
 
 static void vt8500_start_tx(struct uart_port *port)
@@ -466,7 +466,7 @@ static void wait_for_xmitr(struct uart_port *port)
 static void vt8500_console_putchar(struct uart_port *port, unsigned char c)
 {
 	wait_for_xmitr(port);
-	writeb(c, port->membase + VT8500_TXFIFO);
+	pete_writeb("drivers/tty/serial/vt8500_serial.c:469", c, port->membase + VT8500_TXFIFO);
 }
 
 static void vt8500_console_write(struct console *co, const char *s,

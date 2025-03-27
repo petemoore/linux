@@ -514,8 +514,8 @@ static inline void __iomem *intel_uncore_regs(struct intel_uncore *uncore)
  * appropriate GSI offset to the 'base' parameter.
  */
 #define raw_reg_read(base, reg) \
-	readl(base + i915_mmio_reg_offset(reg))
+	pete_readl("drivers/gpu/drm/i915/intel_uncore.h:517", base + i915_mmio_reg_offset(reg))
 #define raw_reg_write(base, reg, value) \
-	writel(value, base + i915_mmio_reg_offset(reg))
+	pete_writel("drivers/gpu/drm/i915/intel_uncore.h:519", value, base + i915_mmio_reg_offset(reg))
 
 #endif /* !__INTEL_UNCORE_H__ */

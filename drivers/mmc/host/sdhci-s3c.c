@@ -265,30 +265,30 @@ static void sdhci_s3c_set_clock(struct sdhci_host *host, unsigned int clock)
 	}
 
 	/* turn clock off to card before changing clock source */
-	writew(0, host->ioaddr + SDHCI_CLOCK_CONTROL);
+	pete_writew("drivers/mmc/host/sdhci-s3c.c:268", 0, host->ioaddr + SDHCI_CLOCK_CONTROL);
 
-	ctrl = readl(host->ioaddr + S3C_SDHCI_CONTROL2);
+	ctrl = pete_readl("drivers/mmc/host/sdhci-s3c.c:270", host->ioaddr + S3C_SDHCI_CONTROL2);
 	ctrl &= ~S3C_SDHCI_CTRL2_SELBASECLK_MASK;
 	ctrl |= best_src << S3C_SDHCI_CTRL2_SELBASECLK_SHIFT;
-	writel(ctrl, host->ioaddr + S3C_SDHCI_CONTROL2);
+	pete_writel("drivers/mmc/host/sdhci-s3c.c:273", ctrl, host->ioaddr + S3C_SDHCI_CONTROL2);
 
 	/* reprogram default hardware configuration */
-	writel(S3C64XX_SDHCI_CONTROL4_DRIVE_9mA,
+	pete_writel("drivers/mmc/host/sdhci-s3c.c:276", S3C64XX_SDHCI_CONTROL4_DRIVE_9mA,
 		host->ioaddr + S3C64XX_SDHCI_CONTROL4);
 
-	ctrl = readl(host->ioaddr + S3C_SDHCI_CONTROL2);
+	ctrl = pete_readl("drivers/mmc/host/sdhci-s3c.c:279", host->ioaddr + S3C_SDHCI_CONTROL2);
 	ctrl |= (S3C64XX_SDHCI_CTRL2_ENSTAASYNCCLR |
 		  S3C64XX_SDHCI_CTRL2_ENCMDCNFMSK |
 		  S3C_SDHCI_CTRL2_ENFBCLKRX |
 		  S3C_SDHCI_CTRL2_DFCNT_NONE |
 		  S3C_SDHCI_CTRL2_ENCLKOUTHOLD);
-	writel(ctrl, host->ioaddr + S3C_SDHCI_CONTROL2);
+	pete_writel("drivers/mmc/host/sdhci-s3c.c:285", ctrl, host->ioaddr + S3C_SDHCI_CONTROL2);
 
 	/* reconfigure the controller for new clock rate */
 	ctrl = (S3C_SDHCI_CTRL3_FCSEL1 | S3C_SDHCI_CTRL3_FCSEL0);
 	if (clock < 25 * 1000000)
 		ctrl |= (S3C_SDHCI_CTRL3_FCSEL3 | S3C_SDHCI_CTRL3_FCSEL2);
-	writel(ctrl, host->ioaddr + S3C_SDHCI_CONTROL3);
+	pete_writel("drivers/mmc/host/sdhci-s3c.c:291", ctrl, host->ioaddr + S3C_SDHCI_CONTROL3);
 
 	sdhci_set_clock(host, clock);
 }

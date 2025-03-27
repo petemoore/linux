@@ -1640,7 +1640,7 @@ static inline int
 lpfc_readl(void __iomem *addr, uint32_t *data)
 {
 	uint32_t temp;
-	temp = readl(addr);
+	temp = pete_readl("drivers/scsi/lpfc/lpfc.h:1643", addr);
 	if (temp == 0xffffffff)
 		return -EIO;
 	*data = temp;
@@ -1664,8 +1664,8 @@ lpfc_sli_read_hs(struct lpfc_hba *phba)
 	}
 
 	/* Clear chip Host Attention error bit */
-	writel(HA_ERATT, phba->HAregaddr);
-	readl(phba->HAregaddr); /* flush */
+	pete_writel("drivers/scsi/lpfc/lpfc.h:1667", HA_ERATT, phba->HAregaddr);
+	pete_readl("drivers/scsi/lpfc/lpfc.h:1668", phba->HAregaddr); /* flush */
 	phba->pport->stopped = 1;
 
 	return 0;
@@ -1744,7 +1744,7 @@ lpfc_sli4_mod_hba_eq_delay(struct lpfc_hba *phba, struct lpfc_queue *eq,
 	reg_data.word0 = 0;
 	bf_set(lpfc_sliport_eqdelay_id, &reg_data, eq->queue_id);
 	bf_set(lpfc_sliport_eqdelay_delay, &reg_data, delay);
-	writel(reg_data.word0, phba->sli4_hba.u.if_type2.EQDregaddr);
+	pete_writel("drivers/scsi/lpfc/lpfc.h:1747", reg_data.word0, phba->sli4_hba.u.if_type2.EQDregaddr);
 	eq->q_mode = delay;
 }
 

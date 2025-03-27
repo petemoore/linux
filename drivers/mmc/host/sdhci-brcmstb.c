@@ -99,12 +99,12 @@ static void sdhci_brcmstb_hs400es(struct mmc_host *mmc, struct mmc_ios *ios)
 
 	dev_dbg(mmc_dev(mmc), "%s(): Setting HS400-Enhanced-Strobe mode\n",
 		__func__);
-	reg = readl(host->ioaddr + SDHCI_VENDOR);
+	reg = pete_readl("drivers/mmc/host/sdhci-brcmstb.c:102", host->ioaddr + SDHCI_VENDOR);
 	if (ios->enhanced_strobe)
 		reg |= SDHCI_VENDOR_ENHANCED_STRB;
 	else
 		reg &= ~SDHCI_VENDOR_ENHANCED_STRB;
-	writel(reg, host->ioaddr + SDHCI_VENDOR);
+	pete_writel("drivers/mmc/host/sdhci-brcmstb.c:107", reg, host->ioaddr + SDHCI_VENDOR);
 }
 
 static void sdhci_bcm2712_set_clock(struct sdhci_host *host, unsigned int clock)
@@ -128,13 +128,13 @@ static void sdhci_bcm2712_set_clock(struct sdhci_host *host, unsigned int clock)
 	break;
 	}
 
-	reg = readl(brcmstb_priv->cfg_regs + SDIO_CFG_SD_PIN_SEL);
+	reg = pete_readl("drivers/mmc/host/sdhci-brcmstb.c:131", brcmstb_priv->cfg_regs + SDIO_CFG_SD_PIN_SEL);
 	reg &= ~SDIO_CFG_SD_PIN_SEL_MASK;
 	if (is_emmc_rate)
 		reg |= SDIO_CFG_SD_PIN_SEL_MMC;
 	else
 		reg |= SDIO_CFG_SD_PIN_SEL_SD;
-	writel(reg, brcmstb_priv->cfg_regs + SDIO_CFG_SD_PIN_SEL);
+	pete_writel("drivers/mmc/host/sdhci-brcmstb.c:137", reg, brcmstb_priv->cfg_regs + SDIO_CFG_SD_PIN_SEL);
 
 	if (clock == 0)
 		return;
@@ -226,10 +226,10 @@ static void sdhci_brcmstb_cfginit_2712(struct sdhci_host *host)
 	* then select the delay line PHY as the clock source.
 	*/
 	if ((host->mmc->caps & uhs_mask) || (host->mmc->caps2 & hsemmc_mask)) {
-		reg = readl(brcmstb_priv->cfg_regs + SDIO_CFG_MAX_50MHZ_MODE);
+		reg = pete_readl("drivers/mmc/host/sdhci-brcmstb.c:229", brcmstb_priv->cfg_regs + SDIO_CFG_MAX_50MHZ_MODE);
 		reg &= ~SDIO_CFG_MAX_50MHZ_MODE_ENABLE;
 		reg |= SDIO_CFG_MAX_50MHZ_MODE_STRAP_OVERRIDE;
-		writel(reg, brcmstb_priv->cfg_regs + SDIO_CFG_MAX_50MHZ_MODE);
+		pete_writel("drivers/mmc/host/sdhci-brcmstb.c:232", reg, brcmstb_priv->cfg_regs + SDIO_CFG_MAX_50MHZ_MODE);
 
 		host->mmc_host_ops.hs400_downgrade = sdhci_bcm2712_hs400_downgrade;
 	}
@@ -237,16 +237,16 @@ static void sdhci_brcmstb_cfginit_2712(struct sdhci_host *host)
 	if ((host->mmc->caps & MMC_CAP_NONREMOVABLE) ||
 	    (host->mmc->caps & MMC_CAP_NEEDS_POLL)) {
 		/* Force presence */
-		reg = readl(brcmstb_priv->cfg_regs + SDIO_CFG_CTRL);
+		reg = pete_readl("drivers/mmc/host/sdhci-brcmstb.c:240", brcmstb_priv->cfg_regs + SDIO_CFG_CTRL);
 		reg &= ~SDIO_CFG_CTRL_SDCD_N_TEST_LEV;
 		reg |= SDIO_CFG_CTRL_SDCD_N_TEST_EN;
-		writel(reg, brcmstb_priv->cfg_regs + SDIO_CFG_CTRL);
+		pete_writel("drivers/mmc/host/sdhci-brcmstb.c:243", reg, brcmstb_priv->cfg_regs + SDIO_CFG_CTRL);
 	}
 
 	/* Guesstimate the timer frequency (controller base clock) */
 	base_clk_mhz = max_t(u32, clk_get_rate(pltfm_host->clk) / (1000 * 1000), 1);
 	reg = (3 << SDIO_CFG_CQ_CAPABILITY_FMUL_SHIFT) | base_clk_mhz;
-	writel(reg, brcmstb_priv->cfg_regs + SDIO_CFG_CQ_CAPABILITY);
+	pete_writel("drivers/mmc/host/sdhci-brcmstb.c:249", reg, brcmstb_priv->cfg_regs + SDIO_CFG_CQ_CAPABILITY);
 }
 
 static int bcm2712_init_sd_express(struct sdhci_host *host, struct mmc_ios *ios)
@@ -270,20 +270,20 @@ static int bcm2712_init_sd_express(struct sdhci_host *host, struct mmc_ios *ios)
 	/* Disable SD DAT0-3 pulls */
 	pinctrl_select_state(brcmstb_priv->pinctrl, brcmstb_priv->pins_sdex);
 
-	ctrl_val = readl(brcmstb_priv->sde_ioaddr);
+	ctrl_val = pete_readl("drivers/mmc/host/sdhci-brcmstb.c:273", brcmstb_priv->sde_ioaddr);
 	dev_dbg(dev, "ctrl_val 1 %08x\n", ctrl_val);
 
 	/* Tri-state the SD pins */
 	ctrl_val |= 0x1ff8;
-	writel(ctrl_val, brcmstb_priv->sde_ioaddr);
-	dev_dbg(dev, "ctrl_val 1->%08x (%08x)\n", ctrl_val, readl(brcmstb_priv->sde_ioaddr));
+	pete_writel("drivers/mmc/host/sdhci-brcmstb.c:278", ctrl_val, brcmstb_priv->sde_ioaddr);
+	dev_dbg(dev, "ctrl_val 1->%08x (%08x)\n", ctrl_val, pete_readl("drivers/mmc/host/sdhci-brcmstb.c:279", brcmstb_priv->sde_ioaddr));
 	/* Let voltages settle */
 	udelay(100);
 
 	/* Enable the PCIe sideband pins */
 	ctrl_val &= ~0x6000;
-	writel(ctrl_val, brcmstb_priv->sde_ioaddr);
-	dev_dbg(dev, "ctrl_val 1->%08x (%08x)\n", ctrl_val, readl(brcmstb_priv->sde_ioaddr));
+	pete_writel("drivers/mmc/host/sdhci-brcmstb.c:285", ctrl_val, brcmstb_priv->sde_ioaddr);
+	dev_dbg(dev, "ctrl_val 1->%08x (%08x)\n", ctrl_val, pete_readl("drivers/mmc/host/sdhci-brcmstb.c:286", brcmstb_priv->sde_ioaddr));
 	/* Let voltages settle */
 	udelay(100);
 
@@ -306,18 +306,18 @@ static int bcm2712_init_sd_express(struct sdhci_host *host, struct mmc_ios *ios)
 	}
 
 	/* Turn on the LCPLL PTEST mux */
-	ctrl_val = readl(brcmstb_priv->sde_ioaddr2 + 20); // misc5
+	ctrl_val = pete_readl("drivers/mmc/host/sdhci-brcmstb.c:309", brcmstb_priv->sde_ioaddr2 + 20); // misc5
 	ctrl_val &= ~(0x7 << 7);
 	ctrl_val |= 3 << 7;
-	writel(ctrl_val, brcmstb_priv->sde_ioaddr2 + 20);
-	dev_dbg(dev, "misc 5->%08x (%08x)\n", ctrl_val, readl(brcmstb_priv->sde_ioaddr2 + 20));
+	pete_writel("drivers/mmc/host/sdhci-brcmstb.c:312", ctrl_val, brcmstb_priv->sde_ioaddr2 + 20);
+	dev_dbg(dev, "misc 5->%08x (%08x)\n", ctrl_val, pete_readl("drivers/mmc/host/sdhci-brcmstb.c:313", brcmstb_priv->sde_ioaddr2 + 20));
 
 	/* PTEST diff driver enable */
-	ctrl_val = readl(brcmstb_priv->sde_ioaddr2);
+	ctrl_val = pete_readl("drivers/mmc/host/sdhci-brcmstb.c:316", brcmstb_priv->sde_ioaddr2);
 	ctrl_val |= BIT(21);
-	writel(ctrl_val, brcmstb_priv->sde_ioaddr2);
+	pete_writel("drivers/mmc/host/sdhci-brcmstb.c:318", ctrl_val, brcmstb_priv->sde_ioaddr2);
 
-	dev_dbg(dev, "misc 0->%08x (%08x)\n", ctrl_val, readl(brcmstb_priv->sde_ioaddr2));
+	dev_dbg(dev, "misc 0->%08x (%08x)\n", ctrl_val, pete_readl("drivers/mmc/host/sdhci-brcmstb.c:320", brcmstb_priv->sde_ioaddr2));
 
 	/* Wait for more than the minimum Tpvpgl time */
 	msleep(100);

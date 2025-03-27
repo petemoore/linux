@@ -46,9 +46,9 @@ static int imx93_pd_on(struct generic_pm_domain *genpd)
 		return ret;
 	}
 
-	val = readl(addr + MIX_SLICE_SW_CTRL_OFF);
+	val = pete_readl("drivers/pmdomain/imx/imx93-pd.c:49", addr + MIX_SLICE_SW_CTRL_OFF);
 	val &= ~SLICE_SW_CTRL_PDN_SOFT_MASK;
-	writel(val, addr + MIX_SLICE_SW_CTRL_OFF);
+	pete_writel("drivers/pmdomain/imx/imx93-pd.c:51", val, addr + MIX_SLICE_SW_CTRL_OFF);
 
 	ret = readl_poll_timeout(addr + MIX_FUNC_STAT_OFF, val,
 				 !(val & FUNC_STAT_SSAR_STAT_MASK), 1, 10000);
@@ -68,9 +68,9 @@ static int imx93_pd_off(struct generic_pm_domain *genpd)
 	u32 val;
 
 	/* Power off MIX */
-	val = readl(addr + MIX_SLICE_SW_CTRL_OFF);
+	val = pete_readl("drivers/pmdomain/imx/imx93-pd.c:71", addr + MIX_SLICE_SW_CTRL_OFF);
 	val |= SLICE_SW_CTRL_PDN_SOFT_MASK;
-	writel(val, addr + MIX_SLICE_SW_CTRL_OFF);
+	pete_writel("drivers/pmdomain/imx/imx93-pd.c:73", val, addr + MIX_SLICE_SW_CTRL_OFF);
 
 	ret = readl_poll_timeout(addr + MIX_FUNC_STAT_OFF, val,
 				 val & FUNC_STAT_PSW_STAT_MASK, 1, 10000);
@@ -123,7 +123,7 @@ static int imx93_pd_probe(struct platform_device *pdev)
 	domain->genpd.power_on = imx93_pd_on;
 	domain->dev = dev;
 
-	domain->init_off = readl(domain->addr + MIX_FUNC_STAT_OFF) & FUNC_STAT_ISO_STAT_MASK;
+	domain->init_off = pete_readl("drivers/pmdomain/imx/imx93-pd.c:126", domain->addr + MIX_FUNC_STAT_OFF) & FUNC_STAT_ISO_STAT_MASK;
 	/* Just to sync the status of hardware */
 	if (!domain->init_off) {
 		ret = clk_bulk_prepare_enable(domain->num_clks, domain->clks);

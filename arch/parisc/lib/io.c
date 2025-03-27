@@ -21,7 +21,7 @@ void memcpy_toio(volatile void __iomem *dst, const void *src, int count)
 	if (((unsigned long)dst & 3) != ((unsigned long)src & 3))
 		goto bytecopy;
 	while ((unsigned long)dst & 3) {
-		writeb(*(char *)src, dst++);
+		pete_writeb("arch/parisc/lib/io.c:24", *(char *)src, dst++);
 		src++;
 		count--;
 	}
@@ -33,7 +33,7 @@ void memcpy_toio(volatile void __iomem *dst, const void *src, int count)
 	}
  bytecopy:
 	while (count--) {
-		writeb(*(char *)src, dst++);
+		pete_writeb("arch/parisc/lib/io.c:36", *(char *)src, dst++);
 		src++;
 	}
 }
@@ -62,7 +62,7 @@ void memcpy_fromio(void *dst, const volatile void __iomem *src, int count)
 
 	/* Then check for misaligned start address */
 	if ((unsigned long)src & 1) {
-		*(u8 *)dst = readb(src);
+		*(u8 *)dst = pete_readb("arch/parisc/lib/io.c:65", src);
 		src++;
 		dst++;
 		count--;
@@ -93,7 +93,7 @@ void memcpy_fromio(void *dst, const volatile void __iomem *src, int count)
 
  bytecopy:
 	while (count--) {
-		*(char *)dst = readb(src);
+		*(char *)dst = pete_readb("arch/parisc/lib/io.c:96", src);
 		src++;
 		dst++;
 	}
@@ -107,7 +107,7 @@ void memset_io(volatile void __iomem *addr, unsigned char val, int count)
 {
 	u32 val32 = (val << 24) | (val << 16) | (val << 8) | val;
 	while ((unsigned long)addr & 3) {
-		writeb(val, addr++);
+		pete_writeb("arch/parisc/lib/io.c:110", val, addr++);
 		count--;
 	}
 	while (count > 3) {
@@ -116,7 +116,7 @@ void memset_io(volatile void __iomem *addr, unsigned char val, int count)
 		count -= 4;
 	}
 	while (count--) {
-		writeb(val, addr++);
+		pete_writeb("arch/parisc/lib/io.c:119", val, addr++);
 	}
 }
 

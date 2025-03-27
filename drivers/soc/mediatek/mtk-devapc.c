@@ -64,9 +64,9 @@ static void clear_vio_status(struct mtk_devapc_context *ctx)
 	reg = ctx->infra_base + ctx->data->regs_ofs->vio_sta_offset;
 
 	for (i = 0; i < VIO_MOD_TO_REG_IND(ctx->data->vio_idx_num) - 1; i++)
-		writel(GENMASK(31, 0), reg + 4 * i);
+		pete_writel("drivers/soc/mediatek/mtk-devapc.c:67", GENMASK(31, 0), reg + 4 * i);
 
-	writel(GENMASK(VIO_MOD_TO_REG_OFF(ctx->data->vio_idx_num) - 1, 0),
+	pete_writel("drivers/soc/mediatek/mtk-devapc.c:69", GENMASK(VIO_MOD_TO_REG_OFF(ctx->data->vio_idx_num) - 1, 0),
 	       reg + 4 * i);
 }
 
@@ -84,9 +84,9 @@ static void mask_module_irq(struct mtk_devapc_context *ctx, bool mask)
 		val = 0;
 
 	for (i = 0; i < VIO_MOD_TO_REG_IND(ctx->data->vio_idx_num) - 1; i++)
-		writel(val, reg + 4 * i);
+		pete_writel("drivers/soc/mediatek/mtk-devapc.c:87", val, reg + 4 * i);
 
-	val = readl(reg + 4 * i);
+	val = pete_readl("drivers/soc/mediatek/mtk-devapc.c:89", reg + 4 * i);
 	if (mask)
 		val |= GENMASK(VIO_MOD_TO_REG_OFF(ctx->data->vio_idx_num) - 1,
 			       0);
@@ -94,7 +94,7 @@ static void mask_module_irq(struct mtk_devapc_context *ctx, bool mask)
 		val &= ~GENMASK(VIO_MOD_TO_REG_OFF(ctx->data->vio_idx_num) - 1,
 				0);
 
-	writel(val, reg + 4 * i);
+	pete_writel("drivers/soc/mediatek/mtk-devapc.c:97", val, reg + 4 * i);
 }
 
 #define PHY_DEVAPC_TIMEOUT	0x10000
@@ -126,17 +126,17 @@ static int devapc_sync_vio_dbg(struct mtk_devapc_context *ctx)
 			       ctx->data->regs_ofs->vio_shift_con_offset;
 
 	/* Find the minimum shift group which has violation */
-	val = readl(pd_vio_shift_sta_reg);
+	val = pete_readl("drivers/soc/mediatek/mtk-devapc.c:129", pd_vio_shift_sta_reg);
 	if (!val)
 		return false;
 
 	min_shift_group = __ffs(val);
 
 	/* Assign the group to sync */
-	writel(0x1 << min_shift_group, pd_vio_shift_sel_reg);
+	pete_writel("drivers/soc/mediatek/mtk-devapc.c:136", 0x1 << min_shift_group, pd_vio_shift_sel_reg);
 
 	/* Start syncing */
-	writel(0x1, pd_vio_shift_con_reg);
+	pete_writel("drivers/soc/mediatek/mtk-devapc.c:139", 0x1, pd_vio_shift_con_reg);
 
 	ret = readl_poll_timeout(pd_vio_shift_con_reg, val, val == 0x3, 0,
 				 PHY_DEVAPC_TIMEOUT);
@@ -146,10 +146,10 @@ static int devapc_sync_vio_dbg(struct mtk_devapc_context *ctx)
 	}
 
 	/* Stop syncing */
-	writel(0x0, pd_vio_shift_con_reg);
+	pete_writel("drivers/soc/mediatek/mtk-devapc.c:149", 0x0, pd_vio_shift_con_reg);
 
 	/* Write clear */
-	writel(0x1 << min_shift_group, pd_vio_shift_sta_reg);
+	pete_writel("drivers/soc/mediatek/mtk-devapc.c:152", 0x1 << min_shift_group, pd_vio_shift_sta_reg);
 
 	return true;
 }
@@ -167,8 +167,8 @@ static void devapc_extract_vio_dbg(struct mtk_devapc_context *ctx)
 	vio_dbg0_reg = ctx->infra_base + ctx->data->regs_ofs->vio_dbg0_offset;
 	vio_dbg1_reg = ctx->infra_base + ctx->data->regs_ofs->vio_dbg1_offset;
 
-	vio_dbgs.vio_dbg0 = readl(vio_dbg0_reg);
-	vio_dbgs.vio_dbg1 = readl(vio_dbg1_reg);
+	vio_dbgs.vio_dbg0 = pete_readl("drivers/soc/mediatek/mtk-devapc.c:170", vio_dbg0_reg);
+	vio_dbgs.vio_dbg1 = pete_readl("drivers/soc/mediatek/mtk-devapc.c:171", vio_dbg1_reg);
 
 	/* Print violation information */
 	if (vio_dbgs.dbg0_bits.vio_w)
@@ -203,7 +203,7 @@ static irqreturn_t devapc_violation_irq(int irq_number, void *data)
  */
 static void start_devapc(struct mtk_devapc_context *ctx)
 {
-	writel(BIT(31), ctx->infra_base + ctx->data->regs_ofs->apc_con_offset);
+	pete_writel("drivers/soc/mediatek/mtk-devapc.c:206", BIT(31), ctx->infra_base + ctx->data->regs_ofs->apc_con_offset);
 
 	mask_module_irq(ctx, false);
 }
@@ -215,7 +215,7 @@ static void stop_devapc(struct mtk_devapc_context *ctx)
 {
 	mask_module_irq(ctx, true);
 
-	writel(BIT(2), ctx->infra_base + ctx->data->regs_ofs->apc_con_offset);
+	pete_writel("drivers/soc/mediatek/mtk-devapc.c:218", BIT(2), ctx->infra_base + ctx->data->regs_ofs->apc_con_offset);
 }
 
 static const struct mtk_devapc_regs_ofs devapc_regs_ofs_mt6779 = {

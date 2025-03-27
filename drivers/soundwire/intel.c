@@ -25,7 +25,7 @@ static int intel_wait_bit(void __iomem *base, int offset, u32 mask, u32 target)
 	u32 reg_read;
 
 	do {
-		reg_read = readl(base + offset);
+		reg_read = pete_readl("drivers/soundwire/intel.c:28", base + offset);
 		if ((reg_read & mask) == target)
 			return 0;
 
@@ -38,13 +38,13 @@ static int intel_wait_bit(void __iomem *base, int offset, u32 mask, u32 target)
 
 static int intel_clear_bit(void __iomem *base, int offset, u32 value, u32 mask)
 {
-	writel(value, base + offset);
+	pete_writel("drivers/soundwire/intel.c:41", value, base + offset);
 	return intel_wait_bit(base, offset, mask, 0);
 }
 
 static int intel_set_bit(void __iomem *base, int offset, u32 value, u32 mask)
 {
-	writel(value, base + offset);
+	pete_writel("drivers/soundwire/intel.c:47", value, base + offset);
 	return intel_wait_bit(base, offset, mask, mask);
 }
 

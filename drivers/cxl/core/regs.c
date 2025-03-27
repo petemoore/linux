@@ -49,7 +49,7 @@ void cxl_probe_component_regs(struct device *dev, void __iomem *base,
 	 */
 	base += CXL_CM_OFFSET;
 
-	cap_array = readl(base + CXL_CM_CAP_HDR_OFFSET);
+	cap_array = pete_readl("drivers/cxl/core/regs.c:52", base + CXL_CM_CAP_HDR_OFFSET);
 
 	if (FIELD_GET(CXL_CM_CAP_HDR_ID_MASK, cap_array) != CM_CAP_HDR_CAP_ID) {
 		dev_err(dev,
@@ -66,12 +66,12 @@ void cxl_probe_component_regs(struct device *dev, void __iomem *base,
 		u16 cap_id, offset;
 		u32 length, hdr;
 
-		hdr = readl(base + cap * 0x4);
+		hdr = pete_readl("drivers/cxl/core/regs.c:69", base + cap * 0x4);
 
 		cap_id = FIELD_GET(CXL_CM_CAP_HDR_ID_MASK, hdr);
 		offset = FIELD_GET(CXL_CM_CAP_PTR_MASK, hdr);
 		register_block = base + offset;
-		hdr = readl(register_block);
+		hdr = pete_readl("drivers/cxl/core/regs.c:74", register_block);
 
 		rmap = NULL;
 		switch (cap_id) {
@@ -124,7 +124,7 @@ void cxl_probe_device_regs(struct device *dev, void __iomem *base,
 
 	*map = (struct cxl_device_reg_map){ 0 };
 
-	cap_array = readq(base + CXLDEV_CAP_ARRAY_OFFSET);
+	cap_array = pete_readq("drivers/cxl/core/regs.c:127", base + CXLDEV_CAP_ARRAY_OFFSET);
 	if (FIELD_GET(CXLDEV_CAP_ARRAY_ID_MASK, cap_array) !=
 	    CXLDEV_CAP_ARRAY_CAP_ID)
 		return;
@@ -137,9 +137,9 @@ void cxl_probe_device_regs(struct device *dev, void __iomem *base,
 		u16 cap_id;
 
 		cap_id = FIELD_GET(CXLDEV_CAP_HDR_CAP_ID_MASK,
-				   readl(base + cap * 0x10));
-		offset = readl(base + cap * 0x10 + 0x4);
-		length = readl(base + cap * 0x10 + 0x8);
+				   pete_readl("drivers/cxl/core/regs.c:140", base + cap * 0x10));
+		offset = pete_readl("drivers/cxl/core/regs.c:141", base + cap * 0x10 + 0x4);
+		length = pete_readl("drivers/cxl/core/regs.c:142", base + cap * 0x10 + 0x8);
 
 		rmap = NULL;
 		switch (cap_id) {
@@ -499,10 +499,10 @@ resource_size_t __rcrb_to_component(struct device *dev, struct cxl_rcrb_info *ri
 		return CXL_RESOURCE_NONE;
 	}
 
-	id = readl(addr + PCI_VENDOR_ID);
-	cmd = readw(addr + PCI_COMMAND);
-	bar0 = readl(addr + PCI_BASE_ADDRESS_0);
-	bar1 = readl(addr + PCI_BASE_ADDRESS_1);
+	id = pete_readl("drivers/cxl/core/regs.c:502", addr + PCI_VENDOR_ID);
+	cmd = pete_readw("drivers/cxl/core/regs.c:503", addr + PCI_COMMAND);
+	bar0 = pete_readl("drivers/cxl/core/regs.c:504", addr + PCI_BASE_ADDRESS_0);
+	bar1 = pete_readl("drivers/cxl/core/regs.c:505", addr + PCI_BASE_ADDRESS_1);
 	iounmap(addr);
 	release_mem_region(rcrb, SZ_4K);
 

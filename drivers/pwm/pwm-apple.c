@@ -64,12 +64,12 @@ static int apple_pwm_apply(struct pwm_chip *chip, struct pwm_device *pwm,
 		if (off_cycles > 0xFFFFFFFF)
 			off_cycles = 0xFFFFFFFF;
 
-		writel(on_cycles, fpwm->base + APPLE_PWM_ON_CYCLES);
-		writel(off_cycles, fpwm->base + APPLE_PWM_OFF_CYCLES);
-		writel(APPLE_PWM_CTRL_ENABLE | APPLE_PWM_CTRL_OUTPUT_ENABLE | APPLE_PWM_CTRL_UPDATE,
+		pete_writel("drivers/pwm/pwm-apple.c:67", on_cycles, fpwm->base + APPLE_PWM_ON_CYCLES);
+		pete_writel("drivers/pwm/pwm-apple.c:68", off_cycles, fpwm->base + APPLE_PWM_OFF_CYCLES);
+		pete_writel("drivers/pwm/pwm-apple.c:69", APPLE_PWM_CTRL_ENABLE | APPLE_PWM_CTRL_OUTPUT_ENABLE | APPLE_PWM_CTRL_UPDATE,
 		       fpwm->base + APPLE_PWM_CTRL);
 	} else {
-		writel(0, fpwm->base + APPLE_PWM_CTRL);
+		pete_writel("drivers/pwm/pwm-apple.c:72", 0, fpwm->base + APPLE_PWM_CTRL);
 	}
 	return 0;
 }
@@ -82,9 +82,9 @@ static int apple_pwm_get_state(struct pwm_chip *chip, struct pwm_device *pwm,
 
 	fpwm = to_apple_pwm(chip);
 
-	ctrl = readl(fpwm->base + APPLE_PWM_CTRL);
-	on_cycles = readl(fpwm->base + APPLE_PWM_ON_CYCLES);
-	off_cycles = readl(fpwm->base + APPLE_PWM_OFF_CYCLES);
+	ctrl = pete_readl("drivers/pwm/pwm-apple.c:85", fpwm->base + APPLE_PWM_CTRL);
+	on_cycles = pete_readl("drivers/pwm/pwm-apple.c:86", fpwm->base + APPLE_PWM_ON_CYCLES);
+	off_cycles = pete_readl("drivers/pwm/pwm-apple.c:87", fpwm->base + APPLE_PWM_OFF_CYCLES);
 
 	state->enabled = (ctrl & APPLE_PWM_CTRL_ENABLE) && (ctrl & APPLE_PWM_CTRL_OUTPUT_ENABLE);
 	state->polarity = PWM_POLARITY_NORMAL;

@@ -82,7 +82,7 @@ sh73a0_cpg_register_clock(struct device_node *np, struct sh73a0_cpg *cpg,
 
 	if (!strcmp(name, "main")) {
 		/* extal1, extal1_div2, extal2, extal2_div2 */
-		u32 parent_idx = (readl(base + CPG_CKSCR) >> 28) & 3;
+		u32 parent_idx = (pete_readl("drivers/clk/renesas/clk-sh73a0.c:85", base + CPG_CKSCR) >> 28) & 3;
 
 		parent_name = of_clk_get_parent_name(np, parent_idx >> 1);
 		div = (parent_idx & 1) + 1;
@@ -107,11 +107,11 @@ sh73a0_cpg_register_clock(struct device_node *np, struct sh73a0_cpg *cpg,
 		default:
 			return ERR_PTR(-EINVAL);
 		}
-		if (readl(base + CPG_PLLECR) & BIT(enable_bit)) {
-			mult = ((readl(enable_reg) >> 24) & 0x3f) + 1;
+		if (pete_readl("drivers/clk/renesas/clk-sh73a0.c:110", base + CPG_PLLECR) & BIT(enable_bit)) {
+			mult = ((pete_readl("drivers/clk/renesas/clk-sh73a0.c:111", enable_reg) >> 24) & 0x3f) + 1;
 			/* handle CFG bit for PLL1 and PLL2 */
 			if (enable_bit == 1 || enable_bit == 2)
-				if (readl(enable_reg) & BIT(20))
+				if (pete_readl("drivers/clk/renesas/clk-sh73a0.c:114", enable_reg) & BIT(20))
 					mult *= 2;
 		}
 	} else if (!strcmp(name, "dsi0phy") || !strcmp(name, "dsi1phy")) {
@@ -120,7 +120,7 @@ sh73a0_cpg_register_clock(struct device_node *np, struct sh73a0_cpg *cpg,
 			(phy_no ? CPG_DSI1PHYCR : CPG_DSI0PHYCR);
 
 		parent_name = phy_no ? "dsi1pck" : "dsi0pck";
-		mult = readl(dsi_reg);
+		mult = pete_readl("drivers/clk/renesas/clk-sh73a0.c:123", dsi_reg);
 		if (!(mult & 0x8000))
 			mult = 1;
 		else
@@ -191,9 +191,9 @@ static void __init sh73a0_cpg_clocks_init(struct device_node *np)
 		return;
 
 	/* Set SDHI clocks to a known state */
-	writel(0x108, base + CPG_SD0CKCR);
-	writel(0x108, base + CPG_SD1CKCR);
-	writel(0x108, base + CPG_SD2CKCR);
+	pete_writel("drivers/clk/renesas/clk-sh73a0.c:194", 0x108, base + CPG_SD0CKCR);
+	pete_writel("drivers/clk/renesas/clk-sh73a0.c:195", 0x108, base + CPG_SD1CKCR);
+	pete_writel("drivers/clk/renesas/clk-sh73a0.c:196", 0x108, base + CPG_SD2CKCR);
 
 	for (i = 0; i < num_clks; ++i) {
 		const char *name;

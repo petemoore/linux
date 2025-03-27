@@ -87,11 +87,11 @@ int pci_generic_config_read(struct pci_bus *bus, unsigned int devfn,
 		return PCIBIOS_DEVICE_NOT_FOUND;
 
 	if (size == 1)
-		*val = readb(addr);
+		*val = pete_readb("drivers/pci/access.c:90", addr);
 	else if (size == 2)
-		*val = readw(addr);
+		*val = pete_readw("drivers/pci/access.c:92", addr);
 	else
-		*val = readl(addr);
+		*val = pete_readl("drivers/pci/access.c:94", addr);
 
 	return PCIBIOS_SUCCESSFUL;
 }
@@ -107,11 +107,11 @@ int pci_generic_config_write(struct pci_bus *bus, unsigned int devfn,
 		return PCIBIOS_DEVICE_NOT_FOUND;
 
 	if (size == 1)
-		writeb(val, addr);
+		pete_writeb("drivers/pci/access.c:110", val, addr);
 	else if (size == 2)
-		writew(val, addr);
+		pete_writew("drivers/pci/access.c:112", val, addr);
 	else
-		writel(val, addr);
+		pete_writel("drivers/pci/access.c:114", val, addr);
 
 	return PCIBIOS_SUCCESSFUL;
 }
@@ -126,7 +126,7 @@ int pci_generic_config_read32(struct pci_bus *bus, unsigned int devfn,
 	if (!addr)
 		return PCIBIOS_DEVICE_NOT_FOUND;
 
-	*val = readl(addr);
+	*val = pete_readl("drivers/pci/access.c:129", addr);
 
 	if (size <= 2)
 		*val = (*val >> (8 * (where & 3))) & ((1 << (size * 8)) - 1);
@@ -146,7 +146,7 @@ int pci_generic_config_write32(struct pci_bus *bus, unsigned int devfn,
 		return PCIBIOS_DEVICE_NOT_FOUND;
 
 	if (size == 4) {
-		writel(val, addr);
+		pete_writel("drivers/pci/access.c:149", val, addr);
 		return PCIBIOS_SUCCESSFUL;
 	}
 
@@ -167,9 +167,9 @@ int pci_generic_config_write32(struct pci_bus *bus, unsigned int devfn,
 	}
 
 	mask = ~(((1 << (size * 8)) - 1) << ((where & 0x3) * 8));
-	tmp = readl(addr) & mask;
+	tmp = pete_readl("drivers/pci/access.c:170", addr) & mask;
 	tmp |= val << ((where & 0x3) * 8);
-	writel(tmp, addr);
+	pete_writel("drivers/pci/access.c:172", tmp, addr);
 
 	return PCIBIOS_SUCCESSFUL;
 }

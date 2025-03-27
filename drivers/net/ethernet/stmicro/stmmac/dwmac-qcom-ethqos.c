@@ -123,13 +123,13 @@ struct qcom_ethqos {
 
 static int rgmii_readl(struct qcom_ethqos *ethqos, unsigned int offset)
 {
-	return readl(ethqos->rgmii_base + offset);
+	return pete_readl("drivers/net/ethernet/stmicro/stmmac/dwmac-qcom-ethqos.c:126", ethqos->rgmii_base + offset);
 }
 
 static void rgmii_writel(struct qcom_ethqos *ethqos,
 			 int value, unsigned int offset)
 {
-	writel(value, ethqos->rgmii_base + offset);
+	pete_writel("drivers/net/ethernet/stmicro/stmmac/dwmac-qcom-ethqos.c:132", value, ethqos->rgmii_base + offset);
 }
 
 static void rgmii_updatel(struct qcom_ethqos *ethqos,
@@ -631,7 +631,7 @@ static int ethqos_configure_sgmii(struct qcom_ethqos *ethqos)
 {
 	int val;
 
-	val = readl(ethqos->mac_base + MAC_CTRL_REG);
+	val = pete_readl("drivers/net/ethernet/stmicro/stmmac/dwmac-qcom-ethqos.c:634", ethqos->mac_base + MAC_CTRL_REG);
 
 	switch (ethqos->speed) {
 	case SPEED_1000:
@@ -653,7 +653,7 @@ static int ethqos_configure_sgmii(struct qcom_ethqos *ethqos)
 		break;
 	}
 
-	writel(val, ethqos->mac_base + MAC_CTRL_REG);
+	pete_writel("drivers/net/ethernet/stmicro/stmmac/dwmac-qcom-ethqos.c:656", val, ethqos->mac_base + MAC_CTRL_REG);
 
 	return val;
 }

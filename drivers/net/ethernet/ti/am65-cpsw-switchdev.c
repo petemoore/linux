@@ -121,9 +121,9 @@ static u16 am65_cpsw_get_pvid(struct am65_cpsw_port *port)
 	u32 pvid;
 
 	if (port->port_id)
-		pvid = readl(port->port_base + AM65_CPSW_PORT_VLAN_REG_OFFSET);
+		pvid = pete_readl("drivers/net/ethernet/ti/am65-cpsw-switchdev.c:124", port->port_base + AM65_CPSW_PORT_VLAN_REG_OFFSET);
 	else
-		pvid = readl(host_p->port_base + AM65_CPSW_PORT_VLAN_REG_OFFSET);
+		pvid = pete_readl("drivers/net/ethernet/ti/am65-cpsw-switchdev.c:126", host_p->port_base + AM65_CPSW_PORT_VLAN_REG_OFFSET);
 
 	pvid = pvid & 0xfff;
 
@@ -141,9 +141,9 @@ static void am65_cpsw_set_pvid(struct am65_cpsw_port *port, u16 vid, bool cfi, u
 	pvid |= (cos & 0x7) << 13;
 
 	if (port->port_id)
-		writel(pvid, port->port_base + AM65_CPSW_PORT_VLAN_REG_OFFSET);
+		pete_writel("drivers/net/ethernet/ti/am65-cpsw-switchdev.c:144", pvid, port->port_base + AM65_CPSW_PORT_VLAN_REG_OFFSET);
 	else
-		writel(pvid, host_p->port_base + AM65_CPSW_PORT_VLAN_REG_OFFSET);
+		pete_writel("drivers/net/ethernet/ti/am65-cpsw-switchdev.c:146", pvid, host_p->port_base + AM65_CPSW_PORT_VLAN_REG_OFFSET);
 }
 
 static int am65_cpsw_port_vlan_add(struct am65_cpsw_port *port, bool untag, bool pvid,

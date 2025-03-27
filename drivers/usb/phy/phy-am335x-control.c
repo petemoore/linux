@@ -49,14 +49,14 @@ static void am335x_phy_wkup(struct  phy_control *phy_ctrl, u32 id, bool on)
 	}
 
 	spin_lock(&usb_ctrl->lock);
-	val = readl(usb_ctrl->wkup);
+	val = pete_readl("drivers/usb/phy/phy-am335x-control.c:52", usb_ctrl->wkup);
 
 	if (on)
 		val |= reg;
 	else
 		val &= ~reg;
 
-	writel(val, usb_ctrl->wkup);
+	pete_writel("drivers/usb/phy/phy-am335x-control.c:59", val, usb_ctrl->wkup);
 	spin_unlock(&usb_ctrl->lock);
 }
 
@@ -81,7 +81,7 @@ static void am335x_phy_power(struct phy_control *phy_ctrl, u32 id,
 		return;
 	}
 
-	val = readl(usb_ctrl->phy_reg + reg);
+	val = pete_readl("drivers/usb/phy/phy-am335x-control.c:84", usb_ctrl->phy_reg + reg);
 	if (on) {
 		if (dr_mode == USB_DR_MODE_HOST) {
 			val &= ~(USBPHY_CM_PWRDN | USBPHY_OTG_PWRDN |
@@ -95,7 +95,7 @@ static void am335x_phy_power(struct phy_control *phy_ctrl, u32 id,
 		val |= USBPHY_CM_PWRDN | USBPHY_OTG_PWRDN;
 	}
 
-	writel(val, usb_ctrl->phy_reg + reg);
+	pete_writel("drivers/usb/phy/phy-am335x-control.c:98", val, usb_ctrl->phy_reg + reg);
 
 	/*
 	 * Give the PHY ~1ms to complete the power up operation.

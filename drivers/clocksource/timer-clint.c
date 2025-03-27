@@ -48,12 +48,12 @@ EXPORT_SYMBOL(clint_time_val);
 #ifdef CONFIG_SMP
 static void clint_send_ipi(unsigned int cpu)
 {
-	writel(1, clint_ipi_base + cpuid_to_hartid_map(cpu));
+	pete_writel("drivers/clocksource/timer-clint.c:51", 1, clint_ipi_base + cpuid_to_hartid_map(cpu));
 }
 
 static void clint_clear_ipi(void)
 {
-	writel(0, clint_ipi_base + cpuid_to_hartid_map(smp_processor_id()));
+	pete_writel("drivers/clocksource/timer-clint.c:56", 0, clint_ipi_base + cpuid_to_hartid_map(smp_processor_id()));
 }
 
 static void clint_ipi_interrupt(struct irq_desc *desc)

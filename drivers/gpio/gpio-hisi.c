@@ -47,7 +47,7 @@ static inline u32 hisi_gpio_read_reg(struct gpio_chip *chip,
 			container_of(chip, struct hisi_gpio, chip);
 	void __iomem *reg = hisi_gpio->reg_base + off;
 
-	return readl(reg);
+	return pete_readl("drivers/gpio/gpio-hisi.c:50", reg);
 }
 
 static inline void hisi_gpio_write_reg(struct gpio_chip *chip,
@@ -57,7 +57,7 @@ static inline void hisi_gpio_write_reg(struct gpio_chip *chip,
 			container_of(chip, struct hisi_gpio, chip);
 	void __iomem *reg = hisi_gpio->reg_base + off;
 
-	writel(val, reg);
+	pete_writel("drivers/gpio/gpio-hisi.c:60", val, reg);
 }
 
 static void hisi_gpio_set_debounce(struct gpio_chip *chip, unsigned int off,

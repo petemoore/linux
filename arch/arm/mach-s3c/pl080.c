@@ -251,7 +251,7 @@ static int __init s3c64xx_pl080_init(void)
 		return 0;
 
 	/* Set all DMA configuration to be DMA, not SDMA */
-	writel(0xffffff, S3C64XX_SDMA_SEL);
+	pete_writel("arch/arm/mach-s3c/pl080.c:254", 0xffffff, S3C64XX_SDMA_SEL);
 
 	if (of_have_populated_dt())
 		return 0;

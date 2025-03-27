@@ -208,14 +208,14 @@ static unsigned int rp1dpi_hw_read(struct rp1_dpi *dpi, unsigned int reg)
 {
 	void __iomem *addr = dpi->hw_base[RP1DPI_HW_BLOCK_DPI] + reg;
 
-	return readl(addr);
+	return pete_readl("drivers/gpu/drm/rp1/rp1-dpi/rp1_dpi_hw.c:211", addr);
 }
 
 static void rp1dpi_hw_write(struct rp1_dpi *dpi, unsigned int reg, unsigned int val)
 {
 	void __iomem *addr = dpi->hw_base[RP1DPI_HW_BLOCK_DPI] + reg;
 
-	writel(val, addr);
+	pete_writel("drivers/gpu/drm/rp1/rp1-dpi/rp1_dpi_hw.c:218", val, addr);
 }
 
 int rp1dpi_hw_busy(struct rp1_dpi *dpi)

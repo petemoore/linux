@@ -1769,31 +1769,31 @@ static unsigned tulip_read_eeprom(void __iomem *regs, int location,
 	void __iomem *ee_addr = regs + ROMCmd;
 	int read_cmd = location | (EE_READ_CMD << addr_len);
 
-	writel(EE_ENB & ~EE_CS, ee_addr);
-	writel(EE_ENB, ee_addr);
+	pete_writel("drivers/net/ethernet/dec/tulip/de2104x.c:1772", EE_ENB & ~EE_CS, ee_addr);
+	pete_writel("drivers/net/ethernet/dec/tulip/de2104x.c:1773", EE_ENB, ee_addr);
 
 	/* Shift the read command bits out. */
 	for (i = 4 + addr_len; i >= 0; i--) {
 		short dataval = (read_cmd & (1 << i)) ? EE_DATA_WRITE : 0;
-		writel(EE_ENB | dataval, ee_addr);
-		readl(ee_addr);
-		writel(EE_ENB | dataval | EE_SHIFT_CLK, ee_addr);
-		readl(ee_addr);
-		retval = (retval << 1) | ((readl(ee_addr) & EE_DATA_READ) ? 1 : 0);
+		pete_writel("drivers/net/ethernet/dec/tulip/de2104x.c:1778", EE_ENB | dataval, ee_addr);
+		pete_readl("drivers/net/ethernet/dec/tulip/de2104x.c:1779", ee_addr);
+		pete_writel("drivers/net/ethernet/dec/tulip/de2104x.c:1780", EE_ENB | dataval | EE_SHIFT_CLK, ee_addr);
+		pete_readl("drivers/net/ethernet/dec/tulip/de2104x.c:1781", ee_addr);
+		retval = (retval << 1) | ((pete_readl("drivers/net/ethernet/dec/tulip/de2104x.c:1782", ee_addr) & EE_DATA_READ) ? 1 : 0);
 	}
-	writel(EE_ENB, ee_addr);
-	readl(ee_addr);
+	pete_writel("drivers/net/ethernet/dec/tulip/de2104x.c:1784", EE_ENB, ee_addr);
+	pete_readl("drivers/net/ethernet/dec/tulip/de2104x.c:1785", ee_addr);
 
 	for (i = 16; i > 0; i--) {
-		writel(EE_ENB | EE_SHIFT_CLK, ee_addr);
-		readl(ee_addr);
-		retval = (retval << 1) | ((readl(ee_addr) & EE_DATA_READ) ? 1 : 0);
-		writel(EE_ENB, ee_addr);
-		readl(ee_addr);
+		pete_writel("drivers/net/ethernet/dec/tulip/de2104x.c:1788", EE_ENB | EE_SHIFT_CLK, ee_addr);
+		pete_readl("drivers/net/ethernet/dec/tulip/de2104x.c:1789", ee_addr);
+		retval = (retval << 1) | ((pete_readl("drivers/net/ethernet/dec/tulip/de2104x.c:1790", ee_addr) & EE_DATA_READ) ? 1 : 0);
+		pete_writel("drivers/net/ethernet/dec/tulip/de2104x.c:1791", EE_ENB, ee_addr);
+		pete_readl("drivers/net/ethernet/dec/tulip/de2104x.c:1792", ee_addr);
 	}
 
 	/* Terminate the EEPROM access. */
-	writel(EE_ENB & ~EE_CS, ee_addr);
+	pete_writel("drivers/net/ethernet/dec/tulip/de2104x.c:1796", EE_ENB & ~EE_CS, ee_addr);
 	return retval;
 }
 

@@ -199,10 +199,10 @@ static inline void bxcan_rmw(struct bxcan_priv *priv, void __iomem *addr,
 	u32 old, val;
 
 	spin_lock_irqsave(&priv->rmw_lock, flags);
-	old = readl(addr);
+	old = pete_readl("drivers/net/can/bxcan.c:202", addr);
 	val = (old & ~clear) | set;
 	if (val != old)
-		writel(val, addr);
+		pete_writel("drivers/net/can/bxcan.c:205", val, addr);
 
 	spin_unlock_irqrestore(&priv->rmw_lock, flags);
 }
@@ -369,7 +369,7 @@ static struct sk_buff *bxcan_mailbox_read(struct can_rx_offload *offload,
 	struct can_frame *cf;
 	u32 rf0r, id, dlc;
 
-	rf0r = readl(&regs->rf0r);
+	rf0r = pete_readl("drivers/net/can/bxcan.c:372", &regs->rf0r);
 	if (unlikely(drop)) {
 		skb = ERR_PTR(-ENOBUFS);
 		goto mark_as_read;
@@ -384,13 +384,13 @@ static struct sk_buff *bxcan_mailbox_read(struct can_rx_offload *offload,
 		goto mark_as_read;
 	}
 
-	id = readl(&mb_regs->id);
+	id = pete_readl("drivers/net/can/bxcan.c:387", &mb_regs->id);
 	if (id & BXCAN_RIxR_IDE)
 		cf->can_id = FIELD_GET(BXCAN_RIxR_EXID_MASK, id) | CAN_EFF_FLAG;
 	else
 		cf->can_id = FIELD_GET(BXCAN_RIxR_STID_MASK, id) & CAN_SFF_MASK;
 
-	dlc = readl(&mb_regs->dlc);
+	dlc = pete_readl("drivers/net/can/bxcan.c:393", &mb_regs->dlc);
 	priv->timestamp = FIELD_GET(BXCAN_RDTxR_TIME_MASK, dlc);
 	cf->len = can_cc_dlc2len(FIELD_GET(BXCAN_RDTxR_DLC_MASK, dlc));
 
@@ -400,12 +400,12 @@ static struct sk_buff *bxcan_mailbox_read(struct can_rx_offload *offload,
 		int i, j;
 
 		for (i = 0, j = 0; i < cf->len; i += 4, j++)
-			*(u32 *)(cf->data + i) = readl(&mb_regs->data[j]);
+			*(u32 *)(cf->data + i) = pete_readl("drivers/net/can/bxcan.c:403", &mb_regs->data[j]);
 	}
 
  mark_as_read:
 	rf0r |= BXCAN_RF0R_RFOM0;
-	writel(rf0r, &regs->rf0r);
+	pete_writel("drivers/net/can/bxcan.c:408", rf0r, &regs->rf0r);
 	return skb;
 }
 
@@ -416,7 +416,7 @@ static irqreturn_t bxcan_rx_isr(int irq, void *dev_id)
 	struct bxcan_regs __iomem *regs = priv->regs;
 	u32 rf0r;
 
-	rf0r = readl(&regs->rf0r);
+	rf0r = pete_readl("drivers/net/can/bxcan.c:419", &regs->rf0r);
 	if (!(rf0r & BXCAN_RF0R_FMP0_MASK))
 		return IRQ_NONE;
 
@@ -435,7 +435,7 @@ static irqreturn_t bxcan_tx_isr(int irq, void *dev_id)
 	u32 tsr, rqcp_bit;
 	int idx;
 
-	tsr = readl(&regs->tsr);
+	tsr = pete_readl("drivers/net/can/bxcan.c:438", &regs->tsr);
 	if (!(tsr & (BXCAN_TSR_RQCP0 | BXCAN_TSR_RQCP1 | BXCAN_TSR_RQCP2)))
 		return IRQ_NONE;
 
@@ -450,7 +450,7 @@ static irqreturn_t bxcan_tx_isr(int irq, void *dev_id)
 		priv->tx_tail++;
 	}
 
-	writel(tsr, &regs->tsr);
+	pete_writel("drivers/net/can/bxcan.c:453", tsr, &regs->tsr);
 
 	if (bxcan_get_tx_free(priv)) {
 		/* Make sure that anybody stopping the queue after
@@ -606,18 +606,18 @@ static irqreturn_t bxcan_state_change_isr(int irq, void *dev_id)
 	struct bxcan_regs __iomem *regs = priv->regs;
 	u32 msr, esr;
 
-	msr = readl(&regs->msr);
+	msr = pete_readl("drivers/net/can/bxcan.c:609", &regs->msr);
 	if (!(msr & BXCAN_MSR_ERRI))
 		return IRQ_NONE;
 
-	esr = readl(&regs->esr);
+	esr = pete_readl("drivers/net/can/bxcan.c:613", &regs->esr);
 	bxcan_handle_state_change(ndev, esr);
 
 	if (priv->can.ctrlmode & CAN_CTRLMODE_BERR_REPORTING)
 		bxcan_handle_bus_err(ndev, esr);
 
 	msr |= BXCAN_MSR_ERRI;
-	writel(msr, &regs->msr);
+	pete_writel("drivers/net/can/bxcan.c:620", msr, &regs->msr);
 	can_rx_offload_irq_finish(&priv->offload);
 
 	return IRQ_HANDLED;
@@ -864,15 +864,15 @@ static netdev_tx_t bxcan_start_xmit(struct sk_buff *skb,
 		id |= BXCAN_TIxR_RTR;
 	} else {
 		for (i = 0, j = 0; i < cf->len; i += 4, j++)
-			writel(*(u32 *)(cf->data + i), &mb_regs->data[j]);
+			pete_writel("drivers/net/can/bxcan.c:867", *(u32 *)(cf->data + i), &mb_regs->data[j]);
 	}
 
-	writel(FIELD_PREP(BXCAN_TDTxR_DLC_MASK, cf->len), &mb_regs->dlc);
+	pete_writel("drivers/net/can/bxcan.c:870", FIELD_PREP(BXCAN_TDTxR_DLC_MASK, cf->len), &mb_regs->dlc);
 
 	can_put_echo_skb(skb, ndev, idx, 0);
 
 	/* Start transmission */
-	writel(id | BXCAN_TIxR_TXRQ, &mb_regs->id);
+	pete_writel("drivers/net/can/bxcan.c:875", id | BXCAN_TIxR_TXRQ, &mb_regs->id);
 
 	return NETDEV_TX_OK;
 }
@@ -920,7 +920,7 @@ static int bxcan_get_berr_counter(const struct net_device *ndev,
 	if (err)
 		return err;
 
-	esr = readl(&regs->esr);
+	esr = pete_readl("drivers/net/can/bxcan.c:923", &regs->esr);
 	bec->txerr = FIELD_GET(BXCAN_ESR_TEC_MASK, esr);
 	bec->rxerr = FIELD_GET(BXCAN_ESR_REC_MASK, esr);
 	clk_disable_unprepare(priv->clk);

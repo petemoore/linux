@@ -71,8 +71,8 @@ struct apple_sart {
 static void sart2_get_entry(struct apple_sart *sart, int index, u8 *flags,
 			    phys_addr_t *paddr, size_t *size)
 {
-	u32 cfg = readl(sart->regs + APPLE_SART2_CONFIG(index));
-	phys_addr_t paddr_ = readl(sart->regs + APPLE_SART2_PADDR(index));
+	u32 cfg = pete_readl("drivers/soc/apple/sart.c:74", sart->regs + APPLE_SART2_CONFIG(index));
+	phys_addr_t paddr_ = pete_readl("drivers/soc/apple/sart.c:75", sart->regs + APPLE_SART2_PADDR(index));
 	size_t size_ = FIELD_GET(APPLE_SART2_CONFIG_SIZE, cfg);
 
 	*flags = FIELD_GET(APPLE_SART2_CONFIG_FLAGS, cfg);
@@ -88,8 +88,8 @@ static void sart2_set_entry(struct apple_sart *sart, int index, u8 flags,
 	cfg = FIELD_PREP(APPLE_SART2_CONFIG_FLAGS, flags);
 	cfg |= FIELD_PREP(APPLE_SART2_CONFIG_SIZE, size_shifted);
 
-	writel(paddr_shifted, sart->regs + APPLE_SART2_PADDR(index));
-	writel(cfg, sart->regs + APPLE_SART2_CONFIG(index));
+	pete_writel("drivers/soc/apple/sart.c:91", paddr_shifted, sart->regs + APPLE_SART2_PADDR(index));
+	pete_writel("drivers/soc/apple/sart.c:92", cfg, sart->regs + APPLE_SART2_CONFIG(index));
 }
 
 static struct apple_sart_ops sart_ops_v2 = {
@@ -103,10 +103,10 @@ static struct apple_sart_ops sart_ops_v2 = {
 static void sart3_get_entry(struct apple_sart *sart, int index, u8 *flags,
 			    phys_addr_t *paddr, size_t *size)
 {
-	phys_addr_t paddr_ = readl(sart->regs + APPLE_SART3_PADDR(index));
-	size_t size_ = readl(sart->regs + APPLE_SART3_SIZE(index));
+	phys_addr_t paddr_ = pete_readl("drivers/soc/apple/sart.c:106", sart->regs + APPLE_SART3_PADDR(index));
+	size_t size_ = pete_readl("drivers/soc/apple/sart.c:107", sart->regs + APPLE_SART3_SIZE(index));
 
-	*flags = readl(sart->regs + APPLE_SART3_CONFIG(index));
+	*flags = pete_readl("drivers/soc/apple/sart.c:109", sart->regs + APPLE_SART3_CONFIG(index));
 	*size = size_ << APPLE_SART3_SIZE_SHIFT;
 	*paddr = paddr_ << APPLE_SART3_PADDR_SHIFT;
 }
@@ -114,9 +114,9 @@ static void sart3_get_entry(struct apple_sart *sart, int index, u8 *flags,
 static void sart3_set_entry(struct apple_sart *sart, int index, u8 flags,
 			    phys_addr_t paddr_shifted, size_t size_shifted)
 {
-	writel(paddr_shifted, sart->regs + APPLE_SART3_PADDR(index));
-	writel(size_shifted, sart->regs + APPLE_SART3_SIZE(index));
-	writel(flags, sart->regs + APPLE_SART3_CONFIG(index));
+	pete_writel("drivers/soc/apple/sart.c:117", paddr_shifted, sart->regs + APPLE_SART3_PADDR(index));
+	pete_writel("drivers/soc/apple/sart.c:118", size_shifted, sart->regs + APPLE_SART3_SIZE(index));
+	pete_writel("drivers/soc/apple/sart.c:119", flags, sart->regs + APPLE_SART3_CONFIG(index));
 }
 
 static struct apple_sart_ops sart_ops_v3 = {

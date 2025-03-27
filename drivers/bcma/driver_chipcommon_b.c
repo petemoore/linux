@@ -18,7 +18,7 @@ static bool bcma_wait_reg(struct bcma_bus *bus, void __iomem *addr, u32 mask,
 	u32 val;
 
 	do {
-		val = readl(addr);
+		val = pete_readl("drivers/bcma/driver_chipcommon_b.c:21", addr);
 		if ((val & mask) == value)
 			return true;
 		cpu_relax();
@@ -35,9 +35,9 @@ void bcma_chipco_b_mii_write(struct bcma_drv_cc_b *ccb, u32 offset, u32 value)
 	struct bcma_bus *bus = ccb->core->bus;
 	void __iomem *mii = ccb->mii;
 
-	writel(offset, mii + BCMA_CCB_MII_MNG_CTL);
+	pete_writel("drivers/bcma/driver_chipcommon_b.c:38", offset, mii + BCMA_CCB_MII_MNG_CTL);
 	bcma_wait_reg(bus, mii + BCMA_CCB_MII_MNG_CTL, 0x0100, 0x0000, 100);
-	writel(value, mii + BCMA_CCB_MII_MNG_CMD_DATA);
+	pete_writel("drivers/bcma/driver_chipcommon_b.c:40", value, mii + BCMA_CCB_MII_MNG_CMD_DATA);
 	bcma_wait_reg(bus, mii + BCMA_CCB_MII_MNG_CTL, 0x0100, 0x0000, 100);
 }
 EXPORT_SYMBOL_GPL(bcma_chipco_b_mii_write);

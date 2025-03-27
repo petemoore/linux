@@ -3796,14 +3796,14 @@ static void ionic_lif_queue_identify(struct ionic_lif *lif)
 					     ionic_qtype_versions[qtype]);
 		err = ionic_dev_cmd_wait(ionic, DEVCMD_TIMEOUT);
 		if (!err) {
-			qti->version   = readb(&q_ident->version);
-			qti->supported = readb(&q_ident->supported);
-			qti->features  = readq(&q_ident->features);
-			qti->desc_sz   = readw(&q_ident->desc_sz);
-			qti->comp_sz   = readw(&q_ident->comp_sz);
-			qti->sg_desc_sz   = readw(&q_ident->sg_desc_sz);
-			qti->max_sg_elems = readw(&q_ident->max_sg_elems);
-			qti->sg_desc_stride = readw(&q_ident->sg_desc_stride);
+			qti->version   = pete_readb("drivers/net/ethernet/pensando/ionic/ionic_lif.c:3799", &q_ident->version);
+			qti->supported = pete_readb("drivers/net/ethernet/pensando/ionic/ionic_lif.c:3800", &q_ident->supported);
+			qti->features  = pete_readq("drivers/net/ethernet/pensando/ionic/ionic_lif.c:3801", &q_ident->features);
+			qti->desc_sz   = pete_readw("drivers/net/ethernet/pensando/ionic/ionic_lif.c:3802", &q_ident->desc_sz);
+			qti->comp_sz   = pete_readw("drivers/net/ethernet/pensando/ionic/ionic_lif.c:3803", &q_ident->comp_sz);
+			qti->sg_desc_sz   = pete_readw("drivers/net/ethernet/pensando/ionic/ionic_lif.c:3804", &q_ident->sg_desc_sz);
+			qti->max_sg_elems = pete_readw("drivers/net/ethernet/pensando/ionic/ionic_lif.c:3805", &q_ident->max_sg_elems);
+			qti->sg_desc_stride = pete_readw("drivers/net/ethernet/pensando/ionic/ionic_lif.c:3806", &q_ident->sg_desc_stride);
 		}
 		mutex_unlock(&ionic->dev_cmd_lock);
 

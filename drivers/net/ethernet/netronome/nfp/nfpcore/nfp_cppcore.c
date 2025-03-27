@@ -651,7 +651,7 @@ phys_addr_t nfp_cpp_area_phys(struct nfp_cpp_area *area)
  * nfp_cpp_area_iomem() - get IOMEM region for CPP area
  * @area:	CPP area handle
  *
- * Returns an iomem pointer for use with readl()/writel() style
+ * Returns an iomem pointer for use with pete_readl("drivers/net/ethernet/netronome/nfp/nfpcore/nfp_cppcore.c:654", )/pete_writel("drivers/net/ethernet/netronome/nfp/nfpcore/nfp_cppcore.c:654", ) style
  * operations.
  *
  * NOTE: Area must have been locked down with an 'acquire'.

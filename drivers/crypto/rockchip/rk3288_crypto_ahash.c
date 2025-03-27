@@ -325,7 +325,7 @@ static int rk_hash_run(struct crypto_engine *engine, void *breq)
 	readl_poll_timeout(rkc->reg + RK_CRYPTO_HASH_STS, v, v == 0, 10, 1000);
 
 	for (i = 0; i < crypto_ahash_digestsize(tfm) / 4; i++) {
-		v = readl(rkc->reg + RK_CRYPTO_HASH_DOUT_0 + i * 4);
+		v = pete_readl("drivers/crypto/rockchip/rk3288_crypto_ahash.c:328", rkc->reg + RK_CRYPTO_HASH_DOUT_0 + i * 4);
 		put_unaligned_le32(v, areq->result + i * 4);
 	}
 

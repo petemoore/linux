@@ -121,19 +121,19 @@ static void acp63_enable_disable_sdw_dma_interrupts(void __iomem *acp_base, bool
 	u32 irq_mask1 = ACP_P1_SDW_DMA_IRQ_MASK;
 
 	if (enable) {
-		ext_intr_cntl = readl(acp_base + ACP_EXTERNAL_INTR_CNTL);
+		ext_intr_cntl = pete_readl("sound/soc/amd/ps/ps-sdw-dma.c:124", acp_base + ACP_EXTERNAL_INTR_CNTL);
 		ext_intr_cntl |= irq_mask;
-		writel(ext_intr_cntl, acp_base + ACP_EXTERNAL_INTR_CNTL);
-		ext_intr_cntl1 = readl(acp_base + ACP_EXTERNAL_INTR_CNTL1);
+		pete_writel("sound/soc/amd/ps/ps-sdw-dma.c:126", ext_intr_cntl, acp_base + ACP_EXTERNAL_INTR_CNTL);
+		ext_intr_cntl1 = pete_readl("sound/soc/amd/ps/ps-sdw-dma.c:127", acp_base + ACP_EXTERNAL_INTR_CNTL1);
 		ext_intr_cntl1 |= irq_mask1;
-		writel(ext_intr_cntl1, acp_base + ACP_EXTERNAL_INTR_CNTL1);
+		pete_writel("sound/soc/amd/ps/ps-sdw-dma.c:129", ext_intr_cntl1, acp_base + ACP_EXTERNAL_INTR_CNTL1);
 	} else {
-		ext_intr_cntl = readl(acp_base + ACP_EXTERNAL_INTR_CNTL);
+		ext_intr_cntl = pete_readl("sound/soc/amd/ps/ps-sdw-dma.c:131", acp_base + ACP_EXTERNAL_INTR_CNTL);
 		ext_intr_cntl &= ~irq_mask;
-		writel(ext_intr_cntl, acp_base + ACP_EXTERNAL_INTR_CNTL);
-		ext_intr_cntl1 = readl(acp_base + ACP_EXTERNAL_INTR_CNTL1);
+		pete_writel("sound/soc/amd/ps/ps-sdw-dma.c:133", ext_intr_cntl, acp_base + ACP_EXTERNAL_INTR_CNTL);
+		ext_intr_cntl1 = pete_readl("sound/soc/amd/ps/ps-sdw-dma.c:134", acp_base + ACP_EXTERNAL_INTR_CNTL1);
 		ext_intr_cntl1 &= ~irq_mask1;
-		writel(ext_intr_cntl1, acp_base + ACP_EXTERNAL_INTR_CNTL1);
+		pete_writel("sound/soc/amd/ps/ps-sdw-dma.c:136", ext_intr_cntl1, acp_base + ACP_EXTERNAL_INTR_CNTL1);
 	}
 }
 
@@ -150,20 +150,20 @@ static void acp63_config_dma(struct acp_sdw_dma_stream *stream, void __iomem *ac
 	val = sdw_dma_pte_offset + (stream_id * ACP_SDW_PTE_OFFSET);
 
 	/* Group Enable */
-	writel(ACP_SDW_SRAM_PTE_OFFSET | BIT(31), acp_base + ACPAXI2AXI_ATU_BASE_ADDR_GRP_2);
-	writel(PAGE_SIZE_4K_ENABLE, acp_base + ACPAXI2AXI_ATU_PAGE_SIZE_GRP_2);
+	pete_writel("sound/soc/amd/ps/ps-sdw-dma.c:153", ACP_SDW_SRAM_PTE_OFFSET | BIT(31), acp_base + ACPAXI2AXI_ATU_BASE_ADDR_GRP_2);
+	pete_writel("sound/soc/amd/ps/ps-sdw-dma.c:154", PAGE_SIZE_4K_ENABLE, acp_base + ACPAXI2AXI_ATU_PAGE_SIZE_GRP_2);
 	for (page_idx = 0; page_idx < stream->num_pages; page_idx++) {
 		/* Load the low address of page int ACP SRAM through SRBM */
 		low = lower_32_bits(addr);
 		high = upper_32_bits(addr);
 
-		writel(low, acp_base + ACP_SCRATCH_REG_0 + val);
+		pete_writel("sound/soc/amd/ps/ps-sdw-dma.c:160", low, acp_base + ACP_SCRATCH_REG_0 + val);
 		high |= BIT(31);
-		writel(high, acp_base + ACP_SCRATCH_REG_0 + val + 4);
+		pete_writel("sound/soc/amd/ps/ps-sdw-dma.c:162", high, acp_base + ACP_SCRATCH_REG_0 + val + 4);
 		val += 8;
 		addr += PAGE_SIZE;
 	}
-	writel(0x1, acp_base + ACPAXI2AXI_ATU_CTRL);
+	pete_writel("sound/soc/amd/ps/ps-sdw-dma.c:166", 0x1, acp_base + ACPAXI2AXI_ATU_CTRL);
 }
 
 static int acp63_configure_sdw_ringbuffer(void __iomem *acp_base, u32 stream_id, u32 size,
@@ -203,11 +203,11 @@ static int acp63_configure_sdw_ringbuffer(void __iomem *acp_base, u32 stream_id,
 	sdw_fifo_addr = sdw_fifo_offset + (stream_id * SDW_FIFO_OFFSET);
 	sdw_ring_buf_addr = sdw_mem_window_offset + (stream_id * ACP_SDW_RING_BUFF_ADDR_OFFSET);
 	sdw_ring_buf_size = size;
-	writel(sdw_ring_buf_size, acp_base + reg_ring_buf_size);
-	writel(sdw_ring_buf_addr, acp_base + reg_ring_buf_addr);
-	writel(sdw_fifo_addr, acp_base + reg_fifo_addr);
-	writel(SDW_DMA_SIZE, acp_base + reg_dma_size);
-	writel(SDW_FIFO_SIZE, acp_base + reg_fifo_size);
+	pete_writel("sound/soc/amd/ps/ps-sdw-dma.c:206", sdw_ring_buf_size, acp_base + reg_ring_buf_size);
+	pete_writel("sound/soc/amd/ps/ps-sdw-dma.c:207", sdw_ring_buf_addr, acp_base + reg_ring_buf_addr);
+	pete_writel("sound/soc/amd/ps/ps-sdw-dma.c:208", sdw_fifo_addr, acp_base + reg_fifo_addr);
+	pete_writel("sound/soc/amd/ps/ps-sdw-dma.c:209", SDW_DMA_SIZE, acp_base + reg_dma_size);
+	pete_writel("sound/soc/amd/ps/ps-sdw-dma.c:210", SDW_FIFO_SIZE, acp_base + reg_fifo_size);
 	return 0;
 }
 
@@ -295,10 +295,10 @@ static int acp63_sdw_dma_hw_params(struct snd_soc_component *component,
 		dev_err(component->dev, "Invalid DMA channel\n");
 		return -EINVAL;
 	}
-	ext_intr_ctrl = readl(sdw_data->acp_base + acp_ext_intr_cntl_reg);
+	ext_intr_ctrl = pete_readl("sound/soc/amd/ps/ps-sdw-dma.c:298", sdw_data->acp_base + acp_ext_intr_cntl_reg);
 	ext_intr_ctrl |= irq_mask;
-	writel(ext_intr_ctrl, sdw_data->acp_base + acp_ext_intr_cntl_reg);
-	writel(period_bytes, sdw_data->acp_base + water_mark_size_reg);
+	pete_writel("sound/soc/amd/ps/ps-sdw-dma.c:300", ext_intr_ctrl, sdw_data->acp_base + acp_ext_intr_cntl_reg);
+	pete_writel("sound/soc/amd/ps/ps-sdw-dma.c:301", period_bytes, sdw_data->acp_base + water_mark_size_reg);
 	return 0;
 }
 
@@ -321,8 +321,8 @@ static u64 acp63_sdw_get_byte_count(struct acp_sdw_dma_stream *stream, void __io
 		goto POINTER_RETURN_BYTES;
 	}
 	if (pos_low_reg) {
-		byte_count.bcount.high = readl(acp_base + pos_high_reg);
-		byte_count.bcount.low = readl(acp_base + pos_low_reg);
+		byte_count.bcount.high = pete_readl("sound/soc/amd/ps/ps-sdw-dma.c:324", acp_base + pos_high_reg);
+		byte_count.bcount.low = pete_readl("sound/soc/amd/ps/ps-sdw-dma.c:325", acp_base + pos_low_reg);
 	}
 POINTER_RETURN_BYTES:
 	return byte_count.bytescount;
@@ -405,7 +405,7 @@ static int acp63_sdw_dma_enable(struct snd_pcm_substream *substream,
 	}
 	sdw_dma_en_stat_reg = sdw_dma_en_reg + 4;
 	dma_enable = sdw_dma_enable;
-	writel(dma_enable, acp_base + sdw_dma_en_reg);
+	pete_writel("sound/soc/amd/ps/ps-sdw-dma.c:408", dma_enable, acp_base + sdw_dma_en_reg);
 	return readl_poll_timeout(acp_base + sdw_dma_en_stat_reg, sdw_dma_stat,
 				  (sdw_dma_stat == dma_enable), ACP_DELAY_US, ACP_COUNTER);
 }
@@ -529,7 +529,7 @@ static int acp_restore_sdw_dma_config(struct sdw_dma_dev_data *sdw_data)
 								     buf_size, instance);
 				if (ret)
 					return ret;
-				writel(period_bytes, sdw_data->acp_base + water_mark_size_reg);
+				pete_writel("sound/soc/amd/ps/ps-sdw-dma.c:532", period_bytes, sdw_data->acp_base + water_mark_size_reg);
 			}
 		}
 	}

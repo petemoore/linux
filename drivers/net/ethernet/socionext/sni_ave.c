@@ -303,7 +303,7 @@ static u32 ave_desc_read(struct net_device *ndev, enum desc_id id, int entry,
 	addr = ((id == AVE_DESCID_TX) ? priv->tx.daddr : priv->rx.daddr)
 		+ entry * priv->desc_size + offset;
 
-	return readl(priv->base + addr);
+	return pete_readl("drivers/net/ethernet/socionext/sni_ave.c:306", priv->base + addr);
 }
 
 static u32 ave_desc_read_cmdsts(struct net_device *ndev, enum desc_id id,
@@ -321,7 +321,7 @@ static void ave_desc_write(struct net_device *ndev, enum desc_id id,
 	addr = ((id == AVE_DESCID_TX) ? priv->tx.daddr : priv->rx.daddr)
 		+ entry * priv->desc_size + offset;
 
-	writel(val, priv->base + addr);
+	pete_writel("drivers/net/ethernet/socionext/sni_ave.c:324", val, priv->base + addr);
 }
 
 static void ave_desc_write_cmdsts(struct net_device *ndev, enum desc_id id,
@@ -348,8 +348,8 @@ static u32 ave_irq_disable_all(struct net_device *ndev)
 	struct ave_private *priv = netdev_priv(ndev);
 	u32 ret;
 
-	ret = readl(priv->base + AVE_GIMR);
-	writel(0, priv->base + AVE_GIMR);
+	ret = pete_readl("drivers/net/ethernet/socionext/sni_ave.c:351", priv->base + AVE_GIMR);
+	pete_writel("drivers/net/ethernet/socionext/sni_ave.c:352", 0, priv->base + AVE_GIMR);
 
 	return ret;
 }
@@ -358,15 +358,15 @@ static void ave_irq_restore(struct net_device *ndev, u32 val)
 {
 	struct ave_private *priv = netdev_priv(ndev);
 
-	writel(val, priv->base + AVE_GIMR);
+	pete_writel("drivers/net/ethernet/socionext/sni_ave.c:361", val, priv->base + AVE_GIMR);
 }
 
 static void ave_irq_enable(struct net_device *ndev, u32 bitflag)
 {
 	struct ave_private *priv = netdev_priv(ndev);
 
-	writel(readl(priv->base + AVE_GIMR) | bitflag, priv->base + AVE_GIMR);
-	writel(bitflag, priv->base + AVE_GISR);
+	pete_writel("drivers/net/ethernet/socionext/sni_ave.c:368", pete_readl("drivers/net/ethernet/socionext/sni_ave.c:368", priv->base + AVE_GIMR) | bitflag, priv->base + AVE_GIMR);
+	pete_writel("drivers/net/ethernet/socionext/sni_ave.c:369", bitflag, priv->base + AVE_GISR);
 }
 
 static void ave_hw_write_macaddr(struct net_device *ndev,
@@ -375,9 +375,9 @@ static void ave_hw_write_macaddr(struct net_device *ndev,
 {
 	struct ave_private *priv = netdev_priv(ndev);
 
-	writel(mac_addr[0] | mac_addr[1] << 8 |
+	pete_writel("drivers/net/ethernet/socionext/sni_ave.c:378", mac_addr[0] | mac_addr[1] << 8 |
 	       mac_addr[2] << 16 | mac_addr[3] << 24, priv->base + reg1);
-	writel(mac_addr[4] | mac_addr[5] << 8, priv->base + reg2);
+	pete_writel("drivers/net/ethernet/socionext/sni_ave.c:380", mac_addr[4] | mac_addr[5] << 8, priv->base + reg2);
 }
 
 static void ave_hw_read_version(struct net_device *ndev, char *buf, int len)
@@ -385,7 +385,7 @@ static void ave_hw_read_version(struct net_device *ndev, char *buf, int len)
 	struct ave_private *priv = netdev_priv(ndev);
 	u32 major, minor, vr;
 
-	vr = readl(priv->base + AVE_VR);
+	vr = pete_readl("drivers/net/ethernet/socionext/sni_ave.c:388", priv->base + AVE_VR);
 	major = (vr & GENMASK(15, 8)) >> 8;
 	minor = (vr & GENMASK(7, 0));
 	snprintf(buf, len, "v%u.%u", major, minor);
@@ -499,11 +499,11 @@ static int ave_mdiobus_read(struct mii_bus *bus, int phyid, int regnum)
 	priv = netdev_priv(ndev);
 
 	/* write address */
-	writel((phyid << 8) | regnum, priv->base + AVE_MDIOAR);
+	pete_writel("drivers/net/ethernet/socionext/sni_ave.c:502", (phyid << 8) | regnum, priv->base + AVE_MDIOAR);
 
 	/* read request */
-	mdioctl = readl(priv->base + AVE_MDIOCTR);
-	writel((mdioctl | AVE_MDIOCTR_RREQ) & ~AVE_MDIOCTR_WREQ,
+	mdioctl = pete_readl("drivers/net/ethernet/socionext/sni_ave.c:505", priv->base + AVE_MDIOCTR);
+	pete_writel("drivers/net/ethernet/socionext/sni_ave.c:506", (mdioctl | AVE_MDIOCTR_RREQ) & ~AVE_MDIOCTR_WREQ,
 	       priv->base + AVE_MDIOCTR);
 
 	ret = readl_poll_timeout(priv->base + AVE_MDIOSR, mdiosr,
@@ -514,7 +514,7 @@ static int ave_mdiobus_read(struct mii_bus *bus, int phyid, int regnum)
 		return ret;
 	}
 
-	return readl(priv->base + AVE_MDIORDR) & GENMASK(15, 0);
+	return pete_readl("drivers/net/ethernet/socionext/sni_ave.c:517", priv->base + AVE_MDIORDR) & GENMASK(15, 0);
 }
 
 static int ave_mdiobus_write(struct mii_bus *bus, int phyid, int regnum,
@@ -528,14 +528,14 @@ static int ave_mdiobus_write(struct mii_bus *bus, int phyid, int regnum,
 	priv = netdev_priv(ndev);
 
 	/* write address */
-	writel((phyid << 8) | regnum, priv->base + AVE_MDIOAR);
+	pete_writel("drivers/net/ethernet/socionext/sni_ave.c:531", (phyid << 8) | regnum, priv->base + AVE_MDIOAR);
 
 	/* write data */
-	writel(val, priv->base + AVE_MDIOWDR);
+	pete_writel("drivers/net/ethernet/socionext/sni_ave.c:534", val, priv->base + AVE_MDIOWDR);
 
 	/* write request */
-	mdioctl = readl(priv->base + AVE_MDIOCTR);
-	writel((mdioctl | AVE_MDIOCTR_WREQ) & ~AVE_MDIOCTR_RREQ,
+	mdioctl = pete_readl("drivers/net/ethernet/socionext/sni_ave.c:537", priv->base + AVE_MDIOCTR);
+	pete_writel("drivers/net/ethernet/socionext/sni_ave.c:538", (mdioctl | AVE_MDIOCTR_WREQ) & ~AVE_MDIOCTR_RREQ,
 	       priv->base + AVE_MDIOCTR);
 
 	ret = readl_poll_timeout(priv->base + AVE_MDIOSR, mdiosr,
@@ -637,11 +637,11 @@ static int ave_desc_switch(struct net_device *ndev, enum desc_state state)
 
 	switch (state) {
 	case AVE_DESC_START:
-		writel(AVE_DESCC_TD | AVE_DESCC_RD0, priv->base + AVE_DESCC);
+		pete_writel("drivers/net/ethernet/socionext/sni_ave.c:640", AVE_DESCC_TD | AVE_DESCC_RD0, priv->base + AVE_DESCC);
 		break;
 
 	case AVE_DESC_STOP:
-		writel(0, priv->base + AVE_DESCC);
+		pete_writel("drivers/net/ethernet/socionext/sni_ave.c:644", 0, priv->base + AVE_DESCC);
 		if (readl_poll_timeout(priv->base + AVE_DESCC, val, !val,
 				       150, 15000)) {
 			netdev_err(ndev, "can't stop descriptor\n");
@@ -650,10 +650,10 @@ static int ave_desc_switch(struct net_device *ndev, enum desc_state state)
 		break;
 
 	case AVE_DESC_RX_SUSPEND:
-		val = readl(priv->base + AVE_DESCC);
+		val = pete_readl("drivers/net/ethernet/socionext/sni_ave.c:653", priv->base + AVE_DESCC);
 		val |= AVE_DESCC_RDSTP;
 		val &= ~AVE_DESCC_STATUS_MASK;
-		writel(val, priv->base + AVE_DESCC);
+		pete_writel("drivers/net/ethernet/socionext/sni_ave.c:656", val, priv->base + AVE_DESCC);
 		if (readl_poll_timeout(priv->base + AVE_DESCC, val,
 				       val & (AVE_DESCC_RDSTP << 16),
 				       150, 150000)) {
@@ -663,10 +663,10 @@ static int ave_desc_switch(struct net_device *ndev, enum desc_state state)
 		break;
 
 	case AVE_DESC_RX_PERMIT:
-		val = readl(priv->base + AVE_DESCC);
+		val = pete_readl("drivers/net/ethernet/socionext/sni_ave.c:666", priv->base + AVE_DESCC);
 		val &= ~AVE_DESCC_RDSTP;
 		val &= ~AVE_DESCC_STATUS_MASK;
-		writel(val, priv->base + AVE_DESCC);
+		pete_writel("drivers/net/ethernet/socionext/sni_ave.c:669", val, priv->base + AVE_DESCC);
 		break;
 
 	default:
@@ -861,29 +861,29 @@ static void ave_global_reset(struct net_device *ndev)
 	val = AVE_CFGR_FLE | AVE_CFGR_IPFCEN | AVE_CFGR_CHE;
 	if (!phy_interface_mode_is_rgmii(priv->phy_mode))
 		val |= AVE_CFGR_MII;
-	writel(val, priv->base + AVE_CFGR);
+	pete_writel("drivers/net/ethernet/socionext/sni_ave.c:864", val, priv->base + AVE_CFGR);
 
 	/* reset RMII register */
-	val = readl(priv->base + AVE_RSTCTRL);
+	val = pete_readl("drivers/net/ethernet/socionext/sni_ave.c:867", priv->base + AVE_RSTCTRL);
 	val &= ~AVE_RSTCTRL_RMIIRST;
-	writel(val, priv->base + AVE_RSTCTRL);
+	pete_writel("drivers/net/ethernet/socionext/sni_ave.c:869", val, priv->base + AVE_RSTCTRL);
 
 	/* assert reset */
-	writel(AVE_GRR_GRST | AVE_GRR_PHYRST, priv->base + AVE_GRR);
+	pete_writel("drivers/net/ethernet/socionext/sni_ave.c:872", AVE_GRR_GRST | AVE_GRR_PHYRST, priv->base + AVE_GRR);
 	msleep(20);
 
 	/* 1st, negate PHY reset only */
-	writel(AVE_GRR_GRST, priv->base + AVE_GRR);
+	pete_writel("drivers/net/ethernet/socionext/sni_ave.c:876", AVE_GRR_GRST, priv->base + AVE_GRR);
 	msleep(40);
 
 	/* negate reset */
-	writel(0, priv->base + AVE_GRR);
+	pete_writel("drivers/net/ethernet/socionext/sni_ave.c:880", 0, priv->base + AVE_GRR);
 	msleep(40);
 
 	/* negate RMII register */
-	val = readl(priv->base + AVE_RSTCTRL);
+	val = pete_readl("drivers/net/ethernet/socionext/sni_ave.c:884", priv->base + AVE_RSTCTRL);
 	val |= AVE_RSTCTRL_RMIIRST;
-	writel(val, priv->base + AVE_RSTCTRL);
+	pete_writel("drivers/net/ethernet/socionext/sni_ave.c:886", val, priv->base + AVE_RSTCTRL);
 
 	ave_irq_disable_all(ndev);
 }
@@ -894,8 +894,8 @@ static void ave_rxfifo_reset(struct net_device *ndev)
 	u32 rxcr_org;
 
 	/* save and disable MAC receive op */
-	rxcr_org = readl(priv->base + AVE_RXCR);
-	writel(rxcr_org & (~AVE_RXCR_RXEN), priv->base + AVE_RXCR);
+	rxcr_org = pete_readl("drivers/net/ethernet/socionext/sni_ave.c:897", priv->base + AVE_RXCR);
+	pete_writel("drivers/net/ethernet/socionext/sni_ave.c:898", rxcr_org & (~AVE_RXCR_RXEN), priv->base + AVE_RXCR);
 
 	/* suspend Rx descriptor */
 	ave_desc_switch(ndev, AVE_DESC_RX_SUSPEND);
@@ -904,21 +904,21 @@ static void ave_rxfifo_reset(struct net_device *ndev)
 	ave_rx_receive(ndev, priv->rx.ndesc);
 
 	/* assert reset */
-	writel(AVE_GRR_RXFFR, priv->base + AVE_GRR);
+	pete_writel("drivers/net/ethernet/socionext/sni_ave.c:907", AVE_GRR_RXFFR, priv->base + AVE_GRR);
 	udelay(50);
 
 	/* negate reset */
-	writel(0, priv->base + AVE_GRR);
+	pete_writel("drivers/net/ethernet/socionext/sni_ave.c:911", 0, priv->base + AVE_GRR);
 	udelay(20);
 
 	/* negate interrupt status */
-	writel(AVE_GI_RXOVF, priv->base + AVE_GISR);
+	pete_writel("drivers/net/ethernet/socionext/sni_ave.c:915", AVE_GI_RXOVF, priv->base + AVE_GISR);
 
 	/* permit descriptor */
 	ave_desc_switch(ndev, AVE_DESC_RX_PERMIT);
 
 	/* restore MAC reccieve op */
-	writel(rxcr_org, priv->base + AVE_RXCR);
+	pete_writel("drivers/net/ethernet/socionext/sni_ave.c:921", rxcr_org, priv->base + AVE_RXCR);
 }
 
 static irqreturn_t ave_irq_handler(int irq, void *netdev)
@@ -930,15 +930,15 @@ static irqreturn_t ave_irq_handler(int irq, void *netdev)
 	gimr_val = ave_irq_disable_all(ndev);
 
 	/* get interrupt status */
-	gisr_val = readl(priv->base + AVE_GISR);
+	gisr_val = pete_readl("drivers/net/ethernet/socionext/sni_ave.c:933", priv->base + AVE_GISR);
 
 	/* PHY */
 	if (gisr_val & AVE_GI_PHY)
-		writel(AVE_GI_PHY, priv->base + AVE_GISR);
+		pete_writel("drivers/net/ethernet/socionext/sni_ave.c:937", AVE_GI_PHY, priv->base + AVE_GISR);
 
 	/* check exceeding packet */
 	if (gisr_val & AVE_GI_RXERR) {
-		writel(AVE_GI_RXERR, priv->base + AVE_GISR);
+		pete_writel("drivers/net/ethernet/socionext/sni_ave.c:941", AVE_GI_RXERR, priv->base + AVE_GISR);
 		netdev_err(ndev, "receive a packet exceeding frame buffer\n");
 	}
 
@@ -956,7 +956,7 @@ static irqreturn_t ave_irq_handler(int irq, void *netdev)
 	/* Rx drop */
 	if (gisr_val & AVE_GI_RXDROP) {
 		priv->stats_rx.dropped++;
-		writel(AVE_GI_RXDROP, priv->base + AVE_GISR);
+		pete_writel("drivers/net/ethernet/socionext/sni_ave.c:959", AVE_GI_RXDROP, priv->base + AVE_GISR);
 	}
 
 	/* Rx interval */
@@ -987,8 +987,8 @@ static int ave_pfsel_start(struct net_device *ndev, unsigned int entry)
 	if (WARN_ON(entry > AVE_PF_SIZE))
 		return -EINVAL;
 
-	val = readl(priv->base + AVE_PFEN);
-	writel(val | BIT(entry), priv->base + AVE_PFEN);
+	val = pete_readl("drivers/net/ethernet/socionext/sni_ave.c:990", priv->base + AVE_PFEN);
+	pete_writel("drivers/net/ethernet/socionext/sni_ave.c:991", val | BIT(entry), priv->base + AVE_PFEN);
 
 	return 0;
 }
@@ -1001,8 +1001,8 @@ static int ave_pfsel_stop(struct net_device *ndev, unsigned int entry)
 	if (WARN_ON(entry > AVE_PF_SIZE))
 		return -EINVAL;
 
-	val = readl(priv->base + AVE_PFEN);
-	writel(val & ~BIT(entry), priv->base + AVE_PFEN);
+	val = pete_readl("drivers/net/ethernet/socionext/sni_ave.c:1004", priv->base + AVE_PFEN);
+	pete_writel("drivers/net/ethernet/socionext/sni_ave.c:1005", val & ~BIT(entry), priv->base + AVE_PFEN);
 
 	return 0;
 }
@@ -1026,15 +1026,15 @@ static int ave_pfsel_set_macaddr(struct net_device *ndev,
 			     AVE_PKTF(entry), AVE_PKTF(entry) + 4);
 
 	/* set byte mask */
-	writel(GENMASK(31, set_size) & AVE_PFMBYTE_MASK0,
+	pete_writel("drivers/net/ethernet/socionext/sni_ave.c:1029", GENMASK(31, set_size) & AVE_PFMBYTE_MASK0,
 	       priv->base + AVE_PFMBYTE(entry));
-	writel(AVE_PFMBYTE_MASK1, priv->base + AVE_PFMBYTE(entry) + 4);
+	pete_writel("drivers/net/ethernet/socionext/sni_ave.c:1031", AVE_PFMBYTE_MASK1, priv->base + AVE_PFMBYTE(entry) + 4);
 
 	/* set bit mask filter */
-	writel(AVE_PFMBIT_MASK, priv->base + AVE_PFMBIT(entry));
+	pete_writel("drivers/net/ethernet/socionext/sni_ave.c:1034", AVE_PFMBIT_MASK, priv->base + AVE_PFMBIT(entry));
 
 	/* set selector to ring 0 */
-	writel(0, priv->base + AVE_PFSEL(entry));
+	pete_writel("drivers/net/ethernet/socionext/sni_ave.c:1037", 0, priv->base + AVE_PFSEL(entry));
 
 	/* restart filter */
 	ave_pfsel_start(ndev, entry);
@@ -1053,14 +1053,14 @@ static void ave_pfsel_set_promisc(struct net_device *ndev,
 	ave_pfsel_stop(ndev, entry);
 
 	/* set byte mask */
-	writel(AVE_PFMBYTE_MASK0, priv->base + AVE_PFMBYTE(entry));
-	writel(AVE_PFMBYTE_MASK1, priv->base + AVE_PFMBYTE(entry) + 4);
+	pete_writel("drivers/net/ethernet/socionext/sni_ave.c:1056", AVE_PFMBYTE_MASK0, priv->base + AVE_PFMBYTE(entry));
+	pete_writel("drivers/net/ethernet/socionext/sni_ave.c:1057", AVE_PFMBYTE_MASK1, priv->base + AVE_PFMBYTE(entry) + 4);
 
 	/* set bit mask filter */
-	writel(AVE_PFMBIT_MASK, priv->base + AVE_PFMBIT(entry));
+	pete_writel("drivers/net/ethernet/socionext/sni_ave.c:1060", AVE_PFMBIT_MASK, priv->base + AVE_PFMBIT(entry));
 
 	/* set selector to rxring */
-	writel(rxring, priv->base + AVE_PFSEL(entry));
+	pete_writel("drivers/net/ethernet/socionext/sni_ave.c:1063", rxring, priv->base + AVE_PFSEL(entry));
 
 	ave_pfsel_start(ndev, entry);
 }
@@ -1094,7 +1094,7 @@ static void ave_phy_adjust_link(struct net_device *ndev)
 	u8 cap;
 
 	/* set RGMII speed */
-	val = readl(priv->base + AVE_TXCR);
+	val = pete_readl("drivers/net/ethernet/socionext/sni_ave.c:1097", priv->base + AVE_TXCR);
 	val &= ~(AVE_TXCR_TXSPD_100 | AVE_TXCR_TXSPD_1G);
 
 	if (phy_interface_is_rgmii(phydev) && phydev->speed == SPEED_1000)
@@ -1102,21 +1102,21 @@ static void ave_phy_adjust_link(struct net_device *ndev)
 	else if (phydev->speed == SPEED_100)
 		val |= AVE_TXCR_TXSPD_100;
 
-	writel(val, priv->base + AVE_TXCR);
+	pete_writel("drivers/net/ethernet/socionext/sni_ave.c:1105", val, priv->base + AVE_TXCR);
 
 	/* set RMII speed (100M/10M only) */
 	if (!phy_interface_is_rgmii(phydev)) {
-		val = readl(priv->base + AVE_LINKSEL);
+		val = pete_readl("drivers/net/ethernet/socionext/sni_ave.c:1109", priv->base + AVE_LINKSEL);
 		if (phydev->speed == SPEED_10)
 			val &= ~AVE_LINKSEL_100M;
 		else
 			val |= AVE_LINKSEL_100M;
-		writel(val, priv->base + AVE_LINKSEL);
+		pete_writel("drivers/net/ethernet/socionext/sni_ave.c:1114", val, priv->base + AVE_LINKSEL);
 	}
 
 	/* check current RXCR/TXCR */
-	rxcr = readl(priv->base + AVE_RXCR);
-	txcr = readl(priv->base + AVE_TXCR);
+	rxcr = pete_readl("drivers/net/ethernet/socionext/sni_ave.c:1118", priv->base + AVE_RXCR);
+	txcr = pete_readl("drivers/net/ethernet/socionext/sni_ave.c:1119", priv->base + AVE_TXCR);
 	rxcr_org = rxcr;
 
 	if (phydev->duplex) {
@@ -1145,10 +1145,10 @@ static void ave_phy_adjust_link(struct net_device *ndev)
 
 	if (rxcr_org != rxcr) {
 		/* disable Rx mac */
-		writel(rxcr & ~AVE_RXCR_RXEN, priv->base + AVE_RXCR);
+		pete_writel("drivers/net/ethernet/socionext/sni_ave.c:1148", rxcr & ~AVE_RXCR_RXEN, priv->base + AVE_RXCR);
 		/* change and enable TX/Rx mac */
-		writel(txcr, priv->base + AVE_TXCR);
-		writel(rxcr, priv->base + AVE_RXCR);
+		pete_writel("drivers/net/ethernet/socionext/sni_ave.c:1150", txcr, priv->base + AVE_TXCR);
+		pete_writel("drivers/net/ethernet/socionext/sni_ave.c:1151", rxcr, priv->base + AVE_RXCR);
 	}
 
 	phy_print_status(phydev);
@@ -1297,7 +1297,7 @@ static int ave_open(struct net_device *ndev)
 		ave_desc_write_cmdsts(ndev, AVE_DESCID_TX, entry, 0);
 		ave_desc_write_addr(ndev, AVE_DESCID_TX, entry, 0);
 	}
-	writel(AVE_TXDC_ADDR_START |
+	pete_writel("drivers/net/ethernet/socionext/sni_ave.c:1300", AVE_TXDC_ADDR_START |
 	       (((priv->tx.ndesc * priv->desc_size) << 16) & AVE_TXDC_SIZE),
 	       priv->base + AVE_TXDC);
 
@@ -1308,7 +1308,7 @@ static int ave_open(struct net_device *ndev)
 		if (ave_rxdesc_prepare(ndev, entry))
 			break;
 	}
-	writel(AVE_RXDC0_ADDR_START |
+	pete_writel("drivers/net/ethernet/socionext/sni_ave.c:1311", AVE_RXDC0_ADDR_START |
 	       (((priv->rx.ndesc * priv->desc_size) << 16) & AVE_RXDC0_SIZE),
 	       priv->base + AVE_RXDC0);
 
@@ -1321,16 +1321,16 @@ static int ave_open(struct net_device *ndev)
 	/* full duplex, enable pause drop, enalbe flow control */
 	val = AVE_RXCR_RXEN | AVE_RXCR_FDUPEN | AVE_RXCR_DRPEN |
 		AVE_RXCR_FLOCTR | (AVE_MAX_ETHFRAME & AVE_RXCR_MPSIZ_MASK);
-	writel(val, priv->base + AVE_RXCR);
+	pete_writel("drivers/net/ethernet/socionext/sni_ave.c:1324", val, priv->base + AVE_RXCR);
 
 	/* set Tx configuration */
 	/* enable flow control, disable loopback */
-	writel(AVE_TXCR_FLOCTR, priv->base + AVE_TXCR);
+	pete_writel("drivers/net/ethernet/socionext/sni_ave.c:1328", AVE_TXCR_FLOCTR, priv->base + AVE_TXCR);
 
 	/* enable timer, clear EN,INTM, and mask interval unit(BSCK) */
-	val = readl(priv->base + AVE_IIRQC) & AVE_IIRQC_BSCK;
+	val = pete_readl("drivers/net/ethernet/socionext/sni_ave.c:1331", priv->base + AVE_IIRQC) & AVE_IIRQC_BSCK;
 	val |= AVE_IIRQC_EN0 | (AVE_INTM_COUNT << 16);
-	writel(val, priv->base + AVE_IIRQC);
+	pete_writel("drivers/net/ethernet/socionext/sni_ave.c:1333", val, priv->base + AVE_IIRQC);
 
 	val = AVE_GI_RXIINT | AVE_GI_RXOVF | AVE_GI_TX | AVE_GI_RXDROP;
 	ave_irq_restore(ndev, val);
@@ -1472,12 +1472,12 @@ static void ave_set_rx_mode(struct net_device *ndev)
 
 	/* MAC addr filter enable for promiscious mode */
 	mc_cnt = netdev_mc_count(ndev);
-	val = readl(priv->base + AVE_RXCR);
+	val = pete_readl("drivers/net/ethernet/socionext/sni_ave.c:1475", priv->base + AVE_RXCR);
 	if (ndev->flags & IFF_PROMISC || !mc_cnt)
 		val &= ~AVE_RXCR_AFEN;
 	else
 		val |= AVE_RXCR_AFEN;
-	writel(val, priv->base + AVE_RXCR);
+	pete_writel("drivers/net/ethernet/socionext/sni_ave.c:1480", val, priv->base + AVE_RXCR);
 
 	/* set all multicast address */
 	if ((ndev->flags & IFF_ALLMULTI) || mc_cnt > AVE_PF_MULTICAST_SIZE) {
@@ -1702,7 +1702,7 @@ static int ave_probe(struct platform_device *pdev)
 	}
 
 	/* get ID and version */
-	ave_id = readl(priv->base + AVE_IDR);
+	ave_id = pete_readl("drivers/net/ethernet/socionext/sni_ave.c:1705", priv->base + AVE_IDR);
 	ave_hw_read_version(ndev, buf, sizeof(buf));
 
 	dev_info(dev, "Socionext %c%c%c%c Ethernet IP %s (irq=%d, phy=%s)\n",

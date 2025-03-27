@@ -75,30 +75,30 @@ static inline struct uart_pmac_port *pmz_get_port_A(struct uart_pmac_port *uap)
 static inline u8 read_zsreg(struct uart_pmac_port *port, u8 reg)
 {
 	if (reg != 0)
-		writeb(reg, port->control_reg);
-	return readb(port->control_reg);
+		pete_writeb("drivers/tty/serial/pmac_zilog.h:78", reg, port->control_reg);
+	return pete_readb("drivers/tty/serial/pmac_zilog.h:79", port->control_reg);
 }
 
 static inline void write_zsreg(struct uart_pmac_port *port, u8 reg, u8 value)
 {
 	if (reg != 0)
-		writeb(reg, port->control_reg);
-	writeb(value, port->control_reg);
+		pete_writeb("drivers/tty/serial/pmac_zilog.h:85", reg, port->control_reg);
+	pete_writeb("drivers/tty/serial/pmac_zilog.h:86", value, port->control_reg);
 }
 
 static inline u8 read_zsdata(struct uart_pmac_port *port)
 {
-	return readb(port->data_reg);
+	return pete_readb("drivers/tty/serial/pmac_zilog.h:91", port->data_reg);
 }
 
 static inline void write_zsdata(struct uart_pmac_port *port, u8 data)
 {
-	writeb(data, port->data_reg);
+	pete_writeb("drivers/tty/serial/pmac_zilog.h:96", data, port->data_reg);
 }
 
 static inline void zssync(struct uart_pmac_port *port)
 {
-	(void)readb(port->control_reg);
+	(void)pete_readb("drivers/tty/serial/pmac_zilog.h:101", port->control_reg);
 }
 
 /* Conversion routines to/from brg time constants from/to bits

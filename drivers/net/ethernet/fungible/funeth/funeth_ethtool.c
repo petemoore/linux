@@ -451,15 +451,15 @@ static void fun_get_regs(struct net_device *dev, struct ethtool_regs *regs,
 	void __iomem *bar = fp->fdev->bar;
 
 	regs->version = 0;
-	*(u64 *)(buf + NVME_REG_CAP)   = readq(bar + NVME_REG_CAP);
-	*(u32 *)(buf + NVME_REG_VS)    = readl(bar + NVME_REG_VS);
-	*(u32 *)(buf + NVME_REG_INTMS) = readl(bar + NVME_REG_INTMS);
-	*(u32 *)(buf + NVME_REG_INTMC) = readl(bar + NVME_REG_INTMC);
-	*(u32 *)(buf + NVME_REG_CC)    = readl(bar + NVME_REG_CC);
-	*(u32 *)(buf + NVME_REG_CSTS)  = readl(bar + NVME_REG_CSTS);
-	*(u32 *)(buf + NVME_REG_AQA)   = readl(bar + NVME_REG_AQA);
-	*(u64 *)(buf + NVME_REG_ASQ)   = readq(bar + NVME_REG_ASQ);
-	*(u64 *)(buf + NVME_REG_ACQ)   = readq(bar + NVME_REG_ACQ);
+	*(u64 *)(buf + NVME_REG_CAP)   = pete_readq("drivers/net/ethernet/fungible/funeth/funeth_ethtool.c:454", bar + NVME_REG_CAP);
+	*(u32 *)(buf + NVME_REG_VS)    = pete_readl("drivers/net/ethernet/fungible/funeth/funeth_ethtool.c:455", bar + NVME_REG_VS);
+	*(u32 *)(buf + NVME_REG_INTMS) = pete_readl("drivers/net/ethernet/fungible/funeth/funeth_ethtool.c:456", bar + NVME_REG_INTMS);
+	*(u32 *)(buf + NVME_REG_INTMC) = pete_readl("drivers/net/ethernet/fungible/funeth/funeth_ethtool.c:457", bar + NVME_REG_INTMC);
+	*(u32 *)(buf + NVME_REG_CC)    = pete_readl("drivers/net/ethernet/fungible/funeth/funeth_ethtool.c:458", bar + NVME_REG_CC);
+	*(u32 *)(buf + NVME_REG_CSTS)  = pete_readl("drivers/net/ethernet/fungible/funeth/funeth_ethtool.c:459", bar + NVME_REG_CSTS);
+	*(u32 *)(buf + NVME_REG_AQA)   = pete_readl("drivers/net/ethernet/fungible/funeth/funeth_ethtool.c:460", bar + NVME_REG_AQA);
+	*(u64 *)(buf + NVME_REG_ASQ)   = pete_readq("drivers/net/ethernet/fungible/funeth/funeth_ethtool.c:461", bar + NVME_REG_ASQ);
+	*(u64 *)(buf + NVME_REG_ACQ)   = pete_readq("drivers/net/ethernet/fungible/funeth/funeth_ethtool.c:462", bar + NVME_REG_ACQ);
 }
 
 static int fun_get_coalesce(struct net_device *netdev,

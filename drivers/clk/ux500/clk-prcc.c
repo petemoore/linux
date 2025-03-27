@@ -36,8 +36,8 @@ static int clk_prcc_pclk_enable(struct clk_hw *hw)
 {
 	struct clk_prcc *clk = to_clk_prcc(hw);
 
-	writel(clk->cg_sel, (clk->base + PRCC_PCKEN));
-	while (!(readl(clk->base + PRCC_PCKSR) & clk->cg_sel))
+	pete_writel("drivers/clk/ux500/clk-prcc.c:39", clk->cg_sel, (clk->base + PRCC_PCKEN));
+	while (!(pete_readl("drivers/clk/ux500/clk-prcc.c:40", clk->base + PRCC_PCKSR) & clk->cg_sel))
 		cpu_relax();
 
 	clk->is_enabled = 1;
@@ -48,7 +48,7 @@ static void clk_prcc_pclk_disable(struct clk_hw *hw)
 {
 	struct clk_prcc *clk = to_clk_prcc(hw);
 
-	writel(clk->cg_sel, (clk->base + PRCC_PCKDIS));
+	pete_writel("drivers/clk/ux500/clk-prcc.c:51", clk->cg_sel, (clk->base + PRCC_PCKDIS));
 	clk->is_enabled = 0;
 }
 
@@ -56,8 +56,8 @@ static int clk_prcc_kclk_enable(struct clk_hw *hw)
 {
 	struct clk_prcc *clk = to_clk_prcc(hw);
 
-	writel(clk->cg_sel, (clk->base + PRCC_KCKEN));
-	while (!(readl(clk->base + PRCC_KCKSR) & clk->cg_sel))
+	pete_writel("drivers/clk/ux500/clk-prcc.c:59", clk->cg_sel, (clk->base + PRCC_KCKEN));
+	while (!(pete_readl("drivers/clk/ux500/clk-prcc.c:60", clk->base + PRCC_KCKSR) & clk->cg_sel))
 		cpu_relax();
 
 	clk->is_enabled = 1;
@@ -68,7 +68,7 @@ static void clk_prcc_kclk_disable(struct clk_hw *hw)
 {
 	struct clk_prcc *clk = to_clk_prcc(hw);
 
-	writel(clk->cg_sel, (clk->base + PRCC_KCKDIS));
+	pete_writel("drivers/clk/ux500/clk-prcc.c:71", clk->cg_sel, (clk->base + PRCC_KCKDIS));
 	clk->is_enabled = 0;
 }
 

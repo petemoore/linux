@@ -303,12 +303,12 @@ static int vf610_pmx_gpio_set_direction(struct pinctrl_dev *pctldev,
 		return -EINVAL;
 
 	/* IBE always enabled allows us to read the value "on the wire" */
-	reg = readl(ipctl->base + pin_reg->mux_reg);
+	reg = pete_readl("drivers/pinctrl/freescale/pinctrl-vf610.c:306", ipctl->base + pin_reg->mux_reg);
 	if (input)
 		reg &= ~0x2;
 	else
 		reg |= 0x2;
-	writel(reg, ipctl->base + pin_reg->mux_reg);
+	pete_writel("drivers/pinctrl/freescale/pinctrl-vf610.c:311", reg, ipctl->base + pin_reg->mux_reg);
 
 	return 0;
 }

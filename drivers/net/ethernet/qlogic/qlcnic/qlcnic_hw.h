@@ -36,19 +36,19 @@ enum qlcnic_regs {
 
 /* Read from an address offset from BAR0, existing registers */
 #define QLC_SHARED_REG_RD32(a, addr)			\
-	readl(((a)->ahw->pci_base0) + ((a)->ahw->reg_tbl[addr]))
+	pete_readl("drivers/net/ethernet/qlogic/qlcnic/qlcnic_hw.h:39", ((a)->ahw->pci_base0) + ((a)->ahw->reg_tbl[addr]))
 
 /* Write to an address offset from BAR0, existing registers */
 #define QLC_SHARED_REG_WR32(a, addr, value)		\
-	writel(value, ((a)->ahw->pci_base0) + ((a)->ahw->reg_tbl[addr]))
+	pete_writel("drivers/net/ethernet/qlogic/qlcnic/qlcnic_hw.h:43", value, ((a)->ahw->pci_base0) + ((a)->ahw->reg_tbl[addr]))
 
 /* Read from a direct address offset from BAR0, additional registers */
 #define QLCRDX(ahw, addr)	\
-	readl(((ahw)->pci_base0) + ((ahw)->ext_reg_tbl[addr]))
+	pete_readl("drivers/net/ethernet/qlogic/qlcnic/qlcnic_hw.h:47", ((ahw)->pci_base0) + ((ahw)->ext_reg_tbl[addr]))
 
 /* Write to a direct address offset from BAR0, additional registers */
 #define QLCWRX(ahw, addr, value)	\
-	writel(value, (((ahw)->pci_base0) + ((ahw)->ext_reg_tbl[addr])))
+	pete_writel("drivers/net/ethernet/qlogic/qlcnic/qlcnic_hw.h:51", value, (((ahw)->pci_base0) + ((ahw)->ext_reg_tbl[addr])))
 
 #define QLCNIC_CMD_CONFIGURE_IP_ADDR		0x1
 #define QLCNIC_CMD_CONFIG_INTRPT		0x2

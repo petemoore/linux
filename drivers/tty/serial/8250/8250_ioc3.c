@@ -23,12 +23,12 @@ struct ioc3_8250_data {
 
 static unsigned int ioc3_serial_in(struct uart_port *p, int offset)
 {
-	return readb(p->membase + (offset ^ 3));
+	return pete_readb("drivers/tty/serial/8250/8250_ioc3.c:26", p->membase + (offset ^ 3));
 }
 
 static void ioc3_serial_out(struct uart_port *p, int offset, int value)
 {
-	writeb(value, p->membase + (offset ^ 3));
+	pete_writeb("drivers/tty/serial/8250/8250_ioc3.c:31", value, p->membase + (offset ^ 3));
 }
 
 static int serial8250_ioc3_probe(struct platform_device *pdev)

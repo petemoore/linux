@@ -271,13 +271,13 @@ static void mtk_spi_reset(struct mtk_spi *mdata)
 	u32 reg_val;
 
 	/* set the software reset bit in SPI_CMD_REG. */
-	reg_val = readl(mdata->base + SPI_CMD_REG);
+	reg_val = pete_readl("drivers/spi/spi-mt65xx.c:274", mdata->base + SPI_CMD_REG);
 	reg_val |= SPI_CMD_RST;
-	writel(reg_val, mdata->base + SPI_CMD_REG);
+	pete_writel("drivers/spi/spi-mt65xx.c:276", reg_val, mdata->base + SPI_CMD_REG);
 
-	reg_val = readl(mdata->base + SPI_CMD_REG);
+	reg_val = pete_readl("drivers/spi/spi-mt65xx.c:278", mdata->base + SPI_CMD_REG);
 	reg_val &= ~SPI_CMD_RST;
-	writel(reg_val, mdata->base + SPI_CMD_REG);
+	pete_writel("drivers/spi/spi-mt65xx.c:280", reg_val, mdata->base + SPI_CMD_REG);
 }
 
 static int mtk_spi_set_hw_cs_timing(struct spi_device *spi)
@@ -306,7 +306,7 @@ static int mtk_spi_set_hw_cs_timing(struct spi_device *spi)
 	inactive = (delay * DIV_ROUND_UP(mdata->spi_clk_hz, 1000000)) / 1000;
 
 	if (hold || setup) {
-		reg_val = readl(mdata->base + SPI_CFG0_REG);
+		reg_val = pete_readl("drivers/spi/spi-mt65xx.c:309", mdata->base + SPI_CFG0_REG);
 		if (mdata->dev_comp->enhance_timing) {
 			if (hold) {
 				hold = min_t(u32, hold, 0x10000);
@@ -333,15 +333,15 @@ static int mtk_spi_set_hw_cs_timing(struct spi_device *spi)
 					<< SPI_CFG0_CS_SETUP_OFFSET);
 			}
 		}
-		writel(reg_val, mdata->base + SPI_CFG0_REG);
+		pete_writel("drivers/spi/spi-mt65xx.c:336", reg_val, mdata->base + SPI_CFG0_REG);
 	}
 
 	if (inactive) {
 		inactive = min_t(u32, inactive, 0x100);
-		reg_val = readl(mdata->base + SPI_CFG1_REG);
+		reg_val = pete_readl("drivers/spi/spi-mt65xx.c:341", mdata->base + SPI_CFG1_REG);
 		reg_val &= ~SPI_CFG1_CS_IDLE_MASK;
 		reg_val |= (((inactive - 1) & 0xff) << SPI_CFG1_CS_IDLE_OFFSET);
-		writel(reg_val, mdata->base + SPI_CFG1_REG);
+		pete_writel("drivers/spi/spi-mt65xx.c:344", reg_val, mdata->base + SPI_CFG1_REG);
 	}
 
 	return 0;
@@ -358,7 +358,7 @@ static int mtk_spi_hw_init(struct spi_master *master,
 	cpha = spi->mode & SPI_CPHA ? 1 : 0;
 	cpol = spi->mode & SPI_CPOL ? 1 : 0;
 
-	reg_val = readl(mdata->base + SPI_CMD_REG);
+	reg_val = pete_readl("drivers/spi/spi-mt65xx.c:361", mdata->base + SPI_CMD_REG);
 	if (mdata->dev_comp->ipm_design) {
 		/* SPI transfer without idle time until packet length done */
 		reg_val |= SPI_CMD_IPM_NONIDLE_MODE;
@@ -417,34 +417,34 @@ static int mtk_spi_hw_init(struct spi_master *master,
 	/* disable deassert mode */
 	reg_val &= ~SPI_CMD_DEASSERT;
 
-	writel(reg_val, mdata->base + SPI_CMD_REG);
+	pete_writel("drivers/spi/spi-mt65xx.c:420", reg_val, mdata->base + SPI_CMD_REG);
 
 	/* pad select */
 	if (mdata->dev_comp->need_pad_sel)
-		writel(mdata->pad_sel[spi_get_chipselect(spi, 0)],
+		pete_writel("drivers/spi/spi-mt65xx.c:424", mdata->pad_sel[spi_get_chipselect(spi, 0)],
 		       mdata->base + SPI_PAD_SEL_REG);
 
 	/* tick delay */
 	if (mdata->dev_comp->enhance_timing) {
 		if (mdata->dev_comp->ipm_design) {
-			reg_val = readl(mdata->base + SPI_CMD_REG);
+			reg_val = pete_readl("drivers/spi/spi-mt65xx.c:430", mdata->base + SPI_CMD_REG);
 			reg_val &= ~SPI_CMD_IPM_GET_TICKDLY_MASK;
 			reg_val |= ((chip_config->tick_delay & 0x7)
 				    << SPI_CMD_IPM_GET_TICKDLY_OFFSET);
-			writel(reg_val, mdata->base + SPI_CMD_REG);
+			pete_writel("drivers/spi/spi-mt65xx.c:434", reg_val, mdata->base + SPI_CMD_REG);
 		} else {
-			reg_val = readl(mdata->base + SPI_CFG1_REG);
+			reg_val = pete_readl("drivers/spi/spi-mt65xx.c:436", mdata->base + SPI_CFG1_REG);
 			reg_val &= ~SPI_CFG1_GET_TICK_DLY_MASK;
 			reg_val |= ((chip_config->tick_delay & 0x7)
 				    << SPI_CFG1_GET_TICK_DLY_OFFSET);
-			writel(reg_val, mdata->base + SPI_CFG1_REG);
+			pete_writel("drivers/spi/spi-mt65xx.c:440", reg_val, mdata->base + SPI_CFG1_REG);
 		}
 	} else {
-		reg_val = readl(mdata->base + SPI_CFG1_REG);
+		reg_val = pete_readl("drivers/spi/spi-mt65xx.c:443", mdata->base + SPI_CFG1_REG);
 		reg_val &= ~SPI_CFG1_GET_TICK_DLY_MASK_V1;
 		reg_val |= ((chip_config->tick_delay & 0x3)
 			    << SPI_CFG1_GET_TICK_DLY_OFFSET_V1);
-		writel(reg_val, mdata->base + SPI_CFG1_REG);
+		pete_writel("drivers/spi/spi-mt65xx.c:447", reg_val, mdata->base + SPI_CFG1_REG);
 	}
 
 	/* set hw cs timing */
@@ -466,13 +466,13 @@ static void mtk_spi_set_cs(struct spi_device *spi, bool enable)
 	if (spi->mode & SPI_CS_HIGH)
 		enable = !enable;
 
-	reg_val = readl(mdata->base + SPI_CMD_REG);
+	reg_val = pete_readl("drivers/spi/spi-mt65xx.c:469", mdata->base + SPI_CMD_REG);
 	if (!enable) {
 		reg_val |= SPI_CMD_PAUSE_EN;
-		writel(reg_val, mdata->base + SPI_CMD_REG);
+		pete_writel("drivers/spi/spi-mt65xx.c:472", reg_val, mdata->base + SPI_CMD_REG);
 	} else {
 		reg_val &= ~SPI_CMD_PAUSE_EN;
-		writel(reg_val, mdata->base + SPI_CMD_REG);
+		pete_writel("drivers/spi/spi-mt65xx.c:475", reg_val, mdata->base + SPI_CMD_REG);
 		mdata->state = MTK_SPI_IDLE;
 		mtk_spi_reset(mdata);
 	}
@@ -492,22 +492,22 @@ static void mtk_spi_prepare_transfer(struct spi_master *master,
 	sck_time = (div + 1) / 2;
 
 	if (mdata->dev_comp->enhance_timing) {
-		reg_val = readl(mdata->base + SPI_CFG2_REG);
+		reg_val = pete_readl("drivers/spi/spi-mt65xx.c:495", mdata->base + SPI_CFG2_REG);
 		reg_val &= ~(0xffff << SPI_CFG2_SCK_HIGH_OFFSET);
 		reg_val |= (((sck_time - 1) & 0xffff)
 			   << SPI_CFG2_SCK_HIGH_OFFSET);
 		reg_val &= ~(0xffff << SPI_CFG2_SCK_LOW_OFFSET);
 		reg_val |= (((sck_time - 1) & 0xffff)
 			   << SPI_CFG2_SCK_LOW_OFFSET);
-		writel(reg_val, mdata->base + SPI_CFG2_REG);
+		pete_writel("drivers/spi/spi-mt65xx.c:502", reg_val, mdata->base + SPI_CFG2_REG);
 	} else {
-		reg_val = readl(mdata->base + SPI_CFG0_REG);
+		reg_val = pete_readl("drivers/spi/spi-mt65xx.c:504", mdata->base + SPI_CFG0_REG);
 		reg_val &= ~(0xff << SPI_CFG0_SCK_HIGH_OFFSET);
 		reg_val |= (((sck_time - 1) & 0xff)
 			   << SPI_CFG0_SCK_HIGH_OFFSET);
 		reg_val &= ~(0xff << SPI_CFG0_SCK_LOW_OFFSET);
 		reg_val |= (((sck_time - 1) & 0xff) << SPI_CFG0_SCK_LOW_OFFSET);
-		writel(reg_val, mdata->base + SPI_CFG0_REG);
+		pete_writel("drivers/spi/spi-mt65xx.c:510", reg_val, mdata->base + SPI_CFG0_REG);
 	}
 }
 
@@ -527,7 +527,7 @@ static void mtk_spi_setup_packet(struct spi_master *master)
 
 	packet_loop = mdata->xfer_len / packet_size;
 
-	reg_val = readl(mdata->base + SPI_CFG1_REG);
+	reg_val = pete_readl("drivers/spi/spi-mt65xx.c:530", mdata->base + SPI_CFG1_REG);
 	if (mdata->dev_comp->ipm_design)
 		reg_val &= ~SPI_CFG1_IPM_PACKET_LENGTH_MASK;
 	else
@@ -535,7 +535,7 @@ static void mtk_spi_setup_packet(struct spi_master *master)
 	reg_val |= (packet_size - 1) << SPI_CFG1_PACKET_LENGTH_OFFSET;
 	reg_val &= ~SPI_CFG1_PACKET_LOOP_MASK;
 	reg_val |= (packet_loop - 1) << SPI_CFG1_PACKET_LOOP_OFFSET;
-	writel(reg_val, mdata->base + SPI_CFG1_REG);
+	pete_writel("drivers/spi/spi-mt65xx.c:538", reg_val, mdata->base + SPI_CFG1_REG);
 }
 
 static void mtk_spi_enable_transfer(struct spi_master *master)
@@ -543,12 +543,12 @@ static void mtk_spi_enable_transfer(struct spi_master *master)
 	u32 cmd;
 	struct mtk_spi *mdata = spi_master_get_devdata(master);
 
-	cmd = readl(mdata->base + SPI_CMD_REG);
+	cmd = pete_readl("drivers/spi/spi-mt65xx.c:546", mdata->base + SPI_CMD_REG);
 	if (mdata->state == MTK_SPI_IDLE)
 		cmd |= SPI_CMD_ACT;
 	else
 		cmd |= SPI_CMD_RESUME;
-	writel(cmd, mdata->base + SPI_CMD_REG);
+	pete_writel("drivers/spi/spi-mt65xx.c:551", cmd, mdata->base + SPI_CMD_REG);
 }
 
 static int mtk_spi_get_mult_delta(struct mtk_spi *mdata, u32 xfer_len)
@@ -600,21 +600,21 @@ static void mtk_spi_setup_dma_addr(struct spi_master *master,
 	struct mtk_spi *mdata = spi_master_get_devdata(master);
 
 	if (mdata->tx_sgl) {
-		writel((u32)(xfer->tx_dma & MTK_SPI_32BITS_MASK),
+		pete_writel("drivers/spi/spi-mt65xx.c:603", (u32)(xfer->tx_dma & MTK_SPI_32BITS_MASK),
 		       mdata->base + SPI_TX_SRC_REG);
 #ifdef CONFIG_ARCH_DMA_ADDR_T_64BIT
 		if (mdata->dev_comp->dma_ext)
-			writel((u32)(xfer->tx_dma >> 32),
+			pete_writel("drivers/spi/spi-mt65xx.c:607", (u32)(xfer->tx_dma >> 32),
 			       mdata->base + SPI_TX_SRC_REG_64);
 #endif
 	}
 
 	if (mdata->rx_sgl) {
-		writel((u32)(xfer->rx_dma & MTK_SPI_32BITS_MASK),
+		pete_writel("drivers/spi/spi-mt65xx.c:613", (u32)(xfer->rx_dma & MTK_SPI_32BITS_MASK),
 		       mdata->base + SPI_RX_DST_REG);
 #ifdef CONFIG_ARCH_DMA_ADDR_T_64BIT
 		if (mdata->dev_comp->dma_ext)
-			writel((u32)(xfer->rx_dma >> 32),
+			pete_writel("drivers/spi/spi-mt65xx.c:617", (u32)(xfer->rx_dma >> 32),
 			       mdata->base + SPI_RX_DST_REG_64);
 #endif
 	}
@@ -641,7 +641,7 @@ static int mtk_spi_fifo_transfer(struct spi_master *master,
 		if (remainder > 0) {
 			reg_val = 0;
 			memcpy(&reg_val, xfer->tx_buf + (cnt * 4), remainder);
-			writel(reg_val, mdata->base + SPI_TX_DATA_REG);
+			pete_writel("drivers/spi/spi-mt65xx.c:644", reg_val, mdata->base + SPI_TX_DATA_REG);
 		}
 	}
 
@@ -666,12 +666,12 @@ static int mtk_spi_dma_transfer(struct spi_master *master,
 
 	mtk_spi_prepare_transfer(master, xfer->speed_hz);
 
-	cmd = readl(mdata->base + SPI_CMD_REG);
+	cmd = pete_readl("drivers/spi/spi-mt65xx.c:669", mdata->base + SPI_CMD_REG);
 	if (xfer->tx_buf)
 		cmd |= SPI_CMD_TX_DMA;
 	if (xfer->rx_buf)
 		cmd |= SPI_CMD_RX_DMA;
-	writel(cmd, mdata->base + SPI_CMD_REG);
+	pete_writel("drivers/spi/spi-mt65xx.c:674", cmd, mdata->base + SPI_CMD_REG);
 
 	if (xfer->tx_buf)
 		mdata->tx_sgl = xfer->tx_sg.sgl;
@@ -709,7 +709,7 @@ static int mtk_spi_transfer_one(struct spi_master *master,
 			if (xfer->rx_buf)
 				reg_val |= SPI_CFG3_IPM_HALF_DUPLEX_DIR;
 		}
-		writel(reg_val, mdata->base + SPI_CFG3_IPM_REG);
+		pete_writel("drivers/spi/spi-mt65xx.c:712", reg_val, mdata->base + SPI_CFG3_IPM_REG);
 	}
 
 	if (master->can_dma(master, spi, xfer))
@@ -749,7 +749,7 @@ static irqreturn_t mtk_spi_interrupt(int irq, void *dev_id)
 	struct mtk_spi *mdata = spi_master_get_devdata(master);
 	struct spi_transfer *trans = mdata->cur_transfer;
 
-	reg_val = readl(mdata->base + SPI_STATUS0_REG);
+	reg_val = pete_readl("drivers/spi/spi-mt65xx.c:752", mdata->base + SPI_STATUS0_REG);
 	if (reg_val & MTK_SPI_PAUSE_INT_STATUS)
 		mdata->state = MTK_SPI_PAUSED;
 	else
@@ -768,7 +768,7 @@ static irqreturn_t mtk_spi_interrupt(int irq, void *dev_id)
 				     trans->rx_buf + mdata->num_xfered, cnt);
 			remainder = mdata->xfer_len % 4;
 			if (remainder > 0) {
-				reg_val = readl(mdata->base + SPI_RX_DATA_REG);
+				reg_val = pete_readl("drivers/spi/spi-mt65xx.c:771", mdata->base + SPI_RX_DATA_REG);
 				memcpy(trans->rx_buf +
 					mdata->num_xfered +
 					(cnt * 4),
@@ -798,7 +798,7 @@ static irqreturn_t mtk_spi_interrupt(int irq, void *dev_id)
 				memcpy(&reg_val,
 					trans->tx_buf + (cnt * 4) + mdata->num_xfered,
 					remainder);
-				writel(reg_val, mdata->base + SPI_TX_DATA_REG);
+				pete_writel("drivers/spi/spi-mt65xx.c:801", reg_val, mdata->base + SPI_TX_DATA_REG);
 			}
 		}
 
@@ -829,10 +829,10 @@ static irqreturn_t mtk_spi_interrupt(int irq, void *dev_id)
 
 	if (!mdata->tx_sgl && !mdata->rx_sgl) {
 		/* spi disable dma */
-		cmd = readl(mdata->base + SPI_CMD_REG);
+		cmd = pete_readl("drivers/spi/spi-mt65xx.c:832", mdata->base + SPI_CMD_REG);
 		cmd &= ~SPI_CMD_TX_DMA;
 		cmd &= ~SPI_CMD_RX_DMA;
-		writel(cmd, mdata->base + SPI_CMD_REG);
+		pete_writel("drivers/spi/spi-mt65xx.c:835", cmd, mdata->base + SPI_CMD_REG);
 
 		spi_finalize_current_transfer(master);
 		return IRQ_HANDLED;
@@ -891,20 +891,20 @@ static void mtk_spi_mem_setup_dma_xfer(struct spi_master *master,
 {
 	struct mtk_spi *mdata = spi_master_get_devdata(master);
 
-	writel((u32)(mdata->tx_dma & MTK_SPI_32BITS_MASK),
+	pete_writel("drivers/spi/spi-mt65xx.c:894", (u32)(mdata->tx_dma & MTK_SPI_32BITS_MASK),
 	       mdata->base + SPI_TX_SRC_REG);
 #ifdef CONFIG_ARCH_DMA_ADDR_T_64BIT
 	if (mdata->dev_comp->dma_ext)
-		writel((u32)(mdata->tx_dma >> 32),
+		pete_writel("drivers/spi/spi-mt65xx.c:898", (u32)(mdata->tx_dma >> 32),
 		       mdata->base + SPI_TX_SRC_REG_64);
 #endif
 
 	if (op->data.dir == SPI_MEM_DATA_IN) {
-		writel((u32)(mdata->rx_dma & MTK_SPI_32BITS_MASK),
+		pete_writel("drivers/spi/spi-mt65xx.c:903", (u32)(mdata->rx_dma & MTK_SPI_32BITS_MASK),
 		       mdata->base + SPI_RX_DST_REG);
 #ifdef CONFIG_ARCH_DMA_ADDR_T_64BIT
 		if (mdata->dev_comp->dma_ext)
-			writel((u32)(mdata->rx_dma >> 32),
+			pete_writel("drivers/spi/spi-mt65xx.c:907", (u32)(mdata->rx_dma >> 32),
 			       mdata->base + SPI_RX_DST_REG_64);
 #endif
 	}
@@ -955,7 +955,7 @@ static int mtk_spi_mem_exec_op(struct spi_mem *mem,
 	mtk_spi_hw_init(mem->spi->master, mem->spi);
 	mtk_spi_prepare_transfer(mem->spi->master, mem->spi->max_speed_hz);
 
-	reg_val = readl(mdata->base + SPI_CFG3_IPM_REG);
+	reg_val = pete_readl("drivers/spi/spi-mt65xx.c:958", mdata->base + SPI_CFG3_IPM_REG);
 	/* opcode byte len */
 	reg_val &= ~SPI_CFG3_IPM_CMD_BYTELEN_MASK;
 	reg_val |= 1 << SPI_CFG3_IPM_CMD_BYTELEN_OFFSET;
@@ -969,7 +969,7 @@ static int mtk_spi_mem_exec_op(struct spi_mem *mem,
 	/* data byte len */
 	if (op->data.dir == SPI_MEM_NO_DATA) {
 		reg_val |= SPI_CFG3_IPM_NODATA_FLAG;
-		writel(0, mdata->base + SPI_CFG1_REG);
+		pete_writel("drivers/spi/spi-mt65xx.c:972", 0, mdata->base + SPI_CFG1_REG);
 	} else {
 		reg_val &= ~SPI_CFG3_IPM_NODATA_FLAG;
 		mdata->xfer_len = op->data.nbytes;
@@ -1002,7 +1002,7 @@ static int mtk_spi_mem_exec_op(struct spi_mem *mem,
 		reg_val |= SPI_CFG3_IPM_HALF_DUPLEX_DIR;
 	else
 		reg_val &= ~SPI_CFG3_IPM_HALF_DUPLEX_DIR;
-	writel(reg_val, mdata->base + SPI_CFG3_IPM_REG);
+	pete_writel("drivers/spi/spi-mt65xx.c:1005", reg_val, mdata->base + SPI_CFG3_IPM_REG);
 
 	tx_size = 1 + op->addr.nbytes + op->dummy.nbytes;
 	if (op->data.dir == SPI_MEM_DATA_OUT)
@@ -1065,11 +1065,11 @@ static int mtk_spi_mem_exec_op(struct spi_mem *mem,
 		}
 	}
 
-	reg_val = readl(mdata->base + SPI_CMD_REG);
+	reg_val = pete_readl("drivers/spi/spi-mt65xx.c:1068", mdata->base + SPI_CMD_REG);
 	reg_val |= SPI_CMD_TX_DMA;
 	if (op->data.dir == SPI_MEM_DATA_IN)
 		reg_val |= SPI_CMD_RX_DMA;
-	writel(reg_val, mdata->base + SPI_CMD_REG);
+	pete_writel("drivers/spi/spi-mt65xx.c:1072", reg_val, mdata->base + SPI_CMD_REG);
 
 	mtk_spi_mem_setup_dma_xfer(mem->spi->master, op);
 
@@ -1081,11 +1081,11 @@ static int mtk_spi_mem_exec_op(struct spi_mem *mem,
 		goto unmap_rx_dma;
 
 	/* spi disable dma */
-	reg_val = readl(mdata->base + SPI_CMD_REG);
+	reg_val = pete_readl("drivers/spi/spi-mt65xx.c:1084", mdata->base + SPI_CMD_REG);
 	reg_val &= ~SPI_CMD_TX_DMA;
 	if (op->data.dir == SPI_MEM_DATA_IN)
 		reg_val &= ~SPI_CMD_RX_DMA;
-	writel(reg_val, mdata->base + SPI_CMD_REG);
+	pete_writel("drivers/spi/spi-mt65xx.c:1088", reg_val, mdata->base + SPI_CMD_REG);
 
 unmap_rx_dma:
 	if (op->data.dir == SPI_MEM_DATA_IN) {

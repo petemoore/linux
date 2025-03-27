@@ -268,12 +268,12 @@ static int snd_atiixp_update_bits(struct atiixp_modem *chip, unsigned int reg,
 {
 	void __iomem *addr = chip->remap_addr + reg;
 	unsigned int data, old_data;
-	old_data = data = readl(addr);
+	old_data = data = pete_readl("sound/pci/atiixp_modem.c:271", addr);
 	data &= ~mask;
 	data |= value;
 	if (old_data == data)
 		return 0;
-	writel(data, addr);
+	pete_writel("sound/pci/atiixp_modem.c:276", data, addr);
 	return 1;
 }
 
@@ -281,9 +281,9 @@ static int snd_atiixp_update_bits(struct atiixp_modem *chip, unsigned int reg,
  * macros for easy use
  */
 #define atiixp_write(chip,reg,value) \
-	writel(value, chip->remap_addr + ATI_REG_##reg)
+	pete_writel("sound/pci/atiixp_modem.c:284", value, chip->remap_addr + ATI_REG_##reg)
 #define atiixp_read(chip,reg) \
-	readl(chip->remap_addr + ATI_REG_##reg)
+	pete_readl("sound/pci/atiixp_modem.c:286", chip->remap_addr + ATI_REG_##reg)
 #define atiixp_update(chip,reg,mask,val) \
 	snd_atiixp_update_bits(chip, ATI_REG_##reg, mask, val)
 
@@ -331,7 +331,7 @@ static int atiixp_build_dma_packets(struct atiixp_modem *chip,
 
 	/* reset DMA before changing the descriptor table */
 	spin_lock_irqsave(&chip->reg_lock, flags);
-	writel(0, chip->remap_addr + dma->ops->llp_offset);
+	pete_writel("sound/pci/atiixp_modem.c:334", 0, chip->remap_addr + dma->ops->llp_offset);
 	dma->ops->enable_dma(chip, 0);
 	dma->ops->enable_dma(chip, 1);
 	spin_unlock_irqrestore(&chip->reg_lock, flags);
@@ -353,7 +353,7 @@ static int atiixp_build_dma_packets(struct atiixp_modem *chip,
 		addr += period_bytes;
 	}
 
-	writel((u32)dma->desc_buf.addr | ATI_REG_LINKPTR_EN,
+	pete_writel("sound/pci/atiixp_modem.c:356", (u32)dma->desc_buf.addr | ATI_REG_LINKPTR_EN,
 	       chip->remap_addr + dma->ops->llp_offset);
 
 	dma->period_bytes = period_bytes;
@@ -370,7 +370,7 @@ static void atiixp_clear_dma_packets(struct atiixp_modem *chip,
 				     struct snd_pcm_substream *substream)
 {
 	if (dma->desc_buf.area) {
-		writel(0, chip->remap_addr + dma->ops->llp_offset);
+		pete_writel("sound/pci/atiixp_modem.c:373", 0, chip->remap_addr + dma->ops->llp_offset);
 		snd_dma_free_pages(&dma->desc_buf);
 		dma->desc_buf.area = NULL;
 	}
@@ -601,7 +601,7 @@ static snd_pcm_uframes_t snd_atiixp_pcm_pointer(struct snd_pcm_substream *substr
 	int timeout = 1000;
 
 	while (timeout--) {
-		curptr = readl(chip->remap_addr + dma->ops->dt_cur);
+		curptr = pete_readl("sound/pci/atiixp_modem.c:604", chip->remap_addr + dma->ops->dt_cur);
 		if (curptr < dma->buf_addr)
 			continue;
 		curptr -= dma->buf_addr;
@@ -610,7 +610,7 @@ static snd_pcm_uframes_t snd_atiixp_pcm_pointer(struct snd_pcm_substream *substr
 		return bytes_to_frames(runtime, curptr);
 	}
 	dev_dbg(chip->card->dev, "invalid DMA pointer read 0x%x (buf=%x)\n",
-		   readl(chip->remap_addr + dma->ops->dt_cur), dma->buf_addr);
+		   pete_readl("sound/pci/atiixp_modem.c:613", chip->remap_addr + dma->ops->dt_cur), dma->buf_addr);
 	return 0;
 }
 
@@ -1145,7 +1145,7 @@ static void snd_atiixp_proc_read(struct snd_info_entry *entry,
 	int i;
 
 	for (i = 0; i < 256; i += 4)
-		snd_iprintf(buffer, "%02x: %08x\n", i, readl(chip->remap_addr + i));
+		snd_iprintf(buffer, "%02x: %08x\n", i, pete_readl("sound/pci/atiixp_modem.c:1148", chip->remap_addr + i));
 }
 
 static void snd_atiixp_proc_init(struct atiixp_modem *chip)

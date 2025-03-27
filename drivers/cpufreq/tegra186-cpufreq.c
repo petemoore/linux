@@ -89,7 +89,7 @@ static int tegra186_cpufreq_set_target(struct cpufreq_policy *policy,
 	unsigned int edvd_offset = data->cpus[policy->cpu].edvd_offset;
 	u32 edvd_val = tbl->driver_data;
 
-	writel(edvd_val, data->regs + edvd_offset);
+	pete_writel("drivers/cpufreq/tegra186-cpufreq.c:92", edvd_val, data->regs + edvd_offset);
 
 	return 0;
 }
@@ -107,7 +107,7 @@ static unsigned int tegra186_cpufreq_get(unsigned int cpu)
 		return 0;
 
 	edvd_offset = data->cpus[policy->cpu].edvd_offset;
-	ndiv = readl(data->regs + edvd_offset) & EDVD_CORE_VOLT_FREQ_F_MASK;
+	ndiv = pete_readl("drivers/cpufreq/tegra186-cpufreq.c:110", data->regs + edvd_offset) & EDVD_CORE_VOLT_FREQ_F_MASK;
 	cluster_id = data->cpus[policy->cpu].bpmp_cluster_id;
 	cluster = &data->clusters[cluster_id];
 	cpufreq_cpu_put(policy);

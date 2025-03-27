@@ -53,16 +53,16 @@ static int tricn_write(adapter_t *adapter, int bundle_addr, int module_addr,
 {
 	int busy, attempts = TRICN_CMD_ATTEMPTS;
 
-	writel(V_WRITE_DATA(wr_data) |
+	pete_writel("drivers/net/ethernet/chelsio/cxgb/espi.c:56", V_WRITE_DATA(wr_data) |
 	       V_REGISTER_OFFSET(reg_offset) |
 	       V_CHANNEL_ADDR(ch_addr) | V_MODULE_ADDR(module_addr) |
 	       V_BUNDLE_ADDR(bundle_addr) |
 	       V_SPI4_COMMAND(TRICN_CMD_WRITE),
 	       adapter->regs + A_ESPI_CMD_ADDR);
-	writel(0, adapter->regs + A_ESPI_GOSTAT);
+	pete_writel("drivers/net/ethernet/chelsio/cxgb/espi.c:62", 0, adapter->regs + A_ESPI_GOSTAT);
 
 	do {
-		busy = readl(adapter->regs + A_ESPI_GOSTAT) & F_ESPI_CMD_BUSY;
+		busy = pete_readl("drivers/net/ethernet/chelsio/cxgb/espi.c:65", adapter->regs + A_ESPI_GOSTAT) & F_ESPI_CMD_BUSY;
 	} while (busy && --attempts);
 
 	if (busy)
@@ -75,12 +75,12 @@ static int tricn_init(adapter_t *adapter)
 {
 	int i, sme = 1;
 
-	if (!(readl(adapter->regs + A_ESPI_RX_RESET)  & F_RX_CLK_STATUS)) {
+	if (!(pete_readl("drivers/net/ethernet/chelsio/cxgb/espi.c:78", adapter->regs + A_ESPI_RX_RESET)  & F_RX_CLK_STATUS)) {
 		pr_err("%s: ESPI clock not ready\n", adapter->name);
 		return -1;
 	}
 
-	writel(F_ESPI_RX_CORE_RST, adapter->regs + A_ESPI_RX_RESET);
+	pete_writel("drivers/net/ethernet/chelsio/cxgb/espi.c:83", F_ESPI_RX_CORE_RST, adapter->regs + A_ESPI_RX_RESET);
 
 	if (sme) {
 		tricn_write(adapter, 0, 0, 0, TRICN_CNFG, 0x81);
@@ -99,7 +99,7 @@ static int tricn_init(adapter_t *adapter)
 	tricn_write(adapter, 0, 2, 7, TRICN_CNFG, 0x80);
 	tricn_write(adapter, 0, 2, 8, TRICN_CNFG, 0xf1);
 
-	writel(F_ESPI_RX_CORE_RST | F_ESPI_RX_LNK_RST,
+	pete_writel("drivers/net/ethernet/chelsio/cxgb/espi.c:102", F_ESPI_RX_CORE_RST | F_ESPI_RX_LNK_RST,
 	       adapter->regs + A_ESPI_RX_RESET);
 
 	return 0;
@@ -107,7 +107,7 @@ static int tricn_init(adapter_t *adapter)
 
 void t1_espi_intr_enable(struct peespi *espi)
 {
-	u32 enable, pl_intr = readl(espi->adapter->regs + A_PL_ENABLE);
+	u32 enable, pl_intr = pete_readl("drivers/net/ethernet/chelsio/cxgb/espi.c:110", espi->adapter->regs + A_PL_ENABLE);
 
 	/*
 	 * Cannot enable ESPI interrupts on T1B because HW asserts the
@@ -117,28 +117,28 @@ void t1_espi_intr_enable(struct peespi *espi)
 	 * cannot be cleared (HW bug).
 	 */
 	enable = t1_is_T1B(espi->adapter) ? 0 : ESPI_INTR_MASK;
-	writel(enable, espi->adapter->regs + A_ESPI_INTR_ENABLE);
-	writel(pl_intr | F_PL_INTR_ESPI, espi->adapter->regs + A_PL_ENABLE);
+	pete_writel("drivers/net/ethernet/chelsio/cxgb/espi.c:120", enable, espi->adapter->regs + A_ESPI_INTR_ENABLE);
+	pete_writel("drivers/net/ethernet/chelsio/cxgb/espi.c:121", pl_intr | F_PL_INTR_ESPI, espi->adapter->regs + A_PL_ENABLE);
 }
 
 void t1_espi_intr_clear(struct peespi *espi)
 {
-	readl(espi->adapter->regs + A_ESPI_DIP2_ERR_COUNT);
-	writel(0xffffffff, espi->adapter->regs + A_ESPI_INTR_STATUS);
-	writel(F_PL_INTR_ESPI, espi->adapter->regs + A_PL_CAUSE);
+	pete_readl("drivers/net/ethernet/chelsio/cxgb/espi.c:126", espi->adapter->regs + A_ESPI_DIP2_ERR_COUNT);
+	pete_writel("drivers/net/ethernet/chelsio/cxgb/espi.c:127", 0xffffffff, espi->adapter->regs + A_ESPI_INTR_STATUS);
+	pete_writel("drivers/net/ethernet/chelsio/cxgb/espi.c:128", F_PL_INTR_ESPI, espi->adapter->regs + A_PL_CAUSE);
 }
 
 void t1_espi_intr_disable(struct peespi *espi)
 {
-	u32 pl_intr = readl(espi->adapter->regs + A_PL_ENABLE);
+	u32 pl_intr = pete_readl("drivers/net/ethernet/chelsio/cxgb/espi.c:133", espi->adapter->regs + A_PL_ENABLE);
 
-	writel(0, espi->adapter->regs + A_ESPI_INTR_ENABLE);
-	writel(pl_intr & ~F_PL_INTR_ESPI, espi->adapter->regs + A_PL_ENABLE);
+	pete_writel("drivers/net/ethernet/chelsio/cxgb/espi.c:135", 0, espi->adapter->regs + A_ESPI_INTR_ENABLE);
+	pete_writel("drivers/net/ethernet/chelsio/cxgb/espi.c:136", pl_intr & ~F_PL_INTR_ESPI, espi->adapter->regs + A_PL_ENABLE);
 }
 
 int t1_espi_intr_handler(struct peespi *espi)
 {
-	u32 status = readl(espi->adapter->regs + A_ESPI_INTR_STATUS);
+	u32 status = pete_readl("drivers/net/ethernet/chelsio/cxgb/espi.c:141", espi->adapter->regs + A_ESPI_INTR_STATUS);
 
 	if (status & F_DIP4ERR)
 		espi->intr_cnt.DIP4_err++;
@@ -157,7 +157,7 @@ int t1_espi_intr_handler(struct peespi *espi)
 		 * Must read the error count to clear the interrupt
 		 * that it causes.
 		 */
-		readl(espi->adapter->regs + A_ESPI_DIP2_ERR_COUNT);
+		pete_readl("drivers/net/ethernet/chelsio/cxgb/espi.c:160", espi->adapter->regs + A_ESPI_DIP2_ERR_COUNT);
 	}
 
 	/*
@@ -166,7 +166,7 @@ int t1_espi_intr_handler(struct peespi *espi)
 	 */
 	if (status && t1_is_T1B(espi->adapter))
 		status = 1;
-	writel(status, espi->adapter->regs + A_ESPI_INTR_STATUS);
+	pete_writel("drivers/net/ethernet/chelsio/cxgb/espi.c:169", status, espi->adapter->regs + A_ESPI_INTR_STATUS);
 	return 0;
 }
 
@@ -179,28 +179,28 @@ static void espi_setup_for_pm3393(adapter_t *adapter)
 {
 	u32 wmark = t1_is_T1B(adapter) ? 0x4000 : 0x3200;
 
-	writel(0x1f4, adapter->regs + A_ESPI_SCH_TOKEN0);
-	writel(0x1f4, adapter->regs + A_ESPI_SCH_TOKEN1);
-	writel(0x1f4, adapter->regs + A_ESPI_SCH_TOKEN2);
-	writel(0x1f4, adapter->regs + A_ESPI_SCH_TOKEN3);
-	writel(0x100, adapter->regs + A_ESPI_RX_FIFO_ALMOST_EMPTY_WATERMARK);
-	writel(wmark, adapter->regs + A_ESPI_RX_FIFO_ALMOST_FULL_WATERMARK);
-	writel(3, adapter->regs + A_ESPI_CALENDAR_LENGTH);
-	writel(0x08000008, adapter->regs + A_ESPI_TRAIN);
-	writel(V_RX_NPORTS(1) | V_TX_NPORTS(1), adapter->regs + A_PORT_CONFIG);
+	pete_writel("drivers/net/ethernet/chelsio/cxgb/espi.c:182", 0x1f4, adapter->regs + A_ESPI_SCH_TOKEN0);
+	pete_writel("drivers/net/ethernet/chelsio/cxgb/espi.c:183", 0x1f4, adapter->regs + A_ESPI_SCH_TOKEN1);
+	pete_writel("drivers/net/ethernet/chelsio/cxgb/espi.c:184", 0x1f4, adapter->regs + A_ESPI_SCH_TOKEN2);
+	pete_writel("drivers/net/ethernet/chelsio/cxgb/espi.c:185", 0x1f4, adapter->regs + A_ESPI_SCH_TOKEN3);
+	pete_writel("drivers/net/ethernet/chelsio/cxgb/espi.c:186", 0x100, adapter->regs + A_ESPI_RX_FIFO_ALMOST_EMPTY_WATERMARK);
+	pete_writel("drivers/net/ethernet/chelsio/cxgb/espi.c:187", wmark, adapter->regs + A_ESPI_RX_FIFO_ALMOST_FULL_WATERMARK);
+	pete_writel("drivers/net/ethernet/chelsio/cxgb/espi.c:188", 3, adapter->regs + A_ESPI_CALENDAR_LENGTH);
+	pete_writel("drivers/net/ethernet/chelsio/cxgb/espi.c:189", 0x08000008, adapter->regs + A_ESPI_TRAIN);
+	pete_writel("drivers/net/ethernet/chelsio/cxgb/espi.c:190", V_RX_NPORTS(1) | V_TX_NPORTS(1), adapter->regs + A_PORT_CONFIG);
 }
 
 static void espi_setup_for_vsc7321(adapter_t *adapter)
 {
-	writel(0x1f4, adapter->regs + A_ESPI_SCH_TOKEN0);
-	writel(0x1f401f4, adapter->regs + A_ESPI_SCH_TOKEN1);
-	writel(0x1f4, adapter->regs + A_ESPI_SCH_TOKEN2);
-	writel(0xa00, adapter->regs + A_ESPI_RX_FIFO_ALMOST_FULL_WATERMARK);
-	writel(0x1ff, adapter->regs + A_ESPI_RX_FIFO_ALMOST_EMPTY_WATERMARK);
-	writel(1, adapter->regs + A_ESPI_CALENDAR_LENGTH);
-	writel(V_RX_NPORTS(4) | V_TX_NPORTS(4), adapter->regs + A_PORT_CONFIG);
+	pete_writel("drivers/net/ethernet/chelsio/cxgb/espi.c:195", 0x1f4, adapter->regs + A_ESPI_SCH_TOKEN0);
+	pete_writel("drivers/net/ethernet/chelsio/cxgb/espi.c:196", 0x1f401f4, adapter->regs + A_ESPI_SCH_TOKEN1);
+	pete_writel("drivers/net/ethernet/chelsio/cxgb/espi.c:197", 0x1f4, adapter->regs + A_ESPI_SCH_TOKEN2);
+	pete_writel("drivers/net/ethernet/chelsio/cxgb/espi.c:198", 0xa00, adapter->regs + A_ESPI_RX_FIFO_ALMOST_FULL_WATERMARK);
+	pete_writel("drivers/net/ethernet/chelsio/cxgb/espi.c:199", 0x1ff, adapter->regs + A_ESPI_RX_FIFO_ALMOST_EMPTY_WATERMARK);
+	pete_writel("drivers/net/ethernet/chelsio/cxgb/espi.c:200", 1, adapter->regs + A_ESPI_CALENDAR_LENGTH);
+	pete_writel("drivers/net/ethernet/chelsio/cxgb/espi.c:201", V_RX_NPORTS(4) | V_TX_NPORTS(4), adapter->regs + A_PORT_CONFIG);
 
-	writel(0x08000008, adapter->regs + A_ESPI_TRAIN);
+	pete_writel("drivers/net/ethernet/chelsio/cxgb/espi.c:203", 0x08000008, adapter->regs + A_ESPI_TRAIN);
 }
 
 /*
@@ -208,20 +208,20 @@ static void espi_setup_for_vsc7321(adapter_t *adapter)
  */
 static void espi_setup_for_ixf1010(adapter_t *adapter, int nports)
 {
-	writel(1, adapter->regs + A_ESPI_CALENDAR_LENGTH);
+	pete_writel("drivers/net/ethernet/chelsio/cxgb/espi.c:211", 1, adapter->regs + A_ESPI_CALENDAR_LENGTH);
 	if (nports == 4) {
 		if (is_T2(adapter)) {
-			writel(0xf00, adapter->regs + A_ESPI_RX_FIFO_ALMOST_FULL_WATERMARK);
-			writel(0x3c0, adapter->regs + A_ESPI_RX_FIFO_ALMOST_EMPTY_WATERMARK);
+			pete_writel("drivers/net/ethernet/chelsio/cxgb/espi.c:214", 0xf00, adapter->regs + A_ESPI_RX_FIFO_ALMOST_FULL_WATERMARK);
+			pete_writel("drivers/net/ethernet/chelsio/cxgb/espi.c:215", 0x3c0, adapter->regs + A_ESPI_RX_FIFO_ALMOST_EMPTY_WATERMARK);
 		} else {
-			writel(0x7ff, adapter->regs + A_ESPI_RX_FIFO_ALMOST_FULL_WATERMARK);
-			writel(0x1ff, adapter->regs + A_ESPI_RX_FIFO_ALMOST_EMPTY_WATERMARK);
+			pete_writel("drivers/net/ethernet/chelsio/cxgb/espi.c:217", 0x7ff, adapter->regs + A_ESPI_RX_FIFO_ALMOST_FULL_WATERMARK);
+			pete_writel("drivers/net/ethernet/chelsio/cxgb/espi.c:218", 0x1ff, adapter->regs + A_ESPI_RX_FIFO_ALMOST_EMPTY_WATERMARK);
 		}
 	} else {
-		writel(0x1fff, adapter->regs + A_ESPI_RX_FIFO_ALMOST_FULL_WATERMARK);
-		writel(0x7ff, adapter->regs + A_ESPI_RX_FIFO_ALMOST_EMPTY_WATERMARK);
+		pete_writel("drivers/net/ethernet/chelsio/cxgb/espi.c:221", 0x1fff, adapter->regs + A_ESPI_RX_FIFO_ALMOST_FULL_WATERMARK);
+		pete_writel("drivers/net/ethernet/chelsio/cxgb/espi.c:222", 0x7ff, adapter->regs + A_ESPI_RX_FIFO_ALMOST_EMPTY_WATERMARK);
 	}
-	writel(V_RX_NPORTS(nports) | V_TX_NPORTS(nports), adapter->regs + A_PORT_CONFIG);
+	pete_writel("drivers/net/ethernet/chelsio/cxgb/espi.c:224", V_RX_NPORTS(nports) | V_TX_NPORTS(nports), adapter->regs + A_PORT_CONFIG);
 
 }
 
@@ -231,16 +231,16 @@ int t1_espi_init(struct peespi *espi, int mac_type, int nports)
 	adapter_t *adapter = espi->adapter;
 
 	/* Disable ESPI training.  MACs that can handle it enable it below. */
-	writel(0, adapter->regs + A_ESPI_TRAIN);
+	pete_writel("drivers/net/ethernet/chelsio/cxgb/espi.c:234", 0, adapter->regs + A_ESPI_TRAIN);
 
 	if (is_T2(adapter)) {
-		writel(V_OUT_OF_SYNC_COUNT(4) |
+		pete_writel("drivers/net/ethernet/chelsio/cxgb/espi.c:237", V_OUT_OF_SYNC_COUNT(4) |
 		       V_DIP2_PARITY_ERR_THRES(3) |
 		       V_DIP4_THRES(1), adapter->regs + A_ESPI_MISC_CONTROL);
-		writel(nports == 4 ? 0x200040 : 0x1000080,
+		pete_writel("drivers/net/ethernet/chelsio/cxgb/espi.c:240", nports == 4 ? 0x200040 : 0x1000080,
 		       adapter->regs + A_ESPI_MAXBURST1_MAXBURST2);
 	} else
-		writel(0x800100, adapter->regs + A_ESPI_MAXBURST1_MAXBURST2);
+		pete_writel("drivers/net/ethernet/chelsio/cxgb/espi.c:243", 0x800100, adapter->regs + A_ESPI_MAXBURST1_MAXBURST2);
 
 	if (mac_type == CHBT_MAC_PM3393)
 		espi_setup_for_pm3393(adapter);
@@ -252,7 +252,7 @@ int t1_espi_init(struct peespi *espi, int mac_type, int nports)
 	} else
 		return -1;
 
-	writel(status_enable_extra | F_RXSTATUSENABLE,
+	pete_writel("drivers/net/ethernet/chelsio/cxgb/espi.c:255", status_enable_extra | F_RXSTATUSENABLE,
 	       adapter->regs + A_ESPI_FIFO_STATUS_ENABLE);
 
 	if (is_T2(adapter)) {
@@ -261,12 +261,12 @@ int t1_espi_init(struct peespi *espi, int mac_type, int nports)
 		 * Always position the control at the 1st port egress IN
 		 * (sop,eop) counter to reduce PIOs for T/N210 workaround.
 		 */
-		espi->misc_ctrl = readl(adapter->regs + A_ESPI_MISC_CONTROL);
+		espi->misc_ctrl = pete_readl("drivers/net/ethernet/chelsio/cxgb/espi.c:264", adapter->regs + A_ESPI_MISC_CONTROL);
 		espi->misc_ctrl &= ~MON_MASK;
 		espi->misc_ctrl |= F_MONITORED_DIRECTION;
 		if (adapter->params.nports == 1)
 			espi->misc_ctrl |= F_MONITORED_INTERFACE;
-		writel(espi->misc_ctrl, adapter->regs + A_ESPI_MISC_CONTROL);
+		pete_writel("drivers/net/ethernet/chelsio/cxgb/espi.c:269", espi->misc_ctrl, adapter->regs + A_ESPI_MISC_CONTROL);
 		spin_lock_init(&espi->lock);
 	}
 
@@ -297,7 +297,7 @@ void t1_espi_set_misc_ctrl(adapter_t *adapter, u32 val)
 	spin_lock(&espi->lock);
 	espi->misc_ctrl = (val & ~MON_MASK) |
 			  (espi->misc_ctrl & MON_MASK);
-	writel(espi->misc_ctrl, adapter->regs + A_ESPI_MISC_CONTROL);
+	pete_writel("drivers/net/ethernet/chelsio/cxgb/espi.c:300", espi->misc_ctrl, adapter->regs + A_ESPI_MISC_CONTROL);
 	spin_unlock(&espi->lock);
 }
 #endif  /*  0  */
@@ -318,12 +318,12 @@ u32 t1_espi_get_mon(adapter_t *adapter, u32 addr, u8 wait)
 		spin_lock(&espi->lock);
 
 	if ((sel != (espi->misc_ctrl & MON_MASK))) {
-		writel(((espi->misc_ctrl & ~MON_MASK) | sel),
+		pete_writel("drivers/net/ethernet/chelsio/cxgb/espi.c:321", ((espi->misc_ctrl & ~MON_MASK) | sel),
 		       adapter->regs + A_ESPI_MISC_CONTROL);
-		sel = readl(adapter->regs + A_ESPI_SCH_TOKEN3);
-		writel(espi->misc_ctrl, adapter->regs + A_ESPI_MISC_CONTROL);
+		sel = pete_readl("drivers/net/ethernet/chelsio/cxgb/espi.c:323", adapter->regs + A_ESPI_SCH_TOKEN3);
+		pete_writel("drivers/net/ethernet/chelsio/cxgb/espi.c:324", espi->misc_ctrl, adapter->regs + A_ESPI_MISC_CONTROL);
 	} else
-		sel = readl(adapter->regs + A_ESPI_SCH_TOKEN3);
+		sel = pete_readl("drivers/net/ethernet/chelsio/cxgb/espi.c:326", adapter->regs + A_ESPI_SCH_TOKEN3);
 	spin_unlock(&espi->lock);
 	return sel;
 }
@@ -347,17 +347,17 @@ int t1_espi_get_mon_t204(adapter_t *adapter, u32 *valp, u8 wait)
 	if ((espi->misc_ctrl & MON_MASK) != F_MONITORED_DIRECTION) {
 		espi->misc_ctrl = (espi->misc_ctrl & ~MON_MASK) |
 					F_MONITORED_DIRECTION;
-		writel(espi->misc_ctrl, adapter->regs + A_ESPI_MISC_CONTROL);
+		pete_writel("drivers/net/ethernet/chelsio/cxgb/espi.c:350", espi->misc_ctrl, adapter->regs + A_ESPI_MISC_CONTROL);
 	}
 	for (i = 0 ; i < nport; i++, valp++) {
 		if (i) {
-			writel(espi->misc_ctrl | V_MONITORED_PORT_NUM(i),
+			pete_writel("drivers/net/ethernet/chelsio/cxgb/espi.c:354", espi->misc_ctrl | V_MONITORED_PORT_NUM(i),
 			       adapter->regs + A_ESPI_MISC_CONTROL);
 		}
-		*valp = readl(adapter->regs + A_ESPI_SCH_TOKEN3);
+		*valp = pete_readl("drivers/net/ethernet/chelsio/cxgb/espi.c:357", adapter->regs + A_ESPI_SCH_TOKEN3);
 	}
 
-	writel(espi->misc_ctrl, adapter->regs + A_ESPI_MISC_CONTROL);
+	pete_writel("drivers/net/ethernet/chelsio/cxgb/espi.c:360", espi->misc_ctrl, adapter->regs + A_ESPI_MISC_CONTROL);
 	spin_unlock(&espi->lock);
 	return 0;
 }

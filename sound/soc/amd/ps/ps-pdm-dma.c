@@ -45,10 +45,10 @@ static const struct snd_pcm_hardware acp63_pdm_hardware_capture = {
 static void acp63_init_pdm_ring_buffer(u32 physical_addr, u32 buffer_size,
 				       u32 watermark_size, void __iomem *acp_base)
 {
-	writel(physical_addr, acp_base + ACP_WOV_RX_RINGBUFADDR);
-	writel(buffer_size, acp_base + ACP_WOV_RX_RINGBUFSIZE);
-	writel(watermark_size, acp_base + ACP_WOV_RX_INTR_WATERMARK_SIZE);
-	writel(0x01, acp_base + ACPAXI2AXI_ATU_CTRL);
+	pete_writel("sound/soc/amd/ps/ps-pdm-dma.c:48", physical_addr, acp_base + ACP_WOV_RX_RINGBUFADDR);
+	pete_writel("sound/soc/amd/ps/ps-pdm-dma.c:49", buffer_size, acp_base + ACP_WOV_RX_RINGBUFSIZE);
+	pete_writel("sound/soc/amd/ps/ps-pdm-dma.c:50", watermark_size, acp_base + ACP_WOV_RX_INTR_WATERMARK_SIZE);
+	pete_writel("sound/soc/amd/ps/ps-pdm-dma.c:51", 0x01, acp_base + ACPAXI2AXI_ATU_CTRL);
 }
 
 static void acp63_enable_pdm_clock(void __iomem *acp_base)
@@ -58,11 +58,11 @@ static void acp63_enable_pdm_clock(void __iomem *acp_base)
 	pdm_clk_enable = ACP_PDM_CLK_FREQ_MASK;
 	pdm_ctrl = 0x00;
 
-	writel(pdm_clk_enable, acp_base + ACP_WOV_CLK_CTRL);
-	pdm_ctrl = readl(acp_base + ACP_WOV_MISC_CTRL);
+	pete_writel("sound/soc/amd/ps/ps-pdm-dma.c:61", pdm_clk_enable, acp_base + ACP_WOV_CLK_CTRL);
+	pdm_ctrl = pete_readl("sound/soc/amd/ps/ps-pdm-dma.c:62", acp_base + ACP_WOV_MISC_CTRL);
 	pdm_ctrl &= ~ACP_WOV_GAIN_CONTROL;
 	pdm_ctrl |= FIELD_PREP(ACP_WOV_GAIN_CONTROL, clamp(pdm_gain, 0, 3));
-	writel(pdm_ctrl, acp_base + ACP_WOV_MISC_CTRL);
+	pete_writel("sound/soc/amd/ps/ps-pdm-dma.c:65", pdm_ctrl, acp_base + ACP_WOV_MISC_CTRL);
 }
 
 static void acp63_enable_pdm_interrupts(struct pdm_dev_data *adata)
@@ -70,9 +70,9 @@ static void acp63_enable_pdm_interrupts(struct pdm_dev_data *adata)
 	u32 ext_int_ctrl;
 
 	mutex_lock(adata->acp_lock);
-	ext_int_ctrl = readl(adata->acp63_base + ACP_EXTERNAL_INTR_CNTL);
+	ext_int_ctrl = pete_readl("sound/soc/amd/ps/ps-pdm-dma.c:73", adata->acp63_base + ACP_EXTERNAL_INTR_CNTL);
 	ext_int_ctrl |= PDM_DMA_INTR_MASK;
-	writel(ext_int_ctrl, adata->acp63_base + ACP_EXTERNAL_INTR_CNTL);
+	pete_writel("sound/soc/amd/ps/ps-pdm-dma.c:75", ext_int_ctrl, adata->acp63_base + ACP_EXTERNAL_INTR_CNTL);
 	mutex_unlock(adata->acp_lock);
 }
 
@@ -81,9 +81,9 @@ static void acp63_disable_pdm_interrupts(struct pdm_dev_data *adata)
 	u32 ext_int_ctrl;
 
 	mutex_lock(adata->acp_lock);
-	ext_int_ctrl = readl(adata->acp63_base + ACP_EXTERNAL_INTR_CNTL);
+	ext_int_ctrl = pete_readl("sound/soc/amd/ps/ps-pdm-dma.c:84", adata->acp63_base + ACP_EXTERNAL_INTR_CNTL);
 	ext_int_ctrl &= ~PDM_DMA_INTR_MASK;
-	writel(ext_int_ctrl, adata->acp63_base + ACP_EXTERNAL_INTR_CNTL);
+	pete_writel("sound/soc/amd/ps/ps-pdm-dma.c:86", ext_int_ctrl, adata->acp63_base + ACP_EXTERNAL_INTR_CNTL);
 	mutex_unlock(adata->acp_lock);
 }
 
@@ -93,8 +93,8 @@ static bool acp63_check_pdm_dma_status(void __iomem *acp_base)
 	u32 pdm_enable, pdm_dma_enable;
 
 	pdm_dma_status = false;
-	pdm_enable = readl(acp_base + ACP_WOV_PDM_ENABLE);
-	pdm_dma_enable = readl(acp_base + ACP_WOV_PDM_DMA_ENABLE);
+	pdm_enable = pete_readl("sound/soc/amd/ps/ps-pdm-dma.c:96", acp_base + ACP_WOV_PDM_ENABLE);
+	pdm_dma_enable = pete_readl("sound/soc/amd/ps/ps-pdm-dma.c:97", acp_base + ACP_WOV_PDM_DMA_ENABLE);
 	if ((pdm_enable & ACP_PDM_ENABLE) && (pdm_dma_enable & ACP_PDM_DMA_EN_STATUS))
 		pdm_dma_status = true;
 
@@ -111,11 +111,11 @@ static int acp63_start_pdm_dma(void __iomem *acp_base)
 	pdm_dma_enable  = 0x01;
 
 	acp63_enable_pdm_clock(acp_base);
-	writel(pdm_enable, acp_base + ACP_WOV_PDM_ENABLE);
-	writel(pdm_dma_enable, acp_base + ACP_WOV_PDM_DMA_ENABLE);
+	pete_writel("sound/soc/amd/ps/ps-pdm-dma.c:114", pdm_enable, acp_base + ACP_WOV_PDM_ENABLE);
+	pete_writel("sound/soc/amd/ps/ps-pdm-dma.c:115", pdm_dma_enable, acp_base + ACP_WOV_PDM_DMA_ENABLE);
 	timeout = 0;
 	while (++timeout < ACP_COUNTER) {
-		pdm_dma_enable = readl(acp_base + ACP_WOV_PDM_DMA_ENABLE);
+		pdm_dma_enable = pete_readl("sound/soc/amd/ps/ps-pdm-dma.c:118", acp_base + ACP_WOV_PDM_DMA_ENABLE);
 		if ((pdm_dma_enable & 0x02) == ACP_PDM_DMA_EN_STATUS)
 			return 0;
 		udelay(DELAY_US);
@@ -131,14 +131,14 @@ static int acp63_stop_pdm_dma(void __iomem *acp_base)
 	pdm_enable = 0x00;
 	pdm_dma_enable  = 0x00;
 
-	pdm_enable = readl(acp_base + ACP_WOV_PDM_ENABLE);
-	pdm_dma_enable = readl(acp_base + ACP_WOV_PDM_DMA_ENABLE);
+	pdm_enable = pete_readl("sound/soc/amd/ps/ps-pdm-dma.c:134", acp_base + ACP_WOV_PDM_ENABLE);
+	pdm_dma_enable = pete_readl("sound/soc/amd/ps/ps-pdm-dma.c:135", acp_base + ACP_WOV_PDM_DMA_ENABLE);
 	if (pdm_dma_enable & 0x01) {
 		pdm_dma_enable = 0x02;
-		writel(pdm_dma_enable, acp_base + ACP_WOV_PDM_DMA_ENABLE);
+		pete_writel("sound/soc/amd/ps/ps-pdm-dma.c:138", pdm_dma_enable, acp_base + ACP_WOV_PDM_DMA_ENABLE);
 		timeout = 0;
 		while (++timeout < ACP_COUNTER) {
-			pdm_dma_enable = readl(acp_base + ACP_WOV_PDM_DMA_ENABLE);
+			pdm_dma_enable = pete_readl("sound/soc/amd/ps/ps-pdm-dma.c:141", acp_base + ACP_WOV_PDM_DMA_ENABLE);
 			if ((pdm_dma_enable & 0x02) == 0x00)
 				break;
 			udelay(DELAY_US);
@@ -148,9 +148,9 @@ static int acp63_stop_pdm_dma(void __iomem *acp_base)
 	}
 	if (pdm_enable == ACP_PDM_ENABLE) {
 		pdm_enable = ACP_PDM_DISABLE;
-		writel(pdm_enable, acp_base + ACP_WOV_PDM_ENABLE);
+		pete_writel("sound/soc/amd/ps/ps-pdm-dma.c:151", pdm_enable, acp_base + ACP_WOV_PDM_ENABLE);
 	}
-	writel(0x01, acp_base + ACP_WOV_PDM_FIFO_FLUSH);
+	pete_writel("sound/soc/amd/ps/ps-pdm-dma.c:153", 0x01, acp_base + ACP_WOV_PDM_FIFO_FLUSH);
 	return 0;
 }
 
@@ -164,16 +164,16 @@ static void acp63_config_dma(struct pdm_stream_instance *rtd, int direction)
 	val = PDM_PTE_OFFSET;
 
 	/* Group Enable */
-	writel(ACP_SRAM_PTE_OFFSET | BIT(31), rtd->acp63_base + ACPAXI2AXI_ATU_BASE_ADDR_GRP_1);
-	writel(PAGE_SIZE_4K_ENABLE, rtd->acp63_base + ACPAXI2AXI_ATU_PAGE_SIZE_GRP_1);
+	pete_writel("sound/soc/amd/ps/ps-pdm-dma.c:167", ACP_SRAM_PTE_OFFSET | BIT(31), rtd->acp63_base + ACPAXI2AXI_ATU_BASE_ADDR_GRP_1);
+	pete_writel("sound/soc/amd/ps/ps-pdm-dma.c:168", PAGE_SIZE_4K_ENABLE, rtd->acp63_base + ACPAXI2AXI_ATU_PAGE_SIZE_GRP_1);
 	for (page_idx = 0; page_idx < rtd->num_pages; page_idx++) {
 		/* Load the low address of page int ACP SRAM through SRBM */
 		low = lower_32_bits(addr);
 		high = upper_32_bits(addr);
 
-		writel(low, rtd->acp63_base + ACP_SCRATCH_REG_0 + val);
+		pete_writel("sound/soc/amd/ps/ps-pdm-dma.c:174", low, rtd->acp63_base + ACP_SCRATCH_REG_0 + val);
 		high |= BIT(31);
-		writel(high, rtd->acp63_base + ACP_SCRATCH_REG_0 + val + 4);
+		pete_writel("sound/soc/amd/ps/ps-pdm-dma.c:176", high, rtd->acp63_base + ACP_SCRATCH_REG_0 + val + 4);
 		val += 8;
 		addr += PAGE_SIZE;
 	}
@@ -240,9 +240,9 @@ static u64 acp63_pdm_get_byte_count(struct pdm_stream_instance *rtd,
 	u32 high, low;
 	u64 byte_count;
 
-	high = readl(rtd->acp63_base + ACP_WOV_RX_LINEARPOSITIONCNTR_HIGH);
+	high = pete_readl("sound/soc/amd/ps/ps-pdm-dma.c:243", rtd->acp63_base + ACP_WOV_RX_LINEARPOSITIONCNTR_HIGH);
 	byte_count = high;
-	low = readl(rtd->acp63_base + ACP_WOV_RX_LINEARPOSITIONCNTR_LOW);
+	low = pete_readl("sound/soc/amd/ps/ps-pdm-dma.c:245", rtd->acp63_base + ACP_WOV_RX_LINEARPOSITIONCNTR_LOW);
 	byte_count = (byte_count << 32) | low;
 	return byte_count;
 }
@@ -307,8 +307,8 @@ static int acp63_pdm_dai_trigger(struct snd_pcm_substream *substream,
 	case SNDRV_PCM_TRIGGER_START:
 	case SNDRV_PCM_TRIGGER_RESUME:
 	case SNDRV_PCM_TRIGGER_PAUSE_RELEASE:
-		writel(ch_mask, rtd->acp63_base + ACP_WOV_PDM_NO_OF_CHANNELS);
-		writel(PDM_DECIMATION_FACTOR, rtd->acp63_base + ACP_WOV_PDM_DECIMATION_FACTOR);
+		pete_writel("sound/soc/amd/ps/ps-pdm-dma.c:310", ch_mask, rtd->acp63_base + ACP_WOV_PDM_NO_OF_CHANNELS);
+		pete_writel("sound/soc/amd/ps/ps-pdm-dma.c:311", PDM_DECIMATION_FACTOR, rtd->acp63_base + ACP_WOV_PDM_DECIMATION_FACTOR);
 		rtd->bytescount = acp63_pdm_get_byte_count(rtd, substream->stream);
 		pdm_status = acp63_check_pdm_dma_status(rtd->acp63_base);
 		if (!pdm_status)

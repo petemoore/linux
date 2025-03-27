@@ -10,10 +10,10 @@
 
 static int dwxgmac2_dma_reset(void __iomem *ioaddr)
 {
-	u32 value = readl(ioaddr + XGMAC_DMA_MODE);
+	u32 value = pete_readl("drivers/net/ethernet/stmicro/stmmac/dwxgmac2_dma.c:13", ioaddr + XGMAC_DMA_MODE);
 
 	/* DMA SW reset */
-	writel(value | XGMAC_SWR, ioaddr + XGMAC_DMA_MODE);
+	pete_writel("drivers/net/ethernet/stmicro/stmmac/dwxgmac2_dma.c:16", value | XGMAC_SWR, ioaddr + XGMAC_DMA_MODE);
 
 	return readl_poll_timeout(ioaddr + XGMAC_DMA_MODE, value,
 				  !(value & XGMAC_SWR), 0, 100000);
@@ -22,7 +22,7 @@ static int dwxgmac2_dma_reset(void __iomem *ioaddr)
 static void dwxgmac2_dma_init(void __iomem *ioaddr,
 			      struct stmmac_dma_cfg *dma_cfg, int atds)
 {
-	u32 value = readl(ioaddr + XGMAC_DMA_SYSBUS_MODE);
+	u32 value = pete_readl("drivers/net/ethernet/stmicro/stmmac/dwxgmac2_dma.c:25", ioaddr + XGMAC_DMA_SYSBUS_MODE);
 
 	if (dma_cfg->aal)
 		value |= XGMAC_AAL;
@@ -30,20 +30,20 @@ static void dwxgmac2_dma_init(void __iomem *ioaddr,
 	if (dma_cfg->eame)
 		value |= XGMAC_EAME;
 
-	writel(value, ioaddr + XGMAC_DMA_SYSBUS_MODE);
+	pete_writel("drivers/net/ethernet/stmicro/stmmac/dwxgmac2_dma.c:33", value, ioaddr + XGMAC_DMA_SYSBUS_MODE);
 }
 
 static void dwxgmac2_dma_init_chan(struct stmmac_priv *priv,
 				   void __iomem *ioaddr,
 				   struct stmmac_dma_cfg *dma_cfg, u32 chan)
 {
-	u32 value = readl(ioaddr + XGMAC_DMA_CH_CONTROL(chan));
+	u32 value = pete_readl("drivers/net/ethernet/stmicro/stmmac/dwxgmac2_dma.c:40", ioaddr + XGMAC_DMA_CH_CONTROL(chan));
 
 	if (dma_cfg->pblx8)
 		value |= XGMAC_PBLx8;
 
-	writel(value, ioaddr + XGMAC_DMA_CH_CONTROL(chan));
-	writel(XGMAC_DMA_INT_DEFAULT_EN, ioaddr + XGMAC_DMA_CH_INT_EN(chan));
+	pete_writel("drivers/net/ethernet/stmicro/stmmac/dwxgmac2_dma.c:45", value, ioaddr + XGMAC_DMA_CH_CONTROL(chan));
+	pete_writel("drivers/net/ethernet/stmicro/stmmac/dwxgmac2_dma.c:46", XGMAC_DMA_INT_DEFAULT_EN, ioaddr + XGMAC_DMA_CH_INT_EN(chan));
 }
 
 static void dwxgmac2_dma_init_rx_chan(struct stmmac_priv *priv,
@@ -54,13 +54,13 @@ static void dwxgmac2_dma_init_rx_chan(struct stmmac_priv *priv,
 	u32 rxpbl = dma_cfg->rxpbl ?: dma_cfg->pbl;
 	u32 value;
 
-	value = readl(ioaddr + XGMAC_DMA_CH_RX_CONTROL(chan));
+	value = pete_readl("drivers/net/ethernet/stmicro/stmmac/dwxgmac2_dma.c:57", ioaddr + XGMAC_DMA_CH_RX_CONTROL(chan));
 	value &= ~XGMAC_RxPBL;
 	value |= (rxpbl << XGMAC_RxPBL_SHIFT) & XGMAC_RxPBL;
-	writel(value, ioaddr + XGMAC_DMA_CH_RX_CONTROL(chan));
+	pete_writel("drivers/net/ethernet/stmicro/stmmac/dwxgmac2_dma.c:60", value, ioaddr + XGMAC_DMA_CH_RX_CONTROL(chan));
 
-	writel(upper_32_bits(phy), ioaddr + XGMAC_DMA_CH_RxDESC_HADDR(chan));
-	writel(lower_32_bits(phy), ioaddr + XGMAC_DMA_CH_RxDESC_LADDR(chan));
+	pete_writel("drivers/net/ethernet/stmicro/stmmac/dwxgmac2_dma.c:62", upper_32_bits(phy), ioaddr + XGMAC_DMA_CH_RxDESC_HADDR(chan));
+	pete_writel("drivers/net/ethernet/stmicro/stmmac/dwxgmac2_dma.c:63", lower_32_bits(phy), ioaddr + XGMAC_DMA_CH_RxDESC_LADDR(chan));
 }
 
 static void dwxgmac2_dma_init_tx_chan(struct stmmac_priv *priv,
@@ -71,19 +71,19 @@ static void dwxgmac2_dma_init_tx_chan(struct stmmac_priv *priv,
 	u32 txpbl = dma_cfg->txpbl ?: dma_cfg->pbl;
 	u32 value;
 
-	value = readl(ioaddr + XGMAC_DMA_CH_TX_CONTROL(chan));
+	value = pete_readl("drivers/net/ethernet/stmicro/stmmac/dwxgmac2_dma.c:74", ioaddr + XGMAC_DMA_CH_TX_CONTROL(chan));
 	value &= ~XGMAC_TxPBL;
 	value |= (txpbl << XGMAC_TxPBL_SHIFT) & XGMAC_TxPBL;
 	value |= XGMAC_OSP;
-	writel(value, ioaddr + XGMAC_DMA_CH_TX_CONTROL(chan));
+	pete_writel("drivers/net/ethernet/stmicro/stmmac/dwxgmac2_dma.c:78", value, ioaddr + XGMAC_DMA_CH_TX_CONTROL(chan));
 
-	writel(upper_32_bits(phy), ioaddr + XGMAC_DMA_CH_TxDESC_HADDR(chan));
-	writel(lower_32_bits(phy), ioaddr + XGMAC_DMA_CH_TxDESC_LADDR(chan));
+	pete_writel("drivers/net/ethernet/stmicro/stmmac/dwxgmac2_dma.c:80", upper_32_bits(phy), ioaddr + XGMAC_DMA_CH_TxDESC_HADDR(chan));
+	pete_writel("drivers/net/ethernet/stmicro/stmmac/dwxgmac2_dma.c:81", lower_32_bits(phy), ioaddr + XGMAC_DMA_CH_TxDESC_LADDR(chan));
 }
 
 static void dwxgmac2_dma_axi(void __iomem *ioaddr, struct stmmac_axi *axi)
 {
-	u32 value = readl(ioaddr + XGMAC_DMA_SYSBUS_MODE);
+	u32 value = pete_readl("drivers/net/ethernet/stmicro/stmmac/dwxgmac2_dma.c:86", ioaddr + XGMAC_DMA_SYSBUS_MODE);
 	int i;
 
 	if (axi->axi_lpi_en)
@@ -129,9 +129,9 @@ static void dwxgmac2_dma_axi(void __iomem *ioaddr, struct stmmac_axi *axi)
 		}
 	}
 
-	writel(value, ioaddr + XGMAC_DMA_SYSBUS_MODE);
-	writel(XGMAC_TDPS, ioaddr + XGMAC_TX_EDMA_CTRL);
-	writel(XGMAC_RDPS, ioaddr + XGMAC_RX_EDMA_CTRL);
+	pete_writel("drivers/net/ethernet/stmicro/stmmac/dwxgmac2_dma.c:132", value, ioaddr + XGMAC_DMA_SYSBUS_MODE);
+	pete_writel("drivers/net/ethernet/stmicro/stmmac/dwxgmac2_dma.c:133", XGMAC_TDPS, ioaddr + XGMAC_TX_EDMA_CTRL);
+	pete_writel("drivers/net/ethernet/stmicro/stmmac/dwxgmac2_dma.c:134", XGMAC_RDPS, ioaddr + XGMAC_RX_EDMA_CTRL);
 }
 
 static void dwxgmac2_dma_dump_regs(struct stmmac_priv *priv,
@@ -140,13 +140,13 @@ static void dwxgmac2_dma_dump_regs(struct stmmac_priv *priv,
 	int i;
 
 	for (i = (XGMAC_DMA_MODE / 4); i < XGMAC_REGSIZE; i++)
-		reg_space[i] = readl(ioaddr + i * 4);
+		reg_space[i] = pete_readl("drivers/net/ethernet/stmicro/stmmac/dwxgmac2_dma.c:143", ioaddr + i * 4);
 }
 
 static void dwxgmac2_dma_rx_mode(struct stmmac_priv *priv, void __iomem *ioaddr,
 				 int mode, u32 channel, int fifosz, u8 qmode)
 {
-	u32 value = readl(ioaddr + XGMAC_MTL_RXQ_OPMODE(channel));
+	u32 value = pete_readl("drivers/net/ethernet/stmicro/stmmac/dwxgmac2_dma.c:149", ioaddr + XGMAC_MTL_RXQ_OPMODE(channel));
 	unsigned int rqs = fifosz / 256 - 1;
 
 	if (mode == SF_DMA_MODE) {
@@ -167,7 +167,7 @@ static void dwxgmac2_dma_rx_mode(struct stmmac_priv *priv, void __iomem *ioaddr,
 	value |= (rqs << XGMAC_RQS_SHIFT) & XGMAC_RQS;
 
 	if ((fifosz >= 4096) && (qmode != MTL_QUEUE_AVB)) {
-		u32 flow = readl(ioaddr + XGMAC_MTL_RXQ_FLOW_CONTROL(channel));
+		u32 flow = pete_readl("drivers/net/ethernet/stmicro/stmmac/dwxgmac2_dma.c:170", ioaddr + XGMAC_MTL_RXQ_FLOW_CONTROL(channel));
 		unsigned int rfd, rfa;
 
 		value |= XGMAC_EHFC;
@@ -199,20 +199,20 @@ static void dwxgmac2_dma_rx_mode(struct stmmac_priv *priv, void __iomem *ioaddr,
 		flow &= ~XGMAC_RFA;
 		flow |= rfa << XGMAC_RFA_SHIFT;
 
-		writel(flow, ioaddr + XGMAC_MTL_RXQ_FLOW_CONTROL(channel));
+		pete_writel("drivers/net/ethernet/stmicro/stmmac/dwxgmac2_dma.c:202", flow, ioaddr + XGMAC_MTL_RXQ_FLOW_CONTROL(channel));
 	}
 
-	writel(value, ioaddr + XGMAC_MTL_RXQ_OPMODE(channel));
+	pete_writel("drivers/net/ethernet/stmicro/stmmac/dwxgmac2_dma.c:205", value, ioaddr + XGMAC_MTL_RXQ_OPMODE(channel));
 
 	/* Enable MTL RX overflow */
-	value = readl(ioaddr + XGMAC_MTL_QINTEN(channel));
-	writel(value | XGMAC_RXOIE, ioaddr + XGMAC_MTL_QINTEN(channel));
+	value = pete_readl("drivers/net/ethernet/stmicro/stmmac/dwxgmac2_dma.c:208", ioaddr + XGMAC_MTL_QINTEN(channel));
+	pete_writel("drivers/net/ethernet/stmicro/stmmac/dwxgmac2_dma.c:209", value | XGMAC_RXOIE, ioaddr + XGMAC_MTL_QINTEN(channel));
 }
 
 static void dwxgmac2_dma_tx_mode(struct stmmac_priv *priv, void __iomem *ioaddr,
 				 int mode, u32 channel, int fifosz, u8 qmode)
 {
-	u32 value = readl(ioaddr + XGMAC_MTL_TXQ_OPMODE(channel));
+	u32 value = pete_readl("drivers/net/ethernet/stmicro/stmmac/dwxgmac2_dma.c:215", ioaddr + XGMAC_MTL_TXQ_OPMODE(channel));
 	unsigned int tqs = fifosz / 256 - 1;
 
 	if (mode == SF_DMA_MODE) {
@@ -249,35 +249,35 @@ static void dwxgmac2_dma_tx_mode(struct stmmac_priv *priv, void __iomem *ioaddr,
 	value &= ~XGMAC_TQS;
 	value |= (tqs << XGMAC_TQS_SHIFT) & XGMAC_TQS;
 
-	writel(value, ioaddr +  XGMAC_MTL_TXQ_OPMODE(channel));
+	pete_writel("drivers/net/ethernet/stmicro/stmmac/dwxgmac2_dma.c:252", value, ioaddr +  XGMAC_MTL_TXQ_OPMODE(channel));
 }
 
 static void dwxgmac2_enable_dma_irq(struct stmmac_priv *priv,
 				    void __iomem *ioaddr, u32 chan,
 				    bool rx, bool tx)
 {
-	u32 value = readl(ioaddr + XGMAC_DMA_CH_INT_EN(chan));
+	u32 value = pete_readl("drivers/net/ethernet/stmicro/stmmac/dwxgmac2_dma.c:259", ioaddr + XGMAC_DMA_CH_INT_EN(chan));
 
 	if (rx)
 		value |= XGMAC_DMA_INT_DEFAULT_RX;
 	if (tx)
 		value |= XGMAC_DMA_INT_DEFAULT_TX;
 
-	writel(value, ioaddr + XGMAC_DMA_CH_INT_EN(chan));
+	pete_writel("drivers/net/ethernet/stmicro/stmmac/dwxgmac2_dma.c:266", value, ioaddr + XGMAC_DMA_CH_INT_EN(chan));
 }
 
 static void dwxgmac2_disable_dma_irq(struct stmmac_priv *priv,
 				     void __iomem *ioaddr, u32 chan,
 				     bool rx, bool tx)
 {
-	u32 value = readl(ioaddr + XGMAC_DMA_CH_INT_EN(chan));
+	u32 value = pete_readl("drivers/net/ethernet/stmicro/stmmac/dwxgmac2_dma.c:273", ioaddr + XGMAC_DMA_CH_INT_EN(chan));
 
 	if (rx)
 		value &= ~XGMAC_DMA_INT_DEFAULT_RX;
 	if (tx)
 		value &= ~XGMAC_DMA_INT_DEFAULT_TX;
 
-	writel(value, ioaddr + XGMAC_DMA_CH_INT_EN(chan));
+	pete_writel("drivers/net/ethernet/stmicro/stmmac/dwxgmac2_dma.c:280", value, ioaddr + XGMAC_DMA_CH_INT_EN(chan));
 }
 
 static void dwxgmac2_dma_start_tx(struct stmmac_priv *priv,
@@ -285,13 +285,13 @@ static void dwxgmac2_dma_start_tx(struct stmmac_priv *priv,
 {
 	u32 value;
 
-	value = readl(ioaddr + XGMAC_DMA_CH_TX_CONTROL(chan));
+	value = pete_readl("drivers/net/ethernet/stmicro/stmmac/dwxgmac2_dma.c:288", ioaddr + XGMAC_DMA_CH_TX_CONTROL(chan));
 	value |= XGMAC_TXST;
-	writel(value, ioaddr + XGMAC_DMA_CH_TX_CONTROL(chan));
+	pete_writel("drivers/net/ethernet/stmicro/stmmac/dwxgmac2_dma.c:290", value, ioaddr + XGMAC_DMA_CH_TX_CONTROL(chan));
 
-	value = readl(ioaddr + XGMAC_TX_CONFIG);
+	value = pete_readl("drivers/net/ethernet/stmicro/stmmac/dwxgmac2_dma.c:292", ioaddr + XGMAC_TX_CONFIG);
 	value |= XGMAC_CONFIG_TE;
-	writel(value, ioaddr + XGMAC_TX_CONFIG);
+	pete_writel("drivers/net/ethernet/stmicro/stmmac/dwxgmac2_dma.c:294", value, ioaddr + XGMAC_TX_CONFIG);
 }
 
 static void dwxgmac2_dma_stop_tx(struct stmmac_priv *priv, void __iomem *ioaddr,
@@ -299,13 +299,13 @@ static void dwxgmac2_dma_stop_tx(struct stmmac_priv *priv, void __iomem *ioaddr,
 {
 	u32 value;
 
-	value = readl(ioaddr + XGMAC_DMA_CH_TX_CONTROL(chan));
+	value = pete_readl("drivers/net/ethernet/stmicro/stmmac/dwxgmac2_dma.c:302", ioaddr + XGMAC_DMA_CH_TX_CONTROL(chan));
 	value &= ~XGMAC_TXST;
-	writel(value, ioaddr + XGMAC_DMA_CH_TX_CONTROL(chan));
+	pete_writel("drivers/net/ethernet/stmicro/stmmac/dwxgmac2_dma.c:304", value, ioaddr + XGMAC_DMA_CH_TX_CONTROL(chan));
 
-	value = readl(ioaddr + XGMAC_TX_CONFIG);
+	value = pete_readl("drivers/net/ethernet/stmicro/stmmac/dwxgmac2_dma.c:306", ioaddr + XGMAC_TX_CONFIG);
 	value &= ~XGMAC_CONFIG_TE;
-	writel(value, ioaddr + XGMAC_TX_CONFIG);
+	pete_writel("drivers/net/ethernet/stmicro/stmmac/dwxgmac2_dma.c:308", value, ioaddr + XGMAC_TX_CONFIG);
 }
 
 static void dwxgmac2_dma_start_rx(struct stmmac_priv *priv,
@@ -313,13 +313,13 @@ static void dwxgmac2_dma_start_rx(struct stmmac_priv *priv,
 {
 	u32 value;
 
-	value = readl(ioaddr + XGMAC_DMA_CH_RX_CONTROL(chan));
+	value = pete_readl("drivers/net/ethernet/stmicro/stmmac/dwxgmac2_dma.c:316", ioaddr + XGMAC_DMA_CH_RX_CONTROL(chan));
 	value |= XGMAC_RXST;
-	writel(value, ioaddr + XGMAC_DMA_CH_RX_CONTROL(chan));
+	pete_writel("drivers/net/ethernet/stmicro/stmmac/dwxgmac2_dma.c:318", value, ioaddr + XGMAC_DMA_CH_RX_CONTROL(chan));
 
-	value = readl(ioaddr + XGMAC_RX_CONFIG);
+	value = pete_readl("drivers/net/ethernet/stmicro/stmmac/dwxgmac2_dma.c:320", ioaddr + XGMAC_RX_CONFIG);
 	value |= XGMAC_CONFIG_RE;
-	writel(value, ioaddr + XGMAC_RX_CONFIG);
+	pete_writel("drivers/net/ethernet/stmicro/stmmac/dwxgmac2_dma.c:322", value, ioaddr + XGMAC_RX_CONFIG);
 }
 
 static void dwxgmac2_dma_stop_rx(struct stmmac_priv *priv, void __iomem *ioaddr,
@@ -327,9 +327,9 @@ static void dwxgmac2_dma_stop_rx(struct stmmac_priv *priv, void __iomem *ioaddr,
 {
 	u32 value;
 
-	value = readl(ioaddr + XGMAC_DMA_CH_RX_CONTROL(chan));
+	value = pete_readl("drivers/net/ethernet/stmicro/stmmac/dwxgmac2_dma.c:330", ioaddr + XGMAC_DMA_CH_RX_CONTROL(chan));
 	value &= ~XGMAC_RXST;
-	writel(value, ioaddr + XGMAC_DMA_CH_RX_CONTROL(chan));
+	pete_writel("drivers/net/ethernet/stmicro/stmmac/dwxgmac2_dma.c:332", value, ioaddr + XGMAC_DMA_CH_RX_CONTROL(chan));
 }
 
 static int dwxgmac2_dma_interrupt(struct stmmac_priv *priv,
@@ -338,8 +338,8 @@ static int dwxgmac2_dma_interrupt(struct stmmac_priv *priv,
 				  u32 dir)
 {
 	struct stmmac_pcpu_stats *stats = this_cpu_ptr(priv->xstats.pcpu_stats);
-	u32 intr_status = readl(ioaddr + XGMAC_DMA_CH_STATUS(chan));
-	u32 intr_en = readl(ioaddr + XGMAC_DMA_CH_INT_EN(chan));
+	u32 intr_status = pete_readl("drivers/net/ethernet/stmicro/stmmac/dwxgmac2_dma.c:341", ioaddr + XGMAC_DMA_CH_STATUS(chan));
+	u32 intr_en = pete_readl("drivers/net/ethernet/stmicro/stmmac/dwxgmac2_dma.c:342", ioaddr + XGMAC_DMA_CH_INT_EN(chan));
 	int ret = 0;
 
 	if (dir == DMA_DIR_RX)
@@ -380,7 +380,7 @@ static int dwxgmac2_dma_interrupt(struct stmmac_priv *priv,
 	}
 
 	/* Clear interrupts */
-	writel(intr_en & intr_status, ioaddr + XGMAC_DMA_CH_STATUS(chan));
+	pete_writel("drivers/net/ethernet/stmicro/stmmac/dwxgmac2_dma.c:383", intr_en & intr_status, ioaddr + XGMAC_DMA_CH_STATUS(chan));
 
 	return ret;
 }
@@ -391,7 +391,7 @@ static int dwxgmac2_get_hw_feature(void __iomem *ioaddr,
 	u32 hw_cap;
 
 	/* MAC HW feature 0 */
-	hw_cap = readl(ioaddr + XGMAC_HW_FEATURE0);
+	hw_cap = pete_readl("drivers/net/ethernet/stmicro/stmmac/dwxgmac2_dma.c:394", ioaddr + XGMAC_HW_FEATURE0);
 	dma_cap->edma = (hw_cap & XGMAC_HWFEAT_EDMA) >> 31;
 	dma_cap->ediffc = (hw_cap & XGMAC_HWFEAT_EDIFFC) >> 30;
 	dma_cap->vxn = (hw_cap & XGMAC_HWFEAT_VXN) >> 29;
@@ -414,7 +414,7 @@ static int dwxgmac2_get_hw_feature(void __iomem *ioaddr,
 	dma_cap->mbps_1000 = (hw_cap & XGMAC_HWFEAT_GMIISEL) >> 1;
 
 	/* MAC HW feature 1 */
-	hw_cap = readl(ioaddr + XGMAC_HW_FEATURE1);
+	hw_cap = pete_readl("drivers/net/ethernet/stmicro/stmmac/dwxgmac2_dma.c:417", ioaddr + XGMAC_HW_FEATURE1);
 	dma_cap->l3l4fnum = (hw_cap & XGMAC_HWFEAT_L3L4FNUM) >> 27;
 	/* If L3L4FNUM < 8, then the number of L3L4 filters supported by
 	 * XGMAC is equal to L3L4FNUM. From L3L4FNUM >= 8 the number of
@@ -460,7 +460,7 @@ static int dwxgmac2_get_hw_feature(void __iomem *ioaddr,
 		128 << ((hw_cap & XGMAC_HWFEAT_RXFIFOSIZE) >> 0);
 
 	/* MAC HW feature 2 */
-	hw_cap = readl(ioaddr + XGMAC_HW_FEATURE2);
+	hw_cap = pete_readl("drivers/net/ethernet/stmicro/stmmac/dwxgmac2_dma.c:463", ioaddr + XGMAC_HW_FEATURE2);
 	dma_cap->aux_snapshot_n = (hw_cap & XGMAC_HWFEAT_AUXSNAPNUM) >> 28;
 	dma_cap->pps_out_num = (hw_cap & XGMAC_HWFEAT_PPSOUTNUM) >> 24;
 	dma_cap->number_tx_channel =
@@ -473,7 +473,7 @@ static int dwxgmac2_get_hw_feature(void __iomem *ioaddr,
 		((hw_cap & XGMAC_HWFEAT_RXQCNT) >> 0) + 1;
 
 	/* MAC HW feature 3 */
-	hw_cap = readl(ioaddr + XGMAC_HW_FEATURE3);
+	hw_cap = pete_readl("drivers/net/ethernet/stmicro/stmmac/dwxgmac2_dma.c:476", ioaddr + XGMAC_HW_FEATURE3);
 	dma_cap->tbs_ch_num = ((hw_cap & XGMAC_HWFEAT_TBSCH) >> 28) + 1;
 	dma_cap->tbssel = (hw_cap & XGMAC_HWFEAT_TBSSEL) >> 27;
 	dma_cap->fpesel = (hw_cap & XGMAC_HWFEAT_FPESEL) >> 26;
@@ -493,7 +493,7 @@ static int dwxgmac2_get_hw_feature(void __iomem *ioaddr,
 	dma_cap->nrvf_num = (hw_cap & XGMAC_HWFEAT_NRVF) >> 0;
 
 	/* MAC HW feature 4 */
-	hw_cap = readl(ioaddr + XGMAC_HW_FEATURE4);
+	hw_cap = pete_readl("drivers/net/ethernet/stmicro/stmmac/dwxgmac2_dma.c:496", ioaddr + XGMAC_HW_FEATURE4);
 	dma_cap->asp |= (hw_cap & XGMAC_HWFEAT_EASP) >> 2;
 	dma_cap->pcsel = (hw_cap & XGMAC_HWFEAT_PCSEL) >> 0;
 
@@ -503,62 +503,62 @@ static int dwxgmac2_get_hw_feature(void __iomem *ioaddr,
 static void dwxgmac2_rx_watchdog(struct stmmac_priv *priv, void __iomem *ioaddr,
 				 u32 riwt, u32 queue)
 {
-	writel(riwt & XGMAC_RWT, ioaddr + XGMAC_DMA_CH_Rx_WATCHDOG(queue));
+	pete_writel("drivers/net/ethernet/stmicro/stmmac/dwxgmac2_dma.c:506", riwt & XGMAC_RWT, ioaddr + XGMAC_DMA_CH_Rx_WATCHDOG(queue));
 }
 
 static void dwxgmac2_set_rx_ring_len(struct stmmac_priv *priv,
 				     void __iomem *ioaddr, u32 len, u32 chan)
 {
-	writel(len, ioaddr + XGMAC_DMA_CH_RxDESC_RING_LEN(chan));
+	pete_writel("drivers/net/ethernet/stmicro/stmmac/dwxgmac2_dma.c:512", len, ioaddr + XGMAC_DMA_CH_RxDESC_RING_LEN(chan));
 }
 
 static void dwxgmac2_set_tx_ring_len(struct stmmac_priv *priv,
 				     void __iomem *ioaddr, u32 len, u32 chan)
 {
-	writel(len, ioaddr + XGMAC_DMA_CH_TxDESC_RING_LEN(chan));
+	pete_writel("drivers/net/ethernet/stmicro/stmmac/dwxgmac2_dma.c:518", len, ioaddr + XGMAC_DMA_CH_TxDESC_RING_LEN(chan));
 }
 
 static void dwxgmac2_set_rx_tail_ptr(struct stmmac_priv *priv,
 				     void __iomem *ioaddr, u32 ptr, u32 chan)
 {
-	writel(ptr, ioaddr + XGMAC_DMA_CH_RxDESC_TAIL_LPTR(chan));
+	pete_writel("drivers/net/ethernet/stmicro/stmmac/dwxgmac2_dma.c:524", ptr, ioaddr + XGMAC_DMA_CH_RxDESC_TAIL_LPTR(chan));
 }
 
 static void dwxgmac2_set_tx_tail_ptr(struct stmmac_priv *priv,
 				     void __iomem *ioaddr, u32 ptr, u32 chan)
 {
-	writel(ptr, ioaddr + XGMAC_DMA_CH_TxDESC_TAIL_LPTR(chan));
+	pete_writel("drivers/net/ethernet/stmicro/stmmac/dwxgmac2_dma.c:530", ptr, ioaddr + XGMAC_DMA_CH_TxDESC_TAIL_LPTR(chan));
 }
 
 static void dwxgmac2_enable_tso(struct stmmac_priv *priv, void __iomem *ioaddr,
 				bool en, u32 chan)
 {
-	u32 value = readl(ioaddr + XGMAC_DMA_CH_TX_CONTROL(chan));
+	u32 value = pete_readl("drivers/net/ethernet/stmicro/stmmac/dwxgmac2_dma.c:536", ioaddr + XGMAC_DMA_CH_TX_CONTROL(chan));
 
 	if (en)
 		value |= XGMAC_TSE;
 	else
 		value &= ~XGMAC_TSE;
 
-	writel(value, ioaddr + XGMAC_DMA_CH_TX_CONTROL(chan));
+	pete_writel("drivers/net/ethernet/stmicro/stmmac/dwxgmac2_dma.c:543", value, ioaddr + XGMAC_DMA_CH_TX_CONTROL(chan));
 }
 
 static void dwxgmac2_qmode(struct stmmac_priv *priv, void __iomem *ioaddr,
 			   u32 channel, u8 qmode)
 {
-	u32 value = readl(ioaddr + XGMAC_MTL_TXQ_OPMODE(channel));
-	u32 flow = readl(ioaddr + XGMAC_RX_FLOW_CTRL);
+	u32 value = pete_readl("drivers/net/ethernet/stmicro/stmmac/dwxgmac2_dma.c:549", ioaddr + XGMAC_MTL_TXQ_OPMODE(channel));
+	u32 flow = pete_readl("drivers/net/ethernet/stmicro/stmmac/dwxgmac2_dma.c:550", ioaddr + XGMAC_RX_FLOW_CTRL);
 
 	value &= ~XGMAC_TXQEN;
 	if (qmode != MTL_QUEUE_AVB) {
 		value |= 0x2 << XGMAC_TXQEN_SHIFT;
-		writel(0, ioaddr + XGMAC_MTL_TCx_ETS_CONTROL(channel));
+		pete_writel("drivers/net/ethernet/stmicro/stmmac/dwxgmac2_dma.c:555", 0, ioaddr + XGMAC_MTL_TCx_ETS_CONTROL(channel));
 	} else {
 		value |= 0x1 << XGMAC_TXQEN_SHIFT;
-		writel(flow & (~XGMAC_RFE), ioaddr + XGMAC_RX_FLOW_CTRL);
+		pete_writel("drivers/net/ethernet/stmicro/stmmac/dwxgmac2_dma.c:558", flow & (~XGMAC_RFE), ioaddr + XGMAC_RX_FLOW_CTRL);
 	}
 
-	writel(value, ioaddr +  XGMAC_MTL_TXQ_OPMODE(channel));
+	pete_writel("drivers/net/ethernet/stmicro/stmmac/dwxgmac2_dma.c:561", value, ioaddr +  XGMAC_MTL_TXQ_OPMODE(channel));
 }
 
 static void dwxgmac2_set_bfsize(struct stmmac_priv *priv, void __iomem *ioaddr,
@@ -566,49 +566,49 @@ static void dwxgmac2_set_bfsize(struct stmmac_priv *priv, void __iomem *ioaddr,
 {
 	u32 value;
 
-	value = readl(ioaddr + XGMAC_DMA_CH_RX_CONTROL(chan));
+	value = pete_readl("drivers/net/ethernet/stmicro/stmmac/dwxgmac2_dma.c:569", ioaddr + XGMAC_DMA_CH_RX_CONTROL(chan));
 	value &= ~XGMAC_RBSZ;
 	value |= bfsize << XGMAC_RBSZ_SHIFT;
-	writel(value, ioaddr + XGMAC_DMA_CH_RX_CONTROL(chan));
+	pete_writel("drivers/net/ethernet/stmicro/stmmac/dwxgmac2_dma.c:572", value, ioaddr + XGMAC_DMA_CH_RX_CONTROL(chan));
 }
 
 static void dwxgmac2_enable_sph(struct stmmac_priv *priv, void __iomem *ioaddr,
 				bool en, u32 chan)
 {
-	u32 value = readl(ioaddr + XGMAC_RX_CONFIG);
+	u32 value = pete_readl("drivers/net/ethernet/stmicro/stmmac/dwxgmac2_dma.c:578", ioaddr + XGMAC_RX_CONFIG);
 
 	value &= ~XGMAC_CONFIG_HDSMS;
 	value |= XGMAC_CONFIG_HDSMS_256; /* Segment max 256 bytes */
-	writel(value, ioaddr + XGMAC_RX_CONFIG);
+	pete_writel("drivers/net/ethernet/stmicro/stmmac/dwxgmac2_dma.c:582", value, ioaddr + XGMAC_RX_CONFIG);
 
-	value = readl(ioaddr + XGMAC_DMA_CH_CONTROL(chan));
+	value = pete_readl("drivers/net/ethernet/stmicro/stmmac/dwxgmac2_dma.c:584", ioaddr + XGMAC_DMA_CH_CONTROL(chan));
 	if (en)
 		value |= XGMAC_SPH;
 	else
 		value &= ~XGMAC_SPH;
-	writel(value, ioaddr + XGMAC_DMA_CH_CONTROL(chan));
+	pete_writel("drivers/net/ethernet/stmicro/stmmac/dwxgmac2_dma.c:589", value, ioaddr + XGMAC_DMA_CH_CONTROL(chan));
 }
 
 static int dwxgmac2_enable_tbs(struct stmmac_priv *priv, void __iomem *ioaddr,
 			       bool en, u32 chan)
 {
-	u32 value = readl(ioaddr + XGMAC_DMA_CH_TX_CONTROL(chan));
+	u32 value = pete_readl("drivers/net/ethernet/stmicro/stmmac/dwxgmac2_dma.c:595", ioaddr + XGMAC_DMA_CH_TX_CONTROL(chan));
 
 	if (en)
 		value |= XGMAC_EDSE;
 	else
 		value &= ~XGMAC_EDSE;
 
-	writel(value, ioaddr + XGMAC_DMA_CH_TX_CONTROL(chan));
+	pete_writel("drivers/net/ethernet/stmicro/stmmac/dwxgmac2_dma.c:602", value, ioaddr + XGMAC_DMA_CH_TX_CONTROL(chan));
 
-	value = readl(ioaddr + XGMAC_DMA_CH_TX_CONTROL(chan)) & XGMAC_EDSE;
+	value = pete_readl("drivers/net/ethernet/stmicro/stmmac/dwxgmac2_dma.c:604", ioaddr + XGMAC_DMA_CH_TX_CONTROL(chan)) & XGMAC_EDSE;
 	if (en && !value)
 		return -EIO;
 
-	writel(XGMAC_DEF_FTOS, ioaddr + XGMAC_DMA_TBS_CTRL0);
-	writel(XGMAC_DEF_FTOS, ioaddr + XGMAC_DMA_TBS_CTRL1);
-	writel(XGMAC_DEF_FTOS, ioaddr + XGMAC_DMA_TBS_CTRL2);
-	writel(XGMAC_DEF_FTOS, ioaddr + XGMAC_DMA_TBS_CTRL3);
+	pete_writel("drivers/net/ethernet/stmicro/stmmac/dwxgmac2_dma.c:608", XGMAC_DEF_FTOS, ioaddr + XGMAC_DMA_TBS_CTRL0);
+	pete_writel("drivers/net/ethernet/stmicro/stmmac/dwxgmac2_dma.c:609", XGMAC_DEF_FTOS, ioaddr + XGMAC_DMA_TBS_CTRL1);
+	pete_writel("drivers/net/ethernet/stmicro/stmmac/dwxgmac2_dma.c:610", XGMAC_DEF_FTOS, ioaddr + XGMAC_DMA_TBS_CTRL2);
+	pete_writel("drivers/net/ethernet/stmicro/stmmac/dwxgmac2_dma.c:611", XGMAC_DEF_FTOS, ioaddr + XGMAC_DMA_TBS_CTRL3);
 	return 0;
 }
 

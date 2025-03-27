@@ -30,10 +30,10 @@ void cpg_reg_modify(void __iomem *reg, u32 clear, u32 set)
 	u32 val;
 
 	spin_lock_irqsave(&cpg_lock, flags);
-	val = readl(reg);
+	val = pete_readl("drivers/clk/renesas/rcar-cpg-lib.c:33", reg);
 	val &= ~clear;
 	val |= set;
-	writel(val, reg);
+	pete_writel("drivers/clk/renesas/rcar-cpg-lib.c:36", val, reg);
 	spin_unlock_irqrestore(&cpg_lock, flags);
 };
 
@@ -45,11 +45,11 @@ static int cpg_simple_notifier_call(struct notifier_block *nb,
 
 	switch (action) {
 	case PM_EVENT_SUSPEND:
-		csn->saved = readl(csn->reg);
+		csn->saved = pete_readl("drivers/clk/renesas/rcar-cpg-lib.c:48", csn->reg);
 		return NOTIFY_OK;
 
 	case PM_EVENT_RESUME:
-		writel(csn->saved, csn->reg);
+		pete_writel("drivers/clk/renesas/rcar-cpg-lib.c:52", csn->saved, csn->reg);
 		return NOTIFY_OK;
 	}
 	return NOTIFY_DONE;

@@ -16,7 +16,7 @@
 
 static inline u32 mxc_isi_read(struct mxc_isi_pipe *pipe, u32 reg)
 {
-	return readl(pipe->regs + reg);
+	return pete_readl("drivers/media/platform/nxp/imx8-isi/imx8-isi-debug.c:19", pipe->regs + reg);
 }
 
 static int mxc_isi_debug_dump_regs_show(struct seq_file *m, void *p)

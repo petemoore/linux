@@ -134,16 +134,16 @@ static void get_error_info(void __iomem *base, struct ecc_status *p, int mask)
 {
 	if (mask & OCM_CEINTR_MASK) {
 		p->ce_cnt++;
-		p->ceinfo.fault_lo = readl(base + CE_FFD0_OFST);
-		p->ceinfo.fault_hi = readl(base + CE_FFD1_OFST);
-		p->ceinfo.addr = (OCM_BASEVAL | readl(base + CE_FFA_OFST));
-		writel(ECC_CTRL_CLR_CE_ERR, base + OCM_ISR_OFST);
+		p->ceinfo.fault_lo = pete_readl("drivers/edac/zynqmp_edac.c:137", base + CE_FFD0_OFST);
+		p->ceinfo.fault_hi = pete_readl("drivers/edac/zynqmp_edac.c:138", base + CE_FFD1_OFST);
+		p->ceinfo.addr = (OCM_BASEVAL | pete_readl("drivers/edac/zynqmp_edac.c:139", base + CE_FFA_OFST));
+		pete_writel("drivers/edac/zynqmp_edac.c:140", ECC_CTRL_CLR_CE_ERR, base + OCM_ISR_OFST);
 	} else if (mask & OCM_UEINTR_MASK) {
 		p->ue_cnt++;
-		p->ueinfo.fault_lo = readl(base + UE_FFD0_OFST);
-		p->ueinfo.fault_hi = readl(base + UE_FFD1_OFST);
-		p->ueinfo.addr = (OCM_BASEVAL | readl(base + UE_FFA_OFST));
-		writel(ECC_CTRL_CLR_UE_ERR, base + OCM_ISR_OFST);
+		p->ueinfo.fault_lo = pete_readl("drivers/edac/zynqmp_edac.c:143", base + UE_FFD0_OFST);
+		p->ueinfo.fault_hi = pete_readl("drivers/edac/zynqmp_edac.c:144", base + UE_FFD1_OFST);
+		p->ueinfo.addr = (OCM_BASEVAL | pete_readl("drivers/edac/zynqmp_edac.c:145", base + UE_FFA_OFST));
+		pete_writel("drivers/edac/zynqmp_edac.c:146", ECC_CTRL_CLR_UE_ERR, base + OCM_ISR_OFST);
 	}
 }
 
@@ -191,7 +191,7 @@ static irqreturn_t intr_handler(int irq, void *dev_id)
 	struct edac_priv *priv = dci->pvt_info;
 	int regval;
 
-	regval = readl(priv->baseaddr + OCM_ISR_OFST);
+	regval = pete_readl("drivers/edac/zynqmp_edac.c:194", priv->baseaddr + OCM_ISR_OFST);
 	if (!(regval & (OCM_CEINTR_MASK | OCM_UEINTR_MASK))) {
 		WARN_ONCE(1, "Unhandled IRQ%d, ISR: 0x%x", irq, regval);
 		return IRQ_NONE;
@@ -216,7 +216,7 @@ static irqreturn_t intr_handler(int irq, void *dev_id)
  */
 static bool get_eccstate(void __iomem *base)
 {
-	return readl(base + ECC_CTRL_OFST) & OCM_ECC_ENABLE_MASK;
+	return pete_readl("drivers/edac/zynqmp_edac.c:219", base + ECC_CTRL_OFST) & OCM_ECC_ENABLE_MASK;
 }
 
 #ifdef CONFIG_EDAC_DEBUG
@@ -237,7 +237,7 @@ static void write_fault_count(struct edac_priv *priv)
 			    "Fault injection count value truncated to %d\n", ficount);
 	}
 
-	writel(ficount, priv->baseaddr + OCM_FIC_OFST);
+	pete_writel("drivers/edac/zynqmp_edac.c:240", ficount, priv->baseaddr + OCM_FIC_OFST);
 }
 
 /*
@@ -265,12 +265,12 @@ static ssize_t inject_ce_write(struct file *file, const char __user *data,
 		return -EINVAL;
 
 	if (priv->ce_bitpos <= UE_MAX_BITPOS_LOWER) {
-		writel(BIT(priv->ce_bitpos), priv->baseaddr + OCM_FID0_OFST);
-		writel(0, priv->baseaddr + OCM_FID1_OFST);
+		pete_writel("drivers/edac/zynqmp_edac.c:268", BIT(priv->ce_bitpos), priv->baseaddr + OCM_FID0_OFST);
+		pete_writel("drivers/edac/zynqmp_edac.c:269", 0, priv->baseaddr + OCM_FID1_OFST);
 	} else {
-		writel(BIT(priv->ce_bitpos - UE_MIN_BITPOS_UPPER),
+		pete_writel("drivers/edac/zynqmp_edac.c:271", BIT(priv->ce_bitpos - UE_MIN_BITPOS_UPPER),
 		       priv->baseaddr + OCM_FID1_OFST);
-		writel(0, priv->baseaddr + OCM_FID0_OFST);
+		pete_writel("drivers/edac/zynqmp_edac.c:273", 0, priv->baseaddr + OCM_FID0_OFST);
 	}
 
 	write_fault_count(priv);
@@ -332,8 +332,8 @@ static ssize_t inject_ue_write(struct file *file, const char __user *data,
 
 	ue_bitpos = BIT(priv->ue_bitpos[0]) | BIT(priv->ue_bitpos[1]);
 
-	writel((u32)ue_bitpos, priv->baseaddr + OCM_FID0_OFST);
-	writel((u32)(ue_bitpos >> 32), priv->baseaddr + OCM_FID1_OFST);
+	pete_writel("drivers/edac/zynqmp_edac.c:335", (u32)ue_bitpos, priv->baseaddr + OCM_FID0_OFST);
+	pete_writel("drivers/edac/zynqmp_edac.c:336", (u32)(ue_bitpos >> 32), priv->baseaddr + OCM_FID1_OFST);
 
 	write_fault_count(priv);
 
@@ -408,7 +408,7 @@ static int edac_probe(struct platform_device *pdev)
 	}
 
 	/* Enable UE, CE interrupts */
-	writel((OCM_CEINTR_MASK | OCM_UEINTR_MASK), priv->baseaddr + OCM_IEN_OFST);
+	pete_writel("drivers/edac/zynqmp_edac.c:411", (OCM_CEINTR_MASK | OCM_UEINTR_MASK), priv->baseaddr + OCM_IEN_OFST);
 
 #ifdef CONFIG_EDAC_DEBUG
 	setup_debugfs(dci);
@@ -432,7 +432,7 @@ static int edac_remove(struct platform_device *pdev)
 	struct edac_priv *priv = dci->pvt_info;
 
 	/* Disable UE, CE interrupts */
-	writel((OCM_CEINTR_MASK | OCM_UEINTR_MASK), priv->baseaddr + OCM_IDS_OFST);
+	pete_writel("drivers/edac/zynqmp_edac.c:435", (OCM_CEINTR_MASK | OCM_UEINTR_MASK), priv->baseaddr + OCM_IDS_OFST);
 
 #ifdef CONFIG_EDAC_DEBUG
 	debugfs_remove_recursive(priv->debugfs_dir);

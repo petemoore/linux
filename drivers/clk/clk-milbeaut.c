@@ -282,7 +282,7 @@ static u8 m10v_mux_get_parent(struct clk_hw *hw)
 	struct clk_mux *mux = to_clk_mux(hw);
 	u32 val;
 
-	val = readl(mux->reg) >> mux->shift;
+	val = pete_readl("drivers/clk/clk-milbeaut.c:285", mux->reg) >> mux->shift;
 	val &= mux->mask;
 
 	return clk_mux_val_to_index(hw, mux->table, mux->flags, val);
@@ -301,12 +301,12 @@ static int m10v_mux_set_parent(struct clk_hw *hw, u8 index)
 	else
 		__acquire(mux->lock);
 
-	reg = readl(mux->reg);
+	reg = pete_readl("drivers/clk/clk-milbeaut.c:304", mux->reg);
 	reg &= ~(mux->mask << mux->shift);
 
 	val = (val | write_en) << mux->shift;
 	reg |= val;
-	writel(reg, mux->reg);
+	pete_writel("drivers/clk/clk-milbeaut.c:309", reg, mux->reg);
 
 	if (mux->lock)
 		spin_unlock_irqrestore(mux->lock, flags);
@@ -379,7 +379,7 @@ static unsigned long m10v_clk_divider_recalc_rate(struct clk_hw *hw,
 	struct m10v_clk_divider *divider = to_m10v_div(hw);
 	unsigned int val;
 
-	val = readl(divider->reg) >> divider->shift;
+	val = pete_readl("drivers/clk/clk-milbeaut.c:382", divider->reg) >> divider->shift;
 	val &= clk_div_mask(divider->width);
 
 	return divider_recalc_rate(hw, parent_rate, val, divider->table,
@@ -395,7 +395,7 @@ static long m10v_clk_divider_round_rate(struct clk_hw *hw, unsigned long rate,
 	if (divider->flags & CLK_DIVIDER_READ_ONLY) {
 		u32 val;
 
-		val = readl(divider->reg) >> divider->shift;
+		val = pete_readl("drivers/clk/clk-milbeaut.c:398", divider->reg) >> divider->shift;
 		val &= clk_div_mask(divider->width);
 
 		return divider_ro_round_rate(hw, rate, prate, divider->table,
@@ -426,14 +426,14 @@ static int m10v_clk_divider_set_rate(struct clk_hw *hw, unsigned long rate,
 	else
 		__acquire(divider->lock);
 
-	val = readl(divider->reg);
+	val = pete_readl("drivers/clk/clk-milbeaut.c:429", divider->reg);
 	val &= ~(clk_div_mask(divider->width) << divider->shift);
 
 	val |= ((u32)value | write_en) << divider->shift;
-	writel(val, divider->reg);
+	pete_writel("drivers/clk/clk-milbeaut.c:433", val, divider->reg);
 
 	if (divider->write_valid_reg) {
-		writel(M10V_DCHREQ, divider->write_valid_reg);
+		pete_writel("drivers/clk/clk-milbeaut.c:436", M10V_DCHREQ, divider->write_valid_reg);
 		if (readl_poll_timeout(divider->write_valid_reg, val,
 			!val, M10V_UPOLL_RATE, M10V_UTIMEOUT))
 			pr_err("%s:%s couldn't stabilize\n",

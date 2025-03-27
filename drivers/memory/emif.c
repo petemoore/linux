@@ -177,7 +177,7 @@ static u32 get_emif_bus_width(struct emif_data *emif)
 	u32		width;
 	void __iomem	*base = emif->base;
 
-	width = (readl(base + EMIF_SDRAM_CONFIG) & NARROW_MODE_MASK)
+	width = (pete_readl("drivers/memory/emif.c:180", base + EMIF_SDRAM_CONFIG) & NARROW_MODE_MASK)
 			>> NARROW_MODE_SHIFT;
 	width = width == 0 ? 32 : 16;
 
@@ -223,10 +223,10 @@ static void set_lpmode(struct emif_data *emif, u8 lpmode)
 		lpmode = EMIF_LP_MODE_SELF_REFRESH;
 	}
 
-	temp = readl(base + EMIF_POWER_MANAGEMENT_CONTROL);
+	temp = pete_readl("drivers/memory/emif.c:226", base + EMIF_POWER_MANAGEMENT_CONTROL);
 	temp &= ~LP_MODE_MASK;
 	temp |= (lpmode << LP_MODE_SHIFT);
-	writel(temp, base + EMIF_POWER_MANAGEMENT_CONTROL);
+	pete_writel("drivers/memory/emif.c:229", temp, base + EMIF_POWER_MANAGEMENT_CONTROL);
 }
 
 static void do_freq_update(void)
@@ -466,14 +466,14 @@ static void get_temperature_level(struct emif_data *emif)
 	base = emif->base;
 
 	/* Read mode register 4 */
-	writel(DDR_MR4, base + EMIF_LPDDR2_MODE_REG_CONFIG);
-	temperature_level = readl(base + EMIF_LPDDR2_MODE_REG_DATA);
+	pete_writel("drivers/memory/emif.c:469", DDR_MR4, base + EMIF_LPDDR2_MODE_REG_CONFIG);
+	temperature_level = pete_readl("drivers/memory/emif.c:470", base + EMIF_LPDDR2_MODE_REG_DATA);
 	temperature_level = (temperature_level & MR4_SDRAM_REF_RATE_MASK) >>
 				MR4_SDRAM_REF_RATE_SHIFT;
 
 	if (emif->plat_data->device_info->cs1_used) {
-		writel(DDR_MR4 | CS_MASK, base + EMIF_LPDDR2_MODE_REG_CONFIG);
-		temp = readl(base + EMIF_LPDDR2_MODE_REG_DATA);
+		pete_writel("drivers/memory/emif.c:475", DDR_MR4 | CS_MASK, base + EMIF_LPDDR2_MODE_REG_CONFIG);
+		temp = pete_readl("drivers/memory/emif.c:476", base + EMIF_LPDDR2_MODE_REG_DATA);
 		temp = (temp & MR4_SDRAM_REF_RATE_MASK)
 				>> MR4_SDRAM_REF_RATE_SHIFT;
 		temperature_level = max(temp, temperature_level);
@@ -523,9 +523,9 @@ static void setup_temperature_sensitive_regs(struct emif_data *emif,
 	}
 
 out:
-	writel(tim1, base + EMIF_SDRAM_TIMING_1_SHDW);
-	writel(tim3, base + EMIF_SDRAM_TIMING_3_SHDW);
-	writel(ref_ctrl, base + EMIF_SDRAM_REFRESH_CTRL_SHDW);
+	pete_writel("drivers/memory/emif.c:526", tim1, base + EMIF_SDRAM_TIMING_1_SHDW);
+	pete_writel("drivers/memory/emif.c:527", tim3, base + EMIF_SDRAM_TIMING_3_SHDW);
+	pete_writel("drivers/memory/emif.c:528", ref_ctrl, base + EMIF_SDRAM_REFRESH_CTRL_SHDW);
 }
 
 static irqreturn_t handle_temp_alert(void __iomem *base, struct emif_data *emif)
@@ -595,8 +595,8 @@ static irqreturn_t emif_interrupt_handler(int irq, void *dev_id)
 	irqreturn_t		ret = IRQ_HANDLED;
 
 	/* Save the status and clear it */
-	interrupts = readl(base + EMIF_SYSTEM_OCP_INTERRUPT_STATUS);
-	writel(interrupts, base + EMIF_SYSTEM_OCP_INTERRUPT_STATUS);
+	interrupts = pete_readl("drivers/memory/emif.c:598", base + EMIF_SYSTEM_OCP_INTERRUPT_STATUS);
+	pete_writel("drivers/memory/emif.c:599", interrupts, base + EMIF_SYSTEM_OCP_INTERRUPT_STATUS);
 
 	/*
 	 * Handle temperature alert
@@ -611,8 +611,8 @@ static irqreturn_t emif_interrupt_handler(int irq, void *dev_id)
 
 	if (emif->plat_data->hw_caps & EMIF_HW_CAPS_LL_INTERFACE) {
 		/* Save the status and clear it */
-		interrupts = readl(base + EMIF_LL_OCP_INTERRUPT_STATUS);
-		writel(interrupts, base + EMIF_LL_OCP_INTERRUPT_STATUS);
+		interrupts = pete_readl("drivers/memory/emif.c:614", base + EMIF_LL_OCP_INTERRUPT_STATUS);
+		pete_writel("drivers/memory/emif.c:615", interrupts, base + EMIF_LL_OCP_INTERRUPT_STATUS);
 
 		if (interrupts & ERR_LL_MASK)
 			dev_err(dev, "Access error from LL port - %x\n",
@@ -657,10 +657,10 @@ static void clear_all_interrupts(struct emif_data *emif)
 {
 	void __iomem	*base = emif->base;
 
-	writel(readl(base + EMIF_SYSTEM_OCP_INTERRUPT_STATUS),
+	pete_writel("drivers/memory/emif.c:660", pete_readl("drivers/memory/emif.c:660", base + EMIF_SYSTEM_OCP_INTERRUPT_STATUS),
 		base + EMIF_SYSTEM_OCP_INTERRUPT_STATUS);
 	if (emif->plat_data->hw_caps & EMIF_HW_CAPS_LL_INTERFACE)
-		writel(readl(base + EMIF_LL_OCP_INTERRUPT_STATUS),
+		pete_writel("drivers/memory/emif.c:663", pete_readl("drivers/memory/emif.c:663", base + EMIF_LL_OCP_INTERRUPT_STATUS),
 			base + EMIF_LL_OCP_INTERRUPT_STATUS);
 }
 
@@ -669,10 +669,10 @@ static void disable_and_clear_all_interrupts(struct emif_data *emif)
 	void __iomem		*base = emif->base;
 
 	/* Disable all interrupts */
-	writel(readl(base + EMIF_SYSTEM_OCP_INTERRUPT_ENABLE_SET),
+	pete_writel("drivers/memory/emif.c:672", pete_readl("drivers/memory/emif.c:672", base + EMIF_SYSTEM_OCP_INTERRUPT_ENABLE_SET),
 		base + EMIF_SYSTEM_OCP_INTERRUPT_ENABLE_CLEAR);
 	if (emif->plat_data->hw_caps & EMIF_HW_CAPS_LL_INTERFACE)
-		writel(readl(base + EMIF_LL_OCP_INTERRUPT_ENABLE_SET),
+		pete_writel("drivers/memory/emif.c:675", pete_readl("drivers/memory/emif.c:675", base + EMIF_LL_OCP_INTERRUPT_ENABLE_SET),
 			base + EMIF_LL_OCP_INTERRUPT_ENABLE_CLEAR);
 
 	/* Clear all interrupts */
@@ -692,13 +692,13 @@ static int __init_or_module setup_interrupts(struct emif_data *emif, u32 irq)
 	interrupts = EN_ERR_SYS_MASK;
 	if (type == DDR_TYPE_LPDDR2_S2 || type == DDR_TYPE_LPDDR2_S4)
 		interrupts |= EN_TA_SYS_MASK;
-	writel(interrupts, base + EMIF_SYSTEM_OCP_INTERRUPT_ENABLE_SET);
+	pete_writel("drivers/memory/emif.c:695", interrupts, base + EMIF_SYSTEM_OCP_INTERRUPT_ENABLE_SET);
 
 	/* Enable interrupts for LL interface */
 	if (emif->plat_data->hw_caps & EMIF_HW_CAPS_LL_INTERFACE) {
 		/* TA need not be enabled for LL */
 		interrupts = EN_ERR_LL_MASK;
-		writel(interrupts, base + EMIF_LL_OCP_INTERRUPT_ENABLE_SET);
+		pete_writel("drivers/memory/emif.c:701", interrupts, base + EMIF_LL_OCP_INTERRUPT_ENABLE_SET);
 	}
 
 	/* setup IRQ handlers */
@@ -728,12 +728,12 @@ static void __init_or_module emif_onetime_settings(struct emif_data *emif)
 	pwr_mgmt_ctrl = get_pwr_mgmt_ctrl(1000000000, emif,
 			emif->plat_data->ip_rev);
 	emif->lpmode = (pwr_mgmt_ctrl & LP_MODE_MASK) >> LP_MODE_SHIFT;
-	writel(pwr_mgmt_ctrl, base + EMIF_POWER_MANAGEMENT_CONTROL);
+	pete_writel("drivers/memory/emif.c:731", pwr_mgmt_ctrl, base + EMIF_POWER_MANAGEMENT_CONTROL);
 
 	/* Init ZQ calibration settings */
 	zq = get_zq_config_reg(addressing, device_info->cs1_used,
 		device_info->cal_resistors_per_cs);
-	writel(zq, base + EMIF_SDRAM_OUTPUT_IMPEDANCE_CALIBRATION_CONFIG);
+	pete_writel("drivers/memory/emif.c:736", zq, base + EMIF_SDRAM_OUTPUT_IMPEDANCE_CALIBRATION_CONFIG);
 
 	/* Check temperature level temperature level*/
 	get_temperature_level(emif);
@@ -744,7 +744,7 @@ static void __init_or_module emif_onetime_settings(struct emif_data *emif)
 	temp_alert_cfg = get_temp_alert_config(addressing,
 		emif->plat_data->custom_configs, device_info->cs1_used,
 		device_info->io_width, get_emif_bus_width(emif));
-	writel(temp_alert_cfg, base + EMIF_TEMPERATURE_ALERT_CONFIG);
+	pete_writel("drivers/memory/emif.c:747", temp_alert_cfg, base + EMIF_TEMPERATURE_ALERT_CONFIG);
 
 	/*
 	 * Program external PHY control registers that are not frequency
@@ -752,27 +752,27 @@ static void __init_or_module emif_onetime_settings(struct emif_data *emif)
 	 */
 	if (emif->plat_data->phy_type != EMIF_PHY_TYPE_INTELLIPHY)
 		return;
-	writel(EMIF_EXT_PHY_CTRL_1_VAL, base + EMIF_EXT_PHY_CTRL_1_SHDW);
-	writel(EMIF_EXT_PHY_CTRL_5_VAL, base + EMIF_EXT_PHY_CTRL_5_SHDW);
-	writel(EMIF_EXT_PHY_CTRL_6_VAL, base + EMIF_EXT_PHY_CTRL_6_SHDW);
-	writel(EMIF_EXT_PHY_CTRL_7_VAL, base + EMIF_EXT_PHY_CTRL_7_SHDW);
-	writel(EMIF_EXT_PHY_CTRL_8_VAL, base + EMIF_EXT_PHY_CTRL_8_SHDW);
-	writel(EMIF_EXT_PHY_CTRL_9_VAL, base + EMIF_EXT_PHY_CTRL_9_SHDW);
-	writel(EMIF_EXT_PHY_CTRL_10_VAL, base + EMIF_EXT_PHY_CTRL_10_SHDW);
-	writel(EMIF_EXT_PHY_CTRL_11_VAL, base + EMIF_EXT_PHY_CTRL_11_SHDW);
-	writel(EMIF_EXT_PHY_CTRL_12_VAL, base + EMIF_EXT_PHY_CTRL_12_SHDW);
-	writel(EMIF_EXT_PHY_CTRL_13_VAL, base + EMIF_EXT_PHY_CTRL_13_SHDW);
-	writel(EMIF_EXT_PHY_CTRL_14_VAL, base + EMIF_EXT_PHY_CTRL_14_SHDW);
-	writel(EMIF_EXT_PHY_CTRL_15_VAL, base + EMIF_EXT_PHY_CTRL_15_SHDW);
-	writel(EMIF_EXT_PHY_CTRL_16_VAL, base + EMIF_EXT_PHY_CTRL_16_SHDW);
-	writel(EMIF_EXT_PHY_CTRL_17_VAL, base + EMIF_EXT_PHY_CTRL_17_SHDW);
-	writel(EMIF_EXT_PHY_CTRL_18_VAL, base + EMIF_EXT_PHY_CTRL_18_SHDW);
-	writel(EMIF_EXT_PHY_CTRL_19_VAL, base + EMIF_EXT_PHY_CTRL_19_SHDW);
-	writel(EMIF_EXT_PHY_CTRL_20_VAL, base + EMIF_EXT_PHY_CTRL_20_SHDW);
-	writel(EMIF_EXT_PHY_CTRL_21_VAL, base + EMIF_EXT_PHY_CTRL_21_SHDW);
-	writel(EMIF_EXT_PHY_CTRL_22_VAL, base + EMIF_EXT_PHY_CTRL_22_SHDW);
-	writel(EMIF_EXT_PHY_CTRL_23_VAL, base + EMIF_EXT_PHY_CTRL_23_SHDW);
-	writel(EMIF_EXT_PHY_CTRL_24_VAL, base + EMIF_EXT_PHY_CTRL_24_SHDW);
+	pete_writel("drivers/memory/emif.c:755", EMIF_EXT_PHY_CTRL_1_VAL, base + EMIF_EXT_PHY_CTRL_1_SHDW);
+	pete_writel("drivers/memory/emif.c:756", EMIF_EXT_PHY_CTRL_5_VAL, base + EMIF_EXT_PHY_CTRL_5_SHDW);
+	pete_writel("drivers/memory/emif.c:757", EMIF_EXT_PHY_CTRL_6_VAL, base + EMIF_EXT_PHY_CTRL_6_SHDW);
+	pete_writel("drivers/memory/emif.c:758", EMIF_EXT_PHY_CTRL_7_VAL, base + EMIF_EXT_PHY_CTRL_7_SHDW);
+	pete_writel("drivers/memory/emif.c:759", EMIF_EXT_PHY_CTRL_8_VAL, base + EMIF_EXT_PHY_CTRL_8_SHDW);
+	pete_writel("drivers/memory/emif.c:760", EMIF_EXT_PHY_CTRL_9_VAL, base + EMIF_EXT_PHY_CTRL_9_SHDW);
+	pete_writel("drivers/memory/emif.c:761", EMIF_EXT_PHY_CTRL_10_VAL, base + EMIF_EXT_PHY_CTRL_10_SHDW);
+	pete_writel("drivers/memory/emif.c:762", EMIF_EXT_PHY_CTRL_11_VAL, base + EMIF_EXT_PHY_CTRL_11_SHDW);
+	pete_writel("drivers/memory/emif.c:763", EMIF_EXT_PHY_CTRL_12_VAL, base + EMIF_EXT_PHY_CTRL_12_SHDW);
+	pete_writel("drivers/memory/emif.c:764", EMIF_EXT_PHY_CTRL_13_VAL, base + EMIF_EXT_PHY_CTRL_13_SHDW);
+	pete_writel("drivers/memory/emif.c:765", EMIF_EXT_PHY_CTRL_14_VAL, base + EMIF_EXT_PHY_CTRL_14_SHDW);
+	pete_writel("drivers/memory/emif.c:766", EMIF_EXT_PHY_CTRL_15_VAL, base + EMIF_EXT_PHY_CTRL_15_SHDW);
+	pete_writel("drivers/memory/emif.c:767", EMIF_EXT_PHY_CTRL_16_VAL, base + EMIF_EXT_PHY_CTRL_16_SHDW);
+	pete_writel("drivers/memory/emif.c:768", EMIF_EXT_PHY_CTRL_17_VAL, base + EMIF_EXT_PHY_CTRL_17_SHDW);
+	pete_writel("drivers/memory/emif.c:769", EMIF_EXT_PHY_CTRL_18_VAL, base + EMIF_EXT_PHY_CTRL_18_SHDW);
+	pete_writel("drivers/memory/emif.c:770", EMIF_EXT_PHY_CTRL_19_VAL, base + EMIF_EXT_PHY_CTRL_19_SHDW);
+	pete_writel("drivers/memory/emif.c:771", EMIF_EXT_PHY_CTRL_20_VAL, base + EMIF_EXT_PHY_CTRL_20_SHDW);
+	pete_writel("drivers/memory/emif.c:772", EMIF_EXT_PHY_CTRL_21_VAL, base + EMIF_EXT_PHY_CTRL_21_SHDW);
+	pete_writel("drivers/memory/emif.c:773", EMIF_EXT_PHY_CTRL_22_VAL, base + EMIF_EXT_PHY_CTRL_22_SHDW);
+	pete_writel("drivers/memory/emif.c:774", EMIF_EXT_PHY_CTRL_23_VAL, base + EMIF_EXT_PHY_CTRL_23_SHDW);
+	pete_writel("drivers/memory/emif.c:775", EMIF_EXT_PHY_CTRL_24_VAL, base + EMIF_EXT_PHY_CTRL_24_SHDW);
 }
 
 static void get_default_timings(struct emif_data *emif)

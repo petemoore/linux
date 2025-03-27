@@ -116,7 +116,7 @@ static int amlogic_spifc_a1_request(struct amlogic_spifc_a1 *spifc, bool read)
 		   (read ? SPIFC_A1_USER_DATA_UPDATED : 0);
 	u32 val;
 
-	writel(SPIFC_A1_USER_REQUEST_ENABLE,
+	pete_writel("drivers/spi/spi-amlogic-spifc-a1.c:119", SPIFC_A1_USER_REQUEST_ENABLE,
 	       spifc->base + SPIFC_A1_USER_CTRL0_REG);
 
 	return readl_poll_timeout(spifc->base + SPIFC_A1_USER_CTRL0_REG,
@@ -131,12 +131,12 @@ static void amlogic_spifc_a1_drain_buffer(struct amlogic_spifc_a1 *spifc,
 	const u32 count = len / sizeof(data);
 	const u32 pad = len % sizeof(data);
 
-	writel(SPIFC_A1_DBUF_AUTO_UPDATE_ADDR,
+	pete_writel("drivers/spi/spi-amlogic-spifc-a1.c:134", SPIFC_A1_DBUF_AUTO_UPDATE_ADDR,
 	       spifc->base + SPIFC_A1_DBUF_CTRL_REG);
 	ioread32_rep(spifc->base + SPIFC_A1_DBUF_DATA_REG, buf, count);
 
 	if (pad) {
-		data = readl(spifc->base + SPIFC_A1_DBUF_DATA_REG);
+		data = pete_readl("drivers/spi/spi-amlogic-spifc-a1.c:139", spifc->base + SPIFC_A1_DBUF_DATA_REG);
 		memcpy(buf + len - pad, &data, pad);
 	}
 }
@@ -148,22 +148,22 @@ static void amlogic_spifc_a1_fill_buffer(struct amlogic_spifc_a1 *spifc,
 	const u32 count = len / sizeof(data);
 	const u32 pad = len % sizeof(data);
 
-	writel(SPIFC_A1_DBUF_DIR | SPIFC_A1_DBUF_AUTO_UPDATE_ADDR,
+	pete_writel("drivers/spi/spi-amlogic-spifc-a1.c:151", SPIFC_A1_DBUF_DIR | SPIFC_A1_DBUF_AUTO_UPDATE_ADDR,
 	       spifc->base + SPIFC_A1_DBUF_CTRL_REG);
 	iowrite32_rep(spifc->base + SPIFC_A1_DBUF_DATA_REG, buf, count);
 
 	if (pad) {
 		memcpy(&data, buf + len - pad, pad);
-		writel(data, spifc->base + SPIFC_A1_DBUF_DATA_REG);
+		pete_writel("drivers/spi/spi-amlogic-spifc-a1.c:157", data, spifc->base + SPIFC_A1_DBUF_DATA_REG);
 	}
 }
 
 static void amlogic_spifc_a1_user_init(struct amlogic_spifc_a1 *spifc)
 {
-	writel(0, spifc->base + SPIFC_A1_USER_CTRL0_REG);
-	writel(0, spifc->base + SPIFC_A1_USER_CTRL1_REG);
-	writel(0, spifc->base + SPIFC_A1_USER_CTRL2_REG);
-	writel(0, spifc->base + SPIFC_A1_USER_CTRL3_REG);
+	pete_writel("drivers/spi/spi-amlogic-spifc-a1.c:163", 0, spifc->base + SPIFC_A1_USER_CTRL0_REG);
+	pete_writel("drivers/spi/spi-amlogic-spifc-a1.c:164", 0, spifc->base + SPIFC_A1_USER_CTRL1_REG);
+	pete_writel("drivers/spi/spi-amlogic-spifc-a1.c:165", 0, spifc->base + SPIFC_A1_USER_CTRL2_REG);
+	pete_writel("drivers/spi/spi-amlogic-spifc-a1.c:166", 0, spifc->base + SPIFC_A1_USER_CTRL3_REG);
 }
 
 static void amlogic_spifc_a1_set_cmd(struct amlogic_spifc_a1 *spifc,
@@ -171,10 +171,10 @@ static void amlogic_spifc_a1_set_cmd(struct amlogic_spifc_a1 *spifc,
 {
 	u32 val;
 
-	val = readl(spifc->base + SPIFC_A1_USER_CTRL1_REG);
+	val = pete_readl("drivers/spi/spi-amlogic-spifc-a1.c:174", spifc->base + SPIFC_A1_USER_CTRL1_REG);
 	val &= ~(SPIFC_A1_USER_CMD_MODE | SPIFC_A1_USER_CMD_CODE);
 	val |= cmd_cfg;
-	writel(val, spifc->base + SPIFC_A1_USER_CTRL1_REG);
+	pete_writel("drivers/spi/spi-amlogic-spifc-a1.c:177", val, spifc->base + SPIFC_A1_USER_CTRL1_REG);
 }
 
 static void amlogic_spifc_a1_set_addr(struct amlogic_spifc_a1 *spifc, u32 addr,
@@ -182,35 +182,35 @@ static void amlogic_spifc_a1_set_addr(struct amlogic_spifc_a1 *spifc, u32 addr,
 {
 	u32 val;
 
-	writel(addr, spifc->base + SPIFC_A1_USER_ADDR_REG);
+	pete_writel("drivers/spi/spi-amlogic-spifc-a1.c:185", addr, spifc->base + SPIFC_A1_USER_ADDR_REG);
 
-	val = readl(spifc->base + SPIFC_A1_USER_CTRL1_REG);
+	val = pete_readl("drivers/spi/spi-amlogic-spifc-a1.c:187", spifc->base + SPIFC_A1_USER_CTRL1_REG);
 	val &= ~(SPIFC_A1_USER_ADDR_MODE | SPIFC_A1_USER_ADDR_BYTES);
 	val |= addr_cfg;
-	writel(val, spifc->base + SPIFC_A1_USER_CTRL1_REG);
+	pete_writel("drivers/spi/spi-amlogic-spifc-a1.c:190", val, spifc->base + SPIFC_A1_USER_CTRL1_REG);
 }
 
 static void amlogic_spifc_a1_set_dummy(struct amlogic_spifc_a1 *spifc,
 				       u32 dummy_cfg)
 {
-	u32 val = readl(spifc->base + SPIFC_A1_USER_CTRL2_REG);
+	u32 val = pete_readl("drivers/spi/spi-amlogic-spifc-a1.c:196", spifc->base + SPIFC_A1_USER_CTRL2_REG);
 
 	val &= ~(SPIFC_A1_USER_DUMMY_MODE | SPIFC_A1_USER_DUMMY_CLK_SYCLES);
 	val |= dummy_cfg;
-	writel(val, spifc->base + SPIFC_A1_USER_CTRL2_REG);
+	pete_writel("drivers/spi/spi-amlogic-spifc-a1.c:200", val, spifc->base + SPIFC_A1_USER_CTRL2_REG);
 }
 
 static int amlogic_spifc_a1_read(struct amlogic_spifc_a1 *spifc, void *buf,
 				 u32 size, u32 mode)
 {
-	u32 val = readl(spifc->base + SPIFC_A1_USER_CTRL3_REG);
+	u32 val = pete_readl("drivers/spi/spi-amlogic-spifc-a1.c:206", spifc->base + SPIFC_A1_USER_CTRL3_REG);
 	int ret;
 
 	val &= ~(SPIFC_A1_USER_DIN_MODE | SPIFC_A1_USER_DIN_BYTES);
 	val |= SPIFC_A1_USER_DIN_ENABLE;
 	val |= FIELD_PREP(SPIFC_A1_USER_DIN_MODE, mode);
 	val |= FIELD_PREP(SPIFC_A1_USER_DIN_BYTES, size);
-	writel(val, spifc->base + SPIFC_A1_USER_CTRL3_REG);
+	pete_writel("drivers/spi/spi-amlogic-spifc-a1.c:213", val, spifc->base + SPIFC_A1_USER_CTRL3_REG);
 
 	ret = amlogic_spifc_a1_request(spifc, true);
 	if (!ret)
@@ -226,12 +226,12 @@ static int amlogic_spifc_a1_write(struct amlogic_spifc_a1 *spifc,
 
 	amlogic_spifc_a1_fill_buffer(spifc, buf, size);
 
-	val = readl(spifc->base + SPIFC_A1_USER_CTRL1_REG);
+	val = pete_readl("drivers/spi/spi-amlogic-spifc-a1.c:229", spifc->base + SPIFC_A1_USER_CTRL1_REG);
 	val &= ~(SPIFC_A1_USER_DOUT_MODE | SPIFC_A1_USER_DOUT_BYTES);
 	val |= FIELD_PREP(SPIFC_A1_USER_DOUT_MODE, mode);
 	val |= FIELD_PREP(SPIFC_A1_USER_DOUT_BYTES, size);
 	val |= SPIFC_A1_USER_DOUT_ENABLE;
-	writel(val, spifc->base + SPIFC_A1_USER_CTRL1_REG);
+	pete_writel("drivers/spi/spi-amlogic-spifc-a1.c:234", val, spifc->base + SPIFC_A1_USER_CTRL1_REG);
 
 	return amlogic_spifc_a1_request(spifc, false);
 }
@@ -276,7 +276,7 @@ static int amlogic_spifc_a1_exec_op(struct spi_mem *mem,
 	if (data_size) {
 		u32 mode = ilog2(op->data.buswidth);
 
-		writel(0, spifc->base + SPIFC_A1_USER_DBUF_ADDR_REG);
+		pete_writel("drivers/spi/spi-amlogic-spifc-a1.c:279", 0, spifc->base + SPIFC_A1_USER_DBUF_ADDR_REG);
 
 		if (op->data.dir == SPI_MEM_DATA_IN)
 			ret = amlogic_spifc_a1_read(spifc, op->data.buf.in,
@@ -302,17 +302,17 @@ static void amlogic_spifc_a1_hw_init(struct amlogic_spifc_a1 *spifc)
 {
 	u32 regv;
 
-	regv = readl(spifc->base + SPIFC_A1_AHB_REQ_CTRL_REG);
+	regv = pete_readl("drivers/spi/spi-amlogic-spifc-a1.c:305", spifc->base + SPIFC_A1_AHB_REQ_CTRL_REG);
 	regv &= ~(SPIFC_A1_AHB_REQ_ENABLE);
-	writel(regv, spifc->base + SPIFC_A1_AHB_REQ_CTRL_REG);
+	pete_writel("drivers/spi/spi-amlogic-spifc-a1.c:307", regv, spifc->base + SPIFC_A1_AHB_REQ_CTRL_REG);
 
-	regv = readl(spifc->base + SPIFC_A1_AHB_CTRL_REG);
+	regv = pete_readl("drivers/spi/spi-amlogic-spifc-a1.c:309", spifc->base + SPIFC_A1_AHB_CTRL_REG);
 	regv &= ~(SPIFC_A1_AHB_BUS_EN);
-	writel(regv, spifc->base + SPIFC_A1_AHB_CTRL_REG);
+	pete_writel("drivers/spi/spi-amlogic-spifc-a1.c:311", regv, spifc->base + SPIFC_A1_AHB_CTRL_REG);
 
-	writel(SPIFC_A1_ACTIMING0_VAL, spifc->base + SPIFC_A1_ACTIMING0_REG);
+	pete_writel("drivers/spi/spi-amlogic-spifc-a1.c:313", SPIFC_A1_ACTIMING0_VAL, spifc->base + SPIFC_A1_ACTIMING0_REG);
 
-	writel(0, spifc->base + SPIFC_A1_USER_DBUF_ADDR_REG);
+	pete_writel("drivers/spi/spi-amlogic-spifc-a1.c:315", 0, spifc->base + SPIFC_A1_USER_DBUF_ADDR_REG);
 }
 
 static const struct spi_controller_mem_ops amlogic_spifc_a1_mem_ops = {

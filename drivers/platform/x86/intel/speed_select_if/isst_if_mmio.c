@@ -70,10 +70,10 @@ static long isst_if_mmio_rd_wr(u8 *cmd_ptr, int *write_only, int resume)
 	 */
 	mutex_lock(&punit_dev->mutex);
 	if (io_reg->read_write) {
-		writel(io_reg->value, punit_dev->punit_mmio+io_reg->reg);
+		pete_writel("drivers/platform/x86/intel/speed_select_if/isst_if_mmio.c:73", io_reg->value, punit_dev->punit_mmio+io_reg->reg);
 		*write_only = 1;
 	} else {
-		io_reg->value = readl(punit_dev->punit_mmio+io_reg->reg);
+		io_reg->value = pete_readl("drivers/platform/x86/intel/speed_select_if/isst_if_mmio.c:76", punit_dev->punit_mmio+io_reg->reg);
 		*write_only = 0;
 	}
 	mutex_unlock(&punit_dev->mutex);
@@ -149,7 +149,7 @@ static int __maybe_unused isst_if_suspend(struct device *device)
 	int i;
 
 	for (i = 0; i < ARRAY_SIZE(punit_dev->range_0); ++i)
-		punit_dev->range_0[i] = readl(punit_dev->punit_mmio +
+		punit_dev->range_0[i] = pete_readl("drivers/platform/x86/intel/speed_select_if/isst_if_mmio.c:152", punit_dev->punit_mmio +
 						punit_dev->mmio_range[0].beg + 4 * i);
 	for (i = 0; i < ARRAY_SIZE(punit_dev->range_1); ++i) {
 		u32 addr;
@@ -157,7 +157,7 @@ static int __maybe_unused isst_if_suspend(struct device *device)
 		addr = punit_dev->mmio_range[1].beg + 4 * i;
 		if (addr > punit_dev->mmio_range[1].end)
 			break;
-		punit_dev->range_1[i] = readl(punit_dev->punit_mmio + addr);
+		punit_dev->range_1[i] = pete_readl("drivers/platform/x86/intel/speed_select_if/isst_if_mmio.c:160", punit_dev->punit_mmio + addr);
 	}
 
 	return 0;
@@ -169,7 +169,7 @@ static int __maybe_unused isst_if_resume(struct device *device)
 	int i;
 
 	for (i = 0; i < ARRAY_SIZE(punit_dev->range_0); ++i)
-		writel(punit_dev->range_0[i], punit_dev->punit_mmio +
+		pete_writel("drivers/platform/x86/intel/speed_select_if/isst_if_mmio.c:172", punit_dev->range_0[i], punit_dev->punit_mmio +
 						punit_dev->mmio_range[0].beg + 4 * i);
 	for (i = 0; i < ARRAY_SIZE(punit_dev->range_1); ++i) {
 		u32 addr;
@@ -178,7 +178,7 @@ static int __maybe_unused isst_if_resume(struct device *device)
 		if (addr > punit_dev->mmio_range[1].end)
 			break;
 
-		writel(punit_dev->range_1[i], punit_dev->punit_mmio + addr);
+		pete_writel("drivers/platform/x86/intel/speed_select_if/isst_if_mmio.c:181", punit_dev->range_1[i], punit_dev->punit_mmio + addr);
 	}
 
 	return 0;

@@ -88,9 +88,9 @@ static int imx8ulp_pcc_assert(struct reset_controller_dev *rcdev, unsigned long 
 
 	spin_lock_irqsave(pcc_reset->lock, flags);
 
-	val = readl(pcc_reset->base + offset);
+	val = pete_readl("drivers/clk/imx/clk-imx8ulp.c:91", pcc_reset->base + offset);
 	val &= ~PCC_SW_RST;
-	writel(val, pcc_reset->base + offset);
+	pete_writel("drivers/clk/imx/clk-imx8ulp.c:93", val, pcc_reset->base + offset);
 
 	spin_unlock_irqrestore(pcc_reset->lock, flags);
 
@@ -106,9 +106,9 @@ static int imx8ulp_pcc_deassert(struct reset_controller_dev *rcdev, unsigned lon
 
 	spin_lock_irqsave(pcc_reset->lock, flags);
 
-	val = readl(pcc_reset->base + offset);
+	val = pete_readl("drivers/clk/imx/clk-imx8ulp.c:109", pcc_reset->base + offset);
 	val |= PCC_SW_RST;
-	writel(val, pcc_reset->base + offset);
+	pete_writel("drivers/clk/imx/clk-imx8ulp.c:111", val, pcc_reset->base + offset);
 
 	spin_unlock_irqrestore(pcc_reset->lock, flags);
 

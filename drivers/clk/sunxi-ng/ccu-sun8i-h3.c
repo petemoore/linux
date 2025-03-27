@@ -1053,9 +1053,9 @@ static int sun8i_h3_ccu_probe(struct platform_device *pdev)
 		return PTR_ERR(reg);
 
 	/* Force the PLL-Audio-1x divider to 1 */
-	val = readl(reg + SUN8I_H3_PLL_AUDIO_REG);
+	val = pete_readl("drivers/clk/sunxi-ng/ccu-sun8i-h3.c:1056", reg + SUN8I_H3_PLL_AUDIO_REG);
 	val &= ~GENMASK(19, 16);
-	writel(val | (0 << 16), reg + SUN8I_H3_PLL_AUDIO_REG);
+	pete_writel("drivers/clk/sunxi-ng/ccu-sun8i-h3.c:1058", val | (0 << 16), reg + SUN8I_H3_PLL_AUDIO_REG);
 
 	ret = devm_sunxi_ccu_probe(&pdev->dev, reg, desc);
 	if (ret)

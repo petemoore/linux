@@ -787,7 +787,7 @@ int snd_hdac_stream_set_spib(struct hdac_bus *bus,
 		return -EINVAL;
 	}
 
-	writel(value, azx_dev->spib_addr);
+	pete_writel("sound/hda/hdac_stream.c:790", value, azx_dev->spib_addr);
 
 	return 0;
 }
@@ -808,7 +808,7 @@ int snd_hdac_stream_get_spbmaxfifo(struct hdac_bus *bus,
 		return -EINVAL;
 	}
 
-	return readl(azx_dev->fifo_addr);
+	return pete_readl("sound/hda/hdac_stream.c:811", azx_dev->fifo_addr);
 }
 EXPORT_SYMBOL_GPL(snd_hdac_stream_get_spbmaxfifo);
 
@@ -873,7 +873,7 @@ int snd_hdac_stream_set_dpibr(struct hdac_bus *bus,
 		return -EINVAL;
 	}
 
-	writel(value, azx_dev->dpibr_addr);
+	pete_writel("sound/hda/hdac_stream.c:876", value, azx_dev->dpibr_addr);
 
 	return 0;
 }

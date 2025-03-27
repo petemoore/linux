@@ -70,12 +70,12 @@ static const struct a5psw_stats a5psw_stats[] = {
 
 static void a5psw_reg_writel(struct a5psw *a5psw, int offset, u32 value)
 {
-	writel(value, a5psw->base + offset);
+	pete_writel("drivers/net/dsa/rzn1_a5psw.c:73", value, a5psw->base + offset);
 }
 
 static u32 a5psw_reg_readl(struct a5psw *a5psw, int offset)
 {
-	return readl(a5psw->base + offset);
+	return pete_readl("drivers/net/dsa/rzn1_a5psw.c:78", a5psw->base + offset);
 }
 
 static void a5psw_reg_rmw(struct a5psw *a5psw, int offset, u32 mask, u32 val)

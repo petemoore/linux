@@ -43,18 +43,18 @@ static void pinmap_set(void __iomem *reg, u32 mask)
 {
 	u32 val;
 
-	val = readl(reg);
+	val = pete_readl("drivers/usb/misc/brcmstb-usb-pinmap.c:46", reg);
 	val |= mask;
-	writel(val, reg);
+	pete_writel("drivers/usb/misc/brcmstb-usb-pinmap.c:48", val, reg);
 }
 
 static void pinmap_unset(void __iomem *reg, u32 mask)
 {
 	u32 val;
 
-	val = readl(reg);
+	val = pete_readl("drivers/usb/misc/brcmstb-usb-pinmap.c:55", reg);
 	val &= ~mask;
-	writel(val, reg);
+	pete_writel("drivers/usb/misc/brcmstb-usb-pinmap.c:57", val, reg);
 }
 
 static void sync_in_pin(struct in_pin *pin)
@@ -80,10 +80,10 @@ static irqreturn_t brcmstb_usb_pinmap_ovr_isr(int irq, void *dev_id)
 	u32 bit;
 	int x;
 
-	pr_debug("%s: reg: 0x%x\n", __func__, readl(pdata->regs));
+	pr_debug("%s: reg: 0x%x\n", __func__, pete_readl("drivers/usb/misc/brcmstb-usb-pinmap.c:83", pdata->regs));
 	pout = pdata->out_pins;
 	for (x = 0; x < pdata->out_count; x++) {
-		val = readl(pdata->regs);
+		val = pete_readl("drivers/usb/misc/brcmstb-usb-pinmap.c:86", pdata->regs);
 		if (val & pout->changed_mask) {
 			pinmap_set(pdata->regs, pout->clr_changed_mask);
 			pinmap_unset(pdata->regs, pout->clr_changed_mask);
@@ -232,7 +232,7 @@ static void sync_all_pins(struct brcmstb_usb_pinmap_data *pdata)
 		pinmap_set(pdata->regs, pout->enable_mask);
 		pinmap_set(pdata->regs, pout->clr_changed_mask);
 		pinmap_unset(pdata->regs, pout->clr_changed_mask);
-		val = readl(pdata->regs) & pout->value_mask;
+		val = pete_readl("drivers/usb/misc/brcmstb-usb-pinmap.c:235", pdata->regs) & pout->value_mask;
 		gpiod_set_value(pout->gpiod, val ? 1 : 0);
 		pout++;
 	}

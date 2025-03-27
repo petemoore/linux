@@ -18,10 +18,10 @@
 #endif
 #include <net/udp_tunnel.h>
 
-#define wr32(a, reg, value)	writel((value), ((a)->hw_addr + (reg)))
-#define rd32(a, reg)		readl((a)->hw_addr + (reg))
-#define wr64(a, reg, value)	writeq((value), ((a)->hw_addr + (reg)))
-#define rd64(a, reg)		readq((a)->hw_addr + (reg))
+#define wr32(a, reg, value)	pete_writel("drivers/net/ethernet/intel/ice/ice_osdep.h:21", (value), ((a)->hw_addr + (reg)))
+#define rd32(a, reg)		pete_readl("drivers/net/ethernet/intel/ice/ice_osdep.h:22", (a)->hw_addr + (reg))
+#define wr64(a, reg, value)	pete_writeq("drivers/net/ethernet/intel/ice/ice_osdep.h:23", (value), ((a)->hw_addr + (reg)))
+#define rd64(a, reg)		pete_readq("drivers/net/ethernet/intel/ice/ice_osdep.h:24", (a)->hw_addr + (reg))
 
 #define ice_flush(a)		rd32((a), GLGEN_STAT)
 #define ICE_M(m, s)		((m) << (s))

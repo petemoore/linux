@@ -754,9 +754,9 @@ static inline unsigned int ehci_readl(const struct ehci_hcd *ehci,
 #ifdef CONFIG_USB_EHCI_BIG_ENDIAN_MMIO
 	return ehci_big_endian_mmio(ehci) ?
 		readl_be(regs) :
-		readl(regs);
+		pete_readl("drivers/usb/host/ehci.h:757", regs);
 #else
-	return readl(regs);
+	return pete_readl("drivers/usb/host/ehci.h:759", regs);
 #endif
 }
 
@@ -778,12 +778,12 @@ static inline void ehci_writel(const struct ehci_hcd *ehci,
 #ifdef CONFIG_USB_EHCI_BIG_ENDIAN_MMIO
 	ehci_big_endian_mmio(ehci) ?
 		writel_be(val, regs) :
-		writel(val, regs);
+		pete_writel("drivers/usb/host/ehci.h:781", val, regs);
 #else
 	if (ehci->imx28_write_fix)
 		imx28_ehci_writel(val, regs);
 	else
-		writel(val, regs);
+		pete_writel("drivers/usb/host/ehci.h:786", val, regs);
 #endif
 }
 

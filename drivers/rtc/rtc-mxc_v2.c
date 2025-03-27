@@ -56,10 +56,10 @@ static void mxc_rtc_sync_lp_locked(struct device *dev, void __iomem *ioaddr)
 
 	/* Wait for 3 CKIL cycles */
 	for (i = 0; i < 3; i++) {
-		const u32 count = readl(ioaddr + SRTC_LPSCLR);
+		const u32 count = pete_readl("drivers/rtc/rtc-mxc_v2.c:59", ioaddr + SRTC_LPSCLR);
 		unsigned int timeout = REG_READ_TIMEOUT;
 
-		while ((readl(ioaddr + SRTC_LPSCLR)) == count) {
+		while ((pete_readl("drivers/rtc/rtc-mxc_v2.c:62", ioaddr + SRTC_LPSCLR)) == count) {
 			if (!--timeout) {
 				dev_err_once(dev, "SRTC_LPSCLR stuck! Check your hw.\n");
 				return;
@@ -83,8 +83,8 @@ static irqreturn_t mxc_rtc_interrupt(int irq, void *dev_id)
 		return IRQ_NONE;
 	}
 
-	lp_status = readl(ioaddr + SRTC_LPSR);
-	lp_cr = readl(ioaddr + SRTC_LPCR);
+	lp_status = pete_readl("drivers/rtc/rtc-mxc_v2.c:86", ioaddr + SRTC_LPSR);
+	lp_cr = pete_readl("drivers/rtc/rtc-mxc_v2.c:87", ioaddr + SRTC_LPCR);
 
 	/* update irq data & counter */
 	if (lp_status & SRTC_LPSR_ALP) {
@@ -96,10 +96,10 @@ static irqreturn_t mxc_rtc_interrupt(int irq, void *dev_id)
 	}
 
 	/* Update interrupt enables */
-	writel(lp_cr, ioaddr + SRTC_LPCR);
+	pete_writel("drivers/rtc/rtc-mxc_v2.c:99", lp_cr, ioaddr + SRTC_LPCR);
 
 	/* clear interrupt status */
-	writel(lp_status, ioaddr + SRTC_LPSR);
+	pete_writel("drivers/rtc/rtc-mxc_v2.c:102", lp_status, ioaddr + SRTC_LPSR);
 
 	mxc_rtc_sync_lp_locked(dev, ioaddr);
 	clk_disable(pdata->clk);
@@ -144,7 +144,7 @@ static int mxc_rtc_read_time(struct device *dev, struct rtc_time *tm)
 	const int clk_failed = clk_enable(pdata->clk);
 
 	if (!clk_failed) {
-		const time64_t now = readl(pdata->ioaddr + SRTC_LPSCMR);
+		const time64_t now = pete_readl("drivers/rtc/rtc-mxc_v2.c:147", pdata->ioaddr + SRTC_LPSCMR);
 
 		rtc_time64_to_tm(now, tm);
 		clk_disable(pdata->clk);
@@ -170,7 +170,7 @@ static int mxc_rtc_set_time(struct device *dev, struct rtc_time *tm)
 	if (ret)
 		return ret;
 
-	writel(time, pdata->ioaddr + SRTC_LPSCMR);
+	pete_writel("drivers/rtc/rtc-mxc_v2.c:173", time, pdata->ioaddr + SRTC_LPSCMR);
 	mxc_rtc_sync_lp_locked(dev, pdata->ioaddr);
 	return mxc_rtc_unlock(pdata);
 }
@@ -194,8 +194,8 @@ static int mxc_rtc_read_alarm(struct device *dev, struct rtc_wkalrm *alrm)
 	if (ret)
 		return ret;
 
-	rtc_time64_to_tm(readl(ioaddr + SRTC_LPSAR), &alrm->time);
-	alrm->pending = !!(readl(ioaddr + SRTC_LPSR) & SRTC_LPSR_ALP);
+	rtc_time64_to_tm(pete_readl("drivers/rtc/rtc-mxc_v2.c:197", ioaddr + SRTC_LPSAR), &alrm->time);
+	alrm->pending = !!(pete_readl("drivers/rtc/rtc-mxc_v2.c:198", ioaddr + SRTC_LPSR) & SRTC_LPSR_ALP);
 	return mxc_rtc_unlock(pdata);
 }
 
@@ -206,14 +206,14 @@ static int mxc_rtc_read_alarm(struct device *dev, struct rtc_wkalrm *alrm)
 static void mxc_rtc_alarm_irq_enable_locked(struct mxc_rtc_data *pdata,
 					    unsigned int enable)
 {
-	u32 lp_cr = readl(pdata->ioaddr + SRTC_LPCR);
+	u32 lp_cr = pete_readl("drivers/rtc/rtc-mxc_v2.c:209", pdata->ioaddr + SRTC_LPCR);
 
 	if (enable)
 		lp_cr |= (SRTC_LPCR_ALP | SRTC_LPCR_WAE);
 	else
 		lp_cr &= ~(SRTC_LPCR_ALP | SRTC_LPCR_WAE);
 
-	writel(lp_cr, pdata->ioaddr + SRTC_LPCR);
+	pete_writel("drivers/rtc/rtc-mxc_v2.c:216", lp_cr, pdata->ioaddr + SRTC_LPCR);
 }
 
 static int mxc_rtc_alarm_irq_enable(struct device *dev, unsigned int enable)
@@ -244,10 +244,10 @@ static int mxc_rtc_set_alarm(struct device *dev, struct rtc_wkalrm *alrm)
 	if (ret)
 		return ret;
 
-	writel((u32)time, pdata->ioaddr + SRTC_LPSAR);
+	pete_writel("drivers/rtc/rtc-mxc_v2.c:247", (u32)time, pdata->ioaddr + SRTC_LPSAR);
 
 	/* clear alarm interrupt status bit */
-	writel(SRTC_LPSR_ALP, pdata->ioaddr + SRTC_LPSR);
+	pete_writel("drivers/rtc/rtc-mxc_v2.c:250", SRTC_LPSR_ALP, pdata->ioaddr + SRTC_LPSR);
 	mxc_rtc_sync_lp_locked(dev, pdata->ioaddr);
 
 	mxc_rtc_alarm_irq_enable_locked(pdata, alrm->enabled);
@@ -268,7 +268,7 @@ static int mxc_rtc_wait_for_flag(void __iomem *ioaddr, int flag)
 {
 	unsigned int timeout = REG_READ_TIMEOUT;
 
-	while (!(readl(ioaddr) & flag)) {
+	while (!(pete_readl("drivers/rtc/rtc-mxc_v2.c:271", ioaddr) & flag)) {
 		if (!--timeout)
 			return -EBUSY;
 	}
@@ -311,13 +311,13 @@ static int mxc_rtc_probe(struct platform_device *pdev)
 	if (ret)
 		return ret;
 	/* initialize glitch detect */
-	writel(SRTC_LPPDR_INIT, ioaddr + SRTC_LPPDR);
+	pete_writel("drivers/rtc/rtc-mxc_v2.c:314", SRTC_LPPDR_INIT, ioaddr + SRTC_LPPDR);
 
 	/* clear lp interrupt status */
-	writel(0xFFFFFFFF, ioaddr + SRTC_LPSR);
+	pete_writel("drivers/rtc/rtc-mxc_v2.c:317", 0xFFFFFFFF, ioaddr + SRTC_LPSR);
 
 	/* move out of init state */
-	writel((SRTC_LPCR_IE | SRTC_LPCR_NSA), ioaddr + SRTC_LPCR);
+	pete_writel("drivers/rtc/rtc-mxc_v2.c:320", (SRTC_LPCR_IE | SRTC_LPCR_NSA), ioaddr + SRTC_LPCR);
 	ret = mxc_rtc_wait_for_flag(ioaddr + SRTC_LPSR, SRTC_LPSR_IES);
 	if (ret) {
 		dev_err(&pdev->dev, "Timeout waiting for SRTC_LPSR_IES\n");
@@ -326,7 +326,7 @@ static int mxc_rtc_probe(struct platform_device *pdev)
 	}
 
 	/* move out of non-valid state */
-	writel((SRTC_LPCR_IE | SRTC_LPCR_NVE | SRTC_LPCR_NSA |
+	pete_writel("drivers/rtc/rtc-mxc_v2.c:329", (SRTC_LPCR_IE | SRTC_LPCR_NVE | SRTC_LPCR_NSA |
 		SRTC_LPCR_EN_LP), ioaddr + SRTC_LPCR);
 	ret = mxc_rtc_wait_for_flag(ioaddr + SRTC_LPSR, SRTC_LPSR_NVES);
 	if (ret) {

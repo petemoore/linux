@@ -104,9 +104,9 @@ static void imx93_adc_power_down(struct imx93_adc *adc)
 	u32 mcr, msr;
 	int ret;
 
-	mcr = readl(adc->regs + IMX93_ADC_MCR);
+	mcr = pete_readl("drivers/iio/adc/imx93_adc.c:107", adc->regs + IMX93_ADC_MCR);
 	mcr |= FIELD_PREP(IMX93_ADC_MCR_PWDN_MASK, 1);
-	writel(mcr, adc->regs + IMX93_ADC_MCR);
+	pete_writel("drivers/iio/adc/imx93_adc.c:109", mcr, adc->regs + IMX93_ADC_MCR);
 
 	ret = readl_poll_timeout(adc->regs + IMX93_ADC_MSR, msr,
 				 ((msr & IMX93_ADC_MSR_ADCSTATUS_MASK) ==
@@ -123,9 +123,9 @@ static void imx93_adc_power_up(struct imx93_adc *adc)
 	u32 mcr;
 
 	/* bring ADC out of power down state, in idle state */
-	mcr = readl(adc->regs + IMX93_ADC_MCR);
+	mcr = pete_readl("drivers/iio/adc/imx93_adc.c:126", adc->regs + IMX93_ADC_MCR);
 	mcr &= ~FIELD_PREP(IMX93_ADC_MCR_PWDN_MASK, 1);
-	writel(mcr, adc->regs + IMX93_ADC_MCR);
+	pete_writel("drivers/iio/adc/imx93_adc.c:128", mcr, adc->regs + IMX93_ADC_MCR);
 }
 
 static void imx93_adc_config_ad_clk(struct imx93_adc *adc)
@@ -136,9 +136,9 @@ static void imx93_adc_config_ad_clk(struct imx93_adc *adc)
 	imx93_adc_power_down(adc);
 
 	/* config the AD_CLK equal to bus clock */
-	mcr = readl(adc->regs + IMX93_ADC_MCR);
+	mcr = pete_readl("drivers/iio/adc/imx93_adc.c:139", adc->regs + IMX93_ADC_MCR);
 	mcr |= FIELD_PREP(IMX93_ADC_MCR_ADCLKSE_MASK, 1);
-	writel(mcr, adc->regs + IMX93_ADC_MCR);
+	pete_writel("drivers/iio/adc/imx93_adc.c:141", mcr, adc->regs + IMX93_ADC_MCR);
 
 	imx93_adc_power_up(adc);
 }
@@ -152,9 +152,9 @@ static int imx93_adc_calibration(struct imx93_adc *adc)
 	imx93_adc_power_down(adc);
 
 	/* config SAR controller operating clock */
-	mcr = readl(adc->regs + IMX93_ADC_MCR);
+	mcr = pete_readl("drivers/iio/adc/imx93_adc.c:155", adc->regs + IMX93_ADC_MCR);
 	mcr &= ~FIELD_PREP(IMX93_ADC_MCR_ADCLKSE_MASK, 1);
-	writel(mcr, adc->regs + IMX93_ADC_MCR);
+	pete_writel("drivers/iio/adc/imx93_adc.c:157", mcr, adc->regs + IMX93_ADC_MCR);
 
 	imx93_adc_power_up(adc);
 
@@ -164,9 +164,9 @@ static int imx93_adc_calibration(struct imx93_adc *adc)
 	 */
 
 	/* run calibration */
-	mcr = readl(adc->regs + IMX93_ADC_MCR);
+	mcr = pete_readl("drivers/iio/adc/imx93_adc.c:167", adc->regs + IMX93_ADC_MCR);
 	mcr |= FIELD_PREP(IMX93_ADC_MCR_CALSTART_MASK, 1);
-	writel(mcr, adc->regs + IMX93_ADC_MCR);
+	pete_writel("drivers/iio/adc/imx93_adc.c:169", mcr, adc->regs + IMX93_ADC_MCR);
 
 	/* wait calibration to be finished */
 	ret = readl_poll_timeout(adc->regs + IMX93_ADC_MSR, msr,
@@ -178,7 +178,7 @@ static int imx93_adc_calibration(struct imx93_adc *adc)
 	}
 
 	/* check whether calbration is success or not */
-	msr = readl(adc->regs + IMX93_ADC_MSR);
+	msr = pete_readl("drivers/iio/adc/imx93_adc.c:181", adc->regs + IMX93_ADC_MSR);
 	if (msr & IMX93_ADC_MSR_CALFAIL_MASK) {
 		dev_warn(adc->dev, "ADC calibration failed!\n");
 		imx93_adc_power_down(adc);
@@ -200,24 +200,24 @@ static int imx93_adc_read_channel_conversion(struct imx93_adc *adc,
 
 	/* config channel mask register */
 	channel = 1 << channel_number;
-	writel(channel, adc->regs + IMX93_ADC_NCMR0);
+	pete_writel("drivers/iio/adc/imx93_adc.c:203", channel, adc->regs + IMX93_ADC_NCMR0);
 
 	/* TODO: can config desired sample time in CTRn if need */
 
 	/* config interrupt mask */
 	imr = FIELD_PREP(IMX93_ADC_IMR_EOC_MASK, 1);
-	writel(imr, adc->regs + IMX93_ADC_IMR);
-	writel(channel, adc->regs + IMX93_ADC_CIMR0);
+	pete_writel("drivers/iio/adc/imx93_adc.c:209", imr, adc->regs + IMX93_ADC_IMR);
+	pete_writel("drivers/iio/adc/imx93_adc.c:210", channel, adc->regs + IMX93_ADC_CIMR0);
 
 	/* config one-shot mode */
-	mcr = readl(adc->regs + IMX93_ADC_MCR);
+	mcr = pete_readl("drivers/iio/adc/imx93_adc.c:213", adc->regs + IMX93_ADC_MCR);
 	mcr &= ~FIELD_PREP(IMX93_ADC_MCR_MODE_MASK, 1);
-	writel(mcr, adc->regs + IMX93_ADC_MCR);
+	pete_writel("drivers/iio/adc/imx93_adc.c:215", mcr, adc->regs + IMX93_ADC_MCR);
 
 	/* start normal conversion */
-	mcr = readl(adc->regs + IMX93_ADC_MCR);
+	mcr = pete_readl("drivers/iio/adc/imx93_adc.c:218", adc->regs + IMX93_ADC_MCR);
 	mcr |= FIELD_PREP(IMX93_ADC_MCR_NSTART_MASK, 1);
-	writel(mcr, adc->regs + IMX93_ADC_MCR);
+	pete_writel("drivers/iio/adc/imx93_adc.c:220", mcr, adc->regs + IMX93_ADC_MCR);
 
 	ret = wait_for_completion_interruptible_timeout(&adc->completion,
 							IMX93_ADC_TIMEOUT);
@@ -227,7 +227,7 @@ static int imx93_adc_read_channel_conversion(struct imx93_adc *adc,
 	if (ret < 0)
 		return ret;
 
-	pcda = readl(adc->regs + IMX93_ADC_PCDR0 + channel_number * 4);
+	pcda = pete_readl("drivers/iio/adc/imx93_adc.c:230", adc->regs + IMX93_ADC_PCDR0 + channel_number * 4);
 
 	*result = FIELD_GET(IMX93_ADC_PCDR_CDATA_MASK, pcda);
 
@@ -277,17 +277,17 @@ static irqreturn_t imx93_adc_isr(int irq, void *dev_id)
 	struct imx93_adc *adc = dev_id;
 	u32 isr, eoc, unexpected;
 
-	isr = readl(adc->regs + IMX93_ADC_ISR);
+	isr = pete_readl("drivers/iio/adc/imx93_adc.c:280", adc->regs + IMX93_ADC_ISR);
 
 	if (FIELD_GET(IMX93_ADC_ISR_EOC_ECH_MASK, isr)) {
 		eoc = isr & IMX93_ADC_ISR_EOC_ECH_MASK;
-		writel(eoc, adc->regs + IMX93_ADC_ISR);
+		pete_writel("drivers/iio/adc/imx93_adc.c:284", eoc, adc->regs + IMX93_ADC_ISR);
 		complete(&adc->completion);
 	}
 
 	unexpected = isr & ~IMX93_ADC_ISR_EOC_ECH_MASK;
 	if (unexpected) {
-		writel(unexpected, adc->regs + IMX93_ADC_ISR);
+		pete_writel("drivers/iio/adc/imx93_adc.c:290", unexpected, adc->regs + IMX93_ADC_ISR);
 		dev_err(adc->dev, "Unexpected interrupt 0x%08x.\n", unexpected);
 		return IRQ_NONE;
 	}

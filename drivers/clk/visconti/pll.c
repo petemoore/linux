@@ -58,16 +58,16 @@ static void visconti_pll_get_params(struct visconti_pll *pll,
 {
 	u32 postdiv, val;
 
-	val = readl(pll->pll_base + PLL_FRACMODE_REG);
+	val = pete_readl("drivers/clk/visconti/pll.c:61", pll->pll_base + PLL_FRACMODE_REG);
 
 	rate_table->dacen = FIELD_GET(PLL0_FRACMODE_DACEN, val);
 	rate_table->dsmen = FIELD_GET(PLL0_FRACMODE_DSMEN, val);
 
-	rate_table->fracin = readl(pll->pll_base + PLL_FRACIN_REG) & PLL_FRACIN_MASK;
-	rate_table->intin = readl(pll->pll_base + PLL_INTIN_REG) & PLL_INTIN_MASK;
-	rate_table->refdiv = readl(pll->pll_base + PLL_REFDIV_REG) & PLL_REFDIV_MASK;
+	rate_table->fracin = pete_readl("drivers/clk/visconti/pll.c:66", pll->pll_base + PLL_FRACIN_REG) & PLL_FRACIN_MASK;
+	rate_table->intin = pete_readl("drivers/clk/visconti/pll.c:67", pll->pll_base + PLL_INTIN_REG) & PLL_INTIN_MASK;
+	rate_table->refdiv = pete_readl("drivers/clk/visconti/pll.c:68", pll->pll_base + PLL_REFDIV_REG) & PLL_REFDIV_MASK;
 
-	postdiv = readl(pll->pll_base + PLL_POSTDIV_REG);
+	postdiv = pete_readl("drivers/clk/visconti/pll.c:70", pll->pll_base + PLL_POSTDIV_REG);
 	rate_table->postdiv1 = postdiv & PLL_POSTDIV_MASK;
 	rate_table->postdiv2 = (postdiv >> 4) & PLL_POSTDIV_MASK;
 }
@@ -131,11 +131,11 @@ static unsigned long visconti_pll_recalc_rate(struct clk_hw *hw,
 static int visconti_pll_set_params(struct visconti_pll *pll,
 				   const struct visconti_pll_rate_table *rate_table)
 {
-	writel(PLL_CREATE_FRACMODE(rate_table), pll->pll_base + PLL_FRACMODE_REG);
-	writel(PLL_CREATE_OSTDIV(rate_table), pll->pll_base + PLL_POSTDIV_REG);
-	writel(rate_table->intin, pll->pll_base + PLL_INTIN_REG);
-	writel(rate_table->fracin, pll->pll_base + PLL_FRACIN_REG);
-	writel(rate_table->refdiv, pll->pll_base + PLL_REFDIV_REG);
+	pete_writel("drivers/clk/visconti/pll.c:134", PLL_CREATE_FRACMODE(rate_table), pll->pll_base + PLL_FRACMODE_REG);
+	pete_writel("drivers/clk/visconti/pll.c:135", PLL_CREATE_OSTDIV(rate_table), pll->pll_base + PLL_POSTDIV_REG);
+	pete_writel("drivers/clk/visconti/pll.c:136", rate_table->intin, pll->pll_base + PLL_INTIN_REG);
+	pete_writel("drivers/clk/visconti/pll.c:137", rate_table->fracin, pll->pll_base + PLL_FRACIN_REG);
+	pete_writel("drivers/clk/visconti/pll.c:138", rate_table->refdiv, pll->pll_base + PLL_REFDIV_REG);
 
 	return 0;
 }
@@ -158,7 +158,7 @@ static int visconti_pll_is_enabled(struct clk_hw *hw)
 	struct visconti_pll *pll = to_visconti_pll(hw);
 	u32 reg;
 
-	reg = readl(pll->pll_base + PLL_CTRL_REG);
+	reg = pete_readl("drivers/clk/visconti/pll.c:161", pll->pll_base + PLL_CTRL_REG);
 
 	return (reg & PLL_PLLEN);
 }
@@ -175,29 +175,29 @@ static int visconti_pll_enable(struct clk_hw *hw)
 
 	spin_lock_irqsave(pll->lock, flags);
 
-	writel(PLL_CONFIG_SEL, pll->pll_base + PLL_CONF_REG);
+	pete_writel("drivers/clk/visconti/pll.c:178", PLL_CONFIG_SEL, pll->pll_base + PLL_CONF_REG);
 
-	reg = readl(pll->pll_base + PLL_CTRL_REG);
+	reg = pete_readl("drivers/clk/visconti/pll.c:180", pll->pll_base + PLL_CTRL_REG);
 	reg |= PLL_BYPASS;
-	writel(reg, pll->pll_base + PLL_CTRL_REG);
+	pete_writel("drivers/clk/visconti/pll.c:182", reg, pll->pll_base + PLL_CTRL_REG);
 
 	visconti_pll_set_params(pll, &rate_table[0]);
 
-	reg = readl(pll->pll_base + PLL_CTRL_REG);
+	reg = pete_readl("drivers/clk/visconti/pll.c:186", pll->pll_base + PLL_CTRL_REG);
 	reg &= ~PLL_PLLEN;
-	writel(reg, pll->pll_base + PLL_CTRL_REG);
+	pete_writel("drivers/clk/visconti/pll.c:188", reg, pll->pll_base + PLL_CTRL_REG);
 
 	udelay(1);
 
-	reg = readl(pll->pll_base + PLL_CTRL_REG);
+	reg = pete_readl("drivers/clk/visconti/pll.c:192", pll->pll_base + PLL_CTRL_REG);
 	reg |= PLL_PLLEN;
-	writel(reg, pll->pll_base + PLL_CTRL_REG);
+	pete_writel("drivers/clk/visconti/pll.c:194", reg, pll->pll_base + PLL_CTRL_REG);
 
 	udelay(40);
 
-	reg = readl(pll->pll_base + PLL_CTRL_REG);
+	reg = pete_readl("drivers/clk/visconti/pll.c:198", pll->pll_base + PLL_CTRL_REG);
 	reg &= ~PLL_BYPASS;
-	writel(reg, pll->pll_base + PLL_CTRL_REG);
+	pete_writel("drivers/clk/visconti/pll.c:200", reg, pll->pll_base + PLL_CTRL_REG);
 
 	spin_unlock_irqrestore(pll->lock, flags);
 
@@ -215,15 +215,15 @@ static void visconti_pll_disable(struct clk_hw *hw)
 
 	spin_lock_irqsave(pll->lock, flags);
 
-	writel(PLL_CONFIG_SEL, pll->pll_base + PLL_CONF_REG);
+	pete_writel("drivers/clk/visconti/pll.c:218", PLL_CONFIG_SEL, pll->pll_base + PLL_CONF_REG);
 
-	reg = readl(pll->pll_base + PLL_CTRL_REG);
+	reg = pete_readl("drivers/clk/visconti/pll.c:220", pll->pll_base + PLL_CTRL_REG);
 	reg |= PLL_BYPASS;
-	writel(reg, pll->pll_base + PLL_CTRL_REG);
+	pete_writel("drivers/clk/visconti/pll.c:222", reg, pll->pll_base + PLL_CTRL_REG);
 
-	reg = readl(pll->pll_base + PLL_CTRL_REG);
+	reg = pete_readl("drivers/clk/visconti/pll.c:224", pll->pll_base + PLL_CTRL_REG);
 	reg &= ~PLL_PLLEN;
-	writel(reg, pll->pll_base + PLL_CTRL_REG);
+	pete_writel("drivers/clk/visconti/pll.c:226", reg, pll->pll_base + PLL_CTRL_REG);
 
 	spin_unlock_irqrestore(pll->lock, flags);
 }

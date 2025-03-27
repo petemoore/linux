@@ -25,7 +25,7 @@ static u32 cmpcr __ro_after_init;
 
 static void sysctr_timer_enable(bool enable)
 {
-	writel(enable ? cmpcr | SYS_CTR_EN : cmpcr, sys_ctr_base + CMPCR);
+	pete_writel("drivers/clocksource/timer-imx-sysctr.c:28", enable ? cmpcr | SYS_CTR_EN : cmpcr, sys_ctr_base + CMPCR);
 }
 
 static void sysctr_irq_acknowledge(void)
@@ -140,7 +140,7 @@ static int __init sysctr_timer_init(struct device_node *np)
 	}
 
 	sys_ctr_base = timer_of_base(&to_sysctr);
-	cmpcr = readl(sys_ctr_base + CMPCR);
+	cmpcr = pete_readl("drivers/clocksource/timer-imx-sysctr.c:143", sys_ctr_base + CMPCR);
 	cmpcr &= ~SYS_CTR_EN;
 
 	sysctr_clockevent_init();

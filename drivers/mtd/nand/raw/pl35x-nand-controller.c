@@ -213,7 +213,7 @@ static struct nand_bbt_descr bbt_mirror_descr = {
 
 static void pl35x_smc_update_regs(struct pl35x_nandc *nfc)
 {
-	writel(PL35X_SMC_DIRECT_CMD_NAND_CS |
+	pete_writel("drivers/mtd/nand/raw/pl35x-nand-controller.c:216", PL35X_SMC_DIRECT_CMD_NAND_CS |
 	       PL35X_SMC_DIRECT_CMD_UPD_REGS,
 	       nfc->conf_regs + PL35X_SMC_DIRECT_CMD);
 }
@@ -223,7 +223,7 @@ static int pl35x_smc_set_buswidth(struct pl35x_nandc *nfc, unsigned int bw)
 	if (bw != PL35X_SMC_OPMODE_BW_8 && bw != PL35X_SMC_OPMODE_BW_16)
 		return -EINVAL;
 
-	writel(bw, nfc->conf_regs + PL35X_SMC_OPMODE);
+	pete_writel("drivers/mtd/nand/raw/pl35x-nand-controller.c:226", bw, nfc->conf_regs + PL35X_SMC_OPMODE);
 	pl35x_smc_update_regs(nfc);
 
 	return 0;
@@ -231,7 +231,7 @@ static int pl35x_smc_set_buswidth(struct pl35x_nandc *nfc, unsigned int bw)
 
 static void pl35x_smc_clear_irq(struct pl35x_nandc *nfc)
 {
-	writel(PL35X_SMC_MEMC_CFG_CLR_INT_CLR_1,
+	pete_writel("drivers/mtd/nand/raw/pl35x-nand-controller.c:234", PL35X_SMC_MEMC_CFG_CLR_INT_CLR_1,
 	       nfc->conf_regs + PL35X_SMC_MEMC_CFG_CLR);
 }
 
@@ -275,10 +275,10 @@ static int pl35x_smc_set_ecc_mode(struct pl35x_nandc *nfc,
 	struct pl35x_nand *plnand;
 	u32 ecc_cfg;
 
-	ecc_cfg = readl(nfc->conf_regs + PL35X_SMC_ECC_CFG);
+	ecc_cfg = pete_readl("drivers/mtd/nand/raw/pl35x-nand-controller.c:278", nfc->conf_regs + PL35X_SMC_ECC_CFG);
 	ecc_cfg &= ~PL35X_SMC_ECC_CFG_MODE_MASK;
 	ecc_cfg |= mode;
-	writel(ecc_cfg, nfc->conf_regs + PL35X_SMC_ECC_CFG);
+	pete_writel("drivers/mtd/nand/raw/pl35x-nand-controller.c:281", ecc_cfg, nfc->conf_regs + PL35X_SMC_ECC_CFG);
 
 	if (chip) {
 		plnand = to_pl35x_nand(chip);
@@ -319,11 +319,11 @@ static void pl35x_nand_select_target(struct nand_chip *chip,
 		return;
 
 	/* Setup the timings */
-	writel(plnand->timings, nfc->conf_regs + PL35X_SMC_CYCLES);
+	pete_writel("drivers/mtd/nand/raw/pl35x-nand-controller.c:322", plnand->timings, nfc->conf_regs + PL35X_SMC_CYCLES);
 	pl35x_smc_update_regs(nfc);
 
 	/* Configure the ECC engine */
-	writel(plnand->ecc_cfg, nfc->conf_regs + PL35X_SMC_ECC_CFG);
+	pete_writel("drivers/mtd/nand/raw/pl35x-nand-controller.c:326", plnand->ecc_cfg, nfc->conf_regs + PL35X_SMC_ECC_CFG);
 
 	nfc->selected_chip = chip;
 }
@@ -348,12 +348,12 @@ static void pl35x_nand_read_data_op(struct nand_chip *chip, u8 *in,
 		if (i + 1 == buf_end)
 			data_phase_addr = PL35X_SMC_DATA_PHASE + last_flags;
 
-		buf32[i] = readl(nfc->io_regs + data_phase_addr);
+		buf32[i] = pete_readl("drivers/mtd/nand/raw/pl35x-nand-controller.c:351", nfc->io_regs + data_phase_addr);
 	}
 
 	/* No working extra flags on unaligned data accesses */
 	for (i = in_start; i < len; i++)
-		buf8[i] = readb(nfc->io_regs + PL35X_SMC_DATA_PHASE);
+		buf8[i] = pete_readb("drivers/mtd/nand/raw/pl35x-nand-controller.c:356", nfc->io_regs + PL35X_SMC_DATA_PHASE);
 
 	if (force_8bit)
 		pl35x_smc_force_byte_access(chip, false);
@@ -380,12 +380,12 @@ static void pl35x_nand_write_data_op(struct nand_chip *chip, const u8 *out,
 		if (i + 1 == buf_end)
 			data_phase_addr = PL35X_SMC_DATA_PHASE + last_flags;
 
-		writel(buf32[i], nfc->io_regs + data_phase_addr);
+		pete_writel("drivers/mtd/nand/raw/pl35x-nand-controller.c:383", buf32[i], nfc->io_regs + data_phase_addr);
 	}
 
 	/* No working extra flags on unaligned data accesses */
 	for (i = in_start; i < len; i++)
-		writeb(buf8[i], nfc->io_regs + PL35X_SMC_DATA_PHASE);
+		pete_writeb("drivers/mtd/nand/raw/pl35x-nand-controller.c:388", buf8[i], nfc->io_regs + PL35X_SMC_DATA_PHASE);
 
 	if (force_8bit)
 		pl35x_smc_force_byte_access(chip, false);
@@ -453,7 +453,7 @@ static int pl35x_nand_read_eccbytes(struct pl35x_nandc *nfc,
 
 	for (chunk = 0; chunk < chip->ecc.steps;
 	     chunk++, read_ecc += chip->ecc.bytes) {
-		ecc_value = readl(nfc->conf_regs + PL35X_SMC_ECC_VALUE(chunk));
+		ecc_value = pete_readl("drivers/mtd/nand/raw/pl35x-nand-controller.c:456", nfc->conf_regs + PL35X_SMC_ECC_VALUE(chunk));
 		if (!PL35X_SMC_ECC_VALUE_IS_VALID(ecc_value))
 			return -EINVAL;
 
@@ -476,7 +476,7 @@ static int pl35x_nand_recover_data_hwecc(struct pl35x_nandc *nfc,
 	for (chunk = 0; chunk < chip->ecc.steps;
 	     chunk++, data += chip->ecc.size, read_ecc += chip->ecc.bytes) {
 		/* Read ECC value for each chunk */
-		ecc_value = readl(nfc->conf_regs + PL35X_SMC_ECC_VALUE(chunk));
+		ecc_value = pete_readl("drivers/mtd/nand/raw/pl35x-nand-controller.c:479", nfc->conf_regs + PL35X_SMC_ECC_VALUE(chunk));
 
 		if (!PL35X_SMC_ECC_VALUE_IS_VALID(ecc_value))
 			return -EINVAL;
@@ -531,9 +531,9 @@ static int pl35x_nand_write_page_hwecc(struct nand_chip *chip,
 	}
 
 	/* Send the command and address cycles */
-	writel(addr1, nfc->io_regs + cmd_addr);
+	pete_writel("drivers/mtd/nand/raw/pl35x-nand-controller.c:534", addr1, nfc->io_regs + cmd_addr);
 	if (plnand->addr_cycles > 4)
-		writel(addr2, nfc->io_regs + cmd_addr);
+		pete_writel("drivers/mtd/nand/raw/pl35x-nand-controller.c:536", addr2, nfc->io_regs + cmd_addr);
 
 	/* Write the data with the engine enabled */
 	pl35x_nand_write_data_op(chip, buf, mtd->writesize, false,
@@ -623,9 +623,9 @@ static int pl35x_nand_read_page_hwecc(struct nand_chip *chip,
 	}
 
 	/* Send the command and address cycles */
-	writel(addr1, nfc->io_regs + cmd_addr);
+	pete_writel("drivers/mtd/nand/raw/pl35x-nand-controller.c:626", addr1, nfc->io_regs + cmd_addr);
 	if (plnand->addr_cycles > 4)
-		writel(addr2, nfc->io_regs + cmd_addr);
+		pete_writel("drivers/mtd/nand/raw/pl35x-nand-controller.c:628", addr2, nfc->io_regs + cmd_addr);
 
 	/* Wait the data to be available in the NAND cache */
 	ndelay(PSEC_TO_NSEC(sdr->tRR_min));
@@ -719,9 +719,9 @@ static int pl35x_nand_exec_op(struct nand_chip *chip,
 	/* Command phase */
 	cmd_addr |= PL35X_SMC_CMD_PHASE | cmd0 | cmd1 |
 		    (cmd1_valid ? PL35X_SMC_CMD_PHASE_CMD1_VALID : 0);
-	writel(addr1, nfc->io_regs + cmd_addr);
+	pete_writel("drivers/mtd/nand/raw/pl35x-nand-controller.c:722", addr1, nfc->io_regs + cmd_addr);
 	if (naddrs > 4)
-		writel(addr2, nfc->io_regs + cmd_addr);
+		pete_writel("drivers/mtd/nand/raw/pl35x-nand-controller.c:724", addr2, nfc->io_regs + cmd_addr);
 
 	/* Data phase */
 	if (data_instr && data_instr->type == NAND_OP_DATA_OUT_INSTR) {
@@ -887,10 +887,10 @@ static void pl35x_smc_set_ecc_pg_size(struct pl35x_nandc *nfc,
 		break;
 	}
 
-	plnand->ecc_cfg = readl(nfc->conf_regs + PL35X_SMC_ECC_CFG);
+	plnand->ecc_cfg = pete_readl("drivers/mtd/nand/raw/pl35x-nand-controller.c:890", nfc->conf_regs + PL35X_SMC_ECC_CFG);
 	plnand->ecc_cfg &= ~PL35X_SMC_ECC_CFG_PGSIZE_MASK;
 	plnand->ecc_cfg |= sz;
-	writel(plnand->ecc_cfg, nfc->conf_regs + PL35X_SMC_ECC_CFG);
+	pete_writel("drivers/mtd/nand/raw/pl35x-nand-controller.c:893", plnand->ecc_cfg, nfc->conf_regs + PL35X_SMC_ECC_CFG);
 }
 
 static int pl35x_nand_init_hw_ecc_controller(struct pl35x_nandc *nfc,
@@ -1002,7 +1002,7 @@ static int pl35x_nand_reset_state(struct pl35x_nandc *nfc)
 	int ret;
 
 	/* Disable interrupts and clear their status */
-	writel(PL35X_SMC_MEMC_CFG_CLR_INT_CLR_1 |
+	pete_writel("drivers/mtd/nand/raw/pl35x-nand-controller.c:1005", PL35X_SMC_MEMC_CFG_CLR_INT_CLR_1 |
 	       PL35X_SMC_MEMC_CFG_CLR_ECC_INT_DIS_1 |
 	       PL35X_SMC_MEMC_CFG_CLR_INT_DIS_1,
 	       nfc->conf_regs + PL35X_SMC_MEMC_CFG_CLR);
@@ -1021,12 +1021,12 @@ static int pl35x_nand_reset_state(struct pl35x_nandc *nfc)
 	 * Configure the commands that the ECC block uses to detect the
 	 * operations it should start/end.
 	 */
-	writel(PL35X_SMC_ECC_CMD1_WRITE(NAND_CMD_SEQIN) |
+	pete_writel("drivers/mtd/nand/raw/pl35x-nand-controller.c:1024", PL35X_SMC_ECC_CMD1_WRITE(NAND_CMD_SEQIN) |
 	       PL35X_SMC_ECC_CMD1_READ(NAND_CMD_READ0) |
 	       PL35X_SMC_ECC_CMD1_READ_END(NAND_CMD_READSTART) |
 	       PL35X_SMC_ECC_CMD1_READ_END_VALID(NAND_CMD_READ1),
 	       nfc->conf_regs + PL35X_SMC_ECC_CMD1);
-	writel(PL35X_SMC_ECC_CMD2_WRITE_COL_CHG(NAND_CMD_RNDIN) |
+	pete_writel("drivers/mtd/nand/raw/pl35x-nand-controller.c:1029", PL35X_SMC_ECC_CMD2_WRITE_COL_CHG(NAND_CMD_RNDIN) |
 	       PL35X_SMC_ECC_CMD2_READ_COL_CHG(NAND_CMD_RNDOUT) |
 	       PL35X_SMC_ECC_CMD2_READ_COL_CHG_END(NAND_CMD_RNDOUTSTART) |
 	       PL35X_SMC_ECC_CMD2_READ_COL_CHG_END_VALID(NAND_CMD_READ1),

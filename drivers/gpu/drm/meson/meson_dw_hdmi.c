@@ -167,12 +167,12 @@ static unsigned int dw_hdmi_top_read(struct meson_dw_hdmi *dw_hdmi,
 	spin_lock_irqsave(&reg_lock, flags);
 
 	/* ADDR must be written twice */
-	writel(addr & 0xffff, dw_hdmi->hdmitx + HDMITX_TOP_ADDR_REG);
-	writel(addr & 0xffff, dw_hdmi->hdmitx + HDMITX_TOP_ADDR_REG);
+	pete_writel("drivers/gpu/drm/meson/meson_dw_hdmi.c:170", addr & 0xffff, dw_hdmi->hdmitx + HDMITX_TOP_ADDR_REG);
+	pete_writel("drivers/gpu/drm/meson/meson_dw_hdmi.c:171", addr & 0xffff, dw_hdmi->hdmitx + HDMITX_TOP_ADDR_REG);
 
 	/* Read needs a second DATA read */
-	data = readl(dw_hdmi->hdmitx + HDMITX_TOP_DATA_REG);
-	data = readl(dw_hdmi->hdmitx + HDMITX_TOP_DATA_REG);
+	data = pete_readl("drivers/gpu/drm/meson/meson_dw_hdmi.c:174", dw_hdmi->hdmitx + HDMITX_TOP_DATA_REG);
+	data = pete_readl("drivers/gpu/drm/meson/meson_dw_hdmi.c:175", dw_hdmi->hdmitx + HDMITX_TOP_DATA_REG);
 
 	spin_unlock_irqrestore(&reg_lock, flags);
 
@@ -182,7 +182,7 @@ static unsigned int dw_hdmi_top_read(struct meson_dw_hdmi *dw_hdmi,
 static unsigned int dw_hdmi_g12a_top_read(struct meson_dw_hdmi *dw_hdmi,
 					  unsigned int addr)
 {
-	return readl(dw_hdmi->hdmitx + HDMITX_TOP_G12A_OFFSET + (addr << 2));
+	return pete_readl("drivers/gpu/drm/meson/meson_dw_hdmi.c:185", dw_hdmi->hdmitx + HDMITX_TOP_G12A_OFFSET + (addr << 2));
 }
 
 static inline void dw_hdmi_top_write(struct meson_dw_hdmi *dw_hdmi,
@@ -193,11 +193,11 @@ static inline void dw_hdmi_top_write(struct meson_dw_hdmi *dw_hdmi,
 	spin_lock_irqsave(&reg_lock, flags);
 
 	/* ADDR must be written twice */
-	writel(addr & 0xffff, dw_hdmi->hdmitx + HDMITX_TOP_ADDR_REG);
-	writel(addr & 0xffff, dw_hdmi->hdmitx + HDMITX_TOP_ADDR_REG);
+	pete_writel("drivers/gpu/drm/meson/meson_dw_hdmi.c:196", addr & 0xffff, dw_hdmi->hdmitx + HDMITX_TOP_ADDR_REG);
+	pete_writel("drivers/gpu/drm/meson/meson_dw_hdmi.c:197", addr & 0xffff, dw_hdmi->hdmitx + HDMITX_TOP_ADDR_REG);
 
 	/* Write needs single DATA write */
-	writel(data, dw_hdmi->hdmitx + HDMITX_TOP_DATA_REG);
+	pete_writel("drivers/gpu/drm/meson/meson_dw_hdmi.c:200", data, dw_hdmi->hdmitx + HDMITX_TOP_DATA_REG);
 
 	spin_unlock_irqrestore(&reg_lock, flags);
 }
@@ -205,7 +205,7 @@ static inline void dw_hdmi_top_write(struct meson_dw_hdmi *dw_hdmi,
 static inline void dw_hdmi_g12a_top_write(struct meson_dw_hdmi *dw_hdmi,
 					  unsigned int addr, unsigned int data)
 {
-	writel(data, dw_hdmi->hdmitx + HDMITX_TOP_G12A_OFFSET + (addr << 2));
+	pete_writel("drivers/gpu/drm/meson/meson_dw_hdmi.c:208", data, dw_hdmi->hdmitx + HDMITX_TOP_G12A_OFFSET + (addr << 2));
 }
 
 /* Helper to change specific bits in PHY registers */
@@ -231,12 +231,12 @@ static unsigned int dw_hdmi_dwc_read(struct meson_dw_hdmi *dw_hdmi,
 	spin_lock_irqsave(&reg_lock, flags);
 
 	/* ADDR must be written twice */
-	writel(addr & 0xffff, dw_hdmi->hdmitx + HDMITX_DWC_ADDR_REG);
-	writel(addr & 0xffff, dw_hdmi->hdmitx + HDMITX_DWC_ADDR_REG);
+	pete_writel("drivers/gpu/drm/meson/meson_dw_hdmi.c:234", addr & 0xffff, dw_hdmi->hdmitx + HDMITX_DWC_ADDR_REG);
+	pete_writel("drivers/gpu/drm/meson/meson_dw_hdmi.c:235", addr & 0xffff, dw_hdmi->hdmitx + HDMITX_DWC_ADDR_REG);
 
 	/* Read needs a second DATA read */
-	data = readl(dw_hdmi->hdmitx + HDMITX_DWC_DATA_REG);
-	data = readl(dw_hdmi->hdmitx + HDMITX_DWC_DATA_REG);
+	data = pete_readl("drivers/gpu/drm/meson/meson_dw_hdmi.c:238", dw_hdmi->hdmitx + HDMITX_DWC_DATA_REG);
+	data = pete_readl("drivers/gpu/drm/meson/meson_dw_hdmi.c:239", dw_hdmi->hdmitx + HDMITX_DWC_DATA_REG);
 
 	spin_unlock_irqrestore(&reg_lock, flags);
 
@@ -246,7 +246,7 @@ static unsigned int dw_hdmi_dwc_read(struct meson_dw_hdmi *dw_hdmi,
 static unsigned int dw_hdmi_g12a_dwc_read(struct meson_dw_hdmi *dw_hdmi,
 					  unsigned int addr)
 {
-	return readb(dw_hdmi->hdmitx + addr);
+	return pete_readb("drivers/gpu/drm/meson/meson_dw_hdmi.c:249", dw_hdmi->hdmitx + addr);
 }
 
 static inline void dw_hdmi_dwc_write(struct meson_dw_hdmi *dw_hdmi,
@@ -257,11 +257,11 @@ static inline void dw_hdmi_dwc_write(struct meson_dw_hdmi *dw_hdmi,
 	spin_lock_irqsave(&reg_lock, flags);
 
 	/* ADDR must be written twice */
-	writel(addr & 0xffff, dw_hdmi->hdmitx + HDMITX_DWC_ADDR_REG);
-	writel(addr & 0xffff, dw_hdmi->hdmitx + HDMITX_DWC_ADDR_REG);
+	pete_writel("drivers/gpu/drm/meson/meson_dw_hdmi.c:260", addr & 0xffff, dw_hdmi->hdmitx + HDMITX_DWC_ADDR_REG);
+	pete_writel("drivers/gpu/drm/meson/meson_dw_hdmi.c:261", addr & 0xffff, dw_hdmi->hdmitx + HDMITX_DWC_ADDR_REG);
 
 	/* Write needs single DATA write */
-	writel(data, dw_hdmi->hdmitx + HDMITX_DWC_DATA_REG);
+	pete_writel("drivers/gpu/drm/meson/meson_dw_hdmi.c:264", data, dw_hdmi->hdmitx + HDMITX_DWC_DATA_REG);
 
 	spin_unlock_irqrestore(&reg_lock, flags);
 }
@@ -269,7 +269,7 @@ static inline void dw_hdmi_dwc_write(struct meson_dw_hdmi *dw_hdmi,
 static inline void dw_hdmi_g12a_dwc_write(struct meson_dw_hdmi *dw_hdmi,
 					  unsigned int addr, unsigned int data)
 {
-	writeb(data, dw_hdmi->hdmitx + addr);
+	pete_writeb("drivers/gpu/drm/meson/meson_dw_hdmi.c:272", data, dw_hdmi->hdmitx + addr);
 }
 
 /* Helper to change specific bits in controller registers */

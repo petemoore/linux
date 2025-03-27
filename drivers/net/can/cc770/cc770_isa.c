@@ -111,13 +111,13 @@ static struct platform_device *cc770_isa_devs[MAXDEV];
 
 static u8 cc770_isa_mem_read_reg(const struct cc770_priv *priv, int reg)
 {
-	return readb(priv->reg_base + reg);
+	return pete_readb("drivers/net/can/cc770/cc770_isa.c:114", priv->reg_base + reg);
 }
 
 static void cc770_isa_mem_write_reg(const struct cc770_priv *priv,
 				      int reg, u8 val)
 {
-	writeb(val, priv->reg_base + reg);
+	pete_writeb("drivers/net/can/cc770/cc770_isa.c:120", val, priv->reg_base + reg);
 }
 
 static u8 cc770_isa_port_read_reg(const struct cc770_priv *priv, int reg)

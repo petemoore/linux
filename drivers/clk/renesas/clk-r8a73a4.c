@@ -68,7 +68,7 @@ r8a73a4_cpg_register_clock(struct device_node *np, struct r8a73a4_cpg *cpg,
 
 
 	if (!strcmp(name, "main")) {
-		u32 ckscr = readl(base + CPG_CKSCR);
+		u32 ckscr = pete_readl("drivers/clk/renesas/clk-r8a73a4.c:71", base + CPG_CKSCR);
 
 		switch ((ckscr >> 28) & 3) {
 		case 0:	/* extal1 */
@@ -92,14 +92,14 @@ r8a73a4_cpg_register_clock(struct device_node *np, struct r8a73a4_cpg *cpg,
 		 * clock implementation and we currently have no need to change
 		 * the multiplier value.
 		 */
-		u32 value = readl(base + CPG_PLL0CR);
+		u32 value = pete_readl("drivers/clk/renesas/clk-r8a73a4.c:95", base + CPG_PLL0CR);
 
 		parent_name = "main";
 		mult = ((value >> 24) & 0x7f) + 1;
 		if (value & BIT(20))
 			div = 2;
 	} else if (!strcmp(name, "pll1")) {
-		u32 value = readl(base + CPG_PLL1CR);
+		u32 value = pete_readl("drivers/clk/renesas/clk-r8a73a4.c:102", base + CPG_PLL1CR);
 
 		parent_name = "main";
 		/* XXX: enable bit? */
@@ -122,7 +122,7 @@ r8a73a4_cpg_register_clock(struct device_node *np, struct r8a73a4_cpg *cpg,
 		default:
 			return ERR_PTR(-EINVAL);
 		}
-		value = readl(base + cr);
+		value = pete_readl("drivers/clk/renesas/clk-r8a73a4.c:125", base + cr);
 		switch ((value >> 5) & 7) {
 		case 0:
 			parent_name = "main";
@@ -158,7 +158,7 @@ r8a73a4_cpg_register_clock(struct device_node *np, struct r8a73a4_cpg *cpg,
 			shift = 0;
 		}
 		div *= 32;
-		mult = 0x20 - ((readl(base + CPG_FRQCRC) >> shift) & 0x1f);
+		mult = 0x20 - ((pete_readl("drivers/clk/renesas/clk-r8a73a4.c:161", base + CPG_FRQCRC) >> shift) & 0x1f);
 	} else {
 		struct div4_clk *c;
 

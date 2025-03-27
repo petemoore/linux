@@ -189,26 +189,26 @@ static void jz4740_mmc_write_irq_mask(struct jz4740_mmc_host *host,
 				      uint32_t val)
 {
 	if (host->version >= JZ_MMC_JZ4725B)
-		return writel(val, host->base + JZ_REG_MMC_IMASK);
+		return pete_writel("drivers/mmc/host/jz4740_mmc.c:192", val, host->base + JZ_REG_MMC_IMASK);
 	else
-		return writew(val, host->base + JZ_REG_MMC_IMASK);
+		return pete_writew("drivers/mmc/host/jz4740_mmc.c:194", val, host->base + JZ_REG_MMC_IMASK);
 }
 
 static void jz4740_mmc_write_irq_reg(struct jz4740_mmc_host *host,
 				     uint32_t val)
 {
 	if (host->version >= JZ_MMC_JZ4780)
-		writel(val, host->base + JZ_REG_MMC_IREG);
+		pete_writel("drivers/mmc/host/jz4740_mmc.c:201", val, host->base + JZ_REG_MMC_IREG);
 	else
-		writew(val, host->base + JZ_REG_MMC_IREG);
+		pete_writew("drivers/mmc/host/jz4740_mmc.c:203", val, host->base + JZ_REG_MMC_IREG);
 }
 
 static uint32_t jz4740_mmc_read_irq_reg(struct jz4740_mmc_host *host)
 {
 	if (host->version >= JZ_MMC_JZ4780)
-		return readl(host->base + JZ_REG_MMC_IREG);
+		return pete_readl("drivers/mmc/host/jz4740_mmc.c:209", host->base + JZ_REG_MMC_IREG);
 	else
-		return readw(host->base + JZ_REG_MMC_IREG);
+		return pete_readw("drivers/mmc/host/jz4740_mmc.c:211", host->base + JZ_REG_MMC_IREG);
 }
 
 /*----------------------------------------------------------------------------*/
@@ -426,7 +426,7 @@ static void jz4740_mmc_clock_enable(struct jz4740_mmc_host *host,
 	if (start_transfer)
 		val |= JZ_MMC_STRPCL_START_OP;
 
-	writew(val, host->base + JZ_REG_MMC_STRPCL);
+	pete_writew("drivers/mmc/host/jz4740_mmc.c:429", val, host->base + JZ_REG_MMC_STRPCL);
 }
 
 static void jz4740_mmc_clock_disable(struct jz4740_mmc_host *host)
@@ -434,9 +434,9 @@ static void jz4740_mmc_clock_disable(struct jz4740_mmc_host *host)
 	uint32_t status;
 	unsigned int timeout = 1000;
 
-	writew(JZ_MMC_STRPCL_CLOCK_STOP, host->base + JZ_REG_MMC_STRPCL);
+	pete_writew("drivers/mmc/host/jz4740_mmc.c:437", JZ_MMC_STRPCL_CLOCK_STOP, host->base + JZ_REG_MMC_STRPCL);
 	do {
-		status = readl(host->base + JZ_REG_MMC_STATUS);
+		status = pete_readl("drivers/mmc/host/jz4740_mmc.c:439", host->base + JZ_REG_MMC_STATUS);
 	} while (status & JZ_MMC_STATUS_CLK_EN && --timeout);
 }
 
@@ -445,10 +445,10 @@ static void jz4740_mmc_reset(struct jz4740_mmc_host *host)
 	uint32_t status;
 	unsigned int timeout = 1000;
 
-	writew(JZ_MMC_STRPCL_RESET, host->base + JZ_REG_MMC_STRPCL);
+	pete_writew("drivers/mmc/host/jz4740_mmc.c:448", JZ_MMC_STRPCL_RESET, host->base + JZ_REG_MMC_STRPCL);
 	udelay(10);
 	do {
-		status = readl(host->base + JZ_REG_MMC_STATUS);
+		status = pete_readl("drivers/mmc/host/jz4740_mmc.c:451", host->base + JZ_REG_MMC_STATUS);
 	} while (status & JZ_MMC_STATUS_IS_RESETTING && --timeout);
 }
 
@@ -492,7 +492,7 @@ static void jz4740_mmc_transfer_check_state(struct jz4740_mmc_host *host,
 {
 	int status;
 
-	status = readl(host->base + JZ_REG_MMC_STATUS);
+	status = pete_readl("drivers/mmc/host/jz4740_mmc.c:495", host->base + JZ_REG_MMC_STATUS);
 	if (status & JZ_MMC_STATUS_WRITE_ERROR_MASK) {
 		if (status & (JZ_MMC_STATUS_TIMEOUT_WRITE)) {
 			host->req->cmd->error = -ETIMEDOUT;
@@ -531,14 +531,14 @@ static bool jz4740_mmc_write_data(struct jz4740_mmc_host *host,
 			if (unlikely(timeout))
 				goto poll_timeout;
 
-			writel(buf[0], fifo_addr);
-			writel(buf[1], fifo_addr);
-			writel(buf[2], fifo_addr);
-			writel(buf[3], fifo_addr);
-			writel(buf[4], fifo_addr);
-			writel(buf[5], fifo_addr);
-			writel(buf[6], fifo_addr);
-			writel(buf[7], fifo_addr);
+			pete_writel("drivers/mmc/host/jz4740_mmc.c:534", buf[0], fifo_addr);
+			pete_writel("drivers/mmc/host/jz4740_mmc.c:535", buf[1], fifo_addr);
+			pete_writel("drivers/mmc/host/jz4740_mmc.c:536", buf[2], fifo_addr);
+			pete_writel("drivers/mmc/host/jz4740_mmc.c:537", buf[3], fifo_addr);
+			pete_writel("drivers/mmc/host/jz4740_mmc.c:538", buf[4], fifo_addr);
+			pete_writel("drivers/mmc/host/jz4740_mmc.c:539", buf[5], fifo_addr);
+			pete_writel("drivers/mmc/host/jz4740_mmc.c:540", buf[6], fifo_addr);
+			pete_writel("drivers/mmc/host/jz4740_mmc.c:541", buf[7], fifo_addr);
 			buf += 8;
 			--j;
 		}
@@ -548,7 +548,7 @@ static bool jz4740_mmc_write_data(struct jz4740_mmc_host *host,
 				goto poll_timeout;
 
 			while (i) {
-				writel(*buf, fifo_addr);
+				pete_writel("drivers/mmc/host/jz4740_mmc.c:551", *buf, fifo_addr);
 				++buf;
 				--i;
 			}
@@ -588,14 +588,14 @@ static bool jz4740_mmc_read_data(struct jz4740_mmc_host *host,
 			if (unlikely(timeout))
 				goto poll_timeout;
 
-			buf[0] = readl(fifo_addr);
-			buf[1] = readl(fifo_addr);
-			buf[2] = readl(fifo_addr);
-			buf[3] = readl(fifo_addr);
-			buf[4] = readl(fifo_addr);
-			buf[5] = readl(fifo_addr);
-			buf[6] = readl(fifo_addr);
-			buf[7] = readl(fifo_addr);
+			buf[0] = pete_readl("drivers/mmc/host/jz4740_mmc.c:591", fifo_addr);
+			buf[1] = pete_readl("drivers/mmc/host/jz4740_mmc.c:592", fifo_addr);
+			buf[2] = pete_readl("drivers/mmc/host/jz4740_mmc.c:593", fifo_addr);
+			buf[3] = pete_readl("drivers/mmc/host/jz4740_mmc.c:594", fifo_addr);
+			buf[4] = pete_readl("drivers/mmc/host/jz4740_mmc.c:595", fifo_addr);
+			buf[5] = pete_readl("drivers/mmc/host/jz4740_mmc.c:596", fifo_addr);
+			buf[6] = pete_readl("drivers/mmc/host/jz4740_mmc.c:597", fifo_addr);
+			buf[7] = pete_readl("drivers/mmc/host/jz4740_mmc.c:598", fifo_addr);
 
 			buf += 8;
 			--j;
@@ -607,11 +607,11 @@ static bool jz4740_mmc_read_data(struct jz4740_mmc_host *host,
 				goto poll_timeout;
 
 			while (i >= 4) {
-				*buf++ = readl(fifo_addr);
+				*buf++ = pete_readl("drivers/mmc/host/jz4740_mmc.c:610", fifo_addr);
 				i -= 4;
 			}
 			if (unlikely(i > 0)) {
-				d = readl(fifo_addr);
+				d = pete_readl("drivers/mmc/host/jz4740_mmc.c:614", fifo_addr);
 				memcpy(buf, &d, i);
 			}
 		}
@@ -622,10 +622,10 @@ static bool jz4740_mmc_read_data(struct jz4740_mmc_host *host,
 	/* For whatever reason there is sometime one word more in the fifo then
 	 * requested */
 	timeout = 1000;
-	status = readl(host->base + JZ_REG_MMC_STATUS);
+	status = pete_readl("drivers/mmc/host/jz4740_mmc.c:625", host->base + JZ_REG_MMC_STATUS);
 	while (!(status & JZ_MMC_STATUS_DATA_FIFO_EMPTY) && --timeout) {
-		d = readl(fifo_addr);
-		status = readl(host->base + JZ_REG_MMC_STATUS);
+		d = pete_readl("drivers/mmc/host/jz4740_mmc.c:627", fifo_addr);
+		status = pete_readl("drivers/mmc/host/jz4740_mmc.c:628", host->base + JZ_REG_MMC_STATUS);
 	}
 
 	return false;
@@ -659,18 +659,18 @@ static void jz4740_mmc_read_response(struct jz4740_mmc_host *host,
 	void __iomem *fifo_addr = host->base + JZ_REG_MMC_RESP_FIFO;
 
 	if (cmd->flags & MMC_RSP_136) {
-		tmp = readw(fifo_addr);
+		tmp = pete_readw("drivers/mmc/host/jz4740_mmc.c:662", fifo_addr);
 		for (i = 0; i < 4; ++i) {
 			cmd->resp[i] = tmp << 24;
-			tmp = readw(fifo_addr);
+			tmp = pete_readw("drivers/mmc/host/jz4740_mmc.c:665", fifo_addr);
 			cmd->resp[i] |= tmp << 8;
-			tmp = readw(fifo_addr);
+			tmp = pete_readw("drivers/mmc/host/jz4740_mmc.c:667", fifo_addr);
 			cmd->resp[i] |= tmp >> 8;
 		}
 	} else {
-		cmd->resp[0] = readw(fifo_addr) << 24;
-		cmd->resp[0] |= readw(fifo_addr) << 8;
-		cmd->resp[0] |= readw(fifo_addr) & 0xff;
+		cmd->resp[0] = pete_readw("drivers/mmc/host/jz4740_mmc.c:671", fifo_addr) << 24;
+		cmd->resp[0] |= pete_readw("drivers/mmc/host/jz4740_mmc.c:672", fifo_addr) << 8;
+		cmd->resp[0] |= pete_readw("drivers/mmc/host/jz4740_mmc.c:673", fifo_addr) & 0xff;
 	}
 }
 
@@ -717,22 +717,22 @@ static void jz4740_mmc_send_command(struct jz4740_mmc_host *host,
 			 * single DMA enable bit in CMDAT.
 			 */
 			if (host->version >= JZ_MMC_JZ4780) {
-				writel(JZ_MMC_DMAC_DMA_EN | JZ_MMC_DMAC_DMA_SEL,
+				pete_writel("drivers/mmc/host/jz4740_mmc.c:720", JZ_MMC_DMAC_DMA_EN | JZ_MMC_DMAC_DMA_SEL,
 				       host->base + JZ_REG_MMC_DMAC);
 			} else {
 				cmdat |= JZ_MMC_CMDAT_DMA_EN;
 			}
 		} else if (host->version >= JZ_MMC_JZ4780) {
-			writel(0, host->base + JZ_REG_MMC_DMAC);
+			pete_writel("drivers/mmc/host/jz4740_mmc.c:726", 0, host->base + JZ_REG_MMC_DMAC);
 		}
 
-		writew(cmd->data->blksz, host->base + JZ_REG_MMC_BLKLEN);
-		writew(cmd->data->blocks, host->base + JZ_REG_MMC_NOB);
+		pete_writew("drivers/mmc/host/jz4740_mmc.c:729", cmd->data->blksz, host->base + JZ_REG_MMC_BLKLEN);
+		pete_writew("drivers/mmc/host/jz4740_mmc.c:730", cmd->data->blocks, host->base + JZ_REG_MMC_NOB);
 	}
 
-	writeb(cmd->opcode, host->base + JZ_REG_MMC_CMD);
-	writel(cmd->arg, host->base + JZ_REG_MMC_ARG);
-	writel(cmdat, host->base + JZ_REG_MMC_CMDAT);
+	pete_writeb("drivers/mmc/host/jz4740_mmc.c:733", cmd->opcode, host->base + JZ_REG_MMC_CMD);
+	pete_writel("drivers/mmc/host/jz4740_mmc.c:734", cmd->arg, host->base + JZ_REG_MMC_ARG);
+	pete_writel("drivers/mmc/host/jz4740_mmc.c:735", cmdat, host->base + JZ_REG_MMC_CMDAT);
 
 	jz4740_mmc_clock_enable(host, 1);
 }
@@ -841,7 +841,7 @@ static irqreturn_t jz_mmc_irq(int irq, void *devid)
 	struct mmc_command *cmd = host->cmd;
 	uint32_t irq_reg, status, tmp;
 
-	status = readl(host->base + JZ_REG_MMC_STATUS);
+	status = pete_readl("drivers/mmc/host/jz4740_mmc.c:844", host->base + JZ_REG_MMC_STATUS);
 	irq_reg = jz4740_mmc_read_irq_reg(host);
 
 	tmp = irq_reg;
@@ -899,20 +899,20 @@ static int jz4740_mmc_set_clock_rate(struct jz4740_mmc_host *host, int rate)
 		real_rate >>= 1;
 	}
 
-	writew(div, host->base + JZ_REG_MMC_CLKRT);
+	pete_writew("drivers/mmc/host/jz4740_mmc.c:902", div, host->base + JZ_REG_MMC_CLKRT);
 
 	if (real_rate > 25000000) {
 		if (host->version >= JZ_MMC_JZ4780) {
-			writel(JZ_MMC_LPM_DRV_RISING_QTR_PHASE_DLY |
+			pete_writel("drivers/mmc/host/jz4740_mmc.c:906", JZ_MMC_LPM_DRV_RISING_QTR_PHASE_DLY |
 				   JZ_MMC_LPM_SMP_RISING_QTR_OR_HALF_PHASE_DLY |
 				   JZ_MMC_LPM_LOW_POWER_MODE_EN,
 				   host->base + JZ_REG_MMC_LPM);
 		} else if (host->version >= JZ_MMC_JZ4760) {
-			writel(JZ_MMC_LPM_DRV_RISING |
+			pete_writel("drivers/mmc/host/jz4740_mmc.c:911", JZ_MMC_LPM_DRV_RISING |
 				   JZ_MMC_LPM_LOW_POWER_MODE_EN,
 				   host->base + JZ_REG_MMC_LPM);
 		} else if (host->version >= JZ_MMC_JZ4725B)
-			writel(JZ_MMC_LPM_LOW_POWER_MODE_EN,
+			pete_writel("drivers/mmc/host/jz4740_mmc.c:915", JZ_MMC_LPM_LOW_POWER_MODE_EN,
 				   host->base + JZ_REG_MMC_LPM);
 	}
 

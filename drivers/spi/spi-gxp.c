@@ -52,16 +52,16 @@ static void gxp_spi_set_mode(struct gxp_spi *spifi, int mode)
 	u8 value;
 	void __iomem *reg_base = spifi->reg_base;
 
-	value = readb(reg_base + OFFSET_SPIMCTRL);
+	value = pete_readb("drivers/spi/spi-gxp.c:55", reg_base + OFFSET_SPIMCTRL);
 
 	if (mode == MANUAL_MODE) {
-		writeb(0x55, reg_base + OFFSET_SPICMD);
-		writeb(0xaa, reg_base + OFFSET_SPICMD);
+		pete_writeb("drivers/spi/spi-gxp.c:58", 0x55, reg_base + OFFSET_SPICMD);
+		pete_writeb("drivers/spi/spi-gxp.c:59", 0xaa, reg_base + OFFSET_SPICMD);
 		value &= ~0x30;
 	} else {
 		value |= 0x30;
 	}
-	writeb(value, reg_base + OFFSET_SPIMCTRL);
+	pete_writeb("drivers/spi/spi-gxp.c:64", value, reg_base + OFFSET_SPIMCTRL);
 }
 
 static int gxp_spi_read_reg(struct gxp_spi_chip *chip, const struct spi_mem_op *op)
@@ -71,24 +71,24 @@ static int gxp_spi_read_reg(struct gxp_spi_chip *chip, const struct spi_mem_op *
 	void __iomem *reg_base = spifi->reg_base;
 	u32 value;
 
-	value = readl(reg_base + OFFSET_SPIMCFG);
+	value = pete_readl("drivers/spi/spi-gxp.c:74", reg_base + OFFSET_SPIMCFG);
 	value &= ~(1 << 24);
 	value |= (chip->cs << 24);
 	value &= ~(0x07 << 16);
 	value &= ~(0x1f << 19);
-	writel(value, reg_base + OFFSET_SPIMCFG);
+	pete_writel("drivers/spi/spi-gxp.c:79", value, reg_base + OFFSET_SPIMCFG);
 
-	writel(0, reg_base + OFFSET_SPIADDR);
+	pete_writel("drivers/spi/spi-gxp.c:81", 0, reg_base + OFFSET_SPIADDR);
 
-	writeb(op->cmd.opcode, reg_base + OFFSET_SPICMD);
+	pete_writeb("drivers/spi/spi-gxp.c:83", op->cmd.opcode, reg_base + OFFSET_SPICMD);
 
-	writew(op->data.nbytes, reg_base + OFFSET_SPIDCNT);
+	pete_writew("drivers/spi/spi-gxp.c:85", op->data.nbytes, reg_base + OFFSET_SPIDCNT);
 
-	value = readb(reg_base + OFFSET_SPIMCTRL);
+	value = pete_readb("drivers/spi/spi-gxp.c:87", reg_base + OFFSET_SPIMCTRL);
 	value &= ~SPIMCTRL_DIR;
 	value |= SPIMCTRL_START;
 
-	writeb(value, reg_base + OFFSET_SPIMCTRL);
+	pete_writeb("drivers/spi/spi-gxp.c:91", value, reg_base + OFFSET_SPIMCTRL);
 
 	ret = readb_poll_timeout(reg_base + OFFSET_SPIMCTRL, value,
 				 !(value & SPIMCTRL_BUSY),
@@ -109,26 +109,26 @@ static int gxp_spi_write_reg(struct gxp_spi_chip *chip, const struct spi_mem_op 
 	void __iomem *reg_base = spifi->reg_base;
 	u32 value;
 
-	value = readl(reg_base + OFFSET_SPIMCFG);
+	value = pete_readl("drivers/spi/spi-gxp.c:112", reg_base + OFFSET_SPIMCFG);
 	value &= ~(1 << 24);
 	value |= (chip->cs << 24);
 	value &= ~(0x07 << 16);
 	value &= ~(0x1f << 19);
-	writel(value, reg_base + OFFSET_SPIMCFG);
+	pete_writel("drivers/spi/spi-gxp.c:117", value, reg_base + OFFSET_SPIMCFG);
 
-	writel(0, reg_base + OFFSET_SPIADDR);
+	pete_writel("drivers/spi/spi-gxp.c:119", 0, reg_base + OFFSET_SPIADDR);
 
-	writeb(op->cmd.opcode, reg_base + OFFSET_SPICMD);
+	pete_writeb("drivers/spi/spi-gxp.c:121", op->cmd.opcode, reg_base + OFFSET_SPICMD);
 
 	memcpy_toio(spifi->dat_base, op->data.buf.in, op->data.nbytes);
 
-	writew(op->data.nbytes, reg_base + OFFSET_SPIDCNT);
+	pete_writew("drivers/spi/spi-gxp.c:125", op->data.nbytes, reg_base + OFFSET_SPIDCNT);
 
-	value = readb(reg_base + OFFSET_SPIMCTRL);
+	value = pete_readb("drivers/spi/spi-gxp.c:127", reg_base + OFFSET_SPIMCTRL);
 	value |= SPIMCTRL_DIR;
 	value |= SPIMCTRL_START;
 
-	writeb(value, reg_base + OFFSET_SPIMCTRL);
+	pete_writeb("drivers/spi/spi-gxp.c:131", value, reg_base + OFFSET_SPIMCTRL);
 
 	ret = readb_poll_timeout(reg_base + OFFSET_SPIMCTRL, value,
 				 !(value & SPIMCTRL_BUSY),
@@ -164,27 +164,27 @@ static ssize_t gxp_spi_write(struct gxp_spi_chip *chip, const struct spi_mem_op 
 	if (write_len > SPILDAT_LEN)
 		write_len = SPILDAT_LEN;
 
-	value = readl(reg_base + OFFSET_SPIMCFG);
+	value = pete_readl("drivers/spi/spi-gxp.c:167", reg_base + OFFSET_SPIMCFG);
 	value &= ~(1 << 24);
 	value |= (chip->cs << 24);
 	value &= ~(0x07 << 16);
 	value |= (op->addr.nbytes << 16);
 	value &= ~(0x1f << 19);
-	writel(value, reg_base + OFFSET_SPIMCFG);
+	pete_writel("drivers/spi/spi-gxp.c:173", value, reg_base + OFFSET_SPIMCFG);
 
-	writel(op->addr.val, reg_base + OFFSET_SPIADDR);
+	pete_writel("drivers/spi/spi-gxp.c:175", op->addr.val, reg_base + OFFSET_SPIADDR);
 
-	writeb(op->cmd.opcode, reg_base + OFFSET_SPICMD);
+	pete_writeb("drivers/spi/spi-gxp.c:177", op->cmd.opcode, reg_base + OFFSET_SPICMD);
 
-	writew(write_len, reg_base + OFFSET_SPIDCNT);
+	pete_writew("drivers/spi/spi-gxp.c:179", write_len, reg_base + OFFSET_SPIDCNT);
 
 	memcpy_toio(spifi->dat_base, op->data.buf.in, write_len);
 
-	value = readb(reg_base + OFFSET_SPIMCTRL);
+	value = pete_readb("drivers/spi/spi-gxp.c:183", reg_base + OFFSET_SPIMCTRL);
 	value |= SPIMCTRL_DIR;
 	value |= SPIMCTRL_START;
 
-	writeb(value, reg_base + OFFSET_SPIMCTRL);
+	pete_writeb("drivers/spi/spi-gxp.c:187", value, reg_base + OFFSET_SPIMCTRL);
 
 	ret = readb_poll_timeout(reg_base + OFFSET_SPIMCTRL, value,
 				 !(value & SPIMCTRL_BUSY),

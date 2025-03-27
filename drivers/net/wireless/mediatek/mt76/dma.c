@@ -17,7 +17,7 @@
 					       ((_q)->wed_regs +	\
 					        _offset));		\
 	else								\
-		_val = readl(&(_q)->regs->_field);			\
+		_val = pete_readl("drivers/net/wireless/mediatek/mt76/dma.c:20", &(_q)->regs->_field);			\
 	_val;								\
 })
 
@@ -28,13 +28,13 @@
 					 ((_q)->wed_regs + _offset),	\
 					 _val);				\
 	else								\
-		writel(_val, &(_q)->regs->_field);			\
+		pete_writel("drivers/net/wireless/mediatek/mt76/dma.c:31", _val, &(_q)->regs->_field);			\
 } while (0)
 
 #else
 
-#define Q_READ(_dev, _q, _field)	readl(&(_q)->regs->_field)
-#define Q_WRITE(_dev, _q, _field, _val)	writel(_val, &(_q)->regs->_field)
+#define Q_READ(_dev, _q, _field)	pete_readl("drivers/net/wireless/mediatek/mt76/dma.c:36", &(_q)->regs->_field)
+#define Q_WRITE(_dev, _q, _field, _val)	pete_writel("drivers/net/wireless/mediatek/mt76/dma.c:37", _val, &(_q)->regs->_field)
 
 #endif
 

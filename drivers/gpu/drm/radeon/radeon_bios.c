@@ -89,8 +89,8 @@ static bool radeon_read_bios(struct radeon_device *rdev)
 		return false;
 	}
 
-	val1 = readb(&bios[0]);
-	val2 = readb(&bios[1]);
+	val1 = pete_readb("drivers/gpu/drm/radeon/radeon_bios.c:92", &bios[0]);
+	val2 = pete_readb("drivers/gpu/drm/radeon/radeon_bios.c:93", &bios[1]);
 
 	if (size == 0 || val1 != 0x55 || val2 != 0xaa) {
 		pci_unmap_rom(rdev->pdev, bios);

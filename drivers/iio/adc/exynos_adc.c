@@ -238,10 +238,10 @@ static void exynos_adc_v1_init_hw(struct exynos_adc *info)
 
 	/* Enable 12-bit ADC resolution */
 	con1 |= ADC_V1_CON_RES;
-	writel(con1, ADC_V1_CON(info->regs));
+	pete_writel("drivers/iio/adc/exynos_adc.c:241", con1, ADC_V1_CON(info->regs));
 
 	/* set touchscreen delay */
-	writel(info->delay, ADC_V1_DLY(info->regs));
+	pete_writel("drivers/iio/adc/exynos_adc.c:244", info->delay, ADC_V1_DLY(info->regs));
 }
 
 static void exynos_adc_v1_exit_hw(struct exynos_adc *info)
@@ -251,14 +251,14 @@ static void exynos_adc_v1_exit_hw(struct exynos_adc *info)
 	if (info->data->needs_adc_phy)
 		regmap_write(info->pmu_map, info->data->phy_offset, 0);
 
-	con = readl(ADC_V1_CON(info->regs));
+	con = pete_readl("drivers/iio/adc/exynos_adc.c:254", ADC_V1_CON(info->regs));
 	con |= ADC_V1_CON_STANDBY;
-	writel(con, ADC_V1_CON(info->regs));
+	pete_writel("drivers/iio/adc/exynos_adc.c:256", con, ADC_V1_CON(info->regs));
 }
 
 static void exynos_adc_v1_clear_irq(struct exynos_adc *info)
 {
-	writel(1, ADC_V1_INTCLR(info->regs));
+	pete_writel("drivers/iio/adc/exynos_adc.c:261", 1, ADC_V1_INTCLR(info->regs));
 }
 
 static void exynos_adc_v1_start_conv(struct exynos_adc *info,
@@ -266,10 +266,10 @@ static void exynos_adc_v1_start_conv(struct exynos_adc *info,
 {
 	u32 con1;
 
-	writel(addr, ADC_V1_MUX(info->regs));
+	pete_writel("drivers/iio/adc/exynos_adc.c:269", addr, ADC_V1_MUX(info->regs));
 
-	con1 = readl(ADC_V1_CON(info->regs));
-	writel(con1 | ADC_CON_EN_START, ADC_V1_CON(info->regs));
+	con1 = pete_readl("drivers/iio/adc/exynos_adc.c:271", ADC_V1_CON(info->regs));
+	pete_writel("drivers/iio/adc/exynos_adc.c:272", con1 | ADC_CON_EN_START, ADC_V1_CON(info->regs));
 }
 
 /* Exynos4212 and 4412 is like ADCv1 but with four channels only */
@@ -313,15 +313,15 @@ static void exynos_adc_s3c2416_start_conv(struct exynos_adc *info,
 	u32 con1;
 
 	/* Enable 12 bit ADC resolution */
-	con1 = readl(ADC_V1_CON(info->regs));
+	con1 = pete_readl("drivers/iio/adc/exynos_adc.c:316", ADC_V1_CON(info->regs));
 	con1 |= ADC_S3C2416_CON_RES_SEL;
-	writel(con1, ADC_V1_CON(info->regs));
+	pete_writel("drivers/iio/adc/exynos_adc.c:318", con1, ADC_V1_CON(info->regs));
 
 	/* Select channel for S3C2416 */
-	writel(addr, ADC_S3C2410_MUX(info->regs));
+	pete_writel("drivers/iio/adc/exynos_adc.c:321", addr, ADC_S3C2410_MUX(info->regs));
 
-	con1 = readl(ADC_V1_CON(info->regs));
-	writel(con1 | ADC_CON_EN_START, ADC_V1_CON(info->regs));
+	con1 = pete_readl("drivers/iio/adc/exynos_adc.c:323", ADC_V1_CON(info->regs));
+	pete_writel("drivers/iio/adc/exynos_adc.c:324", con1 | ADC_CON_EN_START, ADC_V1_CON(info->regs));
 }
 
 static struct exynos_adc_data const exynos_adc_s3c2416_data = {
@@ -339,10 +339,10 @@ static void exynos_adc_s3c2443_start_conv(struct exynos_adc *info,
 	u32 con1;
 
 	/* Select channel for S3C2433 */
-	writel(addr, ADC_S3C2410_MUX(info->regs));
+	pete_writel("drivers/iio/adc/exynos_adc.c:342", addr, ADC_S3C2410_MUX(info->regs));
 
-	con1 = readl(ADC_V1_CON(info->regs));
-	writel(con1 | ADC_CON_EN_START, ADC_V1_CON(info->regs));
+	con1 = pete_readl("drivers/iio/adc/exynos_adc.c:344", ADC_V1_CON(info->regs));
+	pete_writel("drivers/iio/adc/exynos_adc.c:345", con1 | ADC_CON_EN_START, ADC_V1_CON(info->regs));
 }
 
 static struct exynos_adc_data const exynos_adc_s3c2443_data = {
@@ -359,10 +359,10 @@ static void exynos_adc_s3c64xx_start_conv(struct exynos_adc *info,
 {
 	u32 con1;
 
-	con1 = readl(ADC_V1_CON(info->regs));
+	con1 = pete_readl("drivers/iio/adc/exynos_adc.c:362", ADC_V1_CON(info->regs));
 	con1 &= ~ADC_S3C2410_CON_SELMUX(0x7);
 	con1 |= ADC_S3C2410_CON_SELMUX(addr);
-	writel(con1 | ADC_CON_EN_START, ADC_V1_CON(info->regs));
+	pete_writel("drivers/iio/adc/exynos_adc.c:365", con1 | ADC_CON_EN_START, ADC_V1_CON(info->regs));
 }
 
 static struct exynos_adc_data const exynos_adc_s3c24xx_data = {
@@ -392,14 +392,14 @@ static void exynos_adc_v2_init_hw(struct exynos_adc *info)
 		regmap_write(info->pmu_map, info->data->phy_offset, 1);
 
 	con1 = ADC_V2_CON1_SOFT_RESET;
-	writel(con1, ADC_V2_CON1(info->regs));
+	pete_writel("drivers/iio/adc/exynos_adc.c:395", con1, ADC_V2_CON1(info->regs));
 
 	con2 = ADC_V2_CON2_OSEL | ADC_V2_CON2_ESEL |
 		ADC_V2_CON2_HIGHF | ADC_V2_CON2_C_TIME(0);
-	writel(con2, ADC_V2_CON2(info->regs));
+	pete_writel("drivers/iio/adc/exynos_adc.c:399", con2, ADC_V2_CON2(info->regs));
 
 	/* Enable interrupts */
-	writel(1, ADC_V2_INT_EN(info->regs));
+	pete_writel("drivers/iio/adc/exynos_adc.c:402", 1, ADC_V2_INT_EN(info->regs));
 }
 
 static void exynos_adc_v2_exit_hw(struct exynos_adc *info)
@@ -409,14 +409,14 @@ static void exynos_adc_v2_exit_hw(struct exynos_adc *info)
 	if (info->data->needs_adc_phy)
 		regmap_write(info->pmu_map, info->data->phy_offset, 0);
 
-	con = readl(ADC_V2_CON1(info->regs));
+	con = pete_readl("drivers/iio/adc/exynos_adc.c:412", ADC_V2_CON1(info->regs));
 	con &= ~ADC_CON_EN_START;
-	writel(con, ADC_V2_CON1(info->regs));
+	pete_writel("drivers/iio/adc/exynos_adc.c:414", con, ADC_V2_CON1(info->regs));
 }
 
 static void exynos_adc_v2_clear_irq(struct exynos_adc *info)
 {
-	writel(1, ADC_V2_INT_ST(info->regs));
+	pete_writel("drivers/iio/adc/exynos_adc.c:419", 1, ADC_V2_INT_ST(info->regs));
 }
 
 static void exynos_adc_v2_start_conv(struct exynos_adc *info,
@@ -424,13 +424,13 @@ static void exynos_adc_v2_start_conv(struct exynos_adc *info,
 {
 	u32 con1, con2;
 
-	con2 = readl(ADC_V2_CON2(info->regs));
+	con2 = pete_readl("drivers/iio/adc/exynos_adc.c:427", ADC_V2_CON2(info->regs));
 	con2 &= ~ADC_V2_CON2_ACH_MASK;
 	con2 |= ADC_V2_CON2_ACH_SEL(addr);
-	writel(con2, ADC_V2_CON2(info->regs));
+	pete_writel("drivers/iio/adc/exynos_adc.c:430", con2, ADC_V2_CON2(info->regs));
 
-	con1 = readl(ADC_V2_CON1(info->regs));
-	writel(con1 | ADC_CON_EN_START, ADC_V2_CON1(info->regs));
+	con1 = pete_readl("drivers/iio/adc/exynos_adc.c:432", ADC_V2_CON1(info->regs));
+	pete_writel("drivers/iio/adc/exynos_adc.c:433", con1 | ADC_CON_EN_START, ADC_V2_CON1(info->regs));
 }
 
 static const struct exynos_adc_data exynos_adc_v2_data = {
@@ -463,15 +463,15 @@ static void exynos_adc_exynos7_init_hw(struct exynos_adc *info)
 	u32 con1, con2;
 
 	con1 = ADC_V2_CON1_SOFT_RESET;
-	writel(con1, ADC_V2_CON1(info->regs));
+	pete_writel("drivers/iio/adc/exynos_adc.c:466", con1, ADC_V2_CON1(info->regs));
 
-	con2 = readl(ADC_V2_CON2(info->regs));
+	con2 = pete_readl("drivers/iio/adc/exynos_adc.c:468", ADC_V2_CON2(info->regs));
 	con2 &= ~ADC_V2_CON2_C_TIME(7);
 	con2 |= ADC_V2_CON2_C_TIME(0);
-	writel(con2, ADC_V2_CON2(info->regs));
+	pete_writel("drivers/iio/adc/exynos_adc.c:471", con2, ADC_V2_CON2(info->regs));
 
 	/* Enable interrupts */
-	writel(1, ADC_V2_INT_EN(info->regs));
+	pete_writel("drivers/iio/adc/exynos_adc.c:474", 1, ADC_V2_INT_EN(info->regs));
 }
 
 static const struct exynos_adc_data exynos7_adc_data = {
@@ -591,7 +591,7 @@ static int exynos_read_s3c64xx_ts(struct iio_dev *indio_dev, int *x, int *y)
 
 	reinit_completion(&info->completion);
 
-	writel(ADC_S3C2410_TSC_PULL_UP_DISABLE | ADC_TSC_AUTOPST,
+	pete_writel("drivers/iio/adc/exynos_adc.c:594", ADC_S3C2410_TSC_PULL_UP_DISABLE | ADC_TSC_AUTOPST,
 	       ADC_V1_TSC(info->regs));
 
 	/* Select the ts channel to be used and Trigger conversion */
@@ -623,11 +623,11 @@ static irqreturn_t exynos_adc_isr(int irq, void *dev_id)
 
 	/* Read value */
 	if (info->read_ts) {
-		info->ts_x = readl(ADC_V1_DATX(info->regs));
-		info->ts_y = readl(ADC_V1_DATY(info->regs));
-		writel(ADC_TSC_WAIT4INT | ADC_S3C2443_TSC_UD_SEN, ADC_V1_TSC(info->regs));
+		info->ts_x = pete_readl("drivers/iio/adc/exynos_adc.c:626", ADC_V1_DATX(info->regs));
+		info->ts_y = pete_readl("drivers/iio/adc/exynos_adc.c:627", ADC_V1_DATY(info->regs));
+		pete_writel("drivers/iio/adc/exynos_adc.c:628", ADC_TSC_WAIT4INT | ADC_S3C2443_TSC_UD_SEN, ADC_V1_TSC(info->regs));
 	} else {
-		info->value = readl(ADC_V1_DATX(info->regs)) & mask;
+		info->value = pete_readl("drivers/iio/adc/exynos_adc.c:630", ADC_V1_DATX(info->regs)) & mask;
 	}
 
 	/* clear irq */
@@ -674,7 +674,7 @@ static irqreturn_t exynos_ts_isr(int irq, void *dev_id)
 		usleep_range(1000, 1100);
 	}
 
-	writel(0, ADC_V1_CLRINTPNDNUP(info->regs));
+	pete_writel("drivers/iio/adc/exynos_adc.c:677", 0, ADC_V1_CLRINTPNDNUP(info->regs));
 
 	return IRQ_HANDLED;
 }
@@ -688,7 +688,7 @@ static int exynos_adc_reg_access(struct iio_dev *indio_dev,
 	if (readval == NULL)
 		return -EINVAL;
 
-	*readval = readl(info->regs + reg);
+	*readval = pete_readl("drivers/iio/adc/exynos_adc.c:691", info->regs + reg);
 
 	return 0;
 }

@@ -375,10 +375,10 @@ static void pata_macio_apply_timings(struct ata_port *ap, unsigned int device)
 	if (priv->kind == controller_sh_ata6 ||
 	    priv->kind == controller_un_ata6 ||
 	    priv->kind == controller_k2_ata6) {
-		writel(priv->treg[device][0], rbase + IDE_KAUAI_PIO_CONFIG);
-		writel(priv->treg[device][1], rbase + IDE_KAUAI_ULTRA_CONFIG);
+		pete_writel("drivers/ata/pata_macio.c:378", priv->treg[device][0], rbase + IDE_KAUAI_PIO_CONFIG);
+		pete_writel("drivers/ata/pata_macio.c:379", priv->treg[device][1], rbase + IDE_KAUAI_ULTRA_CONFIG);
 	} else
-		writel(priv->treg[device][0], rbase + IDE_TIMING_CONFIG);
+		pete_writel("drivers/ata/pata_macio.c:381", priv->treg[device][0], rbase + IDE_TIMING_CONFIG);
 }
 
 static void pata_macio_dev_select(struct ata_port *ap, unsigned int device)
@@ -585,8 +585,8 @@ static void pata_macio_freeze(struct ata_port *ap)
 		unsigned int timeout = 1000000;
 
 		/* Make sure DMA controller is stopped */
-		writel((RUN|PAUSE|FLUSH|WAKE|DEAD) << 16, &dma_regs->control);
-		while (--timeout && (readl(&dma_regs->status) & RUN))
+		pete_writel("drivers/ata/pata_macio.c:588", (RUN|PAUSE|FLUSH|WAKE|DEAD) << 16, &dma_regs->control);
+		while (--timeout && (pete_readl("drivers/ata/pata_macio.c:589", &dma_regs->status) & RUN))
 			udelay(1);
 	}
 
@@ -604,7 +604,7 @@ static void pata_macio_bmdma_setup(struct ata_queued_cmd *qc)
 	dev_dbgdma(priv->dev, "%s: qc %p\n", __func__, qc);
 
 	/* Make sure DMA commands updates are visible */
-	writel(priv->dma_table_dma, &dma_regs->cmdptr);
+	pete_writel("drivers/ata/pata_macio.c:607", priv->dma_table_dma, &dma_regs->cmdptr);
 
 	/* On KeyLargo 66Mhz cell, we need to add 60ns to wrDataSetup on
 	 * UDMA reads
@@ -616,7 +616,7 @@ static void pata_macio_bmdma_setup(struct ata_queued_cmd *qc)
 
 		if (!(qc->tf.flags & ATA_TFLAG_WRITE))
 			reg += 0x00800000;
-		writel(reg, rbase + IDE_TIMING_CONFIG);
+		pete_writel("drivers/ata/pata_macio.c:619", reg, rbase + IDE_TIMING_CONFIG);
 	}
 
 	/* issue r/w command */
@@ -631,9 +631,9 @@ static void pata_macio_bmdma_start(struct ata_queued_cmd *qc)
 
 	dev_dbgdma(priv->dev, "%s: qc %p\n", __func__, qc);
 
-	writel((RUN << 16) | RUN, &dma_regs->control);
+	pete_writel("drivers/ata/pata_macio.c:634", (RUN << 16) | RUN, &dma_regs->control);
 	/* Make sure it gets to the controller right now */
-	(void)readl(&dma_regs->control);
+	(void)pete_readl("drivers/ata/pata_macio.c:636", &dma_regs->control);
 }
 
 static void pata_macio_bmdma_stop(struct ata_queued_cmd *qc)
@@ -647,7 +647,7 @@ static void pata_macio_bmdma_stop(struct ata_queued_cmd *qc)
 
 	/* Stop the DMA engine and wait for it to full halt */
 	writel (((RUN|WAKE|DEAD) << 16), &dma_regs->control);
-	while (--timeout && (readl(&dma_regs->status) & RUN))
+	while (--timeout && (pete_readl("drivers/ata/pata_macio.c:650", &dma_regs->status) & RUN))
 		udelay(1);
 }
 
@@ -658,7 +658,7 @@ static u8 pata_macio_bmdma_status(struct ata_port *ap)
 	u32 dstat, rstat = ATA_DMA_INTR;
 	unsigned long timeout = 0;
 
-	dstat = readl(&dma_regs->status);
+	dstat = pete_readl("drivers/ata/pata_macio.c:661", &dma_regs->status);
 
 	dev_dbgdma(priv->dev, "%s: dstat=%x\n", __func__, dstat);
 
@@ -693,10 +693,10 @@ static u8 pata_macio_bmdma_status(struct ata_port *ap)
 	 * channel for pending data in the fifo
 	 */
 	udelay(1);
-	writel((FLUSH << 16) | FLUSH, &dma_regs->control);
+	pete_writel("drivers/ata/pata_macio.c:696", (FLUSH << 16) | FLUSH, &dma_regs->control);
 	for (;;) {
 		udelay(1);
-		dstat = readl(&dma_regs->status);
+		dstat = pete_readl("drivers/ata/pata_macio.c:699", &dma_regs->status);
 		if ((dstat & FLUSH) == 0)
 			break;
 		if (++timeout > 1000) {
@@ -791,7 +791,7 @@ static void pata_macio_reset_hw(struct pata_macio_priv *priv, int resume)
 	 * seem necessary and speeds up the boot process
 	 */
 	if (priv->kauai_fcr)
-		writel(KAUAI_FCR_UATA_MAGIC |
+		pete_writel("drivers/ata/pata_macio.c:794", KAUAI_FCR_UATA_MAGIC |
 		       KAUAI_FCR_UATA_RESET_N |
 		       KAUAI_FCR_UATA_ENABLE, priv->kauai_fcr);
 }
@@ -872,9 +872,9 @@ static int pata_macio_do_suspend(struct pata_macio_priv *priv, pm_message_t mesg
 
 	/* Kauai has bus control FCRs directly here */
 	if (priv->kauai_fcr) {
-		u32 fcr = readl(priv->kauai_fcr);
+		u32 fcr = pete_readl("drivers/ata/pata_macio.c:875", priv->kauai_fcr);
 		fcr &= ~(KAUAI_FCR_UATA_RESET_N | KAUAI_FCR_UATA_ENABLE);
-		writel(fcr, priv->kauai_fcr);
+		pete_writel("drivers/ata/pata_macio.c:877", fcr, priv->kauai_fcr);
 	}
 
 	/* For PCI, save state and disable DMA. No need to call

@@ -66,27 +66,27 @@ static int apq8016_dai_init(struct snd_soc_pcm_runtime *rtd, int mi2s)
 
 	switch (mi2s) {
 	case MI2S_PRIMARY:
-		writel(readl(pdata->spkr_iomux) | SPKR_CTL_PRI_WS_SLAVE_SEL_11,
+		pete_writel("sound/soc/qcom/apq8016_sbc.c:69", pete_readl("sound/soc/qcom/apq8016_sbc.c:69", pdata->spkr_iomux) | SPKR_CTL_PRI_WS_SLAVE_SEL_11,
 			pdata->spkr_iomux);
 		break;
 
 	case MI2S_QUATERNARY:
 		/* Configure the Quat MI2S to TLMM */
-		writel(readl(pdata->mic_iomux) | MIC_CTRL_QUA_WS_SLAVE_SEL_10 |
+		pete_writel("sound/soc/qcom/apq8016_sbc.c:75", pete_readl("sound/soc/qcom/apq8016_sbc.c:75", pdata->mic_iomux) | MIC_CTRL_QUA_WS_SLAVE_SEL_10 |
 			MIC_CTRL_TLMM_SCLK_EN,
 			pdata->mic_iomux);
 		break;
 	case MI2S_SECONDARY:
 		/* Clear TLMM_WS_OUT_SEL and TLMM_WS_EN_SEL fields */
-		value = readl(pdata->spkr_iomux) &
+		value = pete_readl("sound/soc/qcom/apq8016_sbc.c:81", pdata->spkr_iomux) &
 			~(SPKR_CTL_TLMM_WS_OUT_SEL_MASK | SPKR_CTL_TLMM_WS_EN_SEL_MASK);
 		/* Configure the Sec MI2S to TLMM */
-		writel(value | SPKR_CTL_TLMM_MCLK_EN | SPKR_CTL_TLMM_SCLK_EN |
+		pete_writel("sound/soc/qcom/apq8016_sbc.c:84", value | SPKR_CTL_TLMM_MCLK_EN | SPKR_CTL_TLMM_SCLK_EN |
 			SPKR_CTL_TLMM_DATA1_EN | SPKR_CTL_TLMM_WS_OUT_SEL_SEC |
 			SPKR_CTL_TLMM_WS_EN_SEL_SEC, pdata->spkr_iomux);
 		break;
 	case MI2S_TERTIARY:
-		writel(readl(pdata->mic_iomux) | MIC_CTRL_TER_WS_SLAVE_SEL |
+		pete_writel("sound/soc/qcom/apq8016_sbc.c:89", pete_readl("sound/soc/qcom/apq8016_sbc.c:89", pdata->mic_iomux) | MIC_CTRL_TER_WS_SLAVE_SEL |
 			MIC_CTRL_TLMM_SCLK_EN,
 			pdata->mic_iomux);
 

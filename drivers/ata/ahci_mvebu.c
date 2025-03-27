@@ -39,19 +39,19 @@ static void ahci_mvebu_mbus_config(struct ahci_host_priv *hpriv,
 	int i;
 
 	for (i = 0; i < 4; i++) {
-		writel(0, hpriv->mmio + AHCI_WINDOW_CTRL(i));
-		writel(0, hpriv->mmio + AHCI_WINDOW_BASE(i));
-		writel(0, hpriv->mmio + AHCI_WINDOW_SIZE(i));
+		pete_writel("drivers/ata/ahci_mvebu.c:42", 0, hpriv->mmio + AHCI_WINDOW_CTRL(i));
+		pete_writel("drivers/ata/ahci_mvebu.c:43", 0, hpriv->mmio + AHCI_WINDOW_BASE(i));
+		pete_writel("drivers/ata/ahci_mvebu.c:44", 0, hpriv->mmio + AHCI_WINDOW_SIZE(i));
 	}
 
 	for (i = 0; i < dram->num_cs; i++) {
 		const struct mbus_dram_window *cs = dram->cs + i;
 
-		writel((cs->mbus_attr << 8) |
+		pete_writel("drivers/ata/ahci_mvebu.c:50", (cs->mbus_attr << 8) |
 		       (dram->mbus_dram_target_id << 4) | 1,
 		       hpriv->mmio + AHCI_WINDOW_CTRL(i));
-		writel(cs->base >> 16, hpriv->mmio + AHCI_WINDOW_BASE(i));
-		writel(((cs->size - 1) & 0xffff0000),
+		pete_writel("drivers/ata/ahci_mvebu.c:53", cs->base >> 16, hpriv->mmio + AHCI_WINDOW_BASE(i));
+		pete_writel("drivers/ata/ahci_mvebu.c:54", ((cs->size - 1) & 0xffff0000),
 		       hpriv->mmio + AHCI_WINDOW_SIZE(i));
 	}
 }
@@ -63,8 +63,8 @@ static void ahci_mvebu_regret_option(struct ahci_host_priv *hpriv)
 	 * request that didn't receive an acknowlegde and avoid a
 	 * deadlock
 	 */
-	writel(0x4, hpriv->mmio + AHCI_VENDOR_SPECIFIC_0_ADDR);
-	writel(0x80, hpriv->mmio + AHCI_VENDOR_SPECIFIC_0_DATA);
+	pete_writel("drivers/ata/ahci_mvebu.c:66", 0x4, hpriv->mmio + AHCI_VENDOR_SPECIFIC_0_ADDR);
+	pete_writel("drivers/ata/ahci_mvebu.c:67", 0x80, hpriv->mmio + AHCI_VENDOR_SPECIFIC_0_DATA);
 }
 
 static int ahci_mvebu_armada_380_config(struct ahci_host_priv *hpriv)
@@ -87,11 +87,11 @@ static int ahci_mvebu_armada_3700_config(struct ahci_host_priv *hpriv)
 {
 	u32 reg;
 
-	writel(0, hpriv->mmio + AHCI_VENDOR_SPECIFIC_0_ADDR);
+	pete_writel("drivers/ata/ahci_mvebu.c:90", 0, hpriv->mmio + AHCI_VENDOR_SPECIFIC_0_ADDR);
 
-	reg = readl(hpriv->mmio + AHCI_VENDOR_SPECIFIC_0_DATA);
+	reg = pete_readl("drivers/ata/ahci_mvebu.c:92", hpriv->mmio + AHCI_VENDOR_SPECIFIC_0_DATA);
 	reg |= BIT(6);
-	writel(reg, hpriv->mmio + AHCI_VENDOR_SPECIFIC_0_DATA);
+	pete_writel("drivers/ata/ahci_mvebu.c:94", reg, hpriv->mmio + AHCI_VENDOR_SPECIFIC_0_DATA);
 
 	return 0;
 }
@@ -121,25 +121,25 @@ static int ahci_mvebu_stop_engine(struct ata_port *ap)
 	void __iomem *port_mmio = ahci_port_base(ap);
 	u32 tmp, port_fbs;
 
-	tmp = readl(port_mmio + PORT_CMD);
+	tmp = pete_readl("drivers/ata/ahci_mvebu.c:124", port_mmio + PORT_CMD);
 
 	/* check if the HBA is idle */
 	if ((tmp & (PORT_CMD_START | PORT_CMD_LIST_ON)) == 0)
 		return 0;
 
 	/* save the port PxFBS register for later restore */
-	port_fbs = readl(port_mmio + PORT_FBS);
+	port_fbs = pete_readl("drivers/ata/ahci_mvebu.c:131", port_mmio + PORT_FBS);
 
 	/* setting HBA to idle */
 	tmp &= ~PORT_CMD_START;
-	writel(tmp, port_mmio + PORT_CMD);
+	pete_writel("drivers/ata/ahci_mvebu.c:135", tmp, port_mmio + PORT_CMD);
 
 	/*
 	 * bit #15 PxCMD signal doesn't clear PxFBS,
 	 * restore the PxFBS register right after clearing the PxCMD ST,
 	 * no need to wait for the PxCMD bit #15.
 	 */
-	writel(port_fbs, port_mmio + PORT_FBS);
+	pete_writel("drivers/ata/ahci_mvebu.c:142", port_fbs, port_mmio + PORT_FBS);
 
 	/* wait for engine to stop. This could be as long as 500 msec */
 	tmp = ata_wait_register(ap, port_mmio + PORT_CMD,

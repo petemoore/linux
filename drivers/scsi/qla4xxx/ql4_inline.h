@@ -38,12 +38,12 @@ static inline void
 __qla4xxx_enable_intrs(struct scsi_qla_host *ha)
 {
 	if (is_qla4022(ha) | is_qla4032(ha)) {
-		writel(set_rmask(IMR_SCSI_INTR_ENABLE),
+		pete_writel("drivers/scsi/qla4xxx/ql4_inline.h:41", set_rmask(IMR_SCSI_INTR_ENABLE),
 		       &ha->reg->u1.isp4022.intr_mask);
-		readl(&ha->reg->u1.isp4022.intr_mask);
+		pete_readl("drivers/scsi/qla4xxx/ql4_inline.h:43", &ha->reg->u1.isp4022.intr_mask);
 	} else {
-		writel(set_rmask(CSR_SCSI_INTR_ENABLE), &ha->reg->ctrl_status);
-		readl(&ha->reg->ctrl_status);
+		pete_writel("drivers/scsi/qla4xxx/ql4_inline.h:45", set_rmask(CSR_SCSI_INTR_ENABLE), &ha->reg->ctrl_status);
+		pete_readl("drivers/scsi/qla4xxx/ql4_inline.h:46", &ha->reg->ctrl_status);
 	}
 	set_bit(AF_INTERRUPTS_ON, &ha->flags);
 }
@@ -52,12 +52,12 @@ static inline void
 __qla4xxx_disable_intrs(struct scsi_qla_host *ha)
 {
 	if (is_qla4022(ha) | is_qla4032(ha)) {
-		writel(clr_rmask(IMR_SCSI_INTR_ENABLE),
+		pete_writel("drivers/scsi/qla4xxx/ql4_inline.h:55", clr_rmask(IMR_SCSI_INTR_ENABLE),
 		       &ha->reg->u1.isp4022.intr_mask);
-		readl(&ha->reg->u1.isp4022.intr_mask);
+		pete_readl("drivers/scsi/qla4xxx/ql4_inline.h:57", &ha->reg->u1.isp4022.intr_mask);
 	} else {
-		writel(clr_rmask(CSR_SCSI_INTR_ENABLE), &ha->reg->ctrl_status);
-		readl(&ha->reg->ctrl_status);
+		pete_writel("drivers/scsi/qla4xxx/ql4_inline.h:59", clr_rmask(CSR_SCSI_INTR_ENABLE), &ha->reg->ctrl_status);
+		pete_readl("drivers/scsi/qla4xxx/ql4_inline.h:60", &ha->reg->ctrl_status);
 	}
 	clear_bit(AF_INTERRUPTS_ON, &ha->flags);
 }

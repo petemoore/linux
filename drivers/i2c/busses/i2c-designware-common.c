@@ -65,7 +65,7 @@ static int dw_reg_read(void *context, unsigned int reg, unsigned int *val)
 {
 	struct dw_i2c_dev *dev = context;
 
-	*val = readl(dev->base + reg);
+	*val = pete_readl("drivers/i2c/busses/i2c-designware-common.c:68", dev->base + reg);
 
 	return 0;
 }
@@ -74,7 +74,7 @@ static int dw_reg_write(void *context, unsigned int reg, unsigned int val)
 {
 	struct dw_i2c_dev *dev = context;
 
-	writel(val, dev->base + reg);
+	pete_writel("drivers/i2c/busses/i2c-designware-common.c:77", val, dev->base + reg);
 
 	return 0;
 }
@@ -83,7 +83,7 @@ static int dw_reg_read_swab(void *context, unsigned int reg, unsigned int *val)
 {
 	struct dw_i2c_dev *dev = context;
 
-	*val = swab32(readl(dev->base + reg));
+	*val = swab32(pete_readl("drivers/i2c/busses/i2c-designware-common.c:86", dev->base + reg));
 
 	return 0;
 }
@@ -92,7 +92,7 @@ static int dw_reg_write_swab(void *context, unsigned int reg, unsigned int val)
 {
 	struct dw_i2c_dev *dev = context;
 
-	writel(swab32(val), dev->base + reg);
+	pete_writel("drivers/i2c/busses/i2c-designware-common.c:95", swab32(val), dev->base + reg);
 
 	return 0;
 }
@@ -101,8 +101,8 @@ static int dw_reg_read_word(void *context, unsigned int reg, unsigned int *val)
 {
 	struct dw_i2c_dev *dev = context;
 
-	*val = readw(dev->base + reg) |
-		(readw(dev->base + reg + 2) << 16);
+	*val = pete_readw("drivers/i2c/busses/i2c-designware-common.c:104", dev->base + reg) |
+		(pete_readw("drivers/i2c/busses/i2c-designware-common.c:105", dev->base + reg + 2) << 16);
 
 	return 0;
 }
@@ -111,8 +111,8 @@ static int dw_reg_write_word(void *context, unsigned int reg, unsigned int val)
 {
 	struct dw_i2c_dev *dev = context;
 
-	writew(val, dev->base + reg);
-	writew(val >> 16, dev->base + reg + 2);
+	pete_writew("drivers/i2c/busses/i2c-designware-common.c:114", val, dev->base + reg);
+	pete_writew("drivers/i2c/busses/i2c-designware-common.c:115", val >> 16, dev->base + reg + 2);
 
 	return 0;
 }
@@ -150,7 +150,7 @@ int i2c_dw_init_regmap(struct dw_i2c_dev *dev)
 	if (ret)
 		return ret;
 
-	reg = readl(dev->base + DW_IC_COMP_TYPE);
+	reg = pete_readl("drivers/i2c/busses/i2c-designware-common.c:153", dev->base + DW_IC_COMP_TYPE);
 	i2c_dw_release_lock(dev);
 
 	if ((dev->flags & MODEL_MASK) == MODEL_AMD_NAVI_GPU)

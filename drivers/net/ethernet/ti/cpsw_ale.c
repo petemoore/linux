@@ -590,12 +590,12 @@ static void cpsw_ale_set_vlan_mcast(struct cpsw_ale *ale, u32 *ale_entry,
 	/* Set VLAN registered multicast flood mask */
 	idx = cpsw_ale_vlan_get_fld(ale, ale_entry,
 				    ALE_ENT_VID_REG_MCAST_IDX);
-	writel(reg_mcast, ale->params.ale_regs + ALE_VLAN_MASK_MUX(idx));
+	pete_writel("drivers/net/ethernet/ti/cpsw_ale.c:593", reg_mcast, ale->params.ale_regs + ALE_VLAN_MASK_MUX(idx));
 
 	/* Set VLAN unregistered multicast flood mask */
 	idx = cpsw_ale_vlan_get_fld(ale, ale_entry,
 				    ALE_ENT_VID_UNREG_MCAST_IDX);
-	writel(unreg_mcast, ale->params.ale_regs + ALE_VLAN_MASK_MUX(idx));
+	pete_writel("drivers/net/ethernet/ti/cpsw_ale.c:598", unreg_mcast, ale->params.ale_regs + ALE_VLAN_MASK_MUX(idx));
 }
 
 static void cpsw_ale_set_vlan_untag(struct cpsw_ale *ale, u32 *ale_entry,
@@ -833,14 +833,14 @@ cpsw_ale_vlan_set_unreg_mcast_idx(struct cpsw_ale *ale, u32 *ale_entry,
 	idx = cpsw_ale_vlan_get_fld(ale, ale_entry,
 				    ALE_ENT_VID_UNREG_MCAST_IDX);
 
-	unreg_mcast = readl(ale->params.ale_regs + ALE_VLAN_MASK_MUX(idx));
+	unreg_mcast = pete_readl("drivers/net/ethernet/ti/cpsw_ale.c:836", ale->params.ale_regs + ALE_VLAN_MASK_MUX(idx));
 
 	if (allmulti)
 		unreg_mcast |= ALE_PORT_HOST;
 	else
 		unreg_mcast &= ~ALE_PORT_HOST;
 
-	writel(unreg_mcast, ale->params.ale_regs + ALE_VLAN_MASK_MUX(idx));
+	pete_writel("drivers/net/ethernet/ti/cpsw_ale.c:843", unreg_mcast, ale->params.ale_regs + ALE_VLAN_MASK_MUX(idx));
 }
 
 void cpsw_ale_set_allmulti(struct cpsw_ale *ale, int allmulti, int port)
@@ -1221,12 +1221,12 @@ static void cpsw_ale_hw_aging_timer_start(struct cpsw_ale *ale)
 			 "ALE aging timer overflow, set to max\n");
 	}
 
-	writel(aging_timer, ale->params.ale_regs + ALE_AGING_TIMER);
+	pete_writel("drivers/net/ethernet/ti/cpsw_ale.c:1224", aging_timer, ale->params.ale_regs + ALE_AGING_TIMER);
 }
 
 static void cpsw_ale_hw_aging_timer_stop(struct cpsw_ale *ale)
 {
-	writel(0, ale->params.ale_regs + ALE_AGING_TIMER);
+	pete_writel("drivers/net/ethernet/ti/cpsw_ale.c:1229", 0, ale->params.ale_regs + ALE_AGING_TIMER);
 }
 
 static void cpsw_ale_aging_start(struct cpsw_ale *ale)
@@ -1272,7 +1272,7 @@ void cpsw_ale_start(struct cpsw_ale *ale)
 	 * max number_of_packets = 1000 * 255 = 255000 when port.BCAST/MCAST_LIMIT = 0xFF
 	 */
 	ale_prescale = ale->params.bus_freq / ALE_RATE_LIMIT_MIN_PPS;
-	writel((u32)ale_prescale, ale->params.ale_regs + ALE_PRESCALE);
+	pete_writel("drivers/net/ethernet/ti/cpsw_ale.c:1275", (u32)ale_prescale, ale->params.ale_regs + ALE_PRESCALE);
 
 	/* Allow MC/BC rate limiting globally.
 	 * The actual Rate Limit cfg enabled per-port by port.BCAST/MCAST_LIMIT

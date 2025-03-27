@@ -472,12 +472,12 @@ done:
 	if (is_bwd_ioat(pdev))
 		ioat_intr_quirk(ioat_dma);
 	intrctrl |= IOAT_INTRCTRL_MASTER_INT_EN;
-	writeb(intrctrl, ioat_dma->reg_base + IOAT_INTRCTRL_OFFSET);
+	pete_writeb("drivers/dma/ioat/init.c:475", intrctrl, ioat_dma->reg_base + IOAT_INTRCTRL_OFFSET);
 	return 0;
 
 err_no_irq:
 	/* Disable all interrupt generation */
-	writeb(0, ioat_dma->reg_base + IOAT_INTRCTRL_OFFSET);
+	pete_writeb("drivers/dma/ioat/init.c:480", 0, ioat_dma->reg_base + IOAT_INTRCTRL_OFFSET);
 	ioat_dma->irq_mode = IOAT_NOIRQ;
 	dev_err(dev, "no usable interrupts\n");
 	return err;
@@ -486,7 +486,7 @@ err_no_irq:
 static void ioat_disable_interrupts(struct ioatdma_device *ioat_dma)
 {
 	/* Disable all interrupt generation */
-	writeb(0, ioat_dma->reg_base + IOAT_INTRCTRL_OFFSET);
+	pete_writeb("drivers/dma/ioat/init.c:489", 0, ioat_dma->reg_base + IOAT_INTRCTRL_OFFSET);
 }
 
 static int ioat_probe(struct ioatdma_device *ioat_dma)
@@ -559,14 +559,14 @@ static void ioat_enumerate_channels(struct ioatdma_device *ioat_dma)
 	int i;
 
 	INIT_LIST_HEAD(&dma->channels);
-	chancnt = readb(ioat_dma->reg_base + IOAT_CHANCNT_OFFSET);
+	chancnt = pete_readb("drivers/dma/ioat/init.c:562", ioat_dma->reg_base + IOAT_CHANCNT_OFFSET);
 	chancnt &= 0x1f; /* bits [4:0] valid */
 	if (chancnt > ARRAY_SIZE(ioat_dma->idx)) {
 		dev_warn(dev, "(%d) exceeds max supported channels (%zu)\n",
 			 chancnt, ARRAY_SIZE(ioat_dma->idx));
 		chancnt = ARRAY_SIZE(ioat_dma->idx);
 	}
-	xfercap_log = readb(ioat_dma->reg_base + IOAT_XFERCAP_OFFSET);
+	xfercap_log = pete_readb("drivers/dma/ioat/init.c:569", ioat_dma->reg_base + IOAT_XFERCAP_OFFSET);
 	xfercap_log &= 0x1f; /* bits [4:0] valid */
 	if (xfercap_log == 0)
 		return;
@@ -614,7 +614,7 @@ static void ioat_free_chan_resources(struct dma_chan *c)
 
 		/* Put LTR to idle */
 		if (ioat_dma->version >= IOAT_VER_3_4)
-			writeb(IOAT_CHAN_LTR_SWSEL_IDLE,
+			pete_writeb("drivers/dma/ioat/init.c:617", IOAT_CHAN_LTR_SWSEL_IDLE,
 			       ioat_chan->reg_base +
 			       IOAT_CHAN_LTR_SWSEL_OFFSET);
 	}
@@ -677,7 +677,7 @@ static int ioat_alloc_chan_resources(struct dma_chan *c)
 		return 1 << ioat_chan->alloc_order;
 
 	/* Setup register to interrupt and write completion status on error */
-	writew(IOAT_CHANCTRL_RUN, ioat_chan->reg_base + IOAT_CHANCTRL_OFFSET);
+	pete_writew("drivers/dma/ioat/init.c:680", IOAT_CHANCTRL_RUN, ioat_chan->reg_base + IOAT_CHANCTRL_OFFSET);
 
 	/* allocate a completion writeback area */
 	/* doing 2 32bit writes to mmio since 1 64b write doesn't work */
@@ -687,9 +687,9 @@ static int ioat_alloc_chan_resources(struct dma_chan *c)
 	if (!ioat_chan->completion)
 		return -ENOMEM;
 
-	writel(((u64)ioat_chan->completion_dma) & 0x00000000FFFFFFFF,
+	pete_writel("drivers/dma/ioat/init.c:690", ((u64)ioat_chan->completion_dma) & 0x00000000FFFFFFFF,
 	       ioat_chan->reg_base + IOAT_CHANCMP_OFFSET_LOW);
-	writel(((u64)ioat_chan->completion_dma) >> 32,
+	pete_writel("drivers/dma/ioat/init.c:692", ((u64)ioat_chan->completion_dma) >> 32,
 	       ioat_chan->reg_base + IOAT_CHANCMP_OFFSET_HIGH);
 
 	order = IOAT_MAX_ORDER;
@@ -715,17 +715,17 @@ static int ioat_alloc_chan_resources(struct dma_chan *c)
 		lat_val = IOAT_CHAN_LTR_ACTIVE_SNVAL |
 			IOAT_CHAN_LTR_ACTIVE_SNLATSCALE |
 			IOAT_CHAN_LTR_ACTIVE_SNREQMNT;
-		writel(lat_val, ioat_chan->reg_base +
+		pete_writel("drivers/dma/ioat/init.c:718", lat_val, ioat_chan->reg_base +
 				IOAT_CHAN_LTR_ACTIVE_OFFSET);
 
 		lat_val = IOAT_CHAN_LTR_IDLE_SNVAL |
 			  IOAT_CHAN_LTR_IDLE_SNLATSCALE |
 			  IOAT_CHAN_LTR_IDLE_SNREQMNT;
-		writel(lat_val, ioat_chan->reg_base +
+		pete_writel("drivers/dma/ioat/init.c:724", lat_val, ioat_chan->reg_base +
 				IOAT_CHAN_LTR_IDLE_OFFSET);
 
 		/* Select to active */
-		writeb(IOAT_CHAN_LTR_SWSEL_ACTIVE,
+		pete_writeb("drivers/dma/ioat/init.c:728", IOAT_CHAN_LTR_SWSEL_ACTIVE,
 		       ioat_chan->reg_base +
 		       IOAT_CHAN_LTR_SWSEL_OFFSET);
 	}
@@ -741,7 +741,7 @@ static int ioat_alloc_chan_resources(struct dma_chan *c)
 	if (is_ioat_active(status) || is_ioat_idle(status))
 		return 1 << ioat_chan->alloc_order;
 
-	chanerr = readl(ioat_chan->reg_base + IOAT_CHANERR_OFFSET);
+	chanerr = pete_readl("drivers/dma/ioat/init.c:744", ioat_chan->reg_base + IOAT_CHANERR_OFFSET);
 
 	dev_WARN(to_dev(ioat_chan),
 		 "failed to start channel chanerr: %#x\n", chanerr);
@@ -1062,11 +1062,11 @@ static void ioat_intr_quirk(struct ioatdma_device *ioat_dma)
 	if (ioat_dma->cap & IOAT_CAP_DWBES) {
 		list_for_each_entry(c, &dma->channels, device_node) {
 			ioat_chan = to_ioat_chan(c);
-			errmask = readl(ioat_chan->reg_base +
+			errmask = pete_readl("drivers/dma/ioat/init.c:1065", ioat_chan->reg_base +
 					IOAT_CHANERR_MASK_OFFSET);
 			errmask |= IOAT_CHANERR_XOR_P_OR_CRC_ERR |
 				   IOAT_CHANERR_XOR_Q_ERR;
-			writel(errmask, ioat_chan->reg_base +
+			pete_writel("drivers/dma/ioat/init.c:1069", errmask, ioat_chan->reg_base +
 					IOAT_CHANERR_MASK_OFFSET);
 		}
 	}
@@ -1091,7 +1091,7 @@ static int ioat3_dma_probe(struct ioatdma_device *ioat_dma, int dca)
 	dma_cap_set(DMA_INTERRUPT, dma->cap_mask);
 	dma->device_prep_dma_interrupt = ioat_prep_interrupt_lock;
 
-	ioat_dma->cap = readl(ioat_dma->reg_base + IOAT_DMA_CAP_OFFSET);
+	ioat_dma->cap = pete_readl("drivers/dma/ioat/init.c:1094", ioat_dma->reg_base + IOAT_DMA_CAP_OFFSET);
 
 	if (is_xeon_cb32(pdev) || is_bwd_noraid(pdev))
 		ioat_dma->cap &=
@@ -1165,7 +1165,7 @@ static int ioat3_dma_probe(struct ioatdma_device *ioat_dma, int dca)
 
 	list_for_each_entry(c, &dma->channels, device_node) {
 		ioat_chan = to_ioat_chan(c);
-		writel(IOAT_DMA_DCA_ANY_CPU,
+		pete_writel("drivers/dma/ioat/init.c:1168", IOAT_DMA_DCA_ANY_CPU,
 		       ioat_chan->reg_base + IOAT_DCACTRL_OFFSET);
 	}
 
@@ -1194,7 +1194,7 @@ static int ioat3_dma_probe(struct ioatdma_device *ioat_dma, int dca)
 	}
 
 	if (ioat_dma->cap & IOAT_CAP_DPS)
-		writeb(ioat_pending_level + 1,
+		pete_writeb("drivers/dma/ioat/init.c:1197", ioat_pending_level + 1,
 		       ioat_dma->reg_base + IOAT_PREFETCH_LIMIT_OFFSET);
 
 	return 0;
@@ -1252,8 +1252,8 @@ static void ioat_resume(struct ioatdma_device *ioat_dma)
 		clear_bit(IOAT_CHAN_DOWN, &ioat_chan->state);
 		spin_unlock_bh(&ioat_chan->prep_lock);
 
-		chanerr = readl(ioat_chan->reg_base + IOAT_CHANERR_OFFSET);
-		writel(chanerr, ioat_chan->reg_base + IOAT_CHANERR_OFFSET);
+		chanerr = pete_readl("drivers/dma/ioat/init.c:1255", ioat_chan->reg_base + IOAT_CHANERR_OFFSET);
+		pete_writel("drivers/dma/ioat/init.c:1256", chanerr, ioat_chan->reg_base + IOAT_CHANERR_OFFSET);
 
 		/* no need to reset as shutdown already did that */
 	}
@@ -1362,7 +1362,7 @@ static int ioat_pci_probe(struct pci_dev *pdev, const struct pci_device_id *id)
 	if (!iomap)
 		return -ENOMEM;
 
-	version = readb(iomap[IOAT_MMIO_BAR] + IOAT_VER_OFFSET);
+	version = pete_readb("drivers/dma/ioat/init.c:1365", iomap[IOAT_MMIO_BAR] + IOAT_VER_OFFSET);
 	if (version < IOAT_VER_3_0)
 		return -ENODEV;
 

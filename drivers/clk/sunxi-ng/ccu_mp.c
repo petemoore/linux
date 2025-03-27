@@ -156,7 +156,7 @@ static unsigned long ccu_mp_recalc_rate(struct clk_hw *hw,
 	parent_rate = ccu_mux_helper_apply_prediv(&cmp->common, &cmp->mux, -1,
 						  parent_rate);
 
-	reg = readl(cmp->common.base + cmp->common.reg);
+	reg = pete_readl("drivers/clk/sunxi-ng/ccu_mp.c:159", cmp->common.base + cmp->common.reg);
 
 	m = reg >> cmp->m.shift;
 	m &= (1 << cmp->m.width) - 1;
@@ -207,13 +207,13 @@ static int ccu_mp_set_rate(struct clk_hw *hw, unsigned long rate,
 
 	spin_lock_irqsave(cmp->common.lock, flags);
 
-	reg = readl(cmp->common.base + cmp->common.reg);
+	reg = pete_readl("drivers/clk/sunxi-ng/ccu_mp.c:210", cmp->common.base + cmp->common.reg);
 	reg &= ~GENMASK(cmp->m.width + cmp->m.shift - 1, cmp->m.shift);
 	reg &= ~GENMASK(cmp->p.width + cmp->p.shift - 1, cmp->p.shift);
 	reg |= (m - cmp->m.offset) << cmp->m.shift;
 	reg |= ilog2(p) << cmp->p.shift;
 
-	writel(reg, cmp->common.base + cmp->common.reg);
+	pete_writel("drivers/clk/sunxi-ng/ccu_mp.c:216", reg, cmp->common.base + cmp->common.reg);
 
 	spin_unlock_irqrestore(cmp->common.lock, flags);
 
@@ -270,7 +270,7 @@ static unsigned long ccu_mp_mmc_recalc_rate(struct clk_hw *hw,
 {
 	unsigned long rate = ccu_mp_recalc_rate(hw, parent_rate);
 	struct ccu_common *cm = hw_to_ccu_common(hw);
-	u32 val = readl(cm->base + cm->reg);
+	u32 val = pete_readl("drivers/clk/sunxi-ng/ccu_mp.c:273", cm->base + cm->reg);
 
 	if (val & CCU_MMC_NEW_TIMING_MODE)
 		return rate / 2;
@@ -281,7 +281,7 @@ static int ccu_mp_mmc_determine_rate(struct clk_hw *hw,
 				     struct clk_rate_request *req)
 {
 	struct ccu_common *cm = hw_to_ccu_common(hw);
-	u32 val = readl(cm->base + cm->reg);
+	u32 val = pete_readl("drivers/clk/sunxi-ng/ccu_mp.c:284", cm->base + cm->reg);
 	int ret;
 
 	/* adjust the requested clock rate */
@@ -307,7 +307,7 @@ static int ccu_mp_mmc_set_rate(struct clk_hw *hw, unsigned long rate,
 			       unsigned long parent_rate)
 {
 	struct ccu_common *cm = hw_to_ccu_common(hw);
-	u32 val = readl(cm->base + cm->reg);
+	u32 val = pete_readl("drivers/clk/sunxi-ng/ccu_mp.c:310", cm->base + cm->reg);
 
 	if (val & CCU_MMC_NEW_TIMING_MODE)
 		rate *= 2;

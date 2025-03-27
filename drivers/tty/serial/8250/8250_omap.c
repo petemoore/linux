@@ -162,7 +162,7 @@ static inline void omap_8250_rx_dma_flush(struct uart_8250_port *p) { }
 
 static u32 uart_read(struct omap8250_priv *priv, u32 reg)
 {
-	return readl(priv->membase + (reg << OMAP_UART_REGSHIFT));
+	return pete_readl("drivers/tty/serial/8250/8250_omap.c:165", priv->membase + (reg << OMAP_UART_REGSHIFT));
 }
 
 /* Timeout low and High */
@@ -1689,7 +1689,7 @@ static int omap8250_lost_context(struct uart_8250_port *up)
 
 static void uart_write(struct omap8250_priv *priv, u32 reg, u32 val)
 {
-	writel(val, priv->membase + (reg << OMAP_UART_REGSHIFT));
+	pete_writel("drivers/tty/serial/8250/8250_omap.c:1692", val, priv->membase + (reg << OMAP_UART_REGSHIFT));
 }
 
 /* TODO: in future, this should happen via API in drivers/reset/ */

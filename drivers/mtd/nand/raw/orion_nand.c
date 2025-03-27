@@ -46,7 +46,7 @@ static void orion_nand_cmd_ctrl(struct nand_chip *nc, int cmd,
 	if (nc->options & NAND_BUSWIDTH_16)
 		offs <<= 1;
 
-	writeb(cmd, nc->legacy.IO_ADDR_W + offs);
+	pete_writeb("drivers/mtd/nand/raw/orion_nand.c:49", cmd, nc->legacy.IO_ADDR_W + offs);
 }
 
 static void orion_nand_read_buf(struct nand_chip *chip, uint8_t *buf, int len)
@@ -58,7 +58,7 @@ static void orion_nand_read_buf(struct nand_chip *chip, uint8_t *buf, int len)
 	int i = 0;
 
 	while (len && (unsigned long)buf & 7) {
-		*buf++ = readb(io_base);
+		*buf++ = pete_readb("drivers/mtd/nand/raw/orion_nand.c:61", io_base);
 		len--;
 	}
 #if defined(__LINUX_ARM_ARCH__) && __LINUX_ARM_ARCH__ >= 5
@@ -80,7 +80,7 @@ static void orion_nand_read_buf(struct nand_chip *chip, uint8_t *buf, int len)
 	i = len / 4 * 4;
 #endif
 	while (i < len)
-		buf[i++] = readb(io_base);
+		buf[i++] = pete_readb("drivers/mtd/nand/raw/orion_nand.c:83", io_base);
 }
 
 static int orion_nand_attach_chip(struct nand_chip *chip)

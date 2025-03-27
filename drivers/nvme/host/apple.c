@@ -274,8 +274,8 @@ static void apple_nvmmu_inval(struct apple_nvme_queue *q, unsigned int tag)
 {
 	struct apple_nvme *anv = queue_to_apple_nvme(q);
 
-	writel(tag, anv->mmio_nvme + APPLE_NVMMU_TCB_INVAL);
-	if (readl(anv->mmio_nvme + APPLE_NVMMU_TCB_STAT))
+	pete_writel("drivers/nvme/host/apple.c:277", tag, anv->mmio_nvme + APPLE_NVMMU_TCB_INVAL);
+	if (pete_readl("drivers/nvme/host/apple.c:278", anv->mmio_nvme + APPLE_NVMMU_TCB_STAT))
 		dev_warn_ratelimited(anv->dev,
 				     "NVMMU TCB invalidation failed\n");
 }
@@ -311,7 +311,7 @@ static void apple_nvme_submit_cmd(struct apple_nvme_queue *q,
 	 * and the final CQ update.
 	 */
 	spin_lock_irq(&anv->lock);
-	writel(tag, q->sq_db);
+	pete_writel("drivers/nvme/host/apple.c:314", tag, q->sq_db);
 	spin_unlock_irq(&anv->lock);
 }
 
@@ -634,7 +634,7 @@ static bool apple_nvme_poll_cq(struct apple_nvme_queue *q,
 	}
 
 	if (found)
-		writel(q->cq_head, q->cq_db);
+		pete_writel("drivers/nvme/host/apple.c:637", q->cq_head, q->cq_db);
 
 	return found;
 }
@@ -797,7 +797,7 @@ static int apple_nvme_init_request(struct blk_mq_tag_set *set,
 
 static void apple_nvme_disable(struct apple_nvme *anv, bool shutdown)
 {
-	u32 csts = readl(anv->mmio_nvme + NVME_REG_CSTS);
+	u32 csts = pete_readl("drivers/nvme/host/apple.c:800", anv->mmio_nvme + NVME_REG_CSTS);
 	bool dead = false, freeze = false;
 	unsigned long flags;
 
@@ -879,7 +879,7 @@ static enum blk_eh_timer_return apple_nvme_timeout(struct request *req)
 	struct apple_nvme_queue *q = iod->q;
 	struct apple_nvme *anv = queue_to_apple_nvme(q);
 	unsigned long flags;
-	u32 csts = readl(anv->mmio_nvme + NVME_REG_CSTS);
+	u32 csts = pete_readl("drivers/nvme/host/apple.c:882", anv->mmio_nvme + NVME_REG_CSTS);
 
 	if (anv->ctrl.state != NVME_CTRL_LIVE) {
 		/*
@@ -1012,7 +1012,7 @@ static void apple_nvme_reset_work(struct work_struct *work)
 			goto out;
 	}
 
-	writel(0, anv->mmio_coproc + APPLE_ANS_COPROC_CPU_CONTROL);
+	pete_writel("drivers/nvme/host/apple.c:1015", 0, anv->mmio_coproc + APPLE_ANS_COPROC_CPU_CONTROL);
 
 	ret = reset_control_assert(anv->reset);
 	if (ret)
@@ -1026,7 +1026,7 @@ static void apple_nvme_reset_work(struct work_struct *work)
 	if (ret)
 		goto out;
 
-	writel(APPLE_ANS_COPROC_CPU_CONTROL_RUN,
+	pete_writel("drivers/nvme/host/apple.c:1029", APPLE_ANS_COPROC_CPU_CONTROL_RUN,
 	       anv->mmio_coproc + APPLE_ANS_COPROC_CPU_CONTROL);
 	ret = apple_rtkit_boot(anv->rtk);
 	if (ret) {
@@ -1062,15 +1062,15 @@ static void apple_nvme_reset_work(struct work_struct *work)
 	 * sq entries will be 128 bytes) and Apple might drop support for
 	 * that mode in the future.
 	 */
-	writel(APPLE_ANS_LINEAR_SQ_EN,
+	pete_writel("drivers/nvme/host/apple.c:1065", APPLE_ANS_LINEAR_SQ_EN,
 	       anv->mmio_nvme + APPLE_ANS_LINEAR_SQ_CTRL);
 
 	/* Allow as many pending command as possible for both queues */
-	writel(APPLE_ANS_MAX_QUEUE_DEPTH | (APPLE_ANS_MAX_QUEUE_DEPTH << 16),
+	pete_writel("drivers/nvme/host/apple.c:1069", APPLE_ANS_MAX_QUEUE_DEPTH | (APPLE_ANS_MAX_QUEUE_DEPTH << 16),
 	       anv->mmio_nvme + APPLE_ANS_MAX_PEND_CMDS_CTRL);
 
 	/* Setup the NVMMU for the maximum admin and IO queue depth */
-	writel(APPLE_ANS_MAX_QUEUE_DEPTH - 1,
+	pete_writel("drivers/nvme/host/apple.c:1073", APPLE_ANS_MAX_QUEUE_DEPTH - 1,
 	       anv->mmio_nvme + APPLE_NVMMU_NUM_TCBS);
 
 	/*
@@ -1079,26 +1079,26 @@ static void apple_nvme_reset_work(struct work_struct *work)
 	 * the co-processor complains about "completed with err BAD_CMD-" or
 	 * a "NULL_PRP_PTR_ERR" in the syslog
 	 */
-	writel(readl(anv->mmio_nvme + APPLE_ANS_UNKNOWN_CTRL) &
+	pete_writel("drivers/nvme/host/apple.c:1082", pete_readl("drivers/nvme/host/apple.c:1082", anv->mmio_nvme + APPLE_ANS_UNKNOWN_CTRL) &
 		       ~APPLE_ANS_PRP_NULL_CHECK,
 	       anv->mmio_nvme + APPLE_ANS_UNKNOWN_CTRL);
 
 	/* Setup the admin queue */
 	aqa = APPLE_NVME_AQ_DEPTH - 1;
 	aqa |= aqa << 16;
-	writel(aqa, anv->mmio_nvme + NVME_REG_AQA);
-	writeq(anv->adminq.sq_dma_addr, anv->mmio_nvme + NVME_REG_ASQ);
-	writeq(anv->adminq.cq_dma_addr, anv->mmio_nvme + NVME_REG_ACQ);
+	pete_writel("drivers/nvme/host/apple.c:1089", aqa, anv->mmio_nvme + NVME_REG_AQA);
+	pete_writeq("drivers/nvme/host/apple.c:1090", anv->adminq.sq_dma_addr, anv->mmio_nvme + NVME_REG_ASQ);
+	pete_writeq("drivers/nvme/host/apple.c:1091", anv->adminq.cq_dma_addr, anv->mmio_nvme + NVME_REG_ACQ);
 
 	/* Setup NVMMU for both queues */
-	writeq(anv->adminq.tcb_dma_addr,
+	pete_writeq("drivers/nvme/host/apple.c:1094", anv->adminq.tcb_dma_addr,
 	       anv->mmio_nvme + APPLE_NVMMU_ASQ_TCB_BASE);
-	writeq(anv->ioq.tcb_dma_addr,
+	pete_writeq("drivers/nvme/host/apple.c:1096", anv->ioq.tcb_dma_addr,
 	       anv->mmio_nvme + APPLE_NVMMU_IOSQ_TCB_BASE);
 
 	anv->ctrl.sqsize =
 		APPLE_ANS_MAX_QUEUE_DEPTH - 1; /* 0's based queue depth */
-	anv->ctrl.cap = readq(anv->mmio_nvme + NVME_REG_CAP);
+	anv->ctrl.cap = pete_readq("drivers/nvme/host/apple.c:1101", anv->mmio_nvme + NVME_REG_CAP);
 
 	dev_dbg(anv->dev, "Enabling controller now");
 	ret = nvme_enable_ctrl(&anv->ctrl);
@@ -1183,19 +1183,19 @@ static void apple_nvme_remove_dead_ctrl_work(struct work_struct *work)
 
 static int apple_nvme_reg_read32(struct nvme_ctrl *ctrl, u32 off, u32 *val)
 {
-	*val = readl(ctrl_to_apple_nvme(ctrl)->mmio_nvme + off);
+	*val = pete_readl("drivers/nvme/host/apple.c:1186", ctrl_to_apple_nvme(ctrl)->mmio_nvme + off);
 	return 0;
 }
 
 static int apple_nvme_reg_write32(struct nvme_ctrl *ctrl, u32 off, u32 val)
 {
-	writel(val, ctrl_to_apple_nvme(ctrl)->mmio_nvme + off);
+	pete_writel("drivers/nvme/host/apple.c:1192", val, ctrl_to_apple_nvme(ctrl)->mmio_nvme + off);
 	return 0;
 }
 
 static int apple_nvme_reg_read64(struct nvme_ctrl *ctrl, u32 off, u64 *val)
 {
-	*val = readq(ctrl_to_apple_nvme(ctrl)->mmio_nvme + off);
+	*val = pete_readq("drivers/nvme/host/apple.c:1198", ctrl_to_apple_nvme(ctrl)->mmio_nvme + off);
 	return 0;
 }
 
@@ -1593,7 +1593,7 @@ static int apple_nvme_suspend(struct device *dev)
 	if (apple_rtkit_is_running(anv->rtk))
 		ret = apple_rtkit_shutdown(anv->rtk);
 
-	writel(0, anv->mmio_coproc + APPLE_ANS_COPROC_CPU_CONTROL);
+	pete_writel("drivers/nvme/host/apple.c:1596", 0, anv->mmio_coproc + APPLE_ANS_COPROC_CPU_CONTROL);
 
 	return ret;
 }

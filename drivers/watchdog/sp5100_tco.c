@@ -111,13 +111,13 @@ static int tco_timer_start(struct watchdog_device *wdd)
 	struct sp5100_tco *tco = watchdog_get_drvdata(wdd);
 	u32 val;
 
-	val = readl(SP5100_WDT_CONTROL(tco->tcobase));
+	val = pete_readl("drivers/watchdog/sp5100_tco.c:114", SP5100_WDT_CONTROL(tco->tcobase));
 	val |= SP5100_WDT_START_STOP_BIT;
-	writel(val, SP5100_WDT_CONTROL(tco->tcobase));
+	pete_writel("drivers/watchdog/sp5100_tco.c:116", val, SP5100_WDT_CONTROL(tco->tcobase));
 
 	/* This must be a distinct write. */
 	val |= SP5100_WDT_TRIGGER_BIT;
-	writel(val, SP5100_WDT_CONTROL(tco->tcobase));
+	pete_writel("drivers/watchdog/sp5100_tco.c:120", val, SP5100_WDT_CONTROL(tco->tcobase));
 
 	return 0;
 }
@@ -127,9 +127,9 @@ static int tco_timer_stop(struct watchdog_device *wdd)
 	struct sp5100_tco *tco = watchdog_get_drvdata(wdd);
 	u32 val;
 
-	val = readl(SP5100_WDT_CONTROL(tco->tcobase));
+	val = pete_readl("drivers/watchdog/sp5100_tco.c:130", SP5100_WDT_CONTROL(tco->tcobase));
 	val &= ~SP5100_WDT_START_STOP_BIT;
-	writel(val, SP5100_WDT_CONTROL(tco->tcobase));
+	pete_writel("drivers/watchdog/sp5100_tco.c:132", val, SP5100_WDT_CONTROL(tco->tcobase));
 
 	return 0;
 }
@@ -139,9 +139,9 @@ static int tco_timer_ping(struct watchdog_device *wdd)
 	struct sp5100_tco *tco = watchdog_get_drvdata(wdd);
 	u32 val;
 
-	val = readl(SP5100_WDT_CONTROL(tco->tcobase));
+	val = pete_readl("drivers/watchdog/sp5100_tco.c:142", SP5100_WDT_CONTROL(tco->tcobase));
 	val |= SP5100_WDT_TRIGGER_BIT;
-	writel(val, SP5100_WDT_CONTROL(tco->tcobase));
+	pete_writel("drivers/watchdog/sp5100_tco.c:144", val, SP5100_WDT_CONTROL(tco->tcobase));
 
 	return 0;
 }
@@ -152,7 +152,7 @@ static int tco_timer_set_timeout(struct watchdog_device *wdd,
 	struct sp5100_tco *tco = watchdog_get_drvdata(wdd);
 
 	/* Write new heartbeat to watchdog */
-	writel(t, SP5100_WDT_COUNT(tco->tcobase));
+	pete_writel("drivers/watchdog/sp5100_tco.c:155", t, SP5100_WDT_COUNT(tco->tcobase));
 
 	wdd->timeout = t;
 
@@ -163,7 +163,7 @@ static unsigned int tco_timer_get_timeleft(struct watchdog_device *wdd)
 {
 	struct sp5100_tco *tco = watchdog_get_drvdata(wdd);
 
-	return readl(SP5100_WDT_COUNT(tco->tcobase));
+	return pete_readl("drivers/watchdog/sp5100_tco.c:166", SP5100_WDT_COUNT(tco->tcobase));
 }
 
 static u8 sp5100_tco_read_pm_reg8(u8 index)
@@ -294,7 +294,7 @@ static int sp5100_tco_timer_init(struct sp5100_tco *tco)
 	struct device *dev = wdd->parent;
 	u32 val;
 
-	val = readl(SP5100_WDT_CONTROL(tco->tcobase));
+	val = pete_readl("drivers/watchdog/sp5100_tco.c:297", SP5100_WDT_CONTROL(tco->tcobase));
 	if (val & SP5100_WDT_DISABLED) {
 		dev_err(dev, "Watchdog hardware is disabled\n");
 		return -ENODEV;
@@ -312,7 +312,7 @@ static int sp5100_tco_timer_init(struct sp5100_tco *tco)
 		val |= SP5100_WDT_ACTION_RESET;
 	else
 		val &= ~SP5100_WDT_ACTION_RESET;
-	writel(val, SP5100_WDT_CONTROL(tco->tcobase));
+	pete_writel("drivers/watchdog/sp5100_tco.c:315", val, SP5100_WDT_CONTROL(tco->tcobase));
 
 	/* Set a reasonable heartbeat before we stop the timer */
 	tco_timer_set_timeout(wdd, wdd->timeout);
@@ -328,17 +328,17 @@ static int sp5100_tco_timer_init(struct sp5100_tco *tco)
 
 static u8 efch_read_pm_reg8(void __iomem *addr, u8 index)
 {
-	return readb(addr + index);
+	return pete_readb("drivers/watchdog/sp5100_tco.c:331", addr + index);
 }
 
 static void efch_update_pm_reg8(void __iomem *addr, u8 index, u8 reset, u8 set)
 {
 	u8 val;
 
-	val = readb(addr + index);
+	val = pete_readb("drivers/watchdog/sp5100_tco.c:338", addr + index);
 	val &= reset;
 	val |= set;
-	writeb(val, addr + index);
+	pete_writeb("drivers/watchdog/sp5100_tco.c:341", val, addr + index);
 }
 
 static void tco_timer_enable_mmio(void __iomem *addr)

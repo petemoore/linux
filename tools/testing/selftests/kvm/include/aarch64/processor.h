@@ -179,8 +179,8 @@ static __always_inline u32 __raw_readl(const volatile void *addr)
 #define writel_relaxed(v,c)	((void)__raw_writel((__force u32)cpu_to_le32(v),(c)))
 #define readl_relaxed(c)	({ u32 __r = le32_to_cpu((__force __le32)__raw_readl(c)); __r; })
 
-#define writel(v,c)		({ __iowmb(); writel_relaxed((v),(c));})
-#define readl(c)		({ u32 __v = readl_relaxed(c); __iormb(__v); __v; })
+#define pete_writel("tools/testing/selftests/kvm/include/aarch64/processor.h:182", v,c)		({ __iowmb(); writel_relaxed((v),(c));})
+#define pete_readl("tools/testing/selftests/kvm/include/aarch64/processor.h:183", c)		({ u32 __v = readl_relaxed(c); __iormb(__v); __v; })
 
 static inline void local_irq_enable(void)
 {

@@ -44,7 +44,7 @@ static void lpc_irq_ack(struct irq_data *d)
 	struct pch_lpc *priv = d->domain->host_data;
 
 	raw_spin_lock_irqsave(&priv->lpc_lock, flags);
-	writel(0x1 << d->hwirq, priv->base + LPC_INT_CLR);
+	pete_writel("drivers/irqchip/irq-loongson-pch-lpc.c:47", 0x1 << d->hwirq, priv->base + LPC_INT_CLR);
 	raw_spin_unlock_irqrestore(&priv->lpc_lock, flags);
 }
 
@@ -54,7 +54,7 @@ static void lpc_irq_mask(struct irq_data *d)
 	struct pch_lpc *priv = d->domain->host_data;
 
 	raw_spin_lock_irqsave(&priv->lpc_lock, flags);
-	writel(readl(priv->base + LPC_INT_ENA) & (~(0x1 << (d->hwirq))),
+	pete_writel("drivers/irqchip/irq-loongson-pch-lpc.c:57", pete_readl("drivers/irqchip/irq-loongson-pch-lpc.c:57", priv->base + LPC_INT_ENA) & (~(0x1 << (d->hwirq))),
 			priv->base + LPC_INT_ENA);
 	raw_spin_unlock_irqrestore(&priv->lpc_lock, flags);
 }
@@ -65,7 +65,7 @@ static void lpc_irq_unmask(struct irq_data *d)
 	struct pch_lpc *priv = d->domain->host_data;
 
 	raw_spin_lock_irqsave(&priv->lpc_lock, flags);
-	writel(readl(priv->base + LPC_INT_ENA) | (0x1 << (d->hwirq)),
+	pete_writel("drivers/irqchip/irq-loongson-pch-lpc.c:68", pete_readl("drivers/irqchip/irq-loongson-pch-lpc.c:68", priv->base + LPC_INT_ENA) | (0x1 << (d->hwirq)),
 			priv->base + LPC_INT_ENA);
 	raw_spin_unlock_irqrestore(&priv->lpc_lock, flags);
 }
@@ -79,14 +79,14 @@ static int lpc_irq_set_type(struct irq_data *d, unsigned int type)
 	if (!(type & IRQ_TYPE_LEVEL_MASK))
 		return 0;
 
-	val = readl(priv->base + LPC_INT_POL);
+	val = pete_readl("drivers/irqchip/irq-loongson-pch-lpc.c:82", priv->base + LPC_INT_POL);
 
 	if (type == IRQ_TYPE_LEVEL_HIGH)
 		val |= mask;
 	else
 		val &= ~mask;
 
-	writel(val, priv->base + LPC_INT_POL);
+	pete_writel("drivers/irqchip/irq-loongson-pch-lpc.c:89", val, priv->base + LPC_INT_POL);
 
 	return 0;
 }
@@ -108,8 +108,8 @@ static void lpc_irq_dispatch(struct irq_desc *desc)
 
 	chained_irq_enter(chip, desc);
 
-	pending = readl(priv->base + LPC_INT_ENA);
-	pending &= readl(priv->base + LPC_INT_STS);
+	pending = pete_readl("drivers/irqchip/irq-loongson-pch-lpc.c:111", priv->base + LPC_INT_ENA);
+	pending &= pete_readl("drivers/irqchip/irq-loongson-pch-lpc.c:112", priv->base + LPC_INT_STS);
 	if (!pending)
 		spurious_interrupt();
 
@@ -137,31 +137,31 @@ static const struct irq_domain_ops pch_lpc_domain_ops = {
 static void pch_lpc_reset(struct pch_lpc *priv)
 {
 	/* Enable the LPC interrupt, bit31: en  bit30: edge */
-	writel(LPC_INT_CTL_EN, priv->base + LPC_INT_CTL);
-	writel(0, priv->base + LPC_INT_ENA);
+	pete_writel("drivers/irqchip/irq-loongson-pch-lpc.c:140", LPC_INT_CTL_EN, priv->base + LPC_INT_CTL);
+	pete_writel("drivers/irqchip/irq-loongson-pch-lpc.c:141", 0, priv->base + LPC_INT_ENA);
 	/* Clear all 18-bit interrpt bit */
-	writel(GENMASK(17, 0), priv->base + LPC_INT_CLR);
+	pete_writel("drivers/irqchip/irq-loongson-pch-lpc.c:143", GENMASK(17, 0), priv->base + LPC_INT_CLR);
 }
 
 static int pch_lpc_disabled(struct pch_lpc *priv)
 {
-	return (readl(priv->base + LPC_INT_ENA) == 0xffffffff) &&
-			(readl(priv->base + LPC_INT_STS) == 0xffffffff);
+	return (pete_readl("drivers/irqchip/irq-loongson-pch-lpc.c:148", priv->base + LPC_INT_ENA) == 0xffffffff) &&
+			(pete_readl("drivers/irqchip/irq-loongson-pch-lpc.c:149", priv->base + LPC_INT_STS) == 0xffffffff);
 }
 
 static int pch_lpc_suspend(void)
 {
-	pch_lpc_priv->saved_reg_ctl = readl(pch_lpc_priv->base + LPC_INT_CTL);
-	pch_lpc_priv->saved_reg_ena = readl(pch_lpc_priv->base + LPC_INT_ENA);
-	pch_lpc_priv->saved_reg_pol = readl(pch_lpc_priv->base + LPC_INT_POL);
+	pch_lpc_priv->saved_reg_ctl = pete_readl("drivers/irqchip/irq-loongson-pch-lpc.c:154", pch_lpc_priv->base + LPC_INT_CTL);
+	pch_lpc_priv->saved_reg_ena = pete_readl("drivers/irqchip/irq-loongson-pch-lpc.c:155", pch_lpc_priv->base + LPC_INT_ENA);
+	pch_lpc_priv->saved_reg_pol = pete_readl("drivers/irqchip/irq-loongson-pch-lpc.c:156", pch_lpc_priv->base + LPC_INT_POL);
 	return 0;
 }
 
 static void pch_lpc_resume(void)
 {
-	writel(pch_lpc_priv->saved_reg_ctl, pch_lpc_priv->base + LPC_INT_CTL);
-	writel(pch_lpc_priv->saved_reg_ena, pch_lpc_priv->base + LPC_INT_ENA);
-	writel(pch_lpc_priv->saved_reg_pol, pch_lpc_priv->base + LPC_INT_POL);
+	pete_writel("drivers/irqchip/irq-loongson-pch-lpc.c:162", pch_lpc_priv->saved_reg_ctl, pch_lpc_priv->base + LPC_INT_CTL);
+	pete_writel("drivers/irqchip/irq-loongson-pch-lpc.c:163", pch_lpc_priv->saved_reg_ena, pch_lpc_priv->base + LPC_INT_ENA);
+	pete_writel("drivers/irqchip/irq-loongson-pch-lpc.c:164", pch_lpc_priv->saved_reg_pol, pch_lpc_priv->base + LPC_INT_POL);
 }
 
 static struct syscore_ops pch_lpc_syscore_ops = {

@@ -43,9 +43,9 @@ static void write_irr(void __iomem *irr0, int idx, u32 value)
 	unsigned int shift = IRR_SHIFT(idx);
 	u32 irr;
 
-	irr = readl(irr0 + offset) & ~(0xf << shift);
+	irr = pete_readl("drivers/irqchip/irq-realtek-rtl.c:46", irr0 + offset) & ~(0xf << shift);
 	irr |= (value & 0xf) << shift;
-	writel(irr, irr0 + offset);
+	pete_writel("drivers/irqchip/irq-realtek-rtl.c:48", irr, irr0 + offset);
 }
 
 static void realtek_ictl_unmask_irq(struct irq_data *i)
@@ -55,9 +55,9 @@ static void realtek_ictl_unmask_irq(struct irq_data *i)
 
 	raw_spin_lock_irqsave(&irq_lock, flags);
 
-	value = readl(REG(RTL_ICTL_GIMR));
+	value = pete_readl("drivers/irqchip/irq-realtek-rtl.c:58", REG(RTL_ICTL_GIMR));
 	value |= BIT(i->hwirq);
-	writel(value, REG(RTL_ICTL_GIMR));
+	pete_writel("drivers/irqchip/irq-realtek-rtl.c:60", value, REG(RTL_ICTL_GIMR));
 
 	raw_spin_unlock_irqrestore(&irq_lock, flags);
 }
@@ -69,9 +69,9 @@ static void realtek_ictl_mask_irq(struct irq_data *i)
 
 	raw_spin_lock_irqsave(&irq_lock, flags);
 
-	value = readl(REG(RTL_ICTL_GIMR));
+	value = pete_readl("drivers/irqchip/irq-realtek-rtl.c:72", REG(RTL_ICTL_GIMR));
 	value &= ~BIT(i->hwirq);
-	writel(value, REG(RTL_ICTL_GIMR));
+	pete_writel("drivers/irqchip/irq-realtek-rtl.c:74", value, REG(RTL_ICTL_GIMR));
 
 	raw_spin_unlock_irqrestore(&irq_lock, flags);
 }
@@ -108,7 +108,7 @@ static void realtek_irq_dispatch(struct irq_desc *desc)
 	unsigned int soc_int;
 
 	chained_irq_enter(chip, desc);
-	pending = readl(REG(RTL_ICTL_GIMR)) & readl(REG(RTL_ICTL_GISR));
+	pending = pete_readl("drivers/irqchip/irq-realtek-rtl.c:111", REG(RTL_ICTL_GIMR)) & pete_readl("drivers/irqchip/irq-realtek-rtl.c:111", REG(RTL_ICTL_GISR));
 
 	if (unlikely(!pending)) {
 		spurious_interrupt();
@@ -135,7 +135,7 @@ static int __init realtek_rtl_of_init(struct device_node *node, struct device_no
 		return -ENXIO;
 
 	/* Disable all cascaded interrupts and clear routing */
-	writel(0, REG(RTL_ICTL_GIMR));
+	pete_writel("drivers/irqchip/irq-realtek-rtl.c:138", 0, REG(RTL_ICTL_GIMR));
 	for (soc_irq = 0; soc_irq < RTL_ICTL_NUM_INPUTS; soc_irq++)
 		write_irr(REG(RTL_ICTL_IRR0), soc_irq, 0);
 

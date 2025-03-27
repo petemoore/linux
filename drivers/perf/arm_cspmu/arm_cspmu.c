@@ -147,9 +147,9 @@ static u64 read_reg64_hilohi(const void __iomem *addr, u32 max_poll_count)
 			return 0;
 		}
 
-		val_hi = readl(addr + 4);
-		val_lo = readl(addr);
-	} while (val_hi != readl(addr + 4));
+		val_hi = pete_readl("drivers/perf/arm_cspmu/arm_cspmu.c:150", addr + 4);
+		val_lo = pete_readl("drivers/perf/arm_cspmu/arm_cspmu.c:151", addr);
+	} while (val_hi != pete_readl("drivers/perf/arm_cspmu/arm_cspmu.c:152", addr + 4));
 
 	val = (((u64)val_hi << 32) | val_lo);
 
@@ -402,7 +402,7 @@ static int arm_cspmu_init_impl_ops(struct arm_cspmu *cspmu)
 	 */
 	cspmu->impl.pmiidr =
 		(apmt_node->impl_id) ? apmt_node->impl_id :
-				       readl(cspmu->base0 + PMIIDR);
+				       pete_readl("drivers/perf/arm_cspmu/arm_cspmu.c:405", cspmu->base0 + PMIIDR);
 
 	/* Find implementer specific attribute ops. */
 	for (; match->pmiidr; match++) {
@@ -512,17 +512,17 @@ static inline void arm_cspmu_reset_counters(struct arm_cspmu *cspmu)
 
 	pmcr |= PMCR_P;
 	pmcr |= PMCR_C;
-	writel(pmcr, cspmu->base0 + PMCR);
+	pete_writel("drivers/perf/arm_cspmu/arm_cspmu.c:515", pmcr, cspmu->base0 + PMCR);
 }
 
 static inline void arm_cspmu_start_counters(struct arm_cspmu *cspmu)
 {
-	writel(PMCR_E, cspmu->base0 + PMCR);
+	pete_writel("drivers/perf/arm_cspmu/arm_cspmu.c:520", PMCR_E, cspmu->base0 + PMCR);
 }
 
 static inline void arm_cspmu_stop_counters(struct arm_cspmu *cspmu)
 {
-	writel(0, cspmu->base0 + PMCR);
+	pete_writel("drivers/perf/arm_cspmu/arm_cspmu.c:525", 0, cspmu->base0 + PMCR);
 }
 
 static void arm_cspmu_enable(struct pmu *pmu)
@@ -699,11 +699,11 @@ static void arm_cspmu_write_counter(struct perf_event *event, u64 val)
 	if (use_64b_counter_reg(cspmu)) {
 		offset = counter_offset(sizeof(u64), event->hw.idx);
 
-		writeq(val, cspmu->base1 + offset);
+		pete_writeq("drivers/perf/arm_cspmu/arm_cspmu.c:702", val, cspmu->base1 + offset);
 	} else {
 		offset = counter_offset(sizeof(u32), event->hw.idx);
 
-		writel(lower_32_bits(val), cspmu->base1 + offset);
+		pete_writel("drivers/perf/arm_cspmu/arm_cspmu.c:706", lower_32_bits(val), cspmu->base1 + offset);
 	}
 }
 
@@ -718,12 +718,12 @@ static u64 arm_cspmu_read_counter(struct perf_event *event)
 		counter_addr = cspmu->base1 + offset;
 
 		return cspmu->has_atomic_dword ?
-			       readq(counter_addr) :
+			       pete_readq("drivers/perf/arm_cspmu/arm_cspmu.c:721", counter_addr) :
 			       read_reg64_hilohi(counter_addr, HILOHI_MAX_POLL);
 	}
 
 	offset = counter_offset(sizeof(u32), event->hw.idx);
-	return readl(cspmu->base1 + offset);
+	return pete_readl("drivers/perf/arm_cspmu/arm_cspmu.c:726", cspmu->base1 + offset);
 }
 
 /*
@@ -751,8 +751,8 @@ static void arm_cspmu_enable_counter(struct arm_cspmu *cspmu, int idx)
 	inten_off = PMINTENSET + (4 * reg_id);
 	cnten_off = PMCNTENSET + (4 * reg_id);
 
-	writel(BIT(reg_bit), cspmu->base0 + inten_off);
-	writel(BIT(reg_bit), cspmu->base0 + cnten_off);
+	pete_writel("drivers/perf/arm_cspmu/arm_cspmu.c:754", BIT(reg_bit), cspmu->base0 + inten_off);
+	pete_writel("drivers/perf/arm_cspmu/arm_cspmu.c:755", BIT(reg_bit), cspmu->base0 + cnten_off);
 }
 
 static void arm_cspmu_disable_counter(struct arm_cspmu *cspmu, int idx)
@@ -765,8 +765,8 @@ static void arm_cspmu_disable_counter(struct arm_cspmu *cspmu, int idx)
 	inten_off = PMINTENCLR + (4 * reg_id);
 	cnten_off = PMCNTENCLR + (4 * reg_id);
 
-	writel(BIT(reg_bit), cspmu->base0 + cnten_off);
-	writel(BIT(reg_bit), cspmu->base0 + inten_off);
+	pete_writel("drivers/perf/arm_cspmu/arm_cspmu.c:768", BIT(reg_bit), cspmu->base0 + cnten_off);
+	pete_writel("drivers/perf/arm_cspmu/arm_cspmu.c:769", BIT(reg_bit), cspmu->base0 + inten_off);
 }
 
 static void arm_cspmu_event_update(struct perf_event *event)
@@ -789,7 +789,7 @@ static inline void arm_cspmu_set_event(struct arm_cspmu *cspmu,
 {
 	u32 offset = PMEVTYPER + (4 * hwc->idx);
 
-	writel(hwc->config, cspmu->base0 + offset);
+	pete_writel("drivers/perf/arm_cspmu/arm_cspmu.c:792", hwc->config, cspmu->base0 + offset);
 }
 
 static inline void arm_cspmu_set_ev_filter(struct arm_cspmu *cspmu,
@@ -798,14 +798,14 @@ static inline void arm_cspmu_set_ev_filter(struct arm_cspmu *cspmu,
 {
 	u32 offset = PMEVFILTR + (4 * hwc->idx);
 
-	writel(filter, cspmu->base0 + offset);
+	pete_writel("drivers/perf/arm_cspmu/arm_cspmu.c:801", filter, cspmu->base0 + offset);
 }
 
 static inline void arm_cspmu_set_cc_filter(struct arm_cspmu *cspmu, u32 filter)
 {
 	u32 offset = PMCCFILTR;
 
-	writel(filter, cspmu->base0 + offset);
+	pete_writel("drivers/perf/arm_cspmu/arm_cspmu.c:808", filter, cspmu->base0 + offset);
 }
 
 static void arm_cspmu_start(struct perf_event *event, int pmu_flags)
@@ -948,7 +948,7 @@ static int arm_cspmu_init_mmio(struct arm_cspmu *cspmu)
 		}
 	}
 
-	cspmu->pmcfgr = readl(cspmu->base0 + PMCFGR);
+	cspmu->pmcfgr = pete_readl("drivers/perf/arm_cspmu/arm_cspmu.c:951", cspmu->base0 + PMCFGR);
 
 	cspmu->num_logical_ctrs = FIELD_GET(PMCFGR_N, cspmu->pmcfgr) + 1;
 
@@ -988,9 +988,9 @@ static inline int arm_cspmu_get_reset_overflow(struct arm_cspmu *cspmu,
 	u32 has_overflowed = 0;
 
 	for (i = 0; i < cspmu->num_set_clr_reg; ++i) {
-		pmovs[i] = readl(cspmu->base1 + pmovclr_offset);
+		pmovs[i] = pete_readl("drivers/perf/arm_cspmu/arm_cspmu.c:991", cspmu->base1 + pmovclr_offset);
 		has_overflowed |= pmovs[i];
-		writel(pmovs[i], cspmu->base1 + pmovclr_offset);
+		pete_writel("drivers/perf/arm_cspmu/arm_cspmu.c:993", pmovs[i], cspmu->base1 + pmovclr_offset);
 		pmovclr_offset += sizeof(u32);
 	}
 

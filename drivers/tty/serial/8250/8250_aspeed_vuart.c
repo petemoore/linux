@@ -65,12 +65,12 @@ static const int unthrottle_timeout = HZ/10;
 
 static inline u8 aspeed_vuart_readb(struct aspeed_vuart *vuart, u8 reg)
 {
-	return readb(vuart->port->port.membase + reg);
+	return pete_readb("drivers/tty/serial/8250/8250_aspeed_vuart.c:68", vuart->port->port.membase + reg);
 }
 
 static inline void aspeed_vuart_writeb(struct aspeed_vuart *vuart, u8 val, u8 reg)
 {
-	writeb(val, vuart->port->port.membase + reg);
+	pete_writeb("drivers/tty/serial/8250/8250_aspeed_vuart.c:73", val, vuart->port->port.membase + reg);
 }
 
 static ssize_t lpc_address_show(struct device *dev,

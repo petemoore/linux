@@ -104,7 +104,7 @@ static u8 stm32_mux_get_parent(void __iomem *base,
 	u32 mask = BIT(mux->width) - 1;
 	u32 val;
 
-	val = readl(base + mux->offset) >> mux->shift;
+	val = pete_readl("drivers/clk/stm32/clk-stm32-core.c:107", base + mux->offset) >> mux->shift;
 	val &= mask;
 
 	return val;
@@ -117,13 +117,13 @@ static int stm32_mux_set_parent(void __iomem *base,
 	const struct stm32_mux_cfg *mux = &data->muxes[mux_id];
 
 	u32 mask = BIT(mux->width) - 1;
-	u32 reg = readl(base + mux->offset);
+	u32 reg = pete_readl("drivers/clk/stm32/clk-stm32-core.c:120", base + mux->offset);
 	u32 val = index << mux->shift;
 
 	reg &= ~(mask << mux->shift);
 	reg |= val;
 
-	writel(reg, base + mux->offset);
+	pete_writel("drivers/clk/stm32/clk-stm32-core.c:126", reg, base + mux->offset);
 
 	return 0;
 }
@@ -140,17 +140,17 @@ static void stm32_gate_endisable(void __iomem *base,
 			return;
 
 		if (gate->set_clr != 0)
-			writel(BIT(gate->bit_idx), addr);
+			pete_writel("drivers/clk/stm32/clk-stm32-core.c:143", BIT(gate->bit_idx), addr);
 		else
-			writel(readl(addr) | BIT(gate->bit_idx), addr);
+			pete_writel("drivers/clk/stm32/clk-stm32-core.c:145", pete_readl("drivers/clk/stm32/clk-stm32-core.c:145", addr) | BIT(gate->bit_idx), addr);
 	} else {
 		if (--data->gate_cpt[gate_id] > 0)
 			return;
 
 		if (gate->set_clr != 0)
-			writel(BIT(gate->bit_idx), addr + gate->set_clr);
+			pete_writel("drivers/clk/stm32/clk-stm32-core.c:151", BIT(gate->bit_idx), addr + gate->set_clr);
 		else
-			writel(readl(addr) & ~BIT(gate->bit_idx), addr);
+			pete_writel("drivers/clk/stm32/clk-stm32-core.c:153", pete_readl("drivers/clk/stm32/clk-stm32-core.c:153", addr) & ~BIT(gate->bit_idx), addr);
 	}
 }
 
@@ -165,9 +165,9 @@ static void stm32_gate_disable_unused(void __iomem *base,
 		return;
 
 	if (gate->set_clr != 0)
-		writel(BIT(gate->bit_idx), addr + gate->set_clr);
+		pete_writel("drivers/clk/stm32/clk-stm32-core.c:168", BIT(gate->bit_idx), addr + gate->set_clr);
 	else
-		writel(readl(addr) & ~BIT(gate->bit_idx), addr);
+		pete_writel("drivers/clk/stm32/clk-stm32-core.c:170", pete_readl("drivers/clk/stm32/clk-stm32-core.c:170", addr) & ~BIT(gate->bit_idx), addr);
 }
 
 static int stm32_gate_is_enabled(void __iomem *base,
@@ -176,7 +176,7 @@ static int stm32_gate_is_enabled(void __iomem *base,
 {
 	const struct stm32_gate_cfg *gate = &data->gates[gate_id];
 
-	return (readl(base + gate->offset) & BIT(gate->bit_idx)) != 0;
+	return (pete_readl("drivers/clk/stm32/clk-stm32-core.c:179", base + gate->offset) & BIT(gate->bit_idx)) != 0;
 }
 
 static unsigned int _get_table_div(const struct clk_div_table *table,
@@ -211,7 +211,7 @@ static unsigned long stm32_divider_get_rate(void __iomem *base,
 	unsigned int val;
 	unsigned int div;
 
-	val =  readl(base + divider->offset) >> divider->shift;
+	val =  pete_readl("drivers/clk/stm32/clk-stm32-core.c:214", base + divider->offset) >> divider->shift;
 	val &= clk_div_mask(divider->width);
 	div = _get_div(divider->table, val, divider->flags, divider->width);
 
@@ -242,13 +242,13 @@ static int stm32_divider_set_rate(void __iomem *base,
 	if (divider->flags & CLK_DIVIDER_HIWORD_MASK) {
 		val = clk_div_mask(divider->width) << (divider->shift + 16);
 	} else {
-		val = readl(base + divider->offset);
+		val = pete_readl("drivers/clk/stm32/clk-stm32-core.c:245", base + divider->offset);
 		val &= ~(clk_div_mask(divider->width) << divider->shift);
 	}
 
 	val |= (u32)value << divider->shift;
 
-	writel(val, base + divider->offset);
+	pete_writel("drivers/clk/stm32/clk-stm32-core.c:251", val, base + divider->offset);
 
 	return 0;
 }
@@ -364,7 +364,7 @@ static long clk_stm32_divider_round_rate(struct clk_hw *hw, unsigned long rate,
 	if (divider->flags & CLK_DIVIDER_READ_ONLY) {
 		u32 val;
 
-		val =  readl(div->base + divider->offset) >> divider->shift;
+		val =  pete_readl("drivers/clk/stm32/clk-stm32-core.c:367", div->base + divider->offset) >> divider->shift;
 		val &= clk_div_mask(divider->width);
 
 		return divider_ro_round_rate(hw, rate, prate, divider->table,
@@ -442,7 +442,7 @@ static int clk_stm32_composite_determine_rate(struct clk_hw *hw,
 	if (divider->flags & CLK_DIVIDER_READ_ONLY) {
 		u32 val;
 
-		val =  readl(composite->base + divider->offset) >> divider->shift;
+		val =  pete_readl("drivers/clk/stm32/clk-stm32-core.c:445", composite->base + divider->offset) >> divider->shift;
 		val &= clk_div_mask(divider->width);
 
 		rate = divider_ro_round_rate(hw, req->rate, &req->best_parent_rate,

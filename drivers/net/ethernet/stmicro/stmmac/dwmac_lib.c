@@ -16,11 +16,11 @@
 
 int dwmac_dma_reset(void __iomem *ioaddr)
 {
-	u32 value = readl(ioaddr + DMA_BUS_MODE);
+	u32 value = pete_readl("drivers/net/ethernet/stmicro/stmmac/dwmac_lib.c:19", ioaddr + DMA_BUS_MODE);
 
 	/* DMA SW reset */
 	value |= DMA_BUS_MODE_SFT_RESET;
-	writel(value, ioaddr + DMA_BUS_MODE);
+	pete_writel("drivers/net/ethernet/stmicro/stmmac/dwmac_lib.c:23", value, ioaddr + DMA_BUS_MODE);
 
 	return readl_poll_timeout(ioaddr + DMA_BUS_MODE, value,
 				 !(value & DMA_BUS_MODE_SFT_RESET),
@@ -30,63 +30,63 @@ int dwmac_dma_reset(void __iomem *ioaddr)
 /* CSR1 enables the transmit DMA to check for new descriptor */
 void dwmac_enable_dma_transmission(void __iomem *ioaddr)
 {
-	writel(1, ioaddr + DMA_XMT_POLL_DEMAND);
+	pete_writel("drivers/net/ethernet/stmicro/stmmac/dwmac_lib.c:33", 1, ioaddr + DMA_XMT_POLL_DEMAND);
 }
 
 void dwmac_enable_dma_irq(struct stmmac_priv *priv, void __iomem *ioaddr,
 			  u32 chan, bool rx, bool tx)
 {
-	u32 value = readl(ioaddr + DMA_INTR_ENA);
+	u32 value = pete_readl("drivers/net/ethernet/stmicro/stmmac/dwmac_lib.c:39", ioaddr + DMA_INTR_ENA);
 
 	if (rx)
 		value |= DMA_INTR_DEFAULT_RX;
 	if (tx)
 		value |= DMA_INTR_DEFAULT_TX;
 
-	writel(value, ioaddr + DMA_INTR_ENA);
+	pete_writel("drivers/net/ethernet/stmicro/stmmac/dwmac_lib.c:46", value, ioaddr + DMA_INTR_ENA);
 }
 
 void dwmac_disable_dma_irq(struct stmmac_priv *priv, void __iomem *ioaddr,
 			   u32 chan, bool rx, bool tx)
 {
-	u32 value = readl(ioaddr + DMA_INTR_ENA);
+	u32 value = pete_readl("drivers/net/ethernet/stmicro/stmmac/dwmac_lib.c:52", ioaddr + DMA_INTR_ENA);
 
 	if (rx)
 		value &= ~DMA_INTR_DEFAULT_RX;
 	if (tx)
 		value &= ~DMA_INTR_DEFAULT_TX;
 
-	writel(value, ioaddr + DMA_INTR_ENA);
+	pete_writel("drivers/net/ethernet/stmicro/stmmac/dwmac_lib.c:59", value, ioaddr + DMA_INTR_ENA);
 }
 
 void dwmac_dma_start_tx(struct stmmac_priv *priv, void __iomem *ioaddr,
 			u32 chan)
 {
-	u32 value = readl(ioaddr + DMA_CONTROL);
+	u32 value = pete_readl("drivers/net/ethernet/stmicro/stmmac/dwmac_lib.c:65", ioaddr + DMA_CONTROL);
 	value |= DMA_CONTROL_ST;
-	writel(value, ioaddr + DMA_CONTROL);
+	pete_writel("drivers/net/ethernet/stmicro/stmmac/dwmac_lib.c:67", value, ioaddr + DMA_CONTROL);
 }
 
 void dwmac_dma_stop_tx(struct stmmac_priv *priv, void __iomem *ioaddr, u32 chan)
 {
-	u32 value = readl(ioaddr + DMA_CONTROL);
+	u32 value = pete_readl("drivers/net/ethernet/stmicro/stmmac/dwmac_lib.c:72", ioaddr + DMA_CONTROL);
 	value &= ~DMA_CONTROL_ST;
-	writel(value, ioaddr + DMA_CONTROL);
+	pete_writel("drivers/net/ethernet/stmicro/stmmac/dwmac_lib.c:74", value, ioaddr + DMA_CONTROL);
 }
 
 void dwmac_dma_start_rx(struct stmmac_priv *priv, void __iomem *ioaddr,
 			u32 chan)
 {
-	u32 value = readl(ioaddr + DMA_CONTROL);
+	u32 value = pete_readl("drivers/net/ethernet/stmicro/stmmac/dwmac_lib.c:80", ioaddr + DMA_CONTROL);
 	value |= DMA_CONTROL_SR;
-	writel(value, ioaddr + DMA_CONTROL);
+	pete_writel("drivers/net/ethernet/stmicro/stmmac/dwmac_lib.c:82", value, ioaddr + DMA_CONTROL);
 }
 
 void dwmac_dma_stop_rx(struct stmmac_priv *priv, void __iomem *ioaddr, u32 chan)
 {
-	u32 value = readl(ioaddr + DMA_CONTROL);
+	u32 value = pete_readl("drivers/net/ethernet/stmicro/stmmac/dwmac_lib.c:87", ioaddr + DMA_CONTROL);
 	value &= ~DMA_CONTROL_SR;
-	writel(value, ioaddr + DMA_CONTROL);
+	pete_writel("drivers/net/ethernet/stmicro/stmmac/dwmac_lib.c:89", value, ioaddr + DMA_CONTROL);
 }
 
 #ifdef DWMAC_DMA_DEBUG
@@ -165,7 +165,7 @@ int dwmac_dma_interrupt(struct stmmac_priv *priv, void __iomem *ioaddr,
 	struct stmmac_pcpu_stats *stats = this_cpu_ptr(priv->xstats.pcpu_stats);
 	int ret = 0;
 	/* read the status register (CSR5) */
-	u32 intr_status = readl(ioaddr + DMA_STATUS);
+	u32 intr_status = pete_readl("drivers/net/ethernet/stmicro/stmmac/dwmac_lib.c:168", ioaddr + DMA_STATUS);
 
 #ifdef DWMAC_DMA_DEBUG
 	/* Enable it to monitor DMA rx/tx status in case of critical problems */
@@ -211,7 +211,7 @@ int dwmac_dma_interrupt(struct stmmac_priv *priv, void __iomem *ioaddr,
 	/* TX/RX NORMAL interrupts */
 	if (likely(intr_status & DMA_STATUS_NIS)) {
 		if (likely(intr_status & DMA_STATUS_RI)) {
-			u32 value = readl(ioaddr + DMA_INTR_ENA);
+			u32 value = pete_readl("drivers/net/ethernet/stmicro/stmmac/dwmac_lib.c:214", ioaddr + DMA_INTR_ENA);
 			/* to schedule NAPI on real RIE event. */
 			if (likely(value & DMA_INTR_ENA_RIE)) {
 				u64_stats_update_begin(&stats->syncp);
@@ -235,17 +235,17 @@ int dwmac_dma_interrupt(struct stmmac_priv *priv, void __iomem *ioaddr,
 		pr_warn("%s: unexpected status %08x\n", __func__, intr_status);
 
 	/* Clear the interrupt by writing a logic 1 to the CSR5[15-0] */
-	writel((intr_status & 0x1ffff), ioaddr + DMA_STATUS);
+	pete_writel("drivers/net/ethernet/stmicro/stmmac/dwmac_lib.c:238", (intr_status & 0x1ffff), ioaddr + DMA_STATUS);
 
 	return ret;
 }
 
 void dwmac_dma_flush_tx_fifo(void __iomem *ioaddr)
 {
-	u32 csr6 = readl(ioaddr + DMA_CONTROL);
-	writel((csr6 | DMA_CONTROL_FTF), ioaddr + DMA_CONTROL);
+	u32 csr6 = pete_readl("drivers/net/ethernet/stmicro/stmmac/dwmac_lib.c:245", ioaddr + DMA_CONTROL);
+	pete_writel("drivers/net/ethernet/stmicro/stmmac/dwmac_lib.c:246", (csr6 | DMA_CONTROL_FTF), ioaddr + DMA_CONTROL);
 
-	do {} while ((readl(ioaddr + DMA_CONTROL) & DMA_CONTROL_FTF));
+	do {} while ((pete_readl("drivers/net/ethernet/stmicro/stmmac/dwmac_lib.c:248", ioaddr + DMA_CONTROL) & DMA_CONTROL_FTF));
 }
 
 void stmmac_set_mac_addr(void __iomem *ioaddr, const u8 addr[6],
@@ -258,9 +258,9 @@ void stmmac_set_mac_addr(void __iomem *ioaddr, const u8 addr[6],
 	 * bit that has no effect on the High Reg 0 where the bit 31 (MO)
 	 * is RO.
 	 */
-	writel(data | GMAC_HI_REG_AE, ioaddr + high);
+	pete_writel("drivers/net/ethernet/stmicro/stmmac/dwmac_lib.c:261", data | GMAC_HI_REG_AE, ioaddr + high);
 	data = (addr[3] << 24) | (addr[2] << 16) | (addr[1] << 8) | addr[0];
-	writel(data, ioaddr + low);
+	pete_writel("drivers/net/ethernet/stmicro/stmmac/dwmac_lib.c:263", data, ioaddr + low);
 }
 EXPORT_SYMBOL_GPL(stmmac_set_mac_addr);
 
@@ -269,7 +269,7 @@ void stmmac_set_mac(void __iomem *ioaddr, bool enable)
 {
 	u32 old_val, value;
 
-	old_val = readl(ioaddr + MAC_CTRL_REG);
+	old_val = pete_readl("drivers/net/ethernet/stmicro/stmmac/dwmac_lib.c:272", ioaddr + MAC_CTRL_REG);
 	value = old_val;
 
 	if (enable)
@@ -278,7 +278,7 @@ void stmmac_set_mac(void __iomem *ioaddr, bool enable)
 		value &= ~(MAC_ENABLE_TX | MAC_ENABLE_RX);
 
 	if (value != old_val)
-		writel(value, ioaddr + MAC_CTRL_REG);
+		pete_writel("drivers/net/ethernet/stmicro/stmmac/dwmac_lib.c:281", value, ioaddr + MAC_CTRL_REG);
 }
 
 void stmmac_get_mac_addr(void __iomem *ioaddr, unsigned char *addr,
@@ -287,8 +287,8 @@ void stmmac_get_mac_addr(void __iomem *ioaddr, unsigned char *addr,
 	unsigned int hi_addr, lo_addr;
 
 	/* Read the MAC address from the hardware */
-	hi_addr = readl(ioaddr + high);
-	lo_addr = readl(ioaddr + low);
+	hi_addr = pete_readl("drivers/net/ethernet/stmicro/stmmac/dwmac_lib.c:290", ioaddr + high);
+	lo_addr = pete_readl("drivers/net/ethernet/stmicro/stmmac/dwmac_lib.c:291", ioaddr + low);
 
 	/* Extract the MAC address from the high and low words */
 	addr[0] = lo_addr & 0xff;

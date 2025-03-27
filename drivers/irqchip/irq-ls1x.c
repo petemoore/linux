@@ -41,8 +41,8 @@ static void ls1x_chained_handle_irq(struct irq_desc *desc)
 	u32 pending;
 
 	chained_irq_enter(chip, desc);
-	pending = readl(priv->intc_base + LS_REG_INTC_STATUS) &
-			readl(priv->intc_base + LS_REG_INTC_EN);
+	pending = pete_readl("drivers/irqchip/irq-ls1x.c:44", priv->intc_base + LS_REG_INTC_STATUS) &
+			pete_readl("drivers/irqchip/irq-ls1x.c:45", priv->intc_base + LS_REG_INTC_EN);
 
 	if (!pending)
 		spurious_interrupt();
@@ -62,10 +62,10 @@ static void ls_intc_set_bit(struct irq_chip_generic *gc,
 							u32 mask, bool set)
 {
 	if (set)
-		writel(readl(gc->reg_base + offset) | mask,
+		pete_writel("drivers/irqchip/irq-ls1x.c:65", pete_readl("drivers/irqchip/irq-ls1x.c:65", gc->reg_base + offset) | mask,
 		gc->reg_base + offset);
 	else
-		writel(readl(gc->reg_base + offset) & ~mask,
+		pete_writel("drivers/irqchip/irq-ls1x.c:68", pete_readl("drivers/irqchip/irq-ls1x.c:68", gc->reg_base + offset) & ~mask,
 		gc->reg_base + offset);
 }
 
@@ -144,13 +144,13 @@ static int __init ls1x_intc_of_init(struct device_node *node,
 	}
 
 	/* Mask all irqs */
-	writel(0x0, priv->intc_base + LS_REG_INTC_EN);
+	pete_writel("drivers/irqchip/irq-ls1x.c:147", 0x0, priv->intc_base + LS_REG_INTC_EN);
 
 	/* Ack all irqs */
-	writel(0xffffffff, priv->intc_base + LS_REG_INTC_CLR);
+	pete_writel("drivers/irqchip/irq-ls1x.c:150", 0xffffffff, priv->intc_base + LS_REG_INTC_CLR);
 
 	/* Set all irqs to high level triggered */
-	writel(0xffffffff, priv->intc_base + LS_REG_INTC_POL);
+	pete_writel("drivers/irqchip/irq-ls1x.c:153", 0xffffffff, priv->intc_base + LS_REG_INTC_POL);
 
 	gc = irq_get_domain_generic_chip(priv->domain, 0);
 

@@ -97,7 +97,7 @@ static int ingenic_rproc_start(struct rproc *rproc)
 
 	/* Reset the AUX and enable message IRQ */
 	ctrl = AUX_CTRL_NMI_RESETS | AUX_CTRL_NMI | AUX_CTRL_MSG_IRQ_EN;
-	writel(ctrl, vpu->aux_base + REG_AUX_CTRL);
+	pete_writel("drivers/remoteproc/ingenic_rproc.c:100", ctrl, vpu->aux_base + REG_AUX_CTRL);
 
 	return 0;
 }
@@ -109,7 +109,7 @@ static int ingenic_rproc_stop(struct rproc *rproc)
 	disable_irq(vpu->irq);
 
 	/* Keep AUX in reset mode */
-	writel(AUX_CTRL_SW_RESET, vpu->aux_base + REG_AUX_CTRL);
+	pete_writel("drivers/remoteproc/ingenic_rproc.c:112", AUX_CTRL_SW_RESET, vpu->aux_base + REG_AUX_CTRL);
 
 	return 0;
 }
@@ -118,7 +118,7 @@ static void ingenic_rproc_kick(struct rproc *rproc, int vqid)
 {
 	struct vpu *vpu = rproc->priv;
 
-	writel(vqid, vpu->aux_base + REG_CORE_MSG);
+	pete_writel("drivers/remoteproc/ingenic_rproc.c:121", vqid, vpu->aux_base + REG_CORE_MSG);
 }
 
 static void *ingenic_rproc_da_to_va(struct rproc *rproc, u64 da, size_t len, bool *is_iomem)
@@ -155,10 +155,10 @@ static irqreturn_t vpu_interrupt(int irq, void *data)
 	struct vpu *vpu = rproc->priv;
 	u32 vring;
 
-	vring = readl(vpu->aux_base + REG_AUX_MSG);
+	vring = pete_readl("drivers/remoteproc/ingenic_rproc.c:158", vpu->aux_base + REG_AUX_MSG);
 
 	/* Ack the interrupt */
-	writel(0, vpu->aux_base + REG_AUX_MSG_ACK);
+	pete_writel("drivers/remoteproc/ingenic_rproc.c:161", 0, vpu->aux_base + REG_AUX_MSG_ACK);
 
 	return rproc_vq_interrupt(rproc, vring);
 }

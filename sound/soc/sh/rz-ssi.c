@@ -137,12 +137,12 @@ static void rz_ssi_dma_complete(void *data);
 
 static void rz_ssi_reg_writel(struct rz_ssi_priv *priv, uint reg, u32 data)
 {
-	writel(data, (priv->base + reg));
+	pete_writel("sound/soc/sh/rz-ssi.c:140", data, (priv->base + reg));
 }
 
 static u32 rz_ssi_reg_readl(struct rz_ssi_priv *priv, uint reg)
 {
-	return readl(priv->base + reg);
+	return pete_readl("sound/soc/sh/rz-ssi.c:145", priv->base + reg);
 }
 
 static void rz_ssi_reg_mask_setl(struct rz_ssi_priv *priv, uint reg,
@@ -150,9 +150,9 @@ static void rz_ssi_reg_mask_setl(struct rz_ssi_priv *priv, uint reg,
 {
 	u32 val;
 
-	val = readl(priv->base + reg);
+	val = pete_readl("sound/soc/sh/rz-ssi.c:153", priv->base + reg);
 	val = (val & ~bclr) | bset;
-	writel(val, (priv->base + reg));
+	pete_writel("sound/soc/sh/rz-ssi.c:155", val, (priv->base + reg));
 }
 
 static inline struct snd_soc_dai *

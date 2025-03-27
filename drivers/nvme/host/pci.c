@@ -482,7 +482,7 @@ static inline void nvme_write_sq_db(struct nvme_queue *nvmeq, bool write_sq)
 
 	if (nvme_dbbuf_update_and_check_event(nvmeq->sq_tail,
 			nvmeq->dbbuf_sq_db, nvmeq->dbbuf_sq_ei))
-		writel(nvmeq->sq_tail, nvmeq->q_db);
+		pete_writel("drivers/nvme/host/pci.c:485", nvmeq->sq_tail, nvmeq->q_db);
 	nvmeq->last_sq_tail = nvmeq->sq_tail;
 }
 
@@ -997,7 +997,7 @@ static inline void nvme_ring_cq_doorbell(struct nvme_queue *nvmeq)
 
 	if (nvme_dbbuf_update_and_check_event(head, nvmeq->dbbuf_cq_db,
 					      nvmeq->dbbuf_cq_ei))
-		writel(head, nvmeq->q_db + nvmeq->dev->db_stride);
+		pete_writel("drivers/nvme/host/pci.c:1000", head, nvmeq->q_db + nvmeq->dev->db_stride);
 }
 
 static inline struct blk_mq_tags *nvme_queue_tagset(struct nvme_queue *nvmeq)
@@ -1282,7 +1282,7 @@ static enum blk_eh_timer_return nvme_timeout(struct request *req)
 	struct nvme_dev *dev = nvmeq->dev;
 	struct request *abort_req;
 	struct nvme_command cmd = { };
-	u32 csts = readl(dev->bar + NVME_REG_CSTS);
+	u32 csts = pete_readl("drivers/nvme/host/pci.c:1285", dev->bar + NVME_REG_CSTS);
 
 	if (nvme_state_terminal(&dev->ctrl))
 		goto disable;
@@ -1727,12 +1727,12 @@ static int nvme_pci_configure_admin_queue(struct nvme_dev *dev)
 	if (result < 0)
 		return result;
 
-	dev->subsystem = readl(dev->bar + NVME_REG_VS) >= NVME_VS(1, 1, 0) ?
+	dev->subsystem = pete_readl("drivers/nvme/host/pci.c:1730", dev->bar + NVME_REG_VS) >= NVME_VS(1, 1, 0) ?
 				NVME_CAP_NSSRC(dev->ctrl.cap) : 0;
 
 	if (dev->subsystem &&
-	    (readl(dev->bar + NVME_REG_CSTS) & NVME_CSTS_NSSRO))
-		writel(NVME_CSTS_NSSRO, dev->bar + NVME_REG_CSTS);
+	    (pete_readl("drivers/nvme/host/pci.c:1734", dev->bar + NVME_REG_CSTS) & NVME_CSTS_NSSRO))
+		pete_writel("drivers/nvme/host/pci.c:1735", NVME_CSTS_NSSRO, dev->bar + NVME_REG_CSTS);
 
 	/*
 	 * If the device has been passed off to us in an enabled state, just
@@ -1755,7 +1755,7 @@ static int nvme_pci_configure_admin_queue(struct nvme_dev *dev)
 	aqa = nvmeq->q_depth - 1;
 	aqa |= aqa << 16;
 
-	writel(aqa, dev->bar + NVME_REG_AQA);
+	pete_writel("drivers/nvme/host/pci.c:1758", aqa, dev->bar + NVME_REG_AQA);
 	lo_hi_writeq(nvmeq->sq_dma_addr, dev->bar + NVME_REG_ASQ);
 	lo_hi_writeq(nvmeq->cq_dma_addr, dev->bar + NVME_REG_ACQ);
 
@@ -1835,12 +1835,12 @@ static void nvme_map_cmb(struct nvme_dev *dev)
 		return;
 
 	if (NVME_CAP_CMBS(dev->ctrl.cap))
-		writel(NVME_CMBMSC_CRE, dev->bar + NVME_REG_CMBMSC);
+		pete_writel("drivers/nvme/host/pci.c:1838", NVME_CMBMSC_CRE, dev->bar + NVME_REG_CMBMSC);
 
-	dev->cmbsz = readl(dev->bar + NVME_REG_CMBSZ);
+	dev->cmbsz = pete_readl("drivers/nvme/host/pci.c:1840", dev->bar + NVME_REG_CMBSZ);
 	if (!dev->cmbsz)
 		return;
-	dev->cmbloc = readl(dev->bar + NVME_REG_CMBLOC);
+	dev->cmbloc = pete_readl("drivers/nvme/host/pci.c:1843", dev->bar + NVME_REG_CMBLOC);
 
 	size = nvme_cmb_size_unit(dev) * nvme_cmb_size(dev);
 	offset = nvme_cmb_size_unit(dev) * NVME_CMB_OFST(dev->cmbloc);
@@ -2506,7 +2506,7 @@ static int nvme_pci_enable(struct nvme_dev *dev)
 
 	pci_set_master(pdev);
 
-	if (readl(dev->bar + NVME_REG_CSTS) == -1) {
+	if (pete_readl("drivers/nvme/host/pci.c:2509", dev->bar + NVME_REG_CSTS) == -1) {
 		result = -ENODEV;
 		goto disable;
 	}
@@ -2594,7 +2594,7 @@ static bool nvme_pci_ctrl_is_dead(struct nvme_dev *dev)
 	if (pdev->error_state != pci_channel_io_normal)
 		return true;
 
-	csts = readl(dev->bar + NVME_REG_CSTS);
+	csts = pete_readl("drivers/nvme/host/pci.c:2597", dev->bar + NVME_REG_CSTS);
 	return (csts & NVME_CSTS_CFS) || !(csts & NVME_CSTS_RDY);
 }
 
@@ -2822,13 +2822,13 @@ static void nvme_reset_work(struct work_struct *work)
 
 static int nvme_pci_reg_read32(struct nvme_ctrl *ctrl, u32 off, u32 *val)
 {
-	*val = readl(to_nvme_dev(ctrl)->bar + off);
+	*val = pete_readl("drivers/nvme/host/pci.c:2825", to_nvme_dev(ctrl)->bar + off);
 	return 0;
 }
 
 static int nvme_pci_reg_write32(struct nvme_ctrl *ctrl, u32 off, u32 val)
 {
-	writel(val, to_nvme_dev(ctrl)->bar + off);
+	pete_writel("drivers/nvme/host/pci.c:2831", val, to_nvme_dev(ctrl)->bar + off);
 	return 0;
 }
 

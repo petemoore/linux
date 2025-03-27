@@ -996,13 +996,13 @@ static u64 snb_uncore_imc_read_counter(struct intel_uncore_box *box, struct perf
 	/*
 	 * SNB IMC counters are 32-bit and are laid out back to back
 	 * in MMIO space. Therefore we must use a 32-bit accessor function
-	 * using readq() from uncore_mmio_read_counter() causes problems
+	 * using pete_readq("arch/x86/events/intel/uncore_snb.c:999", ) from uncore_mmio_read_counter() causes problems
 	 * because it is reading 64-bit at a time. This is okay for the
 	 * uncore_perf_event_update() function because it drops the upper
 	 * 32-bits but not okay for plain uncore_read_counter() as invoked
 	 * in uncore_pmu_event_start().
 	 */
-	return (u64)readl(box->io_addr + hwc->event_base);
+	return (u64)pete_readl("arch/x86/events/intel/uncore_snb.c:1005", box->io_addr + hwc->event_base);
 }
 
 static struct pmu snb_uncore_imc_pmu = {
@@ -1593,7 +1593,7 @@ static void adl_uncore_imc_init_box(struct intel_uncore_box *box)
 
 	/* The global control in MC1 can control both MCs. */
 	if (box->io_addr && (box->pmu->pmu_idx == 1))
-		writel(ADL_UNCORE_IMC_CTL_INT, box->io_addr + ADL_UNCORE_IMC_GLOBAL_CTL);
+		pete_writel("arch/x86/events/intel/uncore_snb.c:1596", ADL_UNCORE_IMC_CTL_INT, box->io_addr + ADL_UNCORE_IMC_GLOBAL_CTL);
 }
 
 static void adl_uncore_mmio_disable_box(struct intel_uncore_box *box)
@@ -1601,7 +1601,7 @@ static void adl_uncore_mmio_disable_box(struct intel_uncore_box *box)
 	if (!box->io_addr)
 		return;
 
-	writel(ADL_UNCORE_IMC_CTL_FRZ, box->io_addr + uncore_mmio_box_ctl(box));
+	pete_writel("arch/x86/events/intel/uncore_snb.c:1604", ADL_UNCORE_IMC_CTL_FRZ, box->io_addr + uncore_mmio_box_ctl(box));
 }
 
 static void adl_uncore_mmio_enable_box(struct intel_uncore_box *box)
@@ -1609,7 +1609,7 @@ static void adl_uncore_mmio_enable_box(struct intel_uncore_box *box)
 	if (!box->io_addr)
 		return;
 
-	writel(0, box->io_addr + uncore_mmio_box_ctl(box));
+	pete_writel("arch/x86/events/intel/uncore_snb.c:1612", 0, box->io_addr + uncore_mmio_box_ctl(box));
 }
 
 static struct intel_uncore_ops adl_uncore_mmio_ops = {

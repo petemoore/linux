@@ -36,14 +36,14 @@
 
 static u32 mtk_cpux_readl(u32 reg_idx, struct timer_of *to)
 {
-	writel(reg_idx, timer_of_base(to) + CPUX_IDX_REG);
-	return readl(timer_of_base(to) + CPUX_CON_REG);
+	pete_writel("drivers/clocksource/timer-mediatek-cpux.c:39", reg_idx, timer_of_base(to) + CPUX_IDX_REG);
+	return pete_readl("drivers/clocksource/timer-mediatek-cpux.c:40", timer_of_base(to) + CPUX_CON_REG);
 }
 
 static void mtk_cpux_writel(u32 val, u32 reg_idx, struct timer_of *to)
 {
-	writel(reg_idx, timer_of_base(to) + CPUX_IDX_REG);
-	writel(val, timer_of_base(to) + CPUX_CON_REG);
+	pete_writel("drivers/clocksource/timer-mediatek-cpux.c:45", reg_idx, timer_of_base(to) + CPUX_IDX_REG);
+	pete_writel("drivers/clocksource/timer-mediatek-cpux.c:46", val, timer_of_base(to) + CPUX_CON_REG);
 }
 
 static void mtk_cpux_set_irq(struct timer_of *to, bool enable)

@@ -90,8 +90,8 @@ static void scp_ipi_handler(struct mtk_scp *scp)
 	struct scp_ipi_desc *ipi_desc = scp->ipi_desc;
 	u8 tmp_data[SCP_SHARE_BUFFER_SIZE];
 	scp_ipi_handler_t handler;
-	u32 id = readl(&rcv_obj->id);
-	u32 len = readl(&rcv_obj->len);
+	u32 id = pete_readl("drivers/remoteproc/mtk_scp.c:93", &rcv_obj->id);
+	u32 len = pete_readl("drivers/remoteproc/mtk_scp.c:94", &rcv_obj->len);
 
 	if (len > SCP_SHARE_BUFFER_SIZE) {
 		dev_err(scp->dev, "ipi message too long (len %d, max %d)", len,
@@ -160,42 +160,42 @@ static void mt8183_scp_reset_assert(struct mtk_scp *scp)
 {
 	u32 val;
 
-	val = readl(scp->reg_base + MT8183_SW_RSTN);
+	val = pete_readl("drivers/remoteproc/mtk_scp.c:163", scp->reg_base + MT8183_SW_RSTN);
 	val &= ~MT8183_SW_RSTN_BIT;
-	writel(val, scp->reg_base + MT8183_SW_RSTN);
+	pete_writel("drivers/remoteproc/mtk_scp.c:165", val, scp->reg_base + MT8183_SW_RSTN);
 }
 
 static void mt8183_scp_reset_deassert(struct mtk_scp *scp)
 {
 	u32 val;
 
-	val = readl(scp->reg_base + MT8183_SW_RSTN);
+	val = pete_readl("drivers/remoteproc/mtk_scp.c:172", scp->reg_base + MT8183_SW_RSTN);
 	val |= MT8183_SW_RSTN_BIT;
-	writel(val, scp->reg_base + MT8183_SW_RSTN);
+	pete_writel("drivers/remoteproc/mtk_scp.c:174", val, scp->reg_base + MT8183_SW_RSTN);
 }
 
 static void mt8192_scp_reset_assert(struct mtk_scp *scp)
 {
-	writel(1, scp->reg_base + MT8192_CORE0_SW_RSTN_SET);
+	pete_writel("drivers/remoteproc/mtk_scp.c:179", 1, scp->reg_base + MT8192_CORE0_SW_RSTN_SET);
 }
 
 static void mt8192_scp_reset_deassert(struct mtk_scp *scp)
 {
-	writel(1, scp->reg_base + MT8192_CORE0_SW_RSTN_CLR);
+	pete_writel("drivers/remoteproc/mtk_scp.c:184", 1, scp->reg_base + MT8192_CORE0_SW_RSTN_CLR);
 }
 
 static void mt8183_scp_irq_handler(struct mtk_scp *scp)
 {
 	u32 scp_to_host;
 
-	scp_to_host = readl(scp->reg_base + MT8183_SCP_TO_HOST);
+	scp_to_host = pete_readl("drivers/remoteproc/mtk_scp.c:191", scp->reg_base + MT8183_SCP_TO_HOST);
 	if (scp_to_host & MT8183_SCP_IPC_INT_BIT)
 		scp_ipi_handler(scp);
 	else
 		scp_wdt_handler(scp, scp_to_host);
 
 	/* SCP won't send another interrupt until we set SCP_TO_HOST to 0. */
-	writel(MT8183_SCP_IPC_INT_BIT | MT8183_SCP_WDT_INT_BIT,
+	pete_writel("drivers/remoteproc/mtk_scp.c:198", MT8183_SCP_IPC_INT_BIT | MT8183_SCP_WDT_INT_BIT,
 	       scp->reg_base + MT8183_SCP_TO_HOST);
 }
 
@@ -203,7 +203,7 @@ static void mt8192_scp_irq_handler(struct mtk_scp *scp)
 {
 	u32 scp_to_host;
 
-	scp_to_host = readl(scp->reg_base + MT8192_SCP2APMCU_IPC_SET);
+	scp_to_host = pete_readl("drivers/remoteproc/mtk_scp.c:206", scp->reg_base + MT8192_SCP2APMCU_IPC_SET);
 
 	if (scp_to_host & MT8192_SCP_IPC_INT_BIT) {
 		scp_ipi_handler(scp);
@@ -212,11 +212,11 @@ static void mt8192_scp_irq_handler(struct mtk_scp *scp)
 		 * SCP won't send another interrupt until we clear
 		 * MT8192_SCP2APMCU_IPC.
 		 */
-		writel(MT8192_SCP_IPC_INT_BIT,
+		pete_writel("drivers/remoteproc/mtk_scp.c:215", MT8192_SCP_IPC_INT_BIT,
 		       scp->reg_base + MT8192_SCP2APMCU_IPC_CLR);
 	} else {
 		scp_wdt_handler(scp, scp_to_host);
-		writel(1, scp->reg_base + MT8192_CORE0_WDT_IRQ);
+		pete_writel("drivers/remoteproc/mtk_scp.c:219", 1, scp->reg_base + MT8192_CORE0_WDT_IRQ);
 	}
 }
 
@@ -349,26 +349,26 @@ static int mt8195_scp_clk_get(struct mtk_scp *scp)
 static int mt8183_scp_before_load(struct mtk_scp *scp)
 {
 	/* Clear SCP to host interrupt */
-	writel(MT8183_SCP_IPC_INT_BIT, scp->reg_base + MT8183_SCP_TO_HOST);
+	pete_writel("drivers/remoteproc/mtk_scp.c:352", MT8183_SCP_IPC_INT_BIT, scp->reg_base + MT8183_SCP_TO_HOST);
 
 	/* Reset clocks before loading FW */
-	writel(0x0, scp->reg_base + MT8183_SCP_CLK_SW_SEL);
-	writel(0x0, scp->reg_base + MT8183_SCP_CLK_DIV_SEL);
+	pete_writel("drivers/remoteproc/mtk_scp.c:355", 0x0, scp->reg_base + MT8183_SCP_CLK_SW_SEL);
+	pete_writel("drivers/remoteproc/mtk_scp.c:356", 0x0, scp->reg_base + MT8183_SCP_CLK_DIV_SEL);
 
 	/* Initialize TCM before loading FW. */
-	writel(0x0, scp->reg_base + MT8183_SCP_L1_SRAM_PD);
-	writel(0x0, scp->reg_base + MT8183_SCP_TCM_TAIL_SRAM_PD);
+	pete_writel("drivers/remoteproc/mtk_scp.c:359", 0x0, scp->reg_base + MT8183_SCP_L1_SRAM_PD);
+	pete_writel("drivers/remoteproc/mtk_scp.c:360", 0x0, scp->reg_base + MT8183_SCP_TCM_TAIL_SRAM_PD);
 
 	/* Turn on the power of SCP's SRAM before using it. */
-	writel(0x0, scp->reg_base + MT8183_SCP_SRAM_PDN);
+	pete_writel("drivers/remoteproc/mtk_scp.c:363", 0x0, scp->reg_base + MT8183_SCP_SRAM_PDN);
 
 	/*
 	 * Set I-cache and D-cache size before loading SCP FW.
 	 * SCP SRAM logical address may change when cache size setting differs.
 	 */
-	writel(MT8183_SCP_CACHE_CON_WAYEN | MT8183_SCP_CACHESIZE_8KB,
+	pete_writel("drivers/remoteproc/mtk_scp.c:369", MT8183_SCP_CACHE_CON_WAYEN | MT8183_SCP_CACHESIZE_8KB,
 	       scp->reg_base + MT8183_SCP_CACHE_CON);
-	writel(MT8183_SCP_CACHESIZE_8KB, scp->reg_base + MT8183_SCP_DCACHE_CON);
+	pete_writel("drivers/remoteproc/mtk_scp.c:371", MT8183_SCP_CACHESIZE_8KB, scp->reg_base + MT8183_SCP_DCACHE_CON);
 
 	return 0;
 }
@@ -378,44 +378,44 @@ static void scp_sram_power_on(void __iomem *addr, u32 reserved_mask)
 	int i;
 
 	for (i = 31; i >= 0; i--)
-		writel(GENMASK(i, 0) & ~reserved_mask, addr);
-	writel(0, addr);
+		pete_writel("drivers/remoteproc/mtk_scp.c:381", GENMASK(i, 0) & ~reserved_mask, addr);
+	pete_writel("drivers/remoteproc/mtk_scp.c:382", 0, addr);
 }
 
 static void scp_sram_power_off(void __iomem *addr, u32 reserved_mask)
 {
 	int i;
 
-	writel(0, addr);
+	pete_writel("drivers/remoteproc/mtk_scp.c:389", 0, addr);
 	for (i = 0; i < 32; i++)
-		writel(GENMASK(i, 0) & ~reserved_mask, addr);
+		pete_writel("drivers/remoteproc/mtk_scp.c:391", GENMASK(i, 0) & ~reserved_mask, addr);
 }
 
 static int mt8186_scp_before_load(struct mtk_scp *scp)
 {
 	/* Clear SCP to host interrupt */
-	writel(MT8183_SCP_IPC_INT_BIT, scp->reg_base + MT8183_SCP_TO_HOST);
+	pete_writel("drivers/remoteproc/mtk_scp.c:397", MT8183_SCP_IPC_INT_BIT, scp->reg_base + MT8183_SCP_TO_HOST);
 
 	/* Reset clocks before loading FW */
-	writel(0x0, scp->reg_base + MT8183_SCP_CLK_SW_SEL);
-	writel(0x0, scp->reg_base + MT8183_SCP_CLK_DIV_SEL);
+	pete_writel("drivers/remoteproc/mtk_scp.c:400", 0x0, scp->reg_base + MT8183_SCP_CLK_SW_SEL);
+	pete_writel("drivers/remoteproc/mtk_scp.c:401", 0x0, scp->reg_base + MT8183_SCP_CLK_DIV_SEL);
 
 	/* Turn on the power of SCP's SRAM before using it. Enable 1 block per time*/
 	scp_sram_power_on(scp->reg_base + MT8183_SCP_SRAM_PDN, 0);
 
 	/* Initialize TCM before loading FW. */
-	writel(0x0, scp->reg_base + MT8183_SCP_L1_SRAM_PD);
-	writel(0x0, scp->reg_base + MT8183_SCP_TCM_TAIL_SRAM_PD);
-	writel(0x0, scp->reg_base + MT8186_SCP_L1_SRAM_PD_P1);
-	writel(0x0, scp->reg_base + MT8186_SCP_L1_SRAM_PD_p2);
+	pete_writel("drivers/remoteproc/mtk_scp.c:407", 0x0, scp->reg_base + MT8183_SCP_L1_SRAM_PD);
+	pete_writel("drivers/remoteproc/mtk_scp.c:408", 0x0, scp->reg_base + MT8183_SCP_TCM_TAIL_SRAM_PD);
+	pete_writel("drivers/remoteproc/mtk_scp.c:409", 0x0, scp->reg_base + MT8186_SCP_L1_SRAM_PD_P1);
+	pete_writel("drivers/remoteproc/mtk_scp.c:410", 0x0, scp->reg_base + MT8186_SCP_L1_SRAM_PD_p2);
 
 	/*
 	 * Set I-cache and D-cache size before loading SCP FW.
 	 * SCP SRAM logical address may change when cache size setting differs.
 	 */
-	writel(MT8183_SCP_CACHE_CON_WAYEN | MT8183_SCP_CACHESIZE_8KB,
+	pete_writel("drivers/remoteproc/mtk_scp.c:416", MT8183_SCP_CACHE_CON_WAYEN | MT8183_SCP_CACHESIZE_8KB,
 	       scp->reg_base + MT8183_SCP_CACHE_CON);
-	writel(MT8183_SCP_CACHESIZE_8KB, scp->reg_base + MT8183_SCP_DCACHE_CON);
+	pete_writel("drivers/remoteproc/mtk_scp.c:418", MT8183_SCP_CACHESIZE_8KB, scp->reg_base + MT8183_SCP_DCACHE_CON);
 
 	return 0;
 }
@@ -423,9 +423,9 @@ static int mt8186_scp_before_load(struct mtk_scp *scp)
 static int mt8192_scp_before_load(struct mtk_scp *scp)
 {
 	/* clear SPM interrupt, SCP2SPM_IPC_CLR */
-	writel(0xff, scp->reg_base + MT8192_SCP2SPM_IPC_CLR);
+	pete_writel("drivers/remoteproc/mtk_scp.c:426", 0xff, scp->reg_base + MT8192_SCP2SPM_IPC_CLR);
 
-	writel(1, scp->reg_base + MT8192_CORE0_SW_RSTN_SET);
+	pete_writel("drivers/remoteproc/mtk_scp.c:428", 1, scp->reg_base + MT8192_CORE0_SW_RSTN_SET);
 
 	/* enable SRAM clock */
 	scp_sram_power_on(scp->reg_base + MT8192_L2TCM_SRAM_PD_0, 0);
@@ -435,7 +435,7 @@ static int mt8192_scp_before_load(struct mtk_scp *scp)
 	scp_sram_power_on(scp->reg_base + MT8192_CPU0_SRAM_PD, 0);
 
 	/* enable MPU for all memory regions */
-	writel(0xff, scp->reg_base + MT8192_CORE0_MEM_ATT_PREDEF);
+	pete_writel("drivers/remoteproc/mtk_scp.c:438", 0xff, scp->reg_base + MT8192_CORE0_MEM_ATT_PREDEF);
 
 	return 0;
 }
@@ -443,9 +443,9 @@ static int mt8192_scp_before_load(struct mtk_scp *scp)
 static int mt8195_scp_before_load(struct mtk_scp *scp)
 {
 	/* clear SPM interrupt, SCP2SPM_IPC_CLR */
-	writel(0xff, scp->reg_base + MT8192_SCP2SPM_IPC_CLR);
+	pete_writel("drivers/remoteproc/mtk_scp.c:446", 0xff, scp->reg_base + MT8192_SCP2SPM_IPC_CLR);
 
-	writel(1, scp->reg_base + MT8192_CORE0_SW_RSTN_SET);
+	pete_writel("drivers/remoteproc/mtk_scp.c:448", 1, scp->reg_base + MT8192_CORE0_SW_RSTN_SET);
 
 	/* enable SRAM clock */
 	scp_sram_power_on(scp->reg_base + MT8192_L2TCM_SRAM_PD_0, 0);
@@ -456,7 +456,7 @@ static int mt8195_scp_before_load(struct mtk_scp *scp)
 	scp_sram_power_on(scp->reg_base + MT8192_CPU0_SRAM_PD, 0);
 
 	/* enable MPU for all memory regions */
-	writel(0xff, scp->reg_base + MT8192_CORE0_MEM_ATT_PREDEF);
+	pete_writel("drivers/remoteproc/mtk_scp.c:459", 0xff, scp->reg_base + MT8192_CORE0_MEM_ATT_PREDEF);
 
 	return 0;
 }
@@ -603,7 +603,7 @@ static void *scp_da_to_va(struct rproc *rproc, u64 da, size_t len, bool *is_iome
 static void mt8183_scp_stop(struct mtk_scp *scp)
 {
 	/* Disable SCP watchdog */
-	writel(0, scp->reg_base + MT8183_WDT_CFG);
+	pete_writel("drivers/remoteproc/mtk_scp.c:606", 0, scp->reg_base + MT8183_WDT_CFG);
 }
 
 static void mt8192_scp_stop(struct mtk_scp *scp)
@@ -616,7 +616,7 @@ static void mt8192_scp_stop(struct mtk_scp *scp)
 	scp_sram_power_off(scp->reg_base + MT8192_CPU0_SRAM_PD, 0);
 
 	/* Disable SCP watchdog */
-	writel(0, scp->reg_base + MT8192_CORE0_WDT_CFG);
+	pete_writel("drivers/remoteproc/mtk_scp.c:619", 0, scp->reg_base + MT8192_CORE0_WDT_CFG);
 }
 
 static void mt8195_scp_stop(struct mtk_scp *scp)
@@ -630,7 +630,7 @@ static void mt8195_scp_stop(struct mtk_scp *scp)
 	scp_sram_power_off(scp->reg_base + MT8192_CPU0_SRAM_PD, 0);
 
 	/* Disable SCP watchdog */
-	writel(0, scp->reg_base + MT8192_CORE0_WDT_CFG);
+	pete_writel("drivers/remoteproc/mtk_scp.c:633", 0, scp->reg_base + MT8192_CORE0_WDT_CFG);
 }
 
 static int scp_stop(struct rproc *rproc)

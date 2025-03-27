@@ -70,7 +70,7 @@ static u32 __init mv98dx3236_get_cpu_freq(void __iomem *sar)
 	u32 cpu_freq = 0;
 	u8 cpu_freq_select = 0;
 
-	cpu_freq_select = ((readl(sar) >> SAR1_MV98DX3236_CPU_DDR_MPLL_FREQ_OPT) &
+	cpu_freq_select = ((pete_readl("drivers/clk/mvebu/mv98dx3236.c:73", sar) >> SAR1_MV98DX3236_CPU_DDR_MPLL_FREQ_OPT) &
 			   SAR1_MV98DX3236_CPU_DDR_MPLL_FREQ_OPT_MASK);
 
 	if (of_machine_is_compatible("marvell,armadaxp-98dx4251"))
@@ -117,7 +117,7 @@ static const int __initconst mv98dx4251_cpu_ddr_ratios[8][2] = {
 static void __init mv98dx3236_get_clk_ratio(
 	void __iomem *sar, int id, int *mult, int *div)
 {
-	u32 opt = ((readl(sar) >> SAR1_MV98DX3236_CPU_DDR_MPLL_FREQ_OPT) &
+	u32 opt = ((pete_readl("drivers/clk/mvebu/mv98dx3236.c:120", sar) >> SAR1_MV98DX3236_CPU_DDR_MPLL_FREQ_OPT) &
 		SAR1_MV98DX3236_CPU_DDR_MPLL_FREQ_OPT_MASK);
 
 	switch (id) {

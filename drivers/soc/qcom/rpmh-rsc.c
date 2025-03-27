@@ -232,14 +232,14 @@ static void write_tcs_reg_sync(const struct rsc_drv *drv, int reg, int tcs_id,
 {
 	int i;
 
-	writel(data, tcs_reg_addr(drv, reg, tcs_id));
+	pete_writel("drivers/soc/qcom/rpmh-rsc.c:235", data, tcs_reg_addr(drv, reg, tcs_id));
 
 	/*
 	 * Wait until we read back the same value.  Use a counter rather than
 	 * ktime for timeout since this may be called after timekeeping stops.
 	 */
 	for (i = 0; i < USEC_PER_SEC; i++) {
-		if (readl(tcs_reg_addr(drv, reg, tcs_id)) == data)
+		if (pete_readl("drivers/soc/qcom/rpmh-rsc.c:242", tcs_reg_addr(drv, reg, tcs_id)) == data)
 			return;
 		udelay(1);
 	}

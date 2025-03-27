@@ -168,12 +168,12 @@ struct hi3670_pcie_phy {
 static inline void hi3670_apb_phy_writel(struct hi3670_pcie_phy *phy, u32 val,
 					 u32 reg)
 {
-	writel(val, phy->base + APB_PHY_START_ADDR + reg);
+	pete_writel("drivers/phy/hisilicon/phy-hi3670-pcie.c:171", val, phy->base + APB_PHY_START_ADDR + reg);
 }
 
 static inline u32 hi3670_apb_phy_readl(struct hi3670_pcie_phy *phy, u32 reg)
 {
-	return readl(phy->base + APB_PHY_START_ADDR + reg);
+	return pete_readl("drivers/phy/hisilicon/phy-hi3670-pcie.c:176", phy->base + APB_PHY_START_ADDR + reg);
 }
 
 static inline void hi3670_apb_phy_updatel(struct hi3670_pcie_phy *phy,
@@ -190,13 +190,13 @@ static inline void hi3670_apb_phy_updatel(struct hi3670_pcie_phy *phy,
 static inline void kirin_apb_natural_phy_writel(struct hi3670_pcie_phy *phy,
 						u32 val, u32 reg)
 {
-	writel(val, phy->base + reg);
+	pete_writel("drivers/phy/hisilicon/phy-hi3670-pcie.c:193", val, phy->base + reg);
 }
 
 static inline u32 kirin_apb_natural_phy_readl(struct hi3670_pcie_phy *phy,
 					      u32 reg)
 {
-	return readl(phy->base + reg);
+	return pete_readl("drivers/phy/hisilicon/phy-hi3670-pcie.c:199", phy->base + reg);
 }
 
 static void hi3670_pcie_phy_oe_enable(struct hi3670_pcie_phy *phy, bool enable)

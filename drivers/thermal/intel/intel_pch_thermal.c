@@ -121,7 +121,7 @@ static int pch_thermal_get_temp(struct thermal_zone_device *tzd, int *temp)
 {
 	struct pch_thermal_device *ptd = thermal_zone_device_priv(tzd);
 
-	*temp = GET_WPT_TEMP(WPT_TEMP_TSR & readw(ptd->hw_base + WPT_TEMP));
+	*temp = GET_WPT_TEMP(WPT_TEMP_TSR & pete_readw("drivers/thermal/intel/intel_pch_thermal.c:124", ptd->hw_base + WPT_TEMP));
 	return 0;
 }
 
@@ -193,12 +193,12 @@ static int intel_pch_thermal_probe(struct pci_dev *pdev,
 	}
 
 	/* Check if BIOS has already enabled thermal sensor */
-	if (WPT_TSEL_ETS & readb(ptd->hw_base + WPT_TSEL)) {
+	if (WPT_TSEL_ETS & pete_readb("drivers/thermal/intel/intel_pch_thermal.c:196", ptd->hw_base + WPT_TSEL)) {
 		ptd->bios_enabled = true;
 		goto read_trips;
 	}
 
-	tsel = readb(ptd->hw_base + WPT_TSEL);
+	tsel = pete_readb("drivers/thermal/intel/intel_pch_thermal.c:201", ptd->hw_base + WPT_TSEL);
 	/*
 	 * When TSEL's Policy Lock-Down bit is 1, TSEL become RO.
 	 * If so, thermal sensor cannot enable. Bail out.
@@ -209,22 +209,22 @@ static int intel_pch_thermal_probe(struct pci_dev *pdev,
 		goto error_cleanup;
 	}
 
-	writeb(tsel|WPT_TSEL_ETS, ptd->hw_base + WPT_TSEL);
-	if (!(WPT_TSEL_ETS & readb(ptd->hw_base + WPT_TSEL))) {
+	pete_writeb("drivers/thermal/intel/intel_pch_thermal.c:212", tsel|WPT_TSEL_ETS, ptd->hw_base + WPT_TSEL);
+	if (!(WPT_TSEL_ETS & pete_readb("drivers/thermal/intel/intel_pch_thermal.c:213", ptd->hw_base + WPT_TSEL))) {
 		dev_err(&ptd->pdev->dev, "Sensor can't be enabled\n");
 		err = -ENODEV;
 		goto error_cleanup;
 	}
 
 read_trips:
-	trip_temp = readw(ptd->hw_base + WPT_CTT);
+	trip_temp = pete_readw("drivers/thermal/intel/intel_pch_thermal.c:220", ptd->hw_base + WPT_CTT);
 	trip_temp &= 0x1FF;
 	if (trip_temp) {
 		ptd->trips[nr_trips].temperature = GET_WPT_TEMP(trip_temp);
 		ptd->trips[nr_trips++].type = THERMAL_TRIP_CRITICAL;
 	}
 
-	trip_temp = readw(ptd->hw_base + WPT_PHL);
+	trip_temp = pete_readw("drivers/thermal/intel/intel_pch_thermal.c:227", ptd->hw_base + WPT_PHL);
 	trip_temp &= 0x1FF;
 	if (trip_temp) {
 		ptd->trips[nr_trips].temperature = GET_WPT_TEMP(trip_temp);
@@ -281,8 +281,8 @@ static int intel_pch_thermal_suspend_noirq(struct device *device)
 
 	/* Shutdown the thermal sensor if it is not enabled by BIOS */
 	if (!ptd->bios_enabled) {
-		tsel = readb(ptd->hw_base + WPT_TSEL);
-		writeb(tsel & 0xFE, ptd->hw_base + WPT_TSEL);
+		tsel = pete_readb("drivers/thermal/intel/intel_pch_thermal.c:284", ptd->hw_base + WPT_TSEL);
+		pete_writeb("drivers/thermal/intel/intel_pch_thermal.c:285", tsel & 0xFE, ptd->hw_base + WPT_TSEL);
 		return 0;
 	}
 
@@ -291,10 +291,10 @@ static int intel_pch_thermal_suspend_noirq(struct device *device)
 		return 0;
 
 	/* Get the PCH temperature threshold value */
-	pch_thr_temp = GET_PCH_TEMP(WPT_TEMP_TSR & readw(ptd->hw_base + WPT_TSPM));
+	pch_thr_temp = GET_PCH_TEMP(WPT_TEMP_TSR & pete_readw("drivers/thermal/intel/intel_pch_thermal.c:294", ptd->hw_base + WPT_TSPM));
 
 	/* Get the PCH current temperature value */
-	pch_cur_temp = GET_PCH_TEMP(WPT_TEMP_TSR & readw(ptd->hw_base + WPT_TEMP));
+	pch_cur_temp = GET_PCH_TEMP(WPT_TEMP_TSR & pete_readw("drivers/thermal/intel/intel_pch_thermal.c:297", ptd->hw_base + WPT_TEMP));
 
 	/*
 	 * If current PCH temperature is higher than configured PCH threshold
@@ -319,7 +319,7 @@ static int intel_pch_thermal_suspend_noirq(struct device *device)
 			pch_cur_temp, pch_thr_temp, pch_delay_cnt, delay_timeout);
 		msleep(delay_timeout);
 		/* Read the PCH current temperature for next cycle. */
-		pch_cur_temp = GET_PCH_TEMP(WPT_TEMP_TSR & readw(ptd->hw_base + WPT_TEMP));
+		pch_cur_temp = GET_PCH_TEMP(WPT_TEMP_TSR & pete_readw("drivers/thermal/intel/intel_pch_thermal.c:322", ptd->hw_base + WPT_TEMP));
 	}
 
 	if (pch_cur_temp >= pch_thr_temp)
@@ -348,9 +348,9 @@ static int intel_pch_thermal_resume(struct device *device)
 	if (ptd->bios_enabled)
 		return 0;
 
-	tsel = readb(ptd->hw_base + WPT_TSEL);
+	tsel = pete_readb("drivers/thermal/intel/intel_pch_thermal.c:351", ptd->hw_base + WPT_TSEL);
 
-	writeb(tsel | WPT_TSEL_ETS, ptd->hw_base + WPT_TSEL);
+	pete_writeb("drivers/thermal/intel/intel_pch_thermal.c:353", tsel | WPT_TSEL_ETS, ptd->hw_base + WPT_TSEL);
 
 	return 0;
 }

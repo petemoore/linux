@@ -324,9 +324,9 @@ static int plltv_set_rate(struct sp_pll *clk)
 	r2 |= HWM_FIELD_PREP(MASK_DIVM, clk->p[DIVM] - 1);
 
 	spin_lock_irqsave(&clk->lock, flags);
-	writel(r0, clk->reg);
-	writel(r1, clk->reg + 4);
-	writel(r2, clk->reg + 8);
+	pete_writel("drivers/clk/clk-sp7021.c:327", r0, clk->reg);
+	pete_writel("drivers/clk/clk-sp7021.c:328", r1, clk->reg + 4);
+	pete_writel("drivers/clk/clk-sp7021.c:329", r2, clk->reg + 8);
 	spin_unlock_irqrestore(&clk->lock, flags);
 
 	return 0;
@@ -379,7 +379,7 @@ static int plla_set_rate(struct sp_pll *clk)
 
 	spin_lock_irqsave(&clk->lock, flags);
 	for (i = 0; i < ARRAY_SIZE(pa->regs); i++)
-		writel(0xffff0000 | pp[i], clk->reg + (i * 4));
+		pete_writel("drivers/clk/clk-sp7021.c:382", 0xffff0000 | pp[i], clk->reg + (i * 4));
 	spin_unlock_irqrestore(&clk->lock, flags);
 
 	return 0;
@@ -437,7 +437,7 @@ static unsigned long sp_pll_recalc_rate(struct clk_hw *hw,
 					unsigned long prate)
 {
 	struct sp_pll *clk = to_sp_pll(hw);
-	u32 reg = readl(clk->reg);
+	u32 reg = pete_readl("drivers/clk/clk-sp7021.c:440", clk->reg);
 	unsigned long ret;
 
 	if (reg & BIT(clk->bp_bit)) {
@@ -447,8 +447,8 @@ static unsigned long sp_pll_recalc_rate(struct clk_hw *hw,
 	} else if (clk->div_width == DIV_TV) {
 		u32 m, r, reg2;
 
-		r = FIELD_GET(MASK_DIVR, readl(clk->reg + 4));
-		reg2 = readl(clk->reg + 8);
+		r = FIELD_GET(MASK_DIVR, pete_readl("drivers/clk/clk-sp7021.c:450", clk->reg + 4));
+		reg2 = pete_readl("drivers/clk/clk-sp7021.c:451", clk->reg + 8);
 		m = FIELD_GET(MASK_DIVM, reg2) + 1;
 
 		if (reg & MASK_SEL_FRA) {
@@ -502,7 +502,7 @@ static int sp_pll_set_rate(struct clk_hw *hw, unsigned long rate,
 	}
 
 	spin_lock_irqsave(&clk->lock, flags);
-	writel(reg, clk->reg);
+	pete_writel("drivers/clk/clk-sp7021.c:505", reg, clk->reg);
 	spin_unlock_irqrestore(&clk->lock, flags);
 
 	return 0;
@@ -512,7 +512,7 @@ static int sp_pll_enable(struct clk_hw *hw)
 {
 	struct sp_pll *clk = to_sp_pll(hw);
 
-	writel(BIT(clk->pd_bit + 16) | BIT(clk->pd_bit), clk->reg);
+	pete_writel("drivers/clk/clk-sp7021.c:515", BIT(clk->pd_bit + 16) | BIT(clk->pd_bit), clk->reg);
 
 	return 0;
 }
@@ -521,14 +521,14 @@ static void sp_pll_disable(struct clk_hw *hw)
 {
 	struct sp_pll *clk = to_sp_pll(hw);
 
-	writel(BIT(clk->pd_bit + 16), clk->reg);
+	pete_writel("drivers/clk/clk-sp7021.c:524", BIT(clk->pd_bit + 16), clk->reg);
 }
 
 static int sp_pll_is_enabled(struct clk_hw *hw)
 {
 	struct sp_pll *clk = to_sp_pll(hw);
 
-	return readl(clk->reg) & BIT(clk->pd_bit);
+	return pete_readl("drivers/clk/clk-sp7021.c:531", clk->reg) & BIT(clk->pd_bit);
 }
 
 static const struct clk_ops sp_pll_ops = {
@@ -615,7 +615,7 @@ static int sp7021_clk_probe(struct platform_device *pdev)
 
 	/* enable default clks */
 	for (i = 0; i < ARRAY_SIZE(sp_clken); i++)
-		writel((sp_clken[i] << 16) | sp_clken[i], clk_base + i * 4);
+		pete_writel("drivers/clk/clk-sp7021.c:618", (sp_clken[i] << 16) | sp_clken[i], clk_base + i * 4);
 
 	clk_data = devm_kzalloc(dev, struct_size(clk_data, hws, CLK_MAX),
 				GFP_KERNEL);

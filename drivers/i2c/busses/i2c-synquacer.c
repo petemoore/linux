@@ -180,7 +180,7 @@ static void synquacer_i2c_stop(struct synquacer_i2c *i2c, int ret)
 	 * set Stop Condition (MSS=0)
 	 * Interrupt Disable
 	 */
-	writeb(0, i2c->base + SYNQUACER_I2C_REG_BCR);
+	pete_writeb("drivers/i2c/busses/i2c-synquacer.c:183", 0, i2c->base + SYNQUACER_I2C_REG_BCR);
 
 	i2c->state = STATE_IDLE;
 
@@ -200,10 +200,10 @@ static void synquacer_i2c_hw_init(struct synquacer_i2c *i2c)
 	u32 rt = i2c->pclkrate;
 
 	/* Set own Address */
-	writeb(0, i2c->base + SYNQUACER_I2C_REG_ADR);
+	pete_writeb("drivers/i2c/busses/i2c-synquacer.c:203", 0, i2c->base + SYNQUACER_I2C_REG_ADR);
 
 	/* Set PCLK frequency */
-	writeb(SYNQUACER_I2C_BUS_CLK_FR(i2c->pclkrate),
+	pete_writeb("drivers/i2c/busses/i2c-synquacer.c:206", SYNQUACER_I2C_BUS_CLK_FR(i2c->pclkrate),
 	       i2c->base + SYNQUACER_I2C_REG_FSR);
 
 	switch (i2c->speed_khz) {
@@ -217,10 +217,10 @@ static void synquacer_i2c_hw_init(struct synquacer_i2c *i2c)
 		}
 
 		/* Set Clock and enable, Set fast mode */
-		writeb(ccr_cs | SYNQUACER_I2C_CCR_FM |
+		pete_writeb("drivers/i2c/busses/i2c-synquacer.c:220", ccr_cs | SYNQUACER_I2C_CCR_FM |
 		       SYNQUACER_I2C_CCR_EN,
 		       i2c->base + SYNQUACER_I2C_REG_CCR);
-		writeb(csr_cs, i2c->base + SYNQUACER_I2C_REG_CSR);
+		pete_writeb("drivers/i2c/busses/i2c-synquacer.c:223", csr_cs, i2c->base + SYNQUACER_I2C_REG_CSR);
 		break;
 	case SYNQUACER_I2C_SPEED_SM:
 		if (i2c->pclkrate <= SYNQUACER_I2C_CLK_RATE_18M) {
@@ -232,24 +232,24 @@ static void synquacer_i2c_hw_init(struct synquacer_i2c *i2c)
 		}
 
 		/* Set Clock and enable, Set standard mode */
-		writeb(ccr_cs | SYNQUACER_I2C_CCR_EN,
+		pete_writeb("drivers/i2c/busses/i2c-synquacer.c:235", ccr_cs | SYNQUACER_I2C_CCR_EN,
 		      i2c->base + SYNQUACER_I2C_REG_CCR);
-		writeb(csr_cs, i2c->base + SYNQUACER_I2C_REG_CSR);
+		pete_writeb("drivers/i2c/busses/i2c-synquacer.c:237", csr_cs, i2c->base + SYNQUACER_I2C_REG_CSR);
 		break;
 	default:
 		WARN_ON(1);
 	}
 
 	/* clear IRQ (INT=0, BER=0), Interrupt Disable */
-	writeb(0, i2c->base + SYNQUACER_I2C_REG_BCR);
-	writeb(0, i2c->base + SYNQUACER_I2C_REG_BC2R);
+	pete_writeb("drivers/i2c/busses/i2c-synquacer.c:244", 0, i2c->base + SYNQUACER_I2C_REG_BCR);
+	pete_writeb("drivers/i2c/busses/i2c-synquacer.c:245", 0, i2c->base + SYNQUACER_I2C_REG_BC2R);
 }
 
 static void synquacer_i2c_hw_reset(struct synquacer_i2c *i2c)
 {
 	/* Disable clock */
-	writeb(0, i2c->base + SYNQUACER_I2C_REG_CCR);
-	writeb(0, i2c->base + SYNQUACER_I2C_REG_CSR);
+	pete_writeb("drivers/i2c/busses/i2c-synquacer.c:251", 0, i2c->base + SYNQUACER_I2C_REG_CCR);
+	pete_writeb("drivers/i2c/busses/i2c-synquacer.c:252", 0, i2c->base + SYNQUACER_I2C_REG_CSR);
 
 	WAIT_PCLK(100, i2c->pclkrate);
 }
@@ -259,13 +259,13 @@ static int synquacer_i2c_master_start(struct synquacer_i2c *i2c,
 {
 	unsigned char bsr, bcr;
 
-	writeb(i2c_8bit_addr_from_msg(pmsg), i2c->base + SYNQUACER_I2C_REG_DAR);
+	pete_writeb("drivers/i2c/busses/i2c-synquacer.c:262", i2c_8bit_addr_from_msg(pmsg), i2c->base + SYNQUACER_I2C_REG_DAR);
 
 	dev_dbg(i2c->dev, "slave:0x%02x\n", pmsg->addr);
 
 	/* Generate Start Condition */
-	bsr = readb(i2c->base + SYNQUACER_I2C_REG_BSR);
-	bcr = readb(i2c->base + SYNQUACER_I2C_REG_BCR);
+	bsr = pete_readb("drivers/i2c/busses/i2c-synquacer.c:267", i2c->base + SYNQUACER_I2C_REG_BSR);
+	bcr = pete_readb("drivers/i2c/busses/i2c-synquacer.c:268", i2c->base + SYNQUACER_I2C_REG_BCR);
 	dev_dbg(i2c->dev, "bsr:0x%02x, bcr:0x%02x\n", bsr, bcr);
 
 	if ((bsr & SYNQUACER_I2C_BSR_BB) &&
@@ -276,7 +276,7 @@ static int synquacer_i2c_master_start(struct synquacer_i2c *i2c,
 
 	if (bsr & SYNQUACER_I2C_BSR_BB) { /* Bus is busy */
 		dev_dbg(i2c->dev, "Continuous Start");
-		writeb(bcr | SYNQUACER_I2C_BCR_SCC,
+		pete_writeb("drivers/i2c/busses/i2c-synquacer.c:279", bcr | SYNQUACER_I2C_BCR_SCC,
 		       i2c->base + SYNQUACER_I2C_REG_BCR);
 	} else {
 		if (bcr & SYNQUACER_I2C_BCR_MSS) {
@@ -285,7 +285,7 @@ static int synquacer_i2c_master_start(struct synquacer_i2c *i2c,
 		}
 		dev_dbg(i2c->dev, "Start Condition");
 		/* Start Condition + Enable Interrupts */
-		writeb(bcr | SYNQUACER_I2C_BCR_MSS |
+		pete_writeb("drivers/i2c/busses/i2c-synquacer.c:288", bcr | SYNQUACER_I2C_BCR_MSS |
 		       SYNQUACER_I2C_BCR_INTE | SYNQUACER_I2C_BCR_BEIE,
 		       i2c->base + SYNQUACER_I2C_REG_BCR);
 	}
@@ -293,8 +293,8 @@ static int synquacer_i2c_master_start(struct synquacer_i2c *i2c,
 	WAIT_PCLK(10, i2c->pclkrate);
 
 	/* get BSR & BCR registers */
-	bsr = readb(i2c->base + SYNQUACER_I2C_REG_BSR);
-	bcr = readb(i2c->base + SYNQUACER_I2C_REG_BCR);
+	bsr = pete_readb("drivers/i2c/busses/i2c-synquacer.c:296", i2c->base + SYNQUACER_I2C_REG_BSR);
+	bcr = pete_readb("drivers/i2c/busses/i2c-synquacer.c:297", i2c->base + SYNQUACER_I2C_REG_BCR);
 	dev_dbg(i2c->dev, "bsr:0x%02x, bcr:0x%02x\n", bsr, bcr);
 
 	if ((bsr & SYNQUACER_I2C_BSR_AL) ||
@@ -314,7 +314,7 @@ static int synquacer_i2c_doxfer(struct synquacer_i2c *i2c,
 	int ret;
 
 	synquacer_i2c_hw_init(i2c);
-	bsr = readb(i2c->base + SYNQUACER_I2C_REG_BSR);
+	bsr = pete_readb("drivers/i2c/busses/i2c-synquacer.c:317", i2c->base + SYNQUACER_I2C_REG_BSR);
 	if (bsr & SYNQUACER_I2C_BSR_BB) {
 		dev_err(i2c->dev, "cannot get bus (bus busy)\n");
 		return -EBUSY;
@@ -361,8 +361,8 @@ static irqreturn_t synquacer_i2c_isr(int irq, void *dev_id)
 	unsigned char bsr, bcr;
 	int ret;
 
-	bcr = readb(i2c->base + SYNQUACER_I2C_REG_BCR);
-	bsr = readb(i2c->base + SYNQUACER_I2C_REG_BSR);
+	bcr = pete_readb("drivers/i2c/busses/i2c-synquacer.c:364", i2c->base + SYNQUACER_I2C_REG_BCR);
+	bsr = pete_readb("drivers/i2c/busses/i2c-synquacer.c:365", i2c->base + SYNQUACER_I2C_REG_BSR);
 	dev_dbg(i2c->dev, "bsr:0x%02x, bcr:0x%02x\n", bsr, bcr);
 
 	if (bcr & SYNQUACER_I2C_BCR_BER) {
@@ -407,11 +407,11 @@ static irqreturn_t synquacer_i2c_isr(int irq, void *dev_id)
 		}
 
 		if (!is_msgend(i2c)) {
-			writeb(i2c->msg->buf[i2c->msg_ptr++],
+			pete_writeb("drivers/i2c/busses/i2c-synquacer.c:410", i2c->msg->buf[i2c->msg_ptr++],
 			       i2c->base + SYNQUACER_I2C_REG_DAR);
 
 			/* clear IRQ, and continue */
-			writeb(SYNQUACER_I2C_BCR_BEIE |
+			pete_writeb("drivers/i2c/busses/i2c-synquacer.c:414", SYNQUACER_I2C_BCR_BEIE |
 			       SYNQUACER_I2C_BCR_MSS |
 			       SYNQUACER_I2C_BCR_INTE,
 			       i2c->base + SYNQUACER_I2C_REG_BCR);
@@ -438,7 +438,7 @@ static irqreturn_t synquacer_i2c_isr(int irq, void *dev_id)
 		break;
 
 	case STATE_READ:
-		byte = readb(i2c->base + SYNQUACER_I2C_REG_DAR);
+		byte = pete_readb("drivers/i2c/busses/i2c-synquacer.c:441", i2c->base + SYNQUACER_I2C_REG_DAR);
 		if (!(bsr & SYNQUACER_I2C_BSR_FBT)) /* data */
 			i2c->msg->buf[i2c->msg_ptr++] = byte;
 		else /* address */
@@ -446,14 +446,14 @@ static irqreturn_t synquacer_i2c_isr(int irq, void *dev_id)
 
 prepare_read:
 		if (is_msglast(i2c)) {
-			writeb(SYNQUACER_I2C_BCR_MSS |
+			pete_writeb("drivers/i2c/busses/i2c-synquacer.c:449", SYNQUACER_I2C_BCR_MSS |
 			       SYNQUACER_I2C_BCR_BEIE |
 			       SYNQUACER_I2C_BCR_INTE,
 			       i2c->base + SYNQUACER_I2C_REG_BCR);
 			break;
 		}
 		if (!is_msgend(i2c)) {
-			writeb(SYNQUACER_I2C_BCR_MSS |
+			pete_writeb("drivers/i2c/busses/i2c-synquacer.c:456", SYNQUACER_I2C_BCR_MSS |
 			       SYNQUACER_I2C_BCR_BEIE |
 			       SYNQUACER_I2C_BCR_INTE |
 			       SYNQUACER_I2C_BCR_ACK,

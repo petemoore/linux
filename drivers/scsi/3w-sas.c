@@ -276,9 +276,9 @@ static int twl_post_command_packet(TW_Device_Extension *tw_dev, int request_id)
 	command_que_value += TW_COMMAND_OFFSET;
 
 	/* First write upper 4 bytes */
-	writel((u32)((u64)command_que_value >> 32), TWL_HIBQPH_REG_ADDR(tw_dev));
+	pete_writel("drivers/scsi/3w-sas.c:279", (u32)((u64)command_que_value >> 32), TWL_HIBQPH_REG_ADDR(tw_dev));
 	/* Then the lower 4 bytes */
-	writel((u32)(command_que_value | TWL_PULL_MODE), TWL_HIBQPL_REG_ADDR(tw_dev));
+	pete_writel("drivers/scsi/3w-sas.c:281", (u32)(command_que_value | TWL_PULL_MODE), TWL_HIBQPL_REG_ADDR(tw_dev));
 
 	tw_dev->state[request_id] = TW_S_POSTED;
 	tw_dev->posted_request_count++;
@@ -530,11 +530,11 @@ static int twl_poll_response(TW_Device_Extension *tw_dev, int request_id, int se
 
 	while (!found) {
 		if (sizeof(dma_addr_t) > 4) {
-			regh = readl(TWL_HOBQPH_REG_ADDR(tw_dev));
-			regl = readl(TWL_HOBQPL_REG_ADDR(tw_dev));
+			regh = pete_readl("drivers/scsi/3w-sas.c:533", TWL_HOBQPH_REG_ADDR(tw_dev));
+			regl = pete_readl("drivers/scsi/3w-sas.c:534", TWL_HOBQPL_REG_ADDR(tw_dev));
 			mfa = ((u64)regh << 32) | regl;
 		} else
-			mfa = readl(TWL_HOBQPL_REG_ADDR(tw_dev));
+			mfa = pete_readl("drivers/scsi/3w-sas.c:537", TWL_HOBQPL_REG_ADDR(tw_dev));
 
 		response = (u32)mfa;
 
@@ -1084,7 +1084,7 @@ static int twl_handle_attention_interrupt(TW_Device_Extension *tw_dev)
 	u32 request_id, doorbell;
 
 	/* Read doorbell status */
-	doorbell = readl(TWL_HOBDB_REG_ADDR(tw_dev));
+	doorbell = pete_readl("drivers/scsi/3w-sas.c:1087", TWL_HOBDB_REG_ADDR(tw_dev));
 
 	/* Check for controller errors */
 	if (doorbell & TWL_DOORBELL_CONTROLLER_ERROR) {
@@ -1110,7 +1110,7 @@ out:
 	TWL_CLEAR_DB_INTERRUPT(tw_dev);
 
 	/* Make sure the clear was flushed by reading it back */
-	readl(TWL_HOBDBC_REG_ADDR(tw_dev));
+	pete_readl("drivers/scsi/3w-sas.c:1113", TWL_HOBDBC_REG_ADDR(tw_dev));
 
 	return retval;
 } /* End twl_handle_attention_interrupt() */
@@ -1128,7 +1128,7 @@ static irqreturn_t twl_interrupt(int irq, void *dev_instance)
 	spin_lock(tw_dev->host->host_lock);
 
 	/* Read host interrupt status */
-	reg = readl(TWL_HISTAT_REG_ADDR(tw_dev));
+	reg = pete_readl("drivers/scsi/3w-sas.c:1131", TWL_HISTAT_REG_ADDR(tw_dev));
 
 	/* Check if this is our interrupt, otherwise bail */
 	if (!(reg & TWL_HISTATUS_VALID_INTERRUPT))
@@ -1151,11 +1151,11 @@ static irqreturn_t twl_interrupt(int irq, void *dev_instance)
 	/* Response interrupt */
 	while (reg & TWL_HISTATUS_RESPONSE_INTERRUPT) {
 		if (sizeof(dma_addr_t) > 4) {
-			regh = readl(TWL_HOBQPH_REG_ADDR(tw_dev));
-			regl = readl(TWL_HOBQPL_REG_ADDR(tw_dev));
+			regh = pete_readl("drivers/scsi/3w-sas.c:1154", TWL_HOBQPH_REG_ADDR(tw_dev));
+			regl = pete_readl("drivers/scsi/3w-sas.c:1155", TWL_HOBQPL_REG_ADDR(tw_dev));
 			mfa = ((u64)regh << 32) | regl;
 		} else
-			mfa = readl(TWL_HOBQPL_REG_ADDR(tw_dev));
+			mfa = pete_readl("drivers/scsi/3w-sas.c:1158", TWL_HOBQPL_REG_ADDR(tw_dev));
 
 		error = 0;
 		response = (u32)mfa;
@@ -1176,8 +1176,8 @@ static irqreturn_t twl_interrupt(int irq, void *dev_instance)
 					}
 
 					/* Now re-post the sense buffer */
-					writel((u32)((u64)tw_dev->sense_buffer_phys[i] >> 32), TWL_HOBQPH_REG_ADDR(tw_dev));
-					writel((u32)tw_dev->sense_buffer_phys[i], TWL_HOBQPL_REG_ADDR(tw_dev));
+					pete_writel("drivers/scsi/3w-sas.c:1179", (u32)((u64)tw_dev->sense_buffer_phys[i] >> 32), TWL_HOBQPH_REG_ADDR(tw_dev));
+					pete_writel("drivers/scsi/3w-sas.c:1180", (u32)tw_dev->sense_buffer_phys[i], TWL_HOBQPL_REG_ADDR(tw_dev));
 					break;
 				}
 			}
@@ -1225,7 +1225,7 @@ static irqreturn_t twl_interrupt(int irq, void *dev_instance)
 		}
 
 		/* Check for another response interrupt */
-		reg = readl(TWL_HISTAT_REG_ADDR(tw_dev));
+		reg = pete_readl("drivers/scsi/3w-sas.c:1228", TWL_HISTAT_REG_ADDR(tw_dev));
 	}
 
 twl_interrupt_bail:
@@ -1240,11 +1240,11 @@ static int twl_poll_register(TW_Device_Extension *tw_dev, void *reg, u32 value, 
 	int retval = 1;
 	u32 reg_value;
 
-	reg_value = readl(reg);
+	reg_value = pete_readl("drivers/scsi/3w-sas.c:1243", reg);
 	before = jiffies;
 
 	while ((reg_value & value) != result) {
-		reg_value = readl(reg);
+		reg_value = pete_readl("drivers/scsi/3w-sas.c:1247", reg);
 		if (time_after(jiffies, before + HZ * seconds))
 			goto out;
 		msleep(50);
@@ -1299,17 +1299,17 @@ static int twl_reset_sequence(TW_Device_Extension *tw_dev, int soft_reset)
 
 		/* Load sense buffers */
 		while (i < TW_Q_LENGTH) {
-			writel((u32)((u64)tw_dev->sense_buffer_phys[i] >> 32), TWL_HOBQPH_REG_ADDR(tw_dev));
-			writel((u32)tw_dev->sense_buffer_phys[i], TWL_HOBQPL_REG_ADDR(tw_dev));
+			pete_writel("drivers/scsi/3w-sas.c:1302", (u32)((u64)tw_dev->sense_buffer_phys[i] >> 32), TWL_HOBQPH_REG_ADDR(tw_dev));
+			pete_writel("drivers/scsi/3w-sas.c:1303", (u32)tw_dev->sense_buffer_phys[i], TWL_HOBQPL_REG_ADDR(tw_dev));
 
 			/* Check status for over-run after each write */
-			status = readl(TWL_STATUS_REG_ADDR(tw_dev));
+			status = pete_readl("drivers/scsi/3w-sas.c:1306", TWL_STATUS_REG_ADDR(tw_dev));
 			if (!(status & TWL_STATUS_OVERRUN_SUBMIT))
 			    i++;
 		}
 
 		/* Now check status */
-		status = readl(TWL_STATUS_REG_ADDR(tw_dev));
+		status = pete_readl("drivers/scsi/3w-sas.c:1312", TWL_STATUS_REG_ADDR(tw_dev));
 		if (status) {
 			TW_PRINTK(tw_dev->host, TW_DRIVER, 0x13, "Bad controller status after loading sense buffers");
 			do_soft_reset = 1;

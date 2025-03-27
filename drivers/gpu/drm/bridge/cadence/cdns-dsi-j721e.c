@@ -35,13 +35,13 @@ static void cdns_dsi_j721e_enable(struct cdns_dsi *dsi)
 	 * to DSI DPI0. This is the only supported configuration on
 	 * J721E.
 	 */
-	writel(DSI_WRAP_DPI_0_EN, dsi->j721e_regs + DSI_WRAP_DPI_CONTROL);
+	pete_writel("drivers/gpu/drm/bridge/cadence/cdns-dsi-j721e.c:38", DSI_WRAP_DPI_0_EN, dsi->j721e_regs + DSI_WRAP_DPI_CONTROL);
 }
 
 static void cdns_dsi_j721e_disable(struct cdns_dsi *dsi)
 {
 	/* Put everything to defaults  */
-	writel(0, dsi->j721e_regs + DSI_WRAP_DPI_CONTROL);
+	pete_writel("drivers/gpu/drm/bridge/cadence/cdns-dsi-j721e.c:44", 0, dsi->j721e_regs + DSI_WRAP_DPI_CONTROL);
 }
 
 const struct cdns_dsi_platform_ops dsi_ti_j721e_ops = {

@@ -73,7 +73,7 @@ static unsigned long cpg_pll_clk_recalc_rate(struct clk_hw *hw,
 	struct cpg_pll_clk *pll_clk = to_pll_clk(hw);
 	unsigned int mult;
 
-	mult = FIELD_GET(CPG_PLLxCR0_NI, readl(pll_clk->pllcr0_reg)) + 1;
+	mult = FIELD_GET(CPG_PLLxCR0_NI, pete_readl("drivers/clk/renesas/rcar-gen4-cpg.c:76", pll_clk->pllcr0_reg)) + 1;
 
 	return parent_rate * mult * 2;
 }
@@ -107,7 +107,7 @@ static int cpg_pll_clk_set_rate(struct clk_hw *hw, unsigned long rate,
 	mult = DIV_ROUND_CLOSEST_ULL(rate, parent_rate * 2);
 	mult = clamp(mult, 1U, 256U);
 
-	if (readl(pll_clk->pllcr0_reg) & CPG_PLLxCR0_KICK)
+	if (pete_readl("drivers/clk/renesas/rcar-gen4-cpg.c:110", pll_clk->pllcr0_reg) & CPG_PLLxCR0_KICK)
 		return -EBUSY;
 
 	cpg_reg_modify(pll_clk->pllcr0_reg, CPG_PLLxCR0_NI,
@@ -165,7 +165,7 @@ static struct clk * __init cpg_pll_clk_register(const char *name,
 	pll_clk->pllecr_pllst_mask = CPG_PLLECR_PLLST(index);
 
 	/* Disable Fractional Multiplication and Frequency Dithering */
-	writel(0, base + cr1_offset);
+	pete_writel("drivers/clk/renesas/rcar-gen4-cpg.c:168", 0, base + cr1_offset);
 	cpg_reg_modify(pll_clk->pllcr0_reg, CPG_PLLxCR0_SSMODE, 0);
 
 	clk = clk_register(NULL, &pll_clk->hw);
@@ -199,7 +199,7 @@ static unsigned long cpg_z_clk_recalc_rate(struct clk_hw *hw,
 	unsigned int mult;
 	u32 val;
 
-	val = readl(zclk->reg) & zclk->mask;
+	val = pete_readl("drivers/clk/renesas/rcar-gen4-cpg.c:202", zclk->reg) & zclk->mask;
 	mult = 32 - (val >> __ffs(zclk->mask));
 
 	return DIV_ROUND_CLOSEST_ULL((u64)parent_rate * mult,
@@ -248,7 +248,7 @@ static int cpg_z_clk_set_rate(struct clk_hw *hw, unsigned long rate,
 				       parent_rate);
 	mult = clamp(mult, 1U, 32U);
 
-	if (readl(zclk->kick_reg) & CPG_FRQCRB_KICK)
+	if (pete_readl("drivers/clk/renesas/rcar-gen4-cpg.c:251", zclk->kick_reg) & CPG_FRQCRB_KICK)
 		return -EBUSY;
 
 	cpg_reg_modify(zclk->reg, zclk->mask, (32 - mult) << __ffs(zclk->mask));
@@ -269,7 +269,7 @@ static int cpg_z_clk_set_rate(struct clk_hw *hw, unsigned long rate,
 	 * "super" safe value.
 	 */
 	for (i = 1000; i; i--) {
-		if (!(readl(zclk->kick_reg) & CPG_FRQCRB_KICK))
+		if (!(pete_readl("drivers/clk/renesas/rcar-gen4-cpg.c:272", zclk->kick_reg) & CPG_FRQCRB_KICK))
 			return 0;
 
 		cpu_relax();
@@ -387,7 +387,7 @@ struct clk * __init rcar_gen4_cpg_clk_register(struct device *dev,
 		break;
 
 	case CLK_TYPE_GEN4_PLL2X_3X:
-		value = readl(base + core->offset);
+		value = pete_readl("drivers/clk/renesas/rcar-gen4-cpg.c:390", base + core->offset);
 		mult = (((value >> 24) & 0x7f) + 1) * 2;
 		break;
 
@@ -396,7 +396,7 @@ struct clk * __init rcar_gen4_cpg_clk_register(struct device *dev,
 					  base, core->div, core->offset);
 
 	case CLK_TYPE_GEN4_SDSRC:
-		div = ((readl(base + SD0CKCR1) >> 29) & 0x03) + 4;
+		div = ((pete_readl("drivers/clk/renesas/rcar-gen4-cpg.c:399", base + SD0CKCR1) >> 29) & 0x03) + 4;
 		break;
 
 	case CLK_TYPE_GEN4_SDH:

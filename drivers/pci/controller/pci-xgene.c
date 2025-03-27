@@ -71,12 +71,12 @@ struct xgene_pcie {
 
 static u32 xgene_pcie_readl(struct xgene_pcie *port, u32 reg)
 {
-	return readl(port->csr_base + reg);
+	return pete_readl("drivers/pci/controller/pci-xgene.c:74", port->csr_base + reg);
 }
 
 static void xgene_pcie_writel(struct xgene_pcie *port, u32 reg, u32 val)
 {
-	writel(val, port->csr_base + reg);
+	pete_writel("drivers/pci/controller/pci-xgene.c:79", val, port->csr_base + reg);
 }
 
 static inline u32 pcie_bar_low_val(u32 addr, u32 flags)
@@ -505,8 +505,8 @@ static void xgene_pcie_setup_ib_reg(struct xgene_pcie *port,
 	case 0:
 		xgene_pcie_set_ib_mask(port, BRIDGE_CFG_4, flags, size);
 		bar_addr = cfg_base + PCI_BASE_ADDRESS_0;
-		writel(bar_low, bar_addr);
-		writel(upper_32_bits(cpu_addr), bar_addr + 0x4);
+		pete_writel("drivers/pci/controller/pci-xgene.c:508", bar_low, bar_addr);
+		pete_writel("drivers/pci/controller/pci-xgene.c:509", upper_32_bits(cpu_addr), bar_addr + 0x4);
 		pim_reg = PIM1_1L;
 		break;
 	case 1:

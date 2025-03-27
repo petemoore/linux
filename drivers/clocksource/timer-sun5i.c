@@ -57,35 +57,35 @@ struct sun5i_timer {
  */
 static void sun5i_clkevt_sync(struct sun5i_timer *ce)
 {
-	u32 old = readl(ce->base + TIMER_CNTVAL_LO_REG(1));
+	u32 old = pete_readl("drivers/clocksource/timer-sun5i.c:60", ce->base + TIMER_CNTVAL_LO_REG(1));
 
-	while ((old - readl(ce->base + TIMER_CNTVAL_LO_REG(1))) < TIMER_SYNC_TICKS)
+	while ((old - pete_readl("drivers/clocksource/timer-sun5i.c:62", ce->base + TIMER_CNTVAL_LO_REG(1))) < TIMER_SYNC_TICKS)
 		cpu_relax();
 }
 
 static void sun5i_clkevt_time_stop(struct sun5i_timer *ce, u8 timer)
 {
-	u32 val = readl(ce->base + TIMER_CTL_REG(timer));
-	writel(val & ~TIMER_CTL_ENABLE, ce->base + TIMER_CTL_REG(timer));
+	u32 val = pete_readl("drivers/clocksource/timer-sun5i.c:68", ce->base + TIMER_CTL_REG(timer));
+	pete_writel("drivers/clocksource/timer-sun5i.c:69", val & ~TIMER_CTL_ENABLE, ce->base + TIMER_CTL_REG(timer));
 
 	sun5i_clkevt_sync(ce);
 }
 
 static void sun5i_clkevt_time_setup(struct sun5i_timer *ce, u8 timer, u32 delay)
 {
-	writel(delay, ce->base + TIMER_INTVAL_LO_REG(timer));
+	pete_writel("drivers/clocksource/timer-sun5i.c:76", delay, ce->base + TIMER_INTVAL_LO_REG(timer));
 }
 
 static void sun5i_clkevt_time_start(struct sun5i_timer *ce, u8 timer, bool periodic)
 {
-	u32 val = readl(ce->base + TIMER_CTL_REG(timer));
+	u32 val = pete_readl("drivers/clocksource/timer-sun5i.c:81", ce->base + TIMER_CTL_REG(timer));
 
 	if (periodic)
 		val &= ~TIMER_CTL_ONESHOT;
 	else
 		val |= TIMER_CTL_ONESHOT;
 
-	writel(val | TIMER_CTL_ENABLE | TIMER_CTL_RELOAD,
+	pete_writel("drivers/clocksource/timer-sun5i.c:88", val | TIMER_CTL_ENABLE | TIMER_CTL_RELOAD,
 	       ce->base + TIMER_CTL_REG(timer));
 }
 
@@ -132,7 +132,7 @@ static irqreturn_t sun5i_timer_interrupt(int irq, void *dev_id)
 {
 	struct sun5i_timer *ce = dev_id;
 
-	writel(0x1, ce->base + TIMER_IRQ_ST_REG);
+	pete_writel("drivers/clocksource/timer-sun5i.c:135", 0x1, ce->base + TIMER_IRQ_ST_REG);
 	ce->clkevt.event_handler(&ce->clkevt);
 
 	return IRQ_HANDLED;
@@ -142,7 +142,7 @@ static u64 sun5i_clksrc_read(struct clocksource *clksrc)
 {
 	struct sun5i_timer *cs = clksrc_to_sun5i_timer(clksrc);
 
-	return ~readl(cs->base + TIMER_CNTVAL_LO_REG(1));
+	return ~pete_readl("drivers/clocksource/timer-sun5i.c:145", cs->base + TIMER_CNTVAL_LO_REG(1));
 }
 
 static int sun5i_rate_cb(struct notifier_block *nb,
@@ -176,8 +176,8 @@ static int sun5i_setup_clocksource(struct platform_device *pdev,
 	void __iomem *base = cs->base;
 	int ret;
 
-	writel(~0, base + TIMER_INTVAL_LO_REG(1));
-	writel(TIMER_CTL_ENABLE | TIMER_CTL_RELOAD,
+	pete_writel("drivers/clocksource/timer-sun5i.c:179", ~0, base + TIMER_INTVAL_LO_REG(1));
+	pete_writel("drivers/clocksource/timer-sun5i.c:180", TIMER_CTL_ENABLE | TIMER_CTL_RELOAD,
 	       base + TIMER_CTL_REG(1));
 
 	cs->clksrc.name = pdev->dev.of_node->name;
@@ -216,8 +216,8 @@ static int sun5i_setup_clockevent(struct platform_device *pdev,
 	ce->clkevt.cpumask = cpu_possible_mask;
 
 	/* Enable timer0 interrupt */
-	val = readl(base + TIMER_IRQ_EN_REG);
-	writel(val | TIMER_IRQ_EN(0), base + TIMER_IRQ_EN_REG);
+	val = pete_readl("drivers/clocksource/timer-sun5i.c:219", base + TIMER_IRQ_EN_REG);
+	pete_writel("drivers/clocksource/timer-sun5i.c:220", val | TIMER_IRQ_EN(0), base + TIMER_IRQ_EN_REG);
 
 	clockevents_config_and_register(&ce->clkevt, rate,
 					TIMER_SYNC_TICKS, 0xffffffff);

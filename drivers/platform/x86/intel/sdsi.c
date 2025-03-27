@@ -123,7 +123,7 @@ sdsi_memcpy64_toio(u64 __iomem *to, const u64 *from, size_t count_bytes)
 	int i;
 
 	for (i = 0; i < count; i++)
-		writeq(from[i], &to[i]);
+		pete_writeq("drivers/platform/x86/intel/sdsi.c:126", from[i], &to[i]);
 }
 
 static __always_inline void
@@ -133,7 +133,7 @@ sdsi_memcpy64_fromio(u64 *to, const u64 __iomem *from, size_t count_bytes)
 	int i;
 
 	for (i = 0; i < count; i++)
-		to[i] = readq(&from[i]);
+		to[i] = pete_readq("drivers/platform/x86/intel/sdsi.c:136", &from[i]);
 }
 
 static inline void sdsi_complete_transaction(struct sdsi_priv *priv)
@@ -141,7 +141,7 @@ static inline void sdsi_complete_transaction(struct sdsi_priv *priv)
 	u64 control = FIELD_PREP(CTRL_COMPLETE, 1);
 
 	lockdep_assert_held(&priv->mb_lock);
-	writeq(control, priv->control_addr);
+	pete_writeq("drivers/platform/x86/intel/sdsi.c:144", control, priv->control_addr);
 }
 
 static int sdsi_status_to_errno(u32 status)
@@ -171,7 +171,7 @@ static int sdsi_mbox_cmd_read(struct sdsi_priv *priv, struct sdsi_mbox_info *inf
 		  FIELD_PREP(CTRL_SOM, 1) |
 		  FIELD_PREP(CTRL_RUN_BUSY, 1) |
 		  FIELD_PREP(CTRL_PACKET_SIZE, info->size);
-	writeq(control, priv->control_addr);
+	pete_writeq("drivers/platform/x86/intel/sdsi.c:174", control, priv->control_addr);
 
 	/* For reads, data sizes that are larger than the mailbox size are read in packets. */
 	total = 0;
@@ -253,7 +253,7 @@ static int sdsi_mbox_cmd_write(struct sdsi_priv *priv, struct sdsi_mbox_info *in
 		  FIELD_PREP(CTRL_RUN_BUSY, 1) |
 		  FIELD_PREP(CTRL_READ_WRITE, 1) |
 		  FIELD_PREP(CTRL_PACKET_SIZE, info->size);
-	writeq(control, priv->control_addr);
+	pete_writeq("drivers/platform/x86/intel/sdsi.c:256", control, priv->control_addr);
 
 	/* Poll on ready bit */
 	ret = readq_poll_timeout(priv->control_addr, control, control & CTRL_READY,
@@ -280,7 +280,7 @@ static int sdsi_mbox_acquire(struct sdsi_priv *priv, struct sdsi_mbox_info *info
 	lockdep_assert_held(&priv->mb_lock);
 
 	/* Check mailbox is available */
-	control = readq(priv->control_addr);
+	control = pete_readq("drivers/platform/x86/intel/sdsi.c:283", priv->control_addr);
 	owner = FIELD_GET(CTRL_OWNER, control);
 	if (owner != MBOX_OWNER_NONE)
 		return -EBUSY;
@@ -292,7 +292,7 @@ static int sdsi_mbox_acquire(struct sdsi_priv *priv, struct sdsi_mbox_info *info
 	 */
 	do {
 		/* Write first qword of payload */
-		writeq(info->payload[0], priv->mbox_addr);
+		pete_writeq("drivers/platform/x86/intel/sdsi.c:295", info->payload[0], priv->mbox_addr);
 
 		/* Check for ownership */
 		ret = readq_poll_timeout(priv->control_addr, control,
@@ -606,7 +606,7 @@ static int sdsi_map_mbox_registers(struct sdsi_priv *priv, struct pci_dev *paren
 	priv->mbox_addr = priv->control_addr + priv->control_size;
 	priv->regs_addr = priv->mbox_addr + SDSI_SIZE_MAILBOX;
 
-	priv->features = readq(priv->regs_addr + SDSI_ENABLED_FEATURES_OFFSET);
+	priv->features = pete_readq("drivers/platform/x86/intel/sdsi.c:609", priv->regs_addr + SDSI_ENABLED_FEATURES_OFFSET);
 
 	return 0;
 }

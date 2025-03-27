@@ -143,7 +143,7 @@ static const char *bcma_device_name(const struct bcma_device_id *id)
 
 static u32 bcma_scan_read32(struct bcma_bus *bus, u16 offset)
 {
-	return readl(bus->mmio + offset);
+	return pete_readl("drivers/bcma/scan.c:146", bus->mmio + offset);
 }
 
 static void bcma_scan_switch_core(struct bcma_bus *bus, u32 addr)
@@ -155,7 +155,7 @@ static void bcma_scan_switch_core(struct bcma_bus *bus, u32 addr)
 
 static u32 bcma_erom_get_ent(struct bcma_bus *bus, u32 __iomem **eromptr)
 {
-	u32 ent = readl(*eromptr);
+	u32 ent = pete_readl("drivers/bcma/scan.c:158", *eromptr);
 	(*eromptr)++;
 	return ent;
 }

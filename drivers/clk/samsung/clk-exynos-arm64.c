@@ -64,10 +64,10 @@ static void __init exynos_arm64_init_clocks(struct device_node *np,
 		if (reg_offs[i] < GATE_OFF_START || reg_offs[i] > GATE_OFF_END)
 			continue;
 
-		val = readl(reg);
+		val = pete_readl("drivers/clk/samsung/clk-exynos-arm64.c:67", reg);
 		val |= GATE_MANUAL;
 		val &= ~GATE_ENABLE_HWACG;
-		writel(val, reg);
+		pete_writel("drivers/clk/samsung/clk-exynos-arm64.c:70", val, reg);
 	}
 
 	iounmap(reg_base);

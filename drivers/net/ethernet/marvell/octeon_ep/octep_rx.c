@@ -284,7 +284,7 @@ void octep_oq_dbell_init(struct octep_device *oct)
 	int i;
 
 	for (i = 0; i < oct->num_oqs; i++)
-		writel(oct->oq[i]->max_count, oct->oq[i]->pkts_credit_reg);
+		pete_writel("drivers/net/ethernet/marvell/octeon_ep/octep_rx.c:287", oct->oq[i]->max_count, oct->oq[i]->pkts_credit_reg);
 }
 
 /**
@@ -318,7 +318,7 @@ static int octep_oq_check_hw_for_pkts(struct octep_device *oct,
 {
 	u32 pkt_count, new_pkts;
 
-	pkt_count = readl(oq->pkts_sent_reg);
+	pkt_count = pete_readl("drivers/net/ethernet/marvell/octeon_ep/octep_rx.c:321", oq->pkts_sent_reg);
 	new_pkts = pkt_count - oq->last_pkt_count;
 
 	/* Clear the hardware packets counter register if the rx queue is
@@ -327,8 +327,8 @@ static int octep_oq_check_hw_for_pkts(struct octep_device *oct,
 	 * this counter is not cleared every time read, to save write cycles.
 	 */
 	if (unlikely(pkt_count > 0xF0000000U)) {
-		writel(pkt_count, oq->pkts_sent_reg);
-		pkt_count = readl(oq->pkts_sent_reg);
+		pete_writel("drivers/net/ethernet/marvell/octeon_ep/octep_rx.c:330", pkt_count, oq->pkts_sent_reg);
+		pkt_count = pete_readl("drivers/net/ethernet/marvell/octeon_ep/octep_rx.c:331", oq->pkts_sent_reg);
 		new_pkts += pkt_count;
 	}
 	oq->last_pkt_count = pkt_count;
@@ -535,7 +535,7 @@ int octep_oq_process_rx(struct octep_oq *oq, int budget)
 
 		/* flush pending writes before updating credits */
 		wmb();
-		writel(desc_refilled, oq->pkts_credit_reg);
+		pete_writel("drivers/net/ethernet/marvell/octeon_ep/octep_rx.c:538", desc_refilled, oq->pkts_credit_reg);
 	}
 
 	return total_pkts_processed;

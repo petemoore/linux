@@ -103,7 +103,7 @@ static const struct sdhci_cdns_phy_cfg sdhci_cdns_phy_cfgs[] = {
 static inline void cdns_writel(struct sdhci_cdns_priv *priv, u32 val,
 			       void __iomem *reg)
 {
-	writel(val, reg);
+	pete_writel("drivers/mmc/host/sdhci-cadence.c:106", val, reg);
 }
 
 static int sdhci_cdns_write_phy_reg(struct sdhci_cdns_priv *priv,
@@ -204,7 +204,7 @@ static void sdhci_cdns_set_emmc_mode(struct sdhci_cdns_priv *priv, u32 mode)
 	u32 tmp;
 
 	/* The speed mode for eMMC is selected by HRS06 register */
-	tmp = readl(priv->hrs_addr + SDHCI_CDNS_HRS06);
+	tmp = pete_readl("drivers/mmc/host/sdhci-cadence.c:207", priv->hrs_addr + SDHCI_CDNS_HRS06);
 	tmp &= ~SDHCI_CDNS_HRS06_MODE;
 	tmp |= FIELD_PREP(SDHCI_CDNS_HRS06_MODE, mode);
 	priv->priv_writel(priv, tmp, priv->hrs_addr + SDHCI_CDNS_HRS06);
@@ -214,7 +214,7 @@ static u32 sdhci_cdns_get_emmc_mode(struct sdhci_cdns_priv *priv)
 {
 	u32 tmp;
 
-	tmp = readl(priv->hrs_addr + SDHCI_CDNS_HRS06);
+	tmp = pete_readl("drivers/mmc/host/sdhci-cadence.c:217", priv->hrs_addr + SDHCI_CDNS_HRS06);
 	return FIELD_GET(SDHCI_CDNS_HRS06_MODE, tmp);
 }
 
@@ -228,7 +228,7 @@ static int sdhci_cdns_set_tune_val(struct sdhci_host *host, unsigned int val)
 	if (WARN_ON(!FIELD_FIT(SDHCI_CDNS_HRS06_TUNE, val)))
 		return -EINVAL;
 
-	tmp = readl(reg);
+	tmp = pete_readl("drivers/mmc/host/sdhci-cadence.c:231", reg);
 	tmp &= ~SDHCI_CDNS_HRS06_TUNE;
 	tmp |= FIELD_PREP(SDHCI_CDNS_HRS06_TUNE, val);
 
@@ -340,8 +340,8 @@ static void elba_priv_writel(struct sdhci_cdns_priv *priv, u32 val,
 	unsigned long flags;
 
 	spin_lock_irqsave(&priv->wrlock, flags);
-	writel(GENMASK(7, 3), priv->ctl_addr);
-	writel(val, reg);
+	pete_writel("drivers/mmc/host/sdhci-cadence.c:343", GENMASK(7, 3), priv->ctl_addr);
+	pete_writel("drivers/mmc/host/sdhci-cadence.c:344", val, reg);
 	spin_unlock_irqrestore(&priv->wrlock, flags);
 }
 
@@ -359,8 +359,8 @@ static void elba_write_w(struct sdhci_host *host, u16 val, int reg)
 
 	byte_enables = GENMASK(1, 0) << shift;
 	spin_lock_irqsave(&priv->wrlock, flags);
-	writel(ELBA_BYTE_ENABLE_MASK(byte_enables), priv->ctl_addr);
-	writew(val, host->ioaddr + reg);
+	pete_writel("drivers/mmc/host/sdhci-cadence.c:362", ELBA_BYTE_ENABLE_MASK(byte_enables), priv->ctl_addr);
+	pete_writew("drivers/mmc/host/sdhci-cadence.c:363", val, host->ioaddr + reg);
 	spin_unlock_irqrestore(&priv->wrlock, flags);
 }
 
@@ -373,8 +373,8 @@ static void elba_write_b(struct sdhci_host *host, u8 val, int reg)
 
 	byte_enables = BIT(0) << shift;
 	spin_lock_irqsave(&priv->wrlock, flags);
-	writel(ELBA_BYTE_ENABLE_MASK(byte_enables), priv->ctl_addr);
-	writeb(val, host->ioaddr + reg);
+	pete_writel("drivers/mmc/host/sdhci-cadence.c:376", ELBA_BYTE_ENABLE_MASK(byte_enables), priv->ctl_addr);
+	pete_writeb("drivers/mmc/host/sdhci-cadence.c:377", val, host->ioaddr + reg);
 	spin_unlock_irqrestore(&priv->wrlock, flags);
 }
 
@@ -405,7 +405,7 @@ static int elba_drv_init(struct platform_device *pdev)
 
 	priv->ctl_addr = ioaddr;
 	priv->priv_writel = elba_priv_writel;
-	writel(ELBA_BYTE_ENABLE_MASK(0xf), priv->ctl_addr);
+	pete_writel("drivers/mmc/host/sdhci-cadence.c:408", ELBA_BYTE_ENABLE_MASK(0xf), priv->ctl_addr);
 
 	return 0;
 }

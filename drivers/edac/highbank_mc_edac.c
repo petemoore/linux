@@ -58,10 +58,10 @@ static irqreturn_t highbank_mc_err_handler(int irq, void *dev_id)
 	u32 status, err_addr;
 
 	/* Read the interrupt status register */
-	status = readl(drvdata->mc_int_base + HB_DDR_ECC_INT_STATUS);
+	status = pete_readl("drivers/edac/highbank_mc_edac.c:61", drvdata->mc_int_base + HB_DDR_ECC_INT_STATUS);
 
 	if (status & HB_DDR_ECC_INT_STAT_UE) {
-		err_addr = readl(drvdata->mc_err_base + HB_DDR_ECC_U_ERR_ADDR);
+		err_addr = pete_readl("drivers/edac/highbank_mc_edac.c:64", drvdata->mc_err_base + HB_DDR_ECC_U_ERR_ADDR);
 		edac_mc_handle_error(HW_EVENT_ERR_UNCORRECTED, mci, 1,
 				     err_addr >> PAGE_SHIFT,
 				     err_addr & ~PAGE_MASK, 0,
@@ -69,9 +69,9 @@ static irqreturn_t highbank_mc_err_handler(int irq, void *dev_id)
 				     mci->ctl_name, "");
 	}
 	if (status & HB_DDR_ECC_INT_STAT_CE) {
-		u32 syndrome = readl(drvdata->mc_err_base + HB_DDR_ECC_C_ERR_STAT);
+		u32 syndrome = pete_readl("drivers/edac/highbank_mc_edac.c:72", drvdata->mc_err_base + HB_DDR_ECC_C_ERR_STAT);
 		syndrome = (syndrome >> 8) & 0xff;
-		err_addr = readl(drvdata->mc_err_base + HB_DDR_ECC_C_ERR_ADDR);
+		err_addr = pete_readl("drivers/edac/highbank_mc_edac.c:74", drvdata->mc_err_base + HB_DDR_ECC_C_ERR_ADDR);
 		edac_mc_handle_error(HW_EVENT_ERR_CORRECTED, mci, 1,
 				     err_addr >> PAGE_SHIFT,
 				     err_addr & ~PAGE_MASK, syndrome,
@@ -80,7 +80,7 @@ static irqreturn_t highbank_mc_err_handler(int irq, void *dev_id)
 	}
 
 	/* clear the error, clears the interrupt */
-	writel(status, drvdata->mc_int_base + HB_DDR_ECC_INT_ACK);
+	pete_writel("drivers/edac/highbank_mc_edac.c:83", status, drvdata->mc_int_base + HB_DDR_ECC_INT_ACK);
 	return IRQ_HANDLED;
 }
 
@@ -89,10 +89,10 @@ static void highbank_mc_err_inject(struct mem_ctl_info *mci, u8 synd)
 	struct hb_mc_drvdata *pdata = mci->pvt_info;
 	u32 reg;
 
-	reg = readl(pdata->mc_err_base + HB_DDR_ECC_OPT);
+	reg = pete_readl("drivers/edac/highbank_mc_edac.c:92", pdata->mc_err_base + HB_DDR_ECC_OPT);
 	reg &= HB_DDR_ECC_OPT_MODE_MASK;
 	reg |= (synd << HB_DDR_ECC_OPT_XOR_SHIFT) | HB_DDR_ECC_OPT_FWC;
-	writel(reg, pdata->mc_err_base + HB_DDR_ECC_OPT);
+	pete_writel("drivers/edac/highbank_mc_edac.c:95", reg, pdata->mc_err_base + HB_DDR_ECC_OPT);
 }
 
 #define to_mci(k) container_of(k, struct mem_ctl_info, dev)
@@ -205,7 +205,7 @@ static int highbank_mc_probe(struct platform_device *pdev)
 	drvdata->mc_err_base = base + settings->err_offset;
 	drvdata->mc_int_base = base + settings->int_offset;
 
-	control = readl(drvdata->mc_err_base + HB_DDR_ECC_OPT) & 0x3;
+	control = pete_readl("drivers/edac/highbank_mc_edac.c:208", drvdata->mc_err_base + HB_DDR_ECC_OPT) & 0x3;
 	if (!control || (control == 0x2)) {
 		dev_err(&pdev->dev, "No ECC present, or ECC disabled\n");
 		res = -ENODEV;

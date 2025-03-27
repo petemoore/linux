@@ -67,9 +67,9 @@ static void icrdma_ena_irq(struct irdma_sc_dev *dev, u32 idx)
 	      FIELD_PREP(IRDMA_GLINT_DYN_CTL_CLEARPBA, 1);
 
 	if (dev->hw_attrs.uk_attrs.hw_rev != IRDMA_GEN_1)
-		writel(val, dev->hw_regs[IRDMA_GLINT_DYN_CTL] + idx);
+		pete_writel("drivers/infiniband/hw/irdma/icrdma_hw.c:70", val, dev->hw_regs[IRDMA_GLINT_DYN_CTL] + idx);
 	else
-		writel(val, dev->hw_regs[IRDMA_GLINT_DYN_CTL] + (idx - 1));
+		pete_writel("drivers/infiniband/hw/irdma/icrdma_hw.c:72", val, dev->hw_regs[IRDMA_GLINT_DYN_CTL] + (idx - 1));
 }
 
 /**
@@ -80,9 +80,9 @@ static void icrdma_ena_irq(struct irdma_sc_dev *dev, u32 idx)
 static void icrdma_disable_irq(struct irdma_sc_dev *dev, u32 idx)
 {
 	if (dev->hw_attrs.uk_attrs.hw_rev != IRDMA_GEN_1)
-		writel(0, dev->hw_regs[IRDMA_GLINT_DYN_CTL] + idx);
+		pete_writel("drivers/infiniband/hw/irdma/icrdma_hw.c:83", 0, dev->hw_regs[IRDMA_GLINT_DYN_CTL] + idx);
 	else
-		writel(0, dev->hw_regs[IRDMA_GLINT_DYN_CTL] + (idx - 1));
+		pete_writel("drivers/infiniband/hw/irdma/icrdma_hw.c:85", 0, dev->hw_regs[IRDMA_GLINT_DYN_CTL] + (idx - 1));
 }
 
 /**
@@ -101,7 +101,7 @@ static void icrdma_cfg_ceq(struct irdma_sc_dev *dev, u32 ceq_id, u32 idx,
 		  FIELD_PREP(IRDMA_GLINT_CEQCTL_MSIX_INDX, idx) |
 		  FIELD_PREP(IRDMA_GLINT_CEQCTL_ITR_INDX, 3);
 
-	writel(reg_val, dev->hw_regs[IRDMA_GLINT_CEQCTL] + ceq_id);
+	pete_writel("drivers/infiniband/hw/irdma/icrdma_hw.c:104", reg_val, dev->hw_regs[IRDMA_GLINT_CEQCTL] + ceq_id);
 }
 
 static const struct irdma_irq_ops icrdma_irq_ops = {

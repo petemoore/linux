@@ -185,17 +185,17 @@ static int qcom_edp_phy_init(struct phy *phy)
 	if (ret)
 		goto out_disable_supplies;
 
-	writel(DP_PHY_PD_CTL_PWRDN | DP_PHY_PD_CTL_AUX_PWRDN |
+	pete_writel("drivers/phy/qualcomm/phy-qcom-edp.c:188", DP_PHY_PD_CTL_PWRDN | DP_PHY_PD_CTL_AUX_PWRDN |
 	       DP_PHY_PD_CTL_PLL_PWRDN | DP_PHY_PD_CTL_DP_CLAMP_EN,
 	       edp->edp + DP_PHY_PD_CTL);
 
 	/* Turn on BIAS current for PHY/PLL */
-	writel(0x17, edp->pll + QSERDES_V4_COM_BIAS_EN_CLKBUFLR_EN);
+	pete_writel("drivers/phy/qualcomm/phy-qcom-edp.c:193", 0x17, edp->pll + QSERDES_V4_COM_BIAS_EN_CLKBUFLR_EN);
 
-	writel(DP_PHY_PD_CTL_PSR_PWRDN, edp->edp + DP_PHY_PD_CTL);
+	pete_writel("drivers/phy/qualcomm/phy-qcom-edp.c:195", DP_PHY_PD_CTL_PSR_PWRDN, edp->edp + DP_PHY_PD_CTL);
 	msleep(20);
 
-	writel(DP_PHY_PD_CTL_PWRDN | DP_PHY_PD_CTL_AUX_PWRDN |
+	pete_writel("drivers/phy/qualcomm/phy-qcom-edp.c:198", DP_PHY_PD_CTL_PWRDN | DP_PHY_PD_CTL_AUX_PWRDN |
 	       DP_PHY_PD_CTL_LANE_0_1_PWRDN | DP_PHY_PD_CTL_LANE_2_3_PWRDN |
 	       DP_PHY_PD_CTL_PLL_PWRDN | DP_PHY_PD_CTL_DP_CLAMP_EN,
 	       edp->edp + DP_PHY_PD_CTL);
@@ -205,20 +205,20 @@ static int qcom_edp_phy_init(struct phy *phy)
 	else
 		cfg8 = 0x37;
 
-	writel(0xfc, edp->edp + DP_PHY_MODE);
+	pete_writel("drivers/phy/qualcomm/phy-qcom-edp.c:208", 0xfc, edp->edp + DP_PHY_MODE);
 
-	writel(0x00, edp->edp + DP_PHY_AUX_CFG0);
-	writel(0x13, edp->edp + DP_PHY_AUX_CFG1);
-	writel(0x24, edp->edp + DP_PHY_AUX_CFG2);
-	writel(0x00, edp->edp + DP_PHY_AUX_CFG3);
-	writel(0x0a, edp->edp + DP_PHY_AUX_CFG4);
-	writel(0x26, edp->edp + DP_PHY_AUX_CFG5);
-	writel(0x0a, edp->edp + DP_PHY_AUX_CFG6);
-	writel(0x03, edp->edp + DP_PHY_AUX_CFG7);
-	writel(cfg8, edp->edp + DP_PHY_AUX_CFG8);
-	writel(0x03, edp->edp + DP_PHY_AUX_CFG9);
+	pete_writel("drivers/phy/qualcomm/phy-qcom-edp.c:210", 0x00, edp->edp + DP_PHY_AUX_CFG0);
+	pete_writel("drivers/phy/qualcomm/phy-qcom-edp.c:211", 0x13, edp->edp + DP_PHY_AUX_CFG1);
+	pete_writel("drivers/phy/qualcomm/phy-qcom-edp.c:212", 0x24, edp->edp + DP_PHY_AUX_CFG2);
+	pete_writel("drivers/phy/qualcomm/phy-qcom-edp.c:213", 0x00, edp->edp + DP_PHY_AUX_CFG3);
+	pete_writel("drivers/phy/qualcomm/phy-qcom-edp.c:214", 0x0a, edp->edp + DP_PHY_AUX_CFG4);
+	pete_writel("drivers/phy/qualcomm/phy-qcom-edp.c:215", 0x26, edp->edp + DP_PHY_AUX_CFG5);
+	pete_writel("drivers/phy/qualcomm/phy-qcom-edp.c:216", 0x0a, edp->edp + DP_PHY_AUX_CFG6);
+	pete_writel("drivers/phy/qualcomm/phy-qcom-edp.c:217", 0x03, edp->edp + DP_PHY_AUX_CFG7);
+	pete_writel("drivers/phy/qualcomm/phy-qcom-edp.c:218", cfg8, edp->edp + DP_PHY_AUX_CFG8);
+	pete_writel("drivers/phy/qualcomm/phy-qcom-edp.c:219", 0x03, edp->edp + DP_PHY_AUX_CFG9);
 
-	writel(PHY_AUX_STOP_ERR_MASK | PHY_AUX_DEC_ERR_MASK |
+	pete_writel("drivers/phy/qualcomm/phy-qcom-edp.c:221", PHY_AUX_STOP_ERR_MASK | PHY_AUX_DEC_ERR_MASK |
 	       PHY_AUX_SYNC_ERR_MASK | PHY_AUX_ALIGN_ERR_MASK |
 	       PHY_AUX_REQ_ERR_MASK, edp->edp + DP_PHY_AUX_INTERRUPT_MASK);
 
@@ -263,13 +263,13 @@ static int qcom_edp_set_voltages(struct qcom_edp *edp, const struct phy_configur
 
 	ldo_config = (cfg && cfg->is_dp) ? 0x1 : 0x0;
 
-	writel(ldo_config, edp->tx0 + TXn_LDO_CONFIG);
-	writel(swing, edp->tx0 + TXn_TX_DRV_LVL);
-	writel(emph, edp->tx0 + TXn_TX_EMP_POST1_LVL);
+	pete_writel("drivers/phy/qualcomm/phy-qcom-edp.c:266", ldo_config, edp->tx0 + TXn_LDO_CONFIG);
+	pete_writel("drivers/phy/qualcomm/phy-qcom-edp.c:267", swing, edp->tx0 + TXn_TX_DRV_LVL);
+	pete_writel("drivers/phy/qualcomm/phy-qcom-edp.c:268", emph, edp->tx0 + TXn_TX_EMP_POST1_LVL);
 
-	writel(ldo_config, edp->tx1 + TXn_LDO_CONFIG);
-	writel(swing, edp->tx1 + TXn_TX_DRV_LVL);
-	writel(emph, edp->tx1 + TXn_TX_EMP_POST1_LVL);
+	pete_writel("drivers/phy/qualcomm/phy-qcom-edp.c:270", ldo_config, edp->tx1 + TXn_LDO_CONFIG);
+	pete_writel("drivers/phy/qualcomm/phy-qcom-edp.c:271", swing, edp->tx1 + TXn_TX_DRV_LVL);
+	pete_writel("drivers/phy/qualcomm/phy-qcom-edp.c:272", emph, edp->tx1 + TXn_TX_EMP_POST1_LVL);
 
 	return 0;
 }
@@ -312,12 +312,12 @@ static int qcom_edp_configure_ssc(const struct qcom_edp *edp)
 		return -EINVAL;
 	}
 
-	writel(0x01, edp->pll + QSERDES_V4_COM_SSC_EN_CENTER);
-	writel(0x00, edp->pll + QSERDES_V4_COM_SSC_ADJ_PER1);
-	writel(0x36, edp->pll + QSERDES_V4_COM_SSC_PER1);
-	writel(0x01, edp->pll + QSERDES_V4_COM_SSC_PER2);
-	writel(step1, edp->pll + QSERDES_V4_COM_SSC_STEP_SIZE1_MODE0);
-	writel(step2, edp->pll + QSERDES_V4_COM_SSC_STEP_SIZE2_MODE0);
+	pete_writel("drivers/phy/qualcomm/phy-qcom-edp.c:315", 0x01, edp->pll + QSERDES_V4_COM_SSC_EN_CENTER);
+	pete_writel("drivers/phy/qualcomm/phy-qcom-edp.c:316", 0x00, edp->pll + QSERDES_V4_COM_SSC_ADJ_PER1);
+	pete_writel("drivers/phy/qualcomm/phy-qcom-edp.c:317", 0x36, edp->pll + QSERDES_V4_COM_SSC_PER1);
+	pete_writel("drivers/phy/qualcomm/phy-qcom-edp.c:318", 0x01, edp->pll + QSERDES_V4_COM_SSC_PER2);
+	pete_writel("drivers/phy/qualcomm/phy-qcom-edp.c:319", step1, edp->pll + QSERDES_V4_COM_SSC_STEP_SIZE1_MODE0);
+	pete_writel("drivers/phy/qualcomm/phy-qcom-edp.c:320", step2, edp->pll + QSERDES_V4_COM_SSC_STEP_SIZE2_MODE0);
 
 	return 0;
 }
@@ -374,36 +374,36 @@ static int qcom_edp_configure_pll(const struct qcom_edp *edp)
 		return -EINVAL;
 	}
 
-	writel(0x01, edp->pll + QSERDES_V4_COM_SVS_MODE_CLK_SEL);
-	writel(0x0b, edp->pll + QSERDES_V4_COM_SYSCLK_EN_SEL);
-	writel(0x02, edp->pll + QSERDES_V4_COM_SYS_CLK_CTRL);
-	writel(0x0c, edp->pll + QSERDES_V4_COM_CLK_ENABLE1);
-	writel(0x06, edp->pll + QSERDES_V4_COM_SYSCLK_BUF_ENABLE);
-	writel(0x30, edp->pll + QSERDES_V4_COM_CLK_SELECT);
-	writel(hsclk_sel, edp->pll + QSERDES_V4_COM_HSCLK_SEL);
-	writel(0x0f, edp->pll + QSERDES_V4_COM_PLL_IVCO);
-	writel(0x08, edp->pll + QSERDES_V4_COM_LOCK_CMP_EN);
-	writel(0x36, edp->pll + QSERDES_V4_COM_PLL_CCTRL_MODE0);
-	writel(0x16, edp->pll + QSERDES_V4_COM_PLL_RCTRL_MODE0);
-	writel(0x06, edp->pll + QSERDES_V4_COM_CP_CTRL_MODE0);
-	writel(dec_start_mode0, edp->pll + QSERDES_V4_COM_DEC_START_MODE0);
-	writel(0x00, edp->pll + QSERDES_V4_COM_DIV_FRAC_START1_MODE0);
-	writel(div_frac_start2_mode0, edp->pll + QSERDES_V4_COM_DIV_FRAC_START2_MODE0);
-	writel(div_frac_start3_mode0, edp->pll + QSERDES_V4_COM_DIV_FRAC_START3_MODE0);
-	writel(0x02, edp->pll + QSERDES_V4_COM_CMN_CONFIG);
-	writel(0x3f, edp->pll + QSERDES_V4_COM_INTEGLOOP_GAIN0_MODE0);
-	writel(0x00, edp->pll + QSERDES_V4_COM_INTEGLOOP_GAIN1_MODE0);
-	writel(0x00, edp->pll + QSERDES_V4_COM_VCO_TUNE_MAP);
-	writel(lock_cmp1_mode0, edp->pll + QSERDES_V4_COM_LOCK_CMP1_MODE0);
-	writel(lock_cmp2_mode0, edp->pll + QSERDES_V4_COM_LOCK_CMP2_MODE0);
+	pete_writel("drivers/phy/qualcomm/phy-qcom-edp.c:377", 0x01, edp->pll + QSERDES_V4_COM_SVS_MODE_CLK_SEL);
+	pete_writel("drivers/phy/qualcomm/phy-qcom-edp.c:378", 0x0b, edp->pll + QSERDES_V4_COM_SYSCLK_EN_SEL);
+	pete_writel("drivers/phy/qualcomm/phy-qcom-edp.c:379", 0x02, edp->pll + QSERDES_V4_COM_SYS_CLK_CTRL);
+	pete_writel("drivers/phy/qualcomm/phy-qcom-edp.c:380", 0x0c, edp->pll + QSERDES_V4_COM_CLK_ENABLE1);
+	pete_writel("drivers/phy/qualcomm/phy-qcom-edp.c:381", 0x06, edp->pll + QSERDES_V4_COM_SYSCLK_BUF_ENABLE);
+	pete_writel("drivers/phy/qualcomm/phy-qcom-edp.c:382", 0x30, edp->pll + QSERDES_V4_COM_CLK_SELECT);
+	pete_writel("drivers/phy/qualcomm/phy-qcom-edp.c:383", hsclk_sel, edp->pll + QSERDES_V4_COM_HSCLK_SEL);
+	pete_writel("drivers/phy/qualcomm/phy-qcom-edp.c:384", 0x0f, edp->pll + QSERDES_V4_COM_PLL_IVCO);
+	pete_writel("drivers/phy/qualcomm/phy-qcom-edp.c:385", 0x08, edp->pll + QSERDES_V4_COM_LOCK_CMP_EN);
+	pete_writel("drivers/phy/qualcomm/phy-qcom-edp.c:386", 0x36, edp->pll + QSERDES_V4_COM_PLL_CCTRL_MODE0);
+	pete_writel("drivers/phy/qualcomm/phy-qcom-edp.c:387", 0x16, edp->pll + QSERDES_V4_COM_PLL_RCTRL_MODE0);
+	pete_writel("drivers/phy/qualcomm/phy-qcom-edp.c:388", 0x06, edp->pll + QSERDES_V4_COM_CP_CTRL_MODE0);
+	pete_writel("drivers/phy/qualcomm/phy-qcom-edp.c:389", dec_start_mode0, edp->pll + QSERDES_V4_COM_DEC_START_MODE0);
+	pete_writel("drivers/phy/qualcomm/phy-qcom-edp.c:390", 0x00, edp->pll + QSERDES_V4_COM_DIV_FRAC_START1_MODE0);
+	pete_writel("drivers/phy/qualcomm/phy-qcom-edp.c:391", div_frac_start2_mode0, edp->pll + QSERDES_V4_COM_DIV_FRAC_START2_MODE0);
+	pete_writel("drivers/phy/qualcomm/phy-qcom-edp.c:392", div_frac_start3_mode0, edp->pll + QSERDES_V4_COM_DIV_FRAC_START3_MODE0);
+	pete_writel("drivers/phy/qualcomm/phy-qcom-edp.c:393", 0x02, edp->pll + QSERDES_V4_COM_CMN_CONFIG);
+	pete_writel("drivers/phy/qualcomm/phy-qcom-edp.c:394", 0x3f, edp->pll + QSERDES_V4_COM_INTEGLOOP_GAIN0_MODE0);
+	pete_writel("drivers/phy/qualcomm/phy-qcom-edp.c:395", 0x00, edp->pll + QSERDES_V4_COM_INTEGLOOP_GAIN1_MODE0);
+	pete_writel("drivers/phy/qualcomm/phy-qcom-edp.c:396", 0x00, edp->pll + QSERDES_V4_COM_VCO_TUNE_MAP);
+	pete_writel("drivers/phy/qualcomm/phy-qcom-edp.c:397", lock_cmp1_mode0, edp->pll + QSERDES_V4_COM_LOCK_CMP1_MODE0);
+	pete_writel("drivers/phy/qualcomm/phy-qcom-edp.c:398", lock_cmp2_mode0, edp->pll + QSERDES_V4_COM_LOCK_CMP2_MODE0);
 
-	writel(0x0a, edp->pll + QSERDES_V4_COM_BG_TIMER);
-	writel(0x14, edp->pll + QSERDES_V4_COM_CORECLK_DIV_MODE0);
-	writel(0x00, edp->pll + QSERDES_V4_COM_VCO_TUNE_CTRL);
-	writel(0x17, edp->pll + QSERDES_V4_COM_BIAS_EN_CLKBUFLR_EN);
-	writel(0x0f, edp->pll + QSERDES_V4_COM_CORE_CLK_EN);
-	writel(0xa0, edp->pll + QSERDES_V4_COM_VCO_TUNE1_MODE0);
-	writel(0x03, edp->pll + QSERDES_V4_COM_VCO_TUNE2_MODE0);
+	pete_writel("drivers/phy/qualcomm/phy-qcom-edp.c:400", 0x0a, edp->pll + QSERDES_V4_COM_BG_TIMER);
+	pete_writel("drivers/phy/qualcomm/phy-qcom-edp.c:401", 0x14, edp->pll + QSERDES_V4_COM_CORECLK_DIV_MODE0);
+	pete_writel("drivers/phy/qualcomm/phy-qcom-edp.c:402", 0x00, edp->pll + QSERDES_V4_COM_VCO_TUNE_CTRL);
+	pete_writel("drivers/phy/qualcomm/phy-qcom-edp.c:403", 0x17, edp->pll + QSERDES_V4_COM_BIAS_EN_CLKBUFLR_EN);
+	pete_writel("drivers/phy/qualcomm/phy-qcom-edp.c:404", 0x0f, edp->pll + QSERDES_V4_COM_CORE_CLK_EN);
+	pete_writel("drivers/phy/qualcomm/phy-qcom-edp.c:405", 0xa0, edp->pll + QSERDES_V4_COM_VCO_TUNE1_MODE0);
+	pete_writel("drivers/phy/qualcomm/phy-qcom-edp.c:406", 0x03, edp->pll + QSERDES_V4_COM_VCO_TUNE2_MODE0);
 
 	return 0;
 }
@@ -439,7 +439,7 @@ static int qcom_edp_set_vco_div(const struct qcom_edp *edp, unsigned long *pixel
 		return -EINVAL;
 	}
 
-	writel(vco_div, edp->edp + DP_PHY_VCO_DIV);
+	pete_writel("drivers/phy/qualcomm/phy-qcom-edp.c:442", vco_div, edp->edp + DP_PHY_VCO_DIV);
 
 	return 0;
 }
@@ -456,11 +456,11 @@ static int qcom_edp_phy_power_on(struct phy *phy)
 	u32 val;
 	u8 cfg1;
 
-	writel(DP_PHY_PD_CTL_PWRDN | DP_PHY_PD_CTL_AUX_PWRDN |
+	pete_writel("drivers/phy/qualcomm/phy-qcom-edp.c:459", DP_PHY_PD_CTL_PWRDN | DP_PHY_PD_CTL_AUX_PWRDN |
 	       DP_PHY_PD_CTL_LANE_0_1_PWRDN | DP_PHY_PD_CTL_LANE_2_3_PWRDN |
 	       DP_PHY_PD_CTL_PLL_PWRDN | DP_PHY_PD_CTL_DP_CLAMP_EN,
 	       edp->edp + DP_PHY_PD_CTL);
-	writel(0xfc, edp->edp + DP_PHY_MODE);
+	pete_writel("drivers/phy/qualcomm/phy-qcom-edp.c:463", 0xfc, edp->edp + DP_PHY_MODE);
 
 	timeout = readl_poll_timeout(edp->pll + QSERDES_V4_COM_CMN_STATUS,
 				     val, val & BIT(7), 5, 200);
@@ -470,10 +470,10 @@ static int qcom_edp_phy_power_on(struct phy *phy)
 
 	ldo_config = (cfg && cfg->is_dp) ? 0x1 : 0x0;
 
-	writel(ldo_config, edp->tx0 + TXn_LDO_CONFIG);
-	writel(ldo_config, edp->tx1 + TXn_LDO_CONFIG);
-	writel(0x00, edp->tx0 + TXn_LANE_MODE_1);
-	writel(0x00, edp->tx1 + TXn_LANE_MODE_1);
+	pete_writel("drivers/phy/qualcomm/phy-qcom-edp.c:473", ldo_config, edp->tx0 + TXn_LDO_CONFIG);
+	pete_writel("drivers/phy/qualcomm/phy-qcom-edp.c:474", ldo_config, edp->tx1 + TXn_LDO_CONFIG);
+	pete_writel("drivers/phy/qualcomm/phy-qcom-edp.c:475", 0x00, edp->tx0 + TXn_LANE_MODE_1);
+	pete_writel("drivers/phy/qualcomm/phy-qcom-edp.c:476", 0x00, edp->tx1 + TXn_LANE_MODE_1);
 
 	if (edp->dp_opts.ssc) {
 		ret = qcom_edp_configure_ssc(edp);
@@ -486,57 +486,57 @@ static int qcom_edp_phy_power_on(struct phy *phy)
 		return ret;
 
 	/* TX Lane configuration */
-	writel(0x05, edp->edp + DP_PHY_TX0_TX1_LANE_CTL);
-	writel(0x05, edp->edp + DP_PHY_TX2_TX3_LANE_CTL);
+	pete_writel("drivers/phy/qualcomm/phy-qcom-edp.c:489", 0x05, edp->edp + DP_PHY_TX0_TX1_LANE_CTL);
+	pete_writel("drivers/phy/qualcomm/phy-qcom-edp.c:490", 0x05, edp->edp + DP_PHY_TX2_TX3_LANE_CTL);
 
 	/* TX-0 register configuration */
-	writel(0x03, edp->tx0 + TXn_TRANSCEIVER_BIAS_EN);
-	writel(0x0f, edp->tx0 + TXn_CLKBUF_ENABLE);
-	writel(0x03, edp->tx0 + TXn_RESET_TSYNC_EN);
-	writel(0x01, edp->tx0 + TXn_TRAN_DRVR_EMP_EN);
-	writel(0x04, edp->tx0 + TXn_TX_BAND);
+	pete_writel("drivers/phy/qualcomm/phy-qcom-edp.c:493", 0x03, edp->tx0 + TXn_TRANSCEIVER_BIAS_EN);
+	pete_writel("drivers/phy/qualcomm/phy-qcom-edp.c:494", 0x0f, edp->tx0 + TXn_CLKBUF_ENABLE);
+	pete_writel("drivers/phy/qualcomm/phy-qcom-edp.c:495", 0x03, edp->tx0 + TXn_RESET_TSYNC_EN);
+	pete_writel("drivers/phy/qualcomm/phy-qcom-edp.c:496", 0x01, edp->tx0 + TXn_TRAN_DRVR_EMP_EN);
+	pete_writel("drivers/phy/qualcomm/phy-qcom-edp.c:497", 0x04, edp->tx0 + TXn_TX_BAND);
 
 	/* TX-1 register configuration */
-	writel(0x03, edp->tx1 + TXn_TRANSCEIVER_BIAS_EN);
-	writel(0x0f, edp->tx1 + TXn_CLKBUF_ENABLE);
-	writel(0x03, edp->tx1 + TXn_RESET_TSYNC_EN);
-	writel(0x01, edp->tx1 + TXn_TRAN_DRVR_EMP_EN);
-	writel(0x04, edp->tx1 + TXn_TX_BAND);
+	pete_writel("drivers/phy/qualcomm/phy-qcom-edp.c:500", 0x03, edp->tx1 + TXn_TRANSCEIVER_BIAS_EN);
+	pete_writel("drivers/phy/qualcomm/phy-qcom-edp.c:501", 0x0f, edp->tx1 + TXn_CLKBUF_ENABLE);
+	pete_writel("drivers/phy/qualcomm/phy-qcom-edp.c:502", 0x03, edp->tx1 + TXn_RESET_TSYNC_EN);
+	pete_writel("drivers/phy/qualcomm/phy-qcom-edp.c:503", 0x01, edp->tx1 + TXn_TRAN_DRVR_EMP_EN);
+	pete_writel("drivers/phy/qualcomm/phy-qcom-edp.c:504", 0x04, edp->tx1 + TXn_TX_BAND);
 
 	ret = qcom_edp_set_vco_div(edp, &pixel_freq);
 	if (ret)
 		return ret;
 
-	writel(0x01, edp->edp + DP_PHY_CFG);
-	writel(0x05, edp->edp + DP_PHY_CFG);
-	writel(0x01, edp->edp + DP_PHY_CFG);
-	writel(0x09, edp->edp + DP_PHY_CFG);
+	pete_writel("drivers/phy/qualcomm/phy-qcom-edp.c:510", 0x01, edp->edp + DP_PHY_CFG);
+	pete_writel("drivers/phy/qualcomm/phy-qcom-edp.c:511", 0x05, edp->edp + DP_PHY_CFG);
+	pete_writel("drivers/phy/qualcomm/phy-qcom-edp.c:512", 0x01, edp->edp + DP_PHY_CFG);
+	pete_writel("drivers/phy/qualcomm/phy-qcom-edp.c:513", 0x09, edp->edp + DP_PHY_CFG);
 
-	writel(0x20, edp->pll + QSERDES_V4_COM_RESETSM_CNTRL);
+	pete_writel("drivers/phy/qualcomm/phy-qcom-edp.c:515", 0x20, edp->pll + QSERDES_V4_COM_RESETSM_CNTRL);
 
 	timeout = readl_poll_timeout(edp->pll + QSERDES_V4_COM_C_READY_STATUS,
 				     val, val & BIT(0), 500, 10000);
 	if (timeout)
 		return timeout;
 
-	writel(0x19, edp->edp + DP_PHY_CFG);
-	writel(0x1f, edp->tx0 + TXn_HIGHZ_DRVR_EN);
-	writel(0x04, edp->tx0 + TXn_HIGHZ_DRVR_EN);
-	writel(0x00, edp->tx0 + TXn_TX_POL_INV);
-	writel(0x1f, edp->tx1 + TXn_HIGHZ_DRVR_EN);
-	writel(0x04, edp->tx1 + TXn_HIGHZ_DRVR_EN);
-	writel(0x00, edp->tx1 + TXn_TX_POL_INV);
-	writel(0x10, edp->tx0 + TXn_TX_DRV_LVL_OFFSET);
-	writel(0x10, edp->tx1 + TXn_TX_DRV_LVL_OFFSET);
-	writel(0x11, edp->tx0 + TXn_RES_CODE_LANE_OFFSET_TX0);
-	writel(0x11, edp->tx0 + TXn_RES_CODE_LANE_OFFSET_TX1);
-	writel(0x11, edp->tx1 + TXn_RES_CODE_LANE_OFFSET_TX0);
-	writel(0x11, edp->tx1 + TXn_RES_CODE_LANE_OFFSET_TX1);
+	pete_writel("drivers/phy/qualcomm/phy-qcom-edp.c:522", 0x19, edp->edp + DP_PHY_CFG);
+	pete_writel("drivers/phy/qualcomm/phy-qcom-edp.c:523", 0x1f, edp->tx0 + TXn_HIGHZ_DRVR_EN);
+	pete_writel("drivers/phy/qualcomm/phy-qcom-edp.c:524", 0x04, edp->tx0 + TXn_HIGHZ_DRVR_EN);
+	pete_writel("drivers/phy/qualcomm/phy-qcom-edp.c:525", 0x00, edp->tx0 + TXn_TX_POL_INV);
+	pete_writel("drivers/phy/qualcomm/phy-qcom-edp.c:526", 0x1f, edp->tx1 + TXn_HIGHZ_DRVR_EN);
+	pete_writel("drivers/phy/qualcomm/phy-qcom-edp.c:527", 0x04, edp->tx1 + TXn_HIGHZ_DRVR_EN);
+	pete_writel("drivers/phy/qualcomm/phy-qcom-edp.c:528", 0x00, edp->tx1 + TXn_TX_POL_INV);
+	pete_writel("drivers/phy/qualcomm/phy-qcom-edp.c:529", 0x10, edp->tx0 + TXn_TX_DRV_LVL_OFFSET);
+	pete_writel("drivers/phy/qualcomm/phy-qcom-edp.c:530", 0x10, edp->tx1 + TXn_TX_DRV_LVL_OFFSET);
+	pete_writel("drivers/phy/qualcomm/phy-qcom-edp.c:531", 0x11, edp->tx0 + TXn_RES_CODE_LANE_OFFSET_TX0);
+	pete_writel("drivers/phy/qualcomm/phy-qcom-edp.c:532", 0x11, edp->tx0 + TXn_RES_CODE_LANE_OFFSET_TX1);
+	pete_writel("drivers/phy/qualcomm/phy-qcom-edp.c:533", 0x11, edp->tx1 + TXn_RES_CODE_LANE_OFFSET_TX0);
+	pete_writel("drivers/phy/qualcomm/phy-qcom-edp.c:534", 0x11, edp->tx1 + TXn_RES_CODE_LANE_OFFSET_TX1);
 
-	writel(0x10, edp->tx0 + TXn_TX_EMP_POST1_LVL);
-	writel(0x10, edp->tx1 + TXn_TX_EMP_POST1_LVL);
-	writel(0x1f, edp->tx0 + TXn_TX_DRV_LVL);
-	writel(0x1f, edp->tx1 + TXn_TX_DRV_LVL);
+	pete_writel("drivers/phy/qualcomm/phy-qcom-edp.c:536", 0x10, edp->tx0 + TXn_TX_EMP_POST1_LVL);
+	pete_writel("drivers/phy/qualcomm/phy-qcom-edp.c:537", 0x10, edp->tx1 + TXn_TX_EMP_POST1_LVL);
+	pete_writel("drivers/phy/qualcomm/phy-qcom-edp.c:538", 0x1f, edp->tx0 + TXn_TX_DRV_LVL);
+	pete_writel("drivers/phy/qualcomm/phy-qcom-edp.c:539", 0x1f, edp->tx1 + TXn_TX_DRV_LVL);
 
 	if (edp->dp_opts.lanes == 1) {
 		bias0_en = 0x01;
@@ -558,16 +558,16 @@ static int qcom_edp_phy_power_on(struct phy *phy)
 		cfg1 = 0xf;
 	}
 
-	writel(drvr0_en, edp->tx0 + TXn_HIGHZ_DRVR_EN);
-	writel(bias0_en, edp->tx0 + TXn_TRANSCEIVER_BIAS_EN);
-	writel(drvr1_en, edp->tx1 + TXn_HIGHZ_DRVR_EN);
-	writel(bias1_en, edp->tx1 + TXn_TRANSCEIVER_BIAS_EN);
-	writel(cfg1, edp->edp + DP_PHY_CFG_1);
+	pete_writel("drivers/phy/qualcomm/phy-qcom-edp.c:561", drvr0_en, edp->tx0 + TXn_HIGHZ_DRVR_EN);
+	pete_writel("drivers/phy/qualcomm/phy-qcom-edp.c:562", bias0_en, edp->tx0 + TXn_TRANSCEIVER_BIAS_EN);
+	pete_writel("drivers/phy/qualcomm/phy-qcom-edp.c:563", drvr1_en, edp->tx1 + TXn_HIGHZ_DRVR_EN);
+	pete_writel("drivers/phy/qualcomm/phy-qcom-edp.c:564", bias1_en, edp->tx1 + TXn_TRANSCEIVER_BIAS_EN);
+	pete_writel("drivers/phy/qualcomm/phy-qcom-edp.c:565", cfg1, edp->edp + DP_PHY_CFG_1);
 
-	writel(0x18, edp->edp + DP_PHY_CFG);
+	pete_writel("drivers/phy/qualcomm/phy-qcom-edp.c:567", 0x18, edp->edp + DP_PHY_CFG);
 	usleep_range(100, 1000);
 
-	writel(0x19, edp->edp + DP_PHY_CFG);
+	pete_writel("drivers/phy/qualcomm/phy-qcom-edp.c:570", 0x19, edp->edp + DP_PHY_CFG);
 
 	ret = readl_poll_timeout(edp->edp + DP_PHY_STATUS,
 				 val, val & BIT(1), 500, 10000);
@@ -584,7 +584,7 @@ static int qcom_edp_phy_power_off(struct phy *phy)
 {
 	const struct qcom_edp *edp = phy_get_drvdata(phy);
 
-	writel(DP_PHY_PD_CTL_PSR_PWRDN, edp->edp + DP_PHY_PD_CTL);
+	pete_writel("drivers/phy/qualcomm/phy-qcom-edp.c:587", DP_PHY_PD_CTL_PSR_PWRDN, edp->edp + DP_PHY_PD_CTL);
 
 	return 0;
 }

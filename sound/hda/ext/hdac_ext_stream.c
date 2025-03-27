@@ -100,7 +100,7 @@ void snd_hdac_ext_stream_decouple_locked(struct hdac_bus *bus,
 	u32 val;
 	int mask = AZX_PPCTL_PROCEN(hstream->index);
 
-	val = readw(bus->ppcap + AZX_REG_PP_PPCTL) & mask;
+	val = pete_readw("sound/hda/ext/hdac_ext_stream.c:103", bus->ppcap + AZX_REG_PP_PPCTL) & mask;
 
 	if (decouple && !val)
 		snd_hdac_updatel(bus->ppcap, AZX_REG_PP_PPCTL, mask, mask);
@@ -163,20 +163,20 @@ void snd_hdac_ext_stream_reset(struct hdac_ext_stream *hext_stream)
 	udelay(3);
 	timeout = 50;
 	do {
-		val = readl(hext_stream->pplc_addr + AZX_REG_PPLCCTL) &
+		val = pete_readl("sound/hda/ext/hdac_ext_stream.c:166", hext_stream->pplc_addr + AZX_REG_PPLCCTL) &
 				AZX_PPLCCTL_STRST;
 		if (val)
 			break;
 		udelay(3);
 	} while (--timeout);
 	val &= ~AZX_PPLCCTL_STRST;
-	writel(val, hext_stream->pplc_addr + AZX_REG_PPLCCTL);
+	pete_writel("sound/hda/ext/hdac_ext_stream.c:173", val, hext_stream->pplc_addr + AZX_REG_PPLCCTL);
 	udelay(3);
 
 	timeout = 50;
 	/* waiting for hardware to report that the stream is out of reset */
 	do {
-		val = readl(hext_stream->pplc_addr + AZX_REG_PPLCCTL) & AZX_PPLCCTL_STRST;
+		val = pete_readl("sound/hda/ext/hdac_ext_stream.c:179", hext_stream->pplc_addr + AZX_REG_PPLCCTL) & AZX_PPLCCTL_STRST;
 		if (!val)
 			break;
 		udelay(3);
@@ -198,13 +198,13 @@ int snd_hdac_ext_stream_setup(struct hdac_ext_stream *hext_stream, int fmt)
 	/* make sure the run bit is zero for SD */
 	snd_hdac_ext_stream_clear(hext_stream);
 	/* program the stream_tag */
-	val = readl(hext_stream->pplc_addr + AZX_REG_PPLCCTL);
+	val = pete_readl("sound/hda/ext/hdac_ext_stream.c:201", hext_stream->pplc_addr + AZX_REG_PPLCCTL);
 	val = (val & ~AZX_PPLCCTL_STRM_MASK) |
 		(hstream->stream_tag << AZX_PPLCCTL_STRM_SHIFT);
-	writel(val, hext_stream->pplc_addr + AZX_REG_PPLCCTL);
+	pete_writel("sound/hda/ext/hdac_ext_stream.c:204", val, hext_stream->pplc_addr + AZX_REG_PPLCCTL);
 
 	/* program the stream format */
-	writew(fmt, hext_stream->pplc_addr + AZX_REG_PPLCFMT);
+	pete_writew("sound/hda/ext/hdac_ext_stream.c:207", fmt, hext_stream->pplc_addr + AZX_REG_PPLCFMT);
 
 	return 0;
 }

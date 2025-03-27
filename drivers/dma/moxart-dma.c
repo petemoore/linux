@@ -196,9 +196,9 @@ static int moxart_terminate_all(struct dma_chan *chan)
 		ch->desc = NULL;
 	}
 
-	ctrl = readl(ch->base + REG_OFF_CTRL);
+	ctrl = pete_readl("drivers/dma/moxart-dma.c:199", ch->base + REG_OFF_CTRL);
 	ctrl &= ~(APB_DMA_ENABLE | APB_DMA_FIN_INT_EN | APB_DMA_ERR_INT_EN);
-	writel(ctrl, ch->base + REG_OFF_CTRL);
+	pete_writel("drivers/dma/moxart-dma.c:201", ctrl, ch->base + REG_OFF_CTRL);
 
 	vchan_get_all_descriptors(&ch->vc, &head);
 	spin_unlock_irqrestore(&ch->vc.lock, flags);
@@ -215,7 +215,7 @@ static int moxart_slave_config(struct dma_chan *chan,
 
 	ch->cfg = *cfg;
 
-	ctrl = readl(ch->base + REG_OFF_CTRL);
+	ctrl = pete_readl("drivers/dma/moxart-dma.c:218", ch->base + REG_OFF_CTRL);
 	ctrl |= APB_DMA_BURST_MODE;
 	ctrl &= ~(APB_DMA_DEST_MASK | APB_DMA_SOURCE_MASK);
 	ctrl &= ~(APB_DMA_DEST_REQ_NO_MASK | APB_DMA_SOURCE_REQ_NO_MASK);
@@ -258,7 +258,7 @@ static int moxart_slave_config(struct dma_chan *chan,
 			 APB_DMA_SOURCE_REQ_NO_MASK);
 	}
 
-	writel(ctrl, ch->base + REG_OFF_CTRL);
+	pete_writel("drivers/dma/moxart-dma.c:261", ctrl, ch->base + REG_OFF_CTRL);
 
 	return 0;
 }
@@ -368,8 +368,8 @@ static void moxart_free_chan_resources(struct dma_chan *chan)
 static void moxart_dma_set_params(struct moxart_chan *ch, dma_addr_t src_addr,
 				  dma_addr_t dst_addr)
 {
-	writel(src_addr, ch->base + REG_OFF_ADDRESS_SOURCE);
-	writel(dst_addr, ch->base + REG_OFF_ADDRESS_DEST);
+	pete_writel("drivers/dma/moxart-dma.c:371", src_addr, ch->base + REG_OFF_ADDRESS_SOURCE);
+	pete_writel("drivers/dma/moxart-dma.c:372", dst_addr, ch->base + REG_OFF_ADDRESS_DEST);
 }
 
 static void moxart_set_transfer_params(struct moxart_chan *ch, unsigned int len)
@@ -383,7 +383,7 @@ static void moxart_set_transfer_params(struct moxart_chan *ch, unsigned int len)
 	 * There are 4 cycles on 64 bytes copied, i.e. one cycle copies 16
 	 * bytes ( when width is APB_DMAB_DATA_WIDTH_4 ).
 	 */
-	writel(d->dma_cycles, ch->base + REG_OFF_CYCLES);
+	pete_writel("drivers/dma/moxart-dma.c:386", d->dma_cycles, ch->base + REG_OFF_CYCLES);
 
 	dev_dbg(chan2dev(&ch->vc.chan), "%s: set %u DMA cycles (len=%u)\n",
 		__func__, d->dma_cycles, len);
@@ -393,9 +393,9 @@ static void moxart_start_dma(struct moxart_chan *ch)
 {
 	u32 ctrl;
 
-	ctrl = readl(ch->base + REG_OFF_CTRL);
+	ctrl = pete_readl("drivers/dma/moxart-dma.c:396", ch->base + REG_OFF_CTRL);
 	ctrl |= (APB_DMA_ENABLE | APB_DMA_FIN_INT_EN | APB_DMA_ERR_INT_EN);
-	writel(ctrl, ch->base + REG_OFF_CTRL);
+	pete_writel("drivers/dma/moxart-dma.c:398", ctrl, ch->base + REG_OFF_CTRL);
 }
 
 static void moxart_dma_start_sg(struct moxart_chan *ch, unsigned int idx)
@@ -462,7 +462,7 @@ static size_t moxart_dma_desc_size_in_flight(struct moxart_chan *ch)
 	unsigned int completed_cycles, cycles;
 
 	size = moxart_dma_desc_size(ch->desc, ch->sgidx);
-	cycles = readl(ch->base + REG_OFF_CYCLES);
+	cycles = pete_readl("drivers/dma/moxart-dma.c:465", ch->base + REG_OFF_CYCLES);
 	completed_cycles = (ch->desc->dma_cycles - cycles);
 	size -= completed_cycles << es_bytes[ch->desc->es];
 
@@ -529,7 +529,7 @@ static irqreturn_t moxart_dma_interrupt(int irq, void *devid)
 		if (!ch->allocated)
 			continue;
 
-		ctrl = readl(ch->base + REG_OFF_CTRL);
+		ctrl = pete_readl("drivers/dma/moxart-dma.c:532", ch->base + REG_OFF_CTRL);
 
 		dev_dbg(chan2dev(&ch->vc.chan), "%s: ch=%p ch->base=%p ctrl=%x\n",
 			__func__, ch, ch->base, ctrl);
@@ -553,7 +553,7 @@ static irqreturn_t moxart_dma_interrupt(int irq, void *devid)
 			ch->error = 1;
 		}
 
-		writel(ctrl, ch->base + REG_OFF_CTRL);
+		pete_writel("drivers/dma/moxart-dma.c:556", ctrl, ch->base + REG_OFF_CTRL);
 	}
 
 	return IRQ_HANDLED;

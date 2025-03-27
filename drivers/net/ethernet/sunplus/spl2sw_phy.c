@@ -18,7 +18,7 @@ static void spl2sw_mii_link_change(struct net_device *ndev)
 	struct spl2sw_common *comm = mac->comm;
 	u32 reg;
 
-	reg = readl(comm->l2sw_reg_base + L2SW_MAC_FORCE_MODE);
+	reg = pete_readl("drivers/net/ethernet/sunplus/spl2sw_phy.c:21", comm->l2sw_reg_base + L2SW_MAC_FORCE_MODE);
 
 	if (phydev->link) {
 		reg |= FIELD_PREP(MAC_FORCE_RMII_LINK, mac->lan_port);
@@ -48,7 +48,7 @@ static void spl2sw_mii_link_change(struct net_device *ndev)
 		       ~MAC_FORCE_RMII_LINK;
 	}
 
-	writel(reg, comm->l2sw_reg_base + L2SW_MAC_FORCE_MODE);
+	pete_writel("drivers/net/ethernet/sunplus/spl2sw_phy.c:51", reg, comm->l2sw_reg_base + L2SW_MAC_FORCE_MODE);
 
 	phy_print_status(phydev);
 }

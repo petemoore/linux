@@ -237,12 +237,12 @@ static inline u32 iproc_i2c_rd_reg(struct bcm_iproc_i2c_dev *iproc_i2c,
 
 	if (iproc_i2c->idm_base) {
 		spin_lock_irqsave(&iproc_i2c->idm_lock, flags);
-		writel(iproc_i2c->ape_addr_mask,
+		pete_writel("drivers/i2c/busses/i2c-bcm-iproc.c:240", iproc_i2c->ape_addr_mask,
 		       iproc_i2c->idm_base + IDM_CTRL_DIRECT_OFFSET);
-		val = readl(iproc_i2c->base + offset);
+		val = pete_readl("drivers/i2c/busses/i2c-bcm-iproc.c:242", iproc_i2c->base + offset);
 		spin_unlock_irqrestore(&iproc_i2c->idm_lock, flags);
 	} else {
-		val = readl(iproc_i2c->base + offset);
+		val = pete_readl("drivers/i2c/busses/i2c-bcm-iproc.c:245", iproc_i2c->base + offset);
 	}
 
 	return val;
@@ -255,12 +255,12 @@ static inline void iproc_i2c_wr_reg(struct bcm_iproc_i2c_dev *iproc_i2c,
 
 	if (iproc_i2c->idm_base) {
 		spin_lock_irqsave(&iproc_i2c->idm_lock, flags);
-		writel(iproc_i2c->ape_addr_mask,
+		pete_writel("drivers/i2c/busses/i2c-bcm-iproc.c:258", iproc_i2c->ape_addr_mask,
 		       iproc_i2c->idm_base + IDM_CTRL_DIRECT_OFFSET);
-		writel(val, iproc_i2c->base + offset);
+		pete_writel("drivers/i2c/busses/i2c-bcm-iproc.c:260", val, iproc_i2c->base + offset);
 		spin_unlock_irqrestore(&iproc_i2c->idm_lock, flags);
 	} else {
-		writel(val, iproc_i2c->base + offset);
+		pete_writel("drivers/i2c/busses/i2c-bcm-iproc.c:263", val, iproc_i2c->base + offset);
 	}
 }
 

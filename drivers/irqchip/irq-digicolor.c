@@ -83,8 +83,8 @@ static int __init digicolor_of_init(struct device_node *node,
 	}
 
 	/* disable all interrupts */
-	writel(0, reg_base + IC_INT0ENABLE_LO);
-	writel(0, reg_base + IC_INT0ENABLE_XLO);
+	pete_writel("drivers/irqchip/irq-digicolor.c:86", 0, reg_base + IC_INT0ENABLE_LO);
+	pete_writel("drivers/irqchip/irq-digicolor.c:87", 0, reg_base + IC_INT0ENABLE_XLO);
 
 	ucregs = syscon_regmap_lookup_by_phandle(node, "syscon");
 	if (IS_ERR(ucregs)) {

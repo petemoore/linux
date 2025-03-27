@@ -393,9 +393,9 @@ static inline void arcnet_set_addr(struct net_device *dev, u8 addr)
 	outsb((addr) + BUS_ALIGN * (offset), buffer, count)
 
 #define arcnet_readb(addr, offset)					\
-	readb((addr) + (offset))
+	pete_readb("drivers/net/arcnet/arcdevice.h:396", (addr) + (offset))
 #define arcnet_writeb(value, addr, offset)				\
-	writeb(value, (addr) + (offset))
+	pete_writeb("drivers/net/arcnet/arcdevice.h:398", value, (addr) + (offset))
 
 #endif				/* __KERNEL__ */
 #endif				/* _LINUX_ARCDEVICE_H */

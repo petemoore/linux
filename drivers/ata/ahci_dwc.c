@@ -188,7 +188,7 @@ static void ahci_dwc_check_cap(struct ahci_host_priv *hpriv)
 	u32 param;
 	int i;
 
-	param = readl(hpriv->mmio + AHCI_DWC_HOST_GPARAM2R);
+	param = pete_readl("drivers/ata/ahci_dwc.c:191", hpriv->mmio + AHCI_DWC_HOST_GPARAM2R);
 	dev_mp = !!(param & AHCI_DWC_HOST_DEV_MP);
 	dev_cp = !!(param & AHCI_DWC_HOST_DEV_CP);
 	fbs_sup = !!(param & AHCI_DWC_HOST_FBS_SUP);
@@ -231,8 +231,8 @@ static void ahci_dwc_init_timer(struct ahci_host_priv *hpriv)
 	u32 cap, cap2;
 
 	/* 1ms tick is generated only for the CCC or DevSleep features */
-	cap = readl(hpriv->mmio + HOST_CAP);
-	cap2 = readl(hpriv->mmio + HOST_CAP2);
+	cap = pete_readl("drivers/ata/ahci_dwc.c:234", hpriv->mmio + HOST_CAP);
+	cap2 = pete_readl("drivers/ata/ahci_dwc.c:235", hpriv->mmio + HOST_CAP2);
 	if (!(cap & HOST_CAP_CCC) && !(cap2 & HOST_CAP2_SDS))
 		return;
 
@@ -245,7 +245,7 @@ static void ahci_dwc_init_timer(struct ahci_host_priv *hpriv)
 		return;
 
 	/* 1ms timer interval is set as TIMV = AMBA_FREQ[MHZ] * 1000 */
-	dpriv->timv = readl(hpriv->mmio + AHCI_DWC_HOST_TIMER1MS);
+	dpriv->timv = pete_readl("drivers/ata/ahci_dwc.c:248", hpriv->mmio + AHCI_DWC_HOST_TIMER1MS);
 	dpriv->timv = FIELD_GET(AHCI_DWC_HOST_TIMV_MASK, dpriv->timv);
 	rate = clk_get_rate(aclk) / 1000UL;
 	if (rate == dpriv->timv)
@@ -254,7 +254,7 @@ static void ahci_dwc_init_timer(struct ahci_host_priv *hpriv)
 	dev_info(&dpriv->pdev->dev, "Update CCC/DevSlp timer for Fapp %lu MHz\n",
 		 rate / 1000UL);
 	dpriv->timv = FIELD_PREP(AHCI_DWC_HOST_TIMV_MASK, rate);
-	writel(dpriv->timv, hpriv->mmio + AHCI_DWC_HOST_TIMER1MS);
+	pete_writel("drivers/ata/ahci_dwc.c:257", dpriv->timv, hpriv->mmio + AHCI_DWC_HOST_TIMER1MS);
 }
 
 static int ahci_dwc_init_dmacr(struct ahci_host_priv *hpriv)
@@ -281,7 +281,7 @@ static int ahci_dwc_init_dmacr(struct ahci_host_priv *hpriv)
 		}
 
 		port_mmio = __ahci_port_base(hpriv, port);
-		dmacr = readl(port_mmio + AHCI_DWC_PORT_DMACR);
+		dmacr = pete_readl("drivers/ata/ahci_dwc.c:284", port_mmio + AHCI_DWC_PORT_DMACR);
 
 		if (!of_property_read_u32(child, "snps,tx-ts-max", &ts)) {
 			ts = ilog2(ts);
@@ -295,7 +295,7 @@ static int ahci_dwc_init_dmacr(struct ahci_host_priv *hpriv)
 			dmacr |= FIELD_PREP(AHCI_DWC_PORT_RXTS_MASK, ts);
 		}
 
-		writel(dmacr, port_mmio + AHCI_DWC_PORT_DMACR);
+		pete_writel("drivers/ata/ahci_dwc.c:298", dmacr, port_mmio + AHCI_DWC_PORT_DMACR);
 		dpriv->dmacr[port] = dmacr;
 	}
 
@@ -354,11 +354,11 @@ static int ahci_dwc_reinit_host(struct ahci_host_priv *hpriv)
 			goto err_disable_resources;
 	}
 
-	writel(dpriv->timv, hpriv->mmio + AHCI_DWC_HOST_TIMER1MS);
+	pete_writel("drivers/ata/ahci_dwc.c:357", dpriv->timv, hpriv->mmio + AHCI_DWC_HOST_TIMER1MS);
 
 	for_each_set_bit(i, &port_map, AHCI_MAX_PORTS) {
 		port_mmio = __ahci_port_base(hpriv, i);
-		writel(dpriv->dmacr[i], port_mmio + AHCI_DWC_PORT_DMACR);
+		pete_writel("drivers/ata/ahci_dwc.c:361", dpriv->dmacr[i], port_mmio + AHCI_DWC_PORT_DMACR);
 	}
 
 	return 0;

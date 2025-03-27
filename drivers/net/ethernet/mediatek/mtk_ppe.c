@@ -25,12 +25,12 @@ static const struct rhashtable_params mtk_flow_l2_ht_params = {
 
 static void ppe_w32(struct mtk_ppe *ppe, u32 reg, u32 val)
 {
-	writel(val, ppe->base + reg);
+	pete_writel("drivers/net/ethernet/mediatek/mtk_ppe.c:28", val, ppe->base + reg);
 }
 
 static u32 ppe_r32(struct mtk_ppe *ppe, u32 reg)
 {
-	return readl(ppe->base + reg);
+	return pete_readl("drivers/net/ethernet/mediatek/mtk_ppe.c:33", ppe->base + reg);
 }
 
 static u32 ppe_m32(struct mtk_ppe *ppe, u32 reg, u32 mask, u32 set)
@@ -102,13 +102,13 @@ static int mtk_mib_entry_read(struct mtk_ppe *ppe, u16 index, u64 *bytes, u64 *p
 	if (ret)
 		return ret;
 
-	cnt_r0 = readl(ppe->base + MTK_PPE_MIB_SER_R0);
-	cnt_r1 = readl(ppe->base + MTK_PPE_MIB_SER_R1);
-	cnt_r2 = readl(ppe->base + MTK_PPE_MIB_SER_R2);
+	cnt_r0 = pete_readl("drivers/net/ethernet/mediatek/mtk_ppe.c:105", ppe->base + MTK_PPE_MIB_SER_R0);
+	cnt_r1 = pete_readl("drivers/net/ethernet/mediatek/mtk_ppe.c:106", ppe->base + MTK_PPE_MIB_SER_R1);
+	cnt_r2 = pete_readl("drivers/net/ethernet/mediatek/mtk_ppe.c:107", ppe->base + MTK_PPE_MIB_SER_R2);
 
 	if (mtk_is_netsys_v3_or_greater(ppe->eth)) {
 		/* 64 bit for each counter */
-		u32 cnt_r3 = readl(ppe->base + MTK_PPE_MIB_SER_R3);
+		u32 cnt_r3 = pete_readl("drivers/net/ethernet/mediatek/mtk_ppe.c:111", ppe->base + MTK_PPE_MIB_SER_R3);
 		*bytes = ((u64)cnt_r1 << 32) | cnt_r0;
 		*packets = ((u64)cnt_r3 << 32) | cnt_r2;
 	} else {

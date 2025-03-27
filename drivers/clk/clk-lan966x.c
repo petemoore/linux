@@ -67,10 +67,10 @@ static void __iomem *base;
 static int lan966x_gck_enable(struct clk_hw *hw)
 {
 	struct lan966x_gck *gck = to_lan966x_gck(hw);
-	u32 val = readl(gck->reg);
+	u32 val = pete_readl("drivers/clk/clk-lan966x.c:70", gck->reg);
 
 	val |= GCK_ENA;
-	writel(val, gck->reg);
+	pete_writel("drivers/clk/clk-lan966x.c:73", val, gck->reg);
 
 	return 0;
 }
@@ -78,10 +78,10 @@ static int lan966x_gck_enable(struct clk_hw *hw)
 static void lan966x_gck_disable(struct clk_hw *hw)
 {
 	struct lan966x_gck *gck = to_lan966x_gck(hw);
-	u32 val = readl(gck->reg);
+	u32 val = pete_readl("drivers/clk/clk-lan966x.c:81", gck->reg);
 
 	val &= ~GCK_ENA;
-	writel(val, gck->reg);
+	pete_writel("drivers/clk/clk-lan966x.c:84", val, gck->reg);
 }
 
 static int lan966x_gck_set_rate(struct clk_hw *hw,
@@ -89,7 +89,7 @@ static int lan966x_gck_set_rate(struct clk_hw *hw,
 				unsigned long parent_rate)
 {
 	struct lan966x_gck *gck = to_lan966x_gck(hw);
-	u32 div, val = readl(gck->reg);
+	u32 div, val = pete_readl("drivers/clk/clk-lan966x.c:92", gck->reg);
 
 	if (rate == 0 || parent_rate == 0)
 		return -EINVAL;
@@ -98,7 +98,7 @@ static int lan966x_gck_set_rate(struct clk_hw *hw,
 	div = parent_rate / rate;
 	val &= ~GCK_PRESCALER;
 	val |= FIELD_PREP(GCK_PRESCALER, (div - 1));
-	writel(val, gck->reg);
+	pete_writel("drivers/clk/clk-lan966x.c:101", val, gck->reg);
 
 	return 0;
 }
@@ -107,7 +107,7 @@ static unsigned long lan966x_gck_recalc_rate(struct clk_hw *hw,
 					     unsigned long parent_rate)
 {
 	struct lan966x_gck *gck = to_lan966x_gck(hw);
-	u32 div, val = readl(gck->reg);
+	u32 div, val = pete_readl("drivers/clk/clk-lan966x.c:110", gck->reg);
 
 	div = FIELD_GET(GCK_PRESCALER, val);
 
@@ -140,7 +140,7 @@ static int lan966x_gck_determine_rate(struct clk_hw *hw,
 static u8 lan966x_gck_get_parent(struct clk_hw *hw)
 {
 	struct lan966x_gck *gck = to_lan966x_gck(hw);
-	u32 val = readl(gck->reg);
+	u32 val = pete_readl("drivers/clk/clk-lan966x.c:143", gck->reg);
 
 	return FIELD_GET(GCK_SRC_SEL, val);
 }
@@ -148,11 +148,11 @@ static u8 lan966x_gck_get_parent(struct clk_hw *hw)
 static int lan966x_gck_set_parent(struct clk_hw *hw, u8 index)
 {
 	struct lan966x_gck *gck = to_lan966x_gck(hw);
-	u32 val = readl(gck->reg);
+	u32 val = pete_readl("drivers/clk/clk-lan966x.c:151", gck->reg);
 
 	val &= ~GCK_SRC_SEL;
 	val |= FIELD_PREP(GCK_SRC_SEL, index);
-	writel(val, gck->reg);
+	pete_writel("drivers/clk/clk-lan966x.c:155", val, gck->reg);
 
 	return 0;
 }

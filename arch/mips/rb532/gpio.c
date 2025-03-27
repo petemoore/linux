@@ -75,10 +75,10 @@ static inline void rb532_set_bit(unsigned bitval,
 
 	local_irq_save(flags);
 
-	val = readl(ioaddr);
+	val = pete_readl("arch/mips/rb532/gpio.c:78", ioaddr);
 	val &= ~(!bitval << offset);   /* unset bit if bitval == 0 */
 	val |= (!!bitval << offset);   /* set bit if bitval == 1 */
-	writel(val, ioaddr);
+	pete_writel("arch/mips/rb532/gpio.c:81", val, ioaddr);
 
 	local_irq_restore(flags);
 }
@@ -89,7 +89,7 @@ static inline void rb532_set_bit(unsigned bitval,
  */
 static inline int rb532_get_bit(unsigned offset, void __iomem *ioaddr)
 {
-	return readl(ioaddr) & (1 << offset);
+	return pete_readl("arch/mips/rb532/gpio.c:92", ioaddr) & (1 << offset);
 }
 
 /*

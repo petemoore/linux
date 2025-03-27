@@ -86,8 +86,8 @@ static int cdns3_ep_run_stream_transfer(struct cdns3_endpoint *priv_ep,
  */
 static void cdns3_clear_register_bit(void __iomem *ptr, u32 mask)
 {
-	mask = readl(ptr) & ~mask;
-	writel(mask, ptr);
+	mask = pete_readl("drivers/usb/cdns3/cdns3-gadget.c:89", ptr) & ~mask;
+	pete_writel("drivers/usb/cdns3/cdns3-gadget.c:90", mask, ptr);
 }
 
 /**
@@ -97,8 +97,8 @@ static void cdns3_clear_register_bit(void __iomem *ptr, u32 mask)
  */
 void cdns3_set_register_bit(void __iomem *ptr, u32 mask)
 {
-	mask = readl(ptr) | mask;
-	writel(mask, ptr);
+	mask = pete_readl("drivers/usb/cdns3/cdns3-gadget.c:100", ptr) | mask;
+	pete_writel("drivers/usb/cdns3/cdns3-gadget.c:101", mask, ptr);
 }
 
 /**
@@ -117,7 +117,7 @@ static int cdns3_get_dma_pos(struct cdns3_device *priv_dev,
 {
 	int dma_index;
 
-	dma_index = readl(&priv_dev->regs->ep_traddr) - priv_ep->trb_pool_dma;
+	dma_index = pete_readl("drivers/usb/cdns3/cdns3-gadget.c:120", &priv_dev->regs->ep_traddr) - priv_ep->trb_pool_dma;
 
 	return dma_index / TRB_SIZE;
 }
@@ -166,7 +166,7 @@ void cdns3_select_ep(struct cdns3_device *priv_dev, u32 ep)
 		return;
 
 	priv_dev->selected_ep = ep;
-	writel(ep, &priv_dev->regs->ep_sel);
+	pete_writel("drivers/usb/cdns3/cdns3-gadget.c:169", ep, &priv_dev->regs->ep_sel);
 }
 
 /**
@@ -179,9 +179,9 @@ void cdns3_select_ep(struct cdns3_device *priv_dev, u32 ep)
 static int cdns3_get_tdl(struct cdns3_device *priv_dev)
 {
 	if (priv_dev->dev_ver < DEV_VER_V3)
-		return EP_CMD_TDL_GET(readl(&priv_dev->regs->ep_cmd));
+		return EP_CMD_TDL_GET(pete_readl("drivers/usb/cdns3/cdns3-gadget.c:182", &priv_dev->regs->ep_cmd));
 	else
-		return readl(&priv_dev->regs->ep_tdl);
+		return pete_readl("drivers/usb/cdns3/cdns3-gadget.c:184", &priv_dev->regs->ep_tdl);
 }
 
 dma_addr_t cdns3_trb_virt_to_dma(struct cdns3_endpoint *priv_ep,
@@ -266,7 +266,7 @@ static void cdns3_ep_stall_flush(struct cdns3_endpoint *priv_ep)
 
 	trace_cdns3_halt(priv_ep, 1, 1);
 
-	writel(EP_CMD_DFLUSH | EP_CMD_ERDY | EP_CMD_SSTALL,
+	pete_writel("drivers/usb/cdns3/cdns3-gadget.c:269", EP_CMD_DFLUSH | EP_CMD_ERDY | EP_CMD_SSTALL,
 	       &priv_dev->regs->ep_cmd);
 
 	/* wait for DFLUSH cleared */
@@ -284,7 +284,7 @@ void cdns3_hw_reset_eps_config(struct cdns3_device *priv_dev)
 {
 	int i;
 
-	writel(USB_CONF_CFGRST, &priv_dev->regs->usb_conf);
+	pete_writel("drivers/usb/cdns3/cdns3-gadget.c:287", USB_CONF_CFGRST, &priv_dev->regs->usb_conf);
 
 	cdns3_allow_enable_l1(priv_dev, 0);
 	priv_dev->hw_configured_flag = 0;
@@ -351,16 +351,16 @@ static void cdns3_ep_inc_deq(struct cdns3_endpoint *priv_ep)
 void cdns3_allow_enable_l1(struct cdns3_device *priv_dev, int enable)
 {
 	if (enable)
-		writel(USB_CONF_L1EN, &priv_dev->regs->usb_conf);
+		pete_writel("drivers/usb/cdns3/cdns3-gadget.c:354", USB_CONF_L1EN, &priv_dev->regs->usb_conf);
 	else
-		writel(USB_CONF_L1DS, &priv_dev->regs->usb_conf);
+		pete_writel("drivers/usb/cdns3/cdns3-gadget.c:356", USB_CONF_L1DS, &priv_dev->regs->usb_conf);
 }
 
 enum usb_device_speed cdns3_get_speed(struct cdns3_device *priv_dev)
 {
 	u32 reg;
 
-	reg = readl(&priv_dev->regs->usb_sts);
+	reg = pete_readl("drivers/usb/cdns3/cdns3-gadget.c:363", &priv_dev->regs->usb_sts);
 
 	if (DEV_SUPERSPEED(reg))
 		return USB_SPEED_SUPER;
@@ -561,10 +561,10 @@ static int cdns3_wa2_gadget_ep_queue(struct cdns3_device *priv_dev,
 
 		cdns3_select_ep(priv_dev, priv_ep->num | priv_ep->dir);
 		priv_ep->flags &= ~EP_QUIRK_EXTRA_BUF_DET;
-		reg = readl(&priv_dev->regs->ep_sts_en);
+		reg = pete_readl("drivers/usb/cdns3/cdns3-gadget.c:564", &priv_dev->regs->ep_sts_en);
 		reg &= ~EP_STS_EN_DESCMISEN;
 		trace_cdns3_wa2(priv_ep, "workaround disabled\n");
-		writel(reg, &priv_dev->regs->ep_sts_en);
+		pete_writel("drivers/usb/cdns3/cdns3-gadget.c:567", reg, &priv_dev->regs->ep_sts_en);
 	}
 
 	if (priv_ep->flags & EP_QUIRK_EXTRA_BUF_EN) {
@@ -709,12 +709,12 @@ err:
 
 static void cdns3_wa2_reset_tdl(struct cdns3_device *priv_dev)
 {
-	u16 tdl = EP_CMD_TDL_GET(readl(&priv_dev->regs->ep_cmd));
+	u16 tdl = EP_CMD_TDL_GET(pete_readl("drivers/usb/cdns3/cdns3-gadget.c:712", &priv_dev->regs->ep_cmd));
 
 	if (tdl) {
 		u16 reset_val = EP_CMD_TDL_MAX + 1 - tdl;
 
-		writel(EP_CMD_TDL_SET(reset_val) | EP_CMD_STDL,
+		pete_writel("drivers/usb/cdns3/cdns3-gadget.c:717", EP_CMD_TDL_SET(reset_val) | EP_CMD_STDL,
 		       &priv_dev->regs->ep_cmd);
 	}
 }
@@ -726,7 +726,7 @@ static void cdns3_wa2_check_outq_status(struct cdns3_device *priv_dev)
 	/* select EP0-out */
 	cdns3_select_ep(priv_dev, 0);
 
-	ep_sts_reg = readl(&priv_dev->regs->ep_sts);
+	ep_sts_reg = pete_readl("drivers/usb/cdns3/cdns3-gadget.c:729", &priv_dev->regs->ep_sts);
 
 	if (EP_STS_OUTQ_VAL(ep_sts_reg)) {
 		u32 outq_ep_num = EP_STS_OUTQ_NO(ep_sts_reg);
@@ -745,8 +745,8 @@ static void cdns3_wa2_check_outq_status(struct cdns3_device *priv_dev)
 
 				cdns3_select_ep(priv_dev, outq_ep->num |
 						outq_ep->dir);
-				ep_sts_en_reg = readl(&priv_dev->regs->ep_sts_en);
-				ep_cmd_reg = readl(&priv_dev->regs->ep_cmd);
+				ep_sts_en_reg = pete_readl("drivers/usb/cdns3/cdns3-gadget.c:748", &priv_dev->regs->ep_sts_en);
+				ep_cmd_reg = pete_readl("drivers/usb/cdns3/cdns3-gadget.c:749", &priv_dev->regs->ep_cmd);
 
 				outq_ep->flags |= EP_TDLCHK_EN;
 				cdns3_set_register_bit(&priv_dev->regs->ep_cfg,
@@ -754,7 +754,7 @@ static void cdns3_wa2_check_outq_status(struct cdns3_device *priv_dev)
 
 				cdns3_wa2_enable_detection(priv_dev, outq_ep,
 							   ep_sts_en_reg);
-				writel(ep_sts_en_reg,
+				pete_writel("drivers/usb/cdns3/cdns3-gadget.c:757", ep_sts_en_reg,
 				       &priv_dev->regs->ep_sts_en);
 				/* reset tdl value to zero */
 				cdns3_wa2_reset_tdl(priv_dev);
@@ -771,7 +771,7 @@ static void cdns3_wa2_check_outq_status(struct cdns3_device *priv_dev)
 					/*
 					 * ring doorbell to generate DESCMIS irq
 					 */
-					writel(EP_CMD_DRDY,
+					pete_writel("drivers/usb/cdns3/cdns3-gadget.c:774", EP_CMD_DRDY,
 					       &priv_dev->regs->ep_cmd);
 				}
 			}
@@ -961,7 +961,7 @@ static int cdns3_wa1_update_guard(struct cdns3_endpoint *priv_ep,
 	if (!priv_ep->wa1_set) {
 		u32 doorbell;
 
-		doorbell = !!(readl(&priv_dev->regs->ep_cmd) & EP_CMD_DRDY);
+		doorbell = !!(pete_readl("drivers/usb/cdns3/cdns3-gadget.c:964", &priv_dev->regs->ep_cmd) & EP_CMD_DRDY);
 
 		if (doorbell) {
 			priv_ep->wa1_cycle_bit = priv_ep->pcs ? TRB_CYCLE : 0;
@@ -981,7 +981,7 @@ static void cdns3_wa1_tray_restore_cycle_bit(struct cdns3_device *priv_dev,
 	int dma_index;
 	u32 doorbell;
 
-	doorbell = !!(readl(&priv_dev->regs->ep_cmd) & EP_CMD_DRDY);
+	doorbell = !!(pete_readl("drivers/usb/cdns3/cdns3-gadget.c:984", &priv_dev->regs->ep_cmd) & EP_CMD_DRDY);
 	dma_index = cdns3_get_dma_pos(priv_dev, priv_ep);
 
 	if (!doorbell || dma_index != priv_ep->wa1_trb_index)
@@ -1057,13 +1057,13 @@ static int cdns3_ep_run_stream_transfer(struct cdns3_endpoint *priv_ep,
 	wmb();
 
 	/* always first element */
-	writel(EP_TRADDR_TRADDR(priv_ep->trb_pool_dma),
+	pete_writel("drivers/usb/cdns3/cdns3-gadget.c:1060", EP_TRADDR_TRADDR(priv_ep->trb_pool_dma),
 	       &priv_dev->regs->ep_traddr);
 
 	if (!(priv_ep->flags & EP_STALLED)) {
 		trace_cdns3_ring(priv_ep);
 		/*clearing TRBERR and EP_STS_DESCMIS before seting DRDY*/
-		writel(EP_STS_TRBERR | EP_STS_DESCMIS, &priv_dev->regs->ep_sts);
+		pete_writel("drivers/usb/cdns3/cdns3-gadget.c:1066", EP_STS_TRBERR | EP_STS_DESCMIS, &priv_dev->regs->ep_sts);
 
 		priv_ep->prime_flag = false;
 
@@ -1073,18 +1073,18 @@ static int cdns3_ep_run_stream_transfer(struct cdns3_endpoint *priv_ep,
 		 */
 
 		if (priv_dev->dev_ver < DEV_VER_V2)
-			writel(EP_CMD_TDL_SET(tdl) | EP_CMD_STDL,
+			pete_writel("drivers/usb/cdns3/cdns3-gadget.c:1076", EP_CMD_TDL_SET(tdl) | EP_CMD_STDL,
 			       &priv_dev->regs->ep_cmd);
 		else if (priv_dev->dev_ver > DEV_VER_V2)
-			writel(tdl, &priv_dev->regs->ep_tdl);
+			pete_writel("drivers/usb/cdns3/cdns3-gadget.c:1079", tdl, &priv_dev->regs->ep_tdl);
 
 		priv_ep->last_stream_id = priv_req->request.stream_id;
-		writel(EP_CMD_DRDY, &priv_dev->regs->ep_cmd);
-		writel(EP_CMD_ERDY_SID(priv_req->request.stream_id) |
+		pete_writel("drivers/usb/cdns3/cdns3-gadget.c:1082", EP_CMD_DRDY, &priv_dev->regs->ep_cmd);
+		pete_writel("drivers/usb/cdns3/cdns3-gadget.c:1083", EP_CMD_ERDY_SID(priv_req->request.stream_id) |
 		       EP_CMD_ERDY, &priv_dev->regs->ep_cmd);
 
 		trace_cdns3_doorbell_epx(priv_ep->name,
-					 readl(&priv_dev->regs->ep_traddr));
+					 pete_readl("drivers/usb/cdns3/cdns3-gadget.c:1087", &priv_dev->regs->ep_traddr));
 	}
 
 	/* WORKAROUND for transition to L0 */
@@ -1100,9 +1100,9 @@ static void cdns3_rearm_drdy_if_needed(struct cdns3_endpoint *priv_ep)
 	if (priv_dev->dev_ver < DEV_VER_V3)
 		return;
 
-	if (readl(&priv_dev->regs->ep_sts) & EP_STS_TRBERR) {
-		writel(EP_STS_TRBERR, &priv_dev->regs->ep_sts);
-		writel(EP_CMD_DRDY, &priv_dev->regs->ep_cmd);
+	if (pete_readl("drivers/usb/cdns3/cdns3-gadget.c:1103", &priv_dev->regs->ep_sts) & EP_STS_TRBERR) {
+		pete_writel("drivers/usb/cdns3/cdns3-gadget.c:1104", EP_STS_TRBERR, &priv_dev->regs->ep_sts);
+		pete_writel("drivers/usb/cdns3/cdns3-gadget.c:1105", EP_CMD_DRDY, &priv_dev->regs->ep_cmd);
 	}
 }
 
@@ -1163,7 +1163,7 @@ static int cdns3_ep_run_transfer(struct cdns3_endpoint *priv_ep,
 		int doorbell, dma_index;
 		u32 ch_bit = 0;
 
-		doorbell = !!(readl(&priv_dev->regs->ep_cmd) & EP_CMD_DRDY);
+		doorbell = !!(pete_readl("drivers/usb/cdns3/cdns3-gadget.c:1166", &priv_dev->regs->ep_cmd) & EP_CMD_DRDY);
 		dma_index = cdns3_get_dma_pos(priv_dev, priv_ep);
 
 		/* Driver can't update LINK TRB if it is current processed. */
@@ -1328,7 +1328,7 @@ static int cdns3_ep_run_transfer(struct cdns3_endpoint *priv_ep,
 	if (priv_dev->dev_ver < DEV_VER_V2 &&
 	    (priv_ep->flags & EP_TDLCHK_EN)) {
 		u16 tdl = total_tdl;
-		u16 old_tdl = EP_CMD_TDL_GET(readl(&priv_dev->regs->ep_cmd));
+		u16 old_tdl = EP_CMD_TDL_GET(pete_readl("drivers/usb/cdns3/cdns3-gadget.c:1331", &priv_dev->regs->ep_cmd));
 
 		if (tdl > EP_CMD_TDL_MAX) {
 			tdl = EP_CMD_TDL_MAX;
@@ -1337,7 +1337,7 @@ static int cdns3_ep_run_transfer(struct cdns3_endpoint *priv_ep,
 
 		if (old_tdl < tdl) {
 			tdl -= old_tdl;
-			writel(EP_CMD_TDL_SET(tdl) | EP_CMD_STDL,
+			pete_writel("drivers/usb/cdns3/cdns3-gadget.c:1340", EP_CMD_TDL_SET(tdl) | EP_CMD_STDL,
 			       &priv_dev->regs->ep_cmd);
 		}
 	}
@@ -1394,7 +1394,7 @@ static int cdns3_ep_run_transfer(struct cdns3_endpoint *priv_ep,
 					       EP_CFG_ENABLE);
 		}
 
-		writel(EP_TRADDR_TRADDR(priv_ep->trb_pool_dma +
+		pete_writel("drivers/usb/cdns3/cdns3-gadget.c:1397", EP_TRADDR_TRADDR(priv_ep->trb_pool_dma +
 					priv_req->start_trb * TRB_SIZE),
 					&priv_dev->regs->ep_traddr);
 
@@ -1404,11 +1404,11 @@ static int cdns3_ep_run_transfer(struct cdns3_endpoint *priv_ep,
 	if (!priv_ep->wa1_set && !(priv_ep->flags & EP_STALLED)) {
 		trace_cdns3_ring(priv_ep);
 		/*clearing TRBERR and EP_STS_DESCMIS before seting DRDY*/
-		writel(EP_STS_TRBERR | EP_STS_DESCMIS, &priv_dev->regs->ep_sts);
-		writel(EP_CMD_DRDY, &priv_dev->regs->ep_cmd);
+		pete_writel("drivers/usb/cdns3/cdns3-gadget.c:1407", EP_STS_TRBERR | EP_STS_DESCMIS, &priv_dev->regs->ep_sts);
+		pete_writel("drivers/usb/cdns3/cdns3-gadget.c:1408", EP_CMD_DRDY, &priv_dev->regs->ep_cmd);
 		cdns3_rearm_drdy_if_needed(priv_ep);
 		trace_cdns3_doorbell_epx(priv_ep->name,
-					 readl(&priv_dev->regs->ep_traddr));
+					 pete_readl("drivers/usb/cdns3/cdns3-gadget.c:1411", &priv_dev->regs->ep_traddr));
 	}
 
 	/* WORKAROUND for transition to L0 */
@@ -1425,7 +1425,7 @@ void cdns3_set_hw_configuration(struct cdns3_device *priv_dev)
 	if (priv_dev->hw_configured_flag)
 		return;
 
-	writel(USB_CONF_CFGSET, &priv_dev->regs->usb_conf);
+	pete_writel("drivers/usb/cdns3/cdns3-gadget.c:1428", USB_CONF_CFGSET, &priv_dev->regs->usb_conf);
 
 	cdns3_set_register_bit(&priv_dev->regs->usb_conf,
 			       USB_CONF_U1EN | USB_CONF_U2EN);
@@ -1491,7 +1491,7 @@ static bool cdns3_trb_handled(struct cdns3_endpoint *priv_ep,
 	int doorbell;
 
 	current_index = cdns3_get_dma_pos(priv_dev, priv_ep);
-	doorbell = !!(readl(&priv_dev->regs->ep_cmd) & EP_CMD_DRDY);
+	doorbell = !!(pete_readl("drivers/usb/cdns3/cdns3-gadget.c:1494", &priv_dev->regs->ep_cmd) & EP_CMD_DRDY);
 
 	/* current trb doesn't belong to this request */
 	if (priv_req->start_trb < priv_req->end_trb) {
@@ -1659,12 +1659,12 @@ void cdns3_rearm_transfer(struct cdns3_endpoint *priv_ep, u8 rearm)
 
 		/* Cycle Bit must be updated before arming DMA. */
 		wmb();
-		writel(EP_CMD_DRDY, &priv_dev->regs->ep_cmd);
+		pete_writel("drivers/usb/cdns3/cdns3-gadget.c:1662", EP_CMD_DRDY, &priv_dev->regs->ep_cmd);
 
 		__cdns3_gadget_wakeup(priv_dev);
 
 		trace_cdns3_doorbell_epx(priv_ep->name,
-					 readl(&priv_dev->regs->ep_traddr));
+					 pete_readl("drivers/usb/cdns3/cdns3-gadget.c:1667", &priv_dev->regs->ep_traddr));
 	}
 }
 
@@ -1680,7 +1680,7 @@ static void cdns3_reprogram_tdl(struct cdns3_endpoint *priv_ep)
 		priv_ep->pending_tdl = 0;
 	}
 
-	writel(EP_CMD_TDL_SET(tdl) | EP_CMD_STDL, &priv_dev->regs->ep_cmd);
+	pete_writel("drivers/usb/cdns3/cdns3-gadget.c:1683", EP_CMD_TDL_SET(tdl) | EP_CMD_STDL, &priv_dev->regs->ep_cmd);
 }
 
 /**
@@ -1701,8 +1701,8 @@ static int cdns3_check_ep_interrupt_proceed(struct cdns3_endpoint *priv_ep)
 
 	trace_cdns3_epx_irq(priv_dev, priv_ep);
 
-	ep_sts_reg = readl(&priv_dev->regs->ep_sts);
-	writel(ep_sts_reg, &priv_dev->regs->ep_sts);
+	ep_sts_reg = pete_readl("drivers/usb/cdns3/cdns3-gadget.c:1704", &priv_dev->regs->ep_sts);
+	pete_writel("drivers/usb/cdns3/cdns3-gadget.c:1705", ep_sts_reg, &priv_dev->regs->ep_sts);
 
 	if ((ep_sts_reg & EP_STS_PRIME) && priv_ep->use_streams) {
 		bool dbusy = !!(ep_sts_reg & EP_STS_DBUSY);
@@ -1718,7 +1718,7 @@ static int cdns3_check_ep_interrupt_proceed(struct cdns3_endpoint *priv_ep)
 		 */
 		if (tdl && (dbusy || !EP_STS_BUFFEMPTY(ep_sts_reg) ||
 		    EP_STS_HOSTPP(ep_sts_reg))) {
-			writel(EP_CMD_ERDY |
+			pete_writel("drivers/usb/cdns3/cdns3-gadget.c:1721", EP_CMD_ERDY |
 			       EP_CMD_ERDY_SID(priv_ep->last_stream_id),
 			       &priv_dev->regs->ep_cmd);
 			ep_sts_reg &= ~(EP_STS_MD_EXIT | EP_STS_IOC);
@@ -1751,10 +1751,10 @@ static int cdns3_check_ep_interrupt_proceed(struct cdns3_endpoint *priv_ep)
 		if (priv_ep->type == USB_ENDPOINT_XFER_ISOC &&
 		    !priv_ep->wa1_set) {
 			if (!priv_ep->dir) {
-				u32 ep_cfg = readl(&priv_dev->regs->ep_cfg);
+				u32 ep_cfg = pete_readl("drivers/usb/cdns3/cdns3-gadget.c:1754", &priv_dev->regs->ep_cfg);
 
 				ep_cfg &= ~EP_CFG_ENABLE;
-				writel(ep_cfg, &priv_dev->regs->ep_cfg);
+				pete_writel("drivers/usb/cdns3/cdns3-gadget.c:1757", ep_cfg, &priv_dev->regs->ep_cfg);
 				priv_ep->flags &= ~EP_QUIRK_ISO_OUT_EN;
 				priv_ep->flags |= EP_UPDATE_EP_TRBADDR;
 			}
@@ -1844,7 +1844,7 @@ __must_hold(&priv_dev->lock)
 		 * from L1. To fix it, if any DMA transfer is pending driver
 		 * must starts driving resume signal immediately.
 		 */
-		if (readl(&priv_dev->regs->drbl))
+		if (pete_readl("drivers/usb/cdns3/cdns3-gadget.c:1847", &priv_dev->regs->drbl))
 			__cdns3_gadget_wakeup(priv_dev);
 	}
 
@@ -1920,7 +1920,7 @@ static irqreturn_t cdns3_device_irq_handler(int irq, void *data)
 		return ret;
 
 	/* check USB device interrupt */
-	reg = readl(&priv_dev->regs->usb_ists);
+	reg = pete_readl("drivers/usb/cdns3/cdns3-gadget.c:1923", &priv_dev->regs->usb_ists);
 	if (reg) {
 		/* After masking interrupts the new interrupts won't be
 		 * reported in usb_ists/ep_ists. In order to not lose some
@@ -1929,16 +1929,16 @@ static irqreturn_t cdns3_device_irq_handler(int irq, void *data)
 		 * interrupt. This an unusual behavior only applies to
 		 * usb_ists register.
 		 */
-		reg = ~reg & readl(&priv_dev->regs->usb_ien);
+		reg = ~reg & pete_readl("drivers/usb/cdns3/cdns3-gadget.c:1932", &priv_dev->regs->usb_ien);
 		/* mask deferred interrupt. */
-		writel(reg, &priv_dev->regs->usb_ien);
+		pete_writel("drivers/usb/cdns3/cdns3-gadget.c:1934", reg, &priv_dev->regs->usb_ien);
 		ret = IRQ_WAKE_THREAD;
 	}
 
 	/* check endpoint interrupt */
-	reg = readl(&priv_dev->regs->ep_ists);
+	reg = pete_readl("drivers/usb/cdns3/cdns3-gadget.c:1939", &priv_dev->regs->ep_ists);
 	if (reg) {
-		writel(0, &priv_dev->regs->ep_ien);
+		pete_writel("drivers/usb/cdns3/cdns3-gadget.c:1941", 0, &priv_dev->regs->ep_ien);
 		ret = IRQ_WAKE_THREAD;
 	}
 
@@ -1964,15 +1964,15 @@ static irqreturn_t cdns3_device_thread_irq_handler(int irq, void *data)
 
 	spin_lock_irqsave(&priv_dev->lock, flags);
 
-	reg = readl(&priv_dev->regs->usb_ists);
+	reg = pete_readl("drivers/usb/cdns3/cdns3-gadget.c:1967", &priv_dev->regs->usb_ists);
 	if (reg) {
-		writel(reg, &priv_dev->regs->usb_ists);
-		writel(USB_IEN_INIT, &priv_dev->regs->usb_ien);
+		pete_writel("drivers/usb/cdns3/cdns3-gadget.c:1969", reg, &priv_dev->regs->usb_ists);
+		pete_writel("drivers/usb/cdns3/cdns3-gadget.c:1970", USB_IEN_INIT, &priv_dev->regs->usb_ien);
 		cdns3_check_usb_interrupt_proceed(priv_dev, reg);
 		ret = IRQ_HANDLED;
 	}
 
-	reg = readl(&priv_dev->regs->ep_ists);
+	reg = pete_readl("drivers/usb/cdns3/cdns3-gadget.c:1975", &priv_dev->regs->ep_ists);
 
 	/* handle default endpoint OUT */
 	if (reg & EP_ISTS_EP_OUT0) {
@@ -2001,7 +2001,7 @@ static irqreturn_t cdns3_device_thread_irq_handler(int irq, void *data)
 		cdns3_wa2_check_outq_status(priv_dev);
 
 irqend:
-	writel(~0, &priv_dev->regs->ep_ien);
+	pete_writel("drivers/usb/cdns3/cdns3-gadget.c:2004", ~0, &priv_dev->regs->ep_ien);
 	spin_unlock_irqrestore(&priv_dev->lock, flags);
 
 	return ret;
@@ -2061,10 +2061,10 @@ static void cdns3_configure_dmult(struct cdns3_device *priv_dev,
 
 	/* For dev_ver > DEV_VER_V2 DMULT is configured per endpoint */
 	if (priv_dev->dev_ver <= DEV_VER_V2)
-		writel(USB_CONF_DMULT, &regs->usb_conf);
+		pete_writel("drivers/usb/cdns3/cdns3-gadget.c:2064", USB_CONF_DMULT, &regs->usb_conf);
 
 	if (priv_dev->dev_ver == DEV_VER_V2)
-		writel(USB_CONF2_EN_TDL_TRB, &regs->usb_conf2);
+		pete_writel("drivers/usb/cdns3/cdns3-gadget.c:2067", USB_CONF2_EN_TDL_TRB, &regs->usb_conf2);
 
 	if (priv_dev->dev_ver >= DEV_VER_V3 && priv_ep) {
 		u32 mask;
@@ -2202,7 +2202,7 @@ int cdns3_ep_config(struct cdns3_endpoint *priv_ep, bool enable)
 		  EP_CFG_MAXBURST(maxburst);
 
 	cdns3_select_ep(priv_dev, bEndpointAddress);
-	writel(ep_cfg, &priv_dev->regs->ep_cfg);
+	pete_writel("drivers/usb/cdns3/cdns3-gadget.c:2205", ep_cfg, &priv_dev->regs->ep_cfg);
 	priv_ep->flags |= EP_CONFIGURED;
 
 	dev_dbg(priv_dev->dev, "Configure %s: with val %08x\n",
@@ -2440,7 +2440,7 @@ static int cdns3_gadget_ep_enable(struct usb_ep *ep,
 
 	trace_cdns3_gadget_ep_enable(priv_ep);
 
-	writel(EP_CMD_EPRST, &priv_dev->regs->ep_cmd);
+	pete_writel("drivers/usb/cdns3/cdns3-gadget.c:2443", EP_CMD_EPRST, &priv_dev->regs->ep_cmd);
 
 	ret = readl_poll_timeout_atomic(&priv_dev->regs->ep_cmd, val,
 					!(val & (EP_CMD_CSTALL | EP_CMD_EPRST)),
@@ -2459,7 +2459,7 @@ static int cdns3_gadget_ep_enable(struct usb_ep *ep,
 	if (priv_dev->dev_ver < DEV_VER_V2)
 		cdns3_wa2_enable_detection(priv_dev, priv_ep, reg);
 
-	writel(reg, &priv_dev->regs->ep_sts_en);
+	pete_writel("drivers/usb/cdns3/cdns3-gadget.c:2462", reg, &priv_dev->regs->ep_sts_en);
 
 	ep->desc = desc;
 	priv_ep->flags &= ~(EP_PENDING_REQUEST | EP_STALLED | EP_STALL_PENDING |
@@ -2468,7 +2468,7 @@ static int cdns3_gadget_ep_enable(struct usb_ep *ep,
 	priv_ep->wa1_set = 0;
 	priv_ep->enqueue = 0;
 	priv_ep->dequeue = 0;
-	reg = readl(&priv_dev->regs->ep_sts);
+	reg = pete_readl("drivers/usb/cdns3/cdns3-gadget.c:2471", &priv_dev->regs->ep_sts);
 	priv_ep->pcs = !!EP_STS_CCS(reg);
 	priv_ep->ccs = !!EP_STS_CCS(reg);
 	/* one TRB is reserved for link TRB used in DMULT mode*/
@@ -2514,9 +2514,9 @@ static int cdns3_gadget_ep_disable(struct usb_ep *ep)
 
 	cdns3_select_ep(priv_dev, ep->desc->bEndpointAddress);
 
-	ep_cfg = readl(&priv_dev->regs->ep_cfg);
+	ep_cfg = pete_readl("drivers/usb/cdns3/cdns3-gadget.c:2517", &priv_dev->regs->ep_cfg);
 	ep_cfg &= ~EP_CFG_ENABLE;
-	writel(ep_cfg, &priv_dev->regs->ep_cfg);
+	pete_writel("drivers/usb/cdns3/cdns3-gadget.c:2519", ep_cfg, &priv_dev->regs->ep_cfg);
 
 	/**
 	 * Driver needs some time before resetting endpoint.
@@ -2525,7 +2525,7 @@ static int cdns3_gadget_ep_disable(struct usb_ep *ep)
 	 */
 	readl_poll_timeout_atomic(&priv_dev->regs->ep_sts, val,
 				  !(val & EP_STS_DBUSY), 1, 10);
-	writel(EP_CMD_EPRST, &priv_dev->regs->ep_cmd);
+	pete_writel("drivers/usb/cdns3/cdns3-gadget.c:2528", EP_CMD_EPRST, &priv_dev->regs->ep_cmd);
 
 	readl_poll_timeout_atomic(&priv_dev->regs->ep_cmd, val,
 				  !(val & (EP_CMD_CSTALL | EP_CMD_EPRST)),
@@ -2726,7 +2726,7 @@ found:
 	/* Update ring only if removed request is on pending_req_list list */
 	if (req_on_hw_ring && link_trb) {
 		/* Stop DMA */
-		writel(EP_CMD_DFLUSH, &priv_dev->regs->ep_cmd);
+		pete_writel("drivers/usb/cdns3/cdns3-gadget.c:2729", EP_CMD_DFLUSH, &priv_dev->regs->ep_cmd);
 
 		/* wait for DFLUSH cleared */
 		readl_poll_timeout_atomic(&priv_dev->regs->ep_cmd, val,
@@ -2764,7 +2764,7 @@ void __cdns3_gadget_ep_set_halt(struct cdns3_endpoint *priv_ep)
 	trace_cdns3_halt(priv_ep, 1, 0);
 
 	if (!(priv_ep->flags & EP_STALLED)) {
-		u32 ep_sts_reg = readl(&priv_dev->regs->ep_sts);
+		u32 ep_sts_reg = pete_readl("drivers/usb/cdns3/cdns3-gadget.c:2767", &priv_dev->regs->ep_sts);
 
 		if (!(ep_sts_reg & EP_STS_DBUSY))
 			cdns3_ep_stall_flush(priv_ep);
@@ -2800,7 +2800,7 @@ int __cdns3_gadget_ep_clear_halt(struct cdns3_endpoint *priv_ep)
 		}
 	}
 
-	writel(EP_CMD_CSTALL | EP_CMD_EPRST, &priv_dev->regs->ep_cmd);
+	pete_writel("drivers/usb/cdns3/cdns3-gadget.c:2803", EP_CMD_CSTALL | EP_CMD_EPRST, &priv_dev->regs->ep_cmd);
 
 	/* wait for EPRST cleared */
 	ret = readl_poll_timeout_atomic(&priv_dev->regs->ep_cmd, val,
@@ -2877,7 +2877,7 @@ static int cdns3_gadget_get_frame(struct usb_gadget *gadget)
 {
 	struct cdns3_device *priv_dev = gadget_to_cdns3_device(gadget);
 
-	return readl(&priv_dev->regs->usb_itpn);
+	return pete_readl("drivers/usb/cdns3/cdns3-gadget.c:2880", &priv_dev->regs->usb_itpn);
 }
 
 int __cdns3_gadget_wakeup(struct cdns3_device *priv_dev)
@@ -2890,7 +2890,7 @@ int __cdns3_gadget_wakeup(struct cdns3_device *priv_dev)
 		return 0;
 
 	/* Start driving resume signaling to indicate remote wakeup. */
-	writel(USB_CONF_LGO_L0, &priv_dev->regs->usb_conf);
+	pete_writel("drivers/usb/cdns3/cdns3-gadget.c:2893", USB_CONF_LGO_L0, &priv_dev->regs->usb_conf);
 
 	return 0;
 }
@@ -2924,11 +2924,11 @@ static int cdns3_gadget_pullup(struct usb_gadget *gadget, int is_on)
 	struct cdns3_device *priv_dev = gadget_to_cdns3_device(gadget);
 
 	if (is_on) {
-		writel(USB_CONF_DEVEN, &priv_dev->regs->usb_conf);
+		pete_writel("drivers/usb/cdns3/cdns3-gadget.c:2927", USB_CONF_DEVEN, &priv_dev->regs->usb_conf);
 	} else {
-		writel(~0, &priv_dev->regs->ep_ists);
-		writel(~0, &priv_dev->regs->usb_ists);
-		writel(USB_CONF_DEVDS, &priv_dev->regs->usb_conf);
+		pete_writel("drivers/usb/cdns3/cdns3-gadget.c:2929", ~0, &priv_dev->regs->ep_ists);
+		pete_writel("drivers/usb/cdns3/cdns3-gadget.c:2930", ~0, &priv_dev->regs->usb_ists);
+		pete_writel("drivers/usb/cdns3/cdns3-gadget.c:2931", USB_CONF_DEVDS, &priv_dev->regs->usb_conf);
 	}
 
 	return 0;
@@ -2942,19 +2942,19 @@ static void cdns3_gadget_config(struct cdns3_device *priv_dev)
 	cdns3_ep0_config(priv_dev);
 
 	/* enable interrupts for endpoint 0 (in and out) */
-	writel(EP_IEN_EP_OUT0 | EP_IEN_EP_IN0, &regs->ep_ien);
+	pete_writel("drivers/usb/cdns3/cdns3-gadget.c:2945", EP_IEN_EP_OUT0 | EP_IEN_EP_IN0, &regs->ep_ien);
 
 	/*
 	 * Driver needs to modify LFPS minimal U1 Exit time for DEV_VER_TI_V1
 	 * revision of controller.
 	 */
 	if (priv_dev->dev_ver == DEV_VER_TI_V1) {
-		reg = readl(&regs->dbg_link1);
+		reg = pete_readl("drivers/usb/cdns3/cdns3-gadget.c:2952", &regs->dbg_link1);
 
 		reg &= ~DBG_LINK1_LFPS_MIN_GEN_U1_EXIT_MASK;
 		reg |= DBG_LINK1_LFPS_MIN_GEN_U1_EXIT(0x55) |
 		       DBG_LINK1_LFPS_MIN_GEN_U1_EXIT_SET;
-		writel(reg, &regs->dbg_link1);
+		pete_writel("drivers/usb/cdns3/cdns3-gadget.c:2957", reg, &regs->dbg_link1);
 	}
 
 	/*
@@ -2962,16 +2962,16 @@ static void cdns3_gadget_config(struct cdns3_device *priv_dev)
 	 * This cause problem with cache, so driver restore non-secure
 	 * access to memory.
 	 */
-	reg = readl(&regs->dma_axi_ctrl);
+	reg = pete_readl("drivers/usb/cdns3/cdns3-gadget.c:2965", &regs->dma_axi_ctrl);
 	reg |= DMA_AXI_CTRL_MARPROT(DMA_AXI_CTRL_NON_SECURE) |
 	       DMA_AXI_CTRL_MAWPROT(DMA_AXI_CTRL_NON_SECURE);
-	writel(reg, &regs->dma_axi_ctrl);
+	pete_writel("drivers/usb/cdns3/cdns3-gadget.c:2968", reg, &regs->dma_axi_ctrl);
 
 	/* enable generic interrupt*/
-	writel(USB_IEN_INIT, &regs->usb_ien);
-	writel(USB_CONF_CLK2OFFDS | USB_CONF_L1DS, &regs->usb_conf);
+	pete_writel("drivers/usb/cdns3/cdns3-gadget.c:2971", USB_IEN_INIT, &regs->usb_ien);
+	pete_writel("drivers/usb/cdns3/cdns3-gadget.c:2972", USB_CONF_CLK2OFFDS | USB_CONF_L1DS, &regs->usb_conf);
 	/*  keep Fast Access bit */
-	writel(PUSB_PWR_FST_REG_ACCESS, &priv_dev->regs->usb_pwr);
+	pete_writel("drivers/usb/cdns3/cdns3-gadget.c:2974", PUSB_PWR_FST_REG_ACCESS, &priv_dev->regs->usb_pwr);
 
 	cdns3_configure_dmult(priv_dev, NULL);
 }
@@ -2998,11 +2998,11 @@ static int cdns3_gadget_udc_start(struct usb_gadget *gadget,
 
 	switch (max_speed) {
 	case USB_SPEED_FULL:
-		writel(USB_CONF_SFORCE_FS, &priv_dev->regs->usb_conf);
-		writel(USB_CONF_USB3DIS, &priv_dev->regs->usb_conf);
+		pete_writel("drivers/usb/cdns3/cdns3-gadget.c:3001", USB_CONF_SFORCE_FS, &priv_dev->regs->usb_conf);
+		pete_writel("drivers/usb/cdns3/cdns3-gadget.c:3002", USB_CONF_USB3DIS, &priv_dev->regs->usb_conf);
 		break;
 	case USB_SPEED_HIGH:
-		writel(USB_CONF_USB3DIS, &priv_dev->regs->usb_conf);
+		pete_writel("drivers/usb/cdns3/cdns3-gadget.c:3005", USB_CONF_USB3DIS, &priv_dev->regs->usb_conf);
 		break;
 	case USB_SPEED_SUPER:
 		break;
@@ -3046,7 +3046,7 @@ static int cdns3_gadget_udc_stop(struct usb_gadget *gadget)
 		priv_ep = ep_to_cdns3_ep(ep);
 		bEndpointAddress = priv_ep->num | priv_ep->dir;
 		cdns3_select_ep(priv_dev, bEndpointAddress);
-		writel(EP_CMD_EPRST, &priv_dev->regs->ep_cmd);
+		pete_writel("drivers/usb/cdns3/cdns3-gadget.c:3049", EP_CMD_EPRST, &priv_dev->regs->ep_cmd);
 		readl_poll_timeout_atomic(&priv_dev->regs->ep_cmd, val,
 					  !(val & EP_CMD_EPRST), 1, 100);
 
@@ -3054,9 +3054,9 @@ static int cdns3_gadget_udc_stop(struct usb_gadget *gadget)
 	}
 
 	/* disable interrupt for device */
-	writel(0, &priv_dev->regs->usb_ien);
-	writel(0, &priv_dev->regs->usb_pwr);
-	writel(USB_CONF_DEVDS, &priv_dev->regs->usb_conf);
+	pete_writel("drivers/usb/cdns3/cdns3-gadget.c:3057", 0, &priv_dev->regs->usb_ien);
+	pete_writel("drivers/usb/cdns3/cdns3-gadget.c:3058", 0, &priv_dev->regs->usb_pwr);
+	pete_writel("drivers/usb/cdns3/cdns3-gadget.c:3059", USB_CONF_DEVDS, &priv_dev->regs->usb_conf);
 
 	return 0;
 }
@@ -3156,8 +3156,8 @@ static int cdns3_init_eps(struct cdns3_device *priv_dev)
 	int i;
 
 	/* Read it from USB_CAP3 to USB_CAP5 */
-	ep_enabled_reg = readl(&priv_dev->regs->usb_cap3);
-	iso_ep_reg = readl(&priv_dev->regs->usb_cap4);
+	ep_enabled_reg = pete_readl("drivers/usb/cdns3/cdns3-gadget.c:3159", &priv_dev->regs->usb_cap3);
+	iso_ep_reg = pete_readl("drivers/usb/cdns3/cdns3-gadget.c:3160", &priv_dev->regs->usb_cap4);
 
 	dev_dbg(priv_dev->dev, "Initializing non-zero endpoints\n");
 
@@ -3300,7 +3300,7 @@ static int cdns3_gadget_start(struct cdns *cdns)
 				 &priv_dev->onchip_buffers);
 
 	if (priv_dev->onchip_buffers <=  0) {
-		u32 reg = readl(&priv_dev->regs->usb_cap2);
+		u32 reg = pete_readl("drivers/usb/cdns3/cdns3-gadget.c:3303", &priv_dev->regs->usb_cap2);
 
 		priv_dev->onchip_buffers = USB_CAP2_ACTUAL_MEM_SIZE(reg);
 	}
@@ -3367,14 +3367,14 @@ static int cdns3_gadget_start(struct cdns *cdns)
 		goto err2;
 	}
 
-	priv_dev->dev_ver = readl(&priv_dev->regs->usb_cap6);
+	priv_dev->dev_ver = pete_readl("drivers/usb/cdns3/cdns3-gadget.c:3370", &priv_dev->regs->usb_cap6);
 
 	dev_dbg(priv_dev->dev, "Device Controller version: %08x\n",
-		readl(&priv_dev->regs->usb_cap6));
+		pete_readl("drivers/usb/cdns3/cdns3-gadget.c:3373", &priv_dev->regs->usb_cap6));
 	dev_dbg(priv_dev->dev, "USB Capabilities:: %08x\n",
-		readl(&priv_dev->regs->usb_cap1));
+		pete_readl("drivers/usb/cdns3/cdns3-gadget.c:3375", &priv_dev->regs->usb_cap1));
 	dev_dbg(priv_dev->dev, "On-Chip memory configuration: %08x\n",
-		readl(&priv_dev->regs->usb_cap2));
+		pete_readl("drivers/usb/cdns3/cdns3-gadget.c:3377", &priv_dev->regs->usb_cap2));
 
 	priv_dev->dev_ver = GET_DEV_BASE_VERSION(priv_dev->dev_ver);
 	if (priv_dev->dev_ver >= DEV_VER_V2)
@@ -3462,7 +3462,7 @@ __must_hold(&cdns->lock)
 	cdns3_hw_reset_eps_config(priv_dev);
 
 	/* disable interrupt for device */
-	writel(0, &priv_dev->regs->usb_ien);
+	pete_writel("drivers/usb/cdns3/cdns3-gadget.c:3465", 0, &priv_dev->regs->usb_ien);
 
 	return 0;
 }
@@ -3476,7 +3476,7 @@ static int cdns3_gadget_resume(struct cdns *cdns, bool hibernated)
 
 	cdns3_gadget_config(priv_dev);
 	if (hibernated)
-		writel(USB_CONF_DEVEN, &priv_dev->regs->usb_conf);
+		pete_writel("drivers/usb/cdns3/cdns3-gadget.c:3479", USB_CONF_DEVEN, &priv_dev->regs->usb_conf);
 
 	return 0;
 }

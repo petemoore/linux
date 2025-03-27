@@ -98,7 +98,7 @@ static int vlynq_linked(struct vlynq_device *dev)
 	int i;
 
 	for (i = 0; i < 100; i++)
-		if (readl(&dev->local->status) & VLYNQ_STATUS_LINK)
+		if (pete_readl("drivers/vlynq/vlynq.c:101", &dev->local->status) & VLYNQ_STATUS_LINK)
 			return 1;
 		else
 			cpu_relax();
@@ -108,14 +108,14 @@ static int vlynq_linked(struct vlynq_device *dev)
 
 static void vlynq_reset(struct vlynq_device *dev)
 {
-	writel(readl(&dev->local->control) | VLYNQ_CTRL_RESET,
+	pete_writel("drivers/vlynq/vlynq.c:111", pete_readl("drivers/vlynq/vlynq.c:111", &dev->local->control) | VLYNQ_CTRL_RESET,
 			&dev->local->control);
 
 	/* Wait for the devices to finish resetting */
 	msleep(5);
 
 	/* Remove reset bit */
-	writel(readl(&dev->local->control) & ~VLYNQ_CTRL_RESET,
+	pete_writel("drivers/vlynq/vlynq.c:118", pete_readl("drivers/vlynq/vlynq.c:118", &dev->local->control) & ~VLYNQ_CTRL_RESET,
 			&dev->local->control);
 
 	/* Give some time for the devices to settle */
@@ -130,9 +130,9 @@ static void vlynq_irq_unmask(struct irq_data *d)
 
 	BUG_ON(!dev);
 	virq = d->irq - dev->irq_start;
-	val = readl(&dev->remote->int_device[virq >> 2]);
+	val = pete_readl("drivers/vlynq/vlynq.c:133", &dev->remote->int_device[virq >> 2]);
 	val |= (VINT_ENABLE | virq) << VINT_OFFSET(virq);
-	writel(val, &dev->remote->int_device[virq >> 2]);
+	pete_writel("drivers/vlynq/vlynq.c:135", val, &dev->remote->int_device[virq >> 2]);
 }
 
 static void vlynq_irq_mask(struct irq_data *d)
@@ -143,9 +143,9 @@ static void vlynq_irq_mask(struct irq_data *d)
 
 	BUG_ON(!dev);
 	virq = d->irq - dev->irq_start;
-	val = readl(&dev->remote->int_device[virq >> 2]);
+	val = pete_readl("drivers/vlynq/vlynq.c:146", &dev->remote->int_device[virq >> 2]);
 	val &= ~(VINT_ENABLE << VINT_OFFSET(virq));
-	writel(val, &dev->remote->int_device[virq >> 2]);
+	pete_writel("drivers/vlynq/vlynq.c:148", val, &dev->remote->int_device[virq >> 2]);
 }
 
 static int vlynq_irq_type(struct irq_data *d, unsigned int flow_type)
@@ -156,7 +156,7 @@ static int vlynq_irq_type(struct irq_data *d, unsigned int flow_type)
 
 	BUG_ON(!dev);
 	virq = d->irq - dev->irq_start;
-	val = readl(&dev->remote->int_device[virq >> 2]);
+	val = pete_readl("drivers/vlynq/vlynq.c:159", &dev->remote->int_device[virq >> 2]);
 	switch (flow_type & IRQ_TYPE_SENSE_MASK) {
 	case IRQ_TYPE_EDGE_RISING:
 	case IRQ_TYPE_EDGE_FALLING:
@@ -175,28 +175,28 @@ static int vlynq_irq_type(struct irq_data *d, unsigned int flow_type)
 	default:
 		return -EINVAL;
 	}
-	writel(val, &dev->remote->int_device[virq >> 2]);
+	pete_writel("drivers/vlynq/vlynq.c:178", val, &dev->remote->int_device[virq >> 2]);
 	return 0;
 }
 
 static void vlynq_local_ack(struct irq_data *d)
 {
 	struct vlynq_device *dev = irq_data_get_irq_chip_data(d);
-	u32 status = readl(&dev->local->status);
+	u32 status = pete_readl("drivers/vlynq/vlynq.c:185", &dev->local->status);
 
 	pr_debug("%s: local status: 0x%08x\n",
 		       dev_name(&dev->dev), status);
-	writel(status, &dev->local->status);
+	pete_writel("drivers/vlynq/vlynq.c:189", status, &dev->local->status);
 }
 
 static void vlynq_remote_ack(struct irq_data *d)
 {
 	struct vlynq_device *dev = irq_data_get_irq_chip_data(d);
-	u32 status = readl(&dev->remote->status);
+	u32 status = pete_readl("drivers/vlynq/vlynq.c:195", &dev->remote->status);
 
 	pr_debug("%s: remote status: 0x%08x\n",
 		       dev_name(&dev->dev), status);
-	writel(status, &dev->remote->status);
+	pete_writel("drivers/vlynq/vlynq.c:199", status, &dev->remote->status);
 }
 
 static irqreturn_t vlynq_irq(int irq, void *dev_id)
@@ -205,8 +205,8 @@ static irqreturn_t vlynq_irq(int irq, void *dev_id)
 	u32 status;
 	int virq = 0;
 
-	status = readl(&dev->local->int_status);
-	writel(status, &dev->local->int_status);
+	status = pete_readl("drivers/vlynq/vlynq.c:208", &dev->local->int_status);
+	pete_writel("drivers/vlynq/vlynq.c:209", status, &dev->local->int_status);
 
 	if (unlikely(!status))
 		spurious_interrupt();
@@ -255,23 +255,23 @@ static int vlynq_setup_irq(struct vlynq_device *dev)
 	}
 
 	/* Clear local and remote error bits */
-	writel(readl(&dev->local->status), &dev->local->status);
-	writel(readl(&dev->remote->status), &dev->remote->status);
+	pete_writel("drivers/vlynq/vlynq.c:258", pete_readl("drivers/vlynq/vlynq.c:258", &dev->local->status), &dev->local->status);
+	pete_writel("drivers/vlynq/vlynq.c:259", pete_readl("drivers/vlynq/vlynq.c:259", &dev->remote->status), &dev->remote->status);
 
 	/* Now setup interrupts */
 	val = VLYNQ_CTRL_INT_VECTOR(dev->local_irq);
 	val |= VLYNQ_CTRL_INT_ENABLE | VLYNQ_CTRL_INT_LOCAL |
 		VLYNQ_CTRL_INT2CFG;
-	val |= readl(&dev->local->control);
-	writel(VLYNQ_INT_OFFSET, &dev->local->int_ptr);
-	writel(val, &dev->local->control);
+	val |= pete_readl("drivers/vlynq/vlynq.c:265", &dev->local->control);
+	pete_writel("drivers/vlynq/vlynq.c:266", VLYNQ_INT_OFFSET, &dev->local->int_ptr);
+	pete_writel("drivers/vlynq/vlynq.c:267", val, &dev->local->control);
 
 	val = VLYNQ_CTRL_INT_VECTOR(dev->remote_irq);
 	val |= VLYNQ_CTRL_INT_ENABLE;
-	val |= readl(&dev->remote->control);
-	writel(VLYNQ_INT_OFFSET, &dev->remote->int_ptr);
-	writel(val, &dev->remote->int_ptr);
-	writel(val, &dev->remote->control);
+	val |= pete_readl("drivers/vlynq/vlynq.c:271", &dev->remote->control);
+	pete_writel("drivers/vlynq/vlynq.c:272", VLYNQ_INT_OFFSET, &dev->remote->int_ptr);
+	pete_writel("drivers/vlynq/vlynq.c:273", val, &dev->remote->int_ptr);
+	pete_writel("drivers/vlynq/vlynq.c:274", val, &dev->remote->control);
 
 	for (i = dev->irq_start; i <= dev->irq_end; i++) {
 		virq = i - dev->irq_start;
@@ -287,7 +287,7 @@ static int vlynq_setup_irq(struct vlynq_device *dev)
 			irq_set_chip_and_handler(i, &vlynq_irq_chip,
 						 handle_simple_irq);
 			irq_set_chip_data(i, dev);
-			writel(0, &dev->remote->int_device[virq >> 2]);
+			pete_writel("drivers/vlynq/vlynq.c:290", 0, &dev->remote->int_device[virq >> 2]);
 		}
 	}
 
@@ -384,12 +384,12 @@ static int __vlynq_try_remote(struct vlynq_device *dev)
 		if (!vlynq_linked(dev))
 			break;
 
-		writel((readl(&dev->remote->control) &
+		pete_writel("drivers/vlynq/vlynq.c:387", (pete_readl("drivers/vlynq/vlynq.c:387", &dev->remote->control) &
 				~VLYNQ_CTRL_CLOCK_MASK) |
 				VLYNQ_CTRL_CLOCK_INT |
 				VLYNQ_CTRL_CLOCK_DIV(i - vlynq_rdiv1),
 				&dev->remote->control);
-		writel((readl(&dev->local->control)
+		pete_writel("drivers/vlynq/vlynq.c:392", (pete_readl("drivers/vlynq/vlynq.c:392", &dev->local->control)
 				& ~(VLYNQ_CTRL_CLOCK_INT |
 				VLYNQ_CTRL_CLOCK_MASK)) |
 				VLYNQ_CTRL_CLOCK_DIV(i - vlynq_rdiv1),
@@ -426,7 +426,7 @@ static int __vlynq_try_local(struct vlynq_device *dev)
 			i <= vlynq_ldiv8 : i >= vlynq_ldiv2;
 		dev->dev_id ? i++ : i--) {
 
-		writel((readl(&dev->local->control) &
+		pete_writel("drivers/vlynq/vlynq.c:429", (pete_readl("drivers/vlynq/vlynq.c:429", &dev->local->control) &
 				~VLYNQ_CTRL_CLOCK_MASK) |
 				VLYNQ_CTRL_CLOCK_INT |
 				VLYNQ_CTRL_CLOCK_DIV(i - vlynq_ldiv1),
@@ -458,11 +458,11 @@ static int __vlynq_try_external(struct vlynq_device *dev)
 	if (!vlynq_linked(dev))
 		return -ENODEV;
 
-	writel((readl(&dev->remote->control) &
+	pete_writel("drivers/vlynq/vlynq.c:461", (pete_readl("drivers/vlynq/vlynq.c:461", &dev->remote->control) &
 			~VLYNQ_CTRL_CLOCK_INT),
 			&dev->remote->control);
 
-	writel((readl(&dev->local->control) &
+	pete_writel("drivers/vlynq/vlynq.c:465", (pete_readl("drivers/vlynq/vlynq.c:465", &dev->local->control) &
 			~VLYNQ_CTRL_CLOCK_INT),
 			&dev->local->control);
 
@@ -492,7 +492,7 @@ static int __vlynq_enable_device(struct vlynq_device *dev)
 		 * generation negotiated by hardware.
 		 * Check which device is generating clocks and perform setup
 		 * accordingly */
-		if (vlynq_linked(dev) && readl(&dev->remote->control) &
+		if (vlynq_linked(dev) && pete_readl("drivers/vlynq/vlynq.c:495", &dev->remote->control) &
 		   VLYNQ_CTRL_CLOCK_INT) {
 			if (!__vlynq_try_remote(dev) ||
 				!__vlynq_try_local(dev)  ||
@@ -513,10 +513,10 @@ static int __vlynq_enable_device(struct vlynq_device *dev)
 	case vlynq_ldiv6:
 	case vlynq_ldiv7:
 	case vlynq_ldiv8:
-		writel(VLYNQ_CTRL_CLOCK_INT |
+		pete_writel("drivers/vlynq/vlynq.c:516", VLYNQ_CTRL_CLOCK_INT |
 			VLYNQ_CTRL_CLOCK_DIV(dev->divisor -
 			vlynq_ldiv1), &dev->local->control);
-		writel(0, &dev->remote->control);
+		pete_writel("drivers/vlynq/vlynq.c:519", 0, &dev->remote->control);
 		if (vlynq_linked(dev)) {
 			printk(KERN_DEBUG
 				"%s: using local clock divisor %d\n",
@@ -533,8 +533,8 @@ static int __vlynq_enable_device(struct vlynq_device *dev)
 	case vlynq_rdiv6:
 	case vlynq_rdiv7:
 	case vlynq_rdiv8:
-		writel(0, &dev->local->control);
-		writel(VLYNQ_CTRL_CLOCK_INT |
+		pete_writel("drivers/vlynq/vlynq.c:536", 0, &dev->local->control);
+		pete_writel("drivers/vlynq/vlynq.c:537", VLYNQ_CTRL_CLOCK_INT |
 			VLYNQ_CTRL_CLOCK_DIV(dev->divisor -
 			vlynq_rdiv1), &dev->remote->control);
 		if (vlynq_linked(dev)) {
@@ -588,10 +588,10 @@ int vlynq_set_local_mapping(struct vlynq_device *dev, u32 tx_offset,
 	if (!dev->enabled)
 		return -ENXIO;
 
-	writel(tx_offset, &dev->local->tx_offset);
+	pete_writel("drivers/vlynq/vlynq.c:591", tx_offset, &dev->local->tx_offset);
 	for (i = 0; i < 4; i++) {
-		writel(mapping[i].offset, &dev->local->rx_mapping[i].offset);
-		writel(mapping[i].size, &dev->local->rx_mapping[i].size);
+		pete_writel("drivers/vlynq/vlynq.c:593", mapping[i].offset, &dev->local->rx_mapping[i].offset);
+		pete_writel("drivers/vlynq/vlynq.c:594", mapping[i].size, &dev->local->rx_mapping[i].size);
 	}
 	return 0;
 }
@@ -605,10 +605,10 @@ int vlynq_set_remote_mapping(struct vlynq_device *dev, u32 tx_offset,
 	if (!dev->enabled)
 		return -ENXIO;
 
-	writel(tx_offset, &dev->remote->tx_offset);
+	pete_writel("drivers/vlynq/vlynq.c:608", tx_offset, &dev->remote->tx_offset);
 	for (i = 0; i < 4; i++) {
-		writel(mapping[i].offset, &dev->remote->rx_mapping[i].offset);
-		writel(mapping[i].size, &dev->remote->rx_mapping[i].size);
+		pete_writel("drivers/vlynq/vlynq.c:610", mapping[i].offset, &dev->remote->rx_mapping[i].offset);
+		pete_writel("drivers/vlynq/vlynq.c:611", mapping[i].size, &dev->remote->rx_mapping[i].size);
 	}
 	return 0;
 }
@@ -724,7 +724,7 @@ static int vlynq_probe(struct platform_device *pdev)
 	dev->divisor = vlynq_div_auto;
 	result = __vlynq_enable_device(dev);
 	if (result == 0) {
-		dev->dev_id = readl(&dev->remote->chip);
+		dev->dev_id = pete_readl("drivers/vlynq/vlynq.c:727", &dev->remote->chip);
 		((struct plat_vlynq_ops *)(dev->dev.platform_data))->off(dev);
 	}
 	if (dev->dev_id)

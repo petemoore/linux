@@ -38,9 +38,9 @@ static void tcon_ch1_disable(struct clk_hw *hw)
 	u32 reg;
 
 	spin_lock_irqsave(&tclk->lock, flags);
-	reg = readl(tclk->reg);
+	reg = pete_readl("drivers/clk/sunxi/clk-sun4i-tcon-ch1.c:41", tclk->reg);
 	reg &= ~(TCON_CH1_SCLK2_GATE_BIT | TCON_CH1_SCLK1_GATE_BIT);
-	writel(reg, tclk->reg);
+	pete_writel("drivers/clk/sunxi/clk-sun4i-tcon-ch1.c:43", reg, tclk->reg);
 	spin_unlock_irqrestore(&tclk->lock, flags);
 }
 
@@ -51,9 +51,9 @@ static int tcon_ch1_enable(struct clk_hw *hw)
 	u32 reg;
 
 	spin_lock_irqsave(&tclk->lock, flags);
-	reg = readl(tclk->reg);
+	reg = pete_readl("drivers/clk/sunxi/clk-sun4i-tcon-ch1.c:54", tclk->reg);
 	reg |= TCON_CH1_SCLK2_GATE_BIT | TCON_CH1_SCLK1_GATE_BIT;
-	writel(reg, tclk->reg);
+	pete_writel("drivers/clk/sunxi/clk-sun4i-tcon-ch1.c:56", reg, tclk->reg);
 	spin_unlock_irqrestore(&tclk->lock, flags);
 
 	return 0;
@@ -64,7 +64,7 @@ static int tcon_ch1_is_enabled(struct clk_hw *hw)
 	struct tcon_ch1_clk *tclk = hw_to_tclk(hw);
 	u32 reg;
 
-	reg = readl(tclk->reg);
+	reg = pete_readl("drivers/clk/sunxi/clk-sun4i-tcon-ch1.c:67", tclk->reg);
 	return reg & (TCON_CH1_SCLK2_GATE_BIT | TCON_CH1_SCLK1_GATE_BIT);
 }
 
@@ -73,7 +73,7 @@ static u8 tcon_ch1_get_parent(struct clk_hw *hw)
 	struct tcon_ch1_clk *tclk = hw_to_tclk(hw);
 	u32 reg;
 
-	reg = readl(tclk->reg) >> TCON_CH1_SCLK2_MUX_SHIFT;
+	reg = pete_readl("drivers/clk/sunxi/clk-sun4i-tcon-ch1.c:76", tclk->reg) >> TCON_CH1_SCLK2_MUX_SHIFT;
 	reg &= reg >> TCON_CH1_SCLK2_MUX_MASK;
 
 	return reg;
@@ -86,10 +86,10 @@ static int tcon_ch1_set_parent(struct clk_hw *hw, u8 index)
 	u32 reg;
 
 	spin_lock_irqsave(&tclk->lock, flags);
-	reg = readl(tclk->reg);
+	reg = pete_readl("drivers/clk/sunxi/clk-sun4i-tcon-ch1.c:89", tclk->reg);
 	reg &= ~(TCON_CH1_SCLK2_MUX_MASK << TCON_CH1_SCLK2_MUX_SHIFT);
 	reg |= index << TCON_CH1_SCLK2_MUX_SHIFT;
-	writel(reg, tclk->reg);
+	pete_writel("drivers/clk/sunxi/clk-sun4i-tcon-ch1.c:92", reg, tclk->reg);
 	spin_unlock_irqrestore(&tclk->lock, flags);
 
 	return 0;
@@ -173,7 +173,7 @@ static unsigned long tcon_ch1_recalc_rate(struct clk_hw *hw,
 	struct tcon_ch1_clk *tclk = hw_to_tclk(hw);
 	u32 reg;
 
-	reg = readl(tclk->reg);
+	reg = pete_readl("drivers/clk/sunxi/clk-sun4i-tcon-ch1.c:176", tclk->reg);
 
 	parent_rate /= (reg & TCON_CH1_SCLK2_DIV_MASK) + 1;
 
@@ -195,14 +195,14 @@ static int tcon_ch1_set_rate(struct clk_hw *hw, unsigned long rate,
 	tcon_ch1_calc_divider(rate, parent_rate, &div_m, &half);
 
 	spin_lock_irqsave(&tclk->lock, flags);
-	reg = readl(tclk->reg);
+	reg = pete_readl("drivers/clk/sunxi/clk-sun4i-tcon-ch1.c:198", tclk->reg);
 	reg &= ~(TCON_CH1_SCLK2_DIV_MASK | TCON_CH1_SCLK1_HALF_BIT);
 	reg |= (div_m - 1) & TCON_CH1_SCLK2_DIV_MASK;
 
 	if (half)
 		reg |= TCON_CH1_SCLK1_HALF_BIT;
 
-	writel(reg, tclk->reg);
+	pete_writel("drivers/clk/sunxi/clk-sun4i-tcon-ch1.c:205", reg, tclk->reg);
 	spin_unlock_irqrestore(&tclk->lock, flags);
 
 	return 0;

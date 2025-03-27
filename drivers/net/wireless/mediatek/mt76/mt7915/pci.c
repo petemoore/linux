@@ -36,7 +36,7 @@ static struct mt7915_hif *mt7915_pci_get_hif2(u32 idx)
 	spin_lock_bh(&hif_lock);
 
 	list_for_each_entry(hif, &hif_list, list) {
-		val = readl(hif->regs + MT_PCIE_RECOG_ID);
+		val = pete_readl("drivers/net/wireless/mediatek/mt76/mt7915/pci.c:39", hif->regs + MT_PCIE_RECOG_ID);
 		val &= MT_PCIE_RECOG_ID_MASK;
 		if (val != idx)
 			continue;
@@ -75,7 +75,7 @@ static struct mt7915_hif *mt7915_pci_init_hif2(struct pci_dev *pdev)
 	}
 	pci_dev_put(tmp_pdev);
 
-	writel(hif_idx | MT_PCIE_RECOG_ID_SEM,
+	pete_writel("drivers/net/wireless/mediatek/mt76/mt7915/pci.c:78", hif_idx | MT_PCIE_RECOG_ID_SEM,
 	       pcim_iomap_table(pdev)[0] + MT_PCIE_RECOG_ID);
 
 	return mt7915_pci_get_hif2(hif_idx);

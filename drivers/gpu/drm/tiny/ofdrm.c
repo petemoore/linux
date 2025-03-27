@@ -477,10 +477,10 @@ static void ofdrm_mach64_cmap_write(struct ofdrm_device *odev, unsigned char ind
 	void __iomem *addr = odev->cmap_base + 0xcc0;
 	void __iomem *data = odev->cmap_base + 0xcc0 + 1;
 
-	writeb(index, addr);
-	writeb(r, data);
-	writeb(g, data);
-	writeb(b, data);
+	pete_writeb("drivers/gpu/drm/tiny/ofdrm.c:480", index, addr);
+	pete_writeb("drivers/gpu/drm/tiny/ofdrm.c:481", r, data);
+	pete_writeb("drivers/gpu/drm/tiny/ofdrm.c:482", g, data);
+	pete_writeb("drivers/gpu/drm/tiny/ofdrm.c:483", b, data);
 }
 
 static void __iomem *ofdrm_rage128_cmap_ioremap(struct ofdrm_device *odev,
@@ -497,8 +497,8 @@ static void ofdrm_rage128_cmap_write(struct ofdrm_device *odev, unsigned char in
 	void __iomem *data = odev->cmap_base + 0xb4;
 	u32 color = (r << 16) | (g << 8) | b;
 
-	writeb(index, addr);
-	writel(color, data);
+	pete_writeb("drivers/gpu/drm/tiny/ofdrm.c:500", index, addr);
+	pete_writel("drivers/gpu/drm/tiny/ofdrm.c:501", color, data);
 }
 
 static void __iomem *ofdrm_rage_m3a_cmap_ioremap(struct ofdrm_device *odev,
@@ -518,13 +518,13 @@ static void ofdrm_rage_m3a_cmap_write(struct ofdrm_device *odev, unsigned char i
 	u32 val;
 
 	/* Clear PALETTE_ACCESS_CNTL in DAC_CNTL */
-	val = readl(dac_ctl);
+	val = pete_readl("drivers/gpu/drm/tiny/ofdrm.c:521", dac_ctl);
 	val &= ~0x20;
-	writel(val, dac_ctl);
+	pete_writel("drivers/gpu/drm/tiny/ofdrm.c:523", val, dac_ctl);
 
 	/* Set color at palette index */
-	writeb(index, addr);
-	writel(color, data);
+	pete_writeb("drivers/gpu/drm/tiny/ofdrm.c:526", index, addr);
+	pete_writel("drivers/gpu/drm/tiny/ofdrm.c:527", color, data);
 }
 
 static void __iomem *ofdrm_rage_m3b_cmap_ioremap(struct ofdrm_device *odev,
@@ -544,13 +544,13 @@ static void ofdrm_rage_m3b_cmap_write(struct ofdrm_device *odev, unsigned char i
 	u32 val;
 
 	/* Set PALETTE_ACCESS_CNTL in DAC_CNTL */
-	val = readl(dac_ctl);
+	val = pete_readl("drivers/gpu/drm/tiny/ofdrm.c:547", dac_ctl);
 	val |= 0x20;
-	writel(val, dac_ctl);
+	pete_writel("drivers/gpu/drm/tiny/ofdrm.c:549", val, dac_ctl);
 
 	/* Set color at palette index */
-	writeb(index, addr);
-	writel(color, data);
+	pete_writeb("drivers/gpu/drm/tiny/ofdrm.c:552", index, addr);
+	pete_writel("drivers/gpu/drm/tiny/ofdrm.c:553", color, data);
 }
 
 static void __iomem *ofdrm_radeon_cmap_ioremap(struct ofdrm_device *odev,
@@ -573,7 +573,7 @@ static void ofdrm_gxt2000_cmap_write(struct ofdrm_device *odev, unsigned char in
 	void __iomem *data = ((unsigned int __iomem *)odev->cmap_base) + index;
 	u32 color = (r << 16) | (g << 8) | b;
 
-	writel(color, data);
+	pete_writel("drivers/gpu/drm/tiny/ofdrm.c:576", color, data);
 }
 
 static void __iomem *ofdrm_avivo_cmap_ioremap(struct ofdrm_device *odev,
@@ -600,13 +600,13 @@ static void ofdrm_avivo_cmap_write(struct ofdrm_device *odev, unsigned char inde
 
 	/* Write to both LUTs for now */
 
-	writel(1, lutsel);
-	writeb(index, addr);
-	writel(color, data);
+	pete_writel("drivers/gpu/drm/tiny/ofdrm.c:603", 1, lutsel);
+	pete_writeb("drivers/gpu/drm/tiny/ofdrm.c:604", index, addr);
+	pete_writel("drivers/gpu/drm/tiny/ofdrm.c:605", color, data);
 
-	writel(0, lutsel);
-	writeb(index, addr);
-	writel(color, data);
+	pete_writel("drivers/gpu/drm/tiny/ofdrm.c:607", 0, lutsel);
+	pete_writeb("drivers/gpu/drm/tiny/ofdrm.c:608", index, addr);
+	pete_writel("drivers/gpu/drm/tiny/ofdrm.c:609", color, data);
 }
 
 static void __iomem *ofdrm_qemu_cmap_ioremap(struct ofdrm_device *odev,
@@ -640,10 +640,10 @@ static void ofdrm_qemu_cmap_write(struct ofdrm_device *odev, unsigned char index
 	void __iomem *addr = odev->cmap_base;
 	void __iomem *data = odev->cmap_base + 1;
 
-	writeb(index, addr);
-	writeb(r, data);
-	writeb(g, data);
-	writeb(b, data);
+	pete_writeb("drivers/gpu/drm/tiny/ofdrm.c:643", index, addr);
+	pete_writeb("drivers/gpu/drm/tiny/ofdrm.c:644", r, data);
+	pete_writeb("drivers/gpu/drm/tiny/ofdrm.c:645", g, data);
+	pete_writeb("drivers/gpu/drm/tiny/ofdrm.c:646", b, data);
 }
 
 static void ofdrm_device_set_gamma_linear(struct ofdrm_device *odev,

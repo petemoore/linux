@@ -80,7 +80,7 @@ static int stf_dphy_configure(struct phy *phy, union phy_configure_opts *opts)
 	struct stf_dphy *dphy = phy_get_drvdata(phy);
 	const struct stf_dphy_info *info = dphy->info;
 
-	writel(FIELD_PREP(STF_DPHY_ENABLE_CLK, 1) |
+	pete_writel("drivers/phy/starfive/phy-jh7110-dphy-rx.c:83", FIELD_PREP(STF_DPHY_ENABLE_CLK, 1) |
 	       FIELD_PREP(STF_DPHY_ENABLE_CLK1, 1) |
 	       FIELD_PREP(STF_DPHY_ENABLE_LAN0, 1) |
 	       FIELD_PREP(STF_DPHY_ENABLE_LAN1, 1) |
@@ -92,18 +92,18 @@ static int stf_dphy_configure(struct phy *phy, union phy_configure_opts *opts)
 	       FIELD_PREP(STF_DPHY_LANE_SWAP_LAN1, info->maps[2]),
 	       dphy->regs + STF_DPHY_APBCFGSAIF_SYSCFG(188));
 
-	writel(FIELD_PREP(STF_DPHY_LANE_SWAP_LAN2, info->maps[3]) |
+	pete_writel("drivers/phy/starfive/phy-jh7110-dphy-rx.c:95", FIELD_PREP(STF_DPHY_LANE_SWAP_LAN2, info->maps[3]) |
 	       FIELD_PREP(STF_DPHY_LANE_SWAP_LAN3, info->maps[4]) |
 	       FIELD_PREP(STF_DPHY_PRECOUNTER_IN_CLK, 8),
 	       dphy->regs + STF_DPHY_APBCFGSAIF_SYSCFG(192));
 
-	writel(FIELD_PREP(STF_DPHY_PRECOUNTER_IN_CLK1, 8) |
+	pete_writel("drivers/phy/starfive/phy-jh7110-dphy-rx.c:100", FIELD_PREP(STF_DPHY_PRECOUNTER_IN_CLK1, 8) |
 	       FIELD_PREP(STF_DPHY_PRECOUNTER_IN_LAN0, 7) |
 	       FIELD_PREP(STF_DPHY_PRECOUNTER_IN_LAN1, 7) |
 	       FIELD_PREP(STF_DPHY_PRECOUNTER_IN_LAN2, 7),
 	       dphy->regs + STF_DPHY_APBCFGSAIF_SYSCFG(196));
 
-	writel(FIELD_PREP(STF_DPHY_PRECOUNTER_IN_LAN3, 7),
+	pete_writel("drivers/phy/starfive/phy-jh7110-dphy-rx.c:106", FIELD_PREP(STF_DPHY_PRECOUNTER_IN_LAN3, 7),
 	       dphy->regs + STF_DPHY_APBCFGSAIF_SYSCFG(200));
 
 	return 0;

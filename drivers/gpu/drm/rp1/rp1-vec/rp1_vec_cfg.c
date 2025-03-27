@@ -474,8 +474,8 @@
 #define VIDEO_OUT_CFG_RSTSEQ_DONE_BUSADAPTER_ACCESS "RO"
 // =============================================================================
 
-#define CFG_WRITE(reg, val)  writel((val),  vec->hw_base[RP1VEC_HW_BLOCK_CFG] + (reg ## _OFFSET))
-#define CFG_READ(reg)	     readl(vec->hw_base[RP1VEC_HW_BLOCK_CFG] + (reg ## _OFFSET))
+#define CFG_WRITE(reg, val)  pete_writel("drivers/gpu/drm/rp1/rp1-vec/rp1_vec_cfg.c:477", (val),  vec->hw_base[RP1VEC_HW_BLOCK_CFG] + (reg ## _OFFSET))
+#define CFG_READ(reg)	     pete_readl("drivers/gpu/drm/rp1/rp1-vec/rp1_vec_cfg.c:478", vec->hw_base[RP1VEC_HW_BLOCK_CFG] + (reg ## _OFFSET))
 
 void rp1vec_vidout_setup(struct rp1_vec *vec)
 {

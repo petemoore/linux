@@ -149,21 +149,21 @@ static int snd_msndmix_volume_get(struct snd_kcontrol *kcontrol,
 
 #define update_volm(a, b)						\
 	do {								\
-		writew((dev->left_levels[a] >> 1) *			\
-		       readw(dev->SMA + SMA_wCurrMastVolLeft) / 0xffff,	\
+		pete_writew("sound/isa/msnd/msnd_pinnacle_mixer.c:152", (dev->left_levels[a] >> 1) *			\
+		       pete_readw("sound/isa/msnd/msnd_pinnacle_mixer.c:153", dev->SMA + SMA_wCurrMastVolLeft) / 0xffff,	\
 		       dev->SMA + SMA_##b##Left);			\
-		writew((dev->right_levels[a] >> 1)  *			\
-		       readw(dev->SMA + SMA_wCurrMastVolRight) / 0xffff, \
+		pete_writew("sound/isa/msnd/msnd_pinnacle_mixer.c:155", (dev->right_levels[a] >> 1)  *			\
+		       pete_readw("sound/isa/msnd/msnd_pinnacle_mixer.c:156", dev->SMA + SMA_wCurrMastVolRight) / 0xffff, \
 		       dev->SMA + SMA_##b##Right);			\
 	} while (0);
 
 #define update_potm(d, s, ar)						\
 	do {								\
-		writeb((dev->left_levels[d] >> 8) *			\
-		       readw(dev->SMA + SMA_wCurrMastVolLeft) / 0xffff, \
+		pete_writeb("sound/isa/msnd/msnd_pinnacle_mixer.c:162", (dev->left_levels[d] >> 8) *			\
+		       pete_readw("sound/isa/msnd/msnd_pinnacle_mixer.c:163", dev->SMA + SMA_wCurrMastVolLeft) / 0xffff, \
 		       dev->SMA + SMA_##s##Left);			\
-		writeb((dev->right_levels[d] >> 8) *			\
-		       readw(dev->SMA + SMA_wCurrMastVolRight) / 0xffff, \
+		pete_writeb("sound/isa/msnd/msnd_pinnacle_mixer.c:165", (dev->right_levels[d] >> 8) *			\
+		       pete_readw("sound/isa/msnd/msnd_pinnacle_mixer.c:166", dev->SMA + SMA_wCurrMastVolRight) / 0xffff, \
 		       dev->SMA + SMA_##s##Right);			\
 		if (snd_msnd_send_word(dev, 0, 0, ar) == 0)		\
 			snd_msnd_send_dsp_cmd(dev, HDEX_AUX_REQ);	\
@@ -171,9 +171,9 @@ static int snd_msndmix_volume_get(struct snd_kcontrol *kcontrol,
 
 #define update_pot(d, s, ar)						\
 	do {								\
-		writeb(dev->left_levels[d] >> 8,			\
+		pete_writeb("sound/isa/msnd/msnd_pinnacle_mixer.c:174", dev->left_levels[d] >> 8,			\
 		       dev->SMA + SMA_##s##Left);			\
-		writeb(dev->right_levels[d] >> 8,			\
+		pete_writeb("sound/isa/msnd/msnd_pinnacle_mixer.c:176", dev->right_levels[d] >> 8,			\
 		       dev->SMA + SMA_##s##Right);			\
 		if (snd_msnd_send_word(dev, 0, 0, ar) == 0)		\
 			snd_msnd_send_dsp_cmd(dev, HDEX_AUX_REQ);	\
@@ -202,8 +202,8 @@ static int snd_msndmix_set(struct snd_msnd *dev, int d, int left, int right)
 		/* master volume unscaled controls */
 	case MSND_MIXER_LINE:			/* line pot control */
 		/* scaled by IMIX in digital mix */
-		writeb(bLeft, dev->SMA + SMA_bInPotPosLeft);
-		writeb(bRight, dev->SMA + SMA_bInPotPosRight);
+		pete_writeb("sound/isa/msnd/msnd_pinnacle_mixer.c:205", bLeft, dev->SMA + SMA_bInPotPosLeft);
+		pete_writeb("sound/isa/msnd/msnd_pinnacle_mixer.c:206", bRight, dev->SMA + SMA_bInPotPosRight);
 		if (snd_msnd_send_word(dev, 0, 0, HDEXAR_IN_SET_POTS) == 0)
 			snd_msnd_send_dsp_cmd(dev, HDEX_AUX_REQ);
 		break;
@@ -211,14 +211,14 @@ static int snd_msndmix_set(struct snd_msnd *dev, int d, int left, int right)
 		if (dev->type == msndClassic)
 			return -EINVAL;
 		/* scaled by IMIX in digital mix */
-		writeb(bLeft, dev->SMA + SMA_bMicPotPosLeft);
-		writeb(bRight, dev->SMA + SMA_bMicPotPosRight);
+		pete_writeb("sound/isa/msnd/msnd_pinnacle_mixer.c:214", bLeft, dev->SMA + SMA_bMicPotPosLeft);
+		pete_writeb("sound/isa/msnd/msnd_pinnacle_mixer.c:215", bRight, dev->SMA + SMA_bMicPotPosRight);
 		if (snd_msnd_send_word(dev, 0, 0, HDEXAR_MIC_SET_POTS) == 0)
 			snd_msnd_send_dsp_cmd(dev, HDEX_AUX_REQ);
 		break;
 	case MSND_MIXER_VOLUME:		/* master volume */
-		writew(wLeft, dev->SMA + SMA_wCurrMastVolLeft);
-		writew(wRight, dev->SMA + SMA_wCurrMastVolRight);
+		pete_writew("sound/isa/msnd/msnd_pinnacle_mixer.c:220", wLeft, dev->SMA + SMA_wCurrMastVolLeft);
+		pete_writew("sound/isa/msnd/msnd_pinnacle_mixer.c:221", wRight, dev->SMA + SMA_wCurrMastVolRight);
 		fallthrough;
 	case MSND_MIXER_AUX:			/* aux pot control */
 		/* scaled by master volume */

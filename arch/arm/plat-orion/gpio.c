@@ -98,24 +98,24 @@ __set_direction(struct orion_gpio_chip *ochip, unsigned pin, int input)
 {
 	u32 u;
 
-	u = readl(GPIO_IO_CONF(ochip));
+	u = pete_readl("arch/arm/plat-orion/gpio.c:101", GPIO_IO_CONF(ochip));
 	if (input)
 		u |= 1 << pin;
 	else
 		u &= ~(1 << pin);
-	writel(u, GPIO_IO_CONF(ochip));
+	pete_writel("arch/arm/plat-orion/gpio.c:106", u, GPIO_IO_CONF(ochip));
 }
 
 static void __set_level(struct orion_gpio_chip *ochip, unsigned pin, int high)
 {
 	u32 u;
 
-	u = readl(GPIO_OUT(ochip));
+	u = pete_readl("arch/arm/plat-orion/gpio.c:113", GPIO_OUT(ochip));
 	if (high)
 		u |= 1 << pin;
 	else
 		u &= ~(1 << pin);
-	writel(u, GPIO_OUT(ochip));
+	pete_writel("arch/arm/plat-orion/gpio.c:118", u, GPIO_OUT(ochip));
 }
 
 static inline void
@@ -123,12 +123,12 @@ __set_blinking(struct orion_gpio_chip *ochip, unsigned pin, int blink)
 {
 	u32 u;
 
-	u = readl(GPIO_BLINK_EN(ochip));
+	u = pete_readl("arch/arm/plat-orion/gpio.c:126", GPIO_BLINK_EN(ochip));
 	if (blink)
 		u |= 1 << pin;
 	else
 		u &= ~(1 << pin);
-	writel(u, GPIO_BLINK_EN(ochip));
+	pete_writel("arch/arm/plat-orion/gpio.c:131", u, GPIO_BLINK_EN(ochip));
 }
 
 static inline int
@@ -184,10 +184,10 @@ static int orion_gpio_get(struct gpio_chip *chip, unsigned pin)
 	struct orion_gpio_chip *ochip = gpiochip_get_data(chip);
 	int val;
 
-	if (readl(GPIO_IO_CONF(ochip)) & (1 << pin)) {
-		val = readl(GPIO_DATA_IN(ochip)) ^ readl(GPIO_IN_POL(ochip));
+	if (pete_readl("arch/arm/plat-orion/gpio.c:187", GPIO_IO_CONF(ochip)) & (1 << pin)) {
+		val = pete_readl("arch/arm/plat-orion/gpio.c:188", GPIO_DATA_IN(ochip)) ^ pete_readl("arch/arm/plat-orion/gpio.c:188", GPIO_IN_POL(ochip));
 	} else {
-		val = readl(GPIO_OUT(ochip));
+		val = pete_readl("arch/arm/plat-orion/gpio.c:190", GPIO_OUT(ochip));
 	}
 
 	return (val >> pin) & 1;
@@ -359,7 +359,7 @@ static int gpio_irq_set_type(struct irq_data *d, u32 type)
 
 	pin = d->hwirq - ochip->secondary_irq_base;
 
-	u = readl(GPIO_IO_CONF(ochip)) & (1 << pin);
+	u = pete_readl("arch/arm/plat-orion/gpio.c:362", GPIO_IO_CONF(ochip)) & (1 << pin);
 	if (!u) {
 		return -EINVAL;
 	}
@@ -377,27 +377,27 @@ static int gpio_irq_set_type(struct irq_data *d, u32 type)
 	 * Configure interrupt polarity.
 	 */
 	if (type == IRQ_TYPE_EDGE_RISING || type == IRQ_TYPE_LEVEL_HIGH) {
-		u = readl(GPIO_IN_POL(ochip));
+		u = pete_readl("arch/arm/plat-orion/gpio.c:380", GPIO_IN_POL(ochip));
 		u &= ~(1 << pin);
-		writel(u, GPIO_IN_POL(ochip));
+		pete_writel("arch/arm/plat-orion/gpio.c:382", u, GPIO_IN_POL(ochip));
 	} else if (type == IRQ_TYPE_EDGE_FALLING || type == IRQ_TYPE_LEVEL_LOW) {
-		u = readl(GPIO_IN_POL(ochip));
+		u = pete_readl("arch/arm/plat-orion/gpio.c:384", GPIO_IN_POL(ochip));
 		u |= 1 << pin;
-		writel(u, GPIO_IN_POL(ochip));
+		pete_writel("arch/arm/plat-orion/gpio.c:386", u, GPIO_IN_POL(ochip));
 	} else if (type == IRQ_TYPE_EDGE_BOTH) {
 		u32 v;
 
-		v = readl(GPIO_IN_POL(ochip)) ^ readl(GPIO_DATA_IN(ochip));
+		v = pete_readl("arch/arm/plat-orion/gpio.c:390", GPIO_IN_POL(ochip)) ^ pete_readl("arch/arm/plat-orion/gpio.c:390", GPIO_DATA_IN(ochip));
 
 		/*
 		 * set initial polarity based on current input level
 		 */
-		u = readl(GPIO_IN_POL(ochip));
+		u = pete_readl("arch/arm/plat-orion/gpio.c:395", GPIO_IN_POL(ochip));
 		if (v & (1 << pin))
 			u |= 1 << pin;		/* falling */
 		else
 			u &= ~(1 << pin);	/* rising */
-		writel(u, GPIO_IN_POL(ochip));
+		pete_writel("arch/arm/plat-orion/gpio.c:400", u, GPIO_IN_POL(ochip));
 	}
 	return 0;
 }
@@ -411,8 +411,8 @@ static void gpio_irq_handler(struct irq_desc *desc)
 	if (ochip == NULL)
 		return;
 
-	cause = readl(GPIO_DATA_IN(ochip)) & readl(GPIO_LEVEL_MASK(ochip));
-	cause |= readl(GPIO_EDGE_CAUSE(ochip)) & readl(GPIO_EDGE_MASK(ochip));
+	cause = pete_readl("arch/arm/plat-orion/gpio.c:414", GPIO_DATA_IN(ochip)) & pete_readl("arch/arm/plat-orion/gpio.c:414", GPIO_LEVEL_MASK(ochip));
+	cause |= pete_readl("arch/arm/plat-orion/gpio.c:415", GPIO_EDGE_CAUSE(ochip)) & pete_readl("arch/arm/plat-orion/gpio.c:415", GPIO_EDGE_MASK(ochip));
 
 	for (i = 0; i < ochip->chip.ngpio; i++) {
 		int irq;
@@ -427,9 +427,9 @@ static void gpio_irq_handler(struct irq_desc *desc)
 			/* Swap polarity (race with GPIO line) */
 			u32 polarity;
 
-			polarity = readl(GPIO_IN_POL(ochip));
+			polarity = pete_readl("arch/arm/plat-orion/gpio.c:430", GPIO_IN_POL(ochip));
 			polarity ^= 1 << i;
-			writel(polarity, GPIO_IN_POL(ochip));
+			pete_writel("arch/arm/plat-orion/gpio.c:432", polarity, GPIO_IN_POL(ochip));
 		}
 		generic_handle_irq(irq);
 	}
@@ -559,9 +559,9 @@ void __init orion_gpio_init(int gpio_base, int ngpio,
 	/*
 	 * Mask and clear GPIO interrupts.
 	 */
-	writel(0, GPIO_EDGE_CAUSE(ochip));
-	writel(0, GPIO_EDGE_MASK(ochip));
-	writel(0, GPIO_LEVEL_MASK(ochip));
+	pete_writel("arch/arm/plat-orion/gpio.c:562", 0, GPIO_EDGE_CAUSE(ochip));
+	pete_writel("arch/arm/plat-orion/gpio.c:563", 0, GPIO_EDGE_MASK(ochip));
+	pete_writel("arch/arm/plat-orion/gpio.c:564", 0, GPIO_LEVEL_MASK(ochip));
 
 	/* Setup the interrupt handlers. Each chip can have up to 4
 	 * interrupt handlers, with each handler dealing with 8 GPIO

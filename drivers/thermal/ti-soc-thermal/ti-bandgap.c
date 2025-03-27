@@ -53,7 +53,7 @@ static int bandgap_omap_cpu_notifier(struct notifier_block *nb,
  */
 static u32 ti_bandgap_readl(struct ti_bandgap *bgp, u32 reg)
 {
-	return readl(bgp->base + reg);
+	return pete_readl("drivers/thermal/ti-soc-thermal/ti-bandgap.c:56", bgp->base + reg);
 }
 
 /**
@@ -66,7 +66,7 @@ static u32 ti_bandgap_readl(struct ti_bandgap *bgp, u32 reg)
  */
 static void ti_bandgap_writel(struct ti_bandgap *bgp, u32 val, u32 reg)
 {
-	writel(val, bgp->base + reg);
+	pete_writel("drivers/thermal/ti-soc-thermal/ti-bandgap.c:69", val, bgp->base + reg);
 }
 
 /**

@@ -70,7 +70,7 @@ static int sun8i_sid_register_readout(const struct sunxi_sid *sid,
 	reg_val = (offset & SUN8I_SID_OFFSET_MASK)
 		  << SUN8I_SID_OFFSET_SHIFT;
 	reg_val |= SUN8I_SID_OP_LOCK | SUN8I_SID_READ;
-	writel(reg_val, sid->base + SUN8I_SID_PRCTL);
+	pete_writel("drivers/nvmem/sunxi_sid.c:73", reg_val, sid->base + SUN8I_SID_PRCTL);
 
 	ret = readl_poll_timeout(sid->base + SUN8I_SID_PRCTL, reg_val,
 				 !(reg_val & SUN8I_SID_READ), 100, 250000);
@@ -78,9 +78,9 @@ static int sun8i_sid_register_readout(const struct sunxi_sid *sid,
 		return ret;
 
 	if (out)
-		*out = readl(sid->base + SUN8I_SID_RDKEY);
+		*out = pete_readl("drivers/nvmem/sunxi_sid.c:81", sid->base + SUN8I_SID_RDKEY);
 
-	writel(0, sid->base + SUN8I_SID_PRCTL);
+	pete_writel("drivers/nvmem/sunxi_sid.c:83", 0, sid->base + SUN8I_SID_PRCTL);
 
 	return 0;
 }

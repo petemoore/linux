@@ -179,10 +179,10 @@ static void rockchip_inno_csidphy_ths_settle(struct rockchip_inno_csidphy *priv,
 	const struct dphy_drv_data *drv_data = priv->drv_data;
 	u32 val;
 
-	val = readl(priv->phy_base + drv_data->ths_settle_offset + offset);
+	val = pete_readl("drivers/phy/rockchip/phy-rockchip-inno-csidphy.c:182", priv->phy_base + drv_data->ths_settle_offset + offset);
 	val &= ~CSIDPHY_THS_SETTLE_MASK;
 	val |= hsfreq;
-	writel(val, priv->phy_base + drv_data->ths_settle_offset + offset);
+	pete_writel("drivers/phy/rockchip/phy-rockchip-inno-csidphy.c:185", val, priv->phy_base + drv_data->ths_settle_offset + offset);
 }
 
 static int rockchip_inno_csidphy_configure(struct phy *phy,
@@ -239,7 +239,7 @@ static int rockchip_inno_csidphy_power_on(struct phy *phy)
 
 	/* phy start */
 	if (drv_data->pwrctl_offset >= 0)
-		writel(CSIDPHY_CTRL_PWRCTL_UNDEFINED |
+		pete_writel("drivers/phy/rockchip/phy-rockchip-inno-csidphy.c:242", CSIDPHY_CTRL_PWRCTL_UNDEFINED |
 		       CSIDPHY_CTRL_PWRCTL_SYNCRST,
 		       priv->phy_base + drv_data->pwrctl_offset);
 
@@ -247,18 +247,18 @@ static int rockchip_inno_csidphy_power_on(struct phy *phy)
 	val = FIELD_PREP(CSIDPHY_CTRL_LANE_ENABLE_MASK, GENMASK(priv->config.lanes - 1, 0)) |
 	      FIELD_PREP(CSIDPHY_CTRL_LANE_ENABLE_CK, 1) |
 	      FIELD_PREP(CSIDPHY_CTRL_LANE_ENABLE_UNDEFINED, 1);
-	writel(val, priv->phy_base + CSIDPHY_CTRL_LANE_ENABLE);
+	pete_writel("drivers/phy/rockchip/phy-rockchip-inno-csidphy.c:250", val, priv->phy_base + CSIDPHY_CTRL_LANE_ENABLE);
 
 	/* Reset dphy analog part */
 	if (drv_data->pwrctl_offset >= 0)
-		writel(CSIDPHY_CTRL_PWRCTL_UNDEFINED,
+		pete_writel("drivers/phy/rockchip/phy-rockchip-inno-csidphy.c:254", CSIDPHY_CTRL_PWRCTL_UNDEFINED,
 		       priv->phy_base + drv_data->pwrctl_offset);
 	usleep_range(500, 1000);
 
 	/* Reset dphy digital part */
-	writel(CSIDPHY_CTRL_DIG_RST_UNDEFINED,
+	pete_writel("drivers/phy/rockchip/phy-rockchip-inno-csidphy.c:259", CSIDPHY_CTRL_DIG_RST_UNDEFINED,
 	       priv->phy_base + CSIDPHY_CTRL_DIG_RST);
-	writel(CSIDPHY_CTRL_DIG_RST_UNDEFINED + CSIDPHY_CTRL_DIG_RST_RESET,
+	pete_writel("drivers/phy/rockchip/phy-rockchip-inno-csidphy.c:261", CSIDPHY_CTRL_DIG_RST_UNDEFINED + CSIDPHY_CTRL_DIG_RST_RESET,
 	       priv->phy_base + CSIDPHY_CTRL_DIG_RST);
 
 	/* not into receive mode/wait stopstate */
@@ -266,11 +266,11 @@ static int rockchip_inno_csidphy_power_on(struct phy *phy)
 
 	/* enable calibration */
 	if (data_rate_mbps > 1500 && drv_data->calib_offset >= 0) {
-		writel(CSIDPHY_CALIB_EN,
+		pete_writel("drivers/phy/rockchip/phy-rockchip-inno-csidphy.c:269", CSIDPHY_CALIB_EN,
 		       priv->phy_base + drv_data->calib_offset +
 					CSIDPHY_CLK_CALIB_EN);
 		for (i = 0; i < priv->config.lanes; i++)
-			writel(CSIDPHY_CALIB_EN,
+			pete_writel("drivers/phy/rockchip/phy-rockchip-inno-csidphy.c:273", CSIDPHY_CALIB_EN,
 			       priv->phy_base + drv_data->calib_offset +
 						CSIDPHY_LANE_CALIB_EN(i));
 	}
@@ -294,12 +294,12 @@ static int rockchip_inno_csidphy_power_off(struct phy *phy)
 	const struct dphy_drv_data *drv_data = priv->drv_data;
 
 	/* disable all lanes */
-	writel(CSIDPHY_CTRL_LANE_ENABLE_UNDEFINED,
+	pete_writel("drivers/phy/rockchip/phy-rockchip-inno-csidphy.c:297", CSIDPHY_CTRL_LANE_ENABLE_UNDEFINED,
 	       priv->phy_base + CSIDPHY_CTRL_LANE_ENABLE);
 
 	/* disable pll and ldo */
 	if (drv_data->pwrctl_offset >= 0)
-		writel(CSIDPHY_CTRL_PWRCTL_UNDEFINED |
+		pete_writel("drivers/phy/rockchip/phy-rockchip-inno-csidphy.c:302", CSIDPHY_CTRL_PWRCTL_UNDEFINED |
 		       CSIDPHY_CTRL_PWRCTL_LDO_PD |
 		       CSIDPHY_CTRL_PWRCTL_PLL_PD,
 		       priv->phy_base + drv_data->pwrctl_offset);

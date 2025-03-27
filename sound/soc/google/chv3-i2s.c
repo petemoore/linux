@@ -100,12 +100,12 @@ static const struct snd_pcm_hardware chv3_dma_hw = {
 
 static inline void chv3_i2s_wr(struct chv3_i2s_dev *i2s, int offset, u32 val)
 {
-	writel(val, i2s->iobase + offset);
+	pete_writel("sound/soc/google/chv3-i2s.c:103", val, i2s->iobase + offset);
 }
 
 static inline u32 chv3_i2s_rd(struct chv3_i2s_dev *i2s, int offset)
 {
-	return readl(i2s->iobase + offset);
+	return pete_readl("sound/soc/google/chv3-i2s.c:108", i2s->iobase + offset);
 }
 
 static irqreturn_t chv3_i2s_isr(int irq, void *data)
@@ -113,7 +113,7 @@ static irqreturn_t chv3_i2s_isr(int irq, void *data)
 	struct chv3_i2s_dev *i2s = data;
 	u32 reg;
 
-	reg = readl(i2s->iobase_irq + I2S_IRQ_CLR);
+	reg = pete_readl("sound/soc/google/chv3-i2s.c:116", i2s->iobase_irq + I2S_IRQ_CLR);
 	if (!reg)
 		return IRQ_NONE;
 
@@ -123,7 +123,7 @@ static irqreturn_t chv3_i2s_isr(int irq, void *data)
 	if (reg & I2S_IRQ_TX_BIT)
 		snd_pcm_period_elapsed(i2s->tx_substream);
 
-	writel(reg, i2s->iobase_irq + I2S_IRQ_CLR);
+	pete_writel("sound/soc/google/chv3-i2s.c:126", reg, i2s->iobase_irq + I2S_IRQ_CLR);
 
 	return IRQ_HANDLED;
 }
@@ -221,7 +221,7 @@ static int chv3_dma_prepare(struct snd_soc_component *component,
 		chv3_i2s_wr(i2s, I2S_TX_IRQ, ((period_bytes / i2s->tx_bytes_to_fetch) << 8) | 1);
 		chv3_i2s_wr(i2s, I2S_TX_ENABLE, 1);
 	}
-	writel(I2S_IRQ_RX_BIT | I2S_IRQ_TX_BIT, i2s->iobase_irq + I2S_IRQ_MASK);
+	pete_writel("sound/soc/google/chv3-i2s.c:224", I2S_IRQ_RX_BIT | I2S_IRQ_TX_BIT, i2s->iobase_irq + I2S_IRQ_MASK);
 
 	return 0;
 }

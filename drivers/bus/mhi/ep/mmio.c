@@ -12,12 +12,12 @@
 
 u32 mhi_ep_mmio_read(struct mhi_ep_cntrl *mhi_cntrl, u32 offset)
 {
-	return readl(mhi_cntrl->mmio + offset);
+	return pete_readl("drivers/bus/mhi/ep/mmio.c:15", mhi_cntrl->mmio + offset);
 }
 
 void mhi_ep_mmio_write(struct mhi_ep_cntrl *mhi_cntrl, u32 offset, u32 val)
 {
-	writel(val, mhi_cntrl->mmio + offset);
+	pete_writel("drivers/bus/mhi/ep/mmio.c:20", val, mhi_cntrl->mmio + offset);
 }
 
 void mhi_ep_mmio_masked_write(struct mhi_ep_cntrl *mhi_cntrl, u32 offset, u32 mask, u32 val)

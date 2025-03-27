@@ -208,12 +208,12 @@ static int mtk_smi_larb_config_port_gen1(struct device *dev)
 			/* do not need to enable m4u for this port */
 			continue;
 		}
-		reg_val = readl(common->smi_ao_base
+		reg_val = pete_readl("drivers/memory/mtk-smi.c:211", common->smi_ao_base
 			+ REG_SMI_SECUR_CON_ADDR(m4u_port_id));
 		reg_val &= SMI_SECUR_CON_VAL_MSK(m4u_port_id);
 		reg_val |= sec_con_val;
 		reg_val |= SMI_SECUR_CON_VAL_DOMAIN(m4u_port_id);
-		writel(reg_val,
+		pete_writel("drivers/memory/mtk-smi.c:216", reg_val,
 			common->smi_ao_base
 			+ REG_SMI_SECUR_CON_ADDR(m4u_port_id));
 	}
@@ -224,7 +224,7 @@ static int mtk_smi_larb_config_port_mt8167(struct device *dev)
 {
 	struct mtk_smi_larb *larb = dev_get_drvdata(dev);
 
-	writel(*larb->mmu, larb->base + MT8167_SMI_LARB_MMU_EN);
+	pete_writel("drivers/memory/mtk-smi.c:227", *larb->mmu, larb->base + MT8167_SMI_LARB_MMU_EN);
 	return 0;
 }
 
@@ -232,7 +232,7 @@ static int mtk_smi_larb_config_port_mt8173(struct device *dev)
 {
 	struct mtk_smi_larb *larb = dev_get_drvdata(dev);
 
-	writel(*larb->mmu, larb->base + MT8173_SMI_LARB_MMU_EN);
+	pete_writel("drivers/memory/mtk-smi.c:235", *larb->mmu, larb->base + MT8173_SMI_LARB_MMU_EN);
 	return 0;
 }
 
@@ -278,7 +278,7 @@ static int mtk_smi_larb_config_port_gen2_general(struct device *dev)
 		reg = readl_relaxed(larb->base + SMI_LARB_NONSEC_CON(i));
 		reg |= F_MMU_EN;
 		reg |= BANK_SEL(larb->bank[i]);
-		writel(reg, larb->base + SMI_LARB_NONSEC_CON(i));
+		pete_writel("drivers/memory/mtk-smi.c:281", reg, larb->base + SMI_LARB_NONSEC_CON(i));
 	}
 	return 0;
 }
@@ -822,7 +822,7 @@ static int __maybe_unused mtk_smi_common_resume(struct device *dev)
 	for (i = 0; i < SMI_COMMON_INIT_REGS_NR && init && init[i].offset; i++)
 		writel_relaxed(init[i].value, common->base + init[i].offset);
 
-	writel(bus_sel, common->base + SMI_BUS_SEL);
+	pete_writel("drivers/memory/mtk-smi.c:825", bus_sel, common->base + SMI_BUS_SEL);
 	return 0;
 }
 

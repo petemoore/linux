@@ -80,12 +80,12 @@ enum {
 
 static inline void hi6210_write_reg(struct hi6210_i2s *i2s, int reg, u32 val)
 {
-	writel(val, i2s->base + reg);
+	pete_writel("sound/soc/hisilicon/hi6210-i2s.c:83", val, i2s->base + reg);
 }
 
 static inline u32 hi6210_read_reg(struct hi6210_i2s *i2s, int reg)
 {
-	return readl(i2s->base + reg);
+	return pete_readl("sound/soc/hisilicon/hi6210-i2s.c:88", i2s->base + reg);
 }
 
 static int hi6210_i2s_startup(struct snd_pcm_substream *substream,

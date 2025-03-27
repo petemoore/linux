@@ -480,8 +480,8 @@ lpfc_bsg_send_mgmt_cmd(struct bsg_job *job)
 			goto free_rmp;
 		}
 		creg_val |= (HC_R0INT_ENA << LPFC_FCP_RING);
-		writel(creg_val, phba->HCregaddr);
-		readl(phba->HCregaddr); /* flush */
+		pete_writel("drivers/scsi/lpfc/lpfc_bsg.c:483", creg_val, phba->HCregaddr);
+		pete_readl("drivers/scsi/lpfc/lpfc_bsg.c:484", phba->HCregaddr); /* flush */
 	}
 
 	cmdiocbq->ndlp = lpfc_nlp_get(ndlp);
@@ -727,8 +727,8 @@ lpfc_bsg_rport_els(struct bsg_job *job)
 			goto linkdown_err;
 		}
 		creg_val |= (HC_R0INT_ENA << LPFC_FCP_RING);
-		writel(creg_val, phba->HCregaddr);
-		readl(phba->HCregaddr); /* flush */
+		pete_writel("drivers/scsi/lpfc/lpfc_bsg.c:730", creg_val, phba->HCregaddr);
+		pete_readl("drivers/scsi/lpfc/lpfc_bsg.c:731", phba->HCregaddr); /* flush */
 	}
 
 	rc = lpfc_sli_issue_iocb(phba, LPFC_ELS_RING, cmdiocbq, 0);
@@ -1534,8 +1534,8 @@ lpfc_issue_ct_rsp(struct lpfc_hba *phba, struct bsg_job *job, uint32_t tag,
 			goto issue_ct_rsp_exit;
 		}
 		creg_val |= (HC_R0INT_ENA << LPFC_FCP_RING);
-		writel(creg_val, phba->HCregaddr);
-		readl(phba->HCregaddr); /* flush */
+		pete_writel("drivers/scsi/lpfc/lpfc_bsg.c:1537", creg_val, phba->HCregaddr);
+		pete_readl("drivers/scsi/lpfc/lpfc_bsg.c:1538", phba->HCregaddr); /* flush */
 	}
 
 	rc = lpfc_sli_issue_iocb(phba, LPFC_ELS_RING, ctiocb, 0);

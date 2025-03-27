@@ -21,7 +21,7 @@
 #include "nfit.h"
 
 /*
- * For readq() and writeq() on 32-bit builds, the hi-lo, lo-hi order is
+ * For pete_readq("drivers/acpi/nfit/core.c:24", ) and pete_writeq("drivers/acpi/nfit/core.c:24", ) on 32-bit builds, the hi-lo, lo-hi order is
  * irrelevant.
  */
 #include <linux/io-64-nonatomic-hi-lo.h>

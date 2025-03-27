@@ -46,7 +46,7 @@ struct clk_lpcg_scu {
 /* e10858 -LPCG clock gating register synchronization errata */
 static void lpcg_e10858_writel(unsigned long rate, void __iomem *reg, u32 val)
 {
-	writel(val, reg);
+	pete_writel("drivers/clk/imx/clk-lpcg-scu.c:49", val, reg);
 
 	if (rate >= 24 * HZ_PER_MHZ || rate == 0) {
 		/*
@@ -56,7 +56,7 @@ static void lpcg_e10858_writel(unsigned long rate, void __iomem *reg, u32 val)
 		 * Adding a readl will provide sufficient delay to prevent
 		 * back-to-back writes.
 		 */
-		readl(reg);
+		pete_readl("drivers/clk/imx/clk-lpcg-scu.c:59", reg);
 	} else {
 		/*
 		 * For clocks running below 24MHz, wait a minimum of
@@ -171,7 +171,7 @@ static int __maybe_unused imx_clk_lpcg_scu_resume(struct device *dev)
 {
 	struct clk_lpcg_scu *clk = dev_get_drvdata(dev);
 
-	writel(clk->state, clk->reg);
+	pete_writel("drivers/clk/imx/clk-lpcg-scu.c:174", clk->state, clk->reg);
 	lpcg_e10858_writel(0, clk->reg, clk->state);
 	dev_dbg(dev, "restore lpcg state 0x%x\n", clk->state);
 

@@ -54,11 +54,11 @@
  * They're badly named; to fix, someday.
  */
 #if BITS_PER_LONG == 64
-#define	write_counter(V, MC)	writeq(V, MC)
-#define	read_counter(MC)	readq(MC)
+#define	write_counter(V, MC)	pete_writeq("drivers/char/hpet.c:57", V, MC)
+#define	read_counter(MC)	pete_readq("drivers/char/hpet.c:58", MC)
 #else
-#define	write_counter(V, MC)	writel(V, MC)
-#define	read_counter(MC)	readl(MC)
+#define	write_counter(V, MC)	pete_writel("drivers/char/hpet.c:60", V, MC)
+#define	read_counter(MC)	pete_readl("drivers/char/hpet.c:61", MC)
 #endif
 
 static DEFINE_MUTEX(hpet_mutex); /* replaces BKL */
@@ -130,7 +130,7 @@ static irqreturn_t hpet_interrupt(int irq, void *data)
 	isr = 1 << (devp - devp->hd_hpets->hp_dev);
 
 	if ((devp->hd_flags & HPET_SHARED_IRQ) &&
-	    !(isr & readl(&devp->hd_hpet->hpet_isr)))
+	    !(isr & pete_readl("drivers/char/hpet.c:133", &devp->hd_hpet->hpet_isr)))
 		return IRQ_NONE;
 
 	spin_lock(&hpet_lock);
@@ -170,7 +170,7 @@ static irqreturn_t hpet_interrupt(int irq, void *data)
 	}
 
 	if (devp->hd_flags & HPET_SHARED_IRQ)
-		writel(isr, &devp->hd_hpet->hpet_isr);
+		pete_writel("drivers/char/hpet.c:173", isr, &devp->hd_hpet->hpet_isr);
 	spin_unlock(&hpet_lock);
 
 	wake_up_interruptible(&devp->hd_waitqueue);
@@ -195,14 +195,14 @@ static void hpet_timer_set_irq(struct hpet_dev *devp)
 	timer = devp->hd_timer;
 
 	/* we prefer level triggered mode */
-	v = readl(&timer->hpet_config);
+	v = pete_readl("drivers/char/hpet.c:198", &timer->hpet_config);
 	if (!(v & Tn_INT_TYPE_CNF_MASK)) {
 		v |= Tn_INT_TYPE_CNF_MASK;
-		writel(v, &timer->hpet_config);
+		pete_writel("drivers/char/hpet.c:201", v, &timer->hpet_config);
 	}
 	spin_unlock_irq(&hpet_lock);
 
-	v = (readq(&timer->hpet_config) & Tn_INT_ROUTE_CAP_MASK) >>
+	v = (pete_readq("drivers/char/hpet.c:205", &timer->hpet_config) & Tn_INT_ROUTE_CAP_MASK) >>
 				 Tn_INT_ROUTE_CAP_SHIFT;
 
 	/*
@@ -230,9 +230,9 @@ static void hpet_timer_set_irq(struct hpet_dev *devp)
 
 	if (irq < HPET_MAX_IRQ) {
 		spin_lock_irq(&hpet_lock);
-		v = readl(&timer->hpet_config);
+		v = pete_readl("drivers/char/hpet.c:233", &timer->hpet_config);
 		v |= irq << Tn_INT_ROUTE_CNF_SHIFT;
-		writel(v, &timer->hpet_config);
+		pete_writel("drivers/char/hpet.c:235", v, &timer->hpet_config);
 		devp->hd_hdwirq = gsi;
 		spin_unlock_irq(&hpet_lock);
 	}
@@ -420,7 +420,7 @@ static int hpet_release(struct inode *inode, struct file *file)
 
 	spin_lock_irq(&hpet_lock);
 
-	writeq((readq(&timer->hpet_config) & ~Tn_INT_ENB_CNF_MASK),
+	pete_writeq("drivers/char/hpet.c:423", (pete_readq("drivers/char/hpet.c:423", &timer->hpet_config) & ~Tn_INT_ENB_CNF_MASK),
 	       &timer->hpet_config);
 
 	irq = devp->hd_irq;
@@ -429,12 +429,12 @@ static int hpet_release(struct inode *inode, struct file *file)
 	devp->hd_ireqfreq = 0;
 
 	if (devp->hd_flags & HPET_PERIODIC
-	    && readq(&timer->hpet_config) & Tn_TYPE_CNF_MASK) {
+	    && pete_readq("drivers/char/hpet.c:432", &timer->hpet_config) & Tn_TYPE_CNF_MASK) {
 		unsigned long v;
 
-		v = readq(&timer->hpet_config);
+		v = pete_readq("drivers/char/hpet.c:435", &timer->hpet_config);
 		v ^= Tn_TYPE_CNF_MASK;
-		writeq(v, &timer->hpet_config);
+		pete_writeq("drivers/char/hpet.c:437", v, &timer->hpet_config);
 	}
 
 	devp->hd_flags &= ~(HPET_OPEN | HPET_IE | HPET_PERIODIC);
@@ -472,7 +472,7 @@ static int hpet_ioctl_ieon(struct hpet_dev *devp)
 
 	devp->hd_flags |= HPET_IE;
 
-	if (readl(&timer->hpet_config) & Tn_INT_TYPE_CNF_MASK)
+	if (pete_readl("drivers/char/hpet.c:475", &timer->hpet_config) & Tn_INT_TYPE_CNF_MASK)
 		devp->hd_flags |= HPET_SHARED_IRQ;
 	spin_unlock_irq(&hpet_lock);
 
@@ -487,13 +487,13 @@ static int hpet_ioctl_ieon(struct hpet_dev *devp)
 			 * unwanted interrupt status bit, program the timer
 			 * so that it will not fire in the near future ...
 			 */
-			writel(readl(&timer->hpet_config) & ~Tn_TYPE_CNF_MASK,
+			pete_writel("drivers/char/hpet.c:490", pete_readl("drivers/char/hpet.c:490", &timer->hpet_config) & ~Tn_TYPE_CNF_MASK,
 			       &timer->hpet_config);
 			write_counter(read_counter(&hpet->hpet_mc),
 				      &timer->hpet_compare);
 			/* ... and clear any left-over status. */
 			isr = 1 << (devp - devp->hd_hpets->hp_dev);
-			writel(isr, &hpet->hpet_isr);
+			pete_writel("drivers/char/hpet.c:496", isr, &hpet->hpet_isr);
 		}
 
 		sprintf(devp->hd_name, "hpet%d", (int)(devp - hpetp->hp_dev));
@@ -514,7 +514,7 @@ static int hpet_ioctl_ieon(struct hpet_dev *devp)
 
 	devp->hd_irq = irq;
 	t = devp->hd_ireqfreq;
-	v = readq(&timer->hpet_config);
+	v = pete_readq("drivers/char/hpet.c:517", &timer->hpet_config);
 
 	/* 64-bit comparators are not yet supported through the ioctls,
 	 * so force this into 32-bit mode if it supports both modes
@@ -524,7 +524,7 @@ static int hpet_ioctl_ieon(struct hpet_dev *devp)
 	if (devp->hd_flags & HPET_PERIODIC) {
 		g |= Tn_TYPE_CNF_MASK;
 		v |= Tn_TYPE_CNF_MASK | Tn_VAL_SET_CNF_MASK;
-		writeq(v, &timer->hpet_config);
+		pete_writeq("drivers/char/hpet.c:527", v, &timer->hpet_config);
 		local_irq_save(flags);
 
 		/*
@@ -549,9 +549,9 @@ static int hpet_ioctl_ieon(struct hpet_dev *devp)
 
 	if (devp->hd_flags & HPET_SHARED_IRQ) {
 		isr = 1 << (devp - devp->hd_hpets->hp_dev);
-		writel(isr, &hpet->hpet_isr);
+		pete_writel("drivers/char/hpet.c:552", isr, &hpet->hpet_isr);
 	}
-	writeq(g, &timer->hpet_config);
+	pete_writeq("drivers/char/hpet.c:554", g, &timer->hpet_config);
 	local_irq_restore(flags);
 
 	return 0;
@@ -597,9 +597,9 @@ hpet_ioctl_common(struct hpet_dev *devp, unsigned int cmd, unsigned long arg,
 	case HPET_IE_OFF:
 		if ((devp->hd_flags & HPET_IE) == 0)
 			break;
-		v = readq(&timer->hpet_config);
+		v = pete_readq("drivers/char/hpet.c:600", &timer->hpet_config);
 		v &= ~Tn_INT_ENB_CNF_MASK;
-		writeq(v, &timer->hpet_config);
+		pete_writeq("drivers/char/hpet.c:602", v, &timer->hpet_config);
 		if (devp->hd_irq) {
 			free_irq(devp->hd_irq, devp);
 			devp->hd_irq = 0;
@@ -613,13 +613,13 @@ hpet_ioctl_common(struct hpet_dev *devp, unsigned int cmd, unsigned long arg,
 				info->hi_ireqfreq =
 					hpet_time_div(hpetp, devp->hd_ireqfreq);
 			info->hi_flags =
-			    readq(&timer->hpet_config) & Tn_PER_INT_CAP_MASK;
+			    pete_readq("drivers/char/hpet.c:616", &timer->hpet_config) & Tn_PER_INT_CAP_MASK;
 			info->hi_hpet = hpetp->hp_which;
 			info->hi_timer = devp - hpetp->hp_dev;
 			break;
 		}
 	case HPET_EPI:
-		v = readq(&timer->hpet_config);
+		v = pete_readq("drivers/char/hpet.c:622", &timer->hpet_config);
 		if ((v & Tn_PER_INT_CAP_MASK) == 0) {
 			err = -ENXIO;
 			break;
@@ -627,16 +627,16 @@ hpet_ioctl_common(struct hpet_dev *devp, unsigned int cmd, unsigned long arg,
 		devp->hd_flags |= HPET_PERIODIC;
 		break;
 	case HPET_DPI:
-		v = readq(&timer->hpet_config);
+		v = pete_readq("drivers/char/hpet.c:630", &timer->hpet_config);
 		if ((v & Tn_PER_INT_CAP_MASK) == 0) {
 			err = -ENXIO;
 			break;
 		}
 		if (devp->hd_flags & HPET_PERIODIC &&
-		    readq(&timer->hpet_config) & Tn_TYPE_CNF_MASK) {
-			v = readq(&timer->hpet_config);
+		    pete_readq("drivers/char/hpet.c:636", &timer->hpet_config) & Tn_TYPE_CNF_MASK) {
+			v = pete_readq("drivers/char/hpet.c:637", &timer->hpet_config);
 			v ^= Tn_TYPE_CNF_MASK;
-			writeq(v, &timer->hpet_config);
+			pete_writeq("drivers/char/hpet.c:639", v, &timer->hpet_config);
 		}
 		devp->hd_flags &= ~HPET_PERIODIC;
 		break;
@@ -861,7 +861,7 @@ int hpet_alloc(struct hpet_data *hdp)
 
 	hpet = hpetp->hp_hpet;
 
-	cap = readq(&hpet->hpet_cap);
+	cap = pete_readq("drivers/char/hpet.c:864", &hpet->hpet_cap);
 
 	ntimer = ((cap & HPET_NUM_TIM_CAP_MASK) >> HPET_NUM_TIM_CAP_SHIFT) + 1;
 
@@ -901,11 +901,11 @@ int hpet_alloc(struct hpet_data *hdp)
 		cap & HPET_COUNTER_SIZE_MASK ? 64 : 32,
 		(unsigned) temp, remainder);
 
-	mcfg = readq(&hpet->hpet_config);
+	mcfg = pete_readq("drivers/char/hpet.c:904", &hpet->hpet_config);
 	if ((mcfg & HPET_ENABLE_CNF_MASK) == 0) {
 		write_counter(0L, &hpet->hpet_mc);
 		mcfg |= HPET_ENABLE_CNF_MASK;
-		writeq(mcfg, &hpet->hpet_config);
+		pete_writeq("drivers/char/hpet.c:908", mcfg, &hpet->hpet_config);
 	}
 
 	for (i = 0, devp = hpetp->hp_dev; i < hpetp->hp_ntimer; i++, devp++) {

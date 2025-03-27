@@ -64,13 +64,13 @@ struct bcm63138_led {
 static void bcm63138_leds_write(struct bcm63138_leds *leds, unsigned int reg,
 				u32 data)
 {
-	writel(data, leds->base + reg);
+	pete_writel("drivers/leds/blink/leds-bcm63138.c:67", data, leds->base + reg);
 }
 
 static unsigned long bcm63138_leds_read(struct bcm63138_leds *leds,
 					unsigned int reg)
 {
-	return readl(leds->base + reg);
+	return pete_readl("drivers/leds/blink/leds-bcm63138.c:73", leds->base + reg);
 }
 
 static void bcm63138_leds_update_bits(struct bcm63138_leds *leds,

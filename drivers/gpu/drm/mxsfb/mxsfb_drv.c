@@ -161,18 +161,18 @@ static irqreturn_t mxsfb_irq_handler(int irq, void *data)
 	u32 reg, crc;
 	u64 vbc;
 
-	reg = readl(mxsfb->base + LCDC_CTRL1);
+	reg = pete_readl("drivers/gpu/drm/mxsfb/mxsfb_drv.c:164", mxsfb->base + LCDC_CTRL1);
 
 	if (reg & CTRL1_CUR_FRAME_DONE_IRQ) {
 		drm_crtc_handle_vblank(&mxsfb->crtc);
 		if (mxsfb->crc_active) {
-			crc = readl(mxsfb->base + LCDC_V4_CRC_STAT);
+			crc = pete_readl("drivers/gpu/drm/mxsfb/mxsfb_drv.c:169", mxsfb->base + LCDC_V4_CRC_STAT);
 			vbc = drm_crtc_accurate_vblank_count(&mxsfb->crtc);
 			drm_crtc_add_crc_entry(&mxsfb->crtc, true, vbc, &crc);
 		}
 	}
 
-	writel(CTRL1_CUR_FRAME_DONE_IRQ, mxsfb->base + LCDC_CTRL1 + REG_CLR);
+	pete_writel("drivers/gpu/drm/mxsfb/mxsfb_drv.c:175", CTRL1_CUR_FRAME_DONE_IRQ, mxsfb->base + LCDC_CTRL1 + REG_CLR);
 
 	return IRQ_HANDLED;
 }
@@ -184,8 +184,8 @@ static void mxsfb_irq_disable(struct drm_device *drm)
 	mxsfb_enable_axi_clk(mxsfb);
 
 	/* Disable and clear VBLANK IRQ */
-	writel(CTRL1_CUR_FRAME_DONE_IRQ_EN, mxsfb->base + LCDC_CTRL1 + REG_CLR);
-	writel(CTRL1_CUR_FRAME_DONE_IRQ, mxsfb->base + LCDC_CTRL1 + REG_CLR);
+	pete_writel("drivers/gpu/drm/mxsfb/mxsfb_drv.c:187", CTRL1_CUR_FRAME_DONE_IRQ_EN, mxsfb->base + LCDC_CTRL1 + REG_CLR);
+	pete_writel("drivers/gpu/drm/mxsfb/mxsfb_drv.c:188", CTRL1_CUR_FRAME_DONE_IRQ, mxsfb->base + LCDC_CTRL1 + REG_CLR);
 
 	mxsfb_disable_axi_clk(mxsfb);
 }

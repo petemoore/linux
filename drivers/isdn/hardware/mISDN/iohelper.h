@@ -65,21 +65,21 @@ struct _ioport {
 #define IOFUNC_MEMIO(name, hws, typ, adr)				\
 	static u8 Read##name##_MIO(void *p, u8 off) {			\
 		struct hws *hw = p;					\
-		return readb(((typ *)hw->adr) + off);			\
+		return pete_readb("drivers/isdn/hardware/mISDN/iohelper.h:68", ((typ *)hw->adr) + off);			\
 	}								\
 	static void Write##name##_MIO(void *p, u8 off, u8 val) {	\
 		struct hws *hw = p;					\
-		writeb(val, ((typ *)hw->adr) + off);			\
+		pete_writeb("drivers/isdn/hardware/mISDN/iohelper.h:72", val, ((typ *)hw->adr) + off);			\
 	}								\
 	static void ReadFiFo##name##_MIO(void *p, u8 off, u8 *dp, int size) { \
 		struct hws *hw = p;					\
 		while (size--)						\
-			*dp++ = readb(((typ *)hw->adr) + off);		\
+			*dp++ = pete_readb("drivers/isdn/hardware/mISDN/iohelper.h:77", ((typ *)hw->adr) + off);		\
 	}								\
 	static void WriteFiFo##name##_MIO(void *p, u8 off, u8 *dp, int size) { \
 		struct hws *hw = p;					\
 		while (size--)						\
-			writeb(*dp++, ((typ *)hw->adr) + off);		\
+			pete_writeb("drivers/isdn/hardware/mISDN/iohelper.h:82", *dp++, ((typ *)hw->adr) + off);		\
 	}
 
 #define ASSIGN_FUNC(typ, name, dest)	do {			\

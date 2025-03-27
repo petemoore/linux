@@ -231,12 +231,12 @@ static int prestera_fw_load(struct prestera_fw *fw);
 
 static void prestera_fw_write(struct prestera_fw *fw, u32 reg, u32 val)
 {
-	writel(val, PRESTERA_FW_REG_ADDR(fw, reg));
+	pete_writel("drivers/net/ethernet/marvell/prestera/prestera_pci.c:234", val, PRESTERA_FW_REG_ADDR(fw, reg));
 }
 
 static u32 prestera_fw_read(struct prestera_fw *fw, u32 reg)
 {
-	return readl(PRESTERA_FW_REG_ADDR(fw, reg));
+	return pete_readl("drivers/net/ethernet/marvell/prestera/prestera_pci.c:239", PRESTERA_FW_REG_ADDR(fw, reg));
 }
 
 static u32 prestera_fw_evtq_len(struct prestera_fw *fw, u8 qid)
@@ -270,7 +270,7 @@ static u32 prestera_fw_evtq_read32(struct prestera_fw *fw, u8 qid)
 	u32 rd_idx = prestera_fw_read(fw, PRESTERA_EVTQ_RD_IDX_REG(qid));
 	u32 val;
 
-	val = readl(prestera_fw_evtq_buf(fw, qid) + rd_idx);
+	val = pete_readl("drivers/net/ethernet/marvell/prestera/prestera_pci.c:273", prestera_fw_evtq_buf(fw, qid) + rd_idx);
 	prestera_fw_evtq_rd_set(fw, qid, rd_idx + 4);
 	return val;
 }
@@ -524,12 +524,12 @@ static irqreturn_t prestera_pci_irq_handler(int irq, void *dev_id)
 
 static void prestera_ldr_write(struct prestera_fw *fw, u32 reg, u32 val)
 {
-	writel(val, PRESTERA_LDR_REG_ADDR(fw, reg));
+	pete_writel("drivers/net/ethernet/marvell/prestera/prestera_pci.c:527", val, PRESTERA_LDR_REG_ADDR(fw, reg));
 }
 
 static u32 prestera_ldr_read(struct prestera_fw *fw, u32 reg)
 {
-	return readl(PRESTERA_LDR_REG_ADDR(fw, reg));
+	return pete_readl("drivers/net/ethernet/marvell/prestera/prestera_pci.c:532", PRESTERA_LDR_REG_ADDR(fw, reg));
 }
 
 static int prestera_ldr_wait_reg32(struct prestera_fw *fw,

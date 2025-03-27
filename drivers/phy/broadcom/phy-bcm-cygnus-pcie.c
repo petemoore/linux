@@ -70,18 +70,18 @@ static int cygnus_pcie_power_config(struct cygnus_pcie_phy *phy, bool enable)
 	}
 
 	if (enable) {
-		val = readl(core->base + PCIE_CFG_OFFSET);
+		val = pete_readl("drivers/phy/broadcom/phy-bcm-cygnus-pcie.c:73", core->base + PCIE_CFG_OFFSET);
 		val &= ~BIT(shift);
-		writel(val, core->base + PCIE_CFG_OFFSET);
+		pete_writel("drivers/phy/broadcom/phy-bcm-cygnus-pcie.c:75", val, core->base + PCIE_CFG_OFFSET);
 		/*
 		 * Wait 50 ms for the PCIe Serdes to stabilize after the analog
 		 * front end is brought up
 		 */
 		msleep(50);
 	} else {
-		val = readl(core->base + PCIE_CFG_OFFSET);
+		val = pete_readl("drivers/phy/broadcom/phy-bcm-cygnus-pcie.c:82", core->base + PCIE_CFG_OFFSET);
 		val |= BIT(shift);
-		writel(val, core->base + PCIE_CFG_OFFSET);
+		pete_writel("drivers/phy/broadcom/phy-bcm-cygnus-pcie.c:84", val, core->base + PCIE_CFG_OFFSET);
 	}
 
 	mutex_unlock(&core->lock);

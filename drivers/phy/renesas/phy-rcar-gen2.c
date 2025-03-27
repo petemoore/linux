@@ -93,10 +93,10 @@ static int rcar_gen2_phy_init(struct phy *p)
 	clk_prepare_enable(drv->clk);
 
 	spin_lock_irqsave(&drv->lock, flags);
-	ugctrl2 = readl(drv->base + USBHS_UGCTRL2);
+	ugctrl2 = pete_readl("drivers/phy/renesas/phy-rcar-gen2.c:96", drv->base + USBHS_UGCTRL2);
 	ugctrl2 &= ~channel->select_mask;
 	ugctrl2 |= phy->select_value;
-	writel(ugctrl2, drv->base + USBHS_UGCTRL2);
+	pete_writel("drivers/phy/renesas/phy-rcar-gen2.c:99", ugctrl2, drv->base + USBHS_UGCTRL2);
 	spin_unlock_irqrestore(&drv->lock, flags);
 	return 0;
 }
@@ -129,20 +129,20 @@ static int rcar_gen2_phy_power_on(struct phy *p)
 	spin_lock_irqsave(&drv->lock, flags);
 
 	/* Power on USBHS PHY */
-	value = readl(base + USBHS_UGCTRL);
+	value = pete_readl("drivers/phy/renesas/phy-rcar-gen2.c:132", base + USBHS_UGCTRL);
 	value &= ~USBHS_UGCTRL_PLLRESET;
-	writel(value, base + USBHS_UGCTRL);
+	pete_writel("drivers/phy/renesas/phy-rcar-gen2.c:134", value, base + USBHS_UGCTRL);
 
-	value = readw(base + USBHS_LPSTS);
+	value = pete_readw("drivers/phy/renesas/phy-rcar-gen2.c:136", base + USBHS_LPSTS);
 	value |= USBHS_LPSTS_SUSPM;
-	writew(value, base + USBHS_LPSTS);
+	pete_writew("drivers/phy/renesas/phy-rcar-gen2.c:138", value, base + USBHS_LPSTS);
 
 	for (i = 0; i < 20; i++) {
-		value = readl(base + USBHS_UGSTS);
+		value = pete_readl("drivers/phy/renesas/phy-rcar-gen2.c:141", base + USBHS_UGSTS);
 		if ((value & USBHS_UGSTS_LOCK) == USBHS_UGSTS_LOCK) {
-			value = readl(base + USBHS_UGCTRL);
+			value = pete_readl("drivers/phy/renesas/phy-rcar-gen2.c:143", base + USBHS_UGCTRL);
 			value |= USBHS_UGCTRL_CONNECT;
-			writel(value, base + USBHS_UGCTRL);
+			pete_writel("drivers/phy/renesas/phy-rcar-gen2.c:145", value, base + USBHS_UGCTRL);
 			goto out;
 		}
 		udelay(1);
@@ -172,17 +172,17 @@ static int rcar_gen2_phy_power_off(struct phy *p)
 	spin_lock_irqsave(&drv->lock, flags);
 
 	/* Power off USBHS PHY */
-	value = readl(base + USBHS_UGCTRL);
+	value = pete_readl("drivers/phy/renesas/phy-rcar-gen2.c:175", base + USBHS_UGCTRL);
 	value &= ~USBHS_UGCTRL_CONNECT;
-	writel(value, base + USBHS_UGCTRL);
+	pete_writel("drivers/phy/renesas/phy-rcar-gen2.c:177", value, base + USBHS_UGCTRL);
 
-	value = readw(base + USBHS_LPSTS);
+	value = pete_readw("drivers/phy/renesas/phy-rcar-gen2.c:179", base + USBHS_LPSTS);
 	value &= ~USBHS_LPSTS_SUSPM;
-	writew(value, base + USBHS_LPSTS);
+	pete_writew("drivers/phy/renesas/phy-rcar-gen2.c:181", value, base + USBHS_LPSTS);
 
-	value = readl(base + USBHS_UGCTRL);
+	value = pete_readl("drivers/phy/renesas/phy-rcar-gen2.c:183", base + USBHS_UGCTRL);
 	value |= USBHS_UGCTRL_PLLRESET;
-	writel(value, base + USBHS_UGCTRL);
+	pete_writel("drivers/phy/renesas/phy-rcar-gen2.c:185", value, base + USBHS_UGCTRL);
 
 	spin_unlock_irqrestore(&drv->lock, flags);
 
@@ -200,17 +200,17 @@ static int rz_g1c_phy_power_on(struct phy *p)
 	spin_lock_irqsave(&drv->lock, flags);
 
 	/* Power on USBHS PHY */
-	value = readl(base + USBHS_UGCTRL);
+	value = pete_readl("drivers/phy/renesas/phy-rcar-gen2.c:203", base + USBHS_UGCTRL);
 	value &= ~USBHS_UGCTRL_PLLRESET;
-	writel(value, base + USBHS_UGCTRL);
+	pete_writel("drivers/phy/renesas/phy-rcar-gen2.c:205", value, base + USBHS_UGCTRL);
 
 	/* As per the data sheet wait 340 micro sec for power stable */
 	udelay(340);
 
 	if (phy->select_value == USBHS_UGCTRL2_USB0SEL_HS_USB20) {
-		value = readw(base + USBHS_LPSTS);
+		value = pete_readw("drivers/phy/renesas/phy-rcar-gen2.c:211", base + USBHS_LPSTS);
 		value |= USBHS_LPSTS_SUSPM;
-		writew(value, base + USBHS_LPSTS);
+		pete_writew("drivers/phy/renesas/phy-rcar-gen2.c:213", value, base + USBHS_LPSTS);
 	}
 
 	spin_unlock_irqrestore(&drv->lock, flags);
@@ -229,14 +229,14 @@ static int rz_g1c_phy_power_off(struct phy *p)
 	spin_lock_irqsave(&drv->lock, flags);
 	/* Power off USBHS PHY */
 	if (phy->select_value == USBHS_UGCTRL2_USB0SEL_HS_USB20) {
-		value = readw(base + USBHS_LPSTS);
+		value = pete_readw("drivers/phy/renesas/phy-rcar-gen2.c:232", base + USBHS_LPSTS);
 		value &= ~USBHS_LPSTS_SUSPM;
-		writew(value, base + USBHS_LPSTS);
+		pete_writew("drivers/phy/renesas/phy-rcar-gen2.c:234", value, base + USBHS_LPSTS);
 	}
 
-	value = readl(base + USBHS_UGCTRL);
+	value = pete_readl("drivers/phy/renesas/phy-rcar-gen2.c:237", base + USBHS_UGCTRL);
 	value |= USBHS_UGCTRL_PLLRESET;
-	writel(value, base + USBHS_UGCTRL);
+	pete_writel("drivers/phy/renesas/phy-rcar-gen2.c:239", value, base + USBHS_UGCTRL);
 
 	spin_unlock_irqrestore(&drv->lock, flags);
 

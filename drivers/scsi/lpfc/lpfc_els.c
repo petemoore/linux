@@ -4556,10 +4556,10 @@ lpfc_link_reset(struct lpfc_vport *vport)
 	if (phba->sli_rev <= LPFC_SLI_REV3) {
 		spin_lock_irq(&phba->hbalock);
 		phba->sli.sli_flag |= LPFC_PROCESS_LA;
-		control = readl(phba->HCregaddr);
+		control = pete_readl("drivers/scsi/lpfc/lpfc_els.c:4559", phba->HCregaddr);
 		control |= HC_LAINT_ENA;
-		writel(control, phba->HCregaddr);
-		readl(phba->HCregaddr); /* flush */
+		pete_writel("drivers/scsi/lpfc/lpfc_els.c:4561", control, phba->HCregaddr);
+		pete_readl("drivers/scsi/lpfc/lpfc_els.c:4562", phba->HCregaddr); /* flush */
 		spin_unlock_irq(&phba->hbalock);
 	}
 

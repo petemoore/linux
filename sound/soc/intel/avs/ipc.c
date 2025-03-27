@@ -186,7 +186,7 @@ static void avs_dsp_receive_rx(struct avs_dev *adev, u64 header)
 	union avs_reply_msg msg = AVS_MSG(header);
 	u64 reg;
 
-	reg = readq(avs_sram_addr(adev, AVS_FW_REGS_WINDOW));
+	reg = pete_readq("sound/soc/intel/avs/ipc.c:189", avs_sram_addr(adev, AVS_FW_REGS_WINDOW));
 	trace_avs_ipc_reply_msg(header, reg);
 
 	ipc->rx.header = header;
@@ -211,7 +211,7 @@ static void avs_dsp_process_notification(struct avs_dev *adev, u64 header)
 	void *data = NULL;
 	u64 reg;
 
-	reg = readq(avs_sram_addr(adev, AVS_FW_REGS_WINDOW));
+	reg = pete_readq("sound/soc/intel/avs/ipc.c:214", avs_sram_addr(adev, AVS_FW_REGS_WINDOW));
 	trace_avs_ipc_notify_msg(header, reg);
 
 	/* Ignore spurious notifications until handshake is established. */
@@ -447,7 +447,7 @@ static void avs_dsp_send_tx(struct avs_dev *adev, struct avs_ipc_msg *tx, bool r
 
 	tx->header |= spec->hipc->req_busy_mask;
 	if (read_fwregs)
-		reg = readq(avs_sram_addr(adev, AVS_FW_REGS_WINDOW));
+		reg = pete_readq("sound/soc/intel/avs/ipc.c:450", avs_sram_addr(adev, AVS_FW_REGS_WINDOW));
 
 	trace_avs_request(tx, reg);
 

@@ -390,7 +390,7 @@ static ssize_t dmi_sel_raw_read_phys32(struct dmi_sysfs_entry *entry,
 
 	while (count && pos < sel->area_length) {
 		count--;
-		*(buf++) = readb(mapped + pos++);
+		*(buf++) = pete_readb("drivers/firmware/dmi-sysfs.c:393", mapped + pos++);
 		wrote++;
 	}
 

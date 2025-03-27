@@ -514,9 +514,9 @@ static int hpre_set_cluster(struct hisi_qm *qm)
 		offset = i * HPRE_CLSTR_ADDR_INTRVL;
 
 		/* clusters initiating */
-		writel(cluster_core_mask,
+		pete_writel("drivers/crypto/hisilicon/hpre/hpre_main.c:517", cluster_core_mask,
 		       qm->io_base + offset + HPRE_CORE_ENB);
-		writel(0x1, qm->io_base + offset + HPRE_CORE_INI_CFG);
+		pete_writel("drivers/crypto/hisilicon/hpre/hpre_main.c:519", 0x1, qm->io_base + offset + HPRE_CORE_INI_CFG);
 		ret = readl_relaxed_poll_timeout(qm->io_base + offset +
 					HPRE_CORE_INI_STATUS, val,
 					((val & cluster_core_mask) ==
@@ -542,11 +542,11 @@ static void disable_flr_of_bme(struct hisi_qm *qm)
 {
 	u32 val;
 
-	val = readl(qm->io_base + QM_PEH_AXUSER_CFG);
+	val = pete_readl("drivers/crypto/hisilicon/hpre/hpre_main.c:545", qm->io_base + QM_PEH_AXUSER_CFG);
 	val &= ~(HPRE_QM_BME_FLR | HPRE_QM_SRIOV_FLR);
 	val |= HPRE_QM_PM_FLR;
-	writel(val, qm->io_base + QM_PEH_AXUSER_CFG);
-	writel(PEH_AXUSER_CFG_ENABLE, qm->io_base + QM_PEH_AXUSER_CFG_ENABLE);
+	pete_writel("drivers/crypto/hisilicon/hpre/hpre_main.c:548", val, qm->io_base + QM_PEH_AXUSER_CFG);
+	pete_writel("drivers/crypto/hisilicon/hpre/hpre_main.c:549", PEH_AXUSER_CFG_ENABLE, qm->io_base + QM_PEH_AXUSER_CFG_ENABLE);
 }
 
 static void hpre_open_sva_prefetch(struct hisi_qm *qm)
@@ -560,7 +560,7 @@ static void hpre_open_sva_prefetch(struct hisi_qm *qm)
 	/* Enable prefetch */
 	val = readl_relaxed(qm->io_base + HPRE_PREFETCH_CFG);
 	val &= HPRE_PREFETCH_ENABLE;
-	writel(val, qm->io_base + HPRE_PREFETCH_CFG);
+	pete_writel("drivers/crypto/hisilicon/hpre/hpre_main.c:563", val, qm->io_base + HPRE_PREFETCH_CFG);
 
 	ret = readl_relaxed_poll_timeout(qm->io_base + HPRE_PREFETCH_CFG,
 					 val, !(val & HPRE_PREFETCH_DISABLE),
@@ -580,7 +580,7 @@ static void hpre_close_sva_prefetch(struct hisi_qm *qm)
 
 	val = readl_relaxed(qm->io_base + HPRE_PREFETCH_CFG);
 	val |= HPRE_PREFETCH_DISABLE;
-	writel(val, qm->io_base + HPRE_PREFETCH_CFG);
+	pete_writel("drivers/crypto/hisilicon/hpre/hpre_main.c:583", val, qm->io_base + HPRE_PREFETCH_CFG);
 
 	ret = readl_relaxed_poll_timeout(qm->io_base + HPRE_SVA_PREFTCH_DFX,
 					 val, !(val & HPRE_SVA_DISABLE_READY),
@@ -597,21 +597,21 @@ static void hpre_enable_clock_gate(struct hisi_qm *qm)
 	if (qm->ver < QM_HW_V3)
 		return;
 
-	val = readl(qm->io_base + HPRE_CLKGATE_CTL);
+	val = pete_readl("drivers/crypto/hisilicon/hpre/hpre_main.c:600", qm->io_base + HPRE_CLKGATE_CTL);
 	val |= HPRE_CLKGATE_CTL_EN;
-	writel(val, qm->io_base + HPRE_CLKGATE_CTL);
+	pete_writel("drivers/crypto/hisilicon/hpre/hpre_main.c:602", val, qm->io_base + HPRE_CLKGATE_CTL);
 
-	val = readl(qm->io_base + HPRE_PEH_CFG_AUTO_GATE);
+	val = pete_readl("drivers/crypto/hisilicon/hpre/hpre_main.c:604", qm->io_base + HPRE_PEH_CFG_AUTO_GATE);
 	val |= HPRE_PEH_CFG_AUTO_GATE_EN;
-	writel(val, qm->io_base + HPRE_PEH_CFG_AUTO_GATE);
+	pete_writel("drivers/crypto/hisilicon/hpre/hpre_main.c:606", val, qm->io_base + HPRE_PEH_CFG_AUTO_GATE);
 
-	val = readl(qm->io_base + HPRE_CLUSTER_DYN_CTL);
+	val = pete_readl("drivers/crypto/hisilicon/hpre/hpre_main.c:608", qm->io_base + HPRE_CLUSTER_DYN_CTL);
 	val |= HPRE_CLUSTER_DYN_CTL_EN;
-	writel(val, qm->io_base + HPRE_CLUSTER_DYN_CTL);
+	pete_writel("drivers/crypto/hisilicon/hpre/hpre_main.c:610", val, qm->io_base + HPRE_CLUSTER_DYN_CTL);
 
 	val = readl_relaxed(qm->io_base + HPRE_CORE_SHB_CFG);
 	val |= HPRE_CORE_GATE_EN;
-	writel(val, qm->io_base + HPRE_CORE_SHB_CFG);
+	pete_writel("drivers/crypto/hisilicon/hpre/hpre_main.c:614", val, qm->io_base + HPRE_CORE_SHB_CFG);
 }
 
 static void hpre_disable_clock_gate(struct hisi_qm *qm)
@@ -621,21 +621,21 @@ static void hpre_disable_clock_gate(struct hisi_qm *qm)
 	if (qm->ver < QM_HW_V3)
 		return;
 
-	val = readl(qm->io_base + HPRE_CLKGATE_CTL);
+	val = pete_readl("drivers/crypto/hisilicon/hpre/hpre_main.c:624", qm->io_base + HPRE_CLKGATE_CTL);
 	val &= ~HPRE_CLKGATE_CTL_EN;
-	writel(val, qm->io_base + HPRE_CLKGATE_CTL);
+	pete_writel("drivers/crypto/hisilicon/hpre/hpre_main.c:626", val, qm->io_base + HPRE_CLKGATE_CTL);
 
-	val = readl(qm->io_base + HPRE_PEH_CFG_AUTO_GATE);
+	val = pete_readl("drivers/crypto/hisilicon/hpre/hpre_main.c:628", qm->io_base + HPRE_PEH_CFG_AUTO_GATE);
 	val &= ~HPRE_PEH_CFG_AUTO_GATE_EN;
-	writel(val, qm->io_base + HPRE_PEH_CFG_AUTO_GATE);
+	pete_writel("drivers/crypto/hisilicon/hpre/hpre_main.c:630", val, qm->io_base + HPRE_PEH_CFG_AUTO_GATE);
 
-	val = readl(qm->io_base + HPRE_CLUSTER_DYN_CTL);
+	val = pete_readl("drivers/crypto/hisilicon/hpre/hpre_main.c:632", qm->io_base + HPRE_CLUSTER_DYN_CTL);
 	val &= ~HPRE_CLUSTER_DYN_CTL_EN;
-	writel(val, qm->io_base + HPRE_CLUSTER_DYN_CTL);
+	pete_writel("drivers/crypto/hisilicon/hpre/hpre_main.c:634", val, qm->io_base + HPRE_CLUSTER_DYN_CTL);
 
 	val = readl_relaxed(qm->io_base + HPRE_CORE_SHB_CFG);
 	val &= ~HPRE_CORE_GATE_EN;
-	writel(val, qm->io_base + HPRE_CORE_SHB_CFG);
+	pete_writel("drivers/crypto/hisilicon/hpre/hpre_main.c:638", val, qm->io_base + HPRE_CORE_SHB_CFG);
 }
 
 static int hpre_set_user_domain_and_cache(struct hisi_qm *qm)
@@ -647,24 +647,24 @@ static int hpre_set_user_domain_and_cache(struct hisi_qm *qm)
 	/* disabel dynamic clock gate before sram init */
 	hpre_disable_clock_gate(qm);
 
-	writel(HPRE_QM_USR_CFG_MASK, qm->io_base + QM_ARUSER_M_CFG_ENABLE);
-	writel(HPRE_QM_USR_CFG_MASK, qm->io_base + QM_AWUSER_M_CFG_ENABLE);
+	pete_writel("drivers/crypto/hisilicon/hpre/hpre_main.c:650", HPRE_QM_USR_CFG_MASK, qm->io_base + QM_ARUSER_M_CFG_ENABLE);
+	pete_writel("drivers/crypto/hisilicon/hpre/hpre_main.c:651", HPRE_QM_USR_CFG_MASK, qm->io_base + QM_AWUSER_M_CFG_ENABLE);
 	writel_relaxed(HPRE_QM_AXI_CFG_MASK, qm->io_base + QM_AXI_M_CFG);
 
 	if (qm->ver >= QM_HW_V3)
-		writel(HPRE_RSA_ENB | HPRE_ECC_ENB,
+		pete_writel("drivers/crypto/hisilicon/hpre/hpre_main.c:655", HPRE_RSA_ENB | HPRE_ECC_ENB,
 			qm->io_base + HPRE_TYPES_ENB);
 	else
-		writel(HPRE_RSA_ENB, qm->io_base + HPRE_TYPES_ENB);
+		pete_writel("drivers/crypto/hisilicon/hpre/hpre_main.c:658", HPRE_RSA_ENB, qm->io_base + HPRE_TYPES_ENB);
 
-	writel(HPRE_QM_VFG_AX_MASK, qm->io_base + HPRE_VFG_AXCACHE);
-	writel(0x0, qm->io_base + HPRE_BD_ENDIAN);
-	writel(0x0, qm->io_base + HPRE_POISON_BYPASS);
-	writel(0x0, qm->io_base + HPRE_ECC_BYPASS);
+	pete_writel("drivers/crypto/hisilicon/hpre/hpre_main.c:660", HPRE_QM_VFG_AX_MASK, qm->io_base + HPRE_VFG_AXCACHE);
+	pete_writel("drivers/crypto/hisilicon/hpre/hpre_main.c:661", 0x0, qm->io_base + HPRE_BD_ENDIAN);
+	pete_writel("drivers/crypto/hisilicon/hpre/hpre_main.c:662", 0x0, qm->io_base + HPRE_POISON_BYPASS);
+	pete_writel("drivers/crypto/hisilicon/hpre/hpre_main.c:663", 0x0, qm->io_base + HPRE_ECC_BYPASS);
 
-	writel(HPRE_BD_USR_MASK, qm->io_base + HPRE_BD_ARUSR_CFG);
-	writel(HPRE_BD_USR_MASK, qm->io_base + HPRE_BD_AWUSR_CFG);
-	writel(0x1, qm->io_base + HPRE_RDCHN_INI_CFG);
+	pete_writel("drivers/crypto/hisilicon/hpre/hpre_main.c:665", HPRE_BD_USR_MASK, qm->io_base + HPRE_BD_ARUSR_CFG);
+	pete_writel("drivers/crypto/hisilicon/hpre/hpre_main.c:666", HPRE_BD_USR_MASK, qm->io_base + HPRE_BD_AWUSR_CFG);
+	pete_writel("drivers/crypto/hisilicon/hpre/hpre_main.c:667", 0x1, qm->io_base + HPRE_RDCHN_INI_CFG);
 	ret = readl_relaxed_poll_timeout(qm->io_base + HPRE_RDCHN_INI_ST, val,
 			val & BIT(0),
 			HPRE_REG_RD_INTVRL_US,
@@ -705,11 +705,11 @@ static void hpre_cnt_regs_clear(struct hisi_qm *qm)
 	clusters_num = qm->cap_tables.dev_cap_table[HPRE_CLUSTER_NUM_CAP_IDX].cap_val;
 	for (i = 0; i < clusters_num; i++) {
 		offset = HPRE_CLSTR_BASE + i * HPRE_CLSTR_ADDR_INTRVL;
-		writel(0x0, qm->io_base + offset + HPRE_CLUSTER_INQURY);
+		pete_writel("drivers/crypto/hisilicon/hpre/hpre_main.c:708", 0x0, qm->io_base + offset + HPRE_CLUSTER_INQURY);
 	}
 
 	/* clear rdclr_en */
-	writel(0x0, qm->io_base + HPRE_CTRL_CNT_CLR_CE);
+	pete_writel("drivers/crypto/hisilicon/hpre/hpre_main.c:712", 0x0, qm->io_base + HPRE_CTRL_CNT_CLR_CE);
 
 	hisi_qm_debug_regs_clear(qm);
 }
@@ -718,7 +718,7 @@ static void hpre_master_ooo_ctrl(struct hisi_qm *qm, bool enable)
 {
 	u32 val1, val2;
 
-	val1 = readl(qm->io_base + HPRE_AM_OOO_SHUTDOWN_ENB);
+	val1 = pete_readl("drivers/crypto/hisilicon/hpre/hpre_main.c:721", qm->io_base + HPRE_AM_OOO_SHUTDOWN_ENB);
 	if (enable) {
 		val1 |= HPRE_AM_OOO_SHUTDOWN_ENABLE;
 		val2 = hisi_qm_get_hw_info(qm, hpre_basic_info,
@@ -729,9 +729,9 @@ static void hpre_master_ooo_ctrl(struct hisi_qm *qm, bool enable)
 	}
 
 	if (qm->ver > QM_HW_V2)
-		writel(val2, qm->io_base + HPRE_OOO_SHUTDOWN_SEL);
+		pete_writel("drivers/crypto/hisilicon/hpre/hpre_main.c:732", val2, qm->io_base + HPRE_OOO_SHUTDOWN_SEL);
 
-	writel(val1, qm->io_base + HPRE_AM_OOO_SHUTDOWN_ENB);
+	pete_writel("drivers/crypto/hisilicon/hpre/hpre_main.c:734", val1, qm->io_base + HPRE_AM_OOO_SHUTDOWN_ENB);
 }
 
 static void hpre_hw_error_disable(struct hisi_qm *qm)
@@ -742,7 +742,7 @@ static void hpre_hw_error_disable(struct hisi_qm *qm)
 	nfe = hisi_qm_get_hw_info(qm, hpre_basic_info, HPRE_NFE_MASK_CAP, qm->cap_ver);
 
 	/* disable hpre hw error interrupts */
-	writel(ce | nfe | HPRE_HAC_RAS_FE_ENABLE, qm->io_base + HPRE_INT_MASK);
+	pete_writel("drivers/crypto/hisilicon/hpre/hpre_main.c:745", ce | nfe | HPRE_HAC_RAS_FE_ENABLE, qm->io_base + HPRE_INT_MASK);
 	/* disable HPRE block master OOO when nfe occurs on Kunpeng930 */
 	hpre_master_ooo_ctrl(qm, false);
 }
@@ -755,19 +755,19 @@ static void hpre_hw_error_enable(struct hisi_qm *qm)
 	nfe = hisi_qm_get_hw_info(qm, hpre_basic_info, HPRE_NFE_MASK_CAP, qm->cap_ver);
 
 	/* clear HPRE hw error source if having */
-	writel(ce | nfe | HPRE_HAC_RAS_FE_ENABLE, qm->io_base + HPRE_HAC_SOURCE_INT);
+	pete_writel("drivers/crypto/hisilicon/hpre/hpre_main.c:758", ce | nfe | HPRE_HAC_RAS_FE_ENABLE, qm->io_base + HPRE_HAC_SOURCE_INT);
 
 	/* configure error type */
-	writel(ce, qm->io_base + HPRE_RAS_CE_ENB);
-	writel(nfe, qm->io_base + HPRE_RAS_NFE_ENB);
-	writel(HPRE_HAC_RAS_FE_ENABLE, qm->io_base + HPRE_RAS_FE_ENB);
+	pete_writel("drivers/crypto/hisilicon/hpre/hpre_main.c:761", ce, qm->io_base + HPRE_RAS_CE_ENB);
+	pete_writel("drivers/crypto/hisilicon/hpre/hpre_main.c:762", nfe, qm->io_base + HPRE_RAS_NFE_ENB);
+	pete_writel("drivers/crypto/hisilicon/hpre/hpre_main.c:763", HPRE_HAC_RAS_FE_ENABLE, qm->io_base + HPRE_RAS_FE_ENB);
 
 	/* enable HPRE block master OOO when nfe occurs on Kunpeng930 */
 	hpre_master_ooo_ctrl(qm, true);
 
 	/* enable hpre hw error interrupts */
 	err_en = ce | nfe | HPRE_HAC_RAS_FE_ENABLE;
-	writel(~err_en, qm->io_base + HPRE_INT_MASK);
+	pete_writel("drivers/crypto/hisilicon/hpre/hpre_main.c:770", ~err_en, qm->io_base + HPRE_INT_MASK);
 }
 
 static inline struct hisi_qm *hpre_file_to_qm(struct hpre_debugfs_file *file)
@@ -781,7 +781,7 @@ static u32 hpre_clear_enable_read(struct hpre_debugfs_file *file)
 {
 	struct hisi_qm *qm = hpre_file_to_qm(file);
 
-	return readl(qm->io_base + HPRE_CTRL_CNT_CLR_CE) &
+	return pete_readl("drivers/crypto/hisilicon/hpre/hpre_main.c:784", qm->io_base + HPRE_CTRL_CNT_CLR_CE) &
 	       HPRE_CTRL_CNT_CLR_CE_BIT;
 }
 
@@ -793,9 +793,9 @@ static int hpre_clear_enable_write(struct hpre_debugfs_file *file, u32 val)
 	if (val != 1 && val != 0)
 		return -EINVAL;
 
-	tmp = (readl(qm->io_base + HPRE_CTRL_CNT_CLR_CE) &
+	tmp = (pete_readl("drivers/crypto/hisilicon/hpre/hpre_main.c:796", qm->io_base + HPRE_CTRL_CNT_CLR_CE) &
 	       ~HPRE_CTRL_CNT_CLR_CE_BIT) | val;
-	writel(tmp, qm->io_base + HPRE_CTRL_CNT_CLR_CE);
+	pete_writel("drivers/crypto/hisilicon/hpre/hpre_main.c:798", tmp, qm->io_base + HPRE_CTRL_CNT_CLR_CE);
 
 	return 0;
 }
@@ -807,7 +807,7 @@ static u32 hpre_cluster_inqry_read(struct hpre_debugfs_file *file)
 	unsigned long offset = HPRE_CLSTR_BASE +
 			       cluster_index * HPRE_CLSTR_ADDR_INTRVL;
 
-	return readl(qm->io_base + offset + HPRE_CLSTR_ADDR_INQRY_RSLT);
+	return pete_readl("drivers/crypto/hisilicon/hpre/hpre_main.c:810", qm->io_base + offset + HPRE_CLSTR_ADDR_INQRY_RSLT);
 }
 
 static void hpre_cluster_inqry_write(struct hpre_debugfs_file *file, u32 val)
@@ -817,7 +817,7 @@ static void hpre_cluster_inqry_write(struct hpre_debugfs_file *file, u32 val)
 	unsigned long offset = HPRE_CLSTR_BASE + cluster_index *
 			       HPRE_CLSTR_ADDR_INTRVL;
 
-	writel(val, qm->io_base + offset + HPRE_CLUSTER_INQURY);
+	pete_writel("drivers/crypto/hisilicon/hpre/hpre_main.c:820", val, qm->io_base + offset + HPRE_CLUSTER_INQURY);
 }
 
 static ssize_t hpre_ctrl_debug_read(struct file *filp, char __user *buf,
@@ -1275,12 +1275,12 @@ static void hpre_log_hw_error(struct hisi_qm *qm, u32 err_sts)
 
 static u32 hpre_get_hw_err_status(struct hisi_qm *qm)
 {
-	return readl(qm->io_base + HPRE_INT_STATUS);
+	return pete_readl("drivers/crypto/hisilicon/hpre/hpre_main.c:1278", qm->io_base + HPRE_INT_STATUS);
 }
 
 static void hpre_clear_hw_err_status(struct hisi_qm *qm, u32 err_sts)
 {
-	writel(err_sts, qm->io_base + HPRE_HAC_SOURCE_INT);
+	pete_writel("drivers/crypto/hisilicon/hpre/hpre_main.c:1283", err_sts, qm->io_base + HPRE_HAC_SOURCE_INT);
 }
 
 static void hpre_disable_error_report(struct hisi_qm *qm, u32 err_type)
@@ -1288,17 +1288,17 @@ static void hpre_disable_error_report(struct hisi_qm *qm, u32 err_type)
 	u32 nfe_mask;
 
 	nfe_mask = hisi_qm_get_hw_info(qm, hpre_basic_info, HPRE_NFE_MASK_CAP, qm->cap_ver);
-	writel(nfe_mask & (~err_type), qm->io_base + HPRE_RAS_NFE_ENB);
+	pete_writel("drivers/crypto/hisilicon/hpre/hpre_main.c:1291", nfe_mask & (~err_type), qm->io_base + HPRE_RAS_NFE_ENB);
 }
 
 static void hpre_open_axi_master_ooo(struct hisi_qm *qm)
 {
 	u32 value;
 
-	value = readl(qm->io_base + HPRE_AM_OOO_SHUTDOWN_ENB);
-	writel(value & ~HPRE_AM_OOO_SHUTDOWN_ENABLE,
+	value = pete_readl("drivers/crypto/hisilicon/hpre/hpre_main.c:1298", qm->io_base + HPRE_AM_OOO_SHUTDOWN_ENB);
+	pete_writel("drivers/crypto/hisilicon/hpre/hpre_main.c:1299", value & ~HPRE_AM_OOO_SHUTDOWN_ENABLE,
 	       qm->io_base + HPRE_AM_OOO_SHUTDOWN_ENB);
-	writel(value | HPRE_AM_OOO_SHUTDOWN_ENABLE,
+	pete_writel("drivers/crypto/hisilicon/hpre/hpre_main.c:1301", value | HPRE_AM_OOO_SHUTDOWN_ENABLE,
 	       qm->io_base + HPRE_AM_OOO_SHUTDOWN_ENB);
 }
 

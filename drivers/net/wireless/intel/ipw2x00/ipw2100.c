@@ -8491,23 +8491,23 @@ static int ipw2100_ucode_download(struct ipw2100_priv *priv,
 
 	/* Symbol control */
 	write_nic_word(dev, IPW2100_CONTROL_REG, 0x703);
-	readl(reg);
+	pete_readl("drivers/net/wireless/intel/ipw2x00/ipw2100.c:8494", reg);
 	write_nic_word(dev, IPW2100_CONTROL_REG, 0x707);
-	readl(reg);
+	pete_readl("drivers/net/wireless/intel/ipw2x00/ipw2100.c:8496", reg);
 
 	/* HW config */
 	write_nic_byte(dev, 0x210014, 0x72);	/* fifo width =16 */
-	readl(reg);
+	pete_readl("drivers/net/wireless/intel/ipw2x00/ipw2100.c:8500", reg);
 	write_nic_byte(dev, 0x210014, 0x72);	/* fifo width =16 */
-	readl(reg);
+	pete_readl("drivers/net/wireless/intel/ipw2x00/ipw2100.c:8502", reg);
 
 	/* EN_CS_ACCESS bit to reset control store pointer */
 	write_nic_byte(dev, 0x210000, 0x40);
-	readl(reg);
+	pete_readl("drivers/net/wireless/intel/ipw2x00/ipw2100.c:8506", reg);
 	write_nic_byte(dev, 0x210000, 0x0);
-	readl(reg);
+	pete_readl("drivers/net/wireless/intel/ipw2x00/ipw2100.c:8508", reg);
 	write_nic_byte(dev, 0x210000, 0x40);
-	readl(reg);
+	pete_readl("drivers/net/wireless/intel/ipw2x00/ipw2100.c:8510", reg);
 
 	/* copy microcode from buffer into Symbol */
 
@@ -8519,31 +8519,31 @@ static int ipw2100_ucode_download(struct ipw2100_priv *priv,
 
 	/* EN_CS_ACCESS bit to reset the control store pointer */
 	write_nic_byte(dev, 0x210000, 0x0);
-	readl(reg);
+	pete_readl("drivers/net/wireless/intel/ipw2x00/ipw2100.c:8522", reg);
 
 	/* Enable System (Reg 0)
 	 * first enable causes garbage in RX FIFO */
 	write_nic_byte(dev, 0x210000, 0x0);
-	readl(reg);
+	pete_readl("drivers/net/wireless/intel/ipw2x00/ipw2100.c:8527", reg);
 	write_nic_byte(dev, 0x210000, 0x80);
-	readl(reg);
+	pete_readl("drivers/net/wireless/intel/ipw2x00/ipw2100.c:8529", reg);
 
 	/* Reset External Baseband Reg */
 	write_nic_word(dev, IPW2100_CONTROL_REG, 0x703);
-	readl(reg);
+	pete_readl("drivers/net/wireless/intel/ipw2x00/ipw2100.c:8533", reg);
 	write_nic_word(dev, IPW2100_CONTROL_REG, 0x707);
-	readl(reg);
+	pete_readl("drivers/net/wireless/intel/ipw2x00/ipw2100.c:8535", reg);
 
 	/* HW Config (Reg 5) */
 	write_nic_byte(dev, 0x210014, 0x72);	// fifo width =16
-	readl(reg);
+	pete_readl("drivers/net/wireless/intel/ipw2x00/ipw2100.c:8539", reg);
 	write_nic_byte(dev, 0x210014, 0x72);	// fifo width =16
-	readl(reg);
+	pete_readl("drivers/net/wireless/intel/ipw2x00/ipw2100.c:8541", reg);
 
 	/* Enable System (Reg 0)
 	 * second enable should be OK */
 	write_nic_byte(dev, 0x210000, 0x00);	// clear enable system
-	readl(reg);
+	pete_readl("drivers/net/wireless/intel/ipw2x00/ipw2100.c:8546", reg);
 	write_nic_byte(dev, 0x210000, 0x80);	// set enable system
 
 	/* check Symbol is enabled - upped this from 5 as it wasn't always

@@ -335,7 +335,7 @@ static int ve_spc_set_performance(int cluster, u32 freq)
 	init_completion(&info->done);
 	info->cur_rsp_mask = RESPONSE_MASK(req_type);
 
-	writel(perf, info->baseaddr + perf_cfg_reg);
+	pete_writel("arch/arm/mach-versatile/spc.c:338", perf, info->baseaddr + perf_cfg_reg);
 	ret = ve_spc_waitforcompletion(req_type);
 
 	info->cur_rsp_mask = 0;
@@ -355,11 +355,11 @@ static int ve_spc_read_sys_cfg(int func, int offset, uint32_t *data)
 	info->cur_rsp_mask = RESPONSE_MASK(SPC_SYS_CFG);
 
 	/* Set the control value */
-	writel(SYSCFG_START | func | offset >> 2, info->baseaddr + COMMS);
+	pete_writel("arch/arm/mach-versatile/spc.c:358", SYSCFG_START | func | offset >> 2, info->baseaddr + COMMS);
 	ret = ve_spc_waitforcompletion(SPC_SYS_CFG);
 
 	if (ret == 0)
-		*data = readl(info->baseaddr + SYSCFG_RDATA);
+		*data = pete_readl("arch/arm/mach-versatile/spc.c:362", info->baseaddr + SYSCFG_RDATA);
 
 	info->cur_rsp_mask = 0;
 	up(&info->sem);

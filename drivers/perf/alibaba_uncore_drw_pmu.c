@@ -291,14 +291,14 @@ static u64 ali_drw_pmu_read_counter(struct perf_event *event)
 	u64 cycle_high, cycle_low;
 
 	if (GET_DRW_EVENTID(event) == ALI_DRW_PMU_CYCLE_EVT_ID) {
-		cycle_high = readl(drw_pmu->cfg_base + ALI_DRW_PMU_CYCLE_CNT_HIGH);
+		cycle_high = pete_readl("drivers/perf/alibaba_uncore_drw_pmu.c:294", drw_pmu->cfg_base + ALI_DRW_PMU_CYCLE_CNT_HIGH);
 		cycle_high &= ALI_DRW_PMU_CYCLE_CNT_HIGH_MASK;
-		cycle_low = readl(drw_pmu->cfg_base + ALI_DRW_PMU_CYCLE_CNT_LOW);
+		cycle_low = pete_readl("drivers/perf/alibaba_uncore_drw_pmu.c:296", drw_pmu->cfg_base + ALI_DRW_PMU_CYCLE_CNT_LOW);
 		cycle_low &= ALI_DRW_PMU_CYCLE_CNT_LOW_MASK;
 		return (cycle_high << 32 | cycle_low);
 	}
 
-	return readl(drw_pmu->cfg_base +
+	return pete_readl("drivers/perf/alibaba_uncore_drw_pmu.c:301", drw_pmu->cfg_base +
 		     ALI_DRW_PMU_COMMON_COUNTERn(event->hw.idx));
 }
 
@@ -327,16 +327,16 @@ static void ali_drw_pmu_event_set_period(struct perf_event *event)
 	struct ali_drw_pmu *drw_pmu = to_ali_drw_pmu(event->pmu);
 
 	/* set a preload counter for test purpose */
-	writel(ALI_DRW_PMU_TEST_SEL_COMMON_COUNTER_BASE + event->hw.idx,
+	pete_writel("drivers/perf/alibaba_uncore_drw_pmu.c:330", ALI_DRW_PMU_TEST_SEL_COMMON_COUNTER_BASE + event->hw.idx,
 	       drw_pmu->cfg_base + ALI_DRW_PMU_TEST_CTRL);
 
 	/* set conunter initial value */
 	pre_val = ALI_DRW_PMU_CNT_INIT;
-	writel(pre_val, drw_pmu->cfg_base + ALI_DRW_PMU_CNT_PRELOAD);
+	pete_writel("drivers/perf/alibaba_uncore_drw_pmu.c:335", pre_val, drw_pmu->cfg_base + ALI_DRW_PMU_CNT_PRELOAD);
 	local64_set(&event->hw.prev_count, pre_val);
 
 	/* set sel mode to zero to start test */
-	writel(0x0, drw_pmu->cfg_base + ALI_DRW_PMU_TEST_CTRL);
+	pete_writel("drivers/perf/alibaba_uncore_drw_pmu.c:339", 0x0, drw_pmu->cfg_base + ALI_DRW_PMU_TEST_CTRL);
 }
 
 static void ali_drw_pmu_enable_counter(struct perf_event *event)
@@ -346,7 +346,7 @@ static void ali_drw_pmu_enable_counter(struct perf_event *event)
 	struct ali_drw_pmu *drw_pmu = to_ali_drw_pmu(event->pmu);
 
 	reg = ALI_DRW_PMU_EVENT_SELn(counter);
-	val = readl(drw_pmu->cfg_base + reg);
+	val = pete_readl("drivers/perf/alibaba_uncore_drw_pmu.c:349", drw_pmu->cfg_base + reg);
 	subval = FIELD_PREP(ALI_DRW_PMCOM_CNT_EN, 1) |
 		 FIELD_PREP(ALI_DRW_PMCOM_CNT_EVENT_MASK, drw_pmu->evtids[counter]);
 
@@ -354,7 +354,7 @@ static void ali_drw_pmu_enable_counter(struct perf_event *event)
 	val &= ~(GENMASK(7, 0) << shift);
 	val |= subval << shift;
 
-	writel(val, drw_pmu->cfg_base + reg);
+	pete_writel("drivers/perf/alibaba_uncore_drw_pmu.c:357", val, drw_pmu->cfg_base + reg);
 }
 
 static void ali_drw_pmu_disable_counter(struct perf_event *event)
@@ -364,7 +364,7 @@ static void ali_drw_pmu_disable_counter(struct perf_event *event)
 	int counter = event->hw.idx;
 
 	reg = ALI_DRW_PMU_EVENT_SELn(counter);
-	val = readl(drw_pmu->cfg_base + reg);
+	val = pete_readl("drivers/perf/alibaba_uncore_drw_pmu.c:367", drw_pmu->cfg_base + reg);
 	subval = FIELD_PREP(ALI_DRW_PMCOM_CNT_EN, 0) |
 		 FIELD_PREP(ALI_DRW_PMCOM_CNT_EVENT_MASK, 0);
 
@@ -372,7 +372,7 @@ static void ali_drw_pmu_disable_counter(struct perf_event *event)
 	val &= ~(GENMASK(7, 0) << shift);
 	val |= subval << shift;
 
-	writel(val, drw_pmu->cfg_base + reg);
+	pete_writel("drivers/perf/alibaba_uncore_drw_pmu.c:375", val, drw_pmu->cfg_base + reg);
 }
 
 static irqreturn_t ali_drw_pmu_isr(int irq_num, void *data)
@@ -395,7 +395,7 @@ static irqreturn_t ali_drw_pmu_isr(int irq_num, void *data)
 		}
 
 		/* common counter intr status */
-		status = readl(drw_pmu->cfg_base + ALI_DRW_PMU_OV_INTR_STATUS);
+		status = pete_readl("drivers/perf/alibaba_uncore_drw_pmu.c:398", drw_pmu->cfg_base + ALI_DRW_PMU_OV_INTR_STATUS);
 		status = FIELD_GET(ALI_DRW_PMCOM_CNT_OV_INTR_MASK, status);
 		if (status) {
 			for_each_set_bit(idx, &status,
@@ -409,7 +409,7 @@ static irqreturn_t ali_drw_pmu_isr(int irq_num, void *data)
 
 			/* clear common counter intr status */
 			clr_status = FIELD_PREP(ALI_DRW_PMCOM_CNT_OV_INTR_MASK, status);
-			writel(clr_status,
+			pete_writel("drivers/perf/alibaba_uncore_drw_pmu.c:412", clr_status,
 			       drw_pmu->cfg_base + ALI_DRW_PMU_OV_INTR_CLR);
 		}
 
@@ -570,7 +570,7 @@ static int ali_drw_pmu_event_init(struct perf_event *event)
 	}
 
 	/* reset all the pmu counters */
-	writel(ALI_DRW_PMU_CNT_RST, drw_pmu->cfg_base + ALI_DRW_PMU_CNT_CTRL);
+	pete_writel("drivers/perf/alibaba_uncore_drw_pmu.c:573", ALI_DRW_PMU_CNT_RST, drw_pmu->cfg_base + ALI_DRW_PMU_CNT_CTRL);
 
 	hwc->idx = -1;
 
@@ -584,7 +584,7 @@ static void ali_drw_pmu_start(struct perf_event *event, int flags)
 	event->hw.state = 0;
 
 	if (GET_DRW_EVENTID(event) == ALI_DRW_PMU_CYCLE_EVT_ID) {
-		writel(ALI_DRW_PMU_CNT_START,
+		pete_writel("drivers/perf/alibaba_uncore_drw_pmu.c:587", ALI_DRW_PMU_CNT_START,
 		       drw_pmu->cfg_base + ALI_DRW_PMU_CNT_CTRL);
 		return;
 	}
@@ -593,13 +593,13 @@ static void ali_drw_pmu_start(struct perf_event *event, int flags)
 	if (flags & PERF_EF_RELOAD) {
 		unsigned long prev_raw_count =
 		    local64_read(&event->hw.prev_count);
-		writel(prev_raw_count,
+		pete_writel("drivers/perf/alibaba_uncore_drw_pmu.c:596", prev_raw_count,
 		       drw_pmu->cfg_base + ALI_DRW_PMU_CNT_PRELOAD);
 	}
 
 	ali_drw_pmu_enable_counter(event);
 
-	writel(ALI_DRW_PMU_CNT_START, drw_pmu->cfg_base + ALI_DRW_PMU_CNT_CTRL);
+	pete_writel("drivers/perf/alibaba_uncore_drw_pmu.c:602", ALI_DRW_PMU_CNT_START, drw_pmu->cfg_base + ALI_DRW_PMU_CNT_CTRL);
 }
 
 static void ali_drw_pmu_stop(struct perf_event *event, int flags)
@@ -612,7 +612,7 @@ static void ali_drw_pmu_stop(struct perf_event *event, int flags)
 	if (GET_DRW_EVENTID(event) != ALI_DRW_PMU_CYCLE_EVT_ID)
 		ali_drw_pmu_disable_counter(event);
 
-	writel(ALI_DRW_PMU_CNT_STOP, drw_pmu->cfg_base + ALI_DRW_PMU_CNT_CTRL);
+	pete_writel("drivers/perf/alibaba_uncore_drw_pmu.c:615", ALI_DRW_PMU_CNT_STOP, drw_pmu->cfg_base + ALI_DRW_PMU_CNT_CTRL);
 
 	ali_drw_pmu_event_update(event);
 	event->hw.state |= PERF_HES_STOPPED | PERF_HES_UPTODATE;
@@ -692,14 +692,14 @@ static int ali_drw_pmu_probe(struct platform_device *pdev)
 	if (!name)
 		return -ENOMEM;
 
-	writel(ALI_DRW_PMU_CNT_RST, drw_pmu->cfg_base + ALI_DRW_PMU_CNT_CTRL);
+	pete_writel("drivers/perf/alibaba_uncore_drw_pmu.c:695", ALI_DRW_PMU_CNT_RST, drw_pmu->cfg_base + ALI_DRW_PMU_CNT_CTRL);
 
 	/* enable the generation of interrupt by all common counters */
-	writel(ALI_DRW_PMCOM_CNT_OV_INTR_MASK,
+	pete_writel("drivers/perf/alibaba_uncore_drw_pmu.c:698", ALI_DRW_PMCOM_CNT_OV_INTR_MASK,
 	       drw_pmu->cfg_base + ALI_DRW_PMU_OV_INTR_ENABLE_CTL);
 
 	/* clearing interrupt status */
-	writel(0xffffff, drw_pmu->cfg_base + ALI_DRW_PMU_OV_INTR_CLR);
+	pete_writel("drivers/perf/alibaba_uncore_drw_pmu.c:702", 0xffffff, drw_pmu->cfg_base + ALI_DRW_PMU_OV_INTR_CLR);
 
 	drw_pmu->cpu = smp_processor_id();
 
@@ -734,7 +734,7 @@ static int ali_drw_pmu_remove(struct platform_device *pdev)
 	struct ali_drw_pmu *drw_pmu = platform_get_drvdata(pdev);
 
 	/* disable the generation of interrupt by all common counters */
-	writel(ALI_DRW_PMCOM_CNT_OV_INTR_MASK,
+	pete_writel("drivers/perf/alibaba_uncore_drw_pmu.c:737", ALI_DRW_PMCOM_CNT_OV_INTR_MASK,
 	       drw_pmu->cfg_base + ALI_DRW_PMU_OV_INTR_DISABLE_CTL);
 
 	ali_drw_pmu_uninit_irq(drw_pmu);

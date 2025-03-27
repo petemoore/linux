@@ -74,7 +74,7 @@ static void
 powertecscsi_irqenable(struct expansion_card *ec, int irqnr)
 {
 	struct powertec_info *info = ec->irq_data;
-	writeb(POWERTEC_INTR_ENABLE, info->base + POWERTEC_INTR_CONTROL);
+	pete_writeb("drivers/scsi/arm/powertec.c:77", POWERTEC_INTR_ENABLE, info->base + POWERTEC_INTR_CONTROL);
 }
 
 /* Prototype: void powertecscsi_irqdisable(ec, irqnr)
@@ -86,7 +86,7 @@ static void
 powertecscsi_irqdisable(struct expansion_card *ec, int irqnr)
 {
 	struct powertec_info *info = ec->irq_data;
-	writeb(POWERTEC_INTR_DISABLE, info->base + POWERTEC_INTR_CONTROL);
+	pete_writeb("drivers/scsi/arm/powertec.c:89", POWERTEC_INTR_DISABLE, info->base + POWERTEC_INTR_CONTROL);
 }
 
 static const expansioncard_ops_t powertecscsi_ops = {
@@ -105,7 +105,7 @@ powertecscsi_terminator_ctl(struct Scsi_Host *host, int on_off)
 	struct powertec_info *info = (struct powertec_info *)host->hostdata;
 
 	info->term_ctl = on_off ? POWERTEC_TERM_ENABLE : 0;
-	writeb(info->term_ctl, info->base + POWERTEC_TERM_CONTROL);
+	pete_writeb("drivers/scsi/arm/powertec.c:108", info->term_ctl, info->base + POWERTEC_TERM_CONTROL);
 }
 
 /* Prototype: void powertecscsi_intr(irq, *dev_id, *regs)

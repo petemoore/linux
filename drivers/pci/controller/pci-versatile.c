@@ -90,8 +90,8 @@ static int versatile_pci_probe(struct platform_device *pdev)
 
 	resource_list_for_each_entry(entry, &bridge->windows) {
 		if (resource_type(entry->res) == IORESOURCE_MEM) {
-			writel(entry->res->start >> 28, PCI_IMAP(mem));
-			writel(__pa(PAGE_OFFSET) >> 28, PCI_SMAP(mem));
+			pete_writel("drivers/pci/controller/pci-versatile.c:93", entry->res->start >> 28, PCI_IMAP(mem));
+			pete_writel("drivers/pci/controller/pci-versatile.c:94", __pa(PAGE_OFFSET) >> 28, PCI_SMAP(mem));
 			mem++;
 		}
 	}
@@ -101,8 +101,8 @@ static int versatile_pci_probe(struct platform_device *pdev)
 	 * before the main PCI probing is performed
 	 */
 	for (i = 0; i < 32; i++) {
-		if ((readl(versatile_cfg_base[0] + (i << 11) + PCI_VENDOR_ID) == VP_PCI_DEVICE_ID) &&
-		    (readl(versatile_cfg_base[0] + (i << 11) + PCI_CLASS_REVISION) == VP_PCI_CLASS_ID)) {
+		if ((pete_readl("drivers/pci/controller/pci-versatile.c:104", versatile_cfg_base[0] + (i << 11) + PCI_VENDOR_ID) == VP_PCI_DEVICE_ID) &&
+		    (pete_readl("drivers/pci/controller/pci-versatile.c:105", versatile_cfg_base[0] + (i << 11) + PCI_CLASS_REVISION) == VP_PCI_CLASS_ID)) {
 			myslot = i;
 			break;
 		}
@@ -118,19 +118,19 @@ static int versatile_pci_probe(struct platform_device *pdev)
 
 	dev_info(dev, "PCI core found (slot %d)\n", myslot);
 
-	writel(myslot, PCI_SELFID);
+	pete_writel("drivers/pci/controller/pci-versatile.c:121", myslot, PCI_SELFID);
 	local_pci_cfg_base = versatile_cfg_base[1] + (myslot << 11);
 
-	val = readl(local_pci_cfg_base + PCI_COMMAND);
+	val = pete_readl("drivers/pci/controller/pci-versatile.c:124", local_pci_cfg_base + PCI_COMMAND);
 	val |= PCI_COMMAND_MEMORY | PCI_COMMAND_MASTER | PCI_COMMAND_INVALIDATE;
-	writel(val, local_pci_cfg_base + PCI_COMMAND);
+	pete_writel("drivers/pci/controller/pci-versatile.c:126", val, local_pci_cfg_base + PCI_COMMAND);
 
 	/*
 	 * Configure the PCI inbound memory windows to be 1:1 mapped to SDRAM
 	 */
-	writel(__pa(PAGE_OFFSET), local_pci_cfg_base + PCI_BASE_ADDRESS_0);
-	writel(__pa(PAGE_OFFSET), local_pci_cfg_base + PCI_BASE_ADDRESS_1);
-	writel(__pa(PAGE_OFFSET), local_pci_cfg_base + PCI_BASE_ADDRESS_2);
+	pete_writel("drivers/pci/controller/pci-versatile.c:131", __pa(PAGE_OFFSET), local_pci_cfg_base + PCI_BASE_ADDRESS_0);
+	pete_writel("drivers/pci/controller/pci-versatile.c:132", __pa(PAGE_OFFSET), local_pci_cfg_base + PCI_BASE_ADDRESS_1);
+	pete_writel("drivers/pci/controller/pci-versatile.c:133", __pa(PAGE_OFFSET), local_pci_cfg_base + PCI_BASE_ADDRESS_2);
 
 	/*
 	 * For many years the kernel and QEMU were symbiotically buggy
@@ -143,7 +143,7 @@ static int versatile_pci_probe(struct platform_device *pdev)
 	 * real hardware behaviour and it need not be backwards
 	 * compatible for us. This write is harmless on real hardware.
 	 */
-	writel(0, versatile_cfg_base[0] + PCI_INTERRUPT_LINE);
+	pete_writel("drivers/pci/controller/pci-versatile.c:146", 0, versatile_cfg_base[0] + PCI_INTERRUPT_LINE);
 
 	pci_add_flags(PCI_REASSIGN_ALL_BUS);
 

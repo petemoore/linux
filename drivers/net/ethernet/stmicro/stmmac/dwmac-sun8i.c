@@ -285,13 +285,13 @@ static const struct emac_variant emac_variant_h6 = {
  */
 static int sun8i_dwmac_dma_reset(void __iomem *ioaddr)
 {
-	writel(0, ioaddr + EMAC_RX_CTL1);
-	writel(0, ioaddr + EMAC_TX_CTL1);
-	writel(0, ioaddr + EMAC_RX_FRM_FLT);
-	writel(0, ioaddr + EMAC_RX_DESC_LIST);
-	writel(0, ioaddr + EMAC_TX_DESC_LIST);
-	writel(0, ioaddr + EMAC_INT_EN);
-	writel(0x1FFFFFF, ioaddr + EMAC_INT_STA);
+	pete_writel("drivers/net/ethernet/stmicro/stmmac/dwmac-sun8i.c:288", 0, ioaddr + EMAC_RX_CTL1);
+	pete_writel("drivers/net/ethernet/stmicro/stmmac/dwmac-sun8i.c:289", 0, ioaddr + EMAC_TX_CTL1);
+	pete_writel("drivers/net/ethernet/stmicro/stmmac/dwmac-sun8i.c:290", 0, ioaddr + EMAC_RX_FRM_FLT);
+	pete_writel("drivers/net/ethernet/stmicro/stmmac/dwmac-sun8i.c:291", 0, ioaddr + EMAC_RX_DESC_LIST);
+	pete_writel("drivers/net/ethernet/stmicro/stmmac/dwmac-sun8i.c:292", 0, ioaddr + EMAC_TX_DESC_LIST);
+	pete_writel("drivers/net/ethernet/stmicro/stmmac/dwmac-sun8i.c:293", 0, ioaddr + EMAC_INT_EN);
+	pete_writel("drivers/net/ethernet/stmicro/stmmac/dwmac-sun8i.c:294", 0x1FFFFFF, ioaddr + EMAC_INT_STA);
 	return 0;
 }
 
@@ -301,8 +301,8 @@ static int sun8i_dwmac_dma_reset(void __iomem *ioaddr)
 static void sun8i_dwmac_dma_init(void __iomem *ioaddr,
 				 struct stmmac_dma_cfg *dma_cfg, int atds)
 {
-	writel(EMAC_RX_INT | EMAC_TX_INT, ioaddr + EMAC_INT_EN);
-	writel(0x1FFFFFF, ioaddr + EMAC_INT_STA);
+	pete_writel("drivers/net/ethernet/stmicro/stmmac/dwmac-sun8i.c:304", EMAC_RX_INT | EMAC_TX_INT, ioaddr + EMAC_INT_EN);
+	pete_writel("drivers/net/ethernet/stmicro/stmmac/dwmac-sun8i.c:305", 0x1FFFFFF, ioaddr + EMAC_INT_STA);
 }
 
 static void sun8i_dwmac_dma_init_rx(struct stmmac_priv *priv,
@@ -311,7 +311,7 @@ static void sun8i_dwmac_dma_init_rx(struct stmmac_priv *priv,
 				    dma_addr_t dma_rx_phy, u32 chan)
 {
 	/* Write RX descriptors address */
-	writel(lower_32_bits(dma_rx_phy), ioaddr + EMAC_RX_DESC_LIST);
+	pete_writel("drivers/net/ethernet/stmicro/stmmac/dwmac-sun8i.c:314", lower_32_bits(dma_rx_phy), ioaddr + EMAC_RX_DESC_LIST);
 }
 
 static void sun8i_dwmac_dma_init_tx(struct stmmac_priv *priv,
@@ -320,7 +320,7 @@ static void sun8i_dwmac_dma_init_tx(struct stmmac_priv *priv,
 				    dma_addr_t dma_tx_phy, u32 chan)
 {
 	/* Write TX descriptors address */
-	writel(lower_32_bits(dma_tx_phy), ioaddr + EMAC_TX_DESC_LIST);
+	pete_writel("drivers/net/ethernet/stmicro/stmmac/dwmac-sun8i.c:323", lower_32_bits(dma_tx_phy), ioaddr + EMAC_TX_DESC_LIST);
 }
 
 /* sun8i_dwmac_dump_regs() - Dump EMAC address space
@@ -335,7 +335,7 @@ static void sun8i_dwmac_dump_regs(struct stmmac_priv *priv,
 	for (i = 0; i < 0xC8; i += 4) {
 		if (i == 0x32 || i == 0x3C)
 			continue;
-		reg_space[i / 4] = readl(ioaddr + i);
+		reg_space[i / 4] = pete_readl("drivers/net/ethernet/stmicro/stmmac/dwmac-sun8i.c:338", ioaddr + i);
 	}
 }
 
@@ -352,7 +352,7 @@ static void sun8i_dwmac_dump_mac_regs(struct mac_device_info *hw,
 	for (i = 0; i < 0xC8; i += 4) {
 		if (i == 0x32 || i == 0x3C)
 			continue;
-		reg_space[i / 4] = readl(ioaddr + i);
+		reg_space[i / 4] = pete_readl("drivers/net/ethernet/stmicro/stmmac/dwmac-sun8i.c:355", ioaddr + i);
 	}
 }
 
@@ -360,28 +360,28 @@ static void sun8i_dwmac_enable_dma_irq(struct stmmac_priv *priv,
 				       void __iomem *ioaddr, u32 chan,
 				       bool rx, bool tx)
 {
-	u32 value = readl(ioaddr + EMAC_INT_EN);
+	u32 value = pete_readl("drivers/net/ethernet/stmicro/stmmac/dwmac-sun8i.c:363", ioaddr + EMAC_INT_EN);
 
 	if (rx)
 		value |= EMAC_RX_INT;
 	if (tx)
 		value |= EMAC_TX_INT;
 
-	writel(value, ioaddr + EMAC_INT_EN);
+	pete_writel("drivers/net/ethernet/stmicro/stmmac/dwmac-sun8i.c:370", value, ioaddr + EMAC_INT_EN);
 }
 
 static void sun8i_dwmac_disable_dma_irq(struct stmmac_priv *priv,
 					void __iomem *ioaddr, u32 chan,
 					bool rx, bool tx)
 {
-	u32 value = readl(ioaddr + EMAC_INT_EN);
+	u32 value = pete_readl("drivers/net/ethernet/stmicro/stmmac/dwmac-sun8i.c:377", ioaddr + EMAC_INT_EN);
 
 	if (rx)
 		value &= ~EMAC_RX_INT;
 	if (tx)
 		value &= ~EMAC_TX_INT;
 
-	writel(value, ioaddr + EMAC_INT_EN);
+	pete_writel("drivers/net/ethernet/stmicro/stmmac/dwmac-sun8i.c:384", value, ioaddr + EMAC_INT_EN);
 }
 
 static void sun8i_dwmac_dma_start_tx(struct stmmac_priv *priv,
@@ -389,20 +389,20 @@ static void sun8i_dwmac_dma_start_tx(struct stmmac_priv *priv,
 {
 	u32 v;
 
-	v = readl(ioaddr + EMAC_TX_CTL1);
+	v = pete_readl("drivers/net/ethernet/stmicro/stmmac/dwmac-sun8i.c:392", ioaddr + EMAC_TX_CTL1);
 	v |= EMAC_TX_DMA_START;
 	v |= EMAC_TX_DMA_EN;
-	writel(v, ioaddr + EMAC_TX_CTL1);
+	pete_writel("drivers/net/ethernet/stmicro/stmmac/dwmac-sun8i.c:395", v, ioaddr + EMAC_TX_CTL1);
 }
 
 static void sun8i_dwmac_enable_dma_transmission(void __iomem *ioaddr)
 {
 	u32 v;
 
-	v = readl(ioaddr + EMAC_TX_CTL1);
+	v = pete_readl("drivers/net/ethernet/stmicro/stmmac/dwmac-sun8i.c:402", ioaddr + EMAC_TX_CTL1);
 	v |= EMAC_TX_DMA_START;
 	v |= EMAC_TX_DMA_EN;
-	writel(v, ioaddr + EMAC_TX_CTL1);
+	pete_writel("drivers/net/ethernet/stmicro/stmmac/dwmac-sun8i.c:405", v, ioaddr + EMAC_TX_CTL1);
 }
 
 static void sun8i_dwmac_dma_stop_tx(struct stmmac_priv *priv,
@@ -410,9 +410,9 @@ static void sun8i_dwmac_dma_stop_tx(struct stmmac_priv *priv,
 {
 	u32 v;
 
-	v = readl(ioaddr + EMAC_TX_CTL1);
+	v = pete_readl("drivers/net/ethernet/stmicro/stmmac/dwmac-sun8i.c:413", ioaddr + EMAC_TX_CTL1);
 	v &= ~EMAC_TX_DMA_EN;
-	writel(v, ioaddr + EMAC_TX_CTL1);
+	pete_writel("drivers/net/ethernet/stmicro/stmmac/dwmac-sun8i.c:415", v, ioaddr + EMAC_TX_CTL1);
 }
 
 static void sun8i_dwmac_dma_start_rx(struct stmmac_priv *priv,
@@ -420,10 +420,10 @@ static void sun8i_dwmac_dma_start_rx(struct stmmac_priv *priv,
 {
 	u32 v;
 
-	v = readl(ioaddr + EMAC_RX_CTL1);
+	v = pete_readl("drivers/net/ethernet/stmicro/stmmac/dwmac-sun8i.c:423", ioaddr + EMAC_RX_CTL1);
 	v |= EMAC_RX_DMA_START;
 	v |= EMAC_RX_DMA_EN;
-	writel(v, ioaddr + EMAC_RX_CTL1);
+	pete_writel("drivers/net/ethernet/stmicro/stmmac/dwmac-sun8i.c:426", v, ioaddr + EMAC_RX_CTL1);
 }
 
 static void sun8i_dwmac_dma_stop_rx(struct stmmac_priv *priv,
@@ -431,9 +431,9 @@ static void sun8i_dwmac_dma_stop_rx(struct stmmac_priv *priv,
 {
 	u32 v;
 
-	v = readl(ioaddr + EMAC_RX_CTL1);
+	v = pete_readl("drivers/net/ethernet/stmicro/stmmac/dwmac-sun8i.c:434", ioaddr + EMAC_RX_CTL1);
 	v &= ~EMAC_RX_DMA_EN;
-	writel(v, ioaddr + EMAC_RX_CTL1);
+	pete_writel("drivers/net/ethernet/stmicro/stmmac/dwmac-sun8i.c:436", v, ioaddr + EMAC_RX_CTL1);
 }
 
 static int sun8i_dwmac_dma_interrupt(struct stmmac_priv *priv,
@@ -445,7 +445,7 @@ static int sun8i_dwmac_dma_interrupt(struct stmmac_priv *priv,
 	int ret = 0;
 	u32 v;
 
-	v = readl(ioaddr + EMAC_INT_STA);
+	v = pete_readl("drivers/net/ethernet/stmicro/stmmac/dwmac-sun8i.c:448", ioaddr + EMAC_INT_STA);
 
 	if (dir == DMA_DIR_RX)
 		v &= EMAC_INT_MSK_RX;
@@ -503,7 +503,7 @@ static int sun8i_dwmac_dma_interrupt(struct stmmac_priv *priv,
 	if (v & EMAC_RGMII_STA_INT)
 		x->irq_rgmii_n++;
 
-	writel(v, ioaddr + EMAC_INT_STA);
+	pete_writel("drivers/net/ethernet/stmicro/stmmac/dwmac-sun8i.c:506", v, ioaddr + EMAC_INT_STA);
 
 	return ret;
 }
@@ -514,7 +514,7 @@ static void sun8i_dwmac_dma_operation_mode_rx(struct stmmac_priv *priv,
 {
 	u32 v;
 
-	v = readl(ioaddr + EMAC_RX_CTL1);
+	v = pete_readl("drivers/net/ethernet/stmicro/stmmac/dwmac-sun8i.c:517", ioaddr + EMAC_RX_CTL1);
 	if (mode == SF_DMA_MODE) {
 		v |= EMAC_RX_MD;
 	} else {
@@ -529,7 +529,7 @@ static void sun8i_dwmac_dma_operation_mode_rx(struct stmmac_priv *priv,
 		else if (mode < 128)
 			v |= EMAC_RX_TH_128;
 	}
-	writel(v, ioaddr + EMAC_RX_CTL1);
+	pete_writel("drivers/net/ethernet/stmicro/stmmac/dwmac-sun8i.c:532", v, ioaddr + EMAC_RX_CTL1);
 }
 
 static void sun8i_dwmac_dma_operation_mode_tx(struct stmmac_priv *priv,
@@ -538,7 +538,7 @@ static void sun8i_dwmac_dma_operation_mode_tx(struct stmmac_priv *priv,
 {
 	u32 v;
 
-	v = readl(ioaddr + EMAC_TX_CTL1);
+	v = pete_readl("drivers/net/ethernet/stmicro/stmmac/dwmac-sun8i.c:541", ioaddr + EMAC_TX_CTL1);
 	if (mode == SF_DMA_MODE) {
 		v |= EMAC_TX_MD;
 		/* Undocumented bit (called TX_NEXT_FRM in BSP), the original
@@ -559,7 +559,7 @@ static void sun8i_dwmac_dma_operation_mode_tx(struct stmmac_priv *priv,
 		else if (mode < 256)
 			v |= EMAC_TX_TH_256;
 	}
-	writel(v, ioaddr + EMAC_TX_CTL1);
+	pete_writel("drivers/net/ethernet/stmicro/stmmac/dwmac-sun8i.c:562", v, ioaddr + EMAC_TX_CTL1);
 }
 
 static const struct stmmac_dma_ops sun8i_dwmac_dma_ops = {
@@ -618,15 +618,15 @@ static void sun8i_dwmac_core_init(struct mac_device_info *hw,
 	u32 v;
 
 	v = (8 << EMAC_BURSTLEN_SHIFT); /* burst len */
-	writel(v, ioaddr + EMAC_BASIC_CTL1);
+	pete_writel("drivers/net/ethernet/stmicro/stmmac/dwmac-sun8i.c:621", v, ioaddr + EMAC_BASIC_CTL1);
 }
 
 static void sun8i_dwmac_set_mac(void __iomem *ioaddr, bool enable)
 {
 	u32 t, r;
 
-	t = readl(ioaddr + EMAC_TX_CTL0);
-	r = readl(ioaddr + EMAC_RX_CTL0);
+	t = pete_readl("drivers/net/ethernet/stmicro/stmmac/dwmac-sun8i.c:628", ioaddr + EMAC_TX_CTL0);
+	r = pete_readl("drivers/net/ethernet/stmicro/stmmac/dwmac-sun8i.c:629", ioaddr + EMAC_RX_CTL0);
 	if (enable) {
 		t |= EMAC_TX_TRANSMITTER_EN;
 		r |= EMAC_RX_RECEIVER_EN;
@@ -634,8 +634,8 @@ static void sun8i_dwmac_set_mac(void __iomem *ioaddr, bool enable)
 		t &= ~EMAC_TX_TRANSMITTER_EN;
 		r &= ~EMAC_RX_RECEIVER_EN;
 	}
-	writel(t, ioaddr + EMAC_TX_CTL0);
-	writel(r, ioaddr + EMAC_RX_CTL0);
+	pete_writel("drivers/net/ethernet/stmicro/stmmac/dwmac-sun8i.c:637", t, ioaddr + EMAC_TX_CTL0);
+	pete_writel("drivers/net/ethernet/stmicro/stmmac/dwmac-sun8i.c:638", r, ioaddr + EMAC_RX_CTL0);
 }
 
 /* Set MAC address at slot reg_n
@@ -650,16 +650,16 @@ static void sun8i_dwmac_set_umac_addr(struct mac_device_info *hw,
 	u32 v;
 
 	if (!addr) {
-		writel(0, ioaddr + EMAC_MACADDR_HI(reg_n));
+		pete_writel("drivers/net/ethernet/stmicro/stmmac/dwmac-sun8i.c:653", 0, ioaddr + EMAC_MACADDR_HI(reg_n));
 		return;
 	}
 
 	stmmac_set_mac_addr(ioaddr, addr, EMAC_MACADDR_HI(reg_n),
 			    EMAC_MACADDR_LO(reg_n));
 	if (reg_n > 0) {
-		v = readl(ioaddr + EMAC_MACADDR_HI(reg_n));
+		v = pete_readl("drivers/net/ethernet/stmicro/stmmac/dwmac-sun8i.c:660", ioaddr + EMAC_MACADDR_HI(reg_n));
 		v |= MAC_ADDR_TYPE_DST;
-		writel(v, ioaddr + EMAC_MACADDR_HI(reg_n));
+		pete_writel("drivers/net/ethernet/stmicro/stmmac/dwmac-sun8i.c:662", v, ioaddr + EMAC_MACADDR_HI(reg_n));
 	}
 }
 
@@ -679,9 +679,9 @@ static int sun8i_dwmac_rx_ipc_enable(struct mac_device_info *hw)
 	void __iomem *ioaddr = hw->pcsr;
 	u32 v;
 
-	v = readl(ioaddr + EMAC_RX_CTL0);
+	v = pete_readl("drivers/net/ethernet/stmicro/stmmac/dwmac-sun8i.c:682", ioaddr + EMAC_RX_CTL0);
 	v |= EMAC_RX_DO_CRC;
-	writel(v, ioaddr + EMAC_RX_CTL0);
+	pete_writel("drivers/net/ethernet/stmicro/stmmac/dwmac-sun8i.c:684", v, ioaddr + EMAC_RX_CTL0);
 
 	return 1;
 }
@@ -715,7 +715,7 @@ static void sun8i_dwmac_set_filter(struct mac_device_info *hw,
 			}
 		}
 	} else {
-		if (!(readl(ioaddr + EMAC_RX_FRM_FLT) & EMAC_FRM_FLT_RXALL))
+		if (!(pete_readl("drivers/net/ethernet/stmicro/stmmac/dwmac-sun8i.c:718", ioaddr + EMAC_RX_FRM_FLT) & EMAC_FRM_FLT_RXALL))
 			netdev_info(dev, "Too many address, switching to promiscuous\n");
 		v = EMAC_FRM_FLT_RXALL;
 	}
@@ -724,7 +724,7 @@ static void sun8i_dwmac_set_filter(struct mac_device_info *hw,
 	while (i < hw->unicast_filter_entries)
 		sun8i_dwmac_set_umac_addr(hw, NULL, i++);
 
-	writel(v, ioaddr + EMAC_RX_FRM_FLT);
+	pete_writel("drivers/net/ethernet/stmicro/stmmac/dwmac-sun8i.c:727", v, ioaddr + EMAC_RX_FRM_FLT);
 }
 
 static void sun8i_dwmac_flow_ctrl(struct mac_device_info *hw,
@@ -734,19 +734,19 @@ static void sun8i_dwmac_flow_ctrl(struct mac_device_info *hw,
 	void __iomem *ioaddr = hw->pcsr;
 	u32 v;
 
-	v = readl(ioaddr + EMAC_RX_CTL0);
+	v = pete_readl("drivers/net/ethernet/stmicro/stmmac/dwmac-sun8i.c:737", ioaddr + EMAC_RX_CTL0);
 	if (fc == FLOW_AUTO)
 		v |= EMAC_RX_FLOW_CTL_EN;
 	else
 		v &= ~EMAC_RX_FLOW_CTL_EN;
-	writel(v, ioaddr + EMAC_RX_CTL0);
+	pete_writel("drivers/net/ethernet/stmicro/stmmac/dwmac-sun8i.c:742", v, ioaddr + EMAC_RX_CTL0);
 
-	v = readl(ioaddr + EMAC_TX_FLOW_CTL);
+	v = pete_readl("drivers/net/ethernet/stmicro/stmmac/dwmac-sun8i.c:744", ioaddr + EMAC_TX_FLOW_CTL);
 	if (fc == FLOW_AUTO)
 		v |= EMAC_TX_FLOW_CTL_EN;
 	else
 		v &= ~EMAC_TX_FLOW_CTL_EN;
-	writel(v, ioaddr + EMAC_TX_FLOW_CTL);
+	pete_writel("drivers/net/ethernet/stmicro/stmmac/dwmac-sun8i.c:749", v, ioaddr + EMAC_TX_FLOW_CTL);
 }
 
 static int sun8i_dwmac_reset(struct stmmac_priv *priv)
@@ -754,8 +754,8 @@ static int sun8i_dwmac_reset(struct stmmac_priv *priv)
 	u32 v;
 	int err;
 
-	v = readl(priv->ioaddr + EMAC_BASIC_CTL1);
-	writel(v | 0x01, priv->ioaddr + EMAC_BASIC_CTL1);
+	v = pete_readl("drivers/net/ethernet/stmicro/stmmac/dwmac-sun8i.c:757", priv->ioaddr + EMAC_BASIC_CTL1);
+	pete_writel("drivers/net/ethernet/stmicro/stmmac/dwmac-sun8i.c:758", v | 0x01, priv->ioaddr + EMAC_BASIC_CTL1);
 
 	/* The timeout was previoulsy set to 10ms, but some board (OrangePI0)
 	 * need more if no cable plugged. 100ms seems OK
@@ -1059,14 +1059,14 @@ static void sun8i_dwmac_exit(struct platform_device *pdev, void *priv)
 
 static void sun8i_dwmac_set_mac_loopback(void __iomem *ioaddr, bool enable)
 {
-	u32 value = readl(ioaddr + EMAC_BASIC_CTL0);
+	u32 value = pete_readl("drivers/net/ethernet/stmicro/stmmac/dwmac-sun8i.c:1062", ioaddr + EMAC_BASIC_CTL0);
 
 	if (enable)
 		value |= EMAC_LOOPBACK;
 	else
 		value &= ~EMAC_LOOPBACK;
 
-	writel(value, ioaddr + EMAC_BASIC_CTL0);
+	pete_writel("drivers/net/ethernet/stmicro/stmmac/dwmac-sun8i.c:1069", value, ioaddr + EMAC_BASIC_CTL0);
 }
 
 static const struct stmmac_ops sun8i_dwmac_ops = {

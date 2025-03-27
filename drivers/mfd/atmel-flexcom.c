@@ -72,7 +72,7 @@ static int atmel_flexcom_probe(struct platform_device *pdev)
 	 * inaccessible and are read as zero. Also the external I/O lines of the
 	 * Flexcom are muxed to reach the selected device.
 	 */
-	writel(FLEX_MR_OPMODE(ddata->opmode), ddata->base + FLEX_MR);
+	pete_writel("drivers/mfd/atmel-flexcom.c:75", FLEX_MR_OPMODE(ddata->opmode), ddata->base + FLEX_MR);
 
 	clk_disable_unprepare(ddata->clk);
 
@@ -96,7 +96,7 @@ static int __maybe_unused atmel_flexcom_resume_noirq(struct device *dev)
 		return err;
 
 	val = FLEX_MR_OPMODE(ddata->opmode),
-	writel(val, ddata->base + FLEX_MR);
+	pete_writel("drivers/mfd/atmel-flexcom.c:99", val, ddata->base + FLEX_MR);
 
 	clk_disable_unprepare(ddata->clk);
 

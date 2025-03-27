@@ -19,13 +19,13 @@
 #include "vec_regs.h"
 
 #define BITS(field, val)    (((val) << (field ## _LSB)) & (field ## _BITS))
-#define VEC_WRITE(reg, val) writel((val), vec->hw_base[RP1VEC_HW_BLOCK_VEC] + (reg ## _OFFSET))
-#define VEC_READ(reg)	    readl(vec->hw_base[RP1VEC_HW_BLOCK_VEC] + (reg ## _OFFSET))
+#define VEC_WRITE(reg, val) pete_writel("drivers/gpu/drm/rp1/rp1-vec/rp1_vec_hw.c:22", (val), vec->hw_base[RP1VEC_HW_BLOCK_VEC] + (reg ## _OFFSET))
+#define VEC_READ(reg)	    pete_readl("drivers/gpu/drm/rp1/rp1-vec/rp1_vec_hw.c:23", vec->hw_base[RP1VEC_HW_BLOCK_VEC] + (reg ## _OFFSET))
 
 static void rp1vec_write_regs(struct rp1_vec *vec, u32 offset, u32 const *vals, u32 num)
 {
 	while (num--) {
-		writel(*vals++, vec->hw_base[RP1VEC_HW_BLOCK_VEC] + offset);
+		pete_writel("drivers/gpu/drm/rp1/rp1-vec/rp1_vec_hw.c:28", *vals++, vec->hw_base[RP1VEC_HW_BLOCK_VEC] + offset);
 		offset += 4;
 	}
 }

@@ -150,7 +150,7 @@ static void mtk_vcodec_load_racing_info(struct mtk_vcodec_dec_ctx *ctx)
 	if (atomic_inc_return(&ctx->dev->dec_active_cnt) == 1) {
 		vdec_racing_addr = ctx->dev->reg_base[VDEC_MISC] + 0x100;
 		for (j = 0; j < 132; j++)
-			writel(ctx->dev->vdec_racing_info[j], vdec_racing_addr + j * 4);
+			pete_writel("drivers/media/platform/mediatek/vcodec/decoder/mtk_vcodec_dec_pm.c:153", ctx->dev->vdec_racing_info[j], vdec_racing_addr + j * 4);
 	}
 	mutex_unlock(&ctx->dev->dec_racing_info_mutex);
 }
@@ -164,7 +164,7 @@ static void mtk_vcodec_record_racing_info(struct mtk_vcodec_dec_ctx *ctx)
 	if (atomic_dec_and_test(&ctx->dev->dec_active_cnt)) {
 		vdec_racing_addr = ctx->dev->reg_base[VDEC_MISC] + 0x100;
 		for (j = 0; j < 132; j++)
-			ctx->dev->vdec_racing_info[j] = readl(vdec_racing_addr + j * 4);
+			ctx->dev->vdec_racing_info[j] = pete_readl("drivers/media/platform/mediatek/vcodec/decoder/mtk_vcodec_dec_pm.c:167", vdec_racing_addr + j * 4);
 	}
 	mutex_unlock(&ctx->dev->dec_racing_info_mutex);
 }

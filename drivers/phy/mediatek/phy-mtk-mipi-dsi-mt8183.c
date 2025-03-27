@@ -79,7 +79,7 @@ static int mtk_mipi_tx_pll_enable(struct clk_hw *hw)
 	udelay(1);
 	mtk_phy_clear_bits(base + MIPITX_PLL_PWR, AD_DSI_PLL_SDM_ISO_EN);
 	pcw = div_u64(((u64)mipi_tx->data_rate * txdiv) << 24, 26000000);
-	writel(pcw, base + MIPITX_PLL_CON0);
+	pete_writel("drivers/phy/mediatek/phy-mtk-mipi-dsi-mt8183.c:82", pcw, base + MIPITX_PLL_CON0);
 	mtk_phy_update_field(base + MIPITX_PLL_CON1, RG_DSI_PLL_POSDIV, txdiv0);
 	mtk_phy_set_bits(base + MIPITX_PLL_CON1, RG_DSI_PLL_EN);
 
@@ -135,9 +135,9 @@ static void mtk_mipi_tx_power_on_signal(struct phy *phy)
 	void __iomem *base = mipi_tx->regs;
 
 	/* BG_LPF_EN / BG_CORE_EN */
-	writel(RG_DSI_PAD_TIEL_SEL | RG_DSI_BG_CORE_EN, base + MIPITX_LANE_CON);
+	pete_writel("drivers/phy/mediatek/phy-mtk-mipi-dsi-mt8183.c:138", RG_DSI_PAD_TIEL_SEL | RG_DSI_BG_CORE_EN, base + MIPITX_LANE_CON);
 	usleep_range(30, 100);
-	writel(RG_DSI_BG_CORE_EN | RG_DSI_BG_LPF_EN, base + MIPITX_LANE_CON);
+	pete_writel("drivers/phy/mediatek/phy-mtk-mipi-dsi-mt8183.c:140", RG_DSI_BG_CORE_EN | RG_DSI_BG_LPF_EN, base + MIPITX_LANE_CON);
 
 	/* Switch OFF each Lane */
 	mtk_phy_clear_bits(base + MIPITX_D0_SW_CTL_EN, DSI_SW_CTL_EN);
@@ -166,8 +166,8 @@ static void mtk_mipi_tx_power_off_signal(struct phy *phy)
 	mtk_phy_set_bits(base + MIPITX_D3_SW_CTL_EN, DSI_SW_CTL_EN);
 	mtk_phy_set_bits(base + MIPITX_CK_SW_CTL_EN, DSI_SW_CTL_EN);
 
-	writel(RG_DSI_PAD_TIEL_SEL | RG_DSI_BG_CORE_EN, base + MIPITX_LANE_CON);
-	writel(RG_DSI_PAD_TIEL_SEL, base + MIPITX_LANE_CON);
+	pete_writel("drivers/phy/mediatek/phy-mtk-mipi-dsi-mt8183.c:169", RG_DSI_PAD_TIEL_SEL | RG_DSI_BG_CORE_EN, base + MIPITX_LANE_CON);
+	pete_writel("drivers/phy/mediatek/phy-mtk-mipi-dsi-mt8183.c:170", RG_DSI_PAD_TIEL_SEL, base + MIPITX_LANE_CON);
 }
 
 const struct mtk_mipitx_data mt8183_mipitx_data = {

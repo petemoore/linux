@@ -53,7 +53,7 @@ static int qcom_aoss_control_assert(struct reset_controller_dev *rcdev,
 	struct qcom_aoss_reset_data *data = to_qcom_aoss_reset_data(rcdev);
 	const struct qcom_aoss_reset_map *map = &data->desc->resets[idx];
 
-	writel(1, data->base + map->reg);
+	pete_writel("drivers/reset/reset-qcom-aoss.c:56", 1, data->base + map->reg);
 	/* Wait 6 32kHz sleep cycles for reset */
 	usleep_range(200, 300);
 	return 0;
@@ -65,7 +65,7 @@ static int qcom_aoss_control_deassert(struct reset_controller_dev *rcdev,
 	struct qcom_aoss_reset_data *data = to_qcom_aoss_reset_data(rcdev);
 	const struct qcom_aoss_reset_map *map = &data->desc->resets[idx];
 
-	writel(0, data->base + map->reg);
+	pete_writel("drivers/reset/reset-qcom-aoss.c:68", 0, data->base + map->reg);
 	/* Wait 6 32kHz sleep cycles for reset */
 	usleep_range(200, 300);
 	return 0;

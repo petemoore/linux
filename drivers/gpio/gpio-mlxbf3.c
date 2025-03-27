@@ -64,11 +64,11 @@ static void mlxbf3_gpio_irq_enable(struct irq_data *irqd)
 	gpiochip_enable_irq(gc, offset);
 
 	raw_spin_lock_irqsave(&gs->gc.bgpio_lock, flags);
-	writel(BIT(offset), gs->gpio_cause_io + MLXBF_GPIO_CAUSE_OR_CLRCAUSE);
+	pete_writel("drivers/gpio/gpio-mlxbf3.c:67", BIT(offset), gs->gpio_cause_io + MLXBF_GPIO_CAUSE_OR_CLRCAUSE);
 
-	val = readl(gs->gpio_cause_io + MLXBF_GPIO_CAUSE_OR_EVTEN0);
+	val = pete_readl("drivers/gpio/gpio-mlxbf3.c:69", gs->gpio_cause_io + MLXBF_GPIO_CAUSE_OR_EVTEN0);
 	val |= BIT(offset);
-	writel(val, gs->gpio_cause_io + MLXBF_GPIO_CAUSE_OR_EVTEN0);
+	pete_writel("drivers/gpio/gpio-mlxbf3.c:71", val, gs->gpio_cause_io + MLXBF_GPIO_CAUSE_OR_EVTEN0);
 	raw_spin_unlock_irqrestore(&gs->gc.bgpio_lock, flags);
 }
 
@@ -81,11 +81,11 @@ static void mlxbf3_gpio_irq_disable(struct irq_data *irqd)
 	u32 val;
 
 	raw_spin_lock_irqsave(&gs->gc.bgpio_lock, flags);
-	val = readl(gs->gpio_cause_io + MLXBF_GPIO_CAUSE_OR_EVTEN0);
+	val = pete_readl("drivers/gpio/gpio-mlxbf3.c:84", gs->gpio_cause_io + MLXBF_GPIO_CAUSE_OR_EVTEN0);
 	val &= ~BIT(offset);
-	writel(val, gs->gpio_cause_io + MLXBF_GPIO_CAUSE_OR_EVTEN0);
+	pete_writel("drivers/gpio/gpio-mlxbf3.c:86", val, gs->gpio_cause_io + MLXBF_GPIO_CAUSE_OR_EVTEN0);
 
-	writel(BIT(offset), gs->gpio_cause_io + MLXBF_GPIO_CAUSE_OR_CLRCAUSE);
+	pete_writel("drivers/gpio/gpio-mlxbf3.c:88", BIT(offset), gs->gpio_cause_io + MLXBF_GPIO_CAUSE_OR_CLRCAUSE);
 	raw_spin_unlock_irqrestore(&gs->gc.bgpio_lock, flags);
 
 	gpiochip_disable_irq(gc, offset);
@@ -98,8 +98,8 @@ static irqreturn_t mlxbf3_gpio_irq_handler(int irq, void *ptr)
 	unsigned long pending;
 	u32 level;
 
-	pending = readl(gs->gpio_cause_io + MLXBF_GPIO_CAUSE_OR_CAUSE_EVTEN0);
-	writel(pending, gs->gpio_cause_io + MLXBF_GPIO_CAUSE_OR_CLRCAUSE);
+	pending = pete_readl("drivers/gpio/gpio-mlxbf3.c:101", gs->gpio_cause_io + MLXBF_GPIO_CAUSE_OR_CAUSE_EVTEN0);
+	pete_writel("drivers/gpio/gpio-mlxbf3.c:102", pending, gs->gpio_cause_io + MLXBF_GPIO_CAUSE_OR_CLRCAUSE);
 
 	for_each_set_bit(level, &pending, gc->ngpio)
 		generic_handle_domain_irq(gc->irq.domain, level);
@@ -120,22 +120,22 @@ mlxbf3_gpio_irq_set_type(struct irq_data *irqd, unsigned int type)
 
 	switch (type & IRQ_TYPE_SENSE_MASK) {
 	case IRQ_TYPE_EDGE_BOTH:
-		val = readl(gs->gpio_io + MLXBF_GPIO_CAUSE_FALL_EN);
+		val = pete_readl("drivers/gpio/gpio-mlxbf3.c:123", gs->gpio_io + MLXBF_GPIO_CAUSE_FALL_EN);
 		val |= BIT(offset);
-		writel(val, gs->gpio_io + MLXBF_GPIO_CAUSE_FALL_EN);
-		val = readl(gs->gpio_io + MLXBF_GPIO_CAUSE_RISE_EN);
+		pete_writel("drivers/gpio/gpio-mlxbf3.c:125", val, gs->gpio_io + MLXBF_GPIO_CAUSE_FALL_EN);
+		val = pete_readl("drivers/gpio/gpio-mlxbf3.c:126", gs->gpio_io + MLXBF_GPIO_CAUSE_RISE_EN);
 		val |= BIT(offset);
-		writel(val, gs->gpio_io + MLXBF_GPIO_CAUSE_RISE_EN);
+		pete_writel("drivers/gpio/gpio-mlxbf3.c:128", val, gs->gpio_io + MLXBF_GPIO_CAUSE_RISE_EN);
 		break;
 	case IRQ_TYPE_EDGE_RISING:
-		val = readl(gs->gpio_io + MLXBF_GPIO_CAUSE_RISE_EN);
+		val = pete_readl("drivers/gpio/gpio-mlxbf3.c:131", gs->gpio_io + MLXBF_GPIO_CAUSE_RISE_EN);
 		val |= BIT(offset);
-		writel(val, gs->gpio_io + MLXBF_GPIO_CAUSE_RISE_EN);
+		pete_writel("drivers/gpio/gpio-mlxbf3.c:133", val, gs->gpio_io + MLXBF_GPIO_CAUSE_RISE_EN);
 		break;
 	case IRQ_TYPE_EDGE_FALLING:
-		val = readl(gs->gpio_io + MLXBF_GPIO_CAUSE_FALL_EN);
+		val = pete_readl("drivers/gpio/gpio-mlxbf3.c:136", gs->gpio_io + MLXBF_GPIO_CAUSE_FALL_EN);
 		val |= BIT(offset);
-		writel(val, gs->gpio_io + MLXBF_GPIO_CAUSE_FALL_EN);
+		pete_writel("drivers/gpio/gpio-mlxbf3.c:138", val, gs->gpio_io + MLXBF_GPIO_CAUSE_FALL_EN);
 		break;
 	default:
 		raw_spin_unlock_irqrestore(&gs->gc.bgpio_lock, flags);
@@ -262,8 +262,8 @@ static void mlxbf3_gpio_shutdown(struct platform_device *pdev)
 	struct mlxbf3_gpio_context *gs = platform_get_drvdata(pdev);
 
 	/* Disable and clear all interrupts */
-	writel(0, gs->gpio_cause_io + MLXBF_GPIO_CAUSE_OR_EVTEN0);
-	writel(MLXBF_GPIO_CLR_ALL_INTS, gs->gpio_cause_io + MLXBF_GPIO_CAUSE_OR_CLRCAUSE);
+	pete_writel("drivers/gpio/gpio-mlxbf3.c:265", 0, gs->gpio_cause_io + MLXBF_GPIO_CAUSE_OR_EVTEN0);
+	pete_writel("drivers/gpio/gpio-mlxbf3.c:266", MLXBF_GPIO_CLR_ALL_INTS, gs->gpio_cause_io + MLXBF_GPIO_CAUSE_OR_CLRCAUSE);
 }
 
 static const struct acpi_device_id mlxbf3_gpio_acpi_match[] = {

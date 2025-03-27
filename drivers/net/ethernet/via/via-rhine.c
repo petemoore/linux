@@ -680,7 +680,7 @@ static inline int verify_mmio(struct device *hwdev,
 		while (mmio_verify_registers[i]) {
 			int reg = mmio_verify_registers[i++];
 			unsigned char a = inb(pioaddr+reg);
-			unsigned char b = readb(ioaddr+reg);
+			unsigned char b = pete_readb("drivers/net/ethernet/via/via-rhine.c:683", ioaddr+reg);
 
 			if (a != b) {
 				dev_err(hwdev,

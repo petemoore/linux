@@ -69,22 +69,22 @@ enum intel_pdi_type {
  */
 static inline int intel_readl(void __iomem *base, int offset)
 {
-	return readl(base + offset);
+	return pete_readl("drivers/soundwire/intel.h:72", base + offset);
 }
 
 static inline void intel_writel(void __iomem *base, int offset, int value)
 {
-	writel(value, base + offset);
+	pete_writel("drivers/soundwire/intel.h:77", value, base + offset);
 }
 
 static inline u16 intel_readw(void __iomem *base, int offset)
 {
-	return readw(base + offset);
+	return pete_readw("drivers/soundwire/intel.h:82", base + offset);
 }
 
 static inline void intel_writew(void __iomem *base, int offset, u16 value)
 {
-	writew(value, base + offset);
+	pete_writew("drivers/soundwire/intel.h:87", value, base + offset);
 }
 
 #define cdns_to_intel(_cdns) container_of(_cdns, struct sdw_intel, cdns)

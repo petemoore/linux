@@ -247,7 +247,7 @@ struct hinic_hwif {
 
 static inline u32 hinic_hwif_read_reg(struct hinic_hwif *hwif, u32 reg)
 {
-	u32 out = readl(hwif->cfg_regs_bar + reg);
+	u32 out = pete_readl("drivers/net/ethernet/huawei/hinic/hinic_hw_if.h:250", hwif->cfg_regs_bar + reg);
 
 	return be32_to_cpu(*(__be32 *)&out);
 }
@@ -257,7 +257,7 @@ static inline void hinic_hwif_write_reg(struct hinic_hwif *hwif, u32 reg,
 {
 	__be32 in = cpu_to_be32(val);
 
-	writel(*(u32 *)&in, hwif->cfg_regs_bar + reg);
+	pete_writel("drivers/net/ethernet/huawei/hinic/hinic_hw_if.h:260", *(u32 *)&in, hwif->cfg_regs_bar + reg);
 }
 
 int hinic_msix_attr_set(struct hinic_hwif *hwif, u16 msix_index,

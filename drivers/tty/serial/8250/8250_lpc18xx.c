@@ -78,7 +78,7 @@ static void lpc18xx_uart_serial_out(struct uart_port *p, int offset, int value)
 		value |= UART_FCR_DMA_SELECT;
 
 	offset = offset << p->regshift;
-	writel(value, p->membase + offset);
+	pete_writel("drivers/tty/serial/8250/8250_lpc18xx.c:81", value, p->membase + offset);
 }
 
 static const struct serial_rs485 lpc18xx_rs485_supported = {

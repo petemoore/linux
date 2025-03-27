@@ -40,22 +40,22 @@ static int sun4i_mdio_read(struct mii_bus *bus, int mii_id, int regnum)
 	int value;
 
 	/* issue the phy address and reg */
-	writel((mii_id << 8) | regnum, data->membase + EMAC_MAC_MADR_REG);
+	pete_writel("drivers/net/mdio/mdio-sun4i.c:43", (mii_id << 8) | regnum, data->membase + EMAC_MAC_MADR_REG);
 	/* pull up the phy io line */
-	writel(0x1, data->membase + EMAC_MAC_MCMD_REG);
+	pete_writel("drivers/net/mdio/mdio-sun4i.c:45", 0x1, data->membase + EMAC_MAC_MCMD_REG);
 
 	/* Wait read complete */
 	timeout_jiffies = jiffies + MDIO_TIMEOUT;
-	while (readl(data->membase + EMAC_MAC_MIND_REG) & 0x1) {
+	while (pete_readl("drivers/net/mdio/mdio-sun4i.c:49", data->membase + EMAC_MAC_MIND_REG) & 0x1) {
 		if (time_is_before_jiffies(timeout_jiffies))
 			return -ETIMEDOUT;
 		msleep(1);
 	}
 
 	/* push down the phy io line */
-	writel(0x0, data->membase + EMAC_MAC_MCMD_REG);
+	pete_writel("drivers/net/mdio/mdio-sun4i.c:56", 0x0, data->membase + EMAC_MAC_MCMD_REG);
 	/* and read data */
-	value = readl(data->membase + EMAC_MAC_MRDD_REG);
+	value = pete_readl("drivers/net/mdio/mdio-sun4i.c:58", data->membase + EMAC_MAC_MRDD_REG);
 
 	return value;
 }
@@ -67,22 +67,22 @@ static int sun4i_mdio_write(struct mii_bus *bus, int mii_id, int regnum,
 	unsigned long timeout_jiffies;
 
 	/* issue the phy address and reg */
-	writel((mii_id << 8) | regnum, data->membase + EMAC_MAC_MADR_REG);
+	pete_writel("drivers/net/mdio/mdio-sun4i.c:70", (mii_id << 8) | regnum, data->membase + EMAC_MAC_MADR_REG);
 	/* pull up the phy io line */
-	writel(0x1, data->membase + EMAC_MAC_MCMD_REG);
+	pete_writel("drivers/net/mdio/mdio-sun4i.c:72", 0x1, data->membase + EMAC_MAC_MCMD_REG);
 
 	/* Wait read complete */
 	timeout_jiffies = jiffies + MDIO_TIMEOUT;
-	while (readl(data->membase + EMAC_MAC_MIND_REG) & 0x1) {
+	while (pete_readl("drivers/net/mdio/mdio-sun4i.c:76", data->membase + EMAC_MAC_MIND_REG) & 0x1) {
 		if (time_is_before_jiffies(timeout_jiffies))
 			return -ETIMEDOUT;
 		msleep(1);
 	}
 
 	/* push down the phy io line */
-	writel(0x0, data->membase + EMAC_MAC_MCMD_REG);
+	pete_writel("drivers/net/mdio/mdio-sun4i.c:83", 0x0, data->membase + EMAC_MAC_MCMD_REG);
 	/* and write data */
-	writel(value, data->membase + EMAC_MAC_MWTD_REG);
+	pete_writel("drivers/net/mdio/mdio-sun4i.c:85", value, data->membase + EMAC_MAC_MWTD_REG);
 
 	return 0;
 }

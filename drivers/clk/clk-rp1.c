@@ -438,12 +438,12 @@ static inline u32 set_register_field(u32 reg, u32 val, u32 mask, u32 shift)
 static inline
 void clockman_write(struct rp1_clockman *clockman, u32 reg, u32 val)
 {
-	writel(val, clockman->regs + reg);
+	pete_writel("drivers/clk/clk-rp1.c:441", val, clockman->regs + reg);
 }
 
 static inline u32 clockman_read(struct rp1_clockman *clockman, u32 reg)
 {
-	return readl(clockman->regs + reg);
+	return pete_readl("drivers/clk/clk-rp1.c:446", clockman->regs + reg);
 }
 
 #ifdef MEASURE_CLOCK_RATE

@@ -259,13 +259,13 @@ MODULE_DEVICE_TABLE(of, sh_mmcif_of_match);
 static inline void sh_mmcif_bitset(struct sh_mmcif_host *host,
 					unsigned int reg, u32 val)
 {
-	writel(val | readl(host->addr + reg), host->addr + reg);
+	pete_writel("drivers/mmc/host/sh_mmcif.c:262", val | pete_readl("drivers/mmc/host/sh_mmcif.c:262", host->addr + reg), host->addr + reg);
 }
 
 static inline void sh_mmcif_bitclr(struct sh_mmcif_host *host,
 					unsigned int reg, u32 val)
 {
-	writel(~val & readl(host->addr + reg), host->addr + reg);
+	pete_writel("drivers/mmc/host/sh_mmcif.c:268", ~val & pete_readl("drivers/mmc/host/sh_mmcif.c:268", host->addr + reg), host->addr + reg);
 }
 
 static void sh_mmcif_dma_complete(void *arg)

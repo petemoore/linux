@@ -240,12 +240,12 @@ struct rcar_drif_sdr {
 /* Register access functions */
 static void rcar_drif_write(struct rcar_drif *ch, u32 offset, u32 data)
 {
-	writel(data, ch->base + offset);
+	pete_writel("drivers/media/platform/renesas/rcar_drif.c:243", data, ch->base + offset);
 }
 
 static u32 rcar_drif_read(struct rcar_drif *ch, u32 offset)
 {
-	return readl(ch->base + offset);
+	return pete_readl("drivers/media/platform/renesas/rcar_drif.c:248", ch->base + offset);
 }
 
 /* Release DMA channels */

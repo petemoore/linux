@@ -70,8 +70,8 @@ static unsigned int rpi_fw_uart_tx_is_full(struct uart_port *port)
 	struct rpi_fw_uart *rfu = container_of(port, struct rpi_fw_uart, port);
 	u32 rd, wr;
 
-	rd = readl(rfu->base + RPI_FW_UART_TX_FIFO_RD);
-	wr = readl(rfu->base + RPI_FW_UART_TX_FIFO_WR);
+	rd = pete_readl("drivers/tty/serial/rpi-fw-uart.c:73", rfu->base + RPI_FW_UART_TX_FIFO_RD);
+	wr = pete_readl("drivers/tty/serial/rpi-fw-uart.c:74", rfu->base + RPI_FW_UART_TX_FIFO_WR);
 	return ((wr + 1) & RPI_FW_UART_FIFO_SIZE_MASK) == rd;
 }
 
@@ -83,8 +83,8 @@ static unsigned int rpi_fw_uart_tx_is_empty(struct uart_port *port)
 	if (!rfu->tx_buffer)
 		return 1;
 
-	rd = readl(rfu->base + RPI_FW_UART_TX_FIFO_RD);
-	wr = readl(rfu->base + RPI_FW_UART_TX_FIFO_WR);
+	rd = pete_readl("drivers/tty/serial/rpi-fw-uart.c:86", rfu->base + RPI_FW_UART_TX_FIFO_RD);
+	wr = pete_readl("drivers/tty/serial/rpi-fw-uart.c:87", rfu->base + RPI_FW_UART_TX_FIFO_WR);
 
 	return rd == wr;
 }
@@ -97,8 +97,8 @@ unsigned int rpi_fw_uart_rx_is_empty(struct uart_port *port)
 	if (!rfu->rx_buffer)
 		return 1;
 
-	rd = readl(rfu->base + RPI_FW_UART_RX_FIFO_RD);
-	wr = readl(rfu->base + RPI_FW_UART_RX_FIFO_WR);
+	rd = pete_readl("drivers/tty/serial/rpi-fw-uart.c:100", rfu->base + RPI_FW_UART_RX_FIFO_RD);
+	wr = pete_readl("drivers/tty/serial/rpi-fw-uart.c:101", rfu->base + RPI_FW_UART_RX_FIFO_WR);
 
 	return rd == wr;
 }
@@ -157,11 +157,11 @@ static unsigned int rpi_fw_write(struct uart_port *port, const char *s,
 	unsigned int consumed = 0;
 
 	while (consumed < count && !rpi_fw_uart_tx_is_full(port)) {
-		u32 wp = readl(rfu->base + RPI_FW_UART_TX_FIFO_WR)
+		u32 wp = pete_readl("drivers/tty/serial/rpi-fw-uart.c:160", rfu->base + RPI_FW_UART_TX_FIFO_WR)
 			& RPI_FW_UART_FIFO_SIZE_MASK;
 		out[wp] = s[consumed++];
 		wp = (wp + 1) & RPI_FW_UART_FIFO_SIZE_MASK;
-		writel(wp, rfu->base + RPI_FW_UART_TX_FIFO_WR);
+		pete_writel("drivers/tty/serial/rpi-fw-uart.c:164", wp, rfu->base + RPI_FW_UART_TX_FIFO_WR);
 	}
 	return consumed;
 }
@@ -199,12 +199,12 @@ static void rpi_fw_uart_start_rx(struct uart_port *port)
 	 */
 	while (!rpi_fw_uart_rx_is_empty(port) && count < port->fifosize) {
 		const u8 *in = rfu->rx_buffer;
-		u32 rp = readl(rfu->base + RPI_FW_UART_RX_FIFO_RD)
+		u32 rp = pete_readl("drivers/tty/serial/rpi-fw-uart.c:202", rfu->base + RPI_FW_UART_RX_FIFO_RD)
 			& RPI_FW_UART_FIFO_SIZE_MASK;
 
 		tty_insert_flip_char(tty_port, in[rp], TTY_NORMAL);
 		rp = (rp + 1) & RPI_FW_UART_FIFO_SIZE_MASK;
-		writel(rp, rfu->base + RPI_FW_UART_RX_FIFO_RD);
+		pete_writel("drivers/tty/serial/rpi-fw-uart.c:207", rp, rfu->base + RPI_FW_UART_RX_FIFO_RD);
 		count++;
 	}
 	if (count)

@@ -182,7 +182,7 @@ static bool intel_pad_owned_by_host(struct intel_pinctrl *pctrl, unsigned int pi
 	offset = community->padown_offset + padgrp->padown_num * 4 + gpp * 4;
 	padown = community->regs + offset;
 
-	return !(readl(padown) & PADOWN_MASK(gpp_offset));
+	return !(pete_readl("drivers/pinctrl/intel/pinctrl-intel.c:185", padown) & PADOWN_MASK(gpp_offset));
 }
 
 static bool intel_pad_acpi_mode(struct intel_pinctrl *pctrl, unsigned int pin)
@@ -206,7 +206,7 @@ static bool intel_pad_acpi_mode(struct intel_pinctrl *pctrl, unsigned int pin)
 	offset = community->hostown_offset + padgrp->reg_num * 4;
 	hostown = community->regs + offset;
 
-	return !(readl(hostown) & BIT(gpp_offset));
+	return !(pete_readl("drivers/pinctrl/intel/pinctrl-intel.c:209", hostown) & BIT(gpp_offset));
 }
 
 /**
@@ -254,12 +254,12 @@ static int intel_pad_locked(struct intel_pinctrl *pctrl, unsigned int pin)
 	 * either fully or partially locked.
 	 */
 	offset = community->padcfglock_offset + 0 + padgrp->reg_num * 8;
-	value = readl(community->regs + offset);
+	value = pete_readl("drivers/pinctrl/intel/pinctrl-intel.c:257", community->regs + offset);
 	if (value & BIT(gpp_offset))
 		ret |= PAD_LOCKED;
 
 	offset = community->padcfglock_offset + 4 + padgrp->reg_num * 8;
-	value = readl(community->regs + offset);
+	value = pete_readl("drivers/pinctrl/intel/pinctrl-intel.c:262", community->regs + offset);
 	if (value & BIT(gpp_offset))
 		ret |= PAD_LOCKED_TX;
 
@@ -317,8 +317,8 @@ static void intel_pin_dbg_show(struct pinctrl_dev *pctldev, struct seq_file *s,
 		return;
 	}
 
-	cfg0 = readl(intel_get_padcfg(pctrl, pin, PADCFG0));
-	cfg1 = readl(intel_get_padcfg(pctrl, pin, PADCFG1));
+	cfg0 = pete_readl("drivers/pinctrl/intel/pinctrl-intel.c:320", intel_get_padcfg(pctrl, pin, PADCFG0));
+	cfg1 = pete_readl("drivers/pinctrl/intel/pinctrl-intel.c:321", intel_get_padcfg(pctrl, pin, PADCFG1));
 
 	mode = (cfg0 & PADCFG0_PMODE_MASK) >> PADCFG0_PMODE_SHIFT;
 	if (mode == PADCFG0_PMODE_GPIO)
@@ -331,7 +331,7 @@ static void intel_pin_dbg_show(struct pinctrl_dev *pctldev, struct seq_file *s,
 	/* Dump the additional PADCFG registers if available */
 	padcfg = intel_get_padcfg(pctrl, pin, PADCFG2);
 	if (padcfg)
-		seq_printf(s, " 0x%08x", readl(padcfg));
+		seq_printf(s, " 0x%08x", pete_readl("drivers/pinctrl/intel/pinctrl-intel.c:334", padcfg));
 
 	locked = intel_pad_locked(pctrl, pin);
 	acpi = intel_pad_acpi_mode(pctrl, pin);
@@ -416,7 +416,7 @@ static int intel_pinmux_set_mux(struct pinctrl_dev *pctldev,
 
 		padcfg0 = intel_get_padcfg(pctrl, grp->grp.pins[i], PADCFG0);
 
-		value = readl(padcfg0);
+		value = pete_readl("drivers/pinctrl/intel/pinctrl-intel.c:419", padcfg0);
 		value &= ~PADCFG0_PMODE_MASK;
 
 		if (grp->modes)
@@ -425,7 +425,7 @@ static int intel_pinmux_set_mux(struct pinctrl_dev *pctldev,
 			pmode = grp->mode;
 
 		value |= pmode << PADCFG0_PMODE_SHIFT;
-		writel(value, padcfg0);
+		pete_writel("drivers/pinctrl/intel/pinctrl-intel.c:428", value, padcfg0);
 	}
 
 	raw_spin_unlock_irqrestore(&pctrl->lock, flags);
@@ -437,7 +437,7 @@ static void __intel_gpio_set_direction(void __iomem *padcfg0, bool input)
 {
 	u32 value;
 
-	value = readl(padcfg0);
+	value = pete_readl("drivers/pinctrl/intel/pinctrl-intel.c:440", padcfg0);
 	if (input) {
 		value &= ~PADCFG0_GPIORXDIS;
 		value |= PADCFG0_GPIOTXDIS;
@@ -445,7 +445,7 @@ static void __intel_gpio_set_direction(void __iomem *padcfg0, bool input)
 		value &= ~PADCFG0_GPIOTXDIS;
 		value |= PADCFG0_GPIORXDIS;
 	}
-	writel(value, padcfg0);
+	pete_writel("drivers/pinctrl/intel/pinctrl-intel.c:448", value, padcfg0);
 }
 
 static int __intel_gpio_get_gpio_mode(u32 value)
@@ -455,14 +455,14 @@ static int __intel_gpio_get_gpio_mode(u32 value)
 
 static int intel_gpio_get_gpio_mode(void __iomem *padcfg0)
 {
-	return __intel_gpio_get_gpio_mode(readl(padcfg0));
+	return __intel_gpio_get_gpio_mode(pete_readl("drivers/pinctrl/intel/pinctrl-intel.c:458", padcfg0));
 }
 
 static void intel_gpio_set_gpio_mode(void __iomem *padcfg0)
 {
 	u32 value;
 
-	value = readl(padcfg0);
+	value = pete_readl("drivers/pinctrl/intel/pinctrl-intel.c:465", padcfg0);
 
 	/* Put the pad into GPIO mode */
 	value &= ~PADCFG0_PMODE_MASK;
@@ -476,7 +476,7 @@ static void intel_gpio_set_gpio_mode(void __iomem *padcfg0)
 	value &= ~(PADCFG0_GPIROUTIOXAPIC | PADCFG0_GPIROUTSCI);
 	value &= ~(PADCFG0_GPIROUTSMI | PADCFG0_GPIROUTNMI);
 
-	writel(value, padcfg0);
+	pete_writel("drivers/pinctrl/intel/pinctrl-intel.c:479", value, padcfg0);
 }
 
 static int intel_gpio_request_enable(struct pinctrl_dev *pctldev,
@@ -557,7 +557,7 @@ static int intel_config_get_pull(struct intel_pinctrl *pctrl, unsigned int pin,
 	padcfg1 = intel_get_padcfg(pctrl, pin, PADCFG1);
 
 	raw_spin_lock_irqsave(&pctrl->lock, flags);
-	value = readl(padcfg1);
+	value = pete_readl("drivers/pinctrl/intel/pinctrl-intel.c:560", padcfg1);
 	raw_spin_unlock_irqrestore(&pctrl->lock, flags);
 
 	term = (value & PADCFG1_TERM_MASK) >> PADCFG1_TERM_SHIFT;
@@ -640,7 +640,7 @@ static int intel_config_get_debounce(struct intel_pinctrl *pctrl, unsigned int p
 		return -ENOTSUPP;
 
 	raw_spin_lock_irqsave(&pctrl->lock, flags);
-	value2 = readl(padcfg2);
+	value2 = pete_readl("drivers/pinctrl/intel/pinctrl-intel.c:643", padcfg2);
 	raw_spin_unlock_irqrestore(&pctrl->lock, flags);
 	if (!(value2 & PADCFG2_DEBEN))
 		return -EINVAL;
@@ -701,7 +701,7 @@ static int intel_config_set_pull(struct intel_pinctrl *pctrl, unsigned int pin,
 
 	raw_spin_lock_irqsave(&pctrl->lock, flags);
 
-	value = readl(padcfg1);
+	value = pete_readl("drivers/pinctrl/intel/pinctrl-intel.c:704", padcfg1);
 	value &= ~(PADCFG1_TERM_MASK | PADCFG1_TERM_UP);
 
 	/* Set default strength value in case none is given */
@@ -775,7 +775,7 @@ static int intel_config_set_pull(struct intel_pinctrl *pctrl, unsigned int pin,
 	}
 
 	if (!ret)
-		writel(value, padcfg1);
+		pete_writel("drivers/pinctrl/intel/pinctrl-intel.c:778", value, padcfg1);
 
 	raw_spin_unlock_irqrestore(&pctrl->lock, flags);
 
@@ -797,8 +797,8 @@ static int intel_config_set_debounce(struct intel_pinctrl *pctrl,
 
 	raw_spin_lock_irqsave(&pctrl->lock, flags);
 
-	value0 = readl(padcfg0);
-	value2 = readl(padcfg2);
+	value0 = pete_readl("drivers/pinctrl/intel/pinctrl-intel.c:800", padcfg0);
+	value2 = pete_readl("drivers/pinctrl/intel/pinctrl-intel.c:801", padcfg2);
 
 	/* Disable glitch filter and debouncer */
 	value0 &= ~PADCFG0_PREGFRXSEL;
@@ -819,8 +819,8 @@ static int intel_config_set_debounce(struct intel_pinctrl *pctrl,
 		value2 |= PADCFG2_DEBEN;
 	}
 
-	writel(value0, padcfg0);
-	writel(value2, padcfg2);
+	pete_writel("drivers/pinctrl/intel/pinctrl-intel.c:822", value0, padcfg0);
+	pete_writel("drivers/pinctrl/intel/pinctrl-intel.c:823", value2, padcfg2);
 
 	raw_spin_unlock_irqrestore(&pctrl->lock, flags);
 
@@ -962,7 +962,7 @@ static int intel_gpio_get(struct gpio_chip *chip, unsigned int offset)
 	if (!reg)
 		return -EINVAL;
 
-	padcfg0 = readl(reg);
+	padcfg0 = pete_readl("drivers/pinctrl/intel/pinctrl-intel.c:965", reg);
 	if (!(padcfg0 & PADCFG0_GPIOTXDIS))
 		return !!(padcfg0 & PADCFG0_GPIOTXSTATE);
 
@@ -987,12 +987,12 @@ static void intel_gpio_set(struct gpio_chip *chip, unsigned int offset,
 		return;
 
 	raw_spin_lock_irqsave(&pctrl->lock, flags);
-	padcfg0 = readl(reg);
+	padcfg0 = pete_readl("drivers/pinctrl/intel/pinctrl-intel.c:990", reg);
 	if (value)
 		padcfg0 |= PADCFG0_GPIOTXSTATE;
 	else
 		padcfg0 &= ~PADCFG0_GPIOTXSTATE;
-	writel(padcfg0, reg);
+	pete_writel("drivers/pinctrl/intel/pinctrl-intel.c:995", padcfg0, reg);
 	raw_spin_unlock_irqrestore(&pctrl->lock, flags);
 }
 
@@ -1013,7 +1013,7 @@ static int intel_gpio_get_direction(struct gpio_chip *chip, unsigned int offset)
 		return -EINVAL;
 
 	raw_spin_lock_irqsave(&pctrl->lock, flags);
-	padcfg0 = readl(reg);
+	padcfg0 = pete_readl("drivers/pinctrl/intel/pinctrl-intel.c:1016", reg);
 	raw_spin_unlock_irqrestore(&pctrl->lock, flags);
 	if (padcfg0 & PADCFG0_PMODE_MASK)
 		return -EINVAL;
@@ -1065,7 +1065,7 @@ static void intel_gpio_irq_ack(struct irq_data *d)
 		is_offset = community->is_offset + gpp * 4;
 
 		raw_spin_lock(&pctrl->lock);
-		writel(BIT(gpp_offset), community->regs + is_offset);
+		pete_writel("drivers/pinctrl/intel/pinctrl-intel.c:1068", BIT(gpp_offset), community->regs + is_offset);
 		raw_spin_unlock(&pctrl->lock);
 	}
 }
@@ -1093,14 +1093,14 @@ static void intel_gpio_irq_mask_unmask(struct gpio_chip *gc, irq_hw_number_t hwi
 		raw_spin_lock_irqsave(&pctrl->lock, flags);
 
 		/* Clear interrupt status first to avoid unexpected interrupt */
-		writel(BIT(gpp_offset), is);
+		pete_writel("drivers/pinctrl/intel/pinctrl-intel.c:1096", BIT(gpp_offset), is);
 
-		value = readl(reg);
+		value = pete_readl("drivers/pinctrl/intel/pinctrl-intel.c:1098", reg);
 		if (mask)
 			value &= ~BIT(gpp_offset);
 		else
 			value |= BIT(gpp_offset);
-		writel(value, reg);
+		pete_writel("drivers/pinctrl/intel/pinctrl-intel.c:1103", value, reg);
 		raw_spin_unlock_irqrestore(&pctrl->lock, flags);
 	}
 }
@@ -1167,12 +1167,12 @@ static int intel_gpio_irq_type(struct irq_data *d, unsigned int type)
 
 	intel_gpio_set_gpio_mode(reg);
 
-	value = readl(reg);
+	value = pete_readl("drivers/pinctrl/intel/pinctrl-intel.c:1170", reg);
 
 	value = (value & ~PADCFG0_RXEVCFG_MASK) | rxevcfg;
 	value = (value & ~PADCFG0_RXINV) | rxinv;
 
-	writel(value, reg);
+	pete_writel("drivers/pinctrl/intel/pinctrl-intel.c:1175", value, reg);
 
 	if (type & IRQ_TYPE_EDGE_BOTH)
 		irq_set_handler_locked(d, handle_edge_irq);
@@ -1223,9 +1223,9 @@ static int intel_gpio_community_irq_handler(struct intel_pinctrl *pctrl,
 
 		raw_spin_lock(&pctrl->lock);
 
-		pending = readl(community->regs + community->is_offset +
+		pending = pete_readl("drivers/pinctrl/intel/pinctrl-intel.c:1226", community->regs + community->is_offset +
 				padgrp->reg_num * 4);
-		enabled = readl(community->regs + community->ie_offset +
+		enabled = pete_readl("drivers/pinctrl/intel/pinctrl-intel.c:1228", community->regs + community->ie_offset +
 				padgrp->reg_num * 4);
 
 		raw_spin_unlock(&pctrl->lock);
@@ -1272,8 +1272,8 @@ static void intel_gpio_irq_init(struct intel_pinctrl *pctrl)
 
 		for (gpp = 0; gpp < community->ngpps; gpp++) {
 			/* Mask and clear all interrupts */
-			writel(0, base + community->ie_offset + gpp * 4);
-			writel(0xffff, base + community->is_offset + gpp * 4);
+			pete_writel("drivers/pinctrl/intel/pinctrl-intel.c:1275", 0, base + community->ie_offset + gpp * 4);
+			pete_writel("drivers/pinctrl/intel/pinctrl-intel.c:1276", 0xffff, base + community->is_offset + gpp * 4);
 		}
 	}
 }
@@ -1579,7 +1579,7 @@ static int intel_pinctrl_probe(struct platform_device *pdev,
 		 * Determine community features based on the revision.
 		 * A value of all ones means the device is not present.
 		 */
-		value = readl(regs + REVID);
+		value = pete_readl("drivers/pinctrl/intel/pinctrl-intel.c:1582", regs + REVID);
 		if (value == ~0u)
 			return -ENODEV;
 		if (((value & REVID_MASK) >> REVID_SHIFT) >= 0x94) {
@@ -1590,7 +1590,7 @@ static int intel_pinctrl_probe(struct platform_device *pdev,
 		/* Determine community features based on the capabilities */
 		offset = CAPLIST;
 		do {
-			value = readl(regs + offset);
+			value = pete_readl("drivers/pinctrl/intel/pinctrl-intel.c:1593", regs + offset);
 			switch ((value & CAPLIST_ID_MASK) >> CAPLIST_ID_SHIFT) {
 			case CAPLIST_ID_GPIO_HW_INFO:
 				community->features |= PINCTRL_FEATURE_GPIO_HW_INFO;
@@ -1613,7 +1613,7 @@ static int intel_pinctrl_probe(struct platform_device *pdev,
 		dev_dbg(dev, "Community%d features: %#08x\n", i, community->features);
 
 		/* Read offset of the pad configuration registers */
-		offset = readl(regs + PADBAR);
+		offset = pete_readl("drivers/pinctrl/intel/pinctrl-intel.c:1616", regs + PADBAR);
 
 		community->regs = regs;
 		community->pad_regs = regs + offset;
@@ -1753,7 +1753,7 @@ static bool intel_pinctrl_should_save(struct intel_pinctrl *pctrl, unsigned int 
 	 *
 	 * See https://bugzilla.kernel.org/show_bug.cgi?id=214749.
 	 */
-	value = readl(intel_get_padcfg(pctrl, pin, PADCFG0));
+	value = pete_readl("drivers/pinctrl/intel/pinctrl-intel.c:1756", intel_get_padcfg(pctrl, pin, PADCFG0));
 	if (__intel_gpio_is_direct_irq(value))
 		return true;
 
@@ -1776,14 +1776,14 @@ int intel_pinctrl_suspend_noirq(struct device *dev)
 		if (!intel_pinctrl_should_save(pctrl, desc->number))
 			continue;
 
-		val = readl(intel_get_padcfg(pctrl, desc->number, PADCFG0));
+		val = pete_readl("drivers/pinctrl/intel/pinctrl-intel.c:1779", intel_get_padcfg(pctrl, desc->number, PADCFG0));
 		pads[i].padcfg0 = val & ~PADCFG0_GPIORXSTATE;
-		val = readl(intel_get_padcfg(pctrl, desc->number, PADCFG1));
+		val = pete_readl("drivers/pinctrl/intel/pinctrl-intel.c:1781", intel_get_padcfg(pctrl, desc->number, PADCFG1));
 		pads[i].padcfg1 = val;
 
 		padcfg = intel_get_padcfg(pctrl, desc->number, PADCFG2);
 		if (padcfg)
-			pads[i].padcfg2 = readl(padcfg);
+			pads[i].padcfg2 = pete_readl("drivers/pinctrl/intel/pinctrl-intel.c:1786", padcfg);
 	}
 
 	communities = pctrl->context.communities;
@@ -1794,11 +1794,11 @@ int intel_pinctrl_suspend_noirq(struct device *dev)
 
 		base = community->regs + community->ie_offset;
 		for (gpp = 0; gpp < community->ngpps; gpp++)
-			communities[i].intmask[gpp] = readl(base + gpp * 4);
+			communities[i].intmask[gpp] = pete_readl("drivers/pinctrl/intel/pinctrl-intel.c:1797", base + gpp * 4);
 
 		base = community->regs + community->hostown_offset;
 		for (gpp = 0; gpp < community->ngpps; gpp++)
-			communities[i].hostown[gpp] = readl(base + gpp * 4);
+			communities[i].hostown[gpp] = pete_readl("drivers/pinctrl/intel/pinctrl-intel.c:1801", base + gpp * 4);
 	}
 
 	return 0;
@@ -1809,13 +1809,13 @@ static bool intel_gpio_update_reg(void __iomem *reg, u32 mask, u32 value)
 {
 	u32 curr, updated;
 
-	curr = readl(reg);
+	curr = pete_readl("drivers/pinctrl/intel/pinctrl-intel.c:1812", reg);
 
 	updated = (curr & ~mask) | (value & mask);
 	if (curr == updated)
 		return false;
 
-	writel(updated, reg);
+	pete_writel("drivers/pinctrl/intel/pinctrl-intel.c:1818", updated, reg);
 	return true;
 }
 
@@ -1838,7 +1838,7 @@ static void intel_restore_hostown(struct intel_pinctrl *pctrl, unsigned int c,
 	if (!intel_gpio_update_reg(base + gpp * 4, requested, saved))
 		return;
 
-	dev_dbg(dev, "restored hostown %u/%u %#08x\n", c, gpp, readl(base + gpp * 4));
+	dev_dbg(dev, "restored hostown %u/%u %#08x\n", c, gpp, pete_readl("drivers/pinctrl/intel/pinctrl-intel.c:1841", base + gpp * 4));
 }
 
 static void intel_restore_intmask(struct intel_pinctrl *pctrl, unsigned int c,
@@ -1849,7 +1849,7 @@ static void intel_restore_intmask(struct intel_pinctrl *pctrl, unsigned int c,
 	if (!intel_gpio_update_reg(base + gpp * 4, ~0U, saved))
 		return;
 
-	dev_dbg(dev, "restored mask %u/%u %#08x\n", c, gpp, readl(base + gpp * 4));
+	dev_dbg(dev, "restored mask %u/%u %#08x\n", c, gpp, pete_readl("drivers/pinctrl/intel/pinctrl-intel.c:1852", base + gpp * 4));
 }
 
 static void intel_restore_padcfg(struct intel_pinctrl *pctrl, unsigned int pin,
@@ -1867,7 +1867,7 @@ static void intel_restore_padcfg(struct intel_pinctrl *pctrl, unsigned int pin,
 	if (!intel_gpio_update_reg(padcfg, ~mask, saved))
 		return;
 
-	dev_dbg(dev, "restored pin %u padcfg%u %#08x\n", pin, n, readl(padcfg));
+	dev_dbg(dev, "restored pin %u padcfg%u %#08x\n", pin, n, pete_readl("drivers/pinctrl/intel/pinctrl-intel.c:1870", padcfg));
 }
 
 int intel_pinctrl_resume_noirq(struct device *dev)

@@ -222,7 +222,7 @@ static void devbus_orion_set_timing_params(struct devbus *devbus,
 		(r->badr_skew << ORION_BADR_SKEW_SHIFT) |
 		ORION_RESERVED;
 
-	writel(value, devbus->base);
+	pete_writel("drivers/memory/mvebu-devbus.c:225", value, devbus->base);
 }
 
 static void devbus_armada_set_timing_params(struct devbus *devbus,
@@ -245,7 +245,7 @@ static void devbus_armada_set_timing_params(struct devbus *devbus,
 		devbus->base + ARMADA_READ_PARAM_OFFSET,
 		value);
 
-	writel(value, devbus->base + ARMADA_READ_PARAM_OFFSET);
+	pete_writel("drivers/memory/mvebu-devbus.c:248", value, devbus->base + ARMADA_READ_PARAM_OFFSET);
 
 	/* Set write timings */
 	value = w->sync_enable  << ARMADA_SYNC_ENABLE_SHIFT |
@@ -257,7 +257,7 @@ static void devbus_armada_set_timing_params(struct devbus *devbus,
 		devbus->base + ARMADA_WRITE_PARAM_OFFSET,
 		value);
 
-	writel(value, devbus->base + ARMADA_WRITE_PARAM_OFFSET);
+	pete_writel("drivers/memory/mvebu-devbus.c:260", value, devbus->base + ARMADA_WRITE_PARAM_OFFSET);
 }
 
 static int mvebu_devbus_probe(struct platform_device *pdev)

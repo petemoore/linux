@@ -583,7 +583,7 @@ static irqreturn_t nvec_interrupt(int irq, void *dev)
 	struct nvec_chip *nvec = dev;
 	unsigned int state = nvec->state;
 
-	status = readl(nvec->base + I2C_SL_STATUS);
+	status = pete_readl("drivers/staging/nvec/nvec.c:586", nvec->base + I2C_SL_STATUS);
 
 	/* Filter out some errors */
 	if ((status & irq_mask) == 0 && (status & ~irq_mask) != 0) {
@@ -597,9 +597,9 @@ static irqreturn_t nvec_interrupt(int irq, void *dev)
 
 	/* The EC did not request a read, so it send us something, read it */
 	if ((status & RNW) == 0) {
-		received = readl(nvec->base + I2C_SL_RCVD);
+		received = pete_readl("drivers/staging/nvec/nvec.c:600", nvec->base + I2C_SL_RCVD);
 		if (status & RCVD)
-			writel(0, nvec->base + I2C_SL_RCVD);
+			pete_writel("drivers/staging/nvec/nvec.c:602", 0, nvec->base + I2C_SL_RCVD);
 	}
 
 	if (status == (I2C_SL_IRQ | RCVD))
@@ -691,7 +691,7 @@ static irqreturn_t nvec_interrupt(int irq, void *dev)
 
 	/* Send data if requested, but not on end of transmission */
 	if ((status & (RNW | END_TRANS)) == RNW)
-		writel(to_send, nvec->base + I2C_SL_RCVD);
+		pete_writel("drivers/staging/nvec/nvec.c:694", to_send, nvec->base + I2C_SL_RCVD);
 
 	/* If we have send the first byte */
 	if (status == (I2C_SL_IRQ | RNW | RCVD))
@@ -731,15 +731,15 @@ static void tegra_init_i2c_slave(struct nvec_chip *nvec)
 
 	val = I2C_CNFG_NEW_MASTER_SFM | I2C_CNFG_PACKET_MODE_EN |
 	    (0x2 << I2C_CNFG_DEBOUNCE_CNT_SHIFT);
-	writel(val, nvec->base + I2C_CNFG);
+	pete_writel("drivers/staging/nvec/nvec.c:734", val, nvec->base + I2C_CNFG);
 
 	clk_set_rate(nvec->i2c_clk, 8 * 80000);
 
-	writel(I2C_SL_NEWSL, nvec->base + I2C_SL_CNFG);
-	writel(0x1E, nvec->base + I2C_SL_DELAY_COUNT);
+	pete_writel("drivers/staging/nvec/nvec.c:738", I2C_SL_NEWSL, nvec->base + I2C_SL_CNFG);
+	pete_writel("drivers/staging/nvec/nvec.c:739", 0x1E, nvec->base + I2C_SL_DELAY_COUNT);
 
-	writel(nvec->i2c_addr >> 1, nvec->base + I2C_SL_ADDR1);
-	writel(0, nvec->base + I2C_SL_ADDR2);
+	pete_writel("drivers/staging/nvec/nvec.c:741", nvec->i2c_addr >> 1, nvec->base + I2C_SL_ADDR1);
+	pete_writel("drivers/staging/nvec/nvec.c:742", 0, nvec->base + I2C_SL_ADDR2);
 
 	enable_irq(nvec->irq);
 }
@@ -748,7 +748,7 @@ static void tegra_init_i2c_slave(struct nvec_chip *nvec)
 static void nvec_disable_i2c_slave(struct nvec_chip *nvec)
 {
 	disable_irq(nvec->irq);
-	writel(I2C_SL_NEWSL | I2C_SL_NACK, nvec->base + I2C_SL_CNFG);
+	pete_writel("drivers/staging/nvec/nvec.c:751", I2C_SL_NEWSL | I2C_SL_NACK, nvec->base + I2C_SL_CNFG);
 	clk_disable_unprepare(nvec->i2c_clk);
 }
 #endif

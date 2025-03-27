@@ -269,14 +269,14 @@ static __attribute_const__ struct io_apic __iomem *io_apic_base(int idx)
 static inline void io_apic_eoi(unsigned int apic, unsigned int vector)
 {
 	struct io_apic __iomem *io_apic = io_apic_base(apic);
-	writel(vector, &io_apic->eoi);
+	pete_writel("arch/x86/kernel/apic/io_apic.c:272", vector, &io_apic->eoi);
 }
 
 unsigned int native_io_apic_read(unsigned int apic, unsigned int reg)
 {
 	struct io_apic __iomem *io_apic = io_apic_base(apic);
-	writel(reg, &io_apic->index);
-	return readl(&io_apic->data);
+	pete_writel("arch/x86/kernel/apic/io_apic.c:278", reg, &io_apic->index);
+	return pete_readl("arch/x86/kernel/apic/io_apic.c:279", &io_apic->data);
 }
 
 static void io_apic_write(unsigned int apic, unsigned int reg,
@@ -284,8 +284,8 @@ static void io_apic_write(unsigned int apic, unsigned int reg,
 {
 	struct io_apic __iomem *io_apic = io_apic_base(apic);
 
-	writel(reg, &io_apic->index);
-	writel(value, &io_apic->data);
+	pete_writel("arch/x86/kernel/apic/io_apic.c:287", reg, &io_apic->index);
+	pete_writel("arch/x86/kernel/apic/io_apic.c:288", value, &io_apic->data);
 }
 
 static struct IO_APIC_route_entry __ioapic_read_entry(int apic, int pin)
@@ -431,7 +431,7 @@ static void io_apic_sync(struct irq_pin_list *entry)
 	struct io_apic __iomem *io_apic;
 
 	io_apic = io_apic_base(entry->apic);
-	readl(&io_apic->data);
+	pete_readl("arch/x86/kernel/apic/io_apic.c:434", &io_apic->data);
 }
 
 static void mask_ioapic_irq(struct irq_data *irq_data)

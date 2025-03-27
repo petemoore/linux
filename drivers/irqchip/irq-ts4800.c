@@ -33,19 +33,19 @@ struct ts4800_irq_data {
 static void ts4800_irq_mask(struct irq_data *d)
 {
 	struct ts4800_irq_data *data = irq_data_get_irq_chip_data(d);
-	u16 reg = readw(data->base + IRQ_MASK);
+	u16 reg = pete_readw("drivers/irqchip/irq-ts4800.c:36", data->base + IRQ_MASK);
 	u16 mask = 1 << d->hwirq;
 
-	writew(reg | mask, data->base + IRQ_MASK);
+	pete_writew("drivers/irqchip/irq-ts4800.c:39", reg | mask, data->base + IRQ_MASK);
 }
 
 static void ts4800_irq_unmask(struct irq_data *d)
 {
 	struct ts4800_irq_data *data = irq_data_get_irq_chip_data(d);
-	u16 reg = readw(data->base + IRQ_MASK);
+	u16 reg = pete_readw("drivers/irqchip/irq-ts4800.c:45", data->base + IRQ_MASK);
 	u16 mask = 1 << d->hwirq;
 
-	writew(reg & ~mask, data->base + IRQ_MASK);
+	pete_writew("drivers/irqchip/irq-ts4800.c:48", reg & ~mask, data->base + IRQ_MASK);
 }
 
 static void ts4800_irq_print_chip(struct irq_data *d, struct seq_file *p)
@@ -82,7 +82,7 @@ static void ts4800_ic_chained_handle_irq(struct irq_desc *desc)
 {
 	struct ts4800_irq_data *data = irq_desc_get_handler_data(desc);
 	struct irq_chip *chip = irq_desc_get_chip(desc);
-	u16 status = readw(data->base + IRQ_STATUS);
+	u16 status = pete_readw("drivers/irqchip/irq-ts4800.c:85", data->base + IRQ_STATUS);
 
 	chained_irq_enter(chip, desc);
 
@@ -117,7 +117,7 @@ static int ts4800_ic_probe(struct platform_device *pdev)
 	if (IS_ERR(data->base))
 		return PTR_ERR(data->base);
 
-	writew(0xFFFF, data->base + IRQ_MASK);
+	pete_writew("drivers/irqchip/irq-ts4800.c:120", 0xFFFF, data->base + IRQ_MASK);
 
 	parent_irq = irq_of_parse_and_map(node, 0);
 	if (!parent_irq) {

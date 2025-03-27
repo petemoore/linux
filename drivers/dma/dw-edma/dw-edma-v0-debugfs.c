@@ -84,12 +84,12 @@ static int dw_edma_debugfs_u32_get(void *data, u64 *val)
 
 		raw_spin_lock_irqsave(&dw->lock, flags);
 
-		writel(viewport_sel, REGS_ADDR(dw, type.legacy.viewport_sel));
-		*val = readl(reg);
+		pete_writel("drivers/dma/dw-edma/dw-edma-v0-debugfs.c:87", viewport_sel, REGS_ADDR(dw, type.legacy.viewport_sel));
+		*val = pete_readl("drivers/dma/dw-edma/dw-edma-v0-debugfs.c:88", reg);
 
 		raw_spin_unlock_irqrestore(&dw->lock, flags);
 	} else {
-		*val = readl(reg);
+		*val = pete_readl("drivers/dma/dw-edma/dw-edma-v0-debugfs.c:92", reg);
 	}
 
 	return 0;

@@ -78,7 +78,7 @@ static int nxp_spifi_reset(struct nxp_spifi *spifi)
 	u8 stat;
 	int ret;
 
-	writel(SPIFI_STAT_RESET, spifi->io_base + SPIFI_STAT);
+	pete_writel("drivers/mtd/spi-nor/controllers/nxp-spifi.c:81", SPIFI_STAT_RESET, spifi->io_base + SPIFI_STAT);
 	ret = readb_poll_timeout(spifi->io_base + SPIFI_STAT, stat,
 				 !(stat & SPIFI_STAT_RESET), 10, 30);
 	if (ret)
@@ -111,7 +111,7 @@ static int nxp_spifi_set_memory_mode_on(struct nxp_spifi *spifi)
 	if (spifi->memory_mode)
 		return 0;
 
-	writel(spifi->mcmd, spifi->io_base + SPIFI_MCMD);
+	pete_writel("drivers/mtd/spi-nor/controllers/nxp-spifi.c:114", spifi->mcmd, spifi->io_base + SPIFI_MCMD);
 	ret = readb_poll_timeout(spifi->io_base + SPIFI_STAT, stat,
 				 stat & SPIFI_STAT_MCINIT, 10, 30);
 	if (ret)
@@ -137,10 +137,10 @@ static int nxp_spifi_read_reg(struct spi_nor *nor, u8 opcode, u8 *buf,
 	      SPIFI_CMD_OPCODE(opcode) |
 	      SPIFI_CMD_FIELDFORM_ALL_SERIAL |
 	      SPIFI_CMD_FRAMEFORM_OPCODE_ONLY;
-	writel(cmd, spifi->io_base + SPIFI_CMD);
+	pete_writel("drivers/mtd/spi-nor/controllers/nxp-spifi.c:140", cmd, spifi->io_base + SPIFI_CMD);
 
 	while (len--)
-		*buf++ = readb(spifi->io_base + SPIFI_DATA);
+		*buf++ = pete_readb("drivers/mtd/spi-nor/controllers/nxp-spifi.c:143", spifi->io_base + SPIFI_DATA);
 
 	return nxp_spifi_wait_for_cmd(spifi);
 }
@@ -161,10 +161,10 @@ static int nxp_spifi_write_reg(struct spi_nor *nor, u8 opcode, const u8 *buf,
 	      SPIFI_CMD_OPCODE(opcode) |
 	      SPIFI_CMD_FIELDFORM_ALL_SERIAL |
 	      SPIFI_CMD_FRAMEFORM_OPCODE_ONLY;
-	writel(cmd, spifi->io_base + SPIFI_CMD);
+	pete_writel("drivers/mtd/spi-nor/controllers/nxp-spifi.c:164", cmd, spifi->io_base + SPIFI_CMD);
 
 	while (len--)
-		writeb(*buf++, spifi->io_base + SPIFI_DATA);
+		pete_writeb("drivers/mtd/spi-nor/controllers/nxp-spifi.c:167", *buf++, spifi->io_base + SPIFI_DATA);
 
 	return nxp_spifi_wait_for_cmd(spifi);
 }
@@ -196,17 +196,17 @@ static ssize_t nxp_spifi_write(struct spi_nor *nor, loff_t to, size_t len,
 	if (ret)
 		return ret;
 
-	writel(to, spifi->io_base + SPIFI_ADDR);
+	pete_writel("drivers/mtd/spi-nor/controllers/nxp-spifi.c:199", to, spifi->io_base + SPIFI_ADDR);
 
 	cmd = SPIFI_CMD_DOUT |
 	      SPIFI_CMD_DATALEN(len) |
 	      SPIFI_CMD_FIELDFORM_ALL_SERIAL |
 	      SPIFI_CMD_OPCODE(nor->program_opcode) |
 	      SPIFI_CMD_FRAMEFORM(spifi->nor.addr_nbytes + 1);
-	writel(cmd, spifi->io_base + SPIFI_CMD);
+	pete_writel("drivers/mtd/spi-nor/controllers/nxp-spifi.c:206", cmd, spifi->io_base + SPIFI_CMD);
 
 	for (i = 0; i < len; i++)
-		writeb(buf[i], spifi->io_base + SPIFI_DATA);
+		pete_writeb("drivers/mtd/spi-nor/controllers/nxp-spifi.c:209", buf[i], spifi->io_base + SPIFI_DATA);
 
 	ret = nxp_spifi_wait_for_cmd(spifi);
 	if (ret)
@@ -225,12 +225,12 @@ static int nxp_spifi_erase(struct spi_nor *nor, loff_t offs)
 	if (ret)
 		return ret;
 
-	writel(offs, spifi->io_base + SPIFI_ADDR);
+	pete_writel("drivers/mtd/spi-nor/controllers/nxp-spifi.c:228", offs, spifi->io_base + SPIFI_ADDR);
 
 	cmd = SPIFI_CMD_FIELDFORM_ALL_SERIAL |
 	      SPIFI_CMD_OPCODE(nor->erase_opcode) |
 	      SPIFI_CMD_FRAMEFORM(spifi->nor.addr_nbytes + 1);
-	writel(cmd, spifi->io_base + SPIFI_CMD);
+	pete_writel("drivers/mtd/spi-nor/controllers/nxp-spifi.c:233", cmd, spifi->io_base + SPIFI_CMD);
 
 	return nxp_spifi_wait_for_cmd(spifi);
 }
@@ -337,7 +337,7 @@ static int nxp_spifi_setup_flash(struct nxp_spifi *spifi,
 		return -EINVAL;
 	}
 
-	writel(ctrl, spifi->io_base + SPIFI_CTRL);
+	pete_writel("drivers/mtd/spi-nor/controllers/nxp-spifi.c:340", ctrl, spifi->io_base + SPIFI_CTRL);
 
 	spifi->nor.dev   = spifi->dev;
 	spi_nor_set_flash_node(&spifi->nor, np);
@@ -411,8 +411,8 @@ static int nxp_spifi_probe(struct platform_device *pdev)
 
 	/* Initialize and reset device */
 	nxp_spifi_reset(spifi);
-	writel(0, spifi->io_base + SPIFI_IDATA);
-	writel(0, spifi->io_base + SPIFI_MCMD);
+	pete_writel("drivers/mtd/spi-nor/controllers/nxp-spifi.c:414", 0, spifi->io_base + SPIFI_IDATA);
+	pete_writel("drivers/mtd/spi-nor/controllers/nxp-spifi.c:415", 0, spifi->io_base + SPIFI_MCMD);
 	nxp_spifi_reset(spifi);
 
 	flash_np = of_get_next_available_child(pdev->dev.of_node, NULL);

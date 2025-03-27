@@ -50,10 +50,10 @@
  * The base address and descriptor number are configured at
  * DMA Queues Descriptor Ring Base Address/Size Register (offset 0x0004)
  */
-#define GET_WPTR(addr)			readw((addr) + 2)
-#define GET_RPTR(addr)			readw((addr))
-#define SET_WPTR(addr, data)		writew((data), (addr) + 2)
-#define SET_RPTR(addr, data)		writew((data), (addr))
+#define GET_WPTR(addr)			pete_readw("drivers/net/ethernet/cortina/gemini.h:53", (addr) + 2)
+#define GET_RPTR(addr)			pete_readw("drivers/net/ethernet/cortina/gemini.h:54", (addr))
+#define SET_WPTR(addr, data)		pete_writew("drivers/net/ethernet/cortina/gemini.h:55", (data), (addr) + 2)
+#define SET_RPTR(addr, data)		pete_writew("drivers/net/ethernet/cortina/gemini.h:56", (data), (addr))
 #define __RWPTR_NEXT(x, mask)		(((unsigned int)(x) + 1) & (mask))
 #define __RWPTR_PREV(x, mask)		(((unsigned int)(x) - 1) & (mask))
 #define __RWPTR_DISTANCE(r, w, mask)	(((unsigned int)(w) - (r)) & (mask))

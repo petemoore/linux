@@ -107,9 +107,9 @@ static void spi_slv_setup(struct spi_geni_master *mas)
 {
 	struct geni_se *se = &mas->se;
 
-	writel(SPI_SLAVE_EN, se->base + SE_SPI_SLAVE_EN);
-	writel(GENI_IO_MUX_0_EN, se->base + GENI_OUTPUT_CTRL);
-	writel(START_TRIGGER, se->base + SE_GENI_CFG_SEQ_START);
+	pete_writel("drivers/spi/spi-geni-qcom.c:110", SPI_SLAVE_EN, se->base + SE_SPI_SLAVE_EN);
+	pete_writel("drivers/spi/spi-geni-qcom.c:111", GENI_IO_MUX_0_EN, se->base + GENI_OUTPUT_CTRL);
+	pete_writel("drivers/spi/spi-geni-qcom.c:112", START_TRIGGER, se->base + SE_GENI_CFG_SEQ_START);
 	dev_dbg(mas->dev, "spi slave setup done\n");
 }
 
@@ -155,7 +155,7 @@ static void handle_se_timeout(struct spi_master *spi,
 
 	spin_lock_irq(&mas->lock);
 	if (mas->cur_xfer_mode == GENI_SE_FIFO)
-		writel(0, se->base + SE_GENI_TX_WATERMARK_REG);
+		pete_writel("drivers/spi/spi-geni-qcom.c:158", 0, se->base + SE_GENI_TX_WATERMARK_REG);
 
 	xfer = mas->cur_xfer;
 	mas->cur_xfer = NULL;
@@ -199,7 +199,7 @@ unmap_if_dma:
 			if (xfer->tx_buf) {
 				spin_lock_irq(&mas->lock);
 				reinit_completion(&mas->tx_reset_done);
-				writel(1, se->base + SE_DMA_TX_FSM_RST);
+				pete_writel("drivers/spi/spi-geni-qcom.c:202", 1, se->base + SE_DMA_TX_FSM_RST);
 				spin_unlock_irq(&mas->lock);
 				time_left = wait_for_completion_timeout(&mas->tx_reset_done, HZ);
 				if (!time_left)
@@ -208,7 +208,7 @@ unmap_if_dma:
 			if (xfer->rx_buf) {
 				spin_lock_irq(&mas->lock);
 				reinit_completion(&mas->rx_reset_done);
-				writel(1, se->base + SE_DMA_RX_FSM_RST);
+				pete_writel("drivers/spi/spi-geni-qcom.c:211", 1, se->base + SE_DMA_RX_FSM_RST);
 				spin_unlock_irq(&mas->lock);
 				time_left = wait_for_completion_timeout(&mas->rx_reset_done, HZ);
 				if (!time_left)
@@ -265,8 +265,8 @@ static bool spi_geni_is_abort_still_pending(struct spi_geni_master *mas)
 	 * until that sorts itself out.
 	 */
 	spin_lock_irq(&mas->lock);
-	m_irq = readl(se->base + SE_GENI_M_IRQ_STATUS);
-	m_irq_en = readl(se->base + SE_GENI_M_IRQ_EN);
+	m_irq = pete_readl("drivers/spi/spi-geni-qcom.c:268", se->base + SE_GENI_M_IRQ_STATUS);
+	m_irq_en = pete_readl("drivers/spi/spi-geni-qcom.c:269", se->base + SE_GENI_M_IRQ_EN);
 	spin_unlock_irq(&mas->lock);
 
 	if (m_irq & m_irq_en) {
@@ -352,7 +352,7 @@ static void spi_setup_word_len(struct spi_geni_master *mas, u16 mode,
 	geni_se_config_packing(&mas->se, bits_per_word, pack_words, msb_first,
 								true, true);
 	word_len = (bits_per_word - MIN_WORD_LEN) & WORD_LEN_MSK;
-	writel(word_len, se->base + SE_SPI_WORD_LEN);
+	pete_writel("drivers/spi/spi-geni-qcom.c:355", word_len, se->base + SE_SPI_WORD_LEN);
 }
 
 static int geni_spi_set_clock_and_bw(struct spi_geni_master *mas,
@@ -382,8 +382,8 @@ static int geni_spi_set_clock_and_bw(struct spi_geni_master *mas,
 
 	clk_sel = idx & CLK_SEL_MSK;
 	m_clk_cfg = (div << CLK_DIV_SHFT) | SER_CLK_EN;
-	writel(clk_sel, se->base + SE_GENI_CLK_SEL);
-	writel(m_clk_cfg, se->base + GENI_SER_M_CLK_CFG);
+	pete_writel("drivers/spi/spi-geni-qcom.c:385", clk_sel, se->base + SE_GENI_CLK_SEL);
+	pete_writel("drivers/spi/spi-geni-qcom.c:386", m_clk_cfg, se->base + GENI_SER_M_CLK_CFG);
 
 	/* Set BW quota for CPU as driver supports FIFO mode only. */
 	se->icc_paths[CPU_TO_GENI].avg_bw = Bps_to_icc(mas->cur_speed_hz);
@@ -419,11 +419,11 @@ static int setup_fifo_params(struct spi_device *spi_slv,
 		mas->cur_bits_per_word = spi_slv->bits_per_word;
 
 		spi_setup_word_len(mas, spi_slv->mode, spi_slv->bits_per_word);
-		writel(loopback_cfg, se->base + SE_SPI_LOOPBACK);
-		writel(demux_sel, se->base + SE_SPI_DEMUX_SEL);
-		writel(cpha, se->base + SE_SPI_CPHA);
-		writel(cpol, se->base + SE_SPI_CPOL);
-		writel(demux_output_inv, se->base + SE_SPI_DEMUX_OUTPUT_INV);
+		pete_writel("drivers/spi/spi-geni-qcom.c:422", loopback_cfg, se->base + SE_SPI_LOOPBACK);
+		pete_writel("drivers/spi/spi-geni-qcom.c:423", demux_sel, se->base + SE_SPI_DEMUX_SEL);
+		pete_writel("drivers/spi/spi-geni-qcom.c:424", cpha, se->base + SE_SPI_CPHA);
+		pete_writel("drivers/spi/spi-geni-qcom.c:425", cpol, se->base + SE_SPI_CPOL);
+		pete_writel("drivers/spi/spi-geni-qcom.c:426", demux_output_inv, se->base + SE_SPI_DEMUX_OUTPUT_INV);
 
 		mas->last_mode = spi_slv->mode;
 	}
@@ -688,7 +688,7 @@ static int spi_geni_init(struct spi_geni_master *mas)
 	else
 		mas->oversampling = 1;
 
-	fifo_disable = readl(se->base + GENI_IF_DISABLE_RO) & FIFO_IF_DISABLE;
+	fifo_disable = pete_readl("drivers/spi/spi-geni-qcom.c:691", se->base + GENI_IF_DISABLE_RO) & FIFO_IF_DISABLE;
 	switch (fifo_disable) {
 	case 1:
 		ret = spi_geni_grab_gpi_chan(mas);
@@ -716,9 +716,9 @@ static int spi_geni_init(struct spi_geni_master *mas)
 
 	/* We always control CS manually */
 	if (!spi->slave) {
-		spi_tx_cfg = readl(se->base + SE_SPI_TRANS_CFG);
+		spi_tx_cfg = pete_readl("drivers/spi/spi-geni-qcom.c:719", se->base + SE_SPI_TRANS_CFG);
 		spi_tx_cfg &= ~CS_TOGGLE;
-		writel(spi_tx_cfg, se->base + SE_SPI_TRANS_CFG);
+		pete_writel("drivers/spi/spi-geni-qcom.c:721", spi_tx_cfg, se->base + SE_SPI_TRANS_CFG);
 	}
 
 out_pm:
@@ -750,7 +750,7 @@ static bool geni_spi_handle_tx(struct spi_geni_master *mas)
 
 	/* Stop the watermark IRQ if nothing to send */
 	if (!mas->cur_xfer) {
-		writel(0, se->base + SE_GENI_TX_WATERMARK_REG);
+		pete_writel("drivers/spi/spi-geni-qcom.c:753", 0, se->base + SE_GENI_TX_WATERMARK_REG);
 		return false;
 	}
 
@@ -772,7 +772,7 @@ static bool geni_spi_handle_tx(struct spi_geni_master *mas)
 	}
 	mas->tx_rem_bytes -= max_bytes;
 	if (!mas->tx_rem_bytes) {
-		writel(0, se->base + SE_GENI_TX_WATERMARK_REG);
+		pete_writel("drivers/spi/spi-geni-qcom.c:775", 0, se->base + SE_GENI_TX_WATERMARK_REG);
 		return false;
 	}
 	return true;
@@ -788,7 +788,7 @@ static void geni_spi_handle_rx(struct spi_geni_master *mas)
 	unsigned int bytes_per_fifo_word = geni_byte_per_fifo_word(mas);
 	unsigned int i = 0;
 
-	rx_fifo_status = readl(se->base + SE_GENI_RX_FIFO_STATUS);
+	rx_fifo_status = pete_readl("drivers/spi/spi-geni-qcom.c:791", se->base + SE_GENI_RX_FIFO_STATUS);
 	rx_bytes = (rx_fifo_status & RX_FIFO_WC_MSK) * bytes_per_fifo_word;
 	if (rx_fifo_status & RX_LAST) {
 		rx_last_byte_valid = rx_fifo_status & RX_LAST_BYTE_VALID_MSK;
@@ -800,7 +800,7 @@ static void geni_spi_handle_rx(struct spi_geni_master *mas)
 	/* Clear out the FIFO and bail if nowhere to put it */
 	if (!mas->cur_xfer) {
 		for (i = 0; i < DIV_ROUND_UP(rx_bytes, bytes_per_fifo_word); i++)
-			readl(se->base + SE_GENI_RX_FIFOn);
+			pete_readl("drivers/spi/spi-geni-qcom.c:803", se->base + SE_GENI_RX_FIFOn);
 		return;
 	}
 
@@ -865,12 +865,12 @@ static int setup_se_xfer(struct spi_transfer *xfer,
 	if (xfer->tx_buf) {
 		m_cmd |= SPI_TX_ONLY;
 		mas->tx_rem_bytes = xfer->len;
-		writel(len, se->base + SE_SPI_TX_TRANS_LEN);
+		pete_writel("drivers/spi/spi-geni-qcom.c:868", len, se->base + SE_SPI_TX_TRANS_LEN);
 	}
 
 	if (xfer->rx_buf) {
 		m_cmd |= SPI_RX_ONLY;
-		writel(len, se->base + SE_SPI_RX_TRANS_LEN);
+		pete_writel("drivers/spi/spi-geni-qcom.c:873", len, se->base + SE_SPI_RX_TRANS_LEN);
 		mas->rx_rem_bytes = xfer->len;
 	}
 
@@ -906,7 +906,7 @@ static int setup_se_xfer(struct spi_transfer *xfer,
 				sg_dma_len(xfer->tx_sg.sgl));
 	} else if (m_cmd & SPI_TX_ONLY) {
 		if (geni_spi_handle_tx(mas))
-			writel(mas->tx_wm, se->base + SE_GENI_TX_WATERMARK_REG);
+			pete_writel("drivers/spi/spi-geni-qcom.c:909", mas->tx_wm, se->base + SE_GENI_TX_WATERMARK_REG);
 	}
 
 	spin_unlock_irq(&mas->lock);
@@ -944,7 +944,7 @@ static irqreturn_t geni_spi_isr(int irq, void *data)
 	struct geni_se *se = &mas->se;
 	u32 m_irq;
 
-	m_irq = readl(se->base + SE_GENI_M_IRQ_STATUS);
+	m_irq = pete_readl("drivers/spi/spi-geni-qcom.c:947", se->base + SE_GENI_M_IRQ_STATUS);
 	if (!m_irq)
 		return IRQ_NONE;
 
@@ -980,7 +980,7 @@ static irqreturn_t geni_spi_isr(int irq, void *data)
 				 * weren't written correctly.
 				 */
 				if (mas->tx_rem_bytes) {
-					writel(0, se->base + SE_GENI_TX_WATERMARK_REG);
+					pete_writel("drivers/spi/spi-geni-qcom.c:983", 0, se->base + SE_GENI_TX_WATERMARK_REG);
 					dev_err(mas->dev, "Premature done. tx_rem = %d bpw%d\n",
 						mas->tx_rem_bytes, mas->cur_bits_per_word);
 				}
@@ -997,9 +997,9 @@ static irqreturn_t geni_spi_isr(int irq, void *data)
 		u32 dma_rx_status = readl_relaxed(se->base + SE_DMA_RX_IRQ_STAT);
 
 		if (dma_tx_status)
-			writel(dma_tx_status, se->base + SE_DMA_TX_IRQ_CLR);
+			pete_writel("drivers/spi/spi-geni-qcom.c:1000", dma_tx_status, se->base + SE_DMA_TX_IRQ_CLR);
 		if (dma_rx_status)
-			writel(dma_rx_status, se->base + SE_DMA_RX_IRQ_CLR);
+			pete_writel("drivers/spi/spi-geni-qcom.c:1002", dma_rx_status, se->base + SE_DMA_RX_IRQ_CLR);
 		if (dma_tx_status & TX_DMA_DONE)
 			mas->tx_rem_bytes = 0;
 		if (dma_rx_status & RX_DMA_DONE)
@@ -1032,7 +1032,7 @@ static irqreturn_t geni_spi_isr(int irq, void *data)
 	 *   _after_ you've handled the condition and always safe to do so
 	 *   since they'll re-assert if they're still happening.
 	 */
-	writel(m_irq, se->base + SE_GENI_M_IRQ_CLEAR);
+	pete_writel("drivers/spi/spi-geni-qcom.c:1035", m_irq, se->base + SE_GENI_M_IRQ_CLEAR);
 
 	spin_unlock(&mas->lock);
 

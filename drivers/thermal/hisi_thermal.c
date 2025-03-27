@@ -160,44 +160,44 @@ static inline int hi3660_thermal_temp_to_step(int temp)
  */
 static inline void hi6220_thermal_set_lag(void __iomem *addr, int value)
 {
-	writel(DIV_ROUND_UP(value, HI6220_TEMP_STEP) & 0x1F,
+	pete_writel("drivers/thermal/hisi_thermal.c:163", DIV_ROUND_UP(value, HI6220_TEMP_STEP) & 0x1F,
 			addr + HI6220_TEMP0_LAG);
 }
 
 static inline void hi6220_thermal_alarm_clear(void __iomem *addr, int value)
 {
-	writel(value, addr + HI6220_TEMP0_INT_CLR);
+	pete_writel("drivers/thermal/hisi_thermal.c:169", value, addr + HI6220_TEMP0_INT_CLR);
 }
 
 static inline void hi6220_thermal_alarm_enable(void __iomem *addr, int value)
 {
-	writel(value, addr + HI6220_TEMP0_INT_EN);
+	pete_writel("drivers/thermal/hisi_thermal.c:174", value, addr + HI6220_TEMP0_INT_EN);
 }
 
 static inline void hi6220_thermal_alarm_set(void __iomem *addr, int temp)
 {
-	writel(hi6220_thermal_temp_to_step(temp) | 0x0FFFFFF00,
+	pete_writel("drivers/thermal/hisi_thermal.c:179", hi6220_thermal_temp_to_step(temp) | 0x0FFFFFF00,
 	       addr + HI6220_TEMP0_TH);
 }
 
 static inline void hi6220_thermal_reset_set(void __iomem *addr, int temp)
 {
-	writel(hi6220_thermal_temp_to_step(temp), addr + HI6220_TEMP0_RST_TH);
+	pete_writel("drivers/thermal/hisi_thermal.c:185", hi6220_thermal_temp_to_step(temp), addr + HI6220_TEMP0_RST_TH);
 }
 
 static inline void hi6220_thermal_reset_enable(void __iomem *addr, int value)
 {
-	writel(value, addr + HI6220_TEMP0_RST_MSK);
+	pete_writel("drivers/thermal/hisi_thermal.c:190", value, addr + HI6220_TEMP0_RST_MSK);
 }
 
 static inline void hi6220_thermal_enable(void __iomem *addr, int value)
 {
-	writel(value, addr + HI6220_TEMP0_EN);
+	pete_writel("drivers/thermal/hisi_thermal.c:195", value, addr + HI6220_TEMP0_EN);
 }
 
 static inline int hi6220_thermal_get_temperature(void __iomem *addr)
 {
-	return hi6220_thermal_step_to_temp(readl(addr + HI6220_TEMP0_VALUE));
+	return hi6220_thermal_step_to_temp(pete_readl("drivers/thermal/hisi_thermal.c:200", addr + HI6220_TEMP0_VALUE));
 }
 
 /*
@@ -212,31 +212,31 @@ static inline int hi6220_thermal_get_temperature(void __iomem *addr)
 static inline void hi3660_thermal_set_lag(void __iomem *addr,
 					  int id, int value)
 {
-	writel(DIV_ROUND_UP(value, HI3660_TEMP_STEP) & 0x7F,
+	pete_writel("drivers/thermal/hisi_thermal.c:215", DIV_ROUND_UP(value, HI3660_TEMP_STEP) & 0x7F,
 			addr + HI3660_LAG(id));
 }
 
 static inline void hi3660_thermal_alarm_clear(void __iomem *addr,
 					      int id, int value)
 {
-	writel(value, addr + HI3660_INT_CLR(id));
+	pete_writel("drivers/thermal/hisi_thermal.c:222", value, addr + HI3660_INT_CLR(id));
 }
 
 static inline void hi3660_thermal_alarm_enable(void __iomem *addr,
 					       int id, int value)
 {
-	writel(value, addr + HI3660_INT_EN(id));
+	pete_writel("drivers/thermal/hisi_thermal.c:228", value, addr + HI3660_INT_EN(id));
 }
 
 static inline void hi3660_thermal_alarm_set(void __iomem *addr,
 					    int id, int value)
 {
-	writel(value, addr + HI3660_TH(id));
+	pete_writel("drivers/thermal/hisi_thermal.c:234", value, addr + HI3660_TH(id));
 }
 
 static inline int hi3660_thermal_get_temperature(void __iomem *addr, int id)
 {
-	return hi3660_thermal_step_to_temp(readl(addr + HI3660_TEMP(id)));
+	return hi3660_thermal_step_to_temp(pete_readl("drivers/thermal/hisi_thermal.c:239", addr + HI3660_TEMP(id)));
 }
 
 /*
@@ -251,7 +251,7 @@ static inline int hi3660_thermal_get_temperature(void __iomem *addr, int id)
  */
 static inline void hi6220_thermal_sensor_select(void __iomem *addr, int sensor)
 {
-	writel((readl(addr + HI6220_TEMP0_CFG) & ~HI6220_TEMP0_CFG_SS_MSK) |
+	pete_writel("drivers/thermal/hisi_thermal.c:254", (pete_readl("drivers/thermal/hisi_thermal.c:254", addr + HI6220_TEMP0_CFG) & ~HI6220_TEMP0_CFG_SS_MSK) |
 	       (sensor << 12), addr + HI6220_TEMP0_CFG);
 }
 
@@ -267,7 +267,7 @@ static inline void hi6220_thermal_sensor_select(void __iomem *addr, int sensor)
  */
 static inline void hi6220_thermal_hdak_set(void __iomem *addr, int value)
 {
-	writel((readl(addr + HI6220_TEMP0_CFG) & ~HI6220_TEMP0_CFG_HDAK_MSK) |
+	pete_writel("drivers/thermal/hisi_thermal.c:270", (pete_readl("drivers/thermal/hisi_thermal.c:270", addr + HI6220_TEMP0_CFG) & ~HI6220_TEMP0_CFG_HDAK_MSK) |
 	       (value << 4), addr + HI6220_TEMP0_CFG);
 }
 

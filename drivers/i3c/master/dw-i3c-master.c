@@ -294,13 +294,13 @@ to_dw_i3c_master(struct i3c_master_controller *master)
 
 static void dw_i3c_master_disable(struct dw_i3c_master *master)
 {
-	writel(readl(master->regs + DEVICE_CTRL) & ~DEV_CTRL_ENABLE,
+	pete_writel("drivers/i3c/master/dw-i3c-master.c:297", pete_readl("drivers/i3c/master/dw-i3c-master.c:297", master->regs + DEVICE_CTRL) & ~DEV_CTRL_ENABLE,
 	       master->regs + DEVICE_CTRL);
 }
 
 static void dw_i3c_master_enable(struct dw_i3c_master *master)
 {
-	writel(readl(master->regs + DEVICE_CTRL) | DEV_CTRL_ENABLE,
+	pete_writel("drivers/i3c/master/dw-i3c-master.c:303", pete_readl("drivers/i3c/master/dw-i3c-master.c:303", master->regs + DEVICE_CTRL) | DEV_CTRL_ENABLE,
 	       master->regs + DEVICE_CTRL);
 }
 
@@ -396,16 +396,16 @@ static void dw_i3c_master_start_xfer_locked(struct dw_i3c_master *master)
 		dw_i3c_master_wr_tx_fifo(master, cmd->tx_buf, cmd->tx_len);
 	}
 
-	thld_ctrl = readl(master->regs + QUEUE_THLD_CTRL);
+	thld_ctrl = pete_readl("drivers/i3c/master/dw-i3c-master.c:399", master->regs + QUEUE_THLD_CTRL);
 	thld_ctrl &= ~QUEUE_THLD_CTRL_RESP_BUF_MASK;
 	thld_ctrl |= QUEUE_THLD_CTRL_RESP_BUF(xfer->ncmds);
-	writel(thld_ctrl, master->regs + QUEUE_THLD_CTRL);
+	pete_writel("drivers/i3c/master/dw-i3c-master.c:402", thld_ctrl, master->regs + QUEUE_THLD_CTRL);
 
 	for (i = 0; i < xfer->ncmds; i++) {
 		struct dw_i3c_cmd *cmd = &xfer->cmds[i];
 
-		writel(cmd->cmd_hi, master->regs + COMMAND_QUEUE_PORT);
-		writel(cmd->cmd_lo, master->regs + COMMAND_QUEUE_PORT);
+		pete_writel("drivers/i3c/master/dw-i3c-master.c:407", cmd->cmd_hi, master->regs + COMMAND_QUEUE_PORT);
+		pete_writel("drivers/i3c/master/dw-i3c-master.c:408", cmd->cmd_lo, master->regs + COMMAND_QUEUE_PORT);
 	}
 }
 
@@ -433,7 +433,7 @@ static void dw_i3c_master_dequeue_xfer_locked(struct dw_i3c_master *master,
 
 		master->xferqueue.cur = NULL;
 
-		writel(RESET_CTRL_RX_FIFO | RESET_CTRL_TX_FIFO |
+		pete_writel("drivers/i3c/master/dw-i3c-master.c:436", RESET_CTRL_RX_FIFO | RESET_CTRL_TX_FIFO |
 		       RESET_CTRL_RESP_QUEUE | RESET_CTRL_CMD_QUEUE,
 		       master->regs + RESET_CTRL);
 
@@ -463,14 +463,14 @@ static void dw_i3c_master_end_xfer_locked(struct dw_i3c_master *master, u32 isr)
 	if (!xfer)
 		return;
 
-	nresp = readl(master->regs + QUEUE_STATUS_LEVEL);
+	nresp = pete_readl("drivers/i3c/master/dw-i3c-master.c:466", master->regs + QUEUE_STATUS_LEVEL);
 	nresp = QUEUE_STATUS_LEVEL_RESP(nresp);
 
 	for (i = 0; i < nresp; i++) {
 		struct dw_i3c_cmd *cmd;
 		u32 resp;
 
-		resp = readl(master->regs + RESPONSE_QUEUE_PORT);
+		resp = pete_readl("drivers/i3c/master/dw-i3c-master.c:473", master->regs + RESPONSE_QUEUE_PORT);
 
 		cmd = &xfer->cmds[RESPONSE_PORT_TID(resp)];
 		cmd->rx_len = RESPONSE_PORT_DATA_LEN(resp);
@@ -507,7 +507,7 @@ static void dw_i3c_master_end_xfer_locked(struct dw_i3c_master *master, u32 isr)
 
 	if (ret < 0) {
 		dw_i3c_master_dequeue_xfer_locked(master, xfer);
-		writel(readl(master->regs + DEVICE_CTRL) | DEV_CTRL_RESUME,
+		pete_writel("drivers/i3c/master/dw-i3c-master.c:510", pete_readl("drivers/i3c/master/dw-i3c-master.c:510", master->regs + DEVICE_CTRL) | DEV_CTRL_RESUME,
 		       master->regs + DEVICE_CTRL);
 	}
 
@@ -542,19 +542,19 @@ static int dw_i3c_clk_cfg(struct dw_i3c_master *master)
 		lcnt = SCL_I3C_TIMING_CNT_MIN;
 
 	scl_timing = SCL_I3C_TIMING_HCNT(hcnt) | SCL_I3C_TIMING_LCNT(lcnt);
-	writel(scl_timing, master->regs + SCL_I3C_PP_TIMING);
+	pete_writel("drivers/i3c/master/dw-i3c-master.c:545", scl_timing, master->regs + SCL_I3C_PP_TIMING);
 
 	/*
 	 * In pure i3c mode, MST_FREE represents tCAS. In shared mode, this
 	 * will be set up by dw_i2c_clk_cfg as tLOW.
 	 */
 	if (master->base.bus.mode == I3C_BUS_MODE_PURE)
-		writel(BUS_I3C_MST_FREE(lcnt), master->regs + BUS_FREE_TIMING);
+		pete_writel("drivers/i3c/master/dw-i3c-master.c:552", BUS_I3C_MST_FREE(lcnt), master->regs + BUS_FREE_TIMING);
 
 	lcnt = max_t(u8,
 		     DIV_ROUND_UP(I3C_BUS_TLOW_OD_MIN_NS, core_period), lcnt);
 	scl_timing = SCL_I3C_TIMING_HCNT(hcnt) | SCL_I3C_TIMING_LCNT(lcnt);
-	writel(scl_timing, master->regs + SCL_I3C_OD_TIMING);
+	pete_writel("drivers/i3c/master/dw-i3c-master.c:557", scl_timing, master->regs + SCL_I3C_OD_TIMING);
 
 	lcnt = DIV_ROUND_UP(core_rate, I3C_BUS_SDR1_SCL_RATE) - hcnt;
 	scl_timing = SCL_EXT_LCNT_1(lcnt);
@@ -564,7 +564,7 @@ static int dw_i3c_clk_cfg(struct dw_i3c_master *master)
 	scl_timing |= SCL_EXT_LCNT_3(lcnt);
 	lcnt = DIV_ROUND_UP(core_rate, I3C_BUS_SDR4_SCL_RATE) - hcnt;
 	scl_timing |= SCL_EXT_LCNT_4(lcnt);
-	writel(scl_timing, master->regs + SCL_EXT_LCNT_TIMING);
+	pete_writel("drivers/i3c/master/dw-i3c-master.c:567", scl_timing, master->regs + SCL_EXT_LCNT_TIMING);
 
 	return 0;
 }
@@ -585,16 +585,16 @@ static int dw_i2c_clk_cfg(struct dw_i3c_master *master)
 	hcnt = DIV_ROUND_UP(core_rate, I3C_BUS_I2C_FM_PLUS_SCL_RATE) - lcnt;
 	scl_timing = SCL_I2C_FMP_TIMING_HCNT(hcnt) |
 		     SCL_I2C_FMP_TIMING_LCNT(lcnt);
-	writel(scl_timing, master->regs + SCL_I2C_FMP_TIMING);
+	pete_writel("drivers/i3c/master/dw-i3c-master.c:588", scl_timing, master->regs + SCL_I2C_FMP_TIMING);
 
 	lcnt = DIV_ROUND_UP(I3C_BUS_I2C_FM_TLOW_MIN_NS, core_period);
 	hcnt = DIV_ROUND_UP(core_rate, I3C_BUS_I2C_FM_SCL_RATE) - lcnt;
 	scl_timing = SCL_I2C_FM_TIMING_HCNT(hcnt) |
 		     SCL_I2C_FM_TIMING_LCNT(lcnt);
-	writel(scl_timing, master->regs + SCL_I2C_FM_TIMING);
+	pete_writel("drivers/i3c/master/dw-i3c-master.c:594", scl_timing, master->regs + SCL_I2C_FM_TIMING);
 
-	writel(BUS_I3C_MST_FREE(lcnt), master->regs + BUS_FREE_TIMING);
-	writel(readl(master->regs + DEVICE_CTRL) | DEV_CTRL_I2C_SLAVE_PRESENT,
+	pete_writel("drivers/i3c/master/dw-i3c-master.c:596", BUS_I3C_MST_FREE(lcnt), master->regs + BUS_FREE_TIMING);
+	pete_writel("drivers/i3c/master/dw-i3c-master.c:597", pete_readl("drivers/i3c/master/dw-i3c-master.c:597", master->regs + DEVICE_CTRL) | DEV_CTRL_I2C_SLAVE_PRESENT,
 	       master->regs + DEVICE_CTRL);
 
 	return 0;
@@ -628,27 +628,27 @@ static int dw_i3c_master_bus_init(struct i3c_master_controller *m)
 		return -EINVAL;
 	}
 
-	thld_ctrl = readl(master->regs + QUEUE_THLD_CTRL);
+	thld_ctrl = pete_readl("drivers/i3c/master/dw-i3c-master.c:631", master->regs + QUEUE_THLD_CTRL);
 	thld_ctrl &= ~(QUEUE_THLD_CTRL_RESP_BUF_MASK |
 		       QUEUE_THLD_CTRL_IBI_STAT_MASK |
 		       QUEUE_THLD_CTRL_IBI_STAT_MASK);
 	thld_ctrl |= QUEUE_THLD_CTRL_IBI_STAT(1) |
 		QUEUE_THLD_CTRL_IBI_DATA(31);
-	writel(thld_ctrl, master->regs + QUEUE_THLD_CTRL);
+	pete_writel("drivers/i3c/master/dw-i3c-master.c:637", thld_ctrl, master->regs + QUEUE_THLD_CTRL);
 
-	thld_ctrl = readl(master->regs + DATA_BUFFER_THLD_CTRL);
+	thld_ctrl = pete_readl("drivers/i3c/master/dw-i3c-master.c:639", master->regs + DATA_BUFFER_THLD_CTRL);
 	thld_ctrl &= ~DATA_BUFFER_THLD_CTRL_RX_BUF;
-	writel(thld_ctrl, master->regs + DATA_BUFFER_THLD_CTRL);
+	pete_writel("drivers/i3c/master/dw-i3c-master.c:641", thld_ctrl, master->regs + DATA_BUFFER_THLD_CTRL);
 
-	writel(INTR_ALL, master->regs + INTR_STATUS);
-	writel(INTR_MASTER_MASK, master->regs + INTR_STATUS_EN);
-	writel(INTR_MASTER_MASK, master->regs + INTR_SIGNAL_EN);
+	pete_writel("drivers/i3c/master/dw-i3c-master.c:643", INTR_ALL, master->regs + INTR_STATUS);
+	pete_writel("drivers/i3c/master/dw-i3c-master.c:644", INTR_MASTER_MASK, master->regs + INTR_STATUS_EN);
+	pete_writel("drivers/i3c/master/dw-i3c-master.c:645", INTR_MASTER_MASK, master->regs + INTR_SIGNAL_EN);
 
 	ret = i3c_master_get_free_addr(m, 0);
 	if (ret < 0)
 		return ret;
 
-	writel(DEV_ADDR_DYNAMIC_ADDR_VALID | DEV_ADDR_DYNAMIC(ret),
+	pete_writel("drivers/i3c/master/dw-i3c-master.c:651", DEV_ADDR_DYNAMIC_ADDR_VALID | DEV_ADDR_DYNAMIC(ret),
 	       master->regs + DEVICE_ADDR);
 
 	memset(&info, 0, sizeof(info));
@@ -658,11 +658,11 @@ static int dw_i3c_master_bus_init(struct i3c_master_controller *m)
 	if (ret)
 		return ret;
 
-	writel(IBI_REQ_REJECT_ALL, master->regs + IBI_SIR_REQ_REJECT);
-	writel(IBI_REQ_REJECT_ALL, master->regs + IBI_MR_REQ_REJECT);
+	pete_writel("drivers/i3c/master/dw-i3c-master.c:661", IBI_REQ_REJECT_ALL, master->regs + IBI_SIR_REQ_REJECT);
+	pete_writel("drivers/i3c/master/dw-i3c-master.c:662", IBI_REQ_REJECT_ALL, master->regs + IBI_MR_REQ_REJECT);
 
 	/* For now don't support Hot-Join */
-	writel(readl(master->regs + DEVICE_CTRL) | DEV_CTRL_HOT_JOIN_NACK,
+	pete_writel("drivers/i3c/master/dw-i3c-master.c:665", pete_readl("drivers/i3c/master/dw-i3c-master.c:665", master->regs + DEVICE_CTRL) | DEV_CTRL_HOT_JOIN_NACK,
 	       master->regs + DEVICE_CTRL);
 
 	dw_i3c_master_enable(master);
@@ -802,7 +802,7 @@ static int dw_i3c_master_daa(struct i3c_master_controller *m)
 		last_addr = ret;
 		ret |= (p << 7);
 
-		writel(DEV_ADDR_TABLE_DYNAMIC_ADDR(ret),
+		pete_writel("drivers/i3c/master/dw-i3c-master.c:805", DEV_ADDR_TABLE_DYNAMIC_ADDR(ret),
 		       master->regs +
 		       DEV_ADDR_TABLE_LOC(master->datstartaddr, pos));
 	}
@@ -929,7 +929,7 @@ static int dw_i3c_master_reattach_i3c_dev(struct i3c_dev_desc *dev,
 	pos = dw_i3c_master_get_free_pos(master);
 
 	if (data->index > pos && pos > 0) {
-		writel(0,
+		pete_writel("drivers/i3c/master/dw-i3c-master.c:932", 0,
 		       master->regs +
 		       DEV_ADDR_TABLE_LOC(master->datstartaddr, data->index));
 
@@ -941,7 +941,7 @@ static int dw_i3c_master_reattach_i3c_dev(struct i3c_dev_desc *dev,
 		master->free_pos &= ~BIT(pos);
 	}
 
-	writel(DEV_ADDR_TABLE_DYNAMIC_ADDR(dev->info.dyn_addr),
+	pete_writel("drivers/i3c/master/dw-i3c-master.c:944", DEV_ADDR_TABLE_DYNAMIC_ADDR(dev->info.dyn_addr),
 	       master->regs +
 	       DEV_ADDR_TABLE_LOC(master->datstartaddr, data->index));
 
@@ -970,7 +970,7 @@ static int dw_i3c_master_attach_i3c_dev(struct i3c_dev_desc *dev)
 	master->free_pos &= ~BIT(pos);
 	i3c_dev_set_master_data(dev, data);
 
-	writel(DEV_ADDR_TABLE_DYNAMIC_ADDR(master->devs[pos].addr),
+	pete_writel("drivers/i3c/master/dw-i3c-master.c:973", DEV_ADDR_TABLE_DYNAMIC_ADDR(master->devs[pos].addr),
 	       master->regs +
 	       DEV_ADDR_TABLE_LOC(master->datstartaddr, data->index));
 
@@ -983,7 +983,7 @@ static void dw_i3c_master_detach_i3c_dev(struct i3c_dev_desc *dev)
 	struct i3c_master_controller *m = i3c_dev_get_master(dev);
 	struct dw_i3c_master *master = to_dw_i3c_master(m);
 
-	writel(0,
+	pete_writel("drivers/i3c/master/dw-i3c-master.c:986", 0,
 	       master->regs +
 	       DEV_ADDR_TABLE_LOC(master->datstartaddr, data->index));
 
@@ -1078,7 +1078,7 @@ static int dw_i3c_master_attach_i2c_dev(struct i2c_dev_desc *dev)
 	master->free_pos &= ~BIT(pos);
 	i2c_dev_set_master_data(dev, data);
 
-	writel(DEV_ADDR_TABLE_LEGACY_I2C_DEV |
+	pete_writel("drivers/i3c/master/dw-i3c-master.c:1081", DEV_ADDR_TABLE_LEGACY_I2C_DEV |
 	       DEV_ADDR_TABLE_STATIC_ADDR(dev->addr),
 	       master->regs +
 	       DEV_ADDR_TABLE_LOC(master->datstartaddr, data->index));
@@ -1092,7 +1092,7 @@ static void dw_i3c_master_detach_i2c_dev(struct i2c_dev_desc *dev)
 	struct i3c_master_controller *m = i2c_dev_get_master(dev);
 	struct dw_i3c_master *master = to_dw_i3c_master(m);
 
-	writel(0,
+	pete_writel("drivers/i3c/master/dw-i3c-master.c:1095", 0,
 	       master->regs +
 	       DEV_ADDR_TABLE_LOC(master->datstartaddr, data->index));
 
@@ -1140,17 +1140,17 @@ static void dw_i3c_master_enable_sir_signal(struct dw_i3c_master *master, bool e
 {
 	u32 reg;
 
-	reg = readl(master->regs + INTR_STATUS_EN);
+	reg = pete_readl("drivers/i3c/master/dw-i3c-master.c:1143", master->regs + INTR_STATUS_EN);
 	reg &= ~INTR_IBI_THLD_STAT;
 	if (enable)
 		reg |= INTR_IBI_THLD_STAT;
-	writel(reg, master->regs + INTR_STATUS_EN);
+	pete_writel("drivers/i3c/master/dw-i3c-master.c:1147", reg, master->regs + INTR_STATUS_EN);
 
-	reg = readl(master->regs + INTR_SIGNAL_EN);
+	reg = pete_readl("drivers/i3c/master/dw-i3c-master.c:1149", master->regs + INTR_SIGNAL_EN);
 	reg &= ~INTR_IBI_THLD_STAT;
 	if (enable)
 		reg |= INTR_IBI_THLD_STAT;
-	writel(reg, master->regs + INTR_SIGNAL_EN);
+	pete_writel("drivers/i3c/master/dw-i3c-master.c:1153", reg, master->regs + INTR_SIGNAL_EN);
 }
 
 static void dw_i3c_master_set_sir_enabled(struct dw_i3c_master *master,
@@ -1164,7 +1164,7 @@ static void dw_i3c_master_set_sir_enabled(struct dw_i3c_master *master,
 	dat_entry = DEV_ADDR_TABLE_LOC(master->datstartaddr, idx);
 
 	spin_lock_irqsave(&master->devs_lock, flags);
-	reg = readl(master->regs + dat_entry);
+	reg = pete_readl("drivers/i3c/master/dw-i3c-master.c:1167", master->regs + dat_entry);
 	if (enable) {
 		reg &= ~DEV_ADDR_TABLE_SIR_REJECT;
 		if (dev->info.bcr & I3C_BCR_IBI_PAYLOAD)
@@ -1173,19 +1173,19 @@ static void dw_i3c_master_set_sir_enabled(struct dw_i3c_master *master,
 		reg |= DEV_ADDR_TABLE_SIR_REJECT;
 	}
 	master->platform_ops->set_dat_ibi(master, dev, enable, &reg);
-	writel(reg, master->regs + dat_entry);
+	pete_writel("drivers/i3c/master/dw-i3c-master.c:1176", reg, master->regs + dat_entry);
 
-	reg = readl(master->regs + IBI_SIR_REQ_REJECT);
+	reg = pete_readl("drivers/i3c/master/dw-i3c-master.c:1178", master->regs + IBI_SIR_REQ_REJECT);
 	if (enable) {
 		global = reg == 0xffffffff;
 		reg &= ~BIT(idx);
 	} else {
-		bool hj_rejected = !!(readl(master->regs + DEVICE_CTRL) & DEV_CTRL_HOT_JOIN_NACK);
+		bool hj_rejected = !!(pete_readl("drivers/i3c/master/dw-i3c-master.c:1183", master->regs + DEVICE_CTRL) & DEV_CTRL_HOT_JOIN_NACK);
 
 		reg |= BIT(idx);
 		global = (reg == 0xffffffff) && hj_rejected;
 	}
-	writel(reg, master->regs + IBI_SIR_REQ_REJECT);
+	pete_writel("drivers/i3c/master/dw-i3c-master.c:1188", reg, master->regs + IBI_SIR_REQ_REJECT);
 
 	if (global)
 		dw_i3c_master_enable_sir_signal(master, enable);
@@ -1199,7 +1199,7 @@ static int dw_i3c_master_enable_hotjoin(struct i3c_master_controller *m)
 	struct dw_i3c_master *master = to_dw_i3c_master(m);
 
 	dw_i3c_master_enable_sir_signal(master, true);
-	writel(readl(master->regs + DEVICE_CTRL) & ~DEV_CTRL_HOT_JOIN_NACK,
+	pete_writel("drivers/i3c/master/dw-i3c-master.c:1202", pete_readl("drivers/i3c/master/dw-i3c-master.c:1202", master->regs + DEVICE_CTRL) & ~DEV_CTRL_HOT_JOIN_NACK,
 	       master->regs + DEVICE_CTRL);
 
 	return 0;
@@ -1209,7 +1209,7 @@ static int dw_i3c_master_disable_hotjoin(struct i3c_master_controller *m)
 {
 	struct dw_i3c_master *master = to_dw_i3c_master(m);
 
-	writel(readl(master->regs + DEVICE_CTRL) | DEV_CTRL_HOT_JOIN_NACK,
+	pete_writel("drivers/i3c/master/dw-i3c-master.c:1212", pete_readl("drivers/i3c/master/dw-i3c-master.c:1212", master->regs + DEVICE_CTRL) | DEV_CTRL_HOT_JOIN_NACK,
 	       master->regs + DEVICE_CTRL);
 
 	return 0;
@@ -1262,7 +1262,7 @@ static void dw_i3c_master_drain_ibi_queue(struct dw_i3c_master *master,
 	int i;
 
 	for (i = 0; i < DIV_ROUND_UP(len, 4); i++)
-		readl(master->regs + IBI_QUEUE_STATUS);
+		pete_readl("drivers/i3c/master/dw-i3c-master.c:1265", master->regs + IBI_QUEUE_STATUS);
 }
 
 static void dw_i3c_master_handle_ibi_sir(struct dw_i3c_master *master,
@@ -1344,13 +1344,13 @@ static void dw_i3c_master_irq_handle_ibis(struct dw_i3c_master *master)
 	unsigned int i, len, n_ibis;
 	u32 reg;
 
-	reg = readl(master->regs + QUEUE_STATUS_LEVEL);
+	reg = pete_readl("drivers/i3c/master/dw-i3c-master.c:1347", master->regs + QUEUE_STATUS_LEVEL);
 	n_ibis = QUEUE_STATUS_IBI_STATUS_CNT(reg);
 	if (!n_ibis)
 		return;
 
 	for (i = 0; i < n_ibis; i++) {
-		reg = readl(master->regs + IBI_QUEUE_STATUS);
+		reg = pete_readl("drivers/i3c/master/dw-i3c-master.c:1353", master->regs + IBI_QUEUE_STATUS);
 
 		if (IBI_TYPE_SIRQ(reg)) {
 			dw_i3c_master_handle_ibi_sir(master, reg);
@@ -1371,17 +1371,17 @@ static irqreturn_t dw_i3c_master_irq_handler(int irq, void *dev_id)
 	struct dw_i3c_master *master = dev_id;
 	u32 status;
 
-	status = readl(master->regs + INTR_STATUS);
+	status = pete_readl("drivers/i3c/master/dw-i3c-master.c:1374", master->regs + INTR_STATUS);
 
-	if (!(status & readl(master->regs + INTR_STATUS_EN))) {
-		writel(INTR_ALL, master->regs + INTR_STATUS);
+	if (!(status & pete_readl("drivers/i3c/master/dw-i3c-master.c:1376", master->regs + INTR_STATUS_EN))) {
+		pete_writel("drivers/i3c/master/dw-i3c-master.c:1377", INTR_ALL, master->regs + INTR_STATUS);
 		return IRQ_NONE;
 	}
 
 	spin_lock(&master->xferqueue.lock);
 	dw_i3c_master_end_xfer_locked(master, status);
 	if (status & INTR_TRANSFER_ERR_STAT)
-		writel(INTR_TRANSFER_ERR_STAT, master->regs + INTR_STATUS);
+		pete_writel("drivers/i3c/master/dw-i3c-master.c:1384", INTR_TRANSFER_ERR_STAT, master->regs + INTR_STATUS);
 	spin_unlock(&master->xferqueue.lock);
 
 	if (status & INTR_IBI_THLD_STAT)
@@ -1483,7 +1483,7 @@ int dw_i3c_common_probe(struct dw_i3c_master *master,
 	spin_lock_init(&master->xferqueue.lock);
 	INIT_LIST_HEAD(&master->xferqueue.list);
 
-	writel(INTR_ALL, master->regs + INTR_STATUS);
+	pete_writel("drivers/i3c/master/dw-i3c-master.c:1486", INTR_ALL, master->regs + INTR_STATUS);
 	irq = platform_get_irq(pdev, 0);
 	ret = devm_request_irq(&pdev->dev, irq,
 			       dw_i3c_master_irq_handler, 0,
@@ -1494,13 +1494,13 @@ int dw_i3c_common_probe(struct dw_i3c_master *master,
 	platform_set_drvdata(pdev, master);
 
 	/* Information regarding the FIFOs/QUEUEs depth */
-	ret = readl(master->regs + QUEUE_STATUS_LEVEL);
+	ret = pete_readl("drivers/i3c/master/dw-i3c-master.c:1497", master->regs + QUEUE_STATUS_LEVEL);
 	master->caps.cmdfifodepth = QUEUE_STATUS_LEVEL_CMD(ret);
 
-	ret = readl(master->regs + DATA_BUFFER_STATUS_LEVEL);
+	ret = pete_readl("drivers/i3c/master/dw-i3c-master.c:1500", master->regs + DATA_BUFFER_STATUS_LEVEL);
 	master->caps.datafifodepth = DATA_BUFFER_STATUS_LEVEL_TX(ret);
 
-	ret = readl(master->regs + DEVICE_ADDR_TABLE_POINTER);
+	ret = pete_readl("drivers/i3c/master/dw-i3c-master.c:1503", master->regs + DEVICE_ADDR_TABLE_POINTER);
 	master->datstartaddr = ret;
 	master->maxdevs = ret >> 16;
 	master->free_pos = GENMASK(master->maxdevs - 1, 0);

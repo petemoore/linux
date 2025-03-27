@@ -21,19 +21,19 @@
 static void rzv2m_usb3drd_set_bit(struct rzv2m_usb3drd *usb3, u32 bits,
 				  u32 offs)
 {
-	u32 val = readl(usb3->reg + offs);
+	u32 val = pete_readl("drivers/usb/gadget/udc/rzv2m_usb3drd.c:24", usb3->reg + offs);
 
 	val |= bits;
-	writel(val, usb3->reg + offs);
+	pete_writel("drivers/usb/gadget/udc/rzv2m_usb3drd.c:27", val, usb3->reg + offs);
 }
 
 static void rzv2m_usb3drd_clear_bit(struct rzv2m_usb3drd *usb3, u32 bits,
 				    u32 offs)
 {
-	u32 val = readl(usb3->reg + offs);
+	u32 val = pete_readl("drivers/usb/gadget/udc/rzv2m_usb3drd.c:33", usb3->reg + offs);
 
 	val &= ~bits;
-	writel(val, usb3->reg + offs);
+	pete_writel("drivers/usb/gadget/udc/rzv2m_usb3drd.c:36", val, usb3->reg + offs);
 }
 
 void rzv2m_usb3drd_reset(struct device *dev, bool host)

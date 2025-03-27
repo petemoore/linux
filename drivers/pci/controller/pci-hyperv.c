@@ -1158,19 +1158,19 @@ static void _hv_pcifront_read_config(struct hv_pci_dev *hpdev, int where,
 			void __iomem *addr = hbus->cfg_addr + offset;
 
 			/* Choose the function to be read. (See comment above) */
-			writel(hpdev->desc.win_slot.slot, hbus->cfg_addr);
+			pete_writel("drivers/pci/controller/pci-hyperv.c:1161", hpdev->desc.win_slot.slot, hbus->cfg_addr);
 			/* Make sure the function was chosen before reading. */
 			mb();
 			/* Read from that function's config space. */
 			switch (size) {
 			case 1:
-				*val = readb(addr);
+				*val = pete_readb("drivers/pci/controller/pci-hyperv.c:1167", addr);
 				break;
 			case 2:
-				*val = readw(addr);
+				*val = pete_readw("drivers/pci/controller/pci-hyperv.c:1170", addr);
 				break;
 			default:
-				*val = readl(addr);
+				*val = pete_readl("drivers/pci/controller/pci-hyperv.c:1173", addr);
 				break;
 			}
 			/*
@@ -1207,11 +1207,11 @@ static u16 hv_pcifront_get_vendor_id(struct hv_pci_dev *hpdev)
 		void __iomem *addr = hbus->cfg_addr + CFG_PAGE_OFFSET +
 					     PCI_VENDOR_ID;
 		/* Choose the function to be read. (See comment above) */
-		writel(hpdev->desc.win_slot.slot, hbus->cfg_addr);
+		pete_writel("drivers/pci/controller/pci-hyperv.c:1210", hpdev->desc.win_slot.slot, hbus->cfg_addr);
 		/* Make sure the function was chosen before we start reading. */
 		mb();
 		/* Read from that function's config space. */
-		ret = readw(addr);
+		ret = pete_readw("drivers/pci/controller/pci-hyperv.c:1214", addr);
 		/*
 		 * mb() is not required here, because the
 		 * spin_unlock_irqrestore() is a barrier.
@@ -1254,19 +1254,19 @@ static void _hv_pcifront_write_config(struct hv_pci_dev *hpdev, int where,
 			void __iomem *addr = hbus->cfg_addr + offset;
 
 			/* Choose the function to write. (See comment above) */
-			writel(hpdev->desc.win_slot.slot, hbus->cfg_addr);
+			pete_writel("drivers/pci/controller/pci-hyperv.c:1257", hpdev->desc.win_slot.slot, hbus->cfg_addr);
 			/* Make sure the function was chosen before writing. */
 			wmb();
 			/* Write to that function's config space. */
 			switch (size) {
 			case 1:
-				writeb(val, addr);
+				pete_writeb("drivers/pci/controller/pci-hyperv.c:1263", val, addr);
 				break;
 			case 2:
-				writew(val, addr);
+				pete_writew("drivers/pci/controller/pci-hyperv.c:1266", val, addr);
 				break;
 			default:
-				writel(val, addr);
+				pete_writel("drivers/pci/controller/pci-hyperv.c:1269", val, addr);
 				break;
 			}
 			/*

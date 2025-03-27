@@ -50,16 +50,16 @@ static void rp1_pwm_apply_config(struct pwm_chip *chip, struct pwm_device *pwm)
 	struct rp1_pwm *pc = to_rp1_pwm(chip);
 	u32 value;
 
-	value = readl(pc->base + PWM_GLOBAL_CTRL);
+	value = pete_readl("drivers/pwm/pwm-rp1.c:53", pc->base + PWM_GLOBAL_CTRL);
 	value |= SET_UPDATE;
-	writel(value, pc->base + PWM_GLOBAL_CTRL);
+	pete_writel("drivers/pwm/pwm-rp1.c:55", value, pc->base + PWM_GLOBAL_CTRL);
 }
 
 static int rp1_pwm_request(struct pwm_chip *chip, struct pwm_device *pwm)
 {
 	struct rp1_pwm *pc = to_rp1_pwm(chip);
 
-	writel(PWM_CHANNEL_DEFAULT, pc->base + PWM_CHANNEL_CTRL(pwm->hwpwm));
+	pete_writel("drivers/pwm/pwm-rp1.c:62", PWM_CHANNEL_DEFAULT, pc->base + PWM_CHANNEL_CTRL(pwm->hwpwm));
 	return 0;
 }
 
@@ -68,9 +68,9 @@ static void rp1_pwm_free(struct pwm_chip *chip, struct pwm_device *pwm)
 	struct rp1_pwm *pc = to_rp1_pwm(chip);
 	u32 value;
 
-	value = readl(pc->base + PWM_CHANNEL_CTRL(pwm->hwpwm));
+	value = pete_readl("drivers/pwm/pwm-rp1.c:71", pc->base + PWM_CHANNEL_CTRL(pwm->hwpwm));
 	value &= ~PWM_MODE_MASK;
-	writel(value, pc->base + PWM_CHANNEL_CTRL(pwm->hwpwm));
+	pete_writel("drivers/pwm/pwm-rp1.c:73", value, pc->base + PWM_CHANNEL_CTRL(pwm->hwpwm));
 	rp1_pwm_apply_config(chip, pwm);
 }
 
@@ -90,28 +90,28 @@ static int rp1_pwm_apply(struct pwm_chip *chip, struct pwm_device *pwm,
 	/* set period */
 	clk_period = DIV_ROUND_CLOSEST(NSEC_PER_SEC, clk_rate);
 
-	writel(DIV_ROUND_CLOSEST(state->duty_cycle, clk_period),
+	pete_writel("drivers/pwm/pwm-rp1.c:93", DIV_ROUND_CLOSEST(state->duty_cycle, clk_period),
 	       pc->base + PWM_DUTY(pwm->hwpwm));
 
 	/* set duty cycle */
-	writel(DIV_ROUND_CLOSEST(state->period, clk_period),
+	pete_writel("drivers/pwm/pwm-rp1.c:97", DIV_ROUND_CLOSEST(state->period, clk_period),
 	       pc->base + PWM_RANGE(pwm->hwpwm));
 
 	/* set polarity */
-	value = readl(pc->base + PWM_CHANNEL_CTRL(pwm->hwpwm));
+	value = pete_readl("drivers/pwm/pwm-rp1.c:101", pc->base + PWM_CHANNEL_CTRL(pwm->hwpwm));
 	if (state->polarity == PWM_POLARITY_NORMAL)
 		value &= ~PWM_POLARITY;
 	else
 		value |= PWM_POLARITY;
-	writel(value, pc->base + PWM_CHANNEL_CTRL(pwm->hwpwm));
+	pete_writel("drivers/pwm/pwm-rp1.c:106", value, pc->base + PWM_CHANNEL_CTRL(pwm->hwpwm));
 
 	/* enable/disable */
-	value = readl(pc->base + PWM_GLOBAL_CTRL);
+	value = pete_readl("drivers/pwm/pwm-rp1.c:109", pc->base + PWM_GLOBAL_CTRL);
 	if (state->enabled)
 		value |= PWM_CHANNEL_ENABLE(pwm->hwpwm);
 	else
 		value &= ~PWM_CHANNEL_ENABLE(pwm->hwpwm);
-	writel(value, pc->base + PWM_GLOBAL_CTRL);
+	pete_writel("drivers/pwm/pwm-rp1.c:114", value, pc->base + PWM_GLOBAL_CTRL);
 
 	rp1_pwm_apply_config(chip, pwm);
 

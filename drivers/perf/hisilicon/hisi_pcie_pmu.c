@@ -620,14 +620,14 @@ static void hisi_pcie_pmu_enable(struct pmu *pmu)
 	if (num == HISI_PCIE_MAX_COUNTERS)
 		return;
 
-	writel(HISI_PCIE_GLOBAL_EN, pcie_pmu->base + HISI_PCIE_GLOBAL_CTRL);
+	pete_writel("drivers/perf/hisilicon/hisi_pcie_pmu.c:623", HISI_PCIE_GLOBAL_EN, pcie_pmu->base + HISI_PCIE_GLOBAL_CTRL);
 }
 
 static void hisi_pcie_pmu_disable(struct pmu *pmu)
 {
 	struct hisi_pcie_pmu *pcie_pmu = to_pcie_pmu(pmu);
 
-	writel(HISI_PCIE_GLOBAL_NONE, pcie_pmu->base + HISI_PCIE_GLOBAL_CTRL);
+	pete_writel("drivers/perf/hisilicon/hisi_pcie_pmu.c:630", HISI_PCIE_GLOBAL_NONE, pcie_pmu->base + HISI_PCIE_GLOBAL_CTRL);
 }
 
 static irqreturn_t hisi_pcie_pmu_irq(int irq, void *data)
@@ -825,7 +825,7 @@ static int hisi_pcie_alloc_pmu(struct pci_dev *pdev, struct hisi_pcie_pmu *pcie_
 
 	pcie_pmu->pdev = pdev;
 	pcie_pmu->on_cpu = -1;
-	pcie_pmu->identifier = readl(pcie_pmu->base + HISI_PCIE_REG_VERSION);
+	pcie_pmu->identifier = pete_readl("drivers/perf/hisilicon/hisi_pcie_pmu.c:828", pcie_pmu->base + HISI_PCIE_REG_VERSION);
 	pcie_pmu->pmu = (struct pmu) {
 		.name		= name,
 		.module		= THIS_MODULE,

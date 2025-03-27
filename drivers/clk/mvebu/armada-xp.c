@@ -70,13 +70,13 @@ static u32 __init axp_get_cpu_freq(void __iomem *sar)
 	u32 cpu_freq;
 	u8 cpu_freq_select = 0;
 
-	cpu_freq_select = ((readl(sar + SARL) >> SARL_AXP_PCLK_FREQ_OPT) &
+	cpu_freq_select = ((pete_readl("drivers/clk/mvebu/armada-xp.c:73", sar + SARL) >> SARL_AXP_PCLK_FREQ_OPT) &
 			   SARL_AXP_PCLK_FREQ_OPT_MASK);
 	/*
 	 * The upper bit is not contiguous to the other ones and
 	 * located in the high part of the SAR registers
 	 */
-	cpu_freq_select |= (((readl(sar + SARH) >> SARH_AXP_PCLK_FREQ_OPT) &
+	cpu_freq_select |= (((pete_readl("drivers/clk/mvebu/armada-xp.c:79", sar + SARH) >> SARH_AXP_PCLK_FREQ_OPT) &
 	     SARH_AXP_PCLK_FREQ_OPT_MASK) << SARH_AXP_PCLK_FREQ_OPT_SHIFT);
 	if (cpu_freq_select >= ARRAY_SIZE(axp_cpu_freqs)) {
 		pr_err("CPU freq select unsupported: %d\n", cpu_freq_select);
@@ -123,13 +123,13 @@ static const int axp_dramclk_ratios[32][2] __initconst = {
 static void __init axp_get_clk_ratio(
 	void __iomem *sar, int id, int *mult, int *div)
 {
-	u32 opt = ((readl(sar + SARL) >> SARL_AXP_FAB_FREQ_OPT) &
+	u32 opt = ((pete_readl("drivers/clk/mvebu/armada-xp.c:126", sar + SARL) >> SARL_AXP_FAB_FREQ_OPT) &
 	      SARL_AXP_FAB_FREQ_OPT_MASK);
 	/*
 	 * The upper bit is not contiguous to the other ones and
 	 * located in the high part of the SAR registers
 	 */
-	opt |= (((readl(sar + SARH) >> SARH_AXP_FAB_FREQ_OPT) &
+	opt |= (((pete_readl("drivers/clk/mvebu/armada-xp.c:132", sar + SARH) >> SARH_AXP_FAB_FREQ_OPT) &
 		 SARH_AXP_FAB_FREQ_OPT_MASK) << SARH_AXP_FAB_FREQ_OPT_SHIFT);
 
 	switch (id) {

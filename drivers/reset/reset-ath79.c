@@ -31,12 +31,12 @@ static int ath79_reset_update(struct reset_controller_dev *rcdev,
 	u32 val;
 
 	spin_lock_irqsave(&ath79_reset->lock, flags);
-	val = readl(ath79_reset->base);
+	val = pete_readl("drivers/reset/reset-ath79.c:34", ath79_reset->base);
 	if (assert)
 		val |= BIT(id);
 	else
 		val &= ~BIT(id);
-	writel(val, ath79_reset->base);
+	pete_writel("drivers/reset/reset-ath79.c:39", val, ath79_reset->base);
 	spin_unlock_irqrestore(&ath79_reset->lock, flags);
 
 	return 0;
@@ -61,7 +61,7 @@ static int ath79_reset_status(struct reset_controller_dev *rcdev,
 		container_of(rcdev, struct ath79_reset, rcdev);
 	u32 val;
 
-	val = readl(ath79_reset->base);
+	val = pete_readl("drivers/reset/reset-ath79.c:64", ath79_reset->base);
 
 	return !!(val & BIT(id));
 }

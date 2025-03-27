@@ -59,7 +59,7 @@ static unsigned long clk_pllv1_recalc_rate(struct clk_hw *hw,
 	u32 reg;
 	unsigned long rate;
 
-	reg = readl(pll->base);
+	reg = pete_readl("drivers/clk/imx/clk-pllv1.c:62", pll->base);
 
 	/*
 	 * Get the resulting clock rate from a PLL register value and the input

@@ -198,7 +198,7 @@ EXPORT_SYMBOL_GPL(sdhci_pltfm_init_and_add_host);
 void sdhci_pltfm_remove(struct platform_device *pdev)
 {
 	struct sdhci_host *host = platform_get_drvdata(pdev);
-	int dead = (readl(host->ioaddr + SDHCI_INT_STATUS) == 0xffffffff);
+	int dead = (pete_readl("drivers/mmc/host/sdhci-pltfm.c:201", host->ioaddr + SDHCI_INT_STATUS) == 0xffffffff);
 
 	sdhci_remove_host(host, dead);
 	sdhci_pltfm_free(pdev);

@@ -241,26 +241,26 @@ static void sdhci_arasan_phy_set_delaychain(struct sdhci_host *host, bool enable
 {
 	u32 reg;
 
-	reg = readl(host->ioaddr + PHY_CTRL_REG2);
+	reg = pete_readl("drivers/mmc/host/sdhci-of-arasan.c:244", host->ioaddr + PHY_CTRL_REG2);
 	if (enable)
 		reg |= (PHY_CTRL_SEL_DLY_TX_MASK | PHY_CTRL_SEL_DLY_RX_MASK);
 	else
 		reg &= ~(PHY_CTRL_SEL_DLY_TX_MASK | PHY_CTRL_SEL_DLY_RX_MASK);
 
-	writel(reg, host->ioaddr + PHY_CTRL_REG2);
+	pete_writel("drivers/mmc/host/sdhci-of-arasan.c:250", reg, host->ioaddr + PHY_CTRL_REG2);
 }
 
 static int sdhci_arasan_phy_set_dll(struct sdhci_host *host, bool enable)
 {
 	u32 reg;
 
-	reg = readl(host->ioaddr + PHY_CTRL_REG2);
+	reg = pete_readl("drivers/mmc/host/sdhci-of-arasan.c:257", host->ioaddr + PHY_CTRL_REG2);
 	if (enable)
 		reg |= PHY_CTRL_EN_DLL_MASK;
 	else
 		reg &= ~PHY_CTRL_EN_DLL_MASK;
 
-	writel(reg, host->ioaddr + PHY_CTRL_REG2);
+	pete_writel("drivers/mmc/host/sdhci-of-arasan.c:263", reg, host->ioaddr + PHY_CTRL_REG2);
 
 	if (!enable)
 		return 0;
@@ -286,10 +286,10 @@ static void sdhci_arasan_phy_dll_set_freq(struct sdhci_host *host, int clock)
 	else
 		freq_sel = FREQSEL_80M_50M;
 
-	reg = readl(host->ioaddr + PHY_CTRL_REG2);
+	reg = pete_readl("drivers/mmc/host/sdhci-of-arasan.c:289", host->ioaddr + PHY_CTRL_REG2);
 	reg &= ~PHY_CTRL_FREQ_SEL_MASK;
 	reg |= (freq_sel << PHY_CTRL_FREQ_SEL_SHIFT);
-	writel(reg, host->ioaddr + PHY_CTRL_REG2);
+	pete_writel("drivers/mmc/host/sdhci-of-arasan.c:292", reg, host->ioaddr + PHY_CTRL_REG2);
 }
 
 /**

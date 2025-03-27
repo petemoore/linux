@@ -169,15 +169,15 @@ static void lcdif_set_formats(struct lcdif_drm_private *lcdif,
 
 	switch (bus_format) {
 	case MEDIA_BUS_FMT_RGB565_1X16:
-		writel(DISP_PARA_LINE_PATTERN_RGB565,
+		pete_writel("drivers/gpu/drm/mxsfb/lcdif_kms.c:172", DISP_PARA_LINE_PATTERN_RGB565,
 		       lcdif->base + LCDC_V8_DISP_PARA);
 		break;
 	case MEDIA_BUS_FMT_RGB888_1X24:
-		writel(DISP_PARA_LINE_PATTERN_RGB888,
+		pete_writel("drivers/gpu/drm/mxsfb/lcdif_kms.c:176", DISP_PARA_LINE_PATTERN_RGB888,
 		       lcdif->base + LCDC_V8_DISP_PARA);
 		break;
 	case MEDIA_BUS_FMT_UYVY8_1X16:
-		writel(DISP_PARA_LINE_PATTERN_UYVY_H,
+		pete_writel("drivers/gpu/drm/mxsfb/lcdif_kms.c:180", DISP_PARA_LINE_PATTERN_UYVY_H,
 		       lcdif->base + LCDC_V8_DISP_PARA);
 		out_yuv = true;
 		break;
@@ -189,48 +189,48 @@ static void lcdif_set_formats(struct lcdif_drm_private *lcdif,
 	switch (format) {
 	/* RGB Formats */
 	case DRM_FORMAT_RGB565:
-		writel(CTRLDESCL0_5_BPP_16_RGB565,
+		pete_writel("drivers/gpu/drm/mxsfb/lcdif_kms.c:192", CTRLDESCL0_5_BPP_16_RGB565,
 		       lcdif->base + LCDC_V8_CTRLDESCL0_5);
 		break;
 	case DRM_FORMAT_RGB888:
-		writel(CTRLDESCL0_5_BPP_24_RGB888,
+		pete_writel("drivers/gpu/drm/mxsfb/lcdif_kms.c:196", CTRLDESCL0_5_BPP_24_RGB888,
 		       lcdif->base + LCDC_V8_CTRLDESCL0_5);
 		break;
 	case DRM_FORMAT_XRGB1555:
-		writel(CTRLDESCL0_5_BPP_16_ARGB1555,
+		pete_writel("drivers/gpu/drm/mxsfb/lcdif_kms.c:200", CTRLDESCL0_5_BPP_16_ARGB1555,
 		       lcdif->base + LCDC_V8_CTRLDESCL0_5);
 		break;
 	case DRM_FORMAT_XRGB4444:
-		writel(CTRLDESCL0_5_BPP_16_ARGB4444,
+		pete_writel("drivers/gpu/drm/mxsfb/lcdif_kms.c:204", CTRLDESCL0_5_BPP_16_ARGB4444,
 		       lcdif->base + LCDC_V8_CTRLDESCL0_5);
 		break;
 	case DRM_FORMAT_XBGR8888:
-		writel(CTRLDESCL0_5_BPP_32_ABGR8888,
+		pete_writel("drivers/gpu/drm/mxsfb/lcdif_kms.c:208", CTRLDESCL0_5_BPP_32_ABGR8888,
 		       lcdif->base + LCDC_V8_CTRLDESCL0_5);
 		break;
 	case DRM_FORMAT_XRGB8888:
-		writel(CTRLDESCL0_5_BPP_32_ARGB8888,
+		pete_writel("drivers/gpu/drm/mxsfb/lcdif_kms.c:212", CTRLDESCL0_5_BPP_32_ARGB8888,
 		       lcdif->base + LCDC_V8_CTRLDESCL0_5);
 		break;
 
 	/* YUV Formats */
 	case DRM_FORMAT_YUYV:
-		writel(CTRLDESCL0_5_BPP_YCbCr422 | CTRLDESCL0_5_YUV_FORMAT_VY2UY1,
+		pete_writel("drivers/gpu/drm/mxsfb/lcdif_kms.c:218", CTRLDESCL0_5_BPP_YCbCr422 | CTRLDESCL0_5_YUV_FORMAT_VY2UY1,
 		       lcdif->base + LCDC_V8_CTRLDESCL0_5);
 		in_yuv = true;
 		break;
 	case DRM_FORMAT_YVYU:
-		writel(CTRLDESCL0_5_BPP_YCbCr422 | CTRLDESCL0_5_YUV_FORMAT_UY2VY1,
+		pete_writel("drivers/gpu/drm/mxsfb/lcdif_kms.c:223", CTRLDESCL0_5_BPP_YCbCr422 | CTRLDESCL0_5_YUV_FORMAT_UY2VY1,
 		       lcdif->base + LCDC_V8_CTRLDESCL0_5);
 		in_yuv = true;
 		break;
 	case DRM_FORMAT_UYVY:
-		writel(CTRLDESCL0_5_BPP_YCbCr422 | CTRLDESCL0_5_YUV_FORMAT_Y2VY1U,
+		pete_writel("drivers/gpu/drm/mxsfb/lcdif_kms.c:228", CTRLDESCL0_5_BPP_YCbCr422 | CTRLDESCL0_5_YUV_FORMAT_Y2VY1U,
 		       lcdif->base + LCDC_V8_CTRLDESCL0_5);
 		in_yuv = true;
 		break;
 	case DRM_FORMAT_VYUY:
-		writel(CTRLDESCL0_5_BPP_YCbCr422 | CTRLDESCL0_5_YUV_FORMAT_Y2UY1V,
+		pete_writel("drivers/gpu/drm/mxsfb/lcdif_kms.c:233", CTRLDESCL0_5_BPP_YCbCr422 | CTRLDESCL0_5_YUV_FORMAT_Y2UY1V,
 		       lcdif->base + LCDC_V8_CTRLDESCL0_5);
 		in_yuv = true;
 		break;
@@ -249,7 +249,7 @@ static void lcdif_set_formats(struct lcdif_drm_private *lcdif,
 	 */
 	if (!in_yuv && out_yuv) {
 		/* RGB -> YCbCr */
-		writel(CSC0_CTRL_CSC_MODE_RGB2YCbCr,
+		pete_writel("drivers/gpu/drm/mxsfb/lcdif_kms.c:252", CSC0_CTRL_CSC_MODE_RGB2YCbCr,
 		       lcdif->base + LCDC_V8_CSC0_CTRL);
 
 		/*
@@ -259,17 +259,17 @@ static void lcdif_set_formats(struct lcdif_drm_private *lcdif,
 		 * |Cb| = |-0.1482 -0.2910  0.4392| * |G| + |128|
 		 * |Cr|   | 0.4392  0.4392 -0.3678|   |B|   |128|
 		 */
-		writel(CSC0_COEF0_A2(0x081) | CSC0_COEF0_A1(0x041),
+		pete_writel("drivers/gpu/drm/mxsfb/lcdif_kms.c:262", CSC0_COEF0_A2(0x081) | CSC0_COEF0_A1(0x041),
 		       lcdif->base + LCDC_V8_CSC0_COEF0);
-		writel(CSC0_COEF1_B1(0x7db) | CSC0_COEF1_A3(0x019),
+		pete_writel("drivers/gpu/drm/mxsfb/lcdif_kms.c:264", CSC0_COEF1_B1(0x7db) | CSC0_COEF1_A3(0x019),
 		       lcdif->base + LCDC_V8_CSC0_COEF1);
-		writel(CSC0_COEF2_B3(0x070) | CSC0_COEF2_B2(0x7b6),
+		pete_writel("drivers/gpu/drm/mxsfb/lcdif_kms.c:266", CSC0_COEF2_B3(0x070) | CSC0_COEF2_B2(0x7b6),
 		       lcdif->base + LCDC_V8_CSC0_COEF2);
-		writel(CSC0_COEF3_C2(0x7a2) | CSC0_COEF3_C1(0x070),
+		pete_writel("drivers/gpu/drm/mxsfb/lcdif_kms.c:268", CSC0_COEF3_C2(0x7a2) | CSC0_COEF3_C1(0x070),
 		       lcdif->base + LCDC_V8_CSC0_COEF3);
-		writel(CSC0_COEF4_D1(0x010) | CSC0_COEF4_C3(0x7ee),
+		pete_writel("drivers/gpu/drm/mxsfb/lcdif_kms.c:270", CSC0_COEF4_D1(0x010) | CSC0_COEF4_C3(0x7ee),
 		       lcdif->base + LCDC_V8_CSC0_COEF4);
-		writel(CSC0_COEF5_D3(0x080) | CSC0_COEF5_D2(0x080),
+		pete_writel("drivers/gpu/drm/mxsfb/lcdif_kms.c:272", CSC0_COEF5_D3(0x080) | CSC0_COEF5_D2(0x080),
 		       lcdif->base + LCDC_V8_CSC0_COEF5);
 	} else if (in_yuv && !out_yuv) {
 		/* YCbCr -> RGB */
@@ -277,18 +277,18 @@ static void lcdif_set_formats(struct lcdif_drm_private *lcdif,
 			lcdif_yuv2rgb_coeffs[plane_state->color_encoding]
 					    [plane_state->color_range];
 
-		writel(CSC0_CTRL_CSC_MODE_YCbCr2RGB,
+		pete_writel("drivers/gpu/drm/mxsfb/lcdif_kms.c:280", CSC0_CTRL_CSC_MODE_YCbCr2RGB,
 		       lcdif->base + LCDC_V8_CSC0_CTRL);
 
-		writel(coeffs[0], lcdif->base + LCDC_V8_CSC0_COEF0);
-		writel(coeffs[1], lcdif->base + LCDC_V8_CSC0_COEF1);
-		writel(coeffs[2], lcdif->base + LCDC_V8_CSC0_COEF2);
-		writel(coeffs[3], lcdif->base + LCDC_V8_CSC0_COEF3);
-		writel(coeffs[4], lcdif->base + LCDC_V8_CSC0_COEF4);
-		writel(coeffs[5], lcdif->base + LCDC_V8_CSC0_COEF5);
+		pete_writel("drivers/gpu/drm/mxsfb/lcdif_kms.c:283", coeffs[0], lcdif->base + LCDC_V8_CSC0_COEF0);
+		pete_writel("drivers/gpu/drm/mxsfb/lcdif_kms.c:284", coeffs[1], lcdif->base + LCDC_V8_CSC0_COEF1);
+		pete_writel("drivers/gpu/drm/mxsfb/lcdif_kms.c:285", coeffs[2], lcdif->base + LCDC_V8_CSC0_COEF2);
+		pete_writel("drivers/gpu/drm/mxsfb/lcdif_kms.c:286", coeffs[3], lcdif->base + LCDC_V8_CSC0_COEF3);
+		pete_writel("drivers/gpu/drm/mxsfb/lcdif_kms.c:287", coeffs[4], lcdif->base + LCDC_V8_CSC0_COEF4);
+		pete_writel("drivers/gpu/drm/mxsfb/lcdif_kms.c:288", coeffs[5], lcdif->base + LCDC_V8_CSC0_COEF5);
 	} else {
 		/* RGB -> RGB, YCbCr -> YCbCr: bypass colorspace converter. */
-		writel(CSC0_CTRL_BYPASS, lcdif->base + LCDC_V8_CSC0_CTRL);
+		pete_writel("drivers/gpu/drm/mxsfb/lcdif_kms.c:291", CSC0_CTRL_BYPASS, lcdif->base + LCDC_V8_CSC0_CTRL);
 	}
 }
 
@@ -306,25 +306,25 @@ static void lcdif_set_mode(struct lcdif_drm_private *lcdif, u32 bus_flags)
 	if (bus_flags & DRM_BUS_FLAG_PIXDATA_DRIVE_NEGEDGE)
 		ctrl |= CTRL_INV_PXCK;
 
-	writel(ctrl, lcdif->base + LCDC_V8_CTRL);
+	pete_writel("drivers/gpu/drm/mxsfb/lcdif_kms.c:309", ctrl, lcdif->base + LCDC_V8_CTRL);
 
-	writel(DISP_SIZE_DELTA_Y(m->vdisplay) |
+	pete_writel("drivers/gpu/drm/mxsfb/lcdif_kms.c:311", DISP_SIZE_DELTA_Y(m->vdisplay) |
 	       DISP_SIZE_DELTA_X(m->hdisplay),
 	       lcdif->base + LCDC_V8_DISP_SIZE);
 
-	writel(HSYN_PARA_BP_H(m->htotal - m->hsync_end) |
+	pete_writel("drivers/gpu/drm/mxsfb/lcdif_kms.c:315", HSYN_PARA_BP_H(m->htotal - m->hsync_end) |
 	       HSYN_PARA_FP_H(m->hsync_start - m->hdisplay),
 	       lcdif->base + LCDC_V8_HSYN_PARA);
 
-	writel(VSYN_PARA_BP_V(m->vtotal - m->vsync_end) |
+	pete_writel("drivers/gpu/drm/mxsfb/lcdif_kms.c:319", VSYN_PARA_BP_V(m->vtotal - m->vsync_end) |
 	       VSYN_PARA_FP_V(m->vsync_start - m->vdisplay),
 	       lcdif->base + LCDC_V8_VSYN_PARA);
 
-	writel(VSYN_HSYN_WIDTH_PW_V(m->vsync_end - m->vsync_start) |
+	pete_writel("drivers/gpu/drm/mxsfb/lcdif_kms.c:323", VSYN_HSYN_WIDTH_PW_V(m->vsync_end - m->vsync_start) |
 	       VSYN_HSYN_WIDTH_PW_H(m->hsync_end - m->hsync_start),
 	       lcdif->base + LCDC_V8_VSYN_HSYN_WIDTH);
 
-	writel(CTRLDESCL0_1_HEIGHT(m->vdisplay) |
+	pete_writel("drivers/gpu/drm/mxsfb/lcdif_kms.c:327", CTRLDESCL0_1_HEIGHT(m->vdisplay) |
 	       CTRLDESCL0_1_WIDTH(m->hdisplay),
 	       lcdif->base + LCDC_V8_CTRLDESCL0_1);
 
@@ -339,7 +339,7 @@ static void lcdif_set_mode(struct lcdif_drm_private *lcdif, u32 bus_flags)
 	 */
 	ctrl = CTRLDESCL0_3_P_SIZE(2) | CTRLDESCL0_3_T_SIZE(2) |
 	       CTRLDESCL0_3_PITCH(lcdif->crtc.primary->state->fb->pitches[0]);
-	writel(ctrl, lcdif->base + LCDC_V8_CTRLDESCL0_3);
+	pete_writel("drivers/gpu/drm/mxsfb/lcdif_kms.c:342", ctrl, lcdif->base + LCDC_V8_CTRLDESCL0_3);
 }
 
 static void lcdif_enable_controller(struct lcdif_drm_private *lcdif)
@@ -347,7 +347,7 @@ static void lcdif_enable_controller(struct lcdif_drm_private *lcdif)
 	u32 reg;
 
 	/* Set FIFO Panic watermarks, low 1/3, high 2/3 . */
-	writel(FIELD_PREP(PANIC0_THRES_LOW_MASK, 1 * PANIC0_THRES_MAX / 3) |
+	pete_writel("drivers/gpu/drm/mxsfb/lcdif_kms.c:350", FIELD_PREP(PANIC0_THRES_LOW_MASK, 1 * PANIC0_THRES_MAX / 3) |
 	       FIELD_PREP(PANIC0_THRES_HIGH_MASK, 2 * PANIC0_THRES_MAX / 3),
 	       lcdif->base + LCDC_V8_PANIC0_THRES);
 
@@ -355,16 +355,16 @@ static void lcdif_enable_controller(struct lcdif_drm_private *lcdif)
 	 * Enable FIFO Panic, this does not generate interrupt, but
 	 * boosts NoC priority based on FIFO Panic watermarks.
 	 */
-	writel(INT_ENABLE_D1_PLANE_PANIC_EN,
+	pete_writel("drivers/gpu/drm/mxsfb/lcdif_kms.c:358", INT_ENABLE_D1_PLANE_PANIC_EN,
 	       lcdif->base + LCDC_V8_INT_ENABLE_D1);
 
-	reg = readl(lcdif->base + LCDC_V8_DISP_PARA);
+	reg = pete_readl("drivers/gpu/drm/mxsfb/lcdif_kms.c:361", lcdif->base + LCDC_V8_DISP_PARA);
 	reg |= DISP_PARA_DISP_ON;
-	writel(reg, lcdif->base + LCDC_V8_DISP_PARA);
+	pete_writel("drivers/gpu/drm/mxsfb/lcdif_kms.c:363", reg, lcdif->base + LCDC_V8_DISP_PARA);
 
-	reg = readl(lcdif->base + LCDC_V8_CTRLDESCL0_5);
+	reg = pete_readl("drivers/gpu/drm/mxsfb/lcdif_kms.c:365", lcdif->base + LCDC_V8_CTRLDESCL0_5);
 	reg |= CTRLDESCL0_5_EN;
-	writel(reg, lcdif->base + LCDC_V8_CTRLDESCL0_5);
+	pete_writel("drivers/gpu/drm/mxsfb/lcdif_kms.c:367", reg, lcdif->base + LCDC_V8_CTRLDESCL0_5);
 }
 
 static void lcdif_disable_controller(struct lcdif_drm_private *lcdif)
@@ -372,9 +372,9 @@ static void lcdif_disable_controller(struct lcdif_drm_private *lcdif)
 	u32 reg;
 	int ret;
 
-	reg = readl(lcdif->base + LCDC_V8_CTRLDESCL0_5);
+	reg = pete_readl("drivers/gpu/drm/mxsfb/lcdif_kms.c:375", lcdif->base + LCDC_V8_CTRLDESCL0_5);
 	reg &= ~CTRLDESCL0_5_EN;
-	writel(reg, lcdif->base + LCDC_V8_CTRLDESCL0_5);
+	pete_writel("drivers/gpu/drm/mxsfb/lcdif_kms.c:377", reg, lcdif->base + LCDC_V8_CTRLDESCL0_5);
 
 	ret = readl_poll_timeout(lcdif->base + LCDC_V8_CTRLDESCL0_5,
 				 reg, !(reg & CTRLDESCL0_5_EN),
@@ -382,20 +382,20 @@ static void lcdif_disable_controller(struct lcdif_drm_private *lcdif)
 	if (ret)
 		drm_err(lcdif->drm, "Failed to disable controller!\n");
 
-	reg = readl(lcdif->base + LCDC_V8_DISP_PARA);
+	reg = pete_readl("drivers/gpu/drm/mxsfb/lcdif_kms.c:385", lcdif->base + LCDC_V8_DISP_PARA);
 	reg &= ~DISP_PARA_DISP_ON;
-	writel(reg, lcdif->base + LCDC_V8_DISP_PARA);
+	pete_writel("drivers/gpu/drm/mxsfb/lcdif_kms.c:387", reg, lcdif->base + LCDC_V8_DISP_PARA);
 
 	/* Disable FIFO Panic NoC priority booster. */
-	writel(0, lcdif->base + LCDC_V8_INT_ENABLE_D1);
+	pete_writel("drivers/gpu/drm/mxsfb/lcdif_kms.c:390", 0, lcdif->base + LCDC_V8_INT_ENABLE_D1);
 }
 
 static void lcdif_reset_block(struct lcdif_drm_private *lcdif)
 {
-	writel(CTRL_SW_RESET, lcdif->base + LCDC_V8_CTRL + REG_SET);
-	readl(lcdif->base + LCDC_V8_CTRL);
-	writel(CTRL_SW_RESET, lcdif->base + LCDC_V8_CTRL + REG_CLR);
-	readl(lcdif->base + LCDC_V8_CTRL);
+	pete_writel("drivers/gpu/drm/mxsfb/lcdif_kms.c:395", CTRL_SW_RESET, lcdif->base + LCDC_V8_CTRL + REG_SET);
+	pete_readl("drivers/gpu/drm/mxsfb/lcdif_kms.c:396", lcdif->base + LCDC_V8_CTRL);
+	pete_writel("drivers/gpu/drm/mxsfb/lcdif_kms.c:397", CTRL_SW_RESET, lcdif->base + LCDC_V8_CTRL + REG_CLR);
+	pete_readl("drivers/gpu/drm/mxsfb/lcdif_kms.c:398", lcdif->base + LCDC_V8_CTRL);
 }
 
 static void lcdif_crtc_mode_set_nofb(struct drm_crtc_state *crtc_state,
@@ -509,9 +509,9 @@ static void lcdif_crtc_atomic_flush(struct drm_crtc *crtc,
 	struct drm_pending_vblank_event *event;
 	u32 reg;
 
-	reg = readl(lcdif->base + LCDC_V8_CTRLDESCL0_5);
+	reg = pete_readl("drivers/gpu/drm/mxsfb/lcdif_kms.c:512", lcdif->base + LCDC_V8_CTRLDESCL0_5);
 	reg |= CTRLDESCL0_5_SHADOW_LOAD_EN;
-	writel(reg, lcdif->base + LCDC_V8_CTRLDESCL0_5);
+	pete_writel("drivers/gpu/drm/mxsfb/lcdif_kms.c:514", reg, lcdif->base + LCDC_V8_CTRLDESCL0_5);
 
 	event = crtc->state->event;
 	crtc->state->event = NULL;
@@ -547,9 +547,9 @@ static void lcdif_crtc_atomic_enable(struct drm_crtc *crtc,
 	/* Write cur_buf as well to avoid an initial corrupt frame */
 	paddr = drm_fb_dma_get_gem_addr(new_pstate->fb, new_pstate, 0);
 	if (paddr) {
-		writel(lower_32_bits(paddr),
+		pete_writel("drivers/gpu/drm/mxsfb/lcdif_kms.c:550", lower_32_bits(paddr),
 		       lcdif->base + LCDC_V8_CTRLDESCL_LOW0_4);
-		writel(CTRLDESCL_HIGH0_4_ADDR_HIGH(upper_32_bits(paddr)),
+		pete_writel("drivers/gpu/drm/mxsfb/lcdif_kms.c:552", CTRLDESCL_HIGH0_4_ADDR_HIGH(upper_32_bits(paddr)),
 		       lcdif->base + LCDC_V8_CTRLDESCL_HIGH0_4);
 	}
 	lcdif_enable_controller(lcdif);
@@ -626,8 +626,8 @@ static int lcdif_crtc_enable_vblank(struct drm_crtc *crtc)
 	struct lcdif_drm_private *lcdif = to_lcdif_drm_private(crtc->dev);
 
 	/* Clear and enable VBLANK IRQ */
-	writel(INT_STATUS_D0_VS_BLANK, lcdif->base + LCDC_V8_INT_STATUS_D0);
-	writel(INT_ENABLE_D0_VS_BLANK_EN, lcdif->base + LCDC_V8_INT_ENABLE_D0);
+	pete_writel("drivers/gpu/drm/mxsfb/lcdif_kms.c:629", INT_STATUS_D0_VS_BLANK, lcdif->base + LCDC_V8_INT_STATUS_D0);
+	pete_writel("drivers/gpu/drm/mxsfb/lcdif_kms.c:630", INT_ENABLE_D0_VS_BLANK_EN, lcdif->base + LCDC_V8_INT_ENABLE_D0);
 
 	return 0;
 }
@@ -637,8 +637,8 @@ static void lcdif_crtc_disable_vblank(struct drm_crtc *crtc)
 	struct lcdif_drm_private *lcdif = to_lcdif_drm_private(crtc->dev);
 
 	/* Disable and clear VBLANK IRQ */
-	writel(0, lcdif->base + LCDC_V8_INT_ENABLE_D0);
-	writel(INT_STATUS_D0_VS_BLANK, lcdif->base + LCDC_V8_INT_STATUS_D0);
+	pete_writel("drivers/gpu/drm/mxsfb/lcdif_kms.c:640", 0, lcdif->base + LCDC_V8_INT_ENABLE_D0);
+	pete_writel("drivers/gpu/drm/mxsfb/lcdif_kms.c:641", INT_STATUS_D0_VS_BLANK, lcdif->base + LCDC_V8_INT_STATUS_D0);
 }
 
 static const struct drm_crtc_helper_funcs lcdif_crtc_helper_funcs = {
@@ -690,9 +690,9 @@ static void lcdif_plane_primary_atomic_update(struct drm_plane *plane,
 
 	paddr = drm_fb_dma_get_gem_addr(new_pstate->fb, new_pstate, 0);
 	if (paddr) {
-		writel(lower_32_bits(paddr),
+		pete_writel("drivers/gpu/drm/mxsfb/lcdif_kms.c:693", lower_32_bits(paddr),
 		       lcdif->base + LCDC_V8_CTRLDESCL_LOW0_4);
-		writel(CTRLDESCL_HIGH0_4_ADDR_HIGH(upper_32_bits(paddr)),
+		pete_writel("drivers/gpu/drm/mxsfb/lcdif_kms.c:695", CTRLDESCL_HIGH0_4_ADDR_HIGH(upper_32_bits(paddr)),
 		       lcdif->base + LCDC_V8_CTRLDESCL_HIGH0_4);
 	}
 }

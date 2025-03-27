@@ -407,7 +407,7 @@ static inline u32 read_reg_le32(volatile u32 __iomem *base, int regindex)
 #ifdef __powerpc__
 	return in_le32(base + regindex);
 #else
-	return readl(base + regindex);
+	return pete_readl("drivers/video/fbdev/imsttfb.c:410", base + regindex);
 #endif
 }
 
@@ -416,7 +416,7 @@ static inline void write_reg_le32(volatile u32 __iomem *base, int regindex, u32 
 #ifdef __powerpc__
 	out_le32(base + regindex, val);
 #else
-	writel(val, base + regindex);
+	pete_writel("drivers/video/fbdev/imsttfb.c:419", val, base + regindex);
 #endif
 }
 

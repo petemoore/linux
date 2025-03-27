@@ -30,9 +30,9 @@
 
 void ast_vhub_dev_irq(struct ast_vhub_dev *d)
 {
-	u32 istat = readl(d->regs + AST_VHUB_DEV_ISR);
+	u32 istat = pete_readl("drivers/usb/gadget/udc/aspeed-vhub/dev.c:33", d->regs + AST_VHUB_DEV_ISR);
 
-	writel(istat, d->regs + AST_VHUB_DEV_ISR);
+	pete_writel("drivers/usb/gadget/udc/aspeed-vhub/dev.c:35", istat, d->regs + AST_VHUB_DEV_ISR);
 
 	if (istat & VHUV_DEV_IRQ_EP0_IN_ACK_STALL)
 		ast_vhub_ep0_handle_ack(&d->ep0, true);
@@ -59,16 +59,16 @@ static void ast_vhub_dev_enable(struct ast_vhub_dev *d)
 		VHUB_DEV_EN_EP0_SETUP_IRQEN;
 	if (d->gadget.speed == USB_SPEED_HIGH)
 		reg |= VHUB_DEV_EN_SPEED_SEL_HIGH;
-	writel(reg, d->regs + AST_VHUB_DEV_EN_CTRL);
+	pete_writel("drivers/usb/gadget/udc/aspeed-vhub/dev.c:62", reg, d->regs + AST_VHUB_DEV_EN_CTRL);
 
 	/* Enable device interrupt in the hub as well */
 	hmsk = VHUB_IRQ_DEVICE1 << d->index;
-	reg = readl(d->vhub->regs + AST_VHUB_IER);
+	reg = pete_readl("drivers/usb/gadget/udc/aspeed-vhub/dev.c:66", d->vhub->regs + AST_VHUB_IER);
 	reg |= hmsk;
-	writel(reg, d->vhub->regs + AST_VHUB_IER);
+	pete_writel("drivers/usb/gadget/udc/aspeed-vhub/dev.c:68", reg, d->vhub->regs + AST_VHUB_IER);
 
 	/* Set EP0 DMA buffer address */
-	writel(d->ep0.buf_dma, d->regs + AST_VHUB_DEV_EP0_DATA);
+	pete_writel("drivers/usb/gadget/udc/aspeed-vhub/dev.c:71", d->ep0.buf_dma, d->regs + AST_VHUB_DEV_EP0_DATA);
 
 	/* Clear stall on all EPs */
 	for (i = 0; i < d->max_epns; i++) {
@@ -95,12 +95,12 @@ static void ast_vhub_dev_disable(struct ast_vhub_dev *d)
 
 	/* Disable device interrupt in the hub */
 	hmsk = VHUB_IRQ_DEVICE1 << d->index;
-	reg = readl(d->vhub->regs + AST_VHUB_IER);
+	reg = pete_readl("drivers/usb/gadget/udc/aspeed-vhub/dev.c:98", d->vhub->regs + AST_VHUB_IER);
 	reg &= ~hmsk;
-	writel(reg, d->vhub->regs + AST_VHUB_IER);
+	pete_writel("drivers/usb/gadget/udc/aspeed-vhub/dev.c:100", reg, d->vhub->regs + AST_VHUB_IER);
 
 	/* Then disable device */
-	writel(0, d->regs + AST_VHUB_DEV_EN_CTRL);
+	pete_writel("drivers/usb/gadget/udc/aspeed-vhub/dev.c:103", 0, d->regs + AST_VHUB_DEV_EN_CTRL);
 	d->gadget.speed = USB_SPEED_UNKNOWN;
 	d->enabled = false;
 }
@@ -120,10 +120,10 @@ static int ast_vhub_dev_feature(struct ast_vhub_dev *d,
 	}
 
 	if (wValue == USB_DEVICE_TEST_MODE) {
-		val = readl(d->vhub->regs + AST_VHUB_CTRL);
+		val = pete_readl("drivers/usb/gadget/udc/aspeed-vhub/dev.c:123", d->vhub->regs + AST_VHUB_CTRL);
 		val &= ~GENMASK(10, 8);
 		val |= VHUB_CTRL_SET_TEST_MODE((wIndex >> 8) & 0x7);
-		writel(val, d->vhub->regs + AST_VHUB_CTRL);
+		pete_writel("drivers/usb/gadget/udc/aspeed-vhub/dev.c:126", val, d->vhub->regs + AST_VHUB_CTRL);
 
 		return std_req_complete;
 	}
@@ -208,10 +208,10 @@ static void ast_vhub_dev_set_address(struct ast_vhub_dev *d, u8 addr)
 
 	DDBG(d, "SET_ADDRESS: Got address %x\n", addr);
 
-	reg = readl(d->regs + AST_VHUB_DEV_EN_CTRL);
+	reg = pete_readl("drivers/usb/gadget/udc/aspeed-vhub/dev.c:211", d->regs + AST_VHUB_DEV_EN_CTRL);
 	reg &= ~VHUB_DEV_EN_ADDR_MASK;
 	reg |= VHUB_DEV_EN_SET_ADDR(addr);
-	writel(reg, d->regs + AST_VHUB_DEV_EN_CTRL);
+	pete_writel("drivers/usb/gadget/udc/aspeed-vhub/dev.c:214", reg, d->regs + AST_VHUB_DEV_EN_CTRL);
 }
 
 int ast_vhub_std_dev_request(struct ast_vhub_ep *ep,
@@ -297,7 +297,7 @@ static int ast_vhub_udc_get_frame(struct usb_gadget* gadget)
 {
 	struct ast_vhub_dev *d = to_ast_dev(gadget);
 
-	return (readl(d->vhub->regs + AST_VHUB_USBSTS) >> 16) & 0x7ff;
+	return (pete_readl("drivers/usb/gadget/udc/aspeed-vhub/dev.c:300", d->vhub->regs + AST_VHUB_USBSTS) >> 16) & 0x7ff;
 }
 
 static void ast_vhub_dev_nuke(struct ast_vhub_dev *d)

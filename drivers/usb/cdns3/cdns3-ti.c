@@ -78,12 +78,12 @@ static const int cdns_ti_rate_table[] = {	/* in KHZ */
 
 static inline u32 cdns_ti_readl(struct cdns_ti *data, u32 offset)
 {
-	return readl(data->usbss + offset);
+	return pete_readl("drivers/usb/cdns3/cdns3-ti.c:81", data->usbss + offset);
 }
 
 static inline void cdns_ti_writel(struct cdns_ti *data, u32 offset, u32 value)
 {
-	writel(value, data->usbss + offset);
+	pete_writel("drivers/usb/cdns3/cdns3-ti.c:86", value, data->usbss + offset);
 }
 
 static struct cdns3_platform_data cdns_ti_pdata = {

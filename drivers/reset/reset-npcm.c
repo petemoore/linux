@@ -101,7 +101,7 @@ static int npcm_rc_restart(struct notifier_block *nb, unsigned long mode,
 	struct npcm_rc_data *rc = container_of(nb, struct npcm_rc_data,
 					       restart_nb);
 
-	writel(NPCM_SWRST << rc->sw_reset_number, rc->base + NPCM_SWRSTR);
+	pete_writel("drivers/reset/reset-npcm.c:104", NPCM_SWRST << rc->sw_reset_number, rc->base + NPCM_SWRSTR);
 	mdelay(1000);
 
 	pr_emerg("%s: unable to restart system\n", __func__);
@@ -119,11 +119,11 @@ static int npcm_rc_setclear_reset(struct reset_controller_dev *rcdev,
 	u32 stat;
 
 	spin_lock_irqsave(&rc->lock, flags);
-	stat = readl(rc->base + ctrl_offset);
+	stat = pete_readl("drivers/reset/reset-npcm.c:122", rc->base + ctrl_offset);
 	if (set)
-		writel(stat | rst_bit, rc->base + ctrl_offset);
+		pete_writel("drivers/reset/reset-npcm.c:124", stat | rst_bit, rc->base + ctrl_offset);
 	else
-		writel(stat & ~rst_bit, rc->base + ctrl_offset);
+		pete_writel("drivers/reset/reset-npcm.c:126", stat & ~rst_bit, rc->base + ctrl_offset);
 	spin_unlock_irqrestore(&rc->lock, flags);
 
 	return 0;
@@ -147,7 +147,7 @@ static int npcm_rc_status(struct reset_controller_dev *rcdev,
 	unsigned int rst_bit = BIT(id & NPCM_MASK_RESETS);
 	unsigned int ctrl_offset = id >> 8;
 
-	return (readl(rc->base + ctrl_offset) & rst_bit);
+	return (pete_readl("drivers/reset/reset-npcm.c:150", rc->base + ctrl_offset) & rst_bit);
 }
 
 static int npcm_reset_xlate(struct reset_controller_dev *rcdev,
@@ -212,18 +212,18 @@ static void npcm_usb_reset_npcm7xx(struct npcm_rc_data *rc)
 	}
 
 	/* assert reset USB PHY and USB devices */
-	iprst1 = readl(rc->base + NPCM_IPSRST1);
-	iprst2 = readl(rc->base + NPCM_IPSRST2);
-	iprst3 = readl(rc->base + NPCM_IPSRST3);
+	iprst1 = pete_readl("drivers/reset/reset-npcm.c:215", rc->base + NPCM_IPSRST1);
+	iprst2 = pete_readl("drivers/reset/reset-npcm.c:216", rc->base + NPCM_IPSRST2);
+	iprst3 = pete_readl("drivers/reset/reset-npcm.c:217", rc->base + NPCM_IPSRST3);
 
 	iprst1 |= ipsrst1_bits;
 	iprst2 |= ipsrst2_bits;
 	iprst3 |= (ipsrst3_bits | NPCM_IPSRST3_USBPHY1 |
 		   NPCM_IPSRST3_USBPHY2);
 
-	writel(iprst1, rc->base + NPCM_IPSRST1);
-	writel(iprst2, rc->base + NPCM_IPSRST2);
-	writel(iprst3, rc->base + NPCM_IPSRST3);
+	pete_writel("drivers/reset/reset-npcm.c:224", iprst1, rc->base + NPCM_IPSRST1);
+	pete_writel("drivers/reset/reset-npcm.c:225", iprst2, rc->base + NPCM_IPSRST2);
+	pete_writel("drivers/reset/reset-npcm.c:226", iprst3, rc->base + NPCM_IPSRST3);
 
 	/* clear USB PHY RS bit */
 	regmap_update_bits(rc->gcr_regmap, NPCM_USB1PHYCTL_OFFSET,
@@ -233,7 +233,7 @@ static void npcm_usb_reset_npcm7xx(struct npcm_rc_data *rc)
 
 	/* deassert reset USB PHY */
 	iprst3 &= ~(NPCM_IPSRST3_USBPHY1 | NPCM_IPSRST3_USBPHY2);
-	writel(iprst3, rc->base + NPCM_IPSRST3);
+	pete_writel("drivers/reset/reset-npcm.c:236", iprst3, rc->base + NPCM_IPSRST3);
 
 	udelay(50);
 
@@ -248,9 +248,9 @@ static void npcm_usb_reset_npcm7xx(struct npcm_rc_data *rc)
 	iprst2 &= ~ipsrst2_bits;
 	iprst3 &= ~ipsrst3_bits;
 
-	writel(iprst1, rc->base + NPCM_IPSRST1);
-	writel(iprst2, rc->base + NPCM_IPSRST2);
-	writel(iprst3, rc->base + NPCM_IPSRST3);
+	pete_writel("drivers/reset/reset-npcm.c:251", iprst1, rc->base + NPCM_IPSRST1);
+	pete_writel("drivers/reset/reset-npcm.c:252", iprst2, rc->base + NPCM_IPSRST2);
+	pete_writel("drivers/reset/reset-npcm.c:253", iprst3, rc->base + NPCM_IPSRST3);
 }
 
 static void npcm_usb_reset_npcm8xx(struct npcm_rc_data *rc)
@@ -282,10 +282,10 @@ static void npcm_usb_reset_npcm8xx(struct npcm_rc_data *rc)
 		ipsrst3_bits |= NPCM_IPSRST3_USBD9;
 
 	/* assert reset USB PHY and USB devices */
-	iprst1 = readl(rc->base + NPCM_IPSRST1);
-	iprst2 = readl(rc->base + NPCM_IPSRST2);
-	iprst3 = readl(rc->base + NPCM_IPSRST3);
-	iprst4 = readl(rc->base + NPCM_IPSRST4);
+	iprst1 = pete_readl("drivers/reset/reset-npcm.c:285", rc->base + NPCM_IPSRST1);
+	iprst2 = pete_readl("drivers/reset/reset-npcm.c:286", rc->base + NPCM_IPSRST2);
+	iprst3 = pete_readl("drivers/reset/reset-npcm.c:287", rc->base + NPCM_IPSRST3);
+	iprst4 = pete_readl("drivers/reset/reset-npcm.c:288", rc->base + NPCM_IPSRST4);
 
 	iprst1 |= ipsrst1_bits;
 	iprst2 |= ipsrst2_bits;
@@ -293,10 +293,10 @@ static void npcm_usb_reset_npcm8xx(struct npcm_rc_data *rc)
 		   NPCM_IPSRST3_USBPHY2);
 	iprst4 |= ipsrst4_bits;
 
-	writel(iprst1, rc->base + NPCM_IPSRST1);
-	writel(iprst2, rc->base + NPCM_IPSRST2);
-	writel(iprst3, rc->base + NPCM_IPSRST3);
-	writel(iprst4, rc->base + NPCM_IPSRST4);
+	pete_writel("drivers/reset/reset-npcm.c:296", iprst1, rc->base + NPCM_IPSRST1);
+	pete_writel("drivers/reset/reset-npcm.c:297", iprst2, rc->base + NPCM_IPSRST2);
+	pete_writel("drivers/reset/reset-npcm.c:298", iprst3, rc->base + NPCM_IPSRST3);
+	pete_writel("drivers/reset/reset-npcm.c:299", iprst4, rc->base + NPCM_IPSRST4);
 
 	/* clear USB PHY RS bit */
 	regmap_update_bits(rc->gcr_regmap, NPCM_USB1PHYCTL_OFFSET,
@@ -308,9 +308,9 @@ static void npcm_usb_reset_npcm8xx(struct npcm_rc_data *rc)
 
 	/* deassert reset USB PHY */
 	iprst3 &= ~(NPCM_IPSRST3_USBPHY1 | NPCM_IPSRST3_USBPHY2);
-	writel(iprst3, rc->base + NPCM_IPSRST3);
+	pete_writel("drivers/reset/reset-npcm.c:311", iprst3, rc->base + NPCM_IPSRST3);
 	iprst4 &= ~NPCM_IPSRST4_USBPHY3;
-	writel(iprst4, rc->base + NPCM_IPSRST4);
+	pete_writel("drivers/reset/reset-npcm.c:313", iprst4, rc->base + NPCM_IPSRST4);
 
 	/* set USB PHY RS bit */
 	regmap_update_bits(rc->gcr_regmap, NPCM_USB1PHYCTL_OFFSET,
@@ -326,10 +326,10 @@ static void npcm_usb_reset_npcm8xx(struct npcm_rc_data *rc)
 	iprst3 &= ~ipsrst3_bits;
 	iprst4 &= ~ipsrst4_bits;
 
-	writel(iprst1, rc->base + NPCM_IPSRST1);
-	writel(iprst2, rc->base + NPCM_IPSRST2);
-	writel(iprst3, rc->base + NPCM_IPSRST3);
-	writel(iprst4, rc->base + NPCM_IPSRST4);
+	pete_writel("drivers/reset/reset-npcm.c:329", iprst1, rc->base + NPCM_IPSRST1);
+	pete_writel("drivers/reset/reset-npcm.c:330", iprst2, rc->base + NPCM_IPSRST2);
+	pete_writel("drivers/reset/reset-npcm.c:331", iprst3, rc->base + NPCM_IPSRST3);
+	pete_writel("drivers/reset/reset-npcm.c:332", iprst4, rc->base + NPCM_IPSRST4);
 }
 
 /*

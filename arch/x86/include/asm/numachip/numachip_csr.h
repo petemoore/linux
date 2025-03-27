@@ -44,12 +44,12 @@ static inline void *lcsr_address(unsigned long offset)
 
 static inline unsigned int read_lcsr(unsigned long offset)
 {
-	return swab32(readl(lcsr_address(offset)));
+	return swab32(pete_readl("arch/x86/include/asm/numachip/numachip_csr.h:47", lcsr_address(offset)));
 }
 
 static inline void write_lcsr(unsigned long offset, unsigned int val)
 {
-	writel(swab32(val), lcsr_address(offset));
+	pete_writel("arch/x86/include/asm/numachip/numachip_csr.h:52", swab32(val), lcsr_address(offset));
 }
 
 /*
@@ -72,22 +72,22 @@ static inline void __iomem *numachip2_lcsr_address(unsigned long offset)
 
 static inline u32 numachip2_read32_lcsr(unsigned long offset)
 {
-	return readl(numachip2_lcsr_address(offset));
+	return pete_readl("arch/x86/include/asm/numachip/numachip_csr.h:75", numachip2_lcsr_address(offset));
 }
 
 static inline u64 numachip2_read64_lcsr(unsigned long offset)
 {
-	return readq(numachip2_lcsr_address(offset));
+	return pete_readq("arch/x86/include/asm/numachip/numachip_csr.h:80", numachip2_lcsr_address(offset));
 }
 
 static inline void numachip2_write32_lcsr(unsigned long offset, u32 val)
 {
-	writel(val, numachip2_lcsr_address(offset));
+	pete_writel("arch/x86/include/asm/numachip/numachip_csr.h:85", val, numachip2_lcsr_address(offset));
 }
 
 static inline void numachip2_write64_lcsr(unsigned long offset, u64 val)
 {
-	writeq(val, numachip2_lcsr_address(offset));
+	pete_writeq("arch/x86/include/asm/numachip/numachip_csr.h:90", val, numachip2_lcsr_address(offset));
 }
 
 static inline unsigned int numachip2_timer(void)

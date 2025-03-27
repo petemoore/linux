@@ -834,15 +834,15 @@ static void d40_phy_lli_load(struct d40_chan *chan, struct d40_desc *desc)
 	struct d40_phy_lli *lli_src = desc->lli_phy.src;
 	void __iomem *base = chan_base(chan);
 
-	writel(lli_src->reg_cfg, base + D40_CHAN_REG_SSCFG);
-	writel(lli_src->reg_elt, base + D40_CHAN_REG_SSELT);
-	writel(lli_src->reg_ptr, base + D40_CHAN_REG_SSPTR);
-	writel(lli_src->reg_lnk, base + D40_CHAN_REG_SSLNK);
+	pete_writel("drivers/dma/ste_dma40.c:837", lli_src->reg_cfg, base + D40_CHAN_REG_SSCFG);
+	pete_writel("drivers/dma/ste_dma40.c:838", lli_src->reg_elt, base + D40_CHAN_REG_SSELT);
+	pete_writel("drivers/dma/ste_dma40.c:839", lli_src->reg_ptr, base + D40_CHAN_REG_SSPTR);
+	pete_writel("drivers/dma/ste_dma40.c:840", lli_src->reg_lnk, base + D40_CHAN_REG_SSLNK);
 
-	writel(lli_dst->reg_cfg, base + D40_CHAN_REG_SDCFG);
-	writel(lli_dst->reg_elt, base + D40_CHAN_REG_SDELT);
-	writel(lli_dst->reg_ptr, base + D40_CHAN_REG_SDPTR);
-	writel(lli_dst->reg_lnk, base + D40_CHAN_REG_SDLNK);
+	pete_writel("drivers/dma/ste_dma40.c:842", lli_dst->reg_cfg, base + D40_CHAN_REG_SDCFG);
+	pete_writel("drivers/dma/ste_dma40.c:843", lli_dst->reg_elt, base + D40_CHAN_REG_SDELT);
+	pete_writel("drivers/dma/ste_dma40.c:844", lli_dst->reg_ptr, base + D40_CHAN_REG_SDPTR);
+	pete_writel("drivers/dma/ste_dma40.c:845", lli_dst->reg_lnk, base + D40_CHAN_REG_SDLNK);
 }
 
 static void d40_desc_done(struct d40_chan *d40c, struct d40_desc *desc)
@@ -1084,7 +1084,7 @@ static int __d40_execute_command_phy(struct d40_chan *d40c,
 		active_reg = d40c->base->virtbase + D40_DREG_ACTIVO;
 
 	if (command == D40_DMA_SUSPEND_REQ) {
-		status = (readl(active_reg) &
+		status = (pete_readl("drivers/dma/ste_dma40.c:1087", active_reg) &
 			  D40_CHAN_POS_MASK(d40c->phy_chan->num)) >>
 			D40_CHAN_POS(d40c->phy_chan->num);
 
@@ -1093,13 +1093,13 @@ static int __d40_execute_command_phy(struct d40_chan *d40c,
 	}
 
 	wmask = 0xffffffff & ~(D40_CHAN_POS_MASK(d40c->phy_chan->num));
-	writel(wmask | (command << D40_CHAN_POS(d40c->phy_chan->num)),
+	pete_writel("drivers/dma/ste_dma40.c:1096", wmask | (command << D40_CHAN_POS(d40c->phy_chan->num)),
 	       active_reg);
 
 	if (command == D40_DMA_SUSPEND_REQ) {
 
 		for (i = 0 ; i < D40_SUSPEND_MAX_IT; i++) {
-			status = (readl(active_reg) &
+			status = (pete_readl("drivers/dma/ste_dma40.c:1102", active_reg) &
 				  D40_CHAN_POS_MASK(d40c->phy_chan->num)) >>
 				D40_CHAN_POS(d40c->phy_chan->num);
 
@@ -1189,24 +1189,24 @@ static void __d40_config_set_event(struct d40_chan *d40c,
 
 	case D40_DEACTIVATE_EVENTLINE:
 
-		writel((D40_DEACTIVATE_EVENTLINE << D40_EVENTLINE_POS(event))
+		pete_writel("drivers/dma/ste_dma40.c:1192", (D40_DEACTIVATE_EVENTLINE << D40_EVENTLINE_POS(event))
 		       | ~D40_EVENTLINE_MASK(event), addr);
 		break;
 
 	case D40_SUSPEND_REQ_EVENTLINE:
-		status = (readl(addr) & D40_EVENTLINE_MASK(event)) >>
+		status = (pete_readl("drivers/dma/ste_dma40.c:1197", addr) & D40_EVENTLINE_MASK(event)) >>
 			  D40_EVENTLINE_POS(event);
 
 		if (status == D40_DEACTIVATE_EVENTLINE ||
 		    status == D40_SUSPEND_REQ_EVENTLINE)
 			break;
 
-		writel((D40_SUSPEND_REQ_EVENTLINE << D40_EVENTLINE_POS(event))
+		pete_writel("drivers/dma/ste_dma40.c:1204", (D40_SUSPEND_REQ_EVENTLINE << D40_EVENTLINE_POS(event))
 		       | ~D40_EVENTLINE_MASK(event), addr);
 
 		for (tries = 0 ; tries < D40_SUSPEND_MAX_IT; tries++) {
 
-			status = (readl(addr) & D40_EVENTLINE_MASK(event)) >>
+			status = (pete_readl("drivers/dma/ste_dma40.c:1209", addr) & D40_EVENTLINE_MASK(event)) >>
 				  D40_EVENTLINE_POS(event);
 
 			cpu_relax();
@@ -1236,11 +1236,11 @@ static void __d40_config_set_event(struct d40_chan *d40c,
 	 */
 		tries = 100;
 		while (--tries) {
-			writel((D40_ACTIVATE_EVENTLINE <<
+			pete_writel("drivers/dma/ste_dma40.c:1239", (D40_ACTIVATE_EVENTLINE <<
 				D40_EVENTLINE_POS(event)) |
 				~D40_EVENTLINE_MASK(event), addr);
 
-			if (readl(addr) & D40_EVENTLINE_MASK(event))
+			if (pete_readl("drivers/dma/ste_dma40.c:1243", addr) & D40_EVENTLINE_MASK(event))
 				break;
 		}
 
@@ -1281,8 +1281,8 @@ static u32 d40_chan_has_events(struct d40_chan *d40c)
 	void __iomem *chanbase = chan_base(d40c);
 	u32 val;
 
-	val = readl(chanbase + D40_CHAN_REG_SSLNK);
-	val |= readl(chanbase + D40_CHAN_REG_SDLNK);
+	val = pete_readl("drivers/dma/ste_dma40.c:1284", chanbase + D40_CHAN_REG_SSLNK);
+	val |= pete_readl("drivers/dma/ste_dma40.c:1285", chanbase + D40_CHAN_REG_SDLNK);
 
 	return val;
 }
@@ -1307,7 +1307,7 @@ __d40_execute_command_log(struct d40_chan *d40c, enum d40_command command)
 	case D40_DMA_STOP:
 	case D40_DMA_SUSPEND_REQ:
 
-		active_status = (readl(active_reg) &
+		active_status = (pete_readl("drivers/dma/ste_dma40.c:1310", active_reg) &
 				 D40_CHAN_POS_MASK(d40c->phy_chan->num)) >>
 				 D40_CHAN_POS(d40c->phy_chan->num);
 
@@ -1380,12 +1380,12 @@ static void d40_config_write(struct d40_chan *d40c)
 	/* Setup channel mode to logical or physical */
 	var = ((u32)(chan_is_logical(d40c)) + 1) <<
 		D40_CHAN_POS(d40c->phy_chan->num);
-	writel(var, d40c->base->virtbase + D40_DREG_PRMSE + addr_base);
+	pete_writel("drivers/dma/ste_dma40.c:1383", var, d40c->base->virtbase + D40_DREG_PRMSE + addr_base);
 
 	/* Setup operational mode option register */
 	var = d40_get_prmo(d40c) << D40_CHAN_POS(d40c->phy_chan->num);
 
-	writel(var, d40c->base->virtbase + D40_DREG_PRMOE + addr_base);
+	pete_writel("drivers/dma/ste_dma40.c:1388", var, d40c->base->virtbase + D40_DREG_PRMOE + addr_base);
 
 	if (chan_is_logical(d40c)) {
 		int lidx = (d40c->phy_chan->num << D40_SREG_ELEM_LOG_LIDX_POS)
@@ -1393,16 +1393,16 @@ static void d40_config_write(struct d40_chan *d40c)
 		void __iomem *chanbase = chan_base(d40c);
 
 		/* Set default config for CFG reg */
-		writel(d40c->src_def_cfg, chanbase + D40_CHAN_REG_SSCFG);
-		writel(d40c->dst_def_cfg, chanbase + D40_CHAN_REG_SDCFG);
+		pete_writel("drivers/dma/ste_dma40.c:1396", d40c->src_def_cfg, chanbase + D40_CHAN_REG_SSCFG);
+		pete_writel("drivers/dma/ste_dma40.c:1397", d40c->dst_def_cfg, chanbase + D40_CHAN_REG_SDCFG);
 
 		/* Set LIDX for lcla */
-		writel(lidx, chanbase + D40_CHAN_REG_SSELT);
-		writel(lidx, chanbase + D40_CHAN_REG_SDELT);
+		pete_writel("drivers/dma/ste_dma40.c:1400", lidx, chanbase + D40_CHAN_REG_SSELT);
+		pete_writel("drivers/dma/ste_dma40.c:1401", lidx, chanbase + D40_CHAN_REG_SDELT);
 
 		/* Clear LNK which will be used by d40_chan_has_events() */
-		writel(0, chanbase + D40_CHAN_REG_SSLNK);
-		writel(0, chanbase + D40_CHAN_REG_SDLNK);
+		pete_writel("drivers/dma/ste_dma40.c:1404", 0, chanbase + D40_CHAN_REG_SSLNK);
+		pete_writel("drivers/dma/ste_dma40.c:1405", 0, chanbase + D40_CHAN_REG_SDLNK);
 	}
 }
 
@@ -1411,10 +1411,10 @@ static u32 d40_residue(struct d40_chan *d40c)
 	u32 num_elt;
 
 	if (chan_is_logical(d40c))
-		num_elt = (readl(&d40c->lcpa->lcsp2) & D40_MEM_LCSP2_ECNT_MASK)
+		num_elt = (pete_readl("drivers/dma/ste_dma40.c:1414", &d40c->lcpa->lcsp2) & D40_MEM_LCSP2_ECNT_MASK)
 			>> D40_MEM_LCSP2_ECNT_POS;
 	else {
-		u32 val = readl(chan_base(d40c) + D40_CHAN_REG_SDELT);
+		u32 val = pete_readl("drivers/dma/ste_dma40.c:1417", chan_base(d40c) + D40_CHAN_REG_SDELT);
 		num_elt = (val & D40_SREG_ELEM_PHY_ECNT_MASK)
 			  >> D40_SREG_ELEM_PHY_ECNT_POS;
 	}
@@ -1427,9 +1427,9 @@ static bool d40_tx_is_linked(struct d40_chan *d40c)
 	bool is_link;
 
 	if (chan_is_logical(d40c))
-		is_link = readl(&d40c->lcpa->lcsp3) &  D40_MEM_LCSP3_DLOS_MASK;
+		is_link = pete_readl("drivers/dma/ste_dma40.c:1430", &d40c->lcpa->lcsp3) &  D40_MEM_LCSP3_DLOS_MASK;
 	else
-		is_link = readl(chan_base(d40c) + D40_CHAN_REG_SDLNK)
+		is_link = pete_readl("drivers/dma/ste_dma40.c:1432", chan_base(d40c) + D40_CHAN_REG_SDLNK)
 			  & D40_SREG_LNK_PHYS_LNK_MASK;
 
 	return is_link;
@@ -1677,7 +1677,7 @@ static irqreturn_t d40_handle_interrupt(int irq, void *data)
 
 	/* Read interrupt status of both logical and physical channels */
 	for (i = 0; i < il_size; i++)
-		regs[i] = readl(base->virtbase + il[i].src);
+		regs[i] = pete_readl("drivers/dma/ste_dma40.c:1680", base->virtbase + il[i].src);
 
 	for (;;) {
 
@@ -1705,7 +1705,7 @@ static irqreturn_t d40_handle_interrupt(int irq, void *data)
 		}
 
 		/* ACK interrupt */
-		writel(BIT(idx), base->virtbase + il[row].clr);
+		pete_writel("drivers/dma/ste_dma40.c:1708", BIT(idx), base->virtbase + il[row].clr);
 
 		spin_lock(&d40c->lock);
 
@@ -2087,7 +2087,7 @@ static bool d40_is_paused(struct d40_chan *d40c)
 		else
 			active_reg = d40c->base->virtbase + D40_DREG_ACTIVO;
 
-		status = (readl(active_reg) &
+		status = (pete_readl("drivers/dma/ste_dma40.c:2090", active_reg) &
 			  D40_CHAN_POS_MASK(d40c->phy_chan->num)) >>
 			D40_CHAN_POS(d40c->phy_chan->num);
 		if (status == D40_DMA_SUSPENDED || status == D40_DMA_STOP)
@@ -2097,9 +2097,9 @@ static bool d40_is_paused(struct d40_chan *d40c)
 
 	if (d40c->dma_cfg.dir == DMA_MEM_TO_DEV ||
 	    d40c->dma_cfg.dir == DMA_MEM_TO_MEM) {
-		status = readl(chanbase + D40_CHAN_REG_SDLNK);
+		status = pete_readl("drivers/dma/ste_dma40.c:2100", chanbase + D40_CHAN_REG_SDLNK);
 	} else if (d40c->dma_cfg.dir == DMA_DEV_TO_MEM) {
-		status = readl(chanbase + D40_CHAN_REG_SSLNK);
+		status = pete_readl("drivers/dma/ste_dma40.c:2102", chanbase + D40_CHAN_REG_SSLNK);
 	} else {
 		chan_err(d40c, "Unknown direction\n");
 		goto unlock;
@@ -2342,8 +2342,8 @@ static void __d40_set_prio_rt(struct d40_chan *d40c, int dev_type, bool src)
 	if (!src)
 		bit <<= 16;
 
-	writel(bit, d40c->base->virtbase + prioreg + group * 4);
-	writel(bit, d40c->base->virtbase + rtreg + group * 4);
+	pete_writel("drivers/dma/ste_dma40.c:2345", bit, d40c->base->virtbase + prioreg + group * 4);
+	pete_writel("drivers/dma/ste_dma40.c:2346", bit, d40c->base->virtbase + rtreg + group * 4);
 }
 
 static void d40_set_prio_realtime(struct d40_chan *d40c)
@@ -3048,8 +3048,8 @@ static int __init d40_phy_res_init(struct d40_base *base)
 	int odd_even_bit = -2;
 	int gcc = D40_DREG_GCC_ENA;
 
-	val[0] = readl(base->virtbase + D40_DREG_PRSME);
-	val[1] = readl(base->virtbase + D40_DREG_PRSMO);
+	val[0] = pete_readl("drivers/dma/ste_dma40.c:3051", base->virtbase + D40_DREG_PRSME);
+	val[1] = pete_readl("drivers/dma/ste_dma40.c:3052", base->virtbase + D40_DREG_PRSMO);
 
 	for (i = 0; i < base->num_phy_chans; i++) {
 		base->phy_res[i].num = i;
@@ -3099,7 +3099,7 @@ static int __init d40_phy_res_init(struct d40_base *base)
 		 num_phy_chans_avail, base->num_phy_chans);
 
 	/* Verify settings extended vs standard */
-	val[0] = readl(base->virtbase + D40_DREG_PRTYP);
+	val[0] = pete_readl("drivers/dma/ste_dma40.c:3102", base->virtbase + D40_DREG_PRTYP);
 
 	for (i = 0; i < base->num_phy_chans; i++) {
 
@@ -3118,7 +3118,7 @@ static int __init d40_phy_res_init(struct d40_base *base)
 	 * The clocks for the event lines on which reserved channels exists
 	 * are not managed here.
 	 */
-	writel(D40_DREG_GCC_ENABLE_ALL, base->virtbase + D40_DREG_GCC);
+	pete_writel("drivers/dma/ste_dma40.c:3121", D40_DREG_GCC_ENABLE_ALL, base->virtbase + D40_DREG_GCC);
 	base->gcc_pwr_off_mask = gcc;
 
 	return num_phy_chans_avail;
@@ -3160,10 +3160,10 @@ static int __init d40_hw_detect_init(struct platform_device *pdev,
 
 	/* This is just a regular AMBA PrimeCell ID actually */
 	for (pid = 0, i = 0; i < 4; i++)
-		pid |= (readl(virtbase + SZ_4K - 0x20 + 4 * i)
+		pid |= (pete_readl("drivers/dma/ste_dma40.c:3163", virtbase + SZ_4K - 0x20 + 4 * i)
 			& 255) << (i * 8);
 	for (cid = 0, i = 0; i < 4; i++)
-		cid |= (readl(virtbase + SZ_4K - 0x10 + 4 * i)
+		cid |= (pete_readl("drivers/dma/ste_dma40.c:3166", virtbase + SZ_4K - 0x10 + 4 * i)
 			& 255) << (i * 8);
 
 	if (cid != AMBA_CID) {
@@ -3195,7 +3195,7 @@ static int __init d40_hw_detect_init(struct platform_device *pdev,
 	if (plat_data->num_of_phy_chans)
 		num_phy_chans = plat_data->num_of_phy_chans;
 	else
-		num_phy_chans = 4 * (readl(virtbase + D40_DREG_ICFG) & 0x7) + 4;
+		num_phy_chans = 4 * (pete_readl("drivers/dma/ste_dma40.c:3198", virtbase + D40_DREG_ICFG) & 0x7) + 4;
 
 	/* The number of channels used for memcpy */
 	if (plat_data->num_of_memcpy_chans)
@@ -3323,7 +3323,7 @@ static void __init d40_hw_init(struct d40_base *base)
 	u32 reg_size = base->gen_dmac.init_reg_size;
 
 	for (i = 0; i < reg_size; i++)
-		writel(dma_init_reg[i].val,
+		pete_writel("drivers/dma/ste_dma40.c:3326", dma_init_reg[i].val,
 		       base->virtbase + dma_init_reg[i].reg);
 
 	/* Configure all our dma channels to default settings */
@@ -3349,16 +3349,16 @@ static void __init d40_hw_init(struct d40_base *base)
 
 	}
 
-	writel(prmseo[1], base->virtbase + D40_DREG_PRMSE);
-	writel(prmseo[0], base->virtbase + D40_DREG_PRMSO);
-	writel(activeo[1], base->virtbase + D40_DREG_ACTIVE);
-	writel(activeo[0], base->virtbase + D40_DREG_ACTIVO);
+	pete_writel("drivers/dma/ste_dma40.c:3352", prmseo[1], base->virtbase + D40_DREG_PRMSE);
+	pete_writel("drivers/dma/ste_dma40.c:3353", prmseo[0], base->virtbase + D40_DREG_PRMSO);
+	pete_writel("drivers/dma/ste_dma40.c:3354", activeo[1], base->virtbase + D40_DREG_ACTIVE);
+	pete_writel("drivers/dma/ste_dma40.c:3355", activeo[0], base->virtbase + D40_DREG_ACTIVO);
 
 	/* Write which interrupt to enable */
-	writel(pcmis, base->virtbase + base->gen_dmac.interrupt_en);
+	pete_writel("drivers/dma/ste_dma40.c:3358", pcmis, base->virtbase + base->gen_dmac.interrupt_en);
 
 	/* Write which interrupt to clear */
-	writel(pcicr, base->virtbase + base->gen_dmac.interrupt_clear);
+	pete_writel("drivers/dma/ste_dma40.c:3361", pcicr, base->virtbase + base->gen_dmac.interrupt_clear);
 
 	/* These are __initdata and cannot be accessed after init */
 	base->gen_dmac.init_reg = NULL;
@@ -3440,7 +3440,7 @@ static int __init d40_lcla_allocate(struct d40_base *base)
 		goto free_page_list;
 	}
 
-	writel(virt_to_phys(base->lcla_pool.base),
+	pete_writel("drivers/dma/ste_dma40.c:3443", virt_to_phys(base->lcla_pool.base),
 	       base->virtbase + D40_DREG_LCLA);
 	ret = 0;
  free_page_list:
@@ -3546,13 +3546,13 @@ static int __init d40_probe(struct platform_device *pdev)
 		 &base->phy_lcpa, &base->lcpa_size);
 
 	/* We make use of ESRAM memory for this. */
-	val = readl(base->virtbase + D40_DREG_LCPA);
+	val = pete_readl("drivers/dma/ste_dma40.c:3549", base->virtbase + D40_DREG_LCPA);
 	if (base->phy_lcpa != val && val != 0) {
 		dev_warn(dev,
 			 "[%s] Mismatch LCPA dma 0x%x, def %08x\n",
 			 __func__, val, (u32)base->phy_lcpa);
 	} else
-		writel(base->phy_lcpa, base->virtbase + D40_DREG_LCPA);
+		pete_writel("drivers/dma/ste_dma40.c:3555", base->phy_lcpa, base->virtbase + D40_DREG_LCPA);
 
 	base->lcpa_base = devm_ioremap(dev, base->phy_lcpa, base->lcpa_size);
 	if (!base->lcpa_base) {
@@ -3577,7 +3577,7 @@ static int __init d40_probe(struct platform_device *pdev)
 			d40_err(dev, "Failed to ioremap LCLA region\n");
 			goto report_failure;
 		}
-		writel(res->start, base->virtbase + D40_DREG_LCLA);
+		pete_writel("drivers/dma/ste_dma40.c:3580", res->start, base->virtbase + D40_DREG_LCLA);
 
 	} else {
 		ret = d40_lcla_allocate(base);

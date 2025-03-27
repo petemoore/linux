@@ -41,12 +41,12 @@ MODULE_PARM_DESC(size, "Size of the cart block data, in bytes");
 
 static void n64cart_write_reg(const u8 reg, const u32 value)
 {
-	writel(value, reg_base + reg);
+	pete_writel("drivers/block/n64cart.c:44", value, reg_base + reg);
 }
 
 static u32 n64cart_read_reg(const u8 reg)
 {
-	return readl(reg_base + reg);
+	return pete_readl("drivers/block/n64cart.c:49", reg_base + reg);
 }
 
 static void n64cart_wait_dma(void)

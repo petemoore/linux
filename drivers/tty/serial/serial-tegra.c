@@ -156,13 +156,13 @@ static void tegra_uart_dma_channel_free(struct tegra_uart_port *tup,
 static inline unsigned long tegra_uart_read(struct tegra_uart_port *tup,
 		unsigned long reg)
 {
-	return readl(tup->uport.membase + (reg << tup->uport.regshift));
+	return pete_readl("drivers/tty/serial/serial-tegra.c:159", tup->uport.membase + (reg << tup->uport.regshift));
 }
 
 static inline void tegra_uart_write(struct tegra_uart_port *tup, unsigned val,
 	unsigned long reg)
 {
-	writel(val, tup->uport.membase + (reg << tup->uport.regshift));
+	pete_writel("drivers/tty/serial/serial-tegra.c:165", val, tup->uport.membase + (reg << tup->uport.regshift));
 }
 
 static inline struct tegra_uart_port *to_tegra_uport(struct uart_port *u)

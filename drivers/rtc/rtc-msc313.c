@@ -52,12 +52,12 @@ static int msc313_rtc_read_alarm(struct device *dev, struct rtc_wkalrm *alarm)
 	struct msc313_rtc *priv = dev_get_drvdata(dev);
 	unsigned long seconds;
 
-	seconds = readw(priv->rtc_base + REG_RTC_MATCH_VAL_L)
-			| ((unsigned long)readw(priv->rtc_base + REG_RTC_MATCH_VAL_H) << 16);
+	seconds = pete_readw("drivers/rtc/rtc-msc313.c:55", priv->rtc_base + REG_RTC_MATCH_VAL_L)
+			| ((unsigned long)pete_readw("drivers/rtc/rtc-msc313.c:56", priv->rtc_base + REG_RTC_MATCH_VAL_H) << 16);
 
 	rtc_time64_to_tm(seconds, &alarm->time);
 
-	if (!(readw(priv->rtc_base + REG_RTC_CTRL) & INT_MASK_BIT))
+	if (!(pete_readw("drivers/rtc/rtc-msc313.c:60", priv->rtc_base + REG_RTC_CTRL) & INT_MASK_BIT))
 		alarm->enabled = 1;
 
 	return 0;
@@ -68,12 +68,12 @@ static int msc313_rtc_alarm_irq_enable(struct device *dev, unsigned int enabled)
 	struct msc313_rtc *priv = dev_get_drvdata(dev);
 	u16 reg;
 
-	reg = readw(priv->rtc_base + REG_RTC_CTRL);
+	reg = pete_readw("drivers/rtc/rtc-msc313.c:71", priv->rtc_base + REG_RTC_CTRL);
 	if (enabled)
 		reg &= ~INT_MASK_BIT;
 	else
 		reg |= INT_MASK_BIT;
-	writew(reg, priv->rtc_base + REG_RTC_CTRL);
+	pete_writew("drivers/rtc/rtc-msc313.c:76", reg, priv->rtc_base + REG_RTC_CTRL);
 	return 0;
 }
 
@@ -83,8 +83,8 @@ static int msc313_rtc_set_alarm(struct device *dev, struct rtc_wkalrm *alarm)
 	unsigned long seconds;
 
 	seconds = rtc_tm_to_time64(&alarm->time);
-	writew((seconds & 0xFFFF), priv->rtc_base + REG_RTC_MATCH_VAL_L);
-	writew((seconds >> 16) & 0xFFFF, priv->rtc_base + REG_RTC_MATCH_VAL_H);
+	pete_writew("drivers/rtc/rtc-msc313.c:86", (seconds & 0xFFFF), priv->rtc_base + REG_RTC_MATCH_VAL_L);
+	pete_writew("drivers/rtc/rtc-msc313.c:87", (seconds >> 16) & 0xFFFF, priv->rtc_base + REG_RTC_MATCH_VAL_H);
 
 	msc313_rtc_alarm_irq_enable(dev, alarm->enabled);
 
@@ -93,16 +93,16 @@ static int msc313_rtc_set_alarm(struct device *dev, struct rtc_wkalrm *alarm)
 
 static bool msc313_rtc_get_enabled(struct msc313_rtc *priv)
 {
-	return readw(priv->rtc_base + REG_RTC_CTRL) & CNT_EN_BIT;
+	return pete_readw("drivers/rtc/rtc-msc313.c:96", priv->rtc_base + REG_RTC_CTRL) & CNT_EN_BIT;
 }
 
 static void msc313_rtc_set_enabled(struct msc313_rtc *priv)
 {
 	u16 reg;
 
-	reg = readw(priv->rtc_base + REG_RTC_CTRL);
+	reg = pete_readw("drivers/rtc/rtc-msc313.c:103", priv->rtc_base + REG_RTC_CTRL);
 	reg |= CNT_EN_BIT;
-	writew(reg, priv->rtc_base + REG_RTC_CTRL);
+	pete_writew("drivers/rtc/rtc-msc313.c:105", reg, priv->rtc_base + REG_RTC_CTRL);
 }
 
 static int msc313_rtc_read_time(struct device *dev, struct rtc_time *tm)
@@ -114,15 +114,15 @@ static int msc313_rtc_read_time(struct device *dev, struct rtc_time *tm)
 	if (!msc313_rtc_get_enabled(priv))
 		return -EINVAL;
 
-	reg = readw(priv->rtc_base + REG_RTC_CTRL);
-	writew(reg | READ_EN_BIT, priv->rtc_base + REG_RTC_CTRL);
+	reg = pete_readw("drivers/rtc/rtc-msc313.c:117", priv->rtc_base + REG_RTC_CTRL);
+	pete_writew("drivers/rtc/rtc-msc313.c:118", reg | READ_EN_BIT, priv->rtc_base + REG_RTC_CTRL);
 
 	/* Wait for HW latch done */
-	while (readw(priv->rtc_base + REG_RTC_CTRL) & READ_EN_BIT)
+	while (pete_readw("drivers/rtc/rtc-msc313.c:121", priv->rtc_base + REG_RTC_CTRL) & READ_EN_BIT)
 		udelay(1);
 
-	seconds = readw(priv->rtc_base + REG_RTC_CNT_VAL_L)
-			| ((unsigned long)readw(priv->rtc_base + REG_RTC_CNT_VAL_H) << 16);
+	seconds = pete_readw("drivers/rtc/rtc-msc313.c:124", priv->rtc_base + REG_RTC_CNT_VAL_L)
+			| ((unsigned long)pete_readw("drivers/rtc/rtc-msc313.c:125", priv->rtc_base + REG_RTC_CNT_VAL_H) << 16);
 
 	rtc_time64_to_tm(seconds, tm);
 
@@ -136,15 +136,15 @@ static int msc313_rtc_set_time(struct device *dev, struct rtc_time *tm)
 	u16 reg;
 
 	seconds = rtc_tm_to_time64(tm);
-	writew(seconds & 0xFFFF, priv->rtc_base + REG_RTC_LOAD_VAL_L);
-	writew((seconds >> 16) & 0xFFFF, priv->rtc_base + REG_RTC_LOAD_VAL_H);
+	pete_writew("drivers/rtc/rtc-msc313.c:139", seconds & 0xFFFF, priv->rtc_base + REG_RTC_LOAD_VAL_L);
+	pete_writew("drivers/rtc/rtc-msc313.c:140", (seconds >> 16) & 0xFFFF, priv->rtc_base + REG_RTC_LOAD_VAL_H);
 
 	/* Enable load for loading value into internal RTC counter */
-	reg = readw(priv->rtc_base + REG_RTC_CTRL);
-	writew(reg | LOAD_EN_BIT, priv->rtc_base + REG_RTC_CTRL);
+	reg = pete_readw("drivers/rtc/rtc-msc313.c:143", priv->rtc_base + REG_RTC_CTRL);
+	pete_writew("drivers/rtc/rtc-msc313.c:144", reg | LOAD_EN_BIT, priv->rtc_base + REG_RTC_CTRL);
 
 	/* Wait for HW latch done */
-	while (readw(priv->rtc_base + REG_RTC_CTRL) & LOAD_EN_BIT)
+	while (pete_readw("drivers/rtc/rtc-msc313.c:147", priv->rtc_base + REG_RTC_CTRL) & LOAD_EN_BIT)
 		udelay(1);
 	msc313_rtc_set_enabled(priv);
 	return 0;
@@ -163,14 +163,14 @@ static irqreturn_t msc313_rtc_interrupt(s32 irq, void *dev_id)
 	struct msc313_rtc *priv = dev_get_drvdata(dev_id);
 	u16 reg;
 
-	reg = readw(priv->rtc_base + REG_RTC_STATUS_INT);
+	reg = pete_readw("drivers/rtc/rtc-msc313.c:166", priv->rtc_base + REG_RTC_STATUS_INT);
 	if (!(reg & ALM_INT_BIT))
 		return IRQ_NONE;
 
-	reg = readw(priv->rtc_base + REG_RTC_CTRL);
+	reg = pete_readw("drivers/rtc/rtc-msc313.c:170", priv->rtc_base + REG_RTC_CTRL);
 	reg |= INT_CLEAR_BIT;
 	reg &= ~INT_FORCE_BIT;
-	writew(reg, priv->rtc_base + REG_RTC_CTRL);
+	pete_writew("drivers/rtc/rtc-msc313.c:173", reg, priv->rtc_base + REG_RTC_CTRL);
 
 	rtc_update_irq(priv->rtc_dev, 1, RTC_IRQF | RTC_AF);
 
@@ -219,8 +219,8 @@ static int msc313_rtc_probe(struct platform_device *pdev)
 	}
 
 	rate = clk_get_rate(clk);
-	writew(rate & 0xFFFF, priv->rtc_base + REG_RTC_FREQ_CW_L);
-	writew((rate >> 16) & 0xFFFF, priv->rtc_base + REG_RTC_FREQ_CW_H);
+	pete_writew("drivers/rtc/rtc-msc313.c:222", rate & 0xFFFF, priv->rtc_base + REG_RTC_FREQ_CW_L);
+	pete_writew("drivers/rtc/rtc-msc313.c:223", (rate >> 16) & 0xFFFF, priv->rtc_base + REG_RTC_FREQ_CW_H);
 
 	platform_set_drvdata(pdev, priv);
 

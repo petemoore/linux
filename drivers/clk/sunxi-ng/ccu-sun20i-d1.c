@@ -1348,15 +1348,15 @@ static int sun20i_d1_ccu_probe(struct platform_device *pdev)
 
 	/* Enable the enable, LDO, and lock bits on all PLLs. */
 	for (i = 0; i < ARRAY_SIZE(pll_regs); i++) {
-		val = readl(reg + pll_regs[i]);
+		val = pete_readl("drivers/clk/sunxi-ng/ccu-sun20i-d1.c:1351", reg + pll_regs[i]);
 		val |= BIT(31) | BIT(30) | BIT(29);
-		writel(val, reg + pll_regs[i]);
+		pete_writel("drivers/clk/sunxi-ng/ccu-sun20i-d1.c:1353", val, reg + pll_regs[i]);
 	}
 
 	/* Force PLL_CPUX factor M to 0. */
-	val = readl(reg + SUN20I_D1_PLL_CPUX_REG);
+	val = pete_readl("drivers/clk/sunxi-ng/ccu-sun20i-d1.c:1357", reg + SUN20I_D1_PLL_CPUX_REG);
 	val &= ~GENMASK(1, 0);
-	writel(val, reg + SUN20I_D1_PLL_CPUX_REG);
+	pete_writel("drivers/clk/sunxi-ng/ccu-sun20i-d1.c:1359", val, reg + SUN20I_D1_PLL_CPUX_REG);
 
 	/*
 	 * Force the output divider of video PLLs to 0.
@@ -1364,20 +1364,20 @@ static int sun20i_d1_ccu_probe(struct platform_device *pdev)
 	 * See the comment before pll-video0 definition for the reason.
 	 */
 	for (i = 0; i < ARRAY_SIZE(pll_video_regs); i++) {
-		val = readl(reg + pll_video_regs[i]);
+		val = pete_readl("drivers/clk/sunxi-ng/ccu-sun20i-d1.c:1367", reg + pll_video_regs[i]);
 		val &= ~BIT(0);
-		writel(val, reg + pll_video_regs[i]);
+		pete_writel("drivers/clk/sunxi-ng/ccu-sun20i-d1.c:1369", val, reg + pll_video_regs[i]);
 	}
 
 	/* Enforce m1 = 0, m0 = 0 for PLL_AUDIO0 */
-	val = readl(reg + SUN20I_D1_PLL_AUDIO0_REG);
+	val = pete_readl("drivers/clk/sunxi-ng/ccu-sun20i-d1.c:1373", reg + SUN20I_D1_PLL_AUDIO0_REG);
 	val &= ~(BIT(1) | BIT(0));
-	writel(val, reg + SUN20I_D1_PLL_AUDIO0_REG);
+	pete_writel("drivers/clk/sunxi-ng/ccu-sun20i-d1.c:1375", val, reg + SUN20I_D1_PLL_AUDIO0_REG);
 
 	/* Force fanout-27M factor N to 0. */
-	val = readl(reg + SUN20I_D1_FANOUT_27M_REG);
+	val = pete_readl("drivers/clk/sunxi-ng/ccu-sun20i-d1.c:1378", reg + SUN20I_D1_FANOUT_27M_REG);
 	val &= ~GENMASK(9, 8);
-	writel(val, reg + SUN20I_D1_FANOUT_27M_REG);
+	pete_writel("drivers/clk/sunxi-ng/ccu-sun20i-d1.c:1380", val, reg + SUN20I_D1_FANOUT_27M_REG);
 
 	ret = devm_sunxi_ccu_probe(&pdev->dev, reg, &sun20i_d1_ccu_desc);
 	if (ret)

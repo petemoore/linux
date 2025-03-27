@@ -293,14 +293,14 @@ static void __nmk_gpio_set_mode(struct nmk_gpio_chip *nmk_chip,
 {
 	u32 afunc, bfunc;
 
-	afunc = readl(nmk_chip->addr + NMK_GPIO_AFSLA) & ~BIT(offset);
-	bfunc = readl(nmk_chip->addr + NMK_GPIO_AFSLB) & ~BIT(offset);
+	afunc = pete_readl("drivers/pinctrl/nomadik/pinctrl-nomadik.c:296", nmk_chip->addr + NMK_GPIO_AFSLA) & ~BIT(offset);
+	bfunc = pete_readl("drivers/pinctrl/nomadik/pinctrl-nomadik.c:297", nmk_chip->addr + NMK_GPIO_AFSLB) & ~BIT(offset);
 	if (gpio_mode & NMK_GPIO_ALT_A)
 		afunc |= BIT(offset);
 	if (gpio_mode & NMK_GPIO_ALT_B)
 		bfunc |= BIT(offset);
-	writel(afunc, nmk_chip->addr + NMK_GPIO_AFSLA);
-	writel(bfunc, nmk_chip->addr + NMK_GPIO_AFSLB);
+	pete_writel("drivers/pinctrl/nomadik/pinctrl-nomadik.c:302", afunc, nmk_chip->addr + NMK_GPIO_AFSLA);
+	pete_writel("drivers/pinctrl/nomadik/pinctrl-nomadik.c:303", bfunc, nmk_chip->addr + NMK_GPIO_AFSLB);
 }
 
 static void __nmk_gpio_set_slpm(struct nmk_gpio_chip *nmk_chip,
@@ -308,12 +308,12 @@ static void __nmk_gpio_set_slpm(struct nmk_gpio_chip *nmk_chip,
 {
 	u32 slpm;
 
-	slpm = readl(nmk_chip->addr + NMK_GPIO_SLPC);
+	slpm = pete_readl("drivers/pinctrl/nomadik/pinctrl-nomadik.c:311", nmk_chip->addr + NMK_GPIO_SLPC);
 	if (mode == NMK_GPIO_SLPM_NOCHANGE)
 		slpm |= BIT(offset);
 	else
 		slpm &= ~BIT(offset);
-	writel(slpm, nmk_chip->addr + NMK_GPIO_SLPC);
+	pete_writel("drivers/pinctrl/nomadik/pinctrl-nomadik.c:316", slpm, nmk_chip->addr + NMK_GPIO_SLPC);
 }
 
 static void __nmk_gpio_set_pull(struct nmk_gpio_chip *nmk_chip,
@@ -321,7 +321,7 @@ static void __nmk_gpio_set_pull(struct nmk_gpio_chip *nmk_chip,
 {
 	u32 pdis;
 
-	pdis = readl(nmk_chip->addr + NMK_GPIO_PDIS);
+	pdis = pete_readl("drivers/pinctrl/nomadik/pinctrl-nomadik.c:324", nmk_chip->addr + NMK_GPIO_PDIS);
 	if (pull == NMK_GPIO_PULL_NONE) {
 		pdis |= BIT(offset);
 		nmk_chip->pull_up &= ~BIT(offset);
@@ -329,14 +329,14 @@ static void __nmk_gpio_set_pull(struct nmk_gpio_chip *nmk_chip,
 		pdis &= ~BIT(offset);
 	}
 
-	writel(pdis, nmk_chip->addr + NMK_GPIO_PDIS);
+	pete_writel("drivers/pinctrl/nomadik/pinctrl-nomadik.c:332", pdis, nmk_chip->addr + NMK_GPIO_PDIS);
 
 	if (pull == NMK_GPIO_PULL_UP) {
 		nmk_chip->pull_up |= BIT(offset);
-		writel(BIT(offset), nmk_chip->addr + NMK_GPIO_DATS);
+		pete_writel("drivers/pinctrl/nomadik/pinctrl-nomadik.c:336", BIT(offset), nmk_chip->addr + NMK_GPIO_DATS);
 	} else if (pull == NMK_GPIO_PULL_DOWN) {
 		nmk_chip->pull_up &= ~BIT(offset);
-		writel(BIT(offset), nmk_chip->addr + NMK_GPIO_DATC);
+		pete_writel("drivers/pinctrl/nomadik/pinctrl-nomadik.c:339", BIT(offset), nmk_chip->addr + NMK_GPIO_DATC);
 	}
 }
 
@@ -360,22 +360,22 @@ static void __nmk_gpio_set_lowemi(struct nmk_gpio_chip *nmk_chip,
 static void __nmk_gpio_make_input(struct nmk_gpio_chip *nmk_chip,
 				  unsigned offset)
 {
-	writel(BIT(offset), nmk_chip->addr + NMK_GPIO_DIRC);
+	pete_writel("drivers/pinctrl/nomadik/pinctrl-nomadik.c:363", BIT(offset), nmk_chip->addr + NMK_GPIO_DIRC);
 }
 
 static void __nmk_gpio_set_output(struct nmk_gpio_chip *nmk_chip,
 				  unsigned offset, int val)
 {
 	if (val)
-		writel(BIT(offset), nmk_chip->addr + NMK_GPIO_DATS);
+		pete_writel("drivers/pinctrl/nomadik/pinctrl-nomadik.c:370", BIT(offset), nmk_chip->addr + NMK_GPIO_DATS);
 	else
-		writel(BIT(offset), nmk_chip->addr + NMK_GPIO_DATC);
+		pete_writel("drivers/pinctrl/nomadik/pinctrl-nomadik.c:372", BIT(offset), nmk_chip->addr + NMK_GPIO_DATC);
 }
 
 static void __nmk_gpio_make_output(struct nmk_gpio_chip *nmk_chip,
 				  unsigned offset, int val)
 {
-	writel(BIT(offset), nmk_chip->addr + NMK_GPIO_DIRS);
+	pete_writel("drivers/pinctrl/nomadik/pinctrl-nomadik.c:378", BIT(offset), nmk_chip->addr + NMK_GPIO_DIRS);
 	__nmk_gpio_set_output(nmk_chip, offset, val);
 }
 
@@ -390,8 +390,8 @@ static void __nmk_gpio_set_mode_safe(struct nmk_gpio_chip *nmk_chip,
 		u32 bit = BIT(offset);
 
 		/* Prevent spurious wakeups */
-		writel(rwimsc & ~bit, nmk_chip->addr + NMK_GPIO_RWIMSC);
-		writel(fwimsc & ~bit, nmk_chip->addr + NMK_GPIO_FWIMSC);
+		pete_writel("drivers/pinctrl/nomadik/pinctrl-nomadik.c:393", rwimsc & ~bit, nmk_chip->addr + NMK_GPIO_RWIMSC);
+		pete_writel("drivers/pinctrl/nomadik/pinctrl-nomadik.c:394", fwimsc & ~bit, nmk_chip->addr + NMK_GPIO_FWIMSC);
 
 		nmk_chip->set_ioforce(true);
 	}
@@ -401,8 +401,8 @@ static void __nmk_gpio_set_mode_safe(struct nmk_gpio_chip *nmk_chip,
 	if (glitch && nmk_chip->set_ioforce) {
 		nmk_chip->set_ioforce(false);
 
-		writel(rwimsc, nmk_chip->addr + NMK_GPIO_RWIMSC);
-		writel(fwimsc, nmk_chip->addr + NMK_GPIO_FWIMSC);
+		pete_writel("drivers/pinctrl/nomadik/pinctrl-nomadik.c:404", rwimsc, nmk_chip->addr + NMK_GPIO_RWIMSC);
+		pete_writel("drivers/pinctrl/nomadik/pinctrl-nomadik.c:405", fwimsc, nmk_chip->addr + NMK_GPIO_FWIMSC);
 	}
 }
 
@@ -440,9 +440,9 @@ static void nmk_write_masked(void __iomem *reg, u32 mask, u32 value)
 {
 	u32 val;
 
-	val = readl(reg);
+	val = pete_readl("drivers/pinctrl/nomadik/pinctrl-nomadik.c:443", reg);
 	val = ((val & ~mask) | (value & mask));
-	writel(val, reg);
+	pete_writel("drivers/pinctrl/nomadik/pinctrl-nomadik.c:445", val, reg);
 }
 
 static void nmk_prcm_altcx_set_mode(struct nmk_pinctrl *npct,
@@ -486,7 +486,7 @@ static void nmk_prcm_altcx_set_mode(struct nmk_pinctrl *npct,
 			if (pin_desc->altcx[i].used == true) {
 				reg = gpiocr_regs[pin_desc->altcx[i].reg_index];
 				bit = pin_desc->altcx[i].control_bit;
-				if (readl(npct->prcm_base + reg) & BIT(bit)) {
+				if (pete_readl("drivers/pinctrl/nomadik/pinctrl-nomadik.c:489", npct->prcm_base + reg) & BIT(bit)) {
 					nmk_write_masked(npct->prcm_base + reg, BIT(bit), 0);
 					dev_dbg(npct->dev,
 						"PRCM GPIOCR: pin %i: alternate-C%i has been disabled\n",
@@ -515,7 +515,7 @@ static void nmk_prcm_altcx_set_mode(struct nmk_pinctrl *npct,
 		if (pin_desc->altcx[i].used == true) {
 			reg = gpiocr_regs[pin_desc->altcx[i].reg_index];
 			bit = pin_desc->altcx[i].control_bit;
-			if (readl(npct->prcm_base + reg) & BIT(bit)) {
+			if (pete_readl("drivers/pinctrl/nomadik/pinctrl-nomadik.c:518", npct->prcm_base + reg) & BIT(bit)) {
 				nmk_write_masked(npct->prcm_base + reg, BIT(bit), 0);
 				dev_dbg(npct->dev,
 					"PRCM GPIOCR: pin %i: alternate-C%i has been disabled\n",
@@ -556,8 +556,8 @@ static void nmk_gpio_glitch_slpm_init(unsigned int *slpm)
 
 		clk_enable(chip->clk);
 
-		slpm[i] = readl(chip->addr + NMK_GPIO_SLPC);
-		writel(temp, chip->addr + NMK_GPIO_SLPC);
+		slpm[i] = pete_readl("drivers/pinctrl/nomadik/pinctrl-nomadik.c:559", chip->addr + NMK_GPIO_SLPC);
+		pete_writel("drivers/pinctrl/nomadik/pinctrl-nomadik.c:560", temp, chip->addr + NMK_GPIO_SLPC);
 	}
 }
 
@@ -571,7 +571,7 @@ static void nmk_gpio_glitch_slpm_restore(unsigned int *slpm)
 		if (!chip)
 			break;
 
-		writel(slpm[i], chip->addr + NMK_GPIO_SLPC);
+		pete_writel("drivers/pinctrl/nomadik/pinctrl-nomadik.c:574", slpm[i], chip->addr + NMK_GPIO_SLPC);
 
 		clk_disable(chip->clk);
 	}
@@ -602,7 +602,7 @@ static int __maybe_unused nmk_prcm_gpiocr_get_mode(struct pinctrl_dev *pctldev, 
 		if (pin_desc->altcx[i].used == true) {
 			reg = gpiocr_regs[pin_desc->altcx[i].reg_index];
 			bit = pin_desc->altcx[i].control_bit;
-			if (readl(npct->prcm_base + reg) & BIT(bit))
+			if (pete_readl("drivers/pinctrl/nomadik/pinctrl-nomadik.c:605", npct->prcm_base + reg) & BIT(bit))
 				return NMK_GPIO_ALT_C+i+1;
 		}
 	}
@@ -617,7 +617,7 @@ static void nmk_gpio_irq_ack(struct irq_data *d)
 	struct nmk_gpio_chip *nmk_chip = gpiochip_get_data(gc);
 
 	clk_enable(nmk_chip->clk);
-	writel(BIT(d->hwirq), nmk_chip->addr + NMK_GPIO_IC);
+	pete_writel("drivers/pinctrl/nomadik/pinctrl-nomadik.c:620", BIT(d->hwirq), nmk_chip->addr + NMK_GPIO_IC);
 	clk_disable(nmk_chip->clk);
 }
 
@@ -653,14 +653,14 @@ static void __nmk_gpio_irq_modify(struct nmk_gpio_chip *nmk_chip,
 			*rimscval |= BIT(offset);
 		else
 			*rimscval &= ~BIT(offset);
-		writel(*rimscval, nmk_chip->addr + rimscreg);
+		pete_writel("drivers/pinctrl/nomadik/pinctrl-nomadik.c:656", *rimscval, nmk_chip->addr + rimscreg);
 	}
 	if (nmk_chip->edge_falling & BIT(offset)) {
 		if (enable)
 			*fimscval |= BIT(offset);
 		else
 			*fimscval &= ~BIT(offset);
-		writel(*fimscval, nmk_chip->addr + fimscreg);
+		pete_writel("drivers/pinctrl/nomadik/pinctrl-nomadik.c:663", *fimscval, nmk_chip->addr + fimscreg);
 	}
 }
 
@@ -813,7 +813,7 @@ static void nmk_gpio_irq_handler(struct irq_desc *desc)
 	chained_irq_enter(host_chip, desc);
 
 	clk_enable(nmk_chip->clk);
-	status = readl(nmk_chip->addr + NMK_GPIO_IS);
+	status = pete_readl("drivers/pinctrl/nomadik/pinctrl-nomadik.c:816", nmk_chip->addr + NMK_GPIO_IS);
 	clk_disable(nmk_chip->clk);
 
 	while (status) {
@@ -835,7 +835,7 @@ static int nmk_gpio_get_dir(struct gpio_chip *chip, unsigned offset)
 
 	clk_enable(nmk_chip->clk);
 
-	dir = readl(nmk_chip->addr + NMK_GPIO_DIR) & BIT(offset);
+	dir = pete_readl("drivers/pinctrl/nomadik/pinctrl-nomadik.c:838", nmk_chip->addr + NMK_GPIO_DIR) & BIT(offset);
 
 	clk_disable(nmk_chip->clk);
 
@@ -851,7 +851,7 @@ static int nmk_gpio_make_input(struct gpio_chip *chip, unsigned offset)
 
 	clk_enable(nmk_chip->clk);
 
-	writel(BIT(offset), nmk_chip->addr + NMK_GPIO_DIRC);
+	pete_writel("drivers/pinctrl/nomadik/pinctrl-nomadik.c:854", BIT(offset), nmk_chip->addr + NMK_GPIO_DIRC);
 
 	clk_disable(nmk_chip->clk);
 
@@ -865,7 +865,7 @@ static int nmk_gpio_get_input(struct gpio_chip *chip, unsigned offset)
 
 	clk_enable(nmk_chip->clk);
 
-	value = !!(readl(nmk_chip->addr + NMK_GPIO_DAT) & BIT(offset));
+	value = !!(pete_readl("drivers/pinctrl/nomadik/pinctrl-nomadik.c:868", nmk_chip->addr + NMK_GPIO_DAT) & BIT(offset));
 
 	clk_disable(nmk_chip->clk);
 
@@ -905,8 +905,8 @@ static int nmk_gpio_get_mode(struct nmk_gpio_chip *nmk_chip, int offset)
 
 	clk_enable(nmk_chip->clk);
 
-	afunc = readl(nmk_chip->addr + NMK_GPIO_AFSLA) & BIT(offset);
-	bfunc = readl(nmk_chip->addr + NMK_GPIO_AFSLB) & BIT(offset);
+	afunc = pete_readl("drivers/pinctrl/nomadik/pinctrl-nomadik.c:908", nmk_chip->addr + NMK_GPIO_AFSLA) & BIT(offset);
+	bfunc = pete_readl("drivers/pinctrl/nomadik/pinctrl-nomadik.c:909", nmk_chip->addr + NMK_GPIO_AFSLB) & BIT(offset);
 
 	clk_disable(nmk_chip->clk);
 
@@ -935,9 +935,9 @@ static void nmk_gpio_dbg_show_one(struct seq_file *s,
 	};
 
 	clk_enable(nmk_chip->clk);
-	is_out = !!(readl(nmk_chip->addr + NMK_GPIO_DIR) & BIT(offset));
-	pull = !(readl(nmk_chip->addr + NMK_GPIO_PDIS) & BIT(offset));
-	data_out = !!(readl(nmk_chip->addr + NMK_GPIO_DAT) & BIT(offset));
+	is_out = !!(pete_readl("drivers/pinctrl/nomadik/pinctrl-nomadik.c:938", nmk_chip->addr + NMK_GPIO_DIR) & BIT(offset));
+	pull = !(pete_readl("drivers/pinctrl/nomadik/pinctrl-nomadik.c:939", nmk_chip->addr + NMK_GPIO_PDIS) & BIT(offset));
+	data_out = !!(pete_readl("drivers/pinctrl/nomadik/pinctrl-nomadik.c:940", nmk_chip->addr + NMK_GPIO_DAT) & BIT(offset));
 	mode = nmk_gpio_get_mode(nmk_chip, offset);
 	if ((mode == NMK_GPIO_ALT_C) && pctldev)
 		mode = nmk_prcm_gpiocr_get_mode(pctldev, gpio);

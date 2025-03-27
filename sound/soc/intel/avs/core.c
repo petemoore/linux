@@ -99,7 +99,7 @@ static bool avs_hdac_bus_init_chip(struct hdac_bus *bus, bool full_reset)
 
 	/* Reset stream-to-link mapping */
 	list_for_each_entry(hlink, &bus->hlink_list, list)
-		writel(0, hlink->ml_addr + AZX_REG_ML_LOSIDV);
+		pete_writel("sound/soc/intel/avs/core.c:102", 0, hlink->ml_addr + AZX_REG_ML_LOSIDV);
 
 	avs_hdac_clock_gating_enable(bus, true);
 

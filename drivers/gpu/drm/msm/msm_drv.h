@@ -476,8 +476,8 @@ void __iomem *msm_ioremap_quiet(struct platform_device *pdev, const char *name);
 
 struct icc_path *msm_icc_get(struct device *dev, const char *name);
 
-#define msm_writel(data, addr) writel((data), (addr))
-#define msm_readl(addr) readl((addr))
+#define msm_writel(data, addr) pete_writel("drivers/gpu/drm/msm/msm_drv.h:479", (data), (addr))
+#define msm_readl(addr) pete_readl("drivers/gpu/drm/msm/msm_drv.h:480", (addr))
 
 static inline void msm_rmw(void __iomem *addr, u32 mask, u32 or)
 {

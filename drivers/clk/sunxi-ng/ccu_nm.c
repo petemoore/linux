@@ -91,7 +91,7 @@ static unsigned long ccu_nm_recalc_rate(struct clk_hw *hw,
 		return rate;
 	}
 
-	reg = readl(nm->common.base + nm->common.reg);
+	reg = pete_readl("drivers/clk/sunxi-ng/ccu_nm.c:94", nm->common.base + nm->common.reg);
 
 	n = reg >> nm->n.shift;
 	n &= (1 << nm->n.width) - 1;
@@ -180,9 +180,9 @@ static int ccu_nm_set_rate(struct clk_hw *hw, unsigned long rate,
 		spin_lock_irqsave(nm->common.lock, flags);
 
 		/* most SoCs require M to be 0 if fractional mode is used */
-		reg = readl(nm->common.base + nm->common.reg);
+		reg = pete_readl("drivers/clk/sunxi-ng/ccu_nm.c:183", nm->common.base + nm->common.reg);
 		reg &= ~GENMASK(nm->m.width + nm->m.shift - 1, nm->m.shift);
-		writel(reg, nm->common.base + nm->common.reg);
+		pete_writel("drivers/clk/sunxi-ng/ccu_nm.c:185", reg, nm->common.base + nm->common.reg);
 
 		spin_unlock_irqrestore(nm->common.lock, flags);
 
@@ -212,13 +212,13 @@ static int ccu_nm_set_rate(struct clk_hw *hw, unsigned long rate,
 
 	spin_lock_irqsave(nm->common.lock, flags);
 
-	reg = readl(nm->common.base + nm->common.reg);
+	reg = pete_readl("drivers/clk/sunxi-ng/ccu_nm.c:215", nm->common.base + nm->common.reg);
 	reg &= ~GENMASK(nm->n.width + nm->n.shift - 1, nm->n.shift);
 	reg &= ~GENMASK(nm->m.width + nm->m.shift - 1, nm->m.shift);
 
 	reg |= (_nm.n - nm->n.offset) << nm->n.shift;
 	reg |= (_nm.m - nm->m.offset) << nm->m.shift;
-	writel(reg, nm->common.base + nm->common.reg);
+	pete_writel("drivers/clk/sunxi-ng/ccu_nm.c:221", reg, nm->common.base + nm->common.reg);
 
 	spin_unlock_irqrestore(nm->common.lock, flags);
 

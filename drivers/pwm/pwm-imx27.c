@@ -131,7 +131,7 @@ static int pwm_imx27_get_state(struct pwm_chip *chip,
 	if (ret < 0)
 		return ret;
 
-	val = readl(imx->mmio_base + MX3_PWMCR);
+	val = pete_readl("drivers/pwm/pwm-imx27.c:134", imx->mmio_base + MX3_PWMCR);
 
 	if (val & MX3_PWMCR_EN)
 		state->enabled = true;
@@ -151,7 +151,7 @@ static int pwm_imx27_get_state(struct pwm_chip *chip,
 
 	prescaler = MX3_PWMCR_PRESCALER_GET(val);
 	pwm_clk = clk_get_rate(imx->clk_per);
-	val = readl(imx->mmio_base + MX3_PWMPR);
+	val = pete_readl("drivers/pwm/pwm-imx27.c:154", imx->mmio_base + MX3_PWMPR);
 	period = val >= MX3_PWMPR_MAX ? MX3_PWMPR_MAX : val;
 
 	/* PWMOUT (Hz) = PWMCLK / (PWMPR + 2) */
@@ -163,7 +163,7 @@ static int pwm_imx27_get_state(struct pwm_chip *chip,
 	 * use the cached value.
 	 */
 	if (state->enabled)
-		val = readl(imx->mmio_base + MX3_PWMSAR);
+		val = pete_readl("drivers/pwm/pwm-imx27.c:166", imx->mmio_base + MX3_PWMSAR);
 	else
 		val = imx->duty_cycle;
 
@@ -182,10 +182,10 @@ static void pwm_imx27_sw_reset(struct pwm_chip *chip)
 	int wait_count = 0;
 	u32 cr;
 
-	writel(MX3_PWMCR_SWR, imx->mmio_base + MX3_PWMCR);
+	pete_writel("drivers/pwm/pwm-imx27.c:185", MX3_PWMCR_SWR, imx->mmio_base + MX3_PWMCR);
 	do {
 		usleep_range(200, 1000);
-		cr = readl(imx->mmio_base + MX3_PWMCR);
+		cr = pete_readl("drivers/pwm/pwm-imx27.c:188", imx->mmio_base + MX3_PWMCR);
 	} while ((cr & MX3_PWMCR_SWR) &&
 		 (wait_count++ < MX3_PWM_SWR_LOOP));
 
@@ -202,14 +202,14 @@ static void pwm_imx27_wait_fifo_slot(struct pwm_chip *chip,
 	int fifoav;
 	u32 sr;
 
-	sr = readl(imx->mmio_base + MX3_PWMSR);
+	sr = pete_readl("drivers/pwm/pwm-imx27.c:205", imx->mmio_base + MX3_PWMSR);
 	fifoav = FIELD_GET(MX3_PWMSR_FIFOAV, sr);
 	if (fifoav == MX3_PWMSR_FIFOAV_4WORDS) {
 		period_ms = DIV_ROUND_UP_ULL(pwm_get_period(pwm),
 					 NSEC_PER_MSEC);
 		msleep(period_ms);
 
-		sr = readl(imx->mmio_base + MX3_PWMSR);
+		sr = pete_readl("drivers/pwm/pwm-imx27.c:212", imx->mmio_base + MX3_PWMSR);
 		if (fifoav == FIELD_GET(MX3_PWMSR_FIFOAV, sr))
 			dev_warn(dev, "there is no free FIFO slot\n");
 	}
@@ -267,9 +267,9 @@ static int pwm_imx27_apply(struct pwm_chip *chip, struct pwm_device *pwm,
 		pwm_imx27_sw_reset(chip);
 	}
 
-	val = readl(imx->mmio_base + MX3_PWMPR);
+	val = pete_readl("drivers/pwm/pwm-imx27.c:270", imx->mmio_base + MX3_PWMPR);
 	val = val >= MX3_PWMPR_MAX ? MX3_PWMPR_MAX : val;
-	cr = readl(imx->mmio_base + MX3_PWMCR);
+	cr = pete_readl("drivers/pwm/pwm-imx27.c:272", imx->mmio_base + MX3_PWMCR);
 	tmp = NSEC_PER_SEC * (u64)(val + 2) * MX3_PWMCR_PRESCALER_GET(cr);
 	tmp = DIV_ROUND_UP_ULL(tmp, clkrate);
 	period_us = DIV_ROUND_UP_ULL(tmp, 1000);
@@ -359,7 +359,7 @@ static int pwm_imx27_apply(struct pwm_chip *chip, struct pwm_device *pwm,
 	writel_relaxed(duty_cycles, imx->mmio_base + MX3_PWMSAR);
 	local_irq_restore(flags);
 
-	writel(period_cycles, imx->mmio_base + MX3_PWMPR);
+	pete_writel("drivers/pwm/pwm-imx27.c:362", period_cycles, imx->mmio_base + MX3_PWMPR);
 
 	/*
 	 * Store the duty cycle for future reference in cases where the
@@ -379,7 +379,7 @@ static int pwm_imx27_apply(struct pwm_chip *chip, struct pwm_device *pwm,
 	if (state->enabled)
 		cr |= MX3_PWMCR_EN;
 
-	writel(cr, imx->mmio_base + MX3_PWMCR);
+	pete_writel("drivers/pwm/pwm-imx27.c:382", cr, imx->mmio_base + MX3_PWMCR);
 
 	if (!state->enabled)
 		pwm_imx27_clk_disable_unprepare(imx);
@@ -432,7 +432,7 @@ static int pwm_imx27_probe(struct platform_device *pdev)
 		return ret;
 
 	/* keep clks on if pwm is running */
-	pwmcr = readl(imx->mmio_base + MX3_PWMCR);
+	pwmcr = pete_readl("drivers/pwm/pwm-imx27.c:435", imx->mmio_base + MX3_PWMCR);
 	if (!(pwmcr & MX3_PWMCR_EN))
 		pwm_imx27_clk_disable_unprepare(imx);
 

@@ -41,9 +41,9 @@ static int pcc_gate_enable(struct clk_hw *hw)
 	 * release the sw reset for peripherals associated with
 	 * with this pcc clock.
 	 */
-	val = readl(gate->reg);
+	val = pete_readl("drivers/clk/imx/clk-composite-7ulp.c:44", gate->reg);
 	val |= SW_RST;
-	writel(val, gate->reg);
+	pete_writel("drivers/clk/imx/clk-composite-7ulp.c:46", val, gate->reg);
 
 	spin_unlock_irqrestore(gate->lock, flags);
 
@@ -79,7 +79,7 @@ static struct clk_hw *imx_ulp_clk_hw_composite(const char *name,
 	struct clk_hw *hw;
 	u32 val;
 
-	val = readl(reg);
+	val = pete_readl("drivers/clk/imx/clk-composite-7ulp.c:82", reg);
 	if (!(val & PCG_PR_MASK)) {
 		pr_info("PCC PR is 0 for clk:%s, bypass\n", name);
 		return 0;

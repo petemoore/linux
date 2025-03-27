@@ -31,12 +31,12 @@ static void __init r8a7778_init_irq_dt(void)
 	irqchip_init();
 
 	/* route all interrupts to ARM */
-	writel(0x73ffffff, base + INT2NTSR0);
-	writel(0xffffffff, base + INT2NTSR1);
+	pete_writel("arch/arm/mach-shmobile/setup-r8a7778.c:34", 0x73ffffff, base + INT2NTSR0);
+	pete_writel("arch/arm/mach-shmobile/setup-r8a7778.c:35", 0xffffffff, base + INT2NTSR1);
 
 	/* unmask all known interrupts in INTCS2 */
-	writel(0x08330773, base + INT2SMSKCR0);
-	writel(0x00311110, base + INT2SMSKCR1);
+	pete_writel("arch/arm/mach-shmobile/setup-r8a7778.c:38", 0x08330773, base + INT2SMSKCR0);
+	pete_writel("arch/arm/mach-shmobile/setup-r8a7778.c:39", 0x00311110, base + INT2SMSKCR1);
 
 	iounmap(base);
 }

@@ -345,12 +345,12 @@ int ls7a2000_cursor_plane_init(struct drm_device *ddev,
 
 static inline u32 lsdc_rreg32(struct lsdc_device *ldev, u32 offset)
 {
-	return readl(ldev->reg_base + offset);
+	return pete_readl("drivers/gpu/drm/loongson/lsdc_drv.h:348", ldev->reg_base + offset);
 }
 
 static inline void lsdc_wreg32(struct lsdc_device *ldev, u32 offset, u32 val)
 {
-	writel(val, ldev->reg_base + offset);
+	pete_writel("drivers/gpu/drm/loongson/lsdc_drv.h:353", val, ldev->reg_base + offset);
 }
 
 static inline void lsdc_ureg32_set(struct lsdc_device *ldev,
@@ -358,9 +358,9 @@ static inline void lsdc_ureg32_set(struct lsdc_device *ldev,
 				   u32 mask)
 {
 	void __iomem *addr = ldev->reg_base + offset;
-	u32 val = readl(addr);
+	u32 val = pete_readl("drivers/gpu/drm/loongson/lsdc_drv.h:361", addr);
 
-	writel(val | mask, addr);
+	pete_writel("drivers/gpu/drm/loongson/lsdc_drv.h:363", val | mask, addr);
 }
 
 static inline void lsdc_ureg32_clr(struct lsdc_device *ldev,
@@ -368,21 +368,21 @@ static inline void lsdc_ureg32_clr(struct lsdc_device *ldev,
 				   u32 mask)
 {
 	void __iomem *addr = ldev->reg_base + offset;
-	u32 val = readl(addr);
+	u32 val = pete_readl("drivers/gpu/drm/loongson/lsdc_drv.h:371", addr);
 
-	writel(val & ~mask, addr);
+	pete_writel("drivers/gpu/drm/loongson/lsdc_drv.h:373", val & ~mask, addr);
 }
 
 static inline u32 lsdc_pipe_rreg32(struct lsdc_device *ldev,
 				   u32 offset, u32 pipe)
 {
-	return readl(ldev->reg_base + offset + pipe * CRTC_PIPE_OFFSET);
+	return pete_readl("drivers/gpu/drm/loongson/lsdc_drv.h:379", ldev->reg_base + offset + pipe * CRTC_PIPE_OFFSET);
 }
 
 static inline void lsdc_pipe_wreg32(struct lsdc_device *ldev,
 				    u32 offset, u32 pipe, u32 val)
 {
-	writel(val, ldev->reg_base + offset + pipe * CRTC_PIPE_OFFSET);
+	pete_writel("drivers/gpu/drm/loongson/lsdc_drv.h:385", val, ldev->reg_base + offset + pipe * CRTC_PIPE_OFFSET);
 }
 
 #endif

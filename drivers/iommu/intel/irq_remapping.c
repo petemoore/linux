@@ -98,7 +98,7 @@ static void init_ir_status(struct intel_iommu *iommu)
 {
 	u32 gsts;
 
-	gsts = readl(iommu->reg + DMAR_GSTS_REG);
+	gsts = pete_readl("drivers/iommu/intel/irq_remapping.c:101", iommu->reg + DMAR_GSTS_REG);
 	if (gsts & DMA_GSTS_IRES)
 		iommu->flags |= VTD_FLAG_IRQ_REMAP_PRE_ENABLED;
 }
@@ -474,7 +474,7 @@ static void iommu_set_irq_remapping(struct intel_iommu *iommu, int mode)
 		    (addr) | IR_X2APIC_MODE(mode) | INTR_REMAP_TABLE_REG_SIZE);
 
 	/* Set interrupt-remapping table pointer */
-	writel(iommu->gcmd | DMA_GCMD_SIRTP, iommu->reg + DMAR_GCMD_REG);
+	pete_writel("drivers/iommu/intel/irq_remapping.c:477", iommu->gcmd | DMA_GCMD_SIRTP, iommu->reg + DMAR_GCMD_REG);
 
 	IOMMU_WAIT_OP(iommu, DMAR_GSTS_REG,
 		      readl, (sts & DMA_GSTS_IRTPS), sts);
@@ -497,14 +497,14 @@ static void iommu_enable_irq_remapping(struct intel_iommu *iommu)
 
 	/* Enable interrupt-remapping */
 	iommu->gcmd |= DMA_GCMD_IRE;
-	writel(iommu->gcmd, iommu->reg + DMAR_GCMD_REG);
+	pete_writel("drivers/iommu/intel/irq_remapping.c:500", iommu->gcmd, iommu->reg + DMAR_GCMD_REG);
 	IOMMU_WAIT_OP(iommu, DMAR_GSTS_REG,
 		      readl, (sts & DMA_GSTS_IRES), sts);
 
 	/* Block compatibility-format MSIs */
 	if (sts & DMA_GSTS_CFIS) {
 		iommu->gcmd &= ~DMA_GCMD_CFI;
-		writel(iommu->gcmd, iommu->reg + DMAR_GCMD_REG);
+		pete_writel("drivers/iommu/intel/irq_remapping.c:507", iommu->gcmd, iommu->reg + DMAR_GCMD_REG);
 		IOMMU_WAIT_OP(iommu, DMAR_GSTS_REG,
 			      readl, !(sts & DMA_GSTS_CFIS), sts);
 	}
@@ -671,12 +671,12 @@ static void iommu_disable_irq_remapping(struct intel_iommu *iommu)
 
 	raw_spin_lock_irqsave(&iommu->register_lock, flags);
 
-	sts = readl(iommu->reg + DMAR_GSTS_REG);
+	sts = pete_readl("drivers/iommu/intel/irq_remapping.c:674", iommu->reg + DMAR_GSTS_REG);
 	if (!(sts & DMA_GSTS_IRES))
 		goto end;
 
 	iommu->gcmd &= ~DMA_GCMD_IRE;
-	writel(iommu->gcmd, iommu->reg + DMAR_GCMD_REG);
+	pete_writel("drivers/iommu/intel/irq_remapping.c:679", iommu->gcmd, iommu->reg + DMAR_GCMD_REG);
 
 	IOMMU_WAIT_OP(iommu, DMAR_GSTS_REG,
 		      readl, !(sts & DMA_GSTS_IRES), sts);

@@ -1859,9 +1859,9 @@ xhci_free_interrupter(struct xhci_hcd *xhci, struct xhci_interrupter *ir)
 	 * dereference the partially cleared 64 bit address, causing IOMMU error.
 	 */
 	if (ir->ir_set) {
-		tmp = readl(&ir->ir_set->erst_size);
+		tmp = pete_readl("drivers/usb/host/xhci-mem.c:1862", &ir->ir_set->erst_size);
 		tmp &= ERST_SIZE_MASK;
-		writel(tmp, &ir->ir_set->erst_size);
+		pete_writel("drivers/usb/host/xhci-mem.c:1864", tmp, &ir->ir_set->erst_size);
 
 		tmp64 = xhci_read_64(xhci, &ir->ir_set->erst_dequeue);
 		tmp64 &= (u64) ERST_PTR_MASK;
@@ -2002,7 +2002,7 @@ static void xhci_add_in_port(struct xhci_hcd *xhci, unsigned int num_ports,
 	struct device *dev = xhci_to_hcd(xhci)->self.sysdev;
 	struct xhci_port_cap *port_cap;
 
-	temp = readl(addr);
+	temp = pete_readl("drivers/usb/host/xhci-mem.c:2005", addr);
 	major_revision = XHCI_EXT_PORT_MAJOR(temp);
 	minor_revision = XHCI_EXT_PORT_MINOR(temp);
 
@@ -2036,7 +2036,7 @@ static void xhci_add_in_port(struct xhci_hcd *xhci, unsigned int num_ports,
 	}
 
 	/* Port offset and count in the third dword, see section 7.2 */
-	temp = readl(addr + 2);
+	temp = pete_readl("drivers/usb/host/xhci-mem.c:2039", addr + 2);
 	port_offset = XHCI_EXT_PORT_OFF(temp);
 	port_count = XHCI_EXT_PORT_COUNT(temp);
 	xhci_dbg_trace(xhci, trace_xhci_dbg_init,
@@ -2062,7 +2062,7 @@ static void xhci_add_in_port(struct xhci_hcd *xhci, unsigned int num_ports,
 
 		port_cap->psi_uid_count++;
 		for (i = 0; i < port_cap->psi_count; i++) {
-			port_cap->psi[i] = readl(addr + 4 + i);
+			port_cap->psi[i] = pete_readl("drivers/usb/host/xhci-mem.c:2065", addr + 4 + i);
 
 			/* count unique ID values, two consecutive entries can
 			 * have the same ID if link is assymetric
@@ -2323,10 +2323,10 @@ xhci_add_interrupter(struct xhci_hcd *xhci, struct xhci_interrupter *ir,
 	ir->ir_set = &xhci->run_regs->ir_set[intr_num];
 
 	/* set ERST count with the number of entries in the segment table */
-	erst_size = readl(&ir->ir_set->erst_size);
+	erst_size = pete_readl("drivers/usb/host/xhci-mem.c:2326", &ir->ir_set->erst_size);
 	erst_size &= ERST_SIZE_MASK;
 	erst_size |= ir->event_ring->num_segs;
-	writel(erst_size, &ir->ir_set->erst_size);
+	pete_writel("drivers/usb/host/xhci-mem.c:2329", erst_size, &ir->ir_set->erst_size);
 
 	erst_base = xhci_read_64(xhci, &ir->ir_set->erst_base);
 	erst_base &= ERST_BASE_RSVDP;
@@ -2357,7 +2357,7 @@ int xhci_mem_init(struct xhci_hcd *xhci, gfp_t flags)
 	INIT_DELAYED_WORK(&xhci->cmd_timer, xhci_handle_command_timeout);
 	init_completion(&xhci->cmd_ring_stop_completion);
 
-	page_size = readl(&xhci->op_regs->page_size);
+	page_size = pete_readl("drivers/usb/host/xhci-mem.c:2360", &xhci->op_regs->page_size);
 	xhci_dbg_trace(xhci, trace_xhci_dbg_init,
 			"Supported page size register = 0x%x", page_size);
 	i = ffs(page_size);
@@ -2376,14 +2376,14 @@ int xhci_mem_init(struct xhci_hcd *xhci, gfp_t flags)
 	 * Program the Number of Device Slots Enabled field in the CONFIG
 	 * register with the max value of slots the HC can handle.
 	 */
-	val = HCS_MAX_SLOTS(readl(&xhci->cap_regs->hcs_params1));
+	val = HCS_MAX_SLOTS(pete_readl("drivers/usb/host/xhci-mem.c:2379", &xhci->cap_regs->hcs_params1));
 	xhci_dbg_trace(xhci, trace_xhci_dbg_init,
 			"// xHC can handle at most %d device slots.", val);
-	val2 = readl(&xhci->op_regs->config_reg);
+	val2 = pete_readl("drivers/usb/host/xhci-mem.c:2382", &xhci->op_regs->config_reg);
 	val |= (val2 & ~HCS_SLOTS_MASK);
 	xhci_dbg_trace(xhci, trace_xhci_dbg_init,
 			"// Setting Max device slots reg = 0x%x.", val);
-	writel(val, &xhci->op_regs->config_reg);
+	pete_writel("drivers/usb/host/xhci-mem.c:2386", val, &xhci->op_regs->config_reg);
 
 	/*
 	 * xHCI section 5.4.6 - Device Context array must be
@@ -2459,7 +2459,7 @@ int xhci_mem_init(struct xhci_hcd *xhci, gfp_t flags)
 	 */
 	xhci->cmd_ring_reserved_trbs++;
 
-	val = readl(&xhci->cap_regs->db_off);
+	val = pete_readl("drivers/usb/host/xhci-mem.c:2462", &xhci->cap_regs->db_off);
 	val &= DBOFF_MASK;
 	xhci_dbg_trace(xhci, trace_xhci_dbg_init,
 		       "// Doorbell array is located at offset 0x%x from cap regs base addr",
@@ -2495,10 +2495,10 @@ int xhci_mem_init(struct xhci_hcd *xhci, gfp_t flags)
 	 * is necessary for allowing USB 3.0 devices to do remote wakeup from
 	 * U3 (device suspend).
 	 */
-	temp = readl(&xhci->op_regs->dev_notification);
+	temp = pete_readl("drivers/usb/host/xhci-mem.c:2498", &xhci->op_regs->dev_notification);
 	temp &= ~DEV_NOTE_MASK;
 	temp |= DEV_NOTE_FWAKE;
-	writel(temp, &xhci->op_regs->dev_notification);
+	pete_writel("drivers/usb/host/xhci-mem.c:2501", temp, &xhci->op_regs->dev_notification);
 
 	return 0;
 

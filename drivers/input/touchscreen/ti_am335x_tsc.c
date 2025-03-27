@@ -61,13 +61,13 @@ struct titsc {
 
 static unsigned int titsc_readl(struct titsc *ts, unsigned int reg)
 {
-	return readl(ts->mfd_tscadc->tscadc_base + reg);
+	return pete_readl("drivers/input/touchscreen/ti_am335x_tsc.c:64", ts->mfd_tscadc->tscadc_base + reg);
 }
 
 static void titsc_writel(struct titsc *tsc, unsigned int reg,
 					unsigned int val)
 {
-	writel(val, tsc->mfd_tscadc->tscadc_base + reg);
+	pete_writel("drivers/input/touchscreen/ti_am335x_tsc.c:70", val, tsc->mfd_tscadc->tscadc_base + reg);
 }
 
 static int titsc_config_wires(struct titsc *ts_dev)

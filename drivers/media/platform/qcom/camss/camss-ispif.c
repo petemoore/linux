@@ -178,7 +178,7 @@ static irqreturn_t ispif_isr_8x96(int irq, void *dev)
 	writel_relaxed(value4, ispif->base + ISPIF_VFE_m_IRQ_CLEAR_1(1));
 	writel_relaxed(value5, ispif->base + ISPIF_VFE_m_IRQ_CLEAR_2(1));
 
-	writel(0x1, ispif->base + ISPIF_IRQ_GLOBAL_CLEAR_CMD);
+	pete_writel("drivers/media/platform/qcom/camss/camss-ispif.c:181", 0x1, ispif->base + ISPIF_IRQ_GLOBAL_CLEAR_CMD);
 
 	if ((value0 >> 27) & 0x1)
 		complete(&ispif->reset_complete[0]);
@@ -240,7 +240,7 @@ static irqreturn_t ispif_isr_8x16(int irq, void *dev)
 	writel_relaxed(value1, ispif->base + ISPIF_VFE_m_IRQ_CLEAR_1(0));
 	writel_relaxed(value2, ispif->base + ISPIF_VFE_m_IRQ_CLEAR_2(0));
 
-	writel(0x1, ispif->base + ISPIF_IRQ_GLOBAL_CLEAR_CMD);
+	pete_writel("drivers/media/platform/qcom/camss/camss-ispif.c:243", 0x1, ispif->base + ISPIF_IRQ_GLOBAL_CLEAR_CMD);
 
 	if ((value0 >> 27) & 0x1)
 		complete(&ispif->reset_complete[0]);
@@ -603,7 +603,7 @@ static void ispif_select_csid(struct ispif_device *ispif, enum ispif_intf intf,
 		break;
 	}
 
-	writel(val, ispif->base + ISPIF_VFE_m_INTF_INPUT_SEL(vfe));
+	pete_writel("drivers/media/platform/qcom/camss/camss-ispif.c:606", val, ispif->base + ISPIF_VFE_m_INTF_INPUT_SEL(vfe));
 }
 
 /*
@@ -645,7 +645,7 @@ static void ispif_select_cid(struct ispif_device *ispif, enum ispif_intf intf,
 	else
 		val &= ~cid_mask;
 
-	writel(val, ispif->base + addr);
+	pete_writel("drivers/media/platform/qcom/camss/camss-ispif.c:648", val, ispif->base + addr);
 }
 
 /*
@@ -708,7 +708,7 @@ static void ispif_config_irq(struct ispif_device *ispif, enum ispif_intf intf,
 		break;
 	}
 
-	writel(0x1, ispif->base + ISPIF_IRQ_GLOBAL_CLEAR_CMD);
+	pete_writel("drivers/media/platform/qcom/camss/camss-ispif.c:711", 0x1, ispif->base + ISPIF_IRQ_GLOBAL_CLEAR_CMD);
 }
 
 /*

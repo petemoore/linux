@@ -75,8 +75,8 @@ static void otx_cpt_send_msg_to_vf(struct otx_cpt_device *cpt, int vf,
 				   struct otx_cpt_mbox *mbx)
 {
 	/* Writing mbox(0) causes interrupt */
-	writeq(mbx->data, cpt->reg_base + OTX_CPT_PF_VFX_MBOXX(vf, 1));
-	writeq(mbx->msg, cpt->reg_base + OTX_CPT_PF_VFX_MBOXX(vf, 0));
+	pete_writeq("drivers/crypto/marvell/octeontx/otx_cptpf_mbox.c:78", mbx->data, cpt->reg_base + OTX_CPT_PF_VFX_MBOXX(vf, 1));
+	pete_writeq("drivers/crypto/marvell/octeontx/otx_cptpf_mbox.c:79", mbx->msg, cpt->reg_base + OTX_CPT_PF_VFX_MBOXX(vf, 0));
 }
 
 /*
@@ -103,7 +103,7 @@ static void otx_cptpf_mbox_send_nack(struct otx_cpt_device *cpt, int vf,
 static void otx_cpt_clear_mbox_intr(struct otx_cpt_device *cpt, u32 vf)
 {
 	/* W1C for the VF */
-	writeq(1ull << vf, cpt->reg_base + OTX_CPT_PF_MBOX_INTX(0));
+	pete_writeq("drivers/crypto/marvell/octeontx/otx_cptpf_mbox.c:106", 1ull << vf, cpt->reg_base + OTX_CPT_PF_MBOX_INTX(0));
 }
 
 /*
@@ -114,10 +114,10 @@ static void otx_cpt_cfg_qlen_for_vf(struct otx_cpt_device *cpt, int vf,
 {
 	union otx_cptx_pf_qx_ctl pf_qx_ctl;
 
-	pf_qx_ctl.u = readq(cpt->reg_base + OTX_CPT_PF_QX_CTL(vf));
+	pf_qx_ctl.u = pete_readq("drivers/crypto/marvell/octeontx/otx_cptpf_mbox.c:117", cpt->reg_base + OTX_CPT_PF_QX_CTL(vf));
 	pf_qx_ctl.s.size = size;
 	pf_qx_ctl.s.cont_err = true;
-	writeq(pf_qx_ctl.u, cpt->reg_base + OTX_CPT_PF_QX_CTL(vf));
+	pete_writeq("drivers/crypto/marvell/octeontx/otx_cptpf_mbox.c:120", pf_qx_ctl.u, cpt->reg_base + OTX_CPT_PF_QX_CTL(vf));
 }
 
 /*
@@ -127,9 +127,9 @@ static void otx_cpt_cfg_vq_priority(struct otx_cpt_device *cpt, int vf, u32 pri)
 {
 	union otx_cptx_pf_qx_ctl pf_qx_ctl;
 
-	pf_qx_ctl.u = readq(cpt->reg_base + OTX_CPT_PF_QX_CTL(vf));
+	pf_qx_ctl.u = pete_readq("drivers/crypto/marvell/octeontx/otx_cptpf_mbox.c:130", cpt->reg_base + OTX_CPT_PF_QX_CTL(vf));
 	pf_qx_ctl.s.pri = pri;
-	writeq(pf_qx_ctl.u, cpt->reg_base + OTX_CPT_PF_QX_CTL(vf));
+	pete_writeq("drivers/crypto/marvell/octeontx/otx_cptpf_mbox.c:132", pf_qx_ctl.u, cpt->reg_base + OTX_CPT_PF_QX_CTL(vf));
 }
 
 static int otx_cpt_bind_vq_to_grp(struct otx_cpt_device *cpt, u8 q, u8 grp)
@@ -157,9 +157,9 @@ static int otx_cpt_bind_vq_to_grp(struct otx_cpt_device *cpt, u8 q, u8 grp)
 		return -EINVAL;
 	}
 
-	pf_qx_ctl.u = readq(cpt->reg_base + OTX_CPT_PF_QX_CTL(q));
+	pf_qx_ctl.u = pete_readq("drivers/crypto/marvell/octeontx/otx_cptpf_mbox.c:160", cpt->reg_base + OTX_CPT_PF_QX_CTL(q));
 	pf_qx_ctl.s.grp = grp;
-	writeq(pf_qx_ctl.u, cpt->reg_base + OTX_CPT_PF_QX_CTL(q));
+	pete_writeq("drivers/crypto/marvell/octeontx/otx_cptpf_mbox.c:162", pf_qx_ctl.u, cpt->reg_base + OTX_CPT_PF_QX_CTL(q));
 
 	if (eng_grp->mirror.is_ena)
 		ucode = &eng_grp->g->grp[eng_grp->mirror.idx].ucode[0];
@@ -184,8 +184,8 @@ static void otx_cpt_handle_mbox_intr(struct otx_cpt_device *cpt, int vf)
 	 * MBOX[0] contains msg
 	 * MBOX[1] contains data
 	 */
-	mbx.msg  = readq(cpt->reg_base + OTX_CPT_PF_VFX_MBOXX(vf, 0));
-	mbx.data = readq(cpt->reg_base + OTX_CPT_PF_VFX_MBOXX(vf, 1));
+	mbx.msg  = pete_readq("drivers/crypto/marvell/octeontx/otx_cptpf_mbox.c:187", cpt->reg_base + OTX_CPT_PF_VFX_MBOXX(vf, 0));
+	mbx.data = pete_readq("drivers/crypto/marvell/octeontx/otx_cptpf_mbox.c:188", cpt->reg_base + OTX_CPT_PF_VFX_MBOXX(vf, 1));
 
 	dump_mbox_msg(&mbx, vf);
 
@@ -242,7 +242,7 @@ void otx_cpt_mbox_intr_handler (struct otx_cpt_device *cpt, int mbx)
 	u64 intr;
 	u8  vf;
 
-	intr = readq(cpt->reg_base + OTX_CPT_PF_MBOX_INTX(0));
+	intr = pete_readq("drivers/crypto/marvell/octeontx/otx_cptpf_mbox.c:245", cpt->reg_base + OTX_CPT_PF_MBOX_INTX(0));
 	pr_debug("PF interrupt mbox%d mask 0x%llx\n", mbx, intr);
 	for (vf = 0; vf < cpt->max_vfs; vf++) {
 		if (intr & (1ULL << vf)) {

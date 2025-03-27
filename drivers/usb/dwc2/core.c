@@ -1160,9 +1160,9 @@ int dwc2_phy_init(struct dwc2_hsotg *hsotg, bool select_phy)
 
 	if (!hsotg->params.activate_ingenic_overcurrent_detection) {
 		if (dwc2_is_host_mode(hsotg)) {
-			otgctl = readl(hsotg->regs + GOTGCTL);
+			otgctl = pete_readl("drivers/usb/dwc2/core.c:1163", hsotg->regs + GOTGCTL);
 			otgctl |= GOTGCTL_VBVALOEN | GOTGCTL_VBVALOVAL;
-			writel(otgctl, hsotg->regs + GOTGCTL);
+			pete_writel("drivers/usb/dwc2/core.c:1165", otgctl, hsotg->regs + GOTGCTL);
 		}
 	}
 

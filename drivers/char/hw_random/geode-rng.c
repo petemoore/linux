@@ -61,7 +61,7 @@ static int geode_rng_data_read(struct hwrng *rng, u32 *data)
 	struct amd_geode_priv *priv = (struct amd_geode_priv *)rng->priv;
 	void __iomem *mem = priv->membase;
 
-	*data = readl(mem + GEODE_RNG_DATA_REG);
+	*data = pete_readl("drivers/char/hw_random/geode-rng.c:64", mem + GEODE_RNG_DATA_REG);
 
 	return 4;
 }
@@ -73,7 +73,7 @@ static int geode_rng_data_present(struct hwrng *rng, int wait)
 	int data, i;
 
 	for (i = 0; i < 20; i++) {
-		data = !!(readl(mem + GEODE_RNG_STATUS_REG));
+		data = !!(pete_readl("drivers/char/hw_random/geode-rng.c:76", mem + GEODE_RNG_STATUS_REG));
 		if (data || !wait)
 			break;
 		udelay(10);

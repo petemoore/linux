@@ -435,9 +435,9 @@ static int bcm4908_pinctrl_set_mux(struct pinctrl_dev *pctrl_dev,
 		lsb |= group->pins[i].number;
 		lsb |= group->pins[i].function << BCM4908_TEST_PORT_LSB_PINMUX_DATA_SHIFT;
 
-		writel(0x0, bcm4908_pinctrl->base + BCM4908_TEST_PORT_BLOCK_DATA_MSB);
-		writel(lsb, bcm4908_pinctrl->base + BCM4908_TEST_PORT_BLOCK_DATA_LSB);
-		writel(BCM4908_TEST_PORT_CMD_LOAD_MUX_REG,
+		pete_writel("drivers/pinctrl/bcm/pinctrl-bcm4908.c:438", 0x0, bcm4908_pinctrl->base + BCM4908_TEST_PORT_BLOCK_DATA_MSB);
+		pete_writel("drivers/pinctrl/bcm/pinctrl-bcm4908.c:439", lsb, bcm4908_pinctrl->base + BCM4908_TEST_PORT_BLOCK_DATA_LSB);
+		pete_writel("drivers/pinctrl/bcm/pinctrl-bcm4908.c:440", BCM4908_TEST_PORT_CMD_LOAD_MUX_REG,
 		       bcm4908_pinctrl->base + BCM4908_TEST_PORT_COMMAND);
 	}
 	mutex_unlock(&bcm4908_pinctrl->mutex);

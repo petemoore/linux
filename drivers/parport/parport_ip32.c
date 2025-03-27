@@ -326,7 +326,7 @@ static void parport_ip32_dump_state(struct parport *p, char *str,
 		static const char ecr_modes[8][4] = {"SPP", "PS2", "PPF",
 						     "ECP", "EPP", "???",
 						     "TST", "CFG"};
-		unsigned int ecr = readb(priv->regs.ecr);
+		unsigned int ecr = pete_readb("drivers/parport/parport_ip32.c:329", priv->regs.ecr);
 		printk(KERN_DEBUG PPIP32 "    ecr=0x%02x", ecr);
 		pr_cont(" %s",
 			ecr_modes[(ecr & ECR_MODE_MASK) >> ECR_MODE_SHIFT]);
@@ -344,13 +344,13 @@ static void parport_ip32_dump_state(struct parport *p, char *str,
 	}
 	if (show_ecp_config) {
 		unsigned int oecr, cnfgA, cnfgB;
-		oecr = readb(priv->regs.ecr);
-		writeb(ECR_MODE_PS2, priv->regs.ecr);
-		writeb(ECR_MODE_CFG, priv->regs.ecr);
-		cnfgA = readb(priv->regs.cnfgA);
-		cnfgB = readb(priv->regs.cnfgB);
-		writeb(ECR_MODE_PS2, priv->regs.ecr);
-		writeb(oecr, priv->regs.ecr);
+		oecr = pete_readb("drivers/parport/parport_ip32.c:347", priv->regs.ecr);
+		pete_writeb("drivers/parport/parport_ip32.c:348", ECR_MODE_PS2, priv->regs.ecr);
+		pete_writeb("drivers/parport/parport_ip32.c:349", ECR_MODE_CFG, priv->regs.ecr);
+		cnfgA = pete_readb("drivers/parport/parport_ip32.c:350", priv->regs.cnfgA);
+		cnfgB = pete_readb("drivers/parport/parport_ip32.c:351", priv->regs.cnfgB);
+		pete_writeb("drivers/parport/parport_ip32.c:352", ECR_MODE_PS2, priv->regs.ecr);
+		pete_writeb("drivers/parport/parport_ip32.c:353", oecr, priv->regs.ecr);
 		printk(KERN_DEBUG PPIP32 "    cnfgA=0x%02x", cnfgA);
 		pr_cont(" ISA-%s", (cnfgA & CNFGA_IRQ) ? "Level" : "Pulses");
 		switch (cnfgA & CNFGA_ID_MASK) {
@@ -384,7 +384,7 @@ static void parport_ip32_dump_state(struct parport *p, char *str,
 		pr_cont("\n");
 	}
 	for (i = 0; i < 2; i++) {
-		unsigned int dcr = i ? priv->dcr_cache : readb(priv->regs.dcr);
+		unsigned int dcr = i ? priv->dcr_cache : pete_readb("drivers/parport/parport_ip32.c:387", priv->regs.dcr);
 		printk(KERN_DEBUG PPIP32 "    dcr(%s)=0x%02x",
 		       i ? "soft" : "hard", dcr);
 		pr_cont(" %s", (dcr & DCR_DIR) ? "rev" : "fwd");
@@ -403,7 +403,7 @@ static void parport_ip32_dump_state(struct parport *p, char *str,
 #define sep (f++ ? ',' : ' ')
 	{
 		unsigned int f = 0;
-		unsigned int dsr = readb(priv->regs.dsr);
+		unsigned int dsr = pete_readb("drivers/parport/parport_ip32.c:406", priv->regs.dsr);
 		printk(KERN_DEBUG PPIP32 "    dsr=0x%02x", dsr);
 		if (!(dsr & DSR_nBUSY))
 			pr_cont("%cBusy", sep);
@@ -516,7 +516,7 @@ static void parport_ip32_dma_setup_context(unsigned int limit)
 			MACEPAR_CONTEXT_BASEADDR_MASK;
 		ctxval |= ((count - 1) << MACEPAR_CONTEXT_DATALEN_SHIFT) &
 			MACEPAR_CONTEXT_DATALEN_MASK;
-		writeq(ctxval, ctxreg);
+		pete_writeq("drivers/parport/parport_ip32.c:519", ctxval, ctxreg);
 		parport_ip32_dma.next += count;
 		parport_ip32_dma.left -= count;
 		parport_ip32_dma.ctx ^= 1U;
@@ -578,7 +578,7 @@ static int parport_ip32_dma_start(struct parport *p,
 
 	/* Reset DMA controller */
 	ctrl = MACEPAR_CTLSTAT_RESET;
-	writeq(ctrl, &mace->perif.ctrl.parport.cntlstat);
+	pete_writeq("drivers/parport/parport_ip32.c:581", ctrl, &mace->perif.ctrl.parport.cntlstat);
 
 	/* DMA IRQs should normally be enabled */
 	if (!parport_ip32_dma.irq_on) {
@@ -598,7 +598,7 @@ static int parport_ip32_dma_start(struct parport *p,
 
 	/* Setup DMA direction and first two contexts */
 	ctrl = (dir == DMA_TO_DEVICE) ? 0 : MACEPAR_CTLSTAT_DIRECTION;
-	writeq(ctrl, &mace->perif.ctrl.parport.cntlstat);
+	pete_writeq("drivers/parport/parport_ip32.c:601", ctrl, &mace->perif.ctrl.parport.cntlstat);
 	/* Single transfer should not cross a 4K page boundary */
 	limit = MACEPAR_CONTEXT_DATA_BOUND -
 		(parport_ip32_dma.next & (MACEPAR_CONTEXT_DATA_BOUND - 1));
@@ -607,7 +607,7 @@ static int parport_ip32_dma_start(struct parport *p,
 
 	/* Real start of DMA transfer */
 	ctrl |= MACEPAR_CTLSTAT_ENABLE;
-	writeq(ctrl, &mace->perif.ctrl.parport.cntlstat);
+	pete_writeq("drivers/parport/parport_ip32.c:610", ctrl, &mace->perif.ctrl.parport.cntlstat);
 
 	return 0;
 }
@@ -644,15 +644,15 @@ static void parport_ip32_dma_stop(struct parport *p)
 	synchronize_irq(MACEISA_PAR_CTXB_IRQ);
 
 	/* Stop DMA transfer */
-	ctrl = readq(&mace->perif.ctrl.parport.cntlstat);
+	ctrl = pete_readq("drivers/parport/parport_ip32.c:647", &mace->perif.ctrl.parport.cntlstat);
 	ctrl &= ~MACEPAR_CTLSTAT_ENABLE;
-	writeq(ctrl, &mace->perif.ctrl.parport.cntlstat);
+	pete_writeq("drivers/parport/parport_ip32.c:649", ctrl, &mace->perif.ctrl.parport.cntlstat);
 
 	/* Adjust residue (parport_ip32_dma.left) */
-	ctx_a = readq(&mace->perif.ctrl.parport.context_a);
-	ctx_b = readq(&mace->perif.ctrl.parport.context_b);
-	ctrl = readq(&mace->perif.ctrl.parport.cntlstat);
-	diag = readq(&mace->perif.ctrl.parport.diagnostic);
+	ctx_a = pete_readq("drivers/parport/parport_ip32.c:652", &mace->perif.ctrl.parport.context_a);
+	ctx_b = pete_readq("drivers/parport/parport_ip32.c:653", &mace->perif.ctrl.parport.context_b);
+	ctrl = pete_readq("drivers/parport/parport_ip32.c:654", &mace->perif.ctrl.parport.cntlstat);
+	diag = pete_readq("drivers/parport/parport_ip32.c:655", &mace->perif.ctrl.parport.diagnostic);
 	res[0] = (ctrl & MACEPAR_CTLSTAT_CTXA_VALID) ?
 		1 + ((ctx_a & MACEPAR_CONTEXT_DATALEN_MASK) >>
 		     MACEPAR_CONTEXT_DATALEN_SHIFT) :
@@ -669,7 +669,7 @@ static void parport_ip32_dma_stop(struct parport *p)
 
 	/* Reset DMA controller, and re-enable IRQs */
 	ctrl = MACEPAR_CTLSTAT_RESET;
-	writeq(ctrl, &mace->perif.ctrl.parport.cntlstat);
+	pete_writeq("drivers/parport/parport_ip32.c:672", ctrl, &mace->perif.ctrl.parport.cntlstat);
 	pr_debug(PPIP32 "IRQ on (stop)\n");
 	enable_irq(MACEISA_PAR_CTXA_IRQ);
 	enable_irq(MACEISA_PAR_CTXB_IRQ);
@@ -702,7 +702,7 @@ static int parport_ip32_dma_register(void)
 	parport_ip32_dma.irq_on = 1;
 
 	/* Reset DMA controller */
-	writeq(MACEPAR_CTLSTAT_RESET, &mace->perif.ctrl.parport.cntlstat);
+	pete_writeq("drivers/parport/parport_ip32.c:705", MACEPAR_CTLSTAT_RESET, &mace->perif.ctrl.parport.cntlstat);
 
 	/* Request IRQs */
 	err = request_irq(MACEISA_PAR_CTXA_IRQ, parport_ip32_dma_interrupt,
@@ -791,7 +791,7 @@ static irqreturn_t parport_ip32_interrupt(int irq, void *dev_id)
 static inline unsigned int parport_ip32_read_econtrol(struct parport *p)
 {
 	struct parport_ip32_private * const priv = p->physport->private_data;
-	return readb(priv->regs.ecr);
+	return pete_readb("drivers/parport/parport_ip32.c:794", priv->regs.ecr);
 }
 
 /**
@@ -803,7 +803,7 @@ static inline void parport_ip32_write_econtrol(struct parport *p,
 					       unsigned int c)
 {
 	struct parport_ip32_private * const priv = p->physport->private_data;
-	writeb(c, priv->regs.ecr);
+	pete_writeb("drivers/parport/parport_ip32.c:806", c, priv->regs.ecr);
 }
 
 /**
@@ -857,7 +857,7 @@ static void parport_ip32_set_mode(struct parport *p, unsigned int mode)
 static inline unsigned char parport_ip32_read_data(struct parport *p)
 {
 	struct parport_ip32_private * const priv = p->physport->private_data;
-	return readb(priv->regs.data);
+	return pete_readb("drivers/parport/parport_ip32.c:860", priv->regs.data);
 }
 
 /**
@@ -868,7 +868,7 @@ static inline unsigned char parport_ip32_read_data(struct parport *p)
 static inline void parport_ip32_write_data(struct parport *p, unsigned char d)
 {
 	struct parport_ip32_private * const priv = p->physport->private_data;
-	writeb(d, priv->regs.data);
+	pete_writeb("drivers/parport/parport_ip32.c:871", d, priv->regs.data);
 }
 
 /**
@@ -878,7 +878,7 @@ static inline void parport_ip32_write_data(struct parport *p, unsigned char d)
 static inline unsigned char parport_ip32_read_status(struct parport *p)
 {
 	struct parport_ip32_private * const priv = p->physport->private_data;
-	return readb(priv->regs.dsr);
+	return pete_readb("drivers/parport/parport_ip32.c:881", priv->regs.dsr);
 }
 
 /**
@@ -902,7 +902,7 @@ static inline void __parport_ip32_write_control(struct parport *p,
 	struct parport_ip32_private * const priv = p->physport->private_data;
 	CHECK_EXTRA_BITS(p, c, priv->dcr_writable);
 	c &= priv->dcr_writable; /* only writable bits */
-	writeb(c, priv->regs.dcr);
+	pete_writeb("drivers/parport/parport_ip32.c:905", c, priv->regs.dcr);
 	priv->dcr_cache = c;		/* update soft copy */
 }
 
@@ -1076,9 +1076,9 @@ static unsigned int parport_ip32_clear_epp_timeout(struct parport *p)
 		parport_ip32_read_status(p);
 		r = parport_ip32_read_status(p);
 		/* Some reset by writing 1 */
-		writeb(r | DSR_TIMEOUT, priv->regs.dsr);
+		pete_writeb("drivers/parport/parport_ip32.c:1079", r | DSR_TIMEOUT, priv->regs.dsr);
 		/* Others by writing 0 */
-		writeb(r & ~DSR_TIMEOUT, priv->regs.dsr);
+		pete_writeb("drivers/parport/parport_ip32.c:1081", r & ~DSR_TIMEOUT, priv->regs.dsr);
 
 		r = parport_ip32_read_status(p);
 		cleared = !(r & DSR_TIMEOUT);
@@ -1107,7 +1107,7 @@ static size_t parport_ip32_epp_read(void __iomem *eppreg,
 	parport_ip32_write_control(p, DCR_nINIT);
 	if ((flags & PARPORT_EPP_FAST) && (len > 1)) {
 		readsb(eppreg, buf, len);
-		if (readb(priv->regs.dsr) & DSR_TIMEOUT) {
+		if (pete_readb("drivers/parport/parport_ip32.c:1110", priv->regs.dsr) & DSR_TIMEOUT) {
 			parport_ip32_clear_epp_timeout(p);
 			return -EIO;
 		}
@@ -1115,8 +1115,8 @@ static size_t parport_ip32_epp_read(void __iomem *eppreg,
 	} else {
 		u8 *bufp = buf;
 		for (got = 0; got < len; got++) {
-			*bufp++ = readb(eppreg);
-			if (readb(priv->regs.dsr) & DSR_TIMEOUT) {
+			*bufp++ = pete_readb("drivers/parport/parport_ip32.c:1118", eppreg);
+			if (pete_readb("drivers/parport/parport_ip32.c:1119", priv->regs.dsr) & DSR_TIMEOUT) {
 				parport_ip32_clear_epp_timeout(p);
 				break;
 			}
@@ -1146,7 +1146,7 @@ static size_t parport_ip32_epp_write(void __iomem *eppreg,
 	parport_ip32_write_control(p, DCR_nINIT);
 	if ((flags & PARPORT_EPP_FAST) && (len > 1)) {
 		writesb(eppreg, buf, len);
-		if (readb(priv->regs.dsr) & DSR_TIMEOUT) {
+		if (pete_readb("drivers/parport/parport_ip32.c:1149", priv->regs.dsr) & DSR_TIMEOUT) {
 			parport_ip32_clear_epp_timeout(p);
 			return -EIO;
 		}
@@ -1154,8 +1154,8 @@ static size_t parport_ip32_epp_write(void __iomem *eppreg,
 	} else {
 		const u8 *bufp = buf;
 		for (written = 0; written < len; written++) {
-			writeb(*bufp++, eppreg);
-			if (readb(priv->regs.dsr) & DSR_TIMEOUT) {
+			pete_writeb("drivers/parport/parport_ip32.c:1157", *bufp++, eppreg);
+			if (pete_readb("drivers/parport/parport_ip32.c:1158", priv->regs.dsr) & DSR_TIMEOUT) {
 				parport_ip32_clear_epp_timeout(p);
 				break;
 			}
@@ -1398,7 +1398,7 @@ static size_t parport_ip32_fifo_write_block_pio(struct parport *p,
 		if (count > left)
 			count = left;
 		if (count == 1) {
-			writeb(*bufp, priv->regs.fifo);
+			pete_writeb("drivers/parport/parport_ip32.c:1401", *bufp, priv->regs.fifo);
 			bufp++, left--;
 		} else {
 			writesb(priv->regs.fifo, bufp, count);
@@ -1563,7 +1563,7 @@ static unsigned int parport_ip32_get_fifo_residue(struct parport *p,
 		for (residue = priv->fifo_depth; residue > 0; residue--) {
 			if (parport_ip32_read_econtrol(p) & ECR_F_FULL)
 				break;
-			writeb(0x00, priv->regs.fifo);
+			pete_writeb("drivers/parport/parport_ip32.c:1566", 0x00, priv->regs.fifo);
 		}
 	}
 	if (residue)
@@ -1590,7 +1590,7 @@ static unsigned int parport_ip32_get_fifo_residue(struct parport *p,
 
 	/* Adjust residue if needed */
 	parport_ip32_set_mode(p, ECR_MODE_CFG);
-	cnfga = readb(priv->regs.cnfgA);
+	cnfga = pete_readb("drivers/parport/parport_ip32.c:1593", priv->regs.cnfgA);
 	if (!(cnfga & CNFGA_nBYTEINTRANS)) {
 		pr_debug1(PPIP32 "%s: cnfgA contains 0x%02x\n",
 			  p->name, cnfga);
@@ -1810,8 +1810,8 @@ static __init unsigned int parport_ip32_ecp_supported(struct parport *p)
 	unsigned int ecr;
 
 	ecr = ECR_MODE_PS2 | ECR_nERRINTR | ECR_SERVINTR;
-	writeb(ecr, priv->regs.ecr);
-	if (readb(priv->regs.ecr) != (ecr | ECR_F_EMPTY))
+	pete_writeb("drivers/parport/parport_ip32.c:1813", ecr, priv->regs.ecr);
+	if (pete_readb("drivers/parport/parport_ip32.c:1814", priv->regs.ecr) != (ecr | ECR_F_EMPTY))
 		goto fail;
 
 	pr_probe(p, "Found working ECR register\n");
@@ -1841,8 +1841,8 @@ static __init unsigned int parport_ip32_fifo_supported(struct parport *p)
 
 	/* Configuration mode */
 	parport_ip32_set_mode(p, ECR_MODE_CFG);
-	configa = readb(priv->regs.cnfgA);
-	configb = readb(priv->regs.cnfgB);
+	configa = pete_readb("drivers/parport/parport_ip32.c:1844", priv->regs.cnfgA);
+	configb = pete_readb("drivers/parport/parport_ip32.c:1845", priv->regs.cnfgB);
 
 	/* Find out PWord size */
 	switch (configa & CNFGA_ID_MASK) {
@@ -1869,16 +1869,16 @@ static __init unsigned int parport_ip32_fifo_supported(struct parport *p)
 	pr_probe(p, "PWord is %u bits\n", 8 * priv->pword);
 
 	/* Check for compression support */
-	writeb(configb | CNFGB_COMPRESS, priv->regs.cnfgB);
-	if (readb(priv->regs.cnfgB) & CNFGB_COMPRESS)
+	pete_writeb("drivers/parport/parport_ip32.c:1872", configb | CNFGB_COMPRESS, priv->regs.cnfgB);
+	if (pete_readb("drivers/parport/parport_ip32.c:1873", priv->regs.cnfgB) & CNFGB_COMPRESS)
 		pr_probe(p, "Hardware compression detected (unsupported)\n");
-	writeb(configb & ~CNFGB_COMPRESS, priv->regs.cnfgB);
+	pete_writeb("drivers/parport/parport_ip32.c:1875", configb & ~CNFGB_COMPRESS, priv->regs.cnfgB);
 
 	/* Reset FIFO and go in test mode (no interrupt, no DMA) */
 	parport_ip32_set_mode(p, ECR_MODE_TST);
 
 	/* FIFO must be empty now */
-	if (!(readb(priv->regs.ecr) & ECR_F_EMPTY)) {
+	if (!(pete_readb("drivers/parport/parport_ip32.c:1881", priv->regs.ecr) & ECR_F_EMPTY)) {
 		pr_probe(p, "FIFO not reset\n");
 		goto fail;
 	}
@@ -1886,12 +1886,12 @@ static __init unsigned int parport_ip32_fifo_supported(struct parport *p)
 	/* Find out FIFO depth. */
 	priv->fifo_depth = 0;
 	for (i = 0; i < 1024; i++) {
-		if (readb(priv->regs.ecr) & ECR_F_FULL) {
+		if (pete_readb("drivers/parport/parport_ip32.c:1889", priv->regs.ecr) & ECR_F_FULL) {
 			/* FIFO full */
 			priv->fifo_depth = i;
 			break;
 		}
-		writeb((u8)i, priv->regs.fifo);
+		pete_writeb("drivers/parport/parport_ip32.c:1894", (u8)i, priv->regs.fifo);
 	}
 	if (i >= 1024) {
 		pr_probe(p, "Can't fill FIFO\n");
@@ -1910,16 +1910,16 @@ static __init unsigned int parport_ip32_fifo_supported(struct parport *p)
 	 * if we get an interrupt. */
 	priv->writeIntrThreshold = 0;
 	for (i = 0; i < priv->fifo_depth; i++) {
-		if (readb(priv->regs.fifo) != (u8)i) {
+		if (pete_readb("drivers/parport/parport_ip32.c:1913", priv->regs.fifo) != (u8)i) {
 			pr_probe(p, "Invalid data in FIFO\n");
 			goto fail;
 		}
 		if (!priv->writeIntrThreshold
-		    && readb(priv->regs.ecr) & ECR_SERVINTR)
+		    && pete_readb("drivers/parport/parport_ip32.c:1918", priv->regs.ecr) & ECR_SERVINTR)
 			/* writeIntrThreshold reached */
 			priv->writeIntrThreshold = i + 1;
 		if (i + 1 < priv->fifo_depth
-		    && readb(priv->regs.ecr) & ECR_F_EMPTY) {
+		    && pete_readb("drivers/parport/parport_ip32.c:1922", priv->regs.ecr) & ECR_F_EMPTY) {
 			/* FIFO empty before the last byte? */
 			pr_probe(p, "Data lost in FIFO\n");
 			goto fail;
@@ -1932,7 +1932,7 @@ static __init unsigned int parport_ip32_fifo_supported(struct parport *p)
 	pr_probe(p, "writeIntrThreshold is %u\n", priv->writeIntrThreshold);
 
 	/* FIFO must be empty now */
-	if (!(readb(priv->regs.ecr) & ECR_F_EMPTY)) {
+	if (!(pete_readb("drivers/parport/parport_ip32.c:1935", priv->regs.ecr) & ECR_F_EMPTY)) {
 		pr_probe(p, "Can't empty FIFO\n");
 		goto fail;
 	}
@@ -1950,8 +1950,8 @@ static __init unsigned int parport_ip32_fifo_supported(struct parport *p)
 	 * an interrupt. */
 	priv->readIntrThreshold = 0;
 	for (i = 0; i < priv->fifo_depth; i++) {
-		writeb(0xaa, priv->regs.fifo);
-		if (readb(priv->regs.ecr) & ECR_SERVINTR) {
+		pete_writeb("drivers/parport/parport_ip32.c:1953", 0xaa, priv->regs.fifo);
+		if (pete_readb("drivers/parport/parport_ip32.c:1954", priv->regs.ecr) & ECR_SERVINTR) {
 			/* readIntrThreshold reached */
 			priv->readIntrThreshold = i + 1;
 			break;

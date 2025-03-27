@@ -412,7 +412,7 @@ static int cdns_regmap_write(void *context, unsigned int reg, unsigned int val)
 	struct cdns_regmap_cdb_context *ctx = context;
 	u32 offset = reg << ctx->reg_offset_shift;
 
-	writew(val, ctx->base + offset);
+	pete_writew("drivers/phy/cadence/phy-cadence-sierra.c:415", val, ctx->base + offset);
 
 	return 0;
 }
@@ -422,7 +422,7 @@ static int cdns_regmap_read(void *context, unsigned int reg, unsigned int *val)
 	struct cdns_regmap_cdb_context *ctx = context;
 	u32 offset = reg << ctx->reg_offset_shift;
 
-	*val = readw(ctx->base + offset);
+	*val = pete_readw("drivers/phy/cadence/phy-cadence-sierra.c:425", ctx->base + offset);
 	return 0;
 }
 

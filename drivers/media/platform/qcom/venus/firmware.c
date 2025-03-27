@@ -35,22 +35,22 @@ static void venus_reset_cpu(struct venus_core *core)
 	else
 		wrapper_base = core->wrapper_base;
 
-	writel(0, wrapper_base + WRAPPER_FW_START_ADDR);
-	writel(fw_size, wrapper_base + WRAPPER_FW_END_ADDR);
-	writel(0, wrapper_base + WRAPPER_CPA_START_ADDR);
-	writel(fw_size, wrapper_base + WRAPPER_CPA_END_ADDR);
-	writel(fw_size, wrapper_base + WRAPPER_NONPIX_START_ADDR);
-	writel(fw_size, wrapper_base + WRAPPER_NONPIX_END_ADDR);
+	pete_writel("drivers/media/platform/qcom/venus/firmware.c:38", 0, wrapper_base + WRAPPER_FW_START_ADDR);
+	pete_writel("drivers/media/platform/qcom/venus/firmware.c:39", fw_size, wrapper_base + WRAPPER_FW_END_ADDR);
+	pete_writel("drivers/media/platform/qcom/venus/firmware.c:40", 0, wrapper_base + WRAPPER_CPA_START_ADDR);
+	pete_writel("drivers/media/platform/qcom/venus/firmware.c:41", fw_size, wrapper_base + WRAPPER_CPA_END_ADDR);
+	pete_writel("drivers/media/platform/qcom/venus/firmware.c:42", fw_size, wrapper_base + WRAPPER_NONPIX_START_ADDR);
+	pete_writel("drivers/media/platform/qcom/venus/firmware.c:43", fw_size, wrapper_base + WRAPPER_NONPIX_END_ADDR);
 
 	if (IS_IRIS2_1(core)) {
 		/* Bring XTSS out of reset */
-		writel(0, wrapper_base + WRAPPER_TZ_XTSS_SW_RESET);
+		pete_writel("drivers/media/platform/qcom/venus/firmware.c:47", 0, wrapper_base + WRAPPER_TZ_XTSS_SW_RESET);
 	} else {
-		writel(0x0, wrapper_base + WRAPPER_CPU_CGC_DIS);
-		writel(0x0, wrapper_base + WRAPPER_CPU_CLOCK_CONFIG);
+		pete_writel("drivers/media/platform/qcom/venus/firmware.c:49", 0x0, wrapper_base + WRAPPER_CPU_CGC_DIS);
+		pete_writel("drivers/media/platform/qcom/venus/firmware.c:50", 0x0, wrapper_base + WRAPPER_CPU_CLOCK_CONFIG);
 
 		/* Bring ARM9 out of reset */
-		writel(0, wrapper_base + WRAPPER_A9SS_SW_RESET);
+		pete_writel("drivers/media/platform/qcom/venus/firmware.c:53", 0, wrapper_base + WRAPPER_A9SS_SW_RESET);
 	}
 }
 
@@ -69,10 +69,10 @@ int venus_set_hw_state(struct venus_core *core, bool resume)
 		venus_reset_cpu(core);
 	} else {
 		if (IS_IRIS2_1(core))
-			writel(WRAPPER_XTSS_SW_RESET_BIT,
+			pete_writel("drivers/media/platform/qcom/venus/firmware.c:72", WRAPPER_XTSS_SW_RESET_BIT,
 			       core->wrapper_tz_base + WRAPPER_TZ_XTSS_SW_RESET);
 		else
-			writel(WRAPPER_A9SS_SW_RESET_BIT,
+			pete_writel("drivers/media/platform/qcom/venus/firmware.c:75", WRAPPER_A9SS_SW_RESET_BIT,
 			       core->wrapper_base + WRAPPER_A9SS_SW_RESET);
 	}
 
@@ -183,14 +183,14 @@ static int venus_shutdown_no_tz(struct venus_core *core)
 
 	if (IS_IRIS2_1(core)) {
 		/* Assert the reset to XTSS */
-		reg = readl(wrapper_tz_base + WRAPPER_TZ_XTSS_SW_RESET);
+		reg = pete_readl("drivers/media/platform/qcom/venus/firmware.c:186", wrapper_tz_base + WRAPPER_TZ_XTSS_SW_RESET);
 		reg |= WRAPPER_XTSS_SW_RESET_BIT;
-		writel(reg, wrapper_tz_base + WRAPPER_TZ_XTSS_SW_RESET);
+		pete_writel("drivers/media/platform/qcom/venus/firmware.c:188", reg, wrapper_tz_base + WRAPPER_TZ_XTSS_SW_RESET);
 	} else {
 		/* Assert the reset to ARM9 */
-		reg = readl(wrapper_base + WRAPPER_A9SS_SW_RESET);
+		reg = pete_readl("drivers/media/platform/qcom/venus/firmware.c:191", wrapper_base + WRAPPER_A9SS_SW_RESET);
 		reg |= WRAPPER_A9SS_SW_RESET_BIT;
-		writel(reg, wrapper_base + WRAPPER_A9SS_SW_RESET);
+		pete_writel("drivers/media/platform/qcom/venus/firmware.c:193", reg, wrapper_base + WRAPPER_A9SS_SW_RESET);
 	}
 
 	iommu = core->fw.iommu_domain;

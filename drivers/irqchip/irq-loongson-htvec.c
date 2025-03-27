@@ -45,7 +45,7 @@ static void htvec_irq_dispatch(struct irq_desc *desc)
 	chained_irq_enter(chip, desc);
 
 	for (i = 0; i < priv->num_parents; i++) {
-		pending = readl(priv->base + 4 * i);
+		pending = pete_readl("drivers/irqchip/irq-loongson-htvec.c:48", priv->base + 4 * i);
 		while (pending) {
 			int bit = __ffs(pending);
 
@@ -66,7 +66,7 @@ static void htvec_ack_irq(struct irq_data *d)
 {
 	struct htvec *priv = irq_data_get_irq_chip_data(d);
 
-	writel(BIT(VEC_REG_BIT(d->hwirq)),
+	pete_writel("drivers/irqchip/irq-loongson-htvec.c:69", BIT(VEC_REG_BIT(d->hwirq)),
 	       priv->base + VEC_REG_IDX(d->hwirq) * 4);
 }
 
@@ -79,9 +79,9 @@ static void htvec_mask_irq(struct irq_data *d)
 	raw_spin_lock(&priv->htvec_lock);
 	addr = priv->base + HTVEC_EN_OFF;
 	addr += VEC_REG_IDX(d->hwirq) * 4;
-	reg = readl(addr);
+	reg = pete_readl("drivers/irqchip/irq-loongson-htvec.c:82", addr);
 	reg &= ~BIT(VEC_REG_BIT(d->hwirq));
-	writel(reg, addr);
+	pete_writel("drivers/irqchip/irq-loongson-htvec.c:84", reg, addr);
 	raw_spin_unlock(&priv->htvec_lock);
 }
 
@@ -94,9 +94,9 @@ static void htvec_unmask_irq(struct irq_data *d)
 	raw_spin_lock(&priv->htvec_lock);
 	addr = priv->base + HTVEC_EN_OFF;
 	addr += VEC_REG_IDX(d->hwirq) * 4;
-	reg = readl(addr);
+	reg = pete_readl("drivers/irqchip/irq-loongson-htvec.c:97", addr);
 	reg |= BIT(VEC_REG_BIT(d->hwirq));
-	writel(reg, addr);
+	pete_writel("drivers/irqchip/irq-loongson-htvec.c:99", reg, addr);
 	raw_spin_unlock(&priv->htvec_lock);
 }
 
@@ -162,7 +162,7 @@ static int htvec_suspend(void)
 	int i;
 
 	for (i = 0; i < htvec_priv->num_parents; i++)
-		htvec_priv->saved_vec_en[i] = readl(htvec_priv->base + HTVEC_EN_OFF + 4 * i);
+		htvec_priv->saved_vec_en[i] = pete_readl("drivers/irqchip/irq-loongson-htvec.c:165", htvec_priv->base + HTVEC_EN_OFF + 4 * i);
 
 	return 0;
 }
@@ -172,7 +172,7 @@ static void htvec_resume(void)
 	int i;
 
 	for (i = 0; i < htvec_priv->num_parents; i++)
-		writel(htvec_priv->saved_vec_en[i], htvec_priv->base + HTVEC_EN_OFF + 4 * i);
+		pete_writel("drivers/irqchip/irq-loongson-htvec.c:175", htvec_priv->saved_vec_en[i], htvec_priv->base + HTVEC_EN_OFF + 4 * i);
 }
 
 static struct syscore_ops htvec_syscore_ops = {

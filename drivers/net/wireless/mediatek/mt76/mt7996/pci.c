@@ -35,7 +35,7 @@ static struct mt7996_hif *mt7996_pci_get_hif2(u32 idx)
 	spin_lock_bh(&hif_lock);
 
 	list_for_each_entry(hif, &hif_list, list) {
-		val = readl(hif->regs + MT_PCIE_RECOG_ID);
+		val = pete_readl("drivers/net/wireless/mediatek/mt76/mt7996/pci.c:38", hif->regs + MT_PCIE_RECOG_ID);
 		val &= MT_PCIE_RECOG_ID_MASK;
 		if (val != idx)
 			continue;
@@ -67,7 +67,7 @@ static struct mt7996_hif *mt7996_pci_init_hif2(struct pci_dev *pdev)
 	    !pci_get_device(PCI_VENDOR_ID_MEDIATEK, 0x799a, NULL))
 		return NULL;
 
-	writel(hif_idx | MT_PCIE_RECOG_ID_SEM,
+	pete_writel("drivers/net/wireless/mediatek/mt76/mt7996/pci.c:70", hif_idx | MT_PCIE_RECOG_ID_SEM,
 	       pcim_iomap_table(pdev)[0] + MT_PCIE_RECOG_ID);
 
 	return mt7996_pci_get_hif2(hif_idx);

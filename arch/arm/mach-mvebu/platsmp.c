@@ -205,8 +205,8 @@ static int mv98dx3236_resume_set_cpu_boot_addr(int hw_cpu, void *boot_addr)
 	if (IS_ERR(base))
 		return PTR_ERR(base);
 
-	writel(0, base + MV98DX3236_CPU_RESUME_CTRL_REG);
-	writel(__pa_symbol(boot_addr), base + MV98DX3236_CPU_RESUME_ADDR_REG);
+	pete_writel("arch/arm/mach-mvebu/platsmp.c:208", 0, base + MV98DX3236_CPU_RESUME_CTRL_REG);
+	pete_writel("arch/arm/mach-mvebu/platsmp.c:209", __pa_symbol(boot_addr), base + MV98DX3236_CPU_RESUME_ADDR_REG);
 
 	iounmap(base);
 

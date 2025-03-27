@@ -37,9 +37,9 @@ static inline int __bpcm_do_op(void __iomem *master, unsigned int addr,
 	u32 cmd;
 
 	cmd = (PMC_PMBM_START | op | (addr & 0xff) << 12 | off);
-	writel(cmd, master + PMB_CTRL);
+	pete_writel("include/linux/reset/bcm63xx_pmb.h:40", cmd, master + PMB_CTRL);
 	do {
-		cmd = readl(master + PMB_CTRL);
+		cmd = pete_readl("include/linux/reset/bcm63xx_pmb.h:42", master + PMB_CTRL);
 		if (!(cmd & PMC_PMBM_START))
 			return 0;
 
@@ -61,7 +61,7 @@ static inline int bpcm_rd(void __iomem *master, unsigned int addr,
 	int ret = 0;
 
 	ret = __bpcm_do_op(master, addr, off >> 2, PMC_PMBM_READ);
-	*val = readl(master + PMB_RD_DATA);
+	*val = pete_readl("include/linux/reset/bcm63xx_pmb.h:64", master + PMB_RD_DATA);
 
 	return ret;
 }
@@ -71,7 +71,7 @@ static inline int bpcm_wr(void __iomem *master, unsigned int addr,
 {
 	int ret = 0;
 
-	writel(val, master + PMB_WR_DATA);
+	pete_writel("include/linux/reset/bcm63xx_pmb.h:74", val, master + PMB_WR_DATA);
 	ret = __bpcm_do_op(master, addr, off >> 2, PMC_PMBM_WRITE);
 
 	return ret;

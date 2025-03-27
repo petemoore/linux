@@ -71,8 +71,8 @@ static u8 env_read(struct env *p, u8 ireg)
 	u8 ret;
 
 	spin_lock(&p->lock);
-	writeb(ireg, p->regs + REG_ADDR);
-	ret = readb(p->regs + REG_DATA);
+	pete_writeb("drivers/hwmon/ultra45_env.c:74", ireg, p->regs + REG_ADDR);
+	ret = pete_readb("drivers/hwmon/ultra45_env.c:75", p->regs + REG_DATA);
 	spin_unlock(&p->lock);
 
 	return ret;
@@ -81,8 +81,8 @@ static u8 env_read(struct env *p, u8 ireg)
 static void env_write(struct env *p, u8 ireg, u8 val)
 {
 	spin_lock(&p->lock);
-	writeb(ireg, p->regs + REG_ADDR);
-	writeb(val, p->regs + REG_DATA);
+	pete_writeb("drivers/hwmon/ultra45_env.c:84", ireg, p->regs + REG_ADDR);
+	pete_writeb("drivers/hwmon/ultra45_env.c:85", val, p->regs + REG_DATA);
 	spin_unlock(&p->lock);
 }
 
@@ -188,7 +188,7 @@ static ssize_t show_stat_bit(struct device *dev, struct device_attribute *attr,
 	struct env *p = dev_get_drvdata(dev);
 	u8 val;
 
-	val = readb(p->regs + REG_STAT);
+	val = pete_readb("drivers/hwmon/ultra45_env.c:191", p->regs + REG_STAT);
 	return sprintf(buf, "%d\n", (val & (1 << index)) ? 1 : 0);
 }
 
@@ -204,7 +204,7 @@ static ssize_t show_fwver(struct device *dev, struct device_attribute *attr,
 	struct env *p = dev_get_drvdata(dev);
 	u8 val;
 
-	val = readb(p->regs + REG_STAT);
+	val = pete_readb("drivers/hwmon/ultra45_env.c:207", p->regs + REG_STAT);
 	return sprintf(buf, "%d\n", val >> 4);
 }
 

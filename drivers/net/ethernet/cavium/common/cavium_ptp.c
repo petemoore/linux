@@ -45,7 +45,7 @@ static u64 ptp_cavium_clock_get(void)
 	if (!base)
 		goto error_put_pdev;
 
-	ret = CLOCK_BASE_RATE * ((readq(base + RST_BOOT) >> 33) & 0x3f);
+	ret = CLOCK_BASE_RATE * ((pete_readq("drivers/net/ethernet/cavium/common/cavium_ptp.c:48", base + RST_BOOT) >> 33) & 0x3f);
 
 	iounmap(base);
 
@@ -126,7 +126,7 @@ static int cavium_ptp_adjfine(struct ptp_clock_info *ptp_info, long scaled_ppm)
 	comp = neg_adj ? comp - adj : comp + adj;
 
 	spin_lock_irqsave(&clock->spin_lock, flags);
-	writeq(comp, clock->reg_base + PTP_CLOCK_COMP);
+	pete_writeq("drivers/net/ethernet/cavium/common/cavium_ptp.c:129", comp, clock->reg_base + PTP_CLOCK_COMP);
 	spin_unlock_irqrestore(&clock->spin_lock, flags);
 
 	return 0;
@@ -214,7 +214,7 @@ static u64 cavium_ptp_cc_read(const struct cyclecounter *cc)
 	struct cavium_ptp *clock =
 		container_of(cc, struct cavium_ptp, cycle_counter);
 
-	return readq(clock->reg_base + PTP_CLOCK_HI);
+	return pete_readq("drivers/net/ethernet/cavium/common/cavium_ptp.c:217", clock->reg_base + PTP_CLOCK_HI);
 }
 
 static int cavium_ptp_probe(struct pci_dev *pdev,
@@ -272,12 +272,12 @@ static int cavium_ptp_probe(struct pci_dev *pdev,
 		.enable		= cavium_ptp_enable,
 	};
 
-	clock_cfg = readq(clock->reg_base + PTP_CLOCK_CFG);
+	clock_cfg = pete_readq("drivers/net/ethernet/cavium/common/cavium_ptp.c:275", clock->reg_base + PTP_CLOCK_CFG);
 	clock_cfg |= PTP_CLOCK_CFG_PTP_EN;
-	writeq(clock_cfg, clock->reg_base + PTP_CLOCK_CFG);
+	pete_writeq("drivers/net/ethernet/cavium/common/cavium_ptp.c:277", clock_cfg, clock->reg_base + PTP_CLOCK_CFG);
 
 	clock_comp = ((u64)1000000000ull << 32) / clock->clock_rate;
-	writeq(clock_comp, clock->reg_base + PTP_CLOCK_COMP);
+	pete_writeq("drivers/net/ethernet/cavium/common/cavium_ptp.c:280", clock_comp, clock->reg_base + PTP_CLOCK_COMP);
 
 	clock->ptp_clock = ptp_clock_register(&clock->ptp_info, dev);
 	if (IS_ERR(clock->ptp_clock)) {
@@ -289,9 +289,9 @@ static int cavium_ptp_probe(struct pci_dev *pdev,
 	return 0;
 
 error_stop:
-	clock_cfg = readq(clock->reg_base + PTP_CLOCK_CFG);
+	clock_cfg = pete_readq("drivers/net/ethernet/cavium/common/cavium_ptp.c:292", clock->reg_base + PTP_CLOCK_CFG);
 	clock_cfg &= ~PTP_CLOCK_CFG_PTP_EN;
-	writeq(clock_cfg, clock->reg_base + PTP_CLOCK_CFG);
+	pete_writeq("drivers/net/ethernet/cavium/common/cavium_ptp.c:294", clock_cfg, clock->reg_base + PTP_CLOCK_CFG);
 	pcim_iounmap_regions(pdev, 1 << PCI_PTP_BAR_NO);
 
 error_free:
@@ -318,9 +318,9 @@ static void cavium_ptp_remove(struct pci_dev *pdev)
 
 	ptp_clock_unregister(clock->ptp_clock);
 
-	clock_cfg = readq(clock->reg_base + PTP_CLOCK_CFG);
+	clock_cfg = pete_readq("drivers/net/ethernet/cavium/common/cavium_ptp.c:321", clock->reg_base + PTP_CLOCK_CFG);
 	clock_cfg &= ~PTP_CLOCK_CFG_PTP_EN;
-	writeq(clock_cfg, clock->reg_base + PTP_CLOCK_CFG);
+	pete_writeq("drivers/net/ethernet/cavium/common/cavium_ptp.c:323", clock_cfg, clock->reg_base + PTP_CLOCK_CFG);
 }
 
 static const struct pci_device_id cavium_ptp_id_table[] = {

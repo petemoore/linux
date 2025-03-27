@@ -77,19 +77,19 @@ static int iomd_get_irq_nr(void)
 	u8 reg;
 
 	/* get highest priority first */
-	reg = readb(IOC_BASE + IOMD_IRQREQB);
+	reg = pete_readb("arch/arm/mach-rpc/irq.c:80", IOC_BASE + IOMD_IRQREQB);
 	irq = irq_prio_h[reg];
 	if (irq)
 		return irq;
 
 	/* get DMA  */
-	reg = readb(IOC_BASE + IOMD_DMAREQ);
+	reg = pete_readb("arch/arm/mach-rpc/irq.c:86", IOC_BASE + IOMD_DMAREQ);
 	irq = irq_prio_d[reg];
 	if (irq)
 		return irq;
 
 	/* get low priority */
-	reg = readb(IOC_BASE + IOMD_IRQREQA);
+	reg = pete_readb("arch/arm/mach-rpc/irq.c:92", IOC_BASE + IOMD_IRQREQA);
 	irq = irq_prio_l[reg];
 	if (irq)
 		return irq;
@@ -127,9 +127,9 @@ static void iomd_irq_mask_ack(struct irq_data *d)
 	void __iomem *base = iomd_get_base(d);
 	unsigned int val, mask = d->mask;
 
-	val = readb(base + MASK);
-	writeb(val & ~mask, base + MASK);
-	writeb(mask, base + CLR);
+	val = pete_readb("arch/arm/mach-rpc/irq.c:130", base + MASK);
+	pete_writeb("arch/arm/mach-rpc/irq.c:131", val & ~mask, base + MASK);
+	pete_writeb("arch/arm/mach-rpc/irq.c:132", mask, base + CLR);
 }
 
 static void iomd_irq_mask(struct irq_data *d)
@@ -137,8 +137,8 @@ static void iomd_irq_mask(struct irq_data *d)
 	void __iomem *base = iomd_get_base(d);
 	unsigned int val, mask = d->mask;
 
-	val = readb(base + MASK);
-	writeb(val & ~mask, base + MASK);
+	val = pete_readb("arch/arm/mach-rpc/irq.c:140", base + MASK);
+	pete_writeb("arch/arm/mach-rpc/irq.c:141", val & ~mask, base + MASK);
 }
 
 static void iomd_irq_unmask(struct irq_data *d)
@@ -146,8 +146,8 @@ static void iomd_irq_unmask(struct irq_data *d)
 	void __iomem *base = iomd_get_base(d);
 	unsigned int val, mask = d->mask;
 
-	val = readb(base + MASK);
-	writeb(val | mask, base + MASK);
+	val = pete_readb("arch/arm/mach-rpc/irq.c:149", base + MASK);
+	pete_writeb("arch/arm/mach-rpc/irq.c:150", val | mask, base + MASK);
 }
 
 static struct irq_chip iomd_chip_clr = {

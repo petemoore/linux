@@ -200,7 +200,7 @@ module_param_call(mpt3sas_fwfault_debug, _scsih_set_fwfault_debug,
  * _base_readl_aero - retry readl for max three times.
  * @addr: MPT Fusion system interface register address
  *
- * Retry the readl() for max three times if it gets zero value
+ * Retry the pete_readl("drivers/scsi/mpt3sas/mpt3sas_base.c:203", ) for max three times if it gets zero value
  * while reading the system interface register.
  */
 static inline u32
@@ -209,7 +209,7 @@ _base_readl_aero(const void __iomem *addr)
 	u32 i = 0, ret_val;
 
 	do {
-		ret_val = readl(addr);
+		ret_val = pete_readl("drivers/scsi/mpt3sas/mpt3sas_base.c:212", addr);
 		i++;
 	} while (ret_val == 0 && i < 3);
 
@@ -222,7 +222,7 @@ _base_readl_ext_retry(const void __iomem *addr)
 	u32 i, ret_val;
 
 	for (i = 0 ; i < 30 ; i++) {
-		ret_val = readl(addr);
+		ret_val = pete_readl("drivers/scsi/mpt3sas/mpt3sas_base.c:225", addr);
 		if (ret_val != 0)
 			break;
 	}
@@ -233,7 +233,7 @@ _base_readl_ext_retry(const void __iomem *addr)
 static inline u32
 _base_readl(const void __iomem *addr)
 {
-	return readl(addr);
+	return pete_readl("drivers/scsi/mpt3sas/mpt3sas_base.c:236", addr);
 }
 
 /**
@@ -258,7 +258,7 @@ _base_clone_reply_to_sys_mem(struct MPT3SAS_ADAPTER *ioc, u32 reply,
 			MPI_FRAME_START_OFFSET +
 			(cmd_credit * ioc->request_sz) + (index * sizeof(u32));
 
-	writel(reply, reply_free_iomem);
+	pete_writel("drivers/scsi/mpt3sas/mpt3sas_base.c:261", reply, reply_free_iomem);
 }
 
 /**
@@ -276,7 +276,7 @@ _base_clone_mpi_to_sys_mem(void *dst_iomem, void *src, u32 size)
 	u32 *src_virt_mem = (u32 *)src;
 
 	for (i = 0; i < size/4; i++)
-		writel((u32)src_virt_mem[i],
+		pete_writel("drivers/scsi/mpt3sas/mpt3sas_base.c:279", (u32)src_virt_mem[i],
 				(void __iomem *)dst_iomem + (i * 4));
 }
 
@@ -294,7 +294,7 @@ _base_clone_to_sys_mem(void __iomem *dst_iomem, void *src, u32 size)
 	u32 *src_virt_mem = (u32 *)(src);
 
 	for (i = 0; i < size/4; i++)
-		writel((u32)src_virt_mem[i],
+		pete_writel("drivers/scsi/mpt3sas/mpt3sas_base.c:297", (u32)src_virt_mem[i],
 			(void __iomem *)dst_iomem + (i * 4));
 }
 
@@ -966,7 +966,7 @@ mpt3sas_halt_firmware(struct MPT3SAS_ADAPTER *ioc)
 		mpt3sas_print_coredump_info(ioc, doorbell &
 		    MPI2_DOORBELL_DATA_MASK);
 	} else {
-		writel(0xC0FFEE00, &ioc->chip->Doorbell);
+		pete_writel("drivers/scsi/mpt3sas/mpt3sas_base.c:969", 0xC0FFEE00, &ioc->chip->Doorbell);
 		ioc_err(ioc, "Firmware is halted due to command timeout\n");
 	}
 
@@ -1636,7 +1636,7 @@ mpt3sas_base_mask_interrupts(struct MPT3SAS_ADAPTER *ioc)
 	ioc->mask_interrupts = 1;
 	him_register = ioc->base_readl(&ioc->chip->HostInterruptMask);
 	him_register |= MPI2_HIM_DIM + MPI2_HIM_RIM + MPI2_HIM_RESET_IRQ_MASK;
-	writel(him_register, &ioc->chip->HostInterruptMask);
+	pete_writel("drivers/scsi/mpt3sas/mpt3sas_base.c:1639", him_register, &ioc->chip->HostInterruptMask);
 	ioc->base_readl(&ioc->chip->HostInterruptMask);
 }
 
@@ -1653,7 +1653,7 @@ mpt3sas_base_unmask_interrupts(struct MPT3SAS_ADAPTER *ioc)
 
 	him_register = ioc->base_readl(&ioc->chip->HostInterruptMask);
 	him_register &= ~MPI2_HIM_RIM;
-	writel(him_register, &ioc->chip->HostInterruptMask);
+	pete_writel("drivers/scsi/mpt3sas/mpt3sas_base.c:1656", him_register, &ioc->chip->HostInterruptMask);
 	ioc->mask_interrupts = 0;
 }
 
@@ -1766,7 +1766,7 @@ _base_process_reply_queue(struct adapter_reply_queue *reply_q)
 					_base_clone_reply_to_sys_mem(ioc,
 						reply,
 						ioc->reply_free_host_index);
-				writel(ioc->reply_free_host_index,
+				pete_writel("drivers/scsi/mpt3sas/mpt3sas_base.c:1769", ioc->reply_free_host_index,
 				    &ioc->chip->ReplyFreeHostIndex);
 			}
 		}
@@ -1787,12 +1787,12 @@ _base_process_reply_queue(struct adapter_reply_queue *reply_q)
 		 */
 		if (completed_cmds >= ioc->thresh_hold) {
 			if (ioc->combined_reply_queue) {
-				writel(reply_q->reply_post_host_index |
+				pete_writel("drivers/scsi/mpt3sas/mpt3sas_base.c:1790", reply_q->reply_post_host_index |
 						((msix_index  & 7) <<
 						 MPI2_RPHI_MSIX_INDEX_SHIFT),
 				    ioc->replyPostRegisterIndex[msix_index/8]);
 			} else {
-				writel(reply_q->reply_post_host_index |
+				pete_writel("drivers/scsi/mpt3sas/mpt3sas_base.c:1795", reply_q->reply_post_host_index |
 						(msix_index <<
 						 MPI2_RPHI_MSIX_INDEX_SHIFT),
 						&ioc->chip->ReplyPostHostIndex);
@@ -1821,7 +1821,7 @@ _base_process_reply_queue(struct adapter_reply_queue *reply_q)
 	}
 
 	if (ioc->is_warpdrive) {
-		writel(reply_q->reply_post_host_index,
+		pete_writel("drivers/scsi/mpt3sas/mpt3sas_base.c:1824", reply_q->reply_post_host_index,
 		ioc->reply_post_host_index[msix_index]);
 		atomic_dec(&reply_q->busy);
 		return completed_cmds;
@@ -1843,11 +1843,11 @@ _base_process_reply_queue(struct adapter_reply_queue *reply_q)
 	 * value in MSIxIndex field.
 	 */
 	if (ioc->combined_reply_queue)
-		writel(reply_q->reply_post_host_index | ((msix_index  & 7) <<
+		pete_writel("drivers/scsi/mpt3sas/mpt3sas_base.c:1846", reply_q->reply_post_host_index | ((msix_index  & 7) <<
 			MPI2_RPHI_MSIX_INDEX_SHIFT),
 			ioc->replyPostRegisterIndex[msix_index/8]);
 	else
-		writel(reply_q->reply_post_host_index | (msix_index <<
+		pete_writel("drivers/scsi/mpt3sas/mpt3sas_base.c:1850", reply_q->reply_post_host_index | (msix_index <<
 			MPI2_RPHI_MSIX_INDEX_SHIFT),
 			&ioc->chip->ReplyPostHostIndex);
 	atomic_dec(&reply_q->busy);
@@ -4347,7 +4347,7 @@ _base_put_smid_scsi_io_atomic(struct MPT3SAS_ADAPTER *ioc, u16 smid,
 	descriptor.MSIxIndex = _base_set_and_get_msix_index(ioc, smid);
 	descriptor.SMID = cpu_to_le16(smid);
 
-	writel(cpu_to_le32(*request), &ioc->chip->AtomicRequestDescriptorPost);
+	pete_writel("drivers/scsi/mpt3sas/mpt3sas_base.c:4350", cpu_to_le32(*request), &ioc->chip->AtomicRequestDescriptorPost);
 }
 
 /**
@@ -4369,7 +4369,7 @@ _base_put_smid_fast_path_atomic(struct MPT3SAS_ADAPTER *ioc, u16 smid,
 	descriptor.MSIxIndex = _base_set_and_get_msix_index(ioc, smid);
 	descriptor.SMID = cpu_to_le16(smid);
 
-	writel(cpu_to_le32(*request), &ioc->chip->AtomicRequestDescriptorPost);
+	pete_writel("drivers/scsi/mpt3sas/mpt3sas_base.c:4372", cpu_to_le32(*request), &ioc->chip->AtomicRequestDescriptorPost);
 }
 
 /**
@@ -4392,7 +4392,7 @@ _base_put_smid_hi_priority_atomic(struct MPT3SAS_ADAPTER *ioc, u16 smid,
 	descriptor.MSIxIndex = msix_task;
 	descriptor.SMID = cpu_to_le16(smid);
 
-	writel(cpu_to_le32(*request), &ioc->chip->AtomicRequestDescriptorPost);
+	pete_writel("drivers/scsi/mpt3sas/mpt3sas_base.c:4395", cpu_to_le32(*request), &ioc->chip->AtomicRequestDescriptorPost);
 }
 
 /**
@@ -4413,7 +4413,7 @@ _base_put_smid_default_atomic(struct MPT3SAS_ADAPTER *ioc, u16 smid)
 	descriptor.MSIxIndex = _base_set_and_get_msix_index(ioc, smid);
 	descriptor.SMID = cpu_to_le16(smid);
 
-	writel(cpu_to_le32(*request), &ioc->chip->AtomicRequestDescriptorPost);
+	pete_writel("drivers/scsi/mpt3sas/mpt3sas_base.c:4416", cpu_to_le32(*request), &ioc->chip->AtomicRequestDescriptorPost);
 }
 
 /**
@@ -6769,7 +6769,7 @@ _base_dump_reg_set(struct MPT3SAS_ADAPTER *ioc)
 
 	ioc_info(ioc, "System Register set:\n");
 	for (i = 0; i < (sz / sizeof(u32)); i++)
-		pr_info("%08x: %08x\n", (i * 4), readl(&reg[i]));
+		pr_info("%08x: %08x\n", (i * 4), pete_readl("drivers/scsi/mpt3sas/mpt3sas_base.c:6772", &reg[i]));
 }
 
 /**
@@ -6946,7 +6946,7 @@ _base_send_ioc_reset(struct MPT3SAS_ADAPTER *ioc, u8 reset_type, int timeout)
 
 	ioc_info(ioc, "sending message unit reset !!\n");
 
-	writel(reset_type << MPI2_DOORBELL_FUNCTION_SHIFT,
+	pete_writel("drivers/scsi/mpt3sas/mpt3sas_base.c:6949", reset_type << MPI2_DOORBELL_FUNCTION_SHIFT,
 	    &ioc->chip->Doorbell);
 	if ((_base_wait_for_doorbell_ack(ioc, 15))) {
 		r = -EFAULT;
@@ -7060,10 +7060,10 @@ _base_handshake_req_reply_wait(struct MPT3SAS_ADAPTER *ioc, int request_bytes,
 	/* clear pending doorbell interrupts from previous state changes */
 	if (ioc->base_readl(&ioc->chip->HostInterruptStatus) &
 	    MPI2_HIS_IOC2SYS_DB_STATUS)
-		writel(0, &ioc->chip->HostInterruptStatus);
+		pete_writel("drivers/scsi/mpt3sas/mpt3sas_base.c:7063", 0, &ioc->chip->HostInterruptStatus);
 
 	/* send message to ioc */
-	writel(((MPI2_FUNCTION_HANDSHAKE<<MPI2_DOORBELL_FUNCTION_SHIFT) |
+	pete_writel("drivers/scsi/mpt3sas/mpt3sas_base.c:7066", ((MPI2_FUNCTION_HANDSHAKE<<MPI2_DOORBELL_FUNCTION_SHIFT) |
 	    ((request_bytes/4)<<MPI2_DOORBELL_ADD_DWORDS_SHIFT)),
 	    &ioc->chip->Doorbell);
 
@@ -7072,7 +7072,7 @@ _base_handshake_req_reply_wait(struct MPT3SAS_ADAPTER *ioc, int request_bytes,
 			__LINE__);
 		return -EFAULT;
 	}
-	writel(0, &ioc->chip->HostInterruptStatus);
+	pete_writel("drivers/scsi/mpt3sas/mpt3sas_base.c:7075", 0, &ioc->chip->HostInterruptStatus);
 
 	if ((_base_wait_for_doorbell_ack(ioc, 5))) {
 		ioc_err(ioc, "doorbell handshake ack failed (line=%d)\n",
@@ -7082,7 +7082,7 @@ _base_handshake_req_reply_wait(struct MPT3SAS_ADAPTER *ioc, int request_bytes,
 
 	/* send message 32-bits at a time */
 	for (i = 0, failed = 0; i < request_bytes/4 && !failed; i++) {
-		writel(cpu_to_le32(request[i]), &ioc->chip->Doorbell);
+		pete_writel("drivers/scsi/mpt3sas/mpt3sas_base.c:7085", cpu_to_le32(request[i]), &ioc->chip->Doorbell);
 		if ((_base_wait_for_doorbell_ack(ioc, 5)))
 			failed = 1;
 	}
@@ -7103,7 +7103,7 @@ _base_handshake_req_reply_wait(struct MPT3SAS_ADAPTER *ioc, int request_bytes,
 	/* read the first two 16-bits, it gives the total length of the reply */
 	reply[0] = le16_to_cpu(ioc->base_readl_ext_retry(&ioc->chip->Doorbell)
 	    & MPI2_DOORBELL_DATA_MASK);
-	writel(0, &ioc->chip->HostInterruptStatus);
+	pete_writel("drivers/scsi/mpt3sas/mpt3sas_base.c:7106", 0, &ioc->chip->HostInterruptStatus);
 	if ((_base_wait_for_doorbell_int(ioc, 5))) {
 		ioc_err(ioc, "doorbell handshake int failed (line=%d)\n",
 			__LINE__);
@@ -7111,7 +7111,7 @@ _base_handshake_req_reply_wait(struct MPT3SAS_ADAPTER *ioc, int request_bytes,
 	}
 	reply[1] = le16_to_cpu(ioc->base_readl_ext_retry(&ioc->chip->Doorbell)
 	    & MPI2_DOORBELL_DATA_MASK);
-	writel(0, &ioc->chip->HostInterruptStatus);
+	pete_writel("drivers/scsi/mpt3sas/mpt3sas_base.c:7114", 0, &ioc->chip->HostInterruptStatus);
 
 	for (i = 2; i < default_reply->MsgLength * 2; i++)  {
 		if ((_base_wait_for_doorbell_int(ioc, 5))) {
@@ -7125,7 +7125,7 @@ _base_handshake_req_reply_wait(struct MPT3SAS_ADAPTER *ioc, int request_bytes,
 			reply[i] = le16_to_cpu(
 			    ioc->base_readl_ext_retry(&ioc->chip->Doorbell)
 			    & MPI2_DOORBELL_DATA_MASK);
-		writel(0, &ioc->chip->HostInterruptStatus);
+		pete_writel("drivers/scsi/mpt3sas/mpt3sas_base.c:7128", 0, &ioc->chip->HostInterruptStatus);
 	}
 
 	_base_wait_for_doorbell_int(ioc, 5);
@@ -7134,7 +7134,7 @@ _base_handshake_req_reply_wait(struct MPT3SAS_ADAPTER *ioc, int request_bytes,
 			  ioc_info(ioc, "doorbell is in use (line=%d)\n",
 				   __LINE__));
 	}
-	writel(0, &ioc->chip->HostInterruptStatus);
+	pete_writel("drivers/scsi/mpt3sas/mpt3sas_base.c:7137", 0, &ioc->chip->HostInterruptStatus);
 
 	if (ioc->logging_level & MPT_DEBUG_INIT) {
 		mfp = (__le32 *)reply;
@@ -7970,13 +7970,13 @@ _base_diag_reset(struct MPT3SAS_ADAPTER *ioc)
 		 * Loop until in diagnostic mode
 		 */
 		drsprintk(ioc, ioc_info(ioc, "write magic sequence\n"));
-		writel(MPI2_WRSEQ_FLUSH_KEY_VALUE, &ioc->chip->WriteSequence);
-		writel(MPI2_WRSEQ_1ST_KEY_VALUE, &ioc->chip->WriteSequence);
-		writel(MPI2_WRSEQ_2ND_KEY_VALUE, &ioc->chip->WriteSequence);
-		writel(MPI2_WRSEQ_3RD_KEY_VALUE, &ioc->chip->WriteSequence);
-		writel(MPI2_WRSEQ_4TH_KEY_VALUE, &ioc->chip->WriteSequence);
-		writel(MPI2_WRSEQ_5TH_KEY_VALUE, &ioc->chip->WriteSequence);
-		writel(MPI2_WRSEQ_6TH_KEY_VALUE, &ioc->chip->WriteSequence);
+		pete_writel("drivers/scsi/mpt3sas/mpt3sas_base.c:7973", MPI2_WRSEQ_FLUSH_KEY_VALUE, &ioc->chip->WriteSequence);
+		pete_writel("drivers/scsi/mpt3sas/mpt3sas_base.c:7974", MPI2_WRSEQ_1ST_KEY_VALUE, &ioc->chip->WriteSequence);
+		pete_writel("drivers/scsi/mpt3sas/mpt3sas_base.c:7975", MPI2_WRSEQ_2ND_KEY_VALUE, &ioc->chip->WriteSequence);
+		pete_writel("drivers/scsi/mpt3sas/mpt3sas_base.c:7976", MPI2_WRSEQ_3RD_KEY_VALUE, &ioc->chip->WriteSequence);
+		pete_writel("drivers/scsi/mpt3sas/mpt3sas_base.c:7977", MPI2_WRSEQ_4TH_KEY_VALUE, &ioc->chip->WriteSequence);
+		pete_writel("drivers/scsi/mpt3sas/mpt3sas_base.c:7978", MPI2_WRSEQ_5TH_KEY_VALUE, &ioc->chip->WriteSequence);
+		pete_writel("drivers/scsi/mpt3sas/mpt3sas_base.c:7979", MPI2_WRSEQ_6TH_KEY_VALUE, &ioc->chip->WriteSequence);
 
 		/* wait 100 msec */
 		msleep(100);
@@ -7998,7 +7998,7 @@ _base_diag_reset(struct MPT3SAS_ADAPTER *ioc)
 	hcb_size = ioc->base_readl(&ioc->chip->HCBSize);
 
 	drsprintk(ioc, ioc_info(ioc, "diag reset: issued\n"));
-	writel(host_diagnostic | MPI2_DIAG_RESET_ADAPTER,
+	pete_writel("drivers/scsi/mpt3sas/mpt3sas_base.c:8001", host_diagnostic | MPI2_DIAG_RESET_ADAPTER,
 	     &ioc->chip->HostDiagnostic);
 
 	/*This delay allows the chip PCIe hardware time to finish reset tasks*/
@@ -8028,20 +8028,20 @@ _base_diag_reset(struct MPT3SAS_ADAPTER *ioc)
 			  ioc_info(ioc, "restart the adapter assuming the HCB Address points to good F/W\n"));
 		host_diagnostic &= ~MPI2_DIAG_BOOT_DEVICE_SELECT_MASK;
 		host_diagnostic |= MPI2_DIAG_BOOT_DEVICE_SELECT_HCDW;
-		writel(host_diagnostic, &ioc->chip->HostDiagnostic);
+		pete_writel("drivers/scsi/mpt3sas/mpt3sas_base.c:8031", host_diagnostic, &ioc->chip->HostDiagnostic);
 
 		drsprintk(ioc, ioc_info(ioc, "re-enable the HCDW\n"));
-		writel(hcb_size | MPI2_HCB_SIZE_HCB_ENABLE,
+		pete_writel("drivers/scsi/mpt3sas/mpt3sas_base.c:8034", hcb_size | MPI2_HCB_SIZE_HCB_ENABLE,
 		    &ioc->chip->HCBSize);
 	}
 
 	drsprintk(ioc, ioc_info(ioc, "restart the adapter\n"));
-	writel(host_diagnostic & ~MPI2_DIAG_HOLD_IOC_RESET,
+	pete_writel("drivers/scsi/mpt3sas/mpt3sas_base.c:8039", host_diagnostic & ~MPI2_DIAG_HOLD_IOC_RESET,
 	    &ioc->chip->HostDiagnostic);
 
 	drsprintk(ioc,
 		  ioc_info(ioc, "disable writes to the diagnostic register\n"));
-	writel(MPI2_WRSEQ_FLUSH_KEY_VALUE, &ioc->chip->WriteSequence);
+	pete_writel("drivers/scsi/mpt3sas/mpt3sas_base.c:8044", MPI2_WRSEQ_FLUSH_KEY_VALUE, &ioc->chip->WriteSequence);
 
 	drsprintk(ioc, ioc_info(ioc, "Wait for FW to go to the READY state\n"));
 	ioc_state = _base_wait_on_iocstate(ioc, MPI2_IOC_STATE_READY, 20);
@@ -8274,16 +8274,16 @@ _base_make_ioc_operational(struct MPT3SAS_ADAPTER *ioc)
 
 	/* initialize reply free host index */
 	ioc->reply_free_host_index = ioc->reply_free_queue_depth - 1;
-	writel(ioc->reply_free_host_index, &ioc->chip->ReplyFreeHostIndex);
+	pete_writel("drivers/scsi/mpt3sas/mpt3sas_base.c:8277", ioc->reply_free_host_index, &ioc->chip->ReplyFreeHostIndex);
 
 	/* initialize reply post host index */
 	list_for_each_entry(reply_q, &ioc->reply_queue_list, list) {
 		if (ioc->combined_reply_queue)
-			writel((reply_q->msix_index & 7)<<
+			pete_writel("drivers/scsi/mpt3sas/mpt3sas_base.c:8282", (reply_q->msix_index & 7)<<
 			   MPI2_RPHI_MSIX_INDEX_SHIFT,
 			   ioc->replyPostRegisterIndex[reply_q->msix_index/8]);
 		else
-			writel(reply_q->msix_index <<
+			pete_writel("drivers/scsi/mpt3sas/mpt3sas_base.c:8286", reply_q->msix_index <<
 				MPI2_RPHI_MSIX_INDEX_SHIFT,
 				&ioc->chip->ReplyPostHostIndex);
 

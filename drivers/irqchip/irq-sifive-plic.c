@@ -96,9 +96,9 @@ static void __plic_toggle(void __iomem *enable_base, int hwirq, int enable)
 	u32 hwirq_mask = 1 << (hwirq % 32);
 
 	if (enable)
-		writel(readl(reg) | hwirq_mask, reg);
+		pete_writel("drivers/irqchip/irq-sifive-plic.c:99", pete_readl("drivers/irqchip/irq-sifive-plic.c:99", reg) | hwirq_mask, reg);
 	else
-		writel(readl(reg) & ~hwirq_mask, reg);
+		pete_writel("drivers/irqchip/irq-sifive-plic.c:101", pete_readl("drivers/irqchip/irq-sifive-plic.c:101", reg) & ~hwirq_mask, reg);
 }
 
 static void plic_toggle(struct plic_handler *handler, int hwirq, int enable)
@@ -124,14 +124,14 @@ static void plic_irq_unmask(struct irq_data *d)
 {
 	struct plic_priv *priv = irq_data_get_irq_chip_data(d);
 
-	writel(1, priv->regs + PRIORITY_BASE + d->hwirq * PRIORITY_PER_ID);
+	pete_writel("drivers/irqchip/irq-sifive-plic.c:127", 1, priv->regs + PRIORITY_BASE + d->hwirq * PRIORITY_PER_ID);
 }
 
 static void plic_irq_mask(struct irq_data *d)
 {
 	struct plic_priv *priv = irq_data_get_irq_chip_data(d);
 
-	writel(0, priv->regs + PRIORITY_BASE + d->hwirq * PRIORITY_PER_ID);
+	pete_writel("drivers/irqchip/irq-sifive-plic.c:134", 0, priv->regs + PRIORITY_BASE + d->hwirq * PRIORITY_PER_ID);
 }
 
 static void plic_irq_enable(struct irq_data *d)
@@ -151,10 +151,10 @@ static void plic_irq_eoi(struct irq_data *d)
 
 	if (unlikely(irqd_irq_disabled(d))) {
 		plic_toggle(handler, d->hwirq, 1);
-		writel(d->hwirq, handler->hart_base + CONTEXT_CLAIM);
+		pete_writel("drivers/irqchip/irq-sifive-plic.c:154", d->hwirq, handler->hart_base + CONTEXT_CLAIM);
 		plic_toggle(handler, d->hwirq, 0);
 	} else {
-		writel(d->hwirq, handler->hart_base + CONTEXT_CLAIM);
+		pete_writel("drivers/irqchip/irq-sifive-plic.c:157", d->hwirq, handler->hart_base + CONTEXT_CLAIM);
 	}
 }
 
@@ -249,7 +249,7 @@ static int plic_irq_suspend(void)
 	priv = per_cpu_ptr(&plic_handlers, smp_processor_id())->priv;
 
 	for (i = 0; i < priv->nr_irqs; i++)
-		if (readl(priv->regs + PRIORITY_BASE + i * PRIORITY_PER_ID))
+		if (pete_readl("drivers/irqchip/irq-sifive-plic.c:252", priv->regs + PRIORITY_BASE + i * PRIORITY_PER_ID))
 			__set_bit(i, priv->prio_save);
 		else
 			__clear_bit(i, priv->prio_save);
@@ -263,7 +263,7 @@ static int plic_irq_suspend(void)
 		raw_spin_lock(&handler->enable_lock);
 		for (i = 0; i < DIV_ROUND_UP(priv->nr_irqs, 32); i++) {
 			reg = handler->enable_base + i * sizeof(u32);
-			handler->enable_save[i] = readl(reg);
+			handler->enable_save[i] = pete_readl("drivers/irqchip/irq-sifive-plic.c:266", reg);
 		}
 		raw_spin_unlock(&handler->enable_lock);
 	}
@@ -281,7 +281,7 @@ static void plic_irq_resume(void)
 
 	for (i = 0; i < priv->nr_irqs; i++) {
 		index = BIT_WORD(i);
-		writel((priv->prio_save[index] & BIT_MASK(i)) ? 1 : 0,
+		pete_writel("drivers/irqchip/irq-sifive-plic.c:284", (priv->prio_save[index] & BIT_MASK(i)) ? 1 : 0,
 		       priv->regs + PRIORITY_BASE + i * PRIORITY_PER_ID);
 	}
 
@@ -294,7 +294,7 @@ static void plic_irq_resume(void)
 		raw_spin_lock(&handler->enable_lock);
 		for (i = 0; i < DIV_ROUND_UP(priv->nr_irqs, 32); i++) {
 			reg = handler->enable_base + i * sizeof(u32);
-			writel(handler->enable_save[i], reg);
+			pete_writel("drivers/irqchip/irq-sifive-plic.c:297", handler->enable_save[i], reg);
 		}
 		raw_spin_unlock(&handler->enable_lock);
 	}
@@ -374,7 +374,7 @@ static void plic_handle_irq(struct irq_desc *desc)
 
 	chained_irq_enter(chip, desc);
 
-	while ((hwirq = readl(claim))) {
+	while ((hwirq = pete_readl("drivers/irqchip/irq-sifive-plic.c:377", claim))) {
 		int err = generic_handle_domain_irq(handler->priv->irqdomain,
 						    hwirq);
 		if (unlikely(err))
@@ -388,7 +388,7 @@ static void plic_handle_irq(struct irq_desc *desc)
 static void plic_set_threshold(struct plic_handler *handler, u32 threshold)
 {
 	/* priority must be > threshold to trigger an interrupt */
-	writel(threshold, handler->hart_base + CONTEXT_THRESHOLD);
+	pete_writel("drivers/irqchip/irq-sifive-plic.c:391", threshold, handler->hart_base + CONTEXT_THRESHOLD);
 }
 
 static int plic_dying_cpu(unsigned int cpu)
@@ -532,7 +532,7 @@ static int __init __plic_init(struct device_node *node,
 done:
 		for (hwirq = 1; hwirq <= nr_irqs; hwirq++) {
 			plic_toggle(handler, hwirq, 0);
-			writel(1, priv->regs + PRIORITY_BASE +
+			pete_writel("drivers/irqchip/irq-sifive-plic.c:535", 1, priv->regs + PRIORITY_BASE +
 				  hwirq * PRIORITY_PER_ID);
 		}
 		nr_handlers++;

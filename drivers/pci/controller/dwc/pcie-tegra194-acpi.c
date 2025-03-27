@@ -42,7 +42,7 @@ static void atu_reg_write(struct tegra194_pcie_ecam *pcie_ecam, int index,
 	u32 offset = PCIE_ATU_UNROLL_BASE(PCIE_ATU_REGION_DIR_OB, index) +
 		     PCIE_ATU_VIEWPORT_BASE;
 
-	writel(val, pcie_ecam->iatu_base + offset + reg);
+	pete_writel("drivers/pci/controller/dwc/pcie-tegra194-acpi.c:45", val, pcie_ecam->iatu_base + offset + reg);
 }
 
 static void program_outbound_atu(struct tegra194_pcie_ecam *pcie_ecam,

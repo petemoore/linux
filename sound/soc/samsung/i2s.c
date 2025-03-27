@@ -149,7 +149,7 @@ static inline bool tx_active(struct i2s_dai *i2s)
 	if (!i2s)
 		return false;
 
-	active = readl(i2s->priv->addr + I2SCON);
+	active = pete_readl("sound/soc/samsung/i2s.c:152", i2s->priv->addr + I2SCON);
 
 	if (is_secondary(i2s))
 		active &= CON_TXSDMA_ACTIVE;
@@ -187,7 +187,7 @@ static inline bool rx_active(struct i2s_dai *i2s)
 	if (!i2s)
 		return false;
 
-	active = readl(i2s->priv->addr + I2SCON) & CON_RXDMA_ACTIVE;
+	active = pete_readl("sound/soc/samsung/i2s.c:190", i2s->priv->addr + I2SCON) & CON_RXDMA_ACTIVE;
 
 	return active ? true : false;
 }
@@ -253,7 +253,7 @@ static inline unsigned get_rfs(struct i2s_dai *i2s)
 	struct samsung_i2s_priv *priv = i2s->priv;
 	u32 rfs;
 
-	rfs = readl(priv->addr + I2SMOD) >> priv->variant_regs->rfs_off;
+	rfs = pete_readl("sound/soc/samsung/i2s.c:256", priv->addr + I2SMOD) >> priv->variant_regs->rfs_off;
 	rfs &= priv->variant_regs->rfs_mask;
 
 	switch (rfs) {
@@ -272,7 +272,7 @@ static inline unsigned get_rfs(struct i2s_dai *i2s)
 static inline void set_rfs(struct i2s_dai *i2s, unsigned rfs)
 {
 	struct samsung_i2s_priv *priv = i2s->priv;
-	u32 mod = readl(priv->addr + I2SMOD);
+	u32 mod = pete_readl("sound/soc/samsung/i2s.c:275", priv->addr + I2SMOD);
 	int rfs_shift = priv->variant_regs->rfs_off;
 
 	mod &= ~(priv->variant_regs->rfs_mask << rfs_shift);
@@ -304,7 +304,7 @@ static inline void set_rfs(struct i2s_dai *i2s, unsigned rfs)
 		break;
 	}
 
-	writel(mod, priv->addr + I2SMOD);
+	pete_writel("sound/soc/samsung/i2s.c:307", mod, priv->addr + I2SMOD);
 }
 
 /* Read bit-clock of I2S (in multiples of LRCLK) */
@@ -313,7 +313,7 @@ static inline unsigned get_bfs(struct i2s_dai *i2s)
 	struct samsung_i2s_priv *priv = i2s->priv;
 	u32 bfs;
 
-	bfs = readl(priv->addr + I2SMOD) >> priv->variant_regs->bfs_off;
+	bfs = pete_readl("sound/soc/samsung/i2s.c:316", priv->addr + I2SMOD) >> priv->variant_regs->bfs_off;
 	bfs &= priv->variant_regs->bfs_mask;
 
 	switch (bfs) {
@@ -333,7 +333,7 @@ static inline unsigned get_bfs(struct i2s_dai *i2s)
 static inline void set_bfs(struct i2s_dai *i2s, unsigned bfs)
 {
 	struct samsung_i2s_priv *priv = i2s->priv;
-	u32 mod = readl(priv->addr + I2SMOD);
+	u32 mod = pete_readl("sound/soc/samsung/i2s.c:336", priv->addr + I2SMOD);
 	int tdm = priv->quirks & QUIRK_SUPPORTS_TDM;
 	int bfs_shift = priv->variant_regs->bfs_off;
 
@@ -378,13 +378,13 @@ static inline void set_bfs(struct i2s_dai *i2s, unsigned bfs)
 		return;
 	}
 
-	writel(mod, priv->addr + I2SMOD);
+	pete_writel("sound/soc/samsung/i2s.c:381", mod, priv->addr + I2SMOD);
 }
 
 /* Sample size */
 static inline int get_blc(struct i2s_dai *i2s)
 {
-	int blc = readl(i2s->priv->addr + I2SMOD);
+	int blc = pete_readl("sound/soc/samsung/i2s.c:387", i2s->priv->addr + I2SMOD);
 
 	blc = (blc >> 13) & 0x3;
 
@@ -401,8 +401,8 @@ static void i2s_txctrl(struct i2s_dai *i2s, int on)
 	struct samsung_i2s_priv *priv = i2s->priv;
 	void __iomem *addr = priv->addr;
 	int txr_off = priv->variant_regs->txr_off;
-	u32 con = readl(addr + I2SCON);
-	u32 mod = readl(addr + I2SMOD) & ~(3 << txr_off);
+	u32 con = pete_readl("sound/soc/samsung/i2s.c:404", addr + I2SCON);
+	u32 mod = pete_readl("sound/soc/samsung/i2s.c:405", addr + I2SMOD) & ~(3 << txr_off);
 
 	if (on) {
 		con |= CON_ACTIVE;
@@ -430,7 +430,7 @@ static void i2s_txctrl(struct i2s_dai *i2s, int on)
 		}
 
 		if (other_tx_active(i2s)) {
-			writel(con, addr + I2SCON);
+			pete_writel("sound/soc/samsung/i2s.c:433", con, addr + I2SCON);
 			return;
 		}
 
@@ -442,8 +442,8 @@ static void i2s_txctrl(struct i2s_dai *i2s, int on)
 			con &= ~CON_ACTIVE;
 	}
 
-	writel(mod, addr + I2SMOD);
-	writel(con, addr + I2SCON);
+	pete_writel("sound/soc/samsung/i2s.c:445", mod, addr + I2SMOD);
+	pete_writel("sound/soc/samsung/i2s.c:446", con, addr + I2SCON);
 }
 
 /* RX Channel Control */
@@ -452,8 +452,8 @@ static void i2s_rxctrl(struct i2s_dai *i2s, int on)
 	struct samsung_i2s_priv *priv = i2s->priv;
 	void __iomem *addr = priv->addr;
 	int txr_off = priv->variant_regs->txr_off;
-	u32 con = readl(addr + I2SCON);
-	u32 mod = readl(addr + I2SMOD) & ~(3 << txr_off);
+	u32 con = pete_readl("sound/soc/samsung/i2s.c:455", addr + I2SCON);
+	u32 mod = pete_readl("sound/soc/samsung/i2s.c:456", addr + I2SMOD) & ~(3 << txr_off);
 
 	if (on) {
 		con |= CON_RXDMA_ACTIVE | CON_ACTIVE;
@@ -473,8 +473,8 @@ static void i2s_rxctrl(struct i2s_dai *i2s, int on)
 			con &= ~CON_ACTIVE;
 	}
 
-	writel(mod, addr + I2SMOD);
-	writel(con, addr + I2SCON);
+	pete_writel("sound/soc/samsung/i2s.c:476", mod, addr + I2SMOD);
+	pete_writel("sound/soc/samsung/i2s.c:477", con, addr + I2SCON);
 }
 
 /* Flush FIFO of an interface */
@@ -492,14 +492,14 @@ static inline void i2s_fifo(struct i2s_dai *i2s, u32 flush)
 		fic = i2s->priv->addr + I2SFIC;
 
 	/* Flush the FIFO */
-	writel(readl(fic) | flush, fic);
+	pete_writel("sound/soc/samsung/i2s.c:495", pete_readl("sound/soc/samsung/i2s.c:495", fic) | flush, fic);
 
 	/* Be patient */
 	val = msecs_to_loops(1) / 1000; /* 1 usec */
 	while (--val)
 		cpu_relax();
 
-	writel(readl(fic) & ~flush, fic);
+	pete_writel("sound/soc/samsung/i2s.c:502", pete_readl("sound/soc/samsung/i2s.c:502", fic) & ~flush, fic);
 }
 
 static int i2s_set_sysclk(struct snd_soc_dai *dai, int clk_id, unsigned int rfs,
@@ -518,7 +518,7 @@ static int i2s_set_sysclk(struct snd_soc_dai *dai, int clk_id, unsigned int rfs,
 	pm_runtime_get_sync(dai->dev);
 
 	spin_lock_irqsave(&priv->lock, flags);
-	mod = readl(priv->addr + I2SMOD);
+	mod = pete_readl("sound/soc/samsung/i2s.c:521", priv->addr + I2SMOD);
 	spin_unlock_irqrestore(&priv->lock, flags);
 
 	switch (clk_id) {
@@ -615,9 +615,9 @@ static int i2s_set_sysclk(struct snd_soc_dai *dai, int clk_id, unsigned int rfs,
 	}
 
 	spin_lock_irqsave(&priv->lock, flags);
-	mod = readl(priv->addr + I2SMOD);
+	mod = pete_readl("sound/soc/samsung/i2s.c:618", priv->addr + I2SMOD);
 	mod = (mod & ~mask) | val;
-	writel(mod, priv->addr + I2SMOD);
+	pete_writel("sound/soc/samsung/i2s.c:620", mod, priv->addr + I2SMOD);
 	spin_unlock_irqrestore(&priv->lock, flags);
 done:
 	pm_runtime_put(dai->dev);
@@ -700,7 +700,7 @@ static int i2s_set_fmt(struct snd_soc_dai *dai, unsigned int fmt)
 
 	pm_runtime_get_sync(dai->dev);
 	spin_lock_irqsave(&priv->lock, flags);
-	mod = readl(priv->addr + I2SMOD);
+	mod = pete_readl("sound/soc/samsung/i2s.c:703", priv->addr + I2SMOD);
 	/*
 	 * Don't change the I2S mode if any controller is active on this
 	 * channel.
@@ -716,7 +716,7 @@ static int i2s_set_fmt(struct snd_soc_dai *dai, unsigned int fmt)
 
 	mod &= ~(sdf_mask | lrp_rlow | mod_slave);
 	mod |= tmp;
-	writel(mod, priv->addr + I2SMOD);
+	pete_writel("sound/soc/samsung/i2s.c:719", mod, priv->addr + I2SMOD);
 	priv->slave_mode = (mod & mod_slave);
 	spin_unlock_irqrestore(&priv->lock, flags);
 	pm_runtime_put(dai->dev);
@@ -804,9 +804,9 @@ static int i2s_hw_params(struct snd_pcm_substream *substream,
 	}
 
 	spin_lock_irqsave(&priv->lock, flags);
-	mod = readl(priv->addr + I2SMOD);
+	mod = pete_readl("sound/soc/samsung/i2s.c:807", priv->addr + I2SMOD);
 	mod = (mod & ~mask) | val;
-	writel(mod, priv->addr + I2SMOD);
+	pete_writel("sound/soc/samsung/i2s.c:809", mod, priv->addr + I2SMOD);
 	spin_unlock_irqrestore(&priv->lock, flags);
 
 	snd_soc_dai_init_dma_data(dai, &i2s->dma_playback, &i2s->dma_capture);
@@ -841,7 +841,7 @@ static int i2s_startup(struct snd_pcm_substream *substream,
 		i2s->mode |= DAI_MANAGER;
 
 	if (!any_active(i2s) && (priv->quirks & QUIRK_NEED_RSTCLR))
-		writel(CON_RSTCLR, i2s->priv->addr + I2SCON);
+		pete_writel("sound/soc/samsung/i2s.c:844", CON_RSTCLR, i2s->priv->addr + I2SCON);
 
 	spin_unlock_irqrestore(&priv->pcm_lock, flags);
 
@@ -925,7 +925,7 @@ static int config_setup(struct i2s_dai *i2s)
 
 	if (!(priv->quirks & QUIRK_NO_MUXPSR)) {
 		psr = priv->rclk_srcrate / i2s->frmclk / rfs;
-		writel(((psr - 1) << 8) | PSR_PSREN, priv->addr + I2SPSR);
+		pete_writel("sound/soc/samsung/i2s.c:928", ((psr - 1) << 8) | PSR_PSREN, priv->addr + I2SPSR);
 		dev_dbg(&i2s->pdev->dev,
 			"RCLK_SRC=%luHz PSR=%u, RCLK=%dfs, BCLK=%dfs\n",
 				priv->rclk_srcrate, psr, rfs, bfs);
@@ -1023,7 +1023,7 @@ i2s_delay(struct snd_pcm_substream *substream, struct snd_soc_dai *dai)
 {
 	struct samsung_i2s_priv *priv = snd_soc_dai_get_drvdata(dai);
 	struct i2s_dai *i2s = to_info(dai);
-	u32 reg = readl(priv->addr + I2SFIC);
+	u32 reg = pete_readl("sound/soc/samsung/i2s.c:1026", priv->addr + I2SFIC);
 	snd_pcm_sframes_t delay;
 
 	WARN_ON(!pm_runtime_active(dai->dev));
@@ -1031,7 +1031,7 @@ i2s_delay(struct snd_pcm_substream *substream, struct snd_soc_dai *dai)
 	if (substream->stream == SNDRV_PCM_STREAM_CAPTURE)
 		delay = FIC_RXCOUNT(reg);
 	else if (is_secondary(i2s))
-		delay = FICS_TXCOUNT(readl(priv->addr + I2SFICS));
+		delay = FICS_TXCOUNT(pete_readl("sound/soc/samsung/i2s.c:1034", priv->addr + I2SFICS));
 	else
 		delay = (reg >> priv->variant_regs->ftx0cnt_off) & 0x7f;
 
@@ -1070,7 +1070,7 @@ static int samsung_i2s_dai_probe(struct snd_soc_dai *dai)
 					  &i2s->dma_capture);
 
 		if (priv->quirks & QUIRK_NEED_RSTCLR)
-			writel(CON_RSTCLR, priv->addr + I2SCON);
+			pete_writel("sound/soc/samsung/i2s.c:1073", CON_RSTCLR, priv->addr + I2SCON);
 
 		if (priv->quirks & QUIRK_SUPPORTS_IDMA)
 			idma_reg_addr_init(priv->addr,
@@ -1109,7 +1109,7 @@ static int samsung_i2s_dai_remove(struct snd_soc_dai *dai)
 	if (!is_secondary(i2s)) {
 		if (priv->quirks & QUIRK_NEED_RSTCLR) {
 			spin_lock_irqsave(&priv->lock, flags);
-			writel(0, priv->addr + I2SCON);
+			pete_writel("sound/soc/samsung/i2s.c:1112", 0, priv->addr + I2SCON);
 			spin_unlock_irqrestore(&priv->lock, flags);
 		}
 	}
@@ -1223,9 +1223,9 @@ static int i2s_runtime_suspend(struct device *dev)
 {
 	struct samsung_i2s_priv *priv = dev_get_drvdata(dev);
 
-	priv->suspend_i2smod = readl(priv->addr + I2SMOD);
-	priv->suspend_i2scon = readl(priv->addr + I2SCON);
-	priv->suspend_i2spsr = readl(priv->addr + I2SPSR);
+	priv->suspend_i2smod = pete_readl("sound/soc/samsung/i2s.c:1226", priv->addr + I2SMOD);
+	priv->suspend_i2scon = pete_readl("sound/soc/samsung/i2s.c:1227", priv->addr + I2SCON);
+	priv->suspend_i2spsr = pete_readl("sound/soc/samsung/i2s.c:1228", priv->addr + I2SPSR);
 
 	clk_disable_unprepare(priv->op_clk);
 	clk_disable_unprepare(priv->clk);
@@ -1250,9 +1250,9 @@ static int i2s_runtime_resume(struct device *dev)
 		}
 	}
 
-	writel(priv->suspend_i2scon, priv->addr + I2SCON);
-	writel(priv->suspend_i2smod, priv->addr + I2SMOD);
-	writel(priv->suspend_i2spsr, priv->addr + I2SPSR);
+	pete_writel("sound/soc/samsung/i2s.c:1253", priv->suspend_i2scon, priv->addr + I2SCON);
+	pete_writel("sound/soc/samsung/i2s.c:1254", priv->suspend_i2smod, priv->addr + I2SMOD);
+	pete_writel("sound/soc/samsung/i2s.c:1255", priv->suspend_i2spsr, priv->addr + I2SPSR);
 
 	return 0;
 }
@@ -1309,8 +1309,8 @@ static int i2s_register_clock_provider(struct samsung_i2s_priv *priv)
 
 	if (!(priv->quirks & QUIRK_NO_MUXPSR)) {
 		/* Activate the prescaler */
-		u32 val = readl(priv->addr + I2SPSR);
-		writel(val | PSR_PSREN, priv->addr + I2SPSR);
+		u32 val = pete_readl("sound/soc/samsung/i2s.c:1312", priv->addr + I2SPSR);
+		pete_writel("sound/soc/samsung/i2s.c:1313", val | PSR_PSREN, priv->addr + I2SPSR);
 
 		priv->clk_table[CLK_I2S_RCLK_SRC] = clk_register_mux(dev,
 				i2s_clk_name[CLK_I2S_RCLK_SRC], p_names,
@@ -1599,7 +1599,7 @@ static void fsd_i2s_fixup_late(struct snd_pcm_substream *substream,
 	struct i2s_dai *other = get_other_dai(i2s);
 
 	if (!is_opened(other))
-		writel(PSR_PSVAL(2) | PSR_PSREN, priv->addr + I2SPSR);
+		pete_writel("sound/soc/samsung/i2s.c:1602", PSR_PSVAL(2) | PSR_PSREN, priv->addr + I2SPSR);
 }
 
 static const struct samsung_i2s_variant_regs i2sv3_regs = {

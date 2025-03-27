@@ -60,10 +60,10 @@ static void __gfxpll_rreg(struct loongson_gfxpll *this,
 			  union loongson_gfxpll_reg_bitmap *reg)
 {
 #if defined(CONFIG_64BIT)
-	reg->d = readq(this->mmio);
+	reg->d = pete_readq("drivers/gpu/drm/loongson/lsdc_gfxpll.c:63", this->mmio);
 #else
-	reg->w[0] = readl(this->mmio);
-	reg->w[1] = readl(this->mmio + 4);
+	reg->w[0] = pete_readl("drivers/gpu/drm/loongson/lsdc_gfxpll.c:65", this->mmio);
+	reg->w[1] = pete_readl("drivers/gpu/drm/loongson/lsdc_gfxpll.c:66", this->mmio + 4);
 #endif
 }
 

@@ -69,8 +69,8 @@ static void riowd_writereg(struct riowd *p, u8 val, int index)
 	unsigned long flags;
 
 	spin_lock_irqsave(&p->lock, flags);
-	writeb(index, p->regs + 0);
-	writeb(val, p->regs + 1);
+	pete_writeb("drivers/watchdog/riowd.c:72", index, p->regs + 0);
+	pete_writeb("drivers/watchdog/riowd.c:73", val, p->regs + 1);
 	spin_unlock_irqrestore(&p->lock, flags);
 }
 

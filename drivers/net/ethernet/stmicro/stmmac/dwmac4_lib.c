@@ -15,11 +15,11 @@
 
 int dwmac4_dma_reset(void __iomem *ioaddr)
 {
-	u32 value = readl(ioaddr + DMA_BUS_MODE);
+	u32 value = pete_readl("drivers/net/ethernet/stmicro/stmmac/dwmac4_lib.c:18", ioaddr + DMA_BUS_MODE);
 
 	/* DMA SW reset */
 	value |= DMA_BUS_MODE_SFT_RESET;
-	writel(value, ioaddr + DMA_BUS_MODE);
+	pete_writel("drivers/net/ethernet/stmicro/stmmac/dwmac4_lib.c:22", value, ioaddr + DMA_BUS_MODE);
 
 	return readl_poll_timeout(ioaddr + DMA_BUS_MODE, value,
 				 !(value & DMA_BUS_MODE_SFT_RESET),
@@ -31,7 +31,7 @@ void dwmac4_set_rx_tail_ptr(struct stmmac_priv *priv, void __iomem *ioaddr,
 {
 	const struct dwmac4_addrs *dwmac4_addrs = priv->plat->dwmac4_addrs;
 
-	writel(tail_ptr, ioaddr + DMA_CHAN_RX_END_ADDR(dwmac4_addrs, chan));
+	pete_writel("drivers/net/ethernet/stmicro/stmmac/dwmac4_lib.c:34", tail_ptr, ioaddr + DMA_CHAN_RX_END_ADDR(dwmac4_addrs, chan));
 }
 
 void dwmac4_set_tx_tail_ptr(struct stmmac_priv *priv, void __iomem *ioaddr,
@@ -39,21 +39,21 @@ void dwmac4_set_tx_tail_ptr(struct stmmac_priv *priv, void __iomem *ioaddr,
 {
 	const struct dwmac4_addrs *dwmac4_addrs = priv->plat->dwmac4_addrs;
 
-	writel(tail_ptr, ioaddr + DMA_CHAN_TX_END_ADDR(dwmac4_addrs, chan));
+	pete_writel("drivers/net/ethernet/stmicro/stmmac/dwmac4_lib.c:42", tail_ptr, ioaddr + DMA_CHAN_TX_END_ADDR(dwmac4_addrs, chan));
 }
 
 void dwmac4_dma_start_tx(struct stmmac_priv *priv, void __iomem *ioaddr,
 			 u32 chan)
 {
 	const struct dwmac4_addrs *dwmac4_addrs = priv->plat->dwmac4_addrs;
-	u32 value = readl(ioaddr + DMA_CHAN_TX_CONTROL(dwmac4_addrs, chan));
+	u32 value = pete_readl("drivers/net/ethernet/stmicro/stmmac/dwmac4_lib.c:49", ioaddr + DMA_CHAN_TX_CONTROL(dwmac4_addrs, chan));
 
 	value |= DMA_CONTROL_ST;
-	writel(value, ioaddr + DMA_CHAN_TX_CONTROL(dwmac4_addrs, chan));
+	pete_writel("drivers/net/ethernet/stmicro/stmmac/dwmac4_lib.c:52", value, ioaddr + DMA_CHAN_TX_CONTROL(dwmac4_addrs, chan));
 
-	value = readl(ioaddr + GMAC_CONFIG);
+	value = pete_readl("drivers/net/ethernet/stmicro/stmmac/dwmac4_lib.c:54", ioaddr + GMAC_CONFIG);
 	value |= GMAC_CONFIG_TE;
-	writel(value, ioaddr + GMAC_CONFIG);
+	pete_writel("drivers/net/ethernet/stmicro/stmmac/dwmac4_lib.c:56", value, ioaddr + GMAC_CONFIG);
 }
 
 void dwmac4_dma_stop_tx(struct stmmac_priv *priv, void __iomem *ioaddr,
@@ -61,10 +61,10 @@ void dwmac4_dma_stop_tx(struct stmmac_priv *priv, void __iomem *ioaddr,
 {
 	const struct dwmac4_addrs *dwmac4_addrs = priv->plat->dwmac4_addrs;
 
-	u32 value = readl(ioaddr + DMA_CHAN_TX_CONTROL(dwmac4_addrs, chan));
+	u32 value = pete_readl("drivers/net/ethernet/stmicro/stmmac/dwmac4_lib.c:64", ioaddr + DMA_CHAN_TX_CONTROL(dwmac4_addrs, chan));
 
 	value &= ~DMA_CONTROL_ST;
-	writel(value, ioaddr + DMA_CHAN_TX_CONTROL(dwmac4_addrs, chan));
+	pete_writel("drivers/net/ethernet/stmicro/stmmac/dwmac4_lib.c:67", value, ioaddr + DMA_CHAN_TX_CONTROL(dwmac4_addrs, chan));
 }
 
 void dwmac4_dma_start_rx(struct stmmac_priv *priv, void __iomem *ioaddr,
@@ -72,25 +72,25 @@ void dwmac4_dma_start_rx(struct stmmac_priv *priv, void __iomem *ioaddr,
 {
 	const struct dwmac4_addrs *dwmac4_addrs = priv->plat->dwmac4_addrs;
 
-	u32 value = readl(ioaddr + DMA_CHAN_RX_CONTROL(dwmac4_addrs, chan));
+	u32 value = pete_readl("drivers/net/ethernet/stmicro/stmmac/dwmac4_lib.c:75", ioaddr + DMA_CHAN_RX_CONTROL(dwmac4_addrs, chan));
 
 	value |= DMA_CONTROL_SR;
 
-	writel(value, ioaddr + DMA_CHAN_RX_CONTROL(dwmac4_addrs, chan));
+	pete_writel("drivers/net/ethernet/stmicro/stmmac/dwmac4_lib.c:79", value, ioaddr + DMA_CHAN_RX_CONTROL(dwmac4_addrs, chan));
 
-	value = readl(ioaddr + GMAC_CONFIG);
+	value = pete_readl("drivers/net/ethernet/stmicro/stmmac/dwmac4_lib.c:81", ioaddr + GMAC_CONFIG);
 	value |= GMAC_CONFIG_RE;
-	writel(value, ioaddr + GMAC_CONFIG);
+	pete_writel("drivers/net/ethernet/stmicro/stmmac/dwmac4_lib.c:83", value, ioaddr + GMAC_CONFIG);
 }
 
 void dwmac4_dma_stop_rx(struct stmmac_priv *priv, void __iomem *ioaddr,
 			u32 chan)
 {
 	const struct dwmac4_addrs *dwmac4_addrs = priv->plat->dwmac4_addrs;
-	u32 value = readl(ioaddr + DMA_CHAN_RX_CONTROL(dwmac4_addrs, chan));
+	u32 value = pete_readl("drivers/net/ethernet/stmicro/stmmac/dwmac4_lib.c:90", ioaddr + DMA_CHAN_RX_CONTROL(dwmac4_addrs, chan));
 
 	value &= ~DMA_CONTROL_SR;
-	writel(value, ioaddr + DMA_CHAN_RX_CONTROL(dwmac4_addrs, chan));
+	pete_writel("drivers/net/ethernet/stmicro/stmmac/dwmac4_lib.c:93", value, ioaddr + DMA_CHAN_RX_CONTROL(dwmac4_addrs, chan));
 }
 
 void dwmac4_set_tx_ring_len(struct stmmac_priv *priv, void __iomem *ioaddr,
@@ -98,7 +98,7 @@ void dwmac4_set_tx_ring_len(struct stmmac_priv *priv, void __iomem *ioaddr,
 {
 	const struct dwmac4_addrs *dwmac4_addrs = priv->plat->dwmac4_addrs;
 
-	writel(len, ioaddr + DMA_CHAN_TX_RING_LEN(dwmac4_addrs, chan));
+	pete_writel("drivers/net/ethernet/stmicro/stmmac/dwmac4_lib.c:101", len, ioaddr + DMA_CHAN_TX_RING_LEN(dwmac4_addrs, chan));
 }
 
 void dwmac4_set_rx_ring_len(struct stmmac_priv *priv, void __iomem *ioaddr,
@@ -106,71 +106,71 @@ void dwmac4_set_rx_ring_len(struct stmmac_priv *priv, void __iomem *ioaddr,
 {
 	const struct dwmac4_addrs *dwmac4_addrs = priv->plat->dwmac4_addrs;
 
-	writel(len, ioaddr + DMA_CHAN_RX_RING_LEN(dwmac4_addrs, chan));
+	pete_writel("drivers/net/ethernet/stmicro/stmmac/dwmac4_lib.c:109", len, ioaddr + DMA_CHAN_RX_RING_LEN(dwmac4_addrs, chan));
 }
 
 void dwmac4_enable_dma_irq(struct stmmac_priv *priv, void __iomem *ioaddr,
 			   u32 chan, bool rx, bool tx)
 {
 	const struct dwmac4_addrs *dwmac4_addrs = priv->plat->dwmac4_addrs;
-	u32 value = readl(ioaddr + DMA_CHAN_INTR_ENA(dwmac4_addrs, chan));
+	u32 value = pete_readl("drivers/net/ethernet/stmicro/stmmac/dwmac4_lib.c:116", ioaddr + DMA_CHAN_INTR_ENA(dwmac4_addrs, chan));
 
 	if (rx)
 		value |= DMA_CHAN_INTR_DEFAULT_RX;
 	if (tx)
 		value |= DMA_CHAN_INTR_DEFAULT_TX;
 
-	writel(value, ioaddr + DMA_CHAN_INTR_ENA(dwmac4_addrs, chan));
+	pete_writel("drivers/net/ethernet/stmicro/stmmac/dwmac4_lib.c:123", value, ioaddr + DMA_CHAN_INTR_ENA(dwmac4_addrs, chan));
 }
 
 void dwmac410_enable_dma_irq(struct stmmac_priv *priv, void __iomem *ioaddr,
 			     u32 chan, bool rx, bool tx)
 {
 	const struct dwmac4_addrs *dwmac4_addrs = priv->plat->dwmac4_addrs;
-	u32 value = readl(ioaddr + DMA_CHAN_INTR_ENA(dwmac4_addrs, chan));
+	u32 value = pete_readl("drivers/net/ethernet/stmicro/stmmac/dwmac4_lib.c:130", ioaddr + DMA_CHAN_INTR_ENA(dwmac4_addrs, chan));
 
 	if (rx)
 		value |= DMA_CHAN_INTR_DEFAULT_RX_4_10;
 	if (tx)
 		value |= DMA_CHAN_INTR_DEFAULT_TX_4_10;
 
-	writel(value, ioaddr + DMA_CHAN_INTR_ENA(dwmac4_addrs, chan));
+	pete_writel("drivers/net/ethernet/stmicro/stmmac/dwmac4_lib.c:137", value, ioaddr + DMA_CHAN_INTR_ENA(dwmac4_addrs, chan));
 }
 
 void dwmac4_disable_dma_irq(struct stmmac_priv *priv, void __iomem *ioaddr,
 			    u32 chan, bool rx, bool tx)
 {
 	const struct dwmac4_addrs *dwmac4_addrs = priv->plat->dwmac4_addrs;
-	u32 value = readl(ioaddr + DMA_CHAN_INTR_ENA(dwmac4_addrs, chan));
+	u32 value = pete_readl("drivers/net/ethernet/stmicro/stmmac/dwmac4_lib.c:144", ioaddr + DMA_CHAN_INTR_ENA(dwmac4_addrs, chan));
 
 	if (rx)
 		value &= ~DMA_CHAN_INTR_DEFAULT_RX;
 	if (tx)
 		value &= ~DMA_CHAN_INTR_DEFAULT_TX;
 
-	writel(value, ioaddr + DMA_CHAN_INTR_ENA(dwmac4_addrs, chan));
+	pete_writel("drivers/net/ethernet/stmicro/stmmac/dwmac4_lib.c:151", value, ioaddr + DMA_CHAN_INTR_ENA(dwmac4_addrs, chan));
 }
 
 void dwmac410_disable_dma_irq(struct stmmac_priv *priv, void __iomem *ioaddr,
 			      u32 chan, bool rx, bool tx)
 {
 	const struct dwmac4_addrs *dwmac4_addrs = priv->plat->dwmac4_addrs;
-	u32 value = readl(ioaddr + DMA_CHAN_INTR_ENA(dwmac4_addrs, chan));
+	u32 value = pete_readl("drivers/net/ethernet/stmicro/stmmac/dwmac4_lib.c:158", ioaddr + DMA_CHAN_INTR_ENA(dwmac4_addrs, chan));
 
 	if (rx)
 		value &= ~DMA_CHAN_INTR_DEFAULT_RX_4_10;
 	if (tx)
 		value &= ~DMA_CHAN_INTR_DEFAULT_TX_4_10;
 
-	writel(value, ioaddr + DMA_CHAN_INTR_ENA(dwmac4_addrs, chan));
+	pete_writel("drivers/net/ethernet/stmicro/stmmac/dwmac4_lib.c:165", value, ioaddr + DMA_CHAN_INTR_ENA(dwmac4_addrs, chan));
 }
 
 int dwmac4_dma_interrupt(struct stmmac_priv *priv, void __iomem *ioaddr,
 			 struct stmmac_extra_stats *x, u32 chan, u32 dir)
 {
 	const struct dwmac4_addrs *dwmac4_addrs = priv->plat->dwmac4_addrs;
-	u32 intr_status = readl(ioaddr + DMA_CHAN_STATUS(dwmac4_addrs, chan));
-	u32 intr_en = readl(ioaddr + DMA_CHAN_INTR_ENA(dwmac4_addrs, chan));
+	u32 intr_status = pete_readl("drivers/net/ethernet/stmicro/stmmac/dwmac4_lib.c:172", ioaddr + DMA_CHAN_STATUS(dwmac4_addrs, chan));
+	u32 intr_en = pete_readl("drivers/net/ethernet/stmicro/stmmac/dwmac4_lib.c:173", ioaddr + DMA_CHAN_INTR_ENA(dwmac4_addrs, chan));
 	struct stmmac_pcpu_stats *stats = this_cpu_ptr(priv->xstats.pcpu_stats);
 	int ret = 0;
 
@@ -217,7 +217,7 @@ int dwmac4_dma_interrupt(struct stmmac_priv *priv, void __iomem *ioaddr,
 	if (unlikely(intr_status & DMA_CHAN_STATUS_ERI))
 		x->rx_early_irq++;
 
-	writel(intr_status & intr_en,
+	pete_writel("drivers/net/ethernet/stmicro/stmmac/dwmac4_lib.c:220", intr_status & intr_en,
 	       ioaddr + DMA_CHAN_STATUS(dwmac4_addrs, chan));
 	return ret;
 }
@@ -233,15 +233,15 @@ void stmmac_dwmac4_set_mac_addr(void __iomem *ioaddr, const u8 addr[6],
 	 * is RO.
 	 */
 	data |= (STMMAC_CHAN0 << GMAC_HI_DCS_SHIFT);
-	writel(data | GMAC_HI_REG_AE, ioaddr + high);
+	pete_writel("drivers/net/ethernet/stmicro/stmmac/dwmac4_lib.c:236", data | GMAC_HI_REG_AE, ioaddr + high);
 	data = (addr[3] << 24) | (addr[2] << 16) | (addr[1] << 8) | addr[0];
-	writel(data, ioaddr + low);
+	pete_writel("drivers/net/ethernet/stmicro/stmmac/dwmac4_lib.c:238", data, ioaddr + low);
 }
 
 /* Enable disable MAC RX/TX */
 void stmmac_dwmac4_set_mac(void __iomem *ioaddr, bool enable)
 {
-	u32 value = readl(ioaddr + GMAC_CONFIG);
+	u32 value = pete_readl("drivers/net/ethernet/stmicro/stmmac/dwmac4_lib.c:244", ioaddr + GMAC_CONFIG);
 	u32 old_val = value;
 
 	if (enable)
@@ -250,7 +250,7 @@ void stmmac_dwmac4_set_mac(void __iomem *ioaddr, bool enable)
 		value &= ~(GMAC_CONFIG_TE | GMAC_CONFIG_RE);
 
 	if (value != old_val)
-		writel(value, ioaddr + GMAC_CONFIG);
+		pete_writel("drivers/net/ethernet/stmicro/stmmac/dwmac4_lib.c:253", value, ioaddr + GMAC_CONFIG);
 }
 
 void stmmac_dwmac4_get_mac_addr(void __iomem *ioaddr, unsigned char *addr,
@@ -259,8 +259,8 @@ void stmmac_dwmac4_get_mac_addr(void __iomem *ioaddr, unsigned char *addr,
 	unsigned int hi_addr, lo_addr;
 
 	/* Read the MAC address from the hardware */
-	hi_addr = readl(ioaddr + high);
-	lo_addr = readl(ioaddr + low);
+	hi_addr = pete_readl("drivers/net/ethernet/stmicro/stmmac/dwmac4_lib.c:262", ioaddr + high);
+	lo_addr = pete_readl("drivers/net/ethernet/stmicro/stmmac/dwmac4_lib.c:263", ioaddr + low);
 
 	/* Extract the MAC address from the high and low words */
 	addr[0] = lo_addr & 0xff;

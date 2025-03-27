@@ -100,12 +100,12 @@ struct ocmem {
 
 static inline void ocmem_write(struct ocmem *ocmem, u32 reg, u32 data)
 {
-	writel(data, ocmem->mmio + reg);
+	pete_writel("drivers/soc/qcom/ocmem.c:103", data, ocmem->mmio + reg);
 }
 
 static inline u32 ocmem_read(struct ocmem *ocmem, u32 reg)
 {
-	return readl(ocmem->mmio + reg);
+	return pete_readl("drivers/soc/qcom/ocmem.c:108", ocmem->mmio + reg);
 }
 
 static void update_ocmem(struct ocmem *ocmem)

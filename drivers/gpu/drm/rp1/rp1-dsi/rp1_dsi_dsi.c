@@ -157,8 +157,8 @@
 #define DPHY_PLL_CHARGE_PUMP_OFFSET 0x11
 #define DPHY_PLL_LPF_OFFSET 0x12
 
-#define DSI_WRITE(reg, val)  writel((val),  dsi->hw_base[RP1DSI_HW_BLOCK_DSI] + (reg))
-#define DSI_READ(reg)        readl(dsi->hw_base[RP1DSI_HW_BLOCK_DSI] + (reg))
+#define DSI_WRITE(reg, val)  pete_writel("drivers/gpu/drm/rp1/rp1-dsi/rp1_dsi_dsi.c:160", (val),  dsi->hw_base[RP1DSI_HW_BLOCK_DSI] + (reg))
+#define DSI_READ(reg)        pete_readl("drivers/gpu/drm/rp1/rp1-dsi/rp1_dsi_dsi.c:161", dsi->hw_base[RP1DSI_HW_BLOCK_DSI] + (reg))
 
 // ================================================================================
 // Register block : RPI_MIPICFG
@@ -1108,8 +1108,8 @@
 #define RPI_MIPICFG_DFTSS_BYPASS_RESETSYNCS_LSB    0
 #define RPI_MIPICFG_DFTSS_BYPASS_RESETSYNCS_ACCESS "RW"
 
-#define CFG_WRITE(reg, val)  writel((val),  dsi->hw_base[RP1DSI_HW_BLOCK_CFG] + (reg ## _OFFSET))
-#define CFG_READ(reg)        readl(dsi->hw_base[RP1DSI_HW_BLOCK_CFG] + (reg ## _OFFSET))
+#define CFG_WRITE(reg, val)  pete_writel("drivers/gpu/drm/rp1/rp1-dsi/rp1_dsi_dsi.c:1111", (val),  dsi->hw_base[RP1DSI_HW_BLOCK_CFG] + (reg ## _OFFSET))
+#define CFG_READ(reg)        pete_readl("drivers/gpu/drm/rp1/rp1-dsi/rp1_dsi_dsi.c:1112", dsi->hw_base[RP1DSI_HW_BLOCK_CFG] + (reg ## _OFFSET))
 
 /* ------------------------------- DPHY setup stuff ------------------------ */
 

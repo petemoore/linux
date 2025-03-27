@@ -139,7 +139,7 @@ static unsigned long mtk_hdmi_pll_recalc_rate(struct clk_hw *hw,
 	unsigned long out_rate, val;
 	u32 tmp;
 
-	tmp = readl(hdmi_phy->regs + HDMI_CON6);
+	tmp = pete_readl("drivers/phy/mediatek/phy-mtk-hdmi-mt2701.c:142", hdmi_phy->regs + HDMI_CON6);
 	val = FIELD_GET(RG_HTPLL_PREDIV_MASK, tmp);
 	switch (val) {
 	case 0x00:
@@ -156,7 +156,7 @@ static unsigned long mtk_hdmi_pll_recalc_rate(struct clk_hw *hw,
 	val = FIELD_GET(RG_HTPLL_FBKDIV_MASK, tmp);
 	out_rate *= (val + 1) * 2;
 
-	tmp = readl(hdmi_phy->regs + HDMI_CON2);
+	tmp = pete_readl("drivers/phy/mediatek/phy-mtk-hdmi-mt2701.c:159", hdmi_phy->regs + HDMI_CON2);
 	val = FIELD_GET(RG_HDMITX_TX_POSDIV_MASK, tmp);
 	out_rate >>= val;
 

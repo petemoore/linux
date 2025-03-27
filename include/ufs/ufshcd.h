@@ -1203,9 +1203,9 @@ static inline bool ufshcd_enable_wb_if_scaling_up(struct ufs_hba *hba)
 }
 
 #define ufsmcq_writel(hba, val, reg)	\
-	writel((val), (hba)->mcq_base + (reg))
+	pete_writel("include/ufs/ufshcd.h:1206", (val), (hba)->mcq_base + (reg))
 #define ufsmcq_readl(hba, reg)	\
-	readl((hba)->mcq_base + (reg))
+	pete_readl("include/ufs/ufshcd.h:1208", (hba)->mcq_base + (reg))
 
 #define ufsmcq_writelx(hba, val, reg)	\
 	writel_relaxed((val), (hba)->mcq_base + (reg))
@@ -1213,9 +1213,9 @@ static inline bool ufshcd_enable_wb_if_scaling_up(struct ufs_hba *hba)
 	readl_relaxed((hba)->mcq_base + (reg))
 
 #define ufshcd_writel(hba, val, reg)	\
-	writel((val), (hba)->mmio_base + (reg))
+	pete_writel("include/ufs/ufshcd.h:1216", (val), (hba)->mmio_base + (reg))
 #define ufshcd_readl(hba, reg)	\
-	readl((hba)->mmio_base + (reg))
+	pete_readl("include/ufs/ufshcd.h:1218", (hba)->mmio_base + (reg))
 
 /**
  * ufshcd_rmwl - perform read/modify/write for a controller register

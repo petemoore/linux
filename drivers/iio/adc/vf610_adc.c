@@ -290,8 +290,8 @@ static void vf610_adc_cfg_post_set(struct vf610_adc *info)
 	if (adc_feature->ovwren)
 		cfg_data |= VF610_ADC_OVWREN;
 
-	writel(cfg_data, info->regs + VF610_REG_ADC_CFG);
-	writel(gc_data, info->regs + VF610_REG_ADC_GC);
+	pete_writel("drivers/iio/adc/vf610_adc.c:293", cfg_data, info->regs + VF610_REG_ADC_CFG);
+	pete_writel("drivers/iio/adc/vf610_adc.c:294", gc_data, info->regs + VF610_REG_ADC_GC);
 }
 
 static void vf610_adc_calibration(struct vf610_adc *info)
@@ -303,15 +303,15 @@ static void vf610_adc_calibration(struct vf610_adc *info)
 
 	/* enable calibration interrupt */
 	hc_cfg = VF610_ADC_AIEN | VF610_ADC_CONV_DISABLE;
-	writel(hc_cfg, info->regs + VF610_REG_ADC_HC0);
+	pete_writel("drivers/iio/adc/vf610_adc.c:306", hc_cfg, info->regs + VF610_REG_ADC_HC0);
 
-	adc_gc = readl(info->regs + VF610_REG_ADC_GC);
-	writel(adc_gc | VF610_ADC_CAL, info->regs + VF610_REG_ADC_GC);
+	adc_gc = pete_readl("drivers/iio/adc/vf610_adc.c:308", info->regs + VF610_REG_ADC_GC);
+	pete_writel("drivers/iio/adc/vf610_adc.c:309", adc_gc | VF610_ADC_CAL, info->regs + VF610_REG_ADC_GC);
 
 	if (!wait_for_completion_timeout(&info->completion, VF610_ADC_TIMEOUT))
 		dev_err(info->dev, "Timeout for adc calibration\n");
 
-	adc_gc = readl(info->regs + VF610_REG_ADC_GS);
+	adc_gc = pete_readl("drivers/iio/adc/vf610_adc.c:314", info->regs + VF610_REG_ADC_GS);
 	if (adc_gc & VF610_ADC_CALF)
 		dev_err(info->dev, "ADC calibration failed\n");
 
@@ -323,7 +323,7 @@ static void vf610_adc_cfg_set(struct vf610_adc *info)
 	struct vf610_adc_feature *adc_feature = &(info->adc_feature);
 	int cfg_data;
 
-	cfg_data = readl(info->regs + VF610_REG_ADC_CFG);
+	cfg_data = pete_readl("drivers/iio/adc/vf610_adc.c:326", info->regs + VF610_REG_ADC_CFG);
 
 	cfg_data &= ~VF610_ADC_ADLPC_EN;
 	if (adc_feature->conv_mode == VF610_ADC_CONV_LOW_POWER)
@@ -333,7 +333,7 @@ static void vf610_adc_cfg_set(struct vf610_adc *info)
 	if (adc_feature->conv_mode == VF610_ADC_CONV_HIGH_SPEED)
 		cfg_data |= VF610_ADC_ADHSC_EN;
 
-	writel(cfg_data, info->regs + VF610_REG_ADC_CFG);
+	pete_writel("drivers/iio/adc/vf610_adc.c:336", cfg_data, info->regs + VF610_REG_ADC_CFG);
 }
 
 static void vf610_adc_sample_set(struct vf610_adc *info)
@@ -341,8 +341,8 @@ static void vf610_adc_sample_set(struct vf610_adc *info)
 	struct vf610_adc_feature *adc_feature = &(info->adc_feature);
 	int cfg_data, gc_data;
 
-	cfg_data = readl(info->regs + VF610_REG_ADC_CFG);
-	gc_data = readl(info->regs + VF610_REG_ADC_GC);
+	cfg_data = pete_readl("drivers/iio/adc/vf610_adc.c:344", info->regs + VF610_REG_ADC_CFG);
+	gc_data = pete_readl("drivers/iio/adc/vf610_adc.c:345", info->regs + VF610_REG_ADC_GC);
 
 	/* resolution mode */
 	cfg_data &= ~VF610_ADC_MODE_MASK;
@@ -448,8 +448,8 @@ static void vf610_adc_sample_set(struct vf610_adc *info)
 			"error hardware sample average select\n");
 	}
 
-	writel(cfg_data, info->regs + VF610_REG_ADC_CFG);
-	writel(gc_data, info->regs + VF610_REG_ADC_GC);
+	pete_writel("drivers/iio/adc/vf610_adc.c:451", cfg_data, info->regs + VF610_REG_ADC_CFG);
+	pete_writel("drivers/iio/adc/vf610_adc.c:452", gc_data, info->regs + VF610_REG_ADC_GC);
 }
 
 static void vf610_adc_hw_init(struct vf610_adc *info)
@@ -557,7 +557,7 @@ static int vf610_adc_read_data(struct vf610_adc *info)
 {
 	int result;
 
-	result = readl(info->regs + VF610_REG_ADC_R0);
+	result = pete_readl("drivers/iio/adc/vf610_adc.c:560", info->regs + VF610_REG_ADC_R0);
 
 	switch (info->adc_feature.res_mode) {
 	case 8:
@@ -582,7 +582,7 @@ static irqreturn_t vf610_adc_isr(int irq, void *dev_id)
 	struct vf610_adc *info = iio_priv(indio_dev);
 	int coco;
 
-	coco = readl(info->regs + VF610_REG_ADC_HS);
+	coco = pete_readl("drivers/iio/adc/vf610_adc.c:585", info->regs + VF610_REG_ADC_HS);
 	if (coco & VF610_ADC_HS_COCO0) {
 		info->value = vf610_adc_read_data(info);
 		if (iio_buffer_enabled(indio_dev)) {
@@ -641,7 +641,7 @@ static int vf610_read_sample(struct iio_dev *indio_dev,
 	reinit_completion(&info->completion);
 	hc_cfg = VF610_ADC_ADCHC(chan->channel);
 	hc_cfg |= VF610_ADC_AIEN;
-	writel(hc_cfg, info->regs + VF610_REG_ADC_HC0);
+	pete_writel("drivers/iio/adc/vf610_adc.c:644", hc_cfg, info->regs + VF610_REG_ADC_HC0);
 	ret = wait_for_completion_interruptible_timeout(&info->completion,
 							VF610_ADC_TIMEOUT);
 	if (ret == 0) {
@@ -747,9 +747,9 @@ static int vf610_adc_buffer_postenable(struct iio_dev *indio_dev)
 	unsigned int channel;
 	int val;
 
-	val = readl(info->regs + VF610_REG_ADC_GC);
+	val = pete_readl("drivers/iio/adc/vf610_adc.c:750", info->regs + VF610_REG_ADC_GC);
 	val |= VF610_ADC_ADCON;
-	writel(val, info->regs + VF610_REG_ADC_GC);
+	pete_writel("drivers/iio/adc/vf610_adc.c:752", val, info->regs + VF610_REG_ADC_GC);
 
 	channel = find_first_bit(indio_dev->active_scan_mask,
 						indio_dev->masklength);
@@ -757,7 +757,7 @@ static int vf610_adc_buffer_postenable(struct iio_dev *indio_dev)
 	val = VF610_ADC_ADCHC(channel);
 	val |= VF610_ADC_AIEN;
 
-	writel(val, info->regs + VF610_REG_ADC_HC0);
+	pete_writel("drivers/iio/adc/vf610_adc.c:760", val, info->regs + VF610_REG_ADC_HC0);
 
 	return 0;
 }
@@ -768,14 +768,14 @@ static int vf610_adc_buffer_predisable(struct iio_dev *indio_dev)
 	unsigned int hc_cfg = 0;
 	int val;
 
-	val = readl(info->regs + VF610_REG_ADC_GC);
+	val = pete_readl("drivers/iio/adc/vf610_adc.c:771", info->regs + VF610_REG_ADC_GC);
 	val &= ~VF610_ADC_ADCON;
-	writel(val, info->regs + VF610_REG_ADC_GC);
+	pete_writel("drivers/iio/adc/vf610_adc.c:773", val, info->regs + VF610_REG_ADC_GC);
 
 	hc_cfg |= VF610_ADC_CONV_DISABLE;
 	hc_cfg &= ~VF610_ADC_AIEN;
 
-	writel(hc_cfg, info->regs + VF610_REG_ADC_HC0);
+	pete_writel("drivers/iio/adc/vf610_adc.c:778", hc_cfg, info->regs + VF610_REG_ADC_HC0);
 
 	return 0;
 }
@@ -796,7 +796,7 @@ static int vf610_adc_reg_access(struct iio_dev *indio_dev,
 		((reg % 4) || (reg > VF610_REG_ADC_PCTL)))
 		return -EINVAL;
 
-	*readval = readl(info->regs + reg);
+	*readval = pete_readl("drivers/iio/adc/vf610_adc.c:799", info->regs + reg);
 
 	return 0;
 }
@@ -936,9 +936,9 @@ static int vf610_adc_suspend(struct device *dev)
 	int hc_cfg;
 
 	/* ADC controller enters to stop mode */
-	hc_cfg = readl(info->regs + VF610_REG_ADC_HC0);
+	hc_cfg = pete_readl("drivers/iio/adc/vf610_adc.c:939", info->regs + VF610_REG_ADC_HC0);
 	hc_cfg |= VF610_ADC_CONV_DISABLE;
-	writel(hc_cfg, info->regs + VF610_REG_ADC_HC0);
+	pete_writel("drivers/iio/adc/vf610_adc.c:941", hc_cfg, info->regs + VF610_REG_ADC_HC0);
 
 	clk_disable_unprepare(info->clk);
 	regulator_disable(info->vref);

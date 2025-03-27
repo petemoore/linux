@@ -117,12 +117,12 @@ static const struct snd_pcm_hardware acp_st_pcm_hardware_capture = {
 
 static u32 acp_reg_read(void __iomem *acp_mmio, u32 reg)
 {
-	return readl(acp_mmio + (reg * 4));
+	return pete_readl("sound/soc/amd/acp-pcm-dma.c:120", acp_mmio + (reg * 4));
 }
 
 static void acp_reg_write(u32 val, void __iomem *acp_mmio, u32 reg)
 {
-	writel(val, acp_mmio + (reg * 4));
+	pete_writel("sound/soc/amd/acp-pcm-dma.c:125", val, acp_mmio + (reg * 4));
 }
 
 /*

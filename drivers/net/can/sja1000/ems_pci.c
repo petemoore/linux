@@ -127,18 +127,18 @@ MODULE_DEVICE_TABLE(pci, ems_pci_tbl);
  */
 static u8 ems_pci_v1_readb(struct ems_pci_card *card, unsigned int port)
 {
-	return readb(card->base_addr + (port * 4));
+	return pete_readb("drivers/net/can/sja1000/ems_pci.c:130", card->base_addr + (port * 4));
 }
 
 static u8 ems_pci_v1_read_reg(const struct sja1000_priv *priv, int port)
 {
-	return readb(priv->reg_base + (port * 4));
+	return pete_readb("drivers/net/can/sja1000/ems_pci.c:135", priv->reg_base + (port * 4));
 }
 
 static void ems_pci_v1_write_reg(const struct sja1000_priv *priv,
 				 int port, u8 val)
 {
-	writeb(val, priv->reg_base + (port * 4));
+	pete_writeb("drivers/net/can/sja1000/ems_pci.c:141", val, priv->reg_base + (port * 4));
 }
 
 static void ems_pci_v1_post_irq(const struct sja1000_priv *priv)
@@ -146,44 +146,44 @@ static void ems_pci_v1_post_irq(const struct sja1000_priv *priv)
 	struct ems_pci_card *card = priv->priv;
 
 	/* reset int flag of pita */
-	writel(PITA2_ICR_INT0_EN | PITA2_ICR_INT0,
+	pete_writel("drivers/net/can/sja1000/ems_pci.c:149", PITA2_ICR_INT0_EN | PITA2_ICR_INT0,
 	       card->conf_addr + PITA2_ICR);
 }
 
 static u8 ems_pci_v2_read_reg(const struct sja1000_priv *priv, int port)
 {
-	return readb(priv->reg_base + port);
+	return pete_readb("drivers/net/can/sja1000/ems_pci.c:155", priv->reg_base + port);
 }
 
 static void ems_pci_v2_write_reg(const struct sja1000_priv *priv,
 				 int port, u8 val)
 {
-	writeb(val, priv->reg_base + port);
+	pete_writeb("drivers/net/can/sja1000/ems_pci.c:161", val, priv->reg_base + port);
 }
 
 static void ems_pci_v2_post_irq(const struct sja1000_priv *priv)
 {
 	struct ems_pci_card *card = priv->priv;
 
-	writel(PLX_ICSR_ENA_CLR, card->conf_addr + PLX_ICSR);
+	pete_writel("drivers/net/can/sja1000/ems_pci.c:168", PLX_ICSR_ENA_CLR, card->conf_addr + PLX_ICSR);
 }
 
 static u8 ems_pci_v3_read_reg(const struct sja1000_priv *priv, int port)
 {
-	return readb(priv->reg_base + port);
+	return pete_readb("drivers/net/can/sja1000/ems_pci.c:173", priv->reg_base + port);
 }
 
 static void ems_pci_v3_write_reg(const struct sja1000_priv *priv,
 				 int port, u8 val)
 {
-	writeb(val, priv->reg_base + port);
+	pete_writeb("drivers/net/can/sja1000/ems_pci.c:179", val, priv->reg_base + port);
 }
 
 static void ems_pci_v3_post_irq(const struct sja1000_priv *priv)
 {
 	struct ems_pci_card *card = priv->priv;
 
-	writel(ASIX_LINTSR_INT0AC, card->conf_addr + ASIX_LINTSR);
+	pete_writel("drivers/net/can/sja1000/ems_pci.c:186", ASIX_LINTSR_INT0AC, card->conf_addr + ASIX_LINTSR);
 }
 
 /* Check if a CAN controller is present at the specified location
@@ -238,7 +238,7 @@ static void ems_pci_del_card(struct pci_dev *pdev)
 static void ems_pci_card_reset(struct ems_pci_card *card)
 {
 	/* Request board reset */
-	writeb(0, card->base_addr);
+	pete_writeb("drivers/net/can/sja1000/ems_pci.c:241", 0, card->base_addr);
 }
 
 /* Probe PCI device for EMS CAN signature and register each available
@@ -307,7 +307,7 @@ static int ems_pci_add_card(struct pci_dev *pdev,
 
 	if (card->version == 1) {
 		/* Configure PITA-2 parallel interface (enable MUX) */
-		writel(PITA2_MISC_CONFIG, card->conf_addr + PITA2_MISC);
+		pete_writel("drivers/net/can/sja1000/ems_pci.c:310", PITA2_MISC_CONFIG, card->conf_addr + PITA2_MISC);
 
 		/* Check for unique EMS CAN signature */
 		if (ems_pci_v1_readb(card, 0) != 0x55 ||
@@ -326,7 +326,7 @@ static int ems_pci_add_card(struct pci_dev *pdev,
 		/* ASIX chip asserts local reset to CAN controllers
 		 * after bootup until it is deasserted
 		 */
-		writel(readl(card->conf_addr + ASIX_LIEMR) & ~ASIX_LIEMR_LRST,
+		pete_writel("drivers/net/can/sja1000/ems_pci.c:329", pete_readl("drivers/net/can/sja1000/ems_pci.c:329", card->conf_addr + ASIX_LIEMR) & ~ASIX_LIEMR_LRST,
 		       card->conf_addr + ASIX_LIEMR);
 	}
 
@@ -378,17 +378,17 @@ static int ems_pci_add_card(struct pci_dev *pdev,
 
 			if (card->version == 1) {
 				/* reset int flag of pita */
-				writel(PITA2_ICR_INT0_EN | PITA2_ICR_INT0,
+				pete_writel("drivers/net/can/sja1000/ems_pci.c:381", PITA2_ICR_INT0_EN | PITA2_ICR_INT0,
 				       card->conf_addr + PITA2_ICR);
 			} else if (card->version == 2) {
 				/* enable IRQ in PLX 9030 */
-				writel(PLX_ICSR_ENA_CLR,
+				pete_writel("drivers/net/can/sja1000/ems_pci.c:385", PLX_ICSR_ENA_CLR,
 				       card->conf_addr + PLX_ICSR);
 			} else {
 				/* Enable IRQ in AX99100 */
-				writel(ASIX_LINTSR_INT0AC, card->conf_addr + ASIX_LINTSR);
+				pete_writel("drivers/net/can/sja1000/ems_pci.c:389", ASIX_LINTSR_INT0AC, card->conf_addr + ASIX_LINTSR);
 				/* Enable local INT0 input enable */
-				writel(readl(card->conf_addr + ASIX_LIEMR) | ASIX_LIEMR_L0EINTEN,
+				pete_writel("drivers/net/can/sja1000/ems_pci.c:391", pete_readl("drivers/net/can/sja1000/ems_pci.c:391", card->conf_addr + ASIX_LIEMR) | ASIX_LIEMR_L0EINTEN,
 				       card->conf_addr + ASIX_LIEMR);
 			}
 

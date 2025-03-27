@@ -118,7 +118,7 @@ static int sp_reset_update(struct reset_controller_dev *rcdev,
 	u32 val;
 
 	val = (1 << (16 + shift)) | (assert << shift);
-	writel(val, reset->base + (index * 4));
+	pete_writel("drivers/reset/reset-sunplus.c:121", val, reset->base + (index * 4));
 
 	return 0;
 }
@@ -143,7 +143,7 @@ static int sp_reset_status(struct reset_controller_dev *rcdev,
 	int shift = sp_resets[id] % BITS_PER_HWM_REG;
 	u32 reg;
 
-	reg = readl(reset->base + (index * 4));
+	reg = pete_readl("drivers/reset/reset-sunplus.c:146", reset->base + (index * 4));
 
 	return !!(reg & BIT(shift));
 }

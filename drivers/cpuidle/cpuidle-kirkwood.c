@@ -29,7 +29,7 @@ static int kirkwood_enter_idle(struct cpuidle_device *dev,
 			       struct cpuidle_driver *drv,
 			       int index)
 {
-	writel(0x7, ddr_operation_base);
+	pete_writel("drivers/cpuidle/cpuidle-kirkwood.c:32", 0x7, ddr_operation_base);
 	cpu_do_idle();
 
 	return index;

@@ -88,7 +88,7 @@ static void rockchip_saradc_start_v1(struct rockchip_saradc *info, int chn)
 	/* 8 clock periods as delay between power up and start cmd */
 	writel_relaxed(8, info->regs + SARADC_DLY_PU_SOC);
 	/* Select the channel to be used and trigger conversion */
-	writel(SARADC_CTRL_POWER_CTRL | (chn & SARADC_CTRL_CHN_MASK) |
+	pete_writel("drivers/iio/adc/rockchip_saradc.c:91", SARADC_CTRL_POWER_CTRL | (chn & SARADC_CTRL_CHN_MASK) |
 	       SARADC_CTRL_IRQ_ENABLE, info->regs + SARADC_CTRL);
 }
 
@@ -108,7 +108,7 @@ static void rockchip_saradc_start_v2(struct rockchip_saradc *info, int chn)
 	      FIELD_PREP(SARADC2_SINGLE_MODE, 1) |
 	      FIELD_PREP(SARADC2_CONV_CHANNELS, chn);
 	val |= (SARADC2_START | SARADC2_SINGLE_MODE | SARADC2_CONV_CHANNELS) << 16;
-	writel(val, info->regs + SARADC2_CONV_CON);
+	pete_writel("drivers/iio/adc/rockchip_saradc.c:111", val, info->regs + SARADC2_CONV_CON);
 }
 
 static void rockchip_saradc_start(struct rockchip_saradc *info, int chn)

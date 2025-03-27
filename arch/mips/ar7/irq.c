@@ -38,35 +38,35 @@ static int ar7_irq_base;
 
 static void ar7_unmask_irq(struct irq_data *d)
 {
-	writel(1 << ((d->irq - ar7_irq_base) % 32),
+	pete_writel("arch/mips/ar7/irq.c:41", 1 << ((d->irq - ar7_irq_base) % 32),
 	       REG(ESR_OFFSET(d->irq - ar7_irq_base)));
 }
 
 static void ar7_mask_irq(struct irq_data *d)
 {
-	writel(1 << ((d->irq - ar7_irq_base) % 32),
+	pete_writel("arch/mips/ar7/irq.c:47", 1 << ((d->irq - ar7_irq_base) % 32),
 	       REG(ECR_OFFSET(d->irq - ar7_irq_base)));
 }
 
 static void ar7_ack_irq(struct irq_data *d)
 {
-	writel(1 << ((d->irq - ar7_irq_base) % 32),
+	pete_writel("arch/mips/ar7/irq.c:53", 1 << ((d->irq - ar7_irq_base) % 32),
 	       REG(CR_OFFSET(d->irq - ar7_irq_base)));
 }
 
 static void ar7_unmask_sec_irq(struct irq_data *d)
 {
-	writel(1 << (d->irq - ar7_irq_base - 40), REG(SEC_ESR_OFFSET));
+	pete_writel("arch/mips/ar7/irq.c:59", 1 << (d->irq - ar7_irq_base - 40), REG(SEC_ESR_OFFSET));
 }
 
 static void ar7_mask_sec_irq(struct irq_data *d)
 {
-	writel(1 << (d->irq - ar7_irq_base - 40), REG(SEC_ECR_OFFSET));
+	pete_writel("arch/mips/ar7/irq.c:64", 1 << (d->irq - ar7_irq_base - 40), REG(SEC_ECR_OFFSET));
 }
 
 static void ar7_ack_sec_irq(struct irq_data *d)
 {
-	writel(1 << (d->irq - ar7_irq_base - 40), REG(SEC_CR_OFFSET));
+	pete_writel("arch/mips/ar7/irq.c:69", 1 << (d->irq - ar7_irq_base - 40), REG(SEC_CR_OFFSET));
 }
 
 static struct irq_chip ar7_irq_type = {
@@ -89,17 +89,17 @@ static void __init ar7_irq_init(int base)
 	/*
 	 * Disable interrupts and clear pending
 	 */
-	writel(0xffffffff, REG(ECR_OFFSET(0)));
-	writel(0xff, REG(ECR_OFFSET(32)));
-	writel(0xffffffff, REG(SEC_ECR_OFFSET));
-	writel(0xffffffff, REG(CR_OFFSET(0)));
-	writel(0xff, REG(CR_OFFSET(32)));
-	writel(0xffffffff, REG(SEC_CR_OFFSET));
+	pete_writel("arch/mips/ar7/irq.c:92", 0xffffffff, REG(ECR_OFFSET(0)));
+	pete_writel("arch/mips/ar7/irq.c:93", 0xff, REG(ECR_OFFSET(32)));
+	pete_writel("arch/mips/ar7/irq.c:94", 0xffffffff, REG(SEC_ECR_OFFSET));
+	pete_writel("arch/mips/ar7/irq.c:95", 0xffffffff, REG(CR_OFFSET(0)));
+	pete_writel("arch/mips/ar7/irq.c:96", 0xff, REG(CR_OFFSET(32)));
+	pete_writel("arch/mips/ar7/irq.c:97", 0xffffffff, REG(SEC_CR_OFFSET));
 
 	ar7_irq_base = base;
 
 	for (i = 0; i < 40; i++) {
-		writel(i, REG(CHNL_OFFSET(i)));
+		pete_writel("arch/mips/ar7/irq.c:102", i, REG(CHNL_OFFSET(i)));
 		/* Primary IRQ's */
 		irq_set_chip_and_handler(base + i, &ar7_irq_type,
 					 handle_level_irq);
@@ -133,15 +133,15 @@ static void ar7_cascade(void)
 	int i, irq;
 
 	/* Primary IRQ's */
-	irq = readl(REG(PIR_OFFSET)) & 0x3f;
+	irq = pete_readl("arch/mips/ar7/irq.c:136", REG(PIR_OFFSET)) & 0x3f;
 	if (irq) {
 		do_IRQ(ar7_irq_base + irq);
 		return;
 	}
 
 	/* Secondary IRQ's are cascaded through primary '0' */
-	writel(1, REG(CR_OFFSET(irq)));
-	status = readl(REG(SEC_SR_OFFSET));
+	pete_writel("arch/mips/ar7/irq.c:143", 1, REG(CR_OFFSET(irq)));
+	status = pete_readl("arch/mips/ar7/irq.c:144", REG(SEC_SR_OFFSET));
 	for (i = 0; i < 32; i++) {
 		if (status & 1) {
 			do_IRQ(ar7_irq_base + i + 40);

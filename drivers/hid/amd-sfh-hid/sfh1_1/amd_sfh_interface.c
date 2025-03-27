@@ -36,7 +36,7 @@ static void amd_start_sensor(struct amd_mp2_dev *privdata, struct amd_mp2_sensor
 	cmd_base.cmd.sub_cmd_value = 1;
 	cmd_base.cmd.sensor_id = info.sensor_idx;
 
-	writel(cmd_base.ul, privdata->mmio + AMD_C2P_MSG(0));
+	pete_writel("drivers/hid/amd-sfh-hid/sfh1_1/amd_sfh_interface.c:39", cmd_base.ul, privdata->mmio + AMD_C2P_MSG(0));
 }
 
 static void amd_stop_sensor(struct amd_mp2_dev *privdata, u16 sensor_idx)
@@ -49,8 +49,8 @@ static void amd_stop_sensor(struct amd_mp2_dev *privdata, u16 sensor_idx)
 	cmd_base.cmd.sub_cmd_value = 1;
 	cmd_base.cmd.sensor_id = sensor_idx;
 
-	writeq(0x0, privdata->mmio + AMD_C2P_MSG(1));
-	writel(cmd_base.ul, privdata->mmio + AMD_C2P_MSG(0));
+	pete_writeq("drivers/hid/amd-sfh-hid/sfh1_1/amd_sfh_interface.c:52", 0x0, privdata->mmio + AMD_C2P_MSG(1));
+	pete_writel("drivers/hid/amd-sfh-hid/sfh1_1/amd_sfh_interface.c:53", cmd_base.ul, privdata->mmio + AMD_C2P_MSG(0));
 }
 
 static void amd_stop_all_sensor(struct amd_mp2_dev *privdata)
@@ -63,7 +63,7 @@ static void amd_stop_all_sensor(struct amd_mp2_dev *privdata)
 	/* 0xf indicates all sensors */
 	cmd_base.cmd.sensor_id = 0xf;
 
-	writel(cmd_base.ul, privdata->mmio + AMD_C2P_MSG(0));
+	pete_writel("drivers/hid/amd-sfh-hid/sfh1_1/amd_sfh_interface.c:66", cmd_base.ul, privdata->mmio + AMD_C2P_MSG(0));
 }
 
 static struct amd_mp2_ops amd_sfh_ops = {

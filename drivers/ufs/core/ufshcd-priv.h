@@ -368,12 +368,12 @@ static inline void ufshcd_inc_sq_tail(struct ufs_hw_queue *q)
 	if (q->sq_tail_slot == q->max_entries)
 		q->sq_tail_slot = 0;
 	val = q->sq_tail_slot * sizeof(struct utp_transfer_req_desc);
-	writel(val, q->mcq_sq_tail);
+	pete_writel("drivers/ufs/core/ufshcd-priv.h:371", val, q->mcq_sq_tail);
 }
 
 static inline void ufshcd_mcq_update_cq_tail_slot(struct ufs_hw_queue *q)
 {
-	u32 val = readl(q->mcq_cq_tail);
+	u32 val = pete_readl("drivers/ufs/core/ufshcd-priv.h:376", q->mcq_cq_tail);
 
 	q->cq_tail_slot = val / sizeof(struct cq_entry);
 }
@@ -392,7 +392,7 @@ static inline void ufshcd_mcq_inc_cq_head_slot(struct ufs_hw_queue *q)
 
 static inline void ufshcd_mcq_update_cq_head(struct ufs_hw_queue *q)
 {
-	writel(q->cq_head_slot * sizeof(struct cq_entry), q->mcq_cq_head);
+	pete_writel("drivers/ufs/core/ufshcd-priv.h:395", q->cq_head_slot * sizeof(struct cq_entry), q->mcq_cq_head);
 }
 
 static inline struct cq_entry *ufshcd_mcq_cur_cqe(struct ufs_hw_queue *q)
@@ -404,7 +404,7 @@ static inline struct cq_entry *ufshcd_mcq_cur_cqe(struct ufs_hw_queue *q)
 
 static inline u32 ufshcd_mcq_get_sq_head_slot(struct ufs_hw_queue *q)
 {
-	u32 val = readl(q->mcq_sq_head);
+	u32 val = pete_readl("drivers/ufs/core/ufshcd-priv.h:407", q->mcq_sq_head);
 
 	return val / sizeof(struct utp_transfer_req_desc);
 }

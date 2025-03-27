@@ -72,7 +72,7 @@ static int lpc18xx_adc_read_chan(struct lpc18xx_adc *adc, unsigned int ch)
 	u32 reg;
 
 	reg = adc->cr_reg | BIT(ch) | LPC18XX_ADC_CR_START_NOW;
-	writel(reg, adc->base + LPC18XX_ADC_CR);
+	pete_writel("drivers/iio/adc/lpc18xx_adc.c:75", reg, adc->base + LPC18XX_ADC_CR);
 
 	ret = readl_poll_timeout(adc->base + LPC18XX_ADC_GDR, reg,
 				 reg & LPC18XX_ADC_CONV_DONE, 3, 9);
@@ -118,7 +118,7 @@ static void lpc18xx_clear_cr_reg(void *data)
 {
 	struct lpc18xx_adc *adc = data;
 
-	writel(0, adc->base + LPC18XX_ADC_CR);
+	pete_writel("drivers/iio/adc/lpc18xx_adc.c:121", 0, adc->base + LPC18XX_ADC_CR);
 }
 
 static void lpc18xx_regulator_disable(void *vref)
@@ -177,7 +177,7 @@ static int lpc18xx_adc_probe(struct platform_device *pdev)
 
 	adc->cr_reg = (clkdiv << LPC18XX_ADC_CR_CLKDIV_SHIFT) |
 			LPC18XX_ADC_CR_PDN;
-	writel(adc->cr_reg, adc->base + LPC18XX_ADC_CR);
+	pete_writel("drivers/iio/adc/lpc18xx_adc.c:180", adc->cr_reg, adc->base + LPC18XX_ADC_CR);
 
 	ret = devm_add_action_or_reset(&pdev->dev, lpc18xx_clear_cr_reg, adc);
 	if (ret)

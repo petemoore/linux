@@ -17,7 +17,7 @@
 
 static void dwmac4_dma_axi(void __iomem *ioaddr, struct stmmac_axi *axi)
 {
-	u32 value = readl(ioaddr + DMA_SYS_BUS_MODE);
+	u32 value = pete_readl("drivers/net/ethernet/stmicro/stmmac/dwmac4_dma.c:20", ioaddr + DMA_SYS_BUS_MODE);
 	int i;
 
 	pr_info("dwmac4: Master AXI performs %s burst length\n",
@@ -66,7 +66,7 @@ static void dwmac4_dma_axi(void __iomem *ioaddr, struct stmmac_axi *axi)
 		}
 	}
 
-	writel(value, ioaddr + DMA_SYS_BUS_MODE);
+	pete_writel("drivers/net/ethernet/stmicro/stmmac/dwmac4_dma.c:69", value, ioaddr + DMA_SYS_BUS_MODE);
 }
 
 static void dwmac4_dma_init_rx_chan(struct stmmac_priv *priv,
@@ -78,15 +78,15 @@ static void dwmac4_dma_init_rx_chan(struct stmmac_priv *priv,
 	u32 value;
 	u32 rxpbl = dma_cfg->rxpbl ?: dma_cfg->pbl;
 
-	value = readl(ioaddr + DMA_CHAN_RX_CONTROL(dwmac4_addrs, chan));
+	value = pete_readl("drivers/net/ethernet/stmicro/stmmac/dwmac4_dma.c:81", ioaddr + DMA_CHAN_RX_CONTROL(dwmac4_addrs, chan));
 	value = value | (rxpbl << DMA_BUS_MODE_RPBL_SHIFT);
-	writel(value, ioaddr + DMA_CHAN_RX_CONTROL(dwmac4_addrs, chan));
+	pete_writel("drivers/net/ethernet/stmicro/stmmac/dwmac4_dma.c:83", value, ioaddr + DMA_CHAN_RX_CONTROL(dwmac4_addrs, chan));
 
 	if (IS_ENABLED(CONFIG_ARCH_DMA_ADDR_T_64BIT) && likely(dma_cfg->eame))
-		writel(upper_32_bits(dma_rx_phy),
+		pete_writel("drivers/net/ethernet/stmicro/stmmac/dwmac4_dma.c:86", upper_32_bits(dma_rx_phy),
 		       ioaddr + DMA_CHAN_RX_BASE_ADDR_HI(dwmac4_addrs, chan));
 
-	writel(lower_32_bits(dma_rx_phy),
+	pete_writel("drivers/net/ethernet/stmicro/stmmac/dwmac4_dma.c:89", lower_32_bits(dma_rx_phy),
 	       ioaddr + DMA_CHAN_RX_BASE_ADDR(dwmac4_addrs, chan));
 }
 
@@ -99,19 +99,19 @@ static void dwmac4_dma_init_tx_chan(struct stmmac_priv *priv,
 	u32 value;
 	u32 txpbl = dma_cfg->txpbl ?: dma_cfg->pbl;
 
-	value = readl(ioaddr + DMA_CHAN_TX_CONTROL(dwmac4_addrs, chan));
+	value = pete_readl("drivers/net/ethernet/stmicro/stmmac/dwmac4_dma.c:102", ioaddr + DMA_CHAN_TX_CONTROL(dwmac4_addrs, chan));
 	value = value | (txpbl << DMA_BUS_MODE_PBL_SHIFT);
 
 	/* Enable OSP to get best performance */
 	value |= DMA_CONTROL_OSP;
 
-	writel(value, ioaddr + DMA_CHAN_TX_CONTROL(dwmac4_addrs, chan));
+	pete_writel("drivers/net/ethernet/stmicro/stmmac/dwmac4_dma.c:108", value, ioaddr + DMA_CHAN_TX_CONTROL(dwmac4_addrs, chan));
 
 	if (IS_ENABLED(CONFIG_ARCH_DMA_ADDR_T_64BIT) && likely(dma_cfg->eame))
-		writel(upper_32_bits(dma_tx_phy),
+		pete_writel("drivers/net/ethernet/stmicro/stmmac/dwmac4_dma.c:111", upper_32_bits(dma_tx_phy),
 		       ioaddr + DMA_CHAN_TX_BASE_ADDR_HI(dwmac4_addrs, chan));
 
-	writel(lower_32_bits(dma_tx_phy),
+	pete_writel("drivers/net/ethernet/stmicro/stmmac/dwmac4_dma.c:114", lower_32_bits(dma_tx_phy),
 	       ioaddr + DMA_CHAN_TX_BASE_ADDR(dwmac4_addrs, chan));
 }
 
@@ -123,13 +123,13 @@ static void dwmac4_dma_init_channel(struct stmmac_priv *priv,
 	u32 value;
 
 	/* common channel control register config */
-	value = readl(ioaddr + DMA_CHAN_CONTROL(dwmac4_addrs, chan));
+	value = pete_readl("drivers/net/ethernet/stmicro/stmmac/dwmac4_dma.c:126", ioaddr + DMA_CHAN_CONTROL(dwmac4_addrs, chan));
 	if (dma_cfg->pblx8)
 		value = value | DMA_BUS_MODE_PBL;
-	writel(value, ioaddr + DMA_CHAN_CONTROL(dwmac4_addrs, chan));
+	pete_writel("drivers/net/ethernet/stmicro/stmmac/dwmac4_dma.c:129", value, ioaddr + DMA_CHAN_CONTROL(dwmac4_addrs, chan));
 
 	/* Mask interrupts by writing to CSR7 */
-	writel(DMA_CHAN_INTR_DEFAULT_MASK,
+	pete_writel("drivers/net/ethernet/stmicro/stmmac/dwmac4_dma.c:132", DMA_CHAN_INTR_DEFAULT_MASK,
 	       ioaddr + DMA_CHAN_INTR_ENA(dwmac4_addrs, chan));
 }
 
@@ -141,21 +141,21 @@ static void dwmac410_dma_init_channel(struct stmmac_priv *priv,
 	u32 value;
 
 	/* common channel control register config */
-	value = readl(ioaddr + DMA_CHAN_CONTROL(dwmac4_addrs, chan));
+	value = pete_readl("drivers/net/ethernet/stmicro/stmmac/dwmac4_dma.c:144", ioaddr + DMA_CHAN_CONTROL(dwmac4_addrs, chan));
 	if (dma_cfg->pblx8)
 		value = value | DMA_BUS_MODE_PBL;
 
-	writel(value, ioaddr + DMA_CHAN_CONTROL(dwmac4_addrs, chan));
+	pete_writel("drivers/net/ethernet/stmicro/stmmac/dwmac4_dma.c:148", value, ioaddr + DMA_CHAN_CONTROL(dwmac4_addrs, chan));
 
 	/* Mask interrupts by writing to CSR7 */
-	writel(DMA_CHAN_INTR_DEFAULT_MASK_4_10,
+	pete_writel("drivers/net/ethernet/stmicro/stmmac/dwmac4_dma.c:151", DMA_CHAN_INTR_DEFAULT_MASK_4_10,
 	       ioaddr + DMA_CHAN_INTR_ENA(dwmac4_addrs, chan));
 }
 
 static void dwmac4_dma_init(void __iomem *ioaddr,
 			    struct stmmac_dma_cfg *dma_cfg, int atds)
 {
-	u32 value = readl(ioaddr + DMA_SYS_BUS_MODE);
+	u32 value = pete_readl("drivers/net/ethernet/stmicro/stmmac/dwmac4_dma.c:158", ioaddr + DMA_SYS_BUS_MODE);
 
 	/* Set the Fixed burst mode */
 	if (dma_cfg->fixed_burst)
@@ -171,9 +171,9 @@ static void dwmac4_dma_init(void __iomem *ioaddr,
 	if (dma_cfg->eame)
 		value |= DMA_SYS_BUS_EAME;
 
-	writel(value, ioaddr + DMA_SYS_BUS_MODE);
+	pete_writel("drivers/net/ethernet/stmicro/stmmac/dwmac4_dma.c:174", value, ioaddr + DMA_SYS_BUS_MODE);
 
-	value = readl(ioaddr + DMA_BUS_MODE);
+	value = pete_readl("drivers/net/ethernet/stmicro/stmmac/dwmac4_dma.c:176", ioaddr + DMA_BUS_MODE);
 
 	if (dma_cfg->multi_msi_en) {
 		value &= ~DMA_BUS_MODE_INTM_MASK;
@@ -183,7 +183,7 @@ static void dwmac4_dma_init(void __iomem *ioaddr,
 	if (dma_cfg->dche)
 		value |= DMA_BUS_MODE_DCHE;
 
-	writel(value, ioaddr + DMA_BUS_MODE);
+	pete_writel("drivers/net/ethernet/stmicro/stmmac/dwmac4_dma.c:186", value, ioaddr + DMA_BUS_MODE);
 
 }
 
@@ -198,47 +198,47 @@ static void _dwmac4_dump_dma_regs(struct stmmac_priv *priv,
 	 * platform modifications, to keep reg_space size constant
 	 */
 	reg_space[DMA_CHAN_CONTROL(default_addrs, channel) / 4] =
-		readl(ioaddr + DMA_CHAN_CONTROL(dwmac4_addrs, channel));
+		pete_readl("drivers/net/ethernet/stmicro/stmmac/dwmac4_dma.c:201", ioaddr + DMA_CHAN_CONTROL(dwmac4_addrs, channel));
 	reg_space[DMA_CHAN_TX_CONTROL(default_addrs, channel) / 4] =
-		readl(ioaddr + DMA_CHAN_TX_CONTROL(dwmac4_addrs, channel));
+		pete_readl("drivers/net/ethernet/stmicro/stmmac/dwmac4_dma.c:203", ioaddr + DMA_CHAN_TX_CONTROL(dwmac4_addrs, channel));
 	reg_space[DMA_CHAN_RX_CONTROL(default_addrs, channel) / 4] =
-		readl(ioaddr + DMA_CHAN_RX_CONTROL(dwmac4_addrs, channel));
+		pete_readl("drivers/net/ethernet/stmicro/stmmac/dwmac4_dma.c:205", ioaddr + DMA_CHAN_RX_CONTROL(dwmac4_addrs, channel));
 	reg_space[DMA_CHAN_TX_BASE_ADDR_HI(default_addrs, channel) / 4] =
-		readl(ioaddr + DMA_CHAN_TX_BASE_ADDR_HI(dwmac4_addrs, channel));
+		pete_readl("drivers/net/ethernet/stmicro/stmmac/dwmac4_dma.c:207", ioaddr + DMA_CHAN_TX_BASE_ADDR_HI(dwmac4_addrs, channel));
 	reg_space[DMA_CHAN_TX_BASE_ADDR(default_addrs, channel) / 4] =
-		readl(ioaddr + DMA_CHAN_TX_BASE_ADDR(dwmac4_addrs, channel));
+		pete_readl("drivers/net/ethernet/stmicro/stmmac/dwmac4_dma.c:209", ioaddr + DMA_CHAN_TX_BASE_ADDR(dwmac4_addrs, channel));
 	reg_space[DMA_CHAN_RX_BASE_ADDR_HI(default_addrs, channel) / 4] =
-		readl(ioaddr + DMA_CHAN_RX_BASE_ADDR_HI(dwmac4_addrs, channel));
+		pete_readl("drivers/net/ethernet/stmicro/stmmac/dwmac4_dma.c:211", ioaddr + DMA_CHAN_RX_BASE_ADDR_HI(dwmac4_addrs, channel));
 	reg_space[DMA_CHAN_RX_BASE_ADDR(default_addrs, channel) / 4] =
-		readl(ioaddr + DMA_CHAN_RX_BASE_ADDR(dwmac4_addrs, channel));
+		pete_readl("drivers/net/ethernet/stmicro/stmmac/dwmac4_dma.c:213", ioaddr + DMA_CHAN_RX_BASE_ADDR(dwmac4_addrs, channel));
 	reg_space[DMA_CHAN_TX_END_ADDR(default_addrs, channel) / 4] =
-		readl(ioaddr + DMA_CHAN_TX_END_ADDR(dwmac4_addrs, channel));
+		pete_readl("drivers/net/ethernet/stmicro/stmmac/dwmac4_dma.c:215", ioaddr + DMA_CHAN_TX_END_ADDR(dwmac4_addrs, channel));
 	reg_space[DMA_CHAN_RX_END_ADDR(default_addrs, channel) / 4] =
-		readl(ioaddr + DMA_CHAN_RX_END_ADDR(dwmac4_addrs, channel));
+		pete_readl("drivers/net/ethernet/stmicro/stmmac/dwmac4_dma.c:217", ioaddr + DMA_CHAN_RX_END_ADDR(dwmac4_addrs, channel));
 	reg_space[DMA_CHAN_TX_RING_LEN(default_addrs, channel) / 4] =
-		readl(ioaddr + DMA_CHAN_TX_RING_LEN(dwmac4_addrs, channel));
+		pete_readl("drivers/net/ethernet/stmicro/stmmac/dwmac4_dma.c:219", ioaddr + DMA_CHAN_TX_RING_LEN(dwmac4_addrs, channel));
 	reg_space[DMA_CHAN_RX_RING_LEN(default_addrs, channel) / 4] =
-		readl(ioaddr + DMA_CHAN_RX_RING_LEN(dwmac4_addrs, channel));
+		pete_readl("drivers/net/ethernet/stmicro/stmmac/dwmac4_dma.c:221", ioaddr + DMA_CHAN_RX_RING_LEN(dwmac4_addrs, channel));
 	reg_space[DMA_CHAN_INTR_ENA(default_addrs, channel) / 4] =
-		readl(ioaddr + DMA_CHAN_INTR_ENA(dwmac4_addrs, channel));
+		pete_readl("drivers/net/ethernet/stmicro/stmmac/dwmac4_dma.c:223", ioaddr + DMA_CHAN_INTR_ENA(dwmac4_addrs, channel));
 	reg_space[DMA_CHAN_RX_WATCHDOG(default_addrs, channel) / 4] =
-		readl(ioaddr + DMA_CHAN_RX_WATCHDOG(dwmac4_addrs, channel));
+		pete_readl("drivers/net/ethernet/stmicro/stmmac/dwmac4_dma.c:225", ioaddr + DMA_CHAN_RX_WATCHDOG(dwmac4_addrs, channel));
 	reg_space[DMA_CHAN_SLOT_CTRL_STATUS(default_addrs, channel) / 4] =
-		readl(ioaddr + DMA_CHAN_SLOT_CTRL_STATUS(dwmac4_addrs, channel));
+		pete_readl("drivers/net/ethernet/stmicro/stmmac/dwmac4_dma.c:227", ioaddr + DMA_CHAN_SLOT_CTRL_STATUS(dwmac4_addrs, channel));
 	reg_space[DMA_CHAN_CUR_TX_DESC(default_addrs, channel) / 4] =
-		readl(ioaddr + DMA_CHAN_CUR_TX_DESC(dwmac4_addrs, channel));
+		pete_readl("drivers/net/ethernet/stmicro/stmmac/dwmac4_dma.c:229", ioaddr + DMA_CHAN_CUR_TX_DESC(dwmac4_addrs, channel));
 	reg_space[DMA_CHAN_CUR_RX_DESC(default_addrs, channel) / 4] =
-		readl(ioaddr + DMA_CHAN_CUR_RX_DESC(dwmac4_addrs, channel));
+		pete_readl("drivers/net/ethernet/stmicro/stmmac/dwmac4_dma.c:231", ioaddr + DMA_CHAN_CUR_RX_DESC(dwmac4_addrs, channel));
 	reg_space[DMA_CHAN_CUR_TX_BUF_ADDR_HI(default_addrs, channel) / 4] =
-		readl(ioaddr + DMA_CHAN_CUR_TX_BUF_ADDR_HI(dwmac4_addrs, channel));
+		pete_readl("drivers/net/ethernet/stmicro/stmmac/dwmac4_dma.c:233", ioaddr + DMA_CHAN_CUR_TX_BUF_ADDR_HI(dwmac4_addrs, channel));
 	reg_space[DMA_CHAN_CUR_TX_BUF_ADDR(default_addrs, channel) / 4] =
-		readl(ioaddr + DMA_CHAN_CUR_TX_BUF_ADDR(dwmac4_addrs, channel));
+		pete_readl("drivers/net/ethernet/stmicro/stmmac/dwmac4_dma.c:235", ioaddr + DMA_CHAN_CUR_TX_BUF_ADDR(dwmac4_addrs, channel));
 	reg_space[DMA_CHAN_CUR_RX_BUF_ADDR_HI(default_addrs, channel) / 4] =
-		readl(ioaddr + DMA_CHAN_CUR_RX_BUF_ADDR_HI(dwmac4_addrs, channel));
+		pete_readl("drivers/net/ethernet/stmicro/stmmac/dwmac4_dma.c:237", ioaddr + DMA_CHAN_CUR_RX_BUF_ADDR_HI(dwmac4_addrs, channel));
 	reg_space[DMA_CHAN_CUR_RX_BUF_ADDR(default_addrs, channel) / 4] =
-		readl(ioaddr + DMA_CHAN_CUR_RX_BUF_ADDR(dwmac4_addrs, channel));
+		pete_readl("drivers/net/ethernet/stmicro/stmmac/dwmac4_dma.c:239", ioaddr + DMA_CHAN_CUR_RX_BUF_ADDR(dwmac4_addrs, channel));
 	reg_space[DMA_CHAN_STATUS(default_addrs, channel) / 4] =
-		readl(ioaddr + DMA_CHAN_STATUS(dwmac4_addrs, channel));
+		pete_readl("drivers/net/ethernet/stmicro/stmmac/dwmac4_dma.c:241", ioaddr + DMA_CHAN_STATUS(dwmac4_addrs, channel));
 }
 
 static void dwmac4_dump_dma_regs(struct stmmac_priv *priv, void __iomem *ioaddr,
@@ -255,7 +255,7 @@ static void dwmac4_rx_watchdog(struct stmmac_priv *priv, void __iomem *ioaddr,
 {
 	const struct dwmac4_addrs *dwmac4_addrs = priv->plat->dwmac4_addrs;
 
-	writel(riwt, ioaddr + DMA_CHAN_RX_WATCHDOG(dwmac4_addrs, queue));
+	pete_writel("drivers/net/ethernet/stmicro/stmmac/dwmac4_dma.c:258", riwt, ioaddr + DMA_CHAN_RX_WATCHDOG(dwmac4_addrs, queue));
 }
 
 static void dwmac4_dma_rx_chan_op_mode(struct stmmac_priv *priv,
@@ -266,7 +266,7 @@ static void dwmac4_dma_rx_chan_op_mode(struct stmmac_priv *priv,
 	unsigned int rqs = fifosz / 256 - 1;
 	u32 mtl_rx_op;
 
-	mtl_rx_op = readl(ioaddr + MTL_CHAN_RX_OP_MODE(dwmac4_addrs, channel));
+	mtl_rx_op = pete_readl("drivers/net/ethernet/stmicro/stmmac/dwmac4_dma.c:269", ioaddr + MTL_CHAN_RX_OP_MODE(dwmac4_addrs, channel));
 
 	if (mode == SF_DMA_MODE) {
 		pr_debug("GMAC: enable RX store and forward mode\n");
@@ -324,7 +324,7 @@ static void dwmac4_dma_rx_chan_op_mode(struct stmmac_priv *priv,
 		mtl_rx_op |= rfa << MTL_OP_MODE_RFA_SHIFT;
 	}
 
-	writel(mtl_rx_op, ioaddr + MTL_CHAN_RX_OP_MODE(dwmac4_addrs, channel));
+	pete_writel("drivers/net/ethernet/stmicro/stmmac/dwmac4_dma.c:327", mtl_rx_op, ioaddr + MTL_CHAN_RX_OP_MODE(dwmac4_addrs, channel));
 }
 
 static void dwmac4_dma_tx_chan_op_mode(struct stmmac_priv *priv,
@@ -332,7 +332,7 @@ static void dwmac4_dma_tx_chan_op_mode(struct stmmac_priv *priv,
 				       u32 channel, int fifosz, u8 qmode)
 {
 	const struct dwmac4_addrs *dwmac4_addrs = priv->plat->dwmac4_addrs;
-	u32 mtl_tx_op = readl(ioaddr + MTL_CHAN_TX_OP_MODE(dwmac4_addrs,
+	u32 mtl_tx_op = pete_readl("drivers/net/ethernet/stmicro/stmmac/dwmac4_dma.c:335", ioaddr + MTL_CHAN_TX_OP_MODE(dwmac4_addrs,
 							   channel));
 	unsigned int tqs = fifosz / 256 - 1;
 
@@ -379,13 +379,13 @@ static void dwmac4_dma_tx_chan_op_mode(struct stmmac_priv *priv,
 	mtl_tx_op &= ~MTL_OP_MODE_TQS_MASK;
 	mtl_tx_op |= tqs << MTL_OP_MODE_TQS_SHIFT;
 
-	writel(mtl_tx_op, ioaddr +  MTL_CHAN_TX_OP_MODE(dwmac4_addrs, channel));
+	pete_writel("drivers/net/ethernet/stmicro/stmmac/dwmac4_dma.c:382", mtl_tx_op, ioaddr +  MTL_CHAN_TX_OP_MODE(dwmac4_addrs, channel));
 }
 
 static int dwmac4_get_hw_feature(void __iomem *ioaddr,
 				 struct dma_features *dma_cap)
 {
-	u32 hw_cap = readl(ioaddr + GMAC_HW_FEATURE0);
+	u32 hw_cap = pete_readl("drivers/net/ethernet/stmicro/stmmac/dwmac4_dma.c:388", ioaddr + GMAC_HW_FEATURE0);
 
 	/*  MAC HW feature0 */
 	dma_cap->mbps_10_100 = (hw_cap & GMAC_HW_FEAT_MIISEL);
@@ -410,7 +410,7 @@ static int dwmac4_get_hw_feature(void __iomem *ioaddr,
 	dma_cap->arpoffsel = (hw_cap & GMAC_HW_FEAT_ARPOFFSEL) >> 9;
 
 	/* MAC HW feature1 */
-	hw_cap = readl(ioaddr + GMAC_HW_FEATURE1);
+	hw_cap = pete_readl("drivers/net/ethernet/stmicro/stmmac/dwmac4_dma.c:413", ioaddr + GMAC_HW_FEATURE1);
 	dma_cap->l3l4fnum = (hw_cap & GMAC_HW_FEAT_L3L4FNUM) >> 27;
 	dma_cap->hash_tb_sz = (hw_cap & GMAC_HW_HASH_TB_SZ) >> 24;
 	dma_cap->av = (hw_cap & GMAC_HW_FEAT_AVSEL) >> 20;
@@ -439,7 +439,7 @@ static int dwmac4_get_hw_feature(void __iomem *ioaddr,
 	dma_cap->tx_fifo_size = 128 << ((hw_cap & GMAC_HW_TXFIFOSIZE) >> 6);
 	dma_cap->rx_fifo_size = 128 << ((hw_cap & GMAC_HW_RXFIFOSIZE) >> 0);
 	/* MAC HW feature2 */
-	hw_cap = readl(ioaddr + GMAC_HW_FEATURE2);
+	hw_cap = pete_readl("drivers/net/ethernet/stmicro/stmmac/dwmac4_dma.c:442", ioaddr + GMAC_HW_FEATURE2);
 	/* TX and RX number of channels */
 	dma_cap->number_rx_channel =
 		((hw_cap & GMAC_HW_FEAT_RXCHCNT) >> 12) + 1;
@@ -459,7 +459,7 @@ static int dwmac4_get_hw_feature(void __iomem *ioaddr,
 	dma_cap->aux_snapshot_n = (hw_cap & GMAC_HW_FEAT_AUXSNAPNUM) >> 28;
 
 	/* MAC HW feature3 */
-	hw_cap = readl(ioaddr + GMAC_HW_FEATURE3);
+	hw_cap = pete_readl("drivers/net/ethernet/stmicro/stmmac/dwmac4_dma.c:462", ioaddr + GMAC_HW_FEATURE3);
 
 	/* 5.10 Features */
 	dma_cap->asp = (hw_cap & GMAC_HW_FEAT_ASP) >> 28;
@@ -485,13 +485,13 @@ static void dwmac4_enable_tso(struct stmmac_priv *priv, void __iomem *ioaddr,
 
 	if (en) {
 		/* enable TSO */
-		value = readl(ioaddr + DMA_CHAN_TX_CONTROL(dwmac4_addrs, chan));
-		writel(value | DMA_CONTROL_TSE,
+		value = pete_readl("drivers/net/ethernet/stmicro/stmmac/dwmac4_dma.c:488", ioaddr + DMA_CHAN_TX_CONTROL(dwmac4_addrs, chan));
+		pete_writel("drivers/net/ethernet/stmicro/stmmac/dwmac4_dma.c:489", value | DMA_CONTROL_TSE,
 		       ioaddr + DMA_CHAN_TX_CONTROL(dwmac4_addrs, chan));
 	} else {
 		/* enable TSO */
-		value = readl(ioaddr + DMA_CHAN_TX_CONTROL(dwmac4_addrs, chan));
-		writel(value & ~DMA_CONTROL_TSE,
+		value = pete_readl("drivers/net/ethernet/stmicro/stmmac/dwmac4_dma.c:493", ioaddr + DMA_CHAN_TX_CONTROL(dwmac4_addrs, chan));
+		pete_writel("drivers/net/ethernet/stmicro/stmmac/dwmac4_dma.c:494", value & ~DMA_CONTROL_TSE,
 		       ioaddr + DMA_CHAN_TX_CONTROL(dwmac4_addrs, chan));
 	}
 }
@@ -500,7 +500,7 @@ static void dwmac4_qmode(struct stmmac_priv *priv, void __iomem *ioaddr,
 			 u32 channel, u8 qmode)
 {
 	const struct dwmac4_addrs *dwmac4_addrs = priv->plat->dwmac4_addrs;
-	u32 mtl_tx_op = readl(ioaddr + MTL_CHAN_TX_OP_MODE(dwmac4_addrs,
+	u32 mtl_tx_op = pete_readl("drivers/net/ethernet/stmicro/stmmac/dwmac4_dma.c:503", ioaddr + MTL_CHAN_TX_OP_MODE(dwmac4_addrs,
 							   channel));
 
 	mtl_tx_op &= ~MTL_OP_MODE_TXQEN_MASK;
@@ -509,63 +509,63 @@ static void dwmac4_qmode(struct stmmac_priv *priv, void __iomem *ioaddr,
 	else
 		mtl_tx_op |= MTL_OP_MODE_TXQEN_AV;
 
-	writel(mtl_tx_op, ioaddr +  MTL_CHAN_TX_OP_MODE(dwmac4_addrs, channel));
+	pete_writel("drivers/net/ethernet/stmicro/stmmac/dwmac4_dma.c:512", mtl_tx_op, ioaddr +  MTL_CHAN_TX_OP_MODE(dwmac4_addrs, channel));
 }
 
 static void dwmac4_set_bfsize(struct stmmac_priv *priv, void __iomem *ioaddr,
 			      int bfsize, u32 chan)
 {
 	const struct dwmac4_addrs *dwmac4_addrs = priv->plat->dwmac4_addrs;
-	u32 value = readl(ioaddr + DMA_CHAN_RX_CONTROL(dwmac4_addrs, chan));
+	u32 value = pete_readl("drivers/net/ethernet/stmicro/stmmac/dwmac4_dma.c:519", ioaddr + DMA_CHAN_RX_CONTROL(dwmac4_addrs, chan));
 
 	value &= ~DMA_RBSZ_MASK;
 	value |= (bfsize << DMA_RBSZ_SHIFT) & DMA_RBSZ_MASK;
 
-	writel(value, ioaddr + DMA_CHAN_RX_CONTROL(dwmac4_addrs, chan));
+	pete_writel("drivers/net/ethernet/stmicro/stmmac/dwmac4_dma.c:524", value, ioaddr + DMA_CHAN_RX_CONTROL(dwmac4_addrs, chan));
 }
 
 static void dwmac4_enable_sph(struct stmmac_priv *priv, void __iomem *ioaddr,
 			      bool en, u32 chan)
 {
 	const struct dwmac4_addrs *dwmac4_addrs = priv->plat->dwmac4_addrs;
-	u32 value = readl(ioaddr + GMAC_EXT_CONFIG);
+	u32 value = pete_readl("drivers/net/ethernet/stmicro/stmmac/dwmac4_dma.c:531", ioaddr + GMAC_EXT_CONFIG);
 
 	value &= ~GMAC_CONFIG_HDSMS;
 	value |= GMAC_CONFIG_HDSMS_256; /* Segment max 256 bytes */
-	writel(value, ioaddr + GMAC_EXT_CONFIG);
+	pete_writel("drivers/net/ethernet/stmicro/stmmac/dwmac4_dma.c:535", value, ioaddr + GMAC_EXT_CONFIG);
 
-	value = readl(ioaddr + GMAC_EXT_CFG1);
+	value = pete_readl("drivers/net/ethernet/stmicro/stmmac/dwmac4_dma.c:537", ioaddr + GMAC_EXT_CFG1);
 	value |= GMAC_CONFIG1_SPLM(1); /* Split mode set to L2OFST */
 	value |= GMAC_CONFIG1_SAVE_EN; /* Enable Split AV mode */
-	writel(value, ioaddr + GMAC_EXT_CFG1);
+	pete_writel("drivers/net/ethernet/stmicro/stmmac/dwmac4_dma.c:540", value, ioaddr + GMAC_EXT_CFG1);
 
-	value = readl(ioaddr + DMA_CHAN_CONTROL(dwmac4_addrs, chan));
+	value = pete_readl("drivers/net/ethernet/stmicro/stmmac/dwmac4_dma.c:542", ioaddr + DMA_CHAN_CONTROL(dwmac4_addrs, chan));
 	if (en)
 		value |= DMA_CONTROL_SPH;
 	else
 		value &= ~DMA_CONTROL_SPH;
-	writel(value, ioaddr + DMA_CHAN_CONTROL(dwmac4_addrs, chan));
+	pete_writel("drivers/net/ethernet/stmicro/stmmac/dwmac4_dma.c:547", value, ioaddr + DMA_CHAN_CONTROL(dwmac4_addrs, chan));
 }
 
 static int dwmac4_enable_tbs(struct stmmac_priv *priv, void __iomem *ioaddr,
 			     bool en, u32 chan)
 {
 	const struct dwmac4_addrs *dwmac4_addrs = priv->plat->dwmac4_addrs;
-	u32 value = readl(ioaddr + DMA_CHAN_TX_CONTROL(dwmac4_addrs, chan));
+	u32 value = pete_readl("drivers/net/ethernet/stmicro/stmmac/dwmac4_dma.c:554", ioaddr + DMA_CHAN_TX_CONTROL(dwmac4_addrs, chan));
 
 	if (en)
 		value |= DMA_CONTROL_EDSE;
 	else
 		value &= ~DMA_CONTROL_EDSE;
 
-	writel(value, ioaddr + DMA_CHAN_TX_CONTROL(dwmac4_addrs, chan));
+	pete_writel("drivers/net/ethernet/stmicro/stmmac/dwmac4_dma.c:561", value, ioaddr + DMA_CHAN_TX_CONTROL(dwmac4_addrs, chan));
 
-	value = readl(ioaddr + DMA_CHAN_TX_CONTROL(dwmac4_addrs,
+	value = pete_readl("drivers/net/ethernet/stmicro/stmmac/dwmac4_dma.c:563", ioaddr + DMA_CHAN_TX_CONTROL(dwmac4_addrs,
 						   chan)) & DMA_CONTROL_EDSE;
 	if (en && !value)
 		return -EIO;
 
-	writel(DMA_TBS_DEF_FTOS, ioaddr + DMA_TBS_CTRL);
+	pete_writel("drivers/net/ethernet/stmicro/stmmac/dwmac4_dma.c:568", DMA_TBS_DEF_FTOS, ioaddr + DMA_TBS_CTRL);
 	return 0;
 }
 

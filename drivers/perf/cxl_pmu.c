@@ -129,7 +129,7 @@ static int cxl_pmu_parse_caps(struct device *dev, struct cxl_pmu_info *info)
 	u64 val, eval;
 	int i;
 
-	val = readq(base + CXL_PMU_CAP_REG);
+	val = pete_readq("drivers/perf/cxl_pmu.c:132", base + CXL_PMU_CAP_REG);
 	freeze_for_enable = FIELD_GET(CXL_PMU_CAP_WRITEABLE_WHEN_FROZEN, val) &&
 		FIELD_GET(CXL_PMU_CAP_FREEZE, val);
 	if (!freeze_for_enable) {
@@ -153,7 +153,7 @@ static int cxl_pmu_parse_caps(struct device *dev, struct cxl_pmu_info *info)
 		u32 events_msk;
 		u8 group_idx;
 
-		val = readq(base + CXL_PMU_COUNTER_CFG_REG(i));
+		val = pete_readq("drivers/perf/cxl_pmu.c:156", base + CXL_PMU_COUNTER_CFG_REG(i));
 
 		if (FIELD_GET(CXL_PMU_COUNTER_CFG_TYPE_MSK, val) ==
 			CXL_PMU_COUNTER_CFG_TYPE_CONFIGURABLE) {
@@ -167,7 +167,7 @@ static int cxl_pmu_parse_caps(struct device *dev, struct cxl_pmu_info *info)
 		/* In this case we know which fields are const */
 		group_idx = FIELD_GET(CXL_PMU_COUNTER_CFG_EVENT_GRP_ID_IDX_MSK, val);
 		events_msk = FIELD_GET(CXL_PMU_COUNTER_CFG_EVENTS_MSK, val);
-		eval = readq(base + CXL_PMU_EVENT_CAP_REG(group_idx));
+		eval = pete_readq("drivers/perf/cxl_pmu.c:170", base + CXL_PMU_EVENT_CAP_REG(group_idx));
 		pmu_ev = devm_kzalloc(dev, sizeof(*pmu_ev), GFP_KERNEL);
 		if (!pmu_ev)
 			return -ENOMEM;
@@ -196,7 +196,7 @@ static int cxl_pmu_parse_caps(struct device *dev, struct cxl_pmu_info *info)
 			if (!pmu_ev)
 				return -ENOMEM;
 
-			eval = readq(base + CXL_PMU_EVENT_CAP_REG(j));
+			eval = pete_readq("drivers/perf/cxl_pmu.c:199", base + CXL_PMU_EVENT_CAP_REG(j));
 			pmu_ev->vid = FIELD_GET(CXL_PMU_EVENT_CAP_VENDOR_ID_MSK, eval);
 			pmu_ev->gid = FIELD_GET(CXL_PMU_EVENT_CAP_GROUP_ID_MSK, eval);
 			pmu_ev->msk = FIELD_GET(CXL_PMU_EVENT_CAP_SUPPORTED_EVENTS_MSK, eval);
@@ -599,7 +599,7 @@ static void cxl_pmu_enable(struct pmu *pmu)
 	void __iomem *base = info->base;
 
 	/* Can assume frozen at this stage */
-	writeq(0, base + CXL_PMU_FREEZE_REG);
+	pete_writeq("drivers/perf/cxl_pmu.c:602", 0, base + CXL_PMU_FREEZE_REG);
 }
 
 static void cxl_pmu_disable(struct pmu *pmu)
@@ -614,7 +614,7 @@ static void cxl_pmu_disable(struct pmu *pmu)
 	 * no reserved bits.  Hence this is only slightly
 	 * naughty.
 	 */
-	writeq(GENMASK_ULL(63, 0), base + CXL_PMU_FREEZE_REG);
+	pete_writeq("drivers/perf/cxl_pmu.c:617", GENMASK_ULL(63, 0), base + CXL_PMU_FREEZE_REG);
 }
 
 static void cxl_pmu_event_start(struct perf_event *event, int flags)
@@ -643,10 +643,10 @@ static void cxl_pmu_event_start(struct perf_event *event, int flags)
 			cfg = cxl_pmu_config2_get_hdm_decoder(event);
 		else
 			cfg = GENMASK(31, 0); /* No filtering if 0xFFFF_FFFF */
-		writeq(cfg, base + CXL_PMU_FILTER_CFG_REG(hwc->idx, 0));
+		pete_writeq("drivers/perf/cxl_pmu.c:646", cfg, base + CXL_PMU_FILTER_CFG_REG(hwc->idx, 0));
 	}
 
-	cfg = readq(base + CXL_PMU_COUNTER_CFG_REG(hwc->idx));
+	cfg = pete_readq("drivers/perf/cxl_pmu.c:649", base + CXL_PMU_COUNTER_CFG_REG(hwc->idx));
 	cfg |= FIELD_PREP(CXL_PMU_COUNTER_CFG_INT_ON_OVRFLW, 1);
 	cfg |= FIELD_PREP(CXL_PMU_COUNTER_CFG_FREEZE_ON_OVRFLW, 1);
 	cfg |= FIELD_PREP(CXL_PMU_COUNTER_CFG_ENABLE, 1);
@@ -673,10 +673,10 @@ static void cxl_pmu_event_start(struct perf_event *event, int flags)
 	 */
 	cfg |= FIELD_PREP(CXL_PMU_COUNTER_CFG_THRESHOLD_MSK,
 			  cxl_pmu_config1_get_threshold(event));
-	writeq(cfg, base + CXL_PMU_COUNTER_CFG_REG(hwc->idx));
+	pete_writeq("drivers/perf/cxl_pmu.c:676", cfg, base + CXL_PMU_COUNTER_CFG_REG(hwc->idx));
 
 	local64_set(&hwc->prev_count, 0);
-	writeq(0, base + CXL_PMU_COUNTER_REG(hwc->idx));
+	pete_writeq("drivers/perf/cxl_pmu.c:679", 0, base + CXL_PMU_COUNTER_REG(hwc->idx));
 
 	perf_event_update_userpage(event);
 }
@@ -686,7 +686,7 @@ static u64 cxl_pmu_read_counter(struct perf_event *event)
 	struct cxl_pmu_info *info = pmu_to_cxl_pmu_info(event->pmu);
 	void __iomem *base = info->base;
 
-	return readq(base + CXL_PMU_COUNTER_REG(event->hw.idx));
+	return pete_readq("drivers/perf/cxl_pmu.c:689", base + CXL_PMU_COUNTER_REG(event->hw.idx));
 }
 
 static void __cxl_pmu_read(struct perf_event *event, bool overflow)
@@ -727,10 +727,10 @@ static void cxl_pmu_event_stop(struct perf_event *event, int flags)
 	WARN_ON_ONCE(hwc->state & PERF_HES_STOPPED);
 	hwc->state |= PERF_HES_STOPPED;
 
-	cfg = readq(base + CXL_PMU_COUNTER_CFG_REG(hwc->idx));
+	cfg = pete_readq("drivers/perf/cxl_pmu.c:730", base + CXL_PMU_COUNTER_CFG_REG(hwc->idx));
 	cfg &= ~(FIELD_PREP(CXL_PMU_COUNTER_CFG_INT_ON_OVRFLW, 1) |
 		 FIELD_PREP(CXL_PMU_COUNTER_CFG_ENABLE, 1));
-	writeq(cfg, base + CXL_PMU_COUNTER_CFG_REG(hwc->idx));
+	pete_writeq("drivers/perf/cxl_pmu.c:733", cfg, base + CXL_PMU_COUNTER_CFG_REG(hwc->idx));
 
 	hwc->state |= PERF_HES_UPTODATE;
 }
@@ -780,7 +780,7 @@ static irqreturn_t cxl_pmu_irq(int irq, void *data)
 	DECLARE_BITMAP(overflowedbm, 64);
 	int i;
 
-	overflowed = readq(base + CXL_PMU_OVERFLOW_REG);
+	overflowed = pete_readq("drivers/perf/cxl_pmu.c:783", base + CXL_PMU_OVERFLOW_REG);
 
 	/* Interrupt may be shared, so maybe it isn't ours */
 	if (!overflowed)
@@ -799,7 +799,7 @@ static irqreturn_t cxl_pmu_irq(int irq, void *data)
 		__cxl_pmu_read(event, true);
 	}
 
-	writeq(overflowed, base + CXL_PMU_OVERFLOW_REG);
+	pete_writeq("drivers/perf/cxl_pmu.c:802", overflowed, base + CXL_PMU_OVERFLOW_REG);
 
 	return IRQ_HANDLED;
 }

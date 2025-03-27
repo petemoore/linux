@@ -33,7 +33,7 @@
  */
 
 #define cxl_doorbell_busy(cxlds)                                                \
-	(readl((cxlds)->regs.mbox + CXLDEV_MBOX_CTRL_OFFSET) &                  \
+	(pete_readl("drivers/cxl/pci.c:36", (cxlds)->regs.mbox + CXLDEV_MBOX_CTRL_OFFSET) &                  \
 	 CXLDEV_MBOX_CTRL_DOORBELL)
 
 /* CXL 2.0 - 8.2.8.4 */
@@ -110,7 +110,7 @@ static bool cxl_mbox_background_complete(struct cxl_dev_state *cxlds)
 {
 	u64 reg;
 
-	reg = readq(cxlds->regs.mbox + CXLDEV_MBOX_BG_CMD_STATUS_OFFSET);
+	reg = pete_readq("drivers/cxl/pci.c:113", cxlds->regs.mbox + CXLDEV_MBOX_BG_CMD_STATUS_OFFSET);
 	return FIELD_GET(CXLDEV_MBOX_BG_CMD_COMMAND_PCT_MASK, reg) == 100;
 }
 
@@ -125,7 +125,7 @@ static irqreturn_t cxl_pci_mbox_irq(int irq, void *id)
 	if (!cxl_mbox_background_complete(cxlds))
 		return IRQ_NONE;
 
-	reg = readq(cxlds->regs.mbox + CXLDEV_MBOX_BG_CMD_STATUS_OFFSET);
+	reg = pete_readq("drivers/cxl/pci.c:128", cxlds->regs.mbox + CXLDEV_MBOX_BG_CMD_STATUS_OFFSET);
 	opcode = FIELD_GET(CXLDEV_MBOX_BG_CMD_COMMAND_OPCODE_MASK, reg);
 	if (opcode == CXL_MBOX_OP_SANITIZE) {
 		mutex_lock(&mds->mbox_mutex);
@@ -220,7 +220,7 @@ static int __cxl_pci_mbox_send_cmd(struct cxl_memdev_state *mds,
 	/* #1 */
 	if (cxl_doorbell_busy(cxlds)) {
 		u64 md_status =
-			readq(cxlds->regs.memdev + CXLMDEV_STATUS_OFFSET);
+			pete_readq("drivers/cxl/pci.c:223", cxlds->regs.memdev + CXLMDEV_STATUS_OFFSET);
 
 		cxl_cmd_err(cxlds->dev, mbox_cmd, md_status,
 			    "mailbox queue busy");
@@ -249,24 +249,24 @@ static int __cxl_pci_mbox_send_cmd(struct cxl_memdev_state *mds,
 	}
 
 	/* #2, #3 */
-	writeq(cmd_reg, cxlds->regs.mbox + CXLDEV_MBOX_CMD_OFFSET);
+	pete_writeq("drivers/cxl/pci.c:252", cmd_reg, cxlds->regs.mbox + CXLDEV_MBOX_CMD_OFFSET);
 
 	/* #4 */
 	dev_dbg(dev, "Sending command: 0x%04x\n", mbox_cmd->opcode);
-	writel(CXLDEV_MBOX_CTRL_DOORBELL,
+	pete_writel("drivers/cxl/pci.c:256", CXLDEV_MBOX_CTRL_DOORBELL,
 	       cxlds->regs.mbox + CXLDEV_MBOX_CTRL_OFFSET);
 
 	/* #5 */
 	rc = cxl_pci_mbox_wait_for_doorbell(cxlds);
 	if (rc == -ETIMEDOUT) {
-		u64 md_status = readq(cxlds->regs.memdev + CXLMDEV_STATUS_OFFSET);
+		u64 md_status = pete_readq("drivers/cxl/pci.c:262", cxlds->regs.memdev + CXLMDEV_STATUS_OFFSET);
 
 		cxl_cmd_err(cxlds->dev, mbox_cmd, md_status, "mailbox timeout");
 		return rc;
 	}
 
 	/* #6 */
-	status_reg = readq(cxlds->regs.mbox + CXLDEV_MBOX_STATUS_OFFSET);
+	status_reg = pete_readq("drivers/cxl/pci.c:269", cxlds->regs.mbox + CXLDEV_MBOX_STATUS_OFFSET);
 	mbox_cmd->return_code =
 		FIELD_GET(CXLDEV_MBOX_STATUS_RET_CODE_MASK, status_reg);
 
@@ -324,7 +324,7 @@ static int __cxl_pci_mbox_send_cmd(struct cxl_memdev_state *mds,
 			return -ETIMEDOUT;
 		}
 
-		bg_status_reg = readq(cxlds->regs.mbox +
+		bg_status_reg = pete_readq("drivers/cxl/pci.c:327", cxlds->regs.mbox +
 				      CXLDEV_MBOX_BG_CMD_STATUS_OFFSET);
 		mbox_cmd->return_code =
 			FIELD_GET(CXLDEV_MBOX_BG_CMD_COMMAND_RC_MASK,
@@ -342,7 +342,7 @@ static int __cxl_pci_mbox_send_cmd(struct cxl_memdev_state *mds,
 
 success:
 	/* #7 */
-	cmd_reg = readq(cxlds->regs.mbox + CXLDEV_MBOX_CMD_OFFSET);
+	cmd_reg = pete_readq("drivers/cxl/pci.c:345", cxlds->regs.mbox + CXLDEV_MBOX_CMD_OFFSET);
 	out_len = FIELD_GET(CXLDEV_MBOX_CMD_PAYLOAD_LENGTH_MASK, cmd_reg);
 
 	/* #8 */
@@ -381,7 +381,7 @@ static int cxl_pci_mbox_send(struct cxl_memdev_state *mds,
 static int cxl_pci_setup_mailbox(struct cxl_memdev_state *mds)
 {
 	struct cxl_dev_state *cxlds = &mds->cxlds;
-	const int cap = readl(cxlds->regs.mbox + CXLDEV_MBOX_CAPS_OFFSET);
+	const int cap = pete_readl("drivers/cxl/pci.c:384", cxlds->regs.mbox + CXLDEV_MBOX_CAPS_OFFSET);
 	struct device *dev = cxlds->dev;
 	unsigned long timeout;
 	int irq, msgnum;
@@ -390,7 +390,7 @@ static int cxl_pci_setup_mailbox(struct cxl_memdev_state *mds)
 
 	timeout = jiffies + mbox_ready_timeout * HZ;
 	do {
-		md_status = readq(cxlds->regs.memdev + CXLMDEV_STATUS_OFFSET);
+		md_status = pete_readq("drivers/cxl/pci.c:393", cxlds->regs.memdev + CXLMDEV_STATUS_OFFSET);
 		if (md_status & CXLMDEV_MBOX_IF_READY)
 			break;
 		if (msleep_interruptible(100))
@@ -450,9 +450,9 @@ static int cxl_pci_setup_mailbox(struct cxl_memdev_state *mds)
 
 	dev_dbg(cxlds->dev, "Mailbox interrupts enabled\n");
 	/* enable background command mbox irq support */
-	ctrl = readl(cxlds->regs.mbox + CXLDEV_MBOX_CTRL_OFFSET);
+	ctrl = pete_readl("drivers/cxl/pci.c:453", cxlds->regs.mbox + CXLDEV_MBOX_CTRL_OFFSET);
 	ctrl |= CXLDEV_MBOX_CTRL_BG_CMD_IRQ;
-	writel(ctrl, cxlds->regs.mbox + CXLDEV_MBOX_CTRL_OFFSET);
+	pete_writel("drivers/cxl/pci.c:455", ctrl, cxlds->regs.mbox + CXLDEV_MBOX_CTRL_OFFSET);
 
 	return 0;
 }
@@ -540,12 +540,12 @@ static int cxl_pci_ras_unmask(struct pci_dev *pdev)
 
 	if (cap & PCI_EXP_DEVCTL_URRE) {
 		addr = cxlds->regs.ras + CXL_RAS_UNCORRECTABLE_MASK_OFFSET;
-		orig_val = readl(addr);
+		orig_val = pete_readl("drivers/cxl/pci.c:543", addr);
 
 		mask = CXL_RAS_UNCORRECTABLE_MASK_MASK |
 		       CXL_RAS_UNCORRECTABLE_MASK_F256B_MASK;
 		val = orig_val & ~mask;
-		writel(val, addr);
+		pete_writel("drivers/cxl/pci.c:548", val, addr);
 		dev_dbg(&pdev->dev,
 			"Uncorrectable RAS Errors Mask: %#x -> %#x\n",
 			orig_val, val);
@@ -553,9 +553,9 @@ static int cxl_pci_ras_unmask(struct pci_dev *pdev)
 
 	if (cap & PCI_EXP_DEVCTL_CERE) {
 		addr = cxlds->regs.ras + CXL_RAS_CORRECTABLE_MASK_OFFSET;
-		orig_val = readl(addr);
+		orig_val = pete_readl("drivers/cxl/pci.c:556", addr);
 		val = orig_val & ~CXL_RAS_CORRECTABLE_MASK_MASK;
-		writel(val, addr);
+		pete_writel("drivers/cxl/pci.c:558", val, addr);
 		dev_dbg(&pdev->dev, "Correctable RAS Errors Mask: %#x -> %#x\n",
 			orig_val, val);
 	}
@@ -618,7 +618,7 @@ static irqreturn_t cxl_event_thread(int irq, void *id)
 		 * CXL 3.0 8.2.8.3.1: The lower 32 bits are the status;
 		 * ignore the reserved upper 32 bits
 		 */
-		status = readl(cxlds->regs.status + CXLDEV_DEV_EVENT_STATUS_OFFSET);
+		status = pete_readl("drivers/cxl/pci.c:621", cxlds->regs.status + CXLDEV_DEV_EVENT_STATUS_OFFSET);
 		/* Ignore logs unknown to the driver */
 		status &= CXLDEV_EVENT_STATUS_ALL;
 		if (!status)

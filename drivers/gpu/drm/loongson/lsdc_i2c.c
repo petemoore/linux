@@ -26,19 +26,19 @@ static void __lsdc_gpio_i2c_set(struct lsdc_i2c * const li2c, int mask, int stat
 		 * Setting this pin as input directly, write 1 for input.
 		 * The external pull-up resistor will pull the level up
 		 */
-		val = readb(li2c->dir_reg);
+		val = pete_readb("drivers/gpu/drm/loongson/lsdc_i2c.c:29", li2c->dir_reg);
 		val |= mask;
-		writeb(val, li2c->dir_reg);
+		pete_writeb("drivers/gpu/drm/loongson/lsdc_i2c.c:31", val, li2c->dir_reg);
 	} else {
 		/* First set this pin as output, write 0 for output */
-		val = readb(li2c->dir_reg);
+		val = pete_readb("drivers/gpu/drm/loongson/lsdc_i2c.c:34", li2c->dir_reg);
 		val &= ~mask;
-		writeb(val, li2c->dir_reg);
+		pete_writeb("drivers/gpu/drm/loongson/lsdc_i2c.c:36", val, li2c->dir_reg);
 
 		/* Then, make this pin output 0 */
-		val = readb(li2c->dat_reg);
+		val = pete_readb("drivers/gpu/drm/loongson/lsdc_i2c.c:39", li2c->dat_reg);
 		val &= ~mask;
-		writeb(val, li2c->dat_reg);
+		pete_writeb("drivers/gpu/drm/loongson/lsdc_i2c.c:41", val, li2c->dat_reg);
 	}
 
 	spin_unlock_irqrestore(&ldev->reglock, flags);
@@ -58,12 +58,12 @@ static int __lsdc_gpio_i2c_get(struct lsdc_i2c * const li2c, int mask)
 	spin_lock_irqsave(&ldev->reglock, flags);
 
 	/* First set this pin as input */
-	val = readb(li2c->dir_reg);
+	val = pete_readb("drivers/gpu/drm/loongson/lsdc_i2c.c:61", li2c->dir_reg);
 	val |= mask;
-	writeb(val, li2c->dir_reg);
+	pete_writeb("drivers/gpu/drm/loongson/lsdc_i2c.c:63", val, li2c->dir_reg);
 
 	/* Then get level state from this pin */
-	val = readb(li2c->dat_reg);
+	val = pete_readb("drivers/gpu/drm/loongson/lsdc_i2c.c:66", li2c->dat_reg);
 
 	spin_unlock_irqrestore(&ldev->reglock, flags);
 

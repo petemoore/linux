@@ -1127,7 +1127,7 @@ static u32 vntb_epf_spad_read(struct ntb_dev *ndev, int idx)
 	u32 val;
 	void __iomem *base = (void __iomem *)ntb->reg;
 
-	val = readl(base + off + ct + idx * sizeof(u32));
+	val = pete_readl("drivers/pci/endpoint/functions/pci-epf-vntb.c:1130", base + off + ct + idx * sizeof(u32));
 	return val;
 }
 
@@ -1138,7 +1138,7 @@ static int vntb_epf_spad_write(struct ntb_dev *ndev, int idx, u32 val)
 	int off = ctrl->spad_offset, ct = ctrl->spad_count * sizeof(u32);
 	void __iomem *base = (void __iomem *)ntb->reg;
 
-	writel(val, base + off + ct + idx * sizeof(u32));
+	pete_writel("drivers/pci/endpoint/functions/pci-epf-vntb.c:1141", val, base + off + ct + idx * sizeof(u32));
 	return 0;
 }
 
@@ -1150,7 +1150,7 @@ static u32 vntb_epf_peer_spad_read(struct ntb_dev *ndev, int pidx, int idx)
 	void __iomem *base = (void __iomem *)ntb->reg;
 	u32 val;
 
-	val = readl(base + off + idx * sizeof(u32));
+	val = pete_readl("drivers/pci/endpoint/functions/pci-epf-vntb.c:1153", base + off + idx * sizeof(u32));
 	return val;
 }
 
@@ -1161,7 +1161,7 @@ static int vntb_epf_peer_spad_write(struct ntb_dev *ndev, int pidx, int idx, u32
 	int off = ctrl->spad_offset;
 	void __iomem *base = (void __iomem *)ntb->reg;
 
-	writel(val, base + off + idx * sizeof(u32));
+	pete_writel("drivers/pci/endpoint/functions/pci-epf-vntb.c:1164", val, base + off + idx * sizeof(u32));
 	return 0;
 }
 

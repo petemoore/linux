@@ -5678,11 +5678,11 @@ bnx2_test_registers(struct bnx2 *bp)
 		rw_mask = reg_tbl[i].rw_mask;
 		ro_mask = reg_tbl[i].ro_mask;
 
-		save_val = readl(bp->regview + offset);
+		save_val = pete_readl("drivers/net/ethernet/broadcom/bnx2.c:5681", bp->regview + offset);
 
-		writel(0, bp->regview + offset);
+		pete_writel("drivers/net/ethernet/broadcom/bnx2.c:5683", 0, bp->regview + offset);
 
-		val = readl(bp->regview + offset);
+		val = pete_readl("drivers/net/ethernet/broadcom/bnx2.c:5685", bp->regview + offset);
 		if ((val & rw_mask) != 0) {
 			goto reg_test_err;
 		}
@@ -5691,9 +5691,9 @@ bnx2_test_registers(struct bnx2 *bp)
 			goto reg_test_err;
 		}
 
-		writel(0xffffffff, bp->regview + offset);
+		pete_writel("drivers/net/ethernet/broadcom/bnx2.c:5694", 0xffffffff, bp->regview + offset);
 
-		val = readl(bp->regview + offset);
+		val = pete_readl("drivers/net/ethernet/broadcom/bnx2.c:5696", bp->regview + offset);
 		if ((val & rw_mask) != rw_mask) {
 			goto reg_test_err;
 		}
@@ -5702,11 +5702,11 @@ bnx2_test_registers(struct bnx2 *bp)
 			goto reg_test_err;
 		}
 
-		writel(save_val, bp->regview + offset);
+		pete_writel("drivers/net/ethernet/broadcom/bnx2.c:5705", save_val, bp->regview + offset);
 		continue;
 
 reg_test_err:
-		writel(save_val, bp->regview + offset);
+		pete_writel("drivers/net/ethernet/broadcom/bnx2.c:5709", save_val, bp->regview + offset);
 		ret = -ENODEV;
 		break;
 	}

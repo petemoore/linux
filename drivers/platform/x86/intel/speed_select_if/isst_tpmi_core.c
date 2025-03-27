@@ -324,11 +324,11 @@ static int sst_add_perf_profiles(struct auxiliary_device *auxdev,
 	pd_info->pp_block_size = pd_info->pp_header.block_size;
 
 	/* Read PP Offset 0: Get feature offset with PP level */
-	*((u64 *)&pd_info->feature_offsets) = readq(pd_info->sst_base +
+	*((u64 *)&pd_info->feature_offsets) = pete_readq("drivers/platform/x86/intel/speed_select_if/isst_tpmi_core.c:327", pd_info->sst_base +
 						    pd_info->sst_header.pp_offset +
 						    SST_PP_OFFSET_0);
 
-	perf_level_offsets = readq(pd_info->sst_base + pd_info->sst_header.pp_offset +
+	perf_level_offsets = pete_readq("drivers/platform/x86/intel/speed_select_if/isst_tpmi_core.c:331", pd_info->sst_base + pd_info->sst_header.pp_offset +
 				   SST_PP_OFFSET_1);
 
 	for (i = 0; i < levels; ++i) {
@@ -348,7 +348,7 @@ static int sst_main(struct auxiliary_device *auxdev, struct tpmi_per_power_domai
 {
 	int i, mask, levels;
 
-	*((u64 *)&pd_info->sst_header) = readq(pd_info->sst_base);
+	*((u64 *)&pd_info->sst_header) = pete_readq("drivers/platform/x86/intel/speed_select_if/isst_tpmi_core.c:351", pd_info->sst_base);
 	pd_info->sst_header.cp_offset *= 8;
 	pd_info->sst_header.pp_offset *= 8;
 
@@ -359,10 +359,10 @@ static int sst_main(struct auxiliary_device *auxdev, struct tpmi_per_power_domai
 	}
 
 	/* Read SST CP Header */
-	*((u64 *)&pd_info->cp_header) = readq(pd_info->sst_base + pd_info->sst_header.cp_offset);
+	*((u64 *)&pd_info->cp_header) = pete_readq("drivers/platform/x86/intel/speed_select_if/isst_tpmi_core.c:362", pd_info->sst_base + pd_info->sst_header.cp_offset);
 
 	/* Read PP header */
-	*((u64 *)&pd_info->pp_header) = readq(pd_info->sst_base + pd_info->sst_header.pp_offset);
+	*((u64 *)&pd_info->pp_header) = pete_readq("drivers/platform/x86/intel/speed_select_if/isst_tpmi_core.c:365", pd_info->sst_base + pd_info->sst_header.pp_offset);
 
 	/* Force level_en_mask level 0 */
 	pd_info->pp_header.level_en_mask |= 0x01;
@@ -420,7 +420,7 @@ static bool disable_dynamic_sst_features(void)
 {\
 	u64 val, mask;\
 	\
-	val = readq(power_domain_info->sst_base + power_domain_info->sst_header.cp_offset +\
+	val = pete_readq("drivers/platform/x86/intel/speed_select_if/isst_tpmi_core.c:423", power_domain_info->sst_base + power_domain_info->sst_header.cp_offset +\
 			(offset));\
 	mask = GENMASK_ULL((start + width - 1), start);\
 	val &= mask; \
@@ -432,12 +432,12 @@ static bool disable_dynamic_sst_features(void)
 {\
 	u64 val, mask;\
 	\
-	val = readq(power_domain_info->sst_base +\
+	val = pete_readq("drivers/platform/x86/intel/speed_select_if/isst_tpmi_core.c:435", power_domain_info->sst_base +\
 		    power_domain_info->sst_header.cp_offset + (offset));\
 	mask = GENMASK_ULL((start + width - 1), start);\
 	val &= ~mask;\
 	val |= (name / div_factor) << start;\
-	writeq(val, power_domain_info->sst_base + power_domain_info->sst_header.cp_offset +\
+	pete_writeq("drivers/platform/x86/intel/speed_select_if/isst_tpmi_core.c:440", val, power_domain_info->sst_base + power_domain_info->sst_header.cp_offset +\
 		(offset));\
 }
 
@@ -602,13 +602,13 @@ static long isst_if_clos_assoc(void __user *argp)
 		shift = punit_cpu_no % SST_CLOS_ASSOC_CPUS_PER_REG;
 		shift *= SST_CLOS_ASSOC_BITS_PER_CPU;
 
-		val = readq(power_domain_info->sst_base +
+		val = pete_readq("drivers/platform/x86/intel/speed_select_if/isst_tpmi_core.c:605", power_domain_info->sst_base +
 				power_domain_info->sst_header.cp_offset + offset);
 		if (assoc_cmds.get_set) {
 			mask = GENMASK_ULL((shift + SST_CLOS_ASSOC_BITS_PER_CPU - 1), shift);
 			val &= ~mask;
 			val |= (clos << shift);
-			writeq(val, power_domain_info->sst_base +
+			pete_writeq("drivers/platform/x86/intel/speed_select_if/isst_tpmi_core.c:611", val, power_domain_info->sst_base +
 					power_domain_info->sst_header.cp_offset + offset);
 		} else {
 			val >>= shift;
@@ -627,7 +627,7 @@ static long isst_if_clos_assoc(void __user *argp)
 {\
 	u64 val, _mask;\
 	\
-	val = readq(power_domain_info->sst_base + power_domain_info->sst_header.pp_offset +\
+	val = pete_readq("drivers/platform/x86/intel/speed_select_if/isst_tpmi_core.c:630", power_domain_info->sst_base + power_domain_info->sst_header.pp_offset +\
 		    (offset));\
 	_mask = GENMASK_ULL((start + width - 1), start);\
 	val &= _mask;\
@@ -639,12 +639,12 @@ static long isst_if_clos_assoc(void __user *argp)
 {\
 	u64 val, _mask;\
 	\
-	val = readq(power_domain_info->sst_base + power_domain_info->sst_header.pp_offset +\
+	val = pete_readq("drivers/platform/x86/intel/speed_select_if/isst_tpmi_core.c:642", power_domain_info->sst_base + power_domain_info->sst_header.pp_offset +\
 		    (offset));\
 	_mask = GENMASK((start + width - 1), start);\
 	val &= ~_mask;\
 	val |= (name / div_factor) << start;\
-	writeq(val, power_domain_info->sst_base + power_domain_info->sst_header.pp_offset +\
+	pete_writeq("drivers/platform/x86/intel/speed_select_if/isst_tpmi_core.c:647", val, power_domain_info->sst_base + power_domain_info->sst_header.pp_offset +\
 	      (offset));\
 }
 
@@ -652,7 +652,7 @@ static long isst_if_clos_assoc(void __user *argp)
 {\
 	u64 val, _mask;\
 	\
-	val = readq(power_domain_info->sst_base +\
+	val = pete_readq("drivers/platform/x86/intel/speed_select_if/isst_tpmi_core.c:655", power_domain_info->sst_base +\
 		    power_domain_info->perf_levels[level].mmio_offset +\
 		(power_domain_info->feature_offsets.bf_offset * 8) + (offset));\
 	_mask = GENMASK_ULL((start + width - 1), start);\
@@ -665,7 +665,7 @@ static long isst_if_clos_assoc(void __user *argp)
 {\
 	u64 val, _mask;\
 	\
-	val = readq(power_domain_info->sst_base +\
+	val = pete_readq("drivers/platform/x86/intel/speed_select_if/isst_tpmi_core.c:668", power_domain_info->sst_base +\
 		    power_domain_info->perf_levels[level].mmio_offset +\
 		(power_domain_info->feature_offsets.tf_offset * 8) + (offset));\
 	_mask = GENMASK_ULL((start + width - 1), start);\
@@ -815,7 +815,7 @@ static int isst_if_set_perf_feature(void __user *argp)
 {\
 	u64 val, _mask;\
 	\
-	val = readq(power_domain_info->sst_base +\
+	val = pete_readq("drivers/platform/x86/intel/speed_select_if/isst_tpmi_core.c:818", power_domain_info->sst_base +\
 		    power_domain_info->perf_levels[level].mmio_offset +\
 		(power_domain_info->feature_offsets.pp_offset * 8) + (offset));\
 	_mask = GENMASK_ULL((start + width - 1), start);\
@@ -1348,7 +1348,7 @@ void tpmi_sst_dev_suspend(struct auxiliary_device *auxdev)
 	void __iomem *cp_base;
 
 	cp_base = power_domain_info->sst_base + power_domain_info->sst_header.cp_offset;
-	power_domain_info->saved_sst_cp_control = readq(cp_base + SST_CP_CONTROL_OFFSET);
+	power_domain_info->saved_sst_cp_control = pete_readq("drivers/platform/x86/intel/speed_select_if/isst_tpmi_core.c:1351", cp_base + SST_CP_CONTROL_OFFSET);
 
 	memcpy_fromio(power_domain_info->saved_clos_configs, cp_base + SST_CLOS_CONFIG_0_OFFSET,
 		      sizeof(power_domain_info->saved_clos_configs));
@@ -1356,7 +1356,7 @@ void tpmi_sst_dev_suspend(struct auxiliary_device *auxdev)
 	memcpy_fromio(power_domain_info->saved_clos_assocs, cp_base + SST_CLOS_ASSOC_0_OFFSET,
 		      sizeof(power_domain_info->saved_clos_assocs));
 
-	power_domain_info->saved_pp_control = readq(power_domain_info->sst_base +
+	power_domain_info->saved_pp_control = pete_readq("drivers/platform/x86/intel/speed_select_if/isst_tpmi_core.c:1359", power_domain_info->sst_base +
 						    power_domain_info->sst_header.pp_offset +
 						    SST_PP_CONTROL_OFFSET);
 }
@@ -1369,7 +1369,7 @@ void tpmi_sst_dev_resume(struct auxiliary_device *auxdev)
 	void __iomem *cp_base;
 
 	cp_base = power_domain_info->sst_base + power_domain_info->sst_header.cp_offset;
-	writeq(power_domain_info->saved_sst_cp_control, cp_base + SST_CP_CONTROL_OFFSET);
+	pete_writeq("drivers/platform/x86/intel/speed_select_if/isst_tpmi_core.c:1372", power_domain_info->saved_sst_cp_control, cp_base + SST_CP_CONTROL_OFFSET);
 
 	memcpy_toio(cp_base + SST_CLOS_CONFIG_0_OFFSET, power_domain_info->saved_clos_configs,
 		    sizeof(power_domain_info->saved_clos_configs));
@@ -1377,7 +1377,7 @@ void tpmi_sst_dev_resume(struct auxiliary_device *auxdev)
 	memcpy_toio(cp_base + SST_CLOS_ASSOC_0_OFFSET, power_domain_info->saved_clos_assocs,
 		    sizeof(power_domain_info->saved_clos_assocs));
 
-	writeq(power_domain_info->saved_pp_control, power_domain_info->sst_base +
+	pete_writeq("drivers/platform/x86/intel/speed_select_if/isst_tpmi_core.c:1380", power_domain_info->saved_pp_control, power_domain_info->sst_base +
 				power_domain_info->sst_header.pp_offset + SST_PP_CONTROL_OFFSET);
 }
 EXPORT_SYMBOL_NS_GPL(tpmi_sst_dev_resume, INTEL_TPMI_SST);

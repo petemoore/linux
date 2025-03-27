@@ -104,12 +104,12 @@ static int s3c_rtc_setaie(struct device *dev, unsigned int enabled)
 	if (ret)
 		return ret;
 
-	tmp = readb(info->base + S3C2410_RTCALM) & ~S3C2410_RTCALM_ALMEN;
+	tmp = pete_readb("drivers/rtc/rtc-s3c.c:107", info->base + S3C2410_RTCALM) & ~S3C2410_RTCALM_ALMEN;
 
 	if (enabled)
 		tmp |= S3C2410_RTCALM_ALMEN;
 
-	writeb(tmp, info->base + S3C2410_RTCALM);
+	pete_writeb("drivers/rtc/rtc-s3c.c:112", tmp, info->base + S3C2410_RTCALM);
 
 	spin_lock_irqsave(&info->alarm_lock, flags);
 
@@ -137,12 +137,12 @@ static int s3c_rtc_read_time(struct s3c_rtc *info, struct rtc_time *tm)
 		return ret;
 
 retry_get_time:
-	tm->tm_min  = readb(info->base + S3C2410_RTCMIN);
-	tm->tm_hour = readb(info->base + S3C2410_RTCHOUR);
-	tm->tm_mday = readb(info->base + S3C2410_RTCDATE);
-	tm->tm_mon  = readb(info->base + S3C2410_RTCMON);
-	tm->tm_year = readb(info->base + S3C2410_RTCYEAR);
-	tm->tm_sec  = readb(info->base + S3C2410_RTCSEC);
+	tm->tm_min  = pete_readb("drivers/rtc/rtc-s3c.c:140", info->base + S3C2410_RTCMIN);
+	tm->tm_hour = pete_readb("drivers/rtc/rtc-s3c.c:141", info->base + S3C2410_RTCHOUR);
+	tm->tm_mday = pete_readb("drivers/rtc/rtc-s3c.c:142", info->base + S3C2410_RTCDATE);
+	tm->tm_mon  = pete_readb("drivers/rtc/rtc-s3c.c:143", info->base + S3C2410_RTCMON);
+	tm->tm_year = pete_readb("drivers/rtc/rtc-s3c.c:144", info->base + S3C2410_RTCYEAR);
+	tm->tm_sec  = pete_readb("drivers/rtc/rtc-s3c.c:145", info->base + S3C2410_RTCSEC);
 
 	/*
 	 * The only way to work out whether the system was mid-update
@@ -175,12 +175,12 @@ static int s3c_rtc_write_time(struct s3c_rtc *info, const struct rtc_time *tm)
 	if (ret)
 		return ret;
 
-	writeb(bin2bcd(tm->tm_sec),  info->base + S3C2410_RTCSEC);
-	writeb(bin2bcd(tm->tm_min),  info->base + S3C2410_RTCMIN);
-	writeb(bin2bcd(tm->tm_hour), info->base + S3C2410_RTCHOUR);
-	writeb(bin2bcd(tm->tm_mday), info->base + S3C2410_RTCDATE);
-	writeb(bin2bcd(tm->tm_mon),  info->base + S3C2410_RTCMON);
-	writeb(bin2bcd(tm->tm_year), info->base + S3C2410_RTCYEAR);
+	pete_writeb("drivers/rtc/rtc-s3c.c:178", bin2bcd(tm->tm_sec),  info->base + S3C2410_RTCSEC);
+	pete_writeb("drivers/rtc/rtc-s3c.c:179", bin2bcd(tm->tm_min),  info->base + S3C2410_RTCMIN);
+	pete_writeb("drivers/rtc/rtc-s3c.c:180", bin2bcd(tm->tm_hour), info->base + S3C2410_RTCHOUR);
+	pete_writeb("drivers/rtc/rtc-s3c.c:181", bin2bcd(tm->tm_mday), info->base + S3C2410_RTCDATE);
+	pete_writeb("drivers/rtc/rtc-s3c.c:182", bin2bcd(tm->tm_mon),  info->base + S3C2410_RTCMON);
+	pete_writeb("drivers/rtc/rtc-s3c.c:183", bin2bcd(tm->tm_year), info->base + S3C2410_RTCYEAR);
 
 	s3c_rtc_disable_clk(info);
 
@@ -232,14 +232,14 @@ static int s3c_rtc_getalarm(struct device *dev, struct rtc_wkalrm *alrm)
 	if (ret)
 		return ret;
 
-	alm_tm->tm_sec  = readb(info->base + S3C2410_ALMSEC);
-	alm_tm->tm_min  = readb(info->base + S3C2410_ALMMIN);
-	alm_tm->tm_hour = readb(info->base + S3C2410_ALMHOUR);
-	alm_tm->tm_mon  = readb(info->base + S3C2410_ALMMON);
-	alm_tm->tm_mday = readb(info->base + S3C2410_ALMDATE);
-	alm_tm->tm_year = readb(info->base + S3C2410_ALMYEAR);
+	alm_tm->tm_sec  = pete_readb("drivers/rtc/rtc-s3c.c:235", info->base + S3C2410_ALMSEC);
+	alm_tm->tm_min  = pete_readb("drivers/rtc/rtc-s3c.c:236", info->base + S3C2410_ALMMIN);
+	alm_tm->tm_hour = pete_readb("drivers/rtc/rtc-s3c.c:237", info->base + S3C2410_ALMHOUR);
+	alm_tm->tm_mon  = pete_readb("drivers/rtc/rtc-s3c.c:238", info->base + S3C2410_ALMMON);
+	alm_tm->tm_mday = pete_readb("drivers/rtc/rtc-s3c.c:239", info->base + S3C2410_ALMDATE);
+	alm_tm->tm_year = pete_readb("drivers/rtc/rtc-s3c.c:240", info->base + S3C2410_ALMYEAR);
 
-	alm_en = readb(info->base + S3C2410_RTCALM);
+	alm_en = pete_readb("drivers/rtc/rtc-s3c.c:242", info->base + S3C2410_RTCALM);
 
 	s3c_rtc_disable_clk(info);
 
@@ -284,37 +284,37 @@ static int s3c_rtc_setalarm(struct device *dev, struct rtc_wkalrm *alrm)
 	if (ret)
 		return ret;
 
-	alrm_en = readb(info->base + S3C2410_RTCALM) & S3C2410_RTCALM_ALMEN;
-	writeb(0x00, info->base + S3C2410_RTCALM);
+	alrm_en = pete_readb("drivers/rtc/rtc-s3c.c:287", info->base + S3C2410_RTCALM) & S3C2410_RTCALM_ALMEN;
+	pete_writeb("drivers/rtc/rtc-s3c.c:288", 0x00, info->base + S3C2410_RTCALM);
 
 	if (tm->tm_sec < 60 && tm->tm_sec >= 0) {
 		alrm_en |= S3C2410_RTCALM_SECEN;
-		writeb(bin2bcd(tm->tm_sec), info->base + S3C2410_ALMSEC);
+		pete_writeb("drivers/rtc/rtc-s3c.c:292", bin2bcd(tm->tm_sec), info->base + S3C2410_ALMSEC);
 	}
 
 	if (tm->tm_min < 60 && tm->tm_min >= 0) {
 		alrm_en |= S3C2410_RTCALM_MINEN;
-		writeb(bin2bcd(tm->tm_min), info->base + S3C2410_ALMMIN);
+		pete_writeb("drivers/rtc/rtc-s3c.c:297", bin2bcd(tm->tm_min), info->base + S3C2410_ALMMIN);
 	}
 
 	if (tm->tm_hour < 24 && tm->tm_hour >= 0) {
 		alrm_en |= S3C2410_RTCALM_HOUREN;
-		writeb(bin2bcd(tm->tm_hour), info->base + S3C2410_ALMHOUR);
+		pete_writeb("drivers/rtc/rtc-s3c.c:302", bin2bcd(tm->tm_hour), info->base + S3C2410_ALMHOUR);
 	}
 
 	if (tm->tm_mon < 12 && tm->tm_mon >= 0) {
 		alrm_en |= S3C2410_RTCALM_MONEN;
-		writeb(bin2bcd(tm->tm_mon + 1), info->base + S3C2410_ALMMON);
+		pete_writeb("drivers/rtc/rtc-s3c.c:307", bin2bcd(tm->tm_mon + 1), info->base + S3C2410_ALMMON);
 	}
 
 	if (tm->tm_mday <= 31 && tm->tm_mday >= 1) {
 		alrm_en |= S3C2410_RTCALM_DAYEN;
-		writeb(bin2bcd(tm->tm_mday), info->base + S3C2410_ALMDATE);
+		pete_writeb("drivers/rtc/rtc-s3c.c:312", bin2bcd(tm->tm_mday), info->base + S3C2410_ALMDATE);
 	}
 
 	dev_dbg(dev, "setting S3C2410_RTCALM to %08x\n", alrm_en);
 
-	writeb(alrm_en, info->base + S3C2410_RTCALM);
+	pete_writeb("drivers/rtc/rtc-s3c.c:317", alrm_en, info->base + S3C2410_RTCALM);
 
 	s3c_rtc_setaie(dev, alrm->enabled);
 
@@ -335,28 +335,28 @@ static void s3c24xx_rtc_enable(struct s3c_rtc *info)
 {
 	unsigned int con, tmp;
 
-	con = readw(info->base + S3C2410_RTCCON);
+	con = pete_readw("drivers/rtc/rtc-s3c.c:338", info->base + S3C2410_RTCCON);
 	/* re-enable the device, and check it is ok */
 	if ((con & S3C2410_RTCCON_RTCEN) == 0) {
 		dev_info(info->dev, "rtc disabled, re-enabling\n");
 
-		tmp = readw(info->base + S3C2410_RTCCON);
-		writew(tmp | S3C2410_RTCCON_RTCEN, info->base + S3C2410_RTCCON);
+		tmp = pete_readw("drivers/rtc/rtc-s3c.c:343", info->base + S3C2410_RTCCON);
+		pete_writew("drivers/rtc/rtc-s3c.c:344", tmp | S3C2410_RTCCON_RTCEN, info->base + S3C2410_RTCCON);
 	}
 
 	if (con & S3C2410_RTCCON_CNTSEL) {
 		dev_info(info->dev, "removing RTCCON_CNTSEL\n");
 
-		tmp = readw(info->base + S3C2410_RTCCON);
-		writew(tmp & ~S3C2410_RTCCON_CNTSEL,
+		tmp = pete_readw("drivers/rtc/rtc-s3c.c:350", info->base + S3C2410_RTCCON);
+		pete_writew("drivers/rtc/rtc-s3c.c:351", tmp & ~S3C2410_RTCCON_CNTSEL,
 		       info->base + S3C2410_RTCCON);
 	}
 
 	if (con & S3C2410_RTCCON_CLKRST) {
 		dev_info(info->dev, "removing RTCCON_CLKRST\n");
 
-		tmp = readw(info->base + S3C2410_RTCCON);
-		writew(tmp & ~S3C2410_RTCCON_CLKRST,
+		tmp = pete_readw("drivers/rtc/rtc-s3c.c:358", info->base + S3C2410_RTCCON);
+		pete_writew("drivers/rtc/rtc-s3c.c:359", tmp & ~S3C2410_RTCCON_CLKRST,
 		       info->base + S3C2410_RTCCON);
 	}
 }
@@ -365,23 +365,23 @@ static void s3c24xx_rtc_disable(struct s3c_rtc *info)
 {
 	unsigned int con;
 
-	con = readw(info->base + S3C2410_RTCCON);
+	con = pete_readw("drivers/rtc/rtc-s3c.c:368", info->base + S3C2410_RTCCON);
 	con &= ~S3C2410_RTCCON_RTCEN;
-	writew(con, info->base + S3C2410_RTCCON);
+	pete_writew("drivers/rtc/rtc-s3c.c:370", con, info->base + S3C2410_RTCCON);
 
-	con = readb(info->base + S3C2410_TICNT);
+	con = pete_readb("drivers/rtc/rtc-s3c.c:372", info->base + S3C2410_TICNT);
 	con &= ~S3C2410_TICNT_ENABLE;
-	writeb(con, info->base + S3C2410_TICNT);
+	pete_writeb("drivers/rtc/rtc-s3c.c:374", con, info->base + S3C2410_TICNT);
 }
 
 static void s3c6410_rtc_disable(struct s3c_rtc *info)
 {
 	unsigned int con;
 
-	con = readw(info->base + S3C2410_RTCCON);
+	con = pete_readw("drivers/rtc/rtc-s3c.c:381", info->base + S3C2410_RTCCON);
 	con &= ~S3C64XX_RTCCON_TICEN;
 	con &= ~S3C2410_RTCCON_RTCEN;
-	writew(con, info->base + S3C2410_RTCCON);
+	pete_writew("drivers/rtc/rtc-s3c.c:384", con, info->base + S3C2410_RTCCON);
 }
 
 static void s3c_rtc_remove(struct platform_device *pdev)
@@ -454,7 +454,7 @@ static int s3c_rtc_probe(struct platform_device *pdev)
 		info->data->enable(info);
 
 	dev_dbg(&pdev->dev, "s3c2410_rtc: RTCCON=%02x\n",
-		readw(info->base + S3C2410_RTCCON));
+		pete_readw("drivers/rtc/rtc-s3c.c:457", info->base + S3C2410_RTCCON));
 
 	device_init_wakeup(&pdev->dev, 1);
 
@@ -546,7 +546,7 @@ static void s3c24xx_rtc_irq(struct s3c_rtc *info, int mask)
 static void s3c6410_rtc_irq(struct s3c_rtc *info, int mask)
 {
 	rtc_update_irq(info->rtc, 1, RTC_AF | RTC_IRQF);
-	writeb(mask, info->base + S3C2410_INTP);
+	pete_writeb("drivers/rtc/rtc-s3c.c:549", mask, info->base + S3C2410_INTP);
 }
 
 static struct s3c_rtc_data const s3c2410_rtc_data = {

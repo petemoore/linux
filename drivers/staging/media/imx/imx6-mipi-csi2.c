@@ -132,42 +132,42 @@ static inline struct csi2_dev *notifier_to_dev(struct v4l2_async_notifier *n)
 static void csi2_enable(struct csi2_dev *csi2, bool enable)
 {
 	if (enable) {
-		writel(0x1, csi2->base + CSI2_PHY_SHUTDOWNZ);
-		writel(0x1, csi2->base + CSI2_DPHY_RSTZ);
-		writel(0x1, csi2->base + CSI2_RESETN);
+		pete_writel("drivers/staging/media/imx/imx6-mipi-csi2.c:135", 0x1, csi2->base + CSI2_PHY_SHUTDOWNZ);
+		pete_writel("drivers/staging/media/imx/imx6-mipi-csi2.c:136", 0x1, csi2->base + CSI2_DPHY_RSTZ);
+		pete_writel("drivers/staging/media/imx/imx6-mipi-csi2.c:137", 0x1, csi2->base + CSI2_RESETN);
 	} else {
-		writel(0x0, csi2->base + CSI2_PHY_SHUTDOWNZ);
-		writel(0x0, csi2->base + CSI2_DPHY_RSTZ);
-		writel(0x0, csi2->base + CSI2_RESETN);
+		pete_writel("drivers/staging/media/imx/imx6-mipi-csi2.c:139", 0x0, csi2->base + CSI2_PHY_SHUTDOWNZ);
+		pete_writel("drivers/staging/media/imx/imx6-mipi-csi2.c:140", 0x0, csi2->base + CSI2_DPHY_RSTZ);
+		pete_writel("drivers/staging/media/imx/imx6-mipi-csi2.c:141", 0x0, csi2->base + CSI2_RESETN);
 	}
 }
 
 static void csi2_set_lanes(struct csi2_dev *csi2, unsigned int lanes)
 {
-	writel(lanes - 1, csi2->base + CSI2_N_LANES);
+	pete_writel("drivers/staging/media/imx/imx6-mipi-csi2.c:147", lanes - 1, csi2->base + CSI2_N_LANES);
 }
 
 static void dw_mipi_csi2_phy_write(struct csi2_dev *csi2,
 				   u32 test_code, u32 test_data)
 {
 	/* Clear PHY test interface */
-	writel(PHY_TESTCLR, csi2->base + CSI2_PHY_TST_CTRL0);
-	writel(0x0, csi2->base + CSI2_PHY_TST_CTRL1);
-	writel(0x0, csi2->base + CSI2_PHY_TST_CTRL0);
+	pete_writel("drivers/staging/media/imx/imx6-mipi-csi2.c:154", PHY_TESTCLR, csi2->base + CSI2_PHY_TST_CTRL0);
+	pete_writel("drivers/staging/media/imx/imx6-mipi-csi2.c:155", 0x0, csi2->base + CSI2_PHY_TST_CTRL1);
+	pete_writel("drivers/staging/media/imx/imx6-mipi-csi2.c:156", 0x0, csi2->base + CSI2_PHY_TST_CTRL0);
 
 	/* Raise test interface strobe signal */
-	writel(PHY_TESTCLK, csi2->base + CSI2_PHY_TST_CTRL0);
+	pete_writel("drivers/staging/media/imx/imx6-mipi-csi2.c:159", PHY_TESTCLK, csi2->base + CSI2_PHY_TST_CTRL0);
 
 	/* Configure address write on falling edge and lower strobe signal */
-	writel(PHY_TESTEN | test_code, csi2->base + CSI2_PHY_TST_CTRL1);
-	writel(0x0, csi2->base + CSI2_PHY_TST_CTRL0);
+	pete_writel("drivers/staging/media/imx/imx6-mipi-csi2.c:162", PHY_TESTEN | test_code, csi2->base + CSI2_PHY_TST_CTRL1);
+	pete_writel("drivers/staging/media/imx/imx6-mipi-csi2.c:163", 0x0, csi2->base + CSI2_PHY_TST_CTRL0);
 
 	/* Configure data write on rising edge and raise strobe signal */
-	writel(test_data, csi2->base + CSI2_PHY_TST_CTRL1);
-	writel(PHY_TESTCLK, csi2->base + CSI2_PHY_TST_CTRL0);
+	pete_writel("drivers/staging/media/imx/imx6-mipi-csi2.c:166", test_data, csi2->base + CSI2_PHY_TST_CTRL1);
+	pete_writel("drivers/staging/media/imx/imx6-mipi-csi2.c:167", PHY_TESTCLK, csi2->base + CSI2_PHY_TST_CTRL0);
 
 	/* Clear strobe signal */
-	writel(0x0, csi2->base + CSI2_PHY_TST_CTRL0);
+	pete_writel("drivers/staging/media/imx/imx6-mipi-csi2.c:170", 0x0, csi2->base + CSI2_PHY_TST_CTRL0);
 }
 
 /*
@@ -298,7 +298,7 @@ static void csi2ipu_gasket_init(struct csi2_dev *csi2)
 		break;
 	}
 
-	writel(reg, csi2->base + CSI2IPU_GASKET);
+	pete_writel("drivers/staging/media/imx/imx6-mipi-csi2.c:301", reg, csi2->base + CSI2IPU_GASKET);
 }
 
 static int csi2_get_active_lanes(struct csi2_dev *csi2, unsigned int *lanes)
@@ -573,33 +573,33 @@ static int csi2_log_status(struct v4l2_subdev *sd)
 
 	v4l2_info(sd, "-----MIPI CSI status-----\n");
 	v4l2_info(sd, "VERSION: 0x%x\n",
-		  readl(csi2->base + CSI2_VERSION));
+		  pete_readl("drivers/staging/media/imx/imx6-mipi-csi2.c:576", csi2->base + CSI2_VERSION));
 	v4l2_info(sd, "N_LANES: 0x%x\n",
-		  readl(csi2->base + CSI2_N_LANES));
+		  pete_readl("drivers/staging/media/imx/imx6-mipi-csi2.c:578", csi2->base + CSI2_N_LANES));
 	v4l2_info(sd, "PHY_SHUTDOWNZ: 0x%x\n",
-		  readl(csi2->base + CSI2_PHY_SHUTDOWNZ));
+		  pete_readl("drivers/staging/media/imx/imx6-mipi-csi2.c:580", csi2->base + CSI2_PHY_SHUTDOWNZ));
 	v4l2_info(sd, "DPHY_RSTZ: 0x%x\n",
-		  readl(csi2->base + CSI2_DPHY_RSTZ));
+		  pete_readl("drivers/staging/media/imx/imx6-mipi-csi2.c:582", csi2->base + CSI2_DPHY_RSTZ));
 	v4l2_info(sd, "RESETN: 0x%x\n",
-		  readl(csi2->base + CSI2_RESETN));
+		  pete_readl("drivers/staging/media/imx/imx6-mipi-csi2.c:584", csi2->base + CSI2_RESETN));
 	v4l2_info(sd, "PHY_STATE: 0x%x\n",
-		  readl(csi2->base + CSI2_PHY_STATE));
+		  pete_readl("drivers/staging/media/imx/imx6-mipi-csi2.c:586", csi2->base + CSI2_PHY_STATE));
 	v4l2_info(sd, "DATA_IDS_1: 0x%x\n",
-		  readl(csi2->base + CSI2_DATA_IDS_1));
+		  pete_readl("drivers/staging/media/imx/imx6-mipi-csi2.c:588", csi2->base + CSI2_DATA_IDS_1));
 	v4l2_info(sd, "DATA_IDS_2: 0x%x\n",
-		  readl(csi2->base + CSI2_DATA_IDS_2));
+		  pete_readl("drivers/staging/media/imx/imx6-mipi-csi2.c:590", csi2->base + CSI2_DATA_IDS_2));
 	v4l2_info(sd, "ERR1: 0x%x\n",
-		  readl(csi2->base + CSI2_ERR1));
+		  pete_readl("drivers/staging/media/imx/imx6-mipi-csi2.c:592", csi2->base + CSI2_ERR1));
 	v4l2_info(sd, "ERR2: 0x%x\n",
-		  readl(csi2->base + CSI2_ERR2));
+		  pete_readl("drivers/staging/media/imx/imx6-mipi-csi2.c:594", csi2->base + CSI2_ERR2));
 	v4l2_info(sd, "MSK1: 0x%x\n",
-		  readl(csi2->base + CSI2_MSK1));
+		  pete_readl("drivers/staging/media/imx/imx6-mipi-csi2.c:596", csi2->base + CSI2_MSK1));
 	v4l2_info(sd, "MSK2: 0x%x\n",
-		  readl(csi2->base + CSI2_MSK2));
+		  pete_readl("drivers/staging/media/imx/imx6-mipi-csi2.c:598", csi2->base + CSI2_MSK2));
 	v4l2_info(sd, "PHY_TST_CTRL0: 0x%x\n",
-		  readl(csi2->base + CSI2_PHY_TST_CTRL0));
+		  pete_readl("drivers/staging/media/imx/imx6-mipi-csi2.c:600", csi2->base + CSI2_PHY_TST_CTRL0));
 	v4l2_info(sd, "PHY_TST_CTRL1: 0x%x\n",
-		  readl(csi2->base + CSI2_PHY_TST_CTRL1));
+		  pete_readl("drivers/staging/media/imx/imx6-mipi-csi2.c:602", csi2->base + CSI2_PHY_TST_CTRL1));
 
 	return 0;
 }

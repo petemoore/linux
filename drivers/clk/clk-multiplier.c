@@ -17,7 +17,7 @@ static inline u32 clk_mult_readl(struct clk_multiplier *mult)
 	if (mult->flags & CLK_MULTIPLIER_BIG_ENDIAN)
 		return ioread32be(mult->reg);
 
-	return readl(mult->reg);
+	return pete_readl("drivers/clk/clk-multiplier.c:20", mult->reg);
 }
 
 static inline void clk_mult_writel(struct clk_multiplier *mult, u32 val)
@@ -25,7 +25,7 @@ static inline void clk_mult_writel(struct clk_multiplier *mult, u32 val)
 	if (mult->flags & CLK_MULTIPLIER_BIG_ENDIAN)
 		iowrite32be(val, mult->reg);
 	else
-		writel(val, mult->reg);
+		pete_writel("drivers/clk/clk-multiplier.c:28", val, mult->reg);
 }
 
 static unsigned long __get_mult(struct clk_multiplier *mult,

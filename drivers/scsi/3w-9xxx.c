@@ -912,12 +912,12 @@ static int twa_decode_bits(TW_Device_Extension *tw_dev, u32 status_reg_value)
 	/* Check for various error conditions and handle them appropriately */
 	if (status_reg_value & TW_STATUS_PCI_PARITY_ERROR) {
 		TW_PRINTK(tw_dev->host, TW_DRIVER, 0xc, "PCI Parity Error: clearing");
-		writel(TW_CONTROL_CLEAR_PARITY_ERROR, TW_CONTROL_REG_ADDR(tw_dev));
+		pete_writel("drivers/scsi/3w-9xxx.c:915", TW_CONTROL_CLEAR_PARITY_ERROR, TW_CONTROL_REG_ADDR(tw_dev));
 	}
 
 	if (status_reg_value & TW_STATUS_PCI_ABORT) {
 		TW_PRINTK(tw_dev->host, TW_DRIVER, 0xd, "PCI Abort: clearing");
-		writel(TW_CONTROL_CLEAR_PCI_ABORT, TW_CONTROL_REG_ADDR(tw_dev));
+		pete_writel("drivers/scsi/3w-9xxx.c:920", TW_CONTROL_CLEAR_PCI_ABORT, TW_CONTROL_REG_ADDR(tw_dev));
 		pci_write_config_word(tw_dev->tw_pci_dev, PCI_STATUS, TW_PCI_CLEAR_PCI_ABORT);
 	}
 
@@ -926,7 +926,7 @@ static int twa_decode_bits(TW_Device_Extension *tw_dev, u32 status_reg_value)
 		     (tw_dev->tw_pci_dev->device != PCI_DEVICE_ID_3WARE_9690SA)) ||
 		    (!test_bit(TW_IN_RESET, &tw_dev->flags)))
 			TW_PRINTK(tw_dev->host, TW_DRIVER, 0xe, "Controller Queue Error: clearing");
-		writel(TW_CONTROL_CLEAR_QUEUE_ERROR, TW_CONTROL_REG_ADDR(tw_dev));
+		pete_writel("drivers/scsi/3w-9xxx.c:929", TW_CONTROL_CLEAR_QUEUE_ERROR, TW_CONTROL_REG_ADDR(tw_dev));
 	}
 
 	if (status_reg_value & TW_STATUS_MICROCONTROLLER_ERROR) {
@@ -947,11 +947,11 @@ static int twa_empty_response_queue(TW_Device_Extension *tw_dev)
 	u32 status_reg_value;
 	int count = 0, retval = 1;
 
-	status_reg_value = readl(TW_STATUS_REG_ADDR(tw_dev));
+	status_reg_value = pete_readl("drivers/scsi/3w-9xxx.c:950", TW_STATUS_REG_ADDR(tw_dev));
 
 	while (((status_reg_value & TW_STATUS_RESPONSE_QUEUE_EMPTY) == 0) && (count < TW_MAX_RESPONSE_DRAIN)) {
-		readl(TW_RESPONSE_QUEUE_REG_ADDR(tw_dev));
-		status_reg_value = readl(TW_STATUS_REG_ADDR(tw_dev));
+		pete_readl("drivers/scsi/3w-9xxx.c:953", TW_RESPONSE_QUEUE_REG_ADDR(tw_dev));
+		status_reg_value = pete_readl("drivers/scsi/3w-9xxx.c:954", TW_STATUS_REG_ADDR(tw_dev));
 		count++;
 	}
 	if (count == TW_MAX_RESPONSE_DRAIN)
@@ -972,7 +972,7 @@ static int twa_empty_response_queue_large(TW_Device_Extension *tw_dev)
 	if (tw_dev->tw_pci_dev->device != PCI_DEVICE_ID_3WARE_9000) {
 		before = jiffies;
 		while ((response_que_value & TW_9550SX_DRAIN_COMPLETED) != TW_9550SX_DRAIN_COMPLETED) {
-			response_que_value = readl(TW_RESPONSE_QUEUE_REG_ADDR_LARGE(tw_dev));
+			response_que_value = pete_readl("drivers/scsi/3w-9xxx.c:975", TW_RESPONSE_QUEUE_REG_ADDR_LARGE(tw_dev));
 			msleep(1);
 			if (time_after(jiffies, before + HZ * 30))
 				goto out;
@@ -1226,7 +1226,7 @@ static irqreturn_t twa_interrupt(int irq, void *dev_instance)
 	spin_lock(tw_dev->host->host_lock);
 
 	/* Read the registers */
-	status_reg_value = readl(TW_STATUS_REG_ADDR(tw_dev));
+	status_reg_value = pete_readl("drivers/scsi/3w-9xxx.c:1229", TW_STATUS_REG_ADDR(tw_dev));
 
 	/* Check if this is our interrupt, otherwise bail */
 	if (!(status_reg_value & TW_STATUS_VALID_INTERRUPT))
@@ -1292,7 +1292,7 @@ static irqreturn_t twa_interrupt(int irq, void *dev_instance)
 		/* Drain the response queue from the board */
 		while ((status_reg_value & TW_STATUS_RESPONSE_QUEUE_EMPTY) == 0) {
 			/* Complete the response */
-			response_que.value = readl(TW_RESPONSE_QUEUE_REG_ADDR(tw_dev));
+			response_que.value = pete_readl("drivers/scsi/3w-9xxx.c:1295", TW_RESPONSE_QUEUE_REG_ADDR(tw_dev));
 			request_id = TW_RESID_OUT(response_que.response_id);
 			full_command_packet = tw_dev->command_packet_virt[request_id];
 			error = 0;
@@ -1361,7 +1361,7 @@ static irqreturn_t twa_interrupt(int irq, void *dev_instance)
 			}
 
 			/* Check for valid status after each drain */
-			status_reg_value = readl(TW_STATUS_REG_ADDR(tw_dev));
+			status_reg_value = pete_readl("drivers/scsi/3w-9xxx.c:1364", TW_STATUS_REG_ADDR(tw_dev));
 			if (twa_check_bits(status_reg_value)) {
 				if (twa_decode_bits(tw_dev, status_reg_value)) {
 					TW_CLEAR_ALL_INTERRUPTS(tw_dev);
@@ -1423,7 +1423,7 @@ static int twa_poll_response(TW_Device_Extension *tw_dev, int request_id, int se
 	TW_Command_Full *full_command_packet = tw_dev->command_packet_virt[request_id];
 
 	if (twa_poll_status_gone(tw_dev, TW_STATUS_RESPONSE_QUEUE_EMPTY, seconds) == 0) {
-		response_queue.value = readl(TW_RESPONSE_QUEUE_REG_ADDR(tw_dev));
+		response_queue.value = pete_readl("drivers/scsi/3w-9xxx.c:1426", TW_RESPONSE_QUEUE_REG_ADDR(tw_dev));
 		response_request_id = TW_RESID_OUT(response_queue.response_id);
 		if (request_id != response_request_id) {
 			TW_PRINTK(tw_dev->host, TW_DRIVER, 0x1e, "Found unexpected request id while polling for response");
@@ -1459,14 +1459,14 @@ static int twa_poll_status(TW_Device_Extension *tw_dev, u32 flag, int seconds)
 	unsigned long before;
 	int retval = 1;
 
-	status_reg_value = readl(TW_STATUS_REG_ADDR(tw_dev));
+	status_reg_value = pete_readl("drivers/scsi/3w-9xxx.c:1462", TW_STATUS_REG_ADDR(tw_dev));
 	before = jiffies;
 
 	if (twa_check_bits(status_reg_value))
 		twa_decode_bits(tw_dev, status_reg_value);
 
 	while ((status_reg_value & flag) != flag) {
-		status_reg_value = readl(TW_STATUS_REG_ADDR(tw_dev));
+		status_reg_value = pete_readl("drivers/scsi/3w-9xxx.c:1469", TW_STATUS_REG_ADDR(tw_dev));
 
 		if (twa_check_bits(status_reg_value))
 			twa_decode_bits(tw_dev, status_reg_value);
@@ -1488,14 +1488,14 @@ static int twa_poll_status_gone(TW_Device_Extension *tw_dev, u32 flag, int secon
 	unsigned long before;
 	int retval = 1;
 
-	status_reg_value = readl(TW_STATUS_REG_ADDR(tw_dev));
+	status_reg_value = pete_readl("drivers/scsi/3w-9xxx.c:1491", TW_STATUS_REG_ADDR(tw_dev));
 	before = jiffies;
 
 	if (twa_check_bits(status_reg_value))
 		twa_decode_bits(tw_dev, status_reg_value);
 
 	while ((status_reg_value & flag) != 0) {
-		status_reg_value = readl(TW_STATUS_REG_ADDR(tw_dev));
+		status_reg_value = pete_readl("drivers/scsi/3w-9xxx.c:1498", TW_STATUS_REG_ADDR(tw_dev));
 		if (twa_check_bits(status_reg_value))
 			twa_decode_bits(tw_dev, status_reg_value);
 
@@ -1522,10 +1522,10 @@ static int twa_post_command_packet(TW_Device_Extension *tw_dev, int request_id, 
 	if ((tw_dev->tw_pci_dev->device == PCI_DEVICE_ID_3WARE_9650SE) ||
 	    (tw_dev->tw_pci_dev->device == PCI_DEVICE_ID_3WARE_9690SA)) {
 		command_que_value += TW_COMMAND_OFFSET;
-		writel((u32)command_que_value, TW_COMMAND_QUEUE_REG_ADDR_LARGE(tw_dev));
+		pete_writel("drivers/scsi/3w-9xxx.c:1525", (u32)command_que_value, TW_COMMAND_QUEUE_REG_ADDR_LARGE(tw_dev));
 	}
 
-	status_reg_value = readl(TW_STATUS_REG_ADDR(tw_dev));
+	status_reg_value = pete_readl("drivers/scsi/3w-9xxx.c:1528", TW_STATUS_REG_ADDR(tw_dev));
 
 	if (twa_check_bits(status_reg_value))
 		twa_decode_bits(tw_dev, status_reg_value);
@@ -1554,14 +1554,14 @@ static int twa_post_command_packet(TW_Device_Extension *tw_dev, int request_id, 
 		if ((tw_dev->tw_pci_dev->device == PCI_DEVICE_ID_3WARE_9650SE) ||
 		    (tw_dev->tw_pci_dev->device == PCI_DEVICE_ID_3WARE_9690SA)) {
 			/* Now write upper 4 bytes */
-			writel((u32)((u64)command_que_value >> 32), TW_COMMAND_QUEUE_REG_ADDR_LARGE(tw_dev) + 0x4);
+			pete_writel("drivers/scsi/3w-9xxx.c:1557", (u32)((u64)command_que_value >> 32), TW_COMMAND_QUEUE_REG_ADDR_LARGE(tw_dev) + 0x4);
 		} else {
 			if (sizeof(dma_addr_t) > 4) {
 				command_que_value += TW_COMMAND_OFFSET;
-				writel((u32)command_que_value, TW_COMMAND_QUEUE_REG_ADDR(tw_dev));
-				writel((u32)((u64)command_que_value >> 32), TW_COMMAND_QUEUE_REG_ADDR(tw_dev) + 0x4);
+				pete_writel("drivers/scsi/3w-9xxx.c:1561", (u32)command_que_value, TW_COMMAND_QUEUE_REG_ADDR(tw_dev));
+				pete_writel("drivers/scsi/3w-9xxx.c:1562", (u32)((u64)command_que_value >> 32), TW_COMMAND_QUEUE_REG_ADDR(tw_dev) + 0x4);
 			} else {
-				writel(TW_COMMAND_OFFSET + command_que_value, TW_COMMAND_QUEUE_REG_ADDR(tw_dev));
+				pete_writel("drivers/scsi/3w-9xxx.c:1564", TW_COMMAND_OFFSET + command_que_value, TW_COMMAND_QUEUE_REG_ADDR(tw_dev));
 			}
 		}
 		tw_dev->state[request_id] = TW_S_POSTED;

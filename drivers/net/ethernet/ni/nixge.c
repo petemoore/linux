@@ -206,31 +206,31 @@ struct nixge_priv {
 
 static void nixge_dma_write_reg(struct nixge_priv *priv, off_t offset, u32 val)
 {
-	writel(val, priv->dma_regs + offset);
+	pete_writel("drivers/net/ethernet/ni/nixge.c:209", val, priv->dma_regs + offset);
 }
 
 static void nixge_dma_write_desc_reg(struct nixge_priv *priv, off_t offset,
 				     dma_addr_t addr)
 {
-	writel(lower_32_bits(addr), priv->dma_regs + offset);
+	pete_writel("drivers/net/ethernet/ni/nixge.c:215", lower_32_bits(addr), priv->dma_regs + offset);
 #ifdef CONFIG_PHYS_ADDR_T_64BIT
-	writel(upper_32_bits(addr), priv->dma_regs + offset + 4);
+	pete_writel("drivers/net/ethernet/ni/nixge.c:217", upper_32_bits(addr), priv->dma_regs + offset + 4);
 #endif
 }
 
 static u32 nixge_dma_read_reg(const struct nixge_priv *priv, off_t offset)
 {
-	return readl(priv->dma_regs + offset);
+	return pete_readl("drivers/net/ethernet/ni/nixge.c:223", priv->dma_regs + offset);
 }
 
 static void nixge_ctrl_write_reg(struct nixge_priv *priv, off_t offset, u32 val)
 {
-	writel(val, priv->ctrl_regs + offset);
+	pete_writel("drivers/net/ethernet/ni/nixge.c:228", val, priv->ctrl_regs + offset);
 }
 
 static u32 nixge_ctrl_read_reg(struct nixge_priv *priv, off_t offset)
 {
-	return readl(priv->ctrl_regs + offset);
+	return pete_readl("drivers/net/ethernet/ni/nixge.c:233", priv->ctrl_regs + offset);
 }
 
 #define nixge_ctrl_poll_timeout(priv, addr, val, cond, sleep_us, timeout_us) \

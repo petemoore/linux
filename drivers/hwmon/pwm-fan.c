@@ -344,7 +344,7 @@ static int pwm_fan_read(struct device *dev, enum hwmon_sensor_types type,
 		return -EOPNOTSUPP;
 	case hwmon_fan:
 		if (ctx->rpm_regbase)
-			*val = (long)readl(ctx->rpm_regbase + ctx->rpm_offset);
+			*val = (long)pete_readl("drivers/hwmon/pwm-fan.c:347", ctx->rpm_regbase + ctx->rpm_offset);
 		else
 			*val = ctx->tachs[channel].rpm;
 		return 0;

@@ -1000,7 +1000,7 @@ static void stmmac_mac_link_up(struct phylink_config *config,
 	    priv->plat->serdes_powerup)
 		priv->plat->serdes_powerup(priv->dev, priv->plat->bsp_priv);
 
-	old_ctrl = readl(priv->ioaddr + MAC_CTRL_REG);
+	old_ctrl = pete_readl("drivers/net/ethernet/stmicro/stmmac/stmmac_main.c:1003", priv->ioaddr + MAC_CTRL_REG);
 	ctrl = old_ctrl & ~priv->hw->link.speed_mask;
 
 	if (interface == PHY_INTERFACE_MODE_USXGMII) {
@@ -1085,7 +1085,7 @@ static void stmmac_mac_link_up(struct phylink_config *config,
 	stmmac_mac_flow_ctrl(priv, duplex);
 
 	if (ctrl != old_ctrl)
-		writel(ctrl, priv->ioaddr + MAC_CTRL_REG);
+		pete_writel("drivers/net/ethernet/stmicro/stmmac/stmmac_main.c:1088", ctrl, priv->ioaddr + MAC_CTRL_REG);
 
 	stmmac_mac_set(priv, priv->ioaddr, true);
 	if (phy && priv->dma_cap.eee) {

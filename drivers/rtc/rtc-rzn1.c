@@ -66,13 +66,13 @@ struct rzn1_rtc {
 
 static void rzn1_rtc_get_time_snapshot(struct rzn1_rtc *rtc, struct rtc_time *tm)
 {
-	tm->tm_sec = readl(rtc->base + RZN1_RTC_SECC);
-	tm->tm_min = readl(rtc->base + RZN1_RTC_MINC);
-	tm->tm_hour = readl(rtc->base + RZN1_RTC_HOURC);
-	tm->tm_wday = readl(rtc->base + RZN1_RTC_WEEKC);
-	tm->tm_mday = readl(rtc->base + RZN1_RTC_DAYC);
-	tm->tm_mon = readl(rtc->base + RZN1_RTC_MONTHC);
-	tm->tm_year = readl(rtc->base + RZN1_RTC_YEARC);
+	tm->tm_sec = pete_readl("drivers/rtc/rtc-rzn1.c:69", rtc->base + RZN1_RTC_SECC);
+	tm->tm_min = pete_readl("drivers/rtc/rtc-rzn1.c:70", rtc->base + RZN1_RTC_MINC);
+	tm->tm_hour = pete_readl("drivers/rtc/rtc-rzn1.c:71", rtc->base + RZN1_RTC_HOURC);
+	tm->tm_wday = pete_readl("drivers/rtc/rtc-rzn1.c:72", rtc->base + RZN1_RTC_WEEKC);
+	tm->tm_mday = pete_readl("drivers/rtc/rtc-rzn1.c:73", rtc->base + RZN1_RTC_DAYC);
+	tm->tm_mon = pete_readl("drivers/rtc/rtc-rzn1.c:74", rtc->base + RZN1_RTC_MONTHC);
+	tm->tm_year = pete_readl("drivers/rtc/rtc-rzn1.c:75", rtc->base + RZN1_RTC_YEARC);
 }
 
 static unsigned int rzn1_rtc_tm_to_wday(struct rtc_time *tm)
@@ -97,12 +97,12 @@ static int rzn1_rtc_read_time(struct device *dev, struct rtc_time *tm)
 	 * The RTC was not started or is stopped and thus does not carry the
 	 * proper time/date.
 	 */
-	val = readl(rtc->base + RZN1_RTC_CTL2);
+	val = pete_readl("drivers/rtc/rtc-rzn1.c:100", rtc->base + RZN1_RTC_CTL2);
 	if (val & RZN1_RTC_CTL2_STOPPED)
 		return -EINVAL;
 
 	rzn1_rtc_get_time_snapshot(rtc, tm);
-	secs = readl(rtc->base + RZN1_RTC_SECC);
+	secs = pete_readl("drivers/rtc/rtc-rzn1.c:105", rtc->base + RZN1_RTC_SECC);
 	if (tm->tm_sec != secs)
 		rzn1_rtc_get_time_snapshot(rtc, tm);
 
@@ -131,10 +131,10 @@ static int rzn1_rtc_set_time(struct device *dev, struct rtc_time *tm)
 	tm->tm_mon = bin2bcd(tm->tm_mon + 1);
 	tm->tm_year = bin2bcd(tm->tm_year - 100);
 
-	val = readl(rtc->base + RZN1_RTC_CTL2);
+	val = pete_readl("drivers/rtc/rtc-rzn1.c:134", rtc->base + RZN1_RTC_CTL2);
 	if (!(val & RZN1_RTC_CTL2_STOPPED)) {
 		/* Hold the counter if it was counting up */
-		writel(RZN1_RTC_CTL2_WAIT, rtc->base + RZN1_RTC_CTL2);
+		pete_writel("drivers/rtc/rtc-rzn1.c:137", RZN1_RTC_CTL2_WAIT, rtc->base + RZN1_RTC_CTL2);
 
 		/* Wait for the counter to stop: two 32k clock cycles */
 		usleep_range(61, 100);
@@ -144,14 +144,14 @@ static int rzn1_rtc_set_time(struct device *dev, struct rtc_time *tm)
 			return ret;
 	}
 
-	writel(tm->tm_sec, rtc->base + RZN1_RTC_SEC);
-	writel(tm->tm_min, rtc->base + RZN1_RTC_MIN);
-	writel(tm->tm_hour, rtc->base + RZN1_RTC_HOUR);
-	writel(tm->tm_wday, rtc->base + RZN1_RTC_WEEK);
-	writel(tm->tm_mday, rtc->base + RZN1_RTC_DAY);
-	writel(tm->tm_mon, rtc->base + RZN1_RTC_MONTH);
-	writel(tm->tm_year, rtc->base + RZN1_RTC_YEAR);
-	writel(0, rtc->base + RZN1_RTC_CTL2);
+	pete_writel("drivers/rtc/rtc-rzn1.c:147", tm->tm_sec, rtc->base + RZN1_RTC_SEC);
+	pete_writel("drivers/rtc/rtc-rzn1.c:148", tm->tm_min, rtc->base + RZN1_RTC_MIN);
+	pete_writel("drivers/rtc/rtc-rzn1.c:149", tm->tm_hour, rtc->base + RZN1_RTC_HOUR);
+	pete_writel("drivers/rtc/rtc-rzn1.c:150", tm->tm_wday, rtc->base + RZN1_RTC_WEEK);
+	pete_writel("drivers/rtc/rtc-rzn1.c:151", tm->tm_mday, rtc->base + RZN1_RTC_DAY);
+	pete_writel("drivers/rtc/rtc-rzn1.c:152", tm->tm_mon, rtc->base + RZN1_RTC_MONTH);
+	pete_writel("drivers/rtc/rtc-rzn1.c:153", tm->tm_year, rtc->base + RZN1_RTC_YEAR);
+	pete_writel("drivers/rtc/rtc-rzn1.c:154", 0, rtc->base + RZN1_RTC_CTL2);
 
 	return 0;
 }
@@ -168,14 +168,14 @@ static irqreturn_t rzn1_rtc_alarm_irq(int irq, void *dev_id)
 static int rzn1_rtc_alarm_irq_enable(struct device *dev, unsigned int enable)
 {
 	struct rzn1_rtc *rtc = dev_get_drvdata(dev);
-	u32 ctl1 = readl(rtc->base + RZN1_RTC_CTL1);
+	u32 ctl1 = pete_readl("drivers/rtc/rtc-rzn1.c:171", rtc->base + RZN1_RTC_CTL1);
 
 	if (enable)
 		ctl1 |= RZN1_RTC_CTL1_ALME;
 	else
 		ctl1 &= ~RZN1_RTC_CTL1_ALME;
 
-	writel(ctl1, rtc->base + RZN1_RTC_CTL1);
+	pete_writel("drivers/rtc/rtc-rzn1.c:178", ctl1, rtc->base + RZN1_RTC_CTL1);
 
 	return 0;
 }
@@ -193,9 +193,9 @@ static int rzn1_rtc_read_alarm(struct device *dev, struct rtc_wkalrm *alrm)
 	if (ret)
 		return ret;
 
-	min = readl(rtc->base + RZN1_RTC_ALM);
-	hour = readl(rtc->base + RZN1_RTC_ALH);
-	wday = readl(rtc->base + RZN1_RTC_ALW);
+	min = pete_readl("drivers/rtc/rtc-rzn1.c:196", rtc->base + RZN1_RTC_ALM);
+	hour = pete_readl("drivers/rtc/rtc-rzn1.c:197", rtc->base + RZN1_RTC_ALH);
+	wday = pete_readl("drivers/rtc/rtc-rzn1.c:198", rtc->base + RZN1_RTC_ALW);
 
 	tm->tm_sec = 0;
 	tm->tm_min = bcd2bin(min);
@@ -208,7 +208,7 @@ static int rzn1_rtc_read_alarm(struct device *dev, struct rtc_wkalrm *alrm)
 		rtc_time64_to_tm(alarm, tm);
 	}
 
-	ctl1 = readl(rtc->base + RZN1_RTC_CTL1);
+	ctl1 = pete_readl("drivers/rtc/rtc-rzn1.c:211", rtc->base + RZN1_RTC_CTL1);
 	alrm->enabled = !!(ctl1 & RZN1_RTC_CTL1_ALME);
 
 	return 0;
@@ -236,9 +236,9 @@ static int rzn1_rtc_set_alarm(struct device *dev, struct rtc_wkalrm *alrm)
 	days_ahead = tm->tm_mday - tm_now.tm_mday;
 	wday = (tm_now.tm_wday + days_ahead) % 7;
 
-	writel(bin2bcd(tm->tm_min), rtc->base + RZN1_RTC_ALM);
-	writel(bin2bcd(tm->tm_hour), rtc->base + RZN1_RTC_ALH);
-	writel(BIT(wday), rtc->base + RZN1_RTC_ALW);
+	pete_writel("drivers/rtc/rtc-rzn1.c:239", bin2bcd(tm->tm_min), rtc->base + RZN1_RTC_ALM);
+	pete_writel("drivers/rtc/rtc-rzn1.c:240", bin2bcd(tm->tm_hour), rtc->base + RZN1_RTC_ALH);
+	pete_writel("drivers/rtc/rtc-rzn1.c:241", BIT(wday), rtc->base + RZN1_RTC_ALW);
 
 	rzn1_rtc_alarm_irq_enable(dev, alrm->enabled);
 
@@ -252,7 +252,7 @@ static int rzn1_rtc_read_offset(struct device *dev, long *offset)
 	bool subtract;
 	u32 val;
 
-	val = readl(rtc->base + RZN1_RTC_SUBU);
+	val = pete_readl("drivers/rtc/rtc-rzn1.c:255", rtc->base + RZN1_RTC_SUBU);
 	ppb_per_step = val & RZN1_RTC_SUBU_DEV ? 1017 : 3051;
 	subtract = val & RZN1_RTC_SUBU_DECR;
 	val &= 0x3F;
@@ -310,7 +310,7 @@ static int rzn1_rtc_set_offset(struct device *dev, long offset)
 	if (ret)
 		return ret;
 
-	writel(subu, rtc->base + RZN1_RTC_SUBU);
+	pete_writel("drivers/rtc/rtc-rzn1.c:313", subu, rtc->base + RZN1_RTC_SUBU);
 
 	return 0;
 }
@@ -367,11 +367,11 @@ static int rzn1_rtc_probe(struct platform_device *pdev)
 	 * Ensure the clock counter is enabled.
 	 * Set 24-hour mode and possible oscillator offset compensation in SUBU mode.
 	 */
-	writel(RZN1_RTC_CTL0_CE | RZN1_RTC_CTL0_AMPM | RZN1_RTC_CTL0_SLSB_SUBU,
+	pete_writel("drivers/rtc/rtc-rzn1.c:370", RZN1_RTC_CTL0_CE | RZN1_RTC_CTL0_AMPM | RZN1_RTC_CTL0_SLSB_SUBU,
 	       rtc->base + RZN1_RTC_CTL0);
 
 	/* Disable all interrupts */
-	writel(0, rtc->base + RZN1_RTC_CTL1);
+	pete_writel("drivers/rtc/rtc-rzn1.c:374", 0, rtc->base + RZN1_RTC_CTL1);
 
 	ret = devm_request_irq(&pdev->dev, alarm_irq, rzn1_rtc_alarm_irq, 0,
 			       dev_name(&pdev->dev), rtc);

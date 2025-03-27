@@ -47,12 +47,12 @@ static int jh71x0_reset_update(struct reset_controller_dev *rcdev,
 
 	spin_lock_irqsave(&data->lock, flags);
 
-	value = readl(reg_assert);
+	value = pete_readl("drivers/reset/starfive/reset-starfive-jh71x0.c:50", reg_assert);
 	if (assert)
 		value |= mask;
 	else
 		value &= ~mask;
-	writel(value, reg_assert);
+	pete_writel("drivers/reset/starfive/reset-starfive-jh71x0.c:55", value, reg_assert);
 
 	/* if the associated clock is gated, deasserting might otherwise hang forever */
 	ret = readl_poll_timeout_atomic(reg_status, value, (value & mask) == done, 0, 1000);
@@ -92,7 +92,7 @@ static int jh71x0_reset_status(struct reset_controller_dev *rcdev,
 	unsigned long offset = id / 32;
 	u32 mask = BIT(id % 32);
 	void __iomem *reg_status = data->status + offset * sizeof(u32);
-	u32 value = readl(reg_status);
+	u32 value = pete_readl("drivers/reset/starfive/reset-starfive-jh71x0.c:95", reg_status);
 
 	return !((value ^ data->asserted[offset]) & mask);
 }

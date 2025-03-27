@@ -194,7 +194,7 @@ static int mtk_mipi_tx_pll_prepare(struct clk_hw *hw)
 	 * Ref_clk is 26MHz
 	 */
 	pcw = div_u64(((u64)mipi_tx->data_rate * 2 * txdiv) << 24, 26000000);
-	writel(pcw, base + MIPITX_DSI_PLL_CON2);
+	pete_writel("drivers/phy/mediatek/phy-mtk-mipi-dsi-mt8173.c:197", pcw, base + MIPITX_DSI_PLL_CON2);
 
 	mtk_phy_set_bits(base + MIPITX_DSI_PLL_CON1, RG_DSI_MPPLL_SDM_FRA_EN);
 

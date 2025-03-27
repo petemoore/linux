@@ -143,13 +143,13 @@ struct hinfc_host {
 
 static inline unsigned int hinfc_read(struct hinfc_host *host, unsigned int reg)
 {
-	return readl(host->iobase + reg);
+	return pete_readl("drivers/mtd/nand/raw/hisi504_nand.c:146", host->iobase + reg);
 }
 
 static inline void hinfc_write(struct hinfc_host *host, unsigned int value,
 			       unsigned int reg)
 {
-	writel(value, host->iobase + reg);
+	pete_writel("drivers/mtd/nand/raw/hisi504_nand.c:152", value, host->iobase + reg);
 }
 
 static void wait_controller_finished(struct hinfc_host *host)

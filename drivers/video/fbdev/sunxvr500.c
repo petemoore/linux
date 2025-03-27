@@ -103,8 +103,8 @@ static void e3d_clut_write(struct e3d_info *ep, int index, u32 val)
 
 	spin_lock_irqsave(&ep->lock, flags);
 
-	writel(index, ramdac + RAMDAC_INDEX);
-	writel(val, ramdac + RAMDAC_DATA);
+	pete_writel("drivers/video/fbdev/sunxvr500.c:106", index, ramdac + RAMDAC_INDEX);
+	pete_writel("drivers/video/fbdev/sunxvr500.c:107", val, ramdac + RAMDAC_DATA);
 
 	spin_unlock_irqrestore(&ep->lock, flags);
 }
@@ -307,10 +307,10 @@ static int e3d_pci_register(struct pci_dev *pdev,
 		goto err_release_pci1;
 	}
 
-	ep->fb8_0_off = readl(ep->ramdac + RAMDAC_VID_8FB_0);
+	ep->fb8_0_off = pete_readl("drivers/video/fbdev/sunxvr500.c:310", ep->ramdac + RAMDAC_VID_8FB_0);
 	ep->fb8_0_off -= ep->fb_base_reg;
 
-	ep->fb8_1_off = readl(ep->ramdac + RAMDAC_VID_8FB_1);
+	ep->fb8_1_off = pete_readl("drivers/video/fbdev/sunxvr500.c:313", ep->ramdac + RAMDAC_VID_8FB_1);
 	ep->fb8_1_off -= ep->fb_base_reg;
 
 	ep->fb8_buf_diff = ep->fb8_1_off - ep->fb8_0_off;
@@ -329,7 +329,7 @@ static int e3d_pci_register(struct pci_dev *pdev,
 	if (err)
 		goto err_release_pci0;
 
-	line_length = (readl(ep->ramdac + RAMDAC_VID_CFG) >> 16) & 0xff;
+	line_length = (pete_readl("drivers/video/fbdev/sunxvr500.c:332", ep->ramdac + RAMDAC_VID_CFG) >> 16) & 0xff;
 	line_length = 1 << line_length;
 
 	switch (ep->depth) {

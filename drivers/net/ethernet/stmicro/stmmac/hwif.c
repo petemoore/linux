@@ -10,7 +10,7 @@
 
 static u32 stmmac_get_id(struct stmmac_priv *priv, u32 id_reg)
 {
-	u32 reg = readl(priv->ioaddr + id_reg);
+	u32 reg = pete_readl("drivers/net/ethernet/stmicro/stmmac/hwif.c:13", priv->ioaddr + id_reg);
 
 	if (!reg) {
 		dev_info(priv->device, "Version ID not available\n");
@@ -25,7 +25,7 @@ static u32 stmmac_get_id(struct stmmac_priv *priv, u32 id_reg)
 
 static u32 stmmac_get_dev_id(struct stmmac_priv *priv, u32 id_reg)
 {
-	u32 reg = readl(priv->ioaddr + id_reg);
+	u32 reg = pete_readl("drivers/net/ethernet/stmicro/stmmac/hwif.c:28", priv->ioaddr + id_reg);
 
 	if (!reg) {
 		dev_info(priv->device, "Version ID not available\n");

@@ -114,7 +114,7 @@ static ssize_t suffix##_show(struct device *dev,\
 	ret = match_string(match_strs, -1, attr->attr.name);\
 	if (ret < 0)\
 		return ret;\
-	reg_val = readl((void __iomem *) (proc_priv->mmio_base + mmio_regs[ret].offset));\
+	reg_val = pete_readl("drivers/thermal/intel/int340x_thermal/processor_thermal_rfim.c:117", (void __iomem *) (proc_priv->mmio_base + mmio_regs[ret].offset));\
 	ret = (reg_val >> mmio_regs[ret].shift) & mmio_regs[ret].mask;\
 	return sprintf(buf, "%u\n", ret);\
 }
@@ -154,10 +154,10 @@ static ssize_t suffix##_store(struct device *dev,\
 	if (err)\
 		return err;\
 	mask = GENMASK(mmio_regs[ret].shift + mmio_regs[ret].bits - 1, mmio_regs[ret].shift);\
-	reg_val = readl((void __iomem *) (proc_priv->mmio_base + mmio_regs[ret].offset));\
+	reg_val = pete_readl("drivers/thermal/intel/int340x_thermal/processor_thermal_rfim.c:157", (void __iomem *) (proc_priv->mmio_base + mmio_regs[ret].offset));\
 	reg_val &= ~mask;\
 	reg_val |= (input << mmio_regs[ret].shift);\
-	writel(reg_val, (void __iomem *) (proc_priv->mmio_base + mmio_regs[ret].offset));\
+	pete_writel("drivers/thermal/intel/int340x_thermal/processor_thermal_rfim.c:160", reg_val, (void __iomem *) (proc_priv->mmio_base + mmio_regs[ret].offset));\
 	return count;\
 }
 

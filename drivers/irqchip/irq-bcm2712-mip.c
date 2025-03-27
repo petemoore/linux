@@ -159,9 +159,9 @@ static int mip_irq_domain_activate(struct irq_domain *domain,
 	u32 val;
 
 	spin_lock_irqsave(&priv->hw_lock, flags);
-	val = readl(reg);
+	val = pete_readl("drivers/irqchip/irq-bcm2712-mip.c:162", reg);
 	val &= ~(1 << (irq % 32)); // Clear the mask
-	writel(val, reg);
+	pete_writel("drivers/irqchip/irq-bcm2712-mip.c:164", val, reg);
 	spin_unlock_irqrestore(&priv->hw_lock, flags);
 	return 0;
 }
@@ -177,9 +177,9 @@ static void mip_irq_domain_deactivate(struct irq_domain *domain,
 	u32 val;
 
 	spin_lock_irqsave(&priv->hw_lock, flags);
-	val = readl(reg);
+	val = pete_readl("drivers/irqchip/irq-bcm2712-mip.c:180", reg);
 	val |= (1 << (irq % 32)); // Mask it out
-	writel(val, reg);
+	pete_writel("drivers/irqchip/irq-bcm2712-mip.c:182", val, reg);
 	spin_unlock_irqrestore(&priv->hw_lock, flags);
 }
 #endif
@@ -292,12 +292,12 @@ static int __init mip_of_msi_init(struct device_node *node,
 	 * Begin with all MSI-Xs masked in for the host, masked out for the
 	 * VPU, and edge-triggered.
 	 */
-	writel(0, priv->base + MIP_INT_MASKL_HOST);
-	writel(0, priv->base + MIP_INT_MASKH_HOST);
-	writel(~0, priv->base + MIP_INT_MASKL_VPU);
-	writel(~0, priv->base + MIP_INT_MASKH_VPU);
-	writel(~0, priv->base + MIP_INT_CFGL_HOST);
-	writel(~0, priv->base + MIP_INT_CFGH_HOST);
+	pete_writel("drivers/irqchip/irq-bcm2712-mip.c:295", 0, priv->base + MIP_INT_MASKL_HOST);
+	pete_writel("drivers/irqchip/irq-bcm2712-mip.c:296", 0, priv->base + MIP_INT_MASKH_HOST);
+	pete_writel("drivers/irqchip/irq-bcm2712-mip.c:297", ~0, priv->base + MIP_INT_MASKL_VPU);
+	pete_writel("drivers/irqchip/irq-bcm2712-mip.c:298", ~0, priv->base + MIP_INT_MASKH_VPU);
+	pete_writel("drivers/irqchip/irq-bcm2712-mip.c:299", ~0, priv->base + MIP_INT_CFGL_HOST);
+	pete_writel("drivers/irqchip/irq-bcm2712-mip.c:300", ~0, priv->base + MIP_INT_CFGH_HOST);
 
 	ret = mip_init_domains(priv, node);
 	if (ret) {

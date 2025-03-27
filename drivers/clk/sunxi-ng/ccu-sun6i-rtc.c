@@ -81,7 +81,7 @@ static unsigned long ccu_iosc_recalc_rate(struct clk_hw *hw,
 	struct ccu_common *cm = hw_to_ccu_common(hw);
 
 	if (have_iosc_calibration) {
-		u32 reg = readl(cm->base + IOSC_CLK_CALI_REG);
+		u32 reg = pete_readl("drivers/clk/sunxi-ng/ccu-sun6i-rtc.c:84", cm->base + IOSC_CLK_CALI_REG);
 
 		/*
 		 * Recover the IOSC frequency by shifting the ones place of
@@ -122,8 +122,8 @@ static int ccu_iosc_32k_prepare(struct clk_hw *hw)
 	if (!have_iosc_calibration)
 		return 0;
 
-	val = readl(cm->base + IOSC_CLK_CALI_REG);
-	writel(val | IOSC_CLK_CALI_EN | IOSC_CLK_CALI_SRC_SEL,
+	val = pete_readl("drivers/clk/sunxi-ng/ccu-sun6i-rtc.c:125", cm->base + IOSC_CLK_CALI_REG);
+	pete_writel("drivers/clk/sunxi-ng/ccu-sun6i-rtc.c:126", val | IOSC_CLK_CALI_EN | IOSC_CLK_CALI_SRC_SEL,
 	       cm->base + IOSC_CLK_CALI_REG);
 
 	return 0;
@@ -137,8 +137,8 @@ static void ccu_iosc_32k_unprepare(struct clk_hw *hw)
 	if (!have_iosc_calibration)
 		return;
 
-	val = readl(cm->base + IOSC_CLK_CALI_REG);
-	writel(val & ~(IOSC_CLK_CALI_EN | IOSC_CLK_CALI_SRC_SEL),
+	val = pete_readl("drivers/clk/sunxi-ng/ccu-sun6i-rtc.c:140", cm->base + IOSC_CLK_CALI_REG);
+	pete_writel("drivers/clk/sunxi-ng/ccu-sun6i-rtc.c:141", val & ~(IOSC_CLK_CALI_EN | IOSC_CLK_CALI_SRC_SEL),
 	       cm->base + IOSC_CLK_CALI_REG);
 }
 
@@ -149,14 +149,14 @@ static unsigned long ccu_iosc_32k_recalc_rate(struct clk_hw *hw,
 	u32 val;
 
 	if (have_iosc_calibration) {
-		val = readl(cm->base + IOSC_CLK_CALI_REG);
+		val = pete_readl("drivers/clk/sunxi-ng/ccu-sun6i-rtc.c:152", cm->base + IOSC_CLK_CALI_REG);
 
 		/* Assume the calibrated 32k clock is accurate. */
 		if (val & IOSC_CLK_CALI_SRC_SEL)
 			return LOSC_RATE;
 	}
 
-	val = readl(cm->base + IOSC_32K_CLK_DIV_REG) & IOSC_32K_CLK_DIV;
+	val = pete_readl("drivers/clk/sunxi-ng/ccu-sun6i-rtc.c:159", cm->base + IOSC_32K_CLK_DIV_REG) & IOSC_32K_CLK_DIV;
 
 	return parent_rate / IOSC_32K_PRE_DIV / (val + 1);
 }
@@ -168,7 +168,7 @@ static unsigned long ccu_iosc_32k_recalc_accuracy(struct clk_hw *hw,
 	u32 val;
 
 	if (have_iosc_calibration) {
-		val = readl(cm->base + IOSC_CLK_CALI_REG);
+		val = pete_readl("drivers/clk/sunxi-ng/ccu-sun6i-rtc.c:171", cm->base + IOSC_CLK_CALI_REG);
 
 		/* Assume the calibrated 32k clock is accurate. */
 		if (val & IOSC_CLK_CALI_SRC_SEL)

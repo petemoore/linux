@@ -52,14 +52,14 @@ static void imx93_clk_composite_gate_endisable(struct clk_hw *hw, int enable)
 	if (gate->lock)
 		spin_lock_irqsave(gate->lock, flags);
 
-	reg = readl(gate->reg);
+	reg = pete_readl("drivers/clk/imx/clk-composite-93.c:55", gate->reg);
 
 	if (enable)
 		reg &= ~BIT(gate->bit_idx);
 	else
 		reg |= BIT(gate->bit_idx);
 
-	writel(reg, gate->reg);
+	pete_writel("drivers/clk/imx/clk-composite-93.c:62", reg, gate->reg);
 
 	imx93_clk_composite_wait_ready(hw, gate->reg);
 
@@ -126,10 +126,10 @@ static int imx93_clk_composite_divider_set_rate(struct clk_hw *hw, unsigned long
 	if (divider->lock)
 		spin_lock_irqsave(divider->lock, flags);
 
-	val = readl(divider->reg);
+	val = pete_readl("drivers/clk/imx/clk-composite-93.c:129", divider->reg);
 	val &= ~(clk_div_mask(divider->width) << divider->shift);
 	val |= (u32)value << divider->shift;
-	writel(val, divider->reg);
+	pete_writel("drivers/clk/imx/clk-composite-93.c:132", val, divider->reg);
 
 	ret = imx93_clk_composite_wait_ready(hw, divider->reg);
 
@@ -162,11 +162,11 @@ static int imx93_clk_composite_mux_set_parent(struct clk_hw *hw, u8 index)
 	if (mux->lock)
 		spin_lock_irqsave(mux->lock, flags);
 
-	reg = readl(mux->reg);
+	reg = pete_readl("drivers/clk/imx/clk-composite-93.c:165", mux->reg);
 	reg &= ~(mux->mask << mux->shift);
 	val = val << mux->shift;
 	reg |= val;
-	writel(reg, mux->reg);
+	pete_writel("drivers/clk/imx/clk-composite-93.c:169", reg, mux->reg);
 
 	ret = imx93_clk_composite_wait_ready(hw, mux->reg);
 
@@ -221,7 +221,7 @@ struct clk_hw *imx93_clk_composite_flags(const char *name, const char * const *p
 	div->lock = &imx_ccm_lock;
 	div->flags = CLK_DIVIDER_ROUND_CLOSEST;
 
-	authen = readl(reg + AUTHEN_OFFSET);
+	authen = pete_readl("drivers/clk/imx/clk-composite-93.c:224", reg + AUTHEN_OFFSET);
 	if (!(authen & TZ_NS_MASK) || !(authen & BIT(WHITE_LIST_SHIFT + domain_id)))
 		clk_ro = true;
 

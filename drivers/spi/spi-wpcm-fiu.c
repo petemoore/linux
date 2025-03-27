@@ -65,14 +65,14 @@ struct wpcm_fiu_spi {
 
 static void wpcm_fiu_set_opcode(struct wpcm_fiu_spi *fiu, u8 opcode)
 {
-	writeb(opcode, fiu->regs + FIU_UMA_CODE);
+	pete_writeb("drivers/spi/spi-wpcm-fiu.c:68", opcode, fiu->regs + FIU_UMA_CODE);
 }
 
 static void wpcm_fiu_set_addr(struct wpcm_fiu_spi *fiu, u32 addr)
 {
-	writeb((addr >>  0) & 0xff, fiu->regs + FIU_UMA_AB0);
-	writeb((addr >>  8) & 0xff, fiu->regs + FIU_UMA_AB1);
-	writeb((addr >> 16) & 0xff, fiu->regs + FIU_UMA_AB2);
+	pete_writeb("drivers/spi/spi-wpcm-fiu.c:73", (addr >>  0) & 0xff, fiu->regs + FIU_UMA_AB0);
+	pete_writeb("drivers/spi/spi-wpcm-fiu.c:74", (addr >>  8) & 0xff, fiu->regs + FIU_UMA_AB1);
+	pete_writeb("drivers/spi/spi-wpcm-fiu.c:75", (addr >> 16) & 0xff, fiu->regs + FIU_UMA_AB2);
 }
 
 static void wpcm_fiu_set_data(struct wpcm_fiu_spi *fiu, const u8 *data, unsigned int nbytes)
@@ -80,7 +80,7 @@ static void wpcm_fiu_set_data(struct wpcm_fiu_spi *fiu, const u8 *data, unsigned
 	int i;
 
 	for (i = 0; i < nbytes; i++)
-		writeb(data[i], fiu->regs + FIU_UMA_DB0 + i);
+		pete_writeb("drivers/spi/spi-wpcm-fiu.c:83", data[i], fiu->regs + FIU_UMA_DB0 + i);
 }
 
 static void wpcm_fiu_get_data(struct wpcm_fiu_spi *fiu, u8 *data, unsigned int nbytes)
@@ -88,7 +88,7 @@ static void wpcm_fiu_get_data(struct wpcm_fiu_spi *fiu, u8 *data, unsigned int n
 	int i;
 
 	for (i = 0; i < nbytes; i++)
-		data[i] = readb(fiu->regs + FIU_UMA_DB0 + i);
+		data[i] = pete_readb("drivers/spi/spi-wpcm-fiu.c:91", fiu->regs + FIU_UMA_DB0 + i);
 }
 
 /*
@@ -106,10 +106,10 @@ static int wpcm_fiu_do_uma(struct wpcm_fiu_spi *fiu, unsigned int cs,
 		cts |= FIU_UMA_CTS_WR;
 	cts |= FIU_UMA_CTS_D_SIZE(data_bytes);
 
-	writeb(cts, fiu->regs + FIU_UMA_CTS);
+	pete_writeb("drivers/spi/spi-wpcm-fiu.c:109", cts, fiu->regs + FIU_UMA_CTS);
 
 	for (i = 0; i < UMA_WAIT_ITERATIONS; i++)
-		if (!(readb(fiu->regs + FIU_UMA_CTS) & FIU_UMA_CTS_EXEC_DONE))
+		if (!(pete_readb("drivers/spi/spi-wpcm-fiu.c:112", fiu->regs + FIU_UMA_CTS) & FIU_UMA_CTS_EXEC_DONE))
 			return 0;
 
 	dev_info(fiu->dev, "UMA transfer has not finished in %d iterations\n", UMA_WAIT_ITERATIONS);
@@ -118,18 +118,18 @@ static int wpcm_fiu_do_uma(struct wpcm_fiu_spi *fiu, unsigned int cs,
 
 static void wpcm_fiu_ects_assert(struct wpcm_fiu_spi *fiu, unsigned int cs)
 {
-	u8 ects = readb(fiu->regs + FIU_UMA_ECTS);
+	u8 ects = pete_readb("drivers/spi/spi-wpcm-fiu.c:121", fiu->regs + FIU_UMA_ECTS);
 
 	ects &= ~BIT(cs);
-	writeb(ects, fiu->regs + FIU_UMA_ECTS);
+	pete_writeb("drivers/spi/spi-wpcm-fiu.c:124", ects, fiu->regs + FIU_UMA_ECTS);
 }
 
 static void wpcm_fiu_ects_deassert(struct wpcm_fiu_spi *fiu, unsigned int cs)
 {
-	u8 ects = readb(fiu->regs + FIU_UMA_ECTS);
+	u8 ects = pete_readb("drivers/spi/spi-wpcm-fiu.c:129", fiu->regs + FIU_UMA_ECTS);
 
 	ects |= BIT(cs);
-	writeb(ects, fiu->regs + FIU_UMA_ECTS);
+	pete_writeb("drivers/spi/spi-wpcm-fiu.c:132", ects, fiu->regs + FIU_UMA_ECTS);
 }
 
 struct wpcm_fiu_op_shape {
@@ -426,12 +426,12 @@ static const struct spi_controller_mem_ops wpcm_fiu_mem_ops = {
 static void wpcm_fiu_hw_init(struct wpcm_fiu_spi *fiu)
 {
 	/* Configure memory-mapped flash access */
-	writeb(FIU_BURST_CFG_R16, fiu->regs + FIU_BURST_BFG);
-	writeb(MAX_MEMORY_SIZE_TOTAL / (512 << 10), fiu->regs + FIU_CFG);
-	writeb(MAX_MEMORY_SIZE_PER_CS / (512 << 10) | BIT(6), fiu->regs + FIU_SPI_FL_CFG);
+	pete_writeb("drivers/spi/spi-wpcm-fiu.c:429", FIU_BURST_CFG_R16, fiu->regs + FIU_BURST_BFG);
+	pete_writeb("drivers/spi/spi-wpcm-fiu.c:430", MAX_MEMORY_SIZE_TOTAL / (512 << 10), fiu->regs + FIU_CFG);
+	pete_writeb("drivers/spi/spi-wpcm-fiu.c:431", MAX_MEMORY_SIZE_PER_CS / (512 << 10) | BIT(6), fiu->regs + FIU_SPI_FL_CFG);
 
 	/* Deassert all manually asserted chip selects */
-	writeb(0x0f, fiu->regs + FIU_UMA_ECTS);
+	pete_writeb("drivers/spi/spi-wpcm-fiu.c:434", 0x0f, fiu->regs + FIU_UMA_ECTS);
 }
 
 static int wpcm_fiu_probe(struct platform_device *pdev)

@@ -91,7 +91,7 @@ static int icp_multi_ai_eoc(struct comedi_device *dev,
 {
 	unsigned int status;
 
-	status = readw(dev->mmio + ICP_MULTI_ADC_CSR);
+	status = pete_readw("drivers/comedi/drivers/icp_multi.c:94", dev->mmio + ICP_MULTI_ADC_CSR);
 	if ((status & ICP_MULTI_ADC_CSR_BSY) == 0)
 		return 0;
 	return -EBUSY;
@@ -117,11 +117,11 @@ static int icp_multi_ai_insn_read(struct comedi_device *dev,
 		adc_csr = ICP_MULTI_ADC_CSR_SE_CHAN(chan);
 	}
 	adc_csr |= range_codes_analog[range];
-	writew(adc_csr, dev->mmio + ICP_MULTI_ADC_CSR);
+	pete_writew("drivers/comedi/drivers/icp_multi.c:120", adc_csr, dev->mmio + ICP_MULTI_ADC_CSR);
 
 	for (n = 0; n < insn->n; n++) {
 		/*  Set start ADC bit */
-		writew(adc_csr | ICP_MULTI_ADC_CSR_ST,
+		pete_writew("drivers/comedi/drivers/icp_multi.c:124", adc_csr | ICP_MULTI_ADC_CSR_ST,
 		       dev->mmio + ICP_MULTI_ADC_CSR);
 
 		udelay(1);
@@ -131,7 +131,7 @@ static int icp_multi_ai_insn_read(struct comedi_device *dev,
 		if (ret)
 			break;
 
-		data[n] = (readw(dev->mmio + ICP_MULTI_AI) >> 4) & 0x0fff;
+		data[n] = (pete_readw("drivers/comedi/drivers/icp_multi.c:134", dev->mmio + ICP_MULTI_AI) >> 4) & 0x0fff;
 	}
 
 	return ret ? ret : n;
@@ -144,7 +144,7 @@ static int icp_multi_ao_ready(struct comedi_device *dev,
 {
 	unsigned int status;
 
-	status = readw(dev->mmio + ICP_MULTI_DAC_CSR);
+	status = pete_readw("drivers/comedi/drivers/icp_multi.c:147", dev->mmio + ICP_MULTI_DAC_CSR);
 	if ((status & ICP_MULTI_DAC_CSR_BSY) == 0)
 		return 0;
 	return -EBUSY;
@@ -163,7 +163,7 @@ static int icp_multi_ao_insn_write(struct comedi_device *dev,
 	/* Select channel and range */
 	dac_csr = ICP_MULTI_DAC_CSR_CHAN(chan);
 	dac_csr |= range_codes_analog[range];
-	writew(dac_csr, dev->mmio + ICP_MULTI_DAC_CSR);
+	pete_writew("drivers/comedi/drivers/icp_multi.c:166", dac_csr, dev->mmio + ICP_MULTI_DAC_CSR);
 
 	for (i = 0; i < insn->n; i++) {
 		unsigned int val = data[i];
@@ -174,10 +174,10 @@ static int icp_multi_ao_insn_write(struct comedi_device *dev,
 		if (ret)
 			return ret;
 
-		writew(val, dev->mmio + ICP_MULTI_AO);
+		pete_writew("drivers/comedi/drivers/icp_multi.c:177", val, dev->mmio + ICP_MULTI_AO);
 
 		/* Set start conversion bit to write data to channel */
-		writew(dac_csr | ICP_MULTI_DAC_CSR_ST,
+		pete_writew("drivers/comedi/drivers/icp_multi.c:180", dac_csr | ICP_MULTI_DAC_CSR_ST,
 		       dev->mmio + ICP_MULTI_DAC_CSR);
 
 		s->readback[chan] = val;
@@ -191,7 +191,7 @@ static int icp_multi_di_insn_bits(struct comedi_device *dev,
 				  struct comedi_insn *insn,
 				  unsigned int *data)
 {
-	data[1] = readw(dev->mmio + ICP_MULTI_DI);
+	data[1] = pete_readw("drivers/comedi/drivers/icp_multi.c:194", dev->mmio + ICP_MULTI_DI);
 
 	return insn->n;
 }
@@ -202,7 +202,7 @@ static int icp_multi_do_insn_bits(struct comedi_device *dev,
 				  unsigned int *data)
 {
 	if (comedi_dio_update_state(s, data))
-		writew(s->state, dev->mmio + ICP_MULTI_DO);
+		pete_writew("drivers/comedi/drivers/icp_multi.c:205", s->state, dev->mmio + ICP_MULTI_DO);
 
 	data[1] = s->state;
 
@@ -214,27 +214,27 @@ static int icp_multi_reset(struct comedi_device *dev)
 	int i;
 
 	/* Disable all interrupts and clear any requests */
-	writew(0, dev->mmio + ICP_MULTI_INT_EN);
-	writew(ICP_MULTI_INT_MASK, dev->mmio + ICP_MULTI_INT_STAT);
+	pete_writew("drivers/comedi/drivers/icp_multi.c:217", 0, dev->mmio + ICP_MULTI_INT_EN);
+	pete_writew("drivers/comedi/drivers/icp_multi.c:218", ICP_MULTI_INT_MASK, dev->mmio + ICP_MULTI_INT_STAT);
 
 	/* Reset the analog output channels to 0V */
 	for (i = 0; i < 4; i++) {
 		unsigned int dac_csr = ICP_MULTI_DAC_CSR_CHAN(i);
 
 		/* Select channel and 0..5V range */
-		writew(dac_csr, dev->mmio + ICP_MULTI_DAC_CSR);
+		pete_writew("drivers/comedi/drivers/icp_multi.c:225", dac_csr, dev->mmio + ICP_MULTI_DAC_CSR);
 
 		/* Output 0V */
-		writew(0, dev->mmio + ICP_MULTI_AO);
+		pete_writew("drivers/comedi/drivers/icp_multi.c:228", 0, dev->mmio + ICP_MULTI_AO);
 
 		/* Set start conversion bit to write data to channel */
-		writew(dac_csr | ICP_MULTI_DAC_CSR_ST,
+		pete_writew("drivers/comedi/drivers/icp_multi.c:231", dac_csr | ICP_MULTI_DAC_CSR_ST,
 		       dev->mmio + ICP_MULTI_DAC_CSR);
 		udelay(1);
 	}
 
 	/* Digital outputs to 0 */
-	writew(0, dev->mmio + ICP_MULTI_DO);
+	pete_writew("drivers/comedi/drivers/icp_multi.c:237", 0, dev->mmio + ICP_MULTI_DO);
 
 	return 0;
 }

@@ -1210,13 +1210,13 @@ static int starfive_gpio_init_hw(struct gpio_chip *gc)
 	struct starfive_pinctrl *sfp = container_of(gc, struct starfive_pinctrl, gc);
 
 	/* mask all GPIO interrupts */
-	writel(0, sfp->base + GPIOIE + 0);
-	writel(0, sfp->base + GPIOIE + 4);
+	pete_writel("drivers/pinctrl/starfive/pinctrl-starfive-jh7100.c:1213", 0, sfp->base + GPIOIE + 0);
+	pete_writel("drivers/pinctrl/starfive/pinctrl-starfive-jh7100.c:1214", 0, sfp->base + GPIOIE + 4);
 	/* clear edge interrupt flags */
-	writel(~0U, sfp->base + GPIOIC + 0);
-	writel(~0U, sfp->base + GPIOIC + 4);
+	pete_writel("drivers/pinctrl/starfive/pinctrl-starfive-jh7100.c:1216", ~0U, sfp->base + GPIOIC + 0);
+	pete_writel("drivers/pinctrl/starfive/pinctrl-starfive-jh7100.c:1217", ~0U, sfp->base + GPIOIC + 4);
 	/* enable GPIO interrupts */
-	writel(1, sfp->base + GPIOEN);
+	pete_writel("drivers/pinctrl/starfive/pinctrl-starfive-jh7100.c:1219", 1, sfp->base + GPIOEN);
 	return 0;
 }
 
@@ -1283,10 +1283,10 @@ static int starfive_probe(struct platform_device *pdev)
 	if (!of_property_read_u32(dev->of_node, "starfive,signal-group", &value)) {
 		if (value > 6)
 			return dev_err_probe(dev, -EINVAL, "invalid signal group %u\n", value);
-		writel(value, sfp->padctl + IO_PADSHARE_SEL);
+		pete_writel("drivers/pinctrl/starfive/pinctrl-starfive-jh7100.c:1286", value, sfp->padctl + IO_PADSHARE_SEL);
 	}
 
-	value = readl(sfp->padctl + IO_PADSHARE_SEL);
+	value = pete_readl("drivers/pinctrl/starfive/pinctrl-starfive-jh7100.c:1289", sfp->padctl + IO_PADSHARE_SEL);
 	switch (value) {
 	case 0:
 		sfp->gpios.pin_base = PAD_INVALID_GPIO;

@@ -104,10 +104,10 @@ struct gscps2port {
  * Various HW level routines
  */
 
-#define gscps2_readb_input(x)		readb((x)+GSC_RCVDATA)
-#define gscps2_readb_control(x)		readb((x)+GSC_CONTROL)
-#define gscps2_readb_status(x)		readb((x)+GSC_STATUS)
-#define gscps2_writeb_control(x, y)	writeb((x), (y)+GSC_CONTROL)
+#define gscps2_readb_input(x)		pete_readb("drivers/input/serio/gscps2.c:107", (x)+GSC_RCVDATA)
+#define gscps2_readb_control(x)		pete_readb("drivers/input/serio/gscps2.c:108", (x)+GSC_CONTROL)
+#define gscps2_readb_status(x)		pete_readb("drivers/input/serio/gscps2.c:109", (x)+GSC_STATUS)
+#define gscps2_writeb_control(x, y)	pete_writeb("drivers/input/serio/gscps2.c:110", (x), (y)+GSC_CONTROL)
 
 
 /*
@@ -157,7 +157,7 @@ static inline int gscps2_writeb_output(struct gscps2port *ps2port, u8 data)
 		/* wait */;
 
 	spin_lock_irqsave(&ps2port->lock, flags);
-	writeb(data, addr+GSC_XMTDATA);
+	pete_writeb("drivers/input/serio/gscps2.c:160", data, addr+GSC_XMTDATA);
 	spin_unlock_irqrestore(&ps2port->lock, flags);
 
 	/* this is ugly, but due to timing of the port it seems to be necessary. */
@@ -205,7 +205,7 @@ static void gscps2_reset(struct gscps2port *ps2port)
 	/* reset the interface */
 	spin_lock_irqsave(&ps2port->lock, flags);
 	gscps2_flush(ps2port);
-	writeb(0xff, ps2port->addr + GSC_RESET);
+	pete_writeb("drivers/input/serio/gscps2.c:208", 0xff, ps2port->addr + GSC_RESET);
 	gscps2_flush(ps2port);
 	spin_unlock_irqrestore(&ps2port->lock, flags);
 }
@@ -357,7 +357,7 @@ static int __init gscps2_probe(struct parisc_device *dev)
 	spin_lock_init(&ps2port->lock);
 
 	gscps2_reset(ps2port);
-	ps2port->id = readb(ps2port->addr + GSC_ID) & 0x0f;
+	ps2port->id = pete_readb("drivers/input/serio/gscps2.c:360", ps2port->addr + GSC_ID) & 0x0f;
 
 	snprintf(serio->name, sizeof(serio->name), "gsc-ps2-%s",
 		 (ps2port->id == GSC_ID_KEYBOARD) ? "keyboard" : "mouse");

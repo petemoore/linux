@@ -16,9 +16,9 @@ void mlxbf_gige_enable_multicast_rx(struct mlxbf_gige *priv)
 	void __iomem *base = priv->base;
 	u64 data;
 
-	data = readq(base + MLXBF_GIGE_RX_MAC_FILTER_GENERAL);
+	data = pete_readq("drivers/net/ethernet/mellanox/mlxbf_gige/mlxbf_gige_rx.c:19", base + MLXBF_GIGE_RX_MAC_FILTER_GENERAL);
 	data |= MLXBF_GIGE_RX_MAC_FILTER_EN_MULTICAST;
-	writeq(data, base + MLXBF_GIGE_RX_MAC_FILTER_GENERAL);
+	pete_writeq("drivers/net/ethernet/mellanox/mlxbf_gige/mlxbf_gige_rx.c:21", data, base + MLXBF_GIGE_RX_MAC_FILTER_GENERAL);
 }
 
 void mlxbf_gige_disable_multicast_rx(struct mlxbf_gige *priv)
@@ -26,9 +26,9 @@ void mlxbf_gige_disable_multicast_rx(struct mlxbf_gige *priv)
 	void __iomem *base = priv->base;
 	u64 data;
 
-	data = readq(base + MLXBF_GIGE_RX_MAC_FILTER_GENERAL);
+	data = pete_readq("drivers/net/ethernet/mellanox/mlxbf_gige/mlxbf_gige_rx.c:29", base + MLXBF_GIGE_RX_MAC_FILTER_GENERAL);
 	data &= ~MLXBF_GIGE_RX_MAC_FILTER_EN_MULTICAST;
-	writeq(data, base + MLXBF_GIGE_RX_MAC_FILTER_GENERAL);
+	pete_writeq("drivers/net/ethernet/mellanox/mlxbf_gige/mlxbf_gige_rx.c:31", data, base + MLXBF_GIGE_RX_MAC_FILTER_GENERAL);
 }
 
 void mlxbf_gige_enable_mac_rx_filter(struct mlxbf_gige *priv,
@@ -38,9 +38,9 @@ void mlxbf_gige_enable_mac_rx_filter(struct mlxbf_gige *priv,
 	u64 control;
 
 	/* Enable MAC receive filter mask for specified index */
-	control = readq(base + MLXBF_GIGE_CONTROL);
+	control = pete_readq("drivers/net/ethernet/mellanox/mlxbf_gige/mlxbf_gige_rx.c:41", base + MLXBF_GIGE_CONTROL);
 	control |= (MLXBF_GIGE_CONTROL_EN_SPECIFIC_MAC << index);
-	writeq(control, base + MLXBF_GIGE_CONTROL);
+	pete_writeq("drivers/net/ethernet/mellanox/mlxbf_gige/mlxbf_gige_rx.c:43", control, base + MLXBF_GIGE_CONTROL);
 }
 
 void mlxbf_gige_disable_mac_rx_filter(struct mlxbf_gige *priv,
@@ -50,9 +50,9 @@ void mlxbf_gige_disable_mac_rx_filter(struct mlxbf_gige *priv,
 	u64 control;
 
 	/* Disable MAC receive filter mask for specified index */
-	control = readq(base + MLXBF_GIGE_CONTROL);
+	control = pete_readq("drivers/net/ethernet/mellanox/mlxbf_gige/mlxbf_gige_rx.c:53", base + MLXBF_GIGE_CONTROL);
 	control &= ~(MLXBF_GIGE_CONTROL_EN_SPECIFIC_MAC << index);
-	writeq(control, base + MLXBF_GIGE_CONTROL);
+	pete_writeq("drivers/net/ethernet/mellanox/mlxbf_gige/mlxbf_gige_rx.c:55", control, base + MLXBF_GIGE_CONTROL);
 }
 
 void mlxbf_gige_set_mac_rx_filter(struct mlxbf_gige *priv,
@@ -61,7 +61,7 @@ void mlxbf_gige_set_mac_rx_filter(struct mlxbf_gige *priv,
 	void __iomem *base = priv->base;
 
 	/* Write destination MAC to specified MAC RX filter */
-	writeq(dmac, base + MLXBF_GIGE_RX_MAC_FILTER +
+	pete_writeq("drivers/net/ethernet/mellanox/mlxbf_gige/mlxbf_gige_rx.c:64", dmac, base + MLXBF_GIGE_RX_MAC_FILTER +
 	       (index * MLXBF_GIGE_RX_MAC_FILTER_STRIDE));
 }
 
@@ -71,7 +71,7 @@ void mlxbf_gige_get_mac_rx_filter(struct mlxbf_gige *priv,
 	void __iomem *base = priv->base;
 
 	/* Read destination MAC from specified MAC RX filter */
-	*dmac = readq(base + MLXBF_GIGE_RX_MAC_FILTER +
+	*dmac = pete_readq("drivers/net/ethernet/mellanox/mlxbf_gige/mlxbf_gige_rx.c:74", base + MLXBF_GIGE_RX_MAC_FILTER +
 		      (index * MLXBF_GIGE_RX_MAC_FILTER_STRIDE));
 }
 
@@ -82,16 +82,16 @@ void mlxbf_gige_enable_promisc(struct mlxbf_gige *priv)
 	u64 end_mac;
 
 	/* Enable MAC_ID_RANGE match functionality */
-	control = readq(base + MLXBF_GIGE_CONTROL);
+	control = pete_readq("drivers/net/ethernet/mellanox/mlxbf_gige/mlxbf_gige_rx.c:85", base + MLXBF_GIGE_CONTROL);
 	control |= MLXBF_GIGE_CONTROL_MAC_ID_RANGE_EN;
-	writeq(control, base + MLXBF_GIGE_CONTROL);
+	pete_writeq("drivers/net/ethernet/mellanox/mlxbf_gige/mlxbf_gige_rx.c:87", control, base + MLXBF_GIGE_CONTROL);
 
 	/* Set start of destination MAC range check to 0 */
-	writeq(0, base + MLXBF_GIGE_RX_MAC_FILTER_DMAC_RANGE_START);
+	pete_writeq("drivers/net/ethernet/mellanox/mlxbf_gige/mlxbf_gige_rx.c:90", 0, base + MLXBF_GIGE_RX_MAC_FILTER_DMAC_RANGE_START);
 
 	/* Set end of destination MAC range check to all FFs */
 	end_mac = BCAST_MAC_ADDR;
-	writeq(end_mac, base + MLXBF_GIGE_RX_MAC_FILTER_DMAC_RANGE_END);
+	pete_writeq("drivers/net/ethernet/mellanox/mlxbf_gige/mlxbf_gige_rx.c:94", end_mac, base + MLXBF_GIGE_RX_MAC_FILTER_DMAC_RANGE_END);
 }
 
 void mlxbf_gige_disable_promisc(struct mlxbf_gige *priv)
@@ -100,9 +100,9 @@ void mlxbf_gige_disable_promisc(struct mlxbf_gige *priv)
 	u64 control;
 
 	/* Disable MAC_ID_RANGE match functionality */
-	control = readq(base + MLXBF_GIGE_CONTROL);
+	control = pete_readq("drivers/net/ethernet/mellanox/mlxbf_gige/mlxbf_gige_rx.c:103", base + MLXBF_GIGE_CONTROL);
 	control &= ~MLXBF_GIGE_CONTROL_MAC_ID_RANGE_EN;
-	writeq(control, base + MLXBF_GIGE_CONTROL);
+	pete_writeq("drivers/net/ethernet/mellanox/mlxbf_gige/mlxbf_gige_rx.c:105", control, base + MLXBF_GIGE_CONTROL);
 
 	/* NOTE: no need to change DMAC_RANGE_START or END;
 	 * those values are ignored since MAC_ID_RANGE_EN=0
@@ -151,7 +151,7 @@ int mlxbf_gige_rx_init(struct mlxbf_gige *priv)
 	}
 
 	/* Write RX WQE base address into MMIO reg */
-	writeq(priv->rx_wqe_base_dma, priv->base + MLXBF_GIGE_RX_WQ_BASE);
+	pete_writeq("drivers/net/ethernet/mellanox/mlxbf_gige/mlxbf_gige_rx.c:154", priv->rx_wqe_base_dma, priv->base + MLXBF_GIGE_RX_WQ_BASE);
 
 	cq_size = MLXBF_GIGE_RX_CQE_SZ * priv->rx_q_entries;
 	priv->rx_cqe_base = dma_alloc_coherent(priv->dev, cq_size,
@@ -164,36 +164,36 @@ int mlxbf_gige_rx_init(struct mlxbf_gige *priv)
 		priv->rx_cqe_base[i] |= MLXBF_GIGE_RX_CQE_VALID_MASK;
 
 	/* Write RX CQE base address into MMIO reg */
-	writeq(priv->rx_cqe_base_dma, priv->base + MLXBF_GIGE_RX_CQ_BASE);
+	pete_writeq("drivers/net/ethernet/mellanox/mlxbf_gige/mlxbf_gige_rx.c:167", priv->rx_cqe_base_dma, priv->base + MLXBF_GIGE_RX_CQ_BASE);
 
 	/* Write RX_WQE_PI with current number of replenished buffers */
-	writeq(priv->rx_q_entries, priv->base + MLXBF_GIGE_RX_WQE_PI);
+	pete_writeq("drivers/net/ethernet/mellanox/mlxbf_gige/mlxbf_gige_rx.c:170", priv->rx_q_entries, priv->base + MLXBF_GIGE_RX_WQE_PI);
 
 	/* Enable removal of CRC during RX */
-	data = readq(priv->base + MLXBF_GIGE_RX);
+	data = pete_readq("drivers/net/ethernet/mellanox/mlxbf_gige/mlxbf_gige_rx.c:173", priv->base + MLXBF_GIGE_RX);
 	data |= MLXBF_GIGE_RX_STRIP_CRC_EN;
-	writeq(data, priv->base + MLXBF_GIGE_RX);
+	pete_writeq("drivers/net/ethernet/mellanox/mlxbf_gige/mlxbf_gige_rx.c:175", data, priv->base + MLXBF_GIGE_RX);
 
 	/* Enable RX MAC filter pass and discard counters */
-	writeq(MLXBF_GIGE_RX_MAC_FILTER_COUNT_DISC_EN,
+	pete_writeq("drivers/net/ethernet/mellanox/mlxbf_gige/mlxbf_gige_rx.c:178", MLXBF_GIGE_RX_MAC_FILTER_COUNT_DISC_EN,
 	       priv->base + MLXBF_GIGE_RX_MAC_FILTER_COUNT_DISC);
-	writeq(MLXBF_GIGE_RX_MAC_FILTER_COUNT_PASS_EN,
+	pete_writeq("drivers/net/ethernet/mellanox/mlxbf_gige/mlxbf_gige_rx.c:180", MLXBF_GIGE_RX_MAC_FILTER_COUNT_PASS_EN,
 	       priv->base + MLXBF_GIGE_RX_MAC_FILTER_COUNT_PASS);
 
-	writeq(ilog2(priv->rx_q_entries),
+	pete_writeq("drivers/net/ethernet/mellanox/mlxbf_gige/mlxbf_gige_rx.c:183", ilog2(priv->rx_q_entries),
 	       priv->base + MLXBF_GIGE_RX_WQE_SIZE_LOG2);
 
 	/* Clear MLXBF_GIGE_INT_MASK 'receive pkt' bit to
 	 * indicate readiness to receive interrupts
 	 */
-	data = readq(priv->base + MLXBF_GIGE_INT_MASK);
+	data = pete_readq("drivers/net/ethernet/mellanox/mlxbf_gige/mlxbf_gige_rx.c:189", priv->base + MLXBF_GIGE_INT_MASK);
 	data &= ~MLXBF_GIGE_INT_MASK_RX_RECEIVE_PACKET;
-	writeq(data, priv->base + MLXBF_GIGE_INT_MASK);
+	pete_writeq("drivers/net/ethernet/mellanox/mlxbf_gige/mlxbf_gige_rx.c:191", data, priv->base + MLXBF_GIGE_INT_MASK);
 
 	/* Enable RX DMA to write new packets to memory */
-	data = readq(priv->base + MLXBF_GIGE_RX_DMA);
+	data = pete_readq("drivers/net/ethernet/mellanox/mlxbf_gige/mlxbf_gige_rx.c:194", priv->base + MLXBF_GIGE_RX_DMA);
 	data |= MLXBF_GIGE_RX_DMA_EN;
-	writeq(data, priv->base + MLXBF_GIGE_RX_DMA);
+	pete_writeq("drivers/net/ethernet/mellanox/mlxbf_gige/mlxbf_gige_rx.c:196", data, priv->base + MLXBF_GIGE_RX_DMA);
 
 	return 0;
 
@@ -222,9 +222,9 @@ void mlxbf_gige_rx_deinit(struct mlxbf_gige *priv)
 	int i;
 
 	/* Disable RX DMA to prevent packet transfers to memory */
-	data = readq(priv->base + MLXBF_GIGE_RX_DMA);
+	data = pete_readq("drivers/net/ethernet/mellanox/mlxbf_gige/mlxbf_gige_rx.c:225", priv->base + MLXBF_GIGE_RX_DMA);
 	data &= ~MLXBF_GIGE_RX_DMA_EN;
-	writeq(data, priv->base + MLXBF_GIGE_RX_DMA);
+	pete_writeq("drivers/net/ethernet/mellanox/mlxbf_gige/mlxbf_gige_rx.c:227", data, priv->base + MLXBF_GIGE_RX_DMA);
 
 	rx_wqe_ptr = priv->rx_wqe_base;
 
@@ -247,8 +247,8 @@ void mlxbf_gige_rx_deinit(struct mlxbf_gige *priv)
 	priv->rx_wqe_base_dma = 0;
 	priv->rx_cqe_base = NULL;
 	priv->rx_cqe_base_dma = 0;
-	writeq(0, priv->base + MLXBF_GIGE_RX_WQ_BASE);
-	writeq(0, priv->base + MLXBF_GIGE_RX_CQ_BASE);
+	pete_writeq("drivers/net/ethernet/mellanox/mlxbf_gige/mlxbf_gige_rx.c:250", 0, priv->base + MLXBF_GIGE_RX_WQ_BASE);
+	pete_writeq("drivers/net/ethernet/mellanox/mlxbf_gige/mlxbf_gige_rx.c:251", 0, priv->base + MLXBF_GIGE_RX_CQ_BASE);
 }
 
 static bool mlxbf_gige_rx_packet(struct mlxbf_gige *priv, int *rx_pkts)
@@ -265,7 +265,7 @@ static bool mlxbf_gige_rx_packet(struct mlxbf_gige *priv, int *rx_pkts)
 	u16 rx_pi;
 
 	/* Index into RX buffer array is rx_pi w/wrap based on RX_CQE_SIZE */
-	rx_pi = readq(priv->base + MLXBF_GIGE_RX_WQE_PI);
+	rx_pi = pete_readq("drivers/net/ethernet/mellanox/mlxbf_gige/mlxbf_gige_rx.c:268", priv->base + MLXBF_GIGE_RX_WQE_PI);
 	rx_pi_rem = rx_pi % priv->rx_q_entries;
 
 	rx_wqe_addr = priv->rx_wqe_base + rx_pi_rem;
@@ -309,7 +309,7 @@ static bool mlxbf_gige_rx_packet(struct mlxbf_gige *priv, int *rx_pkts)
 	 * returns accurate return value even if packet is received into
 	 * just-replenished buffer prior to exiting this routine.
 	 */
-	rx_ci = readq(priv->base + MLXBF_GIGE_RX_CQE_PACKET_CI);
+	rx_ci = pete_readq("drivers/net/ethernet/mellanox/mlxbf_gige/mlxbf_gige_rx.c:312", priv->base + MLXBF_GIGE_RX_CQE_PACKET_CI);
 	rx_ci_rem = rx_ci % priv->rx_q_entries;
 
 	/* Let hardware know we've replenished one buffer */
@@ -317,7 +317,7 @@ static bool mlxbf_gige_rx_packet(struct mlxbf_gige *priv, int *rx_pkts)
 
 	/* Ensure completion of all writes before notifying HW of replenish */
 	wmb();
-	writeq(rx_pi, priv->base + MLXBF_GIGE_RX_WQE_PI);
+	pete_writeq("drivers/net/ethernet/mellanox/mlxbf_gige/mlxbf_gige_rx.c:320", rx_pi, priv->base + MLXBF_GIGE_RX_WQE_PI);
 
 	(*rx_pkts)++;
 
@@ -355,9 +355,9 @@ int mlxbf_gige_poll(struct napi_struct *napi, int budget)
 		/* Clear MLXBF_GIGE_INT_MASK 'receive pkt' bit to
 		 * indicate receive readiness
 		 */
-		data = readq(priv->base + MLXBF_GIGE_INT_MASK);
+		data = pete_readq("drivers/net/ethernet/mellanox/mlxbf_gige/mlxbf_gige_rx.c:358", priv->base + MLXBF_GIGE_INT_MASK);
 		data &= ~MLXBF_GIGE_INT_MASK_RX_RECEIVE_PACKET;
-		writeq(data, priv->base + MLXBF_GIGE_INT_MASK);
+		pete_writeq("drivers/net/ethernet/mellanox/mlxbf_gige/mlxbf_gige_rx.c:360", data, priv->base + MLXBF_GIGE_INT_MASK);
 	}
 
 	return work_done;

@@ -425,12 +425,12 @@ static const struct usbf_ep_info usbf_ep_info[USBF_NUM_ENDPOINTS] = {
 
 static inline u32 usbf_reg_readl(struct usbf_udc *udc, uint offset)
 {
-	return readl(udc->regs + offset);
+	return pete_readl("drivers/usb/gadget/udc/renesas_usbf.c:428", udc->regs + offset);
 }
 
 static inline void usbf_reg_writel(struct usbf_udc *udc, uint offset, u32 val)
 {
-	writel(val, udc->regs + offset);
+	pete_writel("drivers/usb/gadget/udc/renesas_usbf.c:433", val, udc->regs + offset);
 }
 
 static inline void usbf_reg_bitset(struct usbf_udc *udc, uint offset, u32 set)
@@ -464,7 +464,7 @@ static inline void usbf_reg_clrset(struct usbf_udc *udc, uint offset,
 
 static inline u32 usbf_ep_reg_readl(struct usbf_ep *ep, uint offset)
 {
-	return readl(ep->regs + offset);
+	return pete_readl("drivers/usb/gadget/udc/renesas_usbf.c:467", ep->regs + offset);
 }
 
 static inline void usbf_ep_reg_read_rep(struct usbf_ep *ep, uint offset,
@@ -475,7 +475,7 @@ static inline void usbf_ep_reg_read_rep(struct usbf_ep *ep, uint offset,
 
 static inline void usbf_ep_reg_writel(struct usbf_ep *ep, uint offset, u32 val)
 {
-	writel(val, ep->regs + offset);
+	pete_writel("drivers/usb/gadget/udc/renesas_usbf.c:478", val, ep->regs + offset);
 }
 
 static inline void usbf_ep_reg_write_rep(struct usbf_ep *ep, uint offset,
@@ -515,13 +515,13 @@ static inline void usbf_ep_reg_clrset(struct usbf_ep *ep, uint offset,
 
 static inline u32 usbf_ep_dma_reg_readl(struct usbf_ep *ep, uint offset)
 {
-	return readl(ep->dma_regs + offset);
+	return pete_readl("drivers/usb/gadget/udc/renesas_usbf.c:518", ep->dma_regs + offset);
 }
 
 static inline void usbf_ep_dma_reg_writel(struct usbf_ep *ep, uint offset,
 					  u32 val)
 {
-	writel(val, ep->dma_regs + offset);
+	pete_writel("drivers/usb/gadget/udc/renesas_usbf.c:524", val, ep->dma_regs + offset);
 }
 
 static inline void usbf_ep_dma_reg_bitset(struct usbf_ep *ep, uint offset,

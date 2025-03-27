@@ -46,7 +46,7 @@ static int ep93xx_wdt_start(struct watchdog_device *wdd)
 {
 	struct ep93xx_wdt_priv *priv = watchdog_get_drvdata(wdd);
 
-	writel(0xaaaa, priv->mmio + EP93XX_WATCHDOG);
+	pete_writel("drivers/watchdog/ep93xx_wdt.c:49", 0xaaaa, priv->mmio + EP93XX_WATCHDOG);
 
 	return 0;
 }
@@ -55,7 +55,7 @@ static int ep93xx_wdt_stop(struct watchdog_device *wdd)
 {
 	struct ep93xx_wdt_priv *priv = watchdog_get_drvdata(wdd);
 
-	writel(0xaa55, priv->mmio + EP93XX_WATCHDOG);
+	pete_writel("drivers/watchdog/ep93xx_wdt.c:58", 0xaa55, priv->mmio + EP93XX_WATCHDOG);
 
 	return 0;
 }
@@ -64,7 +64,7 @@ static int ep93xx_wdt_ping(struct watchdog_device *wdd)
 {
 	struct ep93xx_wdt_priv *priv = watchdog_get_drvdata(wdd);
 
-	writel(0x5555, priv->mmio + EP93XX_WATCHDOG);
+	pete_writel("drivers/watchdog/ep93xx_wdt.c:67", 0x5555, priv->mmio + EP93XX_WATCHDOG);
 
 	return 0;
 }
@@ -100,7 +100,7 @@ static int ep93xx_wdt_probe(struct platform_device *pdev)
 	if (IS_ERR(priv->mmio))
 		return PTR_ERR(priv->mmio);
 
-	val = readl(priv->mmio + EP93XX_WATCHDOG);
+	val = pete_readl("drivers/watchdog/ep93xx_wdt.c:103", priv->mmio + EP93XX_WATCHDOG);
 
 	wdd = &priv->wdd;
 	wdd->bootstatus = (val & 0x01) ? WDIOF_CARDRESET : 0;

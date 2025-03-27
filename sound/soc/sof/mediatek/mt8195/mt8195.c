@@ -199,11 +199,11 @@ static int adsp_sram_power_on(struct device *dev, bool on)
 		return -ENOMEM;
 	}
 
-	srampool_con = readl(va_dspsysreg);
+	srampool_con = pete_readl("sound/soc/sof/mediatek/mt8195/mt8195.c:202", va_dspsysreg);
 	if (on)
-		writel(srampool_con & ~DSP_SRAM_POOL_PD_MASK, va_dspsysreg);
+		pete_writel("sound/soc/sof/mediatek/mt8195/mt8195.c:204", srampool_con & ~DSP_SRAM_POOL_PD_MASK, va_dspsysreg);
 	else
-		writel(srampool_con | DSP_SRAM_POOL_PD_MASK, va_dspsysreg);
+		pete_writel("sound/soc/sof/mediatek/mt8195/mt8195.c:206", srampool_con | DSP_SRAM_POOL_PD_MASK, va_dspsysreg);
 
 	iounmap(va_dspsysreg);
 	return 0;
@@ -229,9 +229,9 @@ static int adsp_memory_remap_init(struct device *dev, struct mtk_adsp_chip_info 
 	adsp->dram_offset = offset;
 	offset >>= DRAM_REMAP_SHIFT;
 	dev_dbg(dev, "adsp->pa_dram %pa, offset %#x\n", &adsp->pa_dram, offset);
-	writel(offset, vaddr_emi_map);
-	if (offset != readl(vaddr_emi_map)) {
-		dev_err(dev, "write emi map fail : %#x\n", readl(vaddr_emi_map));
+	pete_writel("sound/soc/sof/mediatek/mt8195/mt8195.c:232", offset, vaddr_emi_map);
+	if (offset != pete_readl("sound/soc/sof/mediatek/mt8195/mt8195.c:233", vaddr_emi_map)) {
+		dev_err(dev, "write emi map fail : %#x\n", pete_readl("sound/soc/sof/mediatek/mt8195/mt8195.c:234", vaddr_emi_map));
 		return -EIO;
 	}
 

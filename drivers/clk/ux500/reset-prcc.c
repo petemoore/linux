@@ -77,9 +77,9 @@ static int u8500_prcc_reset(struct reset_controller_dev *rcdev,
 	 * Assert reset and then release it. The one microsecond
 	 * delay is found in the vendor reference code.
 	 */
-	writel(BIT(bit), base + PRCC_K_SOFTRST_CLEAR);
+	pete_writel("drivers/clk/ux500/reset-prcc.c:80", BIT(bit), base + PRCC_K_SOFTRST_CLEAR);
 	udelay(1);
-	writel(BIT(bit), base + PRCC_K_SOFTRST_SET);
+	pete_writel("drivers/clk/ux500/reset-prcc.c:82", BIT(bit), base + PRCC_K_SOFTRST_SET);
 	udelay(1);
 
 	return 0;
@@ -93,7 +93,7 @@ static int u8500_prcc_reset_assert(struct reset_controller_dev *rcdev,
 	unsigned int bit = id % PRCC_PERIPHS_PER_CLUSTER;
 
 	pr_debug("PRCC assert reset id %lu, bit %u\n", id, bit);
-	writel(BIT(bit), base + PRCC_K_SOFTRST_CLEAR);
+	pete_writel("drivers/clk/ux500/reset-prcc.c:96", BIT(bit), base + PRCC_K_SOFTRST_CLEAR);
 
 	return 0;
 }
@@ -106,7 +106,7 @@ static int u8500_prcc_reset_deassert(struct reset_controller_dev *rcdev,
 	unsigned int bit = id % PRCC_PERIPHS_PER_CLUSTER;
 
 	pr_debug("PRCC deassert reset id %lu, bit %u\n", id, bit);
-	writel(BIT(bit), base + PRCC_K_SOFTRST_SET);
+	pete_writel("drivers/clk/ux500/reset-prcc.c:109", BIT(bit), base + PRCC_K_SOFTRST_SET);
 
 	return 0;
 }
@@ -120,7 +120,7 @@ static int u8500_prcc_reset_status(struct reset_controller_dev *rcdev,
 	u32 val;
 
 	pr_debug("PRCC check status on reset line id %lu, bit %u\n", id, bit);
-	val = readl(base + PRCC_K_RST_STATUS);
+	val = pete_readl("drivers/clk/ux500/reset-prcc.c:123", base + PRCC_K_RST_STATUS);
 
 	/* Active low so return the inverse value of the bit */
 	return !(val & BIT(bit));

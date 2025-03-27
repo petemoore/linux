@@ -70,13 +70,13 @@ static void mss2_power_off(void)
 	/*
 	 * Enable and issue soft reset
 	 */
-	reg = readl(RSTOUTn_MASK);
+	reg = pete_readl("arch/arm/mach-orion5x/board-mss2.c:73", RSTOUTn_MASK);
 	reg |= 1 << 2;
-	writel(reg, RSTOUTn_MASK);
+	pete_writel("arch/arm/mach-orion5x/board-mss2.c:75", reg, RSTOUTn_MASK);
 
-	reg = readl(CPU_SOFT_RESET);
+	reg = pete_readl("arch/arm/mach-orion5x/board-mss2.c:77", CPU_SOFT_RESET);
 	reg |= 1;
-	writel(reg, CPU_SOFT_RESET);
+	pete_writel("arch/arm/mach-orion5x/board-mss2.c:79", reg, CPU_SOFT_RESET);
 }
 
 void __init mss2_init(void)

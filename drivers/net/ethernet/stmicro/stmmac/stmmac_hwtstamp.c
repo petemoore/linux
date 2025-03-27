@@ -20,13 +20,13 @@
 
 static void config_hw_tstamping(void __iomem *ioaddr, u32 data)
 {
-	writel(data, ioaddr + PTP_TCR);
+	pete_writel("drivers/net/ethernet/stmicro/stmmac/stmmac_hwtstamp.c:23", data, ioaddr + PTP_TCR);
 }
 
 static void config_sub_second_increment(void __iomem *ioaddr,
 		u32 ptp_clock, int gmac4, u32 *ssinc)
 {
-	u32 value = readl(ioaddr + PTP_TCR);
+	u32 value = pete_readl("drivers/net/ethernet/stmicro/stmmac/stmmac_hwtstamp.c:29", ioaddr + PTP_TCR);
 	unsigned long data;
 	u32 reg_value;
 
@@ -54,7 +54,7 @@ static void config_sub_second_increment(void __iomem *ioaddr,
 	if (gmac4)
 		reg_value <<= GMAC4_PTP_SSIR_SSINC_SHIFT;
 
-	writel(reg_value, ioaddr + PTP_SSIR);
+	pete_writel("drivers/net/ethernet/stmicro/stmmac/stmmac_hwtstamp.c:57", reg_value, ioaddr + PTP_SSIR);
 
 	if (ssinc)
 		*ssinc = data;
@@ -69,12 +69,12 @@ static void hwtstamp_correct_latency(struct stmmac_priv *priv)
 	u32 val;
 
 	/* MAC-internal ingress latency */
-	scaled_ns = readl(ioaddr + PTP_TS_INGR_LAT);
+	scaled_ns = pete_readl("drivers/net/ethernet/stmicro/stmmac/stmmac_hwtstamp.c:72", ioaddr + PTP_TS_INGR_LAT);
 
 	/* See section 11.7.2.5.3.1 "Ingress Correction" on page 4001 of
 	 * i.MX8MP Applications Processor Reference Manual Rev. 1, 06/2021
 	 */
-	val = readl(ioaddr + PTP_TCR);
+	val = pete_readl("drivers/net/ethernet/stmicro/stmmac/stmmac_hwtstamp.c:77", ioaddr + PTP_TCR);
 	if (val & PTP_TCR_TSCTRLSSR)
 		/* nanoseconds field is in decimal format with granularity of 1ns/bit */
 		scaled_ns = ((u64)NSEC_PER_SEC << 16) - scaled_ns;
@@ -89,29 +89,29 @@ static void hwtstamp_correct_latency(struct stmmac_priv *priv)
 	/* set bit 31 for 2's compliment */
 	reg_tsic |= BIT(31);
 
-	writel(reg_tsic, ioaddr + PTP_TS_INGR_CORR_NS);
-	writel(reg_tsicsns, ioaddr + PTP_TS_INGR_CORR_SNS);
+	pete_writel("drivers/net/ethernet/stmicro/stmmac/stmmac_hwtstamp.c:92", reg_tsic, ioaddr + PTP_TS_INGR_CORR_NS);
+	pete_writel("drivers/net/ethernet/stmicro/stmmac/stmmac_hwtstamp.c:93", reg_tsicsns, ioaddr + PTP_TS_INGR_CORR_SNS);
 
 	/* MAC-internal egress latency */
-	scaled_ns = readl(ioaddr + PTP_TS_EGR_LAT);
+	scaled_ns = pete_readl("drivers/net/ethernet/stmicro/stmmac/stmmac_hwtstamp.c:96", ioaddr + PTP_TS_EGR_LAT);
 
 	reg_tsec = scaled_ns >> 16;
 	reg_tsecsns = scaled_ns & 0xff00;
 
-	writel(reg_tsec, ioaddr + PTP_TS_EGR_CORR_NS);
-	writel(reg_tsecsns, ioaddr + PTP_TS_EGR_CORR_SNS);
+	pete_writel("drivers/net/ethernet/stmicro/stmmac/stmmac_hwtstamp.c:101", reg_tsec, ioaddr + PTP_TS_EGR_CORR_NS);
+	pete_writel("drivers/net/ethernet/stmicro/stmmac/stmmac_hwtstamp.c:102", reg_tsecsns, ioaddr + PTP_TS_EGR_CORR_SNS);
 }
 
 static int init_systime(void __iomem *ioaddr, u32 sec, u32 nsec)
 {
 	u32 value;
 
-	writel(sec, ioaddr + PTP_STSUR);
-	writel(nsec, ioaddr + PTP_STNSUR);
+	pete_writel("drivers/net/ethernet/stmicro/stmmac/stmmac_hwtstamp.c:109", sec, ioaddr + PTP_STSUR);
+	pete_writel("drivers/net/ethernet/stmicro/stmmac/stmmac_hwtstamp.c:110", nsec, ioaddr + PTP_STNSUR);
 	/* issue command to initialize the system time value */
-	value = readl(ioaddr + PTP_TCR);
+	value = pete_readl("drivers/net/ethernet/stmicro/stmmac/stmmac_hwtstamp.c:112", ioaddr + PTP_TCR);
 	value |= PTP_TCR_TSINIT;
-	writel(value, ioaddr + PTP_TCR);
+	pete_writel("drivers/net/ethernet/stmicro/stmmac/stmmac_hwtstamp.c:114", value, ioaddr + PTP_TCR);
 
 	/* wait for present system time initialize to complete */
 	return readl_poll_timeout_atomic(ioaddr + PTP_TCR, value,
@@ -124,16 +124,16 @@ static int config_addend(void __iomem *ioaddr, u32 addend)
 	u32 value;
 	int limit;
 
-	writel(addend, ioaddr + PTP_TAR);
+	pete_writel("drivers/net/ethernet/stmicro/stmmac/stmmac_hwtstamp.c:127", addend, ioaddr + PTP_TAR);
 	/* issue command to update the addend value */
-	value = readl(ioaddr + PTP_TCR);
+	value = pete_readl("drivers/net/ethernet/stmicro/stmmac/stmmac_hwtstamp.c:129", ioaddr + PTP_TCR);
 	value |= PTP_TCR_TSADDREG;
-	writel(value, ioaddr + PTP_TCR);
+	pete_writel("drivers/net/ethernet/stmicro/stmmac/stmmac_hwtstamp.c:131", value, ioaddr + PTP_TCR);
 
 	/* wait for present addend update to complete */
 	limit = 10;
 	while (limit--) {
-		if (!(readl(ioaddr + PTP_TCR) & PTP_TCR_TSADDREG))
+		if (!(pete_readl("drivers/net/ethernet/stmicro/stmmac/stmmac_hwtstamp.c:136", ioaddr + PTP_TCR) & PTP_TCR_TSADDREG))
 			break;
 		mdelay(10);
 	}
@@ -157,26 +157,26 @@ static int adjust_systime(void __iomem *ioaddr, u32 sec, u32 nsec,
 		if (gmac4)
 			sec = -sec;
 
-		value = readl(ioaddr + PTP_TCR);
+		value = pete_readl("drivers/net/ethernet/stmicro/stmmac/stmmac_hwtstamp.c:160", ioaddr + PTP_TCR);
 		if (value & PTP_TCR_TSCTRLSSR)
 			nsec = (PTP_DIGITAL_ROLLOVER_MODE - nsec);
 		else
 			nsec = (PTP_BINARY_ROLLOVER_MODE - nsec);
 	}
 
-	writel(sec, ioaddr + PTP_STSUR);
+	pete_writel("drivers/net/ethernet/stmicro/stmmac/stmmac_hwtstamp.c:167", sec, ioaddr + PTP_STSUR);
 	value = (add_sub << PTP_STNSUR_ADDSUB_SHIFT) | nsec;
-	writel(value, ioaddr + PTP_STNSUR);
+	pete_writel("drivers/net/ethernet/stmicro/stmmac/stmmac_hwtstamp.c:169", value, ioaddr + PTP_STNSUR);
 
 	/* issue command to initialize the system time value */
-	value = readl(ioaddr + PTP_TCR);
+	value = pete_readl("drivers/net/ethernet/stmicro/stmmac/stmmac_hwtstamp.c:172", ioaddr + PTP_TCR);
 	value |= PTP_TCR_TSUPDT;
-	writel(value, ioaddr + PTP_TCR);
+	pete_writel("drivers/net/ethernet/stmicro/stmmac/stmmac_hwtstamp.c:174", value, ioaddr + PTP_TCR);
 
 	/* wait for present system time adjust/update to complete */
 	limit = 10;
 	while (limit--) {
-		if (!(readl(ioaddr + PTP_TCR) & PTP_TCR_TSUPDT))
+		if (!(pete_readl("drivers/net/ethernet/stmicro/stmmac/stmmac_hwtstamp.c:179", ioaddr + PTP_TCR) & PTP_TCR_TSUPDT))
 			break;
 		mdelay(10);
 	}
@@ -208,8 +208,8 @@ static void get_ptptime(void __iomem *ptpaddr, u64 *ptp_time)
 {
 	u64 ns;
 
-	ns = readl(ptpaddr + PTP_ATNR);
-	ns += readl(ptpaddr + PTP_ATSR) * NSEC_PER_SEC;
+	ns = pete_readl("drivers/net/ethernet/stmicro/stmmac/stmmac_hwtstamp.c:211", ptpaddr + PTP_ATNR);
+	ns += pete_readl("drivers/net/ethernet/stmicro/stmmac/stmmac_hwtstamp.c:212", ptpaddr + PTP_ATSR) * NSEC_PER_SEC;
 
 	*ptp_time = ns;
 }
@@ -228,7 +228,7 @@ static void timestamp_interrupt(struct stmmac_priv *priv)
 		return;
 	}
 
-	tsync_int = readl(priv->ioaddr + GMAC_INT_STATUS) & GMAC_INT_TSIE;
+	tsync_int = pete_readl("drivers/net/ethernet/stmicro/stmmac/stmmac_hwtstamp.c:231", priv->ioaddr + GMAC_INT_STATUS) & GMAC_INT_TSIE;
 
 	if (!tsync_int)
 		return;
@@ -236,7 +236,7 @@ static void timestamp_interrupt(struct stmmac_priv *priv)
 	/* Read timestamp status to clear interrupt from either external
 	 * timestamp or start/end of PPS.
 	 */
-	ts_status = readl(priv->ioaddr + GMAC_TIMESTAMP_STATUS);
+	ts_status = pete_readl("drivers/net/ethernet/stmicro/stmmac/stmmac_hwtstamp.c:239", priv->ioaddr + GMAC_TIMESTAMP_STATUS);
 
 	if (!(priv->plat->flags & STMMAC_FLAG_EXT_SNAPSHOT_EN))
 		return;
@@ -244,7 +244,7 @@ static void timestamp_interrupt(struct stmmac_priv *priv)
 	num_snapshot = (ts_status & GMAC_TIMESTAMP_ATSNS_MASK) >>
 		       GMAC_TIMESTAMP_ATSNS_SHIFT;
 
-	acr_value = readl(priv->ptpaddr + PTP_ACR);
+	acr_value = pete_readl("drivers/net/ethernet/stmicro/stmmac/stmmac_hwtstamp.c:247", priv->ptpaddr + PTP_ACR);
 	channel = ilog2(FIELD_GET(PTP_ACR_MASK, acr_value));
 
 	for (i = 0; i < num_snapshot; i++) {

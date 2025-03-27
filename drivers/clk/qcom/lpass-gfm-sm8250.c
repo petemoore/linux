@@ -39,7 +39,7 @@ static u8 clk_gfm_get_parent(struct clk_hw *hw)
 {
 	struct clk_gfm *clk = to_clk_gfm(hw);
 
-	return readl(clk->gfm_mux) & clk->mux_mask;
+	return pete_readl("drivers/clk/qcom/lpass-gfm-sm8250.c:42", clk->gfm_mux) & clk->mux_mask;
 }
 
 static int clk_gfm_set_parent(struct clk_hw *hw, u8 index)
@@ -47,7 +47,7 @@ static int clk_gfm_set_parent(struct clk_hw *hw, u8 index)
 	struct clk_gfm *clk = to_clk_gfm(hw);
 	unsigned int val;
 
-	val = readl(clk->gfm_mux);
+	val = pete_readl("drivers/clk/qcom/lpass-gfm-sm8250.c:50", clk->gfm_mux);
 
 	if (index)
 		val |= clk->mux_mask;
@@ -55,7 +55,7 @@ static int clk_gfm_set_parent(struct clk_hw *hw, u8 index)
 		val &= ~clk->mux_mask;
 
 
-	writel(val, clk->gfm_mux);
+	pete_writel("drivers/clk/qcom/lpass-gfm-sm8250.c:58", val, clk->gfm_mux);
 
 	return 0;
 }

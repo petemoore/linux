@@ -297,8 +297,8 @@ static void octep_setup_iq_regs_cn93_pf(struct octep_device *oct, int iq_no)
 			   CN93_SDP_R_IN_INT_LEVELS(iq_no);
 
 	/* Store the current instruction counter (used in flush_iq calculation) */
-	reset_instr_cnt = readl(iq->inst_cnt_reg);
-	writel(reset_instr_cnt, iq->inst_cnt_reg);
+	reset_instr_cnt = pete_readl("drivers/net/ethernet/marvell/octeon_ep/octep_cn9k_pf.c:300", iq->inst_cnt_reg);
+	pete_writel("drivers/net/ethernet/marvell/octeon_ep/octep_cn9k_pf.c:301", reset_instr_cnt, iq->inst_cnt_reg);
 
 	/* INTR_THRESHOLD is set to max(FFFFFFFF) to disable the INTR */
 	reg_val = CFG_GET_IQ_INTR_THRESHOLD(oct->conf) & 0xffffffff;
@@ -551,7 +551,7 @@ static void octep_reinit_regs_cn93_pf(struct octep_device *oct)
 	oct->hw_ops.enable_io_queues(oct);
 
 	for (i = 0; i < CFG_GET_PORTS_ACTIVE_IO_RINGS(oct->conf); i++)
-		writel(oct->oq[i]->max_count, oct->oq[i]->pkts_credit_reg);
+		pete_writel("drivers/net/ethernet/marvell/octeon_ep/octep_cn9k_pf.c:554", oct->oq[i]->max_count, oct->oq[i]->pkts_credit_reg);
 }
 
 /* Enable all interrupts */
@@ -595,7 +595,7 @@ static void octep_disable_interrupts_cn93_pf(struct octep_device *oct)
 /* Get new Octeon Read Index: index of descriptor that Octeon reads next. */
 static u32 octep_update_iq_read_index_cn93_pf(struct octep_iq *iq)
 {
-	u32 pkt_in_done = readl(iq->inst_cnt_reg);
+	u32 pkt_in_done = pete_readl("drivers/net/ethernet/marvell/octeon_ep/octep_cn9k_pf.c:598", iq->inst_cnt_reg);
 	u32 last_done, new_idx;
 
 	last_done = pkt_in_done - iq->pkt_in_done;

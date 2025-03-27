@@ -61,7 +61,7 @@ static int spi_clps711x_transfer_one(struct spi_controller *host,
 
 	/* Initiate transfer */
 	data = hw->tx_buf ? *hw->tx_buf++ : 0;
-	writel(data | SYNCIO_FRMLEN(hw->bpw) | SYNCIO_TXFRMEN, hw->syncio);
+	pete_writel("drivers/spi/spi-clps711x.c:64", data | SYNCIO_FRMLEN(hw->bpw) | SYNCIO_TXFRMEN, hw->syncio);
 
 	return 1;
 }
@@ -73,14 +73,14 @@ static irqreturn_t spi_clps711x_isr(int irq, void *dev_id)
 	u8 data;
 
 	/* Handle RX */
-	data = readb(hw->syncio);
+	data = pete_readb("drivers/spi/spi-clps711x.c:76", hw->syncio);
 	if (hw->rx_buf)
 		*hw->rx_buf++ = data;
 
 	/* Handle TX */
 	if (--hw->len > 0) {
 		data = hw->tx_buf ? *hw->tx_buf++ : 0;
-		writel(data | SYNCIO_FRMLEN(hw->bpw) | SYNCIO_TXFRMEN,
+		pete_writel("drivers/spi/spi-clps711x.c:83", data | SYNCIO_FRMLEN(hw->bpw) | SYNCIO_TXFRMEN,
 		       hw->syncio);
 	} else
 		spi_finalize_current_transfer(host);
@@ -135,7 +135,7 @@ static int spi_clps711x_probe(struct platform_device *pdev)
 	regmap_update_bits(hw->syscon, SYSCON_OFFSET, SYSCON3_ADCCON, 0);
 
 	/* Clear possible pending interrupt */
-	readl(hw->syncio);
+	pete_readl("drivers/spi/spi-clps711x.c:138", hw->syncio);
 
 	ret = devm_request_irq(&pdev->dev, irq, spi_clps711x_isr, 0,
 			       dev_name(&pdev->dev), host);

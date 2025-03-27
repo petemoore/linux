@@ -29,7 +29,7 @@ static struct clk_hw *fixed_mmio_clk_setup(struct device_node *node)
 		return ERR_PTR(-EIO);
 	}
 
-	freq = readl(base);
+	freq = pete_readl("drivers/clk/clk-fixed-mmio.c:32", base);
 	iounmap(base);
 	of_property_read_string(node, "clock-output-names", &clk_name);
 

@@ -47,10 +47,10 @@ static void jz4740_ecc_reset(struct ingenic_ecc *ecc, bool calc_ecc)
 	uint32_t reg;
 
 	/* Clear interrupt status */
-	writel(0, ecc->base + JZ_REG_NAND_IRQ_STAT);
+	pete_writel("drivers/mtd/nand/raw/ingenic/jz4740_ecc.c:50", 0, ecc->base + JZ_REG_NAND_IRQ_STAT);
 
 	/* Initialize and enable ECC hardware */
-	reg = readl(ecc->base + JZ_REG_NAND_ECC_CTRL);
+	reg = pete_readl("drivers/mtd/nand/raw/ingenic/jz4740_ecc.c:53", ecc->base + JZ_REG_NAND_ECC_CTRL);
 	reg |= JZ_NAND_ECC_CTRL_RESET;
 	reg |= JZ_NAND_ECC_CTRL_ENABLE;
 	reg |= JZ_NAND_ECC_CTRL_RS;
@@ -59,7 +59,7 @@ static void jz4740_ecc_reset(struct ingenic_ecc *ecc, bool calc_ecc)
 	else /* correct data from ECC */
 		reg &= ~JZ_NAND_ECC_CTRL_ENCODING;
 
-	writel(reg, ecc->base + JZ_REG_NAND_ECC_CTRL);
+	pete_writel("drivers/mtd/nand/raw/ingenic/jz4740_ecc.c:62", reg, ecc->base + JZ_REG_NAND_ECC_CTRL);
 }
 
 static int jz4740_ecc_calculate(struct ingenic_ecc *ecc,
@@ -73,18 +73,18 @@ static int jz4740_ecc_calculate(struct ingenic_ecc *ecc,
 	jz4740_ecc_reset(ecc, true);
 
 	do {
-		status = readl(ecc->base + JZ_REG_NAND_IRQ_STAT);
+		status = pete_readl("drivers/mtd/nand/raw/ingenic/jz4740_ecc.c:76", ecc->base + JZ_REG_NAND_IRQ_STAT);
 	} while (!(status & JZ_NAND_STATUS_ENC_FINISH) && --timeout);
 
 	if (timeout == 0)
 		return -ETIMEDOUT;
 
-	reg = readl(ecc->base + JZ_REG_NAND_ECC_CTRL);
+	reg = pete_readl("drivers/mtd/nand/raw/ingenic/jz4740_ecc.c:82", ecc->base + JZ_REG_NAND_ECC_CTRL);
 	reg &= ~JZ_NAND_ECC_CTRL_ENABLE;
-	writel(reg, ecc->base + JZ_REG_NAND_ECC_CTRL);
+	pete_writel("drivers/mtd/nand/raw/ingenic/jz4740_ecc.c:84", reg, ecc->base + JZ_REG_NAND_ECC_CTRL);
 
 	for (i = 0; i < params->bytes; ++i)
-		ecc_code[i] = readb(ecc->base + JZ_REG_NAND_PAR0 + i);
+		ecc_code[i] = pete_readb("drivers/mtd/nand/raw/ingenic/jz4740_ecc.c:87", ecc->base + JZ_REG_NAND_PAR0 + i);
 
 	/*
 	 * If the written data is completely 0xff, we also want to write 0xff as
@@ -125,22 +125,22 @@ static int jz4740_ecc_correct(struct ingenic_ecc *ecc,
 	jz4740_ecc_reset(ecc, false);
 
 	for (i = 0; i < params->bytes; ++i)
-		writeb(ecc_code[i], ecc->base + JZ_REG_NAND_PAR0 + i);
+		pete_writeb("drivers/mtd/nand/raw/ingenic/jz4740_ecc.c:128", ecc_code[i], ecc->base + JZ_REG_NAND_PAR0 + i);
 
-	reg = readl(ecc->base + JZ_REG_NAND_ECC_CTRL);
+	reg = pete_readl("drivers/mtd/nand/raw/ingenic/jz4740_ecc.c:130", ecc->base + JZ_REG_NAND_ECC_CTRL);
 	reg |= JZ_NAND_ECC_CTRL_PAR_READY;
-	writel(reg, ecc->base + JZ_REG_NAND_ECC_CTRL);
+	pete_writel("drivers/mtd/nand/raw/ingenic/jz4740_ecc.c:132", reg, ecc->base + JZ_REG_NAND_ECC_CTRL);
 
 	do {
-		status = readl(ecc->base + JZ_REG_NAND_IRQ_STAT);
+		status = pete_readl("drivers/mtd/nand/raw/ingenic/jz4740_ecc.c:135", ecc->base + JZ_REG_NAND_IRQ_STAT);
 	} while (!(status & JZ_NAND_STATUS_DEC_FINISH) && --timeout);
 
 	if (timeout == 0)
 		return -ETIMEDOUT;
 
-	reg = readl(ecc->base + JZ_REG_NAND_ECC_CTRL);
+	reg = pete_readl("drivers/mtd/nand/raw/ingenic/jz4740_ecc.c:141", ecc->base + JZ_REG_NAND_ECC_CTRL);
 	reg &= ~JZ_NAND_ECC_CTRL_ENABLE;
-	writel(reg, ecc->base + JZ_REG_NAND_ECC_CTRL);
+	pete_writel("drivers/mtd/nand/raw/ingenic/jz4740_ecc.c:143", reg, ecc->base + JZ_REG_NAND_ECC_CTRL);
 
 	if (status & JZ_NAND_STATUS_ERROR) {
 		if (status & JZ_NAND_STATUS_UNCOR_ERROR)
@@ -149,7 +149,7 @@ static int jz4740_ecc_correct(struct ingenic_ecc *ecc,
 		error_count = (status & JZ_NAND_STATUS_ERR_COUNT) >> 29;
 
 		for (i = 0; i < error_count; ++i) {
-			error = readl(ecc->base + JZ_REG_NAND_ERR(i));
+			error = pete_readl("drivers/mtd/nand/raw/ingenic/jz4740_ecc.c:152", ecc->base + JZ_REG_NAND_ERR(i));
 			index = ((error >> 16) & 0x1ff) - 1;
 			if (index >= 0 && index < params->size)
 				jz_nand_correct_data(buf, index, error & 0x1ff);
@@ -165,10 +165,10 @@ static void jz4740_ecc_disable(struct ingenic_ecc *ecc)
 {
 	u32 reg;
 
-	writel(0, ecc->base + JZ_REG_NAND_IRQ_STAT);
-	reg = readl(ecc->base + JZ_REG_NAND_ECC_CTRL);
+	pete_writel("drivers/mtd/nand/raw/ingenic/jz4740_ecc.c:168", 0, ecc->base + JZ_REG_NAND_IRQ_STAT);
+	reg = pete_readl("drivers/mtd/nand/raw/ingenic/jz4740_ecc.c:169", ecc->base + JZ_REG_NAND_ECC_CTRL);
 	reg &= ~JZ_NAND_ECC_CTRL_ENABLE;
-	writel(reg, ecc->base + JZ_REG_NAND_ECC_CTRL);
+	pete_writel("drivers/mtd/nand/raw/ingenic/jz4740_ecc.c:171", reg, ecc->base + JZ_REG_NAND_ECC_CTRL);
 }
 
 static const struct ingenic_ecc_ops jz4740_ecc_ops = {

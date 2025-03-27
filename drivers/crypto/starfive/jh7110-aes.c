@@ -90,15 +90,15 @@ static void starfive_aes_aead_hw_start(struct starfive_cryp_ctx *ctx, u32 hw_mod
 
 	switch (hw_mode) {
 	case STARFIVE_AES_MODE_GCM:
-		value = readl(ctx->cryp->base + STARFIVE_AES_CSR);
+		value = pete_readl("drivers/crypto/starfive/jh7110-aes.c:93", ctx->cryp->base + STARFIVE_AES_CSR);
 		value |= STARFIVE_AES_GCM_START;
-		writel(value, cryp->base + STARFIVE_AES_CSR);
+		pete_writel("drivers/crypto/starfive/jh7110-aes.c:95", value, cryp->base + STARFIVE_AES_CSR);
 		starfive_aes_wait_gcmdone(cryp);
 		break;
 	case STARFIVE_AES_MODE_CCM:
-		value = readl(ctx->cryp->base + STARFIVE_AES_CSR);
+		value = pete_readl("drivers/crypto/starfive/jh7110-aes.c:99", ctx->cryp->base + STARFIVE_AES_CSR);
 		value |= STARFIVE_AES_CCM_START;
-		writel(value, cryp->base + STARFIVE_AES_CSR);
+		pete_writel("drivers/crypto/starfive/jh7110-aes.c:101", value, cryp->base + STARFIVE_AES_CSR);
 		break;
 	}
 }
@@ -108,25 +108,25 @@ static inline void starfive_aes_set_ivlen(struct starfive_cryp_ctx *ctx)
 	struct starfive_cryp_dev *cryp = ctx->cryp;
 
 	if (is_gcm(cryp))
-		writel(GCM_AES_IV_SIZE, cryp->base + STARFIVE_AES_IVLEN);
+		pete_writel("drivers/crypto/starfive/jh7110-aes.c:111", GCM_AES_IV_SIZE, cryp->base + STARFIVE_AES_IVLEN);
 	else
-		writel(AES_BLOCK_SIZE, cryp->base + STARFIVE_AES_IVLEN);
+		pete_writel("drivers/crypto/starfive/jh7110-aes.c:113", AES_BLOCK_SIZE, cryp->base + STARFIVE_AES_IVLEN);
 }
 
 static inline void starfive_aes_set_alen(struct starfive_cryp_ctx *ctx)
 {
 	struct starfive_cryp_dev *cryp = ctx->cryp;
 
-	writel(upper_32_bits(cryp->assoclen), cryp->base + STARFIVE_AES_ALEN0);
-	writel(lower_32_bits(cryp->assoclen), cryp->base + STARFIVE_AES_ALEN1);
+	pete_writel("drivers/crypto/starfive/jh7110-aes.c:120", upper_32_bits(cryp->assoclen), cryp->base + STARFIVE_AES_ALEN0);
+	pete_writel("drivers/crypto/starfive/jh7110-aes.c:121", lower_32_bits(cryp->assoclen), cryp->base + STARFIVE_AES_ALEN1);
 }
 
 static inline void starfive_aes_set_mlen(struct starfive_cryp_ctx *ctx)
 {
 	struct starfive_cryp_dev *cryp = ctx->cryp;
 
-	writel(upper_32_bits(cryp->total_in), cryp->base + STARFIVE_AES_MLEN0);
-	writel(lower_32_bits(cryp->total_in), cryp->base + STARFIVE_AES_MLEN1);
+	pete_writel("drivers/crypto/starfive/jh7110-aes.c:128", upper_32_bits(cryp->total_in), cryp->base + STARFIVE_AES_MLEN0);
+	pete_writel("drivers/crypto/starfive/jh7110-aes.c:129", lower_32_bits(cryp->total_in), cryp->base + STARFIVE_AES_MLEN1);
 }
 
 static inline int starfive_aes_ccm_check_iv(const u8 *iv)
@@ -142,9 +142,9 @@ static int starfive_aes_write_iv(struct starfive_cryp_ctx *ctx, u32 *iv)
 {
 	struct starfive_cryp_dev *cryp = ctx->cryp;
 
-	writel(iv[0], cryp->base + STARFIVE_AES_IV0);
-	writel(iv[1], cryp->base + STARFIVE_AES_IV1);
-	writel(iv[2], cryp->base + STARFIVE_AES_IV2);
+	pete_writel("drivers/crypto/starfive/jh7110-aes.c:145", iv[0], cryp->base + STARFIVE_AES_IV0);
+	pete_writel("drivers/crypto/starfive/jh7110-aes.c:146", iv[1], cryp->base + STARFIVE_AES_IV1);
+	pete_writel("drivers/crypto/starfive/jh7110-aes.c:147", iv[2], cryp->base + STARFIVE_AES_IV2);
 
 	if (is_gcm(cryp)) {
 		if (starfive_aes_wait_gcmdone(cryp))
@@ -153,27 +153,27 @@ static int starfive_aes_write_iv(struct starfive_cryp_ctx *ctx, u32 *iv)
 		return 0;
 	}
 
-	writel(iv[3], cryp->base + STARFIVE_AES_IV3);
+	pete_writel("drivers/crypto/starfive/jh7110-aes.c:156", iv[3], cryp->base + STARFIVE_AES_IV3);
 
 	return 0;
 }
 
 static inline void starfive_aes_get_iv(struct starfive_cryp_dev *cryp, u32 *iv)
 {
-	iv[0] = readl(cryp->base + STARFIVE_AES_IV0);
-	iv[1] = readl(cryp->base + STARFIVE_AES_IV1);
-	iv[2] = readl(cryp->base + STARFIVE_AES_IV2);
-	iv[3] = readl(cryp->base + STARFIVE_AES_IV3);
+	iv[0] = pete_readl("drivers/crypto/starfive/jh7110-aes.c:163", cryp->base + STARFIVE_AES_IV0);
+	iv[1] = pete_readl("drivers/crypto/starfive/jh7110-aes.c:164", cryp->base + STARFIVE_AES_IV1);
+	iv[2] = pete_readl("drivers/crypto/starfive/jh7110-aes.c:165", cryp->base + STARFIVE_AES_IV2);
+	iv[3] = pete_readl("drivers/crypto/starfive/jh7110-aes.c:166", cryp->base + STARFIVE_AES_IV3);
 }
 
 static inline void starfive_aes_write_nonce(struct starfive_cryp_ctx *ctx, u32 *nonce)
 {
 	struct starfive_cryp_dev *cryp = ctx->cryp;
 
-	writel(nonce[0], cryp->base + STARFIVE_AES_NONCE0);
-	writel(nonce[1], cryp->base + STARFIVE_AES_NONCE1);
-	writel(nonce[2], cryp->base + STARFIVE_AES_NONCE2);
-	writel(nonce[3], cryp->base + STARFIVE_AES_NONCE3);
+	pete_writel("drivers/crypto/starfive/jh7110-aes.c:173", nonce[0], cryp->base + STARFIVE_AES_NONCE0);
+	pete_writel("drivers/crypto/starfive/jh7110-aes.c:174", nonce[1], cryp->base + STARFIVE_AES_NONCE1);
+	pete_writel("drivers/crypto/starfive/jh7110-aes.c:175", nonce[2], cryp->base + STARFIVE_AES_NONCE2);
+	pete_writel("drivers/crypto/starfive/jh7110-aes.c:176", nonce[3], cryp->base + STARFIVE_AES_NONCE3);
 }
 
 static int starfive_aes_write_key(struct starfive_cryp_ctx *ctx)
@@ -182,20 +182,20 @@ static int starfive_aes_write_key(struct starfive_cryp_ctx *ctx)
 	u32 *key = (u32 *)ctx->key;
 
 	if (ctx->keylen >= AES_KEYSIZE_128) {
-		writel(key[0], cryp->base + STARFIVE_AES_KEY0);
-		writel(key[1], cryp->base + STARFIVE_AES_KEY1);
-		writel(key[2], cryp->base + STARFIVE_AES_KEY2);
-		writel(key[3], cryp->base + STARFIVE_AES_KEY3);
+		pete_writel("drivers/crypto/starfive/jh7110-aes.c:185", key[0], cryp->base + STARFIVE_AES_KEY0);
+		pete_writel("drivers/crypto/starfive/jh7110-aes.c:186", key[1], cryp->base + STARFIVE_AES_KEY1);
+		pete_writel("drivers/crypto/starfive/jh7110-aes.c:187", key[2], cryp->base + STARFIVE_AES_KEY2);
+		pete_writel("drivers/crypto/starfive/jh7110-aes.c:188", key[3], cryp->base + STARFIVE_AES_KEY3);
 	}
 
 	if (ctx->keylen >= AES_KEYSIZE_192) {
-		writel(key[4], cryp->base + STARFIVE_AES_KEY4);
-		writel(key[5], cryp->base + STARFIVE_AES_KEY5);
+		pete_writel("drivers/crypto/starfive/jh7110-aes.c:192", key[4], cryp->base + STARFIVE_AES_KEY4);
+		pete_writel("drivers/crypto/starfive/jh7110-aes.c:193", key[5], cryp->base + STARFIVE_AES_KEY5);
 	}
 
 	if (ctx->keylen >= AES_KEYSIZE_256) {
-		writel(key[6], cryp->base + STARFIVE_AES_KEY6);
-		writel(key[7], cryp->base + STARFIVE_AES_KEY7);
+		pete_writel("drivers/crypto/starfive/jh7110-aes.c:197", key[6], cryp->base + STARFIVE_AES_KEY6);
+		pete_writel("drivers/crypto/starfive/jh7110-aes.c:198", key[7], cryp->base + STARFIVE_AES_KEY7);
 	}
 
 	if (starfive_aes_wait_keydone(cryp))
@@ -240,7 +240,7 @@ static int starfive_aes_hw_init(struct starfive_cryp_ctx *ctx)
 	/* reset */
 	rctx->csr.aes.v = 0;
 	rctx->csr.aes.aesrst = 1;
-	writel(rctx->csr.aes.v, cryp->base + STARFIVE_AES_CSR);
+	pete_writel("drivers/crypto/starfive/jh7110-aes.c:243", rctx->csr.aes.v, cryp->base + STARFIVE_AES_CSR);
 
 	/* csr setup */
 	hw_mode = cryp->flags & FLG_MODE_MASK;
@@ -274,7 +274,7 @@ static int starfive_aes_hw_init(struct starfive_cryp_ctx *ctx)
 		rctx->csr.aes.vaes_start = 1;
 	}
 
-	writel(rctx->csr.aes.v, cryp->base + STARFIVE_AES_CSR);
+	pete_writel("drivers/crypto/starfive/jh7110-aes.c:277", rctx->csr.aes.v, cryp->base + STARFIVE_AES_CSR);
 
 	cryp->err = starfive_aes_write_key(ctx);
 	if (cryp->err)
@@ -319,10 +319,10 @@ static int starfive_aes_read_authtag(struct starfive_cryp_dev *cryp)
 
 	if (is_gcm(cryp))
 		for (i = 0; i < AES_BLOCK_32; i++, start_addr += 4)
-			cryp->tag_out[i] = readl(cryp->base + start_addr);
+			cryp->tag_out[i] = pete_readl("drivers/crypto/starfive/jh7110-aes.c:322", cryp->base + start_addr);
 	else
 		for (i = 0; i < AES_BLOCK_32; i++)
-			cryp->tag_out[i] = readl(cryp->base + STARFIVE_AES_AESDIO0R);
+			cryp->tag_out[i] = pete_readl("drivers/crypto/starfive/jh7110-aes.c:325", cryp->base + STARFIVE_AES_AESDIO0R);
 
 	if (is_encrypt(cryp)) {
 		scatterwalk_copychunks(cryp->tag_out, &cryp->out_walk, cryp->authsize, 1);
@@ -351,7 +351,7 @@ static void starfive_aes_finish_req(struct starfive_cryp_dev *cryp)
 	/* reset irq flags*/
 	csr.v = 0;
 	csr.aesrst = 1;
-	writel(csr.v, cryp->base + STARFIVE_AES_CSR);
+	pete_writel("drivers/crypto/starfive/jh7110-aes.c:354", csr.v, cryp->base + STARFIVE_AES_CSR);
 
 	if (cryp->authsize)
 		crypto_finalize_aead_request(cryp->engine, cryp->req.areq, err);
@@ -368,7 +368,7 @@ void starfive_aes_done_task(unsigned long param)
 	int i;
 
 	for (i = 0; i < AES_BLOCK_32; i++)
-		block[i] = readl(cryp->base + STARFIVE_AES_AESDIO0R);
+		block[i] = pete_readl("drivers/crypto/starfive/jh7110-aes.c:371", cryp->base + STARFIVE_AES_AESDIO0R);
 
 	scatterwalk_copychunks(block, &cryp->out_walk, min_t(size_t, AES_BLOCK_SIZE,
 							     cryp->total_out), 1);
@@ -386,11 +386,11 @@ void starfive_aes_done_task(unsigned long param)
 	cryp->total_in -= min_t(size_t, AES_BLOCK_SIZE, cryp->total_in);
 
 	for (i = 0; i < AES_BLOCK_32; i++)
-		writel(block[i], cryp->base + STARFIVE_AES_AESDIO0R);
+		pete_writel("drivers/crypto/starfive/jh7110-aes.c:389", block[i], cryp->base + STARFIVE_AES_AESDIO0R);
 
-	stat = readl(cryp->base + STARFIVE_IE_MASK_OFFSET);
+	stat = pete_readl("drivers/crypto/starfive/jh7110-aes.c:391", cryp->base + STARFIVE_IE_MASK_OFFSET);
 	stat &= ~STARFIVE_IE_MASK_AES_DONE;
-	writel(stat, cryp->base + STARFIVE_IE_MASK_OFFSET);
+	pete_writel("drivers/crypto/starfive/jh7110-aes.c:393", stat, cryp->base + STARFIVE_IE_MASK_OFFSET);
 }
 
 static int starfive_aes_gcm_write_adata(struct starfive_cryp_ctx *ctx)
@@ -404,13 +404,13 @@ static int starfive_aes_gcm_write_adata(struct starfive_cryp_ctx *ctx)
 	buffer = (u32 *)rctx->adata;
 
 	for (loop = 0; loop < total_len; loop += 4) {
-		writel(*buffer, cryp->base + STARFIVE_AES_NONCE0);
+		pete_writel("drivers/crypto/starfive/jh7110-aes.c:407", *buffer, cryp->base + STARFIVE_AES_NONCE0);
 		buffer++;
-		writel(*buffer, cryp->base + STARFIVE_AES_NONCE1);
+		pete_writel("drivers/crypto/starfive/jh7110-aes.c:409", *buffer, cryp->base + STARFIVE_AES_NONCE1);
 		buffer++;
-		writel(*buffer, cryp->base + STARFIVE_AES_NONCE2);
+		pete_writel("drivers/crypto/starfive/jh7110-aes.c:411", *buffer, cryp->base + STARFIVE_AES_NONCE2);
 		buffer++;
-		writel(*buffer, cryp->base + STARFIVE_AES_NONCE3);
+		pete_writel("drivers/crypto/starfive/jh7110-aes.c:413", *buffer, cryp->base + STARFIVE_AES_NONCE3);
 		buffer++;
 	}
 
@@ -432,21 +432,21 @@ static int starfive_aes_ccm_write_adata(struct starfive_cryp_ctx *ctx)
 	total_len = cryp->assoclen;
 
 	ci = rctx->adata;
-	writeb(*ci, cryp->base + STARFIVE_AES_AESDIO0R);
+	pete_writeb("drivers/crypto/starfive/jh7110-aes.c:435", *ci, cryp->base + STARFIVE_AES_AESDIO0R);
 	ci++;
-	writeb(*ci, cryp->base + STARFIVE_AES_AESDIO0R);
+	pete_writeb("drivers/crypto/starfive/jh7110-aes.c:437", *ci, cryp->base + STARFIVE_AES_AESDIO0R);
 	ci++;
 	total_len -= 2;
 	buffer = (u32 *)ci;
 
 	for (loop = 0; loop < 3; loop++, buffer++)
-		writel(*buffer, cryp->base + STARFIVE_AES_AESDIO0R);
+		pete_writel("drivers/crypto/starfive/jh7110-aes.c:443", *buffer, cryp->base + STARFIVE_AES_AESDIO0R);
 
 	total_len -= 12;
 
 	while (total_len > 0) {
 		for (loop = 0; loop < AES_BLOCK_32; loop++, buffer++)
-			writel(*buffer, cryp->base + STARFIVE_AES_AESDIO0R);
+			pete_writel("drivers/crypto/starfive/jh7110-aes.c:449", *buffer, cryp->base + STARFIVE_AES_AESDIO0R);
 
 		total_len -= AES_BLOCK_SIZE;
 	}
@@ -539,11 +539,11 @@ static int starfive_aes_do_one_req(struct crypto_engine *engine, void *areq)
 	cryp->total_in -= min_t(size_t, AES_BLOCK_SIZE, cryp->total_in);
 
 	for (i = 0; i < AES_BLOCK_32; i++)
-		writel(block[i], cryp->base + STARFIVE_AES_AESDIO0R);
+		pete_writel("drivers/crypto/starfive/jh7110-aes.c:542", block[i], cryp->base + STARFIVE_AES_AESDIO0R);
 
-	stat = readl(cryp->base + STARFIVE_IE_MASK_OFFSET);
+	stat = pete_readl("drivers/crypto/starfive/jh7110-aes.c:544", cryp->base + STARFIVE_IE_MASK_OFFSET);
 	stat &= ~STARFIVE_IE_MASK_AES_DONE;
-	writel(stat, cryp->base + STARFIVE_IE_MASK_OFFSET);
+	pete_writel("drivers/crypto/starfive/jh7110-aes.c:546", stat, cryp->base + STARFIVE_IE_MASK_OFFSET);
 
 	return 0;
 }
@@ -605,11 +605,11 @@ write_text:
 	cryp->total_in -= min_t(size_t, AES_BLOCK_SIZE, cryp->total_in);
 
 	for (i = 0; i < AES_BLOCK_32; i++)
-		writel(block[i], cryp->base + STARFIVE_AES_AESDIO0R);
+		pete_writel("drivers/crypto/starfive/jh7110-aes.c:608", block[i], cryp->base + STARFIVE_AES_AESDIO0R);
 
-	stat = readl(cryp->base + STARFIVE_IE_MASK_OFFSET);
+	stat = pete_readl("drivers/crypto/starfive/jh7110-aes.c:610", cryp->base + STARFIVE_IE_MASK_OFFSET);
 	stat &= ~STARFIVE_IE_MASK_AES_DONE;
-	writel(stat, cryp->base + STARFIVE_IE_MASK_OFFSET);
+	pete_writel("drivers/crypto/starfive/jh7110-aes.c:612", stat, cryp->base + STARFIVE_IE_MASK_OFFSET);
 
 	return 0;
 

@@ -111,8 +111,8 @@ bfa_ioc_cb_firmware_unlock(struct bfa_ioc_s *ioc)
 static void
 bfa_ioc_cb_notify_fail(struct bfa_ioc_s *ioc)
 {
-	writel(~0U, ioc->ioc_regs.err_set);
-	readl(ioc->ioc_regs.err_set);
+	pete_writel("drivers/scsi/bfa/bfa_ioc_cb.c:114", ~0U, ioc->ioc_regs.err_set);
+	pete_readl("drivers/scsi/bfa/bfa_ioc_cb.c:115", ioc->ioc_regs.err_set);
 }
 
 /*
@@ -215,7 +215,7 @@ bfa_ioc_cb_isr_mode_set(struct bfa_ioc_s *ioc, bfa_boolean_t msix)
 static bfa_boolean_t
 bfa_ioc_cb_sync_start(struct bfa_ioc_s *ioc)
 {
-	u32 ioc_fwstate = readl(ioc->ioc_regs.ioc_fwstate);
+	u32 ioc_fwstate = pete_readl("drivers/scsi/bfa/bfa_ioc_cb.c:218", ioc->ioc_regs.ioc_fwstate);
 
 	/**
 	 * Driver load time.  If the join bit is set,
@@ -224,8 +224,8 @@ bfa_ioc_cb_sync_start(struct bfa_ioc_s *ioc)
 	 * should clean it up, no matter which PCI fn.
 	 */
 	if (ioc_fwstate & BFA_IOC_CB_JOIN_MASK) {
-		writel(BFI_IOC_UNINIT, ioc->ioc_regs.ioc_fwstate);
-		writel(BFI_IOC_UNINIT, ioc->ioc_regs.alt_ioc_fwstate);
+		pete_writel("drivers/scsi/bfa/bfa_ioc_cb.c:227", BFI_IOC_UNINIT, ioc->ioc_regs.ioc_fwstate);
+		pete_writel("drivers/scsi/bfa/bfa_ioc_cb.c:228", BFI_IOC_UNINIT, ioc->ioc_regs.alt_ioc_fwstate);
 		return BFA_TRUE;
 	}
 
@@ -244,8 +244,8 @@ bfa_ioc_cb_ownership_reset(struct bfa_ioc_s *ioc)
 	 * before we clear it. If it is not locked, writing 1
 	 * will lock it instead of clearing it.
 	 */
-	readl(ioc->ioc_regs.ioc_sem_reg);
-	writel(1, ioc->ioc_regs.ioc_sem_reg);
+	pete_readl("drivers/scsi/bfa/bfa_ioc_cb.c:247", ioc->ioc_regs.ioc_sem_reg);
+	pete_writel("drivers/scsi/bfa/bfa_ioc_cb.c:248", 1, ioc->ioc_regs.ioc_sem_reg);
 }
 
 /*
@@ -254,35 +254,35 @@ bfa_ioc_cb_ownership_reset(struct bfa_ioc_s *ioc)
 static void
 bfa_ioc_cb_sync_join(struct bfa_ioc_s *ioc)
 {
-	u32 r32 = readl(ioc->ioc_regs.ioc_fwstate);
+	u32 r32 = pete_readl("drivers/scsi/bfa/bfa_ioc_cb.c:257", ioc->ioc_regs.ioc_fwstate);
 	u32 join_pos = bfa_ioc_cb_join_pos(ioc);
 
-	writel((r32 | join_pos), ioc->ioc_regs.ioc_fwstate);
+	pete_writel("drivers/scsi/bfa/bfa_ioc_cb.c:260", (r32 | join_pos), ioc->ioc_regs.ioc_fwstate);
 }
 
 static void
 bfa_ioc_cb_sync_leave(struct bfa_ioc_s *ioc)
 {
-	u32 r32 = readl(ioc->ioc_regs.ioc_fwstate);
+	u32 r32 = pete_readl("drivers/scsi/bfa/bfa_ioc_cb.c:266", ioc->ioc_regs.ioc_fwstate);
 	u32 join_pos = bfa_ioc_cb_join_pos(ioc);
 
-	writel((r32 & ~join_pos), ioc->ioc_regs.ioc_fwstate);
+	pete_writel("drivers/scsi/bfa/bfa_ioc_cb.c:269", (r32 & ~join_pos), ioc->ioc_regs.ioc_fwstate);
 }
 
 static void
 bfa_ioc_cb_set_cur_ioc_fwstate(struct bfa_ioc_s *ioc,
 			enum bfi_ioc_state fwstate)
 {
-	u32 r32 = readl(ioc->ioc_regs.ioc_fwstate);
+	u32 r32 = pete_readl("drivers/scsi/bfa/bfa_ioc_cb.c:276", ioc->ioc_regs.ioc_fwstate);
 
-	writel((fwstate | (r32 & BFA_IOC_CB_JOIN_MASK)),
+	pete_writel("drivers/scsi/bfa/bfa_ioc_cb.c:278", (fwstate | (r32 & BFA_IOC_CB_JOIN_MASK)),
 				ioc->ioc_regs.ioc_fwstate);
 }
 
 static enum bfi_ioc_state
 bfa_ioc_cb_get_cur_ioc_fwstate(struct bfa_ioc_s *ioc)
 {
-	return (enum bfi_ioc_state)(readl(ioc->ioc_regs.ioc_fwstate) &
+	return (enum bfi_ioc_state)(pete_readl("drivers/scsi/bfa/bfa_ioc_cb.c:285", ioc->ioc_regs.ioc_fwstate) &
 			BFA_IOC_CB_FWSTATE_MASK);
 }
 
@@ -290,16 +290,16 @@ static void
 bfa_ioc_cb_set_alt_ioc_fwstate(struct bfa_ioc_s *ioc,
 			enum bfi_ioc_state fwstate)
 {
-	u32 r32 = readl(ioc->ioc_regs.alt_ioc_fwstate);
+	u32 r32 = pete_readl("drivers/scsi/bfa/bfa_ioc_cb.c:293", ioc->ioc_regs.alt_ioc_fwstate);
 
-	writel((fwstate | (r32 & BFA_IOC_CB_JOIN_MASK)),
+	pete_writel("drivers/scsi/bfa/bfa_ioc_cb.c:295", (fwstate | (r32 & BFA_IOC_CB_JOIN_MASK)),
 				ioc->ioc_regs.alt_ioc_fwstate);
 }
 
 static enum bfi_ioc_state
 bfa_ioc_cb_get_alt_ioc_fwstate(struct bfa_ioc_s *ioc)
 {
-	return (enum bfi_ioc_state)(readl(ioc->ioc_regs.alt_ioc_fwstate) &
+	return (enum bfi_ioc_state)(pete_readl("drivers/scsi/bfa/bfa_ioc_cb.c:302", ioc->ioc_regs.alt_ioc_fwstate) &
 			BFA_IOC_CB_FWSTATE_MASK);
 }
 
@@ -366,36 +366,36 @@ bfa_ioc_cb_pll_init(void __iomem *rb, enum bfi_asic_mode fcmode)
 		__APP_PLL_LCLK_RSEL200500 | __APP_PLL_LCLK_P0_1(3U) |
 		__APP_PLL_LCLK_JITLMT0_1(3U) |
 		__APP_PLL_LCLK_CNTLMT0_1(3U);
-	join_bits = readl(rb + BFA_IOC0_STATE_REG) &
+	join_bits = pete_readl("drivers/scsi/bfa/bfa_ioc_cb.c:369", rb + BFA_IOC0_STATE_REG) &
 			BFA_IOC_CB_JOIN_MASK;
-	writel((BFI_IOC_UNINIT | join_bits), (rb + BFA_IOC0_STATE_REG));
-	join_bits = readl(rb + BFA_IOC1_STATE_REG) &
+	pete_writel("drivers/scsi/bfa/bfa_ioc_cb.c:371", (BFI_IOC_UNINIT | join_bits), (rb + BFA_IOC0_STATE_REG));
+	join_bits = pete_readl("drivers/scsi/bfa/bfa_ioc_cb.c:372", rb + BFA_IOC1_STATE_REG) &
 			BFA_IOC_CB_JOIN_MASK;
-	writel((BFI_IOC_UNINIT | join_bits), (rb + BFA_IOC1_STATE_REG));
-	writel(0xffffffffU, (rb + HOSTFN0_INT_MSK));
-	writel(0xffffffffU, (rb + HOSTFN1_INT_MSK));
-	writel(0xffffffffU, (rb + HOSTFN0_INT_STATUS));
-	writel(0xffffffffU, (rb + HOSTFN1_INT_STATUS));
-	writel(0xffffffffU, (rb + HOSTFN0_INT_MSK));
-	writel(0xffffffffU, (rb + HOSTFN1_INT_MSK));
-	writel(__APP_PLL_SCLK_LOGIC_SOFT_RESET, rb + APP_PLL_SCLK_CTL_REG);
-	writel(__APP_PLL_SCLK_BYPASS | __APP_PLL_SCLK_LOGIC_SOFT_RESET,
+	pete_writel("drivers/scsi/bfa/bfa_ioc_cb.c:374", (BFI_IOC_UNINIT | join_bits), (rb + BFA_IOC1_STATE_REG));
+	pete_writel("drivers/scsi/bfa/bfa_ioc_cb.c:375", 0xffffffffU, (rb + HOSTFN0_INT_MSK));
+	pete_writel("drivers/scsi/bfa/bfa_ioc_cb.c:376", 0xffffffffU, (rb + HOSTFN1_INT_MSK));
+	pete_writel("drivers/scsi/bfa/bfa_ioc_cb.c:377", 0xffffffffU, (rb + HOSTFN0_INT_STATUS));
+	pete_writel("drivers/scsi/bfa/bfa_ioc_cb.c:378", 0xffffffffU, (rb + HOSTFN1_INT_STATUS));
+	pete_writel("drivers/scsi/bfa/bfa_ioc_cb.c:379", 0xffffffffU, (rb + HOSTFN0_INT_MSK));
+	pete_writel("drivers/scsi/bfa/bfa_ioc_cb.c:380", 0xffffffffU, (rb + HOSTFN1_INT_MSK));
+	pete_writel("drivers/scsi/bfa/bfa_ioc_cb.c:381", __APP_PLL_SCLK_LOGIC_SOFT_RESET, rb + APP_PLL_SCLK_CTL_REG);
+	pete_writel("drivers/scsi/bfa/bfa_ioc_cb.c:382", __APP_PLL_SCLK_BYPASS | __APP_PLL_SCLK_LOGIC_SOFT_RESET,
 			rb + APP_PLL_SCLK_CTL_REG);
-	writel(__APP_PLL_LCLK_LOGIC_SOFT_RESET, rb + APP_PLL_LCLK_CTL_REG);
-	writel(__APP_PLL_LCLK_BYPASS | __APP_PLL_LCLK_LOGIC_SOFT_RESET,
+	pete_writel("drivers/scsi/bfa/bfa_ioc_cb.c:384", __APP_PLL_LCLK_LOGIC_SOFT_RESET, rb + APP_PLL_LCLK_CTL_REG);
+	pete_writel("drivers/scsi/bfa/bfa_ioc_cb.c:385", __APP_PLL_LCLK_BYPASS | __APP_PLL_LCLK_LOGIC_SOFT_RESET,
 			rb + APP_PLL_LCLK_CTL_REG);
 	udelay(2);
-	writel(__APP_PLL_SCLK_LOGIC_SOFT_RESET, rb + APP_PLL_SCLK_CTL_REG);
-	writel(__APP_PLL_LCLK_LOGIC_SOFT_RESET, rb + APP_PLL_LCLK_CTL_REG);
-	writel(pll_sclk | __APP_PLL_SCLK_LOGIC_SOFT_RESET,
+	pete_writel("drivers/scsi/bfa/bfa_ioc_cb.c:388", __APP_PLL_SCLK_LOGIC_SOFT_RESET, rb + APP_PLL_SCLK_CTL_REG);
+	pete_writel("drivers/scsi/bfa/bfa_ioc_cb.c:389", __APP_PLL_LCLK_LOGIC_SOFT_RESET, rb + APP_PLL_LCLK_CTL_REG);
+	pete_writel("drivers/scsi/bfa/bfa_ioc_cb.c:390", pll_sclk | __APP_PLL_SCLK_LOGIC_SOFT_RESET,
 			rb + APP_PLL_SCLK_CTL_REG);
-	writel(pll_fclk | __APP_PLL_LCLK_LOGIC_SOFT_RESET,
+	pete_writel("drivers/scsi/bfa/bfa_ioc_cb.c:392", pll_fclk | __APP_PLL_LCLK_LOGIC_SOFT_RESET,
 			rb + APP_PLL_LCLK_CTL_REG);
 	udelay(2000);
-	writel(0xffffffffU, (rb + HOSTFN0_INT_STATUS));
-	writel(0xffffffffU, (rb + HOSTFN1_INT_STATUS));
-	writel(pll_sclk, (rb + APP_PLL_SCLK_CTL_REG));
-	writel(pll_fclk, (rb + APP_PLL_LCLK_CTL_REG));
+	pete_writel("drivers/scsi/bfa/bfa_ioc_cb.c:395", 0xffffffffU, (rb + HOSTFN0_INT_STATUS));
+	pete_writel("drivers/scsi/bfa/bfa_ioc_cb.c:396", 0xffffffffU, (rb + HOSTFN1_INT_STATUS));
+	pete_writel("drivers/scsi/bfa/bfa_ioc_cb.c:397", pll_sclk, (rb + APP_PLL_SCLK_CTL_REG));
+	pete_writel("drivers/scsi/bfa/bfa_ioc_cb.c:398", pll_fclk, (rb + APP_PLL_LCLK_CTL_REG));
 
 	return BFA_STATUS_OK;
 }

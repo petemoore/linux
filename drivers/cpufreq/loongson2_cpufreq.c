@@ -129,11 +129,11 @@ static void loongson2_cpu_wait(void)
 	u32 cpu_freq;
 
 	spin_lock_irqsave(&loongson2_wait_lock, flags);
-	cpu_freq = readl(LOONGSON_CHIPCFG);
+	cpu_freq = pete_readl("drivers/cpufreq/loongson2_cpufreq.c:132", LOONGSON_CHIPCFG);
 	/* Put CPU into wait mode */
-	writel(readl(LOONGSON_CHIPCFG) & ~0x7, LOONGSON_CHIPCFG);
+	pete_writel("drivers/cpufreq/loongson2_cpufreq.c:134", pete_readl("drivers/cpufreq/loongson2_cpufreq.c:134", LOONGSON_CHIPCFG) & ~0x7, LOONGSON_CHIPCFG);
 	/* Restore CPU state */
-	writel(cpu_freq, LOONGSON_CHIPCFG);
+	pete_writel("drivers/cpufreq/loongson2_cpufreq.c:136", cpu_freq, LOONGSON_CHIPCFG);
 	spin_unlock_irqrestore(&loongson2_wait_lock, flags);
 	local_irq_enable();
 }

@@ -63,18 +63,18 @@ static void gpu_enable_i2c_bus(struct gpu_i2c_dev *i2cd)
 	u32 val;
 
 	/* enable I2C */
-	val = readl(i2cd->regs + I2C_MST_HYBRID_PADCTL);
+	val = pete_readl("drivers/i2c/busses/i2c-nvidia-gpu.c:66", i2cd->regs + I2C_MST_HYBRID_PADCTL);
 	val |= I2C_MST_HYBRID_PADCTL_MODE_I2C |
 		I2C_MST_HYBRID_PADCTL_I2C_SCL_INPUT_RCV |
 		I2C_MST_HYBRID_PADCTL_I2C_SDA_INPUT_RCV;
-	writel(val, i2cd->regs + I2C_MST_HYBRID_PADCTL);
+	pete_writel("drivers/i2c/busses/i2c-nvidia-gpu.c:70", val, i2cd->regs + I2C_MST_HYBRID_PADCTL);
 
 	/* enable 100KHZ mode */
 	val = I2C_MST_I2C0_TIMING_SCL_PERIOD_100KHZ;
 	val |= (I2C_MST_I2C0_TIMING_TIMEOUT_CLK_CNT_MAX
 	    << I2C_MST_I2C0_TIMING_TIMEOUT_CLK_CNT);
 	val |= I2C_MST_I2C0_TIMING_TIMEOUT_CHECK;
-	writel(val, i2cd->regs + I2C_MST_I2C0_TIMING);
+	pete_writel("drivers/i2c/busses/i2c-nvidia-gpu.c:77", val, i2cd->regs + I2C_MST_I2C0_TIMING);
 }
 
 static int gpu_i2c_check_status(struct gpu_i2c_dev *i2cd)
@@ -92,7 +92,7 @@ static int gpu_i2c_check_status(struct gpu_i2c_dev *i2cd)
 		return -ETIMEDOUT;
 	}
 
-	val = readl(i2cd->regs + I2C_MST_CNTL);
+	val = pete_readl("drivers/i2c/busses/i2c-nvidia-gpu.c:95", i2cd->regs + I2C_MST_CNTL);
 	switch (val & I2C_MST_CNTL_STATUS) {
 	case I2C_MST_CNTL_STATUS_OKAY:
 		return 0;
@@ -113,13 +113,13 @@ static int gpu_i2c_read(struct gpu_i2c_dev *i2cd, u8 *data, u16 len)
 	val = I2C_MST_CNTL_GEN_START | I2C_MST_CNTL_CMD_READ |
 		(len << I2C_MST_CNTL_BURST_SIZE_SHIFT) |
 		I2C_MST_CNTL_CYCLE_TRIGGER | I2C_MST_CNTL_GEN_NACK;
-	writel(val, i2cd->regs + I2C_MST_CNTL);
+	pete_writel("drivers/i2c/busses/i2c-nvidia-gpu.c:116", val, i2cd->regs + I2C_MST_CNTL);
 
 	status = gpu_i2c_check_status(i2cd);
 	if (status < 0)
 		return status;
 
-	val = readl(i2cd->regs + I2C_MST_DATA);
+	val = pete_readl("drivers/i2c/busses/i2c-nvidia-gpu.c:122", i2cd->regs + I2C_MST_DATA);
 	switch (len) {
 	case 1:
 		data[0] = val;
@@ -141,13 +141,13 @@ static int gpu_i2c_read(struct gpu_i2c_dev *i2cd, u8 *data, u16 len)
 
 static int gpu_i2c_start(struct gpu_i2c_dev *i2cd)
 {
-	writel(I2C_MST_CNTL_GEN_START, i2cd->regs + I2C_MST_CNTL);
+	pete_writel("drivers/i2c/busses/i2c-nvidia-gpu.c:144", I2C_MST_CNTL_GEN_START, i2cd->regs + I2C_MST_CNTL);
 	return gpu_i2c_check_status(i2cd);
 }
 
 static int gpu_i2c_stop(struct gpu_i2c_dev *i2cd)
 {
-	writel(I2C_MST_CNTL_GEN_STOP, i2cd->regs + I2C_MST_CNTL);
+	pete_writel("drivers/i2c/busses/i2c-nvidia-gpu.c:150", I2C_MST_CNTL_GEN_STOP, i2cd->regs + I2C_MST_CNTL);
 	return gpu_i2c_check_status(i2cd);
 }
 
@@ -155,10 +155,10 @@ static int gpu_i2c_write(struct gpu_i2c_dev *i2cd, u8 data)
 {
 	u32 val;
 
-	writel(data, i2cd->regs + I2C_MST_DATA);
+	pete_writel("drivers/i2c/busses/i2c-nvidia-gpu.c:158", data, i2cd->regs + I2C_MST_DATA);
 
 	val = I2C_MST_CNTL_CMD_WRITE | (1 << I2C_MST_CNTL_BURST_SIZE_SHIFT);
-	writel(val, i2cd->regs + I2C_MST_CNTL);
+	pete_writel("drivers/i2c/busses/i2c-nvidia-gpu.c:161", val, i2cd->regs + I2C_MST_CNTL);
 
 	return gpu_i2c_check_status(i2cd);
 }
@@ -179,7 +179,7 @@ static int gpu_i2c_master_xfer(struct i2c_adapter *adap,
 	for (i = 0; i < num; i++) {
 		if (msgs[i].flags & I2C_M_RD) {
 			/* program client address before starting read */
-			writel(msgs[i].addr, i2cd->regs + I2C_MST_ADDR);
+			pete_writel("drivers/i2c/busses/i2c-nvidia-gpu.c:182", msgs[i].addr, i2cd->regs + I2C_MST_ADDR);
 			/* gpu_i2c_read has implicit start */
 			status = gpu_i2c_read(i2cd, msgs[i].buf, msgs[i].len);
 			if (status < 0)

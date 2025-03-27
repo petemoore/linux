@@ -55,13 +55,13 @@ const struct pmc_bit_map msr_map[] = {
 
 static inline u32 pmc_core_reg_read(struct pmc *pmc, int reg_offset)
 {
-	return readl(pmc->regbase + reg_offset);
+	return pete_readl("drivers/platform/x86/intel/pmc/core.c:58", pmc->regbase + reg_offset);
 }
 
 static inline void pmc_core_reg_write(struct pmc *pmc, int reg_offset,
 				      u32 val)
 {
-	writel(val, pmc->regbase + reg_offset);
+	pete_writel("drivers/platform/x86/intel/pmc/core.c:64", val, pmc->regbase + reg_offset);
 }
 
 static inline u64 pmc_core_adjust_slp_s0_step(struct pmc *pmc, u32 value)
@@ -296,7 +296,7 @@ static bool slps0_dbg_latch;
 
 static inline u8 pmc_core_reg_read_byte(struct pmc *pmc, int offset)
 {
-	return readb(pmc->regbase + offset);
+	return pete_readb("drivers/platform/x86/intel/pmc/core.c:299", pmc->regbase + offset);
 }
 
 static void pmc_core_display_map(struct seq_file *s, int index, int idx, int ip,

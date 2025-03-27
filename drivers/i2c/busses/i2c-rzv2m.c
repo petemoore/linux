@@ -77,12 +77,12 @@ static const struct bitrate_config bitrate_configs[] = {
 
 static inline void bit_setl(void __iomem *addr, u32 val)
 {
-	writel(readl(addr) | val, addr);
+	pete_writel("drivers/i2c/busses/i2c-rzv2m.c:80", pete_readl("drivers/i2c/busses/i2c-rzv2m.c:80", addr) | val, addr);
 }
 
 static inline void bit_clrl(void __iomem *addr, u32 val)
 {
-	writel(readl(addr) & ~val, addr);
+	pete_writel("drivers/i2c/busses/i2c-rzv2m.c:85", pete_readl("drivers/i2c/busses/i2c-rzv2m.c:85", addr) & ~val, addr);
 }
 
 static irqreturn_t rzv2m_i2c_tia_irq_handler(int this_irq, void *dev_id)
@@ -159,21 +159,21 @@ static void rzv2m_i2c_init(struct rzv2m_i2c_priv *priv)
 	u32 i2c_ctl1;
 
 	/* i2c disable */
-	writel(0, priv->base + IICB0CTL0);
+	pete_writel("drivers/i2c/busses/i2c-rzv2m.c:162", 0, priv->base + IICB0CTL0);
 
 	/* IICB0CTL1 setting */
 	i2c_ctl1 = IICB0SLSE;
 	if (priv->bus_mode == RZV2M_I2C_400K)
 		i2c_ctl1 |= IICB0MDSC;
-	writel(i2c_ctl1, priv->base + IICB0CTL1);
+	pete_writel("drivers/i2c/busses/i2c-rzv2m.c:168", i2c_ctl1, priv->base + IICB0CTL1);
 
 	/* IICB0WL IICB0WH setting */
-	writel(priv->iicb0wl, priv->base + IICB0WL);
-	writel(priv->iicb0wh, priv->base + IICB0WH);
+	pete_writel("drivers/i2c/busses/i2c-rzv2m.c:171", priv->iicb0wl, priv->base + IICB0WL);
+	pete_writel("drivers/i2c/busses/i2c-rzv2m.c:172", priv->iicb0wh, priv->base + IICB0WH);
 
 	/* i2c enable after setting */
 	i2c_ctl0 = IICB0SLWT | IICB0SLAC | IICB0IICE;
-	writel(i2c_ctl0, priv->base + IICB0CTL0);
+	pete_writel("drivers/i2c/busses/i2c-rzv2m.c:176", i2c_ctl0, priv->base + IICB0CTL0);
 }
 
 static int rzv2m_i2c_write_with_ack(struct rzv2m_i2c_priv *priv, u32 data)
@@ -182,7 +182,7 @@ static int rzv2m_i2c_write_with_ack(struct rzv2m_i2c_priv *priv, u32 data)
 
 	reinit_completion(&priv->msg_tia_done);
 
-	writel(data, priv->base + IICB0DAT);
+	pete_writel("drivers/i2c/busses/i2c-rzv2m.c:185", data, priv->base + IICB0DAT);
 
 	time_left = wait_for_completion_timeout(&priv->msg_tia_done,
 						priv->adap.timeout);
@@ -190,7 +190,7 @@ static int rzv2m_i2c_write_with_ack(struct rzv2m_i2c_priv *priv, u32 data)
 		return -ETIMEDOUT;
 
 	/* Confirm ACK */
-	if ((readl(priv->base + IICB0STR0) & IICB0SSAC) != IICB0SSAC)
+	if ((pete_readl("drivers/i2c/busses/i2c-rzv2m.c:193", priv->base + IICB0STR0) & IICB0SSAC) != IICB0SSAC)
 		return -ENXIO;
 
 	return 0;
@@ -208,7 +208,7 @@ static int rzv2m_i2c_read_with_ack(struct rzv2m_i2c_priv *priv, u8 *data,
 	bit_clrl(priv->base + IICB0CTL0, IICB0SLWT);
 
 	/* Exit the wait state */
-	writel(IICB0WRET, priv->base + IICB0TRG);
+	pete_writel("drivers/i2c/busses/i2c-rzv2m.c:211", IICB0WRET, priv->base + IICB0TRG);
 
 	/* Wait for transaction */
 	time_left = wait_for_completion_timeout(&priv->msg_tia_done,
@@ -221,13 +221,13 @@ static int rzv2m_i2c_read_with_ack(struct rzv2m_i2c_priv *priv, u8 *data,
 		bit_clrl(priv->base + IICB0CTL0, IICB0SLAC);
 
 		/* Read data*/
-		data_tmp = readl(priv->base + IICB0DAT);
+		data_tmp = pete_readl("drivers/i2c/busses/i2c-rzv2m.c:224", priv->base + IICB0DAT);
 
 		/* Interrupt request timing : 9th clock */
 		bit_setl(priv->base + IICB0CTL0, IICB0SLWT);
 
 		/* Exit the wait state */
-		writel(IICB0WRET, priv->base + IICB0TRG);
+		pete_writel("drivers/i2c/busses/i2c-rzv2m.c:230", IICB0WRET, priv->base + IICB0TRG);
 
 		/* Wait for transaction */
 		time_left = wait_for_completion_timeout(&priv->msg_tia_done,
@@ -239,7 +239,7 @@ static int rzv2m_i2c_read_with_ack(struct rzv2m_i2c_priv *priv, u8 *data,
 		bit_setl(priv->base + IICB0CTL0, IICB0SLAC);
 	} else {
 		/* Read data */
-		data_tmp = readl(priv->base + IICB0DAT);
+		data_tmp = pete_readl("drivers/i2c/busses/i2c-rzv2m.c:242", priv->base + IICB0DAT);
 	}
 
 	*data = data_tmp;
@@ -315,7 +315,7 @@ static int rzv2m_i2c_stop_condition(struct rzv2m_i2c_priv *priv)
 	u32 value;
 
 	/* Send stop condition */
-	writel(IICB0SPT, priv->base + IICB0TRG);
+	pete_writel("drivers/i2c/busses/i2c-rzv2m.c:318", IICB0SPT, priv->base + IICB0TRG);
 	return readl_poll_timeout(priv->base + IICB0STR0,
 				  value, value & IICB0SSSP,
 				  100, jiffies_to_usecs(priv->adap.timeout));
@@ -328,7 +328,7 @@ static int rzv2m_i2c_master_xfer_msg(struct rzv2m_i2c_priv *priv,
 	int ret, read = !!(msg->flags & I2C_M_RD);
 
 	/* Send start condition */
-	writel(IICB0STT, priv->base + IICB0TRG);
+	pete_writel("drivers/i2c/busses/i2c-rzv2m.c:331", IICB0STT, priv->base + IICB0TRG);
 
 	ret = rzv2m_i2c_send_address(priv, msg);
 	if (!ret) {
@@ -363,7 +363,7 @@ static int rzv2m_i2c_master_xfer(struct i2c_adapter *adap,
 	if (ret < 0)
 		return ret;
 
-	if (readl(priv->base + IICB0STR0) & IICB0SSBS) {
+	if (pete_readl("drivers/i2c/busses/i2c-rzv2m.c:366", priv->base + IICB0STR0) & IICB0SSBS) {
 		ret = -EAGAIN;
 		goto out;
 	}

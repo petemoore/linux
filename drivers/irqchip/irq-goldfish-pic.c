@@ -38,7 +38,7 @@ static void goldfish_pic_cascade(struct irq_desc *desc)
 
 	chained_irq_enter(host_chip, desc);
 
-	pending = readl(gfpic->base + GFPIC_REG_IRQ_PENDING);
+	pending = pete_readl("drivers/irqchip/irq-goldfish-pic.c:41", gfpic->base + GFPIC_REG_IRQ_PENDING);
 	while (pending) {
 		hwirq = __fls(pending);
 		generic_handle_domain_irq(gfpic->irq_domain, hwirq);
@@ -82,7 +82,7 @@ static int __init goldfish_pic_of_init(struct device_node *of_node,
 	}
 
 	/* Mask interrupts. */
-	writel(1, gfpic->base + GFPIC_REG_IRQ_DISABLE_ALL);
+	pete_writel("drivers/irqchip/irq-goldfish-pic.c:85", 1, gfpic->base + GFPIC_REG_IRQ_DISABLE_ALL);
 
 	gc = irq_alloc_generic_chip("GFPIC", 1, GFPIC_IRQ_BASE, gfpic->base,
 				    handle_level_irq);

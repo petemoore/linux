@@ -63,9 +63,9 @@ void mtk_gamma_set_common(void __iomem *regs, struct drm_crtc_state *state, bool
 	u32 diff[3] = {0};
 
 	if (state->gamma_lut) {
-		reg = readl(regs + DISP_GAMMA_CFG);
+		reg = pete_readl("drivers/gpu/drm/mediatek/mtk_disp_gamma.c:66", regs + DISP_GAMMA_CFG);
 		reg = reg | GAMMA_LUT_EN;
-		writel(reg, regs + DISP_GAMMA_CFG);
+		pete_writel("drivers/gpu/drm/mediatek/mtk_disp_gamma.c:68", reg, regs + DISP_GAMMA_CFG);
 		lut_base = regs + DISP_GAMMA_LUT;
 		lut = (struct drm_color_lut *)state->gamma_lut->data;
 		for (i = 0; i < MTK_LUT_SIZE; i++) {
@@ -83,7 +83,7 @@ void mtk_gamma_set_common(void __iomem *regs, struct drm_crtc_state *state, bool
 					((diff[1] & LUT_10BIT_MASK) << 10) +
 					(diff[2] & LUT_10BIT_MASK);
 			}
-			writel(word, (lut_base + i * 4));
+			pete_writel("drivers/gpu/drm/mediatek/mtk_disp_gamma.c:86", word, (lut_base + i * 4));
 		}
 	}
 }
@@ -116,7 +116,7 @@ void mtk_gamma_start(struct device *dev)
 {
 	struct mtk_disp_gamma *gamma = dev_get_drvdata(dev);
 
-	writel(GAMMA_EN, gamma->regs + DISP_GAMMA_EN);
+	pete_writel("drivers/gpu/drm/mediatek/mtk_disp_gamma.c:119", GAMMA_EN, gamma->regs + DISP_GAMMA_EN);
 }
 
 void mtk_gamma_stop(struct device *dev)

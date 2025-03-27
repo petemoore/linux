@@ -131,16 +131,16 @@ static void read_register(void __iomem *vaddr, u64 *val, unsigned int bit_width)
 {
 	switch (bit_width) {
 	case 8:
-		*val = readb(vaddr);
+		*val = pete_readb("drivers/mailbox/pcc.c:134", vaddr);
 		break;
 	case 16:
-		*val = readw(vaddr);
+		*val = pete_readw("drivers/mailbox/pcc.c:137", vaddr);
 		break;
 	case 32:
-		*val = readl(vaddr);
+		*val = pete_readl("drivers/mailbox/pcc.c:140", vaddr);
 		break;
 	case 64:
-		*val = readq(vaddr);
+		*val = pete_readq("drivers/mailbox/pcc.c:143", vaddr);
 		break;
 	}
 }
@@ -149,16 +149,16 @@ static void write_register(void __iomem *vaddr, u64 val, unsigned int bit_width)
 {
 	switch (bit_width) {
 	case 8:
-		writeb(val, vaddr);
+		pete_writeb("drivers/mailbox/pcc.c:152", val, vaddr);
 		break;
 	case 16:
-		writew(val, vaddr);
+		pete_writew("drivers/mailbox/pcc.c:155", val, vaddr);
 		break;
 	case 32:
-		writel(val, vaddr);
+		pete_writel("drivers/mailbox/pcc.c:158", val, vaddr);
 		break;
 	case 64:
-		writeq(val, vaddr);
+		pete_writeq("drivers/mailbox/pcc.c:161", val, vaddr);
 		break;
 	}
 }

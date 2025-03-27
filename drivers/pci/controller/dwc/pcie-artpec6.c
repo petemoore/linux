@@ -159,7 +159,7 @@ static void artpec6_pcie_wait_for_phy_a6(struct artpec6_pcie *artpec6_pcie)
 	retries = 50;
 	do {
 		usleep_range(1000, 2000);
-		val = readl(artpec6_pcie->phy_base + PHY_STATUS);
+		val = pete_readl("drivers/pci/controller/dwc/pcie-artpec6.c:162", artpec6_pcie->phy_base + PHY_STATUS);
 		retries--;
 	} while (retries && !(val & PHY_COSPLLLOCK));
 	if (!retries)
@@ -187,8 +187,8 @@ static void artpec6_pcie_wait_for_phy_a7(struct artpec6_pcie *artpec6_pcie)
 	retries = 50;
 	do {
 		usleep_range(1000, 2000);
-		phy_status_tx = readw(artpec6_pcie->phy_base + PHY_TX_ASIC_OUT);
-		phy_status_rx = readw(artpec6_pcie->phy_base + PHY_RX_ASIC_OUT);
+		phy_status_tx = pete_readw("drivers/pci/controller/dwc/pcie-artpec6.c:190", artpec6_pcie->phy_base + PHY_TX_ASIC_OUT);
+		phy_status_rx = pete_readw("drivers/pci/controller/dwc/pcie-artpec6.c:191", artpec6_pcie->phy_base + PHY_RX_ASIC_OUT);
 		retries--;
 	} while (retries && ((phy_status_tx & PHY_TX_ASIC_OUT_TX_ACK) ||
 				(phy_status_rx & PHY_RX_ASIC_OUT_ACK)));

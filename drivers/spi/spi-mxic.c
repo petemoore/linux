@@ -216,12 +216,12 @@ static void mxic_spi_clk_disable(struct mxic_spi *mxic)
 
 static void mxic_spi_set_input_delay_dqs(struct mxic_spi *mxic, u8 idly_code)
 {
-	writel(IDLY_CODE_VAL(0, idly_code) |
+	pete_writel("drivers/spi/spi-mxic.c:219", IDLY_CODE_VAL(0, idly_code) |
 	       IDLY_CODE_VAL(1, idly_code) |
 	       IDLY_CODE_VAL(2, idly_code) |
 	       IDLY_CODE_VAL(3, idly_code),
 	       mxic->regs + IDLY_CODE(0));
-	writel(IDLY_CODE_VAL(4, idly_code) |
+	pete_writel("drivers/spi/spi-mxic.c:224", IDLY_CODE_VAL(4, idly_code) |
 	       IDLY_CODE_VAL(5, idly_code) |
 	       IDLY_CODE_VAL(6, idly_code) |
 	       IDLY_CODE_VAL(7, idly_code),
@@ -284,12 +284,12 @@ static int mxic_spi_set_freq(struct mxic_spi *mxic, unsigned long freq)
 
 static void mxic_spi_hw_init(struct mxic_spi *mxic)
 {
-	writel(0, mxic->regs + DATA_STROB);
-	writel(INT_STS_ALL, mxic->regs + INT_STS_EN);
-	writel(0, mxic->regs + HC_EN);
-	writel(0, mxic->regs + LRD_CFG);
-	writel(0, mxic->regs + LRD_CTRL);
-	writel(HC_CFG_NIO(1) | HC_CFG_TYPE(0, HC_CFG_TYPE_SPI_NOR) |
+	pete_writel("drivers/spi/spi-mxic.c:287", 0, mxic->regs + DATA_STROB);
+	pete_writel("drivers/spi/spi-mxic.c:288", INT_STS_ALL, mxic->regs + INT_STS_EN);
+	pete_writel("drivers/spi/spi-mxic.c:289", 0, mxic->regs + HC_EN);
+	pete_writel("drivers/spi/spi-mxic.c:290", 0, mxic->regs + LRD_CFG);
+	pete_writel("drivers/spi/spi-mxic.c:291", 0, mxic->regs + LRD_CTRL);
+	pete_writel("drivers/spi/spi-mxic.c:292", HC_CFG_NIO(1) | HC_CFG_TYPE(0, HC_CFG_TYPE_SPI_NOR) |
 	       HC_CFG_SLV_ACT(0) | HC_CFG_MAN_CS_EN | HC_CFG_IDLE_SIO_LVL(1),
 	       mxic->regs + HC_CFG);
 }
@@ -361,7 +361,7 @@ static int mxic_spi_data_xfer(struct mxic_spi *mxic, const void *txbuf,
 		if (ret)
 			return ret;
 
-		writel(data, mxic->regs + TXD(nbytes % 4));
+		pete_writel("drivers/spi/spi-mxic.c:364", data, mxic->regs + TXD(nbytes % 4));
 
 		ret = readl_poll_timeout(mxic->regs + INT_STS, sts,
 					 sts & INT_TX_EMPTY, 0, USEC_PER_SEC);
@@ -374,12 +374,12 @@ static int mxic_spi_data_xfer(struct mxic_spi *mxic, const void *txbuf,
 		if (ret)
 			return ret;
 
-		data = readl(mxic->regs + RXD);
+		data = pete_readl("drivers/spi/spi-mxic.c:377", mxic->regs + RXD);
 		if (rxbuf) {
 			data >>= (8 * (4 - nbytes));
 			memcpy(rxbuf + pos, &data, nbytes);
 		}
-		WARN_ON(readl(mxic->regs + INT_STS) & INT_RX_NOT_EMPTY);
+		WARN_ON(pete_readl("drivers/spi/spi-mxic.c:382", mxic->regs + INT_STS) & INT_RX_NOT_EMPTY);
 
 		pos += nbytes;
 	}
@@ -397,14 +397,14 @@ static ssize_t mxic_spi_mem_dirmap_read(struct spi_mem_dirmap_desc *desc,
 	if (WARN_ON(offs + desc->info.offset + len > U32_MAX))
 		return -EINVAL;
 
-	writel(mxic_spi_prep_hc_cfg(desc->mem->spi, 0), mxic->regs + HC_CFG);
+	pete_writel("drivers/spi/spi-mxic.c:400", mxic_spi_prep_hc_cfg(desc->mem->spi, 0), mxic->regs + HC_CFG);
 
-	writel(mxic_spi_mem_prep_op_cfg(&desc->info.op_tmpl, len),
+	pete_writel("drivers/spi/spi-mxic.c:402", mxic_spi_mem_prep_op_cfg(&desc->info.op_tmpl, len),
 	       mxic->regs + LRD_CFG);
-	writel(desc->info.offset + offs, mxic->regs + LRD_ADDR);
+	pete_writel("drivers/spi/spi-mxic.c:404", desc->info.offset + offs, mxic->regs + LRD_ADDR);
 	len = min_t(size_t, len, mxic->linear.size);
-	writel(len, mxic->regs + LRD_RANGE);
-	writel(LMODE_CMD0(desc->info.op_tmpl.cmd.opcode) |
+	pete_writel("drivers/spi/spi-mxic.c:406", len, mxic->regs + LRD_RANGE);
+	pete_writel("drivers/spi/spi-mxic.c:407", LMODE_CMD0(desc->info.op_tmpl.cmd.opcode) |
 	       LMODE_SLV_ACT(spi_get_chipselect(desc->mem->spi, 0)) |
 	       LMODE_EN,
 	       mxic->regs + LRD_CTRL);
@@ -419,8 +419,8 @@ static ssize_t mxic_spi_mem_dirmap_read(struct spi_mem_dirmap_desc *desc,
 		memcpy_fromio(buf, mxic->linear.map, len);
 	}
 
-	writel(INT_LRD_DIS, mxic->regs + INT_STS);
-	writel(0, mxic->regs + LRD_CTRL);
+	pete_writel("drivers/spi/spi-mxic.c:422", INT_LRD_DIS, mxic->regs + INT_STS);
+	pete_writel("drivers/spi/spi-mxic.c:423", 0, mxic->regs + LRD_CTRL);
 
 	ret = readl_poll_timeout(mxic->regs + INT_STS, sts,
 				 sts & INT_LRD_DIS, 0, USEC_PER_SEC);
@@ -441,14 +441,14 @@ static ssize_t mxic_spi_mem_dirmap_write(struct spi_mem_dirmap_desc *desc,
 	if (WARN_ON(offs + desc->info.offset + len > U32_MAX))
 		return -EINVAL;
 
-	writel(mxic_spi_prep_hc_cfg(desc->mem->spi, 0), mxic->regs + HC_CFG);
+	pete_writel("drivers/spi/spi-mxic.c:444", mxic_spi_prep_hc_cfg(desc->mem->spi, 0), mxic->regs + HC_CFG);
 
-	writel(mxic_spi_mem_prep_op_cfg(&desc->info.op_tmpl, len),
+	pete_writel("drivers/spi/spi-mxic.c:446", mxic_spi_mem_prep_op_cfg(&desc->info.op_tmpl, len),
 	       mxic->regs + LWR_CFG);
-	writel(desc->info.offset + offs, mxic->regs + LWR_ADDR);
+	pete_writel("drivers/spi/spi-mxic.c:448", desc->info.offset + offs, mxic->regs + LWR_ADDR);
 	len = min_t(size_t, len, mxic->linear.size);
-	writel(len, mxic->regs + LWR_RANGE);
-	writel(LMODE_CMD0(desc->info.op_tmpl.cmd.opcode) |
+	pete_writel("drivers/spi/spi-mxic.c:450", len, mxic->regs + LWR_RANGE);
+	pete_writel("drivers/spi/spi-mxic.c:451", LMODE_CMD0(desc->info.op_tmpl.cmd.opcode) |
 	       LMODE_SLV_ACT(spi_get_chipselect(desc->mem->spi, 0)) |
 	       LMODE_EN,
 	       mxic->regs + LWR_CTRL);
@@ -463,8 +463,8 @@ static ssize_t mxic_spi_mem_dirmap_write(struct spi_mem_dirmap_desc *desc,
 		memcpy_toio(mxic->linear.map, buf, len);
 	}
 
-	writel(INT_LWR_DIS, mxic->regs + INT_STS);
-	writel(0, mxic->regs + LWR_CTRL);
+	pete_writel("drivers/spi/spi-mxic.c:466", INT_LWR_DIS, mxic->regs + INT_STS);
+	pete_writel("drivers/spi/spi-mxic.c:467", 0, mxic->regs + LWR_CTRL);
 
 	ret = readl_poll_timeout(mxic->regs + INT_STS, sts,
 				 sts & INT_LWR_DIS, 0, USEC_PER_SEC);
@@ -518,15 +518,15 @@ static int mxic_spi_mem_exec_op(struct spi_mem *mem,
 	if (ret)
 		return ret;
 
-	writel(mxic_spi_prep_hc_cfg(mem->spi, HC_CFG_MAN_CS_EN),
+	pete_writel("drivers/spi/spi-mxic.c:521", mxic_spi_prep_hc_cfg(mem->spi, HC_CFG_MAN_CS_EN),
 	       mxic->regs + HC_CFG);
 
-	writel(HC_EN_BIT, mxic->regs + HC_EN);
+	pete_writel("drivers/spi/spi-mxic.c:524", HC_EN_BIT, mxic->regs + HC_EN);
 
-	writel(mxic_spi_mem_prep_op_cfg(op, op->data.nbytes),
+	pete_writel("drivers/spi/spi-mxic.c:526", mxic_spi_mem_prep_op_cfg(op, op->data.nbytes),
 	       mxic->regs + SS_CTRL(spi_get_chipselect(mem->spi, 0)));
 
-	writel(readl(mxic->regs + HC_CFG) | HC_CFG_MAN_CS_ASSERT,
+	pete_writel("drivers/spi/spi-mxic.c:529", pete_readl("drivers/spi/spi-mxic.c:529", mxic->regs + HC_CFG) | HC_CFG_MAN_CS_ASSERT,
 	       mxic->regs + HC_CFG);
 
 	for (i = 0; i < op->cmd.nbytes; i++)
@@ -555,9 +555,9 @@ static int mxic_spi_mem_exec_op(struct spi_mem *mem,
 				 op->data.nbytes);
 
 out:
-	writel(readl(mxic->regs + HC_CFG) & ~HC_CFG_MAN_CS_ASSERT,
+	pete_writel("drivers/spi/spi-mxic.c:558", pete_readl("drivers/spi/spi-mxic.c:558", mxic->regs + HC_CFG) & ~HC_CFG_MAN_CS_ASSERT,
 	       mxic->regs + HC_CFG);
-	writel(0, mxic->regs + HC_EN);
+	pete_writel("drivers/spi/spi-mxic.c:560", 0, mxic->regs + HC_EN);
 
 	return ret;
 }
@@ -580,15 +580,15 @@ static void mxic_spi_set_cs(struct spi_device *spi, bool lvl)
 	struct mxic_spi *mxic = spi_master_get_devdata(spi->master);
 
 	if (!lvl) {
-		writel(readl(mxic->regs + HC_CFG) | HC_CFG_MAN_CS_EN,
+		pete_writel("drivers/spi/spi-mxic.c:583", pete_readl("drivers/spi/spi-mxic.c:583", mxic->regs + HC_CFG) | HC_CFG_MAN_CS_EN,
 		       mxic->regs + HC_CFG);
-		writel(HC_EN_BIT, mxic->regs + HC_EN);
-		writel(readl(mxic->regs + HC_CFG) | HC_CFG_MAN_CS_ASSERT,
+		pete_writel("drivers/spi/spi-mxic.c:585", HC_EN_BIT, mxic->regs + HC_EN);
+		pete_writel("drivers/spi/spi-mxic.c:586", pete_readl("drivers/spi/spi-mxic.c:586", mxic->regs + HC_CFG) | HC_CFG_MAN_CS_ASSERT,
 		       mxic->regs + HC_CFG);
 	} else {
-		writel(readl(mxic->regs + HC_CFG) & ~HC_CFG_MAN_CS_ASSERT,
+		pete_writel("drivers/spi/spi-mxic.c:589", pete_readl("drivers/spi/spi-mxic.c:589", mxic->regs + HC_CFG) & ~HC_CFG_MAN_CS_ASSERT,
 		       mxic->regs + HC_CFG);
-		writel(0, mxic->regs + HC_EN);
+		pete_writel("drivers/spi/spi-mxic.c:591", 0, mxic->regs + HC_EN);
 	}
 }
 
@@ -624,7 +624,7 @@ static int mxic_spi_transfer_one(struct spi_master *master,
 			busw = OP_BUSW_2;
 	}
 
-	writel(OP_CMD_BYTES(1) | OP_CMD_BUSW(busw) |
+	pete_writel("drivers/spi/spi-mxic.c:627", OP_CMD_BYTES(1) | OP_CMD_BUSW(busw) |
 	       OP_DATA_BUSW(busw) | (t->rx_buf ? OP_READ : 0),
 	       mxic->regs + SS_CTRL(0));
 

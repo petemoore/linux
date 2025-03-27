@@ -157,7 +157,7 @@ static int ehci_atmel_drv_probe(struct platform_device *pdev)
 	device_wakeup_enable(hcd->self.controller);
 
 	if (of_usb_get_phy_mode(pdev->dev.of_node) == USBPHY_INTERFACE_MODE_HSIC)
-		writel(EHCI_INSNREG08_HSIC_EN, hcd->regs + EHCI_INSNREG(8));
+		pete_writel("drivers/usb/host/ehci-atmel.c:160", EHCI_INSNREG08_HSIC_EN, hcd->regs + EHCI_INSNREG(8));
 
 	return retval;
 

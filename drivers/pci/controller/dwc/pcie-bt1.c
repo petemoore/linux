@@ -177,7 +177,7 @@ static int bt1_pcie_read_mmio(void __iomem *addr, int size, u32 *val)
 	if (!IS_ALIGNED((uintptr_t)addr, size))
 		return -EINVAL;
 
-	*val = readl(addr - ofs) >> ofs * BITS_PER_BYTE;
+	*val = pete_readl("drivers/pci/controller/dwc/pcie-bt1.c:180", addr - ofs) >> ofs * BITS_PER_BYTE;
 	if (size == 4) {
 		return 0;
 	} else if (size == 2) {
@@ -200,13 +200,13 @@ static int bt1_pcie_write_mmio(void __iomem *addr, int size, u32 val)
 		return -EINVAL;
 
 	if (size == 4) {
-		writel(val, addr);
+		pete_writel("drivers/pci/controller/dwc/pcie-bt1.c:203", val, addr);
 		return 0;
 	} else if (size == 2 || size == 1) {
 		mask = GENMASK(size * BITS_PER_BYTE - 1, 0);
-		tmp = readl(addr - ofs) & ~(mask << ofs * BITS_PER_BYTE);
+		tmp = pete_readl("drivers/pci/controller/dwc/pcie-bt1.c:207", addr - ofs) & ~(mask << ofs * BITS_PER_BYTE);
 		tmp |= (val & mask) << ofs * BITS_PER_BYTE;
-		writel(tmp, addr - ofs);
+		pete_writel("drivers/pci/controller/dwc/pcie-bt1.c:209", tmp, addr - ofs);
 		return 0;
 	}
 

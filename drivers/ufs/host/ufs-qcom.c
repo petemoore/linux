@@ -825,7 +825,7 @@ static void ufs_qcom_dev_ref_clk_ctrl(struct ufs_qcom_host *host, bool enable)
 		 * Make sure the write to ref_clk reaches the destination and
 		 * not stored in a Write Buffer (WB).
 		 */
-		readl(host->dev_ref_clk_ctrl_mmio);
+		pete_readl("drivers/ufs/host/ufs-qcom.c:828", host->dev_ref_clk_ctrl_mmio);
 
 		/*
 		 * If we call hibern8 exit after this, we need to make sure that
@@ -1770,7 +1770,7 @@ static int ufs_qcom_get_outstanding_cqs(struct ufs_hba *hba,
 	if (!mcq_vs_res->base)
 		return -EINVAL;
 
-	*ocqs = readl(mcq_vs_res->base + UFS_MEM_CQIS_VS);
+	*ocqs = pete_readl("drivers/ufs/host/ufs-qcom.c:1773", mcq_vs_res->base + UFS_MEM_CQIS_VS);
 
 	return 0;
 }

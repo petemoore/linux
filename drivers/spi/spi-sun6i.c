@@ -116,12 +116,12 @@ struct sun6i_spi {
 
 static inline u32 sun6i_spi_read(struct sun6i_spi *sspi, u32 reg)
 {
-	return readl(sspi->base_addr + reg);
+	return pete_readl("drivers/spi/spi-sun6i.c:119", sspi->base_addr + reg);
 }
 
 static inline void sun6i_spi_write(struct sun6i_spi *sspi, u32 reg, u32 value)
 {
-	writel(value, sspi->base_addr + reg);
+	pete_writel("drivers/spi/spi-sun6i.c:124", value, sspi->base_addr + reg);
 }
 
 static inline u32 sun6i_spi_get_rx_fifo_count(struct sun6i_spi *sspi)
@@ -155,7 +155,7 @@ static inline void sun6i_spi_drain_fifo(struct sun6i_spi *sspi)
 	len = sun6i_spi_get_rx_fifo_count(sspi);
 
 	while (len--) {
-		byte = readb(sspi->base_addr + SUN6I_RXDATA_REG);
+		byte = pete_readb("drivers/spi/spi-sun6i.c:158", sspi->base_addr + SUN6I_RXDATA_REG);
 		if (sspi->rx_buf)
 			*sspi->rx_buf++ = byte;
 	}
@@ -174,7 +174,7 @@ static inline void sun6i_spi_fill_fifo(struct sun6i_spi *sspi)
 
 	while (len--) {
 		byte = sspi->tx_buf ? *sspi->tx_buf++ : 0;
-		writeb(byte, sspi->base_addr + SUN6I_TXDATA_REG);
+		pete_writeb("drivers/spi/spi-sun6i.c:177", byte, sspi->base_addr + SUN6I_TXDATA_REG);
 		sspi->len--;
 	}
 }

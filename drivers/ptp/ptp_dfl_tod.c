@@ -83,8 +83,8 @@ static int fine_adjust_tod_clock(struct dfl_tod *dt, u32 adjust_period,
 	void __iomem *base = dt->tod_ctrl;
 	u32 val;
 
-	writel(adjust_period, base + TOD_ADJUST_PERIOD);
-	writel(adjust_count, base + TOD_ADJUST_COUNT);
+	pete_writel("drivers/ptp/ptp_dfl_tod.c:86", adjust_period, base + TOD_ADJUST_PERIOD);
+	pete_writel("drivers/ptp/ptp_dfl_tod.c:87", adjust_count, base + TOD_ADJUST_COUNT);
 
 	/* Wait for present offset adjustment update to complete */
 	return readl_poll_timeout_atomic(base + TOD_ADJUST_COUNT, val, !val, TOD_ADJUST_INTERVAL_US,
@@ -104,9 +104,9 @@ static int coarse_adjust_tod_clock(struct dfl_tod *dt, s64 delta)
 	if (delta == 0)
 		return 0;
 
-	nanosec = readl(base + TOD_NANOSEC);
-	seconds_lsb = readl(base + TOD_SECONDSL);
-	seconds_msb = readl(base + TOD_SECONDSH);
+	nanosec = pete_readl("drivers/ptp/ptp_dfl_tod.c:107", base + TOD_NANOSEC);
+	seconds_lsb = pete_readl("drivers/ptp/ptp_dfl_tod.c:108", base + TOD_SECONDSL);
+	seconds_msb = pete_readl("drivers/ptp/ptp_dfl_tod.c:109", base + TOD_SECONDSH);
 
 	/* Calculate new time */
 	seconds = CAL_SECONDS(seconds_msb, seconds_lsb);
@@ -116,9 +116,9 @@ static int coarse_adjust_tod_clock(struct dfl_tod *dt, s64 delta)
 	seconds_msb = FIELD_GET(SECONDS_MSB, seconds);
 	seconds_lsb = FIELD_GET(SECONDS_LSB, seconds);
 
-	writel(seconds_msb, base + TOD_SECONDSH);
-	writel(seconds_lsb, base + TOD_SECONDSL);
-	writel(nanosec, base + TOD_NANOSEC);
+	pete_writel("drivers/ptp/ptp_dfl_tod.c:119", seconds_msb, base + TOD_SECONDSH);
+	pete_writel("drivers/ptp/ptp_dfl_tod.c:120", seconds_lsb, base + TOD_SECONDSL);
+	pete_writel("drivers/ptp/ptp_dfl_tod.c:121", nanosec, base + TOD_NANOSEC);
 
 	return 0;
 }
@@ -132,7 +132,7 @@ static int dfl_tod_adjust_fine(struct ptp_clock_info *ptp, long scaled_ppm)
 	u64 ppb;
 
 	/* Get the clock rate from clock frequency register offset */
-	rate = readl(base + TOD_CLK_FREQ);
+	rate = pete_readl("drivers/ptp/ptp_dfl_tod.c:135", base + TOD_CLK_FREQ);
 
 	/* add GIGA as nominal ppb */
 	ppb = scaled_ppm_to_ppb(scaled_ppm) + GIGA;
@@ -158,11 +158,11 @@ static int dfl_tod_adjust_fine(struct ptp_clock_info *ptp, long scaled_ppm)
 		tod_drift_adjust_rate = 0;
 
 	spin_lock_irqsave(&dt->tod_lock, flags);
-	writel(tod_period, base + TOD_PERIOD);
-	writel(0, base + TOD_ADJUST_PERIOD);
-	writel(0, base + TOD_ADJUST_COUNT);
-	writel(tod_drift_adjust_fns, base + TOD_DRIFT_ADJUST);
-	writel(tod_drift_adjust_rate, base + TOD_DRIFT_ADJUST_RATE);
+	pete_writel("drivers/ptp/ptp_dfl_tod.c:161", tod_period, base + TOD_PERIOD);
+	pete_writel("drivers/ptp/ptp_dfl_tod.c:162", 0, base + TOD_ADJUST_PERIOD);
+	pete_writel("drivers/ptp/ptp_dfl_tod.c:163", 0, base + TOD_ADJUST_COUNT);
+	pete_writel("drivers/ptp/ptp_dfl_tod.c:164", tod_drift_adjust_fns, base + TOD_DRIFT_ADJUST);
+	pete_writel("drivers/ptp/ptp_dfl_tod.c:165", tod_drift_adjust_rate, base + TOD_DRIFT_ADJUST_RATE);
 	spin_unlock_irqrestore(&dt->tod_lock, flags);
 
 	return 0;
@@ -190,7 +190,7 @@ static int dfl_tod_adjust_time(struct ptp_clock_info *ptp, s64 delta)
 	 * Period register setting and the maximum and minimum possible
 	 * values of the Period register.
 	 */
-	period = readl(base + TOD_PERIOD);
+	period = pete_readl("drivers/ptp/ptp_dfl_tod.c:193", base + TOD_PERIOD);
 
 	if (neg_adj) {
 		diff = (period - TOD_PERIOD_MIN) >> PERIOD_FRAC_OFFSET;
@@ -234,9 +234,9 @@ static int dfl_tod_get_timex(struct ptp_clock_info *ptp, struct timespec64 *ts,
 
 	spin_lock_irqsave(&dt->tod_lock, flags);
 	ptp_read_system_prets(sts);
-	nanosec = readl(base + TOD_NANOSEC);
-	seconds_lsb = readl(base + TOD_SECONDSL);
-	seconds_msb = readl(base + TOD_SECONDSH);
+	nanosec = pete_readl("drivers/ptp/ptp_dfl_tod.c:237", base + TOD_NANOSEC);
+	seconds_lsb = pete_readl("drivers/ptp/ptp_dfl_tod.c:238", base + TOD_SECONDSL);
+	seconds_msb = pete_readl("drivers/ptp/ptp_dfl_tod.c:239", base + TOD_SECONDSH);
 	ptp_read_system_postts(sts);
 	spin_unlock_irqrestore(&dt->tod_lock, flags);
 
@@ -259,9 +259,9 @@ static int dfl_tod_set_time(struct ptp_clock_info *ptp,
 	unsigned long flags;
 
 	spin_lock_irqsave(&dt->tod_lock, flags);
-	writel(seconds_msb, base + TOD_SECONDSH);
-	writel(seconds_lsb, base + TOD_SECONDSL);
-	writel(nanosec, base + TOD_NANOSEC);
+	pete_writel("drivers/ptp/ptp_dfl_tod.c:262", seconds_msb, base + TOD_SECONDSH);
+	pete_writel("drivers/ptp/ptp_dfl_tod.c:263", seconds_lsb, base + TOD_SECONDSL);
+	pete_writel("drivers/ptp/ptp_dfl_tod.c:264", nanosec, base + TOD_NANOSEC);
 	spin_unlock_irqrestore(&dt->tod_lock, flags);
 
 	return 0;

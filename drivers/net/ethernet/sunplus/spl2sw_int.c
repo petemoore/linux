@@ -126,9 +126,9 @@ spl2sw_rx_poll_alloc_err:
 	}
 
 	spin_lock_irqsave(&comm->int_mask_lock, flags);
-	mask = readl(comm->l2sw_reg_base + L2SW_SW_INT_MASK_0);
+	mask = pete_readl("drivers/net/ethernet/sunplus/spl2sw_int.c:129", comm->l2sw_reg_base + L2SW_SW_INT_MASK_0);
 	mask &= ~MAC_INT_RX;
-	writel(mask, comm->l2sw_reg_base + L2SW_SW_INT_MASK_0);
+	pete_writel("drivers/net/ethernet/sunplus/spl2sw_int.c:131", mask, comm->l2sw_reg_base + L2SW_SW_INT_MASK_0);
 	spin_unlock_irqrestore(&comm->int_mask_lock, flags);
 
 	napi_complete(napi);
@@ -199,9 +199,9 @@ spl2sw_tx_poll_next:
 	spin_unlock(&comm->tx_lock);
 
 	spin_lock_irqsave(&comm->int_mask_lock, flags);
-	mask = readl(comm->l2sw_reg_base + L2SW_SW_INT_MASK_0);
+	mask = pete_readl("drivers/net/ethernet/sunplus/spl2sw_int.c:202", comm->l2sw_reg_base + L2SW_SW_INT_MASK_0);
 	mask &= ~MAC_INT_TX;
-	writel(mask, comm->l2sw_reg_base + L2SW_SW_INT_MASK_0);
+	pete_writel("drivers/net/ethernet/sunplus/spl2sw_int.c:204", mask, comm->l2sw_reg_base + L2SW_SW_INT_MASK_0);
 	spin_unlock_irqrestore(&comm->int_mask_lock, flags);
 
 	napi_complete(napi);
@@ -215,19 +215,19 @@ irqreturn_t spl2sw_ethernet_interrupt(int irq, void *dev_id)
 	u32 mask;
 	int i;
 
-	status = readl(comm->l2sw_reg_base + L2SW_SW_INT_STATUS_0);
+	status = pete_readl("drivers/net/ethernet/sunplus/spl2sw_int.c:218", comm->l2sw_reg_base + L2SW_SW_INT_STATUS_0);
 	if (unlikely(!status)) {
 		dev_dbg(&comm->pdev->dev, "Interrupt status is null!\n");
 		goto spl2sw_ethernet_int_out;
 	}
-	writel(status, comm->l2sw_reg_base + L2SW_SW_INT_STATUS_0);
+	pete_writel("drivers/net/ethernet/sunplus/spl2sw_int.c:223", status, comm->l2sw_reg_base + L2SW_SW_INT_STATUS_0);
 
 	if (status & MAC_INT_RX) {
 		/* Disable RX interrupts. */
 		spin_lock(&comm->int_mask_lock);
-		mask = readl(comm->l2sw_reg_base + L2SW_SW_INT_MASK_0);
+		mask = pete_readl("drivers/net/ethernet/sunplus/spl2sw_int.c:228", comm->l2sw_reg_base + L2SW_SW_INT_MASK_0);
 		mask |= MAC_INT_RX;
-		writel(mask, comm->l2sw_reg_base + L2SW_SW_INT_MASK_0);
+		pete_writel("drivers/net/ethernet/sunplus/spl2sw_int.c:230", mask, comm->l2sw_reg_base + L2SW_SW_INT_MASK_0);
 		spin_unlock(&comm->int_mask_lock);
 
 		if (unlikely(status & MAC_INT_RX_DES_ERR)) {
@@ -245,9 +245,9 @@ irqreturn_t spl2sw_ethernet_interrupt(int irq, void *dev_id)
 	if (status & MAC_INT_TX) {
 		/* Disable TX interrupts. */
 		spin_lock(&comm->int_mask_lock);
-		mask = readl(comm->l2sw_reg_base + L2SW_SW_INT_MASK_0);
+		mask = pete_readl("drivers/net/ethernet/sunplus/spl2sw_int.c:248", comm->l2sw_reg_base + L2SW_SW_INT_MASK_0);
 		mask |= MAC_INT_TX;
-		writel(mask, comm->l2sw_reg_base + L2SW_SW_INT_MASK_0);
+		pete_writel("drivers/net/ethernet/sunplus/spl2sw_int.c:250", mask, comm->l2sw_reg_base + L2SW_SW_INT_MASK_0);
 		spin_unlock(&comm->int_mask_lock);
 
 		if (unlikely(status & MAC_INT_TX_DES_ERR)) {
@@ -259,9 +259,9 @@ irqreturn_t spl2sw_ethernet_interrupt(int irq, void *dev_id)
 			dev_dbg(&comm->pdev->dev, "Illegal TX Descriptor Error\n");
 
 			spin_lock(&comm->int_mask_lock);
-			mask = readl(comm->l2sw_reg_base + L2SW_SW_INT_MASK_0);
+			mask = pete_readl("drivers/net/ethernet/sunplus/spl2sw_int.c:262", comm->l2sw_reg_base + L2SW_SW_INT_MASK_0);
 			mask &= ~MAC_INT_TX;
-			writel(mask, comm->l2sw_reg_base + L2SW_SW_INT_MASK_0);
+			pete_writel("drivers/net/ethernet/sunplus/spl2sw_int.c:264", mask, comm->l2sw_reg_base + L2SW_SW_INT_MASK_0);
 			spin_unlock(&comm->int_mask_lock);
 		} else {
 			napi_schedule(&comm->tx_napi);

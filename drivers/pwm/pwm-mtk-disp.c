@@ -61,10 +61,10 @@ static void mtk_disp_pwm_update_bits(struct mtk_disp_pwm *mdp, u32 offset,
 	void __iomem *address = mdp->base + offset;
 	u32 value;
 
-	value = readl(address);
+	value = pete_readl("drivers/pwm/pwm-mtk-disp.c:64", address);
 	value &= ~mask;
 	value |= data;
-	writel(value, address);
+	pete_writel("drivers/pwm/pwm-mtk-disp.c:67", value, address);
 }
 
 static int mtk_disp_pwm_apply(struct pwm_chip *chip, struct pwm_device *pwm,
@@ -203,9 +203,9 @@ static int mtk_disp_pwm_get_state(struct pwm_chip *chip,
 					 mdp->data->bls_debug_mask);
 
 	rate = clk_get_rate(mdp->clk_main);
-	con0 = readl(mdp->base + mdp->data->con0);
-	con1 = readl(mdp->base + mdp->data->con1);
-	pwm_en = readl(mdp->base + DISP_PWM_EN);
+	con0 = pete_readl("drivers/pwm/pwm-mtk-disp.c:206", mdp->base + mdp->data->con0);
+	con1 = pete_readl("drivers/pwm/pwm-mtk-disp.c:207", mdp->base + mdp->data->con1);
+	pwm_en = pete_readl("drivers/pwm/pwm-mtk-disp.c:208", mdp->base + DISP_PWM_EN);
 	state->enabled = !!(pwm_en & mdp->data->enable_mask);
 	clk_div = FIELD_GET(PWM_CLKDIV_MASK, con0);
 	period = FIELD_GET(PWM_PERIOD_MASK, con1);

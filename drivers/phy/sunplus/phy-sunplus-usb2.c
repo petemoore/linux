@@ -101,9 +101,9 @@ static int update_disc_vol(struct sp_usbphy *usbphy)
 	if (IS_ERR(otp_v) || set == 0)
 		set = OTP_DISC_LEVEL_DEFAULT;
 
-	val = readl(usbphy->phy_regs + CONFIG7);
+	val = pete_readl("drivers/phy/sunplus/phy-sunplus-usb2.c:104", usbphy->phy_regs + CONFIG7);
 	val = (val & ~J_DISC) | set;
-	writel(val, usbphy->phy_regs + CONFIG7);
+	pete_writel("drivers/phy/sunplus/phy-sunplus-usb2.c:106", val, usbphy->phy_regs + CONFIG7);
 
 	return 0;
 }
@@ -123,8 +123,8 @@ static int sp_uphy_init(struct phy *phy)
 		goto err_reset;
 
 	/* Default value modification */
-	writel(HIGH_MASK_BITS | 0x4002, usbphy->moon4_regs + UPHY_CONTROL0);
-	writel(HIGH_MASK_BITS | 0x8747, usbphy->moon4_regs + UPHY_CONTROL1);
+	pete_writel("drivers/phy/sunplus/phy-sunplus-usb2.c:126", HIGH_MASK_BITS | 0x4002, usbphy->moon4_regs + UPHY_CONTROL0);
+	pete_writel("drivers/phy/sunplus/phy-sunplus-usb2.c:127", HIGH_MASK_BITS | 0x8747, usbphy->moon4_regs + UPHY_CONTROL1);
 
 	/* disconnect voltage */
 	ret = update_disc_vol(usbphy);
@@ -132,29 +132,29 @@ static int sp_uphy_init(struct phy *phy)
 		return ret;
 
 	/* board uphy 0 internal register modification for tid certification */
-	val = readl(usbphy->phy_regs + CONFIG9);
+	val = pete_readl("drivers/phy/sunplus/phy-sunplus-usb2.c:135", usbphy->phy_regs + CONFIG9);
 	val &= ~(J_ECO_PATH);
-	writel(val, usbphy->phy_regs + CONFIG9);
+	pete_writel("drivers/phy/sunplus/phy-sunplus-usb2.c:137", val, usbphy->phy_regs + CONFIG9);
 
-	val = readl(usbphy->phy_regs + CONFIG1);
+	val = pete_readl("drivers/phy/sunplus/phy-sunplus-usb2.c:139", usbphy->phy_regs + CONFIG1);
 	val &= ~(J_HS_TX_PWRSAV);
-	writel(val, usbphy->phy_regs + CONFIG1);
+	pete_writel("drivers/phy/sunplus/phy-sunplus-usb2.c:141", val, usbphy->phy_regs + CONFIG1);
 
-	val = readl(usbphy->phy_regs + CONFIG23);
+	val = pete_readl("drivers/phy/sunplus/phy-sunplus-usb2.c:143", usbphy->phy_regs + CONFIG23);
 	val = (val & ~PROB) | PROB;
-	writel(val, usbphy->phy_regs + CONFIG23);
+	pete_writel("drivers/phy/sunplus/phy-sunplus-usb2.c:145", val, usbphy->phy_regs + CONFIG23);
 
 	/* port 0 uphy clk fix */
-	writel(MASK_MO1_UPHY_RX_CLK_SEL | MO1_UPHY_RX_CLK_SEL,
+	pete_writel("drivers/phy/sunplus/phy-sunplus-usb2.c:148", MASK_MO1_UPHY_RX_CLK_SEL | MO1_UPHY_RX_CLK_SEL,
 	       usbphy->moon4_regs + UPHY_CONTROL2);
 
 	/* battery charger */
-	writel(J_TBCWAIT_1P1_MS | J_TVDM_SRC_DIS_8P2_MS | J_TVDM_SRC_EN_1P6_MS | J_BC_EN,
+	pete_writel("drivers/phy/sunplus/phy-sunplus-usb2.c:152", J_TBCWAIT_1P1_MS | J_TVDM_SRC_DIS_8P2_MS | J_TVDM_SRC_EN_1P6_MS | J_BC_EN,
 	       usbphy->phy_regs + CONFIG16);
-	writel(IBG_TRIM0_SSLVHT | J_VDATREE_TRIM_DEFAULT, usbphy->phy_regs + CONFIG17);
+	pete_writel("drivers/phy/sunplus/phy-sunplus-usb2.c:154", IBG_TRIM0_SSLVHT | J_VDATREE_TRIM_DEFAULT, usbphy->phy_regs + CONFIG17);
 
 	/* chirp mode */
-	writel(J_FORCE_DISC_ON | J_DEBUG_CTRL_ADDR_MACRO, usbphy->phy_regs + CONFIG3);
+	pete_writel("drivers/phy/sunplus/phy-sunplus-usb2.c:157", J_FORCE_DISC_ON | J_DEBUG_CTRL_ADDR_MACRO, usbphy->phy_regs + CONFIG3);
 
 	return 0;
 
@@ -172,24 +172,24 @@ static int sp_uphy_power_on(struct phy *phy)
 	u32 pll_pwr_on, pll_pwr_off;
 
 	/* PLL power off/on twice */
-	pll_pwr_off = (readl(usbphy->moon4_regs + UPHY_CONTROL3) & ~LOW_MASK_BITS)
+	pll_pwr_off = (pete_readl("drivers/phy/sunplus/phy-sunplus-usb2.c:175", usbphy->moon4_regs + UPHY_CONTROL3) & ~LOW_MASK_BITS)
 			| MO1_UPHY_PLL_POWER_OFF_SEL | MO1_UPHY_PLL_POWER_OFF;
-	pll_pwr_on = (readl(usbphy->moon4_regs + UPHY_CONTROL3) & ~LOW_MASK_BITS)
+	pll_pwr_on = (pete_readl("drivers/phy/sunplus/phy-sunplus-usb2.c:177", usbphy->moon4_regs + UPHY_CONTROL3) & ~LOW_MASK_BITS)
 			| MO1_UPHY_PLL_POWER_OFF_SEL;
 
-	writel(MASK_MO1_UPHY_PLL_POWER_OFF_SEL | MASK_UPHY_PLL_POWER_OFF | pll_pwr_off,
+	pete_writel("drivers/phy/sunplus/phy-sunplus-usb2.c:180", MASK_MO1_UPHY_PLL_POWER_OFF_SEL | MASK_UPHY_PLL_POWER_OFF | pll_pwr_off,
 	       usbphy->moon4_regs + UPHY_CONTROL3);
 	mdelay(1);
-	writel(MASK_MO1_UPHY_PLL_POWER_OFF_SEL | MASK_UPHY_PLL_POWER_OFF | pll_pwr_on,
+	pete_writel("drivers/phy/sunplus/phy-sunplus-usb2.c:183", MASK_MO1_UPHY_PLL_POWER_OFF_SEL | MASK_UPHY_PLL_POWER_OFF | pll_pwr_on,
 	       usbphy->moon4_regs + UPHY_CONTROL3);
 	mdelay(1);
-	writel(MASK_MO1_UPHY_PLL_POWER_OFF_SEL | MASK_UPHY_PLL_POWER_OFF | pll_pwr_off,
+	pete_writel("drivers/phy/sunplus/phy-sunplus-usb2.c:186", MASK_MO1_UPHY_PLL_POWER_OFF_SEL | MASK_UPHY_PLL_POWER_OFF | pll_pwr_off,
 	       usbphy->moon4_regs + UPHY_CONTROL3);
 	mdelay(1);
-	writel(MASK_MO1_UPHY_PLL_POWER_OFF_SEL | MASK_UPHY_PLL_POWER_OFF | pll_pwr_on,
+	pete_writel("drivers/phy/sunplus/phy-sunplus-usb2.c:189", MASK_MO1_UPHY_PLL_POWER_OFF_SEL | MASK_UPHY_PLL_POWER_OFF | pll_pwr_on,
 	       usbphy->moon4_regs + UPHY_CONTROL3);
 	mdelay(1);
-	writel(MASK_MO1_UPHY_PLL_POWER_OFF_SEL | MASK_UPHY_PLL_POWER_OFF | 0x0,
+	pete_writel("drivers/phy/sunplus/phy-sunplus-usb2.c:192", MASK_MO1_UPHY_PLL_POWER_OFF_SEL | MASK_UPHY_PLL_POWER_OFF | 0x0,
 	       usbphy->moon4_regs + UPHY_CONTROL3);
 
 	return 0;
@@ -200,13 +200,13 @@ static int sp_uphy_power_off(struct phy *phy)
 	struct sp_usbphy *usbphy = phy_get_drvdata(phy);
 	u32 pll_pwr_off;
 
-	pll_pwr_off = (readl(usbphy->moon4_regs + UPHY_CONTROL3) & ~LOW_MASK_BITS)
+	pll_pwr_off = (pete_readl("drivers/phy/sunplus/phy-sunplus-usb2.c:203", usbphy->moon4_regs + UPHY_CONTROL3) & ~LOW_MASK_BITS)
 			| MO1_UPHY_PLL_POWER_OFF_SEL | MO1_UPHY_PLL_POWER_OFF;
 
-	writel(MASK_MO1_UPHY_PLL_POWER_OFF_SEL | MASK_UPHY_PLL_POWER_OFF | pll_pwr_off,
+	pete_writel("drivers/phy/sunplus/phy-sunplus-usb2.c:206", MASK_MO1_UPHY_PLL_POWER_OFF_SEL | MASK_UPHY_PLL_POWER_OFF | pll_pwr_off,
 	       usbphy->moon4_regs + UPHY_CONTROL3);
 	mdelay(1);
-	writel(MASK_MO1_UPHY_PLL_POWER_OFF_SEL | MASK_UPHY_PLL_POWER_OFF | 0x0,
+	pete_writel("drivers/phy/sunplus/phy-sunplus-usb2.c:209", MASK_MO1_UPHY_PLL_POWER_OFF_SEL | MASK_UPHY_PLL_POWER_OFF | 0x0,
 	       usbphy->moon4_regs + UPHY_CONTROL3);
 
 	return 0;

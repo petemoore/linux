@@ -2278,7 +2278,7 @@ u32 vc4_plane_write_dlist(struct drm_plane *plane, u32 __iomem *dlist)
 
 	/* Can't memcpy_toio() because it needs to be 32-bit writes. */
 	for (i = 0; i < vc4_state->dlist_count; i++)
-		writel(vc4_state->dlist[i], &dlist[i]);
+		pete_writel("drivers/gpu/drm/vc4/vc4_plane.c:2281", vc4_state->dlist[i], &dlist[i]);
 
 	drm_dev_exit(idx);
 
@@ -2320,11 +2320,11 @@ void vc4_plane_async_set_fb(struct drm_plane *plane, struct drm_framebuffer *fb)
 		value |= VC4_SET_FIELD(upper_32_bits(dma_addr) & 0xff,
 				       SCALER6_PTR0_UPPER_ADDR);
 
-		writel(value, &vc4_state->hw_dlist[vc4_state->ptr0_offset[0]]);
+		pete_writel("drivers/gpu/drm/vc4/vc4_plane.c:2323", value, &vc4_state->hw_dlist[vc4_state->ptr0_offset[0]]);
 		vc4_state->dlist[vc4_state->ptr0_offset[0]] = value;
 
 		value = lower_32_bits(dma_addr);
-		writel(value, &vc4_state->hw_dlist[vc4_state->ptr0_offset[0] + 1]);
+		pete_writel("drivers/gpu/drm/vc4/vc4_plane.c:2327", value, &vc4_state->hw_dlist[vc4_state->ptr0_offset[0] + 1]);
 		vc4_state->dlist[vc4_state->ptr0_offset[0] + 1] = value;
 	} else {
 		u32 addr;
@@ -2335,7 +2335,7 @@ void vc4_plane_async_set_fb(struct drm_plane *plane, struct drm_framebuffer *fb)
 		 * scanout will start from this address as soon as the FIFO
 		 * needs to refill with pixels.
 		 */
-		writel(addr, &vc4_state->hw_dlist[vc4_state->ptr0_offset[0]]);
+		pete_writel("drivers/gpu/drm/vc4/vc4_plane.c:2338", addr, &vc4_state->hw_dlist[vc4_state->ptr0_offset[0]]);
 
 		/* Also update the CPU-side dlist copy, so that any later
 		 * atomic updates that don't do a new modeset on our plane
@@ -2411,11 +2411,11 @@ static void vc4_plane_atomic_async_update(struct drm_plane *plane,
 	 * because that would smash the context data that the HVS is
 	 * currently using.
 	 */
-	writel(vc4_state->dlist[vc4_state->pos0_offset],
+	pete_writel("drivers/gpu/drm/vc4/vc4_plane.c:2414", vc4_state->dlist[vc4_state->pos0_offset],
 	       &vc4_state->hw_dlist[vc4_state->pos0_offset]);
-	writel(vc4_state->dlist[vc4_state->pos2_offset],
+	pete_writel("drivers/gpu/drm/vc4/vc4_plane.c:2416", vc4_state->dlist[vc4_state->pos2_offset],
 	       &vc4_state->hw_dlist[vc4_state->pos2_offset]);
-	writel(vc4_state->dlist[vc4_state->ptr0_offset[0]],
+	pete_writel("drivers/gpu/drm/vc4/vc4_plane.c:2418", vc4_state->dlist[vc4_state->ptr0_offset[0]],
 	       &vc4_state->hw_dlist[vc4_state->ptr0_offset[0]]);
 
 	drm_dev_exit(idx);

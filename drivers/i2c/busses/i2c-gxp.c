@@ -107,7 +107,7 @@ static void gxp_i2c_start(struct gxp_i2c_drvdata *drvdata)
 	value |= drvdata->curr_msg->flags & I2C_M_RD ? RW_CMD | START_CMD : START_CMD;
 
 	drvdata->state = GXP_I2C_ADDR_PHASE;
-	writew(value, drvdata->base + GXP_I2CMCMD);
+	pete_writew("drivers/i2c/busses/i2c-gxp.c:110", value, drvdata->base + GXP_I2CMCMD);
 }
 
 static int gxp_i2c_master_xfer(struct i2c_adapter *adapter,
@@ -160,8 +160,8 @@ static int gxp_i2c_reg_slave(struct i2c_client *slave)
 
 	drvdata->slave = slave;
 
-	writeb(slave->addr << 1, drvdata->base + GXP_I2COWNADR);
-	writeb(SLAVE_EVT_CLR | SNOOP_EVT_MASK | SLAVE_ACK_ENAB |
+	pete_writeb("drivers/i2c/busses/i2c-gxp.c:163", slave->addr << 1, drvdata->base + GXP_I2COWNADR);
+	pete_writeb("drivers/i2c/busses/i2c-gxp.c:164", SLAVE_EVT_CLR | SNOOP_EVT_MASK | SLAVE_ACK_ENAB |
 	       SLAVE_EVT_STALL, drvdata->base + GXP_I2CSCMD);
 
 	return 0;
@@ -173,8 +173,8 @@ static int gxp_i2c_unreg_slave(struct i2c_client *slave)
 
 	WARN_ON(!drvdata->slave);
 
-	writeb(0x00, drvdata->base + GXP_I2COWNADR);
-	writeb(SNOOP_EVT_CLR | SLAVE_EVT_CLR | SNOOP_EVT_MASK |
+	pete_writeb("drivers/i2c/busses/i2c-gxp.c:176", 0x00, drvdata->base + GXP_I2COWNADR);
+	pete_writeb("drivers/i2c/busses/i2c-gxp.c:177", SNOOP_EVT_CLR | SLAVE_EVT_CLR | SNOOP_EVT_MASK |
 	       SLAVE_EVT_MASK, drvdata->base + GXP_I2CSCMD);
 
 	drvdata->slave = NULL;
@@ -195,7 +195,7 @@ static const struct i2c_algorithm gxp_i2c_algo = {
 static void gxp_i2c_stop(struct gxp_i2c_drvdata *drvdata)
 {
 	/* Clear event and send stop */
-	writeb(MASTER_EVT_CLR | STOP_CMD, drvdata->base + GXP_I2CMCMD);
+	pete_writeb("drivers/i2c/busses/i2c-gxp.c:198", MASTER_EVT_CLR | STOP_CMD, drvdata->base + GXP_I2CMCMD);
 
 	complete(&drvdata->completion);
 }
@@ -219,14 +219,14 @@ static void gxp_i2c_restart(struct gxp_i2c_drvdata *drvdata)
 
 	drvdata->state = GXP_I2C_ADDR_PHASE;
 
-	writew(value, drvdata->base + GXP_I2CMCMD);
+	pete_writew("drivers/i2c/busses/i2c-gxp.c:222", value, drvdata->base + GXP_I2CMCMD);
 }
 
 static void gxp_i2c_chk_addr_ack(struct gxp_i2c_drvdata *drvdata)
 {
 	u16 value;
 
-	value = readb(drvdata->base + GXP_I2CSTAT);
+	value = pete_readb("drivers/i2c/busses/i2c-gxp.c:229", drvdata->base + GXP_I2CSTAT);
 	if (!(value & MASK_ACK)) {
 		/* Got no ack, stop */
 		drvdata->state = GXP_I2C_ADDR_NACK;
@@ -247,11 +247,11 @@ static void gxp_i2c_chk_addr_ack(struct gxp_i2c_drvdata *drvdata)
 
 		if (drvdata->buf_remaining == 1) {
 			/* The last data, do not ack */
-			writeb(MASTER_EVT_CLR | RW_CMD,
+			pete_writeb("drivers/i2c/busses/i2c-gxp.c:250", MASTER_EVT_CLR | RW_CMD,
 			       drvdata->base + GXP_I2CMCMD);
 		} else {
 			/* Read data and ack it */
-			writeb(MASTER_EVT_CLR | MASTER_ACK_ENAB |
+			pete_writeb("drivers/i2c/busses/i2c-gxp.c:254", MASTER_EVT_CLR | MASTER_ACK_ENAB |
 			       RW_CMD, drvdata->base + GXP_I2CMCMD);
 		}
 	} else {
@@ -270,7 +270,7 @@ static void gxp_i2c_chk_addr_ack(struct gxp_i2c_drvdata *drvdata)
 		drvdata->buf++;
 		drvdata->buf_remaining--;
 		drvdata->state = GXP_I2C_WDATA_PHASE;
-		writew(value, drvdata->base + GXP_I2CMCMD);
+		pete_writew("drivers/i2c/busses/i2c-gxp.c:273", value, drvdata->base + GXP_I2CMCMD);
 	}
 }
 
@@ -279,7 +279,7 @@ static void gxp_i2c_ack_data(struct gxp_i2c_drvdata *drvdata)
 	u8 value;
 
 	/* Store the data returned */
-	value = readb(drvdata->base + GXP_I2CSNPDAT);
+	value = pete_readb("drivers/i2c/busses/i2c-gxp.c:282", drvdata->base + GXP_I2CSNPDAT);
 	*drvdata->buf = value;
 	drvdata->buf++;
 	drvdata->buf_remaining--;
@@ -304,11 +304,11 @@ static void gxp_i2c_ack_data(struct gxp_i2c_drvdata *drvdata)
 	drvdata->state = GXP_I2C_RDATA_PHASE;
 	if (drvdata->buf_remaining == 1) {
 		/* The last data, do not ack */
-		writeb(MASTER_EVT_CLR | RW_CMD,
+		pete_writeb("drivers/i2c/busses/i2c-gxp.c:307", MASTER_EVT_CLR | RW_CMD,
 		       drvdata->base + GXP_I2CMCMD);
 	} else {
 		/* Read data and ack it */
-		writeb(MASTER_EVT_CLR | MASTER_ACK_ENAB |
+		pete_writeb("drivers/i2c/busses/i2c-gxp.c:311", MASTER_EVT_CLR | MASTER_ACK_ENAB |
 		       RW_CMD, drvdata->base + GXP_I2CMCMD);
 	}
 }
@@ -317,7 +317,7 @@ static void gxp_i2c_chk_data_ack(struct gxp_i2c_drvdata *drvdata)
 {
 	u16 value;
 
-	value = readb(drvdata->base + GXP_I2CSTAT);
+	value = pete_readb("drivers/i2c/busses/i2c-gxp.c:320", drvdata->base + GXP_I2CSTAT);
 	if (!(value & MASK_ACK)) {
 		/* Received No ack, stop */
 		drvdata->state = GXP_I2C_DATA_NACK;
@@ -351,7 +351,7 @@ static void gxp_i2c_chk_data_ack(struct gxp_i2c_drvdata *drvdata)
 	drvdata->buf++;
 	drvdata->buf_remaining--;
 	drvdata->state = GXP_I2C_WDATA_PHASE;
-	writew(value, drvdata->base + GXP_I2CMCMD);
+	pete_writew("drivers/i2c/busses/i2c-gxp.c:354", value, drvdata->base + GXP_I2CMCMD);
 }
 
 static bool gxp_i2c_slave_irq_handler(struct gxp_i2c_drvdata *drvdata)
@@ -360,16 +360,16 @@ static bool gxp_i2c_slave_irq_handler(struct gxp_i2c_drvdata *drvdata)
 	u8 buf;
 	int ret;
 
-	value = readb(drvdata->base + GXP_I2CEVTERR);
+	value = pete_readb("drivers/i2c/busses/i2c-gxp.c:363", drvdata->base + GXP_I2CEVTERR);
 
 	/* Received start or stop event */
 	if (value & MASK_SLAVE_CMD_EVENT) {
-		value = readb(drvdata->base + GXP_I2CSTAT);
+		value = pete_readb("drivers/i2c/busses/i2c-gxp.c:367", drvdata->base + GXP_I2CSTAT);
 		/* Master sent stop */
 		if (value & MASK_STOP_EVENT) {
 			if (drvdata->stopped == 0)
 				i2c_slave_event(drvdata->slave, I2C_SLAVE_STOP, &buf);
-			writeb(SLAVE_EVT_CLR | SNOOP_EVT_MASK |
+			pete_writeb("drivers/i2c/busses/i2c-gxp.c:372", SLAVE_EVT_CLR | SNOOP_EVT_MASK |
 			       SLAVE_ACK_ENAB | SLAVE_EVT_STALL, drvdata->base + GXP_I2CSCMD);
 			drvdata->stopped = 1;
 		} else {
@@ -380,25 +380,25 @@ static bool gxp_i2c_slave_irq_handler(struct gxp_i2c_drvdata *drvdata)
 						I2C_SLAVE_READ_REQUESTED, &buf);
 				value = buf << 8 | (SLAVE_EVT_CLR | SNOOP_EVT_MASK |
 						    SLAVE_EVT_STALL);
-				writew(value, drvdata->base + GXP_I2CSCMD);
+				pete_writew("drivers/i2c/busses/i2c-gxp.c:383", value, drvdata->base + GXP_I2CSCMD);
 			} else {
 				/* Master wants to write to us */
 				ret = i2c_slave_event(drvdata->slave,
 						      I2C_SLAVE_WRITE_REQUESTED, &buf);
 				if (!ret) {
 					/* Ack next byte from master */
-					writeb(SLAVE_EVT_CLR | SNOOP_EVT_MASK |
+					pete_writeb("drivers/i2c/busses/i2c-gxp.c:390", SLAVE_EVT_CLR | SNOOP_EVT_MASK |
 					       SLAVE_ACK_ENAB | SLAVE_EVT_STALL,
 					       drvdata->base + GXP_I2CSCMD);
 				} else {
 					/* Nack next byte from master */
-					writeb(SLAVE_EVT_CLR | SNOOP_EVT_MASK |
+					pete_writeb("drivers/i2c/busses/i2c-gxp.c:395", SLAVE_EVT_CLR | SNOOP_EVT_MASK |
 					       SLAVE_EVT_STALL, drvdata->base + GXP_I2CSCMD);
 				}
 			}
 		}
 	} else if (value & MASK_SLAVE_DATA_EVENT) {
-		value = readb(drvdata->base + GXP_I2CSTAT);
+		value = pete_readb("drivers/i2c/busses/i2c-gxp.c:401", drvdata->base + GXP_I2CSTAT);
 		/* Master wants to read */
 		if (value & MASK_RW) {
 			/* Master wants another byte */
@@ -407,27 +407,27 @@ static bool gxp_i2c_slave_irq_handler(struct gxp_i2c_drvdata *drvdata)
 						I2C_SLAVE_READ_PROCESSED, &buf);
 				value = buf << 8 | (SLAVE_EVT_CLR | SNOOP_EVT_MASK |
 						    SLAVE_EVT_STALL);
-				writew(value, drvdata->base + GXP_I2CSCMD);
+				pete_writew("drivers/i2c/busses/i2c-gxp.c:410", value, drvdata->base + GXP_I2CSCMD);
 			} else {
 				/* No more bytes needed */
-				writew(SLAVE_EVT_CLR | SNOOP_EVT_MASK |
+				pete_writew("drivers/i2c/busses/i2c-gxp.c:413", SLAVE_EVT_CLR | SNOOP_EVT_MASK |
 				       SLAVE_ACK_ENAB | SLAVE_EVT_STALL,
 				       drvdata->base + GXP_I2CSCMD);
 			}
 		} else {
 			/* Master wants to write to us */
-			value = readb(drvdata->base + GXP_I2CSNPDAT);
+			value = pete_readb("drivers/i2c/busses/i2c-gxp.c:419", drvdata->base + GXP_I2CSNPDAT);
 			buf = (uint8_t)value;
 			ret = i2c_slave_event(drvdata->slave,
 					      I2C_SLAVE_WRITE_RECEIVED, &buf);
 			if (!ret) {
 				/* Ack next byte from master */
-				writeb(SLAVE_EVT_CLR | SNOOP_EVT_MASK |
+				pete_writeb("drivers/i2c/busses/i2c-gxp.c:425", SLAVE_EVT_CLR | SNOOP_EVT_MASK |
 				       SLAVE_ACK_ENAB | SLAVE_EVT_STALL,
 				       drvdata->base + GXP_I2CSCMD);
 			} else {
 				/* Nack next byte from master */
-				writeb(SLAVE_EVT_CLR | SNOOP_EVT_MASK |
+				pete_writeb("drivers/i2c/busses/i2c-gxp.c:430", SLAVE_EVT_CLR | SNOOP_EVT_MASK |
 				       SLAVE_EVT_STALL, drvdata->base + GXP_I2CSCMD);
 			}
 		}
@@ -448,13 +448,13 @@ static irqreturn_t gxp_i2c_irq_handler(int irq, void *_drvdata)
 	if (!(value & BIT(drvdata->engine)))
 		return IRQ_NONE;
 
-	value = readb(drvdata->base + GXP_I2CEVTERR);
+	value = pete_readb("drivers/i2c/busses/i2c-gxp.c:451", drvdata->base + GXP_I2CEVTERR);
 
 	/* Error */
 	if (value & ~(MASK_MASTER_EVENT | MASK_SLAVE_CMD_EVENT |
 				MASK_SLAVE_DATA_EVENT)) {
 		/* Clear all events */
-		writeb(0x00, drvdata->base + GXP_I2CEVTERR);
+		pete_writeb("drivers/i2c/busses/i2c-gxp.c:457", 0x00, drvdata->base + GXP_I2CEVTERR);
 		drvdata->state = GXP_I2C_ERROR;
 		gxp_i2c_stop(drvdata);
 		return IRQ_HANDLED;
@@ -490,19 +490,19 @@ static irqreturn_t gxp_i2c_irq_handler(int irq, void *_drvdata)
 static void gxp_i2c_init(struct gxp_i2c_drvdata *drvdata)
 {
 	drvdata->state = GXP_I2C_IDLE;
-	writeb(2000000 / drvdata->t.bus_freq_hz,
+	pete_writeb("drivers/i2c/busses/i2c-gxp.c:493", 2000000 / drvdata->t.bus_freq_hz,
 	       drvdata->base + GXP_I2CFREQDIV);
-	writeb(FILTER_CNT | FAIRNESS_CNT,
+	pete_writeb("drivers/i2c/busses/i2c-gxp.c:495", FILTER_CNT | FAIRNESS_CNT,
 	       drvdata->base + GXP_I2CFLTFAIR);
-	writeb(GXP_DATA_EDGE_RST_CTRL, drvdata->base + GXP_I2CTMOEDG);
-	writeb(0x00, drvdata->base + GXP_I2CCYCTIM);
-	writeb(0x00, drvdata->base + GXP_I2CSNPAA);
-	writeb(0x00, drvdata->base + GXP_I2CADVFEAT);
-	writeb(SNOOP_EVT_CLR | SLAVE_EVT_CLR | SNOOP_EVT_MASK |
+	pete_writeb("drivers/i2c/busses/i2c-gxp.c:497", GXP_DATA_EDGE_RST_CTRL, drvdata->base + GXP_I2CTMOEDG);
+	pete_writeb("drivers/i2c/busses/i2c-gxp.c:498", 0x00, drvdata->base + GXP_I2CCYCTIM);
+	pete_writeb("drivers/i2c/busses/i2c-gxp.c:499", 0x00, drvdata->base + GXP_I2CSNPAA);
+	pete_writeb("drivers/i2c/busses/i2c-gxp.c:500", 0x00, drvdata->base + GXP_I2CADVFEAT);
+	pete_writeb("drivers/i2c/busses/i2c-gxp.c:501", SNOOP_EVT_CLR | SLAVE_EVT_CLR | SNOOP_EVT_MASK |
 	       SLAVE_EVT_MASK, drvdata->base + GXP_I2CSCMD);
-	writeb(MASTER_EVT_CLR, drvdata->base + GXP_I2CMCMD);
-	writeb(0x00, drvdata->base + GXP_I2CEVTERR);
-	writeb(0x00, drvdata->base + GXP_I2COWNADR);
+	pete_writeb("drivers/i2c/busses/i2c-gxp.c:503", MASTER_EVT_CLR, drvdata->base + GXP_I2CMCMD);
+	pete_writeb("drivers/i2c/busses/i2c-gxp.c:504", 0x00, drvdata->base + GXP_I2CEVTERR);
+	pete_writeb("drivers/i2c/busses/i2c-gxp.c:505", 0x00, drvdata->base + GXP_I2COWNADR);
 }
 
 static int gxp_i2c_probe(struct platform_device *pdev)

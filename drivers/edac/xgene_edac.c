@@ -65,7 +65,7 @@ struct xgene_edac {
 
 static void xgene_edac_pcp_rd(struct xgene_edac *edac, u32 reg, u32 *val)
 {
-	*val = readl(edac->pcp_csr + reg);
+	*val = pete_readl("drivers/edac/xgene_edac.c:68", edac->pcp_csr + reg);
 }
 
 static void xgene_edac_pcp_clrbits(struct xgene_edac *edac, u32 reg,
@@ -74,9 +74,9 @@ static void xgene_edac_pcp_clrbits(struct xgene_edac *edac, u32 reg,
 	u32 val;
 
 	spin_lock(&edac->lock);
-	val = readl(edac->pcp_csr + reg);
+	val = pete_readl("drivers/edac/xgene_edac.c:77", edac->pcp_csr + reg);
 	val &= ~bits_mask;
-	writel(val, edac->pcp_csr + reg);
+	pete_writel("drivers/edac/xgene_edac.c:79", val, edac->pcp_csr + reg);
 	spin_unlock(&edac->lock);
 }
 
@@ -86,9 +86,9 @@ static void xgene_edac_pcp_setbits(struct xgene_edac *edac, u32 reg,
 	u32 val;
 
 	spin_lock(&edac->lock);
-	val = readl(edac->pcp_csr + reg);
+	val = pete_readl("drivers/edac/xgene_edac.c:89", edac->pcp_csr + reg);
 	val |= bits_mask;
-	writel(val, edac->pcp_csr + reg);
+	pete_writel("drivers/edac/xgene_edac.c:91", val, edac->pcp_csr + reg);
 	spin_unlock(&edac->lock);
 }
 
@@ -146,7 +146,7 @@ static ssize_t xgene_edac_mc_err_inject_write(struct file *file,
 	int i;
 
 	for (i = 0; i < MCU_MAX_RANK; i++) {
-		writel(MCU_ESRR_MULTUCERR_MASK | MCU_ESRR_BACKUCERR_MASK |
+		pete_writel("drivers/edac/xgene_edac.c:149", MCU_ESRR_MULTUCERR_MASK | MCU_ESRR_BACKUCERR_MASK |
 		       MCU_ESRR_DEMANDUCERR_MASK | MCU_ESRR_CERR_MASK,
 		       ctx->mcu_csr + MCUESRRA0 + i * MCU_RANK_STRIDE);
 	}
@@ -190,7 +190,7 @@ static void xgene_edac_mc_check(struct mem_ctl_info *mci)
 		return;
 
 	for (rank = 0; rank < MCU_MAX_RANK; rank++) {
-		reg = readl(ctx->mcu_csr + MCUESRR0 + rank * MCU_RANK_STRIDE);
+		reg = pete_readl("drivers/edac/xgene_edac.c:193", ctx->mcu_csr + MCUESRR0 + rank * MCU_RANK_STRIDE);
 
 		/* Detect uncorrectable memory error */
 		if (reg & (MCU_ESRR_DEMANDUCERR_MASK |
@@ -205,11 +205,11 @@ static void xgene_edac_mc_check(struct mem_ctl_info *mci)
 
 		/* Detect correctable memory error */
 		if (reg & MCU_ESRR_CERR_MASK) {
-			bank = readl(ctx->mcu_csr + MCUEBLRR0 +
+			bank = pete_readl("drivers/edac/xgene_edac.c:208", ctx->mcu_csr + MCUEBLRR0 +
 				     rank * MCU_RANK_STRIDE);
-			col_row = readl(ctx->mcu_csr + MCUERCRR0 +
+			col_row = pete_readl("drivers/edac/xgene_edac.c:210", ctx->mcu_csr + MCUERCRR0 +
 					rank * MCU_RANK_STRIDE);
-			count = readl(ctx->mcu_csr + MCUSBECNT0 +
+			count = pete_readl("drivers/edac/xgene_edac.c:212", ctx->mcu_csr + MCUSBECNT0 +
 				      rank * MCU_RANK_STRIDE);
 			edac_mc_chipset_printk(mci, KERN_WARNING, "X-Gene",
 				"MCU correctable error at rank %d bank %d column %d row %d count %d\n",
@@ -223,15 +223,15 @@ static void xgene_edac_mc_check(struct mem_ctl_info *mci)
 		}
 
 		/* Clear all error registers */
-		writel(0x0, ctx->mcu_csr + MCUEBLRR0 + rank * MCU_RANK_STRIDE);
-		writel(0x0, ctx->mcu_csr + MCUERCRR0 + rank * MCU_RANK_STRIDE);
-		writel(0x0, ctx->mcu_csr + MCUSBECNT0 +
+		pete_writel("drivers/edac/xgene_edac.c:226", 0x0, ctx->mcu_csr + MCUEBLRR0 + rank * MCU_RANK_STRIDE);
+		pete_writel("drivers/edac/xgene_edac.c:227", 0x0, ctx->mcu_csr + MCUERCRR0 + rank * MCU_RANK_STRIDE);
+		pete_writel("drivers/edac/xgene_edac.c:228", 0x0, ctx->mcu_csr + MCUSBECNT0 +
 		       rank * MCU_RANK_STRIDE);
-		writel(reg, ctx->mcu_csr + MCUESRR0 + rank * MCU_RANK_STRIDE);
+		pete_writel("drivers/edac/xgene_edac.c:230", reg, ctx->mcu_csr + MCUESRR0 + rank * MCU_RANK_STRIDE);
 	}
 
 	/* Detect memory controller error */
-	reg = readl(ctx->mcu_csr + MCUGESR);
+	reg = pete_readl("drivers/edac/xgene_edac.c:234", ctx->mcu_csr + MCUGESR);
 	if (reg) {
 		if (reg & MCU_GESR_ADDRNOMATCH_ERR_MASK)
 			edac_mc_chipset_printk(mci, KERN_WARNING, "X-Gene",
@@ -240,7 +240,7 @@ static void xgene_edac_mc_check(struct mem_ctl_info *mci)
 			edac_mc_chipset_printk(mci, KERN_WARNING, "X-Gene",
 				"MCU address multi-match error\n");
 
-		writel(reg, ctx->mcu_csr + MCUGESR);
+		pete_writel("drivers/edac/xgene_edac.c:243", reg, ctx->mcu_csr + MCUGESR);
 	}
 }
 
@@ -278,20 +278,20 @@ static void xgene_edac_mc_irq_ctl(struct mem_ctl_info *mci, bool enable)
 		}
 
 		/* Enable MCU interrupt and error reporting */
-		val = readl(ctx->mcu_csr + MCUGECR);
+		val = pete_readl("drivers/edac/xgene_edac.c:281", ctx->mcu_csr + MCUGECR);
 		val |= MCU_GECR_DEMANDUCINTREN_MASK |
 		       MCU_GECR_BACKUCINTREN_MASK |
 		       MCU_GECR_CINTREN_MASK |
 		       MUC_GECR_MCUADDRERREN_MASK;
-		writel(val, ctx->mcu_csr + MCUGECR);
+		pete_writel("drivers/edac/xgene_edac.c:286", val, ctx->mcu_csr + MCUGECR);
 	} else {
 		/* Disable MCU interrupt */
-		val = readl(ctx->mcu_csr + MCUGECR);
+		val = pete_readl("drivers/edac/xgene_edac.c:289", ctx->mcu_csr + MCUGECR);
 		val &= ~(MCU_GECR_DEMANDUCINTREN_MASK |
 			 MCU_GECR_BACKUCINTREN_MASK |
 			 MCU_GECR_CINTREN_MASK |
 			 MUC_GECR_MCUADDRERREN_MASK);
-		writel(val, ctx->mcu_csr + MCUGECR);
+		pete_writel("drivers/edac/xgene_edac.c:294", val, ctx->mcu_csr + MCUGECR);
 
 		/* Disable memory controller top level interrupt */
 		xgene_edac_pcp_setbits(ctx->edac, PCPHPERRINTMSK,
@@ -525,7 +525,7 @@ static void xgene_edac_pmd_l1_check(struct edac_device_ctl_info *edac_dev,
 
 	pg_f = ctx->pmd_csr + cpu_idx * CPU_CSR_STRIDE + CPU_MEMERR_CPU_PAGE;
 
-	val = readl(pg_f + MEMERR_CPU_ICFESR_PAGE_OFFSET);
+	val = pete_readl("drivers/edac/xgene_edac.c:528", pg_f + MEMERR_CPU_ICFESR_PAGE_OFFSET);
 	if (!val)
 		goto chk_lsu;
 	dev_err(edac_dev->dev,
@@ -558,14 +558,14 @@ static void xgene_edac_pmd_l1_check(struct edac_device_ctl_info *edac_dev,
 	}
 
 	/* Clear any HW errors */
-	writel(val, pg_f + MEMERR_CPU_ICFESR_PAGE_OFFSET);
+	pete_writel("drivers/edac/xgene_edac.c:561", val, pg_f + MEMERR_CPU_ICFESR_PAGE_OFFSET);
 
 	if (val & (MEMERR_CPU_ICFESR_CERR_MASK |
 		   MEMERR_CPU_ICFESR_MULTCERR_MASK))
 		edac_device_handle_ce(edac_dev, 0, 0, edac_dev->ctl_name);
 
 chk_lsu:
-	val = readl(pg_f + MEMERR_CPU_LSUESR_PAGE_OFFSET);
+	val = pete_readl("drivers/edac/xgene_edac.c:568", pg_f + MEMERR_CPU_LSUESR_PAGE_OFFSET);
 	if (!val)
 		goto chk_mmu;
 	dev_err(edac_dev->dev,
@@ -602,14 +602,14 @@ chk_lsu:
 	}
 
 	/* Clear any HW errors */
-	writel(val, pg_f + MEMERR_CPU_LSUESR_PAGE_OFFSET);
+	pete_writel("drivers/edac/xgene_edac.c:605", val, pg_f + MEMERR_CPU_LSUESR_PAGE_OFFSET);
 
 	if (val & (MEMERR_CPU_LSUESR_CERR_MASK |
 		   MEMERR_CPU_LSUESR_MULTCERR_MASK))
 		edac_device_handle_ce(edac_dev, 0, 0, edac_dev->ctl_name);
 
 chk_mmu:
-	val = readl(pg_f + MEMERR_CPU_MMUESR_PAGE_OFFSET);
+	val = pete_readl("drivers/edac/xgene_edac.c:612", pg_f + MEMERR_CPU_MMUESR_PAGE_OFFSET);
 	if (!val)
 		return;
 	dev_err(edac_dev->dev,
@@ -651,7 +651,7 @@ chk_mmu:
 	}
 
 	/* Clear any HW errors */
-	writel(val, pg_f + MEMERR_CPU_MMUESR_PAGE_OFFSET);
+	pete_writel("drivers/edac/xgene_edac.c:654", val, pg_f + MEMERR_CPU_MMUESR_PAGE_OFFSET);
 
 	edac_device_handle_ce(edac_dev, 0, 0, edac_dev->ctl_name);
 }
@@ -667,11 +667,11 @@ static void xgene_edac_pmd_l2_check(struct edac_device_ctl_info *edac_dev)
 
 	/* Check L2 */
 	pg_e = ctx->pmd_csr + CPU_MEMERR_L2C_PAGE;
-	val = readl(pg_e + MEMERR_L2C_L2ESR_PAGE_OFFSET);
+	val = pete_readl("drivers/edac/xgene_edac.c:670", pg_e + MEMERR_L2C_L2ESR_PAGE_OFFSET);
 	if (!val)
 		goto chk_l2c;
-	val_lo = readl(pg_e + MEMERR_L2C_L2EALR_PAGE_OFFSET);
-	val_hi = readl(pg_e + MEMERR_L2C_L2EAHR_PAGE_OFFSET);
+	val_lo = pete_readl("drivers/edac/xgene_edac.c:673", pg_e + MEMERR_L2C_L2EALR_PAGE_OFFSET);
+	val_hi = pete_readl("drivers/edac/xgene_edac.c:674", pg_e + MEMERR_L2C_L2EAHR_PAGE_OFFSET);
 	dev_err(edac_dev->dev,
 		"PMD%d memory error L2C L2ESR 0x%08X @ 0x%08X.%08X\n",
 		ctx->pmd, val, val_hi, val_lo);
@@ -708,7 +708,7 @@ static void xgene_edac_pmd_l2_check(struct edac_device_ctl_info *edac_dev)
 	}
 
 	/* Clear any HW errors */
-	writel(val, pg_e + MEMERR_L2C_L2ESR_PAGE_OFFSET);
+	pete_writel("drivers/edac/xgene_edac.c:711", val, pg_e + MEMERR_L2C_L2ESR_PAGE_OFFSET);
 
 	if (val & (MEMERR_L2C_L2ESR_ERR_MASK |
 		   MEMERR_L2C_L2ESR_MULTICERR_MASK))
@@ -720,14 +720,14 @@ static void xgene_edac_pmd_l2_check(struct edac_device_ctl_info *edac_dev)
 chk_l2c:
 	/* Check if any memory request timed out on L2 cache */
 	pg_d = ctx->pmd_csr + CPU_L2C_PAGE;
-	val = readl(pg_d + CPUX_L2C_L2RTOSR_PAGE_OFFSET);
+	val = pete_readl("drivers/edac/xgene_edac.c:723", pg_d + CPUX_L2C_L2RTOSR_PAGE_OFFSET);
 	if (val) {
-		val_lo = readl(pg_d + CPUX_L2C_L2RTOALR_PAGE_OFFSET);
-		val_hi = readl(pg_d + CPUX_L2C_L2RTOAHR_PAGE_OFFSET);
+		val_lo = pete_readl("drivers/edac/xgene_edac.c:725", pg_d + CPUX_L2C_L2RTOALR_PAGE_OFFSET);
+		val_hi = pete_readl("drivers/edac/xgene_edac.c:726", pg_d + CPUX_L2C_L2RTOAHR_PAGE_OFFSET);
 		dev_err(edac_dev->dev,
 			"PMD%d L2C error L2C RTOSR 0x%08X @ 0x%08X.%08X\n",
 			ctx->pmd, val, val_hi, val_lo);
-		writel(val, pg_d + CPUX_L2C_L2RTOSR_PAGE_OFFSET);
+		pete_writel("drivers/edac/xgene_edac.c:730", val, pg_d + CPUX_L2C_L2RTOSR_PAGE_OFFSET);
 	}
 }
 
@@ -760,9 +760,9 @@ static void xgene_edac_pmd_cpu_hw_cfg(struct edac_device_ctl_info *edac_dev,
 	 * Enable CPU memory error:
 	 *  MEMERR_CPU_ICFESRA, MEMERR_CPU_LSUESRA, and MEMERR_CPU_MMUESRA
 	 */
-	writel(0x00000301, pg_f + MEMERR_CPU_ICFECR_PAGE_OFFSET);
-	writel(0x00000301, pg_f + MEMERR_CPU_LSUECR_PAGE_OFFSET);
-	writel(0x00000101, pg_f + MEMERR_CPU_MMUECR_PAGE_OFFSET);
+	pete_writel("drivers/edac/xgene_edac.c:763", 0x00000301, pg_f + MEMERR_CPU_ICFECR_PAGE_OFFSET);
+	pete_writel("drivers/edac/xgene_edac.c:764", 0x00000301, pg_f + MEMERR_CPU_LSUECR_PAGE_OFFSET);
+	pete_writel("drivers/edac/xgene_edac.c:765", 0x00000101, pg_f + MEMERR_CPU_MMUECR_PAGE_OFFSET);
 }
 
 static void xgene_edac_pmd_hw_cfg(struct edac_device_ctl_info *edac_dev)
@@ -772,10 +772,10 @@ static void xgene_edac_pmd_hw_cfg(struct edac_device_ctl_info *edac_dev)
 	void __iomem *pg_e = ctx->pmd_csr + CPU_MEMERR_L2C_PAGE;
 
 	/* Enable PMD memory error - MEMERR_L2C_L2ECR and L2C_L2RTOCR */
-	writel(0x00000703, pg_e + MEMERR_L2C_L2ECR_PAGE_OFFSET);
+	pete_writel("drivers/edac/xgene_edac.c:775", 0x00000703, pg_e + MEMERR_L2C_L2ECR_PAGE_OFFSET);
 	/* Configure L2C HW request time out feature if supported */
 	if (ctx->version > 1)
-		writel(0x00000119, pg_d + CPUX_L2C_L2RTOCR_PAGE_OFFSET);
+		pete_writel("drivers/edac/xgene_edac.c:778", 0x00000119, pg_d + CPUX_L2C_L2RTOCR_PAGE_OFFSET);
 }
 
 static void xgene_edac_pmd_hw_ctl(struct edac_device_ctl_info *edac_dev,
@@ -816,13 +816,13 @@ static ssize_t xgene_edac_pmd_l1_inject_ctrl_write(struct file *file,
 		cpux_pg_f = ctx->pmd_csr + i * CPU_CSR_STRIDE +
 			    CPU_MEMERR_CPU_PAGE;
 
-		writel(MEMERR_CPU_ICFESR_MULTCERR_MASK |
+		pete_writel("drivers/edac/xgene_edac.c:819", MEMERR_CPU_ICFESR_MULTCERR_MASK |
 		       MEMERR_CPU_ICFESR_CERR_MASK,
 		       cpux_pg_f + MEMERR_CPU_ICFESRA_PAGE_OFFSET);
-		writel(MEMERR_CPU_LSUESR_MULTCERR_MASK |
+		pete_writel("drivers/edac/xgene_edac.c:822", MEMERR_CPU_LSUESR_MULTCERR_MASK |
 		       MEMERR_CPU_LSUESR_CERR_MASK,
 		       cpux_pg_f + MEMERR_CPU_LSUESRA_PAGE_OFFSET);
-		writel(MEMERR_CPU_MMUESR_MULTCERR_MASK |
+		pete_writel("drivers/edac/xgene_edac.c:825", MEMERR_CPU_MMUESR_MULTCERR_MASK |
 		       MEMERR_CPU_MMUESR_CERR_MASK,
 		       cpux_pg_f + MEMERR_CPU_MMUESRA_PAGE_OFFSET);
 	}
@@ -837,7 +837,7 @@ static ssize_t xgene_edac_pmd_l2_inject_ctrl_write(struct file *file,
 	struct xgene_edac_pmd_ctx *ctx = edac_dev->pvt_info;
 	void __iomem *pg_e = ctx->pmd_csr + CPU_MEMERR_L2C_PAGE;
 
-	writel(MEMERR_L2C_L2ESR_MULTUCERR_MASK |
+	pete_writel("drivers/edac/xgene_edac.c:840", MEMERR_L2C_L2ESR_MULTUCERR_MASK |
 	       MEMERR_L2C_L2ESR_MULTICERR_MASK |
 	       MEMERR_L2C_L2ESR_UCERR_MASK |
 	       MEMERR_L2C_L2ESR_ERR_MASK,
@@ -1058,7 +1058,7 @@ static void xgene_edac_l3_check(struct edac_device_ctl_info *edac_dev)
 	u32 l3caelr;
 	u32 l3cbelr;
 
-	l3cesr = readl(ctx->dev_csr + L3C_ESR);
+	l3cesr = pete_readl("drivers/edac/xgene_edac.c:1061", ctx->dev_csr + L3C_ESR);
 	if (!(l3cesr & (L3C_ESR_UCERR_MASK | L3C_ESR_CERR_MASK)))
 		return;
 
@@ -1067,9 +1067,9 @@ static void xgene_edac_l3_check(struct edac_device_ctl_info *edac_dev)
 	if (l3cesr & L3C_ESR_CERR_MASK)
 		dev_warn(edac_dev->dev, "L3C correctable error\n");
 
-	l3celr = readl(ctx->dev_csr + L3C_ELR);
-	l3caelr = readl(ctx->dev_csr + L3C_AELR);
-	l3cbelr = readl(ctx->dev_csr + L3C_BELR);
+	l3celr = pete_readl("drivers/edac/xgene_edac.c:1070", ctx->dev_csr + L3C_ELR);
+	l3caelr = pete_readl("drivers/edac/xgene_edac.c:1071", ctx->dev_csr + L3C_AELR);
+	l3cbelr = pete_readl("drivers/edac/xgene_edac.c:1072", ctx->dev_csr + L3C_BELR);
 	if (l3cesr & L3C_ESR_MULTIHIT_MASK)
 		dev_err(edac_dev->dev, "L3C multiple hit error\n");
 	if (l3cesr & L3C_ESR_UCEVICT_MASK)
@@ -1097,7 +1097,7 @@ static void xgene_edac_l3_check(struct edac_device_ctl_info *edac_dev)
 		"L3C error status register value 0x%X\n", l3cesr);
 
 	/* Clear L3C error interrupt */
-	writel(0, ctx->dev_csr + L3C_ESR);
+	pete_writel("drivers/edac/xgene_edac.c:1100", 0, ctx->dev_csr + L3C_ESR);
 
 	if (ctx->version <= 1 &&
 	    xgene_edac_l3_promote_to_uc_err(l3cesr, l3celr)) {
@@ -1116,7 +1116,7 @@ static void xgene_edac_l3_hw_init(struct edac_device_ctl_info *edac_dev,
 	struct xgene_edac_dev_ctx *ctx = edac_dev->pvt_info;
 	u32 val;
 
-	val = readl(ctx->dev_csr + L3C_ECR);
+	val = pete_readl("drivers/edac/xgene_edac.c:1119", ctx->dev_csr + L3C_ECR);
 	val |= L3C_UCERREN | L3C_CERREN;
 	/* On disable, we just disable interrupt but keep error enabled */
 	if (edac_dev->op_state == OP_RUNNING_INTERRUPT) {
@@ -1125,7 +1125,7 @@ static void xgene_edac_l3_hw_init(struct edac_device_ctl_info *edac_dev,
 		else
 			val &= ~(L3C_ECR_UCINTREN | L3C_ECR_CINTREN);
 	}
-	writel(val, ctx->dev_csr + L3C_ECR);
+	pete_writel("drivers/edac/xgene_edac.c:1128", val, ctx->dev_csr + L3C_ECR);
 
 	if (edac_dev->op_state == OP_RUNNING_INTERRUPT) {
 		/* Enable/disable L3 error top level interrupt */
@@ -1151,7 +1151,7 @@ static ssize_t xgene_edac_l3_inject_ctrl_write(struct file *file,
 	struct xgene_edac_dev_ctx *ctx = edac_dev->pvt_info;
 
 	/* Generate all errors */
-	writel(0xFFFFFFFF, ctx->dev_csr + L3C_ESR);
+	pete_writel("drivers/edac/xgene_edac.c:1154", 0xFFFFFFFF, ctx->dev_csr + L3C_ESR);
 	return count;
 }
 
@@ -1394,7 +1394,7 @@ static void xgene_edac_iob_gic_report(struct edac_device_ctl_info *edac_dev)
 	u32 info;
 
 	/* GIC transaction error interrupt */
-	reg = readl(ctx->dev_csr + XGICTRANSERRINTSTS);
+	reg = pete_readl("drivers/edac/xgene_edac.c:1397", ctx->dev_csr + XGICTRANSERRINTSTS);
 	if (!reg)
 		goto chk_iob_err;
 	dev_err(edac_dev->dev, "XGIC transaction error\n");
@@ -1406,55 +1406,55 @@ static void xgene_edac_iob_gic_report(struct edac_device_ctl_info *edac_dev)
 		dev_err(edac_dev->dev, "XGIC write size error\n");
 	if (reg & M_WR_ACCESS_ERR_MASK)
 		dev_err(edac_dev->dev, "Multiple XGIC write size error\n");
-	info = readl(ctx->dev_csr + XGICTRANSERRREQINFO);
+	info = pete_readl("drivers/edac/xgene_edac.c:1409", ctx->dev_csr + XGICTRANSERRREQINFO);
 	dev_err(edac_dev->dev, "XGIC %s access @ 0x%08X (0x%08X)\n",
 		info & REQTYPE_MASK ? "read" : "write", ERRADDR_RD(info),
 		info);
-	writel(reg, ctx->dev_csr + XGICTRANSERRINTSTS);
+	pete_writel("drivers/edac/xgene_edac.c:1413", reg, ctx->dev_csr + XGICTRANSERRINTSTS);
 
 chk_iob_err:
 	/* IOB memory error */
-	reg = readl(ctx->dev_csr + GLBL_ERR_STS);
+	reg = pete_readl("drivers/edac/xgene_edac.c:1417", ctx->dev_csr + GLBL_ERR_STS);
 	if (!reg)
 		return;
 	if (reg & SEC_ERR_MASK) {
-		err_addr_lo = readl(ctx->dev_csr + GLBL_SEC_ERRL);
-		err_addr_hi = readl(ctx->dev_csr + GLBL_SEC_ERRH);
+		err_addr_lo = pete_readl("drivers/edac/xgene_edac.c:1421", ctx->dev_csr + GLBL_SEC_ERRL);
+		err_addr_hi = pete_readl("drivers/edac/xgene_edac.c:1422", ctx->dev_csr + GLBL_SEC_ERRH);
 		dev_err(edac_dev->dev,
 			"IOB single-bit correctable memory at 0x%08X.%08X error\n",
 			err_addr_lo, err_addr_hi);
-		writel(err_addr_lo, ctx->dev_csr + GLBL_SEC_ERRL);
-		writel(err_addr_hi, ctx->dev_csr + GLBL_SEC_ERRH);
+		pete_writel("drivers/edac/xgene_edac.c:1426", err_addr_lo, ctx->dev_csr + GLBL_SEC_ERRL);
+		pete_writel("drivers/edac/xgene_edac.c:1427", err_addr_hi, ctx->dev_csr + GLBL_SEC_ERRH);
 	}
 	if (reg & MSEC_ERR_MASK) {
-		err_addr_lo = readl(ctx->dev_csr + GLBL_MSEC_ERRL);
-		err_addr_hi = readl(ctx->dev_csr + GLBL_MSEC_ERRH);
+		err_addr_lo = pete_readl("drivers/edac/xgene_edac.c:1430", ctx->dev_csr + GLBL_MSEC_ERRL);
+		err_addr_hi = pete_readl("drivers/edac/xgene_edac.c:1431", ctx->dev_csr + GLBL_MSEC_ERRH);
 		dev_err(edac_dev->dev,
 			"IOB multiple single-bit correctable memory at 0x%08X.%08X error\n",
 			err_addr_lo, err_addr_hi);
-		writel(err_addr_lo, ctx->dev_csr + GLBL_MSEC_ERRL);
-		writel(err_addr_hi, ctx->dev_csr + GLBL_MSEC_ERRH);
+		pete_writel("drivers/edac/xgene_edac.c:1435", err_addr_lo, ctx->dev_csr + GLBL_MSEC_ERRL);
+		pete_writel("drivers/edac/xgene_edac.c:1436", err_addr_hi, ctx->dev_csr + GLBL_MSEC_ERRH);
 	}
 	if (reg & (SEC_ERR_MASK | MSEC_ERR_MASK))
 		edac_device_handle_ce(edac_dev, 0, 0, edac_dev->ctl_name);
 
 	if (reg & DED_ERR_MASK) {
-		err_addr_lo = readl(ctx->dev_csr + GLBL_DED_ERRL);
-		err_addr_hi = readl(ctx->dev_csr + GLBL_DED_ERRH);
+		err_addr_lo = pete_readl("drivers/edac/xgene_edac.c:1442", ctx->dev_csr + GLBL_DED_ERRL);
+		err_addr_hi = pete_readl("drivers/edac/xgene_edac.c:1443", ctx->dev_csr + GLBL_DED_ERRH);
 		dev_err(edac_dev->dev,
 			"IOB double-bit uncorrectable memory at 0x%08X.%08X error\n",
 			err_addr_lo, err_addr_hi);
-		writel(err_addr_lo, ctx->dev_csr + GLBL_DED_ERRL);
-		writel(err_addr_hi, ctx->dev_csr + GLBL_DED_ERRH);
+		pete_writel("drivers/edac/xgene_edac.c:1447", err_addr_lo, ctx->dev_csr + GLBL_DED_ERRL);
+		pete_writel("drivers/edac/xgene_edac.c:1448", err_addr_hi, ctx->dev_csr + GLBL_DED_ERRH);
 	}
 	if (reg & MDED_ERR_MASK) {
-		err_addr_lo = readl(ctx->dev_csr + GLBL_MDED_ERRL);
-		err_addr_hi = readl(ctx->dev_csr + GLBL_MDED_ERRH);
+		err_addr_lo = pete_readl("drivers/edac/xgene_edac.c:1451", ctx->dev_csr + GLBL_MDED_ERRL);
+		err_addr_hi = pete_readl("drivers/edac/xgene_edac.c:1452", ctx->dev_csr + GLBL_MDED_ERRH);
 		dev_err(edac_dev->dev,
 			"Multiple IOB double-bit uncorrectable memory at 0x%08X.%08X error\n",
 			err_addr_lo, err_addr_hi);
-		writel(err_addr_lo, ctx->dev_csr + GLBL_MDED_ERRL);
-		writel(err_addr_hi, ctx->dev_csr + GLBL_MDED_ERRH);
+		pete_writel("drivers/edac/xgene_edac.c:1456", err_addr_lo, ctx->dev_csr + GLBL_MDED_ERRL);
+		pete_writel("drivers/edac/xgene_edac.c:1457", err_addr_hi, ctx->dev_csr + GLBL_MDED_ERRH);
 	}
 	if (reg & (DED_ERR_MASK | MDED_ERR_MASK))
 		edac_device_handle_ue(edac_dev, 0, 0, edac_dev->ctl_name);
@@ -1511,7 +1511,7 @@ static void xgene_edac_rb_report(struct edac_device_ctl_info *edac_dev)
 rb_skip:
 
 	/* IOB Bridge agent transaction error interrupt */
-	reg = readl(ctx->dev_csr + IOBBATRANSERRINTSTS);
+	reg = pete_readl("drivers/edac/xgene_edac.c:1514", ctx->dev_csr + IOBBATRANSERRINTSTS);
 	if (!reg)
 		return;
 
@@ -1558,15 +1558,15 @@ rb_skip:
 		dev_err(edac_dev->dev,
 			"Multiple IOB BA XGIC/RB illegal access error\n");
 
-	err_addr_lo = readl(ctx->dev_csr + IOBBATRANSERRREQINFOL);
-	err_addr_hi = readl(ctx->dev_csr + IOBBATRANSERRREQINFOH);
+	err_addr_lo = pete_readl("drivers/edac/xgene_edac.c:1561", ctx->dev_csr + IOBBATRANSERRREQINFOL);
+	err_addr_hi = pete_readl("drivers/edac/xgene_edac.c:1562", ctx->dev_csr + IOBBATRANSERRREQINFOH);
 	dev_err(edac_dev->dev, "IOB BA %s access at 0x%02X.%08X (0x%08X)\n",
 		REQTYPE_F2_RD(err_addr_hi) ? "read" : "write",
 		ERRADDRH_F2_RD(err_addr_hi), err_addr_lo, err_addr_hi);
 	if (reg & WRERR_RESP_MASK)
 		dev_err(edac_dev->dev, "IOB BA requestor ID 0x%08X\n",
-			readl(ctx->dev_csr + IOBBATRANSERRCSWREQID));
-	writel(reg, ctx->dev_csr + IOBBATRANSERRINTSTS);
+			pete_readl("drivers/edac/xgene_edac.c:1568", ctx->dev_csr + IOBBATRANSERRCSWREQID));
+	pete_writel("drivers/edac/xgene_edac.c:1569", reg, ctx->dev_csr + IOBBATRANSERRINTSTS);
 }
 
 static void xgene_edac_pa_report(struct edac_device_ctl_info *edac_dev)
@@ -1577,7 +1577,7 @@ static void xgene_edac_pa_report(struct edac_device_ctl_info *edac_dev)
 	u32 reg;
 
 	/* IOB Processing agent transaction error interrupt */
-	reg = readl(ctx->dev_csr + IOBPATRANSERRINTSTS);
+	reg = pete_readl("drivers/edac/xgene_edac.c:1580", ctx->dev_csr + IOBPATRANSERRINTSTS);
 	if (!reg)
 		goto chk_iob_axi0;
 	dev_err(edac_dev->dev, "IOB processing agent (PA) transaction error\n");
@@ -1600,35 +1600,35 @@ static void xgene_edac_pa_report(struct edac_device_ctl_info *edac_dev)
 	if (reg & IOBPA_M_REQIDRAM_CORRUPT_MASK)
 		dev_err(edac_dev->dev,
 			"Multiple IOB PA transaction ID RAM error\n");
-	writel(reg, ctx->dev_csr + IOBPATRANSERRINTSTS);
+	pete_writel("drivers/edac/xgene_edac.c:1603", reg, ctx->dev_csr + IOBPATRANSERRINTSTS);
 
 chk_iob_axi0:
 	/* IOB AXI0 Error */
-	reg = readl(ctx->dev_csr + IOBAXIS0TRANSERRINTSTS);
+	reg = pete_readl("drivers/edac/xgene_edac.c:1607", ctx->dev_csr + IOBAXIS0TRANSERRINTSTS);
 	if (!reg)
 		goto chk_iob_axi1;
-	err_addr_lo = readl(ctx->dev_csr + IOBAXIS0TRANSERRREQINFOL);
-	err_addr_hi = readl(ctx->dev_csr + IOBAXIS0TRANSERRREQINFOH);
+	err_addr_lo = pete_readl("drivers/edac/xgene_edac.c:1610", ctx->dev_csr + IOBAXIS0TRANSERRREQINFOL);
+	err_addr_hi = pete_readl("drivers/edac/xgene_edac.c:1611", ctx->dev_csr + IOBAXIS0TRANSERRREQINFOH);
 	dev_err(edac_dev->dev,
 		"%sAXI slave 0 illegal %s access @ 0x%02X.%08X (0x%08X)\n",
 		reg & IOBAXIS0_M_ILLEGAL_ACCESS_MASK ? "Multiple " : "",
 		REQTYPE_RD(err_addr_hi) ? "read" : "write",
 		ERRADDRH_RD(err_addr_hi), err_addr_lo, err_addr_hi);
-	writel(reg, ctx->dev_csr + IOBAXIS0TRANSERRINTSTS);
+	pete_writel("drivers/edac/xgene_edac.c:1617", reg, ctx->dev_csr + IOBAXIS0TRANSERRINTSTS);
 
 chk_iob_axi1:
 	/* IOB AXI1 Error */
-	reg = readl(ctx->dev_csr + IOBAXIS1TRANSERRINTSTS);
+	reg = pete_readl("drivers/edac/xgene_edac.c:1621", ctx->dev_csr + IOBAXIS1TRANSERRINTSTS);
 	if (!reg)
 		return;
-	err_addr_lo = readl(ctx->dev_csr + IOBAXIS1TRANSERRREQINFOL);
-	err_addr_hi = readl(ctx->dev_csr + IOBAXIS1TRANSERRREQINFOH);
+	err_addr_lo = pete_readl("drivers/edac/xgene_edac.c:1624", ctx->dev_csr + IOBAXIS1TRANSERRREQINFOL);
+	err_addr_hi = pete_readl("drivers/edac/xgene_edac.c:1625", ctx->dev_csr + IOBAXIS1TRANSERRREQINFOH);
 	dev_err(edac_dev->dev,
 		"%sAXI slave 1 illegal %s access @ 0x%02X.%08X (0x%08X)\n",
 		reg & IOBAXIS0_M_ILLEGAL_ACCESS_MASK ? "Multiple " : "",
 		REQTYPE_RD(err_addr_hi) ? "read" : "write",
 		ERRADDRH_RD(err_addr_hi), err_addr_lo, err_addr_hi);
-	writel(reg, ctx->dev_csr + IOBAXIS1TRANSERRINTSTS);
+	pete_writel("drivers/edac/xgene_edac.c:1631", reg, ctx->dev_csr + IOBAXIS1TRANSERRINTSTS);
 }
 
 static void xgene_edac_soc_check(struct edac_device_ctl_info *edac_dev)
@@ -1708,11 +1708,11 @@ static void xgene_edac_soc_hw_init(struct edac_device_ctl_info *edac_dev,
 					       CSW_SWITCH_TRACE_ERR_MASK);
 		}
 
-		writel(enable ? 0x0 : 0xFFFFFFFF,
+		pete_writel("drivers/edac/xgene_edac.c:1711", enable ? 0x0 : 0xFFFFFFFF,
 		       ctx->dev_csr + IOBAXIS0TRANSERRINTMSK);
-		writel(enable ? 0x0 : 0xFFFFFFFF,
+		pete_writel("drivers/edac/xgene_edac.c:1713", enable ? 0x0 : 0xFFFFFFFF,
 		       ctx->dev_csr + IOBAXIS1TRANSERRINTMSK);
-		writel(enable ? 0x0 : 0xFFFFFFFF,
+		pete_writel("drivers/edac/xgene_edac.c:1715", enable ? 0x0 : 0xFFFFFFFF,
 		       ctx->dev_csr + XGICTRANSERRINTMSK);
 
 		xgene_edac_pcp_setbits(ctx->edac, MEMERRINTMSK,

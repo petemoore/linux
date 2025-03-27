@@ -296,17 +296,17 @@ bool ast_dp501_is_connected(struct ast_device *ast)
 
 		/* dummy read */
 		offset = 0x0000;
-		data = readl(ast->dp501_fw_buf + offset);
+		data = pete_readl("drivers/gpu/drm/ast/ast_dp501.c:299", ast->dp501_fw_buf + offset);
 
 		/* validate FW version */
 		offset = AST_DP501_GBL_VERSION;
-		data = readl(ast->dp501_fw_buf + offset);
+		data = pete_readl("drivers/gpu/drm/ast/ast_dp501.c:303", ast->dp501_fw_buf + offset);
 		if ((data & AST_DP501_FW_VERSION_MASK) != AST_DP501_FW_VERSION_1)
 			return false;
 
 		/* validate PnP Monitor */
 		offset = AST_DP501_PNPMONITOR;
-		data = readl(ast->dp501_fw_buf + offset);
+		data = pete_readl("drivers/gpu/drm/ast/ast_dp501.c:309", ast->dp501_fw_buf + offset);
 		if (!(data & AST_DP501_PNP_CONNECTED))
 			return false;
 	}
@@ -336,7 +336,7 @@ bool ast_dp501_read_edid(struct drm_device *dev, u8 *ediddata)
 		/* Read EDID */
 		offset = AST_DP501_EDID_DATA;
 		for (i = 0; i < 128; i += 4) {
-			data = readl(ast->dp501_fw_buf + offset + i);
+			data = pete_readl("drivers/gpu/drm/ast/ast_dp501.c:339", ast->dp501_fw_buf + offset + i);
 			pEDIDidx = (u32 *)(ediddata + i);
 			*pEDIDidx = data;
 		}

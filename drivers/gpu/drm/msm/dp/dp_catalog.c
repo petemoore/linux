@@ -86,9 +86,9 @@ static inline void dp_write_aux(struct dp_catalog_private *catalog,
 {
 	/*
 	 * To make sure aux reg writes happens before any other operation,
-	 * this function uses writel() instread of writel_relaxed()
+	 * this function uses pete_writel("drivers/gpu/drm/msm/dp/dp_catalog.c:89", ) instread of writel_relaxed()
 	 */
-	writel(data, catalog->io->dp_controller.aux.base + offset);
+	pete_writel("drivers/gpu/drm/msm/dp/dp_catalog.c:91", data, catalog->io->dp_controller.aux.base + offset);
 }
 
 static inline u32 dp_read_ahb(const struct dp_catalog_private *catalog, u32 offset)
@@ -101,9 +101,9 @@ static inline void dp_write_ahb(struct dp_catalog_private *catalog,
 {
 	/*
 	 * To make sure phy reg writes happens before any other operation,
-	 * this function uses writel() instread of writel_relaxed()
+	 * this function uses pete_writel("drivers/gpu/drm/msm/dp/dp_catalog.c:104", ) instread of writel_relaxed()
 	 */
-	writel(data, catalog->io->dp_controller.ahb.base + offset);
+	pete_writel("drivers/gpu/drm/msm/dp/dp_catalog.c:106", data, catalog->io->dp_controller.ahb.base + offset);
 }
 
 static inline void dp_write_p0(struct dp_catalog_private *catalog,
@@ -111,9 +111,9 @@ static inline void dp_write_p0(struct dp_catalog_private *catalog,
 {
 	/*
 	 * To make sure interface reg writes happens before any other operation,
-	 * this function uses writel() instread of writel_relaxed()
+	 * this function uses pete_writel("drivers/gpu/drm/msm/dp/dp_catalog.c:114", ) instread of writel_relaxed()
 	 */
-	writel(data, catalog->io->dp_controller.p0.base + offset);
+	pete_writel("drivers/gpu/drm/msm/dp/dp_catalog.c:116", data, catalog->io->dp_controller.p0.base + offset);
 }
 
 static inline u32 dp_read_p0(struct dp_catalog_private *catalog,
@@ -121,7 +121,7 @@ static inline u32 dp_read_p0(struct dp_catalog_private *catalog,
 {
 	/*
 	 * To make sure interface reg writes happens before any other operation,
-	 * this function uses writel() instread of writel_relaxed()
+	 * this function uses pete_writel("drivers/gpu/drm/msm/dp/dp_catalog.c:124", ) instread of writel_relaxed()
 	 */
 	return readl_relaxed(catalog->io->dp_controller.p0.base + offset);
 }
@@ -136,9 +136,9 @@ static inline void dp_write_link(struct dp_catalog_private *catalog,
 {
 	/*
 	 * To make sure link reg writes happens before any other operation,
-	 * this function uses writel() instread of writel_relaxed()
+	 * this function uses pete_writel("drivers/gpu/drm/msm/dp/dp_catalog.c:139", ) instread of writel_relaxed()
 	 */
-	writel(data, catalog->io->dp_controller.link.base + offset);
+	pete_writel("drivers/gpu/drm/msm/dp/dp_catalog.c:141", data, catalog->io->dp_controller.link.base + offset);
 }
 
 /* aux related catalog functions */
@@ -395,7 +395,7 @@ void dp_catalog_ctrl_mainlink_ctrl(struct dp_catalog *dp_catalog,
 	if (enable) {
 		/*
 		 * To make sure link reg writes happens before other operation,
-		 * dp_write_link() function uses writel()
+		 * dp_write_link() function uses pete_writel("drivers/gpu/drm/msm/dp/dp_catalog.c:398", )
 		 */
 		mainlink_ctrl = dp_read_link(catalog, REG_DP_MAINLINK_CTRL);
 

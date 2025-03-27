@@ -72,18 +72,18 @@ static void __init spear_clocksource_init(void)
 	u16 val;
 
 	/* program the prescaler (/256)*/
-	writew(CTRL_PRESCALER256, gpt_base + CR(CLKSRC));
+	pete_writew("arch/arm/mach-spear/time.c:75", CTRL_PRESCALER256, gpt_base + CR(CLKSRC));
 
 	/* find out actual clock driving Timer */
 	tick_rate = clk_get_rate(gpt_clk);
 	tick_rate >>= CTRL_PRESCALER256;
 
-	writew(0xFFFF, gpt_base + LOAD(CLKSRC));
+	pete_writew("arch/arm/mach-spear/time.c:81", 0xFFFF, gpt_base + LOAD(CLKSRC));
 
-	val = readw(gpt_base + CR(CLKSRC));
+	val = pete_readw("arch/arm/mach-spear/time.c:83", gpt_base + CR(CLKSRC));
 	val &= ~CTRL_ONE_SHOT;	/* autoreload mode */
 	val |= CTRL_ENABLE ;
-	writew(val, gpt_base + CR(CLKSRC));
+	pete_writew("arch/arm/mach-spear/time.c:86", val, gpt_base + CR(CLKSRC));
 
 	/* register the clocksource */
 	clocksource_mmio_init(gpt_base + COUNT(CLKSRC), "tmr1", tick_rate,
@@ -92,11 +92,11 @@ static void __init spear_clocksource_init(void)
 
 static inline void spear_timer_shutdown(struct clock_event_device *evt)
 {
-	u16 val = readw(gpt_base + CR(CLKEVT));
+	u16 val = pete_readw("arch/arm/mach-spear/time.c:95", gpt_base + CR(CLKEVT));
 
 	/* stop the timer */
 	val &= ~CTRL_ENABLE;
-	writew(val, gpt_base + CR(CLKEVT));
+	pete_writew("arch/arm/mach-spear/time.c:99", val, gpt_base + CR(CLKEVT));
 }
 
 static int spear_shutdown(struct clock_event_device *evt)
@@ -113,9 +113,9 @@ static int spear_set_oneshot(struct clock_event_device *evt)
 	/* stop the timer */
 	spear_timer_shutdown(evt);
 
-	val = readw(gpt_base + CR(CLKEVT));
+	val = pete_readw("arch/arm/mach-spear/time.c:116", gpt_base + CR(CLKEVT));
 	val |= CTRL_ONE_SHOT;
-	writew(val, gpt_base + CR(CLKEVT));
+	pete_writew("arch/arm/mach-spear/time.c:118", val, gpt_base + CR(CLKEVT));
 
 	return 0;
 }
@@ -130,12 +130,12 @@ static int spear_set_periodic(struct clock_event_device *evt)
 
 	period = clk_get_rate(gpt_clk) / HZ;
 	period >>= CTRL_PRESCALER16;
-	writew(period, gpt_base + LOAD(CLKEVT));
+	pete_writew("arch/arm/mach-spear/time.c:133", period, gpt_base + LOAD(CLKEVT));
 
-	val = readw(gpt_base + CR(CLKEVT));
+	val = pete_readw("arch/arm/mach-spear/time.c:135", gpt_base + CR(CLKEVT));
 	val &= ~CTRL_ONE_SHOT;
 	val |= CTRL_ENABLE | CTRL_INT_ENABLE;
-	writew(val, gpt_base + CR(CLKEVT));
+	pete_writew("arch/arm/mach-spear/time.c:138", val, gpt_base + CR(CLKEVT));
 
 	return 0;
 }
@@ -154,15 +154,15 @@ static struct clock_event_device clkevt = {
 static int clockevent_next_event(unsigned long cycles,
 				 struct clock_event_device *clk_event_dev)
 {
-	u16 val = readw(gpt_base + CR(CLKEVT));
+	u16 val = pete_readw("arch/arm/mach-spear/time.c:157", gpt_base + CR(CLKEVT));
 
 	if (val & CTRL_ENABLE)
-		writew(val & ~CTRL_ENABLE, gpt_base + CR(CLKEVT));
+		pete_writew("arch/arm/mach-spear/time.c:160", val & ~CTRL_ENABLE, gpt_base + CR(CLKEVT));
 
-	writew(cycles, gpt_base + LOAD(CLKEVT));
+	pete_writew("arch/arm/mach-spear/time.c:162", cycles, gpt_base + LOAD(CLKEVT));
 
 	val |= CTRL_ENABLE | CTRL_INT_ENABLE;
-	writew(val, gpt_base + CR(CLKEVT));
+	pete_writew("arch/arm/mach-spear/time.c:165", val, gpt_base + CR(CLKEVT));
 
 	return 0;
 }
@@ -171,7 +171,7 @@ static irqreturn_t spear_timer_interrupt(int irq, void *dev_id)
 {
 	struct clock_event_device *evt = &clkevt;
 
-	writew(INT_STATUS, gpt_base + IR(CLKEVT));
+	pete_writew("arch/arm/mach-spear/time.c:174", INT_STATUS, gpt_base + IR(CLKEVT));
 
 	evt->event_handler(evt);
 
@@ -183,7 +183,7 @@ static void __init spear_clockevent_init(int irq)
 	u32 tick_rate;
 
 	/* program the prescaler */
-	writew(CTRL_PRESCALER16, gpt_base + CR(CLKEVT));
+	pete_writew("arch/arm/mach-spear/time.c:186", CTRL_PRESCALER16, gpt_base + CR(CLKEVT));
 
 	tick_rate = clk_get_rate(gpt_clk);
 	tick_rate >>= CTRL_PRESCALER16;

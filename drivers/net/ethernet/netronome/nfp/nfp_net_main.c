@@ -104,10 +104,10 @@ nfp_net_pf_alloc_vnic(struct nfp_pf *pf, bool needs_netdev,
 	struct nfp_net *nn;
 	int err;
 
-	tx_base = readl(ctrl_bar + NFP_NET_CFG_START_TXQ);
-	rx_base = readl(ctrl_bar + NFP_NET_CFG_START_RXQ);
-	n_tx_rings = readl(ctrl_bar + NFP_NET_CFG_MAX_TXRINGS);
-	n_rx_rings = readl(ctrl_bar + NFP_NET_CFG_MAX_RXRINGS);
+	tx_base = pete_readl("drivers/net/ethernet/netronome/nfp/nfp_net_main.c:107", ctrl_bar + NFP_NET_CFG_START_TXQ);
+	rx_base = pete_readl("drivers/net/ethernet/netronome/nfp/nfp_net_main.c:108", ctrl_bar + NFP_NET_CFG_START_RXQ);
+	n_tx_rings = pete_readl("drivers/net/ethernet/netronome/nfp/nfp_net_main.c:109", ctrl_bar + NFP_NET_CFG_MAX_TXRINGS);
+	n_rx_rings = pete_readl("drivers/net/ethernet/netronome/nfp/nfp_net_main.c:110", ctrl_bar + NFP_NET_CFG_MAX_RXRINGS);
 
 	/* Allocate and initialise the vNIC */
 	nn = nfp_net_alloc(pf->pdev, pf->dev_info, ctrl_bar, needs_netdev,

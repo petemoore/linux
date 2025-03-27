@@ -98,7 +98,7 @@ static void handle_catas(struct mthca_dev *dev)
 
 	ib_dispatch_event(&event);
 
-	switch (swab32(readl(dev->catas_err.map)) >> 24) {
+	switch (swab32(pete_readl("drivers/infiniband/hw/mthca/mthca_catas.c:101", dev->catas_err.map)) >> 24) {
 	case MTHCA_CATAS_TYPE_INTERNAL:
 		type = "internal error";
 		break;
@@ -119,7 +119,7 @@ static void handle_catas(struct mthca_dev *dev)
 	mthca_err(dev, "Catastrophic error detected: %s\n", type);
 	for (i = 0; i < dev->catas_err.size; ++i)
 		mthca_err(dev, "  buf[%02x]: %08x\n",
-			  i, swab32(readl(dev->catas_err.map + i)));
+			  i, swab32(pete_readl("drivers/infiniband/hw/mthca/mthca_catas.c:122", dev->catas_err.map + i)));
 
 	if (catas_reset_disable)
 		return;
@@ -136,7 +136,7 @@ static void poll_catas(struct timer_list *t)
 	int i;
 
 	for (i = 0; i < dev->catas_err.size; ++i)
-		if (readl(dev->catas_err.map + i)) {
+		if (pete_readl("drivers/infiniband/hw/mthca/mthca_catas.c:139", dev->catas_err.map + i)) {
 			handle_catas(dev);
 			return;
 		}

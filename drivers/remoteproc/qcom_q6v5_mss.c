@@ -533,9 +533,9 @@ static int q6v5_reset_deassert(struct q6v5 *qproc)
 
 	if (qproc->has_alt_reset) {
 		reset_control_assert(qproc->pdc_reset);
-		writel(1, qproc->rmb_base + RMB_MBA_ALT_RESET);
+		pete_writel("drivers/remoteproc/qcom_q6v5_mss.c:536", 1, qproc->rmb_base + RMB_MBA_ALT_RESET);
 		ret = reset_control_reset(qproc->mss_restart);
-		writel(0, qproc->rmb_base + RMB_MBA_ALT_RESET);
+		pete_writel("drivers/remoteproc/qcom_q6v5_mss.c:538", 0, qproc->rmb_base + RMB_MBA_ALT_RESET);
 		reset_control_deassert(qproc->pdc_reset);
 	} else if (qproc->has_spare_reg || qproc->has_ext_cntl_regs) {
 		ret = reset_control_reset(qproc->mss_restart);
@@ -553,7 +553,7 @@ static int q6v5_rmb_pbl_wait(struct q6v5 *qproc, int ms)
 
 	timeout = jiffies + msecs_to_jiffies(ms);
 	for (;;) {
-		val = readl(qproc->rmb_base + RMB_PBL_STATUS_REG);
+		val = pete_readl("drivers/remoteproc/qcom_q6v5_mss.c:556", qproc->rmb_base + RMB_PBL_STATUS_REG);
 		if (val)
 			break;
 
@@ -574,7 +574,7 @@ static int q6v5_rmb_mba_wait(struct q6v5 *qproc, u32 status, int ms)
 
 	timeout = jiffies + msecs_to_jiffies(ms);
 	for (;;) {
-		val = readl(qproc->rmb_base + RMB_MBA_STATUS_REG);
+		val = pete_readl("drivers/remoteproc/qcom_q6v5_mss.c:577", qproc->rmb_base + RMB_MBA_STATUS_REG);
 		if (val < 0)
 			break;
 
@@ -624,9 +624,9 @@ static int q6v5proc_reset(struct q6v5 *qproc)
 	int i;
 
 	if (qproc->version == MSS_SDM845) {
-		val = readl(qproc->reg_base + QDSP6SS_SLEEP);
+		val = pete_readl("drivers/remoteproc/qcom_q6v5_mss.c:627", qproc->reg_base + QDSP6SS_SLEEP);
 		val |= Q6SS_CBCR_CLKEN;
-		writel(val, qproc->reg_base + QDSP6SS_SLEEP);
+		pete_writel("drivers/remoteproc/qcom_q6v5_mss.c:629", val, qproc->reg_base + QDSP6SS_SLEEP);
 
 		ret = readl_poll_timeout(qproc->reg_base + QDSP6SS_SLEEP,
 					 val, !(val & Q6SS_CBCR_CLKOFF), 1,
@@ -637,9 +637,9 @@ static int q6v5proc_reset(struct q6v5 *qproc)
 		}
 
 		/* De-assert QDSP6 stop core */
-		writel(1, qproc->reg_base + QDSP6SS_BOOT_CORE_START);
+		pete_writel("drivers/remoteproc/qcom_q6v5_mss.c:640", 1, qproc->reg_base + QDSP6SS_BOOT_CORE_START);
 		/* Trigger boot FSM */
-		writel(1, qproc->reg_base + QDSP6SS_BOOT_CMD);
+		pete_writel("drivers/remoteproc/qcom_q6v5_mss.c:642", 1, qproc->reg_base + QDSP6SS_BOOT_CMD);
 
 		ret = readl_poll_timeout(qproc->rmb_base + RMB_MBA_MSS_STATUS,
 				val, (val & BIT(0)) != 0, 10, BOOT_FSM_TIMEOUT);
@@ -652,9 +652,9 @@ static int q6v5proc_reset(struct q6v5 *qproc)
 
 		goto pbl_wait;
 	} else if (qproc->version == MSS_SC7180 || qproc->version == MSS_SC7280) {
-		val = readl(qproc->reg_base + QDSP6SS_SLEEP);
+		val = pete_readl("drivers/remoteproc/qcom_q6v5_mss.c:655", qproc->reg_base + QDSP6SS_SLEEP);
 		val |= Q6SS_CBCR_CLKEN;
-		writel(val, qproc->reg_base + QDSP6SS_SLEEP);
+		pete_writel("drivers/remoteproc/qcom_q6v5_mss.c:657", val, qproc->reg_base + QDSP6SS_SLEEP);
 
 		ret = readl_poll_timeout(qproc->reg_base + QDSP6SS_SLEEP,
 					 val, !(val & Q6SS_CBCR_CLKOFF), 1,
@@ -665,9 +665,9 @@ static int q6v5proc_reset(struct q6v5 *qproc)
 		}
 
 		/* Turn on the XO clock needed for PLL setup */
-		val = readl(qproc->reg_base + QDSP6SS_XO_CBCR);
+		val = pete_readl("drivers/remoteproc/qcom_q6v5_mss.c:668", qproc->reg_base + QDSP6SS_XO_CBCR);
 		val |= Q6SS_CBCR_CLKEN;
-		writel(val, qproc->reg_base + QDSP6SS_XO_CBCR);
+		pete_writel("drivers/remoteproc/qcom_q6v5_mss.c:670", val, qproc->reg_base + QDSP6SS_XO_CBCR);
 
 		ret = readl_poll_timeout(qproc->reg_base + QDSP6SS_XO_CBCR,
 					 val, !(val & Q6SS_CBCR_CLKOFF), 1,
@@ -678,18 +678,18 @@ static int q6v5proc_reset(struct q6v5 *qproc)
 		}
 
 		/* Configure Q6 core CBCR to auto-enable after reset sequence */
-		val = readl(qproc->reg_base + QDSP6SS_CORE_CBCR);
+		val = pete_readl("drivers/remoteproc/qcom_q6v5_mss.c:681", qproc->reg_base + QDSP6SS_CORE_CBCR);
 		val |= Q6SS_CBCR_CLKEN;
-		writel(val, qproc->reg_base + QDSP6SS_CORE_CBCR);
+		pete_writel("drivers/remoteproc/qcom_q6v5_mss.c:683", val, qproc->reg_base + QDSP6SS_CORE_CBCR);
 
 		/* De-assert the Q6 stop core signal */
-		writel(1, qproc->reg_base + QDSP6SS_BOOT_CORE_START);
+		pete_writel("drivers/remoteproc/qcom_q6v5_mss.c:686", 1, qproc->reg_base + QDSP6SS_BOOT_CORE_START);
 
 		/* Wait for 10 us for any staggering logic to settle */
 		usleep_range(10, 20);
 
 		/* Trigger the boot FSM to start the Q6 out-of-reset sequence */
-		writel(1, qproc->reg_base + QDSP6SS_BOOT_CMD);
+		pete_writel("drivers/remoteproc/qcom_q6v5_mss.c:692", 1, qproc->reg_base + QDSP6SS_BOOT_CMD);
 
 		/* Poll the MSS_STATUS for FSM completion */
 		ret = readl_poll_timeout(qproc->rmb_base + RMB_MBA_MSS_STATUS,
@@ -710,18 +710,18 @@ static int q6v5proc_reset(struct q6v5 *qproc)
 		if (qproc->version != MSS_MSM8909 &&
 		    qproc->version != MSS_MSM8953)
 			/* Override the ACC value if required */
-			writel(QDSP6SS_ACC_OVERRIDE_VAL,
+			pete_writel("drivers/remoteproc/qcom_q6v5_mss.c:713", QDSP6SS_ACC_OVERRIDE_VAL,
 			       qproc->reg_base + QDSP6SS_STRAP_ACC);
 
 		/* Assert resets, stop core */
-		val = readl(qproc->reg_base + QDSP6SS_RESET_REG);
+		val = pete_readl("drivers/remoteproc/qcom_q6v5_mss.c:717", qproc->reg_base + QDSP6SS_RESET_REG);
 		val |= Q6SS_CORE_ARES | Q6SS_BUS_ARES_ENABLE | Q6SS_STOP_CORE;
-		writel(val, qproc->reg_base + QDSP6SS_RESET_REG);
+		pete_writel("drivers/remoteproc/qcom_q6v5_mss.c:719", val, qproc->reg_base + QDSP6SS_RESET_REG);
 
 		/* BHS require xo cbcr to be enabled */
-		val = readl(qproc->reg_base + QDSP6SS_XO_CBCR);
+		val = pete_readl("drivers/remoteproc/qcom_q6v5_mss.c:722", qproc->reg_base + QDSP6SS_XO_CBCR);
 		val |= Q6SS_CBCR_CLKEN;
-		writel(val, qproc->reg_base + QDSP6SS_XO_CBCR);
+		pete_writel("drivers/remoteproc/qcom_q6v5_mss.c:724", val, qproc->reg_base + QDSP6SS_XO_CBCR);
 
 		/* Read CLKOFF bit to go low indicating CLK is enabled */
 		ret = readl_poll_timeout(qproc->reg_base + QDSP6SS_XO_CBCR,
@@ -733,10 +733,10 @@ static int q6v5proc_reset(struct q6v5 *qproc)
 			return ret;
 		}
 		/* Enable power block headswitch and wait for it to stabilize */
-		val = readl(qproc->reg_base + QDSP6SS_PWR_CTL_REG);
+		val = pete_readl("drivers/remoteproc/qcom_q6v5_mss.c:736", qproc->reg_base + QDSP6SS_PWR_CTL_REG);
 		val |= QDSP6v56_BHS_ON;
-		writel(val, qproc->reg_base + QDSP6SS_PWR_CTL_REG);
-		val |= readl(qproc->reg_base + QDSP6SS_PWR_CTL_REG);
+		pete_writel("drivers/remoteproc/qcom_q6v5_mss.c:738", val, qproc->reg_base + QDSP6SS_PWR_CTL_REG);
+		val |= pete_readl("drivers/remoteproc/qcom_q6v5_mss.c:739", qproc->reg_base + QDSP6SS_PWR_CTL_REG);
 		udelay(1);
 
 		if (qproc->version == MSS_SDM660) {
@@ -751,19 +751,19 @@ static int q6v5proc_reset(struct q6v5 *qproc)
 
 		/* Put LDO in bypass mode */
 		val |= QDSP6v56_LDO_BYP;
-		writel(val, qproc->reg_base + QDSP6SS_PWR_CTL_REG);
+		pete_writel("drivers/remoteproc/qcom_q6v5_mss.c:754", val, qproc->reg_base + QDSP6SS_PWR_CTL_REG);
 
 		if (qproc->version != MSS_MSM8909) {
 			int mem_pwr_ctl;
 
 			/* Deassert QDSP6 compiler memory clamp */
-			val = readl(qproc->reg_base + QDSP6SS_PWR_CTL_REG);
+			val = pete_readl("drivers/remoteproc/qcom_q6v5_mss.c:760", qproc->reg_base + QDSP6SS_PWR_CTL_REG);
 			val &= ~QDSP6v56_CLAMP_QMC_MEM;
-			writel(val, qproc->reg_base + QDSP6SS_PWR_CTL_REG);
+			pete_writel("drivers/remoteproc/qcom_q6v5_mss.c:762", val, qproc->reg_base + QDSP6SS_PWR_CTL_REG);
 
 			/* Deassert memory peripheral sleep and L2 memory standby */
 			val |= Q6SS_L2DATA_STBY_N | Q6SS_SLP_RET_N;
-			writel(val, qproc->reg_base + QDSP6SS_PWR_CTL_REG);
+			pete_writel("drivers/remoteproc/qcom_q6v5_mss.c:766", val, qproc->reg_base + QDSP6SS_PWR_CTL_REG);
 
 			/* Turn on L1, L2, ETB and JU memories 1 at a time */
 			if (qproc->version == MSS_MSM8953 ||
@@ -775,81 +775,81 @@ static int q6v5proc_reset(struct q6v5 *qproc)
 				mem_pwr_ctl = QDSP6V6SS_MEM_PWR_CTL;
 				i = 28;
 			}
-			val = readl(qproc->reg_base + mem_pwr_ctl);
+			val = pete_readl("drivers/remoteproc/qcom_q6v5_mss.c:778", qproc->reg_base + mem_pwr_ctl);
 			for (; i >= 0; i--) {
 				val |= BIT(i);
-				writel(val, qproc->reg_base + mem_pwr_ctl);
+				pete_writel("drivers/remoteproc/qcom_q6v5_mss.c:781", val, qproc->reg_base + mem_pwr_ctl);
 				/*
 				 * Read back value to ensure the write is done then
 				 * wait for 1us for both memory peripheral and data
 				 * array to turn on.
 				 */
-				val |= readl(qproc->reg_base + mem_pwr_ctl);
+				val |= pete_readl("drivers/remoteproc/qcom_q6v5_mss.c:787", qproc->reg_base + mem_pwr_ctl);
 				udelay(1);
 			}
 		} else {
 			/* Turn on memories */
-			val = readl(qproc->reg_base + QDSP6SS_PWR_CTL_REG);
+			val = pete_readl("drivers/remoteproc/qcom_q6v5_mss.c:792", qproc->reg_base + QDSP6SS_PWR_CTL_REG);
 			val |= Q6SS_SLP_RET_N | Q6SS_L2DATA_STBY_N |
 			       Q6SS_ETB_SLP_NRET_N | QDSP6V55_MEM_BITS;
-			writel(val, qproc->reg_base + QDSP6SS_PWR_CTL_REG);
+			pete_writel("drivers/remoteproc/qcom_q6v5_mss.c:795", val, qproc->reg_base + QDSP6SS_PWR_CTL_REG);
 
 			/* Turn on L2 banks 1 at a time */
 			for (i = 0; i <= 7; i++) {
 				val |= BIT(i);
-				writel(val, qproc->reg_base + QDSP6SS_PWR_CTL_REG);
+				pete_writel("drivers/remoteproc/qcom_q6v5_mss.c:800", val, qproc->reg_base + QDSP6SS_PWR_CTL_REG);
 			}
 		}
 
 		/* Remove word line clamp */
-		val = readl(qproc->reg_base + QDSP6SS_PWR_CTL_REG);
+		val = pete_readl("drivers/remoteproc/qcom_q6v5_mss.c:805", qproc->reg_base + QDSP6SS_PWR_CTL_REG);
 		val &= ~QDSP6v56_CLAMP_WL;
-		writel(val, qproc->reg_base + QDSP6SS_PWR_CTL_REG);
+		pete_writel("drivers/remoteproc/qcom_q6v5_mss.c:807", val, qproc->reg_base + QDSP6SS_PWR_CTL_REG);
 	} else {
 		/* Assert resets, stop core */
-		val = readl(qproc->reg_base + QDSP6SS_RESET_REG);
+		val = pete_readl("drivers/remoteproc/qcom_q6v5_mss.c:810", qproc->reg_base + QDSP6SS_RESET_REG);
 		val |= Q6SS_CORE_ARES | Q6SS_BUS_ARES_ENABLE | Q6SS_STOP_CORE;
-		writel(val, qproc->reg_base + QDSP6SS_RESET_REG);
+		pete_writel("drivers/remoteproc/qcom_q6v5_mss.c:812", val, qproc->reg_base + QDSP6SS_RESET_REG);
 
 		/* Enable power block headswitch and wait for it to stabilize */
-		val = readl(qproc->reg_base + QDSP6SS_PWR_CTL_REG);
+		val = pete_readl("drivers/remoteproc/qcom_q6v5_mss.c:815", qproc->reg_base + QDSP6SS_PWR_CTL_REG);
 		val |= QDSS_BHS_ON | QDSS_LDO_BYP;
-		writel(val, qproc->reg_base + QDSP6SS_PWR_CTL_REG);
-		val |= readl(qproc->reg_base + QDSP6SS_PWR_CTL_REG);
+		pete_writel("drivers/remoteproc/qcom_q6v5_mss.c:817", val, qproc->reg_base + QDSP6SS_PWR_CTL_REG);
+		val |= pete_readl("drivers/remoteproc/qcom_q6v5_mss.c:818", qproc->reg_base + QDSP6SS_PWR_CTL_REG);
 		udelay(1);
 		/*
 		 * Turn on memories. L2 banks should be done individually
 		 * to minimize inrush current.
 		 */
-		val = readl(qproc->reg_base + QDSP6SS_PWR_CTL_REG);
+		val = pete_readl("drivers/remoteproc/qcom_q6v5_mss.c:824", qproc->reg_base + QDSP6SS_PWR_CTL_REG);
 		val |= Q6SS_SLP_RET_N | Q6SS_L2TAG_SLP_NRET_N |
 			Q6SS_ETB_SLP_NRET_N | Q6SS_L2DATA_STBY_N;
-		writel(val, qproc->reg_base + QDSP6SS_PWR_CTL_REG);
+		pete_writel("drivers/remoteproc/qcom_q6v5_mss.c:827", val, qproc->reg_base + QDSP6SS_PWR_CTL_REG);
 		val |= Q6SS_L2DATA_SLP_NRET_N_2;
-		writel(val, qproc->reg_base + QDSP6SS_PWR_CTL_REG);
+		pete_writel("drivers/remoteproc/qcom_q6v5_mss.c:829", val, qproc->reg_base + QDSP6SS_PWR_CTL_REG);
 		val |= Q6SS_L2DATA_SLP_NRET_N_1;
-		writel(val, qproc->reg_base + QDSP6SS_PWR_CTL_REG);
+		pete_writel("drivers/remoteproc/qcom_q6v5_mss.c:831", val, qproc->reg_base + QDSP6SS_PWR_CTL_REG);
 		val |= Q6SS_L2DATA_SLP_NRET_N_0;
-		writel(val, qproc->reg_base + QDSP6SS_PWR_CTL_REG);
+		pete_writel("drivers/remoteproc/qcom_q6v5_mss.c:833", val, qproc->reg_base + QDSP6SS_PWR_CTL_REG);
 	}
 	/* Remove IO clamp */
 	val &= ~Q6SS_CLAMP_IO;
-	writel(val, qproc->reg_base + QDSP6SS_PWR_CTL_REG);
+	pete_writel("drivers/remoteproc/qcom_q6v5_mss.c:837", val, qproc->reg_base + QDSP6SS_PWR_CTL_REG);
 
 	/* Bring core out of reset */
-	val = readl(qproc->reg_base + QDSP6SS_RESET_REG);
+	val = pete_readl("drivers/remoteproc/qcom_q6v5_mss.c:840", qproc->reg_base + QDSP6SS_RESET_REG);
 	val &= ~Q6SS_CORE_ARES;
-	writel(val, qproc->reg_base + QDSP6SS_RESET_REG);
+	pete_writel("drivers/remoteproc/qcom_q6v5_mss.c:842", val, qproc->reg_base + QDSP6SS_RESET_REG);
 
 	/* Turn on core clock */
-	val = readl(qproc->reg_base + QDSP6SS_GFMUX_CTL_REG);
+	val = pete_readl("drivers/remoteproc/qcom_q6v5_mss.c:845", qproc->reg_base + QDSP6SS_GFMUX_CTL_REG);
 	val |= Q6SS_CLK_ENABLE;
-	writel(val, qproc->reg_base + QDSP6SS_GFMUX_CTL_REG);
+	pete_writel("drivers/remoteproc/qcom_q6v5_mss.c:847", val, qproc->reg_base + QDSP6SS_GFMUX_CTL_REG);
 
 	/* Start core execution */
-	val = readl(qproc->reg_base + QDSP6SS_RESET_REG);
+	val = pete_readl("drivers/remoteproc/qcom_q6v5_mss.c:850", qproc->reg_base + QDSP6SS_RESET_REG);
 	val &= ~Q6SS_STOP_CORE;
-	writel(val, qproc->reg_base + QDSP6SS_RESET_REG);
+	pete_writel("drivers/remoteproc/qcom_q6v5_mss.c:852", val, qproc->reg_base + QDSP6SS_RESET_REG);
 
 pbl_wait:
 	/* Wait for PBL status */
@@ -1032,8 +1032,8 @@ static int q6v5_mpss_init_image(struct q6v5 *qproc, const struct firmware *fw,
 		goto free_dma_attrs;
 	}
 
-	writel(phys, qproc->rmb_base + RMB_PMI_META_DATA_REG);
-	writel(RMB_CMD_META_DATA_READY, qproc->rmb_base + RMB_MBA_COMMAND_REG);
+	pete_writel("drivers/remoteproc/qcom_q6v5_mss.c:1035", phys, qproc->rmb_base + RMB_PMI_META_DATA_REG);
+	pete_writel("drivers/remoteproc/qcom_q6v5_mss.c:1036", RMB_CMD_META_DATA_READY, qproc->rmb_base + RMB_MBA_COMMAND_REG);
 
 	ret = q6v5_rmb_mba_wait(qproc, RMB_MBA_META_DATA_AUTH_SUCCESS, 1000);
 	if (ret == -ETIMEDOUT)
@@ -1164,10 +1164,10 @@ static int q6v5_mba_load(struct q6v5 *qproc)
 	if (qproc->has_mba_logs)
 		qcom_pil_info_store("mba", qproc->mba_phys, MBA_LOG_SIZE);
 
-	writel(qproc->mba_phys, qproc->rmb_base + RMB_MBA_IMAGE_REG);
+	pete_writel("drivers/remoteproc/qcom_q6v5_mss.c:1167", qproc->mba_phys, qproc->rmb_base + RMB_MBA_IMAGE_REG);
 	if (qproc->dp_size) {
-		writel(qproc->mba_phys + SZ_1M, qproc->rmb_base + RMB_PMI_CODE_START_REG);
-		writel(qproc->dp_size, qproc->rmb_base + RMB_PMI_CODE_LENGTH_REG);
+		pete_writel("drivers/remoteproc/qcom_q6v5_mss.c:1169", qproc->mba_phys + SZ_1M, qproc->rmb_base + RMB_PMI_CODE_START_REG);
+		pete_writel("drivers/remoteproc/qcom_q6v5_mss.c:1170", qproc->dp_size, qproc->rmb_base + RMB_PMI_CODE_LENGTH_REG);
 	}
 
 	ret = q6v5proc_reset(qproc);
@@ -1254,10 +1254,10 @@ static void q6v5_mba_reclaim(struct q6v5 *qproc)
 		/*
 		 * To avoid high MX current during LPASS/MSS restart.
 		 */
-		val = readl(qproc->reg_base + QDSP6SS_PWR_CTL_REG);
+		val = pete_readl("drivers/remoteproc/qcom_q6v5_mss.c:1257", qproc->reg_base + QDSP6SS_PWR_CTL_REG);
 		val |= Q6SS_CLAMP_IO | QDSP6v56_CLAMP_WL |
 			QDSP6v56_CLAMP_QMC_MEM;
-		writel(val, qproc->reg_base + QDSP6SS_PWR_CTL_REG);
+		pete_writel("drivers/remoteproc/qcom_q6v5_mss.c:1260", val, qproc->reg_base + QDSP6SS_PWR_CTL_REG);
 	}
 
 	if (qproc->has_ext_cntl_regs) {
@@ -1361,7 +1361,7 @@ static int q6v5_mpss_load(struct q6v5 *qproc)
 	}
 
 	/* Initialize the RMB validator */
-	writel(0, qproc->rmb_base + RMB_PMI_CODE_LENGTH_REG);
+	pete_writel("drivers/remoteproc/qcom_q6v5_mss.c:1364", 0, qproc->rmb_base + RMB_PMI_CODE_LENGTH_REG);
 
 	ret = q6v5_mpss_init_image(qproc, fw, qproc->hexagon_mdt_image);
 	if (ret)
@@ -1487,15 +1487,15 @@ static int q6v5_mpss_load(struct q6v5 *qproc)
 		memunmap(ptr);
 		size += phdr->p_memsz;
 
-		code_length = readl(qproc->rmb_base + RMB_PMI_CODE_LENGTH_REG);
+		code_length = pete_readl("drivers/remoteproc/qcom_q6v5_mss.c:1490", qproc->rmb_base + RMB_PMI_CODE_LENGTH_REG);
 		if (!code_length) {
 			boot_addr = relocate ? qproc->mpss_phys : min_addr;
-			writel(boot_addr, qproc->rmb_base + RMB_PMI_CODE_START_REG);
-			writel(RMB_CMD_LOAD_READY, qproc->rmb_base + RMB_MBA_COMMAND_REG);
+			pete_writel("drivers/remoteproc/qcom_q6v5_mss.c:1493", boot_addr, qproc->rmb_base + RMB_PMI_CODE_START_REG);
+			pete_writel("drivers/remoteproc/qcom_q6v5_mss.c:1494", RMB_CMD_LOAD_READY, qproc->rmb_base + RMB_MBA_COMMAND_REG);
 		}
-		writel(size, qproc->rmb_base + RMB_PMI_CODE_LENGTH_REG);
+		pete_writel("drivers/remoteproc/qcom_q6v5_mss.c:1496", size, qproc->rmb_base + RMB_PMI_CODE_LENGTH_REG);
 
-		ret = readl(qproc->rmb_base + RMB_MBA_STATUS_REG);
+		ret = pete_readl("drivers/remoteproc/qcom_q6v5_mss.c:1498", qproc->rmb_base + RMB_MBA_STATUS_REG);
 		if (ret < 0) {
 			dev_err(qproc->dev, "MPSS authentication failed: %d\n",
 				ret);

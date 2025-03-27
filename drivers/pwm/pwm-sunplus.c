@@ -65,13 +65,13 @@ static int sunplus_pwm_apply(struct pwm_chip *chip, struct pwm_device *pwm,
 
 	if (!state->enabled) {
 		/* disable pwm channel output */
-		mode0 = readl(priv->base + SP7021_PWM_MODE0);
+		mode0 = pete_readl("drivers/pwm/pwm-sunplus.c:68", priv->base + SP7021_PWM_MODE0);
 		mode0 &= ~SP7021_PWM_MODE0_PWMEN(pwm->hwpwm);
-		writel(mode0, priv->base + SP7021_PWM_MODE0);
+		pete_writel("drivers/pwm/pwm-sunplus.c:70", mode0, priv->base + SP7021_PWM_MODE0);
 		/* disable pwm channel clk source */
-		mode1 = readl(priv->base + SP7021_PWM_MODE1);
+		mode1 = pete_readl("drivers/pwm/pwm-sunplus.c:72", priv->base + SP7021_PWM_MODE1);
 		mode1 &= ~SP7021_PWM_MODE1_CNT_EN(pwm->hwpwm);
-		writel(mode1, priv->base + SP7021_PWM_MODE1);
+		pete_writel("drivers/pwm/pwm-sunplus.c:74", mode1, priv->base + SP7021_PWM_MODE1);
 		return 0;
 	}
 
@@ -98,12 +98,12 @@ static int sunplus_pwm_apply(struct pwm_chip *chip, struct pwm_device *pwm,
 	if (dd_freq > SP7021_PWM_FREQ_MAX)
 		dd_freq = SP7021_PWM_FREQ_MAX;
 
-	writel(dd_freq, priv->base + SP7021_PWM_FREQ(pwm->hwpwm));
+	pete_writel("drivers/pwm/pwm-sunplus.c:101", dd_freq, priv->base + SP7021_PWM_FREQ(pwm->hwpwm));
 
 	/* cal and set pwm duty */
-	mode0 = readl(priv->base + SP7021_PWM_MODE0);
+	mode0 = pete_readl("drivers/pwm/pwm-sunplus.c:104", priv->base + SP7021_PWM_MODE0);
 	mode0 |= SP7021_PWM_MODE0_PWMEN(pwm->hwpwm);
-	mode1 = readl(priv->base + SP7021_PWM_MODE1);
+	mode1 = pete_readl("drivers/pwm/pwm-sunplus.c:106", priv->base + SP7021_PWM_MODE1);
 	mode1 |= SP7021_PWM_MODE1_CNT_EN(pwm->hwpwm);
 	if (state->duty_cycle == state->period) {
 		/* PWM channel output = high */
@@ -118,9 +118,9 @@ static int sunplus_pwm_apply(struct pwm_chip *chip, struct pwm_device *pwm,
 					   (u64)dd_freq * NSEC_PER_SEC);
 		duty = SP7021_PWM_DUTY_DD_SEL(pwm->hwpwm) | duty;
 	}
-	writel(duty, priv->base + SP7021_PWM_DUTY(pwm->hwpwm));
-	writel(mode1, priv->base + SP7021_PWM_MODE1);
-	writel(mode0, priv->base + SP7021_PWM_MODE0);
+	pete_writel("drivers/pwm/pwm-sunplus.c:121", duty, priv->base + SP7021_PWM_DUTY(pwm->hwpwm));
+	pete_writel("drivers/pwm/pwm-sunplus.c:122", mode1, priv->base + SP7021_PWM_MODE1);
+	pete_writel("drivers/pwm/pwm-sunplus.c:123", mode0, priv->base + SP7021_PWM_MODE0);
 
 	return 0;
 }
@@ -132,12 +132,12 @@ static int sunplus_pwm_get_state(struct pwm_chip *chip, struct pwm_device *pwm,
 	u32 mode0, dd_freq, duty;
 	u64 clk_rate;
 
-	mode0 = readl(priv->base + SP7021_PWM_MODE0);
+	mode0 = pete_readl("drivers/pwm/pwm-sunplus.c:135", priv->base + SP7021_PWM_MODE0);
 
 	if (mode0 & BIT(pwm->hwpwm)) {
 		clk_rate = clk_get_rate(priv->clk);
-		dd_freq = readl(priv->base + SP7021_PWM_FREQ(pwm->hwpwm));
-		duty = readl(priv->base + SP7021_PWM_DUTY(pwm->hwpwm));
+		dd_freq = pete_readl("drivers/pwm/pwm-sunplus.c:139", priv->base + SP7021_PWM_FREQ(pwm->hwpwm));
+		duty = pete_readl("drivers/pwm/pwm-sunplus.c:140", priv->base + SP7021_PWM_DUTY(pwm->hwpwm));
 		duty = FIELD_GET(SP7021_PWM_DUTY_MASK, duty);
 		/*
 		 * dd_freq 16 bits, SP7021_PWM_FREQ_SCALER 8 bits

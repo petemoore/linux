@@ -775,7 +775,7 @@ static int viafb_cursor(struct fb_info *info, struct fb_cursor *cursor)
 
 	if (cursor->set & FB_CUR_SETHOT) {
 		temp = (cursor->hot.x << 16) + cursor->hot.y;
-		writel(temp, engine + VIA_REG_CURSOR_ORG);
+		pete_writel("drivers/video/fbdev/via/viafbdev.c:778", temp, engine + VIA_REG_CURSOR_ORG);
 	}
 
 	if (cursor->set & FB_CUR_SETPOS) {
@@ -783,7 +783,7 @@ static int viafb_cursor(struct fb_info *info, struct fb_cursor *cursor)
 		xx = cursor->image.dx - info->var.xoffset;
 		temp = yy & 0xFFFF;
 		temp |= (xx << 16);
-		writel(temp, engine + VIA_REG_CURSOR_POS);
+		pete_writel("drivers/video/fbdev/via/viafbdev.c:786", temp, engine + VIA_REG_CURSOR_POS);
 	}
 
 	if (cursor->image.width <= 32 && cursor->image.height <= 32)
@@ -797,13 +797,13 @@ static int viafb_cursor(struct fb_info *info, struct fb_cursor *cursor)
 	}
 
 	if (cursor->set & FB_CUR_SETSIZE) {
-		temp = readl(engine + VIA_REG_CURSOR_MODE);
+		temp = pete_readl("drivers/video/fbdev/via/viafbdev.c:800", engine + VIA_REG_CURSOR_MODE);
 		if (cur_size == 32)
 			temp |= 0x2;
 		else
 			temp &= ~0x2;
 
-		writel(temp, engine + VIA_REG_CURSOR_MODE);
+		pete_writel("drivers/video/fbdev/via/viafbdev.c:806", temp, engine + VIA_REG_CURSOR_MODE);
 	}
 
 	if (cursor->set & FB_CUR_SETCMAP) {
@@ -832,8 +832,8 @@ static int viafb_cursor(struct fb_info *info, struct fb_cursor *cursor)
 				((info->cmap.blue[bg_color] & 0xFF00) >> 8);
 		}
 
-		writel(bg_color, engine + VIA_REG_CURSOR_BG);
-		writel(fg_color, engine + VIA_REG_CURSOR_FG);
+		pete_writel("drivers/video/fbdev/via/viafbdev.c:835", bg_color, engine + VIA_REG_CURSOR_BG);
+		pete_writel("drivers/video/fbdev/via/viafbdev.c:836", fg_color, engine + VIA_REG_CURSOR_FG);
 	}
 
 	if (cursor->set & FB_CUR_SETSHAPE) {

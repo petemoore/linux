@@ -943,7 +943,7 @@ static int fsl_mx6_enable(struct platform_device *pdev)
 			return -EFAULT;
 		}
 
-		writel(0x888, dev->io_base + 0x38);
+		pete_writel("drivers/staging/most/dim2/dim2.c:946", 0x888, dev->io_base + 0x38);
 		clk_prepare_enable(dev->clk_pll);
 	}
 
@@ -979,17 +979,17 @@ static int rcar_gen2_enable(struct platform_device *pdev)
 
 	if (dev->clk_speed >= CLK_2048FS) {
 		/* enable MLP pll and LVDS drivers */
-		writel(0x03, dev->io_base + 0x600);
+		pete_writel("drivers/staging/most/dim2/dim2.c:982", 0x03, dev->io_base + 0x600);
 		/* set bias */
-		writel(0x888, dev->io_base + 0x38);
+		pete_writel("drivers/staging/most/dim2/dim2.c:984", 0x888, dev->io_base + 0x38);
 	} else {
 		/* PLL */
-		writel(0x04, dev->io_base + 0x600);
+		pete_writel("drivers/staging/most/dim2/dim2.c:987", 0x04, dev->io_base + 0x600);
 	}
 
 	/* BBCR = 0b11 */
-	writel(0x03, dev->io_base + 0x500);
-	writel(0x0002FF02, dev->io_base + 0x508);
+	pete_writel("drivers/staging/most/dim2/dim2.c:991", 0x03, dev->io_base + 0x500);
+	pete_writel("drivers/staging/most/dim2/dim2.c:992", 0x0002FF02, dev->io_base + 0x508);
 
 	return 0;
 }
@@ -1001,7 +1001,7 @@ static void rcar_gen2_disable(struct platform_device *pdev)
 	clk_disable_unprepare(dev->clk);
 
 	/* disable PLLs and LVDS drivers */
-	writel(0x0, dev->io_base + 0x600);
+	pete_writel("drivers/staging/most/dim2/dim2.c:1004", 0x0, dev->io_base + 0x600);
 }
 
 static int rcar_gen3_enable(struct platform_device *pdev)
@@ -1023,13 +1023,13 @@ static int rcar_gen3_enable(struct platform_device *pdev)
 	}
 
 	/* PLL */
-	writel(0x04, dev->io_base + 0x600);
+	pete_writel("drivers/staging/most/dim2/dim2.c:1026", 0x04, dev->io_base + 0x600);
 
-	writel(enable_512fs, dev->io_base + 0x604);
+	pete_writel("drivers/staging/most/dim2/dim2.c:1028", enable_512fs, dev->io_base + 0x604);
 
 	/* BBCR = 0b11 */
-	writel(0x03, dev->io_base + 0x500);
-	writel(0x0002FF02, dev->io_base + 0x508);
+	pete_writel("drivers/staging/most/dim2/dim2.c:1031", 0x03, dev->io_base + 0x500);
+	pete_writel("drivers/staging/most/dim2/dim2.c:1032", 0x0002FF02, dev->io_base + 0x508);
 
 	return 0;
 }
@@ -1041,7 +1041,7 @@ static void rcar_gen3_disable(struct platform_device *pdev)
 	clk_disable_unprepare(dev->clk);
 
 	/* disable PLLs and LVDS drivers */
-	writel(0x0, dev->io_base + 0x600);
+	pete_writel("drivers/staging/most/dim2/dim2.c:1044", 0x0, dev->io_base + 0x600);
 }
 
 /* ]] platform specific functions */

@@ -33,7 +33,7 @@ static ssize_t ports_num_show(struct device *dev,
 
 	base = dfl_get_feature_ioaddr_by_id(dev, FME_FEATURE_ID_HEADER);
 
-	v = readq(base + FME_HDR_CAP);
+	v = pete_readq("drivers/fpga/dfl-fme-main.c:36", base + FME_HDR_CAP);
 
 	return scnprintf(buf, PAGE_SIZE, "%u\n",
 			 (unsigned int)FIELD_GET(FME_CAP_NUM_PORTS, v));
@@ -52,7 +52,7 @@ static ssize_t bitstream_id_show(struct device *dev,
 
 	base = dfl_get_feature_ioaddr_by_id(dev, FME_FEATURE_ID_HEADER);
 
-	v = readq(base + FME_HDR_BITSTREAM_ID);
+	v = pete_readq("drivers/fpga/dfl-fme-main.c:55", base + FME_HDR_BITSTREAM_ID);
 
 	return scnprintf(buf, PAGE_SIZE, "0x%llx\n", (unsigned long long)v);
 }
@@ -70,7 +70,7 @@ static ssize_t bitstream_metadata_show(struct device *dev,
 
 	base = dfl_get_feature_ioaddr_by_id(dev, FME_FEATURE_ID_HEADER);
 
-	v = readq(base + FME_HDR_BITSTREAM_MD);
+	v = pete_readq("drivers/fpga/dfl-fme-main.c:73", base + FME_HDR_BITSTREAM_MD);
 
 	return scnprintf(buf, PAGE_SIZE, "0x%llx\n", (unsigned long long)v);
 }
@@ -84,7 +84,7 @@ static ssize_t cache_size_show(struct device *dev,
 
 	base = dfl_get_feature_ioaddr_by_id(dev, FME_FEATURE_ID_HEADER);
 
-	v = readq(base + FME_HDR_CAP);
+	v = pete_readq("drivers/fpga/dfl-fme-main.c:87", base + FME_HDR_CAP);
 
 	return sprintf(buf, "%u\n",
 		       (unsigned int)FIELD_GET(FME_CAP_CACHE_SIZE, v));
@@ -99,7 +99,7 @@ static ssize_t fabric_version_show(struct device *dev,
 
 	base = dfl_get_feature_ioaddr_by_id(dev, FME_FEATURE_ID_HEADER);
 
-	v = readq(base + FME_HDR_CAP);
+	v = pete_readq("drivers/fpga/dfl-fme-main.c:102", base + FME_HDR_CAP);
 
 	return sprintf(buf, "%u\n",
 		       (unsigned int)FIELD_GET(FME_CAP_FABRIC_VERID, v));
@@ -114,7 +114,7 @@ static ssize_t socket_id_show(struct device *dev,
 
 	base = dfl_get_feature_ioaddr_by_id(dev, FME_FEATURE_ID_HEADER);
 
-	v = readq(base + FME_HDR_CAP);
+	v = pete_readq("drivers/fpga/dfl-fme-main.c:117", base + FME_HDR_CAP);
 
 	return sprintf(buf, "%u\n",
 		       (unsigned int)FIELD_GET(FME_CAP_SOCKET_ID, v));
@@ -205,7 +205,7 @@ static const struct dfl_feature_ops fme_hdr_ops = {
 
 static bool fme_thermal_throttle_support(void __iomem *base)
 {
-	u64 v = readq(base + FME_THERM_CAP);
+	u64 v = pete_readq("drivers/fpga/dfl-fme-main.c:208", base + FME_THERM_CAP);
 
 	return FIELD_GET(THERM_NO_THROTTLE, v) ? false : true;
 }
@@ -231,27 +231,27 @@ static int thermal_hwmon_read(struct device *dev, enum hwmon_sensor_types type,
 
 	switch (attr) {
 	case hwmon_temp_input:
-		v = readq(feature->ioaddr + FME_THERM_RDSENSOR_FMT1);
+		v = pete_readq("drivers/fpga/dfl-fme-main.c:234", feature->ioaddr + FME_THERM_RDSENSOR_FMT1);
 		*val = (long)(FIELD_GET(FPGA_TEMPERATURE, v) * MILLI);
 		break;
 	case hwmon_temp_max:
-		v = readq(feature->ioaddr + FME_THERM_THRESHOLD);
+		v = pete_readq("drivers/fpga/dfl-fme-main.c:238", feature->ioaddr + FME_THERM_THRESHOLD);
 		*val = (long)(FIELD_GET(TEMP_THRESHOLD1, v) * MILLI);
 		break;
 	case hwmon_temp_crit:
-		v = readq(feature->ioaddr + FME_THERM_THRESHOLD);
+		v = pete_readq("drivers/fpga/dfl-fme-main.c:242", feature->ioaddr + FME_THERM_THRESHOLD);
 		*val = (long)(FIELD_GET(TEMP_THRESHOLD2, v) * MILLI);
 		break;
 	case hwmon_temp_emergency:
-		v = readq(feature->ioaddr + FME_THERM_THRESHOLD);
+		v = pete_readq("drivers/fpga/dfl-fme-main.c:246", feature->ioaddr + FME_THERM_THRESHOLD);
 		*val = (long)(FIELD_GET(TRIP_THRESHOLD, v) * MILLI);
 		break;
 	case hwmon_temp_max_alarm:
-		v = readq(feature->ioaddr + FME_THERM_THRESHOLD);
+		v = pete_readq("drivers/fpga/dfl-fme-main.c:250", feature->ioaddr + FME_THERM_THRESHOLD);
 		*val = (long)FIELD_GET(TEMP_THRESHOLD1_STATUS, v);
 		break;
 	case hwmon_temp_crit_alarm:
-		v = readq(feature->ioaddr + FME_THERM_THRESHOLD);
+		v = pete_readq("drivers/fpga/dfl-fme-main.c:254", feature->ioaddr + FME_THERM_THRESHOLD);
 		*val = (long)FIELD_GET(TEMP_THRESHOLD2_STATUS, v);
 		break;
 	default:
@@ -284,7 +284,7 @@ static ssize_t temp1_max_policy_show(struct device *dev,
 	struct dfl_feature *feature = dev_get_drvdata(dev);
 	u64 v;
 
-	v = readq(feature->ioaddr + FME_THERM_THRESHOLD);
+	v = pete_readq("drivers/fpga/dfl-fme-main.c:287", feature->ioaddr + FME_THERM_THRESHOLD);
 
 	return sprintf(buf, "%u\n",
 		       (unsigned int)FIELD_GET(TEMP_THRESHOLD1_POLICY, v));
@@ -382,23 +382,23 @@ static int power_hwmon_read(struct device *dev, enum hwmon_sensor_types type,
 
 	switch (attr) {
 	case hwmon_power_input:
-		v = readq(feature->ioaddr + FME_PWR_STATUS);
+		v = pete_readq("drivers/fpga/dfl-fme-main.c:385", feature->ioaddr + FME_PWR_STATUS);
 		*val = (long)(FIELD_GET(PWR_CONSUMED, v) * MICRO);
 		break;
 	case hwmon_power_max:
-		v = readq(feature->ioaddr + FME_PWR_THRESHOLD);
+		v = pete_readq("drivers/fpga/dfl-fme-main.c:389", feature->ioaddr + FME_PWR_THRESHOLD);
 		*val = (long)(FIELD_GET(PWR_THRESHOLD1, v) * MICRO);
 		break;
 	case hwmon_power_crit:
-		v = readq(feature->ioaddr + FME_PWR_THRESHOLD);
+		v = pete_readq("drivers/fpga/dfl-fme-main.c:393", feature->ioaddr + FME_PWR_THRESHOLD);
 		*val = (long)(FIELD_GET(PWR_THRESHOLD2, v) * MICRO);
 		break;
 	case hwmon_power_max_alarm:
-		v = readq(feature->ioaddr + FME_PWR_THRESHOLD);
+		v = pete_readq("drivers/fpga/dfl-fme-main.c:397", feature->ioaddr + FME_PWR_THRESHOLD);
 		*val = (long)FIELD_GET(PWR_THRESHOLD1_STATUS, v);
 		break;
 	case hwmon_power_crit_alarm:
-		v = readq(feature->ioaddr + FME_PWR_THRESHOLD);
+		v = pete_readq("drivers/fpga/dfl-fme-main.c:401", feature->ioaddr + FME_PWR_THRESHOLD);
 		*val = (long)FIELD_GET(PWR_THRESHOLD2_STATUS, v);
 		break;
 	default:
@@ -422,16 +422,16 @@ static int power_hwmon_write(struct device *dev, enum hwmon_sensor_types type,
 
 	switch (attr) {
 	case hwmon_power_max:
-		v = readq(feature->ioaddr + FME_PWR_THRESHOLD);
+		v = pete_readq("drivers/fpga/dfl-fme-main.c:425", feature->ioaddr + FME_PWR_THRESHOLD);
 		v &= ~PWR_THRESHOLD1;
 		v |= FIELD_PREP(PWR_THRESHOLD1, val);
-		writeq(v, feature->ioaddr + FME_PWR_THRESHOLD);
+		pete_writeq("drivers/fpga/dfl-fme-main.c:428", v, feature->ioaddr + FME_PWR_THRESHOLD);
 		break;
 	case hwmon_power_crit:
-		v = readq(feature->ioaddr + FME_PWR_THRESHOLD);
+		v = pete_readq("drivers/fpga/dfl-fme-main.c:431", feature->ioaddr + FME_PWR_THRESHOLD);
 		v &= ~PWR_THRESHOLD2;
 		v |= FIELD_PREP(PWR_THRESHOLD2, val);
-		writeq(v, feature->ioaddr + FME_PWR_THRESHOLD);
+		pete_writeq("drivers/fpga/dfl-fme-main.c:434", v, feature->ioaddr + FME_PWR_THRESHOLD);
 		break;
 	default:
 		ret = -EOPNOTSUPP;
@@ -485,7 +485,7 @@ static ssize_t power1_xeon_limit_show(struct device *dev,
 	u16 xeon_limit = 0;
 	u64 v;
 
-	v = readq(feature->ioaddr + FME_PWR_XEON_LIMIT);
+	v = pete_readq("drivers/fpga/dfl-fme-main.c:488", feature->ioaddr + FME_PWR_XEON_LIMIT);
 
 	if (FIELD_GET(XEON_PWR_EN, v))
 		xeon_limit = FIELD_GET(XEON_PWR_LIMIT, v);
@@ -500,7 +500,7 @@ static ssize_t power1_fpga_limit_show(struct device *dev,
 	u16 fpga_limit = 0;
 	u64 v;
 
-	v = readq(feature->ioaddr + FME_PWR_FPGA_LIMIT);
+	v = pete_readq("drivers/fpga/dfl-fme-main.c:503", feature->ioaddr + FME_PWR_FPGA_LIMIT);
 
 	if (FIELD_GET(FPGA_PWR_EN, v))
 		fpga_limit = FIELD_GET(FPGA_PWR_LIMIT, v);
@@ -514,7 +514,7 @@ static ssize_t power1_ltr_show(struct device *dev,
 	struct dfl_feature *feature = dev_get_drvdata(dev);
 	u64 v;
 
-	v = readq(feature->ioaddr + FME_PWR_STATUS);
+	v = pete_readq("drivers/fpga/dfl-fme-main.c:517", feature->ioaddr + FME_PWR_STATUS);
 
 	return sprintf(buf, "%u\n",
 		       (unsigned int)FIELD_GET(FME_LATENCY_TOLERANCE, v));

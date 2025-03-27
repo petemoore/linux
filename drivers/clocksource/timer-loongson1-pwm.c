@@ -44,32 +44,32 @@ static inline struct ls1x_clocksource *to_ls1x_clksrc(struct clocksource *c)
 static inline void ls1x_pwmtimer_set_period(unsigned int period,
 					    struct timer_of *to)
 {
-	writel(period, timer_of_base(to) + PWM_LRC);
-	writel(period, timer_of_base(to) + PWM_HRC);
+	pete_writel("drivers/clocksource/timer-loongson1-pwm.c:47", period, timer_of_base(to) + PWM_LRC);
+	pete_writel("drivers/clocksource/timer-loongson1-pwm.c:48", period, timer_of_base(to) + PWM_HRC);
 }
 
 static inline void ls1x_pwmtimer_clear(struct timer_of *to)
 {
-	writel(0, timer_of_base(to) + PWM_CNTR);
+	pete_writel("drivers/clocksource/timer-loongson1-pwm.c:53", 0, timer_of_base(to) + PWM_CNTR);
 }
 
 static inline void ls1x_pwmtimer_start(struct timer_of *to)
 {
-	writel((INT_EN | PWM_OE | CNT_EN), timer_of_base(to) + PWM_CTRL);
+	pete_writel("drivers/clocksource/timer-loongson1-pwm.c:58", (INT_EN | PWM_OE | CNT_EN), timer_of_base(to) + PWM_CTRL);
 }
 
 static inline void ls1x_pwmtimer_stop(struct timer_of *to)
 {
-	writel(0, timer_of_base(to) + PWM_CTRL);
+	pete_writel("drivers/clocksource/timer-loongson1-pwm.c:63", 0, timer_of_base(to) + PWM_CTRL);
 }
 
 static inline void ls1x_pwmtimer_irq_ack(struct timer_of *to)
 {
 	int val;
 
-	val = readl(timer_of_base(to) + PWM_CTRL);
+	val = pete_readl("drivers/clocksource/timer-loongson1-pwm.c:70", timer_of_base(to) + PWM_CTRL);
 	val |= INT_SR;
-	writel(val, timer_of_base(to) + PWM_CTRL);
+	pete_writel("drivers/clocksource/timer-loongson1-pwm.c:72", val, timer_of_base(to) + PWM_CTRL);
 }
 
 static irqreturn_t ls1x_clockevent_isr(int irq, void *dev_id)
@@ -180,7 +180,7 @@ static u64 ls1x_clocksource_read(struct clocksource *cs)
 	 */
 	jifs = jiffies;
 	/* read the count */
-	count = readl(ls1x_cs->reg_base + PWM_CNTR);
+	count = pete_readl("drivers/clocksource/timer-loongson1-pwm.c:183", ls1x_cs->reg_base + PWM_CNTR);
 
 	/*
 	 * It's possible for count to appear to go the wrong way for this

@@ -246,7 +246,7 @@ static void uniphier_sd_internal_dma_issue(struct tasklet_struct *t)
 	spin_unlock_irqrestore(&host->lock, flags);
 
 	uniphier_sd_dma_endisable(host, 1);
-	writel(UNIPHIER_SD_DMA_CTL_START, host->ctl + UNIPHIER_SD_DMA_CTL);
+	pete_writel("drivers/mmc/host/uniphier-sd.c:249", UNIPHIER_SD_DMA_CTL_START, host->ctl + UNIPHIER_SD_DMA_CTL);
 }
 
 static void uniphier_sd_internal_dma_start(struct tmio_mmc_host *host,
@@ -285,11 +285,11 @@ static void uniphier_sd_internal_dma_start(struct tmio_mmc_host *host,
 			       UNIPHIER_SD_DMA_MODE_WIDTH_64);
 	dma_mode |= UNIPHIER_SD_DMA_MODE_ADDR_INC;
 
-	writel(dma_mode, host->ctl + UNIPHIER_SD_DMA_MODE);
+	pete_writel("drivers/mmc/host/uniphier-sd.c:288", dma_mode, host->ctl + UNIPHIER_SD_DMA_MODE);
 
 	dma_addr = sg_dma_address(data->sg);
-	writel(lower_32_bits(dma_addr), host->ctl + UNIPHIER_SD_DMA_ADDR_L);
-	writel(upper_32_bits(dma_addr), host->ctl + UNIPHIER_SD_DMA_ADDR_H);
+	pete_writel("drivers/mmc/host/uniphier-sd.c:291", lower_32_bits(dma_addr), host->ctl + UNIPHIER_SD_DMA_ADDR_L);
+	pete_writel("drivers/mmc/host/uniphier-sd.c:292", upper_32_bits(dma_addr), host->ctl + UNIPHIER_SD_DMA_ADDR_H);
 
 	host->dma_on = true;
 
@@ -333,12 +333,12 @@ static void uniphier_sd_internal_dma_abort(struct tmio_mmc_host *host)
 
 	uniphier_sd_dma_endisable(host, 0);
 
-	tmp = readl(host->ctl + UNIPHIER_SD_DMA_RST);
+	tmp = pete_readl("drivers/mmc/host/uniphier-sd.c:336", host->ctl + UNIPHIER_SD_DMA_RST);
 	tmp &= ~(UNIPHIER_SD_DMA_RST_CH1 | UNIPHIER_SD_DMA_RST_CH0);
-	writel(tmp, host->ctl + UNIPHIER_SD_DMA_RST);
+	pete_writel("drivers/mmc/host/uniphier-sd.c:338", tmp, host->ctl + UNIPHIER_SD_DMA_RST);
 
 	tmp |= UNIPHIER_SD_DMA_RST_CH1 | UNIPHIER_SD_DMA_RST_CH0;
-	writel(tmp, host->ctl + UNIPHIER_SD_DMA_RST);
+	pete_writel("drivers/mmc/host/uniphier-sd.c:341", tmp, host->ctl + UNIPHIER_SD_DMA_RST);
 }
 
 static void uniphier_sd_internal_dma_dataend(struct tmio_mmc_host *host)
@@ -472,11 +472,11 @@ static void uniphier_sd_set_clock(struct tmio_mmc_host *host,
 	unsigned long divisor;
 	u32 tmp;
 
-	tmp = readl(host->ctl + (CTL_SD_CARD_CLK_CTL << 1));
+	tmp = pete_readl("drivers/mmc/host/uniphier-sd.c:475", host->ctl + (CTL_SD_CARD_CLK_CTL << 1));
 
 	/* stop the clock before changing its rate to avoid a glitch signal */
 	tmp &= ~CLK_CTL_SCLKEN;
-	writel(tmp, host->ctl + (CTL_SD_CARD_CLK_CTL << 1));
+	pete_writel("drivers/mmc/host/uniphier-sd.c:479", tmp, host->ctl + (CTL_SD_CARD_CLK_CTL << 1));
 
 	uniphier_sd_speed_switch(host);
 
@@ -504,10 +504,10 @@ static void uniphier_sd_set_clock(struct tmio_mmc_host *host,
 	else
 		tmp |= roundup_pow_of_two(divisor) >> 2;
 
-	writel(tmp, host->ctl + (CTL_SD_CARD_CLK_CTL << 1));
+	pete_writel("drivers/mmc/host/uniphier-sd.c:507", tmp, host->ctl + (CTL_SD_CARD_CLK_CTL << 1));
 
 	tmp |= CLK_CTL_SCLKEN;
-	writel(tmp, host->ctl + (CTL_SD_CARD_CLK_CTL << 1));
+	pete_writel("drivers/mmc/host/uniphier-sd.c:510", tmp, host->ctl + (CTL_SD_CARD_CLK_CTL << 1));
 }
 
 static void uniphier_sd_host_init(struct tmio_mmc_host *host)
@@ -527,7 +527,7 @@ static void uniphier_sd_host_init(struct tmio_mmc_host *host)
 	else
 		val = 0x00000000;
 
-	writel(val, host->ctl + UNIPHIER_SD_HOST_MODE);
+	pete_writel("drivers/mmc/host/uniphier-sd.c:530", val, host->ctl + UNIPHIER_SD_HOST_MODE);
 
 	val = 0;
 	/*
@@ -537,7 +537,7 @@ static void uniphier_sd_host_init(struct tmio_mmc_host *host)
 	if (priv->caps & UNIPHIER_SD_CAP_EXTENDED_IP)
 		val |= UNIPHIER_SD_CLKCTL_OFFEN;
 
-	writel(val, host->ctl + (CTL_SD_CARD_CLK_CTL << 1));
+	pete_writel("drivers/mmc/host/uniphier-sd.c:540", val, host->ctl + (CTL_SD_CARD_CLK_CTL << 1));
 }
 
 static int uniphier_sd_start_signal_voltage_switch(struct mmc_host *mmc,
@@ -563,10 +563,10 @@ static int uniphier_sd_start_signal_voltage_switch(struct mmc_host *mmc,
 		return -ENOTSUPP;
 	}
 
-	tmp = readl(host->ctl + UNIPHIER_SD_VOLT);
+	tmp = pete_readl("drivers/mmc/host/uniphier-sd.c:566", host->ctl + UNIPHIER_SD_VOLT);
 	tmp &= ~UNIPHIER_SD_VOLT_MASK;
 	tmp |= FIELD_PREP(UNIPHIER_SD_VOLT_MASK, val);
-	writel(tmp, host->ctl + UNIPHIER_SD_VOLT);
+	pete_writel("drivers/mmc/host/uniphier-sd.c:569", tmp, host->ctl + UNIPHIER_SD_VOLT);
 
 	if (pinstate)
 		pinctrl_select_state(priv->pinctrl, pinstate);

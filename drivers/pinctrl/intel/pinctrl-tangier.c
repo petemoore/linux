@@ -113,7 +113,7 @@ static int tng_read_bufcfg(struct tng_pinctrl *tp, unsigned int pin, u32 *value)
 		return -EBUSY;
 
 	bufcfg = tng_get_bufcfg(tp, pin);
-	*value = readl(bufcfg);
+	*value = pete_readl("drivers/pinctrl/intel/pinctrl-tangier.c:116", bufcfg);
 
 	return 0;
 }
@@ -126,9 +126,9 @@ static void tng_update_bufcfg(struct tng_pinctrl *tp, unsigned int pin,
 
 	bufcfg = tng_get_bufcfg(tp, pin);
 
-	value = readl(bufcfg);
+	value = pete_readl("drivers/pinctrl/intel/pinctrl-tangier.c:129", bufcfg);
 	value = (value & ~mask) | (bits & mask);
-	writel(value, bufcfg);
+	pete_writel("drivers/pinctrl/intel/pinctrl-tangier.c:131", value, bufcfg);
 }
 
 static int tng_get_groups_count(struct pinctrl_dev *pctldev)

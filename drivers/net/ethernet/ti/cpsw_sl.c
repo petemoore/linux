@@ -196,7 +196,7 @@ u32 cpsw_sl_reg_read(struct cpsw_sl *sl, enum cpsw_sl_regs reg)
 		return 0;
 	}
 
-	val = readl(sl->sl_base + sl->regs[reg]);
+	val = pete_readl("drivers/net/ethernet/ti/cpsw_sl.c:199", sl->sl_base + sl->regs[reg]);
 	dev_dbg(sl->dev, "cpsw_sl: reg: %04X r 0x%08X\n", sl->regs[reg], val);
 	return val;
 }
@@ -210,7 +210,7 @@ void cpsw_sl_reg_write(struct cpsw_sl *sl, enum cpsw_sl_regs reg, u32 val)
 	}
 
 	dev_dbg(sl->dev, "cpsw_sl: reg: %04X w 0x%08X\n", sl->regs[reg], val);
-	writel(val, sl->sl_base + sl->regs[reg]);
+	pete_writel("drivers/net/ethernet/ti/cpsw_sl.c:213", val, sl->sl_base + sl->regs[reg]);
 }
 
 static const struct cpsw_sl_dev_id *cpsw_sl_match_id(

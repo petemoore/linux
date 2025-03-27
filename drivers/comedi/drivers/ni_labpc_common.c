@@ -91,13 +91,13 @@ static void labpc_outb(struct comedi_device *dev,
 
 static unsigned int labpc_readb(struct comedi_device *dev, unsigned long reg)
 {
-	return readb(dev->mmio + reg);
+	return pete_readb("drivers/comedi/drivers/ni_labpc_common.c:94", dev->mmio + reg);
 }
 
 static void labpc_writeb(struct comedi_device *dev,
 			 unsigned int byte, unsigned long reg)
 {
-	writeb(byte, dev->mmio + reg);
+	pete_writeb("drivers/comedi/drivers/ni_labpc_common.c:100", byte, dev->mmio + reg);
 }
 
 static int labpc_cancel(struct comedi_device *dev, struct comedi_subdevice *s)

@@ -62,32 +62,32 @@ struct sfctemp {
 static void sfctemp_power_up(struct sfctemp *sfctemp)
 {
 	/* make sure we're powered down first */
-	writel(SFCTEMP_PD, sfctemp->regs);
+	pete_writel("drivers/hwmon/sfctemp.c:65", SFCTEMP_PD, sfctemp->regs);
 	udelay(1);
 
-	writel(0, sfctemp->regs);
+	pete_writel("drivers/hwmon/sfctemp.c:68", 0, sfctemp->regs);
 	/* wait t_pu(50us) + t_rst(100ns) */
 	usleep_range(60, 200);
 
 	/* de-assert reset */
-	writel(SFCTEMP_RSTN, sfctemp->regs);
+	pete_writel("drivers/hwmon/sfctemp.c:73", SFCTEMP_RSTN, sfctemp->regs);
 	udelay(1); /* wait t_su(500ps) */
 }
 
 static void sfctemp_power_down(struct sfctemp *sfctemp)
 {
-	writel(SFCTEMP_PD, sfctemp->regs);
+	pete_writel("drivers/hwmon/sfctemp.c:79", SFCTEMP_PD, sfctemp->regs);
 }
 
 static void sfctemp_run(struct sfctemp *sfctemp)
 {
-	writel(SFCTEMP_RSTN | SFCTEMP_RUN, sfctemp->regs);
+	pete_writel("drivers/hwmon/sfctemp.c:84", SFCTEMP_RSTN | SFCTEMP_RUN, sfctemp->regs);
 	udelay(1);
 }
 
 static void sfctemp_stop(struct sfctemp *sfctemp)
 {
-	writel(SFCTEMP_RSTN, sfctemp->regs);
+	pete_writel("drivers/hwmon/sfctemp.c:90", SFCTEMP_RSTN, sfctemp->regs);
 }
 
 static int sfctemp_enable(struct sfctemp *sfctemp)
@@ -164,7 +164,7 @@ static int sfctemp_convert(struct sfctemp *sfctemp, long *val)
 	}
 
 	/* calculate temperature in milli Celcius */
-	*val = (long)((readl(sfctemp->regs) & SFCTEMP_DOUT_MSK) >> SFCTEMP_DOUT_POS)
+	*val = (long)((pete_readl("drivers/hwmon/sfctemp.c:167", sfctemp->regs) & SFCTEMP_DOUT_MSK) >> SFCTEMP_DOUT_POS)
 		* SFCTEMP_Y1000 / SFCTEMP_Z - SFCTEMP_K1000;
 
 	ret = 0;

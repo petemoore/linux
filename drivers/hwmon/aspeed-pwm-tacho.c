@@ -349,7 +349,7 @@ static int regmap_aspeed_pwm_tacho_reg_write(void *context, unsigned int reg,
 {
 	void __iomem *regs = (void __iomem *)context;
 
-	writel(val, regs + reg);
+	pete_writel("drivers/hwmon/aspeed-pwm-tacho.c:352", val, regs + reg);
 	return 0;
 }
 
@@ -358,7 +358,7 @@ static int regmap_aspeed_pwm_tacho_reg_read(void *context, unsigned int reg,
 {
 	void __iomem *regs = (void __iomem *)context;
 
-	*val = readl(regs + reg);
+	*val = pete_readl("drivers/hwmon/aspeed-pwm-tacho.c:361", regs + reg);
 	return 0;
 }
 

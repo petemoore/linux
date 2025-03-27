@@ -176,7 +176,7 @@ static int mmc_get_phase(struct clk_hw *hw)
 	u32 value;
 	u8 delay;
 
-	value = readl(phase->reg);
+	value = pete_readl("drivers/clk/sunxi/clk-mod0.c:179", phase->reg);
 	delay = (value >> phase->offset) & 0x3;
 
 	if (!delay)
@@ -264,10 +264,10 @@ static int mmc_set_phase(struct clk_hw *hw, int degrees)
 	}
 
 	spin_lock_irqsave(phase->lock, flags);
-	value = readl(phase->reg);
+	value = pete_readl("drivers/clk/sunxi/clk-mod0.c:267", phase->reg);
 	value &= ~GENMASK(phase->offset + 3, phase->offset);
 	value |= delay << phase->offset;
-	writel(value, phase->reg);
+	pete_writel("drivers/clk/sunxi/clk-mod0.c:270", value, phase->reg);
 	spin_unlock_irqrestore(phase->lock, flags);
 
 	return 0;

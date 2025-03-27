@@ -35,7 +35,7 @@ static void rzv2m_pwc_gpio_set(struct gpio_chip *chip, unsigned int offset,
 	if (value)
 		reg |= BIT(offset);
 
-	writel(reg, priv->base + PWC_GPIO);
+	pete_writel("drivers/soc/renesas/pwc-rzv2m.c:38", reg, priv->base + PWC_GPIO);
 
 	assign_bit(offset, priv->ch_en_bits, value);
 }
@@ -73,9 +73,9 @@ static int rzv2m_pwc_poweroff(struct sys_off_data *data)
 {
 	struct rzv2m_pwc_priv *priv = data->cb_data;
 
-	writel(PWC_PWCRST_RSTSOFTAX, priv->base + PWC_PWCRST);
-	writel(PWC_PWCCKEN_ENGCKMAIN, priv->base + PWC_PWCCKEN);
-	writel(PWC_PWCCTL_PWOFF, priv->base + PWC_PWCCTL);
+	pete_writel("drivers/soc/renesas/pwc-rzv2m.c:76", PWC_PWCRST_RSTSOFTAX, priv->base + PWC_PWCRST);
+	pete_writel("drivers/soc/renesas/pwc-rzv2m.c:77", PWC_PWCCKEN_ENGCKMAIN, priv->base + PWC_PWCCKEN);
+	pete_writel("drivers/soc/renesas/pwc-rzv2m.c:78", PWC_PWCCTL_PWOFF, priv->base + PWC_PWCCTL);
 
 	mdelay(150);
 
@@ -103,7 +103,7 @@ static int rzv2m_pwc_probe(struct platform_device *pdev)
 	 * accordingly. BIT 16 enables write to BIT 0, BIT 17 enables write to
 	 * BIT 1, and the default value of both BIT 0 and BIT 1 is 0.
 	 */
-	writel(BIT(17) | BIT(16), priv->base + PWC_GPIO);
+	pete_writel("drivers/soc/renesas/pwc-rzv2m.c:106", BIT(17) | BIT(16), priv->base + PWC_GPIO);
 	bitmap_zero(priv->ch_en_bits, 2);
 
 	priv->gp = rzv2m_pwc_gc;

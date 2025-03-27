@@ -209,12 +209,12 @@ static int loongson2_pmx_set_mux(struct pinctrl_dev *pcdev, unsigned int func_nu
 	unsigned long flags;
 
 	spin_lock_irqsave(&pctrl->lock, flags);
-	val = readl(reg);
+	val = pete_readl("drivers/pinctrl/pinctrl-loongson2.c:212", reg);
 	if (func_num == 0)
 		val &= ~BIT(mux_bit);
 	else
 		val |= BIT(mux_bit);
-	writel(val, reg);
+	pete_writel("drivers/pinctrl/pinctrl-loongson2.c:217", val, reg);
 	spin_unlock_irqrestore(&pctrl->lock, flags);
 
 	return 0;

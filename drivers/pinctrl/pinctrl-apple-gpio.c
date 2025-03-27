@@ -255,7 +255,7 @@ static void apple_gpio_irq_ack(struct irq_data *data)
 	struct apple_gpio_pinctrl *pctl = gpiochip_get_data(irq_data_get_irq_chip_data(data));
 	unsigned int irqgrp = FIELD_GET(REG_GPIOx_GRP, apple_gpio_get_reg(pctl, data->hwirq));
 
-	writel(BIT(data->hwirq % 32), pctl->base + REG_IRQ(irqgrp, data->hwirq));
+	pete_writel("drivers/pinctrl/pinctrl-apple-gpio.c:258", BIT(data->hwirq % 32), pctl->base + REG_IRQ(irqgrp, data->hwirq));
 }
 
 static unsigned int apple_gpio_irq_type(unsigned int type)

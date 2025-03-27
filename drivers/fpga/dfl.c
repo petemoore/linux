@@ -1029,12 +1029,12 @@ static int parse_feature_irqs(struct build_feature_devs_info *binfo,
 		if (type == PORT_ID) {
 			switch (fid) {
 			case PORT_FEATURE_ID_UINT:
-				v = readq(base + PORT_UINT_CAP);
+				v = pete_readq("drivers/fpga/dfl.c:1032", base + PORT_UINT_CAP);
 				ibase = FIELD_GET(PORT_UINT_CAP_FST_VECT, v);
 				inr = FIELD_GET(PORT_UINT_CAP_INT_NUM, v);
 				break;
 			case PORT_FEATURE_ID_ERROR:
-				v = readq(base + PORT_ERROR_CAP);
+				v = pete_readq("drivers/fpga/dfl.c:1037", base + PORT_ERROR_CAP);
 				ibase = FIELD_GET(PORT_ERROR_CAP_INT_VECT, v);
 				inr = FIELD_GET(PORT_ERROR_CAP_SUPP_INT, v);
 				break;
@@ -1042,7 +1042,7 @@ static int parse_feature_irqs(struct build_feature_devs_info *binfo,
 		} else if (type == FME_ID) {
 			switch (fid) {
 			case FME_FEATURE_ID_GLOBAL_ERR:
-				v = readq(base + FME_ERROR_CAP);
+				v = pete_readq("drivers/fpga/dfl.c:1045", base + FME_ERROR_CAP);
 				ibase = FIELD_GET(FME_ERROR_CAP_INT_VECT, v);
 				inr = FIELD_GET(FME_ERROR_CAP_SUPP_INT, v);
 				break;
@@ -1106,11 +1106,11 @@ static int dfh_get_param_size(void __iomem *dfh_base, resource_size_t max)
 	u64 v, next;
 
 	if (!FIELD_GET(DFHv1_CSR_SIZE_GRP_HAS_PARAMS,
-		       readq(dfh_base + DFHv1_CSR_SIZE_GRP)))
+		       pete_readq("drivers/fpga/dfl.c:1109", dfh_base + DFHv1_CSR_SIZE_GRP)))
 		return 0;
 
 	while (size + DFHv1_PARAM_HDR < max) {
-		v = readq(dfh_base + DFHv1_PARAM_HDR + size);
+		v = pete_readq("drivers/fpga/dfl.c:1113", dfh_base + DFHv1_PARAM_HDR + size);
 
 		next = FIELD_GET(DFHv1_PARAM_HDR_NEXT_OFFSET, v);
 		if (!next)
@@ -1145,7 +1145,7 @@ create_feature_instance(struct build_feature_devs_info *binfo,
 	int ret;
 
 	if (fid != FEATURE_ID_AFU) {
-		v = readq(binfo->ioaddr + ofst);
+		v = pete_readq("drivers/fpga/dfl.c:1148", binfo->ioaddr + ofst);
 		revision = FIELD_GET(DFH_REVISION, v);
 		dfh_ver = FIELD_GET(DFH_VERSION, v);
 		/* read feature size and id if inputs are invalid */
@@ -1177,14 +1177,14 @@ create_feature_instance(struct build_feature_devs_info *binfo,
 	finfo->revision = revision;
 	finfo->dfh_version = dfh_ver;
 	if (dfh_ver == 1) {
-		v = readq(binfo->ioaddr + ofst + DFHv1_CSR_ADDR);
+		v = pete_readq("drivers/fpga/dfl.c:1180", binfo->ioaddr + ofst + DFHv1_CSR_ADDR);
 		addr_off = FIELD_GET(DFHv1_CSR_ADDR_MASK, v);
 		if (FIELD_GET(DFHv1_CSR_ADDR_REL, v))
 			start = addr_off << 1;
 		else
 			start = binfo->start + ofst + addr_off;
 
-		v = readq(binfo->ioaddr + ofst + DFHv1_CSR_SIZE_GRP);
+		v = pete_readq("drivers/fpga/dfl.c:1187", binfo->ioaddr + ofst + DFHv1_CSR_SIZE_GRP);
 		end = start + FIELD_GET(DFHv1_CSR_SIZE_GRP_SIZE, v) - 1;
 	} else {
 		start = binfo->start + ofst;
@@ -1209,7 +1209,7 @@ create_feature_instance(struct build_feature_devs_info *binfo,
 static int parse_feature_port_afu(struct build_feature_devs_info *binfo,
 				  resource_size_t ofst)
 {
-	u64 v = readq(binfo->ioaddr + PORT_HDR_CAP);
+	u64 v = pete_readq("drivers/fpga/dfl.c:1212", binfo->ioaddr + PORT_HDR_CAP);
 	u32 size = FIELD_GET(PORT_CAP_MMIO_SIZE, v) << 10;
 
 	WARN_ON(!size);
@@ -1291,7 +1291,7 @@ static int parse_feature_fiu(struct build_feature_devs_info *binfo,
 			return ret;
 	}
 
-	v = readq(binfo->ioaddr + DFH);
+	v = pete_readq("drivers/fpga/dfl.c:1294", binfo->ioaddr + DFH);
 	id = FIELD_GET(DFH_ID, v);
 
 	/* create platform device for dfl feature dev */
@@ -1306,7 +1306,7 @@ static int parse_feature_fiu(struct build_feature_devs_info *binfo,
 	 * find and parse FIU's child AFU via its NEXT_AFU register.
 	 * please note that only Port has valid NEXT_AFU pointer per spec.
 	 */
-	v = readq(binfo->ioaddr + NEXT_AFU);
+	v = pete_readq("drivers/fpga/dfl.c:1309", binfo->ioaddr + NEXT_AFU);
 
 	offset = FIELD_GET(NEXT_AFU_NEXT_DFH_OFST, v);
 	if (offset)
@@ -1322,7 +1322,7 @@ static int parse_feature_private(struct build_feature_devs_info *binfo,
 {
 	if (!is_feature_dev_detected(binfo)) {
 		dev_err(binfo->dev, "the private feature 0x%x does not belong to any AFU.\n",
-			feature_id(readq(binfo->ioaddr + ofst)));
+			feature_id(pete_readq("drivers/fpga/dfl.c:1325", binfo->ioaddr + ofst)));
 		return -EINVAL;
 	}
 
@@ -1341,7 +1341,7 @@ static int parse_feature(struct build_feature_devs_info *binfo,
 	u64 v;
 	u32 type;
 
-	v = readq(binfo->ioaddr + ofst + DFH);
+	v = pete_readq("drivers/fpga/dfl.c:1344", binfo->ioaddr + ofst + DFH);
 	type = FIELD_GET(DFH_TYPE, v);
 
 	switch (type) {
@@ -1382,7 +1382,7 @@ static int parse_feature_list(struct build_feature_devs_info *binfo,
 		if (ret)
 			return ret;
 
-		v = readq(binfo->ioaddr + start - binfo->start + DFH);
+		v = pete_readq("drivers/fpga/dfl.c:1385", binfo->ioaddr + start - binfo->start + DFH);
 		ofst = FIELD_GET(DFH_NEXT_HDR_OFST, v);
 
 		/* stop parsing if EOL(End of List) is set or offset is 0 */
@@ -1794,13 +1794,13 @@ static void config_port_access_mode(struct device *fme_dev, int port_id,
 
 	base = dfl_get_feature_ioaddr_by_id(fme_dev, FME_FEATURE_ID_HEADER);
 
-	v = readq(base + FME_HDR_PORT_OFST(port_id));
+	v = pete_readq("drivers/fpga/dfl.c:1797", base + FME_HDR_PORT_OFST(port_id));
 
 	v &= ~FME_PORT_OFST_ACC_CTRL;
 	v |= FIELD_PREP(FME_PORT_OFST_ACC_CTRL,
 			is_vf ? FME_PORT_OFST_ACC_VF : FME_PORT_OFST_ACC_PF);
 
-	writeq(v, base + FME_HDR_PORT_OFST(port_id));
+	pete_writeq("drivers/fpga/dfl.c:1803", v, base + FME_HDR_PORT_OFST(port_id));
 }
 
 #define config_port_vf_mode(dev, id) config_port_access_mode(dev, id, true)

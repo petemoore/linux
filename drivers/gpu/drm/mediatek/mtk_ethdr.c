@@ -119,21 +119,21 @@ void mtk_ethdr_enable_vblank(struct device *dev)
 {
 	struct mtk_ethdr *priv = dev_get_drvdata(dev);
 
-	writel(MIX_FME_CPL_INTEN, priv->ethdr_comp[ETHDR_MIXER].regs + MIX_INTEN);
+	pete_writel("drivers/gpu/drm/mediatek/mtk_ethdr.c:122", MIX_FME_CPL_INTEN, priv->ethdr_comp[ETHDR_MIXER].regs + MIX_INTEN);
 }
 
 void mtk_ethdr_disable_vblank(struct device *dev)
 {
 	struct mtk_ethdr *priv = dev_get_drvdata(dev);
 
-	writel(0x0, priv->ethdr_comp[ETHDR_MIXER].regs + MIX_INTEN);
+	pete_writel("drivers/gpu/drm/mediatek/mtk_ethdr.c:129", 0x0, priv->ethdr_comp[ETHDR_MIXER].regs + MIX_INTEN);
 }
 
 static irqreturn_t mtk_ethdr_irq_handler(int irq, void *dev_id)
 {
 	struct mtk_ethdr *priv = dev_id;
 
-	writel(0x0, priv->ethdr_comp[ETHDR_MIXER].regs + MIX_INTSTA);
+	pete_writel("drivers/gpu/drm/mediatek/mtk_ethdr.c:136", 0x0, priv->ethdr_comp[ETHDR_MIXER].regs + MIX_INTSTA);
 
 	if (!priv->vblank_cb)
 		return IRQ_NONE;
@@ -251,7 +251,7 @@ void mtk_ethdr_start(struct device *dev)
 	struct mtk_ethdr *priv = dev_get_drvdata(dev);
 	struct mtk_ethdr_comp *mixer = &priv->ethdr_comp[ETHDR_MIXER];
 
-	writel(1, mixer->regs + MIX_EN);
+	pete_writel("drivers/gpu/drm/mediatek/mtk_ethdr.c:254", 1, mixer->regs + MIX_EN);
 }
 
 void mtk_ethdr_stop(struct device *dev)
@@ -259,10 +259,10 @@ void mtk_ethdr_stop(struct device *dev)
 	struct mtk_ethdr *priv = dev_get_drvdata(dev);
 	struct mtk_ethdr_comp *mixer = &priv->ethdr_comp[ETHDR_MIXER];
 
-	writel(0, mixer->regs + MIX_EN);
-	writel(1, mixer->regs + MIX_RST);
+	pete_writel("drivers/gpu/drm/mediatek/mtk_ethdr.c:262", 0, mixer->regs + MIX_EN);
+	pete_writel("drivers/gpu/drm/mediatek/mtk_ethdr.c:263", 1, mixer->regs + MIX_RST);
 	reset_control_reset(priv->reset_ctl);
-	writel(0, mixer->regs + MIX_RST);
+	pete_writel("drivers/gpu/drm/mediatek/mtk_ethdr.c:265", 0, mixer->regs + MIX_RST);
 }
 
 int mtk_ethdr_clk_enable(struct device *dev)

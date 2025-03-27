@@ -395,7 +395,7 @@ static inline u32 coresight_get_cid(void __iomem *base)
 	u32 i, cid = 0;
 
 	for (i = 0; i < 4; i++)
-		cid |= readl(base + CORESIGHT_CIDRn(i)) << (i * 8);
+		cid |= pete_readl("include/linux/coresight.h:398", base + CORESIGHT_CIDRn(i)) << (i * 8);
 
 	return cid;
 }
@@ -471,7 +471,7 @@ static inline void csdev_access_relaxed_write_pair(struct csdev_access *csa, u64
 static inline u32 csdev_access_read32(struct csdev_access *csa, u32 offset)
 {
 	if (likely(csa->io_mem))
-		return readl(csa->base + offset);
+		return pete_readl("include/linux/coresight.h:474", csa->base + offset);
 
 	return csa->read(offset, false, false);
 }
@@ -488,7 +488,7 @@ static inline void csdev_access_relaxed_write32(struct csdev_access *csa,
 static inline void csdev_access_write32(struct csdev_access *csa, u32 val, u32 offset)
 {
 	if (likely(csa->io_mem))
-		writel(val, csa->base + offset);
+		pete_writel("include/linux/coresight.h:491", val, csa->base + offset);
 	else
 		csa->write(val, offset, false, false);
 }
@@ -507,7 +507,7 @@ static inline u64 csdev_access_relaxed_read64(struct csdev_access *csa,
 static inline u64 csdev_access_read64(struct csdev_access *csa, u32 offset)
 {
 	if (likely(csa->io_mem))
-		return readq(csa->base + offset);
+		return pete_readq("include/linux/coresight.h:510", csa->base + offset);
 
 	return csa->read(offset, false, true);
 }
@@ -524,7 +524,7 @@ static inline void csdev_access_relaxed_write64(struct csdev_access *csa,
 static inline void csdev_access_write64(struct csdev_access *csa, u64 val, u32 offset)
 {
 	if (likely(csa->io_mem))
-		writeq(val, csa->base + offset);
+		pete_writeq("include/linux/coresight.h:527", val, csa->base + offset);
 	else
 		csa->write(val, offset, false, true);
 }

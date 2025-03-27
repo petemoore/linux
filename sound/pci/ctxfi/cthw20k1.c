@@ -1811,7 +1811,7 @@ static int uaa_to_xfi(struct pci_dev *pci)
 
 	/* Read current mode from Mode Change Register */
 	for (i = 0; i < 4; i++)
-		data[i] = readl(mem_base + UAA_CORE_CHANGE);
+		data[i] = pete_readl("sound/pci/ctxfi/cthw20k1.c:1814", mem_base + UAA_CORE_CHANGE);
 
 	/* Determine current mode... */
 	if (data[0] == CTLA) {
@@ -1864,10 +1864,10 @@ static int uaa_to_xfi(struct pci_dev *pci)
 	pci_write_config_dword(pci, PCI_COMMAND, cmd);
 
 	/* Switch to X-Fi mode */
-	writel(CTLX, (mem_base + UAA_CORE_CHANGE));
-	writel(CTL_, (mem_base + UAA_CORE_CHANGE));
-	writel(CTLF, (mem_base + UAA_CORE_CHANGE));
-	writel(CTLi, (mem_base + UAA_CORE_CHANGE));
+	pete_writel("sound/pci/ctxfi/cthw20k1.c:1867", CTLX, (mem_base + UAA_CORE_CHANGE));
+	pete_writel("sound/pci/ctxfi/cthw20k1.c:1868", CTL_, (mem_base + UAA_CORE_CHANGE));
+	pete_writel("sound/pci/ctxfi/cthw20k1.c:1869", CTLF, (mem_base + UAA_CORE_CHANGE));
+	pete_writel("sound/pci/ctxfi/cthw20k1.c:1870", CTLi, (mem_base + UAA_CORE_CHANGE));
 
 	iounmap(mem_base);
 

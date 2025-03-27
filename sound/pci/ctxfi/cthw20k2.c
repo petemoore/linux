@@ -2205,12 +2205,12 @@ static int hw_resume(struct hw *hw, struct card_conf *info)
 
 static u32 hw_read_20kx(struct hw *hw, u32 reg)
 {
-	return readl(hw->mem_base + reg);
+	return pete_readl("sound/pci/ctxfi/cthw20k2.c:2208", hw->mem_base + reg);
 }
 
 static void hw_write_20kx(struct hw *hw, u32 reg, u32 data)
 {
-	writel(data, hw->mem_base + reg);
+	pete_writel("sound/pci/ctxfi/cthw20k2.c:2213", data, hw->mem_base + reg);
 }
 
 static const struct hw ct20k2_preset = {

@@ -475,7 +475,7 @@ out:
 		clear_bit(CMDQ_STAT_LAST_PKT_DB, &q->status);
 		if (test_and_set_bit(CMDQ_STAT_RUNNING, &q->status) == 0) {
 			set_bit(CMDQ_STAT_LAST_PKT_DB, &q->status);
-			writel(F_CMDQ0_ENABLE, sge->adapter->regs + A_SG_DOORBELL);
+			pete_writel("drivers/net/ethernet/chelsio/cxgb/sge.c:478", F_CMDQ0_ENABLE, sge->adapter->regs + A_SG_DOORBELL);
 		}
 	}
 	pr_debug("sched_skb ret %p\n", skb);
@@ -489,7 +489,7 @@ out:
 static inline void doorbell_pio(struct adapter *adapter, u32 val)
 {
 	wmb();
-	writel(val, adapter->regs + A_SG_DOORBELL);
+	pete_writel("drivers/net/ethernet/chelsio/cxgb/sge.c:492", val, adapter->regs + A_SG_DOORBELL);
 }
 
 /*
@@ -716,9 +716,9 @@ static inline void setup_ring_params(struct adapter *adapter, u64 addr,
 				     u32 size, int base_reg_lo,
 				     int base_reg_hi, int size_reg)
 {
-	writel((u32)addr, adapter->regs + base_reg_lo);
-	writel(addr >> 32, adapter->regs + base_reg_hi);
-	writel(size, adapter->regs + size_reg);
+	pete_writel("drivers/net/ethernet/chelsio/cxgb/sge.c:719", (u32)addr, adapter->regs + base_reg_lo);
+	pete_writel("drivers/net/ethernet/chelsio/cxgb/sge.c:720", addr >> 32, adapter->regs + base_reg_hi);
+	pete_writel("drivers/net/ethernet/chelsio/cxgb/sge.c:721", size, adapter->regs + size_reg);
 }
 
 /*
@@ -733,8 +733,8 @@ void t1_vlan_mode(struct adapter *adapter, netdev_features_t features)
 	else
 		sge->sge_control &= ~F_VLAN_XTRACT;
 	if (adapter->open_device_map) {
-		writel(sge->sge_control, adapter->regs + A_SG_CONTROL);
-		readl(adapter->regs + A_SG_CONTROL);   /* flush */
+		pete_writel("drivers/net/ethernet/chelsio/cxgb/sge.c:736", sge->sge_control, adapter->regs + A_SG_CONTROL);
+		pete_readl("drivers/net/ethernet/chelsio/cxgb/sge.c:737", adapter->regs + A_SG_CONTROL);   /* flush */
 	}
 }
 
@@ -746,7 +746,7 @@ static void configure_sge(struct sge *sge, struct sge_params *p)
 {
 	struct adapter *ap = sge->adapter;
 
-	writel(0, ap->regs + A_SG_CONTROL);
+	pete_writel("drivers/net/ethernet/chelsio/cxgb/sge.c:749", 0, ap->regs + A_SG_CONTROL);
 	setup_ring_params(ap, sge->cmdQ[0].dma_addr, sge->cmdQ[0].size,
 			  A_SG_CMD0BASELWR, A_SG_CMD0BASEUPR, A_SG_CMD0SIZE);
 	setup_ring_params(ap, sge->cmdQ[1].dma_addr, sge->cmdQ[1].size,
@@ -759,11 +759,11 @@ static void configure_sge(struct sge *sge, struct sge_params *p)
 			  A_SG_FL1BASEUPR, A_SG_FL1SIZE);
 
 	/* The threshold comparison uses <. */
-	writel(SGE_RX_SM_BUF_SIZE + 1, ap->regs + A_SG_FLTHRESHOLD);
+	pete_writel("drivers/net/ethernet/chelsio/cxgb/sge.c:762", SGE_RX_SM_BUF_SIZE + 1, ap->regs + A_SG_FLTHRESHOLD);
 
 	setup_ring_params(ap, sge->respQ.dma_addr, sge->respQ.size,
 			  A_SG_RSPBASELWR, A_SG_RSPBASEUPR, A_SG_RSPSIZE);
-	writel((u32)sge->respQ.size - 1, ap->regs + A_SG_RSPQUEUECREDIT);
+	pete_writel("drivers/net/ethernet/chelsio/cxgb/sge.c:766", (u32)sge->respQ.size - 1, ap->regs + A_SG_RSPQUEUECREDIT);
 
 	sge->sge_control = F_CMDQ0_ENABLE | F_CMDQ1_ENABLE | F_FL0_ENABLE |
 		F_FL1_ENABLE | F_CPL_ENABLE | F_RESPONSE_QUEUE_ENABLE |
@@ -867,7 +867,7 @@ static void refill_free_list(struct sge *sge, struct freelQ *q)
 static void freelQs_empty(struct sge *sge)
 {
 	struct adapter *adapter = sge->adapter;
-	u32 irq_reg = readl(adapter->regs + A_SG_INT_ENABLE);
+	u32 irq_reg = pete_readl("drivers/net/ethernet/chelsio/cxgb/sge.c:870", adapter->regs + A_SG_INT_ENABLE);
 	u32 irqholdoff_reg;
 
 	refill_free_list(sge, &sge->freelQ[0]);
@@ -882,8 +882,8 @@ static void freelQs_empty(struct sge *sge)
 		irq_reg &= ~F_FL_EXHAUSTED;
 		irqholdoff_reg = sge->intrtimer_nres;
 	}
-	writel(irqholdoff_reg, adapter->regs + A_SG_INTRTIMER);
-	writel(irq_reg, adapter->regs + A_SG_INT_ENABLE);
+	pete_writel("drivers/net/ethernet/chelsio/cxgb/sge.c:885", irqholdoff_reg, adapter->regs + A_SG_INTRTIMER);
+	pete_writel("drivers/net/ethernet/chelsio/cxgb/sge.c:886", irq_reg, adapter->regs + A_SG_INT_ENABLE);
 
 	/* We reenable the Qs to force a freelist GTS interrupt later */
 	doorbell_pio(adapter, F_FL0_ENABLE | F_FL1_ENABLE);
@@ -899,10 +899,10 @@ static void freelQs_empty(struct sge *sge)
  */
 void t1_sge_intr_disable(struct sge *sge)
 {
-	u32 val = readl(sge->adapter->regs + A_PL_ENABLE);
+	u32 val = pete_readl("drivers/net/ethernet/chelsio/cxgb/sge.c:902", sge->adapter->regs + A_PL_ENABLE);
 
-	writel(val & ~SGE_PL_INTR_MASK, sge->adapter->regs + A_PL_ENABLE);
-	writel(0, sge->adapter->regs + A_SG_INT_ENABLE);
+	pete_writel("drivers/net/ethernet/chelsio/cxgb/sge.c:904", val & ~SGE_PL_INTR_MASK, sge->adapter->regs + A_PL_ENABLE);
+	pete_writel("drivers/net/ethernet/chelsio/cxgb/sge.c:905", 0, sge->adapter->regs + A_SG_INT_ENABLE);
 }
 
 /*
@@ -911,12 +911,12 @@ void t1_sge_intr_disable(struct sge *sge)
 void t1_sge_intr_enable(struct sge *sge)
 {
 	u32 en = SGE_INT_ENABLE;
-	u32 val = readl(sge->adapter->regs + A_PL_ENABLE);
+	u32 val = pete_readl("drivers/net/ethernet/chelsio/cxgb/sge.c:914", sge->adapter->regs + A_PL_ENABLE);
 
 	if (sge->adapter->port[0].dev->hw_features & NETIF_F_TSO)
 		en &= ~F_PACKET_TOO_BIG;
-	writel(en, sge->adapter->regs + A_SG_INT_ENABLE);
-	writel(val | SGE_PL_INTR_MASK, sge->adapter->regs + A_PL_ENABLE);
+	pete_writel("drivers/net/ethernet/chelsio/cxgb/sge.c:918", en, sge->adapter->regs + A_SG_INT_ENABLE);
+	pete_writel("drivers/net/ethernet/chelsio/cxgb/sge.c:919", val | SGE_PL_INTR_MASK, sge->adapter->regs + A_PL_ENABLE);
 }
 
 /*
@@ -924,8 +924,8 @@ void t1_sge_intr_enable(struct sge *sge)
  */
 void t1_sge_intr_clear(struct sge *sge)
 {
-	writel(SGE_PL_INTR_MASK, sge->adapter->regs + A_PL_CAUSE);
-	writel(0xffffffff, sge->adapter->regs + A_SG_INT_CAUSE);
+	pete_writel("drivers/net/ethernet/chelsio/cxgb/sge.c:927", SGE_PL_INTR_MASK, sge->adapter->regs + A_PL_CAUSE);
+	pete_writel("drivers/net/ethernet/chelsio/cxgb/sge.c:928", 0xffffffff, sge->adapter->regs + A_SG_INT_CAUSE);
 }
 
 /*
@@ -934,7 +934,7 @@ void t1_sge_intr_clear(struct sge *sge)
 bool t1_sge_intr_error_handler(struct sge *sge)
 {
 	struct adapter *adapter = sge->adapter;
-	u32 cause = readl(adapter->regs + A_SG_INT_CAUSE);
+	u32 cause = pete_readl("drivers/net/ethernet/chelsio/cxgb/sge.c:937", adapter->regs + A_SG_INT_CAUSE);
 	bool wake = false;
 
 	if (adapter->port[0].dev->hw_features & NETIF_F_TSO)
@@ -965,7 +965,7 @@ bool t1_sge_intr_error_handler(struct sge *sge)
 		wake = true;
 	}
 
-	writel(cause, adapter->regs + A_SG_INT_CAUSE);
+	pete_writel("drivers/net/ethernet/chelsio/cxgb/sge.c:968", cause, adapter->regs + A_SG_INT_CAUSE);
 	return wake;
 }
 
@@ -1338,7 +1338,7 @@ static void restart_sched(struct tasklet_struct *t)
 		clear_bit(CMDQ_STAT_LAST_PKT_DB, &q->status);
 		if (test_and_set_bit(CMDQ_STAT_RUNNING, &q->status) == 0) {
 			set_bit(CMDQ_STAT_LAST_PKT_DB, &q->status);
-			writel(F_CMDQ0_ENABLE, adapter->regs + A_SG_DOORBELL);
+			pete_writel("drivers/net/ethernet/chelsio/cxgb/sge.c:1341", F_CMDQ0_ENABLE, adapter->regs + A_SG_DOORBELL);
 		}
 	}
 	spin_unlock(&q->lock);
@@ -1448,7 +1448,7 @@ static unsigned int update_tx_info(struct adapter *adapter,
 		if (cmdq->cleaned + cmdq->in_use != cmdq->processed &&
 		    !test_and_set_bit(CMDQ_STAT_LAST_PKT_DB, &cmdq->status)) {
 			set_bit(CMDQ_STAT_RUNNING, &cmdq->status);
-			writel(F_CMDQ0_ENABLE, adapter->regs + A_SG_DOORBELL);
+			pete_writel("drivers/net/ethernet/chelsio/cxgb/sge.c:1451", F_CMDQ0_ENABLE, adapter->regs + A_SG_DOORBELL);
 		}
 		if (sge->tx_sched)
 			tasklet_hi_schedule(&sge->tx_sched->sched_tsk);
@@ -1529,7 +1529,7 @@ static int process_responses(struct adapter *adapter, int budget)
 		prefetch(e);
 
 		if (++q->credits > SGE_RESPQ_REPLENISH_THRES) {
-			writel(q->credits, adapter->regs + A_SG_RSPQUEUECREDIT);
+			pete_writel("drivers/net/ethernet/chelsio/cxgb/sge.c:1532", q->credits, adapter->regs + A_SG_RSPQUEUECREDIT);
 			q->credits = 0;
 		}
 	}
@@ -1584,7 +1584,7 @@ static int process_pure_responses(struct adapter *adapter)
 		prefetch(e);
 
 		if (++q->credits > SGE_RESPQ_REPLENISH_THRES) {
-			writel(q->credits, adapter->regs + A_SG_RSPQUEUECREDIT);
+			pete_writel("drivers/net/ethernet/chelsio/cxgb/sge.c:1587", q->credits, adapter->regs + A_SG_RSPQUEUECREDIT);
 			q->credits = 0;
 		}
 		sge->stats.pure_rsps++;
@@ -1608,7 +1608,7 @@ int t1_poll(struct napi_struct *napi, int budget)
 
 	if (likely(work_done < budget)) {
 		napi_complete_done(napi, work_done);
-		writel(adapter->sge->respQ.cidx,
+		pete_writel("drivers/net/ethernet/chelsio/cxgb/sge.c:1611", adapter->sge->respQ.cidx,
 		       adapter->regs + A_SG_SLEEPING);
 	}
 	return work_done;
@@ -1641,8 +1641,8 @@ irqreturn_t t1_interrupt_thread(int irq, void *data)
 	spin_lock_irq(&adapter->async_lock);
 	adapter->slow_intr_mask |= F_PL_INTR_EXT;
 
-	writel(F_PL_INTR_EXT, adapter->regs + A_PL_CAUSE);
-	writel(adapter->slow_intr_mask | F_PL_INTR_SGE_DATA,
+	pete_writel("drivers/net/ethernet/chelsio/cxgb/sge.c:1644", F_PL_INTR_EXT, adapter->regs + A_PL_CAUSE);
+	pete_writel("drivers/net/ethernet/chelsio/cxgb/sge.c:1645", adapter->slow_intr_mask | F_PL_INTR_SGE_DATA,
 	       adapter->regs + A_PL_ENABLE);
 	spin_unlock_irq(&adapter->async_lock);
 
@@ -1656,14 +1656,14 @@ irqreturn_t t1_interrupt(int irq, void *data)
 	irqreturn_t handled;
 
 	if (likely(responses_pending(adapter))) {
-		writel(F_PL_INTR_SGE_DATA, adapter->regs + A_PL_CAUSE);
+		pete_writel("drivers/net/ethernet/chelsio/cxgb/sge.c:1659", F_PL_INTR_SGE_DATA, adapter->regs + A_PL_CAUSE);
 
 		if (napi_schedule_prep(&adapter->napi)) {
 			if (process_pure_responses(adapter))
 				__napi_schedule(&adapter->napi);
 			else {
 				/* no data, no NAPI needed */
-				writel(sge->respQ.cidx, adapter->regs + A_SG_SLEEPING);
+				pete_writel("drivers/net/ethernet/chelsio/cxgb/sge.c:1666", sge->respQ.cidx, adapter->regs + A_SG_SLEEPING);
 				/* undo schedule_prep */
 				napi_enable(&adapter->napi);
 			}
@@ -1773,7 +1773,7 @@ use_sched:
 		clear_bit(CMDQ_STAT_LAST_PKT_DB, &q->status);
 		if (test_and_set_bit(CMDQ_STAT_RUNNING, &q->status) == 0) {
 			set_bit(CMDQ_STAT_LAST_PKT_DB, &q->status);
-			writel(F_CMDQ0_ENABLE, adapter->regs + A_SG_DOORBELL);
+			pete_writel("drivers/net/ethernet/chelsio/cxgb/sge.c:1776", F_CMDQ0_ENABLE, adapter->regs + A_SG_DOORBELL);
 		}
 	}
 
@@ -1932,7 +1932,7 @@ static void sge_tx_reclaim_cb(struct timer_list *t)
 
 		reclaim_completed_tx(sge, q);
 		if (i == 0 && q->in_use) {    /* flush pending credits */
-			writel(F_CMDQ0_ENABLE, sge->adapter->regs + A_SG_DOORBELL);
+			pete_writel("drivers/net/ethernet/chelsio/cxgb/sge.c:1935", F_CMDQ0_ENABLE, sge->adapter->regs + A_SG_DOORBELL);
 		}
 		spin_unlock(&q->lock);
 	}
@@ -1946,7 +1946,7 @@ int t1_sge_set_coalesce_params(struct sge *sge, struct sge_params *p)
 {
 	sge->fixed_intrtimer = p->rx_coalesce_usecs *
 		core_ticks_per_usec(sge->adapter);
-	writel(sge->fixed_intrtimer, sge->adapter->regs + A_SG_INTRTIMER);
+	pete_writel("drivers/net/ethernet/chelsio/cxgb/sge.c:1949", sge->fixed_intrtimer, sge->adapter->regs + A_SG_INTRTIMER);
 	return 0;
 }
 
@@ -1980,8 +1980,8 @@ int t1_sge_configure(struct sge *sge, struct sge_params *p)
 void t1_sge_stop(struct sge *sge)
 {
 	int i;
-	writel(0, sge->adapter->regs + A_SG_CONTROL);
-	readl(sge->adapter->regs + A_SG_CONTROL); /* flush */
+	pete_writel("drivers/net/ethernet/chelsio/cxgb/sge.c:1983", 0, sge->adapter->regs + A_SG_CONTROL);
+	pete_readl("drivers/net/ethernet/chelsio/cxgb/sge.c:1984", sge->adapter->regs + A_SG_CONTROL); /* flush */
 
 	if (is_T2(sge->adapter))
 		del_timer_sync(&sge->espibug_timer);
@@ -2002,9 +2002,9 @@ void t1_sge_start(struct sge *sge)
 	refill_free_list(sge, &sge->freelQ[0]);
 	refill_free_list(sge, &sge->freelQ[1]);
 
-	writel(sge->sge_control, sge->adapter->regs + A_SG_CONTROL);
+	pete_writel("drivers/net/ethernet/chelsio/cxgb/sge.c:2005", sge->sge_control, sge->adapter->regs + A_SG_CONTROL);
 	doorbell_pio(sge->adapter, F_FL0_ENABLE | F_FL1_ENABLE);
-	readl(sge->adapter->regs + A_SG_CONTROL); /* flush */
+	pete_readl("drivers/net/ethernet/chelsio/cxgb/sge.c:2007", sge->adapter->regs + A_SG_CONTROL); /* flush */
 
 	mod_timer(&sge->tx_reclaim_timer, jiffies + TX_RECLAIM_PERIOD);
 

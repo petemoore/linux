@@ -129,9 +129,9 @@ static int imx8m_reset(struct snd_sof_dev *sdev)
 	u32 pwrctl;
 
 	/* put DSP into reset and stall */
-	pwrctl = readl(priv->dap + IMX8M_DAP_PWRCTL);
+	pwrctl = pete_readl("sound/soc/sof/imx/imx8m.c:132", priv->dap + IMX8M_DAP_PWRCTL);
 	pwrctl |= IMX8M_PWRCTL_CORERESET;
-	writel(pwrctl, priv->dap + IMX8M_DAP_PWRCTL);
+	pete_writel("sound/soc/sof/imx/imx8m.c:134", pwrctl, priv->dap + IMX8M_DAP_PWRCTL);
 
 	/* keep reset asserted for 10 cycles */
 	usleep_range(1, 2);
@@ -140,9 +140,9 @@ static int imx8m_reset(struct snd_sof_dev *sdev)
 			   AudioDSP_REG2_RUNSTALL, AudioDSP_REG2_RUNSTALL);
 
 	/* take the DSP out of reset and keep stalled for FW loading */
-	pwrctl = readl(priv->dap + IMX8M_DAP_PWRCTL);
+	pwrctl = pete_readl("sound/soc/sof/imx/imx8m.c:143", priv->dap + IMX8M_DAP_PWRCTL);
 	pwrctl &= ~IMX8M_PWRCTL_CORERESET;
-	writel(pwrctl, priv->dap + IMX8M_DAP_PWRCTL);
+	pete_writel("sound/soc/sof/imx/imx8m.c:145", pwrctl, priv->dap + IMX8M_DAP_PWRCTL);
 
 	return 0;
 }

@@ -51,9 +51,9 @@ static void lan_rmw_(u32 val, u32 mask, void __iomem *mem, u32 offset)
 {
 	u32 v;
 
-	v = readl(mem + offset);
+	v = pete_readl("drivers/phy/microchip/lan966x_serdes.c:54", mem + offset);
 	v = (v & ~mask) | (val & mask);
-	writel(v, mem + offset);
+	pete_writel("drivers/phy/microchip/lan966x_serdes.c:56", v, mem + offset);
 }
 
 struct serdes_mux {
@@ -230,7 +230,7 @@ static int lan966x_sd6g40_reg_cfg(struct serdes_macro *macro,
 
 	usleep_range(7 * USEC_PER_MSEC, 8 * USEC_PER_MSEC);
 
-	value = readl(macro->ctrl->regs + lan_offset(HSIO_SD_STAT(idx)));
+	value = pete_readl("drivers/phy/microchip/lan966x_serdes.c:233", macro->ctrl->regs + lan_offset(HSIO_SD_STAT(idx)));
 	value = HSIO_SD_STAT_MPLL_STATE_GET(value);
 	if (value != 0x1) {
 		dev_err(macro->ctrl->dev,
@@ -245,7 +245,7 @@ static int lan966x_sd6g40_reg_cfg(struct serdes_macro *macro,
 
 	usleep_range(USEC_PER_MSEC, 2 * USEC_PER_MSEC);
 
-	value = readl(macro->ctrl->regs + lan_offset(HSIO_SD_STAT(idx)));
+	value = pete_readl("drivers/phy/microchip/lan966x_serdes.c:248", macro->ctrl->regs + lan_offset(HSIO_SD_STAT(idx)));
 	value = HSIO_SD_STAT_TX_CM_STATE_GET(value);
 	if (value != 0x1) {
 		dev_err(macro->ctrl->dev,
@@ -263,7 +263,7 @@ static int lan966x_sd6g40_reg_cfg(struct serdes_macro *macro,
 	usleep_range(USEC_PER_MSEC, 2 * USEC_PER_MSEC);
 
 	/* Waiting for serdes 0 rx DPLL to lock...  */
-	value = readl(macro->ctrl->regs + lan_offset(HSIO_SD_STAT(idx)));
+	value = pete_readl("drivers/phy/microchip/lan966x_serdes.c:266", macro->ctrl->regs + lan_offset(HSIO_SD_STAT(idx)));
 	value = HSIO_SD_STAT_RX_PLL_STATE_GET(value);
 	if (value != 0x1) {
 		dev_err(macro->ctrl->dev,
@@ -273,7 +273,7 @@ static int lan966x_sd6g40_reg_cfg(struct serdes_macro *macro,
 	}
 
 	/* Waiting for serdes 0 tx operational...  */
-	value = readl(macro->ctrl->regs + lan_offset(HSIO_SD_STAT(idx)));
+	value = pete_readl("drivers/phy/microchip/lan966x_serdes.c:276", macro->ctrl->regs + lan_offset(HSIO_SD_STAT(idx)));
 	value = HSIO_SD_STAT_TX_STATE_GET(value);
 	if (value != 0x1) {
 		dev_err(macro->ctrl->dev,
@@ -483,7 +483,7 @@ static int serdes_set_mode(struct phy *phy, enum phy_mode mode, int submode)
 		    macro->port != lan966x_serdes_muxes[i].port)
 			continue;
 
-		val = readl(macro->ctrl->regs + lan_offset(HSIO_HW_CFG));
+		val = pete_readl("drivers/phy/microchip/lan966x_serdes.c:486", macro->ctrl->regs + lan_offset(HSIO_HW_CFG));
 		val |= lan966x_serdes_muxes[i].mux;
 		lan_rmw(val, lan966x_serdes_muxes[i].mask,
 			macro->ctrl->regs, HSIO_HW_CFG);
@@ -589,7 +589,7 @@ static int serdes_probe(struct platform_device *pdev)
 			return ret;
 	}
 
-	val = readl(hw_stat);
+	val = pete_readl("drivers/phy/microchip/lan966x_serdes.c:592", hw_stat);
 	val = FIELD_GET(PLL_CONF_MASK, val);
 	ctrl->ref125 = (val == PLL_CONF_125MHZ ||
 			val == PLL_CONF_SERDES_125MHZ);

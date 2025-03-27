@@ -302,12 +302,12 @@ struct rp1_sdio_clkgen {
 static inline void clkgen_write(struct rp1_sdio_clkgen *clkgen, u32 reg, u32 val)
 {
 	dev_dbg(clkgen->dev, "%s: write reg 0x%x: 0x%x\n", __func__, reg, val);
-	writel(val, clkgen->regs + reg);
+	pete_writel("drivers/clk/clk-rp1-sdio.c:305", val, clkgen->regs + reg);
 }
 
 static inline u32 clkgen_read(struct rp1_sdio_clkgen *clkgen, u32 reg)
 {
-	u32 val = readl(clkgen->regs + reg);
+	u32 val = pete_readl("drivers/clk/clk-rp1-sdio.c:310", clkgen->regs + reg);
 
 	dev_dbg(clkgen->dev, "%s: read reg 0x%x: 0x%x\n", __func__, reg, val);
 	return val;

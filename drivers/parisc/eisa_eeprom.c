@@ -36,7 +36,7 @@ static ssize_t eisa_eeprom_read(struct file * file,
 	tmp = kmalloc(count, GFP_KERNEL);
 	if (tmp) {
 		for (i = 0; i < count; i++)
-			tmp[i] = readb(eisa_eeprom_addr+(*ppos)++);
+			tmp[i] = pete_readb("drivers/parisc/eisa_eeprom.c:39", eisa_eeprom_addr+(*ppos)++);
 
 		if (copy_to_user (buf, tmp, count))
 			ret = -EFAULT;

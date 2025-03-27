@@ -197,7 +197,7 @@ static u16 tegra_sdhci_readw(struct sdhci_host *host, int reg)
 		return SDHCI_SPEC_200;
 	}
 
-	return readw(host->ioaddr + reg);
+	return pete_readw("drivers/mmc/host/sdhci-tegra.c:200", host->ioaddr + reg);
 }
 
 static void tegra_sdhci_writew(struct sdhci_host *host, u16 val, int reg)
@@ -213,12 +213,12 @@ static void tegra_sdhci_writew(struct sdhci_host *host, u16 val, int reg)
 		pltfm_host->xfer_mode_shadow = val;
 		return;
 	case SDHCI_COMMAND:
-		writel((val << 16) | pltfm_host->xfer_mode_shadow,
+		pete_writel("drivers/mmc/host/sdhci-tegra.c:216", (val << 16) | pltfm_host->xfer_mode_shadow,
 			host->ioaddr + SDHCI_TRANSFER_MODE);
 		return;
 	}
 
-	writew(val, host->ioaddr + reg);
+	pete_writew("drivers/mmc/host/sdhci-tegra.c:221", val, host->ioaddr + reg);
 }
 
 static void tegra_sdhci_writel(struct sdhci_host *host, u32 val, int reg)
@@ -234,17 +234,17 @@ static void tegra_sdhci_writel(struct sdhci_host *host, u32 val, int reg)
 	if (unlikely(reg == SDHCI_SIGNAL_ENABLE))
 		val &= ~(SDHCI_INT_TIMEOUT|SDHCI_INT_CRC);
 
-	writel(val, host->ioaddr + reg);
+	pete_writel("drivers/mmc/host/sdhci-tegra.c:237", val, host->ioaddr + reg);
 
 	if (unlikely((soc_data->nvquirks & NVQUIRK_ENABLE_BLOCK_GAP_DET) &&
 			(reg == SDHCI_INT_ENABLE))) {
 		/* Erratum: Must enable block gap interrupt detection */
-		u8 gap_ctrl = readb(host->ioaddr + SDHCI_BLOCK_GAP_CONTROL);
+		u8 gap_ctrl = pete_readb("drivers/mmc/host/sdhci-tegra.c:242", host->ioaddr + SDHCI_BLOCK_GAP_CONTROL);
 		if (val & SDHCI_INT_CARD_INT)
 			gap_ctrl |= 0x8;
 		else
 			gap_ctrl &= ~0x8;
-		writeb(gap_ctrl, host->ioaddr + SDHCI_BLOCK_GAP_CONTROL);
+		pete_writeb("drivers/mmc/host/sdhci-tegra.c:247", gap_ctrl, host->ioaddr + SDHCI_BLOCK_GAP_CONTROL);
 	}
 }
 
@@ -280,7 +280,7 @@ static void tegra210_sdhci_writew(struct sdhci_host *host, u16 val, int reg)
 	if (is_tuning_cmd)
 		clk_enabled = tegra_sdhci_configure_card_clk(host, 0);
 
-	writew(val, host->ioaddr + reg);
+	pete_writew("drivers/mmc/host/sdhci-tegra.c:283", val, host->ioaddr + reg);
 
 	if (is_tuning_cmd) {
 		udelay(1);
@@ -1201,7 +1201,7 @@ static void tegra_cqhci_writel(struct cqhci_host *cq_host, u32 val, int reg)
 	    cqhci_readl(cq_host, CQHCI_CTL) & CQHCI_HALT) {
 		sdhci_writew(host, SDHCI_TEGRA_CQE_TRNS_MODE, SDHCI_TRANSFER_MODE);
 		sdhci_cqe_enable(mmc);
-		writel(val, cq_host->mmio + reg);
+		pete_writel("drivers/mmc/host/sdhci-tegra.c:1204", val, cq_host->mmio + reg);
 		timeout = ktime_add_us(ktime_get(), 50);
 		while (1) {
 			timed_out = ktime_compare(ktime_get(), timeout) > 0;
@@ -1214,9 +1214,9 @@ static void tegra_cqhci_writel(struct cqhci_host *cq_host, u32 val, int reg)
 		 * doesn't resume retry unhalt.
 		 */
 		if (timed_out)
-			writel(val, cq_host->mmio + reg);
+			pete_writel("drivers/mmc/host/sdhci-tegra.c:1217", val, cq_host->mmio + reg);
 	} else {
-		writel(val, cq_host->mmio + reg);
+		pete_writel("drivers/mmc/host/sdhci-tegra.c:1219", val, cq_host->mmio + reg);
 	}
 }
 

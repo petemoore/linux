@@ -746,42 +746,42 @@ int nfp_net_sched_mbox_amsg_work(struct nfp_net *nn, u32 cmd, const void *data, 
  */
 static inline u16 nn_readb(struct nfp_net *nn, int off)
 {
-	return readb(nn->dp.ctrl_bar + off);
+	return pete_readb("drivers/net/ethernet/netronome/nfp/nfp_net.h:749", nn->dp.ctrl_bar + off);
 }
 
 static inline void nn_writeb(struct nfp_net *nn, int off, u8 val)
 {
-	writeb(val, nn->dp.ctrl_bar + off);
+	pete_writeb("drivers/net/ethernet/netronome/nfp/nfp_net.h:754", val, nn->dp.ctrl_bar + off);
 }
 
 static inline u16 nn_readw(struct nfp_net *nn, int off)
 {
-	return readw(nn->dp.ctrl_bar + off);
+	return pete_readw("drivers/net/ethernet/netronome/nfp/nfp_net.h:759", nn->dp.ctrl_bar + off);
 }
 
 static inline void nn_writew(struct nfp_net *nn, int off, u16 val)
 {
-	writew(val, nn->dp.ctrl_bar + off);
+	pete_writew("drivers/net/ethernet/netronome/nfp/nfp_net.h:764", val, nn->dp.ctrl_bar + off);
 }
 
 static inline u32 nn_readl(struct nfp_net *nn, int off)
 {
-	return readl(nn->dp.ctrl_bar + off);
+	return pete_readl("drivers/net/ethernet/netronome/nfp/nfp_net.h:769", nn->dp.ctrl_bar + off);
 }
 
 static inline void nn_writel(struct nfp_net *nn, int off, u32 val)
 {
-	writel(val, nn->dp.ctrl_bar + off);
+	pete_writel("drivers/net/ethernet/netronome/nfp/nfp_net.h:774", val, nn->dp.ctrl_bar + off);
 }
 
 static inline u64 nn_readq(struct nfp_net *nn, int off)
 {
-	return readq(nn->dp.ctrl_bar + off);
+	return pete_readq("drivers/net/ethernet/netronome/nfp/nfp_net.h:779", nn->dp.ctrl_bar + off);
 }
 
 static inline void nn_writeq(struct nfp_net *nn, int off, u64 val)
 {
-	writeq(val, nn->dp.ctrl_bar + off);
+	pete_writeq("drivers/net/ethernet/netronome/nfp/nfp_net.h:784", val, nn->dp.ctrl_bar + off);
 }
 
 /* Flush posted PCI writes by reading something without side effects */
@@ -822,7 +822,7 @@ enum nfp_qcp_ptr {
  */
 static inline void nfp_qcp_rd_ptr_add(u8 __iomem *q, u32 val)
 {
-	writel(val, q + NFP_QCP_QUEUE_ADD_RPTR);
+	pete_writel("drivers/net/ethernet/netronome/nfp/nfp_net.h:825", val, q + NFP_QCP_QUEUE_ADD_RPTR);
 }
 
 /**
@@ -833,7 +833,7 @@ static inline void nfp_qcp_rd_ptr_add(u8 __iomem *q, u32 val)
  */
 static inline void nfp_qcp_wr_ptr_add(u8 __iomem *q, u32 val)
 {
-	writel(val, q + NFP_QCP_QUEUE_ADD_WPTR);
+	pete_writel("drivers/net/ethernet/netronome/nfp/nfp_net.h:836", val, q + NFP_QCP_QUEUE_ADD_WPTR);
 }
 
 static inline u32 _nfp_qcp_read(u8 __iomem *q, enum nfp_qcp_ptr ptr)
@@ -846,7 +846,7 @@ static inline u32 _nfp_qcp_read(u8 __iomem *q, enum nfp_qcp_ptr ptr)
 	else
 		off = NFP_QCP_QUEUE_STS_HI;
 
-	val = readl(q + off);
+	val = pete_readl("drivers/net/ethernet/netronome/nfp/nfp_net.h:849", q + off);
 
 	if (ptr == NFP_QCP_READ_PTR)
 		return val & NFP_QCP_QUEUE_STS_LO_READPTR_mask;

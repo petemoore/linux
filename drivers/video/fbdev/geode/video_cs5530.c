@@ -85,11 +85,11 @@ static void cs5530_set_dclk_frequency(struct fb_info *info)
 		}
 	}
 
-	writel(value, par->vid_regs + CS5530_DOT_CLK_CONFIG);
-	writel(value | 0x80000100, par->vid_regs + CS5530_DOT_CLK_CONFIG); /* set reset and bypass */
+	pete_writel("drivers/video/fbdev/geode/video_cs5530.c:88", value, par->vid_regs + CS5530_DOT_CLK_CONFIG);
+	pete_writel("drivers/video/fbdev/geode/video_cs5530.c:89", value | 0x80000100, par->vid_regs + CS5530_DOT_CLK_CONFIG); /* set reset and bypass */
 	udelay(500); /* wait for PLL to settle */
-	writel(value & 0x7FFFFFFF, par->vid_regs + CS5530_DOT_CLK_CONFIG); /* clear reset */
-	writel(value & 0x7FFFFEFF, par->vid_regs + CS5530_DOT_CLK_CONFIG); /* clear bypass */
+	pete_writel("drivers/video/fbdev/geode/video_cs5530.c:91", value & 0x7FFFFFFF, par->vid_regs + CS5530_DOT_CLK_CONFIG); /* clear reset */
+	pete_writel("drivers/video/fbdev/geode/video_cs5530.c:92", value & 0x7FFFFEFF, par->vid_regs + CS5530_DOT_CLK_CONFIG); /* clear bypass */
 }
 
 static void cs5530_configure_display(struct fb_info *info)
@@ -97,7 +97,7 @@ static void cs5530_configure_display(struct fb_info *info)
 	struct geodefb_par *par = info->par;
 	u32 dcfg;
 
-	dcfg = readl(par->vid_regs + CS5530_DISPLAY_CONFIG);
+	dcfg = pete_readl("drivers/video/fbdev/geode/video_cs5530.c:100", par->vid_regs + CS5530_DISPLAY_CONFIG);
 
 	/* Clear bits from existing mode. */
 	dcfg &= ~(CS5530_DCFG_CRT_SYNC_SKW_MASK | CS5530_DCFG_PWR_SEQ_DLY_MASK
@@ -127,7 +127,7 @@ static void cs5530_configure_display(struct fb_info *info)
 	if (info->var.sync & FB_SYNC_VERT_HIGH_ACT)
 		dcfg |= CS5530_DCFG_CRT_VSYNC_POL;
 
-	writel(dcfg, par->vid_regs + CS5530_DISPLAY_CONFIG);
+	pete_writel("drivers/video/fbdev/geode/video_cs5530.c:130", dcfg, par->vid_regs + CS5530_DISPLAY_CONFIG);
 }
 
 static int cs5530_blank_display(struct fb_info *info, int blank_mode)
@@ -156,7 +156,7 @@ static int cs5530_blank_display(struct fb_info *info, int blank_mode)
 		return -EINVAL;
 	}
 
-	dcfg = readl(par->vid_regs + CS5530_DISPLAY_CONFIG);
+	dcfg = pete_readl("drivers/video/fbdev/geode/video_cs5530.c:159", par->vid_regs + CS5530_DISPLAY_CONFIG);
 
 	dcfg &= ~(CS5530_DCFG_DAC_BL_EN | CS5530_DCFG_DAC_PWR_EN
 		  | CS5530_DCFG_HSYNC_EN | CS5530_DCFG_VSYNC_EN
@@ -177,7 +177,7 @@ static int cs5530_blank_display(struct fb_info *info, int blank_mode)
 			dcfg |= CS5530_DCFG_FP_PWR_EN;
 	}
 
-	writel(dcfg, par->vid_regs + CS5530_DISPLAY_CONFIG);
+	pete_writel("drivers/video/fbdev/geode/video_cs5530.c:180", dcfg, par->vid_regs + CS5530_DISPLAY_CONFIG);
 
 	return 0;
 }

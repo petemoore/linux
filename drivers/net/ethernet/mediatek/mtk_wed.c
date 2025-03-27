@@ -88,13 +88,13 @@ wdma_clr(struct mtk_wed_device *dev, u32 reg, u32 mask)
 static u32
 wifi_r32(struct mtk_wed_device *dev, u32 reg)
 {
-	return readl(dev->wlan.base + reg);
+	return pete_readl("drivers/net/ethernet/mediatek/mtk_wed.c:91", dev->wlan.base + reg);
 }
 
 static void
 wifi_w32(struct mtk_wed_device *dev, u32 reg, u32 val)
 {
-	writel(val, dev->wlan.base + reg);
+	pete_writel("drivers/net/ethernet/mediatek/mtk_wed.c:97", val, dev->wlan.base + reg);
 }
 
 static u32
@@ -194,19 +194,19 @@ mtk_wed_wo_reset(struct mtk_wed_device *dev)
 
 	reg = ioremap(MTK_WED_WO_CPU_MCUSYS_RESET_ADDR, 4);
 
-	val = readl(reg);
+	val = pete_readl("drivers/net/ethernet/mediatek/mtk_wed.c:197", reg);
 	switch (dev->hw->index) {
 	case 0:
 		val |= MTK_WED_WO_CPU_WO0_MCUSYS_RESET_MASK;
-		writel(val, reg);
+		pete_writel("drivers/net/ethernet/mediatek/mtk_wed.c:201", val, reg);
 		val &= ~MTK_WED_WO_CPU_WO0_MCUSYS_RESET_MASK;
-		writel(val, reg);
+		pete_writel("drivers/net/ethernet/mediatek/mtk_wed.c:203", val, reg);
 		break;
 	case 1:
 		val |= MTK_WED_WO_CPU_WO1_MCUSYS_RESET_MASK;
-		writel(val, reg);
+		pete_writel("drivers/net/ethernet/mediatek/mtk_wed.c:207", val, reg);
 		val &= ~MTK_WED_WO_CPU_WO1_MCUSYS_RESET_MASK;
-		writel(val, reg);
+		pete_writel("drivers/net/ethernet/mediatek/mtk_wed.c:209", val, reg);
 		break;
 	default:
 		break;
@@ -1629,7 +1629,7 @@ mtk_wed_txfree_ring_setup(struct mtk_wed_device *dev, void __iomem *regs)
 	ring->wpdma = regs;
 
 	for (i = 0; i < 12; i += 4) {
-		u32 val = readl(regs + i);
+		u32 val = pete_readl("drivers/net/ethernet/mediatek/mtk_wed.c:1632", regs + i);
 
 		wed_w32(dev, MTK_WED_RING_RX(index) + i, val);
 		wed_w32(dev, MTK_WED_WPDMA_RING_RX(index) + i, val);

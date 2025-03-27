@@ -217,7 +217,7 @@ static void bnx2i_ring_577xx_doorbell(struct bnx2i_conn *conn)
 			      B577XX_DOORBELL_HDR_CONN_TYPE_SHIFT);
 	msg = *((u32 *)&dbell);
 	/* TODO : get doorbell register mapping */
-	writel(cpu_to_le32(msg), conn->ep->qp.ctx_base);
+	pete_writel("drivers/scsi/bnx2i/bnx2i_hwi.c:220", cpu_to_le32(msg), conn->ep->qp.ctx_base);
 }
 
 
@@ -250,7 +250,7 @@ void bnx2i_put_rq_buf(struct bnx2i_conn *bnx2i_conn, int count)
 		rq_db->prod_idx = ep->qp.rq_prod_idx;
 		/* no need to ring hardware doorbell for 57710 */
 	} else {
-		writew(ep->qp.rq_prod_idx,
+		pete_writew("drivers/scsi/bnx2i/bnx2i_hwi.c:253", ep->qp.rq_prod_idx,
 		       ep->qp.ctx_base + CNIC_RECV_DOORBELL);
 	}
 }
@@ -277,7 +277,7 @@ static void bnx2i_ring_sq_dbell(struct bnx2i_conn *bnx2i_conn, int count)
 		sq_db->prod_idx = ep->qp.sq_prod_idx;
 		bnx2i_ring_577xx_doorbell(bnx2i_conn);
 	} else
-		writew(count, ep->qp.ctx_base + CNIC_SEND_DOORBELL);
+		pete_writew("drivers/scsi/bnx2i/bnx2i_hwi.c:280", count, ep->qp.ctx_base + CNIC_SEND_DOORBELL);
 }
 
 

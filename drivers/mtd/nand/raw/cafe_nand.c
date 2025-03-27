@@ -98,8 +98,8 @@ static const char *part_probes[] = { "cmdlinepart", "RedBoot", NULL };
 #define cafe_dev_dbg(dev, args...) do { if (debug) dev_dbg(dev, ##args); } while(0)
 
 /* Make it easier to switch to PIO if we need to */
-#define cafe_readl(cafe, addr)			readl((cafe)->mmio + CAFE_##addr)
-#define cafe_writel(cafe, datum, addr)		writel(datum, (cafe)->mmio + CAFE_##addr)
+#define cafe_readl(cafe, addr)			pete_readl("drivers/mtd/nand/raw/cafe_nand.c:101", (cafe)->mmio + CAFE_##addr)
+#define cafe_writel(cafe, datum, addr)		pete_writel("drivers/mtd/nand/raw/cafe_nand.c:102", datum, (cafe)->mmio + CAFE_##addr)
 
 static int cafe_device_ready(struct nand_chip *chip)
 {
@@ -269,7 +269,7 @@ static void cafe_nand_cmdfunc(struct nand_chip *chip, unsigned command,
 		int i;
 		printk("About to write command %08x to register 0\n", ctl1);
 		for (i=4; i< 0x5c; i+=4)
-			printk("Register %x: %08x\n", i, readl(cafe->mmio + i));
+			printk("Register %x: %08x\n", i, pete_readl("drivers/mtd/nand/raw/cafe_nand.c:272", cafe->mmio + i));
 	}
 
 	cafe_writel(cafe, ctl1, NAND_CTRL1);
@@ -435,7 +435,7 @@ static int cafe_nand_read_page(struct nand_chip *chip, uint8_t *buf,
 			dev_dbg(&cafe->pdev->dev, "Failed to correct ECC at %08x\n",
 				cafe_readl(cafe, NAND_ADDR2) * 2048);
 			for (i = 0; i < 0x5c; i += 4)
-				printk("Register %x: %08x\n", i, readl(cafe->mmio + i));
+				printk("Register %x: %08x\n", i, pete_readl("drivers/mtd/nand/raw/cafe_nand.c:438", cafe->mmio + i));
 			mtd->ecc_stats.failed++;
 		} else {
 			dev_dbg(&cafe->pdev->dev, "Corrected %d symbol errors\n", n);

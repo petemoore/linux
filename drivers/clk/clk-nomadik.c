@@ -68,11 +68,11 @@ static int nomadik_clk_reboot_handler(struct notifier_block *this,
 	u32 val;
 
 	/* The main chrystal need to be enabled for reboot to work */
-	val = readl(src_base + SRC_XTALCR);
+	val = pete_readl("drivers/clk/clk-nomadik.c:71", src_base + SRC_XTALCR);
 	val &= ~SRC_XTALCR_MXTALOVER;
 	val |= SRC_XTALCR_MXTALEN;
 	pr_crit("force-enabling MXTALO\n");
-	writel(val, src_base + SRC_XTALCR);
+	pete_writel("drivers/clk/clk-nomadik.c:75", val, src_base + SRC_XTALCR);
 	return NOTIFY_OK;
 }
 
@@ -103,7 +103,7 @@ static void __init nomadik_src_init(void)
 	}
 
 	/* Set all timers to use the 2.4 MHz TIMCLK */
-	val = readl(src_base + SRC_CR);
+	val = pete_readl("drivers/clk/clk-nomadik.c:106", src_base + SRC_CR);
 	val |= SRC_CR_T0_ENSEL;
 	val |= SRC_CR_T1_ENSEL;
 	val |= SRC_CR_T2_ENSEL;
@@ -112,9 +112,9 @@ static void __init nomadik_src_init(void)
 	val |= SRC_CR_T5_ENSEL;
 	val |= SRC_CR_T6_ENSEL;
 	val |= SRC_CR_T7_ENSEL;
-	writel(val, src_base + SRC_CR);
+	pete_writel("drivers/clk/clk-nomadik.c:115", val, src_base + SRC_CR);
 
-	val = readl(src_base + SRC_XTALCR);
+	val = pete_readl("drivers/clk/clk-nomadik.c:117", src_base + SRC_XTALCR);
 	pr_info("SXTALO is %s\n",
 		(val & SRC_XTALCR_SXTALDIS) ? "disabled" : "enabled");
 	pr_info("MXTAL is %s\n",
@@ -130,7 +130,7 @@ static void __init nomadik_src_init(void)
 		val &= ~SRC_XTALCR_MXTALEN;
 		pr_info("disabling MXTALO\n");
 	}
-	writel(val, src_base + SRC_XTALCR);
+	pete_writel("drivers/clk/clk-nomadik.c:133", val, src_base + SRC_XTALCR);
 	register_reboot_notifier(&nomadik_clk_reboot_notifier);
 
 out_put:
@@ -170,15 +170,15 @@ static int pll_clk_enable(struct clk_hw *hw)
 	u32 val;
 
 	spin_lock(&src_lock);
-	val = readl(src_base + SRC_PLLCR);
+	val = pete_readl("drivers/clk/clk-nomadik.c:173", src_base + SRC_PLLCR);
 	if (pll->id == 1) {
 		if (val & SRC_PLLCR_PLL1OVER) {
 			val |= SRC_PLLCR_PLL1EN;
-			writel(val, src_base + SRC_PLLCR);
+			pete_writel("drivers/clk/clk-nomadik.c:177", val, src_base + SRC_PLLCR);
 		}
 	} else if (pll->id == 2) {
 		val |= SRC_PLLCR_PLL2EN;
-		writel(val, src_base + SRC_PLLCR);
+		pete_writel("drivers/clk/clk-nomadik.c:181", val, src_base + SRC_PLLCR);
 	}
 	spin_unlock(&src_lock);
 	return 0;
@@ -190,15 +190,15 @@ static void pll_clk_disable(struct clk_hw *hw)
 	u32 val;
 
 	spin_lock(&src_lock);
-	val = readl(src_base + SRC_PLLCR);
+	val = pete_readl("drivers/clk/clk-nomadik.c:193", src_base + SRC_PLLCR);
 	if (pll->id == 1) {
 		if (val & SRC_PLLCR_PLL1OVER) {
 			val &= ~SRC_PLLCR_PLL1EN;
-			writel(val, src_base + SRC_PLLCR);
+			pete_writel("drivers/clk/clk-nomadik.c:197", val, src_base + SRC_PLLCR);
 		}
 	} else if (pll->id == 2) {
 		val &= ~SRC_PLLCR_PLL2EN;
-		writel(val, src_base + SRC_PLLCR);
+		pete_writel("drivers/clk/clk-nomadik.c:201", val, src_base + SRC_PLLCR);
 	}
 	spin_unlock(&src_lock);
 }
@@ -208,7 +208,7 @@ static int pll_clk_is_enabled(struct clk_hw *hw)
 	struct clk_pll *pll = to_pll(hw);
 	u32 val;
 
-	val = readl(src_base + SRC_PLLCR);
+	val = pete_readl("drivers/clk/clk-nomadik.c:211", src_base + SRC_PLLCR);
 	if (pll->id == 1) {
 		if (val & SRC_PLLCR_PLL1OVER)
 			return !!(val & SRC_PLLCR_PLL1EN);
@@ -224,7 +224,7 @@ static unsigned long pll_clk_recalc_rate(struct clk_hw *hw,
 	struct clk_pll *pll = to_pll(hw);
 	u32 val;
 
-	val = readl(src_base + SRC_PLLFR);
+	val = pete_readl("drivers/clk/clk-nomadik.c:227", src_base + SRC_PLLFR);
 
 	if (pll->id == 1) {
 		u8 mul;
@@ -306,9 +306,9 @@ static int src_clk_enable(struct clk_hw *hw)
 	u32 enreg = sclk->group1 ? SRC_PCKEN1 : SRC_PCKEN0;
 	u32 sreg = sclk->group1 ? SRC_PCKSR1 : SRC_PCKSR0;
 
-	writel(sclk->clkbit, src_base + enreg);
+	pete_writel("drivers/clk/clk-nomadik.c:309", sclk->clkbit, src_base + enreg);
 	/* spin until enabled */
-	while (!(readl(src_base + sreg) & sclk->clkbit))
+	while (!(pete_readl("drivers/clk/clk-nomadik.c:311", src_base + sreg) & sclk->clkbit))
 		cpu_relax();
 	return 0;
 }
@@ -319,9 +319,9 @@ static void src_clk_disable(struct clk_hw *hw)
 	u32 disreg = sclk->group1 ? SRC_PCKDIS1 : SRC_PCKDIS0;
 	u32 sreg = sclk->group1 ? SRC_PCKSR1 : SRC_PCKSR0;
 
-	writel(sclk->clkbit, src_base + disreg);
+	pete_writel("drivers/clk/clk-nomadik.c:322", sclk->clkbit, src_base + disreg);
 	/* spin until disabled */
-	while (readl(src_base + sreg) & sclk->clkbit)
+	while (pete_readl("drivers/clk/clk-nomadik.c:324", src_base + sreg) & sclk->clkbit)
 		cpu_relax();
 }
 
@@ -329,7 +329,7 @@ static int src_clk_is_enabled(struct clk_hw *hw)
 {
 	struct clk_src *sclk = to_src(hw);
 	u32 sreg = sclk->group1 ? SRC_PCKSR1 : SRC_PCKSR0;
-	u32 val = readl(src_base + sreg);
+	u32 val = pete_readl("drivers/clk/clk-nomadik.c:332", src_base + sreg);
 
 	return !!(val & sclk->clkbit);
 }
@@ -461,10 +461,10 @@ static const char * const src_clk_names[] = {
 static int nomadik_src_clk_debugfs_show(struct seq_file *s, void *what)
 {
 	int i;
-	u32 src_pcksr0 = readl(src_base + SRC_PCKSR0);
-	u32 src_pcksr1 = readl(src_base + SRC_PCKSR1);
-	u32 src_pckensr0 = readl(src_base + SRC_PCKENSR0);
-	u32 src_pckensr1 = readl(src_base + SRC_PCKENSR1);
+	u32 src_pcksr0 = pete_readl("drivers/clk/clk-nomadik.c:464", src_base + SRC_PCKSR0);
+	u32 src_pcksr1 = pete_readl("drivers/clk/clk-nomadik.c:465", src_base + SRC_PCKSR1);
+	u32 src_pckensr0 = pete_readl("drivers/clk/clk-nomadik.c:466", src_base + SRC_PCKENSR0);
+	u32 src_pckensr1 = pete_readl("drivers/clk/clk-nomadik.c:467", src_base + SRC_PCKENSR1);
 
 	seq_puts(s, "Clock:      Boot:   Now:    Request: ASKED:\n");
 	for (i = 0; i < ARRAY_SIZE(src_clk_names); i++) {
@@ -489,8 +489,8 @@ static int __init nomadik_src_clk_init_debugfs(void)
 	/* Vital for multiplatform */
 	if (!src_base)
 		return -ENODEV;
-	src_pcksr0_boot = readl(src_base + SRC_PCKSR0);
-	src_pcksr1_boot = readl(src_base + SRC_PCKSR1);
+	src_pcksr0_boot = pete_readl("drivers/clk/clk-nomadik.c:492", src_base + SRC_PCKSR0);
+	src_pcksr1_boot = pete_readl("drivers/clk/clk-nomadik.c:493", src_base + SRC_PCKSR1);
 	debugfs_create_file("nomadik-src-clk", S_IFREG | S_IRUGO,
 			    NULL, NULL, &nomadik_src_clk_debugfs_fops);
 	return 0;

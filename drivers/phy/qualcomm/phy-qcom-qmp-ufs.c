@@ -772,24 +772,24 @@ static inline void qphy_setbits(void __iomem *base, u32 offset, u32 val)
 {
 	u32 reg;
 
-	reg = readl(base + offset);
+	reg = pete_readl("drivers/phy/qualcomm/phy-qcom-qmp-ufs.c:775", base + offset);
 	reg |= val;
-	writel(reg, base + offset);
+	pete_writel("drivers/phy/qualcomm/phy-qcom-qmp-ufs.c:777", reg, base + offset);
 
 	/* ensure that above write is through */
-	readl(base + offset);
+	pete_readl("drivers/phy/qualcomm/phy-qcom-qmp-ufs.c:780", base + offset);
 }
 
 static inline void qphy_clrbits(void __iomem *base, u32 offset, u32 val)
 {
 	u32 reg;
 
-	reg = readl(base + offset);
+	reg = pete_readl("drivers/phy/qualcomm/phy-qcom-qmp-ufs.c:787", base + offset);
 	reg &= ~val;
-	writel(reg, base + offset);
+	pete_writel("drivers/phy/qualcomm/phy-qcom-qmp-ufs.c:789", reg, base + offset);
 
 	/* ensure that above write is through */
-	readl(base + offset);
+	pete_readl("drivers/phy/qualcomm/phy-qcom-qmp-ufs.c:792", base + offset);
 }
 
 /* list of clocks required by phy */
@@ -1179,7 +1179,7 @@ static void qmp_ufs_configure_lane(void __iomem *base,
 		if (!(t->lane_mask & lane_mask))
 			continue;
 
-		writel(t->val, base + t->offset);
+		pete_writel("drivers/phy/qualcomm/phy-qcom-qmp-ufs.c:1182", t->val, base + t->offset);
 	}
 }
 

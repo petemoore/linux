@@ -141,12 +141,12 @@ struct clk_aspeed_peci {
 
 static void aspeed_peci_controller_enable(struct aspeed_peci *priv)
 {
-	u32 val = readl(priv->base + ASPEED_PECI_CTRL);
+	u32 val = pete_readl("drivers/peci/controller/peci-aspeed.c:144", priv->base + ASPEED_PECI_CTRL);
 
 	val |= ASPEED_PECI_CTRL_PECI_CLK_EN;
 	val |= ASPEED_PECI_CTRL_PECI_EN;
 
-	writel(val, priv->base + ASPEED_PECI_CTRL);
+	pete_writel("drivers/peci/controller/peci-aspeed.c:149", val, priv->base + ASPEED_PECI_CTRL);
 }
 
 static void aspeed_peci_init_regs(struct aspeed_peci *priv)
@@ -154,20 +154,20 @@ static void aspeed_peci_init_regs(struct aspeed_peci *priv)
 	u32 val;
 
 	/* Clear interrupts */
-	writel(ASPEED_PECI_INT_MASK, priv->base + ASPEED_PECI_INT_STS);
+	pete_writel("drivers/peci/controller/peci-aspeed.c:157", ASPEED_PECI_INT_MASK, priv->base + ASPEED_PECI_INT_STS);
 
 	/* Set timing negotiation mode and enable interrupts */
 	val = FIELD_PREP(ASPEED_PECI_TIMING_NEGO_SEL_MASK, ASPEED_PECI_1ST_BIT_OF_ADDR_NEGO);
 	val |= ASPEED_PECI_INT_MASK;
-	writel(val, priv->base + ASPEED_PECI_INT_CTRL);
+	pete_writel("drivers/peci/controller/peci-aspeed.c:162", val, priv->base + ASPEED_PECI_INT_CTRL);
 
 	val = FIELD_PREP(ASPEED_PECI_CTRL_SAMPLING_MASK, ASPEED_PECI_RD_SAMPLING_POINT_DEFAULT);
-	writel(val, priv->base + ASPEED_PECI_CTRL);
+	pete_writel("drivers/peci/controller/peci-aspeed.c:165", val, priv->base + ASPEED_PECI_CTRL);
 }
 
 static int aspeed_peci_check_idle(struct aspeed_peci *priv)
 {
-	u32 cmd_sts = readl(priv->base + ASPEED_PECI_CMD);
+	u32 cmd_sts = pete_readl("drivers/peci/controller/peci-aspeed.c:170", priv->base + ASPEED_PECI_CMD);
 	int ret;
 
 	/*
@@ -231,12 +231,12 @@ static int aspeed_peci_xfer(struct peci_controller *controller,
 		    FIELD_PREP(ASPEED_PECI_WR_LEN_MASK, req->tx.len) |
 		    FIELD_PREP(ASPEED_PECI_RD_LEN_MASK, req->rx.len);
 
-	writel(peci_head, priv->base + ASPEED_PECI_RW_LENGTH);
+	pete_writel("drivers/peci/controller/peci-aspeed.c:234", peci_head, priv->base + ASPEED_PECI_RW_LENGTH);
 
 	for (i = 0; i < req->tx.len; i += 4) {
 		u32 reg = (i < 16 ? ASPEED_PECI_WR_DATA0 : ASPEED_PECI_WR_DATA4) + i % 16;
 
-		writel(get_unaligned_le32(&req->tx.buf[i]), priv->base + reg);
+		pete_writel("drivers/peci/controller/peci-aspeed.c:239", get_unaligned_le32(&req->tx.buf[i]), priv->base + reg);
 	}
 
 #if IS_ENABLED(CONFIG_DYNAMIC_DEBUG)
@@ -245,7 +245,7 @@ static int aspeed_peci_xfer(struct peci_controller *controller,
 #endif
 
 	priv->status = 0;
-	writel(ASPEED_PECI_CMD_FIRE, priv->base + ASPEED_PECI_CMD);
+	pete_writel("drivers/peci/controller/peci-aspeed.c:248", ASPEED_PECI_CMD_FIRE, priv->base + ASPEED_PECI_CMD);
 	spin_unlock_irq(&priv->lock);
 
 	ret = wait_for_completion_interruptible_timeout(&priv->xfer_complete, timeout);
@@ -275,7 +275,7 @@ static int aspeed_peci_xfer(struct peci_controller *controller,
 
 	for (i = 0; i < req->rx.len; i += 4) {
 		u32 reg = (i < 16 ? ASPEED_PECI_RD_DATA0 : ASPEED_PECI_RD_DATA4) + i % 16;
-		u32 rx_data = readl(priv->base + reg);
+		u32 rx_data = pete_readl("drivers/peci/controller/peci-aspeed.c:278", priv->base + reg);
 
 		put_unaligned_le32(rx_data, &req->rx.buf[i]);
 	}
@@ -292,8 +292,8 @@ static irqreturn_t aspeed_peci_irq_handler(int irq, void *arg)
 	u32 status;
 
 	spin_lock(&priv->lock);
-	status = readl(priv->base + ASPEED_PECI_INT_STS);
-	writel(status, priv->base + ASPEED_PECI_INT_STS);
+	status = pete_readl("drivers/peci/controller/peci-aspeed.c:295", priv->base + ASPEED_PECI_INT_STS);
+	pete_writel("drivers/peci/controller/peci-aspeed.c:296", status, priv->base + ASPEED_PECI_INT_STS);
 	priv->status |= (status & ASPEED_PECI_INT_MASK);
 
 	/*
@@ -303,7 +303,7 @@ static irqreturn_t aspeed_peci_irq_handler(int irq, void *arg)
 	if (status & ASPEED_PECI_INT_CMD_DONE)
 		complete(&priv->xfer_complete);
 
-	writel(0, priv->base + ASPEED_PECI_CMD);
+	pete_writel("drivers/peci/controller/peci-aspeed.c:306", 0, priv->base + ASPEED_PECI_CMD);
 
 	spin_unlock(&priv->lock);
 
@@ -350,13 +350,13 @@ static int clk_aspeed_peci_set_rate(struct clk_hw *hw, unsigned long rate,
 
 	clk_aspeed_peci_find_div_values(this_rate, &msg_timing, &clk_div_exp);
 
-	val = readl(aspeed_peci->base + ASPEED_PECI_CTRL);
+	val = pete_readl("drivers/peci/controller/peci-aspeed.c:353", aspeed_peci->base + ASPEED_PECI_CTRL);
 	val |= FIELD_PREP(ASPEED_PECI_CTRL_CLK_DIV_MASK, clk_div_exp);
-	writel(val, aspeed_peci->base + ASPEED_PECI_CTRL);
+	pete_writel("drivers/peci/controller/peci-aspeed.c:355", val, aspeed_peci->base + ASPEED_PECI_CTRL);
 
 	val = FIELD_PREP(ASPEED_PECI_T_NEGO_MSG_MASK, msg_timing);
 	val |= FIELD_PREP(ASPEED_PECI_T_NEGO_ADDR_MASK, msg_timing);
-	writel(val, aspeed_peci->base + ASPEED_PECI_TIMING_NEGOTIATION);
+	pete_writel("drivers/peci/controller/peci-aspeed.c:359", val, aspeed_peci->base + ASPEED_PECI_TIMING_NEGOTIATION);
 
 	return 0;
 }
@@ -376,14 +376,14 @@ static unsigned long clk_aspeed_peci_recalc_rate(struct clk_hw *hw, unsigned lon
 	int div, msg_timing, addr_timing, clk_div_exp;
 	u32 reg;
 
-	reg = readl(aspeed_peci->base + ASPEED_PECI_TIMING_NEGOTIATION);
+	reg = pete_readl("drivers/peci/controller/peci-aspeed.c:379", aspeed_peci->base + ASPEED_PECI_TIMING_NEGOTIATION);
 	msg_timing = FIELD_GET(ASPEED_PECI_T_NEGO_MSG_MASK, reg);
 	addr_timing = FIELD_GET(ASPEED_PECI_T_NEGO_ADDR_MASK, reg);
 
 	if (msg_timing != addr_timing)
 		return 0;
 
-	reg = readl(aspeed_peci->base + ASPEED_PECI_CTRL);
+	reg = pete_readl("drivers/peci/controller/peci-aspeed.c:386", aspeed_peci->base + ASPEED_PECI_CTRL);
 	clk_div_exp = FIELD_GET(ASPEED_PECI_CTRL_CLK_DIV_MASK, reg);
 
 	div = ASPEED_PECI_CLK_DIV(msg_timing, clk_div_exp);

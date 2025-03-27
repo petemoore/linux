@@ -831,14 +831,14 @@ static int jz4770_codec_reg_read(void *context, unsigned int reg,
 	if (ret)
 		return ret;
 
-	tmp = readl(codec->base + ICDC_RGADW_OFFSET);
+	tmp = pete_readl("sound/soc/codecs/jz4770.c:834", codec->base + ICDC_RGADW_OFFSET);
 	tmp = (tmp & ~ICDC_RGADW_RGADDR_MASK)
 	    | (reg << ICDC_RGADW_RGADDR_OFFSET);
-	writel(tmp, codec->base + ICDC_RGADW_OFFSET);
+	pete_writel("sound/soc/codecs/jz4770.c:837", tmp, codec->base + ICDC_RGADW_OFFSET);
 
 	/* wait 6+ cycles */
 	for (i = 0; i < 6; i++)
-		*val = readl(codec->base + ICDC_RGDATA_OFFSET) &
+		*val = pete_readl("sound/soc/codecs/jz4770.c:841", codec->base + ICDC_RGDATA_OFFSET) &
 			ICDC_RGDATA_RGDOUT_MASK;
 
 	return 0;
@@ -854,7 +854,7 @@ static int jz4770_codec_reg_write(void *context, unsigned int reg,
 	if (ret)
 		return ret;
 
-	writel(ICDC_RGADW_RGWR | (reg << ICDC_RGADW_RGADDR_OFFSET) | val,
+	pete_writel("sound/soc/codecs/jz4770.c:857", ICDC_RGADW_RGWR | (reg << ICDC_RGADW_RGADDR_OFFSET) | val,
 	       codec->base + ICDC_RGADW_OFFSET);
 
 	ret = jz4770_codec_io_wait(codec);

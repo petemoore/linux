@@ -73,10 +73,10 @@
 #define REGION_ACRYM			BIT(23)
 
 #define ast_acry_write(acry, val, offset)	\
-	writel((val), (acry)->regs + (offset))
+	pete_writel("drivers/crypto/aspeed/aspeed-acry.c:76", (val), (acry)->regs + (offset))
 
 #define ast_acry_read(acry, offset)		\
-	readl((acry)->regs + (offset))
+	pete_readl("drivers/crypto/aspeed/aspeed-acry.c:79", (acry)->regs + (offset))
 
 struct aspeed_acry_dev;
 
@@ -318,11 +318,11 @@ static int aspeed_acry_rsa_transfer(struct aspeed_acry_dev *acry_dev)
 
 	for (j = ASPEED_ACRY_SRAM_MAX_LEN - 1; j >= 0; j--) {
 		data_idx = acry_dev->data_byte_mapping[j];
-		if (readb(sram_buffer + data_idx) == 0 && leading_zero) {
+		if (pete_readb("drivers/crypto/aspeed/aspeed-acry.c:321", sram_buffer + data_idx) == 0 && leading_zero) {
 			result_nbytes--;
 		} else {
 			leading_zero = 0;
-			dram_buffer[i] = readb(sram_buffer + data_idx);
+			dram_buffer[i] = pete_readb("drivers/crypto/aspeed/aspeed-acry.c:325", sram_buffer + data_idx);
 			i++;
 		}
 	}

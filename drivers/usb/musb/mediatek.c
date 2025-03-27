@@ -66,7 +66,7 @@ static int mtk_musb_clks_get(struct mtk_glue *glue)
 static int mtk_otg_switch_set(struct mtk_glue *glue, enum usb_role role)
 {
 	struct musb *musb = glue->musb;
-	u8 devctl = readb(musb->mregs + MUSB_DEVCTL);
+	u8 devctl = pete_readb("drivers/usb/musb/mediatek.c:69", musb->mregs + MUSB_DEVCTL);
 	enum usb_role new_role;
 
 	if (role == glue->role)

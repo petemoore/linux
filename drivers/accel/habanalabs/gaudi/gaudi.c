@@ -2533,7 +2533,7 @@ static void gaudi_init_golden_registers(struct hl_device *hdev)
 
 	/* Make sure 1st 128 bytes in SRAM are 0 for Tensor DMA */
 	for (i = 0 ; i < 128 ; i += 8)
-		writeq(0, hdev->pcie_bar[SRAM_BAR_ID] + i);
+		pete_writeq("drivers/accel/habanalabs/gaudi/gaudi.c:2536", 0, hdev->pcie_bar[SRAM_BAR_ID] + i);
 
 	WREG32(mmMME0_CTRL_EUS_ROLLUP_CNT_ADD, 3);
 	WREG32(mmMME1_CTRL_EUS_ROLLUP_CNT_ADD, 3);
@@ -6032,7 +6032,7 @@ static u64 gaudi_read_pte(struct hl_device *hdev, u64 addr)
 	if (hdev->reset_info.hard_reset_pending)
 		return U64_MAX;
 
-	return readq(hdev->pcie_bar[HBM_BAR_ID] +
+	return pete_readq("drivers/accel/habanalabs/gaudi/gaudi.c:6035", hdev->pcie_bar[HBM_BAR_ID] +
 			(addr - gaudi->hbm_bar_cur_addr));
 }
 
@@ -6043,7 +6043,7 @@ static void gaudi_write_pte(struct hl_device *hdev, u64 addr, u64 val)
 	if (hdev->reset_info.hard_reset_pending)
 		return;
 
-	writeq(val, hdev->pcie_bar[HBM_BAR_ID] +
+	pete_writeq("drivers/accel/habanalabs/gaudi/gaudi.c:6046", val, hdev->pcie_bar[HBM_BAR_ID] +
 			(addr - gaudi->hbm_bar_cur_addr));
 }
 

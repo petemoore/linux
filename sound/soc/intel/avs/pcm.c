@@ -898,10 +898,10 @@ static int avs_dai_resume_fe_prepare(struct snd_soc_dai *dai, struct avs_dma_dat
 		return ret;
 	}
 
-	writel(host_stream->pphcllpl, host_stream->pphc_addr + AZX_REG_PPHCLLPL);
-	writel(host_stream->pphcllpu, host_stream->pphc_addr + AZX_REG_PPHCLLPU);
-	writel(host_stream->pphcldpl, host_stream->pphc_addr + AZX_REG_PPHCLDPL);
-	writel(host_stream->pphcldpu, host_stream->pphc_addr + AZX_REG_PPHCLDPU);
+	pete_writel("sound/soc/intel/avs/pcm.c:901", host_stream->pphcllpl, host_stream->pphc_addr + AZX_REG_PPHCLLPL);
+	pete_writel("sound/soc/intel/avs/pcm.c:902", host_stream->pphcllpu, host_stream->pphc_addr + AZX_REG_PPHCLLPU);
+	pete_writel("sound/soc/intel/avs/pcm.c:903", host_stream->pphcldpl, host_stream->pphc_addr + AZX_REG_PPHCLDPL);
+	pete_writel("sound/soc/intel/avs/pcm.c:904", host_stream->pphcldpu, host_stream->pphc_addr + AZX_REG_PPHCLDPU);
 
 	/* As per HW spec recommendation, program LPIB and DPIB to the same value. */
 	snd_hdac_stream_set_lpib(hstream, hstream->lpib);
@@ -930,10 +930,10 @@ static int avs_dai_suspend_fe_hw_free(struct snd_soc_dai *dai, struct avs_dma_da
 
 	/* Store position addresses so we can resume from them later on. */
 	hdac_stream(host_stream)->lpib = snd_hdac_stream_get_pos_lpib(hdac_stream(host_stream));
-	host_stream->pphcllpl = readl(host_stream->pphc_addr + AZX_REG_PPHCLLPL);
-	host_stream->pphcllpu = readl(host_stream->pphc_addr + AZX_REG_PPHCLLPU);
-	host_stream->pphcldpl = readl(host_stream->pphc_addr + AZX_REG_PPHCLDPL);
-	host_stream->pphcldpu = readl(host_stream->pphc_addr + AZX_REG_PPHCLDPU);
+	host_stream->pphcllpl = pete_readl("sound/soc/intel/avs/pcm.c:933", host_stream->pphc_addr + AZX_REG_PPHCLLPL);
+	host_stream->pphcllpu = pete_readl("sound/soc/intel/avs/pcm.c:934", host_stream->pphc_addr + AZX_REG_PPHCLLPU);
+	host_stream->pphcldpl = pete_readl("sound/soc/intel/avs/pcm.c:935", host_stream->pphc_addr + AZX_REG_PPHCLDPL);
+	host_stream->pphcldpu = pete_readl("sound/soc/intel/avs/pcm.c:936", host_stream->pphc_addr + AZX_REG_PPHCLDPU);
 
 	ret = __avs_dai_fe_hw_free(data->substream, dai);
 	if (ret < 0)
@@ -1092,7 +1092,7 @@ static int avs_component_open(struct snd_soc_component *component,
 
 static unsigned int avs_hda_stream_dpib_read(struct hdac_ext_stream *stream)
 {
-	return readl(hdac_stream(stream)->bus->remap_addr + AZX_REG_VS_SDXDPIB_XBASE +
+	return pete_readl("sound/soc/intel/avs/pcm.c:1095", hdac_stream(stream)->bus->remap_addr + AZX_REG_VS_SDXDPIB_XBASE +
 		     (AZX_REG_VS_SDXDPIB_XINTERVAL * hdac_stream(stream)->index));
 }
 

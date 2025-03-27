@@ -64,7 +64,7 @@ static void gpio_nand_dosync(struct gpiomtd *gpiomtd)
 		 * What's required is what's here - a read from a separate
 		 * region with a dependency on that read.
 		 */
-		tmp = readl(gpiomtd->io_sync);
+		tmp = pete_readl("drivers/mtd/nand/raw/gpio.c:67", gpiomtd->io_sync);
 		asm volatile("mov %1, %0\n" : "=r" (tmp) : "r" (tmp));
 	}
 }
@@ -83,7 +83,7 @@ static int gpio_nand_exec_instr(struct nand_chip *chip,
 		gpio_nand_dosync(gpiomtd);
 		gpiod_set_value(gpiomtd->cle, 1);
 		gpio_nand_dosync(gpiomtd);
-		writeb(instr->ctx.cmd.opcode, gpiomtd->io);
+		pete_writeb("drivers/mtd/nand/raw/gpio.c:86", instr->ctx.cmd.opcode, gpiomtd->io);
 		gpio_nand_dosync(gpiomtd);
 		gpiod_set_value(gpiomtd->cle, 0);
 		return 0;
@@ -93,7 +93,7 @@ static int gpio_nand_exec_instr(struct nand_chip *chip,
 		gpiod_set_value(gpiomtd->ale, 1);
 		gpio_nand_dosync(gpiomtd);
 		for (i = 0; i < instr->ctx.addr.naddrs; i++)
-			writeb(instr->ctx.addr.addrs[i], gpiomtd->io);
+			pete_writeb("drivers/mtd/nand/raw/gpio.c:96", instr->ctx.addr.addrs[i], gpiomtd->io);
 		gpio_nand_dosync(gpiomtd);
 		gpiod_set_value(gpiomtd->ale, 0);
 		return 0;

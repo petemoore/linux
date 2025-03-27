@@ -357,7 +357,7 @@ static int max_mbps_to_parameter(unsigned int max_mbps)
 
 static inline void dsi_write(struct dw_mipi_dsi_rockchip *dsi, u32 reg, u32 val)
 {
-	writel(val, dsi->base + reg);
+	pete_writel("drivers/gpu/drm/rockchip/dw-mipi-dsi-rockchip.c:360", val, dsi->base + reg);
 }
 
 static void dw_mipi_dsi_phy_write(struct dw_mipi_dsi_rockchip *dsi,

@@ -18,12 +18,12 @@
 static inline void loongson_spi_write_reg(struct loongson_spi *spi, unsigned char reg,
 					  unsigned char data)
 {
-	writeb(data, spi->base + reg);
+	pete_writeb("drivers/spi/spi-loongson-core.c:21", data, spi->base + reg);
 }
 
 static inline char loongson_spi_read_reg(struct loongson_spi *spi, unsigned char reg)
 {
-	return readb(spi->base + reg);
+	return pete_readb("drivers/spi/spi-loongson-core.c:26", spi->base + reg);
 }
 
 static void loongson_spi_set_cs(struct spi_device *spi, bool en)

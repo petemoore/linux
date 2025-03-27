@@ -50,19 +50,19 @@ static void __iomem *msc313e_clksrc;
 
 static void msc313e_timer_stop(void __iomem *base)
 {
-	writew(0, base + MSC313E_REG_CTRL);
+	pete_writew("drivers/clocksource/timer-msc313e.c:53", 0, base + MSC313E_REG_CTRL);
 }
 
 static void msc313e_timer_start(void __iomem *base, bool periodic)
 {
 	u16 reg;
 
-	reg = readw(base + MSC313E_REG_CTRL);
+	reg = pete_readw("drivers/clocksource/timer-msc313e.c:60", base + MSC313E_REG_CTRL);
 	if (periodic)
 		reg |= MSC313E_REG_CTRL_TIMER_EN;
 	else
 		reg |= MSC313E_REG_CTRL_TIMER_TRIG;
-	writew(reg | MSC313E_REG_CTRL_TIMER_INT_EN, base + MSC313E_REG_CTRL);
+	pete_writew("drivers/clocksource/timer-msc313e.c:65", reg | MSC313E_REG_CTRL_TIMER_INT_EN, base + MSC313E_REG_CTRL);
 }
 
 static void msc313e_timer_setup(void __iomem *base, unsigned long delay)
@@ -70,8 +70,8 @@ static void msc313e_timer_setup(void __iomem *base, unsigned long delay)
 	unsigned long flags;
 
 	local_irq_save(flags);
-	writew(delay >> 16, base + MSC313E_REG_TIMER_MAX_HIGH);
-	writew(delay & 0xffff, base + MSC313E_REG_TIMER_MAX_LOW);
+	pete_writew("drivers/clocksource/timer-msc313e.c:73", delay >> 16, base + MSC313E_REG_TIMER_MAX_HIGH);
+	pete_writew("drivers/clocksource/timer-msc313e.c:74", delay & 0xffff, base + MSC313E_REG_TIMER_MAX_LOW);
 	local_irq_restore(flags);
 }
 
@@ -81,8 +81,8 @@ static unsigned long msc313e_timer_current_value(void __iomem *base)
 	u16 l, h;
 
 	local_irq_save(flags);
-	l = readw(base + MSC313E_REG_COUNTER_LOW);
-	h = readw(base + MSC313E_REG_COUNTER_HIGH);
+	l = pete_readw("drivers/clocksource/timer-msc313e.c:84", base + MSC313E_REG_COUNTER_LOW);
+	h = pete_readw("drivers/clocksource/timer-msc313e.c:85", base + MSC313E_REG_COUNTER_HIGH);
 	local_irq_restore(flags);
 
 	return (((u32)h) << 16 | l);
@@ -184,7 +184,7 @@ static int __init msc313e_clkevt_init(struct device_node *np)
 	if (of_device_is_compatible(np, "sstar,ssd20xd-timer")) {
 		to->of_clk.rate = clk_get_rate(to->of_clk.clk) / MSC313E_CLK_DIVIDER;
 		to->of_clk.period = DIV_ROUND_UP(to->of_clk.rate, HZ);
-		writew(MSC313E_CLK_DIVIDER - 1, timer_of_base(to) + MSC313E_REG_TIMER_DIVIDE);
+		pete_writew("drivers/clocksource/timer-msc313e.c:187", MSC313E_CLK_DIVIDER - 1, timer_of_base(to) + MSC313E_REG_TIMER_DIVIDE);
 	}
 
 	msc313e_clkevt.cpumask = cpu_possible_mask;
@@ -208,9 +208,9 @@ static int __init msc313e_clksrc_init(struct device_node *np)
 		return ret;
 
 	msc313e_clksrc = timer_of_base(&to);
-	reg = readw(msc313e_clksrc + MSC313E_REG_CTRL);
+	reg = pete_readw("drivers/clocksource/timer-msc313e.c:211", msc313e_clksrc + MSC313E_REG_CTRL);
 	reg |= MSC313E_REG_CTRL_TIMER_EN;
-	writew(reg, msc313e_clksrc + MSC313E_REG_CTRL);
+	pete_writew("drivers/clocksource/timer-msc313e.c:213", reg, msc313e_clksrc + MSC313E_REG_CTRL);
 
 #ifdef CONFIG_ARM
 	msc313e_delay.base = timer_of_base(&to);

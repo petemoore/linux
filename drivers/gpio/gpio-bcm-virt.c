@@ -48,7 +48,7 @@ static int brcmvirt_gpio_get(struct gpio_chip *gc, unsigned off)
 	struct brcmvirt_gpio *gpio;
 	unsigned v;
 	gpio = container_of(gc, struct brcmvirt_gpio, gc);
-	v = readl(gpio->ts_base + off);
+	v = pete_readl("drivers/gpio/gpio-bcm-virt.c:51", gpio->ts_base + off);
 	return (s16)((v >> 16) - v) > 0;
 }
 
@@ -72,7 +72,7 @@ static void brcmvirt_gpio_set(struct gpio_chip *gc, unsigned off, int val)
 	diff = (s16)(enables - disables);
 	BUG_ON(diff != 0 && diff != 1);
 	gpio->enables_disables[off] = (enables << 16) | (disables << 0);
-	writel(gpio->enables_disables[off], gpio->ts_base + off);
+	pete_writel("drivers/gpio/gpio-bcm-virt.c:75", gpio->enables_disables[off], gpio->ts_base + off);
 }
 
 static int brcmvirt_gpio_probe(struct platform_device *pdev)

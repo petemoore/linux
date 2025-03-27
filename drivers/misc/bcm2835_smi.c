@@ -89,12 +89,12 @@ struct bcm2835_smi_instance {
 static inline void write_smi_reg(struct bcm2835_smi_instance *inst,
 	u32 val, unsigned reg)
 {
-	writel(val, inst->smi_regs_ptr + reg);
+	pete_writel("drivers/misc/bcm2835_smi.c:92", val, inst->smi_regs_ptr + reg);
 }
 
 static inline u32 read_smi_reg(struct bcm2835_smi_instance *inst, unsigned reg)
 {
-	return readl(inst->smi_regs_ptr + reg);
+	return pete_readl("drivers/misc/bcm2835_smi.c:97", inst->smi_regs_ptr + reg);
 }
 
 /* Token-paste macro for e.g SMIDSR_RSTROBE ->  value of SMIDSR_RSTROBE_MASK */

@@ -158,7 +158,7 @@ bool zynq_slcr_cpu_state_read(int cpu)
 {
 	u32 state;
 
-	state = readl(zynq_slcr_base + SLCR_REBOOT_STATUS_OFFSET);
+	state = pete_readl("arch/arm/mach-zynq/slcr.c:161", zynq_slcr_base + SLCR_REBOOT_STATUS_OFFSET);
 	state &= 1 << (31 - cpu);
 
 	return !state;
@@ -176,13 +176,13 @@ void zynq_slcr_cpu_state_write(int cpu, bool die)
 {
 	u32 state, mask;
 
-	state = readl(zynq_slcr_base + SLCR_REBOOT_STATUS_OFFSET);
+	state = pete_readl("arch/arm/mach-zynq/slcr.c:179", zynq_slcr_base + SLCR_REBOOT_STATUS_OFFSET);
 	mask = 1 << (31 - cpu);
 	if (die)
 		state |= mask;
 	else
 		state &= ~mask;
-	writel(state, zynq_slcr_base + SLCR_REBOOT_STATUS_OFFSET);
+	pete_writel("arch/arm/mach-zynq/slcr.c:185", state, zynq_slcr_base + SLCR_REBOOT_STATUS_OFFSET);
 }
 
 /**

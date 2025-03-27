@@ -101,28 +101,28 @@ static int cortex_a7_release_secondary(unsigned int cpu)
 
 	/* Put the CPU into reset. */
 	reg_val = CORE_RST | COREPOR_RST | CLAMP | CORE_MEM_CLAMP;
-	writel(reg_val, reg + APCS_CPU_PWR_CTL);
+	pete_writel("arch/arm/mach-qcom/platsmp.c:104", reg_val, reg + APCS_CPU_PWR_CTL);
 
 	/* Turn on the BHS and set the BHS_CNT to 16 XO clock cycles */
-	writel(BHS_EN | (0x10 << BHS_CNT_SHIFT), reg + APC_PWR_GATE_CTL);
+	pete_writel("arch/arm/mach-qcom/platsmp.c:107", BHS_EN | (0x10 << BHS_CNT_SHIFT), reg + APC_PWR_GATE_CTL);
 	/* Wait for the BHS to settle */
 	udelay(2);
 
 	reg_val &= ~CORE_MEM_CLAMP;
-	writel(reg_val, reg + APCS_CPU_PWR_CTL);
+	pete_writel("arch/arm/mach-qcom/platsmp.c:112", reg_val, reg + APCS_CPU_PWR_CTL);
 	reg_val |= L2DT_SLP;
-	writel(reg_val, reg + APCS_CPU_PWR_CTL);
+	pete_writel("arch/arm/mach-qcom/platsmp.c:114", reg_val, reg + APCS_CPU_PWR_CTL);
 	udelay(2);
 
 	reg_val = (reg_val | BIT(17)) & ~CLAMP;
-	writel(reg_val, reg + APCS_CPU_PWR_CTL);
+	pete_writel("arch/arm/mach-qcom/platsmp.c:118", reg_val, reg + APCS_CPU_PWR_CTL);
 	udelay(2);
 
 	/* Release CPU out of reset and bring it to life. */
 	reg_val &= ~(CORE_RST | COREPOR_RST);
-	writel(reg_val, reg + APCS_CPU_PWR_CTL);
+	pete_writel("arch/arm/mach-qcom/platsmp.c:123", reg_val, reg + APCS_CPU_PWR_CTL);
 	reg_val |= CORE_PWRD_UP;
-	writel(reg_val, reg + APCS_CPU_PWR_CTL);
+	pete_writel("arch/arm/mach-qcom/platsmp.c:125", reg_val, reg + APCS_CPU_PWR_CTL);
 
 	iounmap(reg);
 out_acc_map:

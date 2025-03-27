@@ -22,7 +22,7 @@ static void sxgbe_mtl_init(void __iomem *ioaddr, unsigned int etsalg,
 {
 	u32 reg_val;
 
-	reg_val = readl(ioaddr + SXGBE_MTL_OP_MODE_REG);
+	reg_val = pete_readl("drivers/net/ethernet/samsung/sxgbe/sxgbe_mtl.c:25", ioaddr + SXGBE_MTL_OP_MODE_REG);
 	reg_val &= ETS_RST;
 
 	/* ETS Algorith */
@@ -37,7 +37,7 @@ static void sxgbe_mtl_init(void __iomem *ioaddr, unsigned int etsalg,
 		reg_val |= ETS_DWRR;
 		break;
 	}
-	writel(reg_val, ioaddr + SXGBE_MTL_OP_MODE_REG);
+	pete_writel("drivers/net/ethernet/samsung/sxgbe/sxgbe_mtl.c:40", reg_val, ioaddr + SXGBE_MTL_OP_MODE_REG);
 
 	switch (raa & SXGBE_MTL_OPMODE_RAAMASK) {
 	case RAA_SP:
@@ -47,15 +47,15 @@ static void sxgbe_mtl_init(void __iomem *ioaddr, unsigned int etsalg,
 		reg_val |= RAA_WSP;
 		break;
 	}
-	writel(reg_val, ioaddr + SXGBE_MTL_OP_MODE_REG);
+	pete_writel("drivers/net/ethernet/samsung/sxgbe/sxgbe_mtl.c:50", reg_val, ioaddr + SXGBE_MTL_OP_MODE_REG);
 }
 
 /* For Dynamic DMA channel mapping for Rx queue */
 static void sxgbe_mtl_dma_dm_rxqueue(void __iomem *ioaddr)
 {
-	writel(RX_QUEUE_DYNAMIC, ioaddr + SXGBE_MTL_RXQ_DMAMAP0_REG);
-	writel(RX_QUEUE_DYNAMIC, ioaddr + SXGBE_MTL_RXQ_DMAMAP1_REG);
-	writel(RX_QUEUE_DYNAMIC, ioaddr + SXGBE_MTL_RXQ_DMAMAP2_REG);
+	pete_writel("drivers/net/ethernet/samsung/sxgbe/sxgbe_mtl.c:56", RX_QUEUE_DYNAMIC, ioaddr + SXGBE_MTL_RXQ_DMAMAP0_REG);
+	pete_writel("drivers/net/ethernet/samsung/sxgbe/sxgbe_mtl.c:57", RX_QUEUE_DYNAMIC, ioaddr + SXGBE_MTL_RXQ_DMAMAP1_REG);
+	pete_writel("drivers/net/ethernet/samsung/sxgbe/sxgbe_mtl.c:58", RX_QUEUE_DYNAMIC, ioaddr + SXGBE_MTL_RXQ_DMAMAP2_REG);
 }
 
 static void sxgbe_mtl_set_txfifosize(void __iomem *ioaddr, int queue_num,
@@ -65,9 +65,9 @@ static void sxgbe_mtl_set_txfifosize(void __iomem *ioaddr, int queue_num,
 
 	/* 0 means 256 bytes */
 	fifo_bits = (queue_fifo / SXGBE_MTL_TX_FIFO_DIV) - 1;
-	reg_val = readl(ioaddr + SXGBE_MTL_TXQ_OPMODE_REG(queue_num));
+	reg_val = pete_readl("drivers/net/ethernet/samsung/sxgbe/sxgbe_mtl.c:68", ioaddr + SXGBE_MTL_TXQ_OPMODE_REG(queue_num));
 	reg_val |= (fifo_bits << SXGBE_MTL_FIFO_LSHIFT);
-	writel(reg_val, ioaddr + SXGBE_MTL_TXQ_OPMODE_REG(queue_num));
+	pete_writel("drivers/net/ethernet/samsung/sxgbe/sxgbe_mtl.c:70", reg_val, ioaddr + SXGBE_MTL_TXQ_OPMODE_REG(queue_num));
 }
 
 static void sxgbe_mtl_set_rxfifosize(void __iomem *ioaddr, int queue_num,
@@ -77,27 +77,27 @@ static void sxgbe_mtl_set_rxfifosize(void __iomem *ioaddr, int queue_num,
 
 	/* 0 means 256 bytes */
 	fifo_bits = (queue_fifo / SXGBE_MTL_RX_FIFO_DIV)-1;
-	reg_val = readl(ioaddr + SXGBE_MTL_RXQ_OPMODE_REG(queue_num));
+	reg_val = pete_readl("drivers/net/ethernet/samsung/sxgbe/sxgbe_mtl.c:80", ioaddr + SXGBE_MTL_RXQ_OPMODE_REG(queue_num));
 	reg_val |= (fifo_bits << SXGBE_MTL_FIFO_LSHIFT);
-	writel(reg_val, ioaddr + SXGBE_MTL_RXQ_OPMODE_REG(queue_num));
+	pete_writel("drivers/net/ethernet/samsung/sxgbe/sxgbe_mtl.c:82", reg_val, ioaddr + SXGBE_MTL_RXQ_OPMODE_REG(queue_num));
 }
 
 static void sxgbe_mtl_enable_txqueue(void __iomem *ioaddr, int queue_num)
 {
 	u32 reg_val;
 
-	reg_val = readl(ioaddr + SXGBE_MTL_TXQ_OPMODE_REG(queue_num));
+	reg_val = pete_readl("drivers/net/ethernet/samsung/sxgbe/sxgbe_mtl.c:89", ioaddr + SXGBE_MTL_TXQ_OPMODE_REG(queue_num));
 	reg_val |= SXGBE_MTL_ENABLE_QUEUE;
-	writel(reg_val, ioaddr + SXGBE_MTL_TXQ_OPMODE_REG(queue_num));
+	pete_writel("drivers/net/ethernet/samsung/sxgbe/sxgbe_mtl.c:91", reg_val, ioaddr + SXGBE_MTL_TXQ_OPMODE_REG(queue_num));
 }
 
 static void sxgbe_mtl_disable_txqueue(void __iomem *ioaddr, int queue_num)
 {
 	u32 reg_val;
 
-	reg_val = readl(ioaddr + SXGBE_MTL_TXQ_OPMODE_REG(queue_num));
+	reg_val = pete_readl("drivers/net/ethernet/samsung/sxgbe/sxgbe_mtl.c:98", ioaddr + SXGBE_MTL_TXQ_OPMODE_REG(queue_num));
 	reg_val &= ~SXGBE_MTL_ENABLE_QUEUE;
-	writel(reg_val, ioaddr + SXGBE_MTL_TXQ_OPMODE_REG(queue_num));
+	pete_writel("drivers/net/ethernet/samsung/sxgbe/sxgbe_mtl.c:100", reg_val, ioaddr + SXGBE_MTL_TXQ_OPMODE_REG(queue_num));
 }
 
 static void sxgbe_mtl_fc_active(void __iomem *ioaddr, int queue_num,
@@ -105,20 +105,20 @@ static void sxgbe_mtl_fc_active(void __iomem *ioaddr, int queue_num,
 {
 	u32 reg_val;
 
-	reg_val = readl(ioaddr + SXGBE_MTL_RXQ_OPMODE_REG(queue_num));
+	reg_val = pete_readl("drivers/net/ethernet/samsung/sxgbe/sxgbe_mtl.c:108", ioaddr + SXGBE_MTL_RXQ_OPMODE_REG(queue_num));
 	reg_val &= ~(SXGBE_MTL_FCMASK << RX_FC_ACTIVE);
 	reg_val |= (threshold << RX_FC_ACTIVE);
 
-	writel(reg_val, ioaddr + SXGBE_MTL_RXQ_OPMODE_REG(queue_num));
+	pete_writel("drivers/net/ethernet/samsung/sxgbe/sxgbe_mtl.c:112", reg_val, ioaddr + SXGBE_MTL_RXQ_OPMODE_REG(queue_num));
 }
 
 static void sxgbe_mtl_fc_enable(void __iomem *ioaddr, int queue_num)
 {
 	u32 reg_val;
 
-	reg_val = readl(ioaddr + SXGBE_MTL_RXQ_OPMODE_REG(queue_num));
+	reg_val = pete_readl("drivers/net/ethernet/samsung/sxgbe/sxgbe_mtl.c:119", ioaddr + SXGBE_MTL_RXQ_OPMODE_REG(queue_num));
 	reg_val |= SXGBE_MTL_ENABLE_FC;
-	writel(reg_val, ioaddr + SXGBE_MTL_RXQ_OPMODE_REG(queue_num));
+	pete_writel("drivers/net/ethernet/samsung/sxgbe/sxgbe_mtl.c:121", reg_val, ioaddr + SXGBE_MTL_RXQ_OPMODE_REG(queue_num));
 }
 
 static void sxgbe_mtl_fc_deactive(void __iomem *ioaddr, int queue_num,
@@ -126,51 +126,51 @@ static void sxgbe_mtl_fc_deactive(void __iomem *ioaddr, int queue_num,
 {
 	u32 reg_val;
 
-	reg_val = readl(ioaddr + SXGBE_MTL_RXQ_OPMODE_REG(queue_num));
+	reg_val = pete_readl("drivers/net/ethernet/samsung/sxgbe/sxgbe_mtl.c:129", ioaddr + SXGBE_MTL_RXQ_OPMODE_REG(queue_num));
 	reg_val &= ~(SXGBE_MTL_FCMASK << RX_FC_DEACTIVE);
 	reg_val |= (threshold << RX_FC_DEACTIVE);
 
-	writel(reg_val, ioaddr + SXGBE_MTL_RXQ_OPMODE_REG(queue_num));
+	pete_writel("drivers/net/ethernet/samsung/sxgbe/sxgbe_mtl.c:133", reg_val, ioaddr + SXGBE_MTL_RXQ_OPMODE_REG(queue_num));
 }
 
 static void sxgbe_mtl_fep_enable(void __iomem *ioaddr, int queue_num)
 {
 	u32 reg_val;
 
-	reg_val = readl(ioaddr + SXGBE_MTL_RXQ_OPMODE_REG(queue_num));
+	reg_val = pete_readl("drivers/net/ethernet/samsung/sxgbe/sxgbe_mtl.c:140", ioaddr + SXGBE_MTL_RXQ_OPMODE_REG(queue_num));
 	reg_val |= SXGBE_MTL_RXQ_OP_FEP;
 
-	writel(reg_val, ioaddr + SXGBE_MTL_RXQ_OPMODE_REG(queue_num));
+	pete_writel("drivers/net/ethernet/samsung/sxgbe/sxgbe_mtl.c:143", reg_val, ioaddr + SXGBE_MTL_RXQ_OPMODE_REG(queue_num));
 }
 
 static void sxgbe_mtl_fep_disable(void __iomem *ioaddr, int queue_num)
 {
 	u32 reg_val;
 
-	reg_val = readl(ioaddr + SXGBE_MTL_RXQ_OPMODE_REG(queue_num));
+	reg_val = pete_readl("drivers/net/ethernet/samsung/sxgbe/sxgbe_mtl.c:150", ioaddr + SXGBE_MTL_RXQ_OPMODE_REG(queue_num));
 	reg_val &= ~(SXGBE_MTL_RXQ_OP_FEP);
 
-	writel(reg_val, ioaddr + SXGBE_MTL_RXQ_OPMODE_REG(queue_num));
+	pete_writel("drivers/net/ethernet/samsung/sxgbe/sxgbe_mtl.c:153", reg_val, ioaddr + SXGBE_MTL_RXQ_OPMODE_REG(queue_num));
 }
 
 static void sxgbe_mtl_fup_enable(void __iomem *ioaddr, int queue_num)
 {
 	u32 reg_val;
 
-	reg_val = readl(ioaddr + SXGBE_MTL_RXQ_OPMODE_REG(queue_num));
+	reg_val = pete_readl("drivers/net/ethernet/samsung/sxgbe/sxgbe_mtl.c:160", ioaddr + SXGBE_MTL_RXQ_OPMODE_REG(queue_num));
 	reg_val |= SXGBE_MTL_RXQ_OP_FUP;
 
-	writel(reg_val, ioaddr + SXGBE_MTL_RXQ_OPMODE_REG(queue_num));
+	pete_writel("drivers/net/ethernet/samsung/sxgbe/sxgbe_mtl.c:163", reg_val, ioaddr + SXGBE_MTL_RXQ_OPMODE_REG(queue_num));
 }
 
 static void sxgbe_mtl_fup_disable(void __iomem *ioaddr, int queue_num)
 {
 	u32 reg_val;
 
-	reg_val = readl(ioaddr + SXGBE_MTL_RXQ_OPMODE_REG(queue_num));
+	reg_val = pete_readl("drivers/net/ethernet/samsung/sxgbe/sxgbe_mtl.c:170", ioaddr + SXGBE_MTL_RXQ_OPMODE_REG(queue_num));
 	reg_val &= ~(SXGBE_MTL_RXQ_OP_FUP);
 
-	writel(reg_val, ioaddr + SXGBE_MTL_RXQ_OPMODE_REG(queue_num));
+	pete_writel("drivers/net/ethernet/samsung/sxgbe/sxgbe_mtl.c:173", reg_val, ioaddr + SXGBE_MTL_RXQ_OPMODE_REG(queue_num));
 }
 
 
@@ -179,7 +179,7 @@ static void sxgbe_set_tx_mtl_mode(void __iomem *ioaddr, int queue_num,
 {
 	u32 reg_val;
 
-	reg_val = readl(ioaddr + SXGBE_MTL_TXQ_OPMODE_REG(queue_num));
+	reg_val = pete_readl("drivers/net/ethernet/samsung/sxgbe/sxgbe_mtl.c:182", ioaddr + SXGBE_MTL_TXQ_OPMODE_REG(queue_num));
 	/* TX specific MTL mode settings */
 	if (tx_mode == SXGBE_MTL_SFMODE) {
 		reg_val |= SXGBE_MTL_SFMODE;
@@ -202,7 +202,7 @@ static void sxgbe_set_tx_mtl_mode(void __iomem *ioaddr, int queue_num,
 	}
 
 	/* write into TXQ operation register */
-	writel(reg_val, ioaddr + SXGBE_MTL_TXQ_OPMODE_REG(queue_num));
+	pete_writel("drivers/net/ethernet/samsung/sxgbe/sxgbe_mtl.c:205", reg_val, ioaddr + SXGBE_MTL_TXQ_OPMODE_REG(queue_num));
 }
 
 static void sxgbe_set_rx_mtl_mode(void __iomem *ioaddr, int queue_num,
@@ -210,7 +210,7 @@ static void sxgbe_set_rx_mtl_mode(void __iomem *ioaddr, int queue_num,
 {
 	u32 reg_val;
 
-	reg_val = readl(ioaddr + SXGBE_MTL_RXQ_OPMODE_REG(queue_num));
+	reg_val = pete_readl("drivers/net/ethernet/samsung/sxgbe/sxgbe_mtl.c:213", ioaddr + SXGBE_MTL_RXQ_OPMODE_REG(queue_num));
 	/* RX specific MTL mode settings */
 	if (rx_mode == SXGBE_RX_MTL_SFMODE) {
 		reg_val |= SXGBE_RX_MTL_SFMODE;
@@ -224,7 +224,7 @@ static void sxgbe_set_rx_mtl_mode(void __iomem *ioaddr, int queue_num,
 	}
 
 	/* write into RXQ operation register */
-	writel(reg_val, ioaddr + SXGBE_MTL_RXQ_OPMODE_REG(queue_num));
+	pete_writel("drivers/net/ethernet/samsung/sxgbe/sxgbe_mtl.c:227", reg_val, ioaddr + SXGBE_MTL_RXQ_OPMODE_REG(queue_num));
 }
 
 static const struct sxgbe_mtl_ops mtl_ops = {

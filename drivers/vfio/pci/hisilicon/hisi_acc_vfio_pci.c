@@ -35,10 +35,10 @@ static u32 qm_check_reg_state(struct hisi_qm *qm, u32 regs)
 	int check_times = 0;
 	u32 state;
 
-	state = readl(qm->io_base + regs);
+	state = pete_readl("drivers/vfio/pci/hisilicon/hisi_acc_vfio_pci.c:38", qm->io_base + regs);
 	while (state && check_times < ERROR_CHECK_TIMEOUT) {
 		udelay(CHECK_DELAY_TIME);
-		state = readl(qm->io_base + regs);
+		state = pete_readl("drivers/vfio/pci/hisilicon/hisi_acc_vfio_pci.c:41", qm->io_base + regs);
 		check_times++;
 	}
 
@@ -54,7 +54,7 @@ static int qm_read_regs(struct hisi_qm *qm, u32 reg_addr,
 		return -EINVAL;
 
 	for (i = 0; i < nums; i++) {
-		data[i] = readl(qm->io_base + reg_addr);
+		data[i] = pete_readl("drivers/vfio/pci/hisilicon/hisi_acc_vfio_pci.c:57", qm->io_base + reg_addr);
 		reg_addr += QM_REG_ADDR_OFFSET;
 	}
 
@@ -70,7 +70,7 @@ static int qm_write_regs(struct hisi_qm *qm, u32 reg,
 		return -EINVAL;
 
 	for (i = 0; i < nums; i++)
-		writel(data[i], qm->io_base + reg + i * QM_REG_ADDR_OFFSET);
+		pete_writel("drivers/vfio/pci/hisilicon/hisi_acc_vfio_pci.c:73", data[i], qm->io_base + reg + i * QM_REG_ADDR_OFFSET);
 
 	return 0;
 }
@@ -85,8 +85,8 @@ static int qm_get_vft(struct hisi_qm *qm, u32 *base)
 	if (ret)
 		return ret;
 
-	sqc_vft = readl(qm->io_base + QM_MB_CMD_DATA_ADDR_L) |
-		  ((u64)readl(qm->io_base + QM_MB_CMD_DATA_ADDR_H) <<
+	sqc_vft = pete_readl("drivers/vfio/pci/hisilicon/hisi_acc_vfio_pci.c:88", qm->io_base + QM_MB_CMD_DATA_ADDR_L) |
+		  ((u64)pete_readl("drivers/vfio/pci/hisilicon/hisi_acc_vfio_pci.c:89", qm->io_base + QM_MB_CMD_DATA_ADDR_H) <<
 		  QM_XQC_ADDR_OFFSET);
 	*base = QM_SQC_VFT_BASE_MASK_V2 & (sqc_vft >> QM_SQC_VFT_BASE_SHIFT_V2);
 	qp_num = (QM_SQC_VFT_NUM_MASK_V2 &
@@ -103,8 +103,8 @@ static int qm_get_sqc(struct hisi_qm *qm, u64 *addr)
 	if (ret)
 		return ret;
 
-	*addr = readl(qm->io_base + QM_MB_CMD_DATA_ADDR_L) |
-		  ((u64)readl(qm->io_base + QM_MB_CMD_DATA_ADDR_H) <<
+	*addr = pete_readl("drivers/vfio/pci/hisilicon/hisi_acc_vfio_pci.c:106", qm->io_base + QM_MB_CMD_DATA_ADDR_L) |
+		  ((u64)pete_readl("drivers/vfio/pci/hisilicon/hisi_acc_vfio_pci.c:107", qm->io_base + QM_MB_CMD_DATA_ADDR_H) <<
 		  QM_XQC_ADDR_OFFSET);
 
 	return 0;
@@ -118,8 +118,8 @@ static int qm_get_cqc(struct hisi_qm *qm, u64 *addr)
 	if (ret)
 		return ret;
 
-	*addr = readl(qm->io_base + QM_MB_CMD_DATA_ADDR_L) |
-		  ((u64)readl(qm->io_base + QM_MB_CMD_DATA_ADDR_H) <<
+	*addr = pete_readl("drivers/vfio/pci/hisilicon/hisi_acc_vfio_pci.c:121", qm->io_base + QM_MB_CMD_DATA_ADDR_L) |
+		  ((u64)pete_readl("drivers/vfio/pci/hisilicon/hisi_acc_vfio_pci.c:122", qm->io_base + QM_MB_CMD_DATA_ADDR_H) <<
 		  QM_XQC_ADDR_OFFSET);
 
 	return 0;
@@ -272,7 +272,7 @@ static void qm_db(struct hisi_qm *qm, u16 qn, u8 cmd,
 		   ((u64)index << QM_DB_INDEX_SHIFT_V2)	 |
 		   ((u64)priority << QM_DB_PRIORITY_SHIFT_V2);
 
-	writeq(doorbell, qm->io_base + dbase);
+	pete_writeq("drivers/vfio/pci/hisilicon/hisi_acc_vfio_pci.c:275", doorbell, qm->io_base + dbase);
 }
 
 static int pf_qm_get_qp_num(struct hisi_qm *qm, int vf_id, u32 *rbase)
@@ -288,13 +288,13 @@ static int pf_qm_get_qp_num(struct hisi_qm *qm, int vf_id, u32 *rbase)
 	if (ret)
 		return ret;
 
-	writel(0x1, qm->io_base + QM_VFT_CFG_OP_WR);
+	pete_writel("drivers/vfio/pci/hisilicon/hisi_acc_vfio_pci.c:291", 0x1, qm->io_base + QM_VFT_CFG_OP_WR);
 	/* 0 mean SQC VFT */
-	writel(0x0, qm->io_base + QM_VFT_CFG_TYPE);
-	writel(vf_id, qm->io_base + QM_VFT_CFG);
+	pete_writel("drivers/vfio/pci/hisilicon/hisi_acc_vfio_pci.c:293", 0x0, qm->io_base + QM_VFT_CFG_TYPE);
+	pete_writel("drivers/vfio/pci/hisilicon/hisi_acc_vfio_pci.c:294", vf_id, qm->io_base + QM_VFT_CFG);
 
-	writel(0x0, qm->io_base + QM_VFT_CFG_RDY);
-	writel(0x1, qm->io_base + QM_VFT_CFG_OP_ENABLE);
+	pete_writel("drivers/vfio/pci/hisilicon/hisi_acc_vfio_pci.c:296", 0x0, qm->io_base + QM_VFT_CFG_RDY);
+	pete_writel("drivers/vfio/pci/hisilicon/hisi_acc_vfio_pci.c:297", 0x1, qm->io_base + QM_VFT_CFG_OP_ENABLE);
 
 	ret = readl_relaxed_poll_timeout(qm->io_base + QM_VFT_CFG_RDY, val,
 					 val & BIT(0), MB_POLL_PERIOD_US,
@@ -302,8 +302,8 @@ static int pf_qm_get_qp_num(struct hisi_qm *qm, int vf_id, u32 *rbase)
 	if (ret)
 		return ret;
 
-	sqc_vft = readl(qm->io_base + QM_VFT_CFG_DATA_L) |
-		  ((u64)readl(qm->io_base + QM_VFT_CFG_DATA_H) <<
+	sqc_vft = pete_readl("drivers/vfio/pci/hisilicon/hisi_acc_vfio_pci.c:305", qm->io_base + QM_VFT_CFG_DATA_L) |
+		  ((u64)pete_readl("drivers/vfio/pci/hisilicon/hisi_acc_vfio_pci.c:306", qm->io_base + QM_VFT_CFG_DATA_H) <<
 		  QM_XQC_ADDR_OFFSET);
 	*rbase = QM_SQC_VFT_BASE_MASK_V2 &
 		  (sqc_vft >> QM_SQC_VFT_BASE_SHIFT_V2);
@@ -316,17 +316,17 @@ static int pf_qm_get_qp_num(struct hisi_qm *qm, int vf_id, u32 *rbase)
 static void qm_dev_cmd_init(struct hisi_qm *qm)
 {
 	/* Clear VF communication status registers. */
-	writel(0x1, qm->io_base + QM_IFC_INT_SOURCE_V);
+	pete_writel("drivers/vfio/pci/hisilicon/hisi_acc_vfio_pci.c:319", 0x1, qm->io_base + QM_IFC_INT_SOURCE_V);
 
 	/* Enable pf and vf communication. */
-	writel(0x0, qm->io_base + QM_IFC_INT_MASK);
+	pete_writel("drivers/vfio/pci/hisilicon/hisi_acc_vfio_pci.c:322", 0x0, qm->io_base + QM_IFC_INT_MASK);
 }
 
 static int vf_qm_cache_wb(struct hisi_qm *qm)
 {
 	unsigned int val;
 
-	writel(0x1, qm->io_base + QM_CACHE_WB_START);
+	pete_writel("drivers/vfio/pci/hisilicon/hisi_acc_vfio_pci.c:329", 0x1, qm->io_base + QM_CACHE_WB_START);
 	if (readl_relaxed_poll_timeout(qm->io_base + QM_CACHE_WB_DONE,
 				       val, val & BIT(0), MB_POLL_PERIOD_US,
 				       MB_POLL_TIMEOUT_US)) {

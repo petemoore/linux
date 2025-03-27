@@ -25,10 +25,10 @@ static int s3c_usb_otgphy_init(struct platform_device *pdev)
 	struct clk *xusbxti;
 	u32 phyclk;
 
-	writel(readl(S3C64XX_OTHERS) | S3C64XX_OTHERS_USBMASK, S3C64XX_OTHERS);
+	pete_writel("arch/arm/mach-s3c/setup-usb-phy-s3c64xx.c:28", pete_readl("arch/arm/mach-s3c/setup-usb-phy-s3c64xx.c:28", S3C64XX_OTHERS) | S3C64XX_OTHERS_USBMASK, S3C64XX_OTHERS);
 
 	/* set clock frequency for PLL */
-	phyclk = readl(S3C_PHYCLK) & ~S3C_PHYCLK_CLKSEL_MASK;
+	phyclk = pete_readl("arch/arm/mach-s3c/setup-usb-phy-s3c64xx.c:31", S3C_PHYCLK) & ~S3C_PHYCLK_CLKSEL_MASK;
 
 	xusbxti = clk_get(&pdev->dev, "xusbxti");
 	if (!IS_ERR(xusbxti)) {
@@ -48,27 +48,27 @@ static int s3c_usb_otgphy_init(struct platform_device *pdev)
 	}
 
 	/* TODO: select external clock/oscillator */
-	writel(phyclk | S3C_PHYCLK_CLK_FORCE, S3C_PHYCLK);
+	pete_writel("arch/arm/mach-s3c/setup-usb-phy-s3c64xx.c:51", phyclk | S3C_PHYCLK_CLK_FORCE, S3C_PHYCLK);
 
 	/* set to normal OTG PHY */
-	writel((readl(S3C_PHYPWR) & ~S3C_PHYPWR_NORMAL_MASK), S3C_PHYPWR);
+	pete_writel("arch/arm/mach-s3c/setup-usb-phy-s3c64xx.c:54", (pete_readl("arch/arm/mach-s3c/setup-usb-phy-s3c64xx.c:54", S3C_PHYPWR) & ~S3C_PHYPWR_NORMAL_MASK), S3C_PHYPWR);
 	mdelay(1);
 
 	/* reset OTG PHY and Link */
-	writel(S3C_RSTCON_PHY | S3C_RSTCON_HCLK | S3C_RSTCON_PHYCLK,
+	pete_writel("arch/arm/mach-s3c/setup-usb-phy-s3c64xx.c:58", S3C_RSTCON_PHY | S3C_RSTCON_HCLK | S3C_RSTCON_PHYCLK,
 			S3C_RSTCON);
 	udelay(20);	/* at-least 10uS */
-	writel(0, S3C_RSTCON);
+	pete_writel("arch/arm/mach-s3c/setup-usb-phy-s3c64xx.c:61", 0, S3C_RSTCON);
 
 	return 0;
 }
 
 static int s3c_usb_otgphy_exit(struct platform_device *pdev)
 {
-	writel((readl(S3C_PHYPWR) | S3C_PHYPWR_ANALOG_POWERDOWN |
+	pete_writel("arch/arm/mach-s3c/setup-usb-phy-s3c64xx.c:68", (pete_readl("arch/arm/mach-s3c/setup-usb-phy-s3c64xx.c:68", S3C_PHYPWR) | S3C_PHYPWR_ANALOG_POWERDOWN |
 				S3C_PHYPWR_OTG_DISABLE), S3C_PHYPWR);
 
-	writel(readl(S3C64XX_OTHERS) & ~S3C64XX_OTHERS_USBMASK, S3C64XX_OTHERS);
+	pete_writel("arch/arm/mach-s3c/setup-usb-phy-s3c64xx.c:71", pete_readl("arch/arm/mach-s3c/setup-usb-phy-s3c64xx.c:71", S3C64XX_OTHERS) & ~S3C64XX_OTHERS_USBMASK, S3C64XX_OTHERS);
 
 	return 0;
 }

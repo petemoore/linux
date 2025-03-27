@@ -82,22 +82,22 @@ int hl_access_sram_dram_region(struct hl_device *hdev, u64 addr, u64 *val,
 
 	switch (acc_type) {
 	case DEBUGFS_READ8:
-		*val = readb(acc_addr);
+		*val = pete_readb("drivers/accel/habanalabs/common/device.c:85", acc_addr);
 		break;
 	case DEBUGFS_WRITE8:
-		writeb(*val, acc_addr);
+		pete_writeb("drivers/accel/habanalabs/common/device.c:88", *val, acc_addr);
 		break;
 	case DEBUGFS_READ32:
-		*val = readl(acc_addr);
+		*val = pete_readl("drivers/accel/habanalabs/common/device.c:91", acc_addr);
 		break;
 	case DEBUGFS_WRITE32:
-		writel(*val, acc_addr);
+		pete_writel("drivers/accel/habanalabs/common/device.c:94", *val, acc_addr);
 		break;
 	case DEBUGFS_READ64:
-		*val = readq(acc_addr);
+		*val = pete_readq("drivers/accel/habanalabs/common/device.c:97", acc_addr);
 		break;
 	case DEBUGFS_WRITE64:
-		writeq(*val, acc_addr);
+		pete_writeq("drivers/accel/habanalabs/common/device.c:100", *val, acc_addr);
 		break;
 	}
 
@@ -2499,7 +2499,7 @@ void hl_device_fini(struct hl_device *hdev)
  */
 inline u32 hl_rreg(struct hl_device *hdev, u32 reg)
 {
-	u32 val = readl(hdev->rmmio + reg);
+	u32 val = pete_readl("drivers/accel/habanalabs/common/device.c:2502", hdev->rmmio + reg);
 
 	if (unlikely(trace_habanalabs_rreg32_enabled()))
 		trace_habanalabs_rreg32(hdev->dev, reg, val);
@@ -2522,7 +2522,7 @@ inline void hl_wreg(struct hl_device *hdev, u32 reg, u32 val)
 	if (unlikely(trace_habanalabs_wreg32_enabled()))
 		trace_habanalabs_wreg32(hdev->dev, reg, val);
 
-	writel(val, hdev->rmmio + reg);
+	pete_writel("drivers/accel/habanalabs/common/device.c:2525", val, hdev->rmmio + reg);
 }
 
 void hl_capture_razwi(struct hl_device *hdev, u64 addr, u16 *engine_id, u16 num_of_engines,

@@ -247,18 +247,18 @@ static int cdns_xspi_wait_for_controller_idle(struct cdns_xspi_dev *cdns_xspi)
 static void cdns_xspi_trigger_command(struct cdns_xspi_dev *cdns_xspi,
 				      u32 cmd_regs[6])
 {
-	writel(cmd_regs[5], cdns_xspi->iobase + CDNS_XSPI_CMD_REG_5);
-	writel(cmd_regs[4], cdns_xspi->iobase + CDNS_XSPI_CMD_REG_4);
-	writel(cmd_regs[3], cdns_xspi->iobase + CDNS_XSPI_CMD_REG_3);
-	writel(cmd_regs[2], cdns_xspi->iobase + CDNS_XSPI_CMD_REG_2);
-	writel(cmd_regs[1], cdns_xspi->iobase + CDNS_XSPI_CMD_REG_1);
-	writel(cmd_regs[0], cdns_xspi->iobase + CDNS_XSPI_CMD_REG_0);
+	pete_writel("drivers/spi/spi-cadence-xspi.c:250", cmd_regs[5], cdns_xspi->iobase + CDNS_XSPI_CMD_REG_5);
+	pete_writel("drivers/spi/spi-cadence-xspi.c:251", cmd_regs[4], cdns_xspi->iobase + CDNS_XSPI_CMD_REG_4);
+	pete_writel("drivers/spi/spi-cadence-xspi.c:252", cmd_regs[3], cdns_xspi->iobase + CDNS_XSPI_CMD_REG_3);
+	pete_writel("drivers/spi/spi-cadence-xspi.c:253", cmd_regs[2], cdns_xspi->iobase + CDNS_XSPI_CMD_REG_2);
+	pete_writel("drivers/spi/spi-cadence-xspi.c:254", cmd_regs[1], cdns_xspi->iobase + CDNS_XSPI_CMD_REG_1);
+	pete_writel("drivers/spi/spi-cadence-xspi.c:255", cmd_regs[0], cdns_xspi->iobase + CDNS_XSPI_CMD_REG_0);
 }
 
 static int cdns_xspi_check_command_status(struct cdns_xspi_dev *cdns_xspi)
 {
 	int ret = 0;
-	u32 cmd_status = readl(cdns_xspi->iobase + CDNS_XSPI_CMD_STATUS_REG);
+	u32 cmd_status = pete_readl("drivers/spi/spi-cadence-xspi.c:261", cdns_xspi->iobase + CDNS_XSPI_CMD_STATUS_REG);
 
 	if (cmd_status & CDNS_XSPI_CMD_STATUS_COMPLETED) {
 		if ((cmd_status & CDNS_XSPI_CMD_STATUS_FAILED) != 0) {
@@ -296,12 +296,12 @@ static void cdns_xspi_set_interrupts(struct cdns_xspi_dev *cdns_xspi,
 {
 	u32 intr_enable;
 
-	intr_enable = readl(cdns_xspi->iobase + CDNS_XSPI_INTR_ENABLE_REG);
+	intr_enable = pete_readl("drivers/spi/spi-cadence-xspi.c:299", cdns_xspi->iobase + CDNS_XSPI_INTR_ENABLE_REG);
 	if (enabled)
 		intr_enable |= CDNS_XSPI_INTR_MASK;
 	else
 		intr_enable &= ~CDNS_XSPI_INTR_MASK;
-	writel(intr_enable, cdns_xspi->iobase + CDNS_XSPI_INTR_ENABLE_REG);
+	pete_writel("drivers/spi/spi-cadence-xspi.c:304", intr_enable, cdns_xspi->iobase + CDNS_XSPI_INTR_ENABLE_REG);
 }
 
 static int cdns_xspi_controller_init(struct cdns_xspi_dev *cdns_xspi)
@@ -310,7 +310,7 @@ static int cdns_xspi_controller_init(struct cdns_xspi_dev *cdns_xspi)
 	u32 ctrl_features;
 	u16 hw_magic_num;
 
-	ctrl_ver = readl(cdns_xspi->iobase + CDNS_XSPI_CTRL_VERSION_REG);
+	ctrl_ver = pete_readl("drivers/spi/spi-cadence-xspi.c:313", cdns_xspi->iobase + CDNS_XSPI_CTRL_VERSION_REG);
 	hw_magic_num = FIELD_GET(CDNS_XSPI_MAGIC_NUM, ctrl_ver);
 	if (hw_magic_num != CDNS_XSPI_MAGIC_NUM_VALUE) {
 		dev_err(cdns_xspi->dev,
@@ -319,7 +319,7 @@ static int cdns_xspi_controller_init(struct cdns_xspi_dev *cdns_xspi)
 		return -EIO;
 	}
 
-	ctrl_features = readl(cdns_xspi->iobase + CDNS_XSPI_CTRL_FEATURES_REG);
+	ctrl_features = pete_readl("drivers/spi/spi-cadence-xspi.c:322", cdns_xspi->iobase + CDNS_XSPI_CTRL_FEATURES_REG);
 	cdns_xspi->hw_num_banks = FIELD_GET(CDNS_XSPI_NUM_BANKS, ctrl_features);
 	cdns_xspi_set_interrupts(cdns_xspi, false);
 
@@ -331,8 +331,8 @@ static void cdns_xspi_sdma_handle(struct cdns_xspi_dev *cdns_xspi)
 	u32 sdma_size, sdma_trd_info;
 	u8 sdma_dir;
 
-	sdma_size = readl(cdns_xspi->iobase + CDNS_XSPI_SDMA_SIZE_REG);
-	sdma_trd_info = readl(cdns_xspi->iobase + CDNS_XSPI_SDMA_TRD_INFO_REG);
+	sdma_size = pete_readl("drivers/spi/spi-cadence-xspi.c:334", cdns_xspi->iobase + CDNS_XSPI_SDMA_SIZE_REG);
+	sdma_trd_info = pete_readl("drivers/spi/spi-cadence-xspi.c:335", cdns_xspi->iobase + CDNS_XSPI_SDMA_TRD_INFO_REG);
 	sdma_dir = FIELD_GET(CDNS_XSPI_SDMA_DIR, sdma_trd_info);
 
 	switch (sdma_dir) {
@@ -361,7 +361,7 @@ static int cdns_xspi_send_stig_command(struct cdns_xspi_dev *cdns_xspi,
 	if (ret < 0)
 		return -EIO;
 
-	writel(FIELD_PREP(CDNS_XSPI_CTRL_WORK_MODE, CDNS_XSPI_WORK_MODE_STIG),
+	pete_writel("drivers/spi/spi-cadence-xspi.c:364", FIELD_PREP(CDNS_XSPI_CTRL_WORK_MODE, CDNS_XSPI_WORK_MODE_STIG),
 	       cdns_xspi->iobase + CDNS_XSPI_CTRL_CONFIG_REG);
 
 	cdns_xspi_set_interrupts(cdns_xspi, true);
@@ -458,8 +458,8 @@ static irqreturn_t cdns_xspi_irq_handler(int this_irq, void *dev)
 	u32 irq_status;
 	irqreturn_t result = IRQ_NONE;
 
-	irq_status = readl(cdns_xspi->iobase + CDNS_XSPI_INTR_STATUS_REG);
-	writel(irq_status, cdns_xspi->iobase + CDNS_XSPI_INTR_STATUS_REG);
+	irq_status = pete_readl("drivers/spi/spi-cadence-xspi.c:461", cdns_xspi->iobase + CDNS_XSPI_INTR_STATUS_REG);
+	pete_writel("drivers/spi/spi-cadence-xspi.c:462", irq_status, cdns_xspi->iobase + CDNS_XSPI_INTR_STATUS_REG);
 
 	if (irq_status &
 	    (CDNS_XSPI_SDMA_ERROR | CDNS_XSPI_SDMA_TRIGGER |
@@ -480,9 +480,9 @@ static irqreturn_t cdns_xspi_irq_handler(int this_irq, void *dev)
 		result = IRQ_HANDLED;
 	}
 
-	irq_status = readl(cdns_xspi->iobase + CDNS_XSPI_TRD_COMP_INTR_STATUS);
+	irq_status = pete_readl("drivers/spi/spi-cadence-xspi.c:483", cdns_xspi->iobase + CDNS_XSPI_TRD_COMP_INTR_STATUS);
 	if (irq_status) {
-		writel(irq_status,
+		pete_writel("drivers/spi/spi-cadence-xspi.c:485", irq_status,
 		       cdns_xspi->iobase + CDNS_XSPI_TRD_COMP_INTR_STATUS);
 
 		complete(&cdns_xspi->auto_cmd_complete);
@@ -523,15 +523,15 @@ static void cdns_xspi_print_phy_config(struct cdns_xspi_dev *cdns_xspi)
 
 	dev_info(dev, "PHY configuration\n");
 	dev_info(dev, "   * xspi_dll_phy_ctrl: %08x\n",
-		 readl(cdns_xspi->iobase + CDNS_XSPI_DLL_PHY_CTRL));
+		 pete_readl("drivers/spi/spi-cadence-xspi.c:526", cdns_xspi->iobase + CDNS_XSPI_DLL_PHY_CTRL));
 	dev_info(dev, "   * phy_dq_timing: %08x\n",
-		 readl(cdns_xspi->auxbase + CDNS_XSPI_CCP_PHY_DQ_TIMING));
+		 pete_readl("drivers/spi/spi-cadence-xspi.c:528", cdns_xspi->auxbase + CDNS_XSPI_CCP_PHY_DQ_TIMING));
 	dev_info(dev, "   * phy_dqs_timing: %08x\n",
-		 readl(cdns_xspi->auxbase + CDNS_XSPI_CCP_PHY_DQS_TIMING));
+		 pete_readl("drivers/spi/spi-cadence-xspi.c:530", cdns_xspi->auxbase + CDNS_XSPI_CCP_PHY_DQS_TIMING));
 	dev_info(dev, "   * phy_gate_loopback_ctrl: %08x\n",
-		 readl(cdns_xspi->auxbase + CDNS_XSPI_CCP_PHY_GATE_LPBCK_CTRL));
+		 pete_readl("drivers/spi/spi-cadence-xspi.c:532", cdns_xspi->auxbase + CDNS_XSPI_CCP_PHY_GATE_LPBCK_CTRL));
 	dev_info(dev, "   * phy_dll_slave_ctrl: %08x\n",
-		 readl(cdns_xspi->auxbase + CDNS_XSPI_CCP_PHY_DLL_SLAVE_CTRL));
+		 pete_readl("drivers/spi/spi-cadence-xspi.c:534", cdns_xspi->auxbase + CDNS_XSPI_CCP_PHY_DLL_SLAVE_CTRL));
 }
 
 static int cdns_xspi_probe(struct platform_device *pdev)

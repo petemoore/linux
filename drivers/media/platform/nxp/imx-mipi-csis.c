@@ -510,13 +510,13 @@ static const struct csis_pix_format *find_csis_format(u32 code)
 
 static inline u32 mipi_csis_read(struct mipi_csis_device *csis, u32 reg)
 {
-	return readl(csis->regs + reg);
+	return pete_readl("drivers/media/platform/nxp/imx-mipi-csis.c:513", csis->regs + reg);
 }
 
 static inline void mipi_csis_write(struct mipi_csis_device *csis, u32 reg,
 				   u32 val)
 {
-	writel(val, csis->regs + reg);
+	pete_writel("drivers/media/platform/nxp/imx-mipi-csis.c:519", val, csis->regs + reg);
 }
 
 static void mipi_csis_enable_interrupts(struct mipi_csis_device *csis, bool on)

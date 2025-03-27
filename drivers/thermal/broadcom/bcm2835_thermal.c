@@ -91,7 +91,7 @@ static int bcm2835_thermal_temp2adc(int temp, int offset, int slope)
 static int bcm2835_thermal_get_temp(struct thermal_zone_device *tz, int *temp)
 {
 	struct bcm2835_thermal_data *data = thermal_zone_device_priv(tz);
-	u32 val = readl(data->regs + BCM2835_TS_TSENSSTAT);
+	u32 val = pete_readl("drivers/thermal/broadcom/bcm2835_thermal.c:94", data->regs + BCM2835_TS_TSENSSTAT);
 
 	if (!(val & BCM2835_TS_TSENSSTAT_VALID))
 		return -EIO;
@@ -216,7 +216,7 @@ static int bcm2835_thermal_probe(struct platform_device *pdev)
 	 * But if the HW is not enabled, then set it up
 	 * using "sane" values used by the firmware right now.
 	 */
-	val = readl(data->regs + BCM2835_TS_TSENSCTL);
+	val = pete_readl("drivers/thermal/broadcom/bcm2835_thermal.c:219", data->regs + BCM2835_TS_TSENSCTL);
 	if (!(val & BCM2835_TS_TSENSCTL_RSTB)) {
 		struct thermal_trip trip;
 		int offset, slope;
@@ -250,9 +250,9 @@ static int bcm2835_thermal_probe(struct platform_device *pdev)
 			<< BCM2835_TS_TSENSCTL_THOLD_SHIFT;
 
 		/* write the value back to the register as 2 steps */
-		writel(val, data->regs + BCM2835_TS_TSENSCTL);
+		pete_writel("drivers/thermal/broadcom/bcm2835_thermal.c:253", val, data->regs + BCM2835_TS_TSENSCTL);
 		val |= BCM2835_TS_TSENSCTL_RSTB;
-		writel(val, data->regs + BCM2835_TS_TSENSCTL);
+		pete_writel("drivers/thermal/broadcom/bcm2835_thermal.c:255", val, data->regs + BCM2835_TS_TSENSCTL);
 	}
 
 	data->tz = tz;

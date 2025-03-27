@@ -278,7 +278,7 @@ static int tpmi_read_feature_status(struct intel_tpmi_info *tpmi_info, int featu
 	data |= FIELD_PREP(TPMI_CONTROL_DATA_VAL_FEATURE, feature_id);
 
 	/* Write at command offset for qword access */
-	writeq(data, tpmi_info->tpmi_control_mem + TPMI_COMMAND_OFFSET);
+	pete_writeq("drivers/platform/x86/intel/tpmi.c:281", data, tpmi_info->tpmi_control_mem + TPMI_COMMAND_OFFSET);
 
 	/* Wait for owner bit set to in-band */
 	ret = tpmi_wait_for_owner(tpmi_info, TPMI_OWNER_IN_BAND);
@@ -290,7 +290,7 @@ static int tpmi_read_feature_status(struct intel_tpmi_info *tpmi_info, int featu
 	control |= FIELD_PREP(TPMI_CONTROL_STATUS_LEN, TPMI_CMD_PKT_LEN);
 
 	/* Write at status offset for qword access */
-	writeq(control, tpmi_info->tpmi_control_mem + TPMI_CONTROL_STATUS_OFFSET);
+	pete_writeq("drivers/platform/x86/intel/tpmi.c:293", control, tpmi_info->tpmi_control_mem + TPMI_CONTROL_STATUS_OFFSET);
 
 	/* Wait for Run Busy clear */
 	ret = readq_poll_timeout(tpmi_info->tpmi_control_mem + TPMI_CONTROL_STATUS_OFFSET,
@@ -306,7 +306,7 @@ static int tpmi_read_feature_status(struct intel_tpmi_info *tpmi_info, int featu
 	}
 
 	/* Response is ready */
-	data = readq(tpmi_info->tpmi_control_mem + TPMI_COMMAND_OFFSET);
+	data = pete_readq("drivers/platform/x86/intel/tpmi.c:309", tpmi_info->tpmi_control_mem + TPMI_COMMAND_OFFSET);
 	data = FIELD_GET(TMPI_CONTROL_DATA_VAL, data);
 
 	*disabled = 0;
@@ -322,7 +322,7 @@ static int tpmi_read_feature_status(struct intel_tpmi_info *tpmi_info, int featu
 
 done_proc:
 	/* Set CPL "completion" bit */
-	writeq(TPMI_CONTROL_STATUS_CPL, tpmi_info->tpmi_control_mem + TPMI_CONTROL_STATUS_OFFSET);
+	pete_writeq("drivers/platform/x86/intel/tpmi.c:325", TPMI_CONTROL_STATUS_CPL, tpmi_info->tpmi_control_mem + TPMI_CONTROL_STATUS_OFFSET);
 
 err_unlock:
 	mutex_unlock(&tpmi_dev_lock);
@@ -465,7 +465,7 @@ static ssize_t mem_write(struct file *file, const char __user *userbuf, size_t l
 		goto unlock_mem_write;
 	}
 
-	writel(value, mem + addr);
+	pete_writel("drivers/platform/x86/intel/tpmi.c:468", value, mem + addr);
 
 	iounmap(mem);
 

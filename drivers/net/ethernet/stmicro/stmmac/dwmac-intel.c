@@ -264,7 +264,7 @@ static void intel_mgbe_ptp_clk_freq_config(struct stmmac_priv *priv)
 
 	intel_priv = (struct intel_priv_data *)priv->plat->bsp_priv;
 
-	gpio_value = readl(priv->ioaddr + GMAC_GPIO_STATUS);
+	gpio_value = pete_readl("drivers/net/ethernet/stmicro/stmmac/dwmac-intel.c:267", priv->ioaddr + GMAC_GPIO_STATUS);
 
 	if (intel_priv->is_pse) {
 		/* For PSE GbE, use 200MHz */
@@ -276,7 +276,7 @@ static void intel_mgbe_ptp_clk_freq_config(struct stmmac_priv *priv)
 		gpio_value |= PCH_PTP_CLK_FREQ_200MHZ;
 	}
 
-	writel(gpio_value, priv->ioaddr + GMAC_GPIO_STATUS);
+	pete_writel("drivers/net/ethernet/stmicro/stmmac/dwmac-intel.c:279", gpio_value, priv->ioaddr + GMAC_GPIO_STATUS);
 }
 
 static void get_arttime(struct mii_bus *mii, int intel_adhoc_addr,
@@ -297,7 +297,7 @@ static void get_arttime(struct mii_bus *mii, int intel_adhoc_addr,
 
 static int stmmac_cross_ts_isr(struct stmmac_priv *priv)
 {
-	return (readl(priv->ioaddr + GMAC_INT_STATUS) & GMAC_INT_TSIE);
+	return (pete_readl("drivers/net/ethernet/stmicro/stmmac/dwmac-intel.c:300", priv->ioaddr + GMAC_INT_STATUS) & GMAC_INT_TSIE);
 }
 
 static int intel_crosststamp(ktime_t *device,
@@ -332,7 +332,7 @@ static int intel_crosststamp(ktime_t *device,
 
 	mutex_lock(&priv->aux_ts_lock);
 	/* Enable Internal snapshot trigger */
-	acr_value = readl(ptpaddr + PTP_ACR);
+	acr_value = pete_readl("drivers/net/ethernet/stmicro/stmmac/dwmac-intel.c:335", ptpaddr + PTP_ACR);
 	acr_value &= ~PTP_ACR_MASK;
 	switch (priv->plat->int_snapshot_num) {
 	case AUX_SNAPSHOT0:
@@ -352,12 +352,12 @@ static int intel_crosststamp(ktime_t *device,
 		priv->plat->flags &= ~STMMAC_FLAG_INT_SNAPSHOT_EN;
 		return -EINVAL;
 	}
-	writel(acr_value, ptpaddr + PTP_ACR);
+	pete_writel("drivers/net/ethernet/stmicro/stmmac/dwmac-intel.c:355", acr_value, ptpaddr + PTP_ACR);
 
 	/* Clear FIFO */
-	acr_value = readl(ptpaddr + PTP_ACR);
+	acr_value = pete_readl("drivers/net/ethernet/stmicro/stmmac/dwmac-intel.c:358", ptpaddr + PTP_ACR);
 	acr_value |= PTP_ACR_ATSFC;
-	writel(acr_value, ptpaddr + PTP_ACR);
+	pete_writel("drivers/net/ethernet/stmicro/stmmac/dwmac-intel.c:360", acr_value, ptpaddr + PTP_ACR);
 	/* Release the mutex */
 	mutex_unlock(&priv->aux_ts_lock);
 
@@ -365,11 +365,11 @@ static int intel_crosststamp(ktime_t *device,
 	 * Create a rising edge by just toggle the GPO1 to low
 	 * and back to high.
 	 */
-	gpio_value = readl(ioaddr + GMAC_GPIO_STATUS);
+	gpio_value = pete_readl("drivers/net/ethernet/stmicro/stmmac/dwmac-intel.c:368", ioaddr + GMAC_GPIO_STATUS);
 	gpio_value &= ~GMAC_GPO1;
-	writel(gpio_value, ioaddr + GMAC_GPIO_STATUS);
+	pete_writel("drivers/net/ethernet/stmicro/stmmac/dwmac-intel.c:370", gpio_value, ioaddr + GMAC_GPIO_STATUS);
 	gpio_value |= GMAC_GPO1;
-	writel(gpio_value, ioaddr + GMAC_GPIO_STATUS);
+	pete_writel("drivers/net/ethernet/stmicro/stmmac/dwmac-intel.c:372", gpio_value, ioaddr + GMAC_GPIO_STATUS);
 
 	/* Time sync done Indication - Interrupt method */
 	if (!wait_event_interruptible_timeout(priv->tstamp_busy_wait,
@@ -379,7 +379,7 @@ static int intel_crosststamp(ktime_t *device,
 		return -ETIMEDOUT;
 	}
 
-	num_snapshot = (readl(ioaddr + GMAC_TIMESTAMP_STATUS) &
+	num_snapshot = (pete_readl("drivers/net/ethernet/stmicro/stmmac/dwmac-intel.c:382", ioaddr + GMAC_TIMESTAMP_STATUS) &
 			GMAC_TIMESTAMP_ATSNS_MASK) >>
 			GMAC_TIMESTAMP_ATSNS_SHIFT;
 
@@ -1098,7 +1098,7 @@ static int intel_eth_pci_probe(struct pci_dev *pdev,
 		u32 tx_lpi_usec;
 
 		tx_lpi_usec = (plat->eee_usecs_rate / 1000000) - 1;
-		writel(tx_lpi_usec, res.addr + GMAC_1US_TIC_COUNTER);
+		pete_writel("drivers/net/ethernet/stmicro/stmmac/dwmac-intel.c:1101", tx_lpi_usec, res.addr + GMAC_1US_TIC_COUNTER);
 	}
 
 	ret = stmmac_config_multi_msi(pdev, plat, &res);

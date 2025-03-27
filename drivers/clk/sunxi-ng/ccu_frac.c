@@ -16,7 +16,7 @@ bool ccu_frac_helper_is_enabled(struct ccu_common *common,
 	if (!(common->features & CCU_FEATURE_FRACTIONAL))
 		return false;
 
-	return !(readl(common->base + common->reg) & cf->enable);
+	return !(pete_readl("drivers/clk/sunxi-ng/ccu_frac.c:19", common->base + common->reg) & cf->enable);
 }
 EXPORT_SYMBOL_NS_GPL(ccu_frac_helper_is_enabled, SUNXI_CCU);
 
@@ -30,8 +30,8 @@ void ccu_frac_helper_enable(struct ccu_common *common,
 		return;
 
 	spin_lock_irqsave(common->lock, flags);
-	reg = readl(common->base + common->reg);
-	writel(reg & ~cf->enable, common->base + common->reg);
+	reg = pete_readl("drivers/clk/sunxi-ng/ccu_frac.c:33", common->base + common->reg);
+	pete_writel("drivers/clk/sunxi-ng/ccu_frac.c:34", reg & ~cf->enable, common->base + common->reg);
 	spin_unlock_irqrestore(common->lock, flags);
 }
 EXPORT_SYMBOL_NS_GPL(ccu_frac_helper_enable, SUNXI_CCU);
@@ -46,8 +46,8 @@ void ccu_frac_helper_disable(struct ccu_common *common,
 		return;
 
 	spin_lock_irqsave(common->lock, flags);
-	reg = readl(common->base + common->reg);
-	writel(reg | cf->enable, common->base + common->reg);
+	reg = pete_readl("drivers/clk/sunxi-ng/ccu_frac.c:49", common->base + common->reg);
+	pete_writel("drivers/clk/sunxi-ng/ccu_frac.c:50", reg | cf->enable, common->base + common->reg);
 	spin_unlock_irqrestore(common->lock, flags);
 }
 EXPORT_SYMBOL_NS_GPL(ccu_frac_helper_disable, SUNXI_CCU);
@@ -76,7 +76,7 @@ unsigned long ccu_frac_helper_read_rate(struct ccu_common *common,
 	pr_debug("%s: clock is fractional (rates %lu and %lu)\n",
 		 clk_hw_get_name(&common->hw), cf->rates[0], cf->rates[1]);
 
-	reg = readl(common->base + common->reg);
+	reg = pete_readl("drivers/clk/sunxi-ng/ccu_frac.c:79", common->base + common->reg);
 
 	pr_debug("%s: clock reg is 0x%x (select is 0x%x)\n",
 		 clk_hw_get_name(&common->hw), reg, cf->select);
@@ -103,9 +103,9 @@ int ccu_frac_helper_set_rate(struct ccu_common *common,
 		return -EINVAL;
 
 	spin_lock_irqsave(common->lock, flags);
-	reg = readl(common->base + common->reg);
+	reg = pete_readl("drivers/clk/sunxi-ng/ccu_frac.c:106", common->base + common->reg);
 	reg &= ~cf->select;
-	writel(reg | sel, common->base + common->reg);
+	pete_writel("drivers/clk/sunxi-ng/ccu_frac.c:108", reg | sel, common->base + common->reg);
 	spin_unlock_irqrestore(common->lock, flags);
 
 	ccu_helper_wait_for_lock(common, lock);

@@ -36,58 +36,58 @@ static void rt_set_cs(struct spi_device *spi, bool active)
 	u32 value;
 
 	/* CS0 bit is active low */
-	value = readl(REG(RTL_SPI_SFCSR));
+	value = pete_readl("drivers/spi/spi-realtek-rtl.c:39", REG(RTL_SPI_SFCSR));
 	if (active)
 		value |= RTL_SPI_SFCSR_CSB0;
 	else
 		value &= ~RTL_SPI_SFCSR_CSB0;
-	writel(value, REG(RTL_SPI_SFCSR));
+	pete_writel("drivers/spi/spi-realtek-rtl.c:44", value, REG(RTL_SPI_SFCSR));
 }
 
 static void set_size(struct rtspi *rtspi, int size)
 {
 	u32 value;
 
-	value = readl(REG(RTL_SPI_SFCSR));
+	value = pete_readl("drivers/spi/spi-realtek-rtl.c:51", REG(RTL_SPI_SFCSR));
 	value &= RTL_SPI_SFCSR_LEN_MASK;
 	if (size == 4)
 		value |= RTL_SPI_SFCSR_LEN4;
 	else if (size == 1)
 		value |= RTL_SPI_SFCSR_LEN1;
-	writel(value, REG(RTL_SPI_SFCSR));
+	pete_writel("drivers/spi/spi-realtek-rtl.c:57", value, REG(RTL_SPI_SFCSR));
 }
 
 static inline void wait_ready(struct rtspi *rtspi)
 {
-	while (!(readl(REG(RTL_SPI_SFCSR)) & RTL_SPI_SFCSR_RDY))
+	while (!(pete_readl("drivers/spi/spi-realtek-rtl.c:62", REG(RTL_SPI_SFCSR)) & RTL_SPI_SFCSR_RDY))
 		cpu_relax();
 }
 static void send4(struct rtspi *rtspi, const u32 *buf)
 {
 	wait_ready(rtspi);
 	set_size(rtspi, 4);
-	writel(*buf, REG(RTL_SPI_SFDR));
+	pete_writel("drivers/spi/spi-realtek-rtl.c:69", *buf, REG(RTL_SPI_SFDR));
 }
 
 static void send1(struct rtspi *rtspi, const u8 *buf)
 {
 	wait_ready(rtspi);
 	set_size(rtspi, 1);
-	writel(buf[0] << 24, REG(RTL_SPI_SFDR));
+	pete_writel("drivers/spi/spi-realtek-rtl.c:76", buf[0] << 24, REG(RTL_SPI_SFDR));
 }
 
 static void rcv4(struct rtspi *rtspi, u32 *buf)
 {
 	wait_ready(rtspi);
 	set_size(rtspi, 4);
-	*buf = readl(REG(RTL_SPI_SFDR));
+	*buf = pete_readl("drivers/spi/spi-realtek-rtl.c:83", REG(RTL_SPI_SFDR));
 }
 
 static void rcv1(struct rtspi *rtspi, u8 *buf)
 {
 	wait_ready(rtspi);
 	set_size(rtspi, 1);
-	*buf = readl(REG(RTL_SPI_SFDR)) >> 24;
+	*buf = pete_readl("drivers/spi/spi-realtek-rtl.c:90", REG(RTL_SPI_SFDR)) >> 24;
 }
 
 static int transfer_one(struct spi_controller *ctrl, struct spi_device *spi,
@@ -135,16 +135,16 @@ static void init_hw(struct rtspi *rtspi)
 	u32 value;
 
 	/* Turn on big-endian byte ordering */
-	value = readl(REG(RTL_SPI_SFCR));
+	value = pete_readl("drivers/spi/spi-realtek-rtl.c:138", REG(RTL_SPI_SFCR));
 	value |= RTL_SPI_SFCR_RBO | RTL_SPI_SFCR_WBO;
-	writel(value, REG(RTL_SPI_SFCR));
+	pete_writel("drivers/spi/spi-realtek-rtl.c:140", value, REG(RTL_SPI_SFCR));
 
-	value = readl(REG(RTL_SPI_SFCSR));
+	value = pete_readl("drivers/spi/spi-realtek-rtl.c:142", REG(RTL_SPI_SFCSR));
 	/* Permanently disable CS1, since it's never used */
 	value |= RTL_SPI_SFCSR_CSB1;
 	/* Select CS0 for use */
 	value &= RTL_SPI_SFCSR_CS;
-	writel(value, REG(RTL_SPI_SFCSR));
+	pete_writel("drivers/spi/spi-realtek-rtl.c:147", value, REG(RTL_SPI_SFCSR));
 }
 
 static int realtek_rtl_spi_probe(struct platform_device *pdev)

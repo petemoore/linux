@@ -111,7 +111,7 @@ static irqreturn_t sun4i_lradc_irq(int irq, void *dev_id)
 	struct sun4i_lradc_data *lradc = dev_id;
 	u32 i, ints, val, voltage, diff, keycode = 0, closest = 0xffffffff;
 
-	ints  = readl(lradc->base + LRADC_INTS);
+	ints  = pete_readl("drivers/input/keyboard/sun4i-lradc-keys.c:114", lradc->base + LRADC_INTS);
 
 	/*
 	 * lradc supports only one keypress at a time, release does not give
@@ -124,7 +124,7 @@ static irqreturn_t sun4i_lradc_irq(int irq, void *dev_id)
 	}
 
 	if ((ints & CHAN0_KEYDOWN_IRQ) && lradc->chan0_keycode == 0) {
-		val = readl(lradc->base + LRADC_DATA0) & 0x3f;
+		val = pete_readl("drivers/input/keyboard/sun4i-lradc-keys.c:127", lradc->base + LRADC_DATA0) & 0x3f;
 		voltage = val * lradc->vref / 63;
 
 		for (i = 0; i < lradc->chan0_map_count; i++) {
@@ -141,7 +141,7 @@ static irqreturn_t sun4i_lradc_irq(int irq, void *dev_id)
 
 	input_sync(lradc->input);
 
-	writel(ints, lradc->base + LRADC_INTS);
+	pete_writel("drivers/input/keyboard/sun4i-lradc-keys.c:144", ints, lradc->base + LRADC_INTS);
 
 	return IRQ_HANDLED;
 }
@@ -170,10 +170,10 @@ static int sun4i_lradc_open(struct input_dev *dev)
 	 * Set sample time to 4 ms / 250 Hz. Wait 2 * 4 ms for key to
 	 * stabilize on press, wait (1 + 1) * 4 ms for key release
 	 */
-	writel(FIRST_CONVERT_DLY(2) | LEVELA_B_CNT(1) | HOLD_EN(1) |
+	pete_writel("drivers/input/keyboard/sun4i-lradc-keys.c:173", FIRST_CONVERT_DLY(2) | LEVELA_B_CNT(1) | HOLD_EN(1) |
 		SAMPLE_RATE(0) | ENABLE(1), lradc->base + LRADC_CTRL);
 
-	writel(CHAN0_KEYUP_IRQ | CHAN0_KEYDOWN_IRQ, lradc->base + LRADC_INTC);
+	pete_writel("drivers/input/keyboard/sun4i-lradc-keys.c:176", CHAN0_KEYUP_IRQ | CHAN0_KEYDOWN_IRQ, lradc->base + LRADC_INTC);
 
 	return 0;
 
@@ -190,9 +190,9 @@ static void sun4i_lradc_close(struct input_dev *dev)
 	struct sun4i_lradc_data *lradc = input_get_drvdata(dev);
 
 	/* Disable lradc, leave other settings unchanged */
-	writel(FIRST_CONVERT_DLY(2) | LEVELA_B_CNT(1) | HOLD_EN(1) |
+	pete_writel("drivers/input/keyboard/sun4i-lradc-keys.c:193", FIRST_CONVERT_DLY(2) | LEVELA_B_CNT(1) | HOLD_EN(1) |
 		SAMPLE_RATE(2), lradc->base + LRADC_CTRL);
-	writel(0, lradc->base + LRADC_INTC);
+	pete_writel("drivers/input/keyboard/sun4i-lradc-keys.c:195", 0, lradc->base + LRADC_INTC);
 
 	clk_disable_unprepare(lradc->clk);
 	reset_control_assert(lradc->reset);

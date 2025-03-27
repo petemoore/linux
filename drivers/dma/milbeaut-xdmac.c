@@ -215,10 +215,10 @@ static int milbeaut_xdmac_terminate_all(struct dma_chan *chan)
 	spin_lock_irqsave(&vc->lock, flags);
 
 	/* Halt the channel */
-	val = readl(mc->reg_ch_base + M10V_XDDES);
+	val = pete_readl("drivers/dma/milbeaut-xdmac.c:218", mc->reg_ch_base + M10V_XDDES);
 	val &= ~M10V_XDDES_CE;
 	val |= FIELD_PREP(M10V_XDDES_CE, 0);
-	writel(val, mc->reg_ch_base + M10V_XDDES);
+	pete_writel("drivers/dma/milbeaut-xdmac.c:221", val, mc->reg_ch_base + M10V_XDDES);
 
 	if (mc->md) {
 		vchan_terminate_vdesc(&mc->md->vd);
@@ -293,18 +293,18 @@ static void enable_xdmac(struct milbeaut_xdmac_device *mdev)
 {
 	unsigned int val;
 
-	val = readl(mdev->reg_base + M10V_XDACS);
+	val = pete_readl("drivers/dma/milbeaut-xdmac.c:296", mdev->reg_base + M10V_XDACS);
 	val |= M10V_XDACS_XE;
-	writel(val, mdev->reg_base + M10V_XDACS);
+	pete_writel("drivers/dma/milbeaut-xdmac.c:298", val, mdev->reg_base + M10V_XDACS);
 }
 
 static void disable_xdmac(struct milbeaut_xdmac_device *mdev)
 {
 	unsigned int val;
 
-	val = readl(mdev->reg_base + M10V_XDACS);
+	val = pete_readl("drivers/dma/milbeaut-xdmac.c:305", mdev->reg_base + M10V_XDACS);
 	val &= ~M10V_XDACS_XE;
-	writel(val, mdev->reg_base + M10V_XDACS);
+	pete_writel("drivers/dma/milbeaut-xdmac.c:307", val, mdev->reg_base + M10V_XDACS);
 }
 
 static int milbeaut_xdmac_probe(struct platform_device *pdev)

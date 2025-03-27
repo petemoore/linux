@@ -52,7 +52,7 @@
 
 static unsigned int altera_jtaguart_tx_space(struct uart_port *port, u32 *ctlp)
 {
-	u32 ctl = readl(port->membase + ALTERA_JTAGUART_CONTROL_REG);
+	u32 ctl = pete_readl("drivers/tty/serial/altera_jtaguart.c:55", port->membase + ALTERA_JTAGUART_CONTROL_REG);
 
 	if (ctlp)
 		*ctlp = ctl;
@@ -77,21 +77,21 @@ static void altera_jtaguart_set_mctrl(struct uart_port *port, unsigned int sigs)
 static void altera_jtaguart_start_tx(struct uart_port *port)
 {
 	port->read_status_mask |= ALTERA_JTAGUART_CONTROL_WE_MSK;
-	writel(port->read_status_mask,
+	pete_writel("drivers/tty/serial/altera_jtaguart.c:80", port->read_status_mask,
 			port->membase + ALTERA_JTAGUART_CONTROL_REG);
 }
 
 static void altera_jtaguart_stop_tx(struct uart_port *port)
 {
 	port->read_status_mask &= ~ALTERA_JTAGUART_CONTROL_WE_MSK;
-	writel(port->read_status_mask,
+	pete_writel("drivers/tty/serial/altera_jtaguart.c:87", port->read_status_mask,
 			port->membase + ALTERA_JTAGUART_CONTROL_REG);
 }
 
 static void altera_jtaguart_stop_rx(struct uart_port *port)
 {
 	port->read_status_mask &= ~ALTERA_JTAGUART_CONTROL_RE_MSK;
-	writel(port->read_status_mask,
+	pete_writel("drivers/tty/serial/altera_jtaguart.c:94", port->read_status_mask,
 			port->membase + ALTERA_JTAGUART_CONTROL_REG);
 }
 
@@ -113,7 +113,7 @@ static void altera_jtaguart_rx_chars(struct uart_port *port)
 	u32 status;
 	u8 ch;
 
-	while ((status = readl(port->membase + ALTERA_JTAGUART_DATA_REG)) &
+	while ((status = pete_readl("drivers/tty/serial/altera_jtaguart.c:116", port->membase + ALTERA_JTAGUART_DATA_REG)) &
 	       ALTERA_JTAGUART_DATA_RVALID_MSK) {
 		ch = status & ALTERA_JTAGUART_DATA_DATA_MSK;
 		port->icount.rx++;
@@ -135,7 +135,7 @@ static void altera_jtaguart_tx_chars(struct uart_port *port)
 
 	uart_port_tx_limited(port, ch, count,
 		true,
-		writel(ch, port->membase + ALTERA_JTAGUART_DATA_REG),
+		pete_writel("drivers/tty/serial/altera_jtaguart.c:138", ch, port->membase + ALTERA_JTAGUART_DATA_REG),
 		({}));
 }
 
@@ -144,7 +144,7 @@ static irqreturn_t altera_jtaguart_interrupt(int irq, void *data)
 	struct uart_port *port = data;
 	unsigned int isr;
 
-	isr = (readl(port->membase + ALTERA_JTAGUART_CONTROL_REG) >>
+	isr = (pete_readl("drivers/tty/serial/altera_jtaguart.c:147", port->membase + ALTERA_JTAGUART_CONTROL_REG) >>
 	       ALTERA_JTAGUART_CONTROL_RI_OFF) & port->read_status_mask;
 
 	spin_lock(&port->lock);
@@ -164,7 +164,7 @@ static void altera_jtaguart_config_port(struct uart_port *port, int flags)
 	port->type = PORT_ALTERA_JTAGUART;
 
 	/* Clear mask, so no surprise interrupts. */
-	writel(0, port->membase + ALTERA_JTAGUART_CONTROL_REG);
+	pete_writel("drivers/tty/serial/altera_jtaguart.c:167", 0, port->membase + ALTERA_JTAGUART_CONTROL_REG);
 }
 
 static int altera_jtaguart_startup(struct uart_port *port)
@@ -184,7 +184,7 @@ static int altera_jtaguart_startup(struct uart_port *port)
 
 	/* Enable RX interrupts now */
 	port->read_status_mask = ALTERA_JTAGUART_CONTROL_RE_MSK;
-	writel(port->read_status_mask,
+	pete_writel("drivers/tty/serial/altera_jtaguart.c:187", port->read_status_mask,
 			port->membase + ALTERA_JTAGUART_CONTROL_REG);
 
 	spin_unlock_irqrestore(&port->lock, flags);
@@ -200,7 +200,7 @@ static void altera_jtaguart_shutdown(struct uart_port *port)
 
 	/* Disable all interrupts now */
 	port->read_status_mask = 0;
-	writel(port->read_status_mask,
+	pete_writel("drivers/tty/serial/altera_jtaguart.c:203", port->read_status_mask,
 			port->membase + ALTERA_JTAGUART_CONTROL_REG);
 
 	spin_unlock_irqrestore(&port->lock, flags);
@@ -275,7 +275,7 @@ static void altera_jtaguart_console_putc(struct uart_port *port, unsigned char c
 		cpu_relax();
 		spin_lock_irqsave(&port->lock, flags);
 	}
-	writel(c, port->membase + ALTERA_JTAGUART_DATA_REG);
+	pete_writel("drivers/tty/serial/altera_jtaguart.c:278", c, port->membase + ALTERA_JTAGUART_DATA_REG);
 	spin_unlock_irqrestore(&port->lock, flags);
 }
 #else
@@ -289,7 +289,7 @@ static void altera_jtaguart_console_putc(struct uart_port *port, unsigned char c
 		cpu_relax();
 		spin_lock_irqsave(&port->lock, flags);
 	}
-	writel(c, port->membase + ALTERA_JTAGUART_DATA_REG);
+	pete_writel("drivers/tty/serial/altera_jtaguart.c:292", c, port->membase + ALTERA_JTAGUART_DATA_REG);
 	spin_unlock_irqrestore(&port->lock, flags);
 }
 #endif

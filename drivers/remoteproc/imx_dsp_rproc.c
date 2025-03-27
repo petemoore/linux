@@ -189,9 +189,9 @@ static int imx8mp_dsp_reset(struct imx_dsp_rproc *priv)
 	int pwrctl;
 
 	/* Put DSP into reset and stall */
-	pwrctl = readl(dap + IMX8M_DAP_PWRCTL);
+	pwrctl = pete_readl("drivers/remoteproc/imx_dsp_rproc.c:192", dap + IMX8M_DAP_PWRCTL);
 	pwrctl |= IMX8M_PWRCTL_CORERESET;
-	writel(pwrctl, dap + IMX8M_DAP_PWRCTL);
+	pete_writel("drivers/remoteproc/imx_dsp_rproc.c:194", pwrctl, dap + IMX8M_DAP_PWRCTL);
 
 	/* Keep reset asserted for 10 cycles */
 	usleep_range(1, 2);
@@ -201,9 +201,9 @@ static int imx8mp_dsp_reset(struct imx_dsp_rproc *priv)
 			   IMX8M_AudioDSP_REG2_RUNSTALL);
 
 	/* Take the DSP out of reset and keep stalled for FW loading */
-	pwrctl = readl(dap + IMX8M_DAP_PWRCTL);
+	pwrctl = pete_readl("drivers/remoteproc/imx_dsp_rproc.c:204", dap + IMX8M_DAP_PWRCTL);
 	pwrctl &= ~IMX8M_PWRCTL_CORERESET;
-	writel(pwrctl, dap + IMX8M_DAP_PWRCTL);
+	pete_writel("drivers/remoteproc/imx_dsp_rproc.c:206", pwrctl, dap + IMX8M_DAP_PWRCTL);
 
 	iounmap(dap);
 	return 0;
@@ -763,7 +763,7 @@ static int imx_dsp_rproc_memcpy(void *dst, const void *src, size_t size)
 
 	/* copy data in units of 32 bits at a time */
 	for (i = 0; i < q; i++)
-		writel(source[i], dest + i * 4);
+		pete_writel("drivers/remoteproc/imx_dsp_rproc.c:766", source[i], dest + i * 4);
 
 	if (r) {
 		affected_mask = GENMASK(8 * r, 0);
@@ -773,14 +773,14 @@ static int imx_dsp_rproc_memcpy(void *dst, const void *src, size_t size)
 		 * bytes, and write back to dest.
 		 * For unaffected bytes, it should not be changed
 		 */
-		tmp = readl(dest + q * 4);
+		tmp = pete_readl("drivers/remoteproc/imx_dsp_rproc.c:776", dest + q * 4);
 		tmp &= ~affected_mask;
 
 		/* avoid reading after end of source */
 		for (i = 0; i < r; i++)
 			tmp |= (src_byte[q * 4 + i] << (8 * i));
 
-		writel(tmp, dest + q * 4);
+		pete_writel("drivers/remoteproc/imx_dsp_rproc.c:783", tmp, dest + q * 4);
 	}
 
 	return 0;
@@ -811,7 +811,7 @@ static int imx_dsp_rproc_memset(void *addr, u8 value, size_t size)
 	r = size % 4;
 
 	while (q--)
-		writel(tmp_val, tmp_dst++);
+		pete_writel("drivers/remoteproc/imx_dsp_rproc.c:814", tmp_val, tmp_dst++);
 
 	if (r) {
 		affected_mask = GENMASK(8 * r, 0);
@@ -821,11 +821,11 @@ static int imx_dsp_rproc_memset(void *addr, u8 value, size_t size)
 		 * bytes, and write back to addr.
 		 * For unaffected bytes, it should not be changed
 		 */
-		tmp = readl(tmp_dst);
+		tmp = pete_readl("drivers/remoteproc/imx_dsp_rproc.c:824", tmp_dst);
 		tmp &= ~affected_mask;
 
 		tmp |= (tmp_val & affected_mask);
-		writel(tmp, tmp_dst);
+		pete_writel("drivers/remoteproc/imx_dsp_rproc.c:828", tmp, tmp_dst);
 	}
 
 	return 0;

@@ -209,7 +209,7 @@ static int aspeed_adc_set_trim_data(struct iio_dev *indio_dev)
 			"trimming val = %d, offset = %08x, fields = %08x\n",
 			trimming_val, data->model_data->trim_locate->offset,
 			data->model_data->trim_locate->field);
-		writel(trimming_val, data->base + ASPEED_REG_COMPENSATION_TRIM);
+		pete_writel("drivers/iio/adc/aspeed_adc.c:212", trimming_val, data->base + ASPEED_REG_COMPENSATION_TRIM);
 	}
 	return 0;
 }
@@ -221,7 +221,7 @@ static int aspeed_adc_compensation(struct iio_dev *indio_dev)
 	u32 adc_engine_control_reg_val;
 
 	adc_engine_control_reg_val =
-		readl(data->base + ASPEED_REG_ENGINE_CONTROL);
+		pete_readl("drivers/iio/adc/aspeed_adc.c:224", data->base + ASPEED_REG_ENGINE_CONTROL);
 	adc_engine_control_reg_val &= ~ASPEED_ADC_OP_MODE;
 	adc_engine_control_reg_val |=
 		(FIELD_PREP(ASPEED_ADC_OP_MODE, ASPEED_ADC_OP_MODE_NORMAL) |
@@ -233,7 +233,7 @@ static int aspeed_adc_compensation(struct iio_dev *indio_dev)
 	 * value. We can get compensating value = 0x200 - ADC read raw value.
 	 * It is recommended to average at least 10 samples to get a final CV.
 	 */
-	writel(adc_engine_control_reg_val | ASPEED_ADC_CTRL_COMPENSATION |
+	pete_writel("drivers/iio/adc/aspeed_adc.c:236", adc_engine_control_reg_val | ASPEED_ADC_CTRL_COMPENSATION |
 		       ASPEED_ADC_CTRL_CHANNEL_ENABLE(0),
 	       data->base + ASPEED_REG_ENGINE_CONTROL);
 	/*
@@ -248,11 +248,11 @@ static int aspeed_adc_compensation(struct iio_dev *indio_dev)
 		 * is fresh each time.
 		 */
 		ndelay(data->sample_period_ns);
-		adc_raw += readw(data->base + aspeed_adc_iio_channels[0].address);
+		adc_raw += pete_readw("drivers/iio/adc/aspeed_adc.c:251", data->base + aspeed_adc_iio_channels[0].address);
 	}
 	adc_raw >>= 4;
 	data->cv = BIT(ASPEED_RESOLUTION_BITS - 1) - adc_raw;
-	writel(adc_engine_control_reg_val,
+	pete_writel("drivers/iio/adc/aspeed_adc.c:255", adc_engine_control_reg_val,
 	       data->base + ASPEED_REG_ENGINE_CONTROL);
 	dev_dbg(data->dev, "Compensating value = %d\n", data->cv);
 
@@ -288,8 +288,8 @@ static int aspeed_adc_read_raw(struct iio_dev *indio_dev,
 	case IIO_CHAN_INFO_RAW:
 		if (data->battery_sensing && chan->channel == 7) {
 			adc_engine_control_reg_val =
-				readl(data->base + ASPEED_REG_ENGINE_CONTROL);
-			writel(adc_engine_control_reg_val |
+				pete_readl("drivers/iio/adc/aspeed_adc.c:291", data->base + ASPEED_REG_ENGINE_CONTROL);
+			pete_writel("drivers/iio/adc/aspeed_adc.c:292", adc_engine_control_reg_val |
 				       FIELD_PREP(ASPEED_ADC_CH7_MODE,
 						  ASPEED_ADC_CH7_BAT) |
 				       ASPEED_ADC_BAT_SENSING_ENABLE,
@@ -299,14 +299,14 @@ static int aspeed_adc_read_raw(struct iio_dev *indio_dev,
 			 * Experiment result is 1ms.
 			 */
 			mdelay(1);
-			*val = readw(data->base + chan->address);
+			*val = pete_readw("drivers/iio/adc/aspeed_adc.c:302", data->base + chan->address);
 			*val = (*val * data->battery_mode_gain.mult) /
 			       data->battery_mode_gain.div;
 			/* Restore control register value */
-			writel(adc_engine_control_reg_val,
+			pete_writel("drivers/iio/adc/aspeed_adc.c:306", adc_engine_control_reg_val,
 			       data->base + ASPEED_REG_ENGINE_CONTROL);
 		} else
-			*val = readw(data->base + chan->address);
+			*val = pete_readw("drivers/iio/adc/aspeed_adc.c:309", data->base + chan->address);
 		return IIO_VAL_INT;
 
 	case IIO_CHAN_INFO_OFFSET:
@@ -364,7 +364,7 @@ static int aspeed_adc_reg_access(struct iio_dev *indio_dev,
 	if (!readval || reg % 4 || reg > ASPEED_REG_MAX)
 		return -EINVAL;
 
-	*readval = readl(data->base + reg);
+	*readval = pete_readl("drivers/iio/adc/aspeed_adc.c:367", data->base + reg);
 
 	return 0;
 }
@@ -400,7 +400,7 @@ static void aspeed_adc_power_down(void *data)
 {
 	struct aspeed_adc_data *priv_data = data;
 
-	writel(FIELD_PREP(ASPEED_ADC_OP_MODE, ASPEED_ADC_OP_MODE_PWR_DOWN),
+	pete_writel("drivers/iio/adc/aspeed_adc.c:403", FIELD_PREP(ASPEED_ADC_OP_MODE, ASPEED_ADC_OP_MODE_PWR_DOWN),
 	       priv_data->base + ASPEED_REG_ENGINE_CONTROL);
 }
 
@@ -422,7 +422,7 @@ static int aspeed_adc_vref_config(struct iio_dev *indio_dev)
 		return 0;
 	}
 	adc_engine_control_reg_val =
-		readl(data->base + ASPEED_REG_ENGINE_CONTROL);
+		pete_readl("drivers/iio/adc/aspeed_adc.c:425", data->base + ASPEED_REG_ENGINE_CONTROL);
 	data->regulator = devm_regulator_get_optional(data->dev, "vref");
 	if (!IS_ERR(data->regulator)) {
 		ret = regulator_enable(data->regulator);
@@ -436,13 +436,13 @@ static int aspeed_adc_vref_config(struct iio_dev *indio_dev)
 		/* Conversion from uV to mV */
 		data->vref_mv /= 1000;
 		if ((data->vref_mv >= 1550) && (data->vref_mv <= 2700))
-			writel(adc_engine_control_reg_val |
+			pete_writel("drivers/iio/adc/aspeed_adc.c:439", adc_engine_control_reg_val |
 				FIELD_PREP(
 					ASPEED_ADC_REF_VOLTAGE,
 					ASPEED_ADC_REF_VOLTAGE_EXT_HIGH),
 			data->base + ASPEED_REG_ENGINE_CONTROL);
 		else if ((data->vref_mv >= 900) && (data->vref_mv <= 1650))
-			writel(adc_engine_control_reg_val |
+			pete_writel("drivers/iio/adc/aspeed_adc.c:445", adc_engine_control_reg_val |
 				FIELD_PREP(
 					ASPEED_ADC_REF_VOLTAGE,
 					ASPEED_ADC_REF_VOLTAGE_EXT_LOW),
@@ -462,12 +462,12 @@ static int aspeed_adc_vref_config(struct iio_dev *indio_dev)
 		/* Conversion from uV to mV */
 		data->vref_mv /= 1000;
 		if (data->vref_mv == 2500)
-			writel(adc_engine_control_reg_val |
+			pete_writel("drivers/iio/adc/aspeed_adc.c:465", adc_engine_control_reg_val |
 				FIELD_PREP(ASPEED_ADC_REF_VOLTAGE,
 						ASPEED_ADC_REF_VOLTAGE_2500mV),
 			data->base + ASPEED_REG_ENGINE_CONTROL);
 		else if (data->vref_mv == 1200)
-			writel(adc_engine_control_reg_val |
+			pete_writel("drivers/iio/adc/aspeed_adc.c:470", adc_engine_control_reg_val |
 				FIELD_PREP(ASPEED_ADC_REF_VOLTAGE,
 						ASPEED_ADC_REF_VOLTAGE_1200mV),
 			data->base + ASPEED_REG_ENGINE_CONTROL);
@@ -573,7 +573,7 @@ static int aspeed_adc_probe(struct platform_device *pdev)
 			     NULL)) {
 		if (data->model_data->bat_sense_sup) {
 			data->battery_sensing = 1;
-			if (readl(data->base + ASPEED_REG_ENGINE_CONTROL) &
+			if (pete_readl("drivers/iio/adc/aspeed_adc.c:576", data->base + ASPEED_REG_ENGINE_CONTROL) &
 			    ASPEED_ADC_BAT_SENSING_DIV) {
 				data->battery_mode_gain.mult = 3;
 				data->battery_mode_gain.div = 1;
@@ -600,12 +600,12 @@ static int aspeed_adc_probe(struct platform_device *pdev)
 		return ret;
 
 	adc_engine_control_reg_val =
-		readl(data->base + ASPEED_REG_ENGINE_CONTROL);
+		pete_readl("drivers/iio/adc/aspeed_adc.c:603", data->base + ASPEED_REG_ENGINE_CONTROL);
 	adc_engine_control_reg_val |=
 		FIELD_PREP(ASPEED_ADC_OP_MODE, ASPEED_ADC_OP_MODE_NORMAL) |
 		ASPEED_ADC_ENGINE_ENABLE;
 	/* Enable engine in normal mode. */
-	writel(adc_engine_control_reg_val,
+	pete_writel("drivers/iio/adc/aspeed_adc.c:608", adc_engine_control_reg_val,
 	       data->base + ASPEED_REG_ENGINE_CONTROL);
 
 	ret = devm_add_action_or_reset(data->dev, aspeed_adc_power_down,
@@ -628,9 +628,9 @@ static int aspeed_adc_probe(struct platform_device *pdev)
 	aspeed_adc_compensation(indio_dev);
 	/* Start all channels in normal mode. */
 	adc_engine_control_reg_val =
-		readl(data->base + ASPEED_REG_ENGINE_CONTROL);
+		pete_readl("drivers/iio/adc/aspeed_adc.c:631", data->base + ASPEED_REG_ENGINE_CONTROL);
 	adc_engine_control_reg_val |= ASPEED_ADC_CTRL_CHANNEL;
-	writel(adc_engine_control_reg_val,
+	pete_writel("drivers/iio/adc/aspeed_adc.c:633", adc_engine_control_reg_val,
 	       data->base + ASPEED_REG_ENGINE_CONTROL);
 
 	indio_dev->name = data->model_data->model_name;

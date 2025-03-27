@@ -1666,27 +1666,27 @@ static void tegra194_cbb_fault_enable(struct tegra_cbb *cbb)
 {
 	struct tegra194_cbb *priv = to_tegra194_cbb(cbb);
 
-	writel(1, priv->regs + ERRLOGGER_0_FAULTEN_0);
-	writel(1, priv->regs + ERRLOGGER_1_FAULTEN_0);
-	writel(1, priv->regs + ERRLOGGER_2_FAULTEN_0);
+	pete_writel("drivers/soc/tegra/cbb/tegra194-cbb.c:1669", 1, priv->regs + ERRLOGGER_0_FAULTEN_0);
+	pete_writel("drivers/soc/tegra/cbb/tegra194-cbb.c:1670", 1, priv->regs + ERRLOGGER_1_FAULTEN_0);
+	pete_writel("drivers/soc/tegra/cbb/tegra194-cbb.c:1671", 1, priv->regs + ERRLOGGER_2_FAULTEN_0);
 }
 
 static void tegra194_cbb_stall_enable(struct tegra_cbb *cbb)
 {
 	struct tegra194_cbb *priv = to_tegra194_cbb(cbb);
 
-	writel(1, priv->regs + ERRLOGGER_0_STALLEN_0);
-	writel(1, priv->regs + ERRLOGGER_1_STALLEN_0);
-	writel(1, priv->regs + ERRLOGGER_2_STALLEN_0);
+	pete_writel("drivers/soc/tegra/cbb/tegra194-cbb.c:1678", 1, priv->regs + ERRLOGGER_0_STALLEN_0);
+	pete_writel("drivers/soc/tegra/cbb/tegra194-cbb.c:1679", 1, priv->regs + ERRLOGGER_1_STALLEN_0);
+	pete_writel("drivers/soc/tegra/cbb/tegra194-cbb.c:1680", 1, priv->regs + ERRLOGGER_2_STALLEN_0);
 }
 
 static void tegra194_cbb_error_clear(struct tegra_cbb *cbb)
 {
 	struct tegra194_cbb *priv = to_tegra194_cbb(cbb);
 
-	writel(1, priv->regs + ERRLOGGER_0_ERRCLR_0);
-	writel(1, priv->regs + ERRLOGGER_1_ERRCLR_0);
-	writel(1, priv->regs + ERRLOGGER_2_ERRCLR_0);
+	pete_writel("drivers/soc/tegra/cbb/tegra194-cbb.c:1687", 1, priv->regs + ERRLOGGER_0_ERRCLR_0);
+	pete_writel("drivers/soc/tegra/cbb/tegra194-cbb.c:1688", 1, priv->regs + ERRLOGGER_1_ERRCLR_0);
+	pete_writel("drivers/soc/tegra/cbb/tegra194-cbb.c:1689", 1, priv->regs + ERRLOGGER_2_ERRCLR_0);
 	dsb(sy);
 }
 
@@ -1695,9 +1695,9 @@ static u32 tegra194_cbb_get_status(struct tegra_cbb *cbb)
 	struct tegra194_cbb *priv = to_tegra194_cbb(cbb);
 	u32 value;
 
-	value = readl(priv->regs + ERRLOGGER_0_ERRVLD_0);
-	value |= (readl(priv->regs + ERRLOGGER_1_ERRVLD_0) << 1);
-	value |= (readl(priv->regs + ERRLOGGER_2_ERRVLD_0) << 2);
+	value = pete_readl("drivers/soc/tegra/cbb/tegra194-cbb.c:1698", priv->regs + ERRLOGGER_0_ERRVLD_0);
+	value |= (pete_readl("drivers/soc/tegra/cbb/tegra194-cbb.c:1699", priv->regs + ERRLOGGER_1_ERRVLD_0) << 1);
+	value |= (pete_readl("drivers/soc/tegra/cbb/tegra194-cbb.c:1700", priv->regs + ERRLOGGER_2_ERRVLD_0) << 2);
 
 	dsb(sy);
 	return value;
@@ -1707,8 +1707,8 @@ static u32 tegra194_axi2apb_status(void __iomem *addr)
 {
 	u32 value;
 
-	value = readl(addr + DMAAPB_X_RAW_INTERRUPT_STATUS);
-	writel(0xffffffff, addr + DMAAPB_X_RAW_INTERRUPT_STATUS);
+	value = pete_readl("drivers/soc/tegra/cbb/tegra194-cbb.c:1710", addr + DMAAPB_X_RAW_INTERRUPT_STATUS);
+	pete_writel("drivers/soc/tegra/cbb/tegra194-cbb.c:1711", 0xffffffff, addr + DMAAPB_X_RAW_INTERRUPT_STATUS);
 
 	return value;
 }
@@ -1923,26 +1923,26 @@ static bool print_errloggerX_info(struct seq_file *file, struct tegra194_cbb *cb
 	tegra_cbb_print_err(file, "\tError Logger\t\t: %d\n", errloggerX);
 
 	if (errloggerX == 0) {
-		cbb->errlog0 = readl(cbb->regs + ERRLOGGER_0_ERRLOG0_0);
-		cbb->errlog1 = readl(cbb->regs + ERRLOGGER_0_ERRLOG1_0);
-		cbb->errlog2 = readl(cbb->regs + ERRLOGGER_0_RSVD_00_0);
-		cbb->errlog3 = readl(cbb->regs + ERRLOGGER_0_ERRLOG3_0);
-		cbb->errlog4 = readl(cbb->regs + ERRLOGGER_0_ERRLOG4_0);
-		cbb->errlog5 = readl(cbb->regs + ERRLOGGER_0_ERRLOG5_0);
+		cbb->errlog0 = pete_readl("drivers/soc/tegra/cbb/tegra194-cbb.c:1926", cbb->regs + ERRLOGGER_0_ERRLOG0_0);
+		cbb->errlog1 = pete_readl("drivers/soc/tegra/cbb/tegra194-cbb.c:1927", cbb->regs + ERRLOGGER_0_ERRLOG1_0);
+		cbb->errlog2 = pete_readl("drivers/soc/tegra/cbb/tegra194-cbb.c:1928", cbb->regs + ERRLOGGER_0_RSVD_00_0);
+		cbb->errlog3 = pete_readl("drivers/soc/tegra/cbb/tegra194-cbb.c:1929", cbb->regs + ERRLOGGER_0_ERRLOG3_0);
+		cbb->errlog4 = pete_readl("drivers/soc/tegra/cbb/tegra194-cbb.c:1930", cbb->regs + ERRLOGGER_0_ERRLOG4_0);
+		cbb->errlog5 = pete_readl("drivers/soc/tegra/cbb/tegra194-cbb.c:1931", cbb->regs + ERRLOGGER_0_ERRLOG5_0);
 	} else if (errloggerX == 1) {
-		cbb->errlog0 = readl(cbb->regs + ERRLOGGER_1_ERRLOG0_0);
-		cbb->errlog1 = readl(cbb->regs + ERRLOGGER_1_ERRLOG1_0);
-		cbb->errlog2 = readl(cbb->regs + ERRLOGGER_1_RSVD_00_0);
-		cbb->errlog3 = readl(cbb->regs + ERRLOGGER_1_ERRLOG3_0);
-		cbb->errlog4 = readl(cbb->regs + ERRLOGGER_1_ERRLOG4_0);
-		cbb->errlog5 = readl(cbb->regs + ERRLOGGER_1_ERRLOG5_0);
+		cbb->errlog0 = pete_readl("drivers/soc/tegra/cbb/tegra194-cbb.c:1933", cbb->regs + ERRLOGGER_1_ERRLOG0_0);
+		cbb->errlog1 = pete_readl("drivers/soc/tegra/cbb/tegra194-cbb.c:1934", cbb->regs + ERRLOGGER_1_ERRLOG1_0);
+		cbb->errlog2 = pete_readl("drivers/soc/tegra/cbb/tegra194-cbb.c:1935", cbb->regs + ERRLOGGER_1_RSVD_00_0);
+		cbb->errlog3 = pete_readl("drivers/soc/tegra/cbb/tegra194-cbb.c:1936", cbb->regs + ERRLOGGER_1_ERRLOG3_0);
+		cbb->errlog4 = pete_readl("drivers/soc/tegra/cbb/tegra194-cbb.c:1937", cbb->regs + ERRLOGGER_1_ERRLOG4_0);
+		cbb->errlog5 = pete_readl("drivers/soc/tegra/cbb/tegra194-cbb.c:1938", cbb->regs + ERRLOGGER_1_ERRLOG5_0);
 	} else if (errloggerX == 2) {
-		cbb->errlog0 = readl(cbb->regs + ERRLOGGER_2_ERRLOG0_0);
-		cbb->errlog1 = readl(cbb->regs + ERRLOGGER_2_ERRLOG1_0);
-		cbb->errlog2 = readl(cbb->regs + ERRLOGGER_2_RSVD_00_0);
-		cbb->errlog3 = readl(cbb->regs + ERRLOGGER_2_ERRLOG3_0);
-		cbb->errlog4 = readl(cbb->regs + ERRLOGGER_2_ERRLOG4_0);
-		cbb->errlog5 = readl(cbb->regs + ERRLOGGER_2_ERRLOG5_0);
+		cbb->errlog0 = pete_readl("drivers/soc/tegra/cbb/tegra194-cbb.c:1940", cbb->regs + ERRLOGGER_2_ERRLOG0_0);
+		cbb->errlog1 = pete_readl("drivers/soc/tegra/cbb/tegra194-cbb.c:1941", cbb->regs + ERRLOGGER_2_ERRLOG1_0);
+		cbb->errlog2 = pete_readl("drivers/soc/tegra/cbb/tegra194-cbb.c:1942", cbb->regs + ERRLOGGER_2_RSVD_00_0);
+		cbb->errlog3 = pete_readl("drivers/soc/tegra/cbb/tegra194-cbb.c:1943", cbb->regs + ERRLOGGER_2_ERRLOG3_0);
+		cbb->errlog4 = pete_readl("drivers/soc/tegra/cbb/tegra194-cbb.c:1944", cbb->regs + ERRLOGGER_2_ERRLOG4_0);
+		cbb->errlog5 = pete_readl("drivers/soc/tegra/cbb/tegra194-cbb.c:1945", cbb->regs + ERRLOGGER_2_ERRLOG5_0);
 	}
 
 	tegra_cbb_print_err(file, "\tErrLog0\t\t\t: %#x\n", cbb->errlog0);

@@ -128,7 +128,7 @@ arxescsi_dma_pseudo(struct Scsi_Host *host, struct scsi_pointer *SCp,
 	if (direction == DMA_OUT) {
 		unsigned int word;
 		while (length > 256) {
-			if (readb(base + 0x80) & STAT_INT) {
+			if (pete_readb("drivers/scsi/arm/arxescsi.c:131", base + 0x80) & STAT_INT) {
 				error = 1;
 				break;
 			}
@@ -139,15 +139,15 @@ arxescsi_dma_pseudo(struct Scsi_Host *host, struct scsi_pointer *SCp,
 
 		if (!error)
 			while (length > 0) {
-				if (readb(base + 0x80) & STAT_INT)
+				if (pete_readb("drivers/scsi/arm/arxescsi.c:142", base + 0x80) & STAT_INT)
 					break;
 	 
-				if (!(readb(base + DMASTAT_OFFSET) & DMASTAT_DRQ))
+				if (!(pete_readb("drivers/scsi/arm/arxescsi.c:145", base + DMASTAT_OFFSET) & DMASTAT_DRQ))
 					continue;
 
 				word = *addr | *(addr + 1) << 8;
 
-				writew(word, base + DMADATA_OFFSET);
+				pete_writew("drivers/scsi/arm/arxescsi.c:150", word, base + DMADATA_OFFSET);
 				if (length > 1) {
 					addr += 2;
 					length -= 2;
@@ -160,12 +160,12 @@ arxescsi_dma_pseudo(struct Scsi_Host *host, struct scsi_pointer *SCp,
 	else {
 		if (transfer && (transfer & 255)) {
 			while (length >= 256) {
-				if (readb(base + 0x80) & STAT_INT) {
+				if (pete_readb("drivers/scsi/arm/arxescsi.c:163", base + 0x80) & STAT_INT) {
 					error = 1;
 					break;
 				}
 	    
-				if (!(readb(base + DMASTAT_OFFSET) & DMASTAT_DRQ))
+				if (!(pete_readb("drivers/scsi/arm/arxescsi.c:168", base + DMASTAT_OFFSET) & DMASTAT_DRQ))
 					continue;
 
 				readsw(base + DMADATA_OFFSET, addr, 256 >> 1);
@@ -178,13 +178,13 @@ arxescsi_dma_pseudo(struct Scsi_Host *host, struct scsi_pointer *SCp,
 			while (length > 0) {
 				unsigned long word;
 
-				if (readb(base + 0x80) & STAT_INT)
+				if (pete_readb("drivers/scsi/arm/arxescsi.c:181", base + 0x80) & STAT_INT)
 					break;
 
-				if (!(readb(base + DMASTAT_OFFSET) & DMASTAT_DRQ))
+				if (!(pete_readb("drivers/scsi/arm/arxescsi.c:184", base + DMASTAT_OFFSET) & DMASTAT_DRQ))
 					continue;
 
-				word = readw(base + DMADATA_OFFSET);
+				word = pete_readw("drivers/scsi/arm/arxescsi.c:187", base + DMADATA_OFFSET);
 				*addr++ = word;
 				if (--length > 0) {
 					*addr++ = word >> 8;

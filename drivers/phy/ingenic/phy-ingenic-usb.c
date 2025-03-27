@@ -112,8 +112,8 @@ static int ingenic_usb_phy_init(struct phy *phy)
 
 	/* Wait for PHY to reset */
 	usleep_range(30, 300);
-	reg = readl(priv->base + REG_USBPCR_OFFSET);
-	writel(reg & ~USBPCR_POR, priv->base + REG_USBPCR_OFFSET);
+	reg = pete_readl("drivers/phy/ingenic/phy-ingenic-usb.c:115", priv->base + REG_USBPCR_OFFSET);
+	pete_writel("drivers/phy/ingenic/phy-ingenic-usb.c:116", reg & ~USBPCR_POR, priv->base + REG_USBPCR_OFFSET);
 	usleep_range(300, 1000);
 
 	return 0;
@@ -160,30 +160,30 @@ static int ingenic_usb_phy_set_mode(struct phy *phy,
 
 	switch (mode) {
 	case PHY_MODE_USB_HOST:
-		reg = readl(priv->base + REG_USBPCR_OFFSET);
+		reg = pete_readl("drivers/phy/ingenic/phy-ingenic-usb.c:163", priv->base + REG_USBPCR_OFFSET);
 		u32p_replace_bits(&reg, 1, USBPCR_USB_MODE);
 		u32p_replace_bits(&reg, 0, USBPCR_VBUSVLDEXT);
 		u32p_replace_bits(&reg, 0, USBPCR_VBUSVLDEXTSEL);
 		u32p_replace_bits(&reg, 0, USBPCR_OTG_DISABLE);
-		writel(reg, priv->base + REG_USBPCR_OFFSET);
+		pete_writel("drivers/phy/ingenic/phy-ingenic-usb.c:168", reg, priv->base + REG_USBPCR_OFFSET);
 
 		break;
 	case PHY_MODE_USB_DEVICE:
-		reg = readl(priv->base + REG_USBPCR_OFFSET);
+		reg = pete_readl("drivers/phy/ingenic/phy-ingenic-usb.c:172", priv->base + REG_USBPCR_OFFSET);
 		u32p_replace_bits(&reg, 0, USBPCR_USB_MODE);
 		u32p_replace_bits(&reg, 1, USBPCR_VBUSVLDEXT);
 		u32p_replace_bits(&reg, 1, USBPCR_VBUSVLDEXTSEL);
 		u32p_replace_bits(&reg, 1, USBPCR_OTG_DISABLE);
-		writel(reg, priv->base + REG_USBPCR_OFFSET);
+		pete_writel("drivers/phy/ingenic/phy-ingenic-usb.c:177", reg, priv->base + REG_USBPCR_OFFSET);
 
 		break;
 	case PHY_MODE_USB_OTG:
-		reg = readl(priv->base + REG_USBPCR_OFFSET);
+		reg = pete_readl("drivers/phy/ingenic/phy-ingenic-usb.c:181", priv->base + REG_USBPCR_OFFSET);
 		u32p_replace_bits(&reg, 1, USBPCR_USB_MODE);
 		u32p_replace_bits(&reg, 1, USBPCR_VBUSVLDEXT);
 		u32p_replace_bits(&reg, 1, USBPCR_VBUSVLDEXTSEL);
 		u32p_replace_bits(&reg, 0, USBPCR_OTG_DISABLE);
-		writel(reg, priv->base + REG_USBPCR_OFFSET);
+		pete_writel("drivers/phy/ingenic/phy-ingenic-usb.c:186", reg, priv->base + REG_USBPCR_OFFSET);
 
 		break;
 	default:
@@ -215,7 +215,7 @@ static void jz4770_usb_phy_init(struct phy *phy)
 		FIELD_PREP(USBPCR_TXFSLSTUNE_MASK, USBPCR_TXFSLSTUNE_DFT) |
 		FIELD_PREP(USBPCR_TXRISETUNE_MASK, USBPCR_TXRISETUNE_DFT) |
 		FIELD_PREP(USBPCR_TXVREFTUNE_MASK, USBPCR_TXVREFTUNE_DFT);
-	writel(reg, priv->base + REG_USBPCR_OFFSET);
+	pete_writel("drivers/phy/ingenic/phy-ingenic-usb.c:218", reg, priv->base + REG_USBPCR_OFFSET);
 }
 
 static void jz4775_usb_phy_init(struct phy *phy)
@@ -223,13 +223,13 @@ static void jz4775_usb_phy_init(struct phy *phy)
 	struct ingenic_usb_phy *priv = phy_get_drvdata(phy);
 	u32 reg;
 
-	reg = readl(priv->base + REG_USBPCR1_OFFSET) | USBPCR1_USB_SEL |
+	reg = pete_readl("drivers/phy/ingenic/phy-ingenic-usb.c:226", priv->base + REG_USBPCR1_OFFSET) | USBPCR1_USB_SEL |
 		USBPCR1_WORD_IF_16BIT;
-	writel(reg, priv->base + REG_USBPCR1_OFFSET);
+	pete_writel("drivers/phy/ingenic/phy-ingenic-usb.c:228", reg, priv->base + REG_USBPCR1_OFFSET);
 
 	reg = USBPCR_COMMONONN | USBPCR_POR |
 		FIELD_PREP(USBPCR_TXVREFTUNE_MASK, USBPCR_TXVREFTUNE_INC_75PPT);
-	writel(reg, priv->base + REG_USBPCR_OFFSET);
+	pete_writel("drivers/phy/ingenic/phy-ingenic-usb.c:232", reg, priv->base + REG_USBPCR_OFFSET);
 }
 
 static void jz4780_usb_phy_init(struct phy *phy)
@@ -237,12 +237,12 @@ static void jz4780_usb_phy_init(struct phy *phy)
 	struct ingenic_usb_phy *priv = phy_get_drvdata(phy);
 	u32 reg;
 
-	reg = readl(priv->base + REG_USBPCR1_OFFSET) | USBPCR1_USB_SEL |
+	reg = pete_readl("drivers/phy/ingenic/phy-ingenic-usb.c:240", priv->base + REG_USBPCR1_OFFSET) | USBPCR1_USB_SEL |
 		USBPCR1_WORD_IF_16BIT;
-	writel(reg, priv->base + REG_USBPCR1_OFFSET);
+	pete_writel("drivers/phy/ingenic/phy-ingenic-usb.c:242", reg, priv->base + REG_USBPCR1_OFFSET);
 
 	reg = USBPCR_TXPREEMPHTUNE | USBPCR_COMMONONN | USBPCR_POR;
-	writel(reg, priv->base + REG_USBPCR_OFFSET);
+	pete_writel("drivers/phy/ingenic/phy-ingenic-usb.c:245", reg, priv->base + REG_USBPCR_OFFSET);
 }
 
 static void x1000_usb_phy_init(struct phy *phy)
@@ -250,14 +250,14 @@ static void x1000_usb_phy_init(struct phy *phy)
 	struct ingenic_usb_phy *priv = phy_get_drvdata(phy);
 	u32 reg;
 
-	reg = readl(priv->base + REG_USBPCR1_OFFSET) | USBPCR1_WORD_IF_16BIT;
-	writel(reg, priv->base + REG_USBPCR1_OFFSET);
+	reg = pete_readl("drivers/phy/ingenic/phy-ingenic-usb.c:253", priv->base + REG_USBPCR1_OFFSET) | USBPCR1_WORD_IF_16BIT;
+	pete_writel("drivers/phy/ingenic/phy-ingenic-usb.c:254", reg, priv->base + REG_USBPCR1_OFFSET);
 
 	reg = USBPCR_TXPREEMPHTUNE | USBPCR_COMMONONN | USBPCR_POR |
 		FIELD_PREP(USBPCR_SQRXTUNE_MASK, USBPCR_SQRXTUNE_DCR_20PCT) |
 		FIELD_PREP(USBPCR_TXHSXVTUNE_MASK, USBPCR_TXHSXVTUNE_DCR_15MV) |
 		FIELD_PREP(USBPCR_TXVREFTUNE_MASK, USBPCR_TXVREFTUNE_INC_25PPT);
-	writel(reg, priv->base + REG_USBPCR_OFFSET);
+	pete_writel("drivers/phy/ingenic/phy-ingenic-usb.c:260", reg, priv->base + REG_USBPCR_OFFSET);
 }
 
 static void x1830_usb_phy_init(struct phy *phy)
@@ -266,15 +266,15 @@ static void x1830_usb_phy_init(struct phy *phy)
 	u32 reg;
 
 	/* rdt */
-	writel(USBRDT_VBFIL_EN | USBRDT_UTMI_RST, priv->base + REG_USBRDT_OFFSET);
+	pete_writel("drivers/phy/ingenic/phy-ingenic-usb.c:269", USBRDT_VBFIL_EN | USBRDT_UTMI_RST, priv->base + REG_USBRDT_OFFSET);
 
-	reg = readl(priv->base + REG_USBPCR1_OFFSET) | USBPCR1_WORD_IF_16BIT |
+	reg = pete_readl("drivers/phy/ingenic/phy-ingenic-usb.c:271", priv->base + REG_USBPCR1_OFFSET) | USBPCR1_WORD_IF_16BIT |
 		USBPCR1_DMPD | USBPCR1_DPPD;
-	writel(reg, priv->base + REG_USBPCR1_OFFSET);
+	pete_writel("drivers/phy/ingenic/phy-ingenic-usb.c:273", reg, priv->base + REG_USBPCR1_OFFSET);
 
 	reg = USBPCR_VBUSVLDEXT | USBPCR_TXPREEMPHTUNE | USBPCR_COMMONONN | USBPCR_POR |
 		FIELD_PREP(USBPCR_IDPULLUP_MASK, USBPCR_IDPULLUP_OTG);
-	writel(reg, priv->base + REG_USBPCR_OFFSET);
+	pete_writel("drivers/phy/ingenic/phy-ingenic-usb.c:277", reg, priv->base + REG_USBPCR_OFFSET);
 }
 
 static void x2000_usb_phy_init(struct phy *phy)
@@ -282,11 +282,11 @@ static void x2000_usb_phy_init(struct phy *phy)
 	struct ingenic_usb_phy *priv = phy_get_drvdata(phy);
 	u32 reg;
 
-	reg = readl(priv->base + REG_USBPCR1_OFFSET) | USBPCR1_DPPD | USBPCR1_DMPD;
-	writel(reg & ~USBPCR1_PORT_RST, priv->base + REG_USBPCR1_OFFSET);
+	reg = pete_readl("drivers/phy/ingenic/phy-ingenic-usb.c:285", priv->base + REG_USBPCR1_OFFSET) | USBPCR1_DPPD | USBPCR1_DMPD;
+	pete_writel("drivers/phy/ingenic/phy-ingenic-usb.c:286", reg & ~USBPCR1_PORT_RST, priv->base + REG_USBPCR1_OFFSET);
 
 	reg = USBPCR_POR | FIELD_PREP(USBPCR_IDPULLUP_MASK, USBPCR_IDPULLUP_OTG);
-	writel(reg, priv->base + REG_USBPCR_OFFSET);
+	pete_writel("drivers/phy/ingenic/phy-ingenic-usb.c:289", reg, priv->base + REG_USBPCR_OFFSET);
 }
 
 static const struct ingenic_soc_info jz4770_soc_info = {

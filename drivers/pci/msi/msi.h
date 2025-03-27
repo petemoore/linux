@@ -37,7 +37,7 @@ static inline void pci_msix_write_vector_ctrl(struct msi_desc *desc, u32 ctrl)
 	void __iomem *desc_addr = pci_msix_desc_addr(desc);
 
 	if (desc->pci.msi_attrib.can_mask)
-		writel(ctrl, desc_addr + PCI_MSIX_ENTRY_VECTOR_CTRL);
+		pete_writel("drivers/pci/msi/msi.h:40", ctrl, desc_addr + PCI_MSIX_ENTRY_VECTOR_CTRL);
 }
 
 static inline void pci_msix_mask(struct msi_desc *desc)
@@ -45,7 +45,7 @@ static inline void pci_msix_mask(struct msi_desc *desc)
 	desc->pci.msix_ctrl |= PCI_MSIX_ENTRY_CTRL_MASKBIT;
 	pci_msix_write_vector_ctrl(desc, desc->pci.msix_ctrl);
 	/* Flush write to device */
-	readl(desc->pci.mask_base);
+	pete_readl("drivers/pci/msi/msi.h:48", desc->pci.mask_base);
 }
 
 static inline void pci_msix_unmask(struct msi_desc *desc)

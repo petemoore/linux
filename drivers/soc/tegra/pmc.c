@@ -499,7 +499,7 @@ static u32 tegra_pmc_readl(struct tegra_pmc *pmc, unsigned long offset)
 		return res.a1;
 	}
 
-	return readl(pmc->base + offset);
+	return pete_readl("drivers/soc/tegra/pmc.c:502", pmc->base + offset);
 }
 
 static void tegra_pmc_writel(struct tegra_pmc *pmc, u32 value,
@@ -519,7 +519,7 @@ static void tegra_pmc_writel(struct tegra_pmc *pmc, u32 value,
 					res.a0);
 		}
 	} else {
-		writel(value, pmc->base + offset);
+		pete_writel("drivers/soc/tegra/pmc.c:522", value, pmc->base + offset);
 	}
 }
 
@@ -528,7 +528,7 @@ static u32 tegra_pmc_scratch_readl(struct tegra_pmc *pmc, unsigned long offset)
 	if (pmc->tz_only)
 		return tegra_pmc_readl(pmc, offset);
 
-	return readl(pmc->scratch + offset);
+	return pete_readl("drivers/soc/tegra/pmc.c:531", pmc->scratch + offset);
 }
 
 static void tegra_pmc_scratch_writel(struct tegra_pmc *pmc, u32 value,
@@ -537,7 +537,7 @@ static void tegra_pmc_scratch_writel(struct tegra_pmc *pmc, u32 value,
 	if (pmc->tz_only)
 		tegra_pmc_writel(pmc, value, offset);
 	else
-		writel(value, pmc->scratch + offset);
+		pete_writel("drivers/soc/tegra/pmc.c:540", value, pmc->scratch + offset);
 }
 
 /*
@@ -2413,9 +2413,9 @@ static void tegra186_pmc_set_wake_filters(struct tegra_pmc *pmc)
 	u32 value;
 
 	/* SW Wake (wake83) needs SR_CAPTURE filter to be enabled */
-	value = readl(pmc->wake + WAKE_AOWAKE_CNTRL(SW_WAKE_ID));
+	value = pete_readl("drivers/soc/tegra/pmc.c:2416", pmc->wake + WAKE_AOWAKE_CNTRL(SW_WAKE_ID));
 	value |= WAKE_AOWAKE_CNTRL_SR_CAPTURE_EN;
-	writel(value, pmc->wake + WAKE_AOWAKE_CNTRL(SW_WAKE_ID));
+	pete_writel("drivers/soc/tegra/pmc.c:2418", value, pmc->wake + WAKE_AOWAKE_CNTRL(SW_WAKE_ID));
 	dev_dbg(pmc->dev, "WAKE_AOWAKE_CNTRL_83 = 0x%x\n", value);
 }
 
@@ -2429,20 +2429,20 @@ static int tegra186_pmc_irq_set_wake(struct irq_data *data, unsigned int on)
 	bit = data->hwirq % 32;
 
 	/* clear wake status */
-	writel(0x1, pmc->wake + WAKE_AOWAKE_STATUS_W(data->hwirq));
+	pete_writel("drivers/soc/tegra/pmc.c:2432", 0x1, pmc->wake + WAKE_AOWAKE_STATUS_W(data->hwirq));
 
 	/* route wake to tier 2 */
-	value = readl(pmc->wake + WAKE_AOWAKE_TIER2_ROUTING(offset));
+	value = pete_readl("drivers/soc/tegra/pmc.c:2435", pmc->wake + WAKE_AOWAKE_TIER2_ROUTING(offset));
 
 	if (!on)
 		value &= ~(1 << bit);
 	else
 		value |= 1 << bit;
 
-	writel(value, pmc->wake + WAKE_AOWAKE_TIER2_ROUTING(offset));
+	pete_writel("drivers/soc/tegra/pmc.c:2442", value, pmc->wake + WAKE_AOWAKE_TIER2_ROUTING(offset));
 
 	/* enable wakeup event */
-	writel(!!on, pmc->wake + WAKE_AOWAKE_MASK_W(data->hwirq));
+	pete_writel("drivers/soc/tegra/pmc.c:2445", !!on, pmc->wake + WAKE_AOWAKE_MASK_W(data->hwirq));
 
 	return 0;
 }
@@ -2452,7 +2452,7 @@ static int tegra186_pmc_irq_set_type(struct irq_data *data, unsigned int type)
 	struct tegra_pmc *pmc = irq_data_get_irq_chip_data(data);
 	u32 value;
 
-	value = readl(pmc->wake + WAKE_AOWAKE_CNTRL(data->hwirq));
+	value = pete_readl("drivers/soc/tegra/pmc.c:2455", pmc->wake + WAKE_AOWAKE_CNTRL(data->hwirq));
 
 	switch (type) {
 	case IRQ_TYPE_EDGE_RISING:
@@ -2479,7 +2479,7 @@ static int tegra186_pmc_irq_set_type(struct irq_data *data, unsigned int type)
 		return -EINVAL;
 	}
 
-	writel(value, pmc->wake + WAKE_AOWAKE_CNTRL(data->hwirq));
+	pete_writel("drivers/soc/tegra/pmc.c:2482", value, pmc->wake + WAKE_AOWAKE_CNTRL(data->hwirq));
 
 	return 0;
 }
@@ -3063,7 +3063,7 @@ cleanup_sysfs:
  */
 static void wke_32kwritel(struct tegra_pmc *pmc, u32 value, unsigned int offset)
 {
-	writel(value, pmc->wake + offset);
+	pete_writel("drivers/soc/tegra/pmc.c:3066", value, pmc->wake + offset);
 	udelay(130);
 }
 
@@ -3072,13 +3072,13 @@ static void wke_write_wake_level(struct tegra_pmc *pmc, int wake, int level)
 	unsigned int offset = WAKE_AOWAKE_CNTRL(wake);
 	u32 value;
 
-	value = readl(pmc->wake + offset);
+	value = pete_readl("drivers/soc/tegra/pmc.c:3075", pmc->wake + offset);
 	if (level)
 		value |= WAKE_AOWAKE_CNTRL_LEVEL;
 	else
 		value &= ~WAKE_AOWAKE_CNTRL_LEVEL;
 
-	writel(value, pmc->wake + offset);
+	pete_writel("drivers/soc/tegra/pmc.c:3081", value, pmc->wake + offset);
 }
 
 static void wke_write_wake_levels(struct tegra_pmc *pmc)
@@ -3127,7 +3127,7 @@ static void wke_read_sw_wake_status(struct tegra_pmc *pmc)
 	bitmap_zero(pmc->wake_sw_status_map, pmc->soc->max_wake_events);
 
 	for (i = 0; i < pmc->soc->max_wake_vectors; i++) {
-		status = readl(pmc->wake + WAKE_AOWAKE_SW_STATUS(i));
+		status = pete_readl("drivers/soc/tegra/pmc.c:3130", pmc->wake + WAKE_AOWAKE_SW_STATUS(i));
 
 		for_each_set_bit(wake, &status, 32)
 			set_bit(wake + (i * 32), pmc->wake_sw_status_map);
@@ -3141,8 +3141,8 @@ static void wke_clear_wake_status(struct tegra_pmc *pmc)
 	u32 mask;
 
 	for (i = 0; i < pmc->soc->max_wake_vectors; i++) {
-		mask = readl(pmc->wake + WAKE_AOWAKE_TIER2_ROUTING(i));
-		status = readl(pmc->wake + WAKE_AOWAKE_STATUS_R(i)) & mask;
+		mask = pete_readl("drivers/soc/tegra/pmc.c:3144", pmc->wake + WAKE_AOWAKE_TIER2_ROUTING(i));
+		status = pete_readl("drivers/soc/tegra/pmc.c:3145", pmc->wake + WAKE_AOWAKE_STATUS_R(i)) & mask;
 
 		for_each_set_bit(wake, &status, 32)
 			wke_32kwritel(pmc, 0x1, WAKE_AOWAKE_STATUS_W((i * 32) + wake));
@@ -3181,8 +3181,8 @@ static void tegra186_pmc_wake_syscore_resume(void)
 	unsigned int i;
 
 	for (i = 0; i < pmc->soc->max_wake_vectors; i++) {
-		mask = readl(pmc->wake + WAKE_AOWAKE_TIER2_ROUTING(i));
-		status = readl(pmc->wake + WAKE_AOWAKE_STATUS_R(i)) & mask;
+		mask = pete_readl("drivers/soc/tegra/pmc.c:3184", pmc->wake + WAKE_AOWAKE_TIER2_ROUTING(i));
+		status = pete_readl("drivers/soc/tegra/pmc.c:3185", pmc->wake + WAKE_AOWAKE_STATUS_R(i)) & mask;
 
 		tegra186_pmc_process_wake_events(pmc, i, status);
 	}
@@ -3881,14 +3881,14 @@ static void tegra186_pmc_setup_irq_polarity(struct tegra_pmc *pmc,
 		return;
 	}
 
-	value = readl(wake + WAKE_AOWAKE_CTRL);
+	value = pete_readl("drivers/soc/tegra/pmc.c:3884", wake + WAKE_AOWAKE_CTRL);
 
 	if (invert)
 		value |= WAKE_AOWAKE_CTRL_INTR_POLARITY;
 	else
 		value &= ~WAKE_AOWAKE_CTRL_INTR_POLARITY;
 
-	writel(value, wake + WAKE_AOWAKE_CTRL);
+	pete_writel("drivers/soc/tegra/pmc.c:3891", value, wake + WAKE_AOWAKE_CTRL);
 
 	iounmap(wake);
 }
@@ -4331,15 +4331,15 @@ static bool __init tegra_pmc_detect_tz_only(struct tegra_pmc *pmc)
 {
 	u32 value, saved;
 
-	saved = readl(pmc->base + pmc->soc->regs->scratch0);
+	saved = pete_readl("drivers/soc/tegra/pmc.c:4334", pmc->base + pmc->soc->regs->scratch0);
 	value = saved ^ 0xffffffff;
 
 	if (value == 0xffffffff)
 		value = 0xdeadbeef;
 
 	/* write pattern and read it back */
-	writel(value, pmc->base + pmc->soc->regs->scratch0);
-	value = readl(pmc->base + pmc->soc->regs->scratch0);
+	pete_writel("drivers/soc/tegra/pmc.c:4341", value, pmc->base + pmc->soc->regs->scratch0);
+	value = pete_readl("drivers/soc/tegra/pmc.c:4342", pmc->base + pmc->soc->regs->scratch0);
 
 	/* if we read all-zeroes, access is restricted to TZ only */
 	if (value == 0) {
@@ -4348,7 +4348,7 @@ static bool __init tegra_pmc_detect_tz_only(struct tegra_pmc *pmc)
 	}
 
 	/* restore original value */
-	writel(saved, pmc->base + pmc->soc->regs->scratch0);
+	pete_writel("drivers/soc/tegra/pmc.c:4351", saved, pmc->base + pmc->soc->regs->scratch0);
 
 	return false;
 }

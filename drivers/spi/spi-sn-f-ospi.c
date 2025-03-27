@@ -121,7 +121,7 @@ static u32 f_ospi_get_dummy_cycle(const struct spi_mem_op *op)
 
 static void f_ospi_clear_irq(struct f_ospi *ospi)
 {
-	writel(OSPI_IRQ_CS_DEASSERT | OSPI_IRQ_CS_TRANS_COMP,
+	pete_writel("drivers/spi/spi-sn-f-ospi.c:124", OSPI_IRQ_CS_DEASSERT | OSPI_IRQ_CS_TRANS_COMP,
 	       ospi->base + OSPI_IRQ);
 }
 
@@ -129,27 +129,27 @@ static void f_ospi_enable_irq_status(struct f_ospi *ospi, u32 irq_bits)
 {
 	u32 val;
 
-	val = readl(ospi->base + OSPI_IRQ_STAT_EN);
+	val = pete_readl("drivers/spi/spi-sn-f-ospi.c:132", ospi->base + OSPI_IRQ_STAT_EN);
 	val |= irq_bits;
-	writel(val, ospi->base + OSPI_IRQ_STAT_EN);
+	pete_writel("drivers/spi/spi-sn-f-ospi.c:134", val, ospi->base + OSPI_IRQ_STAT_EN);
 }
 
 static void f_ospi_disable_irq_status(struct f_ospi *ospi, u32 irq_bits)
 {
 	u32 val;
 
-	val = readl(ospi->base + OSPI_IRQ_STAT_EN);
+	val = pete_readl("drivers/spi/spi-sn-f-ospi.c:141", ospi->base + OSPI_IRQ_STAT_EN);
 	val &= ~irq_bits;
-	writel(val, ospi->base + OSPI_IRQ_STAT_EN);
+	pete_writel("drivers/spi/spi-sn-f-ospi.c:143", val, ospi->base + OSPI_IRQ_STAT_EN);
 }
 
 static void f_ospi_disable_irq_output(struct f_ospi *ospi, u32 irq_bits)
 {
 	u32 val;
 
-	val = readl(ospi->base + OSPI_IRQ_SIG_EN);
+	val = pete_readl("drivers/spi/spi-sn-f-ospi.c:150", ospi->base + OSPI_IRQ_SIG_EN);
 	val &= ~irq_bits;
-	writel(val, ospi->base + OSPI_IRQ_SIG_EN);
+	pete_writel("drivers/spi/spi-sn-f-ospi.c:152", val, ospi->base + OSPI_IRQ_SIG_EN);
 }
 
 static int f_ospi_prepare_config(struct f_ospi *ospi)
@@ -157,9 +157,9 @@ static int f_ospi_prepare_config(struct f_ospi *ospi)
 	u32 val, stat0, stat1;
 
 	/* G4: Disable internal clock */
-	val = readl(ospi->base + OSPI_CLK_CTL);
+	val = pete_readl("drivers/spi/spi-sn-f-ospi.c:160", ospi->base + OSPI_CLK_CTL);
 	val &= ~(OSPI_CLK_CTL_BOOT_INT_CLK_EN | OSPI_CLK_CTL_INT_CLK_EN);
-	writel(val, ospi->base + OSPI_CLK_CTL);
+	pete_writel("drivers/spi/spi-sn-f-ospi.c:162", val, ospi->base + OSPI_CLK_CTL);
 
 	/* G5: Wait for stop */
 	stat0 = OSPI_STAT_IS_AXI_WRITING | OSPI_STAT_IS_AXI_READING;
@@ -175,9 +175,9 @@ static int f_ospi_unprepare_config(struct f_ospi *ospi)
 	u32 val;
 
 	/* G11: Enable internal clock */
-	val = readl(ospi->base + OSPI_CLK_CTL);
+	val = pete_readl("drivers/spi/spi-sn-f-ospi.c:178", ospi->base + OSPI_CLK_CTL);
 	val |= OSPI_CLK_CTL_BOOT_INT_CLK_EN | OSPI_CLK_CTL_INT_CLK_EN;
-	writel(val, ospi->base + OSPI_CLK_CTL);
+	pete_writel("drivers/spi/spi-sn-f-ospi.c:180", val, ospi->base + OSPI_CLK_CTL);
 
 	/* G12: Wait for clock to start */
 	return readl_poll_timeout(ospi->base + OSPI_STAT,
@@ -217,13 +217,13 @@ static void f_ospi_config_clk(struct f_ospi *ospi, u32 device_hz)
 	 * clock phase is fixed at 180 degrees and configure edge direction
 	 * instead.
 	 */
-	val = readl(ospi->base + OSPI_CLK_CTL);
+	val = pete_readl("drivers/spi/spi-sn-f-ospi.c:220", ospi->base + OSPI_CLK_CTL);
 
 	val &= ~(OSPI_CLK_CTL_PHA | OSPI_CLK_CTL_DIV);
 	val |= FIELD_PREP(OSPI_CLK_CTL_PHA, OSPI_CLK_CTL_PHA_180)
 	     | FIELD_PREP(OSPI_CLK_CTL_DIV, div_reg);
 
-	writel(val, ospi->base + OSPI_CLK_CTL);
+	pete_writel("drivers/spi/spi-sn-f-ospi.c:226", val, ospi->base + OSPI_CLK_CTL);
 }
 
 static void f_ospi_config_dll(struct f_ospi *ospi)
@@ -267,7 +267,7 @@ static void f_ospi_config_indir_protocol(struct f_ospi *ospi,
 	int unit;
 
 	/* Set one chip select */
-	writel(BIT(spi_get_chipselect(spi, 0)), ospi->base + OSPI_SSEL);
+	pete_writel("drivers/spi/spi-sn-f-ospi.c:270", BIT(spi_get_chipselect(spi, 0)), ospi->base + OSPI_SSEL);
 
 	mode = f_ospi_get_mode(ospi, op->cmd.buswidth, 1);
 	prot |= FIELD_PREP(OSPI_PROT_MODE_CODE_MASK, mode);
@@ -328,8 +328,8 @@ static void f_ospi_config_indir_protocol(struct f_ospi *ospi,
 	prot |= FIELD_PREP(OSPI_PROT_ADDR_SIZE_MASK, op->addr.nbytes);
 	prot |= FIELD_PREP(OSPI_PROT_CODE_SIZE_MASK, 1);	/* 1byte */
 
-	writel(prot, ospi->base + OSPI_PROT_CTL_INDIR);
-	writel(val, ospi->base + OSPI_DAT_SIZE_INDIR);
+	pete_writel("drivers/spi/spi-sn-f-ospi.c:331", prot, ospi->base + OSPI_PROT_CTL_INDIR);
+	pete_writel("drivers/spi/spi-sn-f-ospi.c:332", val, ospi->base + OSPI_DAT_SIZE_INDIR);
 }
 
 static int f_ospi_indir_prepare_op(struct f_ospi *ospi, struct spi_mem *mem,
@@ -347,9 +347,9 @@ static int f_ospi_indir_prepare_op(struct f_ospi *ospi, struct spi_mem *mem,
 
 	f_ospi_config_indir_protocol(ospi, mem, op);
 
-	writel(f_ospi_get_dummy_cycle(op), ospi->base + OSPI_DMY_INDIR);
-	writel(op->addr.val, ospi->base + OSPI_ADDR);
-	writel(op->cmd.opcode, ospi->base + OSPI_CMD_IDX_INDIR);
+	pete_writel("drivers/spi/spi-sn-f-ospi.c:350", f_ospi_get_dummy_cycle(op), ospi->base + OSPI_DMY_INDIR);
+	pete_writel("drivers/spi/spi-sn-f-ospi.c:351", op->addr.val, ospi->base + OSPI_ADDR);
+	pete_writel("drivers/spi/spi-sn-f-ospi.c:352", op->cmd.opcode, ospi->base + OSPI_CMD_IDX_INDIR);
 
 	f_ospi_clear_irq(ospi);
 
@@ -380,13 +380,13 @@ static int f_ospi_indir_prepare_op(struct f_ospi *ospi, struct spi_mem *mem,
 static void f_ospi_indir_start_xfer(struct f_ospi *ospi)
 {
 	/* Write only 1, auto cleared */
-	writel(OSPI_TRANS_CTL_START_REQ, ospi->base + OSPI_TRANS_CTL);
+	pete_writel("drivers/spi/spi-sn-f-ospi.c:383", OSPI_TRANS_CTL_START_REQ, ospi->base + OSPI_TRANS_CTL);
 }
 
 static void f_ospi_indir_stop_xfer(struct f_ospi *ospi)
 {
 	/* Write only 1, auto cleared */
-	writel(OSPI_TRANS_CTL_STOP_REQ, ospi->base + OSPI_TRANS_CTL);
+	pete_writel("drivers/spi/spi-sn-f-ospi.c:389", OSPI_TRANS_CTL_STOP_REQ, ospi->base + OSPI_TRANS_CTL);
 }
 
 static int f_ospi_indir_wait_xfer_complete(struct f_ospi *ospi)
@@ -422,11 +422,11 @@ static int f_ospi_indir_read(struct f_ospi *ospi, struct spi_mem *mem,
 		if (ret)
 			goto out;
 
-		buf[i] = readl(ospi->base + OSPI_DAT) & 0xFF;
+		buf[i] = pete_readl("drivers/spi/spi-sn-f-ospi.c:425", ospi->base + OSPI_DAT) & 0xFF;
 	}
 
 	/* E5-6: Stop transfer if data size is nothing */
-	if (!(readl(ospi->base + OSPI_DAT_SIZE_INDIR) & OSPI_DAT_SIZE_EN))
+	if (!(pete_readl("drivers/spi/spi-sn-f-ospi.c:429", ospi->base + OSPI_DAT_SIZE_INDIR) & OSPI_DAT_SIZE_EN))
 		f_ospi_indir_stop_xfer(ospi);
 
 	/* E7-8: Wait for completion and clear */
@@ -434,14 +434,14 @@ static int f_ospi_indir_read(struct f_ospi *ospi, struct spi_mem *mem,
 	if (ret)
 		goto out;
 
-	writel(OSPI_IRQ_CS_TRANS_COMP, ospi->base + OSPI_IRQ);
+	pete_writel("drivers/spi/spi-sn-f-ospi.c:437", OSPI_IRQ_CS_TRANS_COMP, ospi->base + OSPI_IRQ);
 
 	/* E9: Do nothing if data size is valid */
-	if (readl(ospi->base + OSPI_DAT_SIZE_INDIR) & OSPI_DAT_SIZE_EN)
+	if (pete_readl("drivers/spi/spi-sn-f-ospi.c:440", ospi->base + OSPI_DAT_SIZE_INDIR) & OSPI_DAT_SIZE_EN)
 		goto out;
 
 	/* E10-11: Reset and check read fifo */
-	writel(OSPI_SWRST_INDIR_READ_FIFO, ospi->base + OSPI_SWRST);
+	pete_writel("drivers/spi/spi-sn-f-ospi.c:444", OSPI_SWRST_INDIR_READ_FIFO, ospi->base + OSPI_SWRST);
 
 	ret = readl_poll_timeout(ospi->base + OSPI_SWRST, val,
 				 !(val & OSPI_SWRST_INDIR_READ_FIFO),
@@ -468,7 +468,7 @@ static int f_ospi_indir_write(struct f_ospi *ospi, struct spi_mem *mem,
 
 	f_ospi_indir_start_xfer(ospi);
 
-	if (!(readl(ospi->base + OSPI_PROT_CTL_INDIR) & OSPI_PROT_DATA_EN))
+	if (!(pete_readl("drivers/spi/spi-sn-f-ospi.c:471", ospi->base + OSPI_PROT_CTL_INDIR) & OSPI_PROT_DATA_EN))
 		goto nodata;
 
 	/* F4-5: Wait for buffer ready and write data */
@@ -479,11 +479,11 @@ static int f_ospi_indir_write(struct f_ospi *ospi, struct spi_mem *mem,
 		if (ret)
 			goto out;
 
-		writel(buf[i], ospi->base + OSPI_DAT);
+		pete_writel("drivers/spi/spi-sn-f-ospi.c:482", buf[i], ospi->base + OSPI_DAT);
 	}
 
 	/* F6-7: Stop transfer if data size is nothing */
-	if (!(readl(ospi->base + OSPI_DAT_SIZE_INDIR) & OSPI_DAT_SIZE_EN))
+	if (!(pete_readl("drivers/spi/spi-sn-f-ospi.c:486", ospi->base + OSPI_DAT_SIZE_INDIR) & OSPI_DAT_SIZE_EN))
 		f_ospi_indir_stop_xfer(ospi);
 
 nodata:
@@ -492,7 +492,7 @@ nodata:
 	if (ret)
 		goto out;
 
-	writel(OSPI_IRQ_CS_TRANS_COMP, ospi->base + OSPI_IRQ);
+	pete_writel("drivers/spi/spi-sn-f-ospi.c:495", OSPI_IRQ_CS_TRANS_COMP, ospi->base + OSPI_IRQ);
 out:
 	mutex_unlock(&ospi->mlock);
 
@@ -586,7 +586,7 @@ static int f_ospi_init(struct f_ospi *ospi)
 		return ret;
 
 	/* Disable boot signal */
-	writel(OSPI_ACC_MODE_BOOT_DISABLE, ospi->base + OSPI_ACC_MODE);
+	pete_writel("drivers/spi/spi-sn-f-ospi.c:589", OSPI_ACC_MODE_BOOT_DISABLE, ospi->base + OSPI_ACC_MODE);
 
 	f_ospi_config_dll(ospi);
 

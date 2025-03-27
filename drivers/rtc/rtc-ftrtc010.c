@@ -68,11 +68,11 @@ static int ftrtc010_rtc_read_time(struct device *dev, struct rtc_time *tm)
 	u32 days, hour, min, sec, offset;
 	timeu64_t time;
 
-	sec  = readl(rtc->rtc_base + FTRTC010_RTC_SECOND);
-	min  = readl(rtc->rtc_base + FTRTC010_RTC_MINUTE);
-	hour = readl(rtc->rtc_base + FTRTC010_RTC_HOUR);
-	days = readl(rtc->rtc_base + FTRTC010_RTC_DAYS);
-	offset = readl(rtc->rtc_base + FTRTC010_RTC_RECORD);
+	sec  = pete_readl("drivers/rtc/rtc-ftrtc010.c:71", rtc->rtc_base + FTRTC010_RTC_SECOND);
+	min  = pete_readl("drivers/rtc/rtc-ftrtc010.c:72", rtc->rtc_base + FTRTC010_RTC_MINUTE);
+	hour = pete_readl("drivers/rtc/rtc-ftrtc010.c:73", rtc->rtc_base + FTRTC010_RTC_HOUR);
+	days = pete_readl("drivers/rtc/rtc-ftrtc010.c:74", rtc->rtc_base + FTRTC010_RTC_DAYS);
+	offset = pete_readl("drivers/rtc/rtc-ftrtc010.c:75", rtc->rtc_base + FTRTC010_RTC_RECORD);
 
 	time = offset + days * 86400 + hour * 3600 + min * 60 + sec;
 
@@ -89,15 +89,15 @@ static int ftrtc010_rtc_set_time(struct device *dev, struct rtc_time *tm)
 
 	time = rtc_tm_to_time64(tm);
 
-	sec = readl(rtc->rtc_base + FTRTC010_RTC_SECOND);
-	min = readl(rtc->rtc_base + FTRTC010_RTC_MINUTE);
-	hour = readl(rtc->rtc_base + FTRTC010_RTC_HOUR);
-	day = readl(rtc->rtc_base + FTRTC010_RTC_DAYS);
+	sec = pete_readl("drivers/rtc/rtc-ftrtc010.c:92", rtc->rtc_base + FTRTC010_RTC_SECOND);
+	min = pete_readl("drivers/rtc/rtc-ftrtc010.c:93", rtc->rtc_base + FTRTC010_RTC_MINUTE);
+	hour = pete_readl("drivers/rtc/rtc-ftrtc010.c:94", rtc->rtc_base + FTRTC010_RTC_HOUR);
+	day = pete_readl("drivers/rtc/rtc-ftrtc010.c:95", rtc->rtc_base + FTRTC010_RTC_DAYS);
 
 	offset = time - (day * 86400 + hour * 3600 + min * 60 + sec);
 
-	writel(offset, rtc->rtc_base + FTRTC010_RTC_RECORD);
-	writel(0x01, rtc->rtc_base + FTRTC010_RTC_CR);
+	pete_writel("drivers/rtc/rtc-ftrtc010.c:99", offset, rtc->rtc_base + FTRTC010_RTC_RECORD);
+	pete_writel("drivers/rtc/rtc-ftrtc010.c:100", 0x01, rtc->rtc_base + FTRTC010_RTC_CR);
 
 	return 0;
 }
@@ -168,10 +168,10 @@ static int ftrtc010_rtc_probe(struct platform_device *pdev)
 
 	rtc->rtc_dev->ops = &ftrtc010_rtc_ops;
 
-	sec  = readl(rtc->rtc_base + FTRTC010_RTC_SECOND);
-	min  = readl(rtc->rtc_base + FTRTC010_RTC_MINUTE);
-	hour = readl(rtc->rtc_base + FTRTC010_RTC_HOUR);
-	days = readl(rtc->rtc_base + FTRTC010_RTC_DAYS);
+	sec  = pete_readl("drivers/rtc/rtc-ftrtc010.c:171", rtc->rtc_base + FTRTC010_RTC_SECOND);
+	min  = pete_readl("drivers/rtc/rtc-ftrtc010.c:172", rtc->rtc_base + FTRTC010_RTC_MINUTE);
+	hour = pete_readl("drivers/rtc/rtc-ftrtc010.c:173", rtc->rtc_base + FTRTC010_RTC_HOUR);
+	days = pete_readl("drivers/rtc/rtc-ftrtc010.c:174", rtc->rtc_base + FTRTC010_RTC_DAYS);
 
 	rtc->rtc_dev->range_min = (u64)days * 86400 + hour * 3600 +
 				  min * 60 + sec;

@@ -49,7 +49,7 @@ static int fun_wait_ready(struct fun_dev *fdev, bool enabled)
 	deadline = ((cap_to + 1) * HZ / 2) + jiffies; /* CAP.TO is in 500ms */
 
 	for (;;) {
-		u32 csts = readl(fdev->bar + NVME_REG_CSTS);
+		u32 csts = pete_readl("drivers/net/ethernet/fungible/funcore/fun_dev.c:52", fdev->bar + NVME_REG_CSTS);
 
 		if (csts == ~0) {
 			dev_err(fdev->dev, "CSTS register read %#x\n", csts);
@@ -76,7 +76,7 @@ static int fun_wait_ready(struct fun_dev *fdev, bool enabled)
  */
 static int fun_check_csts_rdy(struct fun_dev *fdev, unsigned int expected_rdy)
 {
-	u32 csts = readl(fdev->bar + NVME_REG_CSTS);
+	u32 csts = pete_readl("drivers/net/ethernet/fungible/funcore/fun_dev.c:79", fdev->bar + NVME_REG_CSTS);
 	u32 actual_rdy = csts & NVME_CSTS_RDY;
 
 	if (csts == ~0) {
@@ -99,7 +99,7 @@ static int fun_update_cc_enable(struct fun_dev *fdev, unsigned int initial_rdy)
 
 	if (rc)
 		return rc;
-	writel(fdev->cc_reg, fdev->bar + NVME_REG_CC);
+	pete_writel("drivers/net/ethernet/fungible/funcore/fun_dev.c:102", fdev->cc_reg, fdev->bar + NVME_REG_CC);
 	return fun_wait_ready(fdev, !!(fdev->cc_reg & NVME_CC_ENABLE));
 }
 
@@ -266,12 +266,12 @@ static int fun_enable_admin_queue(struct fun_dev *fdev,
 	fun_set_cq_callback(funq, fun_complete_admin_cmd, NULL);
 	fdev->adminq_cb = areq->event_cb;
 
-	writel((funq->sq_depth - 1) << AQA_ASQS_SHIFT |
+	pete_writel("drivers/net/ethernet/fungible/funcore/fun_dev.c:269", (funq->sq_depth - 1) << AQA_ASQS_SHIFT |
 	       (funq->cq_depth - 1) << AQA_ACQS_SHIFT,
 	       fdev->bar + NVME_REG_AQA);
 
-	writeq(funq->sq_dma_addr, fdev->bar + NVME_REG_ASQ);
-	writeq(funq->cq_dma_addr, fdev->bar + NVME_REG_ACQ);
+	pete_writeq("drivers/net/ethernet/fungible/funcore/fun_dev.c:273", funq->sq_dma_addr, fdev->bar + NVME_REG_ASQ);
+	pete_writeq("drivers/net/ethernet/fungible/funcore/fun_dev.c:274", funq->cq_dma_addr, fdev->bar + NVME_REG_ACQ);
 
 	rc = fun_enable_ctrl(fdev, areq->cqe_size_log2, areq->sqe_size_log2);
 	if (rc)
@@ -329,7 +329,7 @@ static void fun_disable_admin_queue(struct fun_dev *fdev)
  */
 static bool fun_adminq_stopped(struct fun_dev *fdev)
 {
-	u32 csts = readl(fdev->bar + NVME_REG_CSTS);
+	u32 csts = pete_readl("drivers/net/ethernet/fungible/funcore/fun_dev.c:332", fdev->bar + NVME_REG_CSTS);
 
 	return (csts & (NVME_CSTS_CFS | NVME_CSTS_RDY)) != NVME_CSTS_RDY;
 }
@@ -400,7 +400,7 @@ int fun_submit_admin_cmd(struct fun_dev *fdev, struct fun_admin_req_common *cmd,
 
 		if (++funq->sq_tail == funq->sq_depth)
 			funq->sq_tail = 0;
-		writel(funq->sq_tail, funq->sq_db);
+		pete_writel("drivers/net/ethernet/fungible/funcore/fun_dev.c:403", funq->sq_tail, funq->sq_db);
 	}
 	spin_unlock(&funq->sq_lock);
 	return rc;
@@ -711,8 +711,8 @@ static int sanitize_dev(struct fun_dev *fdev)
 {
 	int rc;
 
-	fdev->cap_reg = readq(fdev->bar + NVME_REG_CAP);
-	fdev->cc_reg = readl(fdev->bar + NVME_REG_CC);
+	fdev->cap_reg = pete_readq("drivers/net/ethernet/fungible/funcore/fun_dev.c:714", fdev->bar + NVME_REG_CAP);
+	fdev->cc_reg = pete_readl("drivers/net/ethernet/fungible/funcore/fun_dev.c:715", fdev->bar + NVME_REG_CC);
 
 	/* First get RDY to agree with the current EN. Give RDY the opportunity
 	 * to complete a potential recent EN change.

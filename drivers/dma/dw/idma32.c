@@ -52,15 +52,15 @@ static void idma32_initialize_chan_xbar(struct dw_dma_chan *dwc)
 	u32 value;
 
 	/* DMA Channel ID Configuration register must be programmed first */
-	value = readl(misc + DMA_REGACCESS_CHID_CFG);
+	value = pete_readl("drivers/dma/dw/idma32.c:55", misc + DMA_REGACCESS_CHID_CFG);
 
 	value &= ~REGACCESS_CHID_MASK;
 	value |= dwc->chan.chan_id;
 
-	writel(value, misc + DMA_REGACCESS_CHID_CFG);
+	pete_writel("drivers/dma/dw/idma32.c:60", value, misc + DMA_REGACCESS_CHID_CFG);
 
 	/* Configure channel attributes */
-	value = readl(misc + DMA_CTL_CH(dwc->chan.chan_id));
+	value = pete_readl("drivers/dma/dw/idma32.c:63", misc + DMA_CTL_CH(dwc->chan.chan_id));
 
 	value &= ~(CTL_CH_RD_NON_SNOOP_BIT | CTL_CH_WR_NON_SNOOP_BIT);
 	value &= ~(CTL_CH_RD_RS_MASK | CTL_CH_WR_RS_MASK);
@@ -85,10 +85,10 @@ static void idma32_initialize_chan_xbar(struct dw_dma_chan *dwc)
 		return;
 	}
 
-	writel(value, misc + DMA_CTL_CH(dwc->chan.chan_id));
+	pete_writel("drivers/dma/dw/idma32.c:88", value, misc + DMA_CTL_CH(dwc->chan.chan_id));
 
 	/* Configure crossbar selection */
-	value = readl(misc + DMA_XBAR_SEL(dwc->chan.chan_id));
+	value = pete_readl("drivers/dma/dw/idma32.c:91", misc + DMA_XBAR_SEL(dwc->chan.chan_id));
 
 	/* DEVFN selection */
 	value &= ~XBAR_SEL_DEVID_MASK;
@@ -106,7 +106,7 @@ static void idma32_initialize_chan_xbar(struct dw_dma_chan *dwc)
 		return;
 	}
 
-	writel(value, misc + DMA_XBAR_SEL(dwc->chan.chan_id));
+	pete_writel("drivers/dma/dw/idma32.c:109", value, misc + DMA_XBAR_SEL(dwc->chan.chan_id));
 
 	/* Configure DMA channel low and high registers */
 	switch (dwc->direction) {

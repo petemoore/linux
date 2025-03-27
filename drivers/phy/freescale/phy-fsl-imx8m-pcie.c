@@ -83,10 +83,10 @@ static int imx8_pcie_phy_power_on(struct phy *phy)
 
 		/* Tune PHY de-emphasis setting to pass PCIe compliance. */
 		if (imx8_phy->tx_deemph_gen1)
-			writel(imx8_phy->tx_deemph_gen1,
+			pete_writel("drivers/phy/freescale/phy-fsl-imx8m-pcie.c:86", imx8_phy->tx_deemph_gen1,
 			       imx8_phy->base + PCIE_PHY_TRSV_REG5);
 		if (imx8_phy->tx_deemph_gen2)
-			writel(imx8_phy->tx_deemph_gen2,
+			pete_writel("drivers/phy/freescale/phy-fsl-imx8m-pcie.c:89", imx8_phy->tx_deemph_gen2,
 			       imx8_phy->base + PCIE_PHY_TRSV_REG6);
 		break;
 	case IMX8MP: /* Do nothing. */
@@ -96,28 +96,28 @@ static int imx8_pcie_phy_power_on(struct phy *phy)
 	if (pad_mode == IMX8_PCIE_REFCLK_PAD_INPUT ||
 	    pad_mode == IMX8_PCIE_REFCLK_PAD_UNUSED) {
 		/* Configure the pad as input */
-		val = readl(imx8_phy->base + IMX8MM_PCIE_PHY_CMN_REG061);
-		writel(val & ~ANA_PLL_CLK_OUT_TO_EXT_IO_EN,
+		val = pete_readl("drivers/phy/freescale/phy-fsl-imx8m-pcie.c:99", imx8_phy->base + IMX8MM_PCIE_PHY_CMN_REG061);
+		pete_writel("drivers/phy/freescale/phy-fsl-imx8m-pcie.c:100", val & ~ANA_PLL_CLK_OUT_TO_EXT_IO_EN,
 		       imx8_phy->base + IMX8MM_PCIE_PHY_CMN_REG061);
 	} else {
 		/* Configure the PHY to output the refclock via pad */
-		writel(ANA_PLL_CLK_OUT_TO_EXT_IO_EN,
+		pete_writel("drivers/phy/freescale/phy-fsl-imx8m-pcie.c:104", ANA_PLL_CLK_OUT_TO_EXT_IO_EN,
 		       imx8_phy->base + IMX8MM_PCIE_PHY_CMN_REG061);
 	}
 
 	if (pad_mode == IMX8_PCIE_REFCLK_PAD_OUTPUT ||
 	    pad_mode == IMX8_PCIE_REFCLK_PAD_UNUSED) {
 		/* Source clock from SoC internal PLL */
-		writel(ANA_PLL_CLK_OUT_TO_EXT_IO_SEL,
+		pete_writel("drivers/phy/freescale/phy-fsl-imx8m-pcie.c:111", ANA_PLL_CLK_OUT_TO_EXT_IO_SEL,
 		       imx8_phy->base + IMX8MM_PCIE_PHY_CMN_REG062);
 		if (imx8_phy->drvdata->variant != IMX8MM) {
-			writel(AUX_PLL_REFCLK_SEL_SYS_PLL,
+			pete_writel("drivers/phy/freescale/phy-fsl-imx8m-pcie.c:114", AUX_PLL_REFCLK_SEL_SYS_PLL,
 			       imx8_phy->base + IMX8MM_PCIE_PHY_CMN_REG063);
 		}
 		val = ANA_AUX_RX_TX_SEL_TX | ANA_AUX_TX_TERM;
-		writel(val | ANA_AUX_RX_TERM_GND_EN,
+		pete_writel("drivers/phy/freescale/phy-fsl-imx8m-pcie.c:118", val | ANA_AUX_RX_TERM_GND_EN,
 		       imx8_phy->base + IMX8MM_PCIE_PHY_CMN_REG064);
-		writel(ANA_AUX_RX_TERM | ANA_AUX_TX_LVL,
+		pete_writel("drivers/phy/freescale/phy-fsl-imx8m-pcie.c:120", ANA_AUX_RX_TERM | ANA_AUX_TX_LVL,
 		       imx8_phy->base + IMX8MM_PCIE_PHY_CMN_REG065);
 	}
 

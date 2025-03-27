@@ -520,12 +520,12 @@ static inline struct samsung_dsim *bridge_to_dsi(struct drm_bridge *b)
 static inline void samsung_dsim_write(struct samsung_dsim *dsi,
 				      enum reg_idx idx, u32 val)
 {
-	writel(val, dsi->reg_base + dsi->driver_data->reg_ofs[idx]);
+	pete_writel("drivers/gpu/drm/bridge/samsung-dsim.c:523", val, dsi->reg_base + dsi->driver_data->reg_ofs[idx]);
 }
 
 static inline u32 samsung_dsim_read(struct samsung_dsim *dsi, enum reg_idx idx)
 {
-	return readl(dsi->reg_base + dsi->driver_data->reg_ofs[idx]);
+	return pete_readl("drivers/gpu/drm/bridge/samsung-dsim.c:528", dsi->reg_base + dsi->driver_data->reg_ofs[idx]);
 }
 
 static void samsung_dsim_wait_for_reset(struct samsung_dsim *dsi)
@@ -623,7 +623,7 @@ static unsigned long samsung_dsim_set_pll(struct samsung_dsim *dsi,
 	}
 	dev_dbg(dsi->dev, "PLL freq %lu, (p %d, m %d, s %d)\n", fout, p, m, s);
 
-	writel(driver_data->reg_values[PLL_TIMER],
+	pete_writel("drivers/gpu/drm/bridge/samsung-dsim.c:626", driver_data->reg_values[PLL_TIMER],
 	       dsi->reg_base + driver_data->plltmr_reg);
 
 	reg = DSIM_PLL_EN | DSIM_PLL_P(p, driver_data->pll_p_offset) |

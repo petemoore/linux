@@ -194,16 +194,16 @@ static int mlxbf3_pmx_set(struct pinctrl_dev *pctldev,
 
 	if (selector == MLXBF3_GPIO_HW_MODE) {
 		if (group < MLXBF3_NGPIOS_GPIO0)
-			writel(BIT(group), priv->fw_ctrl_clr0);
+			pete_writel("drivers/pinctrl/pinctrl-mlxbf3.c:197", BIT(group), priv->fw_ctrl_clr0);
 		else
-			writel(BIT(group % MLXBF3_NGPIOS_GPIO0), priv->fw_ctrl_clr1);
+			pete_writel("drivers/pinctrl/pinctrl-mlxbf3.c:199", BIT(group % MLXBF3_NGPIOS_GPIO0), priv->fw_ctrl_clr1);
 	}
 
 	if (selector == MLXBF3_GPIO_SW_MODE) {
 		if (group < MLXBF3_NGPIOS_GPIO0)
-			writel(BIT(group), priv->fw_ctrl_set0);
+			pete_writel("drivers/pinctrl/pinctrl-mlxbf3.c:204", BIT(group), priv->fw_ctrl_set0);
 		else
-			writel(BIT(group % MLXBF3_NGPIOS_GPIO0), priv->fw_ctrl_set1);
+			pete_writel("drivers/pinctrl/pinctrl-mlxbf3.c:206", BIT(group % MLXBF3_NGPIOS_GPIO0), priv->fw_ctrl_set1);
 	}
 
 	return 0;
@@ -216,9 +216,9 @@ static int mlxbf3_gpio_request_enable(struct pinctrl_dev *pctldev,
 	struct mlxbf3_pinctrl *priv = pinctrl_dev_get_drvdata(pctldev);
 
 	if (offset < MLXBF3_NGPIOS_GPIO0)
-		writel(BIT(offset), priv->fw_ctrl_set0);
+		pete_writel("drivers/pinctrl/pinctrl-mlxbf3.c:219", BIT(offset), priv->fw_ctrl_set0);
 	else
-		writel(BIT(offset % MLXBF3_NGPIOS_GPIO0), priv->fw_ctrl_set1);
+		pete_writel("drivers/pinctrl/pinctrl-mlxbf3.c:221", BIT(offset % MLXBF3_NGPIOS_GPIO0), priv->fw_ctrl_set1);
 
 	return 0;
 }

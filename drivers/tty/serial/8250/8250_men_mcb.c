@@ -40,7 +40,7 @@
 #define MEN_UART3_OFFSET	(MEN_UART2_OFFSET + MEN_UART_MEM_SIZE)
 #define MEN_UART4_OFFSET	(MEN_UART3_OFFSET + MEN_UART_MEM_SIZE)
 
-#define MEN_READ_REGISTER(addr)	readb(addr)
+#define MEN_READ_REGISTER(addr)	pete_readb("drivers/tty/serial/8250/8250_men_mcb.c:43", addr)
 
 #define MAX_PORTS	4
 

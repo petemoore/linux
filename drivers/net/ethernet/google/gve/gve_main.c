@@ -2195,16 +2195,16 @@ static void gve_write_version(u8 __iomem *driver_version_register)
 	const char *c = gve_version_prefix;
 
 	while (*c) {
-		writeb(*c, driver_version_register);
+		pete_writeb("drivers/net/ethernet/google/gve/gve_main.c:2198", *c, driver_version_register);
 		c++;
 	}
 
 	c = gve_version_str;
 	while (*c) {
-		writeb(*c, driver_version_register);
+		pete_writeb("drivers/net/ethernet/google/gve/gve_main.c:2204", *c, driver_version_register);
 		c++;
 	}
-	writeb('\n', driver_version_register);
+	pete_writeb("drivers/net/ethernet/google/gve/gve_main.c:2207", '\n', driver_version_register);
 }
 
 static int gve_probe(struct pci_dev *pdev, const struct pci_device_id *ent)

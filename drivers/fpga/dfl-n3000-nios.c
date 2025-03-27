@@ -419,7 +419,7 @@ static int create_altera_spi_controller(struct n3000_nios *nn)
 	void __iomem *base = nn->base;
 	u64 v;
 
-	v = readq(base + N3000_NS_PARAM);
+	v = pete_readq("drivers/fpga/dfl-n3000-nios.c:422", base + N3000_NS_PARAM);
 
 	pdata.mode_bits = SPI_CS_HIGH;
 	if (FIELD_GET(N3000_NS_PARAM_CLK_POL, v))
@@ -466,7 +466,7 @@ static int n3000_nios_poll_stat_timeout(void __iomem *base, u64 *v)
 	 * test server, and we set 10000 times loop here for safety.
 	 */
 	for (loops = N3000_NIOS_REGBUS_RETRY_COUNT; loops > 0 ; loops--) {
-		*v = readq(base + N3000_NS_STAT);
+		*v = pete_readq("drivers/fpga/dfl-n3000-nios.c:469", base + N3000_NS_STAT);
 		if (*v & N3000_NS_STAT_RW_VAL)
 			break;
 		cpu_relax();
@@ -484,7 +484,7 @@ static int n3000_nios_reg_write(void *context, unsigned int reg, unsigned int va
 	v = FIELD_PREP(N3000_NS_CTRL_CMD_MSK, N3000_NS_CTRL_CMD_WR) |
 	    FIELD_PREP(N3000_NS_CTRL_ADDR, reg) |
 	    FIELD_PREP(N3000_NS_CTRL_WR_DATA, val);
-	writeq(v, nn->base + N3000_NS_CTRL);
+	pete_writeq("drivers/fpga/dfl-n3000-nios.c:487", v, nn->base + N3000_NS_CTRL);
 
 	ret = n3000_nios_poll_stat_timeout(nn->base, &v);
 	if (ret)
@@ -502,7 +502,7 @@ static int n3000_nios_reg_read(void *context, unsigned int reg, unsigned int *va
 
 	v = FIELD_PREP(N3000_NS_CTRL_CMD_MSK, N3000_NS_CTRL_CMD_RD) |
 	    FIELD_PREP(N3000_NS_CTRL_ADDR, reg);
-	writeq(v, nn->base + N3000_NS_CTRL);
+	pete_writeq("drivers/fpga/dfl-n3000-nios.c:505", v, nn->base + N3000_NS_CTRL);
 
 	ret = n3000_nios_poll_stat_timeout(nn->base, &v);
 	if (ret)

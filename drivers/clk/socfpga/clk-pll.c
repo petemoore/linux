@@ -43,8 +43,8 @@ static unsigned long clk_pll_recalc_rate(struct clk_hw *hwclk,
 	unsigned long long vco_freq;
 	unsigned long bypass;
 
-	reg = readl(socfpgaclk->hw.reg);
-	bypass = readl(clk_mgr_base_addr + CLKMGR_BYPASS);
+	reg = pete_readl("drivers/clk/socfpga/clk-pll.c:46", socfpgaclk->hw.reg);
+	bypass = pete_readl("drivers/clk/socfpga/clk-pll.c:47", clk_mgr_base_addr + CLKMGR_BYPASS);
 	if (bypass & MAINPLL_BYPASS)
 		return parent_rate;
 
@@ -60,7 +60,7 @@ static u8 clk_pll_get_parent(struct clk_hw *hwclk)
 	u32 pll_src;
 	struct socfpga_pll *socfpgaclk = to_socfpga_clk(hwclk);
 
-	pll_src = readl(socfpgaclk->hw.reg);
+	pll_src = pete_readl("drivers/clk/socfpga/clk-pll.c:63", socfpgaclk->hw.reg);
 	return (pll_src >> CLK_MGR_PLL_CLK_SRC_SHIFT) &
 			CLK_MGR_PLL_CLK_SRC_MASK;
 }

@@ -171,13 +171,13 @@ struct jz4780_i2c {
 static inline unsigned short jz4780_i2c_readw(struct jz4780_i2c *i2c,
 					      unsigned long offset)
 {
-	return readw(i2c->iomem + offset);
+	return pete_readw("drivers/i2c/busses/i2c-jz4780.c:174", i2c->iomem + offset);
 }
 
 static inline void jz4780_i2c_writew(struct jz4780_i2c *i2c,
 				     unsigned long offset, unsigned short val)
 {
-	writew(val, i2c->iomem + offset);
+	pete_writew("drivers/i2c/busses/i2c-jz4780.c:180", val, i2c->iomem + offset);
 }
 
 static int jz4780_i2c_disable(struct jz4780_i2c *i2c)

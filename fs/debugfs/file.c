@@ -1174,7 +1174,7 @@ void debugfs_print_regs32(struct seq_file *s, const struct debugfs_reg32 *regs,
 		if (prefix)
 			seq_printf(s, "%s", prefix);
 		seq_printf(s, "%s = 0x%08x\n", regs->name,
-			   readl(base + regs->offset));
+			   pete_readl("fs/debugfs/file.c:1177", base + regs->offset));
 		if (seq_has_overflowed(s))
 			break;
 	}

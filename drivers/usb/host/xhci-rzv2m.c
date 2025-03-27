@@ -32,8 +32,8 @@ void xhci_rzv2m_start(struct usb_hcd *hcd)
 
 	if (hcd->regs) {
 		/* Interrupt Enable */
-		int_en = readl(hcd->regs + RZV2M_USB3_INTEN);
+		int_en = pete_readl("drivers/usb/host/xhci-rzv2m.c:35", hcd->regs + RZV2M_USB3_INTEN);
 		int_en |= RZV2M_USB3_INT_ENA_VAL;
-		writel(int_en, hcd->regs + RZV2M_USB3_INTEN);
+		pete_writel("drivers/usb/host/xhci-rzv2m.c:37", int_en, hcd->regs + RZV2M_USB3_INTEN);
 	}
 }

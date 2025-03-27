@@ -264,12 +264,12 @@ static int pci_plx9050_init(struct pci_dev *dev)
 	p = ioremap(pci_resource_start(dev, 0), 0x80);
 	if (p == NULL)
 		return -ENOMEM;
-	writel(irq_config, p + 0x4c);
+	pete_writel("drivers/tty/serial/8250/8250_pci.c:267", irq_config, p + 0x4c);
 
 	/*
 	 * Read the register back to ensure that it took effect.
 	 */
-	readl(p + 0x4c);
+	pete_readl("drivers/tty/serial/8250/8250_pci.c:272", p + 0x4c);
 	iounmap(p);
 
 	return 0;
@@ -287,12 +287,12 @@ static void pci_plx9050_exit(struct pci_dev *dev)
 	 */
 	p = ioremap(pci_resource_start(dev, 0), 0x80);
 	if (p != NULL) {
-		writel(0, p + 0x4c);
+		pete_writel("drivers/tty/serial/8250/8250_pci.c:290", 0, p + 0x4c);
 
 		/*
 		 * Read the register back to ensure that it took effect.
 		 */
-		readl(p + 0x4c);
+		pete_readl("drivers/tty/serial/8250/8250_pci.c:295", p + 0x4c);
 		iounmap(p);
 	}
 }
@@ -315,7 +315,7 @@ static void pci_ni8420_exit(struct pci_dev *dev)
 		return;
 
 	/* Disable the CPU Interrupt */
-	writel(readl(p + NI8420_INT_ENABLE_REG) & ~(NI8420_INT_ENABLE_BIT),
+	pete_writel("drivers/tty/serial/8250/8250_pci.c:318", pete_readl("drivers/tty/serial/8250/8250_pci.c:318", p + NI8420_INT_ENABLE_REG) & ~(NI8420_INT_ENABLE_BIT),
 	       p + NI8420_INT_ENABLE_REG);
 	iounmap(p);
 }
@@ -344,7 +344,7 @@ static void pci_ni8430_exit(struct pci_dev *dev)
 		return;
 
 	/* Disable the CPU Interrupt */
-	writel(MITE_LCIMR2_CLR_CPU_IE, p + MITE_LCIMR2);
+	pete_writel("drivers/tty/serial/8250/8250_pci.c:347", MITE_LCIMR2_CLR_CPU_IE, p + MITE_LCIMR2);
 	iounmap(p);
 }
 
@@ -388,12 +388,12 @@ static int sbs_init(struct pci_dev *dev)
 	if (p == NULL)
 		return -ENOMEM;
 	/* Set bit-4 Control Register (UART RESET) in to reset the uarts */
-	writeb(0x10, p + OCT_REG_CR_OFF);
+	pete_writeb("drivers/tty/serial/8250/8250_pci.c:391", 0x10, p + OCT_REG_CR_OFF);
 	udelay(50);
-	writeb(0x0, p + OCT_REG_CR_OFF);
+	pete_writeb("drivers/tty/serial/8250/8250_pci.c:393", 0x0, p + OCT_REG_CR_OFF);
 
 	/* Set bit-2 (INTENABLE) of Control Register */
-	writeb(0x4, p + OCT_REG_CR_OFF);
+	pete_writeb("drivers/tty/serial/8250/8250_pci.c:396", 0x4, p + OCT_REG_CR_OFF);
 	iounmap(p);
 
 	return 0;
@@ -410,7 +410,7 @@ static void sbs_exit(struct pci_dev *dev)
 	p = pci_ioremap_bar(dev, 0);
 	/* FIXME: What if resource_len < OCT_REG_CR_OFF */
 	if (p != NULL)
-		writeb(0, p + OCT_REG_CR_OFF);
+		pete_writeb("drivers/tty/serial/8250/8250_pci.c:413", 0, p + OCT_REG_CR_OFF);
 	iounmap(p);
 }
 
@@ -465,8 +465,8 @@ static int pci_siig10x_init(struct pci_dev *dev)
 	if (p == NULL)
 		return -ENOMEM;
 
-	writew(readw(p + 0x28) & data, p + 0x28);
-	readw(p + 0x28);
+	pete_writew("drivers/tty/serial/8250/8250_pci.c:468", pete_readw("drivers/tty/serial/8250/8250_pci.c:468", p + 0x28) & data, p + 0x28);
+	pete_readw("drivers/tty/serial/8250/8250_pci.c:469", p + 0x28);
 	iounmap(p);
 	return 0;
 }
@@ -673,7 +673,7 @@ static int pci_ni8420_init(struct pci_dev *dev)
 		return -ENOMEM;
 
 	/* Enable CPU Interrupt */
-	writel(readl(p + NI8420_INT_ENABLE_REG) | NI8420_INT_ENABLE_BIT,
+	pete_writel("drivers/tty/serial/8250/8250_pci.c:676", pete_readl("drivers/tty/serial/8250/8250_pci.c:676", p + NI8420_INT_ENABLE_REG) | NI8420_INT_ENABLE_BIT,
 	       p + NI8420_INT_ENABLE_REG);
 
 	iounmap(p);
@@ -711,17 +711,17 @@ static int pci_ni8430_init(struct pci_dev *dev)
 	pcibios_resource_to_bus(dev->bus, &region, &dev->resource[bar]);
 	device_window = ((region.start + MITE_IOWBSR1_WIN_OFFSET) & 0xffffff00)
 			| MITE_IOWBSR1_WENAB | MITE_IOWBSR1_WSIZE;
-	writel(device_window, p + MITE_IOWBSR1);
+	pete_writel("drivers/tty/serial/8250/8250_pci.c:714", device_window, p + MITE_IOWBSR1);
 
 	/* Set window access to go to RAMSEL IO address space */
-	writel((readl(p + MITE_IOWCR1) & MITE_IOWCR1_RAMSEL_MASK),
+	pete_writel("drivers/tty/serial/8250/8250_pci.c:717", (pete_readl("drivers/tty/serial/8250/8250_pci.c:717", p + MITE_IOWCR1) & MITE_IOWCR1_RAMSEL_MASK),
 	       p + MITE_IOWCR1);
 
 	/* Enable IO Bus Interrupt 0 */
-	writel(MITE_LCIMR1_IO_IE_0, p + MITE_LCIMR1);
+	pete_writel("drivers/tty/serial/8250/8250_pci.c:721", MITE_LCIMR1_IO_IE_0, p + MITE_LCIMR1);
 
 	/* Enable CPU Interrupt */
-	writel(MITE_LCIMR2_SET_CPU_IE, p + MITE_LCIMR2);
+	pete_writel("drivers/tty/serial/8250/8250_pci.c:724", MITE_LCIMR2_SET_CPU_IE, p + MITE_LCIMR2);
 
 	iounmap(p);
 	return 0;
@@ -751,7 +751,7 @@ pci_ni8430_setup(struct serial_private *priv,
 		return -ENOMEM;
 
 	/* enable the transceiver */
-	writeb(readb(p + offset + NI8430_PORTCON) | NI8430_PORTCON_TXVR_ENABLE,
+	pete_writeb("drivers/tty/serial/8250/8250_pci.c:754", pete_readb("drivers/tty/serial/8250/8250_pci.c:754", p + offset + NI8430_PORTCON) | NI8430_PORTCON_TXVR_ENABLE,
 	       p + offset + NI8430_PORTCON);
 
 	iounmap(p);
@@ -1669,8 +1669,8 @@ static void f815xxa_mem_serial_out(struct uart_port *p, int offset, int value)
 	unsigned long flags;
 
 	spin_lock_irqsave(&data->lock, flags);
-	writeb(value, p->membase + offset);
-	readb(p->membase + UART_SCR); /* Dummy read for flush pcie tx queue */
+	pete_writeb("drivers/tty/serial/8250/8250_pci.c:1672", value, p->membase + offset);
+	pete_readb("drivers/tty/serial/8250/8250_pci.c:1673", p->membase + UART_SCR); /* Dummy read for flush pcie tx queue */
 	spin_unlock_irqrestore(&data->lock, flags);
 }
 

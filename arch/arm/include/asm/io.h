@@ -281,13 +281,13 @@ extern void _memset_io(volatile void __iomem *, int, size_t);
 #define writew_relaxed(v,c)	__raw_writew((__force u16) cpu_to_le16(v),c)
 #define writel_relaxed(v,c)	__raw_writel((__force u32) cpu_to_le32(v),c)
 
-#define readb(c)		({ u8  __v = readb_relaxed(c); __iormb(); __v; })
-#define readw(c)		({ u16 __v = readw_relaxed(c); __iormb(); __v; })
-#define readl(c)		({ u32 __v = readl_relaxed(c); __iormb(); __v; })
+#define pete_readb("arch/arm/include/asm/io.h:284", c)		({ u8  __v = readb_relaxed(c); __iormb(); __v; })
+#define pete_readw("arch/arm/include/asm/io.h:285", c)		({ u16 __v = readw_relaxed(c); __iormb(); __v; })
+#define pete_readl("arch/arm/include/asm/io.h:286", c)		({ u32 __v = readl_relaxed(c); __iormb(); __v; })
 
-#define writeb(v,c)		({ __iowmb(); writeb_relaxed(v,c); })
-#define writew(v,c)		({ __iowmb(); writew_relaxed(v,c); })
-#define writel(v,c)		({ __iowmb(); writel_relaxed(v,c); })
+#define pete_writeb("arch/arm/include/asm/io.h:288", v,c)		({ __iowmb(); writeb_relaxed(v,c); })
+#define pete_writew("arch/arm/include/asm/io.h:289", v,c)		({ __iowmb(); writew_relaxed(v,c); })
+#define pete_writel("arch/arm/include/asm/io.h:290", v,c)		({ __iowmb(); writel_relaxed(v,c); })
 
 #define readsb(p,d,l)		__raw_readsb(p,d,l)
 #define readsw(p,d,l)		__raw_readsw(p,d,l)

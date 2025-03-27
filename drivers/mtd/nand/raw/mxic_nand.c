@@ -216,12 +216,12 @@ static void mxic_nfc_clk_disable(struct mxic_nand_ctlr *nfc)
 
 static void mxic_nfc_set_input_delay(struct mxic_nand_ctlr *nfc, u8 idly_code)
 {
-	writel(IDLY_CODE_VAL(0, idly_code) |
+	pete_writel("drivers/mtd/nand/raw/mxic_nand.c:219", IDLY_CODE_VAL(0, idly_code) |
 	       IDLY_CODE_VAL(1, idly_code) |
 	       IDLY_CODE_VAL(2, idly_code) |
 	       IDLY_CODE_VAL(3, idly_code),
 	       nfc->regs + IDLY_CODE(0));
-	writel(IDLY_CODE_VAL(4, idly_code) |
+	pete_writel("drivers/mtd/nand/raw/mxic_nand.c:224", IDLY_CODE_VAL(4, idly_code) |
 	       IDLY_CODE_VAL(5, idly_code) |
 	       IDLY_CODE_VAL(6, idly_code) |
 	       IDLY_CODE_VAL(7, idly_code),
@@ -285,7 +285,7 @@ static irqreturn_t mxic_nfc_isr(int irq, void *dev_id)
 	struct mxic_nand_ctlr *nfc = dev_id;
 	u32 sts;
 
-	sts = readl(nfc->regs + INT_STS);
+	sts = pete_readl("drivers/mtd/nand/raw/mxic_nand.c:288", nfc->regs + INT_STS);
 	if (sts & INT_RDY_PIN)
 		complete(&nfc->complete);
 	else
@@ -296,28 +296,28 @@ static irqreturn_t mxic_nfc_isr(int irq, void *dev_id)
 
 static void mxic_nfc_hw_init(struct mxic_nand_ctlr *nfc)
 {
-	writel(HC_CFG_NIO(8) | HC_CFG_TYPE(1, HC_CFG_TYPE_RAW_NAND) |
+	pete_writel("drivers/mtd/nand/raw/mxic_nand.c:299", HC_CFG_NIO(8) | HC_CFG_TYPE(1, HC_CFG_TYPE_RAW_NAND) |
 	       HC_CFG_SLV_ACT(0) | HC_CFG_MAN_CS_EN |
 	       HC_CFG_IDLE_SIO_LVL(1), nfc->regs + HC_CFG);
-	writel(INT_STS_ALL, nfc->regs + INT_STS_EN);
-	writel(INT_RDY_PIN, nfc->regs + INT_SIG_EN);
-	writel(0x0, nfc->regs + ONFI_DIN_CNT(0));
-	writel(0, nfc->regs + LRD_CFG);
-	writel(0, nfc->regs + LRD_CTRL);
-	writel(0x0, nfc->regs + HC_EN);
+	pete_writel("drivers/mtd/nand/raw/mxic_nand.c:302", INT_STS_ALL, nfc->regs + INT_STS_EN);
+	pete_writel("drivers/mtd/nand/raw/mxic_nand.c:303", INT_RDY_PIN, nfc->regs + INT_SIG_EN);
+	pete_writel("drivers/mtd/nand/raw/mxic_nand.c:304", 0x0, nfc->regs + ONFI_DIN_CNT(0));
+	pete_writel("drivers/mtd/nand/raw/mxic_nand.c:305", 0, nfc->regs + LRD_CFG);
+	pete_writel("drivers/mtd/nand/raw/mxic_nand.c:306", 0, nfc->regs + LRD_CTRL);
+	pete_writel("drivers/mtd/nand/raw/mxic_nand.c:307", 0x0, nfc->regs + HC_EN);
 }
 
 static void mxic_nfc_cs_enable(struct mxic_nand_ctlr *nfc)
 {
-	writel(readl(nfc->regs + HC_CFG) | HC_CFG_MAN_CS_EN,
+	pete_writel("drivers/mtd/nand/raw/mxic_nand.c:312", pete_readl("drivers/mtd/nand/raw/mxic_nand.c:312", nfc->regs + HC_CFG) | HC_CFG_MAN_CS_EN,
 	       nfc->regs + HC_CFG);
-	writel(HC_CFG_MAN_CS_ASSERT | readl(nfc->regs + HC_CFG),
+	pete_writel("drivers/mtd/nand/raw/mxic_nand.c:314", HC_CFG_MAN_CS_ASSERT | pete_readl("drivers/mtd/nand/raw/mxic_nand.c:314", nfc->regs + HC_CFG),
 	       nfc->regs + HC_CFG);
 }
 
 static void mxic_nfc_cs_disable(struct mxic_nand_ctlr *nfc)
 {
-	writel(~HC_CFG_MAN_CS_ASSERT & readl(nfc->regs + HC_CFG),
+	pete_writel("drivers/mtd/nand/raw/mxic_nand.c:320", ~HC_CFG_MAN_CS_ASSERT & pete_readl("drivers/mtd/nand/raw/mxic_nand.c:320", nfc->regs + HC_CFG),
 	       nfc->regs + HC_CFG);
 }
 
@@ -358,7 +358,7 @@ static int mxic_nfc_data_xfer(struct mxic_nand_ctlr *nfc, const void *txbuf,
 		if (ret)
 			return ret;
 
-		writel(data, nfc->regs + TXD(nbytes % 4));
+		pete_writel("drivers/mtd/nand/raw/mxic_nand.c:361", data, nfc->regs + TXD(nbytes % 4));
 
 		ret = readl_poll_timeout(nfc->regs + INT_STS, sts,
 					 sts & INT_TX_EMPTY, 0, USEC_PER_SEC);
@@ -371,12 +371,12 @@ static int mxic_nfc_data_xfer(struct mxic_nand_ctlr *nfc, const void *txbuf,
 		if (ret)
 			return ret;
 
-		data = readl(nfc->regs + RXD);
+		data = pete_readl("drivers/mtd/nand/raw/mxic_nand.c:374", nfc->regs + RXD);
 		if (rxbuf) {
 			data >>= (8 * (4 - nbytes));
 			memcpy(rxbuf + pos, &data, nbytes);
 		}
-		if (readl(nfc->regs + INT_STS) & INT_RX_NOT_EMPTY)
+		if (pete_readl("drivers/mtd/nand/raw/mxic_nand.c:379", nfc->regs + INT_STS) & INT_RX_NOT_EMPTY)
 			dev_warn(nfc->dev, "RX FIFO not empty\n");
 
 		pos += nbytes;
@@ -403,9 +403,9 @@ static int mxic_nfc_exec_op(struct nand_chip *chip,
 
 		switch (instr->type) {
 		case NAND_OP_CMD_INSTR:
-			writel(0, nfc->regs + HC_EN);
-			writel(HC_EN_BIT, nfc->regs + HC_EN);
-			writel(OP_CMD_BUSW(OP_BUSW_8) |  OP_DUMMY_CYC(0x3F) |
+			pete_writel("drivers/mtd/nand/raw/mxic_nand.c:406", 0, nfc->regs + HC_EN);
+			pete_writel("drivers/mtd/nand/raw/mxic_nand.c:407", HC_EN_BIT, nfc->regs + HC_EN);
+			pete_writel("drivers/mtd/nand/raw/mxic_nand.c:408", OP_CMD_BUSW(OP_BUSW_8) |  OP_DUMMY_CYC(0x3F) |
 			       OP_CMD_BYTES(0), nfc->regs + SS_CTRL(0));
 
 			ret = mxic_nfc_data_xfer(nfc,
@@ -414,7 +414,7 @@ static int mxic_nfc_exec_op(struct nand_chip *chip,
 			break;
 
 		case NAND_OP_ADDR_INSTR:
-			writel(OP_ADDR_BUSW(OP_BUSW_8) | OP_DUMMY_CYC(0x3F) |
+			pete_writel("drivers/mtd/nand/raw/mxic_nand.c:417", OP_ADDR_BUSW(OP_BUSW_8) | OP_DUMMY_CYC(0x3F) |
 			       OP_ADDR_BYTES(instr->ctx.addr.naddrs),
 			       nfc->regs + SS_CTRL(0));
 			ret = mxic_nfc_data_xfer(nfc,
@@ -423,8 +423,8 @@ static int mxic_nfc_exec_op(struct nand_chip *chip,
 			break;
 
 		case NAND_OP_DATA_IN_INSTR:
-			writel(0x0, nfc->regs + ONFI_DIN_CNT(0));
-			writel(OP_DATA_BUSW(OP_BUSW_8) | OP_DUMMY_CYC(0x3F) |
+			pete_writel("drivers/mtd/nand/raw/mxic_nand.c:426", 0x0, nfc->regs + ONFI_DIN_CNT(0));
+			pete_writel("drivers/mtd/nand/raw/mxic_nand.c:427", OP_DATA_BUSW(OP_BUSW_8) | OP_DUMMY_CYC(0x3F) |
 			       OP_READ, nfc->regs + SS_CTRL(0));
 			ret = mxic_nfc_data_xfer(nfc, NULL,
 						 instr->ctx.data.buf.in,
@@ -432,9 +432,9 @@ static int mxic_nfc_exec_op(struct nand_chip *chip,
 			break;
 
 		case NAND_OP_DATA_OUT_INSTR:
-			writel(instr->ctx.data.len,
+			pete_writel("drivers/mtd/nand/raw/mxic_nand.c:435", instr->ctx.data.len,
 			       nfc->regs + ONFI_DIN_CNT(0));
-			writel(OP_DATA_BUSW(OP_BUSW_8) | OP_DUMMY_CYC(0x3F),
+			pete_writel("drivers/mtd/nand/raw/mxic_nand.c:437", OP_DATA_BUSW(OP_BUSW_8) | OP_DUMMY_CYC(0x3F),
 			       nfc->regs + SS_CTRL(0));
 			ret = mxic_nfc_data_xfer(nfc,
 						 instr->ctx.data.buf.out, NULL,
@@ -473,7 +473,7 @@ static int mxic_nfc_setup_interface(struct nand_chip *chip, int chipnr,
 		dev_err(nfc->dev, "set freq:%ld failed\n", freq);
 
 	if (sdr->tRC_min < 30000)
-		writel(DATA_STROB_EDO_EN, nfc->regs + DATA_STROB);
+		pete_writel("drivers/mtd/nand/raw/mxic_nand.c:476", DATA_STROB_EDO_EN, nfc->regs + DATA_STROB);
 
 	return 0;
 }

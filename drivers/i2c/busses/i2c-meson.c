@@ -113,10 +113,10 @@ static void meson_i2c_set_mask(struct meson_i2c *i2c, int reg, u32 mask,
 {
 	u32 data;
 
-	data = readl(i2c->regs + reg);
+	data = pete_readl("drivers/i2c/busses/i2c-meson.c:116", i2c->regs + reg);
 	data &= ~mask;
 	data |= val & mask;
-	writel(data, i2c->regs + reg);
+	pete_writel("drivers/i2c/busses/i2c-meson.c:119", data, i2c->regs + reg);
 }
 
 static void meson_i2c_reset_tokens(struct meson_i2c *i2c)
@@ -217,8 +217,8 @@ static void meson_i2c_get_data(struct meson_i2c *i2c, char *buf, int len)
 	u32 rdata0, rdata1;
 	int i;
 
-	rdata0 = readl(i2c->regs + REG_TOK_RDATA0);
-	rdata1 = readl(i2c->regs + REG_TOK_RDATA1);
+	rdata0 = pete_readl("drivers/i2c/busses/i2c-meson.c:220", i2c->regs + REG_TOK_RDATA0);
+	rdata1 = pete_readl("drivers/i2c/busses/i2c-meson.c:221", i2c->regs + REG_TOK_RDATA1);
 
 	dev_dbg(i2c->dev, "%s: data %08x %08x len %d\n", __func__,
 		rdata0, rdata1, len);
@@ -241,8 +241,8 @@ static void meson_i2c_put_data(struct meson_i2c *i2c, char *buf, int len)
 	for (i = 4; i < min(8, len); i++)
 		wdata1 |= *buf++ << ((i - 4) * 8);
 
-	writel(wdata0, i2c->regs + REG_TOK_WDATA0);
-	writel(wdata1, i2c->regs + REG_TOK_WDATA1);
+	pete_writel("drivers/i2c/busses/i2c-meson.c:244", wdata0, i2c->regs + REG_TOK_WDATA0);
+	pete_writel("drivers/i2c/busses/i2c-meson.c:245", wdata1, i2c->regs + REG_TOK_WDATA1);
 
 	dev_dbg(i2c->dev, "%s: data %08x %08x len %d\n", __func__,
 		wdata0, wdata1, len);
@@ -271,8 +271,8 @@ static void meson_i2c_prepare_xfer(struct meson_i2c *i2c)
 	if (i2c->last && i2c->pos + i2c->count >= i2c->msg->len)
 		meson_i2c_add_token(i2c, TOKEN_STOP);
 
-	writel(i2c->tokens[0], i2c->regs + REG_TOK_LIST0);
-	writel(i2c->tokens[1], i2c->regs + REG_TOK_LIST1);
+	pete_writel("drivers/i2c/busses/i2c-meson.c:274", i2c->tokens[0], i2c->regs + REG_TOK_LIST0);
+	pete_writel("drivers/i2c/busses/i2c-meson.c:275", i2c->tokens[1], i2c->regs + REG_TOK_LIST1);
 }
 
 static void meson_i2c_transfer_complete(struct meson_i2c *i2c, u32 ctrl)
@@ -308,7 +308,7 @@ static irqreturn_t meson_i2c_irq(int irqno, void *dev_id)
 
 	meson_i2c_reset_tokens(i2c);
 	meson_i2c_set_mask(i2c, REG_CTRL, REG_CTRL_START, 0);
-	ctrl = readl(i2c->regs + REG_CTRL);
+	ctrl = pete_readl("drivers/i2c/busses/i2c-meson.c:311", i2c->regs + REG_CTRL);
 
 	dev_dbg(i2c->dev, "irq: state %d, pos %d, count %d, ctrl %08x\n",
 		i2c->state, i2c->pos, i2c->count, ctrl);

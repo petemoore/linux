@@ -95,9 +95,9 @@ static void cmdq_sw_ddr_enable(struct cmdq *cmdq, bool enable)
 	WARN_ON(clk_bulk_enable(cmdq->pdata->gce_num, cmdq->clocks));
 
 	if (enable)
-		writel(GCE_DDR_EN | GCE_CTRL_BY_SW, cmdq->base + GCE_GCTL_VALUE);
+		pete_writel("drivers/mailbox/mtk-cmdq-mailbox.c:98", GCE_DDR_EN | GCE_CTRL_BY_SW, cmdq->base + GCE_GCTL_VALUE);
 	else
-		writel(GCE_CTRL_BY_SW, cmdq->base + GCE_GCTL_VALUE);
+		pete_writel("drivers/mailbox/mtk-cmdq-mailbox.c:100", GCE_CTRL_BY_SW, cmdq->base + GCE_GCTL_VALUE);
 
 	clk_bulk_disable(cmdq->pdata->gce_num, cmdq->clocks);
 }
@@ -114,10 +114,10 @@ static int cmdq_thread_suspend(struct cmdq *cmdq, struct cmdq_thread *thread)
 {
 	u32 status;
 
-	writel(CMDQ_THR_SUSPEND, thread->base + CMDQ_THR_SUSPEND_TASK);
+	pete_writel("drivers/mailbox/mtk-cmdq-mailbox.c:117", CMDQ_THR_SUSPEND, thread->base + CMDQ_THR_SUSPEND_TASK);
 
 	/* If already disabled, treat as suspended successful. */
-	if (!(readl(thread->base + CMDQ_THR_ENABLE_TASK) & CMDQ_THR_ENABLED))
+	if (!(pete_readl("drivers/mailbox/mtk-cmdq-mailbox.c:120", thread->base + CMDQ_THR_ENABLE_TASK) & CMDQ_THR_ENABLED))
 		return 0;
 
 	if (readl_poll_timeout_atomic(thread->base + CMDQ_THR_CURR_STATUS,
@@ -132,7 +132,7 @@ static int cmdq_thread_suspend(struct cmdq *cmdq, struct cmdq_thread *thread)
 
 static void cmdq_thread_resume(struct cmdq_thread *thread)
 {
-	writel(CMDQ_THR_RESUME, thread->base + CMDQ_THR_SUSPEND_TASK);
+	pete_writel("drivers/mailbox/mtk-cmdq-mailbox.c:135", CMDQ_THR_RESUME, thread->base + CMDQ_THR_SUSPEND_TASK);
 }
 
 static void cmdq_init(struct cmdq *cmdq)
@@ -147,11 +147,11 @@ static void cmdq_init(struct cmdq *cmdq)
 		gctl_regval |= GCE_DDR_EN;
 
 	if (gctl_regval)
-		writel(gctl_regval, cmdq->base + GCE_GCTL_VALUE);
+		pete_writel("drivers/mailbox/mtk-cmdq-mailbox.c:150", gctl_regval, cmdq->base + GCE_GCTL_VALUE);
 
-	writel(CMDQ_THR_ACTIVE_SLOT_CYCLES, cmdq->base + CMDQ_THR_SLOT_CYCLES);
+	pete_writel("drivers/mailbox/mtk-cmdq-mailbox.c:152", CMDQ_THR_ACTIVE_SLOT_CYCLES, cmdq->base + CMDQ_THR_SLOT_CYCLES);
 	for (i = 0; i <= CMDQ_MAX_EVENT; i++)
-		writel(i, cmdq->base + CMDQ_SYNC_TOKEN_UPDATE);
+		pete_writel("drivers/mailbox/mtk-cmdq-mailbox.c:154", i, cmdq->base + CMDQ_SYNC_TOKEN_UPDATE);
 	clk_bulk_disable(cmdq->pdata->gce_num, cmdq->clocks);
 }
 
@@ -159,7 +159,7 @@ static int cmdq_thread_reset(struct cmdq *cmdq, struct cmdq_thread *thread)
 {
 	u32 warm_reset;
 
-	writel(CMDQ_THR_DO_WARM_RESET, thread->base + CMDQ_THR_WARM_RESET);
+	pete_writel("drivers/mailbox/mtk-cmdq-mailbox.c:162", CMDQ_THR_DO_WARM_RESET, thread->base + CMDQ_THR_WARM_RESET);
 	if (readl_poll_timeout_atomic(thread->base + CMDQ_THR_WARM_RESET,
 			warm_reset, !(warm_reset & CMDQ_THR_DO_WARM_RESET),
 			0, 10)) {
@@ -174,13 +174,13 @@ static int cmdq_thread_reset(struct cmdq *cmdq, struct cmdq_thread *thread)
 static void cmdq_thread_disable(struct cmdq *cmdq, struct cmdq_thread *thread)
 {
 	cmdq_thread_reset(cmdq, thread);
-	writel(CMDQ_THR_DISABLED, thread->base + CMDQ_THR_ENABLE_TASK);
+	pete_writel("drivers/mailbox/mtk-cmdq-mailbox.c:177", CMDQ_THR_DISABLED, thread->base + CMDQ_THR_ENABLE_TASK);
 }
 
 /* notify GCE to re-fetch commands by setting GCE thread PC */
 static void cmdq_thread_invalidate_fetched_data(struct cmdq_thread *thread)
 {
-	writel(readl(thread->base + CMDQ_THR_CURR_ADDR),
+	pete_writel("drivers/mailbox/mtk-cmdq-mailbox.c:183", pete_readl("drivers/mailbox/mtk-cmdq-mailbox.c:183", thread->base + CMDQ_THR_CURR_ADDR),
 	       thread->base + CMDQ_THR_CURR_ADDR);
 }
 
@@ -206,7 +206,7 @@ static void cmdq_task_insert_into_thread(struct cmdq_task *task)
 
 static bool cmdq_thread_is_in_wfe(struct cmdq_thread *thread)
 {
-	return readl(thread->base + CMDQ_THR_WAIT_TOKEN) & CMDQ_THR_IS_WAITING;
+	return pete_readl("drivers/mailbox/mtk-cmdq-mailbox.c:209", thread->base + CMDQ_THR_WAIT_TOKEN) & CMDQ_THR_IS_WAITING;
 }
 
 static void cmdq_task_exec_done(struct cmdq_task *task, int sta)
@@ -231,7 +231,7 @@ static void cmdq_task_handle_error(struct cmdq_task *task)
 	next_task = list_first_entry_or_null(&thread->task_busy_list,
 			struct cmdq_task, list_entry);
 	if (next_task)
-		writel(next_task->pa_base >> cmdq->pdata->shift,
+		pete_writel("drivers/mailbox/mtk-cmdq-mailbox.c:234", next_task->pa_base >> cmdq->pdata->shift,
 		       thread->base + CMDQ_THR_CURR_ADDR);
 	cmdq_thread_resume(thread);
 }
@@ -243,8 +243,8 @@ static void cmdq_thread_irq_handler(struct cmdq *cmdq,
 	u32 curr_pa, irq_flag, task_end_pa;
 	bool err;
 
-	irq_flag = readl(thread->base + CMDQ_THR_IRQ_STATUS);
-	writel(~irq_flag, thread->base + CMDQ_THR_IRQ_STATUS);
+	irq_flag = pete_readl("drivers/mailbox/mtk-cmdq-mailbox.c:246", thread->base + CMDQ_THR_IRQ_STATUS);
+	pete_writel("drivers/mailbox/mtk-cmdq-mailbox.c:247", ~irq_flag, thread->base + CMDQ_THR_IRQ_STATUS);
 
 	/*
 	 * When ISR call this function, another CPU core could run
@@ -252,7 +252,7 @@ static void cmdq_thread_irq_handler(struct cmdq *cmdq,
 	 * reset / disable this GCE thread, so we need to check the enable
 	 * bit of this GCE thread.
 	 */
-	if (!(readl(thread->base + CMDQ_THR_ENABLE_TASK) & CMDQ_THR_ENABLED))
+	if (!(pete_readl("drivers/mailbox/mtk-cmdq-mailbox.c:255", thread->base + CMDQ_THR_ENABLE_TASK) & CMDQ_THR_ENABLED))
 		return;
 
 	if (irq_flag & CMDQ_THR_IRQ_ERROR)
@@ -262,7 +262,7 @@ static void cmdq_thread_irq_handler(struct cmdq *cmdq,
 	else
 		return;
 
-	curr_pa = readl(thread->base + CMDQ_THR_CURR_ADDR) << cmdq->pdata->shift;
+	curr_pa = pete_readl("drivers/mailbox/mtk-cmdq-mailbox.c:265", thread->base + CMDQ_THR_CURR_ADDR) << cmdq->pdata->shift;
 
 	list_for_each_entry_safe(task, tmp, &thread->task_busy_list,
 				 list_entry) {
@@ -295,7 +295,7 @@ static irqreturn_t cmdq_irq_handler(int irq, void *dev)
 	unsigned long irq_status, flags = 0L;
 	int bit;
 
-	irq_status = readl(cmdq->base + CMDQ_CURR_IRQ_STATUS) & cmdq->irq_mask;
+	irq_status = pete_readl("drivers/mailbox/mtk-cmdq-mailbox.c:298", cmdq->base + CMDQ_CURR_IRQ_STATUS) & cmdq->irq_mask;
 	if (!(irq_status ^ cmdq->irq_mask))
 		return IRQ_NONE;
 
@@ -394,31 +394,31 @@ static int cmdq_mbox_send_data(struct mbox_chan *chan, void *data)
 		 */
 		WARN_ON(cmdq_thread_reset(cmdq, thread) < 0);
 
-		writel(task->pa_base >> cmdq->pdata->shift,
+		pete_writel("drivers/mailbox/mtk-cmdq-mailbox.c:397", task->pa_base >> cmdq->pdata->shift,
 		       thread->base + CMDQ_THR_CURR_ADDR);
-		writel((task->pa_base + pkt->cmd_buf_size) >> cmdq->pdata->shift,
+		pete_writel("drivers/mailbox/mtk-cmdq-mailbox.c:399", (task->pa_base + pkt->cmd_buf_size) >> cmdq->pdata->shift,
 		       thread->base + CMDQ_THR_END_ADDR);
 
-		writel(thread->priority, thread->base + CMDQ_THR_PRIORITY);
-		writel(CMDQ_THR_IRQ_EN, thread->base + CMDQ_THR_IRQ_ENABLE);
-		writel(CMDQ_THR_ENABLED, thread->base + CMDQ_THR_ENABLE_TASK);
+		pete_writel("drivers/mailbox/mtk-cmdq-mailbox.c:402", thread->priority, thread->base + CMDQ_THR_PRIORITY);
+		pete_writel("drivers/mailbox/mtk-cmdq-mailbox.c:403", CMDQ_THR_IRQ_EN, thread->base + CMDQ_THR_IRQ_ENABLE);
+		pete_writel("drivers/mailbox/mtk-cmdq-mailbox.c:404", CMDQ_THR_ENABLED, thread->base + CMDQ_THR_ENABLE_TASK);
 	} else {
 		WARN_ON(cmdq_thread_suspend(cmdq, thread) < 0);
-		curr_pa = readl(thread->base + CMDQ_THR_CURR_ADDR) <<
+		curr_pa = pete_readl("drivers/mailbox/mtk-cmdq-mailbox.c:407", thread->base + CMDQ_THR_CURR_ADDR) <<
 			cmdq->pdata->shift;
-		end_pa = readl(thread->base + CMDQ_THR_END_ADDR) <<
+		end_pa = pete_readl("drivers/mailbox/mtk-cmdq-mailbox.c:409", thread->base + CMDQ_THR_END_ADDR) <<
 			cmdq->pdata->shift;
 		/* check boundary */
 		if (curr_pa == end_pa - CMDQ_INST_SIZE ||
 		    curr_pa == end_pa) {
 			/* set to this task directly */
-			writel(task->pa_base >> cmdq->pdata->shift,
+			pete_writel("drivers/mailbox/mtk-cmdq-mailbox.c:415", task->pa_base >> cmdq->pdata->shift,
 			       thread->base + CMDQ_THR_CURR_ADDR);
 		} else {
 			cmdq_task_insert_into_thread(task);
 			smp_mb(); /* modify jump before enable thread */
 		}
-		writel((task->pa_base + pkt->cmd_buf_size) >> cmdq->pdata->shift,
+		pete_writel("drivers/mailbox/mtk-cmdq-mailbox.c:421", (task->pa_base + pkt->cmd_buf_size) >> cmdq->pdata->shift,
 		       thread->base + CMDQ_THR_END_ADDR);
 		cmdq_thread_resume(thread);
 	}

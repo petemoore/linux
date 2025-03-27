@@ -182,11 +182,11 @@ static int ti_emif_push_sram(struct device *dev, struct ti_emif_data *emif_data)
  */
 static void ti_emif_configure_sr_delay(struct ti_emif_data *emif_data)
 {
-	writel(EMIF_POWER_MGMT_WAIT_SELF_REFRESH_8192_CYCLES,
+	pete_writel("drivers/memory/ti-emif-pm.c:185", EMIF_POWER_MGMT_WAIT_SELF_REFRESH_8192_CYCLES,
 	       (emif_data->pm_data.ti_emif_base_addr_virt +
 		EMIF_POWER_MANAGEMENT_CONTROL));
 
-	writel(EMIF_POWER_MGMT_WAIT_SELF_REFRESH_8192_CYCLES,
+	pete_writel("drivers/memory/ti-emif-pm.c:189", EMIF_POWER_MGMT_WAIT_SELF_REFRESH_8192_CYCLES,
 	       (emif_data->pm_data.ti_emif_base_addr_virt +
 		EMIF_POWER_MANAGEMENT_CTRL_SHDW));
 }
@@ -227,7 +227,7 @@ int ti_emif_get_mem_type(void)
 	if (!emif_instance)
 		return -ENODEV;
 
-	temp = readl(emif_instance->pm_data.ti_emif_base_addr_virt +
+	temp = pete_readl("drivers/memory/ti-emif-pm.c:230", emif_instance->pm_data.ti_emif_base_addr_virt +
 		     EMIF_SDRAM_CONFIG);
 
 	temp = (temp & SDRAM_TYPE_MASK) >> SDRAM_TYPE_SHIFT;

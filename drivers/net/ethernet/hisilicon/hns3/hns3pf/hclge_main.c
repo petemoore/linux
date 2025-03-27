@@ -3622,7 +3622,7 @@ static void hclge_clear_all_event_cause(struct hclge_dev *hdev)
 
 static void hclge_enable_vector(struct hclge_misc_vector *vector, bool enable)
 {
-	writel(enable ? 1 : 0, vector->addr);
+	pete_writel("drivers/net/ethernet/hisilicon/hns3/hns3pf/hclge_main.c:3625", enable ? 1 : 0, vector->addr);
 }
 
 static irqreturn_t hclge_misc_irq_handle(int irq, void *data)

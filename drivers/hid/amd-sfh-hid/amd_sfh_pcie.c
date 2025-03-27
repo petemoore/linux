@@ -65,8 +65,8 @@ static void amd_start_sensor_v2(struct amd_mp2_dev *privdata, struct amd_mp2_sen
 	if (info.sensor_idx == als_idx)
 		cmd_base.cmd_v2.mem_type = USE_C2P_REG;
 
-	writeq(info.dma_address, privdata->mmio + AMD_C2P_MSG1);
-	writel(cmd_base.ul, privdata->mmio + AMD_C2P_MSG0);
+	pete_writeq("drivers/hid/amd-sfh-hid/amd_sfh_pcie.c:68", info.dma_address, privdata->mmio + AMD_C2P_MSG1);
+	pete_writel("drivers/hid/amd-sfh-hid/amd_sfh_pcie.c:69", cmd_base.ul, privdata->mmio + AMD_C2P_MSG0);
 }
 
 static void amd_stop_sensor_v2(struct amd_mp2_dev *privdata, u16 sensor_idx)
@@ -80,8 +80,8 @@ static void amd_stop_sensor_v2(struct amd_mp2_dev *privdata, u16 sensor_idx)
 	cmd_base.cmd_v2.sensor_id = sensor_idx;
 	cmd_base.cmd_v2.length  = 16;
 
-	writeq(0x0, privdata->mmio + AMD_C2P_MSG1);
-	writel(cmd_base.ul, privdata->mmio + AMD_C2P_MSG0);
+	pete_writeq("drivers/hid/amd-sfh-hid/amd_sfh_pcie.c:83", 0x0, privdata->mmio + AMD_C2P_MSG1);
+	pete_writel("drivers/hid/amd-sfh-hid/amd_sfh_pcie.c:84", cmd_base.ul, privdata->mmio + AMD_C2P_MSG0);
 }
 
 static void amd_stop_all_sensor_v2(struct amd_mp2_dev *privdata)
@@ -93,14 +93,14 @@ static void amd_stop_all_sensor_v2(struct amd_mp2_dev *privdata)
 	cmd_base.cmd_v2.period = 0;
 	cmd_base.cmd_v2.sensor_id = 0;
 
-	writel(cmd_base.ul, privdata->mmio + AMD_C2P_MSG0);
+	pete_writel("drivers/hid/amd-sfh-hid/amd_sfh_pcie.c:96", cmd_base.ul, privdata->mmio + AMD_C2P_MSG0);
 }
 
 void amd_sfh_clear_intr_v2(struct amd_mp2_dev *privdata)
 {
-	if (readl(privdata->mmio + AMD_P2C_MSG(4))) {
-		writel(0, privdata->mmio + AMD_P2C_MSG(4));
-		writel(0xf, privdata->mmio + AMD_P2C_MSG(5));
+	if (pete_readl("drivers/hid/amd-sfh-hid/amd_sfh_pcie.c:101", privdata->mmio + AMD_P2C_MSG(4))) {
+		pete_writel("drivers/hid/amd-sfh-hid/amd_sfh_pcie.c:102", 0, privdata->mmio + AMD_P2C_MSG(4));
+		pete_writel("drivers/hid/amd-sfh-hid/amd_sfh_pcie.c:103", 0xf, privdata->mmio + AMD_P2C_MSG(5));
 	}
 }
 
@@ -136,7 +136,7 @@ int amd_sfh_irq_init_v2(struct amd_mp2_dev *privdata)
 
 static int amd_sfh_dis_sts_v2(struct amd_mp2_dev *privdata)
 {
-	return (readl(privdata->mmio + AMD_P2C_MSG(1)) &
+	return (pete_readl("drivers/hid/amd-sfh-hid/amd_sfh_pcie.c:139", privdata->mmio + AMD_P2C_MSG(1)) &
 		      SENSOR_DISCOVERY_STATUS_MASK) >> SENSOR_DISCOVERY_STATUS_SHIFT;
 }
 
@@ -156,9 +156,9 @@ static void amd_start_sensor(struct amd_mp2_dev *privdata, struct amd_mp2_sensor
 	cmd_param.s.buf_layout = 1;
 	cmd_param.s.buf_length = 16;
 
-	writeq(info.dma_address, privdata->mmio + AMD_C2P_MSG2);
-	writel(cmd_param.ul, privdata->mmio + AMD_C2P_MSG1);
-	writel(cmd_base.ul, privdata->mmio + AMD_C2P_MSG0);
+	pete_writeq("drivers/hid/amd-sfh-hid/amd_sfh_pcie.c:159", info.dma_address, privdata->mmio + AMD_C2P_MSG2);
+	pete_writel("drivers/hid/amd-sfh-hid/amd_sfh_pcie.c:160", cmd_param.ul, privdata->mmio + AMD_C2P_MSG1);
+	pete_writel("drivers/hid/amd-sfh-hid/amd_sfh_pcie.c:161", cmd_base.ul, privdata->mmio + AMD_C2P_MSG0);
 }
 
 static void amd_stop_sensor(struct amd_mp2_dev *privdata, u16 sensor_idx)
@@ -171,8 +171,8 @@ static void amd_stop_sensor(struct amd_mp2_dev *privdata, u16 sensor_idx)
 	cmd_base.s.period = 0;
 	cmd_base.s.sensor_id = sensor_idx;
 
-	writeq(0x0, privdata->mmio + AMD_C2P_MSG2);
-	writel(cmd_base.ul, privdata->mmio + AMD_C2P_MSG0);
+	pete_writeq("drivers/hid/amd-sfh-hid/amd_sfh_pcie.c:174", 0x0, privdata->mmio + AMD_C2P_MSG2);
+	pete_writel("drivers/hid/amd-sfh-hid/amd_sfh_pcie.c:175", cmd_base.ul, privdata->mmio + AMD_C2P_MSG0);
 }
 
 static void amd_stop_all_sensors(struct amd_mp2_dev *privdata)
@@ -185,7 +185,7 @@ static void amd_stop_all_sensors(struct amd_mp2_dev *privdata)
 	cmd_base.s.period = 0;
 	cmd_base.s.sensor_id = 0;
 
-	writel(cmd_base.ul, privdata->mmio + AMD_C2P_MSG0);
+	pete_writel("drivers/hid/amd-sfh-hid/amd_sfh_pcie.c:188", cmd_base.ul, privdata->mmio + AMD_C2P_MSG0);
 }
 
 static const struct dmi_system_id dmi_sensor_mask_overrides[] = {
@@ -273,7 +273,7 @@ static void mp2_select_ops(struct amd_mp2_dev *privdata)
 {
 	u8 acs;
 
-	privdata->mp2_acs = readl(privdata->mmio + AMD_P2C_MSG3);
+	privdata->mp2_acs = pete_readl("drivers/hid/amd-sfh-hid/amd_sfh_pcie.c:276", privdata->mmio + AMD_P2C_MSG3);
 	acs = privdata->mp2_acs & GENMASK(3, 0);
 
 	switch (acs) {

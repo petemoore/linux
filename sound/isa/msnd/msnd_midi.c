@@ -71,8 +71,8 @@ static void snd_msndmidi_input_drop(struct snd_msndmidi *mpu)
 {
 	u16 tail;
 
-	tail = readw(mpu->dev->MIDQ + JQS_wTail);
-	writew(tail, mpu->dev->MIDQ + JQS_wHead);
+	tail = pete_readw("sound/isa/msnd/msnd_midi.c:74", mpu->dev->MIDQ + JQS_wTail);
+	pete_writew("sound/isa/msnd/msnd_midi.c:75", tail, mpu->dev->MIDQ + JQS_wHead);
 }
 
 /*
@@ -108,19 +108,19 @@ void snd_msndmidi_input_read(void *mpuv)
 	u16 head, tail, size;
 
 	spin_lock_irqsave(&mpu->input_lock, flags);
-	head = readw(mpu->dev->MIDQ + JQS_wHead);
-	tail = readw(mpu->dev->MIDQ + JQS_wTail);
-	size = readw(mpu->dev->MIDQ + JQS_wSize);
+	head = pete_readw("sound/isa/msnd/msnd_midi.c:111", mpu->dev->MIDQ + JQS_wHead);
+	tail = pete_readw("sound/isa/msnd/msnd_midi.c:112", mpu->dev->MIDQ + JQS_wTail);
+	size = pete_readw("sound/isa/msnd/msnd_midi.c:113", mpu->dev->MIDQ + JQS_wSize);
 	if (head > size || tail > size)
 		goto out;
 	while (head != tail) {
-		unsigned char val = readw(pwMIDQData + 2 * head);
+		unsigned char val = pete_readw("sound/isa/msnd/msnd_midi.c:117", pwMIDQData + 2 * head);
 
 		if (test_bit(MSNDMIDI_MODE_BIT_INPUT_TRIGGER, &mpu->mode))
 			snd_rawmidi_receive(mpu->substream_input, &val, 1);
 		if (++head > size)
 			head = 0;
-		writew(head, mpu->dev->MIDQ + JQS_wHead);
+		pete_writew("sound/isa/msnd/msnd_midi.c:123", head, mpu->dev->MIDQ + JQS_wHead);
 	}
  out:
 	spin_unlock_irqrestore(&mpu->input_lock, flags);

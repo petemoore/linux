@@ -35,7 +35,7 @@ void pio_copy(struct hfi1_devdata *dd, struct pio_buf *pbuf, u64 pbc,
 	void __iomem *dend;			/* 8-byte data end */
 
 	/* write the PBC */
-	writeq(pbc, dest);
+	pete_writeq("drivers/infiniband/hw/hfi1/pio_copy.c:38", pbc, dest);
 	dest += sizeof(u64);
 
 	/* calculate where the QWORD data ends - in SOP=1 space */
@@ -48,7 +48,7 @@ void pio_copy(struct hfi1_devdata *dd, struct pio_buf *pbuf, u64 pbc,
 		 */
 
 		while (dest < dend) {
-			writeq(*(u64 *)from, dest);
+			pete_writeq("drivers/infiniband/hw/hfi1/pio_copy.c:51", *(u64 *)from, dest);
 			from += sizeof(u64);
 			dest += sizeof(u64);
 		}
@@ -64,7 +64,7 @@ void pio_copy(struct hfi1_devdata *dd, struct pio_buf *pbuf, u64 pbc,
 
 		/* write 8-byte SOP chunk data */
 		while (dest < send) {
-			writeq(*(u64 *)from, dest);
+			pete_writeq("drivers/infiniband/hw/hfi1/pio_copy.c:67", *(u64 *)from, dest);
 			from += sizeof(u64);
 			dest += sizeof(u64);
 		}
@@ -83,7 +83,7 @@ void pio_copy(struct hfi1_devdata *dd, struct pio_buf *pbuf, u64 pbc,
 		 */
 		if (pbuf->end <= dend) {
 			while (dest < pbuf->end) {
-				writeq(*(u64 *)from, dest);
+				pete_writeq("drivers/infiniband/hw/hfi1/pio_copy.c:86", *(u64 *)from, dest);
 				from += sizeof(u64);
 				dest += sizeof(u64);
 			}
@@ -94,7 +94,7 @@ void pio_copy(struct hfi1_devdata *dd, struct pio_buf *pbuf, u64 pbc,
 
 		/* write 8-byte non-SOP, non-wrap chunk data */
 		while (dest < dend) {
-			writeq(*(u64 *)from, dest);
+			pete_writeq("drivers/infiniband/hw/hfi1/pio_copy.c:97", *(u64 *)from, dest);
 			from += sizeof(u64);
 			dest += sizeof(u64);
 		}
@@ -107,7 +107,7 @@ void pio_copy(struct hfi1_devdata *dd, struct pio_buf *pbuf, u64 pbc,
 
 		val.val64 = 0;
 		val.val32[0] = *(u32 *)from;
-		writeq(val.val64, dest);
+		pete_writeq("drivers/infiniband/hw/hfi1/pio_copy.c:110", val.val64, dest);
 		dest += sizeof(u64);
 	}
 	/*
@@ -115,7 +115,7 @@ void pio_copy(struct hfi1_devdata *dd, struct pio_buf *pbuf, u64 pbc,
 	 * as we only wrap on a block boundary
 	 */
 	while (((unsigned long)dest & PIO_BLOCK_MASK) != 0) {
-		writeq(0, dest);
+		pete_writeq("drivers/infiniband/hw/hfi1/pio_copy.c:118", 0, dest);
 		dest += sizeof(u64);
 	}
 
@@ -221,7 +221,7 @@ static inline void merge_write8(
 
 	new = *(u64 *)src;
 	temp = pbuf->carry.val64 | (new << mshift(pbuf->carry_bytes));
-	writeq(temp, dest);
+	pete_writeq("drivers/infiniband/hw/hfi1/pio_copy.c:224", temp, dest);
 	pbuf->carry.val64 = new >> zshift(pbuf->carry_bytes);
 }
 
@@ -230,7 +230,7 @@ static inline void merge_write8(
  */
 static inline void carry8_write8(union mix carry, void __iomem *dest)
 {
-	writeq(carry.val64, dest);
+	pete_writeq("drivers/infiniband/hw/hfi1/pio_copy.c:233", carry.val64, dest);
 }
 
 /*
@@ -242,7 +242,7 @@ static inline int carry_write8(struct pio_buf *pbuf, void __iomem *dest)
 {
 	if (pbuf->carry_bytes) {
 		/* unused bytes are always kept zeroed, so just write */
-		writeq(pbuf->carry.val64, dest);
+		pete_writeq("drivers/infiniband/hw/hfi1/pio_copy.c:245", pbuf->carry.val64, dest);
 		return 1;
 	}
 
@@ -266,7 +266,7 @@ void seg_pio_copy_start(struct pio_buf *pbuf, u64 pbc,
 	void __iomem *send = dest + PIO_BLOCK_SIZE;
 	void __iomem *dend;			/* 8-byte data end */
 
-	writeq(pbc, dest);
+	pete_writeq("drivers/infiniband/hw/hfi1/pio_copy.c:269", pbc, dest);
 	dest += sizeof(u64);
 
 	/* calculate where the QWORD data ends - in SOP=1 space */
@@ -279,7 +279,7 @@ void seg_pio_copy_start(struct pio_buf *pbuf, u64 pbc,
 		 */
 
 		while (dest < dend) {
-			writeq(*(u64 *)from, dest);
+			pete_writeq("drivers/infiniband/hw/hfi1/pio_copy.c:282", *(u64 *)from, dest);
 			from += sizeof(u64);
 			dest += sizeof(u64);
 		}
@@ -295,7 +295,7 @@ void seg_pio_copy_start(struct pio_buf *pbuf, u64 pbc,
 
 		/* write 8-byte SOP chunk data */
 		while (dest < send) {
-			writeq(*(u64 *)from, dest);
+			pete_writeq("drivers/infiniband/hw/hfi1/pio_copy.c:298", *(u64 *)from, dest);
 			from += sizeof(u64);
 			dest += sizeof(u64);
 		}
@@ -314,7 +314,7 @@ void seg_pio_copy_start(struct pio_buf *pbuf, u64 pbc,
 		 */
 		if (pbuf->end <= dend) {
 			while (dest < pbuf->end) {
-				writeq(*(u64 *)from, dest);
+				pete_writeq("drivers/infiniband/hw/hfi1/pio_copy.c:317", *(u64 *)from, dest);
 				from += sizeof(u64);
 				dest += sizeof(u64);
 			}
@@ -325,7 +325,7 @@ void seg_pio_copy_start(struct pio_buf *pbuf, u64 pbc,
 
 		/* write 8-byte non-SOP, non-wrap chunk data */
 		while (dest < dend) {
-			writeq(*(u64 *)from, dest);
+			pete_writeq("drivers/infiniband/hw/hfi1/pio_copy.c:328", *(u64 *)from, dest);
 			from += sizeof(u64);
 			dest += sizeof(u64);
 		}
@@ -510,7 +510,7 @@ static void mid_copy_straight(struct pio_buf *pbuf,
 
 		/* write 8-byte chunk data */
 		while (dest < xend) {
-			writeq(*(u64 *)from, dest);
+			pete_writeq("drivers/infiniband/hw/hfi1/pio_copy.c:513", *(u64 *)from, dest);
 			from += sizeof(u64);
 			dest += sizeof(u64);
 		}
@@ -537,7 +537,7 @@ static void mid_copy_straight(struct pio_buf *pbuf,
 	 */
 	if (pbuf->end <= dend) {
 		while (dest < pbuf->end) {
-			writeq(*(u64 *)from, dest);
+			pete_writeq("drivers/infiniband/hw/hfi1/pio_copy.c:540", *(u64 *)from, dest);
 			from += sizeof(u64);
 			dest += sizeof(u64);
 		}
@@ -548,7 +548,7 @@ static void mid_copy_straight(struct pio_buf *pbuf,
 
 	/* write 8-byte non-SOP, non-wrap chunk data */
 	while (dest < dend) {
-		writeq(*(u64 *)from, dest);
+		pete_writeq("drivers/infiniband/hw/hfi1/pio_copy.c:551", *(u64 *)from, dest);
 		from += sizeof(u64);
 		dest += sizeof(u64);
 	}
@@ -705,7 +705,7 @@ void seg_pio_copy_end(struct pio_buf *pbuf)
 
 	/* fill in rest of block */
 	while (((unsigned long)dest & PIO_BLOCK_MASK) != 0) {
-		writeq(0, dest);
+		pete_writeq("drivers/infiniband/hw/hfi1/pio_copy.c:708", 0, dest);
 		dest += sizeof(u64);
 	}
 

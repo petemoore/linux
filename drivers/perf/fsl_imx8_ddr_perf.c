@@ -428,7 +428,7 @@ static void ddr_perf_counter_enable(struct ddr_pmu *pmu, int config,
 		 * need write 0 into CLEAR bit and it turns out to be 1 by
 		 * hardware. Below enable flow is harmless for all counters.
 		 */
-		writel(0, pmu->base + reg);
+		pete_writel("drivers/perf/fsl_imx8_ddr_perf.c:431", 0, pmu->base + reg);
 		val = CNTL_EN | CNTL_CLEAR;
 		val |= FIELD_PREP(CNTL_CSV_MASK, config);
 
@@ -442,11 +442,11 @@ static void ddr_perf_counter_enable(struct ddr_pmu *pmu, int config,
 				val |= FIELD_PREP(CNTL_CP_MASK, 0xf0);
 		}
 
-		writel(val, pmu->base + reg);
+		pete_writel("drivers/perf/fsl_imx8_ddr_perf.c:445", val, pmu->base + reg);
 	} else {
 		/* Disable counter */
 		val = readl_relaxed(pmu->base + reg) & CNTL_EN_MASK;
-		writel(val, pmu->base + reg);
+		pete_writel("drivers/perf/fsl_imx8_ddr_perf.c:449", val, pmu->base + reg);
 	}
 }
 
@@ -466,10 +466,10 @@ static void ddr_perf_counter_clear(struct ddr_pmu *pmu, int counter)
 
 	val = readl_relaxed(pmu->base + reg);
 	val &= ~CNTL_CLEAR;
-	writel(val, pmu->base + reg);
+	pete_writel("drivers/perf/fsl_imx8_ddr_perf.c:469", val, pmu->base + reg);
 
 	val |= CNTL_CLEAR;
-	writel(val, pmu->base + reg);
+	pete_writel("drivers/perf/fsl_imx8_ddr_perf.c:472", val, pmu->base + reg);
 }
 
 static void ddr_perf_event_update(struct perf_event *event)
@@ -543,7 +543,7 @@ static int ddr_perf_event_add(struct perf_event *event, int flags)
 		if (ddr_perf_is_filtered(event)) {
 			/* revert axi id masking(axi_mask) value */
 			cfg1 ^= AXI_MASKING_REVERT;
-			writel(cfg1, pmu->base + COUNTER_DPCR1);
+			pete_writel("drivers/perf/fsl_imx8_ddr_perf.c:546", cfg1, pmu->base + COUNTER_DPCR1);
 		}
 	}
 

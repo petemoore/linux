@@ -124,13 +124,13 @@ static int toprgu_reset_update(struct reset_controller_dev *rcdev,
 
 	spin_lock_irqsave(&data->lock, flags);
 
-	tmp = readl(data->wdt_base + WDT_SWSYSRST);
+	tmp = pete_readl("drivers/watchdog/mtk_wdt.c:127", data->wdt_base + WDT_SWSYSRST);
 	if (assert)
 		tmp |= BIT(id);
 	else
 		tmp &= ~BIT(id);
 	tmp |= WDT_SWSYS_RST_KEY;
-	writel(tmp, data->wdt_base + WDT_SWSYSRST);
+	pete_writel("drivers/watchdog/mtk_wdt.c:133", tmp, data->wdt_base + WDT_SWSYSRST);
 
 	spin_unlock_irqrestore(&data->lock, flags);
 
@@ -196,12 +196,12 @@ static int mtk_wdt_restart(struct watchdog_device *wdt_dev,
 	wdt_base = mtk_wdt->wdt_base;
 
 	/* Enable reset in order to issue a system reset instead of an IRQ */
-	reg = readl(wdt_base + WDT_MODE);
+	reg = pete_readl("drivers/watchdog/mtk_wdt.c:199", wdt_base + WDT_MODE);
 	reg &= ~WDT_MODE_IRQ_EN;
-	writel(reg | WDT_MODE_KEY, wdt_base + WDT_MODE);
+	pete_writel("drivers/watchdog/mtk_wdt.c:201", reg | WDT_MODE_KEY, wdt_base + WDT_MODE);
 
 	while (1) {
-		writel(WDT_SWRST_KEY, wdt_base + WDT_SWRST);
+		pete_writel("drivers/watchdog/mtk_wdt.c:204", WDT_SWRST_KEY, wdt_base + WDT_SWRST);
 		mdelay(5);
 	}
 
@@ -253,7 +253,7 @@ static void mtk_wdt_init(struct watchdog_device *wdt_dev)
 
 	wdt_base = mtk_wdt->wdt_base;
 
-	if (readl(wdt_base + WDT_MODE) & WDT_MODE_EN) {
+	if (pete_readl("drivers/watchdog/mtk_wdt.c:256", wdt_base + WDT_MODE) & WDT_MODE_EN) {
 		set_bit(WDOG_HW_RUNNING, &wdt_dev->status);
 		mtk_wdt_set_timeout(wdt_dev, wdt_dev->timeout);
 	}
@@ -265,7 +265,7 @@ static int mtk_wdt_stop(struct watchdog_device *wdt_dev)
 	void __iomem *wdt_base = mtk_wdt->wdt_base;
 	u32 reg;
 
-	reg = readl(wdt_base + WDT_MODE);
+	reg = pete_readl("drivers/watchdog/mtk_wdt.c:268", wdt_base + WDT_MODE);
 	reg &= ~WDT_MODE_EN;
 	reg |= WDT_MODE_KEY;
 	iowrite32(reg, wdt_base + WDT_MODE);

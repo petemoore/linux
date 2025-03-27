@@ -271,10 +271,10 @@ static const struct attribute_group *attr_groups[] = {
 static void ddr_perf_clear_counter(struct ddr_pmu *pmu, int counter)
 {
 	if (counter == CYCLES_COUNTER) {
-		writel(0, pmu->base + PMC(counter) + 0x4);
-		writel(0, pmu->base + PMC(counter));
+		pete_writel("drivers/perf/fsl_imx9_ddr_perf.c:274", 0, pmu->base + PMC(counter) + 0x4);
+		pete_writel("drivers/perf/fsl_imx9_ddr_perf.c:275", 0, pmu->base + PMC(counter));
 	} else {
-		writel(0, pmu->base + PMC(counter));
+		pete_writel("drivers/perf/fsl_imx9_ddr_perf.c:277", 0, pmu->base + PMC(counter));
 	}
 }
 
@@ -319,7 +319,7 @@ static void ddr_perf_counter_global_config(struct ddr_pmu *pmu, bool enable)
 		 * monitor to begin counting based on the register settings.
 		 */
 		ctrl |= PMGC0_FAC;
-		writel(ctrl, pmu->base + PMGC0);
+		pete_writel("drivers/perf/fsl_imx9_ddr_perf.c:322", ctrl, pmu->base + PMGC0);
 
 		/*
 		 * Freeze all counters disabled, interrupt enabled, and freeze
@@ -327,11 +327,11 @@ static void ddr_perf_counter_global_config(struct ddr_pmu *pmu, bool enable)
 		 */
 		ctrl &= ~PMGC0_FAC;
 		ctrl |= PMGC0_PMIE | PMGC0_FCECE;
-		writel(ctrl, pmu->base + PMGC0);
+		pete_writel("drivers/perf/fsl_imx9_ddr_perf.c:330", ctrl, pmu->base + PMGC0);
 	} else {
 		ctrl |= PMGC0_FAC;
 		ctrl &= ~(PMGC0_PMIE | PMGC0_FCECE);
-		writel(ctrl, pmu->base + PMGC0);
+		pete_writel("drivers/perf/fsl_imx9_ddr_perf.c:334", ctrl, pmu->base + PMGC0);
 	}
 }
 
@@ -344,7 +344,7 @@ static void ddr_perf_counter_local_config(struct ddr_pmu *pmu, int config,
 
 	if (enable) {
 		ctrl_a |= PMLCA_FC;
-		writel(ctrl_a, pmu->base + PMLCA(counter));
+		pete_writel("drivers/perf/fsl_imx9_ddr_perf.c:347", ctrl_a, pmu->base + PMLCA(counter));
 
 		ddr_perf_clear_counter(pmu, counter);
 
@@ -353,11 +353,11 @@ static void ddr_perf_counter_local_config(struct ddr_pmu *pmu, int config,
 		ctrl_a |= PMLCA_CE;
 		ctrl_a &= ~FIELD_PREP(PMLCA_EVENT, 0x7F);
 		ctrl_a |= FIELD_PREP(PMLCA_EVENT, (config & 0x000000FF));
-		writel(ctrl_a, pmu->base + PMLCA(counter));
+		pete_writel("drivers/perf/fsl_imx9_ddr_perf.c:356", ctrl_a, pmu->base + PMLCA(counter));
 	} else {
 		/* Freeze counter. */
 		ctrl_a |= PMLCA_FC;
-		writel(ctrl_a, pmu->base + PMLCA(counter));
+		pete_writel("drivers/perf/fsl_imx9_ddr_perf.c:360", ctrl_a, pmu->base + PMLCA(counter));
 	}
 }
 
@@ -388,12 +388,12 @@ static void ddr_perf_monitor_config(struct ddr_pmu *pmu, int cfg, int cfg1, int 
 
 	pmcfg1 &= ~FIELD_PREP(PMCFG1_ID_MASK, 0x3FFFF);
 	pmcfg1 |= FIELD_PREP(PMCFG1_ID_MASK, cfg2);
-	writel(pmcfg1, pmu->base + PMCFG1);
+	pete_writel("drivers/perf/fsl_imx9_ddr_perf.c:391", pmcfg1, pmu->base + PMCFG1);
 
 	pmcfg2 = readl_relaxed(pmu->base + PMCFG2);
 	pmcfg2 &= ~FIELD_PREP(PMCFG2_ID, 0x3FFFF);
 	pmcfg2 |= FIELD_PREP(PMCFG2_ID, cfg1);
-	writel(pmcfg2, pmu->base + PMCFG2);
+	pete_writel("drivers/perf/fsl_imx9_ddr_perf.c:396", pmcfg2, pmu->base + PMCFG2);
 }
 
 static void ddr_perf_event_update(struct perf_event *event)

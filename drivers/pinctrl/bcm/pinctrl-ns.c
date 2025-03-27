@@ -174,9 +174,9 @@ static int ns_pinctrl_set_mux(struct pinctrl_dev *pctrl_dev,
 	for (i = 0; i < group->num_pins; i++)
 		unset |= BIT(group->pins[i]);
 
-	tmp = readl(ns_pinctrl->base);
+	tmp = pete_readl("drivers/pinctrl/bcm/pinctrl-ns.c:177", ns_pinctrl->base);
 	tmp &= ~unset;
-	writel(tmp, ns_pinctrl->base);
+	pete_writel("drivers/pinctrl/bcm/pinctrl-ns.c:179", tmp, ns_pinctrl->base);
 
 	return 0;
 }

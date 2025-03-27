@@ -62,7 +62,7 @@ static int avs_skl_log_buffer_status(struct avs_dev *adev, union avs_notify_msg 
 		return 0;
 
 	size = avs_log_buffer_size(adev) / 2;
-	write = readl(avs_sram_addr(adev, AVS_FW_REGS_WINDOW) + FW_REGS_DBG_LOG_WP(msg->log.core));
+	write = pete_readl("sound/soc/intel/avs/skl.c:65", avs_sram_addr(adev, AVS_FW_REGS_WINDOW) + FW_REGS_DBG_LOG_WP(msg->log.core));
 	/* determine buffer half */
 	offset = (write < size) ? size : 0;
 

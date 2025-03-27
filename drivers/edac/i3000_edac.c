@@ -330,14 +330,14 @@ static int i3000_probe1(struct pci_dev *pdev, int dev_idx)
 		return -ENODEV;
 	}
 
-	c0dra[0] = readb(window + I3000_C0DRA + 0);	/* ranks 0,1 */
-	c0dra[1] = readb(window + I3000_C0DRA + 1);	/* ranks 2,3 */
-	c1dra[0] = readb(window + I3000_C1DRA + 0);	/* ranks 0,1 */
-	c1dra[1] = readb(window + I3000_C1DRA + 1);	/* ranks 2,3 */
+	c0dra[0] = pete_readb("drivers/edac/i3000_edac.c:333", window + I3000_C0DRA + 0);	/* ranks 0,1 */
+	c0dra[1] = pete_readb("drivers/edac/i3000_edac.c:334", window + I3000_C0DRA + 1);	/* ranks 2,3 */
+	c1dra[0] = pete_readb("drivers/edac/i3000_edac.c:335", window + I3000_C1DRA + 0);	/* ranks 0,1 */
+	c1dra[1] = pete_readb("drivers/edac/i3000_edac.c:336", window + I3000_C1DRA + 1);	/* ranks 2,3 */
 
 	for (i = 0; i < I3000_RANKS_PER_CHANNEL; i++) {
-		c0drb[i] = readb(window + I3000_C0DRB + i);
-		c1drb[i] = readb(window + I3000_C1DRB + i);
+		c0drb[i] = pete_readb("drivers/edac/i3000_edac.c:339", window + I3000_C0DRB + i);
+		c1drb[i] = pete_readb("drivers/edac/i3000_edac.c:340", window + I3000_C1DRB + i);
 	}
 
 	iounmap(window);

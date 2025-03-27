@@ -44,10 +44,10 @@ struct pmt_telem_priv {
 static bool pmt_telem_region_overlaps(struct intel_pmt_entry *entry,
 				      struct device *dev)
 {
-	u32 guid = readl(entry->disc_table + TELEM_GUID_OFFSET);
+	u32 guid = pete_readl("drivers/platform/x86/intel/pmt/telemetry.c:47", entry->disc_table + TELEM_GUID_OFFSET);
 
 	if (intel_pmt_is_early_client_hw(dev)) {
-		u32 type = TELEM_TYPE(readl(entry->disc_table));
+		u32 type = TELEM_TYPE(pete_readl("drivers/platform/x86/intel/pmt/telemetry.c:50", entry->disc_table));
 
 		if ((type == TELEM_TYPE_PUNIT_FIXED) ||
 		    (guid == TELEM_CLIENT_FIXED_BLOCK_GUID))
@@ -66,12 +66,12 @@ static int pmt_telem_header_decode(struct intel_pmt_entry *entry,
 	if (pmt_telem_region_overlaps(entry, dev))
 		return 1;
 
-	header->access_type = TELEM_ACCESS(readl(disc_table));
-	header->guid = readl(disc_table + TELEM_GUID_OFFSET);
-	header->base_offset = readl(disc_table + TELEM_BASE_OFFSET);
+	header->access_type = TELEM_ACCESS(pete_readl("drivers/platform/x86/intel/pmt/telemetry.c:69", disc_table));
+	header->guid = pete_readl("drivers/platform/x86/intel/pmt/telemetry.c:70", disc_table + TELEM_GUID_OFFSET);
+	header->base_offset = pete_readl("drivers/platform/x86/intel/pmt/telemetry.c:71", disc_table + TELEM_BASE_OFFSET);
 
 	/* Size is measured in DWORDS, but accessor returns bytes */
-	header->size = TELEM_SIZE(readl(disc_table));
+	header->size = TELEM_SIZE(pete_readl("drivers/platform/x86/intel/pmt/telemetry.c:74", disc_table));
 
 	/*
 	 * Some devices may expose non-functioning entries that are

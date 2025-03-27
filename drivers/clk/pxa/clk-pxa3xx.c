@@ -159,16 +159,16 @@ unsigned int pxa3xx_get_clk_frequency_khz(int info)
 
 void pxa3xx_clk_update_accr(u32 disable, u32 enable, u32 xclkcfg, u32 mask)
 {
-	u32 accr = readl(clk_regs + ACCR);
+	u32 accr = pete_readl("drivers/clk/pxa/clk-pxa3xx.c:162", clk_regs + ACCR);
 
 	accr &= ~disable;
 	accr |= enable;
 
-	writel(accr, clk_regs + ACCR);
+	pete_writel("drivers/clk/pxa/clk-pxa3xx.c:167", accr, clk_regs + ACCR);
 	if (xclkcfg)
 		__asm__("mcr p14, 0, %0, c6, c0, 0\n" : : "r"(xclkcfg));
 
-	while ((readl(clk_regs + ACSR) & mask) != (accr & mask))
+	while ((pete_readl("drivers/clk/pxa/clk-pxa3xx.c:171", clk_regs + ACSR) & mask) != (accr & mask))
 		cpu_relax();
 }
 
@@ -177,7 +177,7 @@ static unsigned long clk_pxa3xx_ac97_get_rate(struct clk_hw *hw,
 {
 	unsigned long ac97_div, rate;
 
-	ac97_div = readl(clk_regs + AC97_DIV);
+	ac97_div = pete_readl("drivers/clk/pxa/clk-pxa3xx.c:180", clk_regs + AC97_DIV);
 
 	/* This may loose precision for some rates but won't for the
 	 * standard 24.576MHz.
@@ -194,7 +194,7 @@ RATE_RO_OPS(clk_pxa3xx_ac97, "ac97");
 static unsigned long clk_pxa3xx_smemc_get_rate(struct clk_hw *hw,
 					      unsigned long parent_rate)
 {
-	unsigned long acsr = readl(clk_regs + ACSR);
+	unsigned long acsr = pete_readl("drivers/clk/pxa/clk-pxa3xx.c:197", clk_regs + ACSR);
 
 	return (parent_rate / 48)  * smcfs_mult[(acsr >> 23) & 0x7] /
 		pxa3xx_smemc_get_memclkdiv();
@@ -205,7 +205,7 @@ RATE_RO_OPS(clk_pxa3xx_smemc, "smemc");
 
 static bool pxa3xx_is_ring_osc_forced(void)
 {
-	unsigned long acsr = readl(clk_regs + ACSR);
+	unsigned long acsr = pete_readl("drivers/clk/pxa/clk-pxa3xx.c:208", clk_regs + ACSR);
 
 	return acsr & ACCR_D0CS;
 }
@@ -285,7 +285,7 @@ static struct desc_clk_cken pxa93x_clocks[] __initdata = {
 static unsigned long clk_pxa3xx_system_bus_get_rate(struct clk_hw *hw,
 					    unsigned long parent_rate)
 {
-	unsigned long acsr = readl(clk_regs + ACSR);
+	unsigned long acsr = pete_readl("drivers/clk/pxa/clk-pxa3xx.c:288", clk_regs + ACSR);
 	unsigned int hss = (acsr >> 14) & 0x3;
 
 	if (pxa3xx_is_ring_osc_forced())
@@ -332,7 +332,7 @@ MUX_RO_RATE_RO_OPS(clk_pxa3xx_core, "core");
 static unsigned long clk_pxa3xx_run_get_rate(struct clk_hw *hw,
 					     unsigned long parent_rate)
 {
-	unsigned long acsr = readl(clk_regs + ACSR);
+	unsigned long acsr = pete_readl("drivers/clk/pxa/clk-pxa3xx.c:335", clk_regs + ACSR);
 	unsigned int xn = (acsr & ACCR_XN_MASK) >> 8;
 	unsigned int t, xclkcfg;
 
@@ -348,7 +348,7 @@ RATE_RO_OPS(clk_pxa3xx_run, "run");
 static unsigned long clk_pxa3xx_cpll_get_rate(struct clk_hw *hw,
 	unsigned long parent_rate)
 {
-	unsigned long acsr = readl(clk_regs + ACSR);
+	unsigned long acsr = pete_readl("drivers/clk/pxa/clk-pxa3xx.c:351", clk_regs + ACSR);
 	unsigned int xn = (acsr & ACCR_XN_MASK) >> 8;
 	unsigned int xl = acsr & ACCR_XL_MASK;
 	unsigned int t, xclkcfg;

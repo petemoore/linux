@@ -757,11 +757,11 @@ static bool hda_dsp_stream_check(struct hdac_bus *bus, u32 status)
 
 	list_for_each_entry(s, &bus->stream_list, list) {
 		if (status & BIT(s->index) && s->opened) {
-			sd_status = readb(s->sd_addr + SOF_HDA_ADSP_REG_SD_STS);
+			sd_status = pete_readb("sound/soc/sof/intel/hda-stream.c:760", s->sd_addr + SOF_HDA_ADSP_REG_SD_STS);
 
 			trace_sof_intel_hda_dsp_stream_status(bus->dev, s, sd_status);
 
-			writeb(sd_status, s->sd_addr + SOF_HDA_ADSP_REG_SD_STS);
+			pete_writeb("sound/soc/sof/intel/hda-stream.c:764", sd_status, s->sd_addr + SOF_HDA_ADSP_REG_SD_STS);
 
 			active = true;
 			if ((!s->substream && !s->cstream) ||

@@ -62,15 +62,15 @@ static void crdump_enable_crspace_access(struct mlx4_dev *dev,
 {
 	/* Get current enable bit value */
 	crdump_enbale_bit_set =
-		readl(cr_space + CR_ENABLE_BIT_OFFSET) & CR_ENABLE_BIT;
+		pete_readl("drivers/net/ethernet/mellanox/mlx4/crdump.c:65", cr_space + CR_ENABLE_BIT_OFFSET) & CR_ENABLE_BIT;
 
 	/* Enable FW CR filter (set bit6 to 0) */
 	if (crdump_enbale_bit_set)
-		writel(readl(cr_space + CR_ENABLE_BIT_OFFSET) & ~CR_ENABLE_BIT,
+		pete_writel("drivers/net/ethernet/mellanox/mlx4/crdump.c:69", pete_readl("drivers/net/ethernet/mellanox/mlx4/crdump.c:69", cr_space + CR_ENABLE_BIT_OFFSET) & ~CR_ENABLE_BIT,
 		       cr_space + CR_ENABLE_BIT_OFFSET);
 
 	/* Enable block volatile crspace accesses */
-	writel(swab32(1), cr_space + dev->caps.health_buffer_addrs +
+	pete_writel("drivers/net/ethernet/mellanox/mlx4/crdump.c:73", swab32(1), cr_space + dev->caps.health_buffer_addrs +
 	       HEALTH_BUFFER_SIZE);
 }
 
@@ -78,12 +78,12 @@ static void crdump_disable_crspace_access(struct mlx4_dev *dev,
 					  u8 __iomem *cr_space)
 {
 	/* Disable block volatile crspace accesses */
-	writel(0, cr_space + dev->caps.health_buffer_addrs +
+	pete_writel("drivers/net/ethernet/mellanox/mlx4/crdump.c:81", 0, cr_space + dev->caps.health_buffer_addrs +
 	       HEALTH_BUFFER_SIZE);
 
 	/* Restore FW CR filter value (set bit6 to original value) */
 	if (crdump_enbale_bit_set)
-		writel(readl(cr_space + CR_ENABLE_BIT_OFFSET) | CR_ENABLE_BIT,
+		pete_writel("drivers/net/ethernet/mellanox/mlx4/crdump.c:86", pete_readl("drivers/net/ethernet/mellanox/mlx4/crdump.c:86", cr_space + CR_ENABLE_BIT_OFFSET) | CR_ENABLE_BIT,
 		       cr_space + CR_ENABLE_BIT_OFFSET);
 }
 
@@ -109,7 +109,7 @@ static void mlx4_crdump_collect_crspace(struct mlx4_dev *dev,
 	if (crspace_data) {
 		for (offset = 0; offset < cr_res_size; offset += 4)
 			*(u32 *)(crspace_data + offset) =
-					readl(cr_space + offset);
+					pete_readl("drivers/net/ethernet/mellanox/mlx4/crdump.c:112", cr_space + offset);
 
 		err = devlink_region_snapshot_create(crdump->region_crspace,
 						     crspace_data, id);
@@ -148,7 +148,7 @@ static void mlx4_crdump_collect_fw_health(struct mlx4_dev *dev,
 
 		for (offset = 0; offset < HEALTH_BUFFER_SIZE; offset += 4)
 			*(u32 *)(health_data + offset) =
-					readl(health_buf_start + offset);
+					pete_readl("drivers/net/ethernet/mellanox/mlx4/crdump.c:151", health_buf_start + offset);
 
 		err = devlink_region_snapshot_create(crdump->region_fw_health,
 						     health_data, id);

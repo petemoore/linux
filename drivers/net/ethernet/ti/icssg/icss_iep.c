@@ -135,7 +135,7 @@ int icss_iep_get_count_hi(struct icss_iep *iep)
 	u32 val = 0;
 
 	if (iep && (iep->plat_data->flags & ICSS_IEP_64BIT_COUNTER_SUPPORT))
-		val = readl(iep->base + iep->plat_data->reg_offs[ICSS_IEP_COUNT_REG1]);
+		val = pete_readl("drivers/net/ethernet/ti/icssg/icss_iep.c:138", iep->base + iep->plat_data->reg_offs[ICSS_IEP_COUNT_REG1]);
 
 	return val;
 }
@@ -152,7 +152,7 @@ int icss_iep_get_count_low(struct icss_iep *iep)
 	u32 val = 0;
 
 	if (iep)
-		val = readl(iep->base + iep->plat_data->reg_offs[ICSS_IEP_COUNT_REG0]);
+		val = pete_readl("drivers/net/ethernet/ti/icssg/icss_iep.c:155", iep->base + iep->plat_data->reg_offs[ICSS_IEP_COUNT_REG0]);
 
 	return val;
 }
@@ -175,9 +175,9 @@ EXPORT_SYMBOL_GPL(icss_iep_get_ptp_clock_idx);
 static void icss_iep_set_counter(struct icss_iep *iep, u64 ns)
 {
 	if (iep->plat_data->flags & ICSS_IEP_64BIT_COUNTER_SUPPORT)
-		writel(upper_32_bits(ns), iep->base +
+		pete_writel("drivers/net/ethernet/ti/icssg/icss_iep.c:178", upper_32_bits(ns), iep->base +
 		       iep->plat_data->reg_offs[ICSS_IEP_COUNT_REG1]);
-	writel(lower_32_bits(ns), iep->base + iep->plat_data->reg_offs[ICSS_IEP_COUNT_REG0]);
+	pete_writel("drivers/net/ethernet/ti/icssg/icss_iep.c:180", lower_32_bits(ns), iep->base + iep->plat_data->reg_offs[ICSS_IEP_COUNT_REG0]);
 }
 
 static void icss_iep_update_to_next_boundary(struct icss_iep *iep, u64 start_ns);
@@ -187,7 +187,7 @@ static void icss_iep_update_to_next_boundary(struct icss_iep *iep, u64 start_ns)
  * @iep: Pointer to structure representing IEP.
  * @ns: Time to be set in nanoseconds
  *
- * This API uses writel() instead of regmap_write() for write operations as
+ * This API uses pete_writel("drivers/net/ethernet/ti/icssg/icss_iep.c:190", ) instead of regmap_write() for write operations as
  * regmap_write() is too slow and this API is time sensitive.
  */
 static void icss_iep_settime(struct icss_iep *iep, u64 ns)
@@ -201,13 +201,13 @@ static void icss_iep_settime(struct icss_iep *iep, u64 ns)
 
 	spin_lock_irqsave(&iep->irq_lock, flags);
 	if (iep->pps_enabled || iep->perout_enabled)
-		writel(0, iep->base + iep->plat_data->reg_offs[ICSS_IEP_SYNC_CTRL_REG]);
+		pete_writel("drivers/net/ethernet/ti/icssg/icss_iep.c:204", 0, iep->base + iep->plat_data->reg_offs[ICSS_IEP_SYNC_CTRL_REG]);
 
 	icss_iep_set_counter(iep, ns);
 
 	if (iep->pps_enabled || iep->perout_enabled) {
 		icss_iep_update_to_next_boundary(iep, ns);
-		writel(IEP_SYNC_CTRL_SYNC_N_EN(0) | IEP_SYNC_CTRL_SYNC_EN,
+		pete_writel("drivers/net/ethernet/ti/icssg/icss_iep.c:210", IEP_SYNC_CTRL_SYNC_N_EN(0) | IEP_SYNC_CTRL_SYNC_EN,
 		       iep->base + iep->plat_data->reg_offs[ICSS_IEP_SYNC_CTRL_REG]);
 	}
 	spin_unlock_irqrestore(&iep->irq_lock, flags);
@@ -218,7 +218,7 @@ static void icss_iep_settime(struct icss_iep *iep, u64 ns)
  * @iep: Pointer to structure representing IEP.
  * @sts: Pointer to structure representing PTP system timestamp.
  *
- * This API uses readl() instead of regmap_read() for read operations as
+ * This API uses pete_readl("drivers/net/ethernet/ti/icssg/icss_iep.c:221", ) instead of regmap_read() for read operations as
  * regmap_read() is too slow and this API is time sensitive.
  *
  * Return: The current timestamp of the PTP clock using IEP driver
@@ -237,10 +237,10 @@ static u64 icss_iep_gettime(struct icss_iep *iep,
 
 	/* no need to play with hi-lo, hi is latched when lo is read */
 	ptp_read_system_prets(sts);
-	ts_lo = readl(iep->base + iep->plat_data->reg_offs[ICSS_IEP_COUNT_REG0]);
+	ts_lo = pete_readl("drivers/net/ethernet/ti/icssg/icss_iep.c:240", iep->base + iep->plat_data->reg_offs[ICSS_IEP_COUNT_REG0]);
 	ptp_read_system_postts(sts);
 	if (iep->plat_data->flags & ICSS_IEP_64BIT_COUNTER_SUPPORT)
-		ts_hi = readl(iep->base + iep->plat_data->reg_offs[ICSS_IEP_COUNT_REG1]);
+		ts_hi = pete_readl("drivers/net/ethernet/ti/icssg/icss_iep.c:243", iep->base + iep->plat_data->reg_offs[ICSS_IEP_COUNT_REG1]);
 
 	local_irq_restore(flags);
 
@@ -885,7 +885,7 @@ static int icss_iep_regmap_write(void *context, unsigned int reg,
 {
 	struct icss_iep *iep = context;
 
-	writel(val, iep->base + iep->plat_data->reg_offs[reg]);
+	pete_writel("drivers/net/ethernet/ti/icssg/icss_iep.c:888", val, iep->base + iep->plat_data->reg_offs[reg]);
 
 	return 0;
 }
@@ -895,7 +895,7 @@ static int icss_iep_regmap_read(void *context, unsigned int reg,
 {
 	struct icss_iep *iep = context;
 
-	*val = readl(iep->base + iep->plat_data->reg_offs[reg]);
+	*val = pete_readl("drivers/net/ethernet/ti/icssg/icss_iep.c:898", iep->base + iep->plat_data->reg_offs[reg]);
 
 	return 0;
 }

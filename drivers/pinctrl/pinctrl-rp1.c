@@ -612,7 +612,7 @@ static inline u32 rp1_pin_readl(const void __iomem *ioaddr)
 	 * before reading GPIO state, as this will serialise writes versus the next issued read.
 	 */
 	__dma_wmb();
-	return readl(ioaddr);
+	return pete_readl("drivers/pinctrl/pinctrl-rp1.c:615", ioaddr);
 }
 
 static int rp1_pinconf_set(struct pinctrl_dev *pctldev,
@@ -821,11 +821,11 @@ static void rp1_gpio_irq_handler(struct irq_desc *desc)
 
 	chained_irq_enter(host_chip, desc);
 
-	ints = readl(pc->gpio_base + bank->ints_offset);
+	ints = pete_readl("drivers/pinctrl/pinctrl-rp1.c:824", pc->gpio_base + bank->ints_offset);
 	for_each_set_bit(b, &ints, 32) {
 		struct rp1_pin_info *pin = rp1_get_pin(chip, bank->min_gpio + b);
 
-		writel(RP1_GPIO_CTRL_IRQRESET,
+		pete_writel("drivers/pinctrl/pinctrl-rp1.c:828", RP1_GPIO_CTRL_IRQRESET,
 		       pin->gpio + RP1_SET_OFFSET + RP1_GPIO_CTRL);
 		generic_handle_irq(irq_linear_revmap(pc->gpio_chip.irq.domain,
 						     bank->min_gpio + b));
@@ -836,11 +836,11 @@ static void rp1_gpio_irq_handler(struct irq_desc *desc)
 
 static void rp1_gpio_irq_config(struct rp1_pin_info *pin, bool enable)
 {
-	writel(1 << pin->offset,
+	pete_writel("drivers/pinctrl/pinctrl-rp1.c:839", 1 << pin->offset,
 	       pin->inte + (enable ? RP1_SET_OFFSET : RP1_CLR_OFFSET));
 	if (!enable)
 		/* Clear any latched events */
-		writel(RP1_GPIO_CTRL_IRQRESET,
+		pete_writel("drivers/pinctrl/pinctrl-rp1.c:843", RP1_GPIO_CTRL_IRQRESET,
 		       pin->gpio + RP1_SET_OFFSET + RP1_GPIO_CTRL);
 }
 
@@ -891,13 +891,13 @@ static int rp1_irq_set_type(struct rp1_pin_info *pin, unsigned int type)
 	}
 
 	/* Clear the event enables */
-	writel(RP1_INT_MASK << RP1_GPIO_EVENTS_SHIFT_RAW,
+	pete_writel("drivers/pinctrl/pinctrl-rp1.c:894", RP1_INT_MASK << RP1_GPIO_EVENTS_SHIFT_RAW,
 	       pin->gpio + RP1_CLR_OFFSET + RP1_GPIO_CTRL);
 	/* Clear any latched events */
-	writel(RP1_GPIO_CTRL_IRQRESET,
+	pete_writel("drivers/pinctrl/pinctrl-rp1.c:897", RP1_GPIO_CTRL_IRQRESET,
 		pin->gpio + RP1_SET_OFFSET + RP1_GPIO_CTRL);
 	/* Enable the events that are needed */
-	writel(irq_flags << RP1_GPIO_EVENTS_SHIFT_RAW,
+	pete_writel("drivers/pinctrl/pinctrl-rp1.c:900", irq_flags << RP1_GPIO_EVENTS_SHIFT_RAW,
 	       pin->gpio + RP1_SET_OFFSET + RP1_GPIO_CTRL);
 	pin->irq_type = type;
 
@@ -936,7 +936,7 @@ static void rp1_gpio_irq_ack(struct irq_data *data)
 	struct rp1_pin_info *pin = rp1_get_pin(chip, gpio);
 
 	/* Clear any latched events */
-	writel(RP1_GPIO_CTRL_IRQRESET, pin->gpio + RP1_SET_OFFSET + RP1_GPIO_CTRL);
+	pete_writel("drivers/pinctrl/pinctrl-rp1.c:939", RP1_GPIO_CTRL_IRQRESET, pin->gpio + RP1_SET_OFFSET + RP1_GPIO_CTRL);
 }
 
 static int rp1_gpio_irq_set_affinity(struct irq_data *data, const struct cpumask *dest, bool force)
@@ -1340,7 +1340,7 @@ static void rp1_pull_config_set(struct rp1_pin_info *pin, unsigned int arg)
 
 	FLD_SET(padctrl, RP1_PAD_PULL, arg & 0x3);
 
-	writel(padctrl, pin->pad);
+	pete_writel("drivers/pinctrl/pinctrl-rp1.c:1343", padctrl, pin->pad);
 }
 
 /* Generic pinconf methods */

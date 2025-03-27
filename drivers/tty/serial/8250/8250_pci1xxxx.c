@@ -160,7 +160,7 @@ static unsigned int pci1xxxx_get_divisor(struct uart_port *port,
 static void pci1xxxx_set_divisor(struct uart_port *port, unsigned int baud,
 				 unsigned int quot, unsigned int frac)
 {
-	writel(FIELD_PREP(BAUD_CLOCK_DIV_INT_MSK, quot) | frac,
+	pete_writel("drivers/tty/serial/8250/8250_pci1xxxx.c:163", FIELD_PREP(BAUD_CLOCK_DIV_INT_MSK, quot) | frac,
 	       port->membase + UART_BAUD_CLK_DIVISOR_REG);
 }
 
@@ -184,7 +184,7 @@ static int pci1xxxx_rs485_config(struct uart_port *port,
 			mode_cfg |= ADCL_CFG_POL_SEL;
 
 		if (rs485->delay_rts_after_send) {
-			clock_div = readl(port->membase + UART_BAUD_CLK_DIVISOR_REG);
+			clock_div = pete_readl("drivers/tty/serial/8250/8250_pci1xxxx.c:187", port->membase + UART_BAUD_CLK_DIVISOR_REG);
 			baud_period_in_ns =
 				FIELD_GET(BAUD_CLOCK_DIV_INT_MSK, clock_div) *
 				UART_BIT_SAMPLE_CNT;
@@ -201,7 +201,7 @@ static int pci1xxxx_rs485_config(struct uart_port *port,
 				NSEC_PER_MSEC;
 		}
 	}
-	writel(mode_cfg, port->membase + ADCL_CFG_REG);
+	pete_writel("drivers/tty/serial/8250/8250_pci1xxxx.c:204", mode_cfg, port->membase + ADCL_CFG_REG);
 	return 0;
 }
 
@@ -223,7 +223,7 @@ static bool pci1xxxx_port_suspend(int line)
 
 	mutex_lock(&tport->mutex);
 	if (port->suspended == 0 && port->dev) {
-		wakeup_mask = readb(up->port.membase + UART_WAKE_MASK_REG);
+		wakeup_mask = pete_readb("drivers/tty/serial/8250/8250_pci1xxxx.c:226", up->port.membase + UART_WAKE_MASK_REG);
 
 		spin_lock_irqsave(&port->lock, flags);
 		port->mctrl &= ~TIOCM_OUT2;
@@ -233,7 +233,7 @@ static bool pci1xxxx_port_suspend(int line)
 		ret = (wakeup_mask & UART_WAKE_SRCS) != UART_WAKE_SRCS;
 	}
 
-	writeb(UART_WAKE_SRCS, port->membase + UART_WAKE_REG);
+	pete_writeb("drivers/tty/serial/8250/8250_pci1xxxx.c:236", UART_WAKE_SRCS, port->membase + UART_WAKE_REG);
 	mutex_unlock(&tport->mutex);
 
 	return ret;
@@ -247,8 +247,8 @@ static void pci1xxxx_port_resume(int line)
 	unsigned long flags;
 
 	mutex_lock(&tport->mutex);
-	writeb(UART_BLOCK_SET_ACTIVE, port->membase + UART_ACTV_REG);
-	writeb(UART_WAKE_SRCS, port->membase + UART_WAKE_REG);
+	pete_writeb("drivers/tty/serial/8250/8250_pci1xxxx.c:250", UART_BLOCK_SET_ACTIVE, port->membase + UART_ACTV_REG);
+	pete_writeb("drivers/tty/serial/8250/8250_pci1xxxx.c:251", UART_WAKE_SRCS, port->membase + UART_WAKE_REG);
 
 	if (port->suspended == 0) {
 		spin_lock_irqsave(&port->lock, flags);
@@ -281,11 +281,11 @@ static int pci1xxxx_suspend(struct device *dev)
 		return -ENOMEM;
 	}
 
-	data = readl(p + UART_RESET_REG);
-	writel(data | UART_RESET_D3_RESET_DISABLE, p + UART_RESET_REG);
+	data = pete_readl("drivers/tty/serial/8250/8250_pci1xxxx.c:284", p + UART_RESET_REG);
+	pete_writel("drivers/tty/serial/8250/8250_pci1xxxx.c:285", data | UART_RESET_D3_RESET_DISABLE, p + UART_RESET_REG);
 
 	if (wakeup)
-		writeb(UART_PCI_CTRL_D3_CLK_ENABLE, p + UART_PCI_CTRL_REG);
+		pete_writeb("drivers/tty/serial/8250/8250_pci1xxxx.c:288", UART_PCI_CTRL_D3_CLK_ENABLE, p + UART_PCI_CTRL_REG);
 
 	iounmap(p);
 	device_set_wakeup_enable(dev, true);
@@ -308,8 +308,8 @@ static int pci1xxxx_resume(struct device *dev)
 		return -ENOMEM;
 	}
 
-	data = readl(p + UART_RESET_REG);
-	writel(data & ~UART_RESET_D3_RESET_DISABLE, p + UART_RESET_REG);
+	data = pete_readl("drivers/tty/serial/8250/8250_pci1xxxx.c:311", p + UART_RESET_REG);
+	pete_writel("drivers/tty/serial/8250/8250_pci1xxxx.c:312", data & ~UART_RESET_D3_RESET_DISABLE, p + UART_RESET_REG);
 	iounmap(p);
 
 	for (i = 0; i < priv->nr; i++) {
@@ -339,9 +339,9 @@ static int pci1xxxx_setup(struct pci_dev *pdev,
 	if (ret < 0)
 		return ret;
 
-	writeb(UART_BLOCK_SET_ACTIVE, port->port.membase + UART_ACTV_REG);
-	writeb(UART_WAKE_SRCS, port->port.membase + UART_WAKE_REG);
-	writeb(UART_WAKE_N_PIN, port->port.membase + UART_WAKE_MASK_REG);
+	pete_writeb("drivers/tty/serial/8250/8250_pci1xxxx.c:342", UART_BLOCK_SET_ACTIVE, port->port.membase + UART_ACTV_REG);
+	pete_writeb("drivers/tty/serial/8250/8250_pci1xxxx.c:343", UART_WAKE_SRCS, port->port.membase + UART_WAKE_REG);
+	pete_writeb("drivers/tty/serial/8250/8250_pci1xxxx.c:344", UART_WAKE_N_PIN, port->port.membase + UART_WAKE_MASK_REG);
 
 	return 0;
 }
@@ -416,7 +416,7 @@ static int pci1xxxx_serial_probe(struct pci_dev *pdev,
 	uart.port.dev = dev;
 
 	if (num_vectors == max_vec_reqd)
-		writeb(UART_PCI_CTRL_SET_MULTIPLE_MSI, priv->membase + UART_PCI_CTRL_REG);
+		pete_writeb("drivers/tty/serial/8250/8250_pci1xxxx.c:419", UART_PCI_CTRL_SET_MULTIPLE_MSI, priv->membase + UART_PCI_CTRL_REG);
 
 	for (i = 0; i < nr_ports; i++) {
 		priv->line[i] = -ENODEV;

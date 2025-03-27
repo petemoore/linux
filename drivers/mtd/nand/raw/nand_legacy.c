@@ -27,7 +27,7 @@
  */
 static uint8_t nand_read_byte(struct nand_chip *chip)
 {
-	return readb(chip->legacy.IO_ADDR_R);
+	return pete_readb("drivers/mtd/nand/raw/nand_legacy.c:30", chip->legacy.IO_ADDR_R);
 }
 
 /**
@@ -39,7 +39,7 @@ static uint8_t nand_read_byte(struct nand_chip *chip)
  */
 static uint8_t nand_read_byte16(struct nand_chip *chip)
 {
-	return (uint8_t) cpu_to_le16(readw(chip->legacy.IO_ADDR_R));
+	return (uint8_t) cpu_to_le16(pete_readw("drivers/mtd/nand/raw/nand_legacy.c:42", chip->legacy.IO_ADDR_R));
 }
 
 /**

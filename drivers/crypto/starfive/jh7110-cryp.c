@@ -95,23 +95,23 @@ static irqreturn_t starfive_cryp_irq(int irq, void *priv)
 	u32 mask;
 	struct starfive_cryp_dev *cryp = (struct starfive_cryp_dev *)priv;
 
-	mask = readl(cryp->base + STARFIVE_IE_MASK_OFFSET);
-	status = readl(cryp->base + STARFIVE_IE_FLAG_OFFSET);
+	mask = pete_readl("drivers/crypto/starfive/jh7110-cryp.c:98", cryp->base + STARFIVE_IE_MASK_OFFSET);
+	status = pete_readl("drivers/crypto/starfive/jh7110-cryp.c:99", cryp->base + STARFIVE_IE_FLAG_OFFSET);
 	if (status & STARFIVE_IE_FLAG_AES_DONE) {
 		mask |= STARFIVE_IE_MASK_AES_DONE;
-		writel(mask, cryp->base + STARFIVE_IE_MASK_OFFSET);
+		pete_writel("drivers/crypto/starfive/jh7110-cryp.c:102", mask, cryp->base + STARFIVE_IE_MASK_OFFSET);
 		tasklet_schedule(&cryp->aes_done);
 	}
 
 	if (status & STARFIVE_IE_FLAG_HASH_DONE) {
 		mask |= STARFIVE_IE_MASK_HASH_DONE;
-		writel(mask, cryp->base + STARFIVE_IE_MASK_OFFSET);
+		pete_writel("drivers/crypto/starfive/jh7110-cryp.c:108", mask, cryp->base + STARFIVE_IE_MASK_OFFSET);
 		tasklet_schedule(&cryp->hash_done);
 	}
 
 	if (status & STARFIVE_IE_FLAG_PKA_DONE) {
 		mask |= STARFIVE_IE_MASK_PKA_DONE;
-		writel(mask, cryp->base + STARFIVE_IE_MASK_OFFSET);
+		pete_writel("drivers/crypto/starfive/jh7110-cryp.c:114", mask, cryp->base + STARFIVE_IE_MASK_OFFSET);
 		complete(&cryp->pka_done);
 	}
 

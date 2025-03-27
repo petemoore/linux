@@ -203,14 +203,14 @@ static unsigned int rp1dsi_dma_read(struct rp1_dsi *dsi, unsigned int reg)
 {
 	void __iomem *addr = dsi->hw_base[RP1DSI_HW_BLOCK_DMA] + reg;
 
-	return readl(addr);
+	return pete_readl("drivers/gpu/drm/rp1/rp1-dsi/rp1_dsi_dma.c:206", addr);
 }
 
 static void rp1dsi_dma_write(struct rp1_dsi *dsi, unsigned int reg, unsigned int val)
 {
 	void __iomem *addr = dsi->hw_base[RP1DSI_HW_BLOCK_DMA] + reg;
 
-	writel(val, addr);
+	pete_writel("drivers/gpu/drm/rp1/rp1-dsi/rp1_dsi_dma.c:213", val, addr);
 }
 
 int rp1dsi_dma_busy(struct rp1_dsi *dsi)

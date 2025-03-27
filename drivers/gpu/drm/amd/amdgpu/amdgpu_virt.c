@@ -1016,14 +1016,14 @@ static u32 amdgpu_virt_rlcg_reg_rw(struct amdgpu_device *adev, u32 offset, u32 v
 
 	if (offset == reg_access_ctrl->grbm_cntl) {
 		/* if the target reg offset is grbm_cntl, write to scratch_reg2 */
-		writel(v, scratch_reg2);
+		pete_writel("drivers/gpu/drm/amd/amdgpu/amdgpu_virt.c:1019", v, scratch_reg2);
 		if (flag == AMDGPU_RLCG_GC_WRITE_LEGACY)
-			writel(v, ((void __iomem *)adev->rmmio) + (offset * 4));
+			pete_writel("drivers/gpu/drm/amd/amdgpu/amdgpu_virt.c:1021", v, ((void __iomem *)adev->rmmio) + (offset * 4));
 	} else if (offset == reg_access_ctrl->grbm_idx) {
 		/* if the target reg offset is grbm_idx, write to scratch_reg3 */
-		writel(v, scratch_reg3);
+		pete_writel("drivers/gpu/drm/amd/amdgpu/amdgpu_virt.c:1024", v, scratch_reg3);
 		if (flag == AMDGPU_RLCG_GC_WRITE_LEGACY)
-			writel(v, ((void __iomem *)adev->rmmio) + (offset * 4));
+			pete_writel("drivers/gpu/drm/amd/amdgpu/amdgpu_virt.c:1026", v, ((void __iomem *)adev->rmmio) + (offset * 4));
 	} else {
 		/*
 		 * SCRATCH_REG0 	= read/write value
@@ -1031,13 +1031,13 @@ static u32 amdgpu_virt_rlcg_reg_rw(struct amdgpu_device *adev, u32 offset, u32 v
 		 * SCRATCH_REG1[19:0]	= address in dword
 		 * SCRATCH_REG1[26:24]	= Error reporting
 		 */
-		writel(v, scratch_reg0);
-		writel((offset | flag), scratch_reg1);
+		pete_writel("drivers/gpu/drm/amd/amdgpu/amdgpu_virt.c:1034", v, scratch_reg0);
+		pete_writel("drivers/gpu/drm/amd/amdgpu/amdgpu_virt.c:1035", (offset | flag), scratch_reg1);
 		if (reg_access_ctrl->spare_int)
-			writel(1, spare_int);
+			pete_writel("drivers/gpu/drm/amd/amdgpu/amdgpu_virt.c:1037", 1, spare_int);
 
 		for (i = 0; i < timeout; i++) {
-			tmp = readl(scratch_reg1);
+			tmp = pete_readl("drivers/gpu/drm/amd/amdgpu/amdgpu_virt.c:1040", scratch_reg1);
 			if (!(tmp & AMDGPU_RLCG_SCRATCH1_ADDRESS_MASK))
 				break;
 			udelay(10);
@@ -1065,7 +1065,7 @@ static u32 amdgpu_virt_rlcg_reg_rw(struct amdgpu_device *adev, u32 offset, u32 v
 		}
 	}
 
-	ret = readl(scratch_reg0);
+	ret = pete_readl("drivers/gpu/drm/amd/amdgpu/amdgpu_virt.c:1068", scratch_reg0);
 
 	mutex_unlock(&adev->virt.rlcg_reg_lock);
 

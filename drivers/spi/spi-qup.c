@@ -1175,7 +1175,7 @@ static int spi_qup_pm_suspend_runtime(struct device *device)
 	u32 config;
 
 	/* Enable clocks auto gaiting */
-	config = readl(controller->base + QUP_CONFIG);
+	config = pete_readl("drivers/spi/spi-qup.c:1178", controller->base + QUP_CONFIG);
 	config |= QUP_CONFIG_CLOCK_AUTO_GATE;
 	writel_relaxed(config, controller->base + QUP_CONFIG);
 

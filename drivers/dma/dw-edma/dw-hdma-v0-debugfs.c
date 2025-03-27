@@ -50,7 +50,7 @@ static int dw_hdma_debugfs_u32_get(void *data, u64 *val)
 	struct dw_hdma_debugfs_entry *entry = data;
 	void __iomem *reg = entry->reg;
 
-	*val = readl(reg);
+	*val = pete_readl("drivers/dma/dw-edma/dw-hdma-v0-debugfs.c:53", reg);
 
 	return 0;
 }

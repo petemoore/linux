@@ -252,10 +252,10 @@ int pm8001_phy_control(struct asd_sas_phy *sas_phy, enum phy_func func,
 			u32 __iomem *qp = pm8001_ha->io_mem[2].memvirtaddr
 				+ 0x1034 + (0x4000 * (phy_id & 3));
 
-			phy->invalid_dword_count = readl(qp);
-			phy->running_disparity_error_count = readl(&qp[1]);
-			phy->loss_of_dword_sync_count = readl(&qp[3]);
-			phy->phy_reset_problem_count = readl(&qp[4]);
+			phy->invalid_dword_count = pete_readl("drivers/scsi/pm8001/pm8001_sas.c:255", qp);
+			phy->running_disparity_error_count = pete_readl("drivers/scsi/pm8001/pm8001_sas.c:256", &qp[1]);
+			phy->loss_of_dword_sync_count = pete_readl("drivers/scsi/pm8001/pm8001_sas.c:257", &qp[3]);
+			phy->phy_reset_problem_count = pete_readl("drivers/scsi/pm8001/pm8001_sas.c:258", &qp[4]);
 		}
 		if (pm8001_ha->chip_id == chip_8001)
 			pm8001_bar4_shift(pm8001_ha, 0);

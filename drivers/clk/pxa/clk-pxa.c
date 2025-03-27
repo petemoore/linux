@@ -170,7 +170,7 @@ void pxa2xx_cpll_change(struct pxa2xx_freq *freq,
 	 * we need to preset the smaller DRI before the change.	 If we're
 	 * speeding up we need to set the larger DRI value after the change.
 	 */
-	preset_mdrefr = postset_mdrefr = readl(mdrefr);
+	preset_mdrefr = postset_mdrefr = pete_readl("drivers/clk/pxa/clk-pxa.c:173", mdrefr);
 	if ((preset_mdrefr & MDREFR_DRI_MASK) > mdrefr_dri(freq->membus_khz)) {
 		preset_mdrefr = (preset_mdrefr & ~MDREFR_DRI_MASK);
 		preset_mdrefr |= mdrefr_dri(freq->membus_khz);
@@ -191,7 +191,7 @@ void pxa2xx_cpll_change(struct pxa2xx_freq *freq,
 	}
 
 	/* Set new the CCCR and prepare CLKCFG */
-	writel(freq->cccr, cccr);
+	pete_writel("drivers/clk/pxa/clk-pxa.c:194", freq->cccr, cccr);
 
 	asm volatile(
 	"	ldr	r4, [%1]\n"

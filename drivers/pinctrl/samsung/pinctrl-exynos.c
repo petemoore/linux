@@ -58,9 +58,9 @@ static void exynos_irq_mask(struct irq_data *irqd)
 
 	raw_spin_lock_irqsave(&bank->slock, flags);
 
-	mask = readl(bank->eint_base + reg_mask);
+	mask = pete_readl("drivers/pinctrl/samsung/pinctrl-exynos.c:61", bank->eint_base + reg_mask);
 	mask |= 1 << irqd->hwirq;
-	writel(mask, bank->eint_base + reg_mask);
+	pete_writel("drivers/pinctrl/samsung/pinctrl-exynos.c:63", mask, bank->eint_base + reg_mask);
 
 	raw_spin_unlock_irqrestore(&bank->slock, flags);
 }
@@ -72,7 +72,7 @@ static void exynos_irq_ack(struct irq_data *irqd)
 	struct samsung_pin_bank *bank = irq_data_get_irq_chip_data(irqd);
 	unsigned long reg_pend = our_chip->eint_pend + bank->eint_offset;
 
-	writel(1 << irqd->hwirq, bank->eint_base + reg_pend);
+	pete_writel("drivers/pinctrl/samsung/pinctrl-exynos.c:75", 1 << irqd->hwirq, bank->eint_base + reg_pend);
 }
 
 static void exynos_irq_unmask(struct irq_data *irqd)
@@ -97,9 +97,9 @@ static void exynos_irq_unmask(struct irq_data *irqd)
 
 	raw_spin_lock_irqsave(&bank->slock, flags);
 
-	mask = readl(bank->eint_base + reg_mask);
+	mask = pete_readl("drivers/pinctrl/samsung/pinctrl-exynos.c:100", bank->eint_base + reg_mask);
 	mask &= ~(1 << irqd->hwirq);
-	writel(mask, bank->eint_base + reg_mask);
+	pete_writel("drivers/pinctrl/samsung/pinctrl-exynos.c:102", mask, bank->eint_base + reg_mask);
 
 	raw_spin_unlock_irqrestore(&bank->slock, flags);
 }
@@ -139,10 +139,10 @@ static int exynos_irq_set_type(struct irq_data *irqd, unsigned int type)
 	else
 		irq_set_handler_locked(irqd, handle_level_irq);
 
-	con = readl(bank->eint_base + reg_con);
+	con = pete_readl("drivers/pinctrl/samsung/pinctrl-exynos.c:142", bank->eint_base + reg_con);
 	con &= ~(EXYNOS_EINT_CON_MASK << shift);
 	con |= trig_type << shift;
-	writel(con, bank->eint_base + reg_con);
+	pete_writel("drivers/pinctrl/samsung/pinctrl-exynos.c:145", con, bank->eint_base + reg_con);
 
 	return 0;
 }
@@ -169,10 +169,10 @@ static int exynos_irq_request_resources(struct irq_data *irqd)
 
 	raw_spin_lock_irqsave(&bank->slock, flags);
 
-	con = readl(bank->pctl_base + reg_con);
+	con = pete_readl("drivers/pinctrl/samsung/pinctrl-exynos.c:172", bank->pctl_base + reg_con);
 	con &= ~(mask << shift);
 	con |= EXYNOS_PIN_CON_FUNC_EINT << shift;
-	writel(con, bank->pctl_base + reg_con);
+	pete_writel("drivers/pinctrl/samsung/pinctrl-exynos.c:175", con, bank->pctl_base + reg_con);
 
 	raw_spin_unlock_irqrestore(&bank->slock, flags);
 
@@ -192,10 +192,10 @@ static void exynos_irq_release_resources(struct irq_data *irqd)
 
 	raw_spin_lock_irqsave(&bank->slock, flags);
 
-	con = readl(bank->pctl_base + reg_con);
+	con = pete_readl("drivers/pinctrl/samsung/pinctrl-exynos.c:195", bank->pctl_base + reg_con);
 	con &= ~(mask << shift);
 	con |= PIN_CON_FUNC_INPUT << shift;
-	writel(con, bank->pctl_base + reg_con);
+	pete_writel("drivers/pinctrl/samsung/pinctrl-exynos.c:198", con, bank->pctl_base + reg_con);
 
 	raw_spin_unlock_irqrestore(&bank->slock, flags);
 
@@ -247,7 +247,7 @@ static irqreturn_t exynos_eint_gpio_irq(int irq, void *data)
 	unsigned int svc, group, pin;
 	int ret;
 
-	svc = readl(bank->eint_base + EXYNOS_SVC_OFFSET);
+	svc = pete_readl("drivers/pinctrl/samsung/pinctrl-exynos.c:250", bank->eint_base + EXYNOS_SVC_OFFSET);
 	group = EXYNOS_SVC_GROUP(svc);
 	pin = svc & EXYNOS_SVC_NUM_MASK;
 
@@ -510,9 +510,9 @@ static void exynos_irq_demux_eint16_31(struct irq_desc *desc)
 
 	for (i = 0; i < eintd->nr_banks; ++i) {
 		struct samsung_pin_bank *b = eintd->banks[i];
-		pend = readl(b->eint_base + b->irq_chip->eint_pend
+		pend = pete_readl("drivers/pinctrl/samsung/pinctrl-exynos.c:513", b->eint_base + b->irq_chip->eint_pend
 				+ b->eint_offset);
-		mask = readl(b->eint_base + b->irq_chip->eint_mask
+		mask = pete_readl("drivers/pinctrl/samsung/pinctrl-exynos.c:515", b->eint_base + b->irq_chip->eint_mask
 				+ b->eint_offset);
 		exynos_irq_demux_eint(pend & ~mask, b->irq_domain);
 	}
@@ -640,13 +640,13 @@ static void exynos_pinctrl_suspend_bank(
 	struct exynos_eint_gpio_save *save = bank->soc_priv;
 	void __iomem *regs = bank->eint_base;
 
-	save->eint_con = readl(regs + EXYNOS_GPIO_ECON_OFFSET
+	save->eint_con = pete_readl("drivers/pinctrl/samsung/pinctrl-exynos.c:643", regs + EXYNOS_GPIO_ECON_OFFSET
 						+ bank->eint_offset);
-	save->eint_fltcon0 = readl(regs + EXYNOS_GPIO_EFLTCON_OFFSET
+	save->eint_fltcon0 = pete_readl("drivers/pinctrl/samsung/pinctrl-exynos.c:645", regs + EXYNOS_GPIO_EFLTCON_OFFSET
 						+ 2 * bank->eint_offset);
-	save->eint_fltcon1 = readl(regs + EXYNOS_GPIO_EFLTCON_OFFSET
+	save->eint_fltcon1 = pete_readl("drivers/pinctrl/samsung/pinctrl-exynos.c:647", regs + EXYNOS_GPIO_EFLTCON_OFFSET
 						+ 2 * bank->eint_offset + 4);
-	save->eint_mask = readl(regs + bank->irq_chip->eint_mask
+	save->eint_mask = pete_readl("drivers/pinctrl/samsung/pinctrl-exynos.c:649", regs + bank->irq_chip->eint_mask
 						+ bank->eint_offset);
 
 	pr_debug("%s: save     con %#010x\n", bank->name, save->eint_con);
@@ -682,25 +682,25 @@ static void exynos_pinctrl_resume_bank(
 	void __iomem *regs = bank->eint_base;
 
 	pr_debug("%s:     con %#010x => %#010x\n", bank->name,
-			readl(regs + EXYNOS_GPIO_ECON_OFFSET
+			pete_readl("drivers/pinctrl/samsung/pinctrl-exynos.c:685", regs + EXYNOS_GPIO_ECON_OFFSET
 			+ bank->eint_offset), save->eint_con);
 	pr_debug("%s: fltcon0 %#010x => %#010x\n", bank->name,
-			readl(regs + EXYNOS_GPIO_EFLTCON_OFFSET
+			pete_readl("drivers/pinctrl/samsung/pinctrl-exynos.c:688", regs + EXYNOS_GPIO_EFLTCON_OFFSET
 			+ 2 * bank->eint_offset), save->eint_fltcon0);
 	pr_debug("%s: fltcon1 %#010x => %#010x\n", bank->name,
-			readl(regs + EXYNOS_GPIO_EFLTCON_OFFSET
+			pete_readl("drivers/pinctrl/samsung/pinctrl-exynos.c:691", regs + EXYNOS_GPIO_EFLTCON_OFFSET
 			+ 2 * bank->eint_offset + 4), save->eint_fltcon1);
 	pr_debug("%s:    mask %#010x => %#010x\n", bank->name,
-			readl(regs + bank->irq_chip->eint_mask
+			pete_readl("drivers/pinctrl/samsung/pinctrl-exynos.c:694", regs + bank->irq_chip->eint_mask
 			+ bank->eint_offset), save->eint_mask);
 
-	writel(save->eint_con, regs + EXYNOS_GPIO_ECON_OFFSET
+	pete_writel("drivers/pinctrl/samsung/pinctrl-exynos.c:697", save->eint_con, regs + EXYNOS_GPIO_ECON_OFFSET
 						+ bank->eint_offset);
-	writel(save->eint_fltcon0, regs + EXYNOS_GPIO_EFLTCON_OFFSET
+	pete_writel("drivers/pinctrl/samsung/pinctrl-exynos.c:699", save->eint_fltcon0, regs + EXYNOS_GPIO_EFLTCON_OFFSET
 						+ 2 * bank->eint_offset);
-	writel(save->eint_fltcon1, regs + EXYNOS_GPIO_EFLTCON_OFFSET
+	pete_writel("drivers/pinctrl/samsung/pinctrl-exynos.c:701", save->eint_fltcon1, regs + EXYNOS_GPIO_EFLTCON_OFFSET
 						+ 2 * bank->eint_offset + 4);
-	writel(save->eint_mask, regs + bank->irq_chip->eint_mask
+	pete_writel("drivers/pinctrl/samsung/pinctrl-exynos.c:703", save->eint_mask, regs + bank->irq_chip->eint_mask
 						+ bank->eint_offset);
 }
 

@@ -163,8 +163,8 @@ static inline void mt76_wmac_spi_unlock(struct mt7915_dev *dev)
 
 static u32 mt76_wmac_rmw(void __iomem *base, u32 offset, u32 mask, u32 val)
 {
-	val |= readl(base + offset) & ~mask;
-	writel(val, base + offset);
+	val |= pete_readl("drivers/net/wireless/mediatek/mt76/mt7915/soc.c:166", base + offset) & ~mask;
+	pete_writel("drivers/net/wireless/mediatek/mt76/mt7915/soc.c:167", val, base + offset);
 
 	return val;
 }
@@ -177,7 +177,7 @@ static u8 mt798x_wmac_check_adie_type(struct mt7915_dev *dev)
 	if (is_mt7981(&dev->mt76))
 		return ADIE_DBDC;
 
-	val = readl(dev->sku + MT_TOP_POS_SKU);
+	val = pete_readl("drivers/net/wireless/mediatek/mt76/mt7915/soc.c:180", dev->sku + MT_TOP_POS_SKU);
 
 	return FIELD_GET(MT_TOP_POS_SKU_ADIE_DBDC_MASK, val);
 }

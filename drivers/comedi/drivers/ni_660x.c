@@ -274,9 +274,9 @@ static void ni_660x_write(struct comedi_device *dev, unsigned int chip,
 			    ni_660x_reg_data[reg].offset;
 
 	if (ni_660x_reg_data[reg].size == 2)
-		writew(bits, dev->mmio + addr);
+		pete_writew("drivers/comedi/drivers/ni_660x.c:277", bits, dev->mmio + addr);
 	else
-		writel(bits, dev->mmio + addr);
+		pete_writel("drivers/comedi/drivers/ni_660x.c:279", bits, dev->mmio + addr);
 }
 
 static unsigned int ni_660x_read(struct comedi_device *dev,
@@ -286,8 +286,8 @@ static unsigned int ni_660x_read(struct comedi_device *dev,
 			    ni_660x_reg_data[reg].offset;
 
 	if (ni_660x_reg_data[reg].size == 2)
-		return readw(dev->mmio + addr);
-	return readl(dev->mmio + addr);
+		return pete_readw("drivers/comedi/drivers/ni_660x.c:289", dev->mmio + addr);
+	return pete_readl("drivers/comedi/drivers/ni_660x.c:290", dev->mmio + addr);
 }
 
 static void ni_660x_gpct_write(struct ni_gpct *counter, unsigned int bits,

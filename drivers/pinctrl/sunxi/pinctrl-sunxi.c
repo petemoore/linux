@@ -548,7 +548,7 @@ static int sunxi_pconf_get(struct pinctrl_dev *pctldev, unsigned pin,
 	if (ret < 0)
 		return ret;
 
-	val = (readl(pctl->membase + reg) & mask) >> shift;
+	val = (pete_readl("drivers/pinctrl/sunxi/pinctrl-sunxi.c:551", pctl->membase + reg) & mask) >> shift;
 
 	switch (pinconf_to_config_param(*config)) {
 	case PIN_CONFIG_DRIVE_STRENGTH:
@@ -649,7 +649,7 @@ static int sunxi_pconf_set(struct pinctrl_dev *pctldev, unsigned pin,
 		}
 
 		raw_spin_lock_irqsave(&pctl->lock, flags);
-		writel((readl(pctl->membase + reg) & ~mask) | val << shift,
+		pete_writel("drivers/pinctrl/sunxi/pinctrl-sunxi.c:652", (pete_readl("drivers/pinctrl/sunxi/pinctrl-sunxi.c:652", pctl->membase + reg) & ~mask) | val << shift,
 		       pctl->membase + reg);
 		raw_spin_unlock_irqrestore(&pctl->lock, flags);
 	} /* for each config */
@@ -715,17 +715,17 @@ static int sunxi_pinctrl_set_io_bias_cfg(struct sunxi_pinctrl *pctl,
 		else
 			val = 0xD; /* 3.3V */
 
-		reg = readl(pctl->membase + sunxi_grp_config_reg(pin));
+		reg = pete_readl("drivers/pinctrl/sunxi/pinctrl-sunxi.c:718", pctl->membase + sunxi_grp_config_reg(pin));
 		reg &= ~IO_BIAS_MASK;
-		writel(reg | val, pctl->membase + sunxi_grp_config_reg(pin));
+		pete_writel("drivers/pinctrl/sunxi/pinctrl-sunxi.c:720", reg | val, pctl->membase + sunxi_grp_config_reg(pin));
 		return 0;
 	case BIAS_VOLTAGE_PIO_POW_MODE_CTL:
 		val = uV > 1800000 && uV <= 2500000 ? BIT(bank) : 0;
 
 		raw_spin_lock_irqsave(&pctl->lock, flags);
-		reg = readl(pctl->membase + PIO_POW_MOD_CTL_REG);
+		reg = pete_readl("drivers/pinctrl/sunxi/pinctrl-sunxi.c:726", pctl->membase + PIO_POW_MOD_CTL_REG);
 		reg &= ~BIT(bank);
-		writel(reg | val, pctl->membase + PIO_POW_MOD_CTL_REG);
+		pete_writel("drivers/pinctrl/sunxi/pinctrl-sunxi.c:728", reg | val, pctl->membase + PIO_POW_MOD_CTL_REG);
 		raw_spin_unlock_irqrestore(&pctl->lock, flags);
 
 		fallthrough;
@@ -733,9 +733,9 @@ static int sunxi_pinctrl_set_io_bias_cfg(struct sunxi_pinctrl *pctl,
 		val = uV <= 1800000 ? 1 : 0;
 
 		raw_spin_lock_irqsave(&pctl->lock, flags);
-		reg = readl(pctl->membase + PIO_POW_MOD_SEL_REG);
+		reg = pete_readl("drivers/pinctrl/sunxi/pinctrl-sunxi.c:736", pctl->membase + PIO_POW_MOD_SEL_REG);
 		reg &= ~(1 << bank);
-		writel(reg | val << bank, pctl->membase + PIO_POW_MOD_SEL_REG);
+		pete_writel("drivers/pinctrl/sunxi/pinctrl-sunxi.c:738", reg | val << bank, pctl->membase + PIO_POW_MOD_SEL_REG);
 		raw_spin_unlock_irqrestore(&pctl->lock, flags);
 		return 0;
 	default:
@@ -784,7 +784,7 @@ static void sunxi_pmx_set(struct pinctrl_dev *pctldev,
 
 	raw_spin_lock_irqsave(&pctl->lock, flags);
 
-	writel((readl(pctl->membase + reg) & ~mask) | config << shift,
+	pete_writel("drivers/pinctrl/sunxi/pinctrl-sunxi.c:787", (pete_readl("drivers/pinctrl/sunxi/pinctrl-sunxi.c:787", pctl->membase + reg) & ~mask) | config << shift,
 	       pctl->membase + reg);
 
 	raw_spin_unlock_irqrestore(&pctl->lock, flags);
@@ -931,7 +931,7 @@ static int sunxi_pinctrl_gpio_get(struct gpio_chip *chip, unsigned offset)
 	if (set_mux)
 		sunxi_pmx_set(pctl->pctl_dev, pin, SUN4I_FUNC_INPUT);
 
-	val = (readl(pctl->membase + reg) & mask) >> shift;
+	val = (pete_readl("drivers/pinctrl/sunxi/pinctrl-sunxi.c:934", pctl->membase + reg) & mask) >> shift;
 
 	if (set_mux)
 		sunxi_pmx_set(pctl->pctl_dev, pin, SUN4I_FUNC_IRQ);
@@ -950,14 +950,14 @@ static void sunxi_pinctrl_gpio_set(struct gpio_chip *chip,
 
 	raw_spin_lock_irqsave(&pctl->lock, flags);
 
-	val = readl(pctl->membase + reg);
+	val = pete_readl("drivers/pinctrl/sunxi/pinctrl-sunxi.c:953", pctl->membase + reg);
 
 	if (value)
 		val |= mask;
 	else
 		val &= ~mask;
 
-	writel(val, pctl->membase + reg);
+	pete_writel("drivers/pinctrl/sunxi/pinctrl-sunxi.c:960", val, pctl->membase + reg);
 
 	raw_spin_unlock_irqrestore(&pctl->lock, flags);
 }
@@ -1083,9 +1083,9 @@ static int sunxi_pinctrl_irq_set_type(struct irq_data *d, unsigned int type)
 		irq_set_chip_handler_name_locked(d, &sunxi_pinctrl_edge_irq_chip,
 						 handle_edge_irq, NULL);
 
-	regval = readl(pctl->membase + reg);
+	regval = pete_readl("drivers/pinctrl/sunxi/pinctrl-sunxi.c:1086", pctl->membase + reg);
 	regval &= ~(IRQ_CFG_IRQ_MASK << index);
-	writel(regval | (mode << index), pctl->membase + reg);
+	pete_writel("drivers/pinctrl/sunxi/pinctrl-sunxi.c:1088", regval | (mode << index), pctl->membase + reg);
 
 	raw_spin_unlock_irqrestore(&pctl->lock, flags);
 
@@ -1099,7 +1099,7 @@ static void sunxi_pinctrl_irq_ack(struct irq_data *d)
 	u8 status_idx = sunxi_irq_status_offset(d->hwirq);
 
 	/* Clear the IRQ */
-	writel(1 << status_idx, pctl->membase + status_reg);
+	pete_writel("drivers/pinctrl/sunxi/pinctrl-sunxi.c:1102", 1 << status_idx, pctl->membase + status_reg);
 }
 
 static void sunxi_pinctrl_irq_mask(struct irq_data *d)
@@ -1113,8 +1113,8 @@ static void sunxi_pinctrl_irq_mask(struct irq_data *d)
 	raw_spin_lock_irqsave(&pctl->lock, flags);
 
 	/* Mask the IRQ */
-	val = readl(pctl->membase + reg);
-	writel(val & ~(1 << idx), pctl->membase + reg);
+	val = pete_readl("drivers/pinctrl/sunxi/pinctrl-sunxi.c:1116", pctl->membase + reg);
+	pete_writel("drivers/pinctrl/sunxi/pinctrl-sunxi.c:1117", val & ~(1 << idx), pctl->membase + reg);
 
 	raw_spin_unlock_irqrestore(&pctl->lock, flags);
 }
@@ -1130,8 +1130,8 @@ static void sunxi_pinctrl_irq_unmask(struct irq_data *d)
 	raw_spin_lock_irqsave(&pctl->lock, flags);
 
 	/* Unmask the IRQ */
-	val = readl(pctl->membase + reg);
-	writel(val | (1 << idx), pctl->membase + reg);
+	val = pete_readl("drivers/pinctrl/sunxi/pinctrl-sunxi.c:1133", pctl->membase + reg);
+	pete_writel("drivers/pinctrl/sunxi/pinctrl-sunxi.c:1134", val | (1 << idx), pctl->membase + reg);
 
 	raw_spin_unlock_irqrestore(&pctl->lock, flags);
 }
@@ -1227,7 +1227,7 @@ static void sunxi_pinctrl_irq_handler(struct irq_desc *desc)
 	chained_irq_enter(chip, desc);
 
 	reg = sunxi_irq_status_reg_from_bank(pctl->desc, bank);
-	val = readl(pctl->membase + reg);
+	val = pete_readl("drivers/pinctrl/sunxi/pinctrl-sunxi.c:1230", pctl->membase + reg);
 
 	if (val) {
 		int irqoffset;
@@ -1464,7 +1464,7 @@ static int sunxi_pinctrl_setup_debounce(struct sunxi_pinctrl *pctl,
 			src = 0;
 		}
 
-		writel(src | div << 4,
+		pete_writel("drivers/pinctrl/sunxi/pinctrl-sunxi.c:1467", src | div << 4,
 		       pctl->membase +
 		       sunxi_irq_debounce_reg_from_bank(pctl->desc, i));
 	}
@@ -1652,9 +1652,9 @@ int sunxi_pinctrl_init_with_variant(struct platform_device *pdev,
 
 	for (i = 0; i < pctl->desc->irq_banks; i++) {
 		/* Mask and clear all IRQs before registering a handler */
-		writel(0, pctl->membase +
+		pete_writel("drivers/pinctrl/sunxi/pinctrl-sunxi.c:1655", 0, pctl->membase +
 			  sunxi_irq_ctrl_reg_from_bank(pctl->desc, i));
-		writel(0xffffffff,
+		pete_writel("drivers/pinctrl/sunxi/pinctrl-sunxi.c:1657", 0xffffffff,
 		       pctl->membase +
 		       sunxi_irq_status_reg_from_bank(pctl->desc, i));
 

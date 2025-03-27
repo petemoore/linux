@@ -43,13 +43,13 @@ static struct ath79_gpio_ctrl *irq_data_to_ath79_gpio(struct irq_data *data)
 
 static u32 ath79_gpio_read(struct ath79_gpio_ctrl *ctrl, unsigned reg)
 {
-	return readl(ctrl->base + reg);
+	return pete_readl("drivers/gpio/gpio-ath79.c:46", ctrl->base + reg);
 }
 
 static void ath79_gpio_write(struct ath79_gpio_ctrl *ctrl,
 			unsigned reg, u32 val)
 {
-	writel(val, ctrl->base + reg);
+	pete_writel("drivers/gpio/gpio-ath79.c:52", val, ctrl->base + reg);
 }
 
 static bool ath79_gpio_update_bits(

@@ -84,14 +84,14 @@ static void mps2_uart_write8(struct uart_port *port, u8 val, unsigned int off)
 {
 	struct mps2_uart_port *mps_port = to_mps2_port(port);
 
-	writeb(val, mps_port->port.membase + off);
+	pete_writeb("drivers/tty/serial/mps2-uart.c:87", val, mps_port->port.membase + off);
 }
 
 static u8 mps2_uart_read8(struct uart_port *port, unsigned int off)
 {
 	struct mps2_uart_port *mps_port = to_mps2_port(port);
 
-	return readb(mps_port->port.membase + off);
+	return pete_readb("drivers/tty/serial/mps2-uart.c:94", mps_port->port.membase + off);
 }
 
 static void mps2_uart_write32(struct uart_port *port, u32 val, unsigned int off)
@@ -467,10 +467,10 @@ static struct console mps2_uart_console = {
 
 static void mps2_early_putchar(struct uart_port *port, unsigned char ch)
 {
-	while (readb(port->membase + UARTn_STATE) & UARTn_STATE_TX_FULL)
+	while (pete_readb("drivers/tty/serial/mps2-uart.c:470", port->membase + UARTn_STATE) & UARTn_STATE_TX_FULL)
 		cpu_relax();
 
-	writeb((unsigned char)ch, port->membase + UARTn_DATA);
+	pete_writeb("drivers/tty/serial/mps2-uart.c:473", (unsigned char)ch, port->membase + UARTn_DATA);
 }
 
 static void mps2_early_write(struct console *con, const char *s, unsigned int n)

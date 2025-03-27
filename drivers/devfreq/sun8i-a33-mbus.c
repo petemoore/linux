@@ -161,26 +161,26 @@ static int sun8i_a33_mbus_set_dram_freq(struct sun8i_a33_mbus *priv,
 		 MBUS_MDFSCR_BYPASS |
 		 MBUS_MDFSCR_PAD_HOLD |
 		 MBUS_MDFSCR_BUFFER_TIMING;
-	writel(mdfscr, priv->reg_mbus + MBUS_MDFSCR);
+	pete_writel("drivers/devfreq/sun8i-a33-mbus.c:164", mdfscr, priv->reg_mbus + MBUS_MDFSCR);
 
 	/* Update the buffered copy of RFSHTMG. */
 	tREFI_32ck = priv->tREFI_ns * mctl_freq_mhz / 1000 / 32;
 	tRFC_ck = DIV_ROUND_UP(priv->tRFC_ns * mctl_freq_mhz, 1000);
-	writel(DRAM_RFSHTMG_TREFI(tREFI_32ck) | DRAM_RFSHTMG_TRFC(tRFC_ck),
+	pete_writel("drivers/devfreq/sun8i-a33-mbus.c:169", DRAM_RFSHTMG_TREFI(tREFI_32ck) | DRAM_RFSHTMG_TRFC(tRFC_ck),
 	       priv->reg_dram + DRAM_RFSHTMG);
 
 	/* Enable ODT if needed, or disable it to save power. */
 	if (priv->odtmap && dram_freq_mhz > priv->variant->odt_freq_mhz) {
 		dxodt = DRAM_DXnGCR0_DXODT_DYNAMIC;
-		writel(priv->odtmap, priv->reg_dram + DRAM_ODTMAP);
+		pete_writel("drivers/devfreq/sun8i-a33-mbus.c:175", priv->odtmap, priv->reg_dram + DRAM_ODTMAP);
 	} else {
 		dxodt = DRAM_DXnGCR0_DXODT_DISABLED;
-		writel(0, priv->reg_dram + DRAM_ODTMAP);
+		pete_writel("drivers/devfreq/sun8i-a33-mbus.c:178", 0, priv->reg_dram + DRAM_ODTMAP);
 	}
 	for (i = 0; i < DRAM_DX_MAX; ++i) {
 		void __iomem *reg = priv->reg_dram + DRAM_DXnGCR0(i);
 
-		writel((readl(reg) & ~DRAM_DXnGCR0_DXODT) | dxodt, reg);
+		pete_writel("drivers/devfreq/sun8i-a33-mbus.c:183", (pete_readl("drivers/devfreq/sun8i-a33-mbus.c:183", reg) & ~DRAM_DXnGCR0_DXODT) | dxodt, reg);
 	}
 
 	dev_dbg(priv->devfreq_dram->dev.parent,
@@ -189,14 +189,14 @@ static int sun8i_a33_mbus_set_dram_freq(struct sun8i_a33_mbus *priv,
 		dxodt == DRAM_DXnGCR0_DXODT_DYNAMIC ? "dynamic" : "disabled");
 
 	/* Trigger hardware MDFS. */
-	writel(mdfscr | MBUS_MDFSCR_START, priv->reg_mbus + MBUS_MDFSCR);
+	pete_writel("drivers/devfreq/sun8i-a33-mbus.c:192", mdfscr | MBUS_MDFSCR_START, priv->reg_mbus + MBUS_MDFSCR);
 	ret = readl_poll_timeout_atomic(priv->reg_mbus + MBUS_MDFSCR, mdfscr,
 					!(mdfscr & MBUS_MDFSCR_START), 10, 1000);
 	if (ret)
 		return ret;
 
 	/* Disable double buffering. */
-	writel(0, priv->reg_mbus + MBUS_MDFSCR);
+	pete_writel("drivers/devfreq/sun8i-a33-mbus.c:199", 0, priv->reg_mbus + MBUS_MDFSCR);
 
 	/* Restore VTF configuration. */
 	writel_relaxed(vtfcr, priv->reg_dram + DRAM_VTFCR);

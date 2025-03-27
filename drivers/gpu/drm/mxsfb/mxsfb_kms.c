@@ -61,7 +61,7 @@ static void mxsfb_set_formats(struct mxsfb_drm_private *mxsfb,
 	ctrl = CTRL_BYPASS_COUNT | CTRL_MASTER;
 
 	/* CTRL1 contains IRQ config and status bits, preserve those. */
-	ctrl1 = readl(mxsfb->base + LCDC_CTRL1);
+	ctrl1 = pete_readl("drivers/gpu/drm/mxsfb/mxsfb_kms.c:64", mxsfb->base + LCDC_CTRL1);
 	ctrl1 &= CTRL1_CUR_FRAME_DONE_IRQ_EN | CTRL1_CUR_FRAME_DONE_IRQ;
 
 	switch (format) {
@@ -93,8 +93,8 @@ static void mxsfb_set_formats(struct mxsfb_drm_private *mxsfb,
 		break;
 	}
 
-	writel(ctrl1, mxsfb->base + LCDC_CTRL1);
-	writel(ctrl, mxsfb->base + LCDC_CTRL);
+	pete_writel("drivers/gpu/drm/mxsfb/mxsfb_kms.c:96", ctrl1, mxsfb->base + LCDC_CTRL1);
+	pete_writel("drivers/gpu/drm/mxsfb/mxsfb_kms.c:97", ctrl, mxsfb->base + LCDC_CTRL);
 }
 
 static void mxsfb_set_mode(struct mxsfb_drm_private *mxsfb, u32 bus_flags)
@@ -102,7 +102,7 @@ static void mxsfb_set_mode(struct mxsfb_drm_private *mxsfb, u32 bus_flags)
 	struct drm_display_mode *m = &mxsfb->crtc.state->adjusted_mode;
 	u32 vdctrl0, vsync_pulse_len, hsync_pulse_len;
 
-	writel(TRANSFER_COUNT_SET_VCOUNT(m->crtc_vdisplay) |
+	pete_writel("drivers/gpu/drm/mxsfb/mxsfb_kms.c:105", TRANSFER_COUNT_SET_VCOUNT(m->crtc_vdisplay) |
 	       TRANSFER_COUNT_SET_HCOUNT(m->crtc_hdisplay),
 	       mxsfb->base + mxsfb->devdata->transfer_count);
 
@@ -128,22 +128,22 @@ static void mxsfb_set_mode(struct mxsfb_drm_private *mxsfb, u32 bus_flags)
 	if (bus_flags & DRM_BUS_FLAG_PIXDATA_DRIVE_POSEDGE)
 		vdctrl0 |= VDCTRL0_DOTCLK_ACT_FALLING;
 
-	writel(vdctrl0, mxsfb->base + LCDC_VDCTRL0);
+	pete_writel("drivers/gpu/drm/mxsfb/mxsfb_kms.c:131", vdctrl0, mxsfb->base + LCDC_VDCTRL0);
 
 	/* Frame length in lines. */
-	writel(m->crtc_vtotal, mxsfb->base + LCDC_VDCTRL1);
+	pete_writel("drivers/gpu/drm/mxsfb/mxsfb_kms.c:134", m->crtc_vtotal, mxsfb->base + LCDC_VDCTRL1);
 
 	/* Line length in units of clocks or pixels. */
 	hsync_pulse_len = m->crtc_hsync_end - m->crtc_hsync_start;
-	writel(set_hsync_pulse_width(mxsfb, hsync_pulse_len) |
+	pete_writel("drivers/gpu/drm/mxsfb/mxsfb_kms.c:138", set_hsync_pulse_width(mxsfb, hsync_pulse_len) |
 	       VDCTRL2_SET_HSYNC_PERIOD(m->crtc_htotal),
 	       mxsfb->base + LCDC_VDCTRL2);
 
-	writel(SET_HOR_WAIT_CNT(m->crtc_htotal - m->crtc_hsync_start) |
+	pete_writel("drivers/gpu/drm/mxsfb/mxsfb_kms.c:142", SET_HOR_WAIT_CNT(m->crtc_htotal - m->crtc_hsync_start) |
 	       SET_VERT_WAIT_CNT(m->crtc_vtotal - m->crtc_vsync_start),
 	       mxsfb->base + LCDC_VDCTRL3);
 
-	writel(SET_DOTCLK_H_VALID_DATA_CNT(m->hdisplay),
+	pete_writel("drivers/gpu/drm/mxsfb/mxsfb_kms.c:146", SET_DOTCLK_H_VALID_DATA_CNT(m->hdisplay),
 	       mxsfb->base + LCDC_VDCTRL4);
 
 }
@@ -158,19 +158,19 @@ static void mxsfb_enable_controller(struct mxsfb_drm_private *mxsfb)
 
 	/* Increase number of outstanding requests on all supported IPs */
 	if (mxsfb->devdata->has_ctrl2) {
-		reg = readl(mxsfb->base + LCDC_V4_CTRL2);
+		reg = pete_readl("drivers/gpu/drm/mxsfb/mxsfb_kms.c:161", mxsfb->base + LCDC_V4_CTRL2);
 		reg &= ~CTRL2_SET_OUTSTANDING_REQS_MASK;
 		reg |= CTRL2_SET_OUTSTANDING_REQS_16;
-		writel(reg, mxsfb->base + LCDC_V4_CTRL2);
+		pete_writel("drivers/gpu/drm/mxsfb/mxsfb_kms.c:164", reg, mxsfb->base + LCDC_V4_CTRL2);
 	}
 
 	/* If it was disabled, re-enable the mode again */
-	writel(CTRL_DOTCLK_MODE, mxsfb->base + LCDC_CTRL + REG_SET);
+	pete_writel("drivers/gpu/drm/mxsfb/mxsfb_kms.c:168", CTRL_DOTCLK_MODE, mxsfb->base + LCDC_CTRL + REG_SET);
 
 	/* Enable the SYNC signals first, then the DMA engine */
-	reg = readl(mxsfb->base + LCDC_VDCTRL4);
+	reg = pete_readl("drivers/gpu/drm/mxsfb/mxsfb_kms.c:171", mxsfb->base + LCDC_VDCTRL4);
 	reg |= VDCTRL4_SYNC_SIGNALS_ON;
-	writel(reg, mxsfb->base + LCDC_VDCTRL4);
+	pete_writel("drivers/gpu/drm/mxsfb/mxsfb_kms.c:173", reg, mxsfb->base + LCDC_VDCTRL4);
 
 	/*
 	 * Enable recovery on underflow.
@@ -197,11 +197,11 @@ static void mxsfb_enable_controller(struct mxsfb_drm_private *mxsfb)
 	 * "
 	 * Enable this bit to mitigate the sporadic underflows.
 	 */
-	reg = readl(mxsfb->base + LCDC_CTRL1);
+	reg = pete_readl("drivers/gpu/drm/mxsfb/mxsfb_kms.c:200", mxsfb->base + LCDC_CTRL1);
 	reg |= CTRL1_RECOVER_ON_UNDERFLOW;
-	writel(reg, mxsfb->base + LCDC_CTRL1);
+	pete_writel("drivers/gpu/drm/mxsfb/mxsfb_kms.c:202", reg, mxsfb->base + LCDC_CTRL1);
 
-	writel(CTRL_RUN, mxsfb->base + LCDC_CTRL + REG_SET);
+	pete_writel("drivers/gpu/drm/mxsfb/mxsfb_kms.c:204", CTRL_RUN, mxsfb->base + LCDC_CTRL + REG_SET);
 }
 
 static void mxsfb_disable_controller(struct mxsfb_drm_private *mxsfb)
@@ -212,14 +212,14 @@ static void mxsfb_disable_controller(struct mxsfb_drm_private *mxsfb)
 	 * Even if we disable the controller here, it will still continue
 	 * until its FIFOs are running out of data
 	 */
-	writel(CTRL_DOTCLK_MODE, mxsfb->base + LCDC_CTRL + REG_CLR);
+	pete_writel("drivers/gpu/drm/mxsfb/mxsfb_kms.c:215", CTRL_DOTCLK_MODE, mxsfb->base + LCDC_CTRL + REG_CLR);
 
 	readl_poll_timeout(mxsfb->base + LCDC_CTRL, reg, !(reg & CTRL_RUN),
 			   0, 1000);
 
-	reg = readl(mxsfb->base + LCDC_VDCTRL4);
+	reg = pete_readl("drivers/gpu/drm/mxsfb/mxsfb_kms.c:220", mxsfb->base + LCDC_VDCTRL4);
 	reg &= ~VDCTRL4_SYNC_SIGNALS_ON;
-	writel(reg, mxsfb->base + LCDC_VDCTRL4);
+	pete_writel("drivers/gpu/drm/mxsfb/mxsfb_kms.c:222", reg, mxsfb->base + LCDC_VDCTRL4);
 
 	clk_disable_unprepare(mxsfb->clk);
 	if (mxsfb->clk_disp_axi)
@@ -235,7 +235,7 @@ static int clear_poll_bit(void __iomem *addr, u32 mask)
 {
 	u32 reg;
 
-	writel(mask, addr + REG_CLR);
+	pete_writel("drivers/gpu/drm/mxsfb/mxsfb_kms.c:238", mask, addr + REG_CLR);
 	return readl_poll_timeout(addr, reg, !(reg & mask), 0, RESET_TIMEOUT);
 }
 
@@ -253,7 +253,7 @@ static int mxsfb_reset_block(struct mxsfb_drm_private *mxsfb)
 	if (ret)
 		return ret;
 
-	writel(CTRL_CLKGATE, mxsfb->base + LCDC_CTRL + REG_CLR);
+	pete_writel("drivers/gpu/drm/mxsfb/mxsfb_kms.c:256", CTRL_CLKGATE, mxsfb->base + LCDC_CTRL + REG_CLR);
 
 	ret = clear_poll_bit(mxsfb->base + LCDC_CTRL, CTRL_SFTRST);
 	if (ret)
@@ -264,13 +264,13 @@ static int mxsfb_reset_block(struct mxsfb_drm_private *mxsfb)
 		return ret;
 
 	/* Clear the FIFOs */
-	writel(CTRL1_FIFO_CLEAR, mxsfb->base + LCDC_CTRL1 + REG_SET);
-	readl(mxsfb->base + LCDC_CTRL1);
-	writel(CTRL1_FIFO_CLEAR, mxsfb->base + LCDC_CTRL1 + REG_CLR);
-	readl(mxsfb->base + LCDC_CTRL1);
+	pete_writel("drivers/gpu/drm/mxsfb/mxsfb_kms.c:267", CTRL1_FIFO_CLEAR, mxsfb->base + LCDC_CTRL1 + REG_SET);
+	pete_readl("drivers/gpu/drm/mxsfb/mxsfb_kms.c:268", mxsfb->base + LCDC_CTRL1);
+	pete_writel("drivers/gpu/drm/mxsfb/mxsfb_kms.c:269", CTRL1_FIFO_CLEAR, mxsfb->base + LCDC_CTRL1 + REG_CLR);
+	pete_readl("drivers/gpu/drm/mxsfb/mxsfb_kms.c:270", mxsfb->base + LCDC_CTRL1);
 
 	if (mxsfb->devdata->has_overlay)
-		writel(0, mxsfb->base + LCDC_AS_CTRL);
+		pete_writel("drivers/gpu/drm/mxsfb/mxsfb_kms.c:273", 0, mxsfb->base + LCDC_AS_CTRL);
 
 	return 0;
 }
@@ -390,8 +390,8 @@ static void mxsfb_crtc_atomic_enable(struct drm_crtc *crtc,
 	/* Write cur_buf as well to avoid an initial corrupt frame */
 	dma_addr = drm_fb_dma_get_gem_addr(new_pstate->fb, new_pstate, 0);
 	if (dma_addr) {
-		writel(dma_addr, mxsfb->base + mxsfb->devdata->cur_buf);
-		writel(dma_addr, mxsfb->base + mxsfb->devdata->next_buf);
+		pete_writel("drivers/gpu/drm/mxsfb/mxsfb_kms.c:393", dma_addr, mxsfb->base + mxsfb->devdata->cur_buf);
+		pete_writel("drivers/gpu/drm/mxsfb/mxsfb_kms.c:394", dma_addr, mxsfb->base + mxsfb->devdata->next_buf);
 	}
 
 	mxsfb_enable_controller(mxsfb);
@@ -425,8 +425,8 @@ static int mxsfb_crtc_enable_vblank(struct drm_crtc *crtc)
 	struct mxsfb_drm_private *mxsfb = to_mxsfb_drm_private(crtc->dev);
 
 	/* Clear and enable VBLANK IRQ */
-	writel(CTRL1_CUR_FRAME_DONE_IRQ, mxsfb->base + LCDC_CTRL1 + REG_CLR);
-	writel(CTRL1_CUR_FRAME_DONE_IRQ_EN, mxsfb->base + LCDC_CTRL1 + REG_SET);
+	pete_writel("drivers/gpu/drm/mxsfb/mxsfb_kms.c:428", CTRL1_CUR_FRAME_DONE_IRQ, mxsfb->base + LCDC_CTRL1 + REG_CLR);
+	pete_writel("drivers/gpu/drm/mxsfb/mxsfb_kms.c:429", CTRL1_CUR_FRAME_DONE_IRQ_EN, mxsfb->base + LCDC_CTRL1 + REG_SET);
 
 	return 0;
 }
@@ -436,8 +436,8 @@ static void mxsfb_crtc_disable_vblank(struct drm_crtc *crtc)
 	struct mxsfb_drm_private *mxsfb = to_mxsfb_drm_private(crtc->dev);
 
 	/* Disable and clear VBLANK IRQ */
-	writel(CTRL1_CUR_FRAME_DONE_IRQ_EN, mxsfb->base + LCDC_CTRL1 + REG_CLR);
-	writel(CTRL1_CUR_FRAME_DONE_IRQ, mxsfb->base + LCDC_CTRL1 + REG_CLR);
+	pete_writel("drivers/gpu/drm/mxsfb/mxsfb_kms.c:439", CTRL1_CUR_FRAME_DONE_IRQ_EN, mxsfb->base + LCDC_CTRL1 + REG_CLR);
+	pete_writel("drivers/gpu/drm/mxsfb/mxsfb_kms.c:440", CTRL1_CUR_FRAME_DONE_IRQ, mxsfb->base + LCDC_CTRL1 + REG_CLR);
 }
 
 static int mxsfb_crtc_set_crc_source(struct drm_crtc *crtc, const char *source)
@@ -545,7 +545,7 @@ static void mxsfb_plane_primary_atomic_update(struct drm_plane *plane,
 
 	dma_addr = drm_fb_dma_get_gem_addr(new_pstate->fb, new_pstate, 0);
 	if (dma_addr)
-		writel(dma_addr, mxsfb->base + mxsfb->devdata->next_buf);
+		pete_writel("drivers/gpu/drm/mxsfb/mxsfb_kms.c:548", dma_addr, mxsfb->base + mxsfb->devdata->next_buf);
 }
 
 static void mxsfb_plane_overlay_atomic_update(struct drm_plane *plane,
@@ -561,7 +561,7 @@ static void mxsfb_plane_overlay_atomic_update(struct drm_plane *plane,
 
 	dma_addr = drm_fb_dma_get_gem_addr(new_pstate->fb, new_pstate, 0);
 	if (!dma_addr) {
-		writel(0, mxsfb->base + LCDC_AS_CTRL);
+		pete_writel("drivers/gpu/drm/mxsfb/mxsfb_kms.c:564", 0, mxsfb->base + LCDC_AS_CTRL);
 		return;
 	}
 
@@ -573,14 +573,14 @@ static void mxsfb_plane_overlay_atomic_update(struct drm_plane *plane,
 	 */
 	dma_addr += 64;
 
-	writel(dma_addr, mxsfb->base + LCDC_AS_NEXT_BUF);
+	pete_writel("drivers/gpu/drm/mxsfb/mxsfb_kms.c:576", dma_addr, mxsfb->base + LCDC_AS_NEXT_BUF);
 
 	/*
 	 * If the plane was previously disabled, write LCDC_AS_BUF as well to
 	 * provide the first buffer.
 	 */
 	if (!old_pstate->fb)
-		writel(dma_addr, mxsfb->base + LCDC_AS_BUF);
+		pete_writel("drivers/gpu/drm/mxsfb/mxsfb_kms.c:583", dma_addr, mxsfb->base + LCDC_AS_BUF);
 
 	ctrl = AS_CTRL_AS_ENABLE | AS_CTRL_ALPHA(255);
 
@@ -608,7 +608,7 @@ static void mxsfb_plane_overlay_atomic_update(struct drm_plane *plane,
 		break;
 	}
 
-	writel(ctrl, mxsfb->base + LCDC_AS_CTRL);
+	pete_writel("drivers/gpu/drm/mxsfb/mxsfb_kms.c:611", ctrl, mxsfb->base + LCDC_AS_CTRL);
 }
 
 static void mxsfb_plane_overlay_atomic_disable(struct drm_plane *plane,
@@ -616,7 +616,7 @@ static void mxsfb_plane_overlay_atomic_disable(struct drm_plane *plane,
 {
 	struct mxsfb_drm_private *mxsfb = to_mxsfb_drm_private(plane->dev);
 
-	writel(0, mxsfb->base + LCDC_AS_CTRL);
+	pete_writel("drivers/gpu/drm/mxsfb/mxsfb_kms.c:619", 0, mxsfb->base + LCDC_AS_CTRL);
 }
 
 static bool mxsfb_format_mod_supported(struct drm_plane *plane,

@@ -267,14 +267,14 @@ static const char * const ast_ep_name[] = {
 
 /*-------------------------------------------------------------------------*/
 #define ast_udc_read(udc, offset) \
-	readl((udc)->reg + (offset))
+	pete_readl("drivers/usb/gadget/udc/aspeed_udc.c:270", (udc)->reg + (offset))
 #define ast_udc_write(udc, val, offset) \
-	writel((val), (udc)->reg + (offset))
+	pete_writel("drivers/usb/gadget/udc/aspeed_udc.c:272", (val), (udc)->reg + (offset))
 
 #define ast_ep_read(ep, reg) \
-	readl((ep)->ep_reg + (reg))
+	pete_readl("drivers/usb/gadget/udc/aspeed_udc.c:275", (ep)->ep_reg + (reg))
 #define ast_ep_write(ep, val, reg) \
-	writel((val), (ep)->ep_reg + (reg))
+	pete_writel("drivers/usb/gadget/udc/aspeed_udc.c:277", (val), (ep)->ep_reg + (reg))
 
 /*-------------------------------------------------------------------------*/
 

@@ -16,15 +16,15 @@ static void __iomem *base;
 
 static void ls2k_restart(char *command)
 {
-	writel(0x1, base + RST_CNT);
+	pete_writel("drivers/platform/mips/ls2k-reset.c:19", 0x1, base + RST_CNT);
 }
 
 static void ls2k_poweroff(void)
 {
 	/* Clear */
-	writel((readl(base + PM1_STS) & 0xffffffff), base + PM1_STS);
+	pete_writel("drivers/platform/mips/ls2k-reset.c:25", (pete_readl("drivers/platform/mips/ls2k-reset.c:25", base + PM1_STS) & 0xffffffff), base + PM1_STS);
 	/* Sleep Enable | Soft Off*/
-	writel(GENMASK(12, 10) | BIT(13), base + PM1_CNT);
+	pete_writel("drivers/platform/mips/ls2k-reset.c:27", GENMASK(12, 10) | BIT(13), base + PM1_CNT);
 }
 
 static int ls2k_reset_init(void)

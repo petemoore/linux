@@ -183,13 +183,13 @@ static const u8 filter_cr_horiz_tap4[] = {
 
 static inline u32 vp_reg_read(struct mixer_context *ctx, u32 reg_id)
 {
-	return readl(ctx->vp_regs + reg_id);
+	return pete_readl("drivers/gpu/drm/exynos/exynos_mixer.c:186", ctx->vp_regs + reg_id);
 }
 
 static inline void vp_reg_write(struct mixer_context *ctx, u32 reg_id,
 				 u32 val)
 {
-	writel(val, ctx->vp_regs + reg_id);
+	pete_writel("drivers/gpu/drm/exynos/exynos_mixer.c:192", val, ctx->vp_regs + reg_id);
 }
 
 static inline void vp_reg_writemask(struct mixer_context *ctx, u32 reg_id,
@@ -198,18 +198,18 @@ static inline void vp_reg_writemask(struct mixer_context *ctx, u32 reg_id,
 	u32 old = vp_reg_read(ctx, reg_id);
 
 	val = (val & mask) | (old & ~mask);
-	writel(val, ctx->vp_regs + reg_id);
+	pete_writel("drivers/gpu/drm/exynos/exynos_mixer.c:201", val, ctx->vp_regs + reg_id);
 }
 
 static inline u32 mixer_reg_read(struct mixer_context *ctx, u32 reg_id)
 {
-	return readl(ctx->mixer_regs + reg_id);
+	return pete_readl("drivers/gpu/drm/exynos/exynos_mixer.c:206", ctx->mixer_regs + reg_id);
 }
 
 static inline void mixer_reg_write(struct mixer_context *ctx, u32 reg_id,
 				 u32 val)
 {
-	writel(val, ctx->mixer_regs + reg_id);
+	pete_writel("drivers/gpu/drm/exynos/exynos_mixer.c:212", val, ctx->mixer_regs + reg_id);
 }
 
 static inline void mixer_reg_writemask(struct mixer_context *ctx,
@@ -218,7 +218,7 @@ static inline void mixer_reg_writemask(struct mixer_context *ctx,
 	u32 old = mixer_reg_read(ctx, reg_id);
 
 	val = (val & mask) | (old & ~mask);
-	writel(val, ctx->mixer_regs + reg_id);
+	pete_writel("drivers/gpu/drm/exynos/exynos_mixer.c:221", val, ctx->mixer_regs + reg_id);
 }
 
 static void mixer_regs_dump(struct mixer_context *ctx)
@@ -226,7 +226,7 @@ static void mixer_regs_dump(struct mixer_context *ctx)
 #define DUMPREG(reg_id) \
 do { \
 	DRM_DEV_DEBUG_KMS(ctx->dev, #reg_id " = %08x\n", \
-			 (u32)readl(ctx->mixer_regs + reg_id)); \
+			 (u32)pete_readl("drivers/gpu/drm/exynos/exynos_mixer.c:229", ctx->mixer_regs + reg_id)); \
 } while (0)
 
 	DUMPREG(MXR_STATUS);
@@ -258,7 +258,7 @@ static void vp_regs_dump(struct mixer_context *ctx)
 #define DUMPREG(reg_id) \
 do { \
 	DRM_DEV_DEBUG_KMS(ctx->dev, #reg_id " = %08x\n", \
-			 (u32) readl(ctx->vp_regs + reg_id)); \
+			 (u32) pete_readl("drivers/gpu/drm/exynos/exynos_mixer.c:261", ctx->vp_regs + reg_id)); \
 } while (0)
 
 	DUMPREG(VP_ENABLE);

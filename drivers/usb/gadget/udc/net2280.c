@@ -167,13 +167,13 @@ static void ep0_start(struct net2280 *dev);
 /*-------------------------------------------------------------------------*/
 static inline void enable_pciirqenb(struct net2280_ep *ep)
 {
-	u32 tmp = readl(&ep->dev->regs->pciirqenb0);
+	u32 tmp = pete_readl("drivers/usb/gadget/udc/net2280.c:170", &ep->dev->regs->pciirqenb0);
 
 	if (ep->dev->quirks & PLX_LEGACY)
 		tmp |= BIT(ep->num);
 	else
 		tmp |= BIT(ep_bit[ep->num]);
-	writel(tmp, &ep->dev->regs->pciirqenb0);
+	pete_writel("drivers/usb/gadget/udc/net2280.c:176", tmp, &ep->dev->regs->pciirqenb0);
 
 	return;
 }
@@ -240,10 +240,10 @@ net2280_enable(struct usb_ep *_ep, const struct usb_endpoint_descriptor *desc)
 	set_max_speed(ep, max);
 
 	/* set type, direction, address; reset fifo counters */
-	writel(BIT(FIFO_FLUSH), &ep->regs->ep_stat);
+	pete_writel("drivers/usb/gadget/udc/net2280.c:243", BIT(FIFO_FLUSH), &ep->regs->ep_stat);
 
 	if ((dev->quirks & PLX_PCIE) && dev->enhanced_mode) {
-		tmp = readl(&ep->cfg->ep_cfg);
+		tmp = pete_readl("drivers/usb/gadget/udc/net2280.c:246", &ep->cfg->ep_cfg);
 		/* If USB ep number doesn't match hardware ep number */
 		if ((tmp & 0xf) != usb_endpoint_num(desc)) {
 			ret = -EINVAL;
@@ -261,7 +261,7 @@ net2280_enable(struct usb_ep *_ep, const struct usb_endpoint_descriptor *desc)
 		if (dev->chiprev == 0100 &&
 				dev->gadget.speed == USB_SPEED_HIGH &&
 				!(desc->bEndpointAddress & USB_DIR_IN))
-			writel(BIT(CLEAR_NAK_OUT_PACKETS_MODE),
+			pete_writel("drivers/usb/gadget/udc/net2280.c:264", BIT(CLEAR_NAK_OUT_PACKETS_MODE),
 				&ep->regs->ep_rsp);
 	} else if (type == USB_ENDPOINT_XFER_BULK) {
 		/* catch some particularly blatant driver bugs */
@@ -304,18 +304,18 @@ net2280_enable(struct usb_ep *_ep, const struct usb_endpoint_descriptor *desc)
 
 	/* for OUT transfers, block the rx fifo until a read is posted */
 	if (!ep->is_in)
-		writel(BIT(SET_NAK_OUT_PACKETS), &ep->regs->ep_rsp);
+		pete_writel("drivers/usb/gadget/udc/net2280.c:307", BIT(SET_NAK_OUT_PACKETS), &ep->regs->ep_rsp);
 	else if (!(dev->quirks & PLX_2280)) {
 		/* Added for 2282, Don't use nak packets on an in endpoint,
 		 * this was ignored on 2280
 		 */
-		writel(BIT(CLEAR_NAK_OUT_PACKETS) |
+		pete_writel("drivers/usb/gadget/udc/net2280.c:312", BIT(CLEAR_NAK_OUT_PACKETS) |
 			BIT(CLEAR_NAK_OUT_PACKETS_MODE), &ep->regs->ep_rsp);
 	}
 
 	if (dev->quirks & PLX_PCIE)
 		ep_clear_seqnum(ep);
-	writel(tmp, &ep->cfg->ep_cfg);
+	pete_writel("drivers/usb/gadget/udc/net2280.c:318", tmp, &ep->cfg->ep_cfg);
 
 	/* enable irqs */
 	if (!ep->dma) {				/* pio, per-packet */
@@ -324,12 +324,12 @@ net2280_enable(struct usb_ep *_ep, const struct usb_endpoint_descriptor *desc)
 		tmp = BIT(DATA_PACKET_RECEIVED_INTERRUPT_ENABLE) |
 			BIT(DATA_PACKET_TRANSMITTED_INTERRUPT_ENABLE);
 		if (dev->quirks & PLX_2280)
-			tmp |= readl(&ep->regs->ep_irqenb);
-		writel(tmp, &ep->regs->ep_irqenb);
+			tmp |= pete_readl("drivers/usb/gadget/udc/net2280.c:327", &ep->regs->ep_irqenb);
+		pete_writel("drivers/usb/gadget/udc/net2280.c:328", tmp, &ep->regs->ep_irqenb);
 	} else {				/* dma, per-request */
 		tmp = BIT((8 + ep->num));	/* completion */
-		tmp |= readl(&dev->regs->pciirqenb1);
-		writel(tmp, &dev->regs->pciirqenb1);
+		tmp |= pete_readl("drivers/usb/gadget/udc/net2280.c:331", &dev->regs->pciirqenb1);
+		pete_writel("drivers/usb/gadget/udc/net2280.c:332", tmp, &dev->regs->pciirqenb1);
 
 		/* for short OUT transfers, dma completions can't
 		 * advance the queue; do it pio-style, by hand.
@@ -337,7 +337,7 @@ net2280_enable(struct usb_ep *_ep, const struct usb_endpoint_descriptor *desc)
 		 */
 		if ((desc->bEndpointAddress & USB_DIR_IN) == 0) {
 			tmp = BIT(SHORT_PACKET_TRANSFERRED_INTERRUPT_ENABLE);
-			writel(tmp, &ep->regs->ep_irqenb);
+			pete_writel("drivers/usb/gadget/udc/net2280.c:340", tmp, &ep->regs->ep_irqenb);
 
 			enable_pciirqenb(ep);
 		}
@@ -388,21 +388,21 @@ static void ep_reset_228x(struct net2280_regs __iomem *regs,
 
 	/* disable the dma, irqs, endpoint... */
 	if (ep->dma) {
-		writel(0, &ep->dma->dmactl);
-		writel(BIT(DMA_SCATTER_GATHER_DONE_INTERRUPT) |
+		pete_writel("drivers/usb/gadget/udc/net2280.c:391", 0, &ep->dma->dmactl);
+		pete_writel("drivers/usb/gadget/udc/net2280.c:392", BIT(DMA_SCATTER_GATHER_DONE_INTERRUPT) |
 			BIT(DMA_TRANSACTION_DONE_INTERRUPT) |
 			BIT(DMA_ABORT),
 			&ep->dma->dmastat);
 
-		tmp = readl(&regs->pciirqenb0);
+		tmp = pete_readl("drivers/usb/gadget/udc/net2280.c:397", &regs->pciirqenb0);
 		tmp &= ~BIT(ep->num);
-		writel(tmp, &regs->pciirqenb0);
+		pete_writel("drivers/usb/gadget/udc/net2280.c:399", tmp, &regs->pciirqenb0);
 	} else {
-		tmp = readl(&regs->pciirqenb1);
+		tmp = pete_readl("drivers/usb/gadget/udc/net2280.c:401", &regs->pciirqenb1);
 		tmp &= ~BIT((8 + ep->num));	/* completion */
-		writel(tmp, &regs->pciirqenb1);
+		pete_writel("drivers/usb/gadget/udc/net2280.c:403", tmp, &regs->pciirqenb1);
 	}
-	writel(0, &ep->regs->ep_irqenb);
+	pete_writel("drivers/usb/gadget/udc/net2280.c:405", 0, &ep->regs->ep_irqenb);
 
 	/* init to our chosen defaults, notably so that we NAK OUT
 	 * packets until the driver queues a read (+note erratum 0112)
@@ -424,7 +424,7 @@ static void ep_reset_228x(struct net2280_regs __iomem *regs,
 		tmp |= BIT(CLEAR_ENDPOINT_TOGGLE) |
 			BIT(CLEAR_ENDPOINT_HALT);
 	}
-	writel(tmp, &ep->regs->ep_rsp);
+	pete_writel("drivers/usb/gadget/udc/net2280.c:427", tmp, &ep->regs->ep_rsp);
 
 	/* scrub most status bits, and flush any fifo state */
 	if (ep->dev->quirks & PLX_2280)
@@ -433,7 +433,7 @@ static void ep_reset_228x(struct net2280_regs __iomem *regs,
 	else
 		tmp = 0;
 
-	writel(tmp | BIT(TIMEOUT) |
+	pete_writel("drivers/usb/gadget/udc/net2280.c:436", tmp | BIT(TIMEOUT) |
 		BIT(USB_STALL_SENT) |
 		BIT(USB_IN_NAK_SENT) |
 		BIT(USB_IN_ACK_RCVD) |
@@ -464,34 +464,34 @@ static void ep_reset_338x(struct net2280_regs __iomem *regs,
 
 	/* disable the dma, irqs, endpoint... */
 	if (ep->dma) {
-		writel(0, &ep->dma->dmactl);
-		writel(BIT(DMA_ABORT_DONE_INTERRUPT) |
+		pete_writel("drivers/usb/gadget/udc/net2280.c:467", 0, &ep->dma->dmactl);
+		pete_writel("drivers/usb/gadget/udc/net2280.c:468", BIT(DMA_ABORT_DONE_INTERRUPT) |
 		       BIT(DMA_PAUSE_DONE_INTERRUPT) |
 		       BIT(DMA_SCATTER_GATHER_DONE_INTERRUPT) |
 		       BIT(DMA_TRANSACTION_DONE_INTERRUPT),
 		       /* | BIT(DMA_ABORT), */
 		       &ep->dma->dmastat);
 
-		dmastat = readl(&ep->dma->dmastat);
+		dmastat = pete_readl("drivers/usb/gadget/udc/net2280.c:475", &ep->dma->dmastat);
 		if (dmastat == 0x5002) {
 			ep_warn(ep->dev, "The dmastat return = %x!!\n",
 			       dmastat);
-			writel(0x5a, &ep->dma->dmastat);
+			pete_writel("drivers/usb/gadget/udc/net2280.c:479", 0x5a, &ep->dma->dmastat);
 		}
 
-		tmp = readl(&regs->pciirqenb0);
+		tmp = pete_readl("drivers/usb/gadget/udc/net2280.c:482", &regs->pciirqenb0);
 		tmp &= ~BIT(ep_bit[ep->num]);
-		writel(tmp, &regs->pciirqenb0);
+		pete_writel("drivers/usb/gadget/udc/net2280.c:484", tmp, &regs->pciirqenb0);
 	} else {
 		if (ep->num < 5) {
-			tmp = readl(&regs->pciirqenb1);
+			tmp = pete_readl("drivers/usb/gadget/udc/net2280.c:487", &regs->pciirqenb1);
 			tmp &= ~BIT((8 + ep->num));	/* completion */
-			writel(tmp, &regs->pciirqenb1);
+			pete_writel("drivers/usb/gadget/udc/net2280.c:489", tmp, &regs->pciirqenb1);
 		}
 	}
-	writel(0, &ep->regs->ep_irqenb);
+	pete_writel("drivers/usb/gadget/udc/net2280.c:492", 0, &ep->regs->ep_irqenb);
 
-	writel(BIT(SHORT_PACKET_OUT_DONE_INTERRUPT) |
+	pete_writel("drivers/usb/gadget/udc/net2280.c:494", BIT(SHORT_PACKET_OUT_DONE_INTERRUPT) |
 	       BIT(SHORT_PACKET_TRANSFERRED_INTERRUPT) |
 	       BIT(FIFO_OVERFLOW) |
 	       BIT(DATA_PACKET_RECEIVED_INTERRUPT) |
@@ -499,12 +499,12 @@ static void ep_reset_338x(struct net2280_regs __iomem *regs,
 	       BIT(DATA_OUT_PING_TOKEN_INTERRUPT) |
 	       BIT(DATA_IN_TOKEN_INTERRUPT), &ep->regs->ep_stat);
 
-	tmp = readl(&ep->cfg->ep_cfg);
+	tmp = pete_readl("drivers/usb/gadget/udc/net2280.c:502", &ep->cfg->ep_cfg);
 	if (ep->is_in)
 		tmp &= ~USB3380_EP_CFG_MASK_IN;
 	else
 		tmp &= ~USB3380_EP_CFG_MASK_OUT;
-	writel(tmp, &ep->cfg->ep_cfg);
+	pete_writel("drivers/usb/gadget/udc/net2280.c:507", tmp, &ep->cfg->ep_cfg);
 }
 
 static void nuke(struct net2280_ep *);
@@ -531,7 +531,7 @@ static int net2280_disable(struct usb_ep *_ep)
 			ep->dma ? "dma" : "pio", _ep->name);
 
 	/* synch memory views with the device */
-	(void)readl(&ep->cfg->ep_cfg);
+	(void)pete_readl("drivers/usb/gadget/udc/net2280.c:534", &ep->cfg->ep_cfg);
 
 	if (!ep->dma && ep->num >= 1 && ep->num <= 4)
 		ep->dma = &ep->dev->dma[ep->num - 1];
@@ -639,7 +639,7 @@ static void write_fifo(struct net2280_ep *ep, struct usb_request *req)
 		 */
 		tmp = get_unaligned((u32 *)buf);
 		cpu_to_le32s(&tmp);
-		writel(tmp, &regs->ep_data);
+		pete_writel("drivers/usb/gadget/udc/net2280.c:642", tmp, &regs->ep_data);
 		buf += 4;
 		count -= 4;
 	}
@@ -652,7 +652,7 @@ static void write_fifo(struct net2280_ep *ep, struct usb_request *req)
 		tmp = count ? get_unaligned((u32 *)buf) : count;
 		cpu_to_le32s(&tmp);
 		set_fifo_bytecount(ep, count & 0x03);
-		writel(tmp, &regs->ep_data);
+		pete_writel("drivers/usb/gadget/udc/net2280.c:655", tmp, &regs->ep_data);
 	}
 
 	/* pci writes may still be posted */
@@ -672,20 +672,20 @@ static void out_flush(struct net2280_ep *ep)
 
 	statp = &ep->regs->ep_stat;
 
-	tmp = readl(statp);
+	tmp = pete_readl("drivers/usb/gadget/udc/net2280.c:675", statp);
 	if (tmp & BIT(NAK_OUT_PACKETS)) {
 		ep_dbg(ep->dev, "%s %s %08x !NAK\n",
 			ep->ep.name, __func__, tmp);
-		writel(BIT(SET_NAK_OUT_PACKETS), &ep->regs->ep_rsp);
+		pete_writel("drivers/usb/gadget/udc/net2280.c:679", BIT(SET_NAK_OUT_PACKETS), &ep->regs->ep_rsp);
 	}
 
-	writel(BIT(DATA_OUT_PING_TOKEN_INTERRUPT) |
+	pete_writel("drivers/usb/gadget/udc/net2280.c:682", BIT(DATA_OUT_PING_TOKEN_INTERRUPT) |
 		BIT(DATA_PACKET_RECEIVED_INTERRUPT),
 		statp);
-	writel(BIT(FIFO_FLUSH), statp);
+	pete_writel("drivers/usb/gadget/udc/net2280.c:685", BIT(FIFO_FLUSH), statp);
 	/* Make sure that stap is written */
 	mb();
-	tmp = readl(statp);
+	tmp = pete_readl("drivers/usb/gadget/udc/net2280.c:688", statp);
 	if (tmp & BIT(DATA_OUT_PING_TOKEN_INTERRUPT) &&
 			/* high speed did bulk NYET; fifo isn't filling */
 			ep->dev->gadget.speed == USB_SPEED_FULL) {
@@ -718,7 +718,7 @@ static int read_fifo(struct net2280_ep *ep, struct net2280_request *req)
 	if (ep->dev->chiprev == 0x0100 &&
 			ep->dev->gadget.speed == USB_SPEED_FULL) {
 		udelay(1);
-		tmp = readl(&ep->regs->ep_stat);
+		tmp = pete_readl("drivers/usb/gadget/udc/net2280.c:721", &ep->regs->ep_stat);
 		if ((tmp & BIT(NAK_OUT_PACKETS)))
 			cleanup = 1;
 		else if ((tmp & BIT(FIFO_FULL))) {
@@ -732,11 +732,11 @@ static int read_fifo(struct net2280_ep *ep, struct net2280_request *req)
 	 * it sees a short one; we might not be ready for them all.
 	 */
 	prefetchw(buf);
-	count = readl(&regs->ep_avail);
+	count = pete_readl("drivers/usb/gadget/udc/net2280.c:735", &regs->ep_avail);
 	if (unlikely(count == 0)) {
 		udelay(1);
-		tmp = readl(&ep->regs->ep_stat);
-		count = readl(&regs->ep_avail);
+		tmp = pete_readl("drivers/usb/gadget/udc/net2280.c:738", &ep->regs->ep_stat);
+		count = pete_readl("drivers/usb/gadget/udc/net2280.c:739", &regs->ep_avail);
 		/* handled that data already? */
 		if (count == 0 && (tmp & BIT(NAK_OUT_PACKETS)) == 0)
 			return 0;
@@ -767,14 +767,14 @@ static int read_fifo(struct net2280_ep *ep, struct net2280_request *req)
 			req, req->req.actual, req->req.length);
 
 	while (count >= 4) {
-		tmp = readl(&regs->ep_data);
+		tmp = pete_readl("drivers/usb/gadget/udc/net2280.c:770", &regs->ep_data);
 		cpu_to_le32s(&tmp);
 		put_unaligned(tmp, (u32 *)buf);
 		buf += 4;
 		count -= 4;
 	}
 	if (count) {
-		tmp = readl(&regs->ep_data);
+		tmp = pete_readl("drivers/usb/gadget/udc/net2280.c:777", &regs->ep_data);
 		/* LE conversion is implicit here: */
 		do {
 			*buf++ = (u8) tmp;
@@ -784,8 +784,8 @@ static int read_fifo(struct net2280_ep *ep, struct net2280_request *req)
 	if (cleanup)
 		out_flush(ep);
 	if (prevent) {
-		writel(BIT(CLEAR_NAK_OUT_PACKETS), &ep->regs->ep_rsp);
-		(void) readl(&ep->regs->ep_rsp);
+		pete_writel("drivers/usb/gadget/udc/net2280.c:787", BIT(CLEAR_NAK_OUT_PACKETS), &ep->regs->ep_rsp);
+		(void) pete_readl("drivers/usb/gadget/udc/net2280.c:788", &ep->regs->ep_rsp);
 	}
 
 	return is_short || req->req.actual == req->req.length;
@@ -840,7 +840,7 @@ static inline void spin_stop_dma(struct net2280_dma_regs __iomem *dma)
 
 static inline void stop_dma(struct net2280_dma_regs __iomem *dma)
 {
-	writel(readl(&dma->dmactl) & ~BIT(DMA_ENABLE), &dma->dmactl);
+	pete_writel("drivers/usb/gadget/udc/net2280.c:843", pete_readl("drivers/usb/gadget/udc/net2280.c:843", &dma->dmactl) & ~BIT(DMA_ENABLE), &dma->dmactl);
 	spin_stop_dma(dma);
 }
 
@@ -852,18 +852,18 @@ static void start_queue(struct net2280_ep *ep, u32 dmactl, u32 td_dma)
 	if (!(ep->dev->quirks & PLX_2280))
 		tmp |= BIT(END_OF_CHAIN);
 
-	writel(tmp, &dma->dmacount);
-	writel(readl(&dma->dmastat), &dma->dmastat);
+	pete_writel("drivers/usb/gadget/udc/net2280.c:855", tmp, &dma->dmacount);
+	pete_writel("drivers/usb/gadget/udc/net2280.c:856", pete_readl("drivers/usb/gadget/udc/net2280.c:856", &dma->dmastat), &dma->dmastat);
 
-	writel(td_dma, &dma->dmadesc);
+	pete_writel("drivers/usb/gadget/udc/net2280.c:858", td_dma, &dma->dmadesc);
 	if (ep->dev->quirks & PLX_PCIE)
 		dmactl |= BIT(DMA_REQUEST_OUTSTANDING);
-	writel(dmactl, &dma->dmactl);
+	pete_writel("drivers/usb/gadget/udc/net2280.c:861", dmactl, &dma->dmactl);
 
 	/* erratum 0116 workaround part 3:  pci arbiter away from net2280 */
-	(void) readl(&ep->dev->pci->pcimstctl);
+	(void) pete_readl("drivers/usb/gadget/udc/net2280.c:864", &ep->dev->pci->pcimstctl);
 
-	writel(BIT(DMA_START), &dma->dmastat);
+	pete_writel("drivers/usb/gadget/udc/net2280.c:866", BIT(DMA_START), &dma->dmastat);
 }
 
 static void start_dma(struct net2280_ep *ep, struct net2280_request *req)
@@ -874,32 +874,32 @@ static void start_dma(struct net2280_ep *ep, struct net2280_request *req)
 	/* FIXME can't use DMA for ZLPs */
 
 	/* on this path we "know" there's no dma active (yet) */
-	WARN_ON(readl(&dma->dmactl) & BIT(DMA_ENABLE));
-	writel(0, &ep->dma->dmactl);
+	WARN_ON(pete_readl("drivers/usb/gadget/udc/net2280.c:877", &dma->dmactl) & BIT(DMA_ENABLE));
+	pete_writel("drivers/usb/gadget/udc/net2280.c:878", 0, &ep->dma->dmactl);
 
 	/* previous OUT packet might have been short */
-	if (!ep->is_in && (readl(&ep->regs->ep_stat) &
+	if (!ep->is_in && (pete_readl("drivers/usb/gadget/udc/net2280.c:881", &ep->regs->ep_stat) &
 				BIT(NAK_OUT_PACKETS))) {
-		writel(BIT(SHORT_PACKET_TRANSFERRED_INTERRUPT),
+		pete_writel("drivers/usb/gadget/udc/net2280.c:883", BIT(SHORT_PACKET_TRANSFERRED_INTERRUPT),
 			&ep->regs->ep_stat);
 
-		tmp = readl(&ep->regs->ep_avail);
+		tmp = pete_readl("drivers/usb/gadget/udc/net2280.c:886", &ep->regs->ep_avail);
 		if (tmp) {
-			writel(readl(&dma->dmastat), &dma->dmastat);
+			pete_writel("drivers/usb/gadget/udc/net2280.c:888", pete_readl("drivers/usb/gadget/udc/net2280.c:888", &dma->dmastat), &dma->dmastat);
 
 			/* transfer all/some fifo data */
-			writel(req->req.dma, &dma->dmaaddr);
+			pete_writel("drivers/usb/gadget/udc/net2280.c:891", req->req.dma, &dma->dmaaddr);
 			tmp = min(tmp, req->req.length);
 
 			/* dma irq, faking scatterlist status */
 			req->td->dmacount = cpu_to_le32(req->req.length - tmp);
-			writel(BIT(DMA_DONE_INTERRUPT_ENABLE) | tmp,
+			pete_writel("drivers/usb/gadget/udc/net2280.c:896", BIT(DMA_DONE_INTERRUPT_ENABLE) | tmp,
 					&dma->dmacount);
 			req->td->dmadesc = 0;
 			req->valid = 1;
 
-			writel(BIT(DMA_ENABLE), &dma->dmactl);
-			writel(BIT(DMA_START), &dma->dmastat);
+			pete_writel("drivers/usb/gadget/udc/net2280.c:901", BIT(DMA_ENABLE), &dma->dmactl);
+			pete_writel("drivers/usb/gadget/udc/net2280.c:902", BIT(DMA_START), &dma->dmastat);
 			return;
 		}
 		stop_out_naking(ep);
@@ -1031,7 +1031,7 @@ net2280_queue(struct usb_ep *_ep, struct usb_request *_req, gfp_t gfp_flags)
 	/* kickstart this i/o queue? */
 	if  (list_empty(&ep->queue) && !ep->stopped &&
 		!((dev->quirks & PLX_PCIE) && ep->dma &&
-		  (readl(&ep->regs->ep_rsp) & BIT(CLEAR_ENDPOINT_HALT)))) {
+		  (pete_readl("drivers/usb/gadget/udc/net2280.c:1034", &ep->regs->ep_rsp) & BIT(CLEAR_ENDPOINT_HALT)))) {
 
 		/* use DMA if the endpoint supports it, else pio */
 		if (ep->dma)
@@ -1052,7 +1052,7 @@ net2280_queue(struct usb_ep *_ep, struct usb_request *_req, gfp_t gfp_flags)
 				u32	s;
 
 				/* OUT FIFO might have packet(s) buffered */
-				s = readl(&ep->regs->ep_stat);
+				s = pete_readl("drivers/usb/gadget/udc/net2280.c:1055", &ep->regs->ep_stat);
 				if ((s & BIT(FIFO_EMPTY)) == 0) {
 					/* note:  _req->short_not_ok is
 					 * ignored here since PIO _always_
@@ -1071,12 +1071,12 @@ net2280_queue(struct usb_ep *_ep, struct usb_request *_req, gfp_t gfp_flags)
 						done(ep, req, 0);
 						req = NULL;
 					} else
-						s = readl(&ep->regs->ep_stat);
+						s = pete_readl("drivers/usb/gadget/udc/net2280.c:1074", &ep->regs->ep_stat);
 				}
 
 				/* don't NAK, let the fifo fill */
 				if (req && (s & BIT(NAK_OUT_PACKETS)))
-					writel(BIT(CLEAR_NAK_OUT_PACKETS),
+					pete_writel("drivers/usb/gadget/udc/net2280.c:1079", BIT(CLEAR_NAK_OUT_PACKETS),
 							&ep->regs->ep_rsp);
 			}
 		}
@@ -1147,7 +1147,7 @@ static int scan_dma_completions(struct net2280_ep *ep)
 		 */
 		if (unlikely(req->td->dmadesc == 0)) {
 			/* paranoia */
-			u32 const ep_dmacount = readl(&ep->dma->dmacount);
+			u32 const ep_dmacount = pete_readl("drivers/usb/gadget/udc/net2280.c:1150", &ep->dma->dmacount);
 
 			if (ep_dmacount & DMA_BYTE_COUNT_MASK)
 				break;
@@ -1159,7 +1159,7 @@ static int scan_dma_completions(struct net2280_ep *ep)
 			   (req->req.length % ep->ep.maxpacket) &&
 			   !(ep->dev->quirks & PLX_PCIE)) {
 
-			u32 const ep_stat = readl(&ep->regs->ep_stat);
+			u32 const ep_stat = pete_readl("drivers/usb/gadget/udc/net2280.c:1162", &ep->regs->ep_stat);
 			/* AVOID TROUBLE HERE by not issuing short reads from
 			 * your gadget driver.  That helps avoids errata 0121,
 			 * 0122, and 0124; not all cases trigger the warning.
@@ -1169,7 +1169,7 @@ static int scan_dma_completions(struct net2280_ep *ep)
 						ep->ep.name);
 				req->req.status = -EOVERFLOW;
 			} else {
-				u32 const ep_avail = readl(&ep->regs->ep_avail);
+				u32 const ep_avail = pete_readl("drivers/usb/gadget/udc/net2280.c:1172", &ep->regs->ep_avail);
 				if (ep_avail) {
 					/* fifo gets flushed later */
 					ep->out_overflow = 1;
@@ -1204,7 +1204,7 @@ static void abort_dma(struct net2280_ep *ep)
 	/* abort the current transfer */
 	if (likely(!list_empty(&ep->queue))) {
 		/* FIXME work around errata 0121, 0122, 0124 */
-		writel(BIT(DMA_ABORT), &ep->dma->dmastat);
+		pete_writel("drivers/usb/gadget/udc/net2280.c:1207", BIT(DMA_ABORT), &ep->dma->dmastat);
 		spin_stop_dma(ep->dma);
 	} else
 		stop_dma(ep->dma);
@@ -1252,7 +1252,7 @@ static int net2280_dequeue(struct usb_ep *_ep, struct usb_request *_req)
 	dmactl = 0;
 	ep->stopped = 1;
 	if (ep->dma) {
-		dmactl = readl(&ep->dma->dmactl);
+		dmactl = pete_readl("drivers/usb/gadget/udc/net2280.c:1255", &ep->dma->dmactl);
 		/* WARNING erratum 0127 may kick in ... */
 		stop_dma(ep->dma);
 		scan_dma_completions(ep);
@@ -1282,7 +1282,7 @@ static int net2280_dequeue(struct usb_ep *_ep, struct usb_request *_req)
 				/* NOTE: misreports single-transfer mode*/
 				req->td->dmacount = 0;	/* invalidate */
 				dma_done(ep, req,
-					readl(&ep->dma->dmacount),
+					pete_readl("drivers/usb/gadget/udc/net2280.c:1285", &ep->dma->dmacount),
 					-ECONNRESET);
 			}
 		} else {
@@ -1303,7 +1303,7 @@ static int net2280_dequeue(struct usb_ep *_ep, struct usb_request *_req)
 		else if (!ep->stopped) {
 			/* resume current request, or start new one */
 			if (req)
-				writel(dmactl, &ep->dma->dmactl);
+				pete_writel("drivers/usb/gadget/udc/net2280.c:1306", dmactl, &ep->dma->dmactl);
 			else
 				start_dma(ep, list_entry(ep->queue.next,
 					struct net2280_request, queue));
@@ -1366,7 +1366,7 @@ net2280_set_halt_and_wedge(struct usb_ep *_ep, int value, int wedged)
 					restart_dma(ep);
 			ep->wedged = 0;
 		}
-		(void) readl(&ep->regs->ep_rsp);
+		(void) pete_readl("drivers/usb/gadget/udc/net2280.c:1369", &ep->regs->ep_rsp);
 	}
 	spin_unlock_irqrestore(&ep->dev->lock, flags);
 
@@ -1410,7 +1410,7 @@ static int net2280_fifo_status(struct usb_ep *_ep)
 		return -ESHUTDOWN;
 	}
 
-	avail = readl(&ep->regs->ep_avail) & (BIT(12) - 1);
+	avail = pete_readl("drivers/usb/gadget/udc/net2280.c:1413", &ep->regs->ep_avail) & (BIT(12) - 1);
 	if (avail > ep->fifo_size) {
 		dev_err(&ep->dev->pdev->dev, "%s: Fifo overflow\n", __func__);
 		return -EOVERFLOW;
@@ -1436,8 +1436,8 @@ static void net2280_fifo_flush(struct usb_ep *_ep)
 		return;
 	}
 
-	writel(BIT(FIFO_FLUSH), &ep->regs->ep_stat);
-	(void) readl(&ep->regs->ep_rsp);
+	pete_writel("drivers/usb/gadget/udc/net2280.c:1439", BIT(FIFO_FLUSH), &ep->regs->ep_stat);
+	(void) pete_readl("drivers/usb/gadget/udc/net2280.c:1440", &ep->regs->ep_rsp);
 }
 
 static const struct usb_ep_ops net2280_ep_ops = {
@@ -1484,9 +1484,9 @@ static int net2280_wakeup(struct usb_gadget *_gadget)
 	dev = container_of(_gadget, struct net2280, gadget);
 
 	spin_lock_irqsave(&dev->lock, flags);
-	tmp = readl(&dev->usb->usbctl);
+	tmp = pete_readl("drivers/usb/gadget/udc/net2280.c:1487", &dev->usb->usbctl);
 	if (tmp & BIT(DEVICE_REMOTE_WAKEUP_ENABLE))
-		writel(BIT(GENERATE_RESUME), &dev->usb->usbstat);
+		pete_writel("drivers/usb/gadget/udc/net2280.c:1489", BIT(GENERATE_RESUME), &dev->usb->usbstat);
 	spin_unlock_irqrestore(&dev->lock, flags);
 
 	/* pci writes may still be posted */
@@ -1504,7 +1504,7 @@ static int net2280_set_selfpowered(struct usb_gadget *_gadget, int value)
 	dev = container_of(_gadget, struct net2280, gadget);
 
 	spin_lock_irqsave(&dev->lock, flags);
-	tmp = readl(&dev->usb->usbctl);
+	tmp = pete_readl("drivers/usb/gadget/udc/net2280.c:1507", &dev->usb->usbctl);
 	if (value) {
 		tmp |= BIT(SELF_POWERED_STATUS);
 		_gadget->is_selfpowered = 1;
@@ -1512,7 +1512,7 @@ static int net2280_set_selfpowered(struct usb_gadget *_gadget, int value)
 		tmp &= ~BIT(SELF_POWERED_STATUS);
 		_gadget->is_selfpowered = 0;
 	}
-	writel(tmp, &dev->usb->usbctl);
+	pete_writel("drivers/usb/gadget/udc/net2280.c:1515", tmp, &dev->usb->usbctl);
 	spin_unlock_irqrestore(&dev->lock, flags);
 
 	return 0;
@@ -1529,13 +1529,13 @@ static int net2280_pullup(struct usb_gadget *_gadget, int is_on)
 	dev = container_of(_gadget, struct net2280, gadget);
 
 	spin_lock_irqsave(&dev->lock, flags);
-	tmp = readl(&dev->usb->usbctl);
+	tmp = pete_readl("drivers/usb/gadget/udc/net2280.c:1532", &dev->usb->usbctl);
 	dev->softconnect = (is_on != 0);
 	if (is_on) {
 		ep0_start(dev);
-		writel(tmp | BIT(USB_DETECT_ENABLE), &dev->usb->usbctl);
+		pete_writel("drivers/usb/gadget/udc/net2280.c:1536", tmp | BIT(USB_DETECT_ENABLE), &dev->usb->usbctl);
 	} else {
-		writel(tmp & ~BIT(USB_DETECT_ENABLE), &dev->usb->usbctl);
+		pete_writel("drivers/usb/gadget/udc/net2280.c:1538", tmp & ~BIT(USB_DETECT_ENABLE), &dev->usb->usbctl);
 		stop_activity(dev, NULL);
 	}
 
@@ -1675,19 +1675,19 @@ static ssize_t registers_show(struct device *_dev,
 			"pci irqenb0 %02x irqenb1 %08x "
 			"irqstat0 %04x irqstat1 %08x\n",
 			driver_name, dev->chiprev,
-			readl(&dev->regs->devinit),
-			readl(&dev->regs->fifoctl),
+			pete_readl("drivers/usb/gadget/udc/net2280.c:1678", &dev->regs->devinit),
+			pete_readl("drivers/usb/gadget/udc/net2280.c:1679", &dev->regs->fifoctl),
 			s,
-			readl(&dev->regs->pciirqenb0),
-			readl(&dev->regs->pciirqenb1),
-			readl(&dev->regs->irqstat0),
-			readl(&dev->regs->irqstat1));
+			pete_readl("drivers/usb/gadget/udc/net2280.c:1681", &dev->regs->pciirqenb0),
+			pete_readl("drivers/usb/gadget/udc/net2280.c:1682", &dev->regs->pciirqenb1),
+			pete_readl("drivers/usb/gadget/udc/net2280.c:1683", &dev->regs->irqstat0),
+			pete_readl("drivers/usb/gadget/udc/net2280.c:1684", &dev->regs->irqstat1));
 	size -= t;
 	next += t;
 
 	/* USB Control Registers */
-	t1 = readl(&dev->usb->usbctl);
-	t2 = readl(&dev->usb->usbstat);
+	t1 = pete_readl("drivers/usb/gadget/udc/net2280.c:1689", &dev->usb->usbctl);
+	t2 = pete_readl("drivers/usb/gadget/udc/net2280.c:1690", &dev->usb->usbstat);
 	if (t1 & BIT(VBUS_PIN)) {
 		if (t2 & BIT(HIGH_SPEED))
 			s = "high speed";
@@ -1701,8 +1701,8 @@ static ssize_t registers_show(struct device *_dev,
 	t = scnprintf(next, size,
 			"stdrsp %08x usbctl %08x usbstat %08x "
 				"addr 0x%02x (%s)\n",
-			readl(&dev->usb->stdrsp), t1, t2,
-			readl(&dev->usb->ouraddr), s);
+			pete_readl("drivers/usb/gadget/udc/net2280.c:1704", &dev->usb->stdrsp), t1, t2,
+			pete_readl("drivers/usb/gadget/udc/net2280.c:1705", &dev->usb->ouraddr), s);
 	size -= t;
 	next += t;
 
@@ -1718,8 +1718,8 @@ static ssize_t registers_show(struct device *_dev,
 		if (i && !ep->desc)
 			continue;
 
-		t1 = readl(&ep->cfg->ep_cfg);
-		t2 = readl(&ep->regs->ep_rsp) & 0xff;
+		t1 = pete_readl("drivers/usb/gadget/udc/net2280.c:1721", &ep->cfg->ep_cfg);
+		t2 = pete_readl("drivers/usb/gadget/udc/net2280.c:1722", &ep->regs->ep_rsp) & 0xff;
 		t = scnprintf(next, size,
 				"\n%s\tcfg %05x rsp (%02x) %s%s%s%s%s%s%s%s"
 					"irqenb %02x\n",
@@ -1740,15 +1740,15 @@ static ssize_t registers_show(struct device *_dev,
 					? "DATA1 " : "DATA0 ",
 				(t2 & BIT(CLEAR_ENDPOINT_HALT))
 					? "HALT " : "",
-				readl(&ep->regs->ep_irqenb));
+				pete_readl("drivers/usb/gadget/udc/net2280.c:1743", &ep->regs->ep_irqenb));
 		size -= t;
 		next += t;
 
 		t = scnprintf(next, size,
 				"\tstat %08x avail %04x "
 				"(ep%d%s-%s)%s\n",
-				readl(&ep->regs->ep_stat),
-				readl(&ep->regs->ep_avail),
+				pete_readl("drivers/usb/gadget/udc/net2280.c:1750", &ep->regs->ep_stat),
+				pete_readl("drivers/usb/gadget/udc/net2280.c:1751", &ep->regs->ep_avail),
 				t1 & 0x0f, DIR_STRING(t1),
 				type_string(t1 >> 8),
 				ep->stopped ? "*" : "");
@@ -1761,11 +1761,11 @@ static ssize_t registers_show(struct device *_dev,
 		t = scnprintf(next, size,
 				"  dma\tctl %08x stat %08x count %08x\n"
 				"\taddr %08x desc %08x\n",
-				readl(&ep->dma->dmactl),
-				readl(&ep->dma->dmastat),
-				readl(&ep->dma->dmacount),
-				readl(&ep->dma->dmaaddr),
-				readl(&ep->dma->dmadesc));
+				pete_readl("drivers/usb/gadget/udc/net2280.c:1764", &ep->dma->dmactl),
+				pete_readl("drivers/usb/gadget/udc/net2280.c:1765", &ep->dma->dmastat),
+				pete_readl("drivers/usb/gadget/udc/net2280.c:1766", &ep->dma->dmacount),
+				pete_readl("drivers/usb/gadget/udc/net2280.c:1767", &ep->dma->dmaaddr),
+				pete_readl("drivers/usb/gadget/udc/net2280.c:1768", &ep->dma->dmadesc));
 		size -= t;
 		next += t;
 
@@ -1849,13 +1849,13 @@ static ssize_t queues_show(struct device *_dev, struct device_attribute *attr,
 			continue;
 		}
 		list_for_each_entry(req, &ep->queue, queue) {
-			if (ep->dma && req->td_dma == readl(&ep->dma->dmadesc))
+			if (ep->dma && req->td_dma == pete_readl("drivers/usb/gadget/udc/net2280.c:1852", &ep->dma->dmadesc))
 				t = scnprintf(next, size,
 					"\treq %p len %d/%d "
 					"buf %p (dmacount %08x)\n",
 					&req->req, req->req.actual,
 					req->req.length, req->req.buf,
-					readl(&ep->dma->dmacount));
+					pete_readl("drivers/usb/gadget/udc/net2280.c:1858", &ep->dma->dmacount));
 			else
 				t = scnprintf(next, size,
 					"\treq %p len %d/%d buf %p\n",
@@ -1907,7 +1907,7 @@ static DEVICE_ATTR_RO(queues);
 static void set_fifo_mode(struct net2280 *dev, int mode)
 {
 	/* keeping high bits preserves BAR2 */
-	writel((0xffff << PCI_BASE2_RANGE) | mode, &dev->regs->fifoctl);
+	pete_writel("drivers/usb/gadget/udc/net2280.c:1910", (0xffff << PCI_BASE2_RANGE) | mode, &dev->regs->fifoctl);
 
 	/* always ep-{a,b,e,f} ... maybe not ep-c or ep-d */
 	INIT_LIST_HEAD(&dev->gadget.ep_list);
@@ -1947,29 +1947,29 @@ static void defect7374_disable_data_eps(struct net2280 *dev)
 
 	for (i = 1; i < 5; i++) {
 		ep = &dev->ep[i];
-		writel(i, &ep->cfg->ep_cfg);
+		pete_writel("drivers/usb/gadget/udc/net2280.c:1950", i, &ep->cfg->ep_cfg);
 	}
 
 	/* CSROUT, CSRIN, PCIOUT, PCIIN, STATIN, RCIN */
 	for (i = 0; i < 6; i++)
-		writel(0, &dev->dep[i].dep_cfg);
+		pete_writel("drivers/usb/gadget/udc/net2280.c:1955", 0, &dev->dep[i].dep_cfg);
 
 	for (ep_sel = 0; ep_sel <= 21; ep_sel++) {
 		/* Select an endpoint for subsequent operations: */
-		tmp_reg = readl(&dev->plregs->pl_ep_ctrl);
-		writel(((tmp_reg & ~0x1f) | ep_sel), &dev->plregs->pl_ep_ctrl);
+		tmp_reg = pete_readl("drivers/usb/gadget/udc/net2280.c:1959", &dev->plregs->pl_ep_ctrl);
+		pete_writel("drivers/usb/gadget/udc/net2280.c:1960", ((tmp_reg & ~0x1f) | ep_sel), &dev->plregs->pl_ep_ctrl);
 
 		if (ep_sel < 2 || (ep_sel > 9 && ep_sel < 14) ||
 					ep_sel == 18 || ep_sel == 20)
 			continue;
 
 		/* Change settings on some selected endpoints */
-		tmp_reg = readl(&dev->plregs->pl_ep_cfg_4);
+		tmp_reg = pete_readl("drivers/usb/gadget/udc/net2280.c:1967", &dev->plregs->pl_ep_cfg_4);
 		tmp_reg &= ~BIT(NON_CTRL_IN_TOLERATE_BAD_DIR);
-		writel(tmp_reg, &dev->plregs->pl_ep_cfg_4);
-		tmp_reg = readl(&dev->plregs->pl_ep_ctrl);
+		pete_writel("drivers/usb/gadget/udc/net2280.c:1969", tmp_reg, &dev->plregs->pl_ep_cfg_4);
+		tmp_reg = pete_readl("drivers/usb/gadget/udc/net2280.c:1970", &dev->plregs->pl_ep_ctrl);
 		tmp_reg |= BIT(EP_INITIALIZED);
-		writel(tmp_reg, &dev->plregs->pl_ep_ctrl);
+		pete_writel("drivers/usb/gadget/udc/net2280.c:1972", tmp_reg, &dev->plregs->pl_ep_ctrl);
 	}
 }
 
@@ -1998,28 +1998,28 @@ static void defect7374_enable_data_eps_zero(struct net2280 *dev)
 			 BIT(ENDPOINT_ENABLE)));
 
 	for (i = 1; i < 5; i++)
-		writel(tmp, &dev->ep[i].cfg->ep_cfg);
+		pete_writel("drivers/usb/gadget/udc/net2280.c:2001", tmp, &dev->ep[i].cfg->ep_cfg);
 
 	/* CSRIN, PCIIN, STATIN, RCIN*/
 	tmp = ((0 << ENDPOINT_NUMBER) | BIT(ENDPOINT_ENABLE));
-	writel(tmp, &dev->dep[1].dep_cfg);
-	writel(tmp, &dev->dep[3].dep_cfg);
-	writel(tmp, &dev->dep[4].dep_cfg);
-	writel(tmp, &dev->dep[5].dep_cfg);
+	pete_writel("drivers/usb/gadget/udc/net2280.c:2005", tmp, &dev->dep[1].dep_cfg);
+	pete_writel("drivers/usb/gadget/udc/net2280.c:2006", tmp, &dev->dep[3].dep_cfg);
+	pete_writel("drivers/usb/gadget/udc/net2280.c:2007", tmp, &dev->dep[4].dep_cfg);
+	pete_writel("drivers/usb/gadget/udc/net2280.c:2008", tmp, &dev->dep[5].dep_cfg);
 
 	/*Implemented for development and debug.
 	 * Can be refined/tuned later.*/
 	for (ep_sel = 0; ep_sel <= 21; ep_sel++) {
 		/* Select an endpoint for subsequent operations: */
-		tmp_reg = readl(&dev->plregs->pl_ep_ctrl);
-		writel(((tmp_reg & ~0x1f) | ep_sel),
+		tmp_reg = pete_readl("drivers/usb/gadget/udc/net2280.c:2014", &dev->plregs->pl_ep_ctrl);
+		pete_writel("drivers/usb/gadget/udc/net2280.c:2015", ((tmp_reg & ~0x1f) | ep_sel),
 				&dev->plregs->pl_ep_ctrl);
 
 		if (ep_sel == 1) {
 			tmp =
-				(readl(&dev->plregs->pl_ep_ctrl) |
+				(pete_readl("drivers/usb/gadget/udc/net2280.c:2020", &dev->plregs->pl_ep_ctrl) |
 				 BIT(CLEAR_ACK_ERROR_CODE) | 0);
-			writel(tmp, &dev->plregs->pl_ep_ctrl);
+			pete_writel("drivers/usb/gadget/udc/net2280.c:2022", tmp, &dev->plregs->pl_ep_ctrl);
 			continue;
 		}
 
@@ -2027,13 +2027,13 @@ static void defect7374_enable_data_eps_zero(struct net2280 *dev)
 				ep_sel == 18  || ep_sel == 20)
 			continue;
 
-		tmp = (readl(&dev->plregs->pl_ep_cfg_4) |
+		tmp = (pete_readl("drivers/usb/gadget/udc/net2280.c:2030", &dev->plregs->pl_ep_cfg_4) |
 				BIT(NON_CTRL_IN_TOLERATE_BAD_DIR) | 0);
-		writel(tmp, &dev->plregs->pl_ep_cfg_4);
+		pete_writel("drivers/usb/gadget/udc/net2280.c:2032", tmp, &dev->plregs->pl_ep_cfg_4);
 
-		tmp = readl(&dev->plregs->pl_ep_ctrl) &
+		tmp = pete_readl("drivers/usb/gadget/udc/net2280.c:2034", &dev->plregs->pl_ep_ctrl) &
 			~BIT(EP_INITIALIZED);
-		writel(tmp, &dev->plregs->pl_ep_ctrl);
+		pete_writel("drivers/usb/gadget/udc/net2280.c:2036", tmp, &dev->plregs->pl_ep_ctrl);
 
 	}
 
@@ -2059,14 +2059,14 @@ static void usb_reset_228x(struct net2280 *dev)
 	u32	tmp;
 
 	dev->gadget.speed = USB_SPEED_UNKNOWN;
-	(void) readl(&dev->usb->usbctl);
+	(void) pete_readl("drivers/usb/gadget/udc/net2280.c:2062", &dev->usb->usbctl);
 
 	net2280_led_init(dev);
 
 	/* disable automatic responses, and irqs */
-	writel(0, &dev->usb->stdrsp);
-	writel(0, &dev->regs->pciirqenb0);
-	writel(0, &dev->regs->pciirqenb1);
+	pete_writel("drivers/usb/gadget/udc/net2280.c:2067", 0, &dev->usb->stdrsp);
+	pete_writel("drivers/usb/gadget/udc/net2280.c:2068", 0, &dev->regs->pciirqenb0);
+	pete_writel("drivers/usb/gadget/udc/net2280.c:2069", 0, &dev->regs->pciirqenb1);
 
 	/* clear old dma and irq state */
 	for (tmp = 0; tmp < 4; tmp++) {
@@ -2075,16 +2075,16 @@ static void usb_reset_228x(struct net2280 *dev)
 			abort_dma(ep);
 	}
 
-	writel(~0, &dev->regs->irqstat0),
-	writel(~(u32)BIT(SUSPEND_REQUEST_INTERRUPT), &dev->regs->irqstat1),
+	pete_writel("drivers/usb/gadget/udc/net2280.c:2078", ~0, &dev->regs->irqstat0),
+	pete_writel("drivers/usb/gadget/udc/net2280.c:2079", ~(u32)BIT(SUSPEND_REQUEST_INTERRUPT), &dev->regs->irqstat1),
 
 	/* reset, and enable pci */
-	tmp = readl(&dev->regs->devinit) |
+	tmp = pete_readl("drivers/usb/gadget/udc/net2280.c:2082", &dev->regs->devinit) |
 		BIT(PCI_ENABLE) |
 		BIT(FIFO_SOFT_RESET) |
 		BIT(USB_SOFT_RESET) |
 		BIT(M8051_RESET);
-	writel(tmp, &dev->regs->devinit);
+	pete_writel("drivers/usb/gadget/udc/net2280.c:2087", tmp, &dev->regs->devinit);
 
 	/* standard fifo and endpoint allocations */
 	set_fifo_mode(dev, (fifo_mode <= 2) ? fifo_mode : 0);
@@ -2095,15 +2095,15 @@ static void usb_reset_338x(struct net2280 *dev)
 	u32 tmp;
 
 	dev->gadget.speed = USB_SPEED_UNKNOWN;
-	(void)readl(&dev->usb->usbctl);
+	(void)pete_readl("drivers/usb/gadget/udc/net2280.c:2098", &dev->usb->usbctl);
 
 	net2280_led_init(dev);
 
 	if (dev->bug7734_patched) {
 		/* disable automatic responses, and irqs */
-		writel(0, &dev->usb->stdrsp);
-		writel(0, &dev->regs->pciirqenb0);
-		writel(0, &dev->regs->pciirqenb1);
+		pete_writel("drivers/usb/gadget/udc/net2280.c:2104", 0, &dev->usb->stdrsp);
+		pete_writel("drivers/usb/gadget/udc/net2280.c:2105", 0, &dev->regs->pciirqenb0);
+		pete_writel("drivers/usb/gadget/udc/net2280.c:2106", 0, &dev->regs->pciirqenb1);
 	}
 
 	/* clear old dma and irq state */
@@ -2115,22 +2115,22 @@ static void usb_reset_338x(struct net2280 *dev)
 			abort_dma(ep);
 		} else {
 			dma = &dev->dma[tmp];
-			writel(BIT(DMA_ABORT), &dma->dmastat);
-			writel(0, &dma->dmactl);
+			pete_writel("drivers/usb/gadget/udc/net2280.c:2118", BIT(DMA_ABORT), &dma->dmastat);
+			pete_writel("drivers/usb/gadget/udc/net2280.c:2119", 0, &dma->dmactl);
 		}
 	}
 
-	writel(~0, &dev->regs->irqstat0), writel(~0, &dev->regs->irqstat1);
+	pete_writel("drivers/usb/gadget/udc/net2280.c:2123", ~0, &dev->regs->irqstat0), pete_writel("drivers/usb/gadget/udc/net2280.c:2123", ~0, &dev->regs->irqstat1);
 
 	if (dev->bug7734_patched) {
 		/* reset, and enable pci */
-		tmp = readl(&dev->regs->devinit) |
+		tmp = pete_readl("drivers/usb/gadget/udc/net2280.c:2127", &dev->regs->devinit) |
 		    BIT(PCI_ENABLE) |
 		    BIT(FIFO_SOFT_RESET) |
 		    BIT(USB_SOFT_RESET) |
 		    BIT(M8051_RESET);
 
-		writel(tmp, &dev->regs->devinit);
+		pete_writel("drivers/usb/gadget/udc/net2280.c:2133", tmp, &dev->regs->devinit);
 	}
 
 	/* always ep-{1,2,3,4} ... maybe not ep-3 or ep-4 */
@@ -2182,7 +2182,7 @@ static void usb_reinit_228x(struct net2280 *dev)
 	 * but erratum 0119 means this enable bit is ignored
 	 */
 	for (tmp = 0; tmp < 5; tmp++)
-		writel(EP_DONTUSE, &dev->dep[tmp].dep_cfg);
+		pete_writel("drivers/usb/gadget/udc/net2280.c:2185", EP_DONTUSE, &dev->dep[tmp].dep_cfg);
 }
 
 static void usb_reinit_338x(struct net2280 *dev)
@@ -2214,7 +2214,7 @@ static void usb_reinit_338x(struct net2280 *dev)
 			 * in both directions.
 			 */
 			 if (i > 0 && i < 5)
-				writel(ne[i], &ep->cfg->ep_cfg);
+				pete_writel("drivers/usb/gadget/udc/net2280.c:2217", ne[i], &ep->cfg->ep_cfg);
 			ep->regs = (struct net2280_ep_regs __iomem *)
 				(((void __iomem *)&dev->epregs[ne[i]]) +
 				ep_reg_addr[i]);
@@ -2234,36 +2234,36 @@ static void usb_reinit_338x(struct net2280 *dev)
 
 	/* Link layer set up */
 	if (dev->bug7734_patched) {
-		tmp = readl(&dev->usb_ext->usbctl2) &
+		tmp = pete_readl("drivers/usb/gadget/udc/net2280.c:2237", &dev->usb_ext->usbctl2) &
 		    ~(BIT(U1_ENABLE) | BIT(U2_ENABLE) | BIT(LTM_ENABLE));
-		writel(tmp, &dev->usb_ext->usbctl2);
+		pete_writel("drivers/usb/gadget/udc/net2280.c:2239", tmp, &dev->usb_ext->usbctl2);
 	}
 
 	/* Hardware Defect and Workaround */
-	val = readl(&dev->llregs->ll_lfps_5);
+	val = pete_readl("drivers/usb/gadget/udc/net2280.c:2243", &dev->llregs->ll_lfps_5);
 	val &= ~(0xf << TIMER_LFPS_6US);
 	val |= 0x5 << TIMER_LFPS_6US;
-	writel(val, &dev->llregs->ll_lfps_5);
+	pete_writel("drivers/usb/gadget/udc/net2280.c:2246", val, &dev->llregs->ll_lfps_5);
 
-	val = readl(&dev->llregs->ll_lfps_6);
+	val = pete_readl("drivers/usb/gadget/udc/net2280.c:2248", &dev->llregs->ll_lfps_6);
 	val &= ~(0xffff << TIMER_LFPS_80US);
 	val |= 0x0100 << TIMER_LFPS_80US;
-	writel(val, &dev->llregs->ll_lfps_6);
+	pete_writel("drivers/usb/gadget/udc/net2280.c:2251", val, &dev->llregs->ll_lfps_6);
 
 	/*
 	 * AA_AB Errata. Issue 4. Workaround for SuperSpeed USB
 	 * Hot Reset Exit Handshake may Fail in Specific Case using
 	 * Default Register Settings. Workaround for Enumeration test.
 	 */
-	val = readl(&dev->llregs->ll_tsn_counters_2);
+	val = pete_readl("drivers/usb/gadget/udc/net2280.c:2258", &dev->llregs->ll_tsn_counters_2);
 	val &= ~(0x1f << HOT_TX_NORESET_TS2);
 	val |= 0x10 << HOT_TX_NORESET_TS2;
-	writel(val, &dev->llregs->ll_tsn_counters_2);
+	pete_writel("drivers/usb/gadget/udc/net2280.c:2261", val, &dev->llregs->ll_tsn_counters_2);
 
-	val = readl(&dev->llregs->ll_tsn_counters_3);
+	val = pete_readl("drivers/usb/gadget/udc/net2280.c:2263", &dev->llregs->ll_tsn_counters_3);
 	val &= ~(0x1f << HOT_RX_RESET_TS2);
 	val |= 0x3 << HOT_RX_RESET_TS2;
-	writel(val, &dev->llregs->ll_tsn_counters_3);
+	pete_writel("drivers/usb/gadget/udc/net2280.c:2266", val, &dev->llregs->ll_tsn_counters_3);
 
 	/*
 	 * AB errata. Errata 11. Workaround for Default Duration of LFPS
@@ -2271,8 +2271,8 @@ static void usb_reinit_338x(struct net2280 *dev)
 	 * Without this, various enumeration failures observed with
 	 * modern superspeed hosts.
 	 */
-	val = readl(&dev->llregs->ll_lfps_timers_2);
-	writel((val & 0xffff0000) | LFPS_TIMERS_2_WORKAROUND_VALUE,
+	val = pete_readl("drivers/usb/gadget/udc/net2280.c:2274", &dev->llregs->ll_lfps_timers_2);
+	pete_writel("drivers/usb/gadget/udc/net2280.c:2275", (val & 0xffff0000) | LFPS_TIMERS_2_WORKAROUND_VALUE,
 	       &dev->llregs->ll_lfps_timers_2);
 
 	/*
@@ -2283,19 +2283,19 @@ static void usb_reinit_338x(struct net2280 *dev)
 	 * - R-M-W to leave other bits undisturbed.
 	 * - Reference PLX TT-7372
 	*/
-	val = readl(&dev->llregs->ll_tsn_chicken_bit);
+	val = pete_readl("drivers/usb/gadget/udc/net2280.c:2286", &dev->llregs->ll_tsn_chicken_bit);
 	val |= BIT(RECOVERY_IDLE_TO_RECOVER_FMW);
-	writel(val, &dev->llregs->ll_tsn_chicken_bit);
+	pete_writel("drivers/usb/gadget/udc/net2280.c:2288", val, &dev->llregs->ll_tsn_chicken_bit);
 
 	INIT_LIST_HEAD(&dev->gadget.ep0->ep_list);
 
 	/* disable dedicated endpoints */
-	writel(0x0D, &dev->dep[0].dep_cfg);
-	writel(0x0D, &dev->dep[1].dep_cfg);
-	writel(0x0E, &dev->dep[2].dep_cfg);
-	writel(0x0E, &dev->dep[3].dep_cfg);
-	writel(0x0F, &dev->dep[4].dep_cfg);
-	writel(0x0C, &dev->dep[5].dep_cfg);
+	pete_writel("drivers/usb/gadget/udc/net2280.c:2293", 0x0D, &dev->dep[0].dep_cfg);
+	pete_writel("drivers/usb/gadget/udc/net2280.c:2294", 0x0D, &dev->dep[1].dep_cfg);
+	pete_writel("drivers/usb/gadget/udc/net2280.c:2295", 0x0E, &dev->dep[2].dep_cfg);
+	pete_writel("drivers/usb/gadget/udc/net2280.c:2296", 0x0E, &dev->dep[3].dep_cfg);
+	pete_writel("drivers/usb/gadget/udc/net2280.c:2297", 0x0F, &dev->dep[4].dep_cfg);
+	pete_writel("drivers/usb/gadget/udc/net2280.c:2298", 0x0C, &dev->dep[5].dep_cfg);
 }
 
 static void usb_reinit(struct net2280 *dev)
@@ -2307,7 +2307,7 @@ static void usb_reinit(struct net2280 *dev)
 
 static void ep0_start_228x(struct net2280 *dev)
 {
-	writel(BIT(CLEAR_EP_HIDE_STATUS_PHASE) |
+	pete_writel("drivers/usb/gadget/udc/net2280.c:2310", BIT(CLEAR_EP_HIDE_STATUS_PHASE) |
 		BIT(CLEAR_NAK_OUT_PACKETS) |
 		BIT(CLEAR_CONTROL_STATUS_PHASE_HANDSHAKE),
 		&dev->epregs[0].ep_rsp);
@@ -2318,13 +2318,13 @@ static void ep0_start_228x(struct net2280 *dev)
 	 * endpoint status/features are handled in software, to
 	 * help pass tests for some dubious behavior.
 	 */
-	writel(BIT(SET_TEST_MODE) |
+	pete_writel("drivers/usb/gadget/udc/net2280.c:2321", BIT(SET_TEST_MODE) |
 		BIT(SET_ADDRESS) |
 		BIT(DEVICE_SET_CLEAR_DEVICE_REMOTE_WAKEUP) |
 		BIT(GET_DEVICE_STATUS) |
 		BIT(GET_INTERFACE_STATUS),
 		&dev->usb->stdrsp);
-	writel(BIT(USB_ROOT_PORT_WAKEUP_ENABLE) |
+	pete_writel("drivers/usb/gadget/udc/net2280.c:2327", BIT(USB_ROOT_PORT_WAKEUP_ENABLE) |
 		BIT(SELF_POWERED_USB_DEVICE) |
 		BIT(REMOTE_WAKEUP_SUPPORT) |
 		(dev->softconnect << USB_DETECT_ENABLE) |
@@ -2332,10 +2332,10 @@ static void ep0_start_228x(struct net2280 *dev)
 		&dev->usb->usbctl);
 
 	/* enable irqs so we can see ep0 and general operation  */
-	writel(BIT(SETUP_PACKET_INTERRUPT_ENABLE) |
+	pete_writel("drivers/usb/gadget/udc/net2280.c:2335", BIT(SETUP_PACKET_INTERRUPT_ENABLE) |
 		BIT(ENDPOINT_0_INTERRUPT_ENABLE),
 		&dev->regs->pciirqenb0);
-	writel(BIT(PCI_INTERRUPT_ENABLE) |
+	pete_writel("drivers/usb/gadget/udc/net2280.c:2338", BIT(PCI_INTERRUPT_ENABLE) |
 		BIT(PCI_MASTER_ABORT_RECEIVED_INTERRUPT_ENABLE) |
 		BIT(PCI_TARGET_ABORT_RECEIVED_INTERRUPT_ENABLE) |
 		BIT(PCI_RETRY_ABORT_INTERRUPT_ENABLE) |
@@ -2345,14 +2345,14 @@ static void ep0_start_228x(struct net2280 *dev)
 		&dev->regs->pciirqenb1);
 
 	/* don't leave any writes posted */
-	(void) readl(&dev->usb->usbctl);
+	(void) pete_readl("drivers/usb/gadget/udc/net2280.c:2348", &dev->usb->usbctl);
 }
 
 static void ep0_start_338x(struct net2280 *dev)
 {
 
 	if (dev->bug7734_patched)
-		writel(BIT(CLEAR_NAK_OUT_PACKETS_MODE) |
+		pete_writel("drivers/usb/gadget/udc/net2280.c:2355", BIT(CLEAR_NAK_OUT_PACKETS_MODE) |
 		       BIT(SET_EP_HIDE_STATUS_PHASE),
 		       &dev->epregs[0].ep_rsp);
 
@@ -2362,7 +2362,7 @@ static void ep0_start_338x(struct net2280 *dev)
 	 * endpoint status/features are handled in software, to
 	 * help pass tests for some dubious behavior.
 	 */
-	writel(BIT(SET_ISOCHRONOUS_DELAY) |
+	pete_writel("drivers/usb/gadget/udc/net2280.c:2365", BIT(SET_ISOCHRONOUS_DELAY) |
 	       BIT(SET_SEL) |
 	       BIT(SET_TEST_MODE) |
 	       BIT(SET_ADDRESS) |
@@ -2370,23 +2370,23 @@ static void ep0_start_338x(struct net2280 *dev)
 	       BIT(GET_DEVICE_STATUS),
 		&dev->usb->stdrsp);
 	dev->wakeup_enable = 1;
-	writel(BIT(USB_ROOT_PORT_WAKEUP_ENABLE) |
+	pete_writel("drivers/usb/gadget/udc/net2280.c:2373", BIT(USB_ROOT_PORT_WAKEUP_ENABLE) |
 	       (dev->softconnect << USB_DETECT_ENABLE) |
 	       BIT(DEVICE_REMOTE_WAKEUP_ENABLE),
 	       &dev->usb->usbctl);
 
 	/* enable irqs so we can see ep0 and general operation  */
-	writel(BIT(SETUP_PACKET_INTERRUPT_ENABLE) |
+	pete_writel("drivers/usb/gadget/udc/net2280.c:2379", BIT(SETUP_PACKET_INTERRUPT_ENABLE) |
 	       BIT(ENDPOINT_0_INTERRUPT_ENABLE),
 	       &dev->regs->pciirqenb0);
-	writel(BIT(PCI_INTERRUPT_ENABLE) |
+	pete_writel("drivers/usb/gadget/udc/net2280.c:2382", BIT(PCI_INTERRUPT_ENABLE) |
 	       BIT(ROOT_PORT_RESET_INTERRUPT_ENABLE) |
 	       BIT(SUSPEND_REQUEST_CHANGE_INTERRUPT_ENABLE) |
 	       BIT(VBUS_INTERRUPT_ENABLE),
 	       &dev->regs->pciirqenb1);
 
 	/* don't leave any writes posted */
-	(void)readl(&dev->usb->usbctl);
+	(void)pete_readl("drivers/usb/gadget/udc/net2280.c:2389", &dev->usb->usbctl);
 }
 
 static void ep0_start(struct net2280 *dev)
@@ -2527,17 +2527,17 @@ static void handle_ep_small(struct net2280_ep *ep)
 		req = NULL;
 
 	/* ack all, and handle what we care about */
-	t = readl(&ep->regs->ep_stat);
+	t = pete_readl("drivers/usb/gadget/udc/net2280.c:2530", &ep->regs->ep_stat);
 	ep->irqs++;
 
 	ep_vdbg(ep->dev, "%s ack ep_stat %08x, req %p\n",
 			ep->ep.name, t, req ? &req->req : NULL);
 
 	if (!ep->is_in || (ep->dev->quirks & PLX_2280))
-		writel(t & ~BIT(NAK_OUT_PACKETS), &ep->regs->ep_stat);
+		pete_writel("drivers/usb/gadget/udc/net2280.c:2537", t & ~BIT(NAK_OUT_PACKETS), &ep->regs->ep_stat);
 	else
 		/* Added for 2282 */
-		writel(t, &ep->regs->ep_stat);
+		pete_writel("drivers/usb/gadget/udc/net2280.c:2540", t, &ep->regs->ep_stat);
 
 	/* for ep0, monitor token irqs to catch data stage length errors
 	 * and to synchronize on status.
@@ -2610,7 +2610,7 @@ static void handle_ep_small(struct net2280_ep *ep)
 			 * iff (M < N) we won't ever see a DMA interrupt.
 			 */
 			ep->stopped = 1;
-			for (count = 0; ; t = readl(&ep->regs->ep_stat)) {
+			for (count = 0; ; t = pete_readl("drivers/usb/gadget/udc/net2280.c:2613", &ep->regs->ep_stat)) {
 
 				/* any preceding dma transfers must finish.
 				 * dma handles (M >= N), may empty the queue
@@ -2628,9 +2628,9 @@ static void handle_ep_small(struct net2280_ep *ep)
 				 * or (M == N) and the queue didn't empty
 				 */
 				if (likely(t & BIT(FIFO_EMPTY))) {
-					count = readl(&ep->dma->dmacount);
+					count = pete_readl("drivers/usb/gadget/udc/net2280.c:2631", &ep->dma->dmacount);
 					count &= DMA_BYTE_COUNT_MASK;
-					if (readl(&ep->dma->dmadesc)
+					if (pete_readl("drivers/usb/gadget/udc/net2280.c:2633", &ep->dma->dmadesc)
 							!= req->td_dma)
 						req = NULL;
 					break;
@@ -2641,9 +2641,9 @@ static void handle_ep_small(struct net2280_ep *ep)
 				 */
 				if (num_completed == 0) {
 					if (stuck_req == req &&
-					    readl(&ep->dma->dmadesc) !=
+					    pete_readl("drivers/usb/gadget/udc/net2280.c:2644", &ep->dma->dmadesc) !=
 						  req->td_dma && stuck++ > 5) {
-						count = readl(
+						count = pete_readl("drivers/usb/gadget/udc/net2280.c:2646", 
 							&ep->dma->dmacount);
 						count &= DMA_BYTE_COUNT_MASK;
 						req = NULL;
@@ -2664,12 +2664,12 @@ static void handle_ep_small(struct net2280_ep *ep)
 			}
 
 			/* stop DMA, leave ep NAKing */
-			writel(BIT(DMA_ABORT), &ep->dma->dmastat);
+			pete_writel("drivers/usb/gadget/udc/net2280.c:2667", BIT(DMA_ABORT), &ep->dma->dmastat);
 			spin_stop_dma(ep->dma);
 
 			if (likely(req)) {
 				req->td->dmacount = 0;
-				t = readl(&ep->regs->ep_avail);
+				t = pete_readl("drivers/usb/gadget/udc/net2280.c:2672", &ep->regs->ep_avail);
 				dma_done(ep, req, count,
 					(ep->out_overflow || t)
 						? -EOVERFLOW : 0);
@@ -2788,7 +2788,7 @@ static void defect7374_workaround(struct net2280 *dev, struct usb_ctrlrequest r)
 		return;
 
 	/* This is the first Control Read for this connection: */
-	if (!(readl(&dev->usb->usbstat) & BIT(SUPER_SPEED_MODE))) {
+	if (!(pete_readl("drivers/usb/gadget/udc/net2280.c:2791", &dev->usb->usbstat) & BIT(SUPER_SPEED_MODE))) {
 		/*
 		 * Connection is NOT SS:
 		 * - Connection must be FS or HS.
@@ -2805,7 +2805,7 @@ static void defect7374_workaround(struct net2280 *dev, struct usb_ctrlrequest r)
 			ack_wait_timeout < DEFECT_7374_NUMBEROF_MAX_WAIT_LOOPS;
 			ack_wait_timeout++) {
 
-		state =	readl(&dev->plregs->pl_ep_status_1)
+		state =	pete_readl("drivers/usb/gadget/udc/net2280.c:2808", &dev->plregs->pl_ep_status_1)
 			& (0xff << STATE);
 		if ((state >= (ACK_GOOD_NORMAL << STATE)) &&
 			(state <= (ACK_GOOD_MORE_ACKS_TO_COME << STATE))) {
@@ -2851,11 +2851,11 @@ static void ep_clear_seqnum(struct net2280_ep *ep)
 	u32 val;
 	static const u32 ep_pl[9] = { 0, 3, 4, 7, 8, 2, 5, 6, 9 };
 
-	val = readl(&dev->plregs->pl_ep_ctrl) & ~0x1f;
+	val = pete_readl("drivers/usb/gadget/udc/net2280.c:2854", &dev->plregs->pl_ep_ctrl) & ~0x1f;
 	val |= ep_pl[ep->num];
-	writel(val, &dev->plregs->pl_ep_ctrl);
+	pete_writel("drivers/usb/gadget/udc/net2280.c:2856", val, &dev->plregs->pl_ep_ctrl);
 	val |= BIT(SEQUENCE_NUMBER_RESET);
-	writel(val, &dev->plregs->pl_ep_ctrl);
+	pete_writel("drivers/usb/gadget/udc/net2280.c:2858", val, &dev->plregs->pl_ep_ctrl);
 
 	return;
 }
@@ -2884,9 +2884,9 @@ static void handle_stat0_irqs_superspeed(struct net2280 *dev,
 				status |= BIT(0);
 			status |= (dev->u1_enable << 2 | dev->u2_enable << 3 |
 							dev->ltm_enable << 4);
-			writel(0, &dev->epregs[0].ep_irqenb);
+			pete_writel("drivers/usb/gadget/udc/net2280.c:2887", 0, &dev->epregs[0].ep_irqenb);
 			set_fifo_bytecount(ep, sizeof(status));
-			writel((__force u32) status, &dev->epregs[0].ep_data);
+			pete_writel("drivers/usb/gadget/udc/net2280.c:2889", (__force u32) status, &dev->epregs[0].ep_data);
 			allow_status_338x(ep);
 			break;
 
@@ -2894,11 +2894,11 @@ static void handle_stat0_irqs_superspeed(struct net2280 *dev,
 			e = get_ep_by_addr(dev, w_index);
 			if (!e)
 				goto do_stall3;
-			status = readl(&e->regs->ep_rsp) &
+			status = pete_readl("drivers/usb/gadget/udc/net2280.c:2897", &e->regs->ep_rsp) &
 						BIT(CLEAR_ENDPOINT_HALT);
-			writel(0, &dev->epregs[0].ep_irqenb);
+			pete_writel("drivers/usb/gadget/udc/net2280.c:2899", 0, &dev->epregs[0].ep_irqenb);
 			set_fifo_bytecount(ep, sizeof(status));
-			writel((__force u32) status, &dev->epregs[0].ep_data);
+			pete_writel("drivers/usb/gadget/udc/net2280.c:2901", (__force u32) status, &dev->epregs[0].ep_data);
 			allow_status_338x(ep);
 			break;
 
@@ -2914,7 +2914,7 @@ static void handle_stat0_irqs_superspeed(struct net2280 *dev,
 				switch (w_value) {
 				case USB_DEVICE_U1_ENABLE:
 					dev->u1_enable = 0;
-					writel(readl(&dev->usb_ext->usbctl2) &
+					pete_writel("drivers/usb/gadget/udc/net2280.c:2917", pete_readl("drivers/usb/gadget/udc/net2280.c:2917", &dev->usb_ext->usbctl2) &
 						~BIT(U1_ENABLE),
 						&dev->usb_ext->usbctl2);
 					allow_status_338x(ep);
@@ -2922,7 +2922,7 @@ static void handle_stat0_irqs_superspeed(struct net2280 *dev,
 
 				case USB_DEVICE_U2_ENABLE:
 					dev->u2_enable = 0;
-					writel(readl(&dev->usb_ext->usbctl2) &
+					pete_writel("drivers/usb/gadget/udc/net2280.c:2925", pete_readl("drivers/usb/gadget/udc/net2280.c:2925", &dev->usb_ext->usbctl2) &
 						~BIT(U2_ENABLE),
 						&dev->usb_ext->usbctl2);
 					allow_status_338x(ep);
@@ -2930,7 +2930,7 @@ static void handle_stat0_irqs_superspeed(struct net2280 *dev,
 
 				case USB_DEVICE_LTM_ENABLE:
 					dev->ltm_enable = 0;
-					writel(readl(&dev->usb_ext->usbctl2) &
+					pete_writel("drivers/usb/gadget/udc/net2280.c:2933", pete_readl("drivers/usb/gadget/udc/net2280.c:2933", &dev->usb_ext->usbctl2) &
 						~BIT(LTM_ENABLE),
 						&dev->usb_ext->usbctl2);
 					allow_status_338x(ep);
@@ -2942,7 +2942,7 @@ static void handle_stat0_irqs_superspeed(struct net2280 *dev,
 			}
 			if (w_value == USB_DEVICE_REMOTE_WAKEUP) {
 				dev->wakeup_enable = 0;
-				writel(readl(&dev->usb->usbctl) &
+				pete_writel("drivers/usb/gadget/udc/net2280.c:2945", pete_readl("drivers/usb/gadget/udc/net2280.c:2945", &dev->usb->usbctl) &
 					~BIT(DEVICE_REMOTE_WAKEUP_ENABLE),
 					&dev->usb->usbctl);
 				allow_status_338x(ep);
@@ -2980,7 +2980,7 @@ static void handle_stat0_irqs_superspeed(struct net2280 *dev,
 				switch (w_value) {
 				case USB_DEVICE_U1_ENABLE:
 					dev->u1_enable = 1;
-					writel(readl(&dev->usb_ext->usbctl2) |
+					pete_writel("drivers/usb/gadget/udc/net2280.c:2983", pete_readl("drivers/usb/gadget/udc/net2280.c:2983", &dev->usb_ext->usbctl2) |
 						BIT(U1_ENABLE),
 						&dev->usb_ext->usbctl2);
 					allow_status_338x(ep);
@@ -2988,7 +2988,7 @@ static void handle_stat0_irqs_superspeed(struct net2280 *dev,
 
 				case USB_DEVICE_U2_ENABLE:
 					dev->u2_enable = 1;
-					writel(readl(&dev->usb_ext->usbctl2) |
+					pete_writel("drivers/usb/gadget/udc/net2280.c:2991", pete_readl("drivers/usb/gadget/udc/net2280.c:2991", &dev->usb_ext->usbctl2) |
 						BIT(U2_ENABLE),
 						&dev->usb_ext->usbctl2);
 					allow_status_338x(ep);
@@ -2996,7 +2996,7 @@ static void handle_stat0_irqs_superspeed(struct net2280 *dev,
 
 				case USB_DEVICE_LTM_ENABLE:
 					dev->ltm_enable = 1;
-					writel(readl(&dev->usb_ext->usbctl2) |
+					pete_writel("drivers/usb/gadget/udc/net2280.c:2999", pete_readl("drivers/usb/gadget/udc/net2280.c:2999", &dev->usb_ext->usbctl2) |
 						BIT(LTM_ENABLE),
 						&dev->usb_ext->usbctl2);
 					allow_status_338x(ep);
@@ -3008,7 +3008,7 @@ static void handle_stat0_irqs_superspeed(struct net2280 *dev,
 
 			if (w_value == USB_DEVICE_REMOTE_WAKEUP) {
 				dev->wakeup_enable = 1;
-				writel(readl(&dev->usb->usbctl) |
+				pete_writel("drivers/usb/gadget/udc/net2280.c:3011", pete_readl("drivers/usb/gadget/udc/net2280.c:3011", &dev->usb->usbctl) |
 					BIT(DEVICE_REMOTE_WAKEUP_ENABLE),
 					&dev->usb->usbctl);
 				allow_status_338x(ep);
@@ -3042,7 +3042,7 @@ usb3_delegate:
 		ep_vdbg(dev, "setup %02x.%02x v%04x i%04x l%04x ep_cfg %08x\n",
 				r.bRequestType, r.bRequest,
 				w_value, w_index, w_length,
-				readl(&ep->cfg->ep_cfg));
+				pete_readl("drivers/usb/gadget/udc/net2280.c:3045", &ep->cfg->ep_cfg));
 
 		ep->responded = 0;
 		if (dev->async_callbacks) {
@@ -3110,7 +3110,7 @@ static void handle_stat0_irqs(struct net2280 *dev, u32 stat)
 		struct net2280_request		*req;
 
 		if (dev->gadget.speed == USB_SPEED_UNKNOWN) {
-			u32 val = readl(&dev->usb->usbstat);
+			u32 val = pete_readl("drivers/usb/gadget/udc/net2280.c:3113", &dev->usb->usbstat);
 			if (val & BIT(SUPER_SPEED)) {
 				dev->gadget.speed = USB_SPEED_SUPER;
 				usb_ep_set_maxpacket_limit(&dev->ep[0].ep,
@@ -3149,7 +3149,7 @@ static void handle_stat0_irqs(struct net2280 *dev, u32 stat)
 			else
 				tmp = 0;
 
-			writel(tmp | BIT(TIMEOUT) |
+			pete_writel("drivers/usb/gadget/udc/net2280.c:3152", tmp | BIT(TIMEOUT) |
 				   BIT(USB_STALL_SENT) |
 				   BIT(USB_IN_NAK_SENT) |
 				   BIT(USB_IN_ACK_RCVD) |
@@ -3163,8 +3163,8 @@ static void handle_stat0_irqs(struct net2280 *dev, u32 stat)
 				   BIT(DATA_IN_TOKEN_INTERRUPT),
 				   &ep->regs->ep_stat);
 		}
-		u.raw[0] = readl(&dev->usb->setup0123);
-		u.raw[1] = readl(&dev->usb->setup4567);
+		u.raw[0] = pete_readl("drivers/usb/gadget/udc/net2280.c:3166", &dev->usb->setup0123);
+		u.raw[1] = pete_readl("drivers/usb/gadget/udc/net2280.c:3167", &dev->usb->setup4567);
 
 		cpu_to_le32s(&u.raw[0]);
 		cpu_to_le32s(&u.raw[1]);
@@ -3179,7 +3179,7 @@ static void handle_stat0_irqs(struct net2280 *dev, u32 stat)
 #define	w_length	le16_to_cpu(u.r.wLength)
 
 		/* ack the irq */
-		writel(BIT(SETUP_PACKET_INTERRUPT), &dev->regs->irqstat0);
+		pete_writel("drivers/usb/gadget/udc/net2280.c:3182", BIT(SETUP_PACKET_INTERRUPT), &dev->regs->irqstat0);
 		stat ^= BIT(SETUP_PACKET_INTERRUPT);
 
 		/* watch control traffic at the token level, and force
@@ -3197,7 +3197,7 @@ static void handle_stat0_irqs(struct net2280 *dev, u32 stat)
 			scratch = BIT(DATA_PACKET_RECEIVED_INTERRUPT) |
 				BIT(DATA_OUT_PING_TOKEN_INTERRUPT) |
 				BIT(DATA_IN_TOKEN_INTERRUPT);
-		writel(scratch, &dev->epregs[0].ep_irqenb);
+		pete_writel("drivers/usb/gadget/udc/net2280.c:3200", scratch, &dev->epregs[0].ep_irqenb);
 
 		/* we made the hardware handle most lowlevel requests;
 		 * everything else goes uplevel to the gadget code.
@@ -3221,15 +3221,15 @@ static void handle_stat0_irqs(struct net2280 *dev, u32 stat)
 			if (!e || w_length > 2)
 				goto do_stall;
 
-			if (readl(&e->regs->ep_rsp) & BIT(SET_ENDPOINT_HALT))
+			if (pete_readl("drivers/usb/gadget/udc/net2280.c:3224", &e->regs->ep_rsp) & BIT(SET_ENDPOINT_HALT))
 				status = cpu_to_le32(1);
 			else
 				status = cpu_to_le32(0);
 
 			/* don't bother with a request object! */
-			writel(0, &dev->epregs[0].ep_irqenb);
+			pete_writel("drivers/usb/gadget/udc/net2280.c:3230", 0, &dev->epregs[0].ep_irqenb);
 			set_fifo_bytecount(ep, w_length);
-			writel((__force u32)status, &dev->epregs[0].ep_data);
+			pete_writel("drivers/usb/gadget/udc/net2280.c:3232", (__force u32)status, &dev->epregs[0].ep_data);
 			allow_status(ep);
 			ep_vdbg(dev, "%s stat %02x\n", ep->ep.name, status);
 			goto next_endpoints;
@@ -3287,7 +3287,7 @@ delegate:
 				"ep_cfg %08x\n",
 				u.r.bRequestType, u.r.bRequest,
 				w_value, w_index, w_length,
-				readl(&ep->cfg->ep_cfg));
+				pete_readl("drivers/usb/gadget/udc/net2280.c:3290", &ep->cfg->ep_cfg));
 			ep->responded = 0;
 			if (dev->async_callbacks) {
 				spin_unlock(&dev->lock);
@@ -3379,16 +3379,16 @@ __acquires(dev->lock)
 		 * Ignore disconnects and resets if the speed hasn't been set.
 		 * VBUS can bounce and there's always an initial reset.
 		 */
-		writel(tmp, &dev->regs->irqstat1);
+		pete_writel("drivers/usb/gadget/udc/net2280.c:3382", tmp, &dev->regs->irqstat1);
 		if (dev->gadget.speed != USB_SPEED_UNKNOWN) {
 			if ((stat & BIT(VBUS_INTERRUPT)) &&
-					(readl(&dev->usb->usbctl) &
+					(pete_readl("drivers/usb/gadget/udc/net2280.c:3385", &dev->usb->usbctl) &
 						BIT(VBUS_PIN)) == 0) {
 				disconnect = true;
 				ep_dbg(dev, "disconnect %s\n",
 						dev->driver->driver.name);
 			} else if ((stat & BIT(ROOT_PORT_RESET_INTERRUPT)) &&
-					(readl(&dev->usb->usbstat) & mask)
+					(pete_readl("drivers/usb/gadget/udc/net2280.c:3391", &dev->usb->usbstat) & mask)
 						== 0) {
 				reset = true;
 				ep_dbg(dev, "reset %s\n",
@@ -3423,7 +3423,7 @@ __acquires(dev->lock)
 	 */
 	tmp = BIT(SUSPEND_REQUEST_CHANGE_INTERRUPT);
 	if (stat & tmp) {
-		writel(tmp, &dev->regs->irqstat1);
+		pete_writel("drivers/usb/gadget/udc/net2280.c:3426", tmp, &dev->regs->irqstat1);
 		spin_unlock(&dev->lock);
 		if (stat & BIT(SUSPEND_REQUEST_INTERRUPT)) {
 			if (dev->async_callbacks && dev->driver->suspend)
@@ -3441,7 +3441,7 @@ __acquires(dev->lock)
 
 	/* clear any other status/irqs */
 	if (stat)
-		writel(stat, &dev->regs->irqstat1);
+		pete_writel("drivers/usb/gadget/udc/net2280.c:3444", stat, &dev->regs->irqstat1);
 
 	/* some status we can just ignore */
 	if (dev->quirks & PLX_2280)
@@ -3478,12 +3478,12 @@ __acquires(dev->lock)
 			continue;
 
 		/* clear ep's dma status */
-		tmp = readl(&dma->dmastat);
-		writel(tmp, &dma->dmastat);
+		tmp = pete_readl("drivers/usb/gadget/udc/net2280.c:3481", &dma->dmastat);
+		pete_writel("drivers/usb/gadget/udc/net2280.c:3482", tmp, &dma->dmastat);
 
 		/* dma sync*/
 		if (dev->quirks & PLX_PCIE) {
-			u32 r_dmacount = readl(&dma->dmacount);
+			u32 r_dmacount = pete_readl("drivers/usb/gadget/udc/net2280.c:3486", &dma->dmacount);
 			if (!ep->is_in &&  (r_dmacount & 0x00FFFFFF) &&
 			    (tmp & BIT(DMA_TRANSACTION_DONE_INTERRUPT)))
 				continue;
@@ -3510,7 +3510,7 @@ __acquires(dev->lock)
 
 		/* disable dma on inactive queues; else maybe restart */
 		if (!list_empty(&ep->queue)) {
-			tmp = readl(&dma->dmactl);
+			tmp = pete_readl("drivers/usb/gadget/udc/net2280.c:3513", &dma->dmactl);
 			restart_dma(ep);
 		}
 		ep->irqs++;
@@ -3540,22 +3540,22 @@ static irqreturn_t net2280_irq(int irq, void *_dev)
 
 	/* shared interrupt, not ours */
 	if ((dev->quirks & PLX_LEGACY) &&
-		(!(readl(&dev->regs->irqstat0) & BIT(INTA_ASSERTED))))
+		(!(pete_readl("drivers/usb/gadget/udc/net2280.c:3543", &dev->regs->irqstat0) & BIT(INTA_ASSERTED))))
 		return IRQ_NONE;
 
 	spin_lock(&dev->lock);
 
 	/* handle disconnect, dma, and more */
-	handle_stat1_irqs(dev, readl(&dev->regs->irqstat1));
+	handle_stat1_irqs(dev, pete_readl("drivers/usb/gadget/udc/net2280.c:3549", &dev->regs->irqstat1));
 
 	/* control requests and PIO */
-	handle_stat0_irqs(dev, readl(&dev->regs->irqstat0));
+	handle_stat0_irqs(dev, pete_readl("drivers/usb/gadget/udc/net2280.c:3552", &dev->regs->irqstat0));
 
 	if (dev->quirks & PLX_PCIE) {
 		/* re-enable interrupt to trigger any possible new interrupt */
-		u32 pciirqenb1 = readl(&dev->regs->pciirqenb1);
-		writel(pciirqenb1 & 0x7FFFFFFF, &dev->regs->pciirqenb1);
-		writel(pciirqenb1, &dev->regs->pciirqenb1);
+		u32 pciirqenb1 = pete_readl("drivers/usb/gadget/udc/net2280.c:3556", &dev->regs->pciirqenb1);
+		pete_writel("drivers/usb/gadget/udc/net2280.c:3557", pciirqenb1 & 0x7FFFFFFF, &dev->regs->pciirqenb1);
+		pete_writel("drivers/usb/gadget/udc/net2280.c:3558", pciirqenb1, &dev->regs->pciirqenb1);
 	}
 
 	spin_unlock(&dev->lock);
@@ -3689,7 +3689,7 @@ static int net2280_probe(struct pci_dev *pdev, const struct pci_device_id *id)
 							(base + 0x0700);
 		dev->plregs = (struct usb338x_pl_regs __iomem *)
 							(base + 0x0800);
-		usbstat = readl(&dev->usb->usbstat);
+		usbstat = pete_readl("drivers/usb/gadget/udc/net2280.c:3692", &dev->usb->usbstat);
 		dev->enhanced_mode = !!(usbstat & BIT(11));
 		dev->n_ep = (dev->enhanced_mode) ? 9 : 5;
 		/* put into initial config, link up all endpoints */
@@ -3698,14 +3698,14 @@ static int net2280_probe(struct pci_dev *pdev, const struct pci_device_id *id)
 		/* See if firmware needs to set up for workaround: */
 		if (fsmvalue == DEFECT7374_FSM_SS_CONTROL_READ) {
 			dev->bug7734_patched = 1;
-			writel(0, &dev->usb->usbctl);
+			pete_writel("drivers/usb/gadget/udc/net2280.c:3701", 0, &dev->usb->usbctl);
 		} else
 			dev->bug7734_patched = 0;
 	} else {
 		dev->enhanced_mode = 0;
 		dev->n_ep = 7;
 		/* put into initial config, link up all endpoints */
-		writel(0, &dev->usb->usbctl);
+		pete_writel("drivers/usb/gadget/udc/net2280.c:3708", 0, &dev->usb->usbctl);
 	}
 
 	usb_reset(dev);
@@ -3758,7 +3758,7 @@ static int net2280_probe(struct pci_dev *pdev, const struct pci_device_id *id)
 
 	/* enable lower-overhead pci memory bursts during DMA */
 	if (dev->quirks & PLX_LEGACY)
-		writel(BIT(DMA_MEMORY_WRITE_AND_INVALIDATE_ENABLE) |
+		pete_writel("drivers/usb/gadget/udc/net2280.c:3761", BIT(DMA_MEMORY_WRITE_AND_INVALIDATE_ENABLE) |
 			/*
 			 * 256 write retries may not be enough...
 			   BIT(PCI_RETRY_ABORT_ENABLE) |
@@ -3806,11 +3806,11 @@ static void net2280_shutdown(struct pci_dev *pdev)
 	struct net2280		*dev = pci_get_drvdata(pdev);
 
 	/* disable IRQs */
-	writel(0, &dev->regs->pciirqenb0);
-	writel(0, &dev->regs->pciirqenb1);
+	pete_writel("drivers/usb/gadget/udc/net2280.c:3809", 0, &dev->regs->pciirqenb0);
+	pete_writel("drivers/usb/gadget/udc/net2280.c:3810", 0, &dev->regs->pciirqenb1);
 
 	/* disable the pullup so the host will think we're gone */
-	writel(0, &dev->usb->usbctl);
+	pete_writel("drivers/usb/gadget/udc/net2280.c:3813", 0, &dev->usb->usbctl);
 
 }
 

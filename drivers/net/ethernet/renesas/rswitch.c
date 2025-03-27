@@ -1131,7 +1131,7 @@ static int rswitch_etha_set_access(struct rswitch_etha *etha, bool read,
 	if (devad == 0xffffffff)
 		return -ENODEV;
 
-	writel(MMIS1_CLEAR_FLAGS, etha->addr + MMIS1);
+	pete_writel("drivers/net/ethernet/renesas/rswitch.c:1134", MMIS1_CLEAR_FLAGS, etha->addr + MMIS1);
 
 	val = MPSM_PSME | MPSM_MFF_C45;
 	iowrite32((regad << 16) | (devad << 8) | (phyad << 3) | val, etha->addr + MPSM);
@@ -1143,7 +1143,7 @@ static int rswitch_etha_set_access(struct rswitch_etha *etha, bool read,
 	rswitch_modify(etha->addr, MMIS1, MMIS1_PAACS, MMIS1_PAACS);
 
 	if (read) {
-		writel((pop << 13) | (devad << 8) | (phyad << 3) | val, etha->addr + MPSM);
+		pete_writel("drivers/net/ethernet/renesas/rswitch.c:1146", (pop << 13) | (devad << 8) | (phyad << 3) | val, etha->addr + MPSM);
 
 		ret = rswitch_reg_wait(etha->addr, MMIS1, MMIS1_PRACS, MMIS1_PRACS);
 		if (ret)

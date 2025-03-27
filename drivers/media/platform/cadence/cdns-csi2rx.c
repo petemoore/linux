@@ -103,12 +103,12 @@ struct csi2rx_priv *v4l2_subdev_to_csi2rx(struct v4l2_subdev *subdev)
 
 static void csi2rx_reset(struct csi2rx_priv *csi2rx)
 {
-	writel(CSI2RX_SOFT_RESET_PROTOCOL | CSI2RX_SOFT_RESET_FRONT,
+	pete_writel("drivers/media/platform/cadence/cdns-csi2rx.c:106", CSI2RX_SOFT_RESET_PROTOCOL | CSI2RX_SOFT_RESET_FRONT,
 	       csi2rx->base + CSI2RX_SOFT_RESET_REG);
 
 	udelay(10);
 
-	writel(0, csi2rx->base + CSI2RX_SOFT_RESET_REG);
+	pete_writel("drivers/media/platform/cadence/cdns-csi2rx.c:111", 0, csi2rx->base + CSI2RX_SOFT_RESET_REG);
 }
 
 static int csi2rx_configure_ext_dphy(struct csi2rx_priv *csi2rx)
@@ -162,7 +162,7 @@ static int csi2rx_start(struct csi2rx_priv *csi2rx)
 		reg |= CSI2RX_STATIC_CFG_DLANE_MAP(i, i + 1);
 	}
 
-	writel(reg, csi2rx->base + CSI2RX_STATIC_CFG_REG);
+	pete_writel("drivers/media/platform/cadence/cdns-csi2rx.c:165", reg, csi2rx->base + CSI2RX_STATIC_CFG_REG);
 
 	/* Enable DPHY clk and data lanes. */
 	if (csi2rx->dphy) {
@@ -172,7 +172,7 @@ static int csi2rx_start(struct csi2rx_priv *csi2rx)
 			reg |= CSI2RX_DPHY_DL_RST(csi2rx->lanes[i] - 1);
 		}
 
-		writel(reg, csi2rx->base + CSI2RX_DPHY_LANE_CTRL_REG);
+		pete_writel("drivers/media/platform/cadence/cdns-csi2rx.c:175", reg, csi2rx->base + CSI2RX_DPHY_LANE_CTRL_REG);
 
 		ret = csi2rx_configure_ext_dphy(csi2rx);
 		if (ret) {
@@ -199,14 +199,14 @@ static int csi2rx_start(struct csi2rx_priv *csi2rx)
 
 		reset_control_deassert(csi2rx->pixel_rst[i]);
 
-		writel(CSI2RX_STREAM_CFG_FIFO_MODE_LARGE_BUF,
+		pete_writel("drivers/media/platform/cadence/cdns-csi2rx.c:202", CSI2RX_STREAM_CFG_FIFO_MODE_LARGE_BUF,
 		       csi2rx->base + CSI2RX_STREAM_CFG_REG(i));
 
-		writel(CSI2RX_STREAM_DATA_CFG_EN_VC_SELECT |
+		pete_writel("drivers/media/platform/cadence/cdns-csi2rx.c:205", CSI2RX_STREAM_DATA_CFG_EN_VC_SELECT |
 		       CSI2RX_STREAM_DATA_CFG_VC_SELECT(i),
 		       csi2rx->base + CSI2RX_STREAM_DATA_CFG_REG(i));
 
-		writel(CSI2RX_STREAM_CTRL_START,
+		pete_writel("drivers/media/platform/cadence/cdns-csi2rx.c:209", CSI2RX_STREAM_CTRL_START,
 		       csi2rx->base + CSI2RX_STREAM_CTRL_REG(i));
 	}
 
@@ -233,7 +233,7 @@ err_disable_pixclk:
 	}
 
 	if (csi2rx->dphy) {
-		writel(0, csi2rx->base + CSI2RX_DPHY_LANE_CTRL_REG);
+		pete_writel("drivers/media/platform/cadence/cdns-csi2rx.c:236", 0, csi2rx->base + CSI2RX_DPHY_LANE_CTRL_REG);
 		phy_power_off(csi2rx->dphy);
 	}
 err_disable_pclk:
@@ -251,7 +251,7 @@ static void csi2rx_stop(struct csi2rx_priv *csi2rx)
 	clk_disable_unprepare(csi2rx->sys_clk);
 
 	for (i = 0; i < csi2rx->max_streams; i++) {
-		writel(0, csi2rx->base + CSI2RX_STREAM_CTRL_REG(i));
+		pete_writel("drivers/media/platform/cadence/cdns-csi2rx.c:254", 0, csi2rx->base + CSI2RX_STREAM_CTRL_REG(i));
 
 		reset_control_assert(csi2rx->pixel_rst[i]);
 		clk_disable_unprepare(csi2rx->pixel_clk[i]);
@@ -264,7 +264,7 @@ static void csi2rx_stop(struct csi2rx_priv *csi2rx)
 		dev_warn(csi2rx->dev, "Couldn't disable our subdev\n");
 
 	if (csi2rx->dphy) {
-		writel(0, csi2rx->base + CSI2RX_DPHY_LANE_CTRL_REG);
+		pete_writel("drivers/media/platform/cadence/cdns-csi2rx.c:267", 0, csi2rx->base + CSI2RX_DPHY_LANE_CTRL_REG);
 
 		if (phy_power_off(csi2rx->dphy))
 			dev_warn(csi2rx->dev, "Couldn't power off DPHY\n");
@@ -390,7 +390,7 @@ static int csi2rx_get_resources(struct csi2rx_priv *csi2rx,
 		return ret;
 	}
 
-	dev_cfg = readl(csi2rx->base + CSI2RX_DEVICE_CFG_REG);
+	dev_cfg = pete_readl("drivers/media/platform/cadence/cdns-csi2rx.c:393", csi2rx->base + CSI2RX_DEVICE_CFG_REG);
 	clk_disable_unprepare(csi2rx->p_clk);
 
 	csi2rx->max_lanes = dev_cfg & 7;

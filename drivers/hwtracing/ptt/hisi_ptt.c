@@ -49,21 +49,21 @@ static ssize_t hisi_ptt_tune_attr_show(struct device *dev,
 
 	mutex_lock(&hisi_ptt->tune_lock);
 
-	reg = readl(hisi_ptt->iobase + HISI_PTT_TUNING_CTRL);
+	reg = pete_readl("drivers/hwtracing/ptt/hisi_ptt.c:52", hisi_ptt->iobase + HISI_PTT_TUNING_CTRL);
 	reg &= ~(HISI_PTT_TUNING_CTRL_CODE | HISI_PTT_TUNING_CTRL_SUB);
 	reg |= FIELD_PREP(HISI_PTT_TUNING_CTRL_CODE | HISI_PTT_TUNING_CTRL_SUB,
 			  desc->event_code);
-	writel(reg, hisi_ptt->iobase + HISI_PTT_TUNING_CTRL);
+	pete_writel("drivers/hwtracing/ptt/hisi_ptt.c:56", reg, hisi_ptt->iobase + HISI_PTT_TUNING_CTRL);
 
 	/* Write all 1 to indicates it's the read process */
-	writel(~0U, hisi_ptt->iobase + HISI_PTT_TUNING_DATA);
+	pete_writel("drivers/hwtracing/ptt/hisi_ptt.c:59", ~0U, hisi_ptt->iobase + HISI_PTT_TUNING_DATA);
 
 	if (!hisi_ptt_wait_tuning_finish(hisi_ptt)) {
 		mutex_unlock(&hisi_ptt->tune_lock);
 		return -ETIMEDOUT;
 	}
 
-	reg = readl(hisi_ptt->iobase + HISI_PTT_TUNING_DATA);
+	reg = pete_readl("drivers/hwtracing/ptt/hisi_ptt.c:66", hisi_ptt->iobase + HISI_PTT_TUNING_DATA);
 	reg &= HISI_PTT_TUNING_DATA_VAL_MASK;
 	val = FIELD_GET(HISI_PTT_TUNING_DATA_VAL_MASK, reg);
 
@@ -89,12 +89,12 @@ static ssize_t hisi_ptt_tune_attr_store(struct device *dev,
 
 	mutex_lock(&hisi_ptt->tune_lock);
 
-	reg = readl(hisi_ptt->iobase + HISI_PTT_TUNING_CTRL);
+	reg = pete_readl("drivers/hwtracing/ptt/hisi_ptt.c:92", hisi_ptt->iobase + HISI_PTT_TUNING_CTRL);
 	reg &= ~(HISI_PTT_TUNING_CTRL_CODE | HISI_PTT_TUNING_CTRL_SUB);
 	reg |= FIELD_PREP(HISI_PTT_TUNING_CTRL_CODE | HISI_PTT_TUNING_CTRL_SUB,
 			  desc->event_code);
-	writel(reg, hisi_ptt->iobase + HISI_PTT_TUNING_CTRL);
-	writel(FIELD_PREP(HISI_PTT_TUNING_DATA_VAL_MASK, val),
+	pete_writel("drivers/hwtracing/ptt/hisi_ptt.c:96", reg, hisi_ptt->iobase + HISI_PTT_TUNING_CTRL);
+	pete_writel("drivers/hwtracing/ptt/hisi_ptt.c:97", FIELD_PREP(HISI_PTT_TUNING_DATA_VAL_MASK, val),
 	       hisi_ptt->iobase + HISI_PTT_TUNING_DATA);
 
 	if (!hisi_ptt_wait_tuning_finish(hisi_ptt)) {
@@ -182,7 +182,7 @@ static void hisi_ptt_wait_dma_reset_done(struct hisi_ptt *hisi_ptt)
 
 static void hisi_ptt_trace_end(struct hisi_ptt *hisi_ptt)
 {
-	writel(0, hisi_ptt->iobase + HISI_PTT_TRACE_CTRL);
+	pete_writel("drivers/hwtracing/ptt/hisi_ptt.c:185", 0, hisi_ptt->iobase + HISI_PTT_TRACE_CTRL);
 	hisi_ptt->trace_ctrl.started = false;
 }
 
@@ -201,15 +201,15 @@ static int hisi_ptt_trace_start(struct hisi_ptt *hisi_ptt)
 	ctrl->started = true;
 
 	/* Reset the DMA before start tracing */
-	val = readl(hisi_ptt->iobase + HISI_PTT_TRACE_CTRL);
+	val = pete_readl("drivers/hwtracing/ptt/hisi_ptt.c:204", hisi_ptt->iobase + HISI_PTT_TRACE_CTRL);
 	val |= HISI_PTT_TRACE_CTRL_RST;
-	writel(val, hisi_ptt->iobase + HISI_PTT_TRACE_CTRL);
+	pete_writel("drivers/hwtracing/ptt/hisi_ptt.c:206", val, hisi_ptt->iobase + HISI_PTT_TRACE_CTRL);
 
 	hisi_ptt_wait_dma_reset_done(hisi_ptt);
 
-	val = readl(hisi_ptt->iobase + HISI_PTT_TRACE_CTRL);
+	val = pete_readl("drivers/hwtracing/ptt/hisi_ptt.c:210", hisi_ptt->iobase + HISI_PTT_TRACE_CTRL);
 	val &= ~HISI_PTT_TRACE_CTRL_RST;
-	writel(val, hisi_ptt->iobase + HISI_PTT_TRACE_CTRL);
+	pete_writel("drivers/hwtracing/ptt/hisi_ptt.c:212", val, hisi_ptt->iobase + HISI_PTT_TRACE_CTRL);
 
 	/* Reset the index of current buffer */
 	hisi_ptt->trace_ctrl.buf_index = 0;
@@ -219,8 +219,8 @@ static int hisi_ptt_trace_start(struct hisi_ptt *hisi_ptt)
 		memset(ctrl->trace_buf[i].addr, 0, HISI_PTT_TRACE_BUF_SIZE);
 
 	/* Clear the interrupt status */
-	writel(HISI_PTT_TRACE_INT_STAT_MASK, hisi_ptt->iobase + HISI_PTT_TRACE_INT_STAT);
-	writel(0, hisi_ptt->iobase + HISI_PTT_TRACE_INT_MASK);
+	pete_writel("drivers/hwtracing/ptt/hisi_ptt.c:222", HISI_PTT_TRACE_INT_STAT_MASK, hisi_ptt->iobase + HISI_PTT_TRACE_INT_STAT);
+	pete_writel("drivers/hwtracing/ptt/hisi_ptt.c:223", 0, hisi_ptt->iobase + HISI_PTT_TRACE_INT_MASK);
 
 	/* Set the trace control register */
 	val = FIELD_PREP(HISI_PTT_TRACE_CTRL_TYPE_SEL, ctrl->type);
@@ -232,7 +232,7 @@ static int hisi_ptt_trace_start(struct hisi_ptt *hisi_ptt)
 
 	/* Start the Trace */
 	val |= HISI_PTT_TRACE_CTRL_EN;
-	writel(val, hisi_ptt->iobase + HISI_PTT_TRACE_CTRL);
+	pete_writel("drivers/hwtracing/ptt/hisi_ptt.c:235", val, hisi_ptt->iobase + HISI_PTT_TRACE_CTRL);
 
 	return 0;
 }
@@ -260,7 +260,7 @@ static int hisi_ptt_update_aux(struct hisi_ptt *hisi_ptt, int index, bool stop)
 	if (stop) {
 		u32 reg;
 
-		reg = readl(hisi_ptt->iobase + HISI_PTT_TRACE_WR_STS);
+		reg = pete_readl("drivers/hwtracing/ptt/hisi_ptt.c:263", hisi_ptt->iobase + HISI_PTT_TRACE_WR_STS);
 		size = FIELD_GET(HISI_PTT_TRACE_WR_STS_WRITE, reg);
 	} else {
 		size = HISI_PTT_TRACE_BUF_SIZE;
@@ -298,14 +298,14 @@ static irqreturn_t hisi_ptt_isr(int irq, void *context)
 	struct hisi_ptt *hisi_ptt = context;
 	u32 status, buf_idx;
 
-	status = readl(hisi_ptt->iobase + HISI_PTT_TRACE_INT_STAT);
+	status = pete_readl("drivers/hwtracing/ptt/hisi_ptt.c:301", hisi_ptt->iobase + HISI_PTT_TRACE_INT_STAT);
 	if (!(status & HISI_PTT_TRACE_INT_STAT_MASK))
 		return IRQ_NONE;
 
 	buf_idx = ffs(status) - 1;
 
 	/* Clear the interrupt status of buffer @buf_idx */
-	writel(status, hisi_ptt->iobase + HISI_PTT_TRACE_INT_STAT);
+	pete_writel("drivers/hwtracing/ptt/hisi_ptt.c:308", status, hisi_ptt->iobase + HISI_PTT_TRACE_INT_STAT);
 
 	/*
 	 * Update the AUX buffer and cache the current buffer index,
@@ -715,14 +715,14 @@ static int hisi_ptt_config_trace_buf(struct hisi_ptt *hisi_ptt)
 
 	/* Configure the trace DMA buffer */
 	for (i = 0; i < HISI_PTT_TRACE_BUF_CNT; i++) {
-		writel(lower_32_bits(ctrl->trace_buf[i].dma),
+		pete_writel("drivers/hwtracing/ptt/hisi_ptt.c:718", lower_32_bits(ctrl->trace_buf[i].dma),
 		       hisi_ptt->iobase + HISI_PTT_TRACE_ADDR_BASE_LO_0 +
 		       i * HISI_PTT_TRACE_ADDR_STRIDE);
-		writel(upper_32_bits(ctrl->trace_buf[i].dma),
+		pete_writel("drivers/hwtracing/ptt/hisi_ptt.c:721", upper_32_bits(ctrl->trace_buf[i].dma),
 		       hisi_ptt->iobase + HISI_PTT_TRACE_ADDR_BASE_HI_0 +
 		       i * HISI_PTT_TRACE_ADDR_STRIDE);
 	}
-	writel(HISI_PTT_TRACE_BUF_SIZE, hisi_ptt->iobase + HISI_PTT_TRACE_ADDR_SIZE);
+	pete_writel("drivers/hwtracing/ptt/hisi_ptt.c:725", HISI_PTT_TRACE_BUF_SIZE, hisi_ptt->iobase + HISI_PTT_TRACE_ADDR_SIZE);
 
 	return 0;
 }
@@ -755,7 +755,7 @@ static int hisi_ptt_init_ctrls(struct hisi_ptt *hisi_ptt)
 	 * the upper BDF numbers of the root port, while Bit[15:0] indicates
 	 * the lower.
 	 */
-	reg = readl(hisi_ptt->iobase + HISI_PTT_DEVICE_RANGE);
+	reg = pete_readl("drivers/hwtracing/ptt/hisi_ptt.c:758", hisi_ptt->iobase + HISI_PTT_DEVICE_RANGE);
 	hisi_ptt->upper_bdf = FIELD_GET(HISI_PTT_DEVICE_RANGE_UPPER, reg);
 	hisi_ptt->lower_bdf = FIELD_GET(HISI_PTT_DEVICE_RANGE_LOWER, reg);
 
@@ -1231,7 +1231,7 @@ static int hisi_ptt_register_pmu(struct hisi_ptt *hisi_ptt)
 		.read		= hisi_ptt_pmu_read,
 	};
 
-	reg = readl(hisi_ptt->iobase + HISI_PTT_LOCATION);
+	reg = pete_readl("drivers/hwtracing/ptt/hisi_ptt.c:1234", hisi_ptt->iobase + HISI_PTT_LOCATION);
 	core_id = FIELD_GET(HISI_PTT_CORE_ID, reg);
 	sicl_id = FIELD_GET(HISI_PTT_SICL_ID, reg);
 

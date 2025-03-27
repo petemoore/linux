@@ -640,14 +640,14 @@ static inline u32 hns3_tqp_read_reg(struct hns3_enet_ring *ring, u32 reg)
 
 static inline u32 hns3_read_reg(void __iomem *base, u32 reg)
 {
-	return readl(base + reg);
+	return pete_readl("drivers/net/ethernet/hisilicon/hns3/hns3_enet.h:643", base + reg);
 }
 
 static inline void hns3_write_reg(void __iomem *base, u32 reg, u32 value)
 {
 	u8 __iomem *reg_addr = READ_ONCE(base);
 
-	writel(value, reg_addr + reg);
+	pete_writel("drivers/net/ethernet/hisilicon/hns3/hns3_enet.h:650", value, reg_addr + reg);
 }
 
 #define hns3_read_dev(a, reg) \

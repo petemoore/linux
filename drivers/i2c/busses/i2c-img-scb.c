@@ -413,12 +413,12 @@ static int img_i2c_runtime_resume(struct device *dev);
 
 static void img_i2c_writel(struct img_i2c *i2c, u32 offset, u32 value)
 {
-	writel(value, i2c->base + offset);
+	pete_writel("drivers/i2c/busses/i2c-img-scb.c:416", value, i2c->base + offset);
 }
 
 static u32 img_i2c_readl(struct img_i2c *i2c, u32 offset)
 {
-	return readl(i2c->base + offset);
+	return pete_readl("drivers/i2c/busses/i2c-img-scb.c:421", i2c->base + offset);
 }
 
 /*

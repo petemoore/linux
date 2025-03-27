@@ -12,20 +12,20 @@
 static inline u32
 malidp_read32(u32 __iomem *base, u32 offset)
 {
-	return readl((base + (offset >> 2)));
+	return pete_readl("drivers/gpu/drm/arm/display/include/malidp_io.h:15", (base + (offset >> 2)));
 }
 
 static inline void
 malidp_write32(u32 __iomem *base, u32 offset, u32 v)
 {
-	writel(v, (base + (offset >> 2)));
+	pete_writel("drivers/gpu/drm/arm/display/include/malidp_io.h:21", v, (base + (offset >> 2)));
 }
 
 static inline void
 malidp_write64(u32 __iomem *base, u32 offset, u64 v)
 {
-	writel(lower_32_bits(v), (base + (offset >> 2)));
-	writel(upper_32_bits(v), (base + (offset >> 2) + 1));
+	pete_writel("drivers/gpu/drm/arm/display/include/malidp_io.h:27", lower_32_bits(v), (base + (offset >> 2)));
+	pete_writel("drivers/gpu/drm/arm/display/include/malidp_io.h:28", upper_32_bits(v), (base + (offset >> 2) + 1));
 }
 
 static inline void

@@ -256,10 +256,10 @@ static int atmel_ac97c_playback_prepare(struct snd_pcm_substream *substream)
 				runtime->rate);
 
 	/* Initialize and start the PDC */
-	writel(runtime->dma_addr, chip->regs + ATMEL_PDC_TPR);
-	writel(block_size / 2, chip->regs + ATMEL_PDC_TCR);
-	writel(runtime->dma_addr + block_size, chip->regs + ATMEL_PDC_TNPR);
-	writel(block_size / 2, chip->regs + ATMEL_PDC_TNCR);
+	pete_writel("sound/atmel/ac97c.c:259", runtime->dma_addr, chip->regs + ATMEL_PDC_TPR);
+	pete_writel("sound/atmel/ac97c.c:260", block_size / 2, chip->regs + ATMEL_PDC_TCR);
+	pete_writel("sound/atmel/ac97c.c:261", runtime->dma_addr + block_size, chip->regs + ATMEL_PDC_TNPR);
+	pete_writel("sound/atmel/ac97c.c:262", block_size / 2, chip->regs + ATMEL_PDC_TNCR);
 
 	return retval;
 }
@@ -338,10 +338,10 @@ static int atmel_ac97c_capture_prepare(struct snd_pcm_substream *substream)
 				runtime->rate);
 
 	/* Initialize and start the PDC */
-	writel(runtime->dma_addr, chip->regs + ATMEL_PDC_RPR);
-	writel(block_size / 2, chip->regs + ATMEL_PDC_RCR);
-	writel(runtime->dma_addr + block_size, chip->regs + ATMEL_PDC_RNPR);
-	writel(block_size / 2, chip->regs + ATMEL_PDC_RNCR);
+	pete_writel("sound/atmel/ac97c.c:341", runtime->dma_addr, chip->regs + ATMEL_PDC_RPR);
+	pete_writel("sound/atmel/ac97c.c:342", block_size / 2, chip->regs + ATMEL_PDC_RCR);
+	pete_writel("sound/atmel/ac97c.c:343", runtime->dma_addr + block_size, chip->regs + ATMEL_PDC_RNPR);
+	pete_writel("sound/atmel/ac97c.c:344", block_size / 2, chip->regs + ATMEL_PDC_RNCR);
 
 	return retval;
 }
@@ -373,7 +373,7 @@ atmel_ac97c_playback_trigger(struct snd_pcm_substream *substream, int cmd)
 	}
 
 	ac97c_writel(chip, CAMR, camr);
-	writel(ptcr, chip->regs + ATMEL_PDC_PTCR);
+	pete_writel("sound/atmel/ac97c.c:376", ptcr, chip->regs + ATMEL_PDC_PTCR);
 	return 0;
 }
 
@@ -384,7 +384,7 @@ atmel_ac97c_capture_trigger(struct snd_pcm_substream *substream, int cmd)
 	unsigned long camr, ptcr = 0;
 
 	camr = ac97c_readl(chip, CAMR);
-	ptcr = readl(chip->regs + ATMEL_PDC_PTSR);
+	ptcr = pete_readl("sound/atmel/ac97c.c:387", chip->regs + ATMEL_PDC_PTSR);
 
 	switch (cmd) {
 	case SNDRV_PCM_TRIGGER_PAUSE_RELEASE:
@@ -405,7 +405,7 @@ atmel_ac97c_capture_trigger(struct snd_pcm_substream *substream, int cmd)
 	}
 
 	ac97c_writel(chip, CAMR, camr);
-	writel(ptcr, chip->regs + ATMEL_PDC_PTCR);
+	pete_writel("sound/atmel/ac97c.c:408", ptcr, chip->regs + ATMEL_PDC_PTCR);
 	return 0;
 }
 
@@ -417,7 +417,7 @@ atmel_ac97c_playback_pointer(struct snd_pcm_substream *substream)
 	snd_pcm_uframes_t	frames;
 	unsigned long		bytes;
 
-	bytes = readl(chip->regs + ATMEL_PDC_TPR);
+	bytes = pete_readl("sound/atmel/ac97c.c:420", chip->regs + ATMEL_PDC_TPR);
 	bytes -= runtime->dma_addr;
 
 	frames = bytes_to_frames(runtime, bytes);
@@ -434,7 +434,7 @@ atmel_ac97c_capture_pointer(struct snd_pcm_substream *substream)
 	snd_pcm_uframes_t	frames;
 	unsigned long		bytes;
 
-	bytes = readl(chip->regs + ATMEL_PDC_RPR);
+	bytes = pete_readl("sound/atmel/ac97c.c:437", chip->regs + ATMEL_PDC_RPR);
 	bytes -= runtime->dma_addr;
 
 	frames = bytes_to_frames(runtime, bytes);
@@ -493,8 +493,8 @@ static irqreturn_t atmel_ac97c_interrupt(int irq, void *dev)
 
 			offset = block_size * next_period;
 
-			writel(runtime->dma_addr + offset, chip->regs + ATMEL_PDC_TNPR);
-			writel(block_size / 2, chip->regs + ATMEL_PDC_TNCR);
+			pete_writel("sound/atmel/ac97c.c:496", runtime->dma_addr + offset, chip->regs + ATMEL_PDC_TNPR);
+			pete_writel("sound/atmel/ac97c.c:497", block_size / 2, chip->regs + ATMEL_PDC_TNCR);
 
 			snd_pcm_period_elapsed(chip->playback_substream);
 		}
@@ -511,8 +511,8 @@ static irqreturn_t atmel_ac97c_interrupt(int irq, void *dev)
 
 			offset = block_size * next_period;
 
-			writel(runtime->dma_addr + offset, chip->regs + ATMEL_PDC_RNPR);
-			writel(block_size / 2, chip->regs + ATMEL_PDC_RNCR);
+			pete_writel("sound/atmel/ac97c.c:514", runtime->dma_addr + offset, chip->regs + ATMEL_PDC_RNPR);
+			pete_writel("sound/atmel/ac97c.c:515", block_size / 2, chip->regs + ATMEL_PDC_RNCR);
 			snd_pcm_period_elapsed(chip->capture_substream);
 		}
 		retval = IRQ_HANDLED;

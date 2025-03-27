@@ -43,18 +43,18 @@ struct eud_chip {
 
 static int enable_eud(struct eud_chip *priv)
 {
-	writel(EUD_ENABLE, priv->base + EUD_REG_CSR_EUD_EN);
-	writel(EUD_INT_VBUS | EUD_INT_SAFE_MODE,
+	pete_writel("drivers/usb/misc/qcom_eud.c:46", EUD_ENABLE, priv->base + EUD_REG_CSR_EUD_EN);
+	pete_writel("drivers/usb/misc/qcom_eud.c:47", EUD_INT_VBUS | EUD_INT_SAFE_MODE,
 			priv->base + EUD_REG_INT1_EN_MASK);
-	writel(1, priv->mode_mgr + EUD_REG_EUD_EN2);
+	pete_writel("drivers/usb/misc/qcom_eud.c:49", 1, priv->mode_mgr + EUD_REG_EUD_EN2);
 
 	return usb_role_switch_set_role(priv->role_sw, USB_ROLE_DEVICE);
 }
 
 static void disable_eud(struct eud_chip *priv)
 {
-	writel(0, priv->base + EUD_REG_CSR_EUD_EN);
-	writel(0, priv->mode_mgr + EUD_REG_EUD_EN2);
+	pete_writel("drivers/usb/misc/qcom_eud.c:56", 0, priv->base + EUD_REG_CSR_EUD_EN);
+	pete_writel("drivers/usb/misc/qcom_eud.c:57", 0, priv->mode_mgr + EUD_REG_EUD_EN2);
 }
 
 static ssize_t enable_show(struct device *dev,
@@ -102,7 +102,7 @@ static void usb_attach_detach(struct eud_chip *chip)
 	u32 reg;
 
 	/* read ctl_out_1[4] to find USB attach or detach event */
-	reg = readl(chip->base + EUD_REG_CTL_OUT_1);
+	reg = pete_readl("drivers/usb/misc/qcom_eud.c:105", chip->base + EUD_REG_CTL_OUT_1);
 	chip->usb_attached = reg & EUD_INT_SAFE_MODE;
 }
 
@@ -115,10 +115,10 @@ static void pet_eud(struct eud_chip *chip)
 	 * disconnected and we need to detach the pet to check if EUD is in safe
 	 * mode before attaching again.
 	 */
-	reg = readl(chip->base + EUD_REG_SW_ATTACH_DET);
+	reg = pete_readl("drivers/usb/misc/qcom_eud.c:118", chip->base + EUD_REG_SW_ATTACH_DET);
 	if (reg & EUD_INT_PET_EUD) {
 		/* Detach & Attach pet for EUD */
-		writel(0, chip->base + EUD_REG_SW_ATTACH_DET);
+		pete_writel("drivers/usb/misc/qcom_eud.c:121", 0, chip->base + EUD_REG_SW_ATTACH_DET);
 		/* Delay to make sure detach pet is done before attach pet */
 		ret = readl_poll_timeout(chip->base + EUD_REG_SW_ATTACH_DET,
 					reg, (reg == 0), 1, 100);
@@ -128,7 +128,7 @@ static void pet_eud(struct eud_chip *chip)
 		}
 	}
 	/* Attach pet for EUD */
-	writel(EUD_INT_PET_EUD, chip->base + EUD_REG_SW_ATTACH_DET);
+	pete_writel("drivers/usb/misc/qcom_eud.c:131", EUD_INT_PET_EUD, chip->base + EUD_REG_SW_ATTACH_DET);
 }
 
 static irqreturn_t handle_eud_irq(int irq, void *data)
@@ -136,7 +136,7 @@ static irqreturn_t handle_eud_irq(int irq, void *data)
 	struct eud_chip *chip = data;
 	u32 reg;
 
-	reg = readl(chip->base + EUD_REG_INT_STATUS_1);
+	reg = pete_readl("drivers/usb/misc/qcom_eud.c:139", chip->base + EUD_REG_INT_STATUS_1);
 	switch (reg & EUD_INT_ALL) {
 	case EUD_INT_VBUS:
 		usb_attach_detach(chip);
@@ -162,8 +162,8 @@ static irqreturn_t handle_eud_irq_thread(int irq, void *data)
 		dev_err(chip->dev, "failed to set role switch\n");
 
 	/* set and clear vbus_int_clr[0] to clear interrupt */
-	writel(BIT(0), chip->base + EUD_REG_VBUS_INT_CLR);
-	writel(0, chip->base + EUD_REG_VBUS_INT_CLR);
+	pete_writel("drivers/usb/misc/qcom_eud.c:165", BIT(0), chip->base + EUD_REG_VBUS_INT_CLR);
+	pete_writel("drivers/usb/misc/qcom_eud.c:166", 0, chip->base + EUD_REG_VBUS_INT_CLR);
 
 	return IRQ_HANDLED;
 }

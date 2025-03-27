@@ -104,7 +104,7 @@ static map_word sbc_gxx_read8(struct map_info *map, unsigned long ofs)
 	map_word ret;
 	spin_lock(&sbc_gxx_spin);
 	sbc_gxx_page(map, ofs);
-	ret.x[0] = readb(iomapadr + (ofs & WINDOW_MASK));
+	ret.x[0] = pete_readb("drivers/mtd/maps/sbc_gxx.c:107", iomapadr + (ofs & WINDOW_MASK));
 	spin_unlock(&sbc_gxx_spin);
 	return ret;
 }
@@ -130,7 +130,7 @@ static void sbc_gxx_write8(struct map_info *map, map_word d, unsigned long adr)
 {
 	spin_lock(&sbc_gxx_spin);
 	sbc_gxx_page(map, adr);
-	writeb(d.x[0], iomapadr + (adr & WINDOW_MASK));
+	pete_writeb("drivers/mtd/maps/sbc_gxx.c:133", d.x[0], iomapadr + (adr & WINDOW_MASK));
 	spin_unlock(&sbc_gxx_spin);
 }
 

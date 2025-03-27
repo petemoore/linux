@@ -52,9 +52,9 @@ static void ipaq_micro_trigger_tx(struct ipaq_micro *micro)
 	tx->index = 0;
 
 	/* Enable interrupt */
-	val = readl(micro->base + UTCR3);
+	val = pete_readl("drivers/mfd/ipaq-micro.c:55", micro->base + UTCR3);
 	val |= UTCR3_TIE;
-	writel(val, micro->base + UTCR3);
+	pete_writel("drivers/mfd/ipaq-micro.c:57", val, micro->base + UTCR3);
 }
 
 int ipaq_micro_tx_msg(struct ipaq_micro *micro, struct ipaq_micro_msg *msg)
@@ -168,8 +168,8 @@ static void micro_rx_chars(struct ipaq_micro *micro)
 {
 	u32 status, ch;
 
-	while ((status = readl(micro->base + UTSR1)) & UTSR1_RNE) {
-		ch = readl(micro->base + UTDR);
+	while ((status = pete_readl("drivers/mfd/ipaq-micro.c:171", micro->base + UTSR1)) & UTSR1_RNE) {
+		ch = pete_readl("drivers/mfd/ipaq-micro.c:172", micro->base + UTDR);
 		if (status & UTSR1_PRE)
 			dev_err(micro->dev, "rx: parity error\n");
 		else if (status & UTSR1_FRE)
@@ -279,15 +279,15 @@ static void micro_tx_chars(struct ipaq_micro *micro)
 	u32 val;
 
 	while ((tx->index < tx->len) &&
-	       (readl(micro->base + UTSR1) & UTSR1_TNF)) {
-		writel(tx->buf[tx->index], micro->base + UTDR);
+	       (pete_readl("drivers/mfd/ipaq-micro.c:282", micro->base + UTSR1) & UTSR1_TNF)) {
+		pete_writel("drivers/mfd/ipaq-micro.c:283", tx->buf[tx->index], micro->base + UTDR);
 		tx->index++;
 	}
 
 	/* Stop interrupts */
-	val = readl(micro->base + UTCR3);
+	val = pete_readl("drivers/mfd/ipaq-micro.c:288", micro->base + UTCR3);
 	val &= ~UTCR3_TIE;
-	writel(val, micro->base + UTCR3);
+	pete_writel("drivers/mfd/ipaq-micro.c:290", val, micro->base + UTCR3);
 }
 
 static void micro_reset_comm(struct ipaq_micro *micro)
@@ -302,26 +302,26 @@ static void micro_reset_comm(struct ipaq_micro *micro)
 	rx->state = STATE_SOF;  /* Reset the state machine */
 
 	/* Set up interrupts */
-	writel(0x01, micro->sdlc + 0x0); /* Select UART mode */
+	pete_writel("drivers/mfd/ipaq-micro.c:305", 0x01, micro->sdlc + 0x0); /* Select UART mode */
 
 	/* Clean up CR3 */
-	writel(0x0, micro->base + UTCR3);
+	pete_writel("drivers/mfd/ipaq-micro.c:308", 0x0, micro->base + UTCR3);
 
 	/* Format: 8N1 */
-	writel(UTCR0_8BitData | UTCR0_1StpBit, micro->base + UTCR0);
+	pete_writel("drivers/mfd/ipaq-micro.c:311", UTCR0_8BitData | UTCR0_1StpBit, micro->base + UTCR0);
 
 	/* Baud rate: 115200 */
-	writel(0x0, micro->base + UTCR1);
-	writel(0x1, micro->base + UTCR2);
+	pete_writel("drivers/mfd/ipaq-micro.c:314", 0x0, micro->base + UTCR1);
+	pete_writel("drivers/mfd/ipaq-micro.c:315", 0x1, micro->base + UTCR2);
 
 	/* Clear SR0 */
-	writel(0xff, micro->base + UTSR0);
+	pete_writel("drivers/mfd/ipaq-micro.c:318", 0xff, micro->base + UTSR0);
 
 	/* Enable RX int, disable TX int */
-	writel(UTCR3_TXE | UTCR3_RXE | UTCR3_RIE, micro->base + UTCR3);
-	val = readl(micro->base + UTCR3);
+	pete_writel("drivers/mfd/ipaq-micro.c:321", UTCR3_TXE | UTCR3_RXE | UTCR3_RIE, micro->base + UTCR3);
+	val = pete_readl("drivers/mfd/ipaq-micro.c:322", micro->base + UTCR3);
 	val &= ~UTCR3_TIE;
-	writel(val, micro->base + UTCR3);
+	pete_writel("drivers/mfd/ipaq-micro.c:324", val, micro->base + UTCR3);
 }
 
 static irqreturn_t micro_serial_isr(int irq, void *dev_id)
@@ -330,24 +330,24 @@ static irqreturn_t micro_serial_isr(int irq, void *dev_id)
 	struct ipaq_micro_txdev *tx = &micro->tx;
 	u32 status;
 
-	status = readl(micro->base + UTSR0);
+	status = pete_readl("drivers/mfd/ipaq-micro.c:333", micro->base + UTSR0);
 	do {
 		if (status & (UTSR0_RID | UTSR0_RFS)) {
 			if (status & UTSR0_RID)
 				/* Clear the Receiver IDLE bit */
-				writel(UTSR0_RID, micro->base + UTSR0);
+				pete_writel("drivers/mfd/ipaq-micro.c:338", UTSR0_RID, micro->base + UTSR0);
 			micro_rx_chars(micro);
 		}
 
 		/* Clear break bits */
 		if (status & (UTSR0_RBB | UTSR0_REB))
-			writel(status & (UTSR0_RBB | UTSR0_REB),
+			pete_writel("drivers/mfd/ipaq-micro.c:344", status & (UTSR0_RBB | UTSR0_REB),
 			       micro->base + UTSR0);
 
 		if (status & UTSR0_TFS)
 			micro_tx_chars(micro);
 
-		status = readl(micro->base + UTSR0);
+		status = pete_readl("drivers/mfd/ipaq-micro.c:350", micro->base + UTSR0);
 
 	} while (((tx->index < tx->len) && (status & UTSR0_TFS)) ||
 		 (status & (UTSR0_RFS | UTSR0_RID)));

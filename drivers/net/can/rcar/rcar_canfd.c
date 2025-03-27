@@ -624,21 +624,21 @@ static inline u32 reg_gen4(struct rcar_canfd_global *gpriv,
 
 static inline void rcar_canfd_update(u32 mask, u32 val, u32 __iomem *reg)
 {
-	u32 data = readl(reg);
+	u32 data = pete_readl("drivers/net/can/rcar/rcar_canfd.c:627", reg);
 
 	data &= ~mask;
 	data |= (val & mask);
-	writel(data, reg);
+	pete_writel("drivers/net/can/rcar/rcar_canfd.c:631", data, reg);
 }
 
 static inline u32 rcar_canfd_read(void __iomem *base, u32 offset)
 {
-	return readl(base + (offset));
+	return pete_readl("drivers/net/can/rcar/rcar_canfd.c:636", base + (offset));
 }
 
 static inline void rcar_canfd_write(void __iomem *base, u32 offset, u32 val)
 {
-	writel(val, base + (offset));
+	pete_writel("drivers/net/can/rcar/rcar_canfd.c:641", val, base + (offset));
 }
 
 static void rcar_canfd_set_bit(void __iomem *base, u32 reg, u32 val)

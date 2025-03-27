@@ -568,7 +568,7 @@ static int mtk8250_probe(struct platform_device *pdev)
 #endif
 
 	/* Disable Rate Fix function */
-	writel(0x0, uart.port.membase +
+	pete_writel("drivers/tty/serial/8250/8250_mtk.c:571", 0x0, uart.port.membase +
 			(MTK_UART_RATE_FIX << uart.port.regshift));
 
 	platform_set_drvdata(pdev, data);

@@ -133,9 +133,9 @@ static inline int starfive_trng_wait_idle(struct starfive_trng *trng)
 static inline void starfive_trng_irq_mask_clear(struct starfive_trng *trng)
 {
 	/* clear register: ISTAT */
-	u32 data = readl(trng->base + STARFIVE_ISTAT);
+	u32 data = pete_readl("drivers/char/hw_random/jh7110-trng.c:136", trng->base + STARFIVE_ISTAT);
 
-	writel(data, trng->base + STARFIVE_ISTAT);
+	pete_writel("drivers/char/hw_random/jh7110-trng.c:138", data, trng->base + STARFIVE_ISTAT);
 }
 
 static int starfive_trng_cmd(struct starfive_trng *trng, u32 cmd, bool wait)
@@ -150,7 +150,7 @@ static int starfive_trng_cmd(struct starfive_trng *trng, u32 cmd, bool wait)
 	case STARFIVE_CTRL_GENE_RANDNUM:
 		reinit_completion(&trng->random_done);
 		spin_lock_irq(&trng->write_lock);
-		writel(cmd, trng->base + STARFIVE_CTRL);
+		pete_writel("drivers/char/hw_random/jh7110-trng.c:153", cmd, trng->base + STARFIVE_CTRL);
 		spin_unlock_irq(&trng->write_lock);
 		if (!wait_for_completion_timeout(&trng->random_done, usecs_to_jiffies(wait_time)))
 			return -ETIMEDOUT;
@@ -158,7 +158,7 @@ static int starfive_trng_cmd(struct starfive_trng *trng, u32 cmd, bool wait)
 	case STARFIVE_CTRL_EXEC_RANDRESEED:
 		reinit_completion(&trng->reseed_done);
 		spin_lock_irq(&trng->write_lock);
-		writel(cmd, trng->base + STARFIVE_CTRL);
+		pete_writel("drivers/char/hw_random/jh7110-trng.c:161", cmd, trng->base + STARFIVE_CTRL);
 		spin_unlock_irq(&trng->write_lock);
 		if (!wait_for_completion_timeout(&trng->reseed_done, usecs_to_jiffies(wait_time)))
 			return -ETIMEDOUT;
@@ -176,16 +176,16 @@ static int starfive_trng_init(struct hwrng *rng)
 	u32 mode, intr = 0;
 
 	/* setup Auto Request/Age register */
-	writel(autoage, trng->base + STARFIVE_AUTO_AGE);
-	writel(autoreq, trng->base + STARFIVE_AUTO_RQSTS);
+	pete_writel("drivers/char/hw_random/jh7110-trng.c:179", autoage, trng->base + STARFIVE_AUTO_AGE);
+	pete_writel("drivers/char/hw_random/jh7110-trng.c:180", autoreq, trng->base + STARFIVE_AUTO_RQSTS);
 
 	/* clear register: ISTAT */
 	starfive_trng_irq_mask_clear(trng);
 
 	intr |= STARFIVE_IE_ALL;
-	writel(intr, trng->base + STARFIVE_IE);
+	pete_writel("drivers/char/hw_random/jh7110-trng.c:186", intr, trng->base + STARFIVE_IE);
 
-	mode  = readl(trng->base + STARFIVE_MODE);
+	mode  = pete_readl("drivers/char/hw_random/jh7110-trng.c:188", trng->base + STARFIVE_MODE);
 
 	switch (trng->mode) {
 	case PRNG_128BIT:
@@ -199,7 +199,7 @@ static int starfive_trng_init(struct hwrng *rng)
 		break;
 	}
 
-	writel(mode, trng->base + STARFIVE_MODE);
+	pete_writel("drivers/char/hw_random/jh7110-trng.c:202", mode, trng->base + STARFIVE_MODE);
 
 	return starfive_trng_cmd(trng, STARFIVE_CTRL_EXEC_RANDRESEED, 1);
 }
@@ -209,22 +209,22 @@ static irqreturn_t starfive_trng_irq(int irq, void *priv)
 	u32 status;
 	struct starfive_trng *trng = (struct starfive_trng *)priv;
 
-	status = readl(trng->base + STARFIVE_ISTAT);
+	status = pete_readl("drivers/char/hw_random/jh7110-trng.c:212", trng->base + STARFIVE_ISTAT);
 	if (status & STARFIVE_ISTAT_RAND_RDY) {
-		writel(STARFIVE_ISTAT_RAND_RDY, trng->base + STARFIVE_ISTAT);
+		pete_writel("drivers/char/hw_random/jh7110-trng.c:214", STARFIVE_ISTAT_RAND_RDY, trng->base + STARFIVE_ISTAT);
 		complete(&trng->random_done);
 	}
 
 	if (status & STARFIVE_ISTAT_SEED_DONE) {
-		writel(STARFIVE_ISTAT_SEED_DONE, trng->base + STARFIVE_ISTAT);
+		pete_writel("drivers/char/hw_random/jh7110-trng.c:219", STARFIVE_ISTAT_SEED_DONE, trng->base + STARFIVE_ISTAT);
 		complete(&trng->reseed_done);
 	}
 
 	if (status & STARFIVE_ISTAT_LFSR_LOCKUP) {
-		writel(STARFIVE_ISTAT_LFSR_LOCKUP, trng->base + STARFIVE_ISTAT);
+		pete_writel("drivers/char/hw_random/jh7110-trng.c:224", STARFIVE_ISTAT_LFSR_LOCKUP, trng->base + STARFIVE_ISTAT);
 		/* SEU occurred, reseeding required*/
 		spin_lock(&trng->write_lock);
-		writel(STARFIVE_CTRL_EXEC_RANDRESEED, trng->base + STARFIVE_CTRL);
+		pete_writel("drivers/char/hw_random/jh7110-trng.c:227", STARFIVE_CTRL_EXEC_RANDRESEED, trng->base + STARFIVE_CTRL);
 		spin_unlock(&trng->write_lock);
 	}
 
@@ -235,7 +235,7 @@ static void starfive_trng_cleanup(struct hwrng *rng)
 {
 	struct starfive_trng *trng = to_trng(rng);
 
-	writel(0, trng->base + STARFIVE_CTRL);
+	pete_writel("drivers/char/hw_random/jh7110-trng.c:238", 0, trng->base + STARFIVE_CTRL);
 
 	reset_control_assert(trng->rst);
 	clk_disable_unprepare(trng->hclk);

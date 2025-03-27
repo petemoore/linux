@@ -497,11 +497,11 @@ int vpu_malone_config_stream_buffer(struct vpu_shared_addr *shared,
 	struct vpu_dec_ctrl *hc = shared->priv;
 	struct vpu_malone_str_buffer __iomem *str_buf = hc->str_buf[instance];
 
-	writel(buf->phys, &str_buf->start);
-	writel(buf->phys, &str_buf->rptr);
-	writel(buf->phys, &str_buf->wptr);
-	writel(buf->phys + buf->length, &str_buf->end);
-	writel(0x1, &str_buf->lwm);
+	pete_writel("drivers/media/platform/amphion/vpu_malone.c:500", buf->phys, &str_buf->start);
+	pete_writel("drivers/media/platform/amphion/vpu_malone.c:501", buf->phys, &str_buf->rptr);
+	pete_writel("drivers/media/platform/amphion/vpu_malone.c:502", buf->phys, &str_buf->wptr);
+	pete_writel("drivers/media/platform/amphion/vpu_malone.c:503", buf->phys + buf->length, &str_buf->end);
+	pete_writel("drivers/media/platform/amphion/vpu_malone.c:504", 0x1, &str_buf->lwm);
 
 	iface->stream_buffer_desc[instance][0] = hc->buf_addr[instance];
 
@@ -516,10 +516,10 @@ int vpu_malone_get_stream_buffer_desc(struct vpu_shared_addr *shared,
 	struct vpu_malone_str_buffer __iomem *str_buf = hc->str_buf[instance];
 
 	if (desc) {
-		desc->wptr = readl(&str_buf->wptr);
-		desc->rptr = readl(&str_buf->rptr);
-		desc->start = readl(&str_buf->start);
-		desc->end = readl(&str_buf->end);
+		desc->wptr = pete_readl("drivers/media/platform/amphion/vpu_malone.c:519", &str_buf->wptr);
+		desc->rptr = pete_readl("drivers/media/platform/amphion/vpu_malone.c:520", &str_buf->rptr);
+		desc->start = pete_readl("drivers/media/platform/amphion/vpu_malone.c:521", &str_buf->start);
+		desc->end = pete_readl("drivers/media/platform/amphion/vpu_malone.c:522", &str_buf->end);
 	}
 
 	return 0;
@@ -529,14 +529,14 @@ static void vpu_malone_update_wptr(struct vpu_malone_str_buffer __iomem *str_buf
 {
 	/*update wptr after data is written*/
 	mb();
-	writel(wptr, &str_buf->wptr);
+	pete_writel("drivers/media/platform/amphion/vpu_malone.c:532", wptr, &str_buf->wptr);
 }
 
 static void vpu_malone_update_rptr(struct vpu_malone_str_buffer __iomem *str_buf, u32 rptr)
 {
 	/*update rptr after data is read*/
 	mb();
-	writel(rptr, &str_buf->rptr);
+	pete_writel("drivers/media/platform/amphion/vpu_malone.c:539", rptr, &str_buf->rptr);
 }
 
 int vpu_malone_update_stream_buffer(struct vpu_shared_addr *shared,
@@ -1065,7 +1065,7 @@ static int vpu_malone_add_padding_scode(struct vpu_buffer *stream_buffer,
 	if (!ps)
 		return -EINVAL;
 
-	wptr = readl(&str_buf->wptr);
+	wptr = pete_readl("drivers/media/platform/amphion/vpu_malone.c:1068", &str_buf->wptr);
 	if (wptr < stream_buffer->phys || wptr > stream_buffer->phys + stream_buffer->length)
 		return -EINVAL;
 	if (wptr == stream_buffer->phys + stream_buffer->length)
@@ -1530,7 +1530,7 @@ static int vpu_malone_input_frame_data(struct vpu_malone_str_buffer __iomem *str
 {
 	struct malone_scode_t scode;
 	struct vb2_v4l2_buffer *vbuf = to_vb2_v4l2_buffer(vb);
-	u32 wptr = readl(&str_buf->wptr);
+	u32 wptr = pete_readl("drivers/media/platform/amphion/vpu_malone.c:1533", &str_buf->wptr);
 	int size = 0;
 	int ret = 0;
 
@@ -1584,7 +1584,7 @@ static int vpu_malone_input_frame_data(struct vpu_malone_str_buffer __iomem *str
 static int vpu_malone_input_stream_data(struct vpu_malone_str_buffer __iomem *str_buf,
 					struct vpu_inst *inst, struct vb2_buffer *vb)
 {
-	u32 wptr = readl(&str_buf->wptr);
+	u32 wptr = pete_readl("drivers/media/platform/amphion/vpu_malone.c:1587", &str_buf->wptr);
 	int ret = 0;
 
 	ret = vpu_helper_copy_to_stream_buffer(&inst->stream_buffer,

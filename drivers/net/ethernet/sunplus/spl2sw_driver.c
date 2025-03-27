@@ -35,9 +35,9 @@ static int spl2sw_ethernet_open(struct net_device *ndev)
 	spl2sw_mac_hw_start(comm);
 
 	/* Enable TX and RX interrupts */
-	mask = readl(comm->l2sw_reg_base + L2SW_SW_INT_MASK_0);
+	mask = pete_readl("drivers/net/ethernet/sunplus/spl2sw_driver.c:38", comm->l2sw_reg_base + L2SW_SW_INT_MASK_0);
 	mask &= ~(MAC_INT_TX | MAC_INT_RX);
-	writel(mask, comm->l2sw_reg_base + L2SW_SW_INT_MASK_0);
+	pete_writel("drivers/net/ethernet/sunplus/spl2sw_driver.c:40", mask, comm->l2sw_reg_base + L2SW_SW_INT_MASK_0);
 
 	phy_start(ndev->phydev);
 
@@ -130,7 +130,7 @@ static netdev_tx_t spl2sw_ethernet_start_xmit(struct sk_buff *skb,
 	wmb();		/* make sure settings are effective. */
 
 	/* Trigger mac to transmit */
-	writel(MAC_TRIG_L_SOC0, comm->l2sw_reg_base + L2SW_CPU_TX_TRIG);
+	pete_writel("drivers/net/ethernet/sunplus/spl2sw_driver.c:133", MAC_TRIG_L_SOC0, comm->l2sw_reg_base + L2SW_CPU_TX_TRIG);
 
 	spin_unlock_irqrestore(&comm->tx_lock, flags);
 	return NETDEV_TX_OK;

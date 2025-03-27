@@ -506,7 +506,7 @@ static ssize_t remote_settings_file_read(struct file *file, char __user *buf, si
 	unsigned int value;
 	char lbuf[20];
 
-	value = readl(address);
+	value = pete_readl("drivers/misc/ibmasm/ibmasmfs.c:509", address);
 	len = snprintf(lbuf, sizeof(lbuf), "%d\n", value);
 
 	return simple_read_from_buffer(buf, count, offset, lbuf, len);
@@ -536,7 +536,7 @@ static ssize_t remote_settings_file_write(struct file *file, const char __user *
 	}
 
 	value = simple_strtoul(buff, NULL, 10);
-	writel(value, address);
+	pete_writel("drivers/misc/ibmasm/ibmasmfs.c:539", value, address);
 	kfree(buff);
 
 	return count;

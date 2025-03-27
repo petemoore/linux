@@ -42,8 +42,8 @@
  */
 static void set_reg_bit_32(void __iomem *ptr, u32 mask)
 {
-	mask = readl(ptr) | mask;
-	writel(mask, ptr);
+	mask = pete_readl("drivers/usb/gadget/udc/cdns2/cdns2-gadget.c:45", ptr) | mask;
+	pete_writel("drivers/usb/gadget/udc/cdns2/cdns2-gadget.c:46", mask, ptr);
 }
 
 /*
@@ -53,22 +53,22 @@ static void set_reg_bit_32(void __iomem *ptr, u32 mask)
  */
 static void clear_reg_bit_32(void __iomem *ptr, u32 mask)
 {
-	mask = readl(ptr) & ~mask;
-	writel(mask, ptr);
+	mask = pete_readl("drivers/usb/gadget/udc/cdns2/cdns2-gadget.c:56", ptr) & ~mask;
+	pete_writel("drivers/usb/gadget/udc/cdns2/cdns2-gadget.c:57", mask, ptr);
 }
 
 /* Clear bit in given 8 bits register. */
 static void clear_reg_bit_8(void __iomem *ptr, u8 mask)
 {
-	mask = readb(ptr) & ~mask;
-	writeb(mask, ptr);
+	mask = pete_readb("drivers/usb/gadget/udc/cdns2/cdns2-gadget.c:63", ptr) & ~mask;
+	pete_writeb("drivers/usb/gadget/udc/cdns2/cdns2-gadget.c:64", mask, ptr);
 }
 
 /* Set bit in given 16 bits register. */
 void set_reg_bit_8(void __iomem *ptr, u8 mask)
 {
-	mask = readb(ptr) | mask;
-	writeb(mask, ptr);
+	mask = pete_readb("drivers/usb/gadget/udc/cdns2/cdns2-gadget.c:70", ptr) | mask;
+	pete_writeb("drivers/usb/gadget/udc/cdns2/cdns2-gadget.c:71", mask, ptr);
 }
 
 static int cdns2_get_dma_pos(struct cdns2_device *pdev,
@@ -76,7 +76,7 @@ static int cdns2_get_dma_pos(struct cdns2_device *pdev,
 {
 	int dma_index;
 
-	dma_index = readl(&pdev->adma_regs->ep_traddr) - pep->ring.dma;
+	dma_index = pete_readl("drivers/usb/gadget/udc/cdns2/cdns2-gadget.c:79", &pdev->adma_regs->ep_traddr) - pep->ring.dma;
 
 	return dma_index / TRB_SIZE;
 }
@@ -93,7 +93,7 @@ void cdns2_select_ep(struct cdns2_device *pdev, u32 ep)
 		return;
 
 	pdev->selected_ep = ep;
-	writel(ep, &pdev->adma_regs->ep_sel);
+	pete_writel("drivers/usb/gadget/udc/cdns2/cdns2-gadget.c:96", ep, &pdev->adma_regs->ep_sel);
 }
 
 dma_addr_t cdns2_trb_virt_to_dma(struct cdns2_endpoint *pep,
@@ -157,7 +157,7 @@ static void cdns2_ep_stall_flush(struct cdns2_endpoint *pep)
 
 	trace_cdns2_ep_halt(pep, 1, 1);
 
-	writel(DMA_EP_CMD_DFLUSH, &pdev->adma_regs->ep_cmd);
+	pete_writel("drivers/usb/gadget/udc/cdns2/cdns2-gadget.c:160", DMA_EP_CMD_DFLUSH, &pdev->adma_regs->ep_cmd);
 
 	/* Wait for DFLUSH cleared. */
 	readl_poll_timeout_atomic(&pdev->adma_regs->ep_cmd, val,
@@ -206,7 +206,7 @@ static void cdns2_enable_l1(struct cdns2_device *pdev, int enable)
 {
 	if (enable) {
 		clear_reg_bit_8(&pdev->usb_regs->usbcs, USBCS_LPMNYET);
-		writeb(LPMCLOCK_SLEEP_ENTRY, &pdev->usb_regs->lpmclock);
+		pete_writeb("drivers/usb/gadget/udc/cdns2/cdns2-gadget.c:209", LPMCLOCK_SLEEP_ENTRY, &pdev->usb_regs->lpmclock);
 	} else {
 		set_reg_bit_8(&pdev->usb_regs->usbcs, USBCS_LPMNYET);
 	}
@@ -214,7 +214,7 @@ static void cdns2_enable_l1(struct cdns2_device *pdev, int enable)
 
 static enum usb_device_speed cdns2_get_speed(struct cdns2_device *pdev)
 {
-	u8 speed = readb(&pdev->usb_regs->speedctrl);
+	u8 speed = pete_readb("drivers/usb/gadget/udc/cdns2/cdns2-gadget.c:217", &pdev->usb_regs->speedctrl);
 
 	if (speed & SPEEDCTRL_HS)
 		return USB_SPEED_HIGH;
@@ -285,7 +285,7 @@ static int cdns2_wa1_update_guard(struct cdns2_endpoint *pep,
 	if (!pep->wa1_set) {
 		u32 doorbell;
 
-		doorbell = !!(readl(&pdev->adma_regs->ep_cmd) & DMA_EP_CMD_DRDY);
+		doorbell = !!(pete_readl("drivers/usb/gadget/udc/cdns2/cdns2-gadget.c:288", &pdev->adma_regs->ep_cmd) & DMA_EP_CMD_DRDY);
 
 		if (doorbell) {
 			pep->wa1_cycle_bit = pep->ring.pcs ? TRB_CYCLE : 0;
@@ -305,7 +305,7 @@ static void cdns2_wa1_tray_restore_cycle_bit(struct cdns2_device *pdev,
 	int dma_index;
 	u32 doorbell;
 
-	doorbell = !!(readl(&pdev->adma_regs->ep_cmd) & DMA_EP_CMD_DRDY);
+	doorbell = !!(pete_readl("drivers/usb/gadget/udc/cdns2/cdns2-gadget.c:308", &pdev->adma_regs->ep_cmd) & DMA_EP_CMD_DRDY);
 	dma_index = cdns2_get_dma_pos(pdev, pep);
 
 	if (!doorbell || dma_index != pep->wa1_trb_index)
@@ -330,7 +330,7 @@ static int cdns2_prepare_ring(struct cdns2_device *pdev,
 	}
 
 	if ((ring->enqueue + num_trbs)  >= (TRBS_PER_SEGMENT - 1)) {
-		doorbell = !!(readl(&pdev->adma_regs->ep_cmd) & DMA_EP_CMD_DRDY);
+		doorbell = !!(pete_readl("drivers/usb/gadget/udc/cdns2/cdns2-gadget.c:333", &pdev->adma_regs->ep_cmd) & DMA_EP_CMD_DRDY);
 		dma_index = cdns2_get_dma_pos(pdev, pep);
 
 		/* Driver can't update LINK TRB if it is current processed. */
@@ -696,16 +696,16 @@ static void cdns2_set_drdy(struct cdns2_device *pdev,
 	dma_wmb();
 
 	/* Clearing TRBERR and DESCMIS before setting DRDY. */
-	writel(DMA_EP_STS_TRBERR | DMA_EP_STS_DESCMIS,
+	pete_writel("drivers/usb/gadget/udc/cdns2/cdns2-gadget.c:699", DMA_EP_STS_TRBERR | DMA_EP_STS_DESCMIS,
 	       &pdev->adma_regs->ep_sts);
-	writel(DMA_EP_CMD_DRDY, &pdev->adma_regs->ep_cmd);
+	pete_writel("drivers/usb/gadget/udc/cdns2/cdns2-gadget.c:701", DMA_EP_CMD_DRDY, &pdev->adma_regs->ep_cmd);
 
-	if (readl(&pdev->adma_regs->ep_sts) & DMA_EP_STS_TRBERR) {
-		writel(DMA_EP_STS_TRBERR, &pdev->adma_regs->ep_sts);
-		writel(DMA_EP_CMD_DRDY, &pdev->adma_regs->ep_cmd);
+	if (pete_readl("drivers/usb/gadget/udc/cdns2/cdns2-gadget.c:703", &pdev->adma_regs->ep_sts) & DMA_EP_STS_TRBERR) {
+		pete_writel("drivers/usb/gadget/udc/cdns2/cdns2-gadget.c:704", DMA_EP_STS_TRBERR, &pdev->adma_regs->ep_sts);
+		pete_writel("drivers/usb/gadget/udc/cdns2/cdns2-gadget.c:705", DMA_EP_CMD_DRDY, &pdev->adma_regs->ep_cmd);
 	}
 
-	trace_cdns2_doorbell_epx(pep, readl(&pdev->adma_regs->ep_traddr));
+	trace_cdns2_doorbell_epx(pep, pete_readl("drivers/usb/gadget/udc/cdns2/cdns2-gadget.c:708", &pdev->adma_regs->ep_traddr));
 }
 
 static int cdns2_prepare_first_isoc_transfer(struct cdns2_device *pdev,
@@ -715,12 +715,12 @@ static int cdns2_prepare_first_isoc_transfer(struct cdns2_device *pdev,
 	u32 buffer;
 	u8 hw_ccs;
 
-	if ((readl(&pdev->adma_regs->ep_cmd) & DMA_EP_CMD_DRDY))
+	if ((pete_readl("drivers/usb/gadget/udc/cdns2/cdns2-gadget.c:718", &pdev->adma_regs->ep_cmd) & DMA_EP_CMD_DRDY))
 		return -EBUSY;
 
 	if (!pep->dir) {
 		set_reg_bit_32(&pdev->adma_regs->ep_cfg, DMA_EP_CFG_ENABLE);
-		writel(pep->ring.dma + pep->ring.dequeue,
+		pete_writel("drivers/usb/gadget/udc/cdns2/cdns2-gadget.c:723", pep->ring.dma + pep->ring.dequeue,
 		       &pdev->adma_regs->ep_traddr);
 		return 0;
 	}
@@ -730,7 +730,7 @@ static int cdns2_prepare_first_isoc_transfer(struct cdns2_device *pdev,
 	 * driver prepares 0 length packet as first packet.
 	 */
 	buffer = pep->ring.dma + pep->ring.dequeue * TRB_SIZE;
-	hw_ccs = !!DMA_EP_STS_CCS(readl(&pdev->adma_regs->ep_sts));
+	hw_ccs = !!DMA_EP_STS_CCS(pete_readl("drivers/usb/gadget/udc/cdns2/cdns2-gadget.c:733", &pdev->adma_regs->ep_sts));
 
 	trb = &pep->ring.trbs[TRBS_PER_SEGMENT];
 	trb->length = 0;
@@ -751,7 +751,7 @@ static int cdns2_prepare_first_isoc_transfer(struct cdns2_device *pdev,
 		trb->control |= cpu_to_le32(TRB_TOGGLE);
 
 	set_reg_bit_32(&pdev->adma_regs->ep_cfg, DMA_EP_CFG_ENABLE);
-	writel(pep->ring.dma + (TRBS_PER_SEGMENT * TRB_SIZE),
+	pete_writel("drivers/usb/gadget/udc/cdns2/cdns2-gadget.c:754", pep->ring.dma + (TRBS_PER_SEGMENT * TRB_SIZE),
 	       &pdev->adma_regs->ep_traddr);
 
 	return 0;
@@ -887,7 +887,7 @@ static bool cdns2_trb_handled(struct cdns2_endpoint *pep,
 
 	ring = &pep->ring;
 	current_index = cdns2_get_dma_pos(pdev, pep);
-	doorbell = !!(readl(&pdev->adma_regs->ep_cmd) & DMA_EP_CMD_DRDY);
+	doorbell = !!(pete_readl("drivers/usb/gadget/udc/cdns2/cdns2-gadget.c:890", &pdev->adma_regs->ep_cmd) & DMA_EP_CMD_DRDY);
 
 	/*
 	 * Only ISO transfer can use 2 entries outside the standard
@@ -1060,12 +1060,12 @@ static void cdns2_rearm_transfer(struct cdns2_endpoint *pep, u8 rearm)
 		/* Cycle Bit must be updated before arming DMA. */
 		dma_wmb();
 
-		writel(DMA_EP_CMD_DRDY, &pdev->adma_regs->ep_cmd);
+		pete_writel("drivers/usb/gadget/udc/cdns2/cdns2-gadget.c:1063", DMA_EP_CMD_DRDY, &pdev->adma_regs->ep_cmd);
 
 		cdns2_wakeup(pdev);
 
 		trace_cdns2_doorbell_epx(pep,
-					 readl(&pdev->adma_regs->ep_traddr));
+					 pete_readl("drivers/usb/gadget/udc/cdns2/cdns2-gadget.c:1068", &pdev->adma_regs->ep_traddr));
 	}
 }
 
@@ -1080,16 +1080,16 @@ static void cdns2_handle_epx_interrupt(struct cdns2_endpoint *pep)
 
 	trace_cdns2_epx_irq(pdev, pep);
 
-	ep_sts_reg = readl(&pdev->adma_regs->ep_sts);
-	writel(ep_sts_reg, &pdev->adma_regs->ep_sts);
+	ep_sts_reg = pete_readl("drivers/usb/gadget/udc/cdns2/cdns2-gadget.c:1083", &pdev->adma_regs->ep_sts);
+	pete_writel("drivers/usb/gadget/udc/cdns2/cdns2-gadget.c:1084", ep_sts_reg, &pdev->adma_regs->ep_sts);
 
 	if (pep->type == USB_ENDPOINT_XFER_ISOC) {
 		u8 mult;
 		u8 cs;
 
 		mult = USB_EP_MAXP_MULT(pep->endpoint.desc->wMaxPacketSize);
-		cs = pep->dir ? readb(&pdev->epx_regs->ep[pep->num - 1].txcs) :
-				readb(&pdev->epx_regs->ep[pep->num - 1].rxcs);
+		cs = pep->dir ? pete_readb("drivers/usb/gadget/udc/cdns2/cdns2-gadget.c:1091", &pdev->epx_regs->ep[pep->num - 1].txcs) :
+				pete_readb("drivers/usb/gadget/udc/cdns2/cdns2-gadget.c:1092", &pdev->epx_regs->ep[pep->num - 1].rxcs);
 		if (mult > 0)
 			isoerror = EPX_CS_ERR(cs);
 	}
@@ -1106,7 +1106,7 @@ static void cdns2_handle_epx_interrupt(struct cdns2_endpoint *pep)
 		readl_poll_timeout_atomic(&pdev->adma_regs->ep_sts, val,
 					  !(val & DMA_EP_STS_DBUSY), 1, 125);
 
-		writel(DMA_EP_CMD_DFLUSH, &pep->pdev->adma_regs->ep_cmd);
+		pete_writel("drivers/usb/gadget/udc/cdns2/cdns2-gadget.c:1109", DMA_EP_CMD_DFLUSH, &pep->pdev->adma_regs->ep_cmd);
 
 		/* Wait for DFLUSH cleared. */
 		readl_poll_timeout_atomic(&pep->pdev->adma_regs->ep_cmd, val,
@@ -1178,30 +1178,30 @@ static irqreturn_t cdns2_usb_irq_handler(int irq, void *data)
 	if (pdev->in_lpm)
 		return IRQ_NONE;
 
-	reg_usb_irq_m = readb(&pdev->interrupt_regs->usbien);
-	reg_ext_irq_m = readb(&pdev->interrupt_regs->extien);
+	reg_usb_irq_m = pete_readb("drivers/usb/gadget/udc/cdns2/cdns2-gadget.c:1181", &pdev->interrupt_regs->usbien);
+	reg_ext_irq_m = pete_readb("drivers/usb/gadget/udc/cdns2/cdns2-gadget.c:1182", &pdev->interrupt_regs->extien);
 
 	/* Mask all sources of interrupt. */
-	writeb(0, &pdev->interrupt_regs->usbien);
-	writeb(0, &pdev->interrupt_regs->extien);
-	writel(0, &pdev->adma_regs->ep_ien);
+	pete_writeb("drivers/usb/gadget/udc/cdns2/cdns2-gadget.c:1185", 0, &pdev->interrupt_regs->usbien);
+	pete_writeb("drivers/usb/gadget/udc/cdns2/cdns2-gadget.c:1186", 0, &pdev->interrupt_regs->extien);
+	pete_writel("drivers/usb/gadget/udc/cdns2/cdns2-gadget.c:1187", 0, &pdev->adma_regs->ep_ien);
 
 	/* Clear interrupt sources. */
-	writel(0, &pdev->adma_regs->ep_sts);
-	writeb(0, &pdev->interrupt_regs->usbirq);
-	writeb(0, &pdev->interrupt_regs->extirq);
+	pete_writel("drivers/usb/gadget/udc/cdns2/cdns2-gadget.c:1190", 0, &pdev->adma_regs->ep_sts);
+	pete_writeb("drivers/usb/gadget/udc/cdns2/cdns2-gadget.c:1191", 0, &pdev->interrupt_regs->usbirq);
+	pete_writeb("drivers/usb/gadget/udc/cdns2/cdns2-gadget.c:1192", 0, &pdev->interrupt_regs->extirq);
 
-	reg_ep_ists = readl(&pdev->adma_regs->ep_ists);
-	reg_usb_irq = readb(&pdev->interrupt_regs->usbirq);
-	reg_ext_irq = readb(&pdev->interrupt_regs->extirq);
+	reg_ep_ists = pete_readl("drivers/usb/gadget/udc/cdns2/cdns2-gadget.c:1194", &pdev->adma_regs->ep_ists);
+	reg_usb_irq = pete_readb("drivers/usb/gadget/udc/cdns2/cdns2-gadget.c:1195", &pdev->interrupt_regs->usbirq);
+	reg_ext_irq = pete_readb("drivers/usb/gadget/udc/cdns2/cdns2-gadget.c:1196", &pdev->interrupt_regs->extirq);
 
 	if (reg_ep_ists || (reg_usb_irq & reg_usb_irq_m) ||
 	    (reg_ext_irq & reg_ext_irq_m))
 		return IRQ_WAKE_THREAD;
 
-	writeb(USB_IEN_INIT, &pdev->interrupt_regs->usbien);
-	writeb(EXTIRQ_WAKEUP, &pdev->interrupt_regs->extien);
-	writel(~0, &pdev->adma_regs->ep_ien);
+	pete_writeb("drivers/usb/gadget/udc/cdns2/cdns2-gadget.c:1202", USB_IEN_INIT, &pdev->interrupt_regs->usbien);
+	pete_writeb("drivers/usb/gadget/udc/cdns2/cdns2-gadget.c:1203", EXTIRQ_WAKEUP, &pdev->interrupt_regs->extien);
+	pete_writel("drivers/usb/gadget/udc/cdns2/cdns2-gadget.c:1204", ~0, &pdev->adma_regs->ep_ien);
 
 	return IRQ_NONE;
 }
@@ -1212,11 +1212,11 @@ static irqreturn_t cdns2_thread_usb_irq_handler(struct cdns2_device *pdev)
 	int speed;
 	int i;
 
-	ext_irq = readb(&pdev->interrupt_regs->extirq) & EXTIRQ_WAKEUP;
-	writeb(ext_irq, &pdev->interrupt_regs->extirq);
+	ext_irq = pete_readb("drivers/usb/gadget/udc/cdns2/cdns2-gadget.c:1215", &pdev->interrupt_regs->extirq) & EXTIRQ_WAKEUP;
+	pete_writeb("drivers/usb/gadget/udc/cdns2/cdns2-gadget.c:1216", ext_irq, &pdev->interrupt_regs->extirq);
 
-	usb_irq = readb(&pdev->interrupt_regs->usbirq) & USB_IEN_INIT;
-	writeb(usb_irq, &pdev->interrupt_regs->usbirq);
+	usb_irq = pete_readb("drivers/usb/gadget/udc/cdns2/cdns2-gadget.c:1218", &pdev->interrupt_regs->usbirq) & USB_IEN_INIT;
+	pete_writeb("drivers/usb/gadget/udc/cdns2/cdns2-gadget.c:1219", usb_irq, &pdev->interrupt_regs->usbirq);
 
 	if (!ext_irq && !usb_irq)
 		return IRQ_NONE;
@@ -1232,11 +1232,11 @@ static irqreturn_t cdns2_thread_usb_irq_handler(struct cdns2_device *pdev)
 	}
 
 	if (usb_irq & USBIRQ_LPM) {
-		u8 reg = readb(&pdev->usb_regs->lpmctrl);
+		u8 reg = pete_readb("drivers/usb/gadget/udc/cdns2/cdns2-gadget.c:1235", &pdev->usb_regs->lpmctrl);
 
 		/* LPM1 enter */
 		if (!(reg & LPMCTRLLH_LPMNYET))
-			writeb(0, &pdev->usb_regs->sleep_clkgate);
+			pete_writeb("drivers/usb/gadget/udc/cdns2/cdns2-gadget.c:1239", 0, &pdev->usb_regs->sleep_clkgate);
 	}
 
 	if (usb_irq & USBIRQ_SUSPEND) {
@@ -1297,7 +1297,7 @@ static irqreturn_t cdns2_thread_irq_handler(int irq, void *data)
 
 	cdns2_thread_usb_irq_handler(pdev);
 
-	dma_ep_ists = readl(&pdev->adma_regs->ep_ists);
+	dma_ep_ists = pete_readl("drivers/usb/gadget/udc/cdns2/cdns2-gadget.c:1300", &pdev->adma_regs->ep_ists);
 	if (!dma_ep_ists)
 		goto unlock;
 
@@ -1326,9 +1326,9 @@ static irqreturn_t cdns2_thread_irq_handler(int irq, void *data)
 	}
 
 unlock:
-	writel(~0, &pdev->adma_regs->ep_ien);
-	writeb(USB_IEN_INIT, &pdev->interrupt_regs->usbien);
-	writeb(EXTIRQ_WAKEUP, &pdev->interrupt_regs->extien);
+	pete_writel("drivers/usb/gadget/udc/cdns2/cdns2-gadget.c:1329", ~0, &pdev->adma_regs->ep_ien);
+	pete_writeb("drivers/usb/gadget/udc/cdns2/cdns2-gadget.c:1330", USB_IEN_INIT, &pdev->interrupt_regs->usbien);
+	pete_writeb("drivers/usb/gadget/udc/cdns2/cdns2-gadget.c:1331", EXTIRQ_WAKEUP, &pdev->interrupt_regs->extien);
 
 	spin_unlock_irqrestore(&pdev->lock, flags);
 	local_bh_enable();
@@ -1377,7 +1377,7 @@ static void cdns2_eps_onchip_buffer_init(struct cdns2_device *pdev)
 
 			pep->buffering = free;
 
-			writel(tx_offset,
+			pete_writel("drivers/usb/gadget/udc/cdns2/cdns2-gadget.c:1380", tx_offset,
 			       &pdev->epx_regs->txstaddr[pep->num - 1]);
 			pdev->epx_regs->txstaddr[pep->num - 1] = tx_offset;
 
@@ -1396,7 +1396,7 @@ static void cdns2_eps_onchip_buffer_init(struct cdns2_device *pdev)
 			min_buf_rx = min_buf_rx - pep->buffering + free;
 
 			pep->buffering = free;
-			writel(rx_offset,
+			pete_writel("drivers/usb/gadget/udc/cdns2/cdns2-gadget.c:1399", rx_offset,
 			       &pdev->epx_regs->rxstaddr[pep->num - 1]);
 
 			dev_dbg(pdev->dev, "%s onchip address %04x, buffering: %d\n",
@@ -1454,17 +1454,17 @@ static int cdns2_ep_config(struct cdns2_endpoint *pep, bool enable)
 
 	if (pep->dir) {
 		dir = FIFOCTRL_IO_TX;
-		writew(max_packet_size, &pdev->epx_regs->txmaxpack[pep->num - 1]);
-		writeb(ep_cfg, &pdev->epx_regs->ep[pep->num - 1].txcon);
+		pete_writew("drivers/usb/gadget/udc/cdns2/cdns2-gadget.c:1457", max_packet_size, &pdev->epx_regs->txmaxpack[pep->num - 1]);
+		pete_writeb("drivers/usb/gadget/udc/cdns2/cdns2-gadget.c:1458", ep_cfg, &pdev->epx_regs->ep[pep->num - 1].txcon);
 	} else {
-		writew(max_packet_size, &pdev->epx_regs->rxmaxpack[pep->num - 1]);
-		writeb(ep_cfg, &pdev->epx_regs->ep[pep->num - 1].rxcon);
+		pete_writew("drivers/usb/gadget/udc/cdns2/cdns2-gadget.c:1460", max_packet_size, &pdev->epx_regs->rxmaxpack[pep->num - 1]);
+		pete_writeb("drivers/usb/gadget/udc/cdns2/cdns2-gadget.c:1461", ep_cfg, &pdev->epx_regs->ep[pep->num - 1].rxcon);
 	}
 
-	writeb(pep->num | dir | FIFOCTRL_FIFOAUTO,
+	pete_writeb("drivers/usb/gadget/udc/cdns2/cdns2-gadget.c:1464", pep->num | dir | FIFOCTRL_FIFOAUTO,
 	       &pdev->usb_regs->fifoctrl);
-	writeb(pep->num | dir, &pdev->epx_regs->endprst);
-	writeb(pep->num | ENDPRST_FIFORST | ENDPRST_TOGRST | dir,
+	pete_writeb("drivers/usb/gadget/udc/cdns2/cdns2-gadget.c:1466", pep->num | dir, &pdev->epx_regs->endprst);
+	pete_writeb("drivers/usb/gadget/udc/cdns2/cdns2-gadget.c:1467", pep->num | ENDPRST_FIFORST | ENDPRST_TOGRST | dir,
 	       &pdev->epx_regs->endprst);
 
 	if (max_packet_size == 1024)
@@ -1475,7 +1475,7 @@ static int cdns2_ep_config(struct cdns2_endpoint *pep, bool enable)
 		pep->trb_burst_size = 16;
 
 	cdns2_select_ep(pdev, pep->num | pep->dir);
-	writel(DMA_EP_CMD_EPRST | DMA_EP_CMD_DFLUSH, &pdev->adma_regs->ep_cmd);
+	pete_writel("drivers/usb/gadget/udc/cdns2/cdns2-gadget.c:1478", DMA_EP_CMD_EPRST | DMA_EP_CMD_DFLUSH, &pdev->adma_regs->ep_cmd);
 
 	ret = readl_poll_timeout_atomic(&pdev->adma_regs->ep_cmd, val,
 					!(val & (DMA_EP_CMD_DFLUSH |
@@ -1485,10 +1485,10 @@ static int cdns2_ep_config(struct cdns2_endpoint *pep, bool enable)
 	if (ret)
 		return ret;
 
-	writel(DMA_EP_STS_TRBERR | DMA_EP_STS_ISOERR, &pdev->adma_regs->ep_sts_en);
+	pete_writel("drivers/usb/gadget/udc/cdns2/cdns2-gadget.c:1488", DMA_EP_STS_TRBERR | DMA_EP_STS_ISOERR, &pdev->adma_regs->ep_sts_en);
 
 	if (enable)
-		writel(DMA_EP_CFG_ENABLE, &pdev->adma_regs->ep_cfg);
+		pete_writel("drivers/usb/gadget/udc/cdns2/cdns2-gadget.c:1491", DMA_EP_CFG_ENABLE, &pdev->adma_regs->ep_cfg);
 
 	trace_cdns2_epx_hw_cfg(pdev, pep);
 
@@ -1593,11 +1593,11 @@ static int cdns2_gadget_ep_enable(struct usb_ep *ep,
 	pep->wa1_set = 0;
 	pep->ring.enqueue = 0;
 	pep->ring.dequeue = 0;
-	reg = readl(&pdev->adma_regs->ep_sts);
+	reg = pete_readl("drivers/usb/gadget/udc/cdns2/cdns2-gadget.c:1596", &pdev->adma_regs->ep_sts);
 	pep->ring.pcs = !!DMA_EP_STS_CCS(reg);
 	pep->ring.ccs = !!DMA_EP_STS_CCS(reg);
 
-	writel(pep->ring.dma, &pdev->adma_regs->ep_traddr);
+	pete_writel("drivers/usb/gadget/udc/cdns2/cdns2-gadget.c:1600", pep->ring.dma, &pdev->adma_regs->ep_traddr);
 
 	/* one TRB is reserved for link TRB used in DMULT mode*/
 	pep->ring.free_trbs = TRBS_PER_SEGMENT - 1;
@@ -1641,7 +1641,7 @@ static int cdns2_gadget_ep_disable(struct usb_ep *ep)
 	 */
 	readl_poll_timeout_atomic(&pdev->adma_regs->ep_sts, val,
 				  !(val & DMA_EP_STS_DBUSY), 1, 10);
-	writel(DMA_EP_CMD_EPRST, &pdev->adma_regs->ep_cmd);
+	pete_writel("drivers/usb/gadget/udc/cdns2/cdns2-gadget.c:1644", DMA_EP_CMD_EPRST, &pdev->adma_regs->ep_cmd);
 
 	readl_poll_timeout_atomic(&pdev->adma_regs->ep_cmd, val,
 				  !(val & (DMA_EP_CMD_DFLUSH | DMA_EP_CMD_EPRST)),
@@ -1785,7 +1785,7 @@ found:
 	/* Update ring only if removed request is on pending_req_list list. */
 	if (req_on_hw_ring && link_trb) {
 		/* Stop DMA */
-		writel(DMA_EP_CMD_DFLUSH, &pep->pdev->adma_regs->ep_cmd);
+		pete_writel("drivers/usb/gadget/udc/cdns2/cdns2-gadget.c:1788", DMA_EP_CMD_DFLUSH, &pep->pdev->adma_regs->ep_cmd);
 
 		/* Wait for DFLUSH cleared. */
 		readl_poll_timeout_atomic(&pep->pdev->adma_regs->ep_cmd, val,
@@ -1853,8 +1853,8 @@ int cdns2_halt_endpoint(struct cdns2_device *pdev,
 		trace_cdns2_ep_halt(pep, 0, 0);
 
 		/* Resets Sequence Number */
-		writeb(dir | pep->num, &pdev->epx_regs->endprst);
-		writeb(dir | ENDPRST_TOGRST | pep->num,
+		pete_writeb("drivers/usb/gadget/udc/cdns2/cdns2-gadget.c:1856", dir | pep->num, &pdev->epx_regs->endprst);
+		pete_writeb("drivers/usb/gadget/udc/cdns2/cdns2-gadget.c:1857", dir | ENDPRST_TOGRST | pep->num,
 		       &pdev->epx_regs->endprst);
 
 		clear_reg_bit_8(conf, EPX_CON_STALL);
@@ -1872,8 +1872,8 @@ int cdns2_halt_endpoint(struct cdns2_device *pdev,
 	} else {
 		trace_cdns2_ep_halt(pep, 1, 0);
 		set_reg_bit_8(conf, EPX_CON_STALL);
-		writeb(dir | pep->num, &pdev->epx_regs->endprst);
-		writeb(dir | ENDPRST_FIFORST | pep->num,
+		pete_writeb("drivers/usb/gadget/udc/cdns2/cdns2-gadget.c:1875", dir | pep->num, &pdev->epx_regs->endprst);
+		pete_writeb("drivers/usb/gadget/udc/cdns2/cdns2-gadget.c:1876", dir | ENDPRST_FIFORST | pep->num,
 		       &pdev->epx_regs->endprst);
 		pep->ep_state |= EP_STALLED;
 	}
@@ -2000,7 +2000,7 @@ static int cdns2_gadget_get_frame(struct usb_gadget *gadget)
 {
 	struct cdns2_device *pdev = gadget_to_cdns2_device(gadget);
 
-	return readw(&pdev->usb_regs->frmnr);
+	return pete_readw("drivers/usb/gadget/udc/cdns2/cdns2-gadget.c:2003", &pdev->usb_regs->frmnr);
 }
 
 static int cdns2_gadget_wakeup(struct usb_gadget *gadget)
@@ -2033,12 +2033,12 @@ static void cdns2_quiesce(struct cdns2_device *pdev)
 	set_reg_bit_8(&pdev->usb_regs->usbcs, USBCS_DISCON);
 
 	/* Disable interrupt. */
-	writeb(0, &pdev->interrupt_regs->extien),
-	writeb(0, &pdev->interrupt_regs->usbien),
-	writew(0, &pdev->adma_regs->ep_ien);
+	pete_writeb("drivers/usb/gadget/udc/cdns2/cdns2-gadget.c:2036", 0, &pdev->interrupt_regs->extien),
+	pete_writeb("drivers/usb/gadget/udc/cdns2/cdns2-gadget.c:2037", 0, &pdev->interrupt_regs->usbien),
+	pete_writew("drivers/usb/gadget/udc/cdns2/cdns2-gadget.c:2038", 0, &pdev->adma_regs->ep_ien);
 
 	/* Clear interrupt line. */
-	writeb(0x0, &pdev->interrupt_regs->usbirq);
+	pete_writeb("drivers/usb/gadget/udc/cdns2/cdns2-gadget.c:2041", 0x0, &pdev->interrupt_regs->usbirq);
 }
 
 static void cdns2_gadget_config(struct cdns2_device *pdev)
@@ -2046,11 +2046,11 @@ static void cdns2_gadget_config(struct cdns2_device *pdev)
 	cdns2_ep0_config(pdev);
 
 	/* Enable DMA interrupts for all endpoints. */
-	writel(~0x0, &pdev->adma_regs->ep_ien);
+	pete_writel("drivers/usb/gadget/udc/cdns2/cdns2-gadget.c:2049", ~0x0, &pdev->adma_regs->ep_ien);
 	cdns2_enable_l1(pdev, 0);
-	writeb(USB_IEN_INIT, &pdev->interrupt_regs->usbien);
-	writeb(EXTIRQ_WAKEUP, &pdev->interrupt_regs->extien);
-	writel(DMA_CONF_DMULT, &pdev->adma_regs->conf);
+	pete_writeb("drivers/usb/gadget/udc/cdns2/cdns2-gadget.c:2051", USB_IEN_INIT, &pdev->interrupt_regs->usbien);
+	pete_writeb("drivers/usb/gadget/udc/cdns2/cdns2-gadget.c:2052", EXTIRQ_WAKEUP, &pdev->interrupt_regs->extien);
+	pete_writel("drivers/usb/gadget/udc/cdns2/cdns2-gadget.c:2053", DMA_CONF_DMULT, &pdev->adma_regs->conf);
 }
 
 static int cdns2_gadget_pullup(struct usb_gadget *gadget, int is_on)
@@ -2095,10 +2095,10 @@ static int cdns2_gadget_udc_start(struct usb_gadget *gadget,
 
 	switch (max_speed) {
 	case USB_SPEED_FULL:
-		writeb(SPEEDCTRL_HSDISABLE, &pdev->usb_regs->speedctrl);
+		pete_writeb("drivers/usb/gadget/udc/cdns2/cdns2-gadget.c:2098", SPEEDCTRL_HSDISABLE, &pdev->usb_regs->speedctrl);
 		break;
 	case USB_SPEED_HIGH:
-		writeb(0, &pdev->usb_regs->speedctrl);
+		pete_writeb("drivers/usb/gadget/udc/cdns2/cdns2-gadget.c:2101", 0, &pdev->usb_regs->speedctrl);
 		break;
 	default:
 		dev_err(pdev->dev, "invalid maximum_speed parameter %d\n",
@@ -2111,10 +2111,10 @@ static int cdns2_gadget_udc_start(struct usb_gadget *gadget,
 	}
 
 	/* Reset all USB endpoints. */
-	writeb(ENDPRST_IO_TX, &pdev->usb_regs->endprst);
-	writeb(ENDPRST_FIFORST | ENDPRST_TOGRST | ENDPRST_IO_TX,
+	pete_writeb("drivers/usb/gadget/udc/cdns2/cdns2-gadget.c:2114", ENDPRST_IO_TX, &pdev->usb_regs->endprst);
+	pete_writeb("drivers/usb/gadget/udc/cdns2/cdns2-gadget.c:2115", ENDPRST_FIFORST | ENDPRST_TOGRST | ENDPRST_IO_TX,
 	       &pdev->usb_regs->endprst);
-	writeb(ENDPRST_FIFORST | ENDPRST_TOGRST, &pdev->usb_regs->endprst);
+	pete_writeb("drivers/usb/gadget/udc/cdns2/cdns2-gadget.c:2117", ENDPRST_FIFORST | ENDPRST_TOGRST, &pdev->usb_regs->endprst);
 
 	cdns2_eps_onchip_buffer_init(pdev);
 
@@ -2139,17 +2139,17 @@ static int cdns2_gadget_udc_stop(struct usb_gadget *gadget)
 		pep = ep_to_cdns2_ep(ep);
 		bEndpointAddress = pep->num | pep->dir;
 		cdns2_select_ep(pdev, bEndpointAddress);
-		writel(DMA_EP_CMD_EPRST, &pdev->adma_regs->ep_cmd);
+		pete_writel("drivers/usb/gadget/udc/cdns2/cdns2-gadget.c:2142", DMA_EP_CMD_EPRST, &pdev->adma_regs->ep_cmd);
 		readl_poll_timeout_atomic(&pdev->adma_regs->ep_cmd, val,
 					  !(val & DMA_EP_CMD_EPRST), 1, 100);
 	}
 
 	cdns2_quiesce(pdev);
 
-	writeb(ENDPRST_IO_TX, &pdev->usb_regs->endprst);
-	writeb(ENDPRST_FIFORST | ENDPRST_TOGRST | ENDPRST_IO_TX,
+	pete_writeb("drivers/usb/gadget/udc/cdns2/cdns2-gadget.c:2149", ENDPRST_IO_TX, &pdev->usb_regs->endprst);
+	pete_writeb("drivers/usb/gadget/udc/cdns2/cdns2-gadget.c:2150", ENDPRST_FIFORST | ENDPRST_TOGRST | ENDPRST_IO_TX,
 	       &pdev->epx_regs->endprst);
-	writeb(ENDPRST_FIFORST | ENDPRST_TOGRST, &pdev->epx_regs->endprst);
+	pete_writeb("drivers/usb/gadget/udc/cdns2/cdns2-gadget.c:2152", ENDPRST_FIFORST | ENDPRST_TOGRST, &pdev->epx_regs->endprst);
 
 	return 0;
 }
@@ -2260,7 +2260,7 @@ static int cdns2_gadget_start(struct cdns2_device *pdev)
 	pdev->adma_regs = pdev->regs + CDNS2_ADMA_REGS_OFFSET;
 
 	/* Reset controller. */
-	writeb(CPUCTRL_SW_RST | CPUCTRL_UPCLK | CPUCTRL_WUEN,
+	pete_writeb("drivers/usb/gadget/udc/cdns2/cdns2-gadget.c:2263", CPUCTRL_SW_RST | CPUCTRL_UPCLK | CPUCTRL_WUEN,
 	       &pdev->usb_regs->cpuctrl);
 	usleep_range(5, 10);
 
@@ -2384,8 +2384,8 @@ int cdns2_gadget_suspend(struct cdns2_device *pdev)
 	cdns2_enable_l1(pdev, 0);
 
 	/* Disable interrupt for device. */
-	writeb(0, &pdev->interrupt_regs->usbien);
-	writel(0, &pdev->adma_regs->ep_ien);
+	pete_writeb("drivers/usb/gadget/udc/cdns2/cdns2-gadget.c:2387", 0, &pdev->interrupt_regs->usbien);
+	pete_writel("drivers/usb/gadget/udc/cdns2/cdns2-gadget.c:2388", 0, &pdev->adma_regs->ep_ien);
 	spin_unlock_irqrestore(&pdev->lock, flags);
 
 	return 0;

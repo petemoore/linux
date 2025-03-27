@@ -320,14 +320,14 @@ static int qcom_swrm_ahb_reg_write(struct qcom_swrm_ctrl *ctrl,
 static int qcom_swrm_cpu_reg_read(struct qcom_swrm_ctrl *ctrl, int reg,
 				  u32 *val)
 {
-	*val = readl(ctrl->mmio + reg);
+	*val = pete_readl("drivers/soundwire/qcom.c:323", ctrl->mmio + reg);
 	return SDW_CMD_OK;
 }
 
 static int qcom_swrm_cpu_reg_write(struct qcom_swrm_ctrl *ctrl, int reg,
 				   int val)
 {
-	writel(val, ctrl->mmio + reg);
+	pete_writel("drivers/soundwire/qcom.c:330", val, ctrl->mmio + reg);
 	return SDW_CMD_OK;
 }
 

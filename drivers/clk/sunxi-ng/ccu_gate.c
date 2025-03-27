@@ -19,8 +19,8 @@ void ccu_gate_helper_disable(struct ccu_common *common, u32 gate)
 
 	spin_lock_irqsave(common->lock, flags);
 
-	reg = readl(common->base + common->reg);
-	writel(reg & ~gate, common->base + common->reg);
+	reg = pete_readl("drivers/clk/sunxi-ng/ccu_gate.c:22", common->base + common->reg);
+	pete_writel("drivers/clk/sunxi-ng/ccu_gate.c:23", reg & ~gate, common->base + common->reg);
 
 	spin_unlock_irqrestore(common->lock, flags);
 }
@@ -43,8 +43,8 @@ int ccu_gate_helper_enable(struct ccu_common *common, u32 gate)
 
 	spin_lock_irqsave(common->lock, flags);
 
-	reg = readl(common->base + common->reg);
-	writel(reg | gate, common->base + common->reg);
+	reg = pete_readl("drivers/clk/sunxi-ng/ccu_gate.c:46", common->base + common->reg);
+	pete_writel("drivers/clk/sunxi-ng/ccu_gate.c:47", reg | gate, common->base + common->reg);
 
 	spin_unlock_irqrestore(common->lock, flags);
 
@@ -64,7 +64,7 @@ int ccu_gate_helper_is_enabled(struct ccu_common *common, u32 gate)
 	if (!gate)
 		return 1;
 
-	return readl(common->base + common->reg) & gate;
+	return pete_readl("drivers/clk/sunxi-ng/ccu_gate.c:67", common->base + common->reg) & gate;
 }
 EXPORT_SYMBOL_NS_GPL(ccu_gate_helper_is_enabled, SUNXI_CCU);
 

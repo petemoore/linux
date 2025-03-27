@@ -64,7 +64,7 @@ static int tpmi_rapl_read_raw(int id, struct reg_action *ra)
 	if (!ra->reg.mmio)
 		return -EINVAL;
 
-	ra->value = readq(ra->reg.mmio);
+	ra->value = pete_readq("drivers/powercap/intel_rapl_tpmi.c:67", ra->reg.mmio);
 
 	ra->value &= ra->mask;
 	return 0;
@@ -77,12 +77,12 @@ static int tpmi_rapl_write_raw(int id, struct reg_action *ra)
 	if (!ra->reg.mmio)
 		return -EINVAL;
 
-	val = readq(ra->reg.mmio);
+	val = pete_readq("drivers/powercap/intel_rapl_tpmi.c:80", ra->reg.mmio);
 
 	val &= ~ra->mask;
 	val |= ra->value;
 
-	writeq(val, ra->reg.mmio);
+	pete_writeq("drivers/powercap/intel_rapl_tpmi.c:85", val, ra->reg.mmio);
 	return 0;
 }
 
@@ -146,7 +146,7 @@ static int parse_one_domain(struct tpmi_rapl_package *trp, u32 offset)
 	enum tpmi_rapl_register reg_index;
 	enum rapl_domain_reg_id reg_id;
 	int tpmi_domain_size, tpmi_domain_flags;
-	u64 tpmi_domain_header = readq(trp->base + offset);
+	u64 tpmi_domain_header = pete_readq("drivers/powercap/intel_rapl_tpmi.c:149", trp->base + offset);
 	u64 tpmi_domain_info;
 
 	/* Domain Parent bits are ignored for now */
@@ -192,7 +192,7 @@ static int parse_one_domain(struct tpmi_rapl_package *trp, u32 offset)
 			pr_warn(FW_BUG "System domain must support Domain Info register\n");
 			return -ENODEV;
 		}
-		tpmi_domain_info = readq(trp->base + offset + TPMI_RAPL_REG_DOMAIN_INFO * 8);
+		tpmi_domain_info = pete_readq("drivers/powercap/intel_rapl_tpmi.c:195", trp->base + offset + TPMI_RAPL_REG_DOMAIN_INFO * 8);
 		if (!(tpmi_domain_info & TPMI_RAPL_DOMAIN_ROOT))
 			return 0;
 		domain_type = RAPL_DOMAIN_PLATFORM;

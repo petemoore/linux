@@ -405,13 +405,13 @@ static int vmd_pci_read(struct pci_bus *bus, unsigned int devfn, int reg,
 	spin_lock_irqsave(&vmd->cfg_lock, flags);
 	switch (len) {
 	case 1:
-		*value = readb(addr);
+		*value = pete_readb("drivers/pci/controller/vmd.c:408", addr);
 		break;
 	case 2:
-		*value = readw(addr);
+		*value = pete_readw("drivers/pci/controller/vmd.c:411", addr);
 		break;
 	case 4:
-		*value = readl(addr);
+		*value = pete_readl("drivers/pci/controller/vmd.c:414", addr);
 		break;
 	default:
 		ret = -EINVAL;
@@ -440,16 +440,16 @@ static int vmd_pci_write(struct pci_bus *bus, unsigned int devfn, int reg,
 	spin_lock_irqsave(&vmd->cfg_lock, flags);
 	switch (len) {
 	case 1:
-		writeb(value, addr);
-		readb(addr);
+		pete_writeb("drivers/pci/controller/vmd.c:443", value, addr);
+		pete_readb("drivers/pci/controller/vmd.c:444", addr);
 		break;
 	case 2:
-		writew(value, addr);
-		readw(addr);
+		pete_writew("drivers/pci/controller/vmd.c:447", value, addr);
+		pete_readw("drivers/pci/controller/vmd.c:448", addr);
 		break;
 	case 4:
-		writel(value, addr);
-		readl(addr);
+		pete_writel("drivers/pci/controller/vmd.c:451", value, addr);
+		pete_readl("drivers/pci/controller/vmd.c:452", addr);
 		break;
 	default:
 		ret = -EINVAL;
@@ -525,18 +525,18 @@ static void vmd_domain_reset(struct vmd_dev *vmd)
 			base = vmd->cfgbar + PCIE_ECAM_OFFSET(bus,
 						PCI_DEVFN(dev, 0), 0);
 
-			hdr_type = readb(base + PCI_HEADER_TYPE);
+			hdr_type = pete_readb("drivers/pci/controller/vmd.c:528", base + PCI_HEADER_TYPE);
 
 			functions = (hdr_type & 0x80) ? 8 : 1;
 			for (fn = 0; fn < functions; fn++) {
 				base = vmd->cfgbar + PCIE_ECAM_OFFSET(bus,
 						PCI_DEVFN(dev, fn), 0);
 
-				hdr_type = readb(base + PCI_HEADER_TYPE) &
+				hdr_type = pete_readb("drivers/pci/controller/vmd.c:535", base + PCI_HEADER_TYPE) &
 						PCI_HEADER_TYPE_MASK;
 
 				if (hdr_type != PCI_HEADER_TYPE_BRIDGE ||
-				    (readw(base + PCI_CLASS_DEVICE) !=
+				    (pete_readw("drivers/pci/controller/vmd.c:539", base + PCI_CLASS_DEVICE) !=
 				     PCI_CLASS_BRIDGE_PCI))
 					continue;
 
@@ -544,19 +544,19 @@ static void vmd_domain_reset(struct vmd_dev *vmd)
 				 * Temporarily disable the I/O range before updating
 				 * PCI_IO_BASE.
 				 */
-				writel(0x0000ffff, base + PCI_IO_BASE_UPPER16);
+				pete_writel("drivers/pci/controller/vmd.c:547", 0x0000ffff, base + PCI_IO_BASE_UPPER16);
 				/* Update lower 16 bits of I/O base/limit */
-				writew(0x00f0, base + PCI_IO_BASE);
+				pete_writew("drivers/pci/controller/vmd.c:549", 0x00f0, base + PCI_IO_BASE);
 				/* Update upper 16 bits of I/O base/limit */
-				writel(0, base + PCI_IO_BASE_UPPER16);
+				pete_writel("drivers/pci/controller/vmd.c:551", 0, base + PCI_IO_BASE_UPPER16);
 
 				/* MMIO Base/Limit */
-				writel(0x0000fff0, base + PCI_MEMORY_BASE);
+				pete_writel("drivers/pci/controller/vmd.c:554", 0x0000fff0, base + PCI_MEMORY_BASE);
 
 				/* Prefetchable MMIO Base/Limit */
-				writel(0, base + PCI_PREF_LIMIT_UPPER32);
-				writel(0x0000fff0, base + PCI_PREF_MEMORY_BASE);
-				writel(0xffffffff, base + PCI_PREF_BASE_UPPER32);
+				pete_writel("drivers/pci/controller/vmd.c:557", 0, base + PCI_PREF_LIMIT_UPPER32);
+				pete_writel("drivers/pci/controller/vmd.c:558", 0x0000fff0, base + PCI_PREF_MEMORY_BASE);
+				pete_writel("drivers/pci/controller/vmd.c:559", 0xffffffff, base + PCI_PREF_BASE_UPPER32);
 			}
 		}
 	}
@@ -611,8 +611,8 @@ static int vmd_get_phys_offsets(struct vmd_dev *vmd, bool native_hint,
 			membar2 = pci_iomap(dev, VMD_MEMBAR2, 0);
 			if (!membar2)
 				return -ENOMEM;
-			phys1 = readq(membar2 + MB2_SHADOW_OFFSET);
-			phys2 = readq(membar2 + MB2_SHADOW_OFFSET + 8);
+			phys1 = pete_readq("drivers/pci/controller/vmd.c:614", membar2 + MB2_SHADOW_OFFSET);
+			phys2 = pete_readq("drivers/pci/controller/vmd.c:615", membar2 + MB2_SHADOW_OFFSET + 8);
 			pci_iounmap(dev, membar2);
 		} else
 			return 0;

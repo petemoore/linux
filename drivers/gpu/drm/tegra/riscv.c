@@ -31,7 +31,7 @@
 
 static void riscv_writel(struct tegra_drm_riscv *riscv, u32 value, u32 offset)
 {
-	writel(value, riscv->regs + offset);
+	pete_writel("drivers/gpu/drm/tegra/riscv.c:34", value, riscv->regs + offset);
 }
 
 int tegra_drm_riscv_read_descriptors(struct tegra_drm_riscv *riscv)

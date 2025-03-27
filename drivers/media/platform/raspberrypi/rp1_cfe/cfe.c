@@ -327,12 +327,12 @@ static inline struct cfe_device *to_cfe_device(struct v4l2_device *v4l2_dev)
 
 static inline u32 cfg_reg_read(struct cfe_device *cfe, u32 offset)
 {
-	return readl(cfe->mipi_cfg_base + offset);
+	return pete_readl("drivers/media/platform/raspberrypi/rp1_cfe/cfe.c:330", cfe->mipi_cfg_base + offset);
 }
 
 static inline void cfg_reg_write(struct cfe_device *cfe, u32 offset, u32 val)
 {
-	writel(val, cfe->mipi_cfg_base + offset);
+	pete_writel("drivers/media/platform/raspberrypi/rp1_cfe/cfe.c:335", val, cfe->mipi_cfg_base + offset);
 }
 
 static bool check_state(struct cfe_device *cfe, unsigned long state,

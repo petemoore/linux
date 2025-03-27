@@ -51,9 +51,9 @@ static void stmmac_xgmac2_c45_format(struct stmmac_priv *priv, int phyaddr,
 	u32 tmp;
 
 	/* Set port as Clause 45 */
-	tmp = readl(priv->ioaddr + XGMAC_MDIO_C22P);
+	tmp = pete_readl("drivers/net/ethernet/stmicro/stmmac/stmmac_mdio.c:54", priv->ioaddr + XGMAC_MDIO_C22P);
 	tmp &= ~BIT(phyaddr);
-	writel(tmp, priv->ioaddr + XGMAC_MDIO_C22P);
+	pete_writel("drivers/net/ethernet/stmicro/stmmac/stmmac_mdio.c:56", tmp, priv->ioaddr + XGMAC_MDIO_C22P);
 
 	*hw_addr = (phyaddr << MII_XGMAC_PA_SHIFT) | (phyreg & 0xffff);
 	*hw_addr |= devad << MII_XGMAC_DA_SHIFT;
@@ -68,12 +68,12 @@ static void stmmac_xgmac2_c22_format(struct stmmac_priv *priv, int phyaddr,
 		/* Until ver 2.20 XGMAC does not support C22 addr >= 4. Those
 		 * bits above bit 3 of XGMAC_MDIO_C22P register are reserved.
 		 */
-		tmp = readl(priv->ioaddr + XGMAC_MDIO_C22P);
+		tmp = pete_readl("drivers/net/ethernet/stmicro/stmmac/stmmac_mdio.c:71", priv->ioaddr + XGMAC_MDIO_C22P);
 		tmp &= ~MII_XGMAC_C22P_MASK;
 	}
 	/* Set port as Clause 22 */
 	tmp |= BIT(phyaddr);
-	writel(tmp, priv->ioaddr + XGMAC_MDIO_C22P);
+	pete_writel("drivers/net/ethernet/stmicro/stmmac/stmmac_mdio.c:76", tmp, priv->ioaddr + XGMAC_MDIO_C22P);
 
 	*hw_addr = (phyaddr << MII_XGMAC_PA_SHIFT) | (phyreg & 0x1f);
 }
@@ -109,8 +109,8 @@ static int stmmac_xgmac2_mdio_read(struct stmmac_priv *priv, u32 addr,
 	}
 
 	/* Set the MII address register to read */
-	writel(addr, priv->ioaddr + mii_address);
-	writel(value, priv->ioaddr + mii_data);
+	pete_writel("drivers/net/ethernet/stmicro/stmmac/stmmac_mdio.c:112", addr, priv->ioaddr + mii_address);
+	pete_writel("drivers/net/ethernet/stmicro/stmmac/stmmac_mdio.c:113", value, priv->ioaddr + mii_data);
 
 	/* Wait until any existing MII operation is complete */
 	if (readl_poll_timeout(priv->ioaddr + mii_data, tmp,
@@ -120,7 +120,7 @@ static int stmmac_xgmac2_mdio_read(struct stmmac_priv *priv, u32 addr,
 	}
 
 	/* Read the data from the MII data register */
-	ret = (int)readl(priv->ioaddr + mii_data) & GENMASK(15, 0);
+	ret = (int)pete_readl("drivers/net/ethernet/stmicro/stmmac/stmmac_mdio.c:123", priv->ioaddr + mii_data) & GENMASK(15, 0);
 
 err_disable_clks:
 	pm_runtime_put(priv->device);
@@ -193,8 +193,8 @@ static int stmmac_xgmac2_mdio_write(struct stmmac_priv *priv, u32 addr,
 	}
 
 	/* Set the MII address register to write */
-	writel(addr, priv->ioaddr + mii_address);
-	writel(value, priv->ioaddr + mii_data);
+	pete_writel("drivers/net/ethernet/stmicro/stmmac/stmmac_mdio.c:196", addr, priv->ioaddr + mii_address);
+	pete_writel("drivers/net/ethernet/stmicro/stmmac/stmmac_mdio.c:197", value, priv->ioaddr + mii_data);
 
 	/* Wait until any existing MII operation is complete */
 	ret = readl_poll_timeout(priv->ioaddr + mii_data, tmp,
@@ -251,15 +251,15 @@ static int stmmac_mdio_read(struct stmmac_priv *priv, int data, u32 value)
 			       100, 10000))
 		return -EBUSY;
 
-	writel(data, priv->ioaddr + mii_data);
-	writel(value, priv->ioaddr + mii_address);
+	pete_writel("drivers/net/ethernet/stmicro/stmmac/stmmac_mdio.c:254", data, priv->ioaddr + mii_data);
+	pete_writel("drivers/net/ethernet/stmicro/stmmac/stmmac_mdio.c:255", value, priv->ioaddr + mii_address);
 
 	if (readl_poll_timeout(priv->ioaddr + mii_address, v, !(v & MII_BUSY),
 			       100, 10000))
 		return -EBUSY;
 
 	/* Read the data from the MII data register */
-	return readl(priv->ioaddr + mii_data) & MII_DATA_MASK;
+	return pete_readl("drivers/net/ethernet/stmicro/stmmac/stmmac_mdio.c:262", priv->ioaddr + mii_data) & MII_DATA_MASK;
 }
 
 /**
@@ -354,8 +354,8 @@ static int stmmac_mdio_write(struct stmmac_priv *priv, int data, u32 value)
 		return -EBUSY;
 
 	/* Set the MII address register to write */
-	writel(data, priv->ioaddr + mii_data);
-	writel(value, priv->ioaddr + mii_address);
+	pete_writel("drivers/net/ethernet/stmicro/stmmac/stmmac_mdio.c:357", data, priv->ioaddr + mii_data);
+	pete_writel("drivers/net/ethernet/stmicro/stmmac/stmmac_mdio.c:358", value, priv->ioaddr + mii_address);
 
 	/* Wait until any existing MII operation is complete */
 	return readl_poll_timeout(priv->ioaddr + mii_address, v,
@@ -490,7 +490,7 @@ int stmmac_mdio_reset(struct mii_bus *bus)
 	 * if needed.
 	 */
 	if (!priv->plat->has_gmac4)
-		writel(0, priv->ioaddr + mii_address);
+		pete_writel("drivers/net/ethernet/stmicro/stmmac/stmmac_mdio.c:493", 0, priv->ioaddr + mii_address);
 #endif
 	return 0;
 }

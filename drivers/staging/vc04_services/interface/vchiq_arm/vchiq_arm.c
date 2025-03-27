@@ -179,7 +179,7 @@ vchiq_doorbell_irq(int irq, void *dev_id)
 	unsigned int status;
 
 	/* Read (and clear) the doorbell */
-	status = readl(g_regs + BELL0);
+	status = pete_readl("drivers/staging/vc04_services/interface/vchiq_arm/vchiq_arm.c:182", g_regs + BELL0);
 
 	if (status & ARM_DS_ACTIVE) {  /* Was the doorbell rung? */
 		remote_event_pollall(state);
@@ -707,7 +707,7 @@ remote_event_signal(struct remote_event *event)
 	dsb(sy);         /* data barrier operation */
 
 	if (event->armed)
-		writel(0, g_regs + BELL2); /* trigger vc interrupt */
+		pete_writel("drivers/staging/vc04_services/interface/vchiq_arm/vchiq_arm.c:710", 0, g_regs + BELL2); /* trigger vc interrupt */
 }
 
 int

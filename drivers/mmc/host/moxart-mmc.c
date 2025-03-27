@@ -184,12 +184,12 @@ static int moxart_wait_for_status(struct moxart_host *host,
 	u32 i;
 
 	for (i = 0; i < MAX_RETRIES; i++) {
-		*status = readl(host->base + REG_STATUS);
+		*status = pete_readl("drivers/mmc/host/moxart-mmc.c:187", host->base + REG_STATUS);
 		if (!(*status & mask)) {
 			udelay(5);
 			continue;
 		}
-		writel(*status & mask, host->base + REG_CLEAR);
+		pete_writel("drivers/mmc/host/moxart-mmc.c:192", *status & mask, host->base + REG_CLEAR);
 		ret = 0;
 		break;
 	}
@@ -206,9 +206,9 @@ static void moxart_send_command(struct moxart_host *host,
 {
 	u32 status, cmdctrl;
 
-	writel(RSP_TIMEOUT  | RSP_CRC_OK |
+	pete_writel("drivers/mmc/host/moxart-mmc.c:209", RSP_TIMEOUT  | RSP_CRC_OK |
 	       RSP_CRC_FAIL | CMD_SENT, host->base + REG_CLEAR);
-	writel(cmd->arg, host->base + REG_ARGUMENT);
+	pete_writel("drivers/mmc/host/moxart-mmc.c:211", cmd->arg, host->base + REG_ARGUMENT);
 
 	cmdctrl = cmd->opcode & CMD_IDX_MASK;
 	if (cmdctrl == SD_APP_SET_BUS_WIDTH    || cmdctrl == SD_APP_OP_COND   ||
@@ -222,7 +222,7 @@ static void moxart_send_command(struct moxart_host *host,
 	if (cmd->flags & MMC_RSP_136)
 		cmdctrl |= CMD_LONG_RSP;
 
-	writel(cmdctrl | CMD_EN, host->base + REG_COMMAND);
+	pete_writel("drivers/mmc/host/moxart-mmc.c:225", cmdctrl | CMD_EN, host->base + REG_COMMAND);
 
 	if (moxart_wait_for_status(host, MASK_RSP, &status) == -ETIMEDOUT)
 		cmd->error = -ETIMEDOUT;
@@ -237,12 +237,12 @@ static void moxart_send_command(struct moxart_host *host,
 	}
 	if (status & RSP_CRC_OK) {
 		if (cmd->flags & MMC_RSP_136) {
-			cmd->resp[3] = readl(host->base + REG_RESPONSE0);
-			cmd->resp[2] = readl(host->base + REG_RESPONSE1);
-			cmd->resp[1] = readl(host->base + REG_RESPONSE2);
-			cmd->resp[0] = readl(host->base + REG_RESPONSE3);
+			cmd->resp[3] = pete_readl("drivers/mmc/host/moxart-mmc.c:240", host->base + REG_RESPONSE0);
+			cmd->resp[2] = pete_readl("drivers/mmc/host/moxart-mmc.c:241", host->base + REG_RESPONSE1);
+			cmd->resp[1] = pete_readl("drivers/mmc/host/moxart-mmc.c:242", host->base + REG_RESPONSE2);
+			cmd->resp[0] = pete_readl("drivers/mmc/host/moxart-mmc.c:243", host->base + REG_RESPONSE3);
 		} else {
-			cmd->resp[0] = readl(host->base + REG_RESPONSE0);
+			cmd->resp[0] = pete_readl("drivers/mmc/host/moxart-mmc.c:245", host->base + REG_RESPONSE0);
 		}
 	}
 }
@@ -378,11 +378,11 @@ static void moxart_prepare_data(struct moxart_host *host)
 	if ((host->data_len > host->fifo_width) && host->have_dma)
 		datactrl |= DCR_DMA_EN;
 
-	writel(DCR_DATA_FIFO_RESET, host->base + REG_DATA_CONTROL);
-	writel(MASK_DATA | FIFO_URUN | FIFO_ORUN, host->base + REG_CLEAR);
-	writel(host->rate, host->base + REG_DATA_TIMER);
-	writel(host->data_len, host->base + REG_DATA_LENGTH);
-	writel(datactrl, host->base + REG_DATA_CONTROL);
+	pete_writel("drivers/mmc/host/moxart-mmc.c:381", DCR_DATA_FIFO_RESET, host->base + REG_DATA_CONTROL);
+	pete_writel("drivers/mmc/host/moxart-mmc.c:382", MASK_DATA | FIFO_URUN | FIFO_ORUN, host->base + REG_CLEAR);
+	pete_writel("drivers/mmc/host/moxart-mmc.c:383", host->rate, host->base + REG_DATA_TIMER);
+	pete_writel("drivers/mmc/host/moxart-mmc.c:384", host->data_len, host->base + REG_DATA_LENGTH);
+	pete_writel("drivers/mmc/host/moxart-mmc.c:385", datactrl, host->base + REG_DATA_CONTROL);
 }
 
 static void moxart_request(struct mmc_host *mmc, struct mmc_request *mrq)
@@ -398,7 +398,7 @@ static void moxart_request(struct mmc_host *mmc, struct mmc_request *mrq)
 
 	host->mrq = mrq;
 
-	if (readl(host->base + REG_STATUS) & CARD_DETECT) {
+	if (pete_readl("drivers/mmc/host/moxart-mmc.c:401", host->base + REG_STATUS) & CARD_DETECT) {
 		mrq->cmd->error = -ETIMEDOUT;
 		goto request_done;
 	}
@@ -409,7 +409,7 @@ static void moxart_request(struct mmc_host *mmc, struct mmc_request *mrq)
 	if (mrq->cmd->data) {
 		if ((host->data_len > host->fifo_width) && host->have_dma) {
 
-			writel(CARD_CHANGE, host->base + REG_INTERRUPT_MASK);
+			pete_writel("drivers/mmc/host/moxart-mmc.c:412", CARD_CHANGE, host->base + REG_INTERRUPT_MASK);
 
 			spin_unlock_irqrestore(&host->lock, flags);
 
@@ -418,7 +418,7 @@ static void moxart_request(struct mmc_host *mmc, struct mmc_request *mrq)
 			spin_lock_irqsave(&host->lock, flags);
 		} else {
 
-			writel(MASK_INTR_PIO, host->base + REG_INTERRUPT_MASK);
+			pete_writel("drivers/mmc/host/moxart-mmc.c:421", MASK_INTR_PIO, host->base + REG_INTERRUPT_MASK);
 
 			spin_unlock_irqrestore(&host->lock, flags);
 
@@ -460,7 +460,7 @@ static irqreturn_t moxart_irq(int irq, void *devid)
 
 	spin_lock(&host->lock);
 
-	status = readl(host->base + REG_STATUS);
+	status = pete_readl("drivers/mmc/host/moxart-mmc.c:463", host->base + REG_STATUS);
 	if (status & CARD_CHANGE) {
 		host->is_removed = status & CARD_DETECT;
 		if (host->is_removed && host->have_dma) {
@@ -468,8 +468,8 @@ static irqreturn_t moxart_irq(int irq, void *devid)
 			dmaengine_terminate_all(host->dma_chan_rx);
 		}
 		host->mrq = NULL;
-		writel(MASK_INTR_PIO, host->base + REG_CLEAR);
-		writel(CARD_CHANGE, host->base + REG_INTERRUPT_MASK);
+		pete_writel("drivers/mmc/host/moxart-mmc.c:471", MASK_INTR_PIO, host->base + REG_CLEAR);
+		pete_writel("drivers/mmc/host/moxart-mmc.c:472", CARD_CHANGE, host->base + REG_INTERRUPT_MASK);
 		mmc_detect_change(host->mmc, 0);
 	}
 	if (status & (FIFO_ORUN | FIFO_URUN) && host->mrq)
@@ -498,11 +498,11 @@ static void moxart_set_ios(struct mmc_host *mmc, struct mmc_ios *ios)
 		host->rate = host->sysclk / (2 * (div + 1));
 		if (host->rate > host->sysclk)
 			ctrl |= CLK_HISPD;
-		writel(ctrl, host->base + REG_CLOCK_CONTROL);
+		pete_writel("drivers/mmc/host/moxart-mmc.c:501", ctrl, host->base + REG_CLOCK_CONTROL);
 	}
 
 	if (ios->power_mode == MMC_POWER_OFF) {
-		writel(readl(host->base + REG_POWER_CONTROL) & ~SD_POWER_ON,
+		pete_writel("drivers/mmc/host/moxart-mmc.c:505", pete_readl("drivers/mmc/host/moxart-mmc.c:505", host->base + REG_POWER_CONTROL) & ~SD_POWER_ON,
 		       host->base + REG_POWER_CONTROL);
 	} else {
 		if (ios->vdd < MIN_POWER)
@@ -510,16 +510,16 @@ static void moxart_set_ios(struct mmc_host *mmc, struct mmc_ios *ios)
 		else
 			power = ios->vdd - MIN_POWER;
 
-		writel(SD_POWER_ON | (u32) power,
+		pete_writel("drivers/mmc/host/moxart-mmc.c:513", SD_POWER_ON | (u32) power,
 		       host->base + REG_POWER_CONTROL);
 	}
 
 	switch (ios->bus_width) {
 	case MMC_BUS_WIDTH_4:
-		writel(BUS_WIDTH_4, host->base + REG_BUS_WIDTH);
+		pete_writel("drivers/mmc/host/moxart-mmc.c:519", BUS_WIDTH_4, host->base + REG_BUS_WIDTH);
 		break;
 	default:
-		writel(BUS_WIDTH_1, host->base + REG_BUS_WIDTH);
+		pete_writel("drivers/mmc/host/moxart-mmc.c:522", BUS_WIDTH_1, host->base + REG_BUS_WIDTH);
 		break;
 	}
 
@@ -531,7 +531,7 @@ static int moxart_get_ro(struct mmc_host *mmc)
 {
 	struct moxart_host *host = mmc_priv(mmc);
 
-	return !!(readl(host->base + REG_STATUS) & WRITE_PROT);
+	return !!(pete_readl("drivers/mmc/host/moxart-mmc.c:534", host->base + REG_STATUS) & WRITE_PROT);
 }
 
 static const struct mmc_host_ops moxart_ops = {
@@ -595,7 +595,7 @@ static int moxart_probe(struct platform_device *pdev)
 	host->reg_phys = res_mmc.start;
 	host->timeout = msecs_to_jiffies(1000);
 	host->sysclk = clk_get_rate(clk);
-	host->fifo_width = readl(host->base + REG_FEATURE) << 2;
+	host->fifo_width = pete_readl("drivers/mmc/host/moxart-mmc.c:598", host->base + REG_FEATURE) << 2;
 	host->dma_chan_tx = dma_request_chan(dev, "tx");
 	host->dma_chan_rx = dma_request_chan(dev, "rx");
 
@@ -651,14 +651,14 @@ static int moxart_probe(struct platform_device *pdev)
 			dma_get_max_seg_size(host->dma_chan_tx->device->dev));
 	}
 
-	if (readl(host->base + REG_BUS_WIDTH) & BUS_WIDTH_4_SUPPORT)
+	if (pete_readl("drivers/mmc/host/moxart-mmc.c:654", host->base + REG_BUS_WIDTH) & BUS_WIDTH_4_SUPPORT)
 		mmc->caps |= MMC_CAP_4_BIT_DATA;
 
-	writel(0, host->base + REG_INTERRUPT_MASK);
+	pete_writel("drivers/mmc/host/moxart-mmc.c:657", 0, host->base + REG_INTERRUPT_MASK);
 
-	writel(CMD_SDC_RESET, host->base + REG_COMMAND);
+	pete_writel("drivers/mmc/host/moxart-mmc.c:659", CMD_SDC_RESET, host->base + REG_COMMAND);
 	for (i = 0; i < MAX_RETRIES; i++) {
-		if (!(readl(host->base + REG_COMMAND) & CMD_SDC_RESET))
+		if (!(pete_readl("drivers/mmc/host/moxart-mmc.c:661", host->base + REG_COMMAND) & CMD_SDC_RESET))
 			break;
 		udelay(5);
 	}
@@ -698,9 +698,9 @@ static void moxart_remove(struct platform_device *pdev)
 		dma_release_channel(host->dma_chan_rx);
 	mmc_remove_host(mmc);
 
-	writel(0, host->base + REG_INTERRUPT_MASK);
-	writel(0, host->base + REG_POWER_CONTROL);
-	writel(readl(host->base + REG_CLOCK_CONTROL) | CLK_OFF,
+	pete_writel("drivers/mmc/host/moxart-mmc.c:701", 0, host->base + REG_INTERRUPT_MASK);
+	pete_writel("drivers/mmc/host/moxart-mmc.c:702", 0, host->base + REG_POWER_CONTROL);
+	pete_writel("drivers/mmc/host/moxart-mmc.c:703", pete_readl("drivers/mmc/host/moxart-mmc.c:703", host->base + REG_CLOCK_CONTROL) | CLK_OFF,
 	       host->base + REG_CLOCK_CONTROL);
 	mmc_free_host(mmc);
 }

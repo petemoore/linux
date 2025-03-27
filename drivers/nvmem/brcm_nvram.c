@@ -75,11 +75,11 @@ static int brcm_nvram_copy_data(struct brcm_nvram *priv, struct platform_device 
 
 	priv->nvmem_size = resource_size(res);
 
-	priv->padding_byte = readb(base + priv->nvmem_size - 1);
+	priv->padding_byte = pete_readb("drivers/nvmem/brcm_nvram.c:78", base + priv->nvmem_size - 1);
 	for (priv->data_len = priv->nvmem_size;
 	     priv->data_len;
 	     priv->data_len--) {
-		if (readb(base + priv->data_len - 1) != priv->padding_byte)
+		if (pete_readb("drivers/nvmem/brcm_nvram.c:82", base + priv->data_len - 1) != priv->padding_byte)
 			break;
 	}
 	WARN(priv->data_len > SZ_128K, "Unexpected (big) NVRAM size: %zu B\n", priv->data_len);

@@ -122,7 +122,7 @@ static void brcm_sata_alpm_init(struct ahci_host_priv *hpriv)
 	int i;
 
 	/* Enable support for ALPM */
-	host_caps = readl(hpriv->mmio + HOST_CAP);
+	host_caps = pete_readl("drivers/ata/ahci_brcm.c:125", hpriv->mmio + HOST_CAP);
 	if (!(host_caps & HOST_CAP_ALPM))
 		hpriv->flags |= AHCI_HFLAG_YES_ALPM;
 
@@ -134,7 +134,7 @@ static void brcm_sata_alpm_init(struct ahci_host_priv *hpriv)
 	     i < SATA_TOP_MAX_PHYS;
 	     i++, port_ctrl += SATA_NEXT_PORT_CTRL_OFFSET) {
 		if (priv->port_mask & BIT(i))
-			writel(0xff1003fc,
+			pete_writel("drivers/ata/ahci_brcm.c:137", 0xff1003fc,
 			       hpriv->mmio + SATA_PORT_PCTRL6(port_ctrl));
 	}
 }
@@ -219,7 +219,7 @@ static u32 brcm_ahci_get_portmask(struct ahci_host_priv *hpriv,
 {
 	u32 impl;
 
-	impl = readl(hpriv->mmio + HOST_PORTS_IMPL);
+	impl = pete_readl("drivers/ata/ahci_brcm.c:222", hpriv->mmio + HOST_PORTS_IMPL);
 
 	if (fls(impl) > SATA_TOP_MAX_PHYS)
 		dev_warn(priv->dev, "warning: more ports than PHYs (%#x)\n",
@@ -267,10 +267,10 @@ static unsigned int brcm_ahci_read_id(struct ata_device *dev,
 
 	/* Disable host interrupts */
 	spin_lock_irqsave(&host->lock, flags);
-	ctl = readl(mmio + HOST_CTL);
+	ctl = pete_readl("drivers/ata/ahci_brcm.c:270", mmio + HOST_CTL);
 	ctl &= ~HOST_IRQ_EN;
-	writel(ctl, mmio + HOST_CTL);
-	readl(mmio + HOST_CTL); /* flush */
+	pete_writel("drivers/ata/ahci_brcm.c:272", ctl, mmio + HOST_CTL);
+	pete_readl("drivers/ata/ahci_brcm.c:273", mmio + HOST_CTL); /* flush */
 	spin_unlock_irqrestore(&host->lock, flags);
 
 	/* Perform the SATA PHY reset sequence */
@@ -301,10 +301,10 @@ static unsigned int brcm_ahci_read_id(struct ata_device *dev,
 
 	/* Re-enable host interrupts */
 	spin_lock_irqsave(&host->lock, flags);
-	ctl = readl(mmio + HOST_CTL);
+	ctl = pete_readl("drivers/ata/ahci_brcm.c:304", mmio + HOST_CTL);
 	ctl |= HOST_IRQ_EN;
-	writel(ctl, mmio + HOST_CTL);
-	readl(mmio + HOST_CTL); /* flush */
+	pete_writel("drivers/ata/ahci_brcm.c:306", ctl, mmio + HOST_CTL);
+	pete_readl("drivers/ata/ahci_brcm.c:307", mmio + HOST_CTL); /* flush */
 	spin_unlock_irqrestore(&host->lock, flags);
 
 	return ata_do_dev_read_id(dev, tf, id);

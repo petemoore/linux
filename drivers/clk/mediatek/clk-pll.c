@@ -34,7 +34,7 @@ int mtk_pll_is_prepared(struct clk_hw *hw)
 {
 	struct mtk_clk_pll *pll = to_mtk_clk_pll(hw);
 
-	return (readl(pll->en_addr) & BIT(pll->data->pll_en_bit)) != 0;
+	return (pete_readl("drivers/clk/mediatek/clk-pll.c:37", pll->en_addr) & BIT(pll->data->pll_en_bit)) != 0;
 }
 
 static unsigned long __mtk_pll_recalc_rate(struct mtk_clk_pll *pll, u32 fin,
@@ -69,11 +69,11 @@ static void __mtk_pll_tuner_enable(struct mtk_clk_pll *pll)
 	u32 r;
 
 	if (pll->tuner_en_addr) {
-		r = readl(pll->tuner_en_addr) | BIT(pll->data->tuner_en_bit);
-		writel(r, pll->tuner_en_addr);
+		r = pete_readl("drivers/clk/mediatek/clk-pll.c:72", pll->tuner_en_addr) | BIT(pll->data->tuner_en_bit);
+		pete_writel("drivers/clk/mediatek/clk-pll.c:73", r, pll->tuner_en_addr);
 	} else if (pll->tuner_addr) {
-		r = readl(pll->tuner_addr) | AUDPLL_TUNER_EN;
-		writel(r, pll->tuner_addr);
+		r = pete_readl("drivers/clk/mediatek/clk-pll.c:75", pll->tuner_addr) | AUDPLL_TUNER_EN;
+		pete_writel("drivers/clk/mediatek/clk-pll.c:76", r, pll->tuner_addr);
 	}
 }
 
@@ -82,11 +82,11 @@ static void __mtk_pll_tuner_disable(struct mtk_clk_pll *pll)
 	u32 r;
 
 	if (pll->tuner_en_addr) {
-		r = readl(pll->tuner_en_addr) & ~BIT(pll->data->tuner_en_bit);
-		writel(r, pll->tuner_en_addr);
+		r = pete_readl("drivers/clk/mediatek/clk-pll.c:85", pll->tuner_en_addr) & ~BIT(pll->data->tuner_en_bit);
+		pete_writel("drivers/clk/mediatek/clk-pll.c:86", r, pll->tuner_en_addr);
 	} else if (pll->tuner_addr) {
-		r = readl(pll->tuner_addr) & ~AUDPLL_TUNER_EN;
-		writel(r, pll->tuner_addr);
+		r = pete_readl("drivers/clk/mediatek/clk-pll.c:88", pll->tuner_addr) & ~AUDPLL_TUNER_EN;
+		pete_writel("drivers/clk/mediatek/clk-pll.c:89", r, pll->tuner_addr);
 	}
 }
 
@@ -99,25 +99,25 @@ static void mtk_pll_set_rate_regs(struct mtk_clk_pll *pll, u32 pcw,
 	__mtk_pll_tuner_disable(pll);
 
 	/* set postdiv */
-	val = readl(pll->pd_addr);
+	val = pete_readl("drivers/clk/mediatek/clk-pll.c:102", pll->pd_addr);
 	val &= ~(POSTDIV_MASK << pll->data->pd_shift);
 	val |= (ffs(postdiv) - 1) << pll->data->pd_shift;
 
 	/* postdiv and pcw need to set at the same time if on same register */
 	if (pll->pd_addr != pll->pcw_addr) {
-		writel(val, pll->pd_addr);
-		val = readl(pll->pcw_addr);
+		pete_writel("drivers/clk/mediatek/clk-pll.c:108", val, pll->pd_addr);
+		val = pete_readl("drivers/clk/mediatek/clk-pll.c:109", pll->pcw_addr);
 	}
 
 	/* set pcw */
 	val &= ~GENMASK(pll->data->pcw_shift + pll->data->pcwbits - 1,
 			pll->data->pcw_shift);
 	val |= pcw << pll->data->pcw_shift;
-	writel(val, pll->pcw_addr);
-	chg = readl(pll->pcw_chg_addr) | PCW_CHG_MASK;
-	writel(chg, pll->pcw_chg_addr);
+	pete_writel("drivers/clk/mediatek/clk-pll.c:116", val, pll->pcw_addr);
+	chg = pete_readl("drivers/clk/mediatek/clk-pll.c:117", pll->pcw_chg_addr) | PCW_CHG_MASK;
+	pete_writel("drivers/clk/mediatek/clk-pll.c:118", chg, pll->pcw_chg_addr);
 	if (pll->tuner_addr)
-		writel(val + 1, pll->tuner_addr);
+		pete_writel("drivers/clk/mediatek/clk-pll.c:120", val + 1, pll->tuner_addr);
 
 	/* restore tuner_en */
 	__mtk_pll_tuner_enable(pll);
@@ -190,10 +190,10 @@ unsigned long mtk_pll_recalc_rate(struct clk_hw *hw, unsigned long parent_rate)
 	u32 postdiv;
 	u32 pcw;
 
-	postdiv = (readl(pll->pd_addr) >> pll->data->pd_shift) & POSTDIV_MASK;
+	postdiv = (pete_readl("drivers/clk/mediatek/clk-pll.c:193", pll->pd_addr) >> pll->data->pd_shift) & POSTDIV_MASK;
 	postdiv = 1 << postdiv;
 
-	pcw = readl(pll->pcw_addr) >> pll->data->pcw_shift;
+	pcw = pete_readl("drivers/clk/mediatek/clk-pll.c:196", pll->pcw_addr) >> pll->data->pcw_shift;
 	pcw &= GENMASK(pll->data->pcwbits - 1, 0);
 
 	return __mtk_pll_recalc_rate(pll, parent_rate, pcw, postdiv);
@@ -216,20 +216,20 @@ int mtk_pll_prepare(struct clk_hw *hw)
 	struct mtk_clk_pll *pll = to_mtk_clk_pll(hw);
 	u32 r;
 
-	r = readl(pll->pwr_addr) | CON0_PWR_ON;
-	writel(r, pll->pwr_addr);
+	r = pete_readl("drivers/clk/mediatek/clk-pll.c:219", pll->pwr_addr) | CON0_PWR_ON;
+	pete_writel("drivers/clk/mediatek/clk-pll.c:220", r, pll->pwr_addr);
 	udelay(1);
 
-	r = readl(pll->pwr_addr) & ~CON0_ISO_EN;
-	writel(r, pll->pwr_addr);
+	r = pete_readl("drivers/clk/mediatek/clk-pll.c:223", pll->pwr_addr) & ~CON0_ISO_EN;
+	pete_writel("drivers/clk/mediatek/clk-pll.c:224", r, pll->pwr_addr);
 	udelay(1);
 
-	r = readl(pll->en_addr) | BIT(pll->data->pll_en_bit);
-	writel(r, pll->en_addr);
+	r = pete_readl("drivers/clk/mediatek/clk-pll.c:227", pll->en_addr) | BIT(pll->data->pll_en_bit);
+	pete_writel("drivers/clk/mediatek/clk-pll.c:228", r, pll->en_addr);
 
 	if (pll->data->en_mask) {
-		r = readl(pll->base_addr + REG_CON0) | pll->data->en_mask;
-		writel(r, pll->base_addr + REG_CON0);
+		r = pete_readl("drivers/clk/mediatek/clk-pll.c:231", pll->base_addr + REG_CON0) | pll->data->en_mask;
+		pete_writel("drivers/clk/mediatek/clk-pll.c:232", r, pll->base_addr + REG_CON0);
 	}
 
 	__mtk_pll_tuner_enable(pll);
@@ -237,9 +237,9 @@ int mtk_pll_prepare(struct clk_hw *hw)
 	udelay(20);
 
 	if (pll->data->flags & HAVE_RST_BAR) {
-		r = readl(pll->base_addr + REG_CON0);
+		r = pete_readl("drivers/clk/mediatek/clk-pll.c:240", pll->base_addr + REG_CON0);
 		r |= pll->data->rst_bar_mask;
-		writel(r, pll->base_addr + REG_CON0);
+		pete_writel("drivers/clk/mediatek/clk-pll.c:242", r, pll->base_addr + REG_CON0);
 	}
 
 	return 0;
@@ -251,26 +251,26 @@ void mtk_pll_unprepare(struct clk_hw *hw)
 	u32 r;
 
 	if (pll->data->flags & HAVE_RST_BAR) {
-		r = readl(pll->base_addr + REG_CON0);
+		r = pete_readl("drivers/clk/mediatek/clk-pll.c:254", pll->base_addr + REG_CON0);
 		r &= ~pll->data->rst_bar_mask;
-		writel(r, pll->base_addr + REG_CON0);
+		pete_writel("drivers/clk/mediatek/clk-pll.c:256", r, pll->base_addr + REG_CON0);
 	}
 
 	__mtk_pll_tuner_disable(pll);
 
 	if (pll->data->en_mask) {
-		r = readl(pll->base_addr + REG_CON0) & ~pll->data->en_mask;
-		writel(r, pll->base_addr + REG_CON0);
+		r = pete_readl("drivers/clk/mediatek/clk-pll.c:262", pll->base_addr + REG_CON0) & ~pll->data->en_mask;
+		pete_writel("drivers/clk/mediatek/clk-pll.c:263", r, pll->base_addr + REG_CON0);
 	}
 
-	r = readl(pll->en_addr) & ~BIT(pll->data->pll_en_bit);
-	writel(r, pll->en_addr);
+	r = pete_readl("drivers/clk/mediatek/clk-pll.c:266", pll->en_addr) & ~BIT(pll->data->pll_en_bit);
+	pete_writel("drivers/clk/mediatek/clk-pll.c:267", r, pll->en_addr);
 
-	r = readl(pll->pwr_addr) | CON0_ISO_EN;
-	writel(r, pll->pwr_addr);
+	r = pete_readl("drivers/clk/mediatek/clk-pll.c:269", pll->pwr_addr) | CON0_ISO_EN;
+	pete_writel("drivers/clk/mediatek/clk-pll.c:270", r, pll->pwr_addr);
 
-	r = readl(pll->pwr_addr) & ~CON0_PWR_ON;
-	writel(r, pll->pwr_addr);
+	r = pete_readl("drivers/clk/mediatek/clk-pll.c:272", pll->pwr_addr) & ~CON0_PWR_ON;
+	pete_writel("drivers/clk/mediatek/clk-pll.c:273", r, pll->pwr_addr);
 }
 
 const struct clk_ops mtk_pll_ops = {

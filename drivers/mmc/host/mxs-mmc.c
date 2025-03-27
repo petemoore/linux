@@ -72,7 +72,7 @@ static int mxs_mmc_get_cd(struct mmc_host *mmc)
 		return ret;
 
 	present = mmc->caps & MMC_CAP_NEEDS_POLL ||
-		!(readl(ssp->base + HW_SSP_STATUS(ssp)) &
+		!(pete_readl("drivers/mmc/host/mxs-mmc.c:75", ssp->base + HW_SSP_STATUS(ssp)) &
 			BM_SSP_STATUS_CARD_DETECT);
 
 	if (mmc->caps2 & MMC_CAP2_CD_ACTIVE_HIGH)
@@ -102,7 +102,7 @@ static int mxs_mmc_reset(struct mxs_mmc_host *host)
 		BM_SSP_CTRL1_RESP_TIMEOUT_IRQ_EN |
 		BM_SSP_CTRL1_RESP_ERR_IRQ_EN;
 
-	writel(BF_SSP(0xffff, TIMING_TIMEOUT) |
+	pete_writel("drivers/mmc/host/mxs-mmc.c:105", BF_SSP(0xffff, TIMING_TIMEOUT) |
 	       BF_SSP(2, TIMING_CLOCK_DIVIDE) |
 	       BF_SSP(0, TIMING_CLOCK_RATE),
 	       ssp->base + HW_SSP_TIMING(ssp));
@@ -112,8 +112,8 @@ static int mxs_mmc_reset(struct mxs_mmc_host *host)
 		ctrl1 |= BM_SSP_CTRL1_SDIO_IRQ_EN;
 	}
 
-	writel(ctrl0, ssp->base + HW_SSP_CTRL0);
-	writel(ctrl1, ssp->base + HW_SSP_CTRL1(ssp));
+	pete_writel("drivers/mmc/host/mxs-mmc.c:115", ctrl0, ssp->base + HW_SSP_CTRL0);
+	pete_writel("drivers/mmc/host/mxs-mmc.c:116", ctrl1, ssp->base + HW_SSP_CTRL1(ssp));
 	return 0;
 }
 
@@ -129,12 +129,12 @@ static void mxs_mmc_request_done(struct mxs_mmc_host *host)
 
 	if (mmc_resp_type(cmd) & MMC_RSP_PRESENT) {
 		if (mmc_resp_type(cmd) & MMC_RSP_136) {
-			cmd->resp[3] = readl(ssp->base + HW_SSP_SDRESP0(ssp));
-			cmd->resp[2] = readl(ssp->base + HW_SSP_SDRESP1(ssp));
-			cmd->resp[1] = readl(ssp->base + HW_SSP_SDRESP2(ssp));
-			cmd->resp[0] = readl(ssp->base + HW_SSP_SDRESP3(ssp));
+			cmd->resp[3] = pete_readl("drivers/mmc/host/mxs-mmc.c:132", ssp->base + HW_SSP_SDRESP0(ssp));
+			cmd->resp[2] = pete_readl("drivers/mmc/host/mxs-mmc.c:133", ssp->base + HW_SSP_SDRESP1(ssp));
+			cmd->resp[1] = pete_readl("drivers/mmc/host/mxs-mmc.c:134", ssp->base + HW_SSP_SDRESP2(ssp));
+			cmd->resp[0] = pete_readl("drivers/mmc/host/mxs-mmc.c:135", ssp->base + HW_SSP_SDRESP3(ssp));
 		} else {
-			cmd->resp[0] = readl(ssp->base + HW_SSP_SDRESP0(ssp));
+			cmd->resp[0] = pete_readl("drivers/mmc/host/mxs-mmc.c:137", ssp->base + HW_SSP_SDRESP0(ssp));
 		}
 	}
 
@@ -182,8 +182,8 @@ static irqreturn_t mxs_mmc_irq_handler(int irq, void *dev_id)
 
 	spin_lock(&host->lock);
 
-	stat = readl(ssp->base + HW_SSP_CTRL1(ssp));
-	writel(stat & MXS_MMC_IRQ_BITS,
+	stat = pete_readl("drivers/mmc/host/mxs-mmc.c:185", ssp->base + HW_SSP_CTRL1(ssp));
+	pete_writel("drivers/mmc/host/mxs-mmc.c:186", stat & MXS_MMC_IRQ_BITS,
 	       ssp->base + HW_SSP_CTRL1(ssp) + STMP_OFFSET_REG_CLR);
 
 	spin_unlock(&host->lock);
@@ -403,8 +403,8 @@ static void mxs_mmc_adtc(struct mxs_mmc_host *host)
 		cmd0 |= BF_SSP(log2_blksz, CMD0_BLOCK_SIZE) |
 			BF_SSP(blocks - 1, CMD0_BLOCK_COUNT);
 	} else {
-		writel(data_size, ssp->base + HW_SSP_XFER_SIZE);
-		writel(BF_SSP(log2_blksz, BLOCK_SIZE_BLOCK_SIZE) |
+		pete_writel("drivers/mmc/host/mxs-mmc.c:406", data_size, ssp->base + HW_SSP_XFER_SIZE);
+		pete_writel("drivers/mmc/host/mxs-mmc.c:407", BF_SSP(log2_blksz, BLOCK_SIZE_BLOCK_SIZE) |
 		       BF_SSP(blocks - 1, BLOCK_SIZE_BLOCK_COUNT),
 		       ssp->base + HW_SSP_BLOCK_SIZE);
 	}
@@ -421,10 +421,10 @@ static void mxs_mmc_adtc(struct mxs_mmc_host *host)
 
 	/* set the timeout count */
 	timeout = mxs_ns_to_ssp_ticks(ssp->clk_rate, data->timeout_ns);
-	val = readl(ssp->base + HW_SSP_TIMING(ssp));
+	val = pete_readl("drivers/mmc/host/mxs-mmc.c:424", ssp->base + HW_SSP_TIMING(ssp));
 	val &= ~(BM_SSP_TIMING_TIMEOUT);
 	val |= BF_SSP(timeout, TIMING_TIMEOUT);
-	writel(val, ssp->base + HW_SSP_TIMING(ssp));
+	pete_writel("drivers/mmc/host/mxs-mmc.c:427", val, ssp->base + HW_SSP_TIMING(ssp));
 
 	/* pio */
 	ssp->ssp_pio_words[0] = ctrl0;
@@ -517,20 +517,20 @@ static void mxs_mmc_enable_sdio_irq(struct mmc_host *mmc, int enable)
 	host->sdio_irq_en = enable;
 
 	if (enable) {
-		writel(BM_SSP_CTRL0_SDIO_IRQ_CHECK,
+		pete_writel("drivers/mmc/host/mxs-mmc.c:520", BM_SSP_CTRL0_SDIO_IRQ_CHECK,
 		       ssp->base + HW_SSP_CTRL0 + STMP_OFFSET_REG_SET);
-		writel(BM_SSP_CTRL1_SDIO_IRQ_EN,
+		pete_writel("drivers/mmc/host/mxs-mmc.c:522", BM_SSP_CTRL1_SDIO_IRQ_EN,
 		       ssp->base + HW_SSP_CTRL1(ssp) + STMP_OFFSET_REG_SET);
 	} else {
-		writel(BM_SSP_CTRL0_SDIO_IRQ_CHECK,
+		pete_writel("drivers/mmc/host/mxs-mmc.c:525", BM_SSP_CTRL0_SDIO_IRQ_CHECK,
 		       ssp->base + HW_SSP_CTRL0 + STMP_OFFSET_REG_CLR);
-		writel(BM_SSP_CTRL1_SDIO_IRQ_EN,
+		pete_writel("drivers/mmc/host/mxs-mmc.c:527", BM_SSP_CTRL1_SDIO_IRQ_EN,
 		       ssp->base + HW_SSP_CTRL1(ssp) + STMP_OFFSET_REG_CLR);
 	}
 
 	spin_unlock_irqrestore(&host->lock, flags);
 
-	if (enable && readl(ssp->base + HW_SSP_STATUS(ssp)) &
+	if (enable && pete_readl("drivers/mmc/host/mxs-mmc.c:533", ssp->base + HW_SSP_STATUS(ssp)) &
 			BM_SSP_STATUS_SDIO_IRQ)
 		mmc_signal_sdio_irq(host->mmc);
 

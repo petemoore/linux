@@ -61,8 +61,8 @@ static irqreturn_t rp1_mbox_irq(int irq, void *dev_id)
 	unsigned int doorbell;
 	unsigned int evs;
 
-	evs = readl(mbox->regs + SYSCFG_HOST_EVENT_IRQ);
-	writel(evs, mbox->regs + SYSCFG_HOST_EVENTS + HW_CLR_BITS);
+	evs = pete_readl("drivers/mailbox/rp1-mailbox.c:64", mbox->regs + SYSCFG_HOST_EVENT_IRQ);
+	pete_writel("drivers/mailbox/rp1-mailbox.c:65", evs, mbox->regs + SYSCFG_HOST_EVENTS + HW_CLR_BITS);
 
 	while (evs) {
 		doorbell = __ffs(evs);
@@ -78,7 +78,7 @@ static int rp1_send_data(struct mbox_chan *chan, void *data)
 	struct rp1_mbox *mbox = rp1_chan_mbox(chan);
 	unsigned int event = rp1_chan_event(chan);
 
-	writel(event, mbox->regs + SYSCFG_PROC_EVENTS + HW_SET_BITS);
+	pete_writel("drivers/mailbox/rp1-mailbox.c:81", event, mbox->regs + SYSCFG_PROC_EVENTS + HW_SET_BITS);
 
 	return 0;
 }
@@ -88,7 +88,7 @@ static int rp1_startup(struct mbox_chan *chan)
 	struct rp1_mbox *mbox = rp1_chan_mbox(chan);
 	unsigned int event = rp1_chan_event(chan);
 
-	writel(event, mbox->regs + SYSCFG_HOST_EVENT_IRQ_EN + HW_SET_BITS);
+	pete_writel("drivers/mailbox/rp1-mailbox.c:91", event, mbox->regs + SYSCFG_HOST_EVENT_IRQ_EN + HW_SET_BITS);
 
 	return 0;
 }
@@ -98,7 +98,7 @@ static void rp1_shutdown(struct mbox_chan *chan)
 	struct rp1_mbox *mbox = rp1_chan_mbox(chan);
 	unsigned int event = rp1_chan_event(chan);
 
-	writel(event, mbox->regs + SYSCFG_HOST_EVENT_IRQ_EN + HW_CLR_BITS);
+	pete_writel("drivers/mailbox/rp1-mailbox.c:101", event, mbox->regs + SYSCFG_HOST_EVENT_IRQ_EN + HW_CLR_BITS);
 }
 
 static bool rp1_last_tx_done(struct mbox_chan *chan)
@@ -107,7 +107,7 @@ static bool rp1_last_tx_done(struct mbox_chan *chan)
 	unsigned int event = rp1_chan_event(chan);
 	unsigned int evs;
 
-	evs = readl(mbox->regs + SYSCFG_HOST_EVENT_IRQ);
+	evs = pete_readl("drivers/mailbox/rp1-mailbox.c:110", mbox->regs + SYSCFG_HOST_EVENT_IRQ);
 
 	return !(evs & event);
 }

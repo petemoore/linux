@@ -224,21 +224,21 @@ static void s3c64xx_flush_fifo(struct s3c64xx_spi_driver_data *sdd)
 	unsigned long loops;
 	u32 val;
 
-	writel(0, regs + S3C64XX_SPI_PACKET_CNT);
+	pete_writel("drivers/spi/spi-s3c64xx.c:227", 0, regs + S3C64XX_SPI_PACKET_CNT);
 
-	val = readl(regs + S3C64XX_SPI_CH_CFG);
+	val = pete_readl("drivers/spi/spi-s3c64xx.c:229", regs + S3C64XX_SPI_CH_CFG);
 	val &= ~(S3C64XX_SPI_CH_RXCH_ON | S3C64XX_SPI_CH_TXCH_ON);
-	writel(val, regs + S3C64XX_SPI_CH_CFG);
+	pete_writel("drivers/spi/spi-s3c64xx.c:231", val, regs + S3C64XX_SPI_CH_CFG);
 
-	val = readl(regs + S3C64XX_SPI_CH_CFG);
+	val = pete_readl("drivers/spi/spi-s3c64xx.c:233", regs + S3C64XX_SPI_CH_CFG);
 	val |= S3C64XX_SPI_CH_SW_RST;
 	val &= ~S3C64XX_SPI_CH_HS_EN;
-	writel(val, regs + S3C64XX_SPI_CH_CFG);
+	pete_writel("drivers/spi/spi-s3c64xx.c:236", val, regs + S3C64XX_SPI_CH_CFG);
 
 	/* Flush TxFIFO*/
 	loops = msecs_to_loops(1);
 	do {
-		val = readl(regs + S3C64XX_SPI_STATUS);
+		val = pete_readl("drivers/spi/spi-s3c64xx.c:241", regs + S3C64XX_SPI_STATUS);
 	} while (TX_FIFO_LVL(val, sdd) && --loops);
 
 	if (loops == 0)
@@ -247,9 +247,9 @@ static void s3c64xx_flush_fifo(struct s3c64xx_spi_driver_data *sdd)
 	/* Flush RxFIFO*/
 	loops = msecs_to_loops(1);
 	do {
-		val = readl(regs + S3C64XX_SPI_STATUS);
+		val = pete_readl("drivers/spi/spi-s3c64xx.c:250", regs + S3C64XX_SPI_STATUS);
 		if (RX_FIFO_LVL(val, sdd))
-			readl(regs + S3C64XX_SPI_RX_DATA);
+			pete_readl("drivers/spi/spi-s3c64xx.c:252", regs + S3C64XX_SPI_RX_DATA);
 		else
 			break;
 	} while (--loops);
@@ -257,13 +257,13 @@ static void s3c64xx_flush_fifo(struct s3c64xx_spi_driver_data *sdd)
 	if (loops == 0)
 		dev_warn(&sdd->pdev->dev, "Timed out flushing RX FIFO\n");
 
-	val = readl(regs + S3C64XX_SPI_CH_CFG);
+	val = pete_readl("drivers/spi/spi-s3c64xx.c:260", regs + S3C64XX_SPI_CH_CFG);
 	val &= ~S3C64XX_SPI_CH_SW_RST;
-	writel(val, regs + S3C64XX_SPI_CH_CFG);
+	pete_writel("drivers/spi/spi-s3c64xx.c:262", val, regs + S3C64XX_SPI_CH_CFG);
 
-	val = readl(regs + S3C64XX_SPI_MODE_CFG);
+	val = pete_readl("drivers/spi/spi-s3c64xx.c:264", regs + S3C64XX_SPI_MODE_CFG);
 	val &= ~(S3C64XX_SPI_MODE_TXDMA_ON | S3C64XX_SPI_MODE_RXDMA_ON);
-	writel(val, regs + S3C64XX_SPI_MODE_CFG);
+	pete_writel("drivers/spi/spi-s3c64xx.c:266", val, regs + S3C64XX_SPI_MODE_CFG);
 }
 
 static void s3c64xx_spi_dmacb(void *data)
@@ -354,17 +354,17 @@ static void s3c64xx_spi_set_cs(struct spi_device *spi, bool enable)
 
 	if (enable) {
 		if (!(sdd->port_conf->quirks & S3C64XX_SPI_QUIRK_CS_AUTO)) {
-			writel(0, sdd->regs + S3C64XX_SPI_CS_REG);
+			pete_writel("drivers/spi/spi-s3c64xx.c:357", 0, sdd->regs + S3C64XX_SPI_CS_REG);
 		} else {
-			u32 ssel = readl(sdd->regs + S3C64XX_SPI_CS_REG);
+			u32 ssel = pete_readl("drivers/spi/spi-s3c64xx.c:359", sdd->regs + S3C64XX_SPI_CS_REG);
 
 			ssel |= (S3C64XX_SPI_CS_AUTO |
 						S3C64XX_SPI_CS_NSC_CNT_2);
-			writel(ssel, sdd->regs + S3C64XX_SPI_CS_REG);
+			pete_writel("drivers/spi/spi-s3c64xx.c:363", ssel, sdd->regs + S3C64XX_SPI_CS_REG);
 		}
 	} else {
 		if (!(sdd->port_conf->quirks & S3C64XX_SPI_QUIRK_CS_AUTO))
-			writel(S3C64XX_SPI_CS_SIG_INACT,
+			pete_writel("drivers/spi/spi-s3c64xx.c:367", S3C64XX_SPI_CS_SIG_INACT,
 			       sdd->regs + S3C64XX_SPI_CS_REG);
 	}
 }
@@ -436,10 +436,10 @@ static int s3c64xx_enable_datapath(struct s3c64xx_spi_driver_data *sdd,
 	u32 modecfg, chcfg;
 	int ret = 0;
 
-	modecfg = readl(regs + S3C64XX_SPI_MODE_CFG);
+	modecfg = pete_readl("drivers/spi/spi-s3c64xx.c:439", regs + S3C64XX_SPI_MODE_CFG);
 	modecfg &= ~(S3C64XX_SPI_MODE_TXDMA_ON | S3C64XX_SPI_MODE_RXDMA_ON);
 
-	chcfg = readl(regs + S3C64XX_SPI_CH_CFG);
+	chcfg = pete_readl("drivers/spi/spi-s3c64xx.c:442", regs + S3C64XX_SPI_CH_CFG);
 	chcfg &= ~S3C64XX_SPI_CH_TXCH_ON;
 
 	if (dma_mode) {
@@ -450,7 +450,7 @@ static int s3c64xx_enable_datapath(struct s3c64xx_spi_driver_data *sdd,
 		 * as exactly needed.
 		 */
 		chcfg |= S3C64XX_SPI_CH_RXCH_ON;
-		writel(((xfer->len * 8 / sdd->cur_bpw) & 0xffff)
+		pete_writel("drivers/spi/spi-s3c64xx.c:453", ((xfer->len * 8 / sdd->cur_bpw) & 0xffff)
 					| S3C64XX_SPI_PACKET_CNT_EN,
 					regs + S3C64XX_SPI_PACKET_CNT);
 	}
@@ -489,7 +489,7 @@ static int s3c64xx_enable_datapath(struct s3c64xx_spi_driver_data *sdd,
 		if (dma_mode) {
 			modecfg |= S3C64XX_SPI_MODE_RXDMA_ON;
 			chcfg |= S3C64XX_SPI_CH_RXCH_ON;
-			writel(((xfer->len * 8 / sdd->cur_bpw) & 0xffff)
+			pete_writel("drivers/spi/spi-s3c64xx.c:492", ((xfer->len * 8 / sdd->cur_bpw) & 0xffff)
 					| S3C64XX_SPI_PACKET_CNT_EN,
 					regs + S3C64XX_SPI_PACKET_CNT);
 			ret = prepare_dma(&sdd->rx_dma, &xfer->rx_sg);
@@ -499,8 +499,8 @@ static int s3c64xx_enable_datapath(struct s3c64xx_spi_driver_data *sdd,
 	if (ret)
 		return ret;
 
-	writel(modecfg, regs + S3C64XX_SPI_MODE_CFG);
-	writel(chcfg, regs + S3C64XX_SPI_CH_CFG);
+	pete_writel("drivers/spi/spi-s3c64xx.c:502", modecfg, regs + S3C64XX_SPI_MODE_CFG);
+	pete_writel("drivers/spi/spi-s3c64xx.c:503", chcfg, regs + S3C64XX_SPI_CH_CFG);
 
 	return 0;
 }
@@ -517,7 +517,7 @@ static u32 s3c64xx_spi_wait_for_timeout(struct s3c64xx_spi_driver_data *sdd,
 		val = msecs_to_loops(timeout_ms);
 
 	do {
-		status = readl(regs + S3C64XX_SPI_STATUS);
+		status = pete_readl("drivers/spi/spi-s3c64xx.c:520", regs + S3C64XX_SPI_STATUS);
 	} while (RX_FIFO_LVL(status, sdd) < max_fifo && --val);
 
 	/* return the actual received data length */
@@ -551,12 +551,12 @@ static int s3c64xx_wait_for_dma(struct s3c64xx_spi_driver_data *sdd,
 	 */
 	if (val && !xfer->rx_buf) {
 		val = msecs_to_loops(10);
-		status = readl(regs + S3C64XX_SPI_STATUS);
+		status = pete_readl("drivers/spi/spi-s3c64xx.c:554", regs + S3C64XX_SPI_STATUS);
 		while ((TX_FIFO_LVL(status, sdd)
 			|| !S3C64XX_SPI_ST_TX_DONE(status, sdd))
 		       && --val) {
 			cpu_relax();
-			status = readl(regs + S3C64XX_SPI_STATUS);
+			status = pete_readl("drivers/spi/spi-s3c64xx.c:559", regs + S3C64XX_SPI_STATUS);
 		}
 
 	}
@@ -586,7 +586,7 @@ static int s3c64xx_wait_for_pio(struct s3c64xx_spi_driver_data *sdd,
 	ms += 10; /* some tolerance */
 
 	/* sleep during signal transfer time */
-	status = readl(regs + S3C64XX_SPI_STATUS);
+	status = pete_readl("drivers/spi/spi-s3c64xx.c:589", regs + S3C64XX_SPI_STATUS);
 	if (RX_FIFO_LVL(status, sdd) < xfer->len)
 		usleep_range(time_us / 2, time_us);
 
@@ -598,7 +598,7 @@ static int s3c64xx_wait_for_pio(struct s3c64xx_spi_driver_data *sdd,
 
 	val = msecs_to_loops(ms);
 	do {
-		status = readl(regs + S3C64XX_SPI_STATUS);
+		status = pete_readl("drivers/spi/spi-s3c64xx.c:601", regs + S3C64XX_SPI_STATUS);
 	} while (RX_FIFO_LVL(status, sdd) < xfer->len && --val);
 
 	if (!val)
@@ -656,13 +656,13 @@ static int s3c64xx_spi_config(struct s3c64xx_spi_driver_data *sdd)
 
 	/* Disable Clock */
 	if (!sdd->port_conf->clk_from_cmu) {
-		val = readl(regs + S3C64XX_SPI_CLK_CFG);
+		val = pete_readl("drivers/spi/spi-s3c64xx.c:659", regs + S3C64XX_SPI_CLK_CFG);
 		val &= ~S3C64XX_SPI_ENCLK_ENABLE;
-		writel(val, regs + S3C64XX_SPI_CLK_CFG);
+		pete_writel("drivers/spi/spi-s3c64xx.c:661", val, regs + S3C64XX_SPI_CLK_CFG);
 	}
 
 	/* Set Polarity and Phase */
-	val = readl(regs + S3C64XX_SPI_CH_CFG);
+	val = pete_readl("drivers/spi/spi-s3c64xx.c:665", regs + S3C64XX_SPI_CH_CFG);
 	val &= ~(S3C64XX_SPI_CH_SLAVE |
 			S3C64XX_SPI_CPOL_L |
 			S3C64XX_SPI_CPHA_B);
@@ -673,10 +673,10 @@ static int s3c64xx_spi_config(struct s3c64xx_spi_driver_data *sdd)
 	if (sdd->cur_mode & SPI_CPHA)
 		val |= S3C64XX_SPI_CPHA_B;
 
-	writel(val, regs + S3C64XX_SPI_CH_CFG);
+	pete_writel("drivers/spi/spi-s3c64xx.c:676", val, regs + S3C64XX_SPI_CH_CFG);
 
 	/* Set Channel & DMA Mode */
-	val = readl(regs + S3C64XX_SPI_MODE_CFG);
+	val = pete_readl("drivers/spi/spi-s3c64xx.c:679", regs + S3C64XX_SPI_MODE_CFG);
 	val &= ~(S3C64XX_SPI_MODE_BUS_TSZ_MASK
 			| S3C64XX_SPI_MODE_CH_TSZ_MASK);
 
@@ -700,7 +700,7 @@ static int s3c64xx_spi_config(struct s3c64xx_spi_driver_data *sdd)
 	else
 		val &= ~S3C64XX_SPI_MODE_SELF_LOOPBACK;
 
-	writel(val, regs + S3C64XX_SPI_MODE_CFG);
+	pete_writel("drivers/spi/spi-s3c64xx.c:703", val, regs + S3C64XX_SPI_MODE_CFG);
 
 	if (sdd->port_conf->clk_from_cmu) {
 		ret = clk_set_rate(sdd->src_clk, sdd->cur_speed * div);
@@ -709,16 +709,16 @@ static int s3c64xx_spi_config(struct s3c64xx_spi_driver_data *sdd)
 		sdd->cur_speed = clk_get_rate(sdd->src_clk) / div;
 	} else {
 		/* Configure Clock */
-		val = readl(regs + S3C64XX_SPI_CLK_CFG);
+		val = pete_readl("drivers/spi/spi-s3c64xx.c:712", regs + S3C64XX_SPI_CLK_CFG);
 		val &= ~S3C64XX_SPI_PSR_MASK;
 		val |= ((clk_get_rate(sdd->src_clk) / sdd->cur_speed / div - 1)
 				& S3C64XX_SPI_PSR_MASK);
-		writel(val, regs + S3C64XX_SPI_CLK_CFG);
+		pete_writel("drivers/spi/spi-s3c64xx.c:716", val, regs + S3C64XX_SPI_CLK_CFG);
 
 		/* Enable Clock */
-		val = readl(regs + S3C64XX_SPI_CLK_CFG);
+		val = pete_readl("drivers/spi/spi-s3c64xx.c:719", regs + S3C64XX_SPI_CLK_CFG);
 		val |= S3C64XX_SPI_ENCLK_ENABLE;
-		writel(val, regs + S3C64XX_SPI_CLK_CFG);
+		pete_writel("drivers/spi/spi-s3c64xx.c:721", val, regs + S3C64XX_SPI_CLK_CFG);
 	}
 
 	return 0;
@@ -736,9 +736,9 @@ static int s3c64xx_spi_prepare_message(struct spi_controller *host,
 	/* Configure feedback delay */
 	if (!cs)
 		/* No delay if not defined */
-		writel(0, sdd->regs + S3C64XX_SPI_FB_CLK);
+		pete_writel("drivers/spi/spi-s3c64xx.c:739", 0, sdd->regs + S3C64XX_SPI_FB_CLK);
 	else
-		writel(cs->fb_delay & 0x3, sdd->regs + S3C64XX_SPI_FB_CLK);
+		pete_writel("drivers/spi/spi-s3c64xx.c:741", cs->fb_delay & 0x3, sdd->regs + S3C64XX_SPI_FB_CLK);
 
 	return 0;
 }
@@ -814,14 +814,14 @@ static int s3c64xx_spi_transfer_one(struct spi_controller *host,
 			else if (fifo_len == 256)
 				rdy_lv /= 4;
 
-			val = readl(sdd->regs + S3C64XX_SPI_MODE_CFG);
+			val = pete_readl("drivers/spi/spi-s3c64xx.c:817", sdd->regs + S3C64XX_SPI_MODE_CFG);
 			val &= ~S3C64XX_SPI_MODE_RX_RDY_LVL;
 			val |= (rdy_lv << S3C64XX_SPI_MODE_RX_RDY_LVL_SHIFT);
-			writel(val, sdd->regs + S3C64XX_SPI_MODE_CFG);
+			pete_writel("drivers/spi/spi-s3c64xx.c:820", val, sdd->regs + S3C64XX_SPI_MODE_CFG);
 
 			/* Enable FIFO_RDY_EN IRQ */
-			val = readl(sdd->regs + S3C64XX_SPI_INT_EN);
-			writel((val | S3C64XX_SPI_INT_RX_FIFORDY_EN),
+			val = pete_readl("drivers/spi/spi-s3c64xx.c:823", sdd->regs + S3C64XX_SPI_INT_EN);
+			pete_writel("drivers/spi/spi-s3c64xx.c:824", (val | S3C64XX_SPI_INT_RX_FIFORDY_EN),
 					sdd->regs + S3C64XX_SPI_INT_EN);
 
 		}
@@ -1038,7 +1038,7 @@ static irqreturn_t s3c64xx_spi_irq(int irq, void *data)
 	struct spi_controller *spi = sdd->host;
 	unsigned int val, clr = 0;
 
-	val = readl(sdd->regs + S3C64XX_SPI_STATUS);
+	val = pete_readl("drivers/spi/spi-s3c64xx.c:1041", sdd->regs + S3C64XX_SPI_STATUS);
 
 	if (val & S3C64XX_SPI_ST_RX_OVERRUN_ERR) {
 		clr = S3C64XX_SPI_PND_RX_OVERRUN_CLR;
@@ -1060,14 +1060,14 @@ static irqreturn_t s3c64xx_spi_irq(int irq, void *data)
 	if (val & S3C64XX_SPI_ST_RX_FIFORDY) {
 		complete(&sdd->xfer_completion);
 		/* No pending clear irq, turn-off INT_EN_RX_FIFO_RDY */
-		val = readl(sdd->regs + S3C64XX_SPI_INT_EN);
-		writel((val & ~S3C64XX_SPI_INT_RX_FIFORDY_EN),
+		val = pete_readl("drivers/spi/spi-s3c64xx.c:1063", sdd->regs + S3C64XX_SPI_INT_EN);
+		pete_writel("drivers/spi/spi-s3c64xx.c:1064", (val & ~S3C64XX_SPI_INT_RX_FIFORDY_EN),
 				sdd->regs + S3C64XX_SPI_INT_EN);
 	}
 
 	/* Clear the pending irq by setting and then clearing it */
-	writel(clr, sdd->regs + S3C64XX_SPI_PENDING_CLR);
-	writel(0, sdd->regs + S3C64XX_SPI_PENDING_CLR);
+	pete_writel("drivers/spi/spi-s3c64xx.c:1069", clr, sdd->regs + S3C64XX_SPI_PENDING_CLR);
+	pete_writel("drivers/spi/spi-s3c64xx.c:1070", 0, sdd->regs + S3C64XX_SPI_PENDING_CLR);
 
 	return IRQ_HANDLED;
 }
@@ -1081,34 +1081,34 @@ static void s3c64xx_spi_hwinit(struct s3c64xx_spi_driver_data *sdd)
 	sdd->cur_speed = 0;
 
 	if (sci->no_cs)
-		writel(0, sdd->regs + S3C64XX_SPI_CS_REG);
+		pete_writel("drivers/spi/spi-s3c64xx.c:1084", 0, sdd->regs + S3C64XX_SPI_CS_REG);
 	else if (!(sdd->port_conf->quirks & S3C64XX_SPI_QUIRK_CS_AUTO))
-		writel(S3C64XX_SPI_CS_SIG_INACT, sdd->regs + S3C64XX_SPI_CS_REG);
+		pete_writel("drivers/spi/spi-s3c64xx.c:1086", S3C64XX_SPI_CS_SIG_INACT, sdd->regs + S3C64XX_SPI_CS_REG);
 
 	/* Disable Interrupts - we use Polling if not DMA mode */
-	writel(0, regs + S3C64XX_SPI_INT_EN);
+	pete_writel("drivers/spi/spi-s3c64xx.c:1089", 0, regs + S3C64XX_SPI_INT_EN);
 
 	if (!sdd->port_conf->clk_from_cmu)
-		writel(sci->src_clk_nr << S3C64XX_SPI_CLKSEL_SRCSHFT,
+		pete_writel("drivers/spi/spi-s3c64xx.c:1092", sci->src_clk_nr << S3C64XX_SPI_CLKSEL_SRCSHFT,
 				regs + S3C64XX_SPI_CLK_CFG);
-	writel(0, regs + S3C64XX_SPI_MODE_CFG);
-	writel(0, regs + S3C64XX_SPI_PACKET_CNT);
+	pete_writel("drivers/spi/spi-s3c64xx.c:1094", 0, regs + S3C64XX_SPI_MODE_CFG);
+	pete_writel("drivers/spi/spi-s3c64xx.c:1095", 0, regs + S3C64XX_SPI_PACKET_CNT);
 
 	/* Clear any irq pending bits, should set and clear the bits */
 	val = S3C64XX_SPI_PND_RX_OVERRUN_CLR |
 		S3C64XX_SPI_PND_RX_UNDERRUN_CLR |
 		S3C64XX_SPI_PND_TX_OVERRUN_CLR |
 		S3C64XX_SPI_PND_TX_UNDERRUN_CLR;
-	writel(val, regs + S3C64XX_SPI_PENDING_CLR);
-	writel(0, regs + S3C64XX_SPI_PENDING_CLR);
+	pete_writel("drivers/spi/spi-s3c64xx.c:1102", val, regs + S3C64XX_SPI_PENDING_CLR);
+	pete_writel("drivers/spi/spi-s3c64xx.c:1103", 0, regs + S3C64XX_SPI_PENDING_CLR);
 
-	writel(0, regs + S3C64XX_SPI_SWAP_CFG);
+	pete_writel("drivers/spi/spi-s3c64xx.c:1105", 0, regs + S3C64XX_SPI_SWAP_CFG);
 
-	val = readl(regs + S3C64XX_SPI_MODE_CFG);
+	val = pete_readl("drivers/spi/spi-s3c64xx.c:1107", regs + S3C64XX_SPI_MODE_CFG);
 	val &= ~S3C64XX_SPI_MODE_4BURST;
 	val &= ~(S3C64XX_SPI_MAX_TRAILCNT << S3C64XX_SPI_TRAILCNT_OFF);
 	val |= (S3C64XX_SPI_TRAILCNT << S3C64XX_SPI_TRAILCNT_OFF);
-	writel(val, regs + S3C64XX_SPI_MODE_CFG);
+	pete_writel("drivers/spi/spi-s3c64xx.c:1111", val, regs + S3C64XX_SPI_MODE_CFG);
 
 	s3c64xx_flush_fifo(sdd);
 }
@@ -1301,7 +1301,7 @@ static int s3c64xx_spi_probe(struct platform_device *pdev)
 		goto err_pm_put;
 	}
 
-	writel(S3C64XX_SPI_INT_RX_OVERRUN_EN | S3C64XX_SPI_INT_RX_UNDERRUN_EN |
+	pete_writel("drivers/spi/spi-s3c64xx.c:1304", S3C64XX_SPI_INT_RX_OVERRUN_EN | S3C64XX_SPI_INT_RX_UNDERRUN_EN |
 	       S3C64XX_SPI_INT_TX_OVERRUN_EN | S3C64XX_SPI_INT_TX_UNDERRUN_EN,
 	       sdd->regs + S3C64XX_SPI_INT_EN);
 
@@ -1336,7 +1336,7 @@ static void s3c64xx_spi_remove(struct platform_device *pdev)
 
 	pm_runtime_get_sync(&pdev->dev);
 
-	writel(0, sdd->regs + S3C64XX_SPI_INT_EN);
+	pete_writel("drivers/spi/spi-s3c64xx.c:1339", 0, sdd->regs + S3C64XX_SPI_INT_EN);
 
 	if (!is_polling(sdd)) {
 		dma_release_channel(sdd->rx_dma.ch);
@@ -1420,7 +1420,7 @@ static int s3c64xx_spi_runtime_resume(struct device *dev)
 
 	s3c64xx_spi_hwinit(sdd);
 
-	writel(S3C64XX_SPI_INT_RX_OVERRUN_EN | S3C64XX_SPI_INT_RX_UNDERRUN_EN |
+	pete_writel("drivers/spi/spi-s3c64xx.c:1423", S3C64XX_SPI_INT_RX_OVERRUN_EN | S3C64XX_SPI_INT_RX_UNDERRUN_EN |
 	       S3C64XX_SPI_INT_TX_OVERRUN_EN | S3C64XX_SPI_INT_TX_UNDERRUN_EN,
 	       sdd->regs + S3C64XX_SPI_INT_EN);
 

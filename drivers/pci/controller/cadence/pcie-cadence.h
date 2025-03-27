@@ -385,19 +385,19 @@ struct cdns_pcie_ep {
 /* Register access */
 static inline void cdns_pcie_writel(struct cdns_pcie *pcie, u32 reg, u32 value)
 {
-	writel(value, pcie->reg_base + reg);
+	pete_writel("drivers/pci/controller/cadence/pcie-cadence.h:388", value, pcie->reg_base + reg);
 }
 
 static inline u32 cdns_pcie_readl(struct cdns_pcie *pcie, u32 reg)
 {
-	return readl(pcie->reg_base + reg);
+	return pete_readl("drivers/pci/controller/cadence/pcie-cadence.h:393", pcie->reg_base + reg);
 }
 
 static inline u32 cdns_pcie_read_sz(void __iomem *addr, int size)
 {
 	void __iomem *aligned_addr = PTR_ALIGN_DOWN(addr, 0x4);
 	unsigned int offset = (unsigned long)addr & 0x3;
-	u32 val = readl(aligned_addr);
+	u32 val = pete_readl("drivers/pci/controller/cadence/pcie-cadence.h:400", aligned_addr);
 
 	if (!IS_ALIGNED((uintptr_t)addr, size)) {
 		pr_warn("Address %p and size %d are not aligned\n", addr, size);
@@ -423,14 +423,14 @@ static inline void cdns_pcie_write_sz(void __iomem *addr, int size, u32 value)
 	}
 
 	if (size > 2) {
-		writel(value, addr);
+		pete_writel("drivers/pci/controller/cadence/pcie-cadence.h:426", value, addr);
 		return;
 	}
 
 	mask = ~(((1 << (size * 8)) - 1) << (offset * 8));
-	val = readl(aligned_addr) & mask;
+	val = pete_readl("drivers/pci/controller/cadence/pcie-cadence.h:431", aligned_addr) & mask;
 	val |= value << (offset * 8);
-	writel(val, aligned_addr);
+	pete_writel("drivers/pci/controller/cadence/pcie-cadence.h:433", val, aligned_addr);
 }
 
 /* Root Port register access */
@@ -477,7 +477,7 @@ static inline void cdns_pcie_ep_fn_writew(struct cdns_pcie *pcie, u8 fn,
 static inline void cdns_pcie_ep_fn_writel(struct cdns_pcie *pcie, u8 fn,
 					  u32 reg, u32 value)
 {
-	writel(value, pcie->reg_base + CDNS_PCIE_EP_FUNC_BASE(fn) + reg);
+	pete_writel("drivers/pci/controller/cadence/pcie-cadence.h:480", value, pcie->reg_base + CDNS_PCIE_EP_FUNC_BASE(fn) + reg);
 }
 
 static inline u16 cdns_pcie_ep_fn_readw(struct cdns_pcie *pcie, u8 fn, u32 reg)
@@ -489,7 +489,7 @@ static inline u16 cdns_pcie_ep_fn_readw(struct cdns_pcie *pcie, u8 fn, u32 reg)
 
 static inline u32 cdns_pcie_ep_fn_readl(struct cdns_pcie *pcie, u8 fn, u32 reg)
 {
-	return readl(pcie->reg_base + CDNS_PCIE_EP_FUNC_BASE(fn) + reg);
+	return pete_readl("drivers/pci/controller/cadence/pcie-cadence.h:492", pcie->reg_base + CDNS_PCIE_EP_FUNC_BASE(fn) + reg);
 }
 
 static inline int cdns_pcie_start_link(struct cdns_pcie *pcie)

@@ -209,17 +209,17 @@ struct tegra_slink_data {
 static inline u32 tegra_slink_readl(struct tegra_slink_data *tspi,
 		unsigned long reg)
 {
-	return readl(tspi->base + reg);
+	return pete_readl("drivers/spi/spi-tegra20-slink.c:212", tspi->base + reg);
 }
 
 static inline void tegra_slink_writel(struct tegra_slink_data *tspi,
 		u32 val, unsigned long reg)
 {
-	writel(val, tspi->base + reg);
+	pete_writel("drivers/spi/spi-tegra20-slink.c:218", val, tspi->base + reg);
 
 	/* Read back register to make sure that register writes completed */
 	if (reg != SLINK_TX_FIFO)
-		readl(tspi->base + SLINK_MAS_DATA);
+		pete_readl("drivers/spi/spi-tegra20-slink.c:222", tspi->base + SLINK_MAS_DATA);
 }
 
 static void tegra_slink_clear_status(struct tegra_slink_data *tspi)

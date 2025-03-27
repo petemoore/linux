@@ -4259,7 +4259,7 @@ static int mpi3mr_scan_finished(struct Scsi_Host *shost,
 {
 	struct mpi3mr_ioc *mrioc = shost_priv(shost);
 	u32 pe_timeout = MPI3MR_PORTENABLE_TIMEOUT;
-	u32 ioc_status = readl(&mrioc->sysif_regs->ioc_status);
+	u32 ioc_status = pete_readl("drivers/scsi/mpi3mr/mpi3mr_os.c:4262", &mrioc->sysif_regs->ioc_status);
 
 	if ((ioc_status & MPI3_SYSIF_IOC_STATUS_RESET_HISTORY) ||
 	    (ioc_status & MPI3_SYSIF_IOC_STATUS_FAULT)) {

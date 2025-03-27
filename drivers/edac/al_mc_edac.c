@@ -196,7 +196,7 @@ static enum scrub_type get_scrub_mode(void __iomem *mmio_base)
 {
 	u32 ecccfg0;
 
-	ecccfg0 = readl(mmio_base + AL_MC_ECC_CFG);
+	ecccfg0 = pete_readl("drivers/edac/al_mc_edac.c:199", mmio_base + AL_MC_ECC_CFG);
 
 	if (FIELD_GET(AL_MC_ECC_CFG_SCRUB_DISABLED, ecccfg0))
 		return SCRUB_NONE;

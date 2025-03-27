@@ -122,9 +122,9 @@ static void aspeed_spi_set_io_mode(struct aspeed_spi_chip *chip, u32 io_mode)
 	u32 ctl;
 
 	if (io_mode > 0) {
-		ctl = readl(chip->ctl) & ~CTRL_IO_MODE_MASK;
+		ctl = pete_readl("drivers/spi/spi-aspeed-smc.c:125", chip->ctl) & ~CTRL_IO_MODE_MASK;
 		ctl |= io_mode;
-		writel(ctl, chip->ctl);
+		pete_writel("drivers/spi/spi-aspeed-smc.c:127", ctl, chip->ctl);
 	}
 }
 
@@ -133,10 +133,10 @@ static void aspeed_spi_start_user(struct aspeed_spi_chip *chip)
 	u32 ctl = chip->ctl_val[ASPEED_SPI_BASE];
 
 	ctl |= CTRL_IO_MODE_USER | CTRL_CE_STOP_ACTIVE;
-	writel(ctl, chip->ctl);
+	pete_writel("drivers/spi/spi-aspeed-smc.c:136", ctl, chip->ctl);
 
 	ctl &= ~CTRL_CE_STOP_ACTIVE;
-	writel(ctl, chip->ctl);
+	pete_writel("drivers/spi/spi-aspeed-smc.c:139", ctl, chip->ctl);
 }
 
 static void aspeed_spi_stop_user(struct aspeed_spi_chip *chip)
@@ -144,10 +144,10 @@ static void aspeed_spi_stop_user(struct aspeed_spi_chip *chip)
 	u32 ctl = chip->ctl_val[ASPEED_SPI_READ] |
 		CTRL_IO_MODE_USER | CTRL_CE_STOP_ACTIVE;
 
-	writel(ctl, chip->ctl);
+	pete_writel("drivers/spi/spi-aspeed-smc.c:147", ctl, chip->ctl);
 
 	/* Restore defaults */
-	writel(chip->ctl_val[ASPEED_SPI_READ], chip->ctl);
+	pete_writel("drivers/spi/spi-aspeed-smc.c:150", chip->ctl_val[ASPEED_SPI_READ], chip->ctl);
 }
 
 static int aspeed_spi_read_from_ahb(void *buf, void __iomem *src, size_t len)
@@ -310,7 +310,7 @@ static int do_aspeed_spi_exec_op(struct spi_mem *mem, const struct spi_mem_op *o
 		op->dummy.buswidth, op->data.buswidth,
 		op->addr.nbytes, op->dummy.nbytes, op->data.nbytes);
 
-	addr_mode = readl(aspi->regs + CE_CTRL_REG);
+	addr_mode = pete_readl("drivers/spi/spi-aspeed-smc.c:313", aspi->regs + CE_CTRL_REG);
 	addr_mode_backup = addr_mode;
 
 	ctl_val = chip->ctl_val[ASPEED_SPI_BASE];
@@ -341,8 +341,8 @@ static int do_aspeed_spi_exec_op(struct spi_mem *mem, const struct spi_mem_op *o
 		ctl_val |= CTRL_IO_MODE_READ;
 
 	if (addr_mode != addr_mode_backup)
-		writel(addr_mode, aspi->regs + CE_CTRL_REG);
-	writel(ctl_val, chip->ctl);
+		pete_writel("drivers/spi/spi-aspeed-smc.c:344", addr_mode, aspi->regs + CE_CTRL_REG);
+	pete_writel("drivers/spi/spi-aspeed-smc.c:345", ctl_val, chip->ctl);
 
 	if (op->data.dir == SPI_MEM_DATA_IN) {
 		if (!op->addr.nbytes)
@@ -359,8 +359,8 @@ static int do_aspeed_spi_exec_op(struct spi_mem *mem, const struct spi_mem_op *o
 
 	/* Restore defaults */
 	if (addr_mode != addr_mode_backup)
-		writel(addr_mode_backup, aspi->regs + CE_CTRL_REG);
-	writel(chip->ctl_val[ASPEED_SPI_READ], chip->ctl);
+		pete_writel("drivers/spi/spi-aspeed-smc.c:362", addr_mode_backup, aspi->regs + CE_CTRL_REG);
+	pete_writel("drivers/spi/spi-aspeed-smc.c:363", chip->ctl_val[ASPEED_SPI_READ], chip->ctl);
 	return ret;
 }
 
@@ -397,7 +397,7 @@ static void aspeed_spi_get_windows(struct aspeed_spi *aspi,
 	u32 cs;
 
 	for (cs = 0; cs < aspi->data->max_cs; cs++) {
-		reg_val = readl(aspi->regs + CE0_SEGMENT_ADDR_REG + cs * 4);
+		reg_val = pete_readl("drivers/spi/spi-aspeed-smc.c:400", aspi->regs + CE0_SEGMENT_ADDR_REG + cs * 4);
 		windows[cs].cs = cs;
 		windows[cs].size = data->segment_end(aspi, reg_val) -
 			data->segment_start(aspi, reg_val);
@@ -442,22 +442,22 @@ static int aspeed_spi_set_window(struct aspeed_spi *aspi,
 	u32 start = aspi->ahb_base_phy + win->offset;
 	u32 end = start + win->size;
 	void __iomem *seg_reg = aspi->regs + CE0_SEGMENT_ADDR_REG + win->cs * 4;
-	u32 seg_val_backup = readl(seg_reg);
+	u32 seg_val_backup = pete_readl("drivers/spi/spi-aspeed-smc.c:445", seg_reg);
 	u32 seg_val = aspi->data->segment_reg(aspi, start, end);
 
 	if (seg_val == seg_val_backup)
 		return 0;
 
-	writel(seg_val, seg_reg);
+	pete_writel("drivers/spi/spi-aspeed-smc.c:451", seg_val, seg_reg);
 
 	/*
 	 * Restore initial value if something goes wrong else we could
 	 * loose access to the chip.
 	 */
-	if (seg_val != readl(seg_reg)) {
+	if (seg_val != pete_readl("drivers/spi/spi-aspeed-smc.c:457", seg_reg)) {
 		dev_err(aspi->dev, "CE%d invalid window [ 0x%.8x - 0x%.8x ] %dMB",
 			win->cs, start, end - 1, win->size >> 20);
-		writel(seg_val_backup, seg_reg);
+		pete_writel("drivers/spi/spi-aspeed-smc.c:460", seg_val_backup, seg_reg);
 		return -EIO;
 	}
 
@@ -582,7 +582,7 @@ static int aspeed_spi_dirmap_create(struct spi_mem_dirmap_desc *desc)
 			 chip->cs, chip->ahb_window_size >> 20);
 
 	/* Define the default IO read settings */
-	ctl_val = readl(chip->ctl) & ~CTRL_IO_CMD_MASK;
+	ctl_val = pete_readl("drivers/spi/spi-aspeed-smc.c:585", chip->ctl) & ~CTRL_IO_CMD_MASK;
 	ctl_val |= aspeed_spi_get_io_mode(op) |
 		op->cmd.opcode << CTRL_COMMAND_SHIFT |
 		CTRL_IO_MODE_READ;
@@ -592,13 +592,13 @@ static int aspeed_spi_dirmap_create(struct spi_mem_dirmap_desc *desc)
 
 	/* Tune 4BYTE address mode */
 	if (op->addr.nbytes) {
-		u32 addr_mode = readl(aspi->regs + CE_CTRL_REG);
+		u32 addr_mode = pete_readl("drivers/spi/spi-aspeed-smc.c:595", aspi->regs + CE_CTRL_REG);
 
 		if (op->addr.nbytes == 4)
 			addr_mode |= (0x11 << chip->cs);
 		else
 			addr_mode &= ~(0x11 << chip->cs);
-		writel(addr_mode, aspi->regs + CE_CTRL_REG);
+		pete_writel("drivers/spi/spi-aspeed-smc.c:601", addr_mode, aspi->regs + CE_CTRL_REG);
 
 		/* AST2400 SPI controller sets 4BYTE address mode in
 		 * CE0 Control Register
@@ -609,7 +609,7 @@ static int aspeed_spi_dirmap_create(struct spi_mem_dirmap_desc *desc)
 
 	/* READ mode is the controller default setting */
 	chip->ctl_val[ASPEED_SPI_READ] = ctl_val;
-	writel(chip->ctl_val[ASPEED_SPI_READ], chip->ctl);
+	pete_writel("drivers/spi/spi-aspeed-smc.c:612", chip->ctl_val[ASPEED_SPI_READ], chip->ctl);
 
 	ret = aspeed_spi_do_calibration(chip);
 
@@ -651,22 +651,22 @@ static void aspeed_spi_chip_set_type(struct aspeed_spi *aspi, unsigned int cs, i
 {
 	u32 reg;
 
-	reg = readl(aspi->regs + CONFIG_REG);
+	reg = pete_readl("drivers/spi/spi-aspeed-smc.c:654", aspi->regs + CONFIG_REG);
 	reg &= ~(0x3 << (cs * 2));
 	reg |= type << (cs * 2);
-	writel(reg, aspi->regs + CONFIG_REG);
+	pete_writel("drivers/spi/spi-aspeed-smc.c:657", reg, aspi->regs + CONFIG_REG);
 }
 
 static void aspeed_spi_chip_enable(struct aspeed_spi *aspi, unsigned int cs, bool enable)
 {
 	u32 we_bit = BIT(aspi->data->we0 + cs);
-	u32 reg = readl(aspi->regs + CONFIG_REG);
+	u32 reg = pete_readl("drivers/spi/spi-aspeed-smc.c:663", aspi->regs + CONFIG_REG);
 
 	if (enable)
 		reg |= we_bit;
 	else
 		reg &= ~we_bit;
-	writel(reg, aspi->regs + CONFIG_REG);
+	pete_writel("drivers/spi/spi-aspeed-smc.c:669", reg, aspi->regs + CONFIG_REG);
 }
 
 static int aspeed_spi_setup(struct spi_device *spi)
@@ -909,7 +909,7 @@ static int aspeed_spi_calibrate(struct aspeed_spi_chip *chip, u32 hdiv,
 		if (chip->cs == 0) {
 			fread_timing_val &= mask;
 			fread_timing_val |= FREAD_TPASS(i) << shift;
-			writel(fread_timing_val, aspi->regs + data->timing);
+			pete_writel("drivers/spi/spi-aspeed-smc.c:912", fread_timing_val, aspi->regs + data->timing);
 		}
 		pass = aspeed_spi_check_reads(chip, golden_buf, test_buf);
 		dev_dbg(aspi->dev,
@@ -935,7 +935,7 @@ static int aspeed_spi_calibrate(struct aspeed_spi_chip *chip, u32 hdiv,
 	if (chip->cs == 0) {
 		fread_timing_val &= mask;
 		fread_timing_val |= FREAD_TPASS(good_pass) << shift;
-		writel(fread_timing_val, aspi->regs + data->timing);
+		pete_writel("drivers/spi/spi-aspeed-smc.c:938", fread_timing_val, aspi->regs + data->timing);
 	}
 	dev_dbg(aspi->dev, " * -> good is pass %d [0x%08x]",
 		good_pass, fread_timing_val);
@@ -990,7 +990,7 @@ static int aspeed_spi_do_calibration(struct aspeed_spi_chip *chip)
 	 * and get golden data.
 	 */
 	ctl_val = chip->ctl_val[ASPEED_SPI_READ] & data->hclk_mask;
-	writel(ctl_val, chip->ctl);
+	pete_writel("drivers/spi/spi-aspeed-smc.c:993", ctl_val, chip->ctl);
 
 	test_buf = kzalloc(CALIBRATE_BUF_SIZE * 2, GFP_KERNEL);
 	if (!test_buf)
@@ -1019,7 +1019,7 @@ static int aspeed_spi_do_calibration(struct aspeed_spi_chip *chip)
 
 		/* Set the timing */
 		tv = chip->ctl_val[ASPEED_SPI_READ] | ASPEED_SPI_HCLK_DIV(i);
-		writel(tv, chip->ctl);
+		pete_writel("drivers/spi/spi-aspeed-smc.c:1022", tv, chip->ctl);
 		dev_dbg(aspi->dev, "Trying HCLK/%d [%08x] ...", i, tv);
 		rc = data->calibrate(chip, i, golden_buf, test_buf);
 		if (rc == 0)
@@ -1039,7 +1039,7 @@ static int aspeed_spi_do_calibration(struct aspeed_spi_chip *chip)
 	}
 
 no_calib:
-	writel(chip->ctl_val[ASPEED_SPI_READ], chip->ctl);
+	pete_writel("drivers/spi/spi-aspeed-smc.c:1042", chip->ctl_val[ASPEED_SPI_READ], chip->ctl);
 	kfree(test_buf);
 	return 0;
 }
@@ -1067,7 +1067,7 @@ static int aspeed_spi_ast2600_calibrate(struct aspeed_spi_chip *chip, u32 hdiv,
 		fread_timing_val |= hcycle << shift;
 
 		/* no DI input delay first  */
-		writel(fread_timing_val, TIMING_REG_AST2600(chip));
+		pete_writel("drivers/spi/spi-aspeed-smc.c:1070", fread_timing_val, TIMING_REG_AST2600(chip));
 		pass = aspeed_spi_check_reads(chip, golden_buf, test_buf);
 		dev_dbg(aspi->dev,
 			"  * [%08x] %d HCLK delay, DI delay none : %s",
@@ -1083,7 +1083,7 @@ static int aspeed_spi_ast2600_calibrate(struct aspeed_spi_chip *chip, u32 hdiv,
 			fread_timing_val &= ~(0xf << (4 + shift));
 			fread_timing_val |= delay_ns << (4 + shift);
 
-			writel(fread_timing_val, TIMING_REG_AST2600(chip));
+			pete_writel("drivers/spi/spi-aspeed-smc.c:1086", fread_timing_val, TIMING_REG_AST2600(chip));
 			pass = aspeed_spi_check_reads(chip, golden_buf, test_buf);
 			dev_dbg(aspi->dev,
 				"  * [%08x] %d HCLK delay, DI delay %d.%dns : %s",

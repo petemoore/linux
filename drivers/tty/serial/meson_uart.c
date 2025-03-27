@@ -99,7 +99,7 @@ static unsigned int meson_uart_tx_empty(struct uart_port *port)
 {
 	u32 val;
 
-	val = readl(port->membase + AML_UART_STATUS);
+	val = pete_readl("drivers/tty/serial/meson_uart.c:102", port->membase + AML_UART_STATUS);
 	val &= (AML_UART_TX_EMPTY | AML_UART_XMIT_BUSY);
 	return (val == AML_UART_TX_EMPTY) ? TIOCSER_TEMT : 0;
 }
@@ -108,18 +108,18 @@ static void meson_uart_stop_tx(struct uart_port *port)
 {
 	u32 val;
 
-	val = readl(port->membase + AML_UART_CONTROL);
+	val = pete_readl("drivers/tty/serial/meson_uart.c:111", port->membase + AML_UART_CONTROL);
 	val &= ~AML_UART_TX_INT_EN;
-	writel(val, port->membase + AML_UART_CONTROL);
+	pete_writel("drivers/tty/serial/meson_uart.c:113", val, port->membase + AML_UART_CONTROL);
 }
 
 static void meson_uart_stop_rx(struct uart_port *port)
 {
 	u32 val;
 
-	val = readl(port->membase + AML_UART_CONTROL);
+	val = pete_readl("drivers/tty/serial/meson_uart.c:120", port->membase + AML_UART_CONTROL);
 	val &= ~AML_UART_RX_EN;
-	writel(val, port->membase + AML_UART_CONTROL);
+	pete_writel("drivers/tty/serial/meson_uart.c:122", val, port->membase + AML_UART_CONTROL);
 }
 
 static void meson_uart_shutdown(struct uart_port *port)
@@ -131,10 +131,10 @@ static void meson_uart_shutdown(struct uart_port *port)
 
 	spin_lock_irqsave(&port->lock, flags);
 
-	val = readl(port->membase + AML_UART_CONTROL);
+	val = pete_readl("drivers/tty/serial/meson_uart.c:134", port->membase + AML_UART_CONTROL);
 	val &= ~AML_UART_RX_EN;
 	val &= ~(AML_UART_RX_INT_EN | AML_UART_TX_INT_EN);
-	writel(val, port->membase + AML_UART_CONTROL);
+	pete_writel("drivers/tty/serial/meson_uart.c:137", val, port->membase + AML_UART_CONTROL);
 
 	spin_unlock_irqrestore(&port->lock, flags);
 }
@@ -150,9 +150,9 @@ static void meson_uart_start_tx(struct uart_port *port)
 		return;
 	}
 
-	while (!(readl(port->membase + AML_UART_STATUS) & AML_UART_TX_FULL)) {
+	while (!(pete_readl("drivers/tty/serial/meson_uart.c:153", port->membase + AML_UART_STATUS) & AML_UART_TX_FULL)) {
 		if (port->x_char) {
-			writel(port->x_char, port->membase + AML_UART_WFIFO);
+			pete_writel("drivers/tty/serial/meson_uart.c:155", port->x_char, port->membase + AML_UART_WFIFO);
 			port->icount.tx++;
 			port->x_char = 0;
 			continue;
@@ -162,14 +162,14 @@ static void meson_uart_start_tx(struct uart_port *port)
 			break;
 
 		ch = xmit->buf[xmit->tail];
-		writel(ch, port->membase + AML_UART_WFIFO);
+		pete_writel("drivers/tty/serial/meson_uart.c:165", ch, port->membase + AML_UART_WFIFO);
 		uart_xmit_advance(port, 1);
 	}
 
 	if (!uart_circ_empty(xmit)) {
-		val = readl(port->membase + AML_UART_CONTROL);
+		val = pete_readl("drivers/tty/serial/meson_uart.c:170", port->membase + AML_UART_CONTROL);
 		val |= AML_UART_TX_INT_EN;
-		writel(val, port->membase + AML_UART_CONTROL);
+		pete_writel("drivers/tty/serial/meson_uart.c:172", val, port->membase + AML_UART_CONTROL);
 	}
 
 	if (uart_circ_chars_pending(xmit) < WAKEUP_CHARS)
@@ -185,7 +185,7 @@ static void meson_receive_chars(struct uart_port *port)
 	do {
 		flag = TTY_NORMAL;
 		port->icount.rx++;
-		ostatus = status = readl(port->membase + AML_UART_STATUS);
+		ostatus = status = pete_readl("drivers/tty/serial/meson_uart.c:188", port->membase + AML_UART_STATUS);
 
 		if (status & AML_UART_ERR) {
 			if (status & AML_UART_TX_FIFO_WERR)
@@ -195,13 +195,13 @@ static void meson_receive_chars(struct uart_port *port)
 			else if (status & AML_UART_PARITY_ERR)
 				port->icount.frame++;
 
-			mode = readl(port->membase + AML_UART_CONTROL);
+			mode = pete_readl("drivers/tty/serial/meson_uart.c:198", port->membase + AML_UART_CONTROL);
 			mode |= AML_UART_CLEAR_ERR;
-			writel(mode, port->membase + AML_UART_CONTROL);
+			pete_writel("drivers/tty/serial/meson_uart.c:200", mode, port->membase + AML_UART_CONTROL);
 
 			/* It doesn't clear to 0 automatically */
 			mode &= ~AML_UART_CLEAR_ERR;
-			writel(mode, port->membase + AML_UART_CONTROL);
+			pete_writel("drivers/tty/serial/meson_uart.c:204", mode, port->membase + AML_UART_CONTROL);
 
 			status &= port->read_status_mask;
 			if (status & AML_UART_FRAME_ERR)
@@ -210,7 +210,7 @@ static void meson_receive_chars(struct uart_port *port)
 				flag = TTY_PARITY;
 		}
 
-		ch = readl(port->membase + AML_UART_RFIFO);
+		ch = pete_readl("drivers/tty/serial/meson_uart.c:213", port->membase + AML_UART_RFIFO);
 		ch &= 0xff;
 
 		if ((ostatus & AML_UART_FRAME_ERR) && (ch == 0)) {
@@ -229,7 +229,7 @@ static void meson_receive_chars(struct uart_port *port)
 		if (status & AML_UART_TX_FIFO_WERR)
 			tty_insert_flip_char(tport, 0, TTY_OVERRUN);
 
-	} while (!(readl(port->membase + AML_UART_STATUS) & AML_UART_RX_EMPTY));
+	} while (!(pete_readl("drivers/tty/serial/meson_uart.c:232", port->membase + AML_UART_STATUS) & AML_UART_RX_EMPTY));
 
 	tty_flip_buffer_push(tport);
 }
@@ -240,11 +240,11 @@ static irqreturn_t meson_uart_interrupt(int irq, void *dev_id)
 
 	spin_lock(&port->lock);
 
-	if (!(readl(port->membase + AML_UART_STATUS) & AML_UART_RX_EMPTY))
+	if (!(pete_readl("drivers/tty/serial/meson_uart.c:243", port->membase + AML_UART_STATUS) & AML_UART_RX_EMPTY))
 		meson_receive_chars(port);
 
-	if (!(readl(port->membase + AML_UART_STATUS) & AML_UART_TX_FULL)) {
-		if (readl(port->membase + AML_UART_CONTROL) & AML_UART_TX_INT_EN)
+	if (!(pete_readl("drivers/tty/serial/meson_uart.c:246", port->membase + AML_UART_STATUS) & AML_UART_TX_FULL)) {
+		if (pete_readl("drivers/tty/serial/meson_uart.c:247", port->membase + AML_UART_CONTROL) & AML_UART_TX_INT_EN)
 			meson_uart_start_tx(port);
 	}
 
@@ -270,12 +270,12 @@ static void meson_uart_reset(struct uart_port *port)
 {
 	u32 val;
 
-	val = readl(port->membase + AML_UART_CONTROL);
+	val = pete_readl("drivers/tty/serial/meson_uart.c:273", port->membase + AML_UART_CONTROL);
 	val |= (AML_UART_RX_RST | AML_UART_TX_RST | AML_UART_CLEAR_ERR);
-	writel(val, port->membase + AML_UART_CONTROL);
+	pete_writel("drivers/tty/serial/meson_uart.c:275", val, port->membase + AML_UART_CONTROL);
 
 	val &= ~(AML_UART_RX_RST | AML_UART_TX_RST | AML_UART_CLEAR_ERR);
-	writel(val, port->membase + AML_UART_CONTROL);
+	pete_writel("drivers/tty/serial/meson_uart.c:278", val, port->membase + AML_UART_CONTROL);
 }
 
 static int meson_uart_startup(struct uart_port *port)
@@ -286,20 +286,20 @@ static int meson_uart_startup(struct uart_port *port)
 
 	spin_lock_irqsave(&port->lock, flags);
 
-	val = readl(port->membase + AML_UART_CONTROL);
+	val = pete_readl("drivers/tty/serial/meson_uart.c:289", port->membase + AML_UART_CONTROL);
 	val |= AML_UART_CLEAR_ERR;
-	writel(val, port->membase + AML_UART_CONTROL);
+	pete_writel("drivers/tty/serial/meson_uart.c:291", val, port->membase + AML_UART_CONTROL);
 	val &= ~AML_UART_CLEAR_ERR;
-	writel(val, port->membase + AML_UART_CONTROL);
+	pete_writel("drivers/tty/serial/meson_uart.c:293", val, port->membase + AML_UART_CONTROL);
 
 	val |= (AML_UART_RX_EN | AML_UART_TX_EN);
-	writel(val, port->membase + AML_UART_CONTROL);
+	pete_writel("drivers/tty/serial/meson_uart.c:296", val, port->membase + AML_UART_CONTROL);
 
 	val |= (AML_UART_RX_INT_EN | AML_UART_TX_INT_EN);
-	writel(val, port->membase + AML_UART_CONTROL);
+	pete_writel("drivers/tty/serial/meson_uart.c:299", val, port->membase + AML_UART_CONTROL);
 
 	val = (AML_UART_RECV_IRQ(1) | AML_UART_XMIT_IRQ(port->fifosize / 2));
-	writel(val, port->membase + AML_UART_MISC);
+	pete_writel("drivers/tty/serial/meson_uart.c:302", val, port->membase + AML_UART_MISC);
 
 	spin_unlock_irqrestore(&port->lock, flags);
 
@@ -330,7 +330,7 @@ static void meson_uart_change_speed(struct uart_port *port, unsigned long baud)
 		val =  DIV_ROUND_CLOSEST(port->uartclk / 4, baud) - 1;
 	}
 	val |= AML_UART_BAUD_USE;
-	writel(val, port->membase + AML_UART_REG5);
+	pete_writel("drivers/tty/serial/meson_uart.c:333", val, port->membase + AML_UART_REG5);
 }
 
 static void meson_uart_set_termios(struct uart_port *port,
@@ -346,7 +346,7 @@ static void meson_uart_set_termios(struct uart_port *port,
 	cflags = termios->c_cflag;
 	iflags = termios->c_iflag;
 
-	val = readl(port->membase + AML_UART_CONTROL);
+	val = pete_readl("drivers/tty/serial/meson_uart.c:349", port->membase + AML_UART_CONTROL);
 
 	val &= ~AML_UART_DATA_LEN_MASK;
 	switch (cflags & CSIZE) {
@@ -389,7 +389,7 @@ static void meson_uart_set_termios(struct uart_port *port,
 		val |= AML_UART_TWO_WIRE_EN;
 	}
 
-	writel(val, port->membase + AML_UART_CONTROL);
+	pete_writel("drivers/tty/serial/meson_uart.c:392", val, port->membase + AML_UART_CONTROL);
 
 	baud = uart_get_baud_rate(port, termios, old, 50, 4000000);
 	meson_uart_change_speed(port, baud);
@@ -466,10 +466,10 @@ static int meson_uart_poll_get_char(struct uart_port *port)
 
 	spin_lock_irqsave(&port->lock, flags);
 
-	if (readl(port->membase + AML_UART_STATUS) & AML_UART_RX_EMPTY)
+	if (pete_readl("drivers/tty/serial/meson_uart.c:469", port->membase + AML_UART_STATUS) & AML_UART_RX_EMPTY)
 		c = NO_POLL_CHAR;
 	else
-		c = readl(port->membase + AML_UART_RFIFO);
+		c = pete_readl("drivers/tty/serial/meson_uart.c:472", port->membase + AML_UART_RFIFO);
 
 	spin_unlock_irqrestore(&port->lock, flags);
 
@@ -495,7 +495,7 @@ static void meson_uart_poll_put_char(struct uart_port *port, unsigned char c)
 	}
 
 	/* Write the character */
-	writel(c, port->membase + AML_UART_WFIFO);
+	pete_writel("drivers/tty/serial/meson_uart.c:498", c, port->membase + AML_UART_WFIFO);
 
 	/* Wait until FIFO is empty or timeout */
 	ret = readl_poll_timeout_atomic(port->membase + AML_UART_STATUS, reg,
@@ -537,9 +537,9 @@ static void meson_uart_enable_tx_engine(struct uart_port *port)
 {
 	u32 val;
 
-	val = readl(port->membase + AML_UART_CONTROL);
+	val = pete_readl("drivers/tty/serial/meson_uart.c:540", port->membase + AML_UART_CONTROL);
 	val |= AML_UART_TX_EN;
-	writel(val, port->membase + AML_UART_CONTROL);
+	pete_writel("drivers/tty/serial/meson_uart.c:542", val, port->membase + AML_UART_CONTROL);
 }
 
 static void meson_console_putchar(struct uart_port *port, unsigned char ch)
@@ -547,9 +547,9 @@ static void meson_console_putchar(struct uart_port *port, unsigned char ch)
 	if (!port->membase)
 		return;
 
-	while (readl(port->membase + AML_UART_STATUS) & AML_UART_TX_FULL)
+	while (pete_readl("drivers/tty/serial/meson_uart.c:550", port->membase + AML_UART_STATUS) & AML_UART_TX_FULL)
 		cpu_relax();
-	writel(ch, port->membase + AML_UART_WFIFO);
+	pete_writel("drivers/tty/serial/meson_uart.c:552", ch, port->membase + AML_UART_WFIFO);
 }
 
 static void meson_serial_port_write(struct uart_port *port, const char *s,
@@ -569,12 +569,12 @@ static void meson_serial_port_write(struct uart_port *port, const char *s,
 		locked = 1;
 	}
 
-	val = readl(port->membase + AML_UART_CONTROL);
+	val = pete_readl("drivers/tty/serial/meson_uart.c:572", port->membase + AML_UART_CONTROL);
 	tmp = val & ~(AML_UART_TX_INT_EN | AML_UART_RX_INT_EN);
-	writel(tmp, port->membase + AML_UART_CONTROL);
+	pete_writel("drivers/tty/serial/meson_uart.c:574", tmp, port->membase + AML_UART_CONTROL);
 
 	uart_console_write(port, s, count, meson_console_putchar);
-	writel(val, port->membase + AML_UART_CONTROL);
+	pete_writel("drivers/tty/serial/meson_uart.c:577", val, port->membase + AML_UART_CONTROL);
 
 	if (locked)
 		spin_unlock(&port->lock);

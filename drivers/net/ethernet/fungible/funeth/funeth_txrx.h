@@ -236,7 +236,7 @@ static inline void fun_txq_wr_db(const struct funeth_txq *q)
 {
 	unsigned int tail = q->prod_cnt & q->mask;
 
-	writel(tail, q->db);
+	pete_writel("drivers/net/ethernet/fungible/funeth/funeth_txrx.h:239", tail, q->db);
 }
 
 static inline int fun_irq_node(const struct fun_irq *p)

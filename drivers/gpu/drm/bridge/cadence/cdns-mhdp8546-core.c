@@ -59,7 +59,7 @@ static void cdns_mhdp_bridge_hpd_enable(struct drm_bridge *bridge)
 
 	/* Enable SW event interrupts */
 	if (mhdp->bridge_attached)
-		writel(readl(mhdp->regs + CDNS_APB_INT_MASK) &
+		pete_writel("drivers/gpu/drm/bridge/cadence/cdns-mhdp8546-core.c:62", pete_readl("drivers/gpu/drm/bridge/cadence/cdns-mhdp8546-core.c:62", mhdp->regs + CDNS_APB_INT_MASK) &
 		       ~CDNS_APB_INT_MASK_SW_EVENT_INT,
 		       mhdp->regs + CDNS_APB_INT_MASK);
 }
@@ -68,7 +68,7 @@ static void cdns_mhdp_bridge_hpd_disable(struct drm_bridge *bridge)
 {
 	struct cdns_mhdp_device *mhdp = bridge_to_mhdp(bridge);
 
-	writel(readl(mhdp->regs + CDNS_APB_INT_MASK) |
+	pete_writel("drivers/gpu/drm/bridge/cadence/cdns-mhdp8546-core.c:71", pete_readl("drivers/gpu/drm/bridge/cadence/cdns-mhdp8546-core.c:71", mhdp->regs + CDNS_APB_INT_MASK) |
 	       CDNS_APB_INT_MASK_SW_EVENT_INT,
 	       mhdp->regs + CDNS_APB_INT_MASK);
 }
@@ -85,7 +85,7 @@ static int cdns_mhdp_mailbox_read(struct cdns_mhdp_device *mhdp)
 	if (ret < 0)
 		return ret;
 
-	return readl(mhdp->regs + CDNS_MAILBOX_RX_DATA) & 0xff;
+	return pete_readl("drivers/gpu/drm/bridge/cadence/cdns-mhdp8546-core.c:88", mhdp->regs + CDNS_MAILBOX_RX_DATA) & 0xff;
 }
 
 static int cdns_mhdp_mailbox_write(struct cdns_mhdp_device *mhdp, u8 val)
@@ -100,7 +100,7 @@ static int cdns_mhdp_mailbox_write(struct cdns_mhdp_device *mhdp, u8 val)
 	if (ret < 0)
 		return ret;
 
-	writel(val, mhdp->regs + CDNS_MAILBOX_TX_DATA);
+	pete_writel("drivers/gpu/drm/bridge/cadence/cdns-mhdp8546-core.c:103", val, mhdp->regs + CDNS_MAILBOX_TX_DATA);
 
 	return 0;
 }
@@ -678,11 +678,11 @@ static int cdns_mhdp_check_fw_version(struct cdns_mhdp_device *mhdp)
 	u32 major_num, minor_num, revision;
 	u32 fw_ver, lib_ver;
 
-	fw_ver = (readl(mhdp->regs + CDNS_VER_H) << 8)
-	       | readl(mhdp->regs + CDNS_VER_L);
+	fw_ver = (pete_readl("drivers/gpu/drm/bridge/cadence/cdns-mhdp8546-core.c:681", mhdp->regs + CDNS_VER_H) << 8)
+	       | pete_readl("drivers/gpu/drm/bridge/cadence/cdns-mhdp8546-core.c:682", mhdp->regs + CDNS_VER_L);
 
-	lib_ver = (readl(mhdp->regs + CDNS_LIB_H_ADDR) << 8)
-		| readl(mhdp->regs + CDNS_LIB_L_ADDR);
+	lib_ver = (pete_readl("drivers/gpu/drm/bridge/cadence/cdns-mhdp8546-core.c:684", mhdp->regs + CDNS_LIB_H_ADDR) << 8)
+		| pete_readl("drivers/gpu/drm/bridge/cadence/cdns-mhdp8546-core.c:685", mhdp->regs + CDNS_LIB_L_ADDR);
 
 	if (lib_ver < 33984) {
 		/*
@@ -720,12 +720,12 @@ static int cdns_mhdp_fw_activate(const struct firmware *fw,
 	int ret;
 
 	/* Release uCPU reset and stall it. */
-	writel(CDNS_CPU_STALL, mhdp->regs + CDNS_APB_CTRL);
+	pete_writel("drivers/gpu/drm/bridge/cadence/cdns-mhdp8546-core.c:723", CDNS_CPU_STALL, mhdp->regs + CDNS_APB_CTRL);
 
 	memcpy_toio(mhdp->regs + CDNS_MHDP_IMEM, fw->data, fw->size);
 
 	/* Leave debug mode, release stall */
-	writel(0, mhdp->regs + CDNS_APB_CTRL);
+	pete_writel("drivers/gpu/drm/bridge/cadence/cdns-mhdp8546-core.c:728", 0, mhdp->regs + CDNS_APB_CTRL);
 
 	/*
 	 * Wait for the KEEP_ALIVE "message" on the first 8 bits.
@@ -745,10 +745,10 @@ static int cdns_mhdp_fw_activate(const struct firmware *fw,
 		return ret;
 
 	/* Init events to 0 as it's not cleared by FW at boot but on read */
-	readl(mhdp->regs + CDNS_SW_EVENT0);
-	readl(mhdp->regs + CDNS_SW_EVENT1);
-	readl(mhdp->regs + CDNS_SW_EVENT2);
-	readl(mhdp->regs + CDNS_SW_EVENT3);
+	pete_readl("drivers/gpu/drm/bridge/cadence/cdns-mhdp8546-core.c:748", mhdp->regs + CDNS_SW_EVENT0);
+	pete_readl("drivers/gpu/drm/bridge/cadence/cdns-mhdp8546-core.c:749", mhdp->regs + CDNS_SW_EVENT1);
+	pete_readl("drivers/gpu/drm/bridge/cadence/cdns-mhdp8546-core.c:750", mhdp->regs + CDNS_SW_EVENT2);
+	pete_readl("drivers/gpu/drm/bridge/cadence/cdns-mhdp8546-core.c:751", mhdp->regs + CDNS_SW_EVENT3);
 
 	/* Activate uCPU */
 	ret = cdns_mhdp_set_firmware_active(mhdp, true);
@@ -2118,7 +2118,7 @@ static void cdns_mhdp_detach(struct drm_bridge *bridge)
 
 	spin_unlock(&mhdp->start_lock);
 
-	writel(~0, mhdp->regs + CDNS_APB_INT_MASK);
+	pete_writel("drivers/gpu/drm/bridge/cadence/cdns-mhdp8546-core.c:2121", ~0, mhdp->regs + CDNS_APB_INT_MASK);
 }
 
 static struct drm_bridge_state *
@@ -2388,11 +2388,11 @@ static irqreturn_t cdns_mhdp_irq_handler(int irq, void *data)
 	u32 apb_stat, sw_ev0;
 	bool bridge_attached;
 
-	apb_stat = readl(mhdp->regs + CDNS_APB_INT_STATUS);
+	apb_stat = pete_readl("drivers/gpu/drm/bridge/cadence/cdns-mhdp8546-core.c:2391", mhdp->regs + CDNS_APB_INT_STATUS);
 	if (!(apb_stat & CDNS_APB_INT_MASK_SW_EVENT_INT))
 		return IRQ_NONE;
 
-	sw_ev0 = readl(mhdp->regs + CDNS_SW_EVENT0);
+	sw_ev0 = pete_readl("drivers/gpu/drm/bridge/cadence/cdns-mhdp8546-core.c:2395", mhdp->regs + CDNS_SW_EVENT0);
 
 	/*
 	 *  Calling drm_kms_helper_hotplug_event() when not attached
@@ -2527,12 +2527,12 @@ static int cdns_mhdp_probe(struct platform_device *pdev)
 	}
 
 	rate = clk_get_rate(clk);
-	writel(rate % 1000000, mhdp->regs + CDNS_SW_CLK_L);
-	writel(rate / 1000000, mhdp->regs + CDNS_SW_CLK_H);
+	pete_writel("drivers/gpu/drm/bridge/cadence/cdns-mhdp8546-core.c:2530", rate % 1000000, mhdp->regs + CDNS_SW_CLK_L);
+	pete_writel("drivers/gpu/drm/bridge/cadence/cdns-mhdp8546-core.c:2531", rate / 1000000, mhdp->regs + CDNS_SW_CLK_H);
 
 	dev_dbg(dev, "func clk rate %lu Hz\n", rate);
 
-	writel(~0, mhdp->regs + CDNS_APB_INT_MASK);
+	pete_writel("drivers/gpu/drm/bridge/cadence/cdns-mhdp8546-core.c:2535", ~0, mhdp->regs + CDNS_APB_INT_MASK);
 
 	irq = platform_get_irq(pdev, 0);
 	ret = devm_request_threaded_irq(mhdp->dev, irq, NULL,

@@ -224,10 +224,10 @@ static int ast_vhub_hub_dev_feature(struct ast_vhub_ep *ep,
 	}
 
 	if (wValue == USB_DEVICE_TEST_MODE) {
-		val = readl(ep->vhub->regs + AST_VHUB_CTRL);
+		val = pete_readl("drivers/usb/gadget/udc/aspeed-vhub/hub.c:227", ep->vhub->regs + AST_VHUB_CTRL);
 		val &= ~GENMASK(10, 8);
 		val |= VHUB_CTRL_SET_TEST_MODE((wIndex >> 8) & 0x7);
-		writel(val, ep->vhub->regs + AST_VHUB_CTRL);
+		pete_writel("drivers/usb/gadget/udc/aspeed-vhub/hub.c:230", val, ep->vhub->regs + AST_VHUB_CTRL);
 
 		return std_req_complete;
 	}
@@ -257,14 +257,14 @@ static int ast_vhub_hub_ep_feature(struct ast_vhub_ep *ep,
 	      is_set ? "setting" : "clearing");
 
 	ep->vhub->ep1_stalled = is_set;
-	reg = readl(ep->vhub->regs + AST_VHUB_EP1_CTRL);
+	reg = pete_readl("drivers/usb/gadget/udc/aspeed-vhub/hub.c:260", ep->vhub->regs + AST_VHUB_EP1_CTRL);
 	if (is_set) {
 		reg |= VHUB_EP1_CTRL_STALL;
 	} else {
 		reg &= ~VHUB_EP1_CTRL_STALL;
 		reg |= VHUB_EP1_CTRL_RESET_TOGGLE;
 	}
-	writel(reg, ep->vhub->regs + AST_VHUB_EP1_CTRL);
+	pete_writel("drivers/usb/gadget/udc/aspeed-vhub/hub.c:267", reg, ep->vhub->regs + AST_VHUB_EP1_CTRL);
 
 	return std_req_complete;
 }
@@ -409,7 +409,7 @@ enum std_req_rc ast_vhub_std_hub_request(struct ast_vhub_ep *ep,
 
 	/* First packet, grab speed */
 	if (vhub->speed == USB_SPEED_UNKNOWN) {
-		u32 ustat = readl(vhub->regs + AST_VHUB_USBSTS);
+		u32 ustat = pete_readl("drivers/usb/gadget/udc/aspeed-vhub/hub.c:412", vhub->regs + AST_VHUB_USBSTS);
 		if (ustat & VHUB_USBSTS_HISPEED)
 			vhub->speed = USB_SPEED_HIGH;
 		else
@@ -422,7 +422,7 @@ enum std_req_rc ast_vhub_std_hub_request(struct ast_vhub_ep *ep,
 		/* SET_ADDRESS */
 	case DeviceOutRequest | USB_REQ_SET_ADDRESS:
 		EPDBG(ep, "SET_ADDRESS: Got address %x\n", wValue);
-		writel(wValue, vhub->regs + AST_VHUB_CONF);
+		pete_writel("drivers/usb/gadget/udc/aspeed-vhub/hub.c:425", wValue, vhub->regs + AST_VHUB_CONF);
 		return std_req_complete;
 
 		/* GET_STATUS */
@@ -481,13 +481,13 @@ static void ast_vhub_update_hub_ep1(struct ast_vhub *vhub,
 				    unsigned int port)
 {
 	/* Update HW EP1 response */
-	u32 reg = readl(vhub->regs + AST_VHUB_EP1_STS_CHG);
+	u32 reg = pete_readl("drivers/usb/gadget/udc/aspeed-vhub/hub.c:484", vhub->regs + AST_VHUB_EP1_STS_CHG);
 	u32 pmask = (1 << (port + 1));
 	if (vhub->ports[port].change)
 		reg |= pmask;
 	else
 		reg &= ~pmask;
-	writel(reg, vhub->regs + AST_VHUB_EP1_STS_CHG);
+	pete_writel("drivers/usb/gadget/udc/aspeed-vhub/hub.c:490", reg, vhub->regs + AST_VHUB_EP1_STS_CHG);
 }
 
 static void ast_vhub_change_port_stat(struct ast_vhub *vhub,
@@ -531,10 +531,10 @@ static void ast_vhub_change_port_stat(struct ast_vhub *vhub,
 
 static void ast_vhub_send_host_wakeup(struct ast_vhub *vhub)
 {
-	u32 reg = readl(vhub->regs + AST_VHUB_CTRL);
+	u32 reg = pete_readl("drivers/usb/gadget/udc/aspeed-vhub/hub.c:534", vhub->regs + AST_VHUB_CTRL);
 	UDCDBG(vhub, "Waking up host !\n");
 	reg |= VHUB_CTRL_MANUAL_REMOTE_WAKEUP;
-	writel(reg, vhub->regs + AST_VHUB_CTRL);
+	pete_writel("drivers/usb/gadget/udc/aspeed-vhub/hub.c:537", reg, vhub->regs + AST_VHUB_CTRL);
 }
 
 void ast_vhub_device_connect(struct ast_vhub *vhub,
@@ -893,12 +893,12 @@ void ast_vhub_hub_reset(struct ast_vhub *vhub)
 	}
 
 	/* Cleanup HW */
-	writel(0, vhub->regs + AST_VHUB_CONF);
-	writel(0, vhub->regs + AST_VHUB_EP0_CTRL);
-	writel(VHUB_EP1_CTRL_RESET_TOGGLE |
+	pete_writel("drivers/usb/gadget/udc/aspeed-vhub/hub.c:896", 0, vhub->regs + AST_VHUB_CONF);
+	pete_writel("drivers/usb/gadget/udc/aspeed-vhub/hub.c:897", 0, vhub->regs + AST_VHUB_EP0_CTRL);
+	pete_writel("drivers/usb/gadget/udc/aspeed-vhub/hub.c:898", VHUB_EP1_CTRL_RESET_TOGGLE |
 	       VHUB_EP1_CTRL_ENABLE,
 	       vhub->regs + AST_VHUB_EP1_CTRL);
-	writel(0, vhub->regs + AST_VHUB_EP1_STS_CHG);
+	pete_writel("drivers/usb/gadget/udc/aspeed-vhub/hub.c:901", 0, vhub->regs + AST_VHUB_EP1_STS_CHG);
 }
 
 static void ast_vhub_of_parse_dev_desc(struct ast_vhub *vhub,

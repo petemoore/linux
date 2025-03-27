@@ -188,7 +188,7 @@ static unsigned int mvebu_uart_tx_empty(struct uart_port *port)
 	unsigned int st;
 
 	spin_lock_irqsave(&port->lock, flags);
-	st = readl(port->membase + UART_STAT);
+	st = pete_readl("drivers/tty/serial/mvebu-uart.c:191", port->membase + UART_STAT);
 	spin_unlock_irqrestore(&port->lock, flags);
 
 	return (st & STAT_TX_EMP) ? TIOCSER_TEMT : 0;
@@ -210,10 +210,10 @@ static void mvebu_uart_set_mctrl(struct uart_port *port,
 
 static void mvebu_uart_stop_tx(struct uart_port *port)
 {
-	unsigned int ctl = readl(port->membase + UART_INTR(port));
+	unsigned int ctl = pete_readl("drivers/tty/serial/mvebu-uart.c:213", port->membase + UART_INTR(port));
 
 	ctl &= ~CTRL_TX_RDY_INT(port);
-	writel(ctl, port->membase + UART_INTR(port));
+	pete_writel("drivers/tty/serial/mvebu-uart.c:216", ctl, port->membase + UART_INTR(port));
 }
 
 static void mvebu_uart_start_tx(struct uart_port *port)
@@ -222,26 +222,26 @@ static void mvebu_uart_start_tx(struct uart_port *port)
 	struct circ_buf *xmit = &port->state->xmit;
 
 	if (IS_EXTENDED(port) && !uart_circ_empty(xmit)) {
-		writel(xmit->buf[xmit->tail], port->membase + UART_TSH(port));
+		pete_writel("drivers/tty/serial/mvebu-uart.c:225", xmit->buf[xmit->tail], port->membase + UART_TSH(port));
 		uart_xmit_advance(port, 1);
 	}
 
-	ctl = readl(port->membase + UART_INTR(port));
+	ctl = pete_readl("drivers/tty/serial/mvebu-uart.c:229", port->membase + UART_INTR(port));
 	ctl |= CTRL_TX_RDY_INT(port);
-	writel(ctl, port->membase + UART_INTR(port));
+	pete_writel("drivers/tty/serial/mvebu-uart.c:231", ctl, port->membase + UART_INTR(port));
 }
 
 static void mvebu_uart_stop_rx(struct uart_port *port)
 {
 	unsigned int ctl;
 
-	ctl = readl(port->membase + UART_CTRL(port));
+	ctl = pete_readl("drivers/tty/serial/mvebu-uart.c:238", port->membase + UART_CTRL(port));
 	ctl &= ~CTRL_BRK_INT;
-	writel(ctl, port->membase + UART_CTRL(port));
+	pete_writel("drivers/tty/serial/mvebu-uart.c:240", ctl, port->membase + UART_CTRL(port));
 
-	ctl = readl(port->membase + UART_INTR(port));
+	ctl = pete_readl("drivers/tty/serial/mvebu-uart.c:242", port->membase + UART_INTR(port));
 	ctl &= ~CTRL_RX_RDY_INT(port);
-	writel(ctl, port->membase + UART_INTR(port));
+	pete_writel("drivers/tty/serial/mvebu-uart.c:244", ctl, port->membase + UART_INTR(port));
 }
 
 static void mvebu_uart_break_ctl(struct uart_port *port, int brk)
@@ -250,12 +250,12 @@ static void mvebu_uart_break_ctl(struct uart_port *port, int brk)
 	unsigned long flags;
 
 	spin_lock_irqsave(&port->lock, flags);
-	ctl = readl(port->membase + UART_CTRL(port));
+	ctl = pete_readl("drivers/tty/serial/mvebu-uart.c:253", port->membase + UART_CTRL(port));
 	if (brk == -1)
 		ctl |= CTRL_SND_BRK_SEQ;
 	else
 		ctl &= ~CTRL_SND_BRK_SEQ;
-	writel(ctl, port->membase + UART_CTRL(port));
+	pete_writel("drivers/tty/serial/mvebu-uart.c:258", ctl, port->membase + UART_CTRL(port));
 	spin_unlock_irqrestore(&port->lock, flags);
 }
 
@@ -268,7 +268,7 @@ static void mvebu_uart_rx_chars(struct uart_port *port, unsigned int status)
 
 	do {
 		if (status & STAT_RX_RDY(port)) {
-			ch = readl(port->membase + UART_RBR(port));
+			ch = pete_readl("drivers/tty/serial/mvebu-uart.c:271", port->membase + UART_RBR(port));
 			ch &= 0xff;
 			flag = TTY_NORMAL;
 			port->icount.rx++;
@@ -282,9 +282,9 @@ static void mvebu_uart_rx_chars(struct uart_port *port, unsigned int status)
 		 * This causes interrupt loop and system hang.
 		 */
 		if (IS_EXTENDED(port) && (status & STAT_BRK_ERR)) {
-			ret = readl(port->membase + UART_STAT);
+			ret = pete_readl("drivers/tty/serial/mvebu-uart.c:285", port->membase + UART_STAT);
 			ret |= STAT_BRK_ERR;
-			writel(ret, port->membase + UART_STAT);
+			pete_writel("drivers/tty/serial/mvebu-uart.c:287", ret, port->membase + UART_STAT);
 		}
 
 		if (status & STAT_BRK_DET) {
@@ -326,7 +326,7 @@ static void mvebu_uart_rx_chars(struct uart_port *port, unsigned int status)
 			tty_insert_flip_char(tport, 0, TTY_OVERRUN);
 
 ignore_char:
-		status = readl(port->membase + UART_STAT);
+		status = pete_readl("drivers/tty/serial/mvebu-uart.c:329", port->membase + UART_STAT);
 	} while (status & (STAT_RX_RDY(port) | STAT_BRK_DET));
 
 	tty_flip_buffer_push(tport);
@@ -337,15 +337,15 @@ static void mvebu_uart_tx_chars(struct uart_port *port, unsigned int status)
 	u8 ch;
 
 	uart_port_tx_limited(port, ch, port->fifosize,
-		!(readl(port->membase + UART_STAT) & STAT_TX_FIFO_FUL),
-		writel(ch, port->membase + UART_TSH(port)),
+		!(pete_readl("drivers/tty/serial/mvebu-uart.c:340", port->membase + UART_STAT) & STAT_TX_FIFO_FUL),
+		pete_writel("drivers/tty/serial/mvebu-uart.c:341", ch, port->membase + UART_TSH(port)),
 		({}));
 }
 
 static irqreturn_t mvebu_uart_isr(int irq, void *dev_id)
 {
 	struct uart_port *port = (struct uart_port *)dev_id;
-	unsigned int st = readl(port->membase + UART_STAT);
+	unsigned int st = pete_readl("drivers/tty/serial/mvebu-uart.c:348", port->membase + UART_STAT);
 
 	if (st & (STAT_RX_RDY(port) | STAT_OVR_ERR | STAT_FRM_ERR |
 		  STAT_BRK_DET))
@@ -360,7 +360,7 @@ static irqreturn_t mvebu_uart_isr(int irq, void *dev_id)
 static irqreturn_t mvebu_uart_rx_isr(int irq, void *dev_id)
 {
 	struct uart_port *port = (struct uart_port *)dev_id;
-	unsigned int st = readl(port->membase + UART_STAT);
+	unsigned int st = pete_readl("drivers/tty/serial/mvebu-uart.c:363", port->membase + UART_STAT);
 
 	if (st & (STAT_RX_RDY(port) | STAT_OVR_ERR | STAT_FRM_ERR |
 			STAT_BRK_DET))
@@ -372,7 +372,7 @@ static irqreturn_t mvebu_uart_rx_isr(int irq, void *dev_id)
 static irqreturn_t mvebu_uart_tx_isr(int irq, void *dev_id)
 {
 	struct uart_port *port = (struct uart_port *)dev_id;
-	unsigned int st = readl(port->membase + UART_STAT);
+	unsigned int st = pete_readl("drivers/tty/serial/mvebu-uart.c:375", port->membase + UART_STAT);
 
 	if (st & STAT_TX_RDY(port))
 		mvebu_uart_tx_chars(port, st);
@@ -386,20 +386,20 @@ static int mvebu_uart_startup(struct uart_port *port)
 	unsigned int ctl;
 	int ret;
 
-	writel(CTRL_TXFIFO_RST | CTRL_RXFIFO_RST,
+	pete_writel("drivers/tty/serial/mvebu-uart.c:389", CTRL_TXFIFO_RST | CTRL_RXFIFO_RST,
 	       port->membase + UART_CTRL(port));
 	udelay(1);
 
 	/* Clear the error bits of state register before IRQ request */
-	ret = readl(port->membase + UART_STAT);
+	ret = pete_readl("drivers/tty/serial/mvebu-uart.c:394", port->membase + UART_STAT);
 	ret |= STAT_BRK_ERR;
-	writel(ret, port->membase + UART_STAT);
+	pete_writel("drivers/tty/serial/mvebu-uart.c:396", ret, port->membase + UART_STAT);
 
-	writel(CTRL_BRK_INT, port->membase + UART_CTRL(port));
+	pete_writel("drivers/tty/serial/mvebu-uart.c:398", CTRL_BRK_INT, port->membase + UART_CTRL(port));
 
-	ctl = readl(port->membase + UART_INTR(port));
+	ctl = pete_readl("drivers/tty/serial/mvebu-uart.c:400", port->membase + UART_INTR(port));
 	ctl |= CTRL_RX_RDY_INT(port);
-	writel(ctl, port->membase + UART_INTR(port));
+	pete_writel("drivers/tty/serial/mvebu-uart.c:402", ctl, port->membase + UART_INTR(port));
 
 	if (!mvuart->irq[UART_TX_IRQ]) {
 		/* Old bindings with just one interrupt (UART0 only) */
@@ -442,7 +442,7 @@ static void mvebu_uart_shutdown(struct uart_port *port)
 {
 	struct mvebu_uart *mvuart = to_mvuart(port);
 
-	writel(0, port->membase + UART_INTR(port));
+	pete_writel("drivers/tty/serial/mvebu-uart.c:445", 0, port->membase + UART_INTR(port));
 
 	if (!mvuart->irq[UART_TX_IRQ]) {
 		devm_free_irq(port->dev, mvuart->irq[UART_IRQ_SUM], port);
@@ -517,18 +517,18 @@ static unsigned int mvebu_uart_baud_rate_set(struct uart_port *port, unsigned in
 		d_divisor = BRDV_BAUD_MAX;
 
 	spin_lock_irqsave(&mvebu_uart_lock, flags);
-	brdv = readl(port->membase + UART_BRDV);
+	brdv = pete_readl("drivers/tty/serial/mvebu-uart.c:520", port->membase + UART_BRDV);
 	brdv &= ~BRDV_BAUD_MASK;
 	brdv |= d_divisor;
-	writel(brdv, port->membase + UART_BRDV);
+	pete_writel("drivers/tty/serial/mvebu-uart.c:523", brdv, port->membase + UART_BRDV);
 	spin_unlock_irqrestore(&mvebu_uart_lock, flags);
 
-	osamp = readl(port->membase + UART_OSAMP);
+	osamp = pete_readl("drivers/tty/serial/mvebu-uart.c:526", port->membase + UART_OSAMP);
 	osamp &= ~OSAMP_DIVISORS_MASK;
 	if (m_divisor != OSAMP_DEFAULT_DIVISOR)
 		osamp |= (m_divisor << 0) | (m_divisor << 8) |
 			(m_divisor << 16) | (m_divisor << 24);
-	writel(osamp, port->membase + UART_OSAMP);
+	pete_writel("drivers/tty/serial/mvebu-uart.c:531", osamp, port->membase + UART_OSAMP);
 
 	return DIV_ROUND_CLOSEST(port->uartclk, d_divisor * m_divisor);
 }
@@ -610,12 +610,12 @@ static int mvebu_uart_request_port(struct uart_port *port)
 #ifdef CONFIG_CONSOLE_POLL
 static int mvebu_uart_get_poll_char(struct uart_port *port)
 {
-	unsigned int st = readl(port->membase + UART_STAT);
+	unsigned int st = pete_readl("drivers/tty/serial/mvebu-uart.c:613", port->membase + UART_STAT);
 
 	if (!(st & STAT_RX_RDY(port)))
 		return NO_POLL_CHAR;
 
-	return readl(port->membase + UART_RBR(port));
+	return pete_readl("drivers/tty/serial/mvebu-uart.c:618", port->membase + UART_RBR(port));
 }
 
 static void mvebu_uart_put_poll_char(struct uart_port *port, unsigned char c)
@@ -623,7 +623,7 @@ static void mvebu_uart_put_poll_char(struct uart_port *port, unsigned char c)
 	unsigned int st;
 
 	for (;;) {
-		st = readl(port->membase + UART_STAT);
+		st = pete_readl("drivers/tty/serial/mvebu-uart.c:626", port->membase + UART_STAT);
 
 		if (!(st & STAT_TX_FIFO_FUL))
 			break;
@@ -631,7 +631,7 @@ static void mvebu_uart_put_poll_char(struct uart_port *port, unsigned char c)
 		udelay(1);
 	}
 
-	writel(c, port->membase + UART_TSH(port));
+	pete_writel("drivers/tty/serial/mvebu-uart.c:634", c, port->membase + UART_TSH(port));
 }
 #endif
 
@@ -664,16 +664,16 @@ static void mvebu_uart_putc(struct uart_port *port, unsigned char c)
 	unsigned int st;
 
 	for (;;) {
-		st = readl(port->membase + UART_STAT);
+		st = pete_readl("drivers/tty/serial/mvebu-uart.c:667", port->membase + UART_STAT);
 		if (!(st & STAT_TX_FIFO_FUL))
 			break;
 	}
 
 	/* At early stage, DT is not parsed yet, only use UART0 */
-	writel(c, port->membase + UART_STD_TSH);
+	pete_writel("drivers/tty/serial/mvebu-uart.c:673", c, port->membase + UART_STD_TSH);
 
 	for (;;) {
-		st = readl(port->membase + UART_STAT);
+		st = pete_readl("drivers/tty/serial/mvebu-uart.c:676", port->membase + UART_STAT);
 		if (st & STAT_TX_FIFO_EMP)
 			break;
 	}
@@ -723,7 +723,7 @@ static void wait_for_xmite(struct uart_port *port)
 static void mvebu_uart_console_putchar(struct uart_port *port, unsigned char ch)
 {
 	wait_for_xmitr(port);
-	writel(ch, port->membase + UART_TSH(port));
+	pete_writel("drivers/tty/serial/mvebu-uart.c:726", ch, port->membase + UART_TSH(port));
 }
 
 static void mvebu_uart_console_write(struct console *co, const char *s,
@@ -739,22 +739,22 @@ static void mvebu_uart_console_write(struct console *co, const char *s,
 	else
 		spin_lock_irqsave(&port->lock, flags);
 
-	ier = readl(port->membase + UART_CTRL(port)) & CTRL_BRK_INT;
-	intr = readl(port->membase + UART_INTR(port)) &
+	ier = pete_readl("drivers/tty/serial/mvebu-uart.c:742", port->membase + UART_CTRL(port)) & CTRL_BRK_INT;
+	intr = pete_readl("drivers/tty/serial/mvebu-uart.c:743", port->membase + UART_INTR(port)) &
 		(CTRL_RX_RDY_INT(port) | CTRL_TX_RDY_INT(port));
-	writel(0, port->membase + UART_CTRL(port));
-	writel(0, port->membase + UART_INTR(port));
+	pete_writel("drivers/tty/serial/mvebu-uart.c:745", 0, port->membase + UART_CTRL(port));
+	pete_writel("drivers/tty/serial/mvebu-uart.c:746", 0, port->membase + UART_INTR(port));
 
 	uart_console_write(port, s, count, mvebu_uart_console_putchar);
 
 	wait_for_xmite(port);
 
 	if (ier)
-		writel(ier, port->membase + UART_CTRL(port));
+		pete_writel("drivers/tty/serial/mvebu-uart.c:753", ier, port->membase + UART_CTRL(port));
 
 	if (intr) {
-		ctl = intr | readl(port->membase + UART_INTR(port));
-		writel(ctl, port->membase + UART_INTR(port));
+		ctl = intr | pete_readl("drivers/tty/serial/mvebu-uart.c:756", port->membase + UART_INTR(port));
+		pete_writel("drivers/tty/serial/mvebu-uart.c:757", ctl, port->membase + UART_INTR(port));
 	}
 
 	if (locked)
@@ -827,15 +827,15 @@ static int mvebu_uart_suspend(struct device *dev)
 
 	uart_suspend_port(&mvebu_uart_driver, port);
 
-	mvuart->pm_regs.rbr = readl(port->membase + UART_RBR(port));
-	mvuart->pm_regs.tsh = readl(port->membase + UART_TSH(port));
-	mvuart->pm_regs.ctrl = readl(port->membase + UART_CTRL(port));
-	mvuart->pm_regs.intr = readl(port->membase + UART_INTR(port));
-	mvuart->pm_regs.stat = readl(port->membase + UART_STAT);
+	mvuart->pm_regs.rbr = pete_readl("drivers/tty/serial/mvebu-uart.c:830", port->membase + UART_RBR(port));
+	mvuart->pm_regs.tsh = pete_readl("drivers/tty/serial/mvebu-uart.c:831", port->membase + UART_TSH(port));
+	mvuart->pm_regs.ctrl = pete_readl("drivers/tty/serial/mvebu-uart.c:832", port->membase + UART_CTRL(port));
+	mvuart->pm_regs.intr = pete_readl("drivers/tty/serial/mvebu-uart.c:833", port->membase + UART_INTR(port));
+	mvuart->pm_regs.stat = pete_readl("drivers/tty/serial/mvebu-uart.c:834", port->membase + UART_STAT);
 	spin_lock_irqsave(&mvebu_uart_lock, flags);
-	mvuart->pm_regs.brdv = readl(port->membase + UART_BRDV);
+	mvuart->pm_regs.brdv = pete_readl("drivers/tty/serial/mvebu-uart.c:836", port->membase + UART_BRDV);
 	spin_unlock_irqrestore(&mvebu_uart_lock, flags);
-	mvuart->pm_regs.osamp = readl(port->membase + UART_OSAMP);
+	mvuart->pm_regs.osamp = pete_readl("drivers/tty/serial/mvebu-uart.c:838", port->membase + UART_OSAMP);
 
 	device_set_wakeup_enable(dev, true);
 
@@ -848,15 +848,15 @@ static int mvebu_uart_resume(struct device *dev)
 	struct uart_port *port = mvuart->port;
 	unsigned long flags;
 
-	writel(mvuart->pm_regs.rbr, port->membase + UART_RBR(port));
-	writel(mvuart->pm_regs.tsh, port->membase + UART_TSH(port));
-	writel(mvuart->pm_regs.ctrl, port->membase + UART_CTRL(port));
-	writel(mvuart->pm_regs.intr, port->membase + UART_INTR(port));
-	writel(mvuart->pm_regs.stat, port->membase + UART_STAT);
+	pete_writel("drivers/tty/serial/mvebu-uart.c:851", mvuart->pm_regs.rbr, port->membase + UART_RBR(port));
+	pete_writel("drivers/tty/serial/mvebu-uart.c:852", mvuart->pm_regs.tsh, port->membase + UART_TSH(port));
+	pete_writel("drivers/tty/serial/mvebu-uart.c:853", mvuart->pm_regs.ctrl, port->membase + UART_CTRL(port));
+	pete_writel("drivers/tty/serial/mvebu-uart.c:854", mvuart->pm_regs.intr, port->membase + UART_INTR(port));
+	pete_writel("drivers/tty/serial/mvebu-uart.c:855", mvuart->pm_regs.stat, port->membase + UART_STAT);
 	spin_lock_irqsave(&mvebu_uart_lock, flags);
-	writel(mvuart->pm_regs.brdv, port->membase + UART_BRDV);
+	pete_writel("drivers/tty/serial/mvebu-uart.c:857", mvuart->pm_regs.brdv, port->membase + UART_BRDV);
 	spin_unlock_irqrestore(&mvebu_uart_lock, flags);
-	writel(mvuart->pm_regs.osamp, port->membase + UART_OSAMP);
+	pete_writel("drivers/tty/serial/mvebu-uart.c:859", mvuart->pm_regs.osamp, port->membase + UART_OSAMP);
 
 	uart_resume_port(&mvebu_uart_driver, port);
 
@@ -978,9 +978,9 @@ static int mvebu_uart_probe(struct platform_device *pdev)
 	}
 
 	/* UART Soft Reset*/
-	writel(CTRL_SOFT_RST, port->membase + UART_CTRL(port));
+	pete_writel("drivers/tty/serial/mvebu-uart.c:981", CTRL_SOFT_RST, port->membase + UART_CTRL(port));
 	udelay(1);
-	writel(0, port->membase + UART_CTRL(port));
+	pete_writel("drivers/tty/serial/mvebu-uart.c:983", 0, port->membase + UART_CTRL(port));
 
 	return uart_add_one_port(&mvebu_uart_driver, port);
 }
@@ -1096,7 +1096,7 @@ static int mvebu_uart_clock_prepare(struct clk_hw *hw)
 	parent_clock_idx = uart_clock_base->parent_idx;
 	parent_clock_rate = uart_clock_base->parent_rates[parent_clock_idx];
 
-	val = readl(uart_clock_base->reg1);
+	val = pete_readl("drivers/tty/serial/mvebu-uart.c:1099", uart_clock_base->reg1);
 
 	if (uart_clock_base->div > CLK_TBG_DIV1_MAX) {
 		d1 = CLK_TBG_DIV1_MAX;
@@ -1144,11 +1144,11 @@ static int mvebu_uart_clock_prepare(struct clk_hw *hw)
 		val &= ~CLK_NO_XTAL;
 	}
 
-	writel(val, uart_clock_base->reg1);
+	pete_writel("drivers/tty/serial/mvebu-uart.c:1147", val, uart_clock_base->reg1);
 
 	/* Recalculate UART2 divisor so UART2 baudrate does not change */
 	if (prev_clock_rate) {
-		val = readl(uart_clock_base->reg2);
+		val = pete_readl("drivers/tty/serial/mvebu-uart.c:1151", uart_clock_base->reg2);
 		divisor = DIV_U64_ROUND_CLOSEST((u64)(val & BRDV_BAUD_MASK) *
 						parent_clock_rate * prev_d1d2,
 						prev_clock_rate * d1 * d2);
@@ -1157,7 +1157,7 @@ static int mvebu_uart_clock_prepare(struct clk_hw *hw)
 		else if (divisor > BRDV_BAUD_MAX)
 			divisor = BRDV_BAUD_MAX;
 		val = (val & ~BRDV_BAUD_MASK) | divisor;
-		writel(val, uart_clock_base->reg2);
+		pete_writel("drivers/tty/serial/mvebu-uart.c:1160", val, uart_clock_base->reg2);
 	}
 
 	uart_clock_base->configured = true;
@@ -1177,14 +1177,14 @@ static int mvebu_uart_clock_enable(struct clk_hw *hw)
 
 	spin_lock_irqsave(&mvebu_uart_lock, flags);
 
-	val = readl(uart_clock_base->reg1);
+	val = pete_readl("drivers/tty/serial/mvebu-uart.c:1180", uart_clock_base->reg1);
 
 	if (uart_clock->clock_idx == 0)
 		val &= ~UART1_CLK_DIS;
 	else
 		val &= ~UART2_CLK_DIS;
 
-	writel(val, uart_clock_base->reg1);
+	pete_writel("drivers/tty/serial/mvebu-uart.c:1187", val, uart_clock_base->reg1);
 
 	spin_unlock_irqrestore(&mvebu_uart_lock, flags);
 
@@ -1201,14 +1201,14 @@ static void mvebu_uart_clock_disable(struct clk_hw *hw)
 
 	spin_lock_irqsave(&mvebu_uart_lock, flags);
 
-	val = readl(uart_clock_base->reg1);
+	val = pete_readl("drivers/tty/serial/mvebu-uart.c:1204", uart_clock_base->reg1);
 
 	if (uart_clock->clock_idx == 0)
 		val |= UART1_CLK_DIS;
 	else
 		val |= UART2_CLK_DIS;
 
-	writel(val, uart_clock_base->reg1);
+	pete_writel("drivers/tty/serial/mvebu-uart.c:1211", val, uart_clock_base->reg1);
 
 	spin_unlock_irqrestore(&mvebu_uart_lock, flags);
 }
@@ -1220,7 +1220,7 @@ static int mvebu_uart_clock_is_enabled(struct clk_hw *hw)
 						to_uart_clock_base(uart_clock);
 	u32 val;
 
-	val = readl(uart_clock_base->reg1);
+	val = pete_readl("drivers/tty/serial/mvebu-uart.c:1223", uart_clock_base->reg1);
 
 	if (uart_clock->clock_idx == 0)
 		return !(val & UART1_CLK_DIS);
@@ -1236,8 +1236,8 @@ static int mvebu_uart_clock_save_context(struct clk_hw *hw)
 	unsigned long flags;
 
 	spin_lock_irqsave(&mvebu_uart_lock, flags);
-	uart_clock->pm_context_reg1 = readl(uart_clock_base->reg1);
-	uart_clock->pm_context_reg2 = readl(uart_clock_base->reg2);
+	uart_clock->pm_context_reg1 = pete_readl("drivers/tty/serial/mvebu-uart.c:1239", uart_clock_base->reg1);
+	uart_clock->pm_context_reg2 = pete_readl("drivers/tty/serial/mvebu-uart.c:1240", uart_clock_base->reg2);
 	spin_unlock_irqrestore(&mvebu_uart_lock, flags);
 
 	return 0;
@@ -1251,8 +1251,8 @@ static void mvebu_uart_clock_restore_context(struct clk_hw *hw)
 	unsigned long flags;
 
 	spin_lock_irqsave(&mvebu_uart_lock, flags);
-	writel(uart_clock->pm_context_reg1, uart_clock_base->reg1);
-	writel(uart_clock->pm_context_reg2, uart_clock_base->reg2);
+	pete_writel("drivers/tty/serial/mvebu-uart.c:1254", uart_clock->pm_context_reg1, uart_clock_base->reg1);
+	pete_writel("drivers/tty/serial/mvebu-uart.c:1255", uart_clock->pm_context_reg2, uart_clock_base->reg2);
 	spin_unlock_irqrestore(&mvebu_uart_lock, flags);
 }
 

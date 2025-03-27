@@ -27,22 +27,22 @@ static void __iomem *kbd_iobase;
 
 static inline int i8042_read_data(void)
 {
-	return readb(kbd_iobase + 0x60UL);
+	return pete_readb("drivers/input/serio/i8042-sparcio.h:30", kbd_iobase + 0x60UL);
 }
 
 static inline int i8042_read_status(void)
 {
-	return readb(kbd_iobase + 0x64UL);
+	return pete_readb("drivers/input/serio/i8042-sparcio.h:35", kbd_iobase + 0x64UL);
 }
 
 static inline void i8042_write_data(int val)
 {
-	writeb(val, kbd_iobase + 0x60UL);
+	pete_writeb("drivers/input/serio/i8042-sparcio.h:40", val, kbd_iobase + 0x60UL);
 }
 
 static inline void i8042_write_command(int val)
 {
-	writeb(val, kbd_iobase + 0x64UL);
+	pete_writeb("drivers/input/serio/i8042-sparcio.h:45", val, kbd_iobase + 0x64UL);
 }
 
 #ifdef CONFIG_PCI

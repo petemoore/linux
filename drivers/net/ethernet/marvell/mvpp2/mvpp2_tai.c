@@ -69,7 +69,7 @@ static void mvpp2_tai_modify(void __iomem *reg, u32 mask, u32 set)
 
 	val = readl_relaxed(reg) & ~mask;
 	val |= set & mask;
-	writel(val, reg);
+	pete_writel("drivers/net/ethernet/marvell/mvpp2/mvpp2_tai.c:72", val, reg);
 }
 
 static void mvpp2_tai_write(u32 val, void __iomem *reg)
@@ -257,7 +257,7 @@ static int mvpp22_tai_gettimex64(struct ptp_clock_info *ptp,
 	mvpp2_tai_modify(base + MVPP22_TAI_TCFCR0, TCFCR0_TCF_MASK,
 			 TCFCR0_TCF_NOP);
 
-	tcsr = readl(base + MVPP22_TAI_TCSR);
+	tcsr = pete_readl("drivers/net/ethernet/marvell/mvpp2/mvpp2_tai.c:260", base + MVPP22_TAI_TCSR);
 	if (tcsr & TCSR_CAPTURE_1_VALID) {
 		mvpp22_tai_read_ts(ts, base + MVPP22_TAI_TCV1_SEC_HIGH);
 		ret = 0;

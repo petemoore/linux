@@ -130,10 +130,10 @@ static struct proc_dir_entry *proc_mckinley_root __ro_after_init;
 **
 ** Superdome (in particular, REO) allows only 64-bit CSR accesses.
 */
-#define READ_REG32(addr)	readl(addr)
-#define READ_REG64(addr)	readq(addr)
-#define WRITE_REG32(val, addr)	writel((val), (addr))
-#define WRITE_REG64(val, addr)	writeq((val), (addr))
+#define READ_REG32(addr)	pete_readl("drivers/parisc/sba_iommu.c:133", addr)
+#define READ_REG64(addr)	pete_readq("drivers/parisc/sba_iommu.c:134", addr)
+#define WRITE_REG32(val, addr)	pete_writel("drivers/parisc/sba_iommu.c:135", (val), (addr))
+#define WRITE_REG64(val, addr)	pete_writeq("drivers/parisc/sba_iommu.c:136", (val), (addr))
 
 #ifdef CONFIG_64BIT
 #define READ_REG(addr)		READ_REG64(addr)

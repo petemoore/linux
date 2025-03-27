@@ -99,21 +99,21 @@ static irqreturn_t i2s_irq_handler(int irq, void *data)
 		return IRQ_NONE;
 
 	if (adata->rsrc->no_of_ctrls == 2)
-		ext_intr_stat1 = readl(ACP_EXTERNAL_INTR_STAT(adata, (rsrc->irqp_used - 1)));
+		ext_intr_stat1 = pete_readl("sound/soc/amd/acp/acp-platform.c:102", ACP_EXTERNAL_INTR_STAT(adata, (rsrc->irqp_used - 1)));
 
-	ext_intr_stat = readl(ACP_EXTERNAL_INTR_STAT(adata, rsrc->irqp_used));
+	ext_intr_stat = pete_readl("sound/soc/amd/acp/acp-platform.c:104", ACP_EXTERNAL_INTR_STAT(adata, rsrc->irqp_used));
 
 	spin_lock(&adata->acp_lock);
 	list_for_each_entry(stream, &adata->stream_list, list) {
 		if (ext_intr_stat & stream->irq_bit) {
-			writel(stream->irq_bit,
+			pete_writel("sound/soc/amd/acp/acp-platform.c:109", stream->irq_bit,
 			       ACP_EXTERNAL_INTR_STAT(adata, rsrc->irqp_used));
 			snd_pcm_period_elapsed(stream->substream);
 			i2s_flag = 1;
 		}
 		if (adata->rsrc->no_of_ctrls == 2) {
 			if (ext_intr_stat1 & stream->irq_bit) {
-				writel(stream->irq_bit, ACP_EXTERNAL_INTR_STAT(adata,
+				pete_writel("sound/soc/amd/acp/acp-platform.c:116", stream->irq_bit, ACP_EXTERNAL_INTR_STAT(adata,
 				       (rsrc->irqp_used - 1)));
 				snd_pcm_period_elapsed(stream->substream);
 				i2s_flag = 1;
@@ -139,9 +139,9 @@ void config_pte_for_stream(struct acp_dev_data *adata, struct acp_stream *stream
 
 	/* Group Enable */
 	reg_val = rsrc->sram_pte_offset;
-	writel(reg_val | BIT(31), adata->acp_base + pte_reg);
-	writel(PAGE_SIZE_4K_ENABLE,  adata->acp_base + pte_size);
-	writel(0x01, adata->acp_base + ACPAXI2AXI_ATU_CTRL);
+	pete_writel("sound/soc/amd/acp/acp-platform.c:142", reg_val | BIT(31), adata->acp_base + pte_reg);
+	pete_writel("sound/soc/amd/acp/acp-platform.c:143", PAGE_SIZE_4K_ENABLE,  adata->acp_base + pte_size);
+	pete_writel("sound/soc/amd/acp/acp-platform.c:144", 0x01, adata->acp_base + ACPAXI2AXI_ATU_CTRL);
 }
 EXPORT_SYMBOL_NS_GPL(config_pte_for_stream, SND_SOC_ACP_COMMON);
 
@@ -160,9 +160,9 @@ void config_acp_dma(struct acp_dev_data *adata, struct acp_stream *stream, int s
 		/* Load the low address of page int ACP SRAM through SRBM */
 		low = lower_32_bits(addr);
 		high = upper_32_bits(addr);
-		writel(low, adata->acp_base + rsrc->scratch_reg_offset + val);
+		pete_writel("sound/soc/amd/acp/acp-platform.c:163", low, adata->acp_base + rsrc->scratch_reg_offset + val);
 		high |= BIT(31);
-		writel(high, adata->acp_base + rsrc->scratch_reg_offset + val + 4);
+		pete_writel("sound/soc/amd/acp/acp-platform.c:165", high, adata->acp_base + rsrc->scratch_reg_offset + val + 4);
 
 		/* Move to next physically contiguous page */
 		val += 8;
@@ -198,7 +198,7 @@ static int acp_dma_open(struct snd_soc_component *component, struct snd_pcm_subs
 	}
 	runtime->private_data = stream;
 
-	writel(1, ACP_EXTERNAL_INTR_ENB(adata));
+	pete_writel("sound/soc/amd/acp/acp-platform.c:201", 1, ACP_EXTERNAL_INTR_ENB(adata));
 
 	spin_lock_irq(&adata->acp_lock);
 	list_add_tail(&stream->list, &adata->stream_list);

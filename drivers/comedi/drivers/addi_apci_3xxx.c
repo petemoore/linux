@@ -352,12 +352,12 @@ static irqreturn_t apci3xxx_irq_handler(int irq, void *d)
 	unsigned int val;
 
 	/* Test if interrupt occur */
-	status = readl(dev->mmio + 16);
+	status = pete_readl("drivers/comedi/drivers/addi_apci_3xxx.c:355", dev->mmio + 16);
 	if ((status & 0x2) == 0x2) {
 		/* Reset the interrupt */
-		writel(status, dev->mmio + 16);
+		pete_writel("drivers/comedi/drivers/addi_apci_3xxx.c:358", status, dev->mmio + 16);
 
-		val = readl(dev->mmio + 28);
+		val = pete_readl("drivers/comedi/drivers/addi_apci_3xxx.c:360", dev->mmio + 28);
 		comedi_buf_write_samples(s, &val, 1);
 
 		s->async->events |= COMEDI_CB_EOA;
@@ -370,7 +370,7 @@ static irqreturn_t apci3xxx_irq_handler(int irq, void *d)
 
 static int apci3xxx_ai_started(struct comedi_device *dev)
 {
-	if ((readl(dev->mmio + 8) & 0x80000) == 0x80000)
+	if ((pete_readl("drivers/comedi/drivers/addi_apci_3xxx.c:373", dev->mmio + 8) & 0x80000) == 0x80000)
 		return 1;
 
 	return 0;
@@ -388,29 +388,29 @@ static int apci3xxx_ai_setup(struct comedi_device *dev, unsigned int chanspec)
 		return -EBUSY;
 
 	/* Clear the FIFO */
-	writel(0x10000, dev->mmio + 12);
+	pete_writel("drivers/comedi/drivers/addi_apci_3xxx.c:391", 0x10000, dev->mmio + 12);
 
 	/* Get and save the delay mode */
-	delay_mode = readl(dev->mmio + 4);
+	delay_mode = pete_readl("drivers/comedi/drivers/addi_apci_3xxx.c:394", dev->mmio + 4);
 	delay_mode &= 0xfffffef0;
 
 	/* Channel configuration selection */
-	writel(delay_mode, dev->mmio + 4);
+	pete_writel("drivers/comedi/drivers/addi_apci_3xxx.c:398", delay_mode, dev->mmio + 4);
 
 	/* Make the configuration */
 	val = (range & 3) | ((range >> 2) << 6) |
 	      ((aref == AREF_DIFF) << 7);
-	writel(val, dev->mmio + 0);
+	pete_writel("drivers/comedi/drivers/addi_apci_3xxx.c:403", val, dev->mmio + 0);
 
 	/* Channel selection */
-	writel(delay_mode | 0x100, dev->mmio + 4);
-	writel(chan, dev->mmio + 0);
+	pete_writel("drivers/comedi/drivers/addi_apci_3xxx.c:406", delay_mode | 0x100, dev->mmio + 4);
+	pete_writel("drivers/comedi/drivers/addi_apci_3xxx.c:407", chan, dev->mmio + 0);
 
 	/* Restore delay mode */
-	writel(delay_mode, dev->mmio + 4);
+	pete_writel("drivers/comedi/drivers/addi_apci_3xxx.c:410", delay_mode, dev->mmio + 4);
 
 	/* Set the number of sequence to 1 */
-	writel(1, dev->mmio + 48);
+	pete_writel("drivers/comedi/drivers/addi_apci_3xxx.c:413", 1, dev->mmio + 48);
 
 	return 0;
 }
@@ -422,7 +422,7 @@ static int apci3xxx_ai_eoc(struct comedi_device *dev,
 {
 	unsigned int status;
 
-	status = readl(dev->mmio + 20);
+	status = pete_readl("drivers/comedi/drivers/addi_apci_3xxx.c:425", dev->mmio + 20);
 	if (status & 0x1)
 		return 0;
 	return -EBUSY;
@@ -442,7 +442,7 @@ static int apci3xxx_ai_insn_read(struct comedi_device *dev,
 
 	for (i = 0; i < insn->n; i++) {
 		/* Start the conversion */
-		writel(0x80000, dev->mmio + 8);
+		pete_writel("drivers/comedi/drivers/addi_apci_3xxx.c:445", 0x80000, dev->mmio + 8);
 
 		/* Wait the EOS */
 		ret = comedi_timeout(dev, s, insn, apci3xxx_ai_eoc, 0);
@@ -450,7 +450,7 @@ static int apci3xxx_ai_insn_read(struct comedi_device *dev,
 			return ret;
 
 		/* Read the analog value */
-		data[i] = readl(dev->mmio + 28);
+		data[i] = pete_readl("drivers/comedi/drivers/addi_apci_3xxx.c:453", dev->mmio + 28);
 	}
 
 	return insn->n;
@@ -575,13 +575,13 @@ static int apci3xxx_ai_cmd(struct comedi_device *dev,
 		return ret;
 
 	/* Set the convert timing unit */
-	writel(devpriv->ai_time_base, dev->mmio + 36);
+	pete_writel("drivers/comedi/drivers/addi_apci_3xxx.c:578", devpriv->ai_time_base, dev->mmio + 36);
 
 	/* Set the convert timing */
-	writel(devpriv->ai_timer, dev->mmio + 32);
+	pete_writel("drivers/comedi/drivers/addi_apci_3xxx.c:581", devpriv->ai_timer, dev->mmio + 32);
 
 	/* Start the conversion */
-	writel(0x180000, dev->mmio + 8);
+	pete_writel("drivers/comedi/drivers/addi_apci_3xxx.c:584", 0x180000, dev->mmio + 8);
 
 	return 0;
 }
@@ -599,7 +599,7 @@ static int apci3xxx_ao_eoc(struct comedi_device *dev,
 {
 	unsigned int status;
 
-	status = readl(dev->mmio + 96);
+	status = pete_readl("drivers/comedi/drivers/addi_apci_3xxx.c:602", dev->mmio + 96);
 	if (status & 0x100)
 		return 0;
 	return -EBUSY;
@@ -619,10 +619,10 @@ static int apci3xxx_ao_insn_write(struct comedi_device *dev,
 		unsigned int val = data[i];
 
 		/* Set the range selection */
-		writel(range, dev->mmio + 96);
+		pete_writel("drivers/comedi/drivers/addi_apci_3xxx.c:622", range, dev->mmio + 96);
 
 		/* Write the analog value to the selected channel */
-		writel((val << 8) | chan, dev->mmio + 100);
+		pete_writel("drivers/comedi/drivers/addi_apci_3xxx.c:625", (val << 8) | chan, dev->mmio + 100);
 
 		/* Wait the end of transfer */
 		ret = comedi_timeout(dev, s, insn, apci3xxx_ao_eoc, 0);
@@ -730,18 +730,18 @@ static int apci3xxx_reset(struct comedi_device *dev)
 	disable_irq(dev->irq);
 
 	/* Clear the start command */
-	writel(0, dev->mmio + 8);
+	pete_writel("drivers/comedi/drivers/addi_apci_3xxx.c:733", 0, dev->mmio + 8);
 
 	/* Reset the interrupt flags */
-	val = readl(dev->mmio + 16);
-	writel(val, dev->mmio + 16);
+	val = pete_readl("drivers/comedi/drivers/addi_apci_3xxx.c:736", dev->mmio + 16);
+	pete_writel("drivers/comedi/drivers/addi_apci_3xxx.c:737", val, dev->mmio + 16);
 
 	/* clear the EOS */
-	readl(dev->mmio + 20);
+	pete_readl("drivers/comedi/drivers/addi_apci_3xxx.c:740", dev->mmio + 20);
 
 	/* Clear the FIFO */
 	for (i = 0; i < 16; i++)
-		val = readl(dev->mmio + 28);
+		val = pete_readl("drivers/comedi/drivers/addi_apci_3xxx.c:744", dev->mmio + 28);
 
 	/* Enable the interrupt */
 	enable_irq(dev->irq);

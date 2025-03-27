@@ -71,7 +71,7 @@ static void atomisp_css2_hw_store_8(hrt_address addr, uint8_t data)
 	unsigned long flags;
 
 	spin_lock_irqsave(&mmio_lock, flags);
-	writeb(data, isp->base + (addr & 0x003FFFFF));
+	pete_writeb("drivers/staging/media/atomisp/pci/atomisp_compat_css20.c:74", data, isp->base + (addr & 0x003FFFFF));
 	spin_unlock_irqrestore(&mmio_lock, flags);
 }
 
@@ -81,7 +81,7 @@ static void atomisp_css2_hw_store_16(hrt_address addr, uint16_t data)
 	unsigned long flags;
 
 	spin_lock_irqsave(&mmio_lock, flags);
-	writew(data, isp->base + (addr & 0x003FFFFF));
+	pete_writew("drivers/staging/media/atomisp/pci/atomisp_compat_css20.c:84", data, isp->base + (addr & 0x003FFFFF));
 	spin_unlock_irqrestore(&mmio_lock, flags);
 }
 
@@ -91,7 +91,7 @@ void atomisp_css2_hw_store_32(hrt_address addr, uint32_t data)
 	unsigned long flags;
 
 	spin_lock_irqsave(&mmio_lock, flags);
-	writel(data, isp->base + (addr & 0x003FFFFF));
+	pete_writel("drivers/staging/media/atomisp/pci/atomisp_compat_css20.c:94", data, isp->base + (addr & 0x003FFFFF));
 	spin_unlock_irqrestore(&mmio_lock, flags);
 }
 
@@ -102,7 +102,7 @@ static uint8_t atomisp_css2_hw_load_8(hrt_address addr)
 	u8 ret;
 
 	spin_lock_irqsave(&mmio_lock, flags);
-	ret = readb(isp->base + (addr & 0x003FFFFF));
+	ret = pete_readb("drivers/staging/media/atomisp/pci/atomisp_compat_css20.c:105", isp->base + (addr & 0x003FFFFF));
 	spin_unlock_irqrestore(&mmio_lock, flags);
 	return ret;
 }
@@ -114,7 +114,7 @@ static uint16_t atomisp_css2_hw_load_16(hrt_address addr)
 	u16 ret;
 
 	spin_lock_irqsave(&mmio_lock, flags);
-	ret = readw(isp->base + (addr & 0x003FFFFF));
+	ret = pete_readw("drivers/staging/media/atomisp/pci/atomisp_compat_css20.c:117", isp->base + (addr & 0x003FFFFF));
 	spin_unlock_irqrestore(&mmio_lock, flags);
 	return ret;
 }
@@ -126,7 +126,7 @@ static uint32_t atomisp_css2_hw_load_32(hrt_address addr)
 	u32 ret;
 
 	spin_lock_irqsave(&mmio_lock, flags);
-	ret = readl(isp->base + (addr & 0x003FFFFF));
+	ret = pete_readl("drivers/staging/media/atomisp/pci/atomisp_compat_css20.c:129", isp->base + (addr & 0x003FFFFF));
 	spin_unlock_irqrestore(&mmio_lock, flags);
 	return ret;
 }
@@ -140,7 +140,7 @@ static void atomisp_css2_hw_store(hrt_address addr, const void *from, uint32_t n
 	addr &= 0x003FFFFF;
 	spin_lock_irqsave(&mmio_lock, flags);
 	for (i = 0; i < n; i++, from++)
-		writeb(*(s8 *)from, isp->base + addr + i);
+		pete_writeb("drivers/staging/media/atomisp/pci/atomisp_compat_css20.c:143", *(s8 *)from, isp->base + addr + i);
 
 	spin_unlock_irqrestore(&mmio_lock, flags);
 }
@@ -154,7 +154,7 @@ static void atomisp_css2_hw_load(hrt_address addr, void *to, uint32_t n)
 	addr &= 0x003FFFFF;
 	spin_lock_irqsave(&mmio_lock, flags);
 	for (i = 0; i < n; i++, to++)
-		*(s8 *)to = readb(isp->base + addr + i);
+		*(s8 *)to = pete_readb("drivers/staging/media/atomisp/pci/atomisp_compat_css20.c:157", isp->base + addr + i);
 	spin_unlock_irqrestore(&mmio_lock, flags);
 }
 

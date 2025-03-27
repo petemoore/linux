@@ -113,7 +113,7 @@ static void pci1xxxx_spi_set_cs(struct spi_device *spi, bool enable)
 	u32 regval;
 
 	/* Set the DEV_SEL bits of the SPI_MST_CTL_REG */
-	regval = readl(par->reg_base + SPI_MST_CTL_REG_OFFSET(p->hw_inst));
+	regval = pete_readl("drivers/spi/spi-pci1xxxx.c:116", par->reg_base + SPI_MST_CTL_REG_OFFSET(p->hw_inst));
 	if (!enable) {
 		regval |= SPI_FORCE_CE;
 		regval &= ~SPI_MST_CTL_DEVSEL_MASK;
@@ -121,7 +121,7 @@ static void pci1xxxx_spi_set_cs(struct spi_device *spi, bool enable)
 	} else {
 		regval &= ~SPI_FORCE_CE;
 	}
-	writel(regval, par->reg_base + SPI_MST_CTL_REG_OFFSET(p->hw_inst));
+	pete_writel("drivers/spi/spi-pci1xxxx.c:124", regval, par->reg_base + SPI_MST_CTL_REG_OFFSET(p->hw_inst));
 }
 
 static u8 pci1xxxx_get_clock_div(u32 hz)
@@ -166,8 +166,8 @@ static int pci1xxxx_spi_transfer_one(struct spi_controller *spi_ctlr,
 	tx_buf = xfer->tx_buf;
 	rx_buf = xfer->rx_buf;
 	transfer_len = xfer->len;
-	regval = readl(par->reg_base + SPI_MST_EVENT_REG_OFFSET(p->hw_inst));
-	writel(regval, par->reg_base + SPI_MST_EVENT_REG_OFFSET(p->hw_inst));
+	regval = pete_readl("drivers/spi/spi-pci1xxxx.c:169", par->reg_base + SPI_MST_EVENT_REG_OFFSET(p->hw_inst));
+	pete_writel("drivers/spi/spi-pci1xxxx.c:170", regval, par->reg_base + SPI_MST_EVENT_REG_OFFSET(p->hw_inst));
 
 	if (tx_buf) {
 		bytes_transfered = 0;
@@ -186,7 +186,7 @@ static int pci1xxxx_spi_transfer_one(struct spi_controller *spi_ctlr,
 			memcpy_toio(par->reg_base + SPI_MST_CMD_BUF_OFFSET(p->hw_inst),
 				    &tx_buf[bytes_transfered], len);
 			bytes_transfered += len;
-			regval = readl(par->reg_base +
+			regval = pete_readl("drivers/spi/spi-pci1xxxx.c:189", par->reg_base +
 				       SPI_MST_CTL_REG_OFFSET(p->hw_inst));
 			regval &= ~(SPI_MST_CTL_MODE_SEL | SPI_MST_CTL_CMD_LEN_MASK |
 				    SPI_MST_CTL_SPEED_MASK);
@@ -199,12 +199,12 @@ static int pci1xxxx_spi_transfer_one(struct spi_controller *spi_ctlr,
 			regval |= (clkdiv << 5);
 			regval &= ~SPI_MST_CTL_CMD_LEN_MASK;
 			regval |= (len << 8);
-			writel(regval, par->reg_base +
+			pete_writel("drivers/spi/spi-pci1xxxx.c:202", regval, par->reg_base +
 			       SPI_MST_CTL_REG_OFFSET(p->hw_inst));
-			regval = readl(par->reg_base +
+			regval = pete_readl("drivers/spi/spi-pci1xxxx.c:204", par->reg_base +
 				       SPI_MST_CTL_REG_OFFSET(p->hw_inst));
 			regval |= SPI_MST_CTL_GO;
-			writel(regval, par->reg_base +
+			pete_writel("drivers/spi/spi-pci1xxxx.c:207", regval, par->reg_base +
 			       SPI_MST_CTL_REG_OFFSET(p->hw_inst));
 
 			/* Wait for DMA_TERM interrupt */
@@ -232,14 +232,14 @@ static irqreturn_t pci1xxxx_spi_isr(int irq, void *dev)
 	u32 regval;
 
 	/* Clear the SPI GO_BIT Interrupt */
-	regval = readl(p->parent->reg_base + SPI_MST_EVENT_REG_OFFSET(p->hw_inst));
+	regval = pete_readl("drivers/spi/spi-pci1xxxx.c:235", p->parent->reg_base + SPI_MST_EVENT_REG_OFFSET(p->hw_inst));
 	if (regval & SPI_INTR) {
 		/* Clear xfer_done */
 		complete(&p->spi_xfer_done);
 		spi_int_fired = IRQ_HANDLED;
 	}
 
-	writel(regval, p->parent->reg_base + SPI_MST_EVENT_REG_OFFSET(p->hw_inst));
+	pete_writel("drivers/spi/spi-pci1xxxx.c:242", regval, p->parent->reg_base + SPI_MST_EVENT_REG_OFFSET(p->hw_inst));
 
 	return spi_int_fired;
 }
@@ -309,10 +309,10 @@ static int pci1xxxx_spi_probe(struct pci_dev *pdev, const struct pci_device_id *
 
 			init_completion(&spi_sub_ptr->spi_xfer_done);
 			/* Initialize Interrupts - SPI_INT */
-			regval = readl(spi_bus->reg_base +
+			regval = pete_readl("drivers/spi/spi-pci1xxxx.c:312", spi_bus->reg_base +
 				       SPI_MST_EVENT_MASK_REG_OFFSET(spi_sub_ptr->hw_inst));
 			regval &= ~SPI_INTR;
-			writel(regval, spi_bus->reg_base +
+			pete_writel("drivers/spi/spi-pci1xxxx.c:315", regval, spi_bus->reg_base +
 			       SPI_MST_EVENT_MASK_REG_OFFSET(spi_sub_ptr->hw_inst));
 			spi_sub_ptr->irq = pci_irq_vector(pdev, 0);
 
@@ -327,13 +327,13 @@ static int pci1xxxx_spi_probe(struct pci_dev *pdev, const struct pci_device_id *
 			}
 
 			/* This register is only applicable for 1st instance */
-			regval = readl(spi_bus->reg_base + SPI_PCI_CTRL_REG_OFFSET(0));
+			regval = pete_readl("drivers/spi/spi-pci1xxxx.c:330", spi_bus->reg_base + SPI_PCI_CTRL_REG_OFFSET(0));
 			if (!only_sec_inst)
 				regval |= (BIT(4));
 			else
 				regval &= ~(BIT(4));
 
-			writel(regval, spi_bus->reg_base + SPI_PCI_CTRL_REG_OFFSET(0));
+			pete_writel("drivers/spi/spi-pci1xxxx.c:336", regval, spi_bus->reg_base + SPI_PCI_CTRL_REG_OFFSET(0));
 		}
 
 		spi_sub_ptr->hw_inst = start++;
@@ -341,10 +341,10 @@ static int pci1xxxx_spi_probe(struct pci_dev *pdev, const struct pci_device_id *
 		if (iter == 1) {
 			init_completion(&spi_sub_ptr->spi_xfer_done);
 			/* Initialize Interrupts - SPI_INT */
-			regval = readl(spi_bus->reg_base +
+			regval = pete_readl("drivers/spi/spi-pci1xxxx.c:344", spi_bus->reg_base +
 			       SPI_MST_EVENT_MASK_REG_OFFSET(spi_sub_ptr->hw_inst));
 			regval &= ~SPI_INTR;
-			writel(regval, spi_bus->reg_base +
+			pete_writel("drivers/spi/spi-pci1xxxx.c:347", regval, spi_bus->reg_base +
 			       SPI_MST_EVENT_MASK_REG_OFFSET(spi_sub_ptr->hw_inst));
 			spi_sub_ptr->irq = pci_irq_vector(pdev, iter);
 			ret = devm_request_irq(&pdev->dev, spi_sub_ptr->irq,
@@ -389,21 +389,21 @@ static void store_restore_config(struct pci1xxxx_spi *spi_ptr,
 	u32 regval;
 
 	if (store) {
-		regval = readl(spi_ptr->reg_base +
+		regval = pete_readl("drivers/spi/spi-pci1xxxx.c:392", spi_ptr->reg_base +
 			       SPI_MST_CTL_REG_OFFSET(spi_sub_ptr->hw_inst));
 		regval &= SPI_MST_CTL_DEVSEL_MASK;
 		spi_sub_ptr->prev_val.dev_sel = (regval >> 25) & 7;
-		regval = readl(spi_ptr->reg_base +
+		regval = pete_readl("drivers/spi/spi-pci1xxxx.c:396", spi_ptr->reg_base +
 			       SPI_PCI_CTRL_REG_OFFSET(spi_sub_ptr->hw_inst));
 		regval &= SPI_MSI_VECTOR_SEL_MASK;
 		spi_sub_ptr->prev_val.msi_vector_sel = (regval >> 4) & 1;
 	} else {
-		regval = readl(spi_ptr->reg_base + SPI_MST_CTL_REG_OFFSET(inst));
+		regval = pete_readl("drivers/spi/spi-pci1xxxx.c:401", spi_ptr->reg_base + SPI_MST_CTL_REG_OFFSET(inst));
 		regval &= ~SPI_MST_CTL_DEVSEL_MASK;
 		regval |= (spi_sub_ptr->prev_val.dev_sel << 25);
-		writel(regval,
+		pete_writel("drivers/spi/spi-pci1xxxx.c:404", regval,
 		       spi_ptr->reg_base + SPI_MST_CTL_REG_OFFSET(inst));
-		writel((spi_sub_ptr->prev_val.msi_vector_sel << 4),
+		pete_writel("drivers/spi/spi-pci1xxxx.c:406", (spi_sub_ptr->prev_val.msi_vector_sel << 4),
 			spi_ptr->reg_base + SPI_PCI_CTRL_REG_OFFSET(inst));
 	}
 }
@@ -418,7 +418,7 @@ static int pci1xxxx_spi_resume(struct device *dev)
 	for (iter = 0; iter < spi_ptr->total_hw_instances; iter++) {
 		spi_sub_ptr = spi_ptr->spi_int[iter];
 		spi_controller_resume(spi_sub_ptr->spi_host);
-		writel(regval, spi_ptr->reg_base +
+		pete_writel("drivers/spi/spi-pci1xxxx.c:421", regval, spi_ptr->reg_base +
 		       SPI_MST_EVENT_MASK_REG_OFFSET(iter));
 
 		/* Restore config at resume */
@@ -444,7 +444,7 @@ static int pci1xxxx_spi_suspend(struct device *dev)
 		/* Store existing config before suspend */
 		store_restore_config(spi_ptr, spi_sub_ptr, iter, 1);
 		spi_controller_suspend(spi_sub_ptr->spi_host);
-		writel(reg1, spi_ptr->reg_base +
+		pete_writel("drivers/spi/spi-pci1xxxx.c:447", reg1, spi_ptr->reg_base +
 		       SPI_MST_EVENT_MASK_REG_OFFSET(iter));
 	}
 

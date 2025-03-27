@@ -264,17 +264,17 @@ static const u32 mt8195_spmi_regs[] = {
 
 static u32 pmif_readl(struct pmif *arb, enum pmif_regs reg)
 {
-	return readl(arb->base + arb->data->regs[reg]);
+	return pete_readl("drivers/spmi/spmi-mtk-pmif.c:267", arb->base + arb->data->regs[reg]);
 }
 
 static void pmif_writel(struct pmif *arb, u32 val, enum pmif_regs reg)
 {
-	writel(val, arb->base + arb->data->regs[reg]);
+	pete_writel("drivers/spmi/spmi-mtk-pmif.c:272", val, arb->base + arb->data->regs[reg]);
 }
 
 static void mtk_spmi_writel(struct pmif *arb, u32 val, enum spmi_regs reg)
 {
-	writel(val, arb->spmimst_base + arb->data->spmimst_regs[reg]);
+	pete_writel("drivers/spmi/spmi-mtk-pmif.c:277", val, arb->spmimst_base + arb->data->spmimst_regs[reg]);
 }
 
 static bool pmif_is_fsm_vldclr(struct pmif *arb)

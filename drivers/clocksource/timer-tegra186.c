@@ -145,7 +145,7 @@ static void tegra186_wdt_enable(struct tegra186_wdt *wdt)
 
 	/* unmask hardware IRQ, this may have been lost across powergate */
 	value = TKEIE_WDT_MASK(wdt->index, 1);
-	writel(value, tegra->regs + TKEIE(wdt->tmr->hwirq));
+	pete_writel("drivers/clocksource/timer-tegra186.c:148", value, tegra->regs + TKEIE(wdt->tmr->hwirq));
 
 	/* clear interrupt */
 	tmr_writel(wdt->tmr, TMRSR_INTR_CLR, TMRSR);

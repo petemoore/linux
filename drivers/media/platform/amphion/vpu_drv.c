@@ -31,12 +31,12 @@ module_param(debug, bool, 0644);
 
 void vpu_writel(struct vpu_dev *vpu, u32 reg, u32 val)
 {
-	writel(val, vpu->base + reg);
+	pete_writel("drivers/media/platform/amphion/vpu_drv.c:34", val, vpu->base + reg);
 }
 
 u32 vpu_readl(struct vpu_dev *vpu, u32 reg)
 {
-	return readl(vpu->base + reg);
+	return pete_readl("drivers/media/platform/amphion/vpu_drv.c:39", vpu->base + reg);
 }
 
 static void vpu_dev_get(struct vpu_dev *vpu)

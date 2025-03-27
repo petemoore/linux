@@ -40,12 +40,12 @@ int sun4i_ss_prng_generate(struct crypto_rng *tfm, const u8 *src,
 
 	spin_lock_bh(&ss->slock);
 
-	writel(mode, ss->base + SS_CTL);
+	pete_writel("drivers/crypto/allwinner/sun4i-ss/sun4i-ss-prng.c:43", mode, ss->base + SS_CTL);
 
 	while (todo > 0) {
 		/* write the seed */
 		for (i = 0; i < SS_SEED_LEN / BITS_PER_LONG; i++)
-			writel(ss->seed[i], ss->base + SS_KEY0 + i * 4);
+			pete_writel("drivers/crypto/allwinner/sun4i-ss/sun4i-ss-prng.c:48", ss->seed[i], ss->base + SS_KEY0 + i * 4);
 
 		/* Read the random data */
 		len = min_t(size_t, SS_DATA_LEN / BITS_PER_BYTE, todo);
@@ -55,12 +55,12 @@ int sun4i_ss_prng_generate(struct crypto_rng *tfm, const u8 *src,
 
 		/* Update the seed */
 		for (i = 0; i < SS_SEED_LEN / BITS_PER_LONG; i++) {
-			v = readl(ss->base + SS_KEY0 + i * 4);
+			v = pete_readl("drivers/crypto/allwinner/sun4i-ss/sun4i-ss-prng.c:58", ss->base + SS_KEY0 + i * 4);
 			ss->seed[i] = v;
 		}
 	}
 
-	writel(0, ss->base + SS_CTL);
+	pete_writel("drivers/crypto/allwinner/sun4i-ss/sun4i-ss-prng.c:63", 0, ss->base + SS_CTL);
 	spin_unlock_bh(&ss->slock);
 
 	pm_runtime_put(ss->dev);

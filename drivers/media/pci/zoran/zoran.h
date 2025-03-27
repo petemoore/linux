@@ -302,8 +302,8 @@ static inline struct zoran *to_zoran(struct v4l2_device *v4l2_dev)
  * There was something called _ALPHA_BUZ that used the PCI address instead of
  * the kernel iomapped address for btread/btwrite.
  */
-#define btwrite(dat, adr)    writel((dat), zr->zr36057_mem + (adr))
-#define btread(adr)         readl(zr->zr36057_mem + (adr))
+#define btwrite(dat, adr)    pete_writel("drivers/media/pci/zoran/zoran.h:305", (dat), zr->zr36057_mem + (adr))
+#define btread(adr)         pete_readl("drivers/media/pci/zoran/zoran.h:306", zr->zr36057_mem + (adr))
 
 #define btand(dat, adr)      btwrite((dat) & btread(adr), (adr))
 #define btor(dat, adr)       btwrite((dat) | btread(adr), (adr))

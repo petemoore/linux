@@ -41,7 +41,7 @@ static void __init r8a7779_smp_prepare_cpus(unsigned int max_cpus)
 	void __iomem *base = ioremap(HPBREG_BASE, 0x1000);
 
 	/* Map the reset vector (in headsmp-scu.S, headsmp.S) */
-	writel(__pa(shmobile_boot_vector), base + AVECR);
+	pete_writel("arch/arm/mach-shmobile/smp-r8a7779.c:44", __pa(shmobile_boot_vector), base + AVECR);
 
 	/* setup r8a7779 specific SCU bits */
 	shmobile_smp_scu_prepare_cpus(R8A7779_SCU_BASE, max_cpus);

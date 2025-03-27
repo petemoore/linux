@@ -174,13 +174,13 @@ static void serial_omap_mdr1_errataset(struct uart_omap_port *up, u8 mdr1);
 static inline unsigned int serial_in(struct uart_omap_port *up, int offset)
 {
 	offset <<= up->port.regshift;
-	return readw(up->port.membase + offset);
+	return pete_readw("drivers/tty/serial/omap-serial.c:177", up->port.membase + offset);
 }
 
 static inline void serial_out(struct uart_omap_port *up, int offset, int value)
 {
 	offset <<= up->port.regshift;
-	writew(value, up->port.membase + offset);
+	pete_writew("drivers/tty/serial/omap-serial.c:183", value, up->port.membase + offset);
 }
 
 static inline void serial_omap_clear_fifos(struct uart_omap_port *up)
@@ -1141,14 +1141,14 @@ out:
 static unsigned int omap_serial_early_in(struct uart_port *port, int offset)
 {
 	offset <<= port->regshift;
-	return readw(port->membase + offset);
+	return pete_readw("drivers/tty/serial/omap-serial.c:1144", port->membase + offset);
 }
 
 static void omap_serial_early_out(struct uart_port *port, int offset,
 				  int value)
 {
 	offset <<= port->regshift;
-	writew(value, port->membase + offset);
+	pete_writew("drivers/tty/serial/omap-serial.c:1151", value, port->membase + offset);
 }
 
 static void omap_serial_early_putc(struct uart_port *port, unsigned char c)
@@ -1417,7 +1417,7 @@ static void omap_serial_fill_features_erratas(struct uart_omap_port *up)
 	u32 mvr, scheme;
 	u16 revision, major, minor;
 
-	mvr = readl(up->port.membase + (UART_OMAP_MVER << up->port.regshift));
+	mvr = pete_readl("drivers/tty/serial/omap-serial.c:1420", up->port.membase + (UART_OMAP_MVER << up->port.regshift));
 
 	/* Check revision register scheme */
 	scheme = mvr >> OMAP_UART_MVR_SCHEME_SHIFT;

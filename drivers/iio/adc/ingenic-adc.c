@@ -118,17 +118,17 @@ static void ingenic_adc_set_adcmd(struct iio_dev *iio_dev, unsigned long mask)
 	mutex_lock(&adc->lock);
 
 	/* Init ADCMD */
-	readl(adc->base + JZ_ADC_REG_ADCMD);
+	pete_readl("drivers/iio/adc/ingenic-adc.c:121", adc->base + JZ_ADC_REG_ADCMD);
 
 	if (mask & 0x3) {
 		/* Second channel (INGENIC_ADC_TOUCH_YP): sample YP vs. GND */
-		writel(JZ_ADC_REG_ADCMD_XNGRU
+		pete_writel("drivers/iio/adc/ingenic-adc.c:125", JZ_ADC_REG_ADCMD_XNGRU
 		       | JZ_ADC_REG_ADCMD_VREFNXN | JZ_ADC_REG_ADCMD_VREFPVDD33
 		       | JZ_ADC_REG_ADCMD_YPADC,
 		       adc->base + JZ_ADC_REG_ADCMD);
 
 		/* First channel (INGENIC_ADC_TOUCH_XP): sample XP vs. GND */
-		writel(JZ_ADC_REG_ADCMD_YNGRU
+		pete_writel("drivers/iio/adc/ingenic-adc.c:131", JZ_ADC_REG_ADCMD_YNGRU
 		       | JZ_ADC_REG_ADCMD_VREFNYN | JZ_ADC_REG_ADCMD_VREFPVDD33
 		       | JZ_ADC_REG_ADCMD_XPADC,
 		       adc->base + JZ_ADC_REG_ADCMD);
@@ -136,13 +136,13 @@ static void ingenic_adc_set_adcmd(struct iio_dev *iio_dev, unsigned long mask)
 
 	if (mask & 0xc) {
 		/* Fourth channel (INGENIC_ADC_TOUCH_YN): sample YN vs. GND */
-		writel(JZ_ADC_REG_ADCMD_XNGRU
+		pete_writel("drivers/iio/adc/ingenic-adc.c:139", JZ_ADC_REG_ADCMD_XNGRU
 		       | JZ_ADC_REG_ADCMD_VREFNXN | JZ_ADC_REG_ADCMD_VREFPVDD33
 		       | JZ_ADC_REG_ADCMD_YNADC,
 		       adc->base + JZ_ADC_REG_ADCMD);
 
 		/* Third channel (INGENIC_ADC_TOUCH_XN): sample XN vs. GND */
-		writel(JZ_ADC_REG_ADCMD_YNGRU
+		pete_writel("drivers/iio/adc/ingenic-adc.c:145", JZ_ADC_REG_ADCMD_YNGRU
 		       | JZ_ADC_REG_ADCMD_VREFNYN | JZ_ADC_REG_ADCMD_VREFPVDD33
 		       | JZ_ADC_REG_ADCMD_XNADC,
 		       adc->base + JZ_ADC_REG_ADCMD);
@@ -150,18 +150,18 @@ static void ingenic_adc_set_adcmd(struct iio_dev *iio_dev, unsigned long mask)
 
 	if (mask & 0x30) {
 		/* Sixth channel (INGENIC_ADC_TOUCH_YD): sample YP vs. YN */
-		writel(JZ_ADC_REG_ADCMD_VREFNYN | JZ_ADC_REG_ADCMD_VREFPVDD33
+		pete_writel("drivers/iio/adc/ingenic-adc.c:153", JZ_ADC_REG_ADCMD_VREFNYN | JZ_ADC_REG_ADCMD_VREFPVDD33
 		       | JZ_ADC_REG_ADCMD_YPADC,
 		       adc->base + JZ_ADC_REG_ADCMD);
 
 		/* Fifth channel (INGENIC_ADC_TOUCH_XD): sample XP vs. XN */
-		writel(JZ_ADC_REG_ADCMD_VREFNXN | JZ_ADC_REG_ADCMD_VREFPVDD33
+		pete_writel("drivers/iio/adc/ingenic-adc.c:158", JZ_ADC_REG_ADCMD_VREFNXN | JZ_ADC_REG_ADCMD_VREFPVDD33
 		       | JZ_ADC_REG_ADCMD_XPADC,
 		       adc->base + JZ_ADC_REG_ADCMD);
 	}
 
 	/* We're done */
-	writel(0, adc->base + JZ_ADC_REG_ADCMD);
+	pete_writel("drivers/iio/adc/ingenic-adc.c:164", 0, adc->base + JZ_ADC_REG_ADCMD);
 
 	mutex_unlock(&adc->lock);
 }
@@ -174,9 +174,9 @@ static void ingenic_adc_set_config(struct ingenic_adc *adc,
 
 	mutex_lock(&adc->lock);
 
-	cfg = readl(adc->base + JZ_ADC_REG_CFG) & ~mask;
+	cfg = pete_readl("drivers/iio/adc/ingenic-adc.c:177", adc->base + JZ_ADC_REG_CFG) & ~mask;
 	cfg |= val;
-	writel(cfg, adc->base + JZ_ADC_REG_CFG);
+	pete_writel("drivers/iio/adc/ingenic-adc.c:179", cfg, adc->base + JZ_ADC_REG_CFG);
 
 	mutex_unlock(&adc->lock);
 }
@@ -187,14 +187,14 @@ static void ingenic_adc_enable_unlocked(struct ingenic_adc *adc,
 {
 	u8 val;
 
-	val = readb(adc->base + JZ_ADC_REG_ENABLE);
+	val = pete_readb("drivers/iio/adc/ingenic-adc.c:190", adc->base + JZ_ADC_REG_ENABLE);
 
 	if (enabled)
 		val |= BIT(engine);
 	else
 		val &= ~BIT(engine);
 
-	writeb(val, adc->base + JZ_ADC_REG_ENABLE);
+	pete_writeb("drivers/iio/adc/ingenic-adc.c:197", val, adc->base + JZ_ADC_REG_ENABLE);
 }
 
 static void ingenic_adc_enable(struct ingenic_adc *adc,
@@ -219,8 +219,8 @@ static int ingenic_adc_capture(struct ingenic_adc *adc,
 	 * avoid races with the buffer enable/disable functions.
 	 */
 	mutex_lock(&adc->lock);
-	cfg = readl(adc->base + JZ_ADC_REG_CFG);
-	writel(cfg & ~JZ_ADC_REG_CFG_CMD_SEL, adc->base + JZ_ADC_REG_CFG);
+	cfg = pete_readl("drivers/iio/adc/ingenic-adc.c:222", adc->base + JZ_ADC_REG_CFG);
+	pete_writel("drivers/iio/adc/ingenic-adc.c:223", cfg & ~JZ_ADC_REG_CFG_CMD_SEL, adc->base + JZ_ADC_REG_CFG);
 
 	ingenic_adc_enable_unlocked(adc, engine, true);
 	ret = readb_poll_timeout(adc->base + JZ_ADC_REG_ENABLE, val,
@@ -228,7 +228,7 @@ static int ingenic_adc_capture(struct ingenic_adc *adc,
 	if (ret)
 		ingenic_adc_enable_unlocked(adc, engine, false);
 
-	writel(cfg, adc->base + JZ_ADC_REG_CFG);
+	pete_writel("drivers/iio/adc/ingenic-adc.c:231", cfg, adc->base + JZ_ADC_REG_CFG);
 	mutex_unlock(&adc->lock);
 
 	return ret;
@@ -340,7 +340,7 @@ static int jz4725b_adc_init_clk_div(struct device *dev, struct ingenic_adc *adc)
 	/* We also need a divider that produces a 10us clock. */
 	div_10us = DIV_ROUND_UP(rate, 100000);
 
-	writel(((div_10us - 1) << JZ4725B_ADC_REG_ADCLK_CLKDIV10US_LSB) |
+	pete_writel("drivers/iio/adc/ingenic-adc.c:343", ((div_10us - 1) << JZ4725B_ADC_REG_ADCLK_CLKDIV10US_LSB) |
 	       (div_main - 1) << JZ_ADC_REG_ADCLK_CLKDIV_LSB,
 	       adc->base + JZ_ADC_REG_ADCLK);
 
@@ -377,7 +377,7 @@ static int jz4770_adc_init_clk_div(struct device *dev, struct ingenic_adc *adc)
 	/* And another, which produces a 1ms clock. */
 	div_ms = DIV_ROUND_UP(rate, 1000);
 
-	writel(((div_ms - 1) << JZ4770_ADC_REG_ADCLK_CLKDIVMS_LSB) |
+	pete_writel("drivers/iio/adc/ingenic-adc.c:380", ((div_ms - 1) << JZ4770_ADC_REG_ADCLK_CLKDIVMS_LSB) |
 	       ((div_10us - 1) << JZ4770_ADC_REG_ADCLK_CLKDIV10US_LSB) |
 	       (div_main - 1) << JZ_ADC_REG_ADCLK_CLKDIV_LSB,
 	       adc->base + JZ_ADC_REG_ADCLK);
@@ -668,10 +668,10 @@ static int ingenic_adc_read_chan_info_raw(struct iio_dev *iio_dev,
 	case INGENIC_ADC_AUX0:
 	case INGENIC_ADC_AUX:
 	case INGENIC_ADC_AUX2:
-		*val = readw(adc->base + JZ_ADC_REG_ADSDAT);
+		*val = pete_readw("drivers/iio/adc/ingenic-adc.c:671", adc->base + JZ_ADC_REG_ADSDAT);
 		break;
 	case INGENIC_ADC_BATTERY:
-		*val = readw(adc->base + JZ_ADC_REG_ADBDAT);
+		*val = pete_readw("drivers/iio/adc/ingenic-adc.c:674", adc->base + JZ_ADC_REG_ADBDAT);
 		break;
 	}
 
@@ -759,10 +759,10 @@ static int ingenic_adc_buffer_enable(struct iio_dev *iio_dev)
 			       JZ_ADC_REG_CFG_SAMPLE_NUM(4) |
 			       JZ_ADC_REG_CFG_PULL_UP(4));
 
-	writew(80, adc->base + JZ_ADC_REG_ADWAIT);
-	writew(2, adc->base + JZ_ADC_REG_ADSAME);
-	writeb((u8)~JZ_ADC_IRQ_TOUCH, adc->base + JZ_ADC_REG_CTRL);
-	writel(0, adc->base + JZ_ADC_REG_ADTCH);
+	pete_writew("drivers/iio/adc/ingenic-adc.c:762", 80, adc->base + JZ_ADC_REG_ADWAIT);
+	pete_writew("drivers/iio/adc/ingenic-adc.c:763", 2, adc->base + JZ_ADC_REG_ADSAME);
+	pete_writeb("drivers/iio/adc/ingenic-adc.c:764", (u8)~JZ_ADC_IRQ_TOUCH, adc->base + JZ_ADC_REG_CTRL);
+	pete_writel("drivers/iio/adc/ingenic-adc.c:765", 0, adc->base + JZ_ADC_REG_ADTCH);
 
 	ingenic_adc_set_config(adc, JZ_ADC_REG_CFG_CMD_SEL,
 			       JZ_ADC_REG_CFG_CMD_SEL);
@@ -781,11 +781,11 @@ static int ingenic_adc_buffer_disable(struct iio_dev *iio_dev)
 
 	ingenic_adc_set_config(adc, JZ_ADC_REG_CFG_CMD_SEL, 0);
 
-	writeb(0xff, adc->base + JZ_ADC_REG_CTRL);
-	writeb(0xff, adc->base + JZ_ADC_REG_STATUS);
+	pete_writeb("drivers/iio/adc/ingenic-adc.c:784", 0xff, adc->base + JZ_ADC_REG_CTRL);
+	pete_writeb("drivers/iio/adc/ingenic-adc.c:785", 0xff, adc->base + JZ_ADC_REG_STATUS);
 	ingenic_adc_set_config(adc, JZ_ADC_REG_CFG_TOUCH_OPS_MASK, 0);
-	writew(0, adc->base + JZ_ADC_REG_ADSAME);
-	writew(0, adc->base + JZ_ADC_REG_ADWAIT);
+	pete_writew("drivers/iio/adc/ingenic-adc.c:787", 0, adc->base + JZ_ADC_REG_ADSAME);
+	pete_writew("drivers/iio/adc/ingenic-adc.c:788", 0, adc->base + JZ_ADC_REG_ADWAIT);
 	clk_disable(adc->clk);
 
 	return 0;
@@ -806,13 +806,13 @@ static irqreturn_t ingenic_adc_irq(int irq, void *data)
 
 	for (i = 0; i < ARRAY_SIZE(tdat); mask >>= 2, i++) {
 		if (mask & 0x3)
-			tdat[i] = readl(adc->base + JZ_ADC_REG_ADTCH);
+			tdat[i] = pete_readl("drivers/iio/adc/ingenic-adc.c:809", adc->base + JZ_ADC_REG_ADTCH);
 		else
 			tdat[i] = 0;
 	}
 
 	iio_push_to_buffers(iio_dev, tdat);
-	writeb(JZ_ADC_IRQ_TOUCH, adc->base + JZ_ADC_REG_STATUS);
+	pete_writeb("drivers/iio/adc/ingenic-adc.c:815", JZ_ADC_IRQ_TOUCH, adc->base + JZ_ADC_REG_STATUS);
 
 	return IRQ_HANDLED;
 }
@@ -875,8 +875,8 @@ static int ingenic_adc_probe(struct platform_device *pdev)
 	}
 
 	/* Put hardware in a known passive state. */
-	writeb(0x00, adc->base + JZ_ADC_REG_ENABLE);
-	writeb(0xff, adc->base + JZ_ADC_REG_CTRL);
+	pete_writeb("drivers/iio/adc/ingenic-adc.c:878", 0x00, adc->base + JZ_ADC_REG_ENABLE);
+	pete_writeb("drivers/iio/adc/ingenic-adc.c:879", 0xff, adc->base + JZ_ADC_REG_CTRL);
 
 	/* JZ4760B specific */
 	if (device_property_present(dev, "ingenic,use-internal-divider"))

@@ -169,7 +169,7 @@ static int rp2040_gbdg_rp1_read_mux(struct rp2040_gbdg *priv_data, u8 gpio,
 	if (ret)
 		return ret;
 
-	*data = readl(priv_data->gpio_base + offset);
+	*data = pete_readl("drivers/spi/spi-rp2040-gpio-bridge.c:172", priv_data->gpio_base + offset);
 
 	return 0;
 }
@@ -184,7 +184,7 @@ static int rp2040_gbdg_rp1_write_mux(struct rp2040_gbdg *priv_data, u8 gpio,
 	if (ret)
 		return ret;
 
-	writel(val, priv_data->gpio_base + offset);
+	pete_writel("drivers/spi/spi-rp2040-gpio-bridge.c:187", val, priv_data->gpio_base + offset);
 
 	return 0;
 }
@@ -636,12 +636,12 @@ static int rp2040_gbdg_fast_xfer(struct rp2040_gbdg *priv_data, const u8 *data,
 		 */
 		for (size_t i = 0; i < 8; i++) {
 			/* Branchless set/clr data */
-			writel(1 << data_offset,
+			pete_writel("drivers/spi/spi-rp2040-gpio-bridge.c:639", 1 << data_offset,
 			       data_set + ((d <<= 1) & 0x1000) /* CLR offset */
 			);
 
 			/* Toggle the clock */
-			writel(1 << clock_offset, clock_toggle);
+			pete_writel("drivers/spi/spi-rp2040-gpio-bridge.c:644", 1 << clock_offset, clock_toggle);
 		}
 	}
 

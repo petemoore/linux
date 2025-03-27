@@ -42,10 +42,10 @@ static void creg_gpio_set(struct gpio_chip *gc, unsigned int offset, int val)
 		reg_shift += layout->bit_per_gpio[i] + layout->shift[i];
 
 	spin_lock_irqsave(&hcg->lock, flags);
-	reg = readl(hcg->regs);
+	reg = pete_readl("drivers/gpio/gpio-creg-snps.c:45", hcg->regs);
 	reg &= ~(GENMASK(layout->bit_per_gpio[i] - 1, 0) << reg_shift);
 	reg |=  (value << reg_shift);
-	writel(reg, hcg->regs);
+	pete_writel("drivers/gpio/gpio-creg-snps.c:48", reg, hcg->regs);
 	spin_unlock_irqrestore(&hcg->lock, flags);
 }
 

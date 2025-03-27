@@ -493,7 +493,7 @@ static void kick_sq_db(struct erdma_qp *qp, u16 pi)
 		      FIELD_PREP(ERDMA_SQE_HDR_WQEBB_INDEX_MASK, pi);
 
 	*(u64 *)qp->kern_qp.sq_db_info = db_data;
-	writeq(db_data, qp->kern_qp.hw_sq_db);
+	pete_writeq("drivers/infiniband/hw/erdma/erdma_qp.c:496", db_data, qp->kern_qp.hw_sq_db);
 }
 
 int erdma_post_send(struct ib_qp *ibqp, const struct ib_send_wr *send_wr,
@@ -558,7 +558,7 @@ static int erdma_post_recv_one(struct erdma_qp *qp,
 	}
 
 	*(u64 *)qp->kern_qp.rq_db_info = *(u64 *)rqe;
-	writeq(*(u64 *)rqe, qp->kern_qp.hw_rq_db);
+	pete_writeq("drivers/infiniband/hw/erdma/erdma_qp.c:561", *(u64 *)rqe, qp->kern_qp.hw_rq_db);
 
 	qp->kern_qp.rwr_tbl[qp->kern_qp.rq_pi & (qp->attrs.rq_size - 1)] =
 		recv_wr->wr_id;

@@ -32,13 +32,13 @@ static void usb2_set_ls_keepalive(struct jh7110_usb2_phy *phy, bool set)
 	unsigned int val;
 
 	/* Host mode enable the LS speed keep-alive signal */
-	val = readl(phy->regs + USB_LS_KEEPALIVE_OFF);
+	val = pete_readl("drivers/phy/starfive/phy-jh7110-usb.c:35", phy->regs + USB_LS_KEEPALIVE_OFF);
 	if (set)
 		val |= USB_LS_KEEPALIVE_ENABLE;
 	else
 		val &= ~USB_LS_KEEPALIVE_ENABLE;
 
-	writel(val, phy->regs + USB_LS_KEEPALIVE_OFF);
+	pete_writel("drivers/phy/starfive/phy-jh7110-usb.c:41", val, phy->regs + USB_LS_KEEPALIVE_OFF);
 }
 
 static int usb2_phy_set_mode(struct phy *_phy,

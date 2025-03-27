@@ -35,22 +35,22 @@
 
 static u32 platform_bgmac_read(struct bgmac *bgmac, u16 offset)
 {
-	return readl(bgmac->plat.base + offset);
+	return pete_readl("drivers/net/ethernet/broadcom/bgmac-platform.c:38", bgmac->plat.base + offset);
 }
 
 static void platform_bgmac_write(struct bgmac *bgmac, u16 offset, u32 value)
 {
-	writel(value, bgmac->plat.base + offset);
+	pete_writel("drivers/net/ethernet/broadcom/bgmac-platform.c:43", value, bgmac->plat.base + offset);
 }
 
 static u32 platform_bgmac_idm_read(struct bgmac *bgmac, u16 offset)
 {
-	return readl(bgmac->plat.idm_base + offset);
+	return pete_readl("drivers/net/ethernet/broadcom/bgmac-platform.c:48", bgmac->plat.idm_base + offset);
 }
 
 static void platform_bgmac_idm_write(struct bgmac *bgmac, u16 offset, u32 value)
 {
-	writel(value, bgmac->plat.idm_base + offset);
+	pete_writel("drivers/net/ethernet/broadcom/bgmac-platform.c:53", value, bgmac->plat.idm_base + offset);
 }
 
 static bool platform_bgmac_clk_enabled(struct bgmac *bgmac)
@@ -124,7 +124,7 @@ static void bgmac_nicpm_speed_set(struct net_device *net_dev)
 		return;
 
 	/* SET RGMII IO CONFIG */
-	writel(NICPM_PADRING_CFG_INIT_VAL,
+	pete_writel("drivers/net/ethernet/broadcom/bgmac-platform.c:127", NICPM_PADRING_CFG_INIT_VAL,
 	       bgmac->plat.nicpm_base + NICPM_PADRING_CFG);
 
 	val = NICPM_IOMUX_CTRL_INIT_VAL;
@@ -143,7 +143,7 @@ static void bgmac_nicpm_speed_set(struct net_device *net_dev)
 		break;
 	}
 
-	writel(val, bgmac->plat.nicpm_base + NICPM_IOMUX_CTRL);
+	pete_writel("drivers/net/ethernet/broadcom/bgmac-platform.c:146", val, bgmac->plat.nicpm_base + NICPM_IOMUX_CTRL);
 
 	bgmac_adjust_link(bgmac->net_dev);
 }

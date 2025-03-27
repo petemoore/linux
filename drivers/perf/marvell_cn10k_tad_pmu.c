@@ -50,7 +50,7 @@ static void tad_pmu_event_counter_read(struct perf_event *event)
 	do {
 		prev = local64_read(&hwc->prev_count);
 		for (i = 0, new = 0; i < tad_pmu->region_cnt; i++)
-			new += readq(tad_pmu->regions[i].base +
+			new += pete_readq("drivers/perf/marvell_cn10k_tad_pmu.c:53", tad_pmu->regions[i].base +
 				     TAD_PFC(counter_idx));
 	} while (local64_cmpxchg(&hwc->prev_count, prev, new) != prev);
 

@@ -134,7 +134,7 @@ static int wait_for_pin(struct bbc_i2c_bus *bp, u8 *status)
 
 		val = wait_event_interruptible_timeout(
 				bp->wq,
-				(((*status = readb(bp->i2c_control_regs + 0))
+				(((*status = pete_readb("drivers/sbus/char/bbc_i2c.c:137", bp->i2c_control_regs + 0))
 				  & I2C_PCF_PIN) == 0),
 				msecs_to_jiffies(250));
 		if (val > 0) {
@@ -156,26 +156,26 @@ int bbc_i2c_writeb(struct bbc_i2c_client *client, unsigned char val, int off)
 	int ret = -1;
 
 	if (bp->i2c_bussel_reg != NULL)
-		writeb(client->bus, bp->i2c_bussel_reg);
+		pete_writeb("drivers/sbus/char/bbc_i2c.c:159", client->bus, bp->i2c_bussel_reg);
 
-	writeb(address, bp->i2c_control_regs + 0x1);
-	writeb(I2C_PCF_START, bp->i2c_control_regs + 0x0);
+	pete_writeb("drivers/sbus/char/bbc_i2c.c:161", address, bp->i2c_control_regs + 0x1);
+	pete_writeb("drivers/sbus/char/bbc_i2c.c:162", I2C_PCF_START, bp->i2c_control_regs + 0x0);
 	if (wait_for_pin(bp, &status))
 		goto out;
 
-	writeb(off, bp->i2c_control_regs + 0x1);
+	pete_writeb("drivers/sbus/char/bbc_i2c.c:166", off, bp->i2c_control_regs + 0x1);
 	if (wait_for_pin(bp, &status) ||
 	    (status & I2C_PCF_LRB) != 0)
 		goto out;
 
-	writeb(val, bp->i2c_control_regs + 0x1);
+	pete_writeb("drivers/sbus/char/bbc_i2c.c:171", val, bp->i2c_control_regs + 0x1);
 	if (wait_for_pin(bp, &status))
 		goto out;
 
 	ret = 0;
 
 out:
-	writeb(I2C_PCF_STOP, bp->i2c_control_regs + 0x0);
+	pete_writeb("drivers/sbus/char/bbc_i2c.c:178", I2C_PCF_STOP, bp->i2c_control_regs + 0x0);
 	return ret;
 }
 
@@ -186,44 +186,44 @@ int bbc_i2c_readb(struct bbc_i2c_client *client, unsigned char *byte, int off)
 	int ret = -1;
 
 	if (bp->i2c_bussel_reg != NULL)
-		writeb(client->bus, bp->i2c_bussel_reg);
+		pete_writeb("drivers/sbus/char/bbc_i2c.c:189", client->bus, bp->i2c_bussel_reg);
 
-	writeb(address, bp->i2c_control_regs + 0x1);
-	writeb(I2C_PCF_START, bp->i2c_control_regs + 0x0);
+	pete_writeb("drivers/sbus/char/bbc_i2c.c:191", address, bp->i2c_control_regs + 0x1);
+	pete_writeb("drivers/sbus/char/bbc_i2c.c:192", I2C_PCF_START, bp->i2c_control_regs + 0x0);
 	if (wait_for_pin(bp, &status))
 		goto out;
 
-	writeb(off, bp->i2c_control_regs + 0x1);
+	pete_writeb("drivers/sbus/char/bbc_i2c.c:196", off, bp->i2c_control_regs + 0x1);
 	if (wait_for_pin(bp, &status) ||
 	    (status & I2C_PCF_LRB) != 0)
 		goto out;
 
-	writeb(I2C_PCF_STOP, bp->i2c_control_regs + 0x0);
+	pete_writeb("drivers/sbus/char/bbc_i2c.c:201", I2C_PCF_STOP, bp->i2c_control_regs + 0x0);
 
 	address |= 0x1; /* READ */
 
-	writeb(address, bp->i2c_control_regs + 0x1);
-	writeb(I2C_PCF_START, bp->i2c_control_regs + 0x0);
+	pete_writeb("drivers/sbus/char/bbc_i2c.c:205", address, bp->i2c_control_regs + 0x1);
+	pete_writeb("drivers/sbus/char/bbc_i2c.c:206", I2C_PCF_START, bp->i2c_control_regs + 0x0);
 	if (wait_for_pin(bp, &status))
 		goto out;
 
 	/* Set PIN back to one so the device sends the first
 	 * byte.
 	 */
-	(void) readb(bp->i2c_control_regs + 0x1);
+	(void) pete_readb("drivers/sbus/char/bbc_i2c.c:213", bp->i2c_control_regs + 0x1);
 	if (wait_for_pin(bp, &status))
 		goto out;
 
-	writeb(I2C_PCF_ESO | I2C_PCF_ENI, bp->i2c_control_regs + 0x0);
-	*byte = readb(bp->i2c_control_regs + 0x1);
+	pete_writeb("drivers/sbus/char/bbc_i2c.c:217", I2C_PCF_ESO | I2C_PCF_ENI, bp->i2c_control_regs + 0x0);
+	*byte = pete_readb("drivers/sbus/char/bbc_i2c.c:218", bp->i2c_control_regs + 0x1);
 	if (wait_for_pin(bp, &status))
 		goto out;
 
 	ret = 0;
 
 out:
-	writeb(I2C_PCF_STOP, bp->i2c_control_regs + 0x0);
-	(void) readb(bp->i2c_control_regs + 0x1);
+	pete_writeb("drivers/sbus/char/bbc_i2c.c:225", I2C_PCF_STOP, bp->i2c_control_regs + 0x0);
+	(void) pete_readb("drivers/sbus/char/bbc_i2c.c:226", bp->i2c_control_regs + 0x1);
 
 	return ret;
 }
@@ -277,7 +277,7 @@ static irqreturn_t bbc_i2c_interrupt(int irq, void *dev_id)
 	 * makes the i2c assert an interrupt.
 	 */
 	if (bp->waiting &&
-	    !(readb(bp->i2c_control_regs + 0x0) & I2C_PCF_PIN))
+	    !(pete_readb("drivers/sbus/char/bbc_i2c.c:280", bp->i2c_control_regs + 0x0) & I2C_PCF_PIN))
 		wake_up_interruptible(&bp->wq);
 
 	return IRQ_HANDLED;
@@ -285,11 +285,11 @@ static irqreturn_t bbc_i2c_interrupt(int irq, void *dev_id)
 
 static void reset_one_i2c(struct bbc_i2c_bus *bp)
 {
-	writeb(I2C_PCF_PIN, bp->i2c_control_regs + 0x0);
-	writeb(bp->own, bp->i2c_control_regs + 0x1);
-	writeb(I2C_PCF_PIN | I2C_PCF_ES1, bp->i2c_control_regs + 0x0);
-	writeb(bp->clock, bp->i2c_control_regs + 0x1);
-	writeb(I2C_PCF_IDLE, bp->i2c_control_regs + 0x0);
+	pete_writeb("drivers/sbus/char/bbc_i2c.c:288", I2C_PCF_PIN, bp->i2c_control_regs + 0x0);
+	pete_writeb("drivers/sbus/char/bbc_i2c.c:289", bp->own, bp->i2c_control_regs + 0x1);
+	pete_writeb("drivers/sbus/char/bbc_i2c.c:290", I2C_PCF_PIN | I2C_PCF_ES1, bp->i2c_control_regs + 0x0);
+	pete_writeb("drivers/sbus/char/bbc_i2c.c:291", bp->clock, bp->i2c_control_regs + 0x1);
+	pete_writeb("drivers/sbus/char/bbc_i2c.c:292", I2C_PCF_IDLE, bp->i2c_control_regs + 0x0);
 }
 
 static struct bbc_i2c_bus * attach_one_i2c(struct platform_device *op, int index)
@@ -337,10 +337,10 @@ static struct bbc_i2c_bus * attach_one_i2c(struct platform_device *op, int index
 		bp->devs[entry].client_claimed = 0;
 	}
 
-	writeb(I2C_PCF_PIN, bp->i2c_control_regs + 0x0);
-	bp->own = readb(bp->i2c_control_regs + 0x01);
-	writeb(I2C_PCF_PIN | I2C_PCF_ES1, bp->i2c_control_regs + 0x0);
-	bp->clock = readb(bp->i2c_control_regs + 0x01);
+	pete_writeb("drivers/sbus/char/bbc_i2c.c:340", I2C_PCF_PIN, bp->i2c_control_regs + 0x0);
+	bp->own = pete_readb("drivers/sbus/char/bbc_i2c.c:341", bp->i2c_control_regs + 0x01);
+	pete_writeb("drivers/sbus/char/bbc_i2c.c:342", I2C_PCF_PIN | I2C_PCF_ES1, bp->i2c_control_regs + 0x0);
+	bp->clock = pete_readb("drivers/sbus/char/bbc_i2c.c:343", bp->i2c_control_regs + 0x01);
 
 	printk(KERN_INFO "i2c-%d: Regs at %p, %d devices, own %02x, clock %02x.\n",
 	       bp->index, bp->i2c_control_regs, entry, bp->own, bp->clock);

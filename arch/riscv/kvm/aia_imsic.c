@@ -973,7 +973,7 @@ int kvm_riscv_vcpu_aia_imsic_inject(struct kvm_vcpu *vcpu,
 	read_lock_irqsave(&imsic->vsfile_lock, flags);
 
 	if (imsic->vsfile_cpu >= 0) {
-		writel(iid, imsic->vsfile_va + IMSIC_MMIO_SETIPNUM_LE);
+		pete_writel("arch/riscv/kvm/aia_imsic.c:976", iid, imsic->vsfile_va + IMSIC_MMIO_SETIPNUM_LE);
 		kvm_vcpu_kick(vcpu);
 	} else {
 		eix = &imsic->swfile->eix[iid / BITS_PER_TYPE(u64)];

@@ -63,22 +63,22 @@ static int ipq4019_mdio_read_c45(struct mii_bus *bus, int mii_id, int mmd,
 	if (ipq4019_mdio_wait_busy(bus))
 		return -ETIMEDOUT;
 
-	data = readl(priv->membase + MDIO_MODE_REG);
+	data = pete_readl("drivers/net/mdio/mdio-ipq4019.c:66", priv->membase + MDIO_MODE_REG);
 
 	data |= MDIO_MODE_C45;
 
-	writel(data, priv->membase + MDIO_MODE_REG);
+	pete_writel("drivers/net/mdio/mdio-ipq4019.c:70", data, priv->membase + MDIO_MODE_REG);
 
 	/* issue the phy address and mmd */
-	writel((mii_id << 8) | mmd, priv->membase + MDIO_ADDR_REG);
+	pete_writel("drivers/net/mdio/mdio-ipq4019.c:73", (mii_id << 8) | mmd, priv->membase + MDIO_ADDR_REG);
 
 	/* issue reg */
-	writel(reg, priv->membase + MDIO_DATA_WRITE_REG);
+	pete_writel("drivers/net/mdio/mdio-ipq4019.c:76", reg, priv->membase + MDIO_DATA_WRITE_REG);
 
 	cmd = MDIO_CMD_ACCESS_START | MDIO_CMD_ACCESS_CODE_C45_ADDR;
 
 	/* issue read command */
-	writel(cmd, priv->membase + MDIO_CMD_REG);
+	pete_writel("drivers/net/mdio/mdio-ipq4019.c:81", cmd, priv->membase + MDIO_CMD_REG);
 
 	/* Wait read complete */
 	if (ipq4019_mdio_wait_busy(bus))
@@ -86,13 +86,13 @@ static int ipq4019_mdio_read_c45(struct mii_bus *bus, int mii_id, int mmd,
 
 	cmd = MDIO_CMD_ACCESS_START | MDIO_CMD_ACCESS_CODE_C45_READ;
 
-	writel(cmd, priv->membase + MDIO_CMD_REG);
+	pete_writel("drivers/net/mdio/mdio-ipq4019.c:89", cmd, priv->membase + MDIO_CMD_REG);
 
 	if (ipq4019_mdio_wait_busy(bus))
 		return -ETIMEDOUT;
 
 	/* Read and return data */
-	return readl(priv->membase + MDIO_DATA_READ_REG);
+	return pete_readl("drivers/net/mdio/mdio-ipq4019.c:95", priv->membase + MDIO_DATA_READ_REG);
 }
 
 static int ipq4019_mdio_read_c22(struct mii_bus *bus, int mii_id, int regnum)
@@ -104,26 +104,26 @@ static int ipq4019_mdio_read_c22(struct mii_bus *bus, int mii_id, int regnum)
 	if (ipq4019_mdio_wait_busy(bus))
 		return -ETIMEDOUT;
 
-	data = readl(priv->membase + MDIO_MODE_REG);
+	data = pete_readl("drivers/net/mdio/mdio-ipq4019.c:107", priv->membase + MDIO_MODE_REG);
 
 	data &= ~MDIO_MODE_C45;
 
-	writel(data, priv->membase + MDIO_MODE_REG);
+	pete_writel("drivers/net/mdio/mdio-ipq4019.c:111", data, priv->membase + MDIO_MODE_REG);
 
 	/* issue the phy address and reg */
-	writel((mii_id << 8) | regnum, priv->membase + MDIO_ADDR_REG);
+	pete_writel("drivers/net/mdio/mdio-ipq4019.c:114", (mii_id << 8) | regnum, priv->membase + MDIO_ADDR_REG);
 
 	cmd = MDIO_CMD_ACCESS_START | MDIO_CMD_ACCESS_CODE_READ;
 
 	/* issue read command */
-	writel(cmd, priv->membase + MDIO_CMD_REG);
+	pete_writel("drivers/net/mdio/mdio-ipq4019.c:119", cmd, priv->membase + MDIO_CMD_REG);
 
 	/* Wait read complete */
 	if (ipq4019_mdio_wait_busy(bus))
 		return -ETIMEDOUT;
 
 	/* Read and return data */
-	return readl(priv->membase + MDIO_DATA_READ_REG);
+	return pete_readl("drivers/net/mdio/mdio-ipq4019.c:126", priv->membase + MDIO_DATA_READ_REG);
 }
 
 static int ipq4019_mdio_write_c45(struct mii_bus *bus, int mii_id, int mmd,
@@ -136,30 +136,30 @@ static int ipq4019_mdio_write_c45(struct mii_bus *bus, int mii_id, int mmd,
 	if (ipq4019_mdio_wait_busy(bus))
 		return -ETIMEDOUT;
 
-	data = readl(priv->membase + MDIO_MODE_REG);
+	data = pete_readl("drivers/net/mdio/mdio-ipq4019.c:139", priv->membase + MDIO_MODE_REG);
 
 	data |= MDIO_MODE_C45;
 
-	writel(data, priv->membase + MDIO_MODE_REG);
+	pete_writel("drivers/net/mdio/mdio-ipq4019.c:143", data, priv->membase + MDIO_MODE_REG);
 
 	/* issue the phy address and mmd */
-	writel((mii_id << 8) | mmd, priv->membase + MDIO_ADDR_REG);
+	pete_writel("drivers/net/mdio/mdio-ipq4019.c:146", (mii_id << 8) | mmd, priv->membase + MDIO_ADDR_REG);
 
 	/* issue reg */
-	writel(reg, priv->membase + MDIO_DATA_WRITE_REG);
+	pete_writel("drivers/net/mdio/mdio-ipq4019.c:149", reg, priv->membase + MDIO_DATA_WRITE_REG);
 
 	cmd = MDIO_CMD_ACCESS_START | MDIO_CMD_ACCESS_CODE_C45_ADDR;
 
-	writel(cmd, priv->membase + MDIO_CMD_REG);
+	pete_writel("drivers/net/mdio/mdio-ipq4019.c:153", cmd, priv->membase + MDIO_CMD_REG);
 
 	if (ipq4019_mdio_wait_busy(bus))
 		return -ETIMEDOUT;
 
 	/* issue write data */
-	writel(value, priv->membase + MDIO_DATA_WRITE_REG);
+	pete_writel("drivers/net/mdio/mdio-ipq4019.c:159", value, priv->membase + MDIO_DATA_WRITE_REG);
 
 	cmd = MDIO_CMD_ACCESS_START | MDIO_CMD_ACCESS_CODE_C45_WRITE;
-	writel(cmd, priv->membase + MDIO_CMD_REG);
+	pete_writel("drivers/net/mdio/mdio-ipq4019.c:162", cmd, priv->membase + MDIO_CMD_REG);
 
 	/* Wait write complete */
 	if (ipq4019_mdio_wait_busy(bus))
@@ -179,22 +179,22 @@ static int ipq4019_mdio_write_c22(struct mii_bus *bus, int mii_id, int regnum,
 		return -ETIMEDOUT;
 
 	/* Enter Clause 22 mode */
-	data = readl(priv->membase + MDIO_MODE_REG);
+	data = pete_readl("drivers/net/mdio/mdio-ipq4019.c:182", priv->membase + MDIO_MODE_REG);
 
 	data &= ~MDIO_MODE_C45;
 
-	writel(data, priv->membase + MDIO_MODE_REG);
+	pete_writel("drivers/net/mdio/mdio-ipq4019.c:186", data, priv->membase + MDIO_MODE_REG);
 
 	/* issue the phy address and reg */
-	writel((mii_id << 8) | regnum, priv->membase + MDIO_ADDR_REG);
+	pete_writel("drivers/net/mdio/mdio-ipq4019.c:189", (mii_id << 8) | regnum, priv->membase + MDIO_ADDR_REG);
 
 	/* issue write data */
-	writel(value, priv->membase + MDIO_DATA_WRITE_REG);
+	pete_writel("drivers/net/mdio/mdio-ipq4019.c:192", value, priv->membase + MDIO_DATA_WRITE_REG);
 
 	/* issue write command */
 	cmd = MDIO_CMD_ACCESS_START | MDIO_CMD_ACCESS_CODE_WRITE;
 
-	writel(cmd, priv->membase + MDIO_CMD_REG);
+	pete_writel("drivers/net/mdio/mdio-ipq4019.c:197", cmd, priv->membase + MDIO_CMD_REG);
 
 	/* Wait write complete */
 	if (ipq4019_mdio_wait_busy(bus))
@@ -213,9 +213,9 @@ static int ipq_mdio_reset(struct mii_bus *bus)
 	 * is specified in the device tree.
 	 */
 	if (priv->eth_ldo_rdy) {
-		val = readl(priv->eth_ldo_rdy);
+		val = pete_readl("drivers/net/mdio/mdio-ipq4019.c:216", priv->eth_ldo_rdy);
 		val |= BIT(0);
-		writel(val, priv->eth_ldo_rdy);
+		pete_writel("drivers/net/mdio/mdio-ipq4019.c:218", val, priv->eth_ldo_rdy);
 		fsleep(IPQ_PHY_SET_DELAY_US);
 	}
 

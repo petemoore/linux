@@ -363,20 +363,20 @@ static int socfpga_a10_fpga_write(struct fpga_manager *mgr, const char *buf,
 
 	/* Write out the complete 32-bit chunks */
 	while (count >= sizeof(u32)) {
-		writel(buffer_32[i++], priv->fpga_data_addr);
+		pete_writel("drivers/fpga/socfpga-a10.c:366", buffer_32[i++], priv->fpga_data_addr);
 		count -= sizeof(u32);
 	}
 
 	/* Write out remaining non 32-bit chunks */
 	switch (count) {
 	case 3:
-		writel(buffer_32[i++] & 0x00ffffff, priv->fpga_data_addr);
+		pete_writel("drivers/fpga/socfpga-a10.c:373", buffer_32[i++] & 0x00ffffff, priv->fpga_data_addr);
 		break;
 	case 2:
-		writel(buffer_32[i++] & 0x0000ffff, priv->fpga_data_addr);
+		pete_writel("drivers/fpga/socfpga-a10.c:376", buffer_32[i++] & 0x0000ffff, priv->fpga_data_addr);
 		break;
 	case 1:
-		writel(buffer_32[i++] & 0x000000ff, priv->fpga_data_addr);
+		pete_writel("drivers/fpga/socfpga-a10.c:379", buffer_32[i++] & 0x000000ff, priv->fpga_data_addr);
 		break;
 	case 0:
 		break;

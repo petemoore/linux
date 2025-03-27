@@ -317,7 +317,7 @@ int snd_cs46xx_download(struct snd_cs46xx *chip,
 
 	/* writel already converts 32-bit value to right endianess */
 	while (len-- > 0) {
-		writel(*src++, dst);
+		pete_writel("sound/pci/cs46xx/cs46xx_lib.c:320", *src++, dst);
 		dst += sizeof(u32);
 	}
 	return 0;
@@ -480,7 +480,7 @@ int snd_cs46xx_clear_BA1(struct snd_cs46xx *chip,
 
 	/* writel already converts 32-bit value to right endianess */
 	while (len-- > 0) {
-		writel(0, dst);
+		pete_writel("sound/pci/cs46xx/cs46xx_lib.c:483", 0, dst);
 		dst += sizeof(u32);
 	}
 	return 0;

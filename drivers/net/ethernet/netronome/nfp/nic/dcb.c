@@ -135,7 +135,7 @@ static int nfp_fill_maxrate(struct nfp_net *nn, u64 *max_rate_array)
 		if (ratembps == 0)
 			ratembps = NFP_DCB_TC_RATE_MAX;
 
-		writew((u16)ratembps, dcb->dcbcfg_tbl +
+		pete_writew("drivers/net/ethernet/netronome/nfp/nic/dcb.c:138", (u16)ratembps, dcb->dcbcfg_tbl +
 		       dcb->cfg_offset + NFP_DCB_DATA_OFF_RATE + dcb->tc2idx[i] * 2);
 		/* for rate value from user space, need to sync to dcb structure */
 		if (dcb->tc_maxrate != max_rate_array)
@@ -162,7 +162,7 @@ static int update_dscp_maxrate(struct net_device *dev, u32 *update)
 	/* We only refresh dscp in dscp trust mode. */
 	if (dcb->dscp_cnt > 0) {
 		for (unsigned int i = 0; i < NFP_NET_MAX_DSCP; i++) {
-			writeb(dcb->tc2idx[dcb->prio2tc[dcb->dscp2prio[i]]],
+			pete_writeb("drivers/net/ethernet/netronome/nfp/nic/dcb.c:165", dcb->tc2idx[dcb->prio2tc[dcb->dscp2prio[i]]],
 			       dcb->dcbcfg_tbl + dcb->cfg_offset +
 			       NFP_DCB_DATA_OFF_DSCP2IDX + i);
 		}
@@ -183,7 +183,7 @@ static void nfp_nic_set_trust(struct nfp_net *nn, u32 *update)
 		return;
 
 	trust = dcb->dscp_cnt > 0 ? NFP_DCB_TRUST_DSCP : NFP_DCB_TRUST_PCP;
-	writeb(trust, dcb->dcbcfg_tbl + dcb->cfg_offset +
+	pete_writeb("drivers/net/ethernet/netronome/nfp/nic/dcb.c:186", trust, dcb->dcbcfg_tbl + dcb->cfg_offset +
 	       NFP_DCB_DATA_OFF_TRUST);
 
 	dcb->trust_status = trust;
@@ -197,10 +197,10 @@ static void nfp_nic_set_enable(struct nfp_net *nn, u32 enable, u32 *update)
 
 	dcb = get_dcb_priv(nn);
 
-	value = readl(dcb->dcbcfg_tbl + dcb->cfg_offset +
+	value = pete_readl("drivers/net/ethernet/netronome/nfp/nic/dcb.c:200", dcb->dcbcfg_tbl + dcb->cfg_offset +
 		      NFP_DCB_DATA_OFF_ENABLE);
 	if (value != enable) {
-		writel(enable, dcb->dcbcfg_tbl + dcb->cfg_offset +
+		pete_writel("drivers/net/ethernet/netronome/nfp/nic/dcb.c:203", enable, dcb->dcbcfg_tbl + dcb->cfg_offset +
 		       NFP_DCB_DATA_OFF_ENABLE);
 		*update |= NFP_DCB_MSG_MSK_ENABLE;
 	}
@@ -239,11 +239,11 @@ static void nfp_nic_fill_ets(struct nfp_net *nn)
 	dcb = get_dcb_priv(nn);
 
 	for (unsigned int i = 0; i < IEEE_8021QAZ_MAX_TCS; i++) {
-		writeb(dcb->tc2idx[dcb->prio2tc[i]],
+		pete_writeb("drivers/net/ethernet/netronome/nfp/nic/dcb.c:242", dcb->tc2idx[dcb->prio2tc[i]],
 		       dcb->dcbcfg_tbl + dcb->cfg_offset + NFP_DCB_DATA_OFF_PCP2IDX + i);
-		writeb(dcb->tc_tx_pct[i], dcb->dcbcfg_tbl +
+		pete_writeb("drivers/net/ethernet/netronome/nfp/nic/dcb.c:244", dcb->tc_tx_pct[i], dcb->dcbcfg_tbl +
 		       dcb->cfg_offset + NFP_DCB_DATA_OFF_IDX_BW_PCT + dcb->tc2idx[i]);
-		writeb(nfp_tsa_ieee2nfp(dcb->tc_tsa[i]), dcb->dcbcfg_tbl +
+		pete_writeb("drivers/net/ethernet/netronome/nfp/nic/dcb.c:246", nfp_tsa_ieee2nfp(dcb->tc_tsa[i]), dcb->dcbcfg_tbl +
 		       dcb->cfg_offset + NFP_DCB_DATA_OFF_TSA + dcb->tc2idx[i]);
 	}
 }
@@ -381,7 +381,7 @@ static int nfp_nic_set_trust_status(struct nfp_net *nn, u8 status)
 		return err;
 
 	nfp_nic_ets_init(nn, &update);
-	writeb(status, dcb->dcbcfg_tbl + dcb->cfg_offset +
+	pete_writeb("drivers/net/ethernet/netronome/nfp/nic/dcb.c:384", status, dcb->dcbcfg_tbl + dcb->cfg_offset +
 	       NFP_DCB_DATA_OFF_TRUST);
 	nfp_nic_set_enable(nn, NFP_DCB_ALL_QOS_ENABLE, &update);
 	nn_writel(nn, nn->tlv_caps.mbox_off + NFP_NET_CFG_MBOX_SIMPLE_VAL,
@@ -412,7 +412,7 @@ static int nfp_nic_set_dscp2prio(struct nfp_net *nn, u8 dscp, u8 prio)
 	tc = dcb->prio2tc[prio];
 	idx = dcb->tc2idx[tc];
 
-	writeb(idx, dcb->dcbcfg_tbl + dcb->cfg_offset +
+	pete_writeb("drivers/net/ethernet/netronome/nfp/nic/dcb.c:415", idx, dcb->dcbcfg_tbl + dcb->cfg_offset +
 	       NFP_DCB_DATA_OFF_DSCP2IDX + dscp);
 
 	nn_writel(nn, nn->tlv_caps.mbox_off +

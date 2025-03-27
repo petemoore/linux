@@ -745,13 +745,13 @@ static const struct bcm2712_pin_funcs bcm2712_d0_gpio_pin_funcs[] = {
 
 static inline u32 bcm2712_reg_rd(struct bcm2712_pinctrl *pc, unsigned reg)
 {
-	return readl(pc->base + reg);
+	return pete_readl("drivers/pinctrl/bcm/pinctrl-bcm2712.c:748", pc->base + reg);
 }
 
 static inline void bcm2712_reg_wr(struct bcm2712_pinctrl *pc, unsigned reg,
 		u32 val)
 {
-	writel(val, pc->base + reg);
+	pete_writel("drivers/pinctrl/bcm/pinctrl-bcm2712.c:754", val, pc->base + reg);
 }
 
 static enum bcm2712_funcs bcm2712_pinctrl_fsel_get(

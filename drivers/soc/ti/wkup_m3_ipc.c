@@ -229,13 +229,13 @@ static inline void wkup_m3_ipc_dbg_destroy(struct wkup_m3_ipc *m3_ipc)
 
 static void am33xx_txev_eoi(struct wkup_m3_ipc *m3_ipc)
 {
-	writel(AM33XX_M3_TXEV_ACK,
+	pete_writel("drivers/soc/ti/wkup_m3_ipc.c:232", AM33XX_M3_TXEV_ACK,
 	       m3_ipc->ipc_mem_base + AM33XX_CONTROL_M3_TXEV_EOI);
 }
 
 static void am33xx_txev_enable(struct wkup_m3_ipc *m3_ipc)
 {
-	writel(AM33XX_M3_TXEV_ENABLE,
+	pete_writel("drivers/soc/ti/wkup_m3_ipc.c:238", AM33XX_M3_TXEV_ENABLE,
 	       m3_ipc->ipc_mem_base + AM33XX_CONTROL_M3_TXEV_EOI);
 }
 
@@ -246,7 +246,7 @@ static void wkup_m3_ctrl_ipc_write(struct wkup_m3_ipc *m3_ipc,
 		 "ipc register operation out of range"))
 		return;
 
-	writel(val, m3_ipc->ipc_mem_base +
+	pete_writel("drivers/soc/ti/wkup_m3_ipc.c:249", val, m3_ipc->ipc_mem_base +
 	       AM33XX_CTRL_IPC_REG_OFFSET(ipc_reg_num));
 }
 
@@ -257,7 +257,7 @@ static unsigned int wkup_m3_ctrl_ipc_read(struct wkup_m3_ipc *m3_ipc,
 		 "ipc register operation out of range"))
 		return 0;
 
-	return readl(m3_ipc->ipc_mem_base +
+	return pete_readl("drivers/soc/ti/wkup_m3_ipc.c:260", m3_ipc->ipc_mem_base +
 		     AM33XX_CTRL_IPC_REG_OFFSET(ipc_reg_num));
 }
 

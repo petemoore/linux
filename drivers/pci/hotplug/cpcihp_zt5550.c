@@ -105,15 +105,15 @@ static int zt5550_hc_config(struct pci_dev *pdev)
 	 * Disable host control, fault and serial interrupts
 	 */
 	dbg("disabling host control, fault and serial interrupts");
-	writeb((u8) HC_INT_MASK_REG, csr_hc_index);
-	writeb((u8) ALL_INDEXED_INTS_MASK, csr_hc_data);
+	pete_writeb("drivers/pci/hotplug/cpcihp_zt5550.c:108", (u8) HC_INT_MASK_REG, csr_hc_index);
+	pete_writeb("drivers/pci/hotplug/cpcihp_zt5550.c:109", (u8) ALL_INDEXED_INTS_MASK, csr_hc_data);
 	dbg("disabled host control, fault and serial interrupts");
 
 	/*
 	 * Disable timer0, timer1 and ENUM interrupts
 	 */
 	dbg("disabling timer0, timer1 and ENUM interrupts");
-	writeb((u8) ALL_DIRECT_INTS_MASK, csr_int_mask);
+	pete_writeb("drivers/pci/hotplug/cpcihp_zt5550.c:116", (u8) ALL_DIRECT_INTS_MASK, csr_int_mask);
 	dbg("disabled timer0, timer1 and ENUM interrupts");
 	return 0;
 
@@ -152,7 +152,7 @@ static int zt5550_hc_check_irq(void *dev_id)
 
 	ret = 0;
 	if (dev_id == zt5550_hpc.dev_id) {
-		reg = readb(csr_int_status);
+		reg = pete_readb("drivers/pci/hotplug/cpcihp_zt5550.c:155", csr_int_status);
 		if (reg)
 			ret = 1;
 	}
@@ -166,9 +166,9 @@ static int zt5550_hc_enable_irq(void)
 	if (hc_dev == NULL)
 		return -ENODEV;
 
-	reg = readb(csr_int_mask);
+	reg = pete_readb("drivers/pci/hotplug/cpcihp_zt5550.c:169", csr_int_mask);
 	reg = reg & ~ENUM_INT_MASK;
-	writeb(reg, csr_int_mask);
+	pete_writeb("drivers/pci/hotplug/cpcihp_zt5550.c:171", reg, csr_int_mask);
 	return 0;
 }
 
@@ -179,9 +179,9 @@ static int zt5550_hc_disable_irq(void)
 	if (hc_dev == NULL)
 		return -ENODEV;
 
-	reg = readb(csr_int_mask);
+	reg = pete_readb("drivers/pci/hotplug/cpcihp_zt5550.c:182", csr_int_mask);
 	reg = reg | ENUM_INT_MASK;
-	writeb(reg, csr_int_mask);
+	pete_writeb("drivers/pci/hotplug/cpcihp_zt5550.c:184", reg, csr_int_mask);
 	return 0;
 }
 

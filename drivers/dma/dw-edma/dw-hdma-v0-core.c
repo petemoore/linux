@@ -38,15 +38,15 @@ __dw_ch_regs(struct dw_edma *dw, enum dw_edma_dir dir, u16 ch)
 }
 
 #define SET_CH_32(dw, dir, ch, name, value) \
-	writel(value, &(__dw_ch_regs(dw, dir, ch)->name))
+	pete_writel("drivers/dma/dw-edma/dw-hdma-v0-core.c:41", value, &(__dw_ch_regs(dw, dir, ch)->name))
 
 #define GET_CH_32(dw, dir, ch, name) \
-	readl(&(__dw_ch_regs(dw, dir, ch)->name))
+	pete_readl("drivers/dma/dw-edma/dw-hdma-v0-core.c:44", &(__dw_ch_regs(dw, dir, ch)->name))
 
 #define SET_BOTH_CH_32(dw, ch, name, value) \
 	do {					\
-		writel(value, &(__dw_ch_regs(dw, EDMA_DIR_WRITE, ch)->name));	\
-		writel(value, &(__dw_ch_regs(dw, EDMA_DIR_READ, ch)->name));	\
+		pete_writel("drivers/dma/dw-edma/dw-hdma-v0-core.c:48", value, &(__dw_ch_regs(dw, EDMA_DIR_WRITE, ch)->name));	\
+		pete_writel("drivers/dma/dw-edma/dw-hdma-v0-core.c:49", value, &(__dw_ch_regs(dw, EDMA_DIR_READ, ch)->name));	\
 	} while (0)
 
 /* HDMA management callbacks */
@@ -167,10 +167,10 @@ static void dw_hdma_v0_write_ll_data(struct dw_edma_chunk *chunk, int i,
 	} else {
 		struct dw_hdma_v0_lli __iomem *lli = chunk->ll_region.vaddr.io + ofs;
 
-		writel(control, &lli->control);
-		writel(size, &lli->transfer_size);
-		writeq(sar, &lli->sar.reg);
-		writeq(dar, &lli->dar.reg);
+		pete_writel("drivers/dma/dw-edma/dw-hdma-v0-core.c:170", control, &lli->control);
+		pete_writel("drivers/dma/dw-edma/dw-hdma-v0-core.c:171", size, &lli->transfer_size);
+		pete_writeq("drivers/dma/dw-edma/dw-hdma-v0-core.c:172", sar, &lli->sar.reg);
+		pete_writeq("drivers/dma/dw-edma/dw-hdma-v0-core.c:173", dar, &lli->dar.reg);
 	}
 }
 
@@ -187,8 +187,8 @@ static void dw_hdma_v0_write_ll_link(struct dw_edma_chunk *chunk,
 	} else {
 		struct dw_hdma_v0_llp __iomem *llp = chunk->ll_region.vaddr.io + ofs;
 
-		writel(control, &llp->control);
-		writeq(pointer, &llp->llp.reg);
+		pete_writel("drivers/dma/dw-edma/dw-hdma-v0-core.c:190", control, &llp->control);
+		pete_writeq("drivers/dma/dw-edma/dw-hdma-v0-core.c:191", pointer, &llp->llp.reg);
 	}
 }
 
@@ -222,7 +222,7 @@ static void dw_hdma_v0_sync_ll_data(struct dw_edma_chunk *chunk)
 	 * last MWr TLP is completed
 	 */
 	if (!(chunk->chan->dw->chip->flags & DW_EDMA_CHIP_LOCAL))
-		readl(chunk->ll_region.vaddr.io);
+		pete_readl("drivers/dma/dw-edma/dw-hdma-v0-core.c:225", chunk->ll_region.vaddr.io);
 }
 
 static void dw_hdma_v0_core_start(struct dw_edma_chunk *chunk, bool first)

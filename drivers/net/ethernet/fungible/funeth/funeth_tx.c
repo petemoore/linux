@@ -476,7 +476,7 @@ int fun_txq_napi_poll(struct napi_struct *napi, int budget)
 
 	napi_complete(napi);                 /* exhausted pending work */
 	db_val = READ_ONCE(q->irq_db_val) | (q->cons_cnt & q->mask);
-	writel(db_val, q->db);
+	pete_writel("drivers/net/ethernet/fungible/funeth/funeth_tx.c:479", db_val, q->db);
 	return 0;
 }
 
@@ -709,7 +709,7 @@ int fun_txq_create_dev(struct funeth_txq *q, struct fun_irq *irq)
 		q->ndq = netdev_get_tx_queue(q->netdev, q->qidx);
 		q->irq_db_val = FUN_IRQ_SQ_DB(fp->tx_coal_usec,
 					      fp->tx_coal_count);
-		writel(q->irq_db_val, q->db);
+		pete_writel("drivers/net/ethernet/fungible/funeth/funeth_tx.c:712", q->irq_db_val, q->db);
 	}
 
 	q->init_state = FUN_QSTATE_INIT_FULL;

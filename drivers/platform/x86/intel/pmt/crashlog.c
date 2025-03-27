@@ -64,7 +64,7 @@ struct pmt_crashlog_priv {
  */
 static bool pmt_crashlog_complete(struct intel_pmt_entry *entry)
 {
-	u32 control = readl(entry->disc_table + CONTROL_OFFSET);
+	u32 control = pete_readl("drivers/platform/x86/intel/pmt/crashlog.c:67", entry->disc_table + CONTROL_OFFSET);
 
 	/* return current value of the crashlog complete flag */
 	return !!(control & CRASHLOG_FLAG_TRIGGER_COMPLETE);
@@ -72,7 +72,7 @@ static bool pmt_crashlog_complete(struct intel_pmt_entry *entry)
 
 static bool pmt_crashlog_disabled(struct intel_pmt_entry *entry)
 {
-	u32 control = readl(entry->disc_table + CONTROL_OFFSET);
+	u32 control = pete_readl("drivers/platform/x86/intel/pmt/crashlog.c:75", entry->disc_table + CONTROL_OFFSET);
 
 	/* return current value of the crashlog disabled flag */
 	return !!(control & CRASHLOG_FLAG_DISABLE);
@@ -80,7 +80,7 @@ static bool pmt_crashlog_disabled(struct intel_pmt_entry *entry)
 
 static bool pmt_crashlog_supported(struct intel_pmt_entry *entry)
 {
-	u32 discovery_header = readl(entry->disc_table + CONTROL_OFFSET);
+	u32 discovery_header = pete_readl("drivers/platform/x86/intel/pmt/crashlog.c:83", entry->disc_table + CONTROL_OFFSET);
 	u32 crash_type, version;
 
 	crash_type = GET_TYPE(discovery_header);
@@ -96,7 +96,7 @@ static bool pmt_crashlog_supported(struct intel_pmt_entry *entry)
 static void pmt_crashlog_set_disable(struct intel_pmt_entry *entry,
 				     bool disable)
 {
-	u32 control = readl(entry->disc_table + CONTROL_OFFSET);
+	u32 control = pete_readl("drivers/platform/x86/intel/pmt/crashlog.c:99", entry->disc_table + CONTROL_OFFSET);
 
 	/* clear trigger bits so we are only modifying disable flag */
 	control &= ~CRASHLOG_FLAG_TRIGGER_MASK;
@@ -106,27 +106,27 @@ static void pmt_crashlog_set_disable(struct intel_pmt_entry *entry,
 	else
 		control &= ~CRASHLOG_FLAG_DISABLE;
 
-	writel(control, entry->disc_table + CONTROL_OFFSET);
+	pete_writel("drivers/platform/x86/intel/pmt/crashlog.c:109", control, entry->disc_table + CONTROL_OFFSET);
 }
 
 static void pmt_crashlog_set_clear(struct intel_pmt_entry *entry)
 {
-	u32 control = readl(entry->disc_table + CONTROL_OFFSET);
+	u32 control = pete_readl("drivers/platform/x86/intel/pmt/crashlog.c:114", entry->disc_table + CONTROL_OFFSET);
 
 	control &= ~CRASHLOG_FLAG_TRIGGER_MASK;
 	control |= CRASHLOG_FLAG_TRIGGER_CLEAR;
 
-	writel(control, entry->disc_table + CONTROL_OFFSET);
+	pete_writel("drivers/platform/x86/intel/pmt/crashlog.c:119", control, entry->disc_table + CONTROL_OFFSET);
 }
 
 static void pmt_crashlog_set_execute(struct intel_pmt_entry *entry)
 {
-	u32 control = readl(entry->disc_table + CONTROL_OFFSET);
+	u32 control = pete_readl("drivers/platform/x86/intel/pmt/crashlog.c:124", entry->disc_table + CONTROL_OFFSET);
 
 	control &= ~CRASHLOG_FLAG_TRIGGER_MASK;
 	control |= CRASHLOG_FLAG_TRIGGER_EXECUTE;
 
-	writel(control, entry->disc_table + CONTROL_OFFSET);
+	pete_writel("drivers/platform/x86/intel/pmt/crashlog.c:129", control, entry->disc_table + CONTROL_OFFSET);
 }
 
 /*
@@ -236,12 +236,12 @@ static int pmt_crashlog_header_decode(struct intel_pmt_entry *entry,
 	crashlog = container_of(entry, struct crashlog_entry, entry);
 	mutex_init(&crashlog->control_mutex);
 
-	header->access_type = GET_ACCESS(readl(disc_table));
-	header->guid = readl(disc_table + GUID_OFFSET);
-	header->base_offset = readl(disc_table + BASE_OFFSET);
+	header->access_type = GET_ACCESS(pete_readl("drivers/platform/x86/intel/pmt/crashlog.c:239", disc_table));
+	header->guid = pete_readl("drivers/platform/x86/intel/pmt/crashlog.c:240", disc_table + GUID_OFFSET);
+	header->base_offset = pete_readl("drivers/platform/x86/intel/pmt/crashlog.c:241", disc_table + BASE_OFFSET);
 
 	/* Size is measured in DWORDS, but accessor returns bytes */
-	header->size = GET_SIZE(readl(disc_table + SIZE_OFFSET));
+	header->size = GET_SIZE(pete_readl("drivers/platform/x86/intel/pmt/crashlog.c:244", disc_table + SIZE_OFFSET));
 
 	return 0;
 }

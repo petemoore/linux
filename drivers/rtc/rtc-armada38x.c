@@ -102,9 +102,9 @@ struct armada38x_rtc_data {
 
 static void rtc_delayed_write(u32 val, struct armada38x_rtc *rtc, int offset)
 {
-	writel(0, rtc->regs + RTC_STATUS);
-	writel(0, rtc->regs + RTC_STATUS);
-	writel(val, rtc->regs + offset);
+	pete_writel("drivers/rtc/rtc-armada38x.c:105", 0, rtc->regs + RTC_STATUS);
+	pete_writel("drivers/rtc/rtc-armada38x.c:106", 0, rtc->regs + RTC_STATUS);
+	pete_writel("drivers/rtc/rtc-armada38x.c:107", val, rtc->regs + offset);
 	udelay(5);
 }
 
@@ -113,34 +113,34 @@ static void rtc_update_38x_mbus_timing_params(struct armada38x_rtc *rtc)
 {
 	u32 reg;
 
-	reg = readl(rtc->regs_soc + RTC_38X_BRIDGE_TIMING_CTL);
+	reg = pete_readl("drivers/rtc/rtc-armada38x.c:116", rtc->regs_soc + RTC_38X_BRIDGE_TIMING_CTL);
 	reg &= ~RTC_38X_PERIOD_MASK;
 	reg |= 0x3FF << RTC_38X_PERIOD_OFFS; /* Maximum value */
 	reg &= ~RTC_38X_READ_DELAY_MASK;
 	reg |= 0x1F << RTC_38X_READ_DELAY_OFFS; /* Maximum value */
-	writel(reg, rtc->regs_soc + RTC_38X_BRIDGE_TIMING_CTL);
+	pete_writel("drivers/rtc/rtc-armada38x.c:121", reg, rtc->regs_soc + RTC_38X_BRIDGE_TIMING_CTL);
 }
 
 static void rtc_update_8k_mbus_timing_params(struct armada38x_rtc *rtc)
 {
 	u32 reg;
 
-	reg = readl(rtc->regs_soc + RTC_8K_BRIDGE_TIMING_CTL0);
+	reg = pete_readl("drivers/rtc/rtc-armada38x.c:128", rtc->regs_soc + RTC_8K_BRIDGE_TIMING_CTL0);
 	reg &= ~RTC_8K_WRCLK_PERIOD_MASK;
 	reg |= 0x3FF << RTC_8K_WRCLK_PERIOD_OFFS;
 	reg &= ~RTC_8K_WRCLK_SETUP_MASK;
 	reg |= 0x29 << RTC_8K_WRCLK_SETUP_OFFS;
-	writel(reg, rtc->regs_soc + RTC_8K_BRIDGE_TIMING_CTL0);
+	pete_writel("drivers/rtc/rtc-armada38x.c:133", reg, rtc->regs_soc + RTC_8K_BRIDGE_TIMING_CTL0);
 
-	reg = readl(rtc->regs_soc + RTC_8K_BRIDGE_TIMING_CTL1);
+	reg = pete_readl("drivers/rtc/rtc-armada38x.c:135", rtc->regs_soc + RTC_8K_BRIDGE_TIMING_CTL1);
 	reg &= ~RTC_8K_READ_DELAY_MASK;
 	reg |= 0x3F << RTC_8K_READ_DELAY_OFFS;
-	writel(reg, rtc->regs_soc + RTC_8K_BRIDGE_TIMING_CTL1);
+	pete_writel("drivers/rtc/rtc-armada38x.c:138", reg, rtc->regs_soc + RTC_8K_BRIDGE_TIMING_CTL1);
 }
 
 static u32 read_rtc_register(struct armada38x_rtc *rtc, u8 rtc_reg)
 {
-	return readl(rtc->regs + rtc_reg);
+	return pete_readl("drivers/rtc/rtc-armada38x.c:143", rtc->regs + rtc_reg);
 }
 
 static u32 read_rtc_register_38x_wa(struct armada38x_rtc *rtc, u8 rtc_reg)
@@ -148,7 +148,7 @@ static u32 read_rtc_register_38x_wa(struct armada38x_rtc *rtc, u8 rtc_reg)
 	int i, index_max = 0, max = 0;
 
 	for (i = 0; i < SAMPLE_NR; i++) {
-		rtc->val_to_freq[i].value = readl(rtc->regs + rtc_reg);
+		rtc->val_to_freq[i].value = pete_readl("drivers/rtc/rtc-armada38x.c:151", rtc->regs + rtc_reg);
 		rtc->val_to_freq[i].freq = 0;
 	}
 
@@ -187,26 +187,26 @@ static u32 read_rtc_register_38x_wa(struct armada38x_rtc *rtc, u8 rtc_reg)
 
 static void armada38x_clear_isr(struct armada38x_rtc *rtc)
 {
-	u32 val = readl(rtc->regs_soc + SOC_RTC_INTERRUPT);
+	u32 val = pete_readl("drivers/rtc/rtc-armada38x.c:190", rtc->regs_soc + SOC_RTC_INTERRUPT);
 
-	writel(val & ~SOC_RTC_ALARM1, rtc->regs_soc + SOC_RTC_INTERRUPT);
+	pete_writel("drivers/rtc/rtc-armada38x.c:192", val & ~SOC_RTC_ALARM1, rtc->regs_soc + SOC_RTC_INTERRUPT);
 }
 
 static void armada38x_unmask_interrupt(struct armada38x_rtc *rtc)
 {
-	u32 val = readl(rtc->regs_soc + SOC_RTC_INTERRUPT);
+	u32 val = pete_readl("drivers/rtc/rtc-armada38x.c:197", rtc->regs_soc + SOC_RTC_INTERRUPT);
 
-	writel(val | SOC_RTC_ALARM1_MASK, rtc->regs_soc + SOC_RTC_INTERRUPT);
+	pete_writel("drivers/rtc/rtc-armada38x.c:199", val | SOC_RTC_ALARM1_MASK, rtc->regs_soc + SOC_RTC_INTERRUPT);
 }
 
 static void armada8k_clear_isr(struct armada38x_rtc *rtc)
 {
-	writel(RTC_8K_ALARM2, rtc->regs_soc + RTC_8K_ISR);
+	pete_writel("drivers/rtc/rtc-armada38x.c:204", RTC_8K_ALARM2, rtc->regs_soc + RTC_8K_ISR);
 }
 
 static void armada8k_unmask_interrupt(struct armada38x_rtc *rtc)
 {
-	writel(RTC_8K_ALARM2, rtc->regs_soc + RTC_8K_IMR);
+	pete_writel("drivers/rtc/rtc-armada38x.c:209", RTC_8K_ALARM2, rtc->regs_soc + RTC_8K_IMR);
 }
 
 static int armada38x_rtc_read_time(struct device *dev, struct rtc_time *tm)

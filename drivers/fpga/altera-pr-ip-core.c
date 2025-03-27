@@ -36,7 +36,7 @@ static enum fpga_mgr_states alt_pr_fpga_state(struct fpga_manager *mgr)
 	enum fpga_mgr_states ret = FPGA_MGR_STATE_UNKNOWN;
 	u32 val;
 
-	val = readl(priv->reg_base + ALT_PR_CSR_OFST);
+	val = pete_readl("drivers/fpga/altera-pr-ip-core.c:39", priv->reg_base + ALT_PR_CSR_OFST);
 
 	val &= ALT_PR_CSR_STATUS_MSK;
 
@@ -87,7 +87,7 @@ static int alt_pr_fpga_write_init(struct fpga_manager *mgr,
 		return -EINVAL;
 	}
 
-	val = readl(priv->reg_base + ALT_PR_CSR_OFST);
+	val = pete_readl("drivers/fpga/altera-pr-ip-core.c:90", priv->reg_base + ALT_PR_CSR_OFST);
 
 	if (val & ALT_PR_CSR_PR_START) {
 		dev_err(&mgr->dev,
@@ -96,7 +96,7 @@ static int alt_pr_fpga_write_init(struct fpga_manager *mgr,
 		return -EINVAL;
 	}
 
-	writel(val | ALT_PR_CSR_PR_START, priv->reg_base + ALT_PR_CSR_OFST);
+	pete_writel("drivers/fpga/altera-pr-ip-core.c:99", val | ALT_PR_CSR_PR_START, priv->reg_base + ALT_PR_CSR_OFST);
 
 	return 0;
 }
@@ -113,20 +113,20 @@ static int alt_pr_fpga_write(struct fpga_manager *mgr, const char *buf,
 
 	/* Write out the complete 32-bit chunks */
 	while (count >= sizeof(u32)) {
-		writel(buffer_32[i++], priv->reg_base);
+		pete_writel("drivers/fpga/altera-pr-ip-core.c:116", buffer_32[i++], priv->reg_base);
 		count -= sizeof(u32);
 	}
 
 	/* Write out remaining non 32-bit chunks */
 	switch (count) {
 	case 3:
-		writel(buffer_32[i++] & 0x00ffffff, priv->reg_base);
+		pete_writel("drivers/fpga/altera-pr-ip-core.c:123", buffer_32[i++] & 0x00ffffff, priv->reg_base);
 		break;
 	case 2:
-		writel(buffer_32[i++] & 0x0000ffff, priv->reg_base);
+		pete_writel("drivers/fpga/altera-pr-ip-core.c:126", buffer_32[i++] & 0x0000ffff, priv->reg_base);
 		break;
 	case 1:
-		writel(buffer_32[i++] & 0x000000ff, priv->reg_base);
+		pete_writel("drivers/fpga/altera-pr-ip-core.c:129", buffer_32[i++] & 0x000000ff, priv->reg_base);
 		break;
 	case 0:
 		break;
@@ -185,7 +185,7 @@ int alt_pr_register(struct device *dev, void __iomem *reg_base)
 
 	priv->reg_base = reg_base;
 
-	val = readl(priv->reg_base + ALT_PR_CSR_OFST);
+	val = pete_readl("drivers/fpga/altera-pr-ip-core.c:188", priv->reg_base + ALT_PR_CSR_OFST);
 
 	dev_dbg(dev, "%s status=%d start=%d\n", __func__,
 		(val & ALT_PR_CSR_STATUS_MSK) >> ALT_PR_CSR_STATUS_SFT,

@@ -770,7 +770,7 @@ static irqreturn_t qcom_slim_ngd_interrupt(int irq, void *d)
 		return IRQ_NONE;
 	}
 
-	stat = readl(base + NGD_INT_STAT);
+	stat = pete_readl("drivers/slimbus/qcom-ngd-ctrl.c:773", base + NGD_INT_STAT);
 
 	if ((stat & NGD_INT_MSG_BUF_CONTE) ||
 		(stat & NGD_INT_MSG_TX_INVAL) || (stat & NGD_INT_DEV_ERR) ||
@@ -778,7 +778,7 @@ static irqreturn_t qcom_slim_ngd_interrupt(int irq, void *d)
 		dev_err(ctrl->dev, "Error Interrupt received 0x%x\n", stat);
 	}
 
-	writel(stat, base + NGD_INT_CLR);
+	pete_writel("drivers/slimbus/qcom-ngd-ctrl.c:781", stat, base + NGD_INT_CLR);
 
 	return IRQ_HANDLED;
 }

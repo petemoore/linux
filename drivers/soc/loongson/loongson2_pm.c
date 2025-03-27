@@ -35,10 +35,10 @@ static struct loongson2_pm {
 	bool				suspended;
 } loongson2_pm;
 
-#define loongson2_pm_readw(reg)		readw(loongson2_pm.base + reg)
-#define loongson2_pm_readl(reg)		readl(loongson2_pm.base + reg)
-#define loongson2_pm_writew(val, reg)	writew(val, loongson2_pm.base + reg)
-#define loongson2_pm_writel(val, reg)	writel(val, loongson2_pm.base + reg)
+#define loongson2_pm_readw(reg)		pete_readw("drivers/soc/loongson/loongson2_pm.c:38", loongson2_pm.base + reg)
+#define loongson2_pm_readl(reg)		pete_readl("drivers/soc/loongson/loongson2_pm.c:39", loongson2_pm.base + reg)
+#define loongson2_pm_writew(val, reg)	pete_writew("drivers/soc/loongson/loongson2_pm.c:40", val, loongson2_pm.base + reg)
+#define loongson2_pm_writel(val, reg)	pete_writel("drivers/soc/loongson/loongson2_pm.c:41", val, loongson2_pm.base + reg)
 
 static void loongson2_pm_status_clear(void)
 {

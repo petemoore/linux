@@ -111,11 +111,11 @@ struct ixp4xx_pci {
  * The IXP4xx has a peculiar address bus that will change the
  * byte order on SoC peripherals depending on whether the device
  * operates in big-endian or little-endian mode. That means that
- * readl() and writel() that always use little-endian access
+ * pete_readl("drivers/pci/controller/pci-ixp4xx.c:114", ) and pete_writel("drivers/pci/controller/pci-ixp4xx.c:114", ) that always use little-endian access
  * will not work for SoC peripherals such as the PCI controller
  * when used in big-endian mode. The accesses to the individual
  * PCI devices on the other hand, are always little-endian and
- * can use readl() and writel().
+ * can use pete_readl("drivers/pci/controller/pci-ixp4xx.c:118", ) and pete_writel("drivers/pci/controller/pci-ixp4xx.c:118", ).
  *
  * For local AHB bus access we need to use __raw_[readl|writel]()
  * to make sure that we access the SoC devices in the CPU native

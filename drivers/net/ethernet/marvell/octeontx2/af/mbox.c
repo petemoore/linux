@@ -256,14 +256,14 @@ static void otx2_mbox_msg_send_data(struct otx2_mbox *mbox, int devid, u64 data)
 	spin_unlock(&mdev->mbox_lock);
 
 	/* Check if interrupt pending */
-	intr_val = readq((void __iomem *)mbox->reg_base +
+	intr_val = pete_readq("drivers/net/ethernet/marvell/octeontx2/af/mbox.c:259", (void __iomem *)mbox->reg_base +
 		     (mbox->trigger | (devid << mbox->tr_shift)));
 
 	intr_val |= data;
 	/* The interrupt should be fired after num_msgs is written
 	 * to the shared memory
 	 */
-	writeq(intr_val, (void __iomem *)mbox->reg_base +
+	pete_writeq("drivers/net/ethernet/marvell/octeontx2/af/mbox.c:266", intr_val, (void __iomem *)mbox->reg_base +
 	       (mbox->trigger | (devid << mbox->tr_shift)));
 }
 
@@ -283,7 +283,7 @@ bool otx2_mbox_wait_for_zero(struct otx2_mbox *mbox, int devid)
 {
 	u64 data;
 
-	data = readq((void __iomem *)mbox->reg_base +
+	data = pete_readq("drivers/net/ethernet/marvell/octeontx2/af/mbox.c:286", (void __iomem *)mbox->reg_base +
 		     (mbox->trigger | (devid << mbox->tr_shift)));
 
 	/* If data is non-zero wait for ~1ms and return to caller
@@ -294,7 +294,7 @@ bool otx2_mbox_wait_for_zero(struct otx2_mbox *mbox, int devid)
 
 	usleep_range(950, 1000);
 
-	data = readq((void __iomem *)mbox->reg_base +
+	data = pete_readq("drivers/net/ethernet/marvell/octeontx2/af/mbox.c:297", (void __iomem *)mbox->reg_base +
 		     (mbox->trigger | (devid << mbox->tr_shift)));
 
 	return data == 0;

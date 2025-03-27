@@ -513,11 +513,11 @@ static void hns3_get_coal_info(struct hns3_enet_tqp_vector *tqp_vector,
 	sprintf(result[j++], "%u", dim->tired);
 	sprintf(result[j++], "%u", coal->int_gl);
 	sprintf(result[j++], "%u", coal->int_ql);
-	reg_val = readl(tqp_vector->mask_addr + gl_offset) &
+	reg_val = pete_readl("drivers/net/ethernet/hisilicon/hns3/hns3_debugfs.c:516", tqp_vector->mask_addr + gl_offset) &
 		  HNS3_VECTOR_GL_MASK;
 	sprintf(result[j++], "%u", reg_val);
 	if (ql_enable) {
-		reg_val = readl(tqp_vector->mask_addr + ql_offset) &
+		reg_val = pete_readl("drivers/net/ethernet/hisilicon/hns3/hns3_debugfs.c:520", tqp_vector->mask_addr + ql_offset) &
 			  HNS3_VECTOR_QL_MASK;
 		sprintf(result[j++], "%u", reg_val);
 	} else {

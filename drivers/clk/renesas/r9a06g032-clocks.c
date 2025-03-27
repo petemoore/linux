@@ -682,10 +682,10 @@ int r9a06g032_sysctrl_set_dmamux(u32 mask, u32 val)
 
 	spin_lock_irqsave(&sysctrl_priv->lock, flags);
 
-	dmamux = readl(sysctrl_priv->reg + R9A06G032_SYSCTRL_DMAMUX);
+	dmamux = pete_readl("drivers/clk/renesas/r9a06g032-clocks.c:685", sysctrl_priv->reg + R9A06G032_SYSCTRL_DMAMUX);
 	dmamux &= ~mask;
 	dmamux |= val & mask;
-	writel(dmamux, sysctrl_priv->reg + R9A06G032_SYSCTRL_DMAMUX);
+	pete_writel("drivers/clk/renesas/r9a06g032-clocks.c:688", dmamux, sysctrl_priv->reg + R9A06G032_SYSCTRL_DMAMUX);
 
 	spin_unlock_irqrestore(&sysctrl_priv->lock, flags);
 
@@ -702,15 +702,15 @@ static void clk_rdesc_set(struct r9a06g032_priv *clocks,
 	if (!rb.reg && !rb.bit)
 		return;
 
-	val = readl(reg);
+	val = pete_readl("drivers/clk/renesas/r9a06g032-clocks.c:705", reg);
 	val = (val & ~BIT(rb.bit)) | ((!!on) << rb.bit);
-	writel(val, reg);
+	pete_writel("drivers/clk/renesas/r9a06g032-clocks.c:707", val, reg);
 }
 
 static int clk_rdesc_get(struct r9a06g032_priv *clocks, struct regbit rb)
 {
 	u32 __iomem *reg = clocks->reg + (rb.reg * 4);
-	u32 val = readl(reg);
+	u32 val = pete_readl("drivers/clk/renesas/r9a06g032-clocks.c:713", reg);
 
 	return !!(val & BIT(rb.bit));
 }
@@ -931,7 +931,7 @@ r9a06g032_div_recalc_rate(struct clk_hw *hw,
 {
 	struct r9a06g032_clk_div *clk = to_r9a06g032_div(hw);
 	u32 __iomem *reg = clk->clocks->reg + (4 * clk->reg);
-	u32 div = readl(reg);
+	u32 div = pete_readl("drivers/clk/renesas/r9a06g032-clocks.c:934", reg);
 
 	if (div < clk->min)
 		div = clk->min;
@@ -1030,7 +1030,7 @@ r9a06g032_div_set_rate(struct clk_hw *hw,
 	 * TODO: Find whether this callback is sleepable, in case
 	 * the hardware /does/ require some sort of spinloop here.
 	 */
-	writel(div | BIT(31), reg);
+	pete_writel("drivers/clk/renesas/r9a06g032-clocks.c:1033", div | BIT(31), reg);
 
 	return 0;
 }
@@ -1278,7 +1278,7 @@ static void __init r9a06g032_init_h2mode(struct r9a06g032_priv *clocks)
 			break;
 	}
 
-	usb = readl(clocks->reg + R9A06G032_SYSCTRL_USB);
+	usb = pete_readl("drivers/clk/renesas/r9a06g032-clocks.c:1281", clocks->reg + R9A06G032_SYSCTRL_USB);
 	if (usbf_np) {
 		/* 1 host and 1 device mode */
 		usb &= ~R9A06G032_SYSCTRL_USB_H2MODE;
@@ -1287,7 +1287,7 @@ static void __init r9a06g032_init_h2mode(struct r9a06g032_priv *clocks)
 		/* 2 hosts mode */
 		usb |= R9A06G032_SYSCTRL_USB_H2MODE;
 	}
-	writel(usb, clocks->reg + R9A06G032_SYSCTRL_USB);
+	pete_writel("drivers/clk/renesas/r9a06g032-clocks.c:1290", usb, clocks->reg + R9A06G032_SYSCTRL_USB);
 }
 
 static int __init r9a06g032_clocks_probe(struct platform_device *pdev)

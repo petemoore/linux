@@ -98,12 +98,12 @@ union acp_pdm_dma_count {
 
 static inline u32 acp6x_readl(void __iomem *base_addr)
 {
-	return readl(base_addr - ACP6x_PHY_BASE_ADDRESS);
+	return pete_readl("sound/soc/amd/yc/acp6x.h:101", base_addr - ACP6x_PHY_BASE_ADDRESS);
 }
 
 static inline void acp6x_writel(u32 val, void __iomem *base_addr)
 {
-	writel(val, base_addr - ACP6x_PHY_BASE_ADDRESS);
+	pete_writel("sound/soc/amd/yc/acp6x.h:106", val, base_addr - ACP6x_PHY_BASE_ADDRESS);
 }
 
 int snd_amd_acp_find_config(struct pci_dev *pci);

@@ -14,7 +14,7 @@ void notify_eq(struct erdma_eq *eq)
 		      FIELD_PREP(ERDMA_EQDB_ARM_MASK, 1);
 
 	*eq->db_record = db_data;
-	writeq(db_data, eq->db);
+	pete_writeq("drivers/infiniband/hw/erdma/erdma_eq.c:17", db_data, eq->db);
 
 	atomic64_inc(&eq->notify_num);
 }

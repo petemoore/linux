@@ -44,7 +44,7 @@ static void cpsw_gmii_sel_am3352(struct cpsw_phy_sel_priv *priv,
 	u32 mode = 0;
 	bool rgmii_id = false;
 
-	reg = readl(priv->gmii_sel);
+	reg = pete_readl("drivers/net/ethernet/ti/cpsw-phy-sel.c:47", priv->gmii_sel);
 
 	switch (phy_mode) {
 	case PHY_INTERFACE_MODE_RMII:
@@ -93,7 +93,7 @@ static void cpsw_gmii_sel_am3352(struct cpsw_phy_sel_priv *priv,
 	reg &= ~mask;
 	reg |= mode;
 
-	writel(reg, priv->gmii_sel);
+	pete_writel("drivers/net/ethernet/ti/cpsw-phy-sel.c:96", reg, priv->gmii_sel);
 }
 
 static void cpsw_gmii_sel_dra7xx(struct cpsw_phy_sel_priv *priv,
@@ -103,7 +103,7 @@ static void cpsw_gmii_sel_dra7xx(struct cpsw_phy_sel_priv *priv,
 	u32 mask;
 	u32 mode = 0;
 
-	reg = readl(priv->gmii_sel);
+	reg = pete_readl("drivers/net/ethernet/ti/cpsw-phy-sel.c:106", priv->gmii_sel);
 
 	switch (phy_mode) {
 	case PHY_INTERFACE_MODE_RMII:
@@ -146,7 +146,7 @@ static void cpsw_gmii_sel_dra7xx(struct cpsw_phy_sel_priv *priv,
 	reg &= ~mask;
 	reg |= mode;
 
-	writel(reg, priv->gmii_sel);
+	pete_writel("drivers/net/ethernet/ti/cpsw-phy-sel.c:149", reg, priv->gmii_sel);
 }
 
 static struct platform_driver cpsw_phy_sel_driver;

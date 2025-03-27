@@ -483,7 +483,7 @@ static inline struct tegra_sor *to_sor(struct tegra_output *output)
 
 static inline u32 tegra_sor_readl(struct tegra_sor *sor, unsigned int offset)
 {
-	u32 value = readl(sor->regs + (offset << 2));
+	u32 value = pete_readl("drivers/gpu/drm/tegra/sor.c:486", sor->regs + (offset << 2));
 
 	trace_sor_readl(sor->dev, offset, value);
 
@@ -494,7 +494,7 @@ static inline void tegra_sor_writel(struct tegra_sor *sor, u32 value,
 				    unsigned int offset)
 {
 	trace_sor_writel(sor->dev, offset, value);
-	writel(value, sor->regs + (offset << 2));
+	pete_writel("drivers/gpu/drm/tegra/sor.c:497", value, sor->regs + (offset << 2));
 }
 
 static int tegra_sor_set_parent_clock(struct tegra_sor *sor, struct clk *parent)

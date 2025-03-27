@@ -548,7 +548,7 @@ static u32 qlcnic_dump_ocm(struct qlcnic_adapter *adapter,
 
 	addr = adapter->ahw->pci_base0 + ocm->read_addr;
 	for (i = 0; i < ocm->no_ops; i++) {
-		data = readl(addr);
+		data = pete_readl("drivers/net/ethernet/qlogic/qlcnic/qlcnic_minidump.c:551", addr);
 		*buffer++ = cpu_to_le32(data);
 		addr += ocm->read_addr_stride;
 	}

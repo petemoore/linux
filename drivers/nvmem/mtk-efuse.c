@@ -29,7 +29,7 @@ static int mtk_reg_read(void *context,
 	int i;
 
 	for (i = 0; i < bytes; i++, val++)
-		*val = readb(addr + i);
+		*val = pete_readb("drivers/nvmem/mtk-efuse.c:32", addr + i);
 
 	return 0;
 }

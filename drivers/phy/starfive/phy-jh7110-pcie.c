@@ -63,7 +63,7 @@ static int phy_usb3_mode_set(struct jh7110_pcie_phy *data)
 			   USB_PDRSTN_SPLIT, 0);
 
 	/* Configuare spread-spectrum mode: down-spread-spectrum */
-	writel(PCIE_USB3_PHY_ENABLE, data->regs + PCIE_USB3_PHY_PLL_CTL_OFF);
+	pete_writel("drivers/phy/starfive/phy-jh7110-pcie.c:66", PCIE_USB3_PHY_ENABLE, data->regs + PCIE_USB3_PHY_PLL_CTL_OFF);
 
 	return 0;
 }
@@ -87,16 +87,16 @@ static void phy_pcie_mode_set(struct jh7110_pcie_phy *data)
 	regmap_update_bits(data->sys_syscon, data->sys_phy_connect,
 			   USB_PDRSTN_SPLIT, 0);
 
-	val = readl(data->regs + PCIE_USB3_PHY_PLL_CTL_OFF);
+	val = pete_readl("drivers/phy/starfive/phy-jh7110-pcie.c:90", data->regs + PCIE_USB3_PHY_PLL_CTL_OFF);
 	val &= ~PCIE_USB3_PHY_ENABLE;
-	writel(val, data->regs + PCIE_USB3_PHY_PLL_CTL_OFF);
+	pete_writel("drivers/phy/starfive/phy-jh7110-pcie.c:92", val, data->regs + PCIE_USB3_PHY_PLL_CTL_OFF);
 }
 
 static void phy_kvco_gain_set(struct jh7110_pcie_phy *phy)
 {
 	/* PCIe Multi-PHY PLL KVCO Gain fine tune settings: */
-	writel(PHY_KVCO_FINE_TUNE_LEVEL, phy->regs + PCIE_KVCO_LEVEL_OFF);
-	writel(PHY_KVCO_FINE_TUNE_SIGNALS, phy->regs + PCIE_KVCO_TUNE_SIGNAL_OFF);
+	pete_writel("drivers/phy/starfive/phy-jh7110-pcie.c:98", PHY_KVCO_FINE_TUNE_LEVEL, phy->regs + PCIE_KVCO_LEVEL_OFF);
+	pete_writel("drivers/phy/starfive/phy-jh7110-pcie.c:99", PHY_KVCO_FINE_TUNE_SIGNALS, phy->regs + PCIE_KVCO_TUNE_SIGNAL_OFF);
 }
 
 static int jh7110_pcie_phy_set_mode(struct phy *_phy,

@@ -248,16 +248,16 @@ static int xlnx_formatter_pcm_reset(void __iomem *mmio_base)
 {
 	u32 val, retries = 0;
 
-	val = readl(mmio_base + XLNX_AUD_CTRL);
+	val = pete_readl("sound/soc/xilinx/xlnx_formatter_pcm.c:251", mmio_base + XLNX_AUD_CTRL);
 	val |= AUD_CTRL_RESET_MASK;
-	writel(val, mmio_base + XLNX_AUD_CTRL);
+	pete_writel("sound/soc/xilinx/xlnx_formatter_pcm.c:253", val, mmio_base + XLNX_AUD_CTRL);
 
-	val = readl(mmio_base + XLNX_AUD_CTRL);
+	val = pete_readl("sound/soc/xilinx/xlnx_formatter_pcm.c:255", mmio_base + XLNX_AUD_CTRL);
 	/* Poll for maximum timeout of approximately 100ms (1 * 100)*/
 	while ((val & AUD_CTRL_RESET_MASK) && (retries < 100)) {
 		mdelay(1);
 		retries++;
-		val = readl(mmio_base + XLNX_AUD_CTRL);
+		val = pete_readl("sound/soc/xilinx/xlnx_formatter_pcm.c:260", mmio_base + XLNX_AUD_CTRL);
 	}
 	if (val & AUD_CTRL_RESET_MASK)
 		return -ENODEV;
@@ -269,12 +269,12 @@ static void xlnx_formatter_disable_irqs(void __iomem *mmio_base, int stream)
 {
 	u32 val;
 
-	val = readl(mmio_base + XLNX_AUD_CTRL);
+	val = pete_readl("sound/soc/xilinx/xlnx_formatter_pcm.c:272", mmio_base + XLNX_AUD_CTRL);
 	val &= ~AUD_CTRL_IOC_IRQ_MASK;
 	if (stream == SNDRV_PCM_STREAM_CAPTURE)
 		val &= ~AUD_CTRL_TOUT_IRQ_MASK;
 
-	writel(val, mmio_base + XLNX_AUD_CTRL);
+	pete_writel("sound/soc/xilinx/xlnx_formatter_pcm.c:277", val, mmio_base + XLNX_AUD_CTRL);
 }
 
 static irqreturn_t xlnx_mm2s_irq_handler(int irq, void *arg)
@@ -285,9 +285,9 @@ static irqreturn_t xlnx_mm2s_irq_handler(int irq, void *arg)
 	struct xlnx_pcm_drv_data *adata = dev_get_drvdata(dev);
 
 	reg = adata->mmio + XLNX_MM2S_OFFSET + XLNX_AUD_STS;
-	val = readl(reg);
+	val = pete_readl("sound/soc/xilinx/xlnx_formatter_pcm.c:288", reg);
 	if (val & AUD_STS_IOC_IRQ_MASK) {
-		writel(val & AUD_STS_IOC_IRQ_MASK, reg);
+		pete_writel("sound/soc/xilinx/xlnx_formatter_pcm.c:290", val & AUD_STS_IOC_IRQ_MASK, reg);
 		if (adata->play_stream)
 			snd_pcm_period_elapsed(adata->play_stream);
 		return IRQ_HANDLED;
@@ -304,9 +304,9 @@ static irqreturn_t xlnx_s2mm_irq_handler(int irq, void *arg)
 	struct xlnx_pcm_drv_data *adata = dev_get_drvdata(dev);
 
 	reg = adata->mmio + XLNX_S2MM_OFFSET + XLNX_AUD_STS;
-	val = readl(reg);
+	val = pete_readl("sound/soc/xilinx/xlnx_formatter_pcm.c:307", reg);
 	if (val & AUD_STS_IOC_IRQ_MASK) {
-		writel(val & AUD_STS_IOC_IRQ_MASK, reg);
+		pete_writel("sound/soc/xilinx/xlnx_formatter_pcm.c:309", val & AUD_STS_IOC_IRQ_MASK, reg);
 		if (adata->capture_stream)
 			snd_pcm_period_elapsed(adata->capture_stream);
 		return IRQ_HANDLED;
@@ -364,7 +364,7 @@ static int xlnx_formatter_pcm_open(struct snd_soc_component *component,
 		adata->capture_stream = substream;
 	}
 
-	val = readl(adata->mmio + XLNX_AUD_CORE_CONFIG);
+	val = pete_readl("sound/soc/xilinx/xlnx_formatter_pcm.c:367", adata->mmio + XLNX_AUD_CORE_CONFIG);
 
 	if (!(val & data_format_mode))
 		stream_data->interleaved = true;
@@ -409,9 +409,9 @@ static int xlnx_formatter_pcm_open(struct snd_soc_component *component,
 	}
 
 	/* enable DMA IOC irq */
-	val = readl(stream_data->mmio + XLNX_AUD_CTRL);
+	val = pete_readl("sound/soc/xilinx/xlnx_formatter_pcm.c:412", stream_data->mmio + XLNX_AUD_CTRL);
 	val |= AUD_CTRL_IOC_IRQ_MASK;
-	writel(val, stream_data->mmio + XLNX_AUD_CTRL);
+	pete_writel("sound/soc/xilinx/xlnx_formatter_pcm.c:414", val, stream_data->mmio + XLNX_AUD_CTRL);
 
 	return 0;
 }
@@ -443,7 +443,7 @@ xlnx_formatter_pcm_pointer(struct snd_soc_component *component,
 	struct snd_pcm_runtime *runtime = substream->runtime;
 	struct xlnx_pcm_stream_param *stream_data = runtime->private_data;
 
-	pos = readl(stream_data->mmio + XLNX_AUD_XFER_COUNT);
+	pos = pete_readl("sound/soc/xilinx/xlnx_formatter_pcm.c:446", stream_data->mmio + XLNX_AUD_XFER_COUNT);
 
 	if (pos >= stream_data->buffer_size)
 		pos = 0;
@@ -476,16 +476,16 @@ static int xlnx_formatter_pcm_hw_params(struct snd_soc_component *component,
 			return -EINVAL;
 		}
 
-		writel(mclk_fs, stream_data->mmio + XLNX_AUD_FS_MULTIPLIER);
+		pete_writel("sound/soc/xilinx/xlnx_formatter_pcm.c:479", mclk_fs, stream_data->mmio + XLNX_AUD_FS_MULTIPLIER);
 	}
 
 	if (substream->stream == SNDRV_PCM_STREAM_CAPTURE &&
 	    stream_data->xfer_mode == AES_TO_PCM) {
-		val = readl(stream_data->mmio + XLNX_AUD_STS);
+		val = pete_readl("sound/soc/xilinx/xlnx_formatter_pcm.c:484", stream_data->mmio + XLNX_AUD_STS);
 		if (val & AUD_STS_CH_STS_MASK) {
-			aes_reg1_val = readl(stream_data->mmio +
+			aes_reg1_val = pete_readl("sound/soc/xilinx/xlnx_formatter_pcm.c:486", stream_data->mmio +
 					     XLNX_AUD_CH_STS_START);
-			aes_reg2_val = readl(stream_data->mmio +
+			aes_reg2_val = pete_readl("sound/soc/xilinx/xlnx_formatter_pcm.c:488", stream_data->mmio +
 					     XLNX_AUD_CH_STS_START + 0x4);
 
 			xlnx_parse_aes_params(aes_reg1_val, aes_reg2_val,
@@ -499,10 +499,10 @@ static int xlnx_formatter_pcm_hw_params(struct snd_soc_component *component,
 
 	low = lower_32_bits(runtime->dma_addr);
 	high = upper_32_bits(runtime->dma_addr);
-	writel(low, stream_data->mmio + XLNX_AUD_BUFF_ADDR_LSB);
-	writel(high, stream_data->mmio + XLNX_AUD_BUFF_ADDR_MSB);
+	pete_writel("sound/soc/xilinx/xlnx_formatter_pcm.c:502", low, stream_data->mmio + XLNX_AUD_BUFF_ADDR_LSB);
+	pete_writel("sound/soc/xilinx/xlnx_formatter_pcm.c:503", high, stream_data->mmio + XLNX_AUD_BUFF_ADDR_MSB);
 
-	val = readl(stream_data->mmio + XLNX_AUD_CTRL);
+	val = pete_readl("sound/soc/xilinx/xlnx_formatter_pcm.c:505", stream_data->mmio + XLNX_AUD_CTRL);
 	bits_per_sample = params_width(params);
 	switch (bits_per_sample) {
 	case 8:
@@ -525,13 +525,13 @@ static int xlnx_formatter_pcm_hw_params(struct snd_soc_component *component,
 	}
 
 	val |= active_ch << AUD_CTRL_ACTIVE_CH_SHIFT;
-	writel(val, stream_data->mmio + XLNX_AUD_CTRL);
+	pete_writel("sound/soc/xilinx/xlnx_formatter_pcm.c:528", val, stream_data->mmio + XLNX_AUD_CTRL);
 
 	val = (params_periods(params) << PERIOD_CFG_PERIODS_SHIFT)
 		| params_period_bytes(params);
-	writel(val, stream_data->mmio + XLNX_AUD_PERIOD_CONFIG);
+	pete_writel("sound/soc/xilinx/xlnx_formatter_pcm.c:532", val, stream_data->mmio + XLNX_AUD_PERIOD_CONFIG);
 	bytes_per_ch = DIV_ROUND_UP(params_period_bytes(params), active_ch);
-	writel(bytes_per_ch, stream_data->mmio + XLNX_BYTES_PER_CH);
+	pete_writel("sound/soc/xilinx/xlnx_formatter_pcm.c:534", bytes_per_ch, stream_data->mmio + XLNX_BYTES_PER_CH);
 
 	return 0;
 }
@@ -548,16 +548,16 @@ static int xlnx_formatter_pcm_trigger(struct snd_soc_component *component,
 	case SNDRV_PCM_TRIGGER_START:
 	case SNDRV_PCM_TRIGGER_PAUSE_RELEASE:
 	case SNDRV_PCM_TRIGGER_RESUME:
-		val = readl(stream_data->mmio + XLNX_AUD_CTRL);
+		val = pete_readl("sound/soc/xilinx/xlnx_formatter_pcm.c:551", stream_data->mmio + XLNX_AUD_CTRL);
 		val |= AUD_CTRL_DMA_EN_MASK;
-		writel(val, stream_data->mmio + XLNX_AUD_CTRL);
+		pete_writel("sound/soc/xilinx/xlnx_formatter_pcm.c:553", val, stream_data->mmio + XLNX_AUD_CTRL);
 		break;
 	case SNDRV_PCM_TRIGGER_STOP:
 	case SNDRV_PCM_TRIGGER_PAUSE_PUSH:
 	case SNDRV_PCM_TRIGGER_SUSPEND:
-		val = readl(stream_data->mmio + XLNX_AUD_CTRL);
+		val = pete_readl("sound/soc/xilinx/xlnx_formatter_pcm.c:558", stream_data->mmio + XLNX_AUD_CTRL);
 		val &= ~AUD_CTRL_DMA_EN_MASK;
-		writel(val, stream_data->mmio + XLNX_AUD_CTRL);
+		pete_writel("sound/soc/xilinx/xlnx_formatter_pcm.c:560", val, stream_data->mmio + XLNX_AUD_CTRL);
 		break;
 	}
 
@@ -616,7 +616,7 @@ static int xlnx_formatter_pcm_probe(struct platform_device *pdev)
 		goto clk_err;
 	}
 
-	val = readl(aud_drv_data->mmio + XLNX_AUD_CORE_CONFIG);
+	val = pete_readl("sound/soc/xilinx/xlnx_formatter_pcm.c:619", aud_drv_data->mmio + XLNX_AUD_CORE_CONFIG);
 	if (val & AUD_CFG_MM2S_MASK) {
 		aud_drv_data->mm2s_presence = true;
 		ret = xlnx_formatter_pcm_reset(aud_drv_data->mmio +

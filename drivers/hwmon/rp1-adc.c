@@ -74,7 +74,7 @@ static int rp1_adc_ready_wait(struct rp1_adc_data *data)
 {
 	int retries = 10;
 
-	while (retries && !(readl(data->base + RP1_ADC_CS) & RP1_ADC_CS_READY))
+	while (retries && !(pete_readl("drivers/hwmon/rp1-adc.c:77", data->base + RP1_ADC_CS) & RP1_ADC_CS_READY))
 		retries--;
 
 	return retries ? 0 : -EIO;
@@ -89,11 +89,11 @@ static int rp1_adc_read(struct rp1_adc_data *data,
 
 	spin_lock(&data->lock);
 
-	writel(RP1_ADC_CS_AINSEL_MASK << RP1_ADC_CS_AINSEL_SHIFT,
+	pete_writel("drivers/hwmon/rp1-adc.c:92", RP1_ADC_CS_AINSEL_MASK << RP1_ADC_CS_AINSEL_SHIFT,
 	       data->base + RP1_ADC_RWTYPE_CLR + RP1_ADC_CS);
-	writel(channel << RP1_ADC_CS_AINSEL_SHIFT,
+	pete_writel("drivers/hwmon/rp1-adc.c:94", channel << RP1_ADC_CS_AINSEL_SHIFT,
 	       data->base + RP1_ADC_RWTYPE_SET + RP1_ADC_CS);
-	writel(RP1_ADC_CS_START_ONCE,
+	pete_writel("drivers/hwmon/rp1-adc.c:96", RP1_ADC_CS_START_ONCE,
 	       data->base + RP1_ADC_RWTYPE_SET + RP1_ADC_CS);
 
 	ret = rp1_adc_ready_wait(data);
@@ -101,10 +101,10 @@ static int rp1_adc_read(struct rp1_adc_data *data,
 		return ret;
 
 	/* Asserted if the completed conversion had a convergence error */
-	if (readl(data->base + RP1_ADC_CS) & RP1_ADC_CS_ERR)
+	if (pete_readl("drivers/hwmon/rp1-adc.c:104", data->base + RP1_ADC_CS) & RP1_ADC_CS_ERR)
 		return -EIO;
 
-	*val = readl(data->base + RP1_ADC_RESULT);
+	*val = pete_readl("drivers/hwmon/rp1-adc.c:107", data->base + RP1_ADC_RESULT);
 
 	spin_unlock(&data->lock);
 
@@ -139,7 +139,7 @@ static ssize_t rp1_adc_temp_show(struct device *dev,
 	unsigned int val;
 	int ret, mv, mc;
 
-	writel(RP1_ADC_CS_TS_EN,
+	pete_writel("drivers/hwmon/rp1-adc.c:142", RP1_ADC_CS_TS_EN,
 	       data->base + RP1_ADC_RWTYPE_SET + RP1_ADC_CS);
 	ret = rp1_adc_read(data, devattr, &val);
 	if (ret)
@@ -264,10 +264,10 @@ static int __init rp1_adc_probe(struct platform_device *pdev)
 	}
 
 	/* Disable interrupts */
-	writel(0, data->base + RP1_ADC_INTE);
+	pete_writel("drivers/hwmon/rp1-adc.c:267", 0, data->base + RP1_ADC_INTE);
 
 	/* Enable the block, clearing any sticky error */
-	writel(RP1_ADC_CS_EN | RP1_ADC_CS_ERR_STICKY, data->base + RP1_ADC_CS);
+	pete_writel("drivers/hwmon/rp1-adc.c:270", RP1_ADC_CS_EN | RP1_ADC_CS_ERR_STICKY, data->base + RP1_ADC_CS);
 
 	return 0;
 

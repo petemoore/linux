@@ -136,7 +136,7 @@ static inline u32
 dsi_reg_rd(struct dsi_context *ctx, u32 offset, u32 mask,
 	   u32 shift)
 {
-	return (readl(ctx->base + offset) & mask) >> shift;
+	return (pete_readl("drivers/gpu/drm/sprd/sprd_dsi.c:139", ctx->base + offset) & mask) >> shift;
 }
 
 static inline void
@@ -145,19 +145,19 @@ dsi_reg_wr(struct dsi_context *ctx, u32 offset, u32 mask,
 {
 	u32 ret;
 
-	ret = readl(ctx->base + offset);
+	ret = pete_readl("drivers/gpu/drm/sprd/sprd_dsi.c:148", ctx->base + offset);
 	ret &= ~mask;
 	ret |= (val << shift) & mask;
-	writel(ret, ctx->base + offset);
+	pete_writel("drivers/gpu/drm/sprd/sprd_dsi.c:151", ret, ctx->base + offset);
 }
 
 static inline void
 dsi_reg_up(struct dsi_context *ctx, u32 offset, u32 mask,
 	   u32 val)
 {
-	u32 ret = readl(ctx->base + offset);
+	u32 ret = pete_readl("drivers/gpu/drm/sprd/sprd_dsi.c:158", ctx->base + offset);
 
-	writel((ret & ~mask) | (val & mask), ctx->base + offset);
+	pete_writel("drivers/gpu/drm/sprd/sprd_dsi.c:160", (ret & ~mask) | (val & mask), ctx->base + offset);
 }
 
 static int regmap_tst_io_write(void *context, u32 reg, u32 val)
@@ -394,23 +394,23 @@ static void sprd_dsi_init(struct dsi_context *ctx)
 	u16 max_rd_time;
 	int div;
 
-	writel(0, ctx->base + SOFT_RESET);
-	writel(0xffffffff, ctx->base + MASK_PROTOCOL_INT);
-	writel(0xffffffff, ctx->base + MASK_INTERNAL_INT);
-	writel(1, ctx->base + DSI_MODE_CFG);
+	pete_writel("drivers/gpu/drm/sprd/sprd_dsi.c:397", 0, ctx->base + SOFT_RESET);
+	pete_writel("drivers/gpu/drm/sprd/sprd_dsi.c:398", 0xffffffff, ctx->base + MASK_PROTOCOL_INT);
+	pete_writel("drivers/gpu/drm/sprd/sprd_dsi.c:399", 0xffffffff, ctx->base + MASK_INTERNAL_INT);
+	pete_writel("drivers/gpu/drm/sprd/sprd_dsi.c:400", 1, ctx->base + DSI_MODE_CFG);
 	dsi_reg_up(ctx, EOTP_EN, RX_EOTP_EN, 0);
 	dsi_reg_up(ctx, EOTP_EN, TX_EOTP_EN, 0);
 	dsi_reg_up(ctx, RX_PKT_CHECK_CONFIG, RX_PKT_ECC_EN, RX_PKT_ECC_EN);
 	dsi_reg_up(ctx, RX_PKT_CHECK_CONFIG, RX_PKT_CRC_EN, RX_PKT_CRC_EN);
-	writel(1, ctx->base + TA_EN);
+	pete_writel("drivers/gpu/drm/sprd/sprd_dsi.c:405", 1, ctx->base + TA_EN);
 	dsi_reg_up(ctx, VIRTUAL_CHANNEL_ID, VIDEO_PKT_VCID, 0);
 	dsi_reg_up(ctx, VIRTUAL_CHANNEL_ID, GEN_RX_VCID, 0);
 
 	div = DIV_ROUND_UP(byte_clk, dsi->slave->lp_rate);
-	writel(div, ctx->base + TX_ESC_CLK_CONFIG);
+	pete_writel("drivers/gpu/drm/sprd/sprd_dsi.c:410", div, ctx->base + TX_ESC_CLK_CONFIG);
 
 	max_rd_time = ns_to_cycle(ctx->max_rd_time, byte_clk);
-	writel(max_rd_time, ctx->base + MAX_READ_TIME);
+	pete_writel("drivers/gpu/drm/sprd/sprd_dsi.c:413", max_rd_time, ctx->base + MAX_READ_TIME);
 
 	data_hs2lp = ns_to_cycle(ctx->data_hs2lp, byte_clk);
 	data_lp2hs = ns_to_cycle(ctx->data_lp2hs, byte_clk);
@@ -425,7 +425,7 @@ static void sprd_dsi_init(struct dsi_context *ctx)
 	dsi_reg_wr(ctx, PHY_CLKLANE_TIME_CONFIG,
 		   PHY_CLKLANE_LP_TO_HS_TIME, 0, clk_lp2hs);
 
-	writel(1, ctx->base + SOFT_RESET);
+	pete_writel("drivers/gpu/drm/sprd/sprd_dsi.c:428", 1, ctx->base + SOFT_RESET);
 }
 
 /*
@@ -433,9 +433,9 @@ static void sprd_dsi_init(struct dsi_context *ctx)
  */
 static void sprd_dsi_fini(struct dsi_context *ctx)
 {
-	writel(0xffffffff, ctx->base + MASK_PROTOCOL_INT);
-	writel(0xffffffff, ctx->base + MASK_INTERNAL_INT);
-	writel(0, ctx->base + SOFT_RESET);
+	pete_writel("drivers/gpu/drm/sprd/sprd_dsi.c:436", 0xffffffff, ctx->base + MASK_PROTOCOL_INT);
+	pete_writel("drivers/gpu/drm/sprd/sprd_dsi.c:437", 0xffffffff, ctx->base + MASK_INTERNAL_INT);
+	pete_writel("drivers/gpu/drm/sprd/sprd_dsi.c:438", 0, ctx->base + SOFT_RESET);
 }
 
 /*
@@ -474,19 +474,19 @@ static int sprd_dsi_dpi_video(struct dsi_context *ctx)
 	hline = vm->hactive + vm->hsync_len + vm->hfront_porch +
 		vm->hback_porch;
 
-	writel(0, ctx->base + SOFT_RESET);
+	pete_writel("drivers/gpu/drm/sprd/sprd_dsi.c:477", 0, ctx->base + SOFT_RESET);
 	dsi_reg_wr(ctx, VID_MODE_CFG, FRAME_BTA_ACK_EN, 15, ctx->frame_ack_en);
 	dsi_reg_wr(ctx, DPI_VIDEO_FORMAT, DPI_VIDEO_MODE_FORMAT, 0, coding);
 	dsi_reg_wr(ctx, VID_MODE_CFG, VID_MODE_TYPE, 0, ctx->burst_mode);
 	byte_cycle = 95 * hline * ratio_x1000 / 100000;
 	dsi_reg_wr(ctx, VIDEO_SIG_DELAY_CONFIG, VIDEO_SIG_DELAY, 0, byte_cycle);
 	byte_cycle = hline * ratio_x1000 / 1000;
-	writel(byte_cycle, ctx->base + VIDEO_LINE_TIME);
+	pete_writel("drivers/gpu/drm/sprd/sprd_dsi.c:484", byte_cycle, ctx->base + VIDEO_LINE_TIME);
 	byte_cycle = vm->hsync_len * ratio_x1000 / 1000;
 	dsi_reg_wr(ctx, VIDEO_LINE_HBLK_TIME, VIDEO_LINE_HSA_TIME, 16, byte_cycle);
 	byte_cycle = vm->hback_porch * ratio_x1000 / 1000;
 	dsi_reg_wr(ctx, VIDEO_LINE_HBLK_TIME, VIDEO_LINE_HBP_TIME, 0, byte_cycle);
-	writel(vm->vactive, ctx->base + VIDEO_VACTIVE_LINES);
+	pete_writel("drivers/gpu/drm/sprd/sprd_dsi.c:489", vm->vactive, ctx->base + VIDEO_VACTIVE_LINES);
 	dsi_reg_wr(ctx, VIDEO_VBLK_LINES, VFP_LINES, 0, vm->vfront_porch);
 	dsi_reg_wr(ctx, VIDEO_VBLK_LINES, VBP_LINES, 10, vm->vback_porch);
 	dsi_reg_wr(ctx, VIDEO_VBLK_LINES, VSA_LINES, 20, vm->vsync_len);
@@ -497,16 +497,16 @@ static int sprd_dsi_dpi_video(struct dsi_context *ctx)
 	hs_to = (hline * vm->vactive) + (2 * bpp_x100) / 100;
 	for (div = 0x80; (div < hs_to) && (div > 2); div--) {
 		if ((hs_to % div) == 0) {
-			writel(div, ctx->base + TIMEOUT_CNT_CLK_CONFIG);
-			writel(hs_to / div, ctx->base + LRX_H_TO_CONFIG);
-			writel(hs_to / div, ctx->base + HTX_TO_CONFIG);
+			pete_writel("drivers/gpu/drm/sprd/sprd_dsi.c:500", div, ctx->base + TIMEOUT_CNT_CLK_CONFIG);
+			pete_writel("drivers/gpu/drm/sprd/sprd_dsi.c:501", hs_to / div, ctx->base + LRX_H_TO_CONFIG);
+			pete_writel("drivers/gpu/drm/sprd/sprd_dsi.c:502", hs_to / div, ctx->base + HTX_TO_CONFIG);
 			break;
 		}
 	}
 
 	if (ctx->burst_mode == VIDEO_BURST_WITH_SYNC_PULSES) {
 		dsi_reg_wr(ctx, VIDEO_PKT_CONFIG, VIDEO_PKT_SIZE, 0, video_size);
-		writel(0, ctx->base + VIDEO_NULLPKT_SIZE);
+		pete_writel("drivers/gpu/drm/sprd/sprd_dsi.c:509", 0, ctx->base + VIDEO_NULLPKT_SIZE);
 		dsi_reg_up(ctx, VIDEO_PKT_CONFIG, VIDEO_LINE_CHUNK_NUM, 0);
 	} else {
 		/* non burst transmission */
@@ -567,13 +567,13 @@ static int sprd_dsi_dpi_video(struct dsi_context *ctx)
 		}
 
 		dsi_reg_wr(ctx, VIDEO_PKT_CONFIG, VIDEO_PKT_SIZE, 0, video_size);
-		writel(null_pkt_size, ctx->base + VIDEO_NULLPKT_SIZE);
+		pete_writel("drivers/gpu/drm/sprd/sprd_dsi.c:570", null_pkt_size, ctx->base + VIDEO_NULLPKT_SIZE);
 		dsi_reg_wr(ctx, VIDEO_PKT_CONFIG, VIDEO_LINE_CHUNK_NUM, 16, chunks);
 	}
 
-	writel(ctx->int0_mask, ctx->base + MASK_PROTOCOL_INT);
-	writel(ctx->int1_mask, ctx->base + MASK_INTERNAL_INT);
-	writel(1, ctx->base + SOFT_RESET);
+	pete_writel("drivers/gpu/drm/sprd/sprd_dsi.c:574", ctx->int0_mask, ctx->base + MASK_PROTOCOL_INT);
+	pete_writel("drivers/gpu/drm/sprd/sprd_dsi.c:575", ctx->int1_mask, ctx->base + MASK_INTERNAL_INT);
+	pete_writel("drivers/gpu/drm/sprd/sprd_dsi.c:576", 1, ctx->base + SOFT_RESET);
 
 	return 0;
 }
@@ -592,18 +592,18 @@ static void sprd_dsi_edpi_video(struct dsi_context *ctx)
 	bpp_x100 = calc_bytes_per_pixel_x100(coding);
 	max_fifo_len = word_length * fifo_depth * 100 / bpp_x100;
 
-	writel(0, ctx->base + SOFT_RESET);
+	pete_writel("drivers/gpu/drm/sprd/sprd_dsi.c:595", 0, ctx->base + SOFT_RESET);
 	dsi_reg_wr(ctx, DPI_VIDEO_FORMAT, DPI_VIDEO_MODE_FORMAT, 0, coding);
 	dsi_reg_wr(ctx, CMD_MODE_CFG, TEAR_FX_EN, 0, ctx->te_ack_en);
 
 	if (max_fifo_len > hactive)
-		writel(hactive, ctx->base + DCS_WM_PKT_SIZE);
+		pete_writel("drivers/gpu/drm/sprd/sprd_dsi.c:600", hactive, ctx->base + DCS_WM_PKT_SIZE);
 	else
-		writel(max_fifo_len, ctx->base + DCS_WM_PKT_SIZE);
+		pete_writel("drivers/gpu/drm/sprd/sprd_dsi.c:602", max_fifo_len, ctx->base + DCS_WM_PKT_SIZE);
 
-	writel(ctx->int0_mask, ctx->base + MASK_PROTOCOL_INT);
-	writel(ctx->int1_mask, ctx->base + MASK_INTERNAL_INT);
-	writel(1, ctx->base + SOFT_RESET);
+	pete_writel("drivers/gpu/drm/sprd/sprd_dsi.c:604", ctx->int0_mask, ctx->base + MASK_PROTOCOL_INT);
+	pete_writel("drivers/gpu/drm/sprd/sprd_dsi.c:605", ctx->int1_mask, ctx->base + MASK_INTERNAL_INT);
+	pete_writel("drivers/gpu/drm/sprd/sprd_dsi.c:606", 1, ctx->base + SOFT_RESET);
 }
 
 /*
@@ -640,7 +640,7 @@ static int sprd_dsi_wr_pkt(struct dsi_context *ctx, u8 vc, u8 type,
 			for (j = 0; (j < 4) && ((j + i) < (len)); j++)
 				payload |= param[i + j] << (j * 8);
 
-			writel(payload, ctx->base + GEN_PLD_DATA);
+			pete_writel("drivers/gpu/drm/sprd/sprd_dsi.c:643", payload, ctx->base + GEN_PLD_DATA);
 		}
 		wc_lsbyte = len & 0xff;
 		wc_msbyte = len >> 8;
@@ -656,7 +656,7 @@ static int sprd_dsi_wr_pkt(struct dsi_context *ctx, u8 vc, u8 type,
 		return ret;
 	}
 
-	writel(type | (vc << 6) | (wc_lsbyte << 8) | (wc_msbyte << 16),
+	pete_writel("drivers/gpu/drm/sprd/sprd_dsi.c:659", type | (vc << 6) | (wc_lsbyte << 8) | (wc_msbyte << 16),
 	       ctx->base + GEN_HDR);
 
 	return 0;
@@ -688,7 +688,7 @@ static int sprd_dsi_rd_pkt(struct dsi_context *ctx, u8 vc, u8 type,
 	if (!ret)
 		return -EIO;
 
-	writel(type | (vc << 6) | (lsb_byte << 8) | (msb_byte << 16),
+	pete_writel("drivers/gpu/drm/sprd/sprd_dsi.c:691", type | (vc << 6) | (lsb_byte << 8) | (msb_byte << 16),
 	       ctx->base + GEN_HDR);
 
 	/* 2nd: wait peripheral response completed */
@@ -706,7 +706,7 @@ static int sprd_dsi_rd_pkt(struct dsi_context *ctx, u8 vc, u8 type,
 	}
 
 	for (i = 0; i < 100; i++) {
-		temp = readl(ctx->base + GEN_PLD_DATA);
+		temp = pete_readl("drivers/gpu/drm/sprd/sprd_dsi.c:709", ctx->base + GEN_PLD_DATA);
 
 		if (count < bytes_to_read)
 			buffer[count++] = temp & 0xff;
@@ -728,16 +728,16 @@ static int sprd_dsi_rd_pkt(struct dsi_context *ctx, u8 vc, u8 type,
 static void sprd_dsi_set_work_mode(struct dsi_context *ctx, u8 mode)
 {
 	if (mode == DSI_MODE_CMD)
-		writel(1, ctx->base + DSI_MODE_CFG);
+		pete_writel("drivers/gpu/drm/sprd/sprd_dsi.c:731", 1, ctx->base + DSI_MODE_CFG);
 	else
-		writel(0, ctx->base + DSI_MODE_CFG);
+		pete_writel("drivers/gpu/drm/sprd/sprd_dsi.c:733", 0, ctx->base + DSI_MODE_CFG);
 }
 
 static void sprd_dsi_state_reset(struct dsi_context *ctx)
 {
-	writel(0, ctx->base + SOFT_RESET);
+	pete_writel("drivers/gpu/drm/sprd/sprd_dsi.c:738", 0, ctx->base + SOFT_RESET);
 	udelay(100);
-	writel(1, ctx->base + SOFT_RESET);
+	pete_writel("drivers/gpu/drm/sprd/sprd_dsi.c:740", 1, ctx->base + SOFT_RESET);
 }
 
 static int sprd_dphy_init(struct dsi_context *ctx)
@@ -758,9 +758,9 @@ static int sprd_dphy_init(struct dsi_context *ctx)
 
 	dsi_reg_up(ctx, PHY_INTERFACE_CTRL, RF_PHY_SHUTDOWN, RF_PHY_SHUTDOWN);
 	dsi_reg_up(ctx, PHY_INTERFACE_CTRL, RF_PHY_RESET_N, RF_PHY_RESET_N);
-	writel(0x1C, ctx->base + PHY_MIN_STOP_TIME);
+	pete_writel("drivers/gpu/drm/sprd/sprd_dsi.c:761", 0x1C, ctx->base + PHY_MIN_STOP_TIME);
 	dsi_reg_up(ctx, PHY_INTERFACE_CTRL, RF_PHY_CLK_EN, RF_PHY_CLK_EN);
-	writel(dsi->slave->lanes - 1, ctx->base + PHY_LANE_NUM_CONFIG);
+	pete_writel("drivers/gpu/drm/sprd/sprd_dsi.c:763", dsi->slave->lanes - 1, ctx->base + PHY_LANE_NUM_CONFIG);
 
 	ret = dphy_wait_pll_locked(ctx);
 	if (ret) {

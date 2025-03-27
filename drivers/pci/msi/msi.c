@@ -159,9 +159,9 @@ void __pci_read_msi_msg(struct msi_desc *entry, struct msi_msg *msg)
 		if (WARN_ON_ONCE(entry->pci.msi_attrib.is_virtual))
 			return;
 
-		msg->address_lo = readl(base + PCI_MSIX_ENTRY_LOWER_ADDR);
-		msg->address_hi = readl(base + PCI_MSIX_ENTRY_UPPER_ADDR);
-		msg->data = readl(base + PCI_MSIX_ENTRY_DATA);
+		msg->address_lo = pete_readl("drivers/pci/msi/msi.c:162", base + PCI_MSIX_ENTRY_LOWER_ADDR);
+		msg->address_hi = pete_readl("drivers/pci/msi/msi.c:163", base + PCI_MSIX_ENTRY_UPPER_ADDR);
+		msg->data = pete_readl("drivers/pci/msi/msi.c:164", base + PCI_MSIX_ENTRY_DATA);
 	} else {
 		int pos = dev->msi_cap;
 		u16 data;
@@ -221,15 +221,15 @@ static inline void pci_write_msg_msix(struct msi_desc *desc, struct msi_msg *msg
 	if (unmasked)
 		pci_msix_write_vector_ctrl(desc, ctrl | PCI_MSIX_ENTRY_CTRL_MASKBIT);
 
-	writel(msg->address_lo, base + PCI_MSIX_ENTRY_LOWER_ADDR);
-	writel(msg->address_hi, base + PCI_MSIX_ENTRY_UPPER_ADDR);
-	writel(msg->data, base + PCI_MSIX_ENTRY_DATA);
+	pete_writel("drivers/pci/msi/msi.c:224", msg->address_lo, base + PCI_MSIX_ENTRY_LOWER_ADDR);
+	pete_writel("drivers/pci/msi/msi.c:225", msg->address_hi, base + PCI_MSIX_ENTRY_UPPER_ADDR);
+	pete_writel("drivers/pci/msi/msi.c:226", msg->data, base + PCI_MSIX_ENTRY_DATA);
 
 	if (unmasked)
 		pci_msix_write_vector_ctrl(desc, ctrl);
 
 	/* Ensure that the writes are visible in the device */
-	readl(base + PCI_MSIX_ENTRY_DATA);
+	pete_readl("drivers/pci/msi/msi.c:232", base + PCI_MSIX_ENTRY_DATA);
 }
 
 void __pci_write_msi_msg(struct msi_desc *entry, struct msi_msg *msg)
@@ -610,7 +610,7 @@ void msix_prepare_msi_desc(struct pci_dev *dev, struct msi_desc *desc)
 	if (desc->pci.msi_attrib.can_mask) {
 		void __iomem *addr = pci_msix_desc_addr(desc);
 
-		desc->pci.msix_ctrl = readl(addr + PCI_MSIX_ENTRY_VECTOR_CTRL);
+		desc->pci.msix_ctrl = pete_readl("drivers/pci/msi/msi.c:613", addr + PCI_MSIX_ENTRY_VECTOR_CTRL);
 	}
 }
 
@@ -658,7 +658,7 @@ static void msix_mask_all(void __iomem *base, int tsize)
 		return;
 
 	for (i = 0; i < tsize; i++, base += PCI_MSIX_ENTRY_SIZE)
-		writel(ctrl, base + PCI_MSIX_ENTRY_VECTOR_CTRL);
+		pete_writel("drivers/pci/msi/msi.c:661", ctrl, base + PCI_MSIX_ENTRY_VECTOR_CTRL);
 }
 
 static int msix_setup_interrupts(struct pci_dev *dev, struct msix_entry *entries,

@@ -153,7 +153,7 @@ static inline u32 asc_in(struct uart_port *port, u32 offset)
 #ifdef readl_relaxed
 	return readl_relaxed(port->membase + offset);
 #else
-	return readl(port->membase + offset);
+	return pete_readl("drivers/tty/serial/st-asc.c:156", port->membase + offset);
 #endif
 }
 
@@ -162,7 +162,7 @@ static inline void asc_out(struct uart_port *port, u32 offset, u32 value)
 #ifdef writel_relaxed
 	writel_relaxed(value, port->membase + offset);
 #else
-	writel(value, port->membase + offset);
+	pete_writel("drivers/tty/serial/st-asc.c:165", value, port->membase + offset);
 #endif
 }
 

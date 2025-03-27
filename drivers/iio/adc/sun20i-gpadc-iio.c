@@ -73,18 +73,18 @@ static int sun20i_gpadc_adc_read(struct sun20i_gpadc_iio *info,
 		info->last_channel = chan->channel;
 
 		/* enable the analog input channel */
-		writel(SUN20I_GPADC_CS_EN_ADC_CH(chan->channel),
+		pete_writel("drivers/iio/adc/sun20i-gpadc-iio.c:76", SUN20I_GPADC_CS_EN_ADC_CH(chan->channel),
 		       info->regs + SUN20I_GPADC_CS_EN);
 
 		/* enable the data irq for input channel */
-		writel(SUN20I_GPADC_DATA_INTC_CH_DATA_IRQ_EN(chan->channel),
+		pete_writel("drivers/iio/adc/sun20i-gpadc-iio.c:80", SUN20I_GPADC_DATA_INTC_CH_DATA_IRQ_EN(chan->channel),
 		       info->regs + SUN20I_GPADC_DATA_INTC);
 	}
 
 	/* enable the ADC function */
-	ctrl = readl(info->regs + SUN20I_GPADC_CTRL);
+	ctrl = pete_readl("drivers/iio/adc/sun20i-gpadc-iio.c:85", info->regs + SUN20I_GPADC_CTRL);
 	ctrl |= FIELD_PREP(SUN20I_GPADC_CTRL_ADC_EN_MASK, 1);
-	writel(ctrl, info->regs + SUN20I_GPADC_CTRL);
+	pete_writel("drivers/iio/adc/sun20i-gpadc-iio.c:87", ctrl, info->regs + SUN20I_GPADC_CTRL);
 
 	/*
 	 * According to the datasheet maximum acquire time(TACQ) can be
@@ -99,7 +99,7 @@ static int sun20i_gpadc_adc_read(struct sun20i_gpadc_iio *info,
 	}
 
 	/* read the ADC data */
-	*val = readl(info->regs + SUN20I_GPADC_CH_DATA(chan->channel));
+	*val = pete_readl("drivers/iio/adc/sun20i-gpadc-iio.c:102", info->regs + SUN20I_GPADC_CH_DATA(chan->channel));
 
 err_unlock:
 	mutex_unlock(&info->lock);
@@ -131,7 +131,7 @@ static irqreturn_t sun20i_gpadc_irq_handler(int irq, void *data)
 	struct sun20i_gpadc_iio *info = data;
 
 	/* clear data interrupt status register */
-	writel(GENMASK(31, 0), info->regs + SUN20I_GPADC_DATA_INTS);
+	pete_writel("drivers/iio/adc/sun20i-gpadc-iio.c:134", GENMASK(31, 0), info->regs + SUN20I_GPADC_DATA_INTS);
 
 	complete(&info->completion);
 
@@ -245,7 +245,7 @@ static int sun20i_gpadc_probe(struct platform_device *pdev)
 	if (ret)
 		return dev_err_probe(dev, ret, "failed requesting irq %d\n", irq);
 
-	writel(FIELD_PREP(SUN20I_GPADC_CTRL_ADC_AUTOCALI_EN_MASK, 1) |
+	pete_writel("drivers/iio/adc/sun20i-gpadc-iio.c:248", FIELD_PREP(SUN20I_GPADC_CTRL_ADC_AUTOCALI_EN_MASK, 1) |
 	       FIELD_PREP(SUN20I_GPADC_CTRL_WORK_MODE_MASK, SUN20I_GPADC_WORK_MODE_SINGLE),
 	       info->regs + SUN20I_GPADC_CTRL);
 

@@ -152,16 +152,16 @@ static void dvo_awg_configure(struct sti_dvo *dvo, u32 *awg_ram_code, int nb)
 	DRM_DEBUG_DRIVER("\n");
 
 	for (i = 0; i < nb; i++)
-		writel(awg_ram_code[i],
+		pete_writel("drivers/gpu/drm/sti/sti_dvo.c:155", awg_ram_code[i],
 		       dvo->regs + DVO_DIGSYNC_INSTR_I + i * 4);
 	for (i = nb; i < AWG_MAX_INST; i++)
-		writel(0, dvo->regs + DVO_DIGSYNC_INSTR_I + i * 4);
+		pete_writel("drivers/gpu/drm/sti/sti_dvo.c:158", 0, dvo->regs + DVO_DIGSYNC_INSTR_I + i * 4);
 
-	writel(DVO_AWG_CTRL_EN, dvo->regs + DVO_AWG_DIGSYNC_CTRL);
+	pete_writel("drivers/gpu/drm/sti/sti_dvo.c:160", DVO_AWG_CTRL_EN, dvo->regs + DVO_AWG_DIGSYNC_CTRL);
 }
 
 #define DBGFS_DUMP(reg) seq_printf(s, "\n  %-25s 0x%08X", #reg, \
-				   readl(dvo->regs + reg))
+				   pete_readl("drivers/gpu/drm/sti/sti_dvo.c:164", dvo->regs + reg))
 
 static void dvo_dbg_awg_microcode(struct seq_file *s, void __iomem *reg)
 {
@@ -172,7 +172,7 @@ static void dvo_dbg_awg_microcode(struct seq_file *s, void __iomem *reg)
 	for (i = 0; i < AWG_MAX_INST; i++) {
 		if (i % 8 == 0)
 			seq_printf(s, "\n  %04X:", i);
-		seq_printf(s, " %04X", readl(reg + i * 4));
+		seq_printf(s, " %04X", pete_readl("drivers/gpu/drm/sti/sti_dvo.c:175", reg + i * 4));
 	}
 }
 
@@ -218,9 +218,9 @@ static void sti_dvo_disable(struct drm_bridge *bridge)
 	DRM_DEBUG_DRIVER("\n");
 
 	if (dvo->config->awg_fwgen_fct)
-		writel(0x00000000, dvo->regs + DVO_AWG_DIGSYNC_CTRL);
+		pete_writel("drivers/gpu/drm/sti/sti_dvo.c:221", 0x00000000, dvo->regs + DVO_AWG_DIGSYNC_CTRL);
 
-	writel(0x00000000, dvo->regs + DVO_DOF_CFG);
+	pete_writel("drivers/gpu/drm/sti/sti_dvo.c:223", 0x00000000, dvo->regs + DVO_DOF_CFG);
 
 	drm_panel_disable(dvo->panel);
 
@@ -243,8 +243,8 @@ static void sti_dvo_pre_enable(struct drm_bridge *bridge)
 		return;
 
 	/* Make sure DVO is disabled */
-	writel(0x00000000, dvo->regs + DVO_DOF_CFG);
-	writel(0x00000000, dvo->regs + DVO_AWG_DIGSYNC_CTRL);
+	pete_writel("drivers/gpu/drm/sti/sti_dvo.c:246", 0x00000000, dvo->regs + DVO_DOF_CFG);
+	pete_writel("drivers/gpu/drm/sti/sti_dvo.c:247", 0x00000000, dvo->regs + DVO_AWG_DIGSYNC_CTRL);
 
 	if (config->awg_fwgen_fct) {
 		u8 nb_instr;
@@ -265,13 +265,13 @@ static void sti_dvo_pre_enable(struct drm_bridge *bridge)
 	drm_panel_enable(dvo->panel);
 
 	/* Set LUT */
-	writel(config->lowbyte,  dvo->regs + DVO_LUT_PROG_LOW);
-	writel(config->midbyte,  dvo->regs + DVO_LUT_PROG_MID);
-	writel(config->highbyte, dvo->regs + DVO_LUT_PROG_HIGH);
+	pete_writel("drivers/gpu/drm/sti/sti_dvo.c:268", config->lowbyte,  dvo->regs + DVO_LUT_PROG_LOW);
+	pete_writel("drivers/gpu/drm/sti/sti_dvo.c:269", config->midbyte,  dvo->regs + DVO_LUT_PROG_MID);
+	pete_writel("drivers/gpu/drm/sti/sti_dvo.c:270", config->highbyte, dvo->regs + DVO_LUT_PROG_HIGH);
 
 	/* Digital output formatter config */
 	val = (config->flags | DVO_DOF_EN);
-	writel(val, dvo->regs + DVO_DOF_CFG);
+	pete_writel("drivers/gpu/drm/sti/sti_dvo.c:274", val, dvo->regs + DVO_DOF_CFG);
 
 	dvo->enabled = true;
 }

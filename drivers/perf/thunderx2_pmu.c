@@ -293,12 +293,12 @@ static const struct attribute_group *ccpi2_pmu_attr_groups[] = {
 
 static inline u32 reg_readl(unsigned long addr)
 {
-	return readl((void __iomem *)addr);
+	return pete_readl("drivers/perf/thunderx2_pmu.c:296", (void __iomem *)addr);
 }
 
 static inline void reg_writel(u32 val, unsigned long addr)
 {
-	writel(val, (void __iomem *)addr);
+	pete_writel("drivers/perf/thunderx2_pmu.c:301", val, (void __iomem *)addr);
 }
 
 static int alloc_counter(struct tx2_uncore_pmu *tx2_pmu)

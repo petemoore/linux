@@ -1199,14 +1199,14 @@ static inline void reg_dbg(const struct jme_adapter *jme,
  */
 static inline u32 jread32(struct jme_adapter *jme, u32 reg)
 {
-	return readl(jme->regs + reg);
+	return pete_readl("drivers/net/ethernet/jme.h:1202", jme->regs + reg);
 }
 
 static inline void jwrite32(struct jme_adapter *jme, u32 reg, u32 val)
 {
 	reg_dbg(jme, "REG WRITE", val, reg);
-	writel(val, jme->regs + reg);
-	reg_dbg(jme, "VAL AFTER WRITE", readl(jme->regs + reg), reg);
+	pete_writel("drivers/net/ethernet/jme.h:1208", val, jme->regs + reg);
+	reg_dbg(jme, "VAL AFTER WRITE", pete_readl("drivers/net/ethernet/jme.h:1209", jme->regs + reg), reg);
 }
 
 static inline void jwrite32f(struct jme_adapter *jme, u32 reg, u32 val)
@@ -1215,9 +1215,9 @@ static inline void jwrite32f(struct jme_adapter *jme, u32 reg, u32 val)
 	 * Read after write should cause flush
 	 */
 	reg_dbg(jme, "REG WRITE FLUSH", val, reg);
-	writel(val, jme->regs + reg);
-	readl(jme->regs + reg);
-	reg_dbg(jme, "VAL AFTER WRITE", readl(jme->regs + reg), reg);
+	pete_writel("drivers/net/ethernet/jme.h:1218", val, jme->regs + reg);
+	pete_readl("drivers/net/ethernet/jme.h:1219", jme->regs + reg);
+	reg_dbg(jme, "VAL AFTER WRITE", pete_readl("drivers/net/ethernet/jme.h:1220", jme->regs + reg), reg);
 }
 
 /*

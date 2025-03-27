@@ -59,13 +59,13 @@ wed_r32(struct mtk_wed_device *dev, u32 reg)
 static inline void
 wdma_w32(struct mtk_wed_device *dev, u32 reg, u32 val)
 {
-	writel(val, dev->hw->wdma + reg);
+	pete_writel("drivers/net/ethernet/mediatek/mtk_wed.h:62", val, dev->hw->wdma + reg);
 }
 
 static inline u32
 wdma_r32(struct mtk_wed_device *dev, u32 reg)
 {
-	return readl(dev->hw->wdma + reg);
+	return pete_readl("drivers/net/ethernet/mediatek/mtk_wed.h:68", dev->hw->wdma + reg);
 }
 
 static inline u32
@@ -74,7 +74,7 @@ wpdma_tx_r32(struct mtk_wed_device *dev, int ring, u32 reg)
 	if (!dev->tx_ring[ring].wpdma)
 		return 0;
 
-	return readl(dev->tx_ring[ring].wpdma + reg);
+	return pete_readl("drivers/net/ethernet/mediatek/mtk_wed.h:77", dev->tx_ring[ring].wpdma + reg);
 }
 
 static inline void
@@ -83,7 +83,7 @@ wpdma_tx_w32(struct mtk_wed_device *dev, int ring, u32 reg, u32 val)
 	if (!dev->tx_ring[ring].wpdma)
 		return;
 
-	writel(val, dev->tx_ring[ring].wpdma + reg);
+	pete_writel("drivers/net/ethernet/mediatek/mtk_wed.h:86", val, dev->tx_ring[ring].wpdma + reg);
 }
 
 static inline u32
@@ -92,7 +92,7 @@ wpdma_rx_r32(struct mtk_wed_device *dev, int ring, u32 reg)
 	if (!dev->rx_ring[ring].wpdma)
 		return 0;
 
-	return readl(dev->rx_ring[ring].wpdma + reg);
+	return pete_readl("drivers/net/ethernet/mediatek/mtk_wed.h:95", dev->rx_ring[ring].wpdma + reg);
 }
 
 static inline void
@@ -101,7 +101,7 @@ wpdma_rx_w32(struct mtk_wed_device *dev, int ring, u32 reg, u32 val)
 	if (!dev->rx_ring[ring].wpdma)
 		return;
 
-	writel(val, dev->rx_ring[ring].wpdma + reg);
+	pete_writel("drivers/net/ethernet/mediatek/mtk_wed.h:104", val, dev->rx_ring[ring].wpdma + reg);
 }
 
 static inline u32
@@ -110,7 +110,7 @@ wpdma_txfree_r32(struct mtk_wed_device *dev, u32 reg)
 	if (!dev->txfree_ring.wpdma)
 		return 0;
 
-	return readl(dev->txfree_ring.wpdma + reg);
+	return pete_readl("drivers/net/ethernet/mediatek/mtk_wed.h:113", dev->txfree_ring.wpdma + reg);
 }
 
 static inline void
@@ -119,7 +119,7 @@ wpdma_txfree_w32(struct mtk_wed_device *dev, u32 reg, u32 val)
 	if (!dev->txfree_ring.wpdma)
 		return;
 
-	writel(val, dev->txfree_ring.wpdma + reg);
+	pete_writel("drivers/net/ethernet/mediatek/mtk_wed.h:122", val, dev->txfree_ring.wpdma + reg);
 }
 
 void mtk_wed_add_hw(struct device_node *np, struct mtk_eth *eth,

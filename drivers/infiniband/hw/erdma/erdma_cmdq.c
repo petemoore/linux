@@ -15,7 +15,7 @@ static void arm_cmdq_cq(struct erdma_cmdq *cmdq)
 		      FIELD_PREP(ERDMA_CQDB_IDX_MASK, cmdq->cq.cmdsn);
 
 	*cmdq->cq.db_record = db_data;
-	writeq(db_data, dev->func_bar + ERDMA_CMDQ_CQDB_REG);
+	pete_writeq("drivers/infiniband/hw/erdma/erdma_cmdq.c:18", db_data, dev->func_bar + ERDMA_CMDQ_CQDB_REG);
 
 	atomic64_inc(&cmdq->cq.armed_num);
 }
@@ -26,7 +26,7 @@ static void kick_cmdq_db(struct erdma_cmdq *cmdq)
 	u64 db_data = FIELD_PREP(ERDMA_CMD_HDR_WQEBB_INDEX_MASK, cmdq->sq.pi);
 
 	*cmdq->sq.db_record = db_data;
-	writeq(db_data, dev->func_bar + ERDMA_CMDQ_SQDB_REG);
+	pete_writeq("drivers/infiniband/hw/erdma/erdma_cmdq.c:29", db_data, dev->func_bar + ERDMA_CMDQ_SQDB_REG);
 }
 
 static struct erdma_comp_wait *get_comp_wait(struct erdma_cmdq *cmdq)

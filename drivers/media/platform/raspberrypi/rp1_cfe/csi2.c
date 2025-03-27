@@ -109,12 +109,12 @@ MODULE_PARM_DESC(track_csi2_errors, "track csi-2 errors");
 
 static inline u32 csi2_reg_read(struct csi2_device *csi2, u32 offset)
 {
-	return readl(csi2->base + offset);
+	return pete_readl("drivers/media/platform/raspberrypi/rp1_cfe/csi2.c:112", csi2->base + offset);
 }
 
 static inline void csi2_reg_write(struct csi2_device *csi2, u32 offset, u32 val)
 {
-	writel(val, csi2->base + offset);
+	pete_writel("drivers/media/platform/raspberrypi/rp1_cfe/csi2.c:117", val, csi2->base + offset);
 	csi2_dbg_verbose("csi2: write 0x%04x -> 0x%03x\n", val, offset);
 }
 

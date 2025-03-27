@@ -482,7 +482,7 @@ static void sec_open_sva_prefetch(struct hisi_qm *qm)
 	/* Enable prefetch */
 	val = readl_relaxed(qm->io_base + SEC_PREFETCH_CFG);
 	val &= SEC_PREFETCH_ENABLE;
-	writel(val, qm->io_base + SEC_PREFETCH_CFG);
+	pete_writel("drivers/crypto/hisilicon/sec2/sec_main.c:485", val, qm->io_base + SEC_PREFETCH_CFG);
 
 	ret = readl_relaxed_poll_timeout(qm->io_base + SEC_PREFETCH_CFG,
 					 val, !(val & SEC_PREFETCH_DISABLE),
@@ -501,7 +501,7 @@ static void sec_close_sva_prefetch(struct hisi_qm *qm)
 
 	val = readl_relaxed(qm->io_base + SEC_PREFETCH_CFG);
 	val |= SEC_PREFETCH_DISABLE;
-	writel(val, qm->io_base + SEC_PREFETCH_CFG);
+	pete_writel("drivers/crypto/hisilicon/sec2/sec_main.c:504", val, qm->io_base + SEC_PREFETCH_CFG);
 
 	ret = readl_relaxed_poll_timeout(qm->io_base + SEC_SVA_TRANS,
 					 val, !(val & SEC_SVA_DISABLE_READY),
@@ -521,13 +521,13 @@ static void sec_enable_clock_gate(struct hisi_qm *qm)
 	val |= SEC_CLK_GATE_ENABLE;
 	writel_relaxed(val, qm->io_base + SEC_CONTROL_REG);
 
-	val = readl(qm->io_base + SEC_DYNAMIC_GATE_REG);
+	val = pete_readl("drivers/crypto/hisilicon/sec2/sec_main.c:524", qm->io_base + SEC_DYNAMIC_GATE_REG);
 	val |= SEC_DYNAMIC_GATE_EN;
-	writel(val, qm->io_base + SEC_DYNAMIC_GATE_REG);
+	pete_writel("drivers/crypto/hisilicon/sec2/sec_main.c:526", val, qm->io_base + SEC_DYNAMIC_GATE_REG);
 
-	val = readl(qm->io_base + SEC_CORE_AUTO_GATE);
+	val = pete_readl("drivers/crypto/hisilicon/sec2/sec_main.c:528", qm->io_base + SEC_CORE_AUTO_GATE);
 	val |= SEC_CORE_AUTO_GATE_EN;
-	writel(val, qm->io_base + SEC_CORE_AUTO_GATE);
+	pete_writel("drivers/crypto/hisilicon/sec2/sec_main.c:530", val, qm->io_base + SEC_CORE_AUTO_GATE);
 }
 
 static void sec_disable_clock_gate(struct hisi_qm *qm)
@@ -564,11 +564,11 @@ static int sec_engine_init(struct hisi_qm *qm)
 
 	sec_engine_sva_config(qm);
 
-	writel(SEC_SINGLE_PORT_MAX_TRANS,
+	pete_writel("drivers/crypto/hisilicon/sec2/sec_main.c:567", SEC_SINGLE_PORT_MAX_TRANS,
 	       qm->io_base + AM_CFG_SINGLE_PORT_MAX_TRANS);
 
 	reg = hisi_qm_get_hw_info(qm, sec_basic_info, SEC_CORE_ENABLE_BITMAP, qm->cap_ver);
-	writel(reg, qm->io_base + SEC_SAA_EN_REG);
+	pete_writel("drivers/crypto/hisilicon/sec2/sec_main.c:571", reg, qm->io_base + SEC_SAA_EN_REG);
 
 	if (qm->ver < QM_HW_V3) {
 		/* HW V2 enable sm4 extra mode, as ctr/ecb */
@@ -593,22 +593,22 @@ static int sec_engine_init(struct hisi_qm *qm)
 static int sec_set_user_domain_and_cache(struct hisi_qm *qm)
 {
 	/* qm user domain */
-	writel(AXUSER_BASE, qm->io_base + QM_ARUSER_M_CFG_1);
-	writel(ARUSER_M_CFG_ENABLE, qm->io_base + QM_ARUSER_M_CFG_ENABLE);
-	writel(AXUSER_BASE, qm->io_base + QM_AWUSER_M_CFG_1);
-	writel(AWUSER_M_CFG_ENABLE, qm->io_base + QM_AWUSER_M_CFG_ENABLE);
-	writel(WUSER_M_CFG_ENABLE, qm->io_base + QM_WUSER_M_CFG_ENABLE);
+	pete_writel("drivers/crypto/hisilicon/sec2/sec_main.c:596", AXUSER_BASE, qm->io_base + QM_ARUSER_M_CFG_1);
+	pete_writel("drivers/crypto/hisilicon/sec2/sec_main.c:597", ARUSER_M_CFG_ENABLE, qm->io_base + QM_ARUSER_M_CFG_ENABLE);
+	pete_writel("drivers/crypto/hisilicon/sec2/sec_main.c:598", AXUSER_BASE, qm->io_base + QM_AWUSER_M_CFG_1);
+	pete_writel("drivers/crypto/hisilicon/sec2/sec_main.c:599", AWUSER_M_CFG_ENABLE, qm->io_base + QM_AWUSER_M_CFG_ENABLE);
+	pete_writel("drivers/crypto/hisilicon/sec2/sec_main.c:600", WUSER_M_CFG_ENABLE, qm->io_base + QM_WUSER_M_CFG_ENABLE);
 
 	/* qm cache */
-	writel(AXI_M_CFG, qm->io_base + QM_AXI_M_CFG);
-	writel(AXI_M_CFG_ENABLE, qm->io_base + QM_AXI_M_CFG_ENABLE);
+	pete_writel("drivers/crypto/hisilicon/sec2/sec_main.c:603", AXI_M_CFG, qm->io_base + QM_AXI_M_CFG);
+	pete_writel("drivers/crypto/hisilicon/sec2/sec_main.c:604", AXI_M_CFG_ENABLE, qm->io_base + QM_AXI_M_CFG_ENABLE);
 
 	/* disable FLR triggered by BME(bus master enable) */
-	writel(PEH_AXUSER_CFG, qm->io_base + QM_PEH_AXUSER_CFG);
-	writel(PEH_AXUSER_CFG_ENABLE, qm->io_base + QM_PEH_AXUSER_CFG_ENABLE);
+	pete_writel("drivers/crypto/hisilicon/sec2/sec_main.c:607", PEH_AXUSER_CFG, qm->io_base + QM_PEH_AXUSER_CFG);
+	pete_writel("drivers/crypto/hisilicon/sec2/sec_main.c:608", PEH_AXUSER_CFG_ENABLE, qm->io_base + QM_PEH_AXUSER_CFG_ENABLE);
 
 	/* enable sqc,cqc writeback */
-	writel(SQC_CACHE_ENABLE | CQC_CACHE_ENABLE | SQC_CACHE_WB_ENABLE |
+	pete_writel("drivers/crypto/hisilicon/sec2/sec_main.c:611", SQC_CACHE_ENABLE | CQC_CACHE_ENABLE | SQC_CACHE_WB_ENABLE |
 	       CQC_CACHE_WB_ENABLE | FIELD_PREP(SQC_CACHE_WB_THRD, 1) |
 	       FIELD_PREP(CQC_CACHE_WB_THRD, 1), qm->io_base + QM_CACHE_CTL);
 
@@ -621,12 +621,12 @@ static void sec_debug_regs_clear(struct hisi_qm *qm)
 	int i;
 
 	/* clear sec dfx regs */
-	writel(0x1, qm->io_base + SEC_CTRL_CNT_CLR_CE);
+	pete_writel("drivers/crypto/hisilicon/sec2/sec_main.c:624", 0x1, qm->io_base + SEC_CTRL_CNT_CLR_CE);
 	for (i = 0; i < ARRAY_SIZE(sec_dfx_regs); i++)
-		readl(qm->io_base + sec_dfx_regs[i].offset);
+		pete_readl("drivers/crypto/hisilicon/sec2/sec_main.c:626", qm->io_base + sec_dfx_regs[i].offset);
 
 	/* clear rdclr_en */
-	writel(0x0, qm->io_base + SEC_CTRL_CNT_CLR_CE);
+	pete_writel("drivers/crypto/hisilicon/sec2/sec_main.c:629", 0x0, qm->io_base + SEC_CTRL_CNT_CLR_CE);
 
 	hisi_qm_debug_regs_clear(qm);
 }
@@ -635,7 +635,7 @@ static void sec_master_ooo_ctrl(struct hisi_qm *qm, bool enable)
 {
 	u32 val1, val2;
 
-	val1 = readl(qm->io_base + SEC_CONTROL_REG);
+	val1 = pete_readl("drivers/crypto/hisilicon/sec2/sec_main.c:638", qm->io_base + SEC_CONTROL_REG);
 	if (enable) {
 		val1 |= SEC_AXI_SHUTDOWN_ENABLE;
 		val2 = hisi_qm_get_hw_info(qm, sec_basic_info,
@@ -646,9 +646,9 @@ static void sec_master_ooo_ctrl(struct hisi_qm *qm, bool enable)
 	}
 
 	if (qm->ver > QM_HW_V2)
-		writel(val2, qm->io_base + SEC_OOO_SHUTDOWN_SEL);
+		pete_writel("drivers/crypto/hisilicon/sec2/sec_main.c:649", val2, qm->io_base + SEC_OOO_SHUTDOWN_SEL);
 
-	writel(val1, qm->io_base + SEC_CONTROL_REG);
+	pete_writel("drivers/crypto/hisilicon/sec2/sec_main.c:651", val1, qm->io_base + SEC_CONTROL_REG);
 }
 
 static void sec_hw_error_enable(struct hisi_qm *qm)
@@ -656,7 +656,7 @@ static void sec_hw_error_enable(struct hisi_qm *qm)
 	u32 ce, nfe;
 
 	if (qm->ver == QM_HW_V1) {
-		writel(SEC_CORE_INT_DISABLE, qm->io_base + SEC_CORE_INT_MASK);
+		pete_writel("drivers/crypto/hisilicon/sec2/sec_main.c:659", SEC_CORE_INT_DISABLE, qm->io_base + SEC_CORE_INT_MASK);
 		pci_info(qm->pdev, "V1 not support hw error handle\n");
 		return;
 	}
@@ -665,37 +665,37 @@ static void sec_hw_error_enable(struct hisi_qm *qm)
 	nfe = hisi_qm_get_hw_info(qm, sec_basic_info, SEC_NFE_MASK_CAP, qm->cap_ver);
 
 	/* clear SEC hw error source if having */
-	writel(ce | nfe | SEC_RAS_FE_ENB_MSK, qm->io_base + SEC_CORE_INT_SOURCE);
+	pete_writel("drivers/crypto/hisilicon/sec2/sec_main.c:668", ce | nfe | SEC_RAS_FE_ENB_MSK, qm->io_base + SEC_CORE_INT_SOURCE);
 
 	/* enable RAS int */
-	writel(ce, qm->io_base + SEC_RAS_CE_REG);
-	writel(SEC_RAS_FE_ENB_MSK, qm->io_base + SEC_RAS_FE_REG);
-	writel(nfe, qm->io_base + SEC_RAS_NFE_REG);
+	pete_writel("drivers/crypto/hisilicon/sec2/sec_main.c:671", ce, qm->io_base + SEC_RAS_CE_REG);
+	pete_writel("drivers/crypto/hisilicon/sec2/sec_main.c:672", SEC_RAS_FE_ENB_MSK, qm->io_base + SEC_RAS_FE_REG);
+	pete_writel("drivers/crypto/hisilicon/sec2/sec_main.c:673", nfe, qm->io_base + SEC_RAS_NFE_REG);
 
 	/* enable SEC block master OOO when nfe occurs on Kunpeng930 */
 	sec_master_ooo_ctrl(qm, true);
 
 	/* enable SEC hw error interrupts */
-	writel(ce | nfe | SEC_RAS_FE_ENB_MSK, qm->io_base + SEC_CORE_INT_MASK);
+	pete_writel("drivers/crypto/hisilicon/sec2/sec_main.c:679", ce | nfe | SEC_RAS_FE_ENB_MSK, qm->io_base + SEC_CORE_INT_MASK);
 }
 
 static void sec_hw_error_disable(struct hisi_qm *qm)
 {
 	/* disable SEC hw error interrupts */
-	writel(SEC_CORE_INT_DISABLE, qm->io_base + SEC_CORE_INT_MASK);
+	pete_writel("drivers/crypto/hisilicon/sec2/sec_main.c:685", SEC_CORE_INT_DISABLE, qm->io_base + SEC_CORE_INT_MASK);
 
 	/* disable SEC block master OOO when nfe occurs on Kunpeng930 */
 	sec_master_ooo_ctrl(qm, false);
 
 	/* disable RAS int */
-	writel(SEC_RAS_DISABLE, qm->io_base + SEC_RAS_CE_REG);
-	writel(SEC_RAS_DISABLE, qm->io_base + SEC_RAS_FE_REG);
-	writel(SEC_RAS_DISABLE, qm->io_base + SEC_RAS_NFE_REG);
+	pete_writel("drivers/crypto/hisilicon/sec2/sec_main.c:691", SEC_RAS_DISABLE, qm->io_base + SEC_RAS_CE_REG);
+	pete_writel("drivers/crypto/hisilicon/sec2/sec_main.c:692", SEC_RAS_DISABLE, qm->io_base + SEC_RAS_FE_REG);
+	pete_writel("drivers/crypto/hisilicon/sec2/sec_main.c:693", SEC_RAS_DISABLE, qm->io_base + SEC_RAS_NFE_REG);
 }
 
 static u32 sec_clear_enable_read(struct hisi_qm *qm)
 {
-	return readl(qm->io_base + SEC_CTRL_CNT_CLR_CE) &
+	return pete_readl("drivers/crypto/hisilicon/sec2/sec_main.c:698", qm->io_base + SEC_CTRL_CNT_CLR_CE) &
 			SEC_CTRL_CNT_CLR_CE_BIT;
 }
 
@@ -706,9 +706,9 @@ static int sec_clear_enable_write(struct hisi_qm *qm, u32 val)
 	if (val != 1 && val)
 		return -EINVAL;
 
-	tmp = (readl(qm->io_base + SEC_CTRL_CNT_CLR_CE) &
+	tmp = (pete_readl("drivers/crypto/hisilicon/sec2/sec_main.c:709", qm->io_base + SEC_CTRL_CNT_CLR_CE) &
 	       ~SEC_CTRL_CNT_CLR_CE_BIT) | val;
-	writel(tmp, qm->io_base + SEC_CTRL_CNT_CLR_CE);
+	pete_writel("drivers/crypto/hisilicon/sec2/sec_main.c:711", tmp, qm->io_base + SEC_CTRL_CNT_CLR_CE);
 
 	return 0;
 }
@@ -988,7 +988,7 @@ static void sec_log_hw_error(struct hisi_qm *qm, u32 err_sts)
 					errs->msg, errs->int_msk);
 
 			if (SEC_CORE_INT_STATUS_M_ECC & errs->int_msk) {
-				err_val = readl(qm->io_base +
+				err_val = pete_readl("drivers/crypto/hisilicon/sec2/sec_main.c:991", qm->io_base +
 						SEC_CORE_SRAM_ECC_ERR_INFO);
 				dev_err(dev, "multi ecc sram num=0x%x\n",
 						((err_val) >> SEC_ECC_NUM) &
@@ -1001,12 +1001,12 @@ static void sec_log_hw_error(struct hisi_qm *qm, u32 err_sts)
 
 static u32 sec_get_hw_err_status(struct hisi_qm *qm)
 {
-	return readl(qm->io_base + SEC_CORE_INT_STATUS);
+	return pete_readl("drivers/crypto/hisilicon/sec2/sec_main.c:1004", qm->io_base + SEC_CORE_INT_STATUS);
 }
 
 static void sec_clear_hw_err_status(struct hisi_qm *qm, u32 err_sts)
 {
-	writel(err_sts, qm->io_base + SEC_CORE_INT_SOURCE);
+	pete_writel("drivers/crypto/hisilicon/sec2/sec_main.c:1009", err_sts, qm->io_base + SEC_CORE_INT_SOURCE);
 }
 
 static void sec_disable_error_report(struct hisi_qm *qm, u32 err_type)
@@ -1014,16 +1014,16 @@ static void sec_disable_error_report(struct hisi_qm *qm, u32 err_type)
 	u32 nfe_mask;
 
 	nfe_mask = hisi_qm_get_hw_info(qm, sec_basic_info, SEC_NFE_MASK_CAP, qm->cap_ver);
-	writel(nfe_mask & (~err_type), qm->io_base + SEC_RAS_NFE_REG);
+	pete_writel("drivers/crypto/hisilicon/sec2/sec_main.c:1017", nfe_mask & (~err_type), qm->io_base + SEC_RAS_NFE_REG);
 }
 
 static void sec_open_axi_master_ooo(struct hisi_qm *qm)
 {
 	u32 val;
 
-	val = readl(qm->io_base + SEC_CONTROL_REG);
-	writel(val & SEC_AXI_SHUTDOWN_DISABLE, qm->io_base + SEC_CONTROL_REG);
-	writel(val | SEC_AXI_SHUTDOWN_ENABLE, qm->io_base + SEC_CONTROL_REG);
+	val = pete_readl("drivers/crypto/hisilicon/sec2/sec_main.c:1024", qm->io_base + SEC_CONTROL_REG);
+	pete_writel("drivers/crypto/hisilicon/sec2/sec_main.c:1025", val & SEC_AXI_SHUTDOWN_DISABLE, qm->io_base + SEC_CONTROL_REG);
+	pete_writel("drivers/crypto/hisilicon/sec2/sec_main.c:1026", val | SEC_AXI_SHUTDOWN_ENABLE, qm->io_base + SEC_CONTROL_REG);
 }
 
 static enum acc_err_result sec_get_err_result(struct hisi_qm *qm)

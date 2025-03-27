@@ -162,7 +162,7 @@ ti_msgmgr_queue_get_num_messages(const struct ti_msgmgr_desc *d,
 	 * We cannot use relaxed operation here - update may happen
 	 * real-time.
 	 */
-	val = readl(qinst->queue_state) & status_cnt_mask;
+	val = pete_readl("drivers/mailbox/ti-msgmgr.c:165", qinst->queue_state) & status_cnt_mask;
 	val >>= __ffs(status_cnt_mask);
 
 	return val;
@@ -188,7 +188,7 @@ static inline bool ti_msgmgr_queue_is_error(const struct ti_msgmgr_desc *d,
 	 * We cannot use relaxed operation here - update may happen
 	 * real-time.
 	 */
-	val = readl(qinst->queue_state) & d->status_err_mask;
+	val = pete_readl("drivers/mailbox/ti-msgmgr.c:191", qinst->queue_state) & d->status_err_mask;
 
 	return val ? true : false;
 }
@@ -227,7 +227,7 @@ static int ti_msgmgr_queue_rx_data(struct mbox_chan *chan, struct ti_queue_inst 
 	for (data_reg = qinst->queue_buff_start, word_data = qinst->rx_buff,
 	     num_words = (desc->max_message_size / sizeof(u32));
 	     num_words; num_words--, data_reg += sizeof(u32), word_data++)
-		*word_data = readl(data_reg);
+		*word_data = pete_readl("drivers/mailbox/ti-msgmgr.c:230", data_reg);
 
 	/*
 	 * Last register read automatically clears the IRQ if only 1 message
@@ -421,7 +421,7 @@ static int ti_msgmgr_send_data(struct mbox_chan *chan, void *data)
 	     num_words = message->len / sizeof(u32),
 	     word_data = (u32 *)message->buf;
 	     num_words; num_words--, data_reg += sizeof(u32), word_data++)
-		writel(*word_data, data_reg);
+		pete_writel("drivers/mailbox/ti-msgmgr.c:424", *word_data, data_reg);
 
 	trail_bytes = message->len % sizeof(u32);
 	if (trail_bytes) {
@@ -429,7 +429,7 @@ static int ti_msgmgr_send_data(struct mbox_chan *chan, void *data)
 
 		/* Ensure all unused data is 0 */
 		data_trail &= 0xFFFFFFFF >> (8 * (sizeof(u32) - trail_bytes));
-		writel(data_trail, data_reg);
+		pete_writel("drivers/mailbox/ti-msgmgr.c:432", data_trail, data_reg);
 		data_reg += sizeof(u32);
 	}
 
@@ -441,7 +441,7 @@ static int ti_msgmgr_send_data(struct mbox_chan *chan, void *data)
 	 * compatibility to be maintained.
 	 */
 	while (data_reg <= qinst->queue_buff_end) {
-		writel(0, data_reg);
+		pete_writel("drivers/mailbox/ti-msgmgr.c:444", 0, data_reg);
 		data_reg += sizeof(u32);
 	}
 
@@ -520,7 +520,7 @@ static int ti_msgmgr_queue_startup(struct mbox_chan *chan)
 	 * else Rx
 	 */
 	if (d->is_sproxy) {
-		qinst->is_tx = (readl(qinst->queue_ctrl) &
+		qinst->is_tx = (pete_readl("drivers/mailbox/ti-msgmgr.c:523", qinst->queue_ctrl) &
 				SPROXY_THREAD_CTRL_DIR_MASK) ? false : true;
 
 		msg_count = ti_msgmgr_queue_get_num_messages(d, qinst);

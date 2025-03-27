@@ -689,16 +689,16 @@ int acpi_os_read_iomem(void __iomem *virt_addr, u64 *value, u32 width)
 
 	switch (width) {
 	case 8:
-		*(u8 *) value = readb(virt_addr);
+		*(u8 *) value = pete_readb("drivers/acpi/osl.c:692", virt_addr);
 		break;
 	case 16:
-		*(u16 *) value = readw(virt_addr);
+		*(u16 *) value = pete_readw("drivers/acpi/osl.c:695", virt_addr);
 		break;
 	case 32:
-		*(u32 *) value = readl(virt_addr);
+		*(u32 *) value = pete_readl("drivers/acpi/osl.c:698", virt_addr);
 		break;
 	case 64:
-		*(u64 *) value = readq(virt_addr);
+		*(u64 *) value = pete_readq("drivers/acpi/osl.c:701", virt_addr);
 		break;
 	default:
 		return -EINVAL;
@@ -759,16 +759,16 @@ acpi_os_write_memory(acpi_physical_address phys_addr, u64 value, u32 width)
 
 	switch (width) {
 	case 8:
-		writeb(value, virt_addr);
+		pete_writeb("drivers/acpi/osl.c:762", value, virt_addr);
 		break;
 	case 16:
-		writew(value, virt_addr);
+		pete_writew("drivers/acpi/osl.c:765", value, virt_addr);
 		break;
 	case 32:
-		writel(value, virt_addr);
+		pete_writel("drivers/acpi/osl.c:768", value, virt_addr);
 		break;
 	case 64:
-		writeq(value, virt_addr);
+		pete_writeq("drivers/acpi/osl.c:771", value, virt_addr);
 		break;
 	default:
 		BUG();

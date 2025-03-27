@@ -102,7 +102,7 @@ static int hdaml_lnk_enum(struct device *dev, struct hdac_ext2_link *h2link,
 	struct hdac_ext_link *hlink = &h2link->hext_link;
 	u32 base_offset;
 
-	hlink->lcaps  = readl(ml_addr + AZX_REG_ML_LCAP);
+	hlink->lcaps  = pete_readl("sound/soc/sof/intel/hda-mlink.c:105", ml_addr + AZX_REG_ML_LCAP);
 
 	h2link->alt = FIELD_GET(AZX_ML_HDA_LCAP_ALT, hlink->lcaps);
 
@@ -114,7 +114,7 @@ static int hdaml_lnk_enum(struct device *dev, struct hdac_ext2_link *h2link,
 		 * LSDIID is initialized by hardware for HDaudio link,
 		 * it needs to be setup by software for alternate links
 		 */
-		hlink->lsdiid = readw(ml_addr + AZX_REG_ML_LSDIID);
+		hlink->lsdiid = pete_readw("sound/soc/sof/intel/hda-mlink.c:117", ml_addr + AZX_REG_ML_LSDIID);
 
 		dev_dbg(dev, "Link %d: HDAudio - lsdiid=%d\n",
 			link_idx, hlink->lsdiid);
@@ -132,7 +132,7 @@ static int hdaml_lnk_enum(struct device *dev, struct hdac_ext2_link *h2link,
 		link_idx, h2link->slcount);
 
 	/* find IP ID and offsets */
-	h2link->leptr = readl(ml_addr + AZX_REG_ML_LEPTR);
+	h2link->leptr = pete_readl("sound/soc/sof/intel/hda-mlink.c:135", ml_addr + AZX_REG_ML_LEPTR);
 
 	h2link->elid = FIELD_GET(AZX_REG_ML_LEPTR_ID, h2link->leptr);
 
@@ -197,7 +197,7 @@ static int check_sublink_power(u32 __iomem *lctl, int sublink, bool enabled)
 	usleep_range(HDAML_POLL_DELAY_MIN_US,
 		     HDAML_POLL_DELAY_MIN_US + HDAML_POLL_DELAY_SLACK_US);
 	do {
-		val = readl(lctl);
+		val = pete_readl("sound/soc/sof/intel/hda-mlink.c:200", lctl);
 		if (enabled) {
 			if (val & mask)
 				return 0;
@@ -218,10 +218,10 @@ static int hdaml_link_init(u32 __iomem *lctl, int sublink)
 	u32 val;
 	u32 mask = BIT(sublink) << AZX_ML_LCTL_SPA_SHIFT;
 
-	val = readl(lctl);
+	val = pete_readl("sound/soc/sof/intel/hda-mlink.c:221", lctl);
 	val |= mask;
 
-	writel(val, lctl);
+	pete_writel("sound/soc/sof/intel/hda-mlink.c:224", val, lctl);
 
 	return check_sublink_power(lctl, sublink, true);
 }
@@ -231,11 +231,11 @@ static int hdaml_link_shutdown(u32 __iomem *lctl, int sublink)
 	u32 val;
 	u32 mask;
 
-	val = readl(lctl);
+	val = pete_readl("sound/soc/sof/intel/hda-mlink.c:234", lctl);
 	mask = BIT(sublink) << AZX_ML_LCTL_SPA_SHIFT;
 	val &= ~mask;
 
-	writel(val, lctl);
+	pete_writel("sound/soc/sof/intel/hda-mlink.c:238", val, lctl);
 
 	return check_sublink_power(lctl, sublink, false);
 }
@@ -244,20 +244,20 @@ static void hdaml_link_enable_interrupt(u32 __iomem *lctl, bool enable)
 {
 	u32 val;
 
-	val = readl(lctl);
+	val = pete_readl("sound/soc/sof/intel/hda-mlink.c:247", lctl);
 	if (enable)
 		val |= AZX_ML_LCTL_INTEN;
 	else
 		val &= ~AZX_ML_LCTL_INTEN;
 
-	writel(val, lctl);
+	pete_writel("sound/soc/sof/intel/hda-mlink.c:253", val, lctl);
 }
 
 static bool hdaml_link_check_interrupt(u32 __iomem *lctl)
 {
 	u32 val;
 
-	val = readl(lctl);
+	val = pete_readl("sound/soc/sof/intel/hda-mlink.c:260", lctl);
 
 	return val & AZX_ML_LCTL_INTSTS;
 }
@@ -268,7 +268,7 @@ static int hdaml_wait_bit(void __iomem *base, int offset, u32 mask, u32 target)
 	u32 reg_read;
 
 	do {
-		reg_read = readl(base + offset);
+		reg_read = pete_readl("sound/soc/sof/intel/hda-mlink.c:271", base + offset);
 		if ((reg_read & mask) == target)
 			return 0;
 
@@ -284,7 +284,7 @@ static void hdaml_link_set_syncprd(u32 __iomem *lsync, u32 syncprd)
 {
 	u32 val;
 
-	val = readl(lsync);
+	val = pete_readl("sound/soc/sof/intel/hda-mlink.c:287", lsync);
 	val &= ~AZX_REG_ML_LSYNC_SYNCPRD;
 	val |= (syncprd & AZX_REG_ML_LSYNC_SYNCPRD);
 
@@ -294,7 +294,7 @@ static void hdaml_link_set_syncprd(u32 __iomem *lsync, u32 syncprd)
 	 */
 	val |= AZX_REG_ML_LSYNC_SYNCPU;
 
-	writel(val, lsync);
+	pete_writel("sound/soc/sof/intel/hda-mlink.c:297", val, lsync);
 }
 
 static int hdaml_link_wait_syncpu(u32 __iomem *lsync)
@@ -306,44 +306,44 @@ static void hdaml_link_sync_arm(u32 __iomem *lsync, int sublink)
 {
 	u32 val;
 
-	val = readl(lsync);
+	val = pete_readl("sound/soc/sof/intel/hda-mlink.c:309", lsync);
 	val |= (AZX_REG_ML_LSYNC_CMDSYNC << sublink);
 
-	writel(val, lsync);
+	pete_writel("sound/soc/sof/intel/hda-mlink.c:312", val, lsync);
 }
 
 static void hdaml_link_sync_go(u32 __iomem *lsync)
 {
 	u32 val;
 
-	val = readl(lsync);
+	val = pete_readl("sound/soc/sof/intel/hda-mlink.c:319", lsync);
 	val |= AZX_REG_ML_LSYNC_SYNCGO;
 
-	writel(val, lsync);
+	pete_writel("sound/soc/sof/intel/hda-mlink.c:322", val, lsync);
 }
 
 static bool hdaml_link_check_cmdsync(u32 __iomem *lsync, u32 cmdsync_mask)
 {
 	u32 val;
 
-	val = readl(lsync);
+	val = pete_readl("sound/soc/sof/intel/hda-mlink.c:329", lsync);
 
 	return !!(val & cmdsync_mask);
 }
 
 static u16 hdaml_link_get_lsdiid(u16 __iomem *lsdiid)
 {
-	return readw(lsdiid);
+	return pete_readw("sound/soc/sof/intel/hda-mlink.c:336", lsdiid);
 }
 
 static void hdaml_link_set_lsdiid(u16 __iomem *lsdiid, int dev_num)
 {
 	u16 val;
 
-	val = readw(lsdiid);
+	val = pete_readw("sound/soc/sof/intel/hda-mlink.c:343", lsdiid);
 	val |= BIT(dev_num);
 
-	writew(val, lsdiid);
+	pete_writew("sound/soc/sof/intel/hda-mlink.c:346", val, lsdiid);
 }
 
 static void hdaml_shim_map_stream_ch(u16 __iomem *pcmsycm, int lchan, int hchan,
@@ -351,26 +351,26 @@ static void hdaml_shim_map_stream_ch(u16 __iomem *pcmsycm, int lchan, int hchan,
 {
 	u16 val;
 
-	val = readw(pcmsycm);
+	val = pete_readw("sound/soc/sof/intel/hda-mlink.c:354", pcmsycm);
 
 	u16p_replace_bits(&val, lchan, GENMASK(3, 0));
 	u16p_replace_bits(&val, hchan, GENMASK(7, 4));
 	u16p_replace_bits(&val, stream_id, GENMASK(13, 8));
 	u16p_replace_bits(&val, dir, BIT(15));
 
-	writew(val, pcmsycm);
+	pete_writew("sound/soc/sof/intel/hda-mlink.c:361", val, pcmsycm);
 }
 
 static void hdaml_lctl_offload_enable(u32 __iomem *lctl, bool enable)
 {
-	u32 val = readl(lctl);
+	u32 val = pete_readl("sound/soc/sof/intel/hda-mlink.c:366", lctl);
 
 	if (enable)
 		val |=  AZX_ML_LCTL_OFLEN;
 	else
 		val &=  ~AZX_ML_LCTL_OFLEN;
 
-	writel(val, lctl);
+	pete_writel("sound/soc/sof/intel/hda-mlink.c:373", val, lctl);
 }
 
 /* END HDAML section */
@@ -421,7 +421,7 @@ int hda_bus_ml_init(struct hdac_bus *bus)
 	if (!bus->mlcap)
 		return 0;
 
-	link_count = readl(bus->mlcap + AZX_REG_ML_MLCD) + 1;
+	link_count = pete_readl("sound/soc/sof/intel/hda-mlink.c:424", bus->mlcap + AZX_REG_ML_MLCD) + 1;
 
 	dev_dbg(bus->dev, "HDAudio Multi-Link count: %d\n", link_count);
 
@@ -829,7 +829,7 @@ int hdac_bus_eml_sdw_map_stream_ch(struct hdac_bus *bus, int sublink, int y,
 
 	mutex_unlock(&h2link->eml_lock);
 
-	val = readw(pcmsycm);
+	val = pete_readw("sound/soc/sof/intel/hda-mlink.c:832", pcmsycm);
 
 	dev_dbg(bus->dev, "sublink %d channel_mask %#x stream_id %d dir %d pcmscm %#x\n",
 		sublink, channel_mask, stream_id, dir, val);
@@ -856,7 +856,7 @@ void hda_bus_ml_reset_losidv(struct hdac_bus *bus)
 
 	/* Reset stream-to-link mapping */
 	list_for_each_entry(hlink, &bus->hlink_list, list)
-		writel(0, hlink->ml_addr + AZX_REG_ML_LOSIDV);
+		pete_writel("sound/soc/sof/intel/hda-mlink.c:859", 0, hlink->ml_addr + AZX_REG_ML_LOSIDV);
 }
 EXPORT_SYMBOL_NS(hda_bus_ml_reset_losidv, SND_SOC_SOF_HDA_MLINK);
 

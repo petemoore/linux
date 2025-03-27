@@ -1042,7 +1042,7 @@ to_hns_mmap(struct rdma_user_mmap_entry *rdma_entry)
 
 static inline void hns_roce_write64_k(__le32 val[2], void __iomem *dest)
 {
-	writeq(*(u64 *)val, dest);
+	pete_writeq("drivers/infiniband/hw/hns/hns_roce_device.h:1045", *(u64 *)val, dest);
 }
 
 static inline struct hns_roce_qp

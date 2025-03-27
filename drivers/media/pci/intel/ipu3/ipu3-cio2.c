@@ -369,28 +369,28 @@ static int cio2_hw_init(struct cio2_device *cio2, struct cio2_queue *q)
 	if (r)
 		return r;
 
-	writel(timing.clk_termen, q->csi_rx_base +
+	pete_writel("drivers/media/pci/intel/ipu3/ipu3-cio2.c:372", timing.clk_termen, q->csi_rx_base +
 		CIO2_REG_CSIRX_DLY_CNT_TERMEN(CIO2_CSIRX_DLY_CNT_CLANE_IDX));
-	writel(timing.clk_settle, q->csi_rx_base +
+	pete_writel("drivers/media/pci/intel/ipu3/ipu3-cio2.c:374", timing.clk_settle, q->csi_rx_base +
 		CIO2_REG_CSIRX_DLY_CNT_SETTLE(CIO2_CSIRX_DLY_CNT_CLANE_IDX));
 
 	for (i = 0; i < lanes; i++) {
-		writel(timing.dat_termen, q->csi_rx_base +
+		pete_writel("drivers/media/pci/intel/ipu3/ipu3-cio2.c:378", timing.dat_termen, q->csi_rx_base +
 			CIO2_REG_CSIRX_DLY_CNT_TERMEN(i));
-		writel(timing.dat_settle, q->csi_rx_base +
+		pete_writel("drivers/media/pci/intel/ipu3/ipu3-cio2.c:380", timing.dat_settle, q->csi_rx_base +
 			CIO2_REG_CSIRX_DLY_CNT_SETTLE(i));
 	}
 
-	writel(CIO2_PBM_WMCTRL1_MIN_2CK |
+	pete_writel("drivers/media/pci/intel/ipu3/ipu3-cio2.c:384", CIO2_PBM_WMCTRL1_MIN_2CK |
 	       CIO2_PBM_WMCTRL1_MID1_2CK |
 	       CIO2_PBM_WMCTRL1_MID2_2CK, base + CIO2_REG_PBM_WMCTRL1);
-	writel(CIO2_PBM_WMCTRL2_HWM_2CK << CIO2_PBM_WMCTRL2_HWM_2CK_SHIFT |
+	pete_writel("drivers/media/pci/intel/ipu3/ipu3-cio2.c:387", CIO2_PBM_WMCTRL2_HWM_2CK << CIO2_PBM_WMCTRL2_HWM_2CK_SHIFT |
 	       CIO2_PBM_WMCTRL2_LWM_2CK << CIO2_PBM_WMCTRL2_LWM_2CK_SHIFT |
 	       CIO2_PBM_WMCTRL2_OBFFWM_2CK <<
 	       CIO2_PBM_WMCTRL2_OBFFWM_2CK_SHIFT |
 	       CIO2_PBM_WMCTRL2_TRANSDYN << CIO2_PBM_WMCTRL2_TRANSDYN_SHIFT |
 	       CIO2_PBM_WMCTRL2_OBFF_MEM_EN, base + CIO2_REG_PBM_WMCTRL2);
-	writel(CIO2_PBM_ARB_CTRL_LANES_DIV <<
+	pete_writel("drivers/media/pci/intel/ipu3/ipu3-cio2.c:393", CIO2_PBM_ARB_CTRL_LANES_DIV <<
 	       CIO2_PBM_ARB_CTRL_LANES_DIV_SHIFT |
 	       CIO2_PBM_ARB_CTRL_LE_EN |
 	       CIO2_PBM_ARB_CTRL_PLL_POST_SHTDN <<
@@ -398,49 +398,49 @@ static int cio2_hw_init(struct cio2_device *cio2, struct cio2_queue *q)
 	       CIO2_PBM_ARB_CTRL_PLL_AHD_WK_UP <<
 	       CIO2_PBM_ARB_CTRL_PLL_AHD_WK_UP_SHIFT,
 	       base + CIO2_REG_PBM_ARB_CTRL);
-	writel(CIO2_CSIRX_STATUS_DLANE_HS_MASK,
+	pete_writel("drivers/media/pci/intel/ipu3/ipu3-cio2.c:401", CIO2_CSIRX_STATUS_DLANE_HS_MASK,
 	       q->csi_rx_base + CIO2_REG_CSIRX_STATUS_DLANE_HS);
-	writel(CIO2_CSIRX_STATUS_DLANE_LP_MASK,
+	pete_writel("drivers/media/pci/intel/ipu3/ipu3-cio2.c:403", CIO2_CSIRX_STATUS_DLANE_LP_MASK,
 	       q->csi_rx_base + CIO2_REG_CSIRX_STATUS_DLANE_LP);
 
-	writel(CIO2_FB_HPLL_FREQ, base + CIO2_REG_FB_HPLL_FREQ);
-	writel(CIO2_ISCLK_RATIO, base + CIO2_REG_ISCLK_RATIO);
+	pete_writel("drivers/media/pci/intel/ipu3/ipu3-cio2.c:406", CIO2_FB_HPLL_FREQ, base + CIO2_REG_FB_HPLL_FREQ);
+	pete_writel("drivers/media/pci/intel/ipu3/ipu3-cio2.c:407", CIO2_ISCLK_RATIO, base + CIO2_REG_ISCLK_RATIO);
 
 	/* Configure MIPI backend */
 	for (i = 0; i < NUM_VCS; i++)
-		writel(1, q->csi_rx_base + CIO2_REG_MIPIBE_SP_LUT_ENTRY(i));
+		pete_writel("drivers/media/pci/intel/ipu3/ipu3-cio2.c:411", 1, q->csi_rx_base + CIO2_REG_MIPIBE_SP_LUT_ENTRY(i));
 
 	/* There are 16 short packet LUT entry */
 	for (i = 0; i < 16; i++)
-		writel(CIO2_MIPIBE_LP_LUT_ENTRY_DISREGARD,
+		pete_writel("drivers/media/pci/intel/ipu3/ipu3-cio2.c:415", CIO2_MIPIBE_LP_LUT_ENTRY_DISREGARD,
 		       q->csi_rx_base + CIO2_REG_MIPIBE_LP_LUT_ENTRY(i));
-	writel(CIO2_MIPIBE_GLOBAL_LUT_DISREGARD,
+	pete_writel("drivers/media/pci/intel/ipu3/ipu3-cio2.c:417", CIO2_MIPIBE_GLOBAL_LUT_DISREGARD,
 	       q->csi_rx_base + CIO2_REG_MIPIBE_GLOBAL_LUT_DISREGARD);
 
-	writel(CIO2_INT_EN_EXT_IE_MASK, base + CIO2_REG_INT_EN_EXT_IE);
-	writel(CIO2_IRQCTRL_MASK, q->csi_rx_base + CIO2_REG_IRQCTRL_MASK);
-	writel(CIO2_IRQCTRL_MASK, q->csi_rx_base + CIO2_REG_IRQCTRL_ENABLE);
-	writel(0, q->csi_rx_base + CIO2_REG_IRQCTRL_EDGE);
-	writel(0, q->csi_rx_base + CIO2_REG_IRQCTRL_LEVEL_NOT_PULSE);
-	writel(CIO2_INT_EN_EXT_OE_MASK, base + CIO2_REG_INT_EN_EXT_OE);
+	pete_writel("drivers/media/pci/intel/ipu3/ipu3-cio2.c:420", CIO2_INT_EN_EXT_IE_MASK, base + CIO2_REG_INT_EN_EXT_IE);
+	pete_writel("drivers/media/pci/intel/ipu3/ipu3-cio2.c:421", CIO2_IRQCTRL_MASK, q->csi_rx_base + CIO2_REG_IRQCTRL_MASK);
+	pete_writel("drivers/media/pci/intel/ipu3/ipu3-cio2.c:422", CIO2_IRQCTRL_MASK, q->csi_rx_base + CIO2_REG_IRQCTRL_ENABLE);
+	pete_writel("drivers/media/pci/intel/ipu3/ipu3-cio2.c:423", 0, q->csi_rx_base + CIO2_REG_IRQCTRL_EDGE);
+	pete_writel("drivers/media/pci/intel/ipu3/ipu3-cio2.c:424", 0, q->csi_rx_base + CIO2_REG_IRQCTRL_LEVEL_NOT_PULSE);
+	pete_writel("drivers/media/pci/intel/ipu3/ipu3-cio2.c:425", CIO2_INT_EN_EXT_OE_MASK, base + CIO2_REG_INT_EN_EXT_OE);
 
-	writel(CIO2_REG_INT_EN_IRQ | CIO2_INT_IOC(CIO2_DMA_CHAN) |
+	pete_writel("drivers/media/pci/intel/ipu3/ipu3-cio2.c:427", CIO2_REG_INT_EN_IRQ | CIO2_INT_IOC(CIO2_DMA_CHAN) |
 	       CIO2_REG_INT_EN_IOS(CIO2_DMA_CHAN),
 	       base + CIO2_REG_INT_EN);
 
-	writel((CIO2_PXM_PXF_FMT_CFG_BPP_10 | CIO2_PXM_PXF_FMT_CFG_PCK_64B)
+	pete_writel("drivers/media/pci/intel/ipu3/ipu3-cio2.c:431", (CIO2_PXM_PXF_FMT_CFG_BPP_10 | CIO2_PXM_PXF_FMT_CFG_PCK_64B)
 	       << CIO2_PXM_PXF_FMT_CFG_SID0_SHIFT,
 	       base + CIO2_REG_PXM_PXF_FMT_CFG0(csi2bus));
-	writel(SID << CIO2_MIPIBE_LP_LUT_ENTRY_SID_SHIFT |
+	pete_writel("drivers/media/pci/intel/ipu3/ipu3-cio2.c:434", SID << CIO2_MIPIBE_LP_LUT_ENTRY_SID_SHIFT |
 	       sensor_vc << CIO2_MIPIBE_LP_LUT_ENTRY_VC_SHIFT |
 	       fmt->mipicode << CIO2_MIPIBE_LP_LUT_ENTRY_FORMAT_TYPE_SHIFT,
 	       q->csi_rx_base + CIO2_REG_MIPIBE_LP_LUT_ENTRY(ENTRY));
-	writel(0, q->csi_rx_base + CIO2_REG_MIPIBE_COMP_FORMAT(sensor_vc));
-	writel(0, q->csi_rx_base + CIO2_REG_MIPIBE_FORCE_RAW8);
-	writel(0, base + CIO2_REG_PXM_SID2BID0(csi2bus));
+	pete_writel("drivers/media/pci/intel/ipu3/ipu3-cio2.c:438", 0, q->csi_rx_base + CIO2_REG_MIPIBE_COMP_FORMAT(sensor_vc));
+	pete_writel("drivers/media/pci/intel/ipu3/ipu3-cio2.c:439", 0, q->csi_rx_base + CIO2_REG_MIPIBE_FORCE_RAW8);
+	pete_writel("drivers/media/pci/intel/ipu3/ipu3-cio2.c:440", 0, base + CIO2_REG_PXM_SID2BID0(csi2bus));
 
-	writel(lanes, q->csi_rx_base + CIO2_REG_CSIRX_NOF_ENABLED_LANES);
-	writel(CIO2_CGC_PRIM_TGE |
+	pete_writel("drivers/media/pci/intel/ipu3/ipu3-cio2.c:442", lanes, q->csi_rx_base + CIO2_REG_CSIRX_NOF_ENABLED_LANES);
+	pete_writel("drivers/media/pci/intel/ipu3/ipu3-cio2.c:443", CIO2_CGC_PRIM_TGE |
 	       CIO2_CGC_SIDE_TGE |
 	       CIO2_CGC_XOSC_TGE |
 	       CIO2_CGC_D3I3_TGE |
@@ -453,28 +453,28 @@ static int cio2_hw_init(struct cio2_device *cio2, struct cio2_queue *q)
 	       CIO2_CGC_CLKGATE_HOLDOFF << CIO2_CGC_CLKGATE_HOLDOFF_SHIFT |
 	       CIO2_CGC_CSI_CLKGATE_HOLDOFF
 	       << CIO2_CGC_CSI_CLKGATE_HOLDOFF_SHIFT, base + CIO2_REG_CGC);
-	writel(CIO2_LTRCTRL_LTRDYNEN, base + CIO2_REG_LTRCTRL);
-	writel(CIO2_LTRVAL0_VAL << CIO2_LTRVAL02_VAL_SHIFT |
+	pete_writel("drivers/media/pci/intel/ipu3/ipu3-cio2.c:456", CIO2_LTRCTRL_LTRDYNEN, base + CIO2_REG_LTRCTRL);
+	pete_writel("drivers/media/pci/intel/ipu3/ipu3-cio2.c:457", CIO2_LTRVAL0_VAL << CIO2_LTRVAL02_VAL_SHIFT |
 	       CIO2_LTRVAL0_SCALE << CIO2_LTRVAL02_SCALE_SHIFT |
 	       CIO2_LTRVAL1_VAL << CIO2_LTRVAL13_VAL_SHIFT |
 	       CIO2_LTRVAL1_SCALE << CIO2_LTRVAL13_SCALE_SHIFT,
 	       base + CIO2_REG_LTRVAL01);
-	writel(CIO2_LTRVAL2_VAL << CIO2_LTRVAL02_VAL_SHIFT |
+	pete_writel("drivers/media/pci/intel/ipu3/ipu3-cio2.c:462", CIO2_LTRVAL2_VAL << CIO2_LTRVAL02_VAL_SHIFT |
 	       CIO2_LTRVAL2_SCALE << CIO2_LTRVAL02_SCALE_SHIFT |
 	       CIO2_LTRVAL3_VAL << CIO2_LTRVAL13_VAL_SHIFT |
 	       CIO2_LTRVAL3_SCALE << CIO2_LTRVAL13_SCALE_SHIFT,
 	       base + CIO2_REG_LTRVAL23);
 
 	for (i = 0; i < CIO2_NUM_DMA_CHAN; i++) {
-		writel(0, base + CIO2_REG_CDMABA(i));
-		writel(0, base + CIO2_REG_CDMAC0(i));
-		writel(0, base + CIO2_REG_CDMAC1(i));
+		pete_writel("drivers/media/pci/intel/ipu3/ipu3-cio2.c:469", 0, base + CIO2_REG_CDMABA(i));
+		pete_writel("drivers/media/pci/intel/ipu3/ipu3-cio2.c:470", 0, base + CIO2_REG_CDMAC0(i));
+		pete_writel("drivers/media/pci/intel/ipu3/ipu3-cio2.c:471", 0, base + CIO2_REG_CDMAC1(i));
 	}
 
 	/* Enable DMA */
-	writel(PFN_DOWN(q->fbpt_bus_addr), base + CIO2_REG_CDMABA(CIO2_DMA_CHAN));
+	pete_writel("drivers/media/pci/intel/ipu3/ipu3-cio2.c:475", PFN_DOWN(q->fbpt_bus_addr), base + CIO2_REG_CDMABA(CIO2_DMA_CHAN));
 
-	writel(num_buffers1 << CIO2_CDMAC0_FBPT_LEN_SHIFT |
+	pete_writel("drivers/media/pci/intel/ipu3/ipu3-cio2.c:477", num_buffers1 << CIO2_CDMAC0_FBPT_LEN_SHIFT |
 	       FBPT_WIDTH << CIO2_CDMAC0_FBPT_WIDTH_SHIFT |
 	       CIO2_CDMAC0_DMA_INTR_ON_FE |
 	       CIO2_CDMAC0_FBPT_UPDATE_FIFO_FULL |
@@ -482,26 +482,26 @@ static int cio2_hw_init(struct cio2_device *cio2, struct cio2_queue *q)
 	       CIO2_CDMAC0_DMA_INTR_ON_FS |
 	       CIO2_CDMAC0_DMA_HALTED, base + CIO2_REG_CDMAC0(CIO2_DMA_CHAN));
 
-	writel(1 << CIO2_CDMAC1_LINENUMUPDATE_SHIFT,
+	pete_writel("drivers/media/pci/intel/ipu3/ipu3-cio2.c:485", 1 << CIO2_CDMAC1_LINENUMUPDATE_SHIFT,
 	       base + CIO2_REG_CDMAC1(CIO2_DMA_CHAN));
 
-	writel(0, base + CIO2_REG_PBM_FOPN_ABORT);
+	pete_writel("drivers/media/pci/intel/ipu3/ipu3-cio2.c:488", 0, base + CIO2_REG_PBM_FOPN_ABORT);
 
-	writel(CIO2_PXM_FRF_CFG_CRC_TH << CIO2_PXM_FRF_CFG_CRC_TH_SHIFT |
+	pete_writel("drivers/media/pci/intel/ipu3/ipu3-cio2.c:490", CIO2_PXM_FRF_CFG_CRC_TH << CIO2_PXM_FRF_CFG_CRC_TH_SHIFT |
 	       CIO2_PXM_FRF_CFG_MSK_ECC_DPHY_NR |
 	       CIO2_PXM_FRF_CFG_MSK_ECC_RE |
 	       CIO2_PXM_FRF_CFG_MSK_ECC_DPHY_NE,
 	       base + CIO2_REG_PXM_FRF_CFG(q->csi2.port));
 
 	/* Clear interrupts */
-	writel(CIO2_IRQCTRL_MASK, q->csi_rx_base + CIO2_REG_IRQCTRL_CLEAR);
-	writel(~0, base + CIO2_REG_INT_STS_EXT_OE);
-	writel(~0, base + CIO2_REG_INT_STS_EXT_IE);
-	writel(~0, base + CIO2_REG_INT_STS);
+	pete_writel("drivers/media/pci/intel/ipu3/ipu3-cio2.c:497", CIO2_IRQCTRL_MASK, q->csi_rx_base + CIO2_REG_IRQCTRL_CLEAR);
+	pete_writel("drivers/media/pci/intel/ipu3/ipu3-cio2.c:498", ~0, base + CIO2_REG_INT_STS_EXT_OE);
+	pete_writel("drivers/media/pci/intel/ipu3/ipu3-cio2.c:499", ~0, base + CIO2_REG_INT_STS_EXT_IE);
+	pete_writel("drivers/media/pci/intel/ipu3/ipu3-cio2.c:500", ~0, base + CIO2_REG_INT_STS);
 
 	/* Enable devices, starting from the last device in the pipe */
-	writel(1, q->csi_rx_base + CIO2_REG_MIPIBE_ENABLE);
-	writel(1, q->csi_rx_base + CIO2_REG_CSIRX_ENABLE);
+	pete_writel("drivers/media/pci/intel/ipu3/ipu3-cio2.c:503", 1, q->csi_rx_base + CIO2_REG_MIPIBE_ENABLE);
+	pete_writel("drivers/media/pci/intel/ipu3/ipu3-cio2.c:504", 1, q->csi_rx_base + CIO2_REG_CSIRX_ENABLE);
 
 	return 0;
 }
@@ -515,13 +515,13 @@ static void cio2_hw_exit(struct cio2_device *cio2, struct cio2_queue *q)
 	int ret;
 
 	/* Disable CSI receiver and MIPI backend devices */
-	writel(0, q->csi_rx_base + CIO2_REG_IRQCTRL_MASK);
-	writel(0, q->csi_rx_base + CIO2_REG_IRQCTRL_ENABLE);
-	writel(0, q->csi_rx_base + CIO2_REG_CSIRX_ENABLE);
-	writel(0, q->csi_rx_base + CIO2_REG_MIPIBE_ENABLE);
+	pete_writel("drivers/media/pci/intel/ipu3/ipu3-cio2.c:518", 0, q->csi_rx_base + CIO2_REG_IRQCTRL_MASK);
+	pete_writel("drivers/media/pci/intel/ipu3/ipu3-cio2.c:519", 0, q->csi_rx_base + CIO2_REG_IRQCTRL_ENABLE);
+	pete_writel("drivers/media/pci/intel/ipu3/ipu3-cio2.c:520", 0, q->csi_rx_base + CIO2_REG_CSIRX_ENABLE);
+	pete_writel("drivers/media/pci/intel/ipu3/ipu3-cio2.c:521", 0, q->csi_rx_base + CIO2_REG_MIPIBE_ENABLE);
 
 	/* Halt DMA */
-	writel(0, base + CIO2_REG_CDMAC0(CIO2_DMA_CHAN));
+	pete_writel("drivers/media/pci/intel/ipu3/ipu3-cio2.c:524", 0, base + CIO2_REG_CDMAC0(CIO2_DMA_CHAN));
 	ret = readl_poll_timeout(base + CIO2_REG_CDMAC0(CIO2_DMA_CHAN),
 				 value, value & CIO2_CDMAC0_DMA_HALTED,
 				 4000, 2000000);
@@ -529,9 +529,9 @@ static void cio2_hw_exit(struct cio2_device *cio2, struct cio2_queue *q)
 		dev_err(dev, "DMA %i can not be halted\n", CIO2_DMA_CHAN);
 
 	for (i = 0; i < CIO2_NUM_PORTS; i++) {
-		writel(readl(base + CIO2_REG_PXM_FRF_CFG(i)) |
+		pete_writel("drivers/media/pci/intel/ipu3/ipu3-cio2.c:532", pete_readl("drivers/media/pci/intel/ipu3/ipu3-cio2.c:532", base + CIO2_REG_PXM_FRF_CFG(i)) |
 		       CIO2_PXM_FRF_CFG_ABORT, base + CIO2_REG_PXM_FRF_CFG(i));
-		writel(readl(base + CIO2_REG_PBM_FOPN_ABORT) |
+		pete_writel("drivers/media/pci/intel/ipu3/ipu3-cio2.c:534", pete_readl("drivers/media/pci/intel/ipu3/ipu3-cio2.c:534", base + CIO2_REG_PBM_FOPN_ABORT) |
 		       CIO2_PBM_FOPN_ABORT(i), base + CIO2_REG_PBM_FOPN_ABORT);
 	}
 }
@@ -667,7 +667,7 @@ static void cio2_irq_handle_once(struct cio2_device *cio2, u32 int_status)
 		 */
 		u32 oe_status, oe_clear;
 
-		oe_clear = readl(base + CIO2_REG_INT_STS_EXT_OE);
+		oe_clear = pete_readl("drivers/media/pci/intel/ipu3/ipu3-cio2.c:670", base + CIO2_REG_INT_STS_EXT_OE);
 		oe_status = oe_clear;
 
 		if (oe_status & CIO2_INT_EXT_OE_DMAOE_MASK) {
@@ -682,7 +682,7 @@ static void cio2_irq_handle_once(struct cio2_device *cio2, u32 int_status)
 				>> CIO2_INT_EXT_OE_OES_SHIFT);
 			oe_status &= ~CIO2_INT_EXT_OE_OES_MASK;
 		}
-		writel(oe_clear, base + CIO2_REG_INT_STS_EXT_OE);
+		pete_writel("drivers/media/pci/intel/ipu3/ipu3-cio2.c:685", oe_clear, base + CIO2_REG_INT_STS_EXT_OE);
 		if (oe_status)
 			dev_warn(dev, "unknown interrupt 0x%x on OE\n",
 				 oe_status);
@@ -722,7 +722,7 @@ static void cio2_irq_handle_once(struct cio2_device *cio2, u32 int_status)
 		unsigned int port;
 		u32 ie_status;
 
-		ie_status = readl(base + CIO2_REG_INT_STS_EXT_IE);
+		ie_status = pete_readl("drivers/media/pci/intel/ipu3/ipu3-cio2.c:725", base + CIO2_REG_INT_STS_EXT_IE);
 
 		for (port = 0; port < CIO2_NUM_PORTS; port++) {
 			u32 port_status = (ie_status >> (port * 8)) & 0xff;
@@ -734,17 +734,17 @@ static void cio2_irq_handle_once(struct cio2_device *cio2, u32 int_status)
 						base + CIO2_REG_PIPE_BASE(port);
 				u32 csi2_status;
 
-				csi2_status = readl(csi_rx_base +
+				csi2_status = pete_readl("drivers/media/pci/intel/ipu3/ipu3-cio2.c:737", csi_rx_base +
 						CIO2_REG_IRQCTRL_STATUS);
 
 				cio2_irq_log_irq_errs(dev, port, csi2_status);
 
-				writel(csi2_status,
+				pete_writel("drivers/media/pci/intel/ipu3/ipu3-cio2.c:742", csi2_status,
 				       csi_rx_base + CIO2_REG_IRQCTRL_CLEAR);
 			}
 		}
 
-		writel(ie_status, base + CIO2_REG_INT_STS_EXT_IE);
+		pete_writel("drivers/media/pci/intel/ipu3/ipu3-cio2.c:747", ie_status, base + CIO2_REG_INT_STS_EXT_IE);
 
 		int_status &= ~(CIO2_INT_IOIE | CIO2_INT_IOIRQ);
 	}
@@ -760,15 +760,15 @@ static irqreturn_t cio2_irq(int irq, void *cio2_ptr)
 	struct device *dev = &cio2->pci_dev->dev;
 	u32 int_status;
 
-	int_status = readl(base + CIO2_REG_INT_STS);
+	int_status = pete_readl("drivers/media/pci/intel/ipu3/ipu3-cio2.c:763", base + CIO2_REG_INT_STS);
 	dev_dbg(dev, "isr enter - interrupt status 0x%x\n", int_status);
 	if (!int_status)
 		return IRQ_NONE;
 
 	do {
-		writel(int_status, base + CIO2_REG_INT_STS);
+		pete_writel("drivers/media/pci/intel/ipu3/ipu3-cio2.c:769", int_status, base + CIO2_REG_INT_STS);
 		cio2_irq_handle_once(cio2, int_status);
-		int_status = readl(base + CIO2_REG_INT_STS);
+		int_status = pete_readl("drivers/media/pci/intel/ipu3/ipu3-cio2.c:771", base + CIO2_REG_INT_STS);
 		if (int_status)
 			dev_dbg(dev, "pending status 0x%x\n", int_status);
 	} while (int_status);
@@ -915,7 +915,7 @@ static void cio2_vb2_buf_queue(struct vb2_buffer *vb)
 	 */
 	local_irq_save(flags);
 
-	fbpt_rp = (readl(cio2->base + CIO2_REG_CDMARI(CIO2_DMA_CHAN))
+	fbpt_rp = (pete_readl("drivers/media/pci/intel/ipu3/ipu3-cio2.c:918", cio2->base + CIO2_REG_CDMARI(CIO2_DMA_CHAN))
 		   >> CIO2_CDMARI_FBPT_RP_SHIFT)
 		   & CIO2_CDMARI_FBPT_RP_MASK;
 
@@ -1860,7 +1860,7 @@ static int __maybe_unused cio2_runtime_suspend(struct device *dev)
 	void __iomem *const base = cio2->base;
 	u16 pm;
 
-	writel(CIO2_D0I3C_I3, base + CIO2_REG_D0I3C);
+	pete_writel("drivers/media/pci/intel/ipu3/ipu3-cio2.c:1863", CIO2_D0I3C_I3, base + CIO2_REG_D0I3C);
 	dev_dbg(dev, "cio2 runtime suspend.\n");
 
 	pci_read_config_word(pci_dev, pci_dev->pm_cap + CIO2_PMCSR_OFFSET, &pm);
@@ -1878,7 +1878,7 @@ static int __maybe_unused cio2_runtime_resume(struct device *dev)
 	void __iomem *const base = cio2->base;
 	u16 pm;
 
-	writel(CIO2_D0I3C_RR, base + CIO2_REG_D0I3C);
+	pete_writel("drivers/media/pci/intel/ipu3/ipu3-cio2.c:1881", CIO2_D0I3C_RR, base + CIO2_REG_D0I3C);
 	dev_dbg(dev, "cio2 runtime resume.\n");
 
 	pci_read_config_word(pci_dev, pci_dev->pm_cap + CIO2_PMCSR_OFFSET, &pm);

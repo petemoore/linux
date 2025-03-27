@@ -79,26 +79,26 @@ struct sunplus_uart_port {
 
 static void sp_uart_put_char(struct uart_port *port, unsigned int ch)
 {
-	writel(ch, port->membase + SUP_UART_DATA);
+	pete_writel("drivers/tty/serial/sunplus-uart.c:82", ch, port->membase + SUP_UART_DATA);
 }
 
 static u32 sunplus_tx_buf_not_full(struct uart_port *port)
 {
-	unsigned int lsr = readl(port->membase + SUP_UART_LSR);
+	unsigned int lsr = pete_readl("drivers/tty/serial/sunplus-uart.c:87", port->membase + SUP_UART_LSR);
 
 	return (lsr & SUP_UART_LSR_TX) ? SUP_UART_LSR_TX_NOT_FULL : 0;
 }
 
 static unsigned int sunplus_tx_empty(struct uart_port *port)
 {
-	unsigned int lsr = readl(port->membase + SUP_UART_LSR);
+	unsigned int lsr = pete_readl("drivers/tty/serial/sunplus-uart.c:94", port->membase + SUP_UART_LSR);
 
 	return (lsr & UART_LSR_TEMT) ? TIOCSER_TEMT : 0;
 }
 
 static void sunplus_set_mctrl(struct uart_port *port, unsigned int mctrl)
 {
-	unsigned int mcr = readl(port->membase + SUP_UART_MCR);
+	unsigned int mcr = pete_readl("drivers/tty/serial/sunplus-uart.c:101", port->membase + SUP_UART_MCR);
 
 	if (mctrl & TIOCM_DTR)
 		mcr |= UART_MCR_DTR;
@@ -125,14 +125,14 @@ static void sunplus_set_mctrl(struct uart_port *port, unsigned int mctrl)
 	else
 		mcr &= ~UART_MCR_LOOP;
 
-	writel(mcr, port->membase + SUP_UART_MCR);
+	pete_writel("drivers/tty/serial/sunplus-uart.c:128", mcr, port->membase + SUP_UART_MCR);
 }
 
 static unsigned int sunplus_get_mctrl(struct uart_port *port)
 {
 	unsigned int mcr, ret = 0;
 
-	mcr = readl(port->membase + SUP_UART_MCR);
+	mcr = pete_readl("drivers/tty/serial/sunplus-uart.c:135", port->membase + SUP_UART_MCR);
 
 	if (mcr & UART_MCR_DTR)
 		ret |= TIOCM_DTR;
@@ -156,27 +156,27 @@ static void sunplus_stop_tx(struct uart_port *port)
 {
 	unsigned int isc;
 
-	isc = readl(port->membase + SUP_UART_ISC);
+	isc = pete_readl("drivers/tty/serial/sunplus-uart.c:159", port->membase + SUP_UART_ISC);
 	isc &= ~SUP_UART_ISC_TXM;
-	writel(isc, port->membase + SUP_UART_ISC);
+	pete_writel("drivers/tty/serial/sunplus-uart.c:161", isc, port->membase + SUP_UART_ISC);
 }
 
 static void sunplus_start_tx(struct uart_port *port)
 {
 	unsigned int isc;
 
-	isc = readl(port->membase + SUP_UART_ISC);
+	isc = pete_readl("drivers/tty/serial/sunplus-uart.c:168", port->membase + SUP_UART_ISC);
 	isc |= SUP_UART_ISC_TXM;
-	writel(isc, port->membase + SUP_UART_ISC);
+	pete_writel("drivers/tty/serial/sunplus-uart.c:170", isc, port->membase + SUP_UART_ISC);
 }
 
 static void sunplus_stop_rx(struct uart_port *port)
 {
 	unsigned int isc;
 
-	isc = readl(port->membase + SUP_UART_ISC);
+	isc = pete_readl("drivers/tty/serial/sunplus-uart.c:177", port->membase + SUP_UART_ISC);
 	isc &= ~SUP_UART_ISC_RXM;
-	writel(isc, port->membase + SUP_UART_ISC);
+	pete_writel("drivers/tty/serial/sunplus-uart.c:179", isc, port->membase + SUP_UART_ISC);
 }
 
 static void sunplus_break_ctl(struct uart_port *port, int ctl)
@@ -186,14 +186,14 @@ static void sunplus_break_ctl(struct uart_port *port, int ctl)
 
 	spin_lock_irqsave(&port->lock, flags);
 
-	lcr = readl(port->membase + SUP_UART_LCR);
+	lcr = pete_readl("drivers/tty/serial/sunplus-uart.c:189", port->membase + SUP_UART_LCR);
 
 	if (ctl)
 		lcr |= SUP_UART_LCR_SBC; /* start break */
 	else
 		lcr &= ~SUP_UART_LCR_SBC; /* stop break */
 
-	writel(lcr, port->membase + SUP_UART_LCR);
+	pete_writel("drivers/tty/serial/sunplus-uart.c:196", lcr, port->membase + SUP_UART_LCR);
 
 	spin_unlock_irqrestore(&port->lock, flags);
 }
@@ -230,11 +230,11 @@ static void transmit_chars(struct uart_port *port)
 
 static void receive_chars(struct uart_port *port)
 {
-	unsigned int lsr = readl(port->membase + SUP_UART_LSR);
+	unsigned int lsr = pete_readl("drivers/tty/serial/sunplus-uart.c:233", port->membase + SUP_UART_LSR);
 	u8 ch, flag;
 
 	do {
-		ch = readl(port->membase + SUP_UART_DATA);
+		ch = pete_readl("drivers/tty/serial/sunplus-uart.c:237", port->membase + SUP_UART_DATA);
 		flag = TTY_NORMAL;
 		port->icount.rx++;
 
@@ -266,7 +266,7 @@ static void receive_chars(struct uart_port *port)
 		uart_insert_char(port, lsr, SUP_UART_LSR_OE, ch, flag);
 
 ignore_char:
-		lsr = readl(port->membase + SUP_UART_LSR);
+		lsr = pete_readl("drivers/tty/serial/sunplus-uart.c:269", port->membase + SUP_UART_LSR);
 	} while (lsr & SUP_UART_LSR_RX);
 
 	tty_flip_buffer_push(&port->state->port);
@@ -279,7 +279,7 @@ static irqreturn_t sunplus_uart_irq(int irq, void *args)
 
 	spin_lock(&port->lock);
 
-	isc = readl(port->membase + SUP_UART_ISC);
+	isc = pete_readl("drivers/tty/serial/sunplus-uart.c:282", port->membase + SUP_UART_ISC);
 
 	if (isc & SUP_UART_ISC_RX)
 		receive_chars(port);
@@ -308,7 +308,7 @@ static int sunplus_startup(struct uart_port *port)
 	 * only do a write to Bit[7:4] int setting
 	 */
 	isc |= SUP_UART_ISC_RXM;
-	writel(isc, port->membase + SUP_UART_ISC);
+	pete_writel("drivers/tty/serial/sunplus-uart.c:311", isc, port->membase + SUP_UART_ISC);
 	spin_unlock_irqrestore(&port->lock, flags);
 
 	return 0;
@@ -323,7 +323,7 @@ static void sunplus_shutdown(struct uart_port *port)
 	 * isc register will clean Bit[3:0] int status after read
 	 * only do a write to Bit[7:4] int setting
 	 */
-	writel(0, port->membase + SUP_UART_ISC); /* disable all interrupt */
+	pete_writel("drivers/tty/serial/sunplus-uart.c:326", 0, port->membase + SUP_UART_ISC); /* disable all interrupt */
 	spin_unlock_irqrestore(&port->lock, flags);
 
 	free_irq(port->irq, port);
@@ -399,13 +399,13 @@ static void sunplus_set_termios(struct uart_port *port,
 	if ((termios->c_cflag & CREAD) == 0) {
 		port->ignore_status_mask |= SUP_DUMMY_READ;
 		/* flush rx data FIFO */
-		writel(0, port->membase + SUP_UART_RX_RESIDUE);
+		pete_writel("drivers/tty/serial/sunplus-uart.c:402", 0, port->membase + SUP_UART_RX_RESIDUE);
 	}
 
 	/* Settings for baud rate divisor and lcr */
-	writel(div_h, port->membase + SUP_UART_DIV_H);
-	writel(div_l, port->membase + SUP_UART_DIV_L);
-	writel(lcr, port->membase + SUP_UART_LCR);
+	pete_writel("drivers/tty/serial/sunplus-uart.c:406", div_h, port->membase + SUP_UART_DIV_H);
+	pete_writel("drivers/tty/serial/sunplus-uart.c:407", div_l, port->membase + SUP_UART_DIV_L);
+	pete_writel("drivers/tty/serial/sunplus-uart.c:408", lcr, port->membase + SUP_UART_LCR);
 
 	spin_unlock_irqrestore(&port->lock, flags);
 }
@@ -465,12 +465,12 @@ static void sunplus_poll_put_char(struct uart_port *port, unsigned char data)
 
 static int sunplus_poll_get_char(struct uart_port *port)
 {
-	unsigned int lsr = readl(port->membase + SUP_UART_LSR);
+	unsigned int lsr = pete_readl("drivers/tty/serial/sunplus-uart.c:468", port->membase + SUP_UART_LSR);
 
 	if (!(lsr & SUP_UART_LSR_RX))
 		return NO_POLL_CHAR;
 
-	return readl(port->membase + SUP_UART_DATA);
+	return pete_readl("drivers/tty/serial/sunplus-uart.c:473", port->membase + SUP_UART_DATA);
 }
 #endif
 
@@ -745,7 +745,7 @@ static void sunplus_uart_putc(struct uart_port *port, unsigned char c)
 	if (ret)
 		return;
 
-	writel(c, port->membase + SUP_UART_DATA);
+	pete_writel("drivers/tty/serial/sunplus-uart.c:748", c, port->membase + SUP_UART_DATA);
 }
 
 static void sunplus_uart_early_write(struct console *con, const char *s, unsigned int n)

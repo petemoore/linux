@@ -340,27 +340,27 @@ static inline int snand_prepare_bouncebuf(struct mtk_snand *snf, size_t size)
 
 static inline u32 nfi_read32(struct mtk_snand *snf, u32 reg)
 {
-	return readl(snf->nfi_base + reg);
+	return pete_readl("drivers/spi/spi-mtk-snfi.c:343", snf->nfi_base + reg);
 }
 
 static inline void nfi_write32(struct mtk_snand *snf, u32 reg, u32 val)
 {
-	writel(val, snf->nfi_base + reg);
+	pete_writel("drivers/spi/spi-mtk-snfi.c:348", val, snf->nfi_base + reg);
 }
 
 static inline void nfi_write16(struct mtk_snand *snf, u32 reg, u16 val)
 {
-	writew(val, snf->nfi_base + reg);
+	pete_writew("drivers/spi/spi-mtk-snfi.c:353", val, snf->nfi_base + reg);
 }
 
 static inline void nfi_rmw32(struct mtk_snand *snf, u32 reg, u32 clr, u32 set)
 {
 	u32 val;
 
-	val = readl(snf->nfi_base + reg);
+	val = pete_readl("drivers/spi/spi-mtk-snfi.c:360", snf->nfi_base + reg);
 	val &= ~clr;
 	val |= set;
-	writel(val, snf->nfi_base + reg);
+	pete_writel("drivers/spi/spi-mtk-snfi.c:363", val, snf->nfi_base + reg);
 }
 
 static void nfi_read_data(struct mtk_snand *snf, u32 reg, u8 *data, u32 len)

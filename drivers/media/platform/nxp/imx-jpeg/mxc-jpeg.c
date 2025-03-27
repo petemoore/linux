@@ -894,7 +894,7 @@ static irqreturn_t mxc_jpeg_dec_irq(int irq, void *priv)
 
 	spin_lock(&jpeg->hw_lock);
 
-	com_status = readl(reg + COM_STATUS);
+	com_status = pete_readl("drivers/media/platform/nxp/imx-jpeg/mxc-jpeg.c:897", reg + COM_STATUS);
 	slot = COM_STATUS_CUR_SLOT(com_status);
 	dev_dbg(dev, "Irq %d on slot %d.\n", irq, slot);
 
@@ -912,8 +912,8 @@ static irqreturn_t mxc_jpeg_dec_irq(int irq, void *priv)
 	if (!jpeg->slot_data.used)
 		goto job_unlock;
 
-	dec_ret = readl(reg + MXC_SLOT_OFFSET(slot, SLOT_STATUS));
-	writel(dec_ret, reg + MXC_SLOT_OFFSET(slot, SLOT_STATUS)); /* w1c */
+	dec_ret = pete_readl("drivers/media/platform/nxp/imx-jpeg/mxc-jpeg.c:915", reg + MXC_SLOT_OFFSET(slot, SLOT_STATUS));
+	pete_writel("drivers/media/platform/nxp/imx-jpeg/mxc-jpeg.c:916", dec_ret, reg + MXC_SLOT_OFFSET(slot, SLOT_STATUS)); /* w1c */
 
 	dst_buf = v4l2_m2m_next_dst_buf(ctx->fh.m2m_ctx);
 	src_buf = v4l2_m2m_next_src_buf(ctx->fh.m2m_ctx);
@@ -924,7 +924,7 @@ static irqreturn_t mxc_jpeg_dec_irq(int irq, void *priv)
 	jpeg_src_buf = vb2_to_mxc_buf(&src_buf->vb2_buf);
 
 	if (dec_ret & SLOT_STATUS_ENC_CONFIG_ERR) {
-		u32 ret = readl(reg + CAST_STATUS12);
+		u32 ret = pete_readl("drivers/media/platform/nxp/imx-jpeg/mxc-jpeg.c:927", reg + CAST_STATUS12);
 
 		dev_err(dev, "Encoder/decoder error, dec_ret = 0x%08x, status=0x%08x",
 			dec_ret, ret);
@@ -953,7 +953,7 @@ static irqreturn_t mxc_jpeg_dec_irq(int irq, void *priv)
 	}
 
 	if (jpeg->mode == MXC_JPEG_ENCODE) {
-		payload = readl(reg + MXC_SLOT_OFFSET(slot, SLOT_BUF_PTR));
+		payload = pete_readl("drivers/media/platform/nxp/imx-jpeg/mxc-jpeg.c:956", reg + MXC_SLOT_OFFSET(slot, SLOT_BUF_PTR));
 		vb2_set_plane_payload(&dst_buf->vb2_buf, 0, payload);
 		dev_dbg(dev, "Encoding finished, payload size: %ld\n",
 			payload);

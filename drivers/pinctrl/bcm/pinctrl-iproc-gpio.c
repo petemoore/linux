@@ -145,12 +145,12 @@ static inline void iproc_set_bit(struct iproc_gpio *chip, unsigned int reg,
 	unsigned int shift = IPROC_GPIO_SHIFT(gpio);
 	u32 val;
 
-	val = readl(chip->base + offset);
+	val = pete_readl("drivers/pinctrl/bcm/pinctrl-iproc-gpio.c:148", chip->base + offset);
 	if (set)
 		val |= BIT(shift);
 	else
 		val &= ~BIT(shift);
-	writel(val, chip->base + offset);
+	pete_writel("drivers/pinctrl/bcm/pinctrl-iproc-gpio.c:153", val, chip->base + offset);
 }
 
 static inline bool iproc_get_bit(struct iproc_gpio *chip, unsigned int reg,
@@ -159,7 +159,7 @@ static inline bool iproc_get_bit(struct iproc_gpio *chip, unsigned int reg,
 	unsigned int offset = IPROC_GPIO_REG(gpio, reg);
 	unsigned int shift = IPROC_GPIO_SHIFT(gpio);
 
-	return !!(readl(chip->base + offset) & BIT(shift));
+	return !!(pete_readl("drivers/pinctrl/bcm/pinctrl-iproc-gpio.c:162", chip->base + offset) & BIT(shift));
 }
 
 static void iproc_gpio_irq_handler(struct irq_desc *desc)
@@ -173,7 +173,7 @@ static void iproc_gpio_irq_handler(struct irq_desc *desc)
 
 	/* go through the entire GPIO banks and handle all interrupts */
 	for (i = 0; i < chip->num_banks; i++) {
-		unsigned long val = readl(chip->base + (i * GPIO_BANK_SIZE) +
+		unsigned long val = pete_readl("drivers/pinctrl/bcm/pinctrl-iproc-gpio.c:176", chip->base + (i * GPIO_BANK_SIZE) +
 					  IPROC_GPIO_INT_MSTAT_OFFSET);
 
 		for_each_set_bit(bit, &val, NGPIOS_PER_BANK) {
@@ -183,7 +183,7 @@ static void iproc_gpio_irq_handler(struct irq_desc *desc)
 			 * Clear the interrupt before invoking the
 			 * handler, so we do not leave any window
 			 */
-			writel(BIT(bit), chip->base + (i * GPIO_BANK_SIZE) +
+			pete_writel("drivers/pinctrl/bcm/pinctrl-iproc-gpio.c:186", BIT(bit), chip->base + (i * GPIO_BANK_SIZE) +
 			       IPROC_GPIO_INT_CLR_OFFSET);
 
 			generic_handle_domain_irq(gc->irq.domain, pin);
@@ -204,7 +204,7 @@ static void iproc_gpio_irq_ack(struct irq_data *d)
 	unsigned int shift = IPROC_GPIO_SHIFT(gpio);
 	u32 val = BIT(shift);
 
-	writel(val, chip->base + offset);
+	pete_writel("drivers/pinctrl/bcm/pinctrl-iproc-gpio.c:207", val, chip->base + offset);
 }
 
 /**
@@ -386,7 +386,7 @@ static int iproc_gpio_get_direction(struct gpio_chip *gc, unsigned int gpio)
 	unsigned int offset = IPROC_GPIO_REG(gpio, IPROC_GPIO_OUT_EN_OFFSET);
 	unsigned int shift = IPROC_GPIO_SHIFT(gpio);
 
-	if (readl(chip->base + offset) & BIT(shift))
+	if (pete_readl("drivers/pinctrl/bcm/pinctrl-iproc-gpio.c:389", chip->base + offset) & BIT(shift))
 		return GPIO_LINE_DIRECTION_OUT;
 
 	return GPIO_LINE_DIRECTION_IN;
@@ -411,7 +411,7 @@ static int iproc_gpio_get(struct gpio_chip *gc, unsigned gpio)
 					      IPROC_GPIO_DATA_IN_OFFSET);
 	unsigned int shift = IPROC_GPIO_SHIFT(gpio);
 
-	return !!(readl(chip->base + offset) & BIT(shift));
+	return !!(pete_readl("drivers/pinctrl/bcm/pinctrl-iproc-gpio.c:414", chip->base + offset) & BIT(shift));
 }
 
 /*
@@ -508,8 +508,8 @@ static int iproc_gpio_set_pull(struct iproc_gpio *chip, unsigned gpio,
 		base = chip->io_ctrl;
 		shift = IPROC_GPIO_SHIFT(gpio);
 
-		val_1 = readl(base + IPROC_GPIO_PULL_UP_OFFSET);
-		val_2 = readl(base + IPROC_GPIO_PULL_DN_OFFSET);
+		val_1 = pete_readl("drivers/pinctrl/bcm/pinctrl-iproc-gpio.c:511", base + IPROC_GPIO_PULL_UP_OFFSET);
+		val_2 = pete_readl("drivers/pinctrl/bcm/pinctrl-iproc-gpio.c:512", base + IPROC_GPIO_PULL_DN_OFFSET);
 		if (disable) {
 			/* no pull-up or pull-down */
 			val_1 &= ~BIT(shift);
@@ -521,8 +521,8 @@ static int iproc_gpio_set_pull(struct iproc_gpio *chip, unsigned gpio,
 			val_1 &= ~BIT(shift);
 			val_2 |= BIT(shift);
 		}
-		writel(val_1, base + IPROC_GPIO_PULL_UP_OFFSET);
-		writel(val_2, base + IPROC_GPIO_PULL_DN_OFFSET);
+		pete_writel("drivers/pinctrl/bcm/pinctrl-iproc-gpio.c:524", val_1, base + IPROC_GPIO_PULL_UP_OFFSET);
+		pete_writel("drivers/pinctrl/bcm/pinctrl-iproc-gpio.c:525", val_2, base + IPROC_GPIO_PULL_DN_OFFSET);
 	} else {
 		if (disable) {
 			iproc_set_bit(chip, IPROC_GPIO_RES_EN_OFFSET, gpio,
@@ -554,8 +554,8 @@ static void iproc_gpio_get_pull(struct iproc_gpio *chip, unsigned gpio,
 		base = chip->io_ctrl;
 		shift = IPROC_GPIO_SHIFT(gpio);
 
-		val_1 = readl(base + IPROC_GPIO_PULL_UP_OFFSET) & BIT(shift);
-		val_2 = readl(base + IPROC_GPIO_PULL_DN_OFFSET) & BIT(shift);
+		val_1 = pete_readl("drivers/pinctrl/bcm/pinctrl-iproc-gpio.c:557", base + IPROC_GPIO_PULL_UP_OFFSET) & BIT(shift);
+		val_2 = pete_readl("drivers/pinctrl/bcm/pinctrl-iproc-gpio.c:558", base + IPROC_GPIO_PULL_DN_OFFSET) & BIT(shift);
 
 		*pull_up = val_1 ? true : false;
 		*disable = (val_1 | val_2) ? false : true;
@@ -600,10 +600,10 @@ static int iproc_gpio_set_strength(struct iproc_gpio *chip, unsigned gpio,
 	strength = (strength / 2) - 1;
 	for (i = 0; i < GPIO_DRV_STRENGTH_BITS; i++) {
 		offset = DRV_STRENGTH_OFFSET(gpio, i, chip->io_ctrl_type);
-		val = readl(base + offset);
+		val = pete_readl("drivers/pinctrl/bcm/pinctrl-iproc-gpio.c:603", base + offset);
 		val &= ~BIT(shift);
 		val |= ((strength >> i) & 0x1) << shift;
-		writel(val, base + offset);
+		pete_writel("drivers/pinctrl/bcm/pinctrl-iproc-gpio.c:606", val, base + offset);
 	}
 	raw_spin_unlock_irqrestore(&chip->lock, flags);
 
@@ -630,7 +630,7 @@ static int iproc_gpio_get_strength(struct iproc_gpio *chip, unsigned gpio,
 	*strength = 0;
 	for (i = 0; i < GPIO_DRV_STRENGTH_BITS; i++) {
 		offset = DRV_STRENGTH_OFFSET(gpio, i, chip->io_ctrl_type);
-		val = readl(base + offset) & BIT(shift);
+		val = pete_readl("drivers/pinctrl/bcm/pinctrl-iproc-gpio.c:633", base + offset) & BIT(shift);
 		val >>= shift;
 		*strength += (val << i);
 	}

@@ -107,8 +107,8 @@
 #define PM_RSTC_WRCFG_FULL_RESET	0x00000020
 #define PM_RSTC_RESET			0x00000102
 
-#define PM_READ(reg) readl(power->base + (reg))
-#define PM_WRITE(reg, val) writel(PM_PASSWORD | (val), power->base + (reg))
+#define PM_READ(reg) pete_readl("drivers/pmdomain/bcm/bcm2835-power.c:110", power->base + (reg))
+#define PM_WRITE(reg, val) pete_writel("drivers/pmdomain/bcm/bcm2835-power.c:111", PM_PASSWORD | (val), power->base + (reg))
 
 #define ASB_BRDG_VERSION                0x00
 #define ASB_CPR_CTRL                    0x04
@@ -170,13 +170,13 @@ static int bcm2835_asb_control(struct bcm2835_power *power, u32 reg, bool enable
 
 	/* Enable the module's async AXI bridges. */
 	if (enable) {
-		val = readl(base + reg) & ~ASB_REQ_STOP;
+		val = pete_readl("drivers/pmdomain/bcm/bcm2835-power.c:173", base + reg) & ~ASB_REQ_STOP;
 	} else {
-		val = readl(base + reg) | ASB_REQ_STOP;
+		val = pete_readl("drivers/pmdomain/bcm/bcm2835-power.c:175", base + reg) | ASB_REQ_STOP;
 	}
-	writel(PM_PASSWORD | val, base + reg);
+	pete_writel("drivers/pmdomain/bcm/bcm2835-power.c:177", PM_PASSWORD | val, base + reg);
 
-	while (!!(readl(base + reg) & ASB_ACK) == enable) {
+	while (!!(pete_readl("drivers/pmdomain/bcm/bcm2835-power.c:179", base + reg) & ASB_ACK) == enable) {
 		cpu_relax();
 		if (ktime_get_ns() - start >= 1000)
 			return -ETIMEDOUT;
@@ -650,14 +650,14 @@ static int bcm2835_power_probe(struct platform_device *pdev)
 	power->rpivid_asb = pm->rpivid_asb;
 
 	if (power->asb) {
-		id = readl(power->asb + ASB_AXI_BRDG_ID);
+		id = pete_readl("drivers/pmdomain/bcm/bcm2835-power.c:653", power->asb + ASB_AXI_BRDG_ID);
 		if (id != BCM2835_BRDG_ID /* "BRDG" */) {
 			dev_err(dev, "ASB register ID returned 0x%08x\n", id);
 			return -ENODEV;
 		}
 
 		if (power->rpivid_asb) {
-			id = readl(power->rpivid_asb + ASB_AXI_BRDG_ID);
+			id = pete_readl("drivers/pmdomain/bcm/bcm2835-power.c:660", power->rpivid_asb + ASB_AXI_BRDG_ID);
 			if (id != BCM2835_BRDG_ID /* "BRDG" */) {
 				dev_err(dev, "RPiVid ASB register ID returned 0x%08x\n",
 					id);

@@ -92,13 +92,13 @@ void xhci_quiesce(struct xhci_hcd *xhci)
 	u32 mask;
 
 	mask = ~(XHCI_IRQS);
-	halted = readl(&xhci->op_regs->status) & STS_HALT;
+	halted = pete_readl("drivers/usb/host/xhci.c:95", &xhci->op_regs->status) & STS_HALT;
 	if (!halted)
 		mask &= ~CMD_RUN;
 
-	cmd = readl(&xhci->op_regs->command);
+	cmd = pete_readl("drivers/usb/host/xhci.c:99", &xhci->op_regs->command);
 	cmd &= mask;
-	writel(cmd, &xhci->op_regs->command);
+	pete_writel("drivers/usb/host/xhci.c:101", cmd, &xhci->op_regs->command);
 }
 
 /*
@@ -137,11 +137,11 @@ int xhci_start(struct xhci_hcd *xhci)
 	u32 temp;
 	int ret;
 
-	temp = readl(&xhci->op_regs->command);
+	temp = pete_readl("drivers/usb/host/xhci.c:140", &xhci->op_regs->command);
 	temp |= (CMD_RUN);
 	xhci_dbg_trace(xhci, trace_xhci_dbg_init, "// Turn on HC, cmd = 0x%x.",
 			temp);
-	writel(temp, &xhci->op_regs->command);
+	pete_writel("drivers/usb/host/xhci.c:144", temp, &xhci->op_regs->command);
 
 	/*
 	 * Wait for the HCHalted Status bit to be 0 to indicate the host is
@@ -175,7 +175,7 @@ int xhci_reset(struct xhci_hcd *xhci, u64 timeout_us)
 	u32 state;
 	int ret;
 
-	state = readl(&xhci->op_regs->status);
+	state = pete_readl("drivers/usb/host/xhci.c:178", &xhci->op_regs->status);
 
 	if (state == ~(u32)0) {
 		xhci_warn(xhci, "Host not accessible, reset failed.\n");
@@ -188,9 +188,9 @@ int xhci_reset(struct xhci_hcd *xhci, u64 timeout_us)
 	}
 
 	xhci_dbg_trace(xhci, trace_xhci_dbg_init, "// Reset the HC");
-	command = readl(&xhci->op_regs->command);
+	command = pete_readl("drivers/usb/host/xhci.c:191", &xhci->op_regs->command);
 	command |= CMD_RESET;
-	writel(command, &xhci->op_regs->command);
+	pete_writel("drivers/usb/host/xhci.c:193", command, &xhci->op_regs->command);
 
 	/* Existing Intel xHCI controllers require a delay of 1 mS,
 	 * after setting the CMD_RESET bit, and before accessing any
@@ -257,14 +257,14 @@ static void xhci_zero_64b_regs(struct xhci_hcd *xhci)
 	xhci_info(xhci, "Zeroing 64bit base registers, expecting fault\n");
 
 	/* Clear HSEIE so that faults do not get signaled */
-	val = readl(&xhci->op_regs->command);
+	val = pete_readl("drivers/usb/host/xhci.c:260", &xhci->op_regs->command);
 	val &= ~CMD_HSEIE;
-	writel(val, &xhci->op_regs->command);
+	pete_writel("drivers/usb/host/xhci.c:262", val, &xhci->op_regs->command);
 
 	/* Clear HSE (aka FATAL) */
-	val = readl(&xhci->op_regs->status);
+	val = pete_readl("drivers/usb/host/xhci.c:265", &xhci->op_regs->status);
 	val |= STS_FATAL;
-	writel(val, &xhci->op_regs->status);
+	pete_writel("drivers/usb/host/xhci.c:267", val, &xhci->op_regs->status);
 
 	/* Now zero the registers, and brace for impact */
 	val = xhci_read_64(xhci, &xhci->op_regs->dcbaa_ptr);
@@ -304,8 +304,8 @@ static int xhci_enable_interrupter(struct xhci_interrupter *ir)
 	if (!ir || !ir->ir_set)
 		return -EINVAL;
 
-	iman = readl(&ir->ir_set->irq_pending);
-	writel(ER_IRQ_ENABLE(iman), &ir->ir_set->irq_pending);
+	iman = pete_readl("drivers/usb/host/xhci.c:307", &ir->ir_set->irq_pending);
+	pete_writel("drivers/usb/host/xhci.c:308", ER_IRQ_ENABLE(iman), &ir->ir_set->irq_pending);
 
 	return 0;
 }
@@ -317,8 +317,8 @@ static int xhci_disable_interrupter(struct xhci_interrupter *ir)
 	if (!ir || !ir->ir_set)
 		return -EINVAL;
 
-	iman = readl(&ir->ir_set->irq_pending);
-	writel(ER_IRQ_DISABLE(iman), &ir->ir_set->irq_pending);
+	iman = pete_readl("drivers/usb/host/xhci.c:320", &ir->ir_set->irq_pending);
+	pete_writel("drivers/usb/host/xhci.c:321", ER_IRQ_DISABLE(iman), &ir->ir_set->irq_pending);
 
 	return 0;
 }
@@ -339,7 +339,7 @@ static void compliance_mode_recovery(struct timer_list *t)
 		return;
 
 	for (i = 0; i < rhub->num_ports; i++) {
-		temp = readl(rhub->ports[i]->addr);
+		temp = pete_readl("drivers/usb/host/xhci.c:342", rhub->ports[i]->addr);
 		if ((temp & PORT_PLS_MASK) == USB_SS_PORT_LS_COMP_MOD) {
 			/*
 			 * Compliance Mode Detected. Letting USB Core
@@ -468,9 +468,9 @@ static int xhci_run_finished(struct xhci_hcd *xhci)
 	spin_lock_irqsave(&xhci->lock, flags);
 
 	xhci_dbg_trace(xhci, trace_xhci_dbg_init, "Enable interrupts");
-	temp = readl(&xhci->op_regs->command);
+	temp = pete_readl("drivers/usb/host/xhci.c:471", &xhci->op_regs->command);
 	temp |= (CMD_EIE);
-	writel(temp, &xhci->op_regs->command);
+	pete_writel("drivers/usb/host/xhci.c:473", temp, &xhci->op_regs->command);
 
 	xhci_dbg_trace(xhci, trace_xhci_dbg_init, "Enable primary interrupter");
 	xhci_enable_interrupter(ir);
@@ -527,10 +527,10 @@ int xhci_run(struct usb_hcd *hcd)
 
 	xhci_dbg_trace(xhci, trace_xhci_dbg_init,
 			"// Set the interrupt modulation register");
-	temp = readl(&ir->ir_set->irq_control);
+	temp = pete_readl("drivers/usb/host/xhci.c:530", &ir->ir_set->irq_control);
 	temp &= ~ER_IRQ_INTERVAL_MASK;
 	temp |= (xhci->imod_interval / 250) & ER_IRQ_INTERVAL_MASK;
-	writel(temp, &ir->ir_set->irq_control);
+	pete_writel("drivers/usb/host/xhci.c:533", temp, &ir->ir_set->irq_control);
 
 	if (xhci->quirks & XHCI_NEC_HOST) {
 		struct xhci_command *command;
@@ -606,8 +606,8 @@ void xhci_stop(struct usb_hcd *hcd)
 
 	xhci_dbg_trace(xhci, trace_xhci_dbg_init,
 			"// Disabling event ring interrupts");
-	temp = readl(&xhci->op_regs->status);
-	writel((temp & ~0x1fff) | STS_EINT, &xhci->op_regs->status);
+	temp = pete_readl("drivers/usb/host/xhci.c:609", &xhci->op_regs->status);
+	pete_writel("drivers/usb/host/xhci.c:610", (temp & ~0x1fff) | STS_EINT, &xhci->op_regs->status);
 	xhci_disable_interrupter(ir);
 
 	xhci_dbg_trace(xhci, trace_xhci_dbg_init, "cleaning up memory");
@@ -615,7 +615,7 @@ void xhci_stop(struct usb_hcd *hcd)
 	xhci_debugfs_exit(xhci);
 	xhci_dbg_trace(xhci, trace_xhci_dbg_init,
 			"xhci_stop completed - status = %x",
-			readl(&xhci->op_regs->status));
+			pete_readl("drivers/usb/host/xhci.c:618", &xhci->op_regs->status));
 	mutex_unlock(&xhci->mutex);
 }
 EXPORT_SYMBOL_GPL(xhci_stop);
@@ -662,7 +662,7 @@ void xhci_shutdown(struct usb_hcd *hcd)
 
 	xhci_dbg_trace(xhci, trace_xhci_dbg_init,
 			"xhci_shutdown completed - status = %x",
-			readl(&xhci->op_regs->status));
+			pete_readl("drivers/usb/host/xhci.c:665", &xhci->op_regs->status));
 }
 EXPORT_SYMBOL_GPL(xhci_shutdown);
 
@@ -671,34 +671,34 @@ static void xhci_save_registers(struct xhci_hcd *xhci)
 {
 	struct xhci_interrupter *ir = xhci->interrupter;
 
-	xhci->s3.command = readl(&xhci->op_regs->command);
-	xhci->s3.dev_nt = readl(&xhci->op_regs->dev_notification);
+	xhci->s3.command = pete_readl("drivers/usb/host/xhci.c:674", &xhci->op_regs->command);
+	xhci->s3.dev_nt = pete_readl("drivers/usb/host/xhci.c:675", &xhci->op_regs->dev_notification);
 	xhci->s3.dcbaa_ptr = xhci_read_64(xhci, &xhci->op_regs->dcbaa_ptr);
-	xhci->s3.config_reg = readl(&xhci->op_regs->config_reg);
+	xhci->s3.config_reg = pete_readl("drivers/usb/host/xhci.c:677", &xhci->op_regs->config_reg);
 
 	if (!ir)
 		return;
 
-	ir->s3_erst_size = readl(&ir->ir_set->erst_size);
+	ir->s3_erst_size = pete_readl("drivers/usb/host/xhci.c:682", &ir->ir_set->erst_size);
 	ir->s3_erst_base = xhci_read_64(xhci, &ir->ir_set->erst_base);
 	ir->s3_erst_dequeue = xhci_read_64(xhci, &ir->ir_set->erst_dequeue);
-	ir->s3_irq_pending = readl(&ir->ir_set->irq_pending);
-	ir->s3_irq_control = readl(&ir->ir_set->irq_control);
+	ir->s3_irq_pending = pete_readl("drivers/usb/host/xhci.c:685", &ir->ir_set->irq_pending);
+	ir->s3_irq_control = pete_readl("drivers/usb/host/xhci.c:686", &ir->ir_set->irq_control);
 }
 
 static void xhci_restore_registers(struct xhci_hcd *xhci)
 {
 	struct xhci_interrupter *ir = xhci->interrupter;
 
-	writel(xhci->s3.command, &xhci->op_regs->command);
-	writel(xhci->s3.dev_nt, &xhci->op_regs->dev_notification);
+	pete_writel("drivers/usb/host/xhci.c:693", xhci->s3.command, &xhci->op_regs->command);
+	pete_writel("drivers/usb/host/xhci.c:694", xhci->s3.dev_nt, &xhci->op_regs->dev_notification);
 	xhci_write_64(xhci, xhci->s3.dcbaa_ptr, &xhci->op_regs->dcbaa_ptr);
-	writel(xhci->s3.config_reg, &xhci->op_regs->config_reg);
-	writel(ir->s3_erst_size, &ir->ir_set->erst_size);
+	pete_writel("drivers/usb/host/xhci.c:696", xhci->s3.config_reg, &xhci->op_regs->config_reg);
+	pete_writel("drivers/usb/host/xhci.c:697", ir->s3_erst_size, &ir->ir_set->erst_size);
 	xhci_write_64(xhci, ir->s3_erst_base, &ir->ir_set->erst_base);
 	xhci_write_64(xhci, ir->s3_erst_dequeue, &ir->ir_set->erst_dequeue);
-	writel(ir->s3_irq_pending, &ir->ir_set->irq_pending);
-	writel(ir->s3_irq_control, &ir->ir_set->irq_control);
+	pete_writel("drivers/usb/host/xhci.c:700", ir->s3_irq_pending, &ir->ir_set->irq_pending);
+	pete_writel("drivers/usb/host/xhci.c:701", ir->s3_irq_control, &ir->ir_set->irq_control);
 }
 
 static void xhci_set_cmd_ring_deq(struct xhci_hcd *xhci)
@@ -785,7 +785,7 @@ static void xhci_disable_hub_port_wake(struct xhci_hcd *xhci,
 	spin_lock_irqsave(&xhci->lock, flags);
 
 	for (i = 0; i < rhub->num_ports; i++) {
-		portsc = readl(rhub->ports[i]->addr);
+		portsc = pete_readl("drivers/usb/host/xhci.c:788", rhub->ports[i]->addr);
 		t1 = xhci_port_state_to_neutral(portsc);
 		t2 = t1;
 
@@ -798,7 +798,7 @@ static void xhci_disable_hub_port_wake(struct xhci_hcd *xhci,
 			t2 |= PORT_CSC;
 
 		if (t1 != t2) {
-			writel(t2, rhub->ports[i]->addr);
+			pete_writel("drivers/usb/host/xhci.c:801", t2, rhub->ports[i]->addr);
 			xhci_dbg(xhci, "config port %d-%d wake bits, portsc: 0x%x, write: 0x%x\n",
 				 rhub->hcd->self.busnum, i + 1, portsc, t2);
 		}
@@ -813,7 +813,7 @@ static bool xhci_pending_portevent(struct xhci_hcd *xhci)
 	u32			status;
 	u32			portsc;
 
-	status = readl(&xhci->op_regs->status);
+	status = pete_readl("drivers/usb/host/xhci.c:816", &xhci->op_regs->status);
 	if (status & STS_EINT)
 		return true;
 	/*
@@ -825,7 +825,7 @@ static bool xhci_pending_portevent(struct xhci_hcd *xhci)
 	port_index = xhci->usb2_rhub.num_ports;
 	ports = xhci->usb2_rhub.ports;
 	while (port_index--) {
-		portsc = readl(ports[port_index]->addr);
+		portsc = pete_readl("drivers/usb/host/xhci.c:828", ports[port_index]->addr);
 		if (portsc & PORT_CHANGE_MASK ||
 		    (portsc & PORT_PLS_MASK) == XDEV_RESUME)
 			return true;
@@ -833,7 +833,7 @@ static bool xhci_pending_portevent(struct xhci_hcd *xhci)
 	port_index = xhci->usb3_rhub.num_ports;
 	ports = xhci->usb3_rhub.ports;
 	while (port_index--) {
-		portsc = readl(ports[port_index]->addr);
+		portsc = pete_readl("drivers/usb/host/xhci.c:836", ports[port_index]->addr);
 		if (portsc & (PORT_CHANGE_MASK | PORT_CAS) ||
 		    (portsc & PORT_PLS_MASK) == XDEV_RESUME)
 			return true;
@@ -892,9 +892,9 @@ int xhci_suspend(struct xhci_hcd *xhci, bool do_wakeup)
 	/* skipped assuming that port suspend has done */
 
 	/* step 2: clear Run/Stop bit */
-	command = readl(&xhci->op_regs->command);
+	command = pete_readl("drivers/usb/host/xhci.c:895", &xhci->op_regs->command);
 	command &= ~CMD_RUN;
-	writel(command, &xhci->op_regs->command);
+	pete_writel("drivers/usb/host/xhci.c:897", command, &xhci->op_regs->command);
 
 	/* Some chips from Fresco Logic need an extraordinary delay */
 	delay *= (xhci->quirks & XHCI_SLOW_SUSPEND) ? 10 : 1;
@@ -911,9 +911,9 @@ int xhci_suspend(struct xhci_hcd *xhci, bool do_wakeup)
 	xhci_save_registers(xhci);
 
 	/* step 4: set CSS flag */
-	command = readl(&xhci->op_regs->command);
+	command = pete_readl("drivers/usb/host/xhci.c:914", &xhci->op_regs->command);
 	command |= CMD_CSS;
-	writel(command, &xhci->op_regs->command);
+	pete_writel("drivers/usb/host/xhci.c:916", command, &xhci->op_regs->command);
 	xhci->broken_suspend = 0;
 	if (xhci_handshake(&xhci->op_regs->status,
 				STS_SAVE, 0, 20 * 1000)) {
@@ -926,7 +926,7 @@ int xhci_suspend(struct xhci_hcd *xhci, bool do_wakeup)
 	 * if SRE and HCE bits are not set (as per xhci
 	 * Section 5.4.2) and bypass the timeout.
 	 */
-		res = readl(&xhci->op_regs->status);
+		res = pete_readl("drivers/usb/host/xhci.c:929", &xhci->op_regs->status);
 		if ((xhci->quirks & XHCI_SNPS_BROKEN_SUSPEND) &&
 		    (((res & STS_SRE) == 0) &&
 				((res & STS_HCE) == 0))) {
@@ -1011,9 +1011,9 @@ int xhci_resume(struct xhci_hcd *xhci, pm_message_t msg)
 		xhci_set_cmd_ring_deq(xhci);
 		/* step 3: restore state and start state*/
 		/* step 3: set CRS flag */
-		command = readl(&xhci->op_regs->command);
+		command = pete_readl("drivers/usb/host/xhci.c:1014", &xhci->op_regs->command);
 		command |= CMD_CRS;
-		writel(command, &xhci->op_regs->command);
+		pete_writel("drivers/usb/host/xhci.c:1016", command, &xhci->op_regs->command);
 		/*
 		 * Some controllers take up to 55+ ms to complete the controller
 		 * restore so setting the timeout to 100ms. Xhci specification
@@ -1027,7 +1027,7 @@ int xhci_resume(struct xhci_hcd *xhci, pm_message_t msg)
 		}
 	}
 
-	temp = readl(&xhci->op_regs->status);
+	temp = pete_readl("drivers/usb/host/xhci.c:1030", &xhci->op_regs->status);
 
 	/* re-initialize the HC on Restore Error, or Host Controller Error */
 	if ((temp & (STS_SRE | STS_HCE)) &&
@@ -1059,15 +1059,15 @@ int xhci_resume(struct xhci_hcd *xhci, pm_message_t msg)
 			return retval;
 
 		xhci_dbg(xhci, "// Disabling event ring interrupts\n");
-		temp = readl(&xhci->op_regs->status);
-		writel((temp & ~0x1fff) | STS_EINT, &xhci->op_regs->status);
+		temp = pete_readl("drivers/usb/host/xhci.c:1062", &xhci->op_regs->status);
+		pete_writel("drivers/usb/host/xhci.c:1063", (temp & ~0x1fff) | STS_EINT, &xhci->op_regs->status);
 		xhci_disable_interrupter(xhci->interrupter);
 
 		xhci_dbg(xhci, "cleaning up memory\n");
 		xhci_mem_cleanup(xhci);
 		xhci_debugfs_exit(xhci);
 		xhci_dbg(xhci, "xhci_stop completed - status = %x\n",
-			    readl(&xhci->op_regs->status));
+			    pete_readl("drivers/usb/host/xhci.c:1070", &xhci->op_regs->status));
 
 		/* USB core calls the PCI reinit and start functions twice:
 		 * first with the primary HCD, and then with the secondary HCD.
@@ -1103,9 +1103,9 @@ int xhci_resume(struct xhci_hcd *xhci, pm_message_t msg)
 	}
 
 	/* step 4: set Run/Stop bit */
-	command = readl(&xhci->op_regs->command);
+	command = pete_readl("drivers/usb/host/xhci.c:1106", &xhci->op_regs->command);
 	command |= CMD_RUN;
-	writel(command, &xhci->op_regs->command);
+	pete_writel("drivers/usb/host/xhci.c:1108", command, &xhci->op_regs->command);
 	xhci_handshake(&xhci->op_regs->status, STS_HALT,
 		  0, 250 * 1000);
 
@@ -1784,7 +1784,7 @@ static int xhci_urb_dequeue(struct usb_hcd *hcd, struct urb *urb, int status)
 		goto err_giveback;
 
 	/* If xHC is dead take it down and return ALL URBs in xhci_hc_died() */
-	temp = readl(&xhci->op_regs->status);
+	temp = pete_readl("drivers/usb/host/xhci.c:1787", &xhci->op_regs->status);
 	if (temp == ~(u32)0 || xhci->xhc_state & XHCI_STATE_DYING) {
 		xhci_hc_died(xhci);
 		goto done;
@@ -4011,7 +4011,7 @@ int xhci_disable_slot(struct xhci_hcd *xhci, u32 slot_id)
 
 	spin_lock_irqsave(&xhci->lock, flags);
 	/* Don't disable the slot if the host controller is dead. */
-	state = readl(&xhci->op_regs->status);
+	state = pete_readl("drivers/usb/host/xhci.c:4014", &xhci->op_regs->status);
 	if (state == 0xffffffff || (xhci->xhc_state & XHCI_STATE_DYING) ||
 			(xhci->xhc_state & XHCI_STATE_HALTED)) {
 		spin_unlock_irqrestore(&xhci->lock, flags);
@@ -4099,7 +4099,7 @@ int xhci_alloc_dev(struct usb_hcd *hcd, struct usb_device *udev)
 			 xhci_trb_comp_code_string(command->status));
 		xhci_err(xhci, "Max number of devices this xHCI host supports is %u.\n",
 				HCS_MAX_SLOTS(
-					readl(&xhci->cap_regs->hcs_params1)));
+					pete_readl("drivers/usb/host/xhci.c:4102", &xhci->cap_regs->hcs_params1)));
 		xhci_free_command(xhci, command);
 		return 0;
 	}
@@ -4540,7 +4540,7 @@ static int xhci_set_usb2_hardware_lpm(struct usb_hcd *hcd,
 	ports = xhci->usb2_rhub.ports;
 	port_num = udev->portnum - 1;
 	pm_addr = ports[port_num]->addr + PORTPMSC;
-	pm_val = readl(pm_addr);
+	pm_val = pete_readl("drivers/usb/host/xhci.c:4543", pm_addr);
 	hlpm_addr = ports[port_num]->addr + PORTHLPMC;
 
 	xhci_dbg(xhci, "%s port %d USB2 hardware LPM\n",
@@ -4570,26 +4570,26 @@ static int xhci_set_usb2_hardware_lpm(struct usb_hcd *hcd,
 			spin_lock_irqsave(&xhci->lock, flags);
 
 			hlpm_val = xhci_calculate_usb2_hw_lpm_params(udev);
-			writel(hlpm_val, hlpm_addr);
+			pete_writel("drivers/usb/host/xhci.c:4573", hlpm_val, hlpm_addr);
 			/* flush write */
-			readl(hlpm_addr);
+			pete_readl("drivers/usb/host/xhci.c:4575", hlpm_addr);
 		} else {
 			hird = xhci_calculate_hird_besl(xhci, udev);
 		}
 
 		pm_val &= ~PORT_HIRD_MASK;
 		pm_val |= PORT_HIRD(hird) | PORT_RWE | PORT_L1DS(udev->slot_id);
-		writel(pm_val, pm_addr);
-		pm_val = readl(pm_addr);
+		pete_writel("drivers/usb/host/xhci.c:4582", pm_val, pm_addr);
+		pm_val = pete_readl("drivers/usb/host/xhci.c:4583", pm_addr);
 		pm_val |= PORT_HLE;
-		writel(pm_val, pm_addr);
+		pete_writel("drivers/usb/host/xhci.c:4585", pm_val, pm_addr);
 		/* flush write */
-		readl(pm_addr);
+		pete_readl("drivers/usb/host/xhci.c:4587", pm_addr);
 	} else {
 		pm_val &= ~(PORT_HLE | PORT_RWE | PORT_HIRD_MASK | PORT_L1DS_MASK);
-		writel(pm_val, pm_addr);
+		pete_writel("drivers/usb/host/xhci.c:4590", pm_val, pm_addr);
 		/* flush write */
-		readl(pm_addr);
+		pete_readl("drivers/usb/host/xhci.c:4592", pm_addr);
 		if (udev->usb2_hw_lpm_besl_capable) {
 			spin_unlock_irqrestore(&xhci->lock, flags);
 			xhci_change_max_exit_latency(xhci, udev, 0);
@@ -5231,7 +5231,7 @@ static int xhci_get_frame(struct usb_hcd *hcd)
 {
 	struct xhci_hcd *xhci = hcd_to_xhci(hcd);
 	/* EHCI mods by the periodic size.  Why? */
-	return readl(&xhci->run_regs->microframe_index) >> 3;
+	return pete_readl("drivers/usb/host/xhci.c:5234", &xhci->run_regs->microframe_index) >> 3;
 }
 
 static void xhci_hcd_init_usb2_data(struct xhci_hcd *xhci, struct usb_hcd *hcd)
@@ -5315,17 +5315,17 @@ int xhci_gen_setup(struct usb_hcd *hcd, xhci_get_quirks_t get_quirks)
 	xhci->main_hcd = hcd;
 	xhci->cap_regs = hcd->regs;
 	xhci->op_regs = hcd->regs +
-		HC_LENGTH(readl(&xhci->cap_regs->hc_capbase));
+		HC_LENGTH(pete_readl("drivers/usb/host/xhci.c:5318", &xhci->cap_regs->hc_capbase));
 	xhci->run_regs = hcd->regs +
-		(readl(&xhci->cap_regs->run_regs_off) & RTSOFF_MASK);
+		(pete_readl("drivers/usb/host/xhci.c:5320", &xhci->cap_regs->run_regs_off) & RTSOFF_MASK);
 	/* Cache read-only capability registers */
-	xhci->hcs_params1 = readl(&xhci->cap_regs->hcs_params1);
-	xhci->hcs_params2 = readl(&xhci->cap_regs->hcs_params2);
-	xhci->hcs_params3 = readl(&xhci->cap_regs->hcs_params3);
-	xhci->hci_version = HC_VERSION(readl(&xhci->cap_regs->hc_capbase));
-	xhci->hcc_params = readl(&xhci->cap_regs->hcc_params);
+	xhci->hcs_params1 = pete_readl("drivers/usb/host/xhci.c:5322", &xhci->cap_regs->hcs_params1);
+	xhci->hcs_params2 = pete_readl("drivers/usb/host/xhci.c:5323", &xhci->cap_regs->hcs_params2);
+	xhci->hcs_params3 = pete_readl("drivers/usb/host/xhci.c:5324", &xhci->cap_regs->hcs_params3);
+	xhci->hci_version = HC_VERSION(pete_readl("drivers/usb/host/xhci.c:5325", &xhci->cap_regs->hc_capbase));
+	xhci->hcc_params = pete_readl("drivers/usb/host/xhci.c:5326", &xhci->cap_regs->hcc_params);
 	if (xhci->hci_version > 0x100)
-		xhci->hcc_params2 = readl(&xhci->cap_regs->hcc_params2);
+		xhci->hcc_params2 = pete_readl("drivers/usb/host/xhci.c:5328", &xhci->cap_regs->hcc_params2);
 
 	/* xhci-plat or xhci-pci might have set max_interrupters already */
 	if ((!xhci->max_interrupters) ||

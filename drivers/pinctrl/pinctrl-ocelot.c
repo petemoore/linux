@@ -28,7 +28,7 @@
 #include "pinmux.h"
 
 #define ocelot_clrsetbits(addr, clear, set) \
-	writel((readl(addr) & ~(clear)) | (set), (addr))
+	pete_writel("drivers/pinctrl/pinctrl-ocelot.c:31", (pete_readl("drivers/pinctrl/pinctrl-ocelot.c:31", addr) & ~(clear)) | (set), (addr))
 
 enum {
 	PINCONF_BIAS,

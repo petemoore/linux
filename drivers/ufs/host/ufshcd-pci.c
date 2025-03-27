@@ -226,8 +226,8 @@ static void intel_cache_ltr(struct ufs_hba *hba)
 {
 	struct intel_host *host = ufshcd_get_variant(hba);
 
-	host->active_ltr = readl(hba->mmio_base + INTEL_ACTIVELTR);
-	host->idle_ltr = readl(hba->mmio_base + INTEL_IDLELTR);
+	host->active_ltr = pete_readl("drivers/ufs/host/ufshcd-pci.c:229", hba->mmio_base + INTEL_ACTIVELTR);
+	host->idle_ltr = pete_readl("drivers/ufs/host/ufshcd-pci.c:230", hba->mmio_base + INTEL_IDLELTR);
 }
 
 static void intel_ltr_set(struct device *dev, s32 val)
@@ -243,7 +243,7 @@ static void intel_ltr_set(struct device *dev, s32 val)
 	 * by the PM QoS layer or disable it in case we were passed
 	 * negative value or PM_QOS_LATENCY_ANY.
 	 */
-	ltr = readl(hba->mmio_base + INTEL_ACTIVELTR);
+	ltr = pete_readl("drivers/ufs/host/ufshcd-pci.c:246", hba->mmio_base + INTEL_ACTIVELTR);
 
 	if (val == PM_QOS_LATENCY_ANY || val < 0) {
 		ltr &= ~INTEL_LTR_REQ;
@@ -265,8 +265,8 @@ static void intel_ltr_set(struct device *dev, s32 val)
 	if (ltr == host->active_ltr)
 		goto out;
 
-	writel(ltr, hba->mmio_base + INTEL_ACTIVELTR);
-	writel(ltr, hba->mmio_base + INTEL_IDLELTR);
+	pete_writel("drivers/ufs/host/ufshcd-pci.c:268", ltr, hba->mmio_base + INTEL_ACTIVELTR);
+	pete_writel("drivers/ufs/host/ufshcd-pci.c:269", ltr, hba->mmio_base + INTEL_IDLELTR);
 
 	/* Cache the values into intel_host structure */
 	intel_cache_ltr(hba);

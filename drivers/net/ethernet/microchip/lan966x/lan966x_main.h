@@ -761,7 +761,7 @@ static inline u32 lan_rd(struct lan966x *lan966x, int id, int tinst, int tcnt,
 			 int gbase, int ginst, int gcnt, int gwidth,
 			 int raddr, int rinst, int rcnt, int rwidth)
 {
-	return readl(lan_addr(lan966x->regs, id, tinst, tcnt, gbase, ginst,
+	return pete_readl("drivers/net/ethernet/microchip/lan966x/lan966x_main.h:764", lan_addr(lan966x->regs, id, tinst, tcnt, gbase, ginst,
 			      gcnt, gwidth, raddr, rinst, rcnt, rwidth));
 }
 
@@ -770,7 +770,7 @@ static inline void lan_wr(u32 val, struct lan966x *lan966x,
 			  int gbase, int ginst, int gcnt, int gwidth,
 			  int raddr, int rinst, int rcnt, int rwidth)
 {
-	writel(val, lan_addr(lan966x->regs, id, tinst, tcnt,
+	pete_writel("drivers/net/ethernet/microchip/lan966x/lan966x_main.h:773", val, lan_addr(lan966x->regs, id, tinst, tcnt,
 			     gbase, ginst, gcnt, gwidth,
 			     raddr, rinst, rcnt, rwidth));
 }
@@ -782,10 +782,10 @@ static inline void lan_rmw(u32 val, u32 mask, struct lan966x *lan966x,
 {
 	u32 nval;
 
-	nval = readl(lan_addr(lan966x->regs, id, tinst, tcnt, gbase, ginst,
+	nval = pete_readl("drivers/net/ethernet/microchip/lan966x/lan966x_main.h:785", lan_addr(lan966x->regs, id, tinst, tcnt, gbase, ginst,
 			      gcnt, gwidth, raddr, rinst, rcnt, rwidth));
 	nval = (nval & ~mask) | (val & mask);
-	writel(nval, lan_addr(lan966x->regs, id, tinst, tcnt, gbase, ginst,
+	pete_writel("drivers/net/ethernet/microchip/lan966x/lan966x_main.h:788", nval, lan_addr(lan966x->regs, id, tinst, tcnt, gbase, ginst,
 			      gcnt, gwidth, raddr, rinst, rcnt, rwidth));
 }
 

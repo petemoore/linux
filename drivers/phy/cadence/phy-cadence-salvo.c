@@ -149,14 +149,14 @@ static bool cdns_is_nxp_phy(struct cdns_salvo_phy *salvo_phy)
 
 static u16 cdns_salvo_read(struct cdns_salvo_phy *salvo_phy, u32 offset, u32 reg)
 {
-	return (u16)readl(salvo_phy->base + offset +
+	return (u16)pete_readl("drivers/phy/cadence/phy-cadence-salvo.c:152", salvo_phy->base + offset +
 		reg * (1 << salvo_phy->data->reg_offset_shift));
 }
 
 static void cdns_salvo_write(struct cdns_salvo_phy *salvo_phy, u32 offset,
 			     u32 reg, u16 val)
 {
-	writel(val, salvo_phy->base + offset +
+	pete_writel("drivers/phy/cadence/phy-cadence-salvo.c:159", val, salvo_phy->base + offset +
 		reg * (1 << salvo_phy->data->reg_offset_shift));
 }
 

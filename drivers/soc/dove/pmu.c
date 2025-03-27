@@ -271,8 +271,8 @@ static int __init dove_init_pmu_irq(struct pmu_data *pmu, int irq)
 	int ret;
 
 	/* mask and clear all interrupts */
-	writel(0, pmu->pmc_base + PMC_IRQ_MASK);
-	writel(0, pmu->pmc_base + PMC_IRQ_CAUSE);
+	pete_writel("drivers/soc/dove/pmu.c:274", 0, pmu->pmc_base + PMC_IRQ_MASK);
+	pete_writel("drivers/soc/dove/pmu.c:275", 0, pmu->pmc_base + PMC_IRQ_CAUSE);
 
 	domain = irq_domain_add_linear(pmu->of_node, NR_PMU_IRQS,
 				       &irq_generic_chip_ops, NULL);

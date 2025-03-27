@@ -112,12 +112,12 @@ struct xilinx_pcie {
 
 static inline u32 pcie_read(struct xilinx_pcie *pcie, u32 reg)
 {
-	return readl(pcie->reg_base + reg);
+	return pete_readl("drivers/pci/controller/pcie-xilinx.c:115", pcie->reg_base + reg);
 }
 
 static inline void pcie_write(struct xilinx_pcie *pcie, u32 val, u32 reg)
 {
-	writel(val, pcie->reg_base + reg);
+	pete_writel("drivers/pci/controller/pcie-xilinx.c:120", val, pcie->reg_base + reg);
 }
 
 static inline bool xilinx_pcie_link_up(struct xilinx_pcie *pcie)

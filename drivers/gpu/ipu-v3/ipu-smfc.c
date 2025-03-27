@@ -42,10 +42,10 @@ int ipu_smfc_set_burstsize(struct ipu_smfc *smfc, int burstsize)
 	spin_lock_irqsave(&priv->lock, flags);
 
 	shift = smfc->chno * 4;
-	val = readl(priv->base + SMFC_BS);
+	val = pete_readl("drivers/gpu/ipu-v3/ipu-smfc.c:45", priv->base + SMFC_BS);
 	val &= ~(0xf << shift);
 	val |= burstsize << shift;
-	writel(val, priv->base + SMFC_BS);
+	pete_writel("drivers/gpu/ipu-v3/ipu-smfc.c:48", val, priv->base + SMFC_BS);
 
 	spin_unlock_irqrestore(&priv->lock, flags);
 
@@ -62,10 +62,10 @@ int ipu_smfc_map_channel(struct ipu_smfc *smfc, int csi_id, int mipi_id)
 	spin_lock_irqsave(&priv->lock, flags);
 
 	shift = smfc->chno * 3;
-	val = readl(priv->base + SMFC_MAP);
+	val = pete_readl("drivers/gpu/ipu-v3/ipu-smfc.c:65", priv->base + SMFC_MAP);
 	val &= ~(0x7 << shift);
 	val |= ((csi_id << 2) | mipi_id) << shift;
-	writel(val, priv->base + SMFC_MAP);
+	pete_writel("drivers/gpu/ipu-v3/ipu-smfc.c:68", val, priv->base + SMFC_MAP);
 
 	spin_unlock_irqrestore(&priv->lock, flags);
 
@@ -82,10 +82,10 @@ int ipu_smfc_set_watermark(struct ipu_smfc *smfc, u32 set_level, u32 clr_level)
 	spin_lock_irqsave(&priv->lock, flags);
 
 	shift = smfc->chno * 6 + (smfc->chno > 1 ? 4 : 0);
-	val = readl(priv->base + SMFC_WMC);
+	val = pete_readl("drivers/gpu/ipu-v3/ipu-smfc.c:85", priv->base + SMFC_WMC);
 	val &= ~(0x3f << shift);
 	val |= ((clr_level << 3) | set_level) << shift;
-	writel(val, priv->base + SMFC_WMC);
+	pete_writel("drivers/gpu/ipu-v3/ipu-smfc.c:88", val, priv->base + SMFC_WMC);
 
 	spin_unlock_irqrestore(&priv->lock, flags);
 

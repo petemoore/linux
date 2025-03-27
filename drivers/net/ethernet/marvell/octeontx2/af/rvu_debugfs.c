@@ -621,11 +621,11 @@ static ssize_t rvu_dbg_lmtst_map_table_display(struct file *filp,
 		index = pf * rvu->hw->total_vfs * LMT_MAPTBL_ENTRY_SIZE;
 		off += scnprintf(&buf[off], buf_size - 1 - off, " 0x%llx\t\t",
 				 (tbl_base + index));
-		lmt_addr = readq(lmt_map_base + index);
+		lmt_addr = pete_readq("drivers/net/ethernet/marvell/octeontx2/af/rvu_debugfs.c:624", lmt_map_base + index);
 		off += scnprintf(&buf[off], buf_size - 1 - off,
 				 " 0x%016llx\t\t", lmt_addr);
 		index += 8;
-		val = readq(lmt_map_base + index);
+		val = pete_readq("drivers/net/ethernet/marvell/octeontx2/af/rvu_debugfs.c:628", lmt_map_base + index);
 		off += scnprintf(&buf[off], buf_size - 1 - off, " 0x%016llx\n",
 				 val);
 		/* Reading num of VFs per PF */
@@ -637,11 +637,11 @@ static ssize_t rvu_dbg_lmtst_map_table_display(struct file *filp,
 					    "PF%d:VF%d  \t\t", pf, vf);
 			off += scnprintf(&buf[off], buf_size - 1 - off,
 					 " 0x%llx\t\t", (tbl_base + index));
-			lmt_addr = readq(lmt_map_base + index);
+			lmt_addr = pete_readq("drivers/net/ethernet/marvell/octeontx2/af/rvu_debugfs.c:640", lmt_map_base + index);
 			off += scnprintf(&buf[off], buf_size - 1 - off,
 					 " 0x%016llx\t\t", lmt_addr);
 			index += 8;
-			val = readq(lmt_map_base + index);
+			val = pete_readq("drivers/net/ethernet/marvell/octeontx2/af/rvu_debugfs.c:644", lmt_map_base + index);
 			off += scnprintf(&buf[off], buf_size - 1 - off,
 					 " 0x%016llx\n", val);
 		}

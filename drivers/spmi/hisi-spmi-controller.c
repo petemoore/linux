@@ -90,7 +90,7 @@ static int spmi_controller_wait_for_done(struct device *dev,
 	offset += SPMI_CHANNEL_OFFSET * ctrl_dev->channel + SPMI_SLAVE_OFFSET * sid;
 
 	do {
-		status = readl(base + offset);
+		status = pete_readl("drivers/spmi/hisi-spmi-controller.c:93", base + offset);
 
 		if (status & SPMI_APB_TRANS_DONE) {
 			if (status & SPMI_APB_TRANS_FAIL) {
@@ -149,7 +149,7 @@ static int spmi_read_cmd(struct spmi_controller *ctrl,
 
 	spin_lock_irqsave(&spmi_controller->lock, flags);
 
-	writel(cmd, spmi_controller->base + chnl_ofst + SPMI_APB_SPMI_CMD_BASE_ADDR);
+	pete_writel("drivers/spmi/hisi-spmi-controller.c:152", cmd, spmi_controller->base + chnl_ofst + SPMI_APB_SPMI_CMD_BASE_ADDR);
 
 	rc = spmi_controller_wait_for_done(&ctrl->dev, spmi_controller,
 					   spmi_controller->base, slave_id, slave_addr);
@@ -157,7 +157,7 @@ static int spmi_read_cmd(struct spmi_controller *ctrl,
 		goto done;
 
 	for (i = 0; bc > i * SPMI_PER_DATAREG_BYTE; i++) {
-		data = readl(spmi_controller->base + chnl_ofst +
+		data = pete_readl("drivers/spmi/hisi-spmi-controller.c:160", spmi_controller->base + chnl_ofst +
 			     SPMI_SLAVE_OFFSET * slave_id +
 			     SPMI_APB_SPMI_RDATA0_BASE_ADDR +
 			     i * SPMI_PER_DATAREG_BYTE);
@@ -236,14 +236,14 @@ static int spmi_write_cmd(struct spmi_controller *ctrl,
 			buf += (bc % SPMI_PER_DATAREG_BYTE);
 		}
 
-		writel((u32 __force)cpu_to_be32(data),
+		pete_writel("drivers/spmi/hisi-spmi-controller.c:239", (u32 __force)cpu_to_be32(data),
 		       spmi_controller->base + chnl_ofst +
 		       SPMI_APB_SPMI_WDATA0_BASE_ADDR +
 		       SPMI_PER_DATAREG_BYTE * i);
 	}
 
 	/* Start the transaction */
-	writel(cmd, spmi_controller->base + chnl_ofst + SPMI_APB_SPMI_CMD_BASE_ADDR);
+	pete_writel("drivers/spmi/hisi-spmi-controller.c:246", cmd, spmi_controller->base + chnl_ofst + SPMI_APB_SPMI_CMD_BASE_ADDR);
 
 	rc = spmi_controller_wait_for_done(&ctrl->dev, spmi_controller,
 					   spmi_controller->base, slave_id,

@@ -66,7 +66,7 @@ static void regmap_mmio_write8(struct regmap_mmio_context *ctx,
 				unsigned int reg,
 				unsigned int val)
 {
-	writeb(val, ctx->regs + reg);
+	pete_writeb("drivers/base/regmap/regmap-mmio.c:69", val, ctx->regs + reg);
 }
 
 static void regmap_mmio_write8_relaxed(struct regmap_mmio_context *ctx,
@@ -86,7 +86,7 @@ static void regmap_mmio_write16le(struct regmap_mmio_context *ctx,
 				  unsigned int reg,
 				  unsigned int val)
 {
-	writew(val, ctx->regs + reg);
+	pete_writew("drivers/base/regmap/regmap-mmio.c:89", val, ctx->regs + reg);
 }
 
 static void regmap_mmio_write16le_relaxed(struct regmap_mmio_context *ctx,
@@ -106,7 +106,7 @@ static void regmap_mmio_write16be(struct regmap_mmio_context *ctx,
 				  unsigned int reg,
 				  unsigned int val)
 {
-	writew(swab16(val), ctx->regs + reg);
+	pete_writew("drivers/base/regmap/regmap-mmio.c:109", swab16(val), ctx->regs + reg);
 }
 
 static void regmap_mmio_iowrite16be(struct regmap_mmio_context *ctx,
@@ -119,7 +119,7 @@ static void regmap_mmio_write32le(struct regmap_mmio_context *ctx,
 				  unsigned int reg,
 				  unsigned int val)
 {
-	writel(val, ctx->regs + reg);
+	pete_writel("drivers/base/regmap/regmap-mmio.c:122", val, ctx->regs + reg);
 }
 
 static void regmap_mmio_write32le_relaxed(struct regmap_mmio_context *ctx,
@@ -139,7 +139,7 @@ static void regmap_mmio_write32be(struct regmap_mmio_context *ctx,
 				  unsigned int reg,
 				  unsigned int val)
 {
-	writel(swab32(val), ctx->regs + reg);
+	pete_writel("drivers/base/regmap/regmap-mmio.c:142", swab32(val), ctx->regs + reg);
 }
 
 static void regmap_mmio_iowrite32be(struct regmap_mmio_context *ctx,
@@ -192,14 +192,14 @@ static int regmap_mmio_noinc_write(void *context, unsigned int reg,
 		{
 			const u16 *valp = (const u16 *)val;
 			for (i = 0; i < val_count; i++)
-				writew(swab16(valp[i]), ctx->regs + reg);
+				pete_writew("drivers/base/regmap/regmap-mmio.c:195", swab16(valp[i]), ctx->regs + reg);
 			goto out_clk;
 		}
 		case 4:
 		{
 			const u32 *valp = (const u32 *)val;
 			for (i = 0; i < val_count; i++)
-				writel(swab32(valp[i]), ctx->regs + reg);
+				pete_writel("drivers/base/regmap/regmap-mmio.c:202", swab32(valp[i]), ctx->regs + reg);
 			goto out_clk;
 		}
 		default:
@@ -233,7 +233,7 @@ out_clk:
 static unsigned int regmap_mmio_read8(struct regmap_mmio_context *ctx,
 				      unsigned int reg)
 {
-	return readb(ctx->regs + reg);
+	return pete_readb("drivers/base/regmap/regmap-mmio.c:236", ctx->regs + reg);
 }
 
 static unsigned int regmap_mmio_read8_relaxed(struct regmap_mmio_context *ctx,
@@ -251,7 +251,7 @@ static unsigned int regmap_mmio_ioread8(struct regmap_mmio_context *ctx,
 static unsigned int regmap_mmio_read16le(struct regmap_mmio_context *ctx,
 				         unsigned int reg)
 {
-	return readw(ctx->regs + reg);
+	return pete_readw("drivers/base/regmap/regmap-mmio.c:254", ctx->regs + reg);
 }
 
 static unsigned int regmap_mmio_read16le_relaxed(struct regmap_mmio_context *ctx,
@@ -269,7 +269,7 @@ static unsigned int regmap_mmio_ioread16le(struct regmap_mmio_context *ctx,
 static unsigned int regmap_mmio_read16be(struct regmap_mmio_context *ctx,
 				         unsigned int reg)
 {
-	return swab16(readw(ctx->regs + reg));
+	return swab16(pete_readw("drivers/base/regmap/regmap-mmio.c:272", ctx->regs + reg));
 }
 
 static unsigned int regmap_mmio_ioread16be(struct regmap_mmio_context *ctx,
@@ -281,7 +281,7 @@ static unsigned int regmap_mmio_ioread16be(struct regmap_mmio_context *ctx,
 static unsigned int regmap_mmio_read32le(struct regmap_mmio_context *ctx,
 				         unsigned int reg)
 {
-	return readl(ctx->regs + reg);
+	return pete_readl("drivers/base/regmap/regmap-mmio.c:284", ctx->regs + reg);
 }
 
 static unsigned int regmap_mmio_read32le_relaxed(struct regmap_mmio_context *ctx,
@@ -299,7 +299,7 @@ static unsigned int regmap_mmio_ioread32le(struct regmap_mmio_context *ctx,
 static unsigned int regmap_mmio_read32be(struct regmap_mmio_context *ctx,
 				         unsigned int reg)
 {
-	return swab32(readl(ctx->regs + reg));
+	return swab32(pete_readl("drivers/base/regmap/regmap-mmio.c:302", ctx->regs + reg));
 }
 
 static unsigned int regmap_mmio_ioread32be(struct regmap_mmio_context *ctx,

@@ -28,7 +28,7 @@ static inline u32 dw8250_readl_ext(struct uart_port *p, int offset)
 {
 	if (p->iotype == UPIO_MEM32BE)
 		return ioread32be(p->membase + offset);
-	return readl(p->membase + offset);
+	return pete_readl("drivers/tty/serial/8250/8250_dwlib.h:31", p->membase + offset);
 }
 
 static inline void dw8250_writel_ext(struct uart_port *p, int offset, u32 reg)
@@ -36,5 +36,5 @@ static inline void dw8250_writel_ext(struct uart_port *p, int offset, u32 reg)
 	if (p->iotype == UPIO_MEM32BE)
 		iowrite32be(reg, p->membase + offset);
 	else
-		writel(reg, p->membase + offset);
+		pete_writel("drivers/tty/serial/8250/8250_dwlib.h:39", reg, p->membase + offset);
 }

@@ -50,7 +50,7 @@ static int lpc18xx_otp_read(void *context, unsigned int offset,
 		count = LPC18XX_OTP_SIZE - index;
 
 	for (i = index; i < (index + count); i++)
-		*buf++ = readl(otp->base + i * LPC18XX_OTP_WORD_SIZE);
+		*buf++ = pete_readl("drivers/nvmem/lpc18xx_otp.c:53", otp->base + i * LPC18XX_OTP_WORD_SIZE);
 
 	return 0;
 }

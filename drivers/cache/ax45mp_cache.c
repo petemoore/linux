@@ -59,7 +59,7 @@ static struct ax45mp_priv ax45mp_priv;
 /* L2 Cache operations */
 static inline uint32_t ax45mp_cpu_l2c_get_cctl_status(void)
 {
-	return readl(ax45mp_priv.l2c_base + AX45MP_L2C_REG_STATUS_OFFSET);
+	return pete_readl("drivers/cache/ax45mp_cache.c:62", ax45mp_priv.l2c_base + AX45MP_L2C_REG_STATUS_OFFSET);
 }
 
 static void ax45mp_cpu_cache_operation(unsigned long start, unsigned long end,
@@ -75,8 +75,8 @@ static void ax45mp_cpu_cache_operation(unsigned long start, unsigned long end,
 		csr_write(AX45MP_CCTL_REG_UCCTLCOMMAND_NUM, l1_op);
 
 		pa = virt_to_phys((void *)start);
-		writel(pa, base + AX45MP_L2C_REG_CN_ACC_OFFSET(mhartid));
-		writel(l2_op, base + AX45MP_L2C_REG_CN_CMD_OFFSET(mhartid));
+		pete_writel("drivers/cache/ax45mp_cache.c:78", pa, base + AX45MP_L2C_REG_CN_ACC_OFFSET(mhartid));
+		pete_writel("drivers/cache/ax45mp_cache.c:79", l2_op, base + AX45MP_L2C_REG_CN_CMD_OFFSET(mhartid));
 		while ((ax45mp_cpu_l2c_get_cctl_status() &
 			AX45MP_CCTL_L2_STATUS_CN_MASK(mhartid)) !=
 			AX45MP_CCTL_L2_STATUS_IDLE)

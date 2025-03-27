@@ -503,7 +503,7 @@ static int ray_init(struct net_device *dev)
 	/* Initialize CCS's to buffer free state */
 	pccs = ccs_base(local);
 	for (i = 0; i < NUMBER_OF_CCS; i++) {
-		writeb(CCS_BUFFER_FREE, &(pccs++)->buffer_status);
+		pete_writeb("drivers/net/wireless/legacy/ray_cs.c:506", CCS_BUFFER_FREE, &(pccs++)->buffer_status);
 	}
 	init_startup_params(local);
 
@@ -547,7 +547,7 @@ static int dl_startup_params(struct net_device *dev)
 		return -1;
 	local->dl_param_ccs = ccsindex;
 	pccs = ccs_base(local) + ccsindex;
-	writeb(CCS_DOWNLOAD_STARTUP_PARAMS, &pccs->cmd);
+	pete_writeb("drivers/net/wireless/legacy/ray_cs.c:550", CCS_DOWNLOAD_STARTUP_PARAMS, &pccs->cmd);
 	dev_dbg(&link->dev, "dl_startup_params start ccsindex = %d\n",
 	      local->dl_param_ccs);
 	/* Interrupt the firmware to process the command */
@@ -555,7 +555,7 @@ static int dl_startup_params(struct net_device *dev)
 		printk(KERN_INFO "ray dl_startup_params failed - "
 		       "ECF not ready for intr\n");
 		local->card_status = CARD_DL_PARAM_ERROR;
-		writeb(CCS_BUFFER_FREE, &(pccs++)->buffer_status);
+		pete_writeb("drivers/net/wireless/legacy/ray_cs.c:558", CCS_BUFFER_FREE, &(pccs++)->buffer_status);
 		return -2;
 	}
 	local->card_status = CARD_DL_PARAM;
@@ -650,14 +650,14 @@ static void verify_dl_startup(struct timer_list *t)
 		       local->dl_param_ccs);
 		for (i = 0; i < sizeof(struct b5_startup_params); i++) {
 			printk(" %2x",
-			       (unsigned int)readb(local->sram +
+			       (unsigned int)pete_readb("drivers/net/wireless/legacy/ray_cs.c:653", local->sram +
 						   HOST_TO_ECF_BASE + i));
 		}
 		printk("\n");
 	}
 #endif
 
-	status = readb(&pccs->buffer_status);
+	status = pete_readb("drivers/net/wireless/legacy/ray_cs.c:660", &pccs->buffer_status);
 	if (status != CCS_BUFFER_FREE) {
 		printk(KERN_INFO
 		       "Download startup params failed.  Status = %d\n",
@@ -687,12 +687,12 @@ static void start_net(struct timer_list *t)
 	if ((ccsindex = get_free_ccs(local)) < 0)
 		return;
 	pccs = ccs_base(local) + ccsindex;
-	writeb(CCS_START_NETWORK, &pccs->cmd);
-	writeb(0, &pccs->var.start_network.update_param);
+	pete_writeb("drivers/net/wireless/legacy/ray_cs.c:690", CCS_START_NETWORK, &pccs->cmd);
+	pete_writeb("drivers/net/wireless/legacy/ray_cs.c:691", 0, &pccs->var.start_network.update_param);
 	/* Interrupt the firmware to process the command */
 	if (interrupt_ecf(local, ccsindex)) {
 		dev_dbg(&link->dev, "ray start net failed - card not ready for intr\n");
-		writeb(CCS_BUFFER_FREE, &(pccs++)->buffer_status);
+		pete_writeb("drivers/net/wireless/legacy/ray_cs.c:695", CCS_BUFFER_FREE, &(pccs++)->buffer_status);
 		return;
 	}
 	local->card_status = CARD_DOING_ACQ;
@@ -716,13 +716,13 @@ static void join_net(struct timer_list *t)
 	if ((ccsindex = get_free_ccs(local)) < 0)
 		return;
 	pccs = ccs_base(local) + ccsindex;
-	writeb(CCS_JOIN_NETWORK, &pccs->cmd);
-	writeb(0, &pccs->var.join_network.update_param);
-	writeb(0, &pccs->var.join_network.net_initiated);
+	pete_writeb("drivers/net/wireless/legacy/ray_cs.c:719", CCS_JOIN_NETWORK, &pccs->cmd);
+	pete_writeb("drivers/net/wireless/legacy/ray_cs.c:720", 0, &pccs->var.join_network.update_param);
+	pete_writeb("drivers/net/wireless/legacy/ray_cs.c:721", 0, &pccs->var.join_network.net_initiated);
 	/* Interrupt the firmware to process the command */
 	if (interrupt_ecf(local, ccsindex)) {
 		dev_dbg(&link->dev, "ray join net failed - card not ready for intr\n");
-		writeb(CCS_BUFFER_FREE, &(pccs++)->buffer_status);
+		pete_writeb("drivers/net/wireless/legacy/ray_cs.c:725", CCS_BUFFER_FREE, &(pccs++)->buffer_status);
 		return;
 	}
 	local->card_status = CARD_DOING_ACQ;
@@ -919,15 +919,15 @@ static int ray_hw_xmit(unsigned char *data, int len, struct net_device *dev,
 	/* fill in the CCS */
 	pccs = ccs_base(local) + ccsindex;
 	len += TX_HEADER_LENGTH + offset;
-	writeb(CCS_TX_REQUEST, &pccs->cmd);
-	writeb(addr >> 8, &pccs->var.tx_request.tx_data_ptr[0]);
-	writeb(local->tib_length, &pccs->var.tx_request.tx_data_ptr[1]);
-	writeb(len >> 8, &pccs->var.tx_request.tx_data_length[0]);
-	writeb(len & 0xff, &pccs->var.tx_request.tx_data_length[1]);
+	pete_writeb("drivers/net/wireless/legacy/ray_cs.c:922", CCS_TX_REQUEST, &pccs->cmd);
+	pete_writeb("drivers/net/wireless/legacy/ray_cs.c:923", addr >> 8, &pccs->var.tx_request.tx_data_ptr[0]);
+	pete_writeb("drivers/net/wireless/legacy/ray_cs.c:924", local->tib_length, &pccs->var.tx_request.tx_data_ptr[1]);
+	pete_writeb("drivers/net/wireless/legacy/ray_cs.c:925", len >> 8, &pccs->var.tx_request.tx_data_length[0]);
+	pete_writeb("drivers/net/wireless/legacy/ray_cs.c:926", len & 0xff, &pccs->var.tx_request.tx_data_length[1]);
 /* TBD still need psm_cam? */
-	writeb(PSM_CAM, &pccs->var.tx_request.pow_sav_mode);
-	writeb(local->net_default_tx_rate, &pccs->var.tx_request.tx_rate);
-	writeb(0, &pccs->var.tx_request.antenna);
+	pete_writeb("drivers/net/wireless/legacy/ray_cs.c:928", PSM_CAM, &pccs->var.tx_request.pow_sav_mode);
+	pete_writeb("drivers/net/wireless/legacy/ray_cs.c:929", local->net_default_tx_rate, &pccs->var.tx_request.tx_rate);
+	pete_writeb("drivers/net/wireless/legacy/ray_cs.c:930", 0, &pccs->var.tx_request.antenna);
 	pr_debug("ray_hw_xmit default_tx_rate = 0x%x\n",
 	      local->net_default_tx_rate);
 
@@ -938,7 +938,7 @@ static int ray_hw_xmit(unsigned char *data, int len, struct net_device *dev,
    send it, but the alternative is to queue the messages and that
    won't be done for a while.  Maybe set tbusy until a CCS is free?
 */
-		writeb(CCS_BUFFER_FREE, &pccs->buffer_status);
+		pete_writeb("drivers/net/wireless/legacy/ray_cs.c:941", CCS_BUFFER_FREE, &pccs->buffer_status);
 		return XMIT_NO_INTR;
 	}
 	return XMIT_OK;
@@ -957,7 +957,7 @@ static int translate_frame(ray_dev_t *local, struct tx_msg __iomem *ptx,
 			    (UCHAR *) &proto, 2);
 		if (proto == htons(ETH_P_AARP) || proto == htons(ETH_P_IPX)) {
 			/* This is the selective translation table, only 2 entries */
-			writeb(0xf8,
+			pete_writeb("drivers/net/wireless/legacy/ray_cs.c:960", 0xf8,
 			       &((struct snaphdr_t __iomem *)ptx->var)->org[2]);
 		}
 		/* Copy body of ethernet packet without ethernet header */
@@ -982,7 +982,7 @@ static int translate_frame(ray_dev_t *local, struct tx_msg __iomem *ptx,
 static void ray_build_header(ray_dev_t *local, struct tx_msg __iomem *ptx,
 			     UCHAR msg_type, unsigned char *data)
 {
-	writeb(PROTOCOL_VER | msg_type, &ptx->mac.frame_ctl_1);
+	pete_writeb("drivers/net/wireless/legacy/ray_cs.c:985", PROTOCOL_VER | msg_type, &ptx->mac.frame_ctl_1);
 /*** IEEE 802.11 Address field assignments *************
 		TODS	FROMDS	addr_1		addr_2		addr_3	addr_4
 Adhoc		0	0	dest		src (terminal)	BSSID	N/A
@@ -991,7 +991,7 @@ Terminal to AP	1	0	AP(BSSID)	src (terminal)	dest	N/A
 AP to AP	1	1	dest AP		src AP		dest	source
 *******************************************************/
 	if (local->net_type == ADHOC) {
-		writeb(0, &ptx->mac.frame_ctl_2);
+		pete_writeb("drivers/net/wireless/legacy/ray_cs.c:994", 0, &ptx->mac.frame_ctl_2);
 		memcpy_toio(ptx->mac.addr_1, ((struct ethhdr *)data)->h_dest,
 			    ADDRLEN);
 		memcpy_toio(ptx->mac.addr_2, ((struct ethhdr *)data)->h_source,
@@ -1000,7 +1000,7 @@ AP to AP	1	1	dest AP		src AP		dest	source
 	} else { /* infrastructure */
 
 		if (local->sparm.b4.a_acting_as_ap_status) {
-			writeb(FC2_FROM_DS, &ptx->mac.frame_ctl_2);
+			pete_writeb("drivers/net/wireless/legacy/ray_cs.c:1003", FC2_FROM_DS, &ptx->mac.frame_ctl_2);
 			memcpy_toio(ptx->mac.addr_1,
 				    ((struct ethhdr *)data)->h_dest, ADDRLEN);
 			memcpy_toio(ptx->mac.addr_2, local->bss_id, 6);
@@ -1008,7 +1008,7 @@ AP to AP	1	1	dest AP		src AP		dest	source
 				    ((struct ethhdr *)data)->h_source, ADDRLEN);
 		} else { /* Terminal */
 
-			writeb(FC2_TO_DS, &ptx->mac.frame_ctl_2);
+			pete_writeb("drivers/net/wireless/legacy/ray_cs.c:1011", FC2_TO_DS, &ptx->mac.frame_ctl_2);
 			memcpy_toio(ptx->mac.addr_1, local->bss_id, ADDRLEN);
 			memcpy_toio(ptx->mac.addr_2,
 				    ((struct ethhdr *)data)->h_source, ADDRLEN);
@@ -1414,7 +1414,7 @@ static iw_stats *ray_get_wireless_stats(struct net_device *dev)
 #endif /* WIRELESS_SPY */
 
 	if (pcmcia_dev_present(link)) {
-		local->wstats.qual.noise = readb(&p->rxnoise);
+		local->wstats.qual.noise = pete_readb("drivers/net/wireless/legacy/ray_cs.c:1417", &p->rxnoise);
 		local->wstats.qual.updated |= 4;
 	}
 
@@ -1559,7 +1559,7 @@ static int interrupt_ecf(ray_dev_t *local, int ccs)
 	dev_dbg(&link->dev, "interrupt_ecf(local=%p, ccs = 0x%x\n", local, ccs);
 
 	while (i &&
-	       (readb(local->amem + CIS_OFFSET + ECF_INTR_OFFSET) &
+	       (pete_readb("drivers/net/wireless/legacy/ray_cs.c:1562", local->amem + CIS_OFFSET + ECF_INTR_OFFSET) &
 		ECF_INTR_SET))
 		i--;
 	if (i == 0) {
@@ -1567,8 +1567,8 @@ static int interrupt_ecf(ray_dev_t *local, int ccs)
 		return -1;
 	}
 	/* Fill the mailbox, then kick the card */
-	writeb(ccs, local->sram + SCB_BASE);
-	writeb(ECF_INTR_SET, local->amem + CIS_OFFSET + ECF_INTR_OFFSET);
+	pete_writeb("drivers/net/wireless/legacy/ray_cs.c:1570", ccs, local->sram + SCB_BASE);
+	pete_writeb("drivers/net/wireless/legacy/ray_cs.c:1571", ECF_INTR_SET, local->amem + CIS_OFFSET + ECF_INTR_OFFSET);
 	return 0;
 } /* interrupt_ecf */
 
@@ -1592,9 +1592,9 @@ static int get_free_tx_ccs(ray_dev_t *local)
 	}
 
 	for (i = 0; i < NUMBER_OF_TX_CCS; i++) {
-		if (readb(&(pccs + i)->buffer_status) == CCS_BUFFER_FREE) {
-			writeb(CCS_BUFFER_BUSY, &(pccs + i)->buffer_status);
-			writeb(CCS_END_LIST, &(pccs + i)->link);
+		if (pete_readb("drivers/net/wireless/legacy/ray_cs.c:1595", &(pccs + i)->buffer_status) == CCS_BUFFER_FREE) {
+			pete_writeb("drivers/net/wireless/legacy/ray_cs.c:1596", CCS_BUFFER_BUSY, &(pccs + i)->buffer_status);
+			pete_writeb("drivers/net/wireless/legacy/ray_cs.c:1597", CCS_END_LIST, &(pccs + i)->link);
 			local->tx_ccs_lock = 0;
 			return i;
 		}
@@ -1623,9 +1623,9 @@ static int get_free_ccs(ray_dev_t *local)
 	}
 
 	for (i = NUMBER_OF_TX_CCS; i < NUMBER_OF_CCS; i++) {
-		if (readb(&(pccs + i)->buffer_status) == CCS_BUFFER_FREE) {
-			writeb(CCS_BUFFER_BUSY, &(pccs + i)->buffer_status);
-			writeb(CCS_END_LIST, &(pccs + i)->link);
+		if (pete_readb("drivers/net/wireless/legacy/ray_cs.c:1626", &(pccs + i)->buffer_status) == CCS_BUFFER_FREE) {
+			pete_writeb("drivers/net/wireless/legacy/ray_cs.c:1627", CCS_BUFFER_BUSY, &(pccs + i)->buffer_status);
+			pete_writeb("drivers/net/wireless/legacy/ray_cs.c:1628", CCS_END_LIST, &(pccs + i)->link);
 			local->ccs_lock = 0;
 			return i;
 		}
@@ -1688,21 +1688,21 @@ static struct net_device_stats *ray_get_stats(struct net_device *dev)
 		dev_dbg(&link->dev, "ray_cs net_device_stats - device not present\n");
 		return &local->stats;
 	}
-	if (readb(&p->mrx_overflow_for_host)) {
-		local->stats.rx_over_errors += swab16(readw(&p->mrx_overflow));
-		writeb(0, &p->mrx_overflow);
-		writeb(0, &p->mrx_overflow_for_host);
+	if (pete_readb("drivers/net/wireless/legacy/ray_cs.c:1691", &p->mrx_overflow_for_host)) {
+		local->stats.rx_over_errors += swab16(pete_readw("drivers/net/wireless/legacy/ray_cs.c:1692", &p->mrx_overflow));
+		pete_writeb("drivers/net/wireless/legacy/ray_cs.c:1693", 0, &p->mrx_overflow);
+		pete_writeb("drivers/net/wireless/legacy/ray_cs.c:1694", 0, &p->mrx_overflow_for_host);
 	}
-	if (readb(&p->mrx_checksum_error_for_host)) {
+	if (pete_readb("drivers/net/wireless/legacy/ray_cs.c:1696", &p->mrx_checksum_error_for_host)) {
 		local->stats.rx_crc_errors +=
-		    swab16(readw(&p->mrx_checksum_error));
-		writeb(0, &p->mrx_checksum_error);
-		writeb(0, &p->mrx_checksum_error_for_host);
+		    swab16(pete_readw("drivers/net/wireless/legacy/ray_cs.c:1698", &p->mrx_checksum_error));
+		pete_writeb("drivers/net/wireless/legacy/ray_cs.c:1699", 0, &p->mrx_checksum_error);
+		pete_writeb("drivers/net/wireless/legacy/ray_cs.c:1700", 0, &p->mrx_checksum_error_for_host);
 	}
-	if (readb(&p->rx_hec_error_for_host)) {
-		local->stats.rx_frame_errors += swab16(readw(&p->rx_hec_error));
-		writeb(0, &p->rx_hec_error);
-		writeb(0, &p->rx_hec_error_for_host);
+	if (pete_readb("drivers/net/wireless/legacy/ray_cs.c:1702", &p->rx_hec_error_for_host)) {
+		local->stats.rx_frame_errors += swab16(pete_readw("drivers/net/wireless/legacy/ray_cs.c:1703", &p->rx_hec_error));
+		pete_writeb("drivers/net/wireless/legacy/ray_cs.c:1704", 0, &p->rx_hec_error);
+		pete_writeb("drivers/net/wireless/legacy/ray_cs.c:1705", 0, &p->rx_hec_error_for_host);
 	}
 	return &local->stats;
 }
@@ -1727,17 +1727,17 @@ static void ray_update_parm(struct net_device *dev, UCHAR objid, UCHAR *value,
 		return;
 	}
 	pccs = ccs_base(local) + ccsindex;
-	writeb(CCS_UPDATE_PARAMS, &pccs->cmd);
-	writeb(objid, &pccs->var.update_param.object_id);
-	writeb(1, &pccs->var.update_param.number_objects);
-	writeb(0, &pccs->var.update_param.failure_cause);
+	pete_writeb("drivers/net/wireless/legacy/ray_cs.c:1730", CCS_UPDATE_PARAMS, &pccs->cmd);
+	pete_writeb("drivers/net/wireless/legacy/ray_cs.c:1731", objid, &pccs->var.update_param.object_id);
+	pete_writeb("drivers/net/wireless/legacy/ray_cs.c:1732", 1, &pccs->var.update_param.number_objects);
+	pete_writeb("drivers/net/wireless/legacy/ray_cs.c:1733", 0, &pccs->var.update_param.failure_cause);
 	for (i = 0; i < len; i++) {
-		writeb(value[i], local->sram + HOST_TO_ECF_BASE);
+		pete_writeb("drivers/net/wireless/legacy/ray_cs.c:1735", value[i], local->sram + HOST_TO_ECF_BASE);
 	}
 	/* Interrupt the firmware to process the command */
 	if (interrupt_ecf(local, ccsindex)) {
 		dev_dbg(&link->dev, "ray_cs associate failed - ECF not ready for intr\n");
-		writeb(CCS_BUFFER_FREE, &(pccs++)->buffer_status);
+		pete_writeb("drivers/net/wireless/legacy/ray_cs.c:1740", CCS_BUFFER_FREE, &(pccs++)->buffer_status);
 	}
 }
 
@@ -1760,10 +1760,10 @@ static void ray_update_multi_list(struct net_device *dev, int all)
 		return;
 	}
 	pccs = ccs_base(local) + ccsindex;
-	writeb(CCS_UPDATE_MULTICAST_LIST, &pccs->cmd);
+	pete_writeb("drivers/net/wireless/legacy/ray_cs.c:1763", CCS_UPDATE_MULTICAST_LIST, &pccs->cmd);
 
 	if (all) {
-		writeb(0xff, &pccs->var);
+		pete_writeb("drivers/net/wireless/legacy/ray_cs.c:1766", 0xff, &pccs->var);
 		local->num_multi = 0xff;
 	} else {
 		struct netdev_hw_addr *ha;
@@ -1779,7 +1779,7 @@ static void ray_update_multi_list(struct net_device *dev, int all)
 		}
 		if (i > 256 / ADDRLEN)
 			i = 256 / ADDRLEN;
-		writeb((UCHAR) i, &pccs->var);
+		pete_writeb("drivers/net/wireless/legacy/ray_cs.c:1782", (UCHAR) i, &pccs->var);
 		dev_dbg(&link->dev, "ray_cs update_multi %d addresses in list\n", i);
 		/* Interrupt the firmware to process the command */
 		local->num_multi = i;
@@ -1787,7 +1787,7 @@ static void ray_update_multi_list(struct net_device *dev, int all)
 	if (interrupt_ecf(local, ccsindex)) {
 		dev_dbg(&link->dev,
 		      "ray_cs update_multi failed - ECF not ready for intr\n");
-		writeb(CCS_BUFFER_FREE, &(pccs++)->buffer_status);
+		pete_writeb("drivers/net/wireless/legacy/ray_cs.c:1790", CCS_BUFFER_FREE, &(pccs++)->buffer_status);
 	}
 } /* end ray_update_multi_list */
 
@@ -1854,7 +1854,7 @@ static irqreturn_t ray_interrupt(int irq, void *dev_id)
 			"ray_cs interrupt from device not present or suspended.\n");
 		return IRQ_NONE;
 	}
-	rcsindex = readb(&((struct scb __iomem *)(local->sram))->rcs_index);
+	rcsindex = pete_readb("drivers/net/wireless/legacy/ray_cs.c:1857", &((struct scb __iomem *)(local->sram))->rcs_index);
 
 	if (rcsindex >= (NUMBER_OF_CCS + NUMBER_OF_RCS)) {
 		dev_dbg(&link->dev, "ray_cs interrupt bad rcsindex = 0x%x\n", rcsindex);
@@ -1863,8 +1863,8 @@ static irqreturn_t ray_interrupt(int irq, void *dev_id)
 	}
 	if (rcsindex < NUMBER_OF_CCS) { /* If it's a returned CCS */
 		pccs = ccs_base(local) + rcsindex;
-		cmd = readb(&pccs->cmd);
-		status = readb(&pccs->buffer_status);
+		cmd = pete_readb("drivers/net/wireless/legacy/ray_cs.c:1866", &pccs->cmd);
+		status = pete_readb("drivers/net/wireless/legacy/ray_cs.c:1867", &pccs->buffer_status);
 		switch (cmd) {
 		case CCS_DOWNLOAD_STARTUP_PARAMS:	/* Happens in firmware someday */
 			del_timer(&local->timer);
@@ -1880,7 +1880,7 @@ static irqreturn_t ray_interrupt(int irq, void *dev_id)
 			dev_dbg(&link->dev, "ray_cs interrupt update params done\n");
 			if (status != CCS_COMMAND_COMPLETE) {
 				tmp =
-				    readb(&pccs->var.update_param.
+				    pete_readb("drivers/net/wireless/legacy/ray_cs.c:1883", &pccs->var.update_param.
 					  failure_cause);
 				dev_dbg(&link->dev,
 				      "ray_cs interrupt update params failed - reason %d\n",
@@ -1924,10 +1924,10 @@ static irqreturn_t ray_interrupt(int irq, void *dev_id)
 					local->net_default_tx_rate = 3;
 				else
 					local->net_default_tx_rate =
-					    readb(&pccs->var.start_network.
+					    pete_readb("drivers/net/wireless/legacy/ray_cs.c:1927", &pccs->var.start_network.
 						  net_default_tx_rate);
 				local->encryption =
-				    readb(&pccs->var.start_network.encryption);
+				    pete_readb("drivers/net/wireless/legacy/ray_cs.c:1930", &pccs->var.start_network.encryption);
 				if (!sniffer && (local->net_type == INFRA)
 				    && !(local->sparm.b4.a_acting_as_ap_status)) {
 					authenticate(local);
@@ -1993,12 +1993,12 @@ static irqreturn_t ray_interrupt(int irq, void *dev_id)
 			      "ray_cs interrupt Unexpected CCS 0x%x returned 0x%x\n",
 			      rcsindex, cmd);
 		}
-		writeb(CCS_BUFFER_FREE, &pccs->buffer_status);
+		pete_writeb("drivers/net/wireless/legacy/ray_cs.c:1996", CCS_BUFFER_FREE, &pccs->buffer_status);
 	} else { /* It's an RCS */
 
 		prcs = rcs_base(local) + rcsindex;
 
-		switch (readb(&prcs->interrupt_id)) {
+		switch (pete_readb("drivers/net/wireless/legacy/ray_cs.c:2001", &prcs->interrupt_id)) {
 		case PROCESS_RX_PACKET:
 			ray_rx(dev, local, prcs);
 			break;
@@ -2031,10 +2031,10 @@ static irqreturn_t ray_interrupt(int irq, void *dev_id)
 			dev_dbg(&link->dev,
 			      "ray_cs Unexpected interrupt for RCS 0x%x cmd = 0x%x\n",
 			      rcsindex,
-			      (unsigned int)readb(&prcs->interrupt_id));
+			      (unsigned int)pete_readb("drivers/net/wireless/legacy/ray_cs.c:2034", &prcs->interrupt_id));
 			break;
 		}
-		writeb(CCS_BUFFER_FREE, &prcs->buffer_status);
+		pete_writeb("drivers/net/wireless/legacy/ray_cs.c:2037", CCS_BUFFER_FREE, &prcs->buffer_status);
 	}
 	clear_interrupt(local);
 	return IRQ_HANDLED;
@@ -2050,15 +2050,15 @@ static void ray_rx(struct net_device *dev, ray_dev_t *local,
 	pr_debug("ray_rx process rx packet\n");
 
 	/* Calculate address of packet within Rx buffer */
-	pkt_addr = ((readb(&prcs->var.rx_packet.rx_data_ptr[0]) << 8)
-		    + readb(&prcs->var.rx_packet.rx_data_ptr[1])) & RX_BUFF_END;
+	pkt_addr = ((pete_readb("drivers/net/wireless/legacy/ray_cs.c:2053", &prcs->var.rx_packet.rx_data_ptr[0]) << 8)
+		    + pete_readb("drivers/net/wireless/legacy/ray_cs.c:2054", &prcs->var.rx_packet.rx_data_ptr[1])) & RX_BUFF_END;
 	/* Length of first packet fragment */
-	rx_len = (readb(&prcs->var.rx_packet.rx_data_length[0]) << 8)
-	    + readb(&prcs->var.rx_packet.rx_data_length[1]);
+	rx_len = (pete_readb("drivers/net/wireless/legacy/ray_cs.c:2056", &prcs->var.rx_packet.rx_data_length[0]) << 8)
+	    + pete_readb("drivers/net/wireless/legacy/ray_cs.c:2057", &prcs->var.rx_packet.rx_data_length[1]);
 
-	local->last_rsl = readb(&prcs->var.rx_packet.rx_sig_lev);
+	local->last_rsl = pete_readb("drivers/net/wireless/legacy/ray_cs.c:2059", &prcs->var.rx_packet.rx_sig_lev);
 	pmsg = local->rmem + pkt_addr;
-	switch (readb(pmsg)) {
+	switch (pete_readb("drivers/net/wireless/legacy/ray_cs.c:2061", pmsg)) {
 	case DATA_TYPE:
 		pr_debug("ray_rx data type\n");
 		rx_data(dev, prcs, pkt_addr, rx_len);
@@ -2095,7 +2095,7 @@ static void ray_rx(struct net_device *dev, ray_dev_t *local,
 		break;
 	default:
 		pr_debug("ray_cs unknown pkt type %2x\n",
-		      (unsigned int)readb(pmsg));
+		      (unsigned int)pete_readb("drivers/net/wireless/legacy/ray_cs.c:2098", pmsg));
 		break;
 	}
 
@@ -2143,22 +2143,22 @@ static void rx_data(struct net_device *dev, struct rcs __iomem *prcs,
 	}
 	pr_debug("ray_cs rx_data packet\n");
 	/* If fragmented packet, verify sizes of fragments add up */
-	if (readb(&prcs->var.rx_packet.next_frag_rcs_index) != 0xFF) {
+	if (pete_readb("drivers/net/wireless/legacy/ray_cs.c:2146", &prcs->var.rx_packet.next_frag_rcs_index) != 0xFF) {
 		pr_debug("ray_cs rx'ed fragment\n");
-		tmp = (readb(&prcs->var.rx_packet.totalpacketlength[0]) << 8)
-		    + readb(&prcs->var.rx_packet.totalpacketlength[1]);
+		tmp = (pete_readb("drivers/net/wireless/legacy/ray_cs.c:2148", &prcs->var.rx_packet.totalpacketlength[0]) << 8)
+		    + pete_readb("drivers/net/wireless/legacy/ray_cs.c:2149", &prcs->var.rx_packet.totalpacketlength[1]);
 		total_len = tmp;
 		prcslink = prcs;
 		do {
 			tmp -=
-			    (readb(&prcslink->var.rx_packet.rx_data_length[0])
+			    (pete_readb("drivers/net/wireless/legacy/ray_cs.c:2154", &prcslink->var.rx_packet.rx_data_length[0])
 			     << 8)
-			    + readb(&prcslink->var.rx_packet.rx_data_length[1]);
-			if (readb(&prcslink->var.rx_packet.next_frag_rcs_index)
+			    + pete_readb("drivers/net/wireless/legacy/ray_cs.c:2156", &prcslink->var.rx_packet.rx_data_length[1]);
+			if (pete_readb("drivers/net/wireless/legacy/ray_cs.c:2157", &prcslink->var.rx_packet.next_frag_rcs_index)
 			    == 0xFF || tmp < 0)
 				break;
 			prcslink = rcs_base(local)
-			    + readb(&prcslink->link_field);
+			    + pete_readb("drivers/net/wireless/legacy/ray_cs.c:2161", &prcslink->link_field);
 		} while (1);
 
 		if (tmp < 0) {
@@ -2176,7 +2176,7 @@ static void rx_data(struct net_device *dev, struct rcs __iomem *prcs,
 	if (skb == NULL) {
 		pr_debug("ray_cs rx_data could not allocate skb\n");
 		local->stats.rx_dropped++;
-		if (readb(&prcs->var.rx_packet.next_frag_rcs_index) != 0xFF)
+		if (pete_readb("drivers/net/wireless/legacy/ray_cs.c:2179", &prcs->var.rx_packet.next_frag_rcs_index) != 0xFF)
 			release_frag_chain(local, prcs);
 		return;
 	}
@@ -2213,30 +2213,30 @@ static void rx_data(struct net_device *dev, struct rcs __iomem *prcs,
 /************************/
 	/* Now pick up the rest of the fragments if any */
 	tmp = 17;
-	if (readb(&prcs->var.rx_packet.next_frag_rcs_index) != 0xFF) {
+	if (pete_readb("drivers/net/wireless/legacy/ray_cs.c:2216", &prcs->var.rx_packet.next_frag_rcs_index) != 0xFF) {
 		prcslink = prcs;
 		pr_debug("ray_cs rx_data in fragment loop\n");
 		do {
 			prcslink = rcs_base(local)
 			    +
-			    readb(&prcslink->var.rx_packet.next_frag_rcs_index);
+			    pete_readb("drivers/net/wireless/legacy/ray_cs.c:2222", &prcslink->var.rx_packet.next_frag_rcs_index);
 			rx_len =
-			    ((readb(&prcslink->var.rx_packet.rx_data_length[0])
+			    ((pete_readb("drivers/net/wireless/legacy/ray_cs.c:2224", &prcslink->var.rx_packet.rx_data_length[0])
 			      << 8)
 			     +
-			     readb(&prcslink->var.rx_packet.rx_data_length[1]))
+			     pete_readb("drivers/net/wireless/legacy/ray_cs.c:2227", &prcslink->var.rx_packet.rx_data_length[1]))
 			    & RX_BUFF_END;
 			pkt_addr =
-			    ((readb(&prcslink->var.rx_packet.rx_data_ptr[0]) <<
+			    ((pete_readb("drivers/net/wireless/legacy/ray_cs.c:2230", &prcslink->var.rx_packet.rx_data_ptr[0]) <<
 			      8)
-			     + readb(&prcslink->var.rx_packet.rx_data_ptr[1]))
+			     + pete_readb("drivers/net/wireless/legacy/ray_cs.c:2232", &prcslink->var.rx_packet.rx_data_ptr[1]))
 			    & RX_BUFF_END;
 
 			rx_ptr +=
 			    copy_from_rx_buff(local, rx_ptr, pkt_addr, rx_len);
 
 		} while (tmp-- &&
-			 readb(&prcslink->var.rx_packet.next_frag_rcs_index) !=
+			 pete_readb("drivers/net/wireless/legacy/ray_cs.c:2239", &prcslink->var.rx_packet.next_frag_rcs_index) !=
 			 0xFF);
 		release_frag_chain(local, prcs);
 	}
@@ -2385,19 +2385,19 @@ static void release_frag_chain(ray_dev_t *local, struct rcs __iomem *prcs)
 {
 	struct rcs __iomem *prcslink = prcs;
 	int tmp = 17;
-	unsigned rcsindex = readb(&prcs->var.rx_packet.next_frag_rcs_index);
+	unsigned rcsindex = pete_readb("drivers/net/wireless/legacy/ray_cs.c:2388", &prcs->var.rx_packet.next_frag_rcs_index);
 
 	while (tmp--) {
-		writeb(CCS_BUFFER_FREE, &prcslink->buffer_status);
+		pete_writeb("drivers/net/wireless/legacy/ray_cs.c:2391", CCS_BUFFER_FREE, &prcslink->buffer_status);
 		if (rcsindex >= (NUMBER_OF_CCS + NUMBER_OF_RCS)) {
 			pr_debug("ray_cs interrupt bad rcsindex = 0x%x\n",
 			      rcsindex);
 			break;
 		}
 		prcslink = rcs_base(local) + rcsindex;
-		rcsindex = readb(&prcslink->var.rx_packet.next_frag_rcs_index);
+		rcsindex = pete_readb("drivers/net/wireless/legacy/ray_cs.c:2398", &prcslink->var.rx_packet.next_frag_rcs_index);
 	}
-	writeb(CCS_BUFFER_FREE, &prcslink->buffer_status);
+	pete_writeb("drivers/net/wireless/legacy/ray_cs.c:2400", CCS_BUFFER_FREE, &prcslink->buffer_status);
 }
 
 /*===========================================================================*/
@@ -2487,11 +2487,11 @@ static void associate(ray_dev_t *local)
 	dev_dbg(&link->dev, "ray_cs Starting association with access point\n");
 	pccs = ccs_base(local) + ccsindex;
 	/* fill in the CCS */
-	writeb(CCS_START_ASSOCIATION, &pccs->cmd);
+	pete_writeb("drivers/net/wireless/legacy/ray_cs.c:2490", CCS_START_ASSOCIATION, &pccs->cmd);
 	/* Interrupt the firmware to process the command */
 	if (interrupt_ecf(local, ccsindex)) {
 		dev_dbg(&link->dev, "ray_cs associate failed - ECF not ready for intr\n");
-		writeb(CCS_BUFFER_FREE, &(pccs++)->buffer_status);
+		pete_writeb("drivers/net/wireless/legacy/ray_cs.c:2494", CCS_BUFFER_FREE, &(pccs++)->buffer_status);
 
 		del_timer(&local->timer);
 		local->timer.expires = jiffies + HZ * 2;
@@ -2522,7 +2522,7 @@ static void rx_deauthenticate(ray_dev_t *local, struct rcs __iomem *prcs,
 /*===========================================================================*/
 static void clear_interrupt(ray_dev_t *local)
 {
-	writeb(0, local->amem + CIS_OFFSET + HCS_INTR_OFFSET);
+	pete_writeb("drivers/net/wireless/legacy/ray_cs.c:2525", 0, local->amem + CIS_OFFSET + HCS_INTR_OFFSET);
 }
 
 /*===========================================================================*/
@@ -2676,18 +2676,18 @@ static int build_auth_frame(ray_dev_t *local, UCHAR *dest, int auth_type)
 	/* Address in card space */
 	addr = TX_BUF_BASE + (ccsindex << 11);
 	/* fill in the CCS */
-	writeb(CCS_TX_REQUEST, &pccs->cmd);
-	writeb(addr >> 8, pccs->var.tx_request.tx_data_ptr);
-	writeb(0x20, pccs->var.tx_request.tx_data_ptr + 1);
-	writeb(TX_AUTHENTICATE_LENGTH_MSB, pccs->var.tx_request.tx_data_length);
-	writeb(TX_AUTHENTICATE_LENGTH_LSB,
+	pete_writeb("drivers/net/wireless/legacy/ray_cs.c:2679", CCS_TX_REQUEST, &pccs->cmd);
+	pete_writeb("drivers/net/wireless/legacy/ray_cs.c:2680", addr >> 8, pccs->var.tx_request.tx_data_ptr);
+	pete_writeb("drivers/net/wireless/legacy/ray_cs.c:2681", 0x20, pccs->var.tx_request.tx_data_ptr + 1);
+	pete_writeb("drivers/net/wireless/legacy/ray_cs.c:2682", TX_AUTHENTICATE_LENGTH_MSB, pccs->var.tx_request.tx_data_length);
+	pete_writeb("drivers/net/wireless/legacy/ray_cs.c:2683", TX_AUTHENTICATE_LENGTH_LSB,
 	       pccs->var.tx_request.tx_data_length + 1);
-	writeb(0, &pccs->var.tx_request.pow_sav_mode);
+	pete_writeb("drivers/net/wireless/legacy/ray_cs.c:2685", 0, &pccs->var.tx_request.pow_sav_mode);
 
 	ptx = local->sram + addr;
 	/* fill in the mac header */
-	writeb(PROTOCOL_VER | AUTHENTIC_TYPE, &ptx->mac.frame_ctl_1);
-	writeb(0, &ptx->mac.frame_ctl_2);
+	pete_writeb("drivers/net/wireless/legacy/ray_cs.c:2689", PROTOCOL_VER | AUTHENTIC_TYPE, &ptx->mac.frame_ctl_1);
+	pete_writeb("drivers/net/wireless/legacy/ray_cs.c:2690", 0, &ptx->mac.frame_ctl_2);
 
 	memcpy_toio(ptx->mac.addr_1, dest, ADDRLEN);
 	memcpy_toio(ptx->mac.addr_2, local->sparm.b4.a_mac_addr, ADDRLEN);
@@ -2695,13 +2695,13 @@ static int build_auth_frame(ray_dev_t *local, UCHAR *dest, int auth_type)
 
 	/* Fill in msg body with protocol 00 00, sequence 01 00 ,status 00 00 */
 	memset_io(ptx->var, 0, 6);
-	writeb(auth_type & 0xff, ptx->var + 2);
+	pete_writeb("drivers/net/wireless/legacy/ray_cs.c:2698", auth_type & 0xff, ptx->var + 2);
 
 	/* Interrupt the firmware to process the command */
 	if (interrupt_ecf(local, ccsindex)) {
 		pr_debug(
 		      "ray_cs send authentication request failed - ECF not ready for intr\n");
-		writeb(CCS_BUFFER_FREE, &(pccs++)->buffer_status);
+		pete_writeb("drivers/net/wireless/legacy/ray_cs.c:2704", CCS_BUFFER_FREE, &(pccs++)->buffer_status);
 		return -1;
 	}
 	return 0;

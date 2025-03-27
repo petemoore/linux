@@ -135,10 +135,10 @@ static int offb_setcolreg(u_int regno, u_int red, u_int green, u_int blue,
 
 	switch (par->cmap_type) {
 	case cmap_simple:
-		writeb(regno, par->cmap_adr);
-		writeb(red, par->cmap_data);
-		writeb(green, par->cmap_data);
-		writeb(blue, par->cmap_data);
+		pete_writeb("drivers/video/fbdev/offb.c:138", regno, par->cmap_adr);
+		pete_writeb("drivers/video/fbdev/offb.c:139", red, par->cmap_data);
+		pete_writeb("drivers/video/fbdev/offb.c:140", green, par->cmap_data);
+		pete_writeb("drivers/video/fbdev/offb.c:141", blue, par->cmap_data);
 		break;
 	case cmap_M3A:
 		/* Clear PALETTE_ACCESS_CNTL in DAC_CNTL */
@@ -170,13 +170,13 @@ static int offb_setcolreg(u_int regno, u_int red, u_int green, u_int blue,
 		break;
 	case cmap_avivo:
 		/* Write to both LUTs for now */
-		writel(1, par->cmap_adr + AVIVO_DC_LUT_RW_SELECT);
-		writeb(regno, par->cmap_adr + AVIVO_DC_LUT_RW_INDEX);
-		writel(((red) << 22) | ((green) << 12) | ((blue) << 2),
+		pete_writel("drivers/video/fbdev/offb.c:173", 1, par->cmap_adr + AVIVO_DC_LUT_RW_SELECT);
+		pete_writeb("drivers/video/fbdev/offb.c:174", regno, par->cmap_adr + AVIVO_DC_LUT_RW_INDEX);
+		pete_writel("drivers/video/fbdev/offb.c:175", ((red) << 22) | ((green) << 12) | ((blue) << 2),
 		       par->cmap_adr + AVIVO_DC_LUT_30_COLOR);
-		writel(0, par->cmap_adr + AVIVO_DC_LUT_RW_SELECT);
-		writeb(regno, par->cmap_adr + AVIVO_DC_LUT_RW_INDEX);
-		writel(((red) << 22) | ((green) << 12) | ((blue) << 2),
+		pete_writel("drivers/video/fbdev/offb.c:177", 0, par->cmap_adr + AVIVO_DC_LUT_RW_SELECT);
+		pete_writeb("drivers/video/fbdev/offb.c:178", regno, par->cmap_adr + AVIVO_DC_LUT_RW_INDEX);
+		pete_writel("drivers/video/fbdev/offb.c:179", ((red) << 22) | ((green) << 12) | ((blue) << 2),
 		       par->cmap_adr + AVIVO_DC_LUT_30_COLOR);
 		break;
 	}
@@ -206,9 +206,9 @@ static int offb_blank(int blank, struct fb_info *info)
 		for (i = 0; i < 256; i++) {
 			switch (par->cmap_type) {
 			case cmap_simple:
-				writeb(i, par->cmap_adr);
+				pete_writeb("drivers/video/fbdev/offb.c:209", i, par->cmap_adr);
 				for (j = 0; j < 3; j++)
-					writeb(0, par->cmap_data);
+					pete_writeb("drivers/video/fbdev/offb.c:211", 0, par->cmap_data);
 				break;
 			case cmap_M3A:
 				/* Clear PALETTE_ACCESS_CNTL in DAC_CNTL */
@@ -237,12 +237,12 @@ static int offb_blank(int blank, struct fb_info *info)
 					 0);
 				break;
 			case cmap_avivo:
-				writel(1, par->cmap_adr + AVIVO_DC_LUT_RW_SELECT);
-				writeb(i, par->cmap_adr + AVIVO_DC_LUT_RW_INDEX);
-				writel(0, par->cmap_adr + AVIVO_DC_LUT_30_COLOR);
-				writel(0, par->cmap_adr + AVIVO_DC_LUT_RW_SELECT);
-				writeb(i, par->cmap_adr + AVIVO_DC_LUT_RW_INDEX);
-				writel(0, par->cmap_adr + AVIVO_DC_LUT_30_COLOR);
+				pete_writel("drivers/video/fbdev/offb.c:240", 1, par->cmap_adr + AVIVO_DC_LUT_RW_SELECT);
+				pete_writeb("drivers/video/fbdev/offb.c:241", i, par->cmap_adr + AVIVO_DC_LUT_RW_INDEX);
+				pete_writel("drivers/video/fbdev/offb.c:242", 0, par->cmap_adr + AVIVO_DC_LUT_30_COLOR);
+				pete_writel("drivers/video/fbdev/offb.c:243", 0, par->cmap_adr + AVIVO_DC_LUT_RW_SELECT);
+				pete_writeb("drivers/video/fbdev/offb.c:244", i, par->cmap_adr + AVIVO_DC_LUT_RW_INDEX);
+				pete_writel("drivers/video/fbdev/offb.c:245", 0, par->cmap_adr + AVIVO_DC_LUT_30_COLOR);
 				break;
 			}
 	} else
@@ -256,26 +256,26 @@ static int offb_set_par(struct fb_info *info)
 
 	/* On avivo, initialize palette control */
 	if (par->cmap_type == cmap_avivo) {
-		writel(0, par->cmap_adr + AVIVO_DC_LUTA_CONTROL);
-		writel(0, par->cmap_adr + AVIVO_DC_LUTA_BLACK_OFFSET_BLUE);
-		writel(0, par->cmap_adr + AVIVO_DC_LUTA_BLACK_OFFSET_GREEN);
-		writel(0, par->cmap_adr + AVIVO_DC_LUTA_BLACK_OFFSET_RED);
-		writel(0x0000ffff, par->cmap_adr + AVIVO_DC_LUTA_WHITE_OFFSET_BLUE);
-		writel(0x0000ffff, par->cmap_adr + AVIVO_DC_LUTA_WHITE_OFFSET_GREEN);
-		writel(0x0000ffff, par->cmap_adr + AVIVO_DC_LUTA_WHITE_OFFSET_RED);
-		writel(0, par->cmap_adr + AVIVO_DC_LUTB_CONTROL);
-		writel(0, par->cmap_adr + AVIVO_DC_LUTB_BLACK_OFFSET_BLUE);
-		writel(0, par->cmap_adr + AVIVO_DC_LUTB_BLACK_OFFSET_GREEN);
-		writel(0, par->cmap_adr + AVIVO_DC_LUTB_BLACK_OFFSET_RED);
-		writel(0x0000ffff, par->cmap_adr + AVIVO_DC_LUTB_WHITE_OFFSET_BLUE);
-		writel(0x0000ffff, par->cmap_adr + AVIVO_DC_LUTB_WHITE_OFFSET_GREEN);
-		writel(0x0000ffff, par->cmap_adr + AVIVO_DC_LUTB_WHITE_OFFSET_RED);
-		writel(1, par->cmap_adr + AVIVO_DC_LUT_RW_SELECT);
-		writel(0, par->cmap_adr + AVIVO_DC_LUT_RW_MODE);
-		writel(0x0000003f, par->cmap_adr + AVIVO_DC_LUT_WRITE_EN_MASK);
-		writel(0, par->cmap_adr + AVIVO_DC_LUT_RW_SELECT);
-		writel(0, par->cmap_adr + AVIVO_DC_LUT_RW_MODE);
-		writel(0x0000003f, par->cmap_adr + AVIVO_DC_LUT_WRITE_EN_MASK);
+		pete_writel("drivers/video/fbdev/offb.c:259", 0, par->cmap_adr + AVIVO_DC_LUTA_CONTROL);
+		pete_writel("drivers/video/fbdev/offb.c:260", 0, par->cmap_adr + AVIVO_DC_LUTA_BLACK_OFFSET_BLUE);
+		pete_writel("drivers/video/fbdev/offb.c:261", 0, par->cmap_adr + AVIVO_DC_LUTA_BLACK_OFFSET_GREEN);
+		pete_writel("drivers/video/fbdev/offb.c:262", 0, par->cmap_adr + AVIVO_DC_LUTA_BLACK_OFFSET_RED);
+		pete_writel("drivers/video/fbdev/offb.c:263", 0x0000ffff, par->cmap_adr + AVIVO_DC_LUTA_WHITE_OFFSET_BLUE);
+		pete_writel("drivers/video/fbdev/offb.c:264", 0x0000ffff, par->cmap_adr + AVIVO_DC_LUTA_WHITE_OFFSET_GREEN);
+		pete_writel("drivers/video/fbdev/offb.c:265", 0x0000ffff, par->cmap_adr + AVIVO_DC_LUTA_WHITE_OFFSET_RED);
+		pete_writel("drivers/video/fbdev/offb.c:266", 0, par->cmap_adr + AVIVO_DC_LUTB_CONTROL);
+		pete_writel("drivers/video/fbdev/offb.c:267", 0, par->cmap_adr + AVIVO_DC_LUTB_BLACK_OFFSET_BLUE);
+		pete_writel("drivers/video/fbdev/offb.c:268", 0, par->cmap_adr + AVIVO_DC_LUTB_BLACK_OFFSET_GREEN);
+		pete_writel("drivers/video/fbdev/offb.c:269", 0, par->cmap_adr + AVIVO_DC_LUTB_BLACK_OFFSET_RED);
+		pete_writel("drivers/video/fbdev/offb.c:270", 0x0000ffff, par->cmap_adr + AVIVO_DC_LUTB_WHITE_OFFSET_BLUE);
+		pete_writel("drivers/video/fbdev/offb.c:271", 0x0000ffff, par->cmap_adr + AVIVO_DC_LUTB_WHITE_OFFSET_GREEN);
+		pete_writel("drivers/video/fbdev/offb.c:272", 0x0000ffff, par->cmap_adr + AVIVO_DC_LUTB_WHITE_OFFSET_RED);
+		pete_writel("drivers/video/fbdev/offb.c:273", 1, par->cmap_adr + AVIVO_DC_LUT_RW_SELECT);
+		pete_writel("drivers/video/fbdev/offb.c:274", 0, par->cmap_adr + AVIVO_DC_LUT_RW_MODE);
+		pete_writel("drivers/video/fbdev/offb.c:275", 0x0000003f, par->cmap_adr + AVIVO_DC_LUT_WRITE_EN_MASK);
+		pete_writel("drivers/video/fbdev/offb.c:276", 0, par->cmap_adr + AVIVO_DC_LUT_RW_SELECT);
+		pete_writel("drivers/video/fbdev/offb.c:277", 0, par->cmap_adr + AVIVO_DC_LUT_RW_MODE);
+		pete_writel("drivers/video/fbdev/offb.c:278", 0x0000003f, par->cmap_adr + AVIVO_DC_LUT_WRITE_EN_MASK);
 	}
 	return 0;
 }

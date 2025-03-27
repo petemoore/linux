@@ -146,10 +146,10 @@ static unsigned int ixp4xx_mmio_data_xfer(struct ata_queued_cmd *qc,
 	/* Transfer multiple of 2 bytes */
 	if (rw == READ)
 		for (i = 0; i < words; i++)
-			buf16[i] = readw(mmio);
+			buf16[i] = pete_readw("drivers/ata/pata_ixp4xx_cf.c:149", mmio);
 	else
 		for (i = 0; i < words; i++)
-			writew(buf16[i], mmio);
+			pete_writew("drivers/ata/pata_ixp4xx_cf.c:152", buf16[i], mmio);
 
 	/* Transfer trailing 1 byte, if any. */
 	if (unlikely(buflen & 0x01)) {
@@ -157,11 +157,11 @@ static unsigned int ixp4xx_mmio_data_xfer(struct ata_queued_cmd *qc,
 		unsigned char *trailing_buf = buf + buflen - 1;
 
 		if (rw == READ) {
-			align_buf[0] = readw(mmio);
+			align_buf[0] = pete_readw("drivers/ata/pata_ixp4xx_cf.c:160", mmio);
 			memcpy(trailing_buf, align_buf, 1);
 		} else {
 			memcpy(align_buf, trailing_buf, 1);
-			writew(align_buf[0], mmio);
+			pete_writew("drivers/ata/pata_ixp4xx_cf.c:164", align_buf[0], mmio);
 		}
 		words++;
 	}

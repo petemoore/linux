@@ -37,8 +37,8 @@
  * Ring Header Preamble
  */
 
-#define rhs_reg_read(r)		readl(hci->RHS_regs + (RHS_##r))
-#define rhs_reg_write(r, v)	writel(v, hci->RHS_regs + (RHS_##r))
+#define rhs_reg_read(r)		pete_readl("drivers/i3c/master/mipi-i3c-hci/dma.c:40", hci->RHS_regs + (RHS_##r))
+#define rhs_reg_write(r, v)	pete_writel("drivers/i3c/master/mipi-i3c-hci/dma.c:41", v, hci->RHS_regs + (RHS_##r))
 
 #define RHS_CONTROL			0x00
 #define PREAMBLE_SIZE			GENMASK(31, 24)	/* Preamble Section Size */
@@ -52,8 +52,8 @@
  * Ring Header (Per-Ring Bundle)
  */
 
-#define rh_reg_read(r)		readl(rh->regs + (RH_##r))
-#define rh_reg_write(r, v)	writel(v, rh->regs + (RH_##r))
+#define rh_reg_read(r)		pete_readl("drivers/i3c/master/mipi-i3c-hci/dma.c:55", rh->regs + (RH_##r))
+#define rh_reg_write(r, v)	pete_writel("drivers/i3c/master/mipi-i3c-hci/dma.c:56", v, rh->regs + (RH_##r))
 
 #define RH_CR_SETUP			0x00	/* Command/Response Ring */
 #define CR_XFER_STRUCT_SIZE		GENMASK(31, 24)

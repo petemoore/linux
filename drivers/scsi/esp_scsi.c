@@ -2836,7 +2836,7 @@ void esp_send_pio_cmd(struct esp *esp, u32 addr, u32 esp_count,
 			if (!esp_wait_for_fifo(esp))
 				break;
 
-			*dst++ = readb(esp->fifo_reg);
+			*dst++ = pete_readb("drivers/scsi/esp_scsi.c:2839", esp->fifo_reg);
 			--esp_count;
 
 			if (!esp_count)

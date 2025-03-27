@@ -1093,7 +1093,7 @@ static void rnm_to_cpt_errata_fixup(struct device *dev)
 	if (!base)
 		goto put_pdev;
 
-	while ((readq(base + RNM_ENTROPY_STATUS) & 0x7F) != 0x40) {
+	while ((pete_readq("drivers/crypto/marvell/octeontx2/otx2_cptpf_ucode.c:1096", base + RNM_ENTROPY_STATUS) & 0x7F) != 0x40) {
 		cpu_relax();
 		udelay(1);
 		timeout--;

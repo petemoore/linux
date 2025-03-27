@@ -492,7 +492,7 @@ static void __wait_for_fifo_occupancy_below_th(struct bnxt_re_dev *rdev)
 	 * below pacing algo threshold as soon as pacing kicks in.
 	 */
 	while (1) {
-		read_val = readl(rdev->en_dev->bar0 + rdev->pacing.dbr_db_fifo_reg_off);
+		read_val = pete_readl("drivers/infiniband/hw/bnxt_re/main.c:495", rdev->en_dev->bar0 + rdev->pacing.dbr_db_fifo_reg_off);
 		fifo_occup = BNXT_RE_MAX_FIFO_DEPTH -
 			((read_val & BNXT_RE_DB_FIFO_ROOM_MASK) >>
 			 BNXT_RE_DB_FIFO_ROOM_SHIFT);
@@ -565,7 +565,7 @@ static void bnxt_re_pacing_timer_exp(struct work_struct *work)
 		return;
 
 	pacing_data = rdev->qplib_res.pacing_data;
-	read_val = readl(rdev->en_dev->bar0 + rdev->pacing.dbr_db_fifo_reg_off);
+	read_val = pete_readl("drivers/infiniband/hw/bnxt_re/main.c:568", rdev->en_dev->bar0 + rdev->pacing.dbr_db_fifo_reg_off);
 	fifo_occup = BNXT_RE_MAX_FIFO_DEPTH -
 		((read_val & BNXT_RE_DB_FIFO_ROOM_MASK) >>
 		 BNXT_RE_DB_FIFO_ROOM_SHIFT);
@@ -628,7 +628,7 @@ static int bnxt_re_initialize_dbr_pacing(struct bnxt_re_dev *rdev)
 	rdev->qplib_res.pacing_data = (struct bnxt_qplib_db_pacing_data *)rdev->pacing.dbr_page;
 
 	/* MAP HW window 2 for reading db fifo depth */
-	writel(rdev->chip_ctx->dbr_stat_db_fifo & BNXT_GRC_BASE_MASK,
+	pete_writel("drivers/infiniband/hw/bnxt_re/main.c:631", rdev->chip_ctx->dbr_stat_db_fifo & BNXT_GRC_BASE_MASK,
 	       rdev->en_dev->bar0 + BNXT_GRCPF_REG_WINDOW_BASE_OUT + 4);
 	rdev->pacing.dbr_db_fifo_reg_off =
 		(rdev->chip_ctx->dbr_stat_db_fifo & BNXT_GRC_OFFSET_MASK) +

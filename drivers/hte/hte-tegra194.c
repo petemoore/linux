@@ -351,13 +351,13 @@ static const struct tegra_hte_data t234_lic_hte = {
 
 static inline u32 tegra_hte_readl(struct tegra_hte_soc *hte, u32 reg)
 {
-	return readl(hte->regs + reg);
+	return pete_readl("drivers/hte/hte-tegra194.c:354", hte->regs + reg);
 }
 
 static inline void tegra_hte_writel(struct tegra_hte_soc *hte, u32 reg,
 				    u32 val)
 {
-	writel(val, hte->regs + reg);
+	pete_writel("drivers/hte/hte-tegra194.c:360", val, hte->regs + reg);
 }
 
 static int tegra_hte_map_to_line_id(u32 eid,

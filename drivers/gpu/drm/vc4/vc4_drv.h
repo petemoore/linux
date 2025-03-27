@@ -725,25 +725,25 @@ struct vc4_crtc_state {
 #define V3D_READ(offset)								\
 	({										\
 		kunit_fail_current_test("Accessing a register in a unit test!\n");	\
-		readl(vc4->v3d->regs + (offset));						\
+		pete_readl("drivers/gpu/drm/vc4/vc4_drv.h:728", vc4->v3d->regs + (offset));						\
 	})
 
 #define V3D_WRITE(offset, val)								\
 	do {										\
 		kunit_fail_current_test("Accessing a register in a unit test!\n");	\
-		writel(val, vc4->v3d->regs + (offset));					\
+		pete_writel("drivers/gpu/drm/vc4/vc4_drv.h:734", val, vc4->v3d->regs + (offset));					\
 	} while (0)
 
 #define HVS_READ(offset)								\
 	({										\
 		kunit_fail_current_test("Accessing a register in a unit test!\n");	\
-		readl(hvs->regs + (offset));						\
+		pete_readl("drivers/gpu/drm/vc4/vc4_drv.h:740", hvs->regs + (offset));						\
 	})
 
 #define HVS_WRITE(offset, val)								\
 	do {										\
 		kunit_fail_current_test("Accessing a register in a unit test!\n");	\
-		writel(val, hvs->regs + (offset));					\
+		pete_writel("drivers/gpu/drm/vc4/vc4_drv.h:746", val, hvs->regs + (offset));					\
 	} while (0)
 
 #define HVS_READ6(offset) \

@@ -88,12 +88,12 @@ static void cdns_rtc_set_enabled(struct cdns_rtc *crtc, bool enabled)
 {
 	u32 reg = enabled ? 0x0 : CDNS_RTC_CTLR_TIME_CAL;
 
-	writel(reg, crtc->regs + CDNS_RTC_CTLR);
+	pete_writel("drivers/rtc/rtc-cadence.c:91", reg, crtc->regs + CDNS_RTC_CTLR);
 }
 
 static bool cdns_rtc_get_enabled(struct cdns_rtc *crtc)
 {
-	return !(readl(crtc->regs + CDNS_RTC_CTLR) & CDNS_RTC_CTLR_TIME_CAL);
+	return !(pete_readl("drivers/rtc/rtc-cadence.c:96", crtc->regs + CDNS_RTC_CTLR) & CDNS_RTC_CTLR_TIME_CAL);
 }
 
 static irqreturn_t cdns_rtc_irq_handler(int irq, void *id)
@@ -102,7 +102,7 @@ static irqreturn_t cdns_rtc_irq_handler(int irq, void *id)
 	struct cdns_rtc *crtc = dev_get_drvdata(dev);
 
 	/* Reading the register clears it */
-	if (!(readl(crtc->regs + CDNS_RTC_EFLR) & CDNS_RTC_AEI_ALRM))
+	if (!(pete_readl("drivers/rtc/rtc-cadence.c:105", crtc->regs + CDNS_RTC_EFLR) & CDNS_RTC_AEI_ALRM))
 		return IRQ_NONE;
 
 	rtc_update_irq(crtc->rtc_dev, 1, RTC_IRQF | RTC_AF);
@@ -134,10 +134,10 @@ static int cdns_rtc_read_time(struct device *dev, struct rtc_time *tm)
 
 	cdns_rtc_set_enabled(crtc, false);
 
-	reg = readl(crtc->regs + CDNS_RTC_TIMR);
+	reg = pete_readl("drivers/rtc/rtc-cadence.c:137", crtc->regs + CDNS_RTC_TIMR);
 	cdns_rtc_reg2time(reg, tm);
 
-	reg = readl(crtc->regs + CDNS_RTC_CALR);
+	reg = pete_readl("drivers/rtc/rtc-cadence.c:140", crtc->regs + CDNS_RTC_CALR);
 	tm->tm_mday = bcd2bin(FIELD_GET(CDNS_RTC_CAL_D, reg));
 	tm->tm_mon  = bcd2bin(FIELD_GET(CDNS_RTC_CAL_M, reg)) - 1;
 	tm->tm_year = bcd2bin(FIELD_GET(CDNS_RTC_CAL_Y, reg))
@@ -168,9 +168,9 @@ static int cdns_rtc_set_time(struct device *dev, struct rtc_time *tm)
 
 	/* Update registers, check valid flags */
 	for (tries = 0; tries < CDNS_RTC_MAX_REGS_TRIES; tries++) {
-		writel(timr, crtc->regs + CDNS_RTC_TIMR);
-		writel(calr, crtc->regs + CDNS_RTC_CALR);
-		stsr = readl(crtc->regs + CDNS_RTC_STSR);
+		pete_writel("drivers/rtc/rtc-cadence.c:171", timr, crtc->regs + CDNS_RTC_TIMR);
+		pete_writel("drivers/rtc/rtc-cadence.c:172", calr, crtc->regs + CDNS_RTC_CALR);
+		stsr = pete_readl("drivers/rtc/rtc-cadence.c:173", crtc->regs + CDNS_RTC_STSR);
 
 		if ((stsr & CDNS_RTC_STSR_VT_VC) == CDNS_RTC_STSR_VT_VC) {
 			ret = 0;
@@ -187,13 +187,13 @@ static int cdns_rtc_alarm_irq_enable(struct device *dev, unsigned int enabled)
 	struct cdns_rtc *crtc = dev_get_drvdata(dev);
 
 	if (enabled) {
-		writel((CDNS_RTC_AEI_SEC | CDNS_RTC_AEI_MIN | CDNS_RTC_AEI_HOUR
+		pete_writel("drivers/rtc/rtc-cadence.c:190", (CDNS_RTC_AEI_SEC | CDNS_RTC_AEI_MIN | CDNS_RTC_AEI_HOUR
 			| CDNS_RTC_AEI_DATE | CDNS_RTC_AEI_MNTH),
 		       crtc->regs + CDNS_RTC_AENR);
-		writel(CDNS_RTC_AEI_ALRM, crtc->regs + CDNS_RTC_IENR);
+		pete_writel("drivers/rtc/rtc-cadence.c:193", CDNS_RTC_AEI_ALRM, crtc->regs + CDNS_RTC_IENR);
 	} else {
-		writel(0, crtc->regs + CDNS_RTC_AENR);
-		writel(CDNS_RTC_AEI_ALRM, crtc->regs + CDNS_RTC_IDISR);
+		pete_writel("drivers/rtc/rtc-cadence.c:195", 0, crtc->regs + CDNS_RTC_AENR);
+		pete_writel("drivers/rtc/rtc-cadence.c:196", CDNS_RTC_AEI_ALRM, crtc->regs + CDNS_RTC_IDISR);
 	}
 
 	return 0;
@@ -204,10 +204,10 @@ static int cdns_rtc_read_alarm(struct device *dev, struct rtc_wkalrm *alarm)
 	struct cdns_rtc *crtc = dev_get_drvdata(dev);
 	u32 reg;
 
-	reg = readl(crtc->regs + CDNS_RTC_TIMAR);
+	reg = pete_readl("drivers/rtc/rtc-cadence.c:207", crtc->regs + CDNS_RTC_TIMAR);
 	cdns_rtc_reg2time(reg, &alarm->time);
 
-	reg = readl(crtc->regs + CDNS_RTC_CALAR);
+	reg = pete_readl("drivers/rtc/rtc-cadence.c:210", crtc->regs + CDNS_RTC_CALAR);
 	alarm->time.tm_mday = bcd2bin(FIELD_GET(CDNS_RTC_CAL_D, reg));
 	alarm->time.tm_mon  = bcd2bin(FIELD_GET(CDNS_RTC_CAL_M, reg)) - 1;
 
@@ -229,9 +229,9 @@ static int cdns_rtc_set_alarm(struct device *dev, struct rtc_wkalrm *alarm)
 
 	/* Update registers, check valid alarm flags */
 	for (tries = 0; tries < CDNS_RTC_MAX_REGS_TRIES; tries++) {
-		writel(timar, crtc->regs + CDNS_RTC_TIMAR);
-		writel(calar, crtc->regs + CDNS_RTC_CALAR);
-		stsr = readl(crtc->regs + CDNS_RTC_STSR);
+		pete_writel("drivers/rtc/rtc-cadence.c:232", timar, crtc->regs + CDNS_RTC_TIMAR);
+		pete_writel("drivers/rtc/rtc-cadence.c:233", calar, crtc->regs + CDNS_RTC_CALAR);
+		stsr = pete_readl("drivers/rtc/rtc-cadence.c:234", crtc->regs + CDNS_RTC_STSR);
 
 		if ((stsr & CDNS_RTC_STSR_VTA_VCA) == CDNS_RTC_STSR_VTA_VCA) {
 			ret = 0;
@@ -333,8 +333,8 @@ static int cdns_rtc_probe(struct platform_device *pdev)
 	device_init_wakeup(&pdev->dev, true);
 
 	/* Always use 24-hour mode and keep the RTC values */
-	writel(0, crtc->regs + CDNS_RTC_HMR);
-	writel(CDNS_RTC_KRTCR_KRTC, crtc->regs + CDNS_RTC_KRTCR);
+	pete_writel("drivers/rtc/rtc-cadence.c:336", 0, crtc->regs + CDNS_RTC_HMR);
+	pete_writel("drivers/rtc/rtc-cadence.c:337", CDNS_RTC_KRTCR_KRTC, crtc->regs + CDNS_RTC_KRTCR);
 
 	ret = devm_rtc_register_device(crtc->rtc_dev);
 	if (ret)

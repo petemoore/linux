@@ -24,13 +24,13 @@ static int acp63_power_on(void __iomem *acp_base)
 {
 	u32 val;
 
-	val = readl(acp_base + ACP_PGFSM_STATUS);
+	val = pete_readl("sound/soc/amd/ps/pci-ps.c:27", acp_base + ACP_PGFSM_STATUS);
 
 	if (!val)
 		return val;
 
 	if ((val & ACP_PGFSM_STATUS_MASK) != ACP_POWER_ON_IN_PROGRESS)
-		writel(ACP_PGFSM_CNTL_POWER_ON_MASK, acp_base + ACP_PGFSM_CONTROL);
+		pete_writel("sound/soc/amd/ps/pci-ps.c:33", ACP_PGFSM_CNTL_POWER_ON_MASK, acp_base + ACP_PGFSM_CONTROL);
 
 	return readl_poll_timeout(acp_base + ACP_PGFSM_STATUS, val, !val, DELAY_US, ACP_TIMEOUT);
 }
@@ -40,7 +40,7 @@ static int acp63_reset(void __iomem *acp_base)
 	u32 val;
 	int ret;
 
-	writel(1, acp_base + ACP_SOFT_RESET);
+	pete_writel("sound/soc/amd/ps/pci-ps.c:43", 1, acp_base + ACP_SOFT_RESET);
 
 	ret = readl_poll_timeout(acp_base + ACP_SOFT_RESET, val,
 				 val & ACP_SOFT_RESET_SOFTRESET_AUDDONE_MASK,
@@ -48,22 +48,22 @@ static int acp63_reset(void __iomem *acp_base)
 	if (ret)
 		return ret;
 
-	writel(0, acp_base + ACP_SOFT_RESET);
+	pete_writel("sound/soc/amd/ps/pci-ps.c:51", 0, acp_base + ACP_SOFT_RESET);
 
 	return readl_poll_timeout(acp_base + ACP_SOFT_RESET, val, !val, DELAY_US, ACP_TIMEOUT);
 }
 
 static void acp63_enable_interrupts(void __iomem *acp_base)
 {
-	writel(1, acp_base + ACP_EXTERNAL_INTR_ENB);
-	writel(ACP_ERROR_IRQ, acp_base + ACP_EXTERNAL_INTR_CNTL);
+	pete_writel("sound/soc/amd/ps/pci-ps.c:58", 1, acp_base + ACP_EXTERNAL_INTR_ENB);
+	pete_writel("sound/soc/amd/ps/pci-ps.c:59", ACP_ERROR_IRQ, acp_base + ACP_EXTERNAL_INTR_CNTL);
 }
 
 static void acp63_disable_interrupts(void __iomem *acp_base)
 {
-	writel(ACP_EXT_INTR_STAT_CLEAR_MASK, acp_base + ACP_EXTERNAL_INTR_STAT);
-	writel(0, acp_base + ACP_EXTERNAL_INTR_CNTL);
-	writel(0, acp_base + ACP_EXTERNAL_INTR_ENB);
+	pete_writel("sound/soc/amd/ps/pci-ps.c:64", ACP_EXT_INTR_STAT_CLEAR_MASK, acp_base + ACP_EXTERNAL_INTR_STAT);
+	pete_writel("sound/soc/amd/ps/pci-ps.c:65", 0, acp_base + ACP_EXTERNAL_INTR_CNTL);
+	pete_writel("sound/soc/amd/ps/pci-ps.c:66", 0, acp_base + ACP_EXTERNAL_INTR_ENB);
 }
 
 static int acp63_init(void __iomem *acp_base, struct device *dev)
@@ -75,7 +75,7 @@ static int acp63_init(void __iomem *acp_base, struct device *dev)
 		dev_err(dev, "ACP power on failed\n");
 		return ret;
 	}
-	writel(0x01, acp_base + ACP_CONTROL);
+	pete_writel("sound/soc/amd/ps/pci-ps.c:78", 0x01, acp_base + ACP_CONTROL);
 	ret = acp63_reset(acp_base);
 	if (ret) {
 		dev_err(dev, "ACP reset failed\n");
@@ -95,7 +95,7 @@ static int acp63_deinit(void __iomem *acp_base, struct device *dev)
 		dev_err(dev, "ACP reset failed\n");
 		return ret;
 	}
-	writel(0, acp_base + ACP_CONTROL);
+	pete_writel("sound/soc/amd/ps/pci-ps.c:98", 0, acp_base + ACP_CONTROL);
 	return 0;
 }
 
@@ -146,9 +146,9 @@ static irqreturn_t acp63_irq_handler(int irq, void *dev_id)
 	 * effect.
 	 * Bit by bit checking of IRQ field is implemented.
 	 */
-	ext_intr_stat = readl(adata->acp63_base + ACP_EXTERNAL_INTR_STAT);
+	ext_intr_stat = pete_readl("sound/soc/amd/ps/pci-ps.c:149", adata->acp63_base + ACP_EXTERNAL_INTR_STAT);
 	if (ext_intr_stat & ACP_SDW0_STAT) {
-		writel(ACP_SDW0_STAT, adata->acp63_base + ACP_EXTERNAL_INTR_STAT);
+		pete_writel("sound/soc/amd/ps/pci-ps.c:151", ACP_SDW0_STAT, adata->acp63_base + ACP_EXTERNAL_INTR_STAT);
 		pdev_index = adata->sdw0_dev_index;
 		amd_manager = dev_get_drvdata(&adata->pdev[pdev_index]->dev);
 		if (amd_manager)
@@ -156,9 +156,9 @@ static irqreturn_t acp63_irq_handler(int irq, void *dev_id)
 		irq_flag = 1;
 	}
 
-	ext_intr_stat1 = readl(adata->acp63_base + ACP_EXTERNAL_INTR_STAT1);
+	ext_intr_stat1 = pete_readl("sound/soc/amd/ps/pci-ps.c:159", adata->acp63_base + ACP_EXTERNAL_INTR_STAT1);
 	if (ext_intr_stat1 & ACP_SDW1_STAT) {
-		writel(ACP_SDW1_STAT, adata->acp63_base + ACP_EXTERNAL_INTR_STAT1);
+		pete_writel("sound/soc/amd/ps/pci-ps.c:161", ACP_SDW1_STAT, adata->acp63_base + ACP_EXTERNAL_INTR_STAT1);
 		pdev_index = adata->sdw1_dev_index;
 		amd_manager = dev_get_drvdata(&adata->pdev[pdev_index]->dev);
 		if (amd_manager)
@@ -167,18 +167,18 @@ static irqreturn_t acp63_irq_handler(int irq, void *dev_id)
 	}
 
 	if (ext_intr_stat & ACP_ERROR_IRQ) {
-		writel(ACP_ERROR_IRQ, adata->acp63_base + ACP_EXTERNAL_INTR_STAT);
+		pete_writel("sound/soc/amd/ps/pci-ps.c:170", ACP_ERROR_IRQ, adata->acp63_base + ACP_EXTERNAL_INTR_STAT);
 		/* TODO: Report SoundWire Manager instance errors */
-		writel(0, adata->acp63_base + ACP_SW0_I2S_ERROR_REASON);
-		writel(0, adata->acp63_base + ACP_SW1_I2S_ERROR_REASON);
-		writel(0, adata->acp63_base + ACP_ERROR_STATUS);
+		pete_writel("sound/soc/amd/ps/pci-ps.c:172", 0, adata->acp63_base + ACP_SW0_I2S_ERROR_REASON);
+		pete_writel("sound/soc/amd/ps/pci-ps.c:173", 0, adata->acp63_base + ACP_SW1_I2S_ERROR_REASON);
+		pete_writel("sound/soc/amd/ps/pci-ps.c:174", 0, adata->acp63_base + ACP_ERROR_STATUS);
 		irq_flag = 1;
 	}
 
 	if (ext_intr_stat & BIT(PDM_DMA_STAT)) {
 		pdev_index = adata->pdm_dev_index;
 		ps_pdm_data = dev_get_drvdata(&adata->pdev[pdev_index]->dev);
-		writel(BIT(PDM_DMA_STAT), adata->acp63_base + ACP_EXTERNAL_INTR_STAT);
+		pete_writel("sound/soc/amd/ps/pci-ps.c:181", BIT(PDM_DMA_STAT), adata->acp63_base + ACP_EXTERNAL_INTR_STAT);
 		if (ps_pdm_data->capture_stream)
 			snd_pcm_period_elapsed(ps_pdm_data->capture_stream);
 		irq_flag = 1;
@@ -186,7 +186,7 @@ static irqreturn_t acp63_irq_handler(int irq, void *dev_id)
 	if (ext_intr_stat & ACP_SDW_DMA_IRQ_MASK) {
 		for (index = ACP_AUDIO2_RX_THRESHOLD; index <= ACP_AUDIO0_TX_THRESHOLD; index++) {
 			if (ext_intr_stat & BIT(index)) {
-				writel(BIT(index), adata->acp63_base + ACP_EXTERNAL_INTR_STAT);
+				pete_writel("sound/soc/amd/ps/pci-ps.c:189", BIT(index), adata->acp63_base + ACP_EXTERNAL_INTR_STAT);
 				switch (index) {
 				case ACP_AUDIO0_TX_THRESHOLD:
 					stream_id = ACP_SDW0_AUDIO0_TX;
@@ -215,14 +215,14 @@ static irqreturn_t acp63_irq_handler(int irq, void *dev_id)
 	}
 
 	if (ext_intr_stat1 & ACP_P1_AUDIO1_RX_THRESHOLD) {
-		writel(ACP_P1_AUDIO1_RX_THRESHOLD,
+		pete_writel("sound/soc/amd/ps/pci-ps.c:218", ACP_P1_AUDIO1_RX_THRESHOLD,
 		       adata->acp63_base + ACP_EXTERNAL_INTR_STAT1);
 		adata->sdw1_dma_intr_stat[ACP_SDW1_AUDIO1_RX] = 1;
 		sdw_dma_irq_flag = 1;
 	}
 
 	if (ext_intr_stat1 & ACP_P1_AUDIO1_TX_THRESHOLD) {
-		writel(ACP_P1_AUDIO1_TX_THRESHOLD,
+		pete_writel("sound/soc/amd/ps/pci-ps.c:225", ACP_P1_AUDIO1_TX_THRESHOLD,
 		       adata->acp63_base + ACP_EXTERNAL_INTR_STAT1);
 		adata->sdw1_dma_intr_stat[ACP_SDW1_AUDIO1_TX] = 1;
 		sdw_dma_irq_flag = 1;
@@ -637,7 +637,7 @@ static int snd_acp63_probe(struct pci_dev *pci,
 		dev_err(&pci->dev, "ACP PCI IRQ request failed\n");
 		goto de_init;
 	}
-	val = readl(adata->acp63_base + ACP_PIN_CONFIG);
+	val = pete_readl("sound/soc/amd/ps/pci-ps.c:640", adata->acp63_base + ACP_PIN_CONFIG);
 	ret = get_acp63_device_config(val, pci, adata);
 	/* ACP PCI driver probe should be continued even PDM or SoundWire Devices are not found */
 	if (ret) {

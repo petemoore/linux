@@ -25,7 +25,7 @@ static bool fan_installed(struct device *dev, int fan)
 	struct gxp_fan_ctrl_drvdata *drvdata = dev_get_drvdata(dev);
 	u8 val;
 
-	val = readb(drvdata->plreg + OFS_FAN_INST);
+	val = pete_readb("drivers/hwmon/gxp-fan-ctrl.c:28", drvdata->plreg + OFS_FAN_INST);
 
 	return !!(val & BIT(fan));
 }
@@ -35,7 +35,7 @@ static long fan_failed(struct device *dev, int fan)
 	struct gxp_fan_ctrl_drvdata *drvdata = dev_get_drvdata(dev);
 	u8 val;
 
-	val = readb(drvdata->plreg + OFS_FAN_FAIL);
+	val = pete_readb("drivers/hwmon/gxp-fan-ctrl.c:38", drvdata->plreg + OFS_FAN_FAIL);
 
 	return !!(val & BIT(fan));
 }
@@ -50,7 +50,7 @@ static long fan_enabled(struct device *dev, int fan)
 	 * reported for the PWM will be incorrect. Report fan as
 	 * disabled.
 	 */
-	val = readl(drvdata->fn2 + OFS_SEVSTAT);
+	val = pete_readl("drivers/hwmon/gxp-fan-ctrl.c:53", drvdata->fn2 + OFS_SEVSTAT);
 
 	return !!((val & BIT(POWER_BIT)) && fan_installed(dev, fan));
 }
@@ -63,7 +63,7 @@ static int gxp_pwm_write(struct device *dev, u32 attr, int channel, long val)
 	case hwmon_pwm_input:
 		if (val > 255 || val < 0)
 			return -EINVAL;
-		writeb(val, drvdata->base + channel);
+		pete_writeb("drivers/hwmon/gxp-fan-ctrl.c:66", val, drvdata->base + channel);
 		return 0;
 	default:
 		return -EOPNOTSUPP;
@@ -106,10 +106,10 @@ static int gxp_pwm_read(struct device *dev, u32 attr, int channel, long *val)
 	 * report a PWM of zero.
 	 */
 
-	reg = readl(drvdata->fn2 + OFS_SEVSTAT);
+	reg = pete_readl("drivers/hwmon/gxp-fan-ctrl.c:109", drvdata->fn2 + OFS_SEVSTAT);
 
 	if (reg & BIT(POWER_BIT))
-		*val = fan_installed(dev, channel) ? readb(drvdata->base + channel) : 0;
+		*val = fan_installed(dev, channel) ? pete_readb("drivers/hwmon/gxp-fan-ctrl.c:112", drvdata->base + channel) : 0;
 	else
 		*val = 0;
 

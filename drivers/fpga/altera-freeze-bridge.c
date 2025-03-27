@@ -48,13 +48,13 @@ static int altera_freeze_br_req_ack(struct altera_freeze_br_data *priv,
 	int ret = -ETIMEDOUT;
 
 	do {
-		illegal = readl(csr_illegal_req_addr);
+		illegal = pete_readl("drivers/fpga/altera-freeze-bridge.c:51", csr_illegal_req_addr);
 		if (illegal) {
 			dev_err(dev, "illegal request detected 0x%x", illegal);
 
-			writel(1, csr_illegal_req_addr);
+			pete_writel("drivers/fpga/altera-freeze-bridge.c:55", 1, csr_illegal_req_addr);
 
-			illegal = readl(csr_illegal_req_addr);
+			illegal = pete_readl("drivers/fpga/altera-freeze-bridge.c:57", csr_illegal_req_addr);
 			if (illegal)
 				dev_err(dev, "illegal request not cleared 0x%x",
 					illegal);
@@ -63,11 +63,11 @@ static int altera_freeze_br_req_ack(struct altera_freeze_br_data *priv,
 			break;
 		}
 
-		status = readl(priv->base_addr + FREEZE_CSR_STATUS_OFFSET);
+		status = pete_readl("drivers/fpga/altera-freeze-bridge.c:66", priv->base_addr + FREEZE_CSR_STATUS_OFFSET);
 		dev_dbg(dev, "%s %x %x\n", __func__, status, req_ack);
 		status &= req_ack;
 		if (status) {
-			ctrl = readl(priv->base_addr + FREEZE_CSR_CTRL_OFFSET);
+			ctrl = pete_readl("drivers/fpga/altera-freeze-bridge.c:70", priv->base_addr + FREEZE_CSR_CTRL_OFFSET);
 			dev_dbg(dev, "%s request %x acknowledged %x %x\n",
 				__func__, req_ack, status, ctrl);
 			ret = 0;
@@ -93,9 +93,9 @@ static int altera_freeze_br_do_freeze(struct altera_freeze_br_data *priv,
 	u32 status;
 	int ret;
 
-	status = readl(priv->base_addr + FREEZE_CSR_STATUS_OFFSET);
+	status = pete_readl("drivers/fpga/altera-freeze-bridge.c:96", priv->base_addr + FREEZE_CSR_STATUS_OFFSET);
 
-	dev_dbg(dev, "%s %d %d\n", __func__, status, readl(csr_ctrl_addr));
+	dev_dbg(dev, "%s %d %d\n", __func__, status, pete_readl("drivers/fpga/altera-freeze-bridge.c:98", csr_ctrl_addr));
 
 	if (status & FREEZE_CSR_STATUS_FREEZE_REQ_DONE) {
 		dev_dbg(dev, "%s bridge already disabled %d\n",
@@ -106,15 +106,15 @@ static int altera_freeze_br_do_freeze(struct altera_freeze_br_data *priv,
 		return -EINVAL;
 	}
 
-	writel(FREEZE_CSR_CTRL_FREEZE_REQ, csr_ctrl_addr);
+	pete_writel("drivers/fpga/altera-freeze-bridge.c:109", FREEZE_CSR_CTRL_FREEZE_REQ, csr_ctrl_addr);
 
 	ret = altera_freeze_br_req_ack(priv, timeout,
 				       FREEZE_CSR_STATUS_FREEZE_REQ_DONE);
 
 	if (ret)
-		writel(0, csr_ctrl_addr);
+		pete_writel("drivers/fpga/altera-freeze-bridge.c:115", 0, csr_ctrl_addr);
 	else
-		writel(FREEZE_CSR_CTRL_RESET_REQ, csr_ctrl_addr);
+		pete_writel("drivers/fpga/altera-freeze-bridge.c:117", FREEZE_CSR_CTRL_RESET_REQ, csr_ctrl_addr);
 
 	return ret;
 }
@@ -128,11 +128,11 @@ static int altera_freeze_br_do_unfreeze(struct altera_freeze_br_data *priv,
 	u32 status;
 	int ret;
 
-	writel(0, csr_ctrl_addr);
+	pete_writel("drivers/fpga/altera-freeze-bridge.c:131", 0, csr_ctrl_addr);
 
-	status = readl(priv->base_addr + FREEZE_CSR_STATUS_OFFSET);
+	status = pete_readl("drivers/fpga/altera-freeze-bridge.c:133", priv->base_addr + FREEZE_CSR_STATUS_OFFSET);
 
-	dev_dbg(dev, "%s %d %d\n", __func__, status, readl(csr_ctrl_addr));
+	dev_dbg(dev, "%s %d %d\n", __func__, status, pete_readl("drivers/fpga/altera-freeze-bridge.c:135", csr_ctrl_addr));
 
 	if (status & FREEZE_CSR_STATUS_UNFREEZE_REQ_DONE) {
 		dev_dbg(dev, "%s bridge already enabled %d\n",
@@ -143,16 +143,16 @@ static int altera_freeze_br_do_unfreeze(struct altera_freeze_br_data *priv,
 		return -EINVAL;
 	}
 
-	writel(FREEZE_CSR_CTRL_UNFREEZE_REQ, csr_ctrl_addr);
+	pete_writel("drivers/fpga/altera-freeze-bridge.c:146", FREEZE_CSR_CTRL_UNFREEZE_REQ, csr_ctrl_addr);
 
 	ret = altera_freeze_br_req_ack(priv, timeout,
 				       FREEZE_CSR_STATUS_UNFREEZE_REQ_DONE);
 
-	status = readl(priv->base_addr + FREEZE_CSR_STATUS_OFFSET);
+	status = pete_readl("drivers/fpga/altera-freeze-bridge.c:151", priv->base_addr + FREEZE_CSR_STATUS_OFFSET);
 
-	dev_dbg(dev, "%s %d %d\n", __func__, status, readl(csr_ctrl_addr));
+	dev_dbg(dev, "%s %d %d\n", __func__, status, pete_readl("drivers/fpga/altera-freeze-bridge.c:153", csr_ctrl_addr));
 
-	writel(0, csr_ctrl_addr);
+	pete_writel("drivers/fpga/altera-freeze-bridge.c:155", 0, csr_ctrl_addr);
 
 	return ret;
 }
@@ -221,7 +221,7 @@ static int altera_freeze_br_probe(struct platform_device *pdev)
 	if (IS_ERR(base_addr))
 		return PTR_ERR(base_addr);
 
-	revision = readl(base_addr + FREEZE_CSR_REG_VERSION);
+	revision = pete_readl("drivers/fpga/altera-freeze-bridge.c:224", base_addr + FREEZE_CSR_REG_VERSION);
 	if ((revision != FREEZE_CSR_SUPPORTED_VERSION) &&
 	    (revision != FREEZE_CSR_OFFICIAL_VERSION)) {
 		dev_err(dev,
@@ -237,7 +237,7 @@ static int altera_freeze_br_probe(struct platform_device *pdev)
 
 	priv->dev = dev;
 
-	status = readl(base_addr + FREEZE_CSR_STATUS_OFFSET);
+	status = pete_readl("drivers/fpga/altera-freeze-bridge.c:240", base_addr + FREEZE_CSR_STATUS_OFFSET);
 	if (status & FREEZE_CSR_STATUS_UNFREEZE_REQ_DONE)
 		priv->enable = 1;
 

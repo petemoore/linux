@@ -60,7 +60,7 @@ u32 kirkwood_fix_sscg_deviation(u32 system_clk)
 		goto out;
 	}
 
-	sscg_reg = readl(sscg_map);
+	sscg_reg = pete_readl("drivers/clk/mvebu/common.c:63", sscg_map);
 	high_bound = SSCG_CONF_HIGH(sscg_reg);
 	low_bound = SSCG_CONF_LOW(sscg_reg);
 
@@ -217,13 +217,13 @@ static struct clk *clk_gating_get_src(
 
 static int mvebu_clk_gating_suspend(void)
 {
-	ctrl->saved_reg = readl(ctrl->base);
+	ctrl->saved_reg = pete_readl("drivers/clk/mvebu/common.c:220", ctrl->base);
 	return 0;
 }
 
 static void mvebu_clk_gating_resume(void)
 {
-	writel(ctrl->saved_reg, ctrl->base);
+	pete_writel("drivers/clk/mvebu/common.c:226", ctrl->saved_reg, ctrl->base);
 }
 
 static struct syscore_ops clk_gate_syscore_ops = {

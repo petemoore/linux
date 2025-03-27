@@ -786,21 +786,21 @@ static void xhci_ssic_port_unused_quirk(struct usb_hcd *hcd, bool suspend)
 				i * SSIC_PORT_CFG2_OFFSET;
 
 		/* Notify SSIC that SSIC profile programming is not done. */
-		val = readl(reg) & ~PROG_DONE;
-		writel(val, reg);
+		val = pete_readl("drivers/usb/host/xhci-pci.c:789", reg) & ~PROG_DONE;
+		pete_writel("drivers/usb/host/xhci-pci.c:790", val, reg);
 
 		/* Mark SSIC port as unused(suspend) or used(resume) */
-		val = readl(reg);
+		val = pete_readl("drivers/usb/host/xhci-pci.c:793", reg);
 		if (suspend)
 			val |= SSIC_PORT_UNUSED;
 		else
 			val &= ~SSIC_PORT_UNUSED;
-		writel(val, reg);
+		pete_writel("drivers/usb/host/xhci-pci.c:798", val, reg);
 
 		/* Notify SSIC that SSIC profile programming is done */
-		val = readl(reg) | PROG_DONE;
-		writel(val, reg);
-		readl(reg);
+		val = pete_readl("drivers/usb/host/xhci-pci.c:801", reg) | PROG_DONE;
+		pete_writel("drivers/usb/host/xhci-pci.c:802", val, reg);
+		pete_readl("drivers/usb/host/xhci-pci.c:803", reg);
 	}
 }
 
@@ -815,18 +815,18 @@ static void xhci_pme_quirk(struct usb_hcd *hcd)
 	u32 val;
 
 	reg = (void __iomem *) xhci->cap_regs + 0x80a4;
-	val = readl(reg);
-	writel(val | BIT(28), reg);
-	readl(reg);
+	val = pete_readl("drivers/usb/host/xhci-pci.c:818", reg);
+	pete_writel("drivers/usb/host/xhci-pci.c:819", val | BIT(28), reg);
+	pete_readl("drivers/usb/host/xhci-pci.c:820", reg);
 }
 
 static void xhci_sparse_control_quirk(struct usb_hcd *hcd)
 {
 	u32 reg;
 
-	reg = readl(hcd->regs + SPARSE_CNTL_ENABLE);
+	reg = pete_readl("drivers/usb/host/xhci-pci.c:827", hcd->regs + SPARSE_CNTL_ENABLE);
 	reg &= ~BIT(SPARSE_DISABLE_BIT);
-	writel(reg, hcd->regs + SPARSE_CNTL_ENABLE);
+	pete_writel("drivers/usb/host/xhci-pci.c:829", reg, hcd->regs + SPARSE_CNTL_ENABLE);
 }
 
 static int xhci_pci_suspend(struct usb_hcd *hcd, bool do_wakeup)
@@ -931,7 +931,7 @@ static int xhci_pci_poweroff_late(struct usb_hcd *hcd, bool do_wakeup)
 
 	for (i = 0; i < HCS_MAX_PORTS(xhci->hcs_params1); i++) {
 		port = &xhci->hw_ports[i];
-		portsc = readl(port->addr);
+		portsc = pete_readl("drivers/usb/host/xhci-pci.c:934", port->addr);
 
 		if ((portsc & PORT_PLS_MASK) != XDEV_U3)
 			continue;
@@ -953,7 +953,7 @@ static int xhci_pci_poweroff_late(struct usb_hcd *hcd, bool do_wakeup)
 		xhci_dbg(xhci, "port %d-%d in U3 without wakeup, disable it\n",
 			 port->rhub->hcd->self.busnum, port->hcd_portnum + 1);
 		portsc = xhci_port_state_to_neutral(portsc);
-		writel(portsc | PORT_PE, port->addr);
+		pete_writel("drivers/usb/host/xhci-pci.c:956", portsc | PORT_PE, port->addr);
 	}
 
 	return 0;

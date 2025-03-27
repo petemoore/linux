@@ -250,13 +250,13 @@ MODULE_PARM_DESC(persist_gpio_outputs, "Enable GPIO_OUT persistence when pin is 
 
 static inline u32 bcm2835_gpio_rd(struct bcm2835_pinctrl *pc, unsigned reg)
 {
-	return readl(pc->base + reg);
+	return pete_readl("drivers/pinctrl/bcm/pinctrl-bcm2835.c:253", pc->base + reg);
 }
 
 static inline void bcm2835_gpio_wr(struct bcm2835_pinctrl *pc, unsigned reg,
 		u32 val)
 {
-	writel(val, pc->base + reg);
+	pete_writel("drivers/pinctrl/bcm/pinctrl-bcm2835.c:259", val, pc->base + reg);
 }
 
 static inline int bcm2835_gpio_get_bit(struct bcm2835_pinctrl *pc, unsigned reg,

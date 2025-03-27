@@ -83,16 +83,16 @@ static int __maybe_unused tegra_mgbe_resume(struct device *dev)
 		return err;
 
 	/* Enable common interrupt at wrapper level */
-	writel(MAC_SBD_INTR, mgbe->regs + MGBE_WRAP_COMMON_INTR_ENABLE);
+	pete_writel("drivers/net/ethernet/stmicro/stmmac/dwmac-tegra.c:86", MAC_SBD_INTR, mgbe->regs + MGBE_WRAP_COMMON_INTR_ENABLE);
 
 	/* Program SID */
-	writel(mgbe->iommu_sid, mgbe->hv + MGBE_WRAP_AXI_ASID0_CTRL);
+	pete_writel("drivers/net/ethernet/stmicro/stmmac/dwmac-tegra.c:89", mgbe->iommu_sid, mgbe->hv + MGBE_WRAP_AXI_ASID0_CTRL);
 
-	value = readl(mgbe->xpcs + XPCS_WRAP_UPHY_STATUS);
+	value = pete_readl("drivers/net/ethernet/stmicro/stmmac/dwmac-tegra.c:91", mgbe->xpcs + XPCS_WRAP_UPHY_STATUS);
 	if ((value & XPCS_WRAP_UPHY_STATUS_TX_P_UP) == 0) {
-		value = readl(mgbe->xpcs + XPCS_WRAP_UPHY_HW_INIT_CTRL);
+		value = pete_readl("drivers/net/ethernet/stmicro/stmmac/dwmac-tegra.c:93", mgbe->xpcs + XPCS_WRAP_UPHY_HW_INIT_CTRL);
 		value |= XPCS_WRAP_UPHY_HW_INIT_CTRL_TX_EN;
-		writel(value, mgbe->xpcs + XPCS_WRAP_UPHY_HW_INIT_CTRL);
+		pete_writel("drivers/net/ethernet/stmicro/stmmac/dwmac-tegra.c:95", value, mgbe->xpcs + XPCS_WRAP_UPHY_HW_INIT_CTRL);
 	}
 
 	err = readl_poll_timeout(mgbe->xpcs + XPCS_WRAP_UPHY_HW_INIT_CTRL, value,
@@ -117,27 +117,27 @@ static int mgbe_uphy_lane_bringup_serdes_up(struct net_device *ndev, void *mgbe_
 	u32 value;
 	int err;
 
-	value = readl(mgbe->xpcs + XPCS_WRAP_UPHY_RX_CONTROL);
+	value = pete_readl("drivers/net/ethernet/stmicro/stmmac/dwmac-tegra.c:120", mgbe->xpcs + XPCS_WRAP_UPHY_RX_CONTROL);
 	value |= XPCS_WRAP_UPHY_RX_CONTROL_RX_SW_OVRD;
-	writel(value, mgbe->xpcs + XPCS_WRAP_UPHY_RX_CONTROL);
+	pete_writel("drivers/net/ethernet/stmicro/stmmac/dwmac-tegra.c:122", value, mgbe->xpcs + XPCS_WRAP_UPHY_RX_CONTROL);
 
-	value = readl(mgbe->xpcs + XPCS_WRAP_UPHY_RX_CONTROL);
+	value = pete_readl("drivers/net/ethernet/stmicro/stmmac/dwmac-tegra.c:124", mgbe->xpcs + XPCS_WRAP_UPHY_RX_CONTROL);
 	value &= ~XPCS_WRAP_UPHY_RX_CONTROL_RX_IDDQ;
-	writel(value, mgbe->xpcs + XPCS_WRAP_UPHY_RX_CONTROL);
+	pete_writel("drivers/net/ethernet/stmicro/stmmac/dwmac-tegra.c:126", value, mgbe->xpcs + XPCS_WRAP_UPHY_RX_CONTROL);
 
-	value = readl(mgbe->xpcs + XPCS_WRAP_UPHY_RX_CONTROL);
+	value = pete_readl("drivers/net/ethernet/stmicro/stmmac/dwmac-tegra.c:128", mgbe->xpcs + XPCS_WRAP_UPHY_RX_CONTROL);
 	value &= ~XPCS_WRAP_UPHY_RX_CONTROL_AUX_RX_IDDQ;
-	writel(value, mgbe->xpcs + XPCS_WRAP_UPHY_RX_CONTROL);
+	pete_writel("drivers/net/ethernet/stmicro/stmmac/dwmac-tegra.c:130", value, mgbe->xpcs + XPCS_WRAP_UPHY_RX_CONTROL);
 
 	usleep_range(10, 20);  /* 50ns min delay needed as per HW design */
-	value = readl(mgbe->xpcs + XPCS_WRAP_UPHY_RX_CONTROL);
+	value = pete_readl("drivers/net/ethernet/stmicro/stmmac/dwmac-tegra.c:133", mgbe->xpcs + XPCS_WRAP_UPHY_RX_CONTROL);
 	value &= ~XPCS_WRAP_UPHY_RX_CONTROL_RX_SLEEP;
-	writel(value, mgbe->xpcs + XPCS_WRAP_UPHY_RX_CONTROL);
+	pete_writel("drivers/net/ethernet/stmicro/stmmac/dwmac-tegra.c:135", value, mgbe->xpcs + XPCS_WRAP_UPHY_RX_CONTROL);
 
 	usleep_range(10, 20);  /* 500ns min delay needed as per HW design */
-	value = readl(mgbe->xpcs + XPCS_WRAP_UPHY_RX_CONTROL);
+	value = pete_readl("drivers/net/ethernet/stmicro/stmmac/dwmac-tegra.c:138", mgbe->xpcs + XPCS_WRAP_UPHY_RX_CONTROL);
 	value |= XPCS_WRAP_UPHY_RX_CONTROL_RX_CAL_EN;
-	writel(value, mgbe->xpcs + XPCS_WRAP_UPHY_RX_CONTROL);
+	pete_writel("drivers/net/ethernet/stmicro/stmmac/dwmac-tegra.c:140", value, mgbe->xpcs + XPCS_WRAP_UPHY_RX_CONTROL);
 
 	err = readl_poll_timeout(mgbe->xpcs + XPCS_WRAP_UPHY_RX_CONTROL, value,
 				 (value & XPCS_WRAP_UPHY_RX_CONTROL_RX_CAL_EN) == 0,
@@ -148,28 +148,28 @@ static int mgbe_uphy_lane_bringup_serdes_up(struct net_device *ndev, void *mgbe_
 	}
 
 	usleep_range(10, 20);  /* 50ns min delay needed as per HW design */
-	value = readl(mgbe->xpcs + XPCS_WRAP_UPHY_RX_CONTROL);
+	value = pete_readl("drivers/net/ethernet/stmicro/stmmac/dwmac-tegra.c:151", mgbe->xpcs + XPCS_WRAP_UPHY_RX_CONTROL);
 	value |= XPCS_WRAP_UPHY_RX_CONTROL_RX_DATA_EN;
-	writel(value, mgbe->xpcs + XPCS_WRAP_UPHY_RX_CONTROL);
+	pete_writel("drivers/net/ethernet/stmicro/stmmac/dwmac-tegra.c:153", value, mgbe->xpcs + XPCS_WRAP_UPHY_RX_CONTROL);
 
-	value = readl(mgbe->xpcs + XPCS_WRAP_UPHY_RX_CONTROL);
+	value = pete_readl("drivers/net/ethernet/stmicro/stmmac/dwmac-tegra.c:155", mgbe->xpcs + XPCS_WRAP_UPHY_RX_CONTROL);
 	value &= ~XPCS_WRAP_UPHY_RX_CONTROL_RX_PCS_PHY_RDY;
-	writel(value, mgbe->xpcs + XPCS_WRAP_UPHY_RX_CONTROL);
+	pete_writel("drivers/net/ethernet/stmicro/stmmac/dwmac-tegra.c:157", value, mgbe->xpcs + XPCS_WRAP_UPHY_RX_CONTROL);
 
 	usleep_range(10, 20);  /* 50ns min delay needed as per HW design */
-	value = readl(mgbe->xpcs + XPCS_WRAP_UPHY_RX_CONTROL);
+	value = pete_readl("drivers/net/ethernet/stmicro/stmmac/dwmac-tegra.c:160", mgbe->xpcs + XPCS_WRAP_UPHY_RX_CONTROL);
 	value |= XPCS_WRAP_UPHY_RX_CONTROL_RX_CDR_RESET;
-	writel(value, mgbe->xpcs + XPCS_WRAP_UPHY_RX_CONTROL);
+	pete_writel("drivers/net/ethernet/stmicro/stmmac/dwmac-tegra.c:162", value, mgbe->xpcs + XPCS_WRAP_UPHY_RX_CONTROL);
 
 	usleep_range(10, 20);  /* 50ns min delay needed as per HW design */
-	value = readl(mgbe->xpcs + XPCS_WRAP_UPHY_RX_CONTROL);
+	value = pete_readl("drivers/net/ethernet/stmicro/stmmac/dwmac-tegra.c:165", mgbe->xpcs + XPCS_WRAP_UPHY_RX_CONTROL);
 	value |= XPCS_WRAP_UPHY_RX_CONTROL_RX_PCS_PHY_RDY;
-	writel(value, mgbe->xpcs + XPCS_WRAP_UPHY_RX_CONTROL);
+	pete_writel("drivers/net/ethernet/stmicro/stmmac/dwmac-tegra.c:167", value, mgbe->xpcs + XPCS_WRAP_UPHY_RX_CONTROL);
 
 	msleep(30);  /* 30ms delay needed as per HW design */
-	value = readl(mgbe->xpcs + XPCS_WRAP_UPHY_RX_CONTROL);
+	value = pete_readl("drivers/net/ethernet/stmicro/stmmac/dwmac-tegra.c:170", mgbe->xpcs + XPCS_WRAP_UPHY_RX_CONTROL);
 	value &= ~XPCS_WRAP_UPHY_RX_CONTROL_RX_CDR_RESET;
-	writel(value, mgbe->xpcs + XPCS_WRAP_UPHY_RX_CONTROL);
+	pete_writel("drivers/net/ethernet/stmicro/stmmac/dwmac-tegra.c:172", value, mgbe->xpcs + XPCS_WRAP_UPHY_RX_CONTROL);
 
 	err = readl_poll_timeout(mgbe->xpcs + XPCS_WRAP_IRQ_STATUS, value,
 				 value & XPCS_WRAP_IRQ_STATUS_PCS_LINK_STS,
@@ -180,7 +180,7 @@ static int mgbe_uphy_lane_bringup_serdes_up(struct net_device *ndev, void *mgbe_
 	}
 
 	/* clear status */
-	writel(value, mgbe->xpcs + XPCS_WRAP_IRQ_STATUS);
+	pete_writel("drivers/net/ethernet/stmicro/stmmac/dwmac-tegra.c:183", value, mgbe->xpcs + XPCS_WRAP_IRQ_STATUS);
 
 	return 0;
 }
@@ -190,25 +190,25 @@ static void mgbe_uphy_lane_bringup_serdes_down(struct net_device *ndev, void *mg
 	struct tegra_mgbe *mgbe = (struct tegra_mgbe *)mgbe_data;
 	u32 value;
 
-	value = readl(mgbe->xpcs + XPCS_WRAP_UPHY_RX_CONTROL);
+	value = pete_readl("drivers/net/ethernet/stmicro/stmmac/dwmac-tegra.c:193", mgbe->xpcs + XPCS_WRAP_UPHY_RX_CONTROL);
 	value |= XPCS_WRAP_UPHY_RX_CONTROL_RX_SW_OVRD;
-	writel(value, mgbe->xpcs + XPCS_WRAP_UPHY_RX_CONTROL);
+	pete_writel("drivers/net/ethernet/stmicro/stmmac/dwmac-tegra.c:195", value, mgbe->xpcs + XPCS_WRAP_UPHY_RX_CONTROL);
 
-	value = readl(mgbe->xpcs + XPCS_WRAP_UPHY_RX_CONTROL);
+	value = pete_readl("drivers/net/ethernet/stmicro/stmmac/dwmac-tegra.c:197", mgbe->xpcs + XPCS_WRAP_UPHY_RX_CONTROL);
 	value &= ~XPCS_WRAP_UPHY_RX_CONTROL_RX_DATA_EN;
-	writel(value, mgbe->xpcs + XPCS_WRAP_UPHY_RX_CONTROL);
+	pete_writel("drivers/net/ethernet/stmicro/stmmac/dwmac-tegra.c:199", value, mgbe->xpcs + XPCS_WRAP_UPHY_RX_CONTROL);
 
-	value = readl(mgbe->xpcs + XPCS_WRAP_UPHY_RX_CONTROL);
+	value = pete_readl("drivers/net/ethernet/stmicro/stmmac/dwmac-tegra.c:201", mgbe->xpcs + XPCS_WRAP_UPHY_RX_CONTROL);
 	value |= XPCS_WRAP_UPHY_RX_CONTROL_RX_SLEEP;
-	writel(value, mgbe->xpcs + XPCS_WRAP_UPHY_RX_CONTROL);
+	pete_writel("drivers/net/ethernet/stmicro/stmmac/dwmac-tegra.c:203", value, mgbe->xpcs + XPCS_WRAP_UPHY_RX_CONTROL);
 
-	value = readl(mgbe->xpcs + XPCS_WRAP_UPHY_RX_CONTROL);
+	value = pete_readl("drivers/net/ethernet/stmicro/stmmac/dwmac-tegra.c:205", mgbe->xpcs + XPCS_WRAP_UPHY_RX_CONTROL);
 	value |= XPCS_WRAP_UPHY_RX_CONTROL_AUX_RX_IDDQ;
-	writel(value, mgbe->xpcs + XPCS_WRAP_UPHY_RX_CONTROL);
+	pete_writel("drivers/net/ethernet/stmicro/stmmac/dwmac-tegra.c:207", value, mgbe->xpcs + XPCS_WRAP_UPHY_RX_CONTROL);
 
-	value = readl(mgbe->xpcs + XPCS_WRAP_UPHY_RX_CONTROL);
+	value = pete_readl("drivers/net/ethernet/stmicro/stmmac/dwmac-tegra.c:209", mgbe->xpcs + XPCS_WRAP_UPHY_RX_CONTROL);
 	value |= XPCS_WRAP_UPHY_RX_CONTROL_RX_IDDQ;
-	writel(value, mgbe->xpcs + XPCS_WRAP_UPHY_RX_CONTROL);
+	pete_writel("drivers/net/ethernet/stmicro/stmmac/dwmac-tegra.c:211", value, mgbe->xpcs + XPCS_WRAP_UPHY_RX_CONTROL);
 }
 
 static int tegra_mgbe_probe(struct platform_device *pdev)
@@ -327,11 +327,11 @@ static int tegra_mgbe_probe(struct platform_device *pdev)
 
 	plat->mdio_bus_data->needs_reset = true;
 
-	value = readl(mgbe->xpcs + XPCS_WRAP_UPHY_STATUS);
+	value = pete_readl("drivers/net/ethernet/stmicro/stmmac/dwmac-tegra.c:330", mgbe->xpcs + XPCS_WRAP_UPHY_STATUS);
 	if ((value & XPCS_WRAP_UPHY_STATUS_TX_P_UP) == 0) {
-		value = readl(mgbe->xpcs + XPCS_WRAP_UPHY_HW_INIT_CTRL);
+		value = pete_readl("drivers/net/ethernet/stmicro/stmmac/dwmac-tegra.c:332", mgbe->xpcs + XPCS_WRAP_UPHY_HW_INIT_CTRL);
 		value |= XPCS_WRAP_UPHY_HW_INIT_CTRL_TX_EN;
-		writel(value, mgbe->xpcs + XPCS_WRAP_UPHY_HW_INIT_CTRL);
+		pete_writel("drivers/net/ethernet/stmicro/stmmac/dwmac-tegra.c:334", value, mgbe->xpcs + XPCS_WRAP_UPHY_HW_INIT_CTRL);
 	}
 
 	err = readl_poll_timeout(mgbe->xpcs + XPCS_WRAP_UPHY_HW_INIT_CTRL, value,
@@ -351,10 +351,10 @@ static int tegra_mgbe_probe(struct platform_device *pdev)
 	plat->rx_fifo_size = 196608;
 
 	/* Enable common interrupt at wrapper level */
-	writel(MAC_SBD_INTR, mgbe->regs + MGBE_WRAP_COMMON_INTR_ENABLE);
+	pete_writel("drivers/net/ethernet/stmicro/stmmac/dwmac-tegra.c:354", MAC_SBD_INTR, mgbe->regs + MGBE_WRAP_COMMON_INTR_ENABLE);
 
 	/* Program SID */
-	writel(mgbe->iommu_sid, mgbe->hv + MGBE_WRAP_AXI_ASID0_CTRL);
+	pete_writel("drivers/net/ethernet/stmicro/stmmac/dwmac-tegra.c:357", mgbe->iommu_sid, mgbe->hv + MGBE_WRAP_AXI_ASID0_CTRL);
 
 	plat->flags |= STMMAC_FLAG_SERDES_UP_AFTER_PHY_LINKUP;
 

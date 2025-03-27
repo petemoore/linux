@@ -39,7 +39,7 @@ int mtk_vcodec_write_vdecsys(struct mtk_vcodec_dec_ctx *ctx, unsigned int reg,
 	if (dev->vdecsys_regmap)
 		return regmap_write(dev->vdecsys_regmap, reg, val);
 
-	writel(val, dev->reg_base[VDEC_SYS] + reg);
+	pete_writel("drivers/media/platform/mediatek/vcodec/common/mtk_vcodec_util.c:42", val, dev->reg_base[VDEC_SYS] + reg);
 
 	return 0;
 }

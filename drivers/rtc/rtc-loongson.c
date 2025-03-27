@@ -131,11 +131,11 @@ static u32 loongson_rtc_handler(void *id)
 
 	spin_lock(&priv->lock);
 	/* Disable RTC alarm wakeup and interrupt */
-	writel(readl(priv->pm_base + PM1_EN_REG) & ~RTC_EN,
+	pete_writel("drivers/rtc/rtc-loongson.c:134", pete_readl("drivers/rtc/rtc-loongson.c:134", priv->pm_base + PM1_EN_REG) & ~RTC_EN,
 	       priv->pm_base + PM1_EN_REG);
 
 	/* Clear RTC interrupt status */
-	writel(RTC_STS, priv->pm_base + PM1_STS_REG);
+	pete_writel("drivers/rtc/rtc-loongson.c:138", RTC_STS, priv->pm_base + PM1_STS_REG);
 	spin_unlock(&priv->lock);
 
 	return ACPI_INTERRUPT_HANDLED;
@@ -244,7 +244,7 @@ static int loongson_rtc_read_alarm(struct device *dev, struct rtc_wkalrm *alrm)
 	 */
 	alrm->time.tm_year = FIELD_GET(TOY_MATCH_YEAR, alarm_data) + priv->fix_year;
 
-	alrm->enabled = !!(readl(priv->pm_base + PM1_EN_REG) & RTC_EN);
+	alrm->enabled = !!(pete_readl("drivers/rtc/rtc-loongson.c:247", priv->pm_base + PM1_EN_REG) & RTC_EN);
 	return 0;
 }
 
@@ -254,9 +254,9 @@ static int loongson_rtc_alarm_irq_enable(struct device *dev, unsigned int enable
 	struct loongson_rtc_priv *priv = dev_get_drvdata(dev);
 
 	spin_lock(&priv->lock);
-	val = readl(priv->pm_base + PM1_EN_REG);
+	val = pete_readl("drivers/rtc/rtc-loongson.c:257", priv->pm_base + PM1_EN_REG);
 	/* Enable RTC alarm wakeup */
-	writel(enabled ? val | RTC_EN : val & ~RTC_EN,
+	pete_writel("drivers/rtc/rtc-loongson.c:259", enabled ? val | RTC_EN : val & ~RTC_EN,
 	       priv->pm_base + PM1_EN_REG);
 	spin_unlock(&priv->lock);
 

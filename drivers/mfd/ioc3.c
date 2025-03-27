@@ -49,7 +49,7 @@ static void ioc3_irq_ack(struct irq_data *d)
 	struct ioc3_priv_data *ipd = irq_data_get_irq_chip_data(d);
 	unsigned int hwirq = irqd_to_hwirq(d);
 
-	writel(BIT(hwirq), &ipd->regs->sio_ir);
+	pete_writel("drivers/mfd/ioc3.c:52", BIT(hwirq), &ipd->regs->sio_ir);
 }
 
 static void ioc3_irq_mask(struct irq_data *d)
@@ -57,7 +57,7 @@ static void ioc3_irq_mask(struct irq_data *d)
 	struct ioc3_priv_data *ipd = irq_data_get_irq_chip_data(d);
 	unsigned int hwirq = irqd_to_hwirq(d);
 
-	writel(BIT(hwirq), &ipd->regs->sio_iec);
+	pete_writel("drivers/mfd/ioc3.c:60", BIT(hwirq), &ipd->regs->sio_iec);
 }
 
 static void ioc3_irq_unmask(struct irq_data *d)
@@ -65,7 +65,7 @@ static void ioc3_irq_unmask(struct irq_data *d)
 	struct ioc3_priv_data *ipd = irq_data_get_irq_chip_data(d);
 	unsigned int hwirq = irqd_to_hwirq(d);
 
-	writel(BIT(hwirq), &ipd->regs->sio_ies);
+	pete_writel("drivers/mfd/ioc3.c:68", BIT(hwirq), &ipd->regs->sio_ies);
 }
 
 static struct irq_chip ioc3_irq_chip = {
@@ -106,8 +106,8 @@ static void ioc3_irq_handler(struct irq_desc *desc)
 	struct ioc3 __iomem *regs = ipd->regs;
 	u32 pending, mask;
 
-	pending = readl(&regs->sio_ir);
-	mask = readl(&regs->sio_ies);
+	pending = pete_readl("drivers/mfd/ioc3.c:109", &regs->sio_ir);
+	mask = pete_readl("drivers/mfd/ioc3.c:110", &regs->sio_ies);
 	pending &= mask; /* Mask off not enabled interrupts */
 
 	if (pending)
@@ -185,17 +185,17 @@ static int ioc3_serial_setup(struct ioc3_priv_data *ipd)
 	int ret;
 
 	/* Set gpio pins for RS232/RS422 mode selection */
-	writel(GPCR_UARTA_MODESEL | GPCR_UARTB_MODESEL,
+	pete_writel("drivers/mfd/ioc3.c:188", GPCR_UARTA_MODESEL | GPCR_UARTB_MODESEL,
 		&ipd->regs->gpcr_s);
 	/* Select RS232 mode for uart a */
-	writel(0, &ipd->regs->gppr[6]);
+	pete_writel("drivers/mfd/ioc3.c:191", 0, &ipd->regs->gppr[6]);
 	/* Select RS232 mode for uart b */
-	writel(0, &ipd->regs->gppr[7]);
+	pete_writel("drivers/mfd/ioc3.c:193", 0, &ipd->regs->gppr[7]);
 
 	/* Switch both ports to 16650 mode */
-	writel(readl(&ipd->regs->port_a.sscr) & ~SSCR_DMA_EN,
+	pete_writel("drivers/mfd/ioc3.c:196", pete_readl("drivers/mfd/ioc3.c:196", &ipd->regs->port_a.sscr) & ~SSCR_DMA_EN,
 	       &ipd->regs->port_a.sscr);
-	writel(readl(&ipd->regs->port_b.sscr) & ~SSCR_DMA_EN,
+	pete_writel("drivers/mfd/ioc3.c:198", pete_readl("drivers/mfd/ioc3.c:198", &ipd->regs->port_b.sscr) & ~SSCR_DMA_EN,
 	       &ipd->regs->port_b.sscr);
 	udelay(1000); /* Wait until mode switch is done */
 
@@ -273,7 +273,7 @@ static int ioc3_eth_setup(struct ioc3_priv_data *ipd)
 	int ret;
 
 	/* Enable One-Wire bus */
-	writel(GPCR_MLAN_EN, &ipd->regs->gpcr_s);
+	pete_writel("drivers/mfd/ioc3.c:276", GPCR_MLAN_EN, &ipd->regs->gpcr_s);
 
 	/* Generate unique identifier */
 	snprintf(ioc3_w1_platform_data.dev_id,
@@ -543,10 +543,10 @@ static int ioc3_setup(struct ioc3_priv_data *ipd)
 	int i;
 
 	/* Clear IRQs */
-	writel(~0, &ipd->regs->sio_iec);
-	writel(~0, &ipd->regs->sio_ir);
-	writel(0, &ipd->regs->eth.eier);
-	writel(~0, &ipd->regs->eth.eisr);
+	pete_writel("drivers/mfd/ioc3.c:546", ~0, &ipd->regs->sio_iec);
+	pete_writel("drivers/mfd/ioc3.c:547", ~0, &ipd->regs->sio_ir);
+	pete_writel("drivers/mfd/ioc3.c:548", 0, &ipd->regs->eth.eier);
+	pete_writel("drivers/mfd/ioc3.c:549", ~0, &ipd->regs->eth.eisr);
 
 	/* Read subsystem vendor id and subsystem id */
 	pci_read_config_dword(ipd->pdev, PCI_SUBSYSTEM_VENDOR_ID, &sid);
@@ -637,8 +637,8 @@ static void ioc3_mfd_remove(struct pci_dev *pdev)
 	ipd = pci_get_drvdata(pdev);
 
 	/* Clear and disable all IRQs */
-	writel(~0, &ipd->regs->sio_iec);
-	writel(~0, &ipd->regs->sio_ir);
+	pete_writel("drivers/mfd/ioc3.c:640", ~0, &ipd->regs->sio_iec);
+	pete_writel("drivers/mfd/ioc3.c:641", ~0, &ipd->regs->sio_ir);
 
 	/* Release resources */
 	mfd_remove_devices(&ipd->pdev->dev);

@@ -85,23 +85,23 @@ int ipu_dp_set_global_alpha(struct ipu_dp *dp, bool enable,
 
 	mutex_lock(&priv->mutex);
 
-	reg = readl(flow->base + DP_COM_CONF);
+	reg = pete_readl("drivers/gpu/ipu-v3/ipu-dp.c:88", flow->base + DP_COM_CONF);
 	if (bg_chan)
 		reg &= ~DP_COM_CONF_GWSEL;
 	else
 		reg |= DP_COM_CONF_GWSEL;
-	writel(reg, flow->base + DP_COM_CONF);
+	pete_writel("drivers/gpu/ipu-v3/ipu-dp.c:93", reg, flow->base + DP_COM_CONF);
 
 	if (enable) {
-		reg = readl(flow->base + DP_GRAPH_WIND_CTRL) & 0x00FFFFFFL;
-		writel(reg | ((u32) alpha << 24),
+		reg = pete_readl("drivers/gpu/ipu-v3/ipu-dp.c:96", flow->base + DP_GRAPH_WIND_CTRL) & 0x00FFFFFFL;
+		pete_writel("drivers/gpu/ipu-v3/ipu-dp.c:97", reg | ((u32) alpha << 24),
 			     flow->base + DP_GRAPH_WIND_CTRL);
 
-		reg = readl(flow->base + DP_COM_CONF);
-		writel(reg | DP_COM_CONF_GWAM, flow->base + DP_COM_CONF);
+		reg = pete_readl("drivers/gpu/ipu-v3/ipu-dp.c:100", flow->base + DP_COM_CONF);
+		pete_writel("drivers/gpu/ipu-v3/ipu-dp.c:101", reg | DP_COM_CONF_GWAM, flow->base + DP_COM_CONF);
 	} else {
-		reg = readl(flow->base + DP_COM_CONF);
-		writel(reg & ~DP_COM_CONF_GWAM, flow->base + DP_COM_CONF);
+		reg = pete_readl("drivers/gpu/ipu-v3/ipu-dp.c:103", flow->base + DP_COM_CONF);
+		pete_writel("drivers/gpu/ipu-v3/ipu-dp.c:104", reg & ~DP_COM_CONF_GWAM, flow->base + DP_COM_CONF);
 	}
 
 	ipu_srm_dp_update(priv->ipu, true);
@@ -117,7 +117,7 @@ int ipu_dp_set_window_pos(struct ipu_dp *dp, u16 x_pos, u16 y_pos)
 	struct ipu_flow *flow = to_flow(dp);
 	struct ipu_dp_priv *priv = flow->priv;
 
-	writel((x_pos << 16) | y_pos, flow->base + DP_FG_POS);
+	pete_writel("drivers/gpu/ipu-v3/ipu-dp.c:120", (x_pos << 16) | y_pos, flow->base + DP_FG_POS);
 
 	ipu_srm_dp_update(priv->ipu, true);
 
@@ -134,48 +134,48 @@ static void ipu_dp_csc_init(struct ipu_flow *flow,
 {
 	u32 reg;
 
-	reg = readl(flow->base + DP_COM_CONF);
+	reg = pete_readl("drivers/gpu/ipu-v3/ipu-dp.c:137", flow->base + DP_COM_CONF);
 	reg &= ~DP_COM_CONF_CSC_DEF_MASK;
 
 	if (in == out) {
-		writel(reg, flow->base + DP_COM_CONF);
+		pete_writel("drivers/gpu/ipu-v3/ipu-dp.c:141", reg, flow->base + DP_COM_CONF);
 		return;
 	}
 
 	if (in == IPUV3_COLORSPACE_RGB && out == IPUV3_COLORSPACE_YUV) {
-		writel(0x099 | (0x12d << 16), flow->base + DP_CSC_A_0);
-		writel(0x03a | (0x3a9 << 16), flow->base + DP_CSC_A_1);
-		writel(0x356 | (0x100 << 16), flow->base + DP_CSC_A_2);
-		writel(0x100 | (0x329 << 16), flow->base + DP_CSC_A_3);
-		writel(0x3d6 | (0x0000 << 16) | (2 << 30),
+		pete_writel("drivers/gpu/ipu-v3/ipu-dp.c:146", 0x099 | (0x12d << 16), flow->base + DP_CSC_A_0);
+		pete_writel("drivers/gpu/ipu-v3/ipu-dp.c:147", 0x03a | (0x3a9 << 16), flow->base + DP_CSC_A_1);
+		pete_writel("drivers/gpu/ipu-v3/ipu-dp.c:148", 0x356 | (0x100 << 16), flow->base + DP_CSC_A_2);
+		pete_writel("drivers/gpu/ipu-v3/ipu-dp.c:149", 0x100 | (0x329 << 16), flow->base + DP_CSC_A_3);
+		pete_writel("drivers/gpu/ipu-v3/ipu-dp.c:150", 0x3d6 | (0x0000 << 16) | (2 << 30),
 				flow->base + DP_CSC_0);
-		writel(0x200 | (2 << 14) | (0x200 << 16) | (2 << 30),
+		pete_writel("drivers/gpu/ipu-v3/ipu-dp.c:152", 0x200 | (2 << 14) | (0x200 << 16) | (2 << 30),
 				flow->base + DP_CSC_1);
 	} else if (ycbcr_enc == DRM_COLOR_YCBCR_BT709) {
 		/* Rec.709 limited range */
-		writel(0x095 | (0x000 << 16), flow->base + DP_CSC_A_0);
-		writel(0x0e5 | (0x095 << 16), flow->base + DP_CSC_A_1);
-		writel(0x3e5 | (0x3bc << 16), flow->base + DP_CSC_A_2);
-		writel(0x095 | (0x10e << 16), flow->base + DP_CSC_A_3);
-		writel(0x000 | (0x3e10 << 16) | (1 << 30),
+		pete_writel("drivers/gpu/ipu-v3/ipu-dp.c:156", 0x095 | (0x000 << 16), flow->base + DP_CSC_A_0);
+		pete_writel("drivers/gpu/ipu-v3/ipu-dp.c:157", 0x0e5 | (0x095 << 16), flow->base + DP_CSC_A_1);
+		pete_writel("drivers/gpu/ipu-v3/ipu-dp.c:158", 0x3e5 | (0x3bc << 16), flow->base + DP_CSC_A_2);
+		pete_writel("drivers/gpu/ipu-v3/ipu-dp.c:159", 0x095 | (0x10e << 16), flow->base + DP_CSC_A_3);
+		pete_writel("drivers/gpu/ipu-v3/ipu-dp.c:160", 0x000 | (0x3e10 << 16) | (1 << 30),
 				flow->base + DP_CSC_0);
-		writel(0x09a | (1 << 14) | (0x3dbe << 16) | (1 << 30),
+		pete_writel("drivers/gpu/ipu-v3/ipu-dp.c:162", 0x09a | (1 << 14) | (0x3dbe << 16) | (1 << 30),
 				flow->base + DP_CSC_1);
 	} else {
 		/* BT.601 limited range */
-		writel(0x095 | (0x000 << 16), flow->base + DP_CSC_A_0);
-		writel(0x0cc | (0x095 << 16), flow->base + DP_CSC_A_1);
-		writel(0x3ce | (0x398 << 16), flow->base + DP_CSC_A_2);
-		writel(0x095 | (0x0ff << 16), flow->base + DP_CSC_A_3);
-		writel(0x000 | (0x3e42 << 16) | (1 << 30),
+		pete_writel("drivers/gpu/ipu-v3/ipu-dp.c:166", 0x095 | (0x000 << 16), flow->base + DP_CSC_A_0);
+		pete_writel("drivers/gpu/ipu-v3/ipu-dp.c:167", 0x0cc | (0x095 << 16), flow->base + DP_CSC_A_1);
+		pete_writel("drivers/gpu/ipu-v3/ipu-dp.c:168", 0x3ce | (0x398 << 16), flow->base + DP_CSC_A_2);
+		pete_writel("drivers/gpu/ipu-v3/ipu-dp.c:169", 0x095 | (0x0ff << 16), flow->base + DP_CSC_A_3);
+		pete_writel("drivers/gpu/ipu-v3/ipu-dp.c:170", 0x000 | (0x3e42 << 16) | (1 << 30),
 				flow->base + DP_CSC_0);
-		writel(0x10a | (1 << 14) | (0x3dd6 << 16) | (1 << 30),
+		pete_writel("drivers/gpu/ipu-v3/ipu-dp.c:172", 0x10a | (1 << 14) | (0x3dd6 << 16) | (1 << 30),
 				flow->base + DP_CSC_1);
 	}
 
 	reg |= place;
 
-	writel(reg, flow->base + DP_COM_CONF);
+	pete_writel("drivers/gpu/ipu-v3/ipu-dp.c:178", reg, flow->base + DP_COM_CONF);
 }
 
 int ipu_dp_setup_channel(struct ipu_dp *dp,
@@ -254,9 +254,9 @@ int ipu_dp_enable_channel(struct ipu_dp *dp)
 
 	mutex_lock(&priv->mutex);
 
-	reg = readl(flow->base + DP_COM_CONF);
+	reg = pete_readl("drivers/gpu/ipu-v3/ipu-dp.c:257", flow->base + DP_COM_CONF);
 	reg |= DP_COM_CONF_FG_EN;
-	writel(reg, flow->base + DP_COM_CONF);
+	pete_writel("drivers/gpu/ipu-v3/ipu-dp.c:259", reg, flow->base + DP_COM_CONF);
 
 	ipu_srm_dp_update(priv->ipu, true);
 
@@ -279,16 +279,16 @@ void ipu_dp_disable_channel(struct ipu_dp *dp, bool sync)
 
 	mutex_lock(&priv->mutex);
 
-	reg = readl(flow->base + DP_COM_CONF);
+	reg = pete_readl("drivers/gpu/ipu-v3/ipu-dp.c:282", flow->base + DP_COM_CONF);
 	csc = reg & DP_COM_CONF_CSC_DEF_MASK;
 	reg &= ~DP_COM_CONF_CSC_DEF_MASK;
 	if (csc == DP_COM_CONF_CSC_DEF_BOTH || csc == DP_COM_CONF_CSC_DEF_BG)
 		reg |= DP_COM_CONF_CSC_DEF_BG;
 
 	reg &= ~DP_COM_CONF_FG_EN;
-	writel(reg, flow->base + DP_COM_CONF);
+	pete_writel("drivers/gpu/ipu-v3/ipu-dp.c:289", reg, flow->base + DP_COM_CONF);
 
-	writel(0, flow->base + DP_FG_POS);
+	pete_writel("drivers/gpu/ipu-v3/ipu-dp.c:291", 0, flow->base + DP_FG_POS);
 	ipu_srm_dp_update(priv->ipu, sync);
 
 	mutex_unlock(&priv->mutex);

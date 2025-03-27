@@ -279,9 +279,9 @@ static void qcom_pcie_clear_hpc(struct dw_pcie *pci)
 
 	dw_pcie_dbi_ro_wr_en(pci);
 
-	val = readl(pci->dbi_base + offset + PCI_EXP_SLTCAP);
+	val = pete_readl("drivers/pci/controller/dwc/pcie-qcom.c:282", pci->dbi_base + offset + PCI_EXP_SLTCAP);
 	val &= ~PCI_EXP_SLTCAP_HPC;
-	writel(val, pci->dbi_base + offset + PCI_EXP_SLTCAP);
+	pete_writel("drivers/pci/controller/dwc/pcie-qcom.c:284", val, pci->dbi_base + offset + PCI_EXP_SLTCAP);
 
 	dw_pcie_dbi_ro_wr_dis(pci);
 }
@@ -291,9 +291,9 @@ static void qcom_pcie_2_1_0_ltssm_enable(struct qcom_pcie *pcie)
 	u32 val;
 
 	/* enable link training */
-	val = readl(pcie->elbi + ELBI_SYS_CTRL);
+	val = pete_readl("drivers/pci/controller/dwc/pcie-qcom.c:294", pcie->elbi + ELBI_SYS_CTRL);
 	val |= ELBI_SYS_CTRL_LT_ENABLE;
-	writel(val, pcie->elbi + ELBI_SYS_CTRL);
+	pete_writel("drivers/pci/controller/dwc/pcie-qcom.c:296", val, pcie->elbi + ELBI_SYS_CTRL);
 }
 
 static int qcom_pcie_get_resources_2_1_0(struct qcom_pcie *pcie)
@@ -351,7 +351,7 @@ static void qcom_pcie_deinit_2_1_0(struct qcom_pcie *pcie)
 	clk_bulk_disable_unprepare(ARRAY_SIZE(res->clks), res->clks);
 	reset_control_bulk_assert(res->num_resets, res->resets);
 
-	writel(1, pcie->parf + PARF_PHY_CTRL);
+	pete_writel("drivers/pci/controller/dwc/pcie-qcom.c:354", 1, pcie->parf + PARF_PHY_CTRL);
 
 	regulator_bulk_disable(ARRAY_SIZE(res->supplies), res->supplies);
 }
@@ -396,9 +396,9 @@ static int qcom_pcie_post_init_2_1_0(struct qcom_pcie *pcie)
 	int ret;
 
 	/* enable PCIe clocks and resets */
-	val = readl(pcie->parf + PARF_PHY_CTRL);
+	val = pete_readl("drivers/pci/controller/dwc/pcie-qcom.c:399", pcie->parf + PARF_PHY_CTRL);
 	val &= ~PHY_TEST_PWR_DOWN;
-	writel(val, pcie->parf + PARF_PHY_CTRL);
+	pete_writel("drivers/pci/controller/dwc/pcie-qcom.c:401", val, pcie->parf + PARF_PHY_CTRL);
 
 	ret = clk_bulk_prepare_enable(ARRAY_SIZE(res->clks), res->clks);
 	if (ret)
@@ -406,39 +406,39 @@ static int qcom_pcie_post_init_2_1_0(struct qcom_pcie *pcie)
 
 	if (of_device_is_compatible(node, "qcom,pcie-ipq8064") ||
 	    of_device_is_compatible(node, "qcom,pcie-ipq8064-v2")) {
-		writel(PCS_DEEMPH_TX_DEEMPH_GEN1(24) |
+		pete_writel("drivers/pci/controller/dwc/pcie-qcom.c:409", PCS_DEEMPH_TX_DEEMPH_GEN1(24) |
 			       PCS_DEEMPH_TX_DEEMPH_GEN2_3_5DB(24) |
 			       PCS_DEEMPH_TX_DEEMPH_GEN2_6DB(34),
 		       pcie->parf + PARF_PCS_DEEMPH);
-		writel(PCS_SWING_TX_SWING_FULL(120) |
+		pete_writel("drivers/pci/controller/dwc/pcie-qcom.c:413", PCS_SWING_TX_SWING_FULL(120) |
 			       PCS_SWING_TX_SWING_LOW(120),
 		       pcie->parf + PARF_PCS_SWING);
-		writel(PHY_RX0_EQ(4), pcie->parf + PARF_CONFIG_BITS);
+		pete_writel("drivers/pci/controller/dwc/pcie-qcom.c:416", PHY_RX0_EQ(4), pcie->parf + PARF_CONFIG_BITS);
 	}
 
 	if (of_device_is_compatible(node, "qcom,pcie-ipq8064")) {
 		/* set TX termination offset */
-		val = readl(pcie->parf + PARF_PHY_CTRL);
+		val = pete_readl("drivers/pci/controller/dwc/pcie-qcom.c:421", pcie->parf + PARF_PHY_CTRL);
 		val &= ~PHY_CTRL_PHY_TX0_TERM_OFFSET_MASK;
 		val |= PHY_CTRL_PHY_TX0_TERM_OFFSET(7);
-		writel(val, pcie->parf + PARF_PHY_CTRL);
+		pete_writel("drivers/pci/controller/dwc/pcie-qcom.c:424", val, pcie->parf + PARF_PHY_CTRL);
 	}
 
 	/* enable external reference clock */
-	val = readl(pcie->parf + PARF_PHY_REFCLK);
+	val = pete_readl("drivers/pci/controller/dwc/pcie-qcom.c:428", pcie->parf + PARF_PHY_REFCLK);
 	/* USE_PAD is required only for ipq806x */
 	if (!of_device_is_compatible(node, "qcom,pcie-apq8064"))
 		val &= ~PHY_REFCLK_USE_PAD;
 	val |= PHY_REFCLK_SSP_EN;
-	writel(val, pcie->parf + PARF_PHY_REFCLK);
+	pete_writel("drivers/pci/controller/dwc/pcie-qcom.c:433", val, pcie->parf + PARF_PHY_REFCLK);
 
 	/* wait for clock acquisition */
 	usleep_range(1000, 1500);
 
 	/* Set the Max TLP size to 2K, instead of using default of 4K */
-	writel(CFG_REMOTE_RD_REQ_BRIDGE_SIZE_2K,
+	pete_writel("drivers/pci/controller/dwc/pcie-qcom.c:439", CFG_REMOTE_RD_REQ_BRIDGE_SIZE_2K,
 	       pci->dbi_base + AXI_MSTR_RESP_COMP_CTRL0);
-	writel(CFG_BRIDGE_SB_INIT,
+	pete_writel("drivers/pci/controller/dwc/pcie-qcom.c:441", CFG_BRIDGE_SB_INIT,
 	       pci->dbi_base + AXI_MSTR_RESP_COMP_CTRL1);
 
 	qcom_pcie_clear_hpc(pcie->pci);
@@ -517,13 +517,13 @@ err_assert_reset:
 static int qcom_pcie_post_init_1_0_0(struct qcom_pcie *pcie)
 {
 	/* change DBI base address */
-	writel(0, pcie->parf + PARF_DBI_BASE_ADDR);
+	pete_writel("drivers/pci/controller/dwc/pcie-qcom.c:520", 0, pcie->parf + PARF_DBI_BASE_ADDR);
 
 	if (IS_ENABLED(CONFIG_PCI_MSI)) {
-		u32 val = readl(pcie->parf + PARF_AXI_MSTR_WR_ADDR_HALT);
+		u32 val = pete_readl("drivers/pci/controller/dwc/pcie-qcom.c:523", pcie->parf + PARF_AXI_MSTR_WR_ADDR_HALT);
 
 		val |= EN;
-		writel(val, pcie->parf + PARF_AXI_MSTR_WR_ADDR_HALT);
+		pete_writel("drivers/pci/controller/dwc/pcie-qcom.c:526", val, pcie->parf + PARF_AXI_MSTR_WR_ADDR_HALT);
 	}
 
 	qcom_pcie_clear_hpc(pcie->pci);
@@ -536,9 +536,9 @@ static void qcom_pcie_2_3_2_ltssm_enable(struct qcom_pcie *pcie)
 	u32 val;
 
 	/* enable link training */
-	val = readl(pcie->parf + PARF_LTSSM);
+	val = pete_readl("drivers/pci/controller/dwc/pcie-qcom.c:539", pcie->parf + PARF_LTSSM);
 	val |= LTSSM_EN;
-	writel(val, pcie->parf + PARF_LTSSM);
+	pete_writel("drivers/pci/controller/dwc/pcie-qcom.c:541", val, pcie->parf + PARF_LTSSM);
 }
 
 static int qcom_pcie_get_resources_2_3_2(struct qcom_pcie *pcie)
@@ -603,25 +603,25 @@ static int qcom_pcie_post_init_2_3_2(struct qcom_pcie *pcie)
 	u32 val;
 
 	/* enable PCIe clocks and resets */
-	val = readl(pcie->parf + PARF_PHY_CTRL);
+	val = pete_readl("drivers/pci/controller/dwc/pcie-qcom.c:606", pcie->parf + PARF_PHY_CTRL);
 	val &= ~PHY_TEST_PWR_DOWN;
-	writel(val, pcie->parf + PARF_PHY_CTRL);
+	pete_writel("drivers/pci/controller/dwc/pcie-qcom.c:608", val, pcie->parf + PARF_PHY_CTRL);
 
 	/* change DBI base address */
-	writel(0, pcie->parf + PARF_DBI_BASE_ADDR);
+	pete_writel("drivers/pci/controller/dwc/pcie-qcom.c:611", 0, pcie->parf + PARF_DBI_BASE_ADDR);
 
 	/* MAC PHY_POWERDOWN MUX DISABLE  */
-	val = readl(pcie->parf + PARF_SYS_CTRL);
+	val = pete_readl("drivers/pci/controller/dwc/pcie-qcom.c:614", pcie->parf + PARF_SYS_CTRL);
 	val &= ~MAC_PHY_POWERDOWN_IN_P2_D_MUX_EN;
-	writel(val, pcie->parf + PARF_SYS_CTRL);
+	pete_writel("drivers/pci/controller/dwc/pcie-qcom.c:616", val, pcie->parf + PARF_SYS_CTRL);
 
-	val = readl(pcie->parf + PARF_MHI_CLOCK_RESET_CTRL);
+	val = pete_readl("drivers/pci/controller/dwc/pcie-qcom.c:618", pcie->parf + PARF_MHI_CLOCK_RESET_CTRL);
 	val |= BYPASS;
-	writel(val, pcie->parf + PARF_MHI_CLOCK_RESET_CTRL);
+	pete_writel("drivers/pci/controller/dwc/pcie-qcom.c:620", val, pcie->parf + PARF_MHI_CLOCK_RESET_CTRL);
 
-	val = readl(pcie->parf + PARF_AXI_MSTR_WR_ADDR_HALT_V2);
+	val = pete_readl("drivers/pci/controller/dwc/pcie-qcom.c:622", pcie->parf + PARF_AXI_MSTR_WR_ADDR_HALT_V2);
 	val |= EN;
-	writel(val, pcie->parf + PARF_AXI_MSTR_WR_ADDR_HALT_V2);
+	pete_writel("drivers/pci/controller/dwc/pcie-qcom.c:624", val, pcie->parf + PARF_AXI_MSTR_WR_ADDR_HALT_V2);
 
 	qcom_pcie_clear_hpc(pcie->pci);
 
@@ -800,31 +800,31 @@ static int qcom_pcie_post_init_2_3_3(struct qcom_pcie *pcie)
 	u16 offset = dw_pcie_find_capability(pci, PCI_CAP_ID_EXP);
 	u32 val;
 
-	writel(SLV_ADDR_SPACE_SZ, pcie->parf + PARF_SLV_ADDR_SPACE_SIZE);
+	pete_writel("drivers/pci/controller/dwc/pcie-qcom.c:803", SLV_ADDR_SPACE_SZ, pcie->parf + PARF_SLV_ADDR_SPACE_SIZE);
 
-	val = readl(pcie->parf + PARF_PHY_CTRL);
+	val = pete_readl("drivers/pci/controller/dwc/pcie-qcom.c:805", pcie->parf + PARF_PHY_CTRL);
 	val &= ~PHY_TEST_PWR_DOWN;
-	writel(val, pcie->parf + PARF_PHY_CTRL);
+	pete_writel("drivers/pci/controller/dwc/pcie-qcom.c:807", val, pcie->parf + PARF_PHY_CTRL);
 
-	writel(0, pcie->parf + PARF_DBI_BASE_ADDR);
+	pete_writel("drivers/pci/controller/dwc/pcie-qcom.c:809", 0, pcie->parf + PARF_DBI_BASE_ADDR);
 
-	writel(MST_WAKEUP_EN | SLV_WAKEUP_EN | MSTR_ACLK_CGC_DIS
+	pete_writel("drivers/pci/controller/dwc/pcie-qcom.c:811", MST_WAKEUP_EN | SLV_WAKEUP_EN | MSTR_ACLK_CGC_DIS
 		| SLV_ACLK_CGC_DIS | CORE_CLK_CGC_DIS |
 		AUX_PWR_DET | L23_CLK_RMV_DIS | L1_CLK_RMV_DIS,
 		pcie->parf + PARF_SYS_CTRL);
-	writel(0, pcie->parf + PARF_Q2A_FLUSH);
+	pete_writel("drivers/pci/controller/dwc/pcie-qcom.c:815", 0, pcie->parf + PARF_Q2A_FLUSH);
 
-	writel(PCI_COMMAND_MASTER, pci->dbi_base + PCI_COMMAND);
+	pete_writel("drivers/pci/controller/dwc/pcie-qcom.c:817", PCI_COMMAND_MASTER, pci->dbi_base + PCI_COMMAND);
 
 	dw_pcie_dbi_ro_wr_en(pci);
 
-	writel(PCIE_CAP_SLOT_VAL, pci->dbi_base + offset + PCI_EXP_SLTCAP);
+	pete_writel("drivers/pci/controller/dwc/pcie-qcom.c:821", PCIE_CAP_SLOT_VAL, pci->dbi_base + offset + PCI_EXP_SLTCAP);
 
-	val = readl(pci->dbi_base + offset + PCI_EXP_LNKCAP);
+	val = pete_readl("drivers/pci/controller/dwc/pcie-qcom.c:823", pci->dbi_base + offset + PCI_EXP_LNKCAP);
 	val &= ~PCI_EXP_LNKCAP_ASPMS;
-	writel(val, pci->dbi_base + offset + PCI_EXP_LNKCAP);
+	pete_writel("drivers/pci/controller/dwc/pcie-qcom.c:825", val, pci->dbi_base + offset + PCI_EXP_LNKCAP);
 
-	writel(PCI_EXP_DEVCTL2_COMP_TMOUT_DIS, pci->dbi_base + offset +
+	pete_writel("drivers/pci/controller/dwc/pcie-qcom.c:827", PCI_EXP_DEVCTL2_COMP_TMOUT_DIS, pci->dbi_base + offset +
 		PCI_EXP_DEVCTL2);
 
 	dw_pcie_dbi_ro_wr_dis(pci);
@@ -922,33 +922,33 @@ static int qcom_pcie_init_2_7_0(struct qcom_pcie *pcie)
 	usleep_range(1000, 1500);
 
 	/* configure PCIe to RC mode */
-	writel(DEVICE_TYPE_RC, pcie->parf + PARF_DEVICE_TYPE);
+	pete_writel("drivers/pci/controller/dwc/pcie-qcom.c:925", DEVICE_TYPE_RC, pcie->parf + PARF_DEVICE_TYPE);
 
 	/* enable PCIe clocks and resets */
-	val = readl(pcie->parf + PARF_PHY_CTRL);
+	val = pete_readl("drivers/pci/controller/dwc/pcie-qcom.c:928", pcie->parf + PARF_PHY_CTRL);
 	val &= ~PHY_TEST_PWR_DOWN;
-	writel(val, pcie->parf + PARF_PHY_CTRL);
+	pete_writel("drivers/pci/controller/dwc/pcie-qcom.c:930", val, pcie->parf + PARF_PHY_CTRL);
 
 	/* change DBI base address */
-	writel(0, pcie->parf + PARF_DBI_BASE_ADDR);
+	pete_writel("drivers/pci/controller/dwc/pcie-qcom.c:933", 0, pcie->parf + PARF_DBI_BASE_ADDR);
 
 	/* MAC PHY_POWERDOWN MUX DISABLE  */
-	val = readl(pcie->parf + PARF_SYS_CTRL);
+	val = pete_readl("drivers/pci/controller/dwc/pcie-qcom.c:936", pcie->parf + PARF_SYS_CTRL);
 	val &= ~MAC_PHY_POWERDOWN_IN_P2_D_MUX_EN;
-	writel(val, pcie->parf + PARF_SYS_CTRL);
+	pete_writel("drivers/pci/controller/dwc/pcie-qcom.c:938", val, pcie->parf + PARF_SYS_CTRL);
 
-	val = readl(pcie->parf + PARF_MHI_CLOCK_RESET_CTRL);
+	val = pete_readl("drivers/pci/controller/dwc/pcie-qcom.c:940", pcie->parf + PARF_MHI_CLOCK_RESET_CTRL);
 	val |= BYPASS;
-	writel(val, pcie->parf + PARF_MHI_CLOCK_RESET_CTRL);
+	pete_writel("drivers/pci/controller/dwc/pcie-qcom.c:942", val, pcie->parf + PARF_MHI_CLOCK_RESET_CTRL);
 
 	/* Enable L1 and L1SS */
-	val = readl(pcie->parf + PARF_PM_CTRL);
+	val = pete_readl("drivers/pci/controller/dwc/pcie-qcom.c:945", pcie->parf + PARF_PM_CTRL);
 	val &= ~REQ_NOT_ENTR_L1;
-	writel(val, pcie->parf + PARF_PM_CTRL);
+	pete_writel("drivers/pci/controller/dwc/pcie-qcom.c:947", val, pcie->parf + PARF_PM_CTRL);
 
-	val = readl(pcie->parf + PARF_AXI_MSTR_WR_ADDR_HALT_V2);
+	val = pete_readl("drivers/pci/controller/dwc/pcie-qcom.c:949", pcie->parf + PARF_AXI_MSTR_WR_ADDR_HALT_V2);
 	val |= EN;
-	writel(val, pcie->parf + PARF_AXI_MSTR_WR_ADDR_HALT_V2);
+	pete_writel("drivers/pci/controller/dwc/pcie-qcom.c:951", val, pcie->parf + PARF_AXI_MSTR_WR_ADDR_HALT_V2);
 
 	return 0;
 err_disable_clocks:
@@ -996,9 +996,9 @@ static int qcom_pcie_config_sid_1_9_0(struct qcom_pcie *pcie)
 		return 0;
 
 	/* Enable BDF to SID translation by disabling bypass mode (default) */
-	val = readl(pcie->parf + PARF_BDF_TO_SID_CFG);
+	val = pete_readl("drivers/pci/controller/dwc/pcie-qcom.c:999", pcie->parf + PARF_BDF_TO_SID_CFG);
 	val &= ~BDF_TO_SID_BYPASS;
-	writel(val, pcie->parf + PARF_BDF_TO_SID_CFG);
+	pete_writel("drivers/pci/controller/dwc/pcie-qcom.c:1001", val, pcie->parf + PARF_BDF_TO_SID_CFG);
 
 	map = kzalloc(size, GFP_KERNEL);
 	if (!map)
@@ -1025,7 +1025,7 @@ static int qcom_pcie_config_sid_1_9_0(struct qcom_pcie *pcie)
 
 		hash = crc8(qcom_pcie_crc8_table, (u8 *)&bdf_be, sizeof(bdf_be), 0);
 
-		val = readl(bdf_to_sid_base + hash * sizeof(u32));
+		val = pete_readl("drivers/pci/controller/dwc/pcie-qcom.c:1028", bdf_to_sid_base + hash * sizeof(u32));
 
 		/* If the register is already populated, look for next available entry */
 		while (val) {
@@ -1035,15 +1035,15 @@ static int qcom_pcie_config_sid_1_9_0(struct qcom_pcie *pcie)
 			/* If NEXT field is NULL then update it with next hash */
 			if (!(val & next_mask)) {
 				val |= (u32)hash;
-				writel(val, bdf_to_sid_base + current_hash * sizeof(u32));
+				pete_writel("drivers/pci/controller/dwc/pcie-qcom.c:1038", val, bdf_to_sid_base + current_hash * sizeof(u32));
 			}
 
-			val = readl(bdf_to_sid_base + hash * sizeof(u32));
+			val = pete_readl("drivers/pci/controller/dwc/pcie-qcom.c:1041", bdf_to_sid_base + hash * sizeof(u32));
 		}
 
 		/* BDF [31:16] | SID [15:8] | NEXT [7:0] */
 		val = map[i].bdf << 16 | (map[i].smmu_sid - smmu_sid_base) << 8 | 0;
-		writel(val, bdf_to_sid_base + hash * sizeof(u32));
+		pete_writel("drivers/pci/controller/dwc/pcie-qcom.c:1046", val, bdf_to_sid_base + hash * sizeof(u32));
 	}
 
 	kfree(map);
@@ -1118,44 +1118,44 @@ static int qcom_pcie_post_init_2_9_0(struct qcom_pcie *pcie)
 	u32 val;
 	int i;
 
-	writel(SLV_ADDR_SPACE_SZ,
+	pete_writel("drivers/pci/controller/dwc/pcie-qcom.c:1121", SLV_ADDR_SPACE_SZ,
 		pcie->parf + PARF_SLV_ADDR_SPACE_SIZE);
 
-	val = readl(pcie->parf + PARF_PHY_CTRL);
+	val = pete_readl("drivers/pci/controller/dwc/pcie-qcom.c:1124", pcie->parf + PARF_PHY_CTRL);
 	val &= ~PHY_TEST_PWR_DOWN;
-	writel(val, pcie->parf + PARF_PHY_CTRL);
+	pete_writel("drivers/pci/controller/dwc/pcie-qcom.c:1126", val, pcie->parf + PARF_PHY_CTRL);
 
-	writel(0, pcie->parf + PARF_DBI_BASE_ADDR);
+	pete_writel("drivers/pci/controller/dwc/pcie-qcom.c:1128", 0, pcie->parf + PARF_DBI_BASE_ADDR);
 
-	writel(DEVICE_TYPE_RC, pcie->parf + PARF_DEVICE_TYPE);
-	writel(BYPASS | MSTR_AXI_CLK_EN | AHB_CLK_EN,
+	pete_writel("drivers/pci/controller/dwc/pcie-qcom.c:1130", DEVICE_TYPE_RC, pcie->parf + PARF_DEVICE_TYPE);
+	pete_writel("drivers/pci/controller/dwc/pcie-qcom.c:1131", BYPASS | MSTR_AXI_CLK_EN | AHB_CLK_EN,
 		pcie->parf + PARF_MHI_CLOCK_RESET_CTRL);
-	writel(GEN3_RELATED_OFF_RXEQ_RGRDLESS_RXTS |
+	pete_writel("drivers/pci/controller/dwc/pcie-qcom.c:1133", GEN3_RELATED_OFF_RXEQ_RGRDLESS_RXTS |
 		GEN3_RELATED_OFF_GEN3_ZRXDC_NONCOMPL,
 		pci->dbi_base + GEN3_RELATED_OFF);
 
-	writel(MST_WAKEUP_EN | SLV_WAKEUP_EN | MSTR_ACLK_CGC_DIS |
+	pete_writel("drivers/pci/controller/dwc/pcie-qcom.c:1137", MST_WAKEUP_EN | SLV_WAKEUP_EN | MSTR_ACLK_CGC_DIS |
 		SLV_ACLK_CGC_DIS | CORE_CLK_CGC_DIS |
 		AUX_PWR_DET | L23_CLK_RMV_DIS | L1_CLK_RMV_DIS,
 		pcie->parf + PARF_SYS_CTRL);
 
-	writel(0, pcie->parf + PARF_Q2A_FLUSH);
+	pete_writel("drivers/pci/controller/dwc/pcie-qcom.c:1142", 0, pcie->parf + PARF_Q2A_FLUSH);
 
 	dw_pcie_dbi_ro_wr_en(pci);
 
-	writel(PCIE_CAP_SLOT_VAL, pci->dbi_base + offset + PCI_EXP_SLTCAP);
+	pete_writel("drivers/pci/controller/dwc/pcie-qcom.c:1146", PCIE_CAP_SLOT_VAL, pci->dbi_base + offset + PCI_EXP_SLTCAP);
 
-	val = readl(pci->dbi_base + offset + PCI_EXP_LNKCAP);
+	val = pete_readl("drivers/pci/controller/dwc/pcie-qcom.c:1148", pci->dbi_base + offset + PCI_EXP_LNKCAP);
 	val &= ~PCI_EXP_LNKCAP_ASPMS;
-	writel(val, pci->dbi_base + offset + PCI_EXP_LNKCAP);
+	pete_writel("drivers/pci/controller/dwc/pcie-qcom.c:1150", val, pci->dbi_base + offset + PCI_EXP_LNKCAP);
 
-	writel(PCI_EXP_DEVCTL2_COMP_TMOUT_DIS, pci->dbi_base + offset +
+	pete_writel("drivers/pci/controller/dwc/pcie-qcom.c:1152", PCI_EXP_DEVCTL2_COMP_TMOUT_DIS, pci->dbi_base + offset +
 			PCI_EXP_DEVCTL2);
 
 	dw_pcie_dbi_ro_wr_dis(pci);
 
 	for (i = 0; i < 256; i++)
-		writel(0, pcie->parf + PARF_BDF_TO_SID_TABLE_N + (4 * i));
+		pete_writel("drivers/pci/controller/dwc/pcie-qcom.c:1158", 0, pcie->parf + PARF_BDF_TO_SID_TABLE_N + (4 * i));
 
 	return 0;
 }
@@ -1163,7 +1163,7 @@ static int qcom_pcie_post_init_2_9_0(struct qcom_pcie *pcie)
 static int qcom_pcie_link_up(struct dw_pcie *pci)
 {
 	u16 offset = dw_pcie_find_capability(pci, PCI_CAP_ID_EXP);
-	u16 val = readw(pci->dbi_base + offset + PCI_EXP_LNKSTA);
+	u16 val = pete_readw("drivers/pci/controller/dwc/pcie-qcom.c:1166", pci->dbi_base + offset + PCI_EXP_LNKSTA);
 
 	return !!(val & PCI_EXP_LNKSTA_DLLLA);
 }
@@ -1376,7 +1376,7 @@ static void qcom_pcie_icc_update(struct qcom_pcie *pcie)
 		return;
 
 	offset = dw_pcie_find_capability(pci, PCI_CAP_ID_EXP);
-	status = readw(pci->dbi_base + offset + PCI_EXP_LNKSTA);
+	status = pete_readw("drivers/pci/controller/dwc/pcie-qcom.c:1379", pci->dbi_base + offset + PCI_EXP_LNKSTA);
 
 	/* Only update constraints if link is up. */
 	if (!(status & PCI_EXP_LNKSTA_DLLLA))

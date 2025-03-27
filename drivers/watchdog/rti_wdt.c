@@ -265,7 +265,7 @@ static int rti_wdt_probe(struct platform_device *pdev)
 		goto err_iomap;
 	}
 
-	if (readl(wdt->base + RTIDWDCTRL) == WDENABLE_KEY) {
+	if (pete_readl("drivers/watchdog/rti_wdt.c:268", wdt->base + RTIDWDCTRL) == WDENABLE_KEY) {
 		int preset_heartbeat;
 		u32 time_left_ms;
 		u64 heartbeat_ms;
@@ -273,7 +273,7 @@ static int rti_wdt_probe(struct platform_device *pdev)
 
 		set_bit(WDOG_HW_RUNNING, &wdd->status);
 		time_left_ms = rti_wdt_get_timeleft_ms(wdd);
-		heartbeat_ms = readl(wdt->base + RTIDWDPRLD);
+		heartbeat_ms = pete_readl("drivers/watchdog/rti_wdt.c:276", wdt->base + RTIDWDPRLD);
 		heartbeat_ms <<= WDT_PRELOAD_SHIFT;
 		heartbeat_ms *= 1000;
 		do_div(heartbeat_ms, wdt->freq);
@@ -284,7 +284,7 @@ static int rti_wdt_probe(struct platform_device *pdev)
 
 		heartbeat = preset_heartbeat;
 
-		wsize = readl(wdt->base + RTIWWDSIZECTRL);
+		wsize = pete_readl("drivers/watchdog/rti_wdt.c:287", wdt->base + RTIWWDSIZECTRL);
 		ret = rti_wdt_setup_hw_hb(wdd, wsize);
 		if (ret) {
 			dev_err(dev, "bad window size.\n");

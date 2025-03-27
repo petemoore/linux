@@ -241,32 +241,32 @@ static struct lock_class_key pcs_request_class;
 
 static unsigned __maybe_unused pcs_readb(void __iomem *reg)
 {
-	return readb(reg);
+	return pete_readb("drivers/pinctrl/pinctrl-single.c:244", reg);
 }
 
 static unsigned __maybe_unused pcs_readw(void __iomem *reg)
 {
-	return readw(reg);
+	return pete_readw("drivers/pinctrl/pinctrl-single.c:249", reg);
 }
 
 static unsigned __maybe_unused pcs_readl(void __iomem *reg)
 {
-	return readl(reg);
+	return pete_readl("drivers/pinctrl/pinctrl-single.c:254", reg);
 }
 
 static void __maybe_unused pcs_writeb(unsigned val, void __iomem *reg)
 {
-	writeb(val, reg);
+	pete_writeb("drivers/pinctrl/pinctrl-single.c:259", val, reg);
 }
 
 static void __maybe_unused pcs_writew(unsigned val, void __iomem *reg)
 {
-	writew(val, reg);
+	pete_writew("drivers/pinctrl/pinctrl-single.c:264", val, reg);
 }
 
 static void __maybe_unused pcs_writel(unsigned val, void __iomem *reg)
 {
-	writel(val, reg);
+	pete_writel("drivers/pinctrl/pinctrl-single.c:269", val, reg);
 }
 
 static unsigned int pcs_pin_reg_offset_get(struct pcs_device *pcs,

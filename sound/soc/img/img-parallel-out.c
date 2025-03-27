@@ -67,12 +67,12 @@ static int img_prl_out_resume(struct device *dev)
 static inline void img_prl_out_writel(struct img_prl_out *prl,
 				u32 val, u32 reg)
 {
-	writel(val, prl->base + reg);
+	pete_writel("sound/soc/img/img-parallel-out.c:70", val, prl->base + reg);
 }
 
 static inline u32 img_prl_out_readl(struct img_prl_out *prl, u32 reg)
 {
-	return readl(prl->base + reg);
+	return pete_readl("sound/soc/img/img-parallel-out.c:75", prl->base + reg);
 }
 
 static void img_prl_out_reset(struct img_prl_out *prl)

@@ -204,7 +204,7 @@ bool ixgbe_alloc_rx_buffers_zc(struct ixgbe_ring *rx_ring, u16 count)
 		 * such as IA-64).
 		 */
 		wmb();
-		writel(i, rx_ring->tail);
+		pete_writel("drivers/net/ethernet/intel/ixgbe/ixgbe_xsk.c:207", i, rx_ring->tail);
 	}
 
 	return ok;

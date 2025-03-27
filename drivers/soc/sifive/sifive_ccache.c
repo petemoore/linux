@@ -67,7 +67,7 @@ static ssize_t ccache_write(struct file *file, const char __user *data,
 	if (kstrtouint_from_user(data, count, 0, &val))
 		return -EINVAL;
 	if ((val < 0xFF) || (val >= 0x10000 && val < 0x100FF))
-		writel(val, ccache_base + SIFIVE_CCACHE_ECCINJECTERR);
+		pete_writel("drivers/soc/sifive/sifive_ccache.c:70", val, ccache_base + SIFIVE_CCACHE_ECCINJECTERR);
 	else
 		return -EINVAL;
 	return count;
@@ -92,14 +92,14 @@ static void ccache_config_read(void)
 {
 	u32 cfg;
 
-	cfg = readl(ccache_base + SIFIVE_CCACHE_CONFIG);
+	cfg = pete_readl("drivers/soc/sifive/sifive_ccache.c:95", ccache_base + SIFIVE_CCACHE_CONFIG);
 	pr_info("%llu banks, %llu ways, sets/bank=%llu, bytes/block=%llu\n",
 		FIELD_GET(SIFIVE_CCACHE_CONFIG_BANK_MASK, cfg),
 		FIELD_GET(SIFIVE_CCACHE_CONFIG_WAYS_MASK, cfg),
 		BIT_ULL(FIELD_GET(SIFIVE_CCACHE_CONFIG_SETS_MASK, cfg)),
 		BIT_ULL(FIELD_GET(SIFIVE_CCACHE_CONFIG_BLKS_MASK, cfg)));
 
-	cfg = readl(ccache_base + SIFIVE_CCACHE_WAYENABLE);
+	cfg = pete_readl("drivers/soc/sifive/sifive_ccache.c:102", ccache_base + SIFIVE_CCACHE_WAYENABLE);
 	pr_info("Index of the largest way enabled: %u\n", cfg);
 }
 
@@ -126,7 +126,7 @@ EXPORT_SYMBOL_GPL(unregister_sifive_ccache_error_notifier);
 
 static int ccache_largest_wayenabled(void)
 {
-	return readl(ccache_base + SIFIVE_CCACHE_WAYENABLE) & 0xFF;
+	return pete_readl("drivers/soc/sifive/sifive_ccache.c:129", ccache_base + SIFIVE_CCACHE_WAYENABLE) & 0xFF;
 }
 
 static ssize_t number_of_ways_enabled_show(struct device *dev,
@@ -162,41 +162,41 @@ static irqreturn_t ccache_int_handler(int irq, void *device)
 	unsigned int add_h, add_l;
 
 	if (irq == g_irq[DIR_CORR]) {
-		add_h = readl(ccache_base + SIFIVE_CCACHE_DIRECCFIX_HIGH);
-		add_l = readl(ccache_base + SIFIVE_CCACHE_DIRECCFIX_LOW);
+		add_h = pete_readl("drivers/soc/sifive/sifive_ccache.c:165", ccache_base + SIFIVE_CCACHE_DIRECCFIX_HIGH);
+		add_l = pete_readl("drivers/soc/sifive/sifive_ccache.c:166", ccache_base + SIFIVE_CCACHE_DIRECCFIX_LOW);
 		pr_err("DirError @ 0x%08X.%08X\n", add_h, add_l);
 		/* Reading this register clears the DirError interrupt sig */
-		readl(ccache_base + SIFIVE_CCACHE_DIRECCFIX_COUNT);
+		pete_readl("drivers/soc/sifive/sifive_ccache.c:169", ccache_base + SIFIVE_CCACHE_DIRECCFIX_COUNT);
 		atomic_notifier_call_chain(&ccache_err_chain,
 					   SIFIVE_CCACHE_ERR_TYPE_CE,
 					   "DirECCFix");
 	}
 	if (irq == g_irq[DIR_UNCORR]) {
-		add_h = readl(ccache_base + SIFIVE_CCACHE_DIRECCFAIL_HIGH);
-		add_l = readl(ccache_base + SIFIVE_CCACHE_DIRECCFAIL_LOW);
+		add_h = pete_readl("drivers/soc/sifive/sifive_ccache.c:175", ccache_base + SIFIVE_CCACHE_DIRECCFAIL_HIGH);
+		add_l = pete_readl("drivers/soc/sifive/sifive_ccache.c:176", ccache_base + SIFIVE_CCACHE_DIRECCFAIL_LOW);
 		/* Reading this register clears the DirFail interrupt sig */
-		readl(ccache_base + SIFIVE_CCACHE_DIRECCFAIL_COUNT);
+		pete_readl("drivers/soc/sifive/sifive_ccache.c:178", ccache_base + SIFIVE_CCACHE_DIRECCFAIL_COUNT);
 		atomic_notifier_call_chain(&ccache_err_chain,
 					   SIFIVE_CCACHE_ERR_TYPE_UE,
 					   "DirECCFail");
 		panic("CCACHE: DirFail @ 0x%08X.%08X\n", add_h, add_l);
 	}
 	if (irq == g_irq[DATA_CORR]) {
-		add_h = readl(ccache_base + SIFIVE_CCACHE_DATECCFIX_HIGH);
-		add_l = readl(ccache_base + SIFIVE_CCACHE_DATECCFIX_LOW);
+		add_h = pete_readl("drivers/soc/sifive/sifive_ccache.c:185", ccache_base + SIFIVE_CCACHE_DATECCFIX_HIGH);
+		add_l = pete_readl("drivers/soc/sifive/sifive_ccache.c:186", ccache_base + SIFIVE_CCACHE_DATECCFIX_LOW);
 		pr_err("DataError @ 0x%08X.%08X\n", add_h, add_l);
 		/* Reading this register clears the DataError interrupt sig */
-		readl(ccache_base + SIFIVE_CCACHE_DATECCFIX_COUNT);
+		pete_readl("drivers/soc/sifive/sifive_ccache.c:189", ccache_base + SIFIVE_CCACHE_DATECCFIX_COUNT);
 		atomic_notifier_call_chain(&ccache_err_chain,
 					   SIFIVE_CCACHE_ERR_TYPE_CE,
 					   "DatECCFix");
 	}
 	if (irq == g_irq[DATA_UNCORR]) {
-		add_h = readl(ccache_base + SIFIVE_CCACHE_DATECCFAIL_HIGH);
-		add_l = readl(ccache_base + SIFIVE_CCACHE_DATECCFAIL_LOW);
+		add_h = pete_readl("drivers/soc/sifive/sifive_ccache.c:195", ccache_base + SIFIVE_CCACHE_DATECCFAIL_HIGH);
+		add_l = pete_readl("drivers/soc/sifive/sifive_ccache.c:196", ccache_base + SIFIVE_CCACHE_DATECCFAIL_LOW);
 		pr_err("DataFail @ 0x%08X.%08X\n", add_h, add_l);
 		/* Reading this register clears the DataFail interrupt sig */
-		readl(ccache_base + SIFIVE_CCACHE_DATECCFAIL_COUNT);
+		pete_readl("drivers/soc/sifive/sifive_ccache.c:199", ccache_base + SIFIVE_CCACHE_DATECCFAIL_COUNT);
 		atomic_notifier_call_chain(&ccache_err_chain,
 					   SIFIVE_CCACHE_ERR_TYPE_UE,
 					   "DatECCFail");

@@ -303,16 +303,16 @@ static inline u16 OCTEP_MINOR_REV(struct octep_device *oct)
 
 /* Octeon CSR read/write access APIs */
 #define octep_write_csr(octep_dev, reg_off, value) \
-	writel(value, (octep_dev)->mmio[0].hw_addr + (reg_off))
+	pete_writel("drivers/net/ethernet/marvell/octeon_ep/octep_main.h:306", value, (octep_dev)->mmio[0].hw_addr + (reg_off))
 
 #define octep_write_csr64(octep_dev, reg_off, val64) \
-	writeq(val64, (octep_dev)->mmio[0].hw_addr + (reg_off))
+	pete_writeq("drivers/net/ethernet/marvell/octeon_ep/octep_main.h:309", val64, (octep_dev)->mmio[0].hw_addr + (reg_off))
 
 #define octep_read_csr(octep_dev, reg_off)         \
-	readl((octep_dev)->mmio[0].hw_addr + (reg_off))
+	pete_readl("drivers/net/ethernet/marvell/octeon_ep/octep_main.h:312", (octep_dev)->mmio[0].hw_addr + (reg_off))
 
 #define octep_read_csr64(octep_dev, reg_off)         \
-	readq((octep_dev)->mmio[0].hw_addr + (reg_off))
+	pete_readq("drivers/net/ethernet/marvell/octeon_ep/octep_main.h:315", (octep_dev)->mmio[0].hw_addr + (reg_off))
 
 /* Read windowed register.
  * @param  oct   -  pointer to the Octeon device.
@@ -329,8 +329,8 @@ OCTEP_PCI_WIN_READ(struct octep_device *oct, u64 addr)
 	u64 val64;
 
 	addr |= 1ull << 53; /* read 8 bytes */
-	writeq(addr, oct->pci_win_regs.pci_win_rd_addr);
-	val64 = readq(oct->pci_win_regs.pci_win_rd_data);
+	pete_writeq("drivers/net/ethernet/marvell/octeon_ep/octep_main.h:332", addr, oct->pci_win_regs.pci_win_rd_addr);
+	val64 = pete_readq("drivers/net/ethernet/marvell/octeon_ep/octep_main.h:333", oct->pci_win_regs.pci_win_rd_data);
 
 	dev_dbg(&oct->pdev->dev,
 		"%s: reg: 0x%016llx val: 0x%016llx\n", __func__, addr, val64);
@@ -351,8 +351,8 @@ OCTEP_PCI_WIN_READ(struct octep_device *oct, u64 addr)
 static inline void
 OCTEP_PCI_WIN_WRITE(struct octep_device *oct, u64 addr, u64 val)
 {
-	writeq(addr, oct->pci_win_regs.pci_win_wr_addr);
-	writeq(val, oct->pci_win_regs.pci_win_wr_data);
+	pete_writeq("drivers/net/ethernet/marvell/octeon_ep/octep_main.h:354", addr, oct->pci_win_regs.pci_win_wr_addr);
+	pete_writeq("drivers/net/ethernet/marvell/octeon_ep/octep_main.h:355", val, oct->pci_win_regs.pci_win_wr_data);
 
 	dev_dbg(&oct->pdev->dev,
 		"%s: reg: 0x%016llx val: 0x%016llx\n", __func__, addr, val);

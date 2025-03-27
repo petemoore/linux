@@ -91,7 +91,7 @@ static int ns2_drd_phy_init(struct phy *phy)
 	struct ns2_phy_driver *driver = data->driver;
 	u32 val;
 
-	val = readl(driver->icfgdrd_regs + ICFG_FSM_CTRL);
+	val = pete_readl("drivers/phy/broadcom/phy-bcm-ns2-usbdrd.c:94", driver->icfgdrd_regs + ICFG_FSM_CTRL);
 
 	if (data->new_state == EVT_HOST) {
 		val &= ~DRD_DEVICE_MODE;
@@ -100,7 +100,7 @@ static int ns2_drd_phy_init(struct phy *phy)
 		val &= ~DRD_HOST_MODE;
 		val |= DRD_DEVICE_MODE;
 	}
-	writel(val, driver->icfgdrd_regs + ICFG_FSM_CTRL);
+	pete_writel("drivers/phy/broadcom/phy-bcm-ns2-usbdrd.c:103", val, driver->icfgdrd_regs + ICFG_FSM_CTRL);
 
 	return 0;
 }
@@ -111,18 +111,18 @@ static int ns2_drd_phy_poweroff(struct phy *phy)
 	struct ns2_phy_driver *driver = data->driver;
 	u32 val;
 
-	val = readl(driver->crmu_usb2_ctrl);
+	val = pete_readl("drivers/phy/broadcom/phy-bcm-ns2-usbdrd.c:114", driver->crmu_usb2_ctrl);
 	val &= ~AFE_CORERDY_VDDC;
-	writel(val, driver->crmu_usb2_ctrl);
+	pete_writel("drivers/phy/broadcom/phy-bcm-ns2-usbdrd.c:116", val, driver->crmu_usb2_ctrl);
 
-	val = readl(driver->crmu_usb2_ctrl);
+	val = pete_readl("drivers/phy/broadcom/phy-bcm-ns2-usbdrd.c:118", driver->crmu_usb2_ctrl);
 	val &= ~DRD_DEV_MODE;
-	writel(val, driver->crmu_usb2_ctrl);
+	pete_writel("drivers/phy/broadcom/phy-bcm-ns2-usbdrd.c:120", val, driver->crmu_usb2_ctrl);
 
 	/* Disable Host and Device Mode */
-	val = readl(driver->icfgdrd_regs + ICFG_FSM_CTRL);
+	val = pete_readl("drivers/phy/broadcom/phy-bcm-ns2-usbdrd.c:123", driver->icfgdrd_regs + ICFG_FSM_CTRL);
 	val &= ~(DRD_HOST_MODE | DRD_DEVICE_MODE | ICFG_OFF_MODE);
-	writel(val, driver->icfgdrd_regs + ICFG_FSM_CTRL);
+	pete_writel("drivers/phy/broadcom/phy-bcm-ns2-usbdrd.c:125", val, driver->icfgdrd_regs + ICFG_FSM_CTRL);
 
 	return 0;
 }
@@ -136,20 +136,20 @@ static int ns2_drd_phy_poweron(struct phy *phy)
 	u32 val;
 
 	if (extcon_event == EVT_DEVICE) {
-		writel(DRD_DEV_VAL, driver->icfgdrd_regs + ICFG_DRD_P0CTL);
+		pete_writel("drivers/phy/broadcom/phy-bcm-ns2-usbdrd.c:139", DRD_DEV_VAL, driver->icfgdrd_regs + ICFG_DRD_P0CTL);
 
-		val = readl(driver->idmdrd_rst_ctrl);
+		val = pete_readl("drivers/phy/broadcom/phy-bcm-ns2-usbdrd.c:141", driver->idmdrd_rst_ctrl);
 		val &= ~IDM_RST_BIT;
-		writel(val, driver->idmdrd_rst_ctrl);
+		pete_writel("drivers/phy/broadcom/phy-bcm-ns2-usbdrd.c:143", val, driver->idmdrd_rst_ctrl);
 
-		val = readl(driver->crmu_usb2_ctrl);
+		val = pete_readl("drivers/phy/broadcom/phy-bcm-ns2-usbdrd.c:145", driver->crmu_usb2_ctrl);
 		val |= (AFE_CORERDY_VDDC | DRD_DEV_MODE);
-		writel(val, driver->crmu_usb2_ctrl);
+		pete_writel("drivers/phy/broadcom/phy-bcm-ns2-usbdrd.c:147", val, driver->crmu_usb2_ctrl);
 
 		/* Bring PHY and PHY_PLL out of Reset */
-		val = readl(driver->crmu_usb2_ctrl);
+		val = pete_readl("drivers/phy/broadcom/phy-bcm-ns2-usbdrd.c:150", driver->crmu_usb2_ctrl);
 		val |= (PHY_PLL_RESETB | PHY_RESETB);
-		writel(val, driver->crmu_usb2_ctrl);
+		pete_writel("drivers/phy/broadcom/phy-bcm-ns2-usbdrd.c:152", val, driver->crmu_usb2_ctrl);
 
 		ret = pll_lock_stat(ICFG_MISC_STAT, PHY_PLL_LOCK, driver);
 		if (ret < 0) {
@@ -157,11 +157,11 @@ static int ns2_drd_phy_poweron(struct phy *phy)
 			return ret;
 		}
 	} else {
-		writel(DRD_HOST_VAL, driver->icfgdrd_regs + ICFG_DRD_P0CTL);
+		pete_writel("drivers/phy/broadcom/phy-bcm-ns2-usbdrd.c:160", DRD_HOST_VAL, driver->icfgdrd_regs + ICFG_DRD_P0CTL);
 
-		val = readl(driver->crmu_usb2_ctrl);
+		val = pete_readl("drivers/phy/broadcom/phy-bcm-ns2-usbdrd.c:162", driver->crmu_usb2_ctrl);
 		val |= AFE_CORERDY_VDDC;
-		writel(val, driver->crmu_usb2_ctrl);
+		pete_writel("drivers/phy/broadcom/phy-bcm-ns2-usbdrd.c:164", val, driver->crmu_usb2_ctrl);
 
 		ret = pll_lock_stat(ICFG_MISC_STAT, PHY_PLL_LOCK, driver);
 		if (ret < 0) {
@@ -169,14 +169,14 @@ static int ns2_drd_phy_poweron(struct phy *phy)
 			return ret;
 		}
 
-		val = readl(driver->idmdrd_rst_ctrl);
+		val = pete_readl("drivers/phy/broadcom/phy-bcm-ns2-usbdrd.c:172", driver->idmdrd_rst_ctrl);
 		val &= ~IDM_RST_BIT;
-		writel(val, driver->idmdrd_rst_ctrl);
+		pete_writel("drivers/phy/broadcom/phy-bcm-ns2-usbdrd.c:174", val, driver->idmdrd_rst_ctrl);
 
 		/* port over current Polarity */
-		val = readl(driver->usb2h_strap_reg);
+		val = pete_readl("drivers/phy/broadcom/phy-bcm-ns2-usbdrd.c:177", driver->usb2h_strap_reg);
 		val |= OHCI_OVRCUR_POL;
-		writel(val, driver->usb2h_strap_reg);
+		pete_writel("drivers/phy/broadcom/phy-bcm-ns2-usbdrd.c:179", val, driver->usb2h_strap_reg);
 	}
 
 	return 0;
@@ -188,35 +188,35 @@ static void connect_change(struct ns2_phy_driver *driver)
 	u32 val;
 
 	extcon_event = driver->data->new_state;
-	val = readl(driver->icfgdrd_regs + ICFG_FSM_CTRL);
+	val = pete_readl("drivers/phy/broadcom/phy-bcm-ns2-usbdrd.c:191", driver->icfgdrd_regs + ICFG_FSM_CTRL);
 
 	switch (extcon_event) {
 	case EVT_DEVICE:
 		val &= ~(DRD_HOST_MODE | DRD_DEVICE_MODE);
-		writel(val, driver->icfgdrd_regs + ICFG_FSM_CTRL);
+		pete_writel("drivers/phy/broadcom/phy-bcm-ns2-usbdrd.c:196", val, driver->icfgdrd_regs + ICFG_FSM_CTRL);
 
 		val = (val & ~DRD_HOST_MODE) | DRD_DEVICE_MODE;
-		writel(val, driver->icfgdrd_regs + ICFG_FSM_CTRL);
+		pete_writel("drivers/phy/broadcom/phy-bcm-ns2-usbdrd.c:199", val, driver->icfgdrd_regs + ICFG_FSM_CTRL);
 
-		val = readl(driver->icfgdrd_regs + ICFG_DRD_P0CTL);
+		val = pete_readl("drivers/phy/broadcom/phy-bcm-ns2-usbdrd.c:201", driver->icfgdrd_regs + ICFG_DRD_P0CTL);
 		val |= ICFG_DEV_BIT;
-		writel(val, driver->icfgdrd_regs + ICFG_DRD_P0CTL);
+		pete_writel("drivers/phy/broadcom/phy-bcm-ns2-usbdrd.c:203", val, driver->icfgdrd_regs + ICFG_DRD_P0CTL);
 		break;
 
 	case EVT_HOST:
 		val &= ~(DRD_HOST_MODE | DRD_DEVICE_MODE);
-		writel(val, driver->icfgdrd_regs + ICFG_FSM_CTRL);
+		pete_writel("drivers/phy/broadcom/phy-bcm-ns2-usbdrd.c:208", val, driver->icfgdrd_regs + ICFG_FSM_CTRL);
 
 		val = (val & ~DRD_DEVICE_MODE) | DRD_HOST_MODE;
-		writel(val, driver->icfgdrd_regs + ICFG_FSM_CTRL);
+		pete_writel("drivers/phy/broadcom/phy-bcm-ns2-usbdrd.c:211", val, driver->icfgdrd_regs + ICFG_FSM_CTRL);
 
-		val = readl(driver->usb2h_strap_reg);
+		val = pete_readl("drivers/phy/broadcom/phy-bcm-ns2-usbdrd.c:213", driver->usb2h_strap_reg);
 		val |= OHCI_OVRCUR_POL;
-		writel(val, driver->usb2h_strap_reg);
+		pete_writel("drivers/phy/broadcom/phy-bcm-ns2-usbdrd.c:215", val, driver->usb2h_strap_reg);
 
-		val = readl(driver->icfgdrd_regs + ICFG_DRD_P0CTL);
+		val = pete_readl("drivers/phy/broadcom/phy-bcm-ns2-usbdrd.c:217", driver->icfgdrd_regs + ICFG_DRD_P0CTL);
 		val &= ~ICFG_DEV_BIT;
-		writel(val, driver->icfgdrd_regs + ICFG_DRD_P0CTL);
+		pete_writel("drivers/phy/broadcom/phy-bcm-ns2-usbdrd.c:219", val, driver->icfgdrd_regs + ICFG_DRD_P0CTL);
 		break;
 
 	default:
@@ -373,9 +373,9 @@ static int ns2_drd_phy_probe(struct platform_device *pdev)
 	dev_set_drvdata(dev, driver);
 
 	/* Shutdown all ports. They can be powered up as required */
-	val = readl(driver->crmu_usb2_ctrl);
+	val = pete_readl("drivers/phy/broadcom/phy-bcm-ns2-usbdrd.c:376", driver->crmu_usb2_ctrl);
 	val &= ~(AFE_CORERDY_VDDC | PHY_RESETB);
-	writel(val, driver->crmu_usb2_ctrl);
+	pete_writel("drivers/phy/broadcom/phy-bcm-ns2-usbdrd.c:378", val, driver->crmu_usb2_ctrl);
 
 	data = driver->data;
 	data->phy = devm_phy_create(dev, dev->of_node, &ops);

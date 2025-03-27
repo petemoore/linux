@@ -143,15 +143,15 @@ static inline void usb_phy_write_readback(struct usb_phy *phy_dwc3,
 					  u32 offset,
 					  const u32 mask, u32 val)
 {
-	u32 write_val, tmp = readl(phy_dwc3->base + offset);
+	u32 write_val, tmp = pete_readl("drivers/phy/qualcomm/phy-qcom-ipq806x-usb.c:146", phy_dwc3->base + offset);
 
 	tmp &= ~mask;		/* retain other bits */
 	write_val = tmp | val;
 
-	writel(write_val, phy_dwc3->base + offset);
+	pete_writel("drivers/phy/qualcomm/phy-qcom-ipq806x-usb.c:151", write_val, phy_dwc3->base + offset);
 
 	/* Read back to see if val was written */
-	tmp = readl(phy_dwc3->base + offset);
+	tmp = pete_readl("drivers/phy/qualcomm/phy-qcom-ipq806x-usb.c:154", phy_dwc3->base + offset);
 	tmp &= mask;		/* clear other bits */
 
 	if (tmp != val)
@@ -177,23 +177,23 @@ static int usb_ss_write_phycreg(struct usb_phy *phy_dwc3,
 {
 	int ret;
 
-	writel(addr, phy_dwc3->base + CR_PROTOCOL_DATA_IN_REG);
-	writel(SS_CR_CAP_ADDR_REG,
+	pete_writel("drivers/phy/qualcomm/phy-qcom-ipq806x-usb.c:180", addr, phy_dwc3->base + CR_PROTOCOL_DATA_IN_REG);
+	pete_writel("drivers/phy/qualcomm/phy-qcom-ipq806x-usb.c:181", SS_CR_CAP_ADDR_REG,
 	       phy_dwc3->base + CR_PROTOCOL_CAP_ADDR_REG);
 
 	ret = wait_for_latch(phy_dwc3->base + CR_PROTOCOL_CAP_ADDR_REG);
 	if (ret)
 		goto err_wait;
 
-	writel(val, phy_dwc3->base + CR_PROTOCOL_DATA_IN_REG);
-	writel(SS_CR_CAP_DATA_REG,
+	pete_writel("drivers/phy/qualcomm/phy-qcom-ipq806x-usb.c:188", val, phy_dwc3->base + CR_PROTOCOL_DATA_IN_REG);
+	pete_writel("drivers/phy/qualcomm/phy-qcom-ipq806x-usb.c:189", SS_CR_CAP_DATA_REG,
 	       phy_dwc3->base + CR_PROTOCOL_CAP_DATA_REG);
 
 	ret = wait_for_latch(phy_dwc3->base + CR_PROTOCOL_CAP_DATA_REG);
 	if (ret)
 		goto err_wait;
 
-	writel(SS_CR_WRITE_REG, phy_dwc3->base + CR_PROTOCOL_WRITE_REG);
+	pete_writel("drivers/phy/qualcomm/phy-qcom-ipq806x-usb.c:196", SS_CR_WRITE_REG, phy_dwc3->base + CR_PROTOCOL_WRITE_REG);
 
 	ret = wait_for_latch(phy_dwc3->base + CR_PROTOCOL_WRITE_REG);
 
@@ -215,8 +215,8 @@ static int usb_ss_read_phycreg(struct usb_phy *phy_dwc3,
 {
 	int ret;
 
-	writel(addr, phy_dwc3->base + CR_PROTOCOL_DATA_IN_REG);
-	writel(SS_CR_CAP_ADDR_REG,
+	pete_writel("drivers/phy/qualcomm/phy-qcom-ipq806x-usb.c:218", addr, phy_dwc3->base + CR_PROTOCOL_DATA_IN_REG);
+	pete_writel("drivers/phy/qualcomm/phy-qcom-ipq806x-usb.c:219", SS_CR_CAP_ADDR_REG,
 	       phy_dwc3->base + CR_PROTOCOL_CAP_ADDR_REG);
 
 	ret = wait_for_latch(phy_dwc3->base + CR_PROTOCOL_CAP_ADDR_REG);
@@ -228,22 +228,22 @@ static int usb_ss_read_phycreg(struct usb_phy *phy_dwc3,
 	 * incorrect. Hence as workaround, SW should perform SSPHY register
 	 * read twice, but use only second read and ignore first read.
 	 */
-	writel(SS_CR_READ_REG, phy_dwc3->base + CR_PROTOCOL_READ_REG);
+	pete_writel("drivers/phy/qualcomm/phy-qcom-ipq806x-usb.c:231", SS_CR_READ_REG, phy_dwc3->base + CR_PROTOCOL_READ_REG);
 
 	ret = wait_for_latch(phy_dwc3->base + CR_PROTOCOL_READ_REG);
 	if (ret)
 		goto err_wait;
 
 	/* throwaway read */
-	readl(phy_dwc3->base + CR_PROTOCOL_DATA_OUT_REG);
+	pete_readl("drivers/phy/qualcomm/phy-qcom-ipq806x-usb.c:238", phy_dwc3->base + CR_PROTOCOL_DATA_OUT_REG);
 
-	writel(SS_CR_READ_REG, phy_dwc3->base + CR_PROTOCOL_READ_REG);
+	pete_writel("drivers/phy/qualcomm/phy-qcom-ipq806x-usb.c:240", SS_CR_READ_REG, phy_dwc3->base + CR_PROTOCOL_READ_REG);
 
 	ret = wait_for_latch(phy_dwc3->base + CR_PROTOCOL_READ_REG);
 	if (ret)
 		goto err_wait;
 
-	*val = readl(phy_dwc3->base + CR_PROTOCOL_DATA_OUT_REG);
+	*val = pete_readl("drivers/phy/qualcomm/phy-qcom-ipq806x-usb.c:246", phy_dwc3->base + CR_PROTOCOL_DATA_OUT_REG);
 
 err_wait:
 	return ret;
@@ -279,11 +279,11 @@ static int qcom_ipq806x_usb_hs_phy_init(struct phy *phy)
 	if (!phy_dwc3->xo_clk)
 		val |= HSUSB_CTRL_USE_CLKCORE;
 
-	writel(val, phy_dwc3->base + HSUSB_PHY_CTRL_REG);
+	pete_writel("drivers/phy/qualcomm/phy-qcom-ipq806x-usb.c:282", val, phy_dwc3->base + HSUSB_PHY_CTRL_REG);
 	usleep_range(2000, 2200);
 
 	/* Disable (bypass) VBUS and ID filters */
-	writel(HSUSB_GCFG_XHCI_REV, phy_dwc3->base + QSCRATCH_GENERAL_CFG);
+	pete_writel("drivers/phy/qualcomm/phy-qcom-ipq806x-usb.c:286", HSUSB_GCFG_XHCI_REV, phy_dwc3->base + QSCRATCH_GENERAL_CFG);
 
 	return 0;
 }
@@ -315,11 +315,11 @@ static int qcom_ipq806x_usb_ss_phy_init(struct phy *phy)
 	}
 
 	/* reset phy */
-	data = readl(phy_dwc3->base + SSUSB_PHY_CTRL_REG);
-	writel(data | SSUSB_CTRL_SS_PHY_RESET,
+	data = pete_readl("drivers/phy/qualcomm/phy-qcom-ipq806x-usb.c:318", phy_dwc3->base + SSUSB_PHY_CTRL_REG);
+	pete_writel("drivers/phy/qualcomm/phy-qcom-ipq806x-usb.c:319", data | SSUSB_CTRL_SS_PHY_RESET,
 	       phy_dwc3->base + SSUSB_PHY_CTRL_REG);
 	usleep_range(2000, 2200);
-	writel(data, phy_dwc3->base + SSUSB_PHY_CTRL_REG);
+	pete_writel("drivers/phy/qualcomm/phy-qcom-ipq806x-usb.c:322", data, phy_dwc3->base + SSUSB_PHY_CTRL_REG);
 
 	/* clear REF_PAD if we don't have XO clk */
 	if (!phy_dwc3->xo_clk)
@@ -327,13 +327,13 @@ static int qcom_ipq806x_usb_ss_phy_init(struct phy *phy)
 	else
 		data |= SSUSB_CTRL_REF_USE_PAD;
 
-	writel(data, phy_dwc3->base + SSUSB_PHY_CTRL_REG);
+	pete_writel("drivers/phy/qualcomm/phy-qcom-ipq806x-usb.c:330", data, phy_dwc3->base + SSUSB_PHY_CTRL_REG);
 
 	/* wait for ref clk to become stable, this can take up to 30ms */
 	msleep(30);
 
 	data |= SSUSB_CTRL_SS_PHY_EN | SSUSB_CTRL_LANE0_PWR_PRESENT;
-	writel(data, phy_dwc3->base + SSUSB_PHY_CTRL_REG);
+	pete_writel("drivers/phy/qualcomm/phy-qcom-ipq806x-usb.c:336", data, phy_dwc3->base + SSUSB_PHY_CTRL_REG);
 
 	/*
 	 * WORKAROUND: There is SSPHY suspend bug due to which USB enumerates
@@ -413,7 +413,7 @@ static int qcom_ipq806x_usb_ss_phy_init(struct phy *phy)
 	 * TX_DEEMPH_3_5DB [13:8] set based on SoC version
 	 * LOS_BIAS [7:3] to 9
 	 */
-	data = readl(phy_dwc3->base + SSUSB_PHY_PARAM_CTRL_1);
+	data = pete_readl("drivers/phy/qualcomm/phy-qcom-ipq806x-usb.c:416", phy_dwc3->base + SSUSB_PHY_PARAM_CTRL_1);
 
 	data &= ~PHY_PARAM_CTRL1_MASK;
 

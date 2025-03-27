@@ -68,12 +68,12 @@ static atomic_t open_count = ATOMIC_INIT(0);
 
 static u8 bt_inb(struct bt_bmc *bt_bmc, int reg)
 {
-	return readb(bt_bmc->base + reg);
+	return pete_readb("drivers/char/ipmi/bt-bmc.c:71", bt_bmc->base + reg);
 }
 
 static void bt_outb(struct bt_bmc *bt_bmc, u8 data, int reg)
 {
-	writeb(data, bt_bmc->base + reg);
+	pete_writeb("drivers/char/ipmi/bt-bmc.c:76", data, bt_bmc->base + reg);
 }
 
 static void clr_rd_ptr(struct bt_bmc *bt_bmc)
@@ -359,14 +359,14 @@ static irqreturn_t bt_bmc_irq(int irq, void *arg)
 	struct bt_bmc *bt_bmc = arg;
 	u32 reg;
 
-	reg = readl(bt_bmc->base + BT_CR2);
+	reg = pete_readl("drivers/char/ipmi/bt-bmc.c:362", bt_bmc->base + BT_CR2);
 
 	reg &= BT_CR2_IRQ_H2B | BT_CR2_IRQ_HBUSY;
 	if (!reg)
 		return IRQ_NONE;
 
 	/* ack pending IRQs */
-	writel(reg, bt_bmc->base + BT_CR2);
+	pete_writel("drivers/char/ipmi/bt-bmc.c:369", reg, bt_bmc->base + BT_CR2);
 
 	wake_up(&bt_bmc->queue);
 	return IRQ_HANDLED;
@@ -397,9 +397,9 @@ static int bt_bmc_config_irq(struct bt_bmc *bt_bmc,
 	 * will be cleared (along with B2H) when we can write the next
 	 * message to the BT buffer
 	 */
-	reg = readl(bt_bmc->base + BT_CR1);
+	reg = pete_readl("drivers/char/ipmi/bt-bmc.c:400", bt_bmc->base + BT_CR1);
 	reg |= BT_CR1_IRQ_H2B | BT_CR1_IRQ_HBUSY;
-	writel(reg, bt_bmc->base + BT_CR1);
+	pete_writel("drivers/char/ipmi/bt-bmc.c:402", reg, bt_bmc->base + BT_CR1);
 
 	return 0;
 }
@@ -447,7 +447,7 @@ static int bt_bmc_probe(struct platform_device *pdev)
 		add_timer(&bt_bmc->poll_timer);
 	}
 
-	writel((BT_IO_BASE << BT_CR0_IO_BASE) |
+	pete_writel("drivers/char/ipmi/bt-bmc.c:450", (BT_IO_BASE << BT_CR0_IO_BASE) |
 		     (BT_IRQ << BT_CR0_IRQ) |
 		     BT_CR0_EN_CLR_SLV_RDP |
 		     BT_CR0_EN_CLR_SLV_WRP |

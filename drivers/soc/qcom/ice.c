@@ -35,10 +35,10 @@
 #define QCOM_ICE_FORCE_HW_KEY1_SETTING_MASK	0x4
 
 #define qcom_ice_writel(engine, val, reg)	\
-	writel((val), (engine)->base + (reg))
+	pete_writel("drivers/soc/qcom/ice.c:38", (val), (engine)->base + (reg))
 
 #define qcom_ice_readl(engine, reg)	\
-	readl((engine)->base + (reg))
+	pete_readl("drivers/soc/qcom/ice.c:41", (engine)->base + (reg))
 
 struct qcom_ice {
 	struct device *dev;

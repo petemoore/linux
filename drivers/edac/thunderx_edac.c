@@ -262,7 +262,7 @@ static ssize_t thunderx_##_type##_##_name##_read(struct file *file,	    \
 	struct thunderx_##_type *pdata = file->private_data;		    \
 	char buf[20];							    \
 									    \
-	sprintf(buf, "0x%016llx", readq(pdata->regs + _reg));		    \
+	sprintf(buf, "0x%016llx", pete_readq("drivers/edac/thunderx_edac.c:265", pdata->regs + _reg));		    \
 	return simple_read_from_buffer(data, count, ppos,		    \
 				       buf, sizeof(buf));		    \
 }									    \
@@ -278,7 +278,7 @@ static ssize_t thunderx_##_type##_##_name##_write(struct file *file,	    \
 	res = kstrtoull_from_user(data, count, 0, &val);		    \
 									    \
 	if (!res) {							    \
-		writeq(val, pdata->regs + _reg);			    \
+		pete_writeq("drivers/edac/thunderx_edac.c:281", val, pdata->regs + _reg);			    \
 		res = count;						    \
 	}								    \
 									    \
@@ -312,7 +312,7 @@ static ssize_t thunderx_lmc_inject_int_write(struct file *file,
 
 	if (!res) {
 		/* Trigger the interrupt */
-		writeq(val, lmc->regs + LMC_INT_W1S);
+		pete_writeq("drivers/edac/thunderx_edac.c:315", val, lmc->regs + LMC_INT_W1S);
 		res = count;
 	}
 
@@ -325,7 +325,7 @@ static ssize_t thunderx_lmc_int_read(struct file *file,
 {
 	struct thunderx_lmc *lmc = file->private_data;
 	char buf[20];
-	u64 lmc_int = readq(lmc->regs + LMC_INT);
+	u64 lmc_int = pete_readq("drivers/edac/thunderx_edac.c:328", lmc->regs + LMC_INT);
 
 	snprintf(buf, sizeof(buf), "0x%016llx", lmc_int);
 	return simple_read_from_buffer(data, count, ppos, buf, sizeof(buf));
@@ -348,13 +348,13 @@ static int inject_ecc_fn(void *arg)
 	lmc->parity_test &= ~(7ULL << 8);
 	lmc->parity_test |= (cl_idx << 8);
 
-	writeq(lmc->mask0, lmc->regs + LMC_CHAR_MASK0);
-	writeq(lmc->mask2, lmc->regs + LMC_CHAR_MASK2);
-	writeq(lmc->parity_test, lmc->regs + LMC_ECC_PARITY_TEST);
+	pete_writeq("drivers/edac/thunderx_edac.c:351", lmc->mask0, lmc->regs + LMC_CHAR_MASK0);
+	pete_writeq("drivers/edac/thunderx_edac.c:352", lmc->mask2, lmc->regs + LMC_CHAR_MASK2);
+	pete_writeq("drivers/edac/thunderx_edac.c:353", lmc->parity_test, lmc->regs + LMC_ECC_PARITY_TEST);
 
-	readq(lmc->regs + LMC_CHAR_MASK0);
-	readq(lmc->regs + LMC_CHAR_MASK2);
-	readq(lmc->regs + LMC_ECC_PARITY_TEST);
+	pete_readq("drivers/edac/thunderx_edac.c:355", lmc->regs + LMC_CHAR_MASK0);
+	pete_readq("drivers/edac/thunderx_edac.c:356", lmc->regs + LMC_CHAR_MASK2);
+	pete_readq("drivers/edac/thunderx_edac.c:357", lmc->regs + LMC_ECC_PARITY_TEST);
 
 	for (i = 0; i < lines; i++) {
 		memset((void *)addr, TEST_PATTERN, cline_size);
@@ -550,22 +550,22 @@ static irqreturn_t thunderx_lmc_err_isr(int irq, void *dev_id)
 	unsigned long head = ring_pos(lmc->ring_head, ARRAY_SIZE(lmc->err_ctx));
 	struct lmc_err_ctx *ctx = &lmc->err_ctx[head];
 
-	writeq(0, lmc->regs + LMC_CHAR_MASK0);
-	writeq(0, lmc->regs + LMC_CHAR_MASK2);
-	writeq(0x2, lmc->regs + LMC_ECC_PARITY_TEST);
+	pete_writeq("drivers/edac/thunderx_edac.c:553", 0, lmc->regs + LMC_CHAR_MASK0);
+	pete_writeq("drivers/edac/thunderx_edac.c:554", 0, lmc->regs + LMC_CHAR_MASK2);
+	pete_writeq("drivers/edac/thunderx_edac.c:555", 0x2, lmc->regs + LMC_ECC_PARITY_TEST);
 
-	ctx->reg_int = readq(lmc->regs + LMC_INT);
-	ctx->reg_fadr = readq(lmc->regs + LMC_FADR);
-	ctx->reg_nxm_fadr = readq(lmc->regs + LMC_NXM_FADR);
-	ctx->reg_scram_fadr = readq(lmc->regs + LMC_SCRAM_FADR);
-	ctx->reg_ecc_synd = readq(lmc->regs + LMC_ECC_SYND);
+	ctx->reg_int = pete_readq("drivers/edac/thunderx_edac.c:557", lmc->regs + LMC_INT);
+	ctx->reg_fadr = pete_readq("drivers/edac/thunderx_edac.c:558", lmc->regs + LMC_FADR);
+	ctx->reg_nxm_fadr = pete_readq("drivers/edac/thunderx_edac.c:559", lmc->regs + LMC_NXM_FADR);
+	ctx->reg_scram_fadr = pete_readq("drivers/edac/thunderx_edac.c:560", lmc->regs + LMC_SCRAM_FADR);
+	ctx->reg_ecc_synd = pete_readq("drivers/edac/thunderx_edac.c:561", lmc->regs + LMC_ECC_SYND);
 
 	lmc->ring_head++;
 
 	atomic_set(&lmc->ecc_int, 1);
 
 	/* Clear the interrupt */
-	writeq(ctx->reg_int, lmc->regs + LMC_INT);
+	pete_writeq("drivers/edac/thunderx_edac.c:568", ctx->reg_int, lmc->regs + LMC_INT);
 
 	return IRQ_WAKE_THREAD;
 }
@@ -697,9 +697,9 @@ static int thunderx_lmc_probe(struct pci_dev *pdev,
 
 	lmc->regs = pcim_iomap_table(pdev)[0];
 
-	lmc_control = readq(lmc->regs + LMC_CONTROL);
-	lmc_ddr_pll_ctl = readq(lmc->regs + LMC_DDR_PLL_CTL);
-	lmc_config = readq(lmc->regs + LMC_CONFIG);
+	lmc_control = pete_readq("drivers/edac/thunderx_edac.c:700", lmc->regs + LMC_CONTROL);
+	lmc_ddr_pll_ctl = pete_readq("drivers/edac/thunderx_edac.c:701", lmc->regs + LMC_DDR_PLL_CTL);
+	lmc_config = pete_readq("drivers/edac/thunderx_edac.c:702", lmc->regs + LMC_CONFIG);
 
 	if (lmc_control & LMC_CONTROL_RDIMM) {
 		mci->mtype_cap = FIELD_GET(LMC_DDR_PLL_CTL_DDR4,
@@ -764,7 +764,7 @@ static int thunderx_lmc_probe(struct pci_dev *pdev,
 		goto err_free;
 	}
 
-	lmc->l2c_alias = !(readq(l2c_ioaddr) & L2C_CTL_DISIDXALIAS);
+	lmc->l2c_alias = !(pete_readq("drivers/edac/thunderx_edac.c:767", l2c_ioaddr) & L2C_CTL_DISIDXALIAS);
 
 	iounmap(l2c_ioaddr);
 
@@ -774,10 +774,10 @@ static int thunderx_lmc_probe(struct pci_dev *pdev,
 		goto err_free;
 	}
 
-	lmc_int = readq(lmc->regs + LMC_INT);
-	writeq(lmc_int, lmc->regs + LMC_INT);
+	lmc_int = pete_readq("drivers/edac/thunderx_edac.c:777", lmc->regs + LMC_INT);
+	pete_writeq("drivers/edac/thunderx_edac.c:778", lmc_int, lmc->regs + LMC_INT);
 
-	writeq(LMC_INT_ENA_ALL, lmc->regs + LMC_INT_ENA_W1S);
+	pete_writeq("drivers/edac/thunderx_edac.c:780", LMC_INT_ENA_ALL, lmc->regs + LMC_INT_ENA_W1S);
 
 	if (IS_ENABLED(CONFIG_EDAC_DEBUG)) {
 		ret = thunderx_create_debugfs_nodes(mci->debugfs,
@@ -805,7 +805,7 @@ static void thunderx_lmc_remove(struct pci_dev *pdev)
 	struct mem_ctl_info *mci = pci_get_drvdata(pdev);
 	struct thunderx_lmc *lmc = mci->pvt_info;
 
-	writeq(LMC_INT_ENA_ALL, lmc->regs + LMC_INT_ENA_W1C);
+	pete_writeq("drivers/edac/thunderx_edac.c:808", LMC_INT_ENA_ALL, lmc->regs + LMC_INT_ENA_W1C);
 
 	edac_mc_del_mc(&pdev->dev);
 	edac_mc_free(mci);
@@ -1083,18 +1083,18 @@ static irqreturn_t thunderx_ocx_com_isr(int irq, void *irq_id)
 				      ARRAY_SIZE(ocx->com_err_ctx));
 	struct ocx_com_err_ctx *ctx = &ocx->com_err_ctx[head];
 
-	ctx->reg_com_int = readq(ocx->regs + OCX_COM_INT);
+	ctx->reg_com_int = pete_readq("drivers/edac/thunderx_edac.c:1086", ocx->regs + OCX_COM_INT);
 
 	for (lane = 0; lane < OCX_RX_LANES; lane++) {
 		ctx->reg_lane_int[lane] =
-			readq(ocx->regs + OCX_LNE_INT(lane));
+			pete_readq("drivers/edac/thunderx_edac.c:1090", ocx->regs + OCX_LNE_INT(lane));
 		ctx->reg_lane_stat11[lane] =
-			readq(ocx->regs + OCX_LNE_STAT(lane, 11));
+			pete_readq("drivers/edac/thunderx_edac.c:1092", ocx->regs + OCX_LNE_STAT(lane, 11));
 
-		writeq(ctx->reg_lane_int[lane], ocx->regs + OCX_LNE_INT(lane));
+		pete_writeq("drivers/edac/thunderx_edac.c:1094", ctx->reg_lane_int[lane], ocx->regs + OCX_LNE_INT(lane));
 	}
 
-	writeq(ctx->reg_com_int, ocx->regs + OCX_COM_INT);
+	pete_writeq("drivers/edac/thunderx_edac.c:1097", ctx->reg_com_int, ocx->regs + OCX_COM_INT);
 
 	ocx->com_ring_head++;
 
@@ -1175,9 +1175,9 @@ static irqreturn_t thunderx_ocx_lnk_isr(int irq, void *irq_id)
 	struct ocx_link_err_ctx *ctx = &ocx->link_err_ctx[head];
 
 	ctx->link = msix->entry;
-	ctx->reg_com_link_int = readq(ocx->regs + OCX_COM_LINKX_INT(ctx->link));
+	ctx->reg_com_link_int = pete_readq("drivers/edac/thunderx_edac.c:1178", ocx->regs + OCX_COM_LINKX_INT(ctx->link));
 
-	writeq(ctx->reg_com_link_int, ocx->regs + OCX_COM_LINKX_INT(ctx->link));
+	pete_writeq("drivers/edac/thunderx_edac.c:1180", ctx->reg_com_link_int, ocx->regs + OCX_COM_LINKX_INT(ctx->link));
 
 	ocx->link_ring_head++;
 
@@ -1329,13 +1329,13 @@ static void thunderx_ocx_clearstats(struct thunderx_ocx *ocx)
 	int lane, stat, cfg;
 
 	for (lane = 0; lane < OCX_RX_LANES; lane++) {
-		cfg = readq(ocx->regs + OCX_LNE_CFG(lane));
+		cfg = pete_readq("drivers/edac/thunderx_edac.c:1332", ocx->regs + OCX_LNE_CFG(lane));
 		cfg |= OCX_LNE_CFG_RX_STAT_RDCLR;
 		cfg &= ~OCX_LNE_CFG_RX_STAT_ENA;
-		writeq(cfg, ocx->regs + OCX_LNE_CFG(lane));
+		pete_writeq("drivers/edac/thunderx_edac.c:1335", cfg, ocx->regs + OCX_LNE_CFG(lane));
 
 		for (stat = 0; stat < OCX_RX_LANE_STATS; stat++)
-			readq(ocx->regs + OCX_LNE_STAT(lane, stat));
+			pete_readq("drivers/edac/thunderx_edac.c:1338", ocx->regs + OCX_LNE_STAT(lane, stat));
 	}
 }
 
@@ -1442,26 +1442,26 @@ static int thunderx_ocx_probe(struct pci_dev *pdev,
 	thunderx_ocx_clearstats(ocx);
 
 	for (i = 0; i < OCX_RX_LANES; i++) {
-		writeq(OCX_LNE_INT_ENA_ALL,
+		pete_writeq("drivers/edac/thunderx_edac.c:1445", OCX_LNE_INT_ENA_ALL,
 		       ocx->regs + OCX_LNE_INT_EN(i));
 
-		reg = readq(ocx->regs + OCX_LNE_INT(i));
-		writeq(reg, ocx->regs + OCX_LNE_INT(i));
+		reg = pete_readq("drivers/edac/thunderx_edac.c:1448", ocx->regs + OCX_LNE_INT(i));
+		pete_writeq("drivers/edac/thunderx_edac.c:1449", reg, ocx->regs + OCX_LNE_INT(i));
 
 	}
 
 	for (i = 0; i < OCX_LINK_INTS; i++) {
-		reg = readq(ocx->regs + OCX_COM_LINKX_INT(i));
-		writeq(reg, ocx->regs + OCX_COM_LINKX_INT(i));
+		reg = pete_readq("drivers/edac/thunderx_edac.c:1454", ocx->regs + OCX_COM_LINKX_INT(i));
+		pete_writeq("drivers/edac/thunderx_edac.c:1455", reg, ocx->regs + OCX_COM_LINKX_INT(i));
 
-		writeq(OCX_COM_LINKX_INT_ENA_ALL,
+		pete_writeq("drivers/edac/thunderx_edac.c:1457", OCX_COM_LINKX_INT_ENA_ALL,
 		       ocx->regs + OCX_COM_LINKX_INT_ENA_W1S(i));
 	}
 
-	reg = readq(ocx->regs + OCX_COM_INT);
-	writeq(reg, ocx->regs + OCX_COM_INT);
+	reg = pete_readq("drivers/edac/thunderx_edac.c:1461", ocx->regs + OCX_COM_INT);
+	pete_writeq("drivers/edac/thunderx_edac.c:1462", reg, ocx->regs + OCX_COM_INT);
 
-	writeq(OCX_COM_INT_ENA_ALL, ocx->regs + OCX_COM_INT_ENA_W1S);
+	pete_writeq("drivers/edac/thunderx_edac.c:1464", OCX_COM_INT_ENA_ALL, ocx->regs + OCX_COM_INT_ENA_W1S);
 
 	return 0;
 err_free:
@@ -1476,10 +1476,10 @@ static void thunderx_ocx_remove(struct pci_dev *pdev)
 	struct thunderx_ocx *ocx = edac_dev->pvt_info;
 	int i;
 
-	writeq(OCX_COM_INT_ENA_ALL, ocx->regs + OCX_COM_INT_ENA_W1C);
+	pete_writeq("drivers/edac/thunderx_edac.c:1479", OCX_COM_INT_ENA_ALL, ocx->regs + OCX_COM_INT_ENA_W1C);
 
 	for (i = 0; i < OCX_INTS; i++) {
-		writeq(OCX_COM_LINKX_INT_ENA_ALL,
+		pete_writeq("drivers/edac/thunderx_edac.c:1482", OCX_COM_LINKX_INT_ENA_ALL,
 		       ocx->regs + OCX_COM_LINKX_INT_ENA_W1C(i));
 	}
 
@@ -1766,23 +1766,23 @@ static irqreturn_t thunderx_l2c_tad_isr(int irq, void *irq_id)
 	unsigned long head = ring_pos(tad->ring_head, ARRAY_SIZE(tad->err_ctx));
 	struct l2c_err_ctx *ctx = &tad->err_ctx[head];
 
-	ctx->reg_int = readq(tad->regs + L2C_TAD_INT_W1C);
+	ctx->reg_int = pete_readq("drivers/edac/thunderx_edac.c:1769", tad->regs + L2C_TAD_INT_W1C);
 
 	if (ctx->reg_int & L2C_TAD_INT_ECC) {
 		ctx->reg_ext_name = "TQD_ERR";
-		ctx->reg_ext = readq(tad->regs + L2C_TAD_TQD_ERR);
+		ctx->reg_ext = pete_readq("drivers/edac/thunderx_edac.c:1773", tad->regs + L2C_TAD_TQD_ERR);
 	} else if (ctx->reg_int & L2C_TAD_INT_TAG) {
 		ctx->reg_ext_name = "TTG_ERR";
-		ctx->reg_ext = readq(tad->regs + L2C_TAD_TTG_ERR);
+		ctx->reg_ext = pete_readq("drivers/edac/thunderx_edac.c:1776", tad->regs + L2C_TAD_TTG_ERR);
 	} else if (ctx->reg_int & L2C_TAD_INT_LFBTO) {
 		ctx->reg_ext_name = "TIMEOUT";
-		ctx->reg_ext = readq(tad->regs + L2C_TAD_TIMEOUT);
+		ctx->reg_ext = pete_readq("drivers/edac/thunderx_edac.c:1779", tad->regs + L2C_TAD_TIMEOUT);
 	} else if (ctx->reg_int & L2C_TAD_INT_DISOCI) {
 		ctx->reg_ext_name = "ERR";
-		ctx->reg_ext = readq(tad->regs + L2C_TAD_ERR);
+		ctx->reg_ext = pete_readq("drivers/edac/thunderx_edac.c:1782", tad->regs + L2C_TAD_ERR);
 	}
 
-	writeq(ctx->reg_int, tad->regs + L2C_TAD_INT_W1C);
+	pete_writeq("drivers/edac/thunderx_edac.c:1785", ctx->reg_int, tad->regs + L2C_TAD_INT_W1C);
 
 	tad->ring_head++;
 
@@ -1798,20 +1798,20 @@ static irqreturn_t thunderx_l2c_cbc_isr(int irq, void *irq_id)
 	unsigned long head = ring_pos(cbc->ring_head, ARRAY_SIZE(cbc->err_ctx));
 	struct l2c_err_ctx *ctx = &cbc->err_ctx[head];
 
-	ctx->reg_int = readq(cbc->regs + L2C_CBC_INT_W1C);
+	ctx->reg_int = pete_readq("drivers/edac/thunderx_edac.c:1801", cbc->regs + L2C_CBC_INT_W1C);
 
 	if (ctx->reg_int & L2C_CBC_INT_RSD) {
 		ctx->reg_ext_name = "RSDERR";
-		ctx->reg_ext = readq(cbc->regs + L2C_CBC_RSDERR);
+		ctx->reg_ext = pete_readq("drivers/edac/thunderx_edac.c:1805", cbc->regs + L2C_CBC_RSDERR);
 	} else if (ctx->reg_int & L2C_CBC_INT_MIB) {
 		ctx->reg_ext_name = "MIBERR";
-		ctx->reg_ext = readq(cbc->regs + L2C_CBC_MIBERR);
+		ctx->reg_ext = pete_readq("drivers/edac/thunderx_edac.c:1808", cbc->regs + L2C_CBC_MIBERR);
 	} else if (ctx->reg_int & L2C_CBC_INT_IODISOCI) {
 		ctx->reg_ext_name = "IODISOCIERR";
-		ctx->reg_ext = readq(cbc->regs + L2C_CBC_IODISOCIERR);
+		ctx->reg_ext = pete_readq("drivers/edac/thunderx_edac.c:1811", cbc->regs + L2C_CBC_IODISOCIERR);
 	}
 
-	writeq(ctx->reg_int, cbc->regs + L2C_CBC_INT_W1C);
+	pete_writeq("drivers/edac/thunderx_edac.c:1814", ctx->reg_int, cbc->regs + L2C_CBC_INT_W1C);
 
 	cbc->ring_head++;
 
@@ -1827,10 +1827,10 @@ static irqreturn_t thunderx_l2c_mci_isr(int irq, void *irq_id)
 	unsigned long head = ring_pos(mci->ring_head, ARRAY_SIZE(mci->err_ctx));
 	struct l2c_err_ctx *ctx = &mci->err_ctx[head];
 
-	ctx->reg_int = readq(mci->regs + L2C_MCI_INT_W1C);
-	ctx->reg_ext = readq(mci->regs + L2C_MCI_ERR);
+	ctx->reg_int = pete_readq("drivers/edac/thunderx_edac.c:1830", mci->regs + L2C_MCI_INT_W1C);
+	ctx->reg_ext = pete_readq("drivers/edac/thunderx_edac.c:1831", mci->regs + L2C_MCI_ERR);
 
-	writeq(ctx->reg_int, mci->regs + L2C_MCI_INT_W1C);
+	pete_writeq("drivers/edac/thunderx_edac.c:1833", ctx->reg_int, mci->regs + L2C_MCI_INT_W1C);
 
 	ctx->reg_ext_name = "ERR";
 
@@ -2068,7 +2068,7 @@ static int thunderx_l2c_probe(struct pci_dev *pdev,
 
 	pci_set_drvdata(pdev, edac_dev);
 
-	writeq(reg_en_mask, l2c->regs + reg_en_offs);
+	pete_writeq("drivers/edac/thunderx_edac.c:2071", reg_en_mask, l2c->regs + reg_en_offs);
 
 	return 0;
 
@@ -2085,13 +2085,13 @@ static void thunderx_l2c_remove(struct pci_dev *pdev)
 
 	switch (pdev->device) {
 	case PCI_DEVICE_ID_THUNDER_L2C_TAD:
-		writeq(L2C_TAD_INT_ENA_ALL, l2c->regs + L2C_TAD_INT_ENA_W1C);
+		pete_writeq("drivers/edac/thunderx_edac.c:2088", L2C_TAD_INT_ENA_ALL, l2c->regs + L2C_TAD_INT_ENA_W1C);
 		break;
 	case PCI_DEVICE_ID_THUNDER_L2C_CBC:
-		writeq(L2C_CBC_INT_ENA_ALL, l2c->regs + L2C_CBC_INT_ENA_W1C);
+		pete_writeq("drivers/edac/thunderx_edac.c:2091", L2C_CBC_INT_ENA_ALL, l2c->regs + L2C_CBC_INT_ENA_W1C);
 		break;
 	case PCI_DEVICE_ID_THUNDER_L2C_MCI:
-		writeq(L2C_MCI_INT_ENA_ALL, l2c->regs + L2C_MCI_INT_ENA_W1C);
+		pete_writeq("drivers/edac/thunderx_edac.c:2094", L2C_MCI_INT_ENA_ALL, l2c->regs + L2C_MCI_INT_ENA_W1C);
 		break;
 	}
 

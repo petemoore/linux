@@ -356,12 +356,12 @@ static const struct zynqmp_disp_format avbuf_gfx_fmts[] = {
 
 static u32 zynqmp_disp_avbuf_read(struct zynqmp_disp *disp, int reg)
 {
-	return readl(disp->avbuf.base + reg);
+	return pete_readl("drivers/gpu/drm/xlnx/zynqmp_disp.c:359", disp->avbuf.base + reg);
 }
 
 static void zynqmp_disp_avbuf_write(struct zynqmp_disp *disp, int reg, u32 val)
 {
-	writel(val, disp->avbuf.base + reg);
+	pete_writel("drivers/gpu/drm/xlnx/zynqmp_disp.c:364", val, disp->avbuf.base + reg);
 }
 
 static bool zynqmp_disp_layer_is_video(const struct zynqmp_disp_layer *layer)
@@ -587,7 +587,7 @@ static void zynqmp_disp_avbuf_disable(struct zynqmp_disp *disp)
 
 static void zynqmp_disp_blend_write(struct zynqmp_disp *disp, int reg, u32 val)
 {
-	writel(val, disp->blend.base + reg);
+	pete_writel("drivers/gpu/drm/xlnx/zynqmp_disp.c:590", val, disp->blend.base + reg);
 }
 
 /*
@@ -813,7 +813,7 @@ static void zynqmp_disp_blend_layer_disable(struct zynqmp_disp *disp,
 
 static void zynqmp_disp_audio_write(struct zynqmp_disp *disp, int reg, u32 val)
 {
-	writel(val, disp->audio.base + reg);
+	pete_writel("drivers/gpu/drm/xlnx/zynqmp_disp.c:816", val, disp->audio.base + reg);
 }
 
 /**

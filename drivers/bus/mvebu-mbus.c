@@ -201,8 +201,8 @@ static void mvebu_mbus_read_window(struct mvebu_mbus_state *mbus,
 {
 	void __iomem *addr = mbus->mbuswins_base +
 		mbus->soc->win_cfg_offset(win);
-	u32 basereg = readl(addr + WIN_BASE_OFF);
-	u32 ctrlreg = readl(addr + WIN_CTRL_OFF);
+	u32 basereg = pete_readl("drivers/bus/mvebu-mbus.c:204", addr + WIN_BASE_OFF);
+	u32 ctrlreg = pete_readl("drivers/bus/mvebu-mbus.c:205", addr + WIN_CTRL_OFF);
 
 	if (!(ctrlreg & WIN_CTRL_ENABLE)) {
 		*enabled = 0;
@@ -225,8 +225,8 @@ static void mvebu_mbus_read_window(struct mvebu_mbus_state *mbus,
 			u32 remap_low, remap_hi;
 			void __iomem *addr_rmp = mbus->mbuswins_base +
 				mbus->soc->win_remap_offset(win);
-			remap_low = readl(addr_rmp + WIN_REMAP_LO_OFF);
-			remap_hi  = readl(addr_rmp + WIN_REMAP_HI_OFF);
+			remap_low = pete_readl("drivers/bus/mvebu-mbus.c:228", addr_rmp + WIN_REMAP_LO_OFF);
+			remap_hi  = pete_readl("drivers/bus/mvebu-mbus.c:229", addr_rmp + WIN_REMAP_HI_OFF);
 			*remap = ((u64)remap_hi << 32) | remap_low;
 		} else
 			*remap = 0;
@@ -239,13 +239,13 @@ static void mvebu_mbus_disable_window(struct mvebu_mbus_state *mbus,
 	void __iomem *addr;
 
 	addr = mbus->mbuswins_base + mbus->soc->win_cfg_offset(win);
-	writel(0, addr + WIN_BASE_OFF);
-	writel(0, addr + WIN_CTRL_OFF);
+	pete_writel("drivers/bus/mvebu-mbus.c:242", 0, addr + WIN_BASE_OFF);
+	pete_writel("drivers/bus/mvebu-mbus.c:243", 0, addr + WIN_CTRL_OFF);
 
 	if (mvebu_mbus_window_is_remappable(mbus, win)) {
 		addr = mbus->mbuswins_base + mbus->soc->win_remap_offset(win);
-		writel(0, addr + WIN_REMAP_LO_OFF);
-		writel(0, addr + WIN_REMAP_HI_OFF);
+		pete_writel("drivers/bus/mvebu-mbus.c:247", 0, addr + WIN_REMAP_LO_OFF);
+		pete_writel("drivers/bus/mvebu-mbus.c:248", 0, addr + WIN_REMAP_HI_OFF);
 	}
 }
 
@@ -256,7 +256,7 @@ static int mvebu_mbus_window_is_free(struct mvebu_mbus_state *mbus,
 {
 	void __iomem *addr = mbus->mbuswins_base +
 		mbus->soc->win_cfg_offset(win);
-	u32 ctrl = readl(addr + WIN_CTRL_OFF);
+	u32 ctrl = pete_readl("drivers/bus/mvebu-mbus.c:259", addr + WIN_CTRL_OFF);
 
 	return !(ctrl & WIN_CTRL_ENABLE);
 }
@@ -349,8 +349,8 @@ static int mvebu_mbus_setup_window(struct mvebu_mbus_state *mbus,
 	if (mbus->hw_io_coherency)
 		ctrl |= WIN_CTRL_SYNCBARRIER;
 
-	writel(base & WIN_BASE_LOW, addr + WIN_BASE_OFF);
-	writel(ctrl, addr + WIN_CTRL_OFF);
+	pete_writel("drivers/bus/mvebu-mbus.c:352", base & WIN_BASE_LOW, addr + WIN_BASE_OFF);
+	pete_writel("drivers/bus/mvebu-mbus.c:353", ctrl, addr + WIN_CTRL_OFF);
 
 	if (mvebu_mbus_window_is_remappable(mbus, win)) {
 		void __iomem *addr_rmp = mbus->mbuswins_base +
@@ -360,8 +360,8 @@ static int mvebu_mbus_setup_window(struct mvebu_mbus_state *mbus,
 			remap_addr = base;
 		else
 			remap_addr = remap;
-		writel(remap_addr & WIN_REMAP_LOW, addr_rmp + WIN_REMAP_LO_OFF);
-		writel(0, addr_rmp + WIN_REMAP_HI_OFF);
+		pete_writel("drivers/bus/mvebu-mbus.c:363", remap_addr & WIN_REMAP_LOW, addr_rmp + WIN_REMAP_LO_OFF);
+		pete_writel("drivers/bus/mvebu-mbus.c:364", 0, addr_rmp + WIN_REMAP_HI_OFF);
 	}
 
 	return 0;
@@ -411,8 +411,8 @@ static int mvebu_sdram_debug_show_orion(struct mvebu_mbus_state *mbus,
 	int i;
 
 	for (i = 0; i < 4; i++) {
-		u32 basereg = readl(mbus->sdramwins_base + DDR_BASE_CS_OFF(i));
-		u32 sizereg = readl(mbus->sdramwins_base + DDR_SIZE_CS_OFF(i));
+		u32 basereg = pete_readl("drivers/bus/mvebu-mbus.c:414", mbus->sdramwins_base + DDR_BASE_CS_OFF(i));
+		u32 sizereg = pete_readl("drivers/bus/mvebu-mbus.c:415", mbus->sdramwins_base + DDR_SIZE_CS_OFF(i));
 		u64 base;
 		u32 size;
 
@@ -441,7 +441,7 @@ static int mvebu_sdram_debug_show_dove(struct mvebu_mbus_state *mbus,
 	int i;
 
 	for (i = 0; i < 2; i++) {
-		u32 map = readl(mbus->sdramwins_base + DOVE_DDR_BASE_CS_OFF(i));
+		u32 map = pete_readl("drivers/bus/mvebu-mbus.c:444", mbus->sdramwins_base + DOVE_DDR_BASE_CS_OFF(i));
 		u64 base;
 		u32 size;
 
@@ -676,8 +676,8 @@ mvebu_mbus_default_setup_cpu_target(struct mvebu_mbus_state *mbus)
 	mvebu_mbus_dram_info.mbus_dram_target_id = TARGET_DDR;
 
 	for (i = 0, cs = 0; i < 4; i++) {
-		u32 base = readl(mbus->sdramwins_base + DDR_BASE_CS_OFF(i));
-		u32 size = readl(mbus->sdramwins_base + DDR_SIZE_CS_OFF(i));
+		u32 base = pete_readl("drivers/bus/mvebu-mbus.c:679", mbus->sdramwins_base + DDR_BASE_CS_OFF(i));
+		u32 size = pete_readl("drivers/bus/mvebu-mbus.c:680", mbus->sdramwins_base + DDR_SIZE_CS_OFF(i));
 
 		/*
 		 * We only take care of entries for which the chip
@@ -708,15 +708,15 @@ mvebu_mbus_default_save_cpu_target(struct mvebu_mbus_state *mbus,
 	int i;
 
 	for (i = 0; i < 4; i++) {
-		u32 base = readl(mbus->sdramwins_base + DDR_BASE_CS_OFF(i));
-		u32 size = readl(mbus->sdramwins_base + DDR_SIZE_CS_OFF(i));
+		u32 base = pete_readl("drivers/bus/mvebu-mbus.c:711", mbus->sdramwins_base + DDR_BASE_CS_OFF(i));
+		u32 size = pete_readl("drivers/bus/mvebu-mbus.c:712", mbus->sdramwins_base + DDR_SIZE_CS_OFF(i));
 
-		writel(mbus->sdramwins_phys_base + DDR_BASE_CS_OFF(i),
+		pete_writel("drivers/bus/mvebu-mbus.c:714", mbus->sdramwins_phys_base + DDR_BASE_CS_OFF(i),
 		       store_addr++);
-		writel(base, store_addr++);
-		writel(mbus->sdramwins_phys_base + DDR_SIZE_CS_OFF(i),
+		pete_writel("drivers/bus/mvebu-mbus.c:716", base, store_addr++);
+		pete_writel("drivers/bus/mvebu-mbus.c:717", mbus->sdramwins_phys_base + DDR_SIZE_CS_OFF(i),
 		       store_addr++);
-		writel(size, store_addr++);
+		pete_writel("drivers/bus/mvebu-mbus.c:719", size, store_addr++);
 	}
 
 	/* We've written 16 words to the store address */
@@ -732,7 +732,7 @@ mvebu_mbus_dove_setup_cpu_target(struct mvebu_mbus_state *mbus)
 	mvebu_mbus_dram_info.mbus_dram_target_id = TARGET_DDR;
 
 	for (i = 0, cs = 0; i < 2; i++) {
-		u32 map = readl(mbus->sdramwins_base + DOVE_DDR_BASE_CS_OFF(i));
+		u32 map = pete_readl("drivers/bus/mvebu-mbus.c:735", mbus->sdramwins_base + DOVE_DDR_BASE_CS_OFF(i));
 
 		/*
 		 * Chip select enabled?
@@ -760,11 +760,11 @@ mvebu_mbus_dove_save_cpu_target(struct mvebu_mbus_state *mbus,
 	int i;
 
 	for (i = 0; i < 2; i++) {
-		u32 map = readl(mbus->sdramwins_base + DOVE_DDR_BASE_CS_OFF(i));
+		u32 map = pete_readl("drivers/bus/mvebu-mbus.c:763", mbus->sdramwins_base + DOVE_DDR_BASE_CS_OFF(i));
 
-		writel(mbus->sdramwins_phys_base + DOVE_DDR_BASE_CS_OFF(i),
+		pete_writel("drivers/bus/mvebu-mbus.c:765", mbus->sdramwins_phys_base + DOVE_DDR_BASE_CS_OFF(i),
 		       store_addr++);
-		writel(map, store_addr++);
+		pete_writel("drivers/bus/mvebu-mbus.c:767", map, store_addr++);
 	}
 
 	/* We've written 4 words to the store address */
@@ -1019,8 +1019,8 @@ static int mvebu_mbus_suspend(void)
 			s->soc->win_cfg_offset(win);
 		void __iomem *addr_rmp;
 
-		s->wins[win].base = readl(addr + WIN_BASE_OFF);
-		s->wins[win].ctrl = readl(addr + WIN_CTRL_OFF);
+		s->wins[win].base = pete_readl("drivers/bus/mvebu-mbus.c:1022", addr + WIN_BASE_OFF);
+		s->wins[win].ctrl = pete_readl("drivers/bus/mvebu-mbus.c:1023", addr + WIN_CTRL_OFF);
 
 		if (!mvebu_mbus_window_is_remappable(s, win))
 			continue;
@@ -1028,13 +1028,13 @@ static int mvebu_mbus_suspend(void)
 		addr_rmp = s->mbuswins_base +
 			s->soc->win_remap_offset(win);
 
-		s->wins[win].remap_lo = readl(addr_rmp + WIN_REMAP_LO_OFF);
-		s->wins[win].remap_hi = readl(addr_rmp + WIN_REMAP_HI_OFF);
+		s->wins[win].remap_lo = pete_readl("drivers/bus/mvebu-mbus.c:1031", addr_rmp + WIN_REMAP_LO_OFF);
+		s->wins[win].remap_hi = pete_readl("drivers/bus/mvebu-mbus.c:1032", addr_rmp + WIN_REMAP_HI_OFF);
 	}
 
-	s->mbus_bridge_ctrl = readl(s->mbusbridge_base +
+	s->mbus_bridge_ctrl = pete_readl("drivers/bus/mvebu-mbus.c:1035", s->mbusbridge_base +
 				    MBUS_BRIDGE_CTRL_OFF);
-	s->mbus_bridge_base = readl(s->mbusbridge_base +
+	s->mbus_bridge_base = pete_readl("drivers/bus/mvebu-mbus.c:1037", s->mbusbridge_base +
 				    MBUS_BRIDGE_BASE_OFF);
 
 	return 0;
@@ -1045,9 +1045,9 @@ static void mvebu_mbus_resume(void)
 	struct mvebu_mbus_state *s = &mbus_state;
 	int win;
 
-	writel(s->mbus_bridge_ctrl,
+	pete_writel("drivers/bus/mvebu-mbus.c:1048", s->mbus_bridge_ctrl,
 	       s->mbusbridge_base + MBUS_BRIDGE_CTRL_OFF);
-	writel(s->mbus_bridge_base,
+	pete_writel("drivers/bus/mvebu-mbus.c:1050", s->mbus_bridge_base,
 	       s->mbusbridge_base + MBUS_BRIDGE_BASE_OFF);
 
 	for (win = 0; win < s->soc->num_wins; win++) {
@@ -1055,8 +1055,8 @@ static void mvebu_mbus_resume(void)
 			s->soc->win_cfg_offset(win);
 		void __iomem *addr_rmp;
 
-		writel(s->wins[win].base, addr + WIN_BASE_OFF);
-		writel(s->wins[win].ctrl, addr + WIN_CTRL_OFF);
+		pete_writel("drivers/bus/mvebu-mbus.c:1058", s->wins[win].base, addr + WIN_BASE_OFF);
+		pete_writel("drivers/bus/mvebu-mbus.c:1059", s->wins[win].ctrl, addr + WIN_CTRL_OFF);
 
 		if (!mvebu_mbus_window_is_remappable(s, win))
 			continue;
@@ -1064,8 +1064,8 @@ static void mvebu_mbus_resume(void)
 		addr_rmp = s->mbuswins_base +
 			s->soc->win_remap_offset(win);
 
-		writel(s->wins[win].remap_lo, addr_rmp + WIN_REMAP_LO_OFF);
-		writel(s->wins[win].remap_hi, addr_rmp + WIN_REMAP_HI_OFF);
+		pete_writel("drivers/bus/mvebu-mbus.c:1067", s->wins[win].remap_lo, addr_rmp + WIN_REMAP_LO_OFF);
+		pete_writel("drivers/bus/mvebu-mbus.c:1068", s->wins[win].remap_hi, addr_rmp + WIN_REMAP_HI_OFF);
 	}
 }
 
@@ -1115,7 +1115,7 @@ static int __init mvebu_mbus_common_init(struct mvebu_mbus_state *mbus,
 	mvebu_mbus_setup_cpu_target_nooverlap(mbus);
 
 	if (is_coherent)
-		writel(UNIT_SYNC_BARRIER_ALL,
+		pete_writel("drivers/bus/mvebu-mbus.c:1118", UNIT_SYNC_BARRIER_ALL,
 		       mbus->mbuswins_base + UNIT_SYNC_BARRIER_OFF);
 
 	register_syscore_ops(&mvebu_mbus_syscore_ops);

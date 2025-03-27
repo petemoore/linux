@@ -100,12 +100,12 @@ enum bcm_usb_phy_type {
 
 static inline void bcm_usb_reg32_clrbits(void __iomem *addr, uint32_t clear)
 {
-	writel(readl(addr) & ~clear, addr);
+	pete_writel("drivers/phy/broadcom/phy-bcm-sr-usb.c:103", pete_readl("drivers/phy/broadcom/phy-bcm-sr-usb.c:103", addr) & ~clear, addr);
 }
 
 static inline void bcm_usb_reg32_setbits(void __iomem *addr, uint32_t set)
 {
-	writel(readl(addr) | set, addr);
+	pete_writel("drivers/phy/broadcom/phy-bcm-sr-usb.c:108", pete_readl("drivers/phy/broadcom/phy-bcm-sr-usb.c:108", addr) | set, addr);
 }
 
 static int bcm_usb_pll_lock_check(void __iomem *addr, u32 bit)
@@ -131,10 +131,10 @@ static int bcm_usb_ss_phy_init(struct bcm_usb_phy_cfg *phy_cfg)
 	offset = phy_cfg->offset;
 
 	/* Set pctl with mode and soft reset */
-	rd_data = readl(regs + offset[PHY_CTRL]);
+	rd_data = pete_readl("drivers/phy/broadcom/phy-bcm-sr-usb.c:134", regs + offset[PHY_CTRL]);
 	rd_data &= ~(PHY_PCTL_MASK << u3phy_ctrl[PHY_PCTL]);
 	rd_data |= (SSPHY_PCTL_VAL << u3phy_ctrl[PHY_PCTL]);
-	writel(rd_data, regs + offset[PHY_CTRL]);
+	pete_writel("drivers/phy/broadcom/phy-bcm-sr-usb.c:137", rd_data, regs + offset[PHY_CTRL]);
 
 	bcm_usb_reg32_clrbits(regs + offset[PLL_CTRL],
 			      BIT(u3pll_ctrl[SSPLL_SUSPEND_EN]));

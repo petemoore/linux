@@ -46,12 +46,12 @@ struct pic32_dmt {
 
 static inline void dmt_enable(struct pic32_dmt *dmt)
 {
-	writel(DMT_ON, PIC32_SET(dmt->regs + DMTCON_REG));
+	pete_writel("drivers/watchdog/pic32-dmt.c:49", DMT_ON, PIC32_SET(dmt->regs + DMTCON_REG));
 }
 
 static inline void dmt_disable(struct pic32_dmt *dmt)
 {
-	writel(DMT_ON, PIC32_CLR(dmt->regs + DMTCON_REG));
+	pete_writel("drivers/watchdog/pic32-dmt.c:54", DMT_ON, PIC32_CLR(dmt->regs + DMTCON_REG));
 	/*
 	 * Cannot touch registers in the CPU cycle following clearing the
 	 * ON bit.
@@ -63,7 +63,7 @@ static inline int dmt_bad_status(struct pic32_dmt *dmt)
 {
 	u32 val;
 
-	val = readl(dmt->regs + DMTSTAT_REG);
+	val = pete_readl("drivers/watchdog/pic32-dmt.c:66", dmt->regs + DMTSTAT_REG);
 	val &= (DMTSTAT_BAD1 | DMTSTAT_BAD2 | DMTSTAT_EVENT);
 	if (val)
 		return -EAGAIN;
@@ -77,17 +77,17 @@ static inline int dmt_keepalive(struct pic32_dmt *dmt)
 	u32 timeout = 500;
 
 	/* set pre-clear key */
-	writel(DMT_STEP1_KEY << 8, dmt->regs + DMTPRECLR_REG);
+	pete_writel("drivers/watchdog/pic32-dmt.c:80", DMT_STEP1_KEY << 8, dmt->regs + DMTPRECLR_REG);
 
 	/* wait for DMT window to open */
 	while (--timeout) {
-		v = readl(dmt->regs + DMTSTAT_REG) & DMTSTAT_WINOPN;
+		v = pete_readl("drivers/watchdog/pic32-dmt.c:84", dmt->regs + DMTSTAT_REG) & DMTSTAT_WINOPN;
 		if (v == DMTSTAT_WINOPN)
 			break;
 	}
 
 	/* apply key2 */
-	writel(DMT_STEP2_KEY, dmt->regs + DMTCLR_REG);
+	pete_writel("drivers/watchdog/pic32-dmt.c:90", DMT_STEP2_KEY, dmt->regs + DMTCLR_REG);
 
 	/* check whether keys are latched correctly */
 	return dmt_bad_status(dmt);
@@ -99,7 +99,7 @@ static inline u32 pic32_dmt_get_timeout_secs(struct pic32_dmt *dmt)
 
 	rate = clk_get_rate(dmt->clk);
 	if (rate)
-		return readl(dmt->regs + DMTPSCNT_REG) / rate;
+		return pete_readl("drivers/watchdog/pic32-dmt.c:102", dmt->regs + DMTPSCNT_REG) / rate;
 
 	return 0;
 }
@@ -113,9 +113,9 @@ static inline u32 pic32_dmt_bootstatus(struct pic32_dmt *dmt)
 	if (!rst_base)
 		return 0;
 
-	v = readl(rst_base);
+	v = pete_readl("drivers/watchdog/pic32-dmt.c:116", rst_base);
 
-	writel(RESETCON_DMT_TIMEOUT, PIC32_CLR(rst_base));
+	pete_writel("drivers/watchdog/pic32-dmt.c:118", RESETCON_DMT_TIMEOUT, PIC32_CLR(rst_base));
 
 	iounmap(rst_base);
 	return v & RESETCON_DMT_TIMEOUT;

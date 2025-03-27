@@ -146,10 +146,10 @@
 
 #define OFFSET_STRIDE		(9)
 
-#define dmar_readq(a) readq(a)
-#define dmar_writeq(a,v) writeq(v,a)
-#define dmar_readl(a) readl(a)
-#define dmar_writel(a, v) writel(v, a)
+#define dmar_readq(a) pete_readq("drivers/iommu/intel/iommu.h:149", a)
+#define dmar_writeq(a,v) pete_writeq("drivers/iommu/intel/iommu.h:150", v,a)
+#define dmar_readl(a) pete_readl("drivers/iommu/intel/iommu.h:151", a)
+#define dmar_writel(a, v) pete_writel("drivers/iommu/intel/iommu.h:152", v, a)
 
 #define DMAR_VER_MAJOR(v)		(((v) & 0xf0) >> 4)
 #define DMAR_VER_MINOR(v)		((v) & 0x0f)

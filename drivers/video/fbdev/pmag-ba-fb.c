@@ -79,12 +79,12 @@ static const struct fb_fix_screeninfo pmagbafb_fix = {
 
 static inline void dac_write(struct pmagbafb_par *par, unsigned int reg, u8 v)
 {
-	writeb(v, par->dac + reg / 4);
+	pete_writeb("drivers/video/fbdev/pmag-ba-fb.c:82", v, par->dac + reg / 4);
 }
 
 static inline u8 dac_read(struct pmagbafb_par *par, unsigned int reg)
 {
-	return readb(par->dac + reg / 4);
+	return pete_readb("drivers/video/fbdev/pmag-ba-fb.c:87", par->dac + reg / 4);
 }
 
 

@@ -88,22 +88,22 @@ static void rcar_gyroadc_hw_init(struct rcar_gyroadc *priv)
 		clk_len++;
 
 	/* Stop the GyroADC. */
-	writel(0, priv->regs + RCAR_GYROADC_START_STOP);
+	pete_writel("drivers/iio/adc/rcar-gyroadc.c:91", 0, priv->regs + RCAR_GYROADC_START_STOP);
 
 	/* Disable IRQ on V2H. */
 	if (priv->model == RCAR_GYROADC_MODEL_R8A7792)
-		writel(0, priv->regs + RCAR_GYROADC_INTENR);
+		pete_writel("drivers/iio/adc/rcar-gyroadc.c:95", 0, priv->regs + RCAR_GYROADC_INTENR);
 
 	/* Set mode and timing. */
-	writel(priv->mode, priv->regs + RCAR_GYROADC_MODE_SELECT);
-	writel(clk_len, priv->regs + RCAR_GYROADC_CLOCK_LENGTH);
-	writel(clk_mhz * 1250, priv->regs + RCAR_GYROADC_1_25MS_LENGTH);
+	pete_writel("drivers/iio/adc/rcar-gyroadc.c:98", priv->mode, priv->regs + RCAR_GYROADC_MODE_SELECT);
+	pete_writel("drivers/iio/adc/rcar-gyroadc.c:99", clk_len, priv->regs + RCAR_GYROADC_CLOCK_LENGTH);
+	pete_writel("drivers/iio/adc/rcar-gyroadc.c:100", clk_mhz * 1250, priv->regs + RCAR_GYROADC_1_25MS_LENGTH);
 }
 
 static void rcar_gyroadc_hw_start(struct rcar_gyroadc *priv)
 {
 	/* Start sampling. */
-	writel(RCAR_GYROADC_START_STOP_START,
+	pete_writel("drivers/iio/adc/rcar-gyroadc.c:106", RCAR_GYROADC_START_STOP_START,
 	       priv->regs + RCAR_GYROADC_START_STOP);
 
 	/*
@@ -118,7 +118,7 @@ static void rcar_gyroadc_hw_start(struct rcar_gyroadc *priv)
 static void rcar_gyroadc_hw_stop(struct rcar_gyroadc *priv)
 {
 	/* Stop the GyroADC. */
-	writel(0, priv->regs + RCAR_GYROADC_START_STOP);
+	pete_writel("drivers/iio/adc/rcar-gyroadc.c:121", 0, priv->regs + RCAR_GYROADC_START_STOP);
 }
 
 #define RCAR_GYROADC_CHAN(_idx) {				\
@@ -209,7 +209,7 @@ static int rcar_gyroadc_read_raw(struct iio_dev *indio_dev,
 			return ret;
 		}
 
-		*val = readl(priv->regs + datareg);
+		*val = pete_readl("drivers/iio/adc/rcar-gyroadc.c:212", priv->regs + datareg);
 		*val &= BIT(priv->sample_width) - 1;
 
 		ret = rcar_gyroadc_set_power(priv, false);
@@ -257,7 +257,7 @@ static int rcar_gyroadc_reg_access(struct iio_dev *indio_dev,
 	if (reg > maxreg)
 		return -EINVAL;
 
-	*readval = readl(priv->regs + reg);
+	*readval = pete_readl("drivers/iio/adc/rcar-gyroadc.c:260", priv->regs + reg);
 
 	return 0;
 }

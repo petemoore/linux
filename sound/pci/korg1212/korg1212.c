@@ -521,11 +521,11 @@ static int snd_korg1212_Send1212Command(struct snd_korg1212 *korg1212,
 	K1212_DEBUG_PRINTK("K1212_DEBUG: Card <- 0x%08x 0x%08x [%s]\n",
 			   doorbellVal, mailBox0Val, stateName[korg1212->cardState]);
         for (retryCount = 0; retryCount < MAX_COMMAND_RETRIES; retryCount++) {
-		writel(mailBox3Val, korg1212->mailbox3Ptr);
-                writel(mailBox2Val, korg1212->mailbox2Ptr);
-                writel(mailBox1Val, korg1212->mailbox1Ptr);
-                writel(mailBox0Val, korg1212->mailbox0Ptr);
-                writel(doorbellVal, korg1212->outDoorbellPtr);  // interrupt the card
+		pete_writel("sound/pci/korg1212/korg1212.c:524", mailBox3Val, korg1212->mailbox3Ptr);
+                pete_writel("sound/pci/korg1212/korg1212.c:525", mailBox2Val, korg1212->mailbox2Ptr);
+                pete_writel("sound/pci/korg1212/korg1212.c:526", mailBox1Val, korg1212->mailbox1Ptr);
+                pete_writel("sound/pci/korg1212/korg1212.c:527", mailBox0Val, korg1212->mailbox0Ptr);
+                pete_writel("sound/pci/korg1212/korg1212.c:528", doorbellVal, korg1212->outDoorbellPtr);  // interrupt the card
 
                 // --------------------------------------------------------------
                 // the reboot command will not give an acknowledgement.
@@ -543,7 +543,7 @@ static int snd_korg1212_Send1212Command(struct snd_korg1212 *korg1212,
                 // low byte is equal to the doorbell value, then it ack'd.
                 // --------------------------------------------------------------
                 udelay(COMMAND_ACK_DELAY);
-                mailBox3Lo = readl(korg1212->mailbox3Ptr);
+                mailBox3Lo = pete_readl("sound/pci/korg1212/korg1212.c:546", korg1212->mailbox3Ptr);
                 if (mailBox3Lo & COMMAND_ACK_MASK) {
                 	if ((mailBox3Lo & DOORBELL_VAL_MASK) == (doorbellVal & DOORBELL_VAL_MASK)) {
 				K1212_DEBUG_PRINTK_VERBOSE("K1212_DEBUG: Card <- Success\n");
@@ -753,7 +753,7 @@ static int snd_korg1212_StopPlay(struct snd_korg1212 * korg1212)
 
 static void snd_korg1212_EnableCardInterrupts(struct snd_korg1212 * korg1212)
 {
-	writel(PCI_INT_ENABLE_BIT            |
+	pete_writel("sound/pci/korg1212/korg1212.c:756", PCI_INT_ENABLE_BIT            |
 	       PCI_DOORBELL_INT_ENABLE_BIT   |
 	       LOCAL_INT_ENABLE_BIT          |
 	       LOCAL_DOORBELL_INT_ENABLE_BIT |
@@ -869,7 +869,7 @@ static int snd_korg1212_SetClockSource(struct snd_korg1212 *korg1212, int source
 
 static void snd_korg1212_DisableCardInterrupts(struct snd_korg1212 *korg1212)
 {
-	writel(0, korg1212->statusRegPtr);
+	pete_writel("sound/pci/korg1212/korg1212.c:872", 0, korg1212->statusRegPtr);
 }
 
 static int snd_korg1212_WriteADCSensitivity(struct snd_korg1212 *korg1212)
@@ -909,7 +909,7 @@ static int snd_korg1212_WriteADCSensitivity(struct snd_korg1212 *korg1212)
         // we are about to send new values to the card, so clear the new values queued
         // flag.  Also, clear out mailbox 3, so we don't lockup.
         // ----------------------------------------------------------------------------
-        writel(0, korg1212->mailbox3Ptr);
+        pete_writel("sound/pci/korg1212/korg1212.c:912", 0, korg1212->mailbox3Ptr);
         udelay(LOADSHIFT_DELAY);
 
         // ----------------------------------------------------------------------------
@@ -950,7 +950,7 @@ static int snd_korg1212_WriteADCSensitivity(struct snd_korg1212 *korg1212)
                 // ----------------------------------------------------------------------------
                 ClearBitInWord(&controlValue, SET_SENS_LOADSHIFT_BITPOS);
                 ClearBitInWord(&controlValue, SET_SENS_DATA_BITPOS);
-                writew(controlValue, korg1212->sensRegPtr);                          // load/shift goes low
+                pete_writew("sound/pci/korg1212/korg1212.c:953", controlValue, korg1212->sensRegPtr);                          // load/shift goes low
                 udelay(LOADSHIFT_DELAY);
 
                 for (bitPosition = 15; bitPosition >= 0; bitPosition--) {       // for all the bits
@@ -967,10 +967,10 @@ static int snd_korg1212_WriteADCSensitivity(struct snd_korg1212 *korg1212)
 			}
 
                         ClearBitInWord(&controlValue, SET_SENS_CLOCK_BITPOS);
-                        writew(controlValue, korg1212->sensRegPtr);                       // clock goes low
+                        pete_writew("sound/pci/korg1212/korg1212.c:970", controlValue, korg1212->sensRegPtr);                       // clock goes low
                         udelay(SENSCLKPULSE_WIDTH);
                         SetBitInWord(&controlValue, SET_SENS_CLOCK_BITPOS);
-                        writew(controlValue, korg1212->sensRegPtr);                       // clock goes high
+                        pete_writew("sound/pci/korg1212/korg1212.c:973", controlValue, korg1212->sensRegPtr);                       // clock goes high
                         udelay(SENSCLKPULSE_WIDTH);
                 }
 
@@ -981,19 +981,19 @@ static int snd_korg1212_WriteADCSensitivity(struct snd_korg1212 *korg1212)
                 ClearBitInWord(&controlValue, SET_SENS_DATA_BITPOS);
                 ClearBitInWord(&controlValue, SET_SENS_CLOCK_BITPOS);
                 SetBitInWord(&controlValue, SET_SENS_LOADSHIFT_BITPOS);
-                writew(controlValue, korg1212->sensRegPtr);                   // load shift goes high - clk low
+                pete_writew("sound/pci/korg1212/korg1212.c:984", controlValue, korg1212->sensRegPtr);                   // load shift goes high - clk low
                 udelay(SENSCLKPULSE_WIDTH);
 
                 if (clkIs48K)
                         SetBitInWord(&controlValue, SET_SENS_DATA_BITPOS);
 
-                writew(controlValue, korg1212->sensRegPtr);                   // set/clear data bit
+                pete_writew("sound/pci/korg1212/korg1212.c:990", controlValue, korg1212->sensRegPtr);                   // set/clear data bit
                 udelay(ONE_RTC_TICK);
                 SetBitInWord(&controlValue, SET_SENS_CLOCK_BITPOS);
-                writew(controlValue, korg1212->sensRegPtr);                   // clock goes high
+                pete_writew("sound/pci/korg1212/korg1212.c:993", controlValue, korg1212->sensRegPtr);                   // clock goes high
                 udelay(SENSCLKPULSE_WIDTH);
                 ClearBitInWord(&controlValue, SET_SENS_CLOCK_BITPOS);
-                writew(controlValue, korg1212->sensRegPtr);                   // clock goes low
+                pete_writew("sound/pci/korg1212/korg1212.c:996", controlValue, korg1212->sensRegPtr);                   // clock goes low
                 udelay(SENSCLKPULSE_WIDTH);
         }
 
@@ -1100,14 +1100,14 @@ static irqreturn_t snd_korg1212_interrupt(int irq, void *dev_id)
         u32 doorbellValue;
         struct snd_korg1212 *korg1212 = dev_id;
 
-        doorbellValue = readl(korg1212->inDoorbellPtr);
+        doorbellValue = pete_readl("sound/pci/korg1212/korg1212.c:1103", korg1212->inDoorbellPtr);
 
         if (!doorbellValue)
 		return IRQ_NONE;
 
 	spin_lock(&korg1212->lock);
 
-	writel(doorbellValue, korg1212->inDoorbellPtr);
+	pete_writel("sound/pci/korg1212/korg1212.c:1110", doorbellValue, korg1212->inDoorbellPtr);
 
         korg1212->irqcount++;
 

@@ -67,7 +67,7 @@ static unsigned long x1000_otg_phy_recalc_rate(struct clk_hw *hw,
 	u32 usbpcr1;
 	unsigned refclk_div;
 
-	usbpcr1 = readl(cgu->base + CGU_REG_USBPCR1);
+	usbpcr1 = pete_readl("drivers/clk/ingenic/x1000-cgu.c:70", cgu->base + CGU_REG_USBPCR1);
 	refclk_div = usbpcr1 & USBPCR1_REFCLKDIV_MASK;
 
 	switch (refclk_div) {
@@ -121,10 +121,10 @@ static int x1000_otg_phy_set_rate(struct clk_hw *hw, unsigned long req_rate,
 
 	spin_lock_irqsave(&cgu->lock, flags);
 
-	usbpcr1 = readl(cgu->base + CGU_REG_USBPCR1);
+	usbpcr1 = pete_readl("drivers/clk/ingenic/x1000-cgu.c:124", cgu->base + CGU_REG_USBPCR1);
 	usbpcr1 &= ~USBPCR1_REFCLKDIV_MASK;
 	usbpcr1 |= div_bits;
-	writel(usbpcr1, cgu->base + CGU_REG_USBPCR1);
+	pete_writel("drivers/clk/ingenic/x1000-cgu.c:127", usbpcr1, cgu->base + CGU_REG_USBPCR1);
 
 	spin_unlock_irqrestore(&cgu->lock, flags);
 	return 0;
@@ -135,8 +135,8 @@ static int x1000_usb_phy_enable(struct clk_hw *hw)
 	void __iomem *reg_opcr		= cgu->base + CGU_REG_OPCR;
 	void __iomem *reg_usbpcr	= cgu->base + CGU_REG_USBPCR;
 
-	writel(readl(reg_opcr) | OPCR_SPENDN0, reg_opcr);
-	writel(readl(reg_usbpcr) & ~USBPCR_OTG_DISABLE & ~USBPCR_SIDDQ, reg_usbpcr);
+	pete_writel("drivers/clk/ingenic/x1000-cgu.c:138", pete_readl("drivers/clk/ingenic/x1000-cgu.c:138", reg_opcr) | OPCR_SPENDN0, reg_opcr);
+	pete_writel("drivers/clk/ingenic/x1000-cgu.c:139", pete_readl("drivers/clk/ingenic/x1000-cgu.c:139", reg_usbpcr) & ~USBPCR_OTG_DISABLE & ~USBPCR_SIDDQ, reg_usbpcr);
 	return 0;
 }
 
@@ -145,8 +145,8 @@ static void x1000_usb_phy_disable(struct clk_hw *hw)
 	void __iomem *reg_opcr		= cgu->base + CGU_REG_OPCR;
 	void __iomem *reg_usbpcr	= cgu->base + CGU_REG_USBPCR;
 
-	writel(readl(reg_opcr) & ~OPCR_SPENDN0, reg_opcr);
-	writel(readl(reg_usbpcr) | USBPCR_OTG_DISABLE | USBPCR_SIDDQ, reg_usbpcr);
+	pete_writel("drivers/clk/ingenic/x1000-cgu.c:148", pete_readl("drivers/clk/ingenic/x1000-cgu.c:148", reg_opcr) & ~OPCR_SPENDN0, reg_opcr);
+	pete_writel("drivers/clk/ingenic/x1000-cgu.c:149", pete_readl("drivers/clk/ingenic/x1000-cgu.c:149", reg_usbpcr) | USBPCR_OTG_DISABLE | USBPCR_SIDDQ, reg_usbpcr);
 }
 
 static int x1000_usb_phy_is_enabled(struct clk_hw *hw)
@@ -154,9 +154,9 @@ static int x1000_usb_phy_is_enabled(struct clk_hw *hw)
 	void __iomem *reg_opcr		= cgu->base + CGU_REG_OPCR;
 	void __iomem *reg_usbpcr	= cgu->base + CGU_REG_USBPCR;
 
-	return (readl(reg_opcr) & OPCR_SPENDN0) &&
-		!(readl(reg_usbpcr) & USBPCR_SIDDQ) &&
-		!(readl(reg_usbpcr) & USBPCR_OTG_DISABLE);
+	return (pete_readl("drivers/clk/ingenic/x1000-cgu.c:157", reg_opcr) & OPCR_SPENDN0) &&
+		!(pete_readl("drivers/clk/ingenic/x1000-cgu.c:158", reg_usbpcr) & USBPCR_SIDDQ) &&
+		!(pete_readl("drivers/clk/ingenic/x1000-cgu.c:159", reg_usbpcr) & USBPCR_OTG_DISABLE);
 }
 
 static const struct clk_ops x1000_otg_phy_ops = {
@@ -198,7 +198,7 @@ x1000_i2spll_set_rate_hook(const struct ingenic_cgu_pll_info *pll_info,
 	 * based on the current value of I2SCDR.I2SDIV_N, which is needed for
 	 * the divider to function correctly.
 	 */
-	writel(0, cgu->base + CGU_REG_I2SCDR1);
+	pete_writel("drivers/clk/ingenic/x1000-cgu.c:201", 0, cgu->base + CGU_REG_I2SCDR1);
 }
 
 static const s8 pll_od_encoding[8] = {

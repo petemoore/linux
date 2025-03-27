@@ -676,18 +676,18 @@ struct saa7134_dev {
 
 /* ----------------------------------------------------------- */
 
-#define saa_readl(reg)             readl(dev->lmmio + (reg))
-#define saa_writel(reg,value)      writel((value), dev->lmmio + (reg));
+#define saa_readl(reg)             pete_readl("drivers/media/pci/saa7134/saa7134.h:679", dev->lmmio + (reg))
+#define saa_writel(reg,value)      pete_writel("drivers/media/pci/saa7134/saa7134.h:680", (value), dev->lmmio + (reg));
 #define saa_andorl(reg,mask,value) \
-  writel((readl(dev->lmmio+(reg)) & ~(mask)) |\
+  pete_writel("drivers/media/pci/saa7134/saa7134.h:682", (pete_readl("drivers/media/pci/saa7134/saa7134.h:682", dev->lmmio+(reg)) & ~(mask)) |\
   ((value) & (mask)), dev->lmmio+(reg))
 #define saa_setl(reg,bit)          saa_andorl((reg),(bit),(bit))
 #define saa_clearl(reg,bit)        saa_andorl((reg),(bit),0)
 
-#define saa_readb(reg)             readb(dev->bmmio + (reg))
-#define saa_writeb(reg,value)      writeb((value), dev->bmmio + (reg));
+#define saa_readb(reg)             pete_readb("drivers/media/pci/saa7134/saa7134.h:687", dev->bmmio + (reg))
+#define saa_writeb(reg,value)      pete_writeb("drivers/media/pci/saa7134/saa7134.h:688", (value), dev->bmmio + (reg));
 #define saa_andorb(reg,mask,value) \
-  writeb((readb(dev->bmmio+(reg)) & ~(mask)) |\
+  pete_writeb("drivers/media/pci/saa7134/saa7134.h:690", (pete_readb("drivers/media/pci/saa7134/saa7134.h:690", dev->bmmio+(reg)) & ~(mask)) |\
   ((value) & (mask)), dev->bmmio+(reg))
 #define saa_setb(reg,bit)          saa_andorb((reg),(bit),(bit))
 #define saa_clearb(reg,bit)        saa_andorb((reg),(bit),0)

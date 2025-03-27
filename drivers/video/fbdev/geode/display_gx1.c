@@ -59,7 +59,7 @@ int gx1_frame_buffer_size(void)
 
 
 	/* Calculate the total size of both DIMM0 and DIMM1. */
-	bank_cfg = readl(mc_regs + MC_BANK_CFG);
+	bank_cfg = pete_readl("drivers/video/fbdev/geode/display_gx1.c:62", mc_regs + MC_BANK_CFG);
 
 	for (d = 0; d < 2; d++) {
 		if ((bank_cfg & MC_BCFG_DIMM0_PG_SZ_MASK) != MC_BCFG_DIMM0_PG_SZ_NO_DIMM)
@@ -67,7 +67,7 @@ int gx1_frame_buffer_size(void)
 		bank_cfg >>= 16; /* look at DIMM1 next */
 	}
 
-	fb_base = (readl(mc_regs + MC_GBASE_ADD) & MC_GADD_GBADD_MASK) << 19;
+	fb_base = (pete_readl("drivers/video/fbdev/geode/display_gx1.c:70", mc_regs + MC_GBASE_ADD) & MC_GADD_GBADD_MASK) << 19;
 
 	iounmap(mc_regs);
 
@@ -82,32 +82,32 @@ static void gx1_set_mode(struct fb_info *info)
 	int vactive, vblankstart, vsyncstart, vsyncend, vblankend, vtotal;
 
 	/* Unlock the display controller registers. */
-	readl(par->dc_regs + DC_UNLOCK);
-	writel(DC_UNLOCK_CODE, par->dc_regs + DC_UNLOCK);
+	pete_readl("drivers/video/fbdev/geode/display_gx1.c:85", par->dc_regs + DC_UNLOCK);
+	pete_writel("drivers/video/fbdev/geode/display_gx1.c:86", DC_UNLOCK_CODE, par->dc_regs + DC_UNLOCK);
 
-	gcfg = readl(par->dc_regs + DC_GENERAL_CFG);
-	tcfg = readl(par->dc_regs + DC_TIMING_CFG);
+	gcfg = pete_readl("drivers/video/fbdev/geode/display_gx1.c:88", par->dc_regs + DC_GENERAL_CFG);
+	tcfg = pete_readl("drivers/video/fbdev/geode/display_gx1.c:89", par->dc_regs + DC_TIMING_CFG);
 
 	/* Blank the display and disable the timing generator. */
 	tcfg &= ~(DC_TCFG_BLKE | DC_TCFG_TGEN);
-	writel(tcfg, par->dc_regs + DC_TIMING_CFG);
+	pete_writel("drivers/video/fbdev/geode/display_gx1.c:93", tcfg, par->dc_regs + DC_TIMING_CFG);
 
 	/* Wait for pending memory requests before disabling the FIFO load. */
 	udelay(100);
 
 	/* Disable FIFO load and compression. */
 	gcfg &= ~(DC_GCFG_DFLE | DC_GCFG_CMPE | DC_GCFG_DECE);
-	writel(gcfg, par->dc_regs + DC_GENERAL_CFG);
+	pete_writel("drivers/video/fbdev/geode/display_gx1.c:100", gcfg, par->dc_regs + DC_GENERAL_CFG);
 
 	/* Setup DCLK and its divisor. */
 	gcfg &= ~DC_GCFG_DCLK_MASK;
-	writel(gcfg, par->dc_regs + DC_GENERAL_CFG);
+	pete_writel("drivers/video/fbdev/geode/display_gx1.c:104", gcfg, par->dc_regs + DC_GENERAL_CFG);
 
 	par->vid_ops->set_dclk(info);
 
 	dclk_div = DC_GCFG_DCLK_DIV_1; /* FIXME: may need to divide DCLK by 2 sometimes? */
 	gcfg |= dclk_div;
-	writel(gcfg, par->dc_regs + DC_GENERAL_CFG);
+	pete_writel("drivers/video/fbdev/geode/display_gx1.c:110", gcfg, par->dc_regs + DC_GENERAL_CFG);
 
 	/* Wait for the clock generatation to settle.  This is needed since
 	 * some of the register writes that follow require that clock to be
@@ -128,11 +128,11 @@ static void gx1_set_mode(struct fb_info *info)
 	/* FIXME: Set pixel and line double bits if necessary. */
 
 	/* Framebuffer start offset. */
-	writel(0, par->dc_regs + DC_FB_ST_OFFSET);
+	pete_writel("drivers/video/fbdev/geode/display_gx1.c:131", 0, par->dc_regs + DC_FB_ST_OFFSET);
 
 	/* Line delta and line buffer length. */
-	writel(info->fix.line_length >> 2, par->dc_regs + DC_LINE_DELTA);
-	writel(((info->var.xres * info->var.bits_per_pixel/8) >> 3) + 2,
+	pete_writel("drivers/video/fbdev/geode/display_gx1.c:134", info->fix.line_length >> 2, par->dc_regs + DC_LINE_DELTA);
+	pete_writel("drivers/video/fbdev/geode/display_gx1.c:135", ((info->var.xres * info->var.bits_per_pixel/8) >> 3) + 2,
 	       par->dc_regs + DC_BUF_SIZE);
 
 	/* Output configuration. Enable panel data, set pixel format. */
@@ -159,31 +159,31 @@ static void gx1_set_mode(struct fb_info *info)
 	vtotal = vblankend;
 
 	val = (hactive - 1) | ((htotal - 1) << 16);
-	writel(val, par->dc_regs + DC_H_TIMING_1);
+	pete_writel("drivers/video/fbdev/geode/display_gx1.c:162", val, par->dc_regs + DC_H_TIMING_1);
 	val = (hblankstart - 1) | ((hblankend - 1) << 16);
-	writel(val, par->dc_regs + DC_H_TIMING_2);
+	pete_writel("drivers/video/fbdev/geode/display_gx1.c:164", val, par->dc_regs + DC_H_TIMING_2);
 	val = (hsyncstart - 1) | ((hsyncend - 1) << 16);
-	writel(val, par->dc_regs + DC_H_TIMING_3);
-	writel(val, par->dc_regs + DC_FP_H_TIMING);
+	pete_writel("drivers/video/fbdev/geode/display_gx1.c:166", val, par->dc_regs + DC_H_TIMING_3);
+	pete_writel("drivers/video/fbdev/geode/display_gx1.c:167", val, par->dc_regs + DC_FP_H_TIMING);
 	val = (vactive - 1) | ((vtotal - 1) << 16);
-	writel(val, par->dc_regs + DC_V_TIMING_1);
+	pete_writel("drivers/video/fbdev/geode/display_gx1.c:169", val, par->dc_regs + DC_V_TIMING_1);
 	val = (vblankstart - 1) | ((vblankend - 1) << 16);
-	writel(val, par->dc_regs + DC_V_TIMING_2);
+	pete_writel("drivers/video/fbdev/geode/display_gx1.c:171", val, par->dc_regs + DC_V_TIMING_2);
 	val = (vsyncstart - 1) | ((vsyncend - 1) << 16);
-	writel(val, par->dc_regs + DC_V_TIMING_3);
+	pete_writel("drivers/video/fbdev/geode/display_gx1.c:173", val, par->dc_regs + DC_V_TIMING_3);
 	val = (vsyncstart - 2) | ((vsyncend - 2) << 16);
-	writel(val, par->dc_regs + DC_FP_V_TIMING);
+	pete_writel("drivers/video/fbdev/geode/display_gx1.c:175", val, par->dc_regs + DC_FP_V_TIMING);
 
 	/* Write final register values. */
-	writel(ocfg, par->dc_regs + DC_OUTPUT_CFG);
-	writel(tcfg, par->dc_regs + DC_TIMING_CFG);
+	pete_writel("drivers/video/fbdev/geode/display_gx1.c:178", ocfg, par->dc_regs + DC_OUTPUT_CFG);
+	pete_writel("drivers/video/fbdev/geode/display_gx1.c:179", tcfg, par->dc_regs + DC_TIMING_CFG);
 	udelay(1000); /* delay after TIMING_CFG. FIXME: perhaps a little long */
-	writel(gcfg, par->dc_regs + DC_GENERAL_CFG);
+	pete_writel("drivers/video/fbdev/geode/display_gx1.c:181", gcfg, par->dc_regs + DC_GENERAL_CFG);
 
 	par->vid_ops->configure_display(info);
 
 	/* Relock display controller registers */
-	writel(0, par->dc_regs + DC_UNLOCK);
+	pete_writel("drivers/video/fbdev/geode/display_gx1.c:186", 0, par->dc_regs + DC_UNLOCK);
 
 	/* FIXME: write line_length and bpp to Graphics Pipeline GP_BLT_STATUS
 	 * register. */
@@ -200,8 +200,8 @@ static void gx1_set_hw_palette_reg(struct fb_info *info, unsigned regno,
 	val |= (green >>  4) & 0x00fc0;
 	val |= (blue  >> 10) & 0x0003f;
 
-	writel(regno, par->dc_regs + DC_PAL_ADDRESS);
-	writel(val, par->dc_regs + DC_PAL_DATA);
+	pete_writel("drivers/video/fbdev/geode/display_gx1.c:203", regno, par->dc_regs + DC_PAL_ADDRESS);
+	pete_writel("drivers/video/fbdev/geode/display_gx1.c:204", val, par->dc_regs + DC_PAL_DATA);
 }
 
 const struct geode_dc_ops gx1_dc_ops = {

@@ -630,7 +630,7 @@ static irqreturn_t st_i2c_isr_thread(int irq, void *data)
 	 * before re-enabling interrupt at GIC level, and thus avoid spurious
 	 * interrupts.
 	 */
-	readl(i2c_dev->base + SSC_IEN);
+	pete_readl("drivers/i2c/busses/i2c-st.c:633", i2c_dev->base + SSC_IEN);
 
 	return IRQ_HANDLED;
 }

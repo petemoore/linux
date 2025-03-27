@@ -57,7 +57,7 @@ static unsigned long sun9i_a80_cpus_clk_recalc_rate(struct clk_hw *hw,
 	u32 reg;
 
 	/* Fetch the register value */
-	reg = readl(cpus->reg);
+	reg = pete_readl("drivers/clk/sunxi/clk-sun9i-cpus.c:60", cpus->reg);
 
 	/* apply pre-divider first if parent is pll4 */
 	if (SUN9I_CPUS_MUX_GET_PARENT(reg) == SUN9I_CPUS_MUX_PARENT_PLL4)
@@ -159,7 +159,7 @@ static int sun9i_a80_cpus_clk_set_rate(struct clk_hw *hw, unsigned long rate,
 
 	spin_lock_irqsave(&sun9i_a80_cpus_lock, flags);
 
-	reg = readl(cpus->reg);
+	reg = pete_readl("drivers/clk/sunxi/clk-sun9i-cpus.c:162", cpus->reg);
 
 	/* need to know which parent is used to apply pre-divider */
 	parent = SUN9I_CPUS_MUX_GET_PARENT(reg);
@@ -167,7 +167,7 @@ static int sun9i_a80_cpus_clk_set_rate(struct clk_hw *hw, unsigned long rate,
 
 	reg = SUN9I_CPUS_DIV_SET(reg, div);
 	reg = SUN9I_CPUS_PLL4_DIV_SET(reg, pre_div);
-	writel(reg, cpus->reg);
+	pete_writel("drivers/clk/sunxi/clk-sun9i-cpus.c:170", reg, cpus->reg);
 
 	spin_unlock_irqrestore(&sun9i_a80_cpus_lock, flags);
 

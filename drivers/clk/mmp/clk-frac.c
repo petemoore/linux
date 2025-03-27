@@ -125,7 +125,7 @@ static int clk_factor_init(struct clk_hw *hw)
 	if (factor->lock)
 		spin_lock_irqsave(factor->lock, flags);
 
-	val = readl(factor->base);
+	val = pete_readl("drivers/clk/mmp/clk-frac.c:128", factor->base);
 
 	/* calculate numerator */
 	num = (val >> masks->num_shift) & masks->num_mask;
@@ -149,7 +149,7 @@ static int clk_factor_init(struct clk_hw *hw)
 
 	if (!(val & masks->enable_mask) || i >= factor->ftbl_cnt) {
 		val |= masks->enable_mask;
-		writel(val, factor->base);
+		pete_writel("drivers/clk/mmp/clk-frac.c:152", val, factor->base);
 	}
 
 	if (factor->lock)

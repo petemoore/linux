@@ -35,7 +35,7 @@ static void bcm_kona_usb_phy_power(struct bcm_kona_usb *phy, int on)
 {
 	u32 val;
 
-	val = readl(phy->regs + OTGCTL);
+	val = pete_readl("drivers/phy/broadcom/phy-bcm-kona-usb2.c:38", phy->regs + OTGCTL);
 	if (on) {
 		/* Configure and power PHY */
 		val &= ~(OTGCTL_OTGSTAT2 | OTGCTL_OTGSTAT1 |
@@ -44,7 +44,7 @@ static void bcm_kona_usb_phy_power(struct bcm_kona_usb *phy, int on)
 	} else {
 		val &= ~(OTGCTL_PRST_N_SW | OTGCTL_HRESET_N);
 	}
-	writel(val, phy->regs + OTGCTL);
+	pete_writel("drivers/phy/broadcom/phy-bcm-kona-usb2.c:47", val, phy->regs + OTGCTL);
 }
 
 static int bcm_kona_usb_phy_init(struct phy *gphy)
@@ -53,14 +53,14 @@ static int bcm_kona_usb_phy_init(struct phy *gphy)
 	u32 val;
 
 	/* Soft reset PHY */
-	val = readl(phy->regs + P1CTL);
+	val = pete_readl("drivers/phy/broadcom/phy-bcm-kona-usb2.c:56", phy->regs + P1CTL);
 	val &= ~P1CTL_NON_DRIVING;
 	val |= P1CTL_SOFT_RESET;
-	writel(val, phy->regs + P1CTL);
-	writel(val & ~P1CTL_SOFT_RESET, phy->regs + P1CTL);
+	pete_writel("drivers/phy/broadcom/phy-bcm-kona-usb2.c:59", val, phy->regs + P1CTL);
+	pete_writel("drivers/phy/broadcom/phy-bcm-kona-usb2.c:60", val & ~P1CTL_SOFT_RESET, phy->regs + P1CTL);
 	/* Reset needs to be asserted for 2ms */
 	mdelay(2);
-	writel(val | P1CTL_SOFT_RESET, phy->regs + P1CTL);
+	pete_writel("drivers/phy/broadcom/phy-bcm-kona-usb2.c:63", val | P1CTL_SOFT_RESET, phy->regs + P1CTL);
 
 	return 0;
 }

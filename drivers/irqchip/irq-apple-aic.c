@@ -372,7 +372,7 @@ static void __exception_irq_entry aic_handle_irq(struct pt_regs *regs)
 		 * We cannot use a relaxed read here, as reads from DMA buffers
 		 * need to be ordered after the IRQ fires.
 		 */
-		event = readl(ic->event + ic->info.event);
+		event = pete_readl("drivers/irqchip/irq-apple-aic.c:375", ic->event + ic->info.event);
 		type = FIELD_GET(AIC_EVENT_TYPE, event);
 		irq = FIELD_GET(AIC_EVENT_NUM, event);
 

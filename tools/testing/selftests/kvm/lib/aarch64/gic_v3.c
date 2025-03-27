@@ -35,7 +35,7 @@ static void gicv3_gicd_wait_for_rwp(void)
 {
 	unsigned int count = 100000; /* 1s */
 
-	while (readl(gicv3_data.dist_base + GICD_CTLR) & GICD_CTLR_RWP) {
+	while (pete_readl("tools/testing/selftests/kvm/lib/aarch64/gic_v3.c:38", gicv3_data.dist_base + GICD_CTLR) & GICD_CTLR_RWP) {
 		GUEST_ASSERT(count--);
 		udelay(10);
 	}
@@ -45,7 +45,7 @@ static void gicv3_gicr_wait_for_rwp(void *redist_base)
 {
 	unsigned int count = 100000; /* 1s */
 
-	while (readl(redist_base + GICR_CTLR) & GICR_CTLR_RWP) {
+	while (pete_readl("tools/testing/selftests/kvm/lib/aarch64/gic_v3.c:48", redist_base + GICR_CTLR) & GICR_CTLR_RWP) {
 		GUEST_ASSERT(count--);
 		udelay(10);
 	}
@@ -118,14 +118,14 @@ uint32_t gicv3_reg_readl(uint32_t cpu_or_dist, uint64_t offset)
 {
 	void *base = cpu_or_dist & DIST_BIT ? gicv3_data.dist_base
 		: sgi_base_from_redist(gicv3_data.redist_base[cpu_or_dist]);
-	return readl(base + offset);
+	return pete_readl("tools/testing/selftests/kvm/lib/aarch64/gic_v3.c:121", base + offset);
 }
 
 void gicv3_reg_writel(uint32_t cpu_or_dist, uint64_t offset, uint32_t reg_val)
 {
 	void *base = cpu_or_dist & DIST_BIT ? gicv3_data.dist_base
 		: sgi_base_from_redist(gicv3_data.redist_base[cpu_or_dist]);
-	writel(reg_val, base + offset);
+	pete_writel("tools/testing/selftests/kvm/lib/aarch64/gic_v3.c:128", reg_val, base + offset);
 }
 
 uint32_t gicv3_getl_fields(uint32_t cpu_or_dist, uint64_t offset, uint32_t mask)
@@ -265,14 +265,14 @@ static bool gicv3_irq_get_pending(uint32_t intid)
 
 static void gicv3_enable_redist(void *redist_base)
 {
-	uint32_t val = readl(redist_base + GICR_WAKER);
+	uint32_t val = pete_readl("tools/testing/selftests/kvm/lib/aarch64/gic_v3.c:268", redist_base + GICR_WAKER);
 	unsigned int count = 100000; /* 1s */
 
 	val &= ~GICR_WAKER_ProcessorSleep;
-	writel(val, redist_base + GICR_WAKER);
+	pete_writel("tools/testing/selftests/kvm/lib/aarch64/gic_v3.c:272", val, redist_base + GICR_WAKER);
 
 	/* Wait until the processor is 'active' */
-	while (readl(redist_base + GICR_WAKER) & GICR_WAKER_ChildrenAsleep) {
+	while (pete_readl("tools/testing/selftests/kvm/lib/aarch64/gic_v3.c:275", redist_base + GICR_WAKER) & GICR_WAKER_ChildrenAsleep) {
 		GUEST_ASSERT(count--);
 		udelay(10);
 	}
@@ -301,13 +301,13 @@ static void gicv3_cpu_init(unsigned int cpu, void *redist_base)
 	 * Mark all the SGI and PPI interrupts as non-secure Group-1.
 	 * Also, deactivate and disable them.
 	 */
-	writel(~0, sgi_base + GICR_IGROUPR0);
-	writel(~0, sgi_base + GICR_ICACTIVER0);
-	writel(~0, sgi_base + GICR_ICENABLER0);
+	pete_writel("tools/testing/selftests/kvm/lib/aarch64/gic_v3.c:304", ~0, sgi_base + GICR_IGROUPR0);
+	pete_writel("tools/testing/selftests/kvm/lib/aarch64/gic_v3.c:305", ~0, sgi_base + GICR_ICACTIVER0);
+	pete_writel("tools/testing/selftests/kvm/lib/aarch64/gic_v3.c:306", ~0, sgi_base + GICR_ICENABLER0);
 
 	/* Set a default priority for all the SGIs and PPIs */
 	for (i = 0; i < 32; i += 4)
-		writel(GICD_INT_DEF_PRI_X4,
+		pete_writel("tools/testing/selftests/kvm/lib/aarch64/gic_v3.c:310", GICD_INT_DEF_PRI_X4,
 				sgi_base + GICR_IPRIORITYR0 + i);
 
 	gicv3_gicr_wait_for_rwp(redist_base_cpu);
@@ -331,7 +331,7 @@ static void gicv3_dist_init(void)
 	unsigned int i;
 
 	/* Disable the distributor until we set things up */
-	writel(0, dist_base + GICD_CTLR);
+	pete_writel("tools/testing/selftests/kvm/lib/aarch64/gic_v3.c:334", 0, dist_base + GICD_CTLR);
 	gicv3_gicd_wait_for_rwp();
 
 	/*
@@ -339,21 +339,21 @@ static void gicv3_dist_init(void)
 	 * Also, deactivate and disable them.
 	 */
 	for (i = 32; i < gicv3_data.nr_spis; i += 32) {
-		writel(~0, dist_base + GICD_IGROUPR + i / 8);
-		writel(~0, dist_base + GICD_ICACTIVER + i / 8);
-		writel(~0, dist_base + GICD_ICENABLER + i / 8);
+		pete_writel("tools/testing/selftests/kvm/lib/aarch64/gic_v3.c:342", ~0, dist_base + GICD_IGROUPR + i / 8);
+		pete_writel("tools/testing/selftests/kvm/lib/aarch64/gic_v3.c:343", ~0, dist_base + GICD_ICACTIVER + i / 8);
+		pete_writel("tools/testing/selftests/kvm/lib/aarch64/gic_v3.c:344", ~0, dist_base + GICD_ICENABLER + i / 8);
 	}
 
 	/* Set a default priority for all the SPIs */
 	for (i = 32; i < gicv3_data.nr_spis; i += 4)
-		writel(GICD_INT_DEF_PRI_X4,
+		pete_writel("tools/testing/selftests/kvm/lib/aarch64/gic_v3.c:349", GICD_INT_DEF_PRI_X4,
 				dist_base + GICD_IPRIORITYR + i);
 
 	/* Wait for the settings to sync-in */
 	gicv3_gicd_wait_for_rwp();
 
 	/* Finally, enable the distributor globally with ARE */
-	writel(GICD_CTLR_ARE_NS | GICD_CTLR_ENABLE_G1A |
+	pete_writel("tools/testing/selftests/kvm/lib/aarch64/gic_v3.c:356", GICD_CTLR_ARE_NS | GICD_CTLR_ENABLE_G1A |
 			GICD_CTLR_ENABLE_G1, dist_base + GICD_CTLR);
 	gicv3_gicd_wait_for_rwp();
 }
@@ -365,7 +365,7 @@ static void gicv3_init(unsigned int nr_cpus, void *dist_base)
 	gicv3_data.nr_cpus = nr_cpus;
 	gicv3_data.dist_base = dist_base;
 	gicv3_data.nr_spis = GICD_TYPER_SPIS(
-				readl(gicv3_data.dist_base + GICD_TYPER));
+				pete_readl("tools/testing/selftests/kvm/lib/aarch64/gic_v3.c:368", gicv3_data.dist_base + GICD_TYPER));
 	if (gicv3_data.nr_spis > 1020)
 		gicv3_data.nr_spis = 1020;
 

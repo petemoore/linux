@@ -78,9 +78,9 @@ static irqreturn_t charlcd_interrupt(int irq, void *data)
 	struct charlcd *lcd = data;
 	u8 status;
 
-	status = readl(lcd->virtbase + CHAR_STAT) & 0x01;
+	status = pete_readl("drivers/auxdisplay/arm-charlcd.c:81", lcd->virtbase + CHAR_STAT) & 0x01;
 	/* Clear IRQ */
-	writel(CHAR_RAW_CLEAR, lcd->virtbase + CHAR_RAW);
+	pete_writel("drivers/auxdisplay/arm-charlcd.c:83", CHAR_RAW_CLEAR, lcd->virtbase + CHAR_RAW);
 	if (status)
 		complete(&lcd->complete);
 	else
@@ -96,7 +96,7 @@ static void charlcd_wait_complete_irq(struct charlcd *lcd)
 	ret = wait_for_completion_interruptible_timeout(&lcd->complete,
 							CHARLCD_TIMEOUT);
 	/* Disable IRQ after completion */
-	writel(0x00, lcd->virtbase + CHAR_MASK);
+	pete_writel("drivers/auxdisplay/arm-charlcd.c:99", 0x00, lcd->virtbase + CHAR_MASK);
 
 	if (ret < 0) {
 		dev_err(lcd->dev,
@@ -126,16 +126,16 @@ static u8 charlcd_4bit_read_char(struct charlcd *lcd)
 		val = 0;
 		while (!(val & CHAR_RAW_VALID) && i < 10) {
 			udelay(100);
-			val = readl(lcd->virtbase + CHAR_RAW);
+			val = pete_readl("drivers/auxdisplay/arm-charlcd.c:129", lcd->virtbase + CHAR_RAW);
 			i++;
 		}
 
-		writel(CHAR_RAW_CLEAR, lcd->virtbase + CHAR_RAW);
+		pete_writel("drivers/auxdisplay/arm-charlcd.c:133", CHAR_RAW_CLEAR, lcd->virtbase + CHAR_RAW);
 	}
 	msleep(1);
 
 	/* Read the 4 high bits of the data */
-	data = readl(lcd->virtbase + CHAR_RD) & 0xf0;
+	data = pete_readl("drivers/auxdisplay/arm-charlcd.c:138", lcd->virtbase + CHAR_RD) & 0xf0;
 
 	/*
 	 * The second read for the low bits does not trigger an IRQ
@@ -145,14 +145,14 @@ static u8 charlcd_4bit_read_char(struct charlcd *lcd)
 	val = 0;
 	while (!(val & CHAR_RAW_VALID) && i < 10) {
 		udelay(100);
-		val = readl(lcd->virtbase + CHAR_RAW);
+		val = pete_readl("drivers/auxdisplay/arm-charlcd.c:148", lcd->virtbase + CHAR_RAW);
 		i++;
 	}
-	writel(CHAR_RAW_CLEAR, lcd->virtbase + CHAR_RAW);
+	pete_writel("drivers/auxdisplay/arm-charlcd.c:151", CHAR_RAW_CLEAR, lcd->virtbase + CHAR_RAW);
 	msleep(1);
 
 	/* Read the 4 low bits of the data */
-	data |= (readl(lcd->virtbase + CHAR_RD) >> 4) & 0x0f;
+	data |= (pete_readl("drivers/auxdisplay/arm-charlcd.c:155", lcd->virtbase + CHAR_RD) >> 4) & 0x0f;
 
 	return data;
 }
@@ -164,11 +164,11 @@ static bool charlcd_4bit_read_bf(struct charlcd *lcd)
 		 * If we'll use IRQs to wait for the busyflag, clear any
 		 * pending flag and enable IRQ
 		 */
-		writel(CHAR_RAW_CLEAR, lcd->virtbase + CHAR_RAW);
+		pete_writel("drivers/auxdisplay/arm-charlcd.c:167", CHAR_RAW_CLEAR, lcd->virtbase + CHAR_RAW);
 		init_completion(&lcd->complete);
-		writel(0x01, lcd->virtbase + CHAR_MASK);
+		pete_writel("drivers/auxdisplay/arm-charlcd.c:169", 0x01, lcd->virtbase + CHAR_MASK);
 	}
-	readl(lcd->virtbase + CHAR_COM);
+	pete_readl("drivers/auxdisplay/arm-charlcd.c:171", lcd->virtbase + CHAR_COM);
 	return charlcd_4bit_read_char(lcd) & HD_BUSY_FLAG ? true : false;
 }
 
@@ -188,9 +188,9 @@ static void charlcd_4bit_command(struct charlcd *lcd, u8 cmd)
 	u32 cmdlo = (cmd << 4) & 0xf0;
 	u32 cmdhi = (cmd & 0xf0);
 
-	writel(cmdhi, lcd->virtbase + CHAR_COM);
+	pete_writel("drivers/auxdisplay/arm-charlcd.c:191", cmdhi, lcd->virtbase + CHAR_COM);
 	udelay(10);
-	writel(cmdlo, lcd->virtbase + CHAR_COM);
+	pete_writel("drivers/auxdisplay/arm-charlcd.c:193", cmdlo, lcd->virtbase + CHAR_COM);
 	charlcd_4bit_wait_busy(lcd);
 }
 
@@ -199,9 +199,9 @@ static void charlcd_4bit_char(struct charlcd *lcd, u8 ch)
 	u32 chlo = (ch << 4) & 0xf0;
 	u32 chhi = (ch & 0xf0);
 
-	writel(chhi, lcd->virtbase + CHAR_DAT);
+	pete_writel("drivers/auxdisplay/arm-charlcd.c:202", chhi, lcd->virtbase + CHAR_DAT);
 	udelay(10);
-	writel(chlo, lcd->virtbase + CHAR_DAT);
+	pete_writel("drivers/auxdisplay/arm-charlcd.c:204", chlo, lcd->virtbase + CHAR_DAT);
 	charlcd_4bit_wait_busy(lcd);
 }
 
@@ -233,14 +233,14 @@ static void charlcd_4bit_print(struct charlcd *lcd, int line, const char *str)
 static void charlcd_4bit_init(struct charlcd *lcd)
 {
 	/* These commands cannot be checked with the busy flag */
-	writel(HD_FUNCSET | HD_FUNCSET_8BIT, lcd->virtbase + CHAR_COM);
+	pete_writel("drivers/auxdisplay/arm-charlcd.c:236", HD_FUNCSET | HD_FUNCSET_8BIT, lcd->virtbase + CHAR_COM);
 	msleep(5);
-	writel(HD_FUNCSET | HD_FUNCSET_8BIT, lcd->virtbase + CHAR_COM);
+	pete_writel("drivers/auxdisplay/arm-charlcd.c:238", HD_FUNCSET | HD_FUNCSET_8BIT, lcd->virtbase + CHAR_COM);
 	udelay(100);
-	writel(HD_FUNCSET | HD_FUNCSET_8BIT, lcd->virtbase + CHAR_COM);
+	pete_writel("drivers/auxdisplay/arm-charlcd.c:240", HD_FUNCSET | HD_FUNCSET_8BIT, lcd->virtbase + CHAR_COM);
 	udelay(100);
 	/* Go to 4bit mode */
-	writel(HD_FUNCSET, lcd->virtbase + CHAR_COM);
+	pete_writel("drivers/auxdisplay/arm-charlcd.c:243", HD_FUNCSET, lcd->virtbase + CHAR_COM);
 	udelay(100);
 	/*
 	 * 4bit mode, 2 lines, 5x8 font, after this the number of lines

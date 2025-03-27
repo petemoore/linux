@@ -150,7 +150,7 @@
 
 static void tegra20_vi_write(struct tegra_vi_channel *chan, unsigned int addr, u32 val)
 {
-	writel(val, chan->vi->iomem + addr);
+	pete_writel("drivers/staging/media/tegra-video/tegra20.c:153", val, chan->vi->iomem + addr);
 }
 
 /*
@@ -238,10 +238,10 @@ static int tegra20_vi_enable(struct tegra_vi *vi, bool on)
 	if (IS_ERR(apb_misc))
 		return dev_err_probe(vi->dev, PTR_ERR(apb_misc), "cannot access APB_MISC");
 
-	val = readl(apb_misc + reg_offset);
+	val = pete_readl("drivers/staging/media/tegra-video/tegra20.c:241", apb_misc + reg_offset);
 	val &= ~BIT(0);
 	val |= on ? BIT(0) : 0;
-	writel(val, apb_misc + reg_offset);
+	pete_writel("drivers/staging/media/tegra-video/tegra20.c:244", val, apb_misc + reg_offset);
 	iounmap(apb_misc);
 
 	return 0;

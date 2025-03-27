@@ -44,7 +44,7 @@ static bool atmel_trng_wait_ready(struct atmel_trng *trng, bool wait)
 {
 	int ready;
 
-	ready = readl(trng->base + TRNG_ISR) & TRNG_ISR_DATRDY;
+	ready = pete_readl("drivers/char/hw_random/atmel-rng.c:47", trng->base + TRNG_ISR) & TRNG_ISR_DATRDY;
 	if (!ready && wait)
 		readl_poll_timeout(trng->base + TRNG_ISR, ready,
 				   ready & TRNG_ISR_DATRDY, 1000, 20000);
@@ -69,13 +69,13 @@ static int atmel_trng_read(struct hwrng *rng, void *buf, size_t max,
 	if (!ret)
 		goto out;
 
-	*data = readl(trng->base + TRNG_ODATA);
+	*data = pete_readl("drivers/char/hw_random/atmel-rng.c:72", trng->base + TRNG_ODATA);
 	/*
 	 * ensure data ready is only set again AFTER the next data word is ready
 	 * in case it got set between checking ISR and reading ODATA, so we
 	 * don't risk re-reading the same word
 	 */
-	readl(trng->base + TRNG_ISR);
+	pete_readl("drivers/char/hw_random/atmel-rng.c:78", trng->base + TRNG_ISR);
 	ret = 4;
 
 out:
@@ -98,17 +98,17 @@ static int atmel_trng_init(struct atmel_trng *trng)
 
 		/* if peripheral clk is above 100MHz, set HALFR */
 		if (rate > 100000000)
-			writel(TRNG_HALFR, trng->base + TRNG_MR);
+			pete_writel("drivers/char/hw_random/atmel-rng.c:101", TRNG_HALFR, trng->base + TRNG_MR);
 	}
 
-	writel(TRNG_KEY | 1, trng->base + TRNG_CR);
+	pete_writel("drivers/char/hw_random/atmel-rng.c:104", TRNG_KEY | 1, trng->base + TRNG_CR);
 
 	return 0;
 }
 
 static void atmel_trng_cleanup(struct atmel_trng *trng)
 {
-	writel(TRNG_KEY, trng->base + TRNG_CR);
+	pete_writel("drivers/char/hw_random/atmel-rng.c:111", TRNG_KEY, trng->base + TRNG_CR);
 	clk_disable_unprepare(trng->clk);
 }
 

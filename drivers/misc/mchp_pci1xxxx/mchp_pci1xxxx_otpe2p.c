@@ -79,8 +79,8 @@ static int set_sys_lock(struct pci1xxxx_otp_eeprom_device *priv)
 				 MMAP_CFG_OFFSET(CFG_SYS_LOCK_OFFSET);
 	u8 data;
 
-	writel(CFG_SYS_LOCK_PF3, sys_lock);
-	data = readl(sys_lock);
+	pete_writel("drivers/misc/mchp_pci1xxxx/mchp_pci1xxxx_otpe2p.c:82", CFG_SYS_LOCK_PF3, sys_lock);
+	data = pete_readl("drivers/misc/mchp_pci1xxxx/mchp_pci1xxxx_otpe2p.c:83", sys_lock);
 	if (data != CFG_SYS_LOCK_PF3)
 		return -EPERM;
 
@@ -91,7 +91,7 @@ static void release_sys_lock(struct pci1xxxx_otp_eeprom_device *priv)
 {
 	void __iomem *sys_lock = priv->reg_base +
 				 MMAP_CFG_OFFSET(CFG_SYS_LOCK_OFFSET);
-	writel(0, sys_lock);
+	pete_writel("drivers/misc/mchp_pci1xxxx/mchp_pci1xxxx_otpe2p.c:94", 0, sys_lock);
 }
 
 static bool is_eeprom_responsive(struct pci1xxxx_otp_eeprom_device *priv)
@@ -100,9 +100,9 @@ static bool is_eeprom_responsive(struct pci1xxxx_otp_eeprom_device *priv)
 	u32 regval;
 	int ret;
 
-	writel(EEPROM_CMD_EPC_TIMEOUT_BIT,
+	pete_writel("drivers/misc/mchp_pci1xxxx/mchp_pci1xxxx_otpe2p.c:103", EEPROM_CMD_EPC_TIMEOUT_BIT,
 	       rb + MMAP_EEPROM_OFFSET(EEPROM_CMD_REG));
-	writel(EEPROM_CMD_EPC_BUSY_BIT,
+	pete_writel("drivers/misc/mchp_pci1xxxx/mchp_pci1xxxx_otpe2p.c:105", EEPROM_CMD_EPC_BUSY_BIT,
 	       rb + MMAP_EEPROM_OFFSET(EEPROM_CMD_REG));
 
 	/* Wait for the EPC_BUSY bit to get cleared or timeout bit to get set*/
@@ -138,7 +138,7 @@ static int pci1xxxx_eeprom_read(void *priv_t, unsigned int off,
 		return ret;
 
 	for (byte = 0; byte < count; byte++) {
-		writel(EEPROM_CMD_EPC_BUSY_BIT | (off + byte), rb +
+		pete_writel("drivers/misc/mchp_pci1xxxx/mchp_pci1xxxx_otpe2p.c:141", EEPROM_CMD_EPC_BUSY_BIT | (off + byte), rb +
 		       MMAP_EEPROM_OFFSET(EEPROM_CMD_REG));
 
 		ret = read_poll_timeout(readl, regval,
@@ -151,7 +151,7 @@ static int pci1xxxx_eeprom_read(void *priv_t, unsigned int off,
 			goto error;
 		}
 
-		buf[byte] = readl(rb + MMAP_EEPROM_OFFSET(EEPROM_DATA_REG));
+		buf[byte] = pete_readl("drivers/misc/mchp_pci1xxxx/mchp_pci1xxxx_otpe2p.c:154", rb + MMAP_EEPROM_OFFSET(EEPROM_DATA_REG));
 	}
 error:
 	release_sys_lock(priv);
@@ -179,11 +179,11 @@ static int pci1xxxx_eeprom_write(void *priv_t, unsigned int off,
 		return ret;
 
 	for (byte = 0; byte < count; byte++) {
-		writel(*(value + byte), rb + MMAP_EEPROM_OFFSET(EEPROM_DATA_REG));
+		pete_writel("drivers/misc/mchp_pci1xxxx/mchp_pci1xxxx_otpe2p.c:182", *(value + byte), rb + MMAP_EEPROM_OFFSET(EEPROM_DATA_REG));
 		regval = EEPROM_CMD_EPC_TIMEOUT_BIT | EEPROM_CMD_EPC_WRITE |
 			 (off + byte);
-		writel(regval, rb + MMAP_EEPROM_OFFSET(EEPROM_CMD_REG));
-		writel(EEPROM_CMD_EPC_BUSY_BIT | regval,
+		pete_writel("drivers/misc/mchp_pci1xxxx/mchp_pci1xxxx_otpe2p.c:185", regval, rb + MMAP_EEPROM_OFFSET(EEPROM_CMD_REG));
+		pete_writel("drivers/misc/mchp_pci1xxxx/mchp_pci1xxxx_otpe2p.c:186", EEPROM_CMD_EPC_BUSY_BIT | regval,
 		       rb + MMAP_EEPROM_OFFSET(EEPROM_CMD_REG));
 
 		ret = read_poll_timeout(readl, regval,
@@ -208,8 +208,8 @@ static void otp_device_set_address(struct pci1xxxx_otp_eeprom_device *priv,
 
 	lo = address & BYTE_LOW;
 	hi = (address & BYTE_HIGH) >> 8;
-	writew(lo, priv->reg_base + MMAP_OTP_OFFSET(OTP_ADDR_LOW_OFFSET));
-	writew(hi, priv->reg_base + MMAP_OTP_OFFSET(OTP_ADDR_HIGH_OFFSET));
+	pete_writew("drivers/misc/mchp_pci1xxxx/mchp_pci1xxxx_otpe2p.c:211", lo, priv->reg_base + MMAP_OTP_OFFSET(OTP_ADDR_LOW_OFFSET));
+	pete_writew("drivers/misc/mchp_pci1xxxx/mchp_pci1xxxx_otpe2p.c:212", hi, priv->reg_base + MMAP_OTP_OFFSET(OTP_ADDR_HIGH_OFFSET));
 }
 
 static int pci1xxxx_otp_read(void *priv_t, unsigned int off,
@@ -235,11 +235,11 @@ static int pci1xxxx_otp_read(void *priv_t, unsigned int off,
 
 	for (byte = 0; byte < count; byte++) {
 		otp_device_set_address(priv, (u16)(off + byte));
-		data = readl(rb + MMAP_OTP_OFFSET(OTP_FUNC_CMD_OFFSET));
-		writel(data | OTP_FUNC_RD_BIT,
+		data = pete_readl("drivers/misc/mchp_pci1xxxx/mchp_pci1xxxx_otpe2p.c:238", rb + MMAP_OTP_OFFSET(OTP_FUNC_CMD_OFFSET));
+		pete_writel("drivers/misc/mchp_pci1xxxx/mchp_pci1xxxx_otpe2p.c:239", data | OTP_FUNC_RD_BIT,
 		       rb + MMAP_OTP_OFFSET(OTP_FUNC_CMD_OFFSET));
-		data = readl(rb + MMAP_OTP_OFFSET(OTP_CMD_GO_OFFSET));
-		writel(data | OTP_CMD_GO_BIT,
+		data = pete_readl("drivers/misc/mchp_pci1xxxx/mchp_pci1xxxx_otpe2p.c:241", rb + MMAP_OTP_OFFSET(OTP_CMD_GO_OFFSET));
+		pete_writel("drivers/misc/mchp_pci1xxxx/mchp_pci1xxxx_otpe2p.c:242", data | OTP_CMD_GO_BIT,
 		       rb + MMAP_OTP_OFFSET(OTP_CMD_GO_OFFSET));
 
 		ret = read_poll_timeout(readl, regval,
@@ -248,13 +248,13 @@ static int pci1xxxx_otp_read(void *priv_t, unsigned int off,
 					STATUS_READ_TIMEOUT_US, true,
 					rb + MMAP_OTP_OFFSET(OTP_STATUS_OFFSET));
 
-		data = readl(rb + MMAP_OTP_OFFSET(OTP_PASS_FAIL_OFFSET));
+		data = pete_readl("drivers/misc/mchp_pci1xxxx/mchp_pci1xxxx_otpe2p.c:251", rb + MMAP_OTP_OFFSET(OTP_PASS_FAIL_OFFSET));
 		if (ret < 0 || data & OTP_FAIL_BIT) {
 			ret = -EIO;
 			goto error;
 		}
 
-		buf[byte] = readl(rb + MMAP_OTP_OFFSET(OTP_RD_DATA_OFFSET));
+		buf[byte] = pete_readl("drivers/misc/mchp_pci1xxxx/mchp_pci1xxxx_otpe2p.c:257", rb + MMAP_OTP_OFFSET(OTP_RD_DATA_OFFSET));
 	}
 error:
 	release_sys_lock(priv);
@@ -289,15 +289,15 @@ static int pci1xxxx_otp_write(void *priv_t, unsigned int off,
 		 * Set OTP_PGM_MODE_BYTE command bit in OTP_PRGM_MODE register
 		 * to enable Byte programming
 		 */
-		data = readl(rb + MMAP_OTP_OFFSET(OTP_PRGM_MODE_OFFSET));
-		writel(data | OTP_PGM_MODE_BYTE_BIT,
+		data = pete_readl("drivers/misc/mchp_pci1xxxx/mchp_pci1xxxx_otpe2p.c:292", rb + MMAP_OTP_OFFSET(OTP_PRGM_MODE_OFFSET));
+		pete_writel("drivers/misc/mchp_pci1xxxx/mchp_pci1xxxx_otpe2p.c:293", data | OTP_PGM_MODE_BYTE_BIT,
 		       rb + MMAP_OTP_OFFSET(OTP_PRGM_MODE_OFFSET));
-		writel(*(value + byte), rb + MMAP_OTP_OFFSET(OTP_PRGM_DATA_OFFSET));
-		data = readl(rb + MMAP_OTP_OFFSET(OTP_FUNC_CMD_OFFSET));
-		writel(data | OTP_FUNC_PGM_BIT,
+		pete_writel("drivers/misc/mchp_pci1xxxx/mchp_pci1xxxx_otpe2p.c:295", *(value + byte), rb + MMAP_OTP_OFFSET(OTP_PRGM_DATA_OFFSET));
+		data = pete_readl("drivers/misc/mchp_pci1xxxx/mchp_pci1xxxx_otpe2p.c:296", rb + MMAP_OTP_OFFSET(OTP_FUNC_CMD_OFFSET));
+		pete_writel("drivers/misc/mchp_pci1xxxx/mchp_pci1xxxx_otpe2p.c:297", data | OTP_FUNC_PGM_BIT,
 		       rb + MMAP_OTP_OFFSET(OTP_FUNC_CMD_OFFSET));
-		data = readl(rb + MMAP_OTP_OFFSET(OTP_CMD_GO_OFFSET));
-		writel(data | OTP_CMD_GO_BIT,
+		data = pete_readl("drivers/misc/mchp_pci1xxxx/mchp_pci1xxxx_otpe2p.c:299", rb + MMAP_OTP_OFFSET(OTP_CMD_GO_OFFSET));
+		pete_writel("drivers/misc/mchp_pci1xxxx/mchp_pci1xxxx_otpe2p.c:300", data | OTP_CMD_GO_BIT,
 		       rb + MMAP_OTP_OFFSET(OTP_CMD_GO_OFFSET));
 
 		ret = read_poll_timeout(readl, regval,
@@ -306,7 +306,7 @@ static int pci1xxxx_otp_write(void *priv_t, unsigned int off,
 					STATUS_READ_TIMEOUT_US, true,
 					rb + MMAP_OTP_OFFSET(OTP_STATUS_OFFSET));
 
-		data = readl(rb + MMAP_OTP_OFFSET(OTP_PASS_FAIL_OFFSET));
+		data = pete_readl("drivers/misc/mchp_pci1xxxx/mchp_pci1xxxx_otpe2p.c:309", rb + MMAP_OTP_OFFSET(OTP_PASS_FAIL_OFFSET));
 		if (ret < 0 || data & OTP_FAIL_BIT) {
 			ret = -EIO;
 			goto error;
@@ -355,8 +355,8 @@ static int pci1xxxx_otp_eeprom_probe(struct auxiliary_device *aux_dev,
 		return ret;
 
 	/* Set OTP_PWR_DN to 0 to make OTP Operational */
-	data = readl(priv->reg_base + MMAP_OTP_OFFSET(OTP_PWR_DN_OFFSET));
-	writel(data & ~OTP_PWR_DN_BIT,
+	data = pete_readl("drivers/misc/mchp_pci1xxxx/mchp_pci1xxxx_otpe2p.c:358", priv->reg_base + MMAP_OTP_OFFSET(OTP_PWR_DN_OFFSET));
+	pete_writel("drivers/misc/mchp_pci1xxxx/mchp_pci1xxxx_otpe2p.c:359", data & ~OTP_PWR_DN_BIT,
 	       priv->reg_base + MMAP_OTP_OFFSET(OTP_PWR_DN_OFFSET));
 
 	dev_set_drvdata(&aux_dev->dev, priv);
@@ -409,13 +409,13 @@ static void pci1xxxx_otp_eeprom_remove(struct auxiliary_device *aux_dev)
 
 	priv = dev_get_drvdata(&aux_dev->dev);
 	sys_lock = priv->reg_base + MMAP_CFG_OFFSET(CFG_SYS_LOCK_OFFSET);
-	writel(CFG_SYS_LOCK_PF3, sys_lock);
+	pete_writel("drivers/misc/mchp_pci1xxxx/mchp_pci1xxxx_otpe2p.c:412", CFG_SYS_LOCK_PF3, sys_lock);
 
 	/* Shut down OTP */
-	writel(OTP_PWR_DN_BIT,
+	pete_writel("drivers/misc/mchp_pci1xxxx/mchp_pci1xxxx_otpe2p.c:415", OTP_PWR_DN_BIT,
 	       priv->reg_base + MMAP_OTP_OFFSET(OTP_PWR_DN_OFFSET));
 
-	writel(0, sys_lock);
+	pete_writel("drivers/misc/mchp_pci1xxxx/mchp_pci1xxxx_otpe2p.c:418", 0, sys_lock);
 }
 
 static const struct auxiliary_device_id pci1xxxx_otp_eeprom_auxiliary_id_table[] = {

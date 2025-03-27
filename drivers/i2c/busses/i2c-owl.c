@@ -108,14 +108,14 @@ static void owl_i2c_update_reg(void __iomem *reg, unsigned int val, bool state)
 {
 	unsigned int regval;
 
-	regval = readl(reg);
+	regval = pete_readl("drivers/i2c/busses/i2c-owl.c:111", reg);
 
 	if (state)
 		regval |= val;
 	else
 		regval &= ~val;
 
-	writel(regval, reg);
+	pete_writel("drivers/i2c/busses/i2c-owl.c:118", regval, reg);
 }
 
 static void owl_i2c_reset(struct owl_i2c_dev *i2c_dev)
@@ -127,7 +127,7 @@ static void owl_i2c_reset(struct owl_i2c_dev *i2c_dev)
 			   OWL_I2C_CTL_EN, true);
 
 	/* Clear status registers */
-	writel(0, i2c_dev->base + OWL_I2C_REG_STAT);
+	pete_writel("drivers/i2c/busses/i2c-owl.c:130", 0, i2c_dev->base + OWL_I2C_REG_STAT);
 }
 
 static int owl_i2c_reset_fifo(struct owl_i2c_dev *i2c_dev)
@@ -141,7 +141,7 @@ static int owl_i2c_reset_fifo(struct owl_i2c_dev *i2c_dev)
 
 	/* Wait 50ms for FIFO reset complete */
 	do {
-		val = readl(i2c_dev->base + OWL_I2C_REG_FIFOCTL);
+		val = pete_readl("drivers/i2c/busses/i2c-owl.c:144", i2c_dev->base + OWL_I2C_REG_FIFOCTL);
 		if (!(val & (OWL_I2C_FIFOCTL_RFR | OWL_I2C_FIFOCTL_TFR)))
 			break;
 		usleep_range(500, 1000);
@@ -162,7 +162,7 @@ static void owl_i2c_set_freq(struct owl_i2c_dev *i2c_dev)
 	val = DIV_ROUND_UP(i2c_dev->clk_rate, i2c_dev->bus_freq * 16);
 
 	/* Set clock divider factor */
-	writel(OWL_I2C_DIV_FACTOR(val), i2c_dev->base + OWL_I2C_REG_CLKDIV);
+	pete_writel("drivers/i2c/busses/i2c-owl.c:165", OWL_I2C_DIV_FACTOR(val), i2c_dev->base + OWL_I2C_REG_CLKDIV);
 }
 
 static void owl_i2c_xfer_data(struct owl_i2c_dev *i2c_dev)
@@ -173,7 +173,7 @@ static void owl_i2c_xfer_data(struct owl_i2c_dev *i2c_dev)
 	i2c_dev->err = 0;
 
 	/* Handle NACK from slave */
-	fifostat = readl(i2c_dev->base + OWL_I2C_REG_FIFOSTAT);
+	fifostat = pete_readl("drivers/i2c/busses/i2c-owl.c:176", i2c_dev->base + OWL_I2C_REG_FIFOSTAT);
 	if (fifostat & OWL_I2C_FIFOSTAT_RNB) {
 		i2c_dev->err = -ENXIO;
 		/* Clear NACK error bit by writing "1" */
@@ -183,7 +183,7 @@ static void owl_i2c_xfer_data(struct owl_i2c_dev *i2c_dev)
 	}
 
 	/* Handle bus error */
-	stat = readl(i2c_dev->base + OWL_I2C_REG_STAT);
+	stat = pete_readl("drivers/i2c/busses/i2c-owl.c:186", i2c_dev->base + OWL_I2C_REG_STAT);
 	if (stat & OWL_I2C_STAT_BEB) {
 		i2c_dev->err = -EIO;
 		/* Clear BUS error bit by writing "1" */
@@ -194,16 +194,16 @@ static void owl_i2c_xfer_data(struct owl_i2c_dev *i2c_dev)
 
 	/* Handle FIFO read */
 	if (msg->flags & I2C_M_RD) {
-		while ((readl(i2c_dev->base + OWL_I2C_REG_FIFOSTAT) &
+		while ((pete_readl("drivers/i2c/busses/i2c-owl.c:197", i2c_dev->base + OWL_I2C_REG_FIFOSTAT) &
 			OWL_I2C_FIFOSTAT_RFE) && i2c_dev->msg_ptr < msg->len) {
-			msg->buf[i2c_dev->msg_ptr++] = readl(i2c_dev->base +
+			msg->buf[i2c_dev->msg_ptr++] = pete_readl("drivers/i2c/busses/i2c-owl.c:199", i2c_dev->base +
 							     OWL_I2C_REG_RXDAT);
 		}
 	} else {
 		/* Handle the remaining bytes which were not sent */
-		while (!(readl(i2c_dev->base + OWL_I2C_REG_FIFOSTAT) &
+		while (!(pete_readl("drivers/i2c/busses/i2c-owl.c:204", i2c_dev->base + OWL_I2C_REG_FIFOSTAT) &
 			 OWL_I2C_FIFOSTAT_TFF) && i2c_dev->msg_ptr < msg->len) {
-			writel(msg->buf[i2c_dev->msg_ptr++],
+			pete_writel("drivers/i2c/busses/i2c-owl.c:206", msg->buf[i2c_dev->msg_ptr++],
 			       i2c_dev->base + OWL_I2C_REG_TXDAT);
 		}
 	}
@@ -239,7 +239,7 @@ static int owl_i2c_check_bus_busy(struct i2c_adapter *adap)
 
 	/* Check for Bus busy */
 	timeout = jiffies + OWL_I2C_TIMEOUT;
-	while (readl(i2c_dev->base + OWL_I2C_REG_STAT) & OWL_I2C_STAT_BBB) {
+	while (pete_readl("drivers/i2c/busses/i2c-owl.c:242", i2c_dev->base + OWL_I2C_REG_STAT) & OWL_I2C_STAT_BBB) {
 		if (time_after(jiffies, timeout)) {
 			dev_err(&adap->dev, "Bus busy timeout\n");
 			return -ETIMEDOUT;
@@ -286,10 +286,10 @@ static int owl_i2c_xfer_common(struct i2c_adapter *adap, struct i2c_msg *msgs,
 	spin_lock_irqsave(&i2c_dev->lock, flags);
 
 	/* Check for Arbitration lost */
-	val = readl(i2c_dev->base + OWL_I2C_REG_STAT);
+	val = pete_readl("drivers/i2c/busses/i2c-owl.c:289", i2c_dev->base + OWL_I2C_REG_STAT);
 	if (val & OWL_I2C_STAT_LAB) {
 		val &= ~OWL_I2C_STAT_LAB;
-		writel(val, i2c_dev->base + OWL_I2C_REG_STAT);
+		pete_writel("drivers/i2c/busses/i2c-owl.c:292", val, i2c_dev->base + OWL_I2C_REG_STAT);
 		ret = -EAGAIN;
 		goto err_exit;
 	}
@@ -316,11 +316,11 @@ static int owl_i2c_xfer_common(struct i2c_adapter *adap, struct i2c_msg *msgs,
 
 		/* Write slave address */
 		addr = i2c_8bit_addr_from_msg(&msgs[0]);
-		writel(addr, i2c_dev->base + OWL_I2C_REG_TXDAT);
+		pete_writel("drivers/i2c/busses/i2c-owl.c:319", addr, i2c_dev->base + OWL_I2C_REG_TXDAT);
 
 		/* Write internal register address */
 		for (idx = 0; idx < msgs[0].len; idx++)
-			writel(msgs[0].buf[idx],
+			pete_writel("drivers/i2c/busses/i2c-owl.c:323", msgs[0].buf[idx],
 			       i2c_dev->base + OWL_I2C_REG_TXDAT);
 
 		msg = &msgs[1];
@@ -334,20 +334,20 @@ static int owl_i2c_xfer_common(struct i2c_adapter *adap, struct i2c_msg *msgs,
 	i2c_dev->msg_ptr = 0;
 
 	/* Set data count for the message */
-	writel(msg->len, i2c_dev->base + OWL_I2C_REG_DATCNT);
+	pete_writel("drivers/i2c/busses/i2c-owl.c:337", msg->len, i2c_dev->base + OWL_I2C_REG_DATCNT);
 
 	addr = i2c_8bit_addr_from_msg(msg);
-	writel(addr, i2c_dev->base + OWL_I2C_REG_TXDAT);
+	pete_writel("drivers/i2c/busses/i2c-owl.c:340", addr, i2c_dev->base + OWL_I2C_REG_TXDAT);
 
 	if (!(msg->flags & I2C_M_RD)) {
 		/* Write data to FIFO */
 		for (idx = 0; idx < msg->len; idx++) {
 			/* Check for FIFO full */
-			if (readl(i2c_dev->base + OWL_I2C_REG_FIFOSTAT) &
+			if (pete_readl("drivers/i2c/busses/i2c-owl.c:346", i2c_dev->base + OWL_I2C_REG_FIFOSTAT) &
 			    OWL_I2C_FIFOSTAT_TFF)
 				break;
 
-			writel(msg->buf[idx],
+			pete_writel("drivers/i2c/busses/i2c-owl.c:350", msg->buf[idx],
 			       i2c_dev->base + OWL_I2C_REG_TXDAT);
 		}
 
@@ -363,7 +363,7 @@ static int owl_i2c_xfer_common(struct i2c_adapter *adap, struct i2c_msg *msgs,
 				   OWL_I2C_FIFOCTL_NIB, false);
 
 	/* Start the transfer */
-	writel(i2c_cmd, i2c_dev->base + OWL_I2C_REG_CMD);
+	pete_writel("drivers/i2c/busses/i2c-owl.c:366", i2c_cmd, i2c_dev->base + OWL_I2C_REG_CMD);
 
 	spin_unlock_irqrestore(&i2c_dev->lock, flags);
 

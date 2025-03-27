@@ -68,13 +68,13 @@ static struct platform_device *sja1000_isa_devs[MAXDEV];
 
 static u8 sja1000_isa_mem_read_reg(const struct sja1000_priv *priv, int reg)
 {
-	return readb(priv->reg_base + reg);
+	return pete_readb("drivers/net/can/sja1000/sja1000_isa.c:71", priv->reg_base + reg);
 }
 
 static void sja1000_isa_mem_write_reg(const struct sja1000_priv *priv,
 				      int reg, u8 val)
 {
-	writeb(val, priv->reg_base + reg);
+	pete_writeb("drivers/net/can/sja1000/sja1000_isa.c:77", val, priv->reg_base + reg);
 }
 
 static u8 sja1000_isa_port_read_reg(const struct sja1000_priv *priv, int reg)

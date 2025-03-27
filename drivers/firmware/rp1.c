@@ -75,7 +75,7 @@ int rp1_firmware_message(struct rp1_firmware *fw, uint16_t op,
 	mutex_lock(&transaction_lock);
 
 	memcpy_toio(&fw->buf[1], data, data_len);
-	writel((op << 16) | data_len, fw->buf);
+	pete_writel("drivers/firmware/rp1.c:78", (op << 16) | data_len, fw->buf);
 
 	reinit_completion(&fw->c);
 	ret = mbox_send_message(fw->chan, NULL);
@@ -89,7 +89,7 @@ int rp1_firmware_message(struct rp1_firmware *fw, uint16_t op,
 	}
 
 	if (ret == 0) {
-		rc = readl(fw->buf);
+		rc = pete_readl("drivers/firmware/rp1.c:92", fw->buf);
 		if (rc & 0x80000000) {
 			ret = (int32_t)rc;
 		} else {

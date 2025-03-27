@@ -1551,11 +1551,11 @@ static bool mt7603_tx_hang(struct mt7603_dev *dev)
 			continue;
 
 		prev_dma_idx = dev->tx_dma_idx[i];
-		dma_idx = readl(&q->regs->dma_idx);
+		dma_idx = pete_readl("drivers/net/wireless/mediatek/mt76/mt7603/mac.c:1554", &q->regs->dma_idx);
 		dev->tx_dma_idx[i] = dma_idx;
 
 		if (dma_idx == prev_dma_idx &&
-		    dma_idx != readl(&q->regs->cpu_idx))
+		    dma_idx != pete_readl("drivers/net/wireless/mediatek/mt76/mt7603/mac.c:1558", &q->regs->cpu_idx))
 			break;
 	}
 

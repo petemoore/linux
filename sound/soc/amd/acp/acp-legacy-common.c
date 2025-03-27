@@ -21,10 +21,10 @@ void acp_enable_interrupts(struct acp_dev_data *adata)
 	struct acp_resource *rsrc = adata->rsrc;
 	u32 ext_intr_ctrl;
 
-	writel(0x01, ACP_EXTERNAL_INTR_ENB(adata));
-	ext_intr_ctrl = readl(ACP_EXTERNAL_INTR_CNTL(adata, rsrc->irqp_used));
+	pete_writel("sound/soc/amd/acp/acp-legacy-common.c:24", 0x01, ACP_EXTERNAL_INTR_ENB(adata));
+	ext_intr_ctrl = pete_readl("sound/soc/amd/acp/acp-legacy-common.c:25", ACP_EXTERNAL_INTR_CNTL(adata, rsrc->irqp_used));
 	ext_intr_ctrl |= ACP_ERROR_MASK;
-	writel(ext_intr_ctrl, ACP_EXTERNAL_INTR_CNTL(adata, rsrc->irqp_used));
+	pete_writel("sound/soc/amd/acp/acp-legacy-common.c:27", ext_intr_ctrl, ACP_EXTERNAL_INTR_CNTL(adata, rsrc->irqp_used));
 }
 EXPORT_SYMBOL_NS_GPL(acp_enable_interrupts, SND_SOC_ACP_COMMON);
 
@@ -32,8 +32,8 @@ void acp_disable_interrupts(struct acp_dev_data *adata)
 {
 	struct acp_resource *rsrc = adata->rsrc;
 
-	writel(ACP_EXT_INTR_STAT_CLEAR_MASK, ACP_EXTERNAL_INTR_STAT(adata, rsrc->irqp_used));
-	writel(0x00, ACP_EXTERNAL_INTR_ENB(adata));
+	pete_writel("sound/soc/amd/acp/acp-legacy-common.c:35", ACP_EXT_INTR_STAT_CLEAR_MASK, ACP_EXTERNAL_INTR_STAT(adata, rsrc->irqp_used));
+	pete_writel("sound/soc/amd/acp/acp-legacy-common.c:36", 0x00, ACP_EXTERNAL_INTR_ENB(adata));
 }
 EXPORT_SYMBOL_NS_GPL(acp_disable_interrupts, SND_SOC_ACP_COMMON);
 
@@ -52,10 +52,10 @@ static void set_acp_pdm_ring_buffer(struct snd_pcm_substream *substream,
 	physical_addr = stream->reg_offset + MEM_WINDOW_START;
 
 	/* Init ACP PDM Ring buffer */
-	writel(physical_addr, adata->acp_base + ACP_WOV_RX_RINGBUFADDR);
-	writel(pdm_size, adata->acp_base + ACP_WOV_RX_RINGBUFSIZE);
-	writel(period_bytes, adata->acp_base + ACP_WOV_RX_INTR_WATERMARK_SIZE);
-	writel(0x01, adata->acp_base + ACPAXI2AXI_ATU_CTRL);
+	pete_writel("sound/soc/amd/acp/acp-legacy-common.c:55", physical_addr, adata->acp_base + ACP_WOV_RX_RINGBUFADDR);
+	pete_writel("sound/soc/amd/acp/acp-legacy-common.c:56", pdm_size, adata->acp_base + ACP_WOV_RX_RINGBUFSIZE);
+	pete_writel("sound/soc/amd/acp/acp-legacy-common.c:57", period_bytes, adata->acp_base + ACP_WOV_RX_INTR_WATERMARK_SIZE);
+	pete_writel("sound/soc/amd/acp/acp-legacy-common.c:58", 0x01, adata->acp_base + ACPAXI2AXI_ATU_CTRL);
 }
 
 static void set_acp_pdm_clk(struct snd_pcm_substream *substream,
@@ -66,10 +66,10 @@ static void set_acp_pdm_clk(struct snd_pcm_substream *substream,
 	unsigned int pdm_ctrl;
 
 	/* Enable default ACP PDM clk */
-	writel(PDM_CLK_FREQ_MASK, adata->acp_base + ACP_WOV_CLK_CTRL);
-	pdm_ctrl = readl(adata->acp_base + ACP_WOV_MISC_CTRL);
+	pete_writel("sound/soc/amd/acp/acp-legacy-common.c:69", PDM_CLK_FREQ_MASK, adata->acp_base + ACP_WOV_CLK_CTRL);
+	pdm_ctrl = pete_readl("sound/soc/amd/acp/acp-legacy-common.c:70", adata->acp_base + ACP_WOV_MISC_CTRL);
 	pdm_ctrl |= PDM_MISC_CTRL_MASK;
-	writel(pdm_ctrl, adata->acp_base + ACP_WOV_MISC_CTRL);
+	pete_writel("sound/soc/amd/acp/acp-legacy-common.c:72", pdm_ctrl, adata->acp_base + ACP_WOV_MISC_CTRL);
 	set_acp_pdm_ring_buffer(substream, dai);
 }
 
@@ -83,13 +83,13 @@ void restore_acp_pdm_params(struct snd_pcm_substream *substream,
 	soc_runtime = asoc_substream_to_rtd(substream);
 	dai = asoc_rtd_to_cpu(soc_runtime, 0);
 	/* Programming channel mask and sampling rate */
-	writel(adata->ch_mask, adata->acp_base + ACP_WOV_PDM_NO_OF_CHANNELS);
-	writel(PDM_DEC_64, adata->acp_base + ACP_WOV_PDM_DECIMATION_FACTOR);
+	pete_writel("sound/soc/amd/acp/acp-legacy-common.c:86", adata->ch_mask, adata->acp_base + ACP_WOV_PDM_NO_OF_CHANNELS);
+	pete_writel("sound/soc/amd/acp/acp-legacy-common.c:87", PDM_DEC_64, adata->acp_base + ACP_WOV_PDM_DECIMATION_FACTOR);
 
 	/* Enabling ACP Pdm interuppts */
-	ext_int_ctrl = readl(ACP_EXTERNAL_INTR_CNTL(adata, 0));
+	ext_int_ctrl = pete_readl("sound/soc/amd/acp/acp-legacy-common.c:90", ACP_EXTERNAL_INTR_CNTL(adata, 0));
 	ext_int_ctrl |= PDM_DMA_INTR_MASK;
-	writel(ext_int_ctrl, ACP_EXTERNAL_INTR_CNTL(adata, 0));
+	pete_writel("sound/soc/amd/acp/acp-legacy-common.c:92", ext_int_ctrl, ACP_EXTERNAL_INTR_CNTL(adata, 0));
 	set_acp_pdm_clk(substream, dai);
 }
 EXPORT_SYMBOL_NS_GPL(restore_acp_pdm_params, SND_SOC_ACP_COMMON);
@@ -114,7 +114,7 @@ static int set_acp_i2s_dma_fifo(struct snd_pcm_substream *substream,
 			reg_fifo_addr = ACP_I2S_TX_FIFOADDR;
 			reg_fifo_size = ACP_I2S_TX_FIFOSIZE;
 			phy_addr = I2S_SP_TX_MEM_WINDOW_START + stream->reg_offset;
-			writel(phy_addr, adata->acp_base + ACP_I2S_TX_RINGBUFADDR);
+			pete_writel("sound/soc/amd/acp/acp-legacy-common.c:117", phy_addr, adata->acp_base + ACP_I2S_TX_RINGBUFADDR);
 		} else {
 			reg_dma_size = ACP_I2S_RX_DMA_SIZE;
 			acp_fifo_addr = rsrc->sram_pte_offset +
@@ -122,7 +122,7 @@ static int set_acp_i2s_dma_fifo(struct snd_pcm_substream *substream,
 			reg_fifo_addr = ACP_I2S_RX_FIFOADDR;
 			reg_fifo_size = ACP_I2S_RX_FIFOSIZE;
 			phy_addr = I2S_SP_RX_MEM_WINDOW_START + stream->reg_offset;
-			writel(phy_addr, adata->acp_base + ACP_I2S_RX_RINGBUFADDR);
+			pete_writel("sound/soc/amd/acp/acp-legacy-common.c:125", phy_addr, adata->acp_base + ACP_I2S_RX_RINGBUFADDR);
 		}
 		break;
 	case I2S_BT_INSTANCE:
@@ -133,7 +133,7 @@ static int set_acp_i2s_dma_fifo(struct snd_pcm_substream *substream,
 			reg_fifo_addr = ACP_BT_TX_FIFOADDR;
 			reg_fifo_size = ACP_BT_TX_FIFOSIZE;
 			phy_addr = I2S_BT_TX_MEM_WINDOW_START + stream->reg_offset;
-			writel(phy_addr, adata->acp_base + ACP_BT_TX_RINGBUFADDR);
+			pete_writel("sound/soc/amd/acp/acp-legacy-common.c:136", phy_addr, adata->acp_base + ACP_BT_TX_RINGBUFADDR);
 		} else {
 			reg_dma_size = ACP_BT_RX_DMA_SIZE;
 			acp_fifo_addr = rsrc->sram_pte_offset +
@@ -141,7 +141,7 @@ static int set_acp_i2s_dma_fifo(struct snd_pcm_substream *substream,
 			reg_fifo_addr = ACP_BT_RX_FIFOADDR;
 			reg_fifo_size = ACP_BT_RX_FIFOSIZE;
 			phy_addr = I2S_BT_TX_MEM_WINDOW_START + stream->reg_offset;
-			writel(phy_addr, adata->acp_base + ACP_BT_RX_RINGBUFADDR);
+			pete_writel("sound/soc/amd/acp/acp-legacy-common.c:144", phy_addr, adata->acp_base + ACP_BT_RX_RINGBUFADDR);
 		}
 		break;
 	case I2S_HS_INSTANCE:
@@ -152,7 +152,7 @@ static int set_acp_i2s_dma_fifo(struct snd_pcm_substream *substream,
 			reg_fifo_addr = ACP_HS_TX_FIFOADDR;
 			reg_fifo_size = ACP_HS_TX_FIFOSIZE;
 			phy_addr = I2S_HS_TX_MEM_WINDOW_START + stream->reg_offset;
-			writel(phy_addr, adata->acp_base + ACP_HS_TX_RINGBUFADDR);
+			pete_writel("sound/soc/amd/acp/acp-legacy-common.c:155", phy_addr, adata->acp_base + ACP_HS_TX_RINGBUFADDR);
 		} else {
 			reg_dma_size = ACP_HS_RX_DMA_SIZE;
 			acp_fifo_addr = rsrc->sram_pte_offset +
@@ -160,7 +160,7 @@ static int set_acp_i2s_dma_fifo(struct snd_pcm_substream *substream,
 			reg_fifo_addr = ACP_HS_RX_FIFOADDR;
 			reg_fifo_size = ACP_HS_RX_FIFOSIZE;
 			phy_addr = I2S_HS_RX_MEM_WINDOW_START + stream->reg_offset;
-			writel(phy_addr, adata->acp_base + ACP_HS_RX_RINGBUFADDR);
+			pete_writel("sound/soc/amd/acp/acp-legacy-common.c:163", phy_addr, adata->acp_base + ACP_HS_RX_RINGBUFADDR);
 		}
 		break;
 	default:
@@ -168,11 +168,11 @@ static int set_acp_i2s_dma_fifo(struct snd_pcm_substream *substream,
 		return -EINVAL;
 	}
 
-	writel(DMA_SIZE, adata->acp_base + reg_dma_size);
-	writel(acp_fifo_addr, adata->acp_base + reg_fifo_addr);
-	writel(FIFO_SIZE, adata->acp_base + reg_fifo_size);
+	pete_writel("sound/soc/amd/acp/acp-legacy-common.c:171", DMA_SIZE, adata->acp_base + reg_dma_size);
+	pete_writel("sound/soc/amd/acp/acp-legacy-common.c:172", acp_fifo_addr, adata->acp_base + reg_fifo_addr);
+	pete_writel("sound/soc/amd/acp/acp-legacy-common.c:173", FIFO_SIZE, adata->acp_base + reg_fifo_size);
 
-	ext_int_ctrl = readl(ACP_EXTERNAL_INTR_CNTL(adata, rsrc->irqp_used));
+	ext_int_ctrl = pete_readl("sound/soc/amd/acp/acp-legacy-common.c:175", ACP_EXTERNAL_INTR_CNTL(adata, rsrc->irqp_used));
 	ext_int_ctrl |= BIT(I2S_RX_THRESHOLD(rsrc->offset)) |
 			BIT(BT_RX_THRESHOLD(rsrc->offset)) |
 			BIT(I2S_TX_THRESHOLD(rsrc->offset)) |
@@ -180,7 +180,7 @@ static int set_acp_i2s_dma_fifo(struct snd_pcm_substream *substream,
 			BIT(HS_RX_THRESHOLD(rsrc->offset)) |
 			BIT(HS_TX_THRESHOLD(rsrc->offset));
 
-	writel(ext_int_ctrl, ACP_EXTERNAL_INTR_CNTL(adata, rsrc->irqp_used));
+	pete_writel("sound/soc/amd/acp/acp-legacy-common.c:183", ext_int_ctrl, ACP_EXTERNAL_INTR_CNTL(adata, rsrc->irqp_used));
 	return 0;
 }
 
@@ -235,11 +235,11 @@ int restore_acp_i2s_params(struct snd_pcm_substream *substream,
 		}
 		val = adata->xfer_rx_resolution[stream->dai_id - 1] << 3;
 	}
-	writel(val, adata->acp_base + reg_val);
+	pete_writel("sound/soc/amd/acp/acp-legacy-common.c:238", val, adata->acp_base + reg_val);
 	if (adata->tdm_mode == TDM_ENABLE) {
-		writel(tdm_fmt, adata->acp_base + fmt_reg);
-		val = readl(adata->acp_base + reg_val);
-		writel(val | 0x2, adata->acp_base + reg_val);
+		pete_writel("sound/soc/amd/acp/acp-legacy-common.c:240", tdm_fmt, adata->acp_base + fmt_reg);
+		val = pete_readl("sound/soc/amd/acp/acp-legacy-common.c:241", adata->acp_base + reg_val);
+		pete_writel("sound/soc/amd/acp/acp-legacy-common.c:242", val | 0x2, adata->acp_base + reg_val);
 	}
 	return set_acp_i2s_dma_fifo(substream, dai);
 }
@@ -264,12 +264,12 @@ static int acp_power_on(struct acp_chip_info *chip)
 		return -EINVAL;
 	}
 
-	val = readl(base + acp_pgfsm_stat_reg);
+	val = pete_readl("sound/soc/amd/acp/acp-legacy-common.c:267", base + acp_pgfsm_stat_reg);
 	if (val == ACP_POWERED_ON)
 		return 0;
 
 	if ((val & ACP_PGFSM_STATUS_MASK) != ACP_POWER_ON_IN_PROGRESS)
-		writel(ACP_PGFSM_CNTL_POWER_ON_MASK, base + acp_pgfsm_ctrl_reg);
+		pete_writel("sound/soc/amd/acp/acp-legacy-common.c:272", ACP_PGFSM_CNTL_POWER_ON_MASK, base + acp_pgfsm_ctrl_reg);
 
 	return readl_poll_timeout(base + acp_pgfsm_stat_reg, val,
 				  !val, DELAY_US, ACP_TIMEOUT);
@@ -280,13 +280,13 @@ static int acp_reset(void __iomem *base)
 	u32 val;
 	int ret;
 
-	writel(1, base + ACP_SOFT_RESET);
+	pete_writel("sound/soc/amd/acp/acp-legacy-common.c:283", 1, base + ACP_SOFT_RESET);
 	ret = readl_poll_timeout(base + ACP_SOFT_RESET, val, val & ACP_SOFT_RST_DONE_MASK,
 				 DELAY_US, ACP_TIMEOUT);
 	if (ret)
 		return ret;
 
-	writel(0, base + ACP_SOFT_RESET);
+	pete_writel("sound/soc/amd/acp/acp-legacy-common.c:289", 0, base + ACP_SOFT_RESET);
 	return readl_poll_timeout(base + ACP_SOFT_RESET, val, !val, DELAY_US, ACP_TIMEOUT);
 }
 
@@ -300,7 +300,7 @@ int acp_init(struct acp_chip_info *chip)
 		pr_err("ACP power on failed\n");
 		return ret;
 	}
-	writel(0x01, chip->base + ACP_CONTROL);
+	pete_writel("sound/soc/amd/acp/acp-legacy-common.c:303", 0x01, chip->base + ACP_CONTROL);
 
 	/* Reset */
 	ret = acp_reset(chip->base);
@@ -321,7 +321,7 @@ int acp_deinit(void __iomem *base)
 	if (ret)
 		return ret;
 
-	writel(0, base + ACP_CONTROL);
+	pete_writel("sound/soc/amd/acp/acp-legacy-common.c:324", 0, base + ACP_CONTROL);
 	return 0;
 }
 EXPORT_SYMBOL_NS_GPL(acp_deinit, SND_SOC_ACP_COMMON);

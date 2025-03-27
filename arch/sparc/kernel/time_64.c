@@ -529,7 +529,7 @@ static unsigned char mostek_read_byte(struct device *dev, u32 ofs)
 	struct platform_device *pdev = to_platform_device(dev);
 	void __iomem *regs = (void __iomem *) pdev->resource[0].start;
 
-	return readb(regs + ofs);
+	return pete_readb("arch/sparc/kernel/time_64.c:532", regs + ofs);
 }
 
 static void mostek_write_byte(struct device *dev, u32 ofs, u8 val)
@@ -537,7 +537,7 @@ static void mostek_write_byte(struct device *dev, u32 ofs, u8 val)
 	struct platform_device *pdev = to_platform_device(dev);
 	void __iomem *regs = (void __iomem *) pdev->resource[0].start;
 
-	writeb(val, regs + ofs);
+	pete_writeb("arch/sparc/kernel/time_64.c:540", val, regs + ofs);
 }
 
 static struct m48t59_plat_data m48t59_data = {

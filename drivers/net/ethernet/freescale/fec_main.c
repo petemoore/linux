@@ -695,7 +695,7 @@ static int fec_enet_txq_submit_skb(struct fec_enet_priv_tx_q *txq,
 	txq->bd.cur = bdp;
 
 	/* Trigger transmission start */
-	writel(0, txq->bd.reg_desc_active);
+	pete_writel("drivers/net/ethernet/freescale/fec_main.c:698", 0, txq->bd.reg_desc_active);
 
 	return 0;
 }
@@ -887,11 +887,11 @@ static int fec_enet_txq_submit_tso(struct fec_enet_priv_tx_q *txq,
 
 	/* Trigger transmission start */
 	if (!(fep->quirks & FEC_QUIRK_ERR007885) ||
-	    !readl(txq->bd.reg_desc_active) ||
-	    !readl(txq->bd.reg_desc_active) ||
-	    !readl(txq->bd.reg_desc_active) ||
-	    !readl(txq->bd.reg_desc_active))
-		writel(0, txq->bd.reg_desc_active);
+	    !pete_readl("drivers/net/ethernet/freescale/fec_main.c:890", txq->bd.reg_desc_active) ||
+	    !pete_readl("drivers/net/ethernet/freescale/fec_main.c:891", txq->bd.reg_desc_active) ||
+	    !pete_readl("drivers/net/ethernet/freescale/fec_main.c:892", txq->bd.reg_desc_active) ||
+	    !pete_readl("drivers/net/ethernet/freescale/fec_main.c:893", txq->bd.reg_desc_active))
+		pete_writel("drivers/net/ethernet/freescale/fec_main.c:894", 0, txq->bd.reg_desc_active);
 
 	return 0;
 
@@ -1042,7 +1042,7 @@ static void fec_enet_active_rxring(struct net_device *ndev)
 	int i;
 
 	for (i = 0; i < fep->num_rx_queues; i++)
-		writel(0, fep->rx_queue[i]->bd.reg_desc_active);
+		pete_writel("drivers/net/ethernet/freescale/fec_main.c:1045", 0, fep->rx_queue[i]->bd.reg_desc_active);
 }
 
 static void fec_enet_enable_ring(struct net_device *ndev)
@@ -1054,22 +1054,22 @@ static void fec_enet_enable_ring(struct net_device *ndev)
 
 	for (i = 0; i < fep->num_rx_queues; i++) {
 		rxq = fep->rx_queue[i];
-		writel(rxq->bd.dma, fep->hwp + FEC_R_DES_START(i));
-		writel(PKT_MAXBUF_SIZE, fep->hwp + FEC_R_BUFF_SIZE(i));
+		pete_writel("drivers/net/ethernet/freescale/fec_main.c:1057", rxq->bd.dma, fep->hwp + FEC_R_DES_START(i));
+		pete_writel("drivers/net/ethernet/freescale/fec_main.c:1058", PKT_MAXBUF_SIZE, fep->hwp + FEC_R_BUFF_SIZE(i));
 
 		/* enable DMA1/2 */
 		if (i)
-			writel(RCMR_MATCHEN | RCMR_CMP(i),
+			pete_writel("drivers/net/ethernet/freescale/fec_main.c:1062", RCMR_MATCHEN | RCMR_CMP(i),
 			       fep->hwp + FEC_RCMR(i));
 	}
 
 	for (i = 0; i < fep->num_tx_queues; i++) {
 		txq = fep->tx_queue[i];
-		writel(txq->bd.dma, fep->hwp + FEC_X_DES_START(i));
+		pete_writel("drivers/net/ethernet/freescale/fec_main.c:1068", txq->bd.dma, fep->hwp + FEC_X_DES_START(i));
 
 		/* enable DMA1/2 */
 		if (i)
-			writel(DMA_CLASS_EN | IDLE_SLOPE(i),
+			pete_writel("drivers/net/ethernet/freescale/fec_main.c:1072", DMA_CLASS_EN | IDLE_SLOPE(i),
 			       fep->hwp + FEC_DMA_CFG(i));
 	}
 }
@@ -1096,9 +1096,9 @@ fec_restart(struct net_device *ndev)
 	 */
 	if (fep->quirks & FEC_QUIRK_HAS_MULTI_QUEUES ||
 	    ((fep->quirks & FEC_QUIRK_NO_HARD_RESET) && fep->link)) {
-		writel(0, fep->hwp + FEC_ECNTRL);
+		pete_writel("drivers/net/ethernet/freescale/fec_main.c:1099", 0, fep->hwp + FEC_ECNTRL);
 	} else {
-		writel(1, fep->hwp + FEC_ECNTRL);
+		pete_writel("drivers/net/ethernet/freescale/fec_main.c:1101", 1, fep->hwp + FEC_ECNTRL);
 		udelay(10);
 	}
 
@@ -1107,13 +1107,13 @@ fec_restart(struct net_device *ndev)
 	 * so need to reconfigure it.
 	 */
 	memcpy(&temp_mac, ndev->dev_addr, ETH_ALEN);
-	writel((__force u32)cpu_to_be32(temp_mac[0]),
+	pete_writel("drivers/net/ethernet/freescale/fec_main.c:1110", (__force u32)cpu_to_be32(temp_mac[0]),
 	       fep->hwp + FEC_ADDR_LOW);
-	writel((__force u32)cpu_to_be32(temp_mac[1]),
+	pete_writel("drivers/net/ethernet/freescale/fec_main.c:1112", (__force u32)cpu_to_be32(temp_mac[1]),
 	       fep->hwp + FEC_ADDR_HIGH);
 
 	/* Clear any outstanding interrupt, except MDIO. */
-	writel((0xffffffff & ~FEC_ENET_MII), fep->hwp + FEC_IEVENT);
+	pete_writel("drivers/net/ethernet/freescale/fec_main.c:1116", (0xffffffff & ~FEC_ENET_MII), fep->hwp + FEC_IEVENT);
 
 	fec_enet_bd_init(ndev);
 
@@ -1122,19 +1122,19 @@ fec_restart(struct net_device *ndev)
 	/* Enable MII mode */
 	if (fep->full_duplex == DUPLEX_FULL) {
 		/* FD enable */
-		writel(0x04, fep->hwp + FEC_X_CNTRL);
+		pete_writel("drivers/net/ethernet/freescale/fec_main.c:1125", 0x04, fep->hwp + FEC_X_CNTRL);
 	} else {
 		/* No Rcv on Xmit */
 		rcntl |= 0x02;
-		writel(0x0, fep->hwp + FEC_X_CNTRL);
+		pete_writel("drivers/net/ethernet/freescale/fec_main.c:1129", 0x0, fep->hwp + FEC_X_CNTRL);
 	}
 
 	/* Set MII speed */
-	writel(fep->phy_speed, fep->hwp + FEC_MII_SPEED);
+	pete_writel("drivers/net/ethernet/freescale/fec_main.c:1133", fep->phy_speed, fep->hwp + FEC_MII_SPEED);
 
 #if !defined(CONFIG_M5272)
 	if (fep->quirks & FEC_QUIRK_HAS_RACC) {
-		u32 val = readl(fep->hwp + FEC_RACC);
+		u32 val = pete_readl("drivers/net/ethernet/freescale/fec_main.c:1137", fep->hwp + FEC_RACC);
 
 		/* align IP header */
 		val |= FEC_RACC_SHIFT16;
@@ -1143,8 +1143,8 @@ fec_restart(struct net_device *ndev)
 			val |= FEC_RACC_OPTIONS;
 		else
 			val &= ~FEC_RACC_OPTIONS;
-		writel(val, fep->hwp + FEC_RACC);
-		writel(PKT_MAXBUF_SIZE, fep->hwp + FEC_FTRL);
+		pete_writel("drivers/net/ethernet/freescale/fec_main.c:1146", val, fep->hwp + FEC_RACC);
+		pete_writel("drivers/net/ethernet/freescale/fec_main.c:1147", PKT_MAXBUF_SIZE, fep->hwp + FEC_FTRL);
 	}
 #endif
 
@@ -1181,8 +1181,8 @@ fec_restart(struct net_device *ndev)
 		if (fep->quirks & FEC_QUIRK_USE_GASKET) {
 			u32 cfgr;
 			/* disable the gasket and wait */
-			writel(0, fep->hwp + FEC_MIIGSK_ENR);
-			while (readl(fep->hwp + FEC_MIIGSK_ENR) & 4)
+			pete_writel("drivers/net/ethernet/freescale/fec_main.c:1184", 0, fep->hwp + FEC_MIIGSK_ENR);
+			while (pete_readl("drivers/net/ethernet/freescale/fec_main.c:1185", fep->hwp + FEC_MIIGSK_ENR) & 4)
 				udelay(1);
 
 			/*
@@ -1194,10 +1194,10 @@ fec_restart(struct net_device *ndev)
 				? BM_MIIGSK_CFGR_RMII : BM_MIIGSK_CFGR_MII;
 			if (ndev->phydev && ndev->phydev->speed == SPEED_10)
 				cfgr |= BM_MIIGSK_CFGR_FRCONT_10M;
-			writel(cfgr, fep->hwp + FEC_MIIGSK_CFGR);
+			pete_writel("drivers/net/ethernet/freescale/fec_main.c:1197", cfgr, fep->hwp + FEC_MIIGSK_CFGR);
 
 			/* re-enable the gasket */
-			writel(2, fep->hwp + FEC_MIIGSK_ENR);
+			pete_writel("drivers/net/ethernet/freescale/fec_main.c:1200", 2, fep->hwp + FEC_MIIGSK_ENR);
 		}
 #endif
 	}
@@ -1210,32 +1210,32 @@ fec_restart(struct net_device *ndev)
 		rcntl |= FEC_ENET_FCE;
 
 		/* set FIFO threshold parameter to reduce overrun */
-		writel(FEC_ENET_RSEM_V, fep->hwp + FEC_R_FIFO_RSEM);
-		writel(FEC_ENET_RSFL_V, fep->hwp + FEC_R_FIFO_RSFL);
-		writel(FEC_ENET_RAEM_V, fep->hwp + FEC_R_FIFO_RAEM);
-		writel(FEC_ENET_RAFL_V, fep->hwp + FEC_R_FIFO_RAFL);
+		pete_writel("drivers/net/ethernet/freescale/fec_main.c:1213", FEC_ENET_RSEM_V, fep->hwp + FEC_R_FIFO_RSEM);
+		pete_writel("drivers/net/ethernet/freescale/fec_main.c:1214", FEC_ENET_RSFL_V, fep->hwp + FEC_R_FIFO_RSFL);
+		pete_writel("drivers/net/ethernet/freescale/fec_main.c:1215", FEC_ENET_RAEM_V, fep->hwp + FEC_R_FIFO_RAEM);
+		pete_writel("drivers/net/ethernet/freescale/fec_main.c:1216", FEC_ENET_RAFL_V, fep->hwp + FEC_R_FIFO_RAFL);
 
 		/* OPD */
-		writel(FEC_ENET_OPD_V, fep->hwp + FEC_OPD);
+		pete_writel("drivers/net/ethernet/freescale/fec_main.c:1219", FEC_ENET_OPD_V, fep->hwp + FEC_OPD);
 	} else {
 		rcntl &= ~FEC_ENET_FCE;
 	}
 #endif /* !defined(CONFIG_M5272) */
 
-	writel(rcntl, fep->hwp + FEC_R_CNTRL);
+	pete_writel("drivers/net/ethernet/freescale/fec_main.c:1225", rcntl, fep->hwp + FEC_R_CNTRL);
 
 	/* Setup multicast filter. */
 	set_multicast_list(ndev);
 #ifndef CONFIG_M5272
-	writel(0, fep->hwp + FEC_HASH_TABLE_HIGH);
-	writel(0, fep->hwp + FEC_HASH_TABLE_LOW);
+	pete_writel("drivers/net/ethernet/freescale/fec_main.c:1230", 0, fep->hwp + FEC_HASH_TABLE_HIGH);
+	pete_writel("drivers/net/ethernet/freescale/fec_main.c:1231", 0, fep->hwp + FEC_HASH_TABLE_LOW);
 #endif
 
 	if (fep->quirks & FEC_QUIRK_ENET_MAC) {
 		/* enable ENET endian swap */
 		ecntl |= FEC_ECR_BYTESWP;
 		/* enable ENET store and forward mode */
-		writel(FEC_TXWMRK_STRFWD, fep->hwp + FEC_X_WMRK);
+		pete_writel("drivers/net/ethernet/freescale/fec_main.c:1238", FEC_TXWMRK_STRFWD, fep->hwp + FEC_X_WMRK);
 	}
 
 	if (fep->bufdesc_ex)
@@ -1250,11 +1250,11 @@ fec_restart(struct net_device *ndev)
 
 #ifndef CONFIG_M5272
 	/* Enable the MIB statistic event counters */
-	writel(0 << 31, fep->hwp + FEC_MIB_CTRLSTAT);
+	pete_writel("drivers/net/ethernet/freescale/fec_main.c:1253", 0 << 31, fep->hwp + FEC_MIB_CTRLSTAT);
 #endif
 
 	/* And last, enable the transmit and receive processing */
-	writel(ecntl, fep->hwp + FEC_ECNTRL);
+	pete_writel("drivers/net/ethernet/freescale/fec_main.c:1257", ecntl, fep->hwp + FEC_ECNTRL);
 	fec_enet_active_rxring(ndev);
 
 	if (fep->bufdesc_ex) {
@@ -1264,9 +1264,9 @@ fec_restart(struct net_device *ndev)
 
 	/* Enable interrupts we wish to service */
 	if (fep->link)
-		writel(FEC_DEFAULT_IMASK, fep->hwp + FEC_IMASK);
+		pete_writel("drivers/net/ethernet/freescale/fec_main.c:1267", FEC_DEFAULT_IMASK, fep->hwp + FEC_IMASK);
 	else
-		writel(0, fep->hwp + FEC_IMASK);
+		pete_writel("drivers/net/ethernet/freescale/fec_main.c:1269", 0, fep->hwp + FEC_IMASK);
 
 	/* Init the interrupt coalescing */
 	if (fep->quirks & FEC_QUIRK_HAS_COALESCE)
@@ -1325,29 +1325,29 @@ static void fec_irqs_disable(struct net_device *ndev)
 {
 	struct fec_enet_private *fep = netdev_priv(ndev);
 
-	writel(0, fep->hwp + FEC_IMASK);
+	pete_writel("drivers/net/ethernet/freescale/fec_main.c:1328", 0, fep->hwp + FEC_IMASK);
 }
 
 static void fec_irqs_disable_except_wakeup(struct net_device *ndev)
 {
 	struct fec_enet_private *fep = netdev_priv(ndev);
 
-	writel(0, fep->hwp + FEC_IMASK);
-	writel(FEC_ENET_WAKEUP, fep->hwp + FEC_IMASK);
+	pete_writel("drivers/net/ethernet/freescale/fec_main.c:1335", 0, fep->hwp + FEC_IMASK);
+	pete_writel("drivers/net/ethernet/freescale/fec_main.c:1336", FEC_ENET_WAKEUP, fep->hwp + FEC_IMASK);
 }
 
 static void
 fec_stop(struct net_device *ndev)
 {
 	struct fec_enet_private *fep = netdev_priv(ndev);
-	u32 rmii_mode = readl(fep->hwp + FEC_R_CNTRL) & FEC_RCR_RMII;
+	u32 rmii_mode = pete_readl("drivers/net/ethernet/freescale/fec_main.c:1343", fep->hwp + FEC_R_CNTRL) & FEC_RCR_RMII;
 	u32 val;
 
 	/* We cannot expect a graceful transmit stop without link !!! */
 	if (fep->link) {
-		writel(1, fep->hwp + FEC_X_CNTRL); /* Graceful transmit stop */
+		pete_writel("drivers/net/ethernet/freescale/fec_main.c:1348", 1, fep->hwp + FEC_X_CNTRL); /* Graceful transmit stop */
 		udelay(10);
-		if (!(readl(fep->hwp + FEC_IEVENT) & FEC_ENET_GRA))
+		if (!(pete_readl("drivers/net/ethernet/freescale/fec_main.c:1350", fep->hwp + FEC_IEVENT) & FEC_ENET_GRA))
 			netdev_err(ndev, "Graceful transmit stop did not complete!\n");
 	}
 
@@ -1360,30 +1360,30 @@ fec_stop(struct net_device *ndev)
 	 */
 	if (!(fep->wol_flag & FEC_WOL_FLAG_SLEEP_ON)) {
 		if (fep->quirks & FEC_QUIRK_HAS_MULTI_QUEUES) {
-			writel(0, fep->hwp + FEC_ECNTRL);
+			pete_writel("drivers/net/ethernet/freescale/fec_main.c:1363", 0, fep->hwp + FEC_ECNTRL);
 		} else {
-			writel(FEC_ECR_RESET, fep->hwp + FEC_ECNTRL);
+			pete_writel("drivers/net/ethernet/freescale/fec_main.c:1365", FEC_ECR_RESET, fep->hwp + FEC_ECNTRL);
 			udelay(10);
 		}
 	} else {
-		val = readl(fep->hwp + FEC_ECNTRL);
+		val = pete_readl("drivers/net/ethernet/freescale/fec_main.c:1369", fep->hwp + FEC_ECNTRL);
 		val |= (FEC_ECR_MAGICEN | FEC_ECR_SLEEP);
-		writel(val, fep->hwp + FEC_ECNTRL);
+		pete_writel("drivers/net/ethernet/freescale/fec_main.c:1371", val, fep->hwp + FEC_ECNTRL);
 	}
-	writel(fep->phy_speed, fep->hwp + FEC_MII_SPEED);
-	writel(FEC_DEFAULT_IMASK, fep->hwp + FEC_IMASK);
+	pete_writel("drivers/net/ethernet/freescale/fec_main.c:1373", fep->phy_speed, fep->hwp + FEC_MII_SPEED);
+	pete_writel("drivers/net/ethernet/freescale/fec_main.c:1374", FEC_DEFAULT_IMASK, fep->hwp + FEC_IMASK);
 
 	/* We have to keep ENET enabled to have MII interrupt stay working */
 	if (fep->quirks & FEC_QUIRK_ENET_MAC &&
 		!(fep->wol_flag & FEC_WOL_FLAG_SLEEP_ON)) {
-		writel(FEC_ECR_ETHEREN, fep->hwp + FEC_ECNTRL);
-		writel(rmii_mode, fep->hwp + FEC_R_CNTRL);
+		pete_writel("drivers/net/ethernet/freescale/fec_main.c:1379", FEC_ECR_ETHEREN, fep->hwp + FEC_ECNTRL);
+		pete_writel("drivers/net/ethernet/freescale/fec_main.c:1380", rmii_mode, fep->hwp + FEC_R_CNTRL);
 	}
 
 	if (fep->bufdesc_ex) {
-		val = readl(fep->hwp + FEC_ECNTRL);
+		val = pete_readl("drivers/net/ethernet/freescale/fec_main.c:1384", fep->hwp + FEC_ECNTRL);
 		val |= FEC_ECR_EN1588;
-		writel(val, fep->hwp + FEC_ECNTRL);
+		pete_writel("drivers/net/ethernet/freescale/fec_main.c:1386", val, fep->hwp + FEC_ECNTRL);
 
 		fec_ptp_start_cyclecounter(ndev);
 		fec_ptp_restore_state(fep);
@@ -1587,8 +1587,8 @@ tx_buf_done:
 
 	/* ERR006358: Keep the transmitter going */
 	if (bdp != txq->bd.cur &&
-	    readl(txq->bd.reg_desc_active) == 0)
-		writel(0, txq->bd.reg_desc_active);
+	    pete_readl("drivers/net/ethernet/freescale/fec_main.c:1590", txq->bd.reg_desc_active) == 0)
+		pete_writel("drivers/net/ethernet/freescale/fec_main.c:1591", 0, txq->bd.reg_desc_active);
 }
 
 static void fec_enet_tx(struct net_device *ndev, int budget)
@@ -1741,7 +1741,7 @@ fec_enet_rx_queue(struct net_device *ndev, int budget, u16 queue_id)
 			break;
 		pkt_received++;
 
-		writel(FEC_ENET_RXF_GET(queue_id), fep->hwp + FEC_IEVENT);
+		pete_writel("drivers/net/ethernet/freescale/fec_main.c:1744", FEC_ENET_RXF_GET(queue_id), fep->hwp + FEC_IEVENT);
 
 		/* Check for errors. */
 		status ^= BD_ENET_RX_LAST;
@@ -1896,7 +1896,7 @@ rx_processing_done:
 		 * incoming frames.  On a heavily loaded network, we should be
 		 * able to keep up at the expense of system resources.
 		 */
-		writel(0, rxq->bd.reg_desc_active);
+		pete_writel("drivers/net/ethernet/freescale/fec_main.c:1899", 0, rxq->bd.reg_desc_active);
 	}
 	rxq->bd.cur = bdp;
 
@@ -1922,12 +1922,12 @@ static bool fec_enet_collect_events(struct fec_enet_private *fep)
 {
 	uint int_events;
 
-	int_events = readl(fep->hwp + FEC_IEVENT);
+	int_events = pete_readl("drivers/net/ethernet/freescale/fec_main.c:1925", fep->hwp + FEC_IEVENT);
 
 	/* Don't clear MDIO events, we poll for those */
 	int_events &= ~FEC_ENET_MII;
 
-	writel(int_events, fep->hwp + FEC_IEVENT);
+	pete_writel("drivers/net/ethernet/freescale/fec_main.c:1930", int_events, fep->hwp + FEC_IEVENT);
 
 	return int_events != 0;
 }
@@ -1944,7 +1944,7 @@ fec_enet_interrupt(int irq, void *dev_id)
 
 		if (napi_schedule_prep(&fep->napi)) {
 			/* Disable interrupts */
-			writel(0, fep->hwp + FEC_IMASK);
+			pete_writel("drivers/net/ethernet/freescale/fec_main.c:1947", 0, fep->hwp + FEC_IMASK);
 			__napi_schedule(&fep->napi);
 		}
 	}
@@ -1965,7 +1965,7 @@ static int fec_enet_rx_napi(struct napi_struct *napi, int budget)
 
 	if (done < budget) {
 		napi_complete_done(napi, done);
-		writel(FEC_DEFAULT_IMASK, fep->hwp + FEC_IMASK);
+		pete_writel("drivers/net/ethernet/freescale/fec_main.c:1968", FEC_DEFAULT_IMASK, fep->hwp + FEC_IMASK);
 	}
 
 	return done;
@@ -2020,9 +2020,9 @@ static int fec_get_mac(struct net_device *ndev)
 	 */
 	if (!is_valid_ether_addr(iap)) {
 		*((__be32 *) &tmpaddr[0]) =
-			cpu_to_be32(readl(fep->hwp + FEC_ADDR_LOW));
+			cpu_to_be32(pete_readl("drivers/net/ethernet/freescale/fec_main.c:2023", fep->hwp + FEC_ADDR_LOW));
 		*((__be16 *) &tmpaddr[4]) =
-			cpu_to_be16(readl(fep->hwp + FEC_ADDR_HIGH) >> 16);
+			cpu_to_be16(pete_readl("drivers/net/ethernet/freescale/fec_main.c:2025", fep->hwp + FEC_ADDR_HIGH) >> 16);
 		iap = &tmpaddr[0];
 	}
 
@@ -2114,7 +2114,7 @@ static int fec_enet_mdio_wait(struct fec_enet_private *fep)
 					ievent & FEC_ENET_MII, 2, 30000);
 
 	if (!ret)
-		writel(FEC_ENET_MII, fep->hwp + FEC_IEVENT);
+		pete_writel("drivers/net/ethernet/freescale/fec_main.c:2117", FEC_ENET_MII, fep->hwp + FEC_IEVENT);
 
 	return ret;
 }
@@ -2135,7 +2135,7 @@ static int fec_enet_mdio_read_c22(struct mii_bus *bus, int mii_id, int regnum)
 	frame_addr = regnum;
 
 	/* start a read op */
-	writel(frame_start | frame_op |
+	pete_writel("drivers/net/ethernet/freescale/fec_main.c:2138", frame_start | frame_op |
 	       FEC_MMFR_PA(mii_id) | FEC_MMFR_RA(frame_addr) |
 	       FEC_MMFR_TA, fep->hwp + FEC_MII_DATA);
 
@@ -2146,7 +2146,7 @@ static int fec_enet_mdio_read_c22(struct mii_bus *bus, int mii_id, int regnum)
 		goto out;
 	}
 
-	ret = FEC_MMFR_DATA(readl(fep->hwp + FEC_MII_DATA));
+	ret = FEC_MMFR_DATA(pete_readl("drivers/net/ethernet/freescale/fec_main.c:2149", fep->hwp + FEC_MII_DATA));
 
 out:
 	pm_runtime_mark_last_busy(dev);
@@ -2169,7 +2169,7 @@ static int fec_enet_mdio_read_c45(struct mii_bus *bus, int mii_id,
 	frame_start = FEC_MMFR_ST_C45;
 
 	/* write address */
-	writel(frame_start | FEC_MMFR_OP_ADDR_WRITE |
+	pete_writel("drivers/net/ethernet/freescale/fec_main.c:2172", frame_start | FEC_MMFR_OP_ADDR_WRITE |
 	       FEC_MMFR_PA(mii_id) | FEC_MMFR_RA(devad) |
 	       FEC_MMFR_TA | (regnum & 0xFFFF),
 	       fep->hwp + FEC_MII_DATA);
@@ -2184,7 +2184,7 @@ static int fec_enet_mdio_read_c45(struct mii_bus *bus, int mii_id,
 	frame_op = FEC_MMFR_OP_READ_C45;
 
 	/* start a read op */
-	writel(frame_start | frame_op |
+	pete_writel("drivers/net/ethernet/freescale/fec_main.c:2187", frame_start | frame_op |
 	       FEC_MMFR_PA(mii_id) | FEC_MMFR_RA(devad) |
 	       FEC_MMFR_TA, fep->hwp + FEC_MII_DATA);
 
@@ -2195,7 +2195,7 @@ static int fec_enet_mdio_read_c45(struct mii_bus *bus, int mii_id,
 		goto out;
 	}
 
-	ret = FEC_MMFR_DATA(readl(fep->hwp + FEC_MII_DATA));
+	ret = FEC_MMFR_DATA(pete_readl("drivers/net/ethernet/freescale/fec_main.c:2198", fep->hwp + FEC_MII_DATA));
 
 out:
 	pm_runtime_mark_last_busy(dev);
@@ -2220,7 +2220,7 @@ static int fec_enet_mdio_write_c22(struct mii_bus *bus, int mii_id, int regnum,
 	frame_addr = regnum;
 
 	/* start a write op */
-	writel(frame_start | FEC_MMFR_OP_WRITE |
+	pete_writel("drivers/net/ethernet/freescale/fec_main.c:2223", frame_start | FEC_MMFR_OP_WRITE |
 	       FEC_MMFR_PA(mii_id) | FEC_MMFR_RA(frame_addr) |
 	       FEC_MMFR_TA | FEC_MMFR_DATA(value),
 	       fep->hwp + FEC_MII_DATA);
@@ -2250,7 +2250,7 @@ static int fec_enet_mdio_write_c45(struct mii_bus *bus, int mii_id,
 	frame_start = FEC_MMFR_ST_C45;
 
 	/* write address */
-	writel(frame_start | FEC_MMFR_OP_ADDR_WRITE |
+	pete_writel("drivers/net/ethernet/freescale/fec_main.c:2253", frame_start | FEC_MMFR_OP_ADDR_WRITE |
 	       FEC_MMFR_PA(mii_id) | FEC_MMFR_RA(devad) |
 	       FEC_MMFR_TA | (regnum & 0xFFFF),
 	       fep->hwp + FEC_MII_DATA);
@@ -2263,7 +2263,7 @@ static int fec_enet_mdio_write_c45(struct mii_bus *bus, int mii_id,
 	}
 
 	/* start a write op */
-	writel(frame_start | FEC_MMFR_OP_WRITE |
+	pete_writel("drivers/net/ethernet/freescale/fec_main.c:2266", frame_start | FEC_MMFR_OP_WRITE |
 	       FEC_MMFR_PA(mii_id) | FEC_MMFR_RA(devad) |
 	       FEC_MMFR_TA | FEC_MMFR_DATA(value),
 	       fep->hwp + FEC_MII_DATA);
@@ -2549,13 +2549,13 @@ static int fec_enet_mii_init(struct platform_device *pdev)
 		 * - writing MMFR:
 		 *	- mscr[7:0]_not_zero
 		 */
-		writel(0, fep->hwp + FEC_MII_DATA);
+		pete_writel("drivers/net/ethernet/freescale/fec_main.c:2552", 0, fep->hwp + FEC_MII_DATA);
 	}
 
-	writel(fep->phy_speed, fep->hwp + FEC_MII_SPEED);
+	pete_writel("drivers/net/ethernet/freescale/fec_main.c:2555", fep->phy_speed, fep->hwp + FEC_MII_SPEED);
 
 	/* Clear any pending transaction complete indication */
-	writel(FEC_ENET_MII, fep->hwp + FEC_IEVENT);
+	pete_writel("drivers/net/ethernet/freescale/fec_main.c:2558", FEC_ENET_MII, fep->hwp + FEC_IEVENT);
 
 	fep->mii_bus = mdiobus_alloc();
 	if (fep->mii_bus == NULL) {
@@ -2750,7 +2750,7 @@ static void fec_enet_get_regs(struct net_device *ndev,
 			continue;
 
 		off >>= 2;
-		buf[off] = readl(&theregs[off]);
+		buf[off] = pete_readl("drivers/net/ethernet/freescale/fec_main.c:2753", &theregs[off]);
 	}
 
 	pm_runtime_mark_last_busy(dev);
@@ -2922,7 +2922,7 @@ static void fec_enet_update_ethtool_stats(struct net_device *dev)
 	int i;
 
 	for (i = 0; i < ARRAY_SIZE(fec_stats); i++)
-		fep->ethtool_stats[i] = readl(fep->hwp + fec_stats[i].offset);
+		fep->ethtool_stats[i] = pete_readl("drivers/net/ethernet/freescale/fec_main.c:2925", fep->hwp + fec_stats[i].offset);
 }
 
 static void fec_enet_get_xdp_stats(struct fec_enet_private *fep, u64 *data)
@@ -3025,10 +3025,10 @@ static void fec_enet_clear_ethtool_stats(struct net_device *dev)
 	int i, j;
 
 	/* Disable MIB statistics counters */
-	writel(FEC_MIB_CTRLSTAT_DISABLE, fep->hwp + FEC_MIB_CTRLSTAT);
+	pete_writel("drivers/net/ethernet/freescale/fec_main.c:3028", FEC_MIB_CTRLSTAT_DISABLE, fep->hwp + FEC_MIB_CTRLSTAT);
 
 	for (i = 0; i < ARRAY_SIZE(fec_stats); i++)
-		writel(0, fep->hwp + fec_stats[i].offset);
+		pete_writel("drivers/net/ethernet/freescale/fec_main.c:3031", 0, fep->hwp + fec_stats[i].offset);
 
 	for (i = fep->num_rx_queues - 1; i >= 0; i--) {
 		rxq = fep->rx_queue[i];
@@ -3037,7 +3037,7 @@ static void fec_enet_clear_ethtool_stats(struct net_device *dev)
 	}
 
 	/* Don't disable MIB statistics counters */
-	writel(0, fep->hwp + FEC_MIB_CTRLSTAT);
+	pete_writel("drivers/net/ethernet/freescale/fec_main.c:3040", 0, fep->hwp + FEC_MIB_CTRLSTAT);
 }
 
 #else	/* !defined(CONFIG_M5272) */
@@ -3088,13 +3088,13 @@ static void fec_enet_itr_coal_set(struct net_device *ndev)
 	rx_itr |= FEC_ITR_EN;
 	tx_itr |= FEC_ITR_EN;
 
-	writel(tx_itr, fep->hwp + FEC_TXIC0);
-	writel(rx_itr, fep->hwp + FEC_RXIC0);
+	pete_writel("drivers/net/ethernet/freescale/fec_main.c:3091", tx_itr, fep->hwp + FEC_TXIC0);
+	pete_writel("drivers/net/ethernet/freescale/fec_main.c:3092", rx_itr, fep->hwp + FEC_RXIC0);
 	if (fep->quirks & FEC_QUIRK_HAS_MULTI_QUEUES) {
-		writel(tx_itr, fep->hwp + FEC_TXIC1);
-		writel(rx_itr, fep->hwp + FEC_RXIC1);
-		writel(tx_itr, fep->hwp + FEC_TXIC2);
-		writel(rx_itr, fep->hwp + FEC_RXIC2);
+		pete_writel("drivers/net/ethernet/freescale/fec_main.c:3094", tx_itr, fep->hwp + FEC_TXIC1);
+		pete_writel("drivers/net/ethernet/freescale/fec_main.c:3095", rx_itr, fep->hwp + FEC_RXIC1);
+		pete_writel("drivers/net/ethernet/freescale/fec_main.c:3096", tx_itr, fep->hwp + FEC_TXIC2);
+		pete_writel("drivers/net/ethernet/freescale/fec_main.c:3097", rx_itr, fep->hwp + FEC_RXIC2);
 	}
 }
 
@@ -3195,8 +3195,8 @@ static int fec_enet_eee_mode_set(struct net_device *ndev, bool enable)
 	p->eee_enabled = enable;
 	p->eee_active = enable;
 
-	writel(sleep_cycle, fep->hwp + FEC_LPI_SLEEP);
-	writel(wake_cycle, fep->hwp + FEC_LPI_WAKE);
+	pete_writel("drivers/net/ethernet/freescale/fec_main.c:3198", sleep_cycle, fep->hwp + FEC_LPI_SLEEP);
+	pete_writel("drivers/net/ethernet/freescale/fec_main.c:3199", wake_cycle, fep->hwp + FEC_LPI_WAKE);
 
 	return 0;
 }
@@ -3657,22 +3657,22 @@ static void set_multicast_list(struct net_device *ndev)
 	unsigned int hash_high = 0, hash_low = 0;
 
 	if (ndev->flags & IFF_PROMISC) {
-		tmp = readl(fep->hwp + FEC_R_CNTRL);
+		tmp = pete_readl("drivers/net/ethernet/freescale/fec_main.c:3660", fep->hwp + FEC_R_CNTRL);
 		tmp |= 0x8;
-		writel(tmp, fep->hwp + FEC_R_CNTRL);
+		pete_writel("drivers/net/ethernet/freescale/fec_main.c:3662", tmp, fep->hwp + FEC_R_CNTRL);
 		return;
 	}
 
-	tmp = readl(fep->hwp + FEC_R_CNTRL);
+	tmp = pete_readl("drivers/net/ethernet/freescale/fec_main.c:3666", fep->hwp + FEC_R_CNTRL);
 	tmp &= ~0x8;
-	writel(tmp, fep->hwp + FEC_R_CNTRL);
+	pete_writel("drivers/net/ethernet/freescale/fec_main.c:3668", tmp, fep->hwp + FEC_R_CNTRL);
 
 	if (ndev->flags & IFF_ALLMULTI) {
 		/* Catch all multicast addresses, so set the
 		 * filter to all 1's
 		 */
-		writel(0xffffffff, fep->hwp + FEC_GRP_HASH_TABLE_HIGH);
-		writel(0xffffffff, fep->hwp + FEC_GRP_HASH_TABLE_LOW);
+		pete_writel("drivers/net/ethernet/freescale/fec_main.c:3674", 0xffffffff, fep->hwp + FEC_GRP_HASH_TABLE_HIGH);
+		pete_writel("drivers/net/ethernet/freescale/fec_main.c:3675", 0xffffffff, fep->hwp + FEC_GRP_HASH_TABLE_LOW);
 
 		return;
 	}
@@ -3693,8 +3693,8 @@ static void set_multicast_list(struct net_device *ndev)
 			hash_low |= 1 << hash;
 	}
 
-	writel(hash_high, fep->hwp + FEC_GRP_HASH_TABLE_HIGH);
-	writel(hash_low, fep->hwp + FEC_GRP_HASH_TABLE_LOW);
+	pete_writel("drivers/net/ethernet/freescale/fec_main.c:3696", hash_high, fep->hwp + FEC_GRP_HASH_TABLE_HIGH);
+	pete_writel("drivers/net/ethernet/freescale/fec_main.c:3697", hash_low, fep->hwp + FEC_GRP_HASH_TABLE_LOW);
 }
 
 /* Set a MAC change in hardware. */
@@ -3718,10 +3718,10 @@ fec_set_mac_address(struct net_device *ndev, void *p)
 	if (!netif_running(ndev))
 		return 0;
 
-	writel(ndev->dev_addr[3] | (ndev->dev_addr[2] << 8) |
+	pete_writel("drivers/net/ethernet/freescale/fec_main.c:3721", ndev->dev_addr[3] | (ndev->dev_addr[2] << 8) |
 		(ndev->dev_addr[1] << 16) | (ndev->dev_addr[0] << 24),
 		fep->hwp + FEC_ADDR_LOW);
-	writel((ndev->dev_addr[5] << 16) | (ndev->dev_addr[4] << 24),
+	pete_writel("drivers/net/ethernet/freescale/fec_main.c:3724", (ndev->dev_addr[5] << 16) | (ndev->dev_addr[4] << 24),
 		fep->hwp + FEC_ADDR_HIGH);
 	return 0;
 }
@@ -3931,7 +3931,7 @@ static int fec_enet_txq_xmit_frame(struct fec_enet_private *fep,
 	txq->bd.cur = bdp;
 
 	/* Trigger transmission start */
-	writel(0, txq->bd.reg_desc_active);
+	pete_writel("drivers/net/ethernet/freescale/fec_main.c:3934", 0, txq->bd.reg_desc_active);
 
 	return 0;
 }
@@ -4141,7 +4141,7 @@ static int fec_enet_init(struct net_device *ndev)
 	ndev->netdev_ops = &fec_netdev_ops;
 	ndev->ethtool_ops = &fec_enet_ethtool_ops;
 
-	writel(FEC_RX_DISABLED_IMASK, fep->hwp + FEC_IMASK);
+	pete_writel("drivers/net/ethernet/freescale/fec_main.c:4144", FEC_RX_DISABLED_IMASK, fep->hwp + FEC_IMASK);
 	netif_napi_add(ndev, &fep->napi, fec_enet_rx_napi);
 
 	if (fep->quirks & FEC_QUIRK_HAS_VLAN)
@@ -4737,9 +4737,9 @@ static int __maybe_unused fec_resume(struct device *dev)
 				enable_irq(fep->wake_irq);
 			}
 
-			val = readl(fep->hwp + FEC_ECNTRL);
+			val = pete_readl("drivers/net/ethernet/freescale/fec_main.c:4740", fep->hwp + FEC_ECNTRL);
 			val &= ~(FEC_ECR_MAGICEN | FEC_ECR_SLEEP);
-			writel(val, fep->hwp + FEC_ECNTRL);
+			pete_writel("drivers/net/ethernet/freescale/fec_main.c:4742", val, fep->hwp + FEC_ECNTRL);
 			fep->wol_flag &= ~FEC_WOL_FLAG_SLEEP_ON;
 		} else {
 			pinctrl_pm_select_default_state(&fep->pdev->dev);

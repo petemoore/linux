@@ -17,7 +17,7 @@ static irqreturn_t mlxbf_gige_error_intr(int irq, void *dev_id)
 
 	priv = dev_id;
 
-	int_status = readq(priv->base + MLXBF_GIGE_INT_STATUS);
+	int_status = pete_readq("drivers/net/ethernet/mellanox/mlxbf_gige/mlxbf_gige_intr.c:20", priv->base + MLXBF_GIGE_INT_STATUS);
 
 	if (int_status & MLXBF_GIGE_INT_STATUS_HW_ACCESS_ERROR)
 		priv->stats.hw_access_errors++;
@@ -62,7 +62,7 @@ static irqreturn_t mlxbf_gige_error_intr(int irq, void *dev_id)
 
 	int_status &= ~MLXBF_GIGE_INT_STATUS_RX_RECEIVE_PACKET;
 
-	writeq(int_status, priv->base + MLXBF_GIGE_INT_STATUS);
+	pete_writeq("drivers/net/ethernet/mellanox/mlxbf_gige/mlxbf_gige_intr.c:65", int_status, priv->base + MLXBF_GIGE_INT_STATUS);
 
 	return IRQ_HANDLED;
 }

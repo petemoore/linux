@@ -35,7 +35,7 @@
 
 void meson_vpp_setup_mux(struct meson_drm *priv, unsigned int mux)
 {
-	writel(mux, priv->io_base + _REG(VPU_VIU_VENC_MUX_CTRL));
+	pete_writel("drivers/gpu/drm/meson/meson_vpp.c:38", mux, priv->io_base + _REG(VPU_VIU_VENC_MUX_CTRL));
 }
 
 static unsigned int vpp_filter_coefs_4point_bspline[] = {

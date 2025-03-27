@@ -53,7 +53,7 @@ static int rzn1_wdt_ping(struct watchdog_device *w)
 	struct rzn1_watchdog *wdt = watchdog_get_drvdata(w);
 
 	/* Any value retrigggers the watchdog */
-	writel(0, wdt->base + RZN1_WDT_RETRIGGER);
+	pete_writel("drivers/watchdog/rzn1_wdt.c:56", 0, wdt->base + RZN1_WDT_RETRIGGER);
 
 	return 0;
 }
@@ -74,7 +74,7 @@ static int rzn1_wdt_start(struct watchdog_device *w)
 	val |= RZN1_WDT_RETRIGGER_ENABLE;
 	val |= RZN1_WDT_RETRIGGER_PRESCALE;
 	val |= compute_reload_value(w->max_hw_heartbeat_ms, wdt->clk_rate_khz);
-	writel(val, wdt->base + RZN1_WDT_RETRIGGER);
+	pete_writel("drivers/watchdog/rzn1_wdt.c:77", val, wdt->base + RZN1_WDT_RETRIGGER);
 
 	return 0;
 }

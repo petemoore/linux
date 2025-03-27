@@ -241,13 +241,13 @@ static void __iomem *mcq_opr_base(struct ufs_hba *hba,
 
 u32 ufshcd_mcq_read_cqis(struct ufs_hba *hba, int i)
 {
-	return readl(mcq_opr_base(hba, OPR_CQIS, i) + REG_CQIS);
+	return pete_readl("drivers/ufs/core/ufs-mcq.c:244", mcq_opr_base(hba, OPR_CQIS, i) + REG_CQIS);
 }
 EXPORT_SYMBOL_GPL(ufshcd_mcq_read_cqis);
 
 void ufshcd_mcq_write_cqis(struct ufs_hba *hba, u32 val, int i)
 {
-	writel(val, mcq_opr_base(hba, OPR_CQIS, i) + REG_CQIS);
+	pete_writel("drivers/ufs/core/ufs-mcq.c:250", val, mcq_opr_base(hba, OPR_CQIS, i) + REG_CQIS);
 }
 EXPORT_SYMBOL_GPL(ufshcd_mcq_write_cqis);
 
@@ -372,7 +372,7 @@ void ufshcd_mcq_make_queues_operational(struct ufs_hba *hba)
 
 		/* Enable Tail Entry Push Status interrupt only for non-poll queues */
 		if (i < hba->nr_hw_queues - hba->nr_queues[HCTX_TYPE_POLL])
-			writel(1, mcq_opr_base(hba, OPR_CQIS, i) + REG_CQIE);
+			pete_writel("drivers/ufs/core/ufs-mcq.c:375", 1, mcq_opr_base(hba, OPR_CQIS, i) + REG_CQIE);
 
 		/* Completion Queue Enable|Size to Completion Queue Attribute */
 		ufsmcq_writel(hba, (1 << QUEUE_EN_OFFSET) | qsize,
@@ -455,7 +455,7 @@ static int ufshcd_mcq_sq_stop(struct ufs_hba *hba, struct ufs_hw_queue *hwq)
 	if (hba->quirks & UFSHCD_QUIRK_MCQ_BROKEN_RTC)
 		return -ETIMEDOUT;
 
-	writel(SQ_STOP, mcq_opr_base(hba, OPR_SQD, id) + REG_SQRTC);
+	pete_writel("drivers/ufs/core/ufs-mcq.c:458", SQ_STOP, mcq_opr_base(hba, OPR_SQD, id) + REG_SQRTC);
 	reg = mcq_opr_base(hba, OPR_SQD, id) + REG_SQRTS;
 	err = read_poll_timeout(readl, val, val & SQ_STS, 20,
 				MCQ_POLL_US, false, reg);
@@ -474,7 +474,7 @@ static int ufshcd_mcq_sq_start(struct ufs_hba *hba, struct ufs_hw_queue *hwq)
 	if (hba->quirks & UFSHCD_QUIRK_MCQ_BROKEN_RTC)
 		return -ETIMEDOUT;
 
-	writel(SQ_START, mcq_opr_base(hba, OPR_SQD, id) + REG_SQRTC);
+	pete_writel("drivers/ufs/core/ufs-mcq.c:477", SQ_START, mcq_opr_base(hba, OPR_SQD, id) + REG_SQRTC);
 	reg = mcq_opr_base(hba, OPR_SQD, id) + REG_SQRTS;
 	err = read_poll_timeout(readl, val, !(val & SQ_STS), 20,
 				MCQ_POLL_US, false, reg);
@@ -526,17 +526,17 @@ int ufshcd_mcq_sq_cleanup(struct ufs_hba *hba, int task_tag)
 	/* SQCTI = EXT_IID, IID, LUN, Task Tag */
 	nexus = lrbp->lun << 8 | task_tag;
 	opr_sqd_base = mcq_opr_base(hba, OPR_SQD, id);
-	writel(nexus, opr_sqd_base + REG_SQCTI);
+	pete_writel("drivers/ufs/core/ufs-mcq.c:529", nexus, opr_sqd_base + REG_SQCTI);
 
 	/* Initiate Cleanup */
-	writel(readl(opr_sqd_base + REG_SQRTC) | SQ_ICU,
+	pete_writel("drivers/ufs/core/ufs-mcq.c:532", pete_readl("drivers/ufs/core/ufs-mcq.c:532", opr_sqd_base + REG_SQRTC) | SQ_ICU,
 		opr_sqd_base + REG_SQRTC);
 
 	/* Poll SQRTSy.CUS = 1. Return result from SQRTSy.RTC */
 	reg = opr_sqd_base + REG_SQRTS;
 	err = read_poll_timeout(readl, val, val & SQ_CUS, 20,
 				MCQ_POLL_US, false, reg);
-	rtc = FIELD_GET(SQ_ICU_ERR_CODE_MASK, readl(reg));
+	rtc = FIELD_GET(SQ_ICU_ERR_CODE_MASK, pete_readl("drivers/ufs/core/ufs-mcq.c:539", reg));
 	if (err || rtc)
 		dev_err(hba->dev, "%s: failed. hwq=%d, tag=%d err=%d RTC=%d\n",
 			__func__, id, task_tag, err, rtc);

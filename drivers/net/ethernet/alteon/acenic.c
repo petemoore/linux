@@ -561,7 +561,7 @@ static int acenic_probe_one(struct pci_dev *pdev,
 	printk("irq %d\n", pdev->irq);
 
 #ifdef CONFIG_ACENIC_OMIT_TIGON_I
-	if ((readl(&ap->regs->HostCtrl) >> 28) == 4) {
+	if ((pete_readl("drivers/net/ethernet/alteon/acenic.c:564", &ap->regs->HostCtrl) >> 28) == 4) {
 		printk(KERN_ERR "%s: Driver compiled without Tigon I"
 		       " support - NIC disabled\n", dev->name);
 		goto fail_uninit;
@@ -612,15 +612,15 @@ static void acenic_remove_one(struct pci_dev *pdev)
 
 	unregister_netdev(dev);
 
-	writel(readl(&regs->CpuCtrl) | CPU_HALT, &regs->CpuCtrl);
+	pete_writel("drivers/net/ethernet/alteon/acenic.c:615", pete_readl("drivers/net/ethernet/alteon/acenic.c:615", &regs->CpuCtrl) | CPU_HALT, &regs->CpuCtrl);
 	if (ap->version >= 2)
-		writel(readl(&regs->CpuBCtrl) | CPU_HALT, &regs->CpuBCtrl);
+		pete_writel("drivers/net/ethernet/alteon/acenic.c:617", pete_readl("drivers/net/ethernet/alteon/acenic.c:617", &regs->CpuBCtrl) | CPU_HALT, &regs->CpuBCtrl);
 
 	/*
 	 * This clears any pending interrupts
 	 */
-	writel(1, &regs->Mb0Lo);
-	readl(&regs->CpuCtrl);	/* flush */
+	pete_writel("drivers/net/ethernet/alteon/acenic.c:622", 1, &regs->Mb0Lo);
+	pete_readl("drivers/net/ethernet/alteon/acenic.c:623", &regs->CpuCtrl);	/* flush */
 
 	/*
 	 * Make sure no other CPUs are processing interrupts
@@ -847,12 +847,12 @@ static inline void ace_issue_cmd(struct ace_regs __iomem *regs, struct cmd *cmd)
 {
 	u32 idx;
 
-	idx = readl(&regs->CmdPrd);
+	idx = pete_readl("drivers/net/ethernet/alteon/acenic.c:850", &regs->CmdPrd);
 
-	writel(*(u32 *)(cmd), &regs->CmdRng[idx]);
+	pete_writel("drivers/net/ethernet/alteon/acenic.c:852", *(u32 *)(cmd), &regs->CmdRng[idx]);
 	idx = (idx + 1) % CMD_RING_ENTRIES;
 
-	writel(idx, &regs->CmdPrd);
+	pete_writel("drivers/net/ethernet/alteon/acenic.c:855", idx, &regs->CmdPrd);
 }
 
 
@@ -880,8 +880,8 @@ static int ace_init(struct net_device *dev)
 	 * address the `Firmware not running' problem subsequent
 	 * to any crashes involving the NIC
 	 */
-	writel(HW_RESET | (HW_RESET << 24), &regs->HostCtrl);
-	readl(&regs->HostCtrl);		/* PCI write posting */
+	pete_writel("drivers/net/ethernet/alteon/acenic.c:883", HW_RESET | (HW_RESET << 24), &regs->HostCtrl);
+	pete_readl("drivers/net/ethernet/alteon/acenic.c:884", &regs->HostCtrl);		/* PCI write posting */
 	udelay(5);
 
 	/*
@@ -892,22 +892,22 @@ static int ace_init(struct net_device *dev)
 	 * This will most likely need BYTE_SWAP once we switch
 	 * to using __raw_writel()
 	 */
-	writel((WORD_SWAP | CLR_INT | ((WORD_SWAP | CLR_INT) << 24)),
+	pete_writel("drivers/net/ethernet/alteon/acenic.c:895", (WORD_SWAP | CLR_INT | ((WORD_SWAP | CLR_INT) << 24)),
 	       &regs->HostCtrl);
 #else
-	writel((CLR_INT | WORD_SWAP | ((CLR_INT | WORD_SWAP) << 24)),
+	pete_writel("drivers/net/ethernet/alteon/acenic.c:898", (CLR_INT | WORD_SWAP | ((CLR_INT | WORD_SWAP) << 24)),
 	       &regs->HostCtrl);
 #endif
-	readl(&regs->HostCtrl);		/* PCI write posting */
+	pete_readl("drivers/net/ethernet/alteon/acenic.c:901", &regs->HostCtrl);		/* PCI write posting */
 
 	/*
 	 * Stop the NIC CPU and clear pending interrupts
 	 */
-	writel(readl(&regs->CpuCtrl) | CPU_HALT, &regs->CpuCtrl);
-	readl(&regs->CpuCtrl);		/* PCI write posting */
-	writel(0, &regs->Mb0Lo);
+	pete_writel("drivers/net/ethernet/alteon/acenic.c:906", pete_readl("drivers/net/ethernet/alteon/acenic.c:906", &regs->CpuCtrl) | CPU_HALT, &regs->CpuCtrl);
+	pete_readl("drivers/net/ethernet/alteon/acenic.c:907", &regs->CpuCtrl);		/* PCI write posting */
+	pete_writel("drivers/net/ethernet/alteon/acenic.c:908", 0, &regs->Mb0Lo);
 
-	tig_ver = readl(&regs->HostCtrl) >> 28;
+	tig_ver = pete_readl("drivers/net/ethernet/alteon/acenic.c:910", &regs->HostCtrl) >> 28;
 
 	switch(tig_ver){
 #ifndef CONFIG_ACENIC_OMIT_TIGON_I
@@ -916,7 +916,7 @@ static int ace_init(struct net_device *dev)
 		printk(KERN_INFO "  Tigon I  (Rev. %i), Firmware: %i.%i.%i, ",
 		       tig_ver, ap->firmware_major, ap->firmware_minor,
 		       ap->firmware_fix);
-		writel(0, &regs->LocalCtrl);
+		pete_writel("drivers/net/ethernet/alteon/acenic.c:919", 0, &regs->LocalCtrl);
 		ap->version = 1;
 		ap->tx_ring_entries = TIGON_I_TX_RING_ENTRIES;
 		break;
@@ -925,15 +925,15 @@ static int ace_init(struct net_device *dev)
 		printk(KERN_INFO "  Tigon II (Rev. %i), Firmware: %i.%i.%i, ",
 		       tig_ver, ap->firmware_major, ap->firmware_minor,
 		       ap->firmware_fix);
-		writel(readl(&regs->CpuBCtrl) | CPU_HALT, &regs->CpuBCtrl);
-		readl(&regs->CpuBCtrl);		/* PCI write posting */
+		pete_writel("drivers/net/ethernet/alteon/acenic.c:928", pete_readl("drivers/net/ethernet/alteon/acenic.c:928", &regs->CpuBCtrl) | CPU_HALT, &regs->CpuBCtrl);
+		pete_readl("drivers/net/ethernet/alteon/acenic.c:929", &regs->CpuBCtrl);		/* PCI write posting */
 		/*
 		 * The SRAM bank size does _not_ indicate the amount
 		 * of memory on the card, it controls the _bank_ size!
 		 * Ie. a 1MB AceNIC will have two banks of 512KB.
 		 */
-		writel(SRAM_BANK_512K, &regs->LocalCtrl);
-		writel(SYNC_SRAM_TIMING, &regs->MiscCfg);
+		pete_writel("drivers/net/ethernet/alteon/acenic.c:935", SRAM_BANK_512K, &regs->LocalCtrl);
+		pete_writel("drivers/net/ethernet/alteon/acenic.c:936", SYNC_SRAM_TIMING, &regs->MiscCfg);
 		ap->version = 2;
 		ap->tx_ring_entries = MAX_TX_RING_ENTRIES;
 		break;
@@ -952,13 +952,13 @@ static int ace_init(struct net_device *dev)
 	 * `Firmware not running' problem on the Tigon II.
 	 */
 #ifdef __BIG_ENDIAN
-	writel(ACE_BYTE_SWAP_DMA | ACE_WARN | ACE_FATAL | ACE_BYTE_SWAP_BD |
+	pete_writel("drivers/net/ethernet/alteon/acenic.c:955", ACE_BYTE_SWAP_DMA | ACE_WARN | ACE_FATAL | ACE_BYTE_SWAP_BD |
 	       ACE_WORD_SWAP_BD | ACE_NO_JUMBO_FRAG, &regs->ModeStat);
 #else
-	writel(ACE_BYTE_SWAP_DMA | ACE_WARN | ACE_FATAL |
+	pete_writel("drivers/net/ethernet/alteon/acenic.c:958", ACE_BYTE_SWAP_DMA | ACE_WARN | ACE_FATAL |
 	       ACE_WORD_SWAP_BD | ACE_NO_JUMBO_FRAG, &regs->ModeStat);
 #endif
-	readl(&regs->ModeStat);		/* PCI write posting */
+	pete_readl("drivers/net/ethernet/alteon/acenic.c:961", &regs->ModeStat);		/* PCI write posting */
 
 	mac1 = 0;
 	for(i = 0; i < 4; i++) {
@@ -985,8 +985,8 @@ static int ace_init(struct net_device *dev)
 			mac2 |= (t & 0xff);
 	}
 
-	writel(mac1, &regs->MacAddrHi);
-	writel(mac2, &regs->MacAddrLo);
+	pete_writel("drivers/net/ethernet/alteon/acenic.c:988", mac1, &regs->MacAddrHi);
+	pete_writel("drivers/net/ethernet/alteon/acenic.c:989", mac2, &regs->MacAddrLo);
 
 	addr[0] = (mac1 >> 8) & 0xff;
 	addr[1] = mac1 & 0xff;
@@ -1019,7 +1019,7 @@ static int ace_init(struct net_device *dev)
 		}
 	}
 
-	pci_state = readl(&regs->PciState);
+	pci_state = pete_readl("drivers/net/ethernet/alteon/acenic.c:1022", &regs->PciState);
 	printk(KERN_INFO "  PCI bus width: %i bits, speed: %iMHz, "
 	       "latency: %i clks\n",
 	       	(pci_state & PCI_32BIT) ? 32 : 64,
@@ -1105,7 +1105,7 @@ static int ace_init(struct net_device *dev)
 	 */
 	tmp |= DMA_WRITE_MAX_128;
 #endif
-	writel(tmp, &regs->PciState);
+	pete_writel("drivers/net/ethernet/alteon/acenic.c:1108", tmp, &regs->PciState);
 
 #if 0
 	/*
@@ -1177,8 +1177,8 @@ static int ace_init(struct net_device *dev)
 	ap->fw_running = 0;
 
 	tmp_ptr = ap->info_dma;
-	writel(tmp_ptr >> 32, &regs->InfoPtrHi);
-	writel(tmp_ptr & 0xffffffff, &regs->InfoPtrLo);
+	pete_writel("drivers/net/ethernet/alteon/acenic.c:1180", tmp_ptr >> 32, &regs->InfoPtrHi);
+	pete_writel("drivers/net/ethernet/alteon/acenic.c:1181", tmp_ptr & 0xffffffff, &regs->InfoPtrLo);
 
 	memset(ap->evt_ring, 0, EVT_RING_ENTRIES * sizeof(struct event));
 
@@ -1188,17 +1188,17 @@ static int ace_init(struct net_device *dev)
 	*(ap->evt_prd) = 0;
 	wmb();
 	set_aceaddr(&info->evt_prd_ptr, ap->evt_prd_dma);
-	writel(0, &regs->EvtCsm);
+	pete_writel("drivers/net/ethernet/alteon/acenic.c:1191", 0, &regs->EvtCsm);
 
 	set_aceaddr(&info->cmd_ctrl.rngptr, 0x100);
 	info->cmd_ctrl.flags = 0;
 	info->cmd_ctrl.max_len = 0;
 
 	for (i = 0; i < CMD_RING_ENTRIES; i++)
-		writel(0, &regs->CmdRng[i]);
+		pete_writel("drivers/net/ethernet/alteon/acenic.c:1198", 0, &regs->CmdRng[i]);
 
-	writel(0, &regs->CmdPrd);
-	writel(0, &regs->CmdCsm);
+	pete_writel("drivers/net/ethernet/alteon/acenic.c:1200", 0, &regs->CmdPrd);
+	pete_writel("drivers/net/ethernet/alteon/acenic.c:1201", 0, &regs->CmdCsm);
 
 	tmp_ptr = ap->info_dma;
 	tmp_ptr += (unsigned long) &(((struct ace_info *)0)->s.stats);
@@ -1274,13 +1274,13 @@ static int ace_init(struct net_device *dev)
 	set_aceaddr(&info->rx_ret_prd_ptr, ap->rx_ret_prd_dma);
 	*(ap->rx_ret_prd) = 0;
 
-	writel(TX_RING_BASE, &regs->WinBase);
+	pete_writel("drivers/net/ethernet/alteon/acenic.c:1277", TX_RING_BASE, &regs->WinBase);
 
 	if (ACE_IS_TIGON_I(ap)) {
 		ap->tx_ring = (__force struct tx_desc *) regs->Window;
 		for (i = 0; i < (TIGON_I_TX_RING_ENTRIES
 				 * sizeof(struct tx_desc)) / sizeof(u32); i++)
-			writel(0, (__force void __iomem *)ap->tx_ring  + i * 4);
+			pete_writel("drivers/net/ethernet/alteon/acenic.c:1283", 0, (__force void __iomem *)ap->tx_ring  + i * 4);
 
 		set_aceaddr(&info->tx_ctrl.rngptr, TX_RING_BASE);
 	} else {
@@ -1309,25 +1309,25 @@ static int ace_init(struct net_device *dev)
 	 * Potential item for tuning parameter
 	 */
 #if 0 /* NO */
-	writel(DMA_THRESH_16W, &regs->DmaReadCfg);
-	writel(DMA_THRESH_16W, &regs->DmaWriteCfg);
+	pete_writel("drivers/net/ethernet/alteon/acenic.c:1312", DMA_THRESH_16W, &regs->DmaReadCfg);
+	pete_writel("drivers/net/ethernet/alteon/acenic.c:1313", DMA_THRESH_16W, &regs->DmaWriteCfg);
 #else
-	writel(DMA_THRESH_8W, &regs->DmaReadCfg);
-	writel(DMA_THRESH_8W, &regs->DmaWriteCfg);
+	pete_writel("drivers/net/ethernet/alteon/acenic.c:1315", DMA_THRESH_8W, &regs->DmaReadCfg);
+	pete_writel("drivers/net/ethernet/alteon/acenic.c:1316", DMA_THRESH_8W, &regs->DmaWriteCfg);
 #endif
 
-	writel(0, &regs->MaskInt);
-	writel(1, &regs->IfIdx);
+	pete_writel("drivers/net/ethernet/alteon/acenic.c:1319", 0, &regs->MaskInt);
+	pete_writel("drivers/net/ethernet/alteon/acenic.c:1320", 1, &regs->IfIdx);
 #if 0
 	/*
 	 * McKinley boxes do not like us fiddling with AssistState
 	 * this early
 	 */
-	writel(1, &regs->AssistState);
+	pete_writel("drivers/net/ethernet/alteon/acenic.c:1326", 1, &regs->AssistState);
 #endif
 
-	writel(DEF_STAT, &regs->TuneStatTicks);
-	writel(DEF_TRACE, &regs->TuneTrace);
+	pete_writel("drivers/net/ethernet/alteon/acenic.c:1329", DEF_STAT, &regs->TuneStatTicks);
+	pete_writel("drivers/net/ethernet/alteon/acenic.c:1330", DEF_TRACE, &regs->TuneTrace);
 
 	ace_set_rxtx_parms(dev, 0);
 
@@ -1337,22 +1337,22 @@ static int ace_init(struct net_device *dev)
 		       ap->name, ACE_MAX_MOD_PARMS);
 	} else if (board_idx >= 0) {
 		if (tx_coal_tick[board_idx])
-			writel(tx_coal_tick[board_idx],
+			pete_writel("drivers/net/ethernet/alteon/acenic.c:1340", tx_coal_tick[board_idx],
 			       &regs->TuneTxCoalTicks);
 		if (max_tx_desc[board_idx])
-			writel(max_tx_desc[board_idx], &regs->TuneMaxTxDesc);
+			pete_writel("drivers/net/ethernet/alteon/acenic.c:1343", max_tx_desc[board_idx], &regs->TuneMaxTxDesc);
 
 		if (rx_coal_tick[board_idx])
-			writel(rx_coal_tick[board_idx],
+			pete_writel("drivers/net/ethernet/alteon/acenic.c:1346", rx_coal_tick[board_idx],
 			       &regs->TuneRxCoalTicks);
 		if (max_rx_desc[board_idx])
-			writel(max_rx_desc[board_idx], &regs->TuneMaxRxDesc);
+			pete_writel("drivers/net/ethernet/alteon/acenic.c:1349", max_rx_desc[board_idx], &regs->TuneMaxRxDesc);
 
 		if (trace[board_idx])
-			writel(trace[board_idx], &regs->TuneTrace);
+			pete_writel("drivers/net/ethernet/alteon/acenic.c:1352", trace[board_idx], &regs->TuneTrace);
 
 		if ((tx_ratio[board_idx] > 0) && (tx_ratio[board_idx] < 64))
-			writel(tx_ratio[board_idx], &regs->TxBufRat);
+			pete_writel("drivers/net/ethernet/alteon/acenic.c:1355", tx_ratio[board_idx], &regs->TxBufRat);
 	}
 
 	/*
@@ -1405,13 +1405,13 @@ static int ace_init(struct net_device *dev)
 	}
 
 	ap->link = tmp;
-	writel(tmp, &regs->TuneLink);
+	pete_writel("drivers/net/ethernet/alteon/acenic.c:1408", tmp, &regs->TuneLink);
 	if (ap->version >= 2)
-		writel(tmp, &regs->TuneFastLink);
+		pete_writel("drivers/net/ethernet/alteon/acenic.c:1410", tmp, &regs->TuneFastLink);
 
-	writel(ap->firmware_start, &regs->Pc);
+	pete_writel("drivers/net/ethernet/alteon/acenic.c:1412", ap->firmware_start, &regs->Pc);
 
-	writel(0, &regs->Mb0Lo);
+	pete_writel("drivers/net/ethernet/alteon/acenic.c:1414", 0, &regs->Mb0Lo);
 
 	/*
 	 * Set tx_csm before we start receiving interrupts, otherwise
@@ -1424,7 +1424,7 @@ static int ace_init(struct net_device *dev)
 
 	wmb();
 	ace_set_txprd(regs, ap, 0);
-	writel(0, &regs->RxRetCsm);
+	pete_writel("drivers/net/ethernet/alteon/acenic.c:1427", 0, &regs->RxRetCsm);
 
 	/*
 	 * Enable DMA engine now.
@@ -1432,13 +1432,13 @@ static int ace_init(struct net_device *dev)
 	 * I assume it's because Tigon II DMA engine wants to check
 	 * *something* even before the CPU is started.
 	 */
-	writel(1, &regs->AssistState);  /* enable DMA */
+	pete_writel("drivers/net/ethernet/alteon/acenic.c:1435", 1, &regs->AssistState);  /* enable DMA */
 
 	/*
 	 * Start the NIC CPU
 	 */
-	writel(readl(&regs->CpuCtrl) & ~(CPU_HALT|CPU_TRACE), &regs->CpuCtrl);
-	readl(&regs->CpuCtrl);
+	pete_writel("drivers/net/ethernet/alteon/acenic.c:1440", pete_readl("drivers/net/ethernet/alteon/acenic.c:1440", &regs->CpuCtrl) & ~(CPU_HALT|CPU_TRACE), &regs->CpuCtrl);
+	pete_readl("drivers/net/ethernet/alteon/acenic.c:1441", &regs->CpuCtrl);
 
 	/*
 	 * Wait for the firmware to spin up - max 3 seconds.
@@ -1451,8 +1451,8 @@ static int ace_init(struct net_device *dev)
 		printk(KERN_ERR "%s: Firmware NOT running!\n", ap->name);
 
 		ace_dump_trace(ap);
-		writel(readl(&regs->CpuCtrl) | CPU_HALT, &regs->CpuCtrl);
-		readl(&regs->CpuCtrl);
+		pete_writel("drivers/net/ethernet/alteon/acenic.c:1454", pete_readl("drivers/net/ethernet/alteon/acenic.c:1454", &regs->CpuCtrl) | CPU_HALT, &regs->CpuCtrl);
+		pete_readl("drivers/net/ethernet/alteon/acenic.c:1455", &regs->CpuCtrl);
 
 		/* aman@sgi.com - account for badly behaving firmware/NIC:
 		 * - have observed that the NIC may continue to generate
@@ -1464,10 +1464,10 @@ static int ace_init(struct net_device *dev)
 		 *   gone and OOps! - so free_irq also
 		 */
 		if (ap->version >= 2)
-			writel(readl(&regs->CpuBCtrl) | CPU_HALT,
+			pete_writel("drivers/net/ethernet/alteon/acenic.c:1467", pete_readl("drivers/net/ethernet/alteon/acenic.c:1467", &regs->CpuBCtrl) | CPU_HALT,
 			       &regs->CpuBCtrl);
-		writel(0, &regs->Mb0Lo);
-		readl(&regs->Mb0Lo);
+		pete_writel("drivers/net/ethernet/alteon/acenic.c:1469", 0, &regs->Mb0Lo);
+		pete_readl("drivers/net/ethernet/alteon/acenic.c:1470", &regs->Mb0Lo);
 
 		ecode = -EBUSY;
 		goto init_error;
@@ -1506,30 +1506,30 @@ static void ace_set_rxtx_parms(struct net_device *dev, int jumbo)
 	if (board_idx >= 0) {
 		if (!jumbo) {
 			if (!tx_coal_tick[board_idx])
-				writel(DEF_TX_COAL, &regs->TuneTxCoalTicks);
+				pete_writel("drivers/net/ethernet/alteon/acenic.c:1509", DEF_TX_COAL, &regs->TuneTxCoalTicks);
 			if (!max_tx_desc[board_idx])
-				writel(DEF_TX_MAX_DESC, &regs->TuneMaxTxDesc);
+				pete_writel("drivers/net/ethernet/alteon/acenic.c:1511", DEF_TX_MAX_DESC, &regs->TuneMaxTxDesc);
 			if (!rx_coal_tick[board_idx])
-				writel(DEF_RX_COAL, &regs->TuneRxCoalTicks);
+				pete_writel("drivers/net/ethernet/alteon/acenic.c:1513", DEF_RX_COAL, &regs->TuneRxCoalTicks);
 			if (!max_rx_desc[board_idx])
-				writel(DEF_RX_MAX_DESC, &regs->TuneMaxRxDesc);
+				pete_writel("drivers/net/ethernet/alteon/acenic.c:1515", DEF_RX_MAX_DESC, &regs->TuneMaxRxDesc);
 			if (!tx_ratio[board_idx])
-				writel(DEF_TX_RATIO, &regs->TxBufRat);
+				pete_writel("drivers/net/ethernet/alteon/acenic.c:1517", DEF_TX_RATIO, &regs->TxBufRat);
 		} else {
 			if (!tx_coal_tick[board_idx])
-				writel(DEF_JUMBO_TX_COAL,
+				pete_writel("drivers/net/ethernet/alteon/acenic.c:1520", DEF_JUMBO_TX_COAL,
 				       &regs->TuneTxCoalTicks);
 			if (!max_tx_desc[board_idx])
-				writel(DEF_JUMBO_TX_MAX_DESC,
+				pete_writel("drivers/net/ethernet/alteon/acenic.c:1523", DEF_JUMBO_TX_MAX_DESC,
 				       &regs->TuneMaxTxDesc);
 			if (!rx_coal_tick[board_idx])
-				writel(DEF_JUMBO_RX_COAL,
+				pete_writel("drivers/net/ethernet/alteon/acenic.c:1526", DEF_JUMBO_RX_COAL,
 				       &regs->TuneRxCoalTicks);
 			if (!max_rx_desc[board_idx])
-				writel(DEF_JUMBO_RX_MAX_DESC,
+				pete_writel("drivers/net/ethernet/alteon/acenic.c:1529", DEF_JUMBO_RX_MAX_DESC,
 				       &regs->TuneMaxRxDesc);
 			if (!tx_ratio[board_idx])
-				writel(DEF_JUMBO_TX_RATIO, &regs->TxBufRat);
+				pete_writel("drivers/net/ethernet/alteon/acenic.c:1532", DEF_JUMBO_TX_RATIO, &regs->TxBufRat);
 		}
 	}
 }
@@ -1548,7 +1548,7 @@ static void ace_watchdog(struct net_device *data, unsigned int txqueue)
 	 */
 	if (*ap->tx_csm != ap->tx_ret_csm) {
 		printk(KERN_WARNING "%s: Transmitter is stuck, %08x\n",
-		       dev->name, (unsigned int)readl(&regs->HostCtrl));
+		       dev->name, (unsigned int)pete_readl("drivers/net/ethernet/alteon/acenic.c:1551", &regs->HostCtrl));
 		/* This can happen due to ieee flow control. */
 	} else {
 		printk(KERN_DEBUG "%s: BUG... transmitter died. Kicking it.\n",
@@ -1667,7 +1667,7 @@ static void ace_load_std_rx_ring(struct net_device *dev, int nr_bufs)
 		cmd.idx = ap->rx_std_skbprd;
 		ace_issue_cmd(regs, &cmd);
 	} else {
-		writel(idx, &regs->RxStdPrd);
+		pete_writel("drivers/net/ethernet/alteon/acenic.c:1670", idx, &regs->RxStdPrd);
 		wmb();
 	}
 
@@ -1722,7 +1722,7 @@ static void ace_load_mini_rx_ring(struct net_device *dev, int nr_bufs)
 
 	ap->rx_mini_skbprd = idx;
 
-	writel(idx, &regs->RxMiniPrd);
+	pete_writel("drivers/net/ethernet/alteon/acenic.c:1725", idx, &regs->RxMiniPrd);
 	wmb();
 
  out:
@@ -1784,7 +1784,7 @@ static void ace_load_jumbo_rx_ring(struct net_device *dev, int nr_bufs)
 		cmd.idx = ap->rx_jumbo_skbprd;
 		ace_issue_cmd(regs, &cmd);
 	} else {
-		writel(idx, &regs->RxJumboPrd);
+		pete_writel("drivers/net/ethernet/alteon/acenic.c:1787", idx, &regs->RxJumboPrd);
 		wmb();
 	}
 
@@ -1826,7 +1826,7 @@ static u32 ace_handle_event(struct net_device *dev, u32 evtcsm, u32 evtprd)
 			switch (code) {
 			case E_C_LINK_UP:
 			{
-				u32 state = readl(&ap->regs->GigLnkState);
+				u32 state = pete_readl("drivers/net/ethernet/alteon/acenic.c:1829", &ap->regs->GigLnkState);
 				printk(KERN_WARNING "%s: Optical link UP "
 				       "(%s Duplex, Flow Control: %s%s)\n",
 				       ap->name,
@@ -1887,7 +1887,7 @@ static u32 ace_handle_event(struct net_device *dev, u32 evtcsm, u32 evtprd)
 				cmd.idx = 0;
 				ace_issue_cmd(ap->regs, &cmd);
 			} else {
-				writel(0, &((ap->regs)->RxJumboPrd));
+				pete_writel("drivers/net/ethernet/alteon/acenic.c:1890", 0, &((ap->regs)->RxJumboPrd));
 				wmb();
 			}
 
@@ -2013,7 +2013,7 @@ static void ace_rx_int(struct net_device *dev, u32 rxretprd, u32 rxretcsm)
 	 * the 12.3.x Firmware - my Tigon I NICs seem to disagree!
 	 */
 	if (ACE_IS_TIGON_I(ap)) {
-		writel(idx, &ap->regs->RxRetCsm);
+		pete_writel("drivers/net/ethernet/alteon/acenic.c:2016", idx, &ap->regs->RxRetCsm);
 	}
 	ap->cur_rx = idx;
 
@@ -2104,19 +2104,19 @@ static irqreturn_t ace_interrupt(int irq, void *dev_id)
 	 * we want to make sure it is actually our interrupt before
 	 * spending any time in here.
 	 */
-	if (!(readl(&regs->HostCtrl) & IN_INT))
+	if (!(pete_readl("drivers/net/ethernet/alteon/acenic.c:2107", &regs->HostCtrl) & IN_INT))
 		return IRQ_NONE;
 
 	/*
 	 * ACK intr now. Otherwise we will lose updates to rx_ret_prd,
 	 * which happened _after_ rxretprd = *ap->rx_ret_prd; but before
-	 * writel(0, &regs->Mb0Lo).
+	 * pete_writel("drivers/net/ethernet/alteon/acenic.c:2113", 0, &regs->Mb0Lo).
 	 *
 	 * "IRQ avoidance" recommended in docs applies to IRQs served
 	 * threads and it is wrong even for that case.
 	 */
-	writel(0, &regs->Mb0Lo);
-	readl(&regs->Mb0Lo);
+	pete_writel("drivers/net/ethernet/alteon/acenic.c:2118", 0, &regs->Mb0Lo);
+	pete_readl("drivers/net/ethernet/alteon/acenic.c:2119", &regs->Mb0Lo);
 
 	/*
 	 * There is no conflict between transmit handling in
@@ -2146,12 +2146,12 @@ static irqreturn_t ace_interrupt(int irq, void *dev_id)
 			ace_tx_int(dev, txcsm, idx);
 	}
 
-	evtcsm = readl(&regs->EvtCsm);
+	evtcsm = pete_readl("drivers/net/ethernet/alteon/acenic.c:2149", &regs->EvtCsm);
 	evtprd = *ap->evt_prd;
 
 	if (evtcsm != evtprd) {
 		evtcsm = ace_handle_event(dev, evtcsm, evtprd);
-		writel(evtcsm, &regs->EvtCsm);
+		pete_writel("drivers/net/ethernet/alteon/acenic.c:2154", evtcsm, &regs->EvtCsm);
 	}
 
 	/*
@@ -2228,7 +2228,7 @@ static int ace_open(struct net_device *dev)
 		return -EBUSY;
 	}
 
-	writel(dev->mtu + ETH_HLEN + 4, &regs->IfMtu);
+	pete_writel("drivers/net/ethernet/alteon/acenic.c:2231", dev->mtu + ETH_HLEN + 4, &regs->IfMtu);
 
 	cmd.evt = C_CLEAR_STATS;
 	cmd.code = 0;
@@ -2323,9 +2323,9 @@ static int ace_close(struct net_device *dev)
 				/* NB: TIGON_1 is special, tx_ring is in io space */
 				struct tx_desc __iomem *tx;
 				tx = (__force struct tx_desc __iomem *) &ap->tx_ring[i];
-				writel(0, &tx->addr.addrhi);
-				writel(0, &tx->addr.addrlo);
-				writel(0, &tx->flagsize);
+				pete_writel("drivers/net/ethernet/alteon/acenic.c:2326", 0, &tx->addr.addrhi);
+				pete_writel("drivers/net/ethernet/alteon/acenic.c:2327", 0, &tx->addr.addrlo);
+				pete_writel("drivers/net/ethernet/alteon/acenic.c:2328", 0, &tx->flagsize);
 			} else
 				memset(ap->tx_ring + i, 0,
 				       sizeof(struct tx_desc));
@@ -2384,10 +2384,10 @@ ace_load_tx_bd(struct ace_private *ap, struct tx_desc *desc, u64 addr,
 
 	if (ACE_IS_TIGON_I(ap)) {
 		struct tx_desc __iomem *io = (__force struct tx_desc __iomem *) desc;
-		writel(addr >> 32, &io->addr.addrhi);
-		writel(addr & 0xffffffff, &io->addr.addrlo);
-		writel(flagsize, &io->flagsize);
-		writel(vlan_tag, &io->vlanres);
+		pete_writel("drivers/net/ethernet/alteon/acenic.c:2387", addr >> 32, &io->addr.addrhi);
+		pete_writel("drivers/net/ethernet/alteon/acenic.c:2388", addr & 0xffffffff, &io->addr.addrlo);
+		pete_writel("drivers/net/ethernet/alteon/acenic.c:2389", flagsize, &io->flagsize);
+		pete_writel("drivers/net/ethernet/alteon/acenic.c:2390", vlan_tag, &io->vlanres);
 	} else {
 		desc->addr.addrhi = addr >> 32;
 		desc->addr.addrlo = addr;
@@ -2538,7 +2538,7 @@ static int ace_change_mtu(struct net_device *dev, int new_mtu)
 	struct ace_private *ap = netdev_priv(dev);
 	struct ace_regs __iomem *regs = ap->regs;
 
-	writel(new_mtu + ETH_HLEN + 4, &regs->IfMtu);
+	pete_writel("drivers/net/ethernet/alteon/acenic.c:2541", new_mtu + ETH_HLEN + 4, &regs->IfMtu);
 	dev->mtu = new_mtu;
 
 	if (new_mtu > ACE_STD_MTU) {
@@ -2584,11 +2584,11 @@ static int ace_get_link_ksettings(struct net_device *dev,
 
 	cmd->base.port = PORT_FIBRE;
 
-	link = readl(&regs->GigLnkState);
+	link = pete_readl("drivers/net/ethernet/alteon/acenic.c:2587", &regs->GigLnkState);
 	if (link & LNK_1000MB) {
 		cmd->base.speed = SPEED_1000;
 	} else {
-		link = readl(&regs->FastLnkState);
+		link = pete_readl("drivers/net/ethernet/alteon/acenic.c:2591", &regs->FastLnkState);
 		if (link & LNK_100MB)
 			cmd->base.speed = SPEED_100;
 		else if (link & LNK_10MB)
@@ -2610,10 +2610,10 @@ static int ace_get_link_ksettings(struct net_device *dev,
 	/*
 	 * Current struct ethtool_cmd is insufficient
 	 */
-	ecmd->trace = readl(&regs->TuneTrace);
+	ecmd->trace = pete_readl("drivers/net/ethernet/alteon/acenic.c:2613", &regs->TuneTrace);
 
-	ecmd->txcoal = readl(&regs->TuneTxCoalTicks);
-	ecmd->rxcoal = readl(&regs->TuneRxCoalTicks);
+	ecmd->txcoal = pete_readl("drivers/net/ethernet/alteon/acenic.c:2615", &regs->TuneTxCoalTicks);
+	ecmd->rxcoal = pete_readl("drivers/net/ethernet/alteon/acenic.c:2616", &regs->TuneRxCoalTicks);
 #endif
 
 	ethtool_convert_legacy_u32_to_link_mode(cmd->link_modes.supported,
@@ -2629,11 +2629,11 @@ static int ace_set_link_ksettings(struct net_device *dev,
 	struct ace_regs __iomem *regs = ap->regs;
 	u32 link, speed;
 
-	link = readl(&regs->GigLnkState);
+	link = pete_readl("drivers/net/ethernet/alteon/acenic.c:2632", &regs->GigLnkState);
 	if (link & LNK_1000MB)
 		speed = SPEED_1000;
 	else {
-		link = readl(&regs->FastLnkState);
+		link = pete_readl("drivers/net/ethernet/alteon/acenic.c:2636", &regs->FastLnkState);
 		if (link & LNK_100MB)
 			speed = SPEED_100;
 		else if (link & LNK_10MB)
@@ -2672,9 +2672,9 @@ static int ace_set_link_ksettings(struct net_device *dev,
 		       dev->name);
 
 		ap->link = link;
-		writel(link, &regs->TuneLink);
+		pete_writel("drivers/net/ethernet/alteon/acenic.c:2675", link, &regs->TuneLink);
 		if (!ACE_IS_TIGON_I(ap))
-			writel(link, &regs->TuneFastLink);
+			pete_writel("drivers/net/ethernet/alteon/acenic.c:2677", link, &regs->TuneFastLink);
 		wmb();
 
 		cmd.evt = C_LNK_NEGOTIATION;
@@ -2718,8 +2718,8 @@ static int ace_set_mac_addr(struct net_device *dev, void *p)
 
 	da = (const u8 *)dev->dev_addr;
 
-	writel(da[0] << 8 | da[1], &regs->MacAddrHi);
-	writel((da[2] << 24) | (da[3] << 16) | (da[4] << 8) | da[5],
+	pete_writel("drivers/net/ethernet/alteon/acenic.c:2721", da[0] << 8 | da[1], &regs->MacAddrHi);
+	pete_writel("drivers/net/ethernet/alteon/acenic.c:2722", (da[2] << 24) | (da[3] << 16) | (da[4] << 8) | da[5],
 	       &regs->MacAddrLo);
 
 	cmd.evt = C_SET_MAC_ADDR;
@@ -2791,9 +2791,9 @@ static struct net_device_stats *ace_get_stats(struct net_device *dev)
 	struct ace_mac_stats __iomem *mac_stats =
 		(struct ace_mac_stats __iomem *)ap->regs->Stats;
 
-	dev->stats.rx_missed_errors = readl(&mac_stats->drop_space);
-	dev->stats.multicast = readl(&mac_stats->kept_mc);
-	dev->stats.collisions = readl(&mac_stats->coll);
+	dev->stats.rx_missed_errors = pete_readl("drivers/net/ethernet/alteon/acenic.c:2794", &mac_stats->drop_space);
+	dev->stats.multicast = pete_readl("drivers/net/ethernet/alteon/acenic.c:2795", &mac_stats->kept_mc);
+	dev->stats.collisions = pete_readl("drivers/net/ethernet/alteon/acenic.c:2796", &mac_stats->coll);
 
 	return &dev->stats;
 }
@@ -2813,10 +2813,10 @@ static void ace_copy(struct ace_regs __iomem *regs, const __be32 *src,
 			    min_t(u32, size, ACE_WINDOW_SIZE));
 		tdest = (void __iomem *) &regs->Window +
 			(dest & (ACE_WINDOW_SIZE - 1));
-		writel(dest & ~(ACE_WINDOW_SIZE - 1), &regs->WinBase);
+		pete_writel("drivers/net/ethernet/alteon/acenic.c:2816", dest & ~(ACE_WINDOW_SIZE - 1), &regs->WinBase);
 		for (i = 0; i < (tsize / 4); i++) {
 			/* Firmware is big-endian */
-			writel(be32_to_cpup(src), tdest);
+			pete_writel("drivers/net/ethernet/alteon/acenic.c:2819", be32_to_cpup(src), tdest);
 			src++;
 			tdest += 4;
 			dest += 4;
@@ -2839,10 +2839,10 @@ static void ace_clear(struct ace_regs __iomem *regs, u32 dest, int size)
 				min_t(u32, size, ACE_WINDOW_SIZE));
 		tdest = (void __iomem *) &regs->Window +
 			(dest & (ACE_WINDOW_SIZE - 1));
-		writel(dest & ~(ACE_WINDOW_SIZE - 1), &regs->WinBase);
+		pete_writel("drivers/net/ethernet/alteon/acenic.c:2842", dest & ~(ACE_WINDOW_SIZE - 1), &regs->WinBase);
 
 		for (i = 0; i < (tsize / 4); i++) {
-			writel(0, tdest + i*4);
+			pete_writel("drivers/net/ethernet/alteon/acenic.c:2845", 0, tdest + i*4);
 		}
 
 		dest += tsize;
@@ -2867,7 +2867,7 @@ static int ace_load_firmware(struct net_device *dev)
 	u32 load_addr;
 	int ret;
 
-	if (!(readl(&regs->CpuCtrl) & CPU_HALTED)) {
+	if (!(pete_readl("drivers/net/ethernet/alteon/acenic.c:2870", &regs->CpuCtrl) & CPU_HALTED)) {
 		printk(KERN_ERR "%s: trying to download firmware while the "
 		       "CPU is running!\n", ap->name);
 		return -EFAULT;
@@ -2941,27 +2941,27 @@ static void eeprom_start(struct ace_regs __iomem *regs)
 {
 	u32 local;
 
-	readl(&regs->LocalCtrl);
+	pete_readl("drivers/net/ethernet/alteon/acenic.c:2944", &regs->LocalCtrl);
 	udelay(ACE_SHORT_DELAY);
-	local = readl(&regs->LocalCtrl);
+	local = pete_readl("drivers/net/ethernet/alteon/acenic.c:2946", &regs->LocalCtrl);
 	local |= EEPROM_DATA_OUT | EEPROM_WRITE_ENABLE;
-	writel(local, &regs->LocalCtrl);
-	readl(&regs->LocalCtrl);
+	pete_writel("drivers/net/ethernet/alteon/acenic.c:2948", local, &regs->LocalCtrl);
+	pete_readl("drivers/net/ethernet/alteon/acenic.c:2949", &regs->LocalCtrl);
 	mb();
 	udelay(ACE_SHORT_DELAY);
 	local |= EEPROM_CLK_OUT;
-	writel(local, &regs->LocalCtrl);
-	readl(&regs->LocalCtrl);
+	pete_writel("drivers/net/ethernet/alteon/acenic.c:2953", local, &regs->LocalCtrl);
+	pete_readl("drivers/net/ethernet/alteon/acenic.c:2954", &regs->LocalCtrl);
 	mb();
 	udelay(ACE_SHORT_DELAY);
 	local &= ~EEPROM_DATA_OUT;
-	writel(local, &regs->LocalCtrl);
-	readl(&regs->LocalCtrl);
+	pete_writel("drivers/net/ethernet/alteon/acenic.c:2958", local, &regs->LocalCtrl);
+	pete_readl("drivers/net/ethernet/alteon/acenic.c:2959", &regs->LocalCtrl);
 	mb();
 	udelay(ACE_SHORT_DELAY);
 	local &= ~EEPROM_CLK_OUT;
-	writel(local, &regs->LocalCtrl);
-	readl(&regs->LocalCtrl);
+	pete_writel("drivers/net/ethernet/alteon/acenic.c:2963", local, &regs->LocalCtrl);
+	pete_readl("drivers/net/ethernet/alteon/acenic.c:2964", &regs->LocalCtrl);
 	mb();
 }
 
@@ -2972,11 +2972,11 @@ static void eeprom_prep(struct ace_regs __iomem *regs, u8 magic)
 	u32 local;
 
 	udelay(ACE_SHORT_DELAY);
-	local = readl(&regs->LocalCtrl);
+	local = pete_readl("drivers/net/ethernet/alteon/acenic.c:2975", &regs->LocalCtrl);
 	local &= ~EEPROM_DATA_OUT;
 	local |= EEPROM_WRITE_ENABLE;
-	writel(local, &regs->LocalCtrl);
-	readl(&regs->LocalCtrl);
+	pete_writel("drivers/net/ethernet/alteon/acenic.c:2978", local, &regs->LocalCtrl);
+	pete_readl("drivers/net/ethernet/alteon/acenic.c:2979", &regs->LocalCtrl);
 	mb();
 
 	for (i = 0; i < 8; i++, magic <<= 1) {
@@ -2985,19 +2985,19 @@ static void eeprom_prep(struct ace_regs __iomem *regs, u8 magic)
 			local |= EEPROM_DATA_OUT;
 		else
 			local &= ~EEPROM_DATA_OUT;
-		writel(local, &regs->LocalCtrl);
-		readl(&regs->LocalCtrl);
+		pete_writel("drivers/net/ethernet/alteon/acenic.c:2988", local, &regs->LocalCtrl);
+		pete_readl("drivers/net/ethernet/alteon/acenic.c:2989", &regs->LocalCtrl);
 		mb();
 
 		udelay(ACE_SHORT_DELAY);
 		local |= EEPROM_CLK_OUT;
-		writel(local, &regs->LocalCtrl);
-		readl(&regs->LocalCtrl);
+		pete_writel("drivers/net/ethernet/alteon/acenic.c:2994", local, &regs->LocalCtrl);
+		pete_readl("drivers/net/ethernet/alteon/acenic.c:2995", &regs->LocalCtrl);
 		mb();
 		udelay(ACE_SHORT_DELAY);
 		local &= ~(EEPROM_CLK_OUT | EEPROM_DATA_OUT);
-		writel(local, &regs->LocalCtrl);
-		readl(&regs->LocalCtrl);
+		pete_writel("drivers/net/ethernet/alteon/acenic.c:2999", local, &regs->LocalCtrl);
+		pete_readl("drivers/net/ethernet/alteon/acenic.c:3000", &regs->LocalCtrl);
 		mb();
 	}
 }
@@ -3008,23 +3008,23 @@ static int eeprom_check_ack(struct ace_regs __iomem *regs)
 	int state;
 	u32 local;
 
-	local = readl(&regs->LocalCtrl);
+	local = pete_readl("drivers/net/ethernet/alteon/acenic.c:3011", &regs->LocalCtrl);
 	local &= ~EEPROM_WRITE_ENABLE;
-	writel(local, &regs->LocalCtrl);
-	readl(&regs->LocalCtrl);
+	pete_writel("drivers/net/ethernet/alteon/acenic.c:3013", local, &regs->LocalCtrl);
+	pete_readl("drivers/net/ethernet/alteon/acenic.c:3014", &regs->LocalCtrl);
 	mb();
 	udelay(ACE_LONG_DELAY);
 	local |= EEPROM_CLK_OUT;
-	writel(local, &regs->LocalCtrl);
-	readl(&regs->LocalCtrl);
+	pete_writel("drivers/net/ethernet/alteon/acenic.c:3018", local, &regs->LocalCtrl);
+	pete_readl("drivers/net/ethernet/alteon/acenic.c:3019", &regs->LocalCtrl);
 	mb();
 	udelay(ACE_SHORT_DELAY);
 	/* sample data in middle of high clk */
-	state = (readl(&regs->LocalCtrl) & EEPROM_DATA_IN) != 0;
+	state = (pete_readl("drivers/net/ethernet/alteon/acenic.c:3023", &regs->LocalCtrl) & EEPROM_DATA_IN) != 0;
 	udelay(ACE_SHORT_DELAY);
 	mb();
-	writel(readl(&regs->LocalCtrl) & ~EEPROM_CLK_OUT, &regs->LocalCtrl);
-	readl(&regs->LocalCtrl);
+	pete_writel("drivers/net/ethernet/alteon/acenic.c:3026", pete_readl("drivers/net/ethernet/alteon/acenic.c:3026", &regs->LocalCtrl) & ~EEPROM_CLK_OUT, &regs->LocalCtrl);
+	pete_readl("drivers/net/ethernet/alteon/acenic.c:3027", &regs->LocalCtrl);
 	mb();
 
 	return state;
@@ -3036,29 +3036,29 @@ static void eeprom_stop(struct ace_regs __iomem *regs)
 	u32 local;
 
 	udelay(ACE_SHORT_DELAY);
-	local = readl(&regs->LocalCtrl);
+	local = pete_readl("drivers/net/ethernet/alteon/acenic.c:3039", &regs->LocalCtrl);
 	local |= EEPROM_WRITE_ENABLE;
-	writel(local, &regs->LocalCtrl);
-	readl(&regs->LocalCtrl);
+	pete_writel("drivers/net/ethernet/alteon/acenic.c:3041", local, &regs->LocalCtrl);
+	pete_readl("drivers/net/ethernet/alteon/acenic.c:3042", &regs->LocalCtrl);
 	mb();
 	udelay(ACE_SHORT_DELAY);
 	local &= ~EEPROM_DATA_OUT;
-	writel(local, &regs->LocalCtrl);
-	readl(&regs->LocalCtrl);
+	pete_writel("drivers/net/ethernet/alteon/acenic.c:3046", local, &regs->LocalCtrl);
+	pete_readl("drivers/net/ethernet/alteon/acenic.c:3047", &regs->LocalCtrl);
 	mb();
 	udelay(ACE_SHORT_DELAY);
 	local |= EEPROM_CLK_OUT;
-	writel(local, &regs->LocalCtrl);
-	readl(&regs->LocalCtrl);
+	pete_writel("drivers/net/ethernet/alteon/acenic.c:3051", local, &regs->LocalCtrl);
+	pete_readl("drivers/net/ethernet/alteon/acenic.c:3052", &regs->LocalCtrl);
 	mb();
 	udelay(ACE_SHORT_DELAY);
 	local |= EEPROM_DATA_OUT;
-	writel(local, &regs->LocalCtrl);
-	readl(&regs->LocalCtrl);
+	pete_writel("drivers/net/ethernet/alteon/acenic.c:3056", local, &regs->LocalCtrl);
+	pete_readl("drivers/net/ethernet/alteon/acenic.c:3057", &regs->LocalCtrl);
 	mb();
 	udelay(ACE_LONG_DELAY);
 	local &= ~EEPROM_CLK_OUT;
-	writel(local, &regs->LocalCtrl);
+	pete_writel("drivers/net/ethernet/alteon/acenic.c:3061", local, &regs->LocalCtrl);
 	mb();
 }
 
@@ -3120,47 +3120,47 @@ static int read_eeprom_byte(struct net_device *dev, unsigned long offset)
 	}
 
 	for (i = 0; i < 8; i++) {
-		local = readl(&regs->LocalCtrl);
+		local = pete_readl("drivers/net/ethernet/alteon/acenic.c:3123", &regs->LocalCtrl);
 		local &= ~EEPROM_WRITE_ENABLE;
-		writel(local, &regs->LocalCtrl);
-		readl(&regs->LocalCtrl);
+		pete_writel("drivers/net/ethernet/alteon/acenic.c:3125", local, &regs->LocalCtrl);
+		pete_readl("drivers/net/ethernet/alteon/acenic.c:3126", &regs->LocalCtrl);
 		udelay(ACE_LONG_DELAY);
 		mb();
 		local |= EEPROM_CLK_OUT;
-		writel(local, &regs->LocalCtrl);
-		readl(&regs->LocalCtrl);
+		pete_writel("drivers/net/ethernet/alteon/acenic.c:3130", local, &regs->LocalCtrl);
+		pete_readl("drivers/net/ethernet/alteon/acenic.c:3131", &regs->LocalCtrl);
 		mb();
 		udelay(ACE_SHORT_DELAY);
 		/* sample data mid high clk */
 		result = (result << 1) |
-			((readl(&regs->LocalCtrl) & EEPROM_DATA_IN) != 0);
+			((pete_readl("drivers/net/ethernet/alteon/acenic.c:3136", &regs->LocalCtrl) & EEPROM_DATA_IN) != 0);
 		udelay(ACE_SHORT_DELAY);
 		mb();
-		local = readl(&regs->LocalCtrl);
+		local = pete_readl("drivers/net/ethernet/alteon/acenic.c:3139", &regs->LocalCtrl);
 		local &= ~EEPROM_CLK_OUT;
-		writel(local, &regs->LocalCtrl);
-		readl(&regs->LocalCtrl);
+		pete_writel("drivers/net/ethernet/alteon/acenic.c:3141", local, &regs->LocalCtrl);
+		pete_readl("drivers/net/ethernet/alteon/acenic.c:3142", &regs->LocalCtrl);
 		udelay(ACE_SHORT_DELAY);
 		mb();
 		if (i == 7) {
 			local |= EEPROM_WRITE_ENABLE;
-			writel(local, &regs->LocalCtrl);
-			readl(&regs->LocalCtrl);
+			pete_writel("drivers/net/ethernet/alteon/acenic.c:3147", local, &regs->LocalCtrl);
+			pete_readl("drivers/net/ethernet/alteon/acenic.c:3148", &regs->LocalCtrl);
 			mb();
 			udelay(ACE_SHORT_DELAY);
 		}
 	}
 
 	local |= EEPROM_DATA_OUT;
-	writel(local, &regs->LocalCtrl);
-	readl(&regs->LocalCtrl);
+	pete_writel("drivers/net/ethernet/alteon/acenic.c:3155", local, &regs->LocalCtrl);
+	pete_readl("drivers/net/ethernet/alteon/acenic.c:3156", &regs->LocalCtrl);
 	mb();
 	udelay(ACE_SHORT_DELAY);
-	writel(readl(&regs->LocalCtrl) | EEPROM_CLK_OUT, &regs->LocalCtrl);
-	readl(&regs->LocalCtrl);
+	pete_writel("drivers/net/ethernet/alteon/acenic.c:3159", pete_readl("drivers/net/ethernet/alteon/acenic.c:3159", &regs->LocalCtrl) | EEPROM_CLK_OUT, &regs->LocalCtrl);
+	pete_readl("drivers/net/ethernet/alteon/acenic.c:3160", &regs->LocalCtrl);
 	udelay(ACE_LONG_DELAY);
-	writel(readl(&regs->LocalCtrl) & ~EEPROM_CLK_OUT, &regs->LocalCtrl);
-	readl(&regs->LocalCtrl);
+	pete_writel("drivers/net/ethernet/alteon/acenic.c:3162", pete_readl("drivers/net/ethernet/alteon/acenic.c:3162", &regs->LocalCtrl) & ~EEPROM_CLK_OUT, &regs->LocalCtrl);
+	pete_readl("drivers/net/ethernet/alteon/acenic.c:3163", &regs->LocalCtrl);
 	mb();
 	udelay(ACE_SHORT_DELAY);
 	eeprom_stop(regs);

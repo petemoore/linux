@@ -224,16 +224,16 @@ static int rpcif_reg_read(void *context, unsigned int reg, unsigned int *val)
 	case RPCIF_SMWDR0:
 		switch (rpc->xfer_size) {
 		case 1:
-			*val = readb(rpc->base + reg);
+			*val = pete_readb("drivers/memory/renesas-rpc-if.c:227", rpc->base + reg);
 			return 0;
 
 		case 2:
-			*val = readw(rpc->base + reg);
+			*val = pete_readw("drivers/memory/renesas-rpc-if.c:231", rpc->base + reg);
 			return 0;
 
 		case 4:
 		case 8:
-			*val = readl(rpc->base + reg);
+			*val = pete_readl("drivers/memory/renesas-rpc-if.c:236", rpc->base + reg);
 			return 0;
 
 		default:
@@ -247,7 +247,7 @@ static int rpcif_reg_read(void *context, unsigned int reg, unsigned int *val)
 		break;
 	}
 
-	*val = readl(rpc->base + reg);
+	*val = pete_readl("drivers/memory/renesas-rpc-if.c:250", rpc->base + reg);
 	return 0;
 }
 
@@ -259,16 +259,16 @@ static int rpcif_reg_write(void *context, unsigned int reg, unsigned int val)
 	case RPCIF_SMWDR0:
 		switch (rpc->xfer_size) {
 		case 1:
-			writeb(val, rpc->base + reg);
+			pete_writeb("drivers/memory/renesas-rpc-if.c:262", val, rpc->base + reg);
 			return 0;
 
 		case 2:
-			writew(val, rpc->base + reg);
+			pete_writew("drivers/memory/renesas-rpc-if.c:266", val, rpc->base + reg);
 			return 0;
 
 		case 4:
 		case 8:
-			writel(val, rpc->base + reg);
+			pete_writel("drivers/memory/renesas-rpc-if.c:271", val, rpc->base + reg);
 			return 0;
 
 		default:
@@ -285,7 +285,7 @@ static int rpcif_reg_write(void *context, unsigned int reg, unsigned int val)
 		return -EPERM;
 	}
 
-	writel(val, rpc->base + reg);
+	pete_writel("drivers/memory/renesas-rpc-if.c:288", val, rpc->base + reg);
 	return 0;
 }
 

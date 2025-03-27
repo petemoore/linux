@@ -115,7 +115,7 @@ static int rockchip_otp_wait_status(struct rockchip_otp *otp,
 		return ret;
 
 	/* clean int status */
-	writel(flag, otp->base + reg);
+	pete_writel("drivers/nvmem/rockchip-otp.c:118", flag, otp->base + reg);
 
 	return 0;
 }
@@ -124,18 +124,18 @@ static int rockchip_otp_ecc_enable(struct rockchip_otp *otp, bool enable)
 {
 	int ret = 0;
 
-	writel(SBPI_DAP_ADDR_MASK | (SBPI_DAP_ADDR << SBPI_DAP_ADDR_SHIFT),
+	pete_writel("drivers/nvmem/rockchip-otp.c:127", SBPI_DAP_ADDR_MASK | (SBPI_DAP_ADDR << SBPI_DAP_ADDR_SHIFT),
 	       otp->base + OTPC_SBPI_CTRL);
 
-	writel(SBPI_CMD_VALID_MASK | 0x1, otp->base + OTPC_SBPI_CMD_VALID_PRE);
-	writel(SBPI_DAP_CMD_WRF | SBPI_DAP_REG_ECC,
+	pete_writel("drivers/nvmem/rockchip-otp.c:130", SBPI_CMD_VALID_MASK | 0x1, otp->base + OTPC_SBPI_CMD_VALID_PRE);
+	pete_writel("drivers/nvmem/rockchip-otp.c:131", SBPI_DAP_CMD_WRF | SBPI_DAP_REG_ECC,
 	       otp->base + OTPC_SBPI_CMD0_OFFSET);
 	if (enable)
-		writel(SBPI_ECC_ENABLE, otp->base + OTPC_SBPI_CMD1_OFFSET);
+		pete_writel("drivers/nvmem/rockchip-otp.c:134", SBPI_ECC_ENABLE, otp->base + OTPC_SBPI_CMD1_OFFSET);
 	else
-		writel(SBPI_ECC_DISABLE, otp->base + OTPC_SBPI_CMD1_OFFSET);
+		pete_writel("drivers/nvmem/rockchip-otp.c:136", SBPI_ECC_DISABLE, otp->base + OTPC_SBPI_CMD1_OFFSET);
 
-	writel(SBPI_ENABLE_MASK | SBPI_ENABLE, otp->base + OTPC_SBPI_CTRL);
+	pete_writel("drivers/nvmem/rockchip-otp.c:138", SBPI_ENABLE_MASK | SBPI_ENABLE, otp->base + OTPC_SBPI_CTRL);
 
 	ret = rockchip_otp_wait_status(otp, OTPC_INT_STATUS, OTPC_SBPI_DONE);
 	if (ret < 0)
@@ -163,23 +163,23 @@ static int px30_otp_read(void *context, unsigned int offset,
 		return ret;
 	}
 
-	writel(OTPC_USE_USER | OTPC_USE_USER_MASK, otp->base + OTPC_USER_CTRL);
+	pete_writel("drivers/nvmem/rockchip-otp.c:166", OTPC_USE_USER | OTPC_USE_USER_MASK, otp->base + OTPC_USER_CTRL);
 	udelay(5);
 	while (bytes--) {
-		writel(offset++ | OTPC_USER_ADDR_MASK,
+		pete_writel("drivers/nvmem/rockchip-otp.c:169", offset++ | OTPC_USER_ADDR_MASK,
 		       otp->base + OTPC_USER_ADDR);
-		writel(OTPC_USER_FSM_ENABLE | OTPC_USER_FSM_ENABLE_MASK,
+		pete_writel("drivers/nvmem/rockchip-otp.c:171", OTPC_USER_FSM_ENABLE | OTPC_USER_FSM_ENABLE_MASK,
 		       otp->base + OTPC_USER_ENABLE);
 		ret = rockchip_otp_wait_status(otp, OTPC_INT_STATUS, OTPC_USER_DONE);
 		if (ret < 0) {
 			dev_err(otp->dev, "timeout during read setup\n");
 			goto read_end;
 		}
-		*buf++ = readb(otp->base + OTPC_USER_Q);
+		*buf++ = pete_readb("drivers/nvmem/rockchip-otp.c:178", otp->base + OTPC_USER_Q);
 	}
 
 read_end:
-	writel(0x0 | OTPC_USE_USER_MASK, otp->base + OTPC_USER_CTRL);
+	pete_writel("drivers/nvmem/rockchip-otp.c:182", 0x0 | OTPC_USE_USER_MASK, otp->base + OTPC_USER_CTRL);
 
 	return ret;
 }
@@ -203,10 +203,10 @@ static int rk3588_otp_read(void *context, unsigned int offset,
 		return -ENOMEM;
 
 	while (addr_len--) {
-		writel((addr_start << RK3588_ADDR_SHIFT) |
+		pete_writel("drivers/nvmem/rockchip-otp.c:206", (addr_start << RK3588_ADDR_SHIFT) |
 		       (RK3588_BURST_NUM << RK3588_BURST_SHIFT),
 		       otp->base + RK3588_OTPC_AUTO_CTRL);
-		writel(RK3588_AUTO_EN, otp->base + RK3588_OTPC_AUTO_EN);
+		pete_writel("drivers/nvmem/rockchip-otp.c:209", RK3588_AUTO_EN, otp->base + RK3588_OTPC_AUTO_EN);
 
 		ret = rockchip_otp_wait_status(otp, RK3588_OTPC_INT_ST,
 					       RK3588_RD_DONE);
@@ -215,7 +215,7 @@ static int rk3588_otp_read(void *context, unsigned int offset,
 			goto read_end;
 		}
 
-		data = readl(otp->base + RK3588_OTPC_DOUT0);
+		data = pete_readl("drivers/nvmem/rockchip-otp.c:218", otp->base + RK3588_OTPC_DOUT0);
 		memcpy(&buf[i], &data, RK3588_NBYTES);
 
 		i += RK3588_NBYTES;

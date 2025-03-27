@@ -62,12 +62,12 @@ static inline struct nios2_clocksource *
 
 static u16 timer_readw(struct nios2_timer *timer, u32 offs)
 {
-	return readw(timer->base + offs);
+	return pete_readw("arch/nios2/kernel/time.c:65", timer->base + offs);
 }
 
 static void timer_writew(struct nios2_timer *timer, u16 val, u32 offs)
 {
-	writew(val, timer->base + offs);
+	pete_writew("arch/nios2/kernel/time.c:70", val, timer->base + offs);
 }
 
 static inline unsigned long read_timersnapshot(struct nios2_timer *timer)

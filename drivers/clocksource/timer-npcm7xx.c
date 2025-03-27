@@ -58,9 +58,9 @@ static int npcm7xx_timer_resume(struct clock_event_device *evt)
 	struct timer_of *to = to_timer_of(evt);
 	u32 val;
 
-	val = readl(timer_of_base(to) + NPCM7XX_REG_TCSR0);
+	val = pete_readl("drivers/clocksource/timer-npcm7xx.c:61", timer_of_base(to) + NPCM7XX_REG_TCSR0);
 	val |= NPCM7XX_Tx_COUNTEN;
-	writel(val, timer_of_base(to) + NPCM7XX_REG_TCSR0);
+	pete_writel("drivers/clocksource/timer-npcm7xx.c:63", val, timer_of_base(to) + NPCM7XX_REG_TCSR0);
 
 	return 0;
 }
@@ -70,9 +70,9 @@ static int npcm7xx_timer_shutdown(struct clock_event_device *evt)
 	struct timer_of *to = to_timer_of(evt);
 	u32 val;
 
-	val = readl(timer_of_base(to) + NPCM7XX_REG_TCSR0);
+	val = pete_readl("drivers/clocksource/timer-npcm7xx.c:73", timer_of_base(to) + NPCM7XX_REG_TCSR0);
 	val &= ~NPCM7XX_Tx_COUNTEN;
-	writel(val, timer_of_base(to) + NPCM7XX_REG_TCSR0);
+	pete_writel("drivers/clocksource/timer-npcm7xx.c:75", val, timer_of_base(to) + NPCM7XX_REG_TCSR0);
 
 	return 0;
 }
@@ -82,10 +82,10 @@ static int npcm7xx_timer_oneshot(struct clock_event_device *evt)
 	struct timer_of *to = to_timer_of(evt);
 	u32 val;
 
-	val = readl(timer_of_base(to) + NPCM7XX_REG_TCSR0);
+	val = pete_readl("drivers/clocksource/timer-npcm7xx.c:85", timer_of_base(to) + NPCM7XX_REG_TCSR0);
 	val &= ~NPCM7XX_Tx_OPER;
 	val |= NPCM7XX_START_ONESHOT_Tx;
-	writel(val, timer_of_base(to) + NPCM7XX_REG_TCSR0);
+	pete_writel("drivers/clocksource/timer-npcm7xx.c:88", val, timer_of_base(to) + NPCM7XX_REG_TCSR0);
 
 	return 0;
 }
@@ -95,12 +95,12 @@ static int npcm7xx_timer_periodic(struct clock_event_device *evt)
 	struct timer_of *to = to_timer_of(evt);
 	u32 val;
 
-	writel(timer_of_period(to), timer_of_base(to) + NPCM7XX_REG_TICR0);
+	pete_writel("drivers/clocksource/timer-npcm7xx.c:98", timer_of_period(to), timer_of_base(to) + NPCM7XX_REG_TICR0);
 
-	val = readl(timer_of_base(to) + NPCM7XX_REG_TCSR0);
+	val = pete_readl("drivers/clocksource/timer-npcm7xx.c:100", timer_of_base(to) + NPCM7XX_REG_TCSR0);
 	val &= ~NPCM7XX_Tx_OPER;
 	val |= NPCM7XX_START_PERIODIC_Tx;
-	writel(val, timer_of_base(to) + NPCM7XX_REG_TCSR0);
+	pete_writel("drivers/clocksource/timer-npcm7xx.c:103", val, timer_of_base(to) + NPCM7XX_REG_TCSR0);
 
 	return 0;
 }
@@ -111,10 +111,10 @@ static int npcm7xx_clockevent_set_next_event(unsigned long evt,
 	struct timer_of *to = to_timer_of(clk);
 	u32 val;
 
-	writel(evt, timer_of_base(to) + NPCM7XX_REG_TICR0);
-	val = readl(timer_of_base(to) + NPCM7XX_REG_TCSR0);
+	pete_writel("drivers/clocksource/timer-npcm7xx.c:114", evt, timer_of_base(to) + NPCM7XX_REG_TICR0);
+	val = pete_readl("drivers/clocksource/timer-npcm7xx.c:115", timer_of_base(to) + NPCM7XX_REG_TCSR0);
 	val |= NPCM7XX_START_Tx;
-	writel(val, timer_of_base(to) + NPCM7XX_REG_TCSR0);
+	pete_writel("drivers/clocksource/timer-npcm7xx.c:117", val, timer_of_base(to) + NPCM7XX_REG_TCSR0);
 
 	return 0;
 }
@@ -124,7 +124,7 @@ static irqreturn_t npcm7xx_timer0_interrupt(int irq, void *dev_id)
 	struct clock_event_device *evt = (struct clock_event_device *)dev_id;
 	struct timer_of *to = to_timer_of(evt);
 
-	writel(NPCM7XX_T0_CLR_INT, timer_of_base(to) + NPCM7XX_REG_TISR);
+	pete_writel("drivers/clocksource/timer-npcm7xx.c:127", NPCM7XX_T0_CLR_INT, timer_of_base(to) + NPCM7XX_REG_TISR);
 
 	evt->event_handler(evt);
 
@@ -154,10 +154,10 @@ static struct timer_of npcm7xx_to = {
 
 static void __init npcm7xx_clockevents_init(void)
 {
-	writel(NPCM7XX_DEFAULT_CSR,
+	pete_writel("drivers/clocksource/timer-npcm7xx.c:157", NPCM7XX_DEFAULT_CSR,
 		timer_of_base(&npcm7xx_to) + NPCM7XX_REG_TCSR0);
 
-	writel(NPCM7XX_Tx_RESETINT,
+	pete_writel("drivers/clocksource/timer-npcm7xx.c:160", NPCM7XX_Tx_RESETINT,
 		timer_of_base(&npcm7xx_to) + NPCM7XX_REG_TISR);
 
 	npcm7xx_to.clkevt.cpumask = cpumask_of(0);
@@ -170,14 +170,14 @@ static void __init npcm7xx_clocksource_init(void)
 {
 	u32 val;
 
-	writel(NPCM7XX_DEFAULT_CSR,
+	pete_writel("drivers/clocksource/timer-npcm7xx.c:173", NPCM7XX_DEFAULT_CSR,
 		timer_of_base(&npcm7xx_to) + NPCM7XX_REG_TCSR1);
-	writel(NPCM7XX_Tx_MAX_CNT,
+	pete_writel("drivers/clocksource/timer-npcm7xx.c:175", NPCM7XX_Tx_MAX_CNT,
 		timer_of_base(&npcm7xx_to) + NPCM7XX_REG_TICR1);
 
-	val = readl(timer_of_base(&npcm7xx_to) + NPCM7XX_REG_TCSR1);
+	val = pete_readl("drivers/clocksource/timer-npcm7xx.c:178", timer_of_base(&npcm7xx_to) + NPCM7XX_REG_TCSR1);
 	val |= NPCM7XX_START_Tx;
-	writel(val, timer_of_base(&npcm7xx_to) + NPCM7XX_REG_TCSR1);
+	pete_writel("drivers/clocksource/timer-npcm7xx.c:180", val, timer_of_base(&npcm7xx_to) + NPCM7XX_REG_TCSR1);
 
 	clocksource_mmio_init(timer_of_base(&npcm7xx_to) +
 				NPCM7XX_REG_TDR1,

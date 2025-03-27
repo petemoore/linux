@@ -239,7 +239,7 @@ static void sun4i_can_write_cmdreg(struct sun4ican_priv *priv, u8 val)
 	unsigned long flags;
 
 	spin_lock_irqsave(&priv->cmdreg_lock, flags);
-	writel(val, priv->base + SUN4I_REG_CMD_ADDR);
+	pete_writel("drivers/net/can/sun4i_can.c:242", val, priv->base + SUN4I_REG_CMD_ADDR);
 	spin_unlock_irqrestore(&priv->cmdreg_lock, flags);
 }
 
@@ -250,12 +250,12 @@ static int set_normal_mode(struct net_device *dev)
 	u32 mod_reg_val = 0;
 
 	do {
-		mod_reg_val = readl(priv->base + SUN4I_REG_MSEL_ADDR);
+		mod_reg_val = pete_readl("drivers/net/can/sun4i_can.c:253", priv->base + SUN4I_REG_MSEL_ADDR);
 		mod_reg_val &= ~SUN4I_MSEL_RESET_MODE;
-		writel(mod_reg_val, priv->base + SUN4I_REG_MSEL_ADDR);
+		pete_writel("drivers/net/can/sun4i_can.c:255", mod_reg_val, priv->base + SUN4I_REG_MSEL_ADDR);
 	} while (retry-- && (mod_reg_val & SUN4I_MSEL_RESET_MODE));
 
-	if (readl(priv->base + SUN4I_REG_MSEL_ADDR) & SUN4I_MSEL_RESET_MODE) {
+	if (pete_readl("drivers/net/can/sun4i_can.c:258", priv->base + SUN4I_REG_MSEL_ADDR) & SUN4I_MSEL_RESET_MODE) {
 		netdev_err(dev,
 			   "setting controller into normal mode failed!\n");
 		return -ETIMEDOUT;
@@ -271,12 +271,12 @@ static int set_reset_mode(struct net_device *dev)
 	u32 mod_reg_val = 0;
 
 	do {
-		mod_reg_val = readl(priv->base + SUN4I_REG_MSEL_ADDR);
+		mod_reg_val = pete_readl("drivers/net/can/sun4i_can.c:274", priv->base + SUN4I_REG_MSEL_ADDR);
 		mod_reg_val |= SUN4I_MSEL_RESET_MODE;
-		writel(mod_reg_val, priv->base + SUN4I_REG_MSEL_ADDR);
+		pete_writel("drivers/net/can/sun4i_can.c:276", mod_reg_val, priv->base + SUN4I_REG_MSEL_ADDR);
 	} while (retry-- && !(mod_reg_val & SUN4I_MSEL_RESET_MODE));
 
-	if (!(readl(priv->base + SUN4I_REG_MSEL_ADDR) &
+	if (!(pete_readl("drivers/net/can/sun4i_can.c:279", priv->base + SUN4I_REG_MSEL_ADDR) &
 	      SUN4I_MSEL_RESET_MODE)) {
 		netdev_err(dev, "setting controller into reset mode failed!\n");
 		return -ETIMEDOUT;
@@ -300,7 +300,7 @@ static int sun4ican_set_bittiming(struct net_device *dev)
 		cfg |= 0x800000;
 
 	netdev_dbg(dev, "setting BITTIMING=0x%08x\n", cfg);
-	writel(cfg, priv->base + SUN4I_REG_BTIME_ADDR);
+	pete_writel("drivers/net/can/sun4i_can.c:303", cfg, priv->base + SUN4I_REG_BTIME_ADDR);
 
 	return 0;
 }
@@ -318,7 +318,7 @@ static int sun4ican_get_berr_counter(const struct net_device *dev,
 		return err;
 	}
 
-	errors = readl(priv->base + SUN4I_REG_ERRC_ADDR);
+	errors = pete_readl("drivers/net/can/sun4i_can.c:321", priv->base + SUN4I_REG_ERRC_ADDR);
 
 	bec->txerr = errors & 0xFF;
 	bec->rxerr = (errors >> 16) & 0xFF;
@@ -342,26 +342,26 @@ static int sun4i_can_start(struct net_device *dev)
 	}
 
 	/* set filters - we accept all */
-	writel(0x00000000, priv->base + SUN4I_REG_ACPC_ADDR + priv->acp_offset);
-	writel(0xFFFFFFFF, priv->base + SUN4I_REG_ACPM_ADDR + priv->acp_offset);
+	pete_writel("drivers/net/can/sun4i_can.c:345", 0x00000000, priv->base + SUN4I_REG_ACPC_ADDR + priv->acp_offset);
+	pete_writel("drivers/net/can/sun4i_can.c:346", 0xFFFFFFFF, priv->base + SUN4I_REG_ACPM_ADDR + priv->acp_offset);
 
 	/* clear error counters and error code capture */
-	writel(0, priv->base + SUN4I_REG_ERRC_ADDR);
+	pete_writel("drivers/net/can/sun4i_can.c:349", 0, priv->base + SUN4I_REG_ERRC_ADDR);
 
 	/* enable interrupts */
 	if (priv->can.ctrlmode & CAN_CTRLMODE_BERR_REPORTING)
-		writel(0xFF, priv->base + SUN4I_REG_INTEN_ADDR);
+		pete_writel("drivers/net/can/sun4i_can.c:353", 0xFF, priv->base + SUN4I_REG_INTEN_ADDR);
 	else
-		writel(0xFF & ~SUN4I_INTEN_BERR,
+		pete_writel("drivers/net/can/sun4i_can.c:355", 0xFF & ~SUN4I_INTEN_BERR,
 		       priv->base + SUN4I_REG_INTEN_ADDR);
 
 	/* enter the selected mode */
-	mod_reg_val = readl(priv->base + SUN4I_REG_MSEL_ADDR);
+	mod_reg_val = pete_readl("drivers/net/can/sun4i_can.c:359", priv->base + SUN4I_REG_MSEL_ADDR);
 	if (priv->can.ctrlmode & CAN_CTRLMODE_LOOPBACK)
 		mod_reg_val |= SUN4I_MSEL_LOOPBACK_MODE;
 	else if (priv->can.ctrlmode & CAN_CTRLMODE_LISTENONLY)
 		mod_reg_val |= SUN4I_MSEL_LISTEN_ONLY_MODE;
-	writel(mod_reg_val, priv->base + SUN4I_REG_MSEL_ADDR);
+	pete_writel("drivers/net/can/sun4i_can.c:364", mod_reg_val, priv->base + SUN4I_REG_MSEL_ADDR);
 
 	err = sun4ican_set_bittiming(dev);
 	if (err)
@@ -393,7 +393,7 @@ static int sun4i_can_stop(struct net_device *dev)
 	}
 
 	/* disable all interrupts */
-	writel(0, priv->base + SUN4I_REG_INTEN_ADDR);
+	pete_writel("drivers/net/can/sun4i_can.c:396", 0, priv->base + SUN4I_REG_INTEN_ADDR);
 
 	return 0;
 }
@@ -448,20 +448,20 @@ static netdev_tx_t sun4ican_start_xmit(struct sk_buff *skb, struct net_device *d
 	if (id & CAN_EFF_FLAG) {
 		msg_flag_n |= SUN4I_MSG_EFF_FLAG;
 		dreg = SUN4I_REG_BUF5_ADDR;
-		writel((id >> 21) & 0xFF, priv->base + SUN4I_REG_BUF1_ADDR);
-		writel((id >> 13) & 0xFF, priv->base + SUN4I_REG_BUF2_ADDR);
-		writel((id >> 5)  & 0xFF, priv->base + SUN4I_REG_BUF3_ADDR);
-		writel((id << 3)  & 0xF8, priv->base + SUN4I_REG_BUF4_ADDR);
+		pete_writel("drivers/net/can/sun4i_can.c:451", (id >> 21) & 0xFF, priv->base + SUN4I_REG_BUF1_ADDR);
+		pete_writel("drivers/net/can/sun4i_can.c:452", (id >> 13) & 0xFF, priv->base + SUN4I_REG_BUF2_ADDR);
+		pete_writel("drivers/net/can/sun4i_can.c:453", (id >> 5)  & 0xFF, priv->base + SUN4I_REG_BUF3_ADDR);
+		pete_writel("drivers/net/can/sun4i_can.c:454", (id << 3)  & 0xF8, priv->base + SUN4I_REG_BUF4_ADDR);
 	} else {
 		dreg = SUN4I_REG_BUF3_ADDR;
-		writel((id >> 3) & 0xFF, priv->base + SUN4I_REG_BUF1_ADDR);
-		writel((id << 5) & 0xE0, priv->base + SUN4I_REG_BUF2_ADDR);
+		pete_writel("drivers/net/can/sun4i_can.c:457", (id >> 3) & 0xFF, priv->base + SUN4I_REG_BUF1_ADDR);
+		pete_writel("drivers/net/can/sun4i_can.c:458", (id << 5) & 0xE0, priv->base + SUN4I_REG_BUF2_ADDR);
 	}
 
 	for (i = 0; i < dlc; i++)
-		writel(cf->data[i], priv->base + (dreg + i * 4));
+		pete_writel("drivers/net/can/sun4i_can.c:462", cf->data[i], priv->base + (dreg + i * 4));
 
-	writel(msg_flag_n, priv->base + SUN4I_REG_BUF0_ADDR);
+	pete_writel("drivers/net/can/sun4i_can.c:464", msg_flag_n, priv->base + SUN4I_REG_BUF0_ADDR);
 
 	can_put_echo_skb(skb, dev, 0, 0);
 
@@ -489,19 +489,19 @@ static void sun4i_can_rx(struct net_device *dev)
 	if (!skb)
 		return;
 
-	fi = readl(priv->base + SUN4I_REG_BUF0_ADDR);
+	fi = pete_readl("drivers/net/can/sun4i_can.c:492", priv->base + SUN4I_REG_BUF0_ADDR);
 	cf->len = can_cc_dlc2len(fi & 0x0F);
 	if (fi & SUN4I_MSG_EFF_FLAG) {
 		dreg = SUN4I_REG_BUF5_ADDR;
-		id = (readl(priv->base + SUN4I_REG_BUF1_ADDR) << 21) |
-		     (readl(priv->base + SUN4I_REG_BUF2_ADDR) << 13) |
-		     (readl(priv->base + SUN4I_REG_BUF3_ADDR) << 5)  |
-		    ((readl(priv->base + SUN4I_REG_BUF4_ADDR) >> 3)  & 0x1f);
+		id = (pete_readl("drivers/net/can/sun4i_can.c:496", priv->base + SUN4I_REG_BUF1_ADDR) << 21) |
+		     (pete_readl("drivers/net/can/sun4i_can.c:497", priv->base + SUN4I_REG_BUF2_ADDR) << 13) |
+		     (pete_readl("drivers/net/can/sun4i_can.c:498", priv->base + SUN4I_REG_BUF3_ADDR) << 5)  |
+		    ((pete_readl("drivers/net/can/sun4i_can.c:499", priv->base + SUN4I_REG_BUF4_ADDR) >> 3)  & 0x1f);
 		id |= CAN_EFF_FLAG;
 	} else {
 		dreg = SUN4I_REG_BUF3_ADDR;
-		id = (readl(priv->base + SUN4I_REG_BUF1_ADDR) << 3) |
-		    ((readl(priv->base + SUN4I_REG_BUF2_ADDR) >> 5) & 0x7);
+		id = (pete_readl("drivers/net/can/sun4i_can.c:503", priv->base + SUN4I_REG_BUF1_ADDR) << 3) |
+		    ((pete_readl("drivers/net/can/sun4i_can.c:504", priv->base + SUN4I_REG_BUF2_ADDR) >> 5) & 0x7);
 	}
 
 	/* remote frame ? */
@@ -509,7 +509,7 @@ static void sun4i_can_rx(struct net_device *dev)
 		id |= CAN_RTR_FLAG;
 	} else {
 		for (i = 0; i < cf->len; i++)
-			cf->data[i] = readl(priv->base + dreg + i * 4);
+			cf->data[i] = pete_readl("drivers/net/can/sun4i_can.c:512", priv->base + dreg + i * 4);
 
 		stats->rx_bytes += cf->len;
 	}
@@ -536,7 +536,7 @@ static int sun4i_can_err(struct net_device *dev, u8 isrc, u8 status)
 	/* we don't skip if alloc fails because we want the stats anyhow */
 	skb = alloc_can_err_skb(dev, &cf);
 
-	errc = readl(priv->base + SUN4I_REG_ERRC_ADDR);
+	errc = pete_readl("drivers/net/can/sun4i_can.c:539", priv->base + SUN4I_REG_ERRC_ADDR);
 	rxerr = (errc >> 16) & 0xFF;
 	txerr = errc & 0xFF;
 
@@ -579,7 +579,7 @@ static int sun4i_can_err(struct net_device *dev, u8 isrc, u8 status)
 		/* bus error interrupt */
 		netdev_dbg(dev, "bus error interrupt\n");
 		priv->can.can_stats.bus_error++;
-		ecc = readl(priv->base + SUN4I_REG_STA_ADDR);
+		ecc = pete_readl("drivers/net/can/sun4i_can.c:582", priv->base + SUN4I_REG_STA_ADDR);
 
 		if (likely(skb)) {
 			cf->can_id |= CAN_ERR_PROT | CAN_ERR_BUSERROR;
@@ -621,7 +621,7 @@ static int sun4i_can_err(struct net_device *dev, u8 isrc, u8 status)
 	if (isrc & SUN4I_INT_ARB_LOST) {
 		/* arbitration lost interrupt */
 		netdev_dbg(dev, "arbitration lost interrupt\n");
-		alc = readl(priv->base + SUN4I_REG_STA_ADDR);
+		alc = pete_readl("drivers/net/can/sun4i_can.c:624", priv->base + SUN4I_REG_STA_ADDR);
 		priv->can.can_stats.arbitration_lost++;
 		if (likely(skb)) {
 			cf->can_id |= CAN_ERR_LOSTARB;
@@ -657,10 +657,10 @@ static irqreturn_t sun4i_can_interrupt(int irq, void *dev_id)
 	u8 isrc, status;
 	int n = 0;
 
-	while ((isrc = readl(priv->base + SUN4I_REG_INT_ADDR)) &&
+	while ((isrc = pete_readl("drivers/net/can/sun4i_can.c:660", priv->base + SUN4I_REG_INT_ADDR)) &&
 	       (n < SUN4I_CAN_MAX_IRQ)) {
 		n++;
-		status = readl(priv->base + SUN4I_REG_STA_ADDR);
+		status = pete_readl("drivers/net/can/sun4i_can.c:663", priv->base + SUN4I_REG_STA_ADDR);
 
 		if (isrc & SUN4I_INT_WAKEUP)
 			netdev_warn(dev, "wakeup interrupt\n");
@@ -677,7 +677,7 @@ static irqreturn_t sun4i_can_interrupt(int irq, void *dev_id)
 			while (status & SUN4I_STA_RBUF_RDY) {
 				/* RX buffer is not empty */
 				sun4i_can_rx(dev);
-				status = readl(priv->base + SUN4I_REG_STA_ADDR);
+				status = pete_readl("drivers/net/can/sun4i_can.c:680", priv->base + SUN4I_REG_STA_ADDR);
 			}
 		}
 		if (isrc &
@@ -688,8 +688,8 @@ static irqreturn_t sun4i_can_interrupt(int irq, void *dev_id)
 				netdev_err(dev, "can't allocate buffer - clearing pending interrupts\n");
 		}
 		/* clear interrupts */
-		writel(isrc, priv->base + SUN4I_REG_INT_ADDR);
-		readl(priv->base + SUN4I_REG_INT_ADDR);
+		pete_writel("drivers/net/can/sun4i_can.c:691", isrc, priv->base + SUN4I_REG_INT_ADDR);
+		pete_readl("drivers/net/can/sun4i_can.c:692", priv->base + SUN4I_REG_INT_ADDR);
 	}
 	if (n >= SUN4I_CAN_MAX_IRQ)
 		netdev_dbg(dev, "%d messages handled in ISR", n);

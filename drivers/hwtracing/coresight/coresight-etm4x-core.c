@@ -1077,7 +1077,7 @@ static bool etm4_init_sysreg_access(struct etmv4_drvdata *drvdata,
 
 static bool is_devtype_cpu_trace(void __iomem *base)
 {
-	u32 devtype = readl(base + TRCDEVTYPE);
+	u32 devtype = pete_readl("drivers/hwtracing/coresight/coresight-etm4x-core.c:1080", base + TRCDEVTYPE);
 
 	return (devtype == CS_DEVTYPE_PE_TRACE);
 }

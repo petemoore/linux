@@ -83,11 +83,11 @@ static int phy_init(struct usb_phy *phy)
 		return ret;
 	}
 
-	writel(readl(ctrl1) | SRAM_EXT_LD_DONE, ctrl1);
+	pete_writel("drivers/phy/phy-lgm-usb.c:86", pete_readl("drivers/phy/phy-lgm-usb.c:86", ctrl1) | SRAM_EXT_LD_DONE, ctrl1);
 
 	ta->phy_initialized = true;
 	if (!ta->phy.edev) {
-		writel(TCPC_CONN, ta->phy.io_priv + TCPC_OFFSET);
+		pete_writel("drivers/phy/phy-lgm-usb.c:90", TCPC_CONN, ta->phy.io_priv + TCPC_OFFSET);
 		return phy->set_vbus(phy, true);
 	}
 
@@ -109,7 +109,7 @@ static void phy_shutdown(struct usb_phy *phy)
 	ta->phy.set_vbus(&ta->phy, false);
 
 	ta->connected = false;
-	writel(TCPC_DISCONN, ta->phy.io_priv + TCPC_OFFSET);
+	pete_writel("drivers/phy/phy-lgm-usb.c:112", TCPC_DISCONN, ta->phy.io_priv + TCPC_OFFSET);
 
 	for (i = 0; i < ARRAY_SIZE(PHY_RESETS); i++)
 		reset_control_assert(ta->resets[i]);
@@ -162,7 +162,7 @@ static void tca_work(struct work_struct *work)
 		dev_dbg(ta->phy.dev, "disconnected\n");
 	}
 
-	writel(val, ta->phy.io_priv + TCPC_OFFSET);
+	pete_writel("drivers/phy/phy-lgm-usb.c:165", val, ta->phy.io_priv + TCPC_OFFSET);
 
 	ret = ta->phy.set_vbus(&ta->phy, connected);
 	if (ret)

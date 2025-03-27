@@ -56,8 +56,8 @@ static void gxl_enable_internal_mdio(struct gxl_mdio_mux *priv)
 	       REG3_CLKINEN |
 	       REG3_PHYIP);
 
-	writel(REG4_PWRUPRSTSIG, priv->regs + ETH_REG4);
-	writel(val, priv->regs + ETH_REG3);
+	pete_writel("drivers/net/mdio/mdio-mux-meson-gxl.c:59", REG4_PWRUPRSTSIG, priv->regs + ETH_REG4);
+	pete_writel("drivers/net/mdio/mdio-mux-meson-gxl.c:60", val, priv->regs + ETH_REG3);
 	mdelay(10);
 
 	/* NOTE: The HW kept the phy id configurable at runtime.
@@ -65,13 +65,13 @@ static void gxl_enable_internal_mdio(struct gxl_mdio_mux *priv)
 	 * The only constraint is that it must match the one in
 	 * drivers/net/phy/meson-gxl.c to properly match the PHY.
 	 */
-	writel(FIELD_PREP(REG2_PHYID, EPHY_GXL_ID),
+	pete_writel("drivers/net/mdio/mdio-mux-meson-gxl.c:68", FIELD_PREP(REG2_PHYID, EPHY_GXL_ID),
 	       priv->regs + ETH_REG2);
 
 	/* Enable the internal phy */
 	val |= REG3_PHYEN;
-	writel(val, priv->regs + ETH_REG3);
-	writel(0, priv->regs + ETH_REG4);
+	pete_writel("drivers/net/mdio/mdio-mux-meson-gxl.c:73", val, priv->regs + ETH_REG3);
+	pete_writel("drivers/net/mdio/mdio-mux-meson-gxl.c:74", 0, priv->regs + ETH_REG4);
 
 	/* The phy needs a bit of time to power up */
 	mdelay(10);
@@ -80,7 +80,7 @@ static void gxl_enable_internal_mdio(struct gxl_mdio_mux *priv)
 static void gxl_enable_external_mdio(struct gxl_mdio_mux *priv)
 {
 	/* Reset the mdio bus mux to the external phy */
-	writel(0, priv->regs + ETH_REG3);
+	pete_writel("drivers/net/mdio/mdio-mux-meson-gxl.c:83", 0, priv->regs + ETH_REG3);
 }
 
 static int gxl_mdio_switch_fn(int current_child, int desired_child,

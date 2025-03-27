@@ -68,7 +68,7 @@ static void imx8mp_configure_glue(struct dwc3_imx8mp *dwc3_imx)
 	if (!dwc3_imx->glue_base)
 		return;
 
-	value = readl(dwc3_imx->glue_base + USB_CTRL0);
+	value = pete_readl("drivers/usb/dwc3/dwc3-imx8mp.c:71", dwc3_imx->glue_base + USB_CTRL0);
 
 	if (device_property_read_bool(dev, "fsl,permanently-attached"))
 		value |= (USB_CTRL0_USB2_FIXED | USB_CTRL0_USB3_FIXED);
@@ -80,9 +80,9 @@ static void imx8mp_configure_glue(struct dwc3_imx8mp *dwc3_imx)
 	else
 		value |= USB_CTRL0_PORTPWR_EN;
 
-	writel(value, dwc3_imx->glue_base + USB_CTRL0);
+	pete_writel("drivers/usb/dwc3/dwc3-imx8mp.c:83", value, dwc3_imx->glue_base + USB_CTRL0);
 
-	value = readl(dwc3_imx->glue_base + USB_CTRL1);
+	value = pete_readl("drivers/usb/dwc3/dwc3-imx8mp.c:85", dwc3_imx->glue_base + USB_CTRL1);
 	if (device_property_read_bool(dev, "fsl,over-current-active-low"))
 		value |= USB_CTRL1_OC_POLARITY;
 	else
@@ -93,7 +93,7 @@ static void imx8mp_configure_glue(struct dwc3_imx8mp *dwc3_imx)
 	else
 		value &= ~USB_CTRL1_PWR_POLARITY;
 
-	writel(value, dwc3_imx->glue_base + USB_CTRL1);
+	pete_writel("drivers/usb/dwc3/dwc3-imx8mp.c:96", value, dwc3_imx->glue_base + USB_CTRL1);
 }
 
 static void dwc3_imx8mp_wakeup_enable(struct dwc3_imx8mp *dwc3_imx)
@@ -104,7 +104,7 @@ static void dwc3_imx8mp_wakeup_enable(struct dwc3_imx8mp *dwc3_imx)
 	if (!dwc3)
 		return;
 
-	val = readl(dwc3_imx->hsio_blk_base + USB_WAKEUP_CTRL);
+	val = pete_readl("drivers/usb/dwc3/dwc3-imx8mp.c:107", dwc3_imx->hsio_blk_base + USB_WAKEUP_CTRL);
 
 	if ((dwc3->current_dr_role == DWC3_GCTL_PRTCAP_HOST) && dwc3->xhci)
 		val |= USB_WAKEUP_EN | USB_WAKEUP_SS_CONN |
@@ -113,16 +113,16 @@ static void dwc3_imx8mp_wakeup_enable(struct dwc3_imx8mp *dwc3_imx)
 		val |= USB_WAKEUP_EN | USB_WAKEUP_VBUS_EN |
 		       USB_WAKEUP_VBUS_SRC_SESS_VAL;
 
-	writel(val, dwc3_imx->hsio_blk_base + USB_WAKEUP_CTRL);
+	pete_writel("drivers/usb/dwc3/dwc3-imx8mp.c:116", val, dwc3_imx->hsio_blk_base + USB_WAKEUP_CTRL);
 }
 
 static void dwc3_imx8mp_wakeup_disable(struct dwc3_imx8mp *dwc3_imx)
 {
 	u32 val;
 
-	val = readl(dwc3_imx->hsio_blk_base + USB_WAKEUP_CTRL);
+	val = pete_readl("drivers/usb/dwc3/dwc3-imx8mp.c:123", dwc3_imx->hsio_blk_base + USB_WAKEUP_CTRL);
 	val &= ~(USB_WAKEUP_EN | USB_WAKEUP_EN_MASK);
-	writel(val, dwc3_imx->hsio_blk_base + USB_WAKEUP_CTRL);
+	pete_writel("drivers/usb/dwc3/dwc3-imx8mp.c:125", val, dwc3_imx->hsio_blk_base + USB_WAKEUP_CTRL);
 }
 
 static irqreturn_t dwc3_imx8mp_interrupt(int irq, void *_dwc3_imx)

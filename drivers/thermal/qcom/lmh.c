@@ -53,7 +53,7 @@ static void lmh_enable_interrupt(struct irq_data *d)
 	struct lmh_hw_data *lmh_data = irq_data_get_irq_chip_data(d);
 
 	/* Clear the existing interrupt */
-	writel(0xff, lmh_data->base + LMH_REG_DCVS_INTR_CLR);
+	pete_writel("drivers/thermal/qcom/lmh.c:56", 0xff, lmh_data->base + LMH_REG_DCVS_INTR_CLR);
 	enable_irq(lmh_data->irq);
 }
 

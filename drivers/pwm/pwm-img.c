@@ -80,12 +80,12 @@ static inline struct img_pwm_chip *to_img_pwm_chip(struct pwm_chip *chip)
 static inline void img_pwm_writel(struct img_pwm_chip *imgchip,
 				  u32 reg, u32 val)
 {
-	writel(val, imgchip->base + reg);
+	pete_writel("drivers/pwm/pwm-img.c:83", val, imgchip->base + reg);
 }
 
 static inline u32 img_pwm_readl(struct img_pwm_chip *imgchip, u32 reg)
 {
-	return readl(imgchip->base + reg);
+	return pete_readl("drivers/pwm/pwm-img.c:88", imgchip->base + reg);
 }
 
 static int img_pwm_config(struct pwm_chip *chip, struct pwm_device *pwm,

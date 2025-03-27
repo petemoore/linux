@@ -72,8 +72,8 @@ static size_t glink_rpm_rx_avail(struct qcom_glink_pipe *glink_pipe)
 	unsigned int head;
 	unsigned int tail;
 
-	head = readl(pipe->head);
-	tail = readl(pipe->tail);
+	head = pete_readl("drivers/rpmsg/qcom_glink_rpm.c:75", pipe->head);
+	tail = pete_readl("drivers/rpmsg/qcom_glink_rpm.c:76", pipe->tail);
 
 	if (head < tail)
 		return pipe->native.length - tail + head;
@@ -88,7 +88,7 @@ static void glink_rpm_rx_peek(struct qcom_glink_pipe *glink_pipe,
 	unsigned int tail;
 	size_t len;
 
-	tail = readl(pipe->tail);
+	tail = pete_readl("drivers/rpmsg/qcom_glink_rpm.c:91", pipe->tail);
 	tail += offset;
 	if (tail >= pipe->native.length)
 		tail -= pipe->native.length;
@@ -111,13 +111,13 @@ static void glink_rpm_rx_advance(struct qcom_glink_pipe *glink_pipe,
 	struct glink_rpm_pipe *pipe = to_rpm_pipe(glink_pipe);
 	unsigned int tail;
 
-	tail = readl(pipe->tail);
+	tail = pete_readl("drivers/rpmsg/qcom_glink_rpm.c:114", pipe->tail);
 
 	tail += count;
 	if (tail >= pipe->native.length)
 		tail -= pipe->native.length;
 
-	writel(tail, pipe->tail);
+	pete_writel("drivers/rpmsg/qcom_glink_rpm.c:120", tail, pipe->tail);
 }
 
 static size_t glink_rpm_tx_avail(struct qcom_glink_pipe *glink_pipe)
@@ -126,8 +126,8 @@ static size_t glink_rpm_tx_avail(struct qcom_glink_pipe *glink_pipe)
 	unsigned int head;
 	unsigned int tail;
 
-	head = readl(pipe->head);
-	tail = readl(pipe->tail);
+	head = pete_readl("drivers/rpmsg/qcom_glink_rpm.c:129", pipe->head);
+	tail = pete_readl("drivers/rpmsg/qcom_glink_rpm.c:130", pipe->tail);
 
 	if (tail <= head)
 		return pipe->native.length - head + tail;
@@ -182,14 +182,14 @@ static void glink_rpm_tx_write(struct qcom_glink_pipe *glink_pipe,
 	if (aligned_dlen != dlen)
 		memcpy(padding, data + aligned_dlen, dlen - aligned_dlen);
 
-	head = readl(pipe->head);
+	head = pete_readl("drivers/rpmsg/qcom_glink_rpm.c:185", pipe->head);
 	head = glink_rpm_tx_write_one(pipe, head, hdr, hlen);
 	head = glink_rpm_tx_write_one(pipe, head, data, aligned_dlen);
 
 	pad = ALIGN(tlen, 8) - ALIGN_DOWN(tlen, 4);
 	if (pad)
 		head = glink_rpm_tx_write_one(pipe, head, padding, pad);
-	writel(head, pipe->head);
+	pete_writel("drivers/rpmsg/qcom_glink_rpm.c:192", head, pipe->head);
 }
 
 static void glink_rpm_tx_kick(struct qcom_glink_pipe *glink_pipe)
@@ -339,8 +339,8 @@ static int glink_rpm_probe(struct platform_device *pdev)
 	rpm->tx_pipe.native.write = glink_rpm_tx_write;
 	rpm->tx_pipe.native.kick = glink_rpm_tx_kick;
 
-	writel(0, rpm->tx_pipe.head);
-	writel(0, rpm->rx_pipe.tail);
+	pete_writel("drivers/rpmsg/qcom_glink_rpm.c:342", 0, rpm->tx_pipe.head);
+	pete_writel("drivers/rpmsg/qcom_glink_rpm.c:343", 0, rpm->rx_pipe.tail);
 
 	glink = qcom_glink_native_probe(dev,
 					0,

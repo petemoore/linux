@@ -76,7 +76,7 @@ dpu_reg_set(struct dpu_context *ctx, u32 offset, u32 set_bits)
 {
 	u32 bits = readl_relaxed(ctx->base + offset);
 
-	writel(bits | set_bits, ctx->base + offset);
+	pete_writel("drivers/gpu/drm/sprd/sprd_dpu.h:79", bits | set_bits, ctx->base + offset);
 }
 
 static inline void
@@ -84,7 +84,7 @@ dpu_reg_clr(struct dpu_context *ctx, u32 offset, u32 clr_bits)
 {
 	u32 bits = readl_relaxed(ctx->base + offset);
 
-	writel(bits & ~clr_bits, ctx->base + offset);
+	pete_writel("drivers/gpu/drm/sprd/sprd_dpu.h:87", bits & ~clr_bits, ctx->base + offset);
 }
 
 static inline u32
@@ -92,7 +92,7 @@ layer_reg_rd(struct dpu_context *ctx, u32 offset, int index)
 {
 	u32 layer_offset = offset + index * DPU_LAY_REG_OFFSET;
 
-	return readl(ctx->base + layer_offset);
+	return pete_readl("drivers/gpu/drm/sprd/sprd_dpu.h:95", ctx->base + layer_offset);
 }
 
 static inline void
@@ -100,7 +100,7 @@ layer_reg_wr(struct dpu_context *ctx, u32 offset, u32 cfg_bits, int index)
 {
 	u32 layer_offset =  offset + index * DPU_LAY_REG_OFFSET;
 
-	writel(cfg_bits, ctx->base + layer_offset);
+	pete_writel("drivers/gpu/drm/sprd/sprd_dpu.h:103", cfg_bits, ctx->base + layer_offset);
 }
 
 void sprd_dpu_run(struct sprd_dpu *dpu);

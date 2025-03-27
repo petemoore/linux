@@ -83,9 +83,9 @@ static void armada_xp_clear_shared_l2(void)
 	if (!cpu_config_base)
 		return;
 
-	reg = readl(cpu_config_base);
+	reg = pete_readl("arch/arm/mach-mvebu/coherency.c:86", cpu_config_base);
 	reg &= ~CPU_CONFIG_SHARED_L2;
-	writel(reg, cpu_config_base);
+	pete_writel("arch/arm/mach-mvebu/coherency.c:88", reg, cpu_config_base);
 }
 
 static int mvebu_hwcc_notifier(struct notifier_block *nb,

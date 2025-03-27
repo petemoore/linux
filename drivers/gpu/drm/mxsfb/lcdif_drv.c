@@ -114,17 +114,17 @@ static irqreturn_t lcdif_irq_handler(int irq, void *data)
 	struct lcdif_drm_private *lcdif = drm->dev_private;
 	u32 reg, stat;
 
-	stat = readl(lcdif->base + LCDC_V8_INT_STATUS_D0);
+	stat = pete_readl("drivers/gpu/drm/mxsfb/lcdif_drv.c:117", lcdif->base + LCDC_V8_INT_STATUS_D0);
 	if (!stat)
 		return IRQ_NONE;
 
 	if (stat & INT_STATUS_D0_VS_BLANK) {
-		reg = readl(lcdif->base + LCDC_V8_CTRLDESCL0_5);
+		reg = pete_readl("drivers/gpu/drm/mxsfb/lcdif_drv.c:122", lcdif->base + LCDC_V8_CTRLDESCL0_5);
 		if (!(reg & CTRLDESCL0_5_SHADOW_LOAD_EN))
 			drm_crtc_handle_vblank(&lcdif->crtc);
 	}
 
-	writel(stat, lcdif->base + LCDC_V8_INT_STATUS_D0);
+	pete_writel("drivers/gpu/drm/mxsfb/lcdif_drv.c:127", stat, lcdif->base + LCDC_V8_INT_STATUS_D0);
 
 	return IRQ_HANDLED;
 }

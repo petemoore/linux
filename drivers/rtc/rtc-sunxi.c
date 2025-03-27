@@ -146,11 +146,11 @@ static irqreturn_t sunxi_rtc_alarmirq(int irq, void *id)
 	struct sunxi_rtc_dev *chip = (struct sunxi_rtc_dev *) id;
 	u32 val;
 
-	val = readl(chip->base + SUNXI_ALRM_IRQ_STA);
+	val = pete_readl("drivers/rtc/rtc-sunxi.c:149", chip->base + SUNXI_ALRM_IRQ_STA);
 
 	if (val & SUNXI_ALRM_IRQ_STA_CNT_IRQ_PEND) {
 		val |= SUNXI_ALRM_IRQ_STA_CNT_IRQ_PEND;
-		writel(val, chip->base + SUNXI_ALRM_IRQ_STA);
+		pete_writel("drivers/rtc/rtc-sunxi.c:153", val, chip->base + SUNXI_ALRM_IRQ_STA);
 
 		rtc_update_irq(chip->rtc, 1, RTC_AF | RTC_IRQF);
 
@@ -166,18 +166,18 @@ static void sunxi_rtc_setaie(unsigned int to, struct sunxi_rtc_dev *chip)
 	u32 alrm_irq_val = 0;
 
 	if (to) {
-		alrm_val = readl(chip->base + SUNXI_ALRM_EN);
+		alrm_val = pete_readl("drivers/rtc/rtc-sunxi.c:169", chip->base + SUNXI_ALRM_EN);
 		alrm_val |= SUNXI_ALRM_EN_CNT_EN;
 
-		alrm_irq_val = readl(chip->base + SUNXI_ALRM_IRQ_EN);
+		alrm_irq_val = pete_readl("drivers/rtc/rtc-sunxi.c:172", chip->base + SUNXI_ALRM_IRQ_EN);
 		alrm_irq_val |= SUNXI_ALRM_IRQ_EN_CNT_IRQ_EN;
 	} else {
-		writel(SUNXI_ALRM_IRQ_STA_CNT_IRQ_PEND,
+		pete_writel("drivers/rtc/rtc-sunxi.c:175", SUNXI_ALRM_IRQ_STA_CNT_IRQ_PEND,
 				chip->base + SUNXI_ALRM_IRQ_STA);
 	}
 
-	writel(alrm_val, chip->base + SUNXI_ALRM_EN);
-	writel(alrm_irq_val, chip->base + SUNXI_ALRM_IRQ_EN);
+	pete_writel("drivers/rtc/rtc-sunxi.c:179", alrm_val, chip->base + SUNXI_ALRM_EN);
+	pete_writel("drivers/rtc/rtc-sunxi.c:180", alrm_irq_val, chip->base + SUNXI_ALRM_IRQ_EN);
 }
 
 static int sunxi_rtc_getalarm(struct device *dev, struct rtc_wkalrm *wkalrm)
@@ -188,8 +188,8 @@ static int sunxi_rtc_getalarm(struct device *dev, struct rtc_wkalrm *wkalrm)
 	u32 alrm_en;
 	u32 date;
 
-	alrm = readl(chip->base + SUNXI_ALRM_DHMS);
-	date = readl(chip->base + SUNXI_RTC_YMD);
+	alrm = pete_readl("drivers/rtc/rtc-sunxi.c:191", chip->base + SUNXI_ALRM_DHMS);
+	date = pete_readl("drivers/rtc/rtc-sunxi.c:192", chip->base + SUNXI_RTC_YMD);
 
 	alrm_tm->tm_sec = SUNXI_ALRM_GET_SEC_VALUE(alrm);
 	alrm_tm->tm_min = SUNXI_ALRM_GET_MIN_VALUE(alrm);
@@ -208,7 +208,7 @@ static int sunxi_rtc_getalarm(struct device *dev, struct rtc_wkalrm *wkalrm)
 	 */
 	alrm_tm->tm_year += SUNXI_YEAR_OFF(chip->data_year);
 
-	alrm_en = readl(chip->base + SUNXI_ALRM_IRQ_EN);
+	alrm_en = pete_readl("drivers/rtc/rtc-sunxi.c:211", chip->base + SUNXI_ALRM_IRQ_EN);
 	if (alrm_en & SUNXI_ALRM_EN_CNT_EN)
 		wkalrm->enabled = 1;
 
@@ -224,10 +224,10 @@ static int sunxi_rtc_gettime(struct device *dev, struct rtc_time *rtc_tm)
 	 * read again in case it changes
 	 */
 	do {
-		date = readl(chip->base + SUNXI_RTC_YMD);
-		time = readl(chip->base + SUNXI_RTC_HMS);
-	} while ((date != readl(chip->base + SUNXI_RTC_YMD)) ||
-		 (time != readl(chip->base + SUNXI_RTC_HMS)));
+		date = pete_readl("drivers/rtc/rtc-sunxi.c:227", chip->base + SUNXI_RTC_YMD);
+		time = pete_readl("drivers/rtc/rtc-sunxi.c:228", chip->base + SUNXI_RTC_HMS);
+	} while ((date != pete_readl("drivers/rtc/rtc-sunxi.c:229", chip->base + SUNXI_RTC_YMD)) ||
+		 (time != pete_readl("drivers/rtc/rtc-sunxi.c:230", chip->base + SUNXI_RTC_HMS)));
 
 	rtc_tm->tm_sec  = SUNXI_TIME_GET_SEC_VALUE(time);
 	rtc_tm->tm_min  = SUNXI_TIME_GET_MIN_VALUE(time);
@@ -288,17 +288,17 @@ static int sunxi_rtc_setalarm(struct device *dev, struct rtc_wkalrm *wkalrm)
 	time_gap -= time_gap_min * SEC_IN_MIN;
 
 	sunxi_rtc_setaie(0, chip);
-	writel(0, chip->base + SUNXI_ALRM_DHMS);
+	pete_writel("drivers/rtc/rtc-sunxi.c:291", 0, chip->base + SUNXI_ALRM_DHMS);
 	usleep_range(100, 300);
 
 	alrm = SUNXI_ALRM_SET_SEC_VALUE(time_gap) |
 		SUNXI_ALRM_SET_MIN_VALUE(time_gap_min) |
 		SUNXI_ALRM_SET_HOUR_VALUE(time_gap_hour) |
 		SUNXI_ALRM_SET_DAY_VALUE(time_gap_day);
-	writel(alrm, chip->base + SUNXI_ALRM_DHMS);
+	pete_writel("drivers/rtc/rtc-sunxi.c:298", alrm, chip->base + SUNXI_ALRM_DHMS);
 
-	writel(0, chip->base + SUNXI_ALRM_IRQ_EN);
-	writel(SUNXI_ALRM_IRQ_EN_CNT_IRQ_EN, chip->base + SUNXI_ALRM_IRQ_EN);
+	pete_writel("drivers/rtc/rtc-sunxi.c:300", 0, chip->base + SUNXI_ALRM_IRQ_EN);
+	pete_writel("drivers/rtc/rtc-sunxi.c:301", SUNXI_ALRM_IRQ_EN_CNT_IRQ_EN, chip->base + SUNXI_ALRM_IRQ_EN);
 
 	sunxi_rtc_setaie(wkalrm->enabled, chip);
 
@@ -312,7 +312,7 @@ static int sunxi_rtc_wait(struct sunxi_rtc_dev *chip, int offset,
 	u32 reg;
 
 	do {
-		reg = readl(chip->base + offset);
+		reg = pete_readl("drivers/rtc/rtc-sunxi.c:315", chip->base + offset);
 		reg &= mask;
 
 		if (reg == mask)
@@ -358,10 +358,10 @@ static int sunxi_rtc_settime(struct device *dev, struct rtc_time *rtc_tm)
 		SUNXI_TIME_SET_MIN_VALUE(rtc_tm->tm_min)  |
 		SUNXI_TIME_SET_HOUR_VALUE(rtc_tm->tm_hour);
 
-	writel(0, chip->base + SUNXI_RTC_HMS);
-	writel(0, chip->base + SUNXI_RTC_YMD);
+	pete_writel("drivers/rtc/rtc-sunxi.c:361", 0, chip->base + SUNXI_RTC_HMS);
+	pete_writel("drivers/rtc/rtc-sunxi.c:362", 0, chip->base + SUNXI_RTC_YMD);
 
-	writel(time, chip->base + SUNXI_RTC_HMS);
+	pete_writel("drivers/rtc/rtc-sunxi.c:364", time, chip->base + SUNXI_RTC_HMS);
 
 	/*
 	 * After writing the RTC HH-MM-SS register, the
@@ -375,7 +375,7 @@ static int sunxi_rtc_settime(struct device *dev, struct rtc_time *rtc_tm)
 		return -1;
 	}
 
-	writel(date, chip->base + SUNXI_RTC_YMD);
+	pete_writel("drivers/rtc/rtc-sunxi.c:378", date, chip->base + SUNXI_RTC_YMD);
 
 	/*
 	 * After writing the RTC YY-MM-DD register, the
@@ -454,16 +454,16 @@ static int sunxi_rtc_probe(struct platform_device *pdev)
 	}
 
 	/* clear the alarm count value */
-	writel(0, chip->base + SUNXI_ALRM_DHMS);
+	pete_writel("drivers/rtc/rtc-sunxi.c:457", 0, chip->base + SUNXI_ALRM_DHMS);
 
 	/* disable alarm, not generate irq pending */
-	writel(0, chip->base + SUNXI_ALRM_EN);
+	pete_writel("drivers/rtc/rtc-sunxi.c:460", 0, chip->base + SUNXI_ALRM_EN);
 
 	/* disable alarm week/cnt irq, unset to cpu */
-	writel(0, chip->base + SUNXI_ALRM_IRQ_EN);
+	pete_writel("drivers/rtc/rtc-sunxi.c:463", 0, chip->base + SUNXI_ALRM_IRQ_EN);
 
 	/* clear alarm week/cnt irq pending */
-	writel(SUNXI_ALRM_IRQ_STA_CNT_IRQ_PEND, chip->base +
+	pete_writel("drivers/rtc/rtc-sunxi.c:466", SUNXI_ALRM_IRQ_STA_CNT_IRQ_PEND, chip->base +
 			SUNXI_ALRM_IRQ_STA);
 
 	chip->rtc->ops = &sunxi_rtc_ops;

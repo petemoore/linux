@@ -56,15 +56,15 @@ static int rmobile_pd_power_down(struct generic_pm_domain *genpd)
 			return ret;
 	}
 
-	if (readl(rmobile_pd->base + PSTR) & mask) {
-		writel(mask, rmobile_pd->base + SPDCR);
+	if (pete_readl("drivers/pmdomain/renesas/rmobile-sysc.c:59", rmobile_pd->base + PSTR) & mask) {
+		pete_writel("drivers/pmdomain/renesas/rmobile-sysc.c:60", mask, rmobile_pd->base + SPDCR);
 
 		readl_poll_timeout_atomic(rmobile_pd->base + SPDCR, val,
 					  !(val & mask), 0, PSTR_RETRIES);
 	}
 
 	pr_debug("%s: Power off, 0x%08x -> PSTR = 0x%08x\n", genpd->name, mask,
-		 readl(rmobile_pd->base + PSTR));
+		 pete_readl("drivers/pmdomain/renesas/rmobile-sysc.c:67", rmobile_pd->base + PSTR));
 
 	return 0;
 }
@@ -74,10 +74,10 @@ static int __rmobile_pd_power_up(struct rmobile_pm_domain *rmobile_pd)
 	unsigned int val, mask = BIT(rmobile_pd->bit_shift);
 	int ret = 0;
 
-	if (readl(rmobile_pd->base + PSTR) & mask)
+	if (pete_readl("drivers/pmdomain/renesas/rmobile-sysc.c:77", rmobile_pd->base + PSTR) & mask)
 		return ret;
 
-	writel(mask, rmobile_pd->base + SWUCR);
+	pete_writel("drivers/pmdomain/renesas/rmobile-sysc.c:80", mask, rmobile_pd->base + SWUCR);
 
 	ret = readl_poll_timeout_atomic(rmobile_pd->base + SWUCR, val,
 					(val & mask), PSTR_DELAY_US,
@@ -85,7 +85,7 @@ static int __rmobile_pd_power_up(struct rmobile_pm_domain *rmobile_pd)
 
 	pr_debug("%s: Power on, 0x%08x -> PSTR = 0x%08x\n",
 		 rmobile_pd->genpd.name, mask,
-		 readl(rmobile_pd->base + PSTR));
+		 pete_readl("drivers/pmdomain/renesas/rmobile-sysc.c:88", rmobile_pd->base + PSTR));
 
 	return ret;
 }

@@ -301,7 +301,7 @@ renesas_sdhi_internal_dmac_enable_dma(struct tmio_mmc_host *host, bool enable)
 	if (!host->chan_tx || !host->chan_rx)
 		return;
 
-	writel(enable ? ~dma_irqs : INFO1_MASK_CLEAR, host->ctl + DM_CM_INFO1_MASK);
+	pete_writel("drivers/mmc/host/renesas_sdhi_internal_dmac.c:304", enable ? ~dma_irqs : INFO1_MASK_CLEAR, host->ctl + DM_CM_INFO1_MASK);
 
 	if (priv->dma_priv.enable)
 		priv->dma_priv.enable(host, enable);
@@ -314,8 +314,8 @@ renesas_sdhi_internal_dmac_abort_dma(struct tmio_mmc_host *host)
 
 	renesas_sdhi_internal_dmac_enable_dma(host, false);
 
-	writel(RST_RESERVED_BITS & ~val, host->ctl + DM_CM_RST);
-	writel(RST_RESERVED_BITS | val, host->ctl + DM_CM_RST);
+	pete_writel("drivers/mmc/host/renesas_sdhi_internal_dmac.c:317", RST_RESERVED_BITS & ~val, host->ctl + DM_CM_RST);
+	pete_writel("drivers/mmc/host/renesas_sdhi_internal_dmac.c:318", RST_RESERVED_BITS | val, host->ctl + DM_CM_RST);
 
 	clear_bit(SDHI_INTERNAL_DMAC_RX_IN_USE, &global_flags);
 
@@ -330,10 +330,10 @@ static bool renesas_sdhi_internal_dmac_dma_irq(struct tmio_mmc_host *host)
 	u32 dma_irqs = INFO1_DTRANEND0 |
 			(sdhi_has_quirk(priv, old_info1_layout) ?
 			INFO1_DTRANEND1_OLD : INFO1_DTRANEND1);
-	u32 status = readl(host->ctl + DM_CM_INFO1);
+	u32 status = pete_readl("drivers/mmc/host/renesas_sdhi_internal_dmac.c:333", host->ctl + DM_CM_INFO1);
 
 	if (status & dma_irqs) {
-		writel(status ^ dma_irqs, host->ctl + DM_CM_INFO1);
+		pete_writel("drivers/mmc/host/renesas_sdhi_internal_dmac.c:336", status ^ dma_irqs, host->ctl + DM_CM_INFO1);
 		set_bit(SDHI_DMA_END_FLAG_DMA, &dma_priv->end_flags);
 		if (test_bit(SDHI_DMA_END_FLAG_ACCESS, &dma_priv->end_flags))
 			tasklet_schedule(&dma_priv->dma_complete);
@@ -425,8 +425,8 @@ renesas_sdhi_internal_dmac_start_dma(struct tmio_mmc_host *host,
 	renesas_sdhi_internal_dmac_enable_dma(host, true);
 
 	/* set dma parameters */
-	writel(dtran_mode, host->ctl + DM_CM_DTRAN_MODE);
-	writel(sg_dma_address(sg), host->ctl + DM_DTRAN_ADDR);
+	pete_writel("drivers/mmc/host/renesas_sdhi_internal_dmac.c:428", dtran_mode, host->ctl + DM_CM_DTRAN_MODE);
+	pete_writel("drivers/mmc/host/renesas_sdhi_internal_dmac.c:429", sg_dma_address(sg), host->ctl + DM_DTRAN_ADDR);
 
 	host->dma_on = true;
 
@@ -448,7 +448,7 @@ static void renesas_sdhi_internal_dmac_issue_tasklet_fn(unsigned long arg)
 
 	if (!host->cmd->error) {
 		/* start the DMAC */
-		writel(DTRAN_CTRL_DM_START, host->ctl + DM_CM_DTRAN_CTRL);
+		pete_writel("drivers/mmc/host/renesas_sdhi_internal_dmac.c:451", DTRAN_CTRL_DM_START, host->ctl + DM_CM_DTRAN_CTRL);
 	} else {
 		/* on CMD errors, simulate DMA end immediately */
 		set_bit(SDHI_DMA_END_FLAG_DMA, &priv->dma_priv.end_flags);
@@ -535,10 +535,10 @@ renesas_sdhi_internal_dmac_request_dma(struct tmio_mmc_host *host,
 	struct renesas_sdhi *priv = host_to_priv(host);
 
 	/* Disable DMAC interrupts initially */
-	writel(INFO1_MASK_CLEAR, host->ctl + DM_CM_INFO1_MASK);
-	writel(INFO2_MASK_CLEAR, host->ctl + DM_CM_INFO2_MASK);
-	writel(0, host->ctl + DM_CM_INFO1);
-	writel(0, host->ctl + DM_CM_INFO2);
+	pete_writel("drivers/mmc/host/renesas_sdhi_internal_dmac.c:538", INFO1_MASK_CLEAR, host->ctl + DM_CM_INFO1_MASK);
+	pete_writel("drivers/mmc/host/renesas_sdhi_internal_dmac.c:539", INFO2_MASK_CLEAR, host->ctl + DM_CM_INFO2_MASK);
+	pete_writel("drivers/mmc/host/renesas_sdhi_internal_dmac.c:540", 0, host->ctl + DM_CM_INFO1);
+	pete_writel("drivers/mmc/host/renesas_sdhi_internal_dmac.c:541", 0, host->ctl + DM_CM_INFO2);
 
 	/* Each value is set to non-zero to assume "enabling" each DMA */
 	host->chan_rx = host->chan_tx = (void *)0xdeadbeaf;

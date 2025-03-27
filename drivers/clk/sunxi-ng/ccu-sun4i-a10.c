@@ -1441,7 +1441,7 @@ static int sun4i_a10_ccu_probe(struct platform_device *pdev)
 	if (IS_ERR(reg))
 		return PTR_ERR(reg);
 
-	val = readl(reg + SUN4I_PLL_AUDIO_REG);
+	val = pete_readl("drivers/clk/sunxi-ng/ccu-sun4i-a10.c:1444", reg + SUN4I_PLL_AUDIO_REG);
 
 	/*
 	 * Force VCO and PLL bias current to lowest setting. Higher
@@ -1452,7 +1452,7 @@ static int sun4i_a10_ccu_probe(struct platform_device *pdev)
 
 	/* Force the PLL-Audio-1x divider to 1 */
 	val &= ~GENMASK(29, 26);
-	writel(val | (1 << 26), reg + SUN4I_PLL_AUDIO_REG);
+	pete_writel("drivers/clk/sunxi-ng/ccu-sun4i-a10.c:1455", val | (1 << 26), reg + SUN4I_PLL_AUDIO_REG);
 
 	/*
 	 * Use the peripheral PLL6 as the AHB parent, instead of CPU /
@@ -1463,9 +1463,9 @@ static int sun4i_a10_ccu_probe(struct platform_device *pdev)
 	 *
 	 * NB! These bits are undocumented in A10 manual.
 	 */
-	val = readl(reg + SUN4I_AHB_REG);
+	val = pete_readl("drivers/clk/sunxi-ng/ccu-sun4i-a10.c:1466", reg + SUN4I_AHB_REG);
 	val &= ~GENMASK(7, 6);
-	writel(val | (2 << 6), reg + SUN4I_AHB_REG);
+	pete_writel("drivers/clk/sunxi-ng/ccu-sun4i-a10.c:1468", val | (2 << 6), reg + SUN4I_AHB_REG);
 
 	return devm_sunxi_ccu_probe(&pdev->dev, reg, desc);
 }

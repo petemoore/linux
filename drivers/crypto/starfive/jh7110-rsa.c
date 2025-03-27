@@ -52,9 +52,9 @@ static inline void starfive_pka_irq_mask_clear(struct starfive_cryp_ctx *ctx)
 	struct starfive_cryp_dev *cryp = ctx->cryp;
 	u32 stat;
 
-	stat = readl(cryp->base + STARFIVE_IE_MASK_OFFSET);
+	stat = pete_readl("drivers/crypto/starfive/jh7110-rsa.c:55", cryp->base + STARFIVE_IE_MASK_OFFSET);
 	stat &= ~STARFIVE_IE_MASK_PKA_DONE;
-	writel(stat, cryp->base + STARFIVE_IE_MASK_OFFSET);
+	pete_writel("drivers/crypto/starfive/jh7110-rsa.c:57", stat, cryp->base + STARFIVE_IE_MASK_OFFSET);
 
 	reinit_completion(&cryp->pka_done);
 }
@@ -98,10 +98,10 @@ static int starfive_rsa_montgomery_form(struct starfive_cryp_ctx *ctx,
 	opsize = (bit_len - 1) >> 5;
 	rctx->csr.pka.v = 0;
 
-	writel(rctx->csr.pka.v, cryp->base + STARFIVE_PKA_CACR_OFFSET);
+	pete_writel("drivers/crypto/starfive/jh7110-rsa.c:101", rctx->csr.pka.v, cryp->base + STARFIVE_PKA_CACR_OFFSET);
 
 	for (loop = 0; loop <= opsize; loop++)
-		writel(mod[opsize - loop], cryp->base + STARFIVE_PKA_CANR_OFFSET + loop * 4);
+		pete_writel("drivers/crypto/starfive/jh7110-rsa.c:104", mod[opsize - loop], cryp->base + STARFIVE_PKA_CANR_OFFSET + loop * 4);
 
 	if (mont) {
 		rctx->csr.pka.v = 0;
@@ -114,18 +114,18 @@ static int starfive_rsa_montgomery_form(struct starfive_cryp_ctx *ctx,
 		rctx->csr.pka.ie = 1;
 
 		starfive_pka_irq_mask_clear(ctx);
-		writel(rctx->csr.pka.v, cryp->base + STARFIVE_PKA_CACR_OFFSET);
+		pete_writel("drivers/crypto/starfive/jh7110-rsa.c:117", rctx->csr.pka.v, cryp->base + STARFIVE_PKA_CACR_OFFSET);
 
 		if (!starfive_pka_wait_done(ctx))
 			return -ETIMEDOUT;
 
 		for (loop = 0; loop <= opsize; loop++)
-			writel(in[opsize - loop], cryp->base + STARFIVE_PKA_CAAR_OFFSET + loop * 4);
+			pete_writel("drivers/crypto/starfive/jh7110-rsa.c:123", in[opsize - loop], cryp->base + STARFIVE_PKA_CAAR_OFFSET + loop * 4);
 
-		writel(0x1000000, cryp->base + STARFIVE_PKA_CAER_OFFSET);
+		pete_writel("drivers/crypto/starfive/jh7110-rsa.c:125", 0x1000000, cryp->base + STARFIVE_PKA_CAER_OFFSET);
 
 		for (loop = 1; loop <= opsize; loop++)
-			writel(0, cryp->base + STARFIVE_PKA_CAER_OFFSET + loop * 4);
+			pete_writel("drivers/crypto/starfive/jh7110-rsa.c:128", 0, cryp->base + STARFIVE_PKA_CAER_OFFSET + loop * 4);
 
 		rctx->csr.pka.v = 0;
 		rctx->csr.pka.cln_done = 1;
@@ -136,7 +136,7 @@ static int starfive_rsa_montgomery_form(struct starfive_cryp_ctx *ctx,
 		rctx->csr.pka.ie = 1;
 
 		starfive_pka_irq_mask_clear(ctx);
-		writel(rctx->csr.pka.v, cryp->base + STARFIVE_PKA_CACR_OFFSET);
+		pete_writel("drivers/crypto/starfive/jh7110-rsa.c:139", rctx->csr.pka.v, cryp->base + STARFIVE_PKA_CACR_OFFSET);
 
 		if (!starfive_pka_wait_done(ctx))
 			return -ETIMEDOUT;
@@ -151,17 +151,17 @@ static int starfive_rsa_montgomery_form(struct starfive_cryp_ctx *ctx,
 		rctx->csr.pka.ie = 1;
 
 		starfive_pka_irq_mask_clear(ctx);
-		writel(rctx->csr.pka.v, cryp->base + STARFIVE_PKA_CACR_OFFSET);
+		pete_writel("drivers/crypto/starfive/jh7110-rsa.c:154", rctx->csr.pka.v, cryp->base + STARFIVE_PKA_CACR_OFFSET);
 
 		if (!starfive_pka_wait_done(ctx))
 			return -ETIMEDOUT;
 
 		for (loop = 0; loop <= count; loop++)
-			writel(in[count - loop], cryp->base + STARFIVE_PKA_CAER_OFFSET + loop * 4);
+			pete_writel("drivers/crypto/starfive/jh7110-rsa.c:160", in[count - loop], cryp->base + STARFIVE_PKA_CAER_OFFSET + loop * 4);
 
 		/*pad with 0 up to opsize*/
 		for (loop = count + 1; loop <= opsize; loop++)
-			writel(0, cryp->base + STARFIVE_PKA_CAER_OFFSET + loop * 4);
+			pete_writel("drivers/crypto/starfive/jh7110-rsa.c:164", 0, cryp->base + STARFIVE_PKA_CAER_OFFSET + loop * 4);
 
 		rctx->csr.pka.v = 0;
 		rctx->csr.pka.cln_done = 1;
@@ -172,14 +172,14 @@ static int starfive_rsa_montgomery_form(struct starfive_cryp_ctx *ctx,
 		rctx->csr.pka.ie = 1;
 
 		starfive_pka_irq_mask_clear(ctx);
-		writel(rctx->csr.pka.v, cryp->base + STARFIVE_PKA_CACR_OFFSET);
+		pete_writel("drivers/crypto/starfive/jh7110-rsa.c:175", rctx->csr.pka.v, cryp->base + STARFIVE_PKA_CACR_OFFSET);
 
 		if (!starfive_pka_wait_done(ctx))
 			return -ETIMEDOUT;
 	}
 
 	for (loop = 0; loop <= opsize; loop++) {
-		temp = readl(cryp->base + STARFIVE_PKA_CAAR_OFFSET + 0x4 * loop);
+		temp = pete_readl("drivers/crypto/starfive/jh7110-rsa.c:182", cryp->base + STARFIVE_PKA_CAAR_OFFSET + 0x4 * loop);
 		out[opsize - loop] = temp;
 	}
 
@@ -211,7 +211,7 @@ static int starfive_rsa_cpu_start(struct starfive_cryp_ctx *ctx, u32 *result,
 	}
 
 	for (loop = 0; loop <= opsize; loop++)
-		writel(mta[opsize - loop],
+		pete_writel("drivers/crypto/starfive/jh7110-rsa.c:214", mta[opsize - loop],
 		       cryp->base + STARFIVE_PKA_CAER_OFFSET + loop * 4);
 
 	for (loop = key->bitlen - 1; loop > 0; loop--) {
@@ -226,7 +226,7 @@ static int starfive_rsa_cpu_start(struct starfive_cryp_ctx *ctx, u32 *result,
 		rctx->csr.pka.ie = 1;
 
 		starfive_pka_irq_mask_clear(ctx);
-		writel(rctx->csr.pka.v, cryp->base + STARFIVE_PKA_CACR_OFFSET);
+		pete_writel("drivers/crypto/starfive/jh7110-rsa.c:229", rctx->csr.pka.v, cryp->base + STARFIVE_PKA_CACR_OFFSET);
 
 		ret = -ETIMEDOUT;
 		if (!starfive_pka_wait_done(ctx))
@@ -242,7 +242,7 @@ static int starfive_rsa_cpu_start(struct starfive_cryp_ctx *ctx, u32 *result,
 			rctx->csr.pka.ie = 1;
 
 			starfive_pka_irq_mask_clear(ctx);
-			writel(rctx->csr.pka.v, cryp->base + STARFIVE_PKA_CACR_OFFSET);
+			pete_writel("drivers/crypto/starfive/jh7110-rsa.c:245", rctx->csr.pka.v, cryp->base + STARFIVE_PKA_CACR_OFFSET);
 
 			if (!starfive_pka_wait_done(ctx))
 				goto rsa_err;
@@ -250,7 +250,7 @@ static int starfive_rsa_cpu_start(struct starfive_cryp_ctx *ctx, u32 *result,
 	}
 
 	for (loop = 0; loop <= opsize; loop++) {
-		temp = readl(cryp->base + STARFIVE_PKA_CAAR_OFFSET + 0x4 * loop);
+		temp = pete_readl("drivers/crypto/starfive/jh7110-rsa.c:253", cryp->base + STARFIVE_PKA_CAAR_OFFSET + 0x4 * loop);
 		result[opsize - loop] = temp;
 	}
 
@@ -275,7 +275,7 @@ static int starfive_rsa_enc_core(struct starfive_cryp_ctx *ctx, int enc)
 	struct starfive_rsa_key *key = &ctx->rsa_key;
 	int ret = 0, shift = 0;
 
-	writel(STARFIVE_RSA_RESET, cryp->base + STARFIVE_PKA_CACR_OFFSET);
+	pete_writel("drivers/crypto/starfive/jh7110-rsa.c:278", STARFIVE_RSA_RESET, cryp->base + STARFIVE_PKA_CACR_OFFSET);
 
 	if (!IS_ALIGNED(rctx->total, sizeof(u32))) {
 		shift = sizeof(u32) - (rctx->total & 0x3);
@@ -302,7 +302,7 @@ static int starfive_rsa_enc_core(struct starfive_cryp_ctx *ctx, int enc)
 		       rctx->rsa_data, key->key_sz, 0, 0);
 
 err_rsa_crypt:
-	writel(STARFIVE_RSA_RESET, cryp->base + STARFIVE_PKA_CACR_OFFSET);
+	pete_writel("drivers/crypto/starfive/jh7110-rsa.c:305", STARFIVE_RSA_RESET, cryp->base + STARFIVE_PKA_CACR_OFFSET);
 	kfree(rctx->rsa_data);
 	return ret;
 }

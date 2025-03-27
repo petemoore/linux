@@ -49,11 +49,11 @@ static int loongson2_thermal_set(struct loongson2_thermal_data *data,
 
 	reg_ctrl = low;
 	reg_ctrl |= enable ? 0x100 : 0;
-	writew(reg_ctrl, data->regs + LOONGSON2_THSENS_CTRL_LOW_REG + reg_off);
+	pete_writew("drivers/thermal/loongson2_thermal.c:52", reg_ctrl, data->regs + LOONGSON2_THSENS_CTRL_LOW_REG + reg_off);
 
 	reg_ctrl = high;
 	reg_ctrl |= enable ? 0x100 : 0;
-	writew(reg_ctrl, data->regs + LOONGSON2_THSENS_CTRL_HI_REG + reg_off);
+	pete_writew("drivers/thermal/loongson2_thermal.c:56", reg_ctrl, data->regs + LOONGSON2_THSENS_CTRL_HI_REG + reg_off);
 
 	return 0;
 }
@@ -63,7 +63,7 @@ static int loongson2_thermal_get_temp(struct thermal_zone_device *tz, int *temp)
 	u32 reg_val;
 	struct loongson2_thermal_data *data = thermal_zone_device_priv(tz);
 
-	reg_val = readl(data->regs + LOONGSON2_THSENS_OUT_REG);
+	reg_val = pete_readl("drivers/thermal/loongson2_thermal.c:66", data->regs + LOONGSON2_THSENS_OUT_REG);
 	*temp = ((reg_val & LOONGSON2_THSENS_OUT_MASK) - HECTO) * KILO;
 
 	return 0;
@@ -74,7 +74,7 @@ static irqreturn_t loongson2_thermal_irq_thread(int irq, void *dev)
 	struct thermal_zone_device *tzd = dev;
 	struct loongson2_thermal_data *data = thermal_zone_device_priv(tzd);
 
-	writeb(LOONGSON2_THSENS_INT_LO | LOONGSON2_THSENS_INT_HIGH, data->regs +
+	pete_writeb("drivers/thermal/loongson2_thermal.c:77", LOONGSON2_THSENS_INT_LO | LOONGSON2_THSENS_INT_HIGH, data->regs +
 		LOONGSON2_THSENS_STATUS_REG);
 
 	thermal_zone_device_update(tzd, THERMAL_EVENT_UNSPECIFIED);
@@ -115,7 +115,7 @@ static int loongson2_thermal_probe(struct platform_device *pdev)
 	if (irq < 0)
 		return irq;
 
-	writeb(LOONGSON2_THSENS_INT_LO | LOONGSON2_THSENS_INT_HIGH, data->regs +
+	pete_writeb("drivers/thermal/loongson2_thermal.c:118", LOONGSON2_THSENS_INT_LO | LOONGSON2_THSENS_INT_HIGH, data->regs +
 		LOONGSON2_THSENS_STATUS_REG);
 
 	loongson2_thermal_set(data, 0, 0, false);

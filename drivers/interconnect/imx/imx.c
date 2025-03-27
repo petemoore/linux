@@ -49,9 +49,9 @@ static int imx_icc_node_set(struct icc_node *node)
 		if (node_data->setting->mode == IMX_NOC_MODE_FIXED) {
 			prio = node_data->setting->prio_level;
 			prio = PRIORITY_COMP_MARK | (prio << 8) | prio;
-			writel(prio, base + IMX_NOC_PRIO_REG);
-			writel(node_data->setting->mode, base + IMX_NOC_MODE_REG);
-			writel(node_data->setting->ext_control, base + IMX_NOC_EXT_CTL_REG);
+			pete_writel("drivers/interconnect/imx/imx.c:52", prio, base + IMX_NOC_PRIO_REG);
+			pete_writel("drivers/interconnect/imx/imx.c:53", node_data->setting->mode, base + IMX_NOC_MODE_REG);
+			pete_writel("drivers/interconnect/imx/imx.c:54", node_data->setting->ext_control, base + IMX_NOC_EXT_CTL_REG);
 			dev_dbg(dev, "%s: mode: 0x%x, prio: 0x%x, ext_control: 0x%x\n",
 				node_data->desc->name, node_data->setting->mode, prio,
 				node_data->setting->ext_control);

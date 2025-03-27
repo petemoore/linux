@@ -136,7 +136,7 @@ static void u2_phy_slew_rate_calibrate(struct mtk_xsphy *xsphy,
 	readl_poll_timeout(pbase + XSP_U2FREQ_FMMONR1, tmp,
 			   (tmp & P2F_USB_FM_VALID), 10, 200);
 
-	fm_out = readl(pbase + XSP_U2FREQ_MMONR0);
+	fm_out = pete_readl("drivers/phy/mediatek/phy-mtk-xsphy.c:139", pbase + XSP_U2FREQ_MMONR0);
 
 	/* disable frequency meter */
 	mtk_phy_clear_bits(pbase + XSP_U2FREQ_FMCR0, P2F_RG_FREQDET_EN);
@@ -211,7 +211,7 @@ static void u2_phy_instance_set_mode(struct mtk_xsphy *xsphy,
 {
 	u32 tmp;
 
-	tmp = readl(inst->port_base + XSP_U2PHYDTM1);
+	tmp = pete_readl("drivers/phy/mediatek/phy-mtk-xsphy.c:214", inst->port_base + XSP_U2PHYDTM1);
 	switch (mode) {
 	case PHY_MODE_USB_DEVICE:
 		tmp |= P2D_FORCE_IDDIG | P2D_RG_IDDIG;
@@ -226,7 +226,7 @@ static void u2_phy_instance_set_mode(struct mtk_xsphy *xsphy,
 	default:
 		return;
 	}
-	writel(tmp, inst->port_base + XSP_U2PHYDTM1);
+	pete_writel("drivers/phy/mediatek/phy-mtk-xsphy.c:229", tmp, inst->port_base + XSP_U2PHYDTM1);
 }
 
 static void phy_parse_property(struct mtk_xsphy *xsphy,

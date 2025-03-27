@@ -116,12 +116,12 @@ struct mchp_corespi {
 
 static inline u32 mchp_corespi_read(struct mchp_corespi *spi, unsigned int reg)
 {
-	return readl(spi->regs + reg);
+	return pete_readl("drivers/spi/spi-microchip-core.c:119", spi->regs + reg);
 }
 
 static inline void mchp_corespi_write(struct mchp_corespi *spi, unsigned int reg, u32 val)
 {
-	writel(val, spi->regs + reg);
+	pete_writel("drivers/spi/spi-microchip-core.c:124", val, spi->regs + reg);
 }
 
 static inline void mchp_corespi_disable(struct mchp_corespi *spi)

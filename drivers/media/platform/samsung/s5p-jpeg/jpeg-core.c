@@ -619,7 +619,7 @@ static inline void s5p_jpeg_set_qtbl(void __iomem *regs,
 	int i;
 
 	for (i = 0; i < len; i++)
-		writel((unsigned int)qtbl[i], regs + tab + (i * 0x04));
+		pete_writel("drivers/media/platform/samsung/s5p-jpeg/jpeg-core.c:622", (unsigned int)qtbl[i], regs + tab + (i * 0x04));
 }
 
 static inline void s5p_jpeg_set_qtbl_lum(void __iomem *regs, int quality)
@@ -645,7 +645,7 @@ static inline void s5p_jpeg_set_htbl(void __iomem *regs,
 	int i;
 
 	for (i = 0; i < len; i++)
-		writel((unsigned int)htbl[i], regs + tab + (i * 0x04));
+		pete_writel("drivers/media/platform/samsung/s5p-jpeg/jpeg-core.c:648", (unsigned int)htbl[i], regs + tab + (i * 0x04));
 }
 
 static inline void s5p_jpeg_set_hdctbl(void __iomem *regs)
@@ -688,7 +688,7 @@ static inline void exynos4_jpeg_set_tbl(void __iomem *regs,
 			(tbl[i + 1] << 8) |
 			(tbl[i + 2] << 16) |
 			(tbl[i + 3] << 24);
-		writel(dword, regs + tab + i);
+		pete_writel("drivers/media/platform/samsung/s5p-jpeg/jpeg-core.c:691", dword, regs + tab + i);
 	}
 }
 
@@ -832,7 +832,7 @@ static void exynos4_jpeg_parse_huff_tbl(struct s5p_jpeg_ctx *ctx)
 					return;
 				word |= c << ((i % 4) * 8);
 				if ((i + 1) % 4 == 0) {
-					writel(word, jpeg->regs +
+					pete_writel("drivers/media/platform/samsung/s5p-jpeg/jpeg-core.c:835", word, jpeg->regs +
 					exynos4_huff_tbl_len(class, id) +
 					(i / 4) * 4);
 					word = 0;
@@ -846,14 +846,14 @@ static void exynos4_jpeg_parse_huff_tbl(struct s5p_jpeg_ctx *ctx)
 					return;
 				word |= c << ((i % 4) * 8);
 				if ((i + 1) % 4 == 0) {
-					writel(word, jpeg->regs +
+					pete_writel("drivers/media/platform/samsung/s5p-jpeg/jpeg-core.c:849", word, jpeg->regs +
 					exynos4_huff_tbl_val(class, id) +
 					(i / 4) * 4);
 					word = 0;
 				}
 			}
 			if (i % 4) {
-				writel(word, jpeg->regs +
+				pete_writel("drivers/media/platform/samsung/s5p-jpeg/jpeg-core.c:856", word, jpeg->regs +
 				exynos4_huff_tbl_val(class, id) + (i / 4) * 4);
 			}
 			word = 0;
@@ -923,7 +923,7 @@ static void exynos4_jpeg_parse_q_tbl(struct s5p_jpeg_ctx *ctx)
 					return;
 				word |= c << ((i % 4) * 8);
 				if ((i + 1) % 4 == 0) {
-					writel(word, jpeg->regs +
+					pete_writel("drivers/media/platform/samsung/s5p-jpeg/jpeg-core.c:926", word, jpeg->regs +
 					EXYNOS4_QTBL_CONTENT(id) + (i / 4) * 4);
 					word = 0;
 				}

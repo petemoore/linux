@@ -261,9 +261,9 @@ static int qcom_adsp_shutdown(struct qcom_adsp *adsp)
 	int ret;
 
 	/* Reset the retention logic */
-	val = readl(adsp->qdsp6ss_base + RET_CFG_REG);
+	val = pete_readl("drivers/remoteproc/qcom_q6v5_adsp.c:264", adsp->qdsp6ss_base + RET_CFG_REG);
 	val |= 0x1;
-	writel(val, adsp->qdsp6ss_base + RET_CFG_REG);
+	pete_writel("drivers/remoteproc/qcom_q6v5_adsp.c:266", val, adsp->qdsp6ss_base + RET_CFG_REG);
 
 	clk_bulk_disable_unprepare(adsp->num_clks, adsp->clks);
 
@@ -409,25 +409,25 @@ static int adsp_start(struct rproc *rproc)
 	}
 
 	/* Enable the XO clock */
-	writel(1, adsp->qdsp6ss_base + QDSP6SS_XO_CBCR);
+	pete_writel("drivers/remoteproc/qcom_q6v5_adsp.c:412", 1, adsp->qdsp6ss_base + QDSP6SS_XO_CBCR);
 
 	/* Enable the QDSP6SS sleep clock */
-	writel(1, adsp->qdsp6ss_base + QDSP6SS_SLEEP_CBCR);
+	pete_writel("drivers/remoteproc/qcom_q6v5_adsp.c:415", 1, adsp->qdsp6ss_base + QDSP6SS_SLEEP_CBCR);
 
 	/* Enable the QDSP6 core clock */
-	writel(1, adsp->qdsp6ss_base + QDSP6SS_CORE_CBCR);
+	pete_writel("drivers/remoteproc/qcom_q6v5_adsp.c:418", 1, adsp->qdsp6ss_base + QDSP6SS_CORE_CBCR);
 
 	/* Program boot address */
-	writel(adsp->mem_phys >> 4, adsp->qdsp6ss_base + RST_EVB_REG);
+	pete_writel("drivers/remoteproc/qcom_q6v5_adsp.c:421", adsp->mem_phys >> 4, adsp->qdsp6ss_base + RST_EVB_REG);
 
 	if (adsp->lpass_efuse)
-		writel(LPASS_EFUSE_Q6SS_EVB_SEL, adsp->lpass_efuse);
+		pete_writel("drivers/remoteproc/qcom_q6v5_adsp.c:424", LPASS_EFUSE_Q6SS_EVB_SEL, adsp->lpass_efuse);
 
 	/* De-assert QDSP6 stop core. QDSP6 will execute after out of reset */
-	writel(LPASS_BOOT_CORE_START, adsp->qdsp6ss_base + CORE_START_REG);
+	pete_writel("drivers/remoteproc/qcom_q6v5_adsp.c:427", LPASS_BOOT_CORE_START, adsp->qdsp6ss_base + CORE_START_REG);
 
 	/* Trigger boot FSM to start QDSP6 */
-	writel(LPASS_BOOT_CMD_START, adsp->qdsp6ss_base + BOOT_CMD_REG);
+	pete_writel("drivers/remoteproc/qcom_q6v5_adsp.c:430", LPASS_BOOT_CMD_START, adsp->qdsp6ss_base + BOOT_CMD_REG);
 
 	/* Wait for core to come out of reset */
 	ret = readl_poll_timeout(adsp->qdsp6ss_base + BOOT_STATUS_REG,

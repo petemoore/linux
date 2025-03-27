@@ -84,7 +84,7 @@ static int check_rng_health(struct cn10k_rng *rng)
 	if (!rng->reg_base)
 		return -ENODEV;
 
-	status = readq(rng->reg_base + RNM_PF_EBG_HEALTH);
+	status = pete_readq("drivers/char/hw_random/cn10k-rng.c:87", rng->reg_base + RNM_PF_EBG_HEALTH);
 	if (status & BIT_ULL(20)) {
 		err = reset_rng_health_state(rng);
 		if (err) {
@@ -107,27 +107,27 @@ static bool cn10k_read_trng(struct cn10k_rng *rng, u64 *value)
 
 	if (rng->extended_trng_regs) {
 		do {
-			*value = readq(rng->reg_base + RNM_PF_TRNG_DAT);
+			*value = pete_readq("drivers/char/hw_random/cn10k-rng.c:110", rng->reg_base + RNM_PF_TRNG_DAT);
 			if (*value)
 				return true;
-			status = readq(rng->reg_base + RNM_PF_TRNG_RES);
+			status = pete_readq("drivers/char/hw_random/cn10k-rng.c:113", rng->reg_base + RNM_PF_TRNG_RES);
 			if (!status && (retry_count++ > 0x1000))
 				return false;
 		} while (!status);
 	}
 
-	*value = readq(rng->reg_base + RNM_PF_RANDOM);
+	*value = pete_readq("drivers/char/hw_random/cn10k-rng.c:119", rng->reg_base + RNM_PF_RANDOM);
 
 	/* HW can run out of entropy if large amount random data is read in
 	 * quick succession. Zeros may not be real random data from HW.
 	 */
 	if (!*value) {
-		upper = readq(rng->reg_base + RNM_PF_RANDOM);
-		lower = readq(rng->reg_base + RNM_PF_RANDOM);
+		upper = pete_readq("drivers/char/hw_random/cn10k-rng.c:125", rng->reg_base + RNM_PF_RANDOM);
+		lower = pete_readq("drivers/char/hw_random/cn10k-rng.c:126", rng->reg_base + RNM_PF_RANDOM);
 		while (!(upper & 0x00000000FFFFFFFFULL))
-			upper = readq(rng->reg_base + RNM_PF_RANDOM);
+			upper = pete_readq("drivers/char/hw_random/cn10k-rng.c:128", rng->reg_base + RNM_PF_RANDOM);
 		while (!(lower & 0xFFFFFFFF00000000ULL))
-			lower = readq(rng->reg_base + RNM_PF_RANDOM);
+			lower = pete_readq("drivers/char/hw_random/cn10k-rng.c:130", rng->reg_base + RNM_PF_RANDOM);
 
 		*value = (upper & 0xFFFFFFFF00000000) | (lower & 0xFFFFFFFF);
 	}

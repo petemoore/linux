@@ -811,13 +811,13 @@ static void ahci_pci_init_controller(struct ata_host *host)
 			mv = 4;
 		port_mmio = __ahci_port_base(hpriv, mv);
 
-		writel(0, port_mmio + PORT_IRQ_MASK);
+		pete_writel("drivers/ata/ahci.c:814", 0, port_mmio + PORT_IRQ_MASK);
 
 		/* clear port IRQ */
-		tmp = readl(port_mmio + PORT_IRQ_STAT);
+		tmp = pete_readl("drivers/ata/ahci.c:817", port_mmio + PORT_IRQ_STAT);
 		dev_dbg(&pdev->dev, "PORT_IRQ_STAT 0x%x\n", tmp);
 		if (tmp)
-			writel(tmp, port_mmio + PORT_IRQ_STAT);
+			pete_writel("drivers/ata/ahci.c:820", tmp, port_mmio + PORT_IRQ_STAT);
 	}
 
 	ahci_init_controller(host);
@@ -969,10 +969,10 @@ static void ahci_pci_disable_interrupts(struct ata_host *host)
 	 * Software must disable interrupts prior to requesting a
 	 * transition of the HBA to D3 state.
 	 */
-	ctl = readl(mmio + HOST_CTL);
+	ctl = pete_readl("drivers/ata/ahci.c:972", mmio + HOST_CTL);
 	ctl &= ~HOST_IRQ_EN;
-	writel(ctl, mmio + HOST_CTL);
-	readl(mmio + HOST_CTL); /* flush */
+	pete_writel("drivers/ata/ahci.c:974", ctl, mmio + HOST_CTL);
+	pete_readl("drivers/ata/ahci.c:975", mmio + HOST_CTL); /* flush */
 }
 
 static int ahci_pci_device_runtime_suspend(struct device *dev)
@@ -1612,7 +1612,7 @@ static irqreturn_t ahci_thunderx_irq_handler(int irq, void *dev_instance)
 
 	hpriv = host->private_data;
 	mmio = hpriv->mmio;
-	irq_stat = readl(mmio + HOST_IRQ_STAT);
+	irq_stat = pete_readl("drivers/ata/ahci.c:1615", mmio + HOST_IRQ_STAT);
 	if (!irq_stat)
 		return IRQ_NONE;
 
@@ -1622,8 +1622,8 @@ static irqreturn_t ahci_thunderx_irq_handler(int irq, void *dev_instance)
 		rc = ahci_handle_port_intr(host, irq_masked);
 		if (!rc)
 			handled = 0;
-		writel(irq_stat, mmio + HOST_IRQ_STAT);
-		irq_stat = readl(mmio + HOST_IRQ_STAT);
+		pete_writel("drivers/ata/ahci.c:1625", irq_stat, mmio + HOST_IRQ_STAT);
+		irq_stat = pete_readl("drivers/ata/ahci.c:1626", mmio + HOST_IRQ_STAT);
 		spin_unlock(&host->lock);
 	} while (irq_stat);
 
@@ -1643,14 +1643,14 @@ static void ahci_remap_check(struct pci_dev *pdev, int bar,
 	if (pdev->vendor != PCI_VENDOR_ID_INTEL ||
 	    pci_resource_len(pdev, bar) < SZ_512K ||
 	    bar != AHCI_PCI_BAR_STANDARD ||
-	    !(readl(hpriv->mmio + AHCI_VSCAP) & 1))
+	    !(pete_readl("drivers/ata/ahci.c:1646", hpriv->mmio + AHCI_VSCAP) & 1))
 		return;
 
-	cap = readq(hpriv->mmio + AHCI_REMAP_CAP);
+	cap = pete_readq("drivers/ata/ahci.c:1649", hpriv->mmio + AHCI_REMAP_CAP);
 	for (i = 0; i < AHCI_MAX_REMAP; i++) {
 		if ((cap & (1 << i)) == 0)
 			continue;
-		if (readl(hpriv->mmio + ahci_remap_dcc(i))
+		if (pete_readl("drivers/ata/ahci.c:1653", hpriv->mmio + ahci_remap_dcc(i))
 				!= PCI_CLASS_STORAGE_EXPRESS)
 			continue;
 
@@ -1695,7 +1695,7 @@ static int ahci_init_msi(struct pci_dev *pdev, unsigned int n_ports,
 		nvec = pci_alloc_irq_vectors(pdev, n_ports, INT_MAX,
 				PCI_IRQ_MSIX | PCI_IRQ_MSI);
 		if (nvec > 0) {
-			if (!(readl(hpriv->mmio + HOST_CTL) & HOST_MRSM)) {
+			if (!(pete_readl("drivers/ata/ahci.c:1698", hpriv->mmio + HOST_CTL) & HOST_MRSM)) {
 				hpriv->get_irq_vector = ahci_get_irq_vector;
 				hpriv->flags |= AHCI_HFLAG_MULTI_MSI;
 				return nvec;

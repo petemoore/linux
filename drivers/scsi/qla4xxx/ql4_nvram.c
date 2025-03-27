@@ -11,8 +11,8 @@
 
 static inline void eeprom_cmd(uint32_t cmd, struct scsi_qla_host *ha)
 {
-	writel(cmd, isp_nvram(ha));
-	readl(isp_nvram(ha));
+	pete_writel("drivers/scsi/qla4xxx/ql4_nvram.c:14", cmd, isp_nvram(ha));
+	pete_readl("drivers/scsi/qla4xxx/ql4_nvram.c:15", isp_nvram(ha));
 	udelay(1);
 }
 
@@ -126,7 +126,7 @@ static int fm93c56a_datain(struct scsi_qla_host * ha, unsigned short *value)
 		eeprom_cmd(ha->eeprom_cmd_data |
 		       AUBURN_EEPROM_CLK_FALL, ha);
 
-		dataBit = (readw(isp_nvram(ha)) & AUBURN_EEPROM_DI_1) ? 1 : 0;
+		dataBit = (pete_readw("drivers/scsi/qla4xxx/ql4_nvram.c:129", isp_nvram(ha)) & AUBURN_EEPROM_DI_1) ? 1 : 0;
 
 		data = (data << 1) | dataBit;
 	}
@@ -209,8 +209,8 @@ int ql4xxx_sem_spinlock(struct scsi_qla_host * ha, u32 sem_mask, u32 sem_bits)
 		      "0x%x\n", ha->host_no, sem_mask, sem_bits));
 	do {
 		spin_lock_irqsave(&ha->hardware_lock, flags);
-		writel((sem_mask | sem_bits), isp_semaphore(ha));
-		value = readw(isp_semaphore(ha));
+		pete_writel("drivers/scsi/qla4xxx/ql4_nvram.c:212", (sem_mask | sem_bits), isp_semaphore(ha));
+		value = pete_readw("drivers/scsi/qla4xxx/ql4_nvram.c:213", isp_semaphore(ha));
 		spin_unlock_irqrestore(&ha->hardware_lock, flags);
 		if ((value & (sem_mask >> 16)) == sem_bits) {
 			DEBUG2(printk("scsi%ld : Got SEM LOCK - mask= 0x%x, "
@@ -228,8 +228,8 @@ void ql4xxx_sem_unlock(struct scsi_qla_host * ha, u32 sem_mask)
 	unsigned long flags;
 
 	spin_lock_irqsave(&ha->hardware_lock, flags);
-	writel(sem_mask, isp_semaphore(ha));
-	readl(isp_semaphore(ha));
+	pete_writel("drivers/scsi/qla4xxx/ql4_nvram.c:231", sem_mask, isp_semaphore(ha));
+	pete_readl("drivers/scsi/qla4xxx/ql4_nvram.c:232", isp_semaphore(ha));
 	spin_unlock_irqrestore(&ha->hardware_lock, flags);
 
 	DEBUG2(printk("scsi%ld : UNLOCK SEM - mask= 0x%x\n", ha->host_no,
@@ -242,8 +242,8 @@ int ql4xxx_sem_lock(struct scsi_qla_host * ha, u32 sem_mask, u32 sem_bits)
 	unsigned long flags;
 
 	spin_lock_irqsave(&ha->hardware_lock, flags);
-	writel((sem_mask | sem_bits), isp_semaphore(ha));
-	value = readw(isp_semaphore(ha));
+	pete_writel("drivers/scsi/qla4xxx/ql4_nvram.c:245", (sem_mask | sem_bits), isp_semaphore(ha));
+	value = pete_readw("drivers/scsi/qla4xxx/ql4_nvram.c:246", isp_semaphore(ha));
 	spin_unlock_irqrestore(&ha->hardware_lock, flags);
 	if ((value & (sem_mask >> 16)) == sem_bits) {
 		DEBUG2(printk("scsi%ld : Got SEM LOCK - mask= 0x%x, code = "

@@ -2314,32 +2314,32 @@ static inline int sky2_is_copper(const struct sky2_hw *hw)
 /* Register accessor for memory mapped device */
 static inline u32 sky2_read32(const struct sky2_hw *hw, unsigned reg)
 {
-	return readl(hw->regs + reg);
+	return pete_readl("drivers/net/ethernet/marvell/sky2.h:2317", hw->regs + reg);
 }
 
 static inline u16 sky2_read16(const struct sky2_hw *hw, unsigned reg)
 {
-	return readw(hw->regs + reg);
+	return pete_readw("drivers/net/ethernet/marvell/sky2.h:2322", hw->regs + reg);
 }
 
 static inline u8 sky2_read8(const struct sky2_hw *hw, unsigned reg)
 {
-	return readb(hw->regs + reg);
+	return pete_readb("drivers/net/ethernet/marvell/sky2.h:2327", hw->regs + reg);
 }
 
 static inline void sky2_write32(const struct sky2_hw *hw, unsigned reg, u32 val)
 {
-	writel(val, hw->regs + reg);
+	pete_writel("drivers/net/ethernet/marvell/sky2.h:2332", val, hw->regs + reg);
 }
 
 static inline void sky2_write16(const struct sky2_hw *hw, unsigned reg, u16 val)
 {
-	writew(val, hw->regs + reg);
+	pete_writew("drivers/net/ethernet/marvell/sky2.h:2337", val, hw->regs + reg);
 }
 
 static inline void sky2_write8(const struct sky2_hw *hw, unsigned reg, u8 val)
 {
-	writeb(val, hw->regs + reg);
+	pete_writeb("drivers/net/ethernet/marvell/sky2.h:2342", val, hw->regs + reg);
 }
 
 /* Yukon PHY related registers */

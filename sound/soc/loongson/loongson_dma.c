@@ -78,11 +78,11 @@ loongson_dma_desc *dma_desc_save(struct loongson_runtime_data *prtd)
 	u64 val;
 
 	val = (u64)prtd->dma_pos_desc_phy & DMA_ORDER_ASK_MASK;
-	val |= (readq(order_reg) & DMA_ORDER_CTRL_MASK);
+	val |= (pete_readq("sound/soc/loongson/loongson_dma.c:81", order_reg) & DMA_ORDER_CTRL_MASK);
 	val |= DMA_ORDER_ASK_VALID;
-	writeq(val, order_reg);
+	pete_writeq("sound/soc/loongson/loongson_dma.c:83", val, order_reg);
 
-	while (readl(order_reg) & DMA_ORDER_ASK_VALID)
+	while (pete_readl("sound/soc/loongson/loongson_dma.c:85", order_reg) & DMA_ORDER_ASK_VALID)
 		udelay(2);
 
 	return prtd->dma_pos_desc;
@@ -106,11 +106,11 @@ static int loongson_pcm_trigger(struct snd_soc_component *component,
 			val |= DMA_ORDER_ADDR_64;
 		else
 			val &= ~DMA_ORDER_ADDR_64;
-		val |= (readq(order_reg) & DMA_ORDER_CTRL_MASK);
+		val |= (pete_readq("sound/soc/loongson/loongson_dma.c:109", order_reg) & DMA_ORDER_CTRL_MASK);
 		val |= DMA_ORDER_START;
-		writeq(val, order_reg);
+		pete_writeq("sound/soc/loongson/loongson_dma.c:111", val, order_reg);
 
-		while ((readl(order_reg) & DMA_ORDER_START))
+		while ((pete_readl("sound/soc/loongson/loongson_dma.c:113", order_reg) & DMA_ORDER_START))
 			udelay(2);
 		break;
 	case SNDRV_PCM_TRIGGER_STOP:
@@ -119,8 +119,8 @@ static int loongson_pcm_trigger(struct snd_soc_component *component,
 		dma_desc_save(prtd);
 
 		/* dma stop */
-		val = readq(order_reg) | DMA_ORDER_STOP;
-		writeq(val, order_reg);
+		val = pete_readq("sound/soc/loongson/loongson_dma.c:122", order_reg) | DMA_ORDER_STOP;
+		pete_writeq("sound/soc/loongson/loongson_dma.c:123", val, order_reg);
 		udelay(1000);
 
 		break;

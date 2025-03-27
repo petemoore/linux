@@ -115,16 +115,16 @@ static void clk_mt6795_apmixed_setup_md1(void __iomem *base)
 	void __iomem *reg = base + REG_AP_PLL_CON7;
 
 	/* Turn on MD1 internal clock */
-	writel(readl(reg) & ~MD1_CLK_OFF, reg);
+	pete_writel("drivers/clk/mediatek/clk-mt6795-apmixedsys.c:118", pete_readl("drivers/clk/mediatek/clk-mt6795-apmixedsys.c:118", reg) & ~MD1_CLK_OFF, reg);
 
 	/* Unlock MD1's MTCMOS power path */
-	writel(readl(reg) & ~MD1_MTCMOS_OFF, reg);
+	pete_writel("drivers/clk/mediatek/clk-mt6795-apmixedsys.c:121", pete_readl("drivers/clk/mediatek/clk-mt6795-apmixedsys.c:121", reg) & ~MD1_MTCMOS_OFF, reg);
 
 	/* Turn on ISO */
-	writel(readl(reg) & ~MD1_ISO_OFF, reg);
+	pete_writel("drivers/clk/mediatek/clk-mt6795-apmixedsys.c:124", pete_readl("drivers/clk/mediatek/clk-mt6795-apmixedsys.c:124", reg) & ~MD1_ISO_OFF, reg);
 
 	/* Turn on memory */
-	writel(readl(reg) & ~MD1_MEM_OFF, reg);
+	pete_writel("drivers/clk/mediatek/clk-mt6795-apmixedsys.c:127", pete_readl("drivers/clk/mediatek/clk-mt6795-apmixedsys.c:127", reg) & ~MD1_MEM_OFF, reg);
 }
 
 static const struct of_device_id of_match_clk_mt6795_apmixed[] = {

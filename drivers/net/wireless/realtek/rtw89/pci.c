@@ -1596,7 +1596,7 @@ static void rtw89_pci_ops_write32(struct rtw89_dev *rtwdev, u32 addr, u32 data);
 static u32 rtw89_pci_ops_read32_cmac(struct rtw89_dev *rtwdev, u32 addr)
 {
 	struct rtw89_pci *rtwpci = (struct rtw89_pci *)rtwdev->priv;
-	u32 val = readl(rtwpci->mmap + addr);
+	u32 val = pete_readl("drivers/net/wireless/realtek/rtw89/pci.c:1599", rtwpci->mmap + addr);
 	int count;
 
 	for (count = 0; ; count++) {
@@ -1607,7 +1607,7 @@ static u32 rtw89_pci_ops_read32_cmac(struct rtw89_dev *rtwdev, u32 addr)
 			return RTW89_R32_DEAD;
 		}
 		rtw89_pci_ops_write32(rtwdev, R_AX_CK_EN, B_AX_CMAC_ALLCKEN);
-		val = readl(rtwpci->mmap + addr);
+		val = pete_readl("drivers/net/wireless/realtek/rtw89/pci.c:1610", rtwpci->mmap + addr);
 	}
 
 	return val;
@@ -1619,7 +1619,7 @@ static u8 rtw89_pci_ops_read8(struct rtw89_dev *rtwdev, u32 addr)
 	u32 addr32, val32, shift;
 
 	if (!ACCESS_CMAC(addr))
-		return readb(rtwpci->mmap + addr);
+		return pete_readb("drivers/net/wireless/realtek/rtw89/pci.c:1622", rtwpci->mmap + addr);
 
 	addr32 = addr & ~0x3;
 	shift = (addr & 0x3) * 8;
@@ -1633,7 +1633,7 @@ static u16 rtw89_pci_ops_read16(struct rtw89_dev *rtwdev, u32 addr)
 	u32 addr32, val32, shift;
 
 	if (!ACCESS_CMAC(addr))
-		return readw(rtwpci->mmap + addr);
+		return pete_readw("drivers/net/wireless/realtek/rtw89/pci.c:1636", rtwpci->mmap + addr);
 
 	addr32 = addr & ~0x3;
 	shift = (addr & 0x3) * 8;
@@ -1646,7 +1646,7 @@ static u32 rtw89_pci_ops_read32(struct rtw89_dev *rtwdev, u32 addr)
 	struct rtw89_pci *rtwpci = (struct rtw89_pci *)rtwdev->priv;
 
 	if (!ACCESS_CMAC(addr))
-		return readl(rtwpci->mmap + addr);
+		return pete_readl("drivers/net/wireless/realtek/rtw89/pci.c:1649", rtwpci->mmap + addr);
 
 	return rtw89_pci_ops_read32_cmac(rtwdev, addr);
 }
@@ -1655,21 +1655,21 @@ static void rtw89_pci_ops_write8(struct rtw89_dev *rtwdev, u32 addr, u8 data)
 {
 	struct rtw89_pci *rtwpci = (struct rtw89_pci *)rtwdev->priv;
 
-	writeb(data, rtwpci->mmap + addr);
+	pete_writeb("drivers/net/wireless/realtek/rtw89/pci.c:1658", data, rtwpci->mmap + addr);
 }
 
 static void rtw89_pci_ops_write16(struct rtw89_dev *rtwdev, u32 addr, u16 data)
 {
 	struct rtw89_pci *rtwpci = (struct rtw89_pci *)rtwdev->priv;
 
-	writew(data, rtwpci->mmap + addr);
+	pete_writew("drivers/net/wireless/realtek/rtw89/pci.c:1665", data, rtwpci->mmap + addr);
 }
 
 static void rtw89_pci_ops_write32(struct rtw89_dev *rtwdev, u32 addr, u32 data)
 {
 	struct rtw89_pci *rtwpci = (struct rtw89_pci *)rtwdev->priv;
 
-	writel(data, rtwpci->mmap + addr);
+	pete_writel("drivers/net/wireless/realtek/rtw89/pci.c:1672", data, rtwpci->mmap + addr);
 }
 
 static void rtw89_pci_ctrl_dma_trx(struct rtw89_dev *rtwdev, bool enable)

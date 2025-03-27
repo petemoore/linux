@@ -43,11 +43,11 @@ static void clk_gate2_do_shared_clks(struct clk_hw *hw, bool enable)
 	struct clk_gate2 *gate = to_clk_gate2(hw);
 	u32 reg;
 
-	reg = readl(gate->reg);
+	reg = pete_readl("drivers/clk/imx/clk-gate2.c:46", gate->reg);
 	reg &= ~(gate->cgr_mask << gate->bit_idx);
 	if (enable)
 		reg |= (gate->cgr_val & gate->cgr_mask) << gate->bit_idx;
-	writel(reg, gate->reg);
+	pete_writel("drivers/clk/imx/clk-gate2.c:50", reg, gate->reg);
 }
 
 static int clk_gate2_enable(struct clk_hw *hw)
@@ -89,7 +89,7 @@ out:
 static int clk_gate2_reg_is_enabled(void __iomem *reg, u8 bit_idx,
 					u8 cgr_val, u8 cgr_mask)
 {
-	u32 val = readl(reg);
+	u32 val = pete_readl("drivers/clk/imx/clk-gate2.c:92", reg);
 
 	if (((val >> bit_idx) & cgr_mask) == cgr_val)
 		return 1;

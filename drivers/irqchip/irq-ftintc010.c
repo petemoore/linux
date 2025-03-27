@@ -55,9 +55,9 @@ static void ft010_irq_mask(struct irq_data *d)
 	struct ft010_irq_data *f = irq_data_get_irq_chip_data(d);
 	unsigned int mask;
 
-	mask = readl(FT010_IRQ_MASK(f->base));
+	mask = pete_readl("drivers/irqchip/irq-ftintc010.c:58", FT010_IRQ_MASK(f->base));
 	mask &= ~BIT(irqd_to_hwirq(d));
-	writel(mask, FT010_IRQ_MASK(f->base));
+	pete_writel("drivers/irqchip/irq-ftintc010.c:60", mask, FT010_IRQ_MASK(f->base));
 }
 
 static void ft010_irq_unmask(struct irq_data *d)
@@ -65,16 +65,16 @@ static void ft010_irq_unmask(struct irq_data *d)
 	struct ft010_irq_data *f = irq_data_get_irq_chip_data(d);
 	unsigned int mask;
 
-	mask = readl(FT010_IRQ_MASK(f->base));
+	mask = pete_readl("drivers/irqchip/irq-ftintc010.c:68", FT010_IRQ_MASK(f->base));
 	mask |= BIT(irqd_to_hwirq(d));
-	writel(mask, FT010_IRQ_MASK(f->base));
+	pete_writel("drivers/irqchip/irq-ftintc010.c:70", mask, FT010_IRQ_MASK(f->base));
 }
 
 static void ft010_irq_ack(struct irq_data *d)
 {
 	struct ft010_irq_data *f = irq_data_get_irq_chip_data(d);
 
-	writel(BIT(irqd_to_hwirq(d)), FT010_IRQ_CLEAR(f->base));
+	pete_writel("drivers/irqchip/irq-ftintc010.c:77", BIT(irqd_to_hwirq(d)), FT010_IRQ_CLEAR(f->base));
 }
 
 static int ft010_irq_set_type(struct irq_data *d, unsigned int trigger)
@@ -83,8 +83,8 @@ static int ft010_irq_set_type(struct irq_data *d, unsigned int trigger)
 	int offset = irqd_to_hwirq(d);
 	u32 mode, polarity;
 
-	mode = readl(FT010_IRQ_MODE(f->base));
-	polarity = readl(FT010_IRQ_POLARITY(f->base));
+	mode = pete_readl("drivers/irqchip/irq-ftintc010.c:86", FT010_IRQ_MODE(f->base));
+	polarity = pete_readl("drivers/irqchip/irq-ftintc010.c:87", FT010_IRQ_POLARITY(f->base));
 
 	if (trigger & (IRQ_TYPE_LEVEL_LOW)) {
 		irq_set_handler_locked(d, handle_level_irq);
@@ -108,8 +108,8 @@ static int ft010_irq_set_type(struct irq_data *d, unsigned int trigger)
 			offset);
 	}
 
-	writel(mode, FT010_IRQ_MODE(f->base));
-	writel(polarity, FT010_IRQ_POLARITY(f->base));
+	pete_writel("drivers/irqchip/irq-ftintc010.c:111", mode, FT010_IRQ_MODE(f->base));
+	pete_writel("drivers/irqchip/irq-ftintc010.c:112", polarity, FT010_IRQ_POLARITY(f->base));
 
 	return 0;
 }
@@ -131,7 +131,7 @@ static asmlinkage void __exception_irq_entry ft010_irqchip_handle_irq(struct pt_
 	int irq;
 	u32 status;
 
-	while ((status = readl(FT010_IRQ_STATUS(f->base)))) {
+	while ((status = pete_readl("drivers/irqchip/irq-ftintc010.c:134", FT010_IRQ_STATUS(f->base)))) {
 		irq = ffs(status) - 1;
 		generic_handle_domain_irq(f->domain, irq);
 	}
@@ -177,8 +177,8 @@ static int __init ft010_of_init_irq(struct device_node *node,
 	WARN(!f->base, "unable to map gemini irq registers\n");
 
 	/* Disable all interrupts */
-	writel(0, FT010_IRQ_MASK(f->base));
-	writel(0, FT010_FIQ_MASK(f->base));
+	pete_writel("drivers/irqchip/irq-ftintc010.c:180", 0, FT010_IRQ_MASK(f->base));
+	pete_writel("drivers/irqchip/irq-ftintc010.c:181", 0, FT010_FIQ_MASK(f->base));
 
 	f->domain = irq_domain_add_simple(node, FT010_NUM_IRQS, 0,
 					  &ft010_irqdomain_ops, f);

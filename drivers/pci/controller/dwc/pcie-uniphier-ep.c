@@ -92,12 +92,12 @@ static void uniphier_pcie_ltssm_enable(struct uniphier_pcie_ep_priv *priv,
 {
 	u32 val;
 
-	val = readl(priv->base + PCL_APP_READY_CTRL);
+	val = pete_readl("drivers/pci/controller/dwc/pcie-uniphier-ep.c:95", priv->base + PCL_APP_READY_CTRL);
 	if (enable)
 		val |= PCL_APP_LTSSM_ENABLE;
 	else
 		val &= ~PCL_APP_LTSSM_ENABLE;
-	writel(val, priv->base + PCL_APP_READY_CTRL);
+	pete_writel("drivers/pci/controller/dwc/pcie-uniphier-ep.c:100", val, priv->base + PCL_APP_READY_CTRL);
 }
 
 static void uniphier_pcie_phy_reset(struct uniphier_pcie_ep_priv *priv,
@@ -105,12 +105,12 @@ static void uniphier_pcie_phy_reset(struct uniphier_pcie_ep_priv *priv,
 {
 	u32 val;
 
-	val = readl(priv->base + PCL_RSTCTRL2);
+	val = pete_readl("drivers/pci/controller/dwc/pcie-uniphier-ep.c:108", priv->base + PCL_RSTCTRL2);
 	if (assert)
 		val |= PCL_RSTCTRL_PHY_RESET;
 	else
 		val &= ~PCL_RSTCTRL_PHY_RESET;
-	writel(val, priv->base + PCL_RSTCTRL2);
+	pete_writel("drivers/pci/controller/dwc/pcie-uniphier-ep.c:113", val, priv->base + PCL_RSTCTRL2);
 }
 
 static void uniphier_pcie_pro5_init_ep(struct uniphier_pcie_ep_priv *priv)
@@ -118,20 +118,20 @@ static void uniphier_pcie_pro5_init_ep(struct uniphier_pcie_ep_priv *priv)
 	u32 val;
 
 	/* set EP mode */
-	val = readl(priv->base + PCL_MODE);
+	val = pete_readl("drivers/pci/controller/dwc/pcie-uniphier-ep.c:121", priv->base + PCL_MODE);
 	val |= PCL_MODE_REGEN | PCL_MODE_REGVAL;
-	writel(val, priv->base + PCL_MODE);
+	pete_writel("drivers/pci/controller/dwc/pcie-uniphier-ep.c:123", val, priv->base + PCL_MODE);
 
 	/* clock request */
-	val = readl(priv->base + PCL_APP_CLK_CTRL);
+	val = pete_readl("drivers/pci/controller/dwc/pcie-uniphier-ep.c:126", priv->base + PCL_APP_CLK_CTRL);
 	val &= ~PCL_APP_CLK_REQ;
-	writel(val, priv->base + PCL_APP_CLK_CTRL);
+	pete_writel("drivers/pci/controller/dwc/pcie-uniphier-ep.c:128", val, priv->base + PCL_APP_CLK_CTRL);
 
 	/* deassert PIPE3 and AXI reset */
-	val = readl(priv->base + PCL_RSTCTRL0);
+	val = pete_readl("drivers/pci/controller/dwc/pcie-uniphier-ep.c:131", priv->base + PCL_RSTCTRL0);
 	val |= PCL_RSTCTRL_AXI_REG | PCL_RSTCTRL_AXI_SLAVE
 		| PCL_RSTCTRL_AXI_MASTER | PCL_RSTCTRL_PIPE3;
-	writel(val, priv->base + PCL_RSTCTRL0);
+	pete_writel("drivers/pci/controller/dwc/pcie-uniphier-ep.c:134", val, priv->base + PCL_RSTCTRL0);
 
 	uniphier_pcie_ltssm_enable(priv, false);
 
@@ -143,31 +143,31 @@ static void uniphier_pcie_nx1_init_ep(struct uniphier_pcie_ep_priv *priv)
 	u32 val;
 
 	/* set EP mode */
-	val = readl(priv->base + PCL_MODE);
+	val = pete_readl("drivers/pci/controller/dwc/pcie-uniphier-ep.c:146", priv->base + PCL_MODE);
 	val |= PCL_MODE_REGEN | PCL_MODE_REGVAL;
-	writel(val, priv->base + PCL_MODE);
+	pete_writel("drivers/pci/controller/dwc/pcie-uniphier-ep.c:148", val, priv->base + PCL_MODE);
 
 	/* use auxiliary power detection */
-	val = readl(priv->base + PCL_APP_PM0);
+	val = pete_readl("drivers/pci/controller/dwc/pcie-uniphier-ep.c:151", priv->base + PCL_APP_PM0);
 	val |= PCL_SYS_AUX_PWR_DET;
-	writel(val, priv->base + PCL_APP_PM0);
+	pete_writel("drivers/pci/controller/dwc/pcie-uniphier-ep.c:153", val, priv->base + PCL_APP_PM0);
 
 	/* assert PERST# */
-	val = readl(priv->base + PCL_PINCTRL0);
+	val = pete_readl("drivers/pci/controller/dwc/pcie-uniphier-ep.c:156", priv->base + PCL_PINCTRL0);
 	val &= ~(PCL_PERST_NOE_REGVAL | PCL_PERST_OUT_REGVAL
 		 | PCL_PERST_PLDN_REGVAL);
 	val |= PCL_PERST_NOE_REGEN | PCL_PERST_OUT_REGEN
 		| PCL_PERST_PLDN_REGEN;
-	writel(val, priv->base + PCL_PINCTRL0);
+	pete_writel("drivers/pci/controller/dwc/pcie-uniphier-ep.c:161", val, priv->base + PCL_PINCTRL0);
 
 	uniphier_pcie_ltssm_enable(priv, false);
 
 	usleep_range(100000, 200000);
 
 	/* deassert PERST# */
-	val = readl(priv->base + PCL_PINCTRL0);
+	val = pete_readl("drivers/pci/controller/dwc/pcie-uniphier-ep.c:168", priv->base + PCL_PINCTRL0);
 	val |= PCL_PERST_OUT_REGVAL | PCL_PERST_OUT_REGEN;
-	writel(val, priv->base + PCL_PINCTRL0);
+	pete_writel("drivers/pci/controller/dwc/pcie-uniphier-ep.c:170", val, priv->base + PCL_PINCTRL0);
 }
 
 static int uniphier_pcie_nx1_wait_ep(struct uniphier_pcie_ep_priv *priv)
@@ -224,15 +224,15 @@ static int uniphier_pcie_ep_raise_legacy_irq(struct dw_pcie_ep *ep)
 	 * mutex in pci_epc_raise_irq().
 	 */
 	/* assert INTx */
-	val = readl(priv->base + PCL_APP_INTX);
+	val = pete_readl("drivers/pci/controller/dwc/pcie-uniphier-ep.c:227", priv->base + PCL_APP_INTX);
 	val |= PCL_APP_INTX_SYS_INT;
-	writel(val, priv->base + PCL_APP_INTX);
+	pete_writel("drivers/pci/controller/dwc/pcie-uniphier-ep.c:229", val, priv->base + PCL_APP_INTX);
 
 	udelay(PCL_INTX_WIDTH_USEC);
 
 	/* deassert INTx */
 	val &= ~PCL_APP_INTX_SYS_INT;
-	writel(val, priv->base + PCL_APP_INTX);
+	pete_writel("drivers/pci/controller/dwc/pcie-uniphier-ep.c:235", val, priv->base + PCL_APP_INTX);
 
 	return 0;
 }
@@ -246,11 +246,11 @@ static int uniphier_pcie_ep_raise_msi_irq(struct dw_pcie_ep *ep,
 
 	val = FIELD_PREP(PCL_APP_VEN_MSI_TC_MASK, func_no)
 		| FIELD_PREP(PCL_APP_VEN_MSI_VECTOR_MASK, interrupt_num - 1);
-	writel(val, priv->base + PCL_APP_MSI0);
+	pete_writel("drivers/pci/controller/dwc/pcie-uniphier-ep.c:249", val, priv->base + PCL_APP_MSI0);
 
-	val = readl(priv->base + PCL_APP_MSI1);
+	val = pete_readl("drivers/pci/controller/dwc/pcie-uniphier-ep.c:251", priv->base + PCL_APP_MSI1);
 	val |= PCL_APP_MSI_REQ;
-	writel(val, priv->base + PCL_APP_MSI1);
+	pete_writel("drivers/pci/controller/dwc/pcie-uniphier-ep.c:253", val, priv->base + PCL_APP_MSI1);
 
 	return 0;
 }

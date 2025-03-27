@@ -35,10 +35,10 @@ static int acp_dmic_prepare(struct snd_pcm_substream *substream,
 	unsigned int dmic_ctrl;
 
 	/* Enable default DMIC clk */
-	writel(PDM_CLK_FREQ_MASK, adata->acp_base + ACP_WOV_CLK_CTRL);
-	dmic_ctrl = readl(adata->acp_base + ACP_WOV_MISC_CTRL);
+	pete_writel("sound/soc/amd/acp/acp-pdm.c:38", PDM_CLK_FREQ_MASK, adata->acp_base + ACP_WOV_CLK_CTRL);
+	dmic_ctrl = pete_readl("sound/soc/amd/acp/acp-pdm.c:39", adata->acp_base + ACP_WOV_MISC_CTRL);
 	dmic_ctrl |= PDM_MISC_CTRL_MASK;
-	writel(dmic_ctrl, adata->acp_base + ACP_WOV_MISC_CTRL);
+	pete_writel("sound/soc/amd/acp/acp-pdm.c:41", dmic_ctrl, adata->acp_base + ACP_WOV_MISC_CTRL);
 
 	period_bytes = frames_to_bytes(substream->runtime,
 			substream->runtime->period_size);
@@ -48,10 +48,10 @@ static int acp_dmic_prepare(struct snd_pcm_substream *substream,
 	physical_addr = stream->reg_offset + MEM_WINDOW_START;
 
 	/* Init DMIC Ring buffer */
-	writel(physical_addr, adata->acp_base + ACP_WOV_RX_RINGBUFADDR);
-	writel(size_dmic, adata->acp_base + ACP_WOV_RX_RINGBUFSIZE);
-	writel(period_bytes, adata->acp_base + ACP_WOV_RX_INTR_WATERMARK_SIZE);
-	writel(0x01, adata->acp_base + ACPAXI2AXI_ATU_CTRL);
+	pete_writel("sound/soc/amd/acp/acp-pdm.c:51", physical_addr, adata->acp_base + ACP_WOV_RX_RINGBUFADDR);
+	pete_writel("sound/soc/amd/acp/acp-pdm.c:52", size_dmic, adata->acp_base + ACP_WOV_RX_RINGBUFSIZE);
+	pete_writel("sound/soc/amd/acp/acp-pdm.c:53", period_bytes, adata->acp_base + ACP_WOV_RX_INTR_WATERMARK_SIZE);
+	pete_writel("sound/soc/amd/acp/acp-pdm.c:54", 0x01, adata->acp_base + ACPAXI2AXI_ATU_CTRL);
 
 	return 0;
 }
@@ -68,10 +68,10 @@ static int acp_dmic_dai_trigger(struct snd_pcm_substream *substream,
 	case SNDRV_PCM_TRIGGER_START:
 	case SNDRV_PCM_TRIGGER_RESUME:
 	case SNDRV_PCM_TRIGGER_PAUSE_RELEASE:
-		dma_enable = readl(adata->acp_base + ACP_WOV_PDM_DMA_ENABLE);
+		dma_enable = pete_readl("sound/soc/amd/acp/acp-pdm.c:71", adata->acp_base + ACP_WOV_PDM_DMA_ENABLE);
 		if (!(dma_enable & DMA_EN_MASK)) {
-			writel(PDM_ENABLE, adata->acp_base + ACP_WOV_PDM_ENABLE);
-			writel(PDM_ENABLE, adata->acp_base + ACP_WOV_PDM_DMA_ENABLE);
+			pete_writel("sound/soc/amd/acp/acp-pdm.c:73", PDM_ENABLE, adata->acp_base + ACP_WOV_PDM_ENABLE);
+			pete_writel("sound/soc/amd/acp/acp-pdm.c:74", PDM_ENABLE, adata->acp_base + ACP_WOV_PDM_DMA_ENABLE);
 		}
 
 		ret = readl_poll_timeout_atomic(adata->acp_base + ACP_WOV_PDM_DMA_ENABLE,
@@ -81,10 +81,10 @@ static int acp_dmic_dai_trigger(struct snd_pcm_substream *substream,
 	case SNDRV_PCM_TRIGGER_STOP:
 	case SNDRV_PCM_TRIGGER_SUSPEND:
 	case SNDRV_PCM_TRIGGER_PAUSE_PUSH:
-		dma_enable = readl(adata->acp_base + ACP_WOV_PDM_DMA_ENABLE);
+		dma_enable = pete_readl("sound/soc/amd/acp/acp-pdm.c:84", adata->acp_base + ACP_WOV_PDM_DMA_ENABLE);
 		if ((dma_enable & DMA_EN_MASK)) {
-			writel(PDM_DISABLE, adata->acp_base + ACP_WOV_PDM_ENABLE);
-			writel(PDM_DISABLE, adata->acp_base + ACP_WOV_PDM_DMA_ENABLE);
+			pete_writel("sound/soc/amd/acp/acp-pdm.c:86", PDM_DISABLE, adata->acp_base + ACP_WOV_PDM_ENABLE);
+			pete_writel("sound/soc/amd/acp/acp-pdm.c:87", PDM_DISABLE, adata->acp_base + ACP_WOV_PDM_DMA_ENABLE);
 
 		}
 
@@ -129,8 +129,8 @@ static int acp_dmic_hwparams(struct snd_pcm_substream *substream,
 		return -EINVAL;
 	}
 
-	writel(ch_mask, adata->acp_base + ACP_WOV_PDM_NO_OF_CHANNELS);
-	writel(PDM_DEC_64, adata->acp_base + ACP_WOV_PDM_DECIMATION_FACTOR);
+	pete_writel("sound/soc/amd/acp/acp-pdm.c:132", ch_mask, adata->acp_base + ACP_WOV_PDM_NO_OF_CHANNELS);
+	pete_writel("sound/soc/amd/acp/acp-pdm.c:133", PDM_DEC_64, adata->acp_base + ACP_WOV_PDM_DECIMATION_FACTOR);
 
 	return 0;
 }
@@ -149,9 +149,9 @@ static int acp_dmic_dai_startup(struct snd_pcm_substream *substream,
 	stream->reg_offset = ACP_REGION2_OFFSET;
 
 	/* Enable DMIC Interrupts */
-	ext_int_ctrl = readl(ACP_EXTERNAL_INTR_CNTL(adata, 0));
+	ext_int_ctrl = pete_readl("sound/soc/amd/acp/acp-pdm.c:152", ACP_EXTERNAL_INTR_CNTL(adata, 0));
 	ext_int_ctrl |= PDM_DMA_INTR_MASK;
-	writel(ext_int_ctrl, ACP_EXTERNAL_INTR_CNTL(adata, 0));
+	pete_writel("sound/soc/amd/acp/acp-pdm.c:154", ext_int_ctrl, ACP_EXTERNAL_INTR_CNTL(adata, 0));
 
 	return 0;
 }
@@ -164,9 +164,9 @@ static void acp_dmic_dai_shutdown(struct snd_pcm_substream *substream,
 	u32 ext_int_ctrl;
 
 	/* Disable DMIC interrupts */
-	ext_int_ctrl = readl(ACP_EXTERNAL_INTR_CNTL(adata, 0));
+	ext_int_ctrl = pete_readl("sound/soc/amd/acp/acp-pdm.c:167", ACP_EXTERNAL_INTR_CNTL(adata, 0));
 	ext_int_ctrl &= ~PDM_DMA_INTR_MASK;
-	writel(ext_int_ctrl, ACP_EXTERNAL_INTR_CNTL(adata, 0));
+	pete_writel("sound/soc/amd/acp/acp-pdm.c:169", ext_int_ctrl, ACP_EXTERNAL_INTR_CNTL(adata, 0));
 }
 
 const struct snd_soc_dai_ops acp_dmic_dai_ops = {

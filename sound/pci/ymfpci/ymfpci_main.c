@@ -33,27 +33,27 @@ static void snd_ymfpci_irq_wait(struct snd_ymfpci *chip);
 
 static inline void snd_ymfpci_writeb(struct snd_ymfpci *chip, u32 offset, u8 val)
 {
-	writeb(val, chip->reg_area_virt + offset);
+	pete_writeb("sound/pci/ymfpci/ymfpci_main.c:36", val, chip->reg_area_virt + offset);
 }
 
 static inline u16 snd_ymfpci_readw(struct snd_ymfpci *chip, u32 offset)
 {
-	return readw(chip->reg_area_virt + offset);
+	return pete_readw("sound/pci/ymfpci/ymfpci_main.c:41", chip->reg_area_virt + offset);
 }
 
 static inline void snd_ymfpci_writew(struct snd_ymfpci *chip, u32 offset, u16 val)
 {
-	writew(val, chip->reg_area_virt + offset);
+	pete_writew("sound/pci/ymfpci/ymfpci_main.c:46", val, chip->reg_area_virt + offset);
 }
 
 static inline u32 snd_ymfpci_readl(struct snd_ymfpci *chip, u32 offset)
 {
-	return readl(chip->reg_area_virt + offset);
+	return pete_readl("sound/pci/ymfpci/ymfpci_main.c:51", chip->reg_area_virt + offset);
 }
 
 static inline void snd_ymfpci_writel(struct snd_ymfpci *chip, u32 offset, u32 val)
 {
-	writel(val, chip->reg_area_virt + offset);
+	pete_writel("sound/pci/ymfpci/ymfpci_main.c:56", val, chip->reg_area_virt + offset);
 }
 
 static int snd_ymfpci_codec_ready(struct snd_ymfpci *chip, int secondary)

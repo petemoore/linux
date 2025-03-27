@@ -177,12 +177,12 @@ static int dmc520_mc_idx;
 
 static u32 dmc520_read_reg(struct dmc520_edac *pvt, u32 offset)
 {
-	return readl(pvt->reg_base + offset);
+	return pete_readl("drivers/edac/dmc520_edac.c:180", pvt->reg_base + offset);
 }
 
 static void dmc520_write_reg(struct dmc520_edac *pvt, u32 val, u32 offset)
 {
-	writel(val, pvt->reg_base + offset);
+	pete_writel("drivers/edac/dmc520_edac.c:185", val, pvt->reg_base + offset);
 }
 
 static u32 dmc520_calc_dram_ecc_error(u32 value)
@@ -252,7 +252,7 @@ static void dmc520_get_dram_ecc_error_info(struct dmc520_edac *pvt,
 
 static bool dmc520_is_ecc_enabled(void __iomem *reg_base)
 {
-	u32 reg_val = readl(reg_base + REG_OFFSET_FEATURE_CONFIG);
+	u32 reg_val = pete_readl("drivers/edac/dmc520_edac.c:255", reg_base + REG_OFFSET_FEATURE_CONFIG);
 
 	return FIELD_GET(REG_FIELD_DRAM_ECC_ENABLED, reg_val);
 }
@@ -341,7 +341,7 @@ static u32 dmc520_get_rank_count(void __iomem *reg_base)
 {
 	u32 reg_val, rank_bits;
 
-	reg_val = readl(reg_base + REG_OFFSET_ADDRESS_CONTROL_NOW);
+	reg_val = pete_readl("drivers/edac/dmc520_edac.c:344", reg_base + REG_OFFSET_ADDRESS_CONTROL_NOW);
 	rank_bits = FIELD_GET(REG_FIELD_ADDRESS_CONTROL_RANK, reg_val);
 
 	return BIT(rank_bits);

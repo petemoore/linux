@@ -578,7 +578,7 @@ static inline u64 gpu_read64(struct msm_gpu *gpu, u32 reg)
 	 * of a history of putting registers where they fit, especially in
 	 * spins. The longer a GPU family goes the higher the chance that
 	 * we'll get burned.  We could do a series of validity checks if we
-	 * wanted to, but really is a readq() that much better? Nah.
+	 * wanted to, but really is a pete_readq("drivers/gpu/drm/msm/msm_gpu.h:581", ) that much better? Nah.
 	 */
 
 	/*

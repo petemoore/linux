@@ -97,7 +97,7 @@ static inline void funq_sq_post_tail(struct fun_queue *funq, u16 tail)
 	if (++tail == funq->sq_depth)
 		tail = 0;
 	funq->sq_tail = tail;
-	writel(tail, funq->sq_db);
+	pete_writel("drivers/net/ethernet/fungible/funcore/fun_queue.h:100", tail, funq->sq_db);
 }
 
 static inline struct fun_cqe_info *funq_cqe_info(const struct fun_queue *funq,
@@ -108,7 +108,7 @@ static inline struct fun_cqe_info *funq_cqe_info(const struct fun_queue *funq,
 
 static inline void funq_rq_post(struct fun_queue *funq)
 {
-	writel(funq->rq_tail, funq->rq_db);
+	pete_writel("drivers/net/ethernet/fungible/funcore/fun_queue.h:111", funq->rq_tail, funq->rq_db);
 }
 
 struct fun_queue_alloc_req {

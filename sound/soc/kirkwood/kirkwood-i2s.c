@@ -66,7 +66,7 @@ static int armada_38x_i2s_init_quirk(struct platform_device *pdev,
 		return -ENOMEM;
 
 	/* Select one of exceptive modes: I2S or S/PDIF */
-	reg_val = readl(priv->soc_control);
+	reg_val = pete_readl("sound/soc/kirkwood/kirkwood-i2s.c:69", priv->soc_control);
 	if (of_property_read_bool(np, "spdif-mode")) {
 		reg_val |= A38X_SPDIF_MODE_ENABLE;
 		dev_info(&pdev->dev, "using S/PDIF mode\n");
@@ -74,7 +74,7 @@ static int armada_38x_i2s_init_quirk(struct platform_device *pdev,
 		reg_val &= ~A38X_SPDIF_MODE_ENABLE;
 		dev_info(&pdev->dev, "using I2S mode\n");
 	}
-	writel(reg_val, priv->soc_control);
+	pete_writel("sound/soc/kirkwood/kirkwood-i2s.c:77", reg_val, priv->soc_control);
 
 	/* Update available rates of mclk's fs */
 	for (i = 0; i < 2; i++) {
@@ -92,10 +92,10 @@ static inline void armada_38x_set_pll(void __iomem *base, unsigned long rate)
 	u8 audio_postdiv, fb_clk_div = 0x1d;
 
 	/* Set frequency offset value to not valid and enable PLL reset */
-	reg_val = readl(base + A38X_PLL_CONF_REG1);
+	reg_val = pete_readl("sound/soc/kirkwood/kirkwood-i2s.c:95", base + A38X_PLL_CONF_REG1);
 	reg_val &= ~A38X_PLL_FREQ_OFFSET_VALID;
 	reg_val &= ~A38X_PLL_SW_RESET;
-	writel(reg_val, base + A38X_PLL_CONF_REG1);
+	pete_writel("sound/soc/kirkwood/kirkwood-i2s.c:98", reg_val, base + A38X_PLL_CONF_REG1);
 
 	udelay(1);
 
@@ -118,33 +118,33 @@ static inline void armada_38x_set_pll(void __iomem *base, unsigned long rate)
 		break;
 	}
 
-	reg_val = readl(base + A38X_PLL_CONF_REG0);
+	reg_val = pete_readl("sound/soc/kirkwood/kirkwood-i2s.c:121", base + A38X_PLL_CONF_REG0);
 	reg_val &= ~A38X_PLL_FB_CLK_DIV_MASK;
 	reg_val |= (fb_clk_div << A38X_PLL_FB_CLK_DIV_OFFSET);
-	writel(reg_val, base + A38X_PLL_CONF_REG0);
+	pete_writel("sound/soc/kirkwood/kirkwood-i2s.c:124", reg_val, base + A38X_PLL_CONF_REG0);
 
-	reg_val = readl(base + A38X_PLL_CONF_REG2);
+	reg_val = pete_readl("sound/soc/kirkwood/kirkwood-i2s.c:126", base + A38X_PLL_CONF_REG2);
 	reg_val &= ~A38X_PLL_AUDIO_POSTDIV_MASK;
 	reg_val |= audio_postdiv;
-	writel(reg_val, base + A38X_PLL_CONF_REG2);
+	pete_writel("sound/soc/kirkwood/kirkwood-i2s.c:129", reg_val, base + A38X_PLL_CONF_REG2);
 
-	reg_val = readl(base + A38X_PLL_CONF_REG1);
+	reg_val = pete_readl("sound/soc/kirkwood/kirkwood-i2s.c:131", base + A38X_PLL_CONF_REG1);
 	reg_val &= ~A38X_PLL_FREQ_OFFSET_MASK;
 	reg_val |= freq_offset;
-	writel(reg_val, base + A38X_PLL_CONF_REG1);
+	pete_writel("sound/soc/kirkwood/kirkwood-i2s.c:134", reg_val, base + A38X_PLL_CONF_REG1);
 
 	udelay(1);
 
 	/* Disable reset */
 	reg_val |= A38X_PLL_SW_RESET;
-	writel(reg_val, base + A38X_PLL_CONF_REG1);
+	pete_writel("sound/soc/kirkwood/kirkwood-i2s.c:140", reg_val, base + A38X_PLL_CONF_REG1);
 
 	/* Wait 50us for PLL to lock */
 	udelay(50);
 
 	/* Restore frequency offset value validity */
 	reg_val |= A38X_PLL_FREQ_OFFSET_VALID;
-	writel(reg_val, base + A38X_PLL_CONF_REG1);
+	pete_writel("sound/soc/kirkwood/kirkwood-i2s.c:147", reg_val, base + A38X_PLL_CONF_REG1);
 }
 
 static int kirkwood_i2s_set_fmt(struct snd_soc_dai *cpu_dai,
@@ -172,15 +172,15 @@ static int kirkwood_i2s_set_fmt(struct snd_soc_dai *cpu_dai,
 	 * Set same format for playback and record
 	 * This avoids some troubles.
 	 */
-	value = readl(priv->io+KIRKWOOD_I2S_PLAYCTL);
+	value = pete_readl("sound/soc/kirkwood/kirkwood-i2s.c:175", priv->io+KIRKWOOD_I2S_PLAYCTL);
 	value &= ~KIRKWOOD_I2S_CTL_JUST_MASK;
 	value |= mask;
-	writel(value, priv->io+KIRKWOOD_I2S_PLAYCTL);
+	pete_writel("sound/soc/kirkwood/kirkwood-i2s.c:178", value, priv->io+KIRKWOOD_I2S_PLAYCTL);
 
-	value = readl(priv->io+KIRKWOOD_I2S_RECCTL);
+	value = pete_readl("sound/soc/kirkwood/kirkwood-i2s.c:180", priv->io+KIRKWOOD_I2S_RECCTL);
 	value &= ~KIRKWOOD_I2S_CTL_JUST_MASK;
 	value |= mask;
-	writel(value, priv->io+KIRKWOOD_I2S_RECCTL);
+	pete_writel("sound/soc/kirkwood/kirkwood-i2s.c:183", value, priv->io+KIRKWOOD_I2S_RECCTL);
 
 	return 0;
 }
@@ -202,12 +202,12 @@ static inline void kirkwood_set_dco(void __iomem *io, unsigned long rate)
 		value |= KIRKWOOD_DCO_CTL_FREQ_24;
 		break;
 	}
-	writel(value, io + KIRKWOOD_DCO_CTL);
+	pete_writel("sound/soc/kirkwood/kirkwood-i2s.c:205", value, io + KIRKWOOD_DCO_CTL);
 
 	/* wait for dco locked */
 	do {
 		cpu_relax();
-		value = readl(io + KIRKWOOD_DCO_SPCR_STATUS);
+		value = pete_readl("sound/soc/kirkwood/kirkwood-i2s.c:210", io + KIRKWOOD_DCO_SPCR_STATUS);
 		value &= KIRKWOOD_DCO_SPCR_STATUS_DCO_LOCK;
 	} while (value == 0);
 }
@@ -237,7 +237,7 @@ static void kirkwood_set_rate(struct snd_soc_dai *dai,
 
 		clks_ctrl = KIRKWOOD_MCLK_SOURCE_EXTCLK;
 	}
-	writel(clks_ctrl, priv->io + KIRKWOOD_CLOCKS_CTRL);
+	pete_writel("sound/soc/kirkwood/kirkwood-i2s.c:240", clks_ctrl, priv->io + KIRKWOOD_CLOCKS_CTRL);
 }
 
 static int kirkwood_i2s_startup(struct snd_pcm_substream *substream,
@@ -266,7 +266,7 @@ static int kirkwood_i2s_hw_params(struct snd_pcm_substream *substream,
 
 	kirkwood_set_rate(dai, priv, params_rate(params));
 
-	i2s_value = readl(priv->io+i2s_reg);
+	i2s_value = pete_readl("sound/soc/kirkwood/kirkwood-i2s.c:269", priv->io+i2s_reg);
 	i2s_value &= ~KIRKWOOD_I2S_CTL_SIZE_MASK;
 
 	/*
@@ -330,7 +330,7 @@ static int kirkwood_i2s_hw_params(struct snd_pcm_substream *substream,
 		priv->ctl_rec |= ctl_rec;
 	}
 
-	writel(i2s_value, priv->io+i2s_reg);
+	pete_writel("sound/soc/kirkwood/kirkwood-i2s.c:333", i2s_value, priv->io+i2s_reg);
 
 	return 0;
 }
@@ -351,7 +351,7 @@ static int kirkwood_i2s_play_trigger(struct snd_pcm_substream *substream,
 	struct kirkwood_dma_data *priv = snd_soc_dai_get_drvdata(dai);
 	uint32_t ctl, value;
 
-	ctl = readl(priv->io + KIRKWOOD_PLAYCTL);
+	ctl = pete_readl("sound/soc/kirkwood/kirkwood-i2s.c:354", priv->io + KIRKWOOD_PLAYCTL);
 	if ((ctl & KIRKWOOD_PLAYCTL_ENABLE_MASK) == 0) {
 		unsigned timeout = 5000;
 		/*
@@ -361,7 +361,7 @@ static int kirkwood_i2s_play_trigger(struct snd_pcm_substream *substream,
 		 */
 		do {
 			value = ctl;
-			ctl = readl(priv->io + KIRKWOOD_PLAYCTL);
+			ctl = pete_readl("sound/soc/kirkwood/kirkwood-i2s.c:364", priv->io + KIRKWOOD_PLAYCTL);
 			if (!((ctl | value) & KIRKWOOD_PLAYCTL_PLAY_BUSY))
 				break;
 			udelay(1);
@@ -382,39 +382,39 @@ static int kirkwood_i2s_play_trigger(struct snd_pcm_substream *substream,
 			ctl &= ~KIRKWOOD_PLAYCTL_I2S_EN;	/* spdif */
 		ctl = kirkwood_i2s_play_mute(ctl);
 		value = ctl & ~KIRKWOOD_PLAYCTL_ENABLE_MASK;
-		writel(value, priv->io + KIRKWOOD_PLAYCTL);
+		pete_writel("sound/soc/kirkwood/kirkwood-i2s.c:385", value, priv->io + KIRKWOOD_PLAYCTL);
 
 		/* enable interrupts */
 		if (!runtime->no_period_wakeup) {
-			value = readl(priv->io + KIRKWOOD_INT_MASK);
+			value = pete_readl("sound/soc/kirkwood/kirkwood-i2s.c:389", priv->io + KIRKWOOD_INT_MASK);
 			value |= KIRKWOOD_INT_CAUSE_PLAY_BYTES;
-			writel(value, priv->io + KIRKWOOD_INT_MASK);
+			pete_writel("sound/soc/kirkwood/kirkwood-i2s.c:391", value, priv->io + KIRKWOOD_INT_MASK);
 		}
 
 		/* enable playback */
-		writel(ctl, priv->io + KIRKWOOD_PLAYCTL);
+		pete_writel("sound/soc/kirkwood/kirkwood-i2s.c:395", ctl, priv->io + KIRKWOOD_PLAYCTL);
 		break;
 
 	case SNDRV_PCM_TRIGGER_STOP:
 		/* stop audio, disable interrupts */
 		ctl |= KIRKWOOD_PLAYCTL_PAUSE | KIRKWOOD_PLAYCTL_I2S_MUTE |
 				KIRKWOOD_PLAYCTL_SPDIF_MUTE;
-		writel(ctl, priv->io + KIRKWOOD_PLAYCTL);
+		pete_writel("sound/soc/kirkwood/kirkwood-i2s.c:402", ctl, priv->io + KIRKWOOD_PLAYCTL);
 
-		value = readl(priv->io + KIRKWOOD_INT_MASK);
+		value = pete_readl("sound/soc/kirkwood/kirkwood-i2s.c:404", priv->io + KIRKWOOD_INT_MASK);
 		value &= ~KIRKWOOD_INT_CAUSE_PLAY_BYTES;
-		writel(value, priv->io + KIRKWOOD_INT_MASK);
+		pete_writel("sound/soc/kirkwood/kirkwood-i2s.c:406", value, priv->io + KIRKWOOD_INT_MASK);
 
 		/* disable all playbacks */
 		ctl &= ~KIRKWOOD_PLAYCTL_ENABLE_MASK;
-		writel(ctl, priv->io + KIRKWOOD_PLAYCTL);
+		pete_writel("sound/soc/kirkwood/kirkwood-i2s.c:410", ctl, priv->io + KIRKWOOD_PLAYCTL);
 		break;
 
 	case SNDRV_PCM_TRIGGER_PAUSE_PUSH:
 	case SNDRV_PCM_TRIGGER_SUSPEND:
 		ctl |= KIRKWOOD_PLAYCTL_PAUSE | KIRKWOOD_PLAYCTL_I2S_MUTE |
 				KIRKWOOD_PLAYCTL_SPDIF_MUTE;
-		writel(ctl, priv->io + KIRKWOOD_PLAYCTL);
+		pete_writel("sound/soc/kirkwood/kirkwood-i2s.c:417", ctl, priv->io + KIRKWOOD_PLAYCTL);
 		break;
 
 	case SNDRV_PCM_TRIGGER_RESUME:
@@ -422,7 +422,7 @@ static int kirkwood_i2s_play_trigger(struct snd_pcm_substream *substream,
 		ctl &= ~(KIRKWOOD_PLAYCTL_PAUSE | KIRKWOOD_PLAYCTL_I2S_MUTE |
 				KIRKWOOD_PLAYCTL_SPDIF_MUTE);
 		ctl = kirkwood_i2s_play_mute(ctl);
-		writel(ctl, priv->io + KIRKWOOD_PLAYCTL);
+		pete_writel("sound/soc/kirkwood/kirkwood-i2s.c:425", ctl, priv->io + KIRKWOOD_PLAYCTL);
 		break;
 
 	default:
@@ -438,7 +438,7 @@ static int kirkwood_i2s_rec_trigger(struct snd_pcm_substream *substream,
 	struct kirkwood_dma_data *priv = snd_soc_dai_get_drvdata(dai);
 	uint32_t ctl, value;
 
-	value = readl(priv->io + KIRKWOOD_RECCTL);
+	value = pete_readl("sound/soc/kirkwood/kirkwood-i2s.c:441", priv->io + KIRKWOOD_RECCTL);
 
 	switch (cmd) {
 	case SNDRV_PCM_TRIGGER_START:
@@ -450,45 +450,45 @@ static int kirkwood_i2s_rec_trigger(struct snd_pcm_substream *substream,
 			ctl &= ~KIRKWOOD_RECCTL_I2S_EN;		/* spdif */
 
 		value = ctl & ~KIRKWOOD_RECCTL_ENABLE_MASK;
-		writel(value, priv->io + KIRKWOOD_RECCTL);
+		pete_writel("sound/soc/kirkwood/kirkwood-i2s.c:453", value, priv->io + KIRKWOOD_RECCTL);
 
 		/* enable interrupts */
-		value = readl(priv->io + KIRKWOOD_INT_MASK);
+		value = pete_readl("sound/soc/kirkwood/kirkwood-i2s.c:456", priv->io + KIRKWOOD_INT_MASK);
 		value |= KIRKWOOD_INT_CAUSE_REC_BYTES;
-		writel(value, priv->io + KIRKWOOD_INT_MASK);
+		pete_writel("sound/soc/kirkwood/kirkwood-i2s.c:458", value, priv->io + KIRKWOOD_INT_MASK);
 
 		/* enable record */
-		writel(ctl, priv->io + KIRKWOOD_RECCTL);
+		pete_writel("sound/soc/kirkwood/kirkwood-i2s.c:461", ctl, priv->io + KIRKWOOD_RECCTL);
 		break;
 
 	case SNDRV_PCM_TRIGGER_STOP:
 		/* stop audio, disable interrupts */
-		value = readl(priv->io + KIRKWOOD_RECCTL);
+		value = pete_readl("sound/soc/kirkwood/kirkwood-i2s.c:466", priv->io + KIRKWOOD_RECCTL);
 		value |= KIRKWOOD_RECCTL_PAUSE | KIRKWOOD_RECCTL_MUTE;
-		writel(value, priv->io + KIRKWOOD_RECCTL);
+		pete_writel("sound/soc/kirkwood/kirkwood-i2s.c:468", value, priv->io + KIRKWOOD_RECCTL);
 
-		value = readl(priv->io + KIRKWOOD_INT_MASK);
+		value = pete_readl("sound/soc/kirkwood/kirkwood-i2s.c:470", priv->io + KIRKWOOD_INT_MASK);
 		value &= ~KIRKWOOD_INT_CAUSE_REC_BYTES;
-		writel(value, priv->io + KIRKWOOD_INT_MASK);
+		pete_writel("sound/soc/kirkwood/kirkwood-i2s.c:472", value, priv->io + KIRKWOOD_INT_MASK);
 
 		/* disable all records */
-		value = readl(priv->io + KIRKWOOD_RECCTL);
+		value = pete_readl("sound/soc/kirkwood/kirkwood-i2s.c:475", priv->io + KIRKWOOD_RECCTL);
 		value &= ~KIRKWOOD_RECCTL_ENABLE_MASK;
-		writel(value, priv->io + KIRKWOOD_RECCTL);
+		pete_writel("sound/soc/kirkwood/kirkwood-i2s.c:477", value, priv->io + KIRKWOOD_RECCTL);
 		break;
 
 	case SNDRV_PCM_TRIGGER_PAUSE_PUSH:
 	case SNDRV_PCM_TRIGGER_SUSPEND:
-		value = readl(priv->io + KIRKWOOD_RECCTL);
+		value = pete_readl("sound/soc/kirkwood/kirkwood-i2s.c:482", priv->io + KIRKWOOD_RECCTL);
 		value |= KIRKWOOD_RECCTL_PAUSE | KIRKWOOD_RECCTL_MUTE;
-		writel(value, priv->io + KIRKWOOD_RECCTL);
+		pete_writel("sound/soc/kirkwood/kirkwood-i2s.c:484", value, priv->io + KIRKWOOD_RECCTL);
 		break;
 
 	case SNDRV_PCM_TRIGGER_RESUME:
 	case SNDRV_PCM_TRIGGER_PAUSE_RELEASE:
-		value = readl(priv->io + KIRKWOOD_RECCTL);
+		value = pete_readl("sound/soc/kirkwood/kirkwood-i2s.c:489", priv->io + KIRKWOOD_RECCTL);
 		value &= ~(KIRKWOOD_RECCTL_PAUSE | KIRKWOOD_RECCTL_MUTE);
-		writel(value, priv->io + KIRKWOOD_RECCTL);
+		pete_writel("sound/soc/kirkwood/kirkwood-i2s.c:491", value, priv->io + KIRKWOOD_RECCTL);
 		break;
 
 	default:
@@ -516,29 +516,29 @@ static int kirkwood_i2s_init(struct kirkwood_dma_data *priv)
 
 	/* put system in a "safe" state : */
 	/* disable audio interrupts */
-	writel(0xffffffff, priv->io + KIRKWOOD_INT_CAUSE);
-	writel(0, priv->io + KIRKWOOD_INT_MASK);
+	pete_writel("sound/soc/kirkwood/kirkwood-i2s.c:519", 0xffffffff, priv->io + KIRKWOOD_INT_CAUSE);
+	pete_writel("sound/soc/kirkwood/kirkwood-i2s.c:520", 0, priv->io + KIRKWOOD_INT_MASK);
 
-	reg_data = readl(priv->io + 0x1200);
+	reg_data = pete_readl("sound/soc/kirkwood/kirkwood-i2s.c:522", priv->io + 0x1200);
 	reg_data &= (~(0x333FF8));
 	reg_data |= 0x111D18;
-	writel(reg_data, priv->io + 0x1200);
+	pete_writel("sound/soc/kirkwood/kirkwood-i2s.c:525", reg_data, priv->io + 0x1200);
 
 	msleep(500);
 
-	reg_data = readl(priv->io + 0x1200);
+	reg_data = pete_readl("sound/soc/kirkwood/kirkwood-i2s.c:529", priv->io + 0x1200);
 	reg_data &= (~(0x333FF8));
 	reg_data |= 0x111D18;
-	writel(reg_data, priv->io + 0x1200);
+	pete_writel("sound/soc/kirkwood/kirkwood-i2s.c:532", reg_data, priv->io + 0x1200);
 
 	/* disable playback/record */
-	value = readl(priv->io + KIRKWOOD_PLAYCTL);
+	value = pete_readl("sound/soc/kirkwood/kirkwood-i2s.c:535", priv->io + KIRKWOOD_PLAYCTL);
 	value &= ~KIRKWOOD_PLAYCTL_ENABLE_MASK;
-	writel(value, priv->io + KIRKWOOD_PLAYCTL);
+	pete_writel("sound/soc/kirkwood/kirkwood-i2s.c:537", value, priv->io + KIRKWOOD_PLAYCTL);
 
-	value = readl(priv->io + KIRKWOOD_RECCTL);
+	value = pete_readl("sound/soc/kirkwood/kirkwood-i2s.c:539", priv->io + KIRKWOOD_RECCTL);
 	value &= ~KIRKWOOD_RECCTL_ENABLE_MASK;
-	writel(value, priv->io + KIRKWOOD_RECCTL);
+	pete_writel("sound/soc/kirkwood/kirkwood-i2s.c:541", value, priv->io + KIRKWOOD_RECCTL);
 
 	return 0;
 

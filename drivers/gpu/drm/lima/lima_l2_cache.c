@@ -8,8 +8,8 @@
 #include "lima_l2_cache.h"
 #include "lima_regs.h"
 
-#define l2_cache_write(reg, data) writel(data, ip->iomem + reg)
-#define l2_cache_read(reg) readl(ip->iomem + reg)
+#define l2_cache_write(reg, data) pete_writel("drivers/gpu/drm/lima/lima_l2_cache.c:11", data, ip->iomem + reg)
+#define l2_cache_read(reg) pete_readl("drivers/gpu/drm/lima/lima_l2_cache.c:12", ip->iomem + reg)
 
 static int lima_l2_cache_wait_idle(struct lima_ip *ip)
 {

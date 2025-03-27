@@ -132,12 +132,12 @@ static int check_for_compaq_ROM(void __iomem *rom_start)
 	u8 temp1, temp2, temp3, temp4, temp5, temp6;
 	int result = 0;
 
-	temp1 = readb(rom_start + 0xffea + 0);
-	temp2 = readb(rom_start + 0xffea + 1);
-	temp3 = readb(rom_start + 0xffea + 2);
-	temp4 = readb(rom_start + 0xffea + 3);
-	temp5 = readb(rom_start + 0xffea + 4);
-	temp6 = readb(rom_start + 0xffea + 5);
+	temp1 = pete_readb("drivers/pci/hotplug/cpqphp_nvram.c:135", rom_start + 0xffea + 0);
+	temp2 = pete_readb("drivers/pci/hotplug/cpqphp_nvram.c:136", rom_start + 0xffea + 1);
+	temp3 = pete_readb("drivers/pci/hotplug/cpqphp_nvram.c:137", rom_start + 0xffea + 2);
+	temp4 = pete_readb("drivers/pci/hotplug/cpqphp_nvram.c:138", rom_start + 0xffea + 3);
+	temp5 = pete_readb("drivers/pci/hotplug/cpqphp_nvram.c:139", rom_start + 0xffea + 4);
+	temp6 = pete_readb("drivers/pci/hotplug/cpqphp_nvram.c:140", rom_start + 0xffea + 5);
 	if ((temp1 == 'C') &&
 	    (temp2 == 'O') &&
 	    (temp3 == 'M') &&

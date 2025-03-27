@@ -151,12 +151,12 @@ static struct miic_port *phylink_pcs_to_miic_port(struct phylink_pcs *pcs)
 
 static void miic_reg_writel(struct miic *miic, int offset, u32 value)
 {
-	writel(value, miic->base + offset);
+	pete_writel("drivers/net/pcs/pcs-rzn1-miic.c:154", value, miic->base + offset);
 }
 
 static u32 miic_reg_readl(struct miic *miic, int offset)
 {
-	return readl(miic->base + offset);
+	return pete_readl("drivers/net/pcs/pcs-rzn1-miic.c:159", miic->base + offset);
 }
 
 static void miic_reg_rmw(struct miic *miic, int offset, u32 mask, u32 val)

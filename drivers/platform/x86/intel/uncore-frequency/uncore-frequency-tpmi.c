@@ -77,7 +77,7 @@ static void read_control_freq(struct tpmi_uncore_cluster_info *cluster_info,
 {
 	u64 control;
 
-	control = readq(cluster_info->cluster_base + UNCORE_CONTROL_INDEX);
+	control = pete_readq("drivers/platform/x86/intel/uncore-frequency/uncore-frequency-tpmi.c:80", cluster_info->cluster_base + UNCORE_CONTROL_INDEX);
 	*max = FIELD_GET(UNCORE_GENMASK_MAX_RATIO, control) * UNCORE_FREQ_KHZ_MULTIPLIER;
 	*min = FIELD_GET(UNCORE_GENMASK_MIN_RATIO, control) * UNCORE_FREQ_KHZ_MULTIPLIER;
 }
@@ -129,7 +129,7 @@ static void write_control_freq(struct tpmi_uncore_cluster_info *cluster_info, un
 {
 	u64 control;
 
-	control = readq(cluster_info->cluster_base + UNCORE_CONTROL_INDEX);
+	control = pete_readq("drivers/platform/x86/intel/uncore-frequency/uncore-frequency-tpmi.c:132", cluster_info->cluster_base + UNCORE_CONTROL_INDEX);
 
 	if (min_max) {
 		control &= ~UNCORE_GENMASK_MAX_RATIO;
@@ -139,7 +139,7 @@ static void write_control_freq(struct tpmi_uncore_cluster_info *cluster_info, un
 		control |= FIELD_PREP(UNCORE_GENMASK_MIN_RATIO, input);
 	}
 
-	writeq(control, (cluster_info->cluster_base + UNCORE_CONTROL_INDEX));
+	pete_writeq("drivers/platform/x86/intel/uncore-frequency/uncore-frequency-tpmi.c:142", control, (cluster_info->cluster_base + UNCORE_CONTROL_INDEX));
 }
 
 /* Callback for sysfs write for max/min frequencies. Called under mutex locks */
@@ -198,7 +198,7 @@ static int uncore_read_freq(struct uncore_data *data, unsigned int *freq)
 	if (cluster_info->root_domain)
 		return -ENODATA;
 
-	status = readq((u8 __iomem *)cluster_info->cluster_base + UNCORE_STATUS_INDEX);
+	status = pete_readq("drivers/platform/x86/intel/uncore-frequency/uncore-frequency-tpmi.c:201", (u8 __iomem *)cluster_info->cluster_base + UNCORE_STATUS_INDEX);
 	*freq = FIELD_GET(UNCORE_GENMASK_CURRENT_RATIO, status) * UNCORE_FREQ_KHZ_MULTIPLIER;
 
 	return 0;
@@ -301,7 +301,7 @@ static int uncore_probe(struct auxiliary_device *auxdev, const struct auxiliary_
 		}
 
 		/* Check for version and skip this resource if there is mismatch */
-		header = readq(pd_info->uncore_base);
+		header = pete_readq("drivers/platform/x86/intel/uncore-frequency/uncore-frequency-tpmi.c:304", pd_info->uncore_base);
 		pd_info->ufs_header_ver = header & UNCORE_VERSION_MASK;
 		if (pd_info->ufs_header_ver != UNCORE_HEADER_VERSION) {
 			dev_info(&auxdev->dev, "Uncore: Unsupported version:%d\n",
@@ -330,7 +330,7 @@ static int uncore_probe(struct auxiliary_device *auxdev, const struct auxiliary_
 		 * Each byte in the register point to status and control
 		 * registers belonging to cluster id 0-8.
 		 */
-		cluster_offset = readq(pd_info->uncore_base +
+		cluster_offset = pete_readq("drivers/platform/x86/intel/uncore-frequency/uncore-frequency-tpmi.c:333", pd_info->uncore_base +
 					UNCORE_FABRIC_CLUSTER_OFFSET);
 
 		for (j = 0; j < pd_info->cluster_count; ++j) {

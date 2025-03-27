@@ -39,7 +39,7 @@ u32 amdgpu_mm_rdoorbell(struct amdgpu_device *adev, u32 index)
 		return 0;
 
 	if (index < adev->doorbell.num_kernel_doorbells)
-		return readl(adev->doorbell.cpu_addr + index);
+		return pete_readl("drivers/gpu/drm/amd/amdgpu/amdgpu_doorbell_mgr.c:42", adev->doorbell.cpu_addr + index);
 
 	DRM_ERROR("reading beyond doorbell aperture: 0x%08x!\n", index);
 	return 0;
@@ -61,7 +61,7 @@ void amdgpu_mm_wdoorbell(struct amdgpu_device *adev, u32 index, u32 v)
 		return;
 
 	if (index < adev->doorbell.num_kernel_doorbells)
-		writel(v, adev->doorbell.cpu_addr + index);
+		pete_writel("drivers/gpu/drm/amd/amdgpu/amdgpu_doorbell_mgr.c:64", v, adev->doorbell.cpu_addr + index);
 	else
 		DRM_ERROR("writing beyond doorbell aperture: 0x%08x!\n", index);
 }

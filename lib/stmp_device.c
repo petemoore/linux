@@ -27,9 +27,9 @@ static int stmp_clear_poll_bit(void __iomem *addr, u32 mask)
 {
 	int timeout = 0x400;
 
-	writel(mask, addr + STMP_OFFSET_REG_CLR);
+	pete_writel("lib/stmp_device.c:30", mask, addr + STMP_OFFSET_REG_CLR);
 	udelay(1);
-	while ((readl(addr) & mask) && --timeout)
+	while ((pete_readl("lib/stmp_device.c:32", addr) & mask) && --timeout)
 		/* nothing */;
 
 	return !timeout;
@@ -46,14 +46,14 @@ int stmp_reset_block(void __iomem *reset_addr)
 		goto error;
 
 	/* clear CLKGATE */
-	writel(STMP_MODULE_CLKGATE, reset_addr + STMP_OFFSET_REG_CLR);
+	pete_writel("lib/stmp_device.c:49", STMP_MODULE_CLKGATE, reset_addr + STMP_OFFSET_REG_CLR);
 
 	/* set SFTRST to reset the block */
-	writel(STMP_MODULE_SFTRST, reset_addr + STMP_OFFSET_REG_SET);
+	pete_writel("lib/stmp_device.c:52", STMP_MODULE_SFTRST, reset_addr + STMP_OFFSET_REG_SET);
 	udelay(1);
 
 	/* poll CLKGATE becoming set */
-	while ((!(readl(reset_addr) & STMP_MODULE_CLKGATE)) && --timeout)
+	while ((!(pete_readl("lib/stmp_device.c:56", reset_addr) & STMP_MODULE_CLKGATE)) && --timeout)
 		/* nothing */;
 	if (unlikely(!timeout))
 		goto error;

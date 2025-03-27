@@ -346,43 +346,43 @@ static void cptvf_write_vq_ctl(struct otx_cptvf *cptvf, bool val)
 {
 	union otx_cptx_vqx_ctl vqx_ctl;
 
-	vqx_ctl.u = readq(cptvf->reg_base + OTX_CPT_VQX_CTL(0));
+	vqx_ctl.u = pete_readq("drivers/crypto/marvell/octeontx/otx_cptvf_main.c:349", cptvf->reg_base + OTX_CPT_VQX_CTL(0));
 	vqx_ctl.s.ena = val;
-	writeq(vqx_ctl.u, cptvf->reg_base + OTX_CPT_VQX_CTL(0));
+	pete_writeq("drivers/crypto/marvell/octeontx/otx_cptvf_main.c:351", vqx_ctl.u, cptvf->reg_base + OTX_CPT_VQX_CTL(0));
 }
 
 void otx_cptvf_write_vq_doorbell(struct otx_cptvf *cptvf, u32 val)
 {
 	union otx_cptx_vqx_doorbell vqx_dbell;
 
-	vqx_dbell.u = readq(cptvf->reg_base + OTX_CPT_VQX_DOORBELL(0));
+	vqx_dbell.u = pete_readq("drivers/crypto/marvell/octeontx/otx_cptvf_main.c:358", cptvf->reg_base + OTX_CPT_VQX_DOORBELL(0));
 	vqx_dbell.s.dbell_cnt = val * 8; /* Num of Instructions * 8 words */
-	writeq(vqx_dbell.u, cptvf->reg_base + OTX_CPT_VQX_DOORBELL(0));
+	pete_writeq("drivers/crypto/marvell/octeontx/otx_cptvf_main.c:360", vqx_dbell.u, cptvf->reg_base + OTX_CPT_VQX_DOORBELL(0));
 }
 
 static void cptvf_write_vq_inprog(struct otx_cptvf *cptvf, u8 val)
 {
 	union otx_cptx_vqx_inprog vqx_inprg;
 
-	vqx_inprg.u = readq(cptvf->reg_base + OTX_CPT_VQX_INPROG(0));
+	vqx_inprg.u = pete_readq("drivers/crypto/marvell/octeontx/otx_cptvf_main.c:367", cptvf->reg_base + OTX_CPT_VQX_INPROG(0));
 	vqx_inprg.s.inflight = val;
-	writeq(vqx_inprg.u, cptvf->reg_base + OTX_CPT_VQX_INPROG(0));
+	pete_writeq("drivers/crypto/marvell/octeontx/otx_cptvf_main.c:369", vqx_inprg.u, cptvf->reg_base + OTX_CPT_VQX_INPROG(0));
 }
 
 static void cptvf_write_vq_done_numwait(struct otx_cptvf *cptvf, u32 val)
 {
 	union otx_cptx_vqx_done_wait vqx_dwait;
 
-	vqx_dwait.u = readq(cptvf->reg_base + OTX_CPT_VQX_DONE_WAIT(0));
+	vqx_dwait.u = pete_readq("drivers/crypto/marvell/octeontx/otx_cptvf_main.c:376", cptvf->reg_base + OTX_CPT_VQX_DONE_WAIT(0));
 	vqx_dwait.s.num_wait = val;
-	writeq(vqx_dwait.u, cptvf->reg_base + OTX_CPT_VQX_DONE_WAIT(0));
+	pete_writeq("drivers/crypto/marvell/octeontx/otx_cptvf_main.c:378", vqx_dwait.u, cptvf->reg_base + OTX_CPT_VQX_DONE_WAIT(0));
 }
 
 static u32 cptvf_read_vq_done_numwait(struct otx_cptvf *cptvf)
 {
 	union otx_cptx_vqx_done_wait vqx_dwait;
 
-	vqx_dwait.u = readq(cptvf->reg_base + OTX_CPT_VQX_DONE_WAIT(0));
+	vqx_dwait.u = pete_readq("drivers/crypto/marvell/octeontx/otx_cptvf_main.c:385", cptvf->reg_base + OTX_CPT_VQX_DONE_WAIT(0));
 	return vqx_dwait.s.num_wait;
 }
 
@@ -390,9 +390,9 @@ static void cptvf_write_vq_done_timewait(struct otx_cptvf *cptvf, u16 time)
 {
 	union otx_cptx_vqx_done_wait vqx_dwait;
 
-	vqx_dwait.u = readq(cptvf->reg_base + OTX_CPT_VQX_DONE_WAIT(0));
+	vqx_dwait.u = pete_readq("drivers/crypto/marvell/octeontx/otx_cptvf_main.c:393", cptvf->reg_base + OTX_CPT_VQX_DONE_WAIT(0));
 	vqx_dwait.s.time_wait = time;
-	writeq(vqx_dwait.u, cptvf->reg_base + OTX_CPT_VQX_DONE_WAIT(0));
+	pete_writeq("drivers/crypto/marvell/octeontx/otx_cptvf_main.c:395", vqx_dwait.u, cptvf->reg_base + OTX_CPT_VQX_DONE_WAIT(0));
 }
 
 
@@ -400,7 +400,7 @@ static u16 cptvf_read_vq_done_timewait(struct otx_cptvf *cptvf)
 {
 	union otx_cptx_vqx_done_wait vqx_dwait;
 
-	vqx_dwait.u = readq(cptvf->reg_base + OTX_CPT_VQX_DONE_WAIT(0));
+	vqx_dwait.u = pete_readq("drivers/crypto/marvell/octeontx/otx_cptvf_main.c:403", cptvf->reg_base + OTX_CPT_VQX_DONE_WAIT(0));
 	return vqx_dwait.s.time_wait;
 }
 
@@ -408,85 +408,85 @@ static void cptvf_enable_swerr_interrupts(struct otx_cptvf *cptvf)
 {
 	union otx_cptx_vqx_misc_ena_w1s vqx_misc_ena;
 
-	vqx_misc_ena.u = readq(cptvf->reg_base + OTX_CPT_VQX_MISC_ENA_W1S(0));
+	vqx_misc_ena.u = pete_readq("drivers/crypto/marvell/octeontx/otx_cptvf_main.c:411", cptvf->reg_base + OTX_CPT_VQX_MISC_ENA_W1S(0));
 	/* Enable SWERR interrupts for the requested VF */
 	vqx_misc_ena.s.swerr = 1;
-	writeq(vqx_misc_ena.u, cptvf->reg_base + OTX_CPT_VQX_MISC_ENA_W1S(0));
+	pete_writeq("drivers/crypto/marvell/octeontx/otx_cptvf_main.c:414", vqx_misc_ena.u, cptvf->reg_base + OTX_CPT_VQX_MISC_ENA_W1S(0));
 }
 
 static void cptvf_enable_mbox_interrupts(struct otx_cptvf *cptvf)
 {
 	union otx_cptx_vqx_misc_ena_w1s vqx_misc_ena;
 
-	vqx_misc_ena.u = readq(cptvf->reg_base + OTX_CPT_VQX_MISC_ENA_W1S(0));
+	vqx_misc_ena.u = pete_readq("drivers/crypto/marvell/octeontx/otx_cptvf_main.c:421", cptvf->reg_base + OTX_CPT_VQX_MISC_ENA_W1S(0));
 	/* Enable MBOX interrupt for the requested VF */
 	vqx_misc_ena.s.mbox = 1;
-	writeq(vqx_misc_ena.u, cptvf->reg_base + OTX_CPT_VQX_MISC_ENA_W1S(0));
+	pete_writeq("drivers/crypto/marvell/octeontx/otx_cptvf_main.c:424", vqx_misc_ena.u, cptvf->reg_base + OTX_CPT_VQX_MISC_ENA_W1S(0));
 }
 
 static void cptvf_enable_done_interrupts(struct otx_cptvf *cptvf)
 {
 	union otx_cptx_vqx_done_ena_w1s vqx_done_ena;
 
-	vqx_done_ena.u = readq(cptvf->reg_base + OTX_CPT_VQX_DONE_ENA_W1S(0));
+	vqx_done_ena.u = pete_readq("drivers/crypto/marvell/octeontx/otx_cptvf_main.c:431", cptvf->reg_base + OTX_CPT_VQX_DONE_ENA_W1S(0));
 	/* Enable DONE interrupt for the requested VF */
 	vqx_done_ena.s.done = 1;
-	writeq(vqx_done_ena.u, cptvf->reg_base + OTX_CPT_VQX_DONE_ENA_W1S(0));
+	pete_writeq("drivers/crypto/marvell/octeontx/otx_cptvf_main.c:434", vqx_done_ena.u, cptvf->reg_base + OTX_CPT_VQX_DONE_ENA_W1S(0));
 }
 
 static void cptvf_clear_dovf_intr(struct otx_cptvf *cptvf)
 {
 	union otx_cptx_vqx_misc_int vqx_misc_int;
 
-	vqx_misc_int.u = readq(cptvf->reg_base + OTX_CPT_VQX_MISC_INT(0));
+	vqx_misc_int.u = pete_readq("drivers/crypto/marvell/octeontx/otx_cptvf_main.c:441", cptvf->reg_base + OTX_CPT_VQX_MISC_INT(0));
 	/* W1C for the VF */
 	vqx_misc_int.s.dovf = 1;
-	writeq(vqx_misc_int.u, cptvf->reg_base + OTX_CPT_VQX_MISC_INT(0));
+	pete_writeq("drivers/crypto/marvell/octeontx/otx_cptvf_main.c:444", vqx_misc_int.u, cptvf->reg_base + OTX_CPT_VQX_MISC_INT(0));
 }
 
 static void cptvf_clear_irde_intr(struct otx_cptvf *cptvf)
 {
 	union otx_cptx_vqx_misc_int vqx_misc_int;
 
-	vqx_misc_int.u = readq(cptvf->reg_base + OTX_CPT_VQX_MISC_INT(0));
+	vqx_misc_int.u = pete_readq("drivers/crypto/marvell/octeontx/otx_cptvf_main.c:451", cptvf->reg_base + OTX_CPT_VQX_MISC_INT(0));
 	/* W1C for the VF */
 	vqx_misc_int.s.irde = 1;
-	writeq(vqx_misc_int.u, cptvf->reg_base + OTX_CPT_VQX_MISC_INT(0));
+	pete_writeq("drivers/crypto/marvell/octeontx/otx_cptvf_main.c:454", vqx_misc_int.u, cptvf->reg_base + OTX_CPT_VQX_MISC_INT(0));
 }
 
 static void cptvf_clear_nwrp_intr(struct otx_cptvf *cptvf)
 {
 	union otx_cptx_vqx_misc_int vqx_misc_int;
 
-	vqx_misc_int.u = readq(cptvf->reg_base + OTX_CPT_VQX_MISC_INT(0));
+	vqx_misc_int.u = pete_readq("drivers/crypto/marvell/octeontx/otx_cptvf_main.c:461", cptvf->reg_base + OTX_CPT_VQX_MISC_INT(0));
 	/* W1C for the VF */
 	vqx_misc_int.s.nwrp = 1;
-	writeq(vqx_misc_int.u, cptvf->reg_base + OTX_CPT_VQX_MISC_INT(0));
+	pete_writeq("drivers/crypto/marvell/octeontx/otx_cptvf_main.c:464", vqx_misc_int.u, cptvf->reg_base + OTX_CPT_VQX_MISC_INT(0));
 }
 
 static void cptvf_clear_mbox_intr(struct otx_cptvf *cptvf)
 {
 	union otx_cptx_vqx_misc_int vqx_misc_int;
 
-	vqx_misc_int.u = readq(cptvf->reg_base + OTX_CPT_VQX_MISC_INT(0));
+	vqx_misc_int.u = pete_readq("drivers/crypto/marvell/octeontx/otx_cptvf_main.c:471", cptvf->reg_base + OTX_CPT_VQX_MISC_INT(0));
 	/* W1C for the VF */
 	vqx_misc_int.s.mbox = 1;
-	writeq(vqx_misc_int.u, cptvf->reg_base + OTX_CPT_VQX_MISC_INT(0));
+	pete_writeq("drivers/crypto/marvell/octeontx/otx_cptvf_main.c:474", vqx_misc_int.u, cptvf->reg_base + OTX_CPT_VQX_MISC_INT(0));
 }
 
 static void cptvf_clear_swerr_intr(struct otx_cptvf *cptvf)
 {
 	union otx_cptx_vqx_misc_int vqx_misc_int;
 
-	vqx_misc_int.u = readq(cptvf->reg_base + OTX_CPT_VQX_MISC_INT(0));
+	vqx_misc_int.u = pete_readq("drivers/crypto/marvell/octeontx/otx_cptvf_main.c:481", cptvf->reg_base + OTX_CPT_VQX_MISC_INT(0));
 	/* W1C for the VF */
 	vqx_misc_int.s.swerr = 1;
-	writeq(vqx_misc_int.u, cptvf->reg_base + OTX_CPT_VQX_MISC_INT(0));
+	pete_writeq("drivers/crypto/marvell/octeontx/otx_cptvf_main.c:484", vqx_misc_int.u, cptvf->reg_base + OTX_CPT_VQX_MISC_INT(0));
 }
 
 static u64 cptvf_read_vf_misc_intr_status(struct otx_cptvf *cptvf)
 {
-	return readq(cptvf->reg_base + OTX_CPT_VQX_MISC_INT(0));
+	return pete_readq("drivers/crypto/marvell/octeontx/otx_cptvf_main.c:489", cptvf->reg_base + OTX_CPT_VQX_MISC_INT(0));
 }
 
 static irqreturn_t cptvf_misc_intr_handler(int __always_unused irq,
@@ -549,7 +549,7 @@ static inline u32 cptvf_read_vq_done_count(struct otx_cptvf *cptvf)
 {
 	union otx_cptx_vqx_done vqx_done;
 
-	vqx_done.u = readq(cptvf->reg_base + OTX_CPT_VQX_DONE(0));
+	vqx_done.u = pete_readq("drivers/crypto/marvell/octeontx/otx_cptvf_main.c:552", cptvf->reg_base + OTX_CPT_VQX_DONE(0));
 	return vqx_done.s.done;
 }
 
@@ -558,9 +558,9 @@ static inline void cptvf_write_vq_done_ack(struct otx_cptvf *cptvf,
 {
 	union otx_cptx_vqx_done_ack vqx_dack_cnt;
 
-	vqx_dack_cnt.u = readq(cptvf->reg_base + OTX_CPT_VQX_DONE_ACK(0));
+	vqx_dack_cnt.u = pete_readq("drivers/crypto/marvell/octeontx/otx_cptvf_main.c:561", cptvf->reg_base + OTX_CPT_VQX_DONE_ACK(0));
 	vqx_dack_cnt.s.done_ack = ackcnt;
-	writeq(vqx_dack_cnt.u, cptvf->reg_base + OTX_CPT_VQX_DONE_ACK(0));
+	pete_writeq("drivers/crypto/marvell/octeontx/otx_cptvf_main.c:563", vqx_dack_cnt.u, cptvf->reg_base + OTX_CPT_VQX_DONE_ACK(0));
 }
 
 static irqreturn_t cptvf_done_intr_handler(int __always_unused irq,
@@ -616,7 +616,7 @@ static void cptvf_write_vq_saddr(struct otx_cptvf *cptvf, u64 val)
 	union otx_cptx_vqx_saddr vqx_saddr;
 
 	vqx_saddr.u = val;
-	writeq(vqx_saddr.u, cptvf->reg_base + OTX_CPT_VQX_SADDR(0));
+	pete_writeq("drivers/crypto/marvell/octeontx/otx_cptvf_main.c:619", vqx_saddr.u, cptvf->reg_base + OTX_CPT_VQX_SADDR(0));
 }
 
 static void cptvf_device_init(struct otx_cptvf *cptvf)

@@ -68,7 +68,7 @@ static int noinline_for_stack sun4i_ss_opti_poll(struct skcipher_request *areq)
 			writesl(ss->base + SS_IV0 + i * 4, &v, 1);
 		}
 	}
-	writel(mode, ss->base + SS_CTL);
+	pete_writel("drivers/crypto/allwinner/sun4i-ss/sun4i-ss-cipher.c:71", mode, ss->base + SS_CTL);
 
 
 	ileft = areq->cryptlen / 4;
@@ -101,7 +101,7 @@ static int noinline_for_stack sun4i_ss_opti_poll(struct skcipher_request *areq)
 			sg_miter_stop(&mi);
 		}
 
-		spaces = readl(ss->base + SS_FCSR);
+		spaces = pete_readl("drivers/crypto/allwinner/sun4i-ss/sun4i-ss-cipher.c:104", ss->base + SS_FCSR);
 		rx_cnt = SS_RXFIFO_SPACES(spaces);
 		tx_cnt = SS_TXFIFO_SPACES(spaces);
 
@@ -140,7 +140,7 @@ static int noinline_for_stack sun4i_ss_opti_poll(struct skcipher_request *areq)
 	}
 
 release_ss:
-	writel(0, ss->base + SS_CTL);
+	pete_writel("drivers/crypto/allwinner/sun4i-ss/sun4i-ss-cipher.c:143", 0, ss->base + SS_CTL);
 	spin_unlock_irqrestore(&ss->slock, flags);
 	return err;
 }
@@ -260,7 +260,7 @@ static int sun4i_ss_cipher_poll(struct skcipher_request *areq)
 			writesl(ss->base + SS_IV0 + i * 4, &v, 1);
 		}
 	}
-	writel(mode, ss->base + SS_CTL);
+	pete_writel("drivers/crypto/allwinner/sun4i-ss/sun4i-ss-cipher.c:263", mode, ss->base + SS_CTL);
 
 	ileft = areq->cryptlen;
 	oleft = areq->cryptlen;
@@ -317,7 +317,7 @@ static int sun4i_ss_cipher_poll(struct skcipher_request *areq)
 			sg_miter_stop(&mi);
 		}
 
-		spaces = readl(ss->base + SS_FCSR);
+		spaces = pete_readl("drivers/crypto/allwinner/sun4i-ss/sun4i-ss-cipher.c:320", ss->base + SS_FCSR);
 		rx_cnt = SS_RXFIFO_SPACES(spaces);
 		tx_cnt = SS_TXFIFO_SPACES(spaces);
 
@@ -387,7 +387,7 @@ static int sun4i_ss_cipher_poll(struct skcipher_request *areq)
 	}
 
 release_ss:
-	writel(0, ss->base + SS_CTL);
+	pete_writel("drivers/crypto/allwinner/sun4i-ss/sun4i-ss-cipher.c:390", 0, ss->base + SS_CTL);
 	spin_unlock_irqrestore(&ss->slock, flags);
 
 	return err;

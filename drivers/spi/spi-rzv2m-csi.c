@@ -110,8 +110,8 @@ static void rzv2m_csi_reg_write_bit(const struct rzv2m_csi_priv *csi,
 	nr_zeros = count_trailing_zeros(bit_mask);
 	value <<= nr_zeros;
 
-	tmp = (readl(csi->base + reg_offs) & ~bit_mask) | value;
-	writel(tmp, csi->base + reg_offs);
+	tmp = (pete_readl("drivers/spi/spi-rzv2m-csi.c:113", csi->base + reg_offs) & ~bit_mask) | value;
+	pete_writel("drivers/spi/spi-rzv2m-csi.c:114", tmp, csi->base + reg_offs);
 }
 
 static int rzv2m_csi_sw_reset(struct rzv2m_csi_priv *csi, int assert)
@@ -147,19 +147,19 @@ static int rzv2m_csi_fill_txfifo(struct rzv2m_csi_priv *csi)
 {
 	unsigned int i;
 
-	if (readl(csi->base + CSI_OFIFOL))
+	if (pete_readl("drivers/spi/spi-rzv2m-csi.c:150", csi->base + CSI_OFIFOL))
 		return -EIO;
 
 	if (csi->bytes_per_word == 2) {
 		const u16 *buf = csi->txbuf;
 
 		for (i = 0; i < csi->words_to_transfer; i++)
-			writel(buf[i], csi->base + CSI_OFIFO);
+			pete_writel("drivers/spi/spi-rzv2m-csi.c:157", buf[i], csi->base + CSI_OFIFO);
 	} else {
 		const u8 *buf = csi->txbuf;
 
 		for (i = 0; i < csi->words_to_transfer; i++)
-			writel(buf[i], csi->base + CSI_OFIFO);
+			pete_writel("drivers/spi/spi-rzv2m-csi.c:162", buf[i], csi->base + CSI_OFIFO);
 	}
 
 	csi->txbuf += csi->bytes_to_transfer;
@@ -172,19 +172,19 @@ static int rzv2m_csi_read_rxfifo(struct rzv2m_csi_priv *csi)
 {
 	unsigned int i;
 
-	if (readl(csi->base + CSI_IFIFOL) != csi->bytes_to_transfer)
+	if (pete_readl("drivers/spi/spi-rzv2m-csi.c:175", csi->base + CSI_IFIFOL) != csi->bytes_to_transfer)
 		return -EIO;
 
 	if (csi->bytes_per_word == 2) {
 		u16 *buf = csi->rxbuf;
 
 		for (i = 0; i < csi->words_to_transfer; i++)
-			buf[i] = (u16)readl(csi->base + CSI_IFIFO);
+			buf[i] = (u16)pete_readl("drivers/spi/spi-rzv2m-csi.c:182", csi->base + CSI_IFIFO);
 	} else {
 		u8 *buf = csi->rxbuf;
 
 		for (i = 0; i < csi->words_to_transfer; i++)
-			buf[i] = (u8)readl(csi->base + CSI_IFIFO);
+			buf[i] = (u8)pete_readl("drivers/spi/spi-rzv2m-csi.c:187", csi->base + CSI_IFIFO);
 	}
 
 	csi->rxbuf += csi->bytes_to_transfer;
@@ -241,9 +241,9 @@ static inline void rzv2m_csi_enable_rx_trigger(struct rzv2m_csi_priv *csi,
 static void rzv2m_csi_disable_irqs(const struct rzv2m_csi_priv *csi,
 				   u32 enable_bits)
 {
-	u32 cnt = readl(csi->base + CSI_CNT);
+	u32 cnt = pete_readl("drivers/spi/spi-rzv2m-csi.c:244", csi->base + CSI_CNT);
 
-	writel(cnt & ~enable_bits, csi->base + CSI_CNT);
+	pete_writel("drivers/spi/spi-rzv2m-csi.c:246", cnt & ~enable_bits, csi->base + CSI_CNT);
 }
 
 static void rzv2m_csi_disable_all_irqs(struct rzv2m_csi_priv *csi)
@@ -255,7 +255,7 @@ static void rzv2m_csi_disable_all_irqs(struct rzv2m_csi_priv *csi)
 
 static inline void rzv2m_csi_clear_irqs(struct rzv2m_csi_priv *csi, u32 irqs)
 {
-	writel(irqs, csi->base + CSI_INT);
+	pete_writel("drivers/spi/spi-rzv2m-csi.c:258", irqs, csi->base + CSI_INT);
 }
 
 static void rzv2m_csi_clear_all_irqs(struct rzv2m_csi_priv *csi)
@@ -267,9 +267,9 @@ static void rzv2m_csi_clear_all_irqs(struct rzv2m_csi_priv *csi)
 
 static void rzv2m_csi_enable_irqs(struct rzv2m_csi_priv *csi, u32 enable_bits)
 {
-	u32 cnt = readl(csi->base + CSI_CNT);
+	u32 cnt = pete_readl("drivers/spi/spi-rzv2m-csi.c:270", csi->base + CSI_CNT);
 
-	writel(cnt | enable_bits, csi->base + CSI_CNT);
+	pete_writel("drivers/spi/spi-rzv2m-csi.c:272", cnt | enable_bits, csi->base + CSI_CNT);
 }
 
 static int rzv2m_csi_wait_for_interrupt(struct rzv2m_csi_priv *csi,
@@ -298,7 +298,7 @@ static int rzv2m_csi_wait_for_tx_empty(struct rzv2m_csi_priv *csi)
 {
 	int ret;
 
-	if (readl(csi->base + CSI_OFIFOL) == 0)
+	if (pete_readl("drivers/spi/spi-rzv2m-csi.c:301", csi->base + CSI_OFIFOL) == 0)
 		return 0;
 
 	ret = rzv2m_csi_wait_for_interrupt(csi, CSI_INT_TREND, CSI_CNT_TREND_E);
@@ -312,7 +312,7 @@ static inline int rzv2m_csi_wait_for_rx_ready(struct rzv2m_csi_priv *csi)
 {
 	int ret;
 
-	if (readl(csi->base + CSI_IFIFOL) == csi->bytes_to_transfer)
+	if (pete_readl("drivers/spi/spi-rzv2m-csi.c:315", csi->base + CSI_IFIFOL) == csi->bytes_to_transfer)
 		return 0;
 
 	ret = rzv2m_csi_wait_for_interrupt(csi, CSI_INT_R_TRGR,
@@ -327,7 +327,7 @@ static irqreturn_t rzv2m_csi_irq_handler(int irq, void *data)
 {
 	struct rzv2m_csi_priv *csi = data;
 
-	csi->status = readl(csi->base + CSI_INT);
+	csi->status = pete_readl("drivers/spi/spi-rzv2m-csi.c:330", csi->base + CSI_INT);
 	rzv2m_csi_disable_irqs(csi, csi->status);
 
 	if (csi->status & CSI_INT_OVERF)
@@ -392,7 +392,7 @@ static int rzv2m_csi_setup(struct spi_device *spi)
 
 	rzv2m_csi_sw_reset(csi, 0);
 
-	writel(CSI_MODE_SETUP, csi->base + CSI_MODE);
+	pete_writel("drivers/spi/spi-rzv2m-csi.c:395", CSI_MODE_SETUP, csi->base + CSI_MODE);
 
 	/* Setup clock polarity and phase timing */
 	rzv2m_csi_reg_write_bit(csi, CSI_CLKSEL, CSI_CLKSEL_MODE,
@@ -429,7 +429,7 @@ static int rzv2m_csi_pio_transfer(struct rzv2m_csi_priv *csi)
 	int ret = 0;
 
 	/* Make sure the TX FIFO is empty */
-	writel(0, csi->base + CSI_OFIFOL);
+	pete_writel("drivers/spi/spi-rzv2m-csi.c:432", 0, csi->base + CSI_OFIFOL);
 
 	csi->bytes_sent = 0;
 	csi->bytes_received = 0;
@@ -453,9 +453,9 @@ static int rzv2m_csi_pio_transfer(struct rzv2m_csi_priv *csi)
 		rzv2m_csi_enable_irqs(csi, CSI_INT_OVERF | CSI_INT_UNDER);
 
 		/* Make sure the RX FIFO is empty */
-		writel(0, csi->base + CSI_IFIFOL);
+		pete_writel("drivers/spi/spi-rzv2m-csi.c:456", 0, csi->base + CSI_IFIFOL);
 
-		writel(readl(csi->base + CSI_INT), csi->base + CSI_INT);
+		pete_writel("drivers/spi/spi-rzv2m-csi.c:458", pete_readl("drivers/spi/spi-rzv2m-csi.c:458", csi->base + CSI_INT), csi->base + CSI_INT);
 		csi->status = 0;
 
 		rzv2m_csi_start_stop_operation(csi, 1, false);

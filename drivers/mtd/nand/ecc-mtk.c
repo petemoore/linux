@@ -143,23 +143,23 @@ static irqreturn_t mtk_ecc_irq(int irq, void *id)
 	struct mtk_ecc *ecc = id;
 	u32 dec, enc;
 
-	dec = readw(ecc->regs + ecc->caps->ecc_regs[ECC_DECIRQ_STA])
+	dec = pete_readw("drivers/mtd/nand/ecc-mtk.c:146", ecc->regs + ecc->caps->ecc_regs[ECC_DECIRQ_STA])
 		    & ECC_IRQ_EN;
 	if (dec) {
-		dec = readw(ecc->regs + ecc->caps->ecc_regs[ECC_DECDONE]);
+		dec = pete_readw("drivers/mtd/nand/ecc-mtk.c:149", ecc->regs + ecc->caps->ecc_regs[ECC_DECDONE]);
 		if (dec & ecc->sectors) {
 			/*
 			 * Clear decode IRQ status once again to ensure that
 			 * there will be no extra IRQ.
 			 */
-			readw(ecc->regs + ecc->caps->ecc_regs[ECC_DECIRQ_STA]);
+			pete_readw("drivers/mtd/nand/ecc-mtk.c:155", ecc->regs + ecc->caps->ecc_regs[ECC_DECIRQ_STA]);
 			ecc->sectors = 0;
 			complete(&ecc->done);
 		} else {
 			return IRQ_HANDLED;
 		}
 	} else {
-		enc = readl(ecc->regs + ecc->caps->ecc_regs[ECC_ENCIRQ_STA])
+		enc = pete_readl("drivers/mtd/nand/ecc-mtk.c:162", ecc->regs + ecc->caps->ecc_regs[ECC_ENCIRQ_STA])
 		      & ECC_IRQ_EN;
 		if (enc)
 			complete(&ecc->done);
@@ -194,10 +194,10 @@ static int mtk_ecc_config(struct mtk_ecc *ecc, struct mtk_ecc_config *config)
 
 		reg = ecc_bit | (config->mode << ecc->caps->ecc_mode_shift);
 		reg |= (enc_sz << ECC_MS_SHIFT);
-		writel(reg, ecc->regs + ECC_ENCCNFG);
+		pete_writel("drivers/mtd/nand/ecc-mtk.c:197", reg, ecc->regs + ECC_ENCCNFG);
 
 		if (config->mode != ECC_NFI_MODE)
-			writel(lower_32_bits(config->addr),
+			pete_writel("drivers/mtd/nand/ecc-mtk.c:200", lower_32_bits(config->addr),
 			       ecc->regs + ECC_ENCDIADDR);
 
 	} else {
@@ -208,7 +208,7 @@ static int mtk_ecc_config(struct mtk_ecc *ecc, struct mtk_ecc_config *config)
 		reg = ecc_bit | (config->mode << ecc->caps->ecc_mode_shift);
 		reg |= (dec_sz << ECC_MS_SHIFT) | DEC_CNFG_CORRECT;
 		reg |= DEC_EMPTY_EN;
-		writel(reg, ecc->regs + ECC_DECCNFG);
+		pete_writel("drivers/mtd/nand/ecc-mtk.c:211", reg, ecc->regs + ECC_DECCNFG);
 
 		if (config->sectors)
 			ecc->sectors = 1 << (config->sectors - 1);
@@ -228,7 +228,7 @@ void mtk_ecc_get_stats(struct mtk_ecc *ecc, struct mtk_ecc_stats *stats,
 
 	for (i = 0; i < sectors; i++) {
 		offset = (i >> 2) << 2;
-		err = readl(ecc->regs + ECC_DECENUM0 + offset);
+		err = pete_readl("drivers/mtd/nand/ecc-mtk.c:231", ecc->regs + ECC_DECENUM0 + offset);
 		err = err >> ((i % 4) * ecc->caps->err_shift);
 		err &= ecc->caps->err_mask;
 		if (err == ecc->caps->err_mask) {
@@ -255,10 +255,10 @@ EXPORT_SYMBOL(mtk_ecc_release);
 static void mtk_ecc_hw_init(struct mtk_ecc *ecc)
 {
 	mtk_ecc_wait_idle(ecc, ECC_ENCODE);
-	writew(ECC_OP_DISABLE, ecc->regs + ECC_ENCCON);
+	pete_writew("drivers/mtd/nand/ecc-mtk.c:258", ECC_OP_DISABLE, ecc->regs + ECC_ENCCON);
 
 	mtk_ecc_wait_idle(ecc, ECC_DECODE);
-	writel(ECC_OP_DISABLE, ecc->regs + ECC_DECCON);
+	pete_writel("drivers/mtd/nand/ecc-mtk.c:261", ECC_OP_DISABLE, ecc->regs + ECC_DECCON);
 }
 
 static struct mtk_ecc *mtk_ecc_get(struct device_node *np)
@@ -331,14 +331,14 @@ int mtk_ecc_enable(struct mtk_ecc *ecc, struct mtk_ecc_config *config)
 		if (ecc->caps->pg_irq_sel && config->mode == ECC_NFI_MODE)
 			reg_val |= ECC_PG_IRQ_SEL;
 		if (op == ECC_ENCODE)
-			writew(reg_val, ecc->regs +
+			pete_writew("drivers/mtd/nand/ecc-mtk.c:334", reg_val, ecc->regs +
 			       ecc->caps->ecc_regs[ECC_ENCIRQ_EN]);
 		else
-			writew(reg_val, ecc->regs +
+			pete_writew("drivers/mtd/nand/ecc-mtk.c:337", reg_val, ecc->regs +
 			       ecc->caps->ecc_regs[ECC_DECIRQ_EN]);
 	}
 
-	writew(ECC_OP_ENABLE, ecc->regs + ECC_CTL_REG(op));
+	pete_writew("drivers/mtd/nand/ecc-mtk.c:341", ECC_OP_ENABLE, ecc->regs + ECC_CTL_REG(op));
 
 	return 0;
 }
@@ -349,7 +349,7 @@ void mtk_ecc_disable(struct mtk_ecc *ecc)
 	enum mtk_ecc_operation op = ECC_ENCODE;
 
 	/* find out the running operation */
-	if (readw(ecc->regs + ECC_CTL_REG(op)) != ECC_OP_ENABLE)
+	if (pete_readw("drivers/mtd/nand/ecc-mtk.c:352", ecc->regs + ECC_CTL_REG(op)) != ECC_OP_ENABLE)
 		op = ECC_DECODE;
 
 	/* disable it */
@@ -359,13 +359,13 @@ void mtk_ecc_disable(struct mtk_ecc *ecc)
 		 * Clear decode IRQ status in case there is a timeout to wait
 		 * decode IRQ.
 		 */
-		readw(ecc->regs + ecc->caps->ecc_regs[ECC_DECDONE]);
-		writew(0, ecc->regs + ecc->caps->ecc_regs[ECC_DECIRQ_EN]);
+		pete_readw("drivers/mtd/nand/ecc-mtk.c:362", ecc->regs + ecc->caps->ecc_regs[ECC_DECDONE]);
+		pete_writew("drivers/mtd/nand/ecc-mtk.c:363", 0, ecc->regs + ecc->caps->ecc_regs[ECC_DECIRQ_EN]);
 	} else {
-		writew(0, ecc->regs + ecc->caps->ecc_regs[ECC_ENCIRQ_EN]);
+		pete_writew("drivers/mtd/nand/ecc-mtk.c:365", 0, ecc->regs + ecc->caps->ecc_regs[ECC_ENCIRQ_EN]);
 	}
 
-	writew(ECC_OP_DISABLE, ecc->regs + ECC_CTL_REG(op));
+	pete_writew("drivers/mtd/nand/ecc-mtk.c:368", ECC_OP_DISABLE, ecc->regs + ECC_CTL_REG(op));
 
 	mutex_unlock(&ecc->lock);
 }

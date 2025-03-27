@@ -525,10 +525,10 @@ int fun_rxq_napi_poll(struct napi_struct *napi, int budget)
 		q->stats.rx_bufs += q->rq_cons - q->rq_cons_db;
 		u64_stats_update_end(&q->syncp);
 		q->rq_cons_db = q->rq_cons;
-		writel((q->rq_cons - 1) & q->rq_mask, q->rq_db);
+		pete_writel("drivers/net/ethernet/fungible/funeth/funeth_rx.c:528", (q->rq_cons - 1) & q->rq_mask, q->rq_db);
 	}
 
-	writel(cq_db_val, q->cq_db);
+	pete_writel("drivers/net/ethernet/fungible/funeth/funeth_rx.c:531", cq_db_val, q->cq_db);
 	return work_done;
 }
 
@@ -742,7 +742,7 @@ int fun_rxq_create_dev(struct funeth_rxq *q, struct fun_irq *irq)
 		goto free_rq;
 
 	irq->rxq = q;
-	writel(q->rq_mask, q->rq_db);
+	pete_writel("drivers/net/ethernet/fungible/funeth/funeth_rx.c:745", q->rq_mask, q->rq_db);
 	q->init_state = FUN_QSTATE_INIT_FULL;
 
 	netif_info(fp, ifup, q->netdev,

@@ -312,33 +312,33 @@ struct rcar_dmac_of_data {
 static void rcar_dmac_write(struct rcar_dmac *dmac, u32 reg, u32 data)
 {
 	if (reg == RCAR_DMAOR)
-		writew(data, dmac->dmac_base + reg);
+		pete_writew("drivers/dma/sh/rcar-dmac.c:315", data, dmac->dmac_base + reg);
 	else
-		writel(data, dmac->dmac_base + reg);
+		pete_writel("drivers/dma/sh/rcar-dmac.c:317", data, dmac->dmac_base + reg);
 }
 
 static u32 rcar_dmac_read(struct rcar_dmac *dmac, u32 reg)
 {
 	if (reg == RCAR_DMAOR)
-		return readw(dmac->dmac_base + reg);
+		return pete_readw("drivers/dma/sh/rcar-dmac.c:323", dmac->dmac_base + reg);
 	else
-		return readl(dmac->dmac_base + reg);
+		return pete_readl("drivers/dma/sh/rcar-dmac.c:325", dmac->dmac_base + reg);
 }
 
 static u32 rcar_dmac_chan_read(struct rcar_dmac_chan *chan, u32 reg)
 {
 	if (reg == RCAR_DMARS)
-		return readw(chan->iomem + reg);
+		return pete_readw("drivers/dma/sh/rcar-dmac.c:331", chan->iomem + reg);
 	else
-		return readl(chan->iomem + reg);
+		return pete_readl("drivers/dma/sh/rcar-dmac.c:333", chan->iomem + reg);
 }
 
 static void rcar_dmac_chan_write(struct rcar_dmac_chan *chan, u32 reg, u32 data)
 {
 	if (reg == RCAR_DMARS)
-		writew(data, chan->iomem + reg);
+		pete_writew("drivers/dma/sh/rcar-dmac.c:339", data, chan->iomem + reg);
 	else
-		writel(data, chan->iomem + reg);
+		pete_writel("drivers/dma/sh/rcar-dmac.c:341", data, chan->iomem + reg);
 }
 
 static void rcar_dmac_chan_clear(struct rcar_dmac *dmac,

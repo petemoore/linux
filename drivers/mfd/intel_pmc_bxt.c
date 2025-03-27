@@ -86,7 +86,7 @@ int intel_pmc_gcr_read64(struct intel_pmc_dev *pmc, u32 offset, u64 *data)
 		return -EINVAL;
 
 	spin_lock(&pmc->gcr_lock);
-	*data = readq(pmc->gcr_mem_base + offset);
+	*data = pete_readq("drivers/mfd/intel_pmc_bxt.c:89", pmc->gcr_mem_base + offset);
 	spin_unlock(&pmc->gcr_lock);
 
 	return 0;
@@ -113,12 +113,12 @@ int intel_pmc_gcr_update(struct intel_pmc_dev *pmc, u32 offset, u32 mask, u32 va
 		return -EINVAL;
 
 	spin_lock(&pmc->gcr_lock);
-	new_val = readl(pmc->gcr_mem_base + offset);
+	new_val = pete_readl("drivers/mfd/intel_pmc_bxt.c:116", pmc->gcr_mem_base + offset);
 
 	new_val = (new_val & ~mask) | (val & mask);
-	writel(new_val, pmc->gcr_mem_base + offset);
+	pete_writel("drivers/mfd/intel_pmc_bxt.c:119", new_val, pmc->gcr_mem_base + offset);
 
-	new_val = readl(pmc->gcr_mem_base + offset);
+	new_val = pete_readl("drivers/mfd/intel_pmc_bxt.c:121", pmc->gcr_mem_base + offset);
 	spin_unlock(&pmc->gcr_lock);
 
 	/* Check whether the bit update is successful */
@@ -141,8 +141,8 @@ int intel_pmc_s0ix_counter_read(struct intel_pmc_dev *pmc, u64 *data)
 	u64 deep, shlw;
 
 	spin_lock(&pmc->gcr_lock);
-	deep = readq(pmc->gcr_mem_base + PMC_GCR_TELEM_DEEP_S0IX_REG);
-	shlw = readq(pmc->gcr_mem_base + PMC_GCR_TELEM_SHLW_S0IX_REG);
+	deep = pete_readq("drivers/mfd/intel_pmc_bxt.c:144", pmc->gcr_mem_base + PMC_GCR_TELEM_DEEP_S0IX_REG);
+	shlw = pete_readq("drivers/mfd/intel_pmc_bxt.c:145", pmc->gcr_mem_base + PMC_GCR_TELEM_SHLW_S0IX_REG);
 	spin_unlock(&pmc->gcr_lock);
 
 	*data = S0IX_RESIDENCY_IN_USECS(deep, shlw);

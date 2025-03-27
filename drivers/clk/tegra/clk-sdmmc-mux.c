@@ -79,7 +79,7 @@ static int clk_sdmmc_mux_set_parent(struct clk_hw *hw, u8 index)
 	val &= ~MUX_MASK;
 	val |= index << MUX_SHIFT;
 
-	writel(val, sdmmc_mux->reg);
+	pete_writel("drivers/clk/tegra/clk-sdmmc-mux.c:82", val, sdmmc_mux->reg);
 
 	return 0;
 }
@@ -154,7 +154,7 @@ static int clk_sdmmc_mux_set_rate(struct clk_hw *hw, unsigned long rate,
 
 	val = src << MUX_SHIFT;
 	val |= div;
-	writel(val, sdmmc_mux->reg);
+	pete_writel("drivers/clk/tegra/clk-sdmmc-mux.c:157", val, sdmmc_mux->reg);
 	fence_udelay(2, sdmmc_mux->reg);
 
 	if (sdmmc_mux->lock)

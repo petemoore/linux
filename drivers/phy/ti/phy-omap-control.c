@@ -42,11 +42,11 @@ void omap_control_pcie_pcs(struct device *dev, u8 delay)
 		return;
 	}
 
-	val = readl(control_phy->pcie_pcs);
+	val = pete_readl("drivers/phy/ti/phy-omap-control.c:45", control_phy->pcie_pcs);
 	val &= ~(OMAP_CTRL_PCIE_PCS_MASK <<
 		OMAP_CTRL_PCIE_PCS_DELAY_COUNT_SHIFT);
 	val |= (delay << OMAP_CTRL_PCIE_PCS_DELAY_COUNT_SHIFT);
-	writel(val, control_phy->pcie_pcs);
+	pete_writel("drivers/phy/ti/phy-omap-control.c:49", val, control_phy->pcie_pcs);
 }
 EXPORT_SYMBOL_GPL(omap_control_pcie_pcs);
 
@@ -75,7 +75,7 @@ void omap_control_phy_power(struct device *dev, int on)
 	if (control_phy->type == OMAP_CTRL_TYPE_OTGHS)
 		return;
 
-	val = readl(control_phy->power);
+	val = pete_readl("drivers/phy/ti/phy-omap-control.c:78", control_phy->power);
 
 	switch (control_phy->type) {
 	case OMAP_CTRL_TYPE_USB2:
@@ -130,7 +130,7 @@ void omap_control_phy_power(struct device *dev, int on)
 		break;
 	}
 
-	writel(val, control_phy->power);
+	pete_writel("drivers/phy/ti/phy-omap-control.c:133", val, control_phy->power);
 }
 EXPORT_SYMBOL_GPL(omap_control_phy_power);
 
@@ -145,10 +145,10 @@ static void omap_control_usb_host_mode(struct omap_control_phy *ctrl_phy)
 {
 	u32 val;
 
-	val = readl(ctrl_phy->otghs_control);
+	val = pete_readl("drivers/phy/ti/phy-omap-control.c:148", ctrl_phy->otghs_control);
 	val &= ~(OMAP_CTRL_DEV_IDDIG | OMAP_CTRL_DEV_SESSEND);
 	val |= OMAP_CTRL_DEV_AVALID | OMAP_CTRL_DEV_VBUSVALID;
-	writel(val, ctrl_phy->otghs_control);
+	pete_writel("drivers/phy/ti/phy-omap-control.c:151", val, ctrl_phy->otghs_control);
 }
 
 /**
@@ -163,11 +163,11 @@ static void omap_control_usb_device_mode(struct omap_control_phy *ctrl_phy)
 {
 	u32 val;
 
-	val = readl(ctrl_phy->otghs_control);
+	val = pete_readl("drivers/phy/ti/phy-omap-control.c:166", ctrl_phy->otghs_control);
 	val &= ~OMAP_CTRL_DEV_SESSEND;
 	val |= OMAP_CTRL_DEV_IDDIG | OMAP_CTRL_DEV_AVALID |
 		OMAP_CTRL_DEV_VBUSVALID;
-	writel(val, ctrl_phy->otghs_control);
+	pete_writel("drivers/phy/ti/phy-omap-control.c:170", val, ctrl_phy->otghs_control);
 }
 
 /**
@@ -182,10 +182,10 @@ static void omap_control_usb_set_sessionend(struct omap_control_phy *ctrl_phy)
 {
 	u32 val;
 
-	val = readl(ctrl_phy->otghs_control);
+	val = pete_readl("drivers/phy/ti/phy-omap-control.c:185", ctrl_phy->otghs_control);
 	val &= ~(OMAP_CTRL_DEV_AVALID | OMAP_CTRL_DEV_VBUSVALID);
 	val |= OMAP_CTRL_DEV_IDDIG | OMAP_CTRL_DEV_SESSEND;
-	writel(val, ctrl_phy->otghs_control);
+	pete_writel("drivers/phy/ti/phy-omap-control.c:188", val, ctrl_phy->otghs_control);
 }
 
 /**

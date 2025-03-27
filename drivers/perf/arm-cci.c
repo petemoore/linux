@@ -668,7 +668,7 @@ static void __cci_pmu_enable_nosync(struct cci_pmu *cci_pmu)
 
 	/* Enable all the PMU counters. */
 	val = readl_relaxed(cci_pmu->ctrl_base + CCI_PMCR) | CCI_PMCR_CEN;
-	writel(val, cci_pmu->ctrl_base + CCI_PMCR);
+	pete_writel("drivers/perf/arm-cci.c:671", val, cci_pmu->ctrl_base + CCI_PMCR);
 }
 
 /* Should be called with cci_pmu->hw_events->pmu_lock held */
@@ -685,7 +685,7 @@ static void __cci_pmu_disable(struct cci_pmu *cci_pmu)
 
 	/* Disable all the PMU counters. */
 	val = readl_relaxed(cci_pmu->ctrl_base + CCI_PMCR) & ~CCI_PMCR_CEN;
-	writel(val, cci_pmu->ctrl_base + CCI_PMCR);
+	pete_writel("drivers/perf/arm-cci.c:688", val, cci_pmu->ctrl_base + CCI_PMCR);
 }
 
 static ssize_t cci_pmu_format_show(struct device *dev,

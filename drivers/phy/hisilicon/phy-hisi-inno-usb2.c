@@ -72,16 +72,16 @@ static void hisi_inno_phy_write_reg(struct hisi_inno_phy_priv *priv,
 		      ((addr << PHY_TEST_ADDR_OFFSET) & PHY1_TEST_ADDR) |
 		      ((port << PHY1_TEST_PORT_OFFSET) & PHY1_TEST_PORT) |
 		      PHY1_TEST_WREN | PHY1_TEST_RST;
-	writel(val, reg);
+	pete_writel("drivers/phy/hisilicon/phy-hisi-inno-usb2.c:75", val, reg);
 
 	value = val;
 	if (priv->type == PHY_TYPE_0)
 		value |= PHY0_TEST_CLK;
 	else
 		value |= PHY1_TEST_CLK;
-	writel(value, reg);
+	pete_writel("drivers/phy/hisilicon/phy-hisi-inno-usb2.c:82", value, reg);
 
-	writel(val, reg);
+	pete_writel("drivers/phy/hisilicon/phy-hisi-inno-usb2.c:84", val, reg);
 }
 
 static void hisi_inno_phy_setup(struct hisi_inno_phy_priv *priv)

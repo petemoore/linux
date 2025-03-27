@@ -60,7 +60,7 @@ static inline struct nvdec *to_nvdec(struct tegra_drm_client *client)
 static inline void nvdec_writel(struct nvdec *nvdec, u32 value,
 				unsigned int offset)
 {
-	writel(value, nvdec->regs + offset);
+	pete_writel("drivers/gpu/drm/tegra/nvdec.c:63", value, nvdec->regs + offset);
 }
 
 static int nvdec_boot_falcon(struct nvdec *nvdec)

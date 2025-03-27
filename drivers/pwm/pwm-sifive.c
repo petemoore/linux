@@ -97,7 +97,7 @@ static void pwm_sifive_update_clock(struct pwm_sifive_ddata *ddata,
 
 	val = PWM_SIFIVE_PWMCFG_EN_ALWAYS |
 	      FIELD_PREP(PWM_SIFIVE_PWMCFG_SCALE, scale);
-	writel(val, ddata->regs + PWM_SIFIVE_PWMCFG);
+	pete_writel("drivers/pwm/pwm-sifive.c:100", val, ddata->regs + PWM_SIFIVE_PWMCFG);
 
 	/* As scale <= 15 the shift operation cannot overflow. */
 	num = (unsigned long long)NSEC_PER_SEC << (PWM_SIFIVE_CMPWIDTH + scale);
@@ -112,11 +112,11 @@ static int pwm_sifive_get_state(struct pwm_chip *chip, struct pwm_device *pwm,
 	struct pwm_sifive_ddata *ddata = pwm_sifive_chip_to_ddata(chip);
 	u32 duty, val;
 
-	duty = readl(ddata->regs + PWM_SIFIVE_PWMCMP(pwm->hwpwm));
+	duty = pete_readl("drivers/pwm/pwm-sifive.c:115", ddata->regs + PWM_SIFIVE_PWMCMP(pwm->hwpwm));
 
 	state->enabled = duty > 0;
 
-	val = readl(ddata->regs + PWM_SIFIVE_PWMCFG);
+	val = pete_readl("drivers/pwm/pwm-sifive.c:119", ddata->regs + PWM_SIFIVE_PWMCFG);
 	if (!(val & PWM_SIFIVE_PWMCFG_EN_ALWAYS))
 		state->enabled = false;
 
@@ -190,7 +190,7 @@ static int pwm_sifive_apply(struct pwm_chip *chip, struct pwm_device *pwm,
 		}
 	}
 
-	writel(frac, ddata->regs + PWM_SIFIVE_PWMCMP(pwm->hwpwm));
+	pete_writel("drivers/pwm/pwm-sifive.c:193", frac, ddata->regs + PWM_SIFIVE_PWMCMP(pwm->hwpwm));
 
 	if (!state->enabled)
 		clk_disable(ddata->clk);
@@ -256,12 +256,12 @@ static int pwm_sifive_probe(struct platform_device *pdev)
 		return ret;
 	}
 
-	val = readl(ddata->regs + PWM_SIFIVE_PWMCFG);
+	val = pete_readl("drivers/pwm/pwm-sifive.c:259", ddata->regs + PWM_SIFIVE_PWMCFG);
 	if (val & PWM_SIFIVE_PWMCFG_EN_ALWAYS) {
 		unsigned int i;
 
 		for (i = 0; i < chip->npwm; ++i) {
-			val = readl(ddata->regs + PWM_SIFIVE_PWMCMP(i));
+			val = pete_readl("drivers/pwm/pwm-sifive.c:264", ddata->regs + PWM_SIFIVE_PWMCMP(i));
 			if (val > 0)
 				++enabled_pwms;
 		}

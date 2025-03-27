@@ -29,12 +29,12 @@
 
 static void mvneta_bm_write(struct mvneta_bm *priv, u32 offset, u32 data)
 {
-	writel(data, priv->reg_base + offset);
+	pete_writel("drivers/net/ethernet/marvell/mvneta_bm.c:32", data, priv->reg_base + offset);
 }
 
 static u32 mvneta_bm_read(struct mvneta_bm *priv, u32 offset)
 {
-	return readl(priv->reg_base + offset);
+	return pete_readl("drivers/net/ethernet/marvell/mvneta_bm.c:37", priv->reg_base + offset);
 }
 
 static void mvneta_bm_pool_enable(struct mvneta_bm *priv, int pool_id)

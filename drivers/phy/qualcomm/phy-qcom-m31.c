@@ -184,14 +184,14 @@ static int m31usb_phy_init(struct phy *phy)
 
 	/* configure for ULPI mode if requested */
 	if (qphy->ulpi_mode)
-		writel(0x0, qphy->base + USB2PHY_PORT_UTMI_CTRL2);
+		pete_writel("drivers/phy/qualcomm/phy-qcom-m31.c:187", 0x0, qphy->base + USB2PHY_PORT_UTMI_CTRL2);
 
 	/* Enable the PHY */
-	writel(POWER_UP, qphy->base + USB2PHY_PORT_POWERDOWN);
+	pete_writel("drivers/phy/qualcomm/phy-qcom-m31.c:190", POWER_UP, qphy->base + USB2PHY_PORT_POWERDOWN);
 
 	/* Turn on phy ref clock */
 	for (i = 0; i < qphy->nregs; i++) {
-		writel(regs[i].val, qphy->base + regs[i].off);
+		pete_writel("drivers/phy/qualcomm/phy-qcom-m31.c:194", regs[i].val, qphy->base + regs[i].off);
 		if (regs[i].delay)
 			udelay(regs[i].delay);
 	}

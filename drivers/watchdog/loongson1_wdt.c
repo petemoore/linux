@@ -34,7 +34,7 @@ static int ls1x_wdt_ping(struct watchdog_device *wdt_dev)
 {
 	struct ls1x_wdt_drvdata *drvdata = watchdog_get_drvdata(wdt_dev);
 
-	writel(0x1, drvdata->base + WDT_SET);
+	pete_writel("drivers/watchdog/loongson1_wdt.c:37", 0x1, drvdata->base + WDT_SET);
 
 	return 0;
 }
@@ -49,7 +49,7 @@ static int ls1x_wdt_set_timeout(struct watchdog_device *wdt_dev,
 	wdt_dev->timeout = timeout;
 
 	counts = drvdata->clk_rate * min(timeout, max_hw_heartbeat);
-	writel(counts, drvdata->base + WDT_TIMER);
+	pete_writel("drivers/watchdog/loongson1_wdt.c:52", counts, drvdata->base + WDT_TIMER);
 
 	return 0;
 }
@@ -58,7 +58,7 @@ static int ls1x_wdt_start(struct watchdog_device *wdt_dev)
 {
 	struct ls1x_wdt_drvdata *drvdata = watchdog_get_drvdata(wdt_dev);
 
-	writel(0x1, drvdata->base + WDT_EN);
+	pete_writel("drivers/watchdog/loongson1_wdt.c:61", 0x1, drvdata->base + WDT_EN);
 
 	return 0;
 }
@@ -67,7 +67,7 @@ static int ls1x_wdt_stop(struct watchdog_device *wdt_dev)
 {
 	struct ls1x_wdt_drvdata *drvdata = watchdog_get_drvdata(wdt_dev);
 
-	writel(0x0, drvdata->base + WDT_EN);
+	pete_writel("drivers/watchdog/loongson1_wdt.c:70", 0x0, drvdata->base + WDT_EN);
 
 	return 0;
 }
@@ -77,9 +77,9 @@ static int ls1x_wdt_restart(struct watchdog_device *wdt_dev,
 {
 	struct ls1x_wdt_drvdata *drvdata = watchdog_get_drvdata(wdt_dev);
 
-	writel(0x1, drvdata->base + WDT_EN);
-	writel(0x1, drvdata->base + WDT_TIMER);
-	writel(0x1, drvdata->base + WDT_SET);
+	pete_writel("drivers/watchdog/loongson1_wdt.c:80", 0x1, drvdata->base + WDT_EN);
+	pete_writel("drivers/watchdog/loongson1_wdt.c:81", 0x1, drvdata->base + WDT_TIMER);
+	pete_writel("drivers/watchdog/loongson1_wdt.c:82", 0x1, drvdata->base + WDT_SET);
 
 	return 0;
 }

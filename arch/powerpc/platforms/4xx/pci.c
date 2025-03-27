@@ -242,10 +242,10 @@ static int __init ppc4xx_setup_one_pci_PMM(struct pci_controller	*hose,
 	pciha = RES_TO_U32_HIGH(pci_addr);
 	pcila = RES_TO_U32_LOW(pci_addr);
 
-	writel(plb_addr, reg + PCIL0_PMM0LA + (0x10 * index));
-	writel(pcila, reg + PCIL0_PMM0PCILA + (0x10 * index));
-	writel(pciha, reg + PCIL0_PMM0PCIHA + (0x10 * index));
-	writel(ma, reg + PCIL0_PMM0MA + (0x10 * index));
+	pete_writel("arch/powerpc/platforms/4xx/pci.c:245", plb_addr, reg + PCIL0_PMM0LA + (0x10 * index));
+	pete_writel("arch/powerpc/platforms/4xx/pci.c:246", pcila, reg + PCIL0_PMM0PCILA + (0x10 * index));
+	pete_writel("arch/powerpc/platforms/4xx/pci.c:247", pciha, reg + PCIL0_PMM0PCIHA + (0x10 * index));
+	pete_writel("arch/powerpc/platforms/4xx/pci.c:248", ma, reg + PCIL0_PMM0MA + (0x10 * index));
 
 	return 0;
 }
@@ -305,8 +305,8 @@ static void __init ppc4xx_configure_pci_PTMs(struct pci_controller *hose,
 	sa |= 0x1;
 
 	/* RAM is always at 0 local for now */
-	writel(0, reg + PCIL0_PTM1LA);
-	writel(sa, reg + PCIL0_PTM1MS);
+	pete_writel("arch/powerpc/platforms/4xx/pci.c:308", 0, reg + PCIL0_PTM1LA);
+	pete_writel("arch/powerpc/platforms/4xx/pci.c:309", sa, reg + PCIL0_PTM1MS);
 
 	/* Map on PCI side */
 	early_write_config_dword(hose, hose->first_busno, 0,
@@ -373,11 +373,11 @@ static void __init ppc4xx_probe_pci_bridge(struct device_node *np)
 	setup_indirect_pci(hose, rsrc_cfg.start, rsrc_cfg.start + 0x4, 0);
 
 	/* Disable all windows */
-	writel(0, reg + PCIL0_PMM0MA);
-	writel(0, reg + PCIL0_PMM1MA);
-	writel(0, reg + PCIL0_PMM2MA);
-	writel(0, reg + PCIL0_PTM1MS);
-	writel(0, reg + PCIL0_PTM2MS);
+	pete_writel("arch/powerpc/platforms/4xx/pci.c:376", 0, reg + PCIL0_PMM0MA);
+	pete_writel("arch/powerpc/platforms/4xx/pci.c:377", 0, reg + PCIL0_PMM1MA);
+	pete_writel("arch/powerpc/platforms/4xx/pci.c:378", 0, reg + PCIL0_PMM2MA);
+	pete_writel("arch/powerpc/platforms/4xx/pci.c:379", 0, reg + PCIL0_PTM1MS);
+	pete_writel("arch/powerpc/platforms/4xx/pci.c:380", 0, reg + PCIL0_PTM2MS);
 
 	/* Parse outbound mapping resources */
 	pci_process_bridge_OF_ranges(hose, np, primary);
@@ -433,17 +433,17 @@ static int __init ppc4xx_setup_one_pcix_POM(struct pci_controller	*hose,
 
 	/* Program register values */
 	if (index == 0) {
-		writel(lah, reg + PCIX0_POM0LAH);
-		writel(lal, reg + PCIX0_POM0LAL);
-		writel(pciah, reg + PCIX0_POM0PCIAH);
-		writel(pcial, reg + PCIX0_POM0PCIAL);
-		writel(sa, reg + PCIX0_POM0SA);
+		pete_writel("arch/powerpc/platforms/4xx/pci.c:436", lah, reg + PCIX0_POM0LAH);
+		pete_writel("arch/powerpc/platforms/4xx/pci.c:437", lal, reg + PCIX0_POM0LAL);
+		pete_writel("arch/powerpc/platforms/4xx/pci.c:438", pciah, reg + PCIX0_POM0PCIAH);
+		pete_writel("arch/powerpc/platforms/4xx/pci.c:439", pcial, reg + PCIX0_POM0PCIAL);
+		pete_writel("arch/powerpc/platforms/4xx/pci.c:440", sa, reg + PCIX0_POM0SA);
 	} else {
-		writel(lah, reg + PCIX0_POM1LAH);
-		writel(lal, reg + PCIX0_POM1LAL);
-		writel(pciah, reg + PCIX0_POM1PCIAH);
-		writel(pcial, reg + PCIX0_POM1PCIAL);
-		writel(sa, reg + PCIX0_POM1SA);
+		pete_writel("arch/powerpc/platforms/4xx/pci.c:442", lah, reg + PCIX0_POM1LAH);
+		pete_writel("arch/powerpc/platforms/4xx/pci.c:443", lal, reg + PCIX0_POM1LAL);
+		pete_writel("arch/powerpc/platforms/4xx/pci.c:444", pciah, reg + PCIX0_POM1PCIAH);
+		pete_writel("arch/powerpc/platforms/4xx/pci.c:445", pcial, reg + PCIX0_POM1PCIAL);
+		pete_writel("arch/powerpc/platforms/4xx/pci.c:446", sa, reg + PCIX0_POM1SA);
 	}
 
 	return 0;
@@ -502,8 +502,8 @@ static void __init ppc4xx_configure_pcix_PIMs(struct pci_controller *hose,
 	u32 sa;
 
 	/* RAM is always at 0 */
-	writel(0x00000000, reg + PCIX0_PIM0LAH);
-	writel(0x00000000, reg + PCIX0_PIM0LAL);
+	pete_writel("arch/powerpc/platforms/4xx/pci.c:505", 0x00000000, reg + PCIX0_PIM0LAH);
+	pete_writel("arch/powerpc/platforms/4xx/pci.c:506", 0x00000000, reg + PCIX0_PIM0LAL);
 
 	/* Calculate window size */
 	sa = (0xffffffffu << ilog2(size)) | 1;
@@ -512,14 +512,14 @@ static void __init ppc4xx_configure_pcix_PIMs(struct pci_controller *hose,
 		sa |= 0x2;
 	if (enable_msi_hole)
 		sa |= 0x4;
-	writel(sa, reg + PCIX0_PIM0SA);
+	pete_writel("arch/powerpc/platforms/4xx/pci.c:515", sa, reg + PCIX0_PIM0SA);
 	if (big_pim)
-		writel(0xffffffff, reg + PCIX0_PIM0SAH);
+		pete_writel("arch/powerpc/platforms/4xx/pci.c:517", 0xffffffff, reg + PCIX0_PIM0SAH);
 
 	/* Map on PCI side */
-	writel(0x00000000, reg + PCIX0_BAR0H);
-	writel(res->start, reg + PCIX0_BAR0L);
-	writew(0x0006, reg + PCIX0_COMMAND);
+	pete_writel("arch/powerpc/platforms/4xx/pci.c:520", 0x00000000, reg + PCIX0_BAR0H);
+	pete_writel("arch/powerpc/platforms/4xx/pci.c:521", res->start, reg + PCIX0_BAR0L);
+	pete_writew("arch/powerpc/platforms/4xx/pci.c:522", 0x0006, reg + PCIX0_COMMAND);
 }
 
 static void __init ppc4xx_probe_pcix_bridge(struct device_node *np)
@@ -577,15 +577,15 @@ static void __init ppc4xx_probe_pcix_bridge(struct device_node *np)
 					PPC_INDIRECT_TYPE_SET_CFG_TYPE);
 
 	/* Disable all windows */
-	writel(0, reg + PCIX0_POM0SA);
-	writel(0, reg + PCIX0_POM1SA);
-	writel(0, reg + PCIX0_POM2SA);
-	writel(0, reg + PCIX0_PIM0SA);
-	writel(0, reg + PCIX0_PIM1SA);
-	writel(0, reg + PCIX0_PIM2SA);
+	pete_writel("arch/powerpc/platforms/4xx/pci.c:580", 0, reg + PCIX0_POM0SA);
+	pete_writel("arch/powerpc/platforms/4xx/pci.c:581", 0, reg + PCIX0_POM1SA);
+	pete_writel("arch/powerpc/platforms/4xx/pci.c:582", 0, reg + PCIX0_POM2SA);
+	pete_writel("arch/powerpc/platforms/4xx/pci.c:583", 0, reg + PCIX0_PIM0SA);
+	pete_writel("arch/powerpc/platforms/4xx/pci.c:584", 0, reg + PCIX0_PIM1SA);
+	pete_writel("arch/powerpc/platforms/4xx/pci.c:585", 0, reg + PCIX0_PIM2SA);
 	if (big_pim) {
-		writel(0, reg + PCIX0_PIM0SAH);
-		writel(0, reg + PCIX0_PIM2SAH);
+		pete_writel("arch/powerpc/platforms/4xx/pci.c:587", 0, reg + PCIX0_PIM0SAH);
+		pete_writel("arch/powerpc/platforms/4xx/pci.c:588", 0, reg + PCIX0_PIM2SAH);
 	}
 
 	/* Parse outbound mapping resources */

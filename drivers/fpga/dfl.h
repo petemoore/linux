@@ -450,7 +450,7 @@ struct device *dfl_fpga_pdata_to_parent(struct dfl_feature_platform_data *pdata)
 
 static inline bool dfl_feature_is_fme(void __iomem *base)
 {
-	u64 v = readq(base + DFH);
+	u64 v = pete_readq("drivers/fpga/dfl.h:453", base + DFH);
 
 	return (FIELD_GET(DFH_TYPE, v) == DFH_TYPE_FIU) &&
 		(FIELD_GET(DFH_ID, v) == DFH_ID_FIU_FME);
@@ -458,7 +458,7 @@ static inline bool dfl_feature_is_fme(void __iomem *base)
 
 static inline bool dfl_feature_is_port(void __iomem *base)
 {
-	u64 v = readq(base + DFH);
+	u64 v = pete_readq("drivers/fpga/dfl.h:461", base + DFH);
 
 	return (FIELD_GET(DFH_TYPE, v) == DFH_TYPE_FIU) &&
 		(FIELD_GET(DFH_ID, v) == DFH_ID_FIU_PORT);
@@ -466,7 +466,7 @@ static inline bool dfl_feature_is_port(void __iomem *base)
 
 static inline u8 dfl_feature_revision(void __iomem *base)
 {
-	return (u8)FIELD_GET(DFH_REVISION, readq(base + DFH));
+	return (u8)FIELD_GET(DFH_REVISION, pete_readq("drivers/fpga/dfl.h:469", base + DFH));
 }
 
 /**

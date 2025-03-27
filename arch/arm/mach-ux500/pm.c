@@ -44,14 +44,14 @@ static void __iomem *dist_base;
 /* This function decouple the gic from the prcmu */
 int prcmu_gic_decouple(void)
 {
-	u32 val = readl(PRCM_A9_MASK_REQ);
+	u32 val = pete_readl("arch/arm/mach-ux500/pm.c:47", PRCM_A9_MASK_REQ);
 
 	/* Set bit 0 register value to 1 */
-	writel(val | PRCM_A9_MASK_REQ_PRCM_A9_MASK_REQ,
+	pete_writel("arch/arm/mach-ux500/pm.c:50", val | PRCM_A9_MASK_REQ_PRCM_A9_MASK_REQ,
 	       PRCM_A9_MASK_REQ);
 
 	/* Make sure the register is updated */
-	readl(PRCM_A9_MASK_REQ);
+	pete_readl("arch/arm/mach-ux500/pm.c:54", PRCM_A9_MASK_REQ);
 
 	/* Wait a few cycles for the gic mask completion */
 	udelay(1);
@@ -62,10 +62,10 @@ int prcmu_gic_decouple(void)
 /* This function recouple the gic with the prcmu */
 int prcmu_gic_recouple(void)
 {
-	u32 val = readl(PRCM_A9_MASK_REQ);
+	u32 val = pete_readl("arch/arm/mach-ux500/pm.c:65", PRCM_A9_MASK_REQ);
 
 	/* Set bit 0 register value to 0 */
-	writel(val & ~PRCM_A9_MASK_REQ_PRCM_A9_MASK_REQ, PRCM_A9_MASK_REQ);
+	pete_writel("arch/arm/mach-ux500/pm.c:68", val & ~PRCM_A9_MASK_REQ_PRCM_A9_MASK_REQ, PRCM_A9_MASK_REQ);
 
 	return 0;
 }
@@ -112,8 +112,8 @@ bool prcmu_pending_irq(void)
 	int i;
 
 	for (i = 0; i < PRCMU_GIC_NUMBER_REGS - 1; i++) {
-		it = readl(PRCM_ARMITVAL31TO0 + i * 4);
-		im = readl(PRCM_ARMITMSK31TO0 + i * 4);
+		it = pete_readl("arch/arm/mach-ux500/pm.c:115", PRCM_ARMITVAL31TO0 + i * 4);
+		im = pete_readl("arch/arm/mach-ux500/pm.c:116", PRCM_ARMITMSK31TO0 + i * 4);
 		if (it & im)
 			return true; /* There is a pending interrupt */
 	}
@@ -129,7 +129,7 @@ bool prcmu_pending_irq(void)
  */
 bool prcmu_is_cpu_in_wfi(int cpu)
 {
-	return readl(PRCM_ARM_WFI_STANDBY) &
+	return pete_readl("arch/arm/mach-ux500/pm.c:132", PRCM_ARM_WFI_STANDBY) &
 		(cpu ? PRCM_ARM_WFI_STANDBY_WFI1 : PRCM_ARM_WFI_STANDBY_WFI0);
 }
 
@@ -146,7 +146,7 @@ int prcmu_copy_gic_settings(void)
 	for (i = 0; i < PRCMU_GIC_NUMBER_REGS - 1; i++) {
 		er = readl_relaxed(dist_base +
 				   GIC_DIST_ENABLE_SET + (i + 1) * 4);
-		writel(er, PRCM_ARMITMSK31TO0 + i * 4);
+		pete_writel("arch/arm/mach-ux500/pm.c:149", er, PRCM_ARMITMSK31TO0 + i * 4);
 	}
 
 	return 0;

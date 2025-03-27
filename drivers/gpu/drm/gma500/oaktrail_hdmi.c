@@ -36,8 +36,8 @@
 #include "psb_intel_drv.h"
 #include "psb_intel_reg.h"
 
-#define HDMI_READ(reg)		readl(hdmi_dev->regs + (reg))
-#define HDMI_WRITE(reg, val)	writel(val, hdmi_dev->regs + (reg))
+#define HDMI_READ(reg)		pete_readl("drivers/gpu/drm/gma500/oaktrail_hdmi.c:39", hdmi_dev->regs + (reg))
+#define HDMI_WRITE(reg, val)	pete_writel("drivers/gpu/drm/gma500/oaktrail_hdmi.c:40", val, hdmi_dev->regs + (reg))
 
 #define HDMI_HCR	0x1000
 #define HCR_ENABLE_HDCP		(1 << 5)
@@ -214,10 +214,10 @@ static void scu_busy_loop(void __iomem *scu_base)
 	u32 status = 0;
 	u32 loop_count = 0;
 
-	status = readl(scu_base + 0x04);
+	status = pete_readl("drivers/gpu/drm/gma500/oaktrail_hdmi.c:217", scu_base + 0x04);
 	while (status & 1) {
 		udelay(1); /* scu processing time is in few u secods */
-		status = readl(scu_base + 0x04);
+		status = pete_readl("drivers/gpu/drm/gma500/oaktrail_hdmi.c:220", scu_base + 0x04);
 		loop_count++;
 		/* break if scu doesn't reset busy bit after huge retry */
 		if (loop_count > 1000) {
@@ -246,15 +246,15 @@ static void oaktrail_hdmi_reset(struct drm_device *dev)
 	}
 
 	/* scu ipc: assert hdmi controller reset */
-	writel(0xff11d118, base + 0x0c);
-	writel(0x7fffffdf, base + 0x80);
-	writel(0x42005, base + 0x0);
+	pete_writel("drivers/gpu/drm/gma500/oaktrail_hdmi.c:249", 0xff11d118, base + 0x0c);
+	pete_writel("drivers/gpu/drm/gma500/oaktrail_hdmi.c:250", 0x7fffffdf, base + 0x80);
+	pete_writel("drivers/gpu/drm/gma500/oaktrail_hdmi.c:251", 0x42005, base + 0x0);
 	scu_busy_loop(base);
 
 	/* scu ipc: de-assert hdmi controller reset */
-	writel(0xff11d118, base + 0x0c);
-	writel(0x7fffffff, base + 0x80);
-	writel(0x42005, base + 0x0);
+	pete_writel("drivers/gpu/drm/gma500/oaktrail_hdmi.c:255", 0xff11d118, base + 0x0c);
+	pete_writel("drivers/gpu/drm/gma500/oaktrail_hdmi.c:256", 0x7fffffff, base + 0x80);
+	pete_writel("drivers/gpu/drm/gma500/oaktrail_hdmi.c:257", 0x42005, base + 0x0);
 	scu_busy_loop(base);
 
 	iounmap(base);

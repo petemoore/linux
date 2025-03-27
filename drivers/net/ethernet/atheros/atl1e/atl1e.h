@@ -455,31 +455,31 @@ struct atl1e_adapter {
 };
 
 #define AT_WRITE_REG(a, reg, value) ( \
-		writel((value), ((a)->hw_addr + reg)))
+		pete_writel("drivers/net/ethernet/atheros/atl1e/atl1e.h:458", (value), ((a)->hw_addr + reg)))
 
 #define AT_WRITE_FLUSH(a) (\
-		readl((a)->hw_addr))
+		pete_readl("drivers/net/ethernet/atheros/atl1e/atl1e.h:461", (a)->hw_addr))
 
 #define AT_READ_REG(a, reg) ( \
-		readl((a)->hw_addr + reg))
+		pete_readl("drivers/net/ethernet/atheros/atl1e/atl1e.h:464", (a)->hw_addr + reg))
 
 #define AT_WRITE_REGB(a, reg, value) (\
-		writeb((value), ((a)->hw_addr + reg)))
+		pete_writeb("drivers/net/ethernet/atheros/atl1e/atl1e.h:467", (value), ((a)->hw_addr + reg)))
 
 #define AT_READ_REGB(a, reg) (\
-		readb((a)->hw_addr + reg))
+		pete_readb("drivers/net/ethernet/atheros/atl1e/atl1e.h:470", (a)->hw_addr + reg))
 
 #define AT_WRITE_REGW(a, reg, value) (\
-		writew((value), ((a)->hw_addr + reg)))
+		pete_writew("drivers/net/ethernet/atheros/atl1e/atl1e.h:473", (value), ((a)->hw_addr + reg)))
 
 #define AT_READ_REGW(a, reg) (\
-		readw((a)->hw_addr + reg))
+		pete_readw("drivers/net/ethernet/atheros/atl1e/atl1e.h:476", (a)->hw_addr + reg))
 
 #define AT_WRITE_REG_ARRAY(a, reg, offset, value) ( \
-		writel((value), (((a)->hw_addr + reg) + ((offset) << 2))))
+		pete_writel("drivers/net/ethernet/atheros/atl1e/atl1e.h:479", (value), (((a)->hw_addr + reg) + ((offset) << 2))))
 
 #define AT_READ_REG_ARRAY(a, reg, offset) ( \
-		readl(((a)->hw_addr + reg) + ((offset) << 2)))
+		pete_readl("drivers/net/ethernet/atheros/atl1e/atl1e.h:482", ((a)->hw_addr + reg) + ((offset) << 2)))
 
 extern char atl1e_driver_name[];
 

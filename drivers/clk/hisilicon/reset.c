@@ -53,8 +53,8 @@ static int hisi_reset_assert(struct reset_controller_dev *rcdev,
 
 	spin_lock_irqsave(&rstc->lock, flags);
 
-	reg = readl(rstc->membase + offset);
-	writel(reg | BIT(bit), rstc->membase + offset);
+	reg = pete_readl("drivers/clk/hisilicon/reset.c:56", rstc->membase + offset);
+	pete_writel("drivers/clk/hisilicon/reset.c:57", reg | BIT(bit), rstc->membase + offset);
 
 	spin_unlock_irqrestore(&rstc->lock, flags);
 
@@ -74,8 +74,8 @@ static int hisi_reset_deassert(struct reset_controller_dev *rcdev,
 
 	spin_lock_irqsave(&rstc->lock, flags);
 
-	reg = readl(rstc->membase + offset);
-	writel(reg & ~BIT(bit), rstc->membase + offset);
+	reg = pete_readl("drivers/clk/hisilicon/reset.c:77", rstc->membase + offset);
+	pete_writel("drivers/clk/hisilicon/reset.c:78", reg & ~BIT(bit), rstc->membase + offset);
 
 	spin_unlock_irqrestore(&rstc->lock, flags);
 

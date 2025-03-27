@@ -56,16 +56,16 @@ MODULE_DEVICE_TABLE(of, mtk_jpegenc_drv_ids);
 
 void mtk_jpeg_enc_reset(void __iomem *base)
 {
-	writel(0, base + JPEG_ENC_RSTB);
-	writel(JPEG_ENC_RESET_BIT, base + JPEG_ENC_RSTB);
-	writel(0, base + JPEG_ENC_CODEC_SEL);
+	pete_writel("drivers/media/platform/mediatek/jpeg/mtk_jpeg_enc_hw.c:59", 0, base + JPEG_ENC_RSTB);
+	pete_writel("drivers/media/platform/mediatek/jpeg/mtk_jpeg_enc_hw.c:60", JPEG_ENC_RESET_BIT, base + JPEG_ENC_RSTB);
+	pete_writel("drivers/media/platform/mediatek/jpeg/mtk_jpeg_enc_hw.c:61", 0, base + JPEG_ENC_CODEC_SEL);
 }
 EXPORT_SYMBOL_GPL(mtk_jpeg_enc_reset);
 
 u32 mtk_jpeg_enc_get_file_size(void __iomem *base)
 {
-	return readl(base + JPEG_ENC_DMA_ADDR0) -
-	       readl(base + JPEG_ENC_DST_ADDR0);
+	return pete_readl("drivers/media/platform/mediatek/jpeg/mtk_jpeg_enc_hw.c:67", base + JPEG_ENC_DMA_ADDR0) -
+	       pete_readl("drivers/media/platform/mediatek/jpeg/mtk_jpeg_enc_hw.c:68", base + JPEG_ENC_DST_ADDR0);
 }
 EXPORT_SYMBOL_GPL(mtk_jpeg_enc_get_file_size);
 
@@ -73,9 +73,9 @@ void mtk_jpeg_enc_start(void __iomem *base)
 {
 	u32 value;
 
-	value = readl(base + JPEG_ENC_CTRL);
+	value = pete_readl("drivers/media/platform/mediatek/jpeg/mtk_jpeg_enc_hw.c:76", base + JPEG_ENC_CTRL);
 	value |= JPEG_ENC_CTRL_INT_EN_BIT | JPEG_ENC_CTRL_ENABLE_BIT;
-	writel(value, base + JPEG_ENC_CTRL);
+	pete_writel("drivers/media/platform/mediatek/jpeg/mtk_jpeg_enc_hw.c:78", value, base + JPEG_ENC_CTRL);
 }
 EXPORT_SYMBOL_GPL(mtk_jpeg_enc_start);
 
@@ -89,9 +89,9 @@ void mtk_jpeg_set_enc_src(struct mtk_jpeg_ctx *ctx,  void __iomem *base,
 		dma_addr = vb2_dma_contig_plane_dma_addr(src_buf, i) +
 			   src_buf->planes[i].data_offset;
 		if (!i)
-			writel(dma_addr, base + JPEG_ENC_SRC_LUMA_ADDR);
+			pete_writel("drivers/media/platform/mediatek/jpeg/mtk_jpeg_enc_hw.c:92", dma_addr, base + JPEG_ENC_SRC_LUMA_ADDR);
 		else
-			writel(dma_addr, base + JPEG_ENC_SRC_CHROMA_ADDR);
+			pete_writel("drivers/media/platform/mediatek/jpeg/mtk_jpeg_enc_hw.c:94", dma_addr, base + JPEG_ENC_SRC_CHROMA_ADDR);
 	}
 }
 EXPORT_SYMBOL_GPL(mtk_jpeg_set_enc_src);
@@ -109,10 +109,10 @@ void mtk_jpeg_set_enc_dst(struct mtk_jpeg_ctx *ctx, void __iomem *base,
 	dma_addr_offsetmask = dma_addr & JPEG_ENC_DST_ADDR_OFFSET_MASK;
 	size = vb2_plane_size(dst_buf, 0);
 
-	writel(dma_addr_offset & ~0xf, base + JPEG_ENC_OFFSET_ADDR);
-	writel(dma_addr_offsetmask & 0xf, base + JPEG_ENC_BYTE_OFFSET_MASK);
-	writel(dma_addr & ~0xf, base + JPEG_ENC_DST_ADDR0);
-	writel((dma_addr + size) & ~0xf, base + JPEG_ENC_STALL_ADDR0);
+	pete_writel("drivers/media/platform/mediatek/jpeg/mtk_jpeg_enc_hw.c:112", dma_addr_offset & ~0xf, base + JPEG_ENC_OFFSET_ADDR);
+	pete_writel("drivers/media/platform/mediatek/jpeg/mtk_jpeg_enc_hw.c:113", dma_addr_offsetmask & 0xf, base + JPEG_ENC_BYTE_OFFSET_MASK);
+	pete_writel("drivers/media/platform/mediatek/jpeg/mtk_jpeg_enc_hw.c:114", dma_addr & ~0xf, base + JPEG_ENC_DST_ADDR0);
+	pete_writel("drivers/media/platform/mediatek/jpeg/mtk_jpeg_enc_hw.c:115", (dma_addr + size) & ~0xf, base + JPEG_ENC_STALL_ADDR0);
 }
 EXPORT_SYMBOL_GPL(mtk_jpeg_set_enc_dst);
 
@@ -130,7 +130,7 @@ void mtk_jpeg_set_enc_params(struct mtk_jpeg_ctx *ctx,  void __iomem *base)
 	u32 nr_enc_quality = ARRAY_SIZE(mtk_jpeg_enc_quality);
 
 	value = width << 16 | height;
-	writel(value, base + JPEG_ENC_IMG_SIZE);
+	pete_writel("drivers/media/platform/mediatek/jpeg/mtk_jpeg_enc_hw.c:133", value, base + JPEG_ENC_IMG_SIZE);
 
 	if (enc_format == V4L2_PIX_FMT_NV12M ||
 	    enc_format == V4L2_PIX_FMT_NV21M)
@@ -143,7 +143,7 @@ void mtk_jpeg_set_enc_params(struct mtk_jpeg_ctx *ctx,  void __iomem *base)
 	else
 		blk_num = DIV_ROUND_UP(width, 16) *
 			  DIV_ROUND_UP(height, 8) * 4 - 1;
-	writel(blk_num, base + JPEG_ENC_BLK_NUM);
+	pete_writel("drivers/media/platform/mediatek/jpeg/mtk_jpeg_enc_hw.c:146", blk_num, base + JPEG_ENC_BLK_NUM);
 
 	if (enc_format == V4L2_PIX_FMT_NV12M ||
 	    enc_format == V4L2_PIX_FMT_NV21M) {
@@ -155,8 +155,8 @@ void mtk_jpeg_set_enc_params(struct mtk_jpeg_ctx *ctx,  void __iomem *base)
 		img_stride = round_up(width * 2, 32);
 		mem_stride = img_stride;
 	}
-	writel(img_stride, base + JPEG_ENC_IMG_STRIDE);
-	writel(mem_stride, base + JPEG_ENC_STRIDE);
+	pete_writel("drivers/media/platform/mediatek/jpeg/mtk_jpeg_enc_hw.c:158", img_stride, base + JPEG_ENC_IMG_STRIDE);
+	pete_writel("drivers/media/platform/mediatek/jpeg/mtk_jpeg_enc_hw.c:159", mem_stride, base + JPEG_ENC_STRIDE);
 
 	enc_quality = mtk_jpeg_enc_quality[nr_enc_quality - 1].hardware_value;
 	for (i = 0; i < nr_enc_quality; i++) {
@@ -165,9 +165,9 @@ void mtk_jpeg_set_enc_params(struct mtk_jpeg_ctx *ctx,  void __iomem *base)
 			break;
 		}
 	}
-	writel(enc_quality, base + JPEG_ENC_QUALITY);
+	pete_writel("drivers/media/platform/mediatek/jpeg/mtk_jpeg_enc_hw.c:168", enc_quality, base + JPEG_ENC_QUALITY);
 
-	value = readl(base + JPEG_ENC_CTRL);
+	value = pete_readl("drivers/media/platform/mediatek/jpeg/mtk_jpeg_enc_hw.c:170", base + JPEG_ENC_CTRL);
 	value &= ~JPEG_ENC_CTRL_YUV_FORMAT_MASK;
 	value |= (ctx->out_q.fmt->hw_format & 3) << 3;
 	if (ctx->enable_exif)
@@ -178,9 +178,9 @@ void mtk_jpeg_set_enc_params(struct mtk_jpeg_ctx *ctx,  void __iomem *base)
 		value |= JPEG_ENC_CTRL_RESTART_EN_BIT;
 	else
 		value &= ~JPEG_ENC_CTRL_RESTART_EN_BIT;
-	writel(value, base + JPEG_ENC_CTRL);
+	pete_writel("drivers/media/platform/mediatek/jpeg/mtk_jpeg_enc_hw.c:181", value, base + JPEG_ENC_CTRL);
 
-	writel(ctx->restart_interval, base + JPEG_ENC_RST_MCU_NUM);
+	pete_writel("drivers/media/platform/mediatek/jpeg/mtk_jpeg_enc_hw.c:183", ctx->restart_interval, base + JPEG_ENC_RST_MCU_NUM);
 }
 EXPORT_SYMBOL_GPL(mtk_jpeg_set_enc_params);
 
@@ -271,10 +271,10 @@ static irqreturn_t mtk_jpegenc_hw_irq_handler(int irq, void *priv)
 	dst_buf = jpeg->hw_param.dst_buffer;
 	v4l2_m2m_buf_copy_metadata(src_buf, dst_buf, true);
 
-	irq_status = readl(jpeg->reg_base + JPEG_ENC_INT_STS) &
+	irq_status = pete_readl("drivers/media/platform/mediatek/jpeg/mtk_jpeg_enc_hw.c:274", jpeg->reg_base + JPEG_ENC_INT_STS) &
 		JPEG_ENC_INT_STATUS_MASK_ALLIRQ;
 	if (irq_status)
-		writel(0, jpeg->reg_base + JPEG_ENC_INT_STS);
+		pete_writel("drivers/media/platform/mediatek/jpeg/mtk_jpeg_enc_hw.c:277", 0, jpeg->reg_base + JPEG_ENC_INT_STS);
 	if (!(irq_status & JPEG_ENC_INT_STATUS_DONE))
 		dev_warn(jpeg->dev, "Jpg Enc occurs unknown Err.");
 

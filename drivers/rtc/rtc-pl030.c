@@ -28,7 +28,7 @@ struct pl030_rtc {
 static irqreturn_t pl030_interrupt(int irq, void *dev_id)
 {
 	struct pl030_rtc *rtc = dev_id;
-	writel(0, rtc->base + RTC_EOI);
+	pete_writel("drivers/rtc/rtc-pl030.c:31", 0, rtc->base + RTC_EOI);
 	return IRQ_HANDLED;
 }
 
@@ -36,7 +36,7 @@ static int pl030_read_alarm(struct device *dev, struct rtc_wkalrm *alrm)
 {
 	struct pl030_rtc *rtc = dev_get_drvdata(dev);
 
-	rtc_time64_to_tm(readl(rtc->base + RTC_MR), &alrm->time);
+	rtc_time64_to_tm(pete_readl("drivers/rtc/rtc-pl030.c:39", rtc->base + RTC_MR), &alrm->time);
 	return 0;
 }
 
@@ -44,7 +44,7 @@ static int pl030_set_alarm(struct device *dev, struct rtc_wkalrm *alrm)
 {
 	struct pl030_rtc *rtc = dev_get_drvdata(dev);
 
-	writel(rtc_tm_to_time64(&alrm->time), rtc->base + RTC_MR);
+	pete_writel("drivers/rtc/rtc-pl030.c:47", rtc_tm_to_time64(&alrm->time), rtc->base + RTC_MR);
 
 	return 0;
 }
@@ -53,7 +53,7 @@ static int pl030_read_time(struct device *dev, struct rtc_time *tm)
 {
 	struct pl030_rtc *rtc = dev_get_drvdata(dev);
 
-	rtc_time64_to_tm(readl(rtc->base + RTC_DR), tm);
+	rtc_time64_to_tm(pete_readl("drivers/rtc/rtc-pl030.c:56", rtc->base + RTC_DR), tm);
 
 	return 0;
 }
@@ -70,7 +70,7 @@ static int pl030_set_time(struct device *dev, struct rtc_time *tm)
 {
 	struct pl030_rtc *rtc = dev_get_drvdata(dev);
 
-	writel(rtc_tm_to_time64(tm) + 1, rtc->base + RTC_LR);
+	pete_writel("drivers/rtc/rtc-pl030.c:73", rtc_tm_to_time64(tm) + 1, rtc->base + RTC_LR);
 
 	return 0;
 }
@@ -141,7 +141,7 @@ static void pl030_remove(struct amba_device *dev)
 {
 	struct pl030_rtc *rtc = amba_get_drvdata(dev);
 
-	writel(0, rtc->base + RTC_CR);
+	pete_writel("drivers/rtc/rtc-pl030.c:144", 0, rtc->base + RTC_CR);
 
 	free_irq(dev->irq[0], rtc);
 	iounmap(rtc->base);

@@ -45,7 +45,7 @@ static int xlnx_i2s_set_sclkout_div(struct snd_soc_dai *cpu_dai,
 
 	drv_data->sysclk = 0;
 
-	writel(div, drv_data->base + I2S_I2STIM_OFFSET);
+	pete_writel("sound/soc/xilinx/xlnx_i2s.c:48", div, drv_data->base + I2S_I2STIM_OFFSET);
 
 	return 0;
 }
@@ -111,14 +111,14 @@ static int xlnx_i2s_hw_params(struct snd_pcm_substream *substream,
 				 drv_data->sysclk, sclk);
 			return -EINVAL;
 		}
-		writel(sclk_div, drv_data->base + I2S_I2STIM_OFFSET);
+		pete_writel("sound/soc/xilinx/xlnx_i2s.c:114", sclk_div, drv_data->base + I2S_I2STIM_OFFSET);
 	}
 
 	chan_id = params_channels(params) / 2;
 
 	while (chan_id > 0) {
 		reg_off = I2S_CH0_OFFSET + ((chan_id - 1) * 4);
-		writel(chan_id, drv_data->base + reg_off);
+		pete_writel("sound/soc/xilinx/xlnx_i2s.c:121", chan_id, drv_data->base + reg_off);
 		chan_id--;
 	}
 
@@ -134,12 +134,12 @@ static int xlnx_i2s_trigger(struct snd_pcm_substream *substream, int cmd,
 	case SNDRV_PCM_TRIGGER_START:
 	case SNDRV_PCM_TRIGGER_RESUME:
 	case SNDRV_PCM_TRIGGER_PAUSE_RELEASE:
-		writel(I2S_CORE_CTRL_ENABLE, drv_data->base + I2S_CORE_CTRL_OFFSET);
+		pete_writel("sound/soc/xilinx/xlnx_i2s.c:137", I2S_CORE_CTRL_ENABLE, drv_data->base + I2S_CORE_CTRL_OFFSET);
 		break;
 	case SNDRV_PCM_TRIGGER_STOP:
 	case SNDRV_PCM_TRIGGER_SUSPEND:
 	case SNDRV_PCM_TRIGGER_PAUSE_PUSH:
-		writel(0, drv_data->base + I2S_CORE_CTRL_OFFSET);
+		pete_writel("sound/soc/xilinx/xlnx_i2s.c:142", 0, drv_data->base + I2S_CORE_CTRL_OFFSET);
 		break;
 	default:
 		return -EINVAL;
@@ -226,7 +226,7 @@ static int xlnx_i2s_probe(struct platform_device *pdev)
 	} else {
 		return -ENODEV;
 	}
-	drv_data->is_32bit_lrclk = readl(drv_data->base + I2S_CORE_CTRL_OFFSET) &
+	drv_data->is_32bit_lrclk = pete_readl("sound/soc/xilinx/xlnx_i2s.c:229", drv_data->base + I2S_CORE_CTRL_OFFSET) &
 				   I2S_CORE_CTRL_32BIT_LRCLK;
 
 	dev_set_drvdata(&pdev->dev, drv_data);

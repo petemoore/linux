@@ -229,18 +229,18 @@ struct tegra_dma {
 
 static inline void tdma_write(struct tegra_dma *tdma, u32 reg, u32 val)
 {
-	writel(val, tdma->base_addr + reg);
+	pete_writel("drivers/dma/tegra20-apb-dma.c:232", val, tdma->base_addr + reg);
 }
 
 static inline void tdc_write(struct tegra_dma_channel *tdc,
 			     u32 reg, u32 val)
 {
-	writel(val, tdc->chan_addr + reg);
+	pete_writel("drivers/dma/tegra20-apb-dma.c:238", val, tdc->chan_addr + reg);
 }
 
 static inline u32 tdc_read(struct tegra_dma_channel *tdc, u32 reg)
 {
-	return readl(tdc->chan_addr + reg);
+	return pete_readl("drivers/dma/tegra20-apb-dma.c:243", tdc->chan_addr + reg);
 }
 
 static inline struct tegra_dma_channel *to_tegra_dma_chan(struct dma_chan *dc)

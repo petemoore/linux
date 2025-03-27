@@ -234,9 +234,9 @@ static void mid8250_set_termios(struct uart_port *p, struct ktermios *termios,
 	rational_best_approximation(fuart, mid->board->freq, w, w, &mul, &div);
 	p->uartclk = fuart * 16 / ps;		/* core uses ps = 16 always */
 
-	writel(ps, p->membase + INTEL_MID_UART_PS);		/* set PS */
-	writel(mul, p->membase + INTEL_MID_UART_MUL);		/* set MUL */
-	writel(div, p->membase + INTEL_MID_UART_DIV);
+	pete_writel("drivers/tty/serial/8250/8250_mid.c:237", ps, p->membase + INTEL_MID_UART_PS);		/* set PS */
+	pete_writel("drivers/tty/serial/8250/8250_mid.c:238", mul, p->membase + INTEL_MID_UART_MUL);		/* set MUL */
+	pete_writel("drivers/tty/serial/8250/8250_mid.c:239", div, p->membase + INTEL_MID_UART_DIV);
 
 	serial8250_do_set_termios(p, termios, old);
 }

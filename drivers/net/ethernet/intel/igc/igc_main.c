@@ -661,7 +661,7 @@ static void igc_configure_rx_ring(struct igc_adapter *adapter,
 	/* initialize head and tail */
 	ring->tail = adapter->io_addr + IGC_RDT(reg_idx);
 	wr32(IGC_RDH(reg_idx), 0);
-	writel(0, ring->tail);
+	pete_writel("drivers/net/ethernet/intel/igc/igc_main.c:664", 0, ring->tail);
 
 	/* reset next-to- use/clean to place SW in sync with hardware */
 	ring->next_to_clean = 0;
@@ -747,7 +747,7 @@ static void igc_configure_tx_ring(struct igc_adapter *adapter,
 
 	ring->tail = adapter->io_addr + IGC_TDT(reg_idx);
 	wr32(IGC_TDH(reg_idx), 0);
-	writel(0, ring->tail);
+	pete_writel("drivers/net/ethernet/intel/igc/igc_main.c:750", 0, ring->tail);
 
 	txdctl |= IGC_TX_PTHRESH;
 	txdctl |= IGC_TX_HTHRESH << 8;
@@ -1420,7 +1420,7 @@ static int igc_tx_map(struct igc_ring *tx_ring,
 	igc_maybe_stop_tx(tx_ring, DESC_NEEDED);
 
 	if (netif_xmit_stopped(txring_txq(tx_ring)) || !netdev_xmit_more()) {
-		writel(i, tx_ring->tail);
+		pete_writel("drivers/net/ethernet/intel/igc/igc_main.c:1423", i, tx_ring->tail);
 	}
 
 	return 0;
@@ -2279,7 +2279,7 @@ static void igc_alloc_rx_buffers(struct igc_ring *rx_ring, u16 cleaned_count)
 		 * such as IA-64).
 		 */
 		wmb();
-		writel(i, rx_ring->tail);
+		pete_writel("drivers/net/ethernet/intel/igc/igc_main.c:2282", i, rx_ring->tail);
 	}
 }
 
@@ -2336,7 +2336,7 @@ static bool igc_alloc_rx_buffers_zc(struct igc_ring *ring, u16 count)
 		 * such as IA-64).
 		 */
 		wmb();
-		writel(i, ring->tail);
+		pete_writel("drivers/net/ethernet/intel/igc/igc_main.c:2339", i, ring->tail);
 	}
 
 	return ok;
@@ -2533,7 +2533,7 @@ static void igc_flush_tx_descriptors(struct igc_ring *ring)
 	 * writes are complete before the tail pointer is updated.
 	 */
 	wmb();
-	writel(ring->next_to_use, ring->tail);
+	pete_writel("drivers/net/ethernet/intel/igc/igc_main.c:2536", ring->next_to_use, ring->tail);
 }
 
 static void igc_finalize_xdp(struct igc_adapter *adapter, int status)
@@ -3059,7 +3059,7 @@ static bool igc_clean_tx_irq(struct igc_q_vector *q_vector, int napi_budget)
 		    time_after(jiffies, tx_buffer->time_stamp +
 		    (adapter->tx_timeout_factor * HZ)) &&
 		    !(rd32(IGC_STATUS) & IGC_STATUS_TXOFF) &&
-		    (rd32(IGC_TDH(tx_ring->reg_idx)) != readl(tx_ring->tail)) &&
+		    (rd32(IGC_TDH(tx_ring->reg_idx)) != pete_readl("drivers/net/ethernet/intel/igc/igc_main.c:3062", tx_ring->tail)) &&
 		    !tx_ring->oper_gate_closed) {
 			/* detected Tx unit hang */
 			netdev_err(tx_ring->netdev,
@@ -3076,7 +3076,7 @@ static bool igc_clean_tx_irq(struct igc_q_vector *q_vector, int napi_budget)
 				   "  desc.status          <%x>\n",
 				   tx_ring->queue_index,
 				   rd32(IGC_TDH(tx_ring->reg_idx)),
-				   readl(tx_ring->tail),
+				   pete_readl("drivers/net/ethernet/intel/igc/igc_main.c:3079", tx_ring->tail),
 				   tx_ring->next_to_use,
 				   tx_ring->next_to_clean,
 				   tx_buffer->time_stamp,
@@ -5408,7 +5408,7 @@ static void igc_write_itr(struct igc_q_vector *q_vector)
 
 	itr_val |= IGC_EITR_CNT_IGNR;
 
-	writel(itr_val, q_vector->itr_register);
+	pete_writel("drivers/net/ethernet/intel/igc/igc_main.c:5411", itr_val, q_vector->itr_register);
 	q_vector->set_itr = 0;
 }
 
@@ -6617,10 +6617,10 @@ u32 igc_rd32(struct igc_hw *hw, u32 reg)
 	if (IGC_REMOVED(hw_addr))
 		return ~value;
 
-	value = readl(&hw_addr[reg]);
+	value = pete_readl("drivers/net/ethernet/intel/igc/igc_main.c:6620", &hw_addr[reg]);
 
 	/* reads should not return all F's */
-	if (!(~value) && (!reg || !(~readl(hw_addr)))) {
+	if (!(~value) && (!reg || !(~pete_readl("drivers/net/ethernet/intel/igc/igc_main.c:6623", hw_addr)))) {
 		struct net_device *netdev = igc->netdev;
 
 		hw->hw_addr = NULL;

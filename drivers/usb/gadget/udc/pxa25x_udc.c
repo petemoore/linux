@@ -302,12 +302,12 @@ static inline u32 udc_get_reg(struct pxa25x_udc *dev, u32 reg)
 #else
 static inline void udc_set_reg(struct pxa25x_udc *dev, u32 reg, u32 val)
 {
-	writel(val, dev->regs + reg);
+	pete_writel("drivers/usb/gadget/udc/pxa25x_udc.c:305", val, dev->regs + reg);
 }
 
 static inline u32 udc_get_reg(struct pxa25x_udc *dev, u32 reg)
 {
-	return readl(dev->regs + reg);
+	return pete_readl("drivers/usb/gadget/udc/pxa25x_udc.c:310", dev->regs + reg);
 }
 #endif
 

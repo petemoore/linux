@@ -951,11 +951,11 @@ static int sun50i_a64_ccu_probe(struct platform_device *pdev)
 		return PTR_ERR(reg);
 
 	/* Force the PLL-Audio-1x divider to 1 */
-	val = readl(reg + SUN50I_A64_PLL_AUDIO_REG);
+	val = pete_readl("drivers/clk/sunxi-ng/ccu-sun50i-a64.c:954", reg + SUN50I_A64_PLL_AUDIO_REG);
 	val &= ~GENMASK(19, 16);
-	writel(val | (0 << 16), reg + SUN50I_A64_PLL_AUDIO_REG);
+	pete_writel("drivers/clk/sunxi-ng/ccu-sun50i-a64.c:956", val | (0 << 16), reg + SUN50I_A64_PLL_AUDIO_REG);
 
-	writel(0x515, reg + SUN50I_A64_PLL_MIPI_REG);
+	pete_writel("drivers/clk/sunxi-ng/ccu-sun50i-a64.c:958", 0x515, reg + SUN50I_A64_PLL_MIPI_REG);
 
 	ret = devm_sunxi_ccu_probe(&pdev->dev, reg, &sun50i_a64_ccu_desc);
 	if (ret)

@@ -48,11 +48,11 @@ static int rzg2l_usbphy_ctrl_assert(struct reset_controller_dev *rcdev,
 	u32 val;
 
 	spin_lock_irqsave(&priv->lock, flags);
-	val = readl(base + RESET);
+	val = pete_readl("drivers/reset/reset-rzg2l-usbphy-ctrl.c:51", base + RESET);
 	val |= id ? PHY_RESET_PORT2 : PHY_RESET_PORT1;
 	if (port_mask == (val & port_mask))
 		val |= RESET_PLLRESET;
-	writel(val, base + RESET);
+	pete_writel("drivers/reset/reset-rzg2l-usbphy-ctrl.c:55", val, base + RESET);
 	spin_unlock_irqrestore(&priv->lock, flags);
 
 	return 0;
@@ -67,11 +67,11 @@ static int rzg2l_usbphy_ctrl_deassert(struct reset_controller_dev *rcdev,
 	u32 val;
 
 	spin_lock_irqsave(&priv->lock, flags);
-	val = readl(base + RESET);
+	val = pete_readl("drivers/reset/reset-rzg2l-usbphy-ctrl.c:70", base + RESET);
 
 	val |= RESET_SEL_PLLRESET;
 	val &= ~(RESET_PLLRESET | (id ? PHY_RESET_PORT2 : PHY_RESET_PORT1));
-	writel(val, base + RESET);
+	pete_writel("drivers/reset/reset-rzg2l-usbphy-ctrl.c:74", val, base + RESET);
 	spin_unlock_irqrestore(&priv->lock, flags);
 
 	return 0;
@@ -85,7 +85,7 @@ static int rzg2l_usbphy_ctrl_status(struct reset_controller_dev *rcdev,
 
 	port_mask = id ? PHY_RESET_PORT2 : PHY_RESET_PORT1;
 
-	return !!(readl(priv->base + RESET) & port_mask);
+	return !!(pete_readl("drivers/reset/reset-rzg2l-usbphy-ctrl.c:88", priv->base + RESET) & port_mask);
 }
 
 static const struct of_device_id rzg2l_usbphy_ctrl_match_table[] = {
@@ -148,9 +148,9 @@ static int rzg2l_usbphy_ctrl_probe(struct platform_device *pdev)
 
 	/* put pll and phy into reset state */
 	spin_lock_irqsave(&priv->lock, flags);
-	val = readl(priv->base + RESET);
+	val = pete_readl("drivers/reset/reset-rzg2l-usbphy-ctrl.c:151", priv->base + RESET);
 	val |= RESET_SEL_PLLRESET | RESET_PLLRESET | PHY_RESET_PORT2 | PHY_RESET_PORT1;
-	writel(val, priv->base + RESET);
+	pete_writel("drivers/reset/reset-rzg2l-usbphy-ctrl.c:153", val, priv->base + RESET);
 	spin_unlock_irqrestore(&priv->lock, flags);
 
 	return 0;

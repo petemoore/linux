@@ -126,7 +126,7 @@ static irqreturn_t aac_src_intr_message(int irq, void *dev_id)
 			u32 events = src_readl(dev, MUnit.SCR0);
 
 			aac_intr_normal(dev, events, 1, 0, NULL);
-			writel(events, &dev->IndexRegs->Mailbox[0]);
+			pete_writel("drivers/scsi/aacraid/src.c:129", events, &dev->IndexRegs->Mailbox[0]);
 			src_writel(dev, MUnit.IDR, 1 << 23);
 		} else {
 			if (dev->aif_thread && dev->fsa_dev)
@@ -217,14 +217,14 @@ static int src_sync_cmd(struct aac_dev *dev, u32 command,
 	/*
 	 *	Write the command into Mailbox 0
 	 */
-	writel(command, &dev->IndexRegs->Mailbox[0]);
+	pete_writel("drivers/scsi/aacraid/src.c:220", command, &dev->IndexRegs->Mailbox[0]);
 	/*
 	 *	Write the parameters into Mailboxes 1 - 6
 	 */
-	writel(p1, &dev->IndexRegs->Mailbox[1]);
-	writel(p2, &dev->IndexRegs->Mailbox[2]);
-	writel(p3, &dev->IndexRegs->Mailbox[3]);
-	writel(p4, &dev->IndexRegs->Mailbox[4]);
+	pete_writel("drivers/scsi/aacraid/src.c:224", p1, &dev->IndexRegs->Mailbox[1]);
+	pete_writel("drivers/scsi/aacraid/src.c:225", p2, &dev->IndexRegs->Mailbox[2]);
+	pete_writel("drivers/scsi/aacraid/src.c:226", p3, &dev->IndexRegs->Mailbox[3]);
+	pete_writel("drivers/scsi/aacraid/src.c:227", p4, &dev->IndexRegs->Mailbox[4]);
 
 	/*
 	 *	Clear the synch command doorbell to start on a clean slate.
@@ -297,18 +297,18 @@ static int src_sync_cmd(struct aac_dev *dev, u32 command,
 		 *	Pull the synch status from Mailbox 0.
 		 */
 		if (status)
-			*status = readl(&dev->IndexRegs->Mailbox[0]);
+			*status = pete_readl("drivers/scsi/aacraid/src.c:300", &dev->IndexRegs->Mailbox[0]);
 		if (r1)
-			*r1 = readl(&dev->IndexRegs->Mailbox[1]);
+			*r1 = pete_readl("drivers/scsi/aacraid/src.c:302", &dev->IndexRegs->Mailbox[1]);
 		if (r2)
-			*r2 = readl(&dev->IndexRegs->Mailbox[2]);
+			*r2 = pete_readl("drivers/scsi/aacraid/src.c:304", &dev->IndexRegs->Mailbox[2]);
 		if (r3)
-			*r3 = readl(&dev->IndexRegs->Mailbox[3]);
+			*r3 = pete_readl("drivers/scsi/aacraid/src.c:306", &dev->IndexRegs->Mailbox[3]);
 		if (r4)
-			*r4 = readl(&dev->IndexRegs->Mailbox[4]);
+			*r4 = pete_readl("drivers/scsi/aacraid/src.c:308", &dev->IndexRegs->Mailbox[4]);
 		if (command == GET_COMM_PREFERRED_SETTINGS)
 			dev->max_msix =
-				readl(&dev->IndexRegs->Mailbox[5]) & 0xFFFF;
+				pete_readl("drivers/scsi/aacraid/src.c:311", &dev->IndexRegs->Mailbox[5]) & 0xFFFF;
 		/*
 		 *	Clear the synch command doorbell.
 		 */
@@ -780,9 +780,9 @@ static void aac_send_hardware_soft_reset(struct aac_dev *dev)
 	u_int32_t val;
 
 	aac_clear_omr(dev);
-	val = readl(((char *)(dev->base) + IBW_SWR_OFFSET));
+	val = pete_readl("drivers/scsi/aacraid/src.c:783", ((char *)(dev->base) + IBW_SWR_OFFSET));
 	val |= 0x01;
-	writel(val, ((char *)(dev->base) + IBW_SWR_OFFSET));
+	pete_writel("drivers/scsi/aacraid/src.c:785", val, ((char *)(dev->base) + IBW_SWR_OFFSET));
 	msleep_interruptible(20000);
 }
 
@@ -1065,11 +1065,11 @@ static int aac_src_wait_sync(struct aac_dev *dev, int *status)
 	 * Pull the synch status from Mailbox 0.
 	 */
 	if (status && !rc) {
-		status[0] = readl(&dev->IndexRegs->Mailbox[0]);
-		status[1] = readl(&dev->IndexRegs->Mailbox[1]);
-		status[2] = readl(&dev->IndexRegs->Mailbox[2]);
-		status[3] = readl(&dev->IndexRegs->Mailbox[3]);
-		status[4] = readl(&dev->IndexRegs->Mailbox[4]);
+		status[0] = pete_readl("drivers/scsi/aacraid/src.c:1068", &dev->IndexRegs->Mailbox[0]);
+		status[1] = pete_readl("drivers/scsi/aacraid/src.c:1069", &dev->IndexRegs->Mailbox[1]);
+		status[2] = pete_readl("drivers/scsi/aacraid/src.c:1070", &dev->IndexRegs->Mailbox[2]);
+		status[3] = pete_readl("drivers/scsi/aacraid/src.c:1071", &dev->IndexRegs->Mailbox[3]);
+		status[4] = pete_readl("drivers/scsi/aacraid/src.c:1072", &dev->IndexRegs->Mailbox[4]);
 	}
 
 	return rc;

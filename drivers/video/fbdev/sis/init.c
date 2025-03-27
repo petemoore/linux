@@ -1578,11 +1578,11 @@ SiS_ClearBuffer(struct SiS_Private *SiS_Pr, unsigned short ModeNo)
 	 memset_io(memaddr, 0, memsize);
       } else {
 	 pBuffer = (unsigned short SISIOMEMTYPE *)memaddr;
-	 for(i = 0; i < 0x4000; i++) writew(0x0000, &pBuffer[i]);
+	 for(i = 0; i < 0x4000; i++) pete_writew("drivers/video/fbdev/sis/init.c:1581", 0x0000, &pBuffer[i]);
       }
    } else if(SiS_Pr->SiS_ModeType < ModeCGA) {
       pBuffer = (unsigned short SISIOMEMTYPE *)memaddr;
-      for(i = 0; i < 0x4000; i++) writew(0x0720, &pBuffer[i]);
+      for(i = 0; i < 0x4000; i++) pete_writew("drivers/video/fbdev/sis/init.c:1585", 0x0720, &pBuffer[i]);
    } else {
       memset_io(memaddr, 0, 0x8000);
    }

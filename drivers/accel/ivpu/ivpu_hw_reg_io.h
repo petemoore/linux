@@ -16,13 +16,13 @@
 #define REG_IO_ERROR      0xffffffff
 
 #define REGB_RD32(reg)          ivpu_hw_reg_rd32(vdev, vdev->regb, (reg), #reg, __func__)
-#define REGB_RD32_SILENT(reg)   readl(vdev->regb + (reg))
+#define REGB_RD32_SILENT(reg)   pete_readl("drivers/accel/ivpu/ivpu_hw_reg_io.h:19", vdev->regb + (reg))
 #define REGB_RD64(reg)          ivpu_hw_reg_rd64(vdev, vdev->regb, (reg), #reg, __func__)
 #define REGB_WR32(reg, val)     ivpu_hw_reg_wr32(vdev, vdev->regb, (reg), (val), #reg, __func__)
 #define REGB_WR64(reg, val)     ivpu_hw_reg_wr64(vdev, vdev->regb, (reg), (val), #reg, __func__)
 
 #define REGV_RD32(reg)          ivpu_hw_reg_rd32(vdev, vdev->regv, (reg), #reg, __func__)
-#define REGV_RD32_SILENT(reg)   readl(vdev->regv + (reg))
+#define REGV_RD32_SILENT(reg)   pete_readl("drivers/accel/ivpu/ivpu_hw_reg_io.h:25", vdev->regv + (reg))
 #define REGV_RD64(reg)          ivpu_hw_reg_rd64(vdev, vdev->regv, (reg), #reg, __func__)
 #define REGV_WR32(reg, val)     ivpu_hw_reg_wr32(vdev, vdev->regv, (reg), (val), #reg, __func__)
 #define REGV_WR64(reg, val)     ivpu_hw_reg_wr64(vdev, vdev->regv, (reg), (val), #reg, __func__)
@@ -69,7 +69,7 @@ static inline u32
 ivpu_hw_reg_rd32(struct ivpu_device *vdev, void __iomem *base, u32 reg,
 		 const char *name, const char *func)
 {
-	u32 val = readl(base + reg);
+	u32 val = pete_readl("drivers/accel/ivpu/ivpu_hw_reg_io.h:72", base + reg);
 
 	ivpu_dbg(vdev, REG, "%s RD: %s (0x%08x) => 0x%08x\n", func, name, reg, val);
 	return val;
@@ -79,7 +79,7 @@ static inline u64
 ivpu_hw_reg_rd64(struct ivpu_device *vdev, void __iomem *base, u32 reg,
 		 const char *name, const char *func)
 {
-	u64 val = readq(base + reg);
+	u64 val = pete_readq("drivers/accel/ivpu/ivpu_hw_reg_io.h:82", base + reg);
 
 	ivpu_dbg(vdev, REG, "%s RD: %s (0x%08x) => 0x%016llx\n", func, name, reg, val);
 	return val;
@@ -90,7 +90,7 @@ ivpu_hw_reg_wr32(struct ivpu_device *vdev, void __iomem *base, u32 reg, u32 val,
 		 const char *name, const char *func)
 {
 	ivpu_dbg(vdev, REG, "%s WR: %s (0x%08x) <= 0x%08x\n", func, name, reg, val);
-	writel(val, base + reg);
+	pete_writel("drivers/accel/ivpu/ivpu_hw_reg_io.h:93", val, base + reg);
 }
 
 static inline void
@@ -98,7 +98,7 @@ ivpu_hw_reg_wr64(struct ivpu_device *vdev, void __iomem *base, u32 reg, u64 val,
 		 const char *name, const char *func)
 {
 	ivpu_dbg(vdev, REG, "%s WR: %s (0x%08x) <= 0x%016llx\n", func, name, reg, val);
-	writeq(val, base + reg);
+	pete_writeq("drivers/accel/ivpu/ivpu_hw_reg_io.h:101", val, base + reg);
 }
 
 static inline void
@@ -109,7 +109,7 @@ ivpu_hw_reg_wr32_index(struct ivpu_device *vdev, void __iomem *base, u32 reg,
 	reg += index * stride;
 
 	ivpu_dbg(vdev, REG, "%s WR: %s_%d (0x%08x) <= 0x%08x\n", func, name, index, reg, val);
-	writel(val, base + reg);
+	pete_writel("drivers/accel/ivpu/ivpu_hw_reg_io.h:112", val, base + reg);
 }
 
 #endif /* __IVPU_HW_REG_IO_H__ */

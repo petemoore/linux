@@ -23,7 +23,7 @@ DEFINE_CORESIGHT_DEVLIST(sink_devs, "ultra_smb");
 
 static bool smb_buffer_not_empty(struct smb_drv_data *drvdata)
 {
-	u32 buf_status = readl(drvdata->base + SMB_LB_INT_STS_REG);
+	u32 buf_status = pete_readl("drivers/hwtracing/coresight/ultrasoc-smb.c:26", drvdata->base + SMB_LB_INT_STS_REG);
 
 	return FIELD_GET(SMB_LB_INT_STS_NOT_EMPTY_MSK, buf_status);
 }
@@ -33,7 +33,7 @@ static void smb_update_data_size(struct smb_drv_data *drvdata)
 	struct smb_data_buffer *sdb = &drvdata->sdb;
 	u32 buf_wrptr;
 
-	buf_wrptr = readl(drvdata->base + SMB_LB_WR_ADDR_REG) -
+	buf_wrptr = pete_readl("drivers/hwtracing/coresight/ultrasoc-smb.c:36", drvdata->base + SMB_LB_WR_ADDR_REG) -
 			  sdb->buf_hw_base;
 
 	/* Buffer is full */
@@ -58,7 +58,7 @@ static void smb_update_read_ptr(struct smb_drv_data *drvdata, u32 nbytes)
 
 	sdb->buf_rdptr += nbytes;
 	sdb->buf_rdptr %= sdb->buf_size;
-	writel(sdb->buf_hw_base + sdb->buf_rdptr,
+	pete_writel("drivers/hwtracing/coresight/ultrasoc-smb.c:61", sdb->buf_hw_base + sdb->buf_rdptr,
 	       drvdata->base + SMB_LB_RD_ADDR_REG);
 
 	sdb->data_size -= nbytes;
@@ -74,12 +74,12 @@ static void smb_reset_buffer(struct smb_drv_data *drvdata)
 	 * to avoid corrupting the next session.
 	 * Note: The write pointer will never exceed the read pointer.
 	 */
-	writel(SMB_LB_PURGE_PURGED, drvdata->base + SMB_LB_PURGE_REG);
+	pete_writel("drivers/hwtracing/coresight/ultrasoc-smb.c:77", SMB_LB_PURGE_PURGED, drvdata->base + SMB_LB_PURGE_REG);
 
 	/* Reset SMB logical buffer status flags */
-	writel(SMB_LB_INT_STS_RESET, drvdata->base + SMB_LB_INT_STS_REG);
+	pete_writel("drivers/hwtracing/coresight/ultrasoc-smb.c:80", SMB_LB_INT_STS_RESET, drvdata->base + SMB_LB_INT_STS_REG);
 
-	write_ptr = readl(drvdata->base + SMB_LB_WR_ADDR_REG);
+	write_ptr = pete_readl("drivers/hwtracing/coresight/ultrasoc-smb.c:82", drvdata->base + SMB_LB_WR_ADDR_REG);
 
 	/* Do nothing, not data left in hardware path */
 	if (!write_ptr || write_ptr == sdb->buf_rdptr + sdb->buf_hw_base)
@@ -89,7 +89,7 @@ static void smb_reset_buffer(struct smb_drv_data *drvdata)
 	 * The SMB_LB_WR_ADDR_REG register is read-only,
 	 * Synchronize the read pointer to write pointer.
 	 */
-	writel(write_ptr, drvdata->base + SMB_LB_RD_ADDR_REG);
+	pete_writel("drivers/hwtracing/coresight/ultrasoc-smb.c:92", write_ptr, drvdata->base + SMB_LB_RD_ADDR_REG);
 	sdb->buf_rdptr = write_ptr - sdb->buf_hw_base;
 }
 
@@ -204,12 +204,12 @@ static const struct attribute_group *smb_sink_groups[] = {
 
 static void smb_enable_hw(struct smb_drv_data *drvdata)
 {
-	writel(SMB_GLB_EN_HW_ENABLE, drvdata->base + SMB_GLB_EN_REG);
+	pete_writel("drivers/hwtracing/coresight/ultrasoc-smb.c:207", SMB_GLB_EN_HW_ENABLE, drvdata->base + SMB_GLB_EN_REG);
 }
 
 static void smb_disable_hw(struct smb_drv_data *drvdata)
 {
-	writel(0x0, drvdata->base + SMB_GLB_EN_REG);
+	pete_writel("drivers/hwtracing/coresight/ultrasoc-smb.c:212", 0x0, drvdata->base + SMB_GLB_EN_REG);
 }
 
 static void smb_enable_sysfs(struct coresight_device *csdev)
@@ -478,11 +478,11 @@ static void smb_init_hw(struct smb_drv_data *drvdata)
 {
 	smb_disable_hw(drvdata);
 
-	writel(SMB_LB_CFG_LO_DEFAULT, drvdata->base + SMB_LB_CFG_LO_REG);
-	writel(SMB_LB_CFG_HI_DEFAULT, drvdata->base + SMB_LB_CFG_HI_REG);
-	writel(SMB_GLB_CFG_DEFAULT, drvdata->base + SMB_GLB_CFG_REG);
-	writel(SMB_GLB_INT_CFG, drvdata->base + SMB_GLB_INT_REG);
-	writel(SMB_LB_INT_CTRL_CFG, drvdata->base + SMB_LB_INT_CTRL_REG);
+	pete_writel("drivers/hwtracing/coresight/ultrasoc-smb.c:481", SMB_LB_CFG_LO_DEFAULT, drvdata->base + SMB_LB_CFG_LO_REG);
+	pete_writel("drivers/hwtracing/coresight/ultrasoc-smb.c:482", SMB_LB_CFG_HI_DEFAULT, drvdata->base + SMB_LB_CFG_HI_REG);
+	pete_writel("drivers/hwtracing/coresight/ultrasoc-smb.c:483", SMB_GLB_CFG_DEFAULT, drvdata->base + SMB_GLB_CFG_REG);
+	pete_writel("drivers/hwtracing/coresight/ultrasoc-smb.c:484", SMB_GLB_INT_CFG, drvdata->base + SMB_GLB_INT_REG);
+	pete_writel("drivers/hwtracing/coresight/ultrasoc-smb.c:485", SMB_LB_INT_CTRL_CFG, drvdata->base + SMB_LB_INT_CTRL_REG);
 }
 
 static int smb_register_sink(struct platform_device *pdev,

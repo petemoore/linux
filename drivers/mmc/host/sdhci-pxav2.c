@@ -65,7 +65,7 @@ static void pxav2_reset(struct sdhci_host *host, u8 mask)
 		 * no performance impact
 		 */
 		if (pdata && pdata->clk_delay_sel == 1) {
-			tmp = readw(host->ioaddr + SD_CLOCK_BURST_SIZE_SETUP);
+			tmp = pete_readw("drivers/mmc/host/sdhci-pxav2.c:68", host->ioaddr + SD_CLOCK_BURST_SIZE_SETUP);
 
 			tmp &= ~(SDCLK_DELAY_MASK << SDCLK_DELAY_SHIFT);
 			tmp |= (pdata->clk_delay_cycles & SDCLK_DELAY_MASK)
@@ -73,18 +73,18 @@ static void pxav2_reset(struct sdhci_host *host, u8 mask)
 			tmp &= ~(SDCLK_SEL_MASK << SDCLK_SEL_SHIFT);
 			tmp |= (1 & SDCLK_SEL_MASK) << SDCLK_SEL_SHIFT;
 
-			writew(tmp, host->ioaddr + SD_CLOCK_BURST_SIZE_SETUP);
+			pete_writew("drivers/mmc/host/sdhci-pxav2.c:76", tmp, host->ioaddr + SD_CLOCK_BURST_SIZE_SETUP);
 		}
 
 		if (pdata && (pdata->flags & PXA_FLAG_ENABLE_CLOCK_GATING)) {
-			tmp = readw(host->ioaddr + SD_FIFO_PARAM);
+			tmp = pete_readw("drivers/mmc/host/sdhci-pxav2.c:80", host->ioaddr + SD_FIFO_PARAM);
 			tmp &= ~CLK_GATE_SETTING_BITS;
-			writew(tmp, host->ioaddr + SD_FIFO_PARAM);
+			pete_writew("drivers/mmc/host/sdhci-pxav2.c:82", tmp, host->ioaddr + SD_FIFO_PARAM);
 		} else {
-			tmp = readw(host->ioaddr + SD_FIFO_PARAM);
+			tmp = pete_readw("drivers/mmc/host/sdhci-pxav2.c:84", host->ioaddr + SD_FIFO_PARAM);
 			tmp &= ~CLK_GATE_SETTING_BITS;
 			tmp |= CLK_GATE_SETTING_BITS;
-			writew(tmp, host->ioaddr + SD_FIFO_PARAM);
+			pete_writew("drivers/mmc/host/sdhci-pxav2.c:87", tmp, host->ioaddr + SD_FIFO_PARAM);
 		}
 	}
 }
@@ -93,9 +93,9 @@ static u16 pxav1_readw(struct sdhci_host *host, int reg)
 {
 	/* Workaround for data abort exception on SDH2 and SDH4 on PXA168 */
 	if (reg == SDHCI_HOST_VERSION)
-		return readl(host->ioaddr + SDHCI_HOST_VERSION - 2) >> 16;
+		return pete_readl("drivers/mmc/host/sdhci-pxav2.c:96", host->ioaddr + SDHCI_HOST_VERSION - 2) >> 16;
 
-	return readw(host->ioaddr + reg);
+	return pete_readw("drivers/mmc/host/sdhci-pxav2.c:98", host->ioaddr + reg);
 }
 
 static u32 pxav1_irq(struct sdhci_host *host, u32 intmask)
@@ -130,9 +130,9 @@ static void pxav1_request_done(struct sdhci_host *host, struct mmc_request *mrq)
 	    (mrq->cmd->opcode == SD_IO_RW_DIRECT ||
 	     mrq->cmd->opcode == SD_IO_RW_EXTENDED)) {
 		/* Reset data port */
-		tmp = readw(host->ioaddr + SDHCI_TIMEOUT_CONTROL);
+		tmp = pete_readw("drivers/mmc/host/sdhci-pxav2.c:133", host->ioaddr + SDHCI_TIMEOUT_CONTROL);
 		tmp |= 0x400;
-		writew(tmp, host->ioaddr + SDHCI_TIMEOUT_CONTROL);
+		pete_writew("drivers/mmc/host/sdhci-pxav2.c:135", tmp, host->ioaddr + SDHCI_TIMEOUT_CONTROL);
 
 		/* Clock is now stopped, so restart it by sending a dummy CMD0 */
 		pxav2_host = sdhci_pltfm_priv(sdhci_priv(host));
@@ -159,8 +159,8 @@ static void pxav2_mmc_set_bus_width(struct sdhci_host *host, int width)
 	u8 ctrl;
 	u16 tmp;
 
-	ctrl = readb(host->ioaddr + SDHCI_HOST_CONTROL);
-	tmp = readw(host->ioaddr + SD_CE_ATA_2);
+	ctrl = pete_readb("drivers/mmc/host/sdhci-pxav2.c:162", host->ioaddr + SDHCI_HOST_CONTROL);
+	tmp = pete_readw("drivers/mmc/host/sdhci-pxav2.c:163", host->ioaddr + SD_CE_ATA_2);
 	if (width == MMC_BUS_WIDTH_8) {
 		ctrl &= ~SDHCI_CTRL_4BITBUS;
 		tmp |= MMC_CARD | MMC_WIDTH;
@@ -171,8 +171,8 @@ static void pxav2_mmc_set_bus_width(struct sdhci_host *host, int width)
 		else
 			ctrl &= ~SDHCI_CTRL_4BITBUS;
 	}
-	writew(tmp, host->ioaddr + SD_CE_ATA_2);
-	writeb(ctrl, host->ioaddr + SDHCI_HOST_CONTROL);
+	pete_writew("drivers/mmc/host/sdhci-pxav2.c:174", tmp, host->ioaddr + SD_CE_ATA_2);
+	pete_writeb("drivers/mmc/host/sdhci-pxav2.c:175", ctrl, host->ioaddr + SDHCI_HOST_CONTROL);
 }
 
 struct sdhci_pxa_variant {

@@ -109,7 +109,7 @@ static void rockchip_cpuclk_set_dividers(struct rockchip_cpuclk *cpuclk,
 
 		pr_debug("%s: setting reg 0x%x to 0x%x\n",
 			 __func__, clksel->reg, clksel->val);
-		writel(clksel->val, cpuclk->reg_base + clksel->reg);
+		pete_writel("drivers/clk/rockchip/clk-cpu.c:112", clksel->val, cpuclk->reg_base + clksel->reg);
 	}
 }
 
@@ -127,7 +127,7 @@ static void rockchip_cpuclk_set_pre_muxs(struct rockchip_cpuclk *cpuclk,
 
 		pr_debug("%s: setting reg 0x%x to 0x%x\n",
 			 __func__, clksel->reg, clksel->val);
-		writel(clksel->val, cpuclk->reg_base + clksel->reg);
+		pete_writel("drivers/clk/rockchip/clk-cpu.c:130", clksel->val, cpuclk->reg_base + clksel->reg);
 	}
 }
 
@@ -145,7 +145,7 @@ static void rockchip_cpuclk_set_post_muxs(struct rockchip_cpuclk *cpuclk,
 
 		pr_debug("%s: setting reg 0x%x to 0x%x\n",
 			 __func__, clksel->reg, clksel->val);
-		writel(clksel->val, cpuclk->reg_base + clksel->reg);
+		pete_writel("drivers/clk/rockchip/clk-cpu.c:148", clksel->val, cpuclk->reg_base + clksel->reg);
 	}
 }
 
@@ -196,7 +196,7 @@ static int rockchip_cpuclk_pre_rate_change(struct rockchip_cpuclk *cpuclk,
 			 __func__, alt_div, alt_prate, ndata->old_rate);
 
 		for (i = 0; i < reg_data->num_cores; i++) {
-			writel(HIWORD_UPDATE(alt_div, reg_data->div_core_mask[i],
+			pete_writel("drivers/clk/rockchip/clk-cpu.c:199", HIWORD_UPDATE(alt_div, reg_data->div_core_mask[i],
 					     reg_data->div_core_shift[i]),
 			       cpuclk->reg_base + reg_data->core_reg[i]);
 		}
@@ -206,12 +206,12 @@ static int rockchip_cpuclk_pre_rate_change(struct rockchip_cpuclk *cpuclk,
 
 	/* select alternate parent */
 	if (reg_data->mux_core_reg)
-		writel(HIWORD_UPDATE(reg_data->mux_core_alt,
+		pete_writel("drivers/clk/rockchip/clk-cpu.c:209", HIWORD_UPDATE(reg_data->mux_core_alt,
 				     reg_data->mux_core_mask,
 				     reg_data->mux_core_shift),
 		       cpuclk->reg_base + reg_data->mux_core_reg);
 	else
-		writel(HIWORD_UPDATE(reg_data->mux_core_alt,
+		pete_writel("drivers/clk/rockchip/clk-cpu.c:214", HIWORD_UPDATE(reg_data->mux_core_alt,
 				     reg_data->mux_core_mask,
 				     reg_data->mux_core_shift),
 		       cpuclk->reg_base + reg_data->core_reg[0]);
@@ -248,12 +248,12 @@ static int rockchip_cpuclk_post_rate_change(struct rockchip_cpuclk *cpuclk,
 	 */
 
 	if (reg_data->mux_core_reg)
-		writel(HIWORD_UPDATE(reg_data->mux_core_main,
+		pete_writel("drivers/clk/rockchip/clk-cpu.c:251", HIWORD_UPDATE(reg_data->mux_core_main,
 				     reg_data->mux_core_mask,
 				     reg_data->mux_core_shift),
 		       cpuclk->reg_base + reg_data->mux_core_reg);
 	else
-		writel(HIWORD_UPDATE(reg_data->mux_core_main,
+		pete_writel("drivers/clk/rockchip/clk-cpu.c:256", HIWORD_UPDATE(reg_data->mux_core_main,
 				     reg_data->mux_core_mask,
 				     reg_data->mux_core_shift),
 		       cpuclk->reg_base + reg_data->core_reg[0]);
@@ -262,7 +262,7 @@ static int rockchip_cpuclk_post_rate_change(struct rockchip_cpuclk *cpuclk,
 
 	/* remove dividers */
 	for (i = 0; i < reg_data->num_cores; i++) {
-		writel(HIWORD_UPDATE(0, reg_data->div_core_mask[i],
+		pete_writel("drivers/clk/rockchip/clk-cpu.c:265", HIWORD_UPDATE(0, reg_data->div_core_mask[i],
 				     reg_data->div_core_shift[i]),
 		       cpuclk->reg_base + reg_data->core_reg[i]);
 	}

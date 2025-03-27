@@ -228,22 +228,22 @@ static inline struct erdma_dev *to_edev(struct ib_device *ibdev)
 
 static inline u32 erdma_reg_read32(struct erdma_dev *dev, u32 reg)
 {
-	return readl(dev->func_bar + reg);
+	return pete_readl("drivers/infiniband/hw/erdma/erdma.h:231", dev->func_bar + reg);
 }
 
 static inline u64 erdma_reg_read64(struct erdma_dev *dev, u32 reg)
 {
-	return readq(dev->func_bar + reg);
+	return pete_readq("drivers/infiniband/hw/erdma/erdma.h:236", dev->func_bar + reg);
 }
 
 static inline void erdma_reg_write32(struct erdma_dev *dev, u32 reg, u32 value)
 {
-	writel(value, dev->func_bar + reg);
+	pete_writel("drivers/infiniband/hw/erdma/erdma.h:241", value, dev->func_bar + reg);
 }
 
 static inline void erdma_reg_write64(struct erdma_dev *dev, u32 reg, u64 value)
 {
-	writeq(value, dev->func_bar + reg);
+	pete_writeq("drivers/infiniband/hw/erdma/erdma.h:246", value, dev->func_bar + reg);
 }
 
 static inline u32 erdma_reg_read32_filed(struct erdma_dev *dev, u32 reg,

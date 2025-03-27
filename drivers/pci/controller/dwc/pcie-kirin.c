@@ -139,13 +139,13 @@ struct hi3660_pcie_phy {
 static inline void kirin_apb_phy_writel(struct hi3660_pcie_phy *hi3660_pcie_phy,
 					u32 val, u32 reg)
 {
-	writel(val, hi3660_pcie_phy->base + reg);
+	pete_writel("drivers/pci/controller/dwc/pcie-kirin.c:142", val, hi3660_pcie_phy->base + reg);
 }
 
 static inline u32 kirin_apb_phy_readl(struct hi3660_pcie_phy *hi3660_pcie_phy,
 				      u32 reg)
 {
-	return readl(hi3660_pcie_phy->base + reg);
+	return pete_readl("drivers/pci/controller/dwc/pcie-kirin.c:148", hi3660_pcie_phy->base + reg);
 }
 
 static int hi3660_pcie_phy_get_clk(struct hi3660_pcie_phy *phy)

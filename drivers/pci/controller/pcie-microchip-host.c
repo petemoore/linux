@@ -943,30 +943,30 @@ static void mc_pcie_setup_window(void __iomem *bridge_base_addr, u32 index,
 	else
 		val = PCIE_TX_RX_INTERFACE;
 
-	writel(val, bridge_base_addr + (index * ATR_ENTRY_SIZE) +
+	pete_writel("drivers/pci/controller/pcie-microchip-host.c:946", val, bridge_base_addr + (index * ATR_ENTRY_SIZE) +
 	       ATR0_AXI4_SLV0_TRSL_PARAM);
 
 	val = lower_32_bits(axi_addr) | (atr_sz << ATR_SIZE_SHIFT) |
 			    ATR_IMPL_ENABLE;
-	writel(val, bridge_base_addr + (index * ATR_ENTRY_SIZE) +
+	pete_writel("drivers/pci/controller/pcie-microchip-host.c:951", val, bridge_base_addr + (index * ATR_ENTRY_SIZE) +
 	       ATR0_AXI4_SLV0_SRCADDR_PARAM);
 
 	val = upper_32_bits(axi_addr);
-	writel(val, bridge_base_addr + (index * ATR_ENTRY_SIZE) +
+	pete_writel("drivers/pci/controller/pcie-microchip-host.c:955", val, bridge_base_addr + (index * ATR_ENTRY_SIZE) +
 	       ATR0_AXI4_SLV0_SRC_ADDR);
 
 	val = lower_32_bits(pci_addr);
-	writel(val, bridge_base_addr + (index * ATR_ENTRY_SIZE) +
+	pete_writel("drivers/pci/controller/pcie-microchip-host.c:959", val, bridge_base_addr + (index * ATR_ENTRY_SIZE) +
 	       ATR0_AXI4_SLV0_TRSL_ADDR_LSB);
 
 	val = upper_32_bits(pci_addr);
-	writel(val, bridge_base_addr + (index * ATR_ENTRY_SIZE) +
+	pete_writel("drivers/pci/controller/pcie-microchip-host.c:963", val, bridge_base_addr + (index * ATR_ENTRY_SIZE) +
 	       ATR0_AXI4_SLV0_TRSL_ADDR_UDW);
 
-	val = readl(bridge_base_addr + ATR0_PCIE_WIN0_SRCADDR_PARAM);
+	val = pete_readl("drivers/pci/controller/pcie-microchip-host.c:966", bridge_base_addr + ATR0_PCIE_WIN0_SRCADDR_PARAM);
 	val |= (ATR0_PCIE_ATR_SIZE << ATR0_PCIE_ATR_SIZE_SHIFT);
-	writel(val, bridge_base_addr + ATR0_PCIE_WIN0_SRCADDR_PARAM);
-	writel(0, bridge_base_addr + ATR0_PCIE_WIN0_SRC_ADDR);
+	pete_writel("drivers/pci/controller/pcie-microchip-host.c:968", val, bridge_base_addr + ATR0_PCIE_WIN0_SRCADDR_PARAM);
+	pete_writel("drivers/pci/controller/pcie-microchip-host.c:969", 0, bridge_base_addr + ATR0_PCIE_WIN0_SRC_ADDR);
 }
 
 static int mc_pcie_setup_windows(struct platform_device *pdev,
@@ -1159,12 +1159,12 @@ static int mc_host_probe(struct platform_device *pdev)
 	bridge_base_addr = port->axi_base_addr + MC_PCIE_BRIDGE_ADDR;
 
 	/* Allow enabling MSI by disabling MSI-X */
-	val = readl(bridge_base_addr + PCIE_PCI_IRQ_DW0);
+	val = pete_readl("drivers/pci/controller/pcie-microchip-host.c:1162", bridge_base_addr + PCIE_PCI_IRQ_DW0);
 	val &= ~MSIX_CAP_MASK;
-	writel(val, bridge_base_addr + PCIE_PCI_IRQ_DW0);
+	pete_writel("drivers/pci/controller/pcie-microchip-host.c:1164", val, bridge_base_addr + PCIE_PCI_IRQ_DW0);
 
 	/* Pick num vectors from bitfile programmed onto FPGA fabric */
-	val = readl(bridge_base_addr + PCIE_PCI_IRQ_DW0);
+	val = pete_readl("drivers/pci/controller/pcie-microchip-host.c:1167", bridge_base_addr + PCIE_PCI_IRQ_DW0);
 	val &= NUM_MSI_MSGS_MASK;
 	val >>= NUM_MSI_MSGS_SHIFT;
 

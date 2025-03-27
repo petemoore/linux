@@ -511,7 +511,7 @@ static int mlxbf_tmfifo_get_rx_avail(struct mlxbf_tmfifo *fifo)
 {
 	u64 sts;
 
-	sts = readq(fifo->rx.sts);
+	sts = pete_readq("drivers/platform/mellanox/mlxbf-tmfifo.c:514", fifo->rx.sts);
 	return FIELD_GET(MLXBF_TMFIFO_RX_STS__COUNT_MASK, sts);
 }
 
@@ -528,7 +528,7 @@ static int mlxbf_tmfifo_get_tx_avail(struct mlxbf_tmfifo *fifo, int vdev_id)
 	else
 		tx_reserve = 1;
 
-	sts = readq(fifo->tx.sts);
+	sts = pete_readq("drivers/platform/mellanox/mlxbf-tmfifo.c:531", fifo->tx.sts);
 	count = FIELD_GET(MLXBF_TMFIFO_TX_STS__COUNT_MASK, sts);
 	return fifo->tx_fifo_size - tx_reserve - count;
 }
@@ -564,7 +564,7 @@ static void mlxbf_tmfifo_console_tx(struct mlxbf_tmfifo *fifo, int avail)
 	/* Write header. */
 	hdr.type = VIRTIO_ID_CONSOLE;
 	hdr.len = htons(size);
-	writeq(*(u64 *)&hdr, fifo->tx.data);
+	pete_writeq("drivers/platform/mellanox/mlxbf-tmfifo.c:567", *(u64 *)&hdr, fifo->tx.data);
 
 	/* Use spin-lock to protect the 'cons->tx_buf'. */
 	spin_lock_irqsave(&fifo->spin_lock[0], flags);
@@ -581,7 +581,7 @@ static void mlxbf_tmfifo_console_tx(struct mlxbf_tmfifo *fifo, int avail)
 			memcpy((u8 *)&data + seg, cons->tx_buf.buf,
 			       sizeof(u64) - seg);
 		}
-		writeq(data, fifo->tx.data);
+		pete_writeq("drivers/platform/mellanox/mlxbf-tmfifo.c:584", data, fifo->tx.data);
 
 		if (size >= sizeof(u64)) {
 			cons->tx_buf.tail = (cons->tx_buf.tail + sizeof(u64)) %
@@ -612,7 +612,7 @@ static void mlxbf_tmfifo_rxtx_word(struct mlxbf_tmfifo_vring *vring,
 
 	/* Read a word from FIFO for Rx. */
 	if (is_rx)
-		data = readq(fifo->rx.data);
+		data = pete_readq("drivers/platform/mellanox/mlxbf-tmfifo.c:615", fifo->rx.data);
 
 	if (vring->cur_len + sizeof(u64) <= len) {
 		/* The whole word. */
@@ -641,7 +641,7 @@ static void mlxbf_tmfifo_rxtx_word(struct mlxbf_tmfifo_vring *vring,
 
 	/* Write the word into FIFO for Tx. */
 	if (!is_rx)
-		writeq(data, fifo->tx.data);
+		pete_writeq("drivers/platform/mellanox/mlxbf-tmfifo.c:644", data, fifo->tx.data);
 }
 
 /*
@@ -664,7 +664,7 @@ static void mlxbf_tmfifo_rxtx_header(struct mlxbf_tmfifo_vring *vring,
 	/* Read/Write packet header. */
 	if (is_rx) {
 		/* Drain one word from the FIFO. */
-		*(u64 *)&hdr = readq(fifo->rx.data);
+		*(u64 *)&hdr = pete_readq("drivers/platform/mellanox/mlxbf-tmfifo.c:667", fifo->rx.data);
 
 		/* Skip the length 0 packets (keepalive). */
 		if (hdr.len == 0)
@@ -717,7 +717,7 @@ static void mlxbf_tmfifo_rxtx_header(struct mlxbf_tmfifo_vring *vring,
 		hdr.type = (vring->vdev_id == VIRTIO_ID_NET) ?
 			    VIRTIO_ID_NET : VIRTIO_ID_CONSOLE;
 		hdr.len = htons(vring->pkt_len - hdr_len);
-		writeq(*(u64 *)&hdr, fifo->tx.data);
+		pete_writeq("drivers/platform/mellanox/mlxbf-tmfifo.c:720", *(u64 *)&hdr, fifo->tx.data);
 	}
 
 	vring->cur_len = hdr_len;
@@ -907,7 +907,7 @@ retry:
 		if (!is_rx) {
 			vring->tx_timeout = 0;
 			while (vring->rem_padding >= sizeof(u64)) {
-				writeq(0, vring->fifo->tx.data);
+				pete_writeq("drivers/platform/mellanox/mlxbf-tmfifo.c:910", 0, vring->fifo->tx.data);
 				vring->rem_padding -= sizeof(u64);
 				if (--avail == 0)
 					goto retry;
@@ -1293,7 +1293,7 @@ static void mlxbf_tmfifo_set_threshold(struct mlxbf_tmfifo *fifo)
 	u64 ctl;
 
 	/* Get Tx FIFO size and set the low/high watermark. */
-	ctl = readq(fifo->tx.ctl);
+	ctl = pete_readq("drivers/platform/mellanox/mlxbf-tmfifo.c:1296", fifo->tx.ctl);
 	fifo->tx_fifo_size =
 		FIELD_GET(MLXBF_TMFIFO_TX_CTL__MAX_ENTRIES_MASK, ctl);
 	ctl = (ctl & ~MLXBF_TMFIFO_TX_CTL__LWM_MASK) |
@@ -1302,17 +1302,17 @@ static void mlxbf_tmfifo_set_threshold(struct mlxbf_tmfifo *fifo)
 	ctl = (ctl & ~MLXBF_TMFIFO_TX_CTL__HWM_MASK) |
 		FIELD_PREP(MLXBF_TMFIFO_TX_CTL__HWM_MASK,
 			   fifo->tx_fifo_size - 1);
-	writeq(ctl, fifo->tx.ctl);
+	pete_writeq("drivers/platform/mellanox/mlxbf-tmfifo.c:1305", ctl, fifo->tx.ctl);
 
 	/* Get Rx FIFO size and set the low/high watermark. */
-	ctl = readq(fifo->rx.ctl);
+	ctl = pete_readq("drivers/platform/mellanox/mlxbf-tmfifo.c:1308", fifo->rx.ctl);
 	fifo->rx_fifo_size =
 		FIELD_GET(MLXBF_TMFIFO_RX_CTL__MAX_ENTRIES_MASK, ctl);
 	ctl = (ctl & ~MLXBF_TMFIFO_RX_CTL__LWM_MASK) |
 		FIELD_PREP(MLXBF_TMFIFO_RX_CTL__LWM_MASK, 0);
 	ctl = (ctl & ~MLXBF_TMFIFO_RX_CTL__HWM_MASK) |
 		FIELD_PREP(MLXBF_TMFIFO_RX_CTL__HWM_MASK, 1);
-	writeq(ctl, fifo->rx.ctl);
+	pete_writeq("drivers/platform/mellanox/mlxbf-tmfifo.c:1315", ctl, fifo->rx.ctl);
 }
 
 static void mlxbf_tmfifo_cleanup(struct mlxbf_tmfifo *fifo)

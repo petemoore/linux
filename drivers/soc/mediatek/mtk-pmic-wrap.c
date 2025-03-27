@@ -1392,12 +1392,12 @@ struct pmic_wrapper_type {
 
 static u32 pwrap_readl(struct pmic_wrapper *wrp, enum pwrap_regs reg)
 {
-	return readl(wrp->base + wrp->master->regs[reg]);
+	return pete_readl("drivers/soc/mediatek/mtk-pmic-wrap.c:1395", wrp->base + wrp->master->regs[reg]);
 }
 
 static void pwrap_writel(struct pmic_wrapper *wrp, u32 val, enum pwrap_regs reg)
 {
-	writel(val, wrp->base + wrp->master->regs[reg]);
+	pete_writel("drivers/soc/mediatek/mtk-pmic-wrap.c:1400", val, wrp->base + wrp->master->regs[reg]);
 }
 
 static u32 pwrap_get_fsm_state(struct pmic_wrapper *wrp)
@@ -1964,13 +1964,13 @@ static int pwrap_mt8135_init_soc_specific(struct pmic_wrapper *wrp)
 	/* enable pwrap events and pwrap bridge in AP side */
 	pwrap_writel(wrp, 0x1, PWRAP_EVENT_IN_EN);
 	pwrap_writel(wrp, 0xffff, PWRAP_EVENT_DST_EN);
-	writel(0x7f, wrp->bridge_base + PWRAP_MT8135_BRIDGE_IORD_ARB_EN);
-	writel(0x1, wrp->bridge_base + PWRAP_MT8135_BRIDGE_WACS3_EN);
-	writel(0x1, wrp->bridge_base + PWRAP_MT8135_BRIDGE_WACS4_EN);
-	writel(0x1, wrp->bridge_base + PWRAP_MT8135_BRIDGE_WDT_UNIT);
-	writel(0xffff, wrp->bridge_base + PWRAP_MT8135_BRIDGE_WDT_SRC_EN);
-	writel(0x1, wrp->bridge_base + PWRAP_MT8135_BRIDGE_TIMER_EN);
-	writel(0x7ff, wrp->bridge_base + PWRAP_MT8135_BRIDGE_INT_EN);
+	pete_writel("drivers/soc/mediatek/mtk-pmic-wrap.c:1967", 0x7f, wrp->bridge_base + PWRAP_MT8135_BRIDGE_IORD_ARB_EN);
+	pete_writel("drivers/soc/mediatek/mtk-pmic-wrap.c:1968", 0x1, wrp->bridge_base + PWRAP_MT8135_BRIDGE_WACS3_EN);
+	pete_writel("drivers/soc/mediatek/mtk-pmic-wrap.c:1969", 0x1, wrp->bridge_base + PWRAP_MT8135_BRIDGE_WACS4_EN);
+	pete_writel("drivers/soc/mediatek/mtk-pmic-wrap.c:1970", 0x1, wrp->bridge_base + PWRAP_MT8135_BRIDGE_WDT_UNIT);
+	pete_writel("drivers/soc/mediatek/mtk-pmic-wrap.c:1971", 0xffff, wrp->bridge_base + PWRAP_MT8135_BRIDGE_WDT_SRC_EN);
+	pete_writel("drivers/soc/mediatek/mtk-pmic-wrap.c:1972", 0x1, wrp->bridge_base + PWRAP_MT8135_BRIDGE_TIMER_EN);
+	pete_writel("drivers/soc/mediatek/mtk-pmic-wrap.c:1973", 0x7ff, wrp->bridge_base + PWRAP_MT8135_BRIDGE_INT_EN);
 
 	/* enable PMIC event out and sources */
 	if (pwrap_write(wrp, wrp->slave->dew_regs[PWRAP_DEW_EVENT_OUT_EN],
@@ -2135,8 +2135,8 @@ static int pwrap_init(struct pmic_wrapper *wrp)
 	pwrap_writel(wrp, 1, PWRAP_INIT_DONE1);
 
 	if (HAS_CAP(wrp->master->caps, PWRAP_CAP_BRIDGE)) {
-		writel(1, wrp->bridge_base + PWRAP_MT8135_BRIDGE_INIT_DONE3);
-		writel(1, wrp->bridge_base + PWRAP_MT8135_BRIDGE_INIT_DONE4);
+		pete_writel("drivers/soc/mediatek/mtk-pmic-wrap.c:2138", 1, wrp->bridge_base + PWRAP_MT8135_BRIDGE_INIT_DONE3);
+		pete_writel("drivers/soc/mediatek/mtk-pmic-wrap.c:2139", 1, wrp->bridge_base + PWRAP_MT8135_BRIDGE_INIT_DONE4);
 	}
 
 	return 0;

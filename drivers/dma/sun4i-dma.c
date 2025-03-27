@@ -902,9 +902,9 @@ static int sun4i_dma_terminate_all(struct dma_chan *chan)
 	 */
 	if (pchan) {
 		if (pchan->is_dedicated)
-			writel(0, pchan->base + SUN4I_DDMA_CFG_REG);
+			pete_writel("drivers/dma/sun4i-dma.c:905", 0, pchan->base + SUN4I_DDMA_CFG_REG);
 		else
-			writel(0, pchan->base + SUN4I_NDMA_CFG_REG);
+			pete_writel("drivers/dma/sun4i-dma.c:907", 0, pchan->base + SUN4I_NDMA_CFG_REG);
 		set_pchan_interrupt(priv, pchan, 0, 0);
 		release_pchan(priv, pchan);
 	}
@@ -996,9 +996,9 @@ static enum dma_status sun4i_dma_tx_status(struct dma_chan *chan,
 	if (promise && pchan) {
 		bytes -= promise->len;
 		if (pchan->is_dedicated)
-			bytes += readl(pchan->base + SUN4I_DDMA_BYTE_COUNT_REG);
+			bytes += pete_readl("drivers/dma/sun4i-dma.c:999", pchan->base + SUN4I_DDMA_BYTE_COUNT_REG);
 		else
-			bytes += readl(pchan->base + SUN4I_NDMA_BYTE_COUNT_REG);
+			bytes += pete_readl("drivers/dma/sun4i-dma.c:1001", pchan->base + SUN4I_NDMA_BYTE_COUNT_REG);
 	}
 
 exit:
@@ -1237,8 +1237,8 @@ static int sun4i_dma_probe(struct platform_device *pdev)
 	 * Make sure the IRQs are all disabled and accounted for. The bootloader
 	 * likes to leave these dirty
 	 */
-	writel(0, priv->base + SUN4I_DMA_IRQ_ENABLE_REG);
-	writel(0xFFFFFFFF, priv->base + SUN4I_DMA_IRQ_PENDING_STATUS_REG);
+	pete_writel("drivers/dma/sun4i-dma.c:1240", 0, priv->base + SUN4I_DMA_IRQ_ENABLE_REG);
+	pete_writel("drivers/dma/sun4i-dma.c:1241", 0xFFFFFFFF, priv->base + SUN4I_DMA_IRQ_PENDING_STATUS_REG);
 
 	ret = devm_request_irq(&pdev->dev, priv->irq, sun4i_dma_interrupt,
 			       0, dev_name(&pdev->dev), priv);

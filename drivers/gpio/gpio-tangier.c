@@ -85,7 +85,7 @@ static int tng_gpio_get(struct gpio_chip *chip, unsigned int offset)
 
 	gplr = gpio_reg_and_bit(chip, offset, GPLR, &shift);
 
-	return !!(readl(gplr) & BIT(shift));
+	return !!(pete_readl("drivers/gpio/gpio-tangier.c:88", gplr) & BIT(shift));
 }
 
 static void tng_gpio_set(struct gpio_chip *chip, unsigned int offset, int value)
@@ -99,7 +99,7 @@ static void tng_gpio_set(struct gpio_chip *chip, unsigned int offset, int value)
 
 	raw_spin_lock_irqsave(&priv->lock, flags);
 
-	writel(BIT(shift), reg);
+	pete_writel("drivers/gpio/gpio-tangier.c:102", BIT(shift), reg);
 
 	raw_spin_unlock_irqrestore(&priv->lock, flags);
 }
@@ -116,9 +116,9 @@ static int tng_gpio_direction_input(struct gpio_chip *chip, unsigned int offset)
 
 	raw_spin_lock_irqsave(&priv->lock, flags);
 
-	value = readl(gpdr);
+	value = pete_readl("drivers/gpio/gpio-tangier.c:119", gpdr);
 	value &= ~BIT(shift);
-	writel(value, gpdr);
+	pete_writel("drivers/gpio/gpio-tangier.c:121", value, gpdr);
 
 	raw_spin_unlock_irqrestore(&priv->lock, flags);
 
@@ -138,9 +138,9 @@ static int tng_gpio_direction_output(struct gpio_chip *chip, unsigned int offset
 
 	raw_spin_lock_irqsave(&priv->lock, flags);
 
-	value = readl(gpdr);
+	value = pete_readl("drivers/gpio/gpio-tangier.c:141", gpdr);
 	value |= BIT(shift);
-	writel(value, gpdr);
+	pete_writel("drivers/gpio/gpio-tangier.c:143", value, gpdr);
 
 	raw_spin_unlock_irqrestore(&priv->lock, flags);
 
@@ -154,7 +154,7 @@ static int tng_gpio_get_direction(struct gpio_chip *chip, unsigned int offset)
 
 	gpdr = gpio_reg_and_bit(chip, offset, GPDR, &shift);
 
-	if (readl(gpdr) & BIT(shift))
+	if (pete_readl("drivers/gpio/gpio-tangier.c:157", gpdr) & BIT(shift))
 		return GPIO_LINE_DIRECTION_OUT;
 
 	return GPIO_LINE_DIRECTION_IN;
@@ -173,12 +173,12 @@ static int tng_gpio_set_debounce(struct gpio_chip *chip, unsigned int offset,
 
 	raw_spin_lock_irqsave(&priv->lock, flags);
 
-	value = readl(gfbr);
+	value = pete_readl("drivers/gpio/gpio-tangier.c:176", gfbr);
 	if (debounce)
 		value &= ~BIT(shift);
 	else
 		value |= BIT(shift);
-	writel(value, gfbr);
+	pete_writel("drivers/gpio/gpio-tangier.c:181", value, gfbr);
 
 	raw_spin_unlock_irqrestore(&priv->lock, flags);
 
@@ -215,7 +215,7 @@ static void tng_irq_ack(struct irq_data *d)
 	gisr = gpio_reg_and_bit(&priv->chip, gpio, GISR, &shift);
 
 	raw_spin_lock_irqsave(&priv->lock, flags);
-	writel(BIT(shift), gisr);
+	pete_writel("drivers/gpio/gpio-tangier.c:218", BIT(shift), gisr);
 	raw_spin_unlock_irqrestore(&priv->lock, flags);
 }
 
@@ -230,12 +230,12 @@ static void tng_irq_unmask_mask(struct tng_gpio *priv, u32 gpio, bool unmask)
 
 	raw_spin_lock_irqsave(&priv->lock, flags);
 
-	value = readl(gimr);
+	value = pete_readl("drivers/gpio/gpio-tangier.c:233", gimr);
 	if (unmask)
 		value |= BIT(shift);
 	else
 		value &= ~BIT(shift);
-	writel(value, gimr);
+	pete_writel("drivers/gpio/gpio-tangier.c:238", value, gimr);
 
 	raw_spin_unlock_irqrestore(&priv->lock, flags);
 }
@@ -275,41 +275,41 @@ static int tng_irq_set_type(struct irq_data *d, unsigned int type)
 
 	raw_spin_lock_irqsave(&priv->lock, flags);
 
-	value = readl(grer);
+	value = pete_readl("drivers/gpio/gpio-tangier.c:278", grer);
 	if (type & IRQ_TYPE_EDGE_RISING)
 		value |= BIT(shift);
 	else
 		value &= ~BIT(shift);
-	writel(value, grer);
+	pete_writel("drivers/gpio/gpio-tangier.c:283", value, grer);
 
-	value = readl(gfer);
+	value = pete_readl("drivers/gpio/gpio-tangier.c:285", gfer);
 	if (type & IRQ_TYPE_EDGE_FALLING)
 		value |= BIT(shift);
 	else
 		value &= ~BIT(shift);
-	writel(value, gfer);
+	pete_writel("drivers/gpio/gpio-tangier.c:290", value, gfer);
 
 	/*
 	 * To prevent glitches from triggering an unintended level interrupt,
 	 * configure GLPR register first and then configure GITR.
 	 */
-	value = readl(glpr);
+	value = pete_readl("drivers/gpio/gpio-tangier.c:296", glpr);
 	if (type & IRQ_TYPE_LEVEL_LOW)
 		value |= BIT(shift);
 	else
 		value &= ~BIT(shift);
-	writel(value, glpr);
+	pete_writel("drivers/gpio/gpio-tangier.c:301", value, glpr);
 
 	if (type & IRQ_TYPE_LEVEL_MASK) {
-		value = readl(gitr);
+		value = pete_readl("drivers/gpio/gpio-tangier.c:304", gitr);
 		value |= BIT(shift);
-		writel(value, gitr);
+		pete_writel("drivers/gpio/gpio-tangier.c:306", value, gitr);
 
 		irq_set_handler_locked(d, handle_level_irq);
 	} else if (type & IRQ_TYPE_EDGE_BOTH) {
-		value = readl(gitr);
+		value = pete_readl("drivers/gpio/gpio-tangier.c:310", gitr);
 		value &= ~BIT(shift);
-		writel(value, gitr);
+		pete_writel("drivers/gpio/gpio-tangier.c:312", value, gitr);
 
 		irq_set_handler_locked(d, handle_edge_irq);
 	}
@@ -333,14 +333,14 @@ static int tng_irq_set_wake(struct irq_data *d, unsigned int on)
 	raw_spin_lock_irqsave(&priv->lock, flags);
 
 	/* Clear the existing wake status */
-	writel(BIT(shift), gwsr);
+	pete_writel("drivers/gpio/gpio-tangier.c:336", BIT(shift), gwsr);
 
-	value = readl(gwmr);
+	value = pete_readl("drivers/gpio/gpio-tangier.c:338", gwmr);
 	if (on)
 		value |= BIT(shift);
 	else
 		value &= ~BIT(shift);
-	writel(value, gwmr);
+	pete_writel("drivers/gpio/gpio-tangier.c:343", value, gwmr);
 
 	raw_spin_unlock_irqrestore(&priv->lock, flags);
 
@@ -374,8 +374,8 @@ static void tng_irq_handler(struct irq_desc *desc)
 		void __iomem *gimr = gpio_reg(&priv->chip, base, GIMR);
 		unsigned long pending, enabled;
 
-		pending = readl(gisr);
-		enabled = readl(gimr);
+		pending = pete_readl("drivers/gpio/gpio-tangier.c:377", gisr);
+		enabled = pete_readl("drivers/gpio/gpio-tangier.c:378", gimr);
 
 		/* Only interrupts that are enabled */
 		pending &= enabled;
@@ -396,11 +396,11 @@ static int tng_irq_init_hw(struct gpio_chip *chip)
 	for (base = 0; base < priv->chip.ngpio; base += 32) {
 		/* Clear the rising-edge detect register */
 		reg = gpio_reg(&priv->chip, base, GRER);
-		writel(0, reg);
+		pete_writel("drivers/gpio/gpio-tangier.c:399", 0, reg);
 
 		/* Clear the falling-edge detect register */
 		reg = gpio_reg(&priv->chip, base, GFER);
-		writel(0, reg);
+		pete_writel("drivers/gpio/gpio-tangier.c:403", 0, reg);
 	}
 
 	return 0;
@@ -491,14 +491,14 @@ int tng_gpio_suspend(struct device *dev)
 
 	for (base = 0; base < priv->chip.ngpio; base += 32, ctx++) {
 		/* GPLR is RO, values read will be restored using GPSR */
-		ctx->level = readl(gpio_reg(&priv->chip, base, GPLR));
+		ctx->level = pete_readl("drivers/gpio/gpio-tangier.c:494", gpio_reg(&priv->chip, base, GPLR));
 
-		ctx->gpdr = readl(gpio_reg(&priv->chip, base, GPDR));
-		ctx->grer = readl(gpio_reg(&priv->chip, base, GRER));
-		ctx->gfer = readl(gpio_reg(&priv->chip, base, GFER));
-		ctx->gimr = readl(gpio_reg(&priv->chip, base, GIMR));
+		ctx->gpdr = pete_readl("drivers/gpio/gpio-tangier.c:496", gpio_reg(&priv->chip, base, GPDR));
+		ctx->grer = pete_readl("drivers/gpio/gpio-tangier.c:497", gpio_reg(&priv->chip, base, GRER));
+		ctx->gfer = pete_readl("drivers/gpio/gpio-tangier.c:498", gpio_reg(&priv->chip, base, GFER));
+		ctx->gimr = pete_readl("drivers/gpio/gpio-tangier.c:499", gpio_reg(&priv->chip, base, GIMR));
 
-		ctx->gwmr = readl(gpio_reg(&priv->chip, base, priv->wake_regs.gwmr));
+		ctx->gwmr = pete_readl("drivers/gpio/gpio-tangier.c:501", gpio_reg(&priv->chip, base, priv->wake_regs.gwmr));
 	}
 
 	raw_spin_unlock_irqrestore(&priv->lock, flags);
@@ -518,14 +518,14 @@ int tng_gpio_resume(struct device *dev)
 
 	for (base = 0; base < priv->chip.ngpio; base += 32, ctx++) {
 		/* GPLR is RO, values read will be restored using GPSR */
-		writel(ctx->level, gpio_reg(&priv->chip, base, GPSR));
+		pete_writel("drivers/gpio/gpio-tangier.c:521", ctx->level, gpio_reg(&priv->chip, base, GPSR));
 
-		writel(ctx->gpdr, gpio_reg(&priv->chip, base, GPDR));
-		writel(ctx->grer, gpio_reg(&priv->chip, base, GRER));
-		writel(ctx->gfer, gpio_reg(&priv->chip, base, GFER));
-		writel(ctx->gimr, gpio_reg(&priv->chip, base, GIMR));
+		pete_writel("drivers/gpio/gpio-tangier.c:523", ctx->gpdr, gpio_reg(&priv->chip, base, GPDR));
+		pete_writel("drivers/gpio/gpio-tangier.c:524", ctx->grer, gpio_reg(&priv->chip, base, GRER));
+		pete_writel("drivers/gpio/gpio-tangier.c:525", ctx->gfer, gpio_reg(&priv->chip, base, GFER));
+		pete_writel("drivers/gpio/gpio-tangier.c:526", ctx->gimr, gpio_reg(&priv->chip, base, GIMR));
 
-		writel(ctx->gwmr, gpio_reg(&priv->chip, base, priv->wake_regs.gwmr));
+		pete_writel("drivers/gpio/gpio-tangier.c:528", ctx->gwmr, gpio_reg(&priv->chip, base, priv->wake_regs.gwmr));
 	}
 
 	raw_spin_unlock_irqrestore(&priv->lock, flags);

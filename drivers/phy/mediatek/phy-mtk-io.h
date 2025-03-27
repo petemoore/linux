@@ -13,27 +13,27 @@
 
 static inline void mtk_phy_clear_bits(void __iomem *reg, u32 bits)
 {
-	u32 tmp = readl(reg);
+	u32 tmp = pete_readl("drivers/phy/mediatek/phy-mtk-io.h:16", reg);
 
 	tmp &= ~bits;
-	writel(tmp, reg);
+	pete_writel("drivers/phy/mediatek/phy-mtk-io.h:19", tmp, reg);
 }
 
 static inline void mtk_phy_set_bits(void __iomem *reg, u32 bits)
 {
-	u32 tmp = readl(reg);
+	u32 tmp = pete_readl("drivers/phy/mediatek/phy-mtk-io.h:24", reg);
 
 	tmp |= bits;
-	writel(tmp, reg);
+	pete_writel("drivers/phy/mediatek/phy-mtk-io.h:27", tmp, reg);
 }
 
 static inline void mtk_phy_update_bits(void __iomem *reg, u32 mask, u32 val)
 {
-	u32 tmp = readl(reg);
+	u32 tmp = pete_readl("drivers/phy/mediatek/phy-mtk-io.h:32", reg);
 
 	tmp &= ~mask;
 	tmp |= val & mask;
-	writel(tmp, reg);
+	pete_writel("drivers/phy/mediatek/phy-mtk-io.h:36", tmp, reg);
 }
 
 /* field @mask shall be constant and continuous */

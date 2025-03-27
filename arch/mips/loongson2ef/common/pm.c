@@ -75,7 +75,7 @@ int __weak wakeup_loongson(void)
 static void wait_for_wakeup_events(void)
 {
 	while (!wakeup_loongson())
-		writel(readl(LOONGSON_CHIPCFG) & ~0x7, LOONGSON_CHIPCFG);
+		pete_writel("arch/mips/loongson2ef/common/pm.c:78", pete_readl("arch/mips/loongson2ef/common/pm.c:78", LOONGSON_CHIPCFG) & ~0x7, LOONGSON_CHIPCFG);
 }
 
 /*
@@ -98,15 +98,15 @@ static void loongson_suspend_enter(void)
 
 	stop_perf_counters();
 
-	cached_cpu_freq = readl(LOONGSON_CHIPCFG);
+	cached_cpu_freq = pete_readl("arch/mips/loongson2ef/common/pm.c:101", LOONGSON_CHIPCFG);
 
 	/* Put CPU into wait mode */
-	writel(readl(LOONGSON_CHIPCFG) & ~0x7, LOONGSON_CHIPCFG);
+	pete_writel("arch/mips/loongson2ef/common/pm.c:104", pete_readl("arch/mips/loongson2ef/common/pm.c:104", LOONGSON_CHIPCFG) & ~0x7, LOONGSON_CHIPCFG);
 
 	/* wait for the given events to wakeup cpu from wait mode */
 	wait_for_wakeup_events();
 
-	writel(cached_cpu_freq, LOONGSON_CHIPCFG);
+	pete_writel("arch/mips/loongson2ef/common/pm.c:109", cached_cpu_freq, LOONGSON_CHIPCFG);
 
 	mmiowb();
 }

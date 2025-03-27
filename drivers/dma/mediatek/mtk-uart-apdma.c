@@ -120,12 +120,12 @@ static inline struct mtk_uart_apdma_desc *to_mtk_uart_apdma_desc
 static void mtk_uart_apdma_write(struct mtk_chan *c,
 			       unsigned int reg, unsigned int val)
 {
-	writel(val, c->base + reg);
+	pete_writel("drivers/dma/mediatek/mtk-uart-apdma.c:123", val, c->base + reg);
 }
 
 static unsigned int mtk_uart_apdma_read(struct mtk_chan *c, unsigned int reg)
 {
-	return readl(c->base + reg);
+	return pete_readl("drivers/dma/mediatek/mtk-uart-apdma.c:128", c->base + reg);
 }
 
 static void mtk_uart_apdma_desc_free(struct virt_dma_desc *vd)

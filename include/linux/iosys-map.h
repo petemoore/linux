@@ -349,9 +349,9 @@ static inline void iosys_map_memset(struct iosys_map *dst, size_t offset,
 
 #ifdef CONFIG_64BIT
 #define __iosys_map_rd_io_u64_case(val_, vaddr_iomem_)				\
-	u64: val_ = readq(vaddr_iomem_)
+	u64: val_ = pete_readq("include/linux/iosys-map.h:352", vaddr_iomem_)
 #define __iosys_map_wr_io_u64_case(val_, vaddr_iomem_)				\
-	u64: writeq(val_, vaddr_iomem_)
+	u64: pete_writeq("include/linux/iosys-map.h:354", val_, vaddr_iomem_)
 #else
 #define __iosys_map_rd_io_u64_case(val_, vaddr_iomem_)				\
 	u64: memcpy_fromio(&(val_), vaddr_iomem_, sizeof(u64))
@@ -360,18 +360,18 @@ static inline void iosys_map_memset(struct iosys_map *dst, size_t offset,
 #endif
 
 #define __iosys_map_rd_io(val__, vaddr_iomem__, type__) _Generic(val__,		\
-	u8: val__ = readb(vaddr_iomem__),					\
-	u16: val__ = readw(vaddr_iomem__),					\
-	u32: val__ = readl(vaddr_iomem__),					\
+	u8: val__ = pete_readb("include/linux/iosys-map.h:363", vaddr_iomem__),					\
+	u16: val__ = pete_readw("include/linux/iosys-map.h:364", vaddr_iomem__),					\
+	u32: val__ = pete_readl("include/linux/iosys-map.h:365", vaddr_iomem__),					\
 	__iosys_map_rd_io_u64_case(val__, vaddr_iomem__))
 
 #define __iosys_map_rd_sys(val__, vaddr__, type__)				\
 	val__ = READ_ONCE(*(type__ *)(vaddr__))
 
 #define __iosys_map_wr_io(val__, vaddr_iomem__, type__) _Generic(val__,		\
-	u8: writeb(val__, vaddr_iomem__),					\
-	u16: writew(val__, vaddr_iomem__),					\
-	u32: writel(val__, vaddr_iomem__),					\
+	u8: pete_writeb("include/linux/iosys-map.h:372", val__, vaddr_iomem__),					\
+	u16: pete_writew("include/linux/iosys-map.h:373", val__, vaddr_iomem__),					\
+	u32: pete_writel("include/linux/iosys-map.h:374", val__, vaddr_iomem__),					\
 	__iosys_map_wr_io_u64_case(val__, vaddr_iomem__))
 
 #define __iosys_map_wr_sys(val__, vaddr__, type__)				\

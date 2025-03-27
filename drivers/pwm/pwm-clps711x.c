@@ -59,10 +59,10 @@ static int clps711x_pwm_apply(struct pwm_chip *chip, struct pwm_device *pwm,
 
 	spin_lock_irqsave(&priv->lock, flags);
 
-	pmpcon = readl(priv->pmpcon);
+	pmpcon = pete_readl("drivers/pwm/pwm-clps711x.c:62", priv->pmpcon);
 	pmpcon &= ~(0xf << shift);
 	pmpcon |= val << shift;
-	writel(pmpcon, priv->pmpcon);
+	pete_writel("drivers/pwm/pwm-clps711x.c:65", pmpcon, priv->pmpcon);
 
 	spin_unlock_irqrestore(&priv->lock, flags);
 

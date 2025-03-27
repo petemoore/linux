@@ -603,7 +603,7 @@ static int cfi_ctrl_write_complete(struct cfiobject *cfi,
 			addr = (wValue << 16) | wIndex;
 		}
 
-		//writel(reg_value, addr);
+		//pete_writel("drivers/usb/host/dwc_otg/dwc_otg_cfi.c:606", reg_value, addr);
 
 		retval = 0;
 		cfi->need_status_in_complete = 1;

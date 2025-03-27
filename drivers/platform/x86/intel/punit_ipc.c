@@ -50,32 +50,32 @@ static IPC_DEV *punit_ipcdev;
 
 static inline u32 ipc_read_status(IPC_DEV *ipcdev, IPC_TYPE type)
 {
-	return readl(ipcdev->base[type][BASE_IFACE]);
+	return pete_readl("drivers/platform/x86/intel/punit_ipc.c:53", ipcdev->base[type][BASE_IFACE]);
 }
 
 static inline void ipc_write_cmd(IPC_DEV *ipcdev, IPC_TYPE type, u32 cmd)
 {
-	writel(cmd, ipcdev->base[type][BASE_IFACE]);
+	pete_writel("drivers/platform/x86/intel/punit_ipc.c:58", cmd, ipcdev->base[type][BASE_IFACE]);
 }
 
 static inline u32 ipc_read_data_low(IPC_DEV *ipcdev, IPC_TYPE type)
 {
-	return readl(ipcdev->base[type][BASE_DATA] + OFFSET_DATA_LOW);
+	return pete_readl("drivers/platform/x86/intel/punit_ipc.c:63", ipcdev->base[type][BASE_DATA] + OFFSET_DATA_LOW);
 }
 
 static inline u32 ipc_read_data_high(IPC_DEV *ipcdev, IPC_TYPE type)
 {
-	return readl(ipcdev->base[type][BASE_DATA] + OFFSET_DATA_HIGH);
+	return pete_readl("drivers/platform/x86/intel/punit_ipc.c:68", ipcdev->base[type][BASE_DATA] + OFFSET_DATA_HIGH);
 }
 
 static inline void ipc_write_data_low(IPC_DEV *ipcdev, IPC_TYPE type, u32 data)
 {
-	writel(data, ipcdev->base[type][BASE_DATA] + OFFSET_DATA_LOW);
+	pete_writel("drivers/platform/x86/intel/punit_ipc.c:73", data, ipcdev->base[type][BASE_DATA] + OFFSET_DATA_LOW);
 }
 
 static inline void ipc_write_data_high(IPC_DEV *ipcdev, IPC_TYPE type, u32 data)
 {
-	writel(data, ipcdev->base[type][BASE_DATA] + OFFSET_DATA_HIGH);
+	pete_writel("drivers/platform/x86/intel/punit_ipc.c:78", data, ipcdev->base[type][BASE_DATA] + OFFSET_DATA_HIGH);
 }
 
 static const char *ipc_err_string(int error)

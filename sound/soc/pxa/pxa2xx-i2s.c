@@ -100,7 +100,7 @@ static int pxa2xx_i2s_startup(struct snd_pcm_substream *substream,
 		return PTR_ERR(clk_i2s);
 
 	if (!snd_soc_dai_active(cpu_dai))
-		writel(0, i2s_reg_base + SACR0);
+		pete_writel("sound/soc/pxa/pxa2xx-i2s.c:103", 0, i2s_reg_base + SACR0);
 
 	return 0;
 }
@@ -112,7 +112,7 @@ static int pxa_i2s_wait(void)
 
 	/* flush the Rx FIFO */
 	for (i = 0; i < 16; i++)
-		readl(i2s_reg_base + SADR);
+		pete_readl("sound/soc/pxa/pxa2xx-i2s.c:115", i2s_reg_base + SADR);
 	return 0;
 }
 
@@ -172,39 +172,39 @@ static int pxa2xx_i2s_hw_params(struct snd_pcm_substream *substream,
 
 	/* is port used by another stream */
 	if (!(SACR0 & SACR0_ENB)) {
-		writel(0, i2s_reg_base + SACR0);
+		pete_writel("sound/soc/pxa/pxa2xx-i2s.c:175", 0, i2s_reg_base + SACR0);
 		if (pxa_i2s.master)
-			writel(readl(i2s_reg_base + SACR0) | (SACR0_BCKD), i2s_reg_base + SACR0);
+			pete_writel("sound/soc/pxa/pxa2xx-i2s.c:177", pete_readl("sound/soc/pxa/pxa2xx-i2s.c:177", i2s_reg_base + SACR0) | (SACR0_BCKD), i2s_reg_base + SACR0);
 
-		writel(readl(i2s_reg_base + SACR0) | (SACR0_RFTH(14) | SACR0_TFTH(1)), i2s_reg_base + SACR0);
-		writel(readl(i2s_reg_base + SACR1) | (pxa_i2s.fmt), i2s_reg_base + SACR1);
+		pete_writel("sound/soc/pxa/pxa2xx-i2s.c:179", pete_readl("sound/soc/pxa/pxa2xx-i2s.c:179", i2s_reg_base + SACR0) | (SACR0_RFTH(14) | SACR0_TFTH(1)), i2s_reg_base + SACR0);
+		pete_writel("sound/soc/pxa/pxa2xx-i2s.c:180", pete_readl("sound/soc/pxa/pxa2xx-i2s.c:180", i2s_reg_base + SACR1) | (pxa_i2s.fmt), i2s_reg_base + SACR1);
 	}
 	if (substream->stream == SNDRV_PCM_STREAM_PLAYBACK)
-		writel(readl(i2s_reg_base + SAIMR) | (SAIMR_TFS), i2s_reg_base + SAIMR);
+		pete_writel("sound/soc/pxa/pxa2xx-i2s.c:183", pete_readl("sound/soc/pxa/pxa2xx-i2s.c:183", i2s_reg_base + SAIMR) | (SAIMR_TFS), i2s_reg_base + SAIMR);
 	else
-		writel(readl(i2s_reg_base + SAIMR) | (SAIMR_RFS), i2s_reg_base + SAIMR);
+		pete_writel("sound/soc/pxa/pxa2xx-i2s.c:185", pete_readl("sound/soc/pxa/pxa2xx-i2s.c:185", i2s_reg_base + SAIMR) | (SAIMR_RFS), i2s_reg_base + SAIMR);
 
 	switch (params_rate(params)) {
 	case 8000:
-		writel(0x48, i2s_reg_base + SADIV);
+		pete_writel("sound/soc/pxa/pxa2xx-i2s.c:189", 0x48, i2s_reg_base + SADIV);
 		break;
 	case 11025:
-		writel(0x34, i2s_reg_base + SADIV);
+		pete_writel("sound/soc/pxa/pxa2xx-i2s.c:192", 0x34, i2s_reg_base + SADIV);
 		break;
 	case 16000:
-		writel(0x24, i2s_reg_base + SADIV);
+		pete_writel("sound/soc/pxa/pxa2xx-i2s.c:195", 0x24, i2s_reg_base + SADIV);
 		break;
 	case 22050:
-		writel(0x1a, i2s_reg_base + SADIV);
+		pete_writel("sound/soc/pxa/pxa2xx-i2s.c:198", 0x1a, i2s_reg_base + SADIV);
 		break;
 	case 44100:
-		writel(0xd, i2s_reg_base + SADIV);
+		pete_writel("sound/soc/pxa/pxa2xx-i2s.c:201", 0xd, i2s_reg_base + SADIV);
 		break;
 	case 48000:
-		writel(0xc, i2s_reg_base + SADIV);
+		pete_writel("sound/soc/pxa/pxa2xx-i2s.c:204", 0xc, i2s_reg_base + SADIV);
 		break;
 	case 96000: /* not in manual and possibly slightly inaccurate */
-		writel(0x6, i2s_reg_base + SADIV);
+		pete_writel("sound/soc/pxa/pxa2xx-i2s.c:207", 0x6, i2s_reg_base + SADIV);
 		break;
 	}
 
@@ -219,10 +219,10 @@ static int pxa2xx_i2s_trigger(struct snd_pcm_substream *substream, int cmd,
 	switch (cmd) {
 	case SNDRV_PCM_TRIGGER_START:
 		if (substream->stream == SNDRV_PCM_STREAM_PLAYBACK)
-			writel(readl(i2s_reg_base + SACR1) & (~SACR1_DRPL), i2s_reg_base + SACR1);
+			pete_writel("sound/soc/pxa/pxa2xx-i2s.c:222", pete_readl("sound/soc/pxa/pxa2xx-i2s.c:222", i2s_reg_base + SACR1) & (~SACR1_DRPL), i2s_reg_base + SACR1);
 		else
-			writel(readl(i2s_reg_base + SACR1) & (~SACR1_DREC), i2s_reg_base + SACR1);
-		writel(readl(i2s_reg_base + SACR0) | (SACR0_ENB), i2s_reg_base + SACR0);
+			pete_writel("sound/soc/pxa/pxa2xx-i2s.c:224", pete_readl("sound/soc/pxa/pxa2xx-i2s.c:224", i2s_reg_base + SACR1) & (~SACR1_DREC), i2s_reg_base + SACR1);
+		pete_writel("sound/soc/pxa/pxa2xx-i2s.c:225", pete_readl("sound/soc/pxa/pxa2xx-i2s.c:225", i2s_reg_base + SACR0) | (SACR0_ENB), i2s_reg_base + SACR0);
 		break;
 	case SNDRV_PCM_TRIGGER_RESUME:
 	case SNDRV_PCM_TRIGGER_PAUSE_RELEASE:
@@ -241,15 +241,15 @@ static void pxa2xx_i2s_shutdown(struct snd_pcm_substream *substream,
 				struct snd_soc_dai *dai)
 {
 	if (substream->stream == SNDRV_PCM_STREAM_PLAYBACK) {
-		writel(readl(i2s_reg_base + SACR1) | (SACR1_DRPL), i2s_reg_base + SACR1);
-		writel(readl(i2s_reg_base + SAIMR) & (~SAIMR_TFS), i2s_reg_base + SAIMR);
+		pete_writel("sound/soc/pxa/pxa2xx-i2s.c:244", pete_readl("sound/soc/pxa/pxa2xx-i2s.c:244", i2s_reg_base + SACR1) | (SACR1_DRPL), i2s_reg_base + SACR1);
+		pete_writel("sound/soc/pxa/pxa2xx-i2s.c:245", pete_readl("sound/soc/pxa/pxa2xx-i2s.c:245", i2s_reg_base + SAIMR) & (~SAIMR_TFS), i2s_reg_base + SAIMR);
 	} else {
-		writel(readl(i2s_reg_base + SACR1) | (SACR1_DREC), i2s_reg_base + SACR1);
-		writel(readl(i2s_reg_base + SAIMR) & (~SAIMR_RFS), i2s_reg_base + SAIMR);
+		pete_writel("sound/soc/pxa/pxa2xx-i2s.c:247", pete_readl("sound/soc/pxa/pxa2xx-i2s.c:247", i2s_reg_base + SACR1) | (SACR1_DREC), i2s_reg_base + SACR1);
+		pete_writel("sound/soc/pxa/pxa2xx-i2s.c:248", pete_readl("sound/soc/pxa/pxa2xx-i2s.c:248", i2s_reg_base + SAIMR) & (~SAIMR_RFS), i2s_reg_base + SAIMR);
 	}
 
-	if ((readl(i2s_reg_base + SACR1) & (SACR1_DREC | SACR1_DRPL)) == (SACR1_DREC | SACR1_DRPL)) {
-		writel(readl(i2s_reg_base + SACR0) & (~SACR0_ENB), i2s_reg_base + SACR0);
+	if ((pete_readl("sound/soc/pxa/pxa2xx-i2s.c:251", i2s_reg_base + SACR1) & (SACR1_DREC | SACR1_DRPL)) == (SACR1_DREC | SACR1_DRPL)) {
+		pete_writel("sound/soc/pxa/pxa2xx-i2s.c:252", pete_readl("sound/soc/pxa/pxa2xx-i2s.c:252", i2s_reg_base + SACR0) & (~SACR0_ENB), i2s_reg_base + SACR0);
 		pxa_i2s_wait();
 		if (clk_ena) {
 			clk_disable_unprepare(clk_i2s);
@@ -262,13 +262,13 @@ static void pxa2xx_i2s_shutdown(struct snd_pcm_substream *substream,
 static int pxa2xx_soc_pcm_suspend(struct snd_soc_component *component)
 {
 	/* store registers */
-	pxa_i2s.sacr0 = readl(i2s_reg_base + SACR0);
-	pxa_i2s.sacr1 = readl(i2s_reg_base + SACR1);
-	pxa_i2s.saimr = readl(i2s_reg_base + SAIMR);
-	pxa_i2s.sadiv = readl(i2s_reg_base + SADIV);
+	pxa_i2s.sacr0 = pete_readl("sound/soc/pxa/pxa2xx-i2s.c:265", i2s_reg_base + SACR0);
+	pxa_i2s.sacr1 = pete_readl("sound/soc/pxa/pxa2xx-i2s.c:266", i2s_reg_base + SACR1);
+	pxa_i2s.saimr = pete_readl("sound/soc/pxa/pxa2xx-i2s.c:267", i2s_reg_base + SAIMR);
+	pxa_i2s.sadiv = pete_readl("sound/soc/pxa/pxa2xx-i2s.c:268", i2s_reg_base + SADIV);
 
 	/* deactivate link */
-	writel(readl(i2s_reg_base + SACR0) & (~SACR0_ENB), i2s_reg_base + SACR0);
+	pete_writel("sound/soc/pxa/pxa2xx-i2s.c:271", pete_readl("sound/soc/pxa/pxa2xx-i2s.c:271", i2s_reg_base + SACR0) & (~SACR0_ENB), i2s_reg_base + SACR0);
 	pxa_i2s_wait();
 	return 0;
 }
@@ -277,12 +277,12 @@ static int pxa2xx_soc_pcm_resume(struct snd_soc_component *component)
 {
 	pxa_i2s_wait();
 
-	writel(pxa_i2s.sacr0 & ~SACR0_ENB, i2s_reg_base + SACR0);
-	writel(pxa_i2s.sacr1, i2s_reg_base + SACR1);
-	writel(pxa_i2s.saimr, i2s_reg_base + SAIMR);
-	writel(pxa_i2s.sadiv, i2s_reg_base + SADIV);
+	pete_writel("sound/soc/pxa/pxa2xx-i2s.c:280", pxa_i2s.sacr0 & ~SACR0_ENB, i2s_reg_base + SACR0);
+	pete_writel("sound/soc/pxa/pxa2xx-i2s.c:281", pxa_i2s.sacr1, i2s_reg_base + SACR1);
+	pete_writel("sound/soc/pxa/pxa2xx-i2s.c:282", pxa_i2s.saimr, i2s_reg_base + SAIMR);
+	pete_writel("sound/soc/pxa/pxa2xx-i2s.c:283", pxa_i2s.sadiv, i2s_reg_base + SADIV);
 
-	writel(pxa_i2s.sacr0, i2s_reg_base + SACR0);
+	pete_writel("sound/soc/pxa/pxa2xx-i2s.c:285", pxa_i2s.sacr0, i2s_reg_base + SACR0);
 
 	return 0;
 }
@@ -304,12 +304,12 @@ static int pxa2xx_i2s_probe(struct snd_soc_dai *dai)
 	 * the SACR0[RST] bit must also be set and cleared to reset all
 	 * I2S controller registers.
 	 */
-	writel(SACR0_RST, i2s_reg_base + SACR0);
-	writel(0, i2s_reg_base + SACR0);
+	pete_writel("sound/soc/pxa/pxa2xx-i2s.c:307", SACR0_RST, i2s_reg_base + SACR0);
+	pete_writel("sound/soc/pxa/pxa2xx-i2s.c:308", 0, i2s_reg_base + SACR0);
 	/* Make sure RPL and REC are disabled */
-	writel(SACR1_DRPL | SACR1_DREC, i2s_reg_base + SACR1);
+	pete_writel("sound/soc/pxa/pxa2xx-i2s.c:310", SACR1_DRPL | SACR1_DREC, i2s_reg_base + SACR1);
 	/* Along with FIFO servicing */
-	writel(readl(i2s_reg_base + SAIMR) & (~(SAIMR_RFS | SAIMR_TFS)), i2s_reg_base + SAIMR);
+	pete_writel("sound/soc/pxa/pxa2xx-i2s.c:312", pete_readl("sound/soc/pxa/pxa2xx-i2s.c:312", i2s_reg_base + SAIMR) & (~(SAIMR_RFS | SAIMR_TFS)), i2s_reg_base + SAIMR);
 
 	snd_soc_dai_init_dma_data(dai, &pxa2xx_i2s_pcm_stereo_out,
 		&pxa2xx_i2s_pcm_stereo_in);

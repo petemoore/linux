@@ -487,21 +487,21 @@ static inline
 u32 csrrd32(void __iomem *mac, size_t offs)
 {
 	void __iomem *paddr = (void __iomem *)((uintptr_t)mac + offs);
-	return readl(paddr);
+	return pete_readl("drivers/net/ethernet/altera/altera_tse.h:490", paddr);
 }
 
 static inline
 u16 csrrd16(void __iomem *mac, size_t offs)
 {
 	void __iomem *paddr = (void __iomem *)((uintptr_t)mac + offs);
-	return readw(paddr);
+	return pete_readw("drivers/net/ethernet/altera/altera_tse.h:497", paddr);
 }
 
 static inline
 u8 csrrd8(void __iomem *mac, size_t offs)
 {
 	void __iomem *paddr = (void __iomem *)((uintptr_t)mac + offs);
-	return readb(paddr);
+	return pete_readb("drivers/net/ethernet/altera/altera_tse.h:504", paddr);
 }
 
 static inline
@@ -509,7 +509,7 @@ void csrwr32(u32 val, void __iomem *mac, size_t offs)
 {
 	void __iomem *paddr = (void __iomem *)((uintptr_t)mac + offs);
 
-	writel(val, paddr);
+	pete_writel("drivers/net/ethernet/altera/altera_tse.h:512", val, paddr);
 }
 
 static inline
@@ -517,7 +517,7 @@ void csrwr16(u16 val, void __iomem *mac, size_t offs)
 {
 	void __iomem *paddr = (void __iomem *)((uintptr_t)mac + offs);
 
-	writew(val, paddr);
+	pete_writew("drivers/net/ethernet/altera/altera_tse.h:520", val, paddr);
 }
 
 static inline
@@ -525,7 +525,7 @@ void csrwr8(u8 val, void __iomem *mac, size_t offs)
 {
 	void __iomem *paddr = (void __iomem *)((uintptr_t)mac + offs);
 
-	writeb(val, paddr);
+	pete_writeb("drivers/net/ethernet/altera/altera_tse.h:528", val, paddr);
 }
 
 #endif /* __ALTERA_TSE_H__ */

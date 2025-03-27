@@ -41,9 +41,9 @@ static void a64fx_diag_interrupt_clear(struct a64fx_diag_priv *priv)
 	u32 mmsc;
 
 	diag_status_reg_addr = priv->mmsc_reg_base + BMC_DIAG_INTERRUPT_STATUS;
-	mmsc = readl(diag_status_reg_addr);
+	mmsc = pete_readl("drivers/soc/fujitsu/a64fx-diag.c:44", diag_status_reg_addr);
 	if (mmsc & BMC_DIAG_INTERRUPT_MASK)
-		writel(BMC_DIAG_INTERRUPT_MASK, diag_status_reg_addr);
+		pete_writel("drivers/soc/fujitsu/a64fx-diag.c:46", BMC_DIAG_INTERRUPT_MASK, diag_status_reg_addr);
 }
 
 static void a64fx_diag_interrupt_enable(struct a64fx_diag_priv *priv)
@@ -52,10 +52,10 @@ static void a64fx_diag_interrupt_enable(struct a64fx_diag_priv *priv)
 	u32 mmsc;
 
 	diag_enable_reg_addr = priv->mmsc_reg_base + BMC_DIAG_INTERRUPT_ENABLE;
-	mmsc = readl(diag_enable_reg_addr);
+	mmsc = pete_readl("drivers/soc/fujitsu/a64fx-diag.c:55", diag_enable_reg_addr);
 	if (!(mmsc & BMC_DIAG_INTERRUPT_MASK)) {
 		mmsc |= BMC_DIAG_INTERRUPT_MASK;
-		writel(mmsc, diag_enable_reg_addr);
+		pete_writel("drivers/soc/fujitsu/a64fx-diag.c:58", mmsc, diag_enable_reg_addr);
 	}
 }
 
@@ -65,10 +65,10 @@ static void a64fx_diag_interrupt_disable(struct a64fx_diag_priv *priv)
 	u32 mmsc;
 
 	diag_enable_reg_addr = priv->mmsc_reg_base + BMC_DIAG_INTERRUPT_ENABLE;
-	mmsc = readl(diag_enable_reg_addr);
+	mmsc = pete_readl("drivers/soc/fujitsu/a64fx-diag.c:68", diag_enable_reg_addr);
 	if (mmsc & BMC_DIAG_INTERRUPT_MASK) {
 		mmsc &= ~BMC_DIAG_INTERRUPT_MASK;
-		writel(mmsc, diag_enable_reg_addr);
+		pete_writel("drivers/soc/fujitsu/a64fx-diag.c:71", mmsc, diag_enable_reg_addr);
 	}
 }
 

@@ -66,14 +66,14 @@ static void sp_get_seconds(struct device *dev, unsigned long *secs)
 {
 	struct sunplus_rtc *sp_rtc = dev_get_drvdata(dev);
 
-	*secs = (unsigned long)readl(sp_rtc->reg_base + RTC_TIMER_OUT);
+	*secs = (unsigned long)pete_readl("drivers/rtc/rtc-sunplus.c:69", sp_rtc->reg_base + RTC_TIMER_OUT);
 }
 
 static void sp_set_seconds(struct device *dev, unsigned long secs)
 {
 	struct sunplus_rtc *sp_rtc = dev_get_drvdata(dev);
 
-	writel((u32)secs, sp_rtc->reg_base + RTC_TIMER_SET);
+	pete_writel("drivers/rtc/rtc-sunplus.c:76", (u32)secs, sp_rtc->reg_base + RTC_TIMER_SET);
 }
 
 static int sp_rtc_read_time(struct device *dev, struct rtc_time *tm)
@@ -104,7 +104,7 @@ static int sp_rtc_set_alarm(struct device *dev, struct rtc_wkalrm *alrm)
 
 	alarm_time = rtc_tm_to_time64(&alrm->time);
 	dev_dbg(dev, "%s, alarm_time: %u\n", __func__, (u32)(alarm_time));
-	writel((u32)alarm_time, sp_rtc->reg_base + RTC_ALARM_SET);
+	pete_writel("drivers/rtc/rtc-sunplus.c:107", (u32)alarm_time, sp_rtc->reg_base + RTC_ALARM_SET);
 
 	return 0;
 }
@@ -114,7 +114,7 @@ static int sp_rtc_read_alarm(struct device *dev, struct rtc_wkalrm *alrm)
 	struct sunplus_rtc *sp_rtc = dev_get_drvdata(dev);
 	unsigned int alarm_time;
 
-	alarm_time = readl(sp_rtc->reg_base + RTC_ALARM_SET);
+	alarm_time = pete_readl("drivers/rtc/rtc-sunplus.c:117", sp_rtc->reg_base + RTC_ALARM_SET);
 	dev_dbg(dev, "%s, alarm_time: %u\n", __func__, alarm_time);
 
 	if (alarm_time == 0)
@@ -132,13 +132,13 @@ static int sp_rtc_alarm_irq_enable(struct device *dev, unsigned int enabled)
 	struct sunplus_rtc *sp_rtc = dev_get_drvdata(dev);
 
 	if (enabled)
-		writel((TIMER_FREEZE_MASK_BIT | DIS_SYS_RST_RTC_MASK_BIT |
+		pete_writel("drivers/rtc/rtc-sunplus.c:135", (TIMER_FREEZE_MASK_BIT | DIS_SYS_RST_RTC_MASK_BIT |
 			RTC32K_MODE_RESET_MASK_BIT | ALARM_EN_OVERDUE_MASK_BIT |
 			ALARM_EN_PMC_MASK_BIT | ALARM_EN_MASK_BIT) |
 			(DIS_SYS_RST_RTC | ALARM_EN_OVERDUE | ALARM_EN_PMC | ALARM_EN),
 			sp_rtc->reg_base + RTC_CTRL);
 	else
-		writel((ALARM_EN_OVERDUE_MASK_BIT | ALARM_EN_PMC_MASK_BIT | ALARM_EN_MASK_BIT) |
+		pete_writel("drivers/rtc/rtc-sunplus.c:141", (ALARM_EN_OVERDUE_MASK_BIT | ALARM_EN_PMC_MASK_BIT | ALARM_EN_MASK_BIT) |
 			0x0, sp_rtc->reg_base + RTC_CTRL);
 
 	return 0;
@@ -207,15 +207,15 @@ static void sp_rtc_set_trickle_charger(struct device dev)
 		return;
 	}
 
-	writel(BAT_CHARGE_RSEL_MASK_BIT | rsel, sp_rtc->reg_base + RTC_BATT_CHARGE_CTRL);
+	pete_writel("drivers/rtc/rtc-sunplus.c:210", BAT_CHARGE_RSEL_MASK_BIT | rsel, sp_rtc->reg_base + RTC_BATT_CHARGE_CTRL);
 
 	switch (chargeable) {
 	case 0:
-		writel(BAT_CHARGE_DSEL_MASK_BIT | BAT_CHARGE_DSEL_OFF,
+		pete_writel("drivers/rtc/rtc-sunplus.c:214", BAT_CHARGE_DSEL_MASK_BIT | BAT_CHARGE_DSEL_OFF,
 		       sp_rtc->reg_base + RTC_BATT_CHARGE_CTRL);
 		break;
 	case 1:
-		writel(BAT_CHARGE_DSEL_MASK_BIT | BAT_CHARGE_DSEL_ON,
+		pete_writel("drivers/rtc/rtc-sunplus.c:218", BAT_CHARGE_DSEL_MASK_BIT | BAT_CHARGE_DSEL_ON,
 		       sp_rtc->reg_base + RTC_BATT_CHARGE_CTRL);
 		break;
 	default:
@@ -223,7 +223,7 @@ static void sp_rtc_set_trickle_charger(struct device dev)
 		return;
 	}
 
-	writel(BAT_CHARGE_EN_MASK_BIT | BAT_CHARGE_EN, sp_rtc->reg_base + RTC_BATT_CHARGE_CTRL);
+	pete_writel("drivers/rtc/rtc-sunplus.c:226", BAT_CHARGE_EN_MASK_BIT | BAT_CHARGE_EN, sp_rtc->reg_base + RTC_BATT_CHARGE_CTRL);
 }
 
 static int sp_rtc_probe(struct platform_device *plat_dev)
@@ -291,7 +291,7 @@ static int sp_rtc_probe(struct platform_device *plat_dev)
 		sp_rtc_set_trickle_charger(plat_dev->dev);
 
 	/* Keep RTC from system reset */
-	writel(DIS_SYS_RST_RTC_MASK_BIT | DIS_SYS_RST_RTC, sp_rtc->reg_base + RTC_CTRL);
+	pete_writel("drivers/rtc/rtc-sunplus.c:294", DIS_SYS_RST_RTC_MASK_BIT | DIS_SYS_RST_RTC, sp_rtc->reg_base + RTC_CTRL);
 
 	return 0;
 

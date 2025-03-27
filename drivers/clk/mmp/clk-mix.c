@@ -145,9 +145,9 @@ static int _set_rate(struct mmp_clk_mix *mix, u32 mux_val, u32 div_val,
 
 	if (mix->type == MMP_CLK_MIX_TYPE_V1
 		|| mix->type == MMP_CLK_MIX_TYPE_V2)
-		mux_div = readl(ri->reg_clk_ctrl);
+		mux_div = pete_readl("drivers/clk/mmp/clk-mix.c:148", ri->reg_clk_ctrl);
 	else
-		mux_div = readl(ri->reg_clk_sel);
+		mux_div = pete_readl("drivers/clk/mmp/clk-mix.c:150", ri->reg_clk_sel);
 
 	if (change_div) {
 		width = ri->width_div;
@@ -164,13 +164,13 @@ static int _set_rate(struct mmp_clk_mix *mix, u32 mux_val, u32 div_val,
 	}
 
 	if (mix->type == MMP_CLK_MIX_TYPE_V1) {
-		writel(mux_div, ri->reg_clk_ctrl);
+		pete_writel("drivers/clk/mmp/clk-mix.c:167", mux_div, ri->reg_clk_ctrl);
 	} else if (mix->type == MMP_CLK_MIX_TYPE_V2) {
 		mux_div |= (1 << ri->bit_fc);
-		writel(mux_div, ri->reg_clk_ctrl);
+		pete_writel("drivers/clk/mmp/clk-mix.c:170", mux_div, ri->reg_clk_ctrl);
 
 		do {
-			fc_req = readl(ri->reg_clk_ctrl);
+			fc_req = pete_readl("drivers/clk/mmp/clk-mix.c:173", ri->reg_clk_ctrl);
 			timeout--;
 			if (!(fc_req & (1 << ri->bit_fc)))
 				break;
@@ -183,10 +183,10 @@ static int _set_rate(struct mmp_clk_mix *mix, u32 mux_val, u32 div_val,
 			goto error;
 		}
 	} else {
-		fc_req = readl(ri->reg_clk_ctrl);
+		fc_req = pete_readl("drivers/clk/mmp/clk-mix.c:186", ri->reg_clk_ctrl);
 		fc_req |= 1 << ri->bit_fc;
-		writel(fc_req, ri->reg_clk_ctrl);
-		writel(mux_div, ri->reg_clk_sel);
+		pete_writel("drivers/clk/mmp/clk-mix.c:188", fc_req, ri->reg_clk_ctrl);
+		pete_writel("drivers/clk/mmp/clk-mix.c:189", mux_div, ri->reg_clk_sel);
 		fc_req &= ~(1 << ri->bit_fc);
 	}
 
@@ -297,9 +297,9 @@ static u8 mmp_clk_mix_get_parent(struct clk_hw *hw)
 
 	if (mix->type == MMP_CLK_MIX_TYPE_V1
 		|| mix->type == MMP_CLK_MIX_TYPE_V2)
-		mux_div = readl(ri->reg_clk_ctrl);
+		mux_div = pete_readl("drivers/clk/mmp/clk-mix.c:300", ri->reg_clk_ctrl);
 	else
-		mux_div = readl(ri->reg_clk_sel);
+		mux_div = pete_readl("drivers/clk/mmp/clk-mix.c:302", ri->reg_clk_sel);
 
 	if (mix->lock)
 		spin_unlock_irqrestore(mix->lock, flags);
@@ -327,9 +327,9 @@ static unsigned long mmp_clk_mix_recalc_rate(struct clk_hw *hw,
 
 	if (mix->type == MMP_CLK_MIX_TYPE_V1
 		|| mix->type == MMP_CLK_MIX_TYPE_V2)
-		mux_div = readl(ri->reg_clk_ctrl);
+		mux_div = pete_readl("drivers/clk/mmp/clk-mix.c:330", ri->reg_clk_ctrl);
 	else
-		mux_div = readl(ri->reg_clk_sel);
+		mux_div = pete_readl("drivers/clk/mmp/clk-mix.c:332", ri->reg_clk_sel);
 
 	if (mix->lock)
 		spin_unlock_irqrestore(mix->lock, flags);

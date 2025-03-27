@@ -37,12 +37,12 @@
 
 static u32 dw_csi2_host_read(struct dphy_data *dphy, u32 offset)
 {
-	return readl(dphy->base + offset);
+	return pete_readl("drivers/media/platform/raspberrypi/rp1_cfe/dphy.c:40", dphy->base + offset);
 }
 
 static void dw_csi2_host_write(struct dphy_data *dphy, u32 offset, u32 data)
 {
-	writel(data, dphy->base + offset);
+	pete_writel("drivers/media/platform/raspberrypi/rp1_cfe/dphy.c:45", data, dphy->base + offset);
 }
 
 static void set_tstclr(struct dphy_data *dphy, u32 val)

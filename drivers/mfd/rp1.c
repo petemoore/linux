@@ -93,12 +93,12 @@ static void dump_bar(struct pci_dev *pdev, unsigned int bar)
 
 static void msix_cfg_set(struct rp1_dev *rp1, unsigned int hwirq, u32 value)
 {
-	writel(value, rp1->msix_cfg_regs + REG_SET + MSIX_CFG(hwirq));
+	pete_writel("drivers/mfd/rp1.c:96", value, rp1->msix_cfg_regs + REG_SET + MSIX_CFG(hwirq));
 }
 
 static void msix_cfg_clr(struct rp1_dev *rp1, unsigned int hwirq, u32 value)
 {
-	writel(value, rp1->msix_cfg_regs + REG_CLR + MSIX_CFG(hwirq));
+	pete_writel("drivers/mfd/rp1.c:101", value, rp1->msix_cfg_regs + REG_CLR + MSIX_CFG(hwirq));
 }
 
 static void rp1_mask_irq(struct irq_data *irqd)
@@ -233,7 +233,7 @@ static u32 rp1_reg_read(struct rp1_dev *rp1, unsigned int base_addr, u32 offset)
 {
 	dma_addr_t phys = rp1_io_to_phys(rp1, base_addr);
 	void __iomem *regblock = ioremap(phys, 0x1000);
-	u32 value = readl(regblock + offset);
+	u32 value = pete_readl("drivers/mfd/rp1.c:236", regblock + offset);
 
 	iounmap(regblock);
 	return value;

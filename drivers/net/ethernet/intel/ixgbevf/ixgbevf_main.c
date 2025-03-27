@@ -150,7 +150,7 @@ u32 ixgbevf_read_reg(struct ixgbe_hw *hw, u32 reg)
 
 	if (IXGBE_REMOVED(reg_addr))
 		return IXGBE_FAILED_READ_REG;
-	value = readl(reg_addr + reg);
+	value = pete_readl("drivers/net/ethernet/intel/ixgbevf/ixgbevf_main.c:153", reg_addr + reg);
 	if (unlikely(value == IXGBE_FAILED_READ_REG))
 		ixgbevf_check_remove(hw, reg);
 	return value;

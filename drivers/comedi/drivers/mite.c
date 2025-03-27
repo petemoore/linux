@@ -205,7 +205,7 @@ static unsigned int mite_drq_reqs(unsigned int drq_line)
 
 static unsigned int mite_fifo_size(struct mite *mite, unsigned int channel)
 {
-	unsigned int fcr_bits = readl(mite->mmio + MITE_FCR(channel));
+	unsigned int fcr_bits = pete_readl("drivers/comedi/drivers/mite.c:208", mite->mmio + MITE_FCR(channel));
 	unsigned int empty_count = (fcr_bits >> 16) & 0xff;
 	unsigned int full_count = fcr_bits & 0xff;
 
@@ -216,7 +216,7 @@ static u32 mite_device_bytes_transferred(struct mite_channel *mite_chan)
 {
 	struct mite *mite = mite_chan->mite;
 
-	return readl(mite->mmio + MITE_DAR(mite_chan->channel));
+	return pete_readl("drivers/comedi/drivers/mite.c:219", mite->mmio + MITE_DAR(mite_chan->channel));
 }
 
 /**
@@ -227,7 +227,7 @@ u32 mite_bytes_in_transit(struct mite_channel *mite_chan)
 {
 	struct mite *mite = mite_chan->mite;
 
-	return readl(mite->mmio + MITE_FCR(mite_chan->channel)) & 0xff;
+	return pete_readl("drivers/comedi/drivers/mite.c:230", mite->mmio + MITE_FCR(mite_chan->channel)) & 0xff;
 }
 EXPORT_SYMBOL_GPL(mite_bytes_in_transit);
 
@@ -364,10 +364,10 @@ static unsigned int mite_get_status(struct mite_channel *mite_chan)
 	unsigned long flags;
 
 	spin_lock_irqsave(&mite->lock, flags);
-	status = readl(mite->mmio + MITE_CHSR(mite_chan->channel));
+	status = pete_readl("drivers/comedi/drivers/mite.c:367", mite->mmio + MITE_CHSR(mite_chan->channel));
 	if (status & CHSR_DONE) {
 		mite_chan->done = 1;
-		writel(CHOR_CLRDONE,
+		pete_writel("drivers/comedi/drivers/mite.c:370", CHOR_CLRDONE,
 		       mite->mmio + MITE_CHOR(mite_chan->channel));
 	}
 	spin_unlock_irqrestore(&mite->lock, flags);
@@ -391,7 +391,7 @@ void mite_ack_linkc(struct mite_channel *mite_chan,
 
 	status = mite_get_status(mite_chan);
 	if (status & CHSR_LINKC) {
-		writel(CHOR_CLRLC, mite->mmio + MITE_CHOR(mite_chan->channel));
+		pete_writel("drivers/comedi/drivers/mite.c:394", CHOR_CLRLC, mite->mmio + MITE_CHOR(mite_chan->channel));
 		sync = true;
 	}
 	if (sync)
@@ -427,7 +427,7 @@ EXPORT_SYMBOL_GPL(mite_done);
 
 static void mite_dma_reset(struct mite_channel *mite_chan)
 {
-	writel(CHOR_DMARESET | CHOR_FRESET,
+	pete_writel("drivers/comedi/drivers/mite.c:430", CHOR_DMARESET | CHOR_FRESET,
 	       mite_chan->mite->mmio + MITE_CHOR(mite_chan->channel));
 }
 
@@ -448,7 +448,7 @@ void mite_dma_arm(struct mite_channel *mite_chan)
 	spin_lock_irqsave(&mite->lock, flags);
 	mite_chan->done = 0;
 	/* arm */
-	writel(CHOR_START, mite->mmio + MITE_CHOR(mite_chan->channel));
+	pete_writel("drivers/comedi/drivers/mite.c:451", CHOR_START, mite->mmio + MITE_CHOR(mite_chan->channel));
 	spin_unlock_irqrestore(&mite->lock, flags);
 }
 EXPORT_SYMBOL_GPL(mite_dma_arm);
@@ -462,7 +462,7 @@ void mite_dma_disarm(struct mite_channel *mite_chan)
 	struct mite *mite = mite_chan->mite;
 
 	/* disarm */
-	writel(CHOR_ABORT, mite->mmio + MITE_CHOR(mite_chan->channel));
+	pete_writel("drivers/comedi/drivers/mite.c:465", CHOR_ABORT, mite->mmio + MITE_CHOR(mite_chan->channel));
 }
 EXPORT_SYMBOL_GPL(mite_dma_disarm);
 
@@ -505,7 +505,7 @@ void mite_prep_dma(struct mite_channel *mite_chan,
 	if (mite_chan->dir == COMEDI_INPUT)
 		chcr |= CHCR_DEV_TO_MEM;
 
-	writel(chcr, mite->mmio + MITE_CHCR(mite_chan->channel));
+	pete_writel("drivers/comedi/drivers/mite.c:508", chcr, mite->mmio + MITE_CHCR(mite_chan->channel));
 
 	/* to/from memory */
 	mcr = mite_retry_limit(64) | CR_ASEQUP;
@@ -523,7 +523,7 @@ void mite_prep_dma(struct mite_channel *mite_chan,
 		pr_warn("bug! invalid mem bit width for dma transfer\n");
 		break;
 	}
-	writel(mcr, mite->mmio + MITE_MCR(mite_chan->channel));
+	pete_writel("drivers/comedi/drivers/mite.c:526", mcr, mite->mmio + MITE_MCR(mite_chan->channel));
 
 	/* from/to device */
 	dcr = mite_retry_limit(64) | CR_ASEQUP;
@@ -542,17 +542,17 @@ void mite_prep_dma(struct mite_channel *mite_chan,
 		pr_warn("bug! invalid dev bit width for dma transfer\n");
 		break;
 	}
-	writel(dcr, mite->mmio + MITE_DCR(mite_chan->channel));
+	pete_writel("drivers/comedi/drivers/mite.c:545", dcr, mite->mmio + MITE_DCR(mite_chan->channel));
 
 	/* reset the DAR */
-	writel(0, mite->mmio + MITE_DAR(mite_chan->channel));
+	pete_writel("drivers/comedi/drivers/mite.c:548", 0, mite->mmio + MITE_DAR(mite_chan->channel));
 
 	/* the link is 32bits */
 	lkcr = mite_retry_limit(64) | CR_ASEQUP | CR_PSIZE32;
-	writel(lkcr, mite->mmio + MITE_LKCR(mite_chan->channel));
+	pete_writel("drivers/comedi/drivers/mite.c:552", lkcr, mite->mmio + MITE_LKCR(mite_chan->channel));
 
 	/* starting address for link chaining */
-	writel(mite_chan->ring->dma_addr,
+	pete_writel("drivers/comedi/drivers/mite.c:555", mite_chan->ring->dma_addr,
 	       mite->mmio + MITE_LKAR(mite_chan->channel));
 }
 EXPORT_SYMBOL_GPL(mite_prep_dma);
@@ -622,7 +622,7 @@ void mite_release_channel(struct mite_channel *mite_chan)
 		 * disable all channel's interrupts (do it after disarm/reset so
 		 * MITE_CHCR reg isn't changed while dma is still active!)
 		 */
-		writel(CHCR_CLR_DMA_IE | CHCR_CLR_LINKP_IE |
+		pete_writel("drivers/comedi/drivers/mite.c:625", CHCR_CLR_DMA_IE | CHCR_CLR_LINKP_IE |
 		       CHCR_CLR_SAR_IE | CHCR_CLR_DONE_IE |
 		       CHCR_CLR_MRDY_IE | CHCR_CLR_DRDY_IE |
 		       CHCR_CLR_LC_IE | CHCR_CLR_CONT_RB_IE,
@@ -801,15 +801,15 @@ static int mite_setup(struct comedi_device *dev, struct mite *mite,
 	length = pci_resource_len(mite->pcidev, 1);
 
 	if (use_win1) {
-		writel(0, mite->mmio + MITE_IODWBSR);
+		pete_writel("drivers/comedi/drivers/mite.c:804", 0, mite->mmio + MITE_IODWBSR);
 		dev_dbg(dev->class_dev,
 			"mite: using I/O Window Base Size register 1\n");
-		writel(daq_phys_addr | WENAB |
+		pete_writel("drivers/comedi/drivers/mite.c:807", daq_phys_addr | WENAB |
 		       MITE_IODWBSR_1_WSIZE_bits(length),
 		       mite->mmio + MITE_IODWBSR_1);
-		writel(0, mite->mmio + MITE_IODWCR_1);
+		pete_writel("drivers/comedi/drivers/mite.c:810", 0, mite->mmio + MITE_IODWCR_1);
 	} else {
-		writel(daq_phys_addr | WENAB, mite->mmio + MITE_IODWBSR);
+		pete_writel("drivers/comedi/drivers/mite.c:812", daq_phys_addr | WENAB, mite->mmio + MITE_IODWBSR);
 	}
 	/*
 	 * Make sure dma bursts work. I got this from running a bus analyzer
@@ -822,11 +822,11 @@ static int mite_setup(struct comedi_device *dev, struct mite *mite,
 	 * written and read back.  The bits 0x1f always read as 1.
 	 * The rest always read as zero.
 	 */
-	unknown_dma_burst_bits = readl(mite->mmio + MITE_UNKNOWN_DMA_BURST_REG);
+	unknown_dma_burst_bits = pete_readl("drivers/comedi/drivers/mite.c:825", mite->mmio + MITE_UNKNOWN_DMA_BURST_REG);
 	unknown_dma_burst_bits |= UNKNOWN_DMA_BURST_ENABLE_BITS;
-	writel(unknown_dma_burst_bits, mite->mmio + MITE_UNKNOWN_DMA_BURST_REG);
+	pete_writel("drivers/comedi/drivers/mite.c:827", unknown_dma_burst_bits, mite->mmio + MITE_UNKNOWN_DMA_BURST_REG);
 
-	csigr_bits = readl(mite->mmio + MITE_CSIGR);
+	csigr_bits = pete_readl("drivers/comedi/drivers/mite.c:829", mite->mmio + MITE_CSIGR);
 	mite->num_channels = CSIGR_TO_DMAC(csigr_bits);
 	if (mite->num_channels > MAX_MITE_DMA_CHANNELS) {
 		dev_warn(dev->class_dev,
@@ -850,9 +850,9 @@ static int mite_setup(struct comedi_device *dev, struct mite *mite,
 		CSIGR_TO_WINS(csigr_bits), CSIGR_TO_IOWINS(csigr_bits));
 
 	for (i = 0; i < mite->num_channels; i++) {
-		writel(CHOR_DMARESET, mite->mmio + MITE_CHOR(i));
+		pete_writel("drivers/comedi/drivers/mite.c:853", CHOR_DMARESET, mite->mmio + MITE_CHOR(i));
 		/* disable interrupts */
-		writel(CHCR_CLR_DMA_IE | CHCR_CLR_LINKP_IE | CHCR_CLR_SAR_IE |
+		pete_writel("drivers/comedi/drivers/mite.c:855", CHCR_CLR_DMA_IE | CHCR_CLR_LINKP_IE | CHCR_CLR_SAR_IE |
 		       CHCR_CLR_DONE_IE | CHCR_CLR_MRDY_IE | CHCR_CLR_DRDY_IE |
 		       CHCR_CLR_LC_IE | CHCR_CLR_CONT_RB_IE,
 		       mite->mmio + MITE_CHCR(i));

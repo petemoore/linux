@@ -188,7 +188,7 @@ static int kurobox_pro_miconread(unsigned char *buf, int count)
 	for (i = 0; i < count; i++) {
 		timeout = 10;
 
-		while (!(readl(UART1_REG(LSR)) & UART_LSR_DR)) {
+		while (!(pete_readl("arch/arm/mach-orion5x/kurobox_pro-setup.c:191", UART1_REG(LSR)) & UART_LSR_DR)) {
 			if (--timeout == 0)
 				break;
 			udelay(1000);
@@ -196,7 +196,7 @@ static int kurobox_pro_miconread(unsigned char *buf, int count)
 
 		if (timeout == 0)
 			break;
-		buf[i] = readl(UART1_REG(RX));
+		buf[i] = pete_readl("arch/arm/mach-orion5x/kurobox_pro-setup.c:199", UART1_REG(RX));
 	}
 
 	/* return read bytes */
@@ -208,9 +208,9 @@ static int kurobox_pro_miconwrite(const unsigned char *buf, int count)
 	int i = 0;
 
 	while (count--) {
-		while (!(readl(UART1_REG(LSR)) & UART_LSR_THRE))
+		while (!(pete_readl("arch/arm/mach-orion5x/kurobox_pro-setup.c:211", UART1_REG(LSR)) & UART_LSR_THRE))
 			barrier();
-		writel(buf[i++], UART1_REG(TX));
+		pete_writel("arch/arm/mach-orion5x/kurobox_pro-setup.c:213", buf[i++], UART1_REG(TX));
 	}
 
 	return 0;
@@ -294,13 +294,13 @@ static void kurobox_pro_power_off(void)
 	pr_info("%s: triggering power-off...\n", __func__);
 
 	/* hijack uart1 and reset into sane state (38400,8n1,even parity) */
-	writel(0x83, UART1_REG(LCR));
-	writel(divisor & 0xff, UART1_REG(DLL));
-	writel((divisor >> 8) & 0xff, UART1_REG(DLM));
-	writel(0x1b, UART1_REG(LCR));
-	writel(0x00, UART1_REG(IER));
-	writel(0x07, UART1_REG(FCR));
-	writel(0x00, UART1_REG(MCR));
+	pete_writel("arch/arm/mach-orion5x/kurobox_pro-setup.c:297", 0x83, UART1_REG(LCR));
+	pete_writel("arch/arm/mach-orion5x/kurobox_pro-setup.c:298", divisor & 0xff, UART1_REG(DLL));
+	pete_writel("arch/arm/mach-orion5x/kurobox_pro-setup.c:299", (divisor >> 8) & 0xff, UART1_REG(DLM));
+	pete_writel("arch/arm/mach-orion5x/kurobox_pro-setup.c:300", 0x1b, UART1_REG(LCR));
+	pete_writel("arch/arm/mach-orion5x/kurobox_pro-setup.c:301", 0x00, UART1_REG(IER));
+	pete_writel("arch/arm/mach-orion5x/kurobox_pro-setup.c:302", 0x07, UART1_REG(FCR));
+	pete_writel("arch/arm/mach-orion5x/kurobox_pro-setup.c:303", 0x00, UART1_REG(MCR));
 
 	/* Send the commands to shutdown the Kurobox Pro */
 	kurobox_pro_miconsend(watchdogkill, sizeof(watchdogkill)) ;

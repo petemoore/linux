@@ -66,7 +66,7 @@ static int men_z127_debounce(struct gpio_chip *gc, unsigned gpio,
 
 	raw_spin_lock(&gc->bgpio_lock);
 
-	db_en = readl(priv->reg_base + MEN_Z127_DBER);
+	db_en = pete_readl("drivers/gpio/gpio-menz127.c:69", priv->reg_base + MEN_Z127_DBER);
 
 	if (debounce == 0) {
 		db_en &= ~BIT(gpio);
@@ -76,8 +76,8 @@ static int men_z127_debounce(struct gpio_chip *gc, unsigned gpio,
 		db_cnt = debounce;
 	}
 
-	writel(db_en, priv->reg_base + MEN_Z127_DBER);
-	writel(db_cnt, priv->reg_base + GPIO_TO_DBCNT_REG(gpio));
+	pete_writel("drivers/gpio/gpio-menz127.c:79", db_en, priv->reg_base + MEN_Z127_DBER);
+	pete_writel("drivers/gpio/gpio-menz127.c:80", db_cnt, priv->reg_base + GPIO_TO_DBCNT_REG(gpio));
 
 	raw_spin_unlock(&gc->bgpio_lock);
 
@@ -92,7 +92,7 @@ static int men_z127_set_single_ended(struct gpio_chip *gc,
 	u32 od_en;
 
 	raw_spin_lock(&gc->bgpio_lock);
-	od_en = readl(priv->reg_base + MEN_Z127_ODER);
+	od_en = pete_readl("drivers/gpio/gpio-menz127.c:95", priv->reg_base + MEN_Z127_ODER);
 
 	if (param == PIN_CONFIG_DRIVE_OPEN_DRAIN)
 		od_en |= BIT(offset);
@@ -100,7 +100,7 @@ static int men_z127_set_single_ended(struct gpio_chip *gc,
 		/* Implicitly PIN_CONFIG_DRIVE_PUSH_PULL */
 		od_en &= ~BIT(offset);
 
-	writel(od_en, priv->reg_base + MEN_Z127_ODER);
+	pete_writel("drivers/gpio/gpio-menz127.c:103", od_en, priv->reg_base + MEN_Z127_ODER);
 	raw_spin_unlock(&gc->bgpio_lock);
 
 	return 0;

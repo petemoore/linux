@@ -106,13 +106,13 @@ static int read_ad1843_reg(void *priv, int reg)
 
 	spin_lock_irqsave(&chip->ad1843_lock, flags);
 
-	writeq((reg << CODEC_CONTROL_ADDRESS_SHIFT) |
+	pete_writeq("sound/mips/sgio2audio.c:109", (reg << CODEC_CONTROL_ADDRESS_SHIFT) |
 	       CODEC_CONTROL_READ, &mace->perif.audio.codec_control);
 	wmb();
-	val = readq(&mace->perif.audio.codec_control); /* flush bus */
+	val = pete_readq("sound/mips/sgio2audio.c:112", &mace->perif.audio.codec_control); /* flush bus */
 	udelay(200);
 
-	val = readq(&mace->perif.audio.codec_read);
+	val = pete_readq("sound/mips/sgio2audio.c:115", &mace->perif.audio.codec_read);
 
 	spin_unlock_irqrestore(&chip->ad1843_lock, flags);
 	return val;
@@ -129,11 +129,11 @@ static int write_ad1843_reg(void *priv, int reg, int word)
 
 	spin_lock_irqsave(&chip->ad1843_lock, flags);
 
-	writeq((reg << CODEC_CONTROL_ADDRESS_SHIFT) |
+	pete_writeq("sound/mips/sgio2audio.c:132", (reg << CODEC_CONTROL_ADDRESS_SHIFT) |
 	       (word << CODEC_CONTROL_WORD_SHIFT),
 	       &mace->perif.audio.codec_control);
 	wmb();
-	val = readq(&mace->perif.audio.codec_control); /* flush bus */
+	val = pete_readq("sound/mips/sgio2audio.c:136", &mace->perif.audio.codec_control); /* flush bus */
 	udelay(200);
 
 	spin_unlock_irqrestore(&chip->ad1843_lock, flags);
@@ -356,7 +356,7 @@ static int snd_sgio2audio_dma_pull_frag(struct snd_sgio2audio *chip,
 	spin_lock_irqsave(&chip->channel[ch].lock, flags);
 
 	src_base = (unsigned long) chip->ring_base | (ch << CHANNEL_RING_SHIFT);
-	src_pos = readq(&mace->perif.audio.chan[ch].read_ptr);
+	src_pos = pete_readq("sound/mips/sgio2audio.c:359", &mace->perif.audio.chan[ch].read_ptr);
 	dst_base = runtime->dma_area;
 	dst_pos = chip->channel[ch].pos;
 	dst_mask = frames_to_bytes(runtime, runtime->buffer_size) - 1;
@@ -379,7 +379,7 @@ static int snd_sgio2audio_dma_pull_frag(struct snd_sgio2audio *chip,
 		count -= sizeof(u64);
 	}
 
-	writeq(src_pos, &mace->perif.audio.chan[ch].read_ptr); /* in bytes */
+	pete_writeq("sound/mips/sgio2audio.c:382", src_pos, &mace->perif.audio.chan[ch].read_ptr); /* in bytes */
 	chip->channel[ch].pos = dst_pos;
 
 	spin_unlock_irqrestore(&chip->channel[ch].lock, flags);
@@ -404,7 +404,7 @@ static int snd_sgio2audio_dma_push_frag(struct snd_sgio2audio *chip,
 	spin_lock_irqsave(&chip->channel[ch].lock, flags);
 
 	dst_base = (unsigned long)chip->ring_base | (ch << CHANNEL_RING_SHIFT);
-	dst_pos = readq(&mace->perif.audio.chan[ch].write_ptr);
+	dst_pos = pete_readq("sound/mips/sgio2audio.c:407", &mace->perif.audio.chan[ch].write_ptr);
 	src_base = runtime->dma_area;
 	src_pos = chip->channel[ch].pos;
 	src_mask = frames_to_bytes(runtime, runtime->buffer_size) - 1;
@@ -429,7 +429,7 @@ static int snd_sgio2audio_dma_push_frag(struct snd_sgio2audio *chip,
 		count -= sizeof(u64);
 	}
 
-	writeq(dst_pos, &mace->perif.audio.chan[ch].write_ptr); /* in bytes */
+	pete_writeq("sound/mips/sgio2audio.c:432", dst_pos, &mace->perif.audio.chan[ch].write_ptr); /* in bytes */
 	chip->channel[ch].pos = src_pos;
 
 	spin_unlock_irqrestore(&chip->channel[ch].lock, flags);
@@ -443,16 +443,16 @@ static int snd_sgio2audio_dma_start(struct snd_pcm_substream *substream)
 	int ch = chan->idx;
 
 	/* reset DMA channel */
-	writeq(CHANNEL_CONTROL_RESET, &mace->perif.audio.chan[ch].control);
+	pete_writeq("sound/mips/sgio2audio.c:446", CHANNEL_CONTROL_RESET, &mace->perif.audio.chan[ch].control);
 	udelay(10);
-	writeq(0, &mace->perif.audio.chan[ch].control);
+	pete_writeq("sound/mips/sgio2audio.c:448", 0, &mace->perif.audio.chan[ch].control);
 
 	if (substream->stream == SNDRV_PCM_STREAM_PLAYBACK) {
 		/* push a full buffer */
 		snd_sgio2audio_dma_push_frag(chip, ch, CHANNEL_RING_SIZE - 32);
 	}
 	/* set DMA to wake on 50% empty and enable interrupt */
-	writeq(CHANNEL_DMA_ENABLE | CHANNEL_INT_THRESHOLD_50,
+	pete_writeq("sound/mips/sgio2audio.c:455", CHANNEL_DMA_ENABLE | CHANNEL_INT_THRESHOLD_50,
 	       &mace->perif.audio.chan[ch].control);
 	return 0;
 }
@@ -461,7 +461,7 @@ static int snd_sgio2audio_dma_stop(struct snd_pcm_substream *substream)
 {
 	struct snd_sgio2audio_chan *chan = substream->runtime->private_data;
 
-	writeq(0, &mace->perif.audio.chan[chan->idx].control);
+	pete_writeq("sound/mips/sgio2audio.c:464", 0, &mace->perif.audio.chan[chan->idx].control);
 	return 0;
 }
 
@@ -478,7 +478,7 @@ static irqreturn_t snd_sgio2audio_dma_in_isr(int irq, void *dev_id)
 
 	/* empty the ring */
 	count = CHANNEL_RING_SIZE -
-		readq(&mace->perif.audio.chan[ch].depth) - 32;
+		pete_readq("sound/mips/sgio2audio.c:481", &mace->perif.audio.chan[ch].depth) - 32;
 	if (snd_sgio2audio_dma_pull_frag(chip, ch, count))
 		snd_pcm_period_elapsed(substream);
 
@@ -497,7 +497,7 @@ static irqreturn_t snd_sgio2audio_dma_out_isr(int irq, void *dev_id)
 	ch = chan->idx;
 	/* fill the ring */
 	count = CHANNEL_RING_SIZE -
-		readq(&mace->perif.audio.chan[ch].depth) - 32;
+		pete_readq("sound/mips/sgio2audio.c:500", &mace->perif.audio.chan[ch].depth) - 32;
 	if (snd_sgio2audio_dma_push_frag(chip, ch, count))
 		snd_pcm_period_elapsed(substream);
 
@@ -756,9 +756,9 @@ static int snd_sgio2audio_free(struct snd_sgio2audio *chip)
 	int i;
 
 	/* reset interface */
-	writeq(AUDIO_CONTROL_RESET, &mace->perif.audio.control);
+	pete_writeq("sound/mips/sgio2audio.c:759", AUDIO_CONTROL_RESET, &mace->perif.audio.control);
 	udelay(1);
-	writeq(0, &mace->perif.audio.control);
+	pete_writeq("sound/mips/sgio2audio.c:761", 0, &mace->perif.audio.control);
 
 	/* release IRQ's */
 	for (i = 0; i < ARRAY_SIZE(snd_sgio2_isr_table); i++)
@@ -794,7 +794,7 @@ static int snd_sgio2audio_create(struct snd_card *card,
 
 	/* check if a codec is attached to the interface */
 	/* (Audio or Audio/Video board present) */
-	if (!(readq(&mace->perif.audio.control) & AUDIO_CONTROL_CODEC_PRESENT))
+	if (!(pete_readq("sound/mips/sgio2audio.c:797", &mace->perif.audio.control) & AUDIO_CONTROL_CODEC_PRESENT))
 		return -ENOENT;
 
 	chip = kzalloc(sizeof(*chip), GFP_KERNEL);
@@ -836,13 +836,13 @@ static int snd_sgio2audio_create(struct snd_card *card,
 	}
 
 	/* reset the interface */
-	writeq(AUDIO_CONTROL_RESET, &mace->perif.audio.control);
+	pete_writeq("sound/mips/sgio2audio.c:839", AUDIO_CONTROL_RESET, &mace->perif.audio.control);
 	udelay(1);
-	writeq(0, &mace->perif.audio.control);
+	pete_writeq("sound/mips/sgio2audio.c:841", 0, &mace->perif.audio.control);
 	msleep_interruptible(1); /* give time to recover */
 
 	/* set ring base */
-	writeq(chip->ring_base_dma, &mace->perif.ctrl.ringbase);
+	pete_writeq("sound/mips/sgio2audio.c:845", chip->ring_base_dma, &mace->perif.ctrl.ringbase);
 
 	/* attach the AD1843 codec */
 	chip->ad1843.read = read_ad1843_reg;

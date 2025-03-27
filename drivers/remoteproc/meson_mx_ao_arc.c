@@ -68,7 +68,7 @@ static int meson_mx_ao_arc_rproc_start(struct rproc *rproc)
 
 	tmp = FIELD_PREP(AO_REMAP_REG0_REMAP_AHB_SRAM_BITS_17_14_FOR_ARM_CPU,
 			 priv->sram_pa >> 14);
-	writel(tmp, priv->remap_base + AO_REMAP_REG0);
+	pete_writel("drivers/remoteproc/meson_mx_ao_arc.c:71", tmp, priv->remap_base + AO_REMAP_REG0);
 
 	/*
 	 * The SRAM content as seen by the ARC core always starts at 0x0
@@ -77,7 +77,7 @@ static int meson_mx_ao_arc_rproc_start(struct rproc *rproc)
 	 * AO_REMAP_REG1_MOVE_AHB_SRAM_TO_0X0_INSTEAD_OF_DDR to achieve the
 	 * same. (At least) For Meson8 and newer that bit must not be set.
 	 */
-	writel(0x0, priv->remap_base + AO_REMAP_REG1);
+	pete_writel("drivers/remoteproc/meson_mx_ao_arc.c:80", 0x0, priv->remap_base + AO_REMAP_REG1);
 
 	regmap_update_bits(priv->secbus2_regmap, AO_SECURE_REG0,
 			   AO_SECURE_REG0_AHB_SRAM_BITS_19_12,
@@ -102,7 +102,7 @@ static int meson_mx_ao_arc_rproc_start(struct rproc *rproc)
 	tmp = FIELD_PREP(AO_CPU_CNTL_AHB_SRAM_BITS_31_20,
 			 translated_sram_addr >> 20);
 	tmp |= AO_CPU_CNTL_UNKNONWN | AO_CPU_CNTL_RUN;
-	writel(tmp, priv->cpu_base + AO_CPU_CNTL);
+	pete_writel("drivers/remoteproc/meson_mx_ao_arc.c:105", tmp, priv->cpu_base + AO_CPU_CNTL);
 
 	usleep_range(20, 200);
 
@@ -113,7 +113,7 @@ static int meson_mx_ao_arc_rproc_stop(struct rproc *rproc)
 {
 	struct meson_mx_ao_arc_rproc_priv *priv = rproc->priv;
 
-	writel(AO_CPU_CNTL_HALT, priv->cpu_base + AO_CPU_CNTL);
+	pete_writel("drivers/remoteproc/meson_mx_ao_arc.c:116", AO_CPU_CNTL_HALT, priv->cpu_base + AO_CPU_CNTL);
 
 	clk_disable_unprepare(priv->arc_pclk);
 

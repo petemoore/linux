@@ -50,8 +50,8 @@ static int thunder_pem_bridge_read(struct pci_bus *bus, unsigned int devfn,
 	 * The config data lands in the upper 32-bits of PEM_CFG_RD.
 	 */
 	read_val = where & ~3ull;
-	writeq(read_val, pem_pci->pem_reg_base + PEM_CFG_RD);
-	read_val = readq(pem_pci->pem_reg_base + PEM_CFG_RD);
+	pete_writeq("drivers/pci/controller/pci-thunder-pem.c:53", read_val, pem_pci->pem_reg_base + PEM_CFG_RD);
+	read_val = pete_readq("drivers/pci/controller/pci-thunder-pem.c:54", pem_pci->pem_reg_base + PEM_CFG_RD);
 	read_val >>= 32;
 
 	/*
@@ -79,8 +79,8 @@ static int thunder_pem_bridge_read(struct pci_bus *bus, unsigned int devfn,
 		 * T88 and TableSize is reported as 4, else TableSize
 		 * is 2.
 		 */
-		writeq(0x70, pem_pci->pem_reg_base + PEM_CFG_RD);
-		tmp_val = readq(pem_pci->pem_reg_base + PEM_CFG_RD);
+		pete_writeq("drivers/pci/controller/pci-thunder-pem.c:82", 0x70, pem_pci->pem_reg_base + PEM_CFG_RD);
+		tmp_val = pete_readq("drivers/pci/controller/pci-thunder-pem.c:83", pem_pci->pem_reg_base + PEM_CFG_RD);
 		tmp_val >>= 32;
 		if (!(tmp_val & (0x1f << 25)))
 			read_val |= 0x0003bc00;
@@ -231,8 +231,8 @@ static int thunder_pem_bridge_write(struct pci_bus *bus, unsigned int devfn,
 	 */
 	switch (size) {
 	case 1:
-		writeq(where_aligned, pem_pci->pem_reg_base + PEM_CFG_RD);
-		read_val = readq(pem_pci->pem_reg_base + PEM_CFG_RD);
+		pete_writeq("drivers/pci/controller/pci-thunder-pem.c:234", where_aligned, pem_pci->pem_reg_base + PEM_CFG_RD);
+		read_val = pete_readq("drivers/pci/controller/pci-thunder-pem.c:235", pem_pci->pem_reg_base + PEM_CFG_RD);
 		read_val >>= 32;
 		mask = ~(0xff << (8 * (where & 3)));
 		read_val &= mask;
@@ -240,8 +240,8 @@ static int thunder_pem_bridge_write(struct pci_bus *bus, unsigned int devfn,
 		val |= (u32)read_val;
 		break;
 	case 2:
-		writeq(where_aligned, pem_pci->pem_reg_base + PEM_CFG_RD);
-		read_val = readq(pem_pci->pem_reg_base + PEM_CFG_RD);
+		pete_writeq("drivers/pci/controller/pci-thunder-pem.c:243", where_aligned, pem_pci->pem_reg_base + PEM_CFG_RD);
+		read_val = pete_readq("drivers/pci/controller/pci-thunder-pem.c:244", pem_pci->pem_reg_base + PEM_CFG_RD);
 		read_val >>= 32;
 		mask = ~(0xffff << (8 * (where & 3)));
 		read_val &= mask;
@@ -279,7 +279,7 @@ static int thunder_pem_bridge_write(struct pci_bus *bus, unsigned int devfn,
 	 * bits are the data to be written.
 	 */
 	write_val = (((u64)val) << 32) | where_aligned;
-	writeq(write_val, pem_pci->pem_reg_base + PEM_CFG_WR);
+	pete_writeq("drivers/pci/controller/pci-thunder-pem.c:282", write_val, pem_pci->pem_reg_base + PEM_CFG_WR);
 	return PCIBIOS_SUCCESSFUL;
 }
 

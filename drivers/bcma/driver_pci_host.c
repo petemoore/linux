@@ -212,11 +212,11 @@ static int bcma_extpci_write_config(struct bcma_drv_pci *pc, unsigned int dev,
 		else
 			pcicore_write32(pc, addr, val);
 	} else {
-		writel(val, mmio);
+		pete_writel("drivers/bcma/driver_pci_host.c:215", val, mmio);
 
 		if (chipid == BCMA_CHIP_ID_BCM4716 ||
 		    chipid == BCMA_CHIP_ID_BCM4748)
-			readl(mmio);
+			pete_readl("drivers/bcma/driver_pci_host.c:219", mmio);
 	}
 
 	err = 0;

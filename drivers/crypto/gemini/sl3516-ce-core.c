@@ -81,7 +81,7 @@ static void start_dma_tx(struct sl3516_ce_dev *ce)
 	v = TXDMA_CTRL_START | TXDMA_CTRL_CHAIN_MODE | TXDMA_CTRL_CONTINUE | \
 		TXDMA_CTRL_INT_FAIL | TXDMA_CTRL_INT_PERR | TXDMA_CTRL_BURST_UNK;
 
-	writel(v, ce->base + IPSEC_TXDMA_CTRL);
+	pete_writel("drivers/crypto/gemini/sl3516-ce-core.c:84", v, ce->base + IPSEC_TXDMA_CTRL);
 }
 
 static void start_dma_rx(struct sl3516_ce_dev *ce)
@@ -93,7 +93,7 @@ static void start_dma_rx(struct sl3516_ce_dev *ce)
 		RXDMA_CTRL_INT_FAIL | RXDMA_CTRL_INT_PERR | \
 		RXDMA_CTRL_INT_EOD | RXDMA_CTRL_INT_EOF;
 
-	writel(v, ce->base + IPSEC_RXDMA_CTRL);
+	pete_writel("drivers/crypto/gemini/sl3516-ce-core.c:96", v, ce->base + IPSEC_RXDMA_CTRL);
 }
 
 static struct descriptor *get_desc_tx(struct sl3516_ce_dev *ce)
@@ -175,7 +175,7 @@ int sl3516_ce_run_task(struct sl3516_ce_dev *ce, struct sl3516_ce_cipher_req_ctx
 		dev_err(ce->dev, "DMA timeout for %s\n", name);
 		err = -EFAULT;
 	}
-	v = readl(ce->base + IPSEC_STATUS_REG);
+	v = pete_readl("drivers/crypto/gemini/sl3516-ce-core.c:178", ce->base + IPSEC_STATUS_REG);
 	if (v & 0xFFF) {
 		dev_err(ce->dev, "IPSEC_STATUS_REG %x\n", v);
 		err = -EFAULT;
@@ -191,8 +191,8 @@ static irqreturn_t ce_irq_handler(int irq, void *data)
 
 	ce->stat_irq++;
 
-	v = readl(ce->base + IPSEC_DMA_STATUS);
-	writel(v, ce->base + IPSEC_DMA_STATUS);
+	v = pete_readl("drivers/crypto/gemini/sl3516-ce-core.c:194", ce->base + IPSEC_DMA_STATUS);
+	pete_writel("drivers/crypto/gemini/sl3516-ce-core.c:195", v, ce->base + IPSEC_DMA_STATUS);
 
 	if (v & DMA_STATUS_TS_DERR)
 		dev_err(ce->dev, "AHB bus Error While Tx !!!\n");
@@ -327,9 +327,9 @@ static void sl3516_ce_start(struct sl3516_ce_dev *ce)
 {
 	ce->ctx = 0;
 	ce->crx = 0;
-	writel(ce->dtx, ce->base + IPSEC_TXDMA_CURR_DESC);
-	writel(ce->drx, ce->base + IPSEC_RXDMA_CURR_DESC);
-	writel(0, ce->base + IPSEC_DMA_STATUS);
+	pete_writel("drivers/crypto/gemini/sl3516-ce-core.c:330", ce->dtx, ce->base + IPSEC_TXDMA_CURR_DESC);
+	pete_writel("drivers/crypto/gemini/sl3516-ce-core.c:331", ce->drx, ce->base + IPSEC_RXDMA_CURR_DESC);
+	pete_writel("drivers/crypto/gemini/sl3516-ce-core.c:332", 0, ce->base + IPSEC_DMA_STATUS);
 }
 
 /*
@@ -465,11 +465,11 @@ static int sl3516_ce_probe(struct platform_device *pdev)
 	if (err < 0)
 		goto error_pmuse;
 
-	v = readl(ce->base + IPSEC_ID);
+	v = pete_readl("drivers/crypto/gemini/sl3516-ce-core.c:468", ce->base + IPSEC_ID);
 	dev_info(ce->dev, "SL3516 dev %lx rev %lx\n",
 		 v & GENMASK(31, 4),
 		 v & GENMASK(3, 0));
-	v = readl(ce->base + IPSEC_DMA_DEVICE_ID);
+	v = pete_readl("drivers/crypto/gemini/sl3516-ce-core.c:472", ce->base + IPSEC_DMA_DEVICE_ID);
 	dev_info(ce->dev, "SL3516 DMA dev %lx rev %lx\n",
 		 v & GENMASK(15, 4),
 		 v & GENMASK(3, 0));

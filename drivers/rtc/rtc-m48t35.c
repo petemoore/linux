@@ -64,15 +64,15 @@ static int m48t35_read_time(struct device *dev, struct rtc_time *tm)
 	 * by the RTC when initially set to a non-zero value.
 	 */
 	spin_lock_irq(&priv->lock);
-	control = readb(&priv->reg->control);
-	writeb(control | M48T35_RTC_READ, &priv->reg->control);
-	tm->tm_sec = readb(&priv->reg->sec);
-	tm->tm_min = readb(&priv->reg->min);
-	tm->tm_hour = readb(&priv->reg->hour);
-	tm->tm_mday = readb(&priv->reg->date);
-	tm->tm_mon = readb(&priv->reg->month);
-	tm->tm_year = readb(&priv->reg->year);
-	writeb(control, &priv->reg->control);
+	control = pete_readb("drivers/rtc/rtc-m48t35.c:67", &priv->reg->control);
+	pete_writeb("drivers/rtc/rtc-m48t35.c:68", control | M48T35_RTC_READ, &priv->reg->control);
+	tm->tm_sec = pete_readb("drivers/rtc/rtc-m48t35.c:69", &priv->reg->sec);
+	tm->tm_min = pete_readb("drivers/rtc/rtc-m48t35.c:70", &priv->reg->min);
+	tm->tm_hour = pete_readb("drivers/rtc/rtc-m48t35.c:71", &priv->reg->hour);
+	tm->tm_mday = pete_readb("drivers/rtc/rtc-m48t35.c:72", &priv->reg->date);
+	tm->tm_mon = pete_readb("drivers/rtc/rtc-m48t35.c:73", &priv->reg->month);
+	tm->tm_year = pete_readb("drivers/rtc/rtc-m48t35.c:74", &priv->reg->year);
+	pete_writeb("drivers/rtc/rtc-m48t35.c:75", control, &priv->reg->control);
 	spin_unlock_irq(&priv->lock);
 
 	tm->tm_sec = bcd2bin(tm->tm_sec);
@@ -129,15 +129,15 @@ static int m48t35_set_time(struct device *dev, struct rtc_time *tm)
 	yrs = bin2bcd(yrs);
 
 	spin_lock_irq(&priv->lock);
-	control = readb(&priv->reg->control);
-	writeb(control | M48T35_RTC_SET, &priv->reg->control);
-	writeb(yrs, &priv->reg->year);
-	writeb(mon, &priv->reg->month);
-	writeb(day, &priv->reg->date);
-	writeb(hrs, &priv->reg->hour);
-	writeb(min, &priv->reg->min);
-	writeb(sec, &priv->reg->sec);
-	writeb(control, &priv->reg->control);
+	control = pete_readb("drivers/rtc/rtc-m48t35.c:132", &priv->reg->control);
+	pete_writeb("drivers/rtc/rtc-m48t35.c:133", control | M48T35_RTC_SET, &priv->reg->control);
+	pete_writeb("drivers/rtc/rtc-m48t35.c:134", yrs, &priv->reg->year);
+	pete_writeb("drivers/rtc/rtc-m48t35.c:135", mon, &priv->reg->month);
+	pete_writeb("drivers/rtc/rtc-m48t35.c:136", day, &priv->reg->date);
+	pete_writeb("drivers/rtc/rtc-m48t35.c:137", hrs, &priv->reg->hour);
+	pete_writeb("drivers/rtc/rtc-m48t35.c:138", min, &priv->reg->min);
+	pete_writeb("drivers/rtc/rtc-m48t35.c:139", sec, &priv->reg->sec);
+	pete_writeb("drivers/rtc/rtc-m48t35.c:140", control, &priv->reg->control);
 	spin_unlock_irq(&priv->lock);
 	return 0;
 }

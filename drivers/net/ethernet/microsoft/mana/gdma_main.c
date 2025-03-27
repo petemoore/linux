@@ -10,12 +10,12 @@
 
 static u32 mana_gd_r32(struct gdma_context *g, u64 offset)
 {
-	return readl(g->bar0_va + offset);
+	return pete_readl("drivers/net/ethernet/microsoft/mana/gdma_main.c:13", g->bar0_va + offset);
 }
 
 static u64 mana_gd_r64(struct gdma_context *g, u64 offset)
 {
-	return readq(g->bar0_va + offset);
+	return pete_readq("drivers/net/ethernet/microsoft/mana/gdma_main.c:18", g->bar0_va + offset);
 }
 
 static void mana_gd_init_pf_regs(struct pci_dev *pdev)
@@ -314,7 +314,7 @@ static void mana_gd_ring_doorbell(struct gdma_context *gc, u32 db_index,
 	/* Ensure all writes are done before ring doorbell */
 	wmb();
 
-	writeq(e.as_uint64, addr);
+	pete_writeq("drivers/net/ethernet/microsoft/mana/gdma_main.c:317", e.as_uint64, addr);
 }
 
 void mana_gd_wq_ring_doorbell(struct gdma_context *gc, struct gdma_queue *queue)

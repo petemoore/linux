@@ -58,7 +58,7 @@ static inline void vt8500_pwm_busy_wait(struct vt8500_chip *vt8500, int nr, u8 b
 	int loops = msecs_to_loops(10);
 	u32 mask = bitmask << (nr << 8);
 
-	while ((readl(vt8500->base + REG_STATUS) & mask) && --loops)
+	while ((pete_readl("drivers/pwm/pwm-vt8500.c:61", vt8500->base + REG_STATUS) & mask) && --loops)
 		cpu_relax();
 
 	if (unlikely(!loops))
@@ -102,18 +102,18 @@ static int vt8500_pwm_config(struct pwm_chip *chip, struct pwm_device *pwm,
 
 	dc = div64_u64(c, period_ns);
 
-	writel(prescale, vt8500->base + REG_SCALAR(pwm->hwpwm));
+	pete_writel("drivers/pwm/pwm-vt8500.c:105", prescale, vt8500->base + REG_SCALAR(pwm->hwpwm));
 	vt8500_pwm_busy_wait(vt8500, pwm->hwpwm, STATUS_SCALAR_UPDATE);
 
-	writel(pv, vt8500->base + REG_PERIOD(pwm->hwpwm));
+	pete_writel("drivers/pwm/pwm-vt8500.c:108", pv, vt8500->base + REG_PERIOD(pwm->hwpwm));
 	vt8500_pwm_busy_wait(vt8500, pwm->hwpwm, STATUS_PERIOD_UPDATE);
 
-	writel(dc, vt8500->base + REG_DUTY(pwm->hwpwm));
+	pete_writel("drivers/pwm/pwm-vt8500.c:111", dc, vt8500->base + REG_DUTY(pwm->hwpwm));
 	vt8500_pwm_busy_wait(vt8500, pwm->hwpwm, STATUS_DUTY_UPDATE);
 
-	val = readl(vt8500->base + REG_CTRL(pwm->hwpwm));
+	val = pete_readl("drivers/pwm/pwm-vt8500.c:114", vt8500->base + REG_CTRL(pwm->hwpwm));
 	val |= CTRL_AUTOLOAD;
-	writel(val, vt8500->base + REG_CTRL(pwm->hwpwm));
+	pete_writel("drivers/pwm/pwm-vt8500.c:116", val, vt8500->base + REG_CTRL(pwm->hwpwm));
 	vt8500_pwm_busy_wait(vt8500, pwm->hwpwm, STATUS_CTRL_UPDATE);
 
 	clk_disable(vt8500->clk);
@@ -132,9 +132,9 @@ static int vt8500_pwm_enable(struct pwm_chip *chip, struct pwm_device *pwm)
 		return err;
 	}
 
-	val = readl(vt8500->base + REG_CTRL(pwm->hwpwm));
+	val = pete_readl("drivers/pwm/pwm-vt8500.c:135", vt8500->base + REG_CTRL(pwm->hwpwm));
 	val |= CTRL_ENABLE;
-	writel(val, vt8500->base + REG_CTRL(pwm->hwpwm));
+	pete_writel("drivers/pwm/pwm-vt8500.c:137", val, vt8500->base + REG_CTRL(pwm->hwpwm));
 	vt8500_pwm_busy_wait(vt8500, pwm->hwpwm, STATUS_CTRL_UPDATE);
 
 	return 0;
@@ -145,9 +145,9 @@ static void vt8500_pwm_disable(struct pwm_chip *chip, struct pwm_device *pwm)
 	struct vt8500_chip *vt8500 = to_vt8500_chip(chip);
 	u32 val;
 
-	val = readl(vt8500->base + REG_CTRL(pwm->hwpwm));
+	val = pete_readl("drivers/pwm/pwm-vt8500.c:148", vt8500->base + REG_CTRL(pwm->hwpwm));
 	val &= ~CTRL_ENABLE;
-	writel(val, vt8500->base + REG_CTRL(pwm->hwpwm));
+	pete_writel("drivers/pwm/pwm-vt8500.c:150", val, vt8500->base + REG_CTRL(pwm->hwpwm));
 	vt8500_pwm_busy_wait(vt8500, pwm->hwpwm, STATUS_CTRL_UPDATE);
 
 	clk_disable(vt8500->clk);
@@ -160,14 +160,14 @@ static int vt8500_pwm_set_polarity(struct pwm_chip *chip,
 	struct vt8500_chip *vt8500 = to_vt8500_chip(chip);
 	u32 val;
 
-	val = readl(vt8500->base + REG_CTRL(pwm->hwpwm));
+	val = pete_readl("drivers/pwm/pwm-vt8500.c:163", vt8500->base + REG_CTRL(pwm->hwpwm));
 
 	if (polarity == PWM_POLARITY_INVERSED)
 		val |= CTRL_INVERT;
 	else
 		val &= ~CTRL_INVERT;
 
-	writel(val, vt8500->base + REG_CTRL(pwm->hwpwm));
+	pete_writel("drivers/pwm/pwm-vt8500.c:170", val, vt8500->base + REG_CTRL(pwm->hwpwm));
 	vt8500_pwm_busy_wait(vt8500, pwm->hwpwm, STATUS_CTRL_UPDATE);
 
 	return 0;

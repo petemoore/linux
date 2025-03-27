@@ -67,7 +67,7 @@ struct imx7ulp_wdt_device {
 
 static int imx7ulp_wdt_wait_ulk(void __iomem *base)
 {
-	u32 val = readl(base + WDOG_CS);
+	u32 val = pete_readl("drivers/watchdog/imx7ulp_wdt.c:70", base + WDOG_CS);
 
 	if (!(val & WDOG_CS_ULK) &&
 	    readl_poll_timeout_atomic(base + WDOG_CS, val,
@@ -81,7 +81,7 @@ static int imx7ulp_wdt_wait_ulk(void __iomem *base)
 static int imx7ulp_wdt_wait_rcs(struct imx7ulp_wdt_device *wdt)
 {
 	int ret = 0;
-	u32 val = readl(wdt->base + WDOG_CS);
+	u32 val = pete_readl("drivers/watchdog/imx7ulp_wdt.c:84", wdt->base + WDOG_CS);
 	u64 timeout = (val & WDOG_CS_PRES) ?
 		WDOG_RCS_WAIT_TIMEOUT * 256 : WDOG_RCS_WAIT_TIMEOUT;
 	unsigned long wait_min = (val & WDOG_CS_PRES) ?
@@ -101,18 +101,18 @@ static int imx7ulp_wdt_wait_rcs(struct imx7ulp_wdt_device *wdt)
 
 static int _imx7ulp_wdt_enable(struct imx7ulp_wdt_device *wdt, bool enable)
 {
-	u32 val = readl(wdt->base + WDOG_CS);
+	u32 val = pete_readl("drivers/watchdog/imx7ulp_wdt.c:104", wdt->base + WDOG_CS);
 	int ret;
 
 	local_irq_disable();
-	writel(UNLOCK, wdt->base + WDOG_CNT);
+	pete_writel("drivers/watchdog/imx7ulp_wdt.c:108", UNLOCK, wdt->base + WDOG_CNT);
 	ret = imx7ulp_wdt_wait_ulk(wdt->base);
 	if (ret)
 		goto enable_out;
 	if (enable)
-		writel(val | WDOG_CS_EN, wdt->base + WDOG_CS);
+		pete_writel("drivers/watchdog/imx7ulp_wdt.c:113", val | WDOG_CS_EN, wdt->base + WDOG_CS);
 	else
-		writel(val & ~WDOG_CS_EN, wdt->base + WDOG_CS);
+		pete_writel("drivers/watchdog/imx7ulp_wdt.c:115", val & ~WDOG_CS_EN, wdt->base + WDOG_CS);
 
 	local_irq_enable();
 	ret = imx7ulp_wdt_wait_rcs(wdt);
@@ -133,7 +133,7 @@ static int imx7ulp_wdt_enable(struct watchdog_device *wdog, bool enable)
 
 	do {
 		ret = _imx7ulp_wdt_enable(wdt, enable);
-		val = readl(wdt->base + WDOG_CS);
+		val = pete_readl("drivers/watchdog/imx7ulp_wdt.c:136", wdt->base + WDOG_CS);
 	} while (--loop > 0 && ((!!(val & WDOG_CS_EN)) != enable || ret));
 
 	if (loop == 0)
@@ -146,7 +146,7 @@ static int imx7ulp_wdt_ping(struct watchdog_device *wdog)
 {
 	struct imx7ulp_wdt_device *wdt = watchdog_get_drvdata(wdog);
 
-	writel(REFRESH, wdt->base + WDOG_CNT);
+	pete_writel("drivers/watchdog/imx7ulp_wdt.c:149", REFRESH, wdt->base + WDOG_CNT);
 
 	return 0;
 }
@@ -167,11 +167,11 @@ static int _imx7ulp_wdt_set_timeout(struct imx7ulp_wdt_device *wdt,
 	int ret;
 
 	local_irq_disable();
-	writel(UNLOCK, wdt->base + WDOG_CNT);
+	pete_writel("drivers/watchdog/imx7ulp_wdt.c:170", UNLOCK, wdt->base + WDOG_CNT);
 	ret = imx7ulp_wdt_wait_ulk(wdt->base);
 	if (ret)
 		goto timeout_out;
-	writel(toval, wdt->base + WDOG_TOVAL);
+	pete_writel("drivers/watchdog/imx7ulp_wdt.c:174", toval, wdt->base + WDOG_TOVAL);
 	local_irq_enable();
 	ret = imx7ulp_wdt_wait_rcs(wdt);
 	return ret;
@@ -192,7 +192,7 @@ static int imx7ulp_wdt_set_timeout(struct watchdog_device *wdog,
 
 	do {
 		ret = _imx7ulp_wdt_set_timeout(wdt, toval);
-		val = readl(wdt->base + WDOG_TOVAL);
+		val = pete_readl("drivers/watchdog/imx7ulp_wdt.c:195", wdt->base + WDOG_TOVAL);
 	} while (--loop > 0 && (val != toval || ret));
 
 	if (loop == 0)
@@ -245,9 +245,9 @@ static int _imx7ulp_wdt_init(struct imx7ulp_wdt_device *wdt, unsigned int timeou
 
 	local_irq_disable();
 
-	val = readl(wdt->base + WDOG_CS);
+	val = pete_readl("drivers/watchdog/imx7ulp_wdt.c:248", wdt->base + WDOG_CS);
 	if (val & WDOG_CS_CMD32EN) {
-		writel(UNLOCK, wdt->base + WDOG_CNT);
+		pete_writel("drivers/watchdog/imx7ulp_wdt.c:250", UNLOCK, wdt->base + WDOG_CNT);
 	} else {
 		mb();
 		/* unlock the wdog for reconfiguration */
@@ -261,8 +261,8 @@ static int _imx7ulp_wdt_init(struct imx7ulp_wdt_device *wdt, unsigned int timeou
 		goto init_out;
 
 	/* set an initial timeout value in TOVAL */
-	writel(timeout, wdt->base + WDOG_TOVAL);
-	writel(cs, wdt->base + WDOG_CS);
+	pete_writel("drivers/watchdog/imx7ulp_wdt.c:264", timeout, wdt->base + WDOG_TOVAL);
+	pete_writel("drivers/watchdog/imx7ulp_wdt.c:265", cs, wdt->base + WDOG_CS);
 	local_irq_enable();
 	ret = imx7ulp_wdt_wait_rcs(wdt);
 
@@ -287,8 +287,8 @@ static int imx7ulp_wdt_init(struct imx7ulp_wdt_device *wdt, unsigned int timeout
 
 	do {
 		ret = _imx7ulp_wdt_init(wdt, timeout, val);
-		toval = readl(wdt->base + WDOG_TOVAL);
-		cs = readl(wdt->base + WDOG_CS);
+		toval = pete_readl("drivers/watchdog/imx7ulp_wdt.c:290", wdt->base + WDOG_TOVAL);
+		cs = pete_readl("drivers/watchdog/imx7ulp_wdt.c:291", wdt->base + WDOG_CS);
 		cs &= ~(WDOG_CS_FLG | WDOG_CS_ULK | WDOG_CS_RCS);
 	} while (--loop > 0 && (cs != val || toval != timeout || ret));
 

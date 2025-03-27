@@ -58,7 +58,7 @@
 #define VID_MIN_HD_HEIGHT       720
 
 #define DBGFS_DUMP(reg) seq_printf(s, "\n  %-25s 0x%08X", #reg, \
-				   readl(vid->regs + reg))
+				   pete_readl("drivers/gpu/drm/sti/sti_vid.c:61", vid->regs + reg))
 
 static void vid_dbg_ctl(struct seq_file *s, int val)
 {
@@ -98,13 +98,13 @@ static int vid_dbg_show(struct seq_file *s, void *arg)
 	seq_printf(s, "VID: (vaddr= 0x%p)", vid->regs);
 
 	DBGFS_DUMP(VID_CTL);
-	vid_dbg_ctl(s, readl(vid->regs + VID_CTL));
+	vid_dbg_ctl(s, pete_readl("drivers/gpu/drm/sti/sti_vid.c:101", vid->regs + VID_CTL));
 	DBGFS_DUMP(VID_ALP);
 	DBGFS_DUMP(VID_CLF);
 	DBGFS_DUMP(VID_VPO);
-	vid_dbg_vpo(s, readl(vid->regs + VID_VPO));
+	vid_dbg_vpo(s, pete_readl("drivers/gpu/drm/sti/sti_vid.c:105", vid->regs + VID_VPO));
 	DBGFS_DUMP(VID_VPS);
-	vid_dbg_vps(s, readl(vid->regs + VID_VPS));
+	vid_dbg_vps(s, pete_readl("drivers/gpu/drm/sti/sti_vid.c:107", vid->regs + VID_VPS));
 	DBGFS_DUMP(VID_KEY1);
 	DBGFS_DUMP(VID_KEY2);
 	DBGFS_DUMP(VID_MPR0);
@@ -112,7 +112,7 @@ static int vid_dbg_show(struct seq_file *s, void *arg)
 	DBGFS_DUMP(VID_MPR2);
 	DBGFS_DUMP(VID_MPR3);
 	DBGFS_DUMP(VID_MST);
-	vid_dbg_mst(s, readl(vid->regs + VID_MST));
+	vid_dbg_mst(s, pete_readl("drivers/gpu/drm/sti/sti_vid.c:115", vid->regs + VID_MST));
 	DBGFS_DUMP(VID_BC);
 	DBGFS_DUMP(VID_TINT);
 	DBGFS_DUMP(VID_CSAT);
@@ -154,29 +154,29 @@ void sti_vid_commit(struct sti_vid *vid,
 	dst_h = ALIGN(dst_h, 2);
 
 	/* Unmask */
-	val = readl(vid->regs + VID_CTL);
+	val = pete_readl("drivers/gpu/drm/sti/sti_vid.c:157", vid->regs + VID_CTL);
 	val &= ~VID_CTL_IGNORE;
-	writel(val, vid->regs + VID_CTL);
+	pete_writel("drivers/gpu/drm/sti/sti_vid.c:159", val, vid->regs + VID_CTL);
 
 	ydo = sti_vtg_get_line_number(*mode, dst_y);
 	yds = sti_vtg_get_line_number(*mode, dst_y + dst_h - 1);
 	xdo = sti_vtg_get_pixel_number(*mode, dst_x);
 	xds = sti_vtg_get_pixel_number(*mode, dst_x + dst_w - 1);
 
-	writel((ydo << 16) | xdo, vid->regs + VID_VPO);
-	writel((yds << 16) | xds, vid->regs + VID_VPS);
+	pete_writel("drivers/gpu/drm/sti/sti_vid.c:166", (ydo << 16) | xdo, vid->regs + VID_VPO);
+	pete_writel("drivers/gpu/drm/sti/sti_vid.c:167", (yds << 16) | xds, vid->regs + VID_VPS);
 
 	/* Color conversion parameters */
 	if (src_h >= VID_MIN_HD_HEIGHT) {
-		writel(VID_MPR0_BT709, vid->regs + VID_MPR0);
-		writel(VID_MPR1_BT709, vid->regs + VID_MPR1);
-		writel(VID_MPR2_BT709, vid->regs + VID_MPR2);
-		writel(VID_MPR3_BT709, vid->regs + VID_MPR3);
+		pete_writel("drivers/gpu/drm/sti/sti_vid.c:171", VID_MPR0_BT709, vid->regs + VID_MPR0);
+		pete_writel("drivers/gpu/drm/sti/sti_vid.c:172", VID_MPR1_BT709, vid->regs + VID_MPR1);
+		pete_writel("drivers/gpu/drm/sti/sti_vid.c:173", VID_MPR2_BT709, vid->regs + VID_MPR2);
+		pete_writel("drivers/gpu/drm/sti/sti_vid.c:174", VID_MPR3_BT709, vid->regs + VID_MPR3);
 	} else {
-		writel(VID_MPR0_BT601, vid->regs + VID_MPR0);
-		writel(VID_MPR1_BT601, vid->regs + VID_MPR1);
-		writel(VID_MPR2_BT601, vid->regs + VID_MPR2);
-		writel(VID_MPR3_BT601, vid->regs + VID_MPR3);
+		pete_writel("drivers/gpu/drm/sti/sti_vid.c:176", VID_MPR0_BT601, vid->regs + VID_MPR0);
+		pete_writel("drivers/gpu/drm/sti/sti_vid.c:177", VID_MPR1_BT601, vid->regs + VID_MPR1);
+		pete_writel("drivers/gpu/drm/sti/sti_vid.c:178", VID_MPR2_BT601, vid->regs + VID_MPR2);
+		pete_writel("drivers/gpu/drm/sti/sti_vid.c:179", VID_MPR3_BT601, vid->regs + VID_MPR3);
 	}
 }
 
@@ -185,23 +185,23 @@ void sti_vid_disable(struct sti_vid *vid)
 	u32 val;
 
 	/* Mask */
-	val = readl(vid->regs + VID_CTL);
+	val = pete_readl("drivers/gpu/drm/sti/sti_vid.c:188", vid->regs + VID_CTL);
 	val |= VID_CTL_IGNORE;
-	writel(val, vid->regs + VID_CTL);
+	pete_writel("drivers/gpu/drm/sti/sti_vid.c:190", val, vid->regs + VID_CTL);
 }
 
 static void sti_vid_init(struct sti_vid *vid)
 {
 	/* Enable PSI, Mask layer */
-	writel(VID_CTL_PSI_ENABLE | VID_CTL_IGNORE, vid->regs + VID_CTL);
+	pete_writel("drivers/gpu/drm/sti/sti_vid.c:196", VID_CTL_PSI_ENABLE | VID_CTL_IGNORE, vid->regs + VID_CTL);
 
 	/* Opaque */
-	writel(VID_ALP_OPAQUE, vid->regs + VID_ALP);
+	pete_writel("drivers/gpu/drm/sti/sti_vid.c:199", VID_ALP_OPAQUE, vid->regs + VID_ALP);
 
 	/* Brightness, contrast, tint, saturation */
-	writel(VID_BC_DFLT, vid->regs + VID_BC);
-	writel(VID_TINT_DFLT, vid->regs + VID_TINT);
-	writel(VID_CSAT_DFLT, vid->regs + VID_CSAT);
+	pete_writel("drivers/gpu/drm/sti/sti_vid.c:202", VID_BC_DFLT, vid->regs + VID_BC);
+	pete_writel("drivers/gpu/drm/sti/sti_vid.c:203", VID_TINT_DFLT, vid->regs + VID_TINT);
+	pete_writel("drivers/gpu/drm/sti/sti_vid.c:204", VID_CSAT_DFLT, vid->regs + VID_CSAT);
 }
 
 struct sti_vid *sti_vid_create(struct device *dev, struct drm_device *drm_dev,

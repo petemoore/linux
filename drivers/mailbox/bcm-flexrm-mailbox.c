@@ -929,7 +929,7 @@ static void flexrm_write_config_in_seqfile(struct flexrm_mbox *mbox,
 
 	for (i = 0; i < mbox->num_rings; i++) {
 		ring = &mbox->rings[i];
-		if (readl(ring->regs + RING_CONTROL) &
+		if (pete_readl("drivers/mailbox/bcm-flexrm-mailbox.c:932", ring->regs + RING_CONTROL) &
 		    BIT(CONTROL_ACTIVE_SHIFT))
 			state = "active";
 		else

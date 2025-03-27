@@ -437,14 +437,14 @@ struct hclge_comm_hw {
 
 static inline void hclge_comm_write_reg(void __iomem *base, u32 reg, u32 value)
 {
-	writel(value, base + reg);
+	pete_writel("drivers/net/ethernet/hisilicon/hns3/hns3_common/hclge_comm_cmd.h:440", value, base + reg);
 }
 
 static inline u32 hclge_comm_read_reg(u8 __iomem *base, u32 reg)
 {
 	u8 __iomem *reg_addr = READ_ONCE(base);
 
-	return readl(reg_addr + reg);
+	return pete_readl("drivers/net/ethernet/hisilicon/hns3/hns3_common/hclge_comm_cmd.h:447", reg_addr + reg);
 }
 
 #define hclge_comm_write_dev(a, reg, value) \

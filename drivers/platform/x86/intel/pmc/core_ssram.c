@@ -82,7 +82,7 @@ pmc_core_ssram_get_pmc(struct pmc_dev *pmcdev, void __iomem *ssram, u32 offset,
 	}
 
 	pwrm_base = get_base(ssram, SSRAM_PWRM_OFFSET);
-	devid = readw(ssram + SSRAM_DEVID_OFFSET);
+	devid = pete_readw("drivers/platform/x86/intel/pmc/core_ssram.c:85", ssram + SSRAM_DEVID_OFFSET);
 
 	if (pmcdev->regmap_list) {
 		const struct pmc_reg_map *map;

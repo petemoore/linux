@@ -129,7 +129,7 @@ static void hisi_i2c_handle_errors(struct hisi_i2c_controller *ctlr)
 	u32 int_err = ctlr->xfer_err, reg;
 
 	if (int_err & HISI_I2C_INT_FIFO_ERR) {
-		reg = readl(ctlr->iobase + HISI_I2C_FIFO_STATE);
+		reg = pete_readl("drivers/i2c/busses/i2c-hisi.c:132", ctlr->iobase + HISI_I2C_FIFO_STATE);
 
 		if (reg & HISI_I2C_FIFO_STATE_RX_RERR)
 			dev_err(ctlr->dev, "rx fifo error read\n");
@@ -150,22 +150,22 @@ static int hisi_i2c_start_xfer(struct hisi_i2c_controller *ctlr)
 	struct i2c_msg *msg = ctlr->msgs;
 	u32 reg;
 
-	reg = readl(ctlr->iobase + HISI_I2C_FRAME_CTRL);
+	reg = pete_readl("drivers/i2c/busses/i2c-hisi.c:153", ctlr->iobase + HISI_I2C_FRAME_CTRL);
 	reg &= ~HISI_I2C_FRAME_CTRL_ADDR_TEN;
 	if (msg->flags & I2C_M_TEN)
 		reg |= HISI_I2C_FRAME_CTRL_ADDR_TEN;
-	writel(reg, ctlr->iobase + HISI_I2C_FRAME_CTRL);
+	pete_writel("drivers/i2c/busses/i2c-hisi.c:157", reg, ctlr->iobase + HISI_I2C_FRAME_CTRL);
 
-	reg = readl(ctlr->iobase + HISI_I2C_SLV_ADDR);
+	reg = pete_readl("drivers/i2c/busses/i2c-hisi.c:159", ctlr->iobase + HISI_I2C_SLV_ADDR);
 	reg &= ~HISI_I2C_SLV_ADDR_VAL;
 	reg |= FIELD_PREP(HISI_I2C_SLV_ADDR_VAL, msg->addr);
-	writel(reg, ctlr->iobase + HISI_I2C_SLV_ADDR);
+	pete_writel("drivers/i2c/busses/i2c-hisi.c:162", reg, ctlr->iobase + HISI_I2C_SLV_ADDR);
 
-	reg = readl(ctlr->iobase + HISI_I2C_FIFO_CTRL);
+	reg = pete_readl("drivers/i2c/busses/i2c-hisi.c:164", ctlr->iobase + HISI_I2C_FIFO_CTRL);
 	reg |= HISI_I2C_FIFO_RX_CLR | HISI_I2C_FIFO_TX_CLR;
-	writel(reg, ctlr->iobase + HISI_I2C_FIFO_CTRL);
+	pete_writel("drivers/i2c/busses/i2c-hisi.c:166", reg, ctlr->iobase + HISI_I2C_FIFO_CTRL);
 	reg &= ~(HISI_I2C_FIFO_RX_CLR | HISI_I2C_FIFO_TX_CLR);
-	writel(reg, ctlr->iobase + HISI_I2C_FIFO_CTRL);
+	pete_writel("drivers/i2c/busses/i2c-hisi.c:168", reg, ctlr->iobase + HISI_I2C_FIFO_CTRL);
 
 	hisi_i2c_clear_int(ctlr, HISI_I2C_INT_ALL);
 	hisi_i2c_enable_int(ctlr, HISI_I2C_INT_ALL);
@@ -245,11 +245,11 @@ static int hisi_i2c_read_rx_fifo(struct hisi_i2c_controller *ctlr)
 			continue;
 		}
 
-		fifo_state = readl(ctlr->iobase + HISI_I2C_FIFO_STATE);
+		fifo_state = pete_readl("drivers/i2c/busses/i2c-hisi.c:248", ctlr->iobase + HISI_I2C_FIFO_STATE);
 		while (!(fifo_state & HISI_I2C_FIFO_STATE_RX_EMPTY) &&
 		       ctlr->buf_rx_idx < cur_msg->len) {
-			cur_msg->buf[ctlr->buf_rx_idx++] = readl(ctlr->iobase + HISI_I2C_RXDATA);
-			fifo_state = readl(ctlr->iobase + HISI_I2C_FIFO_STATE);
+			cur_msg->buf[ctlr->buf_rx_idx++] = pete_readl("drivers/i2c/busses/i2c-hisi.c:251", ctlr->iobase + HISI_I2C_RXDATA);
+			fifo_state = pete_readl("drivers/i2c/busses/i2c-hisi.c:252", ctlr->iobase + HISI_I2C_FIFO_STATE);
 		}
 
 		if (ctlr->buf_rx_idx == cur_msg->len) {
@@ -279,7 +279,7 @@ static void hisi_i2c_xfer_msg(struct hisi_i2c_controller *ctlr)
 		if (ctlr->msg_tx_idx && !ctlr->buf_tx_idx)
 			need_restart = true;
 
-		fifo_state = readl(ctlr->iobase + HISI_I2C_FIFO_STATE);
+		fifo_state = pete_readl("drivers/i2c/busses/i2c-hisi.c:282", ctlr->iobase + HISI_I2C_FIFO_STATE);
 		while (!(fifo_state & HISI_I2C_FIFO_STATE_TX_FULL) &&
 		       ctlr->buf_tx_idx < cur_msg->len && max_write) {
 			cmd = 0;
@@ -299,11 +299,11 @@ static void hisi_i2c_xfer_msg(struct hisi_i2c_controller *ctlr)
 				cmd |= FIELD_PREP(HISI_I2C_CMD_TXDATA_DATA,
 						  cur_msg->buf[ctlr->buf_tx_idx]);
 
-			writel(cmd, ctlr->iobase + HISI_I2C_CMD_TXDATA);
+			pete_writel("drivers/i2c/busses/i2c-hisi.c:302", cmd, ctlr->iobase + HISI_I2C_CMD_TXDATA);
 			ctlr->buf_tx_idx++;
 			max_write--;
 
-			fifo_state = readl(ctlr->iobase + HISI_I2C_FIFO_STATE);
+			fifo_state = pete_readl("drivers/i2c/busses/i2c-hisi.c:306", ctlr->iobase + HISI_I2C_FIFO_STATE);
 		}
 
 		/* Update the transfer index after per message transfer is done. */
@@ -338,7 +338,7 @@ static irqreturn_t hisi_i2c_irq(int irq, void *context)
 	if (!ctlr->completion)
 		return IRQ_NONE;
 
-	int_stat = readl(ctlr->iobase + HISI_I2C_INT_MSTAT);
+	int_stat = pete_readl("drivers/i2c/busses/i2c-hisi.c:341", ctlr->iobase + HISI_I2C_INT_MSTAT);
 	hisi_i2c_clear_int(ctlr, int_stat);
 	if (!(int_stat & HISI_I2C_INT_ALL))
 		return IRQ_NONE;
@@ -397,8 +397,8 @@ static void hisi_i2c_set_scl(struct hisi_i2c_controller *ctlr,
 	scl_hcnt = t_scl_hcnt - ctlr->spk_len - 7 - scl_fall_cnt;
 	scl_lcnt = t_scl_lcnt - 1 - scl_rise_cnt;
 
-	writel(scl_hcnt, ctlr->iobase + reg_hcnt);
-	writel(scl_lcnt, ctlr->iobase + reg_lcnt);
+	pete_writel("drivers/i2c/busses/i2c-hisi.c:400", scl_hcnt, ctlr->iobase + reg_hcnt);
+	pete_writel("drivers/i2c/busses/i2c-hisi.c:401", scl_lcnt, ctlr->iobase + reg_lcnt);
 }
 
 static void hisi_i2c_configure_bus(struct hisi_i2c_controller *ctlr)
@@ -427,21 +427,21 @@ static void hisi_i2c_configure_bus(struct hisi_i2c_controller *ctlr)
 		break;
 	}
 
-	reg = readl(ctlr->iobase + HISI_I2C_FRAME_CTRL);
+	reg = pete_readl("drivers/i2c/busses/i2c-hisi.c:430", ctlr->iobase + HISI_I2C_FRAME_CTRL);
 	reg &= ~HISI_I2C_FRAME_CTRL_SPEED_MODE;
 	reg |= FIELD_PREP(HISI_I2C_FRAME_CTRL_SPEED_MODE, speed_mode);
-	writel(reg, ctlr->iobase + HISI_I2C_FRAME_CTRL);
+	pete_writel("drivers/i2c/busses/i2c-hisi.c:433", reg, ctlr->iobase + HISI_I2C_FRAME_CTRL);
 
 	sda_hold_cnt = NSEC_TO_CYCLES(ctlr->t.sda_hold_ns, ctlr->clk_rate_khz);
 
 	reg = FIELD_PREP(HISI_I2C_SDA_HOLD_TX, sda_hold_cnt);
-	writel(reg, ctlr->iobase + HISI_I2C_SDA_HOLD);
+	pete_writel("drivers/i2c/busses/i2c-hisi.c:438", reg, ctlr->iobase + HISI_I2C_SDA_HOLD);
 
-	writel(ctlr->spk_len, ctlr->iobase + HISI_I2C_FS_SPK_LEN);
+	pete_writel("drivers/i2c/busses/i2c-hisi.c:440", ctlr->spk_len, ctlr->iobase + HISI_I2C_FS_SPK_LEN);
 
 	reg = FIELD_PREP(HISI_I2C_FIFO_RX_AF_THRESH, HISI_I2C_RX_F_AF_THRESH);
 	reg |= FIELD_PREP(HISI_I2C_FIFO_TX_AE_THRESH, HISI_I2C_TX_F_AE_THRESH);
-	writel(reg, ctlr->iobase + HISI_I2C_FIFO_CTRL);
+	pete_writel("drivers/i2c/busses/i2c-hisi.c:444", reg, ctlr->iobase + HISI_I2C_FIFO_CTRL);
 }
 
 static int hisi_i2c_probe(struct platform_device *pdev)
@@ -498,7 +498,7 @@ static int hisi_i2c_probe(struct platform_device *pdev)
 	if (ret)
 		return ret;
 
-	hw_version = readl(ctlr->iobase + HISI_I2C_VERSION);
+	hw_version = pete_readl("drivers/i2c/busses/i2c-hisi.c:501", ctlr->iobase + HISI_I2C_VERSION);
 	dev_info(ctlr->dev, "speed mode is %s. hw version 0x%x\n",
 		 i2c_freq_mode_string(ctlr->t.bus_freq_hz), hw_version);
 

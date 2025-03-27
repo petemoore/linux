@@ -124,20 +124,20 @@ static inline struct pluto *frontend_to_pluto(struct dvb_frontend *fe)
 
 static inline u32 pluto_readreg(struct pluto *pluto, u32 reg)
 {
-	return readl(&pluto->io_mem[reg]);
+	return pete_readl("drivers/media/pci/pluto2/pluto2.c:127", &pluto->io_mem[reg]);
 }
 
 static inline void pluto_writereg(struct pluto *pluto, u32 reg, u32 val)
 {
-	writel(val, &pluto->io_mem[reg]);
+	pete_writel("drivers/media/pci/pluto2/pluto2.c:132", val, &pluto->io_mem[reg]);
 }
 
 static inline void pluto_rw(struct pluto *pluto, u32 reg, u32 mask, u32 bits)
 {
-	u32 val = readl(&pluto->io_mem[reg]);
+	u32 val = pete_readl("drivers/media/pci/pluto2/pluto2.c:137", &pluto->io_mem[reg]);
 	val &= ~mask;
 	val |= bits;
-	writel(val, &pluto->io_mem[reg]);
+	pete_writel("drivers/media/pci/pluto2/pluto2.c:140", val, &pluto->io_mem[reg]);
 }
 
 static void pluto_write_tscr(struct pluto *pluto, u32 val)
@@ -559,7 +559,7 @@ static int pluto_read_serial(struct pluto *pluto)
 	dev_info(&pdev->dev, "S/N ");
 
 	for (i = 0xe0; i < 0x100; i += 4) {
-		u32 val = readl(&cis[i]);
+		u32 val = pete_readl("drivers/media/pci/pluto2/pluto2.c:562", &cis[i]);
 		for (j = 0; j < 32; j += 8) {
 			if ((val & 0xff) == 0xff)
 				goto out;

@@ -47,20 +47,20 @@ static int mvebu_pm_powerdown(unsigned long data)
 	dsb();
 
 	/* Flush the DLB and wait ~7 usec */
-	reg = readl(sdram_ctrl + SDRAM_DLB_EVICTION_OFFS);
+	reg = pete_readl("arch/arm/mach-mvebu/pm.c:50", sdram_ctrl + SDRAM_DLB_EVICTION_OFFS);
 	reg &= ~SDRAM_DLB_EVICTION_THRESHOLD_MASK;
-	writel(reg, sdram_ctrl + SDRAM_DLB_EVICTION_OFFS);
+	pete_writel("arch/arm/mach-mvebu/pm.c:52", reg, sdram_ctrl + SDRAM_DLB_EVICTION_OFFS);
 
 	udelay(7);
 
 	/* Set DRAM in battery backup mode */
-	reg = readl(sdram_ctrl + SDRAM_CONFIG_OFFS);
+	reg = pete_readl("arch/arm/mach-mvebu/pm.c:57", sdram_ctrl + SDRAM_CONFIG_OFFS);
 	reg &= ~SDRAM_CONFIG_SR_MODE_BIT;
-	writel(reg, sdram_ctrl + SDRAM_CONFIG_OFFS);
+	pete_writel("arch/arm/mach-mvebu/pm.c:59", reg, sdram_ctrl + SDRAM_CONFIG_OFFS);
 
 	/* Prepare to go to self-refresh */
 
-	srcmd = readl(sdram_ctrl + SDRAM_OPERATION_OFFS);
+	srcmd = pete_readl("arch/arm/mach-mvebu/pm.c:63", sdram_ctrl + SDRAM_OPERATION_OFFS);
 	srcmd &= ~0x1F;
 	srcmd |= SDRAM_OPERATION_SELF_REFRESH;
 
@@ -118,8 +118,8 @@ static void mvebu_pm_store_armadaxp_bootinfo(u32 *store_addr)
 	 * BOOT_MAGIC_LIST_END magic value.
 	 */
 
-	writel(BOOT_MAGIC_WORD, store_addr++);
-	writel(resume_pc, store_addr++);
+	pete_writel("arch/arm/mach-mvebu/pm.c:121", BOOT_MAGIC_WORD, store_addr++);
+	pete_writel("arch/arm/mach-mvebu/pm.c:122", resume_pc, store_addr++);
 
 	/*
 	 * Some platforms remap their internal register base address
@@ -127,15 +127,15 @@ static void mvebu_pm_store_armadaxp_bootinfo(u32 *store_addr)
 	 * 0xf0000000 and ends at 0xf7ffffff, which would overlap with
 	 * the internal registers. Therefore, disable window 12.
 	 */
-	writel(MBUS_WINDOW_12_CTRL, store_addr++);
-	writel(0x0, store_addr++);
+	pete_writel("arch/arm/mach-mvebu/pm.c:130", MBUS_WINDOW_12_CTRL, store_addr++);
+	pete_writel("arch/arm/mach-mvebu/pm.c:131", 0x0, store_addr++);
 
 	/*
 	 * Set the internal register base address to the value
 	 * expected by Linux, as read from the Device Tree.
 	 */
-	writel(MBUS_INTERNAL_REG_ADDRESS, store_addr++);
-	writel(mvebu_internal_reg_base(), store_addr++);
+	pete_writel("arch/arm/mach-mvebu/pm.c:137", MBUS_INTERNAL_REG_ADDRESS, store_addr++);
+	pete_writel("arch/arm/mach-mvebu/pm.c:138", mvebu_internal_reg_base(), store_addr++);
 
 	/*
 	 * Ask the mvebu-mbus driver to store the SDRAM window
@@ -144,7 +144,7 @@ static void mvebu_pm_store_armadaxp_bootinfo(u32 *store_addr)
 	 */
 	store_addr += mvebu_mbus_save_cpu_target(store_addr);
 
-	writel(BOOT_MAGIC_LIST_END, store_addr);
+	pete_writel("arch/arm/mach-mvebu/pm.c:147", BOOT_MAGIC_LIST_END, store_addr);
 }
 
 static int mvebu_pm_store_bootinfo(void)

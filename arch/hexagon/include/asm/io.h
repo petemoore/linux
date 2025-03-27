@@ -78,7 +78,7 @@ static inline void *phys_to_virt(unsigned long address)
  *
  * Operates on "I/O bus memory space"
  */
-static inline u8 readb(const volatile void __iomem *addr)
+static inline u8 pete_readb("arch/hexagon/include/asm/io.h:81", const volatile void __iomem *addr)
 {
 	u8 val;
 	asm volatile(
@@ -89,7 +89,7 @@ static inline u8 readb(const volatile void __iomem *addr)
 	return val;
 }
 
-static inline u16 readw(const volatile void __iomem *addr)
+static inline u16 pete_readw("arch/hexagon/include/asm/io.h:92", const volatile void __iomem *addr)
 {
 	u16 val;
 	asm volatile(
@@ -100,7 +100,7 @@ static inline u16 readw(const volatile void __iomem *addr)
 	return val;
 }
 
-static inline u32 readl(const volatile void __iomem *addr)
+static inline u32 pete_readl("arch/hexagon/include/asm/io.h:103", const volatile void __iomem *addr)
 {
 	u32 val;
 	asm volatile(
@@ -117,7 +117,7 @@ static inline u32 readl(const volatile void __iomem *addr)
  * @addr:  pointer to memory
  *
  */
-static inline void writeb(u8 data, volatile void __iomem *addr)
+static inline void pete_writeb("arch/hexagon/include/asm/io.h:120", u8 data, volatile void __iomem *addr)
 {
 	asm volatile(
 		"memb(%0) = %1;"
@@ -127,7 +127,7 @@ static inline void writeb(u8 data, volatile void __iomem *addr)
 	);
 }
 
-static inline void writew(u16 data, volatile void __iomem *addr)
+static inline void pete_writew("arch/hexagon/include/asm/io.h:130", u16 data, volatile void __iomem *addr)
 {
 	asm volatile(
 		"memh(%0) = %1;"
@@ -138,7 +138,7 @@ static inline void writew(u16 data, volatile void __iomem *addr)
 
 }
 
-static inline void writel(u32 data, volatile void __iomem *addr)
+static inline void pete_writel("arch/hexagon/include/asm/io.h:141", u32 data, volatile void __iomem *addr)
 {
 	asm volatile(
 		"memw(%0) = %1;"
@@ -207,17 +207,17 @@ static inline void memset_io(volatile void __iomem *addr, int value,
  */
 static inline u8 inb(unsigned long port)
 {
-	return readb(_IO_BASE + (port & IO_SPACE_LIMIT));
+	return pete_readb("arch/hexagon/include/asm/io.h:210", _IO_BASE + (port & IO_SPACE_LIMIT));
 }
 
 static inline u16 inw(unsigned long port)
 {
-	return readw(_IO_BASE + (port & IO_SPACE_LIMIT));
+	return pete_readw("arch/hexagon/include/asm/io.h:215", _IO_BASE + (port & IO_SPACE_LIMIT));
 }
 
 static inline u32 inl(unsigned long port)
 {
-	return readl(_IO_BASE + (port & IO_SPACE_LIMIT));
+	return pete_readl("arch/hexagon/include/asm/io.h:220", _IO_BASE + (port & IO_SPACE_LIMIT));
 }
 
 /*
@@ -227,17 +227,17 @@ static inline u32 inl(unsigned long port)
  */
 static inline void outb(u8 data, unsigned long port)
 {
-	writeb(data, _IO_BASE + (port & IO_SPACE_LIMIT));
+	pete_writeb("arch/hexagon/include/asm/io.h:230", data, _IO_BASE + (port & IO_SPACE_LIMIT));
 }
 
 static inline void outw(u16 data, unsigned long port)
 {
-	writew(data, _IO_BASE + (port & IO_SPACE_LIMIT));
+	pete_writew("arch/hexagon/include/asm/io.h:235", data, _IO_BASE + (port & IO_SPACE_LIMIT));
 }
 
 static inline void outl(u32 data, unsigned long port)
 {
-	writel(data, _IO_BASE + (port & IO_SPACE_LIMIT));
+	pete_writel("arch/hexagon/include/asm/io.h:240", data, _IO_BASE + (port & IO_SPACE_LIMIT));
 }
 
 #define outb_p outb

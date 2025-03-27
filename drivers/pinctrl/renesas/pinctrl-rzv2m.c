@@ -136,7 +136,7 @@ static const unsigned int drv_3_3V_group_uA[] = { 2000, 4000, 8000, 12000 };
 /* Helper for registers that have a write enable bit in the upper word */
 static void rzv2m_writel_we(void __iomem *addr, u8 shift, u8 value)
 {
-	writel((BIT(16) | value) << shift, addr);
+	pete_writel("drivers/pinctrl/renesas/pinctrl-rzv2m.c:139", (BIT(16) | value) << shift, addr);
 }
 
 static void rzv2m_pinctrl_set_pfc_mode(struct rzv2m_pinctrl *pctrl,
@@ -150,7 +150,7 @@ static void rzv2m_pinctrl_set_pfc_mode(struct rzv2m_pinctrl *pctrl,
 
 	/* Select the function and set the write enable bits */
 	addr = pctrl->base + PFSEL(port) + (pin / 4) * 4;
-	writel(((PFC_MASK << 16) | func) << ((pin % 4) * 4), addr);
+	pete_writel("drivers/pinctrl/renesas/pinctrl-rzv2m.c:153", ((PFC_MASK << 16) | func) << ((pin % 4) * 4), addr);
 
 	/* Unmask input/output */
 	rzv2m_writel_we(pctrl->base + EN_MSK(port), pin, 0);
@@ -449,8 +449,8 @@ static void rzv2m_rmw_pin_config(struct rzv2m_pinctrl *pctrl, u32 offset,
 	u32 reg;
 
 	spin_lock_irqsave(&pctrl->lock, flags);
-	reg = readl(addr) & ~(mask << shift);
-	writel(reg | (val << shift), addr);
+	reg = pete_readl("drivers/pinctrl/renesas/pinctrl-rzv2m.c:452", addr) & ~(mask << shift);
+	pete_writel("drivers/pinctrl/renesas/pinctrl-rzv2m.c:453", reg | (val << shift), addr);
 	spin_unlock_irqrestore(&pctrl->lock, flags);
 }
 
@@ -496,7 +496,7 @@ static int rzv2m_pinctrl_pinconf_get(struct pinctrl_dev *pctldev,
 		/* PUPD uses 2-bits per pin */
 		bit *= 2;
 
-		switch ((readl(pctrl->base + PUPD(port)) >> bit) & PUPD_MASK) {
+		switch ((pete_readl("drivers/pinctrl/renesas/pinctrl-rzv2m.c:499", pctrl->base + PUPD(port)) >> bit) & PUPD_MASK) {
 		case 0:
 			bias = PIN_CONFIG_BIAS_PULL_DOWN;
 			break;
@@ -519,7 +519,7 @@ static int rzv2m_pinctrl_pinconf_get(struct pinctrl_dev *pctldev,
 		/* DRV uses 2-bits per pin */
 		bit *= 2;
 
-		val = (readl(pctrl->base + DRV(port)) >> bit) & DRV_MASK;
+		val = (pete_readl("drivers/pinctrl/renesas/pinctrl-rzv2m.c:522", pctrl->base + DRV(port)) >> bit) & DRV_MASK;
 
 		switch (cfg & PIN_CFG_GRP_MASK) {
 		case PIN_CFG_GRP_1_8V_2:
@@ -545,7 +545,7 @@ static int rzv2m_pinctrl_pinconf_get(struct pinctrl_dev *pctldev,
 		if (!(cfg & PIN_CFG_SLEW))
 			return -EINVAL;
 
-		arg = readl(pctrl->base + SR(port)) & BIT(bit);
+		arg = pete_readl("drivers/pinctrl/renesas/pinctrl-rzv2m.c:548", pctrl->base + SR(port)) & BIT(bit);
 		break;
 
 	default:
@@ -776,7 +776,7 @@ static int rzv2m_gpio_get_direction(struct gpio_chip *chip, unsigned int offset)
 	u32 port = RZV2M_PIN_ID_TO_PORT(offset);
 	u8 bit = RZV2M_PIN_ID_TO_PIN(offset);
 
-	if (!(readl(pctrl->base + IE(port)) & BIT(bit)))
+	if (!(pete_readl("drivers/pinctrl/renesas/pinctrl-rzv2m.c:779", pctrl->base + IE(port)) & BIT(bit)))
 		return GPIO_LINE_DIRECTION_OUT;
 
 	return GPIO_LINE_DIRECTION_IN;
@@ -825,9 +825,9 @@ static int rzv2m_gpio_get(struct gpio_chip *chip, unsigned int offset)
 	int direction = rzv2m_gpio_get_direction(chip, offset);
 
 	if (direction == GPIO_LINE_DIRECTION_IN)
-		return !!(readl(pctrl->base + DI(port)) & BIT(bit));
+		return !!(pete_readl("drivers/pinctrl/renesas/pinctrl-rzv2m.c:828", pctrl->base + DI(port)) & BIT(bit));
 	else
-		return !!(readl(pctrl->base + DO(port)) & BIT(bit));
+		return !!(pete_readl("drivers/pinctrl/renesas/pinctrl-rzv2m.c:830", pctrl->base + DO(port)) & BIT(bit));
 }
 
 static void rzv2m_gpio_free(struct gpio_chip *chip, unsigned int offset)

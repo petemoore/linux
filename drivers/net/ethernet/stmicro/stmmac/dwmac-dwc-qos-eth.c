@@ -208,15 +208,15 @@ static void tegra_eqos_fix_speed(void *priv, unsigned int speed, unsigned int mo
 
 	if (needs_calibration) {
 		/* calibrate */
-		value = readl(eqos->regs + SDMEMCOMPPADCTRL);
+		value = pete_readl("drivers/net/ethernet/stmicro/stmmac/dwmac-dwc-qos-eth.c:211", eqos->regs + SDMEMCOMPPADCTRL);
 		value |= SDMEMCOMPPADCTRL_PAD_E_INPUT_OR_E_PWRD;
-		writel(value, eqos->regs + SDMEMCOMPPADCTRL);
+		pete_writel("drivers/net/ethernet/stmicro/stmmac/dwmac-dwc-qos-eth.c:213", value, eqos->regs + SDMEMCOMPPADCTRL);
 
 		udelay(1);
 
-		value = readl(eqos->regs + AUTO_CAL_CONFIG);
+		value = pete_readl("drivers/net/ethernet/stmicro/stmmac/dwmac-dwc-qos-eth.c:217", eqos->regs + AUTO_CAL_CONFIG);
 		value |= AUTO_CAL_CONFIG_START | AUTO_CAL_CONFIG_ENABLE;
-		writel(value, eqos->regs + AUTO_CAL_CONFIG);
+		pete_writel("drivers/net/ethernet/stmicro/stmmac/dwmac-dwc-qos-eth.c:219", value, eqos->regs + AUTO_CAL_CONFIG);
 
 		err = readl_poll_timeout_atomic(eqos->regs + AUTO_CAL_STATUS,
 						value,
@@ -237,13 +237,13 @@ static void tegra_eqos_fix_speed(void *priv, unsigned int speed, unsigned int mo
 		}
 
 	failed:
-		value = readl(eqos->regs + SDMEMCOMPPADCTRL);
+		value = pete_readl("drivers/net/ethernet/stmicro/stmmac/dwmac-dwc-qos-eth.c:240", eqos->regs + SDMEMCOMPPADCTRL);
 		value &= ~SDMEMCOMPPADCTRL_PAD_E_INPUT_OR_E_PWRD;
-		writel(value, eqos->regs + SDMEMCOMPPADCTRL);
+		pete_writel("drivers/net/ethernet/stmicro/stmmac/dwmac-dwc-qos-eth.c:242", value, eqos->regs + SDMEMCOMPPADCTRL);
 	} else {
-		value = readl(eqos->regs + AUTO_CAL_CONFIG);
+		value = pete_readl("drivers/net/ethernet/stmicro/stmmac/dwmac-dwc-qos-eth.c:244", eqos->regs + AUTO_CAL_CONFIG);
 		value &= ~AUTO_CAL_CONFIG_ENABLE;
-		writel(value, eqos->regs + AUTO_CAL_CONFIG);
+		pete_writel("drivers/net/ethernet/stmicro/stmmac/dwmac-dwc-qos-eth.c:246", value, eqos->regs + AUTO_CAL_CONFIG);
 	}
 
 	err = clk_set_rate(eqos->clk_tx, rate);
@@ -260,7 +260,7 @@ static int tegra_eqos_init(struct platform_device *pdev, void *priv)
 	rate = clk_get_rate(eqos->clk_slave);
 
 	value = (rate / 1000000) - 1;
-	writel(value, eqos->regs + GMAC_1US_TIC_COUNTER);
+	pete_writel("drivers/net/ethernet/stmicro/stmmac/dwmac-dwc-qos-eth.c:263", value, eqos->regs + GMAC_1US_TIC_COUNTER);
 
 	return 0;
 }

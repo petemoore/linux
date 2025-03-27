@@ -71,7 +71,7 @@ static void unrolled_memcpy_fromio(void *to, const volatile void __iomem *from, 
 	int i;
 
 	for (i = 0; i < n; ++i)
-		out[i] = readb(&in[i]);
+		out[i] = pete_readb("arch/x86/lib/iomem.c:74", &in[i]);
 }
 
 static void unrolled_memcpy_toio(volatile void __iomem *to, const void *from, size_t n)
@@ -81,7 +81,7 @@ static void unrolled_memcpy_toio(volatile void __iomem *to, const void *from, si
 	int i;
 
 	for (i = 0; i < n; ++i)
-		writeb(in[i], &out[i]);
+		pete_writeb("arch/x86/lib/iomem.c:84", in[i], &out[i]);
 }
 
 static void unrolled_memset_io(volatile void __iomem *a, int b, size_t c)
@@ -90,7 +90,7 @@ static void unrolled_memset_io(volatile void __iomem *a, int b, size_t c)
 	int i;
 
 	for (i = 0; i < c; ++i)
-		writeb(b, &mem[i]);
+		pete_writeb("arch/x86/lib/iomem.c:93", b, &mem[i]);
 }
 
 void memcpy_fromio(void *to, const volatile void __iomem *from, size_t n)

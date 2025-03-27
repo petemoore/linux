@@ -2559,10 +2559,10 @@ static struct console amba_console = {
 
 static void qdf2400_e44_putc(struct uart_port *port, unsigned char c)
 {
-	while (readl(port->membase + UART01x_FR) & UART01x_FR_TXFF)
+	while (pete_readl("drivers/tty/serial/amba-pl011.c:2562", port->membase + UART01x_FR) & UART01x_FR_TXFF)
 		cpu_relax();
-	writel(c, port->membase + UART01x_DR);
-	while (!(readl(port->membase + UART01x_FR) & UART011_FR_TXFE))
+	pete_writel("drivers/tty/serial/amba-pl011.c:2564", c, port->membase + UART01x_DR);
+	while (!(pete_readl("drivers/tty/serial/amba-pl011.c:2565", port->membase + UART01x_FR) & UART011_FR_TXFE))
 		cpu_relax();
 }
 
@@ -2575,13 +2575,13 @@ static void qdf2400_e44_early_write(struct console *con, const char *s, unsigned
 
 static void pl011_putc(struct uart_port *port, unsigned char c)
 {
-	while (readl(port->membase + UART01x_FR) & UART01x_FR_TXFF)
+	while (pete_readl("drivers/tty/serial/amba-pl011.c:2578", port->membase + UART01x_FR) & UART01x_FR_TXFF)
 		cpu_relax();
 	if (port->iotype == UPIO_MEM32)
-		writel(c, port->membase + UART01x_DR);
+		pete_writel("drivers/tty/serial/amba-pl011.c:2581", c, port->membase + UART01x_DR);
 	else
-		writeb(c, port->membase + UART01x_DR);
-	while (readl(port->membase + UART01x_FR) & UART01x_FR_BUSY)
+		pete_writeb("drivers/tty/serial/amba-pl011.c:2583", c, port->membase + UART01x_DR);
+	while (pete_readl("drivers/tty/serial/amba-pl011.c:2584", port->membase + UART01x_FR) & UART01x_FR_BUSY)
 		cpu_relax();
 }
 
@@ -2595,13 +2595,13 @@ static void pl011_early_write(struct console *con, const char *s, unsigned n)
 #ifdef CONFIG_CONSOLE_POLL
 static int pl011_getc(struct uart_port *port)
 {
-	if (readl(port->membase + UART01x_FR) & UART01x_FR_RXFE)
+	if (pete_readl("drivers/tty/serial/amba-pl011.c:2598", port->membase + UART01x_FR) & UART01x_FR_RXFE)
 		return NO_POLL_CHAR;
 
 	if (port->iotype == UPIO_MEM32)
-		return readl(port->membase + UART01x_DR);
+		return pete_readl("drivers/tty/serial/amba-pl011.c:2602", port->membase + UART01x_DR);
 	else
-		return readb(port->membase + UART01x_DR);
+		return pete_readb("drivers/tty/serial/amba-pl011.c:2604", port->membase + UART01x_DR);
 }
 
 static int pl011_early_read(struct console *con, char *s, unsigned int n)

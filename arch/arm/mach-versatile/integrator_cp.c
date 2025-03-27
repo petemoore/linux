@@ -66,8 +66,8 @@ static void __init intcp_map_io(void)
  */
 static unsigned int mmc_status(struct device *dev)
 {
-	unsigned int status = readl(__io_address(0xca000000 + 4));
-	writel(8, intcp_con_base + 8);
+	unsigned int status = pete_readl("arch/arm/mach-versatile/integrator_cp.c:69", __io_address(0xca000000 + 4));
+	pete_writel("arch/arm/mach-versatile/integrator_cp.c:70", 8, intcp_con_base + 8);
 
 	return status & 8;
 }

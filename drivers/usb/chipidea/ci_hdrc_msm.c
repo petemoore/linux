@@ -59,7 +59,7 @@ ci_hdrc_msm_por_reset(struct reset_controller_dev *r, unsigned long id)
 
 	val = readl_relaxed(addr);
 	val |= HS_PHY_POR_ASSERT;
-	writel(val, addr);
+	pete_writel("drivers/usb/chipidea/ci_hdrc_msm.c:62", val, addr);
 	/*
 	 * wait for minimum 10 microseconds as suggested by manual.
 	 * Use a slightly larger value since the exact value didn't
@@ -67,7 +67,7 @@ ci_hdrc_msm_por_reset(struct reset_controller_dev *r, unsigned long id)
 	 */
 	udelay(12);
 	val &= ~HS_PHY_POR_ASSERT;
-	writel(val, addr);
+	pete_writel("drivers/usb/chipidea/ci_hdrc_msm.c:70", val, addr);
 
 	return 0;
 }

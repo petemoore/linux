@@ -86,12 +86,12 @@ struct msm_pinctrl {
 static u32 msm_readl_##name(struct msm_pinctrl *pctrl, \
 			    const struct msm_pingroup *g) \
 { \
-	return readl(pctrl->regs[g->tile] + g->name##_reg); \
+	return pete_readl("drivers/pinctrl/qcom/pinctrl-msm.c:89", pctrl->regs[g->tile] + g->name##_reg); \
 } \
 static void msm_writel_##name(u32 val, struct msm_pinctrl *pctrl, \
 			      const struct msm_pingroup *g) \
 { \
-	writel(val, pctrl->regs[g->tile] + g->name##_reg); \
+	pete_writel("drivers/pinctrl/qcom/pinctrl-msm.c:94", val, pctrl->regs[g->tile] + g->name##_reg); \
 }
 
 MSM_ACCESSOR(ctl)
@@ -1429,7 +1429,7 @@ static int msm_ps_hold_restart(struct notifier_block *nb, unsigned long action,
 {
 	struct msm_pinctrl *pctrl = container_of(nb, struct msm_pinctrl, restart_nb);
 
-	writel(0, pctrl->regs[0] + PS_HOLD_OFFSET);
+	pete_writel("drivers/pinctrl/qcom/pinctrl-msm.c:1432", 0, pctrl->regs[0] + PS_HOLD_OFFSET);
 	mdelay(1000);
 	return NOTIFY_DONE;
 }

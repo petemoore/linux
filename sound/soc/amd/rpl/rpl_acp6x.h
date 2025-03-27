@@ -27,10 +27,10 @@
 
 static inline u32 rpl_acp_readl(void __iomem *base_addr)
 {
-	return readl(base_addr - ACP6x_PHY_BASE_ADDRESS);
+	return pete_readl("sound/soc/amd/rpl/rpl_acp6x.h:30", base_addr - ACP6x_PHY_BASE_ADDRESS);
 }
 
 static inline void rpl_acp_writel(u32 val, void __iomem *base_addr)
 {
-	writel(val, base_addr - ACP6x_PHY_BASE_ADDRESS);
+	pete_writel("sound/soc/amd/rpl/rpl_acp6x.h:35", val, base_addr - ACP6x_PHY_BASE_ADDRESS);
 }

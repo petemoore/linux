@@ -228,16 +228,16 @@ static inline u64 acp_get_byte_count(struct acp_dev_data *adata, int dai_id, int
 	if (direction == SNDRV_PCM_STREAM_PLAYBACK) {
 		switch (dai_id) {
 		case I2S_BT_INSTANCE:
-			high = readl(adata->acp_base + ACP_BT_TX_LINEARPOSITIONCNTR_HIGH);
-			low = readl(adata->acp_base + ACP_BT_TX_LINEARPOSITIONCNTR_LOW);
+			high = pete_readl("sound/soc/amd/acp/amd.h:231", adata->acp_base + ACP_BT_TX_LINEARPOSITIONCNTR_HIGH);
+			low = pete_readl("sound/soc/amd/acp/amd.h:232", adata->acp_base + ACP_BT_TX_LINEARPOSITIONCNTR_LOW);
 			break;
 		case I2S_SP_INSTANCE:
-			high = readl(adata->acp_base + ACP_I2S_TX_LINEARPOSITIONCNTR_HIGH);
-			low = readl(adata->acp_base + ACP_I2S_TX_LINEARPOSITIONCNTR_LOW);
+			high = pete_readl("sound/soc/amd/acp/amd.h:235", adata->acp_base + ACP_I2S_TX_LINEARPOSITIONCNTR_HIGH);
+			low = pete_readl("sound/soc/amd/acp/amd.h:236", adata->acp_base + ACP_I2S_TX_LINEARPOSITIONCNTR_LOW);
 			break;
 		case I2S_HS_INSTANCE:
-			high = readl(adata->acp_base + ACP_HS_TX_LINEARPOSITIONCNTR_HIGH);
-			low = readl(adata->acp_base + ACP_HS_TX_LINEARPOSITIONCNTR_LOW);
+			high = pete_readl("sound/soc/amd/acp/amd.h:239", adata->acp_base + ACP_HS_TX_LINEARPOSITIONCNTR_HIGH);
+			low = pete_readl("sound/soc/amd/acp/amd.h:240", adata->acp_base + ACP_HS_TX_LINEARPOSITIONCNTR_LOW);
 			break;
 		default:
 			dev_err(adata->dev, "Invalid dai id %x\n", dai_id);
@@ -246,20 +246,20 @@ static inline u64 acp_get_byte_count(struct acp_dev_data *adata, int dai_id, int
 	} else {
 		switch (dai_id) {
 		case I2S_BT_INSTANCE:
-			high = readl(adata->acp_base + ACP_BT_RX_LINEARPOSITIONCNTR_HIGH);
-			low = readl(adata->acp_base + ACP_BT_RX_LINEARPOSITIONCNTR_LOW);
+			high = pete_readl("sound/soc/amd/acp/amd.h:249", adata->acp_base + ACP_BT_RX_LINEARPOSITIONCNTR_HIGH);
+			low = pete_readl("sound/soc/amd/acp/amd.h:250", adata->acp_base + ACP_BT_RX_LINEARPOSITIONCNTR_LOW);
 			break;
 		case I2S_SP_INSTANCE:
-			high = readl(adata->acp_base + ACP_I2S_RX_LINEARPOSITIONCNTR_HIGH);
-			low = readl(adata->acp_base + ACP_I2S_RX_LINEARPOSITIONCNTR_LOW);
+			high = pete_readl("sound/soc/amd/acp/amd.h:253", adata->acp_base + ACP_I2S_RX_LINEARPOSITIONCNTR_HIGH);
+			low = pete_readl("sound/soc/amd/acp/amd.h:254", adata->acp_base + ACP_I2S_RX_LINEARPOSITIONCNTR_LOW);
 			break;
 		case I2S_HS_INSTANCE:
-			high = readl(adata->acp_base + ACP_HS_RX_LINEARPOSITIONCNTR_HIGH);
-			low = readl(adata->acp_base + ACP_HS_RX_LINEARPOSITIONCNTR_LOW);
+			high = pete_readl("sound/soc/amd/acp/amd.h:257", adata->acp_base + ACP_HS_RX_LINEARPOSITIONCNTR_HIGH);
+			low = pete_readl("sound/soc/amd/acp/amd.h:258", adata->acp_base + ACP_HS_RX_LINEARPOSITIONCNTR_LOW);
 			break;
 		case DMIC_INSTANCE:
-			high = readl(adata->acp_base + ACP_WOV_RX_LINEARPOSITIONCNTR_HIGH);
-			low = readl(adata->acp_base + ACP_WOV_RX_LINEARPOSITIONCNTR_LOW);
+			high = pete_readl("sound/soc/amd/acp/amd.h:261", adata->acp_base + ACP_WOV_RX_LINEARPOSITIONCNTR_HIGH);
+			low = pete_readl("sound/soc/amd/acp/amd.h:262", adata->acp_base + ACP_WOV_RX_LINEARPOSITIONCNTR_LOW);
 			break;
 		default:
 			dev_err(adata->dev, "Invalid dai id %x\n", dai_id);
@@ -298,6 +298,6 @@ static inline void acp_set_i2s_clk(struct acp_dev_data *adata, int dai_id)
 
 	mclkgen.bits.i2stdm_bclk_div_val = adata->bclk_div;
 	mclkgen.bits.i2stdm_lrclk_div_val = adata->lrclk_div;
-	writel(mclkgen.u32_all, adata->acp_base + master_reg);
+	pete_writel("sound/soc/amd/acp/amd.h:301", mclkgen.u32_all, adata->acp_base + master_reg);
 }
 #endif

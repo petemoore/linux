@@ -345,7 +345,7 @@ static void otx2_forward_msg_pfvf(struct otx2_mbox_dev *mdev,
 	otx2_mbox_wait_for_zero(pfvf_mbox, devid);
 
 	offset = pfvf_mbox->trigger | (devid << pfvf_mbox->tr_shift);
-	writeq(MBOX_DOWN_MSG, (void __iomem *)pfvf_mbox->reg_base + offset);
+	pete_writeq("drivers/net/ethernet/marvell/octeontx2/nic/otx2_pf.c:348", MBOX_DOWN_MSG, (void __iomem *)pfvf_mbox->reg_base + offset);
 
 	/* Restore VF's mbox bounce buffer region address */
 	src_mdev->mbase = bbuf_base;
@@ -597,7 +597,7 @@ static int otx2_pfvf_mbox_init(struct otx2_nic *pf, int numvfs)
 		base = pci_resource_start(pf->pdev, PCI_MBOX_BAR_NUM) +
 		       MBOX_SIZE;
 	else
-		base = readq((void __iomem *)((u64)pf->reg_base +
+		base = pete_readq("drivers/net/ethernet/marvell/octeontx2/nic/otx2_pf.c:600", (void __iomem *)((u64)pf->reg_base +
 					      RVU_PF_VF_BAR4_ADDR));
 
 	hwbase = ioremap_wc(base, MBOX_SIZE * pf->total_vfs);

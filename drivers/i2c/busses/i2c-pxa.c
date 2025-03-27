@@ -353,7 +353,7 @@ static unsigned int i2c_debug = DEBUG;
 static void i2c_pxa_show_state(struct pxa_i2c *i2c, int lno, const char *fname)
 {
 	dev_dbg(&i2c->adap.dev, "state:%s:%d: ISR=%08x, ICR=%08x, IBMR=%02x\n", fname, lno,
-		readl(_ISR(i2c)), readl(_ICR(i2c)), readl(_IBMR(i2c)));
+		pete_readl("drivers/i2c/busses/i2c-pxa.c:356", _ISR(i2c)), pete_readl("drivers/i2c/busses/i2c-pxa.c:356", _ICR(i2c)), pete_readl("drivers/i2c/busses/i2c-pxa.c:356", _IBMR(i2c)));
 }
 
 #define show_state(i2c) i2c_pxa_show_state(i2c, __LINE__, __func__)
@@ -368,8 +368,8 @@ static void i2c_pxa_scream_blue_murder(struct pxa_i2c *i2c, const char *why)
 	dev_err(dev, "msg_num: %d msg_idx: %d msg_ptr: %d\n",
 		i2c->msg_num, i2c->msg_idx, i2c->msg_ptr);
 	dev_err(dev, "IBMR: %08x IDBR: %08x ICR: %08x ISR: %08x\n",
-		readl(_IBMR(i2c)), readl(_IDBR(i2c)), readl(_ICR(i2c)),
-		readl(_ISR(i2c)));
+		pete_readl("drivers/i2c/busses/i2c-pxa.c:371", _IBMR(i2c)), pete_readl("drivers/i2c/busses/i2c-pxa.c:371", _IDBR(i2c)), pete_readl("drivers/i2c/busses/i2c-pxa.c:371", _ICR(i2c)),
+		pete_readl("drivers/i2c/busses/i2c-pxa.c:372", _ISR(i2c)));
 	dev_err(dev, "log:");
 	for (i = 0; i < i2c->irqlogidx; i++)
 		pr_cont(" [%03x:%05x]", i2c->isrlog[i], i2c->icrlog[i]);
@@ -391,7 +391,7 @@ static void i2c_pxa_master_complete(struct pxa_i2c *i2c, int ret);
 
 static inline int i2c_pxa_is_slavemode(struct pxa_i2c *i2c)
 {
-	return !(readl(_ICR(i2c)) & ICR_SCLE);
+	return !(pete_readl("drivers/i2c/busses/i2c-pxa.c:394", _ICR(i2c)) & ICR_SCLE);
 }
 
 static void i2c_pxa_abort(struct pxa_i2c *i2c)
@@ -403,13 +403,13 @@ static void i2c_pxa_abort(struct pxa_i2c *i2c)
 		return;
 	}
 
-	while ((i > 0) && (readl(_IBMR(i2c)) & IBMR_SDAS) == 0) {
-		unsigned long icr = readl(_ICR(i2c));
+	while ((i > 0) && (pete_readl("drivers/i2c/busses/i2c-pxa.c:406", _IBMR(i2c)) & IBMR_SDAS) == 0) {
+		unsigned long icr = pete_readl("drivers/i2c/busses/i2c-pxa.c:407", _ICR(i2c));
 
 		icr &= ~ICR_START;
 		icr |= ICR_ACKNAK | ICR_STOP | ICR_TB;
 
-		writel(icr, _ICR(i2c));
+		pete_writel("drivers/i2c/busses/i2c-pxa.c:412", icr, _ICR(i2c));
 
 		show_state(i2c);
 
@@ -417,7 +417,7 @@ static void i2c_pxa_abort(struct pxa_i2c *i2c)
 		i --;
 	}
 
-	writel(readl(_ICR(i2c)) & ~(ICR_MA | ICR_START | ICR_STOP),
+	pete_writel("drivers/i2c/busses/i2c-pxa.c:420", pete_readl("drivers/i2c/busses/i2c-pxa.c:420", _ICR(i2c)) & ~(ICR_MA | ICR_START | ICR_STOP),
 	       _ICR(i2c));
 }
 
@@ -427,7 +427,7 @@ static int i2c_pxa_wait_bus_not_busy(struct pxa_i2c *i2c)
 	u32 isr;
 
 	while (1) {
-		isr = readl(_ISR(i2c));
+		isr = pete_readl("drivers/i2c/busses/i2c-pxa.c:430", _ISR(i2c));
 		if (!(isr & (ISR_IBB | ISR_UB)))
 			return 0;
 
@@ -453,9 +453,9 @@ static int i2c_pxa_wait_master(struct pxa_i2c *i2c)
 	while (time_before(jiffies, timeout)) {
 		if (i2c_debug > 1)
 			dev_dbg(&i2c->adap.dev, "%s: %ld: ISR=%08x, ICR=%08x, IBMR=%02x\n",
-				__func__, (long)jiffies, readl(_ISR(i2c)), readl(_ICR(i2c)), readl(_IBMR(i2c)));
+				__func__, (long)jiffies, pete_readl("drivers/i2c/busses/i2c-pxa.c:456", _ISR(i2c)), pete_readl("drivers/i2c/busses/i2c-pxa.c:456", _ICR(i2c)), pete_readl("drivers/i2c/busses/i2c-pxa.c:456", _IBMR(i2c)));
 
-		if (readl(_ISR(i2c)) & ISR_SAD) {
+		if (pete_readl("drivers/i2c/busses/i2c-pxa.c:458", _ISR(i2c)) & ISR_SAD) {
 			if (i2c_debug > 0)
 				dev_dbg(&i2c->adap.dev, "%s: Slave detected\n", __func__);
 			goto out;
@@ -465,8 +465,8 @@ static int i2c_pxa_wait_master(struct pxa_i2c *i2c)
 		 * quick check of the i2c lines themselves to ensure they've
 		 * gone high...
 		 */
-		if ((readl(_ISR(i2c)) & (ISR_UB | ISR_IBB)) == 0 &&
-		    readl(_IBMR(i2c)) == (IBMR_SCLS | IBMR_SDAS)) {
+		if ((pete_readl("drivers/i2c/busses/i2c-pxa.c:468", _ISR(i2c)) & (ISR_UB | ISR_IBB)) == 0 &&
+		    pete_readl("drivers/i2c/busses/i2c-pxa.c:469", _IBMR(i2c)) == (IBMR_SCLS | IBMR_SDAS)) {
 			if (i2c_debug > 0)
 				dev_dbg(&i2c->adap.dev, "%s: done\n", __func__);
 			return 1;
@@ -486,7 +486,7 @@ static int i2c_pxa_set_master(struct pxa_i2c *i2c)
 	if (i2c_debug)
 		dev_dbg(&i2c->adap.dev, "setting to bus master\n");
 
-	if ((readl(_ISR(i2c)) & (ISR_UB | ISR_IBB)) != 0) {
+	if ((pete_readl("drivers/i2c/busses/i2c-pxa.c:489", _ISR(i2c)) & (ISR_UB | ISR_IBB)) != 0) {
 		dev_dbg(&i2c->adap.dev, "%s: unit is busy\n", __func__);
 		if (!i2c_pxa_wait_master(i2c)) {
 			dev_dbg(&i2c->adap.dev, "%s: error: unit busy\n", __func__);
@@ -494,7 +494,7 @@ static int i2c_pxa_set_master(struct pxa_i2c *i2c)
 		}
 	}
 
-	writel(readl(_ICR(i2c)) | ICR_SCLE, _ICR(i2c));
+	pete_writel("drivers/i2c/busses/i2c-pxa.c:497", pete_readl("drivers/i2c/busses/i2c-pxa.c:497", _ICR(i2c)) | ICR_SCLE, _ICR(i2c));
 	return 0;
 }
 
@@ -510,11 +510,11 @@ static int i2c_pxa_wait_slave(struct pxa_i2c *i2c)
 	while (time_before(jiffies, timeout)) {
 		if (i2c_debug > 1)
 			dev_dbg(&i2c->adap.dev, "%s: %ld: ISR=%08x, ICR=%08x, IBMR=%02x\n",
-				__func__, (long)jiffies, readl(_ISR(i2c)), readl(_ICR(i2c)), readl(_IBMR(i2c)));
+				__func__, (long)jiffies, pete_readl("drivers/i2c/busses/i2c-pxa.c:513", _ISR(i2c)), pete_readl("drivers/i2c/busses/i2c-pxa.c:513", _ICR(i2c)), pete_readl("drivers/i2c/busses/i2c-pxa.c:513", _IBMR(i2c)));
 
-		if ((readl(_ISR(i2c)) & (ISR_UB|ISR_IBB)) == 0 ||
-		    (readl(_ISR(i2c)) & ISR_SAD) != 0 ||
-		    (readl(_ICR(i2c)) & ICR_SCLE) == 0) {
+		if ((pete_readl("drivers/i2c/busses/i2c-pxa.c:515", _ISR(i2c)) & (ISR_UB|ISR_IBB)) == 0 ||
+		    (pete_readl("drivers/i2c/busses/i2c-pxa.c:516", _ISR(i2c)) & ISR_SAD) != 0 ||
+		    (pete_readl("drivers/i2c/busses/i2c-pxa.c:517", _ICR(i2c)) & ICR_SCLE) == 0) {
 			if (i2c_debug > 1)
 				dev_dbg(&i2c->adap.dev, "%s: done\n", __func__);
 			return 1;
@@ -542,9 +542,9 @@ static void i2c_pxa_set_slave(struct pxa_i2c *i2c, int errcode)
 		/* we need to wait for the stop condition to end */
 
 		/* if we where in stop, then clear... */
-		if (readl(_ICR(i2c)) & ICR_STOP) {
+		if (pete_readl("drivers/i2c/busses/i2c-pxa.c:545", _ICR(i2c)) & ICR_STOP) {
 			udelay(100);
-			writel(readl(_ICR(i2c)) & ~ICR_STOP, _ICR(i2c));
+			pete_writel("drivers/i2c/busses/i2c-pxa.c:547", pete_readl("drivers/i2c/busses/i2c-pxa.c:547", _ICR(i2c)) & ~ICR_STOP, _ICR(i2c));
 		}
 
 		if (!i2c_pxa_wait_slave(i2c)) {
@@ -554,12 +554,12 @@ static void i2c_pxa_set_slave(struct pxa_i2c *i2c, int errcode)
 		}
 	}
 
-	writel(readl(_ICR(i2c)) & ~(ICR_STOP|ICR_ACKNAK|ICR_MA), _ICR(i2c));
-	writel(readl(_ICR(i2c)) & ~ICR_SCLE, _ICR(i2c));
+	pete_writel("drivers/i2c/busses/i2c-pxa.c:557", pete_readl("drivers/i2c/busses/i2c-pxa.c:557", _ICR(i2c)) & ~(ICR_STOP|ICR_ACKNAK|ICR_MA), _ICR(i2c));
+	pete_writel("drivers/i2c/busses/i2c-pxa.c:558", pete_readl("drivers/i2c/busses/i2c-pxa.c:558", _ICR(i2c)) & ~ICR_SCLE, _ICR(i2c));
 
 	if (i2c_debug) {
-		dev_dbg(&i2c->adap.dev, "ICR now %08x, ISR %08x\n", readl(_ICR(i2c)), readl(_ISR(i2c)));
-		decode_ICR(readl(_ICR(i2c)));
+		dev_dbg(&i2c->adap.dev, "ICR now %08x, ISR %08x\n", pete_readl("drivers/i2c/busses/i2c-pxa.c:561", _ICR(i2c)), pete_readl("drivers/i2c/busses/i2c-pxa.c:561", _ISR(i2c)));
+		decode_ICR(pete_readl("drivers/i2c/busses/i2c-pxa.c:562", _ICR(i2c)));
 	}
 }
 #else
@@ -569,20 +569,20 @@ static void i2c_pxa_set_slave(struct pxa_i2c *i2c, int errcode)
 static void i2c_pxa_do_reset(struct pxa_i2c *i2c)
 {
 	/* reset according to 9.8 */
-	writel(ICR_UR, _ICR(i2c));
-	writel(I2C_ISR_INIT, _ISR(i2c));
-	writel(readl(_ICR(i2c)) & ~ICR_UR, _ICR(i2c));
+	pete_writel("drivers/i2c/busses/i2c-pxa.c:572", ICR_UR, _ICR(i2c));
+	pete_writel("drivers/i2c/busses/i2c-pxa.c:573", I2C_ISR_INIT, _ISR(i2c));
+	pete_writel("drivers/i2c/busses/i2c-pxa.c:574", pete_readl("drivers/i2c/busses/i2c-pxa.c:574", _ICR(i2c)) & ~ICR_UR, _ICR(i2c));
 
 	if (i2c->reg_isar && IS_ENABLED(CONFIG_I2C_PXA_SLAVE))
-		writel(i2c->slave_addr, _ISAR(i2c));
+		pete_writel("drivers/i2c/busses/i2c-pxa.c:577", i2c->slave_addr, _ISAR(i2c));
 
 	/* set control register values */
-	writel(I2C_ICR_INIT | (i2c->fast_mode ? i2c->fm_mask : 0), _ICR(i2c));
-	writel(readl(_ICR(i2c)) | (i2c->high_mode ? i2c->hs_mask : 0), _ICR(i2c));
+	pete_writel("drivers/i2c/busses/i2c-pxa.c:580", I2C_ICR_INIT | (i2c->fast_mode ? i2c->fm_mask : 0), _ICR(i2c));
+	pete_writel("drivers/i2c/busses/i2c-pxa.c:581", pete_readl("drivers/i2c/busses/i2c-pxa.c:581", _ICR(i2c)) | (i2c->high_mode ? i2c->hs_mask : 0), _ICR(i2c));
 
 #ifdef CONFIG_I2C_PXA_SLAVE
 	dev_info(&i2c->adap.dev, "Enabling slave mode\n");
-	writel(readl(_ICR(i2c)) | ICR_SADIE | ICR_ALDIE | ICR_SSDIE, _ICR(i2c));
+	pete_writel("drivers/i2c/busses/i2c-pxa.c:585", pete_readl("drivers/i2c/busses/i2c-pxa.c:585", _ICR(i2c)) | ICR_SADIE | ICR_ALDIE | ICR_SSDIE, _ICR(i2c));
 #endif
 
 	i2c_pxa_set_slave(i2c, 0);
@@ -591,7 +591,7 @@ static void i2c_pxa_do_reset(struct pxa_i2c *i2c)
 static void i2c_pxa_enable(struct pxa_i2c *i2c)
 {
 	/* enable unit */
-	writel(readl(_ICR(i2c)) | ICR_IUE, _ICR(i2c));
+	pete_writel("drivers/i2c/busses/i2c-pxa.c:594", pete_readl("drivers/i2c/busses/i2c-pxa.c:594", _ICR(i2c)) | ICR_IUE, _ICR(i2c));
 	udelay(100);
 }
 
@@ -622,19 +622,19 @@ static void i2c_pxa_slave_txempty(struct pxa_i2c *i2c, u32 isr)
 			i2c_slave_event(i2c->slave, I2C_SLAVE_READ_PROCESSED,
 					&byte);
 
-		writel(byte, _IDBR(i2c));
-		writel(readl(_ICR(i2c)) | ICR_TB, _ICR(i2c));   /* allow next byte */
+		pete_writel("drivers/i2c/busses/i2c-pxa.c:625", byte, _IDBR(i2c));
+		pete_writel("drivers/i2c/busses/i2c-pxa.c:626", pete_readl("drivers/i2c/busses/i2c-pxa.c:626", _ICR(i2c)) | ICR_TB, _ICR(i2c));   /* allow next byte */
 	}
 }
 
 static void i2c_pxa_slave_rxfull(struct pxa_i2c *i2c, u32 isr)
 {
-	u8 byte = readl(_IDBR(i2c));
+	u8 byte = pete_readl("drivers/i2c/busses/i2c-pxa.c:632", _IDBR(i2c));
 
 	if (i2c->slave != NULL)
 		i2c_slave_event(i2c->slave, I2C_SLAVE_WRITE_RECEIVED, &byte);
 
-	writel(readl(_ICR(i2c)) | ICR_TB, _ICR(i2c));
+	pete_writel("drivers/i2c/busses/i2c-pxa.c:637", pete_readl("drivers/i2c/busses/i2c-pxa.c:637", _ICR(i2c)) | ICR_TB, _ICR(i2c));
 }
 
 static void i2c_pxa_slave_start(struct pxa_i2c *i2c, u32 isr)
@@ -651,7 +651,7 @@ static void i2c_pxa_slave_start(struct pxa_i2c *i2c, u32 isr)
 
 			i2c_slave_event(i2c->slave, I2C_SLAVE_READ_REQUESTED,
 					&byte);
-			writel(byte, _IDBR(i2c));
+			pete_writel("drivers/i2c/busses/i2c-pxa.c:654", byte, _IDBR(i2c));
 		} else {
 			i2c_slave_event(i2c->slave, I2C_SLAVE_WRITE_REQUESTED,
 					NULL);
@@ -663,13 +663,13 @@ static void i2c_pxa_slave_start(struct pxa_i2c *i2c, u32 isr)
 	 * start condition... if this happens, we'd better back off
 	 * and stop holding the poor thing up
 	 */
-	writel(readl(_ICR(i2c)) & ~(ICR_START|ICR_STOP), _ICR(i2c));
-	writel(readl(_ICR(i2c)) | ICR_TB, _ICR(i2c));
+	pete_writel("drivers/i2c/busses/i2c-pxa.c:666", pete_readl("drivers/i2c/busses/i2c-pxa.c:666", _ICR(i2c)) & ~(ICR_START|ICR_STOP), _ICR(i2c));
+	pete_writel("drivers/i2c/busses/i2c-pxa.c:667", pete_readl("drivers/i2c/busses/i2c-pxa.c:667", _ICR(i2c)) | ICR_TB, _ICR(i2c));
 
 	timeout = 0x10000;
 
 	while (1) {
-		if ((readl(_IBMR(i2c)) & IBMR_SCLS) == IBMR_SCLS)
+		if ((pete_readl("drivers/i2c/busses/i2c-pxa.c:672", _IBMR(i2c)) & IBMR_SCLS) == IBMR_SCLS)
 			break;
 
 		timeout--;
@@ -680,7 +680,7 @@ static void i2c_pxa_slave_start(struct pxa_i2c *i2c, u32 isr)
 		}
 	}
 
-	writel(readl(_ICR(i2c)) & ~ICR_SCLE, _ICR(i2c));
+	pete_writel("drivers/i2c/busses/i2c-pxa.c:683", pete_readl("drivers/i2c/busses/i2c-pxa.c:683", _ICR(i2c)) & ~ICR_SCLE, _ICR(i2c));
 }
 
 static void i2c_pxa_slave_stop(struct pxa_i2c *i2c)
@@ -715,7 +715,7 @@ static int i2c_pxa_slave_reg(struct i2c_client *slave)
 	i2c->slave = slave;
 	i2c->slave_addr = slave->addr;
 
-	writel(i2c->slave_addr, _ISAR(i2c));
+	pete_writel("drivers/i2c/busses/i2c-pxa.c:718", i2c->slave_addr, _ISAR(i2c));
 
 	return 0;
 }
@@ -727,7 +727,7 @@ static int i2c_pxa_slave_unreg(struct i2c_client *slave)
 	WARN_ON(!i2c->slave);
 
 	i2c->slave_addr = I2C_PXA_SLAVE_ADDR;
-	writel(i2c->slave_addr, _ISAR(i2c));
+	pete_writel("drivers/i2c/busses/i2c-pxa.c:730", i2c->slave_addr, _ISAR(i2c));
 
 	i2c->slave = NULL;
 
@@ -739,14 +739,14 @@ static void i2c_pxa_slave_txempty(struct pxa_i2c *i2c, u32 isr)
 	if (isr & ISR_BED) {
 		/* what should we do here? */
 	} else {
-		writel(0, _IDBR(i2c));
-		writel(readl(_ICR(i2c)) | ICR_TB, _ICR(i2c));
+		pete_writel("drivers/i2c/busses/i2c-pxa.c:742", 0, _IDBR(i2c));
+		pete_writel("drivers/i2c/busses/i2c-pxa.c:743", pete_readl("drivers/i2c/busses/i2c-pxa.c:743", _ICR(i2c)) | ICR_TB, _ICR(i2c));
 	}
 }
 
 static void i2c_pxa_slave_rxfull(struct pxa_i2c *i2c, u32 isr)
 {
-	writel(readl(_ICR(i2c)) | ICR_TB | ICR_ACKNAK, _ICR(i2c));
+	pete_writel("drivers/i2c/busses/i2c-pxa.c:749", pete_readl("drivers/i2c/busses/i2c-pxa.c:749", _ICR(i2c)) | ICR_TB | ICR_ACKNAK, _ICR(i2c));
 }
 
 static void i2c_pxa_slave_start(struct pxa_i2c *i2c, u32 isr)
@@ -758,13 +758,13 @@ static void i2c_pxa_slave_start(struct pxa_i2c *i2c, u32 isr)
 	 * start condition... if this happens, we'd better back off
 	 * and stop holding the poor thing up
 	 */
-	writel(readl(_ICR(i2c)) & ~(ICR_START|ICR_STOP), _ICR(i2c));
-	writel(readl(_ICR(i2c)) | ICR_TB | ICR_ACKNAK, _ICR(i2c));
+	pete_writel("drivers/i2c/busses/i2c-pxa.c:761", pete_readl("drivers/i2c/busses/i2c-pxa.c:761", _ICR(i2c)) & ~(ICR_START|ICR_STOP), _ICR(i2c));
+	pete_writel("drivers/i2c/busses/i2c-pxa.c:762", pete_readl("drivers/i2c/busses/i2c-pxa.c:762", _ICR(i2c)) | ICR_TB | ICR_ACKNAK, _ICR(i2c));
 
 	timeout = 0x10000;
 
 	while (1) {
-		if ((readl(_IBMR(i2c)) & IBMR_SCLS) == IBMR_SCLS)
+		if ((pete_readl("drivers/i2c/busses/i2c-pxa.c:767", _IBMR(i2c)) & IBMR_SCLS) == IBMR_SCLS)
 			break;
 
 		timeout--;
@@ -775,7 +775,7 @@ static void i2c_pxa_slave_start(struct pxa_i2c *i2c, u32 isr)
 		}
 	}
 
-	writel(readl(_ICR(i2c)) & ~ICR_SCLE, _ICR(i2c));
+	pete_writel("drivers/i2c/busses/i2c-pxa.c:778", pete_readl("drivers/i2c/busses/i2c-pxa.c:778", _ICR(i2c)) & ~ICR_SCLE, _ICR(i2c));
 }
 
 static void i2c_pxa_slave_stop(struct pxa_i2c *i2c)
@@ -797,13 +797,13 @@ static inline void i2c_pxa_start_message(struct pxa_i2c *i2c)
 	 * Step 1: target slave address into IDBR
 	 */
 	i2c->req_slave_addr = i2c_8bit_addr_from_msg(i2c->msg);
-	writel(i2c->req_slave_addr, _IDBR(i2c));
+	pete_writel("drivers/i2c/busses/i2c-pxa.c:800", i2c->req_slave_addr, _IDBR(i2c));
 
 	/*
 	 * Step 2: initiate the write.
 	 */
-	icr = readl(_ICR(i2c)) & ~(ICR_STOP | ICR_ALDIE);
-	writel(icr | ICR_START | ICR_TB, _ICR(i2c));
+	icr = pete_readl("drivers/i2c/busses/i2c-pxa.c:805", _ICR(i2c)) & ~(ICR_STOP | ICR_ALDIE);
+	pete_writel("drivers/i2c/busses/i2c-pxa.c:806", icr | ICR_START | ICR_TB, _ICR(i2c));
 }
 
 static inline void i2c_pxa_stop_message(struct pxa_i2c *i2c)
@@ -811,9 +811,9 @@ static inline void i2c_pxa_stop_message(struct pxa_i2c *i2c)
 	u32 icr;
 
 	/* Clear the START, STOP, ACK, TB and MA flags */
-	icr = readl(_ICR(i2c));
+	icr = pete_readl("drivers/i2c/busses/i2c-pxa.c:814", _ICR(i2c));
 	icr &= ~(ICR_START | ICR_STOP | ICR_ACKNAK | ICR_TB | ICR_MA);
-	writel(icr, _ICR(i2c));
+	pete_writel("drivers/i2c/busses/i2c-pxa.c:816", icr, _ICR(i2c));
 }
 
 /*
@@ -829,11 +829,11 @@ static int i2c_pxa_send_mastercode(struct pxa_i2c *i2c)
 
 	spin_lock_irq(&i2c->lock);
 	i2c->highmode_enter = true;
-	writel(i2c->master_code, _IDBR(i2c));
+	pete_writel("drivers/i2c/busses/i2c-pxa.c:832", i2c->master_code, _IDBR(i2c));
 
-	icr = readl(_ICR(i2c)) & ~(ICR_STOP | ICR_ALDIE);
+	icr = pete_readl("drivers/i2c/busses/i2c-pxa.c:834", _ICR(i2c)) & ~(ICR_STOP | ICR_ALDIE);
 	icr |= ICR_GPIOEN | ICR_START | ICR_TB | ICR_ITEIE;
-	writel(icr, _ICR(i2c));
+	pete_writel("drivers/i2c/busses/i2c-pxa.c:836", icr, _ICR(i2c));
 
 	spin_unlock_irq(&i2c->lock);
 	timeout = wait_event_timeout(i2c->wait,
@@ -861,7 +861,7 @@ static void i2c_pxa_master_complete(struct pxa_i2c *i2c, int ret)
 
 static void i2c_pxa_irq_txempty(struct pxa_i2c *i2c, u32 isr)
 {
-	u32 icr = readl(_ICR(i2c)) & ~(ICR_START|ICR_STOP|ICR_ACKNAK|ICR_TB);
+	u32 icr = pete_readl("drivers/i2c/busses/i2c-pxa.c:864", _ICR(i2c)) & ~(ICR_START|ICR_STOP|ICR_ACKNAK|ICR_TB);
 
  again:
 	/*
@@ -914,7 +914,7 @@ static void i2c_pxa_irq_txempty(struct pxa_i2c *i2c, u32 isr)
 		/*
 		 * Write mode.  Write the next data byte.
 		 */
-		writel(i2c->msg->buf[i2c->msg_ptr++], _IDBR(i2c));
+		pete_writel("drivers/i2c/busses/i2c-pxa.c:917", i2c->msg->buf[i2c->msg_ptr++], _IDBR(i2c));
 
 		icr |= ICR_ALDIE | ICR_TB;
 
@@ -947,7 +947,7 @@ static void i2c_pxa_irq_txempty(struct pxa_i2c *i2c, u32 isr)
 		 * Write the next address.
 		 */
 		i2c->req_slave_addr = i2c_8bit_addr_from_msg(i2c->msg);
-		writel(i2c->req_slave_addr, _IDBR(i2c));
+		pete_writel("drivers/i2c/busses/i2c-pxa.c:950", i2c->req_slave_addr, _IDBR(i2c));
 
 		/*
 		 * And trigger a repeated start, and send the byte.
@@ -962,18 +962,18 @@ static void i2c_pxa_irq_txempty(struct pxa_i2c *i2c, u32 isr)
 
 	i2c->icrlog[i2c->irqlogidx-1] = icr;
 
-	writel(icr, _ICR(i2c));
+	pete_writel("drivers/i2c/busses/i2c-pxa.c:965", icr, _ICR(i2c));
 	show_state(i2c);
 }
 
 static void i2c_pxa_irq_rxfull(struct pxa_i2c *i2c, u32 isr)
 {
-	u32 icr = readl(_ICR(i2c)) & ~(ICR_START|ICR_STOP|ICR_ACKNAK|ICR_TB);
+	u32 icr = pete_readl("drivers/i2c/busses/i2c-pxa.c:971", _ICR(i2c)) & ~(ICR_START|ICR_STOP|ICR_ACKNAK|ICR_TB);
 
 	/*
 	 * Read the byte.
 	 */
-	i2c->msg->buf[i2c->msg_ptr++] = readl(_IDBR(i2c));
+	i2c->msg->buf[i2c->msg_ptr++] = pete_readl("drivers/i2c/busses/i2c-pxa.c:976", _IDBR(i2c));
 
 	if (i2c->msg_ptr < i2c->msg->len) {
 		/*
@@ -990,7 +990,7 @@ static void i2c_pxa_irq_rxfull(struct pxa_i2c *i2c, u32 isr)
 
 	i2c->icrlog[i2c->irqlogidx-1] = icr;
 
-	writel(icr, _ICR(i2c));
+	pete_writel("drivers/i2c/busses/i2c-pxa.c:993", icr, _ICR(i2c));
 }
 
 #define VALID_INT_SOURCE	(ISR_SSD | ISR_ALD | ISR_ITE | ISR_IRF | \
@@ -998,14 +998,14 @@ static void i2c_pxa_irq_rxfull(struct pxa_i2c *i2c, u32 isr)
 static irqreturn_t i2c_pxa_handler(int this_irq, void *dev_id)
 {
 	struct pxa_i2c *i2c = dev_id;
-	u32 isr = readl(_ISR(i2c));
+	u32 isr = pete_readl("drivers/i2c/busses/i2c-pxa.c:1001", _ISR(i2c));
 
 	if (!(isr & VALID_INT_SOURCE))
 		return IRQ_NONE;
 
 	if (i2c_debug > 2 && 0) {
 		dev_dbg(&i2c->adap.dev, "%s: ISR=%08x, ICR=%08x, IBMR=%02x\n",
-			__func__, isr, readl(_ICR(i2c)), readl(_IBMR(i2c)));
+			__func__, isr, pete_readl("drivers/i2c/busses/i2c-pxa.c:1008", _ICR(i2c)), pete_readl("drivers/i2c/busses/i2c-pxa.c:1008", _IBMR(i2c)));
 		decode_ISR(isr);
 	}
 
@@ -1017,7 +1017,7 @@ static irqreturn_t i2c_pxa_handler(int this_irq, void *dev_id)
 	/*
 	 * Always clear all pending IRQs.
 	 */
-	writel(isr & VALID_INT_SOURCE, _ISR(i2c));
+	pete_writel("drivers/i2c/busses/i2c-pxa.c:1020", isr & VALID_INT_SOURCE, _ISR(i2c));
 
 	if (isr & ISR_SAD)
 		i2c_pxa_slave_start(i2c, isr);
@@ -1170,7 +1170,7 @@ static int i2c_pxa_pio_set_master(struct pxa_i2c *i2c)
 	/*
 	 * Wait for the bus to become free.
 	 */
-	while (timeout-- && readl(_ISR(i2c)) & (ISR_IBB | ISR_UB))
+	while (timeout-- && pete_readl("drivers/i2c/busses/i2c-pxa.c:1173", _ISR(i2c)) & (ISR_IBB | ISR_UB))
 		udelay(1000);
 
 	if (timeout < 0) {
@@ -1183,7 +1183,7 @@ static int i2c_pxa_pio_set_master(struct pxa_i2c *i2c)
 	/*
 	 * Set master mode.
 	 */
-	writel(readl(_ICR(i2c)) | ICR_SCLE, _ICR(i2c));
+	pete_writel("drivers/i2c/busses/i2c-pxa.c:1186", pete_readl("drivers/i2c/busses/i2c-pxa.c:1186", _ICR(i2c)) | ICR_SCLE, _ICR(i2c));
 
 	return 0;
 }
@@ -1236,7 +1236,7 @@ static int i2c_pxa_pio_xfer(struct i2c_adapter *adap,
 	  (probably due to a suspend/resume destroying state). We do
 	  this here as we can then avoid worrying about resuming the
 	  controller before its users. */
-	if (!(readl(_ICR(i2c)) & ICR_IUE))
+	if (!(pete_readl("drivers/i2c/busses/i2c-pxa.c:1239", _ICR(i2c)) & ICR_IUE))
 		i2c_pxa_reset(i2c);
 
 	return i2c_pxa_internal_xfer(i2c, msgs, num, i2c_pxa_do_pio_xfer);
@@ -1295,7 +1295,7 @@ static int i2c_pxa_probe_pdata(struct platform_device *pdev,
 static void i2c_pxa_prepare_recovery(struct i2c_adapter *adap)
 {
 	struct pxa_i2c *i2c = adap->algo_data;
-	u32 ibmr = readl(_IBMR(i2c));
+	u32 ibmr = pete_readl("drivers/i2c/busses/i2c-pxa.c:1298", _IBMR(i2c));
 
 	/*
 	 * Program the GPIOs to reflect the current I2C bus state while
@@ -1316,7 +1316,7 @@ static void i2c_pxa_unprepare_recovery(struct i2c_adapter *adap)
 	 * The bus should now be free. Clear up the I2C controller before
 	 * handing control of the bus back to avoid the bus changing state.
 	 */
-	isr = readl(_ISR(i2c));
+	isr = pete_readl("drivers/i2c/busses/i2c-pxa.c:1319", _ISR(i2c));
 	if (isr & (ISR_UB | ISR_IBB)) {
 		dev_dbg(&i2c->adap.dev,
 			"recovery: resetting controller, ISR=0x%08x\n", isr);
@@ -1326,7 +1326,7 @@ static void i2c_pxa_unprepare_recovery(struct i2c_adapter *adap)
 	WARN_ON(pinctrl_select_state(i2c->pinctrl, i2c->pinctrl_default));
 
 	dev_dbg(&i2c->adap.dev, "recovery: IBMR 0x%08x ISR 0x%08x\n",
-	        readl(_IBMR(i2c)), readl(_ISR(i2c)));
+	        pete_readl("drivers/i2c/busses/i2c-pxa.c:1329", _IBMR(i2c)), pete_readl("drivers/i2c/busses/i2c-pxa.c:1329", _ISR(i2c)));
 
 	i2c_pxa_enable(i2c);
 }

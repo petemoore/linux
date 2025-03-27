@@ -38,8 +38,8 @@ static int sunxi_usb_reset_assert(struct reset_controller_dev *rcdev,
 	clk_prepare_enable(data->clk);
 	spin_lock_irqsave(data->lock, flags);
 
-	reg = readl(data->reg);
-	writel(reg & ~BIT(id), data->reg);
+	reg = pete_readl("drivers/clk/sunxi/clk-usb.c:41", data->reg);
+	pete_writel("drivers/clk/sunxi/clk-usb.c:42", reg & ~BIT(id), data->reg);
 
 	spin_unlock_irqrestore(data->lock, flags);
 	clk_disable_unprepare(data->clk);
@@ -59,8 +59,8 @@ static int sunxi_usb_reset_deassert(struct reset_controller_dev *rcdev,
 	clk_prepare_enable(data->clk);
 	spin_lock_irqsave(data->lock, flags);
 
-	reg = readl(data->reg);
-	writel(reg | BIT(id), data->reg);
+	reg = pete_readl("drivers/clk/sunxi/clk-usb.c:62", data->reg);
+	pete_writel("drivers/clk/sunxi/clk-usb.c:63", reg | BIT(id), data->reg);
 
 	spin_unlock_irqrestore(data->lock, flags);
 	clk_disable_unprepare(data->clk);

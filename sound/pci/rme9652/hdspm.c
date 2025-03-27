@@ -1134,12 +1134,12 @@ static bool hdspm_is_raydat_or_aio(struct hdspm *hdspm)
 static inline void hdspm_write(struct hdspm * hdspm, unsigned int reg,
 			       unsigned int val)
 {
-	writel(val, hdspm->iobase + reg);
+	pete_writel("sound/pci/rme9652/hdspm.c:1137", val, hdspm->iobase + reg);
 }
 
 static inline unsigned int hdspm_read(struct hdspm * hdspm, unsigned int reg)
 {
-	return readl(hdspm->iobase + reg);
+	return pete_readl("sound/pci/rme9652/hdspm.c:1142", hdspm->iobase + reg);
 }
 
 /* for each output channel (chan) I have an Input (in) and Playback (pb) Fader
@@ -6169,29 +6169,29 @@ static int snd_hdspm_hwdep_ioctl(struct snd_hwdep *hw, struct file *file,
 		levels = &hdspm->peak_rms;
 		for (i = 0; i < HDSPM_MAX_CHANNELS; i++) {
 			levels->input_peaks[i] =
-				readl(hdspm->iobase +
+				pete_readl("sound/pci/rme9652/hdspm.c:6172", hdspm->iobase +
 						HDSPM_MADI_INPUT_PEAK + i*4);
 			levels->playback_peaks[i] =
-				readl(hdspm->iobase +
+				pete_readl("sound/pci/rme9652/hdspm.c:6175", hdspm->iobase +
 						HDSPM_MADI_PLAYBACK_PEAK + i*4);
 			levels->output_peaks[i] =
-				readl(hdspm->iobase +
+				pete_readl("sound/pci/rme9652/hdspm.c:6178", hdspm->iobase +
 						HDSPM_MADI_OUTPUT_PEAK + i*4);
 
 			levels->input_rms[i] =
-				((uint64_t) readl(hdspm->iobase +
+				((uint64_t) pete_readl("sound/pci/rme9652/hdspm.c:6182", hdspm->iobase +
 					HDSPM_MADI_INPUT_RMS_H + i*4) << 32) |
-				(uint64_t) readl(hdspm->iobase +
+				(uint64_t) pete_readl("sound/pci/rme9652/hdspm.c:6184", hdspm->iobase +
 						HDSPM_MADI_INPUT_RMS_L + i*4);
 			levels->playback_rms[i] =
-				((uint64_t)readl(hdspm->iobase +
+				((uint64_t)pete_readl("sound/pci/rme9652/hdspm.c:6187", hdspm->iobase +
 					HDSPM_MADI_PLAYBACK_RMS_H+i*4) << 32) |
-				(uint64_t)readl(hdspm->iobase +
+				(uint64_t)pete_readl("sound/pci/rme9652/hdspm.c:6189", hdspm->iobase +
 					HDSPM_MADI_PLAYBACK_RMS_L + i*4);
 			levels->output_rms[i] =
-				((uint64_t)readl(hdspm->iobase +
+				((uint64_t)pete_readl("sound/pci/rme9652/hdspm.c:6192", hdspm->iobase +
 					HDSPM_MADI_OUTPUT_RMS_H + i*4) << 32) |
-				(uint64_t)readl(hdspm->iobase +
+				(uint64_t)pete_readl("sound/pci/rme9652/hdspm.c:6194", hdspm->iobase +
 						HDSPM_MADI_OUTPUT_RMS_L + i*4);
 		}
 

@@ -70,7 +70,7 @@ static void dpaa2_update_ptp_onestep_direct(struct dpaa2_eth_priv *priv,
 		val |= DPAA2_PTP_SINGLE_STEP_CH;
 
 	if (priv->onestep_reg_base)
-		writel(val, priv->onestep_reg_base);
+		pete_writel("drivers/net/ethernet/freescale/dpaa2/dpaa2-eth.c:73", val, priv->onestep_reg_base);
 }
 
 static void dpaa2_ptp_onestep_reg_update_method(struct dpaa2_eth_priv *priv)

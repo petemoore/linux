@@ -878,7 +878,7 @@ static void tegra20_wait_cpu_in_reset(u32 cpu)
 	unsigned int reg;
 
 	do {
-		reg = readl(clk_base +
+		reg = pete_readl("drivers/clk/tegra/clk-tegra20.c:881", clk_base +
 			    TEGRA_CLK_RST_CONTROLLER_RST_CPU_CMPLX_SET);
 		cpu_relax();
 	} while (!(reg & (1 << cpu)));	/* check CPU been reset or not */
@@ -888,14 +888,14 @@ static void tegra20_wait_cpu_in_reset(u32 cpu)
 
 static void tegra20_put_cpu_in_reset(u32 cpu)
 {
-	writel(CPU_RESET(cpu),
+	pete_writel("drivers/clk/tegra/clk-tegra20.c:891", CPU_RESET(cpu),
 	       clk_base + TEGRA_CLK_RST_CONTROLLER_RST_CPU_CMPLX_SET);
 	dmb();
 }
 
 static void tegra20_cpu_out_of_reset(u32 cpu)
 {
-	writel(CPU_RESET(cpu),
+	pete_writel("drivers/clk/tegra/clk-tegra20.c:898", CPU_RESET(cpu),
 	       clk_base + TEGRA_CLK_RST_CONTROLLER_RST_CPU_CMPLX_CLR);
 	wmb();
 }
@@ -904,19 +904,19 @@ static void tegra20_enable_cpu_clock(u32 cpu)
 {
 	unsigned int reg;
 
-	reg = readl(clk_base + TEGRA_CLK_RST_CONTROLLER_CLK_CPU_CMPLX);
-	writel(reg & ~CPU_CLOCK(cpu),
+	reg = pete_readl("drivers/clk/tegra/clk-tegra20.c:907", clk_base + TEGRA_CLK_RST_CONTROLLER_CLK_CPU_CMPLX);
+	pete_writel("drivers/clk/tegra/clk-tegra20.c:908", reg & ~CPU_CLOCK(cpu),
 	       clk_base + TEGRA_CLK_RST_CONTROLLER_CLK_CPU_CMPLX);
 	barrier();
-	reg = readl(clk_base + TEGRA_CLK_RST_CONTROLLER_CLK_CPU_CMPLX);
+	reg = pete_readl("drivers/clk/tegra/clk-tegra20.c:911", clk_base + TEGRA_CLK_RST_CONTROLLER_CLK_CPU_CMPLX);
 }
 
 static void tegra20_disable_cpu_clock(u32 cpu)
 {
 	unsigned int reg;
 
-	reg = readl(clk_base + TEGRA_CLK_RST_CONTROLLER_CLK_CPU_CMPLX);
-	writel(reg | CPU_CLOCK(cpu),
+	reg = pete_readl("drivers/clk/tegra/clk-tegra20.c:918", clk_base + TEGRA_CLK_RST_CONTROLLER_CLK_CPU_CMPLX);
+	pete_writel("drivers/clk/tegra/clk-tegra20.c:919", reg | CPU_CLOCK(cpu),
 	       clk_base + TEGRA_CLK_RST_CONTROLLER_CLK_CPU_CMPLX);
 }
 
@@ -925,7 +925,7 @@ static bool tegra20_cpu_rail_off_ready(void)
 {
 	unsigned int cpu_rst_status;
 
-	cpu_rst_status = readl(clk_base +
+	cpu_rst_status = pete_readl("drivers/clk/tegra/clk-tegra20.c:928", clk_base +
 			       TEGRA_CLK_RST_CONTROLLER_RST_CPU_CMPLX_SET);
 
 	return !!(cpu_rst_status & 0x2);
@@ -935,17 +935,17 @@ static void tegra20_cpu_clock_suspend(void)
 {
 	/* switch coresite to clk_m, save off original source */
 	tegra20_cpu_clk_sctx.clk_csite_src =
-				readl(clk_base + CLK_SOURCE_CSITE);
-	writel(3<<30, clk_base + CLK_SOURCE_CSITE);
+				pete_readl("drivers/clk/tegra/clk-tegra20.c:938", clk_base + CLK_SOURCE_CSITE);
+	pete_writel("drivers/clk/tegra/clk-tegra20.c:939", 3<<30, clk_base + CLK_SOURCE_CSITE);
 
 	tegra20_cpu_clk_sctx.cpu_burst =
-				readl(clk_base + CCLK_BURST_POLICY);
+				pete_readl("drivers/clk/tegra/clk-tegra20.c:942", clk_base + CCLK_BURST_POLICY);
 	tegra20_cpu_clk_sctx.pllx_base =
-				readl(clk_base + PLLX_BASE);
+				pete_readl("drivers/clk/tegra/clk-tegra20.c:944", clk_base + PLLX_BASE);
 	tegra20_cpu_clk_sctx.pllx_misc =
-				readl(clk_base + PLLX_MISC);
+				pete_readl("drivers/clk/tegra/clk-tegra20.c:946", clk_base + PLLX_MISC);
 	tegra20_cpu_clk_sctx.cclk_divider =
-				readl(clk_base + SUPER_CCLK_DIVIDER);
+				pete_readl("drivers/clk/tegra/clk-tegra20.c:948", clk_base + SUPER_CCLK_DIVIDER);
 }
 
 static void tegra20_cpu_clock_resume(void)
@@ -954,7 +954,7 @@ static void tegra20_cpu_clock_resume(void)
 	u32 misc, base;
 
 	/* Is CPU complex already running on PLLX? */
-	reg = readl(clk_base + CCLK_BURST_POLICY);
+	reg = pete_readl("drivers/clk/tegra/clk-tegra20.c:957", clk_base + CCLK_BURST_POLICY);
 	policy = (reg >> CCLK_BURST_POLICY_SHIFT) & 0xF;
 
 	if (policy == CCLK_IDLE_POLICY)
@@ -971,9 +971,9 @@ static void tegra20_cpu_clock_resume(void)
 		if (misc != tegra20_cpu_clk_sctx.pllx_misc ||
 		    base != tegra20_cpu_clk_sctx.pllx_base) {
 			/* restore PLLX settings if CPU is on different PLL */
-			writel(tegra20_cpu_clk_sctx.pllx_misc,
+			pete_writel("drivers/clk/tegra/clk-tegra20.c:974", tegra20_cpu_clk_sctx.pllx_misc,
 						clk_base + PLLX_MISC);
-			writel(tegra20_cpu_clk_sctx.pllx_base,
+			pete_writel("drivers/clk/tegra/clk-tegra20.c:976", tegra20_cpu_clk_sctx.pllx_base,
 						clk_base + PLLX_BASE);
 
 			/* wait for PLL stabilization if PLLX was enabled */
@@ -986,12 +986,12 @@ static void tegra20_cpu_clock_resume(void)
 	 * Restore original burst policy setting for calls resulting from CPU
 	 * LP2 in idle or system suspend.
 	 */
-	writel(tegra20_cpu_clk_sctx.cclk_divider,
+	pete_writel("drivers/clk/tegra/clk-tegra20.c:989", tegra20_cpu_clk_sctx.cclk_divider,
 					clk_base + SUPER_CCLK_DIVIDER);
-	writel(tegra20_cpu_clk_sctx.cpu_burst,
+	pete_writel("drivers/clk/tegra/clk-tegra20.c:991", tegra20_cpu_clk_sctx.cpu_burst,
 					clk_base + CCLK_BURST_POLICY);
 
-	writel(tegra20_cpu_clk_sctx.clk_csite_src,
+	pete_writel("drivers/clk/tegra/clk-tegra20.c:994", tegra20_cpu_clk_sctx.clk_csite_src,
 					clk_base + CLK_SOURCE_CSITE);
 }
 #endif

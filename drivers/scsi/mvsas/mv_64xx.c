@@ -333,14 +333,14 @@ static int mvs_64xx_init(struct mvs_info *mvi)
 	}
 	if (mvi->flags & MVF_FLAG_SOC) {
 		/* set select registers */
-		writel(0x0E008000, regs + 0x000);
-		writel(0x59000008, regs + 0x004);
-		writel(0x20, regs + 0x008);
-		writel(0x20, regs + 0x00c);
-		writel(0x20, regs + 0x010);
-		writel(0x20, regs + 0x014);
-		writel(0x20, regs + 0x018);
-		writel(0x20, regs + 0x01c);
+		pete_writel("drivers/scsi/mvsas/mv_64xx.c:336", 0x0E008000, regs + 0x000);
+		pete_writel("drivers/scsi/mvsas/mv_64xx.c:337", 0x59000008, regs + 0x004);
+		pete_writel("drivers/scsi/mvsas/mv_64xx.c:338", 0x20, regs + 0x008);
+		pete_writel("drivers/scsi/mvsas/mv_64xx.c:339", 0x20, regs + 0x00c);
+		pete_writel("drivers/scsi/mvsas/mv_64xx.c:340", 0x20, regs + 0x010);
+		pete_writel("drivers/scsi/mvsas/mv_64xx.c:341", 0x20, regs + 0x014);
+		pete_writel("drivers/scsi/mvsas/mv_64xx.c:342", 0x20, regs + 0x018);
+		pete_writel("drivers/scsi/mvsas/mv_64xx.c:343", 0x20, regs + 0x01c);
 	}
 	for (i = 0; i < mvi->chip->n_phy; i++) {
 		/* clear phy int status */

@@ -386,12 +386,12 @@ static __always_inline void vepu_write_relaxed(struct hantro_dev *vpu,
 static __always_inline void vepu_write(struct hantro_dev *vpu, u32 val, u32 reg)
 {
 	vpu_debug(6, "0x%04x = 0x%08x\n", reg / 4, val);
-	writel(val, vpu->enc_base + reg);
+	pete_writel("drivers/media/platform/verisilicon/hantro.h:389", val, vpu->enc_base + reg);
 }
 
 static __always_inline u32 vepu_read(struct hantro_dev *vpu, u32 reg)
 {
-	u32 val = readl(vpu->enc_base + reg);
+	u32 val = pete_readl("drivers/media/platform/verisilicon/hantro.h:394", vpu->enc_base + reg);
 
 	vpu_debug(6, "0x%04x = 0x%08x\n", reg / 4, val);
 	return val;
@@ -407,7 +407,7 @@ static __always_inline void vdpu_write_relaxed(struct hantro_dev *vpu,
 static __always_inline void vdpu_write(struct hantro_dev *vpu, u32 val, u32 reg)
 {
 	vpu_debug(6, "0x%04x = 0x%08x\n", reg / 4, val);
-	writel(val, vpu->dec_base + reg);
+	pete_writel("drivers/media/platform/verisilicon/hantro.h:410", val, vpu->dec_base + reg);
 }
 
 static __always_inline void hantro_write_addr(struct hantro_dev *vpu,
@@ -419,7 +419,7 @@ static __always_inline void hantro_write_addr(struct hantro_dev *vpu,
 
 static __always_inline u32 vdpu_read(struct hantro_dev *vpu, u32 reg)
 {
-	u32 val = readl(vpu->dec_base + reg);
+	u32 val = pete_readl("drivers/media/platform/verisilicon/hantro.h:422", vpu->dec_base + reg);
 
 	vpu_debug(6, "0x%04x = 0x%08x\n", reg / 4, val);
 	return val;

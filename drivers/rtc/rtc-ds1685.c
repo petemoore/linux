@@ -44,7 +44,7 @@
 static u8
 ds1685_read(struct ds1685_priv *rtc, int reg)
 {
-	return readb((u8 __iomem *)rtc->regs +
+	return pete_readb("drivers/rtc/rtc-ds1685.c:47", (u8 __iomem *)rtc->regs +
 		     (reg * rtc->regstep));
 }
 
@@ -57,7 +57,7 @@ ds1685_read(struct ds1685_priv *rtc, int reg)
 static void
 ds1685_write(struct ds1685_priv *rtc, int reg, u8 value)
 {
-	writeb(value, ((u8 __iomem *)rtc->regs +
+	pete_writeb("drivers/rtc/rtc-ds1685.c:60", value, ((u8 __iomem *)rtc->regs +
 		       (reg * rtc->regstep)));
 }
 /* ----------------------------------------------------------------------- */
@@ -75,8 +75,8 @@ ds1685_write(struct ds1685_priv *rtc, int reg, u8 value)
 static u8
 ds1685_indirect_read(struct ds1685_priv *rtc, int reg)
 {
-	writeb(reg, rtc->regs);
-	return readb(rtc->data);
+	pete_writeb("drivers/rtc/rtc-ds1685.c:78", reg, rtc->regs);
+	return pete_readb("drivers/rtc/rtc-ds1685.c:79", rtc->data);
 }
 
 /**
@@ -88,8 +88,8 @@ ds1685_indirect_read(struct ds1685_priv *rtc, int reg)
 static void
 ds1685_indirect_write(struct ds1685_priv *rtc, int reg, u8 value)
 {
-	writeb(reg, rtc->regs);
-	writeb(value, rtc->data);
+	pete_writeb("drivers/rtc/rtc-ds1685.c:91", reg, rtc->regs);
+	pete_writeb("drivers/rtc/rtc-ds1685.c:92", value, rtc->data);
 }
 
 /* ----------------------------------------------------------------------- */

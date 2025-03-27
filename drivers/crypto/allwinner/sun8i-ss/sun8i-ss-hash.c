@@ -322,8 +322,8 @@ static int sun8i_ss_run_hash_task(struct sun8i_ss_dev *ss,
 		mutex_lock(&ss->mlock);
 		if (i > 0) {
 			v |= BIT(17);
-			writel(rctx->t_dst[i - 1].addr, ss->base + SS_KEY_ADR_REG);
-			writel(rctx->t_dst[i - 1].addr, ss->base + SS_IV_ADR_REG);
+			pete_writel("drivers/crypto/allwinner/sun8i-ss/sun8i-ss-hash.c:325", rctx->t_dst[i - 1].addr, ss->base + SS_KEY_ADR_REG);
+			pete_writel("drivers/crypto/allwinner/sun8i-ss/sun8i-ss-hash.c:326", rctx->t_dst[i - 1].addr, ss->base + SS_IV_ADR_REG);
 		}
 
 		dev_dbg(ss->dev,
@@ -332,16 +332,16 @@ static int sun8i_ss_run_hash_task(struct sun8i_ss_dev *ss,
 			rctx->t_src[i].len, rctx->t_dst[i].len,
 			rctx->method, rctx->t_src[i].addr, rctx->t_dst[i].addr);
 
-		writel(rctx->t_src[i].addr, ss->base + SS_SRC_ADR_REG);
-		writel(rctx->t_dst[i].addr, ss->base + SS_DST_ADR_REG);
-		writel(rctx->t_src[i].len, ss->base + SS_LEN_ADR_REG);
-		writel(BIT(0) | BIT(1), ss->base + SS_INT_CTL_REG);
+		pete_writel("drivers/crypto/allwinner/sun8i-ss/sun8i-ss-hash.c:335", rctx->t_src[i].addr, ss->base + SS_SRC_ADR_REG);
+		pete_writel("drivers/crypto/allwinner/sun8i-ss/sun8i-ss-hash.c:336", rctx->t_dst[i].addr, ss->base + SS_DST_ADR_REG);
+		pete_writel("drivers/crypto/allwinner/sun8i-ss/sun8i-ss-hash.c:337", rctx->t_src[i].len, ss->base + SS_LEN_ADR_REG);
+		pete_writel("drivers/crypto/allwinner/sun8i-ss/sun8i-ss-hash.c:338", BIT(0) | BIT(1), ss->base + SS_INT_CTL_REG);
 
 		reinit_completion(&ss->flows[flow].complete);
 		ss->flows[flow].status = 0;
 		wmb();
 
-		writel(v, ss->base + SS_CTL_REG);
+		pete_writel("drivers/crypto/allwinner/sun8i-ss/sun8i-ss-hash.c:344", v, ss->base + SS_CTL_REG);
 		mutex_unlock(&ss->mlock);
 		wait_for_completion_interruptible_timeout(&ss->flows[flow].complete,
 							  msecs_to_jiffies(2000));

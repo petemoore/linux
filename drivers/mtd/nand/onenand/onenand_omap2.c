@@ -58,13 +58,13 @@ static irqreturn_t omap2_onenand_interrupt(int irq, void *dev_id)
 
 static inline unsigned short read_reg(struct omap2_onenand *c, int reg)
 {
-	return readw(c->onenand.base + reg);
+	return pete_readw("drivers/mtd/nand/onenand/onenand_omap2.c:61", c->onenand.base + reg);
 }
 
 static inline void write_reg(struct omap2_onenand *c, unsigned short value,
 			     int reg)
 {
-	writew(value, c->onenand.base + reg);
+	pete_writew("drivers/mtd/nand/onenand/onenand_omap2.c:67", value, c->onenand.base + reg);
 }
 
 static int omap2_onenand_set_cfg(struct omap2_onenand *c,

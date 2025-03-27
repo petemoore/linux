@@ -95,7 +95,7 @@ static inline void setup_irq_channel(u32 magic, void __iomem *reg_addr)
 
 	/* Setup 64 channel slots */
 	for (i = 0; i < INTC_IRQS; i += 4)
-		writel(build_channel_val(i, magic), reg_addr + i);
+		pete_writel("drivers/irqchip/irq-csky-apb-intc.c:98", build_channel_val(i, magic), reg_addr + i);
 }
 
 static int __init
@@ -150,12 +150,12 @@ static void gx_irq_handler(struct pt_regs *regs)
 
 retry:
 	ret = handle_irq_perbit(regs,
-			readl(reg_base + GX_INTC_PEN63_32), 32);
+			pete_readl("drivers/irqchip/irq-csky-apb-intc.c:153", reg_base + GX_INTC_PEN63_32), 32);
 	if (ret)
 		goto retry;
 
 	ret = handle_irq_perbit(regs,
-			readl(reg_base + GX_INTC_PEN31_00), 0);
+			pete_readl("drivers/irqchip/irq-csky-apb-intc.c:158", reg_base + GX_INTC_PEN31_00), 0);
 	if (ret)
 		goto retry;
 }
@@ -172,14 +172,14 @@ gx_intc_init(struct device_node *node, struct device_node *parent)
 	/*
 	 * Initial enable reg to disable all interrupts
 	 */
-	writel(0x0, reg_base + GX_INTC_NEN31_00);
-	writel(0x0, reg_base + GX_INTC_NEN63_32);
+	pete_writel("drivers/irqchip/irq-csky-apb-intc.c:175", 0x0, reg_base + GX_INTC_NEN31_00);
+	pete_writel("drivers/irqchip/irq-csky-apb-intc.c:176", 0x0, reg_base + GX_INTC_NEN63_32);
 
 	/*
 	 * Initial mask reg with all unmasked, because we only use enable reg
 	 */
-	writel(0x0, reg_base + GX_INTC_NMASK31_00);
-	writel(0x0, reg_base + GX_INTC_NMASK63_32);
+	pete_writel("drivers/irqchip/irq-csky-apb-intc.c:181", 0x0, reg_base + GX_INTC_NMASK31_00);
+	pete_writel("drivers/irqchip/irq-csky-apb-intc.c:182", 0x0, reg_base + GX_INTC_NMASK63_32);
 
 	setup_irq_channel(0x03020100, reg_base + GX_INTC_SOURCE);
 
@@ -204,11 +204,11 @@ static void ck_irq_handler(struct pt_regs *regs)
 
 retry:
 	/* handle 0 - 63 irqs */
-	ret = handle_irq_perbit(regs, readl(reg_pen_hi), 32);
+	ret = handle_irq_perbit(regs, pete_readl("drivers/irqchip/irq-csky-apb-intc.c:207", reg_pen_hi), 32);
 	if (ret)
 		goto retry;
 
-	ret = handle_irq_perbit(regs, readl(reg_pen_lo), 0);
+	ret = handle_irq_perbit(regs, pete_readl("drivers/irqchip/irq-csky-apb-intc.c:211", reg_pen_lo), 0);
 	if (ret)
 		goto retry;
 
@@ -217,12 +217,12 @@ retry:
 
 	/* handle 64 - 127 irqs */
 	ret = handle_irq_perbit(regs,
-			readl(reg_pen_hi + CK_INTC_DUAL_BASE), 96);
+			pete_readl("drivers/irqchip/irq-csky-apb-intc.c:220", reg_pen_hi + CK_INTC_DUAL_BASE), 96);
 	if (ret)
 		goto retry;
 
 	ret = handle_irq_perbit(regs,
-			readl(reg_pen_lo + CK_INTC_DUAL_BASE), 64);
+			pete_readl("drivers/irqchip/irq-csky-apb-intc.c:225", reg_pen_lo + CK_INTC_DUAL_BASE), 64);
 	if (ret)
 		goto retry;
 }
@@ -237,11 +237,11 @@ ck_intc_init(struct device_node *node, struct device_node *parent)
 		return ret;
 
 	/* Initial enable reg to disable all interrupts */
-	writel(0, reg_base + CK_INTC_NEN31_00);
-	writel(0, reg_base + CK_INTC_NEN63_32);
+	pete_writel("drivers/irqchip/irq-csky-apb-intc.c:240", 0, reg_base + CK_INTC_NEN31_00);
+	pete_writel("drivers/irqchip/irq-csky-apb-intc.c:241", 0, reg_base + CK_INTC_NEN63_32);
 
 	/* Enable irq intc */
-	writel(BIT(31), reg_base + CK_INTC_ICR);
+	pete_writel("drivers/irqchip/irq-csky-apb-intc.c:244", BIT(31), reg_base + CK_INTC_ICR);
 
 	ck_set_gc(node, reg_base, CK_INTC_NEN31_00, 0);
 	ck_set_gc(node, reg_base, CK_INTC_NEN63_32, 32);
@@ -267,8 +267,8 @@ ck_dual_intc_init(struct device_node *node, struct device_node *parent)
 		return ret;
 
 	/* Initial enable reg to disable all interrupts */
-	writel(0, reg_base + CK_INTC_NEN31_00 + CK_INTC_DUAL_BASE);
-	writel(0, reg_base + CK_INTC_NEN63_32 + CK_INTC_DUAL_BASE);
+	pete_writel("drivers/irqchip/irq-csky-apb-intc.c:270", 0, reg_base + CK_INTC_NEN31_00 + CK_INTC_DUAL_BASE);
+	pete_writel("drivers/irqchip/irq-csky-apb-intc.c:271", 0, reg_base + CK_INTC_NEN63_32 + CK_INTC_DUAL_BASE);
 
 	ck_set_gc(node, reg_base + CK_INTC_DUAL_BASE, CK_INTC_NEN31_00, 64);
 	ck_set_gc(node, reg_base + CK_INTC_DUAL_BASE, CK_INTC_NEN63_32, 96);

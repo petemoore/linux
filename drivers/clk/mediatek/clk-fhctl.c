@@ -56,13 +56,13 @@ static void dump_hw(struct mtk_clk_pll *pll, struct fh_pll_regs *regs,
 		    const struct fh_pll_data *data)
 {
 	pr_info("hp_en<%x>,clk_con<%x>,slope0<%x>,slope1<%x>\n",
-		readl(regs->reg_hp_en), readl(regs->reg_clk_con),
-		readl(regs->reg_slope0), readl(regs->reg_slope1));
+		pete_readl("drivers/clk/mediatek/clk-fhctl.c:59", regs->reg_hp_en), pete_readl("drivers/clk/mediatek/clk-fhctl.c:59", regs->reg_clk_con),
+		pete_readl("drivers/clk/mediatek/clk-fhctl.c:60", regs->reg_slope0), pete_readl("drivers/clk/mediatek/clk-fhctl.c:60", regs->reg_slope1));
 	pr_info("cfg<%x>,lmt<%x>,dds<%x>,dvfs<%x>,mon<%x>\n",
-		readl(regs->reg_cfg), readl(regs->reg_updnlmt),
-		readl(regs->reg_dds), readl(regs->reg_dvfs),
-		readl(regs->reg_mon));
-	pr_info("pcw<%x>\n", readl(pll->pcw_addr));
+		pete_readl("drivers/clk/mediatek/clk-fhctl.c:62", regs->reg_cfg), pete_readl("drivers/clk/mediatek/clk-fhctl.c:62", regs->reg_updnlmt),
+		pete_readl("drivers/clk/mediatek/clk-fhctl.c:63", regs->reg_dds), pete_readl("drivers/clk/mediatek/clk-fhctl.c:63", regs->reg_dvfs),
+		pete_readl("drivers/clk/mediatek/clk-fhctl.c:64", regs->reg_mon));
+	pr_info("pcw<%x>\n", pete_readl("drivers/clk/mediatek/clk-fhctl.c:65", pll->pcw_addr));
 }
 
 static int fhctl_set_ssc_regs(struct mtk_clk_pll *pll, struct fh_pll_regs *regs,
@@ -70,41 +70,41 @@ static int fhctl_set_ssc_regs(struct mtk_clk_pll *pll, struct fh_pll_regs *regs,
 {
 	u32 updnlmt_val, r;
 
-	writel((readl(regs->reg_cfg) & ~(data->frddsx_en)), regs->reg_cfg);
-	writel((readl(regs->reg_cfg) & ~(data->sfstrx_en)), regs->reg_cfg);
-	writel((readl(regs->reg_cfg) & ~(data->fhctlx_en)), regs->reg_cfg);
+	pete_writel("drivers/clk/mediatek/clk-fhctl.c:73", (pete_readl("drivers/clk/mediatek/clk-fhctl.c:73", regs->reg_cfg) & ~(data->frddsx_en)), regs->reg_cfg);
+	pete_writel("drivers/clk/mediatek/clk-fhctl.c:74", (pete_readl("drivers/clk/mediatek/clk-fhctl.c:74", regs->reg_cfg) & ~(data->sfstrx_en)), regs->reg_cfg);
+	pete_writel("drivers/clk/mediatek/clk-fhctl.c:75", (pete_readl("drivers/clk/mediatek/clk-fhctl.c:75", regs->reg_cfg) & ~(data->fhctlx_en)), regs->reg_cfg);
 
 	if (rate > 0) {
 		/* Set the relative parameter registers (dt/df/upbnd/downbnd) */
-		r = readl(regs->reg_cfg);
+		r = pete_readl("drivers/clk/mediatek/clk-fhctl.c:79", regs->reg_cfg);
 		r &= ~(data->msk_frddsx_dys);
 		r |= (data->df_val << (ffs(data->msk_frddsx_dys) - 1));
-		writel(r, regs->reg_cfg);
+		pete_writel("drivers/clk/mediatek/clk-fhctl.c:82", r, regs->reg_cfg);
 
-		r = readl(regs->reg_cfg);
+		r = pete_readl("drivers/clk/mediatek/clk-fhctl.c:84", regs->reg_cfg);
 		r &= ~(data->msk_frddsx_dts);
 		r |= (data->dt_val << (ffs(data->msk_frddsx_dts) - 1));
-		writel(r, regs->reg_cfg);
+		pete_writel("drivers/clk/mediatek/clk-fhctl.c:87", r, regs->reg_cfg);
 
-		writel((readl(pll->pcw_addr) & data->dds_mask) | data->tgl_org,
+		pete_writel("drivers/clk/mediatek/clk-fhctl.c:89", (pete_readl("drivers/clk/mediatek/clk-fhctl.c:89", pll->pcw_addr) & data->dds_mask) | data->tgl_org,
 			regs->reg_dds);
 
 		/* Calculate UPDNLMT */
-		updnlmt_val = PERCENT_TO_DDSLMT((readl(regs->reg_dds) &
+		updnlmt_val = PERCENT_TO_DDSLMT((pete_readl("drivers/clk/mediatek/clk-fhctl.c:93", regs->reg_dds) &
 						 data->dds_mask), rate) <<
 						 data->updnlmt_shft;
 
-		writel(updnlmt_val, regs->reg_updnlmt);
-		writel(readl(regs->reg_hp_en) | BIT(data->fh_id),
+		pete_writel("drivers/clk/mediatek/clk-fhctl.c:97", updnlmt_val, regs->reg_updnlmt);
+		pete_writel("drivers/clk/mediatek/clk-fhctl.c:98", pete_readl("drivers/clk/mediatek/clk-fhctl.c:98", regs->reg_hp_en) | BIT(data->fh_id),
 		       regs->reg_hp_en);
 		/* Enable SSC */
-		writel(readl(regs->reg_cfg) | data->frddsx_en, regs->reg_cfg);
+		pete_writel("drivers/clk/mediatek/clk-fhctl.c:101", pete_readl("drivers/clk/mediatek/clk-fhctl.c:101", regs->reg_cfg) | data->frddsx_en, regs->reg_cfg);
 		/* Enable Hopping control */
-		writel(readl(regs->reg_cfg) | data->fhctlx_en, regs->reg_cfg);
+		pete_writel("drivers/clk/mediatek/clk-fhctl.c:103", pete_readl("drivers/clk/mediatek/clk-fhctl.c:103", regs->reg_cfg) | data->fhctlx_en, regs->reg_cfg);
 
 	} else {
 		/* Switch to APMIXEDSYS control */
-		writel(readl(regs->reg_hp_en) & ~BIT(data->fh_id),
+		pete_writel("drivers/clk/mediatek/clk-fhctl.c:107", pete_readl("drivers/clk/mediatek/clk-fhctl.c:107", regs->reg_hp_en) & ~BIT(data->fh_id),
 		       regs->reg_hp_en);
 		/* Wait for DDS to be stable */
 		udelay(30);
@@ -125,16 +125,16 @@ static int hopping_hw_flow(struct mtk_clk_pll *pll, struct fh_pll_regs *regs,
 	if (state->ssc_rate)
 		fhctl_set_ssc_regs(pll, regs, data, 0);
 
-	writel((readl(pll->pcw_addr) & dds_mask) | data->tgl_org,
+	pete_writel("drivers/clk/mediatek/clk-fhctl.c:128", (pete_readl("drivers/clk/mediatek/clk-fhctl.c:128", pll->pcw_addr) & dds_mask) | data->tgl_org,
 		regs->reg_dds);
 
-	writel(readl(regs->reg_cfg) | data->sfstrx_en, regs->reg_cfg);
-	writel(readl(regs->reg_cfg) | data->fhctlx_en, regs->reg_cfg);
-	writel(data->slope0_value, regs->reg_slope0);
-	writel(data->slope1_value, regs->reg_slope1);
+	pete_writel("drivers/clk/mediatek/clk-fhctl.c:131", pete_readl("drivers/clk/mediatek/clk-fhctl.c:131", regs->reg_cfg) | data->sfstrx_en, regs->reg_cfg);
+	pete_writel("drivers/clk/mediatek/clk-fhctl.c:132", pete_readl("drivers/clk/mediatek/clk-fhctl.c:132", regs->reg_cfg) | data->fhctlx_en, regs->reg_cfg);
+	pete_writel("drivers/clk/mediatek/clk-fhctl.c:133", data->slope0_value, regs->reg_slope0);
+	pete_writel("drivers/clk/mediatek/clk-fhctl.c:134", data->slope1_value, regs->reg_slope1);
 
-	writel(readl(regs->reg_hp_en) | BIT(data->fh_id), regs->reg_hp_en);
-	writel((new_dds) | (data->dvfs_tri), regs->reg_dvfs);
+	pete_writel("drivers/clk/mediatek/clk-fhctl.c:136", pete_readl("drivers/clk/mediatek/clk-fhctl.c:136", regs->reg_hp_en) | BIT(data->fh_id), regs->reg_hp_en);
+	pete_writel("drivers/clk/mediatek/clk-fhctl.c:137", (new_dds) | (data->dvfs_tri), regs->reg_dvfs);
 
 	/* Wait 1000 us until DDS stable */
 	ret = readl_poll_timeout_atomic(regs->reg_mon, mon_dds,
@@ -145,12 +145,12 @@ static int hopping_hw_flow(struct mtk_clk_pll *pll, struct fh_pll_regs *regs,
 		dump_hw(pll, regs, data);
 	}
 
-	con_pcw_tmp = readl(pll->pcw_addr) & (~dds_mask);
-	con_pcw_tmp = (con_pcw_tmp | (readl(regs->reg_mon) & dds_mask) |
+	con_pcw_tmp = pete_readl("drivers/clk/mediatek/clk-fhctl.c:148", pll->pcw_addr) & (~dds_mask);
+	con_pcw_tmp = (con_pcw_tmp | (pete_readl("drivers/clk/mediatek/clk-fhctl.c:149", regs->reg_mon) & dds_mask) |
 		       data->pcwchg);
 
-	writel(con_pcw_tmp, pll->pcw_addr);
-	writel(readl(regs->reg_hp_en) & ~BIT(data->fh_id), regs->reg_hp_en);
+	pete_writel("drivers/clk/mediatek/clk-fhctl.c:152", con_pcw_tmp, pll->pcw_addr);
+	pete_writel("drivers/clk/mediatek/clk-fhctl.c:153", pete_readl("drivers/clk/mediatek/clk-fhctl.c:153", regs->reg_hp_en) & ~BIT(data->fh_id), regs->reg_hp_en);
 
 	if (state->ssc_rate)
 		fhctl_set_ssc_regs(pll, regs, data, state->ssc_rate);
@@ -162,7 +162,7 @@ static unsigned int __get_postdiv(struct mtk_clk_pll *pll)
 {
 	unsigned int regval;
 
-	regval = readl(pll->pd_addr) >> pll->data->pd_shift;
+	regval = pete_readl("drivers/clk/mediatek/clk-fhctl.c:165", pll->pd_addr) >> pll->data->pd_shift;
 	regval &= POSTDIV_MASK;
 
 	return BIT(regval);
@@ -172,10 +172,10 @@ static void __set_postdiv(struct mtk_clk_pll *pll, unsigned int postdiv)
 {
 	unsigned int regval;
 
-	regval = readl(pll->pd_addr);
+	regval = pete_readl("drivers/clk/mediatek/clk-fhctl.c:175", pll->pd_addr);
 	regval &= ~(POSTDIV_MASK << pll->data->pd_shift);
 	regval |= (ffs(postdiv) - 1) << pll->data->pd_shift;
-	writel(regval, pll->pd_addr);
+	pete_writel("drivers/clk/mediatek/clk-fhctl.c:178", regval, pll->pd_addr);
 }
 
 static int fhctl_hopping(struct mtk_fh *fh, unsigned int new_dds,
@@ -246,17 +246,17 @@ void fhctl_hw_init(struct mtk_fh *fh)
 	u32 val;
 
 	/* initial hw register */
-	val = readl(regs.reg_clk_con) | BIT(data.fh_id);
-	writel(val, regs.reg_clk_con);
+	val = pete_readl("drivers/clk/mediatek/clk-fhctl.c:249", regs.reg_clk_con) | BIT(data.fh_id);
+	pete_writel("drivers/clk/mediatek/clk-fhctl.c:250", val, regs.reg_clk_con);
 
-	val = readl(regs.reg_rst_con) & ~BIT(data.fh_id);
-	writel(val, regs.reg_rst_con);
-	val = readl(regs.reg_rst_con) | BIT(data.fh_id);
-	writel(val, regs.reg_rst_con);
+	val = pete_readl("drivers/clk/mediatek/clk-fhctl.c:252", regs.reg_rst_con) & ~BIT(data.fh_id);
+	pete_writel("drivers/clk/mediatek/clk-fhctl.c:253", val, regs.reg_rst_con);
+	val = pete_readl("drivers/clk/mediatek/clk-fhctl.c:254", regs.reg_rst_con) | BIT(data.fh_id);
+	pete_writel("drivers/clk/mediatek/clk-fhctl.c:255", val, regs.reg_rst_con);
 
-	writel(0x0, regs.reg_cfg);
-	writel(0x0, regs.reg_updnlmt);
-	writel(0x0, regs.reg_dds);
+	pete_writel("drivers/clk/mediatek/clk-fhctl.c:257", 0x0, regs.reg_cfg);
+	pete_writel("drivers/clk/mediatek/clk-fhctl.c:258", 0x0, regs.reg_updnlmt);
+	pete_writel("drivers/clk/mediatek/clk-fhctl.c:259", 0x0, regs.reg_dds);
 
 	/* enable ssc if needed */
 	if (state.ssc_rate)

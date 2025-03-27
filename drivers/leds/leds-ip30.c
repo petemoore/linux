@@ -22,7 +22,7 @@ static void ip30led_set(struct led_classdev *led_cdev,
 {
 	struct ip30_led *led = container_of(led_cdev, struct ip30_led, cdev);
 
-	writel(value, led->reg);
+	pete_writel("drivers/leds/leds-ip30.c:25", value, led->reg);
 }
 
 static int ip30led_create(struct platform_device *pdev, int num)
@@ -48,7 +48,7 @@ static int ip30led_create(struct platform_device *pdev, int num)
 		return -EINVAL;
 	}
 
-	data->cdev.brightness = readl(data->reg);
+	data->cdev.brightness = pete_readl("drivers/leds/leds-ip30.c:51", data->reg);
 	data->cdev.max_brightness = 1;
 	data->cdev.brightness_set = ip30led_set;
 

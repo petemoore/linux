@@ -212,13 +212,13 @@ struct vc4_vec {
 #define VEC_READ(offset)								\
 	({										\
 		kunit_fail_current_test("Accessing a register in a unit test!\n");	\
-		readl(vec->regs + (offset));						\
+		pete_readl("drivers/gpu/drm/vc4/vc4_vec.c:215", vec->regs + (offset));						\
 	})
 
 #define VEC_WRITE(offset, val)								\
 	do {										\
 		kunit_fail_current_test("Accessing a register in a unit test!\n");	\
-		writel(val, vec->regs + (offset));					\
+		pete_writel("drivers/gpu/drm/vc4/vc4_vec.c:221", val, vec->regs + (offset));					\
 	} while (0)
 
 #define encoder_to_vc4_vec(_encoder)					\

@@ -152,7 +152,7 @@ static int fotg210_probe(struct platform_device *pdev)
 			return ret;
 	}
 
-	val = readl(fotg->base + FOTG210_RR);
+	val = pete_readl("drivers/usb/fotg210/fotg210-core.c:155", fotg->base + FOTG210_RR);
 	if (mode == USB_DR_MODE_PERIPHERAL) {
 		if (!(val & FOTG210_RR_CROLE))
 			dev_err(dev, "block not in device role\n");

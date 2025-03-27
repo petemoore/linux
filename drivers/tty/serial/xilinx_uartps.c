@@ -229,11 +229,11 @@ static void cdns_uart_handle_rx(void *dev_id, unsigned int isrstatus)
 
 	is_rxbs_support = cdns_uart->quirks & CDNS_UART_RXBS_SUPPORT;
 
-	while ((readl(port->membase + CDNS_UART_SR) &
+	while ((pete_readl("drivers/tty/serial/xilinx_uartps.c:232", port->membase + CDNS_UART_SR) &
 		CDNS_UART_SR_RXEMPTY) != CDNS_UART_SR_RXEMPTY) {
 		if (is_rxbs_support)
-			rxbs_status = readl(port->membase + CDNS_UART_RXBS);
-		data = readl(port->membase + CDNS_UART_FIFO);
+			rxbs_status = pete_readl("drivers/tty/serial/xilinx_uartps.c:235", port->membase + CDNS_UART_RXBS);
+		data = pete_readl("drivers/tty/serial/xilinx_uartps.c:236", port->membase + CDNS_UART_FIFO);
 		port->icount.rx++;
 		/*
 		 * There is no hardware break detection in Zynq, so we interpret
@@ -317,15 +317,15 @@ static void cdns_uart_handle_tx(void *dev_id)
 	unsigned int numbytes;
 
 	if (uart_circ_empty(xmit)) {
-		writel(CDNS_UART_IXR_TXEMPTY, port->membase + CDNS_UART_IDR);
+		pete_writel("drivers/tty/serial/xilinx_uartps.c:320", CDNS_UART_IXR_TXEMPTY, port->membase + CDNS_UART_IDR);
 		return;
 	}
 
 	numbytes = port->fifosize;
 	while (numbytes && !uart_circ_empty(xmit) &&
-	       !(readl(port->membase + CDNS_UART_SR) & CDNS_UART_SR_TXFULL)) {
+	       !(pete_readl("drivers/tty/serial/xilinx_uartps.c:326", port->membase + CDNS_UART_SR) & CDNS_UART_SR_TXFULL)) {
 
-		writel(xmit->buf[xmit->tail], port->membase + CDNS_UART_FIFO);
+		pete_writel("drivers/tty/serial/xilinx_uartps.c:328", xmit->buf[xmit->tail], port->membase + CDNS_UART_FIFO);
 		uart_xmit_advance(port, 1);
 		numbytes--;
 	}
@@ -351,8 +351,8 @@ static irqreturn_t cdns_uart_isr(int irq, void *dev_id)
 	/* Read the interrupt status register to determine which
 	 * interrupt(s) is/are active and clear them.
 	 */
-	isrstatus = readl(port->membase + CDNS_UART_ISR);
-	writel(isrstatus, port->membase + CDNS_UART_ISR);
+	isrstatus = pete_readl("drivers/tty/serial/xilinx_uartps.c:354", port->membase + CDNS_UART_ISR);
+	pete_writel("drivers/tty/serial/xilinx_uartps.c:355", isrstatus, port->membase + CDNS_UART_ISR);
 
 	if (isrstatus & CDNS_UART_IXR_TXEMPTY) {
 		cdns_uart_handle_tx(dev_id);
@@ -366,7 +366,7 @@ static irqreturn_t cdns_uart_isr(int irq, void *dev_id)
 	 * as read bytes will not be removed from the FIFO.
 	 */
 	if (isrstatus & CDNS_UART_IXR_RXMASK &&
-	    !(readl(port->membase + CDNS_UART_CR) & CDNS_UART_CR_RX_DIS))
+	    !(pete_readl("drivers/tty/serial/xilinx_uartps.c:369", port->membase + CDNS_UART_CR) & CDNS_UART_CR_RX_DIS))
 		cdns_uart_handle_rx(dev_id, isrstatus);
 
 	uart_unlock_and_check_sysrq(port);
@@ -455,14 +455,14 @@ static unsigned int cdns_uart_set_baud_rate(struct uart_port *port,
 			&div8);
 
 	/* Write new divisors to hardware */
-	mreg = readl(port->membase + CDNS_UART_MR);
+	mreg = pete_readl("drivers/tty/serial/xilinx_uartps.c:458", port->membase + CDNS_UART_MR);
 	if (div8)
 		mreg |= CDNS_UART_MR_CLKSEL;
 	else
 		mreg &= ~CDNS_UART_MR_CLKSEL;
-	writel(mreg, port->membase + CDNS_UART_MR);
-	writel(cd, port->membase + CDNS_UART_BAUDGEN);
-	writel(bdiv, port->membase + CDNS_UART_BAUDDIV);
+	pete_writel("drivers/tty/serial/xilinx_uartps.c:463", mreg, port->membase + CDNS_UART_MR);
+	pete_writel("drivers/tty/serial/xilinx_uartps.c:464", cd, port->membase + CDNS_UART_BAUDGEN);
+	pete_writel("drivers/tty/serial/xilinx_uartps.c:465", bdiv, port->membase + CDNS_UART_BAUDDIV);
 	cdns_uart->baud = baud;
 
 	return calc_baud;
@@ -509,9 +509,9 @@ static int cdns_uart_clk_notifier_cb(struct notifier_block *nb,
 		spin_lock_irqsave(&cdns_uart->port->lock, flags);
 
 		/* Disable the TX and RX to set baud rate */
-		ctrl_reg = readl(port->membase + CDNS_UART_CR);
+		ctrl_reg = pete_readl("drivers/tty/serial/xilinx_uartps.c:512", port->membase + CDNS_UART_CR);
 		ctrl_reg |= CDNS_UART_CR_TX_DIS | CDNS_UART_CR_RX_DIS;
-		writel(ctrl_reg, port->membase + CDNS_UART_CR);
+		pete_writel("drivers/tty/serial/xilinx_uartps.c:514", ctrl_reg, port->membase + CDNS_UART_CR);
 
 		spin_unlock_irqrestore(&cdns_uart->port->lock, flags);
 
@@ -536,11 +536,11 @@ static int cdns_uart_clk_notifier_cb(struct notifier_block *nb,
 			spin_lock_irqsave(&cdns_uart->port->lock, flags);
 
 		/* Set TX/RX Reset */
-		ctrl_reg = readl(port->membase + CDNS_UART_CR);
+		ctrl_reg = pete_readl("drivers/tty/serial/xilinx_uartps.c:539", port->membase + CDNS_UART_CR);
 		ctrl_reg |= CDNS_UART_CR_TXRST | CDNS_UART_CR_RXRST;
-		writel(ctrl_reg, port->membase + CDNS_UART_CR);
+		pete_writel("drivers/tty/serial/xilinx_uartps.c:541", ctrl_reg, port->membase + CDNS_UART_CR);
 
-		while (readl(port->membase + CDNS_UART_CR) &
+		while (pete_readl("drivers/tty/serial/xilinx_uartps.c:543", port->membase + CDNS_UART_CR) &
 				(CDNS_UART_CR_TXRST | CDNS_UART_CR_RXRST))
 			cpu_relax();
 
@@ -549,11 +549,11 @@ static int cdns_uart_clk_notifier_cb(struct notifier_block *nb,
 		 * enable bit and RX enable bit to enable the transmitter and
 		 * receiver.
 		 */
-		writel(rx_timeout, port->membase + CDNS_UART_RXTOUT);
-		ctrl_reg = readl(port->membase + CDNS_UART_CR);
+		pete_writel("drivers/tty/serial/xilinx_uartps.c:552", rx_timeout, port->membase + CDNS_UART_RXTOUT);
+		ctrl_reg = pete_readl("drivers/tty/serial/xilinx_uartps.c:553", port->membase + CDNS_UART_CR);
 		ctrl_reg &= ~(CDNS_UART_CR_TX_DIS | CDNS_UART_CR_RX_DIS);
 		ctrl_reg |= CDNS_UART_CR_TX_EN | CDNS_UART_CR_RX_EN;
-		writel(ctrl_reg, port->membase + CDNS_UART_CR);
+		pete_writel("drivers/tty/serial/xilinx_uartps.c:556", ctrl_reg, port->membase + CDNS_UART_CR);
 
 		spin_unlock_irqrestore(&cdns_uart->port->lock, flags);
 
@@ -579,20 +579,20 @@ static void cdns_uart_start_tx(struct uart_port *port)
 	 * Set the TX enable bit and clear the TX disable bit to enable the
 	 * transmitter.
 	 */
-	status = readl(port->membase + CDNS_UART_CR);
+	status = pete_readl("drivers/tty/serial/xilinx_uartps.c:582", port->membase + CDNS_UART_CR);
 	status &= ~CDNS_UART_CR_TX_DIS;
 	status |= CDNS_UART_CR_TX_EN;
-	writel(status, port->membase + CDNS_UART_CR);
+	pete_writel("drivers/tty/serial/xilinx_uartps.c:585", status, port->membase + CDNS_UART_CR);
 
 	if (uart_circ_empty(&port->state->xmit))
 		return;
 
-	writel(CDNS_UART_IXR_TXEMPTY, port->membase + CDNS_UART_ISR);
+	pete_writel("drivers/tty/serial/xilinx_uartps.c:590", CDNS_UART_IXR_TXEMPTY, port->membase + CDNS_UART_ISR);
 
 	cdns_uart_handle_tx(port);
 
 	/* Enable the TX Empty interrupt */
-	writel(CDNS_UART_IXR_TXEMPTY, port->membase + CDNS_UART_IER);
+	pete_writel("drivers/tty/serial/xilinx_uartps.c:595", CDNS_UART_IXR_TXEMPTY, port->membase + CDNS_UART_IER);
 }
 
 /**
@@ -603,10 +603,10 @@ static void cdns_uart_stop_tx(struct uart_port *port)
 {
 	unsigned int regval;
 
-	regval = readl(port->membase + CDNS_UART_CR);
+	regval = pete_readl("drivers/tty/serial/xilinx_uartps.c:606", port->membase + CDNS_UART_CR);
 	regval |= CDNS_UART_CR_TX_DIS;
 	/* Disable the transmitter */
-	writel(regval, port->membase + CDNS_UART_CR);
+	pete_writel("drivers/tty/serial/xilinx_uartps.c:609", regval, port->membase + CDNS_UART_CR);
 }
 
 /**
@@ -618,12 +618,12 @@ static void cdns_uart_stop_rx(struct uart_port *port)
 	unsigned int regval;
 
 	/* Disable RX IRQs */
-	writel(CDNS_UART_RX_IRQS, port->membase + CDNS_UART_IDR);
+	pete_writel("drivers/tty/serial/xilinx_uartps.c:621", CDNS_UART_RX_IRQS, port->membase + CDNS_UART_IDR);
 
 	/* Disable the receiver */
-	regval = readl(port->membase + CDNS_UART_CR);
+	regval = pete_readl("drivers/tty/serial/xilinx_uartps.c:624", port->membase + CDNS_UART_CR);
 	regval |= CDNS_UART_CR_RX_DIS;
-	writel(regval, port->membase + CDNS_UART_CR);
+	pete_writel("drivers/tty/serial/xilinx_uartps.c:626", regval, port->membase + CDNS_UART_CR);
 }
 
 /**
@@ -636,7 +636,7 @@ static unsigned int cdns_uart_tx_empty(struct uart_port *port)
 {
 	unsigned int status;
 
-	status = readl(port->membase + CDNS_UART_SR) &
+	status = pete_readl("drivers/tty/serial/xilinx_uartps.c:639", port->membase + CDNS_UART_SR) &
 		       (CDNS_UART_SR_TXEMPTY | CDNS_UART_SR_TACTIVE);
 	return (status == CDNS_UART_SR_TXEMPTY) ? TIOCSER_TEMT : 0;
 }
@@ -654,14 +654,14 @@ static void cdns_uart_break_ctl(struct uart_port *port, int ctl)
 
 	spin_lock_irqsave(&port->lock, flags);
 
-	status = readl(port->membase + CDNS_UART_CR);
+	status = pete_readl("drivers/tty/serial/xilinx_uartps.c:657", port->membase + CDNS_UART_CR);
 
 	if (ctl == -1)
-		writel(CDNS_UART_CR_STARTBRK | status,
+		pete_writel("drivers/tty/serial/xilinx_uartps.c:660", CDNS_UART_CR_STARTBRK | status,
 				port->membase + CDNS_UART_CR);
 	else {
 		if ((status & CDNS_UART_CR_STOPBRK) == 0)
-			writel(CDNS_UART_CR_STOPBRK | status,
+			pete_writel("drivers/tty/serial/xilinx_uartps.c:664", CDNS_UART_CR_STOPBRK | status,
 					port->membase + CDNS_UART_CR);
 	}
 	spin_unlock_irqrestore(&port->lock, flags);
@@ -686,9 +686,9 @@ static void cdns_uart_set_termios(struct uart_port *port,
 	spin_lock_irqsave(&port->lock, flags);
 
 	/* Disable the TX and RX to set baud rate */
-	ctrl_reg = readl(port->membase + CDNS_UART_CR);
+	ctrl_reg = pete_readl("drivers/tty/serial/xilinx_uartps.c:689", port->membase + CDNS_UART_CR);
 	ctrl_reg |= CDNS_UART_CR_TX_DIS | CDNS_UART_CR_RX_DIS;
-	writel(ctrl_reg, port->membase + CDNS_UART_CR);
+	pete_writel("drivers/tty/serial/xilinx_uartps.c:691", ctrl_reg, port->membase + CDNS_UART_CR);
 
 	/*
 	 * Min baud rate = 6bps and Max Baud Rate is 10Mbps for 100Mhz clk
@@ -707,11 +707,11 @@ static void cdns_uart_set_termios(struct uart_port *port,
 	uart_update_timeout(port, termios->c_cflag, baud);
 
 	/* Set TX/RX Reset */
-	ctrl_reg = readl(port->membase + CDNS_UART_CR);
+	ctrl_reg = pete_readl("drivers/tty/serial/xilinx_uartps.c:710", port->membase + CDNS_UART_CR);
 	ctrl_reg |= CDNS_UART_CR_TXRST | CDNS_UART_CR_RXRST;
-	writel(ctrl_reg, port->membase + CDNS_UART_CR);
+	pete_writel("drivers/tty/serial/xilinx_uartps.c:712", ctrl_reg, port->membase + CDNS_UART_CR);
 
-	while (readl(port->membase + CDNS_UART_CR) &
+	while (pete_readl("drivers/tty/serial/xilinx_uartps.c:714", port->membase + CDNS_UART_CR) &
 		(CDNS_UART_CR_TXRST | CDNS_UART_CR_RXRST))
 		cpu_relax();
 
@@ -719,12 +719,12 @@ static void cdns_uart_set_termios(struct uart_port *port,
 	 * Clear the RX disable and TX disable bits and then set the TX enable
 	 * bit and RX enable bit to enable the transmitter and receiver.
 	 */
-	ctrl_reg = readl(port->membase + CDNS_UART_CR);
+	ctrl_reg = pete_readl("drivers/tty/serial/xilinx_uartps.c:722", port->membase + CDNS_UART_CR);
 	ctrl_reg &= ~(CDNS_UART_CR_TX_DIS | CDNS_UART_CR_RX_DIS);
 	ctrl_reg |= CDNS_UART_CR_TX_EN | CDNS_UART_CR_RX_EN;
-	writel(ctrl_reg, port->membase + CDNS_UART_CR);
+	pete_writel("drivers/tty/serial/xilinx_uartps.c:725", ctrl_reg, port->membase + CDNS_UART_CR);
 
-	writel(rx_timeout, port->membase + CDNS_UART_RXTOUT);
+	pete_writel("drivers/tty/serial/xilinx_uartps.c:727", rx_timeout, port->membase + CDNS_UART_RXTOUT);
 
 	port->read_status_mask = CDNS_UART_IXR_TXEMPTY | CDNS_UART_IXR_RXTRIG |
 			CDNS_UART_IXR_OVERRUN | CDNS_UART_IXR_TOUT;
@@ -744,7 +744,7 @@ static void cdns_uart_set_termios(struct uart_port *port,
 			CDNS_UART_IXR_TOUT | CDNS_UART_IXR_PARITY |
 			CDNS_UART_IXR_FRAMING | CDNS_UART_IXR_OVERRUN;
 
-	mode_reg = readl(port->membase + CDNS_UART_MR);
+	mode_reg = pete_readl("drivers/tty/serial/xilinx_uartps.c:747", port->membase + CDNS_UART_MR);
 
 	/* Handling Data Size */
 	switch (termios->c_cflag & CSIZE) {
@@ -785,14 +785,14 @@ static void cdns_uart_set_termios(struct uart_port *port,
 		cval |= CDNS_UART_MR_PARITY_NONE;
 	}
 	cval |= mode_reg & 1;
-	writel(cval, port->membase + CDNS_UART_MR);
+	pete_writel("drivers/tty/serial/xilinx_uartps.c:788", cval, port->membase + CDNS_UART_MR);
 
-	cval = readl(port->membase + CDNS_UART_MODEMCR);
+	cval = pete_readl("drivers/tty/serial/xilinx_uartps.c:790", port->membase + CDNS_UART_MODEMCR);
 	if (termios->c_cflag & CRTSCTS)
 		cval |= CDNS_UART_MODEMCR_FCM;
 	else
 		cval &= ~CDNS_UART_MODEMCR_FCM;
-	writel(cval, port->membase + CDNS_UART_MODEMCR);
+	pete_writel("drivers/tty/serial/xilinx_uartps.c:795", cval, port->membase + CDNS_UART_MODEMCR);
 
 	spin_unlock_irqrestore(&port->lock, flags);
 }
@@ -816,16 +816,16 @@ static int cdns_uart_startup(struct uart_port *port)
 	spin_lock_irqsave(&port->lock, flags);
 
 	/* Disable the TX and RX */
-	writel(CDNS_UART_CR_TX_DIS | CDNS_UART_CR_RX_DIS,
+	pete_writel("drivers/tty/serial/xilinx_uartps.c:819", CDNS_UART_CR_TX_DIS | CDNS_UART_CR_RX_DIS,
 			port->membase + CDNS_UART_CR);
 
 	/* Set the Control Register with TX/RX Enable, TX/RX Reset,
 	 * no break chars.
 	 */
-	writel(CDNS_UART_CR_TXRST | CDNS_UART_CR_RXRST,
+	pete_writel("drivers/tty/serial/xilinx_uartps.c:825", CDNS_UART_CR_TXRST | CDNS_UART_CR_RXRST,
 			port->membase + CDNS_UART_CR);
 
-	while (readl(port->membase + CDNS_UART_CR) &
+	while (pete_readl("drivers/tty/serial/xilinx_uartps.c:828", port->membase + CDNS_UART_CR) &
 		(CDNS_UART_CR_TXRST | CDNS_UART_CR_RXRST))
 		cpu_relax();
 
@@ -833,15 +833,15 @@ static int cdns_uart_startup(struct uart_port *port)
 	 * Clear the RX disable bit and then set the RX enable bit to enable
 	 * the receiver.
 	 */
-	status = readl(port->membase + CDNS_UART_CR);
+	status = pete_readl("drivers/tty/serial/xilinx_uartps.c:836", port->membase + CDNS_UART_CR);
 	status &= ~CDNS_UART_CR_RX_DIS;
 	status |= CDNS_UART_CR_RX_EN;
-	writel(status, port->membase + CDNS_UART_CR);
+	pete_writel("drivers/tty/serial/xilinx_uartps.c:839", status, port->membase + CDNS_UART_CR);
 
 	/* Set the Mode Register with normal mode,8 data bits,1 stop bit,
 	 * no parity.
 	 */
-	writel(CDNS_UART_MR_CHMODE_NORM | CDNS_UART_MR_STOPMODE_1_BIT
+	pete_writel("drivers/tty/serial/xilinx_uartps.c:844", CDNS_UART_MR_CHMODE_NORM | CDNS_UART_MR_STOPMODE_1_BIT
 		| CDNS_UART_MR_PARITY_NONE | CDNS_UART_MR_CHARLEN_8_BIT,
 		port->membase + CDNS_UART_MR);
 
@@ -849,16 +849,16 @@ static int cdns_uart_startup(struct uart_port *port)
 	 * Set the RX FIFO Trigger level to use most of the FIFO, but it
 	 * can be tuned with a module parameter
 	 */
-	writel(rx_trigger_level, port->membase + CDNS_UART_RXWM);
+	pete_writel("drivers/tty/serial/xilinx_uartps.c:852", rx_trigger_level, port->membase + CDNS_UART_RXWM);
 
 	/*
 	 * Receive Timeout register is enabled but it
 	 * can be tuned with a module parameter
 	 */
-	writel(rx_timeout, port->membase + CDNS_UART_RXTOUT);
+	pete_writel("drivers/tty/serial/xilinx_uartps.c:858", rx_timeout, port->membase + CDNS_UART_RXTOUT);
 
 	/* Clear out any pending interrupts before enabling them */
-	writel(readl(port->membase + CDNS_UART_ISR),
+	pete_writel("drivers/tty/serial/xilinx_uartps.c:861", pete_readl("drivers/tty/serial/xilinx_uartps.c:861", port->membase + CDNS_UART_ISR),
 			port->membase + CDNS_UART_ISR);
 
 	spin_unlock_irqrestore(&port->lock, flags);
@@ -872,10 +872,10 @@ static int cdns_uart_startup(struct uart_port *port)
 
 	/* Set the Interrupt Registers with desired interrupts */
 	if (is_brk_support)
-		writel(CDNS_UART_RX_IRQS | CDNS_UART_IXR_BRK,
+		pete_writel("drivers/tty/serial/xilinx_uartps.c:875", CDNS_UART_RX_IRQS | CDNS_UART_IXR_BRK,
 					port->membase + CDNS_UART_IER);
 	else
-		writel(CDNS_UART_RX_IRQS, port->membase + CDNS_UART_IER);
+		pete_writel("drivers/tty/serial/xilinx_uartps.c:878", CDNS_UART_RX_IRQS, port->membase + CDNS_UART_IER);
 
 	return 0;
 }
@@ -892,12 +892,12 @@ static void cdns_uart_shutdown(struct uart_port *port)
 	spin_lock_irqsave(&port->lock, flags);
 
 	/* Disable interrupts */
-	status = readl(port->membase + CDNS_UART_IMR);
-	writel(status, port->membase + CDNS_UART_IDR);
-	writel(0xffffffff, port->membase + CDNS_UART_ISR);
+	status = pete_readl("drivers/tty/serial/xilinx_uartps.c:895", port->membase + CDNS_UART_IMR);
+	pete_writel("drivers/tty/serial/xilinx_uartps.c:896", status, port->membase + CDNS_UART_IDR);
+	pete_writel("drivers/tty/serial/xilinx_uartps.c:897", 0xffffffff, port->membase + CDNS_UART_ISR);
 
 	/* Disable the TX and RX */
-	writel(CDNS_UART_CR_TX_DIS | CDNS_UART_CR_RX_DIS,
+	pete_writel("drivers/tty/serial/xilinx_uartps.c:900", CDNS_UART_CR_TX_DIS | CDNS_UART_CR_RX_DIS,
 			port->membase + CDNS_UART_CR);
 
 	spin_unlock_irqrestore(&port->lock, flags);
@@ -1003,7 +1003,7 @@ static unsigned int cdns_uart_get_mctrl(struct uart_port *port)
 	if (cdns_uart_data->cts_override)
 		return TIOCM_CTS | TIOCM_DSR | TIOCM_CAR;
 
-	val = readl(port->membase + CDNS_UART_MODEMSR);
+	val = pete_readl("drivers/tty/serial/xilinx_uartps.c:1006", port->membase + CDNS_UART_MODEMSR);
 	if (val & CDNS_UART_MODEMSR_CTS)
 		mctrl |= TIOCM_CTS;
 	if (val & CDNS_UART_MODEMSR_DSR)
@@ -1025,8 +1025,8 @@ static void cdns_uart_set_mctrl(struct uart_port *port, unsigned int mctrl)
 	if (cdns_uart_data->cts_override)
 		return;
 
-	val = readl(port->membase + CDNS_UART_MODEMCR);
-	mode_reg = readl(port->membase + CDNS_UART_MR);
+	val = pete_readl("drivers/tty/serial/xilinx_uartps.c:1028", port->membase + CDNS_UART_MODEMCR);
+	mode_reg = pete_readl("drivers/tty/serial/xilinx_uartps.c:1029", port->membase + CDNS_UART_MR);
 
 	val &= ~(CDNS_UART_MODEMCR_RTS | CDNS_UART_MODEMCR_DTR);
 	mode_reg &= ~CDNS_UART_MR_CHMODE_MASK;
@@ -1040,8 +1040,8 @@ static void cdns_uart_set_mctrl(struct uart_port *port, unsigned int mctrl)
 	else
 		mode_reg |= CDNS_UART_MR_CHMODE_NORM;
 
-	writel(val, port->membase + CDNS_UART_MODEMCR);
-	writel(mode_reg, port->membase + CDNS_UART_MR);
+	pete_writel("drivers/tty/serial/xilinx_uartps.c:1043", val, port->membase + CDNS_UART_MODEMCR);
+	pete_writel("drivers/tty/serial/xilinx_uartps.c:1044", mode_reg, port->membase + CDNS_UART_MR);
 }
 
 #ifdef CONFIG_CONSOLE_POLL
@@ -1053,10 +1053,10 @@ static int cdns_uart_poll_get_char(struct uart_port *port)
 	spin_lock_irqsave(&port->lock, flags);
 
 	/* Check if FIFO is empty */
-	if (readl(port->membase + CDNS_UART_SR) & CDNS_UART_SR_RXEMPTY)
+	if (pete_readl("drivers/tty/serial/xilinx_uartps.c:1056", port->membase + CDNS_UART_SR) & CDNS_UART_SR_RXEMPTY)
 		c = NO_POLL_CHAR;
 	else /* Read a character */
-		c = (unsigned char) readl(port->membase + CDNS_UART_FIFO);
+		c = (unsigned char) pete_readl("drivers/tty/serial/xilinx_uartps.c:1059", port->membase + CDNS_UART_FIFO);
 
 	spin_unlock_irqrestore(&port->lock, flags);
 
@@ -1070,14 +1070,14 @@ static void cdns_uart_poll_put_char(struct uart_port *port, unsigned char c)
 	spin_lock_irqsave(&port->lock, flags);
 
 	/* Wait until FIFO is empty */
-	while (!(readl(port->membase + CDNS_UART_SR) & CDNS_UART_SR_TXEMPTY))
+	while (!(pete_readl("drivers/tty/serial/xilinx_uartps.c:1073", port->membase + CDNS_UART_SR) & CDNS_UART_SR_TXEMPTY))
 		cpu_relax();
 
 	/* Write a character */
-	writel(c, port->membase + CDNS_UART_FIFO);
+	pete_writel("drivers/tty/serial/xilinx_uartps.c:1077", c, port->membase + CDNS_UART_FIFO);
 
 	/* Wait until FIFO is empty */
-	while (!(readl(port->membase + CDNS_UART_SR) & CDNS_UART_SR_TXEMPTY))
+	while (!(pete_readl("drivers/tty/serial/xilinx_uartps.c:1080", port->membase + CDNS_UART_SR) & CDNS_UART_SR_TXEMPTY))
 		cpu_relax();
 
 	spin_unlock_irqrestore(&port->lock, flags);
@@ -1136,7 +1136,7 @@ static void cdns_uart_console_putchar(struct uart_port *port, unsigned char ch)
 
 	timeout = jiffies + msecs_to_jiffies(1000);
 	while (1) {
-		ctrl_reg = readl(port->membase + CDNS_UART_CR);
+		ctrl_reg = pete_readl("drivers/tty/serial/xilinx_uartps.c:1139", port->membase + CDNS_UART_CR);
 		if (!(ctrl_reg & CDNS_UART_CR_TX_DIS))
 			break;
 		if (time_after(jiffies, timeout)) {
@@ -1149,7 +1149,7 @@ static void cdns_uart_console_putchar(struct uart_port *port, unsigned char ch)
 
 	timeout = jiffies + msecs_to_jiffies(1000);
 	while (1) {
-		ctrl_reg = readl(port->membase + CDNS_UART_SR);
+		ctrl_reg = pete_readl("drivers/tty/serial/xilinx_uartps.c:1152", port->membase + CDNS_UART_SR);
 
 		if (!(ctrl_reg & CDNS_UART_SR_TXFULL))
 			break;
@@ -1160,7 +1160,7 @@ static void cdns_uart_console_putchar(struct uart_port *port, unsigned char ch)
 		}
 		cpu_relax();
 	}
-	writel(ch, port->membase + CDNS_UART_FIFO);
+	pete_writel("drivers/tty/serial/xilinx_uartps.c:1163", ch, port->membase + CDNS_UART_FIFO);
 }
 
 static void cdns_early_write(struct console *con, const char *s,
@@ -1180,7 +1180,7 @@ static int __init cdns_early_console_setup(struct earlycon_device *device,
 		return -ENODEV;
 
 	/* initialise control register */
-	writel(CDNS_UART_CR_TX_EN|CDNS_UART_CR_TXRST|CDNS_UART_CR_RXRST,
+	pete_writel("drivers/tty/serial/xilinx_uartps.c:1183", CDNS_UART_CR_TX_EN|CDNS_UART_CR_TXRST|CDNS_UART_CR_RXRST,
 	       port->membase + CDNS_UART_CR);
 
 	/* only set baud if specified on command line - otherwise
@@ -1197,9 +1197,9 @@ static int __init cdns_early_console_setup(struct earlycon_device *device,
 		if (div8)
 			mr |= CDNS_UART_MR_CLKSEL;
 
-		writel(mr,   port->membase + CDNS_UART_MR);
-		writel(cd,   port->membase + CDNS_UART_BAUDGEN);
-		writel(bdiv, port->membase + CDNS_UART_BAUDDIV);
+		pete_writel("drivers/tty/serial/xilinx_uartps.c:1200", mr,   port->membase + CDNS_UART_MR);
+		pete_writel("drivers/tty/serial/xilinx_uartps.c:1201", cd,   port->membase + CDNS_UART_BAUDGEN);
+		pete_writel("drivers/tty/serial/xilinx_uartps.c:1202", bdiv, port->membase + CDNS_UART_BAUDDIV);
 	}
 
 	device->con->write = cdns_early_write;
@@ -1235,24 +1235,24 @@ static void cdns_uart_console_write(struct console *co, const char *s,
 		spin_lock_irqsave(&port->lock, flags);
 
 	/* save and disable interrupt */
-	imr = readl(port->membase + CDNS_UART_IMR);
-	writel(imr, port->membase + CDNS_UART_IDR);
+	imr = pete_readl("drivers/tty/serial/xilinx_uartps.c:1238", port->membase + CDNS_UART_IMR);
+	pete_writel("drivers/tty/serial/xilinx_uartps.c:1239", imr, port->membase + CDNS_UART_IDR);
 
 	/*
 	 * Make sure that the tx part is enabled. Set the TX enable bit and
 	 * clear the TX disable bit to enable the transmitter.
 	 */
-	ctrl = readl(port->membase + CDNS_UART_CR);
+	ctrl = pete_readl("drivers/tty/serial/xilinx_uartps.c:1245", port->membase + CDNS_UART_CR);
 	ctrl &= ~CDNS_UART_CR_TX_DIS;
 	ctrl |= CDNS_UART_CR_TX_EN;
-	writel(ctrl, port->membase + CDNS_UART_CR);
+	pete_writel("drivers/tty/serial/xilinx_uartps.c:1248", ctrl, port->membase + CDNS_UART_CR);
 
 	uart_console_write(port, s, count, cdns_uart_console_putchar);
 	while (cdns_uart_tx_empty(port) != TIOCSER_TEMT)
 		cpu_relax();
 
 	/* restore interrupt state */
-	writel(imr, port->membase + CDNS_UART_IER);
+	pete_writel("drivers/tty/serial/xilinx_uartps.c:1255", imr, port->membase + CDNS_UART_IER);
 
 	if (locked)
 		spin_unlock_irqrestore(&port->lock, flags);
@@ -1325,13 +1325,13 @@ static int cdns_uart_suspend(struct device *device)
 
 		spin_lock_irqsave(&port->lock, flags);
 		/* Empty the receive FIFO 1st before making changes */
-		while (!(readl(port->membase + CDNS_UART_SR) &
+		while (!(pete_readl("drivers/tty/serial/xilinx_uartps.c:1328", port->membase + CDNS_UART_SR) &
 					CDNS_UART_SR_RXEMPTY))
-			readl(port->membase + CDNS_UART_FIFO);
+			pete_readl("drivers/tty/serial/xilinx_uartps.c:1330", port->membase + CDNS_UART_FIFO);
 		/* set RX trigger level to 1 */
-		writel(1, port->membase + CDNS_UART_RXWM);
+		pete_writel("drivers/tty/serial/xilinx_uartps.c:1332", 1, port->membase + CDNS_UART_RXWM);
 		/* disable RX timeout interrups */
-		writel(CDNS_UART_IXR_TOUT, port->membase + CDNS_UART_IDR);
+		pete_writel("drivers/tty/serial/xilinx_uartps.c:1334", CDNS_UART_IXR_TOUT, port->membase + CDNS_UART_IDR);
 		spin_unlock_irqrestore(&port->lock, flags);
 	}
 
@@ -1373,20 +1373,20 @@ static int cdns_uart_resume(struct device *device)
 		spin_lock_irqsave(&port->lock, flags);
 
 		/* Set TX/RX Reset */
-		ctrl_reg = readl(port->membase + CDNS_UART_CR);
+		ctrl_reg = pete_readl("drivers/tty/serial/xilinx_uartps.c:1376", port->membase + CDNS_UART_CR);
 		ctrl_reg |= CDNS_UART_CR_TXRST | CDNS_UART_CR_RXRST;
-		writel(ctrl_reg, port->membase + CDNS_UART_CR);
-		while (readl(port->membase + CDNS_UART_CR) &
+		pete_writel("drivers/tty/serial/xilinx_uartps.c:1378", ctrl_reg, port->membase + CDNS_UART_CR);
+		while (pete_readl("drivers/tty/serial/xilinx_uartps.c:1379", port->membase + CDNS_UART_CR) &
 				(CDNS_UART_CR_TXRST | CDNS_UART_CR_RXRST))
 			cpu_relax();
 
 		/* restore rx timeout value */
-		writel(rx_timeout, port->membase + CDNS_UART_RXTOUT);
+		pete_writel("drivers/tty/serial/xilinx_uartps.c:1384", rx_timeout, port->membase + CDNS_UART_RXTOUT);
 		/* Enable Tx/Rx */
-		ctrl_reg = readl(port->membase + CDNS_UART_CR);
+		ctrl_reg = pete_readl("drivers/tty/serial/xilinx_uartps.c:1386", port->membase + CDNS_UART_CR);
 		ctrl_reg &= ~(CDNS_UART_CR_TX_DIS | CDNS_UART_CR_RX_DIS);
 		ctrl_reg |= CDNS_UART_CR_TX_EN | CDNS_UART_CR_RX_EN;
-		writel(ctrl_reg, port->membase + CDNS_UART_CR);
+		pete_writel("drivers/tty/serial/xilinx_uartps.c:1389", ctrl_reg, port->membase + CDNS_UART_CR);
 
 		clk_disable(cdns_uart->uartclk);
 		clk_disable(cdns_uart->pclk);
@@ -1394,9 +1394,9 @@ static int cdns_uart_resume(struct device *device)
 	} else {
 		spin_lock_irqsave(&port->lock, flags);
 		/* restore original rx trigger level */
-		writel(rx_trigger_level, port->membase + CDNS_UART_RXWM);
+		pete_writel("drivers/tty/serial/xilinx_uartps.c:1397", rx_trigger_level, port->membase + CDNS_UART_RXWM);
 		/* enable RX timeout interrupt */
-		writel(CDNS_UART_IXR_TOUT, port->membase + CDNS_UART_IER);
+		pete_writel("drivers/tty/serial/xilinx_uartps.c:1399", CDNS_UART_IXR_TOUT, port->membase + CDNS_UART_IER);
 		spin_unlock_irqrestore(&port->lock, flags);
 	}
 

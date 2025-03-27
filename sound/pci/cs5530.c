@@ -96,7 +96,7 @@ static int snd_cs5530_create(struct snd_card *card,
 		return err;
 	chip->pci_base = pci_resource_start(pci, 0);
 	mem = pcim_iomap_table(pci)[0];
-	map = readw(mem + 0x18);
+	map = pete_readw("sound/pci/cs5530.c:99", mem + 0x18);
 
 	/* Map bits
 		0:1	* 0x20 + 0x200 = sb base

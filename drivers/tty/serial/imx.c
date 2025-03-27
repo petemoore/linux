@@ -272,12 +272,12 @@ MODULE_DEVICE_TABLE(of, imx_uart_dt_ids);
 
 static inline void imx_uart_writel(struct imx_port *sport, u32 val, u32 offset)
 {
-	writel(val, sport->port.membase + offset);
+	pete_writel("drivers/tty/serial/imx.c:275", val, sport->port.membase + offset);
 }
 
 static inline u32 imx_uart_readl(struct imx_port *sport, u32 offset)
 {
-	return readl(sport->port.membase + offset);
+	return pete_readl("drivers/tty/serial/imx.c:280", sport->port.membase + offset);
 }
 
 static inline unsigned imx_uart_uts_reg(struct imx_port *sport)

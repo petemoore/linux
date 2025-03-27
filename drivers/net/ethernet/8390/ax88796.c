@@ -43,8 +43,8 @@
 /* force unsigned long back to 'void __iomem *' */
 #define ax_convert_addr(_a) ((void __force __iomem *)(_a))
 
-#define ei_inb(_a) readb(ax_convert_addr(_a))
-#define ei_outb(_v, _a) writeb(_v, ax_convert_addr(_a))
+#define ei_inb(_a) pete_readb("drivers/net/ethernet/8390/ax88796.c:46", ax_convert_addr(_a))
+#define ei_outb(_v, _a) pete_writeb("drivers/net/ethernet/8390/ax88796.c:47", _v, ax_convert_addr(_a))
 
 #define ei_inb_p(_a) ei_inb(_a)
 #define ei_outb_p(_v, _a) ei_outb(_v, _a)

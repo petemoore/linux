@@ -35,7 +35,7 @@ static int sr_get_temp(struct thermal_zone_device *tz, int *temp)
 	struct sr_tmon *tmon = thermal_zone_device_priv(tz);
 	struct sr_thermal *sr_thermal = tmon->priv;
 
-	*temp = readl(sr_thermal->regs + SR_TMON_TEMP_BASE(tmon->tmon_id));
+	*temp = pete_readl("drivers/thermal/broadcom/sr-thermal.c:38", sr_thermal->regs + SR_TMON_TEMP_BASE(tmon->tmon_id));
 
 	return 0;
 }
@@ -81,7 +81,7 @@ static int sr_thermal_probe(struct platform_device *pdev)
 			continue;
 
 		/* Flush temperature registers */
-		writel(0, sr_thermal->regs + SR_TMON_TEMP_BASE(i));
+		pete_writel("drivers/thermal/broadcom/sr-thermal.c:84", 0, sr_thermal->regs + SR_TMON_TEMP_BASE(i));
 		tmon->tmon_id = i;
 		tmon->priv = sr_thermal;
 		tz = devm_thermal_of_zone_register(dev, i, tmon,

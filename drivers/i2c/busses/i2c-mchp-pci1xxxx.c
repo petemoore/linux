@@ -336,8 +336,8 @@ static int set_sys_lock(struct pci1xxxx_i2c *i2c)
 	void __iomem *p = i2c->i2c_base + SMB_GPR_LOCK_REG;
 	u8 data;
 
-	writel(SMBUS_PERI_LOCK, p);
-	data = readl(p);
+	pete_writel("drivers/i2c/busses/i2c-mchp-pci1xxxx.c:339", SMBUS_PERI_LOCK, p);
+	data = pete_readl("drivers/i2c/busses/i2c-mchp-pci1xxxx.c:340", p);
 	if (data != SMBUS_PERI_LOCK)
 		return -EPERM;
 
@@ -349,12 +349,12 @@ static int release_sys_lock(struct pci1xxxx_i2c *i2c)
 	void __iomem *p = i2c->i2c_base + SMB_GPR_LOCK_REG;
 	u8 data;
 
-	data = readl(p);
+	data = pete_readl("drivers/i2c/busses/i2c-mchp-pci1xxxx.c:352", p);
 	if (data != SMBUS_PERI_LOCK)
 		return 0;
 
-	writel(0, p);
-	data = readl(p);
+	pete_writel("drivers/i2c/busses/i2c-mchp-pci1xxxx.c:356", 0, p);
+	data = pete_readl("drivers/i2c/busses/i2c-mchp-pci1xxxx.c:357", p);
 	if (data & SMBUS_PERI_LOCK)
 		return -EPERM;
 
@@ -363,7 +363,7 @@ static int release_sys_lock(struct pci1xxxx_i2c *i2c)
 
 static void pci1xxxx_ack_high_level_intr(struct pci1xxxx_i2c *i2c, u16 intr_msk)
 {
-	writew(intr_msk, i2c->i2c_base + SMBUS_GEN_INT_STAT_REG_OFF);
+	pete_writew("drivers/i2c/busses/i2c-mchp-pci1xxxx.c:366", intr_msk, i2c->i2c_base + SMBUS_GEN_INT_STAT_REG_OFF);
 }
 
 static void pci1xxxx_i2c_configure_smbalert_pin(struct pci1xxxx_i2c *i2c,
@@ -372,14 +372,14 @@ static void pci1xxxx_i2c_configure_smbalert_pin(struct pci1xxxx_i2c *i2c,
 	void __iomem *p = i2c->i2c_base + SMBALERT_MST_PAD_CTRL_REG_OFF;
 	u8 regval;
 
-	regval = readb(p);
+	regval = pete_readb("drivers/i2c/busses/i2c-mchp-pci1xxxx.c:375", p);
 
 	if (enable)
 		regval |= SMBALERT_MST_PU;
 	else
 		regval &= ~SMBALERT_MST_PU;
 
-	writeb(regval, p);
+	pete_writeb("drivers/i2c/busses/i2c-mchp-pci1xxxx.c:382", regval, p);
 }
 
 static void pci1xxxx_i2c_send_start_stop(struct pci1xxxx_i2c *i2c, bool start)
@@ -387,14 +387,14 @@ static void pci1xxxx_i2c_send_start_stop(struct pci1xxxx_i2c *i2c, bool start)
 	void __iomem *p = i2c->i2c_base + SMB_CORE_CMD_REG_OFF1;
 	u8 regval;
 
-	regval = readb(p);
+	regval = pete_readb("drivers/i2c/busses/i2c-mchp-pci1xxxx.c:390", p);
 
 	if (start)
 		regval |= SMB_CORE_CMD_START;
 	else
 		regval |= SMB_CORE_CMD_STOP;
 
-	writeb(regval, p);
+	pete_writeb("drivers/i2c/busses/i2c-mchp-pci1xxxx.c:397", regval, p);
 }
 
 /*
@@ -411,7 +411,7 @@ static void pci1xxxx_i2c_set_clear_FW_ACK(struct pci1xxxx_i2c *i2c, bool set)
 	else
 		regval = SMB_CORE_CTRL_ESO | SMB_CORE_CTRL_ACK;
 
-	writeb(regval, i2c->i2c_base + SMB_CORE_CTRL_REG_OFF);
+	pete_writeb("drivers/i2c/busses/i2c-mchp-pci1xxxx.c:414", regval, i2c->i2c_base + SMB_CORE_CTRL_REG_OFF);
 }
 
 static void pci1xxxx_i2c_buffer_write(struct pci1xxxx_i2c *i2c, u8 slaveaddr,
@@ -420,7 +420,7 @@ static void pci1xxxx_i2c_buffer_write(struct pci1xxxx_i2c *i2c, u8 slaveaddr,
 	void __iomem *p = i2c->i2c_base + SMBUS_MST_BUF;
 
 	if (slaveaddr)
-		writeb(slaveaddr, p++);
+		pete_writeb("drivers/i2c/busses/i2c-mchp-pci1xxxx.c:423", slaveaddr, p++);
 
 	if (buf)
 		memcpy_toio(p, buf, transferlen);
@@ -433,7 +433,7 @@ static void pci1xxxx_i2c_buffer_write(struct pci1xxxx_i2c *i2c, u8 slaveaddr,
  */
 static void pci1xxxx_i2c_enable_ESO(struct pci1xxxx_i2c *i2c)
 {
-	writeb(SMB_CORE_CTRL_ESO, i2c->i2c_base + SMB_CORE_CTRL_REG_OFF);
+	pete_writeb("drivers/i2c/busses/i2c-mchp-pci1xxxx.c:436", SMB_CORE_CTRL_ESO, i2c->i2c_base + SMB_CORE_CTRL_REG_OFF);
 }
 
 static void pci1xxxx_i2c_reset_counters(struct pci1xxxx_i2c *i2c)
@@ -441,9 +441,9 @@ static void pci1xxxx_i2c_reset_counters(struct pci1xxxx_i2c *i2c)
 	void __iomem *p = i2c->i2c_base + SMBUS_CONTROL_REG_OFF;
 	u8 regval;
 
-	regval = readb(p);
+	regval = pete_readb("drivers/i2c/busses/i2c-mchp-pci1xxxx.c:444", p);
 	regval |= CTL_RESET_COUNTERS;
-	writeb(regval, p);
+	pete_writeb("drivers/i2c/busses/i2c-mchp-pci1xxxx.c:446", regval, p);
 }
 
 static void pci1xxxx_i2c_set_transfer_dir(struct pci1xxxx_i2c *i2c, u8 direction)
@@ -451,28 +451,28 @@ static void pci1xxxx_i2c_set_transfer_dir(struct pci1xxxx_i2c *i2c, u8 direction
 	void __iomem *p = i2c->i2c_base + SMBUS_CONTROL_REG_OFF;
 	u8 regval;
 
-	regval = readb(p);
+	regval = pete_readb("drivers/i2c/busses/i2c-mchp-pci1xxxx.c:454", p);
 	if (direction == I2C_DIRN_WRITE)
 		regval &= ~CTL_TRANSFER_DIR;
 	else
 		regval |= CTL_TRANSFER_DIR;
 
-	writeb(regval, p);
+	pete_writeb("drivers/i2c/busses/i2c-mchp-pci1xxxx.c:460", regval, p);
 }
 
 static void pci1xxxx_i2c_set_mcu_count(struct pci1xxxx_i2c *i2c, u8 count)
 {
-	writeb(count, i2c->i2c_base + SMBUS_MCU_COUNTER_REG_OFF);
+	pete_writeb("drivers/i2c/busses/i2c-mchp-pci1xxxx.c:465", count, i2c->i2c_base + SMBUS_MCU_COUNTER_REG_OFF);
 }
 
 static void pci1xxxx_i2c_set_read_count(struct pci1xxxx_i2c *i2c, u8 readcount)
 {
-	writeb(readcount, i2c->i2c_base + SMB_CORE_CMD_REG_OFF3);
+	pete_writeb("drivers/i2c/busses/i2c-mchp-pci1xxxx.c:470", readcount, i2c->i2c_base + SMB_CORE_CMD_REG_OFF3);
 }
 
 static void pci1xxxx_i2c_set_write_count(struct pci1xxxx_i2c *i2c, u8 writecount)
 {
-	writeb(writecount, i2c->i2c_base + SMB_CORE_CMD_REG_OFF2);
+	pete_writeb("drivers/i2c/busses/i2c-mchp-pci1xxxx.c:475", writecount, i2c->i2c_base + SMB_CORE_CMD_REG_OFF2);
 }
 
 static void pci1xxxx_i2c_set_DMA_run(struct pci1xxxx_i2c *i2c)
@@ -480,9 +480,9 @@ static void pci1xxxx_i2c_set_DMA_run(struct pci1xxxx_i2c *i2c)
 	void __iomem *p = i2c->i2c_base + SMBUS_CONTROL_REG_OFF;
 	u8 regval;
 
-	regval = readb(p);
+	regval = pete_readb("drivers/i2c/busses/i2c-mchp-pci1xxxx.c:483", p);
 	regval |= CTL_RUN;
-	writeb(regval, p);
+	pete_writeb("drivers/i2c/busses/i2c-mchp-pci1xxxx.c:485", regval, p);
 }
 
 static void pci1xxxx_i2c_set_mrun_proceed(struct pci1xxxx_i2c *i2c)
@@ -490,10 +490,10 @@ static void pci1xxxx_i2c_set_mrun_proceed(struct pci1xxxx_i2c *i2c)
 	void __iomem *p = i2c->i2c_base + SMB_CORE_CMD_REG_OFF0;
 	u8 regval;
 
-	regval = readb(p);
+	regval = pete_readb("drivers/i2c/busses/i2c-mchp-pci1xxxx.c:493", p);
 	regval |= SMB_CORE_CMD_M_RUN;
 	regval |= SMB_CORE_CMD_M_PROCEED;
-	writeb(regval, p);
+	pete_writeb("drivers/i2c/busses/i2c-mchp-pci1xxxx.c:496", regval, p);
 }
 
 static void pci1xxxx_i2c_start_DMA(struct pci1xxxx_i2c *i2c)
@@ -507,12 +507,12 @@ static void pci1xxxx_i2c_config_asr(struct pci1xxxx_i2c *i2c, bool enable)
 	void __iomem *p = i2c->i2c_base + SMB_CORE_CONFIG_REG1;
 	u8 regval;
 
-	regval = readb(p);
+	regval = pete_readb("drivers/i2c/busses/i2c-mchp-pci1xxxx.c:510", p);
 	if (enable)
 		regval |= SMB_CONFIG1_ASR;
 	else
 		regval &= ~SMB_CONFIG1_ASR;
-	writeb(regval, p);
+	pete_writeb("drivers/i2c/busses/i2c-mchp-pci1xxxx.c:515", regval, p);
 }
 
 static irqreturn_t pci1xxxx_i2c_isr(int irq, void *dev)
@@ -528,14 +528,14 @@ static irqreturn_t pci1xxxx_i2c_isr(int irq, void *dev)
 	 *  Read the SMBus interrupt status register to see if the
 	 *  DMA_TERM interrupt has caused this callback.
 	 */
-	reg1 = readw(p1);
+	reg1 = pete_readw("drivers/i2c/busses/i2c-mchp-pci1xxxx.c:531", p1);
 
 	if (reg1 & I2C_BUF_MSTR_INTR_MASK) {
-		reg3 = readb(p2);
+		reg3 = pete_readb("drivers/i2c/busses/i2c-mchp-pci1xxxx.c:534", p2);
 		if (reg3 & INTR_STAT_DMA_TERM) {
 			complete(&i2c->i2c_xfer_done);
 			intr_handled = IRQ_HANDLED;
-			writeb(INTR_STAT_DMA_TERM, p2);
+			pete_writeb("drivers/i2c/busses/i2c-mchp-pci1xxxx.c:538", INTR_STAT_DMA_TERM, p2);
 		}
 		pci1xxxx_ack_high_level_intr(i2c, I2C_BUF_MSTR_INTR_MASK);
 	}
@@ -561,18 +561,18 @@ static void pci1xxxx_i2c_set_readm(struct pci1xxxx_i2c *i2c, bool enable)
 	void __iomem *p = i2c->i2c_base + SMB_CORE_CMD_REG_OFF1;
 	u8 regval;
 
-	regval = readb(p);
+	regval = pete_readb("drivers/i2c/busses/i2c-mchp-pci1xxxx.c:564", p);
 	if (enable)
 		regval |= SMB_CORE_CMD_READM;
 	else
 		regval &= ~SMB_CORE_CMD_READM;
 
-	writeb(regval, p);
+	pete_writeb("drivers/i2c/busses/i2c-mchp-pci1xxxx.c:570", regval, p);
 }
 
 static void pci1xxxx_ack_nw_layer_intr(struct pci1xxxx_i2c *i2c, u8 ack_intr_msk)
 {
-	writeb(ack_intr_msk, i2c->i2c_base + SMBUS_INTR_STAT_REG_OFF);
+	pete_writeb("drivers/i2c/busses/i2c-mchp-pci1xxxx.c:575", ack_intr_msk, i2c->i2c_base + SMBUS_INTR_STAT_REG_OFF);
 }
 
 static void pci1xxxx_config_nw_layer_intr(struct pci1xxxx_i2c *i2c,
@@ -581,13 +581,13 @@ static void pci1xxxx_config_nw_layer_intr(struct pci1xxxx_i2c *i2c,
 	void __iomem *p = i2c->i2c_base + SMBUS_INTR_MSK_REG_OFF;
 	u8 regval;
 
-	regval = readb(p);
+	regval = pete_readb("drivers/i2c/busses/i2c-mchp-pci1xxxx.c:584", p);
 	if (enable)
 		regval &= ~intr_msk;
 	else
 		regval |= intr_msk;
 
-	writeb(regval, p);
+	pete_writeb("drivers/i2c/busses/i2c-mchp-pci1xxxx.c:590", regval, p);
 }
 
 static void pci1xxxx_i2c_config_padctrl(struct pci1xxxx_i2c *i2c, bool enable)
@@ -596,21 +596,21 @@ static void pci1xxxx_i2c_config_padctrl(struct pci1xxxx_i2c *i2c, bool enable)
 	void __iomem *p2 = i2c->i2c_base + I2C_SDA_PAD_CTRL_REG_OFF;
 	u8 regval;
 
-	regval = readb(p1);
+	regval = pete_readb("drivers/i2c/busses/i2c-mchp-pci1xxxx.c:599", p1);
 	if (enable)
 		regval |= I2C_INPUT_EN | I2C_OUTPUT_EN;
 	else
 		regval &= ~(I2C_INPUT_EN | I2C_OUTPUT_EN);
 
-	writeb(regval, p1);
+	pete_writeb("drivers/i2c/busses/i2c-mchp-pci1xxxx.c:605", regval, p1);
 
-	regval = readb(p2);
+	regval = pete_readb("drivers/i2c/busses/i2c-mchp-pci1xxxx.c:607", p2);
 	if (enable)
 		regval |= I2C_INPUT_EN | I2C_OUTPUT_EN;
 	else
 		regval &= ~(I2C_INPUT_EN | I2C_OUTPUT_EN);
 
-	writeb(regval, p2);
+	pete_writeb("drivers/i2c/busses/i2c-mchp-pci1xxxx.c:613", regval, p2);
 }
 
 static void pci1xxxx_i2c_set_mode(struct pci1xxxx_i2c *i2c)
@@ -618,13 +618,13 @@ static void pci1xxxx_i2c_set_mode(struct pci1xxxx_i2c *i2c)
 	void __iomem *p = i2c->i2c_base + SMBUS_CONTROL_REG_OFF;
 	u8 regval;
 
-	regval = readb(p);
+	regval = pete_readb("drivers/i2c/busses/i2c-mchp-pci1xxxx.c:621", p);
 	if (i2c->flags & I2C_FLAGS_DIRECT_MODE)
 		regval &= ~CTL_HOST_FIFO_ENTRY;
 	else
 		regval |= CTL_HOST_FIFO_ENTRY;
 
-	writeb(regval, p);
+	pete_writeb("drivers/i2c/busses/i2c-mchp-pci1xxxx.c:627", regval, p);
 }
 
 static void pci1xxxx_i2c_config_high_level_intr(struct pci1xxxx_i2c *i2c,
@@ -633,12 +633,12 @@ static void pci1xxxx_i2c_config_high_level_intr(struct pci1xxxx_i2c *i2c,
 	void __iomem *p = i2c->i2c_base + SMBUS_GEN_INT_MASK_REG_OFF;
 	u16 regval;
 
-	regval = readw(p);
+	regval = pete_readw("drivers/i2c/busses/i2c-mchp-pci1xxxx.c:636", p);
 	if (enable)
 		regval &= ~intr_msk;
 	else
 		regval |= intr_msk;
-	writew(regval, p);
+	pete_writew("drivers/i2c/busses/i2c-mchp-pci1xxxx.c:641", regval, p);
 }
 
 static void pci1xxxx_i2c_configure_core_reg(struct pci1xxxx_i2c *i2c, bool enable)
@@ -648,8 +648,8 @@ static void pci1xxxx_i2c_configure_core_reg(struct pci1xxxx_i2c *i2c, bool enabl
 	u8 reg1;
 	u8 reg3;
 
-	reg1 = readb(p1);
-	reg3 = readb(p3);
+	reg1 = pete_readb("drivers/i2c/busses/i2c-mchp-pci1xxxx.c:651", p1);
+	reg3 = pete_readb("drivers/i2c/busses/i2c-mchp-pci1xxxx.c:652", p3);
 	if (enable) {
 		reg1 |= SMB_CONFIG1_ENAB | SMB_CONFIG1_FEN;
 		reg3 |= SMB_CONFIG3_ENMI | SMB_CONFIG3_ENIDI;
@@ -658,8 +658,8 @@ static void pci1xxxx_i2c_configure_core_reg(struct pci1xxxx_i2c *i2c, bool enabl
 		reg3 &= ~(SMB_CONFIG3_ENMI | SMB_CONFIG3_ENIDI);
 	}
 
-	writeb(reg1, p1);
-	writeb(reg3, p3);
+	pete_writeb("drivers/i2c/busses/i2c-mchp-pci1xxxx.c:661", reg1, p1);
+	pete_writeb("drivers/i2c/busses/i2c-mchp-pci1xxxx.c:662", reg3, p3);
 }
 
 static void pci1xxxx_i2c_set_freq(struct pci1xxxx_i2c *i2c)
@@ -674,31 +674,31 @@ static void pci1xxxx_i2c_set_freq(struct pci1xxxx_i2c *i2c)
 
 	switch (i2c->freq) {
 	case I2C_MAX_STANDARD_MODE_FREQ:
-		writeb(SR_HOLD_TIME_100K_TICKS, p_hold_time);
-		writel(SMB_IDLE_SCALING_100K, p_idle_scaling);
-		writew(BUS_CLK_100K, p_clk_reg);
-		writel(CLK_SYNC_100K, p_clk_sync);
-		writel(DATA_TIMING_100K, p_data_timing);
-		writel(TO_SCALING_100K, p_to_scaling);
+		pete_writeb("drivers/i2c/busses/i2c-mchp-pci1xxxx.c:677", SR_HOLD_TIME_100K_TICKS, p_hold_time);
+		pete_writel("drivers/i2c/busses/i2c-mchp-pci1xxxx.c:678", SMB_IDLE_SCALING_100K, p_idle_scaling);
+		pete_writew("drivers/i2c/busses/i2c-mchp-pci1xxxx.c:679", BUS_CLK_100K, p_clk_reg);
+		pete_writel("drivers/i2c/busses/i2c-mchp-pci1xxxx.c:680", CLK_SYNC_100K, p_clk_sync);
+		pete_writel("drivers/i2c/busses/i2c-mchp-pci1xxxx.c:681", DATA_TIMING_100K, p_data_timing);
+		pete_writel("drivers/i2c/busses/i2c-mchp-pci1xxxx.c:682", TO_SCALING_100K, p_to_scaling);
 		break;
 
 	case I2C_MAX_FAST_MODE_PLUS_FREQ:
-		writeb(SR_HOLD_TIME_1000K_TICKS, p_hold_time);
-		writel(SMB_IDLE_SCALING_1000K, p_idle_scaling);
-		writew(BUS_CLK_1000K, p_clk_reg);
-		writel(CLK_SYNC_1000K, p_clk_sync);
-		writel(DATA_TIMING_1000K, p_data_timing);
-		writel(TO_SCALING_1000K, p_to_scaling);
+		pete_writeb("drivers/i2c/busses/i2c-mchp-pci1xxxx.c:686", SR_HOLD_TIME_1000K_TICKS, p_hold_time);
+		pete_writel("drivers/i2c/busses/i2c-mchp-pci1xxxx.c:687", SMB_IDLE_SCALING_1000K, p_idle_scaling);
+		pete_writew("drivers/i2c/busses/i2c-mchp-pci1xxxx.c:688", BUS_CLK_1000K, p_clk_reg);
+		pete_writel("drivers/i2c/busses/i2c-mchp-pci1xxxx.c:689", CLK_SYNC_1000K, p_clk_sync);
+		pete_writel("drivers/i2c/busses/i2c-mchp-pci1xxxx.c:690", DATA_TIMING_1000K, p_data_timing);
+		pete_writel("drivers/i2c/busses/i2c-mchp-pci1xxxx.c:691", TO_SCALING_1000K, p_to_scaling);
 		break;
 
 	case I2C_MAX_FAST_MODE_FREQ:
 	default:
-		writeb(SR_HOLD_TIME_400K_TICKS, p_hold_time);
-		writel(SMB_IDLE_SCALING_400K, p_idle_scaling);
-		writew(BUS_CLK_400K, p_clk_reg);
-		writel(CLK_SYNC_400K, p_clk_sync);
-		writel(DATA_TIMING_400K, p_data_timing);
-		writel(TO_SCALING_400K, p_to_scaling);
+		pete_writeb("drivers/i2c/busses/i2c-mchp-pci1xxxx.c:696", SR_HOLD_TIME_400K_TICKS, p_hold_time);
+		pete_writel("drivers/i2c/busses/i2c-mchp-pci1xxxx.c:697", SMB_IDLE_SCALING_400K, p_idle_scaling);
+		pete_writew("drivers/i2c/busses/i2c-mchp-pci1xxxx.c:698", BUS_CLK_400K, p_clk_reg);
+		pete_writel("drivers/i2c/busses/i2c-mchp-pci1xxxx.c:699", CLK_SYNC_400K, p_clk_sync);
+		pete_writel("drivers/i2c/busses/i2c-mchp-pci1xxxx.c:700", DATA_TIMING_400K, p_data_timing);
+		pete_writel("drivers/i2c/busses/i2c-mchp-pci1xxxx.c:701", TO_SCALING_400K, p_to_scaling);
 		break;
 	}
 }
@@ -718,7 +718,7 @@ static void pci1xxxx_i2c_init(struct pci1xxxx_i2c *i2c)
 		 */
 		regval = 0;
 	} else {
-		regval = readl(p1);
+		regval = pete_readl("drivers/i2c/busses/i2c-mchp-pci1xxxx.c:721", p1);
 		release_sys_lock(i2c);
 	}
 
@@ -748,7 +748,7 @@ static void pci1xxxx_i2c_init(struct pci1xxxx_i2c *i2c)
 	 * Added as a precaution since BUF_EMPTY in status register
 	 * also trigered an Interrupt.
 	 */
-	writeb(STA_BUF_EMPTY, p2);
+	pete_writeb("drivers/i2c/busses/i2c-mchp-pci1xxxx.c:751", STA_BUF_EMPTY, p2);
 
 	/* Configure core I2c control registers. */
 	pci1xxxx_i2c_configure_core_reg(i2c, true);
@@ -769,7 +769,7 @@ static void pci1xxxx_i2c_clear_flags(struct pci1xxxx_i2c *i2c)
 
 	/* Clear low level interrupts. */
 	regval = COMPLETION_MNAKX | COMPLETION_IDLE | COMPLETION_MDONE;
-	writeb(regval, i2c->i2c_base + SMB_CORE_COMPLETION_REG_OFF3);
+	pete_writeb("drivers/i2c/busses/i2c-mchp-pci1xxxx.c:772", regval, i2c->i2c_base + SMB_CORE_COMPLETION_REG_OFF3);
 	reinit_completion(&i2c->i2c_xfer_done);
 	pci1xxxx_ack_nw_layer_intr(i2c, ALL_NW_LAYER_INTERRUPTS);
 	pci1xxxx_ack_high_level_intr(i2c, ALL_HIGH_LAYER_INTR);
@@ -810,7 +810,7 @@ static int pci1xxxx_i2c_read(struct pci1xxxx_i2c *i2c, u8 slaveaddr,
 		 * Before start of any transaction clear the existing
 		 * START/STOP conditions.
 		 */
-		writeb(0, p1);
+		pete_writeb("drivers/i2c/busses/i2c-mchp-pci1xxxx.c:813", 0, p1);
 		remainingbytes = total_len - count;
 		transferlen = min_t(u16, remainingbytes, SMBUS_BUF_MAX_SIZE);
 
@@ -870,17 +870,17 @@ static int pci1xxxx_i2c_read(struct pci1xxxx_i2c *i2c, u8 slaveaddr,
 		}
 
 		/* Read the completion reg to know the reason for DMA_TERM. */
-		regval = readb(p2);
+		regval = pete_readb("drivers/i2c/busses/i2c-mchp-pci1xxxx.c:873", p2);
 
 		/* Slave did not respond. */
 		if (regval & COMPLETION_MNAKX) {
-			writeb(COMPLETION_MNAKX, p2);
+			pete_writeb("drivers/i2c/busses/i2c-mchp-pci1xxxx.c:877", COMPLETION_MNAKX, p2);
 			retval = -ETIMEDOUT;
 			goto cleanup;
 		}
 
 		if (i2c->flags & I2C_FLAGS_SMB_BLK_READ) {
-			buf[0] = readb(p3);
+			buf[0] = pete_readb("drivers/i2c/busses/i2c-mchp-pci1xxxx.c:883", p3);
 			read_count = buf[0];
 			memcpy_fromio(&buf[1], p3 + 1, read_count);
 		} else {
@@ -926,7 +926,7 @@ static int pci1xxxx_i2c_write(struct pci1xxxx_i2c *i2c, u8 slaveaddr,
 		 * Before start of any transaction clear the existing
 		 * START/STOP conditions.
 		 */
-		writeb(0, p1);
+		pete_writeb("drivers/i2c/busses/i2c-mchp-pci1xxxx.c:929", 0, p1);
 		pci1xxxx_i2c_clear_flags(i2c);
 		remainingbytes = total_len - count;
 
@@ -974,9 +974,9 @@ static int pci1xxxx_i2c_write(struct pci1xxxx_i2c *i2c, u8 slaveaddr,
 			goto cleanup;
 		}
 
-		regval = readb(p2);
+		regval = pete_readb("drivers/i2c/busses/i2c-mchp-pci1xxxx.c:977", p2);
 		if (regval & COMPLETION_MNAKX) {
-			writeb(COMPLETION_MNAKX, p2);
+			pete_writeb("drivers/i2c/busses/i2c-mchp-pci1xxxx.c:979", COMPLETION_MNAKX, p2);
 			retval = -ETIMEDOUT;
 			goto cleanup;
 		}
@@ -1085,9 +1085,9 @@ static int pci1xxxx_i2c_suspend(struct device *dev)
 	 * Enable the PERST_DIS bit to mask the PERST from resetting the core
 	 * registers.
 	 */
-	regval = readl(p);
+	regval = pete_readl("drivers/i2c/busses/i2c-mchp-pci1xxxx.c:1088", p);
 	regval |= PERI_SMBUS_D3_RESET_DIS;
-	writel(regval, p);
+	pete_writel("drivers/i2c/busses/i2c-mchp-pci1xxxx.c:1090", regval, p);
 
 	/* Enable PCI wake in the PMCSR register. */
 	device_set_wakeup_enable(dev, true);
@@ -1104,12 +1104,12 @@ static int pci1xxxx_i2c_resume(struct device *dev)
 	struct pci_dev *pdev = to_pci_dev(dev);
 	u32 regval;
 
-	regval = readw(p1);
-	writew(regval, p1);
+	regval = pete_readw("drivers/i2c/busses/i2c-mchp-pci1xxxx.c:1107", p1);
+	pete_writew("drivers/i2c/busses/i2c-mchp-pci1xxxx.c:1108", regval, p1);
 	pci1xxxx_i2c_config_high_level_intr(i2c, SMBALERT_WAKE_INTR_MASK, false);
-	regval = readl(p2);
+	regval = pete_readl("drivers/i2c/busses/i2c-mchp-pci1xxxx.c:1110", p2);
 	regval &= ~PERI_SMBUS_D3_RESET_DIS;
-	writel(regval, p2);
+	pete_writel("drivers/i2c/busses/i2c-mchp-pci1xxxx.c:1112", regval, p2);
 	i2c_mark_adapter_resumed(&i2c->adap);
 	pci_wake_from_d3(pdev, false);
 	return 0;

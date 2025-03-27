@@ -309,7 +309,7 @@ apple_dart_hw_enable_translation(struct apple_dart_stream_map *stream_map)
 	int sid;
 
 	for_each_set_bit(sid, stream_map->sidmap, dart->num_streams)
-		writel(dart->hw->tcr_enabled, dart->regs + DART_TCR(dart, sid));
+		pete_writel("drivers/iommu/apple-dart.c:312", dart->hw->tcr_enabled, dart->regs + DART_TCR(dart, sid));
 }
 
 static void apple_dart_hw_disable_dma(struct apple_dart_stream_map *stream_map)
@@ -318,7 +318,7 @@ static void apple_dart_hw_disable_dma(struct apple_dart_stream_map *stream_map)
 	int sid;
 
 	for_each_set_bit(sid, stream_map->sidmap, dart->num_streams)
-		writel(dart->hw->tcr_disabled, dart->regs + DART_TCR(dart, sid));
+		pete_writel("drivers/iommu/apple-dart.c:321", dart->hw->tcr_disabled, dart->regs + DART_TCR(dart, sid));
 }
 
 static void
@@ -329,7 +329,7 @@ apple_dart_hw_enable_bypass(struct apple_dart_stream_map *stream_map)
 
 	WARN_ON(!stream_map->dart->supports_bypass);
 	for_each_set_bit(sid, stream_map->sidmap, dart->num_streams)
-		writel(dart->hw->tcr_bypass,
+		pete_writel("drivers/iommu/apple-dart.c:332", dart->hw->tcr_bypass,
 		       dart->regs + DART_TCR(dart, sid));
 }
 
@@ -341,7 +341,7 @@ static void apple_dart_hw_set_ttbr(struct apple_dart_stream_map *stream_map,
 
 	WARN_ON(paddr & ((1 << dart->hw->ttbr_shift) - 1));
 	for_each_set_bit(sid, stream_map->sidmap, dart->num_streams)
-		writel(dart->hw->ttbr_valid |
+		pete_writel("drivers/iommu/apple-dart.c:344", dart->hw->ttbr_valid |
 		       (paddr >> dart->hw->ttbr_shift) << dart->hw->ttbr_addr_field_shift,
 		       dart->regs + DART_TTBR(dart, sid, idx));
 }
@@ -353,7 +353,7 @@ static void apple_dart_hw_clear_ttbr(struct apple_dart_stream_map *stream_map,
 	int sid;
 
 	for_each_set_bit(sid, stream_map->sidmap, dart->num_streams)
-		writel(0, dart->regs + DART_TTBR(dart, sid, idx));
+		pete_writel("drivers/iommu/apple-dart.c:356", 0, dart->regs + DART_TTBR(dart, sid, idx));
 }
 
 static void
@@ -375,8 +375,8 @@ apple_dart_t8020_hw_stream_command(struct apple_dart_stream_map *stream_map,
 
 	spin_lock_irqsave(&stream_map->dart->lock, flags);
 
-	writel(stream_map->sidmap[0], stream_map->dart->regs + DART_T8020_STREAM_SELECT);
-	writel(command, stream_map->dart->regs + DART_T8020_STREAM_COMMAND);
+	pete_writel("drivers/iommu/apple-dart.c:378", stream_map->sidmap[0], stream_map->dart->regs + DART_T8020_STREAM_SELECT);
+	pete_writel("drivers/iommu/apple-dart.c:379", command, stream_map->dart->regs + DART_T8020_STREAM_COMMAND);
 
 	ret = readl_poll_timeout_atomic(
 		stream_map->dart->regs + DART_T8020_STREAM_COMMAND, command_reg,
@@ -409,7 +409,7 @@ apple_dart_t8110_hw_tlb_command(struct apple_dart_stream_map *stream_map,
 	for_each_set_bit(sid, stream_map->sidmap, dart->num_streams) {
 		u32 val = FIELD_PREP(DART_T8110_TLB_CMD_OP, command) |
 			FIELD_PREP(DART_T8110_TLB_CMD_STREAM, sid);
-		writel(val, dart->regs + DART_T8110_TLB_CMD);
+		pete_writel("drivers/iommu/apple-dart.c:412", val, dart->regs + DART_T8110_TLB_CMD);
 
 		ret = readl_poll_timeout_atomic(
 			dart->regs + DART_T8110_TLB_CMD, val,
@@ -453,7 +453,7 @@ static int apple_dart_hw_reset(struct apple_dart *dart)
 	struct apple_dart_stream_map stream_map;
 	int i;
 
-	config = readl(dart->regs + dart->hw->lock);
+	config = pete_readl("drivers/iommu/apple-dart.c:456", dart->regs + dart->hw->lock);
 	if (config & dart->hw->lock_bit) {
 		dev_err(dart->dev, "DART is locked down until reboot: %08x\n",
 			config);
@@ -468,13 +468,13 @@ static int apple_dart_hw_reset(struct apple_dart *dart)
 
 	/* enable all streams globally since TCR is used to control isolation */
 	for (i = 0; i < BITS_TO_U32(dart->num_streams); i++)
-		writel(U32_MAX, dart->regs + dart->hw->enable_streams + 4 * i);
+		pete_writel("drivers/iommu/apple-dart.c:471", U32_MAX, dart->regs + dart->hw->enable_streams + 4 * i);
 
 	/* clear any pending errors before the interrupt is unmasked */
-	writel(readl(dart->regs + dart->hw->error), dart->regs + dart->hw->error);
+	pete_writel("drivers/iommu/apple-dart.c:474", pete_readl("drivers/iommu/apple-dart.c:474", dart->regs + dart->hw->error), dart->regs + dart->hw->error);
 
 	if (dart->hw->type == DART_T8110)
-		writel(0,  dart->regs + DART_T8110_ERROR_MASK);
+		pete_writel("drivers/iommu/apple-dart.c:477", 0,  dart->regs + DART_T8110_ERROR_MASK);
 
 	return dart->hw->invalidate_tlb(&stream_map);
 }
@@ -972,10 +972,10 @@ static irqreturn_t apple_dart_t8020_irq(int irq, void *dev)
 {
 	struct apple_dart *dart = dev;
 	const char *fault_name = NULL;
-	u32 error = readl(dart->regs + DART_T8020_ERROR);
+	u32 error = pete_readl("drivers/iommu/apple-dart.c:975", dart->regs + DART_T8020_ERROR);
 	u32 error_code = FIELD_GET(DART_T8020_ERROR_CODE, error);
-	u32 addr_lo = readl(dart->regs + DART_T8020_ERROR_ADDR_LO);
-	u32 addr_hi = readl(dart->regs + DART_T8020_ERROR_ADDR_HI);
+	u32 addr_lo = pete_readl("drivers/iommu/apple-dart.c:977", dart->regs + DART_T8020_ERROR_ADDR_LO);
+	u32 addr_hi = pete_readl("drivers/iommu/apple-dart.c:978", dart->regs + DART_T8020_ERROR_ADDR_HI);
 	u64 addr = addr_lo | (((u64)addr_hi) << 32);
 	u8 stream_idx = FIELD_GET(DART_T8020_ERROR_STREAM, error);
 
@@ -1001,7 +1001,7 @@ static irqreturn_t apple_dart_t8020_irq(int irq, void *dev)
 		"translation fault: status:0x%x stream:%d code:0x%x (%s) at 0x%llx",
 		error, stream_idx, error_code, fault_name, addr);
 
-	writel(error, dart->regs + DART_T8020_ERROR);
+	pete_writel("drivers/iommu/apple-dart.c:1004", error, dart->regs + DART_T8020_ERROR);
 	return IRQ_HANDLED;
 }
 
@@ -1009,10 +1009,10 @@ static irqreturn_t apple_dart_t8110_irq(int irq, void *dev)
 {
 	struct apple_dart *dart = dev;
 	const char *fault_name = NULL;
-	u32 error = readl(dart->regs + DART_T8110_ERROR);
+	u32 error = pete_readl("drivers/iommu/apple-dart.c:1012", dart->regs + DART_T8110_ERROR);
 	u32 error_code = FIELD_GET(DART_T8110_ERROR_CODE, error);
-	u32 addr_lo = readl(dart->regs + DART_T8110_ERROR_ADDR_LO);
-	u32 addr_hi = readl(dart->regs + DART_T8110_ERROR_ADDR_HI);
+	u32 addr_lo = pete_readl("drivers/iommu/apple-dart.c:1014", dart->regs + DART_T8110_ERROR_ADDR_LO);
+	u32 addr_hi = pete_readl("drivers/iommu/apple-dart.c:1015", dart->regs + DART_T8110_ERROR_ADDR_HI);
 	u64 addr = addr_lo | (((u64)addr_hi) << 32);
 	u8 stream_idx = FIELD_GET(DART_T8110_ERROR_STREAM, error);
 
@@ -1040,7 +1040,7 @@ static irqreturn_t apple_dart_t8110_irq(int irq, void *dev)
 		"translation fault: status:0x%x stream:%d code:0x%x (%s) at 0x%llx",
 		error, stream_idx, error_code, fault_name, addr);
 
-	writel(error, dart->regs + DART_T8110_ERROR);
+	pete_writel("drivers/iommu/apple-dart.c:1043", error, dart->regs + DART_T8110_ERROR);
 	return IRQ_HANDLED;
 }
 
@@ -1082,8 +1082,8 @@ static int apple_dart_probe(struct platform_device *pdev)
 	if (ret)
 		return ret;
 
-	dart_params[0] = readl(dart->regs + DART_PARAMS1);
-	dart_params[1] = readl(dart->regs + DART_PARAMS2);
+	dart_params[0] = pete_readl("drivers/iommu/apple-dart.c:1085", dart->regs + DART_PARAMS1);
+	dart_params[1] = pete_readl("drivers/iommu/apple-dart.c:1086", dart->regs + DART_PARAMS2);
 	dart->pgsize = 1 << FIELD_GET(DART_PARAMS1_PAGE_SHIFT, dart_params[0]);
 	dart->supports_bypass = dart_params[1] & DART_PARAMS2_BYPASS_SUPPORT;
 
@@ -1096,8 +1096,8 @@ static int apple_dart_probe(struct platform_device *pdev)
 		break;
 
 	case DART_T8110:
-		dart_params[2] = readl(dart->regs + DART_T8110_PARAMS3);
-		dart_params[3] = readl(dart->regs + DART_T8110_PARAMS4);
+		dart_params[2] = pete_readl("drivers/iommu/apple-dart.c:1099", dart->regs + DART_T8110_PARAMS3);
+		dart_params[3] = pete_readl("drivers/iommu/apple-dart.c:1100", dart->regs + DART_T8110_PARAMS4);
 		dart->ias = FIELD_GET(DART_T8110_PARAMS3_VA_WIDTH, dart_params[2]);
 		dart->oas = FIELD_GET(DART_T8110_PARAMS3_PA_WIDTH, dart_params[2]);
 		dart->num_streams = FIELD_GET(DART_T8110_PARAMS4_NUM_SIDS, dart_params[3]);
@@ -1247,7 +1247,7 @@ static __maybe_unused int apple_dart_suspend(struct device *dev)
 		dart->save_tcr[sid] = readl_relaxed(dart->regs + DART_TCR(dart, sid));
 		for (idx = 0; idx < dart->hw->ttbr_count; idx++)
 			dart->save_ttbr[sid][idx] =
-				readl(dart->regs + DART_TTBR(dart, sid, idx));
+				pete_readl("drivers/iommu/apple-dart.c:1250", dart->regs + DART_TTBR(dart, sid, idx));
 	}
 
 	return 0;
@@ -1267,9 +1267,9 @@ static __maybe_unused int apple_dart_resume(struct device *dev)
 
 	for (sid = 0; sid < dart->num_streams; sid++) {
 		for (idx = 0; idx < dart->hw->ttbr_count; idx++)
-			writel(dart->save_ttbr[sid][idx],
+			pete_writel("drivers/iommu/apple-dart.c:1270", dart->save_ttbr[sid][idx],
 			       dart->regs + DART_TTBR(dart, sid, idx));
-		writel(dart->save_tcr[sid], dart->regs + DART_TCR(dart, sid));
+		pete_writel("drivers/iommu/apple-dart.c:1272", dart->save_tcr[sid], dart->regs + DART_TCR(dart, sid));
 	}
 
 	return 0;

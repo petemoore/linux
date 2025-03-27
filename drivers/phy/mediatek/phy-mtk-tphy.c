@@ -390,20 +390,20 @@ static int u2_phy_params_show(struct seq_file *sf, void *unused)
 
 	switch (ret) {
 	case U2P_EYE_VRT:
-		tmp = readl(com + U3P_USBPHYACR1);
+		tmp = pete_readl("drivers/phy/mediatek/phy-mtk-tphy.c:393", com + U3P_USBPHYACR1);
 		val = FIELD_GET(PA1_RG_VRT_SEL, tmp);
 		max = FIELD_MAX(PA1_RG_VRT_SEL);
 		break;
 
 	case U2P_EYE_TERM:
-		tmp = readl(com + U3P_USBPHYACR1);
+		tmp = pete_readl("drivers/phy/mediatek/phy-mtk-tphy.c:399", com + U3P_USBPHYACR1);
 		val = FIELD_GET(PA1_RG_TERM_SEL, tmp);
 		max = FIELD_MAX(PA1_RG_TERM_SEL);
 		break;
 
 	case U2P_EFUSE_EN:
 		if (u2_banks->misc) {
-			tmp = readl(u2_banks->misc + U3P_MISC_REG1);
+			tmp = pete_readl("drivers/phy/mediatek/phy-mtk-tphy.c:406", u2_banks->misc + U3P_MISC_REG1);
 			max = 1;
 		}
 
@@ -411,19 +411,19 @@ static int u2_phy_params_show(struct seq_file *sf, void *unused)
 		break;
 
 	case U2P_EFUSE_INTR:
-		tmp = readl(com + U3P_USBPHYACR1);
+		tmp = pete_readl("drivers/phy/mediatek/phy-mtk-tphy.c:414", com + U3P_USBPHYACR1);
 		val = FIELD_GET(PA1_RG_INTR_CAL, tmp);
 		max = FIELD_MAX(PA1_RG_INTR_CAL);
 		break;
 
 	case U2P_DISCTH:
-		tmp = readl(com + U3P_USBPHYACR6);
+		tmp = pete_readl("drivers/phy/mediatek/phy-mtk-tphy.c:420", com + U3P_USBPHYACR6);
 		val = FIELD_GET(PA6_RG_U2_DISCTH, tmp);
 		max = FIELD_MAX(PA6_RG_U2_DISCTH);
 		break;
 
 	case U2P_PRE_EMPHASIS:
-		tmp = readl(com + U3P_USBPHYACR6);
+		tmp = pete_readl("drivers/phy/mediatek/phy-mtk-tphy.c:426", com + U3P_USBPHYACR6);
 		val = FIELD_GET(PA6_RG_U2_PRE_EMP, tmp);
 		max = FIELD_MAX(PA6_RG_U2_PRE_EMP);
 		break;
@@ -531,25 +531,25 @@ static int u3_phy_params_show(struct seq_file *sf, void *unused)
 
 	switch (ret) {
 	case U3P_EFUSE_EN:
-		tmp = readl(u3_banks->phyd + U3P_U3_PHYD_RSV);
+		tmp = pete_readl("drivers/phy/mediatek/phy-mtk-tphy.c:534", u3_banks->phyd + U3P_U3_PHYD_RSV);
 		val = !!(tmp & P3D_RG_EFUSE_AUTO_LOAD_DIS);
 		max = 1;
 		break;
 
 	case U3P_EFUSE_INTR:
-		tmp = readl(u3_banks->phya + U3P_U3_PHYA_REG0);
+		tmp = pete_readl("drivers/phy/mediatek/phy-mtk-tphy.c:540", u3_banks->phya + U3P_U3_PHYA_REG0);
 		val = FIELD_GET(P3A_RG_IEXT_INTR, tmp);
 		max = FIELD_MAX(P3A_RG_IEXT_INTR);
 		break;
 
 	case U3P_EFUSE_TX_IMP:
-		tmp = readl(u3_banks->phyd + U3P_U3_PHYD_IMPCAL0);
+		tmp = pete_readl("drivers/phy/mediatek/phy-mtk-tphy.c:546", u3_banks->phyd + U3P_U3_PHYD_IMPCAL0);
 		val = FIELD_GET(P3D_RG_TX_IMPEL, tmp);
 		max = FIELD_MAX(P3D_RG_TX_IMPEL);
 		break;
 
 	case U3P_EFUSE_RX_IMP:
-		tmp = readl(u3_banks->phyd + U3P_U3_PHYD_IMPCAL1);
+		tmp = pete_readl("drivers/phy/mediatek/phy-mtk-tphy.c:552", u3_banks->phyd + U3P_U3_PHYD_IMPCAL1);
 		val = FIELD_GET(P3D_RG_RX_IMPEL, tmp);
 		max = FIELD_MAX(P3D_RG_RX_IMPEL);
 		break;
@@ -717,13 +717,13 @@ static void hs_slew_rate_calibrate(struct mtk_tphy *tphy,
 	mtk_phy_set_bits(fmreg + U3P_U2FREQ_FMMONR1, P2F_RG_FRCK_EN);
 
 	/* set cycle count as 1024, and select u2 channel */
-	tmp = readl(fmreg + U3P_U2FREQ_FMCR0);
+	tmp = pete_readl("drivers/phy/mediatek/phy-mtk-tphy.c:720", fmreg + U3P_U2FREQ_FMCR0);
 	tmp &= ~(P2F_RG_CYCLECNT | P2F_RG_MONCLK_SEL);
 	tmp |= FIELD_PREP(P2F_RG_CYCLECNT, U3P_FM_DET_CYCLE_CNT);
 	if (tphy->pdata->version == MTK_PHY_V1)
 		tmp |= FIELD_PREP(P2F_RG_MONCLK_SEL, instance->index >> 1);
 
-	writel(tmp, fmreg + U3P_U2FREQ_FMCR0);
+	pete_writel("drivers/phy/mediatek/phy-mtk-tphy.c:726", tmp, fmreg + U3P_U2FREQ_FMCR0);
 
 	/* enable frequency meter */
 	mtk_phy_set_bits(fmreg + U3P_U2FREQ_FMCR0, P2F_RG_FREQDET_EN);
@@ -732,7 +732,7 @@ static void hs_slew_rate_calibrate(struct mtk_tphy *tphy,
 	readl_poll_timeout(fmreg + U3P_U2FREQ_FMMONR1, tmp,
 			   (tmp & P2F_USB_FM_VALID), 10, 200);
 
-	fm_out = readl(fmreg + U3P_U2FREQ_VALUE);
+	fm_out = pete_readl("drivers/phy/mediatek/phy-mtk-tphy.c:735", fmreg + U3P_U2FREQ_VALUE);
 
 	/* disable frequency meter */
 	mtk_phy_clear_bits(fmreg + U3P_U2FREQ_FMCR0, P2F_RG_FREQDET_EN);
@@ -806,7 +806,7 @@ static void u2_phy_pll_26m_set(struct mtk_tphy *tphy,
 
 	mtk_phy_update_field(com + U3P_USBPHYACR2, PA2_RG_U2PLL_BW, 3);
 
-	writel(P2R_RG_U2PLL_FBDIV_26M, com + U3P_U2PHYA_RESV);
+	pete_writel("drivers/phy/mediatek/phy-mtk-tphy.c:809", P2R_RG_U2PLL_FBDIV_26M, com + U3P_U2PHYA_RESV);
 
 	mtk_phy_set_bits(com + U3P_U2PHYA_RESV1,
 			 P2R_RG_U2PLL_FRA_EN | P2R_RG_U2PLL_REFCLK_SEL);
@@ -924,7 +924,7 @@ static void u2_phy_instance_set_mode(struct mtk_tphy *tphy,
 	struct u2phy_banks *u2_banks = &instance->u2_banks;
 	u32 tmp;
 
-	tmp = readl(u2_banks->com + U3P_U2PHYDTM1);
+	tmp = pete_readl("drivers/phy/mediatek/phy-mtk-tphy.c:927", u2_banks->com + U3P_U2PHYDTM1);
 	switch (mode) {
 	case PHY_MODE_USB_DEVICE:
 		tmp |= P2C_FORCE_IDDIG | P2C_RG_IDDIG;
@@ -939,7 +939,7 @@ static void u2_phy_instance_set_mode(struct mtk_tphy *tphy,
 	default:
 		return;
 	}
-	writel(tmp, u2_banks->com + U3P_U2PHYDTM1);
+	pete_writel("drivers/phy/mediatek/phy-mtk-tphy.c:942", tmp, u2_banks->com + U3P_U2PHYDTM1);
 }
 
 static void pcie_phy_instance_init(struct mtk_tphy *tphy,

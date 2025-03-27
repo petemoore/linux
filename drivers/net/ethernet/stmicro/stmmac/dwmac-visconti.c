@@ -64,7 +64,7 @@ static void visconti_eth_fix_mac_speed(void *priv, unsigned int speed, unsigned 
 	spin_lock_irqsave(&dwmac->lock, flags);
 
 	/* adjust link */
-	val = readl(dwmac->reg + MAC_CTRL_REG);
+	val = pete_readl("drivers/net/ethernet/stmicro/stmmac/dwmac-visconti.c:67", dwmac->reg + MAC_CTRL_REG);
 	val &= ~(GMAC_CONFIG_PS | GMAC_CONFIG_FES);
 
 	switch (speed) {
@@ -93,46 +93,46 @@ static void visconti_eth_fix_mac_speed(void *priv, unsigned int speed, unsigned 
 		return;
 	}
 
-	writel(val, dwmac->reg + MAC_CTRL_REG);
+	pete_writel("drivers/net/ethernet/stmicro/stmmac/dwmac-visconti.c:96", val, dwmac->reg + MAC_CTRL_REG);
 
 	/* Stop internal clock */
-	val = readl(dwmac->reg + REG_ETHER_CLOCK_SEL);
+	val = pete_readl("drivers/net/ethernet/stmicro/stmmac/dwmac-visconti.c:99", dwmac->reg + REG_ETHER_CLOCK_SEL);
 	val &= ~(ETHER_CLK_SEL_RMII_CLK_EN | ETHER_CLK_SEL_RX_TX_CLK_EN);
 	val |= ETHER_CLK_SEL_TX_O_E_N_IN;
-	writel(val, dwmac->reg + REG_ETHER_CLOCK_SEL);
+	pete_writel("drivers/net/ethernet/stmicro/stmmac/dwmac-visconti.c:102", val, dwmac->reg + REG_ETHER_CLOCK_SEL);
 
 	/* Set Clock-Mux, Start clock, Set TX_O direction */
 	switch (dwmac->phy_intf_sel) {
 	case ETHER_CONFIG_INTF_RGMII:
 		val = clk_sel_val | ETHER_CLK_SEL_RX_CLK_EXT_SEL_RXC;
-		writel(val, dwmac->reg + REG_ETHER_CLOCK_SEL);
+		pete_writel("drivers/net/ethernet/stmicro/stmmac/dwmac-visconti.c:108", val, dwmac->reg + REG_ETHER_CLOCK_SEL);
 
 		val |= ETHER_CLK_SEL_RX_TX_CLK_EN;
-		writel(val, dwmac->reg + REG_ETHER_CLOCK_SEL);
+		pete_writel("drivers/net/ethernet/stmicro/stmmac/dwmac-visconti.c:111", val, dwmac->reg + REG_ETHER_CLOCK_SEL);
 
 		val &= ~ETHER_CLK_SEL_TX_O_E_N_IN;
-		writel(val, dwmac->reg + REG_ETHER_CLOCK_SEL);
+		pete_writel("drivers/net/ethernet/stmicro/stmmac/dwmac-visconti.c:114", val, dwmac->reg + REG_ETHER_CLOCK_SEL);
 		break;
 	case ETHER_CONFIG_INTF_RMII:
 		val = clk_sel_val | ETHER_CLK_SEL_RX_CLK_EXT_SEL_DIV |
 			ETHER_CLK_SEL_TX_CLK_EXT_SEL_DIV | ETHER_CLK_SEL_TX_O_E_N_IN |
 			ETHER_CLK_SEL_RMII_CLK_SEL_RX_C;
-		writel(val, dwmac->reg + REG_ETHER_CLOCK_SEL);
+		pete_writel("drivers/net/ethernet/stmicro/stmmac/dwmac-visconti.c:120", val, dwmac->reg + REG_ETHER_CLOCK_SEL);
 
 		val |= ETHER_CLK_SEL_RMII_CLK_RST;
-		writel(val, dwmac->reg + REG_ETHER_CLOCK_SEL);
+		pete_writel("drivers/net/ethernet/stmicro/stmmac/dwmac-visconti.c:123", val, dwmac->reg + REG_ETHER_CLOCK_SEL);
 
 		val |= ETHER_CLK_SEL_RMII_CLK_EN | ETHER_CLK_SEL_RX_TX_CLK_EN;
-		writel(val, dwmac->reg + REG_ETHER_CLOCK_SEL);
+		pete_writel("drivers/net/ethernet/stmicro/stmmac/dwmac-visconti.c:126", val, dwmac->reg + REG_ETHER_CLOCK_SEL);
 		break;
 	case ETHER_CONFIG_INTF_MII:
 	default:
 		val = clk_sel_val | ETHER_CLK_SEL_RX_CLK_EXT_SEL_RXC |
 			ETHER_CLK_SEL_TX_CLK_EXT_SEL_TXC | ETHER_CLK_SEL_TX_O_E_N_IN;
-		writel(val, dwmac->reg + REG_ETHER_CLOCK_SEL);
+		pete_writel("drivers/net/ethernet/stmicro/stmmac/dwmac-visconti.c:132", val, dwmac->reg + REG_ETHER_CLOCK_SEL);
 
 		val |= ETHER_CLK_SEL_RX_TX_CLK_EN;
-		writel(val, dwmac->reg + REG_ETHER_CLOCK_SEL);
+		pete_writel("drivers/net/ethernet/stmicro/stmmac/dwmac-visconti.c:135", val, dwmac->reg + REG_ETHER_CLOCK_SEL);
 		break;
 	}
 
@@ -163,18 +163,18 @@ static int visconti_eth_init_hw(struct platform_device *pdev, struct plat_stmmac
 	}
 
 	reg_val = dwmac->phy_intf_sel;
-	writel(reg_val, dwmac->reg + REG_ETHER_CONTROL);
+	pete_writel("drivers/net/ethernet/stmicro/stmmac/dwmac-visconti.c:166", reg_val, dwmac->reg + REG_ETHER_CONTROL);
 
 	/* Enable TX/RX clock */
 	clk_sel_val = ETHER_CLK_SEL_FREQ_SEL_125M;
-	writel(clk_sel_val, dwmac->reg + REG_ETHER_CLOCK_SEL);
+	pete_writel("drivers/net/ethernet/stmicro/stmmac/dwmac-visconti.c:170", clk_sel_val, dwmac->reg + REG_ETHER_CLOCK_SEL);
 
-	writel((clk_sel_val | ETHER_CLK_SEL_RMII_CLK_EN | ETHER_CLK_SEL_RX_TX_CLK_EN),
+	pete_writel("drivers/net/ethernet/stmicro/stmmac/dwmac-visconti.c:172", (clk_sel_val | ETHER_CLK_SEL_RMII_CLK_EN | ETHER_CLK_SEL_RX_TX_CLK_EN),
 	       dwmac->reg + REG_ETHER_CLOCK_SEL);
 
 	/* release internal-reset */
 	reg_val |= ETHER_ETH_CONTROL_RESET;
-	writel(reg_val, dwmac->reg + REG_ETHER_CONTROL);
+	pete_writel("drivers/net/ethernet/stmicro/stmmac/dwmac-visconti.c:177", reg_val, dwmac->reg + REG_ETHER_CONTROL);
 
 	return 0;
 }

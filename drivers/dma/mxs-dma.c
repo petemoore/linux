@@ -197,7 +197,7 @@ static void mxs_dma_reset_chan(struct dma_chan *chan)
 			mxs_chan->flags & MXS_DMA_SG_LOOP) {
 		mxs_chan->reset = true;
 	} else if (dma_is_apbh(mxs_dma) && apbh_is_old(mxs_dma)) {
-		writel(1 << (chan_id + BP_APBH_CTRL0_RESET_CHANNEL),
+		pete_writel("drivers/dma/mxs-dma.c:200", 1 << (chan_id + BP_APBH_CTRL0_RESET_CHANNEL),
 			mxs_dma->base + HW_APBHX_CTRL0 + STMP_OFFSET_REG_SET);
 	} else {
 		unsigned long elapsed = 0;
@@ -212,7 +212,7 @@ static void mxs_dma_reset_chan(struct dma_chan *chan)
 		 * reset. Waiting a maximum of 50ms, the kernel shouldn't crash
 		 * because of this.
 		 */
-		while ((readl(reg_dbg1) & 0xf) == 0x8 && elapsed < max_wait) {
+		while ((pete_readl("drivers/dma/mxs-dma.c:215", reg_dbg1) & 0xf) == 0x8 && elapsed < max_wait) {
 			udelay(100);
 			elapsed += 100;
 		}
@@ -222,7 +222,7 @@ static void mxs_dma_reset_chan(struct dma_chan *chan)
 					"Failed waiting for the DMA channel %d to leave state READ_FLUSH, trying to reset channel in READ_FLUSH state now\n",
 					chan_id);
 
-		writel(1 << (chan_id + BP_APBHX_CHANNEL_CTRL_RESET_CHANNEL),
+		pete_writel("drivers/dma/mxs-dma.c:225", 1 << (chan_id + BP_APBHX_CHANNEL_CTRL_RESET_CHANNEL),
 			mxs_dma->base + HW_APBHX_CHANNEL_CTRL + STMP_OFFSET_REG_SET);
 	}
 
@@ -236,7 +236,7 @@ static void mxs_dma_enable_chan(struct dma_chan *chan)
 	int chan_id = mxs_chan->chan.chan_id;
 
 	/* set cmd_addr up */
-	writel(mxs_chan->ccw_phys,
+	pete_writel("drivers/dma/mxs-dma.c:239", mxs_chan->ccw_phys,
 		mxs_dma->base + HW_APBHX_CHn_NXTCMDAR(mxs_dma, chan_id));
 
 	/* write 1 to SEMA to kick off the channel */
@@ -245,9 +245,9 @@ static void mxs_dma_enable_chan(struct dma_chan *chan)
 		/* A cyclic DMA consists of at least 2 segments, so initialize
 		 * the semaphore with 2 so we have enough time to add 1 to the
 		 * semaphore if we need to */
-		writel(2, mxs_dma->base + HW_APBHX_CHn_SEMA(mxs_dma, chan_id));
+		pete_writel("drivers/dma/mxs-dma.c:248", 2, mxs_dma->base + HW_APBHX_CHn_SEMA(mxs_dma, chan_id));
 	} else {
-		writel(1, mxs_dma->base + HW_APBHX_CHn_SEMA(mxs_dma, chan_id));
+		pete_writel("drivers/dma/mxs-dma.c:250", 1, mxs_dma->base + HW_APBHX_CHn_SEMA(mxs_dma, chan_id));
 	}
 	mxs_chan->reset = false;
 }
@@ -267,10 +267,10 @@ static int mxs_dma_pause_chan(struct dma_chan *chan)
 
 	/* freeze the channel */
 	if (dma_is_apbh(mxs_dma) && apbh_is_old(mxs_dma))
-		writel(1 << chan_id,
+		pete_writel("drivers/dma/mxs-dma.c:270", 1 << chan_id,
 			mxs_dma->base + HW_APBHX_CTRL0 + STMP_OFFSET_REG_SET);
 	else
-		writel(1 << chan_id,
+		pete_writel("drivers/dma/mxs-dma.c:273", 1 << chan_id,
 			mxs_dma->base + HW_APBHX_CHANNEL_CTRL + STMP_OFFSET_REG_SET);
 
 	mxs_chan->status = DMA_PAUSED;
@@ -285,10 +285,10 @@ static int mxs_dma_resume_chan(struct dma_chan *chan)
 
 	/* unfreeze the channel */
 	if (dma_is_apbh(mxs_dma) && apbh_is_old(mxs_dma))
-		writel(1 << chan_id,
+		pete_writel("drivers/dma/mxs-dma.c:288", 1 << chan_id,
 			mxs_dma->base + HW_APBHX_CTRL0 + STMP_OFFSET_REG_CLR);
 	else
-		writel(1 << chan_id,
+		pete_writel("drivers/dma/mxs-dma.c:291", 1 << chan_id,
 			mxs_dma->base + HW_APBHX_CHANNEL_CTRL + STMP_OFFSET_REG_CLR);
 
 	mxs_chan->status = DMA_IN_PROGRESS;
@@ -330,15 +330,15 @@ static irqreturn_t mxs_dma_int_handler(int irq, void *dev_id)
 		return IRQ_NONE;
 
 	/* completion status */
-	completed = readl(mxs_dma->base + HW_APBHX_CTRL1);
+	completed = pete_readl("drivers/dma/mxs-dma.c:333", mxs_dma->base + HW_APBHX_CTRL1);
 	completed = (completed >> chan) & 0x1;
 
 	/* Clear interrupt */
-	writel((1 << chan),
+	pete_writel("drivers/dma/mxs-dma.c:337", (1 << chan),
 			mxs_dma->base + HW_APBHX_CTRL1 + STMP_OFFSET_REG_CLR);
 
 	/* error status */
-	err = readl(mxs_dma->base + HW_APBHX_CTRL2);
+	err = pete_readl("drivers/dma/mxs-dma.c:341", mxs_dma->base + HW_APBHX_CTRL2);
 	err &= (1 << (MXS_DMA_CHANNELS + chan)) | (1 << chan);
 
 	/*
@@ -349,7 +349,7 @@ static irqreturn_t mxs_dma_int_handler(int irq, void *dev_id)
 	err = (err >> (MXS_DMA_CHANNELS + chan)) + (err >> chan);
 
 	/* Clear error irq */
-	writel((1 << chan),
+	pete_writel("drivers/dma/mxs-dma.c:352", (1 << chan),
 			mxs_dma->base + HW_APBHX_CTRL2 + STMP_OFFSET_REG_CLR);
 
 	/*
@@ -373,7 +373,7 @@ static irqreturn_t mxs_dma_int_handler(int irq, void *dev_id)
 		if (mxs_chan->flags & MXS_DMA_SG_LOOP) {
 			mxs_chan->status = DMA_IN_PROGRESS;
 			if (mxs_chan->flags & MXS_DMA_USE_SEMAPHORE)
-				writel(1, mxs_dma->base +
+				pete_writel("drivers/dma/mxs-dma.c:376", 1, mxs_dma->base +
 					HW_APBHX_CHn_SEMA(mxs_dma, chan));
 		} else {
 			mxs_chan->status = DMA_COMPLETE;
@@ -658,7 +658,7 @@ static enum dma_status mxs_dma_tx_status(struct dma_chan *chan,
 		last_ccw = &mxs_chan->ccw[mxs_chan->desc_count - 1];
 		residue = last_ccw->xfer_bytes + last_ccw->bufaddr;
 
-		bar = readl(mxs_dma->base +
+		bar = pete_readl("drivers/dma/mxs-dma.c:661", mxs_dma->base +
 				HW_APBHX_CHn_BAR(mxs_dma, chan->chan_id));
 		residue -= bar;
 	}
@@ -683,14 +683,14 @@ static int mxs_dma_init(struct mxs_dma_engine *mxs_dma)
 
 	/* enable apbh burst */
 	if (dma_is_apbh(mxs_dma)) {
-		writel(BM_APBH_CTRL0_APB_BURST_EN,
+		pete_writel("drivers/dma/mxs-dma.c:686", BM_APBH_CTRL0_APB_BURST_EN,
 			mxs_dma->base + HW_APBHX_CTRL0 + STMP_OFFSET_REG_SET);
-		writel(BM_APBH_CTRL0_APB_BURST8_EN,
+		pete_writel("drivers/dma/mxs-dma.c:688", BM_APBH_CTRL0_APB_BURST8_EN,
 			mxs_dma->base + HW_APBHX_CTRL0 + STMP_OFFSET_REG_SET);
 	}
 
 	/* enable irq for all the channels */
-	writel(MXS_DMA_CHANNELS_MASK << MXS_DMA_CHANNELS,
+	pete_writel("drivers/dma/mxs-dma.c:693", MXS_DMA_CHANNELS_MASK << MXS_DMA_CHANNELS,
 		mxs_dma->base + HW_APBHX_CTRL1 + STMP_OFFSET_REG_SET);
 
 err_out:

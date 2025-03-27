@@ -32,8 +32,8 @@
 
 #define ROTATOR_AUTOSUSPEND_DELAY	2000
 
-#define rot_read(offset)	readl(rot->regs + (offset))
-#define rot_write(cfg, offset)	writel(cfg, rot->regs + (offset))
+#define rot_read(offset)	pete_readl("drivers/gpu/drm/exynos/exynos_drm_rotator.c:35", rot->regs + (offset))
+#define rot_write(cfg, offset)	pete_writel("drivers/gpu/drm/exynos/exynos_drm_rotator.c:36", cfg, rot->regs + (offset))
 
 enum rot_irq_status {
 	ROT_IRQ_STATUS_COMPLETE	= 8,

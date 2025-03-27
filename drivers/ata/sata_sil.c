@@ -365,12 +365,12 @@ static int sil_set_mode(struct ata_link *link, struct ata_device **r_failed)
 		/* value 2 indicates MDMA */
 	}
 
-	tmp = readl(addr);
+	tmp = pete_readl("drivers/ata/sata_sil.c:368", addr);
 	tmp &= ~((1<<5) | (1<<4) | (1<<1) | (1<<0));
 	tmp |= dev_mode[0];
 	tmp |= (dev_mode[1] << 4);
-	writel(tmp, addr);
-	readl(addr);	/* flush */
+	pete_writel("drivers/ata/sata_sil.c:372", tmp, addr);
+	pete_readl("drivers/ata/sata_sil.c:373", addr);	/* flush */
 	return 0;
 }
 
@@ -399,7 +399,7 @@ static int sil_scr_read(struct ata_link *link, unsigned int sc_reg, u32 *val)
 	void __iomem *mmio = sil_scr_addr(link->ap, sc_reg);
 
 	if (mmio) {
-		*val = readl(mmio);
+		*val = pete_readl("drivers/ata/sata_sil.c:402", mmio);
 		return 0;
 	}
 	return -EINVAL;
@@ -410,7 +410,7 @@ static int sil_scr_write(struct ata_link *link, unsigned int sc_reg, u32 val)
 	void __iomem *mmio = sil_scr_addr(link->ap, sc_reg);
 
 	if (mmio) {
-		writel(val, mmio);
+		pete_writel("drivers/ata/sata_sil.c:413", val, mmio);
 		return 0;
 	}
 	return -EINVAL;
@@ -514,7 +514,7 @@ static irqreturn_t sil_interrupt(int irq, void *dev_instance)
 
 	for (i = 0; i < host->n_ports; i++) {
 		struct ata_port *ap = host->ports[i];
-		u32 bmdma2 = readl(mmio_base + sil_port[ap->port_no].bmdma2);
+		u32 bmdma2 = pete_readl("drivers/ata/sata_sil.c:517", mmio_base + sil_port[ap->port_no].bmdma2);
 
 		/* turn off SATA_IRQ if not supported */
 		if (ap->flags & SIL_FLAG_NO_SATA_IRQ)
@@ -539,13 +539,13 @@ static void sil_freeze(struct ata_port *ap)
 	u32 tmp;
 
 	/* global IRQ mask doesn't block SATA IRQ, turn off explicitly */
-	writel(0, mmio_base + sil_port[ap->port_no].sien);
+	pete_writel("drivers/ata/sata_sil.c:542", 0, mmio_base + sil_port[ap->port_no].sien);
 
 	/* plug IRQ */
-	tmp = readl(mmio_base + SIL_SYSCFG);
+	tmp = pete_readl("drivers/ata/sata_sil.c:545", mmio_base + SIL_SYSCFG);
 	tmp |= SIL_MASK_IDE0_INT << ap->port_no;
-	writel(tmp, mmio_base + SIL_SYSCFG);
-	readl(mmio_base + SIL_SYSCFG);	/* flush */
+	pete_writel("drivers/ata/sata_sil.c:547", tmp, mmio_base + SIL_SYSCFG);
+	pete_readl("drivers/ata/sata_sil.c:548", mmio_base + SIL_SYSCFG);	/* flush */
 
 	/* Ensure DMA_ENABLE is off.
 	 *
@@ -572,12 +572,12 @@ static void sil_thaw(struct ata_port *ap)
 
 	/* turn on SATA IRQ if supported */
 	if (!(ap->flags & SIL_FLAG_NO_SATA_IRQ))
-		writel(SIL_SIEN_N, mmio_base + sil_port[ap->port_no].sien);
+		pete_writel("drivers/ata/sata_sil.c:575", SIL_SIEN_N, mmio_base + sil_port[ap->port_no].sien);
 
 	/* turn on IRQ */
-	tmp = readl(mmio_base + SIL_SYSCFG);
+	tmp = pete_readl("drivers/ata/sata_sil.c:578", mmio_base + SIL_SYSCFG);
 	tmp &= ~(SIL_MASK_IDE0_INT << ap->port_no);
-	writel(tmp, mmio_base + SIL_SYSCFG);
+	pete_writel("drivers/ata/sata_sil.c:580", tmp, mmio_base + SIL_SYSCFG);
 }
 
 /**
@@ -661,7 +661,7 @@ static void sil_init_controller(struct ata_host *host)
 		cls >>= 3;
 		cls++;  /* cls = (line_size/8)+1 */
 		for (i = 0; i < host->n_ports; i++)
-			writew(cls << 8 | cls,
+			pete_writew("drivers/ata/sata_sil.c:664", cls << 8 | cls,
 			       mmio_base + sil_port[i].fifo_cfg);
 	} else
 		dev_warn(&pdev->dev,
@@ -672,22 +672,22 @@ static void sil_init_controller(struct ata_host *host)
 		int cnt;
 
 		for (i = 0, cnt = 0; i < host->n_ports; i++) {
-			tmp = readl(mmio_base + sil_port[i].sfis_cfg);
+			tmp = pete_readl("drivers/ata/sata_sil.c:675", mmio_base + sil_port[i].sfis_cfg);
 			if ((tmp & 0x3) != 0x01)
 				continue;
 			if (!cnt)
 				dev_info(&pdev->dev,
 					 "Applying R_ERR on DMA activate FIS errata fix\n");
-			writel(tmp & ~0x3, mmio_base + sil_port[i].sfis_cfg);
+			pete_writel("drivers/ata/sata_sil.c:681", tmp & ~0x3, mmio_base + sil_port[i].sfis_cfg);
 			cnt++;
 		}
 	}
 
 	if (host->n_ports == 4) {
 		/* flip the magic "make 4 ports work" bit */
-		tmp = readl(mmio_base + sil_port[2].bmdma);
+		tmp = pete_readl("drivers/ata/sata_sil.c:688", mmio_base + sil_port[2].bmdma);
 		if ((tmp & SIL_INTR_STEERING) == 0)
-			writel(tmp | SIL_INTR_STEERING,
+			pete_writel("drivers/ata/sata_sil.c:690", tmp | SIL_INTR_STEERING,
 			       mmio_base + sil_port[2].bmdma);
 	}
 }

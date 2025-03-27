@@ -483,7 +483,7 @@ static int __init renesas_soc_init(void)
 	soc_dev_attr->soc_id = kstrdup_const(soc_id, GFP_KERNEL);
 
 	if (chipid) {
-		product = readl(chipid + id->offset);
+		product = pete_readl("drivers/soc/renesas/renesas-soc.c:486", chipid + id->offset);
 		iounmap(chipid);
 
 		if (id == &id_prr) {

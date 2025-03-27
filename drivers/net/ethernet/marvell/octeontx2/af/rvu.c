@@ -104,7 +104,7 @@ int rvu_poll_reg(struct rvu *rvu, u64 block, u64 offset, u64 mask, bool zero)
 
 	reg = rvu->afreg_base + ((block << 28) | offset);
 again:
-	reg_val = readq(reg);
+	reg_val = pete_readq("drivers/net/ethernet/marvell/octeontx2/af/rvu.c:107", reg);
 	if (zero && !(reg_val & mask))
 		return 0;
 	if (!zero && (reg_val & mask))
@@ -912,7 +912,7 @@ static void rvu_get_lbk_bufsize(struct rvu *rvu)
 	if (!base)
 		goto err_put;
 
-	lbk_const = readq(base + LBK_CONST);
+	lbk_const = pete_readq("drivers/net/ethernet/marvell/octeontx2/af/rvu.c:915", base + LBK_CONST);
 
 	/* cache fifo size */
 	rvu->hw->lbk_bufsize = FIELD_GET(LBK_CONST_BUF_SIZE, lbk_const);
@@ -3152,7 +3152,7 @@ int rvu_get_num_lbk_chans(void)
 		goto err_put;
 
 	/* Read number of available LBK channels from LBK(0)_CONST register. */
-	ret = (readq(base + 0x10) >> 32) & 0xffff;
+	ret = (pete_readq("drivers/net/ethernet/marvell/octeontx2/af/rvu.c:3155", base + 0x10) >> 32) & 0xffff;
 	iounmap(base);
 err_put:
 	pci_dev_put(pdev);

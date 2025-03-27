@@ -126,18 +126,18 @@ struct mchp_corei2c_dev {
 
 static void mchp_corei2c_core_disable(struct mchp_corei2c_dev *idev)
 {
-	u8 ctrl = readb(idev->base + CORE_I2C_CTRL);
+	u8 ctrl = pete_readb("drivers/i2c/busses/i2c-microchip-corei2c.c:129", idev->base + CORE_I2C_CTRL);
 
 	ctrl &= ~CTRL_ENS1;
-	writeb(ctrl, idev->base + CORE_I2C_CTRL);
+	pete_writeb("drivers/i2c/busses/i2c-microchip-corei2c.c:132", ctrl, idev->base + CORE_I2C_CTRL);
 }
 
 static void mchp_corei2c_core_enable(struct mchp_corei2c_dev *idev)
 {
-	u8 ctrl = readb(idev->base + CORE_I2C_CTRL);
+	u8 ctrl = pete_readb("drivers/i2c/busses/i2c-microchip-corei2c.c:137", idev->base + CORE_I2C_CTRL);
 
 	ctrl |= CTRL_ENS1;
-	writeb(ctrl, idev->base + CORE_I2C_CTRL);
+	pete_writeb("drivers/i2c/busses/i2c-microchip-corei2c.c:140", ctrl, idev->base + CORE_I2C_CTRL);
 }
 
 static void mchp_corei2c_reset(struct mchp_corei2c_dev *idev)
@@ -148,10 +148,10 @@ static void mchp_corei2c_reset(struct mchp_corei2c_dev *idev)
 
 static inline void mchp_corei2c_stop(struct mchp_corei2c_dev *idev)
 {
-	u8 ctrl = readb(idev->base + CORE_I2C_CTRL);
+	u8 ctrl = pete_readb("drivers/i2c/busses/i2c-microchip-corei2c.c:151", idev->base + CORE_I2C_CTRL);
 
 	ctrl |= CTRL_STO;
-	writeb(ctrl, idev->base + CORE_I2C_CTRL);
+	pete_writeb("drivers/i2c/busses/i2c-microchip-corei2c.c:154", ctrl, idev->base + CORE_I2C_CTRL);
 }
 
 static inline int mchp_corei2c_set_divisor(u32 rate,
@@ -178,12 +178,12 @@ static inline int mchp_corei2c_set_divisor(u32 rate,
 	else
 		return -EINVAL;
 
-	ctrl = readb(idev->base + CORE_I2C_CTRL);
+	ctrl = pete_readb("drivers/i2c/busses/i2c-microchip-corei2c.c:181", idev->base + CORE_I2C_CTRL);
 	ctrl &= ~CLK_MASK;
 	ctrl |= clkval;
-	writeb(ctrl, idev->base + CORE_I2C_CTRL);
+	pete_writeb("drivers/i2c/busses/i2c-microchip-corei2c.c:184", ctrl, idev->base + CORE_I2C_CTRL);
 
-	ctrl = readb(idev->base + CORE_I2C_CTRL);
+	ctrl = pete_readb("drivers/i2c/busses/i2c-microchip-corei2c.c:186", idev->base + CORE_I2C_CTRL);
 	if ((ctrl & CLK_MASK) != clkval)
 		return -EIO;
 
@@ -210,21 +210,21 @@ static void mchp_corei2c_empty_rx(struct mchp_corei2c_dev *idev)
 	u8 ctrl;
 
 	if (idev->msg_len > 0) {
-		*idev->buf++ = readb(idev->base + CORE_I2C_DATA);
+		*idev->buf++ = pete_readb("drivers/i2c/busses/i2c-microchip-corei2c.c:213", idev->base + CORE_I2C_DATA);
 		idev->msg_len--;
 	}
 
 	if (idev->msg_len <= 1) {
-		ctrl = readb(idev->base + CORE_I2C_CTRL);
+		ctrl = pete_readb("drivers/i2c/busses/i2c-microchip-corei2c.c:218", idev->base + CORE_I2C_CTRL);
 		ctrl &= ~CTRL_AA;
-		writeb(ctrl, idev->base + CORE_I2C_CTRL);
+		pete_writeb("drivers/i2c/busses/i2c-microchip-corei2c.c:220", ctrl, idev->base + CORE_I2C_CTRL);
 	}
 }
 
 static int mchp_corei2c_fill_tx(struct mchp_corei2c_dev *idev)
 {
 	if (idev->msg_len > 0)
-		writeb(*idev->buf++, idev->base + CORE_I2C_DATA);
+		pete_writeb("drivers/i2c/busses/i2c-microchip-corei2c.c:227", *idev->buf++, idev->base + CORE_I2C_DATA);
 	idev->msg_len--;
 
 	return 0;
@@ -264,9 +264,9 @@ static void mchp_corei2c_next_msg(struct mchp_corei2c_dev *idev)
 	idev->msg_len = this_msg->len;
 	idev->buf = this_msg->buf;
 
-	ctrl = readb(idev->base + CORE_I2C_CTRL);
+	ctrl = pete_readb("drivers/i2c/busses/i2c-microchip-corei2c.c:267", idev->base + CORE_I2C_CTRL);
 	ctrl |= CTRL_STA;
-	writeb(ctrl, idev->base + CORE_I2C_CTRL);
+	pete_writeb("drivers/i2c/busses/i2c-microchip-corei2c.c:269", ctrl, idev->base + CORE_I2C_CTRL);
 
 	idev->current_num++;
 }
@@ -283,10 +283,10 @@ static irqreturn_t mchp_corei2c_handle_isr(struct mchp_corei2c_dev *idev)
 	switch (status) {
 	case STATUS_M_START_SENT:
 	case STATUS_M_REPEATED_START_SENT:
-		ctrl = readb(idev->base + CORE_I2C_CTRL);
+		ctrl = pete_readb("drivers/i2c/busses/i2c-microchip-corei2c.c:286", idev->base + CORE_I2C_CTRL);
 		ctrl &= ~CTRL_STA;
-		writeb(idev->addr, idev->base + CORE_I2C_DATA);
-		writeb(ctrl, idev->base + CORE_I2C_CTRL);
+		pete_writeb("drivers/i2c/busses/i2c-microchip-corei2c.c:288", idev->addr, idev->base + CORE_I2C_DATA);
+		pete_writeb("drivers/i2c/busses/i2c-microchip-corei2c.c:289", ctrl, idev->base + CORE_I2C_CTRL);
 		break;
 	case STATUS_M_ARB_LOST:
 		idev->msg_err = -EAGAIN;
@@ -310,13 +310,13 @@ static irqreturn_t mchp_corei2c_handle_isr(struct mchp_corei2c_dev *idev)
 		last_byte = true;
 		break;
 	case STATUS_M_SLAR_ACK:
-		ctrl = readb(idev->base + CORE_I2C_CTRL);
+		ctrl = pete_readb("drivers/i2c/busses/i2c-microchip-corei2c.c:313", idev->base + CORE_I2C_CTRL);
 		if (idev->msg_len == 1u) {
 			ctrl &= ~CTRL_AA;
-			writeb(ctrl, idev->base + CORE_I2C_CTRL);
+			pete_writeb("drivers/i2c/busses/i2c-microchip-corei2c.c:316", ctrl, idev->base + CORE_I2C_CTRL);
 		} else {
 			ctrl |= CTRL_AA;
-			writeb(ctrl, idev->base + CORE_I2C_CTRL);
+			pete_writeb("drivers/i2c/busses/i2c-microchip-corei2c.c:319", ctrl, idev->base + CORE_I2C_CTRL);
 		}
 		if (idev->msg_len < 1u)
 			last_byte = true;
@@ -349,15 +349,15 @@ static irqreturn_t mchp_corei2c_isr(int irq, void *_dev)
 	irqreturn_t ret = IRQ_NONE;
 	u8 ctrl;
 
-	ctrl = readb(idev->base + CORE_I2C_CTRL);
+	ctrl = pete_readb("drivers/i2c/busses/i2c-microchip-corei2c.c:352", idev->base + CORE_I2C_CTRL);
 	if (ctrl & CTRL_SI) {
-		idev->isr_status = readb(idev->base + CORE_I2C_STATUS);
+		idev->isr_status = pete_readb("drivers/i2c/busses/i2c-microchip-corei2c.c:354", idev->base + CORE_I2C_STATUS);
 		ret = mchp_corei2c_handle_isr(idev);
 	}
 
-	ctrl = readb(idev->base + CORE_I2C_CTRL);
+	ctrl = pete_readb("drivers/i2c/busses/i2c-microchip-corei2c.c:358", idev->base + CORE_I2C_CTRL);
 	ctrl &= ~CTRL_SI;
-	writeb(ctrl, idev->base + CORE_I2C_CTRL);
+	pete_writeb("drivers/i2c/busses/i2c-microchip-corei2c.c:360", ctrl, idev->base + CORE_I2C_CTRL);
 
 	return ret;
 }
@@ -404,9 +404,9 @@ static int mchp_corei2c_xfer(struct i2c_adapter *adap, struct i2c_msg *msgs,
 	/*
 	 * Send the first start to pass control to the isr
 	 */
-	ctrl = readb(idev->base + CORE_I2C_CTRL);
+	ctrl = pete_readb("drivers/i2c/busses/i2c-microchip-corei2c.c:407", idev->base + CORE_I2C_CTRL);
 	ctrl |= CTRL_STA;
-	writeb(ctrl, idev->base + CORE_I2C_CTRL);
+	pete_writeb("drivers/i2c/busses/i2c-microchip-corei2c.c:409", ctrl, idev->base + CORE_I2C_CTRL);
 
 	time_left = wait_for_completion_timeout(&idev->msg_complete,
 						idev->adapter.timeout);

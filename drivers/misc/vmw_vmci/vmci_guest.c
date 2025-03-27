@@ -102,14 +102,14 @@ u32 vmci_get_vm_context_id(void)
 static unsigned int vmci_read_reg(struct vmci_guest_device *dev, u32 reg)
 {
 	if (dev->mmio_base != NULL)
-		return readl(dev->mmio_base + reg);
+		return pete_readl("drivers/misc/vmw_vmci/vmci_guest.c:105", dev->mmio_base + reg);
 	return ioread32(dev->iobase + reg);
 }
 
 static void vmci_write_reg(struct vmci_guest_device *dev, u32 val, u32 reg)
 {
 	if (dev->mmio_base != NULL)
-		writel(val, dev->mmio_base + reg);
+		pete_writel("drivers/misc/vmw_vmci/vmci_guest.c:112", val, dev->mmio_base + reg);
 	else
 		iowrite32(val, dev->iobase + reg);
 }

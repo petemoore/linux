@@ -29,7 +29,7 @@ static u16 ccu_mux_get_prediv(struct ccu_common *common,
 	if (common->features & CCU_FEATURE_ALL_PREDIV)
 		return common->prediv;
 
-	reg = readl(common->base + common->reg);
+	reg = pete_readl("drivers/clk/sunxi-ng/ccu_mux.c:32", common->base + common->reg);
 	if (parent_index < 0) {
 		parent_index = reg >> cm->shift;
 		parent_index &= (1 << cm->width) - 1;
@@ -163,7 +163,7 @@ u8 ccu_mux_helper_get_parent(struct ccu_common *common,
 	u32 reg;
 	u8 parent;
 
-	reg = readl(common->base + common->reg);
+	reg = pete_readl("drivers/clk/sunxi-ng/ccu_mux.c:166", common->base + common->reg);
 	parent = reg >> cm->shift;
 	parent &= (1 << cm->width) - 1;
 
@@ -192,14 +192,14 @@ int ccu_mux_helper_set_parent(struct ccu_common *common,
 
 	spin_lock_irqsave(common->lock, flags);
 
-	reg = readl(common->base + common->reg);
+	reg = pete_readl("drivers/clk/sunxi-ng/ccu_mux.c:195", common->base + common->reg);
 
 	/* The key field always reads as zero. */
 	if (common->features & CCU_FEATURE_KEY_FIELD)
 		reg |= CCU_MUX_KEY_VALUE;
 
 	reg &= ~GENMASK(cm->width + cm->shift - 1, cm->shift);
-	writel(reg | (index << cm->shift), common->base + common->reg);
+	pete_writel("drivers/clk/sunxi-ng/ccu_mux.c:202", reg | (index << cm->shift), common->base + common->reg);
 
 	spin_unlock_irqrestore(common->lock, flags);
 

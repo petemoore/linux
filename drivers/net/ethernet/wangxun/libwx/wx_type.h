@@ -924,8 +924,8 @@ struct wx {
 #define WX_INTR_Q(i) BIT(i)
 
 /* register operations */
-#define wr32(a, reg, value)	writel((value), ((a)->hw_addr + (reg)))
-#define rd32(a, reg)		readl((a)->hw_addr + (reg))
+#define wr32(a, reg, value)	pete_writel("drivers/net/ethernet/wangxun/libwx/wx_type.h:927", (value), ((a)->hw_addr + (reg)))
+#define rd32(a, reg)		pete_readl("drivers/net/ethernet/wangxun/libwx/wx_type.h:928", (a)->hw_addr + (reg))
 #define rd32a(a, reg, offset) ( \
 	rd32((a), (reg) + ((offset) << 2)))
 #define wr32a(a, reg, off, val) \
@@ -952,7 +952,7 @@ wr32m(struct wx *wx, u32 reg, u32 mask, u32 field)
 }
 
 /* On some domestic CPU platforms, sometimes IO is not synchronized with
- * flushing memory, here use readl() to flush PCI read and write.
+ * flushing memory, here use pete_readl("drivers/net/ethernet/wangxun/libwx/wx_type.h:955", ) to flush PCI read and write.
  */
 #define WX_WRITE_FLUSH(H) rd32(H, WX_MIS_PWR)
 

@@ -100,7 +100,7 @@ static irqreturn_t iomd_dma_handle(int irq, void *dev_id)
 	unsigned int status, cur, end;
 
 	do {
-		status = readb(base + ST);
+		status = pete_readb("arch/arm/mach-rpc/dma.c:103", base + ST);
 		if (!(status & DMA_ST_INT))
 			goto out;
 
@@ -116,8 +116,8 @@ static irqreturn_t iomd_dma_handle(int irq, void *dev_id)
 			cur = CURB;
 			end = ENDB;
 		}
-		writel(idma->cur_addr, base + cur);
-		writel(idma->cur_len, base + end);
+		pete_writel("arch/arm/mach-rpc/dma.c:119", idma->cur_addr, base + cur);
+		pete_writel("arch/arm/mach-rpc/dma.c:120", idma->cur_len, base + end);
 
 		if (status & DMA_ST_OFL &&
 		    idma->cur_len == (DMA_END_S|DMA_END_L))
@@ -178,14 +178,14 @@ static void iomd_enable_dma(unsigned int chan, dma_t *dma)
 		idma->dma_addr = idma->dma.sg->dma_address;
 		idma->dma_len = idma->dma.sg->length;
 
-		writeb(DMA_CR_C, base + CR);
+		pete_writeb("arch/arm/mach-rpc/dma.c:181", DMA_CR_C, base + CR);
 		idma->state = DMA_ST_AB;
 	}
 
 	if (idma->dma.dma_mode == DMA_MODE_READ)
 		ctrl |= DMA_CR_D;
 
-	writeb(ctrl, base + CR);
+	pete_writeb("arch/arm/mach-rpc/dma.c:188", ctrl, base + CR);
 	enable_irq(idma->irq);
 }
 
@@ -198,7 +198,7 @@ static void iomd_disable_dma(unsigned int chan, dma_t *dma)
 	local_irq_save(flags);
 	if (idma->state != ~DMA_ST_AB)
 		disable_irq(idma->irq);
-	writeb(0, base + CR);
+	pete_writeb("arch/arm/mach-rpc/dma.c:201", 0, base + CR);
 	local_irq_restore(flags);
 }
 

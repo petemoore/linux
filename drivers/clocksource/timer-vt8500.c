@@ -43,11 +43,11 @@ static void __iomem *regbase;
 static u64 vt8500_timer_read(struct clocksource *cs)
 {
 	int loops = msecs_to_loops(10);
-	writel(3, regbase + TIMER_CTRL_VAL);
-	while ((readl((regbase + TIMER_AS_VAL)) & TIMER_COUNT_R_ACTIVE)
+	pete_writel("drivers/clocksource/timer-vt8500.c:46", 3, regbase + TIMER_CTRL_VAL);
+	while ((pete_readl("drivers/clocksource/timer-vt8500.c:47", (regbase + TIMER_AS_VAL)) & TIMER_COUNT_R_ACTIVE)
 						&& --loops)
 		cpu_relax();
-	return readl(regbase + TIMER_COUNT_VAL);
+	return pete_readl("drivers/clocksource/timer-vt8500.c:50", regbase + TIMER_COUNT_VAL);
 }
 
 static struct clocksource clocksource = {
@@ -63,23 +63,23 @@ static int vt8500_timer_set_next_event(unsigned long cycles,
 {
 	int loops = msecs_to_loops(10);
 	u64 alarm = clocksource.read(&clocksource) + cycles;
-	while ((readl(regbase + TIMER_AS_VAL) & TIMER_MATCH_W_ACTIVE)
+	while ((pete_readl("drivers/clocksource/timer-vt8500.c:66", regbase + TIMER_AS_VAL) & TIMER_MATCH_W_ACTIVE)
 						&& --loops)
 		cpu_relax();
-	writel((unsigned long)alarm, regbase + TIMER_MATCH_VAL);
+	pete_writel("drivers/clocksource/timer-vt8500.c:69", (unsigned long)alarm, regbase + TIMER_MATCH_VAL);
 
 	if ((signed)(alarm - clocksource.read(&clocksource)) <= MIN_OSCR_DELTA)
 		return -ETIME;
 
-	writel(1, regbase + TIMER_IER_VAL);
+	pete_writel("drivers/clocksource/timer-vt8500.c:74", 1, regbase + TIMER_IER_VAL);
 
 	return 0;
 }
 
 static int vt8500_shutdown(struct clock_event_device *evt)
 {
-	writel(readl(regbase + TIMER_CTRL_VAL) | 1, regbase + TIMER_CTRL_VAL);
-	writel(0, regbase + TIMER_IER_VAL);
+	pete_writel("drivers/clocksource/timer-vt8500.c:81", pete_readl("drivers/clocksource/timer-vt8500.c:81", regbase + TIMER_CTRL_VAL) | 1, regbase + TIMER_CTRL_VAL);
+	pete_writel("drivers/clocksource/timer-vt8500.c:82", 0, regbase + TIMER_IER_VAL);
 	return 0;
 }
 
@@ -95,7 +95,7 @@ static struct clock_event_device clockevent = {
 static irqreturn_t vt8500_timer_interrupt(int irq, void *dev_id)
 {
 	struct clock_event_device *evt = dev_id;
-	writel(0xf, regbase + TIMER_STATUS_VAL);
+	pete_writel("drivers/clocksource/timer-vt8500.c:98", 0xf, regbase + TIMER_STATUS_VAL);
 	evt->event_handler(evt);
 
 	return IRQ_HANDLED;
@@ -119,9 +119,9 @@ static int __init vt8500_timer_init(struct device_node *np)
 		return -EINVAL;
 	}
 
-	writel(1, regbase + TIMER_CTRL_VAL);
-	writel(0xf, regbase + TIMER_STATUS_VAL);
-	writel(~0, regbase + TIMER_MATCH_VAL);
+	pete_writel("drivers/clocksource/timer-vt8500.c:122", 1, regbase + TIMER_CTRL_VAL);
+	pete_writel("drivers/clocksource/timer-vt8500.c:123", 0xf, regbase + TIMER_STATUS_VAL);
+	pete_writel("drivers/clocksource/timer-vt8500.c:124", ~0, regbase + TIMER_MATCH_VAL);
 
 	ret = clocksource_register_hz(&clocksource, VT8500_TIMER_HZ);
 	if (ret) {

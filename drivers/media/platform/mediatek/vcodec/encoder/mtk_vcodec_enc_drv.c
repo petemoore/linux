@@ -62,22 +62,22 @@ static const struct mtk_video_fmt mtk_video_formats_capture_vp8[] =  {
 static void clean_irq_status(unsigned int irq_status, void __iomem *addr)
 {
 	if (irq_status & MTK_VENC_IRQ_STATUS_PAUSE)
-		writel(MTK_VENC_IRQ_STATUS_PAUSE, addr);
+		pete_writel("drivers/media/platform/mediatek/vcodec/encoder/mtk_vcodec_enc_drv.c:65", MTK_VENC_IRQ_STATUS_PAUSE, addr);
 
 	if (irq_status & MTK_VENC_IRQ_STATUS_SWITCH)
-		writel(MTK_VENC_IRQ_STATUS_SWITCH, addr);
+		pete_writel("drivers/media/platform/mediatek/vcodec/encoder/mtk_vcodec_enc_drv.c:68", MTK_VENC_IRQ_STATUS_SWITCH, addr);
 
 	if (irq_status & MTK_VENC_IRQ_STATUS_DRAM)
-		writel(MTK_VENC_IRQ_STATUS_DRAM, addr);
+		pete_writel("drivers/media/platform/mediatek/vcodec/encoder/mtk_vcodec_enc_drv.c:71", MTK_VENC_IRQ_STATUS_DRAM, addr);
 
 	if (irq_status & MTK_VENC_IRQ_STATUS_SPS)
-		writel(MTK_VENC_IRQ_STATUS_SPS, addr);
+		pete_writel("drivers/media/platform/mediatek/vcodec/encoder/mtk_vcodec_enc_drv.c:74", MTK_VENC_IRQ_STATUS_SPS, addr);
 
 	if (irq_status & MTK_VENC_IRQ_STATUS_PPS)
-		writel(MTK_VENC_IRQ_STATUS_PPS, addr);
+		pete_writel("drivers/media/platform/mediatek/vcodec/encoder/mtk_vcodec_enc_drv.c:77", MTK_VENC_IRQ_STATUS_PPS, addr);
 
 	if (irq_status & MTK_VENC_IRQ_STATUS_FRM)
-		writel(MTK_VENC_IRQ_STATUS_FRM, addr);
+		pete_writel("drivers/media/platform/mediatek/vcodec/encoder/mtk_vcodec_enc_drv.c:80", MTK_VENC_IRQ_STATUS_FRM, addr);
 
 }
 static irqreturn_t mtk_vcodec_enc_irq_handler(int irq, void *priv)
@@ -102,7 +102,7 @@ static irqreturn_t mtk_vcodec_enc_irq_handler(int irq, void *priv)
 
 	addr = dev->reg_base[core_id] + MTK_VENC_IRQ_ACK_OFFSET;
 
-	ctx->irq_status = readl(dev->reg_base[core_id] +
+	ctx->irq_status = pete_readl("drivers/media/platform/mediatek/vcodec/encoder/mtk_vcodec_enc_drv.c:105", dev->reg_base[core_id] +
 				(MTK_VENC_IRQ_STATUS_OFFSET));
 
 	clean_irq_status(ctx->irq_status, addr);

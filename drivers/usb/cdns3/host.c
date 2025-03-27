@@ -35,18 +35,18 @@ static void xhci_cdns3_plat_start(struct usb_hcd *hcd)
 	u32 value;
 
 	/* set usbcmd.EU3S */
-	value = readl(&xhci->op_regs->command);
+	value = pete_readl("drivers/usb/cdns3/host.c:38", &xhci->op_regs->command);
 	value |= CMD_PM_INDEX;
-	writel(value, &xhci->op_regs->command);
+	pete_writel("drivers/usb/cdns3/host.c:40", value, &xhci->op_regs->command);
 
 	if (hcd->regs) {
-		value = readl(hcd->regs + XECP_AUX_CTRL_REG1);
+		value = pete_readl("drivers/usb/cdns3/host.c:43", hcd->regs + XECP_AUX_CTRL_REG1);
 		value |= CFG_RXDET_P3_EN;
-		writel(value, hcd->regs + XECP_AUX_CTRL_REG1);
+		pete_writel("drivers/usb/cdns3/host.c:45", value, hcd->regs + XECP_AUX_CTRL_REG1);
 
-		value = readl(hcd->regs + XECP_PORT_CAP_REG);
+		value = pete_readl("drivers/usb/cdns3/host.c:47", hcd->regs + XECP_PORT_CAP_REG);
 		value |= LPM_2_STB_SWITCH_EN;
-		writel(value, hcd->regs + XECP_PORT_CAP_REG);
+		pete_writel("drivers/usb/cdns3/host.c:49", value, hcd->regs + XECP_PORT_CAP_REG);
 	}
 }
 

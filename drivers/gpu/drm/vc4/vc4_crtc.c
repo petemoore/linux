@@ -54,13 +54,13 @@
 #define CRTC_WRITE(offset, val)								\
 	do {										\
 		kunit_fail_current_test("Accessing a register in a unit test!\n");	\
-		writel(val, vc4_crtc->regs + (offset));					\
+		pete_writel("drivers/gpu/drm/vc4/vc4_crtc.c:57", val, vc4_crtc->regs + (offset));					\
 	} while (0)
 
 #define CRTC_READ(offset)								\
 	({										\
 		kunit_fail_current_test("Accessing a register in a unit test!\n");	\
-		readl(vc4_crtc->regs + (offset));					\
+		pete_readl("drivers/gpu/drm/vc4/vc4_crtc.c:63", vc4_crtc->regs + (offset));					\
 	})
 
 static const struct debugfs_reg32 crtc_regs[] = {

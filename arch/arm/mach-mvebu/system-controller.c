@@ -96,13 +96,13 @@ void mvebu_restart(enum reboot_mode mode, const char *cmd)
 		/*
 		 * Enable soft reset to assert RSTOUTn.
 		 */
-		writel(mvebu_sc->rstoutn_mask_reset_out_en,
+		pete_writel("arch/arm/mach-mvebu/system-controller.c:99", mvebu_sc->rstoutn_mask_reset_out_en,
 			system_controller_base +
 			mvebu_sc->rstoutn_mask_offset);
 		/*
 		 * Assert soft reset.
 		 */
-		writel(mvebu_sc->system_soft_reset,
+		pete_writel("arch/arm/mach-mvebu/system-controller.c:105", mvebu_sc->system_soft_reset,
 			system_controller_base +
 			mvebu_sc->system_soft_reset_offset);
 	}
@@ -115,8 +115,8 @@ int mvebu_system_controller_get_soc_id(u32 *dev, u32 *rev)
 {
 	if (of_machine_is_compatible("marvell,armada380") &&
 		system_controller_base) {
-		*dev = readl(system_controller_base + mvebu_sc->dev_id) >> 16;
-		*rev = (readl(system_controller_base + mvebu_sc->rev_id) >> 8)
+		*dev = pete_readl("arch/arm/mach-mvebu/system-controller.c:118", system_controller_base + mvebu_sc->dev_id) >> 16;
+		*rev = (pete_readl("arch/arm/mach-mvebu/system-controller.c:119", system_controller_base + mvebu_sc->rev_id) >> 8)
 			& 0xF;
 		return 0;
 	} else
@@ -150,7 +150,7 @@ void mvebu_system_controller_set_cpu_boot_addr(void *boot_addr)
 	if (of_machine_is_compatible("marvell,armada375"))
 		mvebu_armada375_smp_wa_init();
 
-	writel(__pa_symbol(boot_addr), system_controller_base +
+	pete_writel("arch/arm/mach-mvebu/system-controller.c:153", __pa_symbol(boot_addr), system_controller_base +
 	       mvebu_sc->resume_boot_addr);
 }
 #endif

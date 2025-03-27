@@ -634,32 +634,32 @@ MODULE_DEVICE_TABLE(of, msdc_of_ids);
 
 static void sdr_set_bits(void __iomem *reg, u32 bs)
 {
-	u32 val = readl(reg);
+	u32 val = pete_readl("drivers/mmc/host/mtk-sd.c:637", reg);
 
 	val |= bs;
-	writel(val, reg);
+	pete_writel("drivers/mmc/host/mtk-sd.c:640", val, reg);
 }
 
 static void sdr_clr_bits(void __iomem *reg, u32 bs)
 {
-	u32 val = readl(reg);
+	u32 val = pete_readl("drivers/mmc/host/mtk-sd.c:645", reg);
 
 	val &= ~bs;
-	writel(val, reg);
+	pete_writel("drivers/mmc/host/mtk-sd.c:648", val, reg);
 }
 
 static void sdr_set_field(void __iomem *reg, u32 field, u32 val)
 {
-	unsigned int tv = readl(reg);
+	unsigned int tv = pete_readl("drivers/mmc/host/mtk-sd.c:653", reg);
 
 	tv &= ~field;
 	tv |= ((val) << (ffs((unsigned int)field) - 1));
-	writel(tv, reg);
+	pete_writel("drivers/mmc/host/mtk-sd.c:657", tv, reg);
 }
 
 static void sdr_get_field(void __iomem *reg, u32 field, u32 *val)
 {
-	unsigned int tv = readl(reg);
+	unsigned int tv = pete_readl("drivers/mmc/host/mtk-sd.c:662", reg);
 
 	*val = ((tv & field) >> (ffs((unsigned int)field) - 1));
 }
@@ -675,8 +675,8 @@ static void msdc_reset_hw(struct msdc_host *host)
 	readl_poll_timeout_atomic(host->base + MSDC_FIFOCS, val,
 				  !(val & MSDC_FIFOCS_CLR), 0, 0);
 
-	val = readl(host->base + MSDC_INT);
-	writel(val, host->base + MSDC_INT);
+	val = pete_readl("drivers/mmc/host/mtk-sd.c:678", host->base + MSDC_INT);
+	pete_writel("drivers/mmc/host/mtk-sd.c:679", val, host->base + MSDC_INT);
 }
 
 static void msdc_cmd_next(struct msdc_host *host,
@@ -762,7 +762,7 @@ static inline void msdc_dma_setup(struct msdc_host *host, struct msdc_dma *dma,
 	if (host->dev_comp->support_64g)
 		sdr_set_field(host->base + DMA_SA_H4BIT, DMA_ADDR_HIGH_4BIT,
 			      upper_32_bits(dma->gpd_addr) & 0xf);
-	writel(lower_32_bits(dma->gpd_addr), host->base + MSDC_DMA_SA);
+	pete_writel("drivers/mmc/host/mtk-sd.c:765", lower_32_bits(dma->gpd_addr), host->base + MSDC_DMA_SA);
 }
 
 static void msdc_prepare_data(struct msdc_host *host, struct mmc_data *data)
@@ -885,7 +885,7 @@ static void msdc_set_mclk(struct msdc_host *host, unsigned char timing, u32 hz)
 		return;
 	}
 
-	flags = readl(host->base + MSDC_INTEN);
+	flags = pete_readl("drivers/mmc/host/mtk-sd.c:888", host->base + MSDC_INTEN);
 	sdr_clr_bits(host->base + MSDC_INTEN, flags);
 	if (host->dev_comp->clk_div_bits == 8)
 		sdr_clr_bits(host->base + MSDC_CFG, MSDC_CFG_HS400_CK_MODE);
@@ -961,27 +961,27 @@ static void msdc_set_mclk(struct msdc_host *host, unsigned char timing, u32 hz)
 	 * tune result of hs200/200Mhz is not suitable for 50Mhz
 	 */
 	if (mmc->actual_clock <= 52000000) {
-		writel(host->def_tune_para.iocon, host->base + MSDC_IOCON);
+		pete_writel("drivers/mmc/host/mtk-sd.c:964", host->def_tune_para.iocon, host->base + MSDC_IOCON);
 		if (host->top_base) {
-			writel(host->def_tune_para.emmc_top_control,
+			pete_writel("drivers/mmc/host/mtk-sd.c:966", host->def_tune_para.emmc_top_control,
 			       host->top_base + EMMC_TOP_CONTROL);
-			writel(host->def_tune_para.emmc_top_cmd,
+			pete_writel("drivers/mmc/host/mtk-sd.c:968", host->def_tune_para.emmc_top_cmd,
 			       host->top_base + EMMC_TOP_CMD);
 		} else {
-			writel(host->def_tune_para.pad_tune,
+			pete_writel("drivers/mmc/host/mtk-sd.c:971", host->def_tune_para.pad_tune,
 			       host->base + tune_reg);
 		}
 	} else {
-		writel(host->saved_tune_para.iocon, host->base + MSDC_IOCON);
-		writel(host->saved_tune_para.pad_cmd_tune,
+		pete_writel("drivers/mmc/host/mtk-sd.c:975", host->saved_tune_para.iocon, host->base + MSDC_IOCON);
+		pete_writel("drivers/mmc/host/mtk-sd.c:976", host->saved_tune_para.pad_cmd_tune,
 		       host->base + PAD_CMD_TUNE);
 		if (host->top_base) {
-			writel(host->saved_tune_para.emmc_top_control,
+			pete_writel("drivers/mmc/host/mtk-sd.c:979", host->saved_tune_para.emmc_top_control,
 			       host->top_base + EMMC_TOP_CONTROL);
-			writel(host->saved_tune_para.emmc_top_cmd,
+			pete_writel("drivers/mmc/host/mtk-sd.c:981", host->saved_tune_para.emmc_top_cmd,
 			       host->top_base + EMMC_TOP_CMD);
 		} else {
-			writel(host->saved_tune_para.pad_tune,
+			pete_writel("drivers/mmc/host/mtk-sd.c:984", host->saved_tune_para.pad_tune,
 			       host->base + tune_reg);
 		}
 	}
@@ -1073,7 +1073,7 @@ static inline u32 msdc_cmd_prepare_raw_cmd(struct msdc_host *host,
 			msdc_set_timeout(host, data->timeout_ns,
 					data->timeout_clks);
 
-		writel(data->blocks, host->base + SDC_BLK_NUM);
+		pete_writel("drivers/mmc/host/mtk-sd.c:1076", data->blocks, host->base + SDC_BLK_NUM);
 	}
 	return rawcmd;
 }
@@ -1101,7 +1101,7 @@ static int msdc_auto_cmd_done(struct msdc_host *host, int events,
 {
 	u32 *rsp = cmd->resp;
 
-	rsp[0] = readl(host->base + SDC_ACMD_RESP);
+	rsp[0] = pete_readl("drivers/mmc/host/mtk-sd.c:1104", host->base + SDC_ACMD_RESP);
 
 	if (events & MSDC_INT_ACMDRDY) {
 		cmd->error = 0;
@@ -1134,10 +1134,10 @@ static void msdc_recheck_sdio_irq(struct msdc_host *host)
 	u32 reg_int, reg_inten, reg_ps;
 
 	if (mmc->caps & MMC_CAP_SDIO_IRQ) {
-		reg_inten = readl(host->base + MSDC_INTEN);
+		reg_inten = pete_readl("drivers/mmc/host/mtk-sd.c:1137", host->base + MSDC_INTEN);
 		if (reg_inten & MSDC_INTEN_SDIOIRQ) {
-			reg_int = readl(host->base + MSDC_INT);
-			reg_ps = readl(host->base + MSDC_PS);
+			reg_int = pete_readl("drivers/mmc/host/mtk-sd.c:1139", host->base + MSDC_INT);
+			reg_ps = pete_readl("drivers/mmc/host/mtk-sd.c:1140", host->base + MSDC_PS);
 			if (!(reg_int & MSDC_INT_SDIOIRQ ||
 			      reg_ps & MSDC_PS_DATA1)) {
 				__msdc_enable_sdio_irq(host, 0);
@@ -1212,12 +1212,12 @@ static bool msdc_cmd_done(struct msdc_host *host, int events,
 
 	if (cmd->flags & MMC_RSP_PRESENT) {
 		if (cmd->flags & MMC_RSP_136) {
-			rsp[0] = readl(host->base + SDC_RESP3);
-			rsp[1] = readl(host->base + SDC_RESP2);
-			rsp[2] = readl(host->base + SDC_RESP1);
-			rsp[3] = readl(host->base + SDC_RESP0);
+			rsp[0] = pete_readl("drivers/mmc/host/mtk-sd.c:1215", host->base + SDC_RESP3);
+			rsp[1] = pete_readl("drivers/mmc/host/mtk-sd.c:1216", host->base + SDC_RESP2);
+			rsp[2] = pete_readl("drivers/mmc/host/mtk-sd.c:1217", host->base + SDC_RESP1);
+			rsp[3] = pete_readl("drivers/mmc/host/mtk-sd.c:1218", host->base + SDC_RESP0);
 		} else {
-			rsp[0] = readl(host->base + SDC_RESP0);
+			rsp[0] = pete_readl("drivers/mmc/host/mtk-sd.c:1220", host->base + SDC_RESP0);
 		}
 	}
 
@@ -1295,8 +1295,8 @@ static void msdc_start_command(struct msdc_host *host,
 	if (!msdc_cmd_is_ready(host, mrq, cmd))
 		return;
 
-	if ((readl(host->base + MSDC_FIFOCS) & MSDC_FIFOCS_TXCNT) >> 16 ||
-	    readl(host->base + MSDC_FIFOCS) & MSDC_FIFOCS_RXCNT) {
+	if ((pete_readl("drivers/mmc/host/mtk-sd.c:1298", host->base + MSDC_FIFOCS) & MSDC_FIFOCS_TXCNT) >> 16 ||
+	    pete_readl("drivers/mmc/host/mtk-sd.c:1299", host->base + MSDC_FIFOCS) & MSDC_FIFOCS_RXCNT) {
 		dev_err(host->dev, "TX/RX FIFO non-empty before start of IO. Reset\n");
 		msdc_reset_hw(host);
 	}
@@ -1308,8 +1308,8 @@ static void msdc_start_command(struct msdc_host *host,
 	sdr_set_bits(host->base + MSDC_INTEN, cmd_ints_mask);
 	spin_unlock_irqrestore(&host->lock, flags);
 
-	writel(cmd->arg, host->base + SDC_ARG);
-	writel(rawcmd, host->base + SDC_CMD);
+	pete_writel("drivers/mmc/host/mtk-sd.c:1311", cmd->arg, host->base + SDC_ARG);
+	pete_writel("drivers/mmc/host/mtk-sd.c:1312", rawcmd, host->base + SDC_CMD);
 }
 
 static void msdc_cmd_next(struct msdc_host *host,
@@ -1411,7 +1411,7 @@ static void msdc_data_xfer_done(struct msdc_host *host, u32 events,
 
 	if (check_data || (stop && stop->error)) {
 		dev_dbg(host->dev, "DMA status: 0x%8X\n",
-				readl(host->base + MSDC_DMA_CFG));
+				pete_readl("drivers/mmc/host/mtk-sd.c:1414", host->base + MSDC_DMA_CFG));
 		sdr_set_field(host->base + MSDC_DMA_CTRL, MSDC_DMA_CTRL_STOP,
 				1);
 
@@ -1453,7 +1453,7 @@ static void msdc_data_xfer_done(struct msdc_host *host, u32 events,
 
 static void msdc_set_buswidth(struct msdc_host *host, u32 width)
 {
-	u32 val = readl(host->base + SDC_CFG);
+	u32 val = pete_readl("drivers/mmc/host/mtk-sd.c:1456", host->base + SDC_CFG);
 
 	val &= ~SDC_CFG_BUSWIDTH;
 
@@ -1470,7 +1470,7 @@ static void msdc_set_buswidth(struct msdc_host *host, u32 width)
 		break;
 	}
 
-	writel(val, host->base + SDC_CFG);
+	pete_writel("drivers/mmc/host/mtk-sd.c:1473", val, host->base + SDC_CFG);
 	dev_dbg(host->dev, "Bus Width = %d", width);
 }
 
@@ -1505,7 +1505,7 @@ static int msdc_ops_switch_volt(struct mmc_host *mmc, struct mmc_ios *ios)
 static int msdc_card_busy(struct mmc_host *mmc)
 {
 	struct msdc_host *host = mmc_priv(mmc);
-	u32 status = readl(host->base + MSDC_PS);
+	u32 status = pete_readl("drivers/mmc/host/mtk-sd.c:1508", host->base + MSDC_PS);
 
 	/* only check if data0 is low */
 	return !(status & BIT(16));
@@ -1634,12 +1634,12 @@ static irqreturn_t msdc_irq(int irq, void *dev_id)
 		u32 events, event_mask;
 
 		spin_lock(&host->lock);
-		events = readl(host->base + MSDC_INT);
-		event_mask = readl(host->base + MSDC_INTEN);
+		events = pete_readl("drivers/mmc/host/mtk-sd.c:1637", host->base + MSDC_INT);
+		event_mask = pete_readl("drivers/mmc/host/mtk-sd.c:1638", host->base + MSDC_INTEN);
 		if ((events & event_mask) & MSDC_INT_SDIOIRQ)
 			__msdc_enable_sdio_irq(host, 0);
 		/* clear interrupts */
-		writel(events & event_mask, host->base + MSDC_INT);
+		pete_writel("drivers/mmc/host/mtk-sd.c:1642", events & event_mask, host->base + MSDC_INT);
 
 		mrq = host->mrq;
 		cmd = host->cmd;
@@ -1662,7 +1662,7 @@ static irqreturn_t msdc_irq(int irq, void *dev_id)
 		    (events & MSDC_INT_CMDQ)) {
 			msdc_cmdq_irq(host, events);
 			/* clear interrupts */
-			writel(events, host->base + MSDC_INT);
+			pete_writel("drivers/mmc/host/mtk-sd.c:1665", events, host->base + MSDC_INT);
 			return IRQ_HANDLED;
 		}
 
@@ -1704,9 +1704,9 @@ static void msdc_init_hw(struct msdc_host *host)
 	msdc_reset_hw(host);
 
 	/* Disable and clear all interrupts */
-	writel(0, host->base + MSDC_INTEN);
-	val = readl(host->base + MSDC_INT);
-	writel(val, host->base + MSDC_INT);
+	pete_writel("drivers/mmc/host/mtk-sd.c:1707", 0, host->base + MSDC_INTEN);
+	val = pete_readl("drivers/mmc/host/mtk-sd.c:1708", host->base + MSDC_INT);
+	pete_writel("drivers/mmc/host/mtk-sd.c:1709", val, host->base + MSDC_INT);
 
 	/* Configure card detection */
 	if (host->internal_cd) {
@@ -1722,16 +1722,16 @@ static void msdc_init_hw(struct msdc_host *host)
 	}
 
 	if (host->top_base) {
-		writel(0, host->top_base + EMMC_TOP_CONTROL);
-		writel(0, host->top_base + EMMC_TOP_CMD);
+		pete_writel("drivers/mmc/host/mtk-sd.c:1725", 0, host->top_base + EMMC_TOP_CONTROL);
+		pete_writel("drivers/mmc/host/mtk-sd.c:1726", 0, host->top_base + EMMC_TOP_CMD);
 	} else {
-		writel(0, host->base + tune_reg);
+		pete_writel("drivers/mmc/host/mtk-sd.c:1728", 0, host->base + tune_reg);
 	}
-	writel(0, host->base + MSDC_IOCON);
+	pete_writel("drivers/mmc/host/mtk-sd.c:1730", 0, host->base + MSDC_IOCON);
 	sdr_set_field(host->base + MSDC_IOCON, MSDC_IOCON_DDLSEL, 0);
-	writel(0x403c0046, host->base + MSDC_PATCH_BIT);
+	pete_writel("drivers/mmc/host/mtk-sd.c:1732", 0x403c0046, host->base + MSDC_PATCH_BIT);
 	sdr_set_field(host->base + MSDC_PATCH_BIT, MSDC_CKGEN_MSDC_DLY_SEL, 1);
-	writel(0xffff4089, host->base + MSDC_PATCH_BIT1);
+	pete_writel("drivers/mmc/host/mtk-sd.c:1734", 0xffff4089, host->base + MSDC_PATCH_BIT1);
 	sdr_set_bits(host->base + EMMC50_CFG0, EMMC50_CFG_CFCSTS_SEL);
 
 	if (host->dev_comp->stop_clk_fix) {
@@ -1811,20 +1811,20 @@ static void msdc_init_hw(struct msdc_host *host)
 	/* Configure to default data timeout */
 	sdr_set_field(host->base + SDC_CFG, SDC_CFG_DTOC, 3);
 
-	host->def_tune_para.iocon = readl(host->base + MSDC_IOCON);
-	host->saved_tune_para.iocon = readl(host->base + MSDC_IOCON);
+	host->def_tune_para.iocon = pete_readl("drivers/mmc/host/mtk-sd.c:1814", host->base + MSDC_IOCON);
+	host->saved_tune_para.iocon = pete_readl("drivers/mmc/host/mtk-sd.c:1815", host->base + MSDC_IOCON);
 	if (host->top_base) {
 		host->def_tune_para.emmc_top_control =
-			readl(host->top_base + EMMC_TOP_CONTROL);
+			pete_readl("drivers/mmc/host/mtk-sd.c:1818", host->top_base + EMMC_TOP_CONTROL);
 		host->def_tune_para.emmc_top_cmd =
-			readl(host->top_base + EMMC_TOP_CMD);
+			pete_readl("drivers/mmc/host/mtk-sd.c:1820", host->top_base + EMMC_TOP_CMD);
 		host->saved_tune_para.emmc_top_control =
-			readl(host->top_base + EMMC_TOP_CONTROL);
+			pete_readl("drivers/mmc/host/mtk-sd.c:1822", host->top_base + EMMC_TOP_CONTROL);
 		host->saved_tune_para.emmc_top_cmd =
-			readl(host->top_base + EMMC_TOP_CMD);
+			pete_readl("drivers/mmc/host/mtk-sd.c:1824", host->top_base + EMMC_TOP_CMD);
 	} else {
-		host->def_tune_para.pad_tune = readl(host->base + tune_reg);
-		host->saved_tune_para.pad_tune = readl(host->base + tune_reg);
+		host->def_tune_para.pad_tune = pete_readl("drivers/mmc/host/mtk-sd.c:1826", host->base + tune_reg);
+		host->saved_tune_para.pad_tune = pete_readl("drivers/mmc/host/mtk-sd.c:1827", host->base + tune_reg);
 	}
 	dev_dbg(host->dev, "init hardware done!");
 }
@@ -1840,10 +1840,10 @@ static void msdc_deinit_hw(struct msdc_host *host)
 	}
 
 	/* Disable and clear all interrupts */
-	writel(0, host->base + MSDC_INTEN);
+	pete_writel("drivers/mmc/host/mtk-sd.c:1843", 0, host->base + MSDC_INTEN);
 
-	val = readl(host->base + MSDC_INT);
-	writel(val, host->base + MSDC_INT);
+	val = pete_readl("drivers/mmc/host/mtk-sd.c:1845", host->base + MSDC_INT);
+	pete_writel("drivers/mmc/host/mtk-sd.c:1846", val, host->base + MSDC_INT);
 }
 
 /* init gpd and bd list in msdc_drv_probe */
@@ -2294,13 +2294,13 @@ static int msdc_execute_tuning(struct mmc_host *mmc, u32 opcode)
 	}
 
 tune_done:
-	host->saved_tune_para.iocon = readl(host->base + MSDC_IOCON);
-	host->saved_tune_para.pad_tune = readl(host->base + tune_reg);
-	host->saved_tune_para.pad_cmd_tune = readl(host->base + PAD_CMD_TUNE);
+	host->saved_tune_para.iocon = pete_readl("drivers/mmc/host/mtk-sd.c:2297", host->base + MSDC_IOCON);
+	host->saved_tune_para.pad_tune = pete_readl("drivers/mmc/host/mtk-sd.c:2298", host->base + tune_reg);
+	host->saved_tune_para.pad_cmd_tune = pete_readl("drivers/mmc/host/mtk-sd.c:2299", host->base + PAD_CMD_TUNE);
 	if (host->top_base) {
-		host->saved_tune_para.emmc_top_control = readl(host->top_base +
+		host->saved_tune_para.emmc_top_control = pete_readl("drivers/mmc/host/mtk-sd.c:2301", host->top_base +
 				EMMC_TOP_CONTROL);
-		host->saved_tune_para.emmc_top_cmd = readl(host->top_base +
+		host->saved_tune_para.emmc_top_cmd = pete_readl("drivers/mmc/host/mtk-sd.c:2303", host->top_base +
 				EMMC_TOP_CMD);
 	}
 	return ret;
@@ -2312,10 +2312,10 @@ static int msdc_prepare_hs400_tuning(struct mmc_host *mmc, struct mmc_ios *ios)
 	host->hs400_mode = true;
 
 	if (host->top_base)
-		writel(host->hs400_ds_delay,
+		pete_writel("drivers/mmc/host/mtk-sd.c:2315", host->hs400_ds_delay,
 		       host->top_base + EMMC50_PAD_DS_TUNE);
 	else
-		writel(host->hs400_ds_delay, host->base + PAD_DS_TUNE);
+		pete_writel("drivers/mmc/host/mtk-sd.c:2318", host->hs400_ds_delay, host->base + PAD_DS_TUNE);
 	/* hs400 mode must set it to 0 */
 	sdr_clr_bits(host->base + MSDC_PATCH_BIT2, MSDC_PATCH_BIT2_CFGCRCSTS);
 	/* to improve read performance, set outstanding to 2 */
@@ -2374,9 +2374,9 @@ static int msdc_execute_hs400_tuning(struct mmc_host *mmc, struct mmc_card *card
 			      PAD_DS_TUNE_DLY1, dly1_delay.final_phase);
 
 	if (host->top_base)
-		val = readl(host->top_base + EMMC50_PAD_DS_TUNE);
+		val = pete_readl("drivers/mmc/host/mtk-sd.c:2377", host->top_base + EMMC50_PAD_DS_TUNE);
 	else
-		val = readl(host->base + PAD_DS_TUNE);
+		val = pete_readl("drivers/mmc/host/mtk-sd.c:2379", host->base + PAD_DS_TUNE);
 
 	dev_info(host->dev, "Final PAD_DS_TUNE: 0x%x\n", val);
 
@@ -2417,7 +2417,7 @@ static int msdc_get_cd(struct mmc_host *mmc)
 	if (!host->internal_cd)
 		return mmc_gpio_get_cd(mmc);
 
-	val = readl(host->base + MSDC_PS) & MSDC_PS_CDSTS;
+	val = pete_readl("drivers/mmc/host/mtk-sd.c:2420", host->base + MSDC_PS) & MSDC_PS_CDSTS;
 	if (mmc->caps2 & MMC_CAP2_CD_ACTIVE_HIGH)
 		return !!val;
 	else
@@ -2494,7 +2494,7 @@ static void msdc_cqe_enable(struct mmc_host *mmc)
 	struct cqhci_host *cq_host = mmc->cqe_private;
 
 	/* enable cmdq irq */
-	writel(MSDC_INT_CMDQ, host->base + MSDC_INTEN);
+	pete_writel("drivers/mmc/host/mtk-sd.c:2497", MSDC_INT_CMDQ, host->base + MSDC_INTEN);
 	/* enable busy check */
 	sdr_set_bits(host->base + MSDC_PATCH_BIT1, MSDC_PB1_BUSY_CHECK_SEL);
 	/* default write data / busy timeout 20s */
@@ -2516,8 +2516,8 @@ static void msdc_cqe_disable(struct mmc_host *mmc, bool recovery)
 	/* disable busy check */
 	sdr_clr_bits(host->base + MSDC_PATCH_BIT1, MSDC_PB1_BUSY_CHECK_SEL);
 
-	val = readl(host->base + MSDC_INT);
-	writel(val, host->base + MSDC_INT);
+	val = pete_readl("drivers/mmc/host/mtk-sd.c:2519", host->base + MSDC_INT);
+	pete_writel("drivers/mmc/host/mtk-sd.c:2520", val, host->base + MSDC_INT);
 
 	if (recovery) {
 		sdr_set_field(host->base + MSDC_DMA_CTRL,
@@ -2903,26 +2903,26 @@ static void msdc_save_reg(struct msdc_host *host)
 {
 	u32 tune_reg = host->dev_comp->pad_tune_reg;
 
-	host->save_para.msdc_cfg = readl(host->base + MSDC_CFG);
-	host->save_para.iocon = readl(host->base + MSDC_IOCON);
-	host->save_para.sdc_cfg = readl(host->base + SDC_CFG);
-	host->save_para.patch_bit0 = readl(host->base + MSDC_PATCH_BIT);
-	host->save_para.patch_bit1 = readl(host->base + MSDC_PATCH_BIT1);
-	host->save_para.patch_bit2 = readl(host->base + MSDC_PATCH_BIT2);
-	host->save_para.pad_ds_tune = readl(host->base + PAD_DS_TUNE);
-	host->save_para.pad_cmd_tune = readl(host->base + PAD_CMD_TUNE);
-	host->save_para.emmc50_cfg0 = readl(host->base + EMMC50_CFG0);
-	host->save_para.emmc50_cfg3 = readl(host->base + EMMC50_CFG3);
-	host->save_para.sdc_fifo_cfg = readl(host->base + SDC_FIFO_CFG);
+	host->save_para.msdc_cfg = pete_readl("drivers/mmc/host/mtk-sd.c:2906", host->base + MSDC_CFG);
+	host->save_para.iocon = pete_readl("drivers/mmc/host/mtk-sd.c:2907", host->base + MSDC_IOCON);
+	host->save_para.sdc_cfg = pete_readl("drivers/mmc/host/mtk-sd.c:2908", host->base + SDC_CFG);
+	host->save_para.patch_bit0 = pete_readl("drivers/mmc/host/mtk-sd.c:2909", host->base + MSDC_PATCH_BIT);
+	host->save_para.patch_bit1 = pete_readl("drivers/mmc/host/mtk-sd.c:2910", host->base + MSDC_PATCH_BIT1);
+	host->save_para.patch_bit2 = pete_readl("drivers/mmc/host/mtk-sd.c:2911", host->base + MSDC_PATCH_BIT2);
+	host->save_para.pad_ds_tune = pete_readl("drivers/mmc/host/mtk-sd.c:2912", host->base + PAD_DS_TUNE);
+	host->save_para.pad_cmd_tune = pete_readl("drivers/mmc/host/mtk-sd.c:2913", host->base + PAD_CMD_TUNE);
+	host->save_para.emmc50_cfg0 = pete_readl("drivers/mmc/host/mtk-sd.c:2914", host->base + EMMC50_CFG0);
+	host->save_para.emmc50_cfg3 = pete_readl("drivers/mmc/host/mtk-sd.c:2915", host->base + EMMC50_CFG3);
+	host->save_para.sdc_fifo_cfg = pete_readl("drivers/mmc/host/mtk-sd.c:2916", host->base + SDC_FIFO_CFG);
 	if (host->top_base) {
 		host->save_para.emmc_top_control =
-			readl(host->top_base + EMMC_TOP_CONTROL);
+			pete_readl("drivers/mmc/host/mtk-sd.c:2919", host->top_base + EMMC_TOP_CONTROL);
 		host->save_para.emmc_top_cmd =
-			readl(host->top_base + EMMC_TOP_CMD);
+			pete_readl("drivers/mmc/host/mtk-sd.c:2921", host->top_base + EMMC_TOP_CMD);
 		host->save_para.emmc50_pad_ds_tune =
-			readl(host->top_base + EMMC50_PAD_DS_TUNE);
+			pete_readl("drivers/mmc/host/mtk-sd.c:2923", host->top_base + EMMC50_PAD_DS_TUNE);
 	} else {
-		host->save_para.pad_tune = readl(host->base + tune_reg);
+		host->save_para.pad_tune = pete_readl("drivers/mmc/host/mtk-sd.c:2925", host->base + tune_reg);
 	}
 }
 
@@ -2931,26 +2931,26 @@ static void msdc_restore_reg(struct msdc_host *host)
 	struct mmc_host *mmc = mmc_from_priv(host);
 	u32 tune_reg = host->dev_comp->pad_tune_reg;
 
-	writel(host->save_para.msdc_cfg, host->base + MSDC_CFG);
-	writel(host->save_para.iocon, host->base + MSDC_IOCON);
-	writel(host->save_para.sdc_cfg, host->base + SDC_CFG);
-	writel(host->save_para.patch_bit0, host->base + MSDC_PATCH_BIT);
-	writel(host->save_para.patch_bit1, host->base + MSDC_PATCH_BIT1);
-	writel(host->save_para.patch_bit2, host->base + MSDC_PATCH_BIT2);
-	writel(host->save_para.pad_ds_tune, host->base + PAD_DS_TUNE);
-	writel(host->save_para.pad_cmd_tune, host->base + PAD_CMD_TUNE);
-	writel(host->save_para.emmc50_cfg0, host->base + EMMC50_CFG0);
-	writel(host->save_para.emmc50_cfg3, host->base + EMMC50_CFG3);
-	writel(host->save_para.sdc_fifo_cfg, host->base + SDC_FIFO_CFG);
+	pete_writel("drivers/mmc/host/mtk-sd.c:2934", host->save_para.msdc_cfg, host->base + MSDC_CFG);
+	pete_writel("drivers/mmc/host/mtk-sd.c:2935", host->save_para.iocon, host->base + MSDC_IOCON);
+	pete_writel("drivers/mmc/host/mtk-sd.c:2936", host->save_para.sdc_cfg, host->base + SDC_CFG);
+	pete_writel("drivers/mmc/host/mtk-sd.c:2937", host->save_para.patch_bit0, host->base + MSDC_PATCH_BIT);
+	pete_writel("drivers/mmc/host/mtk-sd.c:2938", host->save_para.patch_bit1, host->base + MSDC_PATCH_BIT1);
+	pete_writel("drivers/mmc/host/mtk-sd.c:2939", host->save_para.patch_bit2, host->base + MSDC_PATCH_BIT2);
+	pete_writel("drivers/mmc/host/mtk-sd.c:2940", host->save_para.pad_ds_tune, host->base + PAD_DS_TUNE);
+	pete_writel("drivers/mmc/host/mtk-sd.c:2941", host->save_para.pad_cmd_tune, host->base + PAD_CMD_TUNE);
+	pete_writel("drivers/mmc/host/mtk-sd.c:2942", host->save_para.emmc50_cfg0, host->base + EMMC50_CFG0);
+	pete_writel("drivers/mmc/host/mtk-sd.c:2943", host->save_para.emmc50_cfg3, host->base + EMMC50_CFG3);
+	pete_writel("drivers/mmc/host/mtk-sd.c:2944", host->save_para.sdc_fifo_cfg, host->base + SDC_FIFO_CFG);
 	if (host->top_base) {
-		writel(host->save_para.emmc_top_control,
+		pete_writel("drivers/mmc/host/mtk-sd.c:2946", host->save_para.emmc_top_control,
 		       host->top_base + EMMC_TOP_CONTROL);
-		writel(host->save_para.emmc_top_cmd,
+		pete_writel("drivers/mmc/host/mtk-sd.c:2948", host->save_para.emmc_top_cmd,
 		       host->top_base + EMMC_TOP_CMD);
-		writel(host->save_para.emmc50_pad_ds_tune,
+		pete_writel("drivers/mmc/host/mtk-sd.c:2950", host->save_para.emmc50_pad_ds_tune,
 		       host->top_base + EMMC50_PAD_DS_TUNE);
 	} else {
-		writel(host->save_para.pad_tune, host->base + tune_reg);
+		pete_writel("drivers/mmc/host/mtk-sd.c:2953", host->save_para.pad_tune, host->base + tune_reg);
 	}
 
 	if (sdio_irq_claimed(mmc))
@@ -3006,8 +3006,8 @@ static int __maybe_unused msdc_suspend(struct device *dev)
 		ret = cqhci_suspend(mmc);
 		if (ret)
 			return ret;
-		val = readl(host->base + MSDC_INT);
-		writel(val, host->base + MSDC_INT);
+		val = pete_readl("drivers/mmc/host/mtk-sd.c:3009", host->base + MSDC_INT);
+		pete_writel("drivers/mmc/host/mtk-sd.c:3010", val, host->base + MSDC_INT);
 	}
 
 	/*

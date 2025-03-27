@@ -163,7 +163,7 @@ static unsigned int en7523_get_base_rate(void __iomem *base, unsigned int i)
 	if (!desc->base_bits)
 		return desc->base_value;
 
-	val = readl(base + desc->base_reg);
+	val = pete_readl("drivers/clk/clk-en7523.c:166", base + desc->base_reg);
 	val >>= desc->base_shift;
 	val &= (1 << desc->base_bits) - 1;
 
@@ -182,7 +182,7 @@ static u32 en7523_get_div(void __iomem *base, int i)
 		return 1;
 
 	reg = desc->div_reg ? desc->div_reg : desc->base_reg;
-	val = readl(base + reg);
+	val = pete_readl("drivers/clk/clk-en7523.c:185", base + reg);
 	val >>= desc->div_shift;
 	val &= (1 << desc->div_bits) - 1;
 
@@ -196,7 +196,7 @@ static int en7523_pci_is_enabled(struct clk_hw *hw)
 {
 	struct en_clk_gate *cg = container_of(hw, struct en_clk_gate, hw);
 
-	return !!(readl(cg->base + REG_PCI_CONTROL) & REG_PCI_CONTROL_REFCLK_EN1);
+	return !!(pete_readl("drivers/clk/clk-en7523.c:199", cg->base + REG_PCI_CONTROL) & REG_PCI_CONTROL_REFCLK_EN1);
 }
 
 static int en7523_pci_prepare(struct clk_hw *hw)
@@ -206,33 +206,33 @@ static int en7523_pci_prepare(struct clk_hw *hw)
 	u32 val, mask;
 
 	/* Need to pull device low before reset */
-	val = readl(np_base + REG_PCI_CONTROL);
+	val = pete_readl("drivers/clk/clk-en7523.c:209", np_base + REG_PCI_CONTROL);
 	val &= ~(REG_PCI_CONTROL_PERSTOUT1 | REG_PCI_CONTROL_PERSTOUT);
-	writel(val, np_base + REG_PCI_CONTROL);
+	pete_writel("drivers/clk/clk-en7523.c:211", val, np_base + REG_PCI_CONTROL);
 	usleep_range(1000, 2000);
 
 	/* Enable PCIe port 1 */
 	val |= REG_PCI_CONTROL_REFCLK_EN1;
-	writel(val, np_base + REG_PCI_CONTROL);
+	pete_writel("drivers/clk/clk-en7523.c:216", val, np_base + REG_PCI_CONTROL);
 	usleep_range(1000, 2000);
 
 	/* Reset to default */
-	val = readl(np_base + REG_RESET_CONTROL);
+	val = pete_readl("drivers/clk/clk-en7523.c:220", np_base + REG_RESET_CONTROL);
 	mask = REG_RESET_CONTROL_PCIE1 | REG_RESET_CONTROL_PCIE2 |
 	       REG_RESET_CONTROL_PCIEHB;
-	writel(val & ~mask, np_base + REG_RESET_CONTROL);
+	pete_writel("drivers/clk/clk-en7523.c:223", val & ~mask, np_base + REG_RESET_CONTROL);
 	usleep_range(1000, 2000);
-	writel(val | mask, np_base + REG_RESET_CONTROL);
+	pete_writel("drivers/clk/clk-en7523.c:225", val | mask, np_base + REG_RESET_CONTROL);
 	msleep(100);
-	writel(val & ~mask, np_base + REG_RESET_CONTROL);
+	pete_writel("drivers/clk/clk-en7523.c:227", val & ~mask, np_base + REG_RESET_CONTROL);
 	usleep_range(5000, 10000);
 
 	/* Release device */
 	mask = REG_PCI_CONTROL_PERSTOUT1 | REG_PCI_CONTROL_PERSTOUT;
-	val = readl(np_base + REG_PCI_CONTROL);
-	writel(val & ~mask, np_base + REG_PCI_CONTROL);
+	val = pete_readl("drivers/clk/clk-en7523.c:232", np_base + REG_PCI_CONTROL);
+	pete_writel("drivers/clk/clk-en7523.c:233", val & ~mask, np_base + REG_PCI_CONTROL);
 	usleep_range(1000, 2000);
-	writel(val | mask, np_base + REG_PCI_CONTROL);
+	pete_writel("drivers/clk/clk-en7523.c:235", val | mask, np_base + REG_PCI_CONTROL);
 	msleep(250);
 
 	return 0;
@@ -244,9 +244,9 @@ static void en7523_pci_unprepare(struct clk_hw *hw)
 	void __iomem *np_base = cg->base;
 	u32 val;
 
-	val = readl(np_base + REG_PCI_CONTROL);
+	val = pete_readl("drivers/clk/clk-en7523.c:247", np_base + REG_PCI_CONTROL);
 	val &= ~REG_PCI_CONTROL_REFCLK_EN1;
-	writel(val, np_base + REG_PCI_CONTROL);
+	pete_writel("drivers/clk/clk-en7523.c:249", val, np_base + REG_PCI_CONTROL);
 }
 
 static struct clk_hw *en7523_register_pcie_clk(struct device *dev,

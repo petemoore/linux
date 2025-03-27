@@ -572,24 +572,24 @@ static inline void qphy_setbits(void __iomem *base, u32 offset, u32 val)
 {
 	u32 reg;
 
-	reg = readl(base + offset);
+	reg = pete_readl("drivers/phy/qualcomm/phy-qcom-qmp-usb-legacy.c:575", base + offset);
 	reg |= val;
-	writel(reg, base + offset);
+	pete_writel("drivers/phy/qualcomm/phy-qcom-qmp-usb-legacy.c:577", reg, base + offset);
 
 	/* ensure that above write is through */
-	readl(base + offset);
+	pete_readl("drivers/phy/qualcomm/phy-qcom-qmp-usb-legacy.c:580", base + offset);
 }
 
 static inline void qphy_clrbits(void __iomem *base, u32 offset, u32 val)
 {
 	u32 reg;
 
-	reg = readl(base + offset);
+	reg = pete_readl("drivers/phy/qualcomm/phy-qcom-qmp-usb-legacy.c:587", base + offset);
 	reg &= ~val;
-	writel(reg, base + offset);
+	pete_writel("drivers/phy/qualcomm/phy-qcom-qmp-usb-legacy.c:589", reg, base + offset);
 
 	/* ensure that above write is through */
-	readl(base + offset);
+	pete_readl("drivers/phy/qualcomm/phy-qcom-qmp-usb-legacy.c:592", base + offset);
 }
 
 /* list of clocks required by phy */
@@ -744,7 +744,7 @@ static void qmp_usb_legacy_configure_lane(void __iomem *base,
 		if (!(t->lane_mask & lane_mask))
 			continue;
 
-		writel(t->val, base + t->offset);
+		pete_writel("drivers/phy/qualcomm/phy-qcom-qmp-usb-legacy.c:747", t->val, base + t->offset);
 	}
 }
 

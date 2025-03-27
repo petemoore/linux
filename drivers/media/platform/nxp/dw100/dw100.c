@@ -202,12 +202,12 @@ static const struct dw100_fmt *dw100_find_format(struct v4l2_format *f)
 
 static inline u32 dw100_read(struct dw100_device *dw_dev, u32 reg)
 {
-	return readl(dw_dev->mmio + reg);
+	return pete_readl("drivers/media/platform/nxp/dw100/dw100.c:205", dw_dev->mmio + reg);
 }
 
 static inline void dw100_write(struct dw100_device *dw_dev, u32 reg, u32 val)
 {
-	writel(val, dw_dev->mmio + reg);
+	pete_writel("drivers/media/platform/nxp/dw100/dw100.c:210", val, dw_dev->mmio + reg);
 }
 
 static inline int dw100_dump_regs(struct seq_file *m)

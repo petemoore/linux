@@ -107,7 +107,7 @@ struct riic_irq_desc {
 
 static inline void riic_clear_set_bit(struct riic_dev *riic, u8 clear, u8 set, u8 reg)
 {
-	writeb((readb(riic->base + reg) & ~clear) | set, riic->base + reg);
+	pete_writeb("drivers/i2c/busses/i2c-riic.c:110", (pete_readb("drivers/i2c/busses/i2c-riic.c:110", riic->base + reg) & ~clear) | set, riic->base + reg);
 }
 
 static int riic_xfer(struct i2c_adapter *adap, struct i2c_msg msgs[], int num)
@@ -119,7 +119,7 @@ static int riic_xfer(struct i2c_adapter *adap, struct i2c_msg msgs[], int num)
 
 	pm_runtime_get_sync(adap->dev.parent);
 
-	if (readb(riic->base + RIIC_ICCR2) & ICCR2_BBSY) {
+	if (pete_readb("drivers/i2c/busses/i2c-riic.c:122", riic->base + RIIC_ICCR2) & ICCR2_BBSY) {
 		riic->err = -EBUSY;
 		goto out;
 	}
@@ -127,7 +127,7 @@ static int riic_xfer(struct i2c_adapter *adap, struct i2c_msg msgs[], int num)
 	reinit_completion(&riic->msg_done);
 	riic->err = 0;
 
-	writeb(0, riic->base + RIIC_ICSR2);
+	pete_writeb("drivers/i2c/busses/i2c-riic.c:130", 0, riic->base + RIIC_ICSR2);
 
 	for (i = 0, start_bit = ICCR2_ST; i < num; i++) {
 		riic->bytes_left = RIIC_INIT_MSG;
@@ -135,9 +135,9 @@ static int riic_xfer(struct i2c_adapter *adap, struct i2c_msg msgs[], int num)
 		riic->msg = &msgs[i];
 		riic->is_last = (i == num - 1);
 
-		writeb(ICIER_NAKIE | ICIER_TIE, riic->base + RIIC_ICIER);
+		pete_writeb("drivers/i2c/busses/i2c-riic.c:138", ICIER_NAKIE | ICIER_TIE, riic->base + RIIC_ICIER);
 
-		writeb(start_bit, riic->base + RIIC_ICCR2);
+		pete_writeb("drivers/i2c/busses/i2c-riic.c:140", start_bit, riic->base + RIIC_ICCR2);
 
 		time_left = wait_for_completion_timeout(&riic->msg_done, riic->adapter.timeout);
 		if (time_left == 0)
@@ -191,7 +191,7 @@ static irqreturn_t riic_tdre_isr(int irq, void *data)
 	 * value could be moved to the shadow shift register right away. So
 	 * this must be after updates to ICIER (where we want to disable TIE)!
 	 */
-	writeb(val, riic->base + RIIC_ICDRT);
+	pete_writeb("drivers/i2c/busses/i2c-riic.c:194", val, riic->base + RIIC_ICDRT);
 
 	return IRQ_HANDLED;
 }
@@ -200,9 +200,9 @@ static irqreturn_t riic_tend_isr(int irq, void *data)
 {
 	struct riic_dev *riic = data;
 
-	if (readb(riic->base + RIIC_ICSR2) & ICSR2_NACKF) {
+	if (pete_readb("drivers/i2c/busses/i2c-riic.c:203", riic->base + RIIC_ICSR2) & ICSR2_NACKF) {
 		/* We got a NACKIE */
-		readb(riic->base + RIIC_ICDRR);	/* dummy read */
+		pete_readb("drivers/i2c/busses/i2c-riic.c:205", riic->base + RIIC_ICDRR);	/* dummy read */
 		riic_clear_set_bit(riic, ICSR2_NACKF, 0, RIIC_ICSR2);
 		riic->err = -ENXIO;
 	} else if (riic->bytes_left) {
@@ -211,7 +211,7 @@ static irqreturn_t riic_tend_isr(int irq, void *data)
 
 	if (riic->is_last || riic->err) {
 		riic_clear_set_bit(riic, ICIER_TEIE, ICIER_SPIE, RIIC_ICIER);
-		writeb(ICCR2_SP, riic->base + RIIC_ICCR2);
+		pete_writeb("drivers/i2c/busses/i2c-riic.c:214", ICCR2_SP, riic->base + RIIC_ICCR2);
 	} else {
 		/* Transfer is complete, but do not send STOP */
 		riic_clear_set_bit(riic, ICIER_TEIE, 0, RIIC_ICIER);
@@ -230,7 +230,7 @@ static irqreturn_t riic_rdrf_isr(int irq, void *data)
 
 	if (riic->bytes_left == RIIC_INIT_MSG) {
 		riic->bytes_left = riic->msg->len;
-		readb(riic->base + RIIC_ICDRR);	/* dummy read */
+		pete_readb("drivers/i2c/busses/i2c-riic.c:233", riic->base + RIIC_ICDRR);	/* dummy read */
 		return IRQ_HANDLED;
 	}
 
@@ -238,7 +238,7 @@ static irqreturn_t riic_rdrf_isr(int irq, void *data)
 		/* STOP must come before we set ACKBT! */
 		if (riic->is_last) {
 			riic_clear_set_bit(riic, 0, ICIER_SPIE, RIIC_ICIER);
-			writeb(ICCR2_SP, riic->base + RIIC_ICCR2);
+			pete_writeb("drivers/i2c/busses/i2c-riic.c:241", ICCR2_SP, riic->base + RIIC_ICCR2);
 		}
 
 		riic_clear_set_bit(riic, 0, ICMR3_ACKBT, RIIC_ICMR3);
@@ -248,7 +248,7 @@ static irqreturn_t riic_rdrf_isr(int irq, void *data)
 	}
 
 	/* Reading acks the RIE interrupt */
-	*riic->buf = readb(riic->base + RIIC_ICDRR);
+	*riic->buf = pete_readb("drivers/i2c/busses/i2c-riic.c:251", riic->base + RIIC_ICDRR);
 	riic->buf++;
 	riic->bytes_left--;
 
@@ -260,10 +260,10 @@ static irqreturn_t riic_stop_isr(int irq, void *data)
 	struct riic_dev *riic = data;
 
 	/* read back registers to confirm writes have fully propagated */
-	writeb(0, riic->base + RIIC_ICSR2);
-	readb(riic->base + RIIC_ICSR2);
-	writeb(0, riic->base + RIIC_ICIER);
-	readb(riic->base + RIIC_ICIER);
+	pete_writeb("drivers/i2c/busses/i2c-riic.c:263", 0, riic->base + RIIC_ICSR2);
+	pete_readb("drivers/i2c/busses/i2c-riic.c:264", riic->base + RIIC_ICSR2);
+	pete_writeb("drivers/i2c/busses/i2c-riic.c:265", 0, riic->base + RIIC_ICIER);
+	pete_readb("drivers/i2c/busses/i2c-riic.c:266", riic->base + RIIC_ICIER);
 
 	complete(&riic->msg_done);
 
@@ -365,15 +365,15 @@ static int riic_init_hw(struct riic_dev *riic, struct i2c_timings *t)
 		 t->scl_rise_ns / (1000000000 / rate), cks, brl, brh);
 
 	/* Changing the order of accessing IICRST and ICE may break things! */
-	writeb(ICCR1_IICRST | ICCR1_SOWP, riic->base + RIIC_ICCR1);
+	pete_writeb("drivers/i2c/busses/i2c-riic.c:368", ICCR1_IICRST | ICCR1_SOWP, riic->base + RIIC_ICCR1);
 	riic_clear_set_bit(riic, 0, ICCR1_ICE, RIIC_ICCR1);
 
-	writeb(ICMR1_CKS(cks), riic->base + RIIC_ICMR1);
-	writeb(brh | ICBR_RESERVED, riic->base + RIIC_ICBRH);
-	writeb(brl | ICBR_RESERVED, riic->base + RIIC_ICBRL);
+	pete_writeb("drivers/i2c/busses/i2c-riic.c:371", ICMR1_CKS(cks), riic->base + RIIC_ICMR1);
+	pete_writeb("drivers/i2c/busses/i2c-riic.c:372", brh | ICBR_RESERVED, riic->base + RIIC_ICBRH);
+	pete_writeb("drivers/i2c/busses/i2c-riic.c:373", brl | ICBR_RESERVED, riic->base + RIIC_ICBRL);
 
-	writeb(0, riic->base + RIIC_ICSER);
-	writeb(ICMR3_ACKWP | ICMR3_RDRFS, riic->base + RIIC_ICMR3);
+	pete_writeb("drivers/i2c/busses/i2c-riic.c:375", 0, riic->base + RIIC_ICSER);
+	pete_writeb("drivers/i2c/busses/i2c-riic.c:376", ICMR3_ACKWP | ICMR3_RDRFS, riic->base + RIIC_ICMR3);
 
 	riic_clear_set_bit(riic, ICCR1_IICRST, 0, RIIC_ICCR1);
 
@@ -481,7 +481,7 @@ static void riic_i2c_remove(struct platform_device *pdev)
 	struct riic_dev *riic = platform_get_drvdata(pdev);
 
 	pm_runtime_get_sync(&pdev->dev);
-	writeb(0, riic->base + RIIC_ICIER);
+	pete_writeb("drivers/i2c/busses/i2c-riic.c:484", 0, riic->base + RIIC_ICIER);
 	pm_runtime_put(&pdev->dev);
 	i2c_del_adapter(&riic->adapter);
 	pm_runtime_disable(&pdev->dev);

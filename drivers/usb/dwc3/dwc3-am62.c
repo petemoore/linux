@@ -131,12 +131,12 @@ static const int dwc3_ti_rate_table[] = {	/* in KHZ */
 
 static inline u32 dwc3_ti_readl(struct dwc3_am62 *am62, u32 offset)
 {
-	return readl((am62->usbss) + offset);
+	return pete_readl("drivers/usb/dwc3/dwc3-am62.c:134", (am62->usbss) + offset);
 }
 
 static inline void dwc3_ti_writel(struct dwc3_am62 *am62, u32 offset, u32 value)
 {
-	writel(value, (am62->usbss) + offset);
+	pete_writel("drivers/usb/dwc3/dwc3-am62.c:139", value, (am62->usbss) + offset);
 }
 
 static int phy_syscon_pll_refclk(struct dwc3_am62 *am62)

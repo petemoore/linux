@@ -38,7 +38,7 @@ static int meson_reset_reset(struct reset_controller_dev *rcdev,
 	unsigned int offset = id % BITS_PER_REG;
 	void __iomem *reg_addr = data->reg_base + (bank << 2);
 
-	writel(BIT(offset), reg_addr);
+	pete_writel("drivers/reset/reset-meson.c:41", BIT(offset), reg_addr);
 
 	return 0;
 }
@@ -58,11 +58,11 @@ static int meson_reset_level(struct reset_controller_dev *rcdev,
 
 	spin_lock_irqsave(&data->lock, flags);
 
-	reg = readl(reg_addr);
+	reg = pete_readl("drivers/reset/reset-meson.c:61", reg_addr);
 	if (assert)
-		writel(reg & ~BIT(offset), reg_addr);
+		pete_writel("drivers/reset/reset-meson.c:63", reg & ~BIT(offset), reg_addr);
 	else
-		writel(reg | BIT(offset), reg_addr);
+		pete_writel("drivers/reset/reset-meson.c:65", reg | BIT(offset), reg_addr);
 
 	spin_unlock_irqrestore(&data->lock, flags);
 

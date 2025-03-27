@@ -54,13 +54,13 @@ struct lpc18xx_eeprom_dev {
 static inline void lpc18xx_eeprom_writel(struct lpc18xx_eeprom_dev *eeprom,
 					 u32 reg, u32 val)
 {
-	writel(val, eeprom->reg_base + reg);
+	pete_writel("drivers/nvmem/lpc18xx_eeprom.c:57", val, eeprom->reg_base + reg);
 }
 
 static inline u32 lpc18xx_eeprom_readl(struct lpc18xx_eeprom_dev *eeprom,
 				       u32 reg)
 {
-	return readl(eeprom->reg_base + reg);
+	return pete_readl("drivers/nvmem/lpc18xx_eeprom.c:63", eeprom->reg_base + reg);
 }
 
 static int lpc18xx_eeprom_busywait_until_prog(struct lpc18xx_eeprom_dev *eeprom)
@@ -110,7 +110,7 @@ static int lpc18xx_eeprom_gather_write(void *context, unsigned int reg,
 	usleep_range(100, 200);
 
 	while (bytes) {
-		writel(*(u32 *)val, eeprom->mem_base + offset);
+		pete_writel("drivers/nvmem/lpc18xx_eeprom.c:113", *(u32 *)val, eeprom->mem_base + offset);
 		ret = lpc18xx_eeprom_busywait_until_prog(eeprom);
 		if (ret < 0)
 			return ret;
@@ -138,7 +138,7 @@ static int lpc18xx_eeprom_read(void *context, unsigned int offset,
 	usleep_range(100, 200);
 
 	while (bytes) {
-		*(u32 *)val = readl(eeprom->mem_base + offset);
+		*(u32 *)val = pete_readl("drivers/nvmem/lpc18xx_eeprom.c:141", eeprom->mem_base + offset);
 		bytes -= eeprom->val_bytes;
 		val += eeprom->val_bytes;
 		offset += eeprom->val_bytes;

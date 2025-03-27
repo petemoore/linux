@@ -331,9 +331,9 @@ static void meson_mmc_clk_gate(struct meson_host *host)
 		 * If the pinmux is not provided - default to the classic and
 		 * unsafe method
 		 */
-		cfg = readl(host->regs + SD_EMMC_CFG);
+		cfg = pete_readl("drivers/mmc/host/meson-gx-mmc.c:334", host->regs + SD_EMMC_CFG);
 		cfg |= CFG_STOP_CLOCK;
-		writel(cfg, host->regs + SD_EMMC_CFG);
+		pete_writel("drivers/mmc/host/meson-gx-mmc.c:336", cfg, host->regs + SD_EMMC_CFG);
 	}
 }
 
@@ -345,9 +345,9 @@ static void meson_mmc_clk_ungate(struct meson_host *host)
 		pinctrl_select_default_state(host->dev);
 
 	/* Make sure the clock is not stopped in the controller */
-	cfg = readl(host->regs + SD_EMMC_CFG);
+	cfg = pete_readl("drivers/mmc/host/meson-gx-mmc.c:348", host->regs + SD_EMMC_CFG);
 	cfg &= ~CFG_STOP_CLOCK;
-	writel(cfg, host->regs + SD_EMMC_CFG);
+	pete_writel("drivers/mmc/host/meson-gx-mmc.c:350", cfg, host->regs + SD_EMMC_CFG);
 }
 
 static int meson_mmc_clk_set(struct meson_host *host, unsigned long rate,
@@ -371,9 +371,9 @@ static int meson_mmc_clk_set(struct meson_host *host, unsigned long rate,
 		return 0;
 
 	/* Stop the clock during rate change to avoid glitches */
-	cfg = readl(host->regs + SD_EMMC_CFG);
+	cfg = pete_readl("drivers/mmc/host/meson-gx-mmc.c:374", host->regs + SD_EMMC_CFG);
 	cfg |= CFG_STOP_CLOCK;
-	writel(cfg, host->regs + SD_EMMC_CFG);
+	pete_writel("drivers/mmc/host/meson-gx-mmc.c:376", cfg, host->regs + SD_EMMC_CFG);
 
 	if (ddr) {
 		/* DDR modes require higher module clock */
@@ -382,7 +382,7 @@ static int meson_mmc_clk_set(struct meson_host *host, unsigned long rate,
 	} else {
 		cfg &= ~CFG_DDR;
 	}
-	writel(cfg, host->regs + SD_EMMC_CFG);
+	pete_writel("drivers/mmc/host/meson-gx-mmc.c:385", cfg, host->regs + SD_EMMC_CFG);
 	host->ddr = ddr;
 
 	ret = clk_set_rate(host->mmc_clk, rate);
@@ -435,7 +435,7 @@ static int meson_mmc_clk_init(struct meson_host *host)
 	clk_reg |= FIELD_PREP(CLK_RX_PHASE_MASK, CLK_PHASE_0);
 	if (host->mmc->caps & MMC_CAP_SDIO_IRQ)
 		clk_reg |= CLK_IRQ_SDIO_SLEEP(host);
-	writel(clk_reg, host->regs + SD_EMMC_CLOCK);
+	pete_writel("drivers/mmc/host/meson-gx-mmc.c:438", clk_reg, host->regs + SD_EMMC_CLOCK);
 
 	/* get the mux parents */
 	for (i = 0; i < MUX_CLK_NUM_PARENTS; i++) {
@@ -506,10 +506,10 @@ static int meson_mmc_clk_init(struct meson_host *host)
 
 static void meson_mmc_disable_resampling(struct meson_host *host)
 {
-	unsigned int val = readl(host->regs + host->data->adjust);
+	unsigned int val = pete_readl("drivers/mmc/host/meson-gx-mmc.c:509", host->regs + host->data->adjust);
 
 	val &= ~ADJUST_ADJ_EN;
-	writel(val, host->regs + host->data->adjust);
+	pete_writel("drivers/mmc/host/meson-gx-mmc.c:512", val, host->regs + host->data->adjust);
 }
 
 static void meson_mmc_reset_resampling(struct meson_host *host)
@@ -518,9 +518,9 @@ static void meson_mmc_reset_resampling(struct meson_host *host)
 
 	meson_mmc_disable_resampling(host);
 
-	val = readl(host->regs + host->data->adjust);
+	val = pete_readl("drivers/mmc/host/meson-gx-mmc.c:521", host->regs + host->data->adjust);
 	val &= ~ADJUST_ADJ_DELAY_MASK;
-	writel(val, host->regs + host->data->adjust);
+	pete_writel("drivers/mmc/host/meson-gx-mmc.c:523", val, host->regs + host->data->adjust);
 }
 
 static int meson_mmc_resampling_tuning(struct mmc_host *mmc, u32 opcode)
@@ -533,9 +533,9 @@ static int meson_mmc_resampling_tuning(struct mmc_host *mmc, u32 opcode)
 	max_dly = DIV_ROUND_UP(clk_get_rate(host->mux_clk),
 			       clk_get_rate(host->mmc_clk));
 
-	val = readl(host->regs + host->data->adjust);
+	val = pete_readl("drivers/mmc/host/meson-gx-mmc.c:536", host->regs + host->data->adjust);
 	val |= ADJUST_ADJ_EN;
-	writel(val, host->regs + host->data->adjust);
+	pete_writel("drivers/mmc/host/meson-gx-mmc.c:538", val, host->regs + host->data->adjust);
 
 	if (mmc_doing_retune(mmc))
 		dly = FIELD_GET(ADJUST_ADJ_DELAY_MASK, val) + 1;
@@ -545,7 +545,7 @@ static int meson_mmc_resampling_tuning(struct mmc_host *mmc, u32 opcode)
 	for (i = 0; i < max_dly; i++) {
 		val &= ~ADJUST_ADJ_DELAY_MASK;
 		val |= FIELD_PREP(ADJUST_ADJ_DELAY_MASK, (dly + i) % max_dly);
-		writel(val, host->regs + host->data->adjust);
+		pete_writel("drivers/mmc/host/meson-gx-mmc.c:548", val, host->regs + host->data->adjust);
 
 		ret = mmc_send_tuning(mmc, opcode, NULL);
 		if (!ret) {
@@ -636,10 +636,10 @@ static void meson_mmc_set_ios(struct mmc_host *mmc, struct mmc_ios *ios)
 		bus_width = CFG_BUS_WIDTH_4;
 	}
 
-	val = readl(host->regs + SD_EMMC_CFG);
+	val = pete_readl("drivers/mmc/host/meson-gx-mmc.c:639", host->regs + SD_EMMC_CFG);
 	val &= ~CFG_BUS_WIDTH_MASK;
 	val |= FIELD_PREP(CFG_BUS_WIDTH_MASK, bus_width);
-	writel(val, host->regs + SD_EMMC_CFG);
+	pete_writel("drivers/mmc/host/meson-gx-mmc.c:642", val, host->regs + SD_EMMC_CFG);
 
 	meson_mmc_check_resampling(host, ios);
 	err = meson_mmc_prepare_ios_clock(host, ios);
@@ -665,7 +665,7 @@ static void meson_mmc_set_blksz(struct mmc_host *mmc, unsigned int blksz)
 	struct meson_host *host = mmc_priv(mmc);
 	u32 cfg, blksz_old;
 
-	cfg = readl(host->regs + SD_EMMC_CFG);
+	cfg = pete_readl("drivers/mmc/host/meson-gx-mmc.c:668", host->regs + SD_EMMC_CFG);
 	blksz_old = FIELD_GET(CFG_BLK_LEN_MASK, cfg);
 
 	if (!is_power_of_2(blksz))
@@ -682,7 +682,7 @@ static void meson_mmc_set_blksz(struct mmc_host *mmc, unsigned int blksz)
 
 	cfg &= ~CFG_BLK_LEN_MASK;
 	cfg |= FIELD_PREP(CFG_BLK_LEN_MASK, blksz);
-	writel(cfg, host->regs + SD_EMMC_CFG);
+	pete_writel("drivers/mmc/host/meson-gx-mmc.c:685", cfg, host->regs + SD_EMMC_CFG);
 }
 
 static void meson_mmc_set_response_bits(struct mmc_command *cmd, u32 *cmd_cfg)
@@ -737,7 +737,7 @@ static void meson_mmc_desc_chain_transfer(struct mmc_host *mmc, u32 cmd_cfg)
 
 	dma_wmb(); /* ensure descriptor is written before kicked */
 	start = host->descs_dma_addr | START_DESC_BUSY;
-	writel(start, host->regs + SD_EMMC_START);
+	pete_writel("drivers/mmc/host/meson-gx-mmc.c:740", start, host->regs + SD_EMMC_START);
 }
 
 /* local sg copy for dram_access_quirk */
@@ -767,14 +767,14 @@ static void meson_mmc_copy_buffer(struct meson_host *host, struct mmc_data *data
 
 		if (to_buffer) {
 			do {
-				writel(*buf++, host->bounce_iomem_buf + offset + buf_offset);
+				pete_writel("drivers/mmc/host/meson-gx-mmc.c:770", *buf++, host->bounce_iomem_buf + offset + buf_offset);
 
 				buf_offset += 4;
 				left -= 4;
 			} while (left);
 		} else {
 			do {
-				*buf++ = readl(host->bounce_iomem_buf + offset + buf_offset);
+				*buf++ = pete_readl("drivers/mmc/host/meson-gx-mmc.c:777", host->bounce_iomem_buf + offset + buf_offset);
 
 				buf_offset += 4;
 				left -= 4;
@@ -845,11 +845,11 @@ static void meson_mmc_start_cmd(struct mmc_host *mmc, struct mmc_command *cmd)
 
 	/* Last descriptor */
 	cmd_cfg |= CMD_CFG_END_OF_CHAIN;
-	writel(cmd_cfg, host->regs + SD_EMMC_CMD_CFG);
-	writel(cmd_data, host->regs + SD_EMMC_CMD_DAT);
-	writel(0, host->regs + SD_EMMC_CMD_RSP);
+	pete_writel("drivers/mmc/host/meson-gx-mmc.c:848", cmd_cfg, host->regs + SD_EMMC_CMD_CFG);
+	pete_writel("drivers/mmc/host/meson-gx-mmc.c:849", cmd_data, host->regs + SD_EMMC_CMD_DAT);
+	pete_writel("drivers/mmc/host/meson-gx-mmc.c:850", 0, host->regs + SD_EMMC_CMD_RSP);
 	wmb(); /* ensure descriptor is written before kicked */
-	writel(cmd->arg, host->regs + SD_EMMC_CMD_ARG);
+	pete_writel("drivers/mmc/host/meson-gx-mmc.c:852", cmd->arg, host->regs + SD_EMMC_CMD_ARG);
 }
 
 static int meson_mmc_validate_dram_access(struct mmc_host *mmc, struct mmc_data *data)
@@ -899,7 +899,7 @@ static void meson_mmc_request(struct mmc_host *mmc, struct mmc_request *mrq)
 		meson_mmc_pre_req(mmc, mrq);
 
 	/* Stop execution */
-	writel(0, host->regs + SD_EMMC_START);
+	pete_writel("drivers/mmc/host/meson-gx-mmc.c:902", 0, host->regs + SD_EMMC_START);
 
 	meson_mmc_start_cmd(mmc, mrq->sbc ?: mrq->cmd);
 }
@@ -909,12 +909,12 @@ static void meson_mmc_read_resp(struct mmc_host *mmc, struct mmc_command *cmd)
 	struct meson_host *host = mmc_priv(mmc);
 
 	if (cmd->flags & MMC_RSP_136) {
-		cmd->resp[0] = readl(host->regs + SD_EMMC_CMD_RSP3);
-		cmd->resp[1] = readl(host->regs + SD_EMMC_CMD_RSP2);
-		cmd->resp[2] = readl(host->regs + SD_EMMC_CMD_RSP1);
-		cmd->resp[3] = readl(host->regs + SD_EMMC_CMD_RSP);
+		cmd->resp[0] = pete_readl("drivers/mmc/host/meson-gx-mmc.c:912", host->regs + SD_EMMC_CMD_RSP3);
+		cmd->resp[1] = pete_readl("drivers/mmc/host/meson-gx-mmc.c:913", host->regs + SD_EMMC_CMD_RSP2);
+		cmd->resp[2] = pete_readl("drivers/mmc/host/meson-gx-mmc.c:914", host->regs + SD_EMMC_CMD_RSP1);
+		cmd->resp[3] = pete_readl("drivers/mmc/host/meson-gx-mmc.c:915", host->regs + SD_EMMC_CMD_RSP);
 	} else if (cmd->flags & MMC_RSP_PRESENT) {
-		cmd->resp[0] = readl(host->regs + SD_EMMC_CMD_RSP);
+		cmd->resp[0] = pete_readl("drivers/mmc/host/meson-gx-mmc.c:917", host->regs + SD_EMMC_CMD_RSP);
 	}
 }
 
@@ -925,7 +925,7 @@ static void __meson_mmc_enable_sdio_irq(struct mmc_host *mmc, int enable)
 
 	if (enable)
 		reg_irqen |= IRQ_SDIO;
-	writel(reg_irqen, host->regs + SD_EMMC_IRQ_EN);
+	pete_writel("drivers/mmc/host/meson-gx-mmc.c:928", reg_irqen, host->regs + SD_EMMC_IRQ_EN);
 }
 
 static irqreturn_t meson_mmc_irq(int irq, void *dev_id)
@@ -937,7 +937,7 @@ static irqreturn_t meson_mmc_irq(int irq, void *dev_id)
 
 	if (host->mmc->caps & MMC_CAP_SDIO_IRQ)
 		irq_mask |= IRQ_SDIO;
-	raw_status = readl(host->regs + SD_EMMC_STATUS);
+	raw_status = pete_readl("drivers/mmc/host/meson-gx-mmc.c:940", host->regs + SD_EMMC_STATUS);
 	status = raw_status & irq_mask;
 
 	if (!status) {
@@ -948,7 +948,7 @@ static irqreturn_t meson_mmc_irq(int irq, void *dev_id)
 	}
 
 	/* ack all raised interrupts */
-	writel(status, host->regs + SD_EMMC_STATUS);
+	pete_writel("drivers/mmc/host/meson-gx-mmc.c:951", status, host->regs + SD_EMMC_STATUS);
 
 	cmd = host->cmd;
 
@@ -994,10 +994,10 @@ static irqreturn_t meson_mmc_irq(int irq, void *dev_id)
 out:
 	if (cmd->error) {
 		/* Stop desc in case of errors */
-		u32 start = readl(host->regs + SD_EMMC_START);
+		u32 start = pete_readl("drivers/mmc/host/meson-gx-mmc.c:997", host->regs + SD_EMMC_START);
 
 		start &= ~START_DESC_BUSY;
-		writel(start, host->regs + SD_EMMC_START);
+		pete_writel("drivers/mmc/host/meson-gx-mmc.c:1000", start, host->regs + SD_EMMC_START);
 	}
 
 	return ret;
@@ -1069,7 +1069,7 @@ static void meson_mmc_cfg_init(struct meson_host *host)
 	/* abort chain on R/W errors */
 	cfg |= CFG_ERR_ABORT;
 
-	writel(cfg, host->regs + SD_EMMC_CFG);
+	pete_writel("drivers/mmc/host/meson-gx-mmc.c:1072", cfg, host->regs + SD_EMMC_CFG);
 }
 
 static int meson_mmc_card_busy(struct mmc_host *mmc)
@@ -1077,7 +1077,7 @@ static int meson_mmc_card_busy(struct mmc_host *mmc)
 	struct meson_host *host = mmc_priv(mmc);
 	u32 regval;
 
-	regval = readl(host->regs + SD_EMMC_STATUS);
+	regval = pete_readl("drivers/mmc/host/meson-gx-mmc.c:1080", host->regs + SD_EMMC_STATUS);
 
 	/* We are only interrested in lines 0 to 3, so mask the other ones */
 	return !(FIELD_GET(STATUS_DATI, regval) & 0xf);
@@ -1212,12 +1212,12 @@ static int meson_mmc_probe(struct platform_device *pdev)
 	meson_mmc_cfg_init(host);
 
 	/* Stop execution */
-	writel(0, host->regs + SD_EMMC_START);
+	pete_writel("drivers/mmc/host/meson-gx-mmc.c:1215", 0, host->regs + SD_EMMC_START);
 
 	/* clear, ack and enable interrupts */
-	writel(0, host->regs + SD_EMMC_IRQ_EN);
-	writel(IRQ_EN_MASK, host->regs + SD_EMMC_STATUS);
-	writel(IRQ_EN_MASK, host->regs + SD_EMMC_IRQ_EN);
+	pete_writel("drivers/mmc/host/meson-gx-mmc.c:1218", 0, host->regs + SD_EMMC_IRQ_EN);
+	pete_writel("drivers/mmc/host/meson-gx-mmc.c:1219", IRQ_EN_MASK, host->regs + SD_EMMC_STATUS);
+	pete_writel("drivers/mmc/host/meson-gx-mmc.c:1220", IRQ_EN_MASK, host->regs + SD_EMMC_IRQ_EN);
 
 	ret = request_threaded_irq(host->irq, meson_mmc_irq,
 				   meson_mmc_irq_thread, IRQF_ONESHOT,
@@ -1300,7 +1300,7 @@ static void meson_mmc_remove(struct platform_device *pdev)
 	mmc_remove_host(host->mmc);
 
 	/* disable interrupts */
-	writel(0, host->regs + SD_EMMC_IRQ_EN);
+	pete_writel("drivers/mmc/host/meson-gx-mmc.c:1303", 0, host->regs + SD_EMMC_IRQ_EN);
 	free_irq(host->irq, host);
 
 	clk_disable_unprepare(host->mmc_clk);

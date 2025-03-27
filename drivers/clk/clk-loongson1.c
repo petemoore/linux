@@ -64,7 +64,7 @@ static unsigned long ls1x_pll_recalc_rate(struct clk_hw *hw,
 	const struct ls1x_clk_pll_data *d = ls1x_clk->data;
 	u32 val, rate;
 
-	val = readl(ls1x_clk->reg);
+	val = pete_readl("drivers/clk/clk-loongson1.c:67", ls1x_clk->reg);
 	rate = d->fixed;
 	rate += ls1x_pll_rate_part(val, d->int_shift, d->int_width);
 	if (d->frac_width)
@@ -86,7 +86,7 @@ static unsigned long ls1x_divider_recalc_rate(struct clk_hw *hw,
 	const struct ls1x_clk_div_data *d = ls1x_clk->data;
 	unsigned int val;
 
-	val = readl(ls1x_clk->reg) >> d->shift;
+	val = pete_readl("drivers/clk/clk-loongson1.c:89", ls1x_clk->reg) >> d->shift;
 	val &= clk_div_mask(d->width);
 
 	return divider_recalc_rate(hw, parent_rate, val, d->table,
@@ -119,25 +119,25 @@ static int ls1x_divider_set_rate(struct clk_hw *hw, unsigned long rate,
 	spin_lock_irqsave(d->lock, flags);
 
 	/* Bypass the clock */
-	val = readl(ls1x_clk->reg);
+	val = pete_readl("drivers/clk/clk-loongson1.c:122", ls1x_clk->reg);
 	if (d->bypass_inv)
 		val &= ~BIT(d->bypass_shift);
 	else
 		val |= BIT(d->bypass_shift);
-	writel(val, ls1x_clk->reg);
+	pete_writel("drivers/clk/clk-loongson1.c:127", val, ls1x_clk->reg);
 
-	val = readl(ls1x_clk->reg);
+	val = pete_readl("drivers/clk/clk-loongson1.c:129", ls1x_clk->reg);
 	val &= ~(clk_div_mask(d->width) << d->shift);
 	val |= (u32)div_val << d->shift;
-	writel(val, ls1x_clk->reg);
+	pete_writel("drivers/clk/clk-loongson1.c:132", val, ls1x_clk->reg);
 
 	/* Restore the clock */
-	val = readl(ls1x_clk->reg);
+	val = pete_readl("drivers/clk/clk-loongson1.c:135", ls1x_clk->reg);
 	if (d->bypass_inv)
 		val |= BIT(d->bypass_shift);
 	else
 		val &= ~BIT(d->bypass_shift);
-	writel(val, ls1x_clk->reg);
+	pete_writel("drivers/clk/clk-loongson1.c:140", val, ls1x_clk->reg);
 
 	spin_unlock_irqrestore(d->lock, flags);
 

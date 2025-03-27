@@ -120,13 +120,13 @@ static void __init kirkwood_dt_eth_fixup(void)
 		}
 
 		macaddr = pmac->value;
-		reg = readl(io + MV643XX_ETH_MAC_ADDR_HIGH);
+		reg = pete_readl("arch/arm/mach-mvebu/kirkwood.c:123", io + MV643XX_ETH_MAC_ADDR_HIGH);
 		macaddr[0] = (reg >> 24) & 0xff;
 		macaddr[1] = (reg >> 16) & 0xff;
 		macaddr[2] = (reg >> 8) & 0xff;
 		macaddr[3] = reg & 0xff;
 
-		reg = readl(io + MV643XX_ETH_MAC_ADDR_LOW);
+		reg = pete_readl("arch/arm/mach-mvebu/kirkwood.c:129", io + MV643XX_ETH_MAC_ADDR_LOW);
 		macaddr[4] = (reg >> 8) & 0xff;
 		macaddr[5] = reg & 0xff;
 
@@ -152,7 +152,7 @@ static void kirkwood_disable_mbus_error_propagation(void)
 	void __iomem *cpu_config;
 
 	cpu_config = ioremap(CPU_CONFIG_PHYS, 4);
-	writel(readl(cpu_config) & ~CPU_CONFIG_ERROR_PROP, cpu_config);
+	pete_writel("arch/arm/mach-mvebu/kirkwood.c:155", pete_readl("arch/arm/mach-mvebu/kirkwood.c:155", cpu_config) & ~CPU_CONFIG_ERROR_PROP, cpu_config);
 }
 
 static struct of_dev_auxdata auxdata[] __initdata = {

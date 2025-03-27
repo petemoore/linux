@@ -1610,9 +1610,9 @@ static void tegra_pcie_dw_pme_turnoff(struct tegra_pcie_dw *pcie)
 		 * Some cards do not go to detect state even after de-asserting
 		 * PERST#. So, de-assert LTSSM to bring link to detect state.
 		 */
-		data = readl(pcie->appl_base + APPL_CTRL);
+		data = pete_readl("drivers/pci/controller/dwc/pcie-tegra194.c:1613", pcie->appl_base + APPL_CTRL);
 		data &= ~APPL_CTRL_LTSSM_EN;
-		writel(data, pcie->appl_base + APPL_CTRL);
+		pete_writel("drivers/pci/controller/dwc/pcie-tegra194.c:1615", data, pcie->appl_base + APPL_CTRL);
 
 		err = readl_poll_timeout_atomic(pcie->appl_base + APPL_DEBUG,
 						data,
@@ -1975,7 +1975,7 @@ static int tegra_pcie_ep_raise_msix_irq(struct tegra_pcie_dw *pcie, u16 irq)
 {
 	struct dw_pcie_ep *ep = &pcie->pci.ep;
 
-	writel(irq, ep->msi_mem);
+	pete_writel("drivers/pci/controller/dwc/pcie-tegra194.c:1978", irq, ep->msi_mem);
 
 	return 0;
 }

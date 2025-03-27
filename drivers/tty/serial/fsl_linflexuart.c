@@ -144,32 +144,32 @@ static void linflex_stop_tx(struct uart_port *port)
 {
 	unsigned long ier;
 
-	ier = readl(port->membase + LINIER);
+	ier = pete_readl("drivers/tty/serial/fsl_linflexuart.c:147", port->membase + LINIER);
 	ier &= ~(LINFLEXD_LINIER_DTIE);
-	writel(ier, port->membase + LINIER);
+	pete_writel("drivers/tty/serial/fsl_linflexuart.c:149", ier, port->membase + LINIER);
 }
 
 static void linflex_stop_rx(struct uart_port *port)
 {
 	unsigned long ier;
 
-	ier = readl(port->membase + LINIER);
-	writel(ier & ~LINFLEXD_LINIER_DRIE, port->membase + LINIER);
+	ier = pete_readl("drivers/tty/serial/fsl_linflexuart.c:156", port->membase + LINIER);
+	pete_writel("drivers/tty/serial/fsl_linflexuart.c:157", ier & ~LINFLEXD_LINIER_DRIE, port->membase + LINIER);
 }
 
 static void linflex_put_char(struct uart_port *sport, unsigned char c)
 {
 	unsigned long status;
 
-	writeb(c, sport->membase + BDRL);
+	pete_writeb("drivers/tty/serial/fsl_linflexuart.c:164", c, sport->membase + BDRL);
 
 	/* Waiting for data transmission completed. */
-	while (((status = readl(sport->membase + UARTSR)) &
+	while (((status = pete_readl("drivers/tty/serial/fsl_linflexuart.c:167", sport->membase + UARTSR)) &
 				LINFLEXD_UARTSR_DTFTFF) !=
 				LINFLEXD_UARTSR_DTFTFF)
 		;
 
-	writel(status | LINFLEXD_UARTSR_DTFTFF, sport->membase + UARTSR);
+	pete_writel("drivers/tty/serial/fsl_linflexuart.c:172", status | LINFLEXD_UARTSR_DTFTFF, sport->membase + UARTSR);
 }
 
 static inline void linflex_transmit_buffer(struct uart_port *sport)
@@ -193,8 +193,8 @@ static void linflex_start_tx(struct uart_port *port)
 	unsigned long ier;
 
 	linflex_transmit_buffer(port);
-	ier = readl(port->membase + LINIER);
-	writel(ier | LINFLEXD_LINIER_DTIE, port->membase + LINIER);
+	ier = pete_readl("drivers/tty/serial/fsl_linflexuart.c:196", port->membase + LINIER);
+	pete_writel("drivers/tty/serial/fsl_linflexuart.c:197", ier | LINFLEXD_LINIER_DTIE, port->membase + LINIER);
 }
 
 static irqreturn_t linflex_txint(int irq, void *dev_id)
@@ -232,9 +232,9 @@ static irqreturn_t linflex_rxint(int irq, void *dev_id)
 
 	spin_lock_irqsave(&sport->lock, flags);
 
-	status = readl(sport->membase + UARTSR);
+	status = pete_readl("drivers/tty/serial/fsl_linflexuart.c:235", sport->membase + UARTSR);
 	while (status & LINFLEXD_UARTSR_RMB) {
-		rx = readb(sport->membase + BDRM);
+		rx = pete_readb("drivers/tty/serial/fsl_linflexuart.c:237", sport->membase + BDRM);
 		brk = false;
 		flg = TTY_NORMAL;
 		sport->icount.rx++;
@@ -254,8 +254,8 @@ static irqreturn_t linflex_rxint(int irq, void *dev_id)
 				sport->icount.parity++;
 		}
 
-		writel(status, sport->membase + UARTSR);
-		status = readl(sport->membase + UARTSR);
+		pete_writel("drivers/tty/serial/fsl_linflexuart.c:257", status, sport->membase + UARTSR);
+		status = pete_readl("drivers/tty/serial/fsl_linflexuart.c:258", sport->membase + UARTSR);
 
 		if (brk) {
 			uart_handle_break(sport);
@@ -278,7 +278,7 @@ static irqreturn_t linflex_int(int irq, void *dev_id)
 	struct uart_port *sport = dev_id;
 	unsigned long status;
 
-	status = readl(sport->membase + UARTSR);
+	status = pete_readl("drivers/tty/serial/fsl_linflexuart.c:281", sport->membase + UARTSR);
 
 	if (status & LINFLEXD_UARTSR_DRFRFE)
 		linflex_rxint(irq, dev_id);
@@ -293,7 +293,7 @@ static unsigned int linflex_tx_empty(struct uart_port *port)
 {
 	unsigned long status;
 
-	status = readl(port->membase + UARTSR) & LINFLEXD_UARTSR_DTFTFF;
+	status = pete_readl("drivers/tty/serial/fsl_linflexuart.c:296", port->membase + UARTSR) & LINFLEXD_UARTSR_DTFTFF;
 
 	return status ? TIOCSER_TEMT : 0;
 }
@@ -316,23 +316,23 @@ static void linflex_setup_watermark(struct uart_port *sport)
 	unsigned long cr, ier, cr1;
 
 	/* Disable transmission/reception */
-	ier = readl(sport->membase + LINIER);
+	ier = pete_readl("drivers/tty/serial/fsl_linflexuart.c:319", sport->membase + LINIER);
 	ier &= ~(LINFLEXD_LINIER_DRIE | LINFLEXD_LINIER_DTIE);
-	writel(ier, sport->membase + LINIER);
+	pete_writel("drivers/tty/serial/fsl_linflexuart.c:321", ier, sport->membase + LINIER);
 
-	cr = readl(sport->membase + UARTCR);
+	cr = pete_readl("drivers/tty/serial/fsl_linflexuart.c:323", sport->membase + UARTCR);
 	cr &= ~(LINFLEXD_UARTCR_RXEN | LINFLEXD_UARTCR_TXEN);
-	writel(cr, sport->membase + UARTCR);
+	pete_writel("drivers/tty/serial/fsl_linflexuart.c:325", cr, sport->membase + UARTCR);
 
 	/* Enter initialization mode by setting INIT bit */
 
 	/* set the Linflex in master mode and activate by-pass filter */
 	cr1 = LINFLEXD_LINCR1_BF | LINFLEXD_LINCR1_MME
 	      | LINFLEXD_LINCR1_INIT;
-	writel(cr1, sport->membase + LINCR1);
+	pete_writel("drivers/tty/serial/fsl_linflexuart.c:332", cr1, sport->membase + LINCR1);
 
 	/* wait for init mode entry */
-	while ((readl(sport->membase + LINSR)
+	while ((pete_readl("drivers/tty/serial/fsl_linflexuart.c:335", sport->membase + LINSR)
 		& LINFLEXD_LINSR_LINS_MASK)
 		!= LINFLEXD_LINSR_LINS_INITMODE)
 		;
@@ -346,22 +346,22 @@ static void linflex_setup_watermark(struct uart_port *sport)
 	 */
 
 	/* set UART bit to allow writing other bits */
-	writel(LINFLEXD_UARTCR_UART, sport->membase + UARTCR);
+	pete_writel("drivers/tty/serial/fsl_linflexuart.c:349", LINFLEXD_UARTCR_UART, sport->membase + UARTCR);
 
 	cr = (LINFLEXD_UARTCR_RXEN | LINFLEXD_UARTCR_TXEN |
 	      LINFLEXD_UARTCR_WL0 | LINFLEXD_UARTCR_UART);
 
-	writel(cr, sport->membase + UARTCR);
+	pete_writel("drivers/tty/serial/fsl_linflexuart.c:354", cr, sport->membase + UARTCR);
 
 	cr1 &= ~(LINFLEXD_LINCR1_INIT);
 
-	writel(cr1, sport->membase + LINCR1);
+	pete_writel("drivers/tty/serial/fsl_linflexuart.c:358", cr1, sport->membase + LINCR1);
 
-	ier = readl(sport->membase + LINIER);
+	ier = pete_readl("drivers/tty/serial/fsl_linflexuart.c:360", sport->membase + LINIER);
 	ier |= LINFLEXD_LINIER_DRIE;
 	ier |= LINFLEXD_LINIER_DTIE;
 
-	writel(ier, sport->membase + LINIER);
+	pete_writel("drivers/tty/serial/fsl_linflexuart.c:364", ier, sport->membase + LINIER);
 }
 
 static int linflex_startup(struct uart_port *port)
@@ -389,9 +389,9 @@ static void linflex_shutdown(struct uart_port *port)
 	spin_lock_irqsave(&port->lock, flags);
 
 	/* disable interrupts */
-	ier = readl(port->membase + LINIER);
+	ier = pete_readl("drivers/tty/serial/fsl_linflexuart.c:392", port->membase + LINIER);
 	ier &= ~(LINFLEXD_LINIER_DRIE | LINFLEXD_LINIER_DTIE);
-	writel(ier, port->membase + LINIER);
+	pete_writel("drivers/tty/serial/fsl_linflexuart.c:394", ier, port->membase + LINIER);
 
 	spin_unlock_irqrestore(&port->lock, flags);
 
@@ -406,16 +406,16 @@ linflex_set_termios(struct uart_port *port, struct ktermios *termios,
 	unsigned long cr, old_cr, cr1;
 	unsigned int old_csize = old ? old->c_cflag & CSIZE : CS8;
 
-	cr = readl(port->membase + UARTCR);
+	cr = pete_readl("drivers/tty/serial/fsl_linflexuart.c:409", port->membase + UARTCR);
 	old_cr = cr;
 
 	/* Enter initialization mode by setting INIT bit */
-	cr1 = readl(port->membase + LINCR1);
+	cr1 = pete_readl("drivers/tty/serial/fsl_linflexuart.c:413", port->membase + LINCR1);
 	cr1 |= LINFLEXD_LINCR1_INIT;
-	writel(cr1, port->membase + LINCR1);
+	pete_writel("drivers/tty/serial/fsl_linflexuart.c:415", cr1, port->membase + LINCR1);
 
 	/* wait for init mode entry */
-	while ((readl(port->membase + LINSR)
+	while ((pete_readl("drivers/tty/serial/fsl_linflexuart.c:418", port->membase + LINSR)
 		& LINFLEXD_LINSR_LINS_MASK)
 		!= LINFLEXD_LINSR_LINS_INITMODE)
 		;
@@ -501,11 +501,11 @@ linflex_set_termios(struct uart_port *port, struct ktermios *termios,
 			port->ignore_status_mask |= LINFLEXD_UARTSR_BOF;
 	}
 
-	writel(cr, port->membase + UARTCR);
+	pete_writel("drivers/tty/serial/fsl_linflexuart.c:504", cr, port->membase + UARTCR);
 
 	cr1 &= ~(LINFLEXD_LINCR1_INIT);
 
-	writel(cr1, port->membase + LINCR1);
+	pete_writel("drivers/tty/serial/fsl_linflexuart.c:508", cr1, port->membase + LINCR1);
 
 	spin_unlock_irqrestore(&port->lock, flags);
 }
@@ -556,22 +556,22 @@ static void linflex_console_putchar(struct uart_port *port, unsigned char ch)
 {
 	unsigned long cr;
 
-	cr = readl(port->membase + UARTCR);
+	cr = pete_readl("drivers/tty/serial/fsl_linflexuart.c:559", port->membase + UARTCR);
 
-	writeb(ch, port->membase + BDRL);
+	pete_writeb("drivers/tty/serial/fsl_linflexuart.c:561", ch, port->membase + BDRL);
 
 	if (!(cr & LINFLEXD_UARTCR_TFBM))
-		while ((readl(port->membase + UARTSR) &
+		while ((pete_readl("drivers/tty/serial/fsl_linflexuart.c:564", port->membase + UARTSR) &
 					LINFLEXD_UARTSR_DTFTFF)
 				!= LINFLEXD_UARTSR_DTFTFF)
 			;
 	else
-		while (readl(port->membase + UARTSR) &
+		while (pete_readl("drivers/tty/serial/fsl_linflexuart.c:569", port->membase + UARTSR) &
 					LINFLEXD_UARTSR_DTFTFF)
 			;
 
 	if (!(cr & LINFLEXD_UARTCR_TFBM)) {
-		writel((readl(port->membase + UARTSR) |
+		pete_writel("drivers/tty/serial/fsl_linflexuart.c:574", (pete_readl("drivers/tty/serial/fsl_linflexuart.c:574", port->membase + UARTSR) |
 					LINFLEXD_UARTSR_DTFTFF),
 					port->membase + UARTSR);
 	}
@@ -624,16 +624,16 @@ static void linflex_string_write(struct uart_port *sport, const char *s,
 {
 	unsigned long cr, ier = 0;
 
-	ier = readl(sport->membase + LINIER);
+	ier = pete_readl("drivers/tty/serial/fsl_linflexuart.c:627", sport->membase + LINIER);
 	linflex_stop_tx(sport);
 
-	cr = readl(sport->membase + UARTCR);
+	cr = pete_readl("drivers/tty/serial/fsl_linflexuart.c:630", sport->membase + UARTCR);
 	cr |= (LINFLEXD_UARTCR_TXEN);
-	writel(cr, sport->membase + UARTCR);
+	pete_writel("drivers/tty/serial/fsl_linflexuart.c:632", cr, sport->membase + UARTCR);
 
 	uart_console_write(sport, s, count, linflex_console_putchar);
 
-	writel(ier, sport->membase + LINIER);
+	pete_writel("drivers/tty/serial/fsl_linflexuart.c:636", ier, sport->membase + LINIER);
 }
 
 static void
@@ -665,7 +665,7 @@ linflex_console_get_options(struct uart_port *sport, int *parity, int *bits)
 {
 	unsigned long cr;
 
-	cr = readl(sport->membase + UARTCR);
+	cr = pete_readl("drivers/tty/serial/fsl_linflexuart.c:668", sport->membase + UARTCR);
 	cr &= LINFLEXD_UARTCR_RXEN | LINFLEXD_UARTCR_TXEN;
 
 	if (!cr)

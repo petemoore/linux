@@ -73,7 +73,7 @@ static int avs_apl_log_buffer_status(struct avs_dev *adev, union avs_notify_msg 
 	avs_dump_fw_log_wakeup(adev, buf + layout.read_ptr, layout.write_ptr - layout.read_ptr);
 
 update_read_ptr:
-	writel(layout.write_ptr, addr);
+	pete_writel("sound/soc/intel/avs/apl.c:76", layout.write_ptr, addr);
 	return 0;
 }
 
@@ -100,7 +100,7 @@ static int avs_apl_wait_log_entry(struct avs_dev *adev, u32 core,
 }
 
 /* reads log header and tests its type */
-#define avs_apl_is_entry_stackdump(addr) ((readl(addr) >> 30) & 0x1)
+#define avs_apl_is_entry_stackdump(addr) ((pete_readl("sound/soc/intel/avs/apl.c:103", addr) >> 30) & 0x1)
 
 static int avs_apl_coredump(struct avs_dev *adev, union avs_notify_msg *msg)
 {
@@ -157,7 +157,7 @@ static int avs_apl_coredump(struct avs_dev *adev, union avs_notify_msg *msg)
 		offset += count;
 
 		/* update read pointer */
-		writel(layout.write_ptr, addr);
+		pete_writel("sound/soc/intel/avs/apl.c:160", layout.write_ptr, addr);
 	} while (offset < msg->ext.coredump.stack_dump_size);
 
 exit:

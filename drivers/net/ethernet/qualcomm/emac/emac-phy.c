@@ -54,7 +54,7 @@ static int emac_mdio_read(struct mii_bus *bus, int addr, int regnum)
 	      ((regnum << MDIO_REG_ADDR_SHFT) & MDIO_REG_ADDR_BMSK) |
 	      MDIO_START | MDIO_RD_NWR;
 
-	writel(reg, adpt->base + EMAC_MDIO_CTRL);
+	pete_writel("drivers/net/ethernet/qualcomm/emac/emac-phy.c:57", reg, adpt->base + EMAC_MDIO_CTRL);
 
 	if (readl_poll_timeout(adpt->base + EMAC_MDIO_CTRL, reg,
 			       !(reg & (MDIO_START | MDIO_BUSY)),
@@ -78,7 +78,7 @@ static int emac_mdio_write(struct mii_bus *bus, int addr, int regnum, u16 val)
 		((val << MDIO_DATA_SHFT) & MDIO_DATA_BMSK) |
 		MDIO_START;
 
-	writel(reg, adpt->base + EMAC_MDIO_CTRL);
+	pete_writel("drivers/net/ethernet/qualcomm/emac/emac-phy.c:81", reg, adpt->base + EMAC_MDIO_CTRL);
 
 	if (readl_poll_timeout(adpt->base + EMAC_MDIO_CTRL, reg,
 			       !(reg & (MDIO_START | MDIO_BUSY)),

@@ -694,14 +694,14 @@ struct mhi_pci_device {
 static int mhi_pci_read_reg(struct mhi_controller *mhi_cntrl,
 			    void __iomem *addr, u32 *out)
 {
-	*out = readl(addr);
+	*out = pete_readl("drivers/bus/mhi/host/pci_generic.c:697", addr);
 	return 0;
 }
 
 static void mhi_pci_write_reg(struct mhi_controller *mhi_cntrl,
 			      void __iomem *addr, u32 val)
 {
-	writel(val, addr);
+	pete_writel("drivers/bus/mhi/host/pci_generic.c:704", val, addr);
 }
 
 static void mhi_pci_status_cb(struct mhi_controller *mhi_cntrl,

@@ -75,13 +75,13 @@ struct imx8qxp_pc {
 
 static inline u32 imx8qxp_pc_read(struct imx8qxp_pc *pc, unsigned int offset)
 {
-	return readl(pc->base + offset);
+	return pete_readl("drivers/gpu/drm/bridge/imx/imx8qxp-pixel-combiner.c:78", pc->base + offset);
 }
 
 static inline void
 imx8qxp_pc_write(struct imx8qxp_pc *pc, unsigned int offset, u32 value)
 {
-	writel(value, pc->base + offset);
+	pete_writel("drivers/gpu/drm/bridge/imx/imx8qxp-pixel-combiner.c:84", value, pc->base + offset);
 }
 
 static inline void

@@ -1222,22 +1222,22 @@ static void m_series_init_eeprom_buffer(struct comedi_device *dev)
 	/* IO Window 1 needs to be temporarily mapped to read the eeprom */
 	daq_phys_addr = pci_resource_start(mite->pcidev, 1);
 
-	old_iodwbsr_bits = readl(mite->mmio + MITE_IODWBSR);
-	old_iodwbsr1_bits = readl(mite->mmio + MITE_IODWBSR_1);
-	old_iodwcr1_bits = readl(mite->mmio + MITE_IODWCR_1);
-	writel(0x0, mite->mmio + MITE_IODWBSR);
-	writel(((0x80 | window_size) | daq_phys_addr),
+	old_iodwbsr_bits = pete_readl("drivers/comedi/drivers/ni_pcimio.c:1225", mite->mmio + MITE_IODWBSR);
+	old_iodwbsr1_bits = pete_readl("drivers/comedi/drivers/ni_pcimio.c:1226", mite->mmio + MITE_IODWBSR_1);
+	old_iodwcr1_bits = pete_readl("drivers/comedi/drivers/ni_pcimio.c:1227", mite->mmio + MITE_IODWCR_1);
+	pete_writel("drivers/comedi/drivers/ni_pcimio.c:1228", 0x0, mite->mmio + MITE_IODWBSR);
+	pete_writel("drivers/comedi/drivers/ni_pcimio.c:1229", ((0x80 | window_size) | daq_phys_addr),
 	       mite->mmio + MITE_IODWBSR_1);
-	writel(0x1 | old_iodwcr1_bits, mite->mmio + MITE_IODWCR_1);
-	writel(0xf, mite->mmio + 0x30);
+	pete_writel("drivers/comedi/drivers/ni_pcimio.c:1231", 0x1 | old_iodwcr1_bits, mite->mmio + MITE_IODWCR_1);
+	pete_writel("drivers/comedi/drivers/ni_pcimio.c:1232", 0xf, mite->mmio + 0x30);
 
 	for (i = 0; i < M_SERIES_EEPROM_SIZE; ++i)
 		devpriv->eeprom_buffer[i] = ni_readb(dev, start_cal_eeprom + i);
 
-	writel(old_iodwbsr1_bits, mite->mmio + MITE_IODWBSR_1);
-	writel(old_iodwbsr_bits, mite->mmio + MITE_IODWBSR);
-	writel(old_iodwcr1_bits, mite->mmio + MITE_IODWCR_1);
-	writel(0x0, mite->mmio + 0x30);
+	pete_writel("drivers/comedi/drivers/ni_pcimio.c:1237", old_iodwbsr1_bits, mite->mmio + MITE_IODWBSR_1);
+	pete_writel("drivers/comedi/drivers/ni_pcimio.c:1238", old_iodwbsr_bits, mite->mmio + MITE_IODWBSR);
+	pete_writel("drivers/comedi/drivers/ni_pcimio.c:1239", old_iodwcr1_bits, mite->mmio + MITE_IODWCR_1);
+	pete_writel("drivers/comedi/drivers/ni_pcimio.c:1240", 0x0, mite->mmio + 0x30);
 }
 
 static void init_6143(struct comedi_device *dev)

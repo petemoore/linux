@@ -101,7 +101,7 @@ int mlx4_reset(struct mlx4_dev *dev)
 	/* grab HW semaphore to lock out flash updates */
 	end = jiffies + MLX4_SEM_TIMEOUT_JIFFIES;
 	do {
-		sem = readl(reset + MLX4_SEM_OFFSET);
+		sem = pete_readl("drivers/net/ethernet/mellanox/mlx4/reset.c:104", reset + MLX4_SEM_OFFSET);
 		if (!sem)
 			break;
 
@@ -116,7 +116,7 @@ int mlx4_reset(struct mlx4_dev *dev)
 	}
 
 	/* actually hit reset */
-	writel(MLX4_RESET_VALUE, reset + MLX4_RESET_OFFSET);
+	pete_writel("drivers/net/ethernet/mellanox/mlx4/reset.c:119", MLX4_RESET_VALUE, reset + MLX4_RESET_OFFSET);
 	iounmap(reset);
 
 	/* Docs say to wait one second before accessing device */

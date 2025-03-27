@@ -305,7 +305,7 @@ static void post_se_instr(struct nitrox_softreq *sr,
 	dma_wmb();
 
 	/* Ring doorbell with count 1 */
-	writeq(1, cmdq->dbell_csr_addr);
+	pete_writeq("drivers/crypto/cavium/nitrox/nitrox_reqmgr.c:308", 1, cmdq->dbell_csr_addr);
 
 	cmdq->write_idx = incr_index(idx, 1, ndev->qlen);
 
@@ -590,7 +590,7 @@ void pkt_slc_resp_tasklet(unsigned long data)
 	union nps_pkt_slc_cnts slc_cnts;
 
 	/* read completion count */
-	slc_cnts.value = readq(cmdq->compl_cnt_csr_addr);
+	slc_cnts.value = pete_readq("drivers/crypto/cavium/nitrox/nitrox_reqmgr.c:593", cmdq->compl_cnt_csr_addr);
 	/* resend the interrupt if more work to do */
 	slc_cnts.s.resend = 1;
 
@@ -600,7 +600,7 @@ void pkt_slc_resp_tasklet(unsigned long data)
 	 * clear the interrupt with resend bit enabled,
 	 * MSI-X interrupt generates if Completion count > Threshold
 	 */
-	writeq(slc_cnts.value, cmdq->compl_cnt_csr_addr);
+	pete_writeq("drivers/crypto/cavium/nitrox/nitrox_reqmgr.c:603", slc_cnts.value, cmdq->compl_cnt_csr_addr);
 
 	if (atomic_read(&cmdq->backlog_count))
 		schedule_work(&cmdq->backlog_qflush);

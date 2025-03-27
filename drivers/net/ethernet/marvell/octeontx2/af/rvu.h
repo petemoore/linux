@@ -556,22 +556,22 @@ struct rvu {
 
 static inline void rvu_write64(struct rvu *rvu, u64 block, u64 offset, u64 val)
 {
-	writeq(val, rvu->afreg_base + ((block << 28) | offset));
+	pete_writeq("drivers/net/ethernet/marvell/octeontx2/af/rvu.h:559", val, rvu->afreg_base + ((block << 28) | offset));
 }
 
 static inline u64 rvu_read64(struct rvu *rvu, u64 block, u64 offset)
 {
-	return readq(rvu->afreg_base + ((block << 28) | offset));
+	return pete_readq("drivers/net/ethernet/marvell/octeontx2/af/rvu.h:564", rvu->afreg_base + ((block << 28) | offset));
 }
 
 static inline void rvupf_write64(struct rvu *rvu, u64 offset, u64 val)
 {
-	writeq(val, rvu->pfreg_base + offset);
+	pete_writeq("drivers/net/ethernet/marvell/octeontx2/af/rvu.h:569", val, rvu->pfreg_base + offset);
 }
 
 static inline u64 rvupf_read64(struct rvu *rvu, u64 offset)
 {
-	return readq(rvu->pfreg_base + offset);
+	return pete_readq("drivers/net/ethernet/marvell/octeontx2/af/rvu.h:574", rvu->pfreg_base + offset);
 }
 
 static inline void rvu_bar2_sel_write64(struct rvu *rvu, u64 block, u64 offset, u64 val)

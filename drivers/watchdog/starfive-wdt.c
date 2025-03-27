@@ -205,13 +205,13 @@ static void starfive_wdt_unlock(struct starfive_wdt *wdt)
 	__acquires(&wdt->lock)
 {
 	spin_lock(&wdt->lock);
-	writel(wdt->variant->unlock_key, wdt->base + wdt->variant->unlock);
+	pete_writel("drivers/watchdog/starfive-wdt.c:208", wdt->variant->unlock_key, wdt->base + wdt->variant->unlock);
 }
 
 static void starfive_wdt_lock(struct starfive_wdt *wdt)
 	__releases(&wdt->lock)
 {
-	writel(~wdt->variant->unlock_key, wdt->base + wdt->variant->unlock);
+	pete_writel("drivers/watchdog/starfive-wdt.c:214", ~wdt->variant->unlock_key, wdt->base + wdt->variant->unlock);
 	spin_unlock(&wdt->lock);
 }
 
@@ -220,15 +220,15 @@ static void starfive_wdt_enable_reset(struct starfive_wdt *wdt)
 {
 	u32 val;
 
-	val = readl(wdt->base + wdt->variant->control);
+	val = pete_readl("drivers/watchdog/starfive-wdt.c:223", wdt->base + wdt->variant->control);
 	val |= STARFIVE_WDT_RESET_EN << wdt->variant->enrst_shift;
-	writel(val, wdt->base + wdt->variant->control);
+	pete_writel("drivers/watchdog/starfive-wdt.c:225", val, wdt->base + wdt->variant->control);
 }
 
 /* interrupt status whether has been raised from the counter */
 static bool starfive_wdt_raise_irq_status(struct starfive_wdt *wdt)
 {
-	return !!readl(wdt->base + wdt->variant->int_status);
+	return !!pete_readl("drivers/watchdog/starfive-wdt.c:231", wdt->base + wdt->variant->int_status);
 }
 
 /* waiting interrupt can be free to clear */
@@ -252,19 +252,19 @@ static int starfive_wdt_int_clr(struct starfive_wdt *wdt)
 			return dev_err_probe(wdt->wdd.parent, ret,
 					     "watchdog is not ready to clear interrupt.\n");
 	}
-	writel(STARFIVE_WDT_INTCLR, wdt->base + wdt->variant->int_clr);
+	pete_writel("drivers/watchdog/starfive-wdt.c:255", STARFIVE_WDT_INTCLR, wdt->base + wdt->variant->int_clr);
 
 	return 0;
 }
 
 static inline void starfive_wdt_set_count(struct starfive_wdt *wdt, u32 val)
 {
-	writel(val, wdt->base + wdt->variant->load);
+	pete_writel("drivers/watchdog/starfive-wdt.c:262", val, wdt->base + wdt->variant->load);
 }
 
 static inline u32 starfive_wdt_get_count(struct starfive_wdt *wdt)
 {
-	return readl(wdt->base + wdt->variant->value);
+	return pete_readl("drivers/watchdog/starfive-wdt.c:267", wdt->base + wdt->variant->value);
 }
 
 /* enable watchdog */
@@ -272,9 +272,9 @@ static inline void starfive_wdt_enable(struct starfive_wdt *wdt)
 {
 	u32 val;
 
-	val = readl(wdt->base + wdt->variant->enable);
+	val = pete_readl("drivers/watchdog/starfive-wdt.c:275", wdt->base + wdt->variant->enable);
 	val |= STARFIVE_WDT_ENABLE << wdt->variant->en_shift;
-	writel(val, wdt->base + wdt->variant->enable);
+	pete_writel("drivers/watchdog/starfive-wdt.c:277", val, wdt->base + wdt->variant->enable);
 }
 
 /* disable watchdog */
@@ -282,9 +282,9 @@ static inline void starfive_wdt_disable(struct starfive_wdt *wdt)
 {
 	u32 val;
 
-	val = readl(wdt->base + wdt->variant->enable);
+	val = pete_readl("drivers/watchdog/starfive-wdt.c:285", wdt->base + wdt->variant->enable);
 	val &= ~(STARFIVE_WDT_ENABLE << wdt->variant->en_shift);
-	writel(val, wdt->base + wdt->variant->enable);
+	pete_writel("drivers/watchdog/starfive-wdt.c:287", val, wdt->base + wdt->variant->enable);
 }
 
 static inline void starfive_wdt_set_reload_count(struct starfive_wdt *wdt, u32 count)
@@ -293,7 +293,7 @@ static inline void starfive_wdt_set_reload_count(struct starfive_wdt *wdt, u32 c
 
 	/* 7100 need set any value to reload register and could reload value to counter */
 	if (wdt->variant->reload)
-		writel(0x1, wdt->base + wdt->variant->reload);
+		pete_writel("drivers/watchdog/starfive-wdt.c:296", 0x1, wdt->base + wdt->variant->reload);
 }
 
 static unsigned int starfive_wdt_max_timeout(struct starfive_wdt *wdt)

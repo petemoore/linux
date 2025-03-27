@@ -103,14 +103,14 @@ static u64 fec_ptp_read(const struct cyclecounter *cc)
 		container_of(cc, struct fec_enet_private, cc);
 	u32 tempval;
 
-	tempval = readl(fep->hwp + FEC_ATIME_CTRL);
+	tempval = pete_readl("drivers/net/ethernet/freescale/fec_ptp.c:106", fep->hwp + FEC_ATIME_CTRL);
 	tempval |= FEC_T_CTRL_CAPTURE;
-	writel(tempval, fep->hwp + FEC_ATIME_CTRL);
+	pete_writel("drivers/net/ethernet/freescale/fec_ptp.c:108", tempval, fep->hwp + FEC_ATIME_CTRL);
 
 	if (fep->quirks & FEC_QUIRK_BUG_CAPTURE)
 		udelay(1);
 
-	return readl(fep->hwp + FEC_ATIME);
+	return pete_readl("drivers/net/ethernet/freescale/fec_ptp.c:113", fep->hwp + FEC_ATIME);
 }
 
 /**
@@ -137,17 +137,17 @@ static int fec_ptp_enable_pps(struct fec_enet_private *fep, uint enable)
 	if (enable) {
 		/* clear capture or output compare interrupt status if have.
 		 */
-		writel(FEC_T_TF_MASK, fep->hwp + FEC_TCSR(fep->pps_channel));
+		pete_writel("drivers/net/ethernet/freescale/fec_ptp.c:140", FEC_T_TF_MASK, fep->hwp + FEC_TCSR(fep->pps_channel));
 
 		/* It is recommended to double check the TMODE field in the
 		 * TCSR register to be cleared before the first compare counter
 		 * is written into TCCR register. Just add a double check.
 		 */
-		val = readl(fep->hwp + FEC_TCSR(fep->pps_channel));
+		val = pete_readl("drivers/net/ethernet/freescale/fec_ptp.c:146", fep->hwp + FEC_TCSR(fep->pps_channel));
 		do {
 			val &= ~(FEC_T_TMODE_MASK);
-			writel(val, fep->hwp + FEC_TCSR(fep->pps_channel));
-			val = readl(fep->hwp + FEC_TCSR(fep->pps_channel));
+			pete_writel("drivers/net/ethernet/freescale/fec_ptp.c:149", val, fep->hwp + FEC_TCSR(fep->pps_channel));
+			val = pete_readl("drivers/net/ethernet/freescale/fec_ptp.c:150", fep->hwp + FEC_TCSR(fep->pps_channel));
 		} while (val & FEC_T_TMODE_MASK);
 
 		/* Dummy read counter to update the counter */
@@ -189,31 +189,31 @@ static int fec_ptp_enable_pps(struct fec_enet_private *fep, uint enable)
 		 * is bigger than fep->cc.mask would be a error.
 		 */
 		val &= fep->cc.mask;
-		writel(val, fep->hwp + FEC_TCCR(fep->pps_channel));
+		pete_writel("drivers/net/ethernet/freescale/fec_ptp.c:192", val, fep->hwp + FEC_TCCR(fep->pps_channel));
 
 		/* Calculate the second the compare event timestamp */
 		fep->next_counter = (val + fep->reload_period) & fep->cc.mask;
 
 		/* * Enable compare event when overflow */
-		val = readl(fep->hwp + FEC_ATIME_CTRL);
+		val = pete_readl("drivers/net/ethernet/freescale/fec_ptp.c:198", fep->hwp + FEC_ATIME_CTRL);
 		val |= FEC_T_CTRL_PINPER;
-		writel(val, fep->hwp + FEC_ATIME_CTRL);
+		pete_writel("drivers/net/ethernet/freescale/fec_ptp.c:200", val, fep->hwp + FEC_ATIME_CTRL);
 
 		/* Compare channel setting. */
-		val = readl(fep->hwp + FEC_TCSR(fep->pps_channel));
+		val = pete_readl("drivers/net/ethernet/freescale/fec_ptp.c:203", fep->hwp + FEC_TCSR(fep->pps_channel));
 		val |= (1 << FEC_T_TF_OFFSET | 1 << FEC_T_TIE_OFFSET);
 		val &= ~(1 << FEC_T_TDRE_OFFSET);
 		val &= ~(FEC_T_TMODE_MASK);
 		val |= (FEC_HIGH_PULSE << FEC_T_TMODE_OFFSET);
-		writel(val, fep->hwp + FEC_TCSR(fep->pps_channel));
+		pete_writel("drivers/net/ethernet/freescale/fec_ptp.c:208", val, fep->hwp + FEC_TCSR(fep->pps_channel));
 
 		/* Write the second compare event timestamp and calculate
 		 * the third timestamp. Refer the TCCR register detail in the spec.
 		 */
-		writel(fep->next_counter, fep->hwp + FEC_TCCR(fep->pps_channel));
+		pete_writel("drivers/net/ethernet/freescale/fec_ptp.c:213", fep->next_counter, fep->hwp + FEC_TCCR(fep->pps_channel));
 		fep->next_counter = (fep->next_counter + fep->reload_period) & fep->cc.mask;
 	} else {
-		writel(0, fep->hwp + FEC_TCSR(fep->pps_channel));
+		pete_writel("drivers/net/ethernet/freescale/fec_ptp.c:216", 0, fep->hwp + FEC_TCSR(fep->pps_channel));
 	}
 
 	fep->pps_enable = enable;
@@ -252,26 +252,26 @@ static int fec_ptp_pps_perout(struct fec_enet_private *fep)
 	compare_val = fep->perout_stime - curr_time + ptp_hc;
 	compare_val &= fep->cc.mask;
 
-	writel(compare_val, fep->hwp + FEC_TCCR(fep->pps_channel));
+	pete_writel("drivers/net/ethernet/freescale/fec_ptp.c:255", compare_val, fep->hwp + FEC_TCCR(fep->pps_channel));
 	fep->next_counter = (compare_val + fep->reload_period) & fep->cc.mask;
 
 	/* Enable compare event when overflow */
-	temp_val = readl(fep->hwp + FEC_ATIME_CTRL);
+	temp_val = pete_readl("drivers/net/ethernet/freescale/fec_ptp.c:259", fep->hwp + FEC_ATIME_CTRL);
 	temp_val |= FEC_T_CTRL_PINPER;
-	writel(temp_val, fep->hwp + FEC_ATIME_CTRL);
+	pete_writel("drivers/net/ethernet/freescale/fec_ptp.c:261", temp_val, fep->hwp + FEC_ATIME_CTRL);
 
 	/* Compare channel setting. */
-	temp_val = readl(fep->hwp + FEC_TCSR(fep->pps_channel));
+	temp_val = pete_readl("drivers/net/ethernet/freescale/fec_ptp.c:264", fep->hwp + FEC_TCSR(fep->pps_channel));
 	temp_val |= (1 << FEC_T_TF_OFFSET | 1 << FEC_T_TIE_OFFSET);
 	temp_val &= ~(1 << FEC_T_TDRE_OFFSET);
 	temp_val &= ~(FEC_T_TMODE_MASK);
 	temp_val |= (FEC_TMODE_TOGGLE << FEC_T_TMODE_OFFSET);
-	writel(temp_val, fep->hwp + FEC_TCSR(fep->pps_channel));
+	pete_writel("drivers/net/ethernet/freescale/fec_ptp.c:269", temp_val, fep->hwp + FEC_TCSR(fep->pps_channel));
 
 	/* Write the second compare event timestamp and calculate
 	 * the third timestamp. Refer the TCCR register detail in the spec.
 	 */
-	writel(fep->next_counter, fep->hwp + FEC_TCCR(fep->pps_channel));
+	pete_writel("drivers/net/ethernet/freescale/fec_ptp.c:274", fep->next_counter, fep->hwp + FEC_TCCR(fep->pps_channel));
 	fep->next_counter = (fep->next_counter + fep->reload_period) & fep->cc.mask;
 	spin_unlock_irqrestore(&fep->tmreg_lock, flags);
 
@@ -308,12 +308,12 @@ void fec_ptp_start_cyclecounter(struct net_device *ndev)
 	spin_lock_irqsave(&fep->tmreg_lock, flags);
 
 	/* 1ns counter */
-	writel(inc << FEC_T_INC_OFFSET, fep->hwp + FEC_ATIME_INC);
+	pete_writel("drivers/net/ethernet/freescale/fec_ptp.c:311", inc << FEC_T_INC_OFFSET, fep->hwp + FEC_ATIME_INC);
 
 	/* use 31-bit timer counter */
-	writel(FEC_COUNTER_PERIOD, fep->hwp + FEC_ATIME_EVT_PERIOD);
+	pete_writel("drivers/net/ethernet/freescale/fec_ptp.c:314", FEC_COUNTER_PERIOD, fep->hwp + FEC_ATIME_EVT_PERIOD);
 
-	writel(FEC_T_CTRL_ENABLE | FEC_T_CTRL_PERIOD_RST,
+	pete_writel("drivers/net/ethernet/freescale/fec_ptp.c:316", FEC_T_CTRL_ENABLE | FEC_T_CTRL_PERIOD_RST,
 		fep->hwp + FEC_ATIME_CTRL);
 
 	memset(&fep->cc, 0, sizeof(fep->cc));
@@ -391,11 +391,11 @@ static int fec_ptp_adjfine(struct ptp_clock_info *ptp, long scaled_ppm)
 
 	spin_lock_irqsave(&fep->tmreg_lock, flags);
 
-	tmp = readl(fep->hwp + FEC_ATIME_INC) & FEC_T_INC_MASK;
+	tmp = pete_readl("drivers/net/ethernet/freescale/fec_ptp.c:394", fep->hwp + FEC_ATIME_INC) & FEC_T_INC_MASK;
 	tmp |= corr_ns << FEC_T_INC_CORR_OFFSET;
-	writel(tmp, fep->hwp + FEC_ATIME_INC);
+	pete_writel("drivers/net/ethernet/freescale/fec_ptp.c:396", tmp, fep->hwp + FEC_ATIME_INC);
 	corr_period = corr_period > 1 ? corr_period - 1 : corr_period;
-	writel(corr_period, fep->hwp + FEC_ATIME_CORR);
+	pete_writel("drivers/net/ethernet/freescale/fec_ptp.c:398", corr_period, fep->hwp + FEC_ATIME_CORR);
 	/* dummy read to update the timer. */
 	timecounter_read(&fep->tc);
 
@@ -487,7 +487,7 @@ static int fec_ptp_settime(struct ptp_clock_info *ptp,
 	counter = ns & fep->cc.mask;
 
 	spin_lock_irqsave(&fep->tmreg_lock, flags);
-	writel(counter, fep->hwp + FEC_ATIME);
+	pete_writel("drivers/net/ethernet/freescale/fec_ptp.c:490", counter, fep->hwp + FEC_ATIME);
 	timecounter_init(&fep->tc, &fep->cc, ns);
 	spin_unlock_irqrestore(&fep->tmreg_lock, flags);
 	mutex_unlock(&fep->ptp_clk_mutex);
@@ -499,7 +499,7 @@ static int fec_ptp_pps_disable(struct fec_enet_private *fep, uint channel)
 	unsigned long flags;
 
 	spin_lock_irqsave(&fep->tmreg_lock, flags);
-	writel(0, fep->hwp + FEC_TCSR(channel));
+	pete_writel("drivers/net/ethernet/freescale/fec_ptp.c:502", 0, fep->hwp + FEC_TCSR(channel));
 	spin_unlock_irqrestore(&fep->tmreg_lock, flags);
 
 	return 0;
@@ -668,15 +668,15 @@ static irqreturn_t fec_pps_interrupt(int irq, void *dev_id)
 	u8 channel = fep->pps_channel;
 	struct ptp_clock_event event;
 
-	val = readl(fep->hwp + FEC_TCSR(channel));
+	val = pete_readl("drivers/net/ethernet/freescale/fec_ptp.c:671", fep->hwp + FEC_TCSR(channel));
 	if (val & FEC_T_TF_MASK) {
 		/* Write the next next compare(not the next according the spec)
 		 * value to the register
 		 */
-		writel(fep->next_counter, fep->hwp + FEC_TCCR(channel));
+		pete_writel("drivers/net/ethernet/freescale/fec_ptp.c:676", fep->next_counter, fep->hwp + FEC_TCCR(channel));
 		do {
-			writel(val, fep->hwp + FEC_TCSR(channel));
-		} while (readl(fep->hwp + FEC_TCSR(channel)) & FEC_T_TF_MASK);
+			pete_writel("drivers/net/ethernet/freescale/fec_ptp.c:678", val, fep->hwp + FEC_TCSR(channel));
+		} while (pete_readl("drivers/net/ethernet/freescale/fec_ptp.c:679", fep->hwp + FEC_TCSR(channel)) & FEC_T_TF_MASK);
 
 		/* Update the counter; */
 		fep->next_counter = (fep->next_counter + fep->reload_period) &
@@ -777,8 +777,8 @@ void fec_ptp_save_state(struct fec_enet_private *fep)
 	fep->ptp_saved_state.ns_phc = timecounter_read(&fep->tc);
 	fep->ptp_saved_state.ns_sys = ktime_get_ns();
 
-	fep->ptp_saved_state.at_corr = readl(fep->hwp + FEC_ATIME_CORR);
-	atime_inc_corr = readl(fep->hwp + FEC_ATIME_INC) & FEC_T_INC_CORR_MASK;
+	fep->ptp_saved_state.at_corr = pete_readl("drivers/net/ethernet/freescale/fec_ptp.c:780", fep->hwp + FEC_ATIME_CORR);
+	atime_inc_corr = pete_readl("drivers/net/ethernet/freescale/fec_ptp.c:781", fep->hwp + FEC_ATIME_INC) & FEC_T_INC_CORR_MASK;
 	fep->ptp_saved_state.at_inc_corr = (u8)(atime_inc_corr >> FEC_T_INC_CORR_OFFSET);
 
 	spin_unlock_irqrestore(&fep->tmreg_lock, flags);
@@ -787,7 +787,7 @@ void fec_ptp_save_state(struct fec_enet_private *fep)
 /* Restore PTP functionality after a reset */
 void fec_ptp_restore_state(struct fec_enet_private *fep)
 {
-	u32 atime_inc = readl(fep->hwp + FEC_ATIME_INC) & FEC_T_INC_MASK;
+	u32 atime_inc = pete_readl("drivers/net/ethernet/freescale/fec_ptp.c:790", fep->hwp + FEC_ATIME_INC) & FEC_T_INC_MASK;
 	unsigned long flags;
 	u32 counter;
 	u64 ns;
@@ -797,13 +797,13 @@ void fec_ptp_restore_state(struct fec_enet_private *fep)
 	/* Reset turned it off, so adjust our status flag */
 	fep->pps_enable = 0;
 
-	writel(fep->ptp_saved_state.at_corr, fep->hwp + FEC_ATIME_CORR);
+	pete_writel("drivers/net/ethernet/freescale/fec_ptp.c:800", fep->ptp_saved_state.at_corr, fep->hwp + FEC_ATIME_CORR);
 	atime_inc |= ((u32)fep->ptp_saved_state.at_inc_corr) << FEC_T_INC_CORR_OFFSET;
-	writel(atime_inc, fep->hwp + FEC_ATIME_INC);
+	pete_writel("drivers/net/ethernet/freescale/fec_ptp.c:802", atime_inc, fep->hwp + FEC_ATIME_INC);
 
 	ns = ktime_get_ns() - fep->ptp_saved_state.ns_sys + fep->ptp_saved_state.ns_phc;
 	counter = ns & fep->cc.mask;
-	writel(counter, fep->hwp + FEC_ATIME);
+	pete_writel("drivers/net/ethernet/freescale/fec_ptp.c:806", counter, fep->hwp + FEC_ATIME);
 	timecounter_init(&fep->tc, &fep->cc, ns);
 
 	spin_unlock_irqrestore(&fep->tmreg_lock, flags);

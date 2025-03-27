@@ -262,9 +262,9 @@ static inline u64 icssg_read_time(const void __iomem *addr)
 	u32 low, high;
 
 	do {
-		high = readl(addr + 4);
-		low = readl(addr);
-	} while (high != readl(addr + 4));
+		high = pete_readl("drivers/net/ethernet/ti/icssg/icssg_prueth.h:265", addr + 4);
+		low = pete_readl("drivers/net/ethernet/ti/icssg/icssg_prueth.h:266", addr);
+	} while (high != pete_readl("drivers/net/ethernet/ti/icssg/icssg_prueth.h:267", addr + 4));
 
 	return low + ((u64)high << 32);
 }

@@ -381,7 +381,7 @@ void wx_alloc_rx_buffers(struct wx_ring *rx_ring, u16 cleaned_count)
 		 * such as IA-64).
 		 */
 		wmb();
-		writel(i, rx_ring->tail);
+		pete_writel("drivers/net/ethernet/wangxun/libwx/wx_lib.c:384", i, rx_ring->tail);
 	}
 }
 
@@ -1033,7 +1033,7 @@ static void wx_tx_map(struct wx_ring *tx_ring,
 	wx_maybe_stop_tx(tx_ring, DESC_NEEDED);
 
 	if (netif_xmit_stopped(wx_txring_txq(tx_ring)) || !netdev_xmit_more())
-		writel(i, tx_ring->tail);
+		pete_writel("drivers/net/ethernet/wangxun/libwx/wx_lib.c:1036", i, tx_ring->tail);
 
 	return;
 dma_error:

@@ -4217,7 +4217,7 @@ static u64 goya_read_pte(struct hl_device *hdev, u64 addr)
 	if (hdev->reset_info.hard_reset_pending)
 		return U64_MAX;
 
-	return readq(hdev->pcie_bar[DDR_BAR_ID] +
+	return pete_readq("drivers/accel/habanalabs/goya/goya.c:4220", hdev->pcie_bar[DDR_BAR_ID] +
 			(addr - goya->ddr_bar_cur_addr));
 }
 
@@ -4228,7 +4228,7 @@ static void goya_write_pte(struct hl_device *hdev, u64 addr, u64 val)
 	if (hdev->reset_info.hard_reset_pending)
 		return;
 
-	writeq(val, hdev->pcie_bar[DDR_BAR_ID] +
+	pete_writeq("drivers/accel/habanalabs/goya/goya.c:4231", val, hdev->pcie_bar[DDR_BAR_ID] +
 			(addr - goya->ddr_bar_cur_addr));
 }
 

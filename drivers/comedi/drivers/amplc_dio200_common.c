@@ -95,7 +95,7 @@ static unsigned char dio200_read8(struct comedi_device *dev,
 		offset <<= 3;
 
 	if (dev->mmio)
-		return readb(dev->mmio + offset);
+		return pete_readb("drivers/comedi/drivers/amplc_dio200_common.c:98", dev->mmio + offset);
 	return inb(dev->iobase + offset);
 }
 
@@ -108,7 +108,7 @@ static void dio200_write8(struct comedi_device *dev,
 		offset <<= 3;
 
 	if (dev->mmio)
-		writeb(val, dev->mmio + offset);
+		pete_writeb("drivers/comedi/drivers/amplc_dio200_common.c:111", val, dev->mmio + offset);
 	else
 		outb(val, dev->iobase + offset);
 }
@@ -122,7 +122,7 @@ static unsigned int dio200_read32(struct comedi_device *dev,
 		offset <<= 3;
 
 	if (dev->mmio)
-		return readl(dev->mmio + offset);
+		return pete_readl("drivers/comedi/drivers/amplc_dio200_common.c:125", dev->mmio + offset);
 	return inl(dev->iobase + offset);
 }
 
@@ -135,7 +135,7 @@ static void dio200_write32(struct comedi_device *dev,
 		offset <<= 3;
 
 	if (dev->mmio)
-		writel(val, dev->mmio + offset);
+		pete_writel("drivers/comedi/drivers/amplc_dio200_common.c:138", val, dev->mmio + offset);
 	else
 		outl(val, dev->iobase + offset);
 }

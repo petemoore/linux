@@ -241,7 +241,7 @@ static inline void pds_core_dbell_ring(u64 __iomem *db_page,
 				       enum pds_core_logical_qtype qtype,
 				       u64 val)
 {
-	writeq(val, &db_page[qtype]);
+	pete_writeq("drivers/net/ethernet/amd/pds_core/core.h:244", val, &db_page[qtype]);
 }
 
 int pdsc_fw_reporter_diagnose(struct devlink_health_reporter *reporter,

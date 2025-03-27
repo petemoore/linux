@@ -44,7 +44,7 @@ static int stm32_reset_update(struct reset_controller_dev *rcdev,
 		if (!assert)
 			addr += data->clear_offset;
 
-		writel(BIT(offset), addr);
+		pete_writel("drivers/clk/stm32/reset-stm32.c:47", BIT(offset), addr);
 
 	} else {
 		unsigned long flags;
@@ -52,14 +52,14 @@ static int stm32_reset_update(struct reset_controller_dev *rcdev,
 
 		spin_lock_irqsave(&data->lock, flags);
 
-		reg = readl(data->membase + (bank * reg_width));
+		reg = pete_readl("drivers/clk/stm32/reset-stm32.c:55", data->membase + (bank * reg_width));
 
 		if (assert)
 			reg |= BIT(offset);
 		else
 			reg &= ~BIT(offset);
 
-		writel(reg, data->membase + (bank * reg_width));
+		pete_writel("drivers/clk/stm32/reset-stm32.c:62", reg, data->membase + (bank * reg_width));
 
 		spin_unlock_irqrestore(&data->lock, flags);
 	}
@@ -88,7 +88,7 @@ static int stm32_reset_status(struct reset_controller_dev *rcdev,
 	int offset = id % (reg_width * BITS_PER_BYTE);
 	u32 reg;
 
-	reg = readl(data->membase + (bank * reg_width));
+	reg = pete_readl("drivers/clk/stm32/reset-stm32.c:91", data->membase + (bank * reg_width));
 
 	return !!(reg & BIT(offset));
 }

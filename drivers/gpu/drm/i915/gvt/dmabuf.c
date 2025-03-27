@@ -78,7 +78,7 @@ static int vgpu_gem_get_pages(struct drm_i915_gem_object *obj)
 		(fb_info->start >> PAGE_SHIFT);
 	for_each_sg(st->sgl, sg, page_num, i) {
 		dma_addr_t dma_addr =
-			GEN8_DECODE_PTE(readq(&gtt_entries[i]));
+			GEN8_DECODE_PTE(pete_readq("drivers/gpu/drm/i915/gvt/dmabuf.c:81", &gtt_entries[i]));
 		if (intel_gvt_dma_pin_guest_page(vgpu, dma_addr)) {
 			ret = -EINVAL;
 			goto out;

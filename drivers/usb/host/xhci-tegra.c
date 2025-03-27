@@ -318,35 +318,35 @@ static struct hc_driver __read_mostly tegra_xhci_hc_driver;
 
 static inline u32 fpci_readl(struct tegra_xusb *tegra, unsigned int offset)
 {
-	return readl(tegra->fpci_base + offset);
+	return pete_readl("drivers/usb/host/xhci-tegra.c:321", tegra->fpci_base + offset);
 }
 
 static inline void fpci_writel(struct tegra_xusb *tegra, u32 value,
 			       unsigned int offset)
 {
-	writel(value, tegra->fpci_base + offset);
+	pete_writel("drivers/usb/host/xhci-tegra.c:327", value, tegra->fpci_base + offset);
 }
 
 static inline u32 ipfs_readl(struct tegra_xusb *tegra, unsigned int offset)
 {
-	return readl(tegra->ipfs_base + offset);
+	return pete_readl("drivers/usb/host/xhci-tegra.c:332", tegra->ipfs_base + offset);
 }
 
 static inline void ipfs_writel(struct tegra_xusb *tegra, u32 value,
 			       unsigned int offset)
 {
-	writel(value, tegra->ipfs_base + offset);
+	pete_writel("drivers/usb/host/xhci-tegra.c:338", value, tegra->ipfs_base + offset);
 }
 
 static inline u32 bar2_readl(struct tegra_xusb *tegra, unsigned int offset)
 {
-	return readl(tegra->bar2_base + offset);
+	return pete_readl("drivers/usb/host/xhci-tegra.c:343", tegra->bar2_base + offset);
 }
 
 static inline void bar2_writel(struct tegra_xusb *tegra, u32 value,
 			       unsigned int offset)
 {
-	writel(value, tegra->bar2_base + offset);
+	pete_writel("drivers/usb/host/xhci-tegra.c:349", value, tegra->bar2_base + offset);
 }
 
 static u32 csb_readl(struct tegra_xusb *tegra, unsigned int offset)
@@ -985,7 +985,7 @@ static int tegra_xusb_wait_for_falcon(struct tegra_xusb *tegra)
 	u32 value;
 
 	cap_regs = tegra->regs;
-	op_regs = tegra->regs + HC_LENGTH(readl(&cap_regs->hc_capbase));
+	op_regs = tegra->regs + HC_LENGTH(pete_readl("drivers/usb/host/xhci-tegra.c:988", &cap_regs->hc_capbase));
 
 	ret = readl_poll_timeout(&op_regs->status, value, !(value & STS_CNR), 1000, 200000);
 
@@ -1965,7 +1965,7 @@ static bool xhci_hub_ports_suspended(struct xhci_hub *hub)
 	u32 value;
 
 	for (i = 0; i < hub->num_ports; i++) {
-		value = readl(hub->ports[i]->addr);
+		value = pete_readl("drivers/usb/host/xhci-tegra.c:1968", hub->ports[i]->addr);
 		if ((value & PORT_PE) == 0)
 			continue;
 
@@ -2091,7 +2091,7 @@ static void tegra_xhci_enable_phy_sleepwalk_wake(struct tegra_xusb *tegra)
 			if (!is_host_mode_phy(tegra, i, j))
 				continue;
 
-			portsc = readl(rhub->ports[index]->addr);
+			portsc = pete_readl("drivers/usb/host/xhci-tegra.c:2094", rhub->ports[index]->addr);
 			speed = tegra_xhci_portsc_to_speed(tegra, portsc);
 			tegra_xusb_padctl_enable_phy_sleepwalk(padctl, phy, speed);
 			tegra_xusb_padctl_enable_phy_wake(padctl, phy);
@@ -2173,9 +2173,9 @@ static int tegra_xusb_enter_elpg(struct tegra_xusb *tegra, bool runtime)
 
 	dev_dbg(dev, "entering ELPG\n");
 
-	usbcmd = readl(&xhci->op_regs->command);
+	usbcmd = pete_readl("drivers/usb/host/xhci-tegra.c:2176", &xhci->op_regs->command);
 	usbcmd &= ~CMD_EIE;
-	writel(usbcmd, &xhci->op_regs->command);
+	pete_writel("drivers/usb/host/xhci-tegra.c:2178", usbcmd, &xhci->op_regs->command);
 
 	err = tegra_xusb_check_ports(tegra);
 	if (err < 0) {
@@ -2186,7 +2186,7 @@ static int tegra_xusb_enter_elpg(struct tegra_xusb *tegra, bool runtime)
 	for (i = 0; i < xhci->usb2_rhub.num_ports; i++) {
 		if (!xhci->usb2_rhub.ports[i])
 			continue;
-		portsc = readl(xhci->usb2_rhub.ports[i]->addr);
+		portsc = pete_readl("drivers/usb/host/xhci-tegra.c:2189", xhci->usb2_rhub.ports[i]->addr);
 		tegra->lp0_utmi_pad_mask &= ~BIT(i);
 		if (((portsc & PORT_PLS_MASK) == XDEV_U3) || ((portsc & DEV_SPEED_MASK) == XDEV_FS))
 			tegra->lp0_utmi_pad_mask |= BIT(i);
@@ -2220,9 +2220,9 @@ out:
 	if (!err)
 		dev_dbg(tegra->dev, "entering ELPG done\n");
 	else {
-		usbcmd = readl(&xhci->op_regs->command);
+		usbcmd = pete_readl("drivers/usb/host/xhci-tegra.c:2223", &xhci->op_regs->command);
 		usbcmd |= CMD_EIE;
-		writel(usbcmd, &xhci->op_regs->command);
+		pete_writel("drivers/usb/host/xhci-tegra.c:2225", usbcmd, &xhci->op_regs->command);
 
 		dev_dbg(tegra->dev, "entering ELPG failed\n");
 		pm_runtime_mark_last_busy(tegra->dev);
@@ -2292,9 +2292,9 @@ static int tegra_xusb_exit_elpg(struct tegra_xusb *tegra, bool runtime)
 		goto disable_phy;
 	}
 
-	usbcmd = readl(&xhci->op_regs->command);
+	usbcmd = pete_readl("drivers/usb/host/xhci-tegra.c:2295", &xhci->op_regs->command);
 	usbcmd |= CMD_EIE;
-	writel(usbcmd, &xhci->op_regs->command);
+	pete_writel("drivers/usb/host/xhci-tegra.c:2297", usbcmd, &xhci->op_regs->command);
 
 	goto out;
 
@@ -2708,7 +2708,7 @@ static int tegra_xhci_hub_control(struct usb_hcd *hcd, u16 type_req, u16 value, 
 		while (i--) {
 			if (!test_bit(i, &bus_state->resuming_ports))
 				continue;
-			portsc = readl(ports[i]->addr);
+			portsc = pete_readl("drivers/usb/host/xhci-tegra.c:2711", ports[i]->addr);
 			if ((portsc & PORT_PLS_MASK) == XDEV_RESUME)
 				tegra_phy_xusb_utmi_pad_power_on(
 					tegra_xusb_get_phy(tegra, "usb2", (int) i));
@@ -2726,7 +2726,7 @@ static int tegra_xhci_hub_control(struct usb_hcd *hcd, u16 type_req, u16 value, 
 			if (!index || index > rhub->num_ports)
 				return -EPIPE;
 			ports = rhub->ports;
-			portsc = readl(ports[port]->addr);
+			portsc = pete_readl("drivers/usb/host/xhci-tegra.c:2729", ports[port]->addr);
 			if (portsc & PORT_CONNECT)
 				tegra_phy_xusb_utmi_pad_power_on(phy);
 		}
@@ -2745,7 +2745,7 @@ static int tegra_xhci_hub_control(struct usb_hcd *hcd, u16 type_req, u16 value, 
 
 		if ((type_req == ClearPortFeature) && (value == USB_PORT_FEAT_C_CONNECTION)) {
 			ports = rhub->ports;
-			portsc = readl(ports[port]->addr);
+			portsc = pete_readl("drivers/usb/host/xhci-tegra.c:2748", ports[port]->addr);
 			if (!(portsc & PORT_CONNECT)) {
 				/* We don't suspend the PAD while HNP role swap happens on the OTG
 				 * port

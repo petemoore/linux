@@ -53,8 +53,8 @@ u32 fm10k_read_reg(struct fm10k_hw *hw, int reg)
 	if (FM10K_REMOVED(hw_addr))
 		return ~value;
 
-	value = readl(&hw_addr[reg]);
-	if (!(~value) && (!reg || !(~readl(hw_addr)))) {
+	value = pete_readl("drivers/net/ethernet/intel/fm10k/fm10k_pci.c:56", &hw_addr[reg]);
+	if (!(~value) && (!reg || !(~pete_readl("drivers/net/ethernet/intel/fm10k/fm10k_pci.c:57", hw_addr)))) {
 		struct fm10k_intfc *interface = hw->back;
 		struct net_device *netdev = interface->netdev;
 
@@ -356,7 +356,7 @@ static void fm10k_detach_subtask(struct fm10k_intfc *interface)
 
 	/* check the real address space to see if we've recovered */
 	hw_addr = READ_ONCE(interface->uc_addr);
-	value = readl(hw_addr);
+	value = pete_readl("drivers/net/ethernet/intel/fm10k/fm10k_pci.c:359", hw_addr);
 	if (~value) {
 		int err;
 
@@ -721,7 +721,7 @@ static void fm10k_check_hang_subtask(struct fm10k_intfc *interface)
 
 			if (!qv->tx.count && !qv->rx.count)
 				continue;
-			writel(FM10K_ITR_ENABLE | FM10K_ITR_PENDING2, qv->itr);
+			pete_writel("drivers/net/ethernet/intel/fm10k/fm10k_pci.c:724", FM10K_ITR_ENABLE | FM10K_ITR_PENDING2, qv->itr);
 		}
 	}
 }
@@ -1738,7 +1738,7 @@ void fm10k_qv_free_irq(struct fm10k_intfc *interface)
 		irq_set_affinity_hint(entry->vector, NULL);
 
 		/* disable interrupts */
-		writel(FM10K_ITR_MASK_SET, q_vector->itr);
+		pete_writel("drivers/net/ethernet/intel/fm10k/fm10k_pci.c:1741", FM10K_ITR_MASK_SET, q_vector->itr);
 
 		free_irq(entry->vector, q_vector);
 	}
@@ -1799,7 +1799,7 @@ int fm10k_qv_request_irq(struct fm10k_intfc *interface)
 		irq_set_affinity_hint(entry->vector, &q_vector->affinity_mask);
 
 		/* Enable q_vector */
-		writel(FM10K_ITR_ENABLE, q_vector->itr);
+		pete_writel("drivers/net/ethernet/intel/fm10k/fm10k_pci.c:1802", FM10K_ITR_ENABLE, q_vector->itr);
 
 		entry++;
 	}
@@ -1822,7 +1822,7 @@ err_out:
 		irq_set_affinity_hint(entry->vector, NULL);
 
 		/* disable interrupts */
-		writel(FM10K_ITR_MASK_SET, q_vector->itr);
+		pete_writel("drivers/net/ethernet/intel/fm10k/fm10k_pci.c:1825", FM10K_ITR_MASK_SET, q_vector->itr);
 
 		free_irq(entry->vector, q_vector);
 	}

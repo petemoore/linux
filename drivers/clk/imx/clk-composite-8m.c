@@ -33,14 +33,14 @@ static unsigned long imx8m_clk_composite_divider_recalc_rate(struct clk_hw *hw,
 	unsigned int prediv_value;
 	unsigned int div_value;
 
-	prediv_value = readl(divider->reg) >> divider->shift;
+	prediv_value = pete_readl("drivers/clk/imx/clk-composite-8m.c:36", divider->reg) >> divider->shift;
 	prediv_value &= clk_div_mask(divider->width);
 
 	prediv_rate = divider_recalc_rate(hw, parent_rate, prediv_value,
 						NULL, divider->flags,
 						divider->width);
 
-	div_value = readl(divider->reg) >> PCG_DIV_SHIFT;
+	div_value = pete_readl("drivers/clk/imx/clk-composite-8m.c:43", divider->reg) >> PCG_DIV_SHIFT;
 	div_value &= clk_div_mask(PCG_DIV_WIDTH);
 
 	return divider_recalc_rate(hw, prediv_rate, div_value, NULL,
@@ -106,7 +106,7 @@ static int imx8m_clk_composite_divider_set_rate(struct clk_hw *hw,
 
 	spin_lock_irqsave(divider->lock, flags);
 
-	orig = readl(divider->reg);
+	orig = pete_readl("drivers/clk/imx/clk-composite-8m.c:109", divider->reg);
 	val = orig & ~((clk_div_mask(divider->width) << divider->shift) |
 		       (clk_div_mask(PCG_DIV_WIDTH) << PCG_DIV_SHIFT));
 
@@ -114,7 +114,7 @@ static int imx8m_clk_composite_divider_set_rate(struct clk_hw *hw,
 	val |= (u32)(div_value - 1) << PCG_DIV_SHIFT;
 
 	if (val != orig)
-		writel(val, divider->reg);
+		pete_writel("drivers/clk/imx/clk-composite-8m.c:117", val, divider->reg);
 
 	spin_unlock_irqrestore(divider->lock, flags);
 
@@ -132,7 +132,7 @@ static int imx8m_divider_determine_rate(struct clk_hw *hw,
 	if (divider->flags & CLK_DIVIDER_READ_ONLY) {
 		u32 val;
 
-		val = readl(divider->reg);
+		val = pete_readl("drivers/clk/imx/clk-composite-8m.c:135", divider->reg);
 		prediv_value = val >> divider->shift;
 		prediv_value &= clk_div_mask(divider->width);
 		prediv_value++;
@@ -173,7 +173,7 @@ static int imx8m_clk_composite_mux_set_parent(struct clk_hw *hw, u8 index)
 	if (mux->lock)
 		spin_lock_irqsave(mux->lock, flags);
 
-	reg = readl(mux->reg);
+	reg = pete_readl("drivers/clk/imx/clk-composite-8m.c:176", mux->reg);
 	reg &= ~(mux->mask << mux->shift);
 	val = val << mux->shift;
 	reg |= val;
@@ -181,8 +181,8 @@ static int imx8m_clk_composite_mux_set_parent(struct clk_hw *hw, u8 index)
 	 * write twice to make sure non-target interface
 	 * SEL_A/B point the same clk input.
 	 */
-	writel(reg, mux->reg);
-	writel(reg, mux->reg);
+	pete_writel("drivers/clk/imx/clk-composite-8m.c:184", reg, mux->reg);
+	pete_writel("drivers/clk/imx/clk-composite-8m.c:185", reg, mux->reg);
 
 	if (mux->lock)
 		spin_unlock_irqrestore(mux->lock, flags);
@@ -212,9 +212,9 @@ static int imx8m_clk_composite_gate_enable(struct clk_hw *hw)
 
 	spin_lock_irqsave(gate->lock, flags);
 
-	val = readl(gate->reg);
+	val = pete_readl("drivers/clk/imx/clk-composite-8m.c:215", gate->reg);
 	val |= BIT(gate->bit_idx);
-	writel(val, gate->reg);
+	pete_writel("drivers/clk/imx/clk-composite-8m.c:217", val, gate->reg);
 
 	spin_unlock_irqrestore(gate->lock, flags);
 

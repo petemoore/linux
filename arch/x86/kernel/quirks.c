@@ -80,13 +80,13 @@ static void ich_force_hpet_resume(void)
 	BUG_ON(rcba_base == NULL);
 
 	/* read the Function Disable register, dword mode only */
-	val = readl(rcba_base + 0x3404);
+	val = pete_readl("arch/x86/kernel/quirks.c:83", rcba_base + 0x3404);
 	if (!(val & 0x80)) {
 		/* HPET disabled in HPTC. Trying to enable */
-		writel(val | 0x80, rcba_base + 0x3404);
+		pete_writel("arch/x86/kernel/quirks.c:86", val | 0x80, rcba_base + 0x3404);
 	}
 
-	val = readl(rcba_base + 0x3404);
+	val = pete_readl("arch/x86/kernel/quirks.c:89", rcba_base + 0x3404);
 	if (!(val & 0x80))
 		BUG();
 	else
@@ -119,7 +119,7 @@ static void ich_force_enable_hpet(struct pci_dev *dev)
 	}
 
 	/* read the Function Disable register, dword mode only */
-	val = readl(rcba_base + 0x3404);
+	val = pete_readl("arch/x86/kernel/quirks.c:122", rcba_base + 0x3404);
 
 	if (val & 0x80) {
 		/* HPET is enabled in HPTC. Just not reported by BIOS */
@@ -132,9 +132,9 @@ static void ich_force_enable_hpet(struct pci_dev *dev)
 	}
 
 	/* HPET disabled in HPTC. Trying to enable */
-	writel(val | 0x80, rcba_base + 0x3404);
+	pete_writel("arch/x86/kernel/quirks.c:135", val | 0x80, rcba_base + 0x3404);
 
-	val = readl(rcba_base + 0x3404);
+	val = pete_readl("arch/x86/kernel/quirks.c:137", rcba_base + 0x3404);
 	if (!(val & 0x80)) {
 		err = 1;
 	} else {

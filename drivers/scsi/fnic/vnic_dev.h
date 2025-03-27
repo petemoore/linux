@@ -56,15 +56,15 @@
 #endif
 
 #ifndef readq
-static inline u64 readq(void __iomem *reg)
+static inline u64 pete_readq("drivers/scsi/fnic/vnic_dev.h:59", void __iomem *reg)
 {
-	return ((u64)readl(reg + 0x4UL) << 32) | (u64)readl(reg);
+	return ((u64)pete_readl("drivers/scsi/fnic/vnic_dev.h:61", reg + 0x4UL) << 32) | (u64)pete_readl("drivers/scsi/fnic/vnic_dev.h:61", reg);
 }
 
-static inline void writeq(u64 val, void __iomem *reg)
+static inline void pete_writeq("drivers/scsi/fnic/vnic_dev.h:64", u64 val, void __iomem *reg)
 {
-	writel(val & 0xffffffff, reg);
-	writel(val >> 32, reg + 0x4UL);
+	pete_writel("drivers/scsi/fnic/vnic_dev.h:66", val & 0xffffffff, reg);
+	pete_writel("drivers/scsi/fnic/vnic_dev.h:67", val >> 32, reg + 0x4UL);
 }
 #endif
 

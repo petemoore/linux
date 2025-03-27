@@ -74,7 +74,7 @@ struct clk_psc {
 static int ep93xx_clk_is_enabled(struct clk_hw *hw)
 {
 	struct clk_psc *psc = to_clk_psc(hw);
-	u32 val = readl(psc->reg);
+	u32 val = pete_readl("arch/arm/mach-ep93xx/clock.c:77", psc->reg);
 
 	return (val & BIT(psc->bit_idx)) ? 1 : 0;
 }

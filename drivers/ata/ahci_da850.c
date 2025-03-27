@@ -31,14 +31,14 @@ static void da850_sata_init(struct device *dev, void __iomem *pwrdn_reg,
 	unsigned int val;
 
 	/* Enable SATA clock receiver */
-	val = readl(pwrdn_reg);
+	val = pete_readl("drivers/ata/ahci_da850.c:34", pwrdn_reg);
 	val &= ~BIT(0);
-	writel(val, pwrdn_reg);
+	pete_writel("drivers/ata/ahci_da850.c:36", val, pwrdn_reg);
 
 	val = SATA_PHY_MPY(mpy) | SATA_PHY_LOS(1) | SATA_PHY_RXCDR(4) |
 	      SATA_PHY_RXEQ(1) | SATA_PHY_TXSWING(3) | SATA_PHY_ENPLL(1);
 
-	writel(val, ahci_base + SATA_P0PHYCR_REG);
+	pete_writel("drivers/ata/ahci_da850.c:41", val, ahci_base + SATA_P0PHYCR_REG);
 }
 
 static u32 ahci_da850_calculate_mpy(unsigned long refclk_rate)

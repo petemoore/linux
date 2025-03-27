@@ -761,13 +761,13 @@ static int global_port_id;
 /* Write helper method */
 static void mvreg_write(struct mvneta_port *pp, u32 offset, u32 data)
 {
-	writel(data, pp->base + offset);
+	pete_writel("drivers/net/ethernet/marvell/mvneta.c:764", data, pp->base + offset);
 }
 
 /* Read helper method */
 static u32 mvreg_read(struct mvneta_port *pp, u32 offset)
 {
-	return readl(pp->base + offset);
+	return pete_readl("drivers/net/ethernet/marvell/mvneta.c:770", pp->base + offset);
 }
 
 /* Increment txq get counter */

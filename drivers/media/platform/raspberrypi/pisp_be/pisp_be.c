@@ -244,12 +244,12 @@ struct pispbe_dev {
 
 static u32 pispbe_rd(struct pispbe_dev *pispbe, unsigned int offset)
 {
-	return readl(pispbe->be_reg_base + offset);
+	return pete_readl("drivers/media/platform/raspberrypi/pisp_be/pisp_be.c:247", pispbe->be_reg_base + offset);
 }
 
 static void pispbe_wr(struct pispbe_dev *pispbe, unsigned int offset, u32 val)
 {
-	writel(val, pispbe->be_reg_base + offset);
+	pete_writel("drivers/media/platform/raspberrypi/pisp_be/pisp_be.c:252", val, pispbe->be_reg_base + offset);
 }
 
 /*

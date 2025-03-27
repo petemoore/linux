@@ -57,18 +57,18 @@ static void nano_register_write(struct histb_combphy_priv *priv,
 	u32 val;
 
 	/* Set up address and data for the write */
-	val = readl(reg);
+	val = pete_readl("drivers/phy/hisilicon/phy-histb-combphy.c:60", reg);
 	val &= ~COMBPHY_TEST_ADDR_MASK;
 	val |= addr << COMBPHY_TEST_ADDR_SHIFT;
 	val &= ~COMBPHY_TEST_DATA_MASK;
 	val |= data << COMBPHY_TEST_DATA_SHIFT;
-	writel(val, reg);
+	pete_writel("drivers/phy/hisilicon/phy-histb-combphy.c:65", val, reg);
 
 	/* Flip strobe control to trigger the write */
 	val &= ~COMBPHY_TEST_WRITE;
-	writel(val, reg);
+	pete_writel("drivers/phy/hisilicon/phy-histb-combphy.c:69", val, reg);
 	val |= COMBPHY_TEST_WRITE;
-	writel(val, reg);
+	pete_writel("drivers/phy/hisilicon/phy-histb-combphy.c:71", val, reg);
 }
 
 static int is_mode_fixed(struct histb_combphy_mode *mode)
@@ -114,9 +114,9 @@ static int histb_combphy_init(struct phy *phy)
 		return ret;
 
 	/* Clear bypass bit to enable encoding/decoding */
-	val = readl(priv->mmio + COMBPHY_CFG_REG);
+	val = pete_readl("drivers/phy/hisilicon/phy-histb-combphy.c:117", priv->mmio + COMBPHY_CFG_REG);
 	val &= ~COMBPHY_BYPASS_CODEC;
-	writel(val, priv->mmio + COMBPHY_CFG_REG);
+	pete_writel("drivers/phy/hisilicon/phy-histb-combphy.c:119", val, priv->mmio + COMBPHY_CFG_REG);
 
 	ret = clk_prepare_enable(priv->ref_clk);
 	if (ret)
@@ -125,9 +125,9 @@ static int histb_combphy_init(struct phy *phy)
 	reset_control_deassert(priv->por_rst);
 
 	/* Enable EP clock */
-	val = readl(priv->mmio + COMBPHY_CFG_REG);
+	val = pete_readl("drivers/phy/hisilicon/phy-histb-combphy.c:128", priv->mmio + COMBPHY_CFG_REG);
 	val |= COMBPHY_CLKREF_OUT_OEN;
-	writel(val, priv->mmio + COMBPHY_CFG_REG);
+	pete_writel("drivers/phy/hisilicon/phy-histb-combphy.c:130", val, priv->mmio + COMBPHY_CFG_REG);
 
 	/* Need to wait for EP clock stable */
 	mdelay(5);
@@ -146,9 +146,9 @@ static int histb_combphy_exit(struct phy *phy)
 	u32 val;
 
 	/* Disable EP clock */
-	val = readl(priv->mmio + COMBPHY_CFG_REG);
+	val = pete_readl("drivers/phy/hisilicon/phy-histb-combphy.c:149", priv->mmio + COMBPHY_CFG_REG);
 	val &= ~COMBPHY_CLKREF_OUT_OEN;
-	writel(val, priv->mmio + COMBPHY_CFG_REG);
+	pete_writel("drivers/phy/hisilicon/phy-histb-combphy.c:151", val, priv->mmio + COMBPHY_CFG_REG);
 
 	reset_control_assert(priv->por_rst);
 	clk_disable_unprepare(priv->ref_clk);

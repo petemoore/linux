@@ -31,14 +31,14 @@ static void amd_enable_sdw_pads(struct amd_sdw_manager *amd_manager)
 	u32 val;
 
 	mutex_lock(amd_manager->acp_sdw_lock);
-	val = readl(amd_manager->acp_mmio + ACP_SW_PAD_KEEPER_EN);
+	val = pete_readl("drivers/soundwire/amd_manager.c:34", amd_manager->acp_mmio + ACP_SW_PAD_KEEPER_EN);
 	val |= amd_manager->reg_mask->sw_pad_enable_mask;
-	writel(val, amd_manager->acp_mmio + ACP_SW_PAD_KEEPER_EN);
+	pete_writel("drivers/soundwire/amd_manager.c:36", val, amd_manager->acp_mmio + ACP_SW_PAD_KEEPER_EN);
 	usleep_range(1000, 1500);
 
-	sw_pad_pulldown_val = readl(amd_manager->acp_mmio + ACP_PAD_PULLDOWN_CTRL);
+	sw_pad_pulldown_val = pete_readl("drivers/soundwire/amd_manager.c:39", amd_manager->acp_mmio + ACP_PAD_PULLDOWN_CTRL);
 	sw_pad_pulldown_val &= amd_manager->reg_mask->sw_pad_pulldown_mask;
-	writel(sw_pad_pulldown_val, amd_manager->acp_mmio + ACP_PAD_PULLDOWN_CTRL);
+	pete_writel("drivers/soundwire/amd_manager.c:41", sw_pad_pulldown_val, amd_manager->acp_mmio + ACP_PAD_PULLDOWN_CTRL);
 	mutex_unlock(amd_manager->acp_sdw_lock);
 }
 
@@ -47,20 +47,20 @@ static int amd_init_sdw_manager(struct amd_sdw_manager *amd_manager)
 	u32 val;
 	int ret;
 
-	writel(AMD_SDW_ENABLE, amd_manager->mmio + ACP_SW_EN);
+	pete_writel("drivers/soundwire/amd_manager.c:50", AMD_SDW_ENABLE, amd_manager->mmio + ACP_SW_EN);
 	ret = readl_poll_timeout(amd_manager->mmio + ACP_SW_EN_STATUS, val, val, ACP_DELAY_US,
 				 AMD_SDW_TIMEOUT);
 	if (ret)
 		return ret;
 
 	/* SoundWire manager bus reset */
-	writel(AMD_SDW_BUS_RESET_REQ, amd_manager->mmio + ACP_SW_BUS_RESET_CTRL);
+	pete_writel("drivers/soundwire/amd_manager.c:57", AMD_SDW_BUS_RESET_REQ, amd_manager->mmio + ACP_SW_BUS_RESET_CTRL);
 	ret = readl_poll_timeout(amd_manager->mmio + ACP_SW_BUS_RESET_CTRL, val,
 				 (val & AMD_SDW_BUS_RESET_DONE), ACP_DELAY_US, AMD_SDW_TIMEOUT);
 	if (ret)
 		return ret;
 
-	writel(AMD_SDW_BUS_RESET_CLEAR_REQ, amd_manager->mmio + ACP_SW_BUS_RESET_CTRL);
+	pete_writel("drivers/soundwire/amd_manager.c:63", AMD_SDW_BUS_RESET_CLEAR_REQ, amd_manager->mmio + ACP_SW_BUS_RESET_CTRL);
 	ret = readl_poll_timeout(amd_manager->mmio + ACP_SW_BUS_RESET_CTRL, val, !val,
 				 ACP_DELAY_US, AMD_SDW_TIMEOUT);
 	if (ret) {
@@ -69,7 +69,7 @@ static int amd_init_sdw_manager(struct amd_sdw_manager *amd_manager)
 		return ret;
 	}
 
-	writel(AMD_SDW_DISABLE, amd_manager->mmio + ACP_SW_EN);
+	pete_writel("drivers/soundwire/amd_manager.c:72", AMD_SDW_DISABLE, amd_manager->mmio + ACP_SW_EN);
 	return readl_poll_timeout(amd_manager->mmio + ACP_SW_EN_STATUS, val, !val, ACP_DELAY_US,
 				  AMD_SDW_TIMEOUT);
 }
@@ -78,7 +78,7 @@ static int amd_enable_sdw_manager(struct amd_sdw_manager *amd_manager)
 {
 	u32 val;
 
-	writel(AMD_SDW_ENABLE, amd_manager->mmio + ACP_SW_EN);
+	pete_writel("drivers/soundwire/amd_manager.c:81", AMD_SDW_ENABLE, amd_manager->mmio + ACP_SW_EN);
 	return readl_poll_timeout(amd_manager->mmio + ACP_SW_EN_STATUS, val, val, ACP_DELAY_US,
 				  AMD_SDW_TIMEOUT);
 }
@@ -87,13 +87,13 @@ static int amd_disable_sdw_manager(struct amd_sdw_manager *amd_manager)
 {
 	u32 val;
 
-	writel(AMD_SDW_DISABLE, amd_manager->mmio + ACP_SW_EN);
+	pete_writel("drivers/soundwire/amd_manager.c:90", AMD_SDW_DISABLE, amd_manager->mmio + ACP_SW_EN);
 	/*
 	 * After invoking manager disable sequence, check whether
 	 * manager has executed clock stop sequence. In this case,
 	 * manager should ignore checking enable status register.
 	 */
-	val = readl(amd_manager->mmio + ACP_SW_CLK_RESUME_CTRL);
+	val = pete_readl("drivers/soundwire/amd_manager.c:96", amd_manager->mmio + ACP_SW_CLK_RESUME_CTRL);
 	if (val)
 		return 0;
 	return readl_poll_timeout(amd_manager->mmio + ACP_SW_EN_STATUS, val, !val, ACP_DELAY_US,
@@ -106,16 +106,16 @@ static void amd_enable_sdw_interrupts(struct amd_sdw_manager *amd_manager)
 	u32 val;
 
 	mutex_lock(amd_manager->acp_sdw_lock);
-	val = readl(amd_manager->acp_mmio + ACP_EXTERNAL_INTR_CNTL(amd_manager->instance));
+	val = pete_readl("drivers/soundwire/amd_manager.c:109", amd_manager->acp_mmio + ACP_EXTERNAL_INTR_CNTL(amd_manager->instance));
 	val |= reg_mask->acp_sdw_intr_mask;
-	writel(val, amd_manager->acp_mmio + ACP_EXTERNAL_INTR_CNTL(amd_manager->instance));
+	pete_writel("drivers/soundwire/amd_manager.c:111", val, amd_manager->acp_mmio + ACP_EXTERNAL_INTR_CNTL(amd_manager->instance));
 	mutex_unlock(amd_manager->acp_sdw_lock);
 
-	writel(AMD_SDW_IRQ_MASK_0TO7, amd_manager->mmio +
+	pete_writel("drivers/soundwire/amd_manager.c:114", AMD_SDW_IRQ_MASK_0TO7, amd_manager->mmio +
 		       ACP_SW_STATE_CHANGE_STATUS_MASK_0TO7);
-	writel(AMD_SDW_IRQ_MASK_8TO11, amd_manager->mmio +
+	pete_writel("drivers/soundwire/amd_manager.c:116", AMD_SDW_IRQ_MASK_8TO11, amd_manager->mmio +
 		       ACP_SW_STATE_CHANGE_STATUS_MASK_8TO11);
-	writel(AMD_SDW_IRQ_ERROR_MASK, amd_manager->mmio + ACP_SW_ERROR_INTR_MASK);
+	pete_writel("drivers/soundwire/amd_manager.c:118", AMD_SDW_IRQ_ERROR_MASK, amd_manager->mmio + ACP_SW_ERROR_INTR_MASK);
 }
 
 static void amd_disable_sdw_interrupts(struct amd_sdw_manager *amd_manager)
@@ -124,14 +124,14 @@ static void amd_disable_sdw_interrupts(struct amd_sdw_manager *amd_manager)
 	u32 val;
 
 	mutex_lock(amd_manager->acp_sdw_lock);
-	val = readl(amd_manager->acp_mmio + ACP_EXTERNAL_INTR_CNTL(amd_manager->instance));
+	val = pete_readl("drivers/soundwire/amd_manager.c:127", amd_manager->acp_mmio + ACP_EXTERNAL_INTR_CNTL(amd_manager->instance));
 	val &= ~reg_mask->acp_sdw_intr_mask;
-	writel(val, amd_manager->acp_mmio + ACP_EXTERNAL_INTR_CNTL(amd_manager->instance));
+	pete_writel("drivers/soundwire/amd_manager.c:129", val, amd_manager->acp_mmio + ACP_EXTERNAL_INTR_CNTL(amd_manager->instance));
 	mutex_unlock(amd_manager->acp_sdw_lock);
 
-	writel(0x00, amd_manager->mmio + ACP_SW_STATE_CHANGE_STATUS_MASK_0TO7);
-	writel(0x00, amd_manager->mmio + ACP_SW_STATE_CHANGE_STATUS_MASK_8TO11);
-	writel(0x00, amd_manager->mmio + ACP_SW_ERROR_INTR_MASK);
+	pete_writel("drivers/soundwire/amd_manager.c:132", 0x00, amd_manager->mmio + ACP_SW_STATE_CHANGE_STATUS_MASK_0TO7);
+	pete_writel("drivers/soundwire/amd_manager.c:133", 0x00, amd_manager->mmio + ACP_SW_STATE_CHANGE_STATUS_MASK_8TO11);
+	pete_writel("drivers/soundwire/amd_manager.c:134", 0x00, amd_manager->mmio + ACP_SW_ERROR_INTR_MASK);
 }
 
 static int amd_deinit_sdw_manager(struct amd_sdw_manager *amd_manager)
@@ -145,20 +145,20 @@ static void amd_sdw_set_frameshape(struct amd_sdw_manager *amd_manager)
 	u32 frame_size;
 
 	frame_size = (amd_manager->rows_index << 3) | amd_manager->cols_index;
-	writel(frame_size, amd_manager->mmio + ACP_SW_FRAMESIZE);
+	pete_writel("drivers/soundwire/amd_manager.c:148", frame_size, amd_manager->mmio + ACP_SW_FRAMESIZE);
 }
 
 static void amd_sdw_wake_enable(struct amd_sdw_manager *amd_manager, bool enable)
 {
 	u32 wake_ctrl;
 
-	wake_ctrl = readl(amd_manager->mmio + ACP_SW_STATE_CHANGE_STATUS_MASK_8TO11);
+	wake_ctrl = pete_readl("drivers/soundwire/amd_manager.c:155", amd_manager->mmio + ACP_SW_STATE_CHANGE_STATUS_MASK_8TO11);
 	if (enable)
 		wake_ctrl |= AMD_SDW_WAKE_INTR_MASK;
 	else
 		wake_ctrl &= ~AMD_SDW_WAKE_INTR_MASK;
 
-	writel(wake_ctrl, amd_manager->mmio + ACP_SW_STATE_CHANGE_STATUS_MASK_8TO11);
+	pete_writel("drivers/soundwire/amd_manager.c:161", wake_ctrl, amd_manager->mmio + ACP_SW_STATE_CHANGE_STATUS_MASK_8TO11);
 }
 
 static void amd_sdw_ctl_word_prep(u32 *lower_word, u32 *upper_word, struct sdw_msg *msg,
@@ -205,10 +205,10 @@ static u64 amd_sdw_send_cmd_get_resp(struct amd_sdw_manager *amd_manager, u32 lo
 
 	if (sts & AMD_SDW_IMM_RES_VALID) {
 		dev_err(amd_manager->dev, "SDW%x manager is in bad state\n", amd_manager->instance);
-		writel(0x00, amd_manager->mmio + ACP_SW_IMM_CMD_STS);
+		pete_writel("drivers/soundwire/amd_manager.c:208", 0x00, amd_manager->mmio + ACP_SW_IMM_CMD_STS);
 	}
-	writel(upper_data, amd_manager->mmio + ACP_SW_IMM_CMD_UPPER_WORD);
-	writel(lower_data, amd_manager->mmio + ACP_SW_IMM_CMD_LOWER_QWORD);
+	pete_writel("drivers/soundwire/amd_manager.c:210", upper_data, amd_manager->mmio + ACP_SW_IMM_CMD_UPPER_WORD);
+	pete_writel("drivers/soundwire/amd_manager.c:211", lower_data, amd_manager->mmio + ACP_SW_IMM_CMD_LOWER_QWORD);
 
 	ret = readl_poll_timeout(amd_manager->mmio + ACP_SW_IMM_CMD_STS, sts,
 				 (sts & AMD_SDW_IMM_RES_VALID), ACP_DELAY_US, AMD_SDW_TIMEOUT);
@@ -217,10 +217,10 @@ static u64 amd_sdw_send_cmd_get_resp(struct amd_sdw_manager *amd_manager, u32 lo
 			amd_manager->instance);
 		return ret;
 	}
-	upper_resp = readl(amd_manager->mmio + ACP_SW_IMM_RESP_UPPER_WORD);
-	lower_resp = readl(amd_manager->mmio + ACP_SW_IMM_RESP_LOWER_QWORD);
+	upper_resp = pete_readl("drivers/soundwire/amd_manager.c:220", amd_manager->mmio + ACP_SW_IMM_RESP_UPPER_WORD);
+	lower_resp = pete_readl("drivers/soundwire/amd_manager.c:221", amd_manager->mmio + ACP_SW_IMM_RESP_LOWER_QWORD);
 
-	writel(AMD_SDW_IMM_RES_VALID, amd_manager->mmio + ACP_SW_IMM_CMD_STS);
+	pete_writel("drivers/soundwire/amd_manager.c:223", AMD_SDW_IMM_RES_VALID, amd_manager->mmio + ACP_SW_IMM_CMD_STS);
 	ret = readl_poll_timeout(amd_manager->mmio + ACP_SW_IMM_CMD_STS, sts,
 				 !(sts & AMD_SDW_IMM_RES_VALID), ACP_DELAY_US, AMD_SDW_TIMEOUT);
 	if (ret) {
@@ -462,11 +462,11 @@ static int amd_sdw_port_params(struct sdw_bus *bus, struct sdw_port_params *p_pa
 		return -EINVAL;
 	}
 
-	dpn_frame_fmt = readl(amd_manager->mmio + frame_fmt_reg);
+	dpn_frame_fmt = pete_readl("drivers/soundwire/amd_manager.c:465", amd_manager->mmio + frame_fmt_reg);
 	u32p_replace_bits(&dpn_frame_fmt, p_params->flow_mode, AMD_DPN_FRAME_FMT_PFM);
 	u32p_replace_bits(&dpn_frame_fmt, p_params->data_mode, AMD_DPN_FRAME_FMT_PDM);
 	u32p_replace_bits(&dpn_frame_fmt, p_params->bps - 1, AMD_DPN_FRAME_FMT_WORD_LEN);
-	writel(dpn_frame_fmt, amd_manager->mmio + frame_fmt_reg);
+	pete_writel("drivers/soundwire/amd_manager.c:469", dpn_frame_fmt, amd_manager->mmio + frame_fmt_reg);
 	return 0;
 }
 
@@ -501,32 +501,32 @@ static int amd_sdw_transport_params(struct sdw_bus *bus,
 	default:
 		return -EINVAL;
 	}
-	writel(AMD_SDW_SSP_COUNTER_VAL, amd_manager->mmio + ACP_SW_SSP_COUNTER);
+	pete_writel("drivers/soundwire/amd_manager.c:504", AMD_SDW_SSP_COUNTER_VAL, amd_manager->mmio + ACP_SW_SSP_COUNTER);
 
-	dpn_frame_fmt = readl(amd_manager->mmio + frame_fmt_reg);
+	dpn_frame_fmt = pete_readl("drivers/soundwire/amd_manager.c:506", amd_manager->mmio + frame_fmt_reg);
 	u32p_replace_bits(&dpn_frame_fmt, params->blk_pkg_mode, AMD_DPN_FRAME_FMT_BLK_PKG_MODE);
 	u32p_replace_bits(&dpn_frame_fmt, params->blk_grp_ctrl, AMD_DPN_FRAME_FMT_BLK_GRP_CTRL);
 	u32p_replace_bits(&dpn_frame_fmt, SDW_STREAM_PCM, AMD_DPN_FRAME_FMT_PCM_OR_PDM);
-	writel(dpn_frame_fmt, amd_manager->mmio + frame_fmt_reg);
+	pete_writel("drivers/soundwire/amd_manager.c:510", dpn_frame_fmt, amd_manager->mmio + frame_fmt_reg);
 
 	dpn_sampleinterval = params->sample_interval - 1;
-	writel(dpn_sampleinterval, amd_manager->mmio + sample_int_reg);
+	pete_writel("drivers/soundwire/amd_manager.c:513", dpn_sampleinterval, amd_manager->mmio + sample_int_reg);
 
 	dpn_hctrl = FIELD_PREP(AMD_DPN_HCTRL_HSTOP, params->hstop);
 	dpn_hctrl |= FIELD_PREP(AMD_DPN_HCTRL_HSTART, params->hstart);
-	writel(dpn_hctrl, amd_manager->mmio + hctrl_dp0_reg);
+	pete_writel("drivers/soundwire/amd_manager.c:517", dpn_hctrl, amd_manager->mmio + hctrl_dp0_reg);
 
 	dpn_offsetctrl = FIELD_PREP(AMD_DPN_OFFSET_CTRL_1, params->offset1);
 	dpn_offsetctrl |= FIELD_PREP(AMD_DPN_OFFSET_CTRL_2, params->offset2);
-	writel(dpn_offsetctrl, amd_manager->mmio + offset_reg);
+	pete_writel("drivers/soundwire/amd_manager.c:521", dpn_offsetctrl, amd_manager->mmio + offset_reg);
 
 	/*
 	 * lane_ctrl_ch_en_reg will be used to program lane_ctrl and ch_mask
 	 * parameters.
 	 */
-	dpn_lanectrl = readl(amd_manager->mmio + lane_ctrl_ch_en_reg);
+	dpn_lanectrl = pete_readl("drivers/soundwire/amd_manager.c:527", amd_manager->mmio + lane_ctrl_ch_en_reg);
 	u32p_replace_bits(&dpn_lanectrl, params->lane_ctrl, AMD_DPN_CH_EN_LCTRL);
-	writel(dpn_lanectrl, amd_manager->mmio + lane_ctrl_ch_en_reg);
+	pete_writel("drivers/soundwire/amd_manager.c:529", dpn_lanectrl, amd_manager->mmio + lane_ctrl_ch_en_reg);
 	return 0;
 }
 
@@ -553,12 +553,12 @@ static int amd_sdw_port_enable(struct sdw_bus *bus,
 	 * lane_ctrl_ch_en_reg will be used to program lane_ctrl and ch_mask
 	 * parameters.
 	 */
-	dpn_ch_enable = readl(amd_manager->mmio + lane_ctrl_ch_en_reg);
+	dpn_ch_enable = pete_readl("drivers/soundwire/amd_manager.c:556", amd_manager->mmio + lane_ctrl_ch_en_reg);
 	u32p_replace_bits(&dpn_ch_enable, enable_ch->ch_mask, AMD_DPN_CH_EN_CHMASK);
 	if (enable_ch->enable)
-		writel(dpn_ch_enable, amd_manager->mmio + lane_ctrl_ch_en_reg);
+		pete_writel("drivers/soundwire/amd_manager.c:559", dpn_ch_enable, amd_manager->mmio + lane_ctrl_ch_en_reg);
 	else
-		writel(0, amd_manager->mmio + lane_ctrl_ch_en_reg);
+		pete_writel("drivers/soundwire/amd_manager.c:561", 0, amd_manager->mmio + lane_ctrl_ch_en_reg);
 	return 0;
 }
 
@@ -791,8 +791,8 @@ static void amd_sdw_update_slave_status_work(struct work_struct *work)
 	int retry_count = 0;
 
 	if (amd_manager->status[0] == SDW_SLAVE_ATTACHED) {
-		writel(0, amd_manager->mmio + ACP_SW_STATE_CHANGE_STATUS_MASK_0TO7);
-		writel(0, amd_manager->mmio + ACP_SW_STATE_CHANGE_STATUS_MASK_8TO11);
+		pete_writel("drivers/soundwire/amd_manager.c:794", 0, amd_manager->mmio + ACP_SW_STATE_CHANGE_STATUS_MASK_0TO7);
+		pete_writel("drivers/soundwire/amd_manager.c:795", 0, amd_manager->mmio + ACP_SW_STATE_CHANGE_STATUS_MASK_8TO11);
 	}
 
 update_status:
@@ -806,9 +806,9 @@ update_status:
 	 */
 	if (amd_manager->status[0] == SDW_SLAVE_ATTACHED) {
 		if (retry_count++ < SDW_MAX_DEVICES) {
-			writel(AMD_SDW_IRQ_MASK_0TO7, amd_manager->mmio +
+			pete_writel("drivers/soundwire/amd_manager.c:809", AMD_SDW_IRQ_MASK_0TO7, amd_manager->mmio +
 			       ACP_SW_STATE_CHANGE_STATUS_MASK_0TO7);
-			writel(AMD_SDW_IRQ_MASK_8TO11, amd_manager->mmio +
+			pete_writel("drivers/soundwire/amd_manager.c:811", AMD_SDW_IRQ_MASK_8TO11, amd_manager->mmio +
 			       ACP_SW_STATE_CHANGE_STATUS_MASK_8TO11);
 			amd_sdw_read_and_process_ping_status(amd_manager);
 			goto update_status;
@@ -847,8 +847,8 @@ static void amd_sdw_update_slave_status(u32 status_change_0to7, u32 status_chang
 static void amd_sdw_process_wake_event(struct amd_sdw_manager *amd_manager)
 {
 	pm_request_resume(amd_manager->dev);
-	writel(0x00, amd_manager->acp_mmio + ACP_SW_WAKE_EN(amd_manager->instance));
-	writel(0x00, amd_manager->mmio + ACP_SW_STATE_CHANGE_STATUS_8TO11);
+	pete_writel("drivers/soundwire/amd_manager.c:850", 0x00, amd_manager->acp_mmio + ACP_SW_WAKE_EN(amd_manager->instance));
+	pete_writel("drivers/soundwire/amd_manager.c:851", 0x00, amd_manager->mmio + ACP_SW_STATE_CHANGE_STATUS_8TO11);
 }
 
 static void amd_sdw_irq_thread(struct work_struct *work)
@@ -858,8 +858,8 @@ static void amd_sdw_irq_thread(struct work_struct *work)
 	u32 status_change_8to11;
 	u32 status_change_0to7;
 
-	status_change_8to11 = readl(amd_manager->mmio + ACP_SW_STATE_CHANGE_STATUS_8TO11);
-	status_change_0to7 = readl(amd_manager->mmio + ACP_SW_STATE_CHANGE_STATUS_0TO7);
+	status_change_8to11 = pete_readl("drivers/soundwire/amd_manager.c:861", amd_manager->mmio + ACP_SW_STATE_CHANGE_STATUS_8TO11);
+	status_change_0to7 = pete_readl("drivers/soundwire/amd_manager.c:862", amd_manager->mmio + ACP_SW_STATE_CHANGE_STATUS_0TO7);
 	dev_dbg(amd_manager->dev, "[SDW%d] SDW INT: 0to7=0x%x, 8to11=0x%x\n",
 		amd_manager->instance, status_change_0to7, status_change_8to11);
 	if (status_change_8to11 & AMD_SDW_WAKE_STAT_MASK)
@@ -873,8 +873,8 @@ static void amd_sdw_irq_thread(struct work_struct *work)
 	}
 	if (status_change_8to11 || status_change_0to7)
 		schedule_work(&amd_manager->amd_sdw_work);
-	writel(0x00, amd_manager->mmio + ACP_SW_STATE_CHANGE_STATUS_8TO11);
-	writel(0x00, amd_manager->mmio + ACP_SW_STATE_CHANGE_STATUS_0TO7);
+	pete_writel("drivers/soundwire/amd_manager.c:876", 0x00, amd_manager->mmio + ACP_SW_STATE_CHANGE_STATUS_8TO11);
+	pete_writel("drivers/soundwire/amd_manager.c:877", 0x00, amd_manager->mmio + ACP_SW_STATE_CHANGE_STATUS_0TO7);
 }
 
 static void amd_sdw_probe_work(struct work_struct *work)
@@ -1032,7 +1032,7 @@ static int amd_sdw_clock_stop(struct amd_sdw_manager *amd_manager)
 
 	amd_manager->clk_stopped = true;
 	if (amd_manager->wake_en_mask)
-		writel(0x01, amd_manager->acp_mmio + ACP_SW_WAKE_EN(amd_manager->instance));
+		pete_writel("drivers/soundwire/amd_manager.c:1035", 0x01, amd_manager->acp_mmio + ACP_SW_WAKE_EN(amd_manager->instance));
 
 	dev_dbg(amd_manager->dev, "SDW%x clock stop successful\n", amd_manager->instance);
 	return 0;
@@ -1044,14 +1044,14 @@ static int amd_sdw_clock_stop_exit(struct amd_sdw_manager *amd_manager)
 	u32 val;
 
 	if (amd_manager->clk_stopped) {
-		val = readl(amd_manager->mmio + ACP_SW_CLK_RESUME_CTRL);
+		val = pete_readl("drivers/soundwire/amd_manager.c:1047", amd_manager->mmio + ACP_SW_CLK_RESUME_CTRL);
 		val |= AMD_SDW_CLK_RESUME_REQ;
-		writel(val, amd_manager->mmio + ACP_SW_CLK_RESUME_CTRL);
+		pete_writel("drivers/soundwire/amd_manager.c:1049", val, amd_manager->mmio + ACP_SW_CLK_RESUME_CTRL);
 		ret = readl_poll_timeout(amd_manager->mmio + ACP_SW_CLK_RESUME_CTRL, val,
 					 (val & AMD_SDW_CLK_RESUME_DONE), ACP_DELAY_US,
 					 AMD_SDW_TIMEOUT);
 		if (val & AMD_SDW_CLK_RESUME_DONE) {
-			writel(0, amd_manager->mmio + ACP_SW_CLK_RESUME_CTRL);
+			pete_writel("drivers/soundwire/amd_manager.c:1054", 0, amd_manager->mmio + ACP_SW_CLK_RESUME_CTRL);
 			ret = sdw_bus_exit_clk_stop(&amd_manager->bus);
 			if (ret < 0)
 				dev_err(amd_manager->dev, "bus failed to exit clock stop %d\n",
@@ -1189,15 +1189,15 @@ static int __maybe_unused amd_resume_runtime(struct device *dev)
 	if (amd_manager->power_mode_mask & AMD_SDW_CLK_STOP_MODE) {
 		return amd_sdw_clock_stop_exit(amd_manager);
 	} else if (amd_manager->power_mode_mask & AMD_SDW_POWER_OFF_MODE) {
-		val = readl(amd_manager->mmio + ACP_SW_CLK_RESUME_CTRL);
+		val = pete_readl("drivers/soundwire/amd_manager.c:1192", amd_manager->mmio + ACP_SW_CLK_RESUME_CTRL);
 		if (val) {
 			val |= AMD_SDW_CLK_RESUME_REQ;
-			writel(val, amd_manager->mmio + ACP_SW_CLK_RESUME_CTRL);
+			pete_writel("drivers/soundwire/amd_manager.c:1195", val, amd_manager->mmio + ACP_SW_CLK_RESUME_CTRL);
 			ret = readl_poll_timeout(amd_manager->mmio + ACP_SW_CLK_RESUME_CTRL, val,
 						 (val & AMD_SDW_CLK_RESUME_DONE), ACP_DELAY_US,
 						 AMD_SDW_TIMEOUT);
 			if (val & AMD_SDW_CLK_RESUME_DONE) {
-				writel(0, amd_manager->mmio + ACP_SW_CLK_RESUME_CTRL);
+				pete_writel("drivers/soundwire/amd_manager.c:1200", 0, amd_manager->mmio + ACP_SW_CLK_RESUME_CTRL);
 				amd_manager->clk_stopped = false;
 			}
 		}

@@ -226,12 +226,12 @@ struct rk3x_i2c {
 static inline void i2c_writel(struct rk3x_i2c *i2c, u32 value,
 			      unsigned int offset)
 {
-	writel(value, i2c->regs + offset);
+	pete_writel("drivers/i2c/busses/i2c-rk3x.c:229", value, i2c->regs + offset);
 }
 
 static inline u32 i2c_readl(struct rk3x_i2c *i2c, unsigned int offset)
 {
-	return readl(i2c->regs + offset);
+	return pete_readl("drivers/i2c/busses/i2c-rk3x.c:234", i2c->regs + offset);
 }
 
 /* Reset all interrupt pending bits */

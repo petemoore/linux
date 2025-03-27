@@ -181,13 +181,13 @@ static int imx8mm_tmu_probe_set_calib_v1(struct platform_device *pdev,
 	if (ret)
 		return dev_err_probe(dev, ret, "Failed to read OCOTP nvmem cell\n");
 
-	writel(FIELD_PREP(TASR_BUF_VREF_MASK,
+	pete_writel("drivers/thermal/imx8mm_thermal.c:184", FIELD_PREP(TASR_BUF_VREF_MASK,
 			  FIELD_GET(ANA0_BUF_VREF_MASK, ana0)) |
 	       FIELD_PREP(TASR_BUF_SLOPE_MASK,
 			  FIELD_GET(ANA0_BUF_SLOPE_MASK, ana0)),
 	       tmu->base + TASR);
 
-	writel(FIELD_PREP(TCALIV_RT_MASK, FIELD_GET(ANA0_RT_MASK, ana0)) |
+	pete_writel("drivers/thermal/imx8mm_thermal.c:190", FIELD_PREP(TCALIV_RT_MASK, FIELD_GET(ANA0_RT_MASK, ana0)) |
 	       FIELD_PREP(TCALIV_HR_MASK, FIELD_GET(ANA0_HR_MASK, ana0)) |
 	       ((ana0 & ANA0_EN) ? TCALIV_EN : 0),
 	       tmu->base + TCALIV(0));
@@ -226,40 +226,40 @@ static int imx8mm_tmu_probe_set_calib_v2(struct platform_device *pdev,
 	/* Blank sample hardware */
 	if (!trim[0] && !trim[1] && !trim[2] && !trim[3]) {
 		/* Use a default 25C binary codes */
-		writel(FIELD_PREP(TCALIV_SNSR25C_MASK, 0x63c),
+		pete_writel("drivers/thermal/imx8mm_thermal.c:229", FIELD_PREP(TCALIV_SNSR25C_MASK, 0x63c),
 		       tmu->base + TCALIV(0));
-		writel(FIELD_PREP(TCALIV_SNSR25C_MASK, 0x63c),
+		pete_writel("drivers/thermal/imx8mm_thermal.c:231", FIELD_PREP(TCALIV_SNSR25C_MASK, 0x63c),
 		       tmu->base + TCALIV(1));
 		return 0;
 	}
 
-	writel(FIELD_PREP(TASR_BUF_VERF_SEL_MASK,
+	pete_writel("drivers/thermal/imx8mm_thermal.c:236", FIELD_PREP(TASR_BUF_VERF_SEL_MASK,
 			  FIELD_GET(TRIM2_BUF_VERF_SEL_MASK, trim[0])) |
 	       FIELD_PREP(TASR_BUF_SLOPE_MASK,
 			  FIELD_GET(TRIM2_BUF_SLOP_SEL_MASK, trim[0])),
 	       tmu->base + TASR);
 
-	writel(FIELD_PREP(TRIM_BJT_CUR_MASK,
+	pete_writel("drivers/thermal/imx8mm_thermal.c:242", FIELD_PREP(TRIM_BJT_CUR_MASK,
 			  FIELD_GET(TRIM2_BJT_CUR_MASK, trim[0])) |
 	       FIELD_PREP(TRIM_BGR_MASK, FIELD_GET(TRIM2_BGR_MASK, trim[0])) |
 	       FIELD_PREP(TRIM_VLSB_MASK, FIELD_GET(TRIM2_VLSB_MASK, trim[0])) |
 	       TRIM_EN_CH,
 	       tmu->base + TRIM);
 
-	writel(FIELD_PREP(TCALIV_SNSR25C_MASK,
+	pete_writel("drivers/thermal/imx8mm_thermal.c:249", FIELD_PREP(TCALIV_SNSR25C_MASK,
 			  FIELD_GET(TRIM3_TCA25_0_LSB_MASK, trim[1]) |
 			  (FIELD_GET(TRIM4_TCA25_0_MSB_MASK, trim[2]) << 4)) |
 	       FIELD_PREP(TCALIV_SNSR105C_MASK,
 			  FIELD_GET(TRIM4_TCA105_0_MASK, trim[2])),
 	       tmu->base + TCALIV(0));
 
-	writel(FIELD_PREP(TCALIV_SNSR25C_MASK,
+	pete_writel("drivers/thermal/imx8mm_thermal.c:256", FIELD_PREP(TCALIV_SNSR25C_MASK,
 			  FIELD_GET(TRIM5_TCA25_1_MASK, trim[3])) |
 	       FIELD_PREP(TCALIV_SNSR105C_MASK,
 			  FIELD_GET(TRIM5_TCA105_1_MASK, trim[3])),
 	       tmu->base + TCALIV(1));
 
-	writel(FIELD_PREP(TCALIV_SNSR25C_MASK,
+	pete_writel("drivers/thermal/imx8mm_thermal.c:262", FIELD_PREP(TCALIV_SNSR25C_MASK,
 			  FIELD_GET(TRIM3_TCA40_0_MASK, trim[1])) |
 	       FIELD_PREP(TCALIV_SNSR105C_MASK,
 			  FIELD_GET(TRIM4_TCA40_1_MASK, trim[2])),

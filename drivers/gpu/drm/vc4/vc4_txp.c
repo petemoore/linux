@@ -152,13 +152,13 @@
 #define TXP_READ(offset)								\
 	({										\
 		kunit_fail_current_test("Accessing a register in a unit test!\n");	\
-		readl(txp->regs + (offset));						\
+		pete_readl("drivers/gpu/drm/vc4/vc4_txp.c:155", txp->regs + (offset));						\
 	})
 
 #define TXP_WRITE(offset, val)								\
 	do {										\
 		kunit_fail_current_test("Accessing a register in a unit test!\n");	\
-		writel(val, txp->regs + (offset));					\
+		pete_writel("drivers/gpu/drm/vc4/vc4_txp.c:161", val, txp->regs + (offset));					\
 	} while (0)
 
 struct vc4_txp {

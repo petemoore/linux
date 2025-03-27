@@ -165,7 +165,7 @@ static unsigned long sun6i_rtc_osc_recalc_rate(struct clk_hw *hw,
 	struct sun6i_rtc_dev *rtc = container_of(hw, struct sun6i_rtc_dev, hw);
 	u32 val = 0;
 
-	val = readl(rtc->base + SUN6I_LOSC_CTRL);
+	val = pete_readl("drivers/rtc/rtc-sun6i.c:168", rtc->base + SUN6I_LOSC_CTRL);
 	if (val & SUN6I_LOSC_CTRL_EXT_OSC)
 		return parent_rate;
 
@@ -173,7 +173,7 @@ static unsigned long sun6i_rtc_osc_recalc_rate(struct clk_hw *hw,
 		parent_rate /= rtc->data->fixed_prescaler;
 
 	if (rtc->data->has_prescaler) {
-		val = readl(rtc->base + SUN6I_LOSC_CLK_PRESCAL);
+		val = pete_readl("drivers/rtc/rtc-sun6i.c:176", rtc->base + SUN6I_LOSC_CLK_PRESCAL);
 		val &= GENMASK(4, 0);
 	}
 
@@ -184,7 +184,7 @@ static u8 sun6i_rtc_osc_get_parent(struct clk_hw *hw)
 {
 	struct sun6i_rtc_dev *rtc = container_of(hw, struct sun6i_rtc_dev, hw);
 
-	return readl(rtc->base + SUN6I_LOSC_CTRL) & SUN6I_LOSC_CTRL_EXT_OSC;
+	return pete_readl("drivers/rtc/rtc-sun6i.c:187", rtc->base + SUN6I_LOSC_CTRL) & SUN6I_LOSC_CTRL_EXT_OSC;
 }
 
 static int sun6i_rtc_osc_set_parent(struct clk_hw *hw, u8 index)
@@ -197,7 +197,7 @@ static int sun6i_rtc_osc_set_parent(struct clk_hw *hw, u8 index)
 		return -EINVAL;
 
 	spin_lock_irqsave(&rtc->lock, flags);
-	val = readl(rtc->base + SUN6I_LOSC_CTRL);
+	val = pete_readl("drivers/rtc/rtc-sun6i.c:200", rtc->base + SUN6I_LOSC_CTRL);
 	val &= ~SUN6I_LOSC_CTRL_EXT_OSC;
 	val |= SUN6I_LOSC_CTRL_KEY;
 	val |= index ? SUN6I_LOSC_CTRL_EXT_OSC : 0;
@@ -205,7 +205,7 @@ static int sun6i_rtc_osc_set_parent(struct clk_hw *hw, u8 index)
 		val &= ~SUN6I_LOSC_CTRL_EXT_LOSC_EN;
 		val |= index ? SUN6I_LOSC_CTRL_EXT_LOSC_EN : 0;
 	}
-	writel(val, rtc->base + SUN6I_LOSC_CTRL);
+	pete_writel("drivers/rtc/rtc-sun6i.c:208", val, rtc->base + SUN6I_LOSC_CTRL);
 	spin_unlock_irqrestore(&rtc->lock, flags);
 
 	return 0;
@@ -256,7 +256,7 @@ static void __init sun6i_rtc_clk_init(struct device_node *node,
 	if (rtc->data->has_auto_swt) {
 		/* Bypass auto-switch to int osc, on ext losc failure */
 		reg |= SUN6I_LOSC_CTRL_AUTO_SWT_BYPASS;
-		writel(reg, rtc->base + SUN6I_LOSC_CTRL);
+		pete_writel("drivers/rtc/rtc-sun6i.c:259", reg, rtc->base + SUN6I_LOSC_CTRL);
 	}
 
 	/* Switch to the external, more precise, oscillator, if present */
@@ -265,7 +265,7 @@ static void __init sun6i_rtc_clk_init(struct device_node *node,
 		if (rtc->data->has_losc_en)
 			reg |= SUN6I_LOSC_CTRL_EXT_LOSC_EN;
 	}
-	writel(reg, rtc->base + SUN6I_LOSC_CTRL);
+	pete_writel("drivers/rtc/rtc-sun6i.c:268", reg, rtc->base + SUN6I_LOSC_CTRL);
 
 	/* Yes, I know, this is ugly. */
 	sun6i_rtc = rtc;
@@ -418,11 +418,11 @@ static irqreturn_t sun6i_rtc_alarmirq(int irq, void *id)
 	u32 val;
 
 	spin_lock(&chip->lock);
-	val = readl(chip->base + SUN6I_ALRM_IRQ_STA);
+	val = pete_readl("drivers/rtc/rtc-sun6i.c:421", chip->base + SUN6I_ALRM_IRQ_STA);
 
 	if (val & SUN6I_ALRM_IRQ_STA_CNT_IRQ_PEND) {
 		val |= SUN6I_ALRM_IRQ_STA_CNT_IRQ_PEND;
-		writel(val, chip->base + SUN6I_ALRM_IRQ_STA);
+		pete_writel("drivers/rtc/rtc-sun6i.c:425", val, chip->base + SUN6I_ALRM_IRQ_STA);
 
 		rtc_update_irq(chip->rtc, 1, RTC_AF | RTC_IRQF);
 
@@ -445,14 +445,14 @@ static void sun6i_rtc_setaie(int to, struct sun6i_rtc_dev *chip)
 		alrm_irq_val = SUN6I_ALRM_IRQ_EN_CNT_IRQ_EN;
 		alrm_wake_val = SUN6I_ALARM_CONFIG_WAKEUP;
 	} else {
-		writel(SUN6I_ALRM_IRQ_STA_CNT_IRQ_PEND,
+		pete_writel("drivers/rtc/rtc-sun6i.c:448", SUN6I_ALRM_IRQ_STA_CNT_IRQ_PEND,
 		       chip->base + SUN6I_ALRM_IRQ_STA);
 	}
 
 	spin_lock_irqsave(&chip->lock, flags);
-	writel(alrm_val, chip->base + SUN6I_ALRM_EN);
-	writel(alrm_irq_val, chip->base + SUN6I_ALRM_IRQ_EN);
-	writel(alrm_wake_val, chip->base + SUN6I_ALARM_CONFIG);
+	pete_writel("drivers/rtc/rtc-sun6i.c:453", alrm_val, chip->base + SUN6I_ALRM_EN);
+	pete_writel("drivers/rtc/rtc-sun6i.c:454", alrm_irq_val, chip->base + SUN6I_ALRM_IRQ_EN);
+	pete_writel("drivers/rtc/rtc-sun6i.c:455", alrm_wake_val, chip->base + SUN6I_ALARM_CONFIG);
 	spin_unlock_irqrestore(&chip->lock, flags);
 }
 
@@ -465,10 +465,10 @@ static int sun6i_rtc_gettime(struct device *dev, struct rtc_time *rtc_tm)
 	 * read again in case it changes
 	 */
 	do {
-		date = readl(chip->base + SUN6I_RTC_YMD);
-		time = readl(chip->base + SUN6I_RTC_HMS);
-	} while ((date != readl(chip->base + SUN6I_RTC_YMD)) ||
-		 (time != readl(chip->base + SUN6I_RTC_HMS)));
+		date = pete_readl("drivers/rtc/rtc-sun6i.c:468", chip->base + SUN6I_RTC_YMD);
+		time = pete_readl("drivers/rtc/rtc-sun6i.c:469", chip->base + SUN6I_RTC_HMS);
+	} while ((date != pete_readl("drivers/rtc/rtc-sun6i.c:470", chip->base + SUN6I_RTC_YMD)) ||
+		 (time != pete_readl("drivers/rtc/rtc-sun6i.c:471", chip->base + SUN6I_RTC_HMS)));
 
 	if (chip->flags & RTC_LINEAR_DAY) {
 		/*
@@ -505,8 +505,8 @@ static int sun6i_rtc_getalarm(struct device *dev, struct rtc_wkalrm *wkalrm)
 	u32 alrm_en;
 
 	spin_lock_irqsave(&chip->lock, flags);
-	alrm_en = readl(chip->base + SUN6I_ALRM_IRQ_EN);
-	alrm_st = readl(chip->base + SUN6I_ALRM_IRQ_STA);
+	alrm_en = pete_readl("drivers/rtc/rtc-sun6i.c:508", chip->base + SUN6I_ALRM_IRQ_EN);
+	alrm_st = pete_readl("drivers/rtc/rtc-sun6i.c:509", chip->base + SUN6I_ALRM_IRQ_STA);
 	spin_unlock_irqrestore(&chip->lock, flags);
 
 	wkalrm->enabled = !!(alrm_en & SUN6I_ALRM_EN_CNT_EN);
@@ -561,14 +561,14 @@ static int sun6i_rtc_setalarm(struct device *dev, struct rtc_wkalrm *wkalrm)
 	}
 
 	sun6i_rtc_setaie(0, chip);
-	writel(0, chip->base + SUN6I_ALRM_COUNTER);
+	pete_writel("drivers/rtc/rtc-sun6i.c:564", 0, chip->base + SUN6I_ALRM_COUNTER);
 	if (chip->flags & RTC_LINEAR_DAY)
-		writel(0, chip->base + SUN6I_ALRM_COUNTER_HMS);
+		pete_writel("drivers/rtc/rtc-sun6i.c:566", 0, chip->base + SUN6I_ALRM_COUNTER_HMS);
 	usleep_range(100, 300);
 
-	writel(counter_val, chip->base + SUN6I_ALRM_COUNTER);
+	pete_writel("drivers/rtc/rtc-sun6i.c:569", counter_val, chip->base + SUN6I_ALRM_COUNTER);
 	if (chip->flags & RTC_LINEAR_DAY)
-		writel(counter_val_hms, chip->base + SUN6I_ALRM_COUNTER_HMS);
+		pete_writel("drivers/rtc/rtc-sun6i.c:571", counter_val_hms, chip->base + SUN6I_ALRM_COUNTER_HMS);
 	chip->alarm = time_set;
 
 	sun6i_rtc_setaie(wkalrm->enabled, chip);
@@ -583,7 +583,7 @@ static int sun6i_rtc_wait(struct sun6i_rtc_dev *chip, int offset,
 	u32 reg;
 
 	do {
-		reg = readl(chip->base + offset);
+		reg = pete_readl("drivers/rtc/rtc-sun6i.c:586", chip->base + offset);
 		reg &= mask;
 
 		if (!reg)
@@ -626,7 +626,7 @@ static int sun6i_rtc_settime(struct device *dev, struct rtc_time *rtc_tm)
 		return -EBUSY;
 	}
 
-	writel(time, chip->base + SUN6I_RTC_HMS);
+	pete_writel("drivers/rtc/rtc-sun6i.c:629", time, chip->base + SUN6I_RTC_HMS);
 
 	/*
 	 * After writing the RTC HH-MM-SS register, the
@@ -640,7 +640,7 @@ static int sun6i_rtc_settime(struct device *dev, struct rtc_time *rtc_tm)
 		return -ETIMEDOUT;
 	}
 
-	writel(date, chip->base + SUN6I_RTC_YMD);
+	pete_writel("drivers/rtc/rtc-sun6i.c:643", date, chip->base + SUN6I_RTC_YMD);
 
 	/*
 	 * After writing the RTC YY-MM-DD register, the
@@ -682,7 +682,7 @@ static int sun6i_rtc_nvmem_read(void *priv, unsigned int offset, void *_val, siz
 	int i;
 
 	for (i = 0; i < bytes / 4; ++i)
-		val[i] = readl(chip->base + SUN6I_GP_DATA + offset + 4 * i);
+		val[i] = pete_readl("drivers/rtc/rtc-sun6i.c:685", chip->base + SUN6I_GP_DATA + offset + 4 * i);
 
 	return 0;
 }
@@ -694,7 +694,7 @@ static int sun6i_rtc_nvmem_write(void *priv, unsigned int offset, void *_val, si
 	int i;
 
 	for (i = 0; i < bytes / 4; ++i)
-		writel(val[i], chip->base + SUN6I_GP_DATA + offset + 4 * i);
+		pete_writel("drivers/rtc/rtc-sun6i.c:697", val[i], chip->base + SUN6I_GP_DATA + offset + 4 * i);
 
 	return 0;
 }
@@ -798,30 +798,30 @@ static int sun6i_rtc_probe(struct platform_device *pdev)
 	}
 
 	/* clear the alarm counter value */
-	writel(0, chip->base + SUN6I_ALRM_COUNTER);
+	pete_writel("drivers/rtc/rtc-sun6i.c:801", 0, chip->base + SUN6I_ALRM_COUNTER);
 
 	/* disable counter alarm */
-	writel(0, chip->base + SUN6I_ALRM_EN);
+	pete_writel("drivers/rtc/rtc-sun6i.c:804", 0, chip->base + SUN6I_ALRM_EN);
 
 	/* disable counter alarm interrupt */
-	writel(0, chip->base + SUN6I_ALRM_IRQ_EN);
+	pete_writel("drivers/rtc/rtc-sun6i.c:807", 0, chip->base + SUN6I_ALRM_IRQ_EN);
 
 	/* disable week alarm */
-	writel(0, chip->base + SUN6I_ALRM1_EN);
+	pete_writel("drivers/rtc/rtc-sun6i.c:810", 0, chip->base + SUN6I_ALRM1_EN);
 
 	/* disable week alarm interrupt */
-	writel(0, chip->base + SUN6I_ALRM1_IRQ_EN);
+	pete_writel("drivers/rtc/rtc-sun6i.c:813", 0, chip->base + SUN6I_ALRM1_IRQ_EN);
 
 	/* clear counter alarm pending interrupts */
-	writel(SUN6I_ALRM_IRQ_STA_CNT_IRQ_PEND,
+	pete_writel("drivers/rtc/rtc-sun6i.c:816", SUN6I_ALRM_IRQ_STA_CNT_IRQ_PEND,
 	       chip->base + SUN6I_ALRM_IRQ_STA);
 
 	/* clear week alarm pending interrupts */
-	writel(SUN6I_ALRM1_IRQ_STA_WEEK_IRQ_PEND,
+	pete_writel("drivers/rtc/rtc-sun6i.c:820", SUN6I_ALRM1_IRQ_STA_WEEK_IRQ_PEND,
 	       chip->base + SUN6I_ALRM1_IRQ_STA);
 
 	/* disable alarm wakeup */
-	writel(0, chip->base + SUN6I_ALARM_CONFIG);
+	pete_writel("drivers/rtc/rtc-sun6i.c:824", 0, chip->base + SUN6I_ALARM_CONFIG);
 
 	clk_prepare_enable(chip->losc);
 

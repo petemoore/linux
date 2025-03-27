@@ -191,48 +191,48 @@ static void intel_spi_dump_regs(struct intel_spi *ispi)
 	u32 value;
 	int i;
 
-	dev_dbg(ispi->dev, "BFPREG=0x%08x\n", readl(ispi->base + BFPREG));
+	dev_dbg(ispi->dev, "BFPREG=0x%08x\n", pete_readl("drivers/spi/spi-intel.c:194", ispi->base + BFPREG));
 
-	value = readl(ispi->base + HSFSTS_CTL);
+	value = pete_readl("drivers/spi/spi-intel.c:196", ispi->base + HSFSTS_CTL);
 	dev_dbg(ispi->dev, "HSFSTS_CTL=0x%08x\n", value);
 	if (value & HSFSTS_CTL_FLOCKDN)
 		dev_dbg(ispi->dev, "-> Locked\n");
 
-	dev_dbg(ispi->dev, "FADDR=0x%08x\n", readl(ispi->base + FADDR));
-	dev_dbg(ispi->dev, "DLOCK=0x%08x\n", readl(ispi->base + DLOCK));
+	dev_dbg(ispi->dev, "FADDR=0x%08x\n", pete_readl("drivers/spi/spi-intel.c:201", ispi->base + FADDR));
+	dev_dbg(ispi->dev, "DLOCK=0x%08x\n", pete_readl("drivers/spi/spi-intel.c:202", ispi->base + DLOCK));
 
 	for (i = 0; i < 16; i++)
 		dev_dbg(ispi->dev, "FDATA(%d)=0x%08x\n",
-			i, readl(ispi->base + FDATA(i)));
+			i, pete_readl("drivers/spi/spi-intel.c:206", ispi->base + FDATA(i)));
 
-	dev_dbg(ispi->dev, "FRACC=0x%08x\n", readl(ispi->base + FRACC));
+	dev_dbg(ispi->dev, "FRACC=0x%08x\n", pete_readl("drivers/spi/spi-intel.c:208", ispi->base + FRACC));
 
 	for (i = 0; i < ispi->nregions; i++)
 		dev_dbg(ispi->dev, "FREG(%d)=0x%08x\n", i,
-			readl(ispi->base + FREG(i)));
+			pete_readl("drivers/spi/spi-intel.c:212", ispi->base + FREG(i)));
 	for (i = 0; i < ispi->pr_num; i++)
 		dev_dbg(ispi->dev, "PR(%d)=0x%08x\n", i,
-			readl(ispi->pregs + PR(i)));
+			pete_readl("drivers/spi/spi-intel.c:215", ispi->pregs + PR(i)));
 
 	if (ispi->sregs) {
-		value = readl(ispi->sregs + SSFSTS_CTL);
+		value = pete_readl("drivers/spi/spi-intel.c:218", ispi->sregs + SSFSTS_CTL);
 		dev_dbg(ispi->dev, "SSFSTS_CTL=0x%08x\n", value);
 		dev_dbg(ispi->dev, "PREOP_OPTYPE=0x%08x\n",
-			readl(ispi->sregs + PREOP_OPTYPE));
+			pete_readl("drivers/spi/spi-intel.c:221", ispi->sregs + PREOP_OPTYPE));
 		dev_dbg(ispi->dev, "OPMENU0=0x%08x\n",
-			readl(ispi->sregs + OPMENU0));
+			pete_readl("drivers/spi/spi-intel.c:223", ispi->sregs + OPMENU0));
 		dev_dbg(ispi->dev, "OPMENU1=0x%08x\n",
-			readl(ispi->sregs + OPMENU1));
+			pete_readl("drivers/spi/spi-intel.c:225", ispi->sregs + OPMENU1));
 	}
 
-	dev_dbg(ispi->dev, "LVSCC=0x%08x\n", readl(ispi->base + LVSCC));
-	dev_dbg(ispi->dev, "UVSCC=0x%08x\n", readl(ispi->base + UVSCC));
+	dev_dbg(ispi->dev, "LVSCC=0x%08x\n", pete_readl("drivers/spi/spi-intel.c:228", ispi->base + LVSCC));
+	dev_dbg(ispi->dev, "UVSCC=0x%08x\n", pete_readl("drivers/spi/spi-intel.c:229", ispi->base + UVSCC));
 
 	dev_dbg(ispi->dev, "Protected regions:\n");
 	for (i = 0; i < ispi->pr_num; i++) {
 		u32 base, limit;
 
-		value = readl(ispi->pregs + PR(i));
+		value = pete_readl("drivers/spi/spi-intel.c:235", ispi->pregs + PR(i));
 		if (!(value & (PR_WPE | PR_RPE)))
 			continue;
 
@@ -248,7 +248,7 @@ static void intel_spi_dump_regs(struct intel_spi *ispi)
 	for (i = 0; i < ispi->nregions; i++) {
 		u32 region, base, limit;
 
-		region = readl(ispi->base + FREG(i));
+		region = pete_readl("drivers/spi/spi-intel.c:251", ispi->base + FREG(i));
 		base = region & FREG_BASE_MASK;
 		limit = (region & FREG_LIMIT_MASK) >> FREG_LIMIT_SHIFT;
 
@@ -346,9 +346,9 @@ static int intel_spi_opcode_index(struct intel_spi *ispi, u8 opcode, int optype)
 	}
 
 	/* The lock is off, so just use index 0 */
-	writel(opcode, ispi->sregs + OPMENU0);
-	preop = readw(ispi->sregs + PREOP_OPTYPE);
-	writel(optype << 16 | preop, ispi->sregs + PREOP_OPTYPE);
+	pete_writel("drivers/spi/spi-intel.c:349", opcode, ispi->sregs + OPMENU0);
+	preop = pete_readw("drivers/spi/spi-intel.c:350", ispi->sregs + PREOP_OPTYPE);
+	pete_writel("drivers/spi/spi-intel.c:351", optype << 16 | preop, ispi->sregs + PREOP_OPTYPE);
 
 	return 0;
 }
@@ -362,19 +362,19 @@ static int intel_spi_hw_cycle(struct intel_spi *ispi,
 	if (!iop->replacement_op)
 		return -EINVAL;
 
-	val = readl(ispi->base + HSFSTS_CTL);
+	val = pete_readl("drivers/spi/spi-intel.c:365", ispi->base + HSFSTS_CTL);
 	val &= ~(HSFSTS_CTL_FCYCLE_MASK | HSFSTS_CTL_FDBC_MASK);
 	val |= (len - 1) << HSFSTS_CTL_FDBC_SHIFT;
 	val |= HSFSTS_CTL_FCERR | HSFSTS_CTL_FDONE;
 	val |= HSFSTS_CTL_FGO;
 	val |= iop->replacement_op;
-	writel(val, ispi->base + HSFSTS_CTL);
+	pete_writel("drivers/spi/spi-intel.c:371", val, ispi->base + HSFSTS_CTL);
 
 	ret = intel_spi_wait_hw_busy(ispi);
 	if (ret)
 		return ret;
 
-	status = readl(ispi->base + HSFSTS_CTL);
+	status = pete_readl("drivers/spi/spi-intel.c:377", ispi->base + HSFSTS_CTL);
 	if (status & HSFSTS_CTL_FCERR)
 		return -EIO;
 	else if (status & HSFSTS_CTL_AEL)
@@ -414,7 +414,7 @@ static int intel_spi_sw_cycle(struct intel_spi *ispi, u8 opcode, size_t len,
 		case OPTYPE_WRITE_NO_ADDR:
 		case OPTYPE_WRITE_WITH_ADDR:
 			/* Pick matching preopcode for the atomic sequence */
-			preop = readw(ispi->sregs + PREOP_OPTYPE);
+			preop = pete_readw("drivers/spi/spi-intel.c:417", ispi->sregs + PREOP_OPTYPE);
 			if ((preop & 0xff) == atomic_preopcode)
 				; /* Do nothing */
 			else if ((preop >> 8) == atomic_preopcode)
@@ -430,13 +430,13 @@ static int intel_spi_sw_cycle(struct intel_spi *ispi, u8 opcode, size_t len,
 			return -EINVAL;
 		}
 	}
-	writel(val, ispi->sregs + SSFSTS_CTL);
+	pete_writel("drivers/spi/spi-intel.c:433", val, ispi->sregs + SSFSTS_CTL);
 
 	ret = intel_spi_wait_sw_busy(ispi);
 	if (ret)
 		return ret;
 
-	status = readl(ispi->sregs + SSFSTS_CTL);
+	status = pete_readl("drivers/spi/spi-intel.c:439", ispi->sregs + SSFSTS_CTL);
 	if (status & SSFSTS_CTL_FCERR)
 		return -EIO;
 	else if (status & SSFSTS_CTL_AEL)
@@ -463,7 +463,7 @@ static int intel_spi_read_reg(struct intel_spi *ispi, const struct spi_mem *mem,
 	u8 opcode = op->cmd.opcode;
 	int ret;
 
-	writel(addr, ispi->base + FADDR);
+	pete_writel("drivers/spi/spi-intel.c:466", addr, ispi->base + FADDR);
 
 	if (ispi->swseq_reg)
 		ret = intel_spi_sw_cycle(ispi, opcode, nbytes,
@@ -501,11 +501,11 @@ static int intel_spi_write_reg(struct intel_spi *ispi, const struct spi_mem *mem
 		if (!ispi->swseq_reg)
 			return 0;
 
-		preop = readw(ispi->sregs + PREOP_OPTYPE);
+		preop = pete_readw("drivers/spi/spi-intel.c:504", ispi->sregs + PREOP_OPTYPE);
 		if ((preop & 0xff) != opcode && (preop >> 8) != opcode) {
 			if (ispi->locked)
 				return -EINVAL;
-			writel(opcode, ispi->sregs + PREOP_OPTYPE);
+			pete_writel("drivers/spi/spi-intel.c:508", opcode, ispi->sregs + PREOP_OPTYPE);
 		}
 
 		/*
@@ -525,7 +525,7 @@ static int intel_spi_write_reg(struct intel_spi *ispi, const struct spi_mem *mem
 	if (opcode == SPINOR_OP_WRDI)
 		return 0;
 
-	writel(addr, ispi->base + FADDR);
+	pete_writel("drivers/spi/spi-intel.c:528", addr, ispi->base + FADDR);
 
 	/* Write the value beforehand */
 	ret = intel_spi_write_block(ispi, op->data.buf.out, nbytes);
@@ -562,21 +562,21 @@ static int intel_spi_read(struct intel_spi *ispi, const struct spi_mem *mem,
 		block_size = min_t(loff_t, addr + block_size,
 				   round_up(addr + 1, SZ_4K)) - addr;
 
-		writel(addr, ispi->base + FADDR);
+		pete_writel("drivers/spi/spi-intel.c:565", addr, ispi->base + FADDR);
 
-		val = readl(ispi->base + HSFSTS_CTL);
+		val = pete_readl("drivers/spi/spi-intel.c:567", ispi->base + HSFSTS_CTL);
 		val &= ~(HSFSTS_CTL_FDBC_MASK | HSFSTS_CTL_FCYCLE_MASK);
 		val |= HSFSTS_CTL_AEL | HSFSTS_CTL_FCERR | HSFSTS_CTL_FDONE;
 		val |= (block_size - 1) << HSFSTS_CTL_FDBC_SHIFT;
 		val |= HSFSTS_CTL_FCYCLE_READ;
 		val |= HSFSTS_CTL_FGO;
-		writel(val, ispi->base + HSFSTS_CTL);
+		pete_writel("drivers/spi/spi-intel.c:573", val, ispi->base + HSFSTS_CTL);
 
 		ret = intel_spi_wait_hw_busy(ispi);
 		if (ret)
 			return ret;
 
-		status = readl(ispi->base + HSFSTS_CTL);
+		status = pete_readl("drivers/spi/spi-intel.c:579", ispi->base + HSFSTS_CTL);
 		if (status & HSFSTS_CTL_FCERR)
 			ret = -EIO;
 		else if (status & HSFSTS_CTL_AEL)
@@ -619,9 +619,9 @@ static int intel_spi_write(struct intel_spi *ispi, const struct spi_mem *mem,
 		block_size = min_t(loff_t, addr + block_size,
 				   round_up(addr + 1, SZ_4K)) - addr;
 
-		writel(addr, ispi->base + FADDR);
+		pete_writel("drivers/spi/spi-intel.c:622", addr, ispi->base + FADDR);
 
-		val = readl(ispi->base + HSFSTS_CTL);
+		val = pete_readl("drivers/spi/spi-intel.c:624", ispi->base + HSFSTS_CTL);
 		val &= ~(HSFSTS_CTL_FDBC_MASK | HSFSTS_CTL_FCYCLE_MASK);
 		val |= HSFSTS_CTL_AEL | HSFSTS_CTL_FCERR | HSFSTS_CTL_FDONE;
 		val |= (block_size - 1) << HSFSTS_CTL_FDBC_SHIFT;
@@ -635,7 +635,7 @@ static int intel_spi_write(struct intel_spi *ispi, const struct spi_mem *mem,
 
 		/* Start the write now */
 		val |= HSFSTS_CTL_FGO;
-		writel(val, ispi->base + HSFSTS_CTL);
+		pete_writel("drivers/spi/spi-intel.c:638", val, ispi->base + HSFSTS_CTL);
 
 		ret = intel_spi_wait_hw_busy(ispi);
 		if (ret) {
@@ -643,7 +643,7 @@ static int intel_spi_write(struct intel_spi *ispi, const struct spi_mem *mem,
 			return ret;
 		}
 
-		status = readl(ispi->base + HSFSTS_CTL);
+		status = pete_readl("drivers/spi/spi-intel.c:646", ispi->base + HSFSTS_CTL);
 		if (status & HSFSTS_CTL_FCERR)
 			ret = -EIO;
 		else if (status & HSFSTS_CTL_AEL)
@@ -671,7 +671,7 @@ static int intel_spi_erase(struct intel_spi *ispi, const struct spi_mem *mem,
 	u32 val, status;
 	int ret;
 
-	writel(addr, ispi->base + FADDR);
+	pete_writel("drivers/spi/spi-intel.c:674", addr, ispi->base + FADDR);
 
 	if (ispi->swseq_erase)
 		return intel_spi_sw_cycle(ispi, opcode, 0,
@@ -680,18 +680,18 @@ static int intel_spi_erase(struct intel_spi *ispi, const struct spi_mem *mem,
 	/* Not needed with HW sequencer erase, make sure it is cleared */
 	ispi->atomic_preopcode = 0;
 
-	val = readl(ispi->base + HSFSTS_CTL);
+	val = pete_readl("drivers/spi/spi-intel.c:683", ispi->base + HSFSTS_CTL);
 	val &= ~(HSFSTS_CTL_FDBC_MASK | HSFSTS_CTL_FCYCLE_MASK);
 	val |= HSFSTS_CTL_AEL | HSFSTS_CTL_FCERR | HSFSTS_CTL_FDONE;
 	val |= HSFSTS_CTL_FGO;
 	val |= iop->replacement_op;
-	writel(val, ispi->base + HSFSTS_CTL);
+	pete_writel("drivers/spi/spi-intel.c:688", val, ispi->base + HSFSTS_CTL);
 
 	ret = intel_spi_wait_hw_busy(ispi);
 	if (ret)
 		return ret;
 
-	status = readl(ispi->base + HSFSTS_CTL);
+	status = pete_readl("drivers/spi/spi-intel.c:694", ispi->base + HSFSTS_CTL);
 	if (status & HSFSTS_CTL_FCERR)
 		return -EIO;
 	if (status & HSFSTS_CTL_AEL)
@@ -1116,9 +1116,9 @@ static int intel_spi_init(struct intel_spi *ispi)
 	}
 
 	/* Disable #SMI generation from HW sequencer */
-	val = readl(ispi->base + HSFSTS_CTL);
+	val = pete_readl("drivers/spi/spi-intel.c:1119", ispi->base + HSFSTS_CTL);
 	val &= ~HSFSTS_CTL_FSMIE;
-	writel(val, ispi->base + HSFSTS_CTL);
+	pete_writel("drivers/spi/spi-intel.c:1121", val, ispi->base + HSFSTS_CTL);
 
 	/*
 	 * Determine whether erase operation should use HW or SW sequencer.
@@ -1128,8 +1128,8 @@ static int intel_spi_init(struct intel_spi *ispi)
 	 * If these registers don't contain a valid erase opcode, erase
 	 * cannot be done using HW sequencer.
 	 */
-	lvscc = readl(ispi->base + LVSCC);
-	uvscc = readl(ispi->base + UVSCC);
+	lvscc = pete_readl("drivers/spi/spi-intel.c:1131", ispi->base + LVSCC);
+	uvscc = pete_readl("drivers/spi/spi-intel.c:1132", ispi->base + UVSCC);
 	if (!(lvscc & ERASE_OPCODE_MASK) || !(uvscc & ERASE_OPCODE_MASK))
 		ispi->swseq_erase = true;
 	/* SPI controller on Intel BXT supports 64K erase opcode */
@@ -1150,13 +1150,13 @@ static int intel_spi_init(struct intel_spi *ispi)
 	 */
 	if (ispi->swseq_reg) {
 		/* Disable #SMI generation from SW sequencer */
-		val = readl(ispi->sregs + SSFSTS_CTL);
+		val = pete_readl("drivers/spi/spi-intel.c:1153", ispi->sregs + SSFSTS_CTL);
 		val &= ~SSFSTS_CTL_FSMIE;
-		writel(val, ispi->sregs + SSFSTS_CTL);
+		pete_writel("drivers/spi/spi-intel.c:1155", val, ispi->sregs + SSFSTS_CTL);
 	}
 
 	/* Check controller's lock status */
-	val = readl(ispi->base + HSFSTS_CTL);
+	val = pete_readl("drivers/spi/spi-intel.c:1159", ispi->base + HSFSTS_CTL);
 	ispi->locked = !!(val & HSFSTS_CTL_FLOCKDN);
 
 	if (ispi->locked && ispi->sregs) {
@@ -1165,8 +1165,8 @@ static int intel_spi_init(struct intel_spi *ispi)
 		 * register. So read back what opcodes it decided to support.
 		 * That's the set we are going to support as well.
 		 */
-		opmenu0 = readl(ispi->sregs + OPMENU0);
-		opmenu1 = readl(ispi->sregs + OPMENU1);
+		opmenu0 = pete_readl("drivers/spi/spi-intel.c:1168", ispi->sregs + OPMENU0);
+		opmenu1 = pete_readl("drivers/spi/spi-intel.c:1169", ispi->sregs + OPMENU1);
 
 		if (opmenu0 && opmenu1) {
 			for (i = 0; i < ARRAY_SIZE(ispi->opcodes) / 2; i++) {
@@ -1196,7 +1196,7 @@ static bool intel_spi_is_protected(const struct intel_spi *ispi,
 	for (i = 0; i < ispi->pr_num; i++) {
 		u32 pr_base, pr_limit, pr_value;
 
-		pr_value = readl(ispi->pregs + PR(i));
+		pr_value = pete_readl("drivers/spi/spi-intel.c:1199", ispi->pregs + PR(i));
 		if (!(pr_value & (PR_WPE | PR_RPE)))
 			continue;
 
@@ -1233,7 +1233,7 @@ static void intel_spi_fill_partition(struct intel_spi *ispi,
 	for (i = 1; i < ispi->nregions; i++) {
 		u32 region, base, limit;
 
-		region = readl(ispi->base + FREG(i));
+		region = pete_readl("drivers/spi/spi-intel.c:1236", ispi->base + FREG(i));
 		base = region & FREG_BASE_MASK;
 		limit = (region & FREG_LIMIT_MASK) >> FREG_LIMIT_SHIFT;
 

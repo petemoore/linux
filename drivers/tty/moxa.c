@@ -535,10 +535,10 @@ static void moxa_wait_finish(void __iomem *ofsAddr)
 {
 	unsigned long end = jiffies + moxaFuncTout;
 
-	while (readw(ofsAddr + FuncCode) != 0)
+	while (pete_readw("drivers/tty/moxa.c:538", ofsAddr + FuncCode) != 0)
 		if (time_after(jiffies, end))
 			return;
-	if (readw(ofsAddr + FuncCode) != 0)
+	if (pete_readw("drivers/tty/moxa.c:541", ofsAddr + FuncCode) != 0)
 		printk_ratelimited(KERN_WARNING "moxa function expired\n");
 }
 
@@ -546,8 +546,8 @@ static void moxafunc(void __iomem *ofsAddr, u16 cmd, u16 arg)
 {
         unsigned long flags;
         spin_lock_irqsave(&moxafunc_lock, flags);
-	writew(arg, ofsAddr + FuncArg);
-	writew(cmd, ofsAddr + FuncCode);
+	pete_writew("drivers/tty/moxa.c:549", arg, ofsAddr + FuncArg);
+	pete_writew("drivers/tty/moxa.c:550", cmd, ofsAddr + FuncCode);
 	moxa_wait_finish(ofsAddr);
 	spin_unlock_irqrestore(&moxafunc_lock, flags);
 }
@@ -557,10 +557,10 @@ static int moxafuncret(void __iomem *ofsAddr, u16 cmd, u16 arg)
         unsigned long flags;
         u16 ret;
         spin_lock_irqsave(&moxafunc_lock, flags);
-	writew(arg, ofsAddr + FuncArg);
-	writew(cmd, ofsAddr + FuncCode);
+	pete_writew("drivers/tty/moxa.c:560", arg, ofsAddr + FuncArg);
+	pete_writew("drivers/tty/moxa.c:561", cmd, ofsAddr + FuncCode);
 	moxa_wait_finish(ofsAddr);
-	ret = readw(ofsAddr + FuncArg);
+	ret = pete_readw("drivers/tty/moxa.c:563", ofsAddr + FuncArg);
 	spin_unlock_irqrestore(&moxafunc_lock, flags);
 	return ret;
 }
@@ -569,10 +569,10 @@ static void moxa_low_water_check(void __iomem *ofsAddr)
 {
 	u16 rptr, wptr, mask, len;
 
-	if (readb(ofsAddr + FlagStat) & Xoff_state) {
-		rptr = readw(ofsAddr + RXrptr);
-		wptr = readw(ofsAddr + RXwptr);
-		mask = readw(ofsAddr + RX_mask);
+	if (pete_readb("drivers/tty/moxa.c:572", ofsAddr + FlagStat) & Xoff_state) {
+		rptr = pete_readw("drivers/tty/moxa.c:573", ofsAddr + RXrptr);
+		wptr = pete_readw("drivers/tty/moxa.c:574", ofsAddr + RXwptr);
+		mask = pete_readw("drivers/tty/moxa.c:575", ofsAddr + RX_mask);
 		len = (wptr - rptr) & mask;
 		if (len <= Low_water)
 			moxafunc(ofsAddr, FC_SendXon, 0);
@@ -760,31 +760,31 @@ static int moxa_load_bios(struct moxa_board_conf *brd, const u8 *buf,
 	void __iomem *baseAddr = brd->basemem;
 	u16 tmp;
 
-	writeb(HW_reset, baseAddr + Control_reg);	/* reset */
+	pete_writeb("drivers/tty/moxa.c:763", HW_reset, baseAddr + Control_reg);	/* reset */
 	msleep(10);
 	memset_io(baseAddr, 0, 4096);
 	memcpy_toio(baseAddr, buf, len);	/* download BIOS */
-	writeb(0, baseAddr + Control_reg);	/* restart */
+	pete_writeb("drivers/tty/moxa.c:767", 0, baseAddr + Control_reg);	/* restart */
 
 	msleep(2000);
 
 	switch (brd->boardType) {
 	case MOXA_BOARD_C218_ISA:
 	case MOXA_BOARD_C218_PCI:
-		tmp = readw(baseAddr + C218_key);
+		tmp = pete_readw("drivers/tty/moxa.c:774", baseAddr + C218_key);
 		if (tmp != C218_KeyCode)
 			goto err;
 		break;
 	case MOXA_BOARD_CP204J:
-		tmp = readw(baseAddr + C218_key);
+		tmp = pete_readw("drivers/tty/moxa.c:779", baseAddr + C218_key);
 		if (tmp != CP204J_KeyCode)
 			goto err;
 		break;
 	default:
-		tmp = readw(baseAddr + C320_key);
+		tmp = pete_readw("drivers/tty/moxa.c:784", baseAddr + C320_key);
 		if (tmp != C320_KeyCode)
 			goto err;
-		tmp = readw(baseAddr + C320_status);
+		tmp = pete_readw("drivers/tty/moxa.c:787", baseAddr + C320_status);
 		if (tmp != STS_init) {
 			printk(KERN_ERR "MOXA: bios upload failed -- CPU/Basic "
 					"module not found\n");
@@ -809,10 +809,10 @@ static int moxa_load_320b(struct moxa_board_conf *brd, const u8 *ptr,
 		return -EINVAL;
 	}
 
-	writew(len - 7168 - 2, baseAddr + C320bapi_len);
-	writeb(1, baseAddr + Control_reg);	/* Select Page 1 */
+	pete_writew("drivers/tty/moxa.c:812", len - 7168 - 2, baseAddr + C320bapi_len);
+	pete_writeb("drivers/tty/moxa.c:813", 1, baseAddr + Control_reg);	/* Select Page 1 */
 	memcpy_toio(baseAddr + DynPage_addr, ptr, 7168);
-	writeb(2, baseAddr + Control_reg);	/* Select Page 2 */
+	pete_writeb("drivers/tty/moxa.c:815", 2, baseAddr + Control_reg);	/* Select Page 2 */
 	memcpy_toio(baseAddr + DynPage_addr, ptr + 7168, len - 7168);
 
 	return 0;
@@ -865,72 +865,72 @@ static int moxa_real_load_code(struct moxa_board_conf *brd, const void *ptr,
 			memcpy_toio(baseAddr + loadbuf, ptr + j, len2 << 1);
 			j += len2 << 1;
 
-			writew(len2, baseAddr + loadlen);
-			writew(0, baseAddr + key);
+			pete_writew("drivers/tty/moxa.c:868", len2, baseAddr + loadlen);
+			pete_writew("drivers/tty/moxa.c:869", 0, baseAddr + key);
 			for (i = 0; i < 100; i++) {
-				if (readw(baseAddr + key) == keycode)
+				if (pete_readw("drivers/tty/moxa.c:871", baseAddr + key) == keycode)
 					break;
 				msleep(10);
 			}
-			if (readw(baseAddr + key) != keycode)
+			if (pete_readw("drivers/tty/moxa.c:875", baseAddr + key) != keycode)
 				return -EIO;
 		}
-		writew(0, baseAddr + loadlen);
-		writew(usum, baseAddr + checksum);
-		writew(0, baseAddr + key);
+		pete_writew("drivers/tty/moxa.c:878", 0, baseAddr + loadlen);
+		pete_writew("drivers/tty/moxa.c:879", usum, baseAddr + checksum);
+		pete_writew("drivers/tty/moxa.c:880", 0, baseAddr + key);
 		for (i = 0; i < 100; i++) {
-			if (readw(baseAddr + key) == keycode)
+			if (pete_readw("drivers/tty/moxa.c:882", baseAddr + key) == keycode)
 				break;
 			msleep(10);
 		}
 		retry++;
-	} while ((readb(baseAddr + checksum_ok) != 1) && (retry < 3));
-	if (readb(baseAddr + checksum_ok) != 1)
+	} while ((pete_readb("drivers/tty/moxa.c:887", baseAddr + checksum_ok) != 1) && (retry < 3));
+	if (pete_readb("drivers/tty/moxa.c:888", baseAddr + checksum_ok) != 1)
 		return -EIO;
 
-	writew(0, baseAddr + key);
+	pete_writew("drivers/tty/moxa.c:891", 0, baseAddr + key);
 	for (i = 0; i < 600; i++) {
-		if (readw(baseAddr + Magic_no) == Magic_code)
+		if (pete_readw("drivers/tty/moxa.c:893", baseAddr + Magic_no) == Magic_code)
 			break;
 		msleep(10);
 	}
-	if (readw(baseAddr + Magic_no) != Magic_code)
+	if (pete_readw("drivers/tty/moxa.c:897", baseAddr + Magic_no) != Magic_code)
 		return -EIO;
 
 	if (MOXA_IS_320(brd)) {
 		if (brd->busType == MOXA_BUS_TYPE_PCI) {	/* ASIC board */
-			writew(0x3800, baseAddr + TMS320_PORT1);
-			writew(0x3900, baseAddr + TMS320_PORT2);
-			writew(28499, baseAddr + TMS320_CLOCK);
+			pete_writew("drivers/tty/moxa.c:902", 0x3800, baseAddr + TMS320_PORT1);
+			pete_writew("drivers/tty/moxa.c:903", 0x3900, baseAddr + TMS320_PORT2);
+			pete_writew("drivers/tty/moxa.c:904", 28499, baseAddr + TMS320_CLOCK);
 		} else {
-			writew(0x3200, baseAddr + TMS320_PORT1);
-			writew(0x3400, baseAddr + TMS320_PORT2);
-			writew(19999, baseAddr + TMS320_CLOCK);
+			pete_writew("drivers/tty/moxa.c:906", 0x3200, baseAddr + TMS320_PORT1);
+			pete_writew("drivers/tty/moxa.c:907", 0x3400, baseAddr + TMS320_PORT2);
+			pete_writew("drivers/tty/moxa.c:908", 19999, baseAddr + TMS320_CLOCK);
 		}
 	}
-	writew(1, baseAddr + Disable_IRQ);
-	writew(0, baseAddr + Magic_no);
+	pete_writew("drivers/tty/moxa.c:911", 1, baseAddr + Disable_IRQ);
+	pete_writew("drivers/tty/moxa.c:912", 0, baseAddr + Magic_no);
 	for (i = 0; i < 500; i++) {
-		if (readw(baseAddr + Magic_no) == Magic_code)
+		if (pete_readw("drivers/tty/moxa.c:914", baseAddr + Magic_no) == Magic_code)
 			break;
 		msleep(10);
 	}
-	if (readw(baseAddr + Magic_no) != Magic_code)
+	if (pete_readw("drivers/tty/moxa.c:918", baseAddr + Magic_no) != Magic_code)
 		return -EIO;
 
 	if (MOXA_IS_320(brd)) {
-		j = readw(baseAddr + Module_cnt);
+		j = pete_readw("drivers/tty/moxa.c:922", baseAddr + Module_cnt);
 		if (j <= 0)
 			return -EIO;
 		brd->numPorts = j * 8;
-		writew(j, baseAddr + Module_no);
-		writew(0, baseAddr + Magic_no);
+		pete_writew("drivers/tty/moxa.c:926", j, baseAddr + Module_no);
+		pete_writew("drivers/tty/moxa.c:927", 0, baseAddr + Magic_no);
 		for (i = 0; i < 600; i++) {
-			if (readw(baseAddr + Magic_no) == Magic_code)
+			if (pete_readw("drivers/tty/moxa.c:929", baseAddr + Magic_no) == Magic_code)
 				break;
 			msleep(10);
 		}
-		if (readw(baseAddr + Magic_no) != Magic_code)
+		if (pete_readw("drivers/tty/moxa.c:933", baseAddr + Magic_no) != Magic_code)
 			return -EIO;
 	}
 	brd->intNdx = baseAddr + IRQindex;
@@ -967,13 +967,13 @@ static int moxa_load_code(struct moxa_board_conf *brd, const void *ptr,
 			port->tableAddr = baseAddr + Extern_table +
 					Extern_size * i;
 			ofsAddr = port->tableAddr;
-			writew(C218rx_mask, ofsAddr + RX_mask);
-			writew(C218tx_mask, ofsAddr + TX_mask);
-			writew(C218rx_spage + i * C218buf_pageno, ofsAddr + Page_rxb);
-			writew(readw(ofsAddr + Page_rxb) + C218rx_pageno, ofsAddr + EndPage_rxb);
+			pete_writew("drivers/tty/moxa.c:970", C218rx_mask, ofsAddr + RX_mask);
+			pete_writew("drivers/tty/moxa.c:971", C218tx_mask, ofsAddr + TX_mask);
+			pete_writew("drivers/tty/moxa.c:972", C218rx_spage + i * C218buf_pageno, ofsAddr + Page_rxb);
+			pete_writew("drivers/tty/moxa.c:973", pete_readw("drivers/tty/moxa.c:973", ofsAddr + Page_rxb) + C218rx_pageno, ofsAddr + EndPage_rxb);
 
-			writew(C218tx_spage + i * C218buf_pageno, ofsAddr + Page_txb);
-			writew(readw(ofsAddr + Page_txb) + C218tx_pageno, ofsAddr + EndPage_txb);
+			pete_writew("drivers/tty/moxa.c:975", C218tx_spage + i * C218buf_pageno, ofsAddr + Page_txb);
+			pete_writew("drivers/tty/moxa.c:976", pete_readw("drivers/tty/moxa.c:976", ofsAddr + Page_txb) + C218tx_pageno, ofsAddr + EndPage_txb);
 
 		}
 		break;
@@ -987,39 +987,39 @@ static int moxa_load_code(struct moxa_board_conf *brd, const void *ptr,
 			ofsAddr = port->tableAddr;
 			switch (brd->numPorts) {
 			case 8:
-				writew(C320p8rx_mask, ofsAddr + RX_mask);
-				writew(C320p8tx_mask, ofsAddr + TX_mask);
-				writew(C320p8rx_spage + i * C320p8buf_pgno, ofsAddr + Page_rxb);
-				writew(readw(ofsAddr + Page_rxb) + C320p8rx_pgno, ofsAddr + EndPage_rxb);
-				writew(C320p8tx_spage + i * C320p8buf_pgno, ofsAddr + Page_txb);
-				writew(readw(ofsAddr + Page_txb) + C320p8tx_pgno, ofsAddr + EndPage_txb);
+				pete_writew("drivers/tty/moxa.c:990", C320p8rx_mask, ofsAddr + RX_mask);
+				pete_writew("drivers/tty/moxa.c:991", C320p8tx_mask, ofsAddr + TX_mask);
+				pete_writew("drivers/tty/moxa.c:992", C320p8rx_spage + i * C320p8buf_pgno, ofsAddr + Page_rxb);
+				pete_writew("drivers/tty/moxa.c:993", pete_readw("drivers/tty/moxa.c:993", ofsAddr + Page_rxb) + C320p8rx_pgno, ofsAddr + EndPage_rxb);
+				pete_writew("drivers/tty/moxa.c:994", C320p8tx_spage + i * C320p8buf_pgno, ofsAddr + Page_txb);
+				pete_writew("drivers/tty/moxa.c:995", pete_readw("drivers/tty/moxa.c:995", ofsAddr + Page_txb) + C320p8tx_pgno, ofsAddr + EndPage_txb);
 
 				break;
 			case 16:
-				writew(C320p16rx_mask, ofsAddr + RX_mask);
-				writew(C320p16tx_mask, ofsAddr + TX_mask);
-				writew(C320p16rx_spage + i * C320p16buf_pgno, ofsAddr + Page_rxb);
-				writew(readw(ofsAddr + Page_rxb) + C320p16rx_pgno, ofsAddr + EndPage_rxb);
-				writew(C320p16tx_spage + i * C320p16buf_pgno, ofsAddr + Page_txb);
-				writew(readw(ofsAddr + Page_txb) + C320p16tx_pgno, ofsAddr + EndPage_txb);
+				pete_writew("drivers/tty/moxa.c:999", C320p16rx_mask, ofsAddr + RX_mask);
+				pete_writew("drivers/tty/moxa.c:1000", C320p16tx_mask, ofsAddr + TX_mask);
+				pete_writew("drivers/tty/moxa.c:1001", C320p16rx_spage + i * C320p16buf_pgno, ofsAddr + Page_rxb);
+				pete_writew("drivers/tty/moxa.c:1002", pete_readw("drivers/tty/moxa.c:1002", ofsAddr + Page_rxb) + C320p16rx_pgno, ofsAddr + EndPage_rxb);
+				pete_writew("drivers/tty/moxa.c:1003", C320p16tx_spage + i * C320p16buf_pgno, ofsAddr + Page_txb);
+				pete_writew("drivers/tty/moxa.c:1004", pete_readw("drivers/tty/moxa.c:1004", ofsAddr + Page_txb) + C320p16tx_pgno, ofsAddr + EndPage_txb);
 				break;
 
 			case 24:
-				writew(C320p24rx_mask, ofsAddr + RX_mask);
-				writew(C320p24tx_mask, ofsAddr + TX_mask);
-				writew(C320p24rx_spage + i * C320p24buf_pgno, ofsAddr + Page_rxb);
-				writew(readw(ofsAddr + Page_rxb) + C320p24rx_pgno, ofsAddr + EndPage_rxb);
-				writew(C320p24tx_spage + i * C320p24buf_pgno, ofsAddr + Page_txb);
-				writew(readw(ofsAddr + Page_txb), ofsAddr + EndPage_txb);
+				pete_writew("drivers/tty/moxa.c:1008", C320p24rx_mask, ofsAddr + RX_mask);
+				pete_writew("drivers/tty/moxa.c:1009", C320p24tx_mask, ofsAddr + TX_mask);
+				pete_writew("drivers/tty/moxa.c:1010", C320p24rx_spage + i * C320p24buf_pgno, ofsAddr + Page_rxb);
+				pete_writew("drivers/tty/moxa.c:1011", pete_readw("drivers/tty/moxa.c:1011", ofsAddr + Page_rxb) + C320p24rx_pgno, ofsAddr + EndPage_rxb);
+				pete_writew("drivers/tty/moxa.c:1012", C320p24tx_spage + i * C320p24buf_pgno, ofsAddr + Page_txb);
+				pete_writew("drivers/tty/moxa.c:1013", pete_readw("drivers/tty/moxa.c:1013", ofsAddr + Page_txb), ofsAddr + EndPage_txb);
 				break;
 			case 32:
-				writew(C320p32rx_mask, ofsAddr + RX_mask);
-				writew(C320p32tx_mask, ofsAddr + TX_mask);
-				writew(C320p32tx_ofs, ofsAddr + Ofs_txb);
-				writew(C320p32rx_spage + i * C320p32buf_pgno, ofsAddr + Page_rxb);
-				writew(readb(ofsAddr + Page_rxb), ofsAddr + EndPage_rxb);
-				writew(C320p32tx_spage + i * C320p32buf_pgno, ofsAddr + Page_txb);
-				writew(readw(ofsAddr + Page_txb), ofsAddr + EndPage_txb);
+				pete_writew("drivers/tty/moxa.c:1016", C320p32rx_mask, ofsAddr + RX_mask);
+				pete_writew("drivers/tty/moxa.c:1017", C320p32tx_mask, ofsAddr + TX_mask);
+				pete_writew("drivers/tty/moxa.c:1018", C320p32tx_ofs, ofsAddr + Ofs_txb);
+				pete_writew("drivers/tty/moxa.c:1019", C320p32rx_spage + i * C320p32buf_pgno, ofsAddr + Page_rxb);
+				pete_writew("drivers/tty/moxa.c:1020", pete_readb("drivers/tty/moxa.c:1020", ofsAddr + Page_rxb), ofsAddr + EndPage_rxb);
+				pete_writew("drivers/tty/moxa.c:1021", C320p32tx_spage + i * C320p32buf_pgno, ofsAddr + Page_txb);
+				pete_writew("drivers/tty/moxa.c:1022", pete_readw("drivers/tty/moxa.c:1022", ofsAddr + Page_txb), ofsAddr + EndPage_txb);
 				break;
 			}
 		}
@@ -1694,14 +1694,14 @@ static int moxa_poll_port(struct moxa_port *p, unsigned int handle,
 	if (!handle) /* nothing else to do */
 		goto put;
 
-	intr = readw(ip); /* port irq status */
+	intr = pete_readw("drivers/tty/moxa.c:1697", ip); /* port irq status */
 	if (intr == 0)
 		goto put;
 
-	writew(0, ip); /* ACK port */
+	pete_writew("drivers/tty/moxa.c:1701", 0, ip); /* ACK port */
 	ofsAddr = p->tableAddr;
 	if (intr & IntrTx) /* disable tx intr */
-		writew(readw(ofsAddr + HostStat) & ~WakeupTx,
+		pete_writew("drivers/tty/moxa.c:1704", pete_readw("drivers/tty/moxa.c:1704", ofsAddr + HostStat) & ~WakeupTx,
 				ofsAddr + HostStat);
 
 	if (!inited)
@@ -1713,7 +1713,7 @@ static int moxa_poll_port(struct moxa_port *p, unsigned int handle,
 	}
 
 	if (intr & IntrLine)
-		moxa_new_dcdstate(p, readb(ofsAddr + FlagStat) & DCD_state);
+		moxa_new_dcdstate(p, pete_readb("drivers/tty/moxa.c:1716", ofsAddr + FlagStat) & DCD_state);
 put:
 	tty_kref_put(tty);
 
@@ -1735,14 +1735,14 @@ static void moxa_poll(struct timer_list *unused)
 		served++;
 
 		ip = NULL;
-		if (readb(brd->intPend) == 0xff)
-			ip = brd->intTable + readb(brd->intNdx);
+		if (pete_readb("drivers/tty/moxa.c:1738", brd->intPend) == 0xff)
+			ip = brd->intTable + pete_readb("drivers/tty/moxa.c:1739", brd->intNdx);
 
 		for (port = 0; port < brd->numPorts; port++)
 			moxa_poll_port(&brd->ports[port], !!ip, ip + port);
 
 		if (ip)
-			writeb(0, brd->intPend); /* ACK */
+			pete_writeb("drivers/tty/moxa.c:1745", 0, brd->intPend); /* ACK */
 
 		if (moxaLowWaterChk) {
 			struct moxa_port *p = brd->ports;
@@ -2002,11 +2002,11 @@ static void MoxaPortEnable(struct moxa_port *port)
 	u16 lowwater = 512;
 
 	ofsAddr = port->tableAddr;
-	writew(lowwater, ofsAddr + Low_water);
+	pete_writew("drivers/tty/moxa.c:2005", lowwater, ofsAddr + Low_water);
 	if (MOXA_IS_320(port->board))
 		moxafunc(ofsAddr, FC_SetBreakIrq, 0);
 	else
-		writew(readw(ofsAddr + HostStat) | WakeupBreak,
+		pete_writew("drivers/tty/moxa.c:2009", pete_readw("drivers/tty/moxa.c:2009", ofsAddr + HostStat) | WakeupBreak,
 				ofsAddr + HostStat);
 
 	moxafunc(ofsAddr, FC_SetLineIrq, Magic_code);
@@ -2022,7 +2022,7 @@ static void MoxaPortDisable(struct moxa_port *port)
 
 	moxafunc(ofsAddr, FC_SetFlowCtl, 0);	/* disable flow control */
 	moxafunc(ofsAddr, FC_ClrLineIrq, Magic_code);
-	writew(0, ofsAddr + HostStat);
+	pete_writew("drivers/tty/moxa.c:2025", 0, ofsAddr + HostStat);
 	moxafunc(ofsAddr, FC_DisableCH, Magic_code);
 }
 
@@ -2094,9 +2094,9 @@ static int MoxaPortSetTermio(struct moxa_port *port, struct ktermios *termio,
 
 	if (termio->c_iflag & (IXON | IXOFF | IXANY)) {
 	        spin_lock_irq(&moxafunc_lock);
-		writeb(termio->c_cc[VSTART], ofsAddr + FuncArg);
-		writeb(termio->c_cc[VSTOP], ofsAddr + FuncArg1);
-		writeb(FC_SetXonXoff, ofsAddr + FuncCode);
+		pete_writeb("drivers/tty/moxa.c:2097", termio->c_cc[VSTART], ofsAddr + FuncArg);
+		pete_writeb("drivers/tty/moxa.c:2098", termio->c_cc[VSTOP], ofsAddr + FuncArg1);
+		pete_writeb("drivers/tty/moxa.c:2099", FC_SetXonXoff, ofsAddr + FuncCode);
 		moxa_wait_finish(ofsAddr);
 		spin_unlock_irq(&moxafunc_lock);
 
@@ -2154,7 +2154,7 @@ static int MoxaPortLineStatus(struct moxa_port *port)
 	if (MOXA_IS_320(port->board))
 		val = moxafuncret(ofsAddr, FC_LineStatus, 0);
 	else
-		val = readw(ofsAddr + FlagStat) >> 4;
+		val = pete_readw("drivers/tty/moxa.c:2157", ofsAddr + FlagStat) >> 4;
 	val &= 0x0B;
 	if (val & 8)
 		val |= 4;
@@ -2173,19 +2173,19 @@ static int MoxaPortWriteData(struct tty_struct *tty, const u8 *buffer, int len)
 
 	ofsAddr = port->tableAddr;
 	baseAddr = port->board->basemem;
-	tx_mask = readw(ofsAddr + TX_mask);
-	spage = readw(ofsAddr + Page_txb);
-	epage = readw(ofsAddr + EndPage_txb);
-	tail = readw(ofsAddr + TXwptr);
-	head = readw(ofsAddr + TXrptr);
+	tx_mask = pete_readw("drivers/tty/moxa.c:2176", ofsAddr + TX_mask);
+	spage = pete_readw("drivers/tty/moxa.c:2177", ofsAddr + Page_txb);
+	epage = pete_readw("drivers/tty/moxa.c:2178", ofsAddr + EndPage_txb);
+	tail = pete_readw("drivers/tty/moxa.c:2179", ofsAddr + TXwptr);
+	head = pete_readw("drivers/tty/moxa.c:2180", ofsAddr + TXrptr);
 	c = (head > tail) ? (head - tail - 1) : (head - tail + tx_mask);
 	if (c > len)
 		c = len;
 	moxaLog.txcnt[port->port.tty->index] += c;
 	total = c;
 	if (spage == epage) {
-		bufhead = readw(ofsAddr + Ofs_txb);
-		writew(spage, baseAddr + Control_reg);
+		bufhead = pete_readw("drivers/tty/moxa.c:2187", ofsAddr + Ofs_txb);
+		pete_writew("drivers/tty/moxa.c:2188", spage, baseAddr + Control_reg);
 		while (c > 0) {
 			if (head > tail)
 				len = head - tail - 1;
@@ -2205,7 +2205,7 @@ static int MoxaPortWriteData(struct tty_struct *tty, const u8 *buffer, int len)
 			len = Page_size - pageofs;
 			if (len > c)
 				len = c;
-			writeb(pageno, baseAddr + Control_reg);
+			pete_writeb("drivers/tty/moxa.c:2208", pageno, baseAddr + Control_reg);
 			ofs = baseAddr + DynPage_addr + pageofs;
 			memcpy_toio(ofs, buffer, len);
 			buffer += len;
@@ -2216,8 +2216,8 @@ static int MoxaPortWriteData(struct tty_struct *tty, const u8 *buffer, int len)
 		}
 		tail = (tail + total) & tx_mask;
 	}
-	writew(tail, ofsAddr + TXwptr);
-	writeb(1, ofsAddr + CD180TXirq);	/* start to send */
+	pete_writew("drivers/tty/moxa.c:2219", tail, ofsAddr + TXwptr);
+	pete_writeb("drivers/tty/moxa.c:2220", 1, ofsAddr + CD180TXirq);	/* start to send */
 	return total;
 }
 
@@ -2232,11 +2232,11 @@ static int MoxaPortReadData(struct moxa_port *port)
 
 	ofsAddr = port->tableAddr;
 	baseAddr = port->board->basemem;
-	head = readw(ofsAddr + RXrptr);
-	tail = readw(ofsAddr + RXwptr);
-	rx_mask = readw(ofsAddr + RX_mask);
-	spage = readw(ofsAddr + Page_rxb);
-	epage = readw(ofsAddr + EndPage_rxb);
+	head = pete_readw("drivers/tty/moxa.c:2235", ofsAddr + RXrptr);
+	tail = pete_readw("drivers/tty/moxa.c:2236", ofsAddr + RXwptr);
+	rx_mask = pete_readw("drivers/tty/moxa.c:2237", ofsAddr + RX_mask);
+	spage = pete_readw("drivers/tty/moxa.c:2238", ofsAddr + Page_rxb);
+	epage = pete_readw("drivers/tty/moxa.c:2239", ofsAddr + EndPage_rxb);
 	count = (tail >= head) ? (tail - head) : (tail - head + rx_mask + 1);
 	if (count == 0)
 		return 0;
@@ -2244,8 +2244,8 @@ static int MoxaPortReadData(struct moxa_port *port)
 	total = count;
 	moxaLog.rxcnt[tty->index] += total;
 	if (spage == epage) {
-		bufhead = readw(ofsAddr + Ofs_rxb);
-		writew(spage, baseAddr + Control_reg);
+		bufhead = pete_readw("drivers/tty/moxa.c:2247", ofsAddr + Ofs_rxb);
+		pete_writew("drivers/tty/moxa.c:2248", spage, baseAddr + Control_reg);
 		while (count > 0) {
 			ofs = baseAddr + DynPage_addr + bufhead + head;
 			len = (tail >= head) ? (tail - head) :
@@ -2260,7 +2260,7 @@ static int MoxaPortReadData(struct moxa_port *port)
 		pageno = spage + (head >> 13);
 		pageofs = head & Page_mask;
 		while (count > 0) {
-			writew(pageno, baseAddr + Control_reg);
+			pete_writew("drivers/tty/moxa.c:2263", pageno, baseAddr + Control_reg);
 			ofs = baseAddr + DynPage_addr + pageofs;
 			len = tty_prepare_flip_string(&port->port, &dst,
 					min(Page_size - pageofs, count));
@@ -2273,8 +2273,8 @@ static int MoxaPortReadData(struct moxa_port *port)
 		}
 		head = (head + total) & rx_mask;
 	}
-	writew(head, ofsAddr + RXrptr);
-	if (readb(ofsAddr + FlagStat) & Xoff_state) {
+	pete_writew("drivers/tty/moxa.c:2276", head, ofsAddr + RXrptr);
+	if (pete_readb("drivers/tty/moxa.c:2277", ofsAddr + FlagStat) & Xoff_state) {
 		moxaLowWaterChk = 1;
 		port->lowChkFlag = 1;
 	}
@@ -2287,9 +2287,9 @@ static unsigned int MoxaPortTxQueue(struct moxa_port *port)
 	void __iomem *ofsAddr = port->tableAddr;
 	u16 rptr, wptr, mask;
 
-	rptr = readw(ofsAddr + TXrptr);
-	wptr = readw(ofsAddr + TXwptr);
-	mask = readw(ofsAddr + TX_mask);
+	rptr = pete_readw("drivers/tty/moxa.c:2290", ofsAddr + TXrptr);
+	wptr = pete_readw("drivers/tty/moxa.c:2291", ofsAddr + TXwptr);
+	mask = pete_readw("drivers/tty/moxa.c:2292", ofsAddr + TX_mask);
 	return (wptr - rptr) & mask;
 }
 
@@ -2298,9 +2298,9 @@ static unsigned int MoxaPortTxFree(struct moxa_port *port)
 	void __iomem *ofsAddr = port->tableAddr;
 	u16 rptr, wptr, mask;
 
-	rptr = readw(ofsAddr + TXrptr);
-	wptr = readw(ofsAddr + TXwptr);
-	mask = readw(ofsAddr + TX_mask);
+	rptr = pete_readw("drivers/tty/moxa.c:2301", ofsAddr + TXrptr);
+	wptr = pete_readw("drivers/tty/moxa.c:2302", ofsAddr + TXwptr);
+	mask = pete_readw("drivers/tty/moxa.c:2303", ofsAddr + TX_mask);
 	return mask - ((wptr - rptr) & mask);
 }
 
@@ -2309,9 +2309,9 @@ static int MoxaPortRxQueue(struct moxa_port *port)
 	void __iomem *ofsAddr = port->tableAddr;
 	u16 rptr, wptr, mask;
 
-	rptr = readw(ofsAddr + RXrptr);
-	wptr = readw(ofsAddr + RXwptr);
-	mask = readw(ofsAddr + RX_mask);
+	rptr = pete_readw("drivers/tty/moxa.c:2312", ofsAddr + RXrptr);
+	wptr = pete_readw("drivers/tty/moxa.c:2313", ofsAddr + RXwptr);
+	mask = pete_readw("drivers/tty/moxa.c:2314", ofsAddr + RX_mask);
 	return (wptr - rptr) & mask;
 }
 

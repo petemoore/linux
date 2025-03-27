@@ -93,11 +93,11 @@ static void mlxbf_gige_cache_stats(struct mlxbf_gige *priv)
 
 	/* Cache stats that will be cleared by clean port operation */
 	p = &priv->stats;
-	p->rx_din_dropped_pkts += readq(priv->base +
+	p->rx_din_dropped_pkts += pete_readq("drivers/net/ethernet/mellanox/mlxbf_gige/mlxbf_gige_main.c:96", priv->base +
 					MLXBF_GIGE_RX_DIN_DROP_COUNTER);
-	p->rx_filter_passed_pkts += readq(priv->base +
+	p->rx_filter_passed_pkts += pete_readq("drivers/net/ethernet/mellanox/mlxbf_gige/mlxbf_gige_main.c:98", priv->base +
 					  MLXBF_GIGE_RX_PASS_COUNTER_ALL);
-	p->rx_filter_discard_pkts += readq(priv->base +
+	p->rx_filter_discard_pkts += pete_readq("drivers/net/ethernet/mellanox/mlxbf_gige/mlxbf_gige_main.c:100", priv->base +
 					   MLXBF_GIGE_RX_DISC_COUNTER_ALL);
 }
 
@@ -108,9 +108,9 @@ static int mlxbf_gige_clean_port(struct mlxbf_gige *priv)
 	int err;
 
 	/* Set the CLEAN_PORT_EN bit to trigger SW reset */
-	control = readq(priv->base + MLXBF_GIGE_CONTROL);
+	control = pete_readq("drivers/net/ethernet/mellanox/mlxbf_gige/mlxbf_gige_main.c:111", priv->base + MLXBF_GIGE_CONTROL);
 	control |= MLXBF_GIGE_CONTROL_CLEAN_PORT_EN;
-	writeq(control, priv->base + MLXBF_GIGE_CONTROL);
+	pete_writeq("drivers/net/ethernet/mellanox/mlxbf_gige/mlxbf_gige_main.c:113", control, priv->base + MLXBF_GIGE_CONTROL);
 
 	/* Ensure completion of "clean port" write before polling status */
 	mb();
@@ -120,9 +120,9 @@ static int mlxbf_gige_clean_port(struct mlxbf_gige *priv)
 					100, 100000);
 
 	/* Clear the CLEAN_PORT_EN bit at end of this loop */
-	control = readq(priv->base + MLXBF_GIGE_CONTROL);
+	control = pete_readq("drivers/net/ethernet/mellanox/mlxbf_gige/mlxbf_gige_main.c:123", priv->base + MLXBF_GIGE_CONTROL);
 	control &= ~MLXBF_GIGE_CONTROL_CLEAN_PORT_EN;
-	writeq(control, priv->base + MLXBF_GIGE_CONTROL);
+	pete_writeq("drivers/net/ethernet/mellanox/mlxbf_gige/mlxbf_gige_main.c:125", control, priv->base + MLXBF_GIGE_CONTROL);
 
 	return err;
 }
@@ -136,9 +136,9 @@ static int mlxbf_gige_open(struct net_device *netdev)
 	int err;
 
 	/* Perform general init of GigE block */
-	control = readq(priv->base + MLXBF_GIGE_CONTROL);
+	control = pete_readq("drivers/net/ethernet/mellanox/mlxbf_gige/mlxbf_gige_main.c:139", priv->base + MLXBF_GIGE_CONTROL);
 	control |= MLXBF_GIGE_CONTROL_PORT_EN;
-	writeq(control, priv->base + MLXBF_GIGE_CONTROL);
+	pete_writeq("drivers/net/ethernet/mellanox/mlxbf_gige/mlxbf_gige_main.c:141", control, priv->base + MLXBF_GIGE_CONTROL);
 
 	mlxbf_gige_cache_stats(priv);
 	err = mlxbf_gige_clean_port(priv);
@@ -184,7 +184,7 @@ static int mlxbf_gige_open(struct net_device *netdev)
 	/* Ensure completion of all initialization before enabling interrupts */
 	mb();
 
-	writeq(int_en, priv->base + MLXBF_GIGE_INT_EN);
+	pete_writeq("drivers/net/ethernet/mellanox/mlxbf_gige/mlxbf_gige_main.c:187", int_en, priv->base + MLXBF_GIGE_INT_EN);
 
 	return 0;
 
@@ -206,7 +206,7 @@ static int mlxbf_gige_stop(struct net_device *netdev)
 {
 	struct mlxbf_gige *priv = netdev_priv(netdev);
 
-	writeq(0, priv->base + MLXBF_GIGE_INT_EN);
+	pete_writeq("drivers/net/ethernet/mellanox/mlxbf_gige/mlxbf_gige_main.c:209", 0, priv->base + MLXBF_GIGE_INT_EN);
 	netif_stop_queue(netdev);
 	napi_disable(&priv->napi);
 	netif_napi_del(&priv->napi);
@@ -260,7 +260,7 @@ static void mlxbf_gige_get_stats64(struct net_device *netdev,
 
 	stats->rx_length_errors = priv->stats.rx_truncate_errors;
 	stats->rx_fifo_errors = priv->stats.rx_din_dropped_pkts +
-				readq(priv->base + MLXBF_GIGE_RX_DIN_DROP_COUNTER);
+				pete_readq("drivers/net/ethernet/mellanox/mlxbf_gige/mlxbf_gige_main.c:263", priv->base + MLXBF_GIGE_RX_DIN_DROP_COUNTER);
 	stats->rx_crc_errors = priv->stats.rx_mac_errors;
 	stats->rx_errors = stats->rx_length_errors +
 			   stats->rx_fifo_errors +
@@ -314,16 +314,16 @@ static void mlxbf_gige_bf3_adjust_link(struct net_device *netdev)
 			return;
 		}
 
-		val = readl(priv->plu_base + MLXBF_GIGE_PLU_TX_REG0);
+		val = pete_readl("drivers/net/ethernet/mellanox/mlxbf_gige/mlxbf_gige_main.c:317", priv->plu_base + MLXBF_GIGE_PLU_TX_REG0);
 		val &= ~(MLXBF_GIGE_PLU_TX_IPG_SIZE_MASK | MLXBF_GIGE_PLU_TX_SGMII_MODE_MASK);
 		val |= FIELD_PREP(MLXBF_GIGE_PLU_TX_IPG_SIZE_MASK, ipg_size);
 		val |= FIELD_PREP(MLXBF_GIGE_PLU_TX_SGMII_MODE_MASK, sgmii_mode);
-		writel(val, priv->plu_base + MLXBF_GIGE_PLU_TX_REG0);
+		pete_writel("drivers/net/ethernet/mellanox/mlxbf_gige/mlxbf_gige_main.c:321", val, priv->plu_base + MLXBF_GIGE_PLU_TX_REG0);
 
-		val = readl(priv->plu_base + MLXBF_GIGE_PLU_RX_REG0);
+		val = pete_readl("drivers/net/ethernet/mellanox/mlxbf_gige/mlxbf_gige_main.c:323", priv->plu_base + MLXBF_GIGE_PLU_RX_REG0);
 		val &= ~MLXBF_GIGE_PLU_RX_SGMII_MODE_MASK;
 		val |= FIELD_PREP(MLXBF_GIGE_PLU_RX_SGMII_MODE_MASK, sgmii_mode);
-		writel(val, priv->plu_base + MLXBF_GIGE_PLU_RX_REG0);
+		pete_writel("drivers/net/ethernet/mellanox/mlxbf_gige/mlxbf_gige_main.c:326", val, priv->plu_base + MLXBF_GIGE_PLU_RX_REG0);
 
 		priv->prev_speed = phydev->speed;
 	}
@@ -414,7 +414,7 @@ static int mlxbf_gige_probe(struct platform_device *pdev)
 
 	spin_lock_init(&priv->lock);
 
-	priv->hw_version = readq(base + MLXBF_GIGE_VERSION);
+	priv->hw_version = pete_readq("drivers/net/ethernet/mellanox/mlxbf_gige/mlxbf_gige_main.c:417", base + MLXBF_GIGE_VERSION);
 
 	/* Attach MDIO device */
 	err = mlxbf_gige_mdio_probe(pdev, priv);

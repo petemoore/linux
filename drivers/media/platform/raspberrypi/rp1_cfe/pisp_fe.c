@@ -125,13 +125,13 @@ static const struct pisp_fe_config_param pisp_fe_config_map[] = {
 
 static inline u32 pisp_fe_reg_read(struct pisp_fe_device *fe, u32 offset)
 {
-	return readl(fe->base + offset);
+	return pete_readl("drivers/media/platform/raspberrypi/rp1_cfe/pisp_fe.c:128", fe->base + offset);
 }
 
 static inline void pisp_fe_reg_write(struct pisp_fe_device *fe, u32 offset,
 				     u32 val)
 {
-	writel(val, fe->base + offset);
+	pete_writel("drivers/media/platform/raspberrypi/rp1_cfe/pisp_fe.c:134", val, fe->base + offset);
 	pisp_fe_dbg_verbose("fe: write 0x%04x -> 0x%03x\n", val, offset);
 }
 

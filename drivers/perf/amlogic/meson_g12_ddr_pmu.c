@@ -132,7 +132,7 @@ static unsigned long dmc_g12_get_freq_quick(struct dmc_info *info)
 	unsigned int od_div = 0xfff;
 	unsigned long freq = 0;
 
-	val = readl(info->pll_reg);
+	val = pete_readl("drivers/perf/amlogic/meson_g12_ddr_pmu.c:135", info->pll_reg);
 	val = val & 0xfffff;
 	switch ((val >> 16) & 7) {
 	case 0:
@@ -176,22 +176,22 @@ static void g12_dump_reg(struct dmc_info *db)
 	unsigned int r;
 
 	for (i = 0; i < 9; i++) {
-		r  = readl(db->ddr_reg[0] + (DMC_MON_G12_CTRL0 + (i << 2)));
+		r  = pete_readl("drivers/perf/amlogic/meson_g12_ddr_pmu.c:179", db->ddr_reg[0] + (DMC_MON_G12_CTRL0 + (i << 2)));
 		pr_notice("DMC_MON_CTRL%d:        %08x\n", i, r);
 	}
-	r  = readl(db->ddr_reg[0] + DMC_MON_G12_ALL_REQ_CNT);
+	r  = pete_readl("drivers/perf/amlogic/meson_g12_ddr_pmu.c:182", db->ddr_reg[0] + DMC_MON_G12_ALL_REQ_CNT);
 	pr_notice("DMC_MON_ALL_REQ_CNT:  %08x\n", r);
-	r  = readl(db->ddr_reg[0] + DMC_MON_G12_ALL_GRANT_CNT);
+	r  = pete_readl("drivers/perf/amlogic/meson_g12_ddr_pmu.c:184", db->ddr_reg[0] + DMC_MON_G12_ALL_GRANT_CNT);
 	pr_notice("DMC_MON_ALL_GRANT_CNT:%08x\n", r);
-	r  = readl(db->ddr_reg[0] + DMC_MON_G12_ONE_GRANT_CNT);
+	r  = pete_readl("drivers/perf/amlogic/meson_g12_ddr_pmu.c:186", db->ddr_reg[0] + DMC_MON_G12_ONE_GRANT_CNT);
 	pr_notice("DMC_MON_ONE_GRANT_CNT:%08x\n", r);
-	r  = readl(db->ddr_reg[0] + DMC_MON_G12_SEC_GRANT_CNT);
+	r  = pete_readl("drivers/perf/amlogic/meson_g12_ddr_pmu.c:188", db->ddr_reg[0] + DMC_MON_G12_SEC_GRANT_CNT);
 	pr_notice("DMC_MON_SEC_GRANT_CNT:%08x\n", r);
-	r  = readl(db->ddr_reg[0] + DMC_MON_G12_THD_GRANT_CNT);
+	r  = pete_readl("drivers/perf/amlogic/meson_g12_ddr_pmu.c:190", db->ddr_reg[0] + DMC_MON_G12_THD_GRANT_CNT);
 	pr_notice("DMC_MON_THD_GRANT_CNT:%08x\n", r);
-	r  = readl(db->ddr_reg[0] + DMC_MON_G12_FOR_GRANT_CNT);
+	r  = pete_readl("drivers/perf/amlogic/meson_g12_ddr_pmu.c:192", db->ddr_reg[0] + DMC_MON_G12_FOR_GRANT_CNT);
 	pr_notice("DMC_MON_FOR_GRANT_CNT:%08x\n", r);
-	r  = readl(db->ddr_reg[0] + DMC_MON_G12_TIMER);
+	r  = pete_readl("drivers/perf/amlogic/meson_g12_ddr_pmu.c:194", db->ddr_reg[0] + DMC_MON_G12_TIMER);
 	pr_notice("DMC_MON_TIMER:        %08x\n", r);
 }
 #endif
@@ -201,16 +201,16 @@ static void dmc_g12_counter_enable(struct dmc_info *info)
 	unsigned int val;
 	unsigned long clock_count = dmc_g12_get_freq_quick(info) / 10; /* 100ms */
 
-	writel(clock_count, info->ddr_reg[0] + DMC_MON_G12_TIMER);
+	pete_writel("drivers/perf/amlogic/meson_g12_ddr_pmu.c:204", clock_count, info->ddr_reg[0] + DMC_MON_G12_TIMER);
 
-	val = readl(info->ddr_reg[0] + DMC_MON_G12_CTRL0);
+	val = pete_readl("drivers/perf/amlogic/meson_g12_ddr_pmu.c:206", info->ddr_reg[0] + DMC_MON_G12_CTRL0);
 
 	/* enable all channel */
 	val =  BIT(31) |	/* enable bit */
 	       BIT(20) |	/* use timer  */
 	       0x0f;		/* 4 channels */
 
-	writel(val, info->ddr_reg[0] + DMC_MON_G12_CTRL0);
+	pete_writel("drivers/perf/amlogic/meson_g12_ddr_pmu.c:213", val, info->ddr_reg[0] + DMC_MON_G12_CTRL0);
 
 #ifdef DEBUG
 	g12_dump_reg(info);
@@ -229,8 +229,8 @@ static void dmc_g12_config_fiter(struct dmc_info *info,
 
 	/* clear all port mask */
 	if (port < 0) {
-		writel(0, info->ddr_reg[0] + rp[channel]);
-		writel(0, info->ddr_reg[0] + rs[channel]);
+		pete_writel("drivers/perf/amlogic/meson_g12_ddr_pmu.c:232", 0, info->ddr_reg[0] + rp[channel]);
+		pete_writel("drivers/perf/amlogic/meson_g12_ddr_pmu.c:233", 0, info->ddr_reg[0] + rs[channel]);
 		return;
 	}
 
@@ -238,17 +238,17 @@ static void dmc_g12_config_fiter(struct dmc_info *info,
 		subport = port - PORT_MAJOR;
 
 	if (subport < 0) {
-		val = readl(info->ddr_reg[0] + rp[channel]);
+		val = pete_readl("drivers/perf/amlogic/meson_g12_ddr_pmu.c:241", info->ddr_reg[0] + rp[channel]);
 		val |=  (1 << port);
-		writel(val, info->ddr_reg[0] + rp[channel]);
+		pete_writel("drivers/perf/amlogic/meson_g12_ddr_pmu.c:243", val, info->ddr_reg[0] + rp[channel]);
 		val = 0xffff;
-		writel(val, info->ddr_reg[0] + rs[channel]);
+		pete_writel("drivers/perf/amlogic/meson_g12_ddr_pmu.c:245", val, info->ddr_reg[0] + rs[channel]);
 	} else {
 		val = BIT(23);		/* select device */
-		writel(val, info->ddr_reg[0] + rp[channel]);
-		val = readl(info->ddr_reg[0] + rs[channel]);
+		pete_writel("drivers/perf/amlogic/meson_g12_ddr_pmu.c:248", val, info->ddr_reg[0] + rp[channel]);
+		val = pete_readl("drivers/perf/amlogic/meson_g12_ddr_pmu.c:249", info->ddr_reg[0] + rs[channel]);
 		val |= (1 << subport);
-		writel(val, info->ddr_reg[0] + rs[channel]);
+		pete_writel("drivers/perf/amlogic/meson_g12_ddr_pmu.c:251", val, info->ddr_reg[0] + rs[channel]);
 	}
 }
 
@@ -265,15 +265,15 @@ static void dmc_g12_counter_disable(struct dmc_info *info)
 	int i;
 
 	/* clear timer */
-	writel(0, info->ddr_reg[0] + DMC_MON_G12_CTRL0);
-	writel(0, info->ddr_reg[0] + DMC_MON_G12_TIMER);
+	pete_writel("drivers/perf/amlogic/meson_g12_ddr_pmu.c:268", 0, info->ddr_reg[0] + DMC_MON_G12_CTRL0);
+	pete_writel("drivers/perf/amlogic/meson_g12_ddr_pmu.c:269", 0, info->ddr_reg[0] + DMC_MON_G12_TIMER);
 
-	writel(0, info->ddr_reg[0] + DMC_MON_G12_ALL_REQ_CNT);
-	writel(0, info->ddr_reg[0] + DMC_MON_G12_ALL_GRANT_CNT);
-	writel(0, info->ddr_reg[0] + DMC_MON_G12_ONE_GRANT_CNT);
-	writel(0, info->ddr_reg[0] + DMC_MON_G12_SEC_GRANT_CNT);
-	writel(0, info->ddr_reg[0] + DMC_MON_G12_THD_GRANT_CNT);
-	writel(0, info->ddr_reg[0] + DMC_MON_G12_FOR_GRANT_CNT);
+	pete_writel("drivers/perf/amlogic/meson_g12_ddr_pmu.c:271", 0, info->ddr_reg[0] + DMC_MON_G12_ALL_REQ_CNT);
+	pete_writel("drivers/perf/amlogic/meson_g12_ddr_pmu.c:272", 0, info->ddr_reg[0] + DMC_MON_G12_ALL_GRANT_CNT);
+	pete_writel("drivers/perf/amlogic/meson_g12_ddr_pmu.c:273", 0, info->ddr_reg[0] + DMC_MON_G12_ONE_GRANT_CNT);
+	pete_writel("drivers/perf/amlogic/meson_g12_ddr_pmu.c:274", 0, info->ddr_reg[0] + DMC_MON_G12_SEC_GRANT_CNT);
+	pete_writel("drivers/perf/amlogic/meson_g12_ddr_pmu.c:275", 0, info->ddr_reg[0] + DMC_MON_G12_THD_GRANT_CNT);
+	pete_writel("drivers/perf/amlogic/meson_g12_ddr_pmu.c:276", 0, info->ddr_reg[0] + DMC_MON_G12_FOR_GRANT_CNT);
 
 	/* clear port channel mapping */
 	for (i = 0; i < info->hw_info->chann_nr; i++)
@@ -286,12 +286,12 @@ static void dmc_g12_get_counters(struct dmc_info *info,
 	int i;
 	unsigned int reg;
 
-	counter->all_cnt = readl(info->ddr_reg[0] + DMC_MON_G12_ALL_GRANT_CNT);
-	counter->all_req   = readl(info->ddr_reg[0] + DMC_MON_G12_ALL_REQ_CNT);
+	counter->all_cnt = pete_readl("drivers/perf/amlogic/meson_g12_ddr_pmu.c:289", info->ddr_reg[0] + DMC_MON_G12_ALL_GRANT_CNT);
+	counter->all_req   = pete_readl("drivers/perf/amlogic/meson_g12_ddr_pmu.c:290", info->ddr_reg[0] + DMC_MON_G12_ALL_REQ_CNT);
 
 	for (i = 0; i < info->hw_info->chann_nr; i++) {
 		reg = DMC_MON_G12_ONE_GRANT_CNT + (i << 2);
-		counter->channel_cnt[i] = readl(info->ddr_reg[0] + reg);
+		counter->channel_cnt[i] = pete_readl("drivers/perf/amlogic/meson_g12_ddr_pmu.c:294", info->ddr_reg[0] + reg);
 	}
 }
 
@@ -301,11 +301,11 @@ static int dmc_g12_irq_handler(struct dmc_info *info,
 	unsigned int val;
 	int ret = -EINVAL;
 
-	val = readl(info->ddr_reg[0] + DMC_MON_G12_CTRL0);
+	val = pete_readl("drivers/perf/amlogic/meson_g12_ddr_pmu.c:304", info->ddr_reg[0] + DMC_MON_G12_CTRL0);
 	if (val & DMC_QOS_IRQ) {
 		dmc_g12_get_counters(info, counter);
 		/* clear irq flags */
-		writel(val, info->ddr_reg[0] + DMC_MON_G12_CTRL0);
+		pete_writel("drivers/perf/amlogic/meson_g12_ddr_pmu.c:308", val, info->ddr_reg[0] + DMC_MON_G12_CTRL0);
 		ret = 0;
 	}
 	return ret;

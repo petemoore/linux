@@ -463,7 +463,7 @@ static int intel_get_lctl_scf(struct azx *chip)
 	u32 val, t;
 	int i;
 
-	val = readl(bus->mlcap + AZX_ML_BASE + AZX_REG_ML_LCAP);
+	val = pete_readl("sound/pci/hda/hda_intel.c:466", bus->mlcap + AZX_ML_BASE + AZX_REG_ML_LCAP);
 
 	for (i = 0; i < ARRAY_SIZE(preferred_bits); i++) {
 		t = preferred_bits[i];
@@ -485,14 +485,14 @@ static int intel_ml_lctl_set_power(struct azx *chip, int state)
 	 * Changes to LCTL.SCF are only needed for the first multi-link dealing
 	 * with external codecs
 	 */
-	val = readl(bus->mlcap + AZX_ML_BASE + AZX_REG_ML_LCTL);
+	val = pete_readl("sound/pci/hda/hda_intel.c:488", bus->mlcap + AZX_ML_BASE + AZX_REG_ML_LCTL);
 	val &= ~AZX_ML_LCTL_SPA;
 	val |= state << AZX_ML_LCTL_SPA_SHIFT;
-	writel(val, bus->mlcap + AZX_ML_BASE + AZX_REG_ML_LCTL);
+	pete_writel("sound/pci/hda/hda_intel.c:491", val, bus->mlcap + AZX_ML_BASE + AZX_REG_ML_LCTL);
 	/* wait for CPA */
 	timeout = 50;
 	while (timeout) {
-		if (((readl(bus->mlcap + AZX_ML_BASE + AZX_REG_ML_LCTL)) &
+		if (((pete_readl("sound/pci/hda/hda_intel.c:495", bus->mlcap + AZX_ML_BASE + AZX_REG_ML_LCTL)) &
 		    AZX_ML_LCTL_CPA) == (state << AZX_ML_LCTL_CPA_SHIFT))
 			return 0;
 		timeout--;
@@ -509,7 +509,7 @@ static void intel_init_lctl(struct azx *chip)
 	int ret;
 
 	/* 0. check lctl register value is correct or not */
-	val = readl(bus->mlcap + AZX_ML_BASE + AZX_REG_ML_LCTL);
+	val = pete_readl("sound/pci/hda/hda_intel.c:512", bus->mlcap + AZX_ML_BASE + AZX_REG_ML_LCTL);
 	/* only perform additional configurations if the SCF is initially based on 6MHz */
 	if ((val & AZX_ML_LCTL_SCF) != 0)
 		return;
@@ -531,7 +531,7 @@ static void intel_init_lctl(struct azx *chip)
 	/* 2. update SCF to select an audio clock different from 6MHz */
 	val &= ~AZX_ML_LCTL_SCF;
 	val |= intel_get_lctl_scf(chip);
-	writel(val, bus->mlcap + AZX_ML_BASE + AZX_REG_ML_LCTL);
+	pete_writel("sound/pci/hda/hda_intel.c:534", val, bus->mlcap + AZX_ML_BASE + AZX_REG_ML_LCTL);
 
 set_spa:
 	/* 4. turn link up: set SPA to 1 and wait CPA to 1 */

@@ -293,9 +293,9 @@ static inline void ams_ps_update_reg(struct ams *ams, unsigned int offset,
 {
 	u32 val, regval;
 
-	val = readl(ams->ps_base + offset);
+	val = pete_readl("drivers/iio/adc/xilinx-ams.c:296", ams->ps_base + offset);
 	regval = (val & ~mask) | (data & mask);
-	writel(regval, ams->ps_base + offset);
+	pete_writel("drivers/iio/adc/xilinx-ams.c:298", regval, ams->ps_base + offset);
 }
 
 static inline void ams_pl_update_reg(struct ams *ams, unsigned int offset,
@@ -303,9 +303,9 @@ static inline void ams_pl_update_reg(struct ams *ams, unsigned int offset,
 {
 	u32 val, regval;
 
-	val = readl(ams->pl_base + offset);
+	val = pete_readl("drivers/iio/adc/xilinx-ams.c:306", ams->pl_base + offset);
 	regval = (val & ~mask) | (data & mask);
-	writel(regval, ams->pl_base + offset);
+	pete_writel("drivers/iio/adc/xilinx-ams.c:308", regval, ams->pl_base + offset);
 }
 
 static void ams_update_intrmask(struct ams *ams, u64 mask, u64 val)
@@ -315,16 +315,16 @@ static void ams_update_intrmask(struct ams *ams, u64 mask, u64 val)
 	ams->intr_mask = (ams->intr_mask & ~mask) | (val & mask);
 
 	regval = ~(ams->intr_mask | ams->current_masked_alarm);
-	writel(regval, ams->base + AMS_IER_0);
+	pete_writel("drivers/iio/adc/xilinx-ams.c:318", regval, ams->base + AMS_IER_0);
 
 	regval = ~(FIELD_GET(AMS_ISR1_INTR_MASK, ams->intr_mask));
-	writel(regval, ams->base + AMS_IER_1);
+	pete_writel("drivers/iio/adc/xilinx-ams.c:321", regval, ams->base + AMS_IER_1);
 
 	regval = ams->intr_mask | ams->current_masked_alarm;
-	writel(regval, ams->base + AMS_IDR_0);
+	pete_writel("drivers/iio/adc/xilinx-ams.c:324", regval, ams->base + AMS_IDR_0);
 
 	regval = FIELD_GET(AMS_ISR1_INTR_MASK, ams->intr_mask);
-	writel(regval, ams->base + AMS_IDR_1);
+	pete_writel("drivers/iio/adc/xilinx-ams.c:327", regval, ams->base + AMS_IDR_1);
 }
 
 static void ams_disable_all_alarms(struct ams *ams)
@@ -428,10 +428,10 @@ static void ams_enable_channel_sequence(struct iio_dev *indio_dev)
 
 		/* configure basic channels */
 		regval = FIELD_GET(AMS_REG_SEQ0_MASK, scan_mask);
-		writel(regval, ams->ps_base + AMS_REG_SEQ_CH0);
+		pete_writel("drivers/iio/adc/xilinx-ams.c:431", regval, ams->ps_base + AMS_REG_SEQ_CH0);
 
 		regval = FIELD_GET(AMS_REG_SEQ2_MASK, scan_mask);
-		writel(regval, ams->ps_base + AMS_REG_SEQ_CH2);
+		pete_writel("drivers/iio/adc/xilinx-ams.c:434", regval, ams->ps_base + AMS_REG_SEQ_CH2);
 
 		/* set continuous sequence mode */
 		ams_ps_update_reg(ams, AMS_REG_CONFIG1, AMS_CONF1_SEQ_MASK,
@@ -447,13 +447,13 @@ static void ams_enable_channel_sequence(struct iio_dev *indio_dev)
 		scan_mask = FIELD_GET(AMS_PL_SEQ_MASK, scan_mask);
 
 		regval = FIELD_GET(AMS_REG_SEQ0_MASK, scan_mask);
-		writel(regval, ams->pl_base + AMS_REG_SEQ_CH0);
+		pete_writel("drivers/iio/adc/xilinx-ams.c:450", regval, ams->pl_base + AMS_REG_SEQ_CH0);
 
 		regval = FIELD_GET(AMS_REG_SEQ1_MASK, scan_mask);
-		writel(regval, ams->pl_base + AMS_REG_SEQ_CH1);
+		pete_writel("drivers/iio/adc/xilinx-ams.c:453", regval, ams->pl_base + AMS_REG_SEQ_CH1);
 
 		regval = FIELD_GET(AMS_REG_SEQ2_MASK, scan_mask);
-		writel(regval, ams->pl_base + AMS_REG_SEQ_CH2);
+		pete_writel("drivers/iio/adc/xilinx-ams.c:456", regval, ams->pl_base + AMS_REG_SEQ_CH2);
 
 		/* set continuous sequence mode */
 		ams_pl_update_reg(ams, AMS_REG_CONFIG1, AMS_CONF1_SEQ_MASK,
@@ -469,7 +469,7 @@ static int ams_init_device(struct ams *ams)
 
 	/* reset AMS */
 	if (ams->ps_base) {
-		writel(AMS_PS_RESET_VALUE, ams->ps_base + AMS_VP_VN);
+		pete_writel("drivers/iio/adc/xilinx-ams.c:472", AMS_PS_RESET_VALUE, ams->ps_base + AMS_VP_VN);
 
 		ret = readl_poll_timeout(ams->base + AMS_PS_CSTS, reg, (reg & expect),
 					 AMS_INIT_POLL_TIME_US, AMS_INIT_TIMEOUT_US);
@@ -482,11 +482,11 @@ static int ams_init_device(struct ams *ams)
 	}
 
 	if (ams->pl_base) {
-		value = readl(ams->base + AMS_PL_CSTS);
+		value = pete_readl("drivers/iio/adc/xilinx-ams.c:485", ams->base + AMS_PL_CSTS);
 		if (value == 0)
 			return 0;
 
-		writel(AMS_PL_RESET_VALUE, ams->pl_base + AMS_VP_VN);
+		pete_writel("drivers/iio/adc/xilinx-ams.c:489", AMS_PL_RESET_VALUE, ams->pl_base + AMS_VP_VN);
 
 		/* put sysmon in a default state */
 		ams_pl_update_reg(ams, AMS_REG_CONFIG1, AMS_CONF1_SEQ_MASK,
@@ -499,8 +499,8 @@ static int ams_init_device(struct ams *ams)
 	ams_update_intrmask(ams, AMS_ALARM_MASK, AMS_ALARM_MASK);
 
 	/* Clear any pending interrupt */
-	writel(AMS_ISR0_ALARM_MASK, ams->base + AMS_ISR_0);
-	writel(AMS_ISR1_ALARM_MASK, ams->base + AMS_ISR_1);
+	pete_writel("drivers/iio/adc/xilinx-ams.c:502", AMS_ISR0_ALARM_MASK, ams->base + AMS_ISR_0);
+	pete_writel("drivers/iio/adc/xilinx-ams.c:503", AMS_ISR1_ALARM_MASK, ams->base + AMS_ISR_1);
 
 	return 0;
 }
@@ -561,13 +561,13 @@ static int ams_read_vcc_reg(struct ams *ams, unsigned int offset, u32 *data)
 		return ret;
 
 	/* clear end-of-conversion flag, wait for next conversion to complete */
-	writel(expect, ams->base + AMS_ISR_1);
+	pete_writel("drivers/iio/adc/xilinx-ams.c:564", expect, ams->base + AMS_ISR_1);
 	ret = readl_poll_timeout(ams->base + AMS_ISR_1, reg, (reg & expect),
 				 AMS_INIT_POLL_TIME_US, AMS_INIT_TIMEOUT_US);
 	if (ret)
 		return ret;
 
-	*data = readl(ams->base + offset);
+	*data = pete_readl("drivers/iio/adc/xilinx-ams.c:570", ams->base + offset);
 
 	return 0;
 }
@@ -617,28 +617,28 @@ static int ams_get_pl_scale(struct ams *ams, int address)
 		val = AMS_SUPPLY_SCALE_3VOLT_mV;
 		break;
 	case AMS_SUPPLY7:
-		regval = readl(ams->pl_base + AMS_REG_CONFIG4);
+		regval = pete_readl("drivers/iio/adc/xilinx-ams.c:620", ams->pl_base + AMS_REG_CONFIG4);
 		if (FIELD_GET(AMS_VUSER0_MASK, regval))
 			val = AMS_SUPPLY_SCALE_6VOLT_mV;
 		else
 			val = AMS_SUPPLY_SCALE_3VOLT_mV;
 		break;
 	case AMS_SUPPLY8:
-		regval = readl(ams->pl_base + AMS_REG_CONFIG4);
+		regval = pete_readl("drivers/iio/adc/xilinx-ams.c:627", ams->pl_base + AMS_REG_CONFIG4);
 		if (FIELD_GET(AMS_VUSER1_MASK, regval))
 			val = AMS_SUPPLY_SCALE_6VOLT_mV;
 		else
 			val = AMS_SUPPLY_SCALE_3VOLT_mV;
 		break;
 	case AMS_SUPPLY9:
-		regval = readl(ams->pl_base + AMS_REG_CONFIG4);
+		regval = pete_readl("drivers/iio/adc/xilinx-ams.c:634", ams->pl_base + AMS_REG_CONFIG4);
 		if (FIELD_GET(AMS_VUSER2_MASK, regval))
 			val = AMS_SUPPLY_SCALE_6VOLT_mV;
 		else
 			val = AMS_SUPPLY_SCALE_3VOLT_mV;
 		break;
 	case AMS_SUPPLY10:
-		regval = readl(ams->pl_base + AMS_REG_CONFIG4);
+		regval = pete_readl("drivers/iio/adc/xilinx-ams.c:641", ams->pl_base + AMS_REG_CONFIG4);
 		if (FIELD_GET(AMS_VUSER3_MASK, regval))
 			val = AMS_SUPPLY_SCALE_6VOLT_mV;
 		else
@@ -694,9 +694,9 @@ static int ams_read_raw(struct iio_dev *indio_dev,
 				goto unlock_mutex;
 			ams_enable_channel_sequence(indio_dev);
 		} else if (chan->scan_index >= AMS_PS_SEQ_MAX)
-			*val = readl(ams->pl_base + chan->address);
+			*val = pete_readl("drivers/iio/adc/xilinx-ams.c:697", ams->pl_base + chan->address);
 		else
-			*val = readl(ams->ps_base + chan->address);
+			*val = pete_readl("drivers/iio/adc/xilinx-ams.c:699", ams->ps_base + chan->address);
 
 		ret = IIO_VAL_INT;
 unlock_mutex:
@@ -928,9 +928,9 @@ static int ams_read_event_value(struct iio_dev *indio_dev,
 	mutex_lock(&ams->lock);
 
 	if (chan->scan_index >= AMS_PS_SEQ_MAX)
-		*val = readl(ams->pl_base + offset);
+		*val = pete_readl("drivers/iio/adc/xilinx-ams.c:931", ams->pl_base + offset);
 	else
-		*val = readl(ams->ps_base + offset);
+		*val = pete_readl("drivers/iio/adc/xilinx-ams.c:933", ams->ps_base + offset);
 
 	mutex_unlock(&ams->lock);
 
@@ -964,9 +964,9 @@ static int ams_write_event_value(struct iio_dev *indio_dev,
 
 	offset = ams_get_alarm_offset(chan->scan_index, dir);
 	if (chan->scan_index >= AMS_PS_SEQ_MAX)
-		writel(val, ams->pl_base + offset);
+		pete_writel("drivers/iio/adc/xilinx-ams.c:967", val, ams->pl_base + offset);
 	else
-		writel(val, ams->ps_base + offset);
+		pete_writel("drivers/iio/adc/xilinx-ams.c:969", val, ams->ps_base + offset);
 
 	mutex_unlock(&ams->lock);
 
@@ -1029,7 +1029,7 @@ static void ams_unmask_worker(struct work_struct *work)
 
 	spin_lock_irq(&ams->intr_lock);
 
-	status = readl(ams->base + AMS_ISR_0);
+	status = pete_readl("drivers/iio/adc/xilinx-ams.c:1032", ams->base + AMS_ISR_0);
 
 	/* Clear those bits which are not active anymore */
 	unmask = (ams->current_masked_alarm ^ status) & ams->current_masked_alarm;
@@ -1043,7 +1043,7 @@ static void ams_unmask_worker(struct work_struct *work)
 	ams->current_masked_alarm &= ~ams->intr_mask;
 
 	/* Clear the interrupts before we unmask them */
-	writel(unmask, ams->base + AMS_ISR_0);
+	pete_writel("drivers/iio/adc/xilinx-ams.c:1046", unmask, ams->base + AMS_ISR_0);
 
 	ams_update_intrmask(ams, ~AMS_ALARM_MASK, ~AMS_ALARM_MASK);
 
@@ -1063,7 +1063,7 @@ static irqreturn_t ams_irq(int irq, void *data)
 
 	spin_lock(&ams->intr_lock);
 
-	isr0 = readl(ams->base + AMS_ISR_0);
+	isr0 = pete_readl("drivers/iio/adc/xilinx-ams.c:1066", ams->base + AMS_ISR_0);
 
 	/* Only process alarms that are not masked */
 	isr0 &= ~((ams->intr_mask & AMS_ISR0_ALARM_MASK) | ams->current_masked_alarm);
@@ -1073,7 +1073,7 @@ static irqreturn_t ams_irq(int irq, void *data)
 	}
 
 	/* Clear interrupt */
-	writel(isr0, ams->base + AMS_ISR_0);
+	pete_writel("drivers/iio/adc/xilinx-ams.c:1076", isr0, ams->base + AMS_ISR_0);
 
 	/* Mask the alarm interrupts until cleared */
 	ams->current_masked_alarm |= isr0;
@@ -1311,14 +1311,14 @@ static int ams_parse_firmware(struct iio_dev *indio_dev)
 				ams_get_alarm_offset(ams_channels[i].scan_index,
 						     IIO_EV_DIR_RISING);
 			if (ams_channels[i].scan_index >= AMS_PS_SEQ_MAX) {
-				writel(AMS_ALARM_THR_MIN,
+				pete_writel("drivers/iio/adc/xilinx-ams.c:1314", AMS_ALARM_THR_MIN,
 				       ams->pl_base + falling_off);
-				writel(AMS_ALARM_THR_MAX,
+				pete_writel("drivers/iio/adc/xilinx-ams.c:1316", AMS_ALARM_THR_MAX,
 				       ams->pl_base + rising_off);
 			} else {
-				writel(AMS_ALARM_THR_MIN,
+				pete_writel("drivers/iio/adc/xilinx-ams.c:1319", AMS_ALARM_THR_MIN,
 				       ams->ps_base + falling_off);
-				writel(AMS_ALARM_THR_MAX,
+				pete_writel("drivers/iio/adc/xilinx-ams.c:1321", AMS_ALARM_THR_MAX,
 				       ams->ps_base + rising_off);
 			}
 		}

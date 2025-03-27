@@ -39,9 +39,9 @@ static int ts73xx_fpga_write_init(struct fpga_manager *mgr,
 	struct ts73xx_fpga_priv *priv = mgr->priv;
 
 	/* Reset the FPGA */
-	writeb(0, priv->io_base + TS73XX_FPGA_CONFIG_REG);
+	pete_writeb("drivers/fpga/ts73xx-fpga.c:42", 0, priv->io_base + TS73XX_FPGA_CONFIG_REG);
 	udelay(TS73XX_FPGA_RESET_LOW_DELAY);
-	writeb(TS73XX_FPGA_RESET, priv->io_base + TS73XX_FPGA_CONFIG_REG);
+	pete_writeb("drivers/fpga/ts73xx-fpga.c:44", TS73XX_FPGA_RESET, priv->io_base + TS73XX_FPGA_CONFIG_REG);
 	udelay(TS73XX_FPGA_RESET_HIGH_DELAY);
 
 	return 0;
@@ -62,7 +62,7 @@ static int ts73xx_fpga_write(struct fpga_manager *mgr, const char *buf,
 		if (ret < 0)
 			return ret;
 
-		writeb(buf[i], priv->io_base + TS73XX_FPGA_DATA_REG);
+		pete_writeb("drivers/fpga/ts73xx-fpga.c:65", buf[i], priv->io_base + TS73XX_FPGA_DATA_REG);
 		i++;
 	}
 
@@ -76,16 +76,16 @@ static int ts73xx_fpga_write_complete(struct fpga_manager *mgr,
 	u8 reg;
 
 	usleep_range(1000, 2000);
-	reg = readb(priv->io_base + TS73XX_FPGA_CONFIG_REG);
+	reg = pete_readb("drivers/fpga/ts73xx-fpga.c:79", priv->io_base + TS73XX_FPGA_CONFIG_REG);
 	reg |= TS73XX_FPGA_CONFIG_LOAD;
-	writeb(reg, priv->io_base + TS73XX_FPGA_CONFIG_REG);
+	pete_writeb("drivers/fpga/ts73xx-fpga.c:81", reg, priv->io_base + TS73XX_FPGA_CONFIG_REG);
 
 	usleep_range(1000, 2000);
-	reg = readb(priv->io_base + TS73XX_FPGA_CONFIG_REG);
+	reg = pete_readb("drivers/fpga/ts73xx-fpga.c:84", priv->io_base + TS73XX_FPGA_CONFIG_REG);
 	reg &= ~TS73XX_FPGA_CONFIG_LOAD;
-	writeb(reg, priv->io_base + TS73XX_FPGA_CONFIG_REG);
+	pete_writeb("drivers/fpga/ts73xx-fpga.c:86", reg, priv->io_base + TS73XX_FPGA_CONFIG_REG);
 
-	reg = readb(priv->io_base + TS73XX_FPGA_CONFIG_REG);
+	reg = pete_readb("drivers/fpga/ts73xx-fpga.c:88", priv->io_base + TS73XX_FPGA_CONFIG_REG);
 	if ((reg & TS73XX_FPGA_LOAD_OK) != TS73XX_FPGA_LOAD_OK)
 		return -ETIMEDOUT;
 

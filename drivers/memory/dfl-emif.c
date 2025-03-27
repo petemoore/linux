@@ -64,7 +64,7 @@ static ssize_t emif_state_show(struct device *dev,
 	struct dfl_emif *de = dev_get_drvdata(dev);
 	u64 val;
 
-	val = readq(de->base + EMIF_STAT);
+	val = pete_readq("drivers/memory/dfl-emif.c:67", de->base + EMIF_STAT);
 
 	return sysfs_emit(buf, "%u\n",
 			  !!(val & BIT_ULL(eattr->shift + eattr->index)));
@@ -87,10 +87,10 @@ static ssize_t emif_clear_store(struct device *dev,
 
 	spin_lock(&de->lock);
 	/* The CLEAR_EN field is WO, but other fields are RW */
-	val = readq(base + EMIF_CTRL);
+	val = pete_readq("drivers/memory/dfl-emif.c:90", base + EMIF_CTRL);
 	val &= ~EMIF_CTRL_CLEAR_EN_MSK;
 	val |= clear_en_msk;
-	writeq(val, base + EMIF_CTRL);
+	pete_writeq("drivers/memory/dfl-emif.c:93", val, base + EMIF_CTRL);
 	spin_unlock(&de->lock);
 
 	if (readq_poll_timeout(base + EMIF_STAT, val,
@@ -200,10 +200,10 @@ static umode_t dfl_emif_visible(struct kobject *kobj,
 
 	if (ddev->revision == 0)
 		val = FIELD_GET(EMIF_CAPABILITY_CHN_MSK_V0,
-				readq(de->base + EMIF_CAPABILITY_BASE));
+				pete_readq("drivers/memory/dfl-emif.c:203", de->base + EMIF_CAPABILITY_BASE));
 	else
 		val = FIELD_GET(EMIF_CAPABILITY_CHN_MSK,
-				readq(de->base + EMIF_CAPABILITY_BASE));
+				pete_readq("drivers/memory/dfl-emif.c:206", de->base + EMIF_CAPABILITY_BASE));
 
 	return (val & BIT_ULL(eattr->index)) ? attr->mode : 0;
 }

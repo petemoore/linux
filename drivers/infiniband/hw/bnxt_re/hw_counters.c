@@ -291,7 +291,7 @@ static void bnxt_re_copy_db_pacing_stats(struct bnxt_re_dev *rdev,
 	stats->value[BNXT_RE_PACING_CMPL] = pacing_s->complete;
 	stats->value[BNXT_RE_PACING_ALERT] = pacing_s->alerts;
 	stats->value[BNXT_RE_DB_FIFO_REG] =
-		readl(rdev->en_dev->bar0 + rdev->pacing.dbr_db_fifo_reg_off);
+		pete_readl("drivers/infiniband/hw/bnxt_re/hw_counters.c:294", rdev->en_dev->bar0 + rdev->pacing.dbr_db_fifo_reg_off);
 }
 
 int bnxt_re_ib_get_hw_stats(struct ib_device *ibdev,

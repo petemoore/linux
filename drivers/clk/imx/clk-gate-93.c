@@ -49,16 +49,16 @@ static void imx93_clk_gate_do_hardware(struct clk_hw *hw, bool enable)
 	struct imx93_clk_gate *gate = to_imx93_clk_gate(hw);
 	u32 val;
 
-	val = readl(gate->reg + AUTHEN_OFFSET);
+	val = pete_readl("drivers/clk/imx/clk-gate-93.c:52", gate->reg + AUTHEN_OFFSET);
 	if (val & CPULPM_EN) {
 		val = enable ? LPM_SETTING_ON : LPM_SETTING_OFF;
-		writel(val, gate->reg + LPM_CUR_OFFSET);
+		pete_writel("drivers/clk/imx/clk-gate-93.c:55", val, gate->reg + LPM_CUR_OFFSET);
 	} else {
-		val = readl(gate->reg + DIRECT_OFFSET);
+		val = pete_readl("drivers/clk/imx/clk-gate-93.c:57", gate->reg + DIRECT_OFFSET);
 		val &= ~(gate->mask << gate->bit_idx);
 		if (enable)
 			val |= (gate->val & gate->mask) << gate->bit_idx;
-		writel(val, gate->reg + DIRECT_OFFSET);
+		pete_writel("drivers/clk/imx/clk-gate-93.c:61", val, gate->reg + DIRECT_OFFSET);
 	}
 }
 
@@ -100,14 +100,14 @@ out:
 
 static int imx93_clk_gate_reg_is_enabled(struct imx93_clk_gate *gate)
 {
-	u32 val = readl(gate->reg + AUTHEN_OFFSET);
+	u32 val = pete_readl("drivers/clk/imx/clk-gate-93.c:103", gate->reg + AUTHEN_OFFSET);
 
 	if (val & CPULPM_EN) {
-		val = readl(gate->reg + LPM_CUR_OFFSET);
+		val = pete_readl("drivers/clk/imx/clk-gate-93.c:106", gate->reg + LPM_CUR_OFFSET);
 		if (val == LPM_SETTING_ON)
 			return 1;
 	} else {
-		val = readl(gate->reg);
+		val = pete_readl("drivers/clk/imx/clk-gate-93.c:110", gate->reg);
 		if (((val >> gate->bit_idx) & gate->mask) == gate->val)
 			return 1;
 	}
@@ -184,7 +184,7 @@ struct clk_hw *imx93_clk_gate(struct device *dev, const char *name, const char *
 	gate->hw.init = &init;
 	hw = &gate->hw;
 
-	authen = readl(reg + AUTHEN_OFFSET);
+	authen = pete_readl("drivers/clk/imx/clk-gate-93.c:187", reg + AUTHEN_OFFSET);
 	if (!(authen & TZ_NS_MASK) || !(authen & BIT(WHITE_LIST_SHIFT + domain_id)))
 		init.ops = &imx93_clk_gate_ro_ops;
 

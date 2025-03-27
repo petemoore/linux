@@ -426,9 +426,9 @@ static int rnandc_read_page_hw_ecc(struct nand_chip *chip, u8 *buf,
 	/* Configure DMA */
 	dma_addr = dma_map_single(rnandc->dev, rnandc->buf, mtd->writesize,
 				  DMA_FROM_DEVICE);
-	writel(dma_addr, rnandc->regs + DMA_ADDR_LOW_REG);
-	writel(mtd->writesize, rnandc->regs + DMA_CNT_REG);
-	writel(DMA_TLVL_MAX, rnandc->regs + DMA_TLVL_REG);
+	pete_writel("drivers/mtd/nand/raw/renesas-nand-controller.c:429", dma_addr, rnandc->regs + DMA_ADDR_LOW_REG);
+	pete_writel("drivers/mtd/nand/raw/renesas-nand-controller.c:430", mtd->writesize, rnandc->regs + DMA_CNT_REG);
+	pete_writel("drivers/mtd/nand/raw/renesas-nand-controller.c:431", DMA_TLVL_MAX, rnandc->regs + DMA_TLVL_REG);
 
 	rnandc_trigger_op(rnandc, &rop);
 	rnandc_trigger_dma(rnandc);
@@ -516,16 +516,16 @@ static int rnandc_read_subpage_hw_ecc(struct nand_chip *chip, u32 req_offset,
 	rnandc_en_correction(rnandc);
 	rnandc_trigger_op(rnandc, &rop);
 
-	while (!FIFO_STATE_C_EMPTY(readl(rnandc->regs + FIFO_STATE_REG)))
+	while (!FIFO_STATE_C_EMPTY(pete_readl("drivers/mtd/nand/raw/renesas-nand-controller.c:519", rnandc->regs + FIFO_STATE_REG)))
 		cpu_relax();
 
-	while (FIFO_STATE_R_EMPTY(readl(rnandc->regs + FIFO_STATE_REG)))
+	while (FIFO_STATE_R_EMPTY(pete_readl("drivers/mtd/nand/raw/renesas-nand-controller.c:522", rnandc->regs + FIFO_STATE_REG)))
 		cpu_relax();
 
 	ioread32_rep(rnandc->regs + FIFO_DATA_REG, bufpoi + page_off,
 		     real_len / 4);
 
-	if (!FIFO_STATE_R_EMPTY(readl(rnandc->regs + FIFO_STATE_REG))) {
+	if (!FIFO_STATE_R_EMPTY(pete_readl("drivers/mtd/nand/raw/renesas-nand-controller.c:528", rnandc->regs + FIFO_STATE_REG))) {
 		dev_err(rnandc->dev, "Clearing residual data in the read FIFO\n");
 		rnandc_clear_fifo(rnandc);
 	}
@@ -606,9 +606,9 @@ static int rnandc_write_page_hw_ecc(struct nand_chip *chip, const u8 *buf,
 	/* Configure DMA */
 	dma_addr = dma_map_single(rnandc->dev, (void *)rnandc->buf, mtd->writesize,
 				  DMA_TO_DEVICE);
-	writel(dma_addr, rnandc->regs + DMA_ADDR_LOW_REG);
-	writel(mtd->writesize, rnandc->regs + DMA_CNT_REG);
-	writel(DMA_TLVL_MAX, rnandc->regs + DMA_TLVL_REG);
+	pete_writel("drivers/mtd/nand/raw/renesas-nand-controller.c:609", dma_addr, rnandc->regs + DMA_ADDR_LOW_REG);
+	pete_writel("drivers/mtd/nand/raw/renesas-nand-controller.c:610", mtd->writesize, rnandc->regs + DMA_CNT_REG);
+	pete_writel("drivers/mtd/nand/raw/renesas-nand-controller.c:611", DMA_TLVL_MAX, rnandc->regs + DMA_TLVL_REG);
 
 	rnandc_trigger_op(rnandc, &rop);
 	rnandc_trigger_dma(rnandc);
@@ -656,13 +656,13 @@ static int rnandc_write_subpage_hw_ecc(struct nand_chip *chip, u32 req_offset,
 	rnandc_en_correction(rnandc);
 	rnandc_trigger_op(rnandc, &rop);
 
-	while (FIFO_STATE_W_FULL(readl(rnandc->regs + FIFO_STATE_REG)))
+	while (FIFO_STATE_W_FULL(pete_readl("drivers/mtd/nand/raw/renesas-nand-controller.c:659", rnandc->regs + FIFO_STATE_REG)))
 		cpu_relax();
 
 	iowrite32_rep(rnandc->regs + FIFO_DATA_REG, bufpoi + page_off,
 		      real_len / 4);
 
-	while (!FIFO_STATE_W_EMPTY(readl(rnandc->regs + FIFO_STATE_REG)))
+	while (!FIFO_STATE_W_EMPTY(pete_readl("drivers/mtd/nand/raw/renesas-nand-controller.c:665", rnandc->regs + FIFO_STATE_REG)))
 		cpu_relax();
 
 	ret = rnandc_wait_end_of_op(rnandc, chip);
@@ -844,10 +844,10 @@ static int rnandc_exec_op(struct nand_chip *chip,
 	words = rop.len / sizeof(u32);
 	remainder = rop.len % sizeof(u32);
 	if (rop.buf && rop.read) {
-		while (!FIFO_STATE_C_EMPTY(readl(rnandc->regs + FIFO_STATE_REG)))
+		while (!FIFO_STATE_C_EMPTY(pete_readl("drivers/mtd/nand/raw/renesas-nand-controller.c:847", rnandc->regs + FIFO_STATE_REG)))
 			cpu_relax();
 
-		while (FIFO_STATE_R_EMPTY(readl(rnandc->regs + FIFO_STATE_REG)))
+		while (FIFO_STATE_R_EMPTY(pete_readl("drivers/mtd/nand/raw/renesas-nand-controller.c:850", rnandc->regs + FIFO_STATE_REG)))
 			cpu_relax();
 
 		ioread32_rep(rnandc->regs + FIFO_DATA_REG, rop.buf, words);
@@ -857,13 +857,13 @@ static int rnandc_exec_op(struct nand_chip *chip,
 			       remainder);
 		}
 
-		if (!FIFO_STATE_R_EMPTY(readl(rnandc->regs + FIFO_STATE_REG))) {
+		if (!FIFO_STATE_R_EMPTY(pete_readl("drivers/mtd/nand/raw/renesas-nand-controller.c:860", rnandc->regs + FIFO_STATE_REG))) {
 			dev_warn(rnandc->dev,
 				 "Clearing residual data in the read FIFO\n");
 			rnandc_clear_fifo(rnandc);
 		}
 	} else if (rop.len && !rop.read) {
-		while (FIFO_STATE_W_FULL(readl(rnandc->regs + FIFO_STATE_REG)))
+		while (FIFO_STATE_W_FULL(pete_readl("drivers/mtd/nand/raw/renesas-nand-controller.c:866", rnandc->regs + FIFO_STATE_REG)))
 			cpu_relax();
 
 		iowrite32_rep(rnandc->regs + FIFO_DATA_REG, rop.buf,
@@ -875,7 +875,7 @@ static int rnandc_exec_op(struct nand_chip *chip,
 			writel_relaxed(last_bytes, rnandc->regs + FIFO_DATA_REG);
 		}
 
-		while (!FIFO_STATE_W_EMPTY(readl(rnandc->regs + FIFO_STATE_REG)))
+		while (!FIFO_STATE_W_EMPTY(pete_readl("drivers/mtd/nand/raw/renesas-nand-controller.c:878", rnandc->regs + FIFO_STATE_REG)))
 			cpu_relax();
 	}
 

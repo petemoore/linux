@@ -188,7 +188,7 @@ static int weim_timing_setup(struct device *dev, struct device_node *np,
 
 		/* set the timing for WEIM */
 		for (i = 0; i < devtype->cs_regs_count; i++)
-			writel(value[i],
+			pete_writel("drivers/bus/imx-weim.c:191", value[i],
 				base + cs_idx * devtype->cs_stride + i * 4);
 		if (!cst->is_applied) {
 			cst->is_applied = true;
@@ -222,7 +222,7 @@ static int weim_parse_dt(struct platform_device *pdev)
 
 	if (of_property_read_bool(pdev->dev.of_node, "fsl,burst-clk-enable")) {
 		if (devtype->wcr_bcm) {
-			reg = readl(base + devtype->wcr_offset);
+			reg = pete_readl("drivers/bus/imx-weim.c:225", base + devtype->wcr_offset);
 			reg |= devtype->wcr_bcm;
 
 			if (of_property_read_bool(pdev->dev.of_node,
@@ -236,7 +236,7 @@ static int weim_parse_dt(struct platform_device *pdev)
 				}
 			}
 
-			writel(reg, base + devtype->wcr_offset);
+			pete_writel("drivers/bus/imx-weim.c:239", reg, base + devtype->wcr_offset);
 		} else {
 			dev_err(&pdev->dev, "burst clk mode not supported.\n");
 			return -EINVAL;

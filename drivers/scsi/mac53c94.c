@@ -109,13 +109,13 @@ static int mac53c94_host_reset(struct scsi_cmnd *cmd)
 
 	spin_lock_irqsave(cmd->device->host->host_lock, flags);
 
-	writel((RUN|PAUSE|FLUSH|WAKE) << 16, &dma->control);
-	writeb(CMD_SCSI_RESET, &regs->command);	/* assert RST */
+	pete_writel("drivers/scsi/mac53c94.c:112", (RUN|PAUSE|FLUSH|WAKE) << 16, &dma->control);
+	pete_writeb("drivers/scsi/mac53c94.c:113", CMD_SCSI_RESET, &regs->command);	/* assert RST */
 	udelay(100);			/* leave it on for a while (>= 25us) */
-	writeb(CMD_RESET, &regs->command);
+	pete_writeb("drivers/scsi/mac53c94.c:115", CMD_RESET, &regs->command);
 	udelay(20);
 	mac53c94_init(state);
-	writeb(CMD_NOP, &regs->command);
+	pete_writeb("drivers/scsi/mac53c94.c:118", CMD_NOP, &regs->command);
 
 	spin_unlock_irqrestore(cmd->device->host->host_lock, flags);
 	return SUCCESS;
@@ -126,15 +126,15 @@ static void mac53c94_init(struct fsc_state *state)
 	struct mac53c94_regs __iomem *regs = state->regs;
 	struct dbdma_regs __iomem *dma = state->dma;
 
-	writeb(state->host->this_id | CF1_PAR_ENABLE, &regs->config1);
-	writeb(TIMO_VAL(250), &regs->sel_timeout);	/* 250ms */
-	writeb(CLKF_VAL(state->clk_freq), &regs->clk_factor);
-	writeb(CF2_FEATURE_EN, &regs->config2);
-	writeb(0, &regs->config3);
-	writeb(0, &regs->sync_period);
-	writeb(0, &regs->sync_offset);
-	(void)readb(&regs->interrupt);
-	writel((RUN|PAUSE|FLUSH|WAKE) << 16, &dma->control);
+	pete_writeb("drivers/scsi/mac53c94.c:129", state->host->this_id | CF1_PAR_ENABLE, &regs->config1);
+	pete_writeb("drivers/scsi/mac53c94.c:130", TIMO_VAL(250), &regs->sel_timeout);	/* 250ms */
+	pete_writeb("drivers/scsi/mac53c94.c:131", CLKF_VAL(state->clk_freq), &regs->clk_factor);
+	pete_writeb("drivers/scsi/mac53c94.c:132", CF2_FEATURE_EN, &regs->config2);
+	pete_writeb("drivers/scsi/mac53c94.c:133", 0, &regs->config3);
+	pete_writeb("drivers/scsi/mac53c94.c:134", 0, &regs->sync_period);
+	pete_writeb("drivers/scsi/mac53c94.c:135", 0, &regs->sync_offset);
+	(void)pete_readb("drivers/scsi/mac53c94.c:136", &regs->interrupt);
+	pete_writel("drivers/scsi/mac53c94.c:137", (RUN|PAUSE|FLUSH|WAKE) << 16, &dma->control);
 }
 
 /*
@@ -155,23 +155,23 @@ static void mac53c94_start(struct fsc_state *state)
 	state->request_q = (struct scsi_cmnd *) cmd->host_scribble;
 
 	/* Off we go */
-	writeb(0, &regs->count_lo);
-	writeb(0, &regs->count_mid);
-	writeb(0, &regs->count_hi);
-	writeb(CMD_NOP + CMD_DMA_MODE, &regs->command);
+	pete_writeb("drivers/scsi/mac53c94.c:158", 0, &regs->count_lo);
+	pete_writeb("drivers/scsi/mac53c94.c:159", 0, &regs->count_mid);
+	pete_writeb("drivers/scsi/mac53c94.c:160", 0, &regs->count_hi);
+	pete_writeb("drivers/scsi/mac53c94.c:161", CMD_NOP + CMD_DMA_MODE, &regs->command);
 	udelay(1);
-	writeb(CMD_FLUSH, &regs->command);
+	pete_writeb("drivers/scsi/mac53c94.c:163", CMD_FLUSH, &regs->command);
 	udelay(1);
-	writeb(cmd->device->id, &regs->dest_id);
-	writeb(0, &regs->sync_period);
-	writeb(0, &regs->sync_offset);
+	pete_writeb("drivers/scsi/mac53c94.c:165", cmd->device->id, &regs->dest_id);
+	pete_writeb("drivers/scsi/mac53c94.c:166", 0, &regs->sync_period);
+	pete_writeb("drivers/scsi/mac53c94.c:167", 0, &regs->sync_offset);
 
 	/* load the command into the FIFO */
 	for (i = 0; i < cmd->cmd_len; ++i)
-		writeb(cmd->cmnd[i], &regs->fifo);
+		pete_writeb("drivers/scsi/mac53c94.c:171", cmd->cmnd[i], &regs->fifo);
 
 	/* do select without ATN XXX */
-	writeb(CMD_SELECT, &regs->command);
+	pete_writeb("drivers/scsi/mac53c94.c:174", CMD_SELECT, &regs->command);
 	state->phase = selecting;
 
 	set_dma_cmds(state, cmd);
@@ -202,9 +202,9 @@ static void mac53c94_interrupt(int irq, void *dev_id)
 	 * Apparently, reading the interrupt register unlatches
 	 * the status and sequence step registers.
 	 */
-	seq = readb(&regs->seqstep);
-	stat = readb(&regs->status);
-	intr = readb(&regs->interrupt);
+	seq = pete_readb("drivers/scsi/mac53c94.c:205", &regs->seqstep);
+	stat = pete_readb("drivers/scsi/mac53c94.c:206", &regs->status);
+	intr = pete_readb("drivers/scsi/mac53c94.c:207", &regs->interrupt);
 
 #if 0
 	printk(KERN_DEBUG "mac53c94_intr, intr=%x stat=%x seq=%x phase=%d\n",
@@ -214,8 +214,8 @@ static void mac53c94_interrupt(int irq, void *dev_id)
 	if (intr & INTR_RESET) {
 		/* SCSI bus was reset */
 		printk(KERN_INFO "external SCSI bus reset detected\n");
-		writeb(CMD_NOP, &regs->command);
-		writel(RUN << 16, &dma->control);	/* stop dma */
+		pete_writeb("drivers/scsi/mac53c94.c:217", CMD_NOP, &regs->command);
+		pete_writel("drivers/scsi/mac53c94.c:218", RUN << 16, &dma->control);	/* stop dma */
 		cmd_done(state, DID_RESET << 16);
 		return;
 	}
@@ -232,7 +232,7 @@ static void mac53c94_interrupt(int irq, void *dev_id)
 		       intr, stat, seq, state->phase);
 #endif
 		++mac53c94_errors;
-		writeb(CMD_NOP + CMD_DMA_MODE, &regs->command);
+		pete_writeb("drivers/scsi/mac53c94.c:235", CMD_NOP + CMD_DMA_MODE, &regs->command);
 	}
 	if (!cmd) {
 		printk(KERN_DEBUG "53c94: interrupt with no command active?\n");
@@ -260,7 +260,7 @@ static void mac53c94_interrupt(int irq, void *dev_id)
 			cmd_done(state, DID_ERROR << 16);
 			return;
 		}
-		writeb(CMD_NOP, &regs->command);
+		pete_writeb("drivers/scsi/mac53c94.c:263", CMD_NOP, &regs->command);
 		/* set DMA controller going if any data to transfer */
 		if ((stat & (STAT_MSG|STAT_CD)) == 0
 		    && (scsi_sg_count(cmd) > 0 || scsi_bufflen(cmd))) {
@@ -268,17 +268,17 @@ static void mac53c94_interrupt(int irq, void *dev_id)
 			if (nb > 0xfff0)
 				nb = 0xfff0;
 			mcmd->this_residual -= nb;
-			writeb(nb, &regs->count_lo);
-			writeb(nb >> 8, &regs->count_mid);
-			writeb(CMD_DMA_MODE + CMD_NOP, &regs->command);
-			writel(virt_to_phys(state->dma_cmds), &dma->cmdptr);
-			writel((RUN << 16) | RUN, &dma->control);
-			writeb(CMD_DMA_MODE + CMD_XFER_DATA, &regs->command);
+			pete_writeb("drivers/scsi/mac53c94.c:271", nb, &regs->count_lo);
+			pete_writeb("drivers/scsi/mac53c94.c:272", nb >> 8, &regs->count_mid);
+			pete_writeb("drivers/scsi/mac53c94.c:273", CMD_DMA_MODE + CMD_NOP, &regs->command);
+			pete_writel("drivers/scsi/mac53c94.c:274", virt_to_phys(state->dma_cmds), &dma->cmdptr);
+			pete_writel("drivers/scsi/mac53c94.c:275", (RUN << 16) | RUN, &dma->control);
+			pete_writeb("drivers/scsi/mac53c94.c:276", CMD_DMA_MODE + CMD_XFER_DATA, &regs->command);
 			state->phase = dataing;
 			break;
 		} else if ((stat & STAT_PHASE) == STAT_CD + STAT_IO) {
 			/* up to status phase already */
-			writeb(CMD_I_COMPLETE, &regs->command);
+			pete_writeb("drivers/scsi/mac53c94.c:281", CMD_I_COMPLETE, &regs->command);
 			state->phase = completing;
 		} else {
 			printk(KERN_DEBUG "in unexpected phase %x after cmd\n",
@@ -301,19 +301,19 @@ static void mac53c94_interrupt(int irq, void *dev_id)
 			if (nb > 0xfff0)
 				nb = 0xfff0;
 			mcmd->this_residual -= nb;
-			writeb(nb, &regs->count_lo);
-			writeb(nb >> 8, &regs->count_mid);
-			writeb(CMD_DMA_MODE + CMD_NOP, &regs->command);
-			writeb(CMD_DMA_MODE + CMD_XFER_DATA, &regs->command);
+			pete_writeb("drivers/scsi/mac53c94.c:304", nb, &regs->count_lo);
+			pete_writeb("drivers/scsi/mac53c94.c:305", nb >> 8, &regs->count_mid);
+			pete_writeb("drivers/scsi/mac53c94.c:306", CMD_DMA_MODE + CMD_NOP, &regs->command);
+			pete_writeb("drivers/scsi/mac53c94.c:307", CMD_DMA_MODE + CMD_XFER_DATA, &regs->command);
 			break;
 		}
 		if ((stat & STAT_PHASE) != STAT_CD + STAT_IO) {
 			printk(KERN_DEBUG "intr %x before data xfer complete\n", intr);
 		}
-		writel(RUN << 16, &dma->control);	/* stop dma */
+		pete_writel("drivers/scsi/mac53c94.c:313", RUN << 16, &dma->control);	/* stop dma */
 		scsi_dma_unmap(cmd);
 		/* should check dma status */
-		writeb(CMD_I_COMPLETE, &regs->command);
+		pete_writeb("drivers/scsi/mac53c94.c:316", CMD_I_COMPLETE, &regs->command);
 		state->phase = completing;
 		break;
 	case completing:
@@ -322,9 +322,9 @@ static void mac53c94_interrupt(int irq, void *dev_id)
 			cmd_done(state, DID_ERROR << 16);
 			return;
 		}
-		mcmd->status = readb(&regs->fifo);
-		mcmd->message = readb(&regs->fifo);
-		writeb(CMD_ACCEPT_MSG, &regs->command);
+		mcmd->status = pete_readb("drivers/scsi/mac53c94.c:325", &regs->fifo);
+		mcmd->message = pete_readb("drivers/scsi/mac53c94.c:326", &regs->fifo);
+		pete_writeb("drivers/scsi/mac53c94.c:327", CMD_ACCEPT_MSG, &regs->command);
 		state->phase = busfreeing;
 		break;
 	case busfreeing:

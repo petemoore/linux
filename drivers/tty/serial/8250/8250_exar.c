@@ -290,7 +290,7 @@ static int default_setup(struct exar8250 *priv, struct pci_dev *pcidev,
 	 * at offset 0x09. Instead check the Deice ID (DVID) register
 	 * for a 2, 4 or 8 port UART.
 	 */
-	status = readb(port->port.membase + UART_EXAR_DVID);
+	status = pete_readb("drivers/tty/serial/8250/8250_exar.c:293", port->port.membase + UART_EXAR_DVID);
 	if (status == 0x82 || status == 0x84 || status == 0x88) {
 		port->port.type = PORT_XR17V35X;
 
@@ -325,10 +325,10 @@ pci_fastcom335_setup(struct exar8250 *priv, struct pci_dev *pcidev,
 
 	p = port->port.membase;
 
-	writeb(0x00, p + UART_EXAR_8XMODE);
-	writeb(UART_FCTR_EXAR_TRGD, p + UART_EXAR_FCTR);
-	writeb(32, p + UART_EXAR_TXTRG);
-	writeb(32, p + UART_EXAR_RXTRG);
+	pete_writeb("drivers/tty/serial/8250/8250_exar.c:328", 0x00, p + UART_EXAR_8XMODE);
+	pete_writeb("drivers/tty/serial/8250/8250_exar.c:329", UART_FCTR_EXAR_TRGD, p + UART_EXAR_FCTR);
+	pete_writeb("drivers/tty/serial/8250/8250_exar.c:330", 32, p + UART_EXAR_TXTRG);
+	pete_writeb("drivers/tty/serial/8250/8250_exar.c:331", 32, p + UART_EXAR_RXTRG);
 
 	/*
 	 * Setup Multipurpose Input/Output pins.
@@ -337,20 +337,20 @@ pci_fastcom335_setup(struct exar8250 *priv, struct pci_dev *pcidev,
 		switch (pcidev->device) {
 		case PCI_DEVICE_ID_COMMTECH_4222PCI335:
 		case PCI_DEVICE_ID_COMMTECH_4224PCI335:
-			writeb(0x78, p + UART_EXAR_MPIOLVL_7_0);
-			writeb(0x00, p + UART_EXAR_MPIOINV_7_0);
-			writeb(0x00, p + UART_EXAR_MPIOSEL_7_0);
+			pete_writeb("drivers/tty/serial/8250/8250_exar.c:340", 0x78, p + UART_EXAR_MPIOLVL_7_0);
+			pete_writeb("drivers/tty/serial/8250/8250_exar.c:341", 0x00, p + UART_EXAR_MPIOINV_7_0);
+			pete_writeb("drivers/tty/serial/8250/8250_exar.c:342", 0x00, p + UART_EXAR_MPIOSEL_7_0);
 			break;
 		case PCI_DEVICE_ID_COMMTECH_2324PCI335:
 		case PCI_DEVICE_ID_COMMTECH_2328PCI335:
-			writeb(0x00, p + UART_EXAR_MPIOLVL_7_0);
-			writeb(0xc0, p + UART_EXAR_MPIOINV_7_0);
-			writeb(0xc0, p + UART_EXAR_MPIOSEL_7_0);
+			pete_writeb("drivers/tty/serial/8250/8250_exar.c:346", 0x00, p + UART_EXAR_MPIOLVL_7_0);
+			pete_writeb("drivers/tty/serial/8250/8250_exar.c:347", 0xc0, p + UART_EXAR_MPIOINV_7_0);
+			pete_writeb("drivers/tty/serial/8250/8250_exar.c:348", 0xc0, p + UART_EXAR_MPIOSEL_7_0);
 			break;
 		}
-		writeb(0x00, p + UART_EXAR_MPIOINT_7_0);
-		writeb(0x00, p + UART_EXAR_MPIO3T_7_0);
-		writeb(0x00, p + UART_EXAR_MPIOOD_7_0);
+		pete_writeb("drivers/tty/serial/8250/8250_exar.c:351", 0x00, p + UART_EXAR_MPIOINT_7_0);
+		pete_writeb("drivers/tty/serial/8250/8250_exar.c:352", 0x00, p + UART_EXAR_MPIO3T_7_0);
+		pete_writeb("drivers/tty/serial/8250/8250_exar.c:353", 0x00, p + UART_EXAR_MPIOOD_7_0);
 	}
 
 	return 0;
@@ -397,18 +397,18 @@ static void setup_gpio(struct pci_dev *pcidev, u8 __iomem *p)
 		dir = 0x00;
 	}
 
-	writeb(0x00, p + UART_EXAR_MPIOINT_7_0);
-	writeb(0x00, p + UART_EXAR_MPIOLVL_7_0);
-	writeb(0x00, p + UART_EXAR_MPIO3T_7_0);
-	writeb(0x00, p + UART_EXAR_MPIOINV_7_0);
-	writeb(dir,  p + UART_EXAR_MPIOSEL_7_0);
-	writeb(0x00, p + UART_EXAR_MPIOOD_7_0);
-	writeb(0x00, p + UART_EXAR_MPIOINT_15_8);
-	writeb(0x00, p + UART_EXAR_MPIOLVL_15_8);
-	writeb(0x00, p + UART_EXAR_MPIO3T_15_8);
-	writeb(0x00, p + UART_EXAR_MPIOINV_15_8);
-	writeb(dir,  p + UART_EXAR_MPIOSEL_15_8);
-	writeb(0x00, p + UART_EXAR_MPIOOD_15_8);
+	pete_writeb("drivers/tty/serial/8250/8250_exar.c:400", 0x00, p + UART_EXAR_MPIOINT_7_0);
+	pete_writeb("drivers/tty/serial/8250/8250_exar.c:401", 0x00, p + UART_EXAR_MPIOLVL_7_0);
+	pete_writeb("drivers/tty/serial/8250/8250_exar.c:402", 0x00, p + UART_EXAR_MPIO3T_7_0);
+	pete_writeb("drivers/tty/serial/8250/8250_exar.c:403", 0x00, p + UART_EXAR_MPIOINV_7_0);
+	pete_writeb("drivers/tty/serial/8250/8250_exar.c:404", dir,  p + UART_EXAR_MPIOSEL_7_0);
+	pete_writeb("drivers/tty/serial/8250/8250_exar.c:405", 0x00, p + UART_EXAR_MPIOOD_7_0);
+	pete_writeb("drivers/tty/serial/8250/8250_exar.c:406", 0x00, p + UART_EXAR_MPIOINT_15_8);
+	pete_writeb("drivers/tty/serial/8250/8250_exar.c:407", 0x00, p + UART_EXAR_MPIOLVL_15_8);
+	pete_writeb("drivers/tty/serial/8250/8250_exar.c:408", 0x00, p + UART_EXAR_MPIO3T_15_8);
+	pete_writeb("drivers/tty/serial/8250/8250_exar.c:409", 0x00, p + UART_EXAR_MPIOINV_15_8);
+	pete_writeb("drivers/tty/serial/8250/8250_exar.c:410", dir,  p + UART_EXAR_MPIOSEL_15_8);
+	pete_writeb("drivers/tty/serial/8250/8250_exar.c:411", 0x00, p + UART_EXAR_MPIOOD_15_8);
 }
 
 static struct platform_device *__xr17v35x_register_gpio(struct pci_dev *pcidev,
@@ -473,16 +473,16 @@ static int generic_rs485_config(struct uart_port *port, struct ktermios *termios
 	u8 __iomem *p = port->membase;
 	u8 value;
 
-	value = readb(p + UART_EXAR_FCTR);
+	value = pete_readb("drivers/tty/serial/8250/8250_exar.c:476", p + UART_EXAR_FCTR);
 	if (is_rs485)
 		value |= UART_FCTR_EXAR_485;
 	else
 		value &= ~UART_FCTR_EXAR_485;
 
-	writeb(value, p + UART_EXAR_FCTR);
+	pete_writeb("drivers/tty/serial/8250/8250_exar.c:482", value, p + UART_EXAR_FCTR);
 
 	if (is_rs485)
-		writeb(UART_EXAR_RS485_DLY(4), p + UART_MSR);
+		pete_writeb("drivers/tty/serial/8250/8250_exar.c:485", UART_EXAR_RS485_DLY(4), p + UART_MSR);
 
 	return 0;
 }
@@ -523,10 +523,10 @@ static int iot2040_rs485_config(struct uart_port *port, struct ktermios *termios
 		mode <<= IOT2040_UART2_SHIFT;
 	}
 
-	value = readb(p + UART_EXAR_MPIOLVL_7_0);
+	value = pete_readb("drivers/tty/serial/8250/8250_exar.c:526", p + UART_EXAR_MPIOLVL_7_0);
 	value &= ~mask;
 	value |= mode;
-	writeb(value, p + UART_EXAR_MPIOLVL_7_0);
+	pete_writeb("drivers/tty/serial/8250/8250_exar.c:529", value, p + UART_EXAR_MPIOLVL_7_0);
 
 	return generic_rs485_config(port, termios, rs485);
 }
@@ -551,10 +551,10 @@ static int iot2040_register_gpio(struct pci_dev *pcidev,
 {
 	u8 __iomem *p = port->port.membase;
 
-	writeb(IOT2040_UARTS_DEFAULT_MODE, p + UART_EXAR_MPIOLVL_7_0);
-	writeb(IOT2040_UARTS_GPIO_LO_MODE, p + UART_EXAR_MPIOSEL_7_0);
-	writeb(IOT2040_UARTS_ENABLE, p + UART_EXAR_MPIOLVL_15_8);
-	writeb(IOT2040_UARTS_GPIO_HI_MODE, p + UART_EXAR_MPIOSEL_15_8);
+	pete_writeb("drivers/tty/serial/8250/8250_exar.c:554", IOT2040_UARTS_DEFAULT_MODE, p + UART_EXAR_MPIOLVL_7_0);
+	pete_writeb("drivers/tty/serial/8250/8250_exar.c:555", IOT2040_UARTS_GPIO_LO_MODE, p + UART_EXAR_MPIOSEL_7_0);
+	pete_writeb("drivers/tty/serial/8250/8250_exar.c:556", IOT2040_UARTS_ENABLE, p + UART_EXAR_MPIOLVL_15_8);
+	pete_writeb("drivers/tty/serial/8250/8250_exar.c:557", IOT2040_UARTS_GPIO_HI_MODE, p + UART_EXAR_MPIOSEL_15_8);
 
 	port->port.private_data =
 		__xr17v35x_register_gpio(pcidev, &iot2040_gpio_node);
@@ -622,10 +622,10 @@ pci_xr17v35x_setup(struct exar8250 *priv, struct pci_dev *pcidev,
 
 	p = port->port.membase;
 
-	writeb(0x00, p + UART_EXAR_8XMODE);
-	writeb(UART_FCTR_EXAR_TRGD, p + UART_EXAR_FCTR);
-	writeb(128, p + UART_EXAR_TXTRG);
-	writeb(128, p + UART_EXAR_RXTRG);
+	pete_writeb("drivers/tty/serial/8250/8250_exar.c:625", 0x00, p + UART_EXAR_8XMODE);
+	pete_writeb("drivers/tty/serial/8250/8250_exar.c:626", UART_FCTR_EXAR_TRGD, p + UART_EXAR_FCTR);
+	pete_writeb("drivers/tty/serial/8250/8250_exar.c:627", 128, p + UART_EXAR_TXTRG);
+	pete_writeb("drivers/tty/serial/8250/8250_exar.c:628", 128, p + UART_EXAR_RXTRG);
 
 	if (idx == 0) {
 		/* Setup Multipurpose Input/Output pins. */
@@ -649,11 +649,11 @@ static void pci_xr17v35x_exit(struct pci_dev *pcidev)
 static inline void exar_misc_clear(struct exar8250 *priv)
 {
 	/* Clear all PCI interrupts by reading INT0. No effect on IIR */
-	readb(priv->virt + UART_EXAR_INT0);
+	pete_readb("drivers/tty/serial/8250/8250_exar.c:652", priv->virt + UART_EXAR_INT0);
 
 	/* Clear INT0 for Expansion Interface slave ports, too */
 	if (priv->board->num_ports > 8)
-		readb(priv->virt + 0x2000 + UART_EXAR_INT0);
+		pete_readb("drivers/tty/serial/8250/8250_exar.c:656", priv->virt + 0x2000 + UART_EXAR_INT0);
 }
 
 /*

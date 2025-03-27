@@ -79,7 +79,7 @@ static int jh71xx_pmu_get_state(struct jh71xx_pmu_dev *pmd, u32 mask, bool *is_o
 	if (!mask)
 		return -EINVAL;
 
-	*is_on = readl(pmu->base + JH71XX_PMU_CURR_POWER_MODE) & mask;
+	*is_on = pete_readl("drivers/pmdomain/starfive/jh71xx-pmu.c:82", pmu->base + JH71XX_PMU_CURR_POWER_MODE) & mask;
 
 	return 0;
 }
@@ -130,7 +130,7 @@ static int jh71xx_pmu_set_state(struct jh71xx_pmu_dev *pmd, u32 mask, bool on)
 		encourage_hi = JH71XX_PMU_SW_ENCOURAGE_DIS_HI;
 	}
 
-	writel(mask, pmu->base + mode);
+	pete_writel("drivers/pmdomain/starfive/jh71xx-pmu.c:133", mask, pmu->base + mode);
 
 	/*
 	 * 2.Write SW encourage command sequence to the Software Encourage Reg (offset 0x44)
@@ -140,9 +140,9 @@ static int jh71xx_pmu_set_state(struct jh71xx_pmu_dev *pmd, u32 mask, bool on)
 	 *   Then write the lower bits of the command sequence, followed by the upper
 	 *   bits. The sequence differs between powering on & off a domain.
 	 */
-	writel(JH71XX_PMU_SW_ENCOURAGE_ON, pmu->base + JH71XX_PMU_SW_ENCOURAGE);
-	writel(encourage_lo, pmu->base + JH71XX_PMU_SW_ENCOURAGE);
-	writel(encourage_hi, pmu->base + JH71XX_PMU_SW_ENCOURAGE);
+	pete_writel("drivers/pmdomain/starfive/jh71xx-pmu.c:143", JH71XX_PMU_SW_ENCOURAGE_ON, pmu->base + JH71XX_PMU_SW_ENCOURAGE);
+	pete_writel("drivers/pmdomain/starfive/jh71xx-pmu.c:144", encourage_lo, pmu->base + JH71XX_PMU_SW_ENCOURAGE);
+	pete_writel("drivers/pmdomain/starfive/jh71xx-pmu.c:145", encourage_hi, pmu->base + JH71XX_PMU_SW_ENCOURAGE);
 
 	spin_unlock_irqrestore(&pmu->lock, flags);
 
@@ -190,14 +190,14 @@ static void jh71xx_pmu_int_enable(struct jh71xx_pmu *pmu, u32 mask, bool enable)
 	unsigned long flags;
 
 	spin_lock_irqsave(&pmu->lock, flags);
-	val = readl(pmu->base + JH71XX_PMU_TIMER_INT_MASK);
+	val = pete_readl("drivers/pmdomain/starfive/jh71xx-pmu.c:193", pmu->base + JH71XX_PMU_TIMER_INT_MASK);
 
 	if (enable)
 		val &= ~mask;
 	else
 		val |= mask;
 
-	writel(val, pmu->base + JH71XX_PMU_TIMER_INT_MASK);
+	pete_writel("drivers/pmdomain/starfive/jh71xx-pmu.c:200", val, pmu->base + JH71XX_PMU_TIMER_INT_MASK);
 	spin_unlock_irqrestore(&pmu->lock, flags);
 }
 
@@ -206,7 +206,7 @@ static irqreturn_t jh71xx_pmu_interrupt(int irq, void *data)
 	struct jh71xx_pmu *pmu = data;
 	u32 val;
 
-	val = readl(pmu->base + JH71XX_PMU_INT_STATUS);
+	val = pete_readl("drivers/pmdomain/starfive/jh71xx-pmu.c:209", pmu->base + JH71XX_PMU_INT_STATUS);
 
 	if (val & JH71XX_PMU_INT_SEQ_DONE)
 		dev_dbg(pmu->dev, "sequence done.\n");
@@ -220,8 +220,8 @@ static irqreturn_t jh71xx_pmu_interrupt(int irq, void *data)
 		dev_err(pmu->dev, "p-channel fail event.\n");
 
 	/* clear interrupts */
-	writel(val, pmu->base + JH71XX_PMU_INT_STATUS);
-	writel(val, pmu->base + JH71XX_PMU_EVENT_STATUS);
+	pete_writel("drivers/pmdomain/starfive/jh71xx-pmu.c:223", val, pmu->base + JH71XX_PMU_INT_STATUS);
+	pete_writel("drivers/pmdomain/starfive/jh71xx-pmu.c:224", val, pmu->base + JH71XX_PMU_EVENT_STATUS);
 
 	return IRQ_HANDLED;
 }

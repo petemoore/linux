@@ -73,7 +73,7 @@ static unsigned int intr_reg(unsigned int line)
 static bool thunderx_gpio_is_gpio_nowarn(struct thunderx_gpio *txgpio,
 					 unsigned int line)
 {
-	u64 bit_cfg = readq(txgpio->register_base + bit_cfg_reg(line));
+	u64 bit_cfg = pete_readq("drivers/gpio/gpio-thunderx.c:76", txgpio->register_base + bit_cfg_reg(line));
 
 	return (bit_cfg & GPIO_BIT_CFG_PIN_SEL_MASK) == 0;
 }
@@ -109,7 +109,7 @@ static int thunderx_gpio_dir_in(struct gpio_chip *chip, unsigned int line)
 	raw_spin_lock(&txgpio->lock);
 	clear_bit(line, txgpio->invert_mask);
 	clear_bit(line, txgpio->od_mask);
-	writeq(txgpio->line_entries[line].fil_bits,
+	pete_writeq("drivers/gpio/gpio-thunderx.c:112", txgpio->line_entries[line].fil_bits,
 	       txgpio->register_base + bit_cfg_reg(line));
 	raw_spin_unlock(&txgpio->lock);
 	return 0;
@@ -125,7 +125,7 @@ static void thunderx_gpio_set(struct gpio_chip *chip, unsigned int line,
 	void __iomem *reg = txgpio->register_base +
 		(bank * GPIO_2ND_BANK) + (value ? GPIO_TX_SET : GPIO_TX_CLR);
 
-	writeq(BIT_ULL(bank_bit), reg);
+	pete_writeq("drivers/gpio/gpio-thunderx.c:128", BIT_ULL(bank_bit), reg);
 }
 
 static int thunderx_gpio_dir_out(struct gpio_chip *chip, unsigned int line,
@@ -147,7 +147,7 @@ static int thunderx_gpio_dir_out(struct gpio_chip *chip, unsigned int line,
 	if (test_bit(line, txgpio->od_mask))
 		bit_cfg |= GPIO_BIT_CFG_TX_OD;
 
-	writeq(bit_cfg, txgpio->register_base + bit_cfg_reg(line));
+	pete_writeq("drivers/gpio/gpio-thunderx.c:150", bit_cfg, txgpio->register_base + bit_cfg_reg(line));
 
 	raw_spin_unlock(&txgpio->lock);
 	return 0;
@@ -166,7 +166,7 @@ static int thunderx_gpio_get_direction(struct gpio_chip *chip, unsigned int line
 		 */
 		return 1;
 
-	bit_cfg = readq(txgpio->register_base + bit_cfg_reg(line));
+	bit_cfg = pete_readq("drivers/gpio/gpio-thunderx.c:169", txgpio->register_base + bit_cfg_reg(line));
 
 	if (bit_cfg & GPIO_BIT_CFG_TX_OE)
 		return GPIO_LINE_DIRECTION_OUT;
@@ -195,8 +195,8 @@ static int thunderx_gpio_set_config(struct gpio_chip *chip,
 	new_invert  = orig_invert;
 	orig_od = test_bit(line, txgpio->od_mask);
 	new_od = orig_od;
-	orig_dat = ((readq(reg) >> bank_bit) & 1) ^ orig_invert;
-	bit_cfg = readq(txgpio->register_base + bit_cfg_reg(line));
+	orig_dat = ((pete_readq("drivers/gpio/gpio-thunderx.c:198", reg) >> bank_bit) & 1) ^ orig_invert;
+	bit_cfg = pete_readq("drivers/gpio/gpio-thunderx.c:199", txgpio->register_base + bit_cfg_reg(line));
 	switch (pinconf_to_config_param(cfg)) {
 	case PIN_CONFIG_DRIVE_OPEN_DRAIN:
 		/*
@@ -235,7 +235,7 @@ static int thunderx_gpio_set_config(struct gpio_chip *chip,
 			(arg << GPIO_BIT_CFG_FIL_CNT_SHIFT);
 		bit_cfg &= ~GPIO_BIT_CFG_FIL_MASK;
 		bit_cfg |= txgpio->line_entries[line].fil_bits;
-		writeq(bit_cfg, txgpio->register_base + bit_cfg_reg(line));
+		pete_writeq("drivers/gpio/gpio-thunderx.c:238", bit_cfg, txgpio->register_base + bit_cfg_reg(line));
 		ret = 0;
 		break;
 	default:
@@ -259,7 +259,7 @@ static int thunderx_gpio_get(struct gpio_chip *chip, unsigned int line)
 	struct thunderx_gpio *txgpio = gpiochip_get_data(chip);
 	int bank = line / 64;
 	int bank_bit = line % 64;
-	u64 read_bits = readq(txgpio->register_base + (bank * GPIO_2ND_BANK) + GPIO_RX_DAT);
+	u64 read_bits = pete_readq("drivers/gpio/gpio-thunderx.c:262", txgpio->register_base + (bank * GPIO_2ND_BANK) + GPIO_RX_DAT);
 	u64 masked_bits = read_bits & BIT_ULL(bank_bit);
 
 	if (test_bit(line, txgpio->invert_mask))
@@ -279,8 +279,8 @@ static void thunderx_gpio_set_multiple(struct gpio_chip *chip,
 	for (bank = 0; bank <= chip->ngpio / 64; bank++) {
 		set_bits = bits[bank] & mask[bank];
 		clear_bits = ~bits[bank] & mask[bank];
-		writeq(set_bits, txgpio->register_base + (bank * GPIO_2ND_BANK) + GPIO_TX_SET);
-		writeq(clear_bits, txgpio->register_base + (bank * GPIO_2ND_BANK) + GPIO_TX_CLR);
+		pete_writeq("drivers/gpio/gpio-thunderx.c:282", set_bits, txgpio->register_base + (bank * GPIO_2ND_BANK) + GPIO_TX_SET);
+		pete_writeq("drivers/gpio/gpio-thunderx.c:283", clear_bits, txgpio->register_base + (bank * GPIO_2ND_BANK) + GPIO_TX_CLR);
 	}
 }
 
@@ -289,7 +289,7 @@ static void thunderx_gpio_irq_ack(struct irq_data *d)
 	struct gpio_chip *gc = irq_data_get_irq_chip_data(d);
 	struct thunderx_gpio *txgpio = gpiochip_get_data(gc);
 
-	writeq(GPIO_INTR_INTR,
+	pete_writeq("drivers/gpio/gpio-thunderx.c:292", GPIO_INTR_INTR,
 	       txgpio->register_base + intr_reg(irqd_to_hwirq(d)));
 }
 
@@ -298,7 +298,7 @@ static void thunderx_gpio_irq_mask(struct irq_data *d)
 	struct gpio_chip *gc = irq_data_get_irq_chip_data(d);
 	struct thunderx_gpio *txgpio = gpiochip_get_data(gc);
 
-	writeq(GPIO_INTR_ENA_W1C,
+	pete_writeq("drivers/gpio/gpio-thunderx.c:301", GPIO_INTR_ENA_W1C,
 	       txgpio->register_base + intr_reg(irqd_to_hwirq(d)));
 }
 
@@ -307,7 +307,7 @@ static void thunderx_gpio_irq_mask_ack(struct irq_data *d)
 	struct gpio_chip *gc = irq_data_get_irq_chip_data(d);
 	struct thunderx_gpio *txgpio = gpiochip_get_data(gc);
 
-	writeq(GPIO_INTR_ENA_W1C | GPIO_INTR_INTR,
+	pete_writeq("drivers/gpio/gpio-thunderx.c:310", GPIO_INTR_ENA_W1C | GPIO_INTR_INTR,
 	       txgpio->register_base + intr_reg(irqd_to_hwirq(d)));
 }
 
@@ -316,7 +316,7 @@ static void thunderx_gpio_irq_unmask(struct irq_data *d)
 	struct gpio_chip *gc = irq_data_get_irq_chip_data(d);
 	struct thunderx_gpio *txgpio = gpiochip_get_data(gc);
 
-	writeq(GPIO_INTR_ENA_W1S,
+	pete_writeq("drivers/gpio/gpio-thunderx.c:319", GPIO_INTR_ENA_W1S,
 	       txgpio->register_base + intr_reg(irqd_to_hwirq(d)));
 }
 
@@ -348,7 +348,7 @@ static int thunderx_gpio_irq_set_type(struct irq_data *d,
 		clear_bit(txline->line, txgpio->invert_mask);
 	}
 	clear_bit(txline->line, txgpio->od_mask);
-	writeq(bit_cfg, txgpio->register_base + bit_cfg_reg(txline->line));
+	pete_writeq("drivers/gpio/gpio-thunderx.c:351", bit_cfg, txgpio->register_base + bit_cfg_reg(txline->line));
 	raw_spin_unlock(&txgpio->lock);
 
 	return IRQ_SET_MASK_OK;
@@ -468,7 +468,7 @@ static int thunderx_gpio_probe(struct pci_dev *pdev,
 		ngpio = 50;
 		txgpio->base_msi = 48;
 	} else {
-		u64 c = readq(txgpio->register_base + GPIO_CONST);
+		u64 c = pete_readq("drivers/gpio/gpio-thunderx.c:471", txgpio->register_base + GPIO_CONST);
 
 		ngpio = c & GPIO_CONST_GPIOS_MASK;
 		txgpio->base_msi = (c >> 8) & 0xff;
@@ -492,7 +492,7 @@ static int thunderx_gpio_probe(struct pci_dev *pdev,
 	}
 
 	for (i = 0; i < ngpio; i++) {
-		u64 bit_cfg = readq(txgpio->register_base + bit_cfg_reg(i));
+		u64 bit_cfg = pete_readq("drivers/gpio/gpio-thunderx.c:495", txgpio->register_base + bit_cfg_reg(i));
 
 		txgpio->msix_entries[i].entry = txgpio->base_msi + (2 * i);
 		txgpio->line_entries[i].line = i;

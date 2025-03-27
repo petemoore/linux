@@ -340,7 +340,7 @@ lpfc_sli4_wq_put(struct lpfc_queue *q, union lpfc_wqe128 *wqe)
 	} else {
 		return -EINVAL;
 	}
-	writel(doorbell.word0, q->db_regaddr);
+	pete_writel("drivers/scsi/lpfc/lpfc_sli.c:343", doorbell.word0, q->db_regaddr);
 
 	return 0;
 }
@@ -402,7 +402,7 @@ lpfc_sli4_mq_put(struct lpfc_queue *q, struct lpfc_mqe *mqe)
 	doorbell.word0 = 0;
 	bf_set(lpfc_mq_doorbell_num_posted, &doorbell, 1);
 	bf_set(lpfc_mq_doorbell_id, &doorbell, q->queue_id);
-	writel(doorbell.word0, q->phba->sli4_hba.MQDBregaddr);
+	pete_writel("drivers/scsi/lpfc/lpfc_sli.c:405", doorbell.word0, q->phba->sli4_hba.MQDBregaddr);
 	return 0;
 }
 
@@ -481,7 +481,7 @@ lpfc_sli4_eq_clr_intr(struct lpfc_queue *q)
 	bf_set(lpfc_eqcq_doorbell_eqid_hi, &doorbell,
 		(q->queue_id >> LPFC_EQID_HI_FIELD_SHIFT));
 	bf_set(lpfc_eqcq_doorbell_eqid_lo, &doorbell, q->queue_id);
-	writel(doorbell.word0, q->phba->sli4_hba.EQDBregaddr);
+	pete_writel("drivers/scsi/lpfc/lpfc_sli.c:484", doorbell.word0, q->phba->sli4_hba.EQDBregaddr);
 }
 
 /**
@@ -496,7 +496,7 @@ lpfc_sli4_if6_eq_clr_intr(struct lpfc_queue *q)
 
 	doorbell.word0 = 0;
 	bf_set(lpfc_if6_eq_doorbell_eqid, &doorbell, q->queue_id);
-	writel(doorbell.word0, q->phba->sli4_hba.EQDBregaddr);
+	pete_writel("drivers/scsi/lpfc/lpfc_sli.c:499", doorbell.word0, q->phba->sli4_hba.EQDBregaddr);
 }
 
 /**
@@ -531,10 +531,10 @@ lpfc_sli4_write_eq_db(struct lpfc_hba *phba, struct lpfc_queue *q,
 	bf_set(lpfc_eqcq_doorbell_eqid_hi, &doorbell,
 			(q->queue_id >> LPFC_EQID_HI_FIELD_SHIFT));
 	bf_set(lpfc_eqcq_doorbell_eqid_lo, &doorbell, q->queue_id);
-	writel(doorbell.word0, q->phba->sli4_hba.EQDBregaddr);
+	pete_writel("drivers/scsi/lpfc/lpfc_sli.c:534", doorbell.word0, q->phba->sli4_hba.EQDBregaddr);
 	/* PCI read to flush PCI pipeline on re-arming for INTx mode */
 	if ((q->phba->intr_type == INTx) && (arm == LPFC_QUEUE_REARM))
-		readl(q->phba->sli4_hba.EQDBregaddr);
+		pete_readl("drivers/scsi/lpfc/lpfc_sli.c:537", q->phba->sli4_hba.EQDBregaddr);
 }
 
 /**
@@ -564,10 +564,10 @@ lpfc_sli4_if6_write_eq_db(struct lpfc_hba *phba, struct lpfc_queue *q,
 		bf_set(lpfc_if6_eq_doorbell_arm, &doorbell, 1);
 	bf_set(lpfc_if6_eq_doorbell_num_released, &doorbell, count);
 	bf_set(lpfc_if6_eq_doorbell_eqid, &doorbell, q->queue_id);
-	writel(doorbell.word0, q->phba->sli4_hba.EQDBregaddr);
+	pete_writel("drivers/scsi/lpfc/lpfc_sli.c:567", doorbell.word0, q->phba->sli4_hba.EQDBregaddr);
 	/* PCI read to flush PCI pipeline on re-arming for INTx mode */
 	if ((q->phba->intr_type == INTx) && (arm == LPFC_QUEUE_REARM))
-		readl(q->phba->sli4_hba.EQDBregaddr);
+		pete_readl("drivers/scsi/lpfc/lpfc_sli.c:570", q->phba->sli4_hba.EQDBregaddr);
 }
 
 static void
@@ -749,7 +749,7 @@ lpfc_sli4_write_cq_db(struct lpfc_hba *phba, struct lpfc_queue *q,
 	bf_set(lpfc_eqcq_doorbell_cqid_hi, &doorbell,
 			(q->queue_id >> LPFC_CQID_HI_FIELD_SHIFT));
 	bf_set(lpfc_eqcq_doorbell_cqid_lo, &doorbell, q->queue_id);
-	writel(doorbell.word0, q->phba->sli4_hba.CQDBregaddr);
+	pete_writel("drivers/scsi/lpfc/lpfc_sli.c:752", doorbell.word0, q->phba->sli4_hba.CQDBregaddr);
 }
 
 /**
@@ -779,7 +779,7 @@ lpfc_sli4_if6_write_cq_db(struct lpfc_hba *phba, struct lpfc_queue *q,
 		bf_set(lpfc_if6_cq_doorbell_arm, &doorbell, 1);
 	bf_set(lpfc_if6_cq_doorbell_num_released, &doorbell, count);
 	bf_set(lpfc_if6_cq_doorbell_cqid, &doorbell, q->queue_id);
-	writel(doorbell.word0, q->phba->sli4_hba.CQDBregaddr);
+	pete_writel("drivers/scsi/lpfc/lpfc_sli.c:782", doorbell.word0, q->phba->sli4_hba.CQDBregaddr);
 }
 
 /*
@@ -841,7 +841,7 @@ lpfc_sli4_rq_put(struct lpfc_queue *hq, struct lpfc_queue *dq,
 		} else {
 			return -EINVAL;
 		}
-		writel(doorbell.word0, hq->db_regaddr);
+		pete_writel("drivers/scsi/lpfc/lpfc_sli.c:844", doorbell.word0, hq->db_regaddr);
 	}
 	return hq_put_index;
 }
@@ -2225,7 +2225,7 @@ lpfc_sli_submit_iocb(struct lpfc_hba *phba, struct lpfc_sli_ring *pring,
 	 * driver will put a command into.
 	 */
 	pring->sli.sli3.cmdidx = pring->sli.sli3.next_cmdidx;
-	writel(pring->sli.sli3.cmdidx, &phba->host_gp[pring->ringno].cmdPutInx);
+	pete_writel("drivers/scsi/lpfc/lpfc_sli.c:2228", pring->sli.sli3.cmdidx, &phba->host_gp[pring->ringno].cmdPutInx);
 }
 
 /**
@@ -2253,8 +2253,8 @@ lpfc_sli_update_full_ring(struct lpfc_hba *phba, struct lpfc_sli_ring *pring)
 	 * Set ring 'ringno' to SET R0CE_REQ in Chip Att register.
 	 * The HBA will tell us when an IOCB entry is available.
 	 */
-	writel((CA_R0ATT|CA_R0CE_REQ) << (ringno*4), phba->CAregaddr);
-	readl(phba->CAregaddr); /* flush */
+	pete_writel("drivers/scsi/lpfc/lpfc_sli.c:2256", (CA_R0ATT|CA_R0CE_REQ) << (ringno*4), phba->CAregaddr);
+	pete_readl("drivers/scsi/lpfc/lpfc_sli.c:2257", phba->CAregaddr); /* flush */
 
 	pring->stats.iocb_cmd_full++;
 }
@@ -2278,8 +2278,8 @@ lpfc_sli_update_ring(struct lpfc_hba *phba, struct lpfc_sli_ring *pring)
 	 */
 	if (!(phba->sli3_options & LPFC_SLI3_CRP_ENABLED)) {
 		wmb();
-		writel(CA_R0ATT << (ringno * 4), phba->CAregaddr);
-		readl(phba->CAregaddr); /* flush */
+		pete_writel("drivers/scsi/lpfc/lpfc_sli.c:2281", CA_R0ATT << (ringno * 4), phba->CAregaddr);
+		pete_readl("drivers/scsi/lpfc/lpfc_sli.c:2282", phba->CAregaddr); /* flush */
 	}
 }
 
@@ -2459,9 +2459,9 @@ lpfc_sli_hbq_to_firmware_s3(struct lpfc_hba *phba, uint32_t hbqno,
 		hbqe->buffer_tag = le32_to_cpu(hbq_buf->tag);
 				/* Sync SLIM */
 		hbqp->hbqPutIdx = hbqp->next_hbqPutIdx;
-		writel(hbqp->hbqPutIdx, phba->hbq_put + hbqno);
+		pete_writel("drivers/scsi/lpfc/lpfc_sli.c:2462", hbqp->hbqPutIdx, phba->hbq_put + hbqno);
 				/* flush */
-		readl(phba->hbq_put + hbqno);
+		pete_readl("drivers/scsi/lpfc/lpfc_sli.c:2464", phba->hbq_put + hbqno);
 		list_add_tail(&hbq_buf->dbuf.list, &hbqp->hbq_buffer_list);
 		return 0;
 	} else
@@ -4133,7 +4133,7 @@ lpfc_sli_handle_fast_ring_event(struct lpfc_hba *phba,
 		 * been updated, sync the pgp->rspPutInx and fetch the new port
 		 * response put pointer.
 		 */
-		writel(pring->sli.sli3.rspidx,
+		pete_writel("drivers/scsi/lpfc/lpfc_sli.c:4136", pring->sli.sli3.rspidx,
 			&phba->host_gp[pring->ringno].rspGetInx);
 
 		if (pring->sli.sli3.rspidx == portRspPut)
@@ -4143,8 +4143,8 @@ lpfc_sli_handle_fast_ring_event(struct lpfc_hba *phba,
 	if ((rsp_cmpl > 0) && (mask & HA_R0RE_REQ)) {
 		pring->stats.iocb_rsp_full++;
 		status = ((CA_R0ATT | CA_R0RE_RSP) << (pring->ringno * 4));
-		writel(status, phba->CAregaddr);
-		readl(phba->CAregaddr);
+		pete_writel("drivers/scsi/lpfc/lpfc_sli.c:4146", status, phba->CAregaddr);
+		pete_readl("drivers/scsi/lpfc/lpfc_sli.c:4147", phba->CAregaddr);
 	}
 	if ((mask & HA_R0CE_RSP) && (pring->flag & LPFC_CALL_RING_AVAILABLE)) {
 		pring->flag &= ~LPFC_CALL_RING_AVAILABLE;
@@ -4452,7 +4452,7 @@ lpfc_sli_handle_slow_ring_event_s3(struct lpfc_hba *phba,
 				*(((uint32_t *) irsp) + 7));
 		}
 
-		writel(pring->sli.sli3.rspidx,
+		pete_writel("drivers/scsi/lpfc/lpfc_sli.c:4455", pring->sli.sli3.rspidx,
 			&phba->host_gp[pring->ringno].rspGetInx);
 
 		spin_unlock_irqrestore(&phba->hbalock, iflag);
@@ -4475,8 +4475,8 @@ lpfc_sli_handle_slow_ring_event_s3(struct lpfc_hba *phba,
 		pring->stats.iocb_rsp_full++;
 		/* SET RxRE_RSP in Chip Att register */
 		status = ((CA_R0ATT | CA_R0RE_RSP) << (pring->ringno * 4));
-		writel(status, phba->CAregaddr);
-		readl(phba->CAregaddr); /* flush */
+		pete_writel("drivers/scsi/lpfc/lpfc_sli.c:4478", status, phba->CAregaddr);
+		pete_readl("drivers/scsi/lpfc/lpfc_sli.c:4479", phba->CAregaddr); /* flush */
 	}
 	if ((mask & HA_R0CE_RSP) && (pring->flag & LPFC_CALL_RING_AVAILABLE)) {
 		pring->flag &= ~LPFC_CALL_RING_AVAILABLE;
@@ -4805,8 +4805,8 @@ lpfc_sli_brdready_s3(struct lpfc_hba *phba, uint32_t mask)
 				"2751 Adapter failed to restart, "
 				"status reg x%x, FW Data: A8 x%x AC x%x\n",
 				status,
-				readl(phba->MBslimaddr + 0xa8),
-				readl(phba->MBslimaddr + 0xac));
+				pete_readl("drivers/scsi/lpfc/lpfc_sli.c:4808", phba->MBslimaddr + 0xa8),
+				pete_readl("drivers/scsi/lpfc/lpfc_sli.c:4809", phba->MBslimaddr + 0xac));
 		phba->link_state = LPFC_HBA_ERROR;
 		retval = 1;
 	}
@@ -4900,15 +4900,15 @@ void lpfc_reset_barrier(struct lpfc_hba *phba)
 	/* Disable the error attention */
 	if (lpfc_readl(phba->HCregaddr, &hc_copy))
 		return;
-	writel((hc_copy & ~HC_ERINT_ENA), phba->HCregaddr);
-	readl(phba->HCregaddr); /* flush */
+	pete_writel("drivers/scsi/lpfc/lpfc_sli.c:4903", (hc_copy & ~HC_ERINT_ENA), phba->HCregaddr);
+	pete_readl("drivers/scsi/lpfc/lpfc_sli.c:4904", phba->HCregaddr); /* flush */
 	phba->link_flag |= LS_IGNORE_ERATT;
 
 	if (lpfc_readl(phba->HAregaddr, &ha_copy))
 		return;
 	if (ha_copy & HA_ERATT) {
 		/* Clear Chip error bit */
-		writel(HA_ERATT, phba->HAregaddr);
+		pete_writel("drivers/scsi/lpfc/lpfc_sli.c:4911", HA_ERATT, phba->HAregaddr);
 		phba->pport->stopped = 1;
 	}
 
@@ -4916,9 +4916,9 @@ void lpfc_reset_barrier(struct lpfc_hba *phba)
 	mbox.mbxCommand = MBX_KILL_BOARD;
 	mbox.mbxOwner = OWN_CHIP;
 
-	writel(BARRIER_TEST_PATTERN, (resp_buf + 1));
+	pete_writel("drivers/scsi/lpfc/lpfc_sli.c:4919", BARRIER_TEST_PATTERN, (resp_buf + 1));
 	mbox_buf = phba->MBslimaddr;
-	writel(mbox.word0, mbox_buf);
+	pete_writel("drivers/scsi/lpfc/lpfc_sli.c:4921", mbox.word0, mbox_buf);
 
 	for (i = 0; i < 50; i++) {
 		if (lpfc_readl((resp_buf + 1), &resp_data))
@@ -4961,15 +4961,15 @@ clear_errat:
 			break;
 	}
 
-	if (readl(phba->HAregaddr) & HA_ERATT) {
-		writel(HA_ERATT, phba->HAregaddr);
+	if (pete_readl("drivers/scsi/lpfc/lpfc_sli.c:4964", phba->HAregaddr) & HA_ERATT) {
+		pete_writel("drivers/scsi/lpfc/lpfc_sli.c:4965", HA_ERATT, phba->HAregaddr);
 		phba->pport->stopped = 1;
 	}
 
 restore_hc:
 	phba->link_flag &= ~LS_IGNORE_ERATT;
-	writel(hc_copy, phba->HCregaddr);
-	readl(phba->HCregaddr); /* flush */
+	pete_writel("drivers/scsi/lpfc/lpfc_sli.c:4971", hc_copy, phba->HCregaddr);
+	pete_readl("drivers/scsi/lpfc/lpfc_sli.c:4972", phba->HCregaddr); /* flush */
 }
 
 /**
@@ -5012,8 +5012,8 @@ lpfc_sli_brdkill(struct lpfc_hba *phba)
 		return 1;
 	}
 	status &= ~HC_ERINT_ENA;
-	writel(status, phba->HCregaddr);
-	readl(phba->HCregaddr); /* flush */
+	pete_writel("drivers/scsi/lpfc/lpfc_sli.c:5015", status, phba->HCregaddr);
+	pete_readl("drivers/scsi/lpfc/lpfc_sli.c:5016", phba->HCregaddr); /* flush */
 	phba->link_flag |= LS_IGNORE_ERATT;
 	spin_unlock_irq(&phba->hbalock);
 
@@ -5054,7 +5054,7 @@ lpfc_sli_brdkill(struct lpfc_hba *phba)
 
 	del_timer_sync(&psli->mbox_tmo);
 	if (ha_copy & HA_ERATT) {
-		writel(HA_ERATT, phba->HAregaddr);
+		pete_writel("drivers/scsi/lpfc/lpfc_sli.c:5057", HA_ERATT, phba->HAregaddr);
 		phba->pport->stopped = 1;
 	}
 	spin_lock_irq(&phba->hbalock);
@@ -5116,11 +5116,11 @@ lpfc_sli_brdreset(struct lpfc_hba *phba)
 	psli->sli_flag &= ~(LPFC_SLI_ACTIVE | LPFC_PROCESS_LA);
 
 	/* Now toggle INITFF bit in the Host Control Register */
-	writel(HC_INITFF, phba->HCregaddr);
+	pete_writel("drivers/scsi/lpfc/lpfc_sli.c:5119", HC_INITFF, phba->HCregaddr);
 	mdelay(1);
-	readl(phba->HCregaddr); /* flush */
-	writel(0, phba->HCregaddr);
-	readl(phba->HCregaddr); /* flush */
+	pete_readl("drivers/scsi/lpfc/lpfc_sli.c:5121", phba->HCregaddr); /* flush */
+	pete_writel("drivers/scsi/lpfc/lpfc_sli.c:5122", 0, phba->HCregaddr);
+	pete_readl("drivers/scsi/lpfc/lpfc_sli.c:5123", phba->HCregaddr); /* flush */
 
 	/* Restore PCI cmd register */
 	pci_write_config_word(phba->pcidev, PCI_COMMAND, cfg_value);
@@ -5235,8 +5235,8 @@ lpfc_sli_brdrestart_s3(struct lpfc_hba *phba)
 	lpfc_reset_barrier(phba);
 
 	to_slim = phba->MBslimaddr;
-	writel(mb.word0, to_slim);
-	readl(to_slim); /* flush */
+	pete_writel("drivers/scsi/lpfc/lpfc_sli.c:5238", mb.word0, to_slim);
+	pete_readl("drivers/scsi/lpfc/lpfc_sli.c:5239", to_slim); /* flush */
 
 	/* Only skip post after fc_ffinit is completed */
 	if (phba->pport && phba->pport->port_state)
@@ -5244,8 +5244,8 @@ lpfc_sli_brdrestart_s3(struct lpfc_hba *phba)
 	else
 		mb.word0 = 0;	/* This is really setting up word1 */
 	to_slim = phba->MBslimaddr + sizeof (uint32_t);
-	writel(mb.word0, to_slim);
-	readl(to_slim); /* flush */
+	pete_writel("drivers/scsi/lpfc/lpfc_sli.c:5247", mb.word0, to_slim);
+	pete_readl("drivers/scsi/lpfc/lpfc_sli.c:5248", to_slim); /* flush */
 
 	lpfc_sli_brdreset(phba);
 	if (phba->pport)
@@ -5362,8 +5362,8 @@ lpfc_sli_chipset_init(struct lpfc_hba *phba)
 					"0436 Adapter failed to init, "
 					"timeout, status reg x%x, "
 					"FW Data: A8 x%x AC x%x\n", status,
-					readl(phba->MBslimaddr + 0xa8),
-					readl(phba->MBslimaddr + 0xac));
+					pete_readl("drivers/scsi/lpfc/lpfc_sli.c:5365", phba->MBslimaddr + 0xa8),
+					pete_readl("drivers/scsi/lpfc/lpfc_sli.c:5366", phba->MBslimaddr + 0xac));
 			phba->link_state = LPFC_HBA_ERROR;
 			return -ETIMEDOUT;
 		}
@@ -5377,8 +5377,8 @@ lpfc_sli_chipset_init(struct lpfc_hba *phba)
 					"0437 Adapter failed to init, "
 					"chipset, status reg x%x, "
 					"FW Data: A8 x%x AC x%x\n", status,
-					readl(phba->MBslimaddr + 0xa8),
-					readl(phba->MBslimaddr + 0xac));
+					pete_readl("drivers/scsi/lpfc/lpfc_sli.c:5380", phba->MBslimaddr + 0xa8),
+					pete_readl("drivers/scsi/lpfc/lpfc_sli.c:5381", phba->MBslimaddr + 0xac));
 			phba->link_state = LPFC_HBA_ERROR;
 			return -EIO;
 		}
@@ -5408,8 +5408,8 @@ lpfc_sli_chipset_init(struct lpfc_hba *phba)
 				"0438 Adapter failed to init, chipset, "
 				"status reg x%x, "
 				"FW Data: A8 x%x AC x%x\n", status,
-				readl(phba->MBslimaddr + 0xa8),
-				readl(phba->MBslimaddr + 0xac));
+				pete_readl("drivers/scsi/lpfc/lpfc_sli.c:5411", phba->MBslimaddr + 0xa8),
+				pete_readl("drivers/scsi/lpfc/lpfc_sli.c:5412", phba->MBslimaddr + 0xac));
 		phba->link_state = LPFC_HBA_ERROR;
 		return -EIO;
 	}
@@ -5417,12 +5417,12 @@ lpfc_sli_chipset_init(struct lpfc_hba *phba)
 	phba->hba_flag |= HBA_NEEDS_CFG_PORT;
 
 	/* Clear all interrupt enable conditions */
-	writel(0, phba->HCregaddr);
-	readl(phba->HCregaddr); /* flush */
+	pete_writel("drivers/scsi/lpfc/lpfc_sli.c:5420", 0, phba->HCregaddr);
+	pete_readl("drivers/scsi/lpfc/lpfc_sli.c:5421", phba->HCregaddr); /* flush */
 
 	/* setup host attn register */
-	writel(0xffffffff, phba->HAregaddr);
-	readl(phba->HAregaddr); /* flush */
+	pete_writel("drivers/scsi/lpfc/lpfc_sli.c:5424", 0xffffffff, phba->HAregaddr);
+	pete_readl("drivers/scsi/lpfc/lpfc_sli.c:5425", phba->HAregaddr); /* flush */
 	return 0;
 }
 
@@ -6862,7 +6862,7 @@ lpfc_ras_stop_fwlog(struct lpfc_hba *phba)
 	spin_unlock_irq(&phba->ras_fwlog_lock);
 
 	/* Disable FW logging to host memory */
-	writel(LPFC_CTL_PDEV_CTL_DDL_RAS,
+	pete_writel("drivers/scsi/lpfc/lpfc_sli.c:6865", LPFC_CTL_PDEV_CTL_DDL_RAS,
 	       phba->sli4_hba.conf_regs_memmap_p + LPFC_CTL_PDEV_CTL_OFFSET);
 
 	/* Wait 10ms for firmware to stop using DMA buffer */
@@ -9591,8 +9591,8 @@ lpfc_sli_issue_mbox_s3(struct lpfc_hba *phba, LPFC_MBOXQ_t *pmbox,
 		/* Next copy over first word, with mbxOwner set */
 		ldata = *((uint32_t *)mbx);
 		to_slim = phba->MBslimaddr;
-		writel(ldata, to_slim);
-		readl(to_slim); /* flush */
+		pete_writel("drivers/scsi/lpfc/lpfc_sli.c:9594", ldata, to_slim);
+		pete_readl("drivers/scsi/lpfc/lpfc_sli.c:9595", to_slim); /* flush */
 
 		if (mbx->mbxCommand == MBX_CONFIG_PORT)
 			/* switch over to host mailbox */
@@ -9606,8 +9606,8 @@ lpfc_sli_issue_mbox_s3(struct lpfc_hba *phba, LPFC_MBOXQ_t *pmbox,
 		/* Set up reference to mailbox command */
 		psli->mbox_active = pmbox;
 		/* Interrupt board to do it */
-		writel(CA_MBATT, phba->CAregaddr);
-		readl(phba->CAregaddr); /* flush */
+		pete_writel("drivers/scsi/lpfc/lpfc_sli.c:9609", CA_MBATT, phba->CAregaddr);
+		pete_readl("drivers/scsi/lpfc/lpfc_sli.c:9610", phba->CAregaddr); /* flush */
 		/* Don't wait for it to finish, just return */
 		break;
 
@@ -9615,8 +9615,8 @@ lpfc_sli_issue_mbox_s3(struct lpfc_hba *phba, LPFC_MBOXQ_t *pmbox,
 		/* Set up null reference to mailbox command */
 		psli->mbox_active = NULL;
 		/* Interrupt board to do it */
-		writel(CA_MBATT, phba->CAregaddr);
-		readl(phba->CAregaddr); /* flush */
+		pete_writel("drivers/scsi/lpfc/lpfc_sli.c:9618", CA_MBATT, phba->CAregaddr);
+		pete_readl("drivers/scsi/lpfc/lpfc_sli.c:9619", phba->CAregaddr); /* flush */
 
 		if (psli->sli_flag & LPFC_SLI_ACTIVE) {
 			/* First read mbox status word */
@@ -9672,7 +9672,7 @@ lpfc_sli_issue_mbox_s3(struct lpfc_hba *phba, LPFC_MBOXQ_t *pmbox,
 					MAILBOX_t *slimmb;
 					uint32_t slimword0;
 					/* Check real SLIM for any errors */
-					slimword0 = readl(phba->MBslimaddr);
+					slimword0 = pete_readl("drivers/scsi/lpfc/lpfc_sli.c:9675", phba->MBslimaddr);
 					slimmb = (MAILBOX_t *) & slimword0;
 					if (((slimword0 & OWN_CHIP) != OWN_CHIP)
 					    && slimmb->mbxStatus) {
@@ -9683,7 +9683,7 @@ lpfc_sli_issue_mbox_s3(struct lpfc_hba *phba, LPFC_MBOXQ_t *pmbox,
 				}
 			} else {
 				/* First copy command data */
-				word0 = readl(phba->MBslimaddr);
+				word0 = pete_readl("drivers/scsi/lpfc/lpfc_sli.c:9686", phba->MBslimaddr);
 			}
 			/* Read the HBA Host Attention Register */
 			if (lpfc_readl(phba->HAregaddr, &ha_copy)) {
@@ -9717,8 +9717,8 @@ lpfc_sli_issue_mbox_s3(struct lpfc_hba *phba, LPFC_MBOXQ_t *pmbox,
 			}
 		}
 
-		writel(HA_MBATT, phba->HAregaddr);
-		readl(phba->HAregaddr); /* flush */
+		pete_writel("drivers/scsi/lpfc/lpfc_sli.c:9720", HA_MBATT, phba->HAregaddr);
+		pete_readl("drivers/scsi/lpfc/lpfc_sli.c:9721", phba->HAregaddr); /* flush */
 
 		psli->sli_flag &= ~LPFC_SLI_MBOX_ACTIVE;
 		status = mbx->mbxStatus;
@@ -9893,7 +9893,7 @@ lpfc_sli4_wait_bmbx_ready(struct lpfc_hba *phba, LPFC_MBOXQ_t *mboxq)
 				   * 1000) + jiffies;
 
 	do {
-		bmbx_reg.word0 = readl(phba->sli4_hba.BMBXregaddr);
+		bmbx_reg.word0 = pete_readl("drivers/scsi/lpfc/lpfc_sli.c:9896", phba->sli4_hba.BMBXregaddr);
 		db_ready = bf_get(lpfc_bmbx_rdy, &bmbx_reg);
 		if (!db_ready)
 			mdelay(2);
@@ -9971,7 +9971,7 @@ lpfc_sli4_post_sync_mbox(struct lpfc_hba *phba, LPFC_MBOXQ_t *mboxq)
 
 	/* Post the high mailbox dma address to the port and wait for ready. */
 	dma_address = &phba->sli4_hba.bmbx.dma_address;
-	writel(dma_address->addr_hi, phba->sli4_hba.BMBXregaddr);
+	pete_writel("drivers/scsi/lpfc/lpfc_sli.c:9974", dma_address->addr_hi, phba->sli4_hba.BMBXregaddr);
 
 	/* wait for bootstrap mbox register for hi-address write done */
 	rc = lpfc_sli4_wait_bmbx_ready(phba, mboxq);
@@ -9979,7 +9979,7 @@ lpfc_sli4_post_sync_mbox(struct lpfc_hba *phba, LPFC_MBOXQ_t *mboxq)
 		goto exit;
 
 	/* Post the low mailbox dma address to the port. */
-	writel(dma_address->addr_lo, phba->sli4_hba.BMBXregaddr);
+	pete_writel("drivers/scsi/lpfc/lpfc_sli.c:9982", dma_address->addr_lo, phba->sli4_hba.BMBXregaddr);
 
 	/* wait for bootstrap mbox register for low address write done */
 	rc = lpfc_sli4_wait_bmbx_ready(phba, mboxq);
@@ -13154,8 +13154,8 @@ lpfc_sli_issue_iocb_wait(struct lpfc_hba *phba,
 		if (lpfc_readl(phba->HCregaddr, &creg_val))
 			return IOCB_ERROR;
 		creg_val |= (HC_R0INT_ENA << LPFC_FCP_RING);
-		writel(creg_val, phba->HCregaddr);
-		readl(phba->HCregaddr); /* flush */
+		pete_writel("drivers/scsi/lpfc/lpfc_sli.c:13157", creg_val, phba->HCregaddr);
+		pete_readl("drivers/scsi/lpfc/lpfc_sli.c:13158", phba->HCregaddr); /* flush */
 	}
 
 	retval = lpfc_sli_issue_iocb(phba, ring_number, piocb,
@@ -13221,8 +13221,8 @@ lpfc_sli_issue_iocb_wait(struct lpfc_hba *phba,
 		if (lpfc_readl(phba->HCregaddr, &creg_val))
 			return IOCB_ERROR;
 		creg_val &= ~(HC_R0INT_ENA << LPFC_FCP_RING);
-		writel(creg_val, phba->HCregaddr);
-		readl(phba->HCregaddr); /* flush */
+		pete_writel("drivers/scsi/lpfc/lpfc_sli.c:13224", creg_val, phba->HCregaddr);
+		pete_readl("drivers/scsi/lpfc/lpfc_sli.c:13225", phba->HCregaddr); /* flush */
 	}
 
 	if (prspiocbq)
@@ -13396,8 +13396,8 @@ lpfc_sli_eratt_read(struct lpfc_hba *phba)
 		      HS_FFER6 | HS_FFER7 | HS_FFER8) & phba->work_hs)) {
 			phba->hba_flag |= DEFER_ERATT;
 			/* Clear all interrupt enable conditions */
-			writel(0, phba->HCregaddr);
-			readl(phba->HCregaddr);
+			pete_writel("drivers/scsi/lpfc/lpfc_sli.c:13399", 0, phba->HCregaddr);
+			pete_readl("drivers/scsi/lpfc/lpfc_sli.c:13400", phba->HCregaddr);
 		}
 
 		/* Set the driver HA work bitmap */
@@ -13483,9 +13483,9 @@ lpfc_sli4_eratt_read(struct lpfc_hba *phba)
 		}
 		if (bf_get(lpfc_sliport_status_err, &portstat_reg)) {
 			phba->work_status[0] =
-				readl(phba->sli4_hba.u.if_type2.ERR1regaddr);
+				pete_readl("drivers/scsi/lpfc/lpfc_sli.c:13486", phba->sli4_hba.u.if_type2.ERR1regaddr);
 			phba->work_status[1] =
-				readl(phba->sli4_hba.u.if_type2.ERR2regaddr);
+				pete_readl("drivers/scsi/lpfc/lpfc_sli.c:13488", phba->sli4_hba.u.if_type2.ERR2regaddr);
 			logmask = LOG_TRACE_EVENT;
 			if (phba->work_status[0] ==
 				SLIPORT_ERR1_REG_ERR_CODE_2 &&
@@ -13696,13 +13696,13 @@ lpfc_sli_sp_intr_handler(int irq, void *dev_id)
 		if (lpfc_readl(phba->HCregaddr, &hc_copy))
 			goto unplug_error;
 
-		writel(hc_copy & ~(HC_MBINT_ENA | HC_R2INT_ENA |
+		pete_writel("drivers/scsi/lpfc/lpfc_sli.c:13699", hc_copy & ~(HC_MBINT_ENA | HC_R2INT_ENA |
 			HC_LAINT_ENA | HC_ERINT_ENA),
 			phba->HCregaddr);
-		writel((ha_copy & (HA_MBATT | HA_R2_CLR_MSK)),
+		pete_writel("drivers/scsi/lpfc/lpfc_sli.c:13702", (ha_copy & (HA_MBATT | HA_R2_CLR_MSK)),
 			phba->HAregaddr);
-		writel(hc_copy, phba->HCregaddr);
-		readl(phba->HAregaddr); /* flush */
+		pete_writel("drivers/scsi/lpfc/lpfc_sli.c:13704", hc_copy, phba->HCregaddr);
+		pete_readl("drivers/scsi/lpfc/lpfc_sli.c:13705", phba->HAregaddr); /* flush */
 		spin_unlock_irqrestore(&phba->hbalock, iflag);
 	} else
 		ha_copy = phba->ha_copy;
@@ -13721,8 +13721,8 @@ lpfc_sli_sp_intr_handler(int irq, void *dev_id)
 				if (lpfc_readl(phba->HCregaddr, &control))
 					goto unplug_error;
 				control &= ~HC_LAINT_ENA;
-				writel(control, phba->HCregaddr);
-				readl(phba->HCregaddr); /* flush */
+				pete_writel("drivers/scsi/lpfc/lpfc_sli.c:13724", control, phba->HCregaddr);
+				pete_readl("drivers/scsi/lpfc/lpfc_sli.c:13725", phba->HCregaddr); /* flush */
 				spin_unlock_irqrestore(&phba->hbalock, iflag);
 			}
 			else
@@ -13757,8 +13757,8 @@ lpfc_sli_sp_intr_handler(int irq, void *dev_id)
 
 					control &=
 					    ~(HC_R0INT_ENA << LPFC_ELS_RING);
-					writel(control, phba->HCregaddr);
-					readl(phba->HCregaddr); /* flush */
+					pete_writel("drivers/scsi/lpfc/lpfc_sli.c:13760", control, phba->HCregaddr);
+					pete_readl("drivers/scsi/lpfc/lpfc_sli.c:13761", phba->HCregaddr); /* flush */
 				}
 				else {
 					lpfc_debugfs_slow_ring_trc(phba,
@@ -13785,8 +13785,8 @@ lpfc_sli_sp_intr_handler(int irq, void *dev_id)
 				  phba->work_hs)) {
 				phba->hba_flag |= DEFER_ERATT;
 				/* Clear all interrupt enable conditions */
-				writel(0, phba->HCregaddr);
-				readl(phba->HCregaddr);
+				pete_writel("drivers/scsi/lpfc/lpfc_sli.c:13788", 0, phba->HCregaddr);
+				pete_readl("drivers/scsi/lpfc/lpfc_sli.c:13789", phba->HCregaddr);
 			}
 		}
 
@@ -13982,9 +13982,9 @@ lpfc_sli_fp_intr_handler(int irq, void *dev_id)
 			spin_unlock_irqrestore(&phba->hbalock, iflag);
 			return IRQ_NONE;
 		}
-		writel((ha_copy & (HA_R0_CLR_MSK | HA_R1_CLR_MSK)),
+		pete_writel("drivers/scsi/lpfc/lpfc_sli.c:13985", (ha_copy & (HA_R0_CLR_MSK | HA_R1_CLR_MSK)),
 			phba->HAregaddr);
-		readl(phba->HAregaddr); /* flush */
+		pete_readl("drivers/scsi/lpfc/lpfc_sli.c:13987", phba->HAregaddr); /* flush */
 		spin_unlock_irqrestore(&phba->hbalock, iflag);
 	} else
 		ha_copy = phba->ha_copy;
@@ -14085,12 +14085,12 @@ lpfc_sli_intr_handler(int irq, void *dev_id)
 		spin_unlock(&phba->hbalock);
 		return IRQ_HANDLED;
 	}
-	writel(hc_copy & ~(HC_MBINT_ENA | HC_R0INT_ENA | HC_R1INT_ENA
+	pete_writel("drivers/scsi/lpfc/lpfc_sli.c:14088", hc_copy & ~(HC_MBINT_ENA | HC_R0INT_ENA | HC_R1INT_ENA
 		| HC_R2INT_ENA | HC_LAINT_ENA | HC_ERINT_ENA),
 		phba->HCregaddr);
-	writel((phba->ha_copy & ~(HA_LATT | HA_ERATT)), phba->HAregaddr);
-	writel(hc_copy, phba->HCregaddr);
-	readl(phba->HAregaddr); /* flush */
+	pete_writel("drivers/scsi/lpfc/lpfc_sli.c:14091", (phba->ha_copy & ~(HA_LATT | HA_ERATT)), phba->HAregaddr);
+	pete_writel("drivers/scsi/lpfc/lpfc_sli.c:14092", hc_copy, phba->HCregaddr);
+	pete_readl("drivers/scsi/lpfc/lpfc_sli.c:14093", phba->HAregaddr); /* flush */
 	spin_unlock(&phba->hbalock);
 
 	/*

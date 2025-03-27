@@ -115,14 +115,14 @@ static inline int pxamci_set_power(struct pxamci_host *host,
 
 static void pxamci_stop_clock(struct pxamci_host *host)
 {
-	if (readl(host->base + MMC_STAT) & STAT_CLK_EN) {
+	if (pete_readl("drivers/mmc/host/pxamci.c:118", host->base + MMC_STAT) & STAT_CLK_EN) {
 		unsigned long timeout = 10000;
 		unsigned int v;
 
-		writel(STOP_CLOCK, host->base + MMC_STRPCL);
+		pete_writel("drivers/mmc/host/pxamci.c:122", STOP_CLOCK, host->base + MMC_STRPCL);
 
 		do {
-			v = readl(host->base + MMC_STAT);
+			v = pete_readl("drivers/mmc/host/pxamci.c:125", host->base + MMC_STAT);
 			if (!(v & STAT_CLK_EN))
 				break;
 			udelay(1);
@@ -139,7 +139,7 @@ static void pxamci_enable_irq(struct pxamci_host *host, unsigned int mask)
 
 	spin_lock_irqsave(&host->lock, flags);
 	host->imask &= ~mask;
-	writel(host->imask, host->base + MMC_I_MASK);
+	pete_writel("drivers/mmc/host/pxamci.c:142", host->imask, host->base + MMC_I_MASK);
 	spin_unlock_irqrestore(&host->lock, flags);
 }
 
@@ -149,7 +149,7 @@ static void pxamci_disable_irq(struct pxamci_host *host, unsigned int mask)
 
 	spin_lock_irqsave(&host->lock, flags);
 	host->imask |= mask;
-	writel(host->imask, host->base + MMC_I_MASK);
+	pete_writel("drivers/mmc/host/pxamci.c:152", host->imask, host->base + MMC_I_MASK);
 	spin_unlock_irqrestore(&host->lock, flags);
 }
 
@@ -168,13 +168,13 @@ static void pxamci_setup_data(struct pxamci_host *host, struct mmc_data *data)
 
 	host->data = data;
 
-	writel(nob, host->base + MMC_NOB);
-	writel(data->blksz, host->base + MMC_BLKLEN);
+	pete_writel("drivers/mmc/host/pxamci.c:171", nob, host->base + MMC_NOB);
+	pete_writel("drivers/mmc/host/pxamci.c:172", data->blksz, host->base + MMC_BLKLEN);
 
 	clks = (unsigned long long)data->timeout_ns * host->clkrate;
 	do_div(clks, 1000000000UL);
 	timeout = (unsigned int)clks + (data->timeout_clks << host->clkrt);
-	writel((timeout + 255) / 256, host->base + MMC_RDTO);
+	pete_writel("drivers/mmc/host/pxamci.c:177", (timeout + 255) / 256, host->base + MMC_RDTO);
 
 	memset(&config, 0, sizeof(config));
 	config.src_addr_width = DMA_SLAVE_BUSWIDTH_1_BYTE;
@@ -252,13 +252,13 @@ static void pxamci_start_cmd(struct pxamci_host *host, struct mmc_command *cmd, 
 		break;
 	}
 
-	writel(cmd->opcode, host->base + MMC_CMD);
-	writel(cmd->arg >> 16, host->base + MMC_ARGH);
-	writel(cmd->arg & 0xffff, host->base + MMC_ARGL);
-	writel(cmdat, host->base + MMC_CMDAT);
-	writel(host->clkrt, host->base + MMC_CLKRT);
+	pete_writel("drivers/mmc/host/pxamci.c:255", cmd->opcode, host->base + MMC_CMD);
+	pete_writel("drivers/mmc/host/pxamci.c:256", cmd->arg >> 16, host->base + MMC_ARGH);
+	pete_writel("drivers/mmc/host/pxamci.c:257", cmd->arg & 0xffff, host->base + MMC_ARGL);
+	pete_writel("drivers/mmc/host/pxamci.c:258", cmdat, host->base + MMC_CMDAT);
+	pete_writel("drivers/mmc/host/pxamci.c:259", host->clkrt, host->base + MMC_CLKRT);
 
-	writel(START_CLOCK, host->base + MMC_STRPCL);
+	pete_writel("drivers/mmc/host/pxamci.c:261", START_CLOCK, host->base + MMC_STRPCL);
 
 	pxamci_enable_irq(host, END_CMD_RES);
 }
@@ -286,10 +286,10 @@ static int pxamci_cmd_done(struct pxamci_host *host, unsigned int stat)
 	 * Did I mention this is Sick.  We always need to
 	 * discard the upper 8 bits of the first 16-bit word.
 	 */
-	v = readl(host->base + MMC_RES) & 0xffff;
+	v = pete_readl("drivers/mmc/host/pxamci.c:289", host->base + MMC_RES) & 0xffff;
 	for (i = 0; i < 4; i++) {
-		u32 w1 = readl(host->base + MMC_RES) & 0xffff;
-		u32 w2 = readl(host->base + MMC_RES) & 0xffff;
+		u32 w1 = pete_readl("drivers/mmc/host/pxamci.c:291", host->base + MMC_RES) & 0xffff;
+		u32 w2 = pete_readl("drivers/mmc/host/pxamci.c:292", host->base + MMC_RES) & 0xffff;
 		cmd->resp[i] = v << 24 | w1 << 8 | w2 >> 8;
 		v = w2;
 	}
@@ -376,10 +376,10 @@ static irqreturn_t pxamci_irq(int irq, void *devid)
 	unsigned int ireg;
 	int handled = 0;
 
-	ireg = readl(host->base + MMC_I_REG) & ~readl(host->base + MMC_I_MASK);
+	ireg = pete_readl("drivers/mmc/host/pxamci.c:379", host->base + MMC_I_REG) & ~pete_readl("drivers/mmc/host/pxamci.c:379", host->base + MMC_I_MASK);
 
 	if (ireg) {
-		unsigned stat = readl(host->base + MMC_STAT);
+		unsigned stat = pete_readl("drivers/mmc/host/pxamci.c:382", host->base + MMC_STAT);
 
 		pr_debug("PXAMCI: irq %08x stat %08x\n", ireg, stat);
 
@@ -546,7 +546,7 @@ static void pxamci_dma_irq(void *param)
 	status = dmaengine_tx_status(chan, host->dma_cookie, &state);
 
 	if (likely(status == DMA_COMPLETE)) {
-		writel(BUF_PART_FULL, host->base + MMC_PRTBUF);
+		pete_writel("drivers/mmc/host/pxamci.c:549", BUF_PART_FULL, host->base + MMC_PRTBUF);
 	} else {
 		pr_err("%s: DMA error on %s channel\n", mmc_hostname(host->mmc),
 			host->data->flags & MMC_DATA_READ ? "rx" : "tx");
@@ -697,9 +697,9 @@ static int pxamci_probe(struct platform_device *pdev)
 	 * with our defaults.
 	 */
 	pxamci_stop_clock(host);
-	writel(0, host->base + MMC_SPI);
-	writel(64, host->base + MMC_RESTO);
-	writel(host->imask, host->base + MMC_I_MASK);
+	pete_writel("drivers/mmc/host/pxamci.c:700", 0, host->base + MMC_SPI);
+	pete_writel("drivers/mmc/host/pxamci.c:701", 64, host->base + MMC_RESTO);
+	pete_writel("drivers/mmc/host/pxamci.c:702", host->imask, host->base + MMC_I_MASK);
 
 	ret = devm_request_irq(dev, irq, pxamci_irq, 0,
 			       DRIVER_NAME, host);
@@ -795,7 +795,7 @@ static void pxamci_remove(struct platform_device *pdev)
 			host->pdata->exit(&pdev->dev, mmc);
 
 		pxamci_stop_clock(host);
-		writel(TXFIFO_WR_REQ|RXFIFO_RD_REQ|CLK_IS_OFF|STOP_CMD|
+		pete_writel("drivers/mmc/host/pxamci.c:798", TXFIFO_WR_REQ|RXFIFO_RD_REQ|CLK_IS_OFF|STOP_CMD|
 		       END_CMD_RES|PRG_DONE|DATA_TRAN_DONE,
 		       host->base + MMC_I_MASK);
 

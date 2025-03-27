@@ -87,7 +87,7 @@ static irqreturn_t gti_wdt_interrupt(int irq, void *data)
 	struct gti_wdt_priv *priv = watchdog_get_drvdata(wdev);
 
 	/* Clear Interrupt Pending Status */
-	writeq(GTI_CWD_INT_PENDING_STATUS(priv->wdt_timer_idx),
+	pete_writeq("drivers/watchdog/marvell_gti_wdt.c:90", GTI_CWD_INT_PENDING_STATUS(priv->wdt_timer_idx),
 	       priv->base + GTI_CWD_INT);
 
 	watchdog_notify_pretimeout(wdev);
@@ -99,7 +99,7 @@ static int gti_wdt_ping(struct watchdog_device *wdev)
 {
 	struct gti_wdt_priv *priv = watchdog_get_drvdata(wdev);
 
-	writeq(GTI_CWD_POKE_VAL,
+	pete_writeq("drivers/watchdog/marvell_gti_wdt.c:102", GTI_CWD_POKE_VAL,
 	       priv->base + GTI_CWD_POKE(priv->wdt_timer_idx));
 
 	return 0;
@@ -116,17 +116,17 @@ static int gti_wdt_start(struct watchdog_device *wdev)
 	set_bit(WDOG_HW_RUNNING, &wdev->status);
 
 	/* Clear any pending interrupt */
-	writeq(GTI_CWD_INT_PENDING_STATUS(priv->wdt_timer_idx),
+	pete_writeq("drivers/watchdog/marvell_gti_wdt.c:119", GTI_CWD_INT_PENDING_STATUS(priv->wdt_timer_idx),
 	       priv->base + GTI_CWD_INT);
 
 	/* Enable Interrupt */
-	writeq(GTI_CWD_INT_ENA_SET_VAL(priv->wdt_timer_idx),
+	pete_writeq("drivers/watchdog/marvell_gti_wdt.c:123", GTI_CWD_INT_ENA_SET_VAL(priv->wdt_timer_idx),
 	       priv->base + GTI_CWD_INT_ENA_SET);
 
 	/* Set (Interrupt + SCP interrupt (DEL3T) + core domain reset) Mode */
-	regval = readq(priv->base + GTI_CWD_WDOG(priv->wdt_timer_idx));
+	regval = pete_readq("drivers/watchdog/marvell_gti_wdt.c:127", priv->base + GTI_CWD_WDOG(priv->wdt_timer_idx));
 	regval |= GTI_CWD_WDOG_MODE_INT_DEL3T_RST;
-	writeq(regval, priv->base + GTI_CWD_WDOG(priv->wdt_timer_idx));
+	pete_writeq("drivers/watchdog/marvell_gti_wdt.c:129", regval, priv->base + GTI_CWD_WDOG(priv->wdt_timer_idx));
 
 	return 0;
 }
@@ -137,13 +137,13 @@ static int gti_wdt_stop(struct watchdog_device *wdev)
 	u64 regval;
 
 	/* Disable Interrupt */
-	writeq(GTI_CWD_INT_ENA_CLR_VAL(priv->wdt_timer_idx),
+	pete_writeq("drivers/watchdog/marvell_gti_wdt.c:140", GTI_CWD_INT_ENA_CLR_VAL(priv->wdt_timer_idx),
 	       priv->base + GTI_CWD_INT_ENA_CLR);
 
 	/* Set GTI_CWD_WDOG.Mode = 0 to stop the timer */
-	regval = readq(priv->base + GTI_CWD_WDOG(priv->wdt_timer_idx));
+	regval = pete_readq("drivers/watchdog/marvell_gti_wdt.c:144", priv->base + GTI_CWD_WDOG(priv->wdt_timer_idx));
 	regval &= ~GTI_CWD_WDOG_MODE_MASK;
-	writeq(regval, priv->base + GTI_CWD_WDOG(priv->wdt_timer_idx));
+	pete_writeq("drivers/watchdog/marvell_gti_wdt.c:146", regval, priv->base + GTI_CWD_WDOG(priv->wdt_timer_idx));
 
 	return 0;
 }
@@ -175,11 +175,11 @@ static int gti_wdt_settimeout(struct watchdog_device *wdev,
 	 * GTI_CWD_WDOG.LEN is 24bit, lower 8-bits should be zero and
 	 * upper 16-bits are same as GTI_CWD_WDOG.CNT
 	 */
-	regval = readq(priv->base + GTI_CWD_WDOG(priv->wdt_timer_idx));
+	regval = pete_readq("drivers/watchdog/marvell_gti_wdt.c:178", priv->base + GTI_CWD_WDOG(priv->wdt_timer_idx));
 	regval &= GTI_CWD_WDOG_MODE_MASK;
 	regval |= (timeout_wdog << (GTI_CWD_WDOG_CNT_SHIFT + 8)) |
 		   (timeout_wdog << GTI_CWD_WDOG_LEN_SHIFT);
-	writeq(regval, priv->base + GTI_CWD_WDOG(priv->wdt_timer_idx));
+	pete_writeq("drivers/watchdog/marvell_gti_wdt.c:182", regval, priv->base + GTI_CWD_WDOG(priv->wdt_timer_idx));
 
 	return 0;
 }

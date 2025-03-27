@@ -162,9 +162,9 @@ waitfor_idle(struct idt77252_dev *card)
 {
 	u32 stat;
 
-	stat = readl(SAR_REG_STAT);
+	stat = pete_readl("drivers/atm/idt77252.c:165", SAR_REG_STAT);
 	while (stat & SAR_STAT_CMDBZ)
-		stat = readl(SAR_REG_STAT);
+		stat = pete_readl("drivers/atm/idt77252.c:167", SAR_REG_STAT);
 }
 
 static u32
@@ -174,9 +174,9 @@ read_sram(struct idt77252_dev *card, unsigned long addr)
 	u32 value;
 
 	spin_lock_irqsave(&card->cmd_lock, flags);
-	writel(SAR_CMD_READ_SRAM | (addr << 2), SAR_REG_CMD);
+	pete_writel("drivers/atm/idt77252.c:177", SAR_CMD_READ_SRAM | (addr << 2), SAR_REG_CMD);
 	waitfor_idle(card);
-	value = readl(SAR_REG_DR0);
+	value = pete_readl("drivers/atm/idt77252.c:179", SAR_REG_DR0);
 	spin_unlock_irqrestore(&card->cmd_lock, flags);
 	return value;
 }
@@ -196,8 +196,8 @@ write_sram(struct idt77252_dev *card, unsigned long addr, u32 value)
 	}
 
 	spin_lock_irqsave(&card->cmd_lock, flags);
-	writel(value, SAR_REG_DR0);
-	writel(SAR_CMD_WRITE_SRAM | (addr << 2), SAR_REG_CMD);
+	pete_writel("drivers/atm/idt77252.c:199", value, SAR_REG_DR0);
+	pete_writel("drivers/atm/idt77252.c:200", SAR_CMD_WRITE_SRAM | (addr << 2), SAR_REG_CMD);
 	waitfor_idle(card);
 	spin_unlock_irqrestore(&card->cmd_lock, flags);
 }
@@ -215,9 +215,9 @@ read_utility(void *dev, unsigned long ubus_addr)
 	}
 
 	spin_lock_irqsave(&card->cmd_lock, flags);
-	writel(SAR_CMD_READ_UTILITY + ubus_addr, SAR_REG_CMD);
+	pete_writel("drivers/atm/idt77252.c:218", SAR_CMD_READ_UTILITY + ubus_addr, SAR_REG_CMD);
 	waitfor_idle(card);
-	value = readl(SAR_REG_DR0);
+	value = pete_readl("drivers/atm/idt77252.c:220", SAR_REG_DR0);
 	spin_unlock_irqrestore(&card->cmd_lock, flags);
 	return value;
 }
@@ -234,8 +234,8 @@ write_utility(void *dev, unsigned long ubus_addr, u8 value)
 	}
 
 	spin_lock_irqsave(&card->cmd_lock, flags);
-	writel((u32) value, SAR_REG_DR0);
-	writel(SAR_CMD_WRITE_UTILITY + ubus_addr, SAR_REG_CMD);
+	pete_writel("drivers/atm/idt77252.c:237", (u32) value, SAR_REG_DR0);
+	pete_writel("drivers/atm/idt77252.c:238", SAR_CMD_WRITE_UTILITY + ubus_addr, SAR_REG_CMD);
 	waitfor_idle(card);
 	spin_unlock_irqrestore(&card->cmd_lock, flags);
 }
@@ -351,7 +351,7 @@ idt77252_read_gp(struct idt77252_dev *card)
 {
 	u32 gp;
 
-	gp = readl(SAR_REG_GP);
+	gp = pete_readl("drivers/atm/idt77252.c:354", SAR_REG_GP);
 #if 0
 	printk("RD: %s\n", gp & SAR_GP_EEDI ? "1" : "0");
 #endif
@@ -371,7 +371,7 @@ idt77252_write_gp(struct idt77252_dev *card, u32 value)
 
 	spin_lock_irqsave(&card->cmd_lock, flags);
 	waitfor_idle(card);
-	writel(value, SAR_REG_GP);
+	pete_writel("drivers/atm/idt77252.c:374", value, SAR_REG_GP);
 	spin_unlock_irqrestore(&card->cmd_lock, flags);
 }
 
@@ -732,7 +732,7 @@ push_on_scq(struct idt77252_dev *card, struct vc_map *vc, struct sk_buff *skb)
 			vc->estimator->avcps = cps << 5;
 			if (vc->lacr < vc->init_er) {
 				vc->lacr = vc->init_er;
-				writel(TCMDQ_LACR | (vc->lacr << 16) |
+				pete_writel("drivers/atm/idt77252.c:735", TCMDQ_LACR | (vc->lacr << 16) |
 				       vc->index, SAR_REG_TCMDQ);
 			}
 		}
@@ -761,7 +761,7 @@ push_on_scq(struct idt77252_dev *card, struct vc_map *vc, struct sk_buff *skb)
 	scq->trans_start = jiffies;
 
 	if (test_and_clear_bit(VCF_IDLE, &vc->flags)) {
-		writel(TCMDQ_START_LACR | (vc->lacr << 16) | vc->index,
+		pete_writel("drivers/atm/idt77252.c:764", TCMDQ_START_LACR | (vc->lacr << 16) | vc->index,
 		       SAR_REG_TCMDQ);
 	}
 
@@ -984,18 +984,18 @@ init_rsq(struct idt77252_dev *card)
 	for (rsqe = card->rsq.base; rsqe <= card->rsq.last; rsqe++)
 		rsqe->word_4 = 0;
 
-	writel((unsigned long) card->rsq.last - (unsigned long) card->rsq.base,
+	pete_writel("drivers/atm/idt77252.c:987", (unsigned long) card->rsq.last - (unsigned long) card->rsq.base,
 	       SAR_REG_RSQH);
-	writel(card->rsq.paddr, SAR_REG_RSQB);
+	pete_writel("drivers/atm/idt77252.c:989", card->rsq.paddr, SAR_REG_RSQB);
 
 	IPRINTK("%s: RSQ base at 0x%lx (0x%x).\n", card->name,
 		(unsigned long) card->rsq.base,
-		readl(SAR_REG_RSQB));
+		pete_readl("drivers/atm/idt77252.c:993", SAR_REG_RSQB));
 	IPRINTK("%s: RSQ head = 0x%x, base = 0x%x, tail = 0x%x.\n",
 		card->name,
-		readl(SAR_REG_RSQH),
-		readl(SAR_REG_RSQB),
-		readl(SAR_REG_RSQT));
+		pete_readl("drivers/atm/idt77252.c:996", SAR_REG_RSQH),
+		pete_readl("drivers/atm/idt77252.c:997", SAR_REG_RSQB),
+		pete_readl("drivers/atm/idt77252.c:998", SAR_REG_RSQT));
 
 	return 0;
 }
@@ -1131,7 +1131,7 @@ dequeue_rx(struct idt77252_dev *card, struct rsq_entry *rsqe)
 		if ((len + 8 > rpp->len) || (len + (47 + 8) < rpp->len)) {
 			RXPRINTK("%s: AAL5 PDU size mismatch: %d != %d. "
 			         "(CDC: %08x)\n",
-			         card->name, len, rpp->len, readl(SAR_REG_CDC));
+			         card->name, len, rpp->len, pete_readl("drivers/atm/idt77252.c:1134", SAR_REG_CDC));
 			recycle_rx_pool_skb(card, rpp);
 			atomic_inc(&vcc->stats->rx_err);
 			return;
@@ -1230,7 +1230,7 @@ idt77252_rx(struct idt77252_dev *card)
 			rsqe = card->rsq.next + 1;
 	} while (le32_to_cpu(rsqe->word_4) & SAR_RSQE_VALID);
 
-	writel((unsigned long) card->rsq.next - (unsigned long) card->rsq.base,
+	pete_writel("drivers/atm/idt77252.c:1233", (unsigned long) card->rsq.next - (unsigned long) card->rsq.base,
 	       SAR_REG_RSQH);
 }
 
@@ -1253,7 +1253,7 @@ idt77252_rx_raw(struct idt77252_dev *card)
 		return;
 
 	head = IDT77252_PRV_PADDR(queue) + (queue->data - queue->head - 16);
-	tail = readl(SAR_REG_RAWCT);
+	tail = pete_readl("drivers/atm/idt77252.c:1256", SAR_REG_RAWCT);
 
 	dma_sync_single_for_cpu(&card->pcidev->dev, IDT77252_PRV_PADDR(queue),
 				skb_end_offset(queue) - 16,
@@ -1387,8 +1387,8 @@ init_tsq(struct idt77252_dev *card)
 	for (tsqe = card->tsq.base; tsqe <= card->tsq.last; tsqe++)
 		tsqe->word_2 = cpu_to_le32(SAR_TSQE_INVALID);
 
-	writel(card->tsq.paddr, SAR_REG_TSQB);
-	writel((unsigned long) card->tsq.next - (unsigned long) card->tsq.base,
+	pete_writel("drivers/atm/idt77252.c:1390", card->tsq.paddr, SAR_REG_TSQB);
+	pete_writel("drivers/atm/idt77252.c:1391", (unsigned long) card->tsq.next - (unsigned long) card->tsq.base,
 	       SAR_REG_TSQH);
 
 	return 0;
@@ -1417,9 +1417,9 @@ idt77252_tx(struct idt77252_dev *card)
 	TXPRINTK("idt77252_tx: tsq  %p: base %p, next %p, last %p\n", tsqe,
 		 card->tsq.base, card->tsq.next, card->tsq.last);
 	TXPRINTK("idt77252_tx: tsqb %08x, tsqt %08x, tsqh %08x, \n",
-		 readl(SAR_REG_TSQB),
-		 readl(SAR_REG_TSQT),
-		 readl(SAR_REG_TSQH));
+		 pete_readl("drivers/atm/idt77252.c:1420", SAR_REG_TSQB),
+		 pete_readl("drivers/atm/idt77252.c:1421", SAR_REG_TSQT),
+		 pete_readl("drivers/atm/idt77252.c:1422", SAR_REG_TSQH));
 
 	stat = le32_to_cpu(tsqe->word_2);
 
@@ -1519,12 +1519,12 @@ idt77252_tx(struct idt77252_dev *card)
 
 	} while (!(stat & SAR_TSQE_INVALID));
 
-	writel((unsigned long)card->tsq.next - (unsigned long)card->tsq.base,
+	pete_writel("drivers/atm/idt77252.c:1522", (unsigned long)card->tsq.next - (unsigned long)card->tsq.base,
 	       SAR_REG_TSQH);
 
 	XPRINTK("idt77252_tx-after writel%d: TSQ head = 0x%x, tail = 0x%x, next = 0x%p.\n",
-		card->index, readl(SAR_REG_TSQH),
-		readl(SAR_REG_TSQT), card->tsq.next);
+		card->index, pete_readl("drivers/atm/idt77252.c:1526", SAR_REG_TSQH),
+		pete_readl("drivers/atm/idt77252.c:1527", SAR_REG_TSQT), card->tsq.next);
 }
 
 
@@ -1545,7 +1545,7 @@ tst_timer(struct timer_list *t)
 	if (test_bit(TST_SWITCH_WAIT, &card->tst_state)) {
 		jump = base + card->tst_size - 2;
 
-		pc = readl(SAR_REG_NOW) >> 2;
+		pc = pete_readl("drivers/atm/idt77252.c:1548", SAR_REG_NOW) >> 2;
 		if ((pc ^ idle) & ~(card->tst_size - 1)) {
 			mod_timer(&card->tst_timer, jiffies + 1);
 			goto out;
@@ -1787,7 +1787,7 @@ set_tct(struct idt77252_dev *card, struct vc_map *vc)
 static __inline__ int
 idt77252_fbq_full(struct idt77252_dev *card, int queue)
 {
-	return (readl(SAR_REG_STAT) >> (16 + (queue << 2))) == 0x0f;
+	return (pete_readl("drivers/atm/idt77252.c:1790", SAR_REG_STAT) >> (16 + (queue << 2))) == 0x0f;
 }
 
 static int
@@ -1829,8 +1829,8 @@ push_rx_skb(struct idt77252_dev *card, struct sk_buff *skb, int queue)
 	addr = IDT77252_PRV_PADDR(skb);
 
 	spin_lock_irqsave(&card->cmd_lock, flags);
-	writel(handle, card->fbq[queue]);
-	writel(addr, card->fbq[queue]);
+	pete_writel("drivers/atm/idt77252.c:1832", handle, card->fbq[queue]);
+	pete_writel("drivers/atm/idt77252.c:1833", addr, card->fbq[queue]);
 	spin_unlock_irqrestore(&card->cmd_lock, flags);
 
 	return 0;
@@ -2098,7 +2098,7 @@ idt77252_est_timer(struct timer_list *t)
 
 	if (lacr != vc->lacr) {
 		vc->lacr = lacr;
-		writel(TCMDQ_LACR|(vc->lacr << 16)|vc->index, SAR_REG_TCMDQ);
+		pete_writel("drivers/atm/idt77252.c:2101", TCMDQ_LACR|(vc->lacr << 16)|vc->index, SAR_REG_TCMDQ);
 	}
 
 	est->timer.expires = jiffies + ((HZ / 4) << est->interval);
@@ -2293,7 +2293,7 @@ idt77252_init_tx(struct idt77252_dev *card, struct vc_map *vc,
 			}
 
 			clear_bit(VCF_IDLE, &vc->flags);
-			writel(TCMDQ_START | vc->index, SAR_REG_TCMDQ);
+			pete_writel("drivers/atm/idt77252.c:2296", TCMDQ_START | vc->index, SAR_REG_TCMDQ);
 			break;
 
 		case SCHED_UBR:
@@ -2370,7 +2370,7 @@ idt77252_init_rx(struct idt77252_dev *card, struct vc_map *vc,
 	write_sram(card, addr, rcte);
 
 	spin_lock_irqsave(&card->cmd_lock, flags);
-	writel(SAR_CMD_OPEN_CONNECTION | (addr << 2), SAR_REG_CMD);
+	pete_writel("drivers/atm/idt77252.c:2373", SAR_CMD_OPEN_CONNECTION | (addr << 2), SAR_REG_CMD);
 	waitfor_idle(card);
 	spin_unlock_irqrestore(&card->cmd_lock, flags);
 
@@ -2509,7 +2509,7 @@ idt77252_close(struct atm_vcc *vcc)
 		addr = card->rct_base + vc->index * SAR_SRAM_RCT_SIZE;
 
 		spin_lock_irqsave(&card->cmd_lock, flags);
-		writel(SAR_CMD_CLOSE_CONNECTION | (addr << 2), SAR_REG_CMD);
+		pete_writel("drivers/atm/idt77252.c:2512", SAR_CMD_CLOSE_CONNECTION | (addr << 2), SAR_REG_CMD);
 		waitfor_idle(card);
 		spin_unlock_irqrestore(&card->cmd_lock, flags);
 
@@ -2547,7 +2547,7 @@ done:
 			}
 		}
 
-		writel(TCMDQ_HALT | vc->index, SAR_REG_TCMDQ);
+		pete_writel("drivers/atm/idt77252.c:2550", TCMDQ_HALT | vc->index, SAR_REG_TCMDQ);
 		clear_scd(card, vc->scq, vc->class);
 
 		if (vc->class == SCHED_CBR) {
@@ -2592,7 +2592,7 @@ idt77252_change_qos(struct atm_vcc *vcc, struct atm_qos *qos, int flags)
 					goto out;
 
 				if (!test_bit(VCF_IDLE, &vc->flags)) {
-					writel(TCMDQ_LACR | (vc->lacr << 16) |
+					pete_writel("drivers/atm/idt77252.c:2595", TCMDQ_LACR | (vc->lacr << 16) |
 					       vc->index, SAR_REG_TCMDQ);
 				}
 				break;
@@ -2698,9 +2698,9 @@ idt77252_proc_read(struct atm_dev *dev, loff_t * pos, char *page)
 static void
 idt77252_collect_stat(struct idt77252_dev *card)
 {
-	(void) readl(SAR_REG_CDC);
-	(void) readl(SAR_REG_VPEC);
-	(void) readl(SAR_REG_ICC);
+	(void) pete_readl("drivers/atm/idt77252.c:2701", SAR_REG_CDC);
+	(void) pete_readl("drivers/atm/idt77252.c:2702", SAR_REG_VPEC);
+	(void) pete_readl("drivers/atm/idt77252.c:2703", SAR_REG_ICC);
 
 }
 
@@ -2710,7 +2710,7 @@ idt77252_interrupt(int irq, void *dev_id)
 	struct idt77252_dev *card = dev_id;
 	u32 stat;
 
-	stat = readl(SAR_REG_STAT) & 0xffff;
+	stat = pete_readl("drivers/atm/idt77252.c:2713", SAR_REG_STAT) & 0xffff;
 	if (!stat)	/* no interrupt for us */
 		return IRQ_NONE;
 
@@ -2719,7 +2719,7 @@ idt77252_interrupt(int irq, void *dev_id)
 		goto out;
 	}
 
-	writel(stat, SAR_REG_STAT);	/* reset interrupt */
+	pete_writel("drivers/atm/idt77252.c:2722", stat, SAR_REG_STAT);	/* reset interrupt */
 
 	if (stat & SAR_STAT_TSIF) {	/* entry written to TSQ  */
 		INTPRINTK("%s: TSIF\n", card->name);
@@ -2775,7 +2775,7 @@ idt77252_interrupt(int irq, void *dev_id)
 	if (stat & (SAR_STAT_FBQ0A | SAR_STAT_FBQ1A |
 		    SAR_STAT_FBQ2A | SAR_STAT_FBQ3A)) {
 
-		writel(readl(SAR_REG_CFG) & ~(SAR_CFG_FBIE), SAR_REG_CFG);
+		pete_writel("drivers/atm/idt77252.c:2778", pete_readl("drivers/atm/idt77252.c:2778", SAR_REG_CFG) & ~(SAR_CFG_FBIE), SAR_REG_CFG);
 
 		INTPRINTK("%s: FBQA: %04x\n", card->name, stat);
 
@@ -2805,7 +2805,7 @@ idt77252_softint(struct work_struct *work)
 	int done;
 
 	for (done = 1; ; done = 1) {
-		stat = readl(SAR_REG_STAT) >> 16;
+		stat = pete_readl("drivers/atm/idt77252.c:2808", SAR_REG_STAT) >> 16;
 
 		if ((stat & 0x0f) < SAR_FBQ0_HIGH) {
 			add_rx_skb(card, 0, SAR_FB_SIZE_0, 32);
@@ -2834,7 +2834,7 @@ idt77252_softint(struct work_struct *work)
 			break;
 	}
 
-	writel(readl(SAR_REG_CFG) | SAR_CFG_FBIE, SAR_REG_CFG);
+	pete_writel("drivers/atm/idt77252.c:2837", pete_readl("drivers/atm/idt77252.c:2837", SAR_REG_CFG) | SAR_CFG_FBIE, SAR_REG_CFG);
 }
 
 
@@ -2871,7 +2871,7 @@ open_card_oam(struct idt77252_dev *card)
 			write_sram(card, addr, rcte);
 
 			spin_lock_irqsave(&card->cmd_lock, flags);
-			writel(SAR_CMD_OPEN_CONNECTION | (addr << 2),
+			pete_writel("drivers/atm/idt77252.c:2874", SAR_CMD_OPEN_CONNECTION | (addr << 2),
 			       SAR_REG_CMD);
 			waitfor_idle(card);
 			spin_unlock_irqrestore(&card->cmd_lock, flags);
@@ -2898,7 +2898,7 @@ close_card_oam(struct idt77252_dev *card)
 			addr = card->rct_base + vc->index * SAR_SRAM_RCT_SIZE;
 
 			spin_lock_irqsave(&card->cmd_lock, flags);
-			writel(SAR_CMD_CLOSE_CONNECTION | (addr << 2),
+			pete_writel("drivers/atm/idt77252.c:2901", SAR_CMD_CLOSE_CONNECTION | (addr << 2),
 			       SAR_REG_CMD);
 			waitfor_idle(card);
 			spin_unlock_irqrestore(&card->cmd_lock, flags);
@@ -2952,7 +2952,7 @@ open_card_ubr0(struct idt77252_dev *card)
 	write_sram(card, card->tct_base + 7, TCT_FLAG_UBR);
 
 	clear_bit(VCF_IDLE, &vc->flags);
-	writel(TCMDQ_START | 0, SAR_REG_TCMDQ);
+	pete_writel("drivers/atm/idt77252.c:2955", TCMDQ_START | 0, SAR_REG_TCMDQ);
 	return 0;
 }
 
@@ -2993,7 +2993,7 @@ idt77252_dev_open(struct idt77252_dev *card)
 	conf |= SAR_CFG_VPECA;
 #endif
 
-	writel(readl(SAR_REG_CFG) | conf, SAR_REG_CFG);
+	pete_writel("drivers/atm/idt77252.c:2996", pete_readl("drivers/atm/idt77252.c:2996", SAR_REG_CFG) | conf, SAR_REG_CFG);
 
 	if (open_card_oam(card)) {
 		printk("%s: Error initializing OAM.\n", card->name);
@@ -3029,7 +3029,7 @@ static void idt77252_dev_close(struct atm_dev *dev)
 	    SAR_CFG_TXSFI	/* interrupt on TSQ almost full  */
 	    ;
 
-	writel(readl(SAR_REG_CFG) & ~(conf), SAR_REG_CFG);
+	pete_writel("drivers/atm/idt77252.c:3032", pete_readl("drivers/atm/idt77252.c:3032", SAR_REG_CFG) & ~(conf), SAR_REG_CFG);
 
 	DIPRINTK("%s: closed IDT77252 ABR SAR.\n", card->name);
 }
@@ -3054,7 +3054,7 @@ deinit_card(struct idt77252_dev *card)
 	}
 	DIPRINTK("idt77252: deinitialize card %u\n", card->index);
 
-	writel(0, SAR_REG_CFG);
+	pete_writel("drivers/atm/idt77252.c:3057", 0, SAR_REG_CFG);
 
 	if (card->atmdev)
 		atm_dev_deregister(card->atmdev);
@@ -3181,10 +3181,10 @@ static void init_sram(struct idt77252_dev *card)
 				    (u32) 0xffffffff);
 	}
 
-	writel((SAR_FBQ0_LOW << 28) | (SAR_FB_SIZE_0 / 48), SAR_REG_FBQS0);
-	writel((SAR_FBQ1_LOW << 28) | (SAR_FB_SIZE_1 / 48), SAR_REG_FBQS1);
-	writel((SAR_FBQ2_LOW << 28) | (SAR_FB_SIZE_2 / 48), SAR_REG_FBQS2);
-	writel((SAR_FBQ3_LOW << 28) | (SAR_FB_SIZE_3 / 48), SAR_REG_FBQS3);
+	pete_writel("drivers/atm/idt77252.c:3184", (SAR_FBQ0_LOW << 28) | (SAR_FB_SIZE_0 / 48), SAR_REG_FBQS0);
+	pete_writel("drivers/atm/idt77252.c:3185", (SAR_FBQ1_LOW << 28) | (SAR_FB_SIZE_1 / 48), SAR_REG_FBQS1);
+	pete_writel("drivers/atm/idt77252.c:3186", (SAR_FBQ2_LOW << 28) | (SAR_FB_SIZE_2 / 48), SAR_REG_FBQS2);
+	pete_writel("drivers/atm/idt77252.c:3187", (SAR_FBQ3_LOW << 28) | (SAR_FB_SIZE_3 / 48), SAR_REG_FBQS3);
 
 	/* Initialize rate table  */
 	for (i = 0; i < 256; i++) {
@@ -3220,7 +3220,7 @@ static void init_sram(struct idt77252_dev *card)
 #endif
 
 	IPRINTK("%s: initialize rate table ...\n", card->name);
-	writel(card->rt_base << 2, SAR_REG_RTBL);
+	pete_writel("drivers/atm/idt77252.c:3223", card->rt_base << 2, SAR_REG_RTBL);
 
 	/* Initialize TSTs */
 	IPRINTK("%s: initialize TST ...\n", card->name);
@@ -3240,15 +3240,15 @@ static void init_sram(struct idt77252_dev *card)
 	idt77252_sram_write_errors = 0;
 
 	card->tst_index = 0;
-	writel(card->tst[0] << 2, SAR_REG_TSTB);
+	pete_writel("drivers/atm/idt77252.c:3243", card->tst[0] << 2, SAR_REG_TSTB);
 
 	/* Initialize ABRSTD and Receive FIFO */
 	IPRINTK("%s: initialize ABRSTD ...\n", card->name);
-	writel(card->abrst_size | (card->abrst_base << 2),
+	pete_writel("drivers/atm/idt77252.c:3247", card->abrst_size | (card->abrst_base << 2),
 	       SAR_REG_ABRSTD);
 
 	IPRINTK("%s: initialize receive fifo ...\n", card->name);
-	writel(card->fifo_size | (card->fifo_base << 2),
+	pete_writel("drivers/atm/idt77252.c:3251", card->fifo_size | (card->fifo_base << 2),
 	       SAR_REG_RXFD);
 
 	IPRINTK("%s: SRAM initialization complete.\n", card->name);
@@ -3311,9 +3311,9 @@ static int init_card(struct atm_dev *dev)
 		}
 	}
 	/* Reset Timer register */
-	if (readl(SAR_REG_STAT) & SAR_STAT_TMROF) {
+	if (pete_readl("drivers/atm/idt77252.c:3314", SAR_REG_STAT) & SAR_STAT_TMROF) {
 		printk("%s: resetting timer overflow.\n", card->name);
-		writel(SAR_STAT_TMROF, SAR_REG_STAT);
+		pete_writel("drivers/atm/idt77252.c:3316", SAR_STAT_TMROF, SAR_REG_STAT);
 	}
 	IPRINTK("%s: Request IRQ ... ", card->name);
 	if (request_irq(pcidev->irq, idt77252_interrupt, IRQF_SHARED,
@@ -3360,7 +3360,7 @@ static int init_card(struct atm_dev *dev)
 		break;
 	}
 
-	writel(readl(SAR_REG_CFG) | conf, SAR_REG_CFG);
+	pete_writel("drivers/atm/idt77252.c:3363", pete_readl("drivers/atm/idt77252.c:3363", SAR_REG_CFG) | conf, SAR_REG_CFG);
 
 	init_sram(card);
 
@@ -3392,10 +3392,10 @@ static int init_card(struct atm_dev *dev)
 	}
 
 	IPRINTK("%s: Setting VPI/VCI mask to zero.\n", card->name);
-	writel(0, SAR_REG_VPM);
+	pete_writel("drivers/atm/idt77252.c:3395", 0, SAR_REG_VPM);
 
 	/* Little Endian Order   */
-	writel(0, SAR_REG_GP);
+	pete_writel("drivers/atm/idt77252.c:3398", 0, SAR_REG_GP);
 
 	/* Initialize RAW Cell Handle Register  */
 	card->raw_cell_hnd = dma_alloc_coherent(&card->pcidev->dev,
@@ -3407,7 +3407,7 @@ static int init_card(struct atm_dev *dev)
 		deinit_card(card);
 		return -1;
 	}
-	writel(card->raw_cell_paddr, SAR_REG_RAWHND);
+	pete_writel("drivers/atm/idt77252.c:3410", card->raw_cell_paddr, SAR_REG_RAWHND);
 	IPRINTK("%s: raw cell handle is at 0x%p.\n", card->name,
 		card->raw_cell_hnd);
 
@@ -3518,7 +3518,7 @@ static int init_card(struct atm_dev *dev)
 	 */
 
 	/* Set Maximum Deficit Count for now. */
-	writel(0xffff, SAR_REG_MDFCT);
+	pete_writel("drivers/atm/idt77252.c:3521", 0xffff, SAR_REG_MDFCT);
 
 	set_bit(IDT77252_BIT_INIT, &card->flags);
 
@@ -3566,9 +3566,9 @@ static int idt77252_preset(struct idt77252_dev *card)
 /*****************************************************************/
 
 	/* Software reset */
-	writel(SAR_CFG_SWRST, SAR_REG_CFG);
+	pete_writel("drivers/atm/idt77252.c:3569", SAR_CFG_SWRST, SAR_REG_CFG);
 	mdelay(1);
-	writel(0, SAR_REG_CFG);
+	pete_writel("drivers/atm/idt77252.c:3571", 0, SAR_REG_CFG);
 
 	IPRINTK("%s: Software resetted.\n", card->name);
 	return 0;
@@ -3579,15 +3579,15 @@ static unsigned long probe_sram(struct idt77252_dev *card)
 {
 	u32 data, addr;
 
-	writel(0, SAR_REG_DR0);
-	writel(SAR_CMD_WRITE_SRAM | (0 << 2), SAR_REG_CMD);
+	pete_writel("drivers/atm/idt77252.c:3582", 0, SAR_REG_DR0);
+	pete_writel("drivers/atm/idt77252.c:3583", SAR_CMD_WRITE_SRAM | (0 << 2), SAR_REG_CMD);
 
 	for (addr = 0x4000; addr < 0x80000; addr += 0x4000) {
-		writel(ATM_POISON, SAR_REG_DR0);
-		writel(SAR_CMD_WRITE_SRAM | (addr << 2), SAR_REG_CMD);
+		pete_writel("drivers/atm/idt77252.c:3586", ATM_POISON, SAR_REG_DR0);
+		pete_writel("drivers/atm/idt77252.c:3587", SAR_CMD_WRITE_SRAM | (addr << 2), SAR_REG_CMD);
 
-		writel(SAR_CMD_READ_SRAM | (0 << 2), SAR_REG_CMD);
-		data = readl(SAR_REG_DR0);
+		pete_writel("drivers/atm/idt77252.c:3589", SAR_CMD_READ_SRAM | (0 << 2), SAR_REG_CMD);
+		data = pete_readl("drivers/atm/idt77252.c:3590", SAR_REG_DR0);
 
 		if (data != 0)
 			break;

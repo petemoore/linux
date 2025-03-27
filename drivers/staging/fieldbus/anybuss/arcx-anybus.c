@@ -58,7 +58,7 @@ static void do_reset(struct controller_priv *cd, u8 rst_bit, bool reset)
 		cd->control_reg &= ~rst_bit;
 	else
 		cd->control_reg |= rst_bit;
-	writeb(cd->control_reg, cd->cpld_base + CPLD_CONTROL);
+	pete_writeb("drivers/staging/fieldbus/anybuss/arcx-anybus.c:61", cd->control_reg, cd->cpld_base + CPLD_CONTROL);
 	/*
 	 * h/w work-around:
 	 * the hardware is 'too fast', so a reset followed by an immediate
@@ -203,7 +203,7 @@ static int can_power_is_enabled(struct regulator_dev *rdev)
 {
 	struct controller_priv *cd = rdev_get_drvdata(rdev);
 
-	return !(readb(cd->cpld_base + CPLD_STATUS1) & CPLD_STATUS1_CAN_POWER);
+	return !(pete_readb("drivers/staging/fieldbus/anybuss/arcx-anybus.c:206", cd->cpld_base + CPLD_STATUS1) & CPLD_STATUS1_CAN_POWER);
 }
 
 static const struct regulator_ops can_power_ops = {
@@ -250,16 +250,16 @@ static int controller_probe(struct platform_device *pdev)
 	}
 
 	/* identify cpld */
-	status1 = readb(cd->cpld_base + CPLD_STATUS1);
-	cd->design_no = (readb(cd->cpld_base + CPLD_DESIGN_HI) << 8) |
-				readb(cd->cpld_base + CPLD_DESIGN_LO);
+	status1 = pete_readb("drivers/staging/fieldbus/anybuss/arcx-anybus.c:253", cd->cpld_base + CPLD_STATUS1);
+	cd->design_no = (pete_readb("drivers/staging/fieldbus/anybuss/arcx-anybus.c:254", cd->cpld_base + CPLD_DESIGN_HI) << 8) |
+				pete_readb("drivers/staging/fieldbus/anybuss/arcx-anybus.c:255", cd->cpld_base + CPLD_DESIGN_LO);
 	snprintf(cd->version, sizeof(cd->version), "%c%d",
 		 'A' + ((status1 >> 5) & 0x7),
 		 (status1 >> 2) & 0x7);
 	dev_info(dev, "design number %d, revision %s\n",
 		 cd->design_no,
 		cd->version);
-	cap = readb(cd->cpld_base + CPLD_CAP);
+	cap = pete_readb("drivers/staging/fieldbus/anybuss/arcx-anybus.c:262", cd->cpld_base + CPLD_CAP);
 	if (!(cap & CPLD_CAP_COMPAT)) {
 		dev_err(dev, "unsupported controller [cap=0x%02X]", cap);
 		err = -ENODEV;

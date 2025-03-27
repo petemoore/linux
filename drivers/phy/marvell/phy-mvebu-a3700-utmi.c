@@ -95,11 +95,11 @@ static int mvebu_a3700_utmi_phy_power_on(struct phy *phy)
 	 * Setup PLL. 40MHz clock used to be the default, being 25MHz now.
 	 * See "PLL Settings for Typical REFCLK" table.
 	 */
-	reg = readl(utmi->regs + USB2_PHY_PLL_CTRL_REG0);
+	reg = pete_readl("drivers/phy/marvell/phy-mvebu-a3700-utmi.c:98", utmi->regs + USB2_PHY_PLL_CTRL_REG0);
 	reg &= ~(PLL_REF_DIV_MASK | PLL_FB_DIV_MASK | PLL_SEL_LPFR_MASK);
 	reg |= (PLL_REF_DIV_5 << PLL_REF_DIV_OFF) |
 	       (PLL_FB_DIV_96 << PLL_FB_DIV_OFF);
-	writel(reg, utmi->regs + USB2_PHY_PLL_CTRL_REG0);
+	pete_writel("drivers/phy/marvell/phy-mvebu-a3700-utmi.c:102", reg, utmi->regs + USB2_PHY_PLL_CTRL_REG0);
 
 	/* Enable PHY pull up and disable USB2 suspend */
 	regmap_update_bits(utmi->usb_misc, USB2_PHY_CTRL(usb32),
@@ -108,15 +108,15 @@ static int mvebu_a3700_utmi_phy_power_on(struct phy *phy)
 
 	if (usb32) {
 		/* Power up OTG module */
-		reg = readl(utmi->regs + USB2_PHY_OTG_CTRL);
+		reg = pete_readl("drivers/phy/marvell/phy-mvebu-a3700-utmi.c:111", utmi->regs + USB2_PHY_OTG_CTRL);
 		reg |= PHY_PU_OTG;
-		writel(reg, utmi->regs + USB2_PHY_OTG_CTRL);
+		pete_writel("drivers/phy/marvell/phy-mvebu-a3700-utmi.c:113", reg, utmi->regs + USB2_PHY_OTG_CTRL);
 
 		/* Disable PHY charger detection */
-		reg = readl(utmi->regs + USB2_PHY_CHRGR_DETECT);
+		reg = pete_readl("drivers/phy/marvell/phy-mvebu-a3700-utmi.c:116", utmi->regs + USB2_PHY_CHRGR_DETECT);
 		reg &= ~(PHY_CDP_EN | PHY_DCP_EN | PHY_PD_EN | PHY_PU_CHRG_DTC |
 			 PHY_CDP_DM_AUTO | PHY_ENSWITCH_DP | PHY_ENSWITCH_DM);
-		writel(reg, utmi->regs + USB2_PHY_CHRGR_DETECT);
+		pete_writel("drivers/phy/marvell/phy-mvebu-a3700-utmi.c:119", reg, utmi->regs + USB2_PHY_CHRGR_DETECT);
 
 		/* Disable PHY DP/DM pull-down (used for device mode) */
 		regmap_update_bits(utmi->usb_misc, USB2_PHY_CTRL(usb32),
@@ -168,15 +168,15 @@ static int mvebu_a3700_utmi_phy_power_off(struct phy *phy)
 	u32 reg;
 
 	/* Disable PHY pull-up and enable USB2 suspend */
-	reg = readl(utmi->regs + USB2_PHY_CTRL(usb32));
+	reg = pete_readl("drivers/phy/marvell/phy-mvebu-a3700-utmi.c:171", utmi->regs + USB2_PHY_CTRL(usb32));
 	reg &= ~(RB_USB2PHY_PU | RB_USB2PHY_SUSPM(usb32));
-	writel(reg, utmi->regs + USB2_PHY_CTRL(usb32));
+	pete_writel("drivers/phy/marvell/phy-mvebu-a3700-utmi.c:173", reg, utmi->regs + USB2_PHY_CTRL(usb32));
 
 	/* Power down OTG module */
 	if (usb32) {
-		reg = readl(utmi->regs + USB2_PHY_OTG_CTRL);
+		reg = pete_readl("drivers/phy/marvell/phy-mvebu-a3700-utmi.c:177", utmi->regs + USB2_PHY_OTG_CTRL);
 		reg &= ~PHY_PU_OTG;
-		writel(reg, utmi->regs + USB2_PHY_OTG_CTRL);
+		pete_writel("drivers/phy/marvell/phy-mvebu-a3700-utmi.c:179", reg, utmi->regs + USB2_PHY_OTG_CTRL);
 	}
 
 	return 0;

@@ -276,8 +276,8 @@ static void __send_message_no_waiter(struct bnxt_qplib_rcfw *rcfw,
 	atomic_inc(&rcfw->timeout_send);
 	/* ring CMDQ DB */
 	wmb();
-	writel(cmdq_prod, cmdq->cmdq_mbox.prod);
-	writel(RCFW_CMDQ_TRIG_VAL, cmdq->cmdq_mbox.db);
+	pete_writel("drivers/infiniband/hw/bnxt_re/qplib_rcfw.c:279", cmdq_prod, cmdq->cmdq_mbox.prod);
+	pete_writel("drivers/infiniband/hw/bnxt_re/qplib_rcfw.c:280", RCFW_CMDQ_TRIG_VAL, cmdq->cmdq_mbox.db);
 }
 
 static int __send_message(struct bnxt_qplib_rcfw *rcfw,
@@ -364,8 +364,8 @@ static int __send_message(struct bnxt_qplib_rcfw *rcfw,
 	}
 	/* ring CMDQ DB */
 	wmb();
-	writel(cmdq_prod, cmdq->cmdq_mbox.prod);
-	writel(RCFW_CMDQ_TRIG_VAL, cmdq->cmdq_mbox.db);
+	pete_writel("drivers/infiniband/hw/bnxt_re/qplib_rcfw.c:367", cmdq_prod, cmdq->cmdq_mbox.prod);
+	pete_writel("drivers/infiniband/hw/bnxt_re/qplib_rcfw.c:368", RCFW_CMDQ_TRIG_VAL, cmdq->cmdq_mbox.db);
 	spin_unlock_bh(&hwq->lock);
 	/* Return the CREQ response pointer */
 	return 0;

@@ -543,7 +543,7 @@ static struct dsiescclk dsiescclk[3] = {
 
 u32 db8500_prcmu_read(unsigned int reg)
 {
-	return readl(prcmu_base + reg);
+	return pete_readl("drivers/mfd/db8500-prcmu.c:546", prcmu_base + reg);
 }
 
 void db8500_prcmu_write(unsigned int reg, u32 value)
@@ -551,7 +551,7 @@ void db8500_prcmu_write(unsigned int reg, u32 value)
 	unsigned long flags;
 
 	spin_lock_irqsave(&prcmu_lock, flags);
-	writel(value, (prcmu_base + reg));
+	pete_writel("drivers/mfd/db8500-prcmu.c:554", value, (prcmu_base + reg));
 	spin_unlock_irqrestore(&prcmu_lock, flags);
 }
 
@@ -561,9 +561,9 @@ void db8500_prcmu_write_masked(unsigned int reg, u32 mask, u32 value)
 	unsigned long flags;
 
 	spin_lock_irqsave(&prcmu_lock, flags);
-	val = readl(prcmu_base + reg);
+	val = pete_readl("drivers/mfd/db8500-prcmu.c:564", prcmu_base + reg);
 	val = ((val & ~mask) | (value & mask));
-	writel(val, (prcmu_base + reg));
+	pete_writel("drivers/mfd/db8500-prcmu.c:566", val, (prcmu_base + reg));
 	spin_unlock_irqrestore(&prcmu_lock, flags);
 }
 
@@ -582,7 +582,7 @@ static bool prcmu_is_ulppll_disabled(void)
 
 bool prcmu_has_arm_maxopp(void)
 {
-	return (readb(tcdm_base + PRCM_AVS_VARM_MAX_OPP) &
+	return (pete_readb("drivers/mfd/db8500-prcmu.c:585", tcdm_base + PRCM_AVS_VARM_MAX_OPP) &
 		PRCM_AVS_ISMODEENABLE_MASK) == PRCM_AVS_ISMODEENABLE_MASK;
 }
 
@@ -598,7 +598,7 @@ int prcmu_set_rc_a2p(enum romcode_write val)
 {
 	if (val < RDY_2_DS || val > RDY_2_XP70_RST)
 		return -EINVAL;
-	writeb(val, (tcdm_base + PRCM_ROMCODE_A2P));
+	pete_writeb("drivers/mfd/db8500-prcmu.c:601", val, (tcdm_base + PRCM_ROMCODE_A2P));
 	return 0;
 }
 
@@ -611,7 +611,7 @@ int prcmu_set_rc_a2p(enum romcode_write val)
  */
 enum romcode_read prcmu_get_rc_p2a(void)
 {
-	return readb(tcdm_base + PRCM_ROMCODE_P2A);
+	return pete_readb("drivers/mfd/db8500-prcmu.c:614", tcdm_base + PRCM_ROMCODE_P2A);
 }
 
 /**
@@ -621,7 +621,7 @@ enum romcode_read prcmu_get_rc_p2a(void)
  */
 enum ap_pwrst prcmu_get_xp70_current_state(void)
 {
-	return readb(tcdm_base + PRCM_XP70_CUR_PWR_STATE);
+	return pete_readb("drivers/mfd/db8500-prcmu.c:624", tcdm_base + PRCM_XP70_CUR_PWR_STATE);
 }
 
 /**
@@ -667,7 +667,7 @@ int prcmu_config_clkout(u8 clkout, u8 source, u8 div)
 
 	spin_lock_irqsave(&clkout_lock, flags);
 
-	val = readl(PRCM_CLKOCR);
+	val = pete_readl("drivers/mfd/db8500-prcmu.c:670", PRCM_CLKOCR);
 	if (val & div_mask) {
 		if (div) {
 			if ((val & mask) != bits) {
@@ -681,7 +681,7 @@ int prcmu_config_clkout(u8 clkout, u8 source, u8 div)
 			}
 		}
 	}
-	writel((bits | (val & ~mask)), PRCM_CLKOCR);
+	pete_writel("drivers/mfd/db8500-prcmu.c:684", (bits | (val & ~mask)), PRCM_CLKOCR);
 	requests[clkout] += (div ? 1 : -1);
 
 unlock_and_return:
@@ -698,16 +698,16 @@ int db8500_prcmu_set_power_state(u8 state, bool keep_ulp_clk, bool keep_ap_pll)
 
 	spin_lock_irqsave(&mb0_transfer.lock, flags);
 
-	while (readl(PRCM_MBOX_CPU_VAL) & MBOX_BIT(0))
+	while (pete_readl("drivers/mfd/db8500-prcmu.c:701", PRCM_MBOX_CPU_VAL) & MBOX_BIT(0))
 		cpu_relax();
 
-	writeb(MB0H_POWER_STATE_TRANS, (tcdm_base + PRCM_MBOX_HEADER_REQ_MB0));
-	writeb(state, (tcdm_base + PRCM_REQ_MB0_AP_POWER_STATE));
-	writeb((keep_ap_pll ? 1 : 0), (tcdm_base + PRCM_REQ_MB0_AP_PLL_STATE));
-	writeb((keep_ulp_clk ? 1 : 0),
+	pete_writeb("drivers/mfd/db8500-prcmu.c:704", MB0H_POWER_STATE_TRANS, (tcdm_base + PRCM_MBOX_HEADER_REQ_MB0));
+	pete_writeb("drivers/mfd/db8500-prcmu.c:705", state, (tcdm_base + PRCM_REQ_MB0_AP_POWER_STATE));
+	pete_writeb("drivers/mfd/db8500-prcmu.c:706", (keep_ap_pll ? 1 : 0), (tcdm_base + PRCM_REQ_MB0_AP_PLL_STATE));
+	pete_writeb("drivers/mfd/db8500-prcmu.c:707", (keep_ulp_clk ? 1 : 0),
 		(tcdm_base + PRCM_REQ_MB0_ULP_CLOCK_STATE));
-	writeb(0, (tcdm_base + PRCM_REQ_MB0_DO_NOT_WFI));
-	writel(MBOX_BIT(0), PRCM_MBOX_CPU_SET);
+	pete_writeb("drivers/mfd/db8500-prcmu.c:709", 0, (tcdm_base + PRCM_REQ_MB0_DO_NOT_WFI));
+	pete_writel("drivers/mfd/db8500-prcmu.c:710", MBOX_BIT(0), PRCM_MBOX_CPU_SET);
 
 	spin_unlock_irqrestore(&mb0_transfer.lock, flags);
 
@@ -716,7 +716,7 @@ int db8500_prcmu_set_power_state(u8 state, bool keep_ulp_clk, bool keep_ap_pll)
 
 u8 db8500_prcmu_get_power_state_result(void)
 {
-	return readb(tcdm_base + PRCM_ACK_MB0_AP_PWRSTTR_STATUS);
+	return pete_readb("drivers/mfd/db8500-prcmu.c:719", tcdm_base + PRCM_ACK_MB0_AP_PWRSTTR_STATUS);
 }
 
 /* This function should only be called while mb0_transfer.lock is held. */
@@ -741,12 +741,12 @@ static void config_wakeups(void)
 		return;
 
 	for (i = 0; i < 2; i++) {
-		while (readl(PRCM_MBOX_CPU_VAL) & MBOX_BIT(0))
+		while (pete_readl("drivers/mfd/db8500-prcmu.c:744", PRCM_MBOX_CPU_VAL) & MBOX_BIT(0))
 			cpu_relax();
-		writel(dbb_events, (tcdm_base + PRCM_REQ_MB0_WAKEUP_8500));
-		writel(abb_events, (tcdm_base + PRCM_REQ_MB0_WAKEUP_4500));
-		writeb(header[i], (tcdm_base + PRCM_MBOX_HEADER_REQ_MB0));
-		writel(MBOX_BIT(0), PRCM_MBOX_CPU_SET);
+		pete_writel("drivers/mfd/db8500-prcmu.c:746", dbb_events, (tcdm_base + PRCM_REQ_MB0_WAKEUP_8500));
+		pete_writel("drivers/mfd/db8500-prcmu.c:747", abb_events, (tcdm_base + PRCM_REQ_MB0_WAKEUP_4500));
+		pete_writeb("drivers/mfd/db8500-prcmu.c:748", header[i], (tcdm_base + PRCM_MBOX_HEADER_REQ_MB0));
+		pete_writel("drivers/mfd/db8500-prcmu.c:749", MBOX_BIT(0), PRCM_MBOX_CPU_SET);
 	}
 	last_dbb_events = dbb_events;
 	last_abb_events = abb_events;
@@ -787,7 +787,7 @@ void db8500_prcmu_config_abb_event_readout(u32 abb_events)
 
 void db8500_prcmu_get_abb_event_buffer(void __iomem **buf)
 {
-	if (readb(tcdm_base + PRCM_ACK_MB0_READ_POINTER) & 1)
+	if (pete_readb("drivers/mfd/db8500-prcmu.c:790", tcdm_base + PRCM_ACK_MB0_READ_POINTER) & 1)
 		*buf = (tcdm_base + PRCM_ACK_MB0_WAKEUP_1_4500);
 	else
 		*buf = (tcdm_base + PRCM_ACK_MB0_WAKEUP_0_4500);
@@ -811,14 +811,14 @@ int db8500_prcmu_set_arm_opp(u8 opp)
 
 	mutex_lock(&mb1_transfer.lock);
 
-	while (readl(PRCM_MBOX_CPU_VAL) & MBOX_BIT(1))
+	while (pete_readl("drivers/mfd/db8500-prcmu.c:814", PRCM_MBOX_CPU_VAL) & MBOX_BIT(1))
 		cpu_relax();
 
-	writeb(MB1H_ARM_APE_OPP, (tcdm_base + PRCM_MBOX_HEADER_REQ_MB1));
-	writeb(opp, (tcdm_base + PRCM_REQ_MB1_ARM_OPP));
-	writeb(APE_NO_CHANGE, (tcdm_base + PRCM_REQ_MB1_APE_OPP));
+	pete_writeb("drivers/mfd/db8500-prcmu.c:817", MB1H_ARM_APE_OPP, (tcdm_base + PRCM_MBOX_HEADER_REQ_MB1));
+	pete_writeb("drivers/mfd/db8500-prcmu.c:818", opp, (tcdm_base + PRCM_REQ_MB1_ARM_OPP));
+	pete_writeb("drivers/mfd/db8500-prcmu.c:819", APE_NO_CHANGE, (tcdm_base + PRCM_REQ_MB1_APE_OPP));
 
-	writel(MBOX_BIT(1), PRCM_MBOX_CPU_SET);
+	pete_writel("drivers/mfd/db8500-prcmu.c:821", MBOX_BIT(1), PRCM_MBOX_CPU_SET);
 	wait_for_completion(&mb1_transfer.work);
 
 	if ((mb1_transfer.ack.header != MB1H_ARM_APE_OPP) ||
@@ -837,7 +837,7 @@ int db8500_prcmu_set_arm_opp(u8 opp)
  */
 int db8500_prcmu_get_arm_opp(void)
 {
-	return readb(tcdm_base + PRCM_ACK_MB1_CURRENT_ARM_OPP);
+	return pete_readb("drivers/mfd/db8500-prcmu.c:840", tcdm_base + PRCM_ACK_MB1_CURRENT_ARM_OPP);
 }
 
 /**
@@ -847,7 +847,7 @@ int db8500_prcmu_get_arm_opp(void)
  */
 int db8500_prcmu_get_ddr_opp(void)
 {
-	return readb(PRCM_DDR_SUBSYS_APE_MINBW);
+	return pete_readb("drivers/mfd/db8500-prcmu.c:850", PRCM_DDR_SUBSYS_APE_MINBW);
 }
 
 /* Divide the frequency of certain clocks by 2 for APE_50_PARTLY_25_OPP. */
@@ -863,14 +863,14 @@ static void request_even_slower_clocks(bool enable)
 	spin_lock_irqsave(&clk_mgt_lock, flags);
 
 	/* Grab the HW semaphore. */
-	while ((readl(PRCM_SEM) & PRCM_SEM_PRCM_SEM) != 0)
+	while ((pete_readl("drivers/mfd/db8500-prcmu.c:866", PRCM_SEM) & PRCM_SEM_PRCM_SEM) != 0)
 		cpu_relax();
 
 	for (i = 0; i < ARRAY_SIZE(clock_reg); i++) {
 		u32 val;
 		u32 div;
 
-		val = readl(prcmu_base + clock_reg[i]);
+		val = pete_readl("drivers/mfd/db8500-prcmu.c:873", prcmu_base + clock_reg[i]);
 		div = (val & PRCM_CLK_MGT_CLKPLLDIV_MASK);
 		if (enable) {
 			if ((div <= 1) || (div > 15)) {
@@ -886,12 +886,12 @@ static void request_even_slower_clocks(bool enable)
 		}
 		val = ((val & ~PRCM_CLK_MGT_CLKPLLDIV_MASK) |
 			(div & PRCM_CLK_MGT_CLKPLLDIV_MASK));
-		writel(val, prcmu_base + clock_reg[i]);
+		pete_writel("drivers/mfd/db8500-prcmu.c:889", val, prcmu_base + clock_reg[i]);
 	}
 
 unlock_and_return:
 	/* Release the HW semaphore. */
-	writel(0, PRCM_SEM);
+	pete_writel("drivers/mfd/db8500-prcmu.c:894", 0, PRCM_SEM);
 
 	spin_unlock_irqrestore(&clk_mgt_lock, flags);
 }
@@ -918,15 +918,15 @@ int db8500_prcmu_set_ape_opp(u8 opp)
 	if ((opp != APE_100_OPP) && (mb1_transfer.ape_opp != APE_100_OPP))
 		goto skip_message;
 
-	while (readl(PRCM_MBOX_CPU_VAL) & MBOX_BIT(1))
+	while (pete_readl("drivers/mfd/db8500-prcmu.c:921", PRCM_MBOX_CPU_VAL) & MBOX_BIT(1))
 		cpu_relax();
 
-	writeb(MB1H_ARM_APE_OPP, (tcdm_base + PRCM_MBOX_HEADER_REQ_MB1));
-	writeb(ARM_NO_CHANGE, (tcdm_base + PRCM_REQ_MB1_ARM_OPP));
-	writeb(((opp == APE_50_PARTLY_25_OPP) ? APE_50_OPP : opp),
+	pete_writeb("drivers/mfd/db8500-prcmu.c:924", MB1H_ARM_APE_OPP, (tcdm_base + PRCM_MBOX_HEADER_REQ_MB1));
+	pete_writeb("drivers/mfd/db8500-prcmu.c:925", ARM_NO_CHANGE, (tcdm_base + PRCM_REQ_MB1_ARM_OPP));
+	pete_writeb("drivers/mfd/db8500-prcmu.c:926", ((opp == APE_50_PARTLY_25_OPP) ? APE_50_OPP : opp),
 		(tcdm_base + PRCM_REQ_MB1_APE_OPP));
 
-	writel(MBOX_BIT(1), PRCM_MBOX_CPU_SET);
+	pete_writel("drivers/mfd/db8500-prcmu.c:929", MBOX_BIT(1), PRCM_MBOX_CPU_SET);
 	wait_for_completion(&mb1_transfer.work);
 
 	if ((mb1_transfer.ack.header != MB1H_ARM_APE_OPP) ||
@@ -952,7 +952,7 @@ skip_message:
  */
 int db8500_prcmu_get_ape_opp(void)
 {
-	return readb(tcdm_base + PRCM_ACK_MB1_CURRENT_APE_OPP);
+	return pete_readb("drivers/mfd/db8500-prcmu.c:955", tcdm_base + PRCM_ACK_MB1_CURRENT_APE_OPP);
 }
 
 /**
@@ -983,12 +983,12 @@ int db8500_prcmu_request_ape_opp_100_voltage(bool enable)
 		header = MB1H_RELEASE_APE_OPP_100_VOLT;
 	}
 
-	while (readl(PRCM_MBOX_CPU_VAL) & MBOX_BIT(1))
+	while (pete_readl("drivers/mfd/db8500-prcmu.c:986", PRCM_MBOX_CPU_VAL) & MBOX_BIT(1))
 		cpu_relax();
 
-	writeb(header, (tcdm_base + PRCM_MBOX_HEADER_REQ_MB1));
+	pete_writeb("drivers/mfd/db8500-prcmu.c:989", header, (tcdm_base + PRCM_MBOX_HEADER_REQ_MB1));
 
-	writel(MBOX_BIT(1), PRCM_MBOX_CPU_SET);
+	pete_writel("drivers/mfd/db8500-prcmu.c:991", MBOX_BIT(1), PRCM_MBOX_CPU_SET);
 	wait_for_completion(&mb1_transfer.work);
 
 	if ((mb1_transfer.ack.header != header) ||
@@ -1012,13 +1012,13 @@ int prcmu_release_usb_wakeup_state(void)
 
 	mutex_lock(&mb1_transfer.lock);
 
-	while (readl(PRCM_MBOX_CPU_VAL) & MBOX_BIT(1))
+	while (pete_readl("drivers/mfd/db8500-prcmu.c:1015", PRCM_MBOX_CPU_VAL) & MBOX_BIT(1))
 		cpu_relax();
 
-	writeb(MB1H_RELEASE_USB_WAKEUP,
+	pete_writeb("drivers/mfd/db8500-prcmu.c:1018", MB1H_RELEASE_USB_WAKEUP,
 		(tcdm_base + PRCM_MBOX_HEADER_REQ_MB1));
 
-	writel(MBOX_BIT(1), PRCM_MBOX_CPU_SET);
+	pete_writel("drivers/mfd/db8500-prcmu.c:1021", MBOX_BIT(1), PRCM_MBOX_CPU_SET);
 	wait_for_completion(&mb1_transfer.work);
 
 	if ((mb1_transfer.ack.header != MB1H_RELEASE_USB_WAKEUP) ||
@@ -1043,13 +1043,13 @@ static int request_pll(u8 clock, bool enable)
 
 	mutex_lock(&mb1_transfer.lock);
 
-	while (readl(PRCM_MBOX_CPU_VAL) & MBOX_BIT(1))
+	while (pete_readl("drivers/mfd/db8500-prcmu.c:1046", PRCM_MBOX_CPU_VAL) & MBOX_BIT(1))
 		cpu_relax();
 
-	writeb(MB1H_PLL_ON_OFF, (tcdm_base + PRCM_MBOX_HEADER_REQ_MB1));
-	writeb(clock, (tcdm_base + PRCM_REQ_MB1_PLL_ON_OFF));
+	pete_writeb("drivers/mfd/db8500-prcmu.c:1049", MB1H_PLL_ON_OFF, (tcdm_base + PRCM_MBOX_HEADER_REQ_MB1));
+	pete_writeb("drivers/mfd/db8500-prcmu.c:1050", clock, (tcdm_base + PRCM_REQ_MB1_PLL_ON_OFF));
 
-	writel(MBOX_BIT(1), PRCM_MBOX_CPU_SET);
+	pete_writel("drivers/mfd/db8500-prcmu.c:1052", MBOX_BIT(1), PRCM_MBOX_CPU_SET);
 	wait_for_completion(&mb1_transfer.work);
 
 	if (mb1_transfer.ack.header != MB1H_PLL_ON_OFF)
@@ -1095,17 +1095,17 @@ int db8500_prcmu_set_epod(u16 epod_id, u8 epod_state)
 	mutex_lock(&mb2_transfer.lock);
 
 	/* wait for mailbox */
-	while (readl(PRCM_MBOX_CPU_VAL) & MBOX_BIT(2))
+	while (pete_readl("drivers/mfd/db8500-prcmu.c:1098", PRCM_MBOX_CPU_VAL) & MBOX_BIT(2))
 		cpu_relax();
 
 	/* fill in mailbox */
 	for (i = 0; i < NUM_EPOD_ID; i++)
-		writeb(EPOD_STATE_NO_CHANGE, (tcdm_base + PRCM_REQ_MB2 + i));
-	writeb(epod_state, (tcdm_base + PRCM_REQ_MB2 + epod_id));
+		pete_writeb("drivers/mfd/db8500-prcmu.c:1103", EPOD_STATE_NO_CHANGE, (tcdm_base + PRCM_REQ_MB2 + i));
+	pete_writeb("drivers/mfd/db8500-prcmu.c:1104", epod_state, (tcdm_base + PRCM_REQ_MB2 + epod_id));
 
-	writeb(MB2H_DPS, (tcdm_base + PRCM_MBOX_HEADER_REQ_MB2));
+	pete_writeb("drivers/mfd/db8500-prcmu.c:1106", MB2H_DPS, (tcdm_base + PRCM_MBOX_HEADER_REQ_MB2));
 
-	writel(MBOX_BIT(2), PRCM_MBOX_CPU_SET);
+	pete_writel("drivers/mfd/db8500-prcmu.c:1108", MBOX_BIT(2), PRCM_MBOX_CPU_SET);
 
 	/*
 	 * The current firmware version does not handle errors correctly,
@@ -1163,8 +1163,8 @@ void prcmu_configure_auto_pm(struct prcmu_auto_pm_config *sleep,
 	 * fields in mailbox 2, but these fields are only used as shared
 	 * variables - i.e. there is no need to send a message.
 	 */
-	writel(sleep_cfg, (tcdm_base + PRCM_REQ_MB2_AUTO_PM_SLEEP));
-	writel(idle_cfg, (tcdm_base + PRCM_REQ_MB2_AUTO_PM_IDLE));
+	pete_writel("drivers/mfd/db8500-prcmu.c:1166", sleep_cfg, (tcdm_base + PRCM_REQ_MB2_AUTO_PM_SLEEP));
+	pete_writel("drivers/mfd/db8500-prcmu.c:1167", idle_cfg, (tcdm_base + PRCM_REQ_MB2_AUTO_PM_IDLE));
 
 	mb2_transfer.auto_pm_enabled =
 		((sleep->sva_auto_pm_enable == PRCMU_AUTO_PM_ON) ||
@@ -1192,13 +1192,13 @@ static int request_sysclk(bool enable)
 
 	spin_lock_irqsave(&mb3_transfer.lock, flags);
 
-	while (readl(PRCM_MBOX_CPU_VAL) & MBOX_BIT(3))
+	while (pete_readl("drivers/mfd/db8500-prcmu.c:1195", PRCM_MBOX_CPU_VAL) & MBOX_BIT(3))
 		cpu_relax();
 
-	writeb((enable ? ON : OFF), (tcdm_base + PRCM_REQ_MB3_SYSCLK_MGT));
+	pete_writeb("drivers/mfd/db8500-prcmu.c:1198", (enable ? ON : OFF), (tcdm_base + PRCM_REQ_MB3_SYSCLK_MGT));
 
-	writeb(MB3H_SYSCLK, (tcdm_base + PRCM_MBOX_HEADER_REQ_MB3));
-	writel(MBOX_BIT(3), PRCM_MBOX_CPU_SET);
+	pete_writeb("drivers/mfd/db8500-prcmu.c:1200", MB3H_SYSCLK, (tcdm_base + PRCM_MBOX_HEADER_REQ_MB3));
+	pete_writel("drivers/mfd/db8500-prcmu.c:1201", MBOX_BIT(3), PRCM_MBOX_CPU_SET);
 
 	spin_unlock_irqrestore(&mb3_transfer.lock, flags);
 
@@ -1237,7 +1237,7 @@ static int request_timclk(bool enable)
 			PRCM_TCR_DOZE_MODE |
 			PRCM_TCR_TENSEL_MASK;
 
-	writel(val, PRCM_TCR);
+	pete_writel("drivers/mfd/db8500-prcmu.c:1240", val, PRCM_TCR);
 
 	return 0;
 }
@@ -1250,20 +1250,20 @@ static int request_clock(u8 clock, bool enable)
 	spin_lock_irqsave(&clk_mgt_lock, flags);
 
 	/* Grab the HW semaphore. */
-	while ((readl(PRCM_SEM) & PRCM_SEM_PRCM_SEM) != 0)
+	while ((pete_readl("drivers/mfd/db8500-prcmu.c:1253", PRCM_SEM) & PRCM_SEM_PRCM_SEM) != 0)
 		cpu_relax();
 
-	val = readl(prcmu_base + clk_mgt[clock].offset);
+	val = pete_readl("drivers/mfd/db8500-prcmu.c:1256", prcmu_base + clk_mgt[clock].offset);
 	if (enable) {
 		val |= (PRCM_CLK_MGT_CLKEN | clk_mgt[clock].pllsw);
 	} else {
 		clk_mgt[clock].pllsw = (val & PRCM_CLK_MGT_CLKPLLSW_MASK);
 		val &= ~(PRCM_CLK_MGT_CLKEN | PRCM_CLK_MGT_CLKPLLSW_MASK);
 	}
-	writel(val, prcmu_base + clk_mgt[clock].offset);
+	pete_writel("drivers/mfd/db8500-prcmu.c:1263", val, prcmu_base + clk_mgt[clock].offset);
 
 	/* Release the HW semaphore. */
-	writel(0, PRCM_SEM);
+	pete_writel("drivers/mfd/db8500-prcmu.c:1266", 0, PRCM_SEM);
 
 	spin_unlock_irqrestore(&clk_mgt_lock, flags);
 
@@ -1276,15 +1276,15 @@ static int request_sga_clock(u8 clock, bool enable)
 	int ret;
 
 	if (enable) {
-		val = readl(PRCM_CGATING_BYPASS);
-		writel(val | PRCM_CGATING_BYPASS_ICN2, PRCM_CGATING_BYPASS);
+		val = pete_readl("drivers/mfd/db8500-prcmu.c:1279", PRCM_CGATING_BYPASS);
+		pete_writel("drivers/mfd/db8500-prcmu.c:1280", val | PRCM_CGATING_BYPASS_ICN2, PRCM_CGATING_BYPASS);
 	}
 
 	ret = request_clock(clock, enable);
 
 	if (!ret && !enable) {
-		val = readl(PRCM_CGATING_BYPASS);
-		writel(val & ~PRCM_CGATING_BYPASS_ICN2, PRCM_CGATING_BYPASS);
+		val = pete_readl("drivers/mfd/db8500-prcmu.c:1286", PRCM_CGATING_BYPASS);
+		pete_writel("drivers/mfd/db8500-prcmu.c:1287", val & ~PRCM_CGATING_BYPASS_ICN2, PRCM_CGATING_BYPASS);
 	}
 
 	return ret;
@@ -1292,7 +1292,7 @@ static int request_sga_clock(u8 clock, bool enable)
 
 static inline bool plldsi_locked(void)
 {
-	return (readl(PRCM_PLLDSI_LOCKP) &
+	return (pete_readl("drivers/mfd/db8500-prcmu.c:1295", PRCM_PLLDSI_LOCKP) &
 		(PRCM_PLLDSI_LOCKP_PRCM_PLLDSI_LOCKP10 |
 		 PRCM_PLLDSI_LOCKP_PRCM_PLLDSI_LOCKP3)) ==
 		(PRCM_PLLDSI_LOCKP_PRCM_PLLDSI_LOCKP10 |
@@ -1304,16 +1304,16 @@ static int request_plldsi(bool enable)
 	int r = 0;
 	u32 val;
 
-	writel((PRCM_MMIP_LS_CLAMP_DSIPLL_CLAMP |
+	pete_writel("drivers/mfd/db8500-prcmu.c:1307", (PRCM_MMIP_LS_CLAMP_DSIPLL_CLAMP |
 		PRCM_MMIP_LS_CLAMP_DSIPLL_CLAMPI), (enable ?
 		PRCM_MMIP_LS_CLAMP_CLR : PRCM_MMIP_LS_CLAMP_SET));
 
-	val = readl(PRCM_PLLDSI_ENABLE);
+	val = pete_readl("drivers/mfd/db8500-prcmu.c:1311", PRCM_PLLDSI_ENABLE);
 	if (enable)
 		val |= PRCM_PLLDSI_ENABLE_PRCM_PLLDSI_ENABLE;
 	else
 		val &= ~PRCM_PLLDSI_ENABLE_PRCM_PLLDSI_ENABLE;
-	writel(val, PRCM_PLLDSI_ENABLE);
+	pete_writel("drivers/mfd/db8500-prcmu.c:1316", val, PRCM_PLLDSI_ENABLE);
 
 	if (enable) {
 		unsigned int i;
@@ -1324,18 +1324,18 @@ static int request_plldsi(bool enable)
 			locked = plldsi_locked();
 		}
 		if (locked) {
-			writel(PRCM_APE_RESETN_DSIPLL_RESETN,
+			pete_writel("drivers/mfd/db8500-prcmu.c:1327", PRCM_APE_RESETN_DSIPLL_RESETN,
 				PRCM_APE_RESETN_SET);
 		} else {
-			writel((PRCM_MMIP_LS_CLAMP_DSIPLL_CLAMP |
+			pete_writel("drivers/mfd/db8500-prcmu.c:1330", (PRCM_MMIP_LS_CLAMP_DSIPLL_CLAMP |
 				PRCM_MMIP_LS_CLAMP_DSIPLL_CLAMPI),
 				PRCM_MMIP_LS_CLAMP_SET);
 			val &= ~PRCM_PLLDSI_ENABLE_PRCM_PLLDSI_ENABLE;
-			writel(val, PRCM_PLLDSI_ENABLE);
+			pete_writel("drivers/mfd/db8500-prcmu.c:1334", val, PRCM_PLLDSI_ENABLE);
 			r = -EAGAIN;
 		}
 	} else {
-		writel(PRCM_APE_RESETN_DSIPLL_RESETN, PRCM_APE_RESETN_CLR);
+		pete_writel("drivers/mfd/db8500-prcmu.c:1338", PRCM_APE_RESETN_DSIPLL_RESETN, PRCM_APE_RESETN_CLR);
 	}
 	return r;
 }
@@ -1344,11 +1344,11 @@ static int request_dsiclk(u8 n, bool enable)
 {
 	u32 val;
 
-	val = readl(PRCM_DSI_PLLOUT_SEL);
+	val = pete_readl("drivers/mfd/db8500-prcmu.c:1347", PRCM_DSI_PLLOUT_SEL);
 	val &= ~dsiclk[n].divsel_mask;
 	val |= ((enable ? dsiclk[n].divsel : PRCM_DSI_PLLOUT_SEL_OFF) <<
 		dsiclk[n].divsel_shift);
-	writel(val, PRCM_DSI_PLLOUT_SEL);
+	pete_writel("drivers/mfd/db8500-prcmu.c:1351", val, PRCM_DSI_PLLOUT_SEL);
 	return 0;
 }
 
@@ -1356,9 +1356,9 @@ static int request_dsiescclk(u8 n, bool enable)
 {
 	u32 val;
 
-	val = readl(PRCM_DSITVCLK_DIV);
+	val = pete_readl("drivers/mfd/db8500-prcmu.c:1359", PRCM_DSITVCLK_DIV);
 	enable ? (val |= dsiescclk[n].en) : (val &= ~dsiescclk[n].en);
-	writel(val, PRCM_DSITVCLK_DIV);
+	pete_writel("drivers/mfd/db8500-prcmu.c:1361", val, PRCM_DSITVCLK_DIV);
 	return 0;
 }
 
@@ -1400,7 +1400,7 @@ static unsigned long pll_rate(void __iomem *reg, unsigned long src_rate,
 	u32 d;
 	u32 div = 1;
 
-	val = readl(reg);
+	val = pete_readl("drivers/mfd/db8500-prcmu.c:1403", reg);
 
 	rate = src_rate;
 	rate *= ((val & PRCM_PLL_FREQ_D_MASK) >> PRCM_PLL_FREQ_D_SHIFT);
@@ -1436,7 +1436,7 @@ static unsigned long clock_rate(u8 clock)
 	u32 pllsw;
 	unsigned long rate = ROOT_CLOCK_RATE;
 
-	val = readl(prcmu_base + clk_mgt[clock].offset);
+	val = pete_readl("drivers/mfd/db8500-prcmu.c:1439", prcmu_base + clk_mgt[clock].offset);
 
 	if (val & PRCM_CLK_MGT_CLK38) {
 		if (clk_mgt[clock].clk38div && (val & PRCM_CLK_MGT_CLK38DIV))
@@ -1475,7 +1475,7 @@ static unsigned long armss_rate(void)
 	u32 r;
 	unsigned long rate;
 
-	r = readl(PRCM_ARM_CHGCLKREQ);
+	r = pete_readl("drivers/mfd/db8500-prcmu.c:1478", PRCM_ARM_CHGCLKREQ);
 
 	if (r & PRCM_ARM_CHGCLKREQ_PRCM_ARM_CHGCLKREQ) {
 		/* External ARMCLKFIX clock */
@@ -1487,7 +1487,7 @@ static unsigned long armss_rate(void)
 			rate /= 2;
 
 		/* Check PRCM_ARMCLKFIX_MGT divider */
-		r = readl(PRCM_ARMCLKFIX_MGT);
+		r = pete_readl("drivers/mfd/db8500-prcmu.c:1490", PRCM_ARMCLKFIX_MGT);
 		r &= PRCM_CLK_MGT_CLKPLLDIV_MASK;
 		rate /= r;
 
@@ -1503,7 +1503,7 @@ static unsigned long dsiclk_rate(u8 n)
 	u32 divsel;
 	u32 div = 1;
 
-	divsel = readl(PRCM_DSI_PLLOUT_SEL);
+	divsel = pete_readl("drivers/mfd/db8500-prcmu.c:1506", PRCM_DSI_PLLOUT_SEL);
 	divsel = ((divsel & dsiclk[n].divsel_mask) >> dsiclk[n].divsel_shift);
 
 	if (divsel == PRCM_DSI_PLLOUT_SEL_OFF)
@@ -1530,7 +1530,7 @@ static unsigned long dsiescclk_rate(u8 n)
 {
 	u32 div;
 
-	div = readl(PRCM_DSITVCLK_DIV);
+	div = pete_readl("drivers/mfd/db8500-prcmu.c:1533", PRCM_DSITVCLK_DIV);
 	div = ((div & dsiescclk[n].div_mask) >> (dsiescclk[n].div_shift));
 	return clock_rate(PRCMU_TVCLK) / max((u32)1, div);
 }
@@ -1597,7 +1597,7 @@ static long round_clock_rate(u8 clock, unsigned long rate)
 	unsigned long src_rate;
 	long rounded_rate;
 
-	val = readl(prcmu_base + clk_mgt[clock].offset);
+	val = pete_readl("drivers/mfd/db8500-prcmu.c:1600", prcmu_base + clk_mgt[clock].offset);
 	src_rate = clock_source_rate((val | clk_mgt[clock].pllsw),
 		clk_mgt[clock].branch);
 	div = clock_divider(src_rate, rate);
@@ -1754,10 +1754,10 @@ static void set_clock_rate(u8 clock, unsigned long rate)
 	spin_lock_irqsave(&clk_mgt_lock, flags);
 
 	/* Grab the HW semaphore. */
-	while ((readl(PRCM_SEM) & PRCM_SEM_PRCM_SEM) != 0)
+	while ((pete_readl("drivers/mfd/db8500-prcmu.c:1757", PRCM_SEM) & PRCM_SEM_PRCM_SEM) != 0)
 		cpu_relax();
 
-	val = readl(prcmu_base + clk_mgt[clock].offset);
+	val = pete_readl("drivers/mfd/db8500-prcmu.c:1760", prcmu_base + clk_mgt[clock].offset);
 	src_rate = clock_source_rate((val | clk_mgt[clock].pllsw),
 		clk_mgt[clock].branch);
 	div = clock_divider(src_rate, rate);
@@ -1785,10 +1785,10 @@ static void set_clock_rate(u8 clock, unsigned long rate)
 		val &= ~PRCM_CLK_MGT_CLKPLLDIV_MASK;
 		val |= min(div, (u32)31);
 	}
-	writel(val, prcmu_base + clk_mgt[clock].offset);
+	pete_writel("drivers/mfd/db8500-prcmu.c:1788", val, prcmu_base + clk_mgt[clock].offset);
 
 	/* Release the HW semaphore. */
-	writel(0, PRCM_SEM);
+	pete_writel("drivers/mfd/db8500-prcmu.c:1791", 0, PRCM_SEM);
 
 	spin_unlock_irqrestore(&clk_mgt_lock, flags);
 }
@@ -1865,7 +1865,7 @@ static int set_plldsi_rate(unsigned long rate)
 		return -EINVAL;
 
 	pll_freq |= (1 << PRCM_PLL_FREQ_N_SHIFT);
-	writel(pll_freq, PRCM_PLLDSI_FREQ);
+	pete_writel("drivers/mfd/db8500-prcmu.c:1868", pll_freq, PRCM_PLLDSI_FREQ);
 
 	return 0;
 }
@@ -1882,10 +1882,10 @@ static void set_dsiclk_rate(u8 n, unsigned long rate)
 			   (div == 2) ? PRCM_DSI_PLLOUT_SEL_PHI_2 :
 			   /* else */	PRCM_DSI_PLLOUT_SEL_PHI_4;
 
-	val = readl(PRCM_DSI_PLLOUT_SEL);
+	val = pete_readl("drivers/mfd/db8500-prcmu.c:1885", PRCM_DSI_PLLOUT_SEL);
 	val &= ~dsiclk[n].divsel_mask;
 	val |= (dsiclk[n].divsel << dsiclk[n].divsel_shift);
-	writel(val, PRCM_DSI_PLLOUT_SEL);
+	pete_writel("drivers/mfd/db8500-prcmu.c:1888", val, PRCM_DSI_PLLOUT_SEL);
 }
 
 static void set_dsiescclk_rate(u8 n, unsigned long rate)
@@ -1894,10 +1894,10 @@ static void set_dsiescclk_rate(u8 n, unsigned long rate)
 	u32 div;
 
 	div = clock_divider(clock_rate(PRCMU_TVCLK), rate);
-	val = readl(PRCM_DSITVCLK_DIV);
+	val = pete_readl("drivers/mfd/db8500-prcmu.c:1897", PRCM_DSITVCLK_DIV);
 	val &= ~dsiescclk[n].div_mask;
 	val |= (min(div, (u32)255) << dsiescclk[n].div_shift);
-	writel(val, PRCM_DSITVCLK_DIV);
+	pete_writel("drivers/mfd/db8500-prcmu.c:1900", val, PRCM_DSITVCLK_DIV);
 }
 
 int prcmu_set_clock_rate(u8 clock, unsigned long rate)
@@ -1923,17 +1923,17 @@ int db8500_prcmu_config_esram0_deep_sleep(u8 state)
 
 	mutex_lock(&mb4_transfer.lock);
 
-	while (readl(PRCM_MBOX_CPU_VAL) & MBOX_BIT(4))
+	while (pete_readl("drivers/mfd/db8500-prcmu.c:1926", PRCM_MBOX_CPU_VAL) & MBOX_BIT(4))
 		cpu_relax();
 
-	writeb(MB4H_MEM_ST, (tcdm_base + PRCM_MBOX_HEADER_REQ_MB4));
-	writeb(((DDR_PWR_STATE_OFFHIGHLAT << 4) | DDR_PWR_STATE_ON),
+	pete_writeb("drivers/mfd/db8500-prcmu.c:1929", MB4H_MEM_ST, (tcdm_base + PRCM_MBOX_HEADER_REQ_MB4));
+	pete_writeb("drivers/mfd/db8500-prcmu.c:1930", ((DDR_PWR_STATE_OFFHIGHLAT << 4) | DDR_PWR_STATE_ON),
 	       (tcdm_base + PRCM_REQ_MB4_DDR_ST_AP_SLEEP_IDLE));
-	writeb(DDR_PWR_STATE_ON,
+	pete_writeb("drivers/mfd/db8500-prcmu.c:1932", DDR_PWR_STATE_ON,
 	       (tcdm_base + PRCM_REQ_MB4_DDR_ST_AP_DEEP_IDLE));
-	writeb(state, (tcdm_base + PRCM_REQ_MB4_ESRAM0_ST));
+	pete_writeb("drivers/mfd/db8500-prcmu.c:1934", state, (tcdm_base + PRCM_REQ_MB4_ESRAM0_ST));
 
-	writel(MBOX_BIT(4), PRCM_MBOX_CPU_SET);
+	pete_writel("drivers/mfd/db8500-prcmu.c:1936", MBOX_BIT(4), PRCM_MBOX_CPU_SET);
 	wait_for_completion(&mb4_transfer.work);
 
 	mutex_unlock(&mb4_transfer.lock);
@@ -1945,13 +1945,13 @@ int db8500_prcmu_config_hotdog(u8 threshold)
 {
 	mutex_lock(&mb4_transfer.lock);
 
-	while (readl(PRCM_MBOX_CPU_VAL) & MBOX_BIT(4))
+	while (pete_readl("drivers/mfd/db8500-prcmu.c:1948", PRCM_MBOX_CPU_VAL) & MBOX_BIT(4))
 		cpu_relax();
 
-	writeb(threshold, (tcdm_base + PRCM_REQ_MB4_HOTDOG_THRESHOLD));
-	writeb(MB4H_HOTDOG, (tcdm_base + PRCM_MBOX_HEADER_REQ_MB4));
+	pete_writeb("drivers/mfd/db8500-prcmu.c:1951", threshold, (tcdm_base + PRCM_REQ_MB4_HOTDOG_THRESHOLD));
+	pete_writeb("drivers/mfd/db8500-prcmu.c:1952", MB4H_HOTDOG, (tcdm_base + PRCM_MBOX_HEADER_REQ_MB4));
 
-	writel(MBOX_BIT(4), PRCM_MBOX_CPU_SET);
+	pete_writel("drivers/mfd/db8500-prcmu.c:1954", MBOX_BIT(4), PRCM_MBOX_CPU_SET);
 	wait_for_completion(&mb4_transfer.work);
 
 	mutex_unlock(&mb4_transfer.lock);
@@ -1963,16 +1963,16 @@ int db8500_prcmu_config_hotmon(u8 low, u8 high)
 {
 	mutex_lock(&mb4_transfer.lock);
 
-	while (readl(PRCM_MBOX_CPU_VAL) & MBOX_BIT(4))
+	while (pete_readl("drivers/mfd/db8500-prcmu.c:1966", PRCM_MBOX_CPU_VAL) & MBOX_BIT(4))
 		cpu_relax();
 
-	writeb(low, (tcdm_base + PRCM_REQ_MB4_HOTMON_LOW));
-	writeb(high, (tcdm_base + PRCM_REQ_MB4_HOTMON_HIGH));
-	writeb((HOTMON_CONFIG_LOW | HOTMON_CONFIG_HIGH),
+	pete_writeb("drivers/mfd/db8500-prcmu.c:1969", low, (tcdm_base + PRCM_REQ_MB4_HOTMON_LOW));
+	pete_writeb("drivers/mfd/db8500-prcmu.c:1970", high, (tcdm_base + PRCM_REQ_MB4_HOTMON_HIGH));
+	pete_writeb("drivers/mfd/db8500-prcmu.c:1971", (HOTMON_CONFIG_LOW | HOTMON_CONFIG_HIGH),
 		(tcdm_base + PRCM_REQ_MB4_HOTMON_CONFIG));
-	writeb(MB4H_HOTMON, (tcdm_base + PRCM_MBOX_HEADER_REQ_MB4));
+	pete_writeb("drivers/mfd/db8500-prcmu.c:1973", MB4H_HOTMON, (tcdm_base + PRCM_MBOX_HEADER_REQ_MB4));
 
-	writel(MBOX_BIT(4), PRCM_MBOX_CPU_SET);
+	pete_writel("drivers/mfd/db8500-prcmu.c:1975", MBOX_BIT(4), PRCM_MBOX_CPU_SET);
 	wait_for_completion(&mb4_transfer.work);
 
 	mutex_unlock(&mb4_transfer.lock);
@@ -1985,13 +1985,13 @@ static int config_hot_period(u16 val)
 {
 	mutex_lock(&mb4_transfer.lock);
 
-	while (readl(PRCM_MBOX_CPU_VAL) & MBOX_BIT(4))
+	while (pete_readl("drivers/mfd/db8500-prcmu.c:1988", PRCM_MBOX_CPU_VAL) & MBOX_BIT(4))
 		cpu_relax();
 
-	writew(val, (tcdm_base + PRCM_REQ_MB4_HOT_PERIOD));
-	writeb(MB4H_HOT_PERIOD, (tcdm_base + PRCM_MBOX_HEADER_REQ_MB4));
+	pete_writew("drivers/mfd/db8500-prcmu.c:1991", val, (tcdm_base + PRCM_REQ_MB4_HOT_PERIOD));
+	pete_writeb("drivers/mfd/db8500-prcmu.c:1992", MB4H_HOT_PERIOD, (tcdm_base + PRCM_MBOX_HEADER_REQ_MB4));
 
-	writel(MBOX_BIT(4), PRCM_MBOX_CPU_SET);
+	pete_writel("drivers/mfd/db8500-prcmu.c:1994", MBOX_BIT(4), PRCM_MBOX_CPU_SET);
 	wait_for_completion(&mb4_transfer.work);
 
 	mutex_unlock(&mb4_transfer.lock);
@@ -2019,17 +2019,17 @@ static int prcmu_a9wdog(u8 cmd, u8 d0, u8 d1, u8 d2, u8 d3)
 
 	mutex_lock(&mb4_transfer.lock);
 
-	while (readl(PRCM_MBOX_CPU_VAL) & MBOX_BIT(4))
+	while (pete_readl("drivers/mfd/db8500-prcmu.c:2022", PRCM_MBOX_CPU_VAL) & MBOX_BIT(4))
 		cpu_relax();
 
-	writeb(d0, (tcdm_base + PRCM_REQ_MB4_A9WDOG_0));
-	writeb(d1, (tcdm_base + PRCM_REQ_MB4_A9WDOG_1));
-	writeb(d2, (tcdm_base + PRCM_REQ_MB4_A9WDOG_2));
-	writeb(d3, (tcdm_base + PRCM_REQ_MB4_A9WDOG_3));
+	pete_writeb("drivers/mfd/db8500-prcmu.c:2025", d0, (tcdm_base + PRCM_REQ_MB4_A9WDOG_0));
+	pete_writeb("drivers/mfd/db8500-prcmu.c:2026", d1, (tcdm_base + PRCM_REQ_MB4_A9WDOG_1));
+	pete_writeb("drivers/mfd/db8500-prcmu.c:2027", d2, (tcdm_base + PRCM_REQ_MB4_A9WDOG_2));
+	pete_writeb("drivers/mfd/db8500-prcmu.c:2028", d3, (tcdm_base + PRCM_REQ_MB4_A9WDOG_3));
 
-	writeb(cmd, (tcdm_base + PRCM_MBOX_HEADER_REQ_MB4));
+	pete_writeb("drivers/mfd/db8500-prcmu.c:2030", cmd, (tcdm_base + PRCM_MBOX_HEADER_REQ_MB4));
 
-	writel(MBOX_BIT(4), PRCM_MBOX_CPU_SET);
+	pete_writel("drivers/mfd/db8500-prcmu.c:2032", MBOX_BIT(4), PRCM_MBOX_CPU_SET);
 	wait_for_completion(&mb4_transfer.work);
 
 	mutex_unlock(&mb4_transfer.lock);
@@ -2102,16 +2102,16 @@ int prcmu_abb_read(u8 slave, u8 reg, u8 *value, u8 size)
 
 	mutex_lock(&mb5_transfer.lock);
 
-	while (readl(PRCM_MBOX_CPU_VAL) & MBOX_BIT(5))
+	while (pete_readl("drivers/mfd/db8500-prcmu.c:2105", PRCM_MBOX_CPU_VAL) & MBOX_BIT(5))
 		cpu_relax();
 
-	writeb(0, (tcdm_base + PRCM_MBOX_HEADER_REQ_MB5));
-	writeb(PRCMU_I2C_READ(slave), (tcdm_base + PRCM_REQ_MB5_I2C_SLAVE_OP));
-	writeb(PRCMU_I2C_STOP_EN, (tcdm_base + PRCM_REQ_MB5_I2C_HW_BITS));
-	writeb(reg, (tcdm_base + PRCM_REQ_MB5_I2C_REG));
-	writeb(0, (tcdm_base + PRCM_REQ_MB5_I2C_VAL));
+	pete_writeb("drivers/mfd/db8500-prcmu.c:2108", 0, (tcdm_base + PRCM_MBOX_HEADER_REQ_MB5));
+	pete_writeb("drivers/mfd/db8500-prcmu.c:2109", PRCMU_I2C_READ(slave), (tcdm_base + PRCM_REQ_MB5_I2C_SLAVE_OP));
+	pete_writeb("drivers/mfd/db8500-prcmu.c:2110", PRCMU_I2C_STOP_EN, (tcdm_base + PRCM_REQ_MB5_I2C_HW_BITS));
+	pete_writeb("drivers/mfd/db8500-prcmu.c:2111", reg, (tcdm_base + PRCM_REQ_MB5_I2C_REG));
+	pete_writeb("drivers/mfd/db8500-prcmu.c:2112", 0, (tcdm_base + PRCM_REQ_MB5_I2C_VAL));
 
-	writel(MBOX_BIT(5), PRCM_MBOX_CPU_SET);
+	pete_writel("drivers/mfd/db8500-prcmu.c:2114", MBOX_BIT(5), PRCM_MBOX_CPU_SET);
 
 	if (!wait_for_completion_timeout(&mb5_transfer.work,
 				msecs_to_jiffies(20000))) {
@@ -2152,16 +2152,16 @@ int prcmu_abb_write_masked(u8 slave, u8 reg, u8 *value, u8 *mask, u8 size)
 
 	mutex_lock(&mb5_transfer.lock);
 
-	while (readl(PRCM_MBOX_CPU_VAL) & MBOX_BIT(5))
+	while (pete_readl("drivers/mfd/db8500-prcmu.c:2155", PRCM_MBOX_CPU_VAL) & MBOX_BIT(5))
 		cpu_relax();
 
-	writeb(~*mask, (tcdm_base + PRCM_MBOX_HEADER_REQ_MB5));
-	writeb(PRCMU_I2C_WRITE(slave), (tcdm_base + PRCM_REQ_MB5_I2C_SLAVE_OP));
-	writeb(PRCMU_I2C_STOP_EN, (tcdm_base + PRCM_REQ_MB5_I2C_HW_BITS));
-	writeb(reg, (tcdm_base + PRCM_REQ_MB5_I2C_REG));
-	writeb(*value, (tcdm_base + PRCM_REQ_MB5_I2C_VAL));
+	pete_writeb("drivers/mfd/db8500-prcmu.c:2158", ~*mask, (tcdm_base + PRCM_MBOX_HEADER_REQ_MB5));
+	pete_writeb("drivers/mfd/db8500-prcmu.c:2159", PRCMU_I2C_WRITE(slave), (tcdm_base + PRCM_REQ_MB5_I2C_SLAVE_OP));
+	pete_writeb("drivers/mfd/db8500-prcmu.c:2160", PRCMU_I2C_STOP_EN, (tcdm_base + PRCM_REQ_MB5_I2C_HW_BITS));
+	pete_writeb("drivers/mfd/db8500-prcmu.c:2161", reg, (tcdm_base + PRCM_REQ_MB5_I2C_REG));
+	pete_writeb("drivers/mfd/db8500-prcmu.c:2162", *value, (tcdm_base + PRCM_REQ_MB5_I2C_VAL));
 
-	writel(MBOX_BIT(5), PRCM_MBOX_CPU_SET);
+	pete_writel("drivers/mfd/db8500-prcmu.c:2164", MBOX_BIT(5), PRCM_MBOX_CPU_SET);
 
 	if (!wait_for_completion_timeout(&mb5_transfer.work,
 				msecs_to_jiffies(20000))) {
@@ -2204,7 +2204,7 @@ int prcmu_ac_wake_req(void)
 
 	mutex_lock(&mb0_transfer.ac_wake_lock);
 
-	val = readl(PRCM_HOSTACCESS_REQ);
+	val = pete_readl("drivers/mfd/db8500-prcmu.c:2207", PRCM_HOSTACCESS_REQ);
 	if (val & PRCM_HOSTACCESS_REQ_HOSTACCESS_REQ)
 		goto unlock_and_return;
 
@@ -2216,12 +2216,12 @@ int prcmu_ac_wake_req(void)
 	 * request. The 31us delay has been calculated by HWI.
 	 */
 	val |= PRCM_HOSTACCESS_REQ_WAKE_REQ;
-	writel(val, PRCM_HOSTACCESS_REQ);
+	pete_writel("drivers/mfd/db8500-prcmu.c:2219", val, PRCM_HOSTACCESS_REQ);
 
 	udelay(31);
 
 	val |= PRCM_HOSTACCESS_REQ_HOSTACCESS_REQ;
-	writel(val, PRCM_HOSTACCESS_REQ);
+	pete_writel("drivers/mfd/db8500-prcmu.c:2224", val, PRCM_HOSTACCESS_REQ);
 
 	if (!wait_for_completion_timeout(&mb0_transfer.ac_wake_work,
 			msecs_to_jiffies(5000))) {
@@ -2244,11 +2244,11 @@ void prcmu_ac_sleep_req(void)
 
 	mutex_lock(&mb0_transfer.ac_wake_lock);
 
-	val = readl(PRCM_HOSTACCESS_REQ);
+	val = pete_readl("drivers/mfd/db8500-prcmu.c:2247", PRCM_HOSTACCESS_REQ);
 	if (!(val & PRCM_HOSTACCESS_REQ_HOSTACCESS_REQ))
 		goto unlock_and_return;
 
-	writel((val & ~PRCM_HOSTACCESS_REQ_HOSTACCESS_REQ),
+	pete_writel("drivers/mfd/db8500-prcmu.c:2251", (val & ~PRCM_HOSTACCESS_REQ_HOSTACCESS_REQ),
 		PRCM_HOSTACCESS_REQ);
 
 	if (!wait_for_completion_timeout(&mb0_transfer.ac_wake_work,
@@ -2278,8 +2278,8 @@ bool db8500_prcmu_is_ac_wake_requested(void)
  */
 void db8500_prcmu_system_reset(u16 reset_code)
 {
-	writew(reset_code, (tcdm_base + PRCM_SW_RST_REASON));
-	writel(1, PRCM_APE_SOFTRST);
+	pete_writew("drivers/mfd/db8500-prcmu.c:2281", reset_code, (tcdm_base + PRCM_SW_RST_REASON));
+	pete_writel("drivers/mfd/db8500-prcmu.c:2282", 1, PRCM_APE_SOFTRST);
 }
 
 /**
@@ -2290,7 +2290,7 @@ void db8500_prcmu_system_reset(u16 reset_code)
  */
 u16 db8500_prcmu_get_reset_code(void)
 {
-	return readw(tcdm_base + PRCM_SW_RST_REASON);
+	return pete_readw("drivers/mfd/db8500-prcmu.c:2293", tcdm_base + PRCM_SW_RST_REASON);
 }
 
 /**
@@ -2300,11 +2300,11 @@ void db8500_prcmu_modem_reset(void)
 {
 	mutex_lock(&mb1_transfer.lock);
 
-	while (readl(PRCM_MBOX_CPU_VAL) & MBOX_BIT(1))
+	while (pete_readl("drivers/mfd/db8500-prcmu.c:2303", PRCM_MBOX_CPU_VAL) & MBOX_BIT(1))
 		cpu_relax();
 
-	writeb(MB1H_RESET_MODEM, (tcdm_base + PRCM_MBOX_HEADER_REQ_MB1));
-	writel(MBOX_BIT(1), PRCM_MBOX_CPU_SET);
+	pete_writeb("drivers/mfd/db8500-prcmu.c:2306", MB1H_RESET_MODEM, (tcdm_base + PRCM_MBOX_HEADER_REQ_MB1));
+	pete_writel("drivers/mfd/db8500-prcmu.c:2307", MBOX_BIT(1), PRCM_MBOX_CPU_SET);
 	wait_for_completion(&mb1_transfer.work);
 
 	/*
@@ -2321,11 +2321,11 @@ static void ack_dbb_wakeup(void)
 
 	spin_lock_irqsave(&mb0_transfer.lock, flags);
 
-	while (readl(PRCM_MBOX_CPU_VAL) & MBOX_BIT(0))
+	while (pete_readl("drivers/mfd/db8500-prcmu.c:2324", PRCM_MBOX_CPU_VAL) & MBOX_BIT(0))
 		cpu_relax();
 
-	writeb(MB0H_READ_WAKEUP_ACK, (tcdm_base + PRCM_MBOX_HEADER_REQ_MB0));
-	writel(MBOX_BIT(0), PRCM_MBOX_CPU_SET);
+	pete_writeb("drivers/mfd/db8500-prcmu.c:2327", MB0H_READ_WAKEUP_ACK, (tcdm_base + PRCM_MBOX_HEADER_REQ_MB0));
+	pete_writel("drivers/mfd/db8500-prcmu.c:2328", MBOX_BIT(0), PRCM_MBOX_CPU_SET);
 
 	spin_unlock_irqrestore(&mb0_transfer.lock, flags);
 }
@@ -2343,14 +2343,14 @@ static bool read_mailbox_0(void)
 	unsigned int n;
 	u8 header;
 
-	header = readb(tcdm_base + PRCM_MBOX_HEADER_ACK_MB0);
+	header = pete_readb("drivers/mfd/db8500-prcmu.c:2346", tcdm_base + PRCM_MBOX_HEADER_ACK_MB0);
 	switch (header) {
 	case MB0H_WAKEUP_EXE:
 	case MB0H_WAKEUP_SLEEP:
-		if (readb(tcdm_base + PRCM_ACK_MB0_READ_POINTER) & 1)
-			ev = readl(tcdm_base + PRCM_ACK_MB0_WAKEUP_1_8500);
+		if (pete_readb("drivers/mfd/db8500-prcmu.c:2350", tcdm_base + PRCM_ACK_MB0_READ_POINTER) & 1)
+			ev = pete_readl("drivers/mfd/db8500-prcmu.c:2351", tcdm_base + PRCM_ACK_MB0_WAKEUP_1_8500);
 		else
-			ev = readl(tcdm_base + PRCM_ACK_MB0_WAKEUP_0_8500);
+			ev = pete_readl("drivers/mfd/db8500-prcmu.c:2353", tcdm_base + PRCM_ACK_MB0_WAKEUP_0_8500);
 
 		if (ev & (WAKEUP_BIT_AC_WAKE_ACK | WAKEUP_BIT_AC_SLEEP_ACK))
 			complete(&mb0_transfer.ac_wake_work);
@@ -2370,35 +2370,35 @@ static bool read_mailbox_0(void)
 		r = false;
 		break;
 	}
-	writel(MBOX_BIT(0), PRCM_ARM_IT1_CLR);
+	pete_writel("drivers/mfd/db8500-prcmu.c:2373", MBOX_BIT(0), PRCM_ARM_IT1_CLR);
 	return r;
 }
 
 static bool read_mailbox_1(void)
 {
-	mb1_transfer.ack.header = readb(tcdm_base + PRCM_MBOX_HEADER_REQ_MB1);
-	mb1_transfer.ack.arm_opp = readb(tcdm_base +
+	mb1_transfer.ack.header = pete_readb("drivers/mfd/db8500-prcmu.c:2379", tcdm_base + PRCM_MBOX_HEADER_REQ_MB1);
+	mb1_transfer.ack.arm_opp = pete_readb("drivers/mfd/db8500-prcmu.c:2380", tcdm_base +
 		PRCM_ACK_MB1_CURRENT_ARM_OPP);
-	mb1_transfer.ack.ape_opp = readb(tcdm_base +
+	mb1_transfer.ack.ape_opp = pete_readb("drivers/mfd/db8500-prcmu.c:2382", tcdm_base +
 		PRCM_ACK_MB1_CURRENT_APE_OPP);
-	mb1_transfer.ack.ape_voltage_status = readb(tcdm_base +
+	mb1_transfer.ack.ape_voltage_status = pete_readb("drivers/mfd/db8500-prcmu.c:2384", tcdm_base +
 		PRCM_ACK_MB1_APE_VOLTAGE_STATUS);
-	writel(MBOX_BIT(1), PRCM_ARM_IT1_CLR);
+	pete_writel("drivers/mfd/db8500-prcmu.c:2386", MBOX_BIT(1), PRCM_ARM_IT1_CLR);
 	complete(&mb1_transfer.work);
 	return false;
 }
 
 static bool read_mailbox_2(void)
 {
-	mb2_transfer.ack.status = readb(tcdm_base + PRCM_ACK_MB2_DPS_STATUS);
-	writel(MBOX_BIT(2), PRCM_ARM_IT1_CLR);
+	mb2_transfer.ack.status = pete_readb("drivers/mfd/db8500-prcmu.c:2393", tcdm_base + PRCM_ACK_MB2_DPS_STATUS);
+	pete_writel("drivers/mfd/db8500-prcmu.c:2394", MBOX_BIT(2), PRCM_ARM_IT1_CLR);
 	complete(&mb2_transfer.work);
 	return false;
 }
 
 static bool read_mailbox_3(void)
 {
-	writel(MBOX_BIT(3), PRCM_ARM_IT1_CLR);
+	pete_writel("drivers/mfd/db8500-prcmu.c:2401", MBOX_BIT(3), PRCM_ARM_IT1_CLR);
 	return false;
 }
 
@@ -2407,7 +2407,7 @@ static bool read_mailbox_4(void)
 	u8 header;
 	bool do_complete = true;
 
-	header = readb(tcdm_base + PRCM_MBOX_HEADER_REQ_MB4);
+	header = pete_readb("drivers/mfd/db8500-prcmu.c:2410", tcdm_base + PRCM_MBOX_HEADER_REQ_MB4);
 	switch (header) {
 	case MB4H_MEM_ST:
 	case MB4H_HOTDOG:
@@ -2425,7 +2425,7 @@ static bool read_mailbox_4(void)
 		break;
 	}
 
-	writel(MBOX_BIT(4), PRCM_ARM_IT1_CLR);
+	pete_writel("drivers/mfd/db8500-prcmu.c:2428", MBOX_BIT(4), PRCM_ARM_IT1_CLR);
 
 	if (do_complete)
 		complete(&mb4_transfer.work);
@@ -2435,22 +2435,22 @@ static bool read_mailbox_4(void)
 
 static bool read_mailbox_5(void)
 {
-	mb5_transfer.ack.status = readb(tcdm_base + PRCM_ACK_MB5_I2C_STATUS);
-	mb5_transfer.ack.value = readb(tcdm_base + PRCM_ACK_MB5_I2C_VAL);
-	writel(MBOX_BIT(5), PRCM_ARM_IT1_CLR);
+	mb5_transfer.ack.status = pete_readb("drivers/mfd/db8500-prcmu.c:2438", tcdm_base + PRCM_ACK_MB5_I2C_STATUS);
+	mb5_transfer.ack.value = pete_readb("drivers/mfd/db8500-prcmu.c:2439", tcdm_base + PRCM_ACK_MB5_I2C_VAL);
+	pete_writel("drivers/mfd/db8500-prcmu.c:2440", MBOX_BIT(5), PRCM_ARM_IT1_CLR);
 	complete(&mb5_transfer.work);
 	return false;
 }
 
 static bool read_mailbox_6(void)
 {
-	writel(MBOX_BIT(6), PRCM_ARM_IT1_CLR);
+	pete_writel("drivers/mfd/db8500-prcmu.c:2447", MBOX_BIT(6), PRCM_ARM_IT1_CLR);
 	return false;
 }
 
 static bool read_mailbox_7(void)
 {
-	writel(MBOX_BIT(7), PRCM_ARM_IT1_CLR);
+	pete_writel("drivers/mfd/db8500-prcmu.c:2453", MBOX_BIT(7), PRCM_ARM_IT1_CLR);
 	return false;
 }
 
@@ -2471,7 +2471,7 @@ static irqreturn_t prcmu_irq_handler(int irq, void *data)
 	u8 n;
 	irqreturn_t r;
 
-	bits = (readl(PRCM_ARM_IT1_VAL) & ALL_MBOX_BITS);
+	bits = (pete_readl("drivers/mfd/db8500-prcmu.c:2474", PRCM_ARM_IT1_VAL) & ALL_MBOX_BITS);
 	if (unlikely(!bits))
 		return IRQ_NONE;
 
@@ -2634,7 +2634,7 @@ static void dbx500_fw_version_init(struct device_node *np)
 		return;
 	}
 
-	version = readl(tcpm_base + DB8500_PRCMU_FW_VERSION_OFFSET);
+	version = pete_readl("drivers/mfd/db8500-prcmu.c:2637", tcpm_base + DB8500_PRCMU_FW_VERSION_OFFSET);
 	fw_info.version.project = (version & 0xFF);
 	fw_info.version.api_version = (version >> 8) & 0xFF;
 	fw_info.version.func_version = (version >> 16) & 0xFF;
@@ -2698,10 +2698,10 @@ static void init_prcm_registers(void)
 {
 	u32 val;
 
-	val = readl(PRCM_A9PL_FORCE_CLKEN);
+	val = pete_readl("drivers/mfd/db8500-prcmu.c:2701", PRCM_A9PL_FORCE_CLKEN);
 	val &= ~(PRCM_A9PL_FORCE_CLKEN_PRCM_A9PL_FORCE_CLKEN |
 		PRCM_A9PL_FORCE_CLKEN_PRCM_A9AXI_FORCE_CLKEN);
-	writel(val, (PRCM_A9PL_FORCE_CLKEN));
+	pete_writel("drivers/mfd/db8500-prcmu.c:2704", val, (PRCM_A9PL_FORCE_CLKEN));
 }
 
 /*
@@ -3026,7 +3026,7 @@ static int db8500_prcmu_probe(struct platform_device *pdev)
 	}
 
 	/* Clean up the mailbox interrupts after pre-kernel code. */
-	writel(ALL_MBOX_BITS, PRCM_ARM_IT1_CLR);
+	pete_writel("drivers/mfd/db8500-prcmu.c:3029", ALL_MBOX_BITS, PRCM_ARM_IT1_CLR);
 
 	irq = platform_get_irq(pdev, 0);
 	if (irq <= 0)

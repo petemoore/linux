@@ -65,7 +65,7 @@ static inline void hfa384x_outb_debug(struct net_device *dev, int a, u8 v)
 
 	spin_lock_irqsave(&local->lock, flags);
 	prism2_io_debug_add(dev, PRISM2_IO_DEBUG_CMD_OUTB, a, v);
-	writeb(v, hw_priv->mem_start + a);
+	pete_writeb("drivers/net/wireless/intersil/hostap/hostap_pci.c:68", v, hw_priv->mem_start + a);
 	spin_unlock_irqrestore(&local->lock, flags);
 }
 
@@ -82,7 +82,7 @@ static inline u8 hfa384x_inb_debug(struct net_device *dev, int a)
 	hw_priv = local->hw_priv;
 
 	spin_lock_irqsave(&local->lock, flags);
-	v = readb(hw_priv->mem_start + a);
+	v = pete_readb("drivers/net/wireless/intersil/hostap/hostap_pci.c:85", hw_priv->mem_start + a);
 	prism2_io_debug_add(dev, PRISM2_IO_DEBUG_CMD_INB, a, v);
 	spin_unlock_irqrestore(&local->lock, flags);
 	return v;
@@ -101,7 +101,7 @@ static inline void hfa384x_outw_debug(struct net_device *dev, int a, u16 v)
 
 	spin_lock_irqsave(&local->lock, flags);
 	prism2_io_debug_add(dev, PRISM2_IO_DEBUG_CMD_OUTW, a, v);
-	writew(v, hw_priv->mem_start + a);
+	pete_writew("drivers/net/wireless/intersil/hostap/hostap_pci.c:104", v, hw_priv->mem_start + a);
 	spin_unlock_irqrestore(&local->lock, flags);
 }
 
@@ -118,7 +118,7 @@ static inline u16 hfa384x_inw_debug(struct net_device *dev, int a)
 	hw_priv = local->hw_priv;
 
 	spin_lock_irqsave(&local->lock, flags);
-	v = readw(hw_priv->mem_start + a);
+	v = pete_readw("drivers/net/wireless/intersil/hostap/hostap_pci.c:121", hw_priv->mem_start + a);
 	prism2_io_debug_add(dev, PRISM2_IO_DEBUG_CMD_INW, a, v);
 	spin_unlock_irqrestore(&local->lock, flags);
 	return v;
@@ -139,7 +139,7 @@ static inline void hfa384x_outb(struct net_device *dev, int a, u8 v)
 	struct hostap_pci_priv *hw_priv;
 	iface = netdev_priv(dev);
 	hw_priv = iface->local->hw_priv;
-	writeb(v, hw_priv->mem_start + a);
+	pete_writeb("drivers/net/wireless/intersil/hostap/hostap_pci.c:142", v, hw_priv->mem_start + a);
 }
 
 static inline u8 hfa384x_inb(struct net_device *dev, int a)
@@ -148,7 +148,7 @@ static inline u8 hfa384x_inb(struct net_device *dev, int a)
 	struct hostap_pci_priv *hw_priv;
 	iface = netdev_priv(dev);
 	hw_priv = iface->local->hw_priv;
-	return readb(hw_priv->mem_start + a);
+	return pete_readb("drivers/net/wireless/intersil/hostap/hostap_pci.c:151", hw_priv->mem_start + a);
 }
 
 static inline void hfa384x_outw(struct net_device *dev, int a, u16 v)
@@ -157,7 +157,7 @@ static inline void hfa384x_outw(struct net_device *dev, int a, u16 v)
 	struct hostap_pci_priv *hw_priv;
 	iface = netdev_priv(dev);
 	hw_priv = iface->local->hw_priv;
-	writew(v, hw_priv->mem_start + a);
+	pete_writew("drivers/net/wireless/intersil/hostap/hostap_pci.c:160", v, hw_priv->mem_start + a);
 }
 
 static inline u16 hfa384x_inw(struct net_device *dev, int a)
@@ -166,7 +166,7 @@ static inline u16 hfa384x_inw(struct net_device *dev, int a)
 	struct hostap_pci_priv *hw_priv;
 	iface = netdev_priv(dev);
 	hw_priv = iface->local->hw_priv;
-	return readw(hw_priv->mem_start + a);
+	return pete_readw("drivers/net/wireless/intersil/hostap/hostap_pci.c:169", hw_priv->mem_start + a);
 }
 
 #define HFA384X_OUTB(v,a) hfa384x_outb(dev, (a), (v))

@@ -735,14 +735,14 @@ static int sun8i_a23_ccu_probe(struct platform_device *pdev)
 		return PTR_ERR(reg);
 
 	/* Force the PLL-Audio-1x divider to 1 */
-	val = readl(reg + SUN8I_A23_PLL_AUDIO_REG);
+	val = pete_readl("drivers/clk/sunxi-ng/ccu-sun8i-a23.c:738", reg + SUN8I_A23_PLL_AUDIO_REG);
 	val &= ~GENMASK(19, 16);
-	writel(val | (0 << 16), reg + SUN8I_A23_PLL_AUDIO_REG);
+	pete_writel("drivers/clk/sunxi-ng/ccu-sun8i-a23.c:740", val | (0 << 16), reg + SUN8I_A23_PLL_AUDIO_REG);
 
 	/* Force PLL-MIPI to MIPI mode */
-	val = readl(reg + SUN8I_A23_PLL_MIPI_REG);
+	val = pete_readl("drivers/clk/sunxi-ng/ccu-sun8i-a23.c:743", reg + SUN8I_A23_PLL_MIPI_REG);
 	val &= ~BIT(16);
-	writel(val, reg + SUN8I_A23_PLL_MIPI_REG);
+	pete_writel("drivers/clk/sunxi-ng/ccu-sun8i-a23.c:745", val, reg + SUN8I_A23_PLL_MIPI_REG);
 
 	return devm_sunxi_ccu_probe(&pdev->dev, reg, &sun8i_a23_ccu_desc);
 }

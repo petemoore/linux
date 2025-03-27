@@ -50,7 +50,7 @@ struct sun20i_ppu_pd {
 
 static bool sun20i_ppu_pd_is_on(const struct sun20i_ppu_pd *pd)
 {
-	u32 status = readl(pd->base + PD_STATUS_REG);
+	u32 status = pete_readl("drivers/pmdomain/sunxi/sun20i-ppu.c:53", pd->base + PD_STATUS_REG);
 
 	return FIELD_GET(PD_STATUS_STATE, status) == PD_STATE_ON;
 }
@@ -70,7 +70,7 @@ static int sun20i_ppu_pd_set_power(const struct sun20i_ppu_pd *pd, bool power_on
 		return ret;
 
 	state = power_on ? PD_STATE_ON : PD_STATE_OFF;
-	writel(state, pd->base + PD_COMMAND_REG);
+	pete_writel("drivers/pmdomain/sunxi/sun20i-ppu.c:73", state, pd->base + PD_COMMAND_REG);
 
 	/* Wait for the state transition to complete. */
 	ret = readl_poll_timeout(pd->base + PD_STATUS_REG, status,
@@ -80,7 +80,7 @@ static int sun20i_ppu_pd_set_power(const struct sun20i_ppu_pd *pd, bool power_on
 		return ret;
 
 	/* Clear the completion flag. */
-	writel(status, pd->base + PD_STATUS_REG);
+	pete_writel("drivers/pmdomain/sunxi/sun20i-ppu.c:83", status, pd->base + PD_STATUS_REG);
 
 	return 0;
 }

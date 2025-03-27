@@ -91,15 +91,15 @@ static int sp_otp_read_real(struct sp_ocotp_priv *otp, int addr, char *value)
 	addr = addr / (OTP_WORD_SIZE * OTP_WORDS_PER_BANK);
 	addr = addr * OTP_BIT_ADDR_OF_BANK;
 
-	writel(readl(otp->base[OTPRX] + OTP_STATUS) & OTP_READ_DONE_MASK &
+	pete_writel("drivers/nvmem/sunplus-ocotp.c:94", pete_readl("drivers/nvmem/sunplus-ocotp.c:94", otp->base[OTPRX] + OTP_STATUS) & OTP_READ_DONE_MASK &
 	       OTP_LOAD_SECURE_DONE_MASK, otp->base[OTPRX] + OTP_STATUS);
-	writel(addr, otp->base[OTPRX] + OTP_READ_ADDRESS);
-	writel(readl(otp->base[OTPRX] + OTP_CONTROL_2) | OTP_READ,
+	pete_writel("drivers/nvmem/sunplus-ocotp.c:96", addr, otp->base[OTPRX] + OTP_READ_ADDRESS);
+	pete_writel("drivers/nvmem/sunplus-ocotp.c:97", pete_readl("drivers/nvmem/sunplus-ocotp.c:97", otp->base[OTPRX] + OTP_CONTROL_2) | OTP_READ,
 	       otp->base[OTPRX] + OTP_CONTROL_2);
-	writel(readl(otp->base[OTPRX] + OTP_CONTROL_2) & SEL_BAK_KEY2_MASK & SW_TRIM_EN_MASK
+	pete_writel("drivers/nvmem/sunplus-ocotp.c:99", pete_readl("drivers/nvmem/sunplus-ocotp.c:99", otp->base[OTPRX] + OTP_CONTROL_2) & SEL_BAK_KEY2_MASK & SW_TRIM_EN_MASK
 	       & SEL_BAK_KEY_MASK & OTP_LOAD_SECURE_DATA_MASK & OTP_DO_CRC_MASK,
 	       otp->base[OTPRX] + OTP_CONTROL_2);
-	writel((readl(otp->base[OTPRX] + OTP_CONTROL_2) & OTP_RD_PERIOD_MASK) | CPU_CLOCK,
+	pete_writel("drivers/nvmem/sunplus-ocotp.c:102", (pete_readl("drivers/nvmem/sunplus-ocotp.c:102", otp->base[OTPRX] + OTP_CONTROL_2) & OTP_RD_PERIOD_MASK) | CPU_CLOCK,
 	       otp->base[OTPRX] + OTP_CONTROL_2);
 
 	ret = readl_poll_timeout(otp->base[OTPRX] + OTP_STATUS, status,
@@ -108,7 +108,7 @@ static int sp_otp_read_real(struct sp_ocotp_priv *otp, int addr, char *value)
 	if (ret < 0)
 		return ret;
 
-	*value = (readl(otp->base[HB_GPIO] + ADDRESS_8_DATA + addr_data * OTP_WORD_SIZE)
+	*value = (pete_readl("drivers/nvmem/sunplus-ocotp.c:111", otp->base[HB_GPIO] + ADDRESS_8_DATA + addr_data * OTP_WORD_SIZE)
 		  >> (8 * byte_shift)) & 0xff;
 
 	return ret;

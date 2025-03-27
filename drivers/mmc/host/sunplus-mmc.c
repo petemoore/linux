@@ -204,25 +204,25 @@ static void spmmc_get_rsp(struct spmmc_host *host, struct mmc_command *cmd)
 	if (cmd->flags & MMC_RSP_136) {
 		if (spmmc_wait_rspbuf_full(host))
 			return;
-		value0_3 = readl(host->base + SPMMC_SD_RSPBUF0_3_REG);
-		value4_5 = readl(host->base + SPMMC_SD_RSPBUF4_5_REG) & 0xffff;
+		value0_3 = pete_readl("drivers/mmc/host/sunplus-mmc.c:207", host->base + SPMMC_SD_RSPBUF0_3_REG);
+		value4_5 = pete_readl("drivers/mmc/host/sunplus-mmc.c:208", host->base + SPMMC_SD_RSPBUF4_5_REG) & 0xffff;
 		cmd->resp[0] = (value0_3 << 8) | (value4_5 >> 8);
 		cmd->resp[1] = value4_5 << 24;
-		value0_3 = readl(host->base + SPMMC_SD_RSPBUF0_3_REG);
-		value4_5 = readl(host->base + SPMMC_SD_RSPBUF4_5_REG) & 0xffff;
+		value0_3 = pete_readl("drivers/mmc/host/sunplus-mmc.c:211", host->base + SPMMC_SD_RSPBUF0_3_REG);
+		value4_5 = pete_readl("drivers/mmc/host/sunplus-mmc.c:212", host->base + SPMMC_SD_RSPBUF4_5_REG) & 0xffff;
 		cmd->resp[1] |= value0_3 >> 8;
 		cmd->resp[2] = value0_3 << 24;
 		cmd->resp[2] |= value4_5 << 8;
-		value0_3 = readl(host->base + SPMMC_SD_RSPBUF0_3_REG);
-		value4_5 = readl(host->base + SPMMC_SD_RSPBUF4_5_REG) & 0xffff;
+		value0_3 = pete_readl("drivers/mmc/host/sunplus-mmc.c:216", host->base + SPMMC_SD_RSPBUF0_3_REG);
+		value4_5 = pete_readl("drivers/mmc/host/sunplus-mmc.c:217", host->base + SPMMC_SD_RSPBUF4_5_REG) & 0xffff;
 		cmd->resp[2] |= value0_3 >> 24;
 		cmd->resp[3] = value0_3 << 8;
 		cmd->resp[3] |= value4_5 >> 8;
 	} else {
 		if (spmmc_wait_rspbuf_full(host))
 			return;
-		value0_3 = readl(host->base + SPMMC_SD_RSPBUF0_3_REG);
-		value4_5 = readl(host->base + SPMMC_SD_RSPBUF4_5_REG) & 0xffff;
+		value0_3 = pete_readl("drivers/mmc/host/sunplus-mmc.c:224", host->base + SPMMC_SD_RSPBUF0_3_REG);
+		value4_5 = pete_readl("drivers/mmc/host/sunplus-mmc.c:225", host->base + SPMMC_SD_RSPBUF4_5_REG) & 0xffff;
 		cmd->resp[0] = (value0_3 << 8) | (value4_5 >> 8);
 		cmd->resp[1] = value4_5 << 24;
 	}
@@ -233,7 +233,7 @@ static void spmmc_set_bus_clk(struct spmmc_host *host, int clk)
 	unsigned int clkdiv;
 	int f_min = host->mmc->f_min;
 	int f_max = host->mmc->f_max;
-	u32 value = readl(host->base + SPMMC_SD_CONFIG0_REG);
+	u32 value = pete_readl("drivers/mmc/host/sunplus-mmc.c:236", host->base + SPMMC_SD_CONFIG0_REG);
 
 	if (clk < f_min)
 		clk = f_min;
@@ -245,13 +245,13 @@ static void spmmc_set_bus_clk(struct spmmc_host *host, int clk)
 		clkdiv = 0xfff;
 	value &= ~SPMMC_CLOCK_DIVISION;
 	value |= FIELD_PREP(SPMMC_CLOCK_DIVISION, clkdiv);
-	writel(value, host->base + SPMMC_SD_CONFIG0_REG);
+	pete_writel("drivers/mmc/host/sunplus-mmc.c:248", value, host->base + SPMMC_SD_CONFIG0_REG);
 }
 
 static void spmmc_set_bus_timing(struct spmmc_host *host, unsigned int timing)
 {
-	u32 value = readl(host->base + SPMMC_SD_CONFIG1_REG);
-	int clkdiv = FIELD_GET(SPMMC_CLOCK_DIVISION, readl(host->base + SPMMC_SD_CONFIG0_REG));
+	u32 value = pete_readl("drivers/mmc/host/sunplus-mmc.c:253", host->base + SPMMC_SD_CONFIG1_REG);
+	int clkdiv = FIELD_GET(SPMMC_CLOCK_DIVISION, pete_readl("drivers/mmc/host/sunplus-mmc.c:254", host->base + SPMMC_SD_CONFIG0_REG));
 	int delay = clkdiv / 2 < 7 ? clkdiv / 2 : 7;
 	int hs_en = 1, ddr_enabled = 0;
 
@@ -279,31 +279,31 @@ static void spmmc_set_bus_timing(struct spmmc_host *host, unsigned int timing)
 
 	if (hs_en) {
 		value |= SPMMC_SD_HIGH_SPEED_EN;
-		writel(value, host->base + SPMMC_SD_CONFIG1_REG);
-		value = readl(host->base + SPMMC_SD_TIMING_CONFIG0_REG);
+		pete_writel("drivers/mmc/host/sunplus-mmc.c:282", value, host->base + SPMMC_SD_CONFIG1_REG);
+		value = pete_readl("drivers/mmc/host/sunplus-mmc.c:283", host->base + SPMMC_SD_TIMING_CONFIG0_REG);
 		value &= ~SPMMC_SD_WRITE_DATA_DELAY;
 		value |= FIELD_PREP(SPMMC_SD_WRITE_DATA_DELAY, delay);
 		value &= ~SPMMC_SD_WRITE_COMMAND_DELAY;
 		value |= FIELD_PREP(SPMMC_SD_WRITE_COMMAND_DELAY, delay);
-		writel(value, host->base + SPMMC_SD_TIMING_CONFIG0_REG);
+		pete_writel("drivers/mmc/host/sunplus-mmc.c:288", value, host->base + SPMMC_SD_TIMING_CONFIG0_REG);
 	} else {
 		value &= ~SPMMC_SD_HIGH_SPEED_EN;
-		writel(value, host->base + SPMMC_SD_CONFIG1_REG);
+		pete_writel("drivers/mmc/host/sunplus-mmc.c:291", value, host->base + SPMMC_SD_CONFIG1_REG);
 	}
 	if (ddr_enabled) {
-		value = readl(host->base + SPMMC_SD_CONFIG0_REG);
+		value = pete_readl("drivers/mmc/host/sunplus-mmc.c:294", host->base + SPMMC_SD_CONFIG0_REG);
 		value |= SPMMC_SD_DDR_MODE;
-		writel(value, host->base + SPMMC_SD_CONFIG0_REG);
+		pete_writel("drivers/mmc/host/sunplus-mmc.c:296", value, host->base + SPMMC_SD_CONFIG0_REG);
 	} else {
-		value = readl(host->base + SPMMC_SD_CONFIG0_REG);
+		value = pete_readl("drivers/mmc/host/sunplus-mmc.c:298", host->base + SPMMC_SD_CONFIG0_REG);
 		value &= ~SPMMC_SD_DDR_MODE;
-		writel(value, host->base + SPMMC_SD_CONFIG0_REG);
+		pete_writel("drivers/mmc/host/sunplus-mmc.c:300", value, host->base + SPMMC_SD_CONFIG0_REG);
 	}
 }
 
 static void spmmc_set_bus_width(struct spmmc_host *host, int width)
 {
-	u32 value = readl(host->base + SPMMC_SD_CONFIG0_REG);
+	u32 value = pete_readl("drivers/mmc/host/sunplus-mmc.c:306", host->base + SPMMC_SD_CONFIG0_REG);
 
 	switch (width) {
 	case MMC_BUS_WIDTH_8:
@@ -319,7 +319,7 @@ static void spmmc_set_bus_width(struct spmmc_host *host, int width)
 		value &= ~SPMMC_MMC8_EN;
 		break;
 	}
-	writel(value, host->base + SPMMC_SD_CONFIG0_REG);
+	pete_writel("drivers/mmc/host/sunplus-mmc.c:322", value, host->base + SPMMC_SD_CONFIG0_REG);
 }
 
 /*
@@ -327,11 +327,11 @@ static void spmmc_set_bus_width(struct spmmc_host *host, int width)
  */
 static void spmmc_set_sdmmc_mode(struct spmmc_host *host)
 {
-	u32 value = readl(host->base + SPMMC_SD_CONFIG0_REG);
+	u32 value = pete_readl("drivers/mmc/host/sunplus-mmc.c:330", host->base + SPMMC_SD_CONFIG0_REG);
 
 	value |= SPMMC_SD_MMC_MODE;
 	value &= ~SPMMC_SDIO_MODE;
-	writel(value, host->base + SPMMC_SD_CONFIG0_REG);
+	pete_writel("drivers/mmc/host/sunplus-mmc.c:334", value, host->base + SPMMC_SD_CONFIG0_REG);
 }
 
 static void spmmc_sw_reset(struct spmmc_host *host)
@@ -343,15 +343,15 @@ static void spmmc_sw_reset(struct spmmc_host *host)
 	 * be stuck on sd_state == 0x1c00 because of
 	 * a controller software reset bug
 	 */
-	value = readl(host->base + SPMMC_HW_DMA_CTRL_REG);
+	value = pete_readl("drivers/mmc/host/sunplus-mmc.c:346", host->base + SPMMC_HW_DMA_CTRL_REG);
 	value |= SPMMC_DMAIDLE;
-	writel(value, host->base + SPMMC_HW_DMA_CTRL_REG);
+	pete_writel("drivers/mmc/host/sunplus-mmc.c:348", value, host->base + SPMMC_HW_DMA_CTRL_REG);
 	value &= ~SPMMC_DMAIDLE;
-	writel(value, host->base + SPMMC_HW_DMA_CTRL_REG);
-	value = readl(host->base + SPMMC_HW_DMA_CTRL_REG);
+	pete_writel("drivers/mmc/host/sunplus-mmc.c:350", value, host->base + SPMMC_HW_DMA_CTRL_REG);
+	value = pete_readl("drivers/mmc/host/sunplus-mmc.c:351", host->base + SPMMC_HW_DMA_CTRL_REG);
 	value |= SPMMC_HW_DMA_RST;
-	writel(value, host->base + SPMMC_HW_DMA_CTRL_REG);
-	writel(0x7, host->base + SPMMC_SD_RST_REG);
+	pete_writel("drivers/mmc/host/sunplus-mmc.c:353", value, host->base + SPMMC_HW_DMA_CTRL_REG);
+	pete_writel("drivers/mmc/host/sunplus-mmc.c:354", 0x7, host->base + SPMMC_SD_RST_REG);
 	readl_poll_timeout_atomic(host->base + SPMMC_SD_HW_STATE_REG, value,
 				  !(value & BIT(6)), 1, SPMMC_TIMEOUT_US);
 }
@@ -362,23 +362,23 @@ static void spmmc_prepare_cmd(struct spmmc_host *host, struct mmc_command *cmd)
 
 	/* add start bit, according to spec, command format */
 	value = ((cmd->opcode | 0x40) << 24) | (cmd->arg >> 8);
-	writel(value, host->base + SPMMC_SD_CMDBUF0_3_REG);
-	writeb(cmd->arg & 0xff, host->base + SPMMC_SD_CMDBUF4_REG);
+	pete_writel("drivers/mmc/host/sunplus-mmc.c:365", value, host->base + SPMMC_SD_CMDBUF0_3_REG);
+	pete_writeb("drivers/mmc/host/sunplus-mmc.c:366", cmd->arg & 0xff, host->base + SPMMC_SD_CMDBUF4_REG);
 
 	/* disable interrupt if needed */
-	value = readl(host->base + SPMMC_SD_INT_REG);
+	value = pete_readl("drivers/mmc/host/sunplus-mmc.c:369", host->base + SPMMC_SD_INT_REG);
 	value |= SPMMC_SDINT_SDCMPCLR;
 	value &= ~SPMMC_SDINT_SDCMPEN;
-	writel(value, host->base + SPMMC_SD_INT_REG);
+	pete_writel("drivers/mmc/host/sunplus-mmc.c:372", value, host->base + SPMMC_SD_INT_REG);
 
-	value = readl(host->base + SPMMC_SD_CONFIG0_REG);
+	value = pete_readl("drivers/mmc/host/sunplus-mmc.c:374", host->base + SPMMC_SD_CONFIG0_REG);
 	value &= ~SPMMC_SD_TRANS_MODE;
 	value |= SPMMC_SD_CMD_DUMMY;
 	if (cmd->flags & MMC_RSP_PRESENT) {
 		value |= SPMMC_SD_AUTO_RESPONSE;
 	} else {
 		value &= ~SPMMC_SD_AUTO_RESPONSE;
-		writel(value, host->base + SPMMC_SD_CONFIG0_REG);
+		pete_writel("drivers/mmc/host/sunplus-mmc.c:381", value, host->base + SPMMC_SD_CONFIG0_REG);
 
 		return;
 	}
@@ -395,36 +395,36 @@ static void spmmc_prepare_cmd(struct spmmc_host *host, struct mmc_command *cmd)
 		value |= SPMMC_SD_RSP_TYPE;
 	else
 		value &= ~SPMMC_SD_RSP_TYPE;
-	writel(value, host->base + SPMMC_SD_CONFIG0_REG);
+	pete_writel("drivers/mmc/host/sunplus-mmc.c:398", value, host->base + SPMMC_SD_CONFIG0_REG);
 }
 
 static void spmmc_prepare_data(struct spmmc_host *host, struct mmc_data *data)
 {
 	u32 value, srcdst;
 
-	writel(data->blocks - 1, host->base + SPMMC_SD_PAGE_NUM_REG);
-	writel(data->blksz - 1, host->base + SPMMC_SD_BLOCKSIZE_REG);
-	value = readl(host->base + SPMMC_SD_CONFIG0_REG);
+	pete_writel("drivers/mmc/host/sunplus-mmc.c:405", data->blocks - 1, host->base + SPMMC_SD_PAGE_NUM_REG);
+	pete_writel("drivers/mmc/host/sunplus-mmc.c:406", data->blksz - 1, host->base + SPMMC_SD_BLOCKSIZE_REG);
+	value = pete_readl("drivers/mmc/host/sunplus-mmc.c:407", host->base + SPMMC_SD_CONFIG0_REG);
 	if (data->flags & MMC_DATA_READ) {
 		value &= ~SPMMC_SD_TRANS_MODE;
 		value |= FIELD_PREP(SPMMC_SD_TRANS_MODE, 2);
 		value &= ~SPMMC_SD_AUTO_RESPONSE;
 		value &= ~SPMMC_SD_CMD_DUMMY;
-		srcdst = readl(host->base + SPMMC_CARD_MEDIATYPE_SRCDST_REG);
+		srcdst = pete_readl("drivers/mmc/host/sunplus-mmc.c:413", host->base + SPMMC_CARD_MEDIATYPE_SRCDST_REG);
 		srcdst &= ~SPMMC_DMA_SOURCE;
 		srcdst |= FIELD_PREP(SPMMC_DMA_SOURCE, 0x2);
 		srcdst &= ~SPMMC_DMA_DESTINATION;
 		srcdst |= FIELD_PREP(SPMMC_DMA_DESTINATION, 0x1);
-		writel(srcdst, host->base + SPMMC_CARD_MEDIATYPE_SRCDST_REG);
+		pete_writel("drivers/mmc/host/sunplus-mmc.c:418", srcdst, host->base + SPMMC_CARD_MEDIATYPE_SRCDST_REG);
 	} else {
 		value &= ~SPMMC_SD_TRANS_MODE;
 		value |= FIELD_PREP(SPMMC_SD_TRANS_MODE, 1);
-		srcdst = readl(host->base + SPMMC_CARD_MEDIATYPE_SRCDST_REG);
+		srcdst = pete_readl("drivers/mmc/host/sunplus-mmc.c:422", host->base + SPMMC_CARD_MEDIATYPE_SRCDST_REG);
 		srcdst &= ~SPMMC_DMA_SOURCE;
 		srcdst |= FIELD_PREP(SPMMC_DMA_SOURCE, 0x1);
 		srcdst &= ~SPMMC_DMA_DESTINATION;
 		srcdst |= FIELD_PREP(SPMMC_DMA_DESTINATION, 0x2);
-		writel(srcdst, host->base + SPMMC_CARD_MEDIATYPE_SRCDST_REG);
+		pete_writel("drivers/mmc/host/sunplus-mmc.c:427", srcdst, host->base + SPMMC_CARD_MEDIATYPE_SRCDST_REG);
 	}
 
 	value |= SPMMC_SD_LEN_MODE;
@@ -445,54 +445,54 @@ static void spmmc_prepare_data(struct spmmc_host *host, struct mmc_data *data)
 			dma_addr = sg_dma_address(sg);
 			dma_size = sg_dma_len(sg) / data->blksz - 1;
 			if (i == 0) {
-				writel(dma_addr, host->base + SPMMC_DMA_BASE_ADDR_REG);
-				writel(dma_size, host->base + SPMMC_SDRAM_SECTOR_0_SIZE_REG);
+				pete_writel("drivers/mmc/host/sunplus-mmc.c:448", dma_addr, host->base + SPMMC_DMA_BASE_ADDR_REG);
+				pete_writel("drivers/mmc/host/sunplus-mmc.c:449", dma_size, host->base + SPMMC_SDRAM_SECTOR_0_SIZE_REG);
 			} else if (i == 1) {
-				writel(dma_addr, host->base + SPMMC_SDRAM_SECTOR_1_ADDR_REG);
-				writel(dma_size, host->base + SPMMC_SDRAM_SECTOR_1_LENG_REG);
+				pete_writel("drivers/mmc/host/sunplus-mmc.c:451", dma_addr, host->base + SPMMC_SDRAM_SECTOR_1_ADDR_REG);
+				pete_writel("drivers/mmc/host/sunplus-mmc.c:452", dma_size, host->base + SPMMC_SDRAM_SECTOR_1_LENG_REG);
 			} else if (i == 2) {
-				writel(dma_addr, host->base + SPMMC_SDRAM_SECTOR_2_ADDR_REG);
-				writel(dma_size, host->base + SPMMC_SDRAM_SECTOR_2_LENG_REG);
+				pete_writel("drivers/mmc/host/sunplus-mmc.c:454", dma_addr, host->base + SPMMC_SDRAM_SECTOR_2_ADDR_REG);
+				pete_writel("drivers/mmc/host/sunplus-mmc.c:455", dma_size, host->base + SPMMC_SDRAM_SECTOR_2_LENG_REG);
 			} else if (i == 3) {
-				writel(dma_addr, host->base + SPMMC_SDRAM_SECTOR_3_ADDR_REG);
-				writel(dma_size, host->base + SPMMC_SDRAM_SECTOR_3_LENG_REG);
+				pete_writel("drivers/mmc/host/sunplus-mmc.c:457", dma_addr, host->base + SPMMC_SDRAM_SECTOR_3_ADDR_REG);
+				pete_writel("drivers/mmc/host/sunplus-mmc.c:458", dma_size, host->base + SPMMC_SDRAM_SECTOR_3_LENG_REG);
 			} else if (i == 4) {
-				writel(dma_addr, host->base + SPMMC_SDRAM_SECTOR_4_ADDR_REG);
-				writel(dma_size, host->base + SPMMC_SDRAM_SECTOR_4_LENG_REG);
+				pete_writel("drivers/mmc/host/sunplus-mmc.c:460", dma_addr, host->base + SPMMC_SDRAM_SECTOR_4_ADDR_REG);
+				pete_writel("drivers/mmc/host/sunplus-mmc.c:461", dma_size, host->base + SPMMC_SDRAM_SECTOR_4_LENG_REG);
 			} else if (i == 5) {
-				writel(dma_addr, host->base + SPMMC_SDRAM_SECTOR_5_ADDR_REG);
-				writel(dma_size, host->base + SPMMC_SDRAM_SECTOR_5_LENG_REG);
+				pete_writel("drivers/mmc/host/sunplus-mmc.c:463", dma_addr, host->base + SPMMC_SDRAM_SECTOR_5_ADDR_REG);
+				pete_writel("drivers/mmc/host/sunplus-mmc.c:464", dma_size, host->base + SPMMC_SDRAM_SECTOR_5_LENG_REG);
 			} else if (i == 6) {
-				writel(dma_addr, host->base + SPMMC_SDRAM_SECTOR_6_ADDR_REG);
-				writel(dma_size, host->base + SPMMC_SDRAM_SECTOR_6_LENG_REG);
+				pete_writel("drivers/mmc/host/sunplus-mmc.c:466", dma_addr, host->base + SPMMC_SDRAM_SECTOR_6_ADDR_REG);
+				pete_writel("drivers/mmc/host/sunplus-mmc.c:467", dma_size, host->base + SPMMC_SDRAM_SECTOR_6_LENG_REG);
 			} else if (i == 7) {
-				writel(dma_addr, host->base + SPMMC_SDRAM_SECTOR_7_ADDR_REG);
-				writel(dma_size, host->base + SPMMC_SDRAM_SECTOR_7_LENG_REG);
+				pete_writel("drivers/mmc/host/sunplus-mmc.c:469", dma_addr, host->base + SPMMC_SDRAM_SECTOR_7_ADDR_REG);
+				pete_writel("drivers/mmc/host/sunplus-mmc.c:470", dma_size, host->base + SPMMC_SDRAM_SECTOR_7_LENG_REG);
 			}
 		}
 		value &= ~SPMMC_SD_PIO_MODE;
-		writel(value, host->base + SPMMC_SD_CONFIG0_REG);
+		pete_writel("drivers/mmc/host/sunplus-mmc.c:474", value, host->base + SPMMC_SD_CONFIG0_REG);
 		/* enable interrupt if needed */
 		if (data->blksz * data->blocks > host->dma_int_threshold) {
 			host->dma_use_int = 1;
-			value = readl(host->base + SPMMC_SD_INT_REG);
+			value = pete_readl("drivers/mmc/host/sunplus-mmc.c:478", host->base + SPMMC_SD_INT_REG);
 			value &= ~SPMMC_SDINT_SDCMPEN;
 			value |= FIELD_PREP(SPMMC_SDINT_SDCMPEN, 1); /* sdcmpen */
-			writel(value, host->base + SPMMC_SD_INT_REG);
+			pete_writel("drivers/mmc/host/sunplus-mmc.c:481", value, host->base + SPMMC_SD_INT_REG);
 		}
 	} else {
 		value |= SPMMC_SD_PIO_MODE;
 		value |= SPMMC_RX4_EN;
-		writel(value, host->base + SPMMC_SD_CONFIG0_REG);
+		pete_writel("drivers/mmc/host/sunplus-mmc.c:486", value, host->base + SPMMC_SD_CONFIG0_REG);
 	}
 }
 
 static inline void spmmc_trigger_transaction(struct spmmc_host *host)
 {
-	u32 value = readl(host->base + SPMMC_SD_CTRL_REG);
+	u32 value = pete_readl("drivers/mmc/host/sunplus-mmc.c:492", host->base + SPMMC_SD_CTRL_REG);
 
 	value |= SPMMC_NEW_COMMAND_TRIGGER;
-	writel(value, host->base + SPMMC_SD_CTRL_REG);
+	pete_writel("drivers/mmc/host/sunplus-mmc.c:495", value, host->base + SPMMC_SD_CTRL_REG);
 }
 
 static void spmmc_send_stop_cmd(struct spmmc_host *host)
@@ -504,10 +504,10 @@ static void spmmc_send_stop_cmd(struct spmmc_host *host)
 	stop.arg = 0;
 	stop.flags = MMC_RSP_R1B;
 	spmmc_prepare_cmd(host, &stop);
-	value = readl(host->base + SPMMC_SD_INT_REG);
+	value = pete_readl("drivers/mmc/host/sunplus-mmc.c:507", host->base + SPMMC_SD_INT_REG);
 	value &= ~SPMMC_SDINT_SDCMPEN;
 	value |= FIELD_PREP(SPMMC_SDINT_SDCMPEN, 0);
-	writel(value, host->base + SPMMC_SD_INT_REG);
+	pete_writel("drivers/mmc/host/sunplus-mmc.c:510", value, host->base + SPMMC_SD_INT_REG);
 	spmmc_trigger_transaction(host);
 	readl_poll_timeout(host->base + SPMMC_SD_STATE_REG, value,
 			   (value & SPMMC_SDSTATE_FINISH), 1, SPMMC_TIMEOUT_US);
@@ -519,16 +519,16 @@ static int spmmc_check_error(struct spmmc_host *host, struct mmc_request *mrq)
 	struct mmc_command *cmd = mrq->cmd;
 	struct mmc_data *data = mrq->data;
 
-	u32 value = readl(host->base + SPMMC_SD_STATE_REG);
+	u32 value = pete_readl("drivers/mmc/host/sunplus-mmc.c:522", host->base + SPMMC_SD_STATE_REG);
 	u32 crc_token = FIELD_GET(SPMMC_CRCTOKEN_CHECK_RESULT, value);
 
 	if (value & SPMMC_SDSTATE_ERROR) {
 		u32 timing_cfg0 = 0;
 
-		value = readl(host->base + SPMMC_SD_STATUS_REG);
+		value = pete_readl("drivers/mmc/host/sunplus-mmc.c:528", host->base + SPMMC_SD_STATUS_REG);
 
 		if (host->tuning_info.enable_tuning) {
-			timing_cfg0 = readl(host->base + SPMMC_SD_TIMING_CONFIG0_REG);
+			timing_cfg0 = pete_readl("drivers/mmc/host/sunplus-mmc.c:531", host->base + SPMMC_SD_TIMING_CONFIG0_REG);
 			host->tuning_info.rd_crc_dly = FIELD_GET(SPMMC_SD_READ_CRC_DELAY,
 								 timing_cfg0);
 			host->tuning_info.rd_dat_dly = FIELD_GET(SPMMC_SD_READ_DATA_DELAY,
@@ -590,7 +590,7 @@ static int spmmc_check_error(struct spmmc_host *host, struct mmc_request *mrq)
 			timing_cfg0 &= ~SPMMC_SD_WRITE_DATA_DELAY;
 			timing_cfg0 |= FIELD_PREP(SPMMC_SD_WRITE_DATA_DELAY,
 						       host->tuning_info.wr_dat_dly);
-			writel(timing_cfg0, host->base + SPMMC_SD_TIMING_CONFIG0_REG);
+			pete_writel("drivers/mmc/host/sunplus-mmc.c:593", timing_cfg0, host->base + SPMMC_SD_TIMING_CONFIG0_REG);
 		}
 	} else if (data) {
 		data->error = 0;
@@ -645,11 +645,11 @@ static void spmmc_xfer_data_pio(struct spmmc_host *host, struct mmc_data *data)
 			if (data->flags & MMC_DATA_WRITE) {
 				if (spmmc_wait_txbuf_empty(host))
 					goto done;
-				writel(*buf, host->base + SPMMC_SD_PIODATATX_REG);
+				pete_writel("drivers/mmc/host/sunplus-mmc.c:648", *buf, host->base + SPMMC_SD_PIODATATX_REG);
 			} else {
 				if (spmmc_wait_rxbuf_full(host))
 					goto done;
-				*buf = readl(host->base + SPMMC_SD_PIODATARX_REG);
+				*buf = pete_readl("drivers/mmc/host/sunplus-mmc.c:652", host->base + SPMMC_SD_PIODATARX_REG);
 			}
 			buf++;
 			/* tx/rx 4 bytes one time in pio mode */
@@ -673,10 +673,10 @@ static void spmmc_controller_init(struct spmmc_host *host)
 		ret = reset_control_deassert(host->rstc);
 	}
 
-	value = readl(host->base + SPMMC_CARD_MEDIATYPE_SRCDST_REG);
+	value = pete_readl("drivers/mmc/host/sunplus-mmc.c:676", host->base + SPMMC_CARD_MEDIATYPE_SRCDST_REG);
 	value &= ~SPMMC_MEDIA_TYPE;
 	value |= FIELD_PREP(SPMMC_MEDIA_TYPE, SPMMC_MEDIA_SD);
-	writel(value, host->base + SPMMC_CARD_MEDIATYPE_SRCDST_REG);
+	pete_writel("drivers/mmc/host/sunplus-mmc.c:679", value, host->base + SPMMC_CARD_MEDIATYPE_SRCDST_REG);
 }
 
 /*
@@ -713,12 +713,12 @@ static void spmmc_finish_request(struct spmmc_host *host, struct mmc_request *mr
 static irqreturn_t spmmc_irq(int irq, void *dev_id)
 {
 	struct spmmc_host *host = dev_id;
-	u32 value = readl(host->base + SPMMC_SD_INT_REG);
+	u32 value = pete_readl("drivers/mmc/host/sunplus-mmc.c:716", host->base + SPMMC_SD_INT_REG);
 
 	if ((value & SPMMC_SDINT_SDCMP) && (value & SPMMC_SDINT_SDCMPEN)) {
 		value &= ~SPMMC_SDINT_SDCMPEN;
 		value |= SPMMC_SDINT_SDCMPCLR;
-		writel(value, host->base + SPMMC_SD_INT_REG);
+		pete_writel("drivers/mmc/host/sunplus-mmc.c:721", value, host->base + SPMMC_SD_INT_REG);
 		return IRQ_WAKE_THREAD;
 	}
 	return IRQ_HANDLED;
@@ -750,9 +750,9 @@ static void spmmc_request(struct mmc_host *mmc, struct mmc_request *mrq)
 		if (host->dmapio_mode == SPMMC_PIO_MODE && data) {
 			u32 value;
 			/* pio data transfer do not use interrupt */
-			value = readl(host->base + SPMMC_SD_INT_REG);
+			value = pete_readl("drivers/mmc/host/sunplus-mmc.c:753", host->base + SPMMC_SD_INT_REG);
 			value &= ~SPMMC_SDINT_SDCMPEN;
-			writel(value, host->base + SPMMC_SD_INT_REG);
+			pete_writel("drivers/mmc/host/sunplus-mmc.c:755", value, host->base + SPMMC_SD_INT_REG);
 			spmmc_trigger_transaction(host);
 			spmmc_xfer_data_pio(host, data);
 			spmmc_wait_finish(host);
@@ -808,14 +808,14 @@ static int spmmc_execute_tuning(struct mmc_host *mmc, u32 opcode)
 
 	host->tuning_info.enable_tuning = 0;
 	do {
-		value = readl(host->base + SPMMC_SD_TIMING_CONFIG0_REG);
+		value = pete_readl("drivers/mmc/host/sunplus-mmc.c:811", host->base + SPMMC_SD_TIMING_CONFIG0_REG);
 		value &= ~SPMMC_SD_READ_RESPONSE_DELAY;
 		value |= FIELD_PREP(SPMMC_SD_READ_RESPONSE_DELAY, smpl_dly);
 		value &= ~SPMMC_SD_READ_DATA_DELAY;
 		value |= FIELD_PREP(SPMMC_SD_READ_DATA_DELAY, smpl_dly);
 		value &= ~SPMMC_SD_READ_CRC_DELAY;
 		value |= FIELD_PREP(SPMMC_SD_READ_CRC_DELAY, smpl_dly);
-		writel(value, host->base + SPMMC_SD_TIMING_CONFIG0_REG);
+		pete_writel("drivers/mmc/host/sunplus-mmc.c:818", value, host->base + SPMMC_SD_TIMING_CONFIG0_REG);
 
 		if (!mmc_send_tuning(mmc, opcode, NULL)) {
 			candidate_dly |= (1 << smpl_dly);
@@ -826,14 +826,14 @@ static int spmmc_execute_tuning(struct mmc_host *mmc, u32 opcode)
 
 	if (candidate_dly) {
 		smpl_dly = spmmc_find_best_delay(candidate_dly);
-		value = readl(host->base + SPMMC_SD_TIMING_CONFIG0_REG);
+		value = pete_readl("drivers/mmc/host/sunplus-mmc.c:829", host->base + SPMMC_SD_TIMING_CONFIG0_REG);
 		value &= ~SPMMC_SD_READ_RESPONSE_DELAY;
 		value |= FIELD_PREP(SPMMC_SD_READ_RESPONSE_DELAY, smpl_dly);
 		value &= ~SPMMC_SD_READ_DATA_DELAY;
 		value |= FIELD_PREP(SPMMC_SD_READ_DATA_DELAY, smpl_dly);
 		value &= ~SPMMC_SD_READ_CRC_DELAY;
 		value |= FIELD_PREP(SPMMC_SD_READ_CRC_DELAY, smpl_dly);
-		writel(value, host->base + SPMMC_SD_TIMING_CONFIG0_REG);
+		pete_writel("drivers/mmc/host/sunplus-mmc.c:836", value, host->base + SPMMC_SD_TIMING_CONFIG0_REG);
 		return 0;
 	}
 

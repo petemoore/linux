@@ -291,11 +291,11 @@ struct smi_dev {
 	struct smi_rc ir;
 };
 
-#define smi_read(reg)             readl(dev->lmmio + ((reg)>>2))
-#define smi_write(reg, value)     writel((value), dev->lmmio + ((reg)>>2))
+#define smi_read(reg)             pete_readl("drivers/media/pci/smipcie/smipcie.h:294", dev->lmmio + ((reg)>>2))
+#define smi_write(reg, value)     pete_writel("drivers/media/pci/smipcie/smipcie.h:295", (value), dev->lmmio + ((reg)>>2))
 
 #define smi_andor(reg, mask, value) \
-	writel((readl(dev->lmmio+((reg)>>2)) & ~(mask)) |\
+	pete_writel("drivers/media/pci/smipcie/smipcie.h:298", (pete_readl("drivers/media/pci/smipcie/smipcie.h:298", dev->lmmio+((reg)>>2)) & ~(mask)) |\
 	((value) & (mask)), dev->lmmio+((reg)>>2))
 
 #define smi_set(reg, bit)          smi_andor((reg), (bit), (bit))

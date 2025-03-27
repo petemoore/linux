@@ -105,13 +105,13 @@ struct vc4_dpi {
 #define DPI_READ(offset)								\
 	({										\
 		kunit_fail_current_test("Accessing a register in a unit test!\n");	\
-		readl(dpi->regs + (offset));						\
+		pete_readl("drivers/gpu/drm/vc4/vc4_dpi.c:108", dpi->regs + (offset));						\
 	})
 
 #define DPI_WRITE(offset, val)								\
 	do {										\
 		kunit_fail_current_test("Accessing a register in a unit test!\n");	\
-		writel(val, dpi->regs + (offset));					\
+		pete_writel("drivers/gpu/drm/vc4/vc4_dpi.c:114", val, dpi->regs + (offset));					\
 	} while (0)
 
 static const struct debugfs_reg32 dpi_regs[] = {

@@ -961,11 +961,11 @@ static irqreturn_t bcm2708_fb_dma_irq(int irq, void *cxt)
 	 * actually interrupting us or not, in case this interrupt
 	 * ever becomes shared amongst several DMA channels
 	 *
-	 * readl(dma_chan_base + BCM2708_DMA_CS) & BCM2708_DMA_IRQ;
+	 * pete_readl("drivers/video/fbdev/bcm2708_fb.c:964", dma_chan_base + BCM2708_DMA_CS) & BCM2708_DMA_IRQ;
 	 */
 
 	/* acknowledge the interrupt */
-	writel(BCM2708_DMA_INT, fbdev->dma_chan_base + BCM2708_DMA_CS);
+	pete_writel("drivers/video/fbdev/bcm2708_fb.c:968", BCM2708_DMA_INT, fbdev->dma_chan_base + BCM2708_DMA_CS);
 
 	wake_up(&fbdev->dma_waitq);
 	return IRQ_HANDLED;

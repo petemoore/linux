@@ -53,12 +53,12 @@ static void ppc4xx_trng_enable(struct crypto4xx_device *dev, bool enable)
 {
 	u32 device_ctrl;
 
-	device_ctrl = readl(dev->ce_base + CRYPTO4XX_DEVICE_CTRL);
+	device_ctrl = pete_readl("drivers/crypto/amcc/crypto4xx_trng.c:56", dev->ce_base + CRYPTO4XX_DEVICE_CTRL);
 	if (enable)
 		device_ctrl |= PPC4XX_TRNG_EN;
 	else
 		device_ctrl &= ~PPC4XX_TRNG_EN;
-	writel(device_ctrl, dev->ce_base + CRYPTO4XX_DEVICE_CTRL);
+	pete_writel("drivers/crypto/amcc/crypto4xx_trng.c:61", device_ctrl, dev->ce_base + CRYPTO4XX_DEVICE_CTRL);
 }
 
 static const struct of_device_id ppc4xx_trng_match[] = {

@@ -847,40 +847,40 @@ xirc2ps_config(struct pcmcia_device * link)
 	/* Setup the CCRs; there are no infos in the CIS about the Ethernet
 	 * part.
 	 */
-	writeb(0x47, local->dingo_ccr + CISREG_COR);
+	pete_writeb("drivers/net/ethernet/xircom/xirc2ps_cs.c:850", 0x47, local->dingo_ccr + CISREG_COR);
 	ioaddr = link->resource[0]->start;
-	writeb(ioaddr & 0xff	  , local->dingo_ccr + CISREG_IOBASE_0);
-	writeb((ioaddr >> 8)&0xff , local->dingo_ccr + CISREG_IOBASE_1);
+	pete_writeb("drivers/net/ethernet/xircom/xirc2ps_cs.c:852", ioaddr & 0xff	  , local->dingo_ccr + CISREG_IOBASE_0);
+	pete_writeb("drivers/net/ethernet/xircom/xirc2ps_cs.c:853", (ioaddr >> 8)&0xff , local->dingo_ccr + CISREG_IOBASE_1);
 
       #if 0
 	{
 	    u_char tmp;
 	    pr_info("ECOR:");
 	    for (i=0; i < 7; i++) {
-		tmp = readb(local->dingo_ccr + i*2);
+		tmp = pete_readb("drivers/net/ethernet/xircom/xirc2ps_cs.c:860", local->dingo_ccr + i*2);
 		pr_cont(" %02x", tmp);
 	    }
 	    pr_cont("\n");
 	    pr_info("DCOR:");
 	    for (i=0; i < 4; i++) {
-		tmp = readb(local->dingo_ccr + 0x20 + i*2);
+		tmp = pete_readb("drivers/net/ethernet/xircom/xirc2ps_cs.c:866", local->dingo_ccr + 0x20 + i*2);
 		pr_cont(" %02x", tmp);
 	    }
 	    pr_cont("\n");
 	    pr_info("SCOR:");
 	    for (i=0; i < 10; i++) {
-		tmp = readb(local->dingo_ccr + 0x40 + i*2);
+		tmp = pete_readb("drivers/net/ethernet/xircom/xirc2ps_cs.c:872", local->dingo_ccr + 0x40 + i*2);
 		pr_cont(" %02x", tmp);
 	    }
 	    pr_cont("\n");
 	}
       #endif
 
-	writeb(0x01, local->dingo_ccr + 0x20);
-	writeb(0x0c, local->dingo_ccr + 0x22);
-	writeb(0x00, local->dingo_ccr + 0x24);
-	writeb(0x00, local->dingo_ccr + 0x26);
-	writeb(0x00, local->dingo_ccr + 0x28);
+	pete_writeb("drivers/net/ethernet/xircom/xirc2ps_cs.c:879", 0x01, local->dingo_ccr + 0x20);
+	pete_writeb("drivers/net/ethernet/xircom/xirc2ps_cs.c:880", 0x0c, local->dingo_ccr + 0x22);
+	pete_writeb("drivers/net/ethernet/xircom/xirc2ps_cs.c:881", 0x00, local->dingo_ccr + 0x24);
+	pete_writeb("drivers/net/ethernet/xircom/xirc2ps_cs.c:882", 0x00, local->dingo_ccr + 0x26);
+	pete_writeb("drivers/net/ethernet/xircom/xirc2ps_cs.c:883", 0x00, local->dingo_ccr + 0x28);
     }
 
     /* The if_port symbol can be set when the module is loaded */

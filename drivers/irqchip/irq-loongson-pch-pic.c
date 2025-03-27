@@ -58,9 +58,9 @@ static void pch_pic_bitset(struct pch_pic *priv, int offset, int bit)
 	void __iomem *addr = priv->base + offset + PIC_REG_IDX(bit) * 4;
 
 	raw_spin_lock(&priv->pic_lock);
-	reg = readl(addr);
+	reg = pete_readl("drivers/irqchip/irq-loongson-pch-pic.c:61", addr);
 	reg |= BIT(PIC_REG_BIT(bit));
-	writel(reg, addr);
+	pete_writel("drivers/irqchip/irq-loongson-pch-pic.c:63", reg, addr);
 	raw_spin_unlock(&priv->pic_lock);
 }
 
@@ -70,9 +70,9 @@ static void pch_pic_bitclr(struct pch_pic *priv, int offset, int bit)
 	void __iomem *addr = priv->base + offset + PIC_REG_IDX(bit) * 4;
 
 	raw_spin_lock(&priv->pic_lock);
-	reg = readl(addr);
+	reg = pete_readl("drivers/irqchip/irq-loongson-pch-pic.c:73", addr);
 	reg &= ~BIT(PIC_REG_BIT(bit));
-	writel(reg, addr);
+	pete_writel("drivers/irqchip/irq-loongson-pch-pic.c:75", reg, addr);
 	raw_spin_unlock(&priv->pic_lock);
 }
 
@@ -88,7 +88,7 @@ static void pch_pic_unmask_irq(struct irq_data *d)
 {
 	struct pch_pic *priv = irq_data_get_irq_chip_data(d);
 
-	writel(BIT(PIC_REG_BIT(d->hwirq)),
+	pete_writel("drivers/irqchip/irq-loongson-pch-pic.c:91", BIT(PIC_REG_BIT(d->hwirq)),
 			priv->base + PCH_PIC_CLR + PIC_REG_IDX(d->hwirq) * 4);
 
 	irq_chip_unmask_parent(d);
@@ -134,9 +134,9 @@ static void pch_pic_ack_irq(struct irq_data *d)
 	unsigned int reg;
 	struct pch_pic *priv = irq_data_get_irq_chip_data(d);
 
-	reg = readl(priv->base + PCH_PIC_EDGE + PIC_REG_IDX(d->hwirq) * 4);
+	reg = pete_readl("drivers/irqchip/irq-loongson-pch-pic.c:137", priv->base + PCH_PIC_EDGE + PIC_REG_IDX(d->hwirq) * 4);
 	if (reg & BIT(PIC_REG_BIT(d->hwirq))) {
-		writel(BIT(PIC_REG_BIT(d->hwirq)),
+		pete_writel("drivers/irqchip/irq-loongson-pch-pic.c:139", BIT(PIC_REG_BIT(d->hwirq)),
 			priv->base + PCH_PIC_CLR + PIC_REG_IDX(d->hwirq) * 4);
 	}
 	irq_chip_ack_parent(d);
@@ -222,9 +222,9 @@ static void pch_pic_reset(struct pch_pic *priv)
 
 	for (i = 0; i < PIC_COUNT; i++) {
 		/* Write vector ID */
-		writeb(priv->ht_vec_base + i, priv->base + PCH_INT_HTVEC(i));
+		pete_writeb("drivers/irqchip/irq-loongson-pch-pic.c:225", priv->ht_vec_base + i, priv->base + PCH_INT_HTVEC(i));
 		/* Hardcode route to HT0 Lo */
-		writeb(1, priv->base + PCH_INT_ROUTE(i));
+		pete_writeb("drivers/irqchip/irq-loongson-pch-pic.c:227", 1, priv->base + PCH_INT_ROUTE(i));
 	}
 
 	for (i = 0; i < PIC_REG_COUNT; i++) {
@@ -246,11 +246,11 @@ static int pch_pic_suspend(void)
 	for (i = 0; i < nr_pics; i++) {
 		for (j = 0; j < PIC_REG_COUNT; j++) {
 			pch_pic_priv[i]->saved_vec_pol[j] =
-				readl(pch_pic_priv[i]->base + PCH_PIC_POL + 4 * j);
+				pete_readl("drivers/irqchip/irq-loongson-pch-pic.c:249", pch_pic_priv[i]->base + PCH_PIC_POL + 4 * j);
 			pch_pic_priv[i]->saved_vec_edge[j] =
-				readl(pch_pic_priv[i]->base + PCH_PIC_EDGE + 4 * j);
+				pete_readl("drivers/irqchip/irq-loongson-pch-pic.c:251", pch_pic_priv[i]->base + PCH_PIC_EDGE + 4 * j);
 			pch_pic_priv[i]->saved_vec_en[j] =
-				readl(pch_pic_priv[i]->base + PCH_PIC_MASK + 4 * j);
+				pete_readl("drivers/irqchip/irq-loongson-pch-pic.c:253", pch_pic_priv[i]->base + PCH_PIC_MASK + 4 * j);
 		}
 	}
 
@@ -264,11 +264,11 @@ static void pch_pic_resume(void)
 	for (i = 0; i < nr_pics; i++) {
 		pch_pic_reset(pch_pic_priv[i]);
 		for (j = 0; j < PIC_REG_COUNT; j++) {
-			writel(pch_pic_priv[i]->saved_vec_pol[j],
+			pete_writel("drivers/irqchip/irq-loongson-pch-pic.c:267", pch_pic_priv[i]->saved_vec_pol[j],
 					pch_pic_priv[i]->base + PCH_PIC_POL + 4 * j);
-			writel(pch_pic_priv[i]->saved_vec_edge[j],
+			pete_writel("drivers/irqchip/irq-loongson-pch-pic.c:269", pch_pic_priv[i]->saved_vec_edge[j],
 					pch_pic_priv[i]->base + PCH_PIC_EDGE + 4 * j);
-			writel(pch_pic_priv[i]->saved_vec_en[j],
+			pete_writel("drivers/irqchip/irq-loongson-pch-pic.c:271", pch_pic_priv[i]->saved_vec_en[j],
 					pch_pic_priv[i]->base + PCH_PIC_MASK + 4 * j);
 		}
 	}
@@ -295,7 +295,7 @@ static int pch_pic_init(phys_addr_t addr, unsigned long size, int vec_base,
 		goto free_priv;
 
 	priv->ht_vec_base = vec_base;
-	priv->vec_count = ((readq(priv->base) >> 48) & 0xff) + 1;
+	priv->vec_count = ((pete_readq("drivers/irqchip/irq-loongson-pch-pic.c:298", priv->base) >> 48) & 0xff) + 1;
 	priv->gsi_base = gsi_base;
 
 	priv->pic_domain = irq_domain_create_hierarchy(parent_domain, 0,

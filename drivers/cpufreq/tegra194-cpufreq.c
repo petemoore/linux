@@ -123,7 +123,7 @@ static int tegra234_get_cpu_ndiv(u32 cpu, u32 cpuid, u32 clusterid, u64 *ndiv)
 	mpidr_id = (clusterid * data->soc->maxcpus_per_cluster) + cpuid;
 	freq_core_reg = SCRATCH_FREQ_CORE_REG(data, mpidr_id);
 
-	*ndiv = readl(freq_core_reg) & NDIV_MASK;
+	*ndiv = pete_readl("drivers/cpufreq/tegra194-cpufreq.c:126", freq_core_reg) & NDIV_MASK;
 
 	return 0;
 }
@@ -142,7 +142,7 @@ static void tegra234_set_cpu_ndiv(struct cpufreq_policy *policy, u64 ndiv)
 		mpidr_id = (clusterid * data->soc->maxcpus_per_cluster) + cpuid;
 		freq_core_reg = SCRATCH_FREQ_CORE_REG(data, mpidr_id);
 
-		writel(ndiv, freq_core_reg);
+		pete_writel("drivers/cpufreq/tegra194-cpufreq.c:145", ndiv, freq_core_reg);
 	}
 }
 
@@ -163,11 +163,11 @@ static void tegra234_read_counters(struct tegra_cpu_ctr *c)
 	data->soc->ops->get_cpu_cluster_id(c->cpu, &cpuid, &clusterid);
 	actmon_reg = CORE_ACTMON_CNTR_REG(data, clusterid, cpuid);
 
-	val = readq(actmon_reg);
+	val = pete_readq("drivers/cpufreq/tegra194-cpufreq.c:166", actmon_reg);
 	c->last_refclk_cnt = upper_32_bits(val);
 	c->last_coreclk_cnt = lower_32_bits(val);
 	udelay(US_DELAY);
-	val = readq(actmon_reg);
+	val = pete_readq("drivers/cpufreq/tegra194-cpufreq.c:170", actmon_reg);
 	c->refclk_cnt = upper_32_bits(val);
 	c->coreclk_cnt = lower_32_bits(val);
 }

@@ -957,8 +957,8 @@ int agp_generic_create_gatt_table(struct agp_bridge_data *bridge)
 
 	/* AK: bogus, should encode addresses > 4GB */
 	for (i = 0; i < num_entries; i++) {
-		writel(bridge->scratch_page, bridge->gatt_table+i);
-		readl(bridge->gatt_table+i);	/* PCI Posting. */
+		pete_writel("drivers/char/agp/generic.c:960", bridge->scratch_page, bridge->gatt_table+i);
+		pete_readl("drivers/char/agp/generic.c:961", bridge->gatt_table+i);	/* PCI Posting. */
 	}
 
 	return 0;
@@ -1080,7 +1080,7 @@ int agp_generic_insert_memory(struct agp_memory * mem, off_t pg_start, int type)
 	j = pg_start;
 
 	while (j < (pg_start + mem->page_count)) {
-		if (!PGE_EMPTY(bridge, readl(bridge->gatt_table+j)))
+		if (!PGE_EMPTY(bridge, pete_readl("drivers/char/agp/generic.c:1083", bridge->gatt_table+j)))
 			return -EBUSY;
 		j++;
 	}
@@ -1091,12 +1091,12 @@ int agp_generic_insert_memory(struct agp_memory * mem, off_t pg_start, int type)
 	}
 
 	for (i = 0, j = pg_start; i < mem->page_count; i++, j++) {
-		writel(bridge->driver->mask_memory(bridge,
+		pete_writel("drivers/char/agp/generic.c:1094", bridge->driver->mask_memory(bridge,
 						   page_to_phys(mem->pages[i]),
 						   mask_type),
 		       bridge->gatt_table+j);
 	}
-	readl(bridge->gatt_table+j-1);	/* PCI Posting. */
+	pete_readl("drivers/char/agp/generic.c:1099", bridge->gatt_table+j-1);	/* PCI Posting. */
 
 	bridge->driver->tlb_flush(mem);
 	return 0;
@@ -1133,9 +1133,9 @@ int agp_generic_remove_memory(struct agp_memory *mem, off_t pg_start, int type)
 
 	/* AK: bogus, should encode addresses > 4GB */
 	for (i = pg_start; i < (mem->page_count + pg_start); i++) {
-		writel(bridge->scratch_page, bridge->gatt_table+i);
+		pete_writel("drivers/char/agp/generic.c:1136", bridge->scratch_page, bridge->gatt_table+i);
 	}
-	readl(bridge->gatt_table+i-1);	/* PCI Posting. */
+	pete_readl("drivers/char/agp/generic.c:1138", bridge->gatt_table+i-1);	/* PCI Posting. */
 
 	bridge->driver->tlb_flush(mem);
 	return 0;

@@ -103,12 +103,12 @@ struct img_spfi {
 
 static inline u32 spfi_readl(struct img_spfi *spfi, u32 reg)
 {
-	return readl(spfi->regs + reg);
+	return pete_readl("drivers/spi/spi-img-spfi.c:106", spfi->regs + reg);
 }
 
 static inline void spfi_writel(struct img_spfi *spfi, u32 val, u32 reg)
 {
-	writel(val, spfi->regs + reg);
+	pete_writel("drivers/spi/spi-img-spfi.c:111", val, spfi->regs + reg);
 }
 
 static inline void spfi_start(struct img_spfi *spfi)

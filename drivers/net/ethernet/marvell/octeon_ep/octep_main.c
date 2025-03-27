@@ -358,19 +358,19 @@ static void octep_enable_ioq_irq(struct octep_iq *iq, struct octep_oq *oq)
 
 	netdev_dbg(iq->netdev, "enabling intr for Q-%u\n", iq->q_no);
 	if (iq->pkts_processed) {
-		writel(iq->pkts_processed, iq->inst_cnt_reg);
+		pete_writel("drivers/net/ethernet/marvell/octeon_ep/octep_main.c:361", iq->pkts_processed, iq->inst_cnt_reg);
 		iq->pkt_in_done -= iq->pkts_processed;
 		iq->pkts_processed = 0;
 	}
 	if (oq->last_pkt_count - pkts_pend) {
-		writel(oq->last_pkt_count - pkts_pend, oq->pkts_sent_reg);
+		pete_writel("drivers/net/ethernet/marvell/octeon_ep/octep_main.c:366", oq->last_pkt_count - pkts_pend, oq->pkts_sent_reg);
 		oq->last_pkt_count = pkts_pend;
 	}
 
 	/* Flush the previous wrties before writing to RESEND bit */
 	wmb();
-	writeq(1UL << OCTEP_OQ_INTR_RESEND_BIT, oq->pkts_sent_reg);
-	writeq(1UL << OCTEP_IQ_INTR_RESEND_BIT, iq->inst_cnt_reg);
+	pete_writeq("drivers/net/ethernet/marvell/octeon_ep/octep_main.c:372", 1UL << OCTEP_OQ_INTR_RESEND_BIT, oq->pkts_sent_reg);
+	pete_writeq("drivers/net/ethernet/marvell/octeon_ep/octep_main.c:373", 1UL << OCTEP_IQ_INTR_RESEND_BIT, iq->inst_cnt_reg);
 }
 
 /**
@@ -726,7 +726,7 @@ static netdev_tx_t octep_start_xmit(struct sk_buff *skb,
 	wmb();
 
 	/* Ring Doorbell to notify the NIC there is a new packet */
-	writel(1, iq->doorbell_reg);
+	pete_writel("drivers/net/ethernet/marvell/octeon_ep/octep_main.c:729", 1, iq->doorbell_reg);
 	iq->stats.instr_posted++;
 	return NETDEV_TX_OK;
 

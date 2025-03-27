@@ -201,7 +201,7 @@ int cxl_await_media_ready(struct cxl_dev_state *cxlds)
 			return rc;
 	}
 
-	md_status = readq(cxlds->regs.memdev + CXLMDEV_STATUS_OFFSET);
+	md_status = pete_readq("drivers/cxl/core/pci.c:204", cxlds->regs.memdev + CXLMDEV_STATUS_OFFSET);
 	if (!CXLMDEV_READY(md_status))
 		return -EIO;
 
@@ -303,8 +303,8 @@ static void disable_hdm(void *_cxlhdm)
 	struct cxl_hdm *cxlhdm = _cxlhdm;
 	void __iomem *hdm = cxlhdm->regs.hdm_decoder;
 
-	global_ctrl = readl(hdm + CXL_HDM_DECODER_CTRL_OFFSET);
-	writel(global_ctrl & ~CXL_HDM_DECODER_ENABLE,
+	global_ctrl = pete_readl("drivers/cxl/core/pci.c:306", hdm + CXL_HDM_DECODER_CTRL_OFFSET);
+	pete_writel("drivers/cxl/core/pci.c:307", global_ctrl & ~CXL_HDM_DECODER_ENABLE,
 	       hdm + CXL_HDM_DECODER_CTRL_OFFSET);
 }
 
@@ -313,8 +313,8 @@ static int devm_cxl_enable_hdm(struct device *host, struct cxl_hdm *cxlhdm)
 	void __iomem *hdm = cxlhdm->regs.hdm_decoder;
 	u32 global_ctrl;
 
-	global_ctrl = readl(hdm + CXL_HDM_DECODER_CTRL_OFFSET);
-	writel(global_ctrl | CXL_HDM_DECODER_ENABLE,
+	global_ctrl = pete_readl("drivers/cxl/core/pci.c:316", hdm + CXL_HDM_DECODER_CTRL_OFFSET);
+	pete_writel("drivers/cxl/core/pci.c:317", global_ctrl | CXL_HDM_DECODER_ENABLE,
 	       hdm + CXL_HDM_DECODER_CTRL_OFFSET);
 
 	return devm_add_action_or_reset(host, disable_hdm, cxlhdm);
@@ -436,7 +436,7 @@ int cxl_hdm_decode_init(struct cxl_dev_state *cxlds, struct cxl_hdm *cxlhdm,
 	u32 global_ctrl = 0;
 
 	if (hdm)
-		global_ctrl = readl(hdm + CXL_HDM_DECODER_CTRL_OFFSET);
+		global_ctrl = pete_readl("drivers/cxl/core/pci.c:439", hdm + CXL_HDM_DECODER_CTRL_OFFSET);
 
 	/*
 	 * If the HDM Decoder Capability is already enabled then assume
@@ -650,9 +650,9 @@ void cxl_cor_error_detected(struct pci_dev *pdev)
 		return;
 
 	addr = cxlds->regs.ras + CXL_RAS_CORRECTABLE_STATUS_OFFSET;
-	status = readl(addr);
+	status = pete_readl("drivers/cxl/core/pci.c:653", addr);
 	if (status & CXL_RAS_CORRECTABLE_STATUS_MASK) {
-		writel(status & CXL_RAS_CORRECTABLE_STATUS_MASK, addr);
+		pete_writel("drivers/cxl/core/pci.c:655", status & CXL_RAS_CORRECTABLE_STATUS_MASK, addr);
 		trace_cxl_aer_correctable_error(cxlds->cxlmd, status);
 	}
 }
@@ -669,7 +669,7 @@ static void header_log_copy(struct cxl_dev_state *cxlds, u32 *log)
 	log_addr = log;
 
 	for (i = 0; i < log_u32_size; i++) {
-		*log_addr = readl(addr);
+		*log_addr = pete_readl("drivers/cxl/core/pci.c:672", addr);
 		log_addr++;
 		addr += sizeof(u32);
 	}
@@ -690,7 +690,7 @@ static bool cxl_report_and_clear(struct cxl_dev_state *cxlds)
 		return false;
 
 	addr = cxlds->regs.ras + CXL_RAS_UNCORRECTABLE_STATUS_OFFSET;
-	status = readl(addr);
+	status = pete_readl("drivers/cxl/core/pci.c:693", addr);
 	if (!(status & CXL_RAS_UNCORRECTABLE_STATUS_MASK))
 		return false;
 
@@ -700,14 +700,14 @@ static bool cxl_report_and_clear(struct cxl_dev_state *cxlds)
 			cxlds->regs.ras + CXL_RAS_CAP_CONTROL_OFFSET;
 
 		fe = BIT(FIELD_GET(CXL_RAS_CAP_CONTROL_FE_MASK,
-				   readl(rcc_addr)));
+				   pete_readl("drivers/cxl/core/pci.c:703", rcc_addr)));
 	} else {
 		fe = status;
 	}
 
 	header_log_copy(cxlds, hl);
 	trace_cxl_aer_uncorrectable_error(cxlds->cxlmd, status, fe, hl);
-	writel(status & CXL_RAS_UNCORRECTABLE_STATUS_MASK, addr);
+	pete_writel("drivers/cxl/core/pci.c:710", status & CXL_RAS_UNCORRECTABLE_STATUS_MASK, addr);
 
 	return true;
 }

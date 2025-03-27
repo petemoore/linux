@@ -37,75 +37,75 @@ struct sppctl_gpio_chip {
 
 static inline u32 sppctl_first_readl(struct sppctl_gpio_chip *spp_gchip, u32 off)
 {
-	return readl(spp_gchip->first_base + SPPCTL_GPIO_OFF_FIRST + off);
+	return pete_readl("drivers/pinctrl/sunplus/sppctl.c:40", spp_gchip->first_base + SPPCTL_GPIO_OFF_FIRST + off);
 }
 
 static inline void sppctl_first_writel(struct sppctl_gpio_chip *spp_gchip, u32 val, u32 off)
 {
-	writel(val, spp_gchip->first_base + SPPCTL_GPIO_OFF_FIRST + off);
+	pete_writel("drivers/pinctrl/sunplus/sppctl.c:45", val, spp_gchip->first_base + SPPCTL_GPIO_OFF_FIRST + off);
 }
 
 static inline u32 sppctl_gpio_master_readl(struct sppctl_gpio_chip *spp_gchip, u32 off)
 {
-	return readl(spp_gchip->gpioxt_base + SPPCTL_GPIO_OFF_MASTER + off);
+	return pete_readl("drivers/pinctrl/sunplus/sppctl.c:50", spp_gchip->gpioxt_base + SPPCTL_GPIO_OFF_MASTER + off);
 }
 
 static inline void sppctl_gpio_master_writel(struct sppctl_gpio_chip *spp_gchip, u32 val,
 					     u32 off)
 {
-	writel(val, spp_gchip->gpioxt_base + SPPCTL_GPIO_OFF_MASTER + off);
+	pete_writel("drivers/pinctrl/sunplus/sppctl.c:56", val, spp_gchip->gpioxt_base + SPPCTL_GPIO_OFF_MASTER + off);
 }
 
 static inline u32 sppctl_gpio_oe_readl(struct sppctl_gpio_chip *spp_gchip, u32 off)
 {
-	return readl(spp_gchip->gpioxt_base + SPPCTL_GPIO_OFF_OE + off);
+	return pete_readl("drivers/pinctrl/sunplus/sppctl.c:61", spp_gchip->gpioxt_base + SPPCTL_GPIO_OFF_OE + off);
 }
 
 static inline void sppctl_gpio_oe_writel(struct sppctl_gpio_chip *spp_gchip, u32 val, u32 off)
 {
-	writel(val, spp_gchip->gpioxt_base + SPPCTL_GPIO_OFF_OE + off);
+	pete_writel("drivers/pinctrl/sunplus/sppctl.c:66", val, spp_gchip->gpioxt_base + SPPCTL_GPIO_OFF_OE + off);
 }
 
 static inline void sppctl_gpio_out_writel(struct sppctl_gpio_chip *spp_gchip, u32 val, u32 off)
 {
-	writel(val, spp_gchip->gpioxt_base + SPPCTL_GPIO_OFF_OUT + off);
+	pete_writel("drivers/pinctrl/sunplus/sppctl.c:71", val, spp_gchip->gpioxt_base + SPPCTL_GPIO_OFF_OUT + off);
 }
 
 static inline u32 sppctl_gpio_in_readl(struct sppctl_gpio_chip *spp_gchip, u32 off)
 {
-	return readl(spp_gchip->gpioxt_base + SPPCTL_GPIO_OFF_IN + off);
+	return pete_readl("drivers/pinctrl/sunplus/sppctl.c:76", spp_gchip->gpioxt_base + SPPCTL_GPIO_OFF_IN + off);
 }
 
 static inline u32 sppctl_gpio_iinv_readl(struct sppctl_gpio_chip *spp_gchip, u32 off)
 {
-	return readl(spp_gchip->gpioxt_base + SPPCTL_GPIO_OFF_IINV + off);
+	return pete_readl("drivers/pinctrl/sunplus/sppctl.c:81", spp_gchip->gpioxt_base + SPPCTL_GPIO_OFF_IINV + off);
 }
 
 static inline void sppctl_gpio_iinv_writel(struct sppctl_gpio_chip *spp_gchip, u32 val,
 					   u32 off)
 {
-	writel(val, spp_gchip->gpioxt_base + SPPCTL_GPIO_OFF_IINV + off);
+	pete_writel("drivers/pinctrl/sunplus/sppctl.c:87", val, spp_gchip->gpioxt_base + SPPCTL_GPIO_OFF_IINV + off);
 }
 
 static inline u32 sppctl_gpio_oinv_readl(struct sppctl_gpio_chip *spp_gchip, u32 off)
 {
-	return readl(spp_gchip->gpioxt_base + SPPCTL_GPIO_OFF_OINV + off);
+	return pete_readl("drivers/pinctrl/sunplus/sppctl.c:92", spp_gchip->gpioxt_base + SPPCTL_GPIO_OFF_OINV + off);
 }
 
 static inline void sppctl_gpio_oinv_writel(struct sppctl_gpio_chip *spp_gchip, u32 val,
 					   u32 off)
 {
-	writel(val, spp_gchip->gpioxt_base + SPPCTL_GPIO_OFF_OINV + off);
+	pete_writel("drivers/pinctrl/sunplus/sppctl.c:98", val, spp_gchip->gpioxt_base + SPPCTL_GPIO_OFF_OINV + off);
 }
 
 static inline u32 sppctl_gpio_od_readl(struct sppctl_gpio_chip *spp_gchip, u32 off)
 {
-	return readl(spp_gchip->gpioxt_base + SPPCTL_GPIO_OFF_OD + off);
+	return pete_readl("drivers/pinctrl/sunplus/sppctl.c:103", spp_gchip->gpioxt_base + SPPCTL_GPIO_OFF_OD + off);
 }
 
 static inline void sppctl_gpio_od_writel(struct sppctl_gpio_chip *spp_gchip, u32 val, u32 off)
 {
-	writel(val, spp_gchip->gpioxt_base + SPPCTL_GPIO_OFF_OD + off);
+	pete_writel("drivers/pinctrl/sunplus/sppctl.c:108", val, spp_gchip->gpioxt_base + SPPCTL_GPIO_OFF_OD + off);
 }
 
 static inline u32 sppctl_get_reg_and_bit_offset(unsigned int offset, u32 *reg_off)
@@ -200,7 +200,7 @@ static void sppctl_func_set(struct sppctl_pdata *pctl, u8 func, u8 val)
 	offset = func * 2;
 	offset &= GENMASK(31, 2);
 
-	writel(reg, pctl->moon2_base + offset);
+	pete_writel("drivers/pinctrl/sunplus/sppctl.c:203", reg, pctl->moon2_base + offset);
 }
 
 /**
@@ -236,7 +236,7 @@ static void sppctl_gmx_set(struct sppctl_pdata *pctl, u8 reg_off, u8 bit_off, u8
 	mask = GENMASK(bit_sz - 1, 0) << SPPCTL_MOON_REG_MASK_SHIFT;
 	reg = (mask | val) << bit_off;
 
-	writel(reg, pctl->moon1_base + reg_off * 4);
+	pete_writel("drivers/pinctrl/sunplus/sppctl.c:239", reg, pctl->moon1_base + reg_off * 4);
 }
 
 /**

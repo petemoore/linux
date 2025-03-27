@@ -410,7 +410,7 @@ static int rockchip_pcie_ep_send_msi_irq(struct rockchip_pcie_ep *ep, u8 fn,
 		ep->irq_pci_fn = fn;
 	}
 
-	writew(data, ep->irq_cpu_addr + (pci_addr & ~PCIE_ADDR_MASK));
+	pete_writew("drivers/pci/controller/pcie-rockchip-ep.c:413", data, ep->irq_cpu_addr + (pci_addr & ~PCIE_ADDR_MASK));
 	return 0;
 }
 

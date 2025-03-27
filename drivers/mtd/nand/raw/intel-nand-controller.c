@@ -145,7 +145,7 @@ static u8 ebu_nand_readb(struct nand_chip *chip)
 	u8 cs_num = ebu_host->cs_num;
 	u8 val;
 
-	val = readb(ebu_host->cs[cs_num].chipaddr + HSNAND_CS_OFFS);
+	val = pete_readb("drivers/mtd/nand/raw/intel-nand-controller.c:148", ebu_host->cs[cs_num].chipaddr + HSNAND_CS_OFFS);
 	ebu_nand_waitrdy(chip, 1000);
 	return val;
 }
@@ -155,7 +155,7 @@ static void ebu_nand_writeb(struct nand_chip *chip, u32 offset, u8 value)
 	struct ebu_nand_controller *ebu_host = nand_get_controller_data(chip);
 	u8 cs_num = ebu_host->cs_num;
 
-	writeb(value, ebu_host->cs[cs_num].chipaddr + offset);
+	pete_writeb("drivers/mtd/nand/raw/intel-nand-controller.c:158", value, ebu_host->cs[cs_num].chipaddr + offset);
 	ebu_nand_waitrdy(chip, 1000);
 }
 
@@ -179,7 +179,7 @@ static void ebu_nand_disable(struct nand_chip *chip)
 {
 	struct ebu_nand_controller *ebu_host = nand_get_controller_data(chip);
 
-	writel(0, ebu_host->ebu + EBU_CON);
+	pete_writel("drivers/mtd/nand/raw/intel-nand-controller.c:182", 0, ebu_host->ebu + EBU_CON);
 }
 
 static void ebu_select_chip(struct nand_chip *chip)
@@ -188,7 +188,7 @@ static void ebu_select_chip(struct nand_chip *chip)
 	void __iomem *nand_con = ebu_host->ebu + EBU_CON;
 	u32 cs = ebu_host->cs_num;
 
-	writel(EBU_CON_NANDM_EN | EBU_CON_CSMUX_E_EN | EBU_CON_CS_P_LOW |
+	pete_writel("drivers/mtd/nand/raw/intel-nand-controller.c:191", EBU_CON_NANDM_EN | EBU_CON_CSMUX_E_EN | EBU_CON_CS_P_LOW |
 	       EBU_CON_SE_P_LOW | EBU_CON_WP_P_LOW | EBU_CON_PRE_P_LOW |
 	       EBU_CON_IN_CS_S(cs) | EBU_CON_OUT_CS_S(cs) |
 	       EBU_CON_LAT_EN_CS_P, nand_con);
@@ -228,7 +228,7 @@ static int ebu_nand_set_timings(struct nand_chip *chip, int csline,
 	reg |= EBU_BUSCON_CMULT_V4 | EBU_BUSCON_BCGEN_CS | EBU_BUSCON_ALEC |
 		EBU_BUSCON_SETUP_EN;
 
-	writel(reg, ctrl->ebu + EBU_BUSCON(ctrl->cs_num));
+	pete_writel("drivers/mtd/nand/raw/intel-nand-controller.c:231", reg, ctrl->ebu + EBU_BUSCON(ctrl->cs_num));
 
 	return 0;
 }
@@ -358,17 +358,17 @@ static void ebu_nand_trigger(struct ebu_nand_controller *ebu_host,
 	unsigned int val;
 
 	val = cmd | (page & 0xFF) << HSNAND_CTL1_ADDR_SHIFT;
-	writel(val, ebu_host->hsnand + HSNAND_CTL1);
+	pete_writel("drivers/mtd/nand/raw/intel-nand-controller.c:361", val, ebu_host->hsnand + HSNAND_CTL1);
 	val = (page & 0xFFFF00) >> 8 | HSNAND_CTL2_CYC_N_V5;
-	writel(val, ebu_host->hsnand + HSNAND_CTL2);
+	pete_writel("drivers/mtd/nand/raw/intel-nand-controller.c:363", val, ebu_host->hsnand + HSNAND_CTL2);
 
-	writel(ebu_host->nd_para0, ebu_host->hsnand + HSNAND_PARA0);
+	pete_writel("drivers/mtd/nand/raw/intel-nand-controller.c:365", ebu_host->nd_para0, ebu_host->hsnand + HSNAND_PARA0);
 
 	/* clear first, will update later */
-	writel(0xFFFFFFFF, ebu_host->hsnand + HSNAND_CMSG_0);
-	writel(0xFFFFFFFF, ebu_host->hsnand + HSNAND_CMSG_1);
+	pete_writel("drivers/mtd/nand/raw/intel-nand-controller.c:368", 0xFFFFFFFF, ebu_host->hsnand + HSNAND_CMSG_0);
+	pete_writel("drivers/mtd/nand/raw/intel-nand-controller.c:369", 0xFFFFFFFF, ebu_host->hsnand + HSNAND_CMSG_1);
 
-	writel(HSNAND_INT_MSK_CTL_WR_C,
+	pete_writel("drivers/mtd/nand/raw/intel-nand-controller.c:371", HSNAND_INT_MSK_CTL_WR_C,
 	       ebu_host->hsnand + HSNAND_INT_MSK_CTL);
 
 	if (!cmd)
@@ -376,7 +376,7 @@ static void ebu_nand_trigger(struct ebu_nand_controller *ebu_host,
 	else
 		val = HSNAND_CTL_RW_WRITE;
 
-	writel(HSNAND_CTL_MSG_EN | HSNAND_CTL_CKFF_EN |
+	pete_writel("drivers/mtd/nand/raw/intel-nand-controller.c:379", HSNAND_CTL_MSG_EN | HSNAND_CTL_CKFF_EN |
 	       HSNAND_CTL_ECC_OFF_V8TH | HSNAND_CTL_CE_SEL_CS(ebu_host->cs_num) |
 	       HSNAND_CTL_ENABLE_ECC | HSNAND_CTL_GO | val,
 	       ebu_host->hsnand + HSNAND_CTL);
@@ -398,9 +398,9 @@ static int ebu_nand_read_page_hwecc(struct nand_chip *chip, u8 *buf,
 	if (oob_required)
 		chip->ecc.read_oob(chip, page);
 
-	reg_data = readl(ebu_host->hsnand + HSNAND_CTL);
+	reg_data = pete_readl("drivers/mtd/nand/raw/intel-nand-controller.c:401", ebu_host->hsnand + HSNAND_CTL);
 	reg_data &= ~HSNAND_CTL_GO;
-	writel(reg_data, ebu_host->hsnand + HSNAND_CTL);
+	pete_writel("drivers/mtd/nand/raw/intel-nand-controller.c:403", reg_data, ebu_host->hsnand + HSNAND_CTL);
 
 	return 0;
 }
@@ -422,10 +422,10 @@ static int ebu_nand_write_page_hwecc(struct nand_chip *chip, const u8 *buf,
 
 	if (oob_required) {
 		reg = get_unaligned_le32(chip->oob_poi);
-		writel(reg, ebu_host->hsnand + HSNAND_CMSG_0);
+		pete_writel("drivers/mtd/nand/raw/intel-nand-controller.c:425", reg, ebu_host->hsnand + HSNAND_CMSG_0);
 
 		reg = get_unaligned_le32(chip->oob_poi + 4);
-		writel(reg, ebu_host->hsnand + HSNAND_CMSG_1);
+		pete_writel("drivers/mtd/nand/raw/intel-nand-controller.c:428", reg, ebu_host->hsnand + HSNAND_CMSG_1);
 	}
 
 	ret = readl_poll_timeout_atomic(int_sta, val, !(val & HSNAND_INT_STA_WR_C),
@@ -433,9 +433,9 @@ static int ebu_nand_write_page_hwecc(struct nand_chip *chip, const u8 *buf,
 	if (ret)
 		return ret;
 
-	reg_data = readl(ebu_host->hsnand + HSNAND_CTL);
+	reg_data = pete_readl("drivers/mtd/nand/raw/intel-nand-controller.c:436", ebu_host->hsnand + HSNAND_CTL);
 	reg_data &= ~HSNAND_CTL_GO;
-	writel(reg_data, ebu_host->hsnand + HSNAND_CTL);
+	pete_writel("drivers/mtd/nand/raw/intel-nand-controller.c:438", reg_data, ebu_host->hsnand + HSNAND_CTL);
 
 	return 0;
 }
@@ -665,7 +665,7 @@ static int ebu_nand_probe(struct platform_device *pdev)
 		goto err_cleanup_dma;
 	}
 	ebu_host->cs[cs].addr_sel = res->start;
-	writel(ebu_host->cs[cs].addr_sel | EBU_ADDR_MASK(5) | EBU_ADDR_SEL_REGEN,
+	pete_writel("drivers/mtd/nand/raw/intel-nand-controller.c:668", ebu_host->cs[cs].addr_sel | EBU_ADDR_MASK(5) | EBU_ADDR_SEL_REGEN,
 	       ebu_host->ebu + EBU_ADDR_SEL(cs));
 
 	nand_set_flash_node(&ebu_host->chip, chip_np);

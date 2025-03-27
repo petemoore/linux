@@ -172,12 +172,12 @@ static inline struct vf610_nfc *chip_to_nfc(struct nand_chip *chip)
 
 static inline u32 vf610_nfc_read(struct vf610_nfc *nfc, uint reg)
 {
-	return readl(nfc->regs + reg);
+	return pete_readl("drivers/mtd/nand/raw/vf610_nfc.c:175", nfc->regs + reg);
 }
 
 static inline void vf610_nfc_write(struct vf610_nfc *nfc, uint reg, u32 val)
 {
-	writel(val, nfc->regs + reg);
+	pete_writel("drivers/mtd/nand/raw/vf610_nfc.c:180", val, nfc->regs + reg);
 }
 
 static inline void vf610_nfc_set(struct vf610_nfc *nfc, uint reg, u32 bits)

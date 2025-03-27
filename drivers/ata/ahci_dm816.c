@@ -90,12 +90,12 @@ static int ahci_dm816_phy_init(struct ahci_host_priv *hpriv, struct device *dev)
 	val = AHCI_DM816_PHY_MPY(mpy) | AHCI_DM816_PHY_LOS(1) |
 	      AHCI_DM816_PHY_RXCDR(4) | AHCI_DM816_PHY_RXEQ(1) |
 	      AHCI_DM816_PHY_TXSWING(3) | AHCI_DM816_PHY_ENPLL(1);
-	writel(val, hpriv->mmio + AHCI_DM816_P0PHYCR_REG);
+	pete_writel("drivers/ata/ahci_dm816.c:93", val, hpriv->mmio + AHCI_DM816_P0PHYCR_REG);
 
 	/* Configure the second HBA port. */
 	val = AHCI_DM816_PHY_LOS(1) | AHCI_DM816_PHY_RXCDR(4) |
 	      AHCI_DM816_PHY_RXEQ(1) | AHCI_DM816_PHY_TXSWING(3);
-	writel(val, hpriv->mmio + AHCI_DM816_P1PHYCR_REG);
+	pete_writel("drivers/ata/ahci_dm816.c:98", val, hpriv->mmio + AHCI_DM816_P1PHYCR_REG);
 
 	return 0;
 }

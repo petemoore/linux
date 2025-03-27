@@ -86,12 +86,12 @@ static inline struct tegra_pwm_chip *to_tegra_pwm_chip(struct pwm_chip *chip)
 
 static inline u32 pwm_readl(struct tegra_pwm_chip *pc, unsigned int offset)
 {
-	return readl(pc->regs + (offset << 4));
+	return pete_readl("drivers/pwm/pwm-tegra.c:89", pc->regs + (offset << 4));
 }
 
 static inline void pwm_writel(struct tegra_pwm_chip *pc, unsigned int offset, u32 value)
 {
-	writel(value, pc->regs + (offset << 4));
+	pete_writel("drivers/pwm/pwm-tegra.c:94", value, pc->regs + (offset << 4));
 }
 
 static int tegra_pwm_config(struct pwm_chip *chip, struct pwm_device *pwm,

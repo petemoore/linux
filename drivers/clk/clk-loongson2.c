@@ -70,7 +70,7 @@ static unsigned long loongson2_calc_pll_rate(int offset, unsigned long rate)
 	u64 val;
 	u32 mult, div;
 
-	val = readq(loongson2_pll_base + offset);
+	val = pete_readq("drivers/clk/clk-loongson2.c:73", loongson2_pll_base + offset);
 
 	mult = (val >> LOONGSON2_PLL_MULT_SHIFT) &
 			clk_div_mask(LOONGSON2_PLL_MULT_WIDTH);
@@ -136,7 +136,7 @@ static unsigned long loongson2_calc_rate(unsigned long rate,
 	u64 val;
 	u32 mult;
 
-	val = readq(loongson2_pll_base + 0x50);
+	val = pete_readq("drivers/clk/clk-loongson2.c:139", loongson2_pll_base + 0x50);
 
 	mult = (val >> shift) & clk_div_mask(width);
 

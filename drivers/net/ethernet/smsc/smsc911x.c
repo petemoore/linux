@@ -147,11 +147,11 @@ struct smsc911x_data {
 static inline u32 __smsc911x_reg_read(struct smsc911x_data *pdata, u32 reg)
 {
 	if (pdata->config.flags & SMSC911X_USE_32BIT)
-		return readl(pdata->ioaddr + reg);
+		return pete_readl("drivers/net/ethernet/smsc/smsc911x.c:150", pdata->ioaddr + reg);
 
 	if (pdata->config.flags & SMSC911X_USE_16BIT)
-		return ((readw(pdata->ioaddr + reg) & 0xFFFF) |
-			((readw(pdata->ioaddr + reg + 2) & 0xFFFF) << 16));
+		return ((pete_readw("drivers/net/ethernet/smsc/smsc911x.c:153", pdata->ioaddr + reg) & 0xFFFF) |
+			((pete_readw("drivers/net/ethernet/smsc/smsc911x.c:154", pdata->ioaddr + reg + 2) & 0xFFFF) << 16));
 
 	BUG();
 	return 0;
@@ -161,12 +161,12 @@ static inline u32
 __smsc911x_reg_read_shift(struct smsc911x_data *pdata, u32 reg)
 {
 	if (pdata->config.flags & SMSC911X_USE_32BIT)
-		return readl(pdata->ioaddr + __smsc_shift(pdata, reg));
+		return pete_readl("drivers/net/ethernet/smsc/smsc911x.c:164", pdata->ioaddr + __smsc_shift(pdata, reg));
 
 	if (pdata->config.flags & SMSC911X_USE_16BIT)
-		return (readw(pdata->ioaddr +
+		return (pete_readw("drivers/net/ethernet/smsc/smsc911x.c:167", pdata->ioaddr +
 				__smsc_shift(pdata, reg)) & 0xFFFF) |
-			((readw(pdata->ioaddr +
+			((pete_readw("drivers/net/ethernet/smsc/smsc911x.c:169", pdata->ioaddr +
 			__smsc_shift(pdata, reg + 2)) & 0xFFFF) << 16);
 
 	BUG();
@@ -189,13 +189,13 @@ static inline void __smsc911x_reg_write(struct smsc911x_data *pdata, u32 reg,
 					u32 val)
 {
 	if (pdata->config.flags & SMSC911X_USE_32BIT) {
-		writel(val, pdata->ioaddr + reg);
+		pete_writel("drivers/net/ethernet/smsc/smsc911x.c:192", val, pdata->ioaddr + reg);
 		return;
 	}
 
 	if (pdata->config.flags & SMSC911X_USE_16BIT) {
-		writew(val & 0xFFFF, pdata->ioaddr + reg);
-		writew((val >> 16) & 0xFFFF, pdata->ioaddr + reg + 2);
+		pete_writew("drivers/net/ethernet/smsc/smsc911x.c:197", val & 0xFFFF, pdata->ioaddr + reg);
+		pete_writew("drivers/net/ethernet/smsc/smsc911x.c:198", (val >> 16) & 0xFFFF, pdata->ioaddr + reg + 2);
 		return;
 	}
 
@@ -206,14 +206,14 @@ static inline void
 __smsc911x_reg_write_shift(struct smsc911x_data *pdata, u32 reg, u32 val)
 {
 	if (pdata->config.flags & SMSC911X_USE_32BIT) {
-		writel(val, pdata->ioaddr + __smsc_shift(pdata, reg));
+		pete_writel("drivers/net/ethernet/smsc/smsc911x.c:209", val, pdata->ioaddr + __smsc_shift(pdata, reg));
 		return;
 	}
 
 	if (pdata->config.flags & SMSC911X_USE_16BIT) {
-		writew(val & 0xFFFF,
+		pete_writew("drivers/net/ethernet/smsc/smsc911x.c:214", val & 0xFFFF,
 			pdata->ioaddr + __smsc_shift(pdata, reg));
-		writew((val >> 16) & 0xFFFF,
+		pete_writew("drivers/net/ethernet/smsc/smsc911x.c:216", (val >> 16) & 0xFFFF,
 			pdata->ioaddr + __smsc_shift(pdata, reg + 2));
 		return;
 	}

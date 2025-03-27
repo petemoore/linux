@@ -207,7 +207,7 @@ static int rzg2l_cpg_sd_clk_mux_set_parent(struct clk_hw *hw, u8 index)
 	msk = off ? CPG_CLKSTATUS_SELSDHI1_STS : CPG_CLKSTATUS_SELSDHI0_STS;
 	spin_lock_irqsave(&priv->rmw_lock, flags);
 	if (index != clk_src_266) {
-		writel(bitmask | ((clk_src_266 + 1) << shift), priv->base + off);
+		pete_writel("drivers/clk/renesas/rzg2l-cpg.c:210", bitmask | ((clk_src_266 + 1) << shift), priv->base + off);
 
 		ret = readl_poll_timeout_atomic(priv->base + CPG_CLKSTATUS, val,
 						!(val & msk), 10,
@@ -216,7 +216,7 @@ static int rzg2l_cpg_sd_clk_mux_set_parent(struct clk_hw *hw, u8 index)
 			goto unlock;
 	}
 
-	writel(bitmask | ((index + 1) << shift), priv->base + off);
+	pete_writel("drivers/clk/renesas/rzg2l-cpg.c:219", bitmask | ((index + 1) << shift), priv->base + off);
 
 	ret = readl_poll_timeout_atomic(priv->base + CPG_CLKSTATUS, val,
 					!(val & msk), 10,
@@ -234,7 +234,7 @@ static u8 rzg2l_cpg_sd_clk_mux_get_parent(struct clk_hw *hw)
 {
 	struct sd_hw_data *hwdata = to_sd_hw_data(hw);
 	struct rzg2l_cpg_priv *priv = hwdata->priv;
-	u32 val = readl(priv->base + GET_REG_OFFSET(hwdata->conf));
+	u32 val = pete_readl("drivers/clk/renesas/rzg2l-cpg.c:237", priv->base + GET_REG_OFFSET(hwdata->conf));
 
 	val >>= GET_SHIFT(hwdata->conf);
 	val &= GENMASK(GET_WIDTH(hwdata->conf) - 1, 0);
@@ -370,7 +370,7 @@ static int rzg2l_cpg_dsi_div_set_rate(struct clk_hw *hw,
 		return -EINVAL;
 
 	dsi_div->rate = rate;
-	writel(CPG_PL5_SDIV_DIV_DSI_A_WEN | CPG_PL5_SDIV_DIV_DSI_B_WEN |
+	pete_writel("drivers/clk/renesas/rzg2l-cpg.c:373", CPG_PL5_SDIV_DIV_DSI_A_WEN | CPG_PL5_SDIV_DIV_DSI_B_WEN |
 	       (priv->mux_dsi_div_params.dsi_div_a << 0) |
 	       (priv->mux_dsi_div_params.dsi_div_b << 8),
 	       priv->base + CPG_PL5_SDIV);
@@ -461,7 +461,7 @@ static int rzg2l_cpg_pll5_4_clk_mux_set_parent(struct clk_hw *hw, u8 index)
 	 * pll5_4_clk_mux which sets the clock source for DSI divider clock.
 	 */
 
-	writel(CPG_OTHERFUNC1_REG_RES0_ON_WEN | index,
+	pete_writel("drivers/clk/renesas/rzg2l-cpg.c:464", CPG_OTHERFUNC1_REG_RES0_ON_WEN | index,
 	       priv->base + CPG_OTHERFUNC1_REG);
 
 	return 0;
@@ -472,7 +472,7 @@ static u8 rzg2l_cpg_pll5_4_clk_mux_get_parent(struct clk_hw *hw)
 	struct pll5_mux_hw_data *hwdata = to_pll5_mux_hw_data(hw);
 	struct rzg2l_cpg_priv *priv = hwdata->priv;
 
-	return readl(priv->base + GET_REG_OFFSET(hwdata->conf));
+	return pete_readl("drivers/clk/renesas/rzg2l-cpg.c:475", priv->base + GET_REG_OFFSET(hwdata->conf));
 }
 
 static const struct clk_ops rzg2l_cpg_pll5_4_clk_mux_ops = {
@@ -588,7 +588,7 @@ static int rzg2l_cpg_sipll5_set_rate(struct clk_hw *hw,
 		rzg2l_cpg_get_foutpostdiv_rate(&params, vclk_rate);
 
 	/* Put PLL5 into standby mode */
-	writel(CPG_SIPLL5_STBY_RESETB_WEN, priv->base + CPG_SIPLL5_STBY);
+	pete_writel("drivers/clk/renesas/rzg2l-cpg.c:591", CPG_SIPLL5_STBY_RESETB_WEN, priv->base + CPG_SIPLL5_STBY);
 	ret = readl_poll_timeout(priv->base + CPG_SIPLL5_MON, val,
 				 !(val & CPG_SIPLL5_MON_PLL5_LOCK), 100, 250000);
 	if (ret) {
@@ -597,21 +597,21 @@ static int rzg2l_cpg_sipll5_set_rate(struct clk_hw *hw,
 	}
 
 	/* Output clock setting 1 */
-	writel((params.pl5_postdiv1 << 0) | (params.pl5_postdiv2 << 4) |
+	pete_writel("drivers/clk/renesas/rzg2l-cpg.c:600", (params.pl5_postdiv1 << 0) | (params.pl5_postdiv2 << 4) |
 	       (params.pl5_refdiv << 8), priv->base + CPG_SIPLL5_CLK1);
 
 	/* Output clock setting, SSCG modulation value setting 3 */
-	writel((params.pl5_fracin << 8), priv->base + CPG_SIPLL5_CLK3);
+	pete_writel("drivers/clk/renesas/rzg2l-cpg.c:604", (params.pl5_fracin << 8), priv->base + CPG_SIPLL5_CLK3);
 
 	/* Output clock setting 4 */
-	writel(CPG_SIPLL5_CLK4_RESV_LSB | (params.pl5_intin << 16),
+	pete_writel("drivers/clk/renesas/rzg2l-cpg.c:607", CPG_SIPLL5_CLK4_RESV_LSB | (params.pl5_intin << 16),
 	       priv->base + CPG_SIPLL5_CLK4);
 
 	/* Output clock setting 5 */
-	writel(params.pl5_spread, priv->base + CPG_SIPLL5_CLK5);
+	pete_writel("drivers/clk/renesas/rzg2l-cpg.c:611", params.pl5_spread, priv->base + CPG_SIPLL5_CLK5);
 
 	/* PLL normal mode setting */
-	writel(CPG_SIPLL5_STBY_DOWNSPREAD_WEN | CPG_SIPLL5_STBY_SSCG_EN_WEN |
+	pete_writel("drivers/clk/renesas/rzg2l-cpg.c:614", CPG_SIPLL5_STBY_DOWNSPREAD_WEN | CPG_SIPLL5_STBY_SSCG_EN_WEN |
 	       CPG_SIPLL5_STBY_RESETB_WEN | CPG_SIPLL5_STBY_RESETB,
 	       priv->base + CPG_SIPLL5_STBY);
 
@@ -663,7 +663,7 @@ rzg2l_cpg_sipll5_register(const struct cpg_core_clk *core,
 	sipll5->conf = core->conf;
 	sipll5->priv = priv;
 
-	writel(CPG_SIPLL5_STBY_SSCG_EN_WEN | CPG_SIPLL5_STBY_RESETB_WEN |
+	pete_writel("drivers/clk/renesas/rzg2l-cpg.c:666", CPG_SIPLL5_STBY_SSCG_EN_WEN | CPG_SIPLL5_STBY_RESETB_WEN |
 	       CPG_SIPLL5_STBY_RESETB, priv->base + CPG_SIPLL5_STBY);
 
 	clk_hw = &sipll5->hw;
@@ -701,8 +701,8 @@ static unsigned long rzg2l_cpg_pll_clk_recalc_rate(struct clk_hw *hw,
 	if (pll_clk->type != CLK_TYPE_SAM_PLL)
 		return parent_rate;
 
-	val1 = readl(priv->base + GET_REG_SAMPLL_CLK1(pll_clk->conf));
-	val2 = readl(priv->base + GET_REG_SAMPLL_CLK2(pll_clk->conf));
+	val1 = pete_readl("drivers/clk/renesas/rzg2l-cpg.c:704", priv->base + GET_REG_SAMPLL_CLK1(pll_clk->conf));
+	val2 = pete_readl("drivers/clk/renesas/rzg2l-cpg.c:705", priv->base + GET_REG_SAMPLL_CLK2(pll_clk->conf));
 
 	rate = mul_u64_u32_shr(parent_rate, (MDIV(val1) << 16) + KDIV(val1),
 			       16 + SDIV(val2));
@@ -914,7 +914,7 @@ static int rzg2l_mod_clock_endisable(struct clk_hw *hw, bool enable)
 		value = (bitmask << 16) | bitmask;
 	else
 		value = bitmask << 16;
-	writel(value, priv->base + CLK_ON_R(reg));
+	pete_writel("drivers/clk/renesas/rzg2l-cpg.c:917", value, priv->base + CLK_ON_R(reg));
 
 	spin_unlock_irqrestore(&priv->rmw_lock, flags);
 
@@ -989,9 +989,9 @@ static int rzg2l_mod_clock_is_enabled(struct clk_hw *hw)
 		return clock->enabled;
 
 	if (priv->info->has_clk_mon_regs)
-		value = readl(priv->base + CLK_MON_R(clock->off));
+		value = pete_readl("drivers/clk/renesas/rzg2l-cpg.c:992", priv->base + CLK_MON_R(clock->off));
 	else
-		value = readl(priv->base + clock->off);
+		value = pete_readl("drivers/clk/renesas/rzg2l-cpg.c:994", priv->base + clock->off);
 
 	return value & bitmask;
 }
@@ -1118,7 +1118,7 @@ static int rzg2l_cpg_assert(struct reset_controller_dev *rcdev,
 
 	dev_dbg(rcdev->dev, "assert id:%ld offset:0x%x\n", id, CLK_RST_R(reg));
 
-	writel(value, priv->base + CLK_RST_R(reg));
+	pete_writel("drivers/clk/renesas/rzg2l-cpg.c:1121", value, priv->base + CLK_RST_R(reg));
 
 	if (info->has_clk_mon_regs) {
 		reg = CLK_MRST_R(reg);
@@ -1148,7 +1148,7 @@ static int rzg2l_cpg_deassert(struct reset_controller_dev *rcdev,
 	dev_dbg(rcdev->dev, "deassert id:%ld offset:0x%x\n", id,
 		CLK_RST_R(reg));
 
-	writel(value, priv->base + CLK_RST_R(reg));
+	pete_writel("drivers/clk/renesas/rzg2l-cpg.c:1151", value, priv->base + CLK_RST_R(reg));
 
 	if (info->has_clk_mon_regs) {
 		reg = CLK_MRST_R(reg);
@@ -1196,7 +1196,7 @@ static int rzg2l_cpg_status(struct reset_controller_dev *rcdev,
 		return -ENOTSUPP;
 	}
 
-	return !!(readl(priv->base + reg) & bitmask);
+	return !!(pete_readl("drivers/clk/renesas/rzg2l-cpg.c:1199", priv->base + reg) & bitmask);
 }
 
 static const struct reset_control_ops rzg2l_cpg_reset_ops = {

@@ -58,13 +58,13 @@ struct keembay_wdt {
 
 static inline u32 keembay_wdt_readl(struct keembay_wdt *wdt, u32 offset)
 {
-	return readl(wdt->base + offset);
+	return pete_readl("drivers/watchdog/keembay_wdt.c:61", wdt->base + offset);
 }
 
 static inline void keembay_wdt_writel(struct keembay_wdt *wdt, u32 offset, u32 val)
 {
-	writel(WDT_UNLOCK, wdt->base + TIM_SAFE);
-	writel(val, wdt->base + offset);
+	pete_writel("drivers/watchdog/keembay_wdt.c:66", WDT_UNLOCK, wdt->base + TIM_SAFE);
+	pete_writel("drivers/watchdog/keembay_wdt.c:67", val, wdt->base + offset);
 }
 
 static void keembay_wdt_set_timeout_reg(struct watchdog_device *wdog)

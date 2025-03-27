@@ -54,11 +54,11 @@ static int sp_wdt_restart(struct watchdog_device *wdev,
 	struct sp_wdt_priv *priv = watchdog_get_drvdata(wdev);
 	void __iomem *base = priv->base;
 
-	writel(WDT_STOP, base + WDT_CTRL);
-	writel(WDT_UNLOCK, base + WDT_CTRL);
-	writel(0x0001, base + WDT_CNT);
-	writel(WDT_LOCK, base + WDT_CTRL);
-	writel(WDT_RESUME, base + WDT_CTRL);
+	pete_writel("drivers/watchdog/sunplus_wdt.c:57", WDT_STOP, base + WDT_CTRL);
+	pete_writel("drivers/watchdog/sunplus_wdt.c:58", WDT_UNLOCK, base + WDT_CTRL);
+	pete_writel("drivers/watchdog/sunplus_wdt.c:59", 0x0001, base + WDT_CNT);
+	pete_writel("drivers/watchdog/sunplus_wdt.c:60", WDT_LOCK, base + WDT_CTRL);
+	pete_writel("drivers/watchdog/sunplus_wdt.c:61", WDT_RESUME, base + WDT_CTRL);
 
 	return 0;
 }
@@ -71,17 +71,17 @@ static int sp_wdt_ping(struct watchdog_device *wdev)
 
 	if (wdev->timeout > SP_WDT_MAX_TIMEOUT) {
 		/* WDT_CONMAX sets the count to the maximum (down-counting). */
-		writel(WDT_CONMAX, base + WDT_CTRL);
+		pete_writel("drivers/watchdog/sunplus_wdt.c:74", WDT_CONMAX, base + WDT_CTRL);
 	} else {
-		writel(WDT_UNLOCK, base + WDT_CTRL);
+		pete_writel("drivers/watchdog/sunplus_wdt.c:76", WDT_UNLOCK, base + WDT_CTRL);
 		/*
 		 * Watchdog timer is a 20-bit down-counting based on STC_CLK.
 		 * This register bits[16:0] is from bit[19:4] of the watchdog
 		 * timer counter.
 		 */
 		count = (wdev->timeout * STC_CLK) >> 4;
-		writel(count, base + WDT_CNT);
-		writel(WDT_LOCK, base + WDT_CTRL);
+		pete_writel("drivers/watchdog/sunplus_wdt.c:83", count, base + WDT_CNT);
+		pete_writel("drivers/watchdog/sunplus_wdt.c:84", WDT_LOCK, base + WDT_CTRL);
 	}
 
 	return 0;
@@ -92,7 +92,7 @@ static int sp_wdt_stop(struct watchdog_device *wdev)
 	struct sp_wdt_priv *priv = watchdog_get_drvdata(wdev);
 	void __iomem *base = priv->base;
 
-	writel(WDT_STOP, base + WDT_CTRL);
+	pete_writel("drivers/watchdog/sunplus_wdt.c:95", WDT_STOP, base + WDT_CTRL);
 
 	return 0;
 }
@@ -102,7 +102,7 @@ static int sp_wdt_start(struct watchdog_device *wdev)
 	struct sp_wdt_priv *priv = watchdog_get_drvdata(wdev);
 	void __iomem *base = priv->base;
 
-	writel(WDT_RESUME, base + WDT_CTRL);
+	pete_writel("drivers/watchdog/sunplus_wdt.c:105", WDT_RESUME, base + WDT_CTRL);
 
 	return 0;
 }
@@ -113,7 +113,7 @@ static unsigned int sp_wdt_get_timeleft(struct watchdog_device *wdev)
 	void __iomem *base = priv->base;
 	u32 val;
 
-	val = readl(base + WDT_CNT);
+	val = pete_readl("drivers/watchdog/sunplus_wdt.c:116", base + WDT_CNT);
 	val &= 0xffff;
 	val = val << 4;
 

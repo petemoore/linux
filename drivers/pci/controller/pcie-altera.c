@@ -44,7 +44,7 @@
 #define S10_RP_CFG_ADDR(pcie, reg)	\
 	(((pcie)->hip_base) + (reg) + (1 << 20))
 #define S10_RP_SECONDARY(pcie)		\
-	readb(S10_RP_CFG_ADDR(pcie, PCI_SECONDARY_BUS))
+	pete_readb("drivers/pci/controller/pcie-altera.c:47", S10_RP_CFG_ADDR(pcie, PCI_SECONDARY_BUS))
 
 /* TLP configuration type 0 and 1 */
 #define TLP_FMTTYPE_CFGRD0		0x04	/* Configuration Read Type 0 */
@@ -143,7 +143,7 @@ static bool s10_altera_pcie_link_up(struct altera_pcie *pcie)
 				   pcie->pcie_data->cap_offset +
 				   PCI_EXP_LNKSTA);
 
-	return !!(readw(addr) & PCI_EXP_LNKSTA_DLLLA);
+	return !!(pete_readw("drivers/pci/controller/pcie-altera.c:146", addr) & PCI_EXP_LNKSTA_DLLLA);
 }
 
 /*
@@ -386,13 +386,13 @@ static int s10_rp_read_cfg(struct altera_pcie *pcie, int where,
 
 	switch (size) {
 	case 1:
-		*value = readb(addr);
+		*value = pete_readb("drivers/pci/controller/pcie-altera.c:389", addr);
 		break;
 	case 2:
-		*value = readw(addr);
+		*value = pete_readw("drivers/pci/controller/pcie-altera.c:392", addr);
 		break;
 	default:
-		*value = readl(addr);
+		*value = pete_readl("drivers/pci/controller/pcie-altera.c:395", addr);
 		break;
 	}
 
@@ -406,13 +406,13 @@ static int s10_rp_write_cfg(struct altera_pcie *pcie, u8 busno,
 
 	switch (size) {
 	case 1:
-		writeb(value, addr);
+		pete_writeb("drivers/pci/controller/pcie-altera.c:409", value, addr);
 		break;
 	case 2:
-		writew(value, addr);
+		pete_writew("drivers/pci/controller/pcie-altera.c:412", value, addr);
 		break;
 	default:
-		writel(value, addr);
+		pete_writel("drivers/pci/controller/pcie-altera.c:415", value, addr);
 		break;
 	}
 

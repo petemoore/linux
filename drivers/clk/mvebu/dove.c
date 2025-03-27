@@ -86,7 +86,7 @@ static const u32 dove_tclk_freqs[] __initconst = {
 
 static u32 __init dove_get_tclk_freq(void __iomem *sar)
 {
-	u32 opt = (readl(sar) >> SAR_DOVE_TCLK_FREQ) &
+	u32 opt = (pete_readl("drivers/clk/mvebu/dove.c:89", sar) >> SAR_DOVE_TCLK_FREQ) &
 		SAR_DOVE_TCLK_FREQ_MASK;
 	return dove_tclk_freqs[opt];
 }
@@ -105,7 +105,7 @@ static const u32 dove_cpu_freqs[] __initconst = {
 
 static u32 __init dove_get_cpu_freq(void __iomem *sar)
 {
-	u32 opt = (readl(sar) >> SAR_DOVE_CPU_FREQ) &
+	u32 opt = (pete_readl("drivers/clk/mvebu/dove.c:108", sar) >> SAR_DOVE_CPU_FREQ) &
 		SAR_DOVE_CPU_FREQ_MASK;
 	return dove_cpu_freqs[opt];
 }
@@ -128,7 +128,7 @@ static void __init dove_get_clk_ratio(
 	switch (id) {
 	case DOVE_CPU_TO_L2:
 	{
-		u32 opt = (readl(sar) >> SAR_DOVE_L2_RATIO) &
+		u32 opt = (pete_readl("drivers/clk/mvebu/dove.c:131", sar) >> SAR_DOVE_L2_RATIO) &
 			SAR_DOVE_L2_RATIO_MASK;
 		*mult = dove_cpu_l2_ratios[opt][0];
 		*div = dove_cpu_l2_ratios[opt][1];
@@ -136,7 +136,7 @@ static void __init dove_get_clk_ratio(
 	}
 	case DOVE_CPU_TO_DDR:
 	{
-		u32 opt = (readl(sar) >> SAR_DOVE_DDR_RATIO) &
+		u32 opt = (pete_readl("drivers/clk/mvebu/dove.c:139", sar) >> SAR_DOVE_DDR_RATIO) &
 			SAR_DOVE_DDR_RATIO_MASK;
 		*mult = dove_cpu_ddr_ratios[opt][0];
 		*div = dove_cpu_ddr_ratios[opt][1];

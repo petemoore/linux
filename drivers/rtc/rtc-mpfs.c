@@ -62,25 +62,25 @@ static void mpfs_rtc_start(struct mpfs_rtc_dev *rtcdev)
 {
 	u32 ctrl;
 
-	ctrl = readl(rtcdev->base + CONTROL_REG);
+	ctrl = pete_readl("drivers/rtc/rtc-mpfs.c:65", rtcdev->base + CONTROL_REG);
 	ctrl &= ~CONTROL_STOP_BIT;
 	ctrl |= CONTROL_START_BIT;
-	writel(ctrl, rtcdev->base + CONTROL_REG);
+	pete_writel("drivers/rtc/rtc-mpfs.c:68", ctrl, rtcdev->base + CONTROL_REG);
 }
 
 static void mpfs_rtc_clear_irq(struct mpfs_rtc_dev *rtcdev)
 {
-	u32 val = readl(rtcdev->base + CONTROL_REG);
+	u32 val = pete_readl("drivers/rtc/rtc-mpfs.c:73", rtcdev->base + CONTROL_REG);
 
 	val &= ~(CONTROL_ALARM_ON_BIT | CONTROL_STOP_BIT);
 	val |= CONTROL_ALARM_OFF_BIT;
-	writel(val, rtcdev->base + CONTROL_REG);
+	pete_writel("drivers/rtc/rtc-mpfs.c:77", val, rtcdev->base + CONTROL_REG);
 	/*
 	 * Ensure that the posted write to the CONTROL_REG register completed before
 	 * returning from this function. Not doing this may result in the interrupt
 	 * only being cleared some time after this function returns.
 	 */
-	(void)readl(rtcdev->base + CONTROL_REG);
+	(void)pete_readl("drivers/rtc/rtc-mpfs.c:83", rtcdev->base + CONTROL_REG);
 }
 
 static int mpfs_rtc_readtime(struct device *dev, struct rtc_time *tm)
@@ -88,8 +88,8 @@ static int mpfs_rtc_readtime(struct device *dev, struct rtc_time *tm)
 	struct mpfs_rtc_dev *rtcdev = dev_get_drvdata(dev);
 	u64 time;
 
-	time = readl(rtcdev->base + DATETIME_LOWER_REG);
-	time |= ((u64)readl(rtcdev->base + DATETIME_UPPER_REG) & DATETIME_UPPER_MASK) << 32;
+	time = pete_readl("drivers/rtc/rtc-mpfs.c:91", rtcdev->base + DATETIME_LOWER_REG);
+	time |= ((u64)pete_readl("drivers/rtc/rtc-mpfs.c:92", rtcdev->base + DATETIME_UPPER_REG) & DATETIME_UPPER_MASK) << 32;
 	rtc_time64_to_tm(time, tm);
 
 	return 0;
@@ -104,13 +104,13 @@ static int mpfs_rtc_settime(struct device *dev, struct rtc_time *tm)
 
 	time = rtc_tm_to_time64(tm);
 
-	writel((u32)time, rtcdev->base + DATETIME_LOWER_REG);
-	writel((u32)(time >> 32) & DATETIME_UPPER_MASK, rtcdev->base + DATETIME_UPPER_REG);
+	pete_writel("drivers/rtc/rtc-mpfs.c:107", (u32)time, rtcdev->base + DATETIME_LOWER_REG);
+	pete_writel("drivers/rtc/rtc-mpfs.c:108", (u32)(time >> 32) & DATETIME_UPPER_MASK, rtcdev->base + DATETIME_UPPER_REG);
 
-	ctrl = readl(rtcdev->base + CONTROL_REG);
+	ctrl = pete_readl("drivers/rtc/rtc-mpfs.c:110", rtcdev->base + CONTROL_REG);
 	ctrl &= ~CONTROL_STOP_BIT;
 	ctrl |= CONTROL_UPLOAD_BIT;
-	writel(ctrl, rtcdev->base + CONTROL_REG);
+	pete_writel("drivers/rtc/rtc-mpfs.c:113", ctrl, rtcdev->base + CONTROL_REG);
 
 	ret = read_poll_timeout(readl, prog, prog & CONTROL_UPLOAD_BIT, 0, UPLOAD_TIMEOUT_US,
 				false, rtcdev->base + CONTROL_REG);
@@ -126,13 +126,13 @@ static int mpfs_rtc_settime(struct device *dev, struct rtc_time *tm)
 static int mpfs_rtc_readalarm(struct device *dev, struct rtc_wkalrm *alrm)
 {
 	struct mpfs_rtc_dev *rtcdev = dev_get_drvdata(dev);
-	u32 mode = readl(rtcdev->base + MODE_REG);
+	u32 mode = pete_readl("drivers/rtc/rtc-mpfs.c:129", rtcdev->base + MODE_REG);
 	u64 time;
 
 	alrm->enabled = mode & MODE_WAKE_EN;
 
-	time = (u64)readl(rtcdev->base + ALARM_LOWER_REG) << 32;
-	time |= (readl(rtcdev->base + ALARM_UPPER_REG) & ALARM_UPPER_MASK);
+	time = (u64)pete_readl("drivers/rtc/rtc-mpfs.c:134", rtcdev->base + ALARM_LOWER_REG) << 32;
+	time |= (pete_readl("drivers/rtc/rtc-mpfs.c:135", rtcdev->base + ALARM_UPPER_REG) & ALARM_UPPER_MASK);
 	rtc_time64_to_tm(time, &alrm->time);
 
 	return 0;
@@ -145,22 +145,22 @@ static int mpfs_rtc_setalarm(struct device *dev, struct rtc_wkalrm *alrm)
 	u64 time;
 
 	/* Disable the alarm before updating */
-	ctrl = readl(rtcdev->base + CONTROL_REG);
+	ctrl = pete_readl("drivers/rtc/rtc-mpfs.c:148", rtcdev->base + CONTROL_REG);
 	ctrl |= CONTROL_ALARM_OFF_BIT;
-	writel(ctrl, rtcdev->base + CONTROL_REG);
+	pete_writel("drivers/rtc/rtc-mpfs.c:150", ctrl, rtcdev->base + CONTROL_REG);
 
 	time = rtc_tm_to_time64(&alrm->time);
 
-	writel((u32)time, rtcdev->base + ALARM_LOWER_REG);
-	writel((u32)(time >> 32) & ALARM_UPPER_MASK, rtcdev->base + ALARM_UPPER_REG);
+	pete_writel("drivers/rtc/rtc-mpfs.c:154", (u32)time, rtcdev->base + ALARM_LOWER_REG);
+	pete_writel("drivers/rtc/rtc-mpfs.c:155", (u32)(time >> 32) & ALARM_UPPER_MASK, rtcdev->base + ALARM_UPPER_REG);
 
 	/* Bypass compare register in alarm mode */
-	writel(GENMASK(31, 0), rtcdev->base + COMPARE_LOWER_REG);
-	writel(GENMASK(29, 0), rtcdev->base + COMPARE_UPPER_REG);
+	pete_writel("drivers/rtc/rtc-mpfs.c:158", GENMASK(31, 0), rtcdev->base + COMPARE_LOWER_REG);
+	pete_writel("drivers/rtc/rtc-mpfs.c:159", GENMASK(29, 0), rtcdev->base + COMPARE_UPPER_REG);
 
 	/* Configure the RTC to enable the alarm. */
-	ctrl = readl(rtcdev->base + CONTROL_REG);
-	mode = readl(rtcdev->base + MODE_REG);
+	ctrl = pete_readl("drivers/rtc/rtc-mpfs.c:162", rtcdev->base + CONTROL_REG);
+	mode = pete_readl("drivers/rtc/rtc-mpfs.c:163", rtcdev->base + MODE_REG);
 	if (alrm->enabled) {
 		mode = MODE_WAKE_EN | MODE_WAKE_CONTINUE;
 		/* Enable the alarm */
@@ -169,8 +169,8 @@ static int mpfs_rtc_setalarm(struct device *dev, struct rtc_wkalrm *alrm)
 	}
 	ctrl &= ~CONTROL_STOP_BIT;
 	ctrl |= CONTROL_START_BIT;
-	writel(ctrl, rtcdev->base + CONTROL_REG);
-	writel(mode, rtcdev->base + MODE_REG);
+	pete_writel("drivers/rtc/rtc-mpfs.c:172", ctrl, rtcdev->base + CONTROL_REG);
+	pete_writel("drivers/rtc/rtc-mpfs.c:173", mode, rtcdev->base + MODE_REG);
 
 	return 0;
 }
@@ -180,7 +180,7 @@ static int mpfs_rtc_alarm_irq_enable(struct device *dev, unsigned int enabled)
 	struct mpfs_rtc_dev *rtcdev = dev_get_drvdata(dev);
 	u32 ctrl;
 
-	ctrl = readl(rtcdev->base + CONTROL_REG);
+	ctrl = pete_readl("drivers/rtc/rtc-mpfs.c:183", rtcdev->base + CONTROL_REG);
 	ctrl &= ~(CONTROL_ALARM_ON_BIT | CONTROL_ALARM_OFF_BIT | CONTROL_STOP_BIT);
 
 	if (enabled)
@@ -188,7 +188,7 @@ static int mpfs_rtc_alarm_irq_enable(struct device *dev, unsigned int enabled)
 	else
 		ctrl |= CONTROL_ALARM_OFF_BIT;
 
-	writel(ctrl, rtcdev->base + CONTROL_REG);
+	pete_writel("drivers/rtc/rtc-mpfs.c:191", ctrl, rtcdev->base + CONTROL_REG);
 
 	return 0;
 }
@@ -263,7 +263,7 @@ static int mpfs_rtc_probe(struct platform_device *pdev)
 		return -EINVAL;
 	}
 
-	writel(prescaler, rtcdev->base + PRESCALER_REG);
+	pete_writel("drivers/rtc/rtc-mpfs.c:266", prescaler, rtcdev->base + PRESCALER_REG);
 	dev_info(&pdev->dev, "prescaler set to: %lu\n", prescaler);
 
 	device_init_wakeup(&pdev->dev, true);

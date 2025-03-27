@@ -155,9 +155,9 @@ static inline void smmu_pmu_enable(struct pmu *pmu)
 {
 	struct smmu_pmu *smmu_pmu = to_smmu_pmu(pmu);
 
-	writel(SMMU_PMCG_IRQ_CTRL_IRQEN,
+	pete_writel("drivers/perf/arm_smmuv3_pmu.c:158", SMMU_PMCG_IRQ_CTRL_IRQEN,
 	       smmu_pmu->reg_base + SMMU_PMCG_IRQ_CTRL);
-	writel(SMMU_PMCG_CR_ENABLE, smmu_pmu->reg_base + SMMU_PMCG_CR);
+	pete_writel("drivers/perf/arm_smmuv3_pmu.c:160", SMMU_PMCG_CR_ENABLE, smmu_pmu->reg_base + SMMU_PMCG_CR);
 }
 
 static int smmu_pmu_apply_event_filter(struct smmu_pmu *smmu_pmu,
@@ -178,8 +178,8 @@ static inline void smmu_pmu_disable(struct pmu *pmu)
 {
 	struct smmu_pmu *smmu_pmu = to_smmu_pmu(pmu);
 
-	writel(0, smmu_pmu->reg_base + SMMU_PMCG_CR);
-	writel(0, smmu_pmu->reg_base + SMMU_PMCG_IRQ_CTRL);
+	pete_writel("drivers/perf/arm_smmuv3_pmu.c:181", 0, smmu_pmu->reg_base + SMMU_PMCG_CR);
+	pete_writel("drivers/perf/arm_smmuv3_pmu.c:182", 0, smmu_pmu->reg_base + SMMU_PMCG_IRQ_CTRL);
 }
 
 static inline void smmu_pmu_disable_quirk_hip08_09(struct pmu *pmu)
@@ -193,7 +193,7 @@ static inline void smmu_pmu_disable_quirk_hip08_09(struct pmu *pmu)
 	 * to forcibly stop counting.
 	 */
 	for_each_set_bit(idx, smmu_pmu->used_counters, smmu_pmu->num_counters)
-		writel(0xffff, smmu_pmu->reg_base + SMMU_PMCG_EVTYPER(idx));
+		pete_writel("drivers/perf/arm_smmuv3_pmu.c:196", 0xffff, smmu_pmu->reg_base + SMMU_PMCG_EVTYPER(idx));
 
 	smmu_pmu_disable(pmu);
 }
@@ -202,9 +202,9 @@ static inline void smmu_pmu_counter_set_value(struct smmu_pmu *smmu_pmu,
 					      u32 idx, u64 value)
 {
 	if (smmu_pmu->counter_mask & BIT(32))
-		writeq(value, smmu_pmu->reloc_base + SMMU_PMCG_EVCNTR(idx, 8));
+		pete_writeq("drivers/perf/arm_smmuv3_pmu.c:205", value, smmu_pmu->reloc_base + SMMU_PMCG_EVCNTR(idx, 8));
 	else
-		writel(value, smmu_pmu->reloc_base + SMMU_PMCG_EVCNTR(idx, 4));
+		pete_writel("drivers/perf/arm_smmuv3_pmu.c:207", value, smmu_pmu->reloc_base + SMMU_PMCG_EVCNTR(idx, 4));
 }
 
 static inline u64 smmu_pmu_counter_get_value(struct smmu_pmu *smmu_pmu, u32 idx)
@@ -212,43 +212,43 @@ static inline u64 smmu_pmu_counter_get_value(struct smmu_pmu *smmu_pmu, u32 idx)
 	u64 value;
 
 	if (smmu_pmu->counter_mask & BIT(32))
-		value = readq(smmu_pmu->reloc_base + SMMU_PMCG_EVCNTR(idx, 8));
+		value = pete_readq("drivers/perf/arm_smmuv3_pmu.c:215", smmu_pmu->reloc_base + SMMU_PMCG_EVCNTR(idx, 8));
 	else
-		value = readl(smmu_pmu->reloc_base + SMMU_PMCG_EVCNTR(idx, 4));
+		value = pete_readl("drivers/perf/arm_smmuv3_pmu.c:217", smmu_pmu->reloc_base + SMMU_PMCG_EVCNTR(idx, 4));
 
 	return value;
 }
 
 static inline void smmu_pmu_counter_enable(struct smmu_pmu *smmu_pmu, u32 idx)
 {
-	writeq(BIT(idx), smmu_pmu->reg_base + SMMU_PMCG_CNTENSET0);
+	pete_writeq("drivers/perf/arm_smmuv3_pmu.c:224", BIT(idx), smmu_pmu->reg_base + SMMU_PMCG_CNTENSET0);
 }
 
 static inline void smmu_pmu_counter_disable(struct smmu_pmu *smmu_pmu, u32 idx)
 {
-	writeq(BIT(idx), smmu_pmu->reg_base + SMMU_PMCG_CNTENCLR0);
+	pete_writeq("drivers/perf/arm_smmuv3_pmu.c:229", BIT(idx), smmu_pmu->reg_base + SMMU_PMCG_CNTENCLR0);
 }
 
 static inline void smmu_pmu_interrupt_enable(struct smmu_pmu *smmu_pmu, u32 idx)
 {
-	writeq(BIT(idx), smmu_pmu->reg_base + SMMU_PMCG_INTENSET0);
+	pete_writeq("drivers/perf/arm_smmuv3_pmu.c:234", BIT(idx), smmu_pmu->reg_base + SMMU_PMCG_INTENSET0);
 }
 
 static inline void smmu_pmu_interrupt_disable(struct smmu_pmu *smmu_pmu,
 					      u32 idx)
 {
-	writeq(BIT(idx), smmu_pmu->reg_base + SMMU_PMCG_INTENCLR0);
+	pete_writeq("drivers/perf/arm_smmuv3_pmu.c:240", BIT(idx), smmu_pmu->reg_base + SMMU_PMCG_INTENCLR0);
 }
 
 static inline void smmu_pmu_set_evtyper(struct smmu_pmu *smmu_pmu, u32 idx,
 					u32 val)
 {
-	writel(val, smmu_pmu->reg_base + SMMU_PMCG_EVTYPER(idx));
+	pete_writel("drivers/perf/arm_smmuv3_pmu.c:246", val, smmu_pmu->reg_base + SMMU_PMCG_EVTYPER(idx));
 }
 
 static inline void smmu_pmu_set_smr(struct smmu_pmu *smmu_pmu, u32 idx, u32 val)
 {
-	writel(val, smmu_pmu->reg_base + SMMU_PMCG_SMR(idx));
+	pete_writel("drivers/perf/arm_smmuv3_pmu.c:251", val, smmu_pmu->reg_base + SMMU_PMCG_SMR(idx));
 }
 
 static void smmu_pmu_event_update(struct perf_event *event)
@@ -692,11 +692,11 @@ static irqreturn_t smmu_pmu_handle_irq(int irq_num, void *data)
 	u64 ovsr;
 	unsigned int idx;
 
-	ovsr = readq(smmu_pmu->reloc_base + SMMU_PMCG_OVSSET0);
+	ovsr = pete_readq("drivers/perf/arm_smmuv3_pmu.c:695", smmu_pmu->reloc_base + SMMU_PMCG_OVSSET0);
 	if (!ovsr)
 		return IRQ_NONE;
 
-	writeq(ovsr, smmu_pmu->reloc_base + SMMU_PMCG_OVSCLR0);
+	pete_writeq("drivers/perf/arm_smmuv3_pmu.c:699", ovsr, smmu_pmu->reloc_base + SMMU_PMCG_OVSCLR0);
 
 	bitmap_from_u64(ovs, ovsr);
 	for_each_set_bit(idx, ovs, smmu_pmu->num_counters) {
@@ -746,7 +746,7 @@ static void smmu_pmu_setup_msi(struct smmu_pmu *pmu)
 	writeq_relaxed(0, pmu->reg_base + SMMU_PMCG_IRQ_CFG0);
 
 	/* MSI supported or not */
-	if (!(readl(pmu->reg_base + SMMU_PMCG_CFGR) & SMMU_PMCG_CFGR_MSI))
+	if (!(pete_readl("drivers/perf/arm_smmuv3_pmu.c:749", pmu->reg_base + SMMU_PMCG_CFGR) & SMMU_PMCG_CFGR_MSI))
 		return;
 
 	ret = platform_msi_domain_alloc_irqs(dev, 1, smmu_pmu_write_msi_msg);
@@ -820,11 +820,11 @@ static void smmu_pmu_get_iidr(struct smmu_pmu *smmu_pmu)
 	u32 iidr = readl_relaxed(smmu_pmu->reg_base + SMMU_PMCG_IIDR);
 
 	if (!iidr && smmu_pmu_coresight_id_regs(smmu_pmu)) {
-		u32 pidr0 = readl(smmu_pmu->reg_base + SMMU_PMCG_PIDR0);
-		u32 pidr1 = readl(smmu_pmu->reg_base + SMMU_PMCG_PIDR1);
-		u32 pidr2 = readl(smmu_pmu->reg_base + SMMU_PMCG_PIDR2);
-		u32 pidr3 = readl(smmu_pmu->reg_base + SMMU_PMCG_PIDR3);
-		u32 pidr4 = readl(smmu_pmu->reg_base + SMMU_PMCG_PIDR4);
+		u32 pidr0 = pete_readl("drivers/perf/arm_smmuv3_pmu.c:823", smmu_pmu->reg_base + SMMU_PMCG_PIDR0);
+		u32 pidr1 = pete_readl("drivers/perf/arm_smmuv3_pmu.c:824", smmu_pmu->reg_base + SMMU_PMCG_PIDR1);
+		u32 pidr2 = pete_readl("drivers/perf/arm_smmuv3_pmu.c:825", smmu_pmu->reg_base + SMMU_PMCG_PIDR2);
+		u32 pidr3 = pete_readl("drivers/perf/arm_smmuv3_pmu.c:826", smmu_pmu->reg_base + SMMU_PMCG_PIDR3);
+		u32 pidr4 = pete_readl("drivers/perf/arm_smmuv3_pmu.c:827", smmu_pmu->reg_base + SMMU_PMCG_PIDR4);
 
 		u32 productid = FIELD_GET(SMMU_PMCG_PIDR0_PART_0, pidr0) |
 				(FIELD_GET(SMMU_PMCG_PIDR1_PART_1, pidr1) << 8);

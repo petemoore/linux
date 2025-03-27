@@ -92,22 +92,22 @@ static void qmp_kick(struct qmp *qmp)
 
 static bool qmp_magic_valid(struct qmp *qmp)
 {
-	return readl(qmp->msgram + QMP_DESC_MAGIC) == QMP_MAGIC;
+	return pete_readl("drivers/soc/qcom/qcom_aoss.c:95", qmp->msgram + QMP_DESC_MAGIC) == QMP_MAGIC;
 }
 
 static bool qmp_link_acked(struct qmp *qmp)
 {
-	return readl(qmp->msgram + QMP_DESC_MCORE_LINK_STATE_ACK) == QMP_STATE_UP;
+	return pete_readl("drivers/soc/qcom/qcom_aoss.c:100", qmp->msgram + QMP_DESC_MCORE_LINK_STATE_ACK) == QMP_STATE_UP;
 }
 
 static bool qmp_mcore_channel_acked(struct qmp *qmp)
 {
-	return readl(qmp->msgram + QMP_DESC_MCORE_CH_STATE_ACK) == QMP_STATE_UP;
+	return pete_readl("drivers/soc/qcom/qcom_aoss.c:105", qmp->msgram + QMP_DESC_MCORE_CH_STATE_ACK) == QMP_STATE_UP;
 }
 
 static bool qmp_ucore_channel_up(struct qmp *qmp)
 {
-	return readl(qmp->msgram + QMP_DESC_UCORE_CH_STATE) == QMP_STATE_UP;
+	return pete_readl("drivers/soc/qcom/qcom_aoss.c:110", qmp->msgram + QMP_DESC_UCORE_CH_STATE) == QMP_STATE_UP;
 }
 
 static int qmp_open(struct qmp *qmp)
@@ -120,25 +120,25 @@ static int qmp_open(struct qmp *qmp)
 		return -EINVAL;
 	}
 
-	val = readl(qmp->msgram + QMP_DESC_VERSION);
+	val = pete_readl("drivers/soc/qcom/qcom_aoss.c:123", qmp->msgram + QMP_DESC_VERSION);
 	if (val != QMP_VERSION) {
 		dev_err(qmp->dev, "unsupported QMP version %d\n", val);
 		return -EINVAL;
 	}
 
-	qmp->offset = readl(qmp->msgram + QMP_DESC_MCORE_MBOX_OFFSET);
-	qmp->size = readl(qmp->msgram + QMP_DESC_MCORE_MBOX_SIZE);
+	qmp->offset = pete_readl("drivers/soc/qcom/qcom_aoss.c:129", qmp->msgram + QMP_DESC_MCORE_MBOX_OFFSET);
+	qmp->size = pete_readl("drivers/soc/qcom/qcom_aoss.c:130", qmp->msgram + QMP_DESC_MCORE_MBOX_SIZE);
 	if (!qmp->size) {
 		dev_err(qmp->dev, "invalid mailbox size\n");
 		return -EINVAL;
 	}
 
 	/* Ack remote core's link state */
-	val = readl(qmp->msgram + QMP_DESC_UCORE_LINK_STATE);
-	writel(val, qmp->msgram + QMP_DESC_UCORE_LINK_STATE_ACK);
+	val = pete_readl("drivers/soc/qcom/qcom_aoss.c:137", qmp->msgram + QMP_DESC_UCORE_LINK_STATE);
+	pete_writel("drivers/soc/qcom/qcom_aoss.c:138", val, qmp->msgram + QMP_DESC_UCORE_LINK_STATE_ACK);
 
 	/* Set local core's link state to up */
-	writel(QMP_STATE_UP, qmp->msgram + QMP_DESC_MCORE_LINK_STATE);
+	pete_writel("drivers/soc/qcom/qcom_aoss.c:141", QMP_STATE_UP, qmp->msgram + QMP_DESC_MCORE_LINK_STATE);
 
 	qmp_kick(qmp);
 
@@ -148,7 +148,7 @@ static int qmp_open(struct qmp *qmp)
 		goto timeout_close_link;
 	}
 
-	writel(QMP_STATE_UP, qmp->msgram + QMP_DESC_MCORE_CH_STATE);
+	pete_writel("drivers/soc/qcom/qcom_aoss.c:151", QMP_STATE_UP, qmp->msgram + QMP_DESC_MCORE_CH_STATE);
 
 	qmp_kick(qmp);
 
@@ -159,7 +159,7 @@ static int qmp_open(struct qmp *qmp)
 	}
 
 	/* Ack remote core's channel state */
-	writel(QMP_STATE_UP, qmp->msgram + QMP_DESC_UCORE_CH_STATE_ACK);
+	pete_writel("drivers/soc/qcom/qcom_aoss.c:162", QMP_STATE_UP, qmp->msgram + QMP_DESC_UCORE_CH_STATE_ACK);
 
 	qmp_kick(qmp);
 
@@ -172,10 +172,10 @@ static int qmp_open(struct qmp *qmp)
 	return 0;
 
 timeout_close_channel:
-	writel(QMP_STATE_DOWN, qmp->msgram + QMP_DESC_MCORE_CH_STATE);
+	pete_writel("drivers/soc/qcom/qcom_aoss.c:175", QMP_STATE_DOWN, qmp->msgram + QMP_DESC_MCORE_CH_STATE);
 
 timeout_close_link:
-	writel(QMP_STATE_DOWN, qmp->msgram + QMP_DESC_MCORE_LINK_STATE);
+	pete_writel("drivers/soc/qcom/qcom_aoss.c:178", QMP_STATE_DOWN, qmp->msgram + QMP_DESC_MCORE_LINK_STATE);
 	qmp_kick(qmp);
 
 	return -ETIMEDOUT;
@@ -183,8 +183,8 @@ timeout_close_link:
 
 static void qmp_close(struct qmp *qmp)
 {
-	writel(QMP_STATE_DOWN, qmp->msgram + QMP_DESC_MCORE_CH_STATE);
-	writel(QMP_STATE_DOWN, qmp->msgram + QMP_DESC_MCORE_LINK_STATE);
+	pete_writel("drivers/soc/qcom/qcom_aoss.c:186", QMP_STATE_DOWN, qmp->msgram + QMP_DESC_MCORE_CH_STATE);
+	pete_writel("drivers/soc/qcom/qcom_aoss.c:187", QMP_STATE_DOWN, qmp->msgram + QMP_DESC_MCORE_LINK_STATE);
 	qmp_kick(qmp);
 }
 
@@ -199,7 +199,7 @@ static irqreturn_t qmp_intr(int irq, void *data)
 
 static bool qmp_message_empty(struct qmp *qmp)
 {
-	return readl(qmp->msgram + qmp->offset) == 0;
+	return pete_readl("drivers/soc/qcom/qcom_aoss.c:202", qmp->msgram + qmp->offset) == 0;
 }
 
 /**
@@ -238,10 +238,10 @@ int qmp_send(struct qmp *qmp, const char *fmt, ...)
 	/* The message RAM only implements 32-bit accesses */
 	__iowrite32_copy(qmp->msgram + qmp->offset + sizeof(u32),
 			 buf, sizeof(buf) / sizeof(u32));
-	writel(sizeof(buf), qmp->msgram + qmp->offset);
+	pete_writel("drivers/soc/qcom/qcom_aoss.c:241", sizeof(buf), qmp->msgram + qmp->offset);
 
 	/* Read back length to confirm data written in message RAM */
-	readl(qmp->msgram + qmp->offset);
+	pete_readl("drivers/soc/qcom/qcom_aoss.c:244", qmp->msgram + qmp->offset);
 	qmp_kick(qmp);
 
 	time_left = wait_event_interruptible_timeout(qmp->event,
@@ -251,7 +251,7 @@ int qmp_send(struct qmp *qmp, const char *fmt, ...)
 		ret = -ETIMEDOUT;
 
 		/* Clear message from buffer */
-		writel(0, qmp->msgram + qmp->offset);
+		pete_writel("drivers/soc/qcom/qcom_aoss.c:254", 0, qmp->msgram + qmp->offset);
 	} else {
 		ret = 0;
 	}

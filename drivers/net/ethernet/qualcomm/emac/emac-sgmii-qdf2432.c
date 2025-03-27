@@ -109,7 +109,7 @@ static void emac_reg_write_all(void __iomem *base,
 	size_t i;
 
 	for (i = 0; i < size; ++itr, ++i)
-		writel(itr->val, base + itr->offset);
+		pete_writel("drivers/net/ethernet/qualcomm/emac/emac-sgmii-qdf2432.c:112", itr->val, base + itr->offset);
 }
 
 static const struct emac_reg_write sgmii_laned[] = {
@@ -174,12 +174,12 @@ int emac_sgmii_init_qdf2432(struct emac_adapter *adpt)
 
 	/* Power up PCS and start reset lane state machine */
 
-	writel(0, phy_regs + EMAC_SGMII_PHY_RESET_CTRL);
-	writel(1, laned + SGMII_LN_RSM_START);
+	pete_writel("drivers/net/ethernet/qualcomm/emac/emac-sgmii-qdf2432.c:177", 0, phy_regs + EMAC_SGMII_PHY_RESET_CTRL);
+	pete_writel("drivers/net/ethernet/qualcomm/emac/emac-sgmii-qdf2432.c:178", 1, laned + SGMII_LN_RSM_START);
 
 	/* Wait for c_ready assertion */
 	for (i = 0; i < SERDES_START_WAIT_TIMES; i++) {
-		lnstatus = readl(phy_regs + SGMII_PHY_LN_LANE_STATUS);
+		lnstatus = pete_readl("drivers/net/ethernet/qualcomm/emac/emac-sgmii-qdf2432.c:182", phy_regs + SGMII_PHY_LN_LANE_STATUS);
 		if (lnstatus & BIT(1))
 			break;
 		usleep_range(100, 200);
@@ -191,12 +191,12 @@ int emac_sgmii_init_qdf2432(struct emac_adapter *adpt)
 	}
 
 	/* Disable digital and SERDES loopback */
-	writel(0, phy_regs + SGMII_PHY_LN_BIST_GEN0);
-	writel(0, phy_regs + SGMII_PHY_LN_BIST_GEN2);
-	writel(0, phy_regs + SGMII_PHY_LN_CDR_CTRL1);
+	pete_writel("drivers/net/ethernet/qualcomm/emac/emac-sgmii-qdf2432.c:194", 0, phy_regs + SGMII_PHY_LN_BIST_GEN0);
+	pete_writel("drivers/net/ethernet/qualcomm/emac/emac-sgmii-qdf2432.c:195", 0, phy_regs + SGMII_PHY_LN_BIST_GEN2);
+	pete_writel("drivers/net/ethernet/qualcomm/emac/emac-sgmii-qdf2432.c:196", 0, phy_regs + SGMII_PHY_LN_CDR_CTRL1);
 
 	/* Mask out all the SGMII Interrupt */
-	writel(0, phy_regs + EMAC_SGMII_PHY_INTERRUPT_MASK);
+	pete_writel("drivers/net/ethernet/qualcomm/emac/emac-sgmii-qdf2432.c:199", 0, phy_regs + EMAC_SGMII_PHY_INTERRUPT_MASK);
 
 	return 0;
 }

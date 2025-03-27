@@ -269,14 +269,14 @@ to_v3d_fence(struct dma_fence *fence)
 	return (struct v3d_fence *)fence;
 }
 
-#define V3D_READ(offset) readl(v3d->hub_regs + offset)
-#define V3D_WRITE(offset, val) writel(val, v3d->hub_regs + offset)
+#define V3D_READ(offset) pete_readl("drivers/gpu/drm/v3d/v3d_drv.h:272", v3d->hub_regs + offset)
+#define V3D_WRITE(offset, val) pete_writel("drivers/gpu/drm/v3d/v3d_drv.h:273", val, v3d->hub_regs + offset)
 
-#define V3D_BRIDGE_READ(offset) readl(v3d->bridge_regs + offset)
-#define V3D_BRIDGE_WRITE(offset, val) writel(val, v3d->bridge_regs + offset)
+#define V3D_BRIDGE_READ(offset) pete_readl("drivers/gpu/drm/v3d/v3d_drv.h:275", v3d->bridge_regs + offset)
+#define V3D_BRIDGE_WRITE(offset, val) pete_writel("drivers/gpu/drm/v3d/v3d_drv.h:276", val, v3d->bridge_regs + offset)
 
-#define V3D_GCA_READ(offset) readl(v3d->gca_regs + offset)
-#define V3D_GCA_WRITE(offset, val) writel(val, v3d->gca_regs + offset)
+#define V3D_GCA_READ(offset) pete_readl("drivers/gpu/drm/v3d/v3d_drv.h:278", v3d->gca_regs + offset)
+#define V3D_GCA_WRITE(offset, val) pete_writel("drivers/gpu/drm/v3d/v3d_drv.h:279", val, v3d->gca_regs + offset)
 
 #define V3D_SMS_IDLE				0x0
 #define V3D_SMS_ISOLATING_FOR_RESET		0xa
@@ -284,11 +284,11 @@ to_v3d_fence(struct dma_fence *fence)
 #define V3D_SMS_ISOLATING_FOR_POWER_OFF	0xc
 #define V3D_SMS_POWER_OFF_STATE		0xd
 
-#define V3D_SMS_READ(offset) readl(v3d->sms_regs + (offset))
-#define V3D_SMS_WRITE(offset, val) writel(val, v3d->sms_regs + (offset))
+#define V3D_SMS_READ(offset) pete_readl("drivers/gpu/drm/v3d/v3d_drv.h:287", v3d->sms_regs + (offset))
+#define V3D_SMS_WRITE(offset, val) pete_writel("drivers/gpu/drm/v3d/v3d_drv.h:288", val, v3d->sms_regs + (offset))
 
-#define V3D_CORE_READ(core, offset) readl(v3d->core_regs[core] + offset)
-#define V3D_CORE_WRITE(core, offset, val) writel(val, v3d->core_regs[core] + offset)
+#define V3D_CORE_READ(core, offset) pete_readl("drivers/gpu/drm/v3d/v3d_drv.h:290", v3d->core_regs[core] + offset)
+#define V3D_CORE_WRITE(core, offset, val) pete_writel("drivers/gpu/drm/v3d/v3d_drv.h:291", val, v3d->core_regs[core] + offset)
 
 struct v3d_job {
 	struct drm_sched_job base;
