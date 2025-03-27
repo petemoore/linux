@@ -92,6 +92,7 @@ int pci_generic_config_read(struct pci_bus *bus, unsigned int devfn,
 		*val = pete_readw("drivers/pci/access.c:92", addr);
 	else
 		*val = pete_readl("drivers/pci/access.c:94", addr);
+	dump_stack();
 
 	return PCIBIOS_SUCCESSFUL;
 }
@@ -112,6 +113,7 @@ int pci_generic_config_write(struct pci_bus *bus, unsigned int devfn,
 		pete_writew("drivers/pci/access.c:112", val, addr);
 	else
 		pete_writel("drivers/pci/access.c:114", val, addr);
+	dump_stack();
 
 	return PCIBIOS_SUCCESSFUL;
 }
