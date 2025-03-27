@@ -91,6 +91,7 @@ int pci_generic_config_read(struct pci_bus *bus, unsigned int devfn,
 		*val = readw(addr);
 	else
 		*val = readl(addr);
+	dump_stack();
 
 	return PCIBIOS_SUCCESSFUL;
 }
@@ -111,6 +112,7 @@ int pci_generic_config_write(struct pci_bus *bus, unsigned int devfn,
 		writew(val, addr);
 	else
 		writel(val, addr);
+	dump_stack();
 
 	return PCIBIOS_SUCCESSFUL;
 }
